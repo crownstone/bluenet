@@ -55,10 +55,10 @@ Scanner::Scanner() :
 
 void Scanner::init() {
 	State& settings = State::getInstance();
-	settings.get(CS_TYPE::CONFIG_SCAN_DURATION, &_scanDuration, PersistenceMode::FLASH);
-	settings.get(CS_TYPE::CONFIG_SCAN_SEND_DELAY, &_scanSendDelay, PersistenceMode::FLASH);
-	settings.get(CS_TYPE::CONFIG_SCAN_BREAK_DURATION, &_scanBreakDuration, PersistenceMode::FLASH);
-	settings.get(CS_TYPE::CONFIG_SCAN_FILTER, &_scanFilter, PersistenceMode::FLASH);
+	settings.get(CS_TYPE::CONFIG_SCAN_DURATION, &_scanDuration, PersistenceMode::STRATEGY1);
+	settings.get(CS_TYPE::CONFIG_SCAN_SEND_DELAY, &_scanSendDelay, PersistenceMode::STRATEGY1);
+	settings.get(CS_TYPE::CONFIG_SCAN_BREAK_DURATION, &_scanBreakDuration, PersistenceMode::STRATEGY1);
+	settings.get(CS_TYPE::CONFIG_SCAN_FILTER, &_scanFilter, PersistenceMode::STRATEGY1);
 
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Scanner::staticTick);

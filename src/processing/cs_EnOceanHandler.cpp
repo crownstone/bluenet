@@ -49,7 +49,7 @@ EnOceanHandler::EnOceanHandler() :
 
 void EnOceanHandler::init() {
 	size16_t size = MAX_SWITCHES * sizeof(learned_enocean_t);
-	State::getInstance().get(CS_TYPE::STATE_LEARNED_SWITCHES, _learnedSwitches, size, PersistenceMode::FLASH);
+	State::getInstance().get(CS_TYPE::STATE_LEARNED_SWITCHES, _learnedSwitches, size, PersistenceMode::STRATEGY1);
 
 #ifdef ENOCEAN_VERBOSE
 	_log(SERIAL_INFO, "learned switches:");
@@ -267,7 +267,7 @@ void EnOceanHandler::save() {
 	BLEutil::printArray(_learnedSwitches, sizeof(_learnedSwitches));
 #endif
 
-	State::getInstance().set(CS_TYPE::STATE_LEARNED_SWITCHES, _learnedSwitches, MAX_SWITCHES * sizeof(learned_enocean_t), PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::STATE_LEARNED_SWITCHES, _learnedSwitches, MAX_SWITCHES * sizeof(learned_enocean_t), PersistenceMode::STRATEGY1);
 }
 
 bool EnOceanHandler::learnEnOcean(uint8_t * adrs_ptr, data_t* p_data) {

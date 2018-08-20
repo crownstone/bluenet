@@ -230,15 +230,6 @@ RSSI_ENABLE=1
 # connection alive timeout. if no write command received within timeout the connection is closed by the device.
 CONNECTION_ALIVE_TIMEOUT=20000
 
-# NOTE: APP_DATA_RESERVED is obsolete. the bootloader obtains the value directly from PSTORAGE_RESERVED defined in
-#   include/third/nrf/pstorage_platform.h, but if desired it can still be used to increase the value over the
-#   PSTORAGE_RESERVED value (can't decrease the value)
-# NOTE: The value has to be a multiple of CODE_PAGE_SIZE which is 0x400 for nrf51 and 0x1000 for nrf52
-#
-# The value is used to prevent the bootloader from overwriting pstorage data during DFU
-# (http://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk52.v0.9.0%2Flib_pstorage.html)
-# APP_DATA_RESERVED=0x5000
-
 # This is the directory where the cross-compiler resides
 COMPILER_PATH=
 

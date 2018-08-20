@@ -383,7 +383,7 @@ cs_ret_code_t CrownstoneService::configOnWrite(const EncryptionAccessLevel acces
 
 		uint8_t *payload = _streamBuffer->payload();
 		uint16_t payloadLength = _streamBuffer->length();
-		errCode = State::getInstance().writeToStorage(type, payload, payloadLength, PersistenceMode::FLASH);
+		errCode = State::getInstance().writeToStorage(type, payload, payloadLength, PersistenceMode::STRATEGY1);
 		break;
 	}
 	default:
@@ -461,7 +461,7 @@ cs_ret_code_t CrownstoneService::stateOnWrite(const EncryptionAccessLevel access
 		}
 		case OPCODE_WRITE_VALUE: {
 			LOGd(FMT_WRITE_TYPE, STR_CHAR_STATE, type);
-			errCode = State::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length(), PersistenceMode::FLASH);
+			errCode = State::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length(), PersistenceMode::STRATEGY1);
 			break;
 		}
 		default:

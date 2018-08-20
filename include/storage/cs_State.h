@@ -8,17 +8,32 @@
 
 #include <cfg/cs_Boards.h>
 #include <common/cs_BaseClass.h>
+#include <common/cs_Types.h>
 #include <drivers/cs_Storage.h>
-#include <events/cs_EventTypes.h>
-#include <protocol/cs_ConfigTypes.h>
-#include <protocol/cs_StateTypes.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <structs/cs_StreamBuffer.h>
 
-#define OPERATION_MODE_SETUP                       0x00
-#define OPERATION_MODE_DFU                         0x01
-#define OPERATION_MODE_FACTORY_RESET               0x02
-#define OPERATION_MODE_NORMAL                      0x10
+enum class OperationMode {
+	OPERATION_MODE_SETUP                       = 0x00,
+	OPERATION_MODE_DFU                         = 0x01,
+	OPERATION_MODE_FACTORY_RESET               = 0x02,
+	OPERATION_MODE_NORMAL                      = 0x10,
+};
+
+constexpr const char* TypeName(OperationMode const & mode) {
+    switch(mode) {
+	case OperationMode::OPERATION_MODE_SETUP:
+	    return "OPERATION_MODE_SETUP";
+	case OperationMode::OPERATION_MODE_DFU:
+	    return "OPERATION_MODE_DFU";
+	case OperationMode::OPERATION_MODE_FACTORY_RESET:
+	    return "OPERATION_MODE_FACTORY_RESET";
+	case OperationMode::OPERATION_MODE_NORMAL:
+	    return "OPERATION_MODE_NORMAL";
+    }
+    // never reached
+    return "";
+}
 
 #define FACTORY_RESET_STATE_NORMAL 0
 #define FACTORY_RESET_STATE_LOWTX  1
@@ -100,9 +115,10 @@ public:
 	 */
 	cs_ret_code_t readFromStorage(CS_TYPE type, StreamBuffer<uint8_t>* streamBuffer);
 
+	/**
+	 * Shorthand for get(data, PersistenceMode::STRATEGY1) for boolean data types.
+	 */
 	bool isSet(CS_TYPE type);
-
-	bool updateFlag(CS_TYPE type, bool value, PersistenceMode mode);
 
 	/**
 	 */
@@ -110,21 +126,31 @@ public:
 
 	cs_ret_code_t get(const CS_TYPE type, void* data, const PersistenceMode mode);
 
-	/*
+	/* The function gets an item from memory.
+	 *
+	 * It is most "clean" to not use thousands of arguments, but have a struct as argument. Yes, this means that 
+	 * the person calling this function has to write the arguments into a struct. However, it makes it much 
+	 * easier to add an additional argument.
+	 *
 	 * @param[in] type          One of the types from the CS_TYPE enumeration class.
-	 * @param[in] data          Pointer to where we have to write the data.
+	 * @param[out] data         Pointer to where we have to write the data.
 	 * @param[in,out] size      If size is non-zero, it will indicate maximum size available. Afterwards it will have
 	 *                          the size of the data.
 	 * @param[in] mode          Indicates to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
+	 *
+	 * @deprecated              Use get(st_file_data_t, mode).
 	 */
 	cs_ret_code_t get(const CS_TYPE type, void* data, size16_t & size, const PersistenceMode mode);
 
+	/* The function gets an item from memory.
+	 *
+	 * @param[in,out] data      Data struct (contains type, pointer to data, and size).
+	 * @param[in] mode          Indicates to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
+	 */
 	cs_ret_code_t get(st_file_data_t & data, const PersistenceMode mode);
 
 	cs_ret_code_t set(CS_TYPE type, void* data, size16_t size, PersistenceMode mode);
-
-	//size16_t getStateItemSize(CS_TYPE type);
-
+	
 	void setNotify(CS_TYPE type, bool enable);
 
 	bool isNotifying(CS_TYPE type);

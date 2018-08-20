@@ -7,11 +7,11 @@
 
 #pragma once
 
+#include <ble/cs_Nordic.h>
 #include <cstdlib>
-#include <protocol/cs_ConfigTypes.h>
-#include "nrf_soc.h"
 #include <drivers/cs_RNG.h>
 #include <events/cs_EventListener.h>
+#include <storage/cs_State.h>
 
 #define PACKET_NONCE_LENGTH  	3
 #define USER_LEVEL_LENGTH 		1
@@ -44,12 +44,14 @@ enum EncryptionType {
 	ECB_GUEST_CAFEBABE
 };
 
+/** EncryptionHandler is reponsible for encrypting each BLE message.
+ */
 class EncryptionHandler : EventListener {
 private:
 	EncryptionHandler()  {}
 	~EncryptionHandler() {}
 
-	uint8_t _operationMode;
+	OperationMode _operationMode;
 	uint8_t _sessionNonce[SESSION_NONCE_LENGTH];
 	nrf_ecb_hal_data_t _block __attribute__ ((aligned (4)));
 	uint8_t _setupKey[SOC_ECB_KEY_LENGTH];

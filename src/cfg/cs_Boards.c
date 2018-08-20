@@ -1,6 +1,13 @@
-#include "cfg/cs_Boards.h"
-#include "nrf_error.h"
-#include "cfg/cs_DeviceTypes.h"
+/**
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Aug 20, 2018
+ * Triple-license: LGPLv3+, Apache License, and/or MIT
+ */
+
+#include <cfg/cs_Boards.h>
+#include <cfg/cs_DeviceTypes.h>
+#include <nrf_error.h>
 
 // overwrite the type defined by the board if the DEVICE_TYPE was defined in the config
 #ifdef DEVICE_TYPE

@@ -28,7 +28,7 @@ void sys_evt_dispatch(uint32_t sys_evt) {
     switch(sys_evt) {
 	case NRF_EVT_FLASH_OPERATION_SUCCESS:
 	case NRF_EVT_FLASH_OPERATION_ERROR:
-	    //pstorage_sys_event_handler(sys_evt);
+	    LOGw("Storage event, unhandled");
 	    break;
 	case NRF_EVT_POWER_FAILURE_WARNING: {
 	    event_t event(CS_TYPE::EVT_BROWNOUT_IMPENDING, NULL, 0);

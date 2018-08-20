@@ -263,7 +263,7 @@ private:
 	uint32_t _firstErrorTimestamp; // TODO: use State for this?
 
 	//! Store the operation mode.
-	uint8_t _operationMode;
+	OperationMode _operationMode;
 
 	//! Store whether a device is connected or not.
 	bool _connected;

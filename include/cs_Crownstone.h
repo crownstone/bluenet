@@ -174,7 +174,7 @@ private:
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;
 
-	uint8_t _operationMode;
+	OperationMode _operationMode;
 
 };
 

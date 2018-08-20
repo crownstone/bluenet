@@ -34,11 +34,6 @@ void SetupService::createCharacteristics() {
 	addSetupKeyCharacteristic(_keyBuffer, SOC_ECB_KEY_LENGTH);
 	LOGi(FMT_CHAR_ADD, STR_CHAR_SETUP_KEY);
 
-
-//	LOGi(FMT_CHAR_ADD, STR_CHAR_CONFIGURATION);
-//	addConfigurationControlCharacteristic(buffer, maxLength);
-//	addConfigurationReadCharacteristic(buffer, maxLength, SETUP);
-
 	LOGi(FMT_CHAR_ADD, BLE_CHAR_GOTO_DFU);
 	addGoToDfuCharacteristic();
 

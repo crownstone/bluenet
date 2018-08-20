@@ -62,9 +62,15 @@ public:
 
 	bool exists(st_file_id_t file_id, CS_TYPE type);
 
-	bool exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t record_fd);
+	/** Check if a type of record exists and return the record descriptor.
+	 * 
+	 * @param[in] file_id                        Unique file
+	 * @param[in] type                           One of the Crownstone types
+	 * @param[in,out] record_desc                Record descriptor
+	 */
+	bool exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc);
 
-	void print(const std::string & prefix, CS_TYPE type);
+	inline void print(const std::string & prefix, CS_TYPE type);
 
 	// Handle Crownstone events
 	void handleEvent(event_t & event) {};
@@ -84,5 +90,7 @@ private:
 
 	std::vector<st_file_data_t> _records_in_memory;	
 
+	// Use before ftok
+	void initSearch();
 };
 

@@ -32,7 +32,7 @@ Switch::Switch():
 	_delayedSwitchState(0),
 	_delayedStoreStatePending(false)
 {
-	LOGd(FMT_CREATE, "Switch");
+	LOGd(FMT_CREATE, "switch");
 
 	_switchTimerData = { {0} };
 	_switchTimerId = &_switchTimerData;
@@ -42,10 +42,13 @@ Switch::Switch():
 }
 
 void Switch::init(const boards_config_t& board) {
+	
+	LOGd(FMT_INIT, "switch");
+
 	PWM& pwm = PWM::getInstance();
 	uint32_t pwmPeriod;
-	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, PersistenceMode::FLASH);
-	LOGd("pwm pin %d", board.pinGpioPwm);
+	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, PersistenceMode::STRATEGY1);
+	LOGd("PWM period %i pin %d", pwmPeriod, board.pinGpioPwm);
 
 	pwm_config_t pwmConfig;
 	pwmConfig.channelCount = 1;
@@ -61,7 +64,7 @@ void Switch::init(const boards_config_t& board) {
 		_pinRelayOff = board.pinGpioRelayOff;
 		_pinRelayOn = board.pinGpioRelayOn;
 
-		State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, &_relayHighDuration, PersistenceMode::FLASH);
+		State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, &_relayHighDuration, PersistenceMode::STRATEGY1);
 
 		nrf_gpio_cfg_output(_pinRelayOff);
 		nrf_gpio_pin_clear(_pinRelayOff);
@@ -71,7 +74,7 @@ void Switch::init(const boards_config_t& board) {
 
 	// Retrieve last switch state from persistent storage
 	size16_t size = sizeof(switch_state_t);
-	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::FLASH);
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::STRATEGY1);
 	LOGd("Stored switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
 
 	EventDispatcher::getInstance().addListener(this);
@@ -154,7 +157,7 @@ void Switch::storeState(switch_state_t oldVal) {
 	if (memcmp(&oldVal, &_switchValue, sizeof(switch_state_t)) != 0) {
 		LOGd("storeState: %u", _switchValue);
 		persistent = (oldVal.relay_state != _switchValue.relay_state);
-		PersistenceMode pmode = persistent ? PersistenceMode::FLASH : PersistenceMode::RAM;
+		PersistenceMode pmode = persistent ? PersistenceMode::STRATEGY1 : PersistenceMode::STRATEGY1;
 		size16_t size = sizeof(switch_state_t);
 		State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, pmode);
 	}
@@ -181,7 +184,7 @@ void Switch::delayedStoreStateExecute() {
 	// Just write to persistent storage
 	LOGd("write to storage: %u", _switchValue);
 	size16_t size = sizeof(switch_state_t);
-	State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::STRATEGY1);
 }
 
 
@@ -525,7 +528,7 @@ void Switch::forceSwitchOff() {
 
 bool Switch::allowPwmOn() {
 	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
 	LOGd("errors=%d", stateErrors.asInt);
 
 	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
@@ -534,7 +537,7 @@ bool Switch::allowPwmOn() {
 
 bool Switch::allowRelayOff() {
 	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
 	return !(stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
@@ -542,7 +545,7 @@ bool Switch::allowRelayOff() {
 
 bool Switch::allowRelayOn() {
 	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
 	LOGd("errors=%d", stateErrors.asInt);
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.

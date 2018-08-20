@@ -39,7 +39,7 @@ Tracker::Tracker() : EventListener(),
 void Tracker::init() {
 	readTrackedDevices();
 
-	State::getInstance().get(CS_TYPE::CONFIG_NEARBY_TIMEOUT, &_timeoutCounts, PersistenceMode::FLASH);
+	State::getInstance().get(CS_TYPE::CONFIG_NEARBY_TIMEOUT, &_timeoutCounts, PersistenceMode::STRATEGY1);
 	_trackedDeviceList->setTimeout(_timeoutCounts);
 
 
@@ -95,7 +95,7 @@ void Tracker::writeTrackedDevices() {
 	buffer_ptr_t buffer;
 	uint16_t length;
 	_trackedDeviceList->getBuffer(buffer, length);
-	State::getInstance().set(CS_TYPE::STATE_TRACKED_DEVICES, buffer, _trackedDeviceList->getMaxLength(), PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::STATE_TRACKED_DEVICES, buffer, _trackedDeviceList->getMaxLength(), PersistenceMode::STRATEGY1);
 }
 
 void Tracker::readTrackedDevices() {
@@ -104,7 +104,7 @@ void Tracker::readTrackedDevices() {
 	_trackedDeviceList->getBuffer(buffer, length);
 
 	size16_t size = _trackedDeviceList->getMaxLength();
-	State::getInstance().get(CS_TYPE::STATE_TRACKED_DEVICES, buffer, size, PersistenceMode::RAM);
+	State::getInstance().get(CS_TYPE::STATE_TRACKED_DEVICES, buffer, size, PersistenceMode::STRATEGY1);
 	_trackedDeviceList->resetTimeoutCounters();
 
 	if (!_trackedDeviceList->isEmpty()) {

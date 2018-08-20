@@ -21,8 +21,6 @@
 #include <events/cs_EventDispatcher.h>
 #include <float.h>
 #include <mesh/cs_Mesh.h>
-#include <protocol/cs_ConfigTypes.h>
-#include <protocol/cs_StateTypes.h>
 #include <storage/cs_State.h>
 
 extern "C" {
@@ -45,17 +43,19 @@ ret_code_t Storage::remove(st_file_id_t file_id) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
+	LOGi("Delete file, removes all configuration values!");
 	ret_code_t ret_code;
 	ret_code = fds_file_delete(file_id);
 	return ret_code;
 }
 
+void Storage::initSearch() {
+	// clear fds token before every use
+	memset(&_ftok, 0x00, sizeof(fds_find_token_t));
+}
 
 ret_code_t Storage::init() {
-	LOGd(FMT_INIT, "storage");
-
-	// clear fds token before first use 
-	memset(&_ftok, 0x00, sizeof(fds_find_token_t));
+	LOGi(FMT_INIT, "storage");
 
 	// register and initialize module
 	ret_code_t ret_code;
@@ -122,6 +122,9 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 				break;
 			case FDS_SUCCESS:
 				LOGd("Write successful");
+				if (!exists(file_id, file_data.type, record_desc)) {
+					LOGe("Should now exist!");
+				}
 				break;
 		}
 	}
@@ -145,6 +148,7 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 
 	//LOGd("Read from file %i record %i", file_id, file_data.key);
 	// go through all records with given file_id and key (can be multiple)
+	initSearch();
 	while (fds_record_find(file_id, +file_data.type, &record_desc, &_ftok) == FDS_SUCCESS) {
 		ret_code = fds_record_open(&record_desc, &flash_record);
 		if (ret_code != FDS_SUCCESS) break;
@@ -158,6 +162,11 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 		// invalidates the record	
 		ret_code = fds_record_close(&record_desc);
 		if (ret_code != FDS_SUCCESS) break;
+
+		if (ret_code == FDS_SUCCESS) {
+			// return on first find, there should actually not be more records..
+			break;
+		}
 	}
 	return ret_code;
 }
@@ -173,6 +182,7 @@ ret_code_t Storage::remove(st_file_id_t file_id, CS_TYPE type) {
 	ret_code = FDS_ERR_NOT_FOUND;
 
 	// go through all records with given file_id and key (can be multiple)
+	initSearch();
 	while (fds_record_find(file_id, +type, &record_desc, &_ftok) == FDS_SUCCESS) {
 		ret_code = fds_record_delete(&record_desc);
 		if (ret_code != FDS_SUCCESS) break;
@@ -194,12 +204,13 @@ bool Storage::exists(st_file_id_t file_id, CS_TYPE type) {
 	return exists(file_id, type, record_desc);
 }
 
-bool Storage::exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t record_fd) {
+bool Storage::exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
-	while (fds_record_find(file_id, +type, &record_fd, &_ftok) == FDS_SUCCESS) {
+	initSearch();
+	while (fds_record_find(file_id, +type, &record_desc, &_ftok) == FDS_SUCCESS) {
 		print("Exists:", type);
 		return true;
 	}
@@ -211,9 +222,9 @@ void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 	switch (p_fds_evt->id) {
 		case FDS_EVT_INIT:
 			if (p_fds_evt->result != FDS_SUCCESS) {
-				LOGe("Storage: Initialization failed");
+				LOGe("Storage: init failed");
 			} else {
-				LOGd("Storage: Initialization successful");
+				//LOGd("Storage: Initialization successful");
 				_initialized = true;
 			}
 			break;

@@ -9,28 +9,18 @@
  */
 #pragma once
 
+#include <ble/cs_CrownstoneManufacturer.h>
 #include <ble/cs_Nordic.h>
-
 #include <ble/cs_Service.h>
+#include <ble/cs_ServiceData.h>
 #include <ble/cs_iBeacon.h>
-
 #include <cfg/cs_Config.h>
 #include <cfg/cs_Strings.h>
-#include <util/cs_BleError.h>
 #include <common/cs_Tuple.h>
 #include <common/cs_Types.h>
-#include <third/std/function.h>
-#include <ble/cs_CrownstoneManufacturer.h>
-#include <ble/cs_ServiceData.h>
-#include "nrf_sdm.h"
 #include <string>
-
-/////////////////////////////////////////////////
-// test
-
-extern "C" {
-#include "sdk_errors.h"
-}
+#include <third/std/function.h>
+#include <util/cs_BleError.h>
 
 /////////////////////////////////////////////////
 
@@ -52,11 +42,11 @@ class Service;
 class Stack {
 private:
 
-	/** Constructor of the BLE stack on the NRF51822
+	/** Constructor of the BLE stack on the NRF5 series.
 	 *
-	 * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. However,
-	 * the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the init()
-	 * function.
+	 * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. 
+	 * However, the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the 
+	 * init() function.
 	 */
 	Stack();
 	Stack(Stack const&);
@@ -194,16 +184,6 @@ public:
 	 * init().
 	 */
 	void initServices();
-
-	/*
-	 *
-	 */
-	void startTicking();
-
-	/*
-	 *
-	 */
-	void stopTicking();
 
 	/**
 	 * In case a disconnect has been called, we cannot allow another write or we'll get an Fatal Error 8

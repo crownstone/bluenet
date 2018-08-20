@@ -5,26 +5,20 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "drivers/cs_Serial.h"
-
-#include <cstring>
-#include <cstdarg>
-#include <cstdlib>
-#include <cstdio>
-
-#include "app_util.h"
-#include "nrf.h"
-
-#include "util/cs_BleError.h"
+#include <app_util.h>
 #include <app_util_platform.h>
-
-#include "util/cs_Utils.h"
-#include "protocol/cs_UartProtocol.h"
-
-#include "ble/cs_Nordic.h"
-#include "cfg/cs_Boards.h"
-
-#include "events/cs_EventDispatcher.h"
+#include <ble/cs_Nordic.h>
+#include <cfg/cs_Boards.h>
+#include <cstdarg>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <drivers/cs_Serial.h>
+#include <events/cs_EventDispatcher.h>
+#include <nrf.h>
+#include <protocol/cs_UartProtocol.h>
+#include <util/cs_BleError.h>
+#include <util/cs_Utils.h>
 
 #ifdef INCLUDE_TIMESTAMPS
 #include <drivers/cs_RTC.h>

@@ -5,13 +5,11 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "services/cs_ScheduleService.h"
-
 #include <cfg/cs_UuidConfig.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_Scheduler.h>
+#include <services/cs_ScheduleService.h>
 #include <structs/buffer/cs_MasterBuffer.h>
-#include <protocol/cs_StateTypes.h>
 
 ScheduleService::ScheduleService() :
 		_currentTimeCharacteristic(NULL),

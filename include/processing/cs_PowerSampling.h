@@ -6,16 +6,14 @@
  */
 #pragma once
 
-//extern "C" {
-//#include <nrf_drv_saadc.h>
-//}
-#include "structs/cs_PowerSamples.h"
-#include "structs/buffer/cs_CircularBuffer.h"
-#include "cfg/cs_Boards.h"
-#include "drivers/cs_ADC.h"
-#include "third/Median.h"
-#include "events/cs_EventListener.h"
-#include "processing/cs_Switch.h"
+#include <cfg/cs_Boards.h>
+#include <drivers/cs_ADC.h>
+#include <events/cs_EventListener.h>
+#include <processing/cs_Switch.h>
+#include <storage/cs_State.h>
+#include <structs/buffer/cs_CircularBuffer.h>
+#include <structs/cs_PowerSamples.h>
+#include <third/Median.h>
 
 typedef void (*ps_zero_crossing_cb_t) ();
 
@@ -102,7 +100,7 @@ private:
 	app_timer_id_t           _powerSamplingSentDoneTimerId;
 
 	//! Operation mode of this device.
-	uint8_t _operationMode;
+	OperationMode _operationMode;
 
 	//! Buffer that holds the data of the power samples.
 	buffer_ptr_t _powerSamplesBuffer;

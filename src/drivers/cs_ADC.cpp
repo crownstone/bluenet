@@ -5,21 +5,18 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "drivers/cs_ADC.h"
-
-#include <nrf.h>
-#include <app_util_platform.h>
-
-#include "cfg/cs_Boards.h"
-#include "drivers/cs_Serial.h"
-#include "util/cs_BleError.h"
-#include "drivers/cs_RTC.h"
-#include "cfg/cs_Strings.h"
-#include "cfg/cs_Config.h"
-#include "protocol/cs_ErrorCodes.h"
-#include "protocol/cs_UartProtocol.h"
-#include "structs/buffer/cs_InterleavedBuffer.h"
-#include "events/cs_EventDispatcher.h"
+#include <ble/cs_Nordic.h>
+#include <cfg/cs_Boards.h>
+#include <cfg/cs_Config.h>
+#include <cfg/cs_Strings.h>
+#include <drivers/cs_ADC.h>
+#include <drivers/cs_RTC.h>
+#include <drivers/cs_Serial.h>
+#include <events/cs_EventDispatcher.h>
+#include <protocol/cs_ErrorCodes.h>
+#include <protocol/cs_UartProtocol.h>
+#include <structs/buffer/cs_InterleavedBuffer.h>
+#include <util/cs_BleError.h>
 
 // Define to print adc restarts
 //#define PRINT_DEBUG

@@ -5,18 +5,19 @@
  * Triple-license: LGPLv3+, Apache License, and/or MIT
  */
 
-#include "processing/cs_Setup.h"
-#include "drivers/cs_Serial.h"
-#include "storage/cs_State.h"
+#include <drivers/cs_Serial.h>
+#include <processing/cs_Setup.h>
+#include <storage/cs_State.h>
 
 Setup::Setup(): _setupDone(false) {
 	EventDispatcher::getInstance().addListener(this);
 }
 
 cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
-	uint8_t opMode;
-	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &opMode, PersistenceMode::FLASH);
-	if (opMode != OPERATION_MODE_SETUP) {
+	uint8_t mode;
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
+	OperationMode _persistenceMode = static_cast<OperationMode>(mode);
+	if (_persistenceMode != OperationMode::OPERATION_MODE_SETUP) {
 		LOGw("only available in setup mode");
 		return ERR_NOT_AVAILABLE;
 	}
@@ -50,21 +51,22 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 
 	// Save all settings.
 	setup_data_t & sd = *setupData;
-	PersistenceMode pmode = PersistenceMode::FLASH;
 
 	State& state = State::getInstance();
-	state.set(CS_TYPE::CONFIG_CROWNSTONE_ID, &(sd.id), sizeof(sd.id), pmode);
-	state.set(CS_TYPE::CONFIG_KEY_ADMIN, sd.adminKey, sizeof(sd.adminKey), pmode);
-	state.set(CS_TYPE::CONFIG_KEY_MEMBER, sd.memberKey, sizeof(sd.memberKey), pmode);
-	state.set(CS_TYPE::CONFIG_KEY_GUEST, sd.guestKey, sizeof(sd.guestKey), pmode);
-	state.set(CS_TYPE::CONFIG_MESH_ACCESS_ADDRESS, &(sd.meshAccessAddress), sizeof(sd.meshAccessAddress), pmode);
-	state.set(CS_TYPE::CONFIG_IBEACON_UUID, &(sd.ibeaconUuid.uuid128), sizeof(sd.ibeaconUuid), pmode);
-	state.set(CS_TYPE::CONFIG_IBEACON_MAJOR, &(sd.ibeaconMajor), sizeof(sd.ibeaconMajor), pmode);
-	state.set(CS_TYPE::CONFIG_IBEACON_MINOR, &(sd.ibeaconMinor), sizeof(sd.ibeaconMinor), pmode);
+	state.set(CS_TYPE::CONFIG_CROWNSTONE_ID, &(sd.id), sizeof(sd.id), PersistenceMode::STRATEGY1);
+	state.set(CS_TYPE::CONFIG_KEY_ADMIN, sd.adminKey, sizeof(sd.adminKey), PersistenceMode::STRATEGY1);
+	state.set(CS_TYPE::CONFIG_KEY_MEMBER, sd.memberKey, sizeof(sd.memberKey), PersistenceMode::STRATEGY1);
+	state.set(CS_TYPE::CONFIG_KEY_GUEST, sd.guestKey, sizeof(sd.guestKey), PersistenceMode::STRATEGY1);
+	state.set(CS_TYPE::CONFIG_MESH_ACCESS_ADDRESS, &(sd.meshAccessAddress), sizeof(sd.meshAccessAddress), 
+			PersistenceMode::STRATEGY1);
+	state.set(CS_TYPE::CONFIG_IBEACON_UUID, &(sd.ibeaconUuid.uuid128), sizeof(sd.ibeaconUuid), 
+			PersistenceMode::STRATEGY1);
+	state.set(CS_TYPE::CONFIG_IBEACON_MAJOR, &(sd.ibeaconMajor), sizeof(sd.ibeaconMajor), PersistenceMode::STRATEGY1);
+	state.set(CS_TYPE::CONFIG_IBEACON_MINOR, &(sd.ibeaconMinor), sizeof(sd.ibeaconMinor), PersistenceMode::STRATEGY1);
 
 	// Set operation mode to normal mode
-	uint8_t mode = OPERATION_MODE_NORMAL;
-	state.set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), pmode);
+	mode = +OperationMode::OPERATION_MODE_NORMAL;
+	state.set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::STRATEGY1);
 
 	// Switch relay on
 	event_t event(CS_TYPE::EVT_POWER_ON);

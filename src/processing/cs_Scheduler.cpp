@@ -100,7 +100,7 @@ void Scheduler::tick() {
 		_posixTimeStamp++;
 		_rtcTimeStamp += RTC::msToTicks(1000);
 
-		State::getInstance().set(CS_TYPE::STATE_TIME, &_posixTimeStamp, sizeof(_posixTimeStamp), PersistenceMode::RAM);
+		State::getInstance().set(CS_TYPE::STATE_TIME, &_posixTimeStamp, sizeof(_posixTimeStamp), PersistenceMode::STRATEGY1);
 	}
 
 	schedule_entry_t* entry = _scheduleList->isActionTime(_posixTimeStamp);
@@ -110,7 +110,7 @@ void Scheduler::tick() {
 				//! TODO: use an event instead
 				uint8_t switchState = entry->pwm.pwm;
 				Switch::getInstance().setSwitch(switchState);
-				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::RAM);
+				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::STRATEGY1);
 				break;
 			}
 			case SCHEDULE_ACTION_TYPE_FADE: {
@@ -119,12 +119,12 @@ void Scheduler::tick() {
 				//TODO: if (entry->fade.fadeDuration == 0), then just use SCHEDULE_ACTION_TYPE_PWM
 				uint8_t switchState = entry->fade.pwmEnd;
 				Switch::getInstance().setSwitch(switchState);
-				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::RAM);
+				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::STRATEGY1);
 				break;
 			}
 			case SCHEDULE_ACTION_TYPE_TOGGLE: {
 				Switch::getInstance().toggle();
-				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::RAM);
+				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::STRATEGY1);
 				break;
 			}
 		}
@@ -139,7 +139,7 @@ void Scheduler::writeScheduleList(bool store) {
 	buffer_ptr_t buffer;
 	uint16_t size;
 	_scheduleList->getBuffer(buffer, size);
-	State::getInstance().set(CS_TYPE::STATE_SCHEDULE, buffer, size, PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::STATE_SCHEDULE, buffer, size, PersistenceMode::STRATEGY1);
 }
 
 void Scheduler::readScheduleList() {
@@ -148,7 +148,7 @@ void Scheduler::readScheduleList() {
 	_scheduleList->getBuffer(buffer, length);
 	length = _scheduleList->getMaxLength();
 
-	State::getInstance().get(CS_TYPE::STATE_SCHEDULE, buffer, length, PersistenceMode::FLASH);
+	State::getInstance().get(CS_TYPE::STATE_SCHEDULE, buffer, length, PersistenceMode::STRATEGY1);
 	bool adjusted = _scheduleList->checkAllEntries();
 	if (adjusted) {
 		writeScheduleList(true);

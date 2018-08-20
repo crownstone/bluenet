@@ -4,22 +4,19 @@
  * Date: May 4, 2016
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
-#include "ble/cs_ServiceData.h"
 
-#include "processing/cs_EncryptionHandler.h"
-#include "protocol/cs_StateTypes.h"
-#include "protocol/cs_ConfigTypes.h"
-#include "drivers/cs_Serial.h"
-#include "drivers/cs_RNG.h"
-#include "storage/cs_State.h"
-#include "util/cs_Utils.h"
-#include "drivers/cs_RTC.h"
-#include "protocol/cs_UartProtocol.h"
+#include <ble/cs_ServiceData.h>
+#include <drivers/cs_RNG.h>
+#include <drivers/cs_RTC.h>
+#include <drivers/cs_Serial.h>
+#include <processing/cs_EncryptionHandler.h>
+#include <protocol/cs_UartProtocol.h>
+#include <storage/cs_State.h>
+#include <util/cs_Utils.h>
 
 #if BUILD_MESHING == 1
-#include "mesh/cs_MeshControl.h"
-#include "protocol/mesh/cs_MeshMessageState.h"
-//#include "mesh/cs_Mesh.h"
+#include <mesh/cs_MeshControl.h>
+#include <protocol/mesh/cs_MeshMessageState.h>
 #endif
 
 #define ADVERTISE_EXTERNAL_DATA
@@ -55,7 +52,9 @@ void ServiceData::init() {
 	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
 
 	// get the operation mode from state
-	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, PersistenceMode::FLASH);
+	uint8_t mode;
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
+	_operationMode = static_cast<OperationMode>(mode);
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -172,10 +171,10 @@ void ServiceData::updateAdvertisement(bool initial) {
 		bool serviceDataSet = false;
 
 		state_errors_t stateErrors;
-		State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
+		State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
 
 		uint32_t timestamp;
-		State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, PersistenceMode::RAM);
+		State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, PersistenceMode::STRATEGY1);
 
 //		// Update flag
 //		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
@@ -189,7 +188,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 			_firstErrorTimestamp = timestamp;
 		}
 
-		if (_operationMode == OPERATION_MODE_SETUP) {
+		if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
 			// In setup mode, only advertise this state.
 			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_SETUP;
 			_serviceData.params.setup.type = 0;
@@ -248,7 +247,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 //		Mesh::getInstance().printRssiList();
 
 		// encrypt the array using the guest key ECB if encryption is enabled.
-		if (State::getInstance().isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) && _operationMode != OPERATION_MODE_SETUP) {
+		if (State::getInstance().isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) && _operationMode != OperationMode::OPERATION_MODE_SETUP) {
 			EncryptionHandler::getInstance().encrypt(
 					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
 					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
@@ -264,7 +263,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 	}
 
 	// start the timer again.
-	if (_operationMode == OPERATION_MODE_SETUP) {
+	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
 		Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD_SETUP), this);
 	}
 	else {
@@ -733,10 +732,12 @@ void ServiceData::handleEvent(event_t & event) {
 	// Keep track of the BLE connection status. If we are connected we do not need to update the packet.
 	switch(event.type) {
 		case CS_TYPE::EVT_BLE_CONNECT: {
+			LOGd("Event: %s", TypeName(event.type));
 			_connected = true;
 			break;
 		}
 		case CS_TYPE::EVT_BLE_DISCONNECT: {
+			LOGd("Event: %s", TypeName(event.type));
 			_connected = false;
 			updateAdvertisement(false);
 			break;
@@ -744,9 +745,11 @@ void ServiceData::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_PWM_FORCED_OFF:
 		case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 		case CS_TYPE::EVT_RELAY_FORCED_ON:
+			LOGd("Event: %s", TypeName(event.type));
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, true);
 			break;
 		case CS_TYPE::STATE_ERRORS: {
+			LOGd("Event: %s", TypeName(event.type));
 			if (event.size != sizeof(state_errors_t)) {
 				break;
 			}
@@ -760,7 +763,7 @@ void ServiceData::handleEvent(event_t & event) {
 	}
 
 	// In case the operation mode is setup, we have a different advertisement package.
-	if (_operationMode == OPERATION_MODE_SETUP) {
+	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
 		return;
 	}
 

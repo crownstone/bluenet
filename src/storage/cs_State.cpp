@@ -11,8 +11,8 @@
 #include <algorithm>
 #include <ble/cs_UUID.h>
 #include <cfg/cs_Config.h>
+#include <drivers/cs_Serial.h>
 #include <events/cs_EventDispatcher.h>
-#include <protocol/cs_Defaults.h>
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
 
@@ -20,6 +20,7 @@ State::State() : _storage(NULL), _boardsConfig(NULL) {
 };
 
 void State::init(boards_config_t* boardsConfig) {
+	LOGi(FMT_INIT, "board config");
 	_storage = &Storage::getInstance();
 	_boardsConfig = boardsConfig;
 
@@ -162,14 +163,19 @@ cs_ret_code_t State::get(st_file_data_t & data, const PersistenceMode mode) {
 					return ERR_NOT_IMPLEMENTED;
 			}
 			bool exist = loadFromRam(data);
-			if (exist) return ERR_SUCCESS;
+			if (exist) {
+				LOGd("Loaded from RAM");
+				return ERR_SUCCESS;
+			}
 
 			ret_code = _storage->read(FILE_CONFIGURATION, data);
 			switch(ret_code) {
 				case FDS_SUCCESS:
+					LOGd("Move from FLASH to RAM");
 					storeInRam(data);
 					return ret_code;
 				case FDS_ERR_NOT_FOUND:
+					//LOGd("Get default");
 					getDefault(data);
 					return ERR_SUCCESS;
 				default: {
@@ -273,30 +279,6 @@ cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const Persis
 	return ret_code;
 }
 
-bool State::updateFlag(CS_TYPE type, bool value, const PersistenceMode mode) {
-	uint8_t tmp = value;
-	st_file_data_t data;
-	data.type = type;
-	data.value = &tmp;
-	data.size = 1;
-	//data.persistent = persistent;
-	return _storage->write(FILE_CONFIGURATION, data);
-}
-
-bool State::readFlag(CS_TYPE type, bool& value) {
-	cs_ret_code_t error_code;
-	
-	uint8_t tmp = value;
-	st_file_data_t data;
-	data.type = type;
-	data.value = &tmp;
-	data.size = 1;
-	
-	error_code = _storage->read(FILE_CONFIGURATION, data);
-	value = *data.value;
-	return error_code;
-}
-
 bool State::isSet(CS_TYPE type) {
 	bool enabled = false;
 	switch(type) {
@@ -308,8 +290,10 @@ bool State::isSet(CS_TYPE type) {
 		case CS_TYPE::CONFIG_DEFAULT_ON:
 		case CS_TYPE::CONFIG_PWM_ALLOWED:
 		case CS_TYPE::CONFIG_SWITCH_LOCKED:
-		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: 
-			readFlag(type, enabled);
+		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: {
+			size16_t size = sizeof(enabled);
+			get(type, (void*)&enabled, size, PersistenceMode::STRATEGY1);
+		}
 		default: {}
 	}
 	return enabled;
@@ -341,10 +325,9 @@ void State::disableNotifications() {
 
 void State::factoryReset(uint32_t resetCode) {
 	if (resetCode != FACTORY_RESET_CODE) {
-		LOGe("wrong reset code!");
+		LOGe("Wrong reset code!");
 		return;
 	}
 
-	// TODO:	_storage->clearStorage(PS_ID_CONFIGURATION);
-	// TODO: memset(&_storageStruct, 0xFF, sizeof(_storageStruct));
+	_storage->remove(FILE_CONFIGURATION);
 }

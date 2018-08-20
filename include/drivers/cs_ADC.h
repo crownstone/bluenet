@@ -6,12 +6,12 @@
  */
 #pragma once
 
-#include "ble/cs_Nordic.h"
-#include "cfg/cs_Config.h"
-#include "structs/buffer/cs_CircularBuffer.h"
-#include "structs/buffer/cs_StackBuffer.h"
-#include "structs/buffer/cs_DifferentialBuffer.h"
-#include "events/cs_EventListener.h"
+#include <ble/cs_Nordic.h>
+#include <cfg/cs_Config.h>
+#include <events/cs_EventListener.h>
+#include <structs/buffer/cs_CircularBuffer.h>
+#include <structs/buffer/cs_DifferentialBuffer.h>
+#include <structs/buffer/cs_StackBuffer.h>
 
 // Numeric reference to a pin
 typedef uint8_t cs_adc_pin_id_t;

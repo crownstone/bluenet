@@ -5,20 +5,13 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "services/cs_DeviceInformationService.h"
-
-//
 #include <ble/cs_Nordic.h>
-#include "cfg/cs_Boards.h"
-#include "cfg/cs_HardwareVersions.h"
-#include "cfg/cs_UuidConfig.h"
-
+#include <cfg/cs_Boards.h>
+#include <cfg/cs_HardwareVersions.h>
+#include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Serial.h>
+#include <services/cs_DeviceInformationService.h>
 #include <util/cs_Utils.h>
-
-extern "C" {
-#include "nrf52.h"
-}
 
 inline std::string get_hardware_revision(void) {
 

@@ -5,12 +5,18 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <ble/cs_Stack.h>
-
-#include <cfg/cs_Config.h>
 #include <ble/cs_Handlers.h>
-
+#include <ble/cs_Nordic.h>
+#include <ble/cs_Stack.h>
+#include <cfg/cs_Config.h>
+#include <cfg/cs_UuidConfig.h>
+#include <drivers/cs_Storage.h>
+#include <events/cs_EventDispatcher.h>
+#include <processing/cs_Scanner.h>
+#include <processing/cs_Tracker.h>
+#include <storage/cs_State.h>
 #include <structs/buffer/cs_MasterBuffer.h>
+#include <util/cs_Utils.h>
 
 #if BUILD_MESHING == 1
 extern "C" {
@@ -18,18 +24,6 @@ extern "C" {
 }
 #endif
 
-extern "C" {
-#include <app_util.h>
-}
-
-#include <drivers/cs_Storage.h>
-#include <storage/cs_State.h>
-#include <util/cs_Utils.h>
-#include <cfg/cs_UuidConfig.h>
-
-#include <events/cs_EventDispatcher.h>
-#include <processing/cs_Scanner.h>
-#include <processing/cs_Tracker.h>
 
 //#define PRINT_STACK_VERBOSE
 
@@ -50,7 +44,6 @@ Stack::Stack() :
 	_scanning(false),
 	_conn_handle(BLE_CONN_HANDLE_INVALID),
 	_radio_notify(0),
-	//_dm_app_handle(0), 
 	_dm_initialized(false),
 	_lowPowerTimeoutId(NULL),
 	_secReqTimerId(NULL),
@@ -83,15 +76,6 @@ Stack::~Stack() {
 	shutdown();
 }
 
-/*
-const nrf_clock_lf_cfg_t Stack::defaultClockSource = { 
-	.source        = NRF_CLOCK_LF_SRC_XTAL,        
-	.rc_ctiv       = 0,                     
-	.rc_temp_ctiv  = 0,                     
-	.xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM 
-};
-*/
-
 /**
  * Called by the Softdevice handler on any BLE event. It is initialized from the SoftDevice using the app scheduler.
  * This means that the callback runs on the main thread. 
@@ -113,14 +97,19 @@ void Stack::init() {
 		LOGw("Stack already initialized");
 		return;
 	}
+	LOGi(FMT_INIT, "stack");
+
+	ret_code_t err_code;
 
 	// Check if SoftDevice is already running and disable it in that case (to restart later)
 	LOGi(FMT_INIT, "softdevice");
 	uint8_t enabled;
-	BLE_CALL(sd_softdevice_is_enabled, (&enabled));
+	err_code = sd_softdevice_is_enabled(&enabled);
+	APP_ERROR_CHECK(err_code);
 	if (enabled) {
 		LOGw(MSG_BLE_SOFTDEVICE_RUNNING);
-		BLE_CALL(sd_softdevice_disable, ());
+		err_code = sd_softdevice_disable();
+		APP_ERROR_CHECK(err_code);
 	}
 
 	// Enable power-fail comparator
@@ -157,17 +146,17 @@ void Stack::init() {
  *   NRF_SDH_BLE_CENTRAL_LINK_COUNT = 0
  */
 void Stack::initRadio() {
-	ret_code_t err_code;
 	if (!checkCondition(C_STACK_INITIALIZED, true)) return;
 	if (checkCondition(C_RADIO_INITIALIZED, false)) return;
-		
-	LOGd("nrf_sdh_enable_request");
+	ret_code_t err_code;
 
+	LOGd("nrf_sdh_enable_request");
 	err_code = nrf_sdh_enable_request(); 
 	if (err_code == NRF_ERROR_INVALID_STATE) {
 		LOGw("Softdevice, already initialized");
 		return;
 	}
+
 	// Enable BLE stack
 	uint32_t ram_start = RAM_R1_BASE;
 	_conn_cfg_tag = 1;
@@ -230,7 +219,8 @@ void Stack::initRadio() {
 
 	updateConnParams();
 	updatePasskey();
-	updateTxPowerLevel();
+	LOGw("Update TX Power not possible yet");
+	//updateTxPowerLevel();
 }
 
 
@@ -318,21 +308,6 @@ void Stack::initServices() {
 	_initializedServices = true;
 }
 
-// TODO: remove this function
-void Stack::startTicking() {
-//	LOGi(FMT_START, "ticking");
-//	for (Service* svc : _services) {
-//		svc->startTicking();
-//	}
-}
-
-void Stack::stopTicking() {
-//	LOGi(FMT_STOP, "ticking");
-//	for (Service* svc : _services) {
-//		svc->stopTicking();
-//	}
-}
-
 void Stack::shutdown() {
 	stopAdvertising();
 
@@ -357,7 +332,7 @@ void Stack::addService(Service* svc) {
  */
 void Stack::setTxPowerLevel(int8_t powerLevel) {
 #ifdef PRINT_STACK_VERBOSE
-	LOGd(FMT_SET_INT_VAL, "tx power", powerLevel);
+	LOGd(FMT_SET_INT_VAL, "TX power", powerLevel);
 #endif
 
 	switch (powerLevel) {
@@ -383,15 +358,13 @@ void Stack::setTxPowerLevel(int8_t powerLevel) {
 
 void Stack::updateTxPowerLevel() {
 	if (!_initializedRadio || _adv_handle == BLE_ADV_HANDLE_INVALID) {
-		LOGw("Radio not initialized yet");
+		LOGw("Radio not initialized or invalid handle");
 		return;
 	}
 	uint32_t err_code;
 	LOGd("Update tx power level %i", _tx_power_level);
 	err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _tx_power_level, _adv_handle);
 	APP_ERROR_CHECK(err_code);
-//	LOGw("TODO: update tx power level %i", _tx_power_level);
-//	return;
 }
 
 void Stack::setMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
@@ -456,6 +429,17 @@ void Stack::configureIBeaconAdvData(IBeacon* beacon) {
 
 	_config_advdata.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 	_config_advdata.p_manuf_specific_data = &_manufac_apple;
+
+	// we now have to encode the data by an explicit call
+	ret_code_t ret_code;
+	_data_advdata.len = sizeof(_config_advdata);
+	if (_data_advdata.p_data == NULL) {
+		_data_advdata.p_data = (uint8_t*)malloc(_data_advdata.len);
+	}
+	LOGd("Set buffer to size: %i", _data_advdata.len);
+	ret_code = ble_advdata_encode(&_config_advdata, _data_advdata.p_data, &_data_advdata.len);
+	LOGd("Got buffer of size: %i", _data_advdata.len);
+	APP_ERROR_CHECK(ret_code);
 }
 
 /** Configurate advertisement data according to Crowstone specification.
@@ -513,6 +497,17 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 	uint8_t nameLength = maxDataLength - serviceDataLength;
 	nameLength = std::min(nameLength, (uint8_t)(getDeviceName().length()));
 	_config_scanrsp.short_name_len = nameLength;
+	
+	// we now have to encode the data by an explicit call
+	ret_code_t ret_code;
+	_data_scanrsp.len = sizeof(_config_advdata);
+	if (_data_scanrsp.p_data == NULL) {
+		_data_scanrsp.p_data = (uint8_t*)malloc(_data_scanrsp.len);
+	}
+	LOGd("Set buffer to size: %i", _data_scanrsp.len);
+	ret_code = ble_advdata_encode(&_config_scanrsp, _data_scanrsp.p_data, &_data_scanrsp.len);
+	LOGd("Got buffer of size: %i", _data_scanrsp.len);
+	APP_ERROR_CHECK(ret_code);
 }
 
 void Stack::configureIBeacon(IBeacon* beacon, uint8_t deviceType) {
@@ -559,6 +554,7 @@ void Stack::setNonConnectable() {
 }
 
 void Stack::restartAdvertising() {
+	LOGd("Restart advertising");
 	if (!_initializedRadio) {
 		LOGw(FMT_NOT_INITIALIZED, "radio");
 		return;
@@ -577,9 +573,9 @@ void Stack::startAdvertising() {
 		return;
 	}
 
-	LOGi(MSG_BLE_ADVERTISING_STARTING);
+	//LOGi(MSG_BLE_ADVERTISING_STARTING);
 	
-	LOGd("sd_ble_gap_adv_start");
+	//LOGd("sd_ble_gap_adv_start");
 	uint32_t err_code = sd_ble_gap_adv_start(_adv_handle, _conn_cfg_tag);
 	if (err_code == NRF_SUCCESS) {
 		_advertising = true;
@@ -598,7 +594,7 @@ void Stack::stopAdvertising() {
 	// Ignore invalid state error, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 	APP_ERROR_CHECK_EXCEPT(err_code, NRF_ERROR_INVALID_STATE);
 
-	LOGi(MSG_BLE_ADVERTISING_STOPPED);
+	//LOGi(MSG_BLE_ADVERTISING_STOPPED);
 
 	_advertising = false;
 }
@@ -659,24 +655,39 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
 	return field;
 }
 
+/**
+ * After this function _adv_handle should be valid. Note, that we are not allowed to:
+ *
+ *   call sd_ble_gap_adv_set_configure with adv_params != NULL while advertising
+ *   call sd_ble_gap_adv_set_configure again with the same pointer to _adv_data 
+ */
 void Stack::setAdvertisementData() {
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
 
 	uint32_t err;
-	
+
 	bool first_time = false;
 	if (_adv_handle == BLE_ADV_HANDLE_INVALID) {
 		first_time = true;
 	}
-
-	if (!first_time) {
+	
+	if (first_time) {
+		LOGd("sd_ble_gap_adv_set_configure");
+		err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
+		APP_ERROR_CHECK(err);
+	} else {
 		// update now does not just allow adv_data to point to something else...
-		return; // for now
-	}
+		//LOGw("Cannot just update adv_params on the fly");
+		stopAdvertising();
+		//LOGd("sd_ble_gap_adv_set_configure");
+		err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
+		APP_ERROR_CHECK(err);
+		startAdvertising();
+	} 
 
-	LOGd("sd_ble_gap_adv_set_configure");
-	err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
-	APP_ERROR_CHECK(err);
+	// check if we have iBeacons settings in setup mode
+	// if not, setAdvertisementData is called to early and it is relied upon that adv_params can be changed later
+
 }
 
 void Stack::startScanning() {
@@ -692,8 +703,8 @@ void Stack::startScanning() {
 	p_scan_params.active = 0;
 	p_scan_params.timeout = 0x0000;
 
-	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &p_scan_params.interval, PersistenceMode::RAM);
-	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &p_scan_params.window, PersistenceMode::RAM);
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &p_scan_params.interval, PersistenceMode::STRATEGY1);
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &p_scan_params.window, PersistenceMode::STRATEGY1);
 
 	//! todo: which fields to set here?
 	// TODO: p_adv_report_buffer
@@ -761,13 +772,13 @@ void Stack::lowPowerTimeout(void* p_context) {
 
 void Stack::changeToLowTxPowerMode() {
 	int8_t lowTxPower;
-	State::getInstance().get(CS_TYPE::CONFIG_LOW_TX_POWER, &lowTxPower, PersistenceMode::RAM);
+	State::getInstance().get(CS_TYPE::CONFIG_LOW_TX_POWER, &lowTxPower, PersistenceMode::STRATEGY1);
 	setTxPowerLevel(lowTxPower);
 }
 
 void Stack::changeToNormalTxPowerMode() {
 	int8_t txPower;
-	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, PersistenceMode::RAM);
+	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, PersistenceMode::STRATEGY1);
 	setTxPowerLevel(txPower);
 }
 

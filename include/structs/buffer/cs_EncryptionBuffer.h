@@ -44,10 +44,10 @@ public:
 	}
 
 	void alloc(uint16_t size) {
-		LOGd("alloc %d", size);
+		LOGd("Allocate buffer [%d]", size);
 		_size = size;
 		_buffer = (buffer_ptr_t)calloc(_size, sizeof(uint8_t));
-		LOGd("buffer: %p", _buffer);
+		//LOGd("buffer: %p", _buffer);
 	}
 
 	void clear() {

@@ -5,16 +5,14 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <services/cs_PowerService.h>
-
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_Timer.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_PowerSampling.h>
-#include <structs/buffer/cs_MasterBuffer.h>
-#include <protocol/cs_StateTypes.h>
 #include <processing/cs_Switch.h>
+#include <services/cs_PowerService.h>
+#include <structs/buffer/cs_MasterBuffer.h>
 
 PowerService::PowerService() : EventListener(),
 		_pwmCharacteristic(NULL),

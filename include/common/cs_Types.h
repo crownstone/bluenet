@@ -9,8 +9,8 @@
 #include <ble/cs_Nordic.h>
 #include <cfg/cs_Config.h>
 #include <cstdint>
-#include <protocol/cs_Defaults.h>
 #include <type_traits>
+#include <drivers/cs_Serial.h>
 
 typedef uint8_t* buffer_ptr_t;
 typedef uint16_t buffer_size_t;
@@ -25,6 +25,15 @@ enum TypeBases {
 	Uart_Base          = 0x180,
 };
 
+/** Cast to underlying type.
+ *
+ * This can be used in the following way.
+ *
+ *   CS_TYPE type = CONFIG_TX_POWER;
+ *   uint8_t raw_value = +type;
+ *
+ * This should be used very rarely. Use the CS_TYPE wherever possible.
+ */
 template <typename T>
 constexpr auto operator+(T e) noexcept 
 -> std::enable_if_t<std::is_enum<T>::value, std::underlying_type_t<T>> {
@@ -203,22 +212,22 @@ struct state_vars_notifaction {
 
 union state_errors_t {
    struct __attribute__((packed)) {
-      uint8_t overCurrent : 1;
-      uint8_t overCurrentPwm : 1;
-      uint8_t chipTemp : 1;
-      uint8_t pwmTemp : 1;
-      uint8_t dimmerOn : 1;
-      uint8_t dimmerOff : 1;
-      uint32_t reserved : 26;
+      uint8_t overCurrent: 1;
+      uint8_t overCurrentPwm: 1;
+      uint8_t chipTemp: 1;
+      uint8_t pwmTemp: 1;
+      uint8_t dimmerOn: 1;
+      uint8_t dimmerOff: 1;
+      uint32_t reserved: 26;
    } errors;
    uint32_t asInt;
 };
 
 union state_ignore_bitmask_t {
    struct __attribute__((packed)) {
-      uint8_t all : 1;
-      uint8_t location : 1;
-      uint8_t reserved : 6;
+      uint8_t all: 1;
+      uint8_t location: 1;
+      uint8_t reserved: 6;
    } mask;
    uint8_t asInt;
 };
@@ -246,14 +255,14 @@ struct __attribute__((packed)) evt_do_reset_delayed_t {
 
 typedef uint16_t st_file_id_t;
 
-typedef union {
+union st_value_t {
    int8_t    s8;
    int16_t   s16;
    int32_t   s32;
    uint8_t   u8;
    uint16_t  u16;
    uint32_t  u32;
-} __ALIGN(4) st_value_t;
+} __ALIGN(4);
 
 struct st_file_data_t { 
    CS_TYPE type;
@@ -271,27 +280,12 @@ struct st_file_data_t {
       }
       return true;
    }
-  // friend bool operator!=(const st_file_data_t data0, const st_file_data_t & data1);
+   friend bool operator!=(const st_file_data_t data0, const st_file_data_t & data1) {
+     return !(data0 == data1);
+   }
 
 };
 
-/*
-bool operator==(const st_file_data_t data0, const st_file_data_t & data1) {
-   if (data0.type != data1.type || data0.size != data1.size) {
-      return false;
-   }
-   for (int i = 0; i < data0.size; ++i) {
-      if (data0.value[i] != data1.value[i]) {
-	 return false;
-      }
-   }
-   return true;
-}
-
-bool operator!=(const st_file_data_t data0, const st_file_data_t & data1) {
-   return !(data0 == data1);
-}
-*/
 /*---------------------------------------------------------------------------------------------------------------------
  *
  *                                               Types
@@ -782,52 +776,147 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
  *-------------------------------------------------------------------------------------------------------------------*/
 
 constexpr const char* TypeName(CS_TYPE const & type) {
-    switch(type) {
-	case CS_TYPE::STATE_RESET_COUNTER:
-	    return "STATE_RESET_COUNTER";
-	case CS_TYPE::STATE_SWITCH_STATE:
-	    return "STATE_SWITCH_STATE";
-	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
-	    return "STATE_ACCUMULATED_ENERGY";
-	case CS_TYPE::STATE_POWER_USAGE:
-	    return "STATE_POWER_USAGE";
-	case CS_TYPE::STATE_TRACKED_DEVICES:
-	    return "STATE_TRACKED_DEVICES";
-	case CS_TYPE::STATE_SCHEDULE:
-	    return "STATE_SCHEDULE";
-	case CS_TYPE::STATE_OPERATION_MODE:
-	    return "STATE_OPERATION_MODE";
-	case CS_TYPE::STATE_TEMPERATURE:
-	    return "STATE_TEMPERATURE";
-	case CS_TYPE::STATE_TIME:
-	    return "STATE_TIME";
-	case CS_TYPE::STATE_FACTORY_RESET:
-	    return "STATE_FACTORY_RESET";
-	case CS_TYPE::STATE_LEARNED_SWITCHES:
-	    return "STATE_LEARNED_SWITCHES";
-	case CS_TYPE::STATE_ERRORS:
-	    return "STATE_ERRORS";
-	case CS_TYPE::STATE_ERROR_OVER_CURRENT:
-	    return "STATE_ERROR_OVER_CURRENT";
-	case CS_TYPE::STATE_ERROR_OVER_CURRENT_PWM:
-	    return "STATE_ERROR_OVER_CURRENT_PWM";
-	case CS_TYPE::STATE_ERROR_CHIP_TEMP:
-	    return "STATE_ERROR_CHIP_TEMP";
-	case CS_TYPE::STATE_ERROR_PWM_TEMP:
-	    return "STATE_ERROR_PWM_TEMP";
-	case CS_TYPE::STATE_IGNORE_BITMASK:
-	    return "STATE_IGNORE_BITMASK";
-	case CS_TYPE::STATE_IGNORE_ALL:
-	    return "STATE_IGNORE_ALL";
-	case CS_TYPE::STATE_IGNORE_LOCATION:
-	    return "STATE_IGNORE_LOCATION";
-	case CS_TYPE::STATE_ERROR_DIMMER_ON_FAILURE:
-	    return "STATE_ERROR_DIMMER_ON_FAILURE";
-	case CS_TYPE::STATE_ERROR_DIMMER_OFF_FAILURE:
-	    return "STATE_ERROR_DIMMER_OFF_FAILURE";
-	default:
-	    return "Unknown";
+
+  switch(type) {
+    case CS_TYPE::CONFIG_ADV_INTERVAL: return "CONFIG_ADV_INTERVAL";
+    case CS_TYPE::CONFIG_BOOT_DELAY: return "CONFIG_BOOT_DELAY";
+    case CS_TYPE::CONFIG_CONT_POWER_SAMPLER_ENABLED: return "CONFIG_CONT_POWER_SAMPLER_ENABLED";
+    case CS_TYPE::CONFIG_CROWNSTONE_ID: return "CONFIG_CROWNSTONE_ID";
+    case CS_TYPE::CONFIG_CURRENT_MULTIPLIER: return "CONFIG_CURRENT_MULTIPLIER";
+    case CS_TYPE::CONFIG_CURRENT_ZERO: return "CONFIG_CURRENT_ZERO";
+    case CS_TYPE::CONFIG_DEFAULT_ON: return "CONFIG_DEFAULT_ON";
+    case CS_TYPE::CONFIG_DEVICE_TYPE: return "CONFIG_DEVICE_TYPE";
+    case CS_TYPE::CONFIG_ENCRYPTION_ENABLED: return "CONFIG_ENCRYPTION_ENABLED";
+    case CS_TYPE::CONFIG_FLOOR: return "CONFIG_FLOOR";
+    case CS_TYPE::CONFIG_IBEACON_ENABLED: return "CONFIG_IBEACON_ENABLED";
+    case CS_TYPE::CONFIG_IBEACON_MAJOR: return "CONFIG_IBEACON_MAJOR";
+    case CS_TYPE::CONFIG_IBEACON_MINOR: return "CONFIG_IBEACON_MINOR";
+    case CS_TYPE::CONFIG_IBEACON_TXPOWER: return "CONFIG_IBEACON_TXPOWER";
+    case CS_TYPE::CONFIG_IBEACON_UUID: return "CONFIG_IBEACON_UUID";
+    case CS_TYPE::CONFIG_KEY_ADMIN: return "CONFIG_KEY_ADMIN";
+    case CS_TYPE::CONFIG_KEY_GUEST: return "CONFIG_KEY_GUEST";
+    case CS_TYPE::CONFIG_KEY_MEMBER: return "CONFIG_KEY_MEMBER";
+    case CS_TYPE::CONFIG_LOW_TX_POWER: return "CONFIG_LOW_TX_POWER";
+    case CS_TYPE::CONFIG_MAX_CHIP_TEMP: return "CONFIG_MAX_CHIP_TEMP";
+    case CS_TYPE::CONFIG_MAX_ENV_TEMP: return "CONFIG_MAX_ENV_TEMP";
+    case CS_TYPE::CONFIG_MESH_ACCESS_ADDRESS: return "CONFIG_MESH_ACCESS_ADDRESS";
+    case CS_TYPE::CONFIG_MESH_CHANNEL: return "CONFIG_MESH_CHANNEL";
+    case CS_TYPE::CONFIG_MESH_ENABLED: return "CONFIG_MESH_ENABLED";
+    case CS_TYPE::CONFIG_MIN_ENV_TEMP: return "CONFIG_MIN_ENV_TEMP";
+    case CS_TYPE::CONFIG_NAME: return "CONFIG_NAME";
+    case CS_TYPE::CONFIG_NEARBY_TIMEOUT: return "CONFIG_NEARBY_TIMEOUT";
+    case CS_TYPE::CONFIG_PASSKEY: return "CONFIG_PASSKEY";
+    case CS_TYPE::CONFIG_POWER_ZERO: return "CONFIG_POWER_ZERO";
+    case CS_TYPE::CONFIG_POWER_ZERO_AVG_WINDOW: return "CONFIG_POWER_ZERO_AVG_WINDOW";
+    case CS_TYPE::CONFIG_PWM_ALLOWED: return "CONFIG_PWM_ALLOWED";
+    case CS_TYPE::CONFIG_PWM_PERIOD: return "CONFIG_PWM_PERIOD";
+    case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN: return "CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN";
+    case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP: return "CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP";
+    case CS_TYPE::CONFIG_RELAY_HIGH_DURATION: return "CONFIG_RELAY_HIGH_DURATION";
+    case CS_TYPE::CONFIG_ROOM: return "CONFIG_ROOM";
+    case CS_TYPE::CONFIG_SCANNER_ENABLED: return "CONFIG_SCANNER_ENABLED";
+    case CS_TYPE::CONFIG_SCAN_BREAK_DURATION: return "CONFIG_SCAN_BREAK_DURATION";
+    case CS_TYPE::CONFIG_SCAN_DURATION: return "CONFIG_SCAN_DURATION";
+    case CS_TYPE::CONFIG_SCAN_FILTER: return "CONFIG_SCAN_FILTER";
+    case CS_TYPE::CONFIG_SCAN_FILTER_SEND_FRACTION: return "CONFIG_SCAN_FILTER_SEND_FRACTION";
+    case CS_TYPE::CONFIG_SCAN_INTERVAL: return "CONFIG_SCAN_INTERVAL";
+    case CS_TYPE::CONFIG_SCAN_SEND_DELAY: return "CONFIG_SCAN_SEND_DELAY";
+    case CS_TYPE::CONFIG_SCAN_WINDOW: return "CONFIG_SCAN_WINDOW";
+    case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD: return "CONFIG_SOFT_FUSE_CURRENT_THRESHOLD";
+    case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM: return "CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM";
+    case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: return "CONFIG_SWITCHCRAFT_ENABLED";
+    case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD: return "CONFIG_SWITCHCRAFT_THRESHOLD";
+    case CS_TYPE::CONFIG_SWITCH_LOCKED: return "CONFIG_SWITCH_LOCKED";
+    case CS_TYPE::CONFIG_TRACKER_ENABLED: return "CONFIG_TRACKER_ENABLED";
+    case CS_TYPE::CONFIG_TX_POWER: return "CONFIG_TX_POWER";
+    case CS_TYPE::CONFIG_UART_ENABLED: return "CONFIG_UART_ENABLED";
+    case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER: return "CONFIG_VOLTAGE_MULTIPLIER";
+    case CS_TYPE::CONFIG_VOLTAGE_ZERO: return "CONFIG_VOLTAGE_ZERO";
+    case CS_TYPE::EVT_ADC_RESTARTED: return "EVT_ADC_RESTARTED";
+    case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: return "EVT_ADVERTISEMENT_UPDATED";
+    case CS_TYPE::EVT_BLE_CONNECT: return "EVT_BLE_CONNECT";
+    case CS_TYPE::EVT_BLE_DISCONNECT: return "EVT_BLE_DISCONNECT";
+    case CS_TYPE::EVT_BLE_EVENT: return "EVT_BLE_EVENT";
+    case CS_TYPE::EVT_BROWNOUT_IMPENDING: return "EVT_BROWNOUT_IMPENDING";
+    case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD: return "EVT_CHIP_TEMP_ABOVE_THRESHOLD";
+    case CS_TYPE::EVT_CHIP_TEMP_OK: return "EVT_CHIP_TEMP_OK";
+    case CS_TYPE::EVT_CMD_RESET: return "EVT_CMD_RESET";
+    case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD: return "EVT_CURRENT_USAGE_ABOVE_THRESHOLD";
+    case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM: return "EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM";
+    case CS_TYPE::EVT_DEC_CURRENT_RANGE: return "EVT_DEC_CURRENT_RANGE";
+    case CS_TYPE::EVT_DEC_VOLTAGE_RANGE: return "EVT_DEC_VOLTAGE_RANGE";
+    case CS_TYPE::EVT_DEVICE_SCANNED: return "EVT_DEVICE_SCANNED";
+    case CS_TYPE::EVT_DIMMER_OFF_FAILURE_DETECTED: return "EVT_DIMMER_OFF_FAILURE_DETECTED";
+    case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED: return "EVT_DIMMER_ON_FAILURE_DETECTED";
+    case CS_TYPE::EVT_DO_RESET_DELAYED: return "EVT_DO_RESET_DELAYED";
+    case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT: return "EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT";
+    case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE: return "EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE";
+    case CS_TYPE::EVT_ENABLE_ADVERTISEMENT: return "EVT_ENABLE_ADVERTISEMENT";
+    case CS_TYPE::EVT_ENABLE_LOG_CURRENT: return "EVT_ENABLE_LOG_CURRENT";
+    case CS_TYPE::EVT_ENABLE_LOG_FILTERED_CURRENT: return "EVT_ENABLE_LOG_FILTERED_CURRENT";
+    case CS_TYPE::EVT_ENABLE_LOG_POWER: return "EVT_ENABLE_LOG_POWER";
+    case CS_TYPE::EVT_ENABLE_LOG_VOLTAGE: return "EVT_ENABLE_LOG_VOLTAGE";
+    case CS_TYPE::EVT_ENABLE_MESH: return "EVT_ENABLE_MESH";
+    case CS_TYPE::EVT_EXTERNAL_STATE_MSG_CHAN_0: return "EVT_EXTERNAL_STATE_MSG_CHAN_0";
+    case CS_TYPE::EVT_EXTERNAL_STATE_MSG_CHAN_1: return "EVT_EXTERNAL_STATE_MSG_CHAN_1";
+    case CS_TYPE::EVT_INC_CURRENT_RANGE: return "EVT_INC_CURRENT_RANGE";
+    case CS_TYPE::EVT_INC_VOLTAGE_RANGE: return "EVT_INC_VOLTAGE_RANGE";
+    case CS_TYPE::EVT_KEEP_ALIVE: return "EVT_KEEP_ALIVE";
+    case CS_TYPE::EVT_MESH_TIME: return "EVT_MESH_TIME";
+    case CS_TYPE::EVT_POWER_OFF: return "EVT_POWER_OFF";
+    case CS_TYPE::EVT_POWER_ON: return "EVT_POWER_ON";
+    case CS_TYPE::EVT_POWER_SAMPLES_END: return "EVT_POWER_SAMPLES_END";
+    case CS_TYPE::EVT_POWER_SAMPLES_START: return "EVT_POWER_SAMPLES_START";
+    case CS_TYPE::EVT_POWER_TOGGLE: return "EVT_POWER_TOGGLE";
+    case CS_TYPE::EVT_PWM_ALLOWED: return "EVT_PWM_ALLOWED";
+    case CS_TYPE::EVT_PWM_FORCED_OFF: return "EVT_PWM_FORCED_OFF";
+    case CS_TYPE::EVT_PWM_POWERED: return "EVT_PWM_POWERED";
+    case CS_TYPE::EVT_PWM_TEMP_ABOVE_THRESHOLD: return "EVT_PWM_TEMP_ABOVE_THRESHOLD";
+    case CS_TYPE::EVT_PWM_TEMP_OK: return "EVT_PWM_TEMP_OK";
+    case CS_TYPE::EVT_RELAY_FORCED_ON: return "EVT_RELAY_FORCED_ON";
+    case CS_TYPE::EVT_RX_CONTROL: return "EVT_RX_CONTROL";
+    case CS_TYPE::EVT_SCANNED_DEVICES: return "EVT_SCANNED_DEVICES";
+    case CS_TYPE::EVT_SCAN_STARTED: return "EVT_SCAN_STARTED";
+    case CS_TYPE::EVT_SCAN_STOPPED: return "EVT_SCAN_STOPPED";
+    case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED: return "EVT_SCHEDULE_ENTRIES_UPDATED";
+    case CS_TYPE::EVT_SESSION_NONCE_SET: return "EVT_SESSION_NONCE_SET";
+    case CS_TYPE::EVT_SETUP_DONE: return "EVT_SETUP_DONE";
+    case CS_TYPE::EVT_SET_LOG_LEVEL: return "EVT_SET_LOG_LEVEL";
+    case CS_TYPE::EVT_STATE_NOTIFICATION: return "EVT_STATE_NOTIFICATION";
+    case CS_TYPE::EVT_STORAGE_ERASE: return "EVT_STORAGE_ERASE";
+    case CS_TYPE::EVT_STORAGE_WRITE: return "EVT_STORAGE_WRITE";
+    case CS_TYPE::EVT_STORAGE_WRITE_DONE: return "EVT_STORAGE_WRITE_DONE";
+    case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: return "EVT_SWITCHCRAFT_ENABLED";
+    case CS_TYPE::EVT_SWITCH_FORCED_OFF: return "EVT_SWITCH_FORCED_OFF";
+    case CS_TYPE::EVT_SWITCH_LOCKED: return "EVT_SWITCH_LOCKED";
+    case CS_TYPE::EVT_TIME_SET: return "EVT_TIME_SET";
+    case CS_TYPE::EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN: return "EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN";
+    case CS_TYPE::EVT_TRACKED_DEVICES: return "EVT_TRACKED_DEVICES";
+    case CS_TYPE::EVT_TRACKED_DEVICE_IS_NEARBY: return "EVT_TRACKED_DEVICE_IS_NEARBY";
+    case CS_TYPE::EVT_TRACKED_DEVICE_NOT_NEARBY: return "EVT_TRACKED_DEVICE_NOT_NEARBY";
+    case CS_TYPE::STATE_ACCUMULATED_ENERGY: return "STATE_ACCUMULATED_ENERGY";
+    case CS_TYPE::STATE_ERRORS: return "STATE_ERRORS";
+    case CS_TYPE::STATE_ERROR_CHIP_TEMP: return "STATE_ERROR_CHIP_TEMP";
+    case CS_TYPE::STATE_ERROR_DIMMER_OFF_FAILURE: return "STATE_ERROR_DIMMER_OFF_FAILURE";
+    case CS_TYPE::STATE_ERROR_DIMMER_ON_FAILURE: return "STATE_ERROR_DIMMER_ON_FAILURE";
+    case CS_TYPE::STATE_ERROR_OVER_CURRENT: return "STATE_ERROR_OVER_CURRENT";
+    case CS_TYPE::STATE_ERROR_OVER_CURRENT_PWM: return "STATE_ERROR_OVER_CURRENT_PWM";
+    case CS_TYPE::STATE_ERROR_PWM_TEMP: return "STATE_ERROR_PWM_TEMP";
+    case CS_TYPE::STATE_FACTORY_RESET: return "STATE_FACTORY_RESET";
+    case CS_TYPE::STATE_IGNORE_ALL: return "STATE_IGNORE_ALL";
+    case CS_TYPE::STATE_IGNORE_BITMASK: return "STATE_IGNORE_BITMASK";
+    case CS_TYPE::STATE_IGNORE_LOCATION: return "STATE_IGNORE_LOCATION";
+    case CS_TYPE::STATE_LEARNED_SWITCHES: return "STATE_LEARNED_SWITCHES";
+    case CS_TYPE::STATE_OPERATION_MODE: return "STATE_OPERATION_MODE";
+    case CS_TYPE::STATE_POWER_USAGE: return "STATE_POWER_USAGE";
+    case CS_TYPE::STATE_RESET_COUNTER: return "STATE_RESET_COUNTER";
+    case CS_TYPE::STATE_SCHEDULE: return "STATE_SCHEDULE";
+    case CS_TYPE::STATE_SWITCH_STATE: return "STATE_SWITCH_STATE";
+    case CS_TYPE::STATE_TEMPERATURE: return "STATE_TEMPERATURE";
+    case CS_TYPE::STATE_TIME: return "STATE_TIME";
+    case CS_TYPE::STATE_TRACKED_DEVICES: return "STATE_TRACKED_DEVICES";
     }
+    return "Unknown";
 }
 
 constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
@@ -892,14 +981,14 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
 	case CS_TYPE::CONFIG_MESH_CHANNEL:
 	case CS_TYPE::CONFIG_UART_ENABLED:
-	    return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_RESET_COUNTER:
+	case CS_TYPE::STATE_OPERATION_MODE:
+	    return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_SWITCH_STATE:
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
 	case CS_TYPE::STATE_TRACKED_DEVICES:
 	case CS_TYPE::STATE_SCHEDULE:
-	case CS_TYPE::STATE_OPERATION_MODE:
 	case CS_TYPE::STATE_TEMPERATURE:
 	case CS_TYPE::STATE_TIME:
 	case CS_TYPE::STATE_FACTORY_RESET:
@@ -993,6 +1082,11 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
  *
  *-------------------------------------------------------------------------------------------------------------------*/
 
+/** Gets the default. 
+ *
+ * Note that if data.value is not aligned at a word boundary, the result still isn't. Use st_value_t to align 
+ * (u)int8_t, (u)int16_t, float, etc. on word boundaries.
+ */
 constexpr void getDefault(st_file_data_t & data) {
 
     data.size = TypeSize(data.type);
@@ -1213,7 +1307,7 @@ constexpr void getDefault(st_file_data_t & data) {
 	    *(TYPIFY(STATE_ERROR_DIMMER_OFF_FAILURE)*)data.value = STATE_ERROR_DIMMER_OFF_FAILURE_DEFAULT;
 	    break;
 	default:
-	    //LOGw("Unknown default for %i", data.type);
+	    LOGw("Unknown default for %i", +data.type);
 	    break;
 
     }

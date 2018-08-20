@@ -24,7 +24,6 @@ extern "C" {
  * that are defined for the timeslot API.
  *
  * Events are send to:
- * + pstorage: NRF_EVT_FLASH_OPERATION_SUCCESS and NRF_EVT_FLASH_OPERATION_ERROR
  * + mesh: storage events and timeslot events (see above)
  * + all: NRF_EVT_POWER_FAILURE_WARNING just before a brownout
  *
@@ -33,8 +32,6 @@ extern "C" {
  * @param sys_evt                      System event.
  */
 void sys_evt_dispatch(uint32_t sys_evt);
-
-//void ble_evt_handler(ble_evt_t* p_ble_evt);
 
 #ifdef __cplusplus
 }

@@ -16,7 +16,9 @@
 void EncryptionHandler::init() {
 	_defaultValidationKey.b = DEFAULT_SESSION_KEY;
 	EventDispatcher::getInstance().addListener(this);
-	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, PersistenceMode::RAM);
+	uint8_t mode;
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
+	_operationMode = static_cast<OperationMode>(mode);
 }
 
 uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength, EncryptionType encryptionType) {
@@ -80,6 +82,14 @@ bool EncryptionHandler::allowedToWrite() {
  * It encrypts the block with the GUEST key.
  */
 bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
+	uint32_t err_code;
+	uint8_t softdevice_enabled;
+	err_code = sd_softdevice_is_enabled(&softdevice_enabled);
+	if (!softdevice_enabled) {
+		LOGw("Softdevice not enabled! Cannot call sd_ecb_block_encrypt");
+		return false;
+	}
+
 	// total length must be exactly 1 block.
 	if (targetLength != SOC_ECB_CIPHERTEXT_LENGTH) {
 		LOGe("Invalid target buffer length %d %d",dataLength, targetLength);
@@ -96,7 +106,6 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 		return false;
 
 	// set the guest key as active encryption key
-	uint32_t err_code;
 
 	// set the cleartext to 0x0 so we automatically zeropad the cleartext
 	memset(_block.cleartext, 0x0, SOC_ECB_CLEARTEXT_LENGTH);
@@ -126,7 +135,7 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 
 bool EncryptionHandler::encryptMesh(mesh_nonce_t nonce, uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength) {
 
-	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, PersistenceMode::RAM);
+	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, PersistenceMode::STRATEGY1);
 
 	// first MESH_OVERHEAD bytes of the target are overhead, which is a random number + nonce (message number)
 	uint16_t targetNetLength = targetLength - MESH_OVERHEAD;
@@ -166,7 +175,7 @@ bool EncryptionHandler::decryptMesh(uint8_t* encryptedDataPacket, uint16_t encry
 		return false;
 	}
 
-	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, PersistenceMode::RAM);
+	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, PersistenceMode::STRATEGY1);
 
 	// the actual encrypted part is after the overhead
 	uint16_t sourceNetLength = encryptedDataPacketLength - MESH_OVERHEAD;
@@ -490,11 +499,12 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 		keyConfigType = CS_TYPE::CONFIG_KEY_GUEST;
 		break;
 	case SETUP: {
-		if (_operationMode == OPERATION_MODE_SETUP && _setupKeyValid) {
+		if (_operationMode == OperationMode::OPERATION_MODE_SETUP && _setupKeyValid) {
 			memcpy(_block.key, _setupKey, SOC_ECB_KEY_LENGTH);
 			return true;
 		}
-		LOGe("Can't use this setup key");
+		// This error is generated once on boot
+		LOGe("Can't use this setup key (yet)");
 		return false;
 	}
 	default:
@@ -504,7 +514,7 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 	}
 
 	// get the key from the storage
-	State::getInstance().get(keyConfigType, _block.key, PersistenceMode::RAM);
+	State::getInstance().get(keyConfigType, _block.key, PersistenceMode::STRATEGY1);
 	return true;
 }
 
@@ -575,11 +585,11 @@ bool EncryptionHandler::allowAccess(EncryptionAccessLevel minimum, EncryptionAcc
 	}
 
 	if (minimum != ENCRYPTION_DISABLED) {
-		if (_operationMode == OPERATION_MODE_SETUP && provided == SETUP && _setupKeyValid) {
+		if (_operationMode == OperationMode::OPERATION_MODE_SETUP && provided == SETUP && _setupKeyValid) {
 			return true;
 		}
 
-		if (minimum == SETUP && (provided != SETUP || _operationMode != OPERATION_MODE_SETUP || !_setupKeyValid)) {
+		if (minimum == SETUP && (provided != SETUP || _operationMode != OperationMode::OPERATION_MODE_SETUP || !_setupKeyValid)) {
 			LOGw("Setup mode required");
 			return false;
 		}
@@ -595,7 +605,7 @@ bool EncryptionHandler::allowAccess(EncryptionAccessLevel minimum, EncryptionAcc
 }
 
 uint8_t* EncryptionHandler::generateNewSetupKey() {
-	if (_operationMode == OPERATION_MODE_SETUP) {
+	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
 		RNG::fillBuffer(_setupKey, SOC_ECB_KEY_LENGTH);
 		_setupKeyValid = true;
 	}

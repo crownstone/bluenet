@@ -19,29 +19,28 @@
  *
  *********************************************************************************************************************/
 
-#include "protocol/cs_UartProtocol.h"
-#include "util/cs_Utils.h"
-#include "protocol/cs_ErrorCodes.h"
-#include "util/cs_BleError.h"
-#include "ble/cs_Nordic.h"
-
-#include "structs/cs_StreamBuffer.h"
-#include "events/cs_EventDispatcher.h"
-#include "events/cs_EventTypes.h"
-#include "storage/cs_State.h"
+#include <ble/cs_Nordic.h>
+#include <common/cs_Types.h>
+#include <events/cs_EventDispatcher.h>
+#include <protocol/cs_ErrorCodes.h>
+#include <protocol/cs_UartProtocol.h>
+#include <storage/cs_State.h>
+#include <structs/cs_StreamBuffer.h>
+#include <util/cs_BleError.h>
+#include <util/cs_Utils.h>
 
 // Define both test pin to enable gpio debug.
 //#define TEST_PIN   22
 //#define TEST_PIN2  23
 
 UartProtocol::UartProtocol():
-_initialized(false),
-_readBuffer(NULL),
-_readBufferIdx(0),
-_startedReading(false),
-_escapeNextByte(false),
-_readPacketSize(0),
-_readBusy(false)
+    _initialized(false),
+    _readBuffer(NULL),
+    _readBufferIdx(0),
+    _startedReading(false),
+    _escapeNextByte(false),
+    _readPacketSize(0),
+    _readBusy(false)
 {
 
 }
@@ -291,7 +290,7 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 	    }
 	    case UART_OPCODE_RX_GET_ID: {
 		uint16_t crownstoneId;
-		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, PersistenceMode::FLASH);
+		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, PersistenceMode::STRATEGY1);
 		writeMsg(UART_OPCODE_TX_OWN_ID, (uint8_t*)&crownstoneId, sizeof(crownstoneId));
 		break;
 	    }

@@ -218,7 +218,7 @@ cs_ret_code_t CommandHandler::handleCmdEnableMesh(buffer_ptr_t buffer, const uin
 	bool enable = payload->enable;
 
 	LOGi("%s mesh", enable ? STR_ENABLE : STR_DISABLE);
-	State::getInstance().updateFlag(CS_TYPE::CONFIG_MESH_ENABLED, enable, PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::CONFIG_MESH_ENABLED, (void*)&enable, sizeof(enable), PersistenceMode::STRATEGY1);
 
 #if BUILD_MESHING == 1
 	if (enable) {
@@ -248,7 +248,7 @@ cs_ret_code_t CommandHandler::handleCmdEnableEncryption(buffer_ptr_t buffer, con
 	bool enable = payload->enable;
 
 	LOGi("%s encryption", enable ? STR_ENABLE : STR_DISABLE);
-	State::getInstance().updateFlag(CS_TYPE::CONFIG_ENCRYPTION_ENABLED, enable, PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::CONFIG_ENCRYPTION_ENABLED, (void*)&enable, sizeof(enable), PersistenceMode::STRATEGY1);
 
 	return ERR_SUCCESS;
 }
@@ -267,7 +267,7 @@ cs_ret_code_t CommandHandler::handleCmdEnableIbeacon(buffer_ptr_t buffer, const 
 	bool enable = payload->enable;
 
 	LOGi("%s ibeacon", enable ? STR_ENABLE : STR_DISABLE);
-	State::getInstance().updateFlag(CS_TYPE::CONFIG_IBEACON_ENABLED, enable, PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::CONFIG_IBEACON_ENABLED, (void*)&enable, sizeof(enable), PersistenceMode::STRATEGY1);
 
 	return ERR_SUCCESS;
 }
@@ -302,7 +302,7 @@ cs_ret_code_t CommandHandler::handleCmdEnableScanner(buffer_ptr_t buffer, const 
 	}
 
 	// TODO: first update flag, then start scanner? The scanner is stopped to write to pstorage anyway.
-	State::getInstance().updateFlag(CS_TYPE::CONFIG_SCANNER_ENABLED, enable, PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::CONFIG_SCANNER_ENABLED, (void*)&enable, sizeof(enable), PersistenceMode::STRATEGY1);
 
 	return ERR_SUCCESS;
 }
@@ -587,11 +587,11 @@ cs_ret_code_t CommandHandler::handleCmdResetErrors(buffer_ptr_t buffer, const ui
 	}
 	state_errors_t* payload = (state_errors_t*) buffer;
 	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::FLASH);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
 	LOGd("old errors %u - reset %u", stateErrors.asInt, *payload);
 	stateErrors.asInt &= ~(payload->asInt);
 	LOGd("new errors %u", stateErrors.asInt);
-	State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, sizeof(stateErrors), PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, sizeof(stateErrors), PersistenceMode::STRATEGY1);
 	return ERR_SUCCESS;
 }
 
@@ -741,12 +741,12 @@ cs_ret_code_t CommandHandler::handleCmdAllowDimming(buffer_ptr_t buffer, const u
 	if (enable && State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("unlock switch");
 		bool lockEnable = false;
-		State::getInstance().updateFlag(CS_TYPE::CONFIG_SWITCH_LOCKED, lockEnable, PersistenceMode::FLASH);
+		State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &lockEnable, sizeof(lockEnable), PersistenceMode::STRATEGY1);
 		event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &lockEnable, sizeof(bool));
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
-	State::getInstance().updateFlag(CS_TYPE::CONFIG_PWM_ALLOWED, enable, PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &enable, sizeof(enable), PersistenceMode::STRATEGY1);
 	event_t event(CS_TYPE::EVT_PWM_ALLOWED, &enable, sizeof(bool));
 	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
@@ -770,7 +770,7 @@ cs_ret_code_t CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uin
 		return ERR_NOT_AVAILABLE;
 	}
 
-	State::getInstance().updateFlag(CS_TYPE::CONFIG_SWITCH_LOCKED, enable, PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &enable, sizeof(enable), PersistenceMode::STRATEGY1);
 	event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &enable, sizeof(bool));
 	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
@@ -787,7 +787,7 @@ cs_ret_code_t CommandHandler::handleCmdEnableSwitchcraft(buffer_ptr_t buffer, co
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
 	bool enable = payload->enable;
 
-	State::getInstance().updateFlag(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED, enable, PersistenceMode::FLASH);
+	State::getInstance().set(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED, &enable, sizeof(enable), PersistenceMode::STRATEGY1);
 	event_t event(CS_TYPE::EVT_SWITCHCRAFT_ENABLED, &enable, sizeof(bool));
 	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
@@ -813,7 +813,7 @@ cs_ret_code_t CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const uin
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	uint8_t enable = *(uint8_t*) buffer;
-	cs_ret_code_t errCode = State::getInstance().set(CS_TYPE::CONFIG_UART_ENABLED, buffer, size, PersistenceMode::FLASH);
+	cs_ret_code_t errCode = State::getInstance().set(CS_TYPE::CONFIG_UART_ENABLED, buffer, size, PersistenceMode::STRATEGY1);
 	if (errCode != ERR_SUCCESS) {
 		return errCode;
 	}

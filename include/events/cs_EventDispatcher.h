@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#include <events/cs_EventTypes.h>
+#include <common/cs_Types.h>
 #include <events/cs_EventListener.h>
 
 #define MAX_EVENT_LISTENERS 30
