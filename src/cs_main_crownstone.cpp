@@ -948,7 +948,7 @@ int main() {
 		uint32_t onTimes[numOnTimes] = {50, 100, 200, 400, 800};
 		size_t numOffTimes = 8;
 		uint32_t offTimes[numOffTimes] = {5, 10, 15, 20, 30, 40, 60, 80};
-		size_t repeats = 3;
+		size_t repeats = 10;
 
 		for (size_t i=0; i<numOffTimes; ++i) {
 			LOGi("off for %ums", offTimes[i]);
