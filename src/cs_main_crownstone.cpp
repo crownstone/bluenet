@@ -928,60 +928,80 @@ int main() {
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
-	if (board.flags.hasSerial) {
-		// init uart, be nice and say hello
-		welcome(board.pinGpioRx, board.pinGpioTx);
+	// init uart, be nice and say hello
+	welcome(board.pinGpioRx, board.pinGpioTx);
+
+
+
+	// Wait a bit
+	nrf_delay_ms(1000);
+
+	// turn relay off
+	nrf_gpio_pin_set(board.pinGpioRelayOff);
+	nrf_delay_ms(RELAY_HIGH_DURATION);
+	nrf_gpio_pin_clear(board.pinGpioRelayOff);
+
+	// Simulate sluusje
+	while (true) {
+		// With IGBTs
+		size_t numOnTimes = 5;
+		uint32_t onTimes[numOnTimes] = {50, 100, 200, 400, 800};
+		size_t numOffTimes = 8;
+		uint32_t offTimes[numOffTimes] = {5, 10, 15, 20, 30, 40, 60, 80};
+		size_t repeats = 3;
+
+		for (size_t i=0; i<numOffTimes; ++i) {
+			LOGi("off for %ums", offTimes[i]);
+			for (size_t j=0; j<numOnTimes; ++j) {
+				LOGd("on for %ums", onTimes[j]);
+				for (size_t k=0; k<repeats; ++k) {
+					nrf_gpio_pin_toggle(board.pinGpioPwm); // turn on
+					nrf_delay_ms(onTimes[j]);
+					nrf_gpio_pin_toggle(board.pinGpioPwm); // turn off
+					nrf_delay_ms(offTimes[i]);
+				}
+			}
+		}
+
+		// With relay
+		LOGw("With relay")
+		uint32_t relayHighDuration = 15;
+		size_t numRelayOnTimes = 3;
+		uint32_t relayOnTimes[numRelayOnTimes] = { 200, 400, 800 };
+		size_t numRelayOffTimes = 5;
+		uint32_t relayOffTimes[numRelayOffTimes] = { 20, 30, 40, 60, 80 };
+
+		for (size_t i=0; i<numRelayOffTimes; ++i) {
+			if (relayHighDuration >= relayOffTimes[i]) {
+				LOGf("invalid off time: %u", relayOffTimes[i]);
+				APP_ERROR_CHECK(1);
+			}
+		}
+		for (size_t i=0; i<numRelayOnTimes; ++i) {
+			if (relayHighDuration >= relayOnTimes[i]) {
+				LOGf("invalid off time: %u", relayOnTimes[i]);
+				APP_ERROR_CHECK(1);
+			}
+		}
+
+		for (size_t i=0; i<numRelayOffTimes; ++i) {
+			LOGi("off for %ums", relayOffTimes[i]);
+			for (size_t j=0; j<numRelayOnTimes; ++j) {
+				LOGd("on for %ums", relayOnTimes[j]);
+				for (size_t k=0; k<repeats; ++k) {
+					// turn on
+					nrf_gpio_pin_set(board.pinGpioRelayOn);
+					nrf_delay_ms(relayHighDuration);
+					nrf_gpio_pin_clear(board.pinGpioRelayOn);
+					nrf_delay_ms(relayOnTimes[j] - relayHighDuration);
+					// turn off
+					nrf_gpio_pin_set(board.pinGpioRelayOff);
+					nrf_delay_ms(relayHighDuration);
+					nrf_gpio_pin_clear(board.pinGpioRelayOff);
+					nrf_delay_ms(relayOffTimes[i] - relayHighDuration);
+				}
+			}
+		}
+
 	}
-
-	BLEutil::print_heap("Heap welcome: ");
-	BLEutil::print_stack("Stack welcome: ");
-
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
-	Crownstone crownstone(board); // 250 ms
-
-	BLEutil::print_heap("Heap crownstone construct: ");
-	BLEutil::print_stack("Stack crownstone construct: ");
-
-	// initialize crownstone (depends on the operation mode) ...
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
-
-#ifdef ENABLE_LEDS
-	// WARNING: this is stored in UICR and not easily reversible!
-	if (NRF_UICR->NFCPINS != 0) {
-		LOGw("enable gpio LEDs");
-		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
-	}
-#endif
-	LOGd("NFC pins: %p", NRF_UICR->NFCPINS);
-
-
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		LOGw("write board");
-		nrf_nvmc_write_word(HARDWARE_BOARD_ADDRESS, DEFAULT_HARDWARE_BOARD);
-	}
-	LOGd("Board: %p", hardwareBoard);
-
-	// init drivers, configure(), create services and chars,
-	crownstone.init(); // 13 ms
-
-	BLEutil::print_heap("Heap crownstone init: ");
-	BLEutil::print_stack("Stack crownstone init: ");
-
-	//! start up phase, start ticking (depends on the operation mode) ...
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
-	crownstone.startUp(); // 500 ms
-
-	//! run forever ...
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
-	crownstone.run();
-
 }

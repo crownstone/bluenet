@@ -35,7 +35,7 @@
 //#define TEST_PIN2  23
 
 // Define to only print debug text (without header and tail).
-//#define DEBUGGING_CLEAN_UART
+#define DEBUGGING_CLEAN_UART
 
 UartProtocol::UartProtocol():
 _initialized(false),
