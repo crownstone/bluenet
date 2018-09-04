@@ -145,7 +145,7 @@ The following variables have to be set before you can build the code:
 - Set `BLUETOOTH_NAME` to something you like, but make sure it's short (<9).
 - Set `HARDWARE_BOARD` to the board you're using. This determines the pin layout.
 - Set `COMPILER_PATH` to the path where the compiler can be found (it should contain the `/bin` subdir).
-- Set `NRF51822_DIR` to wherever you installed the Nordic SDK. It should have the following subdirectories:
+- Set `NRF5_DIR` to wherever you installed the Nordic SDK. It should have the following subdirectories:
     - components
     - documentation
     - examples
@@ -245,7 +245,7 @@ The above scripts and configuration are sufficient if you work with one device a
 
 #### Local config file
 
-There are options which are the same for all configurations, such as the paths (`NRF51822_DIR`, `COMPILER_PATH`, etc.). Instead of defining them in every configuration file, you can create a file `$BLUENET_DIR/CMakeBuild.config.local` and store common configuration values there.
+There are options which are the same for all configurations, such as the paths (`NRF5_DIR`, `COMPILER_PATH`, etc.). Instead of defining them in every configuration file, you can create a file `$BLUENET_DIR/CMakeBuild.config.local` and store common configuration values there.
 This file is optional and not required. If it is available, it will overwrite the default values from $BLUENET_DIR/CMakeBuild.config.default`. The order of precedence of the configuration values in the 3 files is as follows:
 
 1. Values are loaded from `$BLUENET_DIR/conf/cmake/CMakeBuild.config.default`

@@ -98,6 +98,8 @@ void Stack::init() {
 		return;
 	}
 	LOGi(FMT_INIT, "stack");
+	
+	LOGd("_adv_handle=%i", BLE_ADV_HANDLE_INVALID);
 
 	ret_code_t err_code;
 
@@ -118,12 +120,11 @@ void Stack::init() {
 	// an NRF_EVT_POWER_FAILURE_WARNING will be triggered.
 	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
 	
-	_data_advdata.p_data = NULL;
-	_data_advdata.len = 0;
-	_adv_data.adv_data = _data_advdata;
-	_data_scanrsp.p_data = NULL;
-	_data_scanrsp.len = 0;
-	_adv_data.scan_rsp_data = _data_scanrsp;
+	_adv_data.adv_data.p_data = NULL;
+	_adv_data.adv_data.len = 0;
+	
+	_adv_data.scan_rsp_data.p_data = NULL;
+	_adv_data.scan_rsp_data.len = 0;
 
 	_initializedStack = true;
 }
@@ -158,7 +159,8 @@ void Stack::initRadio() {
 	}
 
 	// Enable BLE stack
-	uint32_t ram_start = RAM_R1_BASE;
+//	uint32_t ram_start = RAM_R1_BASE;
+	uint32_t ram_start = 0;
 	_conn_cfg_tag = 1;
 	LOGd("nrf_sdh_ble_default_cfg_set at %p", ram_start);
 	err_code = nrf_sdh_ble_default_cfg_set(_conn_cfg_tag, &ram_start); 
@@ -419,26 +421,47 @@ void Stack::updateConnParams() {
  * The company identifier has to be set to 0x004C or it will not be recognized as an iBeacon by iPhones.
  */
 void Stack::configureIBeaconAdvData(IBeacon* beacon) {
+	LOGd("Configure iBeacon adv data");
 
 	memset(&_manufac_apple, 0, sizeof(_manufac_apple));
 	_manufac_apple.company_identifier = 0x004C; 
 	_manufac_apple.data.p_data = beacon->getArray();
 	_manufac_apple.data.size = beacon->size();
 
+	LOGd("Apple data size: %i", beacon->size());
+
 	memset(&_config_advdata, 0, sizeof(_config_advdata));
 
 	_config_advdata.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 	_config_advdata.p_manuf_specific_data = &_manufac_apple;
+	//_config_advdata.name_type = BLE_ADVDATA_SHORT_NAME;
+	//_config_advdata.short_name_len = 5;
+	_config_advdata.name_type = BLE_ADVDATA_NO_NAME;
+	_config_advdata.include_appearance = false;
 
 	// we now have to encode the data by an explicit call
 	ret_code_t ret_code;
-	_data_advdata.len = sizeof(_config_advdata);
-	if (_data_advdata.p_data == NULL) {
-		_data_advdata.p_data = (uint8_t*)malloc(_data_advdata.len);
+	_adv_data.adv_data.len = sizeof(_config_advdata);
+	if (_adv_data.adv_data.p_data == NULL) {
+		_adv_data.adv_data.p_data = (uint8_t*)calloc(sizeof(uint8_t), _adv_data.adv_data.len);
 	}
-	LOGd("Set buffer to size: %i", _data_advdata.len);
-	ret_code = ble_advdata_encode(&_config_advdata, _data_advdata.p_data, &_data_advdata.len);
-	LOGd("Got buffer of size: %i", _data_advdata.len);
+	LOGd("Set buffer to size: %i", _adv_data.adv_data.len);
+	
+	LOGd("First bytes in encoded buffer: [%02x %02x %02x %02x]", 
+			_adv_data.adv_data.p_data[0], _adv_data.adv_data.p_data[1],
+			_adv_data.adv_data.p_data[2], _adv_data.adv_data.p_data[3]
+	    );
+
+	LOGd("Encode for example company_identifier: %04x", 
+			_config_advdata.p_manuf_specific_data->company_identifier);
+
+	LOGd("ble_advdata_encode");
+	ret_code = ble_advdata_encode(&_config_advdata, _adv_data.adv_data.p_data, &_adv_data.adv_data.len);
+	LOGd("First bytes in encoded buffer: [%02x %02x %02x %02x]", 
+			_adv_data.adv_data.p_data[0], _adv_data.adv_data.p_data[1],
+			_adv_data.adv_data.p_data[2], _adv_data.adv_data.p_data[3]
+	    );
+	LOGd("Got encoded buffer of size: %i", _adv_data.adv_data.len);
 	APP_ERROR_CHECK(ret_code);
 }
 
@@ -500,20 +523,26 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 	
 	// we now have to encode the data by an explicit call
 	ret_code_t ret_code;
-	_data_scanrsp.len = sizeof(_config_advdata);
-	if (_data_scanrsp.p_data == NULL) {
-		_data_scanrsp.p_data = (uint8_t*)malloc(_data_scanrsp.len);
+	_adv_data.scan_rsp_data.len = sizeof(_config_advdata);
+	if (_adv_data.scan_rsp_data.p_data == NULL) {
+		_adv_data.scan_rsp_data.p_data = (uint8_t*)calloc(sizeof(uint8_t),_adv_data.scan_rsp_data.len);
 	}
-	LOGd("Set buffer to size: %i", _data_scanrsp.len);
-	ret_code = ble_advdata_encode(&_config_scanrsp, _data_scanrsp.p_data, &_data_scanrsp.len);
-	LOGd("Got buffer of size: %i", _data_scanrsp.len);
+	LOGd("Set buffer to size: %i", _adv_data.scan_rsp_data.len);
+	ret_code = ble_advdata_encode(&_config_scanrsp, _adv_data.scan_rsp_data.p_data, &_adv_data.scan_rsp_data.len);
+	LOGd("Got encoded buffer of size: %i", _adv_data.scan_rsp_data.len);
 	APP_ERROR_CHECK(ret_code);
 }
 
+/** Configure the Crownstone as iBeacon device
+ *
+ * This sets the advertisements data, the scan response data, and the advertisement parameters. Subseqeuently, these
+ * values are written to the SoftDevice in setAdvertisementData. If the device is already advertising it will be
+ * temporarily stopped in that function.
+ */
 void Stack::configureIBeacon(IBeacon* beacon, uint8_t deviceType) {
 	LOGi(FMT_BLE_CONFIGURE_AS, "iBeacon");
 	configureIBeaconAdvData(beacon);
-	configureScanResponse(deviceType);
+	//configureScanResponse(deviceType);
 	configureAdvertisementParameters();
 	setAdvertisementData();
 }
@@ -521,18 +550,24 @@ void Stack::configureIBeacon(IBeacon* beacon, uint8_t deviceType) {
 void Stack::configureBleDevice(uint8_t deviceType) {
 	LOGi(FMT_BLE_CONFIGURE_AS, "BleDevice");
 	configureBleDeviceAdvData();
-	configureScanResponse(deviceType);
+	//configureScanResponse(deviceType);
 	configureAdvertisementParameters();
 	setAdvertisementData();
 }
 
+/**
+ * It is only possible to include TX power if the advertisement is an "extended" type.
+ */
 void Stack::configureAdvertisementParameters() {
 	LOGd("set _adv_params");
-	_adv_params.properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
-	_adv_params.p_peer_addr = NULL;
-	_adv_params.filter_policy = BLE_GAP_ADV_FP_ANY;
-	_adv_params.interval = _interval;
-	_adv_params.duration = _timeout;
+	_adv_params.primary_phy                 = BLE_GAP_PHY_1MBPS;
+	_adv_params.properties.type             = BLE_GAP_ADV_TYPE_NONCONNECTABLE_SCANNABLE_UNDIRECTED;
+	_adv_params.properties.anonymous        = 0;
+	_adv_params.properties.include_tx_power = 0;
+	_adv_params.p_peer_addr                 = NULL;
+	_adv_params.filter_policy               = BLE_GAP_ADV_FP_ANY;
+	_adv_params.interval                    = _interval;
+	_adv_params.duration                    = _timeout;
 }
 
 void Stack::setConnectable() {
@@ -572,10 +607,16 @@ void Stack::startAdvertising() {
 		LOGw("Should not already be advertising");
 		return;
 	}
-
-	//LOGi(MSG_BLE_ADVERTISING_STARTING);
 	
-	//LOGd("sd_ble_gap_adv_start");
+	static int max_debug = 3;
+	static int i = 0;
+	if (i < max_debug) {
+		LOGd("sd_ble_gap_adv_start(_adv_handle=%i,_conn_cfg_tag=%i)", _adv_handle, _conn_cfg_tag);
+		i++;
+		if (i == max_debug) {
+			LOGd("Suppress further messages about adv start");
+		}
+	}
 	uint32_t err_code = sd_ble_gap_adv_start(_adv_handle, _conn_cfg_tag);
 	if (err_code == NRF_SUCCESS) {
 		_advertising = true;
@@ -585,7 +626,7 @@ void Stack::startAdvertising() {
 
 void Stack::stopAdvertising() {
 	if (!_advertising) {
-		LOGw("Already not advertising");
+		LOGw("In stopAdvertising: already not advertising");
 		return;
 	}
 
@@ -660,6 +701,9 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
  *
  *   call sd_ble_gap_adv_set_configure with adv_params != NULL while advertising
  *   call sd_ble_gap_adv_set_configure again with the same pointer to _adv_data 
+ *
+ * If adv_params != NULL we are temporarily stopping advertising.
+ * If our data is different we have to provide a different pointer to _adv_data.
  */
 void Stack::setAdvertisementData() {
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
@@ -672,22 +716,30 @@ void Stack::setAdvertisementData() {
 	}
 	
 	if (first_time) {
-		LOGd("sd_ble_gap_adv_set_configure");
+		LOGd("sd_ble_gap_adv_set_configure(_adv_handle=%i,...,...)", _adv_handle);
+		LOGd("First bytes in encoded buffer: [%02x %02x %02x %02x]", 
+				_adv_data.adv_data.p_data[0], _adv_data.adv_data.p_data[1],
+				_adv_data.adv_data.p_data[2], _adv_data.adv_data.p_data[3]
+		    );
+		LOGd("Length is: %i", _adv_data.adv_data.len);
 		err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
 		APP_ERROR_CHECK(err);
 	} else {
+		// TODO: for now, just do nothing
+		return;
 		// update now does not just allow adv_data to point to something else...
 		//LOGw("Cannot just update adv_params on the fly");
-		stopAdvertising();
+		bool temporary_stop_advertising = _advertising;
+		if (temporary_stop_advertising) {
+			stopAdvertising();
+		}
 		//LOGd("sd_ble_gap_adv_set_configure");
 		err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
 		APP_ERROR_CHECK(err);
-		startAdvertising();
+		if (temporary_stop_advertising) {
+			startAdvertising();
+		}
 	} 
-
-	// check if we have iBeacons settings in setup mode
-	// if not, setAdvertisementData is called to early and it is relied upon that adv_params can be changed later
-
 }
 
 void Stack::startScanning() {

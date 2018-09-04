@@ -223,7 +223,7 @@ if [[ $existing == 0 ]]; then
 
 	sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $directory/CMakeBuild.config
 
-	sed -i "s/NRF51822_DIR=/#NRF51822_DIR=/" $directory/CMakeBuild.config
+	sed -i "s/NRF5_DIR=/#NRF5_DIR=/" $directory/CMakeBuild.config
 	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $directory/CMakeBuild.config
 
 	sed -i "s/CROWNSTONE_SERVICE=.*/CROWNSTONE_SERVICE=1/" $directory/CMakeBuild.config

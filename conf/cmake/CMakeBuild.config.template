@@ -58,4 +58,4 @@
 # JLINK_GDB_SERVER=
 
 # Location of the Nordic Software Development Kit
-# NRF51822_DIR=
+# NRF5_DIR=

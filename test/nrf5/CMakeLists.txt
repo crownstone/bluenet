@@ -5,29 +5,29 @@ MESSAGE(STATUS "[test/nrf5/test_generate]")
 INCLUDE_DIRECTORIES(${INCLUDE_DIR})
 
 # Add to the -I flags
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/common")
-#INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/ble_services")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/ble/device_manager")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/device/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/common/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/gpiote/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/delay/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/hal/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/ppi/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/pstorage/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/timer/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/saadc/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/comp/")
-#INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/pwm")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/util/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/timer/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/scheduler/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/libraries/crc16/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/softdevice/common/softdevice_handler/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/softdevice/s132/headers/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/toolchain/")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/toolchain/gcc")
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/toolchain/CMSIS/Include")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/ble/common")
+#INCLUDE_DIRECTORIES("${NRF5_DIR}/components/ble/ble_services")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/ble/device_manager")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/device/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/common/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/gpiote/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/delay/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/hal/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/ppi/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/pstorage/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/timer/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/saadc/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/comp/")
+#INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/pwm")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/util/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/timer/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/scheduler/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/crc16/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/softdevice/common/softdevice_handler/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/softdevice/s132/headers/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/toolchain/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/toolchain/gcc")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/toolchain/CMSIS/Include")
 
 MESSAGE(STATUS "[test/adc_test/CMakeLists.txt]: Compiler: ${CMAKE_C_COMPILER}") 
 
@@ -35,25 +35,25 @@ set(TEST test_adc)
 
 set(TEST_SOURCE_DIR "test/nrf5")
 
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/saadc/nrf_drv_saadc.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/saadc/nrf_drv_saadc.c")
 
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/ppi/nrf_drv_ppi.c")
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/hal/nrf_saadc.c")
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/common/nrf_drv_common.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/ppi/nrf_drv_ppi.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/hal/nrf_saadc.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/common/nrf_drv_common.c")
 
 # lpcomp should not be here
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/comp/nrf_drv_comp.c")
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/scheduler/app_scheduler.c")
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/util/app_util_platform.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/comp/nrf_drv_comp.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/scheduler/app_scheduler.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_util_platform.c")
 
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/softdevice/common/softdevice_handler/softdevice_handler.c")
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/softdevice/common/softdevice_handler/softdevice_handler_appsh.c")
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/timer/app_timer_appsh.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/softdevice_handler/softdevice_handler.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/softdevice_handler/softdevice_handler_appsh.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/timer/app_timer_appsh.c")
 
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/libraries/crc16/crc16.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/crc16/crc16.c")
 
 # In case of adding powersampling
-LIST(APPEND NORDIC_SOURCE "${NRF51822_DIR}/components/drivers_nrf/pstorage/pstorage.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/pstorage/pstorage.c")
 
 # RTC1_IRQHandler
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/app_timer.c")
@@ -141,7 +141,7 @@ ADD_CUSTOM_TARGET(analyze-${TEST}
 	COMMENT "Read headers ${TEST}.elf"
 	)
 
-#LIST(APPEND NORDIC_SOURCE_${TEST} "${NRF51822_DIR}/components/drivers_nrf/pwm/nrf_drv_pwm.c")
+#LIST(APPEND NORDIC_SOURCE_${TEST} "${NRF5_DIR}/components/drivers_nrf/pwm/nrf_drv_pwm.c")
 SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${TEST}.bin)
 
 TARGET_LINK_LIBRARIES(${TEST} ${LIBS})
@@ -157,7 +157,7 @@ set(TEST test_generate)
 
 set(TEST_SOURCE_FILES "${FOLDER_SOURCE}")
 
-INCLUDE_DIRECTORIES("${NRF51822_DIR}/components/drivers_nrf/pwm/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/pwm/")
 
 set(SOURCE_FILES ${TEST_SOURCE_DIR}/${TEST}.cpp ${TEST_SOURCE_FILES}) 
 add_executable(${TEST} ${SOURCE_FILES} ${TEST}.tmp)

@@ -590,6 +590,7 @@ void Crownstone::startUp() {
 #if EDDYSTONE==1
 	_eddystone->advertising_start();
 #else
+	LOGi("Start advertising");
 	_stack->startAdvertising();
 #endif
 	//! have to give the stack a moment of pause to start advertising, otherwise we get into race conditions

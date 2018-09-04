@@ -112,7 +112,7 @@ ELSE()
 ENDIF()
 
 # Obtain variables to be used for the compiler
-SET(NRF51822_DIR                                "${NRF51822_DIR}"                   CACHE STRING "Nordic SDK Directory" FORCE)
+SET(NRF5_DIR                                "${NRF5_DIR}"                   CACHE STRING "Nordic SDK Directory" FORCE)
 SET(NORDIC_SDK_VERSION                          "${NORDIC_SDK_VERSION}"             CACHE STRING "Nordic SDK Version" FORCE)
 SET(SOFTDEVICE_SERIES                           "${SOFTDEVICE_SERIES}"              CACHE STRING "SOFTDEVICE_SERIES" FORCE)
 SET(SOFTDEVICE_MAJOR                            "${SOFTDEVICE_MAJOR}"               CACHE STRING "SOFTDEVICE_MAJOR" FORCE)
@@ -248,9 +248,9 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 #SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
 
 SET(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
-SET(PATH_FILE_MEMORY "-L${NRF51822_DIR}/config/nrf52832/armgcc/")
+SET(PATH_FILE_MEMORY "-L${NRF5_DIR}/config/nrf52832/armgcc/")
 
-SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF51822_DIR}/modules/nrfx/mdk/")
+SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
 
 # http://public.kitware.com/Bug/view.php?id=12652
 # CMake does send the compiler flags also to the linker

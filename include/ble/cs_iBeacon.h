@@ -39,17 +39,18 @@ private:
 	 * Because the advertisement package has to be in big-endian, and nordic's chip is using
 	 * little-endian, the values are converted in the setter/getter functions, so that the array
 	 * is correct and doesn't need to be converted anymore to be used in the advertisement data.
-	 * As a result, changes to the IBeacn values, such as major, minor, etc, will directly reflect
+	 * As a result, changes to the IBeacon values, such as major, minor, etc, will directly reflect
 	 * in the advertisement data once they are changed here.
 	 */
 	union {
+		/** Individual fields.
+		 */
 		struct {
-
 			/** Advertisement indicator, defined as 0x0215 for iBeacons
 			 */
 			uint16_t adv_indicator;
 
-			/** proximity UUID, shared for all iBeacons for a given application
+			/** Proximity UUID, shared for all iBeacons for a given application
 			 */
 			ble_uuid128_t uuid;
 
@@ -70,6 +71,8 @@ private:
 			 */
 			int8_t txPower;
 		} _params;
+		/** Buffer
+		 */
 		uint8_t _buffer[sizeof(_params)];
 	};
 

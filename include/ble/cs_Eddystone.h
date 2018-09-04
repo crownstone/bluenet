@@ -10,9 +10,11 @@
 
 #pragma once
 
+//#include <ble/cs_Nordic.h>
 #include <ble/cs_UUID.h>
-
 #include <drivers/cs_Serial.h>
+
+#define BLE_GAP_ADV_MAX_SIZE     31
 
 typedef struct
 {
@@ -26,17 +28,17 @@ typedef struct
  *
  */
 class Eddystone {
-	private:
-	public:
+    private:
+    public:
 
-    void advertising_init(void);
-    void advertising_start(void);
+        void advertising_init(void);
+        void advertising_start(void);
 
-    void init_url_frame_buffer();
-    void init_tlm_frame_buffer();
-    void init_uid_frame_buffer();
+        void init_url_frame_buffer();
+        void init_tlm_frame_buffer();
+        void init_uid_frame_buffer();
 
-    uint32_t eddystone_set_adv_data(uint32_t frame_index);
+        uint32_t eddystone_set_adv_data(uint32_t frame_index);
 
 
         uint32_t eddystone_head_encode(uint8_t *p_encoded_data,

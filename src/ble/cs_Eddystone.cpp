@@ -23,7 +23,12 @@
 
 static edstn_frame_t edstn_frames[3];
 
-static ble_gap_adv_params_t m_adv_params; 
+static ble_gap_adv_params_t   m_adv_params; 
+static ble_gap_adv_data_t     m_adv_data;
+
+static uint8_t m_adv_handle;
+
+static uint8_t m_conn_handle = 1;
 
 static uint8_t pdu_count = 0;
 
@@ -44,6 +49,22 @@ enum UrlSchemePrefix {
  */
 void Eddystone::advertising_init(void) {
 	LOGi("Initialize advertising Eddystone...");
+
+	uint32_t err_code;
+	
+	LOGd("nrf_sdh_enable_request");
+	err_code = nrf_sdh_enable_request(); 
+	APP_ERROR_CHECK(err_code);
+
+	uint32_t ram_start = 0;
+	LOGd("nrf_sdh_ble_default_cfg_set at %p", ram_start);
+	err_code = nrf_sdh_ble_default_cfg_set(m_conn_handle, &ram_start); 
+	APP_ERROR_CHECK(err_code);
+
+	LOGd("nrf_sdh_ble_enable");
+	err_code = nrf_sdh_ble_enable(&ram_start);
+	APP_ERROR_CHECK(err_code);
+
 	init_uid_frame_buffer();
 	init_url_frame_buffer();
 	init_tlm_frame_buffer();
@@ -55,11 +76,12 @@ void Eddystone::advertising_init(void) {
 	// Initialize advertising parameters (used when starting advertising).
 	memset(&m_adv_params, 0, sizeof(m_adv_params));
 
-	m_adv_params.type = BLE_GAP_ADV_TYPE_ADV_NONCONN_IND;
-	m_adv_params.p_peer_addr = NULL;                             // Undirected advertisement.
-	m_adv_params.fp = BLE_GAP_ADV_FP_ANY;
-	m_adv_params.interval = NON_CONNECTABLE_ADV_INTERVAL;
-	m_adv_params.timeout = APP_CFG_NON_CONN_ADV_TIMEOUT;
+	m_adv_params.primary_phy                 = BLE_GAP_PHY_1MBPS;
+	m_adv_params.properties.type             = BLE_GAP_ADV_TYPE_NONCONNECTABLE_SCANNABLE_UNDIRECTED;
+	m_adv_params.p_peer_addr                 = NULL;
+	m_adv_params.filter_policy               = BLE_GAP_ADV_FP_ANY;
+	m_adv_params.interval                    = NON_CONNECTABLE_ADV_INTERVAL;
+	m_adv_params.duration                    = 0;
 }
 
 /**
@@ -72,7 +94,7 @@ void Eddystone::advertising_start(void) {
 	LOGi("Start advertising Eddystone...");
 	uint32_t err_code;
 
-	err_code = sd_ble_gap_adv_start(&m_adv_params);
+	err_code = sd_ble_gap_adv_start(m_adv_handle, m_conn_handle);
 	LOGd("adv_start %d", err_code)
 	APP_ERROR_CHECK(err_code);
 }
@@ -152,10 +174,34 @@ void Eddystone::init_uid_frame_buffer() {
 	encoded_advdata[0x07] = (*len_advdata) - 8; // Length	Service Data. Ibid. § 1.11
 }
 
+//static ble_advdata_t          adv_data;
 
 uint32_t Eddystone::eddystone_set_adv_data(uint32_t frame_index) {
-	uint8_t *p_encoded_advdata = edstn_frames[frame_index].adv_frame;
-	return sd_ble_gap_adv_data_set(p_encoded_advdata, edstn_frames[frame_index].adv_len, NULL, 0);
+	/*
+	std::string str = "Test";
+	uint32_t ret;
+	ble_gap_conn_sec_mode_t sec_mode;
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&sec_mode);
+	ret = sd_ble_gap_device_name_set(&sec_mode, (const uint8_t*)str.c_str(), str.size());
+	APP_ERROR_CHECK(ret);
+
+	memset(&adv_data, 0, sizeof(adv_data));
+	static int8_t tx_power_level = 4;
+	adv_data.name_type          = BLE_ADVDATA_NO_NAME;
+	adv_data.short_name_len     = 6;
+	adv_data.flags              = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
+	adv_data.p_tx_power_level   = &tx_power_level;
+	adv_data.include_appearance = false;
+	m_adv_data.adv_data.len = 31;
+	ret = ble_advdata_encode(&adv_data, m_adv_data.adv_data.p_data, &m_adv_data.adv_data.len);
+	APP_ERROR_CHECK(ret);
+*/
+	m_adv_data.adv_data.p_data      = edstn_frames[frame_index].adv_frame;
+	m_adv_data.adv_data.len         = edstn_frames[frame_index].adv_len;
+	m_adv_data.scan_rsp_data.p_data = NULL;
+	m_adv_data.scan_rsp_data.len    = 0;
+	LOGd("Encoded data size: %i", m_adv_data.adv_data.len);
+	return sd_ble_gap_adv_set_configure(&m_adv_handle, &m_adv_data, &m_adv_params);
 }
 
 uint32_t Eddystone::eddystone_head_encode(uint8_t *p_encoded_data,

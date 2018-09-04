@@ -251,7 +251,7 @@ DEVICE=nRF52832_xxAA
 NRF51_USE_SOFTDEVICE=1
 
 # the directory with /Source and /Include subdirectories from the Nordic SDK
-NRF51822_DIR=
+NRF5_DIR=
 # the nordic sdk version
 NORDIC_SDK_VERSION=11
 
