@@ -73,6 +73,7 @@ public:
 	//! Maximum number of services (currently set to 5)
 	static const uint8_t MAX_SERVICE_COUNT = 5;
 
+	typedef fixed_tuple<Service*, MAX_SERVICE_COUNT> Services_t;  
 
 	//! The default BLE appearance, for unknown reason set to generic tag. See: https://devzone.nordicsemi.com/question/2973/an36-ble_appearance/
 	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_TAG;
@@ -92,7 +93,7 @@ protected:
 
 	// might want to change this to a linked list or something that
 	// we can loop over but doesn't allocate more space than needed
-	fixed_tuple<Service*, MAX_SERVICE_COUNT>    _services;  //! 32
+	Services_t                                  _services;  
 
 	nrf_clock_lf_cfg_t                          _clock_source;
 	int8_t                                      _tx_power_level;
@@ -273,8 +274,17 @@ public:
 		_callback_disconnected = callback;
 	}
 
+	/** Get a service by name
+	 */
 	Service& getService(std::string name);
-	void addService(Service* svc);
+
+	/** Add a service to the stack.
+	 */
+	Stack & addService(Service* svc);
+
+	/** Remove a service from the stack.
+	 */
+	Stack & removeService(Service* svc);
 
 	/** Start advertising as an iBeacon
 	 *
@@ -376,7 +386,7 @@ public:
 	 * is faster to set up maps from handles to directly the right function.
 	 */
 	//void on_ble_evt(ble_evt_t * p_ble_evt, void * p_event);
-	void on_ble_evt(ble_evt_t * p_ble_evt);
+	void on_ble_evt(const ble_evt_t * p_ble_evt);
 
 	void secReqTimeoutHandler(void * p_context);
 
@@ -404,9 +414,9 @@ protected:
 	 *
 	 * On a connection request send it to all services.
 	 */
-	void on_connected(ble_evt_t * p_ble_evt);
-	void on_disconnected(ble_evt_t * p_ble_evt);
-	void on_advertisement(ble_evt_t * p_ble_evt);
+	void on_connected(const ble_evt_t * p_ble_evt);
+	void on_disconnected(const ble_evt_t * p_ble_evt);
+//	void on_advertisement(const ble_evt_t * p_ble_evt);
 
 	void configureAdvertisementParameters();
 
@@ -414,7 +424,7 @@ protected:
 	 *
 	 * Inform all services that transmission was completed in case they have notifications pending
 	 */
-	void onTxComplete(ble_evt_t * p_ble_evt);
+	void onTxComplete(const ble_evt_t * p_ble_evt);
 
 	static void lowPowerTimeout(void* p_context);
 

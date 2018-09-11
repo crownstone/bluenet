@@ -22,15 +22,20 @@ extern "C" {
  * the message follows, eventually succeeded by content if the string contains format specifiers. This means that this
  * requires a variadic macro as well, see http://www.wikiwand.com/en/Variadic_macro. The two ## are e.g. a gcc
  * specific extension that removes the , after __LINE__, so log(level, msg) can also be used without arguments.
+ *
+ * The log levels follow more or less common conventions with a few exeptions. There are some modes in which we run
+ * where even fatal messages will not be written to console. In production we use SERIAL_NONE, SERIAL_READ_ONLY, or
+ * SERIAL_BYTE_PROTOCOL_ONLY. 
  */
-#define SERIAL_DEBUG                0
-#define SERIAL_INFO                 1
-#define SERIAL_WARN                 2
-#define SERIAL_ERROR                3
-#define SERIAL_FATAL                4
-#define SERIAL_BYTE_PROTOCOL_ONLY   5
-#define SERIAL_READ_ONLY            6
-#define SERIAL_NONE                 7
+#define SERIAL_NONE                 0
+#define SERIAL_READ_ONLY            1
+#define SERIAL_BYTE_PROTOCOL_ONLY   2
+#define SERIAL_FATAL                3
+#define SERIAL_ERROR                4
+#define SERIAL_WARN                 5
+#define SERIAL_INFO                 6
+#define SERIAL_DEBUG                7
+#define SERIAL_VERBOSE              8
 
 #define SERIAL_CRLF "\r\n"
 
@@ -47,13 +52,13 @@ typedef enum {
 	SERIAL_ENABLE_RX_AND_TX = 3,
 } serial_enable_t;
 
-#if SERIAL_VERBOSITY < SERIAL_BYTE_PROTOCOL_ONLY
+#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
 
 	#include "string.h"
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
 	#define _log(level, fmt, ...) \
-			   if (level >= SERIAL_VERBOSITY) { \
+			   if (level <= SERIAL_VERBOSITY) { \
 				   cs_write(fmt, ##__VA_ARGS__); \
 			   }
 
@@ -81,6 +86,7 @@ typedef enum {
 	#define logLN(level, fmt, ...)
 #endif
 
+#define LOGv(fmt, ...) logLN(SERIAL_VERBOSE, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGd(fmt, ...) logLN(SERIAL_DEBUG, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGi(fmt, ...) logLN(SERIAL_INFO,  "\033[34;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGw(fmt, ...) logLN(SERIAL_WARN,  "\033[33;1m" fmt "\033[0m", ##__VA_ARGS__)
@@ -94,27 +100,32 @@ typedef enum {
 	LOGd("Memory %s() heap=%p, stack=%p", __func__, p, (uint8_t*)sp); \
 	free(p); 
 
-#if SERIAL_VERBOSITY>SERIAL_DEBUG
+#if SERIAL_VERBOSITY<SERIAL_VERBOSE
+#undef LOGv
+#define LOGv(fmt, ...)
+#endif
+
+#if SERIAL_VERBOSITY<SERIAL_DEBUG
 #undef LOGd
 #define LOGd(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY>SERIAL_INFO
+#if SERIAL_VERBOSITY<SERIAL_INFO
 #undef LOGi
 #define LOGi(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY>SERIAL_WARN
+#if SERIAL_VERBOSITY<SERIAL_WARN
 #undef LOGw
 #define LOGw(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY>SERIAL_ERROR
+#if SERIAL_VERBOSITY<SERIAL_ERROR
 #undef LOGe
 #define LOGe(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY>SERIAL_FATAL
+#if SERIAL_VERBOSITY<SERIAL_FATAL
 #undef LOGf
 #define LOGf(fmt, ...)
 #endif

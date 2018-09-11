@@ -1185,7 +1185,7 @@
 // <e> PEER_MANAGER_ENABLED - peer_manager - Peer Manager
 //==========================================================
 #ifndef PEER_MANAGER_ENABLED
-#define PEER_MANAGER_ENABLED 0
+#define PEER_MANAGER_ENABLED 1
 #endif
 // <o> PM_MAX_REGISTRANTS - Number of event handlers that can be registered. 
 #ifndef PM_MAX_REGISTRANTS
@@ -1581,6 +1581,52 @@
 #ifndef NRF_STACK_GUARD_CONFIG_SIZE
 #define NRF_STACK_GUARD_CONFIG_SIZE 7
 #endif
+
+// </e>
+
+// <e> NRF_LOG_BACKEND_UART_ENABLED - nrf_log_backend_uart - Log UART backend                                           
+//==========================================================                                                            
+#ifndef NRF_LOG_BACKEND_UART_ENABLED                                                                                    
+#define NRF_LOG_BACKEND_UART_ENABLED 1                                                                                  
+#endif                                                                                                                  
+
+// <o> NRF_LOG_BACKEND_UART_TX_PIN - UART TX pin                                                                        
+#ifndef NRF_LOG_BACKEND_UART_TX_PIN                                                                                     
+#define NRF_LOG_BACKEND_UART_TX_PIN 6                                                                                   
+#endif                                                                                                                  
+                                                                                                                        
+// <o> NRF_LOG_BACKEND_UART_BAUDRATE  - Default Baudrate                                                                
+                                                                                                                        
+// <323584=> 1200 baud                                                                                                  
+// <643072=> 2400 baud                                                                                                  
+// <1290240=> 4800 baud                                                                                                 
+// <2576384=> 9600 baud                                                                                                 
+// <3862528=> 14400 baud                                                                                                
+// <5152768=> 19200 baud                                                                                                
+// <7716864=> 28800 baud                                                                                                
+// <10289152=> 38400 baud                                                                                               
+// <15400960=> 57600 baud                                                                                               
+// <20615168=> 76800 baud                                                                                               
+// <30801920=> 115200 baud                                                                                              
+// <61865984=> 230400 baud                                                                                              
+// <67108864=> 250000 baud                                                                                              
+// <121634816=> 460800 baud                                                                                             
+// <251658240=> 921600 baud                                                                                             
+// <268435456=> 1000000 baud                                                                                            
+                                                                                                                        
+#ifndef NRF_LOG_BACKEND_UART_BAUDRATE                                                                                   
+#define NRF_LOG_BACKEND_UART_BAUDRATE 30801920                                                                          
+#endif                                                                                                                  
+                                                                                                                        
+// <o> NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE - Size of buffer for partially processed strings.                          
+// <i> Size of the buffer is a trade-off between RAM usage and processing.                                              
+// <i> if buffer is smaller then strings will often be fragmented.                                                      
+// <i> It is recommended to use size which will fit typical log and only the                                            
+// <i> longer one will be fragmented.                                                                                   
+                                                                                                                        
+#ifndef NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE                                                                           
+#define NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE 128                                                                       
+#endif                       
 
 // </e>
 
@@ -7245,7 +7291,7 @@
 // <i> Increase this value if you frequently get synchronous FDS_ERR_NO_SPACE_IN_QUEUES errors.
 
 #ifndef FDS_OP_QUEUE_SIZE
-#define FDS_OP_QUEUE_SIZE 4
+#define FDS_OP_QUEUE_SIZE 16
 #endif
 
 // </h> 
@@ -8133,8 +8179,9 @@
 // <e> NRF_LOG_ENABLED - Logging module for nRF5 SDK
 //==========================================================
 #ifndef NRF_LOG_ENABLED
-#define NRF_LOG_ENABLED 0
+#define NRF_LOG_ENABLED 1
 #endif
+
 // <e> NRF_LOG_USES_COLORS - If enabled then ANSI escape code for colors is prefixed to every string
 //==========================================================
 #ifndef NRF_LOG_USES_COLORS
@@ -8199,7 +8246,7 @@
 // <4=> Debug 
 
 #ifndef NRF_LOG_DEFAULT_LEVEL
-#define NRF_LOG_DEFAULT_LEVEL 3
+#define NRF_LOG_DEFAULT_LEVEL 4
 #endif
 
 // <q> NRF_LOG_DEFERRED  - Enable deffered logger.
@@ -8208,7 +8255,7 @@
 // <i> Log data is buffered and can be processed in idle.
 
 #ifndef NRF_LOG_DEFERRED
-#define NRF_LOG_DEFERRED 1
+#define NRF_LOG_DEFERRED 0
 #endif
 
 // <o> NRF_LOG_BUFSIZE  - Size of the buffer for storing logs (in bytes).
@@ -8259,6 +8306,20 @@
 #ifndef NRF_LOG_FILTERS_ENABLED
 #define NRF_LOG_FILTERS_ENABLED 0
 #endif
+
+// <o> NRF_LOG_STR_PUSH_BUFFER_SIZE  - Size of the buffer dedicated for strings stored using @ref NRF_LOG_PUSH.         
+                                                                                                                        
+// <16=> 16                                                                                                             
+// <32=> 32                                                                                                             
+// <64=> 64                                                                                                             
+// <128=> 128                                                                                                           
+// <256=> 256                                                                                                           
+// <512=> 512                                                                                                           
+// <1024=> 1024                                                                                                         
+                                                                                                                        
+#ifndef NRF_LOG_STR_PUSH_BUFFER_SIZE                                                                                    
+#define NRF_LOG_STR_PUSH_BUFFER_SIZE 128                                                                                
+#endif 
 
 // <q> NRF_LOG_CLI_CMDS  - Enable CLI commands for the module.
  

@@ -206,7 +206,7 @@ void deinit_tx() {
 }
 
 void serial_init(serial_enable_t enabled) {
-#if SERIAL_VERBOSITY<SERIAL_NONE
+#if SERIAL_VERBOSITY>SERIAL_NONE
 	_state = enabled;
 	init();
 	switch (enabled) {
@@ -243,7 +243,7 @@ serial_enable_t serial_get_state() {
 }
 
 inline void _writeByte(uint8_t val) {
-#if SERIAL_VERBOSITY<SERIAL_READ_ONLY
+#if SERIAL_VERBOSITY>SERIAL_READ_ONLY
 //	if (_initializedTx) { // Check this in functions that call this function.
 		NRF_UART0->EVENTS_TXDRDY = 0;
 		NRF_UART0->TXD = val;
@@ -256,7 +256,7 @@ inline void _writeByte(uint8_t val) {
  * A write function with a format specifier.
  */
 int cs_write(const char *str, ...) {
-#if SERIAL_VERBOSITY<SERIAL_BYTE_PROTOCOL_ONLY
+#if SERIAL_VERBOSITY>SERIAL_BYTE_PROTOCOL_ONLY
 	if (!_initializedTx) {
 		return 0;
 	}
@@ -290,7 +290,7 @@ int cs_write(const char *str, ...) {
 
 // TODO: use uart class for this.
 void writeBytes(uint8_t* data, const uint16_t size) {
-#if SERIAL_VERBOSITY<SERIAL_READ_ONLY
+#if SERIAL_VERBOSITY>SERIAL_READ_ONLY
 	if (!_initializedTx) {
 		return;
 	}
@@ -311,7 +311,7 @@ void writeBytes(uint8_t* data, const uint16_t size) {
 
 // TODO: use uart class for this.
 void writeStartByte() {
-#if SERIAL_VERBOSITY<SERIAL_READ_ONLY
+#if SERIAL_VERBOSITY>SERIAL_READ_ONLY
 	if (_initializedTx) {
 		_writeByte(UART_START_BYTE);
 	}

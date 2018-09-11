@@ -16,6 +16,15 @@
 
 const char* Service::defaultServiceName = "unnamed";
 
+Service::Service():
+		_stack(NULL),
+		_name(""),
+		_primary(true),
+		_service_handle(BLE_CONN_HANDLE_INVALID),
+		_started(false) {
+}
+
+
 void Service::init(Stack* stack) {
 
 	_stack = stack;
@@ -38,13 +47,6 @@ void Service::init(Stack* stack) {
 
 }
 
-void Service::setPinEncrypted(bool encrypted) {
-	//! set all characteristics to encrypted
-	for (CharacteristicBase* characteristic : getCharacteristics()) {
-		characteristic->setPinEncrypted(encrypted);
-	}
-}
-
 void Service::setAesEncrypted(bool encrypted) {
 	//! set all characteristics to encrypted
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
@@ -63,7 +65,7 @@ void Service::setAesEncrypted(bool encrypted) {
  * A service can receive a BLE event. Currently we pass the connection events through as well as the write event.
  * The latter is wired through on_write() which we pass the evt.gatts_evt.params.write part of the event.
  */
-void Service::on_ble_event(ble_evt_t * p_ble_evt) {
+void Service::on_ble_event(const ble_evt_t * p_ble_evt) {
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_CONNECTED:
 		on_connect(p_ble_evt->evt.gap_evt.conn_handle, p_ble_evt->evt.gap_evt.params.connected);
@@ -87,7 +89,7 @@ void Service::on_ble_event(ble_evt_t * p_ble_evt) {
  * An individual service normally doesn't respond to a connect event. However, it can be used to for example allocate
  * memory only when a user is connected.
  */
-void Service::on_connect(uint16_t conn_handle, ble_gap_evt_connected_t& gap_evt) {
+void Service::on_connect(uint16_t conn_handle, const ble_gap_evt_connected_t& gap_evt) {
 	//! nothing here yet.
 }
 
@@ -96,7 +98,7 @@ void Service::on_connect(uint16_t conn_handle, ble_gap_evt_connected_t& gap_evt)
  * Just as on_connect this method can be used to for example deallocate structures that only need to exist when a user
  * is connected.
  */
-void Service::on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& gap_evt) {
+void Service::on_disconnect(uint16_t conn_handle, const ble_gap_evt_disconnected_t& gap_evt) {
 	//! nothing here yet.
 }
 
@@ -111,7 +113,7 @@ void Service::on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& ga
  * write_evt.handle is compared instead of write_evt.context.value_handle. Of course, the corresponding handle in
  * the characteristic object is also different.
  */
-bool Service::on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle) {
+bool Service::on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_handle) {
 //	bool found = false;
 
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
@@ -156,7 +158,7 @@ bool Service::on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle) 
 }
 
 //! inform all characteristics that transmission was completed in case they have notifications pending
-void Service::onTxComplete(ble_common_evt_t * p_ble_evt) {
+void Service::onTxComplete(const ble_common_evt_t * p_ble_evt) {
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 		characteristic->onTxComplete(p_ble_evt);
 	}

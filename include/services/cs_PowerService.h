@@ -6,27 +6,18 @@
  */
 #pragma once
 
-//#include "third/std/function.h"
-//#include <vector>
-
-//#include <common/cs_Types.h>
-
-//#include "characteristics/cs_UuidConfig.h"
-#include "drivers/cs_Storage.h"
-#include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
-#include "drivers/cs_LPComp.h"
-#include "structs/buffer/cs_CircularBuffer.h"
-#include "structs/buffer/cs_StackBuffer.h"
-#include "structs/buffer/cs_DifferentialBuffer.h"
-#include "structs/cs_PowerSamples.h"
-//#include "protocol/cs_MeshMessageTypes.h"
-
 #include <ble/cs_Service.h>
-#include <ble/cs_Characteristic.h>
+#include <drivers/cs_LPComp.h>
+#include <drivers/cs_Storage.h>
 #include <events/cs_EventListener.h>
+#include <structs/buffer/cs_CircularBuffer.h>
+#include <structs/buffer/cs_DifferentialBuffer.h>
+#include <structs/buffer/cs_StackBuffer.h>
+#include <structs/cs_PowerSamples.h>
 
-#define POWER_SERVICE_UPDATE_FREQUENCY 10 //! hz
+//! POWER_SERVICE_UPDATE_FREQUENCY is in Herz.
+#define POWER_SERVICE_UPDATE_FREQUENCY 10 
 
 /** PowerService controls the relays on the Crownstone.
  *
@@ -46,30 +37,39 @@ public:
 	 */
 	PowerService();
 
+	/** Destructor for power service
+	 */
+	virtual ~PowerService();
+
 	/** Initialize a GeneralService object
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
 	void createCharacteristics();
 
-	/** Perform non urgent functionality every main loop.
+	/** Remove all characteristics
 	 *
-	 * Every component has a "tick" function which is for non-urgent things.
-	 * Urgent matters have to be resolved immediately in interrupt service handlers.
+	 * Remove and deallocate all characteristics
 	 */
-//	void tick();
+	void removeCharacteristics();
 
-//	void scheduleNextTick();
-
+	/** Function handler for incoming events.
+	 */
 	void handleEvent(event_t & event);
 
 protected:
-	//! The characteristics in this service
+
+	//! The dimming characteristic
 	void addPWMCharacteristic();
+	
+	//! The relay characteristic
 	void addRelayCharacteristic();
+
+	//! The power samples characteristic
 	void addPowerSamplesCharacteristic();
+	
+	//! The power consumption characteristic
 	void addPowerConsumptionCharacteristic();
-//	void addCurrentLimitCharacteristic();
 
 private:
 	//! References to characteristics that need to be written from other functions

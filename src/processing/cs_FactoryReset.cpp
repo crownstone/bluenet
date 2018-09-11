@@ -46,14 +46,14 @@ void FactoryReset::resetTimeout() {
 
 void FactoryReset::timeout() {
 	_recoveryEnabled = false;
-	LOGi("recovery period expired.")
-	uint8_t resetState;
-	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState, PersistenceMode::STRATEGY1);
-	if (resetState == FACTORY_RESET_STATE_LOWTX) {
-		LOGi("change to  normal")
+	LOGi("Recovery period expired")
+	st_value_t resetState;
+	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState.u8, PersistenceMode::STRATEGY1);
+	if (resetState.u8 == FACTORY_RESET_STATE_LOWTX) {
+		LOGi("Change to normal mode")
 		Stack::getInstance().changeToNormalTxPowerMode();
 	}
-	resetState = FACTORY_RESET_STATE_NORMAL;
+	resetState.u8 = FACTORY_RESET_STATE_NORMAL;
 	State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState), PersistenceMode::STRATEGY1);
 }
 

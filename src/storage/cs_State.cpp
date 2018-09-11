@@ -228,6 +228,9 @@ cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const Persis
 	st_file_data_t data;
 	data.type = type;
 	data.value = (uint8_t*)target;
+	if ((uint32_t)data.value % 4u != 0) {
+		LOGe("Unaligned type: %s: %p", TypeName(type), data.value);
+	}
 	data.size = size;
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	switch(mode) {
@@ -328,6 +331,7 @@ void State::factoryReset(uint32_t resetCode) {
 		LOGe("Wrong reset code!");
 		return;
 	}
+	LOGw("Perform factory reset!");
 
 	_storage->remove(FILE_CONFIGURATION);
 }

@@ -64,7 +64,6 @@ struct Status {
 	bool writable                                : 1;
 	bool notifyingEnabled                        : 1; //! Whether server registered for notifications
 	bool indicates                               : 1;
-	bool pinEncrypted                            : 1;
 	bool aesEncrypted                            : 1;
 
 	/** Flag to indicate if notification is pending to be sent once currently waiting
@@ -134,10 +133,6 @@ public:
 	 * Side effect: sets member field <_status.inited>.
 	 */
 	void init(Service* svc);
-
-	void setPinEncrypted(bool encrypted) {
-		_status.pinEncrypted = encrypted;
-	}
 
 	/** Set this characteristic to be writable.
 	 */
@@ -322,7 +317,7 @@ public:
 	 * is cleared if the call eas successful. If not successful, it will be tried
 	 * again during the next callback call
 	 */
-	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
+	virtual void onTxComplete(const ble_common_evt_t * p_ble_evt);
 
 	/** Enable / Disable aes encryption. If enabled, a buffer is created to hold the encrypted
 	 *  value. If disabled, the buffer is freed again.
@@ -758,7 +753,8 @@ public:
 
 	uint32_t notify();
 
-	void onTxComplete(ble_common_evt_t * p_ble_evt);
+	// forward declaration
+	void onTxComplete(const ble_common_evt_t * p_ble_evt);
 
 	/** Set the value for this characteristic
 	 * @value the pointer to the buffer in memory

@@ -51,7 +51,9 @@ protected:
 	 *
 	 * Add all characteristics and initialize them where necessary.
 	 */
-	virtual void createCharacteristics();
+	void createCharacteristics();
+	
+	void removeCharacteristics();
 
 	/** Enable the command characteristic.
  	 */

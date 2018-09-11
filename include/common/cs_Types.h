@@ -256,12 +256,12 @@ struct __attribute__((packed)) evt_do_reset_delayed_t {
 typedef uint16_t st_file_id_t;
 
 union st_value_t {
-   int8_t    s8;
-   int16_t   s16;
-   int32_t   s32;
-   uint8_t   u8;
-   uint16_t  u16;
-   uint32_t  u32;
+  int8_t    s8; 
+  int16_t   s16;
+  int32_t   s32; 
+  uint8_t   u8; 
+  uint16_t  u16;
+  uint32_t  u32; 
 } __ALIGN(4);
 
 struct st_file_data_t { 

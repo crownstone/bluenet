@@ -68,10 +68,8 @@ SET(CMAKE_CXX_COMPILER_FORCED TRUE CACHE INTERNAL "")
 SET(CMAKE_C_COMPILER_ID_RUN TRUE CACHE INTERNAL "")
 SET(CMAKE_CXX_COMPILER_ID_RUN TRUE CACHE INTERNAL "")
 
-SET(DISABLE_NORDIC_COMPILE_ERRORS "-Wno-unused-variable -Wno-unused-but-set-variable")
-
 SET(DEFAULT_CXX_FLAGS       "-std=c++14 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")
-SET(DEFAULT_C_FLAGS         "-std=gnu99 ${DISABLE_NORDIC_COMPILE_ERRORS}")
+SET(DEFAULT_C_FLAGS         "")
 SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -fmax-errors=3 -fdiagnostics-color=always")
 
 SET(ASM_OPTIONS "-x assembler-with-cpp")
@@ -248,7 +246,8 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 #SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
 
 SET(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
-SET(PATH_FILE_MEMORY "-L${NRF5_DIR}/config/nrf52832/armgcc/")
+#SET(PATH_FILE_MEMORY "-L${NRF5_DIR}/config/nrf52832/armgcc/")
+SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
 
 SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
 

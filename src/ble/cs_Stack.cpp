@@ -5,6 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <algorithm>
 #include <ble/cs_Handlers.h>
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Stack.h>
@@ -80,13 +81,30 @@ Stack::~Stack() {
  * Called by the Softdevice handler on any BLE event. It is initialized from the SoftDevice using the app scheduler.
  * This means that the callback runs on the main thread. 
  */
-extern "C" void ble_evt_dispatch(ble_evt_t* p_ble_evt) {
+extern "C" {
+
+
+	static void ble_evt_dispatch(const ble_evt_t * p_ble_evt, void * p_context) {
 #if BUILD_MESHING == 1
-	if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
-		rbc_mesh_ble_evt_handler(p_ble_evt);
-	}
+		if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
+			rbc_mesh_ble_evt_handler(p_ble_evt);
+		}
 #endif
-	Stack::getInstance().on_ble_evt(p_ble_evt);
+		Stack::getInstance().on_ble_evt(p_ble_evt);
+	}
+
+#define STACK_OBSERVER_PRIO 1
+
+	NRF_SDH_BLE_OBSERVER(m_stack, STACK_OBSERVER_PRIO, ble_evt_dispatch, NULL);
+
+	/*
+	NRF_SECTION_SET_ITEM_REGISTER(sdh_ble_observers, STACK_OBSERVER_PRIO, static nrf_sdh_ble_evt_observer_t m_stack) =
+	{
+		.handler   = ble_evt_dispatch,
+		.p_context = NULL
+	};*/
+
+	// then it goes on in nrf_section.h
 }
 
 /**
@@ -99,21 +117,22 @@ void Stack::init() {
 	}
 	LOGi(FMT_INIT, "stack");
 	
-	LOGd("_adv_handle=%i", BLE_ADV_HANDLE_INVALID);
-
-	ret_code_t err_code;
+	ret_code_t ret_code;
 
 	// Check if SoftDevice is already running and disable it in that case (to restart later)
 	LOGi(FMT_INIT, "softdevice");
 	uint8_t enabled;
-	err_code = sd_softdevice_is_enabled(&enabled);
-	APP_ERROR_CHECK(err_code);
+	ret_code = sd_softdevice_is_enabled(&enabled);
+	APP_ERROR_CHECK(ret_code);
 	if (enabled) {
 		LOGw(MSG_BLE_SOFTDEVICE_RUNNING);
-		err_code = sd_softdevice_disable();
-		APP_ERROR_CHECK(err_code);
+		ret_code = sd_softdevice_disable();
+		APP_ERROR_CHECK(ret_code);
 	}
 
+	//softdevice_ble_evt_handler_set(ble_evt_dispatch);
+	//LOGd("Address of sdh_ble_observers", &sdh_ble_observers);
+	
 	// Enable power-fail comparator
 	sd_power_pof_enable(true);
 	// set threshold value, if power falls below threshold,
@@ -149,22 +168,21 @@ void Stack::init() {
 void Stack::initRadio() {
 	if (!checkCondition(C_STACK_INITIALIZED, true)) return;
 	if (checkCondition(C_RADIO_INITIALIZED, false)) return;
-	ret_code_t err_code;
+	ret_code_t ret_code;
 
-	LOGd("nrf_sdh_enable_request");
-	err_code = nrf_sdh_enable_request(); 
-	if (err_code == NRF_ERROR_INVALID_STATE) {
+	LOGv("nrf_sdh_enable_request");
+	ret_code = nrf_sdh_enable_request(); 
+	if (ret_code == NRF_ERROR_INVALID_STATE) {
 		LOGw("Softdevice, already initialized");
 		return;
 	}
 
 	// Enable BLE stack
-//	uint32_t ram_start = RAM_R1_BASE;
-	uint32_t ram_start = 0;
+	uint32_t ram_start = RAM_R1_BASE;
 	_conn_cfg_tag = 1;
-	LOGd("nrf_sdh_ble_default_cfg_set at %p", ram_start);
-	err_code = nrf_sdh_ble_default_cfg_set(_conn_cfg_tag, &ram_start); 
-	switch(err_code) {
+	LOGv("nrf_sdh_ble_default_cfg_set at %p", ram_start);
+	ret_code = nrf_sdh_ble_default_cfg_set(_conn_cfg_tag, &ram_start); 
+	switch(ret_code) {
 		case NRF_ERROR_NO_MEM:
 			LOGe("Unrecoverable, memory softdevice and app overlaps: %p", ram_start);
 			break;
@@ -172,14 +190,14 @@ void Stack::initRadio() {
 			LOGe("RAM, invalid length");
 			break;
 	}
-	APP_ERROR_CHECK(err_code);
+	APP_ERROR_CHECK(ret_code);
 	if (ram_start != RAM_R1_BASE) {
 		LOGw("Application address is too high, memory is unused: %p", ram_start);
 	}
 
-	LOGd("nrf_sdh_ble_enable");
-	err_code = nrf_sdh_ble_enable(&ram_start);
-	switch(err_code) {
+	LOGv("nrf_sdh_ble_enable");
+	ret_code = nrf_sdh_ble_enable(&ram_start);
+	switch(ret_code) {
 		case NRF_ERROR_INVALID_STATE:
 			LOGe("BLE: invalid radio state");
 			break;
@@ -190,30 +208,30 @@ void Stack::initRadio() {
 			LOGe("BLE: no memory available");
 			break;
 	}
-	APP_ERROR_CHECK(err_code);
+	APP_ERROR_CHECK(ret_code);
 
 	// Version is not saved or shown yet
 	ble_version_t version( { });
 	version.company_id = 12;
-	err_code = sd_ble_version_get(&version);
-	APP_ERROR_CHECK(err_code);
+	ret_code = sd_ble_version_get(&version);
+	APP_ERROR_CHECK(ret_code);
 
 	std::string device_name = "noname";
 	if (!_device_name.empty()) {
 		device_name = _device_name;
 	}
-	LOGd("sd_ble_gap_device_name_set");
-	err_code = sd_ble_gap_device_name_set(&_sec_mode, (uint8_t*) device_name.c_str(), device_name.length());
-	APP_ERROR_CHECK(err_code);
+	LOGv("sd_ble_gap_device_name_set");
+	ret_code = sd_ble_gap_device_name_set(&_sec_mode, (uint8_t*) device_name.c_str(), device_name.length());
+	APP_ERROR_CHECK(ret_code);
 	
-	err_code = sd_ble_gap_appearance_set(_appearance);
-	APP_ERROR_CHECK(err_code);
+	ret_code = sd_ble_gap_appearance_set(_appearance);
+	APP_ERROR_CHECK(ret_code);
 
 	// BLE address with which we will broadcast, store in object field
-	err_code = sd_ble_gap_addr_get(&_connectable_address);
-	APP_ERROR_CHECK(err_code);
-	err_code = sd_ble_gap_addr_get(&_nonconnectable_address);
-	APP_ERROR_CHECK(err_code);
+	ret_code = sd_ble_gap_addr_get(&_connectable_address);
+	APP_ERROR_CHECK(ret_code);
+	ret_code = sd_ble_gap_addr_get(&_nonconnectable_address);
+	APP_ERROR_CHECK(ret_code);
 	// have non-connectable address one value higher than connectable one
 	_nonconnectable_address.addr[0] += 0x1; 
 
@@ -320,10 +338,20 @@ void Stack::shutdown() {
 	_initializedStack = false;
 }
 
-void Stack::addService(Service* svc) {
-	//APP_ERROR_CHECK_BOOL(_services.size() < MAX_SERVICE_COUNT);
-
+Stack& Stack::addService(Service* svc) {
 	_services.push_back(svc);
+	return *this;
+}
+
+/**
+ * Removes a services including all its characteristics.
+ */
+Stack& Stack::removeService(Service* svc) {
+	Services_t::iterator it;
+	it = std::find(_services.begin(), _services.end(), svc);
+	(*it)->removeCharacteristics();
+	_services.erase(it);
+	return *this;
 }
 
 /**
@@ -363,10 +391,10 @@ void Stack::updateTxPowerLevel() {
 		LOGw("Radio not initialized or invalid handle");
 		return;
 	}
-	uint32_t err_code;
+	uint32_t ret_code;
 	LOGd("Update tx power level %i", _tx_power_level);
-	err_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _tx_power_level, _adv_handle);
-	APP_ERROR_CHECK(err_code);
+	ret_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _tx_power_level, _adv_handle);
+	APP_ERROR_CHECK(ret_code);
 }
 
 void Stack::setMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
@@ -406,7 +434,8 @@ void Stack::setConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms) {
 }
 
 void Stack::updateConnParams() {
-	BLE_CALL(sd_ble_gap_ppcp_set, (&_gap_conn_params));
+	ret_code_t ret_code = sd_ble_gap_ppcp_set(&_gap_conn_params);
+	APP_ERROR_CHECK(ret_code);
 }
 
 /** Configure advertisement data according to iBeacon specification.
@@ -421,47 +450,31 @@ void Stack::updateConnParams() {
  * The company identifier has to be set to 0x004C or it will not be recognized as an iBeacon by iPhones.
  */
 void Stack::configureIBeaconAdvData(IBeacon* beacon) {
-	LOGd("Configure iBeacon adv data");
+	LOGv("Configure iBeacon adv data");
 
 	memset(&_manufac_apple, 0, sizeof(_manufac_apple));
 	_manufac_apple.company_identifier = 0x004C; 
 	_manufac_apple.data.p_data = beacon->getArray();
 	_manufac_apple.data.size = beacon->size();
 
-	LOGd("Apple data size: %i", beacon->size());
-
 	memset(&_config_advdata, 0, sizeof(_config_advdata));
 
 	_config_advdata.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
 	_config_advdata.p_manuf_specific_data = &_manufac_apple;
-	//_config_advdata.name_type = BLE_ADVDATA_SHORT_NAME;
-	//_config_advdata.short_name_len = 5;
 	_config_advdata.name_type = BLE_ADVDATA_NO_NAME;
 	_config_advdata.include_appearance = false;
 
-	// we now have to encode the data by an explicit call
 	ret_code_t ret_code;
 	_adv_data.adv_data.len = sizeof(_config_advdata);
 	if (_adv_data.adv_data.p_data == NULL) {
 		_adv_data.adv_data.p_data = (uint8_t*)calloc(sizeof(uint8_t), _adv_data.adv_data.len);
 	}
-	LOGd("Set buffer to size: %i", _adv_data.adv_data.len);
-	
-	LOGd("First bytes in encoded buffer: [%02x %02x %02x %02x]", 
-			_adv_data.adv_data.p_data[0], _adv_data.adv_data.p_data[1],
-			_adv_data.adv_data.p_data[2], _adv_data.adv_data.p_data[3]
-	    );
-
-	LOGd("Encode for example company_identifier: %04x", 
-			_config_advdata.p_manuf_specific_data->company_identifier);
-
-	LOGd("ble_advdata_encode");
 	ret_code = ble_advdata_encode(&_config_advdata, _adv_data.adv_data.p_data, &_adv_data.adv_data.len);
-	LOGd("First bytes in encoded buffer: [%02x %02x %02x %02x]", 
+	LOGv("First bytes in encoded buffer: [%02x %02x %02x %02x]", 
 			_adv_data.adv_data.p_data[0], _adv_data.adv_data.p_data[1],
 			_adv_data.adv_data.p_data[2], _adv_data.adv_data.p_data[3]
 	    );
-	LOGd("Got encoded buffer of size: %i", _adv_data.adv_data.len);
+	LOGv("Got encoded buffer of size: %i", _adv_data.adv_data.len);
 	APP_ERROR_CHECK(ret_code);
 }
 
@@ -527,9 +540,7 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 	if (_adv_data.scan_rsp_data.p_data == NULL) {
 		_adv_data.scan_rsp_data.p_data = (uint8_t*)calloc(sizeof(uint8_t),_adv_data.scan_rsp_data.len);
 	}
-	LOGd("Set buffer to size: %i", _adv_data.scan_rsp_data.len);
 	ret_code = ble_advdata_encode(&_config_scanrsp, _adv_data.scan_rsp_data.p_data, &_adv_data.scan_rsp_data.len);
-	LOGd("Got encoded buffer of size: %i", _adv_data.scan_rsp_data.len);
 	APP_ERROR_CHECK(ret_code);
 }
 
@@ -542,7 +553,7 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 void Stack::configureIBeacon(IBeacon* beacon, uint8_t deviceType) {
 	LOGi(FMT_BLE_CONFIGURE_AS, "iBeacon");
 	configureIBeaconAdvData(beacon);
-	//configureScanResponse(deviceType);
+	configureScanResponse(deviceType);
 	configureAdvertisementParameters();
 	setAdvertisementData();
 }
@@ -550,7 +561,7 @@ void Stack::configureIBeacon(IBeacon* beacon, uint8_t deviceType) {
 void Stack::configureBleDevice(uint8_t deviceType) {
 	LOGi(FMT_BLE_CONFIGURE_AS, "BleDevice");
 	configureBleDeviceAdvData();
-	//configureScanResponse(deviceType);
+	configureScanResponse(deviceType);
 	configureAdvertisementParameters();
 	setAdvertisementData();
 }
@@ -559,9 +570,9 @@ void Stack::configureBleDevice(uint8_t deviceType) {
  * It is only possible to include TX power if the advertisement is an "extended" type.
  */
 void Stack::configureAdvertisementParameters() {
-	LOGd("set _adv_params");
+	LOGv("set _adv_params");
 	_adv_params.primary_phy                 = BLE_GAP_PHY_1MBPS;
-	_adv_params.properties.type             = BLE_GAP_ADV_TYPE_NONCONNECTABLE_SCANNABLE_UNDIRECTED;
+	_adv_params.properties.type             = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
 	_adv_params.properties.anonymous        = 0;
 	_adv_params.properties.include_tx_power = 0;
 	_adv_params.p_peer_addr                 = NULL;
@@ -572,20 +583,20 @@ void Stack::configureAdvertisementParameters() {
 
 void Stack::setConnectable() {
 	_adv_params.properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
-	uint32_t err_code;
+	uint32_t ret_code;
 	do {
-		err_code = sd_ble_gap_addr_set(&_connectable_address);
-	} while (err_code == NRF_ERROR_INVALID_STATE);
-	APP_ERROR_CHECK(err_code);
+		ret_code = sd_ble_gap_addr_set(&_connectable_address);
+	} while (ret_code == NRF_ERROR_INVALID_STATE);
+	APP_ERROR_CHECK(ret_code);
 }
 
 void Stack::setNonConnectable() {
 	_adv_params.properties.type = BLE_GAP_ADV_TYPE_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED;
-	uint32_t err_code;
+	uint32_t ret_code;
 	do {
-		err_code = sd_ble_gap_addr_set(&_nonconnectable_address);
-	} while (err_code == NRF_ERROR_INVALID_STATE);
-	APP_ERROR_CHECK(err_code);
+		ret_code = sd_ble_gap_addr_set(&_nonconnectable_address);
+	} while (ret_code == NRF_ERROR_INVALID_STATE);
+	APP_ERROR_CHECK(ret_code);
 }
 
 void Stack::restartAdvertising() {
@@ -611,17 +622,17 @@ void Stack::startAdvertising() {
 	static int max_debug = 3;
 	static int i = 0;
 	if (i < max_debug) {
-		LOGd("sd_ble_gap_adv_start(_adv_handle=%i,_conn_cfg_tag=%i)", _adv_handle, _conn_cfg_tag);
+		LOGv("sd_ble_gap_adv_start(_adv_handle=%i,_conn_cfg_tag=%i)", _adv_handle, _conn_cfg_tag);
 		i++;
 		if (i == max_debug) {
-			LOGd("Suppress further messages about adv start");
+			LOGv("Suppress further messages about adv start");
 		}
 	}
-	uint32_t err_code = sd_ble_gap_adv_start(_adv_handle, _conn_cfg_tag);
-	if (err_code == NRF_SUCCESS) {
+	uint32_t ret_code = sd_ble_gap_adv_start(_adv_handle, _conn_cfg_tag);
+	if (ret_code == NRF_SUCCESS) {
 		_advertising = true;
 	}
-	APP_ERROR_CHECK(err_code);
+	APP_ERROR_CHECK(ret_code);
 }
 
 void Stack::stopAdvertising() {
@@ -631,9 +642,9 @@ void Stack::stopAdvertising() {
 	}
 
 	// This function call can take 31ms
-	uint32_t err_code = sd_ble_gap_adv_stop(_adv_handle); 
+	uint32_t ret_code = sd_ble_gap_adv_stop(_adv_handle); 
 	// Ignore invalid state error, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
-	APP_ERROR_CHECK_EXCEPT(err_code, NRF_ERROR_INVALID_STATE);
+	APP_ERROR_CHECK_EXCEPT(ret_code, NRF_ERROR_INVALID_STATE);
 
 	//LOGi(MSG_BLE_ADVERTISING_STOPPED);
 
@@ -716,12 +727,12 @@ void Stack::setAdvertisementData() {
 	}
 	
 	if (first_time) {
-		LOGd("sd_ble_gap_adv_set_configure(_adv_handle=%i,...,...)", _adv_handle);
-		LOGd("First bytes in encoded buffer: [%02x %02x %02x %02x]", 
+		LOGv("sd_ble_gap_adv_set_configure(_adv_handle=%i,...,...)", _adv_handle);
+		LOGv("First bytes in encoded buffer: [%02x %02x %02x %02x]", 
 				_adv_data.adv_data.p_data[0], _adv_data.adv_data.p_data[1],
 				_adv_data.adv_data.p_data[2], _adv_data.adv_data.p_data[3]
 		    );
-		LOGd("Length is: %i", _adv_data.adv_data.len);
+		LOGv("Length is: %i", _adv_data.adv_data.len);
 		err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
 		APP_ERROR_CHECK(err);
 	} else {
@@ -789,8 +800,6 @@ bool Stack::isScanning() {
 }
 
 void Stack::setAesEncrypted(bool encrypted) {
-
-	//! set characteristics of all services to encrypted
 	for (Service* svc : _services) {
 		svc->setAesEncrypted(encrypted);
 	}
@@ -834,7 +843,12 @@ void Stack::changeToNormalTxPowerMode() {
 	setTxPowerLevel(txPower);
 }
 
-void Stack::on_ble_evt(ble_evt_t * p_ble_evt) {//, void * p_context) {
+void Stack::on_ble_evt(const ble_evt_t * p_ble_evt) {
+
+	if (p_ble_evt->header.evt_id !=  BLE_GAP_EVT_RSSI_CHANGED) {
+		const char *evt_name = NordicEventTypeName(p_ble_evt->header.evt_id);
+		LOGd("Event %i (0x%X) %s", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id, evt_name);
+	}
 
 	if (_dm_initialized) {
 		// Note: peer manager is removed
@@ -930,7 +944,7 @@ void Stack::on_ble_evt(ble_evt_t * p_ble_evt) {//, void * p_context) {
 	}
 
 	case BLE_GAP_EVT_ADV_REPORT: {
-		event_t event(CS_TYPE::EVT_BLE_EVENT, p_ble_evt, sizeof(p_ble_evt));
+		event_t event(CS_TYPE::EVT_BLE_EVENT, (void*)p_ble_evt, sizeof(p_ble_evt));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
@@ -979,7 +993,8 @@ void Stack::resetConnectionAliveTimer() {
 #endif
 }
 
-void Stack::on_connected(ble_evt_t * p_ble_evt) {
+void Stack::on_connected(const ble_evt_t * p_ble_evt) {
+	LOGd("Connection event");
 	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
 	_advertising = false; //! Advertising stops on connect, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 	_disconnectingInProgress = false;
@@ -1001,7 +1016,7 @@ void Stack::on_connected(ble_evt_t * p_ble_evt) {
 	startConnectionAliveTimer();
 }
 
-void Stack::on_disconnected(ble_evt_t * p_ble_evt) {
+void Stack::on_disconnected(const ble_evt_t * p_ble_evt) {
 	//ble_gap_evt_disconnected_t disconnected_evt = p_ble_evt->evt.gap_evt.params.disconnected;
 	_conn_handle = BLE_CONN_HANDLE_INVALID;
 	if (_callback_connected) {
@@ -1037,7 +1052,7 @@ bool Stack::isConnected() {
 	return _conn_handle != BLE_CONN_HANDLE_INVALID;
 }
 
-void Stack::onTxComplete(ble_evt_t * p_ble_evt) {
+void Stack::onTxComplete(const ble_evt_t * p_ble_evt) {
 	for (Service* svc: _services) {
 		svc->onTxComplete(&p_ble_evt->evt.common_evt);
 	}

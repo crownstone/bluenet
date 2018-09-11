@@ -115,11 +115,25 @@ void CrownstoneService::createCharacteristics() {
 	addCharacteristicsDone();
 }
 
+void CrownstoneService::removeCharacteristics() {
+#if BUILD_MESHING == 1
+	removeCharacteristic(_meshControlCharacteristic);
+#endif
+	removeCharacteristic(_stateControlCharacteristic);
+	removeCharacteristic(_stateReadCharacteristic);
+	removeCharacteristic(_sessionNonceCharacteristic);
+	removeCharacteristic(_factoryResetCharacteristic);
+
+	// remove allocated data structures
+	if (_streamBuffer != NULL) {
+		delete [] _streamBuffer;
+		_streamBuffer = NULL;
+	}
+}
 
 void CrownstoneService::addMeshCharacteristic() {
 #if BUILD_MESHING == 1
 	_meshCommand = new MeshCommand();
-//	_meshCommand = new StreamBuffer<uint8_t, MAX_MESH_MESSAGE_PAYLOAD_LENGTH>();
 
 	MasterBuffer& mb = MasterBuffer::getInstance();
 	buffer_ptr_t buffer = NULL;
@@ -138,10 +152,12 @@ void CrownstoneService::addMeshCharacteristic() {
 	_meshControlCharacteristic->setMinAccessLevel(MEMBER);
 	_meshControlCharacteristic->setMaxGattValueLength(size);
 	_meshControlCharacteristic->setValueLength(0);
-	_meshControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
-		// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
-		// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
-		// If the user writes to this characteristic with insufficient rights, this method is not called
+	_meshControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, 
+				const buffer_ptr_t& value, uint16_t length) -> void {
+		// Encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
+		// This is only for characteristics that the user writes to. The ones that are read are encrypted using 
+		// the setMinAccessLevel level.
+		// If the user writes to this characteristic with insufficient rights, this onWrite() method is not called.
 
 		LOGi(MSG_MESH_MESSAGE_WRITE);
 
@@ -155,7 +171,7 @@ void CrownstoneService::addMeshCharacteristic() {
 			error_code = MeshControl::getInstance().send(handle, p_data, length);
 		}
 
-//		LOGi("err error_code: %d", error_code);
+		LOGv("Mesh onWrite error_code: %d", error_code);
 		memcpy(value, &error_code, sizeof(error_code));
 		_meshControlCharacteristic->setValueLength(sizeof(error_code));
 		_meshControlCharacteristic->updateValue();
@@ -177,7 +193,8 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	_controlCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_controlCharacteristic->setMaxGattValueLength(size);
 	_controlCharacteristic->setValueLength(0);
-	_controlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
+	_controlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, 
+				const buffer_ptr_t& value, uint16_t length) -> void {
 		// encryption in the write stage verifies if the key is at least GUEST, command specific permissions are
 		// handled in the commandHandler
 
@@ -210,7 +227,8 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 
 }
 
-void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
+void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size, 
+		EncryptionAccessLevel minimumAccessLevel) {
 	_configurationControlCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_configurationControlCharacteristic);
 
@@ -221,7 +239,8 @@ void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffe
 	_configurationControlCharacteristic->setMinAccessLevel(minimumAccessLevel);
 	_configurationControlCharacteristic->setMaxGattValueLength(size);
 	_configurationControlCharacteristic->setValueLength(0);
-	_configurationControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
+	_configurationControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, 
+				const buffer_ptr_t& value, uint16_t length) -> void {
 		bool writeErrCode = true;
 		cs_ret_code_t errCode = configOnWrite(accessLevel, value, length, writeErrCode);
 		if (writeErrCode) {
@@ -264,7 +283,8 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
 	_stateControlCharacteristic->setMinAccessLevel(MEMBER);
 	_stateControlCharacteristic->setMaxGattValueLength(size);
 	_stateControlCharacteristic->setValueLength(0);
-	_stateControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
+	_stateControlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, 
+				const buffer_ptr_t& value, uint16_t length) -> void {
 		bool writeErrCode = true;
 		cs_ret_code_t errCode = stateOnWrite(accessLevel, value, length, writeErrCode);
 		if (writeErrCode) {
@@ -295,7 +315,8 @@ void CrownstoneService::addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t
 }
 
 
-void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel) {
+void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, 
+		EncryptionAccessLevel minimumAccessLevel) {
 	_sessionNonceCharacteristic = new Characteristic<buffer_ptr_t>();
 	addCharacteristic(_sessionNonceCharacteristic);
 
@@ -321,7 +342,8 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	_factoryResetCharacteristic->setNotifies(true);
 	_factoryResetCharacteristic->setDefaultValue(0);
 	_factoryResetCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-	_factoryResetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value, uint16_t length) -> void {
+	_factoryResetCharacteristic->onWrite([&](const uint8_t accessLevel, const uint32_t& value, 
+				uint16_t length) -> void {
 		// TODO if settings --> factory reset disabled, we set the value to 2 to indicate reset is not possible.
 		// No need to check length, as value is not a pointer.
 		bool success = FactoryReset::getInstance().recover(value);
@@ -333,7 +355,8 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	});
 }
 
-cs_ret_code_t CrownstoneService::configOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length, bool& writeErrCode) {
+cs_ret_code_t CrownstoneService::configOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, 
+		uint16_t length, bool& writeErrCode) {
 	// encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
 	// this is only for characteristics that the user writes to. The ones that are read are encrypted using the setMinAccessLevel level.
 	// If the user writes to this characteristic with insufficient rights, this method is not called

@@ -26,26 +26,16 @@ public:
 	 */
 	void createCharacteristics();
 
+	/** Remove all characteristics.
+	 */
+	void removeCharacteristics();
 protected:
-	//! The characteristics in this service, based on:
-	//! https://developer.bluetooth.org/TechnologyOverview/Pages/DIS.aspx
-//	void addManufacturerNameCharacteristic();
-//	void addModelNumberCharacteristic();
-//	void addSerialNumberCharacteristic();
 	void addHardwareRevisionCharacteristic();
 	void addFirmwareRevisionCharacteristic();
 	void addSoftwareRevisionCharacteristic();
-//	void addSystemIDCharacteristic();
-//	void addRegulatoryCertificationDataListCharacteristic();
-
+	
 private:
-	//! References to characteristics that need to be written from other functions
-//	Characteristic<std::string> *_manufacturerNameCharacteristic;
-//	Characteristic<std::string> *_modelNumberCharacteristic;
-//	Characteristic<std::string> *_serialNumberCharacteristic;
-//	Characteristic<std::string> *_hardwareRevisionCharacteristic;
-//	Characteristic<std::string> *_firmwareRevisionCharacteristic;
-//	Characteristic<std::string> *_softwareRevisionCharacteristic;
-//	Characteristic<std::string> *_systemIdCharacteristic;
-//	Characteristic<std::string> *_regulatoryCerificationDataListCharacteristic;
+	Characteristic<std::string>* _hardwareRevisionCharacteristic;
+	Characteristic<std::string>* _firmwareRevisionCharacteristic;
+	Characteristic<std::string>* _softwareRevisionCharacteristic;
 };

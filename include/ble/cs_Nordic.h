@@ -30,6 +30,7 @@ extern "C"
 #include <nrf_nvic.h>
 #include <nrf_sdh.h>
 #include <nrf_sdh_ble.h>
+#include <nrf_sdh_soc.h>
 #include <nrf_sdm.h>
 #include <nrfx_glue.h>
 

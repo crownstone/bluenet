@@ -55,11 +55,15 @@ case $softdevice_firmware_version in
 		version="S132 v6.0.0"
 		echo $version
 		;;
+	00AF)
+		version="S132 v6.1.0"
+		echo $version
+		;;
 	FFFE)
 		version="development/any"
 		echo $version
 		;;
 	*)
-		echo "Sorry, I don't know this version"
+		echo "Sorry, I don't know this version: $softdevice_firmware_version"
 		;;
 esac

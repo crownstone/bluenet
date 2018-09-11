@@ -1,5 +1,5 @@
 /**
- * @file
+ * @file cs_Service.h
  * BLE service
  *
  * @authors Crownstone Team, Christopher Mason.
@@ -9,67 +9,27 @@
  */
 #pragma once
 
-#include <ble/cs_Stack.h>
 #include <ble/cs_Characteristic.h>
-
-#include <common/cs_Tuple.h>
+#include <ble/cs_Stack.h>
 #include <cfg/cs_Strings.h>
-#include <util/cs_BleError.h>
+#include <common/cs_Tuple.h>
 #include <drivers/cs_Timer.h>
+#include <util/cs_BleError.h>
 
-
-/** General BLE name service
- *
- * All functionality that is just general BLE functionality is encapsulated in the BLEpp namespace.
- */
 class Stack;
 class CharacteristicBase;
 
 /** Service as defined in the GATT Specification.
  */
 class Service {
-
 public:
-	static const char* defaultServiceName; //! "Generic Service"
+	//! The "Generic Service"
+	static const char* defaultServiceName; 
 
-	// might want to change this to a linked list or something that
-	// we can loop over but doesn't allocate more space than needed
+	//! A container with characteristics (underlying data format is a std::vector).
 	typedef tuple<CharacteristicBase*> Characteristics_t;
 
-protected:
-
-	Stack*  _stack;
-	UUID                     _uuid;
-	std::string              _name;
-	bool                     _primary;
-	uint16_t                 _service_handle; //! provided by stack.
-	bool                     _started;
-
-	// per BLE definition, there is no maximum number of characteristics per
-	// service. it is limited by the memory available to the GATT table over
-	// all services/characteristics
-	//! Currently maximum number of characteristics per service
-//	static const uint8_t MAX_CHARACTERISTICS = 10;
-
-	//! List of characteristics
-//	fixed_tuple<CharacteristicBase*, MAX_CHARACTERISTICS> _characteristics;
-	Characteristics_t _characteristics;
-
-public:
-	Service() :
-		_stack(NULL),
-		_name(""),
-		_primary(true),
-		_service_handle(BLE_CONN_HANDLE_INVALID),
-		_started(false)
-//		,_appTimerId(NULL)
-{
-		//! Should be done in the service, if it wants a timer
-//#if (NORDIC_SDK_VERSION >= 11)
-//		_appTimerData = { {0} };
-//		_appTimerId = &_appTimerData;
-//#endif
-}
+	Service();
 
 	/** Default empty destructor
 	 *
@@ -80,21 +40,28 @@ public:
 	virtual ~Service() {
 	}
 
+	/** Set the name of the service.
+	 *
+	 * The name of the service is a const char pointer. Setting the parameters can be done in a chained manner, the
+	 * function returns Service again.
+	 */
 	Service& setName(const char * const name) {
 		_name = name;
 		return *this;
 	}
 
+	/** Set the UUID.
+	 *
+	 * The UUID cannot be set anymore after the service has been started.
+	 */
 	Service& setUUID(const UUID& uuid) {
 		if (_started) BLE_THROW("Already started.");
-
 		_uuid = uuid;
 		return *this;
 	}
 
 	Service& setIsPrimary(bool isPrimary) {
 		if (_started) BLE_THROW("Already started.");
-
 		_primary = isPrimary;
 		return *this;
 	}
@@ -110,29 +77,44 @@ public:
 	uint16_t getHandle() {
 		return _service_handle;
 	}
-
-	//! internal:
-
-	virtual void createCharacteristics() = 0;
-
-//	virtual void tick() {};
-//	static void staticTick(Service* ptr) {
-//		ptr->tick();
-//	}
-
-
-	virtual void init(Stack* stack);
+	
 	virtual void stopAdvertising() {};
 
-	virtual void on_ble_event(ble_evt_t * p_ble_evt);
+protected:
+	friend class Stack;
 
-	virtual void on_connect(uint16_t conn_handle, ble_gap_evt_connected_t& gap_evt);  //! FIXME NRFAPI  friend??
+	//! Back reference to the stack.
+	Stack*  _stack;
 
-	virtual void on_disconnect(uint16_t conn_handle, ble_gap_evt_disconnected_t& gap_evt);  //! FIXME NRFAPI
+	UUID                     _uuid;
+	std::string              _name;
+	bool                     _primary;
+	//! Service handle will be obtained from SoftDevice
+	uint16_t                 _service_handle; 
+	bool                     _started;
 
-	virtual bool on_write(ble_gatts_evt_write_t& write_evt, uint16_t value_handle);  //! FIXME NRFAPI
+	//! List of characteristics
+	Characteristics_t _characteristics;
 
-	virtual void onTxComplete(ble_common_evt_t * p_ble_evt);
+	virtual void createCharacteristics() = 0;
+	
+	virtual void removeCharacteristics() = 0;
+
+	/** Initialization of the service.
+	 *
+	 * The initialization can be different for each service.
+	 */
+	virtual void init(Stack* stack);
+
+	virtual void on_ble_event(const ble_evt_t * p_ble_evt);
+
+	virtual void on_connect(uint16_t conn_handle, const ble_gap_evt_connected_t& gap_evt); 
+
+	virtual void on_disconnect(uint16_t conn_handle, const ble_gap_evt_disconnected_t& gap_evt);
+
+	virtual bool on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_handle);
+
+	virtual void onTxComplete(const ble_common_evt_t * p_ble_evt);
 
 	/** Get list of characteristics
 	 *
@@ -146,14 +128,12 @@ public:
 	 * @characteristic Characteristic to add
 	 */
 	virtual Service& addCharacteristic(CharacteristicBase* characteristic) {
-//		if (_characteristics.size() == MAX_CHARACTERISTICS) {
-//			BLE_THROW(MSG_BLE_CHAR_TOO_MANY);
-//		}
 		_characteristics.push_back(characteristic);
-
 		return *this;
 	}
 
+	/** Remove a characteristic.
+	 */
 	virtual Service& removeCharacteristic(CharacteristicBase* characteristic);
 
 	Service& addCharacteristicsDone() {
@@ -161,7 +141,6 @@ public:
 		return *this;
 	}
 
-	void setPinEncrypted(bool encrypted);
 	void setAesEncrypted(bool encrypted);
 
 };

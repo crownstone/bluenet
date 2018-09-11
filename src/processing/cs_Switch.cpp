@@ -21,7 +21,6 @@
 #define PRINT_SWITCH_VERBOSE
 
 Switch::Switch():
-//	_nextRelayVal(SWITCH_NEXT_RELAY_VAL_NONE),
 	_pwmPowered(false),
 	_relayPowered(false),
 	_hasRelay(false),
@@ -75,29 +74,40 @@ void Switch::init(const boards_config_t& board) {
 	// Retrieve last switch state from persistent storage
 	size16_t size = sizeof(switch_state_t);
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::STRATEGY1);
-	LOGd("Stored switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
+	LOGd("Obtained last switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
 
 	EventDispatcher::getInstance().addListener(this);
-	Timer::getInstance().createSingleShot(_switchTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSwitch);
-	Timer::getInstance().createSingleShot(_switchStoreStateTimerId, (app_timer_timeout_handler_t)Switch::staticTimedStoreSwitch);
+	Timer::getInstance().createSingleShot(_switchTimerId, 
+			(app_timer_timeout_handler_t)Switch::staticTimedSwitch);
+	Timer::getInstance().createSingleShot(_switchStoreStateTimerId, 
+			(app_timer_timeout_handler_t)Switch::staticTimedStoreSwitch);
 }
 
-
+/** 
+ * TODO: Remove function. This should be self-contained... If it is required to wait a bit after init, this type of
+ * decision should be part of this class. If there is a message exchange required with the current sensing module,
+ * then this should be done over the event bus. 
+ *
+ * The PWM is required for syncing with zero-crossings.
+ */
 void Switch::start() {
+	LOGd("Start switch");
+
 	_relayPowered = true;
-//	// Restore the pwm state. Use _setPwm(), so that we don't write to persistent storage again.
-//	_setPwm(_switchValue.pwm_state);
 
 	// Already start PWM, so it can sync with the zero crossings. But don't set the value yet.
 	PWM::getInstance().start(true);
 
-	// If switchcraft is enabled, assume a boot is due to a brownout caused by a too slow wall switch, so the pwm is already powered.
+	// If switchcraft is enabled, assume a boot is due to a brownout caused by a too slow wall switch.
+	// This means we will assume that the pwm is already powered and just set the _pwmPowered flag.
+	// TODO: Really? Why can't we just organize this with events?
 	bool switchcraftEnabled = State::getInstance().isSet(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
 	if (switchcraftEnabled) {
 		_pwmPowered = true;
 	}
 
 	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
+	// TODO: What does this sentence mean?
 	if (_switchValue.pwm_state != 0) {
 		switch_state_t oldVal = _switchValue;
 		if (_pwmPowered) {
@@ -105,20 +115,17 @@ void Switch::start() {
 			_relayOff();
 		}
 		else {
-//			// This shouldn't happen, but let's check it to be sure.
-//			LOGd("pwm allowed: %u", State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
-//			if (!State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED)) {
-//				_switchValue.pwm_state = 0;
-//			}
-			// Always set pwm state to 0, just use relay.
-			// This is for the case of a wall switch: you don't want to hear the relay turn on and off every time you power the crownstone.
+			// This is in case of a wall switch.
+			// You don't want to hear the relay turn on and off every time you power the crownstone.
+			// TODO: So, why does it call _relayOn() if it is supposed to do nothing...?
 			_switchValue.pwm_state = 0;
 			_relayOn();
 			storeState(oldVal);
 		}
 	}
 	else {
-		// Make sure the relay is in the stored position (no need to store)
+		// Make sure the relay is in the stored position (no need to store).
+		// TODO: Why is it not stored?
 		if (_switchValue.relay_state == 1) {
 			_relayOn();
 		}
@@ -136,8 +143,6 @@ void Switch::startPwm() {
 
 	// Restore the pwm state.
 	bool success = _setPwm(_switchValue.pwm_state);
-	// PWM was already started in start(), so it could sync with zero crossings.
-//	PWM::getInstance().start(true); // Start after setting value, else there's a race condition.
 	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state == 1) {
 		// Don't use relayOff(), as that checks for switchLocked.
 		switch_state_t oldVal = _switchValue;
@@ -148,10 +153,12 @@ void Switch::startPwm() {
 	EventDispatcher::getInstance().dispatch(event);
 }
 
-//void Switch::onZeroCrossing() {
-//	PWM::getInstance().onZeroCrossing();
-//}
-
+/**
+ * TODO: Why is the old value stored as STATE_SWITCH_STATE and not as STATE_OLD_SWITCH_STATE? On a reboot of the
+ * Crownstone through Switchcraft you probably want to restore it to the proper dimming state. This is why the old
+ * state is required. However, in that case it should be called STATE_PREVIOUS_SWITCH_STATE or something indicating 
+ * this.
+ */
 void Switch::storeState(switch_state_t oldVal) {
 	bool persistent = false;
 	if (memcmp(&oldVal, &_switchValue, sizeof(switch_state_t)) != 0) {
@@ -244,15 +251,9 @@ void Switch::setPwm(uint8_t value) {
 		LOGw("Switch locked!");
 		return;
 	}
-//	LOGd("pwm allowed: %u", State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
-//	if (!State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED)) {
-//		LOGd("pwm not allowed");
-//		return;
-//	}
 	bool success = _setPwm(value);
 	// Turn on relay instead, when trying to dim too soon after boot.
 	// Dimmer state will be restored when startPwm() is called.
-//	if (_switchValue.relay_state == 0 && value != 0 && !_pwmPowered) {
 	if (!success && _switchValue.relay_state == 0) {
 		_relayOn();
 	}
@@ -275,7 +276,15 @@ void Switch::relayOn() {
 	storeState(oldVal);
 }
 
-
+/**
+ * Wrapper function that has all kind of side-effects besides turning off the relay. It does the following things:
+ *   - check if the relay is locked, it will not switch in that case
+ *   - turn off the relay
+ *   - store the old state of the relay
+ * TODO: Use a struct { bool check_log; switch_state_t value; bool store_previous; value_t delay; }
+ * TODO: Get rid of almost similar functions relayOff(), _relayOff(), forceRelayOff().
+ * TODO: Get rid of almost similar functions with relay/switch/pwm.
+ */
 void Switch::relayOff() {
 	if (State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
@@ -532,7 +541,6 @@ bool Switch::allowPwmOn() {
 	LOGd("errors=%d", stateErrors.asInt);
 
 	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
-//	return !(stateErrors.errors.chipTemp || stateErrors.errors.pwmTemp);
 }
 
 bool Switch::allowRelayOff() {

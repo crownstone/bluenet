@@ -10,7 +10,9 @@
 #include <cstdint>
 
 /** A tuple is a vector with a templated type and a public constructor.
- * @param T templated element which goes into the vector
+ *
+ * Wrapper for a std::vector with a default constructor.
+ * @param T                  Templated type of elements in the vector.
  */
 template<typename T> class tuple : public std::vector<T> {
 public:
@@ -19,8 +21,10 @@ public:
 };
 
 /** A fixed tuple is a vector with a templated type and a reserved capacity.
- * @param T templated type which goes into the vector
- * @param capacity Predefined capacity of the underlying std::vector.
+ *
+ * Wrapper for a std::vector with a default constructor with a particular capacity.
+ * @param T                  Templated type of elements in the vector.
+ * @param capacity           Predefined capacity of the underlying std::vector.
  */
 template<typename T, uint8_t capacity> class fixed_tuple : public tuple<T> {
 public:

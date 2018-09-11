@@ -37,15 +37,14 @@ inline std::string get_hardware_revision(void) {
 	}
 
 	char hardware_revision[33];
-	sprintf(hardware_revision, "%11.11s%.4s%.4s%.8s%.6s", get_hardware_version(), production_run.c_str(), housing_id.c_str(), reserved.c_str(), nordic_chip_version);
+	sprintf(hardware_revision, "%11.11s%.4s%.4s%.8s%.6s", get_hardware_version(), production_run.c_str(), 
+			housing_id.c_str(), reserved.c_str(), nordic_chip_version);
 	return std::string(hardware_revision, 33);
 }
 
-DeviceInformationService::DeviceInformationService()
-{
+DeviceInformationService::DeviceInformationService() {
 	setUUID(UUID(BLE_UUID_DEVICE_INFORMATION_SERVICE));
 	setName(BLE_SERVICE_DEVICE_INFORMATION);
-
 }
 
 void DeviceInformationService::createCharacteristics() {
@@ -65,8 +64,14 @@ void DeviceInformationService::createCharacteristics() {
 	addCharacteristicsDone();
 }
 
+void DeviceInformationService::removeCharacteristics() {
+	delete _hardwareRevisionCharacteristic;
+	delete _firmwareRevisionCharacteristic;
+	delete _softwareRevisionCharacteristic;
+}
+
 void DeviceInformationService::addHardwareRevisionCharacteristic() {
-	Characteristic<std::string>* _hardwareRevisionCharacteristic = new Characteristic<std::string>();
+	_hardwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_hardwareRevisionCharacteristic);
 
 	std::string hardware_revision = get_hardware_revision();
@@ -81,7 +86,7 @@ void DeviceInformationService::addHardwareRevisionCharacteristic() {
 }
 
 void DeviceInformationService::addFirmwareRevisionCharacteristic() {
-	Characteristic<std::string>* _firmwareRevisionCharacteristic = new Characteristic<std::string>();
+	_firmwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_firmwareRevisionCharacteristic);
 
 #ifdef GIT_HASH
@@ -100,15 +105,13 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 }
 
 void DeviceInformationService::addSoftwareRevisionCharacteristic() {
-	Characteristic<std::string>* _softwareRevisionCharacteristic = new Characteristic<std::string>();
+	_softwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_softwareRevisionCharacteristic);
 	_softwareRevisionCharacteristic->setUUID(BLE_UUID_SOFTWARE_REVISION_STRING_CHAR);
 	_softwareRevisionCharacteristic->setName(BLE_CHAR_SOFTWARE_REVISION);
 	_softwareRevisionCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 #ifdef GIT_BRANCH
 	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(GIT_BRANCH));
-#else
-//	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(SOFTWARE_REVISION));
 #endif
 	_softwareRevisionCharacteristic->setWritable(false);
 }

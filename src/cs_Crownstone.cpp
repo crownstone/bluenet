@@ -227,6 +227,9 @@ void Crownstone::init() {
 	app_sched_execute();
 }
 
+/**
+ * Configurate the Bluetooth stack. This also increments the reset counter.
+ */
 void Crownstone::configure() {
 
 	LOGi("> stack ...");
@@ -271,7 +274,10 @@ void Crownstone::initDrivers() {
 	_storage->init();
 	_state->init(&_boardsConfig);
 
-	_state->factoryReset(FACTORY_RESET_CODE);
+//#define ANNE_OH_NO
+#ifdef ANNE_OH_NO
+	 _state->factoryReset(FACTORY_RESET_CODE);
+#endif
 
 	// If not done already, init UART
 	// TODO: make into a class with proper init() function
@@ -378,7 +384,7 @@ void Crownstone::configureStack() {
 		sd_power_gpregret_clr(gpregret_id, gpregret_msk);
 
 		_stack->setNonConnectable();
-		_stack->restartAdvertising();
+	//	_stack->restartAdvertising();
 
 	});
 
@@ -593,15 +599,16 @@ void Crownstone::startUp() {
 	LOGi("Start advertising");
 	_stack->startAdvertising();
 #endif
-	//! have to give the stack a moment of pause to start advertising, otherwise we get into race conditions
+	// Have to give the stack a moment of pause to start advertising, otherwise we get into race conditions.
+	// TODO: Is this still the case? Can we solve this differently? 
 	nrf_delay_ms(50);
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		//! Start switch, so it can be used.
 		_switch->start();
-//		Switch::getInstance().setPwm(90);
 
-		if (_operationMode == OperationMode::OPERATION_MODE_SETUP && _boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
+		if (_operationMode == OperationMode::OPERATION_MODE_SETUP && 
+				_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
 			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
 		}
 
@@ -624,9 +631,6 @@ void Crownstone::startUp() {
 		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 			// Let the power sampler call the PWM callback function on zero crossings.
 			_powerSampler->enableZeroCrossingInterrupt(handleZeroCrossing);
-
-			// This way doesn't seem any better: https://stackoverflow.com/questions/2298242/callback-functions-in-c
-//			_powerSampler->enableZeroCrossingInterrupt(PWM::getInstance().onZeroCrossing);
 		}
 
 		_scheduler->start();
@@ -674,10 +678,8 @@ void Crownstone::startUp() {
 }
 
 void Crownstone::tick() {
-
-	//LOGd("Crownstone tick");
-	// Update temperature
-	int32_t temperature = getTemperature();
+	st_value_t temperature;
+	temperature.s32 = getTemperature();
 	_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature), PersistenceMode::STRATEGY1);
 
 #define ADVERTISEMENT_IMPROVEMENT 1
@@ -720,14 +722,13 @@ void Crownstone::run() {
 
 void Crownstone::handleEvent(event_t & event) {
 
-	//LOGd("Event: %s [%i]", TypeName(event.type), +event.type);
+//	LOGd("Event: %s [%i]", TypeName(event.type), +event.type);
 
 	bool reconfigureBeacon = false;
 	switch(event.type) {
 
 		case CS_TYPE::CONFIG_NAME: {
 			_stack->updateDeviceName(std::string((char*)event.data, event.size));
-			// need to reconfigure scan response package for updated name
 			_stack->configureScanResponse(_boardsConfig.deviceType);
 			_stack->setAdvertisementData();
 			break;
@@ -901,6 +902,43 @@ void overwrite_hardware_version() {
 	}
 	LOGd("Board: %p", hardwareBoard);
 }
+
+extern "C" {
+
+#define CROWNSTONE_SOC_OBSERVER_PRIO 1
+static void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
+	LOGd("SOC event: %i", evt_id);
+}
+
+#define CROWNSTONE_STATE_OBSERVER_PRIO 1
+static void crownstone_state_handler(nrf_sdh_state_evt_t state, void * p_context) {
+	switch (state) {
+		case NRF_SDH_EVT_STATE_ENABLE_PREPARE:
+			LOGd("Softdevice is about to be enabled");
+			break;
+		case NRF_SDH_EVT_STATE_ENABLED:
+			LOGd("Softdevice is now enabled");
+			break;
+		case NRF_SDH_EVT_STATE_DISABLE_PREPARE:
+			LOGd("Softdevice is about to be disabled");
+			break;
+		case NRF_SDH_EVT_STATE_DISABLED:
+			LOGd("Softdevice is now disabled");
+			break;
+		default:
+			LOGd("Unknown state change");
+	}
+}
+
+NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, crownstone_soc_evt_handler, NULL);
+
+NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRIO) =
+{ 
+	.handler = crownstone_state_handler,
+	.p_context = NULL
+};
+
+}	
 
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,

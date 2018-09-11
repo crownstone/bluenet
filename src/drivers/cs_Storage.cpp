@@ -123,7 +123,7 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 			case FDS_SUCCESS:
 				LOGd("Write successful");
 				if (!exists(file_id, file_data.type, record_desc)) {
-					LOGe("Should now exist!");
+					LOGw("Warning: written with delay");
 				}
 				break;
 		}

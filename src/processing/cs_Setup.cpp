@@ -49,11 +49,16 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 		return ERR_WRONG_PARAMETER;
 	}
 
-	// Save all settings.
-	setup_data_t & sd = *setupData;
+	// Save all settings, use a padded struct.
+	padded_setup_data_t setup_data;
+	setup_data.data = *setupData;
+	setup_data_t & sd = setup_data.data;
 
+	LOGd("Store keys, mesh address, and other config data");
+	st_value_t value;
 	State& state = State::getInstance();
-	state.set(CS_TYPE::CONFIG_CROWNSTONE_ID, &(sd.id), sizeof(sd.id), PersistenceMode::STRATEGY1);
+	value.u8 = sd.id;
+	state.set(CS_TYPE::CONFIG_CROWNSTONE_ID, &value, sizeof(value), PersistenceMode::STRATEGY1);
 	state.set(CS_TYPE::CONFIG_KEY_ADMIN, sd.adminKey, sizeof(sd.adminKey), PersistenceMode::STRATEGY1);
 	state.set(CS_TYPE::CONFIG_KEY_MEMBER, sd.memberKey, sizeof(sd.memberKey), PersistenceMode::STRATEGY1);
 	state.set(CS_TYPE::CONFIG_KEY_GUEST, sd.guestKey, sizeof(sd.guestKey), PersistenceMode::STRATEGY1);
@@ -61,12 +66,15 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 			PersistenceMode::STRATEGY1);
 	state.set(CS_TYPE::CONFIG_IBEACON_UUID, &(sd.ibeaconUuid.uuid128), sizeof(sd.ibeaconUuid), 
 			PersistenceMode::STRATEGY1);
-	state.set(CS_TYPE::CONFIG_IBEACON_MAJOR, &(sd.ibeaconMajor), sizeof(sd.ibeaconMajor), PersistenceMode::STRATEGY1);
-	state.set(CS_TYPE::CONFIG_IBEACON_MINOR, &(sd.ibeaconMinor), sizeof(sd.ibeaconMinor), PersistenceMode::STRATEGY1);
+	value.u16 = sd.ibeaconMajor;
+	state.set(CS_TYPE::CONFIG_IBEACON_MAJOR, &value, sizeof(value), PersistenceMode::STRATEGY1);
+	value.u16 = sd.ibeaconMinor;
+	state.set(CS_TYPE::CONFIG_IBEACON_MINOR, &value, sizeof(value), PersistenceMode::STRATEGY1);
 
 	// Set operation mode to normal mode
 	mode = +OperationMode::OPERATION_MODE_NORMAL;
-	state.set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::STRATEGY1);
+	value.u8 = mode;
+	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::STRATEGY1);
 
 	// Switch relay on
 	event_t event(CS_TYPE::EVT_POWER_ON);
@@ -79,6 +87,12 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
+/**
+ * This event handler only listens to one event, namely EVT_STORAGE_WRITE_DONE. In that case it will continue with
+ * a reset procedure. However, how does it know that the right item has been written? What should be done instead is
+ * just calling a reset procedure that - in a loop - queries if there are peripherals still busy. As soon as for
+ * example the entire storage queue has been handled, it should perform the reset.
+ */
 void Setup::handleEvent(event_t & event) {
 	switch (event.type) {
 		case CS_TYPE::EVT_STORAGE_WRITE_DONE:
