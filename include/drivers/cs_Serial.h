@@ -26,6 +26,9 @@ extern "C" {
  * The log levels follow more or less common conventions with a few exeptions. There are some modes in which we run
  * where even fatal messages will not be written to console. In production we use SERIAL_NONE, SERIAL_READ_ONLY, or
  * SERIAL_BYTE_PROTOCOL_ONLY. 
+ *
+ * TODO: Somehow all namespaces are removed. This leads to conflicts! The function "log" means something if you 
+ * include <cmath>...
  */
 #define SERIAL_NONE                 0
 #define SERIAL_READ_ONLY            1
@@ -64,16 +67,10 @@ typedef enum {
 
 #ifdef INCLUDE_TIMESTAMPS
 
-	#define log(level, fmt, ...) \
-		_log(level, "[%-20.20s : %-5d](%d) " fmt, _FILE, __LINE__, now(), ##__VA_ARGS__)
-
 	#define logLN(level, fmt, ...) \
 		_log(level, "[%-20.20s : %-5d](%d) " fmt SERIAL_CRLF, _FILE, __LINE__, now(), ##__VA_ARGS__)
 
 #else
-
-	#define log(level, fmt, ...) \
-		_log(level, "[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
 
 	#define logLN(level, fmt, ...) \
 		_log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
@@ -82,7 +79,6 @@ typedef enum {
 
 #else
 	#define _log(level, fmt, ...)
-	#define log(level, fmt, ...)
 	#define logLN(level, fmt, ...)
 #endif
 

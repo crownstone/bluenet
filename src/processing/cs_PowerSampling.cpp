@@ -8,7 +8,7 @@
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Serial.h>
 #include <events/cs_EventDispatcher.h>
-#include <math.h>
+#include <cmath>
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_RecognizeSwitch.h>
 #include <processing/cs_Switch.h>
@@ -40,7 +40,6 @@ PowerSampling::PowerSampling() :
 		_consecutivePwmOvercurrent(0),
 		_lastEnergyCalculationTicks(0),
 		_energyUsedmicroJoule(0),
-//		_lastSwitchState(0),
 		_lastSwitchOffTicks(0),
 		_lastSwitchOffTicksValid(false),
 		_igbtFailureDetectionStarted(false)
@@ -524,7 +523,7 @@ void PowerSampling::calculatePower(power_t power) {
 		pSum +=       (current * voltage) / (1000*1000);
 	}
 	int32_t powerMilliWattReal = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
-	int32_t currentRmsMA =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
+	int32_t currentRmsMA = sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
 	int32_t voltageRmsMilliVolt = sqrt((double)vSquareSum * _voltageMultiplier * _voltageMultiplier / numSamples) * 1000;
 
 

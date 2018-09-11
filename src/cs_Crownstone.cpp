@@ -60,8 +60,6 @@ Crownstone::Crownstone(boards_config_t& board) :
 	_boardsConfig(board),
 	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL), _watchdog(NULL), _enOceanHandler(NULL),
 	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
-	_generalService(NULL), _localizationService(NULL), _powerService(NULL),
-	_scheduleService(NULL),
 	_serviceData(NULL), _beacon(NULL),
 #if BUILD_MESHING == 1
 	_mesh(NULL),
@@ -466,7 +464,6 @@ void Crownstone::configureAdvertisement() {
 void Crownstone::createSetupServices() {
 	LOGi(STR_CREATE_ALL_SERVICES);
 
-	//! should be available always
 	_deviceInformationService = new DeviceInformationService();
 	_stack->addService(_deviceInformationService);
 
@@ -478,42 +475,11 @@ void Crownstone::createSetupServices() {
 void Crownstone::createCrownstoneServices() {
 	LOGi(STR_CREATE_ALL_SERVICES);
 
-	//! should be available always
 	_deviceInformationService = new DeviceInformationService();
 	_stack->addService(_deviceInformationService);
 
-#if CROWNSTONE_SERVICE==1
-	//! should be available always
 	_crownstoneService = new CrownstoneService();
 	_stack->addService(_crownstoneService);
-#endif
-
-#if GENERAL_SERVICE==1
-	//! general services, such as internal temperature, setting names, etc.
-	_generalService = new GeneralService;
-	_stack->addService(_generalService);
-#endif
-
-#if INDOOR_SERVICE==1
-	//! now, build up the services and characteristics.
-	_localizationService = new IndoorLocalizationService;
-	_stack->addService(_localizationService);
-#endif
-
-#if POWER_SERVICE==1
-	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-		_powerService = new PowerService;
-		_stack->addService(_powerService);
-	} else {
-		LOGe("Power service not available");
-	}
-#endif
-
-#if SCHEDULE_SERVICE==1
-	_scheduleService = new ScheduleService;
-	_stack->addService(_scheduleService);
-#endif
-
 }
 
 /**
@@ -664,7 +630,7 @@ void Crownstone::startUp() {
 	err_code = sd_ble_gap_addr_get(&address);
 	APP_ERROR_CHECK(err_code);
 
-	log(SERIAL_INFO, "BLE Address: ");	
+	_log(SERIAL_INFO, "BLE Address: ");	
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN);
 
 #ifdef RELAY_DEFAULT_ON

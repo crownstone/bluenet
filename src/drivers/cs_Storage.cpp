@@ -21,6 +21,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <float.h>
 #include <mesh/cs_Mesh.h>
+#include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 
 extern "C" {
@@ -100,7 +101,9 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 	record.data.p_data       = file_data.value;
 	record.data.length_words = file_data.size; 
 
-	if (exists(file_id, file_data.type, record_desc)) {
+	bool f_exists = false;
+	ret_code = exists(file_id, file_data.type, record_desc, f_exists);
+	if (f_exists) {
 		LOGd("Update file %i record %i", file_id, record.key);
 		ret_code = fds_record_update(&record_desc, &record);
 		FDS_ERROR_CHECK(ret_code);
@@ -122,7 +125,8 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 				break;
 			case FDS_SUCCESS:
 				LOGd("Write successful");
-				if (!exists(file_id, file_data.type, record_desc)) {
+				ret_code = exists(file_id, file_data.type, record_desc, f_exists);
+				if (!f_exists) {
 					LOGw("Warning: written with delay");
 				}
 				break;
@@ -190,7 +194,7 @@ ret_code_t Storage::remove(st_file_id_t file_id, CS_TYPE type) {
 	return ret_code;
 }
 
-bool Storage::exists(st_file_id_t file_id) {
+ret_code_t Storage::exists(st_file_id_t file_id, bool & result) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -199,12 +203,12 @@ bool Storage::exists(st_file_id_t file_id) {
 	return false;
 }
 
-bool Storage::exists(st_file_id_t file_id, CS_TYPE type) {
+ret_code_t Storage::exists(st_file_id_t file_id, CS_TYPE type, bool & result) {
 	fds_record_desc_t record_desc;
-	return exists(file_id, type, record_desc);
+	return exists(file_id, type, record_desc, result);
 }
 
-bool Storage::exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc) {
+ret_code_t Storage::exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc, bool & result) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;

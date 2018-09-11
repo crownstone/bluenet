@@ -58,17 +58,18 @@ public:
 	
 	ret_code_t remove(st_file_id_t file_id, CS_TYPE type);
 
-	bool exists(st_file_id_t file_id);
+	ret_code_t exists(st_file_id_t file_id, bool & result);
 
-	bool exists(st_file_id_t file_id, CS_TYPE type);
+	ret_code_t exists(st_file_id_t file_id, CS_TYPE type, bool & result);
 
 	/** Check if a type of record exists and return the record descriptor.
 	 * 
 	 * @param[in] file_id                        Unique file
 	 * @param[in] type                           One of the Crownstone types
 	 * @param[in,out] record_desc                Record descriptor
+	 * @param[out] result                        True if descriptor exists.
 	 */
-	bool exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc);
+	ret_code_t exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc, bool & result);
 
 	inline void print(const std::string & prefix, CS_TYPE type);
 

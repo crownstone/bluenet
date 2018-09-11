@@ -18,7 +18,7 @@
 
 //#define GENERAL_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
-/** General Service for the Crownstone
+/** Setup Service for the Crownstone
  *
  * There are several characteristics that fit into the general service description. There is a characteristic
  * that measures the temperature, there are several characteristics that defines the crownstone, namely by
@@ -30,8 +30,8 @@ class SetupService: public CrownstoneService {
 public:
 	/** Constructor for general crownstone service object
 	 *
-	 * Creates persistent storage (FLASH) object which is used internally to store name and other information that is
-	 * set over so-called configuration characteristics. It also initializes all characteristics.
+	 * Creates persistent storage (FLASH) object which is used internally to store name and other information that 
+	 * is set over so-called configuration characteristics. It also initializes all characteristics.
 	 */
 	SetupService();
 

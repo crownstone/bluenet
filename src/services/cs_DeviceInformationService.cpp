@@ -13,6 +13,11 @@
 #include <services/cs_DeviceInformationService.h>
 #include <util/cs_Utils.h>
 
+union cs_variant_t {
+	uint32_t u32;
+	uint8_t  u8[4];
+};
+
 inline std::string get_hardware_revision(void) {
 
 	// get Production run
@@ -24,22 +29,43 @@ inline std::string get_hardware_revision(void) {
 	// reserved
 	std::string reserved = "00000000";
 
-	uint32_t variant = BLEutil::convertEndian32(NRF_FICR->INFO.VARIANT);
+	// AAB0 is stored as 0x41414230
+	cs_variant_t variant;
+	variant.u32 = BLEutil::convertEndian32(NRF_FICR->INFO.VARIANT);
 
 	// get nordic chip version
 	char nordic_chip_version[6];
-	if (NRF_FICR->INFO.PACKAGE == 0x2000) {
-		sprintf(nordic_chip_version, "QF%.4s", (char*)&variant);
-	} else if (NRF_FICR->INFO.PACKAGE == 0x2001) {
-		sprintf(nordic_chip_version, "CI%.4s", (char*)&variant);
-	} else {
-		sprintf(nordic_chip_version, "??%.4s", (char*)&variant);
+
+	switch(NRF_FICR->INFO.PACKAGE) {
+		case 0x2000:
+			nordic_chip_version[0] = 'Q';
+			nordic_chip_version[1] = 'F';
+			break;
+		case 0x2001:
+			nordic_chip_version[0] = 'C';
+			nordic_chip_version[1] = 'H';
+			break;
+		case 0x2002:
+			nordic_chip_version[0] = 'C';
+			nordic_chip_version[1] = 'I';
+			break;
+		case 0x2005:
+			nordic_chip_version[0] = 'C';
+			nordic_chip_version[1] = 'K';
+			break;
+		default:
+			nordic_chip_version[0] = '?';
+			nordic_chip_version[1] = '?';
 	}
 
-	char hardware_revision[33];
+	for (uint8_t i = 0; i < 4; ++i) {
+		nordic_chip_version[i+2] = variant.u8[3-i];
+	}
+
+	char hardware_revision[34];
 	sprintf(hardware_revision, "%11.11s%.4s%.4s%.8s%.6s", get_hardware_version(), production_run.c_str(), 
 			housing_id.c_str(), reserved.c_str(), nordic_chip_version);
-	return std::string(hardware_revision, 33);
+	return std::string(hardware_revision, 34);
 }
 
 DeviceInformationService::DeviceInformationService() {

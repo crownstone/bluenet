@@ -29,10 +29,6 @@
 #include <processing/cs_Watchdog.h>
 #include <services/cs_CrownstoneService.h>
 #include <services/cs_DeviceInformationService.h>
-#include <services/cs_IndoorLocalisationService.h>
-#include <services/cs_GeneralService.h>
-#include <services/cs_PowerService.h>
-#include <services/cs_ScheduleService.h>
 #include <services/cs_SetupService.h>
 #include <storage/cs_State.h>
 #include <storage/cs_State.h>
@@ -149,10 +145,6 @@ private:
 	DeviceInformationService* _deviceInformationService;
 	CrownstoneService* _crownstoneService;
 	SetupService* _setupService;
-	GeneralService* _generalService;
-	IndoorLocalizationService* _localizationService;
-	PowerService* _powerService;
-	ScheduleService* _scheduleService;
 
 	// advertise
 	ServiceData* _serviceData;

@@ -263,7 +263,7 @@ int cs_write(const char *str, ...) {
 	char buffer[128];
 	va_list ap;
 	va_start(ap, str);
-	int16_t len = vsprintf(NULL, str, ap);
+	int16_t len = vsnprintf(NULL, 0, str, ap);
 	va_end(ap);
 
 	if (len < 0) return len;
