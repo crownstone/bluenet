@@ -35,7 +35,7 @@ constexpr const char* TypeName(OperationMode const & mode) {
 	    return "OPERATION_MODE_UNINITIALIZED";
     }
     // never reached
-    return "";
+    return "Mode does not exist!";
 }
 
 #define FACTORY_RESET_STATE_NORMAL 0

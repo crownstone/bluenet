@@ -164,38 +164,68 @@ public:
 	 *
 	 * @return the type, see <ConfigurationTypes>
 	 */
-	inline uint8_t type() const { return _buffer->header.type; }
+	inline uint8_t type() const { 
+		if (!_buffer) {
+			LOGe(FMT_NOT_INITIALIZED, "Buffer");
+		}
+		return _buffer->header.type; 
+	}
 
 	/** Get the length/size of the payload in number of elements
 	 *
 	 * @return number of elements stored
 	 */
-	inline uint16_t length() const { return std::min(_buffer->header.length, _maxLength); }
+	inline uint16_t length() const { 
+		if (!_buffer) {
+			LOGe(FMT_NOT_INITIALIZED, "Buffer");
+		}
+		return std::min(_buffer->header.length, _maxLength);
+	}
 
 	/** Get a pointer to the payload array
 	 *
 	 * @return pointer to the array used to store
 	 *   the elements of the stream buffer
 	 */
-	inline T* payload() const { return _buffer->payload; }
+	inline T* payload() const { 
+		if (!_buffer) {
+			LOGe(FMT_NOT_INITIALIZED, "Buffer");
+		}
+		return _buffer->payload; 
+	}
 
 	/** Set the type for this stream buffer
 	 *
 	 * @type the type, see <ConfigurationTypes>
 	 */
-	inline void setType(uint8_t type) { _buffer->header.type = type; }
+	inline void setType(uint8_t type) { 
+		if (!_buffer) {
+			LOGe(FMT_NOT_INITIALIZED, "Buffer");
+		}
+		_buffer->header.type = type; 
+	}
 
 	/** Return the opcode assigned to the SreamBuffer
 	 *
 	 * @return the opcode, see <OpCode>
 	 */
-	inline uint8_t opCode() const { return _buffer->header.opCode; }
+	inline uint8_t opCode() const { 
+		if (!_buffer) {
+			LOGe(FMT_NOT_INITIALIZED, "Buffer");
+		}
+		return _buffer->header.opCode; 
+	}
 
 	/** Set the opcode for this stream buffer
 	 *
 	 * @opcode the opcode, see <OpCode>
 	 */
-	inline void setOpCode(uint8_t opCode) { _buffer->header.opCode = opCode; }
+	inline void setOpCode(uint8_t opCode) { 
+		if (!_buffer) {
+			LOGe(FMT_NOT_INITIALIZED, "Buffer");
+		}
+		_buffer->header.opCode = opCode; 
+	}
 
 	/** Set payload of the buffer.
 	 *
@@ -208,7 +238,7 @@ public:
 	 * If length is larger than the capacity, the function returns an error.
 	 */
 	cs_ret_code_t setPayload(T *payload, uint16_t length) {
-		if (!_buffer->payload) {
+		if (!_buffer || !_buffer->payload) {
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 			return SB_BUFFER_NOT_INITIALIZED;
 		}

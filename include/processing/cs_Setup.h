@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <events/cs_EventDispatcher.h>
 #include <events/cs_EventListener.h>
+#include <storage/cs_State.h>
 
 struct __attribute__((__packed__)) setup_data_t {
 	uint8_t        type;
@@ -44,6 +45,7 @@ public:
 	// Handle events as EventListener
 	void handleEvent(event_t & event);
 
+	OperationMode _persistenceMode;
 private:
 	Setup();
 

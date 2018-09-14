@@ -81,8 +81,14 @@ protected:
 			EncryptionAccessLevel minimumAccessLevel = ADMIN);
 
 	inline void addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
+
+	void removeStateControlCharacteristic();
+	
 	inline void addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size);
+
 	inline void addFactoryResetCharacteristic();
+
+	void removeFactoryResetCharacteristic();
 
 	void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, 
 			EncryptionAccessLevel minimumAccessLevel = GUEST);
@@ -93,7 +99,11 @@ protected:
 	 */
 	inline void addMeshCharacteristic();
 
+	void removeMeshControlCharacteristic();
+
 	StreamBuffer<uint8_t>* getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength);
+
+	void removeBuffer();
 
 protected:
 	Characteristic<buffer_ptr_t>* _controlCharacteristic;

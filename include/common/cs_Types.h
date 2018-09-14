@@ -1099,8 +1099,8 @@ constexpr void getDefault(st_file_data_t & data) {
 
     switch(data.type) {
 	case CS_TYPE::CONFIG_NAME: {
-	    data.size = MIN(data.size, sizeof(STRINGIFY(BLUETOOTH_NAME)));
-	    memcpy(data.value, STRINGIFY(BLUETOOTH_NAME), data.size);
+	    data.size = MIN(data.size, sizeof(BLUETOOTH_NAME));
+	    memcpy(data.value, BLUETOOTH_NAME, data.size);
 	    break;
 	}
 	case CS_TYPE::CONFIG_MESH_ENABLED: 

@@ -7,7 +7,6 @@
 
 #include <drivers/cs_Serial.h>
 #include <processing/cs_Setup.h>
-#include <storage/cs_State.h>
 
 Setup::Setup(): _setupDone(false) {
 	EventDispatcher::getInstance().addListener(this);
@@ -16,7 +15,7 @@ Setup::Setup(): _setupDone(false) {
 cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	uint8_t mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
-	OperationMode _persistenceMode = static_cast<OperationMode>(mode);
+	_persistenceMode = static_cast<OperationMode>(mode);
 	if (_persistenceMode != OperationMode::OPERATION_MODE_SETUP) {
 		LOGw("only available in setup mode");
 		return ERR_NOT_AVAILABLE;
@@ -72,7 +71,8 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	state.set(CS_TYPE::CONFIG_IBEACON_MINOR, &value, sizeof(value), PersistenceMode::STRATEGY1);
 
 	// Set operation mode to normal mode
-	mode = +OperationMode::OPERATION_MODE_NORMAL;
+	_persistenceMode = OperationMode::OPERATION_MODE_NORMAL;
+	mode = +_persistenceMode;
 	value.u8 = mode;
 	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::STRATEGY1);
 
@@ -83,7 +83,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	// Reboot will be done when persistent storage is done.
 	_setupDone = true;
 
-	event_t event1(CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE);
+	event_t event1(CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE, (void*)&_persistenceMode, sizeof(_persistenceMode));
 	EventDispatcher::getInstance().dispatch(event1);
 
 	LOGi("Setup completed");

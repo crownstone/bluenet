@@ -189,7 +189,7 @@ void Crownstone::initDrivers() {
 	_storage->init();
 	_state->init(&_boardsConfig);
 
-#define ANNE_OH_NO
+//#define ANNE_OH_NO
 #ifdef ANNE_OH_NO
 	 _state->factoryReset(FACTORY_RESET_CODE);
 #endif

@@ -79,6 +79,7 @@
 #define STR_CHAR_HARDWARE_REVISION               "Hardware Revision"
 #define STR_CHAR_FIRMWARE_REVISION               "Firmware Revision"
 #define STR_CHAR_SOFTWARE_REVISION               "Software Revision"
+#define STR_CHAR_STATE_CONTROL                   "State Control"
 #define STR_CHAR_TEMPERATURE                     "Temperature"
 #define STR_CHAR_RESET                           "Reset"
 #define STR_CHAR_RSSI                            "Signal Strength"
