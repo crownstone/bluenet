@@ -18,6 +18,7 @@ enum class OperationMode {
 	OPERATION_MODE_DFU                         = 0x01,
 	OPERATION_MODE_FACTORY_RESET               = 0x02,
 	OPERATION_MODE_NORMAL                      = 0x10,
+	OPERATION_MODE_UNINITIALIZED               = 0xFF,
 };
 
 constexpr const char* TypeName(OperationMode const & mode) {
@@ -30,6 +31,8 @@ constexpr const char* TypeName(OperationMode const & mode) {
 	    return "OPERATION_MODE_FACTORY_RESET";
 	case OperationMode::OPERATION_MODE_NORMAL:
 	    return "OPERATION_MODE_NORMAL";
+	case OperationMode::OPERATION_MODE_UNINITIALIZED:
+	    return "OPERATION_MODE_UNINITIALIZED";
     }
     // never reached
     return "";

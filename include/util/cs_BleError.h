@@ -192,25 +192,25 @@ constexpr const char* NordicEventTypeName(uint32_t nordic_type) {
 
 /** @brief Macro for FDS error handling (will not abort)
  */
-#define FDS_ERROR_CHECK(ret_code_t)                                                                        \
-		do                                                                                                 \
-		{                                                                                                  \
-			const uint32_t LOCAL_ret_code_t = (ret_code_t);                                                \
-			const char* LOCAL_ret_code_str = NordicFDSTypeName(ret_code_t);                                \
-			if (LOCAL_ret_code_t != NRF_SUCCESS)                                                           \
-			{                                                                                              \
-				LOGe("ret_code_t: %d (0x%X) %s", LOCAL_ret_code_t, LOCAL_ret_code_t, LOCAL_ret_code_str);  \
-			}                                                                                              \
+#define FDS_ERROR_CHECK(ret_code_t)                                                                                    \
+		do                                                                                                             \
+		{                                                                                                              \
+			const uint32_t LOCAL_ret_code_t = (ret_code_t);                                                            \
+			const char* LOCAL_ret_code_str = NordicFDSTypeName(ret_code_t);                                            \
+			if (LOCAL_ret_code_t != NRF_SUCCESS)                                                                       \
+			{                                                                                                          \
+				LOGe("ret_code_t: %d (0x%X) %s", LOCAL_ret_code_t, LOCAL_ret_code_t, LOCAL_ret_code_str);              \
+			}                                                                                                          \
 		} while (0)
 
 /** @brief Macro for calling error handler function.
  *
  * @param[in] cs_ret_code_t Error code supplied to the error handler.
  */
-#define APP_ERROR_HANDLER(cs_ret_code_t)                                         \
-		do                                                                  \
-		{                                                                   \
-			app_error_handler((cs_ret_code_t), __LINE__, (uint8_t*) __FILE__);   \
+#define APP_ERROR_HANDLER(cs_ret_code_t)                                                                               \
+		do                                                                                                             \
+		{                                                                                                              \
+			app_error_handler((cs_ret_code_t), __LINE__, (uint8_t*) __FILE__);                                         \
 		} while (0)
 
 
@@ -218,22 +218,23 @@ constexpr const char* NordicEventTypeName(uint32_t nordic_type) {
  *
  * @param[in] cs_ret_code_t Error code supplied to the error handler.
  */
-#define APP_ERROR_CHECK(cs_ret_code_t)                                                   \
-		do                                                                          \
-		{                                                                           \
-			const uint32_t LOCAL_cs_ret_code_t = (cs_ret_code_t);                             \
-			if (LOCAL_cs_ret_code_t != NRF_SUCCESS)                                      \
-			{                                                                       \
-				LOGd("cs_ret_code_t: %d (0x%X)", LOCAL_cs_ret_code_t, LOCAL_cs_ret_code_t);		\
-				APP_ERROR_HANDLER(LOCAL_cs_ret_code_t);                                  \
-			}                                                                       \
+#define APP_ERROR_CHECK(cs_ret_code_t)                                                                                 \
+		do                                                                                                             \
+		{                                                                                                              \
+			const uint32_t LOCAL_cs_ret_code_t = (cs_ret_code_t);                                                      \
+			if (LOCAL_cs_ret_code_t != NRF_SUCCESS)                                                                    \
+			{                                                                                                          \
+				const char* LOCAL_ret_code_str = NordicTypeName(cs_ret_code_t);                                        \
+				LOGd("cs_ret_code_t: %d (0x%X)", LOCAL_cs_ret_code_t, LOCAL_cs_ret_code_t, LOCAL_ret_code_str);        \
+				APP_ERROR_HANDLER(LOCAL_cs_ret_code_t);                                                                \
+			}                                                                                                          \
 		} while (0)
 
-#define APP_ERROR_CHECK_EXCEPT(cs_ret_code_t, EXCEPTION)                                 \
-		if (cs_ret_code_t == EXCEPTION) {                                                \
-			LOGw(STRINGIFY(EXCEPTION));                                             \
-		} else {                                                                    \
-			APP_ERROR_CHECK(cs_ret_code_t);                                              \
+#define APP_ERROR_CHECK_EXCEPT(cs_ret_code_t, EXCEPTION)                                                               \
+		if (cs_ret_code_t == EXCEPTION) {                                                                              \
+			LOGw(STRINGIFY(EXCEPTION));                                                                                \
+		} else {                                                                                                       \
+			APP_ERROR_CHECK(cs_ret_code_t);                                                                            \
 		}
 
 #ifdef __EXCEPTIONS

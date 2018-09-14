@@ -139,11 +139,9 @@ void ServiceData::updateFlagsBitmask(uint8_t bitmask) {
 void ServiceData::updateFlagsBitmask(uint8_t bit, bool set) {
 
 	if (set) {
-//		_flags |= 1 << bit;
 		BLEutil::setBit(_flags, bit);
 	}
 	else {
-//		_flags &= ~(1 << bit);
 		BLEutil::clearBit(_flags, bit);
 	}
 }

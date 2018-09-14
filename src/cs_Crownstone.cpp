@@ -70,6 +70,8 @@ Crownstone::Crownstone(boards_config_t& board) :
 {
 	_mainTimerData = { {0} };
 	_mainTimerId = &_mainTimerData;
+	
+	_operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
@@ -124,23 +126,6 @@ void Crownstone::init() {
 	initDrivers();
 	LOG_MEMORY;
 
-	LOGi(FMT_HEADER, "mode");
-	uint8_t mode;
-	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
-	_operationMode = static_cast<OperationMode>(mode);
-	switch(_operationMode) {
-		case OperationMode::OPERATION_MODE_SETUP: 
-		case OperationMode::OPERATION_MODE_NORMAL: 
-		case OperationMode::OPERATION_MODE_FACTORY_RESET: 
-		case OperationMode::OPERATION_MODE_DFU: 
-			break;
-		default:
-			LOGd("Huh? Set default mode to setup");
-			_operationMode = OperationMode::OPERATION_MODE_SETUP;
-			_state->set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::STRATEGY1);
-	}
-	LOGd("Operation mode: %s", TypeName(_operationMode));
-	
 	//! configure the crownstone
 	LOGi(FMT_HEADER, "configure");
 	configure();
@@ -148,73 +133,12 @@ void Crownstone::init() {
 	LOGi(FMT_CREATE, "timer");
 	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
 
-	switch(_operationMode) {
-		case OperationMode::OPERATION_MODE_SETUP: {
-			if (serial_get_state() == SERIAL_ENABLE_NONE) {
-				serial_enable(SERIAL_ENABLE_RX_ONLY);
-			}
-
-			LOGd("Configure setup mode");
-
-			// create services
-			createSetupServices();
-
-			// loop through all services added to the stack and create the characteristics
-			_stack->createCharacteristics();
-
-			// set it by default into low tx mode
-			_stack->changeToLowTxPowerMode();
-
-			// Because iPhones cannot programmatically clear their cache of paired devices, the phone that
-			// did the setup is at risk of not being able to connect to the crownstone if the cs clears the device
-			// manager. We use our own encryption scheme to counteract this.
-			if (_state->isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
-				LOGi(FMT_ENABLE, "AES encryption");
-				_stack->setAesEncrypted(true);
-			}
-			//		LOGi(FMT_ENABLE, "PIN encryption");
-			//		// use PIN encryption for setup mode
-			//		_stack->setPinEncrypted(true);
-
-			//		if (_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
-			//			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
-			//		}
-
-			break;
-		}
-		case OperationMode::OPERATION_MODE_NORMAL: {
-
-			LOGd("Configure normal operation mode");
-
-			// setup normal operation mode
-			prepareNormalOperationMode();
-
-			// create services
-			createCrownstoneServices();
-
-			// loop through all services added to the stack and create the characteristics
-			_stack->createCharacteristics();
-
-			// use aes encryption for normal mode (if enabled)
-			if (_state->isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
-				LOGi(FMT_ENABLE, "AES encryption");
-				_stack->setAesEncrypted(true);
-			}
-
-			break;
-		}
-		case OperationMode::OPERATION_MODE_FACTORY_RESET: {
-
-			LOGd("Configure factory reset mode");
-			FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
-			break;
-		}
-		case OperationMode::OPERATION_MODE_DFU: {
-
-			CommandHandler::getInstance().handleCommand(CMD_GOTO_DFU);
-			break;
-		}
-	}
+	LOGi(FMT_HEADER, "mode");
+	uint8_t mode;
+	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
+	OperationMode newOperationMode = static_cast<OperationMode>(mode);
+	//LOGd("Operation mode: %s", TypeName(_operationMode));
+	switchMode(newOperationMode);
 
 	LOGi(FMT_HEADER, "init services");
 
@@ -231,7 +155,6 @@ void Crownstone::init() {
 void Crownstone::configure() {
 
 	LOGi("> stack ...");
-	// configure parameters for the Bluetooth stack
 	configureStack();
 
 	Storage::getInstance().garbageCollect();
@@ -240,7 +163,8 @@ void Crownstone::configure() {
 	State::getInstance().get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, PersistenceMode::STRATEGY1);
 	resetCounter.u32++;
 	LOGw("Reset counter at: %d", resetCounter.u8);
-	State::getInstance().set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), PersistenceMode::STRATEGY1);
+	State::getInstance().set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), 
+			PersistenceMode::STRATEGY1);
 
 	// set advertising parameters such as the device name and appearance.
 	// Note: has to be called after _stack->init or Storage is initialized too early and won't work correctly
@@ -249,14 +173,7 @@ void Crownstone::configure() {
 	writeDefaults();
 
 	LOGi("> advertisement ...");
-	// configure advertising parameters
-#if EDDYSTONE==1
-	_eddystone = new Eddystone();
-	_eddystone->advertising_init();
-#else
 	configureAdvertisement();
-#endif
-
 }
 
 /**
@@ -272,7 +189,7 @@ void Crownstone::initDrivers() {
 	_storage->init();
 	_state->init(&_boardsConfig);
 
-//#define ANNE_OH_NO
+#define ANNE_OH_NO
 #ifdef ANNE_OH_NO
 	 _state->factoryReset(FACTORY_RESET_CODE);
 #endif
@@ -308,9 +225,6 @@ void Crownstone::initDrivers() {
 
 		LOGi(FMT_INIT, "watchdog");
 		_watchdog->init();
-
-		//LOGi(FMT_INIT, "enocean");
-		//_enOceanHandler->init();
 	}
 
 	// init GPIOs
@@ -366,9 +280,7 @@ void Crownstone::configureStack() {
 	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
 	_state->get(CS_TYPE::CONFIG_PASSKEY, passkey, PersistenceMode::STRATEGY1);
 
-	// TODO: If key is not set, this leads to a crash
-//	_stack->setPasskey(passkey);
-
+	// Set callback handler for a connection event
 	_stack->onConnect([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
 		// TODO: see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
@@ -382,10 +294,9 @@ void Crownstone::configureStack() {
 		sd_power_gpregret_clr(gpregret_id, gpregret_msk);
 
 		_stack->setNonConnectable();
-	//	_stack->restartAdvertising();
-
 	});
 
+	// Set callback handler for a disconnection event
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
 		if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
@@ -399,6 +310,10 @@ void Crownstone::configureStack() {
 	});
 }
 
+/**
+ * Populate advertisement (including service data) with information. The persistence mode is obtained from storage
+ * (the _operationMode var is not used).
+ */
 void Crownstone::configureAdvertisement() {
 
 	// Initialize service data
@@ -461,25 +376,142 @@ void Crownstone::configureAdvertisement() {
 
 }
 
-void Crownstone::createSetupServices() {
-	LOGi(STR_CREATE_ALL_SERVICES);
-
-	_deviceInformationService = new DeviceInformationService();
-	_stack->addService(_deviceInformationService);
-
-	_setupService = new SetupService();
-	_stack->addService(_setupService);
-
+void Crownstone::createService(const ServiceEvent event) {
+	switch(event) {
+		case CREATE_DEVICE_INFO_SERVICE:
+			LOGd("Create device info service");
+			_deviceInformationService = new DeviceInformationService();
+			_stack->addService(_deviceInformationService);
+			break;
+		case CREATE_SETUP_SERVICE:
+			_setupService = new SetupService();
+			_stack->addService(_setupService);
+			break;
+		case CREATE_CROWNSTONE_SERVICE:
+			_crownstoneService = new CrownstoneService();
+			_stack->addService(_crownstoneService);
+			break;
+		default:
+			LOGe("Unknown creation event");
+	}
 }
 
-void Crownstone::createCrownstoneServices() {
-	LOGi(STR_CREATE_ALL_SERVICES);
+void Crownstone::removeService(const ServiceEvent event) {
+	switch(event) {
+		case REMOVE_DEVICE_INFO_SERVICE:
+			LOGd("Remove device info service");
+			_stack->removeService(_deviceInformationService);
+			delete _deviceInformationService;
+			_deviceInformationService = NULL;
+			break;
+		case REMOVE_SETUP_SERVICE:
+			_stack->removeService(_setupService);
+			delete _setupService;
+			_setupService = NULL;
+			break;
+		case REMOVE_CROWNSTONE_SERVICE:
+			_stack->removeService(_crownstoneService);
+			delete _crownstoneService;
+			_crownstoneService = NULL;
+			break;
+		default:
+			LOGe("Unknown removal event");
+	}
+}
 
-	_deviceInformationService = new DeviceInformationService();
-	_stack->addService(_deviceInformationService);
+/** Switch from one operation mode to another.
+ *
+ * Depending on the operation mode we have a different set of services / characteristics enabled. Subsequently,
+ * also different entities are started (for example a scanner, or the BLE mesh).
+ */
+void Crownstone::switchMode(const OperationMode & newMode) {
 
-	_crownstoneService = new CrownstoneService();
-	_stack->addService(_crownstoneService);
+	// TODO: Can we check if FDS has an empty queue?
+	
+	LOGd("Current mode: %s", TypeName(_operationMode));
+	LOGd("Switch to mode: %s", TypeName(newMode));	
+	
+	switch(_operationMode) {
+		case OperationMode::OPERATION_MODE_DFU:
+		case OperationMode::OPERATION_MODE_NORMAL:
+		case OperationMode::OPERATION_MODE_SETUP:
+		case OperationMode::OPERATION_MODE_UNINITIALIZED:
+		case OperationMode::OPERATION_MODE_FACTORY_RESET:
+			break;
+		default:
+			LOGe("Unknown mode %i!", newMode);
+			return;
+	}
+
+	_stack->halt();
+	
+	// Remove services that belong to the current operation mode.
+	switch(_operationMode) {
+		case OperationMode::OPERATION_MODE_UNINITIALIZED:
+			break;
+		case OperationMode::OPERATION_MODE_NORMAL:
+			removeService(REMOVE_CROWNSTONE_SERVICE);
+			break;
+		case OperationMode::OPERATION_MODE_SETUP:
+			removeService(REMOVE_SETUP_SERVICE);
+			break;
+		default:
+			// nothing to do
+			;
+	}
+
+	startOperationMode(newMode);
+
+	// Create services that belong to the new mode.
+	switch(newMode) {
+		case OperationMode::OPERATION_MODE_NORMAL:
+			if (_operationMode == OperationMode::OPERATION_MODE_UNINITIALIZED) {
+				createService(CREATE_DEVICE_INFO_SERVICE);
+			}
+			createService(CREATE_CROWNSTONE_SERVICE);
+			break;
+		case OperationMode::OPERATION_MODE_SETUP:
+			if (_operationMode == OperationMode::OPERATION_MODE_UNINITIALIZED) {
+				createService(CREATE_DEVICE_INFO_SERVICE);
+			}
+			createService(CREATE_SETUP_SERVICE);
+			break;
+		default:
+			// nothing to do
+			;	
+	}
+
+	// Loop through all services added to the stack and create the characteristics.
+	_stack->createCharacteristics();
+	
+	_stack->resume();
+			
+	switch(newMode) {
+		case OperationMode::OPERATION_MODE_SETUP:
+			LOGd("Configure setup mode");
+			_stack->changeToLowTxPowerMode();
+			break;
+		case OperationMode::OPERATION_MODE_FACTORY_RESET: 
+			LOGd("Configure factory reset mode");
+			FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
+			_stack->changeToNormalTxPowerMode();
+			break;
+		case OperationMode::OPERATION_MODE_DFU: 
+			LOGd("Configure DFU mode");
+			CommandHandler::getInstance().handleCommand(CMD_GOTO_DFU);
+			_stack->changeToNormalTxPowerMode();
+			break;
+		default:
+			_stack->changeToNormalTxPowerMode();
+	}
+
+	// Enable AES encryption.
+	if (_state->isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
+		LOGi(FMT_ENABLE, "AES encryption");
+		_stack->setAesEncrypted(true);
+	}
+
+	_operationMode = newMode;
 }
 
 /**
@@ -512,26 +544,36 @@ void Crownstone::setName() {
 
 }
 
-void Crownstone::prepareNormalOperationMode() {
+void Crownstone::startOperationMode(const OperationMode & mode) {
+	switch(mode) {
+		case OperationMode::OPERATION_MODE_NORMAL:
+			_scanner->init();
+			_scanner->setStack(_stack);
 
-	//! create scanner object
-	_scanner->init();
-	_scanner->setStack(_stack);
-//	if (_state->isSet(CONFIG_TRACKER_ENABLED)) {
 #if CHAR_TRACK_DEVICES == 1
-	_tracker->init();
+			if (_state->isSet(CONFIG_TRACKER_ENABLED)) {
+				_tracker->init();
+			}
 #endif
-//	}
 
-	//! create scheduler
-	_scheduler = &Scheduler::getInstance();
-
+			_scheduler = &Scheduler::getInstance();
 
 #if BUILD_MESHING == 1
-//	if (_state->isEnabled(CONFIG_MESH_ENABLED)) {
-		_mesh->init();
-//	}
+			if (_state->isEnabled(CONFIG_MESH_ENABLED)) {
+				_mesh->init();
+			}
 #endif
+			break;
+		case OperationMode::OPERATION_MODE_SETUP:
+			// TODO: Why this hack?
+			if (serial_get_state() == SERIAL_ENABLE_NONE) {
+				serial_enable(SERIAL_ENABLE_RX_ONLY);
+			}
+
+		default:
+			// nothing to be done
+			;
+	}
 }
 
 void Crownstone::writeDefaults() {
@@ -559,12 +601,9 @@ void Crownstone::startUp() {
 	}
 
 	//! start advertising
-#if EDDYSTONE==1
-	_eddystone->advertising_start();
-#else
 	LOGi("Start advertising");
 	_stack->startAdvertising();
-#endif
+	
 	// Have to give the stack a moment of pause to start advertising, otherwise we get into race conditions.
 	// TODO: Is this still the case? Can we solve this differently? 
 	nrf_delay_ms(50);
@@ -607,11 +646,11 @@ void Crownstone::startUp() {
 			_scanner->delayedStart(delay);
 		}
 
-//		if (_state->isSet(CONFIG_TRACKER_ENABLED)) {
 #if CHAR_TRACK_DEVICES == 1
+		if (_state->isSet(CONFIG_TRACKER_ENABLED)) {
 			_tracker->startTracking();
+		}
 #endif
-//		}
 
 		if (_state->isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
 #if BUILD_MESHING == 1
@@ -630,8 +669,10 @@ void Crownstone::startUp() {
 	err_code = sd_ble_gap_addr_get(&address);
 	APP_ERROR_CHECK(err_code);
 
-	_log(SERIAL_INFO, "BLE Address: ");	
+	_log(SERIAL_INFO, "\r\n");
+	_log(SERIAL_INFO, "\t\t\tAddress: ");	
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN);
+	_log(SERIAL_INFO, "\r\n");
 
 #ifdef RELAY_DEFAULT_ON
 #if RELAY_DEFAULT_ON==0
@@ -686,9 +727,18 @@ void Crownstone::run() {
 	}
 }
 
+/**
+ * Handle events that can come from other parts of the Crownstone firmware and even originate from outside of the
+ * firmware via the BLE interface (an application, or the mesh).
+ */
 void Crownstone::handleEvent(event_t & event) {
 
-//	LOGd("Event: %s [%i]", TypeName(event.type), +event.type);
+	switch(event.type) {
+		case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
+			break;
+		default:
+			LOGd("Event: %s [%i]", TypeName(event.type), +event.type);
+	}
 
 	bool reconfigureBeacon = false;
 	switch(event.type) {
@@ -774,7 +824,7 @@ void Crownstone::handleEvent(event_t & event) {
 			LOGf("brownout impending!! force shutdown ...")
 
 #if BUILD_MESHING == 1
-				rbc_mesh_stop();
+			rbc_mesh_stop();
 #endif
 			_scanner->stop();
 
@@ -797,6 +847,11 @@ void Crownstone::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::EVT_CMD_RESET: {
 			CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
+			break;
+		}
+		case CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE: {
+			OperationMode mode = *(OperationMode*)event.data;
+			switchMode(mode);
 			break;
 		}
 		default: return;
@@ -946,23 +1001,14 @@ int main() {
 		}
 	}
 
-#ifdef TEST_PIN1
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
 	if (board.flags.hasSerial) {
 		// init uart, be nice and say hello
 		welcome(board.pinGpioRx, board.pinGpioTx);
 	}
 
-#ifdef TEST_PIN1
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
 	Crownstone crownstone(board); // 250 ms
 
 	// initialize crownstone (depends on the operation mode) ...
-#ifdef TEST_PIN1
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
 
 #ifdef ENABLE_LEDS
 	// WARNING: this is stored in UICR and not easily reversible!
@@ -979,15 +1025,9 @@ int main() {
 	crownstone.init(); // 13 ms
 
 	//! start up phase, start ticking (depends on the operation mode) ...
-#ifdef TEST_PIN1
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
 	crownstone.startUp(); // 500 ms
 
 	//! run forever ...
-#ifdef TEST_PIN1
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
 	crownstone.run();
 
 	return 0;

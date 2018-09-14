@@ -21,8 +21,10 @@ class CharacteristicBase;
 
 /** Service as defined in the GATT Specification.
  */
-class Service {
+class Service: public BaseClass<1> {
 public:
+	enum condition_t { C_SERVICE_INITIALIZED };
+
 	//! The "Generic Service"
 	static const char* defaultServiceName; 
 
@@ -54,17 +56,7 @@ public:
 	 *
 	 * The UUID cannot be set anymore after the service has been started.
 	 */
-	Service& setUUID(const UUID& uuid) {
-		if (_started) BLE_THROW("Already started.");
-		_uuid = uuid;
-		return *this;
-	}
-
-	Service& setIsPrimary(bool isPrimary) {
-		if (_started) BLE_THROW("Already started.");
-		_primary = isPrimary;
-		return *this;
-	}
+	Service& setUUID(const UUID& uuid);
 
 	Stack* getStack() {
 		return _stack;
@@ -88,10 +80,8 @@ protected:
 
 	UUID                     _uuid;
 	std::string              _name;
-	bool                     _primary;
 	//! Service handle will be obtained from SoftDevice
 	uint16_t                 _service_handle; 
-	bool                     _started;
 
 	//! List of characteristics
 	Characteristics_t _characteristics;
@@ -136,7 +126,7 @@ protected:
 	 */
 	virtual Service& removeCharacteristic(CharacteristicBase* characteristic);
 
-	Service& addCharacteristicsDone() {
+	Service& updatedCharacteristics() {
 		_characteristics.shrink_to_fit();
 		return *this;
 	}

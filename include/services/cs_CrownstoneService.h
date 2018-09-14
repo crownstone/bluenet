@@ -52,12 +52,19 @@ protected:
 	 * Add all characteristics and initialize them where necessary.
 	 */
 	void createCharacteristics();
-	
+
+	/** Remove all characteristics.
+	 */
 	void removeCharacteristics();
 
-	/** Enable the command characteristic.
+	/** Enable the control characteristic.
  	 */
-	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, uint16_t charUuid, EncryptionAccessLevel minimumAccessLevel = GUEST);
+	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, uint16_t charUuid, 
+			EncryptionAccessLevel minimumAccessLevel = GUEST);
+
+	/** Remove the control characteristic.
+	 */
+	void removeControlCharacteristic();
 
 	/** Enable the set configuration characteristic.
 	 *
@@ -65,17 +72,22 @@ protected:
 	 * characteristic.
 	 * See <_setConfigurationCharacteristic>.
 	 */
-	void addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel = ADMIN);
+	void addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size, 
+			EncryptionAccessLevel minimumAccessLevel = ADMIN);
 
 	/** Enable the get configuration characteristic.
 	 */
-	void addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel = ADMIN);
+	void addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size, 
+			EncryptionAccessLevel minimumAccessLevel = ADMIN);
 
 	inline void addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 	inline void addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size);
 	inline void addFactoryResetCharacteristic();
 
-	void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, EncryptionAccessLevel minimumAccessLevel = GUEST);
+	void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, 
+			EncryptionAccessLevel minimumAccessLevel = GUEST);
+
+	void removeSessionNonceCharacteristic();
 
 	/** Enable the mesh characteristic.
 	 */

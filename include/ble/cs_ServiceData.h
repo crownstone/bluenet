@@ -128,15 +128,12 @@ struct __attribute__((packed)) service_data_setup_t {
 	};
 };
 
-
-
 //! Service data struct, this data type is what ends up in the advertisement.
 union service_data_t {
 	struct __attribute__((packed)) {
 		uint8_t  protocolVersion;
 		uint8_t  deviceType;
 		union {
-//			service_data_v1_t v1;
 			service_data_encrypted_t encrypted;
 			service_data_setup_t setup;
 			uint8_t encryptedArray[sizeof(service_data_encrypted_t)];

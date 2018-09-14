@@ -13,6 +13,10 @@
 #include <services/cs_DeviceInformationService.h>
 #include <util/cs_Utils.h>
 
+#ifdef GIT_BRANCH
+#define SOFTWARE_REVISION_CHARACTERISTIC
+#endif
+
 union cs_variant_t {
 	uint32_t u32;
 	uint8_t  u8[4];
@@ -68,7 +72,11 @@ inline std::string get_hardware_revision(void) {
 	return std::string(hardware_revision, 34);
 }
 
-DeviceInformationService::DeviceInformationService() {
+DeviceInformationService::DeviceInformationService():
+	_hardwareRevisionCharacteristic(NULL),
+	_firmwareRevisionCharacteristic(NULL),
+	_softwareRevisionCharacteristic(NULL)
+{
 	setUUID(UUID(BLE_UUID_DEVICE_INFORMATION_SERVICE));
 	setName(BLE_SERVICE_DEVICE_INFORMATION);
 }
@@ -76,27 +84,68 @@ DeviceInformationService::DeviceInformationService() {
 void DeviceInformationService::createCharacteristics() {
 	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_DEVICE_INFORMATION);
 
-	LOGi(FMT_CHAR_ADD, STR_CHAR_HARDWARE_REVISION);
 	addHardwareRevisionCharacteristic();
-
-	LOGi(FMT_CHAR_ADD, STR_CHAR_FIRMWARE_REVISION);
 	addFirmwareRevisionCharacteristic();
 
-#ifdef GIT_BRANCH
-	LOGi(FMT_CHAR_ADD, STR_CHAR_SOFTWARE_REVISION);
+#ifdef SOFTWARE_REVISION_CHARACTERISTIC
 	addSoftwareRevisionCharacteristic();
 #endif
 
-	addCharacteristicsDone();
+	updatedCharacteristics();
 }
 
 void DeviceInformationService::removeCharacteristics() {
+	removeHardwareRevisionCharacteristic();
+	removeFirmwareRevisionCharacteristic();
+	removeSoftwareRevisionCharacteristic();
+	updatedCharacteristics();
+}
+
+void DeviceInformationService::removeHardwareRevisionCharacteristic() {
+	LOGi(FMT_CHAR_REMOVED, STR_CHAR_HARDWARE_REVISION);
+	if (_hardwareRevisionCharacteristic == NULL) {
+		LOGe(FMT_CHAR_DOES_NOT_EXIST, STR_CHAR_HARDWARE_REVISION);
+		return;
+	}
+
+	removeCharacteristic(_hardwareRevisionCharacteristic);
 	delete _hardwareRevisionCharacteristic;
+	_hardwareRevisionCharacteristic = NULL;
+}
+
+void DeviceInformationService::removeFirmwareRevisionCharacteristic() {
+	LOGi(FMT_CHAR_REMOVED, STR_CHAR_FIRMWARE_REVISION);
+	if (_firmwareRevisionCharacteristic == NULL) {
+		LOGe(FMT_CHAR_DOES_NOT_EXIST, STR_CHAR_FIRMWARE_REVISION);
+		return;
+	}
+
+	removeCharacteristic(_firmwareRevisionCharacteristic);
 	delete _firmwareRevisionCharacteristic;
+	_firmwareRevisionCharacteristic = NULL;
+}
+
+void DeviceInformationService::removeSoftwareRevisionCharacteristic() {
+#ifdef SOFTWARE_REVISION_CHARACTERISTIC
+	LOGi(FMT_CHAR_REMOVED, STR_CHAR_SOFTWARE_REVISION);
+	if (_softwareRevisionCharacteristic == NULL) {
+		LOGe(FMT_CHAR_DOES_NOT_EXIST, STR_CHAR_SOFTWARE_REVISION);
+		return;
+	}
+
+	removeCharacteristic(_softwareRevisionCharacteristic);
 	delete _softwareRevisionCharacteristic;
+	_softwareRevisionCharacteristic = NULL;
+#endif
 }
 
 void DeviceInformationService::addHardwareRevisionCharacteristic() {
+	LOGi(FMT_CHAR_ADD, STR_CHAR_HARDWARE_REVISION);
+	if (_hardwareRevisionCharacteristic != NULL) {
+		LOGe(FMT_CHAR_EXISTS, STR_CHAR_HARDWARE_REVISION);
+		return;
+	}
+
 	_hardwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_hardwareRevisionCharacteristic);
 
@@ -112,6 +161,11 @@ void DeviceInformationService::addHardwareRevisionCharacteristic() {
 }
 
 void DeviceInformationService::addFirmwareRevisionCharacteristic() {
+	LOGi(FMT_CHAR_ADD, STR_CHAR_FIRMWARE_REVISION);
+	if (_firmwareRevisionCharacteristic != NULL) {
+		LOGe(FMT_CHAR_EXISTS, STR_CHAR_FIRMWARE_REVISION);
+		return;
+	}
 	_firmwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_firmwareRevisionCharacteristic);
 
@@ -131,13 +185,16 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 }
 
 void DeviceInformationService::addSoftwareRevisionCharacteristic() {
+	LOGi(FMT_CHAR_ADD, STR_CHAR_SOFTWARE_REVISION);
+	if (_softwareRevisionCharacteristic != NULL) {
+		LOGe(FMT_CHAR_EXISTS, STR_CHAR_SOFTWARE_REVISION);
+		return;
+	}
 	_softwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_softwareRevisionCharacteristic);
 	_softwareRevisionCharacteristic->setUUID(BLE_UUID_SOFTWARE_REVISION_STRING_CHAR);
 	_softwareRevisionCharacteristic->setName(BLE_CHAR_SOFTWARE_REVISION);
 	_softwareRevisionCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-#ifdef GIT_BRANCH
 	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(GIT_BRANCH));
-#endif
 	_softwareRevisionCharacteristic->setWritable(false);
 }

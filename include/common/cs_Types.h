@@ -196,6 +196,7 @@ enum class CS_TYPE: uint16_t {
     EVT_INC_CURRENT_RANGE,
     EVT_DEC_CURRENT_RANGE,
     EVT_RX_CONTROL,
+    EVT_CROWNSTONE_SWITCH_MODE,
 }; 
 
 /*---------------------------------------------------------------------------------------------------------------------
@@ -375,6 +376,7 @@ typedef  uint8_t TYPIFY(EVT_BROWNOUT_IMPENDING);
 typedef  uint8_t TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
 typedef  uint8_t TYPIFY(EVT_CHIP_TEMP_OK);
 typedef  uint8_t TYPIFY(EVT_CMD_RESET);
+typedef  uint8_t TYPIFY(EVT_CROWNSTONE_SWITCH_MODE);
 typedef  uint8_t TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
 typedef  uint8_t TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 typedef  uint8_t TYPIFY(EVT_DEC_CURRENT_RANGE);
@@ -764,6 +766,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 	    return sizeof(TYPIFY(EVT_DEC_CURRENT_RANGE));
 	case CS_TYPE::EVT_RX_CONTROL:
 	    return sizeof(TYPIFY(EVT_RX_CONTROL));
+	case CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE:
+	    return sizeof(TYPIFY(EVT_CROWNSTONE_SWITCH_MODE));
     }
     // should never happen
     return 0;
@@ -841,6 +845,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
     case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD: return "EVT_CHIP_TEMP_ABOVE_THRESHOLD";
     case CS_TYPE::EVT_CHIP_TEMP_OK: return "EVT_CHIP_TEMP_OK";
     case CS_TYPE::EVT_CMD_RESET: return "EVT_CMD_RESET";
+    case CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE: return "EVT_CROWNSTONE_SWITCH_MODE";
     case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD: return "EVT_CURRENT_USAGE_ABOVE_THRESHOLD";
     case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM: return "EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM";
     case CS_TYPE::EVT_DEC_CURRENT_RANGE: return "EVT_DEC_CURRENT_RANGE";
@@ -1070,6 +1075,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_INC_CURRENT_RANGE:
 	case CS_TYPE::EVT_DEC_CURRENT_RANGE:
 	case CS_TYPE::EVT_RX_CONTROL:
+	case CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE:
 	    return PersistenceMode::RAM;
     }
     // should not reach this

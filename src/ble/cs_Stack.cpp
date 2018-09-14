@@ -39,7 +39,6 @@ Stack::Stack() :
 	_tx_power_level(TX_POWER), _sec_mode({ }),
 	_interval(defaultAdvertisingInterval_0_625_ms), _timeout(defaultAdvertisingTimeout_seconds),
 	_gap_conn_params( { }),
-	_initializedStack(false), _initializedServices(false), _initializedRadio(false), 
 	_advertising(false), 
 	_advertisingConfigured(false), 
 	_scanning(false),
@@ -71,6 +70,9 @@ Stack::Stack() :
 	_gap_conn_params.max_conn_interval = MAX_CONNECTION_INTERVAL;
 	_gap_conn_params.slave_latency = SLAVE_LATENCY;
 	_gap_conn_params.conn_sup_timeout = CONNECTION_SUPERVISION_TIMEOUT;
+	
+	// default stack state (will be used in halt/resume)
+	_stack_state.advertising = false;
 }
 
 Stack::~Stack() {
@@ -96,25 +98,13 @@ extern "C" {
 #define STACK_OBSERVER_PRIO 1
 
 	NRF_SDH_BLE_OBSERVER(m_stack, STACK_OBSERVER_PRIO, ble_evt_dispatch, NULL);
-
-	/*
-	NRF_SECTION_SET_ITEM_REGISTER(sdh_ble_observers, STACK_OBSERVER_PRIO, static nrf_sdh_ble_evt_observer_t m_stack) =
-	{
-		.handler   = ble_evt_dispatch,
-		.p_context = NULL
-	};*/
-
-	// then it goes on in nrf_section.h
 }
 
 /**
  * Initialize SoftDevice, handlers, and brown-out.
  */
 void Stack::init() {
-	if (checkCondition(C_STACK_INITIALIZED, false)) {
-		LOGw("Stack already initialized");
-		return;
-	}
+	if (checkCondition(C_STACK_INITIALIZED, false)) return;
 	LOGi(FMT_INIT, "stack");
 	
 	ret_code_t ret_code;
@@ -145,7 +135,7 @@ void Stack::init() {
 	_adv_data.scan_rsp_data.p_data = NULL;
 	_adv_data.scan_rsp_data.len = 0;
 
-	_initializedStack = true;
+	setInitialized(C_STACK_INITIALIZED);
 }
 
 /** Initialize or configure the BLE radio.
@@ -216,10 +206,8 @@ void Stack::initRadio() {
 	ret_code = sd_ble_version_get(&version);
 	APP_ERROR_CHECK(ret_code);
 
-	std::string device_name = "noname";
-	if (!_device_name.empty()) {
-		device_name = _device_name;
-	}
+	std::string device_name = _device_name.empty() ? "not set..." : _device_name;
+
 	LOGv("sd_ble_gap_device_name_set");
 	ret_code = sd_ble_gap_device_name_set(&_sec_mode, (uint8_t*) device_name.c_str(), device_name.length());
 	APP_ERROR_CHECK(ret_code);
@@ -235,7 +223,7 @@ void Stack::initRadio() {
 	// have non-connectable address one value higher than connectable one
 	_nonconnectable_address.addr[0] += 0x1; 
 
-	_initializedRadio = true;
+	setInitialized(C_RADIO_INITIALIZED);
 
 	updateConnParams();
 	updatePasskey();
@@ -243,6 +231,19 @@ void Stack::initRadio() {
 	//updateTxPowerLevel();
 }
 
+void Stack::halt() {
+	_stack_state.advertising = _advertising;
+	if (_advertising) {
+		stopAdvertising();
+	}
+}
+
+void Stack::resume() {
+	if (_stack_state.advertising) {
+		_stack_state.advertising = false;
+		startAdvertising();
+	}
+}
 
 void Stack::setAppearance(uint16_t appearance) {
 	_appearance = appearance;
@@ -265,10 +266,9 @@ void Stack::setAdvertisingInterval(uint16_t advertisingInterval) {
 }
 
 void Stack::updateAdvertisingInterval(uint16_t advertisingInterval, bool apply) {
-	if (!_initializedRadio) {
-		LOGw(FMT_NOT_INITIALIZED, "radio");
-		return;
-	}
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
+	LOGd("Update advertising interval");
+
 	setAdvertisingInterval(advertisingInterval);
 	configureAdvertisementParameters();
 
@@ -279,20 +279,22 @@ void Stack::updateAdvertisingInterval(uint16_t advertisingInterval, bool apply) 
 	}
 }
 
+/**
+ * Programming by side effect! Other functions assume _device_name to be set even if sd_ble_gap_device_name_set has
+ * not been called yet.
+ */
 void Stack::updateDeviceName(const std::string& deviceName) {
 	_device_name = deviceName;
 
-	if (!_initializedRadio) {
-		return;
-	}
-	if (!_device_name.empty()) {
-		BLE_CALL(sd_ble_gap_device_name_set,
-				(&_sec_mode, (uint8_t*) _device_name.c_str(), _device_name.length()));
-	} else {
-		std::string name = "not set...";
-		BLE_CALL(sd_ble_gap_device_name_set,
-				(&_sec_mode, (uint8_t*) name.c_str(), name.length()));
-	}
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
+	LOGd("Update device name");
+
+	std::string name = _device_name.empty() ? "not set..." : deviceName;
+
+	uint32_t ret_code;
+	ret_code = sd_ble_gap_device_name_set(&_sec_mode, (uint8_t*) name.c_str(), 
+			name.length());
+	APP_ERROR_CHECK(ret_code);
 }
 
 void Stack::updateAppearance(uint16_t appearance) {
@@ -301,31 +303,23 @@ void Stack::updateAppearance(uint16_t appearance) {
 }
 
 void Stack::createCharacteristics() {
-	if (!_initializedRadio) {
-		LOGw(FMT_NOT_INITIALIZED, "radio");
-		return;
-	}
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
+	LOGd("Create characteristics");
 	for (Service* svc: _services) {
 		svc->createCharacteristics();
 	}
 }
 
 void Stack::initServices() {
-	if (!_initializedRadio) {
-		LOGw(FMT_NOT_INITIALIZED, "radio");
-		return;
-	}
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
+	if (checkCondition(C_SERVICES_INITIALIZED, false)) return;
 	LOGd("Init services");
-	if (_initializedServices) {
-		LOGw(FMT_ALREADY_INITIALIZED, "services");
-		return;
-	}
 
 	for (Service* svc : _services) {
 		svc->init(this);
 	}
-
-	_initializedServices = true;
+	
+	setInitialized(C_SERVICES_INITIALIZED);
 }
 
 void Stack::shutdown() {
@@ -335,7 +329,7 @@ void Stack::shutdown() {
 		svc->stopAdvertising();
 	}
 
-	_initializedStack = false;
+	setUninitialized(C_STACK_INITIALIZED);
 }
 
 Stack& Stack::addService(Service* svc) {
@@ -349,6 +343,10 @@ Stack& Stack::addService(Service* svc) {
 Stack& Stack::removeService(Service* svc) {
 	Services_t::iterator it;
 	it = std::find(_services.begin(), _services.end(), svc);
+	if (it == _services.end()) {
+		LOGe("Service does not exist");
+		return *this;
+	}
 	(*it)->removeCharacteristics();
 	_services.erase(it);
 	return *this;
@@ -366,74 +364,66 @@ void Stack::setTxPowerLevel(int8_t powerLevel) {
 #endif
 
 	switch (powerLevel) {
-		case -40: 
-		case -20: 
-		case -16: 
-		case -12: 
-		case -8: 
-		case -4: 
-		case 0: 
-		case 4: 
+		case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4: 
+			// accepted values
 			break;
 		default: 
+			// other values are not accepted
 			return;
 	}
 	if (_tx_power_level != powerLevel) {
 		_tx_power_level = powerLevel;
-		if (_initializedRadio) {
-			updateTxPowerLevel();
-		}
+		updateTxPowerLevel();
 	}
 }
 
+/** 
+ * It seems that if we have a connectable advertisement and a subsequent connection, we cannot update the TX
+ * power while already being connected. At least it returns a BLE_ERROR_INVALID_ADV_HANDLE. 
+ */
 void Stack::updateTxPowerLevel() {
-	if (!_initializedRadio || _adv_handle == BLE_ADV_HANDLE_INVALID) {
-		LOGw("Radio not initialized or invalid handle");
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
+	if (_adv_handle == BLE_ADV_HANDLE_INVALID) {
+		LOGw("Invalid handle");
 		return;
 	}
 	uint32_t ret_code;
-	LOGd("Update tx power level %i", _tx_power_level);
-	ret_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _tx_power_level, _adv_handle);
+	LOGd("Update tx power level %i for handle %i", _tx_power_level, _adv_handle);
+
+	ret_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _adv_handle, _tx_power_level);
 	APP_ERROR_CHECK(ret_code);
 }
 
 void Stack::setMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
 	if (_gap_conn_params.min_conn_interval != connectionInterval_1_25_ms) {
 		_gap_conn_params.min_conn_interval = connectionInterval_1_25_ms;
-		if (_initializedRadio) {
-			updateConnParams();
-		}
+		updateConnParams();
 	}
 }
 
 void Stack::setMaxConnectionInterval(uint16_t connectionInterval_1_25_ms) {
 	if (_gap_conn_params.max_conn_interval != connectionInterval_1_25_ms) {
 		_gap_conn_params.max_conn_interval = connectionInterval_1_25_ms;
-		if (_initializedRadio) {
-			updateConnParams();
-		}
+		updateConnParams();
 	}
 }
 
 void Stack::setSlaveLatency(uint16_t slaveLatency) {
 	if ( _gap_conn_params.slave_latency != slaveLatency ) {
 		_gap_conn_params.slave_latency = slaveLatency;
-		if (_initializedRadio) {
-			updateConnParams();
-		}
+		updateConnParams();
 	}
 }
 
 void Stack::setConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms) {
 	if (_gap_conn_params.conn_sup_timeout != conSupTimeout_10_ms) {
 		_gap_conn_params.conn_sup_timeout = conSupTimeout_10_ms;
-		if (_initializedRadio) {
-			updateConnParams();
-		}
+		updateConnParams();
 	}
 }
 
 void Stack::updateConnParams() {
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
 	ret_code_t ret_code = sd_ble_gap_ppcp_set(&_gap_conn_params);
 	APP_ERROR_CHECK(ret_code);
 }
@@ -450,7 +440,7 @@ void Stack::updateConnParams() {
  * The company identifier has to be set to 0x004C or it will not be recognized as an iBeacon by iPhones.
  */
 void Stack::configureIBeaconAdvData(IBeacon* beacon) {
-	LOGv("Configure iBeacon adv data");
+	LOGd("Configure iBeacon adv data");
 
 	memset(&_manufac_apple, 0, sizeof(_manufac_apple));
 	_manufac_apple.company_identifier = 0x004C; 
@@ -469,6 +459,7 @@ void Stack::configureIBeaconAdvData(IBeacon* beacon) {
 	if (_adv_data.adv_data.p_data == NULL) {
 		_adv_data.adv_data.p_data = (uint8_t*)calloc(sizeof(uint8_t), _adv_data.adv_data.len);
 	}
+	LOGd("Create advertisement of size %i", _adv_data.adv_data.len);
 	ret_code = ble_advdata_encode(&_config_advdata, _adv_data.adv_data.p_data, &_adv_data.adv_data.len);
 	LOGv("First bytes in encoded buffer: [%02x %02x %02x %02x]", 
 			_adv_data.adv_data.p_data[0], _adv_data.adv_data.p_data[1],
@@ -509,6 +500,7 @@ void Stack::configureBleDeviceAdvData() {
  *   N bytes for name         (1 byte for type,  N-1 bytes for data)
  */
 void Stack::configureScanResponse(uint8_t deviceType) {
+	LOGd("Configurate scan response and call ble_advdata_encode");
 
 	uint8_t serviceDataLength = 0;
 
@@ -526,17 +518,25 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 		_config_scanrsp.p_service_data_array = &_service_data;
 		_config_scanrsp.service_data_count = 1;
 
+		LOGd("Add UUID %X", _service_data.service_uuid);
 		serviceDataLength += 2 + sizeof(_service_data.service_uuid) + _service_data.data.size;
 	}
 
 	const uint8_t maxDataLength = 29;
 	uint8_t nameLength = maxDataLength - serviceDataLength;
+	LOGd("Maximum data length minus service data length: %i - %i = %i", maxDataLength, serviceDataLength, nameLength);
 	nameLength = std::min(nameLength, (uint8_t)(getDeviceName().length()));
+	LOGd("Set BLE name to length %i", nameLength);
 	_config_scanrsp.short_name_len = nameLength;
-	
+
+	if (nameLength == 0) {
+		LOGe("Scan response payload too large or device name not set");
+	}
+
 	// we now have to encode the data by an explicit call
 	ret_code_t ret_code;
-	_adv_data.scan_rsp_data.len = sizeof(_config_advdata);
+	_adv_data.scan_rsp_data.len = sizeof(_config_scanrsp);
+	LOGd("Create scan response of size %i", _adv_data.scan_rsp_data.len);
 	if (_adv_data.scan_rsp_data.p_data == NULL) {
 		_adv_data.scan_rsp_data.p_data = (uint8_t*)calloc(sizeof(uint8_t),_adv_data.scan_rsp_data.len);
 	}
@@ -570,7 +570,7 @@ void Stack::configureBleDevice(uint8_t deviceType) {
  * It is only possible to include TX power if the advertisement is an "extended" type.
  */
 void Stack::configureAdvertisementParameters() {
-	LOGv("set _adv_params");
+	LOGd("set _adv_params");
 	_adv_params.primary_phy                 = BLE_GAP_PHY_1MBPS;
 	_adv_params.properties.type             = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
 	_adv_params.properties.anonymous        = 0;
@@ -601,10 +601,7 @@ void Stack::setNonConnectable() {
 
 void Stack::restartAdvertising() {
 	LOGd("Restart advertising");
-	if (!_initializedRadio) {
-		LOGw(FMT_NOT_INITIALIZED, "radio");
-		return;
-	}
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
 
 	if (_advertising) {
 		stopAdvertising();
@@ -618,14 +615,14 @@ void Stack::startAdvertising() {
 		LOGw("Should not already be advertising");
 		return;
 	}
-	
+
 	static int max_debug = 3;
 	static int i = 0;
 	if (i < max_debug) {
-		LOGv("sd_ble_gap_adv_start(_adv_handle=%i,_conn_cfg_tag=%i)", _adv_handle, _conn_cfg_tag);
+		LOGd("sd_ble_gap_adv_start(_adv_handle=%i,_conn_cfg_tag=%i)", _adv_handle, _conn_cfg_tag);
 		i++;
 		if (i == max_debug) {
-			LOGv("Suppress further messages about adv start");
+			LOGd("Suppress further messages about adv start");
 		}
 	}
 	uint32_t ret_code = sd_ble_gap_adv_start(_adv_handle, _conn_cfg_tag);
@@ -642,10 +639,13 @@ void Stack::stopAdvertising() {
 	}
 
 	// This function call can take 31ms
+	LOGd("sd_ble_gap_adv_stop(_adv_handle=%i", _adv_handle);
 	uint32_t ret_code = sd_ble_gap_adv_stop(_adv_handle); 
-	// Ignore invalid state error, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
+	// Ignore invalid state error, 
+	// see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 	APP_ERROR_CHECK_EXCEPT(ret_code, NRF_ERROR_INVALID_STATE);
 
+	_adv_handle = BLE_ADV_HANDLE_INVALID;
 	//LOGi(MSG_BLE_ADVERTISING_STOPPED);
 
 	_advertising = false;
@@ -685,22 +685,28 @@ void Stack::updateAdvertisement(bool toggle) {
 bool Stack::checkCondition(condition_t condition, bool expectation) {
 	bool field = false;
 	switch(condition) {
-	case C_ADVERTISING: 
-		field = _advertising;
-		if (expectation != field) {
-			LOGw("Advertising %i", field);
-		}
-		break;
 	case C_STACK_INITIALIZED:
-		field = _initializedStack;
+		field = isInitialized(C_STACK_INITIALIZED);
 		if (expectation != field) {
 			LOGw("Stack init %i", field);
 		}
 		break;
 	case C_RADIO_INITIALIZED:
-		field = _initializedRadio;
+		field = isInitialized(C_RADIO_INITIALIZED);
 		if (expectation != field) {
 			LOGw("Radio init %i", field);
+		}
+		break;
+	case C_SERVICES_INITIALIZED:
+		field = isInitialized(C_SERVICES_INITIALIZED);
+		if (expectation != field) {
+			LOGw("Services init %i", field);
+		}
+		break;
+	case C_ADVERTISING: 
+		field = _advertising;
+		if (expectation != field) {
+			LOGw("Advertising %i", field);
 		}
 		break;
 	}
@@ -754,10 +760,7 @@ void Stack::setAdvertisementData() {
 }
 
 void Stack::startScanning() {
-	if (!_initializedRadio) {
-		LOGw(FMT_NOT_INITIALIZED, "radio");
-		return;
-	}
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
 	if (_scanning)
 		return;
 
@@ -780,10 +783,7 @@ void Stack::startScanning() {
 
 
 void Stack::stopScanning() {
-	if (!_initializedRadio) {
-		LOGw(FMT_NOT_INITIALIZED, "radio");
-		return;
-	}
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
 	if (!_scanning)
 		return;
 
@@ -811,16 +811,12 @@ void Stack::setPasskey(uint8_t* passkey) {
 #endif
 	memcpy(_passkey, passkey, BLE_GAP_PASSKEY_LEN);
 
-	if (_initializedRadio) {
-		updatePasskey();
-	}
+	updatePasskey();
 }
 
 void Stack::updatePasskey() {
-	if (!_initializedRadio) {
-		LOGw(FMT_NOT_INITIALIZED, "radio");
-		return;
-	}
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
+	LOGd("Update pass key");
 	ble_opt_t static_pin_option;
 	static_pin_option.gap_opt.passkey.p_passkey = _passkey;
 	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
@@ -1045,7 +1041,7 @@ void Stack::disconnect() {
 }
 
 bool Stack::isDisconnecting() {
-		return _disconnectingInProgress;
+	return _disconnectingInProgress;
 };
 
 bool Stack::isConnected() {
@@ -1058,5 +1054,14 @@ void Stack::onTxComplete(const ble_evt_t * p_ble_evt) {
 	}
 }
 
+void Stack::onConnect(const callback_connected_t& callback) {
 
+	_callback_connected = callback;
 
+	// TODO: why update connection parameters here?
+	updateConnParams();
+}
+
+void Stack::onDisconnect(const callback_disconnected_t& callback) {
+	_callback_disconnected = callback;
+}

@@ -53,9 +53,6 @@ DEFAULT_HARDWARE_BOARD=ACR01B2C
 # the characteristics / command should be persistently stored!
 PERSISTENT_FLAGS_DISABLED=0
 
-# Eddystone is the iBeacon variant of Google, but meant for other purposes, such as Physical Web
-EDDYSTONE=0
-
 # Add reset counter at end of name
 CHANGE_NAME_ON_RESET=0
 

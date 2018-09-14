@@ -12,9 +12,6 @@
 
 #include <ble/cs_Stack.h>
 #include <ble/cs_iBeacon.h>
-#if EDDYSTONE==1
-#include <ble/cs_Eddystone.h>
-#endif
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
 #include <processing/cs_CommandHandler.h>
@@ -48,125 +45,138 @@
  */
 class Crownstone : EventListener {
 public:
-	Crownstone(boards_config_t& board);
 
-	/** initialize the crownstone:
-	 *    1. start UART
-	 *    2. configure (drivers, stack, advertisement)
-	 *    3. check operation mode
-	 *    		3a. for setup mode, create setup services
-	 *    		3b. for normal operation mode, create crownstone services
-	 *    			and prepare Crownstone for operation
-	 *    4. initialize services
-	 */
-	void init();
+    enum ServiceEvent { 
+	CREATE_DEVICE_INFO_SERVICE, CREATE_SETUP_SERVICE, CREATE_CROWNSTONE_SERVICE, 
+	REMOVE_DEVICE_INFO_SERVICE, REMOVE_SETUP_SERVICE, REMOVE_CROWNSTONE_SERVICE };
 
-	/** startup the crownstone:
-	 * 	  1. start advertising
-	 * 	  2. start processing (mesh, scanner, tracker, tempGuard, etc)
-	 */
-	void startUp();
+    /**
+     * Constructor.
+     */
+    Crownstone(boards_config_t& board);
 
-	/** run main
-	 *    1. execute app scheduler
-	 *    2. wait for ble events
-	 */
-	void run();
+    /** initialize the crownstone:
+     *    1. start UART
+     *    2. configure (drivers, stack, advertisement)
+     *    3. check operation mode
+     *    		3a. for setup mode, create setup services
+     *    		3b. for normal operation mode, create crownstone services
+     *    			and prepare Crownstone for operation
+     *    4. initialize services
+     */
+    void init();
 
-	/** handle (crownstone) events
-	 */
-	void handleEvent(event_t & event);
+    /** startup the crownstone:
+     * 	  1. start advertising
+     * 	  2. start processing (mesh, scanner, tracker, tempGuard, etc)
+     */
+    void startUp();
 
-	/** tick function called by app timer
-	 */
-	static void staticTick(Crownstone *ptr) {
-		ptr->tick();
-	}
+    /** run main
+     *    1. execute app scheduler
+     *    2. wait for ble events
+     */
+    void run();
+
+    /** handle (crownstone) events
+    */
+    void handleEvent(event_t & event);
+
+    /** tick function called by app timer
+    */
+    static void staticTick(Crownstone *ptr) {
+	ptr->tick();
+    }
 
 protected:
 
-	/** initialize drivers (stack, timer, storage, pwm, etc), loads settings from storage.
-	 */
-	void initDrivers();
+    /** initialize drivers (stack, timer, storage, pwm, etc), loads settings from storage.
+    */
+    void initDrivers();
 
-	/** configure the crownstone. this will call the other configureXXX functions in turn
-	 *    1. configure ble stack
-	 *    2. set ble name
-	 *    3. configure advertisement
-	 *
-	 */
-	void configure();
-	void configureStack();
-	void configureAdvertisement();
-	void setName();
+    /** configure the crownstone. this will call the other configureXXX functions in turn
+     *    1. configure ble stack
+     *    2. set ble name
+     *    3. configure advertisement
+     *
+     */
+    void configure();
+    void configureStack();
+    void configureAdvertisement();
+    void setName();
 
-	void writeDefaults();
+    void writeDefaults();
 
-	/** create services available in setup mode
-	 */
-	void createSetupServices();
-	/** create services available in normal operation mode
-	 */
-	void createCrownstoneServices();
+    void createService(const ServiceEvent event);
+    
+    void removeService(const ServiceEvent event);
 
-	/** prepare crownstone for normal operation mode, this includes:
-	 *    - prepare mesh
-	 *    - prepare scanner
-	 *    - prepare tracker
-	 *    - ...
-	 */
-	void prepareNormalOperationMode();
+    /** create services available in setup mode
+    */
+    void createSetupServices();
+    /** create services available in normal operation mode
+    */
+    void createCrownstoneServices();
 
-	/** tick function for crownstone to update/execute periodically
-	 */
-	void tick();
+    /** Start operation for Crownstone. 
+     * 
+     * This currently only enables parts in Normal operation mode. This includes:
+     *    - prepare mesh
+     *    - prepare scanner
+     *    - prepare tracker
+     *    - ...
+     */
+    void startOperationMode(const OperationMode & mode);
+    
+    void switchMode(const OperationMode & mode);
 
-	/** schedule next execution of tick function
-	 */
-	void scheduleNextTick();
+    /** tick function for crownstone to update/execute periodically
+    */
+    void tick();
+
+    /** schedule next execution of tick function
+    */
+    void scheduleNextTick();
 
 private:
 
-	boards_config_t _boardsConfig;
+    boards_config_t _boardsConfig;
 
-	// drivers
-	Stack* _stack;
-	Timer* _timer;
-	Storage* _storage;
-	State* _state;
+    // drivers
+    Stack* _stack;
+    Timer* _timer;
+    Storage* _storage;
+    State* _state;
 
-	Switch* _switch;
-	TemperatureGuard* _temperatureGuard;
-	PowerSampling* _powerSampler;
-	Watchdog* _watchdog;
-	EnOceanHandler* _enOceanHandler;
+    Switch* _switch;
+    TemperatureGuard* _temperatureGuard;
+    PowerSampling* _powerSampler;
+    Watchdog* _watchdog;
+    EnOceanHandler* _enOceanHandler;
 
-	// services
-	DeviceInformationService* _deviceInformationService;
-	CrownstoneService* _crownstoneService;
-	SetupService* _setupService;
+    // services
+    DeviceInformationService* _deviceInformationService;
+    CrownstoneService* _crownstoneService;
+    SetupService* _setupService;
 
-	// advertise
-	ServiceData* _serviceData;
-	IBeacon* _beacon;
-#if EDDYSTONE==1
-	Eddystone* _eddystone;
-#endif
+    // advertise
+    ServiceData* _serviceData;
+    IBeacon* _beacon;
 
-	// processing
+    // processing
 #if BUILD_MESHING == 1
-	Mesh* _mesh;
+    Mesh* _mesh;
 #endif
     CommandHandler* _commandHandler;
-	Scanner* _scanner;
-	Tracker* _tracker;
-	Scheduler* _scheduler;
-	FactoryReset* _factoryReset;
+    Scanner* _scanner;
+    Tracker* _tracker;
+    Scheduler* _scheduler;
+    FactoryReset* _factoryReset;
 
-	app_timer_t              _mainTimerData;
-	app_timer_id_t           _mainTimerId;
+    app_timer_t              _mainTimerData;
+    app_timer_id_t           _mainTimerId;
 
-	OperationMode _operationMode;
+    OperationMode _operationMode;
 
 };
 

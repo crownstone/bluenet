@@ -34,6 +34,10 @@ protected:
 	void addFirmwareRevisionCharacteristic();
 	void addSoftwareRevisionCharacteristic();
 	
+	void removeHardwareRevisionCharacteristic();
+	void removeFirmwareRevisionCharacteristic();
+	void removeSoftwareRevisionCharacteristic();
+	
 private:
 	Characteristic<std::string>* _hardwareRevisionCharacteristic;
 	Characteristic<std::string>* _firmwareRevisionCharacteristic;

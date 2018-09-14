@@ -6,44 +6,39 @@
  */
 #pragma once
 
-#include <ble/cs_Nordic.h>
-
-#include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
+#include <ble/cs_Nordic.h>
+#include <ble/cs_Service.h>
 #include <events/cs_EventListener.h>
-//#if BUILD_MESHING == 1
-//#include <structs/cs_MeshCommand.h>
-//#endif
 #include <services/cs_CrownstoneService.h>
 
 //#define GENERAL_SERVICE_UPDATE_FREQUENCY 10 //! hz
 
 /** Setup Service for the Crownstone
  *
- * There are several characteristics that fit into the general service description. There is a characteristic
- * that measures the temperature, there are several characteristics that defines the crownstone, namely by
- * name, by type, or by location (room), and there is a characteristic to update its firmware.
- *
- * If meshing is enabled, it is also possible to send a message into the mesh network using a characteristic.
  */
 class SetupService: public CrownstoneService {
-public:
-	/** Constructor for general crownstone service object
-	 *
-	 * Creates persistent storage (FLASH) object which is used internally to store name and other information that 
-	 * is set over so-called configuration characteristics. It also initializes all characteristics.
+    public:
+	/** Setup Service derivces from Crownstone Service.
 	 */
 	SetupService();
 
-	/** Initialize a GeneralService object
+	/** Initialize the Setup Service object.
 	 *
-	 * Add all characteristics and initialize them where necessary.
+	 * Add all characteristics and initialize them if necessary. The function will not call createCharacteristics
+	 * of the super class CrownstoneService.
 	 */
 	void createCharacteristics();
 
+	/**
+	 * Remove characteristics that are specific to setup service. The function will not call removeCharacteristics
+	 * of the super class CrownstoneService.
+	 */
+	void removeCharacteristics();
+
 	void handleEvent(event_t & event);
 
-protected:
+    protected:
 
 	inline void addMacAddressCharacteristic();
 
@@ -51,10 +46,16 @@ protected:
 
 	inline void addGoToDfuCharacteristic();
 
-private:
+	void removeMacAddressCharacteristic();
+
+	void removeSetupKeyCharacteristic();
+
+	void removeGoToDfuCharacteristic();
+
+    private:
 
 	// stores the MAC address of the devices to be used for mesh message handling
-    ble_gap_addr_t _myAddr;
+	ble_gap_addr_t _myAddr;
 
 	uint8_t _keyBuffer[SOC_ECB_KEY_LENGTH];
 	uint8_t _nonceBuffer[SESSION_NONCE_LENGTH];
@@ -62,8 +63,5 @@ private:
 	Characteristic<buffer_ptr_t>* _macAddressCharacteristic;
 	Characteristic<buffer_ptr_t>* _setupKeyCharacteristic;
 	Characteristic<uint8_t>* _gotoDfuCharacteristic;
-
-
-
 
 };

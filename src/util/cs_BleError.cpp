@@ -26,7 +26,7 @@ void app_error_handler (uint32_t error_code, uint32_t line_num, const uint8_t * 
 	volatile const uint8_t* file __attribute__((unused)) = p_file_name;
 
 	const char * str_error = NordicTypeName(error);
-	LOGe("%", str_error);
+	LOGe("%s", str_error);
 	LOGf("FATAL ERROR 0x%x, at %s:%d", error, file, line);
 
 	__asm("BKPT");
@@ -41,7 +41,7 @@ void app_error_handler_bare(ret_code_t error_code)
 	volatile const uint8_t* file __attribute__((unused)) = NULL;
 
 	const char * str_error = NordicTypeName(error);
-	LOGe("%", str_error);
+	LOGe("%s", str_error);
 	LOGf("FATAL ERROR 0x%x", error);
 
 	__asm("BKPT");

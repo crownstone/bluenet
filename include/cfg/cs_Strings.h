@@ -66,6 +66,7 @@
 #define STR_DISABLE                              "Disable"
 #define STR_FAILED                               "Failed"
 
+//TODO: A lot of repetition, what is the difference between BLE_CHAR_HARDWARE_REVISION and STR_CHAR_HARDWARE_REVISION
 //#define STR_CROWNSTONE                           "Crownstone"
 #define STR_CHAR_CONTROL                         "Control"
 #define STR_CHAR_MESH                            "Mesh"
@@ -91,6 +92,7 @@
 #define STR_CHAR_SCHEDULE                        "Schedule"
 #define STR_CHAR_MAC_ADDRESS                     "MAC Address"
 #define STR_CHAR_SETUP_KEY                       "Setup Encryption Key"
+#define STR_CHAR_GOTO_DFU                        "GoTo DFU"
 
 #define STR_CREATE_ALL_SERVICES                  "Create all services"
 
@@ -134,6 +136,9 @@
 #define FMT_SERVICE_INIT                         "%s Service init"
 #define FMT_CHAR_ADD                             "Characteristic %s added"
 #define FMT_CHAR_SKIP                            "Characteristic %s skipped"
+#define FMT_CHAR_REMOVED                         "Characteristic %s removed"
+#define FMT_CHAR_EXISTS                          "Characteristic %s exists"
+#define FMT_CHAR_DOES_NOT_EXIST                  "Characteristic %s does not exist"
 
 #define FMT_WRONG_PAYLOAD_LENGTH                 "Wrong payload length received: %u"
 #define FMT_SELECT_TYPE                          "Select %s type: %d"

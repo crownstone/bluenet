@@ -77,11 +77,14 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::STRATEGY1);
 
 	// Switch relay on
-	event_t event(CS_TYPE::EVT_POWER_ON);
-	EventDispatcher::getInstance().dispatch(event);
+	event_t event0(CS_TYPE::EVT_POWER_ON);
+	EventDispatcher::getInstance().dispatch(event0);
 
 	// Reboot will be done when persistent storage is done.
 	_setupDone = true;
+
+	event_t event1(CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE);
+	EventDispatcher::getInstance().dispatch(event1);
 
 	LOGi("Setup completed");
 	return ERR_WAIT_FOR_SUCCESS;
@@ -94,6 +97,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
  * example the entire storage queue has been handled, it should perform the reset.
  */
 void Setup::handleEvent(event_t & event) {
+	/*
 	switch (event.type) {
 		case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 			if (_setupDone) {
@@ -111,5 +115,6 @@ void Setup::handleEvent(event_t & event) {
 			break;
 		default: {}
 	}
+	*/
 }
 

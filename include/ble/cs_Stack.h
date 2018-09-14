@@ -16,6 +16,7 @@
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Config.h>
 #include <cfg/cs_Strings.h>
+#include <common/cs_BaseClass.h>
 #include <common/cs_Tuple.h>
 #include <common/cs_Types.h>
 #include <string>
@@ -39,30 +40,13 @@ class Service;
  * handlers. However, please, if an object depends on it, try to make this dependency explicit, and use this
  * stack object as an argument w.r.t. this object. This makes dependencies traceable for the user.
  */
-class Stack {
-private:
-
-	/** Constructor of the BLE stack on the NRF5 series.
-	 *
-	 * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. 
-	 * However, the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the 
-	 * init() function.
-	 */
-	Stack();
-	Stack(Stack const&);
-	void operator=(Stack const &);
-
-	/**
-	 * The destructor shuts down the stack.
-	 *
-	 * TODO: The SoftDevice should be disabled as well.
-	 */
-	~Stack();
+class Stack: public BaseClass<4> {
 public:
 	static Stack& getInstance() {
 		static Stack instance;
 		return instance;
 	}
+
 	//! Format of the callback when a connection has been made
 	typedef function<void(uint16_t conn_handle)>   callback_connected_t;
 	//! Format of the callback after a disconnection event
@@ -75,7 +59,8 @@ public:
 
 	typedef fixed_tuple<Service*, MAX_SERVICE_COUNT> Services_t;  
 
-	//! The default BLE appearance, for unknown reason set to generic tag. See: https://devzone.nordicsemi.com/question/2973/an36-ble_appearance/
+	//! The default BLE appearance, for unknown reason set to generic tag. 
+	// See: https://devzone.nordicsemi.com/question/2973/an36-ble_appearance/
 	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_TAG;
 	//! The low-frequency clock, currently generated from the high frequency clock
 	static const nrf_clock_lf_cfg_t        defaultClockSource;
@@ -85,7 +70,7 @@ public:
 	static const uint16_t                  defaultAdvertisingTimeout_seconds = ADVERTISING_TIMEOUT;
 
 protected:
-	enum condition_t { C_STACK_INITIALIZED, C_RADIO_INITIALIZED, C_ADVERTISING };
+	enum condition_t { C_STACK_INITIALIZED, C_RADIO_INITIALIZED, C_SERVICES_INITIALIZED, C_ADVERTISING };
 
 	std::string                                 _device_name; //! 4
 	uint16_t                                    _appearance;
@@ -102,9 +87,9 @@ protected:
 	uint16_t                                    _timeout;
 	ble_gap_conn_params_t                       _gap_conn_params; //! 8
 
-	bool                                        _initializedStack;
-	bool                                        _initializedServices;
-	bool                                        _initializedRadio;
+	//bool                                        _initializedStack;
+	//bool                                        _initializedServices;
+	//bool                                        _initializedRadio;
 	bool                                        _advertising;
 	bool                                        _advertisingConfigured;
 	bool                                        _scanning;
@@ -114,7 +99,8 @@ protected:
 	callback_connected_t                        _callback_connected;  //! 16
 	callback_disconnected_t                     _callback_disconnected;  //! 16
 	callback_radio_t                            _callback_radio;  //! 16
-	volatile uint8_t                            _radio_notify; //! 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
+	//! 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
+	volatile uint8_t                            _radio_notify; 
 
 	ble_user_mem_block_t 						_user_mem_block; //! used for user memory (long write)
 
@@ -153,6 +139,11 @@ protected:
 
 	ble_gap_addr_t                              _connectable_address;
 	ble_gap_addr_t                              _nonconnectable_address;
+	
+	struct stack_state {
+		bool advertising;
+	} _stack_state;
+
 public:
 
 	/** Initialization of the BLE stack
@@ -170,6 +161,12 @@ public:
 	 *   - set the callback for BLE events (if we use Source/sd_common/softdevice_handler.c in Nordic's SDK)
 	 */
 	void init();
+	
+	//! Temporarily halt the stack
+	void halt();
+
+	//! Continue running the stack
+	void resume();
 
 	/** Initialization of the radio
 	 *
@@ -231,6 +228,7 @@ public:
 	 * the end-user.
 	 */
 	void updateDeviceName(const std::string& deviceName);
+
 	std::string & getDeviceName() { return _device_name; }
 
 	//! Update the advertising interval in 0.625ms units. Set apply to true, if change should be immediately applied.
@@ -257,22 +255,9 @@ public:
 	/** Set the connection supervision timeout in units of 10 ms. */
 	void setConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms);
 
-	void onConnect(const callback_connected_t& callback) {
-		//if (callback && _callback_connected) BLE_THROW("Connected callback already registered.");
+	void onConnect(const callback_connected_t& callback);
 
-		_callback_connected = callback;
-
-		// TODO: why update connection parameters here?
-		if (_initializedRadio) {
-			updateConnParams();
-		}
-	}
-
-	void onDisconnect(const callback_disconnected_t& callback) {
-		//if (callback && _callback_disconnected) BLE_THROW("Disconnected callback already registered.");
-
-		_callback_disconnected = callback;
-	}
+	void onDisconnect(const callback_disconnected_t& callback);
 
 	/** Get a service by name
 	 */
@@ -431,6 +416,23 @@ protected:
 	void startConnectionAliveTimer();
 	void stopConnectionAliveTimer();
 	void resetConnectionAliveTimer();
+private:
+	/** Constructor of the BLE stack on the NRF5 series.
+	 *
+	 * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. 
+	 * However, the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the 
+	 * init() function.
+	 */
+	Stack();
+	Stack(Stack const&);
+	void operator=(Stack const &);
+
+	/**
+	 * The destructor shuts down the stack.
+	 *
+	 * TODO: The SoftDevice should be disabled as well.
+	 */
+	~Stack();
 
 };
 

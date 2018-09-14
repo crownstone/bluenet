@@ -19,13 +19,12 @@ const char* Service::defaultServiceName = "unnamed";
 Service::Service():
 		_stack(NULL),
 		_name(""),
-		_primary(true),
-		_service_handle(BLE_CONN_HANDLE_INVALID),
-		_started(false) {
+		_service_handle(BLE_CONN_HANDLE_INVALID)
+		{
 }
 
-
 void Service::init(Stack* stack) {
+	if (isInitialized(C_SERVICE_INITIALIZED)) return;
 
 	_stack = stack;
 
@@ -43,8 +42,7 @@ void Service::init(Stack* stack) {
 		characteristic->init(this);
 	}
 
-	_started = true;
-
+	setInitialized(C_SERVICE_INITIALIZED);
 }
 
 void Service::setAesEncrypted(bool encrypted) {
@@ -52,6 +50,19 @@ void Service::setAesEncrypted(bool encrypted) {
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 		characteristic->setAesEncrypted(encrypted);
 	}
+}
+
+/** 
+ * Set the UUID. It is only possible to do before starting the service. Nordic does not support removing a service.
+ * There is only a sd_ble_gatts_service_changed call. If the UUID needs changed in the mean-time, restart the 
+ * SoftDevice. Calling setUUID when running will only evoke an error. It will have no consequences.
+ */
+Service& Service::setUUID(const UUID& uuid) {
+	if (isInitialized(C_SERVICE_INITIALIZED)) {
+		LOGw("Already started. Needs SoftDevice reset.");
+	}
+	_uuid = uuid;
+	return *this;
 }
 
 //void Service::setEncryptionBuffer(buffer_ptr_t buffer, buffer_size_t size) {
@@ -165,8 +176,17 @@ void Service::onTxComplete(const ble_common_evt_t * p_ble_evt) {
 }
 
 Service& Service::removeCharacteristic(CharacteristicBase* characteristic) {
+	if (characteristic == NULL) {
+		LOGe("Characteristic is null pointer.");
+		return *this;
+	}
 	Characteristics_t::iterator it;
 	it = std::find(_characteristics.begin(), _characteristics.end(), characteristic);
+	if (it == _characteristics.end()) {
+		LOGe("Characteristic does not exist");
+		LOGe("Characteristic %s does not exist", characteristic->getName());
+		return *this;
+	}
 	_characteristics.erase(it);
 	return *this;
 }

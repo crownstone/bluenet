@@ -181,6 +181,10 @@ public:
 
 	void setName(const char * const name);
 
+	const char* getName() {
+		return _name; 
+	}
+
 	const UUID & getUUID() {
 		return _uuid;
 	}

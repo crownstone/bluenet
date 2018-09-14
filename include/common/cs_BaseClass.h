@@ -27,6 +27,10 @@ public:
 	inline void setInitialized(uint8_t i = 0) {
 		_initialized[i] = true;
 	}
+	
+	inline void setUninitialized(uint8_t i = 0) {
+		_initialized[i] = false;
+	}
 
 private:
 	bool _initialized[N];
