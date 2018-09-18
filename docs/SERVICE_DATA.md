@@ -63,9 +63,19 @@ uint 8 | Device type | 1 | Type of stone: plug, builtin, guidestone, etc.
 uint 8 | Data type | 1 | Type of data, see below.
 uint 8[] | Encrypted data | 16 | Encrypted data, see below.
 
+Device types:
+
+Value | Device type
+---| ---
+0 | Unknown
+1 | Crownstone plug
+2 | Guidestone
+3 | Crownstone builtin
+4 | Crownstone dongle
+
 The following data types are available:
 
-Type | Packet
+Value | Data type
 --- | ---
 0 | [State](#service_data_encrypted_state_2).
 1 | [Error](#service_data_encrypted_error_2).
