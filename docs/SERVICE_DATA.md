@@ -30,43 +30,6 @@ Type | Packet
 
 
 
-<a name="switch_state_packet"></a>
-#### Switch state
-To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
-
-![Switch State Packet](../docs/diagrams/switch_state_packet.png)
-
-Bit | Name |  Description
---- | --- | ---
-0 | Relay | Value of the relay, where 0 = OFF, 1 = ON.
-1-7 | Dimmer | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
-
-<a name="flags_bitmask"></a>
-#### Flags bitmask
-
-Bit | Name |  Description
---- | --- | ---
-0 | Dimming available | When dimming is physically available, this will be 1.
-1 | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
-2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](#service_data_encrypted_error), or by reading the [error state](PROTOCOL.md#state_packet).
-3 | Switch locked | When the switch state is locked, this will be 1.
-4 | Time set | If this is 1, the time is set on this Crownstone.
-5 | Switchcraft | If this is 1, switchcraft is enabled on this Crownstone.
-6 | Reserved | Reserved for future use.
-7 | Reserved | Reserved for future use.
-
-<a name="device_type"></a>
-#### Device type
-
-Value | Device type
----| ---
-0 | Unknown
-1 | Crownstone plug
-2 | Guidestone
-3 | Crownstone builtin
-4 | Crownstone dongle
-
-
 <a name="servicedata_device_type"></a>
 # Device type and encrypted service data
 This packet contains the device type and the state info. If encryption is enabled, the data is encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
@@ -174,7 +137,6 @@ uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating
 
 
 
-
 <a name="servicedata_device_type_setup"></a>
 # Device type and setup service data
 This packet contains the state info, it is unencrypted.
@@ -206,3 +168,43 @@ int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to g
 uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
 uint 8 | Counter | 1 | Simply counts up and overflows.
 uint 8 | Reserved | 4 | Reserved for future use.
+
+
+
+# General packets
+
+<a name="switch_state_packet"></a>
+#### Switch state
+To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
+
+![Switch State Packet](../docs/diagrams/switch_state_packet.png)
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Relay | Value of the relay, where 0 = OFF, 1 = ON.
+1-7 | Dimmer | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
+
+<a name="flags_bitmask"></a>
+#### Flags bitmask
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Dimming available | When dimming is physically available, this will be 1.
+1 | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
+2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](#service_data_encrypted_error), or by reading the [error state](PROTOCOL.md#state_packet).
+3 | Switch locked | When the switch state is locked, this will be 1.
+4 | Time set | If this is 1, the time is set on this Crownstone.
+5 | Switchcraft | If this is 1, switchcraft is enabled on this Crownstone.
+6 | Reserved | Reserved for future use.
+7 | Reserved | Reserved for future use.
+
+<a name="device_type"></a>
+#### Device type
+
+Value | Device type
+---| ---
+0 | Unknown
+1 | Crownstone plug
+2 | Guidestone
+3 | Crownstone builtin
+4 | Crownstone dongle
