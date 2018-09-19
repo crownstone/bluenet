@@ -1,6 +1,8 @@
 # Bluenet service data v2.1.0
 -----------------------------
 
+The service data contains the state of the Crownstone.
+
 This only documents the latest service data protocol. The old versions are kept up in a separate [document](SERVICE_DATA_DEPRECATED.md).
 
 # Index
@@ -11,15 +13,18 @@ This only documents the latest service data protocol. The old versions are kept 
 
 <a name="service_data_header"></a>
 # Service data header
-This packet contains the state info. If encryption is enabled, the last 16 bytes will be encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
-You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
+The first byte of the service data determines how to parse the remaining bytes.
 
 ![Scan response service data](../docs/diagrams/scan-response-service-data.png)
 
-The type determines how to parse the remaining bytes.
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Service data type | 1 | Type of service data, see below.
+uint 8[] | Data |  | Remaining data, length depends on type.
 
 Type | Packet
 --- | ---
+0-4 | Deprecated, see this [document](SERVICE_DATA_DEPRECATED.md)
 5 | [Device type + data](#servicedata_device_type). Advertised when in normal mode.
 6 | [Device type + data](#servicedata_device_type_setup). Advertised when in setup mode.
 
@@ -31,8 +36,10 @@ To be able to distinguish between the relay and dimmer state, the switch state i
 
 ![Switch State Packet](../docs/diagrams/switch_state_packet.png)
 
-Bit 7 is used for the relay flag, where 0 = OFF, 1 = ON.
-Bits 6-0 are used for PWM, where 100 is fully ON, 0 is OFF, dimmed in between.
+Bit | Name |  Description
+--- | --- | ---
+0 | Relay | Value of the relay, where 0 = OFF, 1 = ON.
+1-7 | Dimmer | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
 
 <a name="flags_bitmask"></a>
 #### Flags bitmask
@@ -48,22 +55,8 @@ Bit | Name |  Description
 6 | Reserved | Reserved for future use.
 7 | Reserved | Reserved for future use.
 
-
-
-<a name="servicedata_device_type"></a>
-# Device type and encrypted service data
-This packet contains the device type and the state info. If encryption is enabled, the state is encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
-You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
-
-![Device typeEncrypted service data](../docs/diagrams/service-data-device-type-and-encrypted.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Device type | 1 | Type of stone: plug, builtin, guidestone, etc.
-uint 8 | Data type | 1 | Type of data, see below.
-uint 8[] | Encrypted data | 16 | Encrypted data, see below.
-
-Device types:
+<a name="device_type"></a>
+#### Device type
 
 Value | Device type
 ---| ---
@@ -73,9 +66,31 @@ Value | Device type
 3 | Crownstone builtin
 4 | Crownstone dongle
 
+
+<a name="servicedata_device_type"></a>
+# Device type and encrypted service data
+This packet contains the device type and the state info. If encryption is enabled, the data is encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
+You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
+
+![Device type and encrypted service data](../docs/diagrams/service-data-device-type-and-encrypted.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | [Device type](#device_type) | 1 | Type of stone: plug, builtin, guidestone, etc.
+uint 8[] | Encrypted data | 16 | Encrypted data, see below.
+
+Encrypted data:
+
+![Encrypted service data](../docs/diagrams/service-data-encrypted-2.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Data type | 1 | Type of data, see below.
+uint 8[] | Data | 15 | Data, see below.
+
 The following data types are available:
 
-Value | Data type
+Type | Packet
 --- | ---
 0 | [State](#service_data_encrypted_state_2).
 1 | [Error](#service_data_encrypted_error_2).
@@ -168,9 +183,9 @@ This packet contains the state info, it is unencrypted.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Device type | 1 | Type of stone: plug, builtin, guidestone, etc.
+uint 8 | [Device type](#device_type) | 1 | Type of stone: plug, builtin, guidestone, etc.
 uint 8 | Data type | 1 | Type of data, see below.
-uint 8[] | Data | 16 | Data, see below.
+uint 8[] | Data | 15 | Data, see below.
 
 Type | Packet
 --- | ---
