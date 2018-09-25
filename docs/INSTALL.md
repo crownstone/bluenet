@@ -56,7 +56,7 @@ Note that it might be the case that UART is not enabled (idProduct `0101` rather
 
 ### Cross compiler
 
-The GCC cross-compiler for ARM can be found at the [ARM website](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads). It's now at version 7, in Q2 2018: [64 bit tar ball](https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2?revision=bc2c96c0-14b5-4bb4-9f18-bceb4050fee7?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,7-2018-q2-update).
+The GCC cross-compiler for ARM can be found at the [ARM website](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads). It's now at version 7, in Q2 2018: [64 bit tar ball](https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2?revision=bc2c96c0-14b5-4bb4-9f18-bceb4050fee7?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,7-2018-q2-update). You might also just use the cross-compiler if it's in a PPA. It's nice if you have one with Python support enabled so you can use this [GDB dashboard](https://github.com/cyrus-and/gdb-dashboard), but this is optional.
 
 Assuming you have a 64 bit system, you might have to install 32 bit packages:
 
