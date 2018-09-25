@@ -45,13 +45,13 @@ In SDK 11, there is another bug that has to be fixed. In the file `nrf_drv_saadc
 
 ### J-Link
 
-Download and install J-Link Segger’s [software](https://www.segger.com/downloads/jlink). The current version is 6.0.6 [64bit .deb file version 6.0.6](https://www.segger.com/downloads/jlink/jlink_6.0.6_x86_64.deb) and can be found at the "J-Link Software and Documentation Pack" section. 
+Download and install J-Link Segger’s [software](https://www.segger.com/downloads/jlink). The current version is V6.34f (direct link to [64bit .deb](https://www.segger.com/downloads/jlink/JLink_Linux_x86_64.deb)) and can be found at the "J-Link Software and Documentation Pack" section. 
 
 Then install it:
 
-    sudo dpkg -i jlink_5.12.8_x86_64.deb
+    sudo dpkg -i JLink_Linux_x86_64.deb
 
-Check the [Segger forums](http://forum.segger.com/index.php?page=Thread&threadID=4089) for some help with the udev rules (there is one that comes with the Segger software).
+Check the [Segger forums](http://forum.segger.com/index.php?page=Thread&threadID=4089) for some help with the udev rules (there is one that comes with the Segger software). One thing that you might want to do is disable or deinstall the modemmanager on Ubuntu: `sudo systemctl disable ModemManager.service`.
 Note that it might be the case that UART is not enabled (idProduct `0101` rather than `0105`). You can enable this by typing `vcom enable` on the JLink command line.
 
 ### Cross compiler
