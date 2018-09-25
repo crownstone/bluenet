@@ -45,7 +45,7 @@ In SDK 11, there is another bug that has to be fixed. In the file `nrf_drv_saadc
 
 ### J-Link
 
-Download and install J-Link Segger’s [software](https://www.segger.com/downloads/jlink). The current version is V6.34f (direct link to [64bit .deb](https://www.segger.com/downloads/jlink/JLink_Linux_x86_64.deb)) and can be found at the "J-Link Software and Documentation Pack" section. 
+Download and install J-Link Segger’s [software](https://www.segger.com/downloads/jlink). The current version is V6.34f (direct link to [64 bit .deb](https://www.segger.com/downloads/jlink/JLink_Linux_x86_64.deb)) and can be found at the "J-Link Software and Documentation Pack" section. 
 
 Then install it:
 
@@ -56,19 +56,15 @@ Note that it might be the case that UART is not enabled (idProduct `0101` rather
 
 ### Cross compiler
 
-A cross-compiler for ARM is the GCC cross-compiler which is maintained by the ARM folks on [Launchpad](https://launchpad.net/gcc-arm-embedded).
+The GCC cross-compiler for ARM can be found at the [ARM website](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads). It's now at version 7, in Q2 2018: [64 bit tar ball](https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2?revision=bc2c96c0-14b5-4bb4-9f18-bceb4050fee7?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,7-2018-q2-update).
 
-Download and extract version [2016-q2](https://launchpad.net/gcc-arm-embedded/5.0/5-2016-q2-update/+download/gcc-arm-none-eabi-5_4-2016q2-20160622-linux.tar.bz2).
-
-Assuming you have a 64bit system, you will have to install some 32bit packages:
+Assuming you have a 64 bit system, you might have to install 32 bit packages:
 
     sudo dpkg --add-architecture i386
     sudo apt-get update
     sudo apt-get install libstdc++6:i386 libncurses5:i386
 
-If the cross-compiler does not work, make sure you check if all its dependencies are met:
-
-    ldd /opt/gcc-arm-none-eabi-5_4-2016q2/bin/arm-none-eabi-gcc
+If the cross-compiler does not work, make sure you check if all its dependencies are met with `ldd arm-none-eabi-gcc`.
 
 ### Misc.
 
