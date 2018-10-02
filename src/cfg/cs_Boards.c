@@ -270,8 +270,8 @@ void asPca10040(boards_config_t* p_config) {
 	p_config->pinAinVoltage                      = 2; // gpio4
 	p_config->pinAinZeroRef	                     = 4; // gpio28
 	p_config->pinAinPwmTemp                      = 0; // gpio2
-	p_config->pinGpioRx                          = 8;
-	p_config->pinGpioTx                          = 6;
+	p_config->pinGpioRx                          = 8; // for UART commands
+	p_config->pinGpioTx                          = 6; // for UART output
 	p_config->pinLedRed                          = 19;
 	p_config->pinLedGreen                        = 20;
 

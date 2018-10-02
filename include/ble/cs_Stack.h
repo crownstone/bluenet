@@ -172,6 +172,8 @@ public:
 	 *
 	 */
 	void initRadio();
+	
+	void initSoftdevice();
 
 	void createCharacteristics();
 

@@ -8,8 +8,9 @@
 #include <drivers/cs_Serial.h>
 #include <processing/cs_Setup.h>
 
-Setup::Setup(): _setupDone(false) {
+Setup::Setup() {
 	EventDispatcher::getInstance().addListener(this);
+	_last_record_key = 0;
 }
 
 cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
@@ -74,6 +75,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	_persistenceMode = OperationMode::OPERATION_MODE_NORMAL;
 	mode = +_persistenceMode;
 	value.u8 = mode;
+	_last_record_key = mode;
 	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::STRATEGY1);
 
 	// Switch relay on
@@ -81,10 +83,11 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	EventDispatcher::getInstance().dispatch(event0);
 
 	// Reboot will be done when persistent storage is done.
-	_setupDone = true;
+	
+//	_setupDone = true;
 
-	event_t event1(CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE, (void*)&_persistenceMode, sizeof(_persistenceMode));
-	EventDispatcher::getInstance().dispatch(event1);
+//	event_t event1(CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE, (void*)&_persistenceMode, sizeof(_persistenceMode));
+//	EventDispatcher::getInstance().dispatch(event1);
 
 	LOGi("Setup completed");
 	return ERR_WAIT_FOR_SUCCESS;
@@ -97,24 +100,31 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
  * example the entire storage queue has been handled, it should perform the reset.
  */
 void Setup::handleEvent(event_t & event) {
-	/*
+	// we want to react to the last write request (OPERATION_MODE_NORMAL)
 	switch (event.type) {
-		case CS_TYPE::EVT_STORAGE_WRITE_DONE:
-			if (_setupDone) {
-				// set char value
-				event_t event1(CS_TYPE::EVT_SETUP_DONE);
-				EventDispatcher::getInstance().dispatch(event1);
+	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
+		uint8_t record_key = *(uint8_t*)event.data;
 
-				// reset after 1000 ms
-				evt_do_reset_delayed_t payload;
-				payload.resetCode = GPREGRET_SOFT_RESET;
-				payload.delayMs = 1000;
-				event_t event2(CS_TYPE::EVT_DO_RESET_DELAYED, &payload, sizeof(payload));
-				EventDispatcher::getInstance().dispatch(event2);
-			}
-			break;
-		default: {}
+		if (record_key == _last_record_key) {
+			LOGi("Setup done... Reset crownstone");
+			// set char value
+			event_t event1(CS_TYPE::EVT_SETUP_DONE);
+			EventDispatcher::getInstance().dispatch(event1);
+
+			// reset after 1000 ms
+			evt_do_reset_delayed_t payload;
+			payload.resetCode = GPREGRET_SOFT_RESET;
+			payload.delayMs = 1000;
+			event_t event2(CS_TYPE::EVT_DO_RESET_DELAYED, &payload, sizeof(payload));
+			EventDispatcher::getInstance().dispatch(event2);
+		} else {
+			LOGd("Compare key %i with %i", record_key, _last_record_key);
+		}
+		break;
 	}
-	*/
+	default: {
+		//LOGd("Setup receives event %s", TypeName(event.type));
+	}
+	}
 }
 

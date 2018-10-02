@@ -193,7 +193,7 @@ extern "C" {
 /**
  * @brief Bitmask defining TIMER instances reserved to be used outside of nrfx.
  */
-#define NRFX_TIMERS_USED        0
+#define NRFX_TIMERS_USED        1
 
 /** @} */
 

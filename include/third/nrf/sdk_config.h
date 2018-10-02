@@ -1587,7 +1587,7 @@
 // <e> NRF_LOG_BACKEND_UART_ENABLED - nrf_log_backend_uart - Log UART backend                                           
 //==========================================================                                                            
 #ifndef NRF_LOG_BACKEND_UART_ENABLED                                                                                    
-#define NRF_LOG_BACKEND_UART_ENABLED 1                                                                                  
+#define NRF_LOG_BACKEND_UART_ENABLED 1
 #endif                                                                                                                  
 
 // <o> NRF_LOG_BACKEND_UART_TX_PIN - UART TX pin                                                                        
@@ -5333,11 +5333,11 @@
 // <e> NRFX_UART_ENABLED - nrfx_uart - UART peripheral driver
 //==========================================================
 #ifndef NRFX_UART_ENABLED
-#define NRFX_UART_ENABLED 0
+#define NRFX_UART_ENABLED 1
 #endif
 // <o> NRFX_UART0_ENABLED - Enable UART0 instance 
 #ifndef NRFX_UART0_ENABLED
-#define NRFX_UART0_ENABLED 0
+#define NRFX_UART0_ENABLED 1
 #endif
 
 // <o> NRFX_UART_DEFAULT_CONFIG_HWFC  - Hardware Flow Control
@@ -5401,7 +5401,7 @@
 // <e> NRFX_UART_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRFX_UART_CONFIG_LOG_ENABLED
-#define NRFX_UART_CONFIG_LOG_ENABLED 0
+#define NRFX_UART_CONFIG_LOG_ENABLED 1
 #endif
 // <o> NRFX_UART_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -6641,7 +6641,7 @@
 // <e> UART_ENABLED - nrf_drv_uart - UART/UARTE peripheral driver - legacy layer
 //==========================================================
 #ifndef UART_ENABLED
-#define UART_ENABLED 0
+#define UART_ENABLED 1
 #endif
 // <o> UART_DEFAULT_CONFIG_HWFC  - Hardware Flow Control
  
@@ -6712,13 +6712,13 @@
  
 
 #ifndef UART_LEGACY_SUPPORT
-#define UART_LEGACY_SUPPORT 1
+#define UART_LEGACY_SUPPORT 0
 #endif
 
 // <e> UART0_ENABLED - Enable UART0 instance
 //==========================================================
 #ifndef UART0_ENABLED
-#define UART0_ENABLED 0
+#define UART0_ENABLED 1
 #endif
 // <q> UART0_CONFIG_USE_EASY_DMA  - Default setting for using EasyDMA
  
@@ -8254,6 +8254,8 @@
 
 // <i> Log data is buffered and can be processed in idle.
 
+// If DEFERRED is 1, you need to call FLASH manually
+
 #ifndef NRF_LOG_DEFERRED
 #define NRF_LOG_DEFERRED 0
 #endif
@@ -8365,7 +8367,7 @@
 // <e> NRF_MPU_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRF_MPU_CONFIG_LOG_ENABLED
-#define NRF_MPU_CONFIG_LOG_ENABLED 0
+#define NRF_MPU_CONFIG_LOG_ENABLED 1
 #endif
 // <o> NRF_MPU_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -8416,7 +8418,7 @@
 // <e> NRF_STACK_GUARD_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRF_STACK_GUARD_CONFIG_LOG_ENABLED
-#define NRF_STACK_GUARD_CONFIG_LOG_ENABLED 0
+#define NRF_STACK_GUARD_CONFIG_LOG_ENABLED 1
 #endif
 // <o> NRF_STACK_GUARD_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -8467,7 +8469,7 @@
 // <e> TASK_MANAGER_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef TASK_MANAGER_CONFIG_LOG_ENABLED
-#define TASK_MANAGER_CONFIG_LOG_ENABLED 0
+#define TASK_MANAGER_CONFIG_LOG_ENABLED 1
 #endif
 // <o> TASK_MANAGER_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -9194,7 +9196,7 @@
 // <e> TIMER_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef TIMER_CONFIG_LOG_ENABLED
-#define TIMER_CONFIG_LOG_ENABLED 0
+#define TIMER_CONFIG_LOG_ENABLED 1
 #endif
 // <o> TIMER_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -10213,7 +10215,7 @@
 // <e> NRF_QUEUE_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRF_QUEUE_CONFIG_LOG_ENABLED
-#define NRF_QUEUE_CONFIG_LOG_ENABLED 0
+#define NRF_QUEUE_CONFIG_LOG_ENABLED 1
 #endif
 // <o> NRF_QUEUE_CONFIG_LOG_LEVEL  - Default Severity level
  
@@ -10224,7 +10226,7 @@
 // <4=> Debug 
 
 #ifndef NRF_QUEUE_CONFIG_LOG_LEVEL
-#define NRF_QUEUE_CONFIG_LOG_LEVEL 3
+#define NRF_QUEUE_CONFIG_LOG_LEVEL 4
 #endif
 
 // <o> NRF_QUEUE_CONFIG_LOG_INIT_FILTER_LEVEL  - Initial severity level if dynamic filtering is enabled

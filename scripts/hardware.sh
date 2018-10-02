@@ -44,7 +44,8 @@ hardware_version() {
 		$JLINK -Device $DEVICE -speed 100 -SelectEmuBySN $serial_num -If SWD $TEMP_DIR/hardware_version.script -ExitonError 1
 	fi
 
-	checkError "Failed to get hardware version"
+	result=$?
+	checkError $result "Failed to get hardware version"
 
 	cs_log "The result should be something like:"
 	cs_log "    10000104 = 30 42 41 41"
@@ -58,7 +59,8 @@ power() {
 	cs_info "Power up through JLink"
 	SCRIPT=power.script
 	$JLINK -Device $DEVICE -If SWD $SCRIPT_DIR/$SCRIPT
-	checkError "Failed to power up"
+	result=$?
+	checkError $result "Failed to power up"
 }
 
 reboot() {
@@ -67,8 +69,8 @@ reboot() {
 	GDB_SCRIPT=gdbreset
 	cs_log "$GDB -x ${path}/gdb/$GDB_SCRIPT"
 	$GDB -x $path/gdb/$GDB_SCRIPT
-	
-	checkError "Failed to reboot"
+	result=$?
+	checkError $result "Failed to reboot"
 }
 
 

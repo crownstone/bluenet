@@ -6,11 +6,11 @@
  */
 
 #include <algorithm>
-#include <ble/cs_Handlers.h>
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Config.h>
 #include <cfg/cs_UuidConfig.h>
+#include <common/cs_Handlers.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_Scanner.h>
@@ -80,28 +80,9 @@ Stack::~Stack() {
 }
 
 /**
- * Called by the Softdevice handler on any BLE event. It is initialized from the SoftDevice using the app scheduler.
- * This means that the callback runs on the main thread. 
- */
-extern "C" {
-
-
-	static void ble_evt_dispatch(const ble_evt_t * p_ble_evt, void * p_context) {
-#if BUILD_MESHING == 1
-		if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
-			rbc_mesh_ble_evt_handler(p_ble_evt);
-		}
-#endif
-		Stack::getInstance().on_ble_evt(p_ble_evt);
-	}
-
-#define STACK_OBSERVER_PRIO 1
-
-	NRF_SDH_BLE_OBSERVER(m_stack, STACK_OBSERVER_PRIO, ble_evt_dispatch, NULL);
-}
-
-/**
  * Initialize SoftDevice, handlers, and brown-out.
+ * In previous versions softdevice_ble_evt_handler_set could be called with a static function to be used as callback
+ * function. Now, the macro NRF_SDH_BLE_OBSERVER ha been introduced instead.
  */
 void Stack::init() {
 	if (checkCondition(C_STACK_INITIALIZED, false)) return;
@@ -110,7 +91,6 @@ void Stack::init() {
 	ret_code_t ret_code;
 
 	// Check if SoftDevice is already running and disable it in that case (to restart later)
-	LOGi(FMT_INIT, "softdevice");
 	uint8_t enabled;
 	ret_code = sd_softdevice_is_enabled(&enabled);
 	APP_ERROR_CHECK(ret_code);
@@ -120,9 +100,10 @@ void Stack::init() {
 		APP_ERROR_CHECK(ret_code);
 	}
 
+	// now done through NRF_SDH_BLE_OBSERV
 	//softdevice_ble_evt_handler_set(ble_evt_dispatch);
 	//LOGd("Address of sdh_ble_observers", &sdh_ble_observers);
-	
+
 	// Enable power-fail comparator
 	sd_power_pof_enable(true);
 	// set threshold value, if power falls below threshold,
@@ -135,7 +116,46 @@ void Stack::init() {
 	_adv_data.scan_rsp_data.p_data = NULL;
 	_adv_data.scan_rsp_data.len = 0;
 
+	LOGd("Stack initialized");
 	setInitialized(C_STACK_INITIALIZED);
+
+}
+
+/**
+ * This function calls nrf_sdh_enable_request. Somehow, when called after a reboot. This works fine. However, when
+ * called for the first time this leads to a hard fault. APP_ERROR_CHECK is not even called. The second time it
+ * goes through the event that the Storage is initialized doesn't come through. 
+ */
+void Stack::initSoftdevice() {
+
+	app_sched_execute();
+
+	ret_code_t ret_code;
+	LOGi(FMT_INIT, "softdevice");
+	if (nrf_sdh_is_enabled()) {
+		LOGd("Softdevice is enabled");
+	} else {
+		LOGd("Softdevice is currently not enabled");
+	}
+	if (nrf_sdh_is_suspended()) {
+		LOGd("Softdevice is suspended");
+	} else {
+		LOGd("Softdevice is currently not suspended");
+	}
+	LOGd("nrf_sdh_enable_request");
+	ret_code = nrf_sdh_enable_request(); 
+	if (ret_code == NRF_ERROR_INVALID_STATE) {
+		LOGw("Softdevice, already initialized");
+		return;
+	}
+	LOGd("Error: %i", ret_code);
+	APP_ERROR_CHECK(ret_code);
+
+	while (!nrf_sdh_is_enabled()) {
+		LOGe("Softdevice, not enabled");
+		// The status change has been deferred.
+		app_sched_execute();
+	}
 }
 
 /** Initialize or configure the BLE radio.
@@ -158,19 +178,14 @@ void Stack::init() {
 void Stack::initRadio() {
 	if (!checkCondition(C_STACK_INITIALIZED, true)) return;
 	if (checkCondition(C_RADIO_INITIALIZED, false)) return;
+
 	ret_code_t ret_code;
-
-	LOGv("nrf_sdh_enable_request");
-	ret_code = nrf_sdh_enable_request(); 
-	if (ret_code == NRF_ERROR_INVALID_STATE) {
-		LOGw("Softdevice, already initialized");
-		return;
-	}
-
+	
+	LOGi(FMT_INIT, "radio");
 	// Enable BLE stack
 	uint32_t ram_start = RAM_R1_BASE;
 	_conn_cfg_tag = 1;
-	LOGv("nrf_sdh_ble_default_cfg_set at %p", ram_start);
+	LOGd("nrf_sdh_ble_default_cfg_set at %p", ram_start);
 	ret_code = nrf_sdh_ble_default_cfg_set(_conn_cfg_tag, &ram_start); 
 	switch(ret_code) {
 		case NRF_ERROR_NO_MEM:
@@ -185,7 +200,7 @@ void Stack::initRadio() {
 		LOGw("Application address is too high, memory is unused: %p", ram_start);
 	}
 
-	LOGv("nrf_sdh_ble_enable");
+	LOGd("nrf_sdh_ble_enable");
 	ret_code = nrf_sdh_ble_enable(&ram_start);
 	switch(ret_code) {
 		case NRF_ERROR_INVALID_STATE:
@@ -197,8 +212,12 @@ void Stack::initRadio() {
 		case NRF_ERROR_NO_MEM:
 			LOGe("BLE: no memory available");
 			break;
+		case NRF_SUCCESS:
+			LOGi("Softdevice enabled");
+			break;
 	}
 	APP_ERROR_CHECK(ret_code);
+
 
 	// Version is not saved or shown yet
 	ble_version_t version( { });
@@ -688,25 +707,25 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
 	case C_STACK_INITIALIZED:
 		field = isInitialized(C_STACK_INITIALIZED);
 		if (expectation != field) {
-			LOGw("Stack init %i", field);
+			LOGw("Stack init %s", field ? "true" : "false");
 		}
 		break;
 	case C_RADIO_INITIALIZED:
 		field = isInitialized(C_RADIO_INITIALIZED);
 		if (expectation != field) {
-			LOGw("Radio init %i", field);
+			LOGw("Radio init %s", field ? "true" : "false");
 		}
 		break;
 	case C_SERVICES_INITIALIZED:
 		field = isInitialized(C_SERVICES_INITIALIZED);
 		if (expectation != field) {
-			LOGw("Services init %i", field);
+			LOGw("Services init %s", field ? "true" : "false");
 		}
 		break;
 	case C_ADVERTISING: 
 		field = _advertising;
 		if (expectation != field) {
-			LOGw("Advertising %i", field);
+			LOGw("Advertising init %s", field ? "true" : "false");
 		}
 		break;
 	}
@@ -842,7 +861,7 @@ void Stack::changeToNormalTxPowerMode() {
 void Stack::on_ble_evt(const ble_evt_t * p_ble_evt) {
 
 	if (p_ble_evt->header.evt_id !=  BLE_GAP_EVT_RSSI_CHANGED) {
-		const char *evt_name = NordicEventTypeName(p_ble_evt->header.evt_id);
+		const char *evt_name __attribute__((unused)) = NordicEventTypeName(p_ble_evt->header.evt_id);
 		LOGd("Event %i (0x%X) %s", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id, evt_name);
 	}
 

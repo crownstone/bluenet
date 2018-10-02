@@ -98,12 +98,12 @@ typedef enum {
 
 #if SERIAL_VERBOSITY<SERIAL_VERBOSE
 #undef LOGv
-#define LOGv(fmt, ...)
+#define LOGv(fmt, ...) do { if (false) logLN(SERIAL_VERBOSE, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__); } while(0)
 #endif
 
 #if SERIAL_VERBOSITY<SERIAL_DEBUG
 #undef LOGd
-#define LOGd(fmt, ...)
+#define LOGd(fmt, ...) do { if (false) logLN(SERIAL_DEBUG, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__); } while(0)
 #endif
 
 #if SERIAL_VERBOSITY<SERIAL_INFO

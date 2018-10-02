@@ -33,6 +33,9 @@ extern "C" {
  */
 void sys_evt_dispatch(uint32_t sys_evt);
 
+void fds_evt_handler(fds_evt_t const * p_fds_evt);
+
+
 #ifdef __cplusplus
 }
 #endif

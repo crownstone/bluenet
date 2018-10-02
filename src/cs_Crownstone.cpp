@@ -47,7 +47,6 @@ extern "C" {
 // Define to enable leds. WARNING: this is stored in UICR and not easily reversible!
 //#define ENABLE_LEDS
 
-
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
@@ -132,7 +131,7 @@ void Crownstone::init() {
 
 	LOGi(FMT_CREATE, "timer");
 	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
-
+	
 	LOGi(FMT_HEADER, "mode");
 	uint8_t mode;
 	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
@@ -155,6 +154,15 @@ void Crownstone::init() {
 void Crownstone::configure() {
 
 	LOGi("> stack ...");
+	
+	_stack->initRadio();
+
+	if (nrf_sdh_is_enabled()) {
+		LOGd("Softdevice enabled");
+	} else {
+		LOGd("Softdevice still not enabled?");
+	}
+
 	configureStack();
 
 	Storage::getInstance().garbageCollect();
@@ -186,6 +194,9 @@ void Crownstone::configure() {
 void Crownstone::initDrivers() {
 	_stack->init();
 	_timer->init();
+	
+	_stack->initSoftdevice();
+
 	_storage->init();
 	_state->init(&_boardsConfig);
 
@@ -211,6 +222,7 @@ void Crownstone::initDrivers() {
 
 	LOGi(FMT_INIT, "encryption handler");
 	EncryptionHandler::getInstance().init();
+	
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		// switch / PWM init
@@ -364,7 +376,7 @@ void Crownstone::configureAdvertisement() {
 	_stack->setServiceData(_serviceData);
 
 	// Need to init radio before configuring ibeacon?
-	_stack->initRadio();
+//	_stack->initRadio();
 
 	if (_state->isSet(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
 		LOGd("Configure iBeacon");
@@ -723,7 +735,7 @@ void Crownstone::run() {
 	// Forever, run scheduler, wait for events and handle them
 	while(1) {
 		app_sched_execute();
-		BLE_CALL(sd_app_evt_wait, ());
+		sd_app_evt_wait();
 	}
 }
 
@@ -896,10 +908,10 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	_log(SERIAL_INFO, " _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| \r\n\r\n");
 	_log(SERIAL_INFO, "\033[0m");
 
-	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_DAY));
+	LOGi("Compilation date: %s", COMPILATION_DAY);
 	LOGi("Compilation time: %s", __TIME__);
 	LOGi("Hardware version: %s", get_hardware_version());
-
+	LOGi("Verbosity: %i", SERIAL_VERBOSITY); 
 	LOG_MEMORY;
 }
 
@@ -924,43 +936,6 @@ void overwrite_hardware_version() {
 	LOGd("Board: %p", hardwareBoard);
 }
 
-extern "C" {
-
-#define CROWNSTONE_SOC_OBSERVER_PRIO 1
-static void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
-	LOGd("SOC event: %i", evt_id);
-}
-
-#define CROWNSTONE_STATE_OBSERVER_PRIO 1
-static void crownstone_state_handler(nrf_sdh_state_evt_t state, void * p_context) {
-	switch (state) {
-		case NRF_SDH_EVT_STATE_ENABLE_PREPARE:
-			LOGd("Softdevice is about to be enabled");
-			break;
-		case NRF_SDH_EVT_STATE_ENABLED:
-			LOGd("Softdevice is now enabled");
-			break;
-		case NRF_SDH_EVT_STATE_DISABLE_PREPARE:
-			LOGd("Softdevice is about to be disabled");
-			break;
-		case NRF_SDH_EVT_STATE_DISABLED:
-			LOGd("Softdevice is now disabled");
-			break;
-		default:
-			LOGd("Unknown state change");
-	}
-}
-
-NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, crownstone_soc_evt_handler, NULL);
-
-NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRIO) =
-{ 
-	.handler = crownstone_state_handler,
-	.p_context = NULL
-};
-
-}	
-
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
  * the code within the bootloader has been processed before. But also after the bootloader, the code in
@@ -978,6 +953,10 @@ int main() {
 	SCB->CPACR |= (3UL << 20) | (3UL << 22); __DSB(); __ISB();
 
 	atexit(on_exit);
+
+	NRF_LOG_INIT(NULL);
+	NRF_LOG_DEFAULT_BACKENDS_INIT();
+
 
 	uint32_t errCode;
 	boards_config_t board = {};

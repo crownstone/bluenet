@@ -81,7 +81,8 @@ bool EncryptionHandler::allowedToWrite() {
  * This method does not use the AES CTR method but straight ECB.
  * It encrypts the block with the GUEST key.
  */
-bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
+bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength, 
+		EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
 	uint32_t err_code;
 	uint8_t softdevice_enabled;
 	err_code = sd_softdevice_is_enabled(&softdevice_enabled);
@@ -102,10 +103,9 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 		return false;
 	}
 
+	// set the guest key as active encryption key
 	if (_checkAndSetKey(userLevel) == false)
 		return false;
-
-	// set the guest key as active encryption key
 
 	// set the cleartext to 0x0 so we automatically zeropad the cleartext
 	memset(_block.cleartext, 0x0, SOC_ECB_CLEARTEXT_LENGTH);
@@ -249,7 +249,8 @@ bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, u
 
 
 
-bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel& levelOfPackage, EncryptionType encryptionType) {
+bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, 
+		uint16_t targetLength, EncryptionAccessLevel& levelOfPackage, EncryptionType encryptionType) {
 	if (!(encryptionType == CTR || encryptionType == CTR_CAFEBABE)) {
 		LOGe("Cannot decrypt ECB");
 		return false;

@@ -196,7 +196,7 @@ constexpr const char* NordicEventTypeName(uint32_t nordic_type) {
 		do                                                                                                             \
 		{                                                                                                              \
 			const uint32_t LOCAL_ret_code_t = (ret_code_t);                                                            \
-			const char* LOCAL_ret_code_str = NordicFDSTypeName(ret_code_t);                                            \
+			const char* LOCAL_ret_code_str __attribute__((unused)) = NordicFDSTypeName(ret_code_t);                    \
 			if (LOCAL_ret_code_t != NRF_SUCCESS)                                                                       \
 			{                                                                                                          \
 				LOGe("ret_code_t: %d (0x%X) %s", LOCAL_ret_code_t, LOCAL_ret_code_t, LOCAL_ret_code_str);              \
@@ -224,8 +224,8 @@ constexpr const char* NordicEventTypeName(uint32_t nordic_type) {
 			const uint32_t LOCAL_cs_ret_code_t = (cs_ret_code_t);                                                      \
 			if (LOCAL_cs_ret_code_t != NRF_SUCCESS)                                                                    \
 			{                                                                                                          \
-				const char* LOCAL_ret_code_str = NordicTypeName(cs_ret_code_t);                                        \
-				LOGd("cs_ret_code_t: %d (0x%X)", LOCAL_cs_ret_code_t, LOCAL_cs_ret_code_t, LOCAL_ret_code_str);        \
+				const char* LOCAL_ret_code_str __attribute__((unused)) = NordicTypeName(cs_ret_code_t);                \
+				LOGe("cs_ret_code_t: %d (0x%X)", LOCAL_cs_ret_code_t, LOCAL_cs_ret_code_t, LOCAL_ret_code_str);        \
 				APP_ERROR_HANDLER(LOCAL_cs_ret_code_t);                                                                \
 			}                                                                                                          \
 		} while (0)

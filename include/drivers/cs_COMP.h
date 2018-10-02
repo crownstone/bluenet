@@ -9,14 +9,7 @@
 
 // TODO: requires symbol names to be preceded by std::
 #include <cstdint>
-
-// TODO: collect external dependencies to Nordic drivers in one file
-extern "C" {
-#include <app_util_platform.h>
-typedef uint32_t ret_code_t;
-#include <nrfx_comp.h>
-#include <nrf_drv_comp.h>
-}
+#include <cs_Nordic.h>
 
 /**
  * Compare events indicate if the sampled values (be it current, voltage, or temperature) go through a predefined threshold from

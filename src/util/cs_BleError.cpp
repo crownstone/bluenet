@@ -25,7 +25,7 @@ void app_error_handler (uint32_t error_code, uint32_t line_num, const uint8_t * 
 	volatile uint16_t line __attribute__((unused)) = line_num;
 	volatile const uint8_t* file __attribute__((unused)) = p_file_name;
 
-	const char * str_error = NordicTypeName(error);
+	const char * str_error __attribute__((unused)) = NordicTypeName(error);
 	LOGe("%s", str_error);
 	LOGf("FATAL ERROR 0x%x, at %s:%d", error, file, line);
 
@@ -40,7 +40,7 @@ void app_error_handler_bare(ret_code_t error_code)
 	volatile uint16_t line __attribute__((unused)) = 0;
 	volatile const uint8_t* file __attribute__((unused)) = NULL;
 
-	const char * str_error = NordicTypeName(error);
+	const char * str_error __attribute__((unused)) = NordicTypeName(error);
 	LOGe("%s", str_error);
 	LOGf("FATAL ERROR 0x%x", error);
 
