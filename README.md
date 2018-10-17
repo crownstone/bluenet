@@ -23,7 +23,7 @@ We also provide libraries which implements this protocol (so if you build a smar
 
 - [Android](https://github.com/crownstone/bluenet-lib-android)
 - [iOS](https://github.com/crownstone/bluenet-ios-lib)
-- [Python](https://github.com/crownstone/bluenet-lib-python)
+- [Python](https://github.com/crownstone/bluenet-python-lib)
 
 
 # Build
