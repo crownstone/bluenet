@@ -48,6 +48,10 @@ void serial_config(uint8_t pinRx, uint8_t pinTx) {
 // Initializes anything but the UART peripheral.
 // Only to be called once.
 void init() {
+
+	// TODO: Anne, make sure UART gets operational again
+	return;
+
 	if (_initialized) {
 		return;
 	}
@@ -85,6 +89,10 @@ void init() {
 
 // Initializes the UART peripheral, and enables interrupt.
 void init_uart() {
+
+	// TODO: Anne, make sure UART gets operational again
+	return;
+
 	if (_initializedUart) {
 		return;
 	}
@@ -206,6 +214,24 @@ void deinit_tx() {
 }
 
 void serial_init(serial_enable_t enabled) {
+
+	// TODO: Anne, set back later, mmm. This is legacy. What's the new way to do this?
+	/*
+	 *
+    nrf_drv_uart_config_t config = NRF_DRV_UART_DEFAULT_CONFIG;
+    config.pseltxd  = NRF_LOG_BACKEND_UART_TX_PIN;
+    config.pselrxd  = NRF_UART_PSEL_DISCONNECTED;
+    config.pselcts  = NRF_UART_PSEL_DISCONNECTED;
+    config.pselrts  = NRF_UART_PSEL_DISCONNECTED;
+    config.baudrate = (nrf_uart_baudrate_t)NRF_LOG_BACKEND_UART_BAUDRATE;
+	 *
+	nrf_drv_uart_config_t config = NRF_DRV_UART_DEFAULT_CONFIG;
+	config.pselrxd = _pinRx;
+	config.pseltxd = _pinTx;
+	config.bandwidth = UART_BAUDRATE_BAUDRATE_Baud230400;
+	ret_code = nrf_drv_uart_init(&config, NULL);
+	*/
+	/*
 #if SERIAL_VERBOSITY>SERIAL_NONE
 	_state = enabled;
 	init();
@@ -232,6 +258,7 @@ void serial_init(serial_enable_t enabled) {
 	deinit_tx();
 	deinit_uart();
 #endif
+*/
 }
 
 void serial_enable(serial_enable_t enabled) {
@@ -327,9 +354,12 @@ int now() {
 #endif
 
 
-static uint8_t readByte;
 
 // UART interrupt handler
+// TODO: Anne, disabled for now
+/*
+static uint8_t readByte;
+
 extern "C" void UART0_IRQHandler(void) {
 	if (NRF_UART0->EVENTS_ERROR && nrf_uart_int_enable_check(NRF_UART0, NRF_UART_INT_MASK_ERROR)) {
 #ifdef ERROR_PIN
@@ -362,5 +392,5 @@ extern "C" void UART0_IRQHandler(void) {
 //		nrf_uart_event_clear(NRF_UART0, NRF_UART_EVENT_RXTO);
 		// TODO: init and start UART.
 	}
-
 }
+*/

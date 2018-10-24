@@ -544,12 +544,14 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 	const uint8_t maxDataLength = 29;
 	uint8_t nameLength = maxDataLength - serviceDataLength;
 	LOGd("Maximum data length minus service data length: %i - %i = %i", maxDataLength, serviceDataLength, nameLength);
-	nameLength = std::min(nameLength, (uint8_t)(getDeviceName().length()));
+	uint8_t deviceNameLength = getDeviceName().length();
+	nameLength = std::min(nameLength, deviceNameLength);
 	LOGd("Set BLE name to length %i", nameLength);
 	_config_scanrsp.short_name_len = nameLength;
 
 	if (nameLength == 0) {
 		LOGe("Scan response payload too large or device name not set");
+		return;
 	}
 
 	// we now have to encode the data by an explicit call

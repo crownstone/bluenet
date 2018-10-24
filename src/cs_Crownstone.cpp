@@ -956,7 +956,7 @@ int main() {
 
 	NRF_LOG_INIT(NULL);
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
-
+	NRF_LOG_INFO("Main");
 
 	uint32_t errCode;
 	boards_config_t board = {};

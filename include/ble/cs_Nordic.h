@@ -42,6 +42,9 @@ typedef uint32_t ret_code_t;
 #include <nrf_sdm.h>
 // legacy #include <nrf_drv_uart.h>
 #include <nrfx_glue.h>
+#include <nrfx_log.h>
+//#include <nordic_common.h>
+//#include <nrf_serial.h>
 
 #ifndef BOOTLOADER_COMPILATION
 #include <crc16.h>

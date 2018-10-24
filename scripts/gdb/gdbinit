@@ -4,6 +4,10 @@
 #source ~/.gdbinit
 set history filename .gdb_history
 set history save
+set history remove-duplicates 100
+set history expansion on
+set history size 1024
+
 set print object
 set print static off
 set print elements 1
