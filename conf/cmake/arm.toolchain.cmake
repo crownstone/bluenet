@@ -23,13 +23,13 @@ SET(CMAKE_CROSSCOMPILING 1)
 # get the configuration data from the proper CMakeBuild.config file from some configuration directory.
 SET(CONFIG_FILE ${CMAKE_SOURCE_DIR}/CMakeConfig.cmake)
 IF(EXISTS "${CONFIG_FILE}")
-	MESSAGE(STATUS "Load config file ${CONFIG_FILE}")
+	MESSAGE(STATUS "arm.toolchain.cmake: Load config file ${CONFIG_FILE}")
 	INCLUDE(${CONFIG_FILE})
 ELSE()
-	MESSAGE(WARNING "Cannot find config file ${CONFIG_FILE}")
+	MESSAGE(WARNING "arm.toolchain.cmake: Cannot find config file ${CONFIG_FILE}")
 ENDIF()
 
-MESSAGE(STATUS "ARM cmake: Bluetooth name ${BLUETOOTH_NAME}")
+MESSAGE(STATUS "arm.toolchain.cmake: Bluetooth name ${BLUETOOTH_NAME}")
 
 #######################################################################################################################
 # type of compiler we want to use, the COMPILER_TYPE can be empty if normal gcc and g++ compilers are intended
@@ -42,7 +42,7 @@ SET(CMAKE_CXX_OUTPUT_EXTENSION .o)
 
 # Make cross-compiler easy to find (but we will use absolute paths anyway)
 SET(PATH "${PATH}:${COMPILER_PATH}/bin")
-MESSAGE(STATUS "ARM cmake: PATH is set to: ${PATH}")
+MESSAGE(STATUS "arm.toolchain.cmake: PATH is set to: ${PATH}")
 
 # Specify the cross compiler, linker, etc.
 SET(CMAKE_C_COMPILER                   ${COMPILER_PATH}/bin/${COMPILER_TYPE}gcc)
@@ -92,8 +92,8 @@ SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS          "")
 # The directory with some of the FindXXX modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake")
 
-MESSAGE(STATUS "ARM cmake: C Compiler: ${CMAKE_C_COMPILER}")
-MESSAGE(STATUS "ARM cmake: Search for FindX files in ${CMAKE_MODULE_PATH}")
+MESSAGE(STATUS "arm.toolchain.cmake: C Compiler: ${CMAKE_C_COMPILER}")
+MESSAGE(STATUS "arm.toolchain.cmake: Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 INCLUDE(crownstone.defs)
 
@@ -204,11 +204,11 @@ GET_DIRECTORY_PROPERTY( DirDefs DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITION
 
 FOREACH(definition ${DirDefs})
 	IF(VERBOSITY GREATER 4)
-		MESSAGE(STATUS "ARM cmake: Definition: " ${definition})
+		MESSAGE(STATUS "arm.toolchain.cmake: Definition: " ${definition})
 	ENDIF()
 	IF(${definition} MATCHES "=$")
 		IF(NOT ${definition} MATCHES "COMPILATION_TIME")
-			MESSAGE(STATUS "ARM cmake: Definition ${definition} is not defined" )
+			MESSAGE(STATUS "arm.toolchain.cmake: Definition ${definition} is not defined" )
 		ENDIF()
 	ENDIF()
 ENDFOREACH()
@@ -227,8 +227,8 @@ ENDIF()
 
 # Final collection of C/C++ compiler flags
 
-MESSAGE(STATUS "ARM cmake: CXX flags: ${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
-MESSAGE(STATUS "ARM cmake: C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
+MESSAGE(STATUS "arm.toolchain.cmake: CXX flags: ${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
+MESSAGE(STATUS "arm.toolchain.cmake: C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
 
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
@@ -265,7 +265,7 @@ SET(CMAKE_INSTALL_PREFIX ${DESTDIR}/usr/local)
 
 # the following doesn't seem to work so well
 SET(CMAKE_INCLUDE_PATH ${DESTDIR}/usr/local/include)
-MESSAGE(STATUS "ARM cmake: Add include path: ${CMAKE_INCLUDE_PATH}")
+MESSAGE(STATUS "arm.toolchain.cmake: Add include path: ${CMAKE_INCLUDE_PATH}")
 
 # indicate where the linker is allowed to search for library / headers
 #SET(CMAKE_FIND_ROOT_PATH
