@@ -350,9 +350,9 @@ The main way to debug your application is through UART. The TX pin is defined by
 
 In case you happen to have the nRFgo Motherboard (nRF6310, strongly recommended) you can easily connect the pins at P2.0 and P2.1 to respectively the pins RXD and TXD on P15 on the board. Do not forget to switch on the RS232 switch. Subsequently you will need some RS232 to USB cable if you haven't an extremely old laptop.
 
-The current set baudrate you can find in `cs_Serial.cpp` and is `38400` baud. To read from serial you can for example use `minicom` (replace ttyUSB0 with the correct device):
+The current set baudrate you can find in `cs_Serial.cpp` and is `230400` baud. To read from serial you can for example use `minicom` (replace ttyUSB0 with the correct device):
 
-    minicom -b 38400 -c on -D /dev/ttyUSB0
+    minicom -b 230400 -c on -D /dev/ttyUSB0
 
 If this requires sudo rights, you may want to add yourself to the dialout group:
 
