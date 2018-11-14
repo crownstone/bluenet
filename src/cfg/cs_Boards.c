@@ -172,8 +172,152 @@ void asACR01B7B(boards_config_t* p_config) {
 	p_config->voltageRange                       = 1800;
 	p_config->currentRange                       = 3000;
 
+	// See https://en.wikipedia.org/wiki/Thermistor#B_or_%CE%B2_parameter_equation B=3380, T0=25, R0=10000
+	// Python: r=10000*math.exp(3380*(1/(90+273.15)-1/(25+273.15))); 3.3/(16000+r)*r
 	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
+//	p_config->pwmTempVoltageThresholdDown        = 0.5;  // About 60 degrees C
 	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
+
+	p_config->minTxPower                         = -20; // higher tx power for builtins
+}
+
+
+void asACR01B9A(boards_config_t* p_config) {
+	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioRelayOn                     = 10;
+	p_config->pinGpioRelayOff                    = 9;
+	p_config->pinAinCurrentGainHigh              = 4; // highest gain
+	p_config->pinAinCurrentGainMed               = 5;
+	p_config->pinAinCurrentGainLow               = 6; // lowest gain
+	p_config->pinAinVoltage                      = 2;
+	p_config->pinAinZeroRef                      = 0;
+	p_config->pinAinPwmTemp                      = 3;
+	p_config->pinGpioRx                          = 20;
+	p_config->pinGpioTx                          = 19;
+	p_config->pinLedRed                          = 14;
+	p_config->pinLedGreen                        = 15;
+
+	p_config->flags.hasRelay                     = true;
+	p_config->flags.pwmInverted                  = false;
+	p_config->flags.hasSerial                    = false;
+	p_config->flags.hasLed                       = true;
+	p_config->flags.ledInverted                  = false;
+	p_config->flags.hasAdcZeroRef                = true;
+//	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
+	p_config->flags.pwmTempInverted              = true;
+
+	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+
+//	p_config->voltageMultiplier                  = 0.257f; // for range -1800 - 1800 mV
+//	p_config->currentMultiplier                  = 0.00294f; // for range -3000 - 3000 mV on pin 5
+	p_config->voltageMultiplier                  = 0.0f;
+	p_config->currentMultiplier                  = 0.0f;
+	p_config->voltageZero                        = -45; // for range -1800 - 1800 mV
+	p_config->currentZero                        = -20; // for range -3000 - 3000 mV on pin 5
+	p_config->powerZero                          = 0; // TODO: calibrate
+	p_config->voltageRange                       = 1800;
+	p_config->currentRange                       = 3000;
+
+	// See https://en.wikipedia.org/wiki/Thermistor#B_or_%CE%B2_parameter_equation B=3380, T0=25, R0=10000
+	// Python: r=10000*math.exp(3380*(1/(90+273.15)-1/(25+273.15))); 3.3/(16000+r)*r
+	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
+//	p_config->pwmTempVoltageThresholdDown        = 0.5;  // About 60 degrees C
+	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
+
+	p_config->minTxPower                         = -20; // higher tx power for builtins
+}
+
+void asACR01B9B(boards_config_t* p_config) {
+	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioRelayOn                     = 15;
+	p_config->pinGpioRelayOff                    = 14;
+	p_config->pinAinCurrentGainHigh              = 4; // highest gain
+	p_config->pinAinCurrentGainMed               = 5;
+	p_config->pinAinCurrentGainLow               = 6; // lowest gain
+	p_config->pinAinVoltage                      = 2;
+	p_config->pinAinZeroRef                      = 0;
+	p_config->pinAinPwmTemp                      = 3;
+	p_config->pinGpioRx                          = 20;
+	p_config->pinGpioTx                          = 19;
+	p_config->pinLedRed                          = 6; // Not there
+	p_config->pinLedGreen                        = 7; // Not there
+
+	p_config->flags.hasRelay                     = true;
+	p_config->flags.pwmInverted                  = false;
+//	p_config->flags.hasSerial                    = false;
+	p_config->flags.hasSerial                    = true;
+	p_config->flags.hasLed                       = true;
+	p_config->flags.ledInverted                  = false;
+	p_config->flags.hasAdcZeroRef                = true;
+//	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
+	p_config->flags.pwmTempInverted              = true;
+
+	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+
+//	p_config->voltageMultiplier                  = 0.257f; // for range -1800 - 1800 mV
+//	p_config->currentMultiplier                  = 0.00294f; // for range -3000 - 3000 mV on pin 5
+	p_config->voltageMultiplier                  = 0.0f;
+	p_config->currentMultiplier                  = 0.0f;
+	p_config->voltageZero                        = -45; // for range -1800 - 1800 mV
+	p_config->currentZero                        = -20; // for range -3000 - 3000 mV on pin 5
+	p_config->powerZero                          = 0; // TODO: calibrate
+	p_config->voltageRange                       = 1800;
+	p_config->currentRange                       = 3000;
+
+	// See https://en.wikipedia.org/wiki/Thermistor#B_or_%CE%B2_parameter_equation B=3380, T0=25, R0=10000
+	// Python: temp=71; r=10000*math.exp(3380*(1/(temp+273.15)-1/(25+273.15))); 3.3/(16000+r)*r
+	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
+//	p_config->pwmTempVoltageThresholdDown        = 0.5;  // About 60 degrees C
+//	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
+	p_config->pwmTempVoltageThresholdDown        = 0.4; // About 71 degrees C
+
+	p_config->minTxPower                         = -20; // higher tx power for builtins
+}
+
+
+void asACR01B9C(boards_config_t* p_config) {
+	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioRelayOn                     = 14;
+	p_config->pinGpioRelayOff                    = 13;
+	p_config->pinAinCurrentGainHigh              = 4; // highest gain
+	p_config->pinAinCurrentGainMed               = 5;
+	p_config->pinAinCurrentGainLow               = 6; // lowest gain
+	p_config->pinAinVoltage                      = 2;
+	p_config->pinAinZeroRef                      = 0;
+	p_config->pinAinPwmTemp                      = 3;
+	p_config->pinGpioRx                          = 20;
+	p_config->pinGpioTx                          = 19;
+	p_config->pinLedRed                          = 6; // Not there
+	p_config->pinLedGreen                        = 7; // Not there
+
+	p_config->flags.hasRelay                     = true;
+	p_config->flags.pwmInverted                  = false;
+//	p_config->flags.hasSerial                    = false;
+	p_config->flags.hasSerial                    = true;
+	p_config->flags.hasLed                       = true;
+	p_config->flags.ledInverted                  = false;
+	p_config->flags.hasAdcZeroRef                = true;
+//	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
+	p_config->flags.pwmTempInverted              = true;
+
+	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+
+//	p_config->voltageMultiplier                  = 0.257f; // for range -1800 - 1800 mV
+//	p_config->currentMultiplier                  = 0.00294f; // for range -3000 - 3000 mV on pin 5
+	p_config->voltageMultiplier                  = 0.0f;
+	p_config->currentMultiplier                  = 0.0f;
+	p_config->voltageZero                        = -45; // for range -1800 - 1800 mV
+	p_config->currentZero                        = -20; // for range -3000 - 3000 mV on pin 5
+	p_config->powerZero                          = 0; // TODO: calibrate
+	p_config->voltageRange                       = 1800;
+	p_config->currentRange                       = 3000;
+
+	// See https://en.wikipedia.org/wiki/Thermistor#B_or_%CE%B2_parameter_equation B=3380, T0=25, R0=10000
+	// Python: temp=71; r=10000*math.exp(3380*(1/(temp+273.15)-1/(25+273.15))); 3.3/(16000+r)*r
+	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
+//	p_config->pwmTempVoltageThresholdDown        = 0.5;  // About 60 degrees C
+//	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
+	p_config->pwmTempVoltageThresholdDown        = 0.4; // About 71 degrees C
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
 }
@@ -361,8 +505,8 @@ uint32_t configure_board(boards_config_t* p_config) {
 //		asACR01B6D(p_config);
 //		break;
 
-	case ACR01B7B:
-		asACR01B7B(p_config);
+	case ACR01B9C:
+		asACR01B9C(p_config);
 		break;
 
 	case ACR01B2A:
