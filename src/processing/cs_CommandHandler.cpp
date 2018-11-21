@@ -588,7 +588,7 @@ cs_ret_code_t CommandHandler::handleCmdResetErrors(buffer_ptr_t buffer, const ui
 	state_errors_t* payload = (state_errors_t*) buffer;
 	state_errors_t stateErrors;
 	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
-	LOGd("old errors %u - reset %u", stateErrors.asInt, *payload);
+	LOGd("old errors %u - reset %u", stateErrors.asInt, payload->asInt);
 	stateErrors.asInt &= ~(payload->asInt);
 	LOGd("new errors %u", stateErrors.asInt);
 	State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, sizeof(stateErrors), PersistenceMode::STRATEGY1);

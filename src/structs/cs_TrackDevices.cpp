@@ -84,9 +84,11 @@ void TrackedDeviceList::print(uint8_t *addr) const {
 
 void TrackedDeviceList::print() const {
 	for (int i = 0; i < getSize(); ++i) {
-		LOGd("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tcount: %d", _buffer->list[i].addr[5],
+		LOGd("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tocc: %d", _buffer->list[i].addr[5],
 				_buffer->list[i].addr[4], _buffer->list[i].addr[3], _buffer->list[i].addr[2], _buffer->list[i].addr[1],
-				_buffer->list[i].addr[0], _buffer->list[i].rssiThreshold, _buffer->counters[i]);
+				_buffer->list[i].addr[0]);
+		LOGd("rssi: %d\tocc: %d",
+				_buffer->list[i].rssiThreshold, _buffer->counters[i]);
 	}
 }
 
@@ -202,8 +204,9 @@ void TrackedDeviceList::resetTimeoutCounters() {
  */
 
 void TrackedDevice::print() const {
-	LOGi("[%02X %02X %02X %02X %02X %02X]\trssi: %d", _buffer->addr[5],
+	LOGi("[%02X %02X %02X %02X %02X %02X]", _buffer->addr[5],
 		_buffer->addr[4], _buffer->addr[3], _buffer->addr[2], _buffer->addr[1],
-		_buffer->addr[0], _buffer->rssiThreshold);
+		_buffer->addr[0]);
+	LOGi("rssi: %d", _buffer->rssiThreshold);
 }
 

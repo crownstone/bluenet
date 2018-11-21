@@ -1626,7 +1626,7 @@
 // <i> longer one will be fragmented.                                                                                  
                                                                                                                        
 #ifndef NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE                                                                          
-#define NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE 128
+#define NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE 256
 #endif
 
 // </e>
@@ -2956,7 +2956,7 @@
 // <e> NRFX_COMP_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRFX_COMP_CONFIG_LOG_ENABLED
-#define NRFX_COMP_CONFIG_LOG_ENABLED 1
+#define NRFX_COMP_CONFIG_LOG_ENABLED 0
 #endif
 // <o> NRFX_COMP_CONFIG_LOG_LEVEL  - Default Severity level
 
@@ -3728,7 +3728,7 @@
 // <e> NRFX_PWM_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRFX_PWM_CONFIG_LOG_ENABLED
-#define NRFX_PWM_CONFIG_LOG_ENABLED 1
+#define NRFX_PWM_CONFIG_LOG_ENABLED 0
 #endif
 // <o> NRFX_PWM_CONFIG_LOG_LEVEL  - Default Severity level
 
@@ -4101,7 +4101,7 @@
 // <e> NRFX_RTC_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRFX_RTC_CONFIG_LOG_ENABLED
-#define NRFX_RTC_CONFIG_LOG_ENABLED 1
+#define NRFX_RTC_CONFIG_LOG_ENABLED 0
 #endif
 // <o> NRFX_RTC_CONFIG_LOG_LEVEL  - Default Severity level
 
@@ -5402,7 +5402,7 @@
 // <e> NRFX_UART_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRFX_UART_CONFIG_LOG_ENABLED
-#define NRFX_UART_CONFIG_LOG_ENABLED 1
+#define NRFX_UART_CONFIG_LOG_ENABLED 0
 #endif
 // <o> NRFX_UART_CONFIG_LOG_LEVEL  - Default Severity level
 
@@ -7332,7 +7332,7 @@
 //==========================================================
 // <o> FDS_MAX_USERS - Maximum number of callbacks that can be registered.
 #ifndef FDS_MAX_USERS
-#define FDS_MAX_USERS 4
+#define FDS_MAX_USERS 8
 #endif
 
 // </h>
@@ -7660,7 +7660,7 @@
 
 
 #ifndef NRF_BALLOC_CONFIG_BASIC_CHECKS_ENABLED
-#define NRF_BALLOC_CONFIG_BASIC_CHECKS_ENABLED 0
+#define NRF_BALLOC_CONFIG_BASIC_CHECKS_ENABLED 1
 #endif
 
 // <q> NRF_BALLOC_CONFIG_DOUBLE_FREE_CHECK_ENABLED  - Enables double memory free check in this module.
@@ -8171,7 +8171,7 @@
 
 
 #ifndef NRF_LOG_STR_FORMATTER_TIMESTAMP_FORMAT_ENABLED
-#define NRF_LOG_STR_FORMATTER_TIMESTAMP_FORMAT_ENABLED 1
+#define NRF_LOG_STR_FORMATTER_TIMESTAMP_FORMAT_ENABLED 0
 #endif
 
 // <h> nrf_log - Logger
@@ -8258,7 +8258,7 @@
 // If DEFERRED is 1, you need to call FLUSH manually
 
 #ifndef NRF_LOG_DEFERRED
-#define NRF_LOG_DEFERRED 0
+#define NRF_LOG_DEFERRED 1
 #endif
 
 // <o> NRF_LOG_BUFSIZE  - Size of the buffer for storing logs (in bytes).
@@ -8296,6 +8296,7 @@
 #ifndef NRF_LOG_USES_TIMESTAMP
 #define NRF_LOG_USES_TIMESTAMP 0
 #endif
+
 // <o> NRF_LOG_TIMESTAMP_DEFAULT_FREQUENCY - Default frequency of the timestamp (in Hz)
 #ifndef NRF_LOG_TIMESTAMP_DEFAULT_FREQUENCY
 #define NRF_LOG_TIMESTAMP_DEFAULT_FREQUENCY 32768
@@ -8368,7 +8369,7 @@
 // <e> NRF_MPU_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRF_MPU_CONFIG_LOG_ENABLED
-#define NRF_MPU_CONFIG_LOG_ENABLED 1
+#define NRF_MPU_CONFIG_LOG_ENABLED 0
 #endif
 // <o> NRF_MPU_CONFIG_LOG_LEVEL  - Default Severity level
 
@@ -8419,7 +8420,7 @@
 // <e> NRF_STACK_GUARD_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRF_STACK_GUARD_CONFIG_LOG_ENABLED
-#define NRF_STACK_GUARD_CONFIG_LOG_ENABLED 1
+#define NRF_STACK_GUARD_CONFIG_LOG_ENABLED 0
 #endif
 // <o> NRF_STACK_GUARD_CONFIG_LOG_LEVEL  - Default Severity level
 
@@ -8470,7 +8471,7 @@
 // <e> TASK_MANAGER_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef TASK_MANAGER_CONFIG_LOG_ENABLED
-#define TASK_MANAGER_CONFIG_LOG_ENABLED 1
+#define TASK_MANAGER_CONFIG_LOG_ENABLED 0
 #endif
 // <o> TASK_MANAGER_CONFIG_LOG_LEVEL  - Default Severity level
 
@@ -9197,7 +9198,7 @@
 // <e> TIMER_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef TIMER_CONFIG_LOG_ENABLED
-#define TIMER_CONFIG_LOG_ENABLED 1
+#define TIMER_CONFIG_LOG_ENABLED 0
 #endif
 // <o> TIMER_CONFIG_LOG_LEVEL  - Default Severity level
 
@@ -9350,7 +9351,7 @@
 // <e> UART_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef UART_CONFIG_LOG_ENABLED
-#define UART_CONFIG_LOG_ENABLED 1
+#define UART_CONFIG_LOG_ENABLED 0
 #endif
 // <o> UART_CONFIG_LOG_LEVEL  - Default Severity level
 
@@ -10216,7 +10217,7 @@
 // <e> NRF_QUEUE_CONFIG_LOG_ENABLED - Enables logging in the module.
 //==========================================================
 #ifndef NRF_QUEUE_CONFIG_LOG_ENABLED
-#define NRF_QUEUE_CONFIG_LOG_ENABLED 1
+#define NRF_QUEUE_CONFIG_LOG_ENABLED 0
 #endif
 // <o> NRF_QUEUE_CONFIG_LOG_LEVEL  - Default Severity level
 
@@ -10279,7 +10280,7 @@
 // <e> NRF_SDH_ANT_LOG_ENABLED - Enable logging in SoftDevice handler (ANT) module.
 //==========================================================
 #ifndef NRF_SDH_ANT_LOG_ENABLED
-#define NRF_SDH_ANT_LOG_ENABLED 1
+#define NRF_SDH_ANT_LOG_ENABLED 0
 #endif
 // <o> NRF_SDH_ANT_LOG_LEVEL  - Default Severity level
 
@@ -10330,7 +10331,7 @@
 // <e> NRF_SDH_BLE_LOG_ENABLED - Enable logging in SoftDevice handler (BLE) module.
 //==========================================================
 #ifndef NRF_SDH_BLE_LOG_ENABLED
-#define NRF_SDH_BLE_LOG_ENABLED 1
+#define NRF_SDH_BLE_LOG_ENABLED 0
 #endif
 // <o> NRF_SDH_BLE_LOG_LEVEL  - Default Severity level
 
@@ -10381,7 +10382,7 @@
 // <e> NRF_SDH_LOG_ENABLED - Enable logging in SoftDevice handler module.
 //==========================================================
 #ifndef NRF_SDH_LOG_ENABLED
-#define NRF_SDH_LOG_ENABLED 1
+#define NRF_SDH_LOG_ENABLED 0
 #endif
 // <o> NRF_SDH_LOG_LEVEL  - Default Severity level
 
@@ -10432,7 +10433,7 @@
 // <e> NRF_SDH_SOC_LOG_ENABLED - Enable logging in SoftDevice handler (SoC) module.
 //==========================================================
 #ifndef NRF_SDH_SOC_LOG_ENABLED
-#define NRF_SDH_SOC_LOG_ENABLED 1
+#define NRF_SDH_SOC_LOG_ENABLED 0
 #endif
 // <o> NRF_SDH_SOC_LOG_LEVEL  - Default Severity level
 
@@ -12333,7 +12334,7 @@
 // <i> The priority level of a handler determines the order in which it receives events, with respect to other handlers.
 
 #ifndef NRF_SDH_ANT_OBSERVER_PRIO_LEVELS
-#define NRF_SDH_ANT_OBSERVER_PRIO_LEVELS 2
+#define NRF_SDH_ANT_OBSERVER_PRIO_LEVELS 1
 #endif
 
 // <h> ANT Observers priorities - Invididual priorities
@@ -12473,7 +12474,7 @@
 // <i> The priority level of a handler determines the order in which it receives events, with respect to other handlers.
 
 #ifndef NRF_SDH_BLE_OBSERVER_PRIO_LEVELS
-#define NRF_SDH_BLE_OBSERVER_PRIO_LEVELS 4
+#define NRF_SDH_BLE_OBSERVER_PRIO_LEVELS 2
 #endif
 
 // <h> BLE Observers priorities - Invididual priorities
@@ -12869,7 +12870,7 @@
 // <i> The priority level of a handler determines the order in which it receives events, with respect to other handlers.
 
 #ifndef NRF_SDH_REQ_OBSERVER_PRIO_LEVELS
-#define NRF_SDH_REQ_OBSERVER_PRIO_LEVELS 2
+#define NRF_SDH_REQ_OBSERVER_PRIO_LEVELS 1
 #endif
 
 // <o> NRF_SDH_STATE_OBSERVER_PRIO_LEVELS - Total number of priority levels for state observers.
@@ -12877,7 +12878,7 @@
 // <i> The priority level of a handler determines the order in which it receives events, with respect to other handlers.
 
 #ifndef NRF_SDH_STATE_OBSERVER_PRIO_LEVELS
-#define NRF_SDH_STATE_OBSERVER_PRIO_LEVELS 2
+#define NRF_SDH_STATE_OBSERVER_PRIO_LEVELS 1
 #endif
 
 // <o> NRF_SDH_STACK_OBSERVER_PRIO_LEVELS - Total number of priority levels for stack event observers.
@@ -12934,7 +12935,7 @@
 // <i> Zero is the highest priority.
 
 #ifndef NRF_SDH_BLE_STACK_OBSERVER_PRIO
-#define NRF_SDH_BLE_STACK_OBSERVER_PRIO 0
+#define NRF_SDH_BLE_STACK_OBSERVER_PRIO 1
 #endif
 
 // <o> NRF_SDH_SOC_STACK_OBSERVER_PRIO 
@@ -12968,7 +12969,7 @@
 // <i> The priority level of a handler determines the order in which it receives events, with respect to other handlers.
 
 #ifndef NRF_SDH_SOC_OBSERVER_PRIO_LEVELS
-#define NRF_SDH_SOC_OBSERVER_PRIO_LEVELS 2
+#define NRF_SDH_SOC_OBSERVER_PRIO_LEVELS 1
 #endif
 
 // <h> SoC Observers priorities - Invididual priorities

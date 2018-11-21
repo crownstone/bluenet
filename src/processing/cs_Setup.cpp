@@ -101,6 +101,9 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
  */
 void Setup::handleEvent(event_t & event) {
 	// we want to react to the last write request (OPERATION_MODE_NORMAL)
+	if (event.type != CS_TYPE::EVT_ADVERTISEMENT_UPDATED) {
+		LOGi("Setup received %s [%i]", TypeName(event.type), +event.type);
+	}
 	switch (event.type) {
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
 		uint8_t record_key = *(uint8_t*)event.data;

@@ -736,6 +736,7 @@ void Crownstone::run() {
 	while(1) {
 		app_sched_execute();
 		sd_app_evt_wait();
+		NRF_LOG_FLUSH();
 	}
 }
 
@@ -899,14 +900,14 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	char version[sizeof(STRINGIFY(FIRMWARE_VERSION))];
 	memcpy(version, STRINGIFY(FIRMWARE_VERSION), size);
 
-	_log(SERIAL_INFO, "Welcome! Bluenet firmware, version %s\r\n\r\n", version);
-	_log(SERIAL_INFO, "\033[35;1m");
-	_log(SERIAL_INFO, " _|_|_|    _|                                            _|     \r\n");
-	_log(SERIAL_INFO, " _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| \r\n");
-	_log(SERIAL_INFO, " _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     \r\n");
-	_log(SERIAL_INFO, " _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     \r\n");
-	_log(SERIAL_INFO, " _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| \r\n\r\n");
-	_log(SERIAL_INFO, "\033[0m");
+	LOGi("Welcome! Bluenet firmware, version %s", version);
+	LOGi("\033[35;1m");
+	LOGi(" _|_|_|    _|                                            _|     ");
+	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");
+	LOGi(" _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     ");
+	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
+	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
+	LOGi("\033[0m");
 
 	LOGi("Compilation date: %s", COMPILATION_DAY);
 	LOGi("Compilation time: %s", __TIME__);
@@ -957,6 +958,7 @@ int main() {
 	NRF_LOG_INIT(NULL);
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
 	NRF_LOG_INFO("Main");
+	NRF_LOG_FLUSH();
 
 	uint32_t errCode;
 	boards_config_t board = {};
@@ -983,6 +985,7 @@ int main() {
 	if (board.flags.hasSerial) {
 		// init uart, be nice and say hello
 		welcome(board.pinGpioRx, board.pinGpioTx);
+		NRF_LOG_FLUSH();
 	}
 
 	Crownstone crownstone(board); // 250 ms
@@ -997,14 +1000,17 @@ int main() {
 	}
 #endif
 	LOGd("NFC pins: %p", NRF_UICR->NFCPINS);
+	NRF_LOG_FLUSH();
 
 	overwrite_hardware_version();
 
 	// init drivers, configure(), create services and chars,
 	crownstone.init(); // 13 ms
+	NRF_LOG_FLUSH();
 
 	//! start up phase, start ticking (depends on the operation mode) ...
 	crownstone.startUp(); // 500 ms
+	NRF_LOG_FLUSH();
 
 	//! run forever ...
 	crownstone.run();

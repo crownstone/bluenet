@@ -68,7 +68,8 @@ void HardFault_HandlerC(unsigned long *hardfault_args){
     //! Bus Fault Address Register
     _BFAR = (*((volatile unsigned long *)(0xE000ED38))) ;
 
-    LOGe("HARDFAULT!");
+    // With the Nordic logger, this is not displayed anymore...
+    //LOGe("HARDFAULT!");
 
     __asm("BKPT #0\n") ; //! Break into the debugger
 

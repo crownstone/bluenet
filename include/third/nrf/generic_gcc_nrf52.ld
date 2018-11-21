@@ -20,12 +20,19 @@ GROUP(-lgcc -lc -lnosys)
  * Note that this information is from the perspective of the application to be compiled.
  *   So, we start where the SoftDevice ends... At 0x26000. 
  *   Total memory is 512 kB, so the size available to the application is 0x80000 - 0x26000 = 0x5A000.
+ * 
+ * According to nrf_sd_ble debug information RAM start location can be adjusted to 0x200020B0 and the RAM size
+ * for the application to 0xDF50
+ *
+ * RAM (rwx) :  ORIGIN = 0x20002430, LENGTH = 0xdad0
+ *
+ * Update the sections using a recent flash_placement.xml file...
  */
 
 MEMORY
 {
   FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0x5A000
-  RAM (rwx) :  ORIGIN = 0x20002430, LENGTH = 0xdad0
+  RAM (rwx) :  ORIGIN = 0x200020B0, LENGTH = 0xDF50
 }
 
 SECTIONS
@@ -44,6 +51,12 @@ SECTIONS
     KEEP(*(SORT(.log_dynamic_data*)))
     PROVIDE(__stop_log_dynamic_data = .);
   } > RAM
+  .log_filter_data :                                                                                                    
+  {                                                                                                                     
+    PROVIDE(__start_log_filter_data = .);                                                                               
+    KEEP(*(SORT(.log_filter_data*)))                                                                                    
+    PROVIDE(__stop_log_filter_data = .);                                                                                
+  } > RAM    
   .cli_sorted_cmd_ptrs :
   {
     PROVIDE(__start_cli_sorted_cmd_ptrs = .);
@@ -64,12 +77,6 @@ SECTIONS
   .mem_section_dummy_rom :
   {
   }
-  .sdh_ant_observers :
-  {
-    PROVIDE(__start_sdh_ant_observers = .);
-    KEEP(*(SORT(.sdh_ant_observers*)))
-    PROVIDE(__stop_sdh_ant_observers = .);
-  } > FLASH
   .sdh_ble_observers :
   {
     PROVIDE(__start_sdh_ble_observers = .);
@@ -106,7 +113,13 @@ SECTIONS
     KEEP(*(SORT(.log_const_data*)))
     PROVIDE(__stop_log_const_data = .);
   } > FLASH
-    .nrf_balloc :
+  .log_backends :                                                                                                       
+  {                                                                                                                     
+    PROVIDE(__start_log_backends = .);                                                                                  
+    KEEP(*(SORT(.log_backends*)))                                                                                       
+    PROVIDE(__stop_log_backends = .);                                                                                   
+  } > FLASH        
+  .nrf_balloc :
   {
     PROVIDE(__start_nrf_balloc = .);
     KEEP(*(.nrf_balloc))

@@ -132,7 +132,9 @@ void ScanResult::print() const {
 	for (int i = 0; i < getSize(); ++i) {
 		LOGd("[%02X %02X %02X %02X %02X %02X]\trssi: %d\tocc: %d", _buffer->list[i].addr[5],
 				_buffer->list[i].addr[4], _buffer->list[i].addr[3], _buffer->list[i].addr[2], _buffer->list[i].addr[1],
-				_buffer->list[i].addr[0], _buffer->list[i].rssi, _buffer->list[i].occurrences);
+				_buffer->list[i].addr[0]);
+		LOGd("rssi: %d\tocc: %d",
+				_buffer->list[i].rssi, _buffer->list[i].occurrences);
 	}
 
 }

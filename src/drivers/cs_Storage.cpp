@@ -66,7 +66,6 @@ ret_code_t Storage::init() {
 		return ret_code;
 	}
 		
-	app_sched_execute();
 
 	LOGd("fds_init");
 	ret_code = fds_init();
@@ -74,7 +73,14 @@ ret_code_t Storage::init() {
 		LOGe("Init FDS failed (err=%i)", ret_code);
 		return ret_code;
 	}
-	LOGd("Storage init done (wait for FDS_EVT_INIT)");
+//	LOGd("Storage init done (wait for FDS_EVT_INIT)");
+
+	/*
+	while (!_initialized)
+	{
+		(void) sd_app_evt_wait();
+	}*/
+
 	return ret_code;
 }
 
@@ -114,10 +120,12 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 	bool f_exists = false;
 	ret_code = exists(file_id, file_data.type, record_desc, f_exists);
 	if (f_exists) {
-		LOGd("Update file %i record %i desc %i", file_id, record.key, record_desc);
+		//LOGd("Update file %i record %i desc %i", file_id, record.key, record_desc);
+		LOGd("Update file %i record %i", file_id, record.key);
 		ret_code = fds_record_update(&record_desc, &record);
 		FDS_ERROR_CHECK(ret_code);
-		LOGd("Updated to record %i desc %i", record.key, record_desc);
+		//LOGd("Updated to record %i desc %i", record.key, record_desc);
+		LOGd("Updated to record %i", record.key);
 	}
 	else {
 		LOGd("Write file %i, record %i, ptr %p", file_id, record.key, record.data.p_data);
@@ -171,7 +179,8 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 	bool found = false;
 	while (fds_record_find(file_id, +file_data.type, &record_desc, &_ftok) == FDS_SUCCESS) {
 
-		LOGd("Record %i desc %i", +file_data.type, record_desc);
+		//LOGd("Record %i desc %i", +file_data.type, record_desc);
+		LOGd("Record %i", +file_data.type);
 		if (!found) {
 			ret_code = fds_record_open(&record_desc, &flash_record);
 			if (ret_code != FDS_SUCCESS) {
@@ -267,7 +276,7 @@ void Storage::handleSuccessfullEvent(fds_evt_t const * p_fds_evt) {
 	case FDS_EVT_UPDATE: {
 		//uint8_t file_id = p_fds_evt->write.file_id;
 		uint8_t record_key = p_fds_evt->write.record_key;
-		LOGd("Dispatch write/update event, record %i", record_key);
+		LOGi("Dispatch write/update event, record %i", record_key);
 		event_t event1(CS_TYPE::EVT_STORAGE_WRITE_DONE, (void*)&record_key, sizeof(record_key));
 		EventDispatcher::getInstance().dispatch(event1);
 		break;
@@ -280,6 +289,7 @@ void Storage::handleSuccessfullEvent(fds_evt_t const * p_fds_evt) {
 
 void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 
+	LOGd("FS: %i: %i", p_fds_evt->result, p_fds_evt->id);
 	switch(p_fds_evt->result) {
 	case FDS_ERR_NOT_FOUND:
 		LOGe("Not found");

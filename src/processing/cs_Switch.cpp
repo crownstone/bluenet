@@ -162,7 +162,8 @@ void Switch::startPwm() {
 void Switch::storeState(switch_state_t oldVal) {
 	bool persistent = false;
 	if (memcmp(&oldVal, &_switchValue, sizeof(switch_state_t)) != 0) {
-		LOGd("storeState: %u", _switchValue);
+		LOGd("Store switch state %i, %i", _switchValue.relay_state, _switchValue.pwm_state);
+		//LOGd("storeState: %u", _switchValue);
 		persistent = (oldVal.relay_state != _switchValue.relay_state);
 		PersistenceMode pmode = persistent ? PersistenceMode::STRATEGY1 : PersistenceMode::STRATEGY1;
 		size16_t size = sizeof(switch_state_t);
@@ -189,7 +190,8 @@ void Switch::delayedStoreStateExecute() {
 	}
 
 	// Just write to persistent storage
-	LOGd("write to storage: %u", _switchValue);
+//	LOGd("write to storage: %u", _switchValue);
+	LOGd("Write switch state %i, %i", _switchValue.relay_state, _switchValue.pwm_state);
 	size16_t size = sizeof(switch_state_t);
 	State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::STRATEGY1);
 }
@@ -197,7 +199,8 @@ void Switch::delayedStoreStateExecute() {
 
 switch_state_t Switch::getSwitchState() {
 #ifdef PRINT_SWITCH_VERBOSE
-	LOGd(FMT_GET_INT_VAL, "Switch state", _switchValue);
+//LOGd(FMT_GET_INT_VAL, "Switch state", _switchValue);
+	LOGd("Switch state %i, %i", _switchValue.relay_state, _switchValue.pwm_state);
 #endif
 	return _switchValue;
 }

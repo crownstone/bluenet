@@ -31,9 +31,11 @@ extern "C" {
  *
  * @param sys_evt                      System event.
  */
-void sys_evt_dispatch(uint32_t sys_evt);
+//void sys_evt_dispatch(uint32_t sys_evt);
+void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context);
 
-void fds_evt_handler(fds_evt_t const * p_fds_evt);
+//void fds_evt_handler(fds_evt_t const * p_fds_evt);
+void fds_evt_handler(fds_evt_t const * const p_fds_evt);
 
 
 #ifdef __cplusplus

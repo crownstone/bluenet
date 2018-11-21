@@ -11,6 +11,8 @@ extern "C" {
 #endif
 
 #include <cfg/cs_Debug.h>
+#include <ble/cs_Nordic.h>
+
 #include "stdint.h"
 
 #ifdef HOST_TARGET
@@ -82,12 +84,21 @@ typedef enum {
 	#define logLN(level, fmt, ...)
 #endif
 
+/*
 #define LOGv(fmt, ...) logLN(SERIAL_VERBOSE, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGd(fmt, ...) logLN(SERIAL_DEBUG, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGi(fmt, ...) logLN(SERIAL_INFO,  "\033[34;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGw(fmt, ...) logLN(SERIAL_WARN,  "\033[33;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGe(fmt, ...) logLN(SERIAL_ERROR, "\033[35;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGf(fmt, ...) logLN(SERIAL_FATAL, "\033[31;1m" fmt "\033[0m", ##__VA_ARGS__)
+*/
+
+#define LOGv NRF_LOG_DEBUG
+#define LOGd NRF_LOG_DEBUG
+#define LOGi NRF_LOG_INFO
+#define LOGw NRF_LOG_WARNING
+#define LOGe NRF_LOG_ERROR
+#define LOGf NRF_LOG_ERROR
 
 #define LOG_MEMORY \
 	uint8_t *p = (uint8_t*)malloc(1); \
