@@ -38,7 +38,7 @@ void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 	}
 #endif
 
-	LOGd("init %d %d", NRFX_VOLTAGE_THRESHOLD_TO_INT(thresholdDown, 3.3), NRFX_VOLTAGE_THRESHOLD_TO_INT(thresholdUp, 3.3));
+	LOGd("init pin=%u down=%i up=%i", ainPin, VOLTAGE_THRESHOLD_TO_INT(thresholdDown, 3.3), VOLTAGE_THRESHOLD_TO_INT(thresholdUp, 3.3));
 	_lastEventTimestamp = RTC::getCount();
 #ifdef NRF52_PAN_12
 	applyWorkarounds();
