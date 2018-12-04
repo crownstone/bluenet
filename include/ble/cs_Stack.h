@@ -269,10 +269,6 @@ public:
 	 */
 	Stack & addService(Service* svc);
 
-	/** Remove a service from the stack.
-	 */
-	Stack & removeService(Service* svc);
-
 	/** Start advertising as an iBeacon
 	 *
 	 * @beacon the object defining the parameters for the

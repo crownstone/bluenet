@@ -306,7 +306,7 @@ void Stack::updateDeviceName(const std::string& deviceName) {
 	_device_name = deviceName;
 
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	LOGd("Update device name");
+	LOGd("Set device name to %s", _device_name.c_str());
 
 	std::string name = _device_name.empty() ? "not set..." : deviceName;
 
@@ -353,21 +353,6 @@ void Stack::shutdown() {
 
 Stack& Stack::addService(Service* svc) {
 	_services.push_back(svc);
-	return *this;
-}
-
-/**
- * Removes a services including all its characteristics.
- */
-Stack& Stack::removeService(Service* svc) {
-	Services_t::iterator it;
-	it = std::find(_services.begin(), _services.end(), svc);
-	if (it == _services.end()) {
-		LOGe("Service does not exist");
-		return *this;
-	}
-	(*it)->removeCharacteristics();
-	_services.erase(it);
 	return *this;
 }
 

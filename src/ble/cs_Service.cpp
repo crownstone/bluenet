@@ -5,17 +5,17 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <algorithm>
 #include <ble/cs_Service.h>
+#include <ble/cs_Softdevice.h>
 #include <drivers/cs_Serial.h>
 
-#include <ble/cs_Softdevice.h>
-
-#include <algorithm>
-
-///! Service ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///! Service //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 const char* Service::defaultServiceName = "unnamed";
 
+/** Base class for a BLE service
+ */
 Service::Service():
 		_stack(NULL),
 		_name(""),
@@ -23,6 +23,13 @@ Service::Service():
 		{
 }
 
+/** Initialize service. 
+ *
+ * This initializes each characteristic. A pointer to the stack is stored locally. By default characteristics are not
+ * encrypted. If required, setAesEncrypted() should be called next. This will encrypt all characteristics in this
+ * service.
+ *
+ */
 void Service::init(Stack* stack) {
 	if (isInitialized(C_SERVICE_INITIALIZED)) return;
 
@@ -34,8 +41,7 @@ void Service::init(Stack* stack) {
 	const ble_uuid_t uuid = _uuid;
 
 	_service_handle = BLE_CONN_HANDLE_INVALID;
-	err_code = sd_ble_gatts_service_add(BLE_GATTS_SRVC_TYPE_PRIMARY, &uuid,
-			(uint16_t*) &_service_handle);
+	err_code = sd_ble_gatts_service_add(BLE_GATTS_SRVC_TYPE_PRIMARY, &uuid, (uint16_t*) &_service_handle);
 	APP_ERROR_CHECK(err_code);
 
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
@@ -45,8 +51,14 @@ void Service::init(Stack* stack) {
 	setInitialized(C_SERVICE_INITIALIZED);
 }
 
+/** Set encryption.
+ *
+ * For encryption AES is used. A symmetric cipher. In a service every characteristic is encrypted in the same way.
+ * The encryption has to be done by the characteristic itself.
+ */
 void Service::setAesEncrypted(bool encrypted) {
 	//! set all characteristics to encrypted
+	LOGd("Enable AES encryption for %s", _name.c_str());
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 		characteristic->setAesEncrypted(encrypted);
 	}
@@ -64,13 +76,6 @@ Service& Service::setUUID(const UUID& uuid) {
 	_uuid = uuid;
 	return *this;
 }
-
-//void Service::setEncryptionBuffer(buffer_ptr_t buffer, buffer_size_t size) {
-//	//! set all characteristics to encrypted
-//	for (CharacteristicBase* characteristic : getCharacteristics()) {
-//		characteristic->setEncryptionBuffer(buffer, size);
-//	}
-//}
 
 /**
  * A service can receive a BLE event. Currently we pass the connection events through as well as the write event.
@@ -125,19 +130,16 @@ void Service::on_disconnect(uint16_t conn_handle, const ble_gap_evt_disconnected
  * the characteristic object is also different.
  */
 bool Service::on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_handle) {
-//	bool found = false;
 
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 
 		if (characteristic->getCccdHandle() == write_evt.handle && write_evt.len == 2) {
 			//! received write to enable/disable notification
 			characteristic->setNotifyingEnabled(ble_srv_is_notification_enabled(write_evt.data));
-//			found = true;
 			return true;
 
 		} else if (characteristic->getValueHandle() == value_handle) {
 			//! TODO: make a map.
-//			found = true;
 
 			if (write_evt.op == BLE_GATTS_OP_WRITE_REQ
 					|| write_evt.op == BLE_GATTS_OP_WRITE_CMD
@@ -149,44 +151,24 @@ bool Service::on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_ha
 
 				//! get length of data, header does not contain full length but rather the "step size"
 				uint16_t length = 0;
-				cs_sd_ble_gatts_value_get(getStack()->getConnectionHandle(), characteristic->getValueHandle(), &length, NULL);
-
+				cs_sd_ble_gatts_value_get(getStack()->getConnectionHandle(), characteristic->getValueHandle(), 
+						&length, NULL);
 				characteristic->written(length);
-
-//			} else {
-//				found = false;
 			}
 
 			return true;
 		}
 	}
-
-//	if (!found) {
-		//! tell someone
-//		LOGe("TODO: fix the check on service");
-		return false;
-//	}
+	return false;
 }
 
-//! inform all characteristics that transmission was completed in case they have notifications pending
+/** Propagate BLE event to characteristics.
+ *
+ * Inform all characteristics that transmission was completed in case they have notifications pending.
+ */
 void Service::onTxComplete(const ble_common_evt_t * p_ble_evt) {
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 		characteristic->onTxComplete(p_ble_evt);
 	}
 }
 
-Service& Service::removeCharacteristic(CharacteristicBase* characteristic) {
-	if (characteristic == NULL) {
-		LOGe("Characteristic is null pointer.");
-		return *this;
-	}
-	Characteristics_t::iterator it;
-	it = std::find(_characteristics.begin(), _characteristics.end(), characteristic);
-	if (it == _characteristics.end()) {
-		LOGe("Characteristic does not exist");
-		LOGe("Characteristic %s does not exist", characteristic->getName());
-		return *this;
-	}
-	_characteristics.erase(it);
-	return *this;
-}

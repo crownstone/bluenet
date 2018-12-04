@@ -12,7 +12,7 @@
 #include <ble/cs_Softdevice.h>
 #include <storage/cs_State.h>
 
-//#define PRINT_CHARACTERISTIC_VERBOSE
+#define PRINT_CHARACTERISTIC_VERBOSE
 
 CharacteristicBase::CharacteristicBase() :
     _name(NULL),
@@ -20,6 +20,9 @@ CharacteristicBase::CharacteristicBase() :
 {
 }
 
+/**
+ * Set the name of the characteristic. This can only be done before initialization.
+ */
 void CharacteristicBase::setName(const char * const name) {
 	if (_status.initialized) BLE_THROW(MSG_BLE_CHAR_INITIALIZED);
 	_name = name;
@@ -179,6 +182,8 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	ci.attr_md.write_perm = _writeperm;
 }
 
+/** Update characteristic. This is also required when switching to/from encryption.
+ */
 uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 
 //	LOGi("[%s] update Value", _name);
@@ -202,14 +207,8 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 		// we calculate what size buffer we need
 		uint16_t encryptionBufferLength = EncryptionHandler::calculateEncryptionBufferLength(
 			valueLength, encryptionType);
-		bool success = EncryptionHandler::getInstance().encrypt(
-			getValuePtr(),
-			valueLength,
-			valueGattAddress,
-			encryptionBufferLength,
-			_minAccessLevel,
-			encryptionType
-		);
+		bool success = EncryptionHandler::getInstance().encrypt(getValuePtr(), valueLength, valueGattAddress,
+			encryptionBufferLength, _minAccessLevel, encryptionType);
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
 		_log(SERIAL_DEBUG, "encrypted: ");
 		BLEutil::printArray(valueGattAddress, encryptionBufferLength);
@@ -414,6 +413,8 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 	return err_code;
 }
 
+/** When a previous transmission is successful send the next.
+ */
 void CharacteristicBase::onTxComplete(const ble_common_evt_t * p_ble_evt) {
 	//! if we have a notification pending, try to send it
 	if (_status.notificationPending) {

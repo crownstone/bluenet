@@ -50,25 +50,6 @@ void SetupService::createCharacteristics() {
     updatedCharacteristics();
 }
 
-void SetupService::removeCharacteristics() {
-
-    removeControlCharacteristic();
-    removeMacAddressCharacteristic();
-    removeSetupKeyCharacteristic();
-    removeGoToDfuCharacteristic();
-    removeSessionNonceCharacteristic();
-
-    // remove allocated data structures
-    LOGd("Remove streambuffer");
-    if (_streamBuffer != NULL) {
-	delete _streamBuffer;
-	_streamBuffer = NULL;
-    }
-
-    LOGd("All characteristics updated");
-    updatedCharacteristics();
-}
-
 void SetupService::addMacAddressCharacteristic() {
     if (_macAddressCharacteristic != NULL) {
 	LOGe(FMT_CHAR_EXISTS, STR_CHAR_MAC_ADDRESS);
@@ -88,15 +69,6 @@ void SetupService::addMacAddressCharacteristic() {
     _macAddressCharacteristic->setValueLength(BLE_GAP_ADDR_LEN);
 }
 
-void SetupService::removeMacAddressCharacteristic() {
-    LOGi(FMT_CHAR_REMOVED, STR_CHAR_MAC_ADDRESS);
-    if (_macAddressCharacteristic != NULL) {
-	removeCharacteristic(_macAddressCharacteristic);
-	delete _macAddressCharacteristic;
-	_macAddressCharacteristic = NULL;
-    }
-}
-
 void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size) {
     if (_setupKeyCharacteristic != NULL) {
 	LOGe(FMT_CHAR_EXISTS, STR_CHAR_SETUP_KEY);
@@ -112,15 +84,6 @@ void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size)
     _setupKeyCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
     _setupKeyCharacteristic->setMaxGattValueLength(size);
     _setupKeyCharacteristic->setValueLength(0);
-}
-
-void SetupService::removeSetupKeyCharacteristic() {
-    LOGi(FMT_CHAR_REMOVED, STR_CHAR_SETUP_KEY);
-    if (_setupKeyCharacteristic != NULL) {
-	removeCharacteristic(_setupKeyCharacteristic);
-	delete _setupKeyCharacteristic;
-	_setupKeyCharacteristic = NULL;
-    }
 }
 
 void SetupService::addGoToDfuCharacteristic() {
@@ -145,15 +108,6 @@ void SetupService::addGoToDfuCharacteristic() {
 	        LOGe("goto dfu failed, wrong value: %d", value);
 	    }
 	});
-}
-
-void SetupService::removeGoToDfuCharacteristic() {
-    LOGi(FMT_CHAR_REMOVED, STR_CHAR_GOTO_DFU);
-    if (_gotoDfuCharacteristic != NULL) {
-	removeCharacteristic(_gotoDfuCharacteristic);
-	delete _gotoDfuCharacteristic;
-	_gotoDfuCharacteristic = NULL;
-    }
 }
 
 void SetupService::handleEvent(event_t & event) {

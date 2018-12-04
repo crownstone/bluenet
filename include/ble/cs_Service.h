@@ -88,8 +88,6 @@ protected:
 
 	virtual void createCharacteristics() = 0;
 	
-	virtual void removeCharacteristics() = 0;
-
 	/** Initialization of the service.
 	 *
 	 * The initialization can be different for each service.
@@ -121,10 +119,6 @@ protected:
 		_characteristics.push_back(characteristic);
 		return *this;
 	}
-
-	/** Remove a characteristic.
-	 */
-	virtual Service& removeCharacteristic(CharacteristicBase* characteristic);
 
 	Service& updatedCharacteristics() {
 		_characteristics.shrink_to_fit();

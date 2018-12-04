@@ -26,17 +26,10 @@ public:
 	 */
 	void createCharacteristics();
 
-	/** Remove all characteristics.
-	 */
-	void removeCharacteristics();
 protected:
 	void addHardwareRevisionCharacteristic();
 	void addFirmwareRevisionCharacteristic();
 	void addSoftwareRevisionCharacteristic();
-	
-	void removeHardwareRevisionCharacteristic();
-	void removeFirmwareRevisionCharacteristic();
-	void removeSoftwareRevisionCharacteristic();
 	
 private:
 	Characteristic<std::string>* _hardwareRevisionCharacteristic;

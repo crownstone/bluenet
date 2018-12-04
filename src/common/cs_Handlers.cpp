@@ -35,13 +35,13 @@ extern "C" {
  * From this function storage_sys_evt_handler was called. It's now fs_sys_event_handler.
  */
 void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
-	LOGd("SOC event: %i", evt_id);
+    //LOGd("SOC event: %i", evt_id);
 
     //fs_sys_event_handler(evt_id);
 
     switch(evt_id) {
 	case NRF_EVT_FLASH_OPERATION_SUCCESS:
-	    LOGw("NRF_EVT_FLASH_OPERATION_SUCCESS, unhandled");
+	    LOGnone("NRF_EVT_FLASH_OPERATION_SUCCESS, unhandled");
 	    break;
 	case NRF_EVT_FLASH_OPERATION_ERROR:
 	    // Why is it unhandled here? If there is a call to a filesystem event handler, is it supposed to change
@@ -142,7 +142,7 @@ NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRI
  * The FDS event handler is registered in the cs_Storage class.
  */
 void fds_evt_handler(fds_evt_t const * const p_fds_evt) {
-    LOGi("fds_evt_handler");
+    LOGnone("fds_evt_handler");
     Storage::getInstance().handleFileStorageEvent(p_fds_evt);
 }
 

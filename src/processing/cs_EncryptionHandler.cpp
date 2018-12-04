@@ -11,7 +11,7 @@
 #include <processing/cs_EncryptionHandler.h>
 #include <storage/cs_State.h>
 
-//#define TESTING_ENCRYPTION true
+//#define TESTING_ENCRYPTION
 
 void EncryptionHandler::init() {
 	_defaultValidationKey.b = DEFAULT_SESSION_KEY;
@@ -83,6 +83,7 @@ bool EncryptionHandler::allowedToWrite() {
  */
 bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength, 
 		EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
+	LOGnone("Encrypt ECB");
 	uint32_t err_code;
 	uint8_t softdevice_enabled;
 	err_code = sd_softdevice_is_enabled(&softdevice_enabled);
@@ -129,6 +130,7 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 	// copy result into target.
 	memcpy(target, _block.ciphertext, SOC_ECB_CIPHERTEXT_LENGTH);
 
+	LOGnone("ECB encrypted");
 	return true;
 }
 
@@ -189,7 +191,8 @@ bool EncryptionHandler::decryptMesh(uint8_t* encryptedDataPacket, uint16_t encry
 	// copy the mesh overhead of the encrypted data packet to be used as IV (first nonce, second part random)
 	memcpy(_block.cleartext, encryptedDataPacket, MESH_OVERHEAD);
 
-	if (_decryptCTR((uint8_t*)nonce, encryptedDataPacket + MESH_OVERHEAD, sourceNetLength, target, targetLength) == false) {
+	if (_decryptCTR((uint8_t*)nonce, encryptedDataPacket + MESH_OVERHEAD, sourceNetLength, target, 
+				targetLength) == false) {
 		LOGe("Error while decrypting");
 		return false;
 	}
@@ -198,7 +201,11 @@ bool EncryptionHandler::decryptMesh(uint8_t* encryptedDataPacket, uint16_t encry
 }
 
 
-bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
+/**
+ * Perform encryption:
+ */
+bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, 
+		EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
 	if (encryptionType == CTR || encryptionType == CTR_CAFEBABE) {
 		return _prepareEncryptCTR(data,dataLength,target,targetLength,userLevel,encryptionType);
 	} else {
@@ -206,10 +213,17 @@ bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* tar
 	}
 }
 
-bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
+/**
+ */
+bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, 
+		EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
+	LOGd("Encrypt CTR");	
+
 	// check if the userLevel has been set
-	if (_checkAndSetKey(userLevel) == false)
+	if (_checkAndSetKey(userLevel) == false) {
+		LOGe("User level not set");
 		return false;
+	}
 
 	uint16_t targetNetLength = targetLength - _overhead;
 
@@ -311,6 +325,7 @@ bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encrypted
  *
  */
 bool EncryptionHandler::_decryptCTR(uint8_t* validationNonce, uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength) {
+	LOGd("Decrypt CTR");
 	if (_validateBlockLength(inputLength) == false) {
 		LOGe(STR_ERR_MULTIPLE_OF_16);
 //		LOGe("Length of input block does not match the expected length (N*16 Bytes).");
@@ -399,8 +414,6 @@ bool EncryptionHandler::_validateDecryption(uint8_t* buffer, uint8_t* validation
 	}
 	return true;
 }
-
-
 
 
 /**
@@ -510,11 +523,15 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 	}
 	default:
 		LOGe("Invalid user level");
-//		LOGe("Provided userLevel does not exist (level is not admin, member or guest)");
 		return false;
 	}
 
 	// get the key from the storage
+	static int log_once = 1;
+	if (log_once) {
+		LOGd("Get key - level %i - from storage", userLevel);
+		log_once = 0;
+	}
 	State::getInstance().get(keyConfigType, _block.key, PersistenceMode::STRATEGY1);
 	return true;
 }

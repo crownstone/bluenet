@@ -164,18 +164,16 @@ cs_ret_code_t State::get(st_file_data_t & data, const PersistenceMode mode) {
 			}
 			bool exist = loadFromRam(data);
 			if (exist) {
-				LOGd("Loaded from RAM");
 				return ERR_SUCCESS;
 			}
 
 			ret_code = _storage->read(FILE_CONFIGURATION, data);
 			switch(ret_code) {
 				case FDS_SUCCESS:
-					LOGd("Move from FLASH to RAM");
+					LOGnone("Move from FLASH to RAM");
 					storeInRam(data);
 					return ret_code;
 				case FDS_ERR_NOT_FOUND:
-					//LOGd("Get default");
 					getDefault(data);
 					return ERR_SUCCESS;
 				default: {
@@ -251,19 +249,23 @@ cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const Persis
 					LOGe("PM not implemented");
 					return ERR_NOT_IMPLEMENTED;
 			}
-			// it is general, but not a fast implementation, better to directly compare with the default without
-			// copying to a local variable
+			// the following is general, but it is not a fast implementation
+			// it is better to directly compare with the default without copying to a local variable
 			st_file_data_t data_compare;
 			data_compare.type = type;
 			data_compare.value = (uint8_t*)malloc(size);
 			data_compare.size = size;
 			ret_code = get(data_compare, PersistenceMode::FIRMWARE_DEFAULT);
 			if (data == data_compare) {
-				return ERR_SUCCESS; // do nothing	
+				LOGd("Same value as default");
+				// TODO: No, we cannot assume it is fine. We might reset FLASH to firmware default
+				// in that case we should remove the written value or at least write it as well to FLASH
+//				return ERR_SUCCESS; // do nothing	
 			}
 			// we cannot assume that the value is already in RAM, it might be the first time it is accessed
 			ret_code = get(data_compare, PersistenceMode::FLASH);
 			if ((ret_code == ERR_SUCCESS) && (data == data_compare)) {
+				LOGd("Same value as flash");
 				return ERR_SUCCESS; // do nothing
 			}
 			// either value is not present in FLASH, or it is different, update it!	
@@ -271,6 +273,7 @@ cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const Persis
 			if (ret_code != ERR_SUCCESS) {
 				LOGw("Failure to store in RAM, will still try to store in FLASH");
 			}
+			LOGd("Write 0x%x", data.value[0]);
 			return _storage->write(FILE_CONFIGURATION, data);
 		}
 		case PersistenceMode::FIRMWARE_DEFAULT: {

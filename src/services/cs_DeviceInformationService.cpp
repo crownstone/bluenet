@@ -94,51 +94,6 @@ void DeviceInformationService::createCharacteristics() {
 	updatedCharacteristics();
 }
 
-void DeviceInformationService::removeCharacteristics() {
-	removeHardwareRevisionCharacteristic();
-	removeFirmwareRevisionCharacteristic();
-	removeSoftwareRevisionCharacteristic();
-	updatedCharacteristics();
-}
-
-void DeviceInformationService::removeHardwareRevisionCharacteristic() {
-	LOGi(FMT_CHAR_REMOVED, STR_CHAR_HARDWARE_REVISION);
-	if (_hardwareRevisionCharacteristic == NULL) {
-		LOGe(FMT_CHAR_DOES_NOT_EXIST, STR_CHAR_HARDWARE_REVISION);
-		return;
-	}
-
-	removeCharacteristic(_hardwareRevisionCharacteristic);
-	delete _hardwareRevisionCharacteristic;
-	_hardwareRevisionCharacteristic = NULL;
-}
-
-void DeviceInformationService::removeFirmwareRevisionCharacteristic() {
-	LOGi(FMT_CHAR_REMOVED, STR_CHAR_FIRMWARE_REVISION);
-	if (_firmwareRevisionCharacteristic == NULL) {
-		LOGe(FMT_CHAR_DOES_NOT_EXIST, STR_CHAR_FIRMWARE_REVISION);
-		return;
-	}
-
-	removeCharacteristic(_firmwareRevisionCharacteristic);
-	delete _firmwareRevisionCharacteristic;
-	_firmwareRevisionCharacteristic = NULL;
-}
-
-void DeviceInformationService::removeSoftwareRevisionCharacteristic() {
-#ifdef SOFTWARE_REVISION_CHARACTERISTIC
-	LOGi(FMT_CHAR_REMOVED, STR_CHAR_SOFTWARE_REVISION);
-	if (_softwareRevisionCharacteristic == NULL) {
-		LOGe(FMT_CHAR_DOES_NOT_EXIST, STR_CHAR_SOFTWARE_REVISION);
-		return;
-	}
-
-	removeCharacteristic(_softwareRevisionCharacteristic);
-	delete _softwareRevisionCharacteristic;
-	_softwareRevisionCharacteristic = NULL;
-#endif
-}
-
 void DeviceInformationService::addHardwareRevisionCharacteristic() {
 	LOGi(FMT_CHAR_ADD, STR_CHAR_HARDWARE_REVISION);
 	if (_hardwareRevisionCharacteristic != NULL) {

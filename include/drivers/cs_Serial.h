@@ -93,6 +93,11 @@ typedef enum {
 #define LOGf(fmt, ...) logLN(SERIAL_FATAL, "\033[31;1m" fmt "\033[0m", ##__VA_ARGS__)
 */
 
+#define LOG_IGNORE(fmt, ...) 
+
+// To disable particular logs, but without commenting it.
+#define LOGnone LOG_IGNORE
+
 #define LOGv NRF_LOG_DEBUG
 #define LOGd NRF_LOG_DEBUG
 #define LOGi NRF_LOG_INFO

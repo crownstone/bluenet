@@ -109,13 +109,12 @@ protected:
 
     void createService(const ServiceEvent event);
     
-    void removeService(const ServiceEvent event);
-
-    /** create services available in setup mode
-    */
+    /** Create services available in setup mode
+     */
     void createSetupServices();
-    /** create services available in normal operation mode
-    */
+
+    /** Create services available in normal operation mode
+     */
     void createCrownstoneServices();
 
     /** Start operation for Crownstone. 
@@ -131,13 +130,16 @@ protected:
     void switchMode(const OperationMode & mode);
 
     /** tick function for crownstone to update/execute periodically
-    */
+     */
     void tick();
 
     /** schedule next execution of tick function
-    */
+     */
     void scheduleNextTick();
 
+    /** Increase reset counter. This will be stored in FLASH so it persists over reboots.
+     */
+    void increaseResetCounter();
 private:
 
     boards_config_t _boardsConfig;

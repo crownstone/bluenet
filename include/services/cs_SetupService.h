@@ -30,12 +30,6 @@ class SetupService: public CrownstoneService {
 	 */
 	void createCharacteristics();
 
-	/**
-	 * Remove characteristics that are specific to setup service. The function will not call removeCharacteristics
-	 * of the super class CrownstoneService.
-	 */
-	void removeCharacteristics();
-
 	void handleEvent(event_t & event);
 
     protected:
@@ -45,12 +39,6 @@ class SetupService: public CrownstoneService {
 	inline void addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	inline void addGoToDfuCharacteristic();
-
-	void removeMacAddressCharacteristic();
-
-	void removeSetupKeyCharacteristic();
-
-	void removeGoToDfuCharacteristic();
 
     private:
 

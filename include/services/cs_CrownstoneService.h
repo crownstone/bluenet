@@ -53,18 +53,10 @@ protected:
 	 */
 	void createCharacteristics();
 
-	/** Remove all characteristics.
-	 */
-	void removeCharacteristics();
-
 	/** Enable the control characteristic.
  	 */
 	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, uint16_t charUuid, 
 			EncryptionAccessLevel minimumAccessLevel = GUEST);
-
-	/** Remove the control characteristic.
-	 */
-	void removeControlCharacteristic();
 
 	/** Enable the set configuration characteristic.
 	 *
@@ -82,24 +74,16 @@ protected:
 
 	inline void addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
-	void removeStateControlCharacteristic();
-	
 	inline void addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
 	inline void addFactoryResetCharacteristic();
 
-	void removeFactoryResetCharacteristic();
-
 	void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, 
 			EncryptionAccessLevel minimumAccessLevel = GUEST);
-
-	void removeSessionNonceCharacteristic();
 
 	/** Enable the mesh characteristic.
 	 */
 	inline void addMeshCharacteristic();
-
-	void removeMeshControlCharacteristic();
 
 	StreamBuffer<uint8_t>* getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength);
 

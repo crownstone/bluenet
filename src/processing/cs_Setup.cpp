@@ -56,7 +56,8 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 
 	LOGd("Store keys, mesh address, and other config data");
 	st_value_t value;
-	State& state = State::getInstance();
+	State &state = State::getInstance();
+	value.u32 = 0;
 	value.u8 = sd.id;
 	state.set(CS_TYPE::CONFIG_CROWNSTONE_ID, &value, sizeof(value), PersistenceMode::STRATEGY1);
 	state.set(CS_TYPE::CONFIG_KEY_ADMIN, sd.adminKey, sizeof(sd.adminKey), PersistenceMode::STRATEGY1);
@@ -66,17 +67,22 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 			PersistenceMode::STRATEGY1);
 	state.set(CS_TYPE::CONFIG_IBEACON_UUID, &(sd.ibeaconUuid.uuid128), sizeof(sd.ibeaconUuid), 
 			PersistenceMode::STRATEGY1);
+	value.u32 = 0;
 	value.u16 = sd.ibeaconMajor;
 	state.set(CS_TYPE::CONFIG_IBEACON_MAJOR, &value, sizeof(value), PersistenceMode::STRATEGY1);
+	value.u32 = 0;
 	value.u16 = sd.ibeaconMinor;
 	state.set(CS_TYPE::CONFIG_IBEACON_MINOR, &value, sizeof(value), PersistenceMode::STRATEGY1);
 
 	// Set operation mode to normal mode
 	_persistenceMode = OperationMode::OPERATION_MODE_NORMAL;
 	mode = +_persistenceMode;
+	value.u32 = 0;
 	value.u8 = mode;
-	_last_record_key = mode;
-	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::STRATEGY1);
+	_last_record_key = +CS_TYPE::STATE_OPERATION_MODE;
+	LOGi("Set mode NORMAL");
+	LOGi("Set mode %x", mode);
+	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::FLASH);
 
 	// Switch relay on
 	event_t event0(CS_TYPE::EVT_POWER_ON);
@@ -102,7 +108,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 void Setup::handleEvent(event_t & event) {
 	// we want to react to the last write request (OPERATION_MODE_NORMAL)
 	if (event.type != CS_TYPE::EVT_ADVERTISEMENT_UPDATED) {
-		LOGi("Setup received %s [%i]", TypeName(event.type), +event.type);
+		LOGnone("Setup received %s [%i]", TypeName(event.type), +event.type);
 	}
 	switch (event.type) {
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
@@ -113,6 +119,13 @@ void Setup::handleEvent(event_t & event) {
 			// set char value
 			event_t event1(CS_TYPE::EVT_SETUP_DONE);
 			EventDispatcher::getInstance().dispatch(event1);
+	
+			State &state = State::getInstance();
+			uint8_t mode = 0;
+			state.get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::FLASH);
+			LOGd("New mode is %x", mode);
+			OperationMode _tmpOperationMode = static_cast<OperationMode>(mode);
+			LOGd("Operation mode: %s", TypeName(_tmpOperationMode));
 
 			// reset after 1000 ms
 			evt_do_reset_delayed_t payload;
@@ -121,7 +134,7 @@ void Setup::handleEvent(event_t & event) {
 			event_t event2(CS_TYPE::EVT_DO_RESET_DELAYED, &payload, sizeof(payload));
 			EventDispatcher::getInstance().dispatch(event2);
 		} else {
-			LOGd("Compare key %i with %i", record_key, _last_record_key);
+			LOGnone("Compare key %i with %i", record_key, _last_record_key);
 		}
 		break;
 	}

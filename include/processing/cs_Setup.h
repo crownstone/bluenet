@@ -49,8 +49,6 @@ public:
 private:
 	Setup();
 
-//	bool _setupDone;
-
 	// Used to check if last record has been written
 	uint8_t _last_record_key;
 };

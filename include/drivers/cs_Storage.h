@@ -78,7 +78,7 @@ public:
 
 	void handleFileStorageEvent(fds_evt_t const * p_fds_evt);
 
-	void handleSuccessfullEvent(fds_evt_t const * p_fds_evt);
+	void handleSuccessfulEvent(fds_evt_t const * p_fds_evt);
 	
 	ret_code_t garbageCollect();
 

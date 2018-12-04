@@ -94,12 +94,12 @@ ret_code_t Storage::garbageCollect() {
 	if (!enabled) {
 		LOGe("Softdevice is not enabled yet!");
 	}
-	LOGd("fds_gc");
+	LOGnone("fds_gc");
 	ret_code = fds_gc();
 	if (ret_code != FDS_SUCCESS) {
-		LOGw("No success (err=%i)", ret_code);
+		LOGw("No success garbage collection (err=%i)", ret_code);
 	}
-	LOGd("Garbage collected");
+	LOGnone("Garbage collected");
 	return ret_code;
 }
 
@@ -115,23 +115,32 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 	record.file_id           = file_id;
 	record.key               = +file_data.type;
 	record.data.p_data       = file_data.value;
-	record.data.length_words = file_data.size; 
+	record.data.length_words = file_data.size >> 2; 
+	LOGw("Store 0x%x of size %i", record.data.p_data, record.data.length_words);
 
 	bool f_exists = false;
 	ret_code = exists(file_id, file_data.type, record_desc, f_exists);
 	if (f_exists) {
-		//LOGd("Update file %i record %i desc %i", file_id, record.key, record_desc);
+		uint8_t value = file_data.value[0];
+		LOGd("Value is 0x%x", value);
 		LOGd("Update file %i record %i", file_id, record.key);
+		uint8_t *data;
+		data = (uint8_t*) record.data.p_data;
+		for (int i = 0; i < file_data.size; ++i) {
+			LOGd("Write: 0x%x", data[i]);
+		}
+		// Update is just not done... fds_record_write seems to be okay...
+		uint32_t last_location = *(record_desc.p_record);
+		LOGd("Last flash %x", last_location);
 		ret_code = fds_record_update(&record_desc, &record);
 		FDS_ERROR_CHECK(ret_code);
-		//LOGd("Updated to record %i desc %i", record.key, record_desc);
-		LOGd("Updated to record %i", record.key);
+		LOGd("Updated record %i", record.key);
 	}
 	else {
 		LOGd("Write file %i, record %i, ptr %p", file_id, record.key, record.data.p_data);
-		// somehow we do not get events back anymore... as if the app scheduler is full, but this is not fed
-		// back to us...
 		ret_code = fds_record_write(&record_desc, &record);
+		uint32_t last_location = *(record_desc.p_record);
+		LOGd("Last flash %x", last_location);
 		FDS_ERROR_CHECK(ret_code);
 		static bool garbage_collection = false;
 		f_exists = false;
@@ -146,7 +155,7 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 				}
 				break;
 			case FDS_SUCCESS:
-				LOGd("Write successful");
+				LOGnone("Write successful");
 				ret_code = exists(file_id, file_data.type, record_desc, f_exists);
 				if (!f_exists) {
 					LOGw("Warning: written with delay");
@@ -179,7 +188,6 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 	bool found = false;
 	while (fds_record_find(file_id, +file_data.type, &record_desc, &_ftok) == FDS_SUCCESS) {
 
-		//LOGd("Record %i desc %i", +file_data.type, record_desc);
 		LOGd("Record %i", +file_data.type);
 		if (!found) {
 			ret_code = fds_record_open(&record_desc, &flash_record);
@@ -187,13 +195,18 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 				LOGw("Error on opening record");
 				break;
 			}
-			print("Found:", file_data.type);
+			// print("Found:", file_data.type);
 			found = true;
 
 			// map flash_record.p_data to value
 			file_data.size = flash_record.p_header->length_words;
 			LOGd("Record has size %i", file_data.size);
 			memcpy(file_data.value, flash_record.p_data, file_data.size);
+			uint8_t *data;
+			data = (uint8_t *) flash_record.p_data;
+			for (uint8_t i=0; i < file_data.size << 2; i++) {
+				LOGd("Read 0x%x ",data[i]);
+			}
 
 			// invalidates the record	
 			ret_code = fds_record_close(&record_desc);
@@ -205,6 +218,10 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 				break;
 			}
 		}
+	} 
+
+	if (!found) {
+		LOGnone("Record not found");
 	}
 	return ret_code;
 }
@@ -242,6 +259,9 @@ ret_code_t Storage::exists(st_file_id_t file_id, CS_TYPE type, bool & result) {
 	return exists(file_id, type, record_desc, result);
 }
 
+/**
+ * Check if a record exists and removes duplicate record items. We only support one record field.
+ */
 ret_code_t Storage::exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc, bool & result) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
@@ -256,17 +276,21 @@ ret_code_t Storage::exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t
 			fds_record_delete(&record_desc);
 		}
 		if (!result) {
-			print("Exists:", type);
+			//print("Exists:", type);
 			result = true;
 		}
 	}
 	if (!result) {
-		print("Does not exist:", type);
+		//print("Does not exist:", type);
 	}
 	return ERR_SUCCESS;
 }
 
-void Storage::handleSuccessfullEvent(fds_evt_t const * p_fds_evt) {
+/**
+ * Receives only successful events via the callback handler registered in the SoftDevice. On the moment we propagate
+ * successful write events so it can be used by other modules to respond to.
+ */
+void Storage::handleSuccessfulEvent(fds_evt_t const * p_fds_evt) {
 	switch (p_fds_evt->id) {
 	case FDS_EVT_INIT:
 		LOGd("Successfully initialized");
@@ -276,11 +300,18 @@ void Storage::handleSuccessfullEvent(fds_evt_t const * p_fds_evt) {
 	case FDS_EVT_UPDATE: {
 		//uint8_t file_id = p_fds_evt->write.file_id;
 		uint8_t record_key = p_fds_evt->write.record_key;
-		LOGi("Dispatch write/update event, record %i", record_key);
+		LOGnone("Dispatch write/update event, record %i", record_key);
 		event_t event1(CS_TYPE::EVT_STORAGE_WRITE_DONE, (void*)&record_key, sizeof(record_key));
 		EventDispatcher::getInstance().dispatch(event1);
 		break;
 	}
+	case FDS_EVT_DEL_RECORD:
+		LOGi("Record successfully deleted");
+		break;
+	case FDS_EVT_DEL_FILE:
+		LOGi("File successfully deleted");
+		fds_gc();
+		break;
 	default:
 		LOGd("Storage evt %i with value %i", p_fds_evt->id, p_fds_evt->result);
 		break;
@@ -289,13 +320,13 @@ void Storage::handleSuccessfullEvent(fds_evt_t const * p_fds_evt) {
 
 void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 
-	LOGd("FS: %i: %i", p_fds_evt->result, p_fds_evt->id);
+	LOGnone("FS: %i: %i", p_fds_evt->result, p_fds_evt->id);
 	switch(p_fds_evt->result) {
 	case FDS_ERR_NOT_FOUND:
 		LOGe("Not found");
 		break;
 	case FDS_SUCCESS: 
-		handleSuccessfullEvent(p_fds_evt);
+		handleSuccessfulEvent(p_fds_evt);
 		break;
 	default:
 		LOGe("Storage error: %i", p_fds_evt->result);

@@ -114,25 +114,6 @@ void CrownstoneService::createCharacteristics() {
     updatedCharacteristics();
 }
 
-void CrownstoneService::removeCharacteristics() {
-#if BUILD_MESHING == 1
-    removeMeshControlCharacteristic();
-#endif
-    removeStateControlCharacteristic();
-    removeSessionNonceCharacteristic();
-    removeFactoryResetCharacteristic();
-
-    updatedCharacteristics();
-}
-
-void CrownstoneService::removeBuffer() {
-    // remove allocated data structures
-    if (_streamBuffer != NULL) {
-	delete [] _streamBuffer;
-	_streamBuffer = NULL;
-    }
-}
-
 void CrownstoneService::addMeshCharacteristic() {
 #if BUILD_MESHING == 1
     if (_meshControlCharacteristic != NULL) {
@@ -188,17 +169,6 @@ void CrownstoneService::addMeshCharacteristic() {
 #endif
 }
 
-void CrownstoneService::removeMeshControlCharacteristic() {
-#if BUILD_MESHING == 1
-    LOGi(FMT_CHAR_REMOVED, STR_CHAR_MESH);
-    if (_meshControlCharacteristic != NULL) {
-	removeCharacteristic(_meshControlCharacteristic);
-	delete _meshControlCharacteristic;
-	_meshControlCharacteristic = NULL;
-    }
-#endif
-}
-
 void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, uint16_t charUuid, 
 	EncryptionAccessLevel minimumAccessLevel) {
     if (_controlCharacteristic != NULL) {
@@ -248,15 +218,6 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	}
 	controlWriteErrorCode(type, errCode);
     });
-}
-
-void CrownstoneService::removeControlCharacteristic() {
-    LOGi(FMT_CHAR_REMOVED, STR_CHAR_CONTROL);
-    if (_controlCharacteristic != NULL) {
-	removeCharacteristic(_controlCharacteristic);
-	delete _controlCharacteristic;
-	_controlCharacteristic = NULL;
-    }
 }
 
 void CrownstoneService::addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size, 
@@ -345,15 +306,6 @@ void CrownstoneService::addStateControlCharacteristic(buffer_ptr_t buffer, uint1
     });
 }
 
-void CrownstoneService::removeStateControlCharacteristic() {
-    LOGi(FMT_CHAR_REMOVED, STR_CHAR_STATE_CONTROL);
-    if (_stateControlCharacteristic != NULL) {
-	removeCharacteristic(_stateControlCharacteristic);
-	delete _stateControlCharacteristic;
-	_stateControlCharacteristic = NULL;
-    }
-}
-
 void CrownstoneService::addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size) {
     if (_stateReadCharacteristic != NULL) {
 	LOGe(FMT_CHAR_EXISTS, STR_CHAR_STATE);
@@ -394,15 +346,6 @@ void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, uint1
     _sessionNonceCharacteristic->setValueLength(0);
 }
 
-void CrownstoneService::removeSessionNonceCharacteristic() {
-    LOGi(FMT_CHAR_REMOVED, STR_CHAR_SESSION_NONCE);
-    if (_sessionNonceCharacteristic != NULL) {
-	removeCharacteristic(_sessionNonceCharacteristic);
-	delete _sessionNonceCharacteristic;
-	_sessionNonceCharacteristic = NULL;
-    }
-}
-
 void CrownstoneService::addFactoryResetCharacteristic() {
     _factoryResetCharacteristic = new Characteristic<uint32_t>();
     addCharacteristic(_factoryResetCharacteristic);
@@ -424,15 +367,6 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	}
 	_factoryResetCharacteristic->operator=(val);
     });
-}
-
-void CrownstoneService::removeFactoryResetCharacteristic() {
-    LOGi(FMT_CHAR_REMOVED, STR_CHAR_FACTORY_RESET);
-    if (_factoryResetCharacteristic != NULL) {
-	removeCharacteristic(_factoryResetCharacteristic);
-	delete _factoryResetCharacteristic;
-	_factoryResetCharacteristic = NULL;
-    }
 }
 
 /*
