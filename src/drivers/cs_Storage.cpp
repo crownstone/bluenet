@@ -116,31 +116,18 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 	record.key               = +file_data.type;
 	record.data.p_data       = file_data.value;
 	record.data.length_words = file_data.size >> 2; 
-	LOGw("Store 0x%x of size %i", record.data.p_data, record.data.length_words);
+	LOGnone("Store 0x%x of size %i", record.data.p_data, record.data.length_words);
 
 	bool f_exists = false;
 	ret_code = exists(file_id, file_data.type, record_desc, f_exists);
 	if (f_exists) {
-		uint8_t value = file_data.value[0];
-		LOGd("Value is 0x%x", value);
 		LOGd("Update file %i record %i", file_id, record.key);
-		uint8_t *data;
-		data = (uint8_t*) record.data.p_data;
-		for (int i = 0; i < file_data.size; ++i) {
-			LOGd("Write: 0x%x", data[i]);
-		}
-		// Update is just not done... fds_record_write seems to be okay...
-		uint32_t last_location = *(record_desc.p_record);
-		LOGd("Last flash %x", last_location);
 		ret_code = fds_record_update(&record_desc, &record);
 		FDS_ERROR_CHECK(ret_code);
-		LOGd("Updated record %i", record.key);
 	}
 	else {
-		LOGd("Write file %i, record %i, ptr %p", file_id, record.key, record.data.p_data);
+		LOGnone("Write file %i, record %i, ptr %p", file_id, record.key, record.data.p_data);
 		ret_code = fds_record_write(&record_desc, &record);
-		uint32_t last_location = *(record_desc.p_record);
-		LOGd("Last flash %x", last_location);
 		FDS_ERROR_CHECK(ret_code);
 		static bool garbage_collection = false;
 		f_exists = false;
@@ -188,25 +175,18 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 	bool found = false;
 	while (fds_record_find(file_id, +file_data.type, &record_desc, &_ftok) == FDS_SUCCESS) {
 
-		LOGd("Record %i", +file_data.type);
+		LOGnone("Read record %i", +file_data.type);
 		if (!found) {
 			ret_code = fds_record_open(&record_desc, &flash_record);
 			if (ret_code != FDS_SUCCESS) {
 				LOGw("Error on opening record");
 				break;
 			}
-			// print("Found:", file_data.type);
 			found = true;
 
 			// map flash_record.p_data to value
 			file_data.size = flash_record.p_header->length_words;
-			LOGd("Record has size %i", file_data.size);
 			memcpy(file_data.value, flash_record.p_data, file_data.size);
-			uint8_t *data;
-			data = (uint8_t *) flash_record.p_data;
-			for (uint8_t i=0; i < file_data.size << 2; i++) {
-				LOGd("Read 0x%x ",data[i]);
-			}
 
 			// invalidates the record	
 			ret_code = fds_record_close(&record_desc);
@@ -298,9 +278,8 @@ void Storage::handleSuccessfulEvent(fds_evt_t const * p_fds_evt) {
 		break;
 	case FDS_EVT_WRITE:
 	case FDS_EVT_UPDATE: {
-		//uint8_t file_id = p_fds_evt->write.file_id;
 		uint8_t record_key = p_fds_evt->write.record_key;
-		LOGnone("Dispatch write/update event, record %i", record_key);
+		LOGd("Dispatch write/update event, record %i", record_key);
 		event_t event1(CS_TYPE::EVT_STORAGE_WRITE_DONE, (void*)&record_key, sizeof(record_key));
 		EventDispatcher::getInstance().dispatch(event1);
 		break;

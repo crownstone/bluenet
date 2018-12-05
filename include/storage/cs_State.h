@@ -34,8 +34,20 @@ constexpr const char* TypeName(OperationMode const & mode) {
 	case OperationMode::OPERATION_MODE_UNINITIALIZED:
 	    return "OPERATION_MODE_UNINITIALIZED";
     }
-    // never reached
+    // should never be reached
     return "Mode does not exist!";
+}
+
+constexpr int ValidMode(OperationMode const & mode) {
+    switch(mode) {
+	case OperationMode::OPERATION_MODE_SETUP:
+	case OperationMode::OPERATION_MODE_DFU:
+	case OperationMode::OPERATION_MODE_FACTORY_RESET:
+	case OperationMode::OPERATION_MODE_NORMAL:
+	case OperationMode::OPERATION_MODE_UNINITIALIZED:
+	    return 1;
+    }
+    return 0;
 }
 
 #define FACTORY_RESET_STATE_NORMAL 0
@@ -60,12 +72,23 @@ constexpr const char* TypeName(OperationMode const & mode) {
  *     - if present, copy to RAM, return RAM value
  *     - if not present, should be impossible: compile-time error please!
  *
- * Default FLASH write procedure:
+ * Default FLASH write procedure (outdated):
  *   1. Compare FIRMWARE_DEFAULT
  *     - if same, return success
  *   2. Compare FLASH
  *     - if same, return success
  *   3. Write to FLASH and copy to RAM
+ *
+ * Note. The above has a bug. When a value has been written to FLASH and then the FIRMWARE_DEFAULT needs to be 
+ * written the above protocol fails to write FIRMWARE_DEFAULT values. 
+ *
+ * Default FLASH write procedure:
+ *   1. Compare with RAM
+ *     - if same, return success
+ *   2. Write to FLASH
+ *
+ * We assume here that a value even if it is the same as FIRMWARE_DEFAULT it will still be written. To remove a 
+ * value should be a deliberate action.
  *
  * Default RAM read procedure:
  *   1. Read RAM
@@ -153,6 +176,8 @@ public:
 	cs_ret_code_t get(st_file_data_t & data, const PersistenceMode mode);
 
 	cs_ret_code_t set(CS_TYPE type, void* data, size16_t size, PersistenceMode mode);
+
+	cs_ret_code_t remove(CS_TYPE type, const PersistenceMode mode);
 	
 	void setNotify(CS_TYPE type, bool enable);
 
@@ -174,9 +199,11 @@ protected:
 
 	cs_ret_code_t loadFromRam(st_file_data_t & data);
 
+	cs_ret_code_t storeInRam(const st_file_data_t & data, size16_t & index_in_ram);
+
 	std::vector<CS_TYPE> _notifyingStates;
 
-	std::vector<st_file_data_t> _not_persistent;
+	std::vector<st_file_data_t> _data_in_ram;
 
 private:
 

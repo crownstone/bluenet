@@ -7,15 +7,26 @@
 
 /**********************************************************************************************************************
  *
- * The Crownstone is a high-voltage (domestic) switch. It can be used for:
- *   - indoor localization
- *   - building automation
+ * The Crownstone is a high-voltage (110-240V) switch. It can be used for indoor localization and building automation.
+ * It is an essential building block for smart homes. Contemporary switches do come with smartphone apps. However, 
+ * this does not simplify their use. The user needs to unlock her phone, open the app, navigate to the right screen,
+ * and click a particular icon. A truly smart home knows that the user wants the lights on. For this, indoor
+ * localization on a room level is required. Now, a smart home can turn on the lights there were the user resides.
+ * Indoor localization can be used to adjust lights, temperature, or even music to your presence.
  *
- * It is one of the first, or the first(?), open-source Internet-of-Things devices entering the market.
+ * Very remarkable, our Crownstone technology is one of the first open-source Internet of Things devices entering the
+ * market (2016). Our firmware dates from 2014. Please, contact us if you encounter other IoT devices that are open
+ * source!
  *
  * Read more on: https://crownstone.rocks
  *
- * Almost all configuration options should be set in CMakeBuild.config.
+ * Crownstone uses quite a sophisticated build system. It has to account for multiple devices and multiple 
+ * configuration options. For that the CMake system is used in parallel. Configuration options are set in a file 
+ * called CMakeBuild.config. Details can be found in the following documents:
+ *
+ * - Development/Installation:         https://github.com/crownstone/bluenet/blob/master/docs/INSTALL.md
+ * - Protocol Definition:              https://github.com/crownstone/bluenet/blob/master/docs/PROTOCOL.md
+ * - Firmware Specifications:          https://github.com/crownstone/bluenet/blob/master/docs/FIRMWARE_SPECS.md 
  *
  *********************************************************************************************************************/
 
@@ -57,7 +68,7 @@ void handleZeroCrossing() {
 	PWM::getInstance().onZeroCrossing();
 }
 
-/** Allocate Crownstone structs.
+/** Allocate Crownstone class and internal references.
  * 
  * Create buffers, timers, storage, state, etc. We are running on an embedded device. Only allocate something in a
  * constructor. For dynamic information use the stack. Do not allocate/deallocate anything during runtime. It is 
@@ -134,7 +145,8 @@ Crownstone::Crownstone(boards_config_t& board) :
 /**
  * Initialize Crownstone firmware. First drivers are initialized (log modules, storage modules, ADC conversion, 
  * timers). Then everything is configured independent of the mode (everything that is common to whatever mode the
- * Crownstone runs on). The timer is created that  
+ * Crownstone runs on). A callback to the local staticTick function for a timer is set up. Then the mode of
+ * operation is switched and the BLE services are initialized.
  */
 void Crownstone::init() {
 	//! initialize drivers
@@ -187,19 +199,6 @@ void Crownstone::initDrivers() {
 	_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), PersistenceMode::FLASH);
 	
 	increaseResetCounter();
-
-	/*
-	LOGi("Inc");
-
-	increaseResetCounter();
-
-	increaseResetCounter();
-
-	increaseResetCounter();
-
-
-	increaseResetCounter();
-	*/
 #endif
 
 	// If not done already, init UART
@@ -262,22 +261,19 @@ void Crownstone::initDrivers() {
  * the storage has been initialized.
  */
 void Crownstone::configure() {
+	assert(_stack != NULL, "Stack");
+	assert(_storage != NULL, "Storage");
 
 	LOGi("> stack ...");
 	
 	_stack->initRadio();
 
-	if (nrf_sdh_is_enabled()) {
-		LOGd("Softdevice enabled");
-	} else {
-		LOGd("Softdevice still not enabled?");
-	}
-
 	configureStack();
 
-	Storage::getInstance().garbageCollect();
+	_storage->garbageCollect();
 
 	increaseResetCounter();
+	
 	setName();
 
 	writeDefaults();
@@ -308,7 +304,7 @@ void Crownstone::configure() {
  */
 void Crownstone::configureStack() {
 	// Set the stored tx power
-	int8_t txPower;
+	int8_t txPower = 0;
 	_state->get(CS_TYPE::CONFIG_TX_POWER, &txPower, PersistenceMode::STRATEGY1);
 	_stack->setTxPowerLevel(txPower);
 
@@ -525,8 +521,6 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 /**
  * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
  * It is loaded from memory or from the default and written to the Stack.
- *
- *
  */
 void Crownstone::setName() {
 	static bool addResetCounterToName = false;
@@ -553,6 +547,10 @@ void Crownstone::setName() {
 
 }
 
+/**
+ * Start the different modules depending on the operational mode. For example, in normal mode we use a scanner and
+ * the mesh. In setup mode we use the serial module (but only RX).
+ */
 void Crownstone::startOperationMode(const OperationMode & mode) {
 	switch(mode) {
 		case OperationMode::OPERATION_MODE_NORMAL:
@@ -585,6 +583,9 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	}
 }
 
+/**
+ * Write temperature, time, and state errors to (persistent) memory.
+ */
 void Crownstone::writeDefaults() {
 	st_value_t value;
 	value.u32 = 0;
@@ -593,6 +594,16 @@ void Crownstone::writeDefaults() {
 	_state->set(CS_TYPE::STATE_ERRORS, &value, sizeof(value), PersistenceMode::STRATEGY1);
 }
 
+/**
+ * After allocation of all modules, after initialization of each module, and after configuration of each module, we
+ * are ready to "start". This means:
+ *
+ *   - advertise
+ *   - turn on/off switch at boot (depending on default)
+ *   - watch temperature excess
+ *   - power sampling
+ *   - schedule tasks
+ */
 void Crownstone::startUp() {
 
 	LOGi(FMT_HEADER, "startup");
@@ -698,21 +709,14 @@ void Crownstone::startUp() {
  * persists over reboots.
  */
 void Crownstone::increaseResetCounter() {
-	static st_value_t resetCounter;
-	resetCounter.u32 = 0;
-//	_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, PersistenceMode::STRATEGY1);
-	_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, PersistenceMode::FLASH);
-	LOGi("Reset counter at: 0x%x", resetCounter.u32);
-//	LOGi("Reset counter at: %i", resetCounter.u8);
-	resetCounter.u32 = 0x13 ;
-//	LOGi("Reset counter at: %d", resetCounter.u8);
-	LOGi("Reset counter at: 0x%x", resetCounter.u32);
-	//_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), PersistenceMode::STRATEGY1);
-	_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), PersistenceMode::FLASH);
-	resetCounter.u32 = 0;
-	
-	_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, PersistenceMode::FLASH);
-	LOGi("Reset counter at: 0x%x", resetCounter.u32);
+	//st_value_t resetCounter;
+	uint32_t resetCounter;
+	resetCounter = 0;
+	_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, PersistenceMode::STRATEGY1);
+	LOGi("Get counter 0x%x", resetCounter);
+	resetCounter++;
+//	LOGi("Set counter 0x%x", resetCounter.u32);
+	_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), PersistenceMode::STRATEGY1);
 }
 
 /**
@@ -748,11 +752,14 @@ void Crownstone::scheduleNextTick() {
 	Timer::getInstance().start(_mainTimerId, HZ_TO_TICKS(CROWNSTONE_UPDATE_FREQUENCY), this);
 }
 
+/**
+ * An infinite loop in which the application ceases control to the SoftDevice at regular times. It runs the scheduler,
+ * waits for events, and handles them. Also the printed statements in the log module are flushed.
+ */
 void Crownstone::run() {
 
 	LOGi(FMT_HEADER, "running");
 
-	// Forever, run scheduler, wait for events and handle them
 	while(1) {
 		app_sched_execute();
 		sd_app_evt_wait();

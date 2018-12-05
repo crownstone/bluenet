@@ -126,6 +126,10 @@ void Setup::handleEvent(event_t & event) {
 			LOGd("New mode is %x", mode);
 			OperationMode _tmpOperationMode = static_cast<OperationMode>(mode);
 			LOGd("Operation mode: %s", TypeName(_tmpOperationMode));
+			if (!ValidMode(_tmpOperationMode)) {
+				LOGe("Invalid operation mode!");
+				// for now continue with reset (will be considered setup mode)
+			}
 
 			// reset after 1000 ms
 			evt_do_reset_delayed_t payload;
