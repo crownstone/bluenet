@@ -20,6 +20,9 @@
 
 #define PRINT_SWITCH_VERBOSE
 
+#define FADE_TICK_HZ 20
+#define FADE_TIMEOUT_TICKS HZ_TO_TICKS(FADE_TICK_HZ)
+
 Switch::Switch():
 //	_nextRelayVal(SWITCH_NEXT_RELAY_VAL_NONE),
 	_pwmPowered(false),
@@ -39,6 +42,9 @@ Switch::Switch():
 
 	_switchStoreStateTimerData = { {0} };
 	_switchStoreStateTimerId = &_switchStoreStateTimerData;
+
+	_switchFadeTimerData = { {0} };
+	_switchFadeTimerId = &_switchFadeTimerData;
 }
 
 void Switch::init(const boards_config_t& board) {
@@ -76,6 +82,7 @@ void Switch::init(const boards_config_t& board) {
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_switchTimerId, (app_timer_timeout_handler_t)Switch::staticTimedSwitch);
 	Timer::getInstance().createSingleShot(_switchStoreStateTimerId, (app_timer_timeout_handler_t)Switch::staticTimedStoreSwitch);
+	Timer::getInstance().createSingleShot(_switchFadeTimerId, (app_timer_timeout_handler_t)Switch::staticSwitchFadeTick);
 }
 
 
@@ -291,6 +298,51 @@ bool Switch::getRelayState() {
 }
 
 
+void Switch::_setSwitchAndRelay(uint8_t switchState) {
+	// TODO: the pwm gets set at the start of a period, which lets the light flicker in case the relay is turned off..
+	// First pwm on, then relay off!
+	// Otherwise, if you go from 100 to 90, the power first turns off, then to 90.
+	// TODO: why not first relay on, then pwm off, when going from 90 to 100?
+
+	// Pwm when value is 1-99, else pwm off
+	bool pwmOnSuccess = true;
+	if (switchState > 0 && switchState < SWITCH_ON) {
+		pwmOnSuccess = _setPwm(switchState);
+	}
+	else {
+		_setPwm(0);
+	}
+
+	// Relay on when value >= 100, or when trying to dim, but that was unsuccessful.
+	// Else off (as the dimmer is parallel)
+	if (switchState >= SWITCH_ON || !pwmOnSuccess) {
+		if (_switchValue.relay_state == 0) {
+			_relayOn();
+		}
+	}
+	else {
+		if (_switchValue.relay_state == 1) {
+			_relayOff();
+		}
+	}
+}
+
+
+void Switch::switchFadeTick() {
+	int8_t newValue = (int8_t)_switchValue.pwm_state + _switchFadeStep;
+
+	if ((_switchFadeStep < 0 && newValue < (int8_t)_switchFadeTarget)
+		|| (_switchFadeStep > 0 && newValue > (int8_t)_switchFadeTarget)) {
+		newValue = _switchFadeTarget;
+	}
+
+	if (_switchValue.pwm_state != newValue) {
+		Switch::_setSwitchAndRelay(newValue);
+		Timer::getInstance().start(_switchFadeTimerId, FADE_TIMEOUT_TICKS, this);
+	}
+}
+
+
 void Switch::setSwitch(uint8_t switchState) {
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGi("Set switch state: %d", switchState);
@@ -314,32 +366,23 @@ void Switch::setSwitch(uint8_t switchState) {
 			break;
 		}
 		default: {
-			// TODO: the pwm gets set at the start of a period, which lets the light flicker in case the relay is turned off..
-			// First pwm on, then relay off!
-			// Otherwise, if you go from 100 to 90, the power first turns off, then to 90.
-			// TODO: why not first relay on, then pwm off, when going from 90 to 100?
+			switchState = (switchState > SWITCH_ON) ? SWITCH_ON : switchState;
+			int8_t fadeStep = ((int8_t)switchState - (int8_t)_switchValue.pwm_state) / FADE_TICK_HZ;
 
-			// Pwm when value is 1-99, else pwm off
-			bool pwmOnSuccess = true;
-			if (switchState > 0 && switchState < SWITCH_ON) {
-				pwmOnSuccess = _setPwm(switchState);
+			if (fadeStep == 0 && switchState < _switchValue.pwm_state) {
+				fadeStep = -1;
 			}
-			else {
-				_setPwm(0);
+			else if (fadeStep == 0 && switchState > _switchValue.pwm_state) {
+				fadeStep = 1;
 			}
 
-			// Relay on when value >= 100, or when trying to dim, but that was unsuccessful.
-			// Else off (as the dimmer is parallel)
-			if (switchState >= SWITCH_ON || !pwmOnSuccess) {
-				if (_switchValue.relay_state == 0) {
-					_relayOn();
-				}
-			}
-			else {
-				if (_switchValue.relay_state == 1) {
-					_relayOff();
-				}
-			}
+			Timer::getInstance().stop(_switchFadeTimerId);
+
+			// Might want to atomically set both at the same time.
+			_switchFadeStep = fadeStep;
+			_switchFadeTarget = switchState;
+
+			Timer::getInstance().start(_switchFadeTimerId, FADE_TIMEOUT_TICKS, this);
 			break;
 		}
 	}

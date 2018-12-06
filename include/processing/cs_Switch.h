@@ -165,6 +165,10 @@ public:
 
 	/** Used internally
 	 */
+	static void staticSwitchFadeTick(Switch* ptr) { ptr->switchFadeTick(); }
+
+	/** Used internally
+	 */
 	void handleEvent(uint16_t evt, void* p_data, uint16_t length);
 
 #if BUILD_MESHING == 1
@@ -186,6 +190,17 @@ private:
 	 * @return                           True when the given value was set, false otherwise.
 	 */
 	bool _setPwm(uint8_t value);
+
+	/** Sets and updates the switch state. When the switchState is set to 0 or 100,
+	 * the relay will be turned off or turned on, respectively, and the pwm will
+	 * be turned off.
+	 *
+	 * Does not store the state.
+	 * Does not check for switch lock.
+	 *
+	 * @param[in] switchState            Pwm value (0-100)
+	 */
+	void _setSwitchAndRelay(uint8_t switchState);
 
 	/** Turns the relay on.
 	 *
@@ -217,17 +232,25 @@ private:
 	//! Set switch after the delay time has passed.
 	void delayedSwitchExecute();
 
+	//! Each ticks moves the switch state towards the target value.
+	void switchFadeTick();
+
 	void pwmNotAllowed();
 
 	void forcePwmOff();
 	void forceRelayOn();
 	void forceSwitchOff();
 
+	void _setSwitchAndRelay(uint8_t switchState);
+
 	bool allowPwmOn();
 	bool allowRelayOff();
 	bool allowRelayOn();
 
 	switch_state_t _switchValue;
+
+	uint8_t _switchFadeTarget;
+	int8_t _switchFadeStep;
 
 	//! Timer used to set the switch state with a delay.
 	app_timer_t              _switchTimerData;
@@ -236,6 +259,10 @@ private:
 	//! Timer used to write the switch state to storage with a delay.
 	app_timer_t              _switchStoreStateTimerData;
 	app_timer_id_t           _switchStoreStateTimerId;
+
+	//! Timer used to gradually dim the switch.
+	app_timer_t              _switchFadeTimerData;
+	app_timer_id_t           _switchFadeTimerId;
 
 //	uint8_t _nextRelayVal;
 
