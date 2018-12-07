@@ -153,13 +153,16 @@ void Crownstone::init() {
 	LOGi(FMT_HEADER, "init");
 	initDrivers();
 	LOG_MEMORY;
+	NRF_LOG_FLUSH();
 
 	//! configure the crownstone
 	LOGi(FMT_HEADER, "configure");
 	configure();
+	NRF_LOG_FLUSH();
 
 	LOGi(FMT_CREATE, "timer");
 	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
+	NRF_LOG_FLUSH();
 	
 	LOGi(FMT_HEADER, "mode");
 	uint8_t mode;
@@ -167,10 +170,12 @@ void Crownstone::init() {
 	LOGd("Mode is %x", mode);
 	OperationMode newOperationMode = static_cast<OperationMode>(mode);
 	switchMode(newOperationMode);
+	NRF_LOG_FLUSH();
 
 	LOGi(FMT_HEADER, "init services");
 
 	_stack->initServices();
+	NRF_LOG_FLUSH();
 }
 
 /**

@@ -134,7 +134,7 @@ cs_ret_code_t State::get(const CS_TYPE type, void* target, size16_t & size, cons
 	st_file_data_t data;
 	data.type = type;
 	data.size = size;
-	data.value = NULL;
+	data.value = (uint8_t*)target;
 	ret_code_t ret_code = get(data, mode);
 	LOGnone("Got type %s (%i) of size %i", TypeName(data.type), data.type, data.size);
 	memcpy(target, data.value, data.size);
@@ -168,18 +168,23 @@ cs_ret_code_t State::get(st_file_data_t & data, const PersistenceMode mode) {
 			}
 			bool exist = loadFromRam(data);
 			if (exist) {
+				LOGnone("Loaded from RAM: %s", TypeName(data.type));
 				return ERR_SUCCESS;
 			}
 
 			ret_code = _storage->read(FILE_CONFIGURATION, data);
 			switch(ret_code) {
-				case FDS_SUCCESS:
-					LOGnone("Move from FLASH to RAM");
+				case FDS_SUCCESS: {
+					LOGnone("Loaded from FLASH: %s", TypeName(data.type));
 					storeInRam(data);
 					return ret_code;
-				case FDS_ERR_NOT_FOUND:
+				}
+				case FDS_ERR_NOT_FOUND: {
+					LOGnone("Loaded default: %s", TypeName(data.type));
 					getDefault(data);
+					storeInRam(data);
 					return ERR_SUCCESS;
+				}
 				default: {
 					LOGe("Should not happen");
 				}
@@ -203,11 +208,19 @@ cs_ret_code_t State::storeInRam(const st_file_data_t & data) {
 	return storeInRam(data, temp);
 }
 
+/**
+ * Maybe we should check if data is stored at right boundary.
+ *
+ * if ((uint32_t)data.value % 4u != 0) {
+ *		LOGe("Unaligned type: %s: %p", TypeName(type), data.value);
+ *	}
+ */
 cs_ret_code_t State::storeInRam(const st_file_data_t & data, size16_t & index_in_ram) {
 	// TODO: Check if enough RAM is available
 	bool exist = false;
 	for (size16_t i = 0; i < _data_in_ram.size(); ++i) {
 		if (_data_in_ram[i].type == data.type) {
+			LOGnone("Update RAM");
 			st_file_data_t & ram_data = _data_in_ram[i];
 			if (ram_data.size != data.size) { 
 				free(ram_data.value);
@@ -221,12 +234,15 @@ cs_ret_code_t State::storeInRam(const st_file_data_t & data, size16_t & index_in
 		}
 	}
 	if (!exist) {
+		LOGnone("Store %i in RAM", data.type);
 		st_file_data_t &ram_data = *(st_file_data_t*)malloc(sizeof(st_file_data_t));
 		ram_data.type = data.type;
 		ram_data.size = data.size;
+		LOGnone("Allocate value array of size %i", data.size);
 		ram_data.value = (uint8_t*)malloc(sizeof(uint8_t) * data.size);
 		memcpy(ram_data.value, data.value, data.size);
 		_data_in_ram.push_back(ram_data);
+		LOGd("RAM buffer now of size %i", _data_in_ram.size());
 		index_in_ram = _data_in_ram.size() - 1;
 	}
 	return ERR_SUCCESS;
@@ -254,15 +270,15 @@ cs_ret_code_t State::loadFromRam(st_file_data_t & data) {
 // TODO: deleteFromRam to limit RAM usage
 
 /**
- * For now always write all settings to persistent storage. 
+ * There are three modes:
+ *   RAM: store item in volatile memory
+ *   FLASH: store item in persistent memory
+ *   STRATEGY: store item depending on its default location, keep a copy in RAM.
  */
 cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const PersistenceMode mode) {
 	st_file_data_t data;
 	data.type = type;
 	data.value = (uint8_t*)target;
-	if ((uint32_t)data.value % 4u != 0) {
-		LOGe("Unaligned type: %s: %p", TypeName(type), data.value);
-	}
 	LOGnone("Set value: %s: %i", TypeName(type), type);
 	data.size = size;
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;

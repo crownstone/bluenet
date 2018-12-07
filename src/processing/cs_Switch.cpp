@@ -20,6 +20,9 @@
 
 #define PRINT_SWITCH_VERBOSE
 
+/**
+ * The Switch class takes care of switching loads and configures also the Dimmer.
+ */
 Switch::Switch():
 	_pwmPowered(false),
 	_relayPowered(false),
@@ -40,14 +43,26 @@ Switch::Switch():
 	_switchStoreStateTimerId = &_switchStoreStateTimerData;
 }
 
+/**
+ * Initialize the "switch". The switch class encapsulates both the relay for switching high-power loads and the 
+ * IGBTs for very fast switching of low-power loads. The latter enables all types of dimming. The following types
+ * of dimming exists: 
+ *   + pulse width modulation (PWM)
+ *   + leading edge dimming
+ *   + trailing edge dimming
+ *
+ * TODO: The PWM class concerns dimming in general. It should be called "Dimmer", not just "PWM".
+ */
 void Switch::init(const boards_config_t& board) {
 	
 	LOGd(FMT_INIT, "switch");
 
 	PWM& pwm = PWM::getInstance();
-	uint32_t pwmPeriod;
+	uint32_t pwmPeriod = 0L;
+	LOGd("PWM period ptr: %p", &pwmPeriod);
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, PersistenceMode::STRATEGY1);
 	LOGd("PWM period %i pin %d", pwmPeriod, board.pinGpioPwm);
+	NRF_LOG_FLUSH();
 
 	pwm_config_t pwmConfig;
 	pwmConfig.channelCount = 1;

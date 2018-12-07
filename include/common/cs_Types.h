@@ -471,6 +471,11 @@ enum class PersistenceMode: uint8_t {
     STRATEGY1, 
 };
 
+/**
+ * The size of a particular default value. In case of strings or arrays this is the maximum size of the corresponding
+ * field. There are no fields that are of unrestricted size. For fields that are not implemented it is possible to
+ * set size to 0.
+ */
 constexpr size16_t TypeSize(CS_TYPE const & type) {
     switch(type) {
 	case CS_TYPE::CONFIG_NAME:
@@ -1092,9 +1097,14 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
  *
  * Note that if data.value is not aligned at a word boundary, the result still isn't. Use st_value_t to align 
  * (u)int8_t, (u)int16_t, float, etc. on word boundaries.
+ *
+ * There is no allocation done in this function. It is assumed that data.value points to an array or single
+ * variable that needs to be written. The allocation of strings or arrays is limited by TypeSize which in that case
+ * can be considered as MaxTypeSize.
  */
 constexpr void getDefault(st_file_data_t & data) {
 
+    // for all non-string types we already know the to-be expected size
     data.size = TypeSize(data.type);
 
     switch(data.type) {
@@ -1226,7 +1236,12 @@ constexpr void getDefault(st_file_data_t & data) {
 	    *(TYPIFY(CONFIG_MESH_ACCESS_ADDRESS)*)data.value = MESH_ACCESS_ADDRESS;
 	    break;
 	case CS_TYPE::CONFIG_PWM_PERIOD:
-	    *(TYPIFY(CONFIG_PWM_PERIOD)*)data.value = PWM_PERIOD;
+	    LOGd("Got PWM period: %li", PWM_PERIOD);
+	    LOGd("Data value ptr: %p", data.value);
+	    *((uint32_t*)data.value) = 1;
+	    LOGd("data.value: %li", *((uint32_t*)data.value));
+	    *(TYPIFY(CONFIG_PWM_PERIOD)*)data.value = (TYPIFY(CONFIG_PWM_PERIOD))PWM_PERIOD;
+	    LOGd("data.value: %li", *((uint32_t*)data.value));
 	    break;
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
 	    *(TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD)*)data.value = CURRENT_USAGE_THRESHOLD;

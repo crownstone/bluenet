@@ -155,6 +155,25 @@ constexpr const char* NordicFDSTypeName(uint32_t nordic_type) {
 	}
 }
 
+constexpr const char* NordicFDSEventTypeName(uint32_t nordic_type) {
+	switch(nordic_type) {
+		case FDS_EVT_INIT:
+			return "FDS_EVT_INIT";
+		case FDS_EVT_WRITE:
+			return "FDS_EVT_WRITE";
+		case FDS_EVT_UPDATE:
+			return "FDS_EVT_UPDATE";
+		case FDS_EVT_DEL_RECORD:
+			return "FDS_EVT_DEL_RECORD";
+		case FDS_EVT_DEL_FILE:
+			return "FDS_EVT_DEL_FILE";
+		case FDS_EVT_GC:
+			return "FDS_EVT_GC";
+		default:
+			return "Unknown";
+	}
+}
+
 constexpr const char* NordicEventTypeName(uint32_t nordic_type) {
 	switch(nordic_type) {
 		case BLE_GAP_EVT_CONNECTED:

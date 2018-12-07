@@ -81,7 +81,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	value.u8 = mode;
 	_last_record_key = +CS_TYPE::STATE_OPERATION_MODE;
 	LOGi("Set mode NORMAL");
-	LOGi("Set mode %x", mode);
+	LOGi("Set mode %x", value.u32);
 	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::FLASH);
 
 	// Switch relay on

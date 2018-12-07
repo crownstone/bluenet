@@ -28,7 +28,7 @@
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
 Storage::Storage() : EventListener() {
-	LOGd(FMT_CREATE, "Storage");
+	LOGd(FMT_CREATE, "storage");
 
 	EventDispatcher::getInstance().addListener(this);
 }
@@ -297,12 +297,20 @@ void Storage::handleSuccessfulEvent(fds_evt_t const * p_fds_evt) {
 	}
 }
 
+/**
+ * The p_fds_evt struct has the following structure:
+ *   id,
+ *   result,
+ *   write { record_id, file_id, record_key, is_record_updated },
+ *   del { record_id, file_id, record_key }
+ */
 void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 
 	LOGnone("FS: %i: %i", p_fds_evt->result, p_fds_evt->id);
 	switch(p_fds_evt->result) {
 	case FDS_ERR_NOT_FOUND:
-		LOGe("Not found");
+		LOGe("Not found on %s (%i)", NordicFDSEventTypeName(p_fds_evt->id), p_fds_evt->id);
+		LOGe("Record %s (%i)", TypeName(static_cast<CS_TYPE>(p_fds_evt->write.record_id)), p_fds_evt->write.record_id);
 		break;
 	case FDS_SUCCESS: 
 		handleSuccessfulEvent(p_fds_evt);

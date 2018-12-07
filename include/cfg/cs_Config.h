@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
+
 #define CROWNSTONE_COMPANY_ID                    0x038E
 
 // size of the buffer used for characteristics
@@ -197,7 +199,8 @@
 
 #define SWITCHCRAFT_THRESHOLD                    (500000) // Threshold for switch recognition (float).
 
-#define PWM_PERIOD                               10000L // Interval in us: 1/10000e-6 = 100 Hz
+const uint32_t PWM_PERIOD = 10000;
+//#define PWM_PERIOD                               10000L // Interval in us: 1/10000e-6 = 100 Hz
 
 #define KEEP_ALIVE_INTERVAL                      (2 * 60) // 2 minutes, in seconds
 
