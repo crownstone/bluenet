@@ -35,7 +35,7 @@ extern "C" {
 	  |--------------------  Family: 1 Crownstone
 */
 
-inline const char* get_hardware_version() {
+static inline const char* get_hardware_version() {
 
 	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (hardwareBoard == 0xFFFFFFFF) {
