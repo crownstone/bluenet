@@ -1,5 +1,4 @@
-power on
-Sleep 1000
+sleep 1000
 st
 speed 1000
 r
