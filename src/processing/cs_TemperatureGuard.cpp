@@ -38,6 +38,7 @@ void TemperatureGuard::init(const boards_config_t& boardConfig) {
 	Settings::getInstance().get(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP, &pwmTempThresholdUp);
 	Settings::getInstance().get(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN, &pwmTempThresholdDown);
 	_comp->init(boardConfig.pinAinPwmTemp, pwmTempThresholdDown, pwmTempThresholdUp);
+//	_comp->init(boardConfig.pinAinZeroRef, pwmTempThresholdDown, pwmTempThresholdUp); // use zero ref: disables NTC temp guard
 //	_comp->setEventCallback(comp_event_callback);
 
 	_lastChipTempEvent = EVT_CHIP_TEMP_OK;

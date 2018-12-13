@@ -677,6 +677,9 @@ void Nrf51822BluetoothStack::configureAdvertisementParameters() {
 	_adv_params.fp = BLE_GAP_ADV_FP_ANY;
 	_adv_params.interval = _interval;
 	_adv_params.timeout = _timeout;
+	_adv_params.channel_mask.ch_37_off = 0;
+	_adv_params.channel_mask.ch_38_off = 0;
+	_adv_params.channel_mask.ch_39_off = 0;
 }
 
 void Nrf51822BluetoothStack::setConnectable() {

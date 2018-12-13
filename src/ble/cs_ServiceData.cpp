@@ -779,6 +779,10 @@ void ServiceData::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	case STATE_ACCUMULATED_ENERGY: {
 		int32_t energyUsed = (*(int64_t*)p_data) / 1000 / 1000 / 64;
 		updateAccumulatedEnergy(energyUsed);
+//		int32_t voltageRms = (*(int32_t*)p_data) / 64;
+//		updateAccumulatedEnergy(voltageRms);
+//		int32_t ntcMilliVolt = (*(int32_t*)p_data) * 3000 / 4095 / 64;
+//		updateAccumulatedEnergy(ntcMilliVolt);
 		// todo create mesh state event if changes significantly
 		break;
 	}

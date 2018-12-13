@@ -313,6 +313,8 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 		// TODO: use State.set() for this.
 		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
 		EventDispatcher::getInstance().dispatch(STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
+//		EventDispatcher::getInstance().dispatch(STATE_ACCUMULATED_ENERGY, &_avgVoltageRmsMilliVolt, sizeof(_avgVoltageRmsMilliVolt));
+//		EventDispatcher::getInstance().dispatch(STATE_ACCUMULATED_ENERGY, &_avgZeroCurrent, sizeof(_avgZeroCurrent)); // Send NTC voltage
 	}
 
 #ifdef TEST_PIN
