@@ -292,7 +292,7 @@ ERR_CODE MeshControl::handleCommandReplyMessage(reply_message_t* msg, uint16_t l
 #if defined(PRINT_DEBUG) and defined(PRINT_VERBOSE_COMMAND_REPLY)
 		for (int i = 0; i < msg->itemCount; ++i) {
 			config_reply_item_t* item = &msg->configList[i];
-			log(SERIAL_INFO, "  ID %d: Type: %d, Data: 0x", item->id, item->data.type);
+			logSerial(SERIAL_INFO, "  ID %d: Type: %d, Data: 0x", item->id, item->data.type);
 			BLEutil::printArray(item->data.payload, item->data.length);
 		}
 #endif
@@ -304,7 +304,7 @@ ERR_CODE MeshControl::handleCommandReplyMessage(reply_message_t* msg, uint16_t l
 #if defined(PRINT_DEBUG) and defined(PRINT_VERBOSE_COMMAND_REPLY)
 		for (int i = 0; i < msg->itemCount; ++i) {
 			state_reply_item_t* item = &msg->stateList[i];
-			log(SERIAL_INFO, "  ID %d: Type: %d, Data: 0x", item->id, item->data.type);
+			logSerial(SERIAL_INFO, "  ID %d: Type: %d, Data: 0x", item->id, item->data.type);
 			BLEutil::printArray(item->data.payload, item->data.length);
 		}
 #endif

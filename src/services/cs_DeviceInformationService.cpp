@@ -34,7 +34,7 @@ inline std::string get_hardware_revision(void) {
 	uint32_t variant = BLEutil::convertEndian32(NRF_FICR->INFO.VARIANT);
 
 	// get nordic chip version
-	char nordic_chip_version[6];
+	char nordic_chip_version[7];
 	if (NRF_FICR->INFO.PACKAGE == 0x2000) {
 		sprintf(nordic_chip_version, "QF%.4s", (char*)&variant);
 	} else if (NRF_FICR->INFO.PACKAGE == 0x2001) {
@@ -43,7 +43,7 @@ inline std::string get_hardware_revision(void) {
 		sprintf(nordic_chip_version, "??%.4s", (char*)&variant);
 	}
 
-	char hardware_revision[33];
+	char hardware_revision[34];
 	sprintf(hardware_revision, "%11.11s%.4s%.4s%.8s%.6s", get_hardware_version(), production_run.c_str(), housing_id.c_str(), reserved.c_str(), nordic_chip_version);
 	return std::string(hardware_revision, 33);
 }

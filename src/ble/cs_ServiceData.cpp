@@ -410,9 +410,9 @@ stone_id_t ServiceData::chooseExternalId(stone_id_t ownId, state_message_t state
 	LOGd("chooseExternalId");
 	LOGd("head=%u list:", _advertisedIds.head);
 	for (uint8_t i=0; i<_advertisedIds.size; ++i) {
-		_log(SERIAL_DEBUG, " %u", _advertisedIds.list[i]);
+		_logSerial(SERIAL_DEBUG, " %u", _advertisedIds.list[i]);
 	}
-	_log(SERIAL_DEBUG, SERIAL_CRLF);
+	_logSerial(SERIAL_DEBUG, SERIAL_CRLF);
 
 	LOGd("msgs:");
 	for (uint8_t chan=0; chan<MESH_STATE_HANDLE_COUNT; ++chan) {
@@ -423,10 +423,10 @@ stone_id_t ServiceData::chooseExternalId(stone_id_t ownId, state_message_t state
 		state_item_t* stateItem;
 		while (peek_next_state_item(&(stateMsgs[chan]), &stateItem, idx)) {
 			stone_id_t __attribute__((unused)) itemId = meshStateItemGetId(stateItem);
-			_log(SERIAL_DEBUG, "  id=%u type=%u", itemId, stateItem->type);
+			_logSerial(SERIAL_DEBUG, "  id=%u type=%u", itemId, stateItem->type);
 		}
 	}
-	_log(SERIAL_DEBUG, SERIAL_CRLF);
+	_logSerial(SERIAL_DEBUG, SERIAL_CRLF);
 #endif
 
 	// Remove ids from the recent list that are not in the messages
@@ -484,9 +484,9 @@ stone_id_t ServiceData::chooseExternalId(stone_id_t ownId, state_message_t state
 #ifdef PRINT_VERBOSE_EXTERNAL_DATA
 	LOGd("head=%u list:", _advertisedIds.head);
 	for (uint8_t i=0; i<_advertisedIds.size; ++i) {
-		_log(SERIAL_DEBUG, " %u", _advertisedIds.list[i]);
+		_logSerial(SERIAL_DEBUG, " %u", _advertisedIds.list[i]);
 	}
-	_log(SERIAL_DEBUG, SERIAL_CRLF);
+	_logSerial(SERIAL_DEBUG, SERIAL_CRLF);
 #endif
 	// Done removing ids from the recent list that are not in the messages
 

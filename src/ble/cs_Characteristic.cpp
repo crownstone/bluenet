@@ -203,7 +203,7 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
 		// the valueGattAddress can be used as buffer for encryption
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
-		_log(SERIAL_DEBUG, "data: ");
+		_logSerial(SERIAL_DEBUG, "data: ");
 		BLEutil::printArray(getValuePtr(), valueLength);
 #endif
 
@@ -218,7 +218,7 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 			encryptionType
 		);
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
-		_log(SERIAL_DEBUG, "encrypted: ");
+		_logSerial(SERIAL_DEBUG, "encrypted: ");
 		BLEutil::printArray(valueGattAddress, encryptionBufferLength);
 #endif
 

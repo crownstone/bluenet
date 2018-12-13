@@ -662,7 +662,7 @@ void Crownstone::startUp() {
 	err_code = sd_ble_gap_address_get(&address);
 	APP_ERROR_CHECK(err_code);
 
-	log(SERIAL_INFO, "BLE Address: ");	
+	logSerial(SERIAL_INFO, "BLE Address: ");
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN);
 
 #ifdef RELAY_DEFAULT_ON
@@ -851,7 +851,7 @@ void on_exit(void) {
 void welcome(uint8_t pinRx, uint8_t pinTx) {
 	config_uart(pinRx, pinTx);
 
-	_log(SERIAL_INFO, SERIAL_CRLF);
+	_logSerial(SERIAL_INFO, SERIAL_CRLF);
 
 //	BLEutil::print_heap("Heap init");
 //	BLEutil::print_stack("Stack init");

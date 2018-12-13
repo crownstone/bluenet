@@ -298,7 +298,7 @@ void Storage::readStorage(pstorage_handle_t handle, ps_storage_base_t* item, uin
 	BLE_CALL (pstorage_load, ((uint8_t*)item, &block_handle, size, 0) );
 
 #ifdef PRINT_ITEMS
-	_log(SERIAL_INFO, "get struct: \r\n");
+	_logSerial(SERIAL_INFO, "get struct: \r\n");
 	BLEutil::printArray((uint8_t*)item, size);
 #endif
 
@@ -316,7 +316,7 @@ void Storage::readItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_t
 	BLE_CALL (pstorage_load, (item, &block_handle, size, offset) );
 
 #ifdef PRINT_ITEMS
-	_log(SERIAL_INFO, "read item: \r\n");
+	_logSerial(SERIAL_INFO, "read item: \r\n");
 	BLEutil::printArray(item, size);
 #endif
 
@@ -326,7 +326,7 @@ void Storage::writeItem(pstorage_handle_t handle, pstorage_size_t offset, uint8_
 	pstorage_handle_t block_handle;
 
 #ifdef PRINT_ITEMS
-	_log(SERIAL_INFO, "write item: \r\n");
+	_logSerial(SERIAL_INFO, "write item: \r\n");
 	BLEutil::printArray((uint8_t*)item, size);
 #endif
 

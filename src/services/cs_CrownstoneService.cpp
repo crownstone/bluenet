@@ -499,7 +499,7 @@ void CrownstoneService::handleEvent(uint16_t evt, void* p_data, uint16_t length)
 	case EVT_STATE_NOTIFICATION: {
 		if (_stateReadCharacteristic != NULL) {
 			state_vars_notifaction notification = *(state_vars_notifaction*)p_data;
-//			log(SERIAL_DEBUG, "send notification for %d, value:", notification.type);
+//			logSerial(SERIAL_DEBUG, "send notification for %d, value:", notification.type);
 //			BLEutil::printArray(notification.data, notification.dataLength);
 
 			_streamBuffer->setPayload(notification.data, notification.dataLength);

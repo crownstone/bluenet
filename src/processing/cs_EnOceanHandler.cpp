@@ -51,7 +51,7 @@ void EnOceanHandler::init() {
 	State::getInstance().get(STATE_LEARNED_SWITCHES, _learnedSwitches, MAX_SWITCHES * sizeof(learned_enocean_t));
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "learned switches:");
+	_logSerial(SERIAL_INFO, "learned switches:");
 	BLEutil::printArray(_learnedSwitches, sizeof(_learnedSwitches));
 #endif
 
@@ -83,17 +83,17 @@ learned_enocean_t* EnOceanHandler::newEnOcean() {
 bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "address: %02X %02X %02X %02X %02X %02X\r\n", adrs_ptr[5],
+	_logSerial(SERIAL_INFO, "address: %02X %02X %02X %02X %02X %02X\r\n", adrs_ptr[5],
 						adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
 						adrs_ptr[0]);
 
-	_log(SERIAL_INFO, "security key: ");
+	_logSerial(SERIAL_INFO, "security key: ");
 	BLEutil::printArray(key, 16);
 
-	_log(SERIAL_INFO, "seqCounter: %p, bytes: ", p_data->seqCounter);
+	_logSerial(SERIAL_INFO, "seqCounter: %p, bytes: ", p_data->seqCounter);
 	BLEutil::printArray(&p_data->seqCounter, 4);
 
-	_log(SERIAL_INFO, "signature: %p, bytes: ", p_data->securitySignature);
+	_logSerial(SERIAL_INFO, "signature: %p, bytes: ", p_data->securitySignature);
 	BLEutil::printArray(&p_data->securitySignature, 4);
 #endif
 
@@ -114,7 +114,7 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 	memcpy(&nonce[6], &p_data->seqCounter, 4);
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "nonce: ");
+	_logSerial(SERIAL_INFO, "nonce: ");
 	BLEutil::printArray(nonce, sizeof(nonce));
 #endif
 
@@ -127,7 +127,7 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 	memcpy(&b_0[1], nonce, sizeof(nonce));
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "b_0: ");
+	_logSerial(SERIAL_INFO, "b_0: ");
 	BLEutil::printArray(b_0, 16);
 #endif
 
@@ -147,7 +147,7 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 	b_1[10] = p_data->switchState;
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "b_1: ");
+	_logSerial(SERIAL_INFO, "b_1: ");
 	BLEutil::printArray(b_1, 16);
 #endif
 
@@ -164,7 +164,7 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 	memcpy(x_1, _block.ciphertext, 16);
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "x_1: ");
+	_logSerial(SERIAL_INFO, "x_1: ");
 	BLEutil::printArray(x_1, 16);
 #endif
 
@@ -178,7 +178,7 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 	}
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "x_1 ^ b_1: ");
+	_logSerial(SERIAL_INFO, "x_1 ^ b_1: ");
 	BLEutil::printArray(_block.cleartext, 16);
 #endif
 
@@ -189,7 +189,7 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 	memcpy(x_2, _block.ciphertext, 16);
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "x_2: ");
+	_logSerial(SERIAL_INFO, "x_2: ");
 	BLEutil::printArray(_block.ciphertext, 16);
 #endif
 
@@ -201,7 +201,7 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 	memcpy(T, _block.ciphertext, 4);
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "T: ");
+	_logSerial(SERIAL_INFO, "T: ");
 	BLEutil::printArray(T, 4);
 #endif
 
@@ -214,7 +214,7 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 	memcpy(&a_0[1], nonce, sizeof(nonce));
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "a_0: ");
+	_logSerial(SERIAL_INFO, "a_0: ");
 	BLEutil::printArray(a_0, 16);
 #endif
 
@@ -231,7 +231,7 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 	memcpy(S_0, _block.ciphertext, 16);
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "S_0: ");
+	_logSerial(SERIAL_INFO, "S_0: ");
 	BLEutil::printArray(S_0, 16);
 #endif
 
@@ -245,7 +245,7 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 	}
 
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "U: ");
+	_logSerial(SERIAL_INFO, "U: ");
 	BLEutil::printArray(U, 4);
 #endif
 
@@ -262,7 +262,7 @@ bool EnOceanHandler::authenticate(uint8_t * adrs_ptr, data_telegram_t* p_data) {
 
 void EnOceanHandler::save() {
 #ifdef ENOCEAN_VERBOSE
-	_log(SERIAL_INFO, "learned switches:");
+	_logSerial(SERIAL_INFO, "learned switches:");
 	BLEutil::printArray(_learnedSwitches, sizeof(_learnedSwitches));
 #endif
 
@@ -304,7 +304,7 @@ bool EnOceanHandler::learnEnOcean(uint8_t * adrs_ptr, data_t* p_data) {
 				save();
 
 #ifdef ENOCEAN_VERBOSE
-				_log(SERIAL_INFO, "security key: ");
+				_logSerial(SERIAL_INFO, "security key: ");
 				BLEutil::printArray(telegram->securityKey, 16);
 #endif
 

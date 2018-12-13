@@ -114,16 +114,16 @@ int write(const char *str, ...) {
 	char buffer[128];
 	va_list ap;
 	va_start(ap, str);
-	int16_t len = vsprintf(NULL, str, ap);
+	int16_t len = vsnprintf(buffer, sizeof(buffer), str, ap);
 	va_end(ap);
 
 	if (len < 0) return len;
 
 	//! if strings are small we do not need to allocate by malloc
 	if (sizeof buffer >= len + 1UL) {
-		va_start(ap, str);
-		len = vsprintf(buffer, str, ap);
-		va_end(ap);
+//		va_start(ap, str);
+//		len = vsprintf(buffer, str, ap);
+//		va_end(ap);
 //		writeBytes((uint8_t*)buffer, len);
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)buffer, len);
 	} else {
