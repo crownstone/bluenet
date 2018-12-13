@@ -23,7 +23,7 @@ We also provide libraries which implements this protocol (so if you build a smar
 
 - [Android](https://github.com/crownstone/bluenet-lib-android)
 - [iOS](https://github.com/crownstone/bluenet-ios-lib)
-- [Python](https://github.com/crownstone/bluenet-lib-python)
+- [Python](https://github.com/crownstone/bluenet-python-lib)
 
 
 # Build
@@ -75,7 +75,7 @@ Crownstone also integrates their hardware technology in third-party products, ra
 
 # Copyrights
 
-The copyrights (2014-2017) belongs to the team of Crownstone B.V. and are provided under an noncontagious open-source license:
+Copyrights belong to the team of Crownstone B.V. and are provided under an noncontagious open-source license:
 
 * Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Alex de Mulder, Christian Haas
 * Date: 27 Jan. 2014

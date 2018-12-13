@@ -9,7 +9,6 @@ DIR = "../docs/diagrams/"
 GEN_DIR = "../docs/diagrams/generated/"
 FILENAMES = ["../docs/PROTOCOL.md", "../docs/SERVICE_DATA.md", "../docs/SERVICE_DATA_DEPRECATED.md"]
 
-
 fontPath = "../docs/diagrams/fonts/LiberationSans-Regular.ttf"
 fontSizeBlocks = 24
 fontSizeBytes = 16
@@ -107,6 +106,8 @@ colorDict = {}
 
 
 colorDict['type'] = SKY_BLUES[3]
+colorDict['data type'] = SKY_BLUES[3]
+colorDict['device type'] = SKY_BLUES[2]
 colorDict['length'] = SKY_BLUES[2]
 colorDict['size'] = SKY_BLUES[2]
 colorDict['ad length'] = SKY_BLUES[6]
@@ -123,6 +124,7 @@ colorDict['payload'] = CHARTS[2]
 colorDict['encrypted payload'] = CHARTS[2]
 colorDict['data'] = CHARTS[2]
 colorDict['list'] = CHARTS[2]
+colorDict['encrypted data'] = CHARTS[2]
 
 
 
@@ -268,6 +270,7 @@ def drawVarList(varList, filename):
 		for var in varList:
 			print "  " + var[0]
 		return
+	print "Generating " + filename
 
 	totalLen = 0
 	for var in varList:
@@ -309,11 +312,29 @@ def drawVarList(varList, filename):
 		# Draw the byte numbers
 		if byteNumKnown:
 			if varLenKnown:
-				for i in range(0, varLen):
+				if varLen > MAX_VAR_LEN:
+					endByteNum = byteNum + varLen-1
+					for i in range(0, MAX_VAR_LEN-2):
+						byteLabel = fontBytes.render(str(byteNum), True, BLACK)
+						screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
+						byteNum += 1
+						x += STEP_X
+					byteLabel = fontBytes.render("...", True, BLACK)
+					screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
+					byteNum += 1
+					x += STEP_X
+					byteNum = endByteNum
 					byteLabel = fontBytes.render(str(byteNum), True, BLACK)
 					screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
 					byteNum += 1
 					x += STEP_X
+
+				else:
+					for i in range(0, varLen):
+						byteLabel = fontBytes.render(str(byteNum), True, BLACK)
+						screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
+						byteNum += 1
+						x += STEP_X
 			else:
 				byteLabel = fontBytes.render(str(byteNum), True, BLACK)
 				screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
@@ -358,11 +379,11 @@ def parseFile(textFilename):
 	varList = []
 
 	for line in file:
-		# print line
+		#print "line: " line
 		if (foundTableLines):
 			match = patternTableRow.findall(line)
 			if (len(match)):
-				# print "found Line: " + line
+				#print "found line: " + line
 				varName = match[0][0].strip()
 				linkMatch = patternLink.findall(varName)
 				if (linkMatch):
@@ -376,7 +397,7 @@ def parseFile(textFilename):
 					varLen = DEFAULT_VAR_LEN
 
 				varList.append((varName, varLen, varLenKnown))
-				# print "varName=" + varName + " varLen=" + str(varLen)
+				#print "varName=" + varName + " varLen=" + str(varLen)
 
 			else:
 				# End of table, draw and reset
@@ -389,19 +410,23 @@ def parseFile(textFilename):
 
 		# Just skip one line
 		if (foundTableHeader):
-			# print "foundTableLines"
+			#print "foundTableLines"
 			foundTableLines = True
 			foundTableHeader = False
 
 		matches = patternTableHeader.findall(line)
 		if len(matches):
-			# print "foundTableHeader: " + matches[0]
+			#print "foundTableHeader: " + matches[0]
 			foundTableHeader = True
 
 		matches = patternFileName.findall(line)
 		if len(matches):
 			filename = GEN_DIR + matches[0]
 
+	# End of file
+	if (foundTableLines):
+		# Draw last table
+		drawVarList(varList, filename)
 
 
 pygame.init()
