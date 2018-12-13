@@ -264,8 +264,8 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 //			LOGw("Expected 16 bytes for UUID, received: %d", length);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		log(SERIAL_INFO, FMT_SET_STR_TYPE_VAL, type, "");
-		log(SERIAL_INFO, "Set uuid to: "); BLEutil::printArray(payload, 16);
+		logSerial(SERIAL_INFO, FMT_SET_STR_TYPE_VAL, type, "");
+		logSerial(SERIAL_INFO, "Set uuid to: "); BLEutil::printArray(payload, 16);
 		return ERR_SUCCESS;
 	}
 	case CONFIG_PASSKEY: {
@@ -291,7 +291,7 @@ ERR_CODE Settings::verify(uint8_t type, uint8_t* payload, uint8_t length) {
 			LOGe(FMT_ERR_EXPECTED_RECEIVED, ENCRYPTION_KEY_LENGTH, length);
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		log(SERIAL_INFO, FMT_SET_STR_TYPE_VAL, type, "");
+		logSerial(SERIAL_INFO, FMT_SET_STR_TYPE_VAL, type, "");
 		BLEutil::printArray((uint8_t*)payload, length);
 		return ERR_SUCCESS;
 	}

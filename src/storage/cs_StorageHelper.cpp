@@ -45,7 +45,7 @@ void StorageHelper::setString(const char* value, uint16_t length, char* target) 
 //void StorageHelper::getString(char* value, std::string& target, std::string default_value) {
 //
 //#ifdef PRINT_ITEMS
-//	_log(SERIAL_INFO, "get string (raw): \r\n");
+//	_logSerial(SERIAL_INFO, "get string (raw): \r\n");
 //	BLEutil::printArray((uint8_t*)value, MAX_STRING_STORAGE_SIZE+1);
 //#endif
 //
@@ -70,7 +70,7 @@ void StorageHelper::setString(const char* value, uint16_t length, char* target) 
 void StorageHelper::getString(char* value, char* target, char* default_value, uint16_t& size, bool getDefaultValue) {
 
 #ifdef PRINT_ITEMS
-	_log(SERIAL_INFO, "get string (raw): \r\n");
+	_logSerial(SERIAL_INFO, "get string (raw): \r\n");
 	BLEutil::printArray((uint8_t*)value, MAX_STRING_STORAGE_SIZE+1);
 #endif
 
@@ -273,7 +273,7 @@ void StorageHelper::getInt32(int32_t value, int32_t* target, int32_t default_val
 //
 //#ifdef PRINT_ITEMS
 //	uint8_t* tmp = (uint8_t*)&value;
-//	log(SERIAL_DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
+//	logSerial(SERIAL_DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
 //	BLEutil::printArray(tmp, sizeof(double));
 //#endif
 //
@@ -306,7 +306,7 @@ void StorageHelper::getFloat(float value, float* target, float default_value, bo
 
 #ifdef PRINT_ITEMS
 	uint8_t* tmp = (uint8_t*)&value;
-	log(SERIAL_DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
+	logSerial(SERIAL_DEBUG, "raw value:", tmp[3], tmp[2], tmp[1], tmp[0]);
 	BLEutil::printArray(tmp, sizeof(float));
 #endif
 

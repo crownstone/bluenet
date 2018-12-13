@@ -51,32 +51,32 @@ typedef enum {
 	#include "string.h"
 	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
-	#define _log(level, fmt, ...) \
+	#define _logSerial(level, fmt, ...) \
 			   if (level >= SERIAL_VERBOSITY) { \
 				   write(fmt, ##__VA_ARGS__); \
 			   }
 
 #ifdef INCLUDE_TIMESTAMPS
 
-	#define log(level, fmt, ...) \
-		_log(level, "[%-20.20s : %-5d](%d) " fmt, _FILE, __LINE__, now(), ##__VA_ARGS__)
+	#define logSerial(level, fmt, ...) \
+		_logSerial(level, "[%-20.20s : %-5d](%d) " fmt, _FILE, __LINE__, now(), ##__VA_ARGS__)
 
 	#define logLN(level, fmt, ...) \
-		_log(level, "[%-20.20s : %-5d](%d) " fmt SERIAL_CRLF, _FILE, __LINE__, now(), ##__VA_ARGS__)
+		_logSerial(level, "[%-20.20s : %-5d](%d) " fmt SERIAL_CRLF, _FILE, __LINE__, now(), ##__VA_ARGS__)
 
 #else
 
-	#define log(level, fmt, ...) \
-		_log(level, "[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
+	#define logSerial(level, fmt, ...) \
+		_logSerial(level, "[%-30.30s : %-5d] " fmt, _FILE, __LINE__, ##__VA_ARGS__)
 
 	#define logLN(level, fmt, ...) \
-		_log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
+		_logSerial(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
 
 #endif
 
 #else
-	#define _log(level, fmt, ...)
-	#define log(level, fmt, ...)
+	#define _logSerial(level, fmt, ...)
+	#define logSerial(level, fmt, ...)
 	#define logLN(level, fmt, ...)
 #endif
 
