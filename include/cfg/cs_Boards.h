@@ -50,9 +50,7 @@ extern "C" {
 #define ACR01B1C             1002
 #define ACR01B1D             1003 // released
 #define ACR01B1E             1004 // same as ACR01B1D, but with patch
-//#define ACR01B6C             1005 // prototype, deprecated
-//#define ACR01B6D             1006 // prototype, deprecated
-#define ACR01B9C             1007 // prototype
+#define ACR01B9E             1007 // prototype
 
 // CROWNSTONE PLUGS
 
