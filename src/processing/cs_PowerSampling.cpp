@@ -138,7 +138,8 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].pin = boardConfig.pinAinVoltage;
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].rangeMilliVolt = boardConfig.voltageRange;
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrentGainMed;
+//	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrentGainMed;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrentGainLow;
 	adcConfig.channels[CURRENT_CHANNEL_IDX].rangeMilliVolt = boardConfig.currentRange;
 	adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
 	adcConfig.samplingPeriodUs = CS_ADC_SAMPLE_INTERVAL_US;
@@ -314,6 +315,7 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 		EventDispatcher::getInstance().dispatch(STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
 		EventDispatcher::getInstance().dispatch(STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
 //		EventDispatcher::getInstance().dispatch(STATE_ACCUMULATED_ENERGY, &_avgVoltageRmsMilliVolt, sizeof(_avgVoltageRmsMilliVolt));
+//		EventDispatcher::getInstance().dispatch(STATE_ACCUMULATED_ENERGY, &_avgCurrentRmsMilliAmp, sizeof(_avgCurrentRmsMilliAmp));
 //		EventDispatcher::getInstance().dispatch(STATE_ACCUMULATED_ENERGY, &_avgZeroCurrent, sizeof(_avgZeroCurrent)); // Send NTC voltage
 	}
 
@@ -524,6 +526,7 @@ void PowerSampling::calculatePower(power_t power) {
 		vSquareSum += (voltage * voltage) / (1000*1000);
 		pSum +=       (current * voltage) / (1000*1000);
 	}
+	pSum *= -1;
 	int32_t powerMilliWattReal = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
 	int32_t currentRmsMA =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
 	int32_t voltageRmsMilliVolt = sqrt((double)vSquareSum * _voltageMultiplier * _voltageMultiplier / numSamples) * 1000;
