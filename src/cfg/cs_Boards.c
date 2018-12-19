@@ -444,15 +444,15 @@ void asACR01B9F(boards_config_t* p_config) {
 
 	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
 
-//	p_config->voltageMultiplier                  = 0.257f; // for range -1800 - 1800 mV
-//	p_config->currentMultiplier                  = 0.00294f; // for range -3000 - 3000 mV on pin 5
-	p_config->voltageMultiplier                  = 0.0f;
-	p_config->currentMultiplier                  = 0.0f;
-	p_config->voltageZero                        = -45; // for range -1800 - 1800 mV
-	p_config->currentZero                        = -20; // for range -3000 - 3000 mV on pin 5
-	p_config->powerZero                          = 0; // TODO: calibrate
+	p_config->voltageMultiplier                  = 0.253f; // for range -1800 - 1800 mV
+	p_config->currentMultiplier                  = 0.0071f; // for range -600 - 600 mV on pin 6
+//	p_config->voltageMultiplier                  = 0.0f;
+//	p_config->currentMultiplier                  = 0.0f;
+	p_config->voltageZero                        = 500; // for range -1800 - 1800 mV
+	p_config->currentZero                        = -125; // for range -600 - 600 mV on pin 6
+	p_config->powerZero                          = 0;
 	p_config->voltageRange                       = 1800;
-	p_config->currentRange                       = 3000;
+	p_config->currentRange                       = 600;
 
 	// See https://en.wikipedia.org/wiki/Thermistor#B_or_%CE%B2_parameter_equation B=3380, T0=25, R0=10000
 	// Python: temp=82; r=10000*math.exp(3380*(1/(temp+273.15)-1/(25+273.15))); 3.3/(16000+r)*r
