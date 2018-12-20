@@ -708,7 +708,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	switch_state_t switchState;
 
 	// TODO: implement this differently
-	if (RTC::getCount() > RTC::msToTicks(2000)) {
+	if (RTC::getCount() > RTC::msToTicks(5000)) {
 		startIgbtFailureDetection();
 	}
 
@@ -752,6 +752,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 //	if ((currentRmsFilteredMA > _currentMilliAmpThresholdPwm) && (!stateErrors.errors.overCurrentPwm)) {
 	if (currentRmsMA > _currentMilliAmpThresholdPwm) {
 		++_consecutivePwmOvercurrent;
+//		_logSerial(SERIAL_DEBUG, "mA=%u cnt=%u\r\n", currentRmsMA, _consecutivePwmOvercurrent);
 	}
 	else {
 		_consecutivePwmOvercurrent = 0;
