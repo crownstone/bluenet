@@ -942,7 +942,7 @@ void CommandHandler::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::EVT_RX_CONTROL: {
 			stream_header_t* streamHeader = (stream_header_t*)event.data;
-			if (event.size - sizeof(stream_header_t) < streamHeader->length) {
+			if ((event.size < sizeof(stream_header_t)) || (event.size - sizeof(stream_header_t) < streamHeader->length)) {
 				LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 				break;
 			}
