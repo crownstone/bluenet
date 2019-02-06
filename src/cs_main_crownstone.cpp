@@ -150,6 +150,9 @@ void Crownstone::init() {
 
 	switch(_operationMode) {
 	case OPERATION_MODE_SETUP: {
+		// Enable UART RX when in setup mode.
+		// With RX enabled, TX can be enabled via UART command.
+		// Then, the MAC address can be requested to be sent over UART, so you know what to connect to via BLE, without the need for scanning.
 		if (serial_get_state() == SERIAL_ENABLE_NONE) {
 			serial_enable(SERIAL_ENABLE_RX_ONLY);
 		}
