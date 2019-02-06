@@ -935,7 +935,7 @@ void CommandHandler::handleEvent(uint16_t evt, void* p_data, uint16_t length) {
 	}
 	case EVT_RX_CONTROL: {
 		stream_header_t* streamHeader = (stream_header_t*)p_data;
-		if (length - sizeof(stream_header_t) < streamHeader->length) {
+		if ((length < sizeof(stream_header_t)) || (length - sizeof(stream_header_t) < streamHeader->length)) {
 			LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			break;
 		}
