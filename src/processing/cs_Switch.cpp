@@ -89,8 +89,9 @@ void Switch::start() {
 
 	// If switchcraft is enabled, assume a boot is due to a brownout caused by a too slow wall switch, so the pwm is already powered.
 	bool switchcraftEnabled = Settings::getInstance().isSet(CONFIG_SWITCHCRAFT_ENABLED);
-	if (switchcraftEnabled) {
+	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0)) {
 		_pwmPowered = true;
+		EventDispatcher::getInstance().dispatch(EVT_PWM_POWERED);
 	}
 
 	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.

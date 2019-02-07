@@ -709,7 +709,7 @@ void Crownstone::tick() {
 
 	// Check for timeouts
 	if (_operationMode == OPERATION_MODE_NORMAL) {
-		if (RTC::getCount() > RTC::msToTicks(PWM_BOOT_DELAY_MS)) {
+		if ((PWM_BOOT_DELAY_MS > 0) && (RTC::getCount() > RTC::msToTicks(PWM_BOOT_DELAY_MS))) {
 			_switch->startPwm();
 		}
 	}
