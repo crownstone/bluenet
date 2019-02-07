@@ -202,8 +202,8 @@
 
 #define SWITCH_DELAYED_STORE_MS                  10000 // Timeout before storing the pwm switch value is stored.
 
-//#define PWM_BOOT_DELAY_MS                        60000 // Delay after boot until pwm can be used. Has to be smaller than overflow time of RTC.
-#define PWM_BOOT_DELAY_MS                        1000 // Delay after boot until pwm can be used. Has to be smaller than overflow time of RTC.
+//#define PWM_BOOT_DELAY_MS                        60000 // Delay after boot until pwm can be used. Has to be smaller than overflow time of RTC. 0 For no delay.
+#define PWM_BOOT_DELAY_MS                        0 // Delay after boot until pwm can be used. Has to be smaller than overflow time of RTC. 0 For no delay.
 
 // Stack config values
 // See: https://devzone.nordicsemi.com/question/60/what-is-connection-parameters/
