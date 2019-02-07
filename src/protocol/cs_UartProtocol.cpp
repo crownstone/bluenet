@@ -299,7 +299,7 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 		ble_gap_addr_t address;
 		err_code = sd_ble_gap_addr_get(&address);
 		APP_ERROR_CHECK(err_code);
-		writeMsg(UART_OPCODE_TX_OWN_MAC, address.addr, sizeof(ble_gap_addr_t));
+		writeMsg(UART_OPCODE_TX_OWN_MAC, address.addr, sizeof(address.addr));
 		break;
 	    }
 	    case UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_CURRENT: {
