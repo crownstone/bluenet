@@ -447,7 +447,6 @@ void PowerSampling::calculateCurrentZero(power_t power) {
 	// Exponential moving average
 	int64_t avgZeroCurrentDiscount = _avgZeroCurrentDiscount; // Make sure calculations are in int64_t
 	_avgZeroCurrent = ((1000 - avgZeroCurrentDiscount) * _avgZeroCurrent + avgZeroCurrentDiscount * zeroCurrent) / 1000;
-	
 }
 
 /*
