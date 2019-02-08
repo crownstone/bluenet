@@ -13,6 +13,7 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <processing/cs_EnOceanHandler.h>
 #include <structs/buffer/cs_StackBuffer.h>
+#include <cfg/cs_Config.h>
 #include <vector>
 
 #define SWITCH_STATE_PERSISTENT

@@ -11,6 +11,7 @@
 #include <storage/cs_Settings.h>
 #include "drivers/cs_Timer.h"
 #include <storage/cs_StorageHelper.h>
+#include <cfg/cs_Config.h>
 
 #include <algorithm>
 
@@ -44,6 +45,7 @@ State::State() :
 	_switchcraftBuf1.init();
 	_switchcraftBuf2.init();
 	_switchcraftBuf3.init();
+	LOGd("switchcraft debug buf size=%u", _switchcraftBuf1.getMaxByteSize());
 #endif
 }
 
@@ -201,6 +203,20 @@ ERR_CODE State::readFromStorage(uint8_t type, StreamBuffer<uint8_t>* streamBuffe
 		}
 		return error_code;
 	}
+#if SWITCHCRAFT_DEBUG_BUFFERS==true
+	case STATE_SWITCHCRAFT_LAST_BUF1: {
+		size = _switchcraftBuf1.getMaxByteSize();
+		break;
+	}
+	case STATE_SWITCHCRAFT_LAST_BUF2: {
+		size = _switchcraftBuf2.getMaxByteSize();
+		break;
+	}
+	case STATE_SWITCHCRAFT_LAST_BUF3: {
+		size = _switchcraftBuf3.getMaxByteSize();
+		break;
+	}
+#endif
 	case STATE_LEARNED_SWITCHES:
 	default: {
 		LOGw(FMT_STATE_NOT_FOUND, type);
@@ -305,6 +321,17 @@ ERR_CODE State::verify(uint8_t type, uint16_t size) {
 		success = size <= getStateItemSize(type);
 		break;
 	}
+#if SWITCHCRAFT_DEBUG_BUFFERS==true
+	case STATE_SWITCHCRAFT_LAST_BUF1:
+		success = size == _switchcraftBuf1.getMaxByteSize();
+		break;
+	case STATE_SWITCHCRAFT_LAST_BUF2:
+		success = size == _switchcraftBuf2.getMaxByteSize();
+		break;
+	case STATE_SWITCHCRAFT_LAST_BUF3:
+		success = size == _switchcraftBuf3.getMaxByteSize();
+		break;
+#endif
 	default: {
 		LOGw(FMT_STATE_NOT_FOUND, type);
 		return ERR_UNKNOWN_TYPE;
@@ -572,18 +599,18 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 		}
 #if SWITCHCRAFT_DEBUG_BUFFERS==true
 		case STATE_SWITCHCRAFT_LAST_BUF1: {
-			size = _switchcraftBuf1.size();
-			memcpy(target, _switchcraftBuf1.getBuffer(), size * sizeof(uint16_t));
+			size = _switchcraftBuf1.getMaxByteSize();
+			memcpy(target, _switchcraftBuf1.getBuffer(), size);
 			break;
 		}
 		case STATE_SWITCHCRAFT_LAST_BUF2: {
-			size = _switchcraftBuf2.size();
-			memcpy(target, _switchcraftBuf2.getBuffer(), size * sizeof(uint16_t));
+			size = _switchcraftBuf2.getMaxByteSize();
+			memcpy(target, _switchcraftBuf2.getBuffer(), size);
 			break;
 		}
 		case STATE_SWITCHCRAFT_LAST_BUF3: {
-			size = _switchcraftBuf3.size();
-			memcpy(target, _switchcraftBuf3.getBuffer(), size * sizeof(uint16_t));
+			size = _switchcraftBuf3.getMaxByteSize();
+			memcpy(target, _switchcraftBuf3.getBuffer(), size);
 			break;
 		}
 #endif

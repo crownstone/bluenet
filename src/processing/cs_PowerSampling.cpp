@@ -345,7 +345,6 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 		}
 #endif
 	}
-
 	_adc->releaseBuffer(bufIndex);
 }
 
