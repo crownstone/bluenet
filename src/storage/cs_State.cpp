@@ -30,10 +30,21 @@ void debugprint(void * p_context) {
 #endif
 
 State::State() :
+#if SWITCHCRAFT_DEBUG_BUFFERS==true
+		_switchcraftBuf1(CS_ADC_BUF_SIZE / CS_ADC_MAX_PINS),
+		_switchcraftBuf2(CS_ADC_BUF_SIZE / CS_ADC_MAX_PINS),
+		_switchcraftBuf3(CS_ADC_BUF_SIZE / CS_ADC_MAX_PINS),
+#endif
 		_initialized(false), _storage(NULL), _resetCounter(NULL), _switchState(NULL), _accumulatedEnergy(NULL),
-		_temperature(0), _powerUsage(0), _time(0), _factoryResetState(FACTORY_RESET_STATE_NORMAL) {
+		_temperature(0), _powerUsage(0), _time(0), _factoryResetState(FACTORY_RESET_STATE_NORMAL)
+{
 	_errorState.asInt = 0;
 	_overrideBitmask.asInt = 0;
+#if SWITCHCRAFT_DEBUG_BUFFERS==true
+	_switchcraftBuf1.init();
+	_switchcraftBuf2.init();
+	_switchcraftBuf3.init();
+#endif
 }
 
 void State::init() {
@@ -559,6 +570,23 @@ ERR_CODE State::get(uint8_t type, void* target, uint16_t size) {
 			*(state_ignore_bitmask_t*)target = _overrideBitmask;
 			break;
 		}
+#if SWITCHCRAFT_DEBUG_BUFFERS==true
+		case STATE_SWITCHCRAFT_LAST_BUF1: {
+			size = _switchcraftBuf1.size();
+			memcpy(target, _switchcraftBuf1.getBuffer(), size * sizeof(uint16_t));
+			break;
+		}
+		case STATE_SWITCHCRAFT_LAST_BUF2: {
+			size = _switchcraftBuf2.size();
+			memcpy(target, _switchcraftBuf2.getBuffer(), size * sizeof(uint16_t));
+			break;
+		}
+		case STATE_SWITCHCRAFT_LAST_BUF3: {
+			size = _switchcraftBuf3.size();
+			memcpy(target, _switchcraftBuf3.getBuffer(), size * sizeof(uint16_t));
+			break;
+		}
+#endif
 		case STATE_ACCUMULATED_ENERGY: {
 //			break;
 		}

@@ -327,6 +327,23 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	if (switch_detected) {
 		LOGd("Switch event detected!");
 		EventDispatcher::getInstance().dispatch(EVT_POWER_TOGGLE);
+
+#if SWITCHCRAFT_DEBUG_BUFFERS==true
+		// Copy buffers to state, so that switch craft can be debugged.
+		InterleavedBuffer & ib = InterleavedBuffer::getInstance();
+		State::getInstance()._switchcraftBuf1.clear();
+		State::getInstance()._switchcraftBuf2.clear();
+		State::getInstance()._switchcraftBuf3.clear();
+		for (int i=0; i<ib.getChannelLength(); ++i) {
+			State::getInstance()._switchcraftBuf1.push(ib.getValue(prevIndex, power.voltageIndex, i));
+		}
+		for (int i=0; i<ib.getChannelLength(); ++i) {
+			State::getInstance()._switchcraftBuf2.push(ib.getValue(prevIndex, power.voltageIndex, i + ib.getChannelLength()));
+		}
+		for (int i=0; i<ib.getChannelLength(); ++i) {
+			State::getInstance()._switchcraftBuf3.push(ib.getValue(prevIndex, power.voltageIndex, i + 2 * ib.getChannelLength()));
+		}
+#endif
 	}
 
 	_adc->releaseBuffer(bufIndex);

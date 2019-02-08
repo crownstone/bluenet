@@ -222,6 +222,8 @@
  */
 #define CONNECTION_SUPERVISION_TIMEOUT           400 // In units of 10ms.
 
+#define SWITCHCRAFT_DEBUG_BUFFERS                true // Set to true to store the last voltage samples that were recognized as switch (short power interrupt).
+
 /* 
  * By setting a non-zero slave latency, the Peripheral can choose to not answer when the Central asks for data up to 
  * the slave latency number of times. However, if the Peripheral has data to send, it can choose to send data at any 

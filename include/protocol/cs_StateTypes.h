@@ -34,6 +34,9 @@ enum StateTypes {
 	STATE_IGNORE_LOCATION,                // 0x92 - 146
 	STATE_ERROR_DIMMER_ON_FAILURE,        // 0x93 - 147
 	STATE_ERROR_DIMMER_OFF_FAILURE,       // 0x94 - 148
+	STATE_SWITCHCRAFT_LAST_BUF1,          // 0x95 - 149
+	STATE_SWITCHCRAFT_LAST_BUF2,          // 0x96 - 150
+	STATE_SWITCHCRAFT_LAST_BUF3,          // 0x97 - 151
 
 	STATE_TYPES
 }; // Current max is 255 (0xFF), see cs_EventTypes.h

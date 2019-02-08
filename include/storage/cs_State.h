@@ -12,6 +12,7 @@
 #include <protocol/cs_StateTypes.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <processing/cs_EnOceanHandler.h>
+#include <structs/buffer/cs_StackBuffer.h>
 #include <vector>
 
 #define SWITCH_STATE_PERSISTENT
@@ -224,6 +225,13 @@ public:
 	void setNotify(uint8_t type, bool enable);
 	bool isNotifying(uint8_t type);
 	void disableNotifications();
+
+#ifdef SWITCHCRAFT_DEBUG_BUFFERS
+	// Buffers that keep up last buffers that was recognized as switch.
+	StackBuffer<uint16_t> _switchcraftBuf1;
+	StackBuffer<uint16_t> _switchcraftBuf2;
+	StackBuffer<uint16_t> _switchcraftBuf3;
+#endif
 
 protected:
 
