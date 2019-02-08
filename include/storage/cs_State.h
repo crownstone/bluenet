@@ -226,7 +226,7 @@ public:
 	bool isNotifying(uint8_t type);
 	void disableNotifications();
 
-#ifdef SWITCHCRAFT_DEBUG_BUFFERS
+#if SWITCHCRAFT_DEBUG_BUFFERS==true
 	// Buffers that keep up last buffers that was recognized as switch.
 	StackBuffer<uint16_t> _switchcraftBuf1;
 	StackBuffer<uint16_t> _switchcraftBuf2;
