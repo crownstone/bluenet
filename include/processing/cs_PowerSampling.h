@@ -124,8 +124,10 @@ private:
 	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value (times 1000).
 	bool _recalibrateZeroVoltage; //! Whether or not the zero voltage value should be recalculated.
 	bool _recalibrateZeroCurrent; //! Whether or not the zero current value should be recalculated.
-	bool _zeroVoltageInitialized; // True when zero of voltage has been initialized.
-	bool _zeroCurrentInitialized; // True when zero of current has been initialized.
+//	bool _zeroVoltageInitialized; // True when zero of voltage has been initialized.
+//	bool _zeroCurrentInitialized; // True when zero of current has been initialized.
+	uint16_t _zeroVoltageCount; // Number of times the zero voltage has been calculated.
+	uint16_t _zeroCurrentCount; // Number of times the zero current has been calculated.
 	double _avgPower; //! Used for storing and calculating the average power (in mW).
 	int32_t _avgPowerMilliWatt; //! Used to send out the average power (in mW).
 	int32_t _avgCurrentRmsMilliAmp; //! Used for storing the average rms current (in mA).
