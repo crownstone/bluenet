@@ -103,8 +103,10 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	initAverages();
 	_recalibrateZeroVoltage = true;
 	_recalibrateZeroCurrent = true;
-	_zeroVoltageInitialized = false;
-	_zeroCurrentInitialized = false;
+//	_zeroVoltageInitialized = false;
+//	_zeroCurrentInitialized = false;
+	_zeroVoltageCount = 0;
+	_zeroCurrentCount = 0;
 	_avgZeroVoltageDiscount = VOLTAGE_ZERO_EXP_AVG_DISCOUNT;
 	_avgZeroCurrentDiscount = CURRENT_ZERO_EXP_AVG_DISCOUNT;
 	_avgPowerDiscount = POWER_EXP_AVG_DISCOUNT;
@@ -427,14 +429,20 @@ void PowerSampling::calculateVoltageZero(power_t power) {
 	}
 	int32_t zeroVoltage = sum * 1000 / numSamples;
 	
-	if (!_zeroVoltageInitialized) {
+//	if (!_zeroVoltageInitialized) {
+//		_avgZeroVoltage = zeroVoltage;
+//		_zeroVoltageInitialized = true;
+//	}
+	if (!_zeroVoltageCount) {
 		_avgZeroVoltage = zeroVoltage;
-		_zeroVoltageInitialized = true;
 	}
 	else {
 		// Exponential moving average
 		int64_t avgZeroVoltageDiscount = _avgZeroVoltageDiscount; // Make sure calculations are in int64_t
 		_avgZeroVoltage = ((1000 - avgZeroVoltageDiscount) * _avgZeroVoltage + avgZeroVoltageDiscount * zeroVoltage) / 1000;
+	}
+	if (_zeroVoltageCount < 65535) {
+		++_zeroVoltageCount;
 	}
 }
 
@@ -451,14 +459,20 @@ void PowerSampling::calculateCurrentZero(power_t power) {
 	}
 	int32_t zeroCurrent = sum * 1000 / numSamples;
 
-	if (!_zeroCurrentInitialized) {
+//	if (!_zeroCurrentInitialized) {
+//		_avgZeroCurrent = zeroCurrent;
+//		_zeroCurrentInitialized = true;
+//	}
+	if (!_zeroCurrentCount) {
 		_avgZeroCurrent = zeroCurrent;
-		_zeroCurrentInitialized = true;
 	}
 	else {
 		// Exponential moving average
 		int64_t avgZeroCurrentDiscount = _avgZeroCurrentDiscount; // Make sure calculations are in int64_t
 		_avgZeroCurrent = ((1000 - avgZeroCurrentDiscount) * _avgZeroCurrent + avgZeroCurrentDiscount * zeroCurrent) / 1000;
+	}
+	if (_zeroCurrentCount < 65535) {
+		++_zeroCurrentCount;
 	}
 }
 
@@ -590,7 +604,8 @@ void PowerSampling::calculatePower(power_t power) {
 	}
 
 	// Now that Irms is known: first check the soft fuse.
-	if (_zeroCurrentInitialized && _zeroVoltageInitialized) {
+//	if (_zeroCurrentInitialized && _zeroVoltageInitialized) {
+	if (_zeroVoltageCount > 20 && _zeroCurrentCount > 20) {
 		checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA);
 	}
 
