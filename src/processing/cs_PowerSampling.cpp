@@ -98,6 +98,8 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	initAverages();
 	_recalibrateZeroVoltage = true;
 	_recalibrateZeroCurrent = true;
+	_zeroVoltageInitialized = false;
+	_zeroCurrentInitialized = false;
 	_avgZeroVoltageDiscount = VOLTAGE_ZERO_EXP_AVG_DISCOUNT;
 	_avgZeroCurrentDiscount = CURRENT_ZERO_EXP_AVG_DISCOUNT;
 	_avgPowerDiscount = POWER_EXP_AVG_DISCOUNT;
@@ -405,9 +407,15 @@ void PowerSampling::calculateVoltageZero(power_t power) {
 	}
 	int32_t zeroVoltage = sum * 1000 / numSamples;
 	
-	// Exponential moving average
-	int64_t avgZeroVoltageDiscount = _avgZeroVoltageDiscount; // Make sure calculations are in int64_t
-	_avgZeroVoltage = ((1000 - avgZeroVoltageDiscount) * _avgZeroVoltage + avgZeroVoltageDiscount * zeroVoltage) / 1000;
+	if (!_zeroVoltageInitialized) {
+		_avgZeroVoltage = zeroVoltage;
+		_zeroVoltageInitialized = true;
+	}
+	else {
+		// Exponential moving average
+		int64_t avgZeroVoltageDiscount = _avgZeroVoltageDiscount; // Make sure calculations are in int64_t
+		_avgZeroVoltage = ((1000 - avgZeroVoltageDiscount) * _avgZeroVoltage + avgZeroVoltageDiscount * zeroVoltage) / 1000;
+	}
 }
 
 /**
@@ -423,10 +431,15 @@ void PowerSampling::calculateCurrentZero(power_t power) {
 	}
 	int32_t zeroCurrent = sum * 1000 / numSamples;
 
-	// Exponential moving average
-	int64_t avgZeroCurrentDiscount = _avgZeroCurrentDiscount; // Make sure calculations are in int64_t
-	_avgZeroCurrent = ((1000 - avgZeroCurrentDiscount) * _avgZeroCurrent + avgZeroCurrentDiscount * zeroCurrent) / 1000;
-	
+	if (!_zeroCurrentInitialized) {
+		_avgZeroCurrent = zeroCurrent;
+		_zeroCurrentInitialized = true;
+	}
+	else {
+		// Exponential moving average
+		int64_t avgZeroCurrentDiscount = _avgZeroCurrentDiscount; // Make sure calculations are in int64_t
+		_avgZeroCurrent = ((1000 - avgZeroCurrentDiscount) * _avgZeroCurrent + avgZeroCurrentDiscount * zeroCurrent) / 1000;
+	}
 }
 
 /*
@@ -556,7 +569,9 @@ void PowerSampling::calculatePower(power_t power) {
 	}
 
 	// Now that Irms is known: first check the soft fuse.
-	checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA);
+	if (_zeroCurrentInitialized && _zeroVoltageInitialized) {
+		checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA);
+	}
 
 
 
