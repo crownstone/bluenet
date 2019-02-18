@@ -605,7 +605,7 @@ void PowerSampling::calculatePower(power_t power) {
 
 	// Now that Irms is known: first check the soft fuse.
 //	if (_zeroCurrentInitialized && _zeroVoltageInitialized) {
-	if (_zeroVoltageCount > 20 && _zeroCurrentCount > 20) {
+	if (_zeroVoltageCount > 200 && _zeroCurrentCount > 200) { // Wait some time, for the measurement to converge.. why does this have to take so long?
 		checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA);
 	}
 
