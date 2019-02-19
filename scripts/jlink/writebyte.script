@@ -1,11 +1,8 @@
-sleep 1000
 st
-speed 1000
 r
-Sleep 500
 w4 @ADDRESS@ @VALUE@
 r
-sleep 2000
+sleep 200
 mem @ADDRESS@ 4
 r
-q
+qc
