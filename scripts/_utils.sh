@@ -16,6 +16,8 @@ cyan=$(tput setaf 6)
 white=$(tput setaf 7)
 normal=$(tput sgr0)
 
+bold=$(tput bold)
+
 export black=$black
 export red=$red
 export green=$green
@@ -29,23 +31,33 @@ export normal=$normal
 prefix='oo'
 
 cs_err() {
-	printf "$red$prefix $1$normal\n"
-}
-
-cs_info() {
-	printf "$yellow$prefix $1$normal\n"
-}
-
-cs_succ() {
-	printf "$green$prefix $1$normal\n"
-}
-
-cs_log() {
-	printf "$normal$prefix $1$normal\n"
+	printf "$red$bold$prefix $1$normal\n"
 }
 
 cs_warn() {
-	printf "$magenta$prefix $1$magenta\n"
+	printf "$yellow$bold$prefix $1$magenta\n"
+}
+
+cs_info() {
+	printf "$blue$bold$prefix $1$normal\n"
+}
+
+cs_log() {
+	printf "$normal$bold$prefix $1$normal\n"
+}
+
+cs_succ() {
+	printf "$green$bold$prefix $1$normal\n"
+}
+
+bluenet_logo() {
+	printf "$blue$bold\n"
+	printf "$prefix  _|_|_|    _|                                            _|     \n"
+	printf "$prefix  _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| \n"
+	printf "$prefix  _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     \n"
+	printf "$prefix  _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     \n"
+	printf "$prefix  _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| \n"
+	printf "$normal\n"
 }
 
 checkError() {
