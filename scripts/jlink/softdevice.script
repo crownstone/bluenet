@@ -1,6 +1,5 @@
-w4 4001e504 2
-w4 4001e50c 1
-w4 4001e504 1
+st
 loadbin @SOFTDEVICE_DIR@/softdevice_uicr.bin 0x10001000
 loadbin @SOFTDEVICE_DIR@/softdevice_mainpart.bin 0
+r
 qc
