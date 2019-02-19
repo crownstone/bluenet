@@ -1,3 +1,5 @@
+st
 w4 @ADDRESS@ @VALUE@
+sleep 200
 mem @ADDRESS@ 4
-q
+qc
