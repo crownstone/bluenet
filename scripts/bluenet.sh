@@ -10,6 +10,9 @@ ERR_HARDWARE_VERSION_UNSET=106
 ERR_JLINK_NOT_FOUND=107
 ERR_HARDWARE_VERSION_MISMATCH=108
 ERR_CONFIG=109
+ERR_NO_COMMAND=110
+ERR_NOTHING_INCLUDED=111
+
 
 usage() {
 	echo "Bluenet bash script"
@@ -49,7 +52,7 @@ fi
 
 getopt --test > /dev/null
 if [[ $? -ne 4 ]]; then
-	echo "I’m sorry, `getopt --test` failed in this environment."
+	echo "I’m sorry, \"getopt --test\" failed in this environment."
 	exit $ERR_GETOPT_TEST
 fi
 
@@ -134,7 +137,7 @@ while true; do
 			;;
 		-h|--help)
 			usage
-			exit
+			exit 0
 			shift 1
 			;;
 
@@ -194,19 +197,13 @@ echo
 
 
 build_firmware() {
-	cd ${path}/..
-	cs_info "Execute make cross-compile-target"
-	make ${make_flag} cross-compile-target
+	${path}/firmware.sh build $target
 	checkError "Error building firmware"
-	cd $path
 }
 
 build_firmware_release() {
-	cd ${path}/..
-	cs_info "Execute make release"
-	make ${make_flag} release
-	checkError "Failed to build release"
-	cd $path
+	${path}/firmware.sh release $target
+	checkError "Error building firmware release"
 }
 
 build_bootloader() {
@@ -232,11 +229,8 @@ build_combined() {
 }
 
 build_unit_test_host() {
-	cd ${path}/..
-	cs_info "Execute make host-compile-target"
-	make ${make_flag} host-compile-target
+	${path}/firmware.sh unit-test-host $target
 	checkError "Error building unit test host"
-	cd $path
 }
 
 
@@ -247,7 +241,7 @@ erase_flash() {
 
 
 upload_firmware() {
-	${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num
+	${path}/firmware.sh upload $target $address
 	checkError "Error uploading firmware"
 }
 
@@ -283,7 +277,7 @@ upload_hardware_version() {
 }
 
 debug_firmware() {
-	${path}/_debug.sh $BLUENET_BIN_DIR/$target.elf $serial_num $gdb_port
+	${path}/firmware.sh debug $target $gdb_port
 	checkError "Error debugging firmware"
 }
 
@@ -294,13 +288,13 @@ debug_bootloader() {
 
 
 
-upload_valid_app() {
+upload_valid_app_mark() {
 	cs_info "Mark current app as valid"
 	${path}/_writebyte.sh 0x0007F000 1 $serial_num
 	checkError "Error marking app valid"
 }
 
-upload_invalid_app() {
+upload_invalid_app_mark() {
 	cs_info "Mark current app as invalid"
 	${path}/_writebyte.sh 0x0007F000 0 $serial_num
 	checkError "Error marking app invalid"
@@ -310,9 +304,8 @@ upload_invalid_app() {
 
 
 clean_firmware() {
-	cd ${path}/..
-	make ${make_flag} clean
-	checkError "Error cleaning up"
+	${path}/firmware.sh clean $target
+	checkError "Error cleaning up firmware"
 }
 
 clean_bootloader() {
@@ -321,7 +314,7 @@ clean_bootloader() {
 
 clean_softdevice() {
 	${path}/softdevice.sh build $target
-	checkError "Error building softdevice"
+	checkError "Error cleaning up softdevice"
 }
 
 
@@ -340,24 +333,29 @@ verify_hardware_version_defined() {
 	fi
 }
 
-# The hardware board is actually physically checked.
+# Checks if a hardware version is already written.
+# If so, and it's different from config, then it will give an error.
+# If nothing is written, it will give an error.
 verify_hardware_version_written() {
 	verify_hardware_version_defined
-	cs_info "Find hardware board version via ${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num"
+	cs_log "Find hardware version via ${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num"
 	hardware_board_version=$(${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num)
 	HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BLUENET_DIR/include/cfg/cs_Boards.h | grep -oP "\d+$")
 	config_board_version=$(printf "%08x" $HARDWARE_BOARD_INT)
 	if [ "$hardware_board_version" == 'FFFFFFFF' ] || [ "$hardware_board_version" == 'ffffffff' ]; then
+#		cs_log "No hardware version is written yet, writing the one from config."
+#		upload_hardware_version
+		cs_info "Hardware version is not written."
 		if [ $autoyes ]; then
-			cs_info "Automatically overwriting hardware version (now at 0xFFFFFFFF)"
+			cs_info "Automatically writing hardware version."
 		else
-			cs_info "Hardware version is $hardware_board_version"
-			echo -n "Do you want to overwrite the hardware version [y/N]? "
-			read autoyes
+			echo -n "Do you want to overwrite the hardware version [Y/n]? "
+			read overwrite_hardware_version
 		fi
-		if [ "$autoyes" == 'true' ] || [ "$autoyes" == 'Y' ] || [ "$autoyes" == 'y' ]; then
-			upload_hardware_version
-		else
+		# Default yes
+		if [ "$autoyes" == 'true' ] || [ "$overwrite_hardware_version" == 'Y' ] || [ "$overwrite_hardware_version" == 'y' ]; then 
+			writeHardwareVersion
+		else 
 			cs_err "You have to write the hardware version! It is still set to $hardware_board_version."
 			exit $ERR_HARDWARE_VERSION_UNSET
 		fi
@@ -366,7 +364,23 @@ verify_hardware_version_written() {
 		exit $ERR_JLINK_NOT_FOUND
 	elif [ "$hardware_board_version" != "$config_board_version" ]; then
 		cs_err "You have an incorrect hardware version on your board! It is set to $hardware_board_version rather than $config_board_version."
+		cs_err "This value cannot be overwritten, you have to erase first."
 		exit $ERR_HARDWARE_VERSION_MISMATCH
+#		if [ $autoyes ]; then
+#			#cs_info "Automatically overwriting hardware version (now at $hardware_board_version)"
+#			: #noop
+#		else
+#			cs_info "Hardware version is $hardware_board_version"
+#			echo -n "Do you want to overwrite the hardware version [y/N]? "
+#			read overwrite_hardware_version
+#		fi
+#		# Default no
+#		if [ "$overwrite_hardware_version" == 'Y' ] || [ "$overwrite_hardware_version" == 'y' ]; then
+#			upload_hardware_version
+#		else
+#			cs_err "You have a different hardware version on your board! It is set to $hardware_board_version rather than $config_board_version."
+#			exit $ERR_HARDWARE_VERSION_MISMATCH
+#		fi
 	else
 		cs_info "Found hardware version: $hardware_board_version"
 	fi
@@ -374,7 +388,9 @@ verify_hardware_version_written() {
 
 
 # Main
+done_something=false
 if [ $do_build ]; then
+	done_something=true
 	done_built=false
 	if [ $include_firmware ]; then
 		if [ $release_build ]; then
@@ -397,18 +413,20 @@ if [ $do_build ]; then
 		done_built=true
 	fi
 	if [ "$done_built" != true ]; then
-		cs_err "Nothing was built"
-		exit 1
+		cs_err "Nothing was built. Please specify what to build."
+		exit $ERR_NOTHING_INCLUDED
 	fi
 fi
 
 
 if [ $do_erase_flash ]; then
+	done_something=true
 	erase_flash
 fi
 
 
 if [ $do_upload ]; then
+	done_something=true
 	done_upload=false
 	if [ $use_combined ]; then
 		upload_combined
@@ -424,24 +442,26 @@ if [ $do_upload ]; then
 		fi
 		if [ $include_firmware ]; then
 			upload_firmware
-			upload_valid_app
+			upload_valid_app_mark
 			done_upload=true
 		else
-			upload_invalid_app
+			upload_invalid_app_mark
 		fi
 		if [ $include_hardware_version ]; then
 			upload_hardware_version
 			done_upload=true
 		fi
 	fi
+	verify_hardware_version_written
 	if [ "$done_upload" != true ]; then
-		cs_err "Nothing was uploaded"
-		exit 1
+		cs_err "Nothing was uploaded. Please specify what to upload."
+		exit $ERR_NOTHING_INCLUDED
 	fi
 fi
 
 
 if [ $do_debug ]; then
+	done_something=true
 	if [ $include_firmware ]; then
 		debug_firmware
 	elif [ $include_bootloader ]; then
@@ -453,6 +473,7 @@ fi
 
 
 if [ $do_clean ]; then
+	done_something=true
 	done_clean=false
 	if [ $include_firmware ]; then
 		clean_firmware
@@ -467,19 +488,26 @@ if [ $do_clean ]; then
 		done_clean=true
 	fi
 	if [ "$done_clean" != true ]; then
-		cs_err "Nothing was cleaned"
-		exit 1
+		cs_err "Nothing was cleaned. Please specify what to clean."
+		exit $ERR_NOTHING_INCLUDED
 	fi
 fi
 
 
 if [ $do_unit_test_host ]; then
+	done_something=true
 	build_unit_test_host
 fi
 
 
 if [ $do_unit_test_nrf5 ]; then
+	done_something=true
 	cs_warn "TODO: unit_test_nrf5"
 fi
 
+
+if [ "$done_something" != true ]; then
+	cs_err "Nothing was done. Please specify a command."
+	exit $ERR_NO_COMMAND
+fi
 cs_succ "Done!"
