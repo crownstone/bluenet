@@ -24,8 +24,7 @@ fi
 
 build() {
 	cs_log "There is no real building step. Nordic provides a binary blob as SoftDevice"
-	cs_log "However, we still need to extract the binary and the config blob"
-	cs_log "  from $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX"
+	cs_log "However, we still need to extract the binary and the config blob from $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX"
 	$path/_softdevice_objcopy.sh $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX $SD_BINDIR $SOFTDEVICE $COMPILER_PATH $COMPILER_TYPE $SOFTDEVICE_NO_SEPARATE_UICR_SECTION
 	result=$?
 	checkError $result "Error with building softdevice"
@@ -37,6 +36,10 @@ upload() {
 	checkError $result "Error with uploading softdevice"
 	echo "Check which version we have uploaded"
 	./software_firmware_id.sh
+}
+
+clean() {
+	cs_log "Nothing to clean for softdevice"
 }
 
 all() {
@@ -55,10 +58,13 @@ case "$cmd" in
 	upload)
 		upload
 		;;
+	clean)
+		clean
+		;;
 	all)
 		all
 		;;
 	*)
-		cs_info "Usage: $0 {build|upload|all}"
+		cs_info "Usage: $0 {build|upload|clean|all}"
 		exit 1
 esac
