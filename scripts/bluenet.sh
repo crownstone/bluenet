@@ -43,7 +43,7 @@ fi
 
 getopt --test > /dev/null
 if [[ $? -ne 4 ]]; then
-	echo "I’m sorry, \"getopt --test\" failed in this environment."
+	cs_err "Error: \"getopt --test\" failed in this environment. Please install the GNU version of getopt."
 	exit $CS_ERR_GETOPT_TEST
 fi
 
@@ -231,12 +231,12 @@ upload_board_version() {
 }
 
 debug_firmware() {
-	${path}/firmware.sh debug $target $gdb_port
+	${path}/firmware.sh debug $target
 	checkError "Error debugging firmware"
 }
 
 debug_bootloader() {
-	${path}/bootloader.sh debug $target $gdb_port
+	${path}/bootloader.sh debug $target
 	checkError "Error debugging bootloader"
 }
 

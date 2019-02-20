@@ -11,6 +11,8 @@ export CS_ERR_HARDWARE_VERSION_MISMATCH=108
 export CS_ERR_CONFIG=109
 export CS_ERR_NO_COMMAND=110
 export CS_ERR_NOTHING_INCLUDED=111
+export CS_ERR_FILE_NOT_FOUND=112
+export CS_ERR_WRONG_FILE_TYPE=113
 
 # colour assignments, see -> http://linuxtidbits.wordpress.com/2008/08/13/output-color-on-bash-scripts-advanced/
 # ORANGE="\033[38;5;214m"

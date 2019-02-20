@@ -1,5 +1,9 @@
 #!/bin/bash
 
+TARGET=${1:? "$0 requires \"target\" as argument"}
+SERIAL_NUM=$2
+GDB_PORT=$3
+
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 source $path/_config.sh
@@ -12,12 +16,7 @@ GDB_SCRIPT=$TEMP_DIR/gdbinit
 cp gdb/gdbinit $GDB_SCRIPT
 
 GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}gdb
-DEVICE=nRF52832_xxAA
 
-TARGET=${1:? "$0 requires \"target\" as first argument"}
-
-SN=$2
-GDB_PORT=$3
 if [ -z $GDB_PORT ]; then
 	GDB_PORT=2331
 fi
@@ -27,12 +26,12 @@ TELNET_PORT=$((${SWO_PORT} + 1))
 sed -i "s/@gdb_port@/${GDB_PORT}/" $GDB_SCRIPT
 
 # Run JLink gdb server
-if [ -z $SN ]; then
+if [ -z $SERIAL_NUM ]; then
 	cs_log "$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
 	$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &
 else
-	cs_log "$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
-	$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SN -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &
+	cs_log "$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SERIAL_NUM -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
+	$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SERIAL_NUM -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &
 fi
 
 # Stop running processes on exit of script

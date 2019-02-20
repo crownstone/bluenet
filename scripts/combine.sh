@@ -30,7 +30,7 @@ usage() {
 
 getopt --test > /dev/null
 if [[ $? -ne 4 ]]; then
-	echo "I’m sorry, \"getopt --test\" failed in this environment."
+	cs_err "Error: \"getopt --test\" failed in this environment. Please install the GNU version of getopt."
 	exit $CS_ERR_GETOPT_TEST
 fi
 
