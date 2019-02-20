@@ -11,4 +11,4 @@ source $path/_config.sh
 sed "s|@ADDRESS@|$ADDRESS|" $JLINK_SCRIPT_DIR/readbytes.script > $SCRIPT_TEMP_DIR/readbytes.script
 sed -i "s|@NUM_BYTES@|$NUM_BYTES|" $SCRIPT_TEMP_DIR/readbytes.script
 
-$path/jlink.sh $SCRIPT_TEMP_DIR/readbytes.script $SERIAL_NUM
+$path/_jlink.sh $SCRIPT_TEMP_DIR/readbytes.script $SERIAL_NUM

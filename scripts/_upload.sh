@@ -32,4 +32,4 @@ cs_log "Write to address: $ADDRESS"
 sed "s|@BIN@|$FILE|" $JLINK_SCRIPT_DIR/upload.script > $SCRIPT_TEMP_DIR/upload.script
 sed -i "s|@START_ADDRESS@|$ADDRESS|" $SCRIPT_TEMP_DIR/upload.script
 
-$path/jlink.sh $SCRIPT_TEMP_DIR/upload.script $SERIAL_NUM
+$path/_jlink.sh $SCRIPT_TEMP_DIR/upload.script $SERIAL_NUM

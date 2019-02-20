@@ -11,4 +11,4 @@ source $path/_config.sh
 sed "s|@ADDRESS@|$ADDRESS|" $JLINK_SCRIPT_DIR/writebyte.script > $SCRIPT_TEMP_DIR/writebyte.script.1
 sed "s|@VALUE@|$VALUE|" $SCRIPT_TEMP_DIR/writebyte.script.1 > $SCRIPT_TEMP_DIR/writebyte.script
 
-$path/jlink.sh $SCRIPT_TEMP_DIR/writebyte.script $SERIAL_NUM
+$path/_jlink.sh $SCRIPT_TEMP_DIR/writebyte.script $SERIAL_NUM

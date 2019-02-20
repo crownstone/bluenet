@@ -19,4 +19,4 @@ if [ $SOFTDEVICE_NO_SEPARATE_UICR_SECTION == 1 ]; then
 	sed -i '/uicr/d' $SCRIPT_TEMP_DIR/softdevice.script
 fi
 
-$path/jlink.sh $SCRIPT_TEMP_DIR/softdevice.script $SERIAL_NUM
+$path/_jlink.sh $SCRIPT_TEMP_DIR/softdevice.script $SERIAL_NUM
