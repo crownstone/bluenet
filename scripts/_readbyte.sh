@@ -9,7 +9,7 @@ source $path/_config.sh >/dev/null
 
 sed "s|@ADDRESS@|$ADDRESS|" $JLINK_SCRIPT_DIR/readbyte.script > $SCRIPT_TEMP_DIR/readbyte.script
 
-result0=$($path/jlink.sh $SCRIPT_TEMP_DIR/readbyte.script $SERIAL_NUM | grep -A1 identified | tail -n1)
+result0=$($path/_jlink.sh $SCRIPT_TEMP_DIR/readbyte.script $SERIAL_NUM | grep -A1 identified | tail -n1)
 
 if [ "$result0" == "" ]; then
 	echo '<not found>'
