@@ -3,7 +3,7 @@
 option=${1:? "Usage: $0 (generate|memory_map|publish|view)"}
 
 # optional target, have default option
-target=${1:-default}
+target=${1:-crownstone}
 
 # Obtain current path and utils
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
