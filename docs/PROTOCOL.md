@@ -327,7 +327,7 @@ The schedule service has UUID 24f50000-7d10-4805-bfc1-7663a01c3bff.
 
 Characteristic | UUID | Date type | Description | A | M | G
 --- | --- | --- | --- | :---: | :---: | :---:
-Set time        | 24f50001-7d10-4805-bfc1-7663a01c3bff | uint 32 | Sets the time. Timestamp is in seconds since epoch. | x
+Set time        | 24f50001-7d10-4805-bfc1-7663a01c3bff | uint 32 | Sets the time. Timestamp is in seconds since epoch (Unix time). | x
 Schedule write  | 24f50002-7d10-4805-bfc1-7663a01c3bff | [Schedule command](#schedule_command_packet) | Set or clear a schedule entry. To clear: only write the index. | x
 Schedule read   | 24f50003-7d10-4805-bfc1-7663a01c3bff | [Schedule list](#schedule_list_packet) | Get a list of all schedule entries. | x
 
@@ -728,7 +728,7 @@ Type | Name | Length | Description
 uint 8 | reserved | 1 | Reserved for future use.
 uint 8 | Type | 1 | Combined repeat and action type. Defined as `repeatType + (actionType << 4)`.
 uint 8 | [Override mask](#schedule_override_mask) | 1 | Bitmask of switch commands to override.
-uint 32 | Next timestamp | 4 | Timestamp of the next time this entry triggers. Set to 0 to remove this entry.
+uint 32 | Next timestamp | 4 | Unix timestamp of the next time this entry triggers. Set to 0 to remove this entry.
 [schedule repeat](#schedule_repeat_packet) | Repeat data | 2 | Repeat time data, depends on the repeat type.
 [schedule action](#schedule_action_packet) | Action data | 3 | Action data, depends on the action type.
 
@@ -939,7 +939,7 @@ uint 8 | Head | 1 | Keeps the index of the oldest element in the list (read poin
 uint 8 | Tail | 1 | Keeps the index where the next element can be inserted in the list (write pointer)
 uint 8 | Size | 1 | Number of elements in the list
 uint 8 | Reserved | 1 | Reserved for future use
-uint 32 | Timestamp | 4 | Posix timestamp at which this message was originally sent (0 for unknown time)
+uint 32 | Timestamp | 4 | Unix timestamp at which this message was originally sent (0 for unknown time)
 [Crownstone state item](#state_mesh_item) [] | List | 84 | Circular list with Crownstone state items
 
 
