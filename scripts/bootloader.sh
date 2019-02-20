@@ -16,7 +16,7 @@ target=${2:-crownstone}
 # optional address, use APPLICATION_START_ADDRESS as default
 address=${3:-$APPLICATION_START_ADDRESS}
 
-gdb_port=$3
+gdb_port=${$3:-$gdb_port}
 
 # Get the scripts path: the path where this file is located.
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
