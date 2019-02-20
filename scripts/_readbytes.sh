@@ -8,11 +8,7 @@ path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 source $path/_config.sh
 
-SCRIPT_DIR=$path/jlink
-TEMP_DIR=$path/tmp
-mkdir -p $TEMP_DIR
+sed "s|@ADDRESS@|$ADDRESS|" $JLINK_SCRIPT_DIR/readbytes.script > $SCRIPT_TEMP_DIR/readbytes.script
+sed -i "s|@NUM_BYTES@|$NUM_BYTES|" $SCRIPT_TEMP_DIR/readbytes.script
 
-sed "s|@ADDRESS@|$ADDRESS|" $SCRIPT_DIR/readbytes.script > $TEMP_DIR/readbytes.script
-sed -i "s|@NUM_BYTES@|$NUM_BYTES|" $TEMP_DIR/readbytes.script
-
-$path/jlink.sh $TEMP_DIR/readbytes.script $SERIAL_NUM
+$path/jlink.sh $SCRIPT_TEMP_DIR/readbytes.script $SERIAL_NUM

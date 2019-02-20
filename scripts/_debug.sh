@@ -8,11 +8,7 @@ path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 source $path/_config.sh
 
-SCRIPT_DIR=$path/jlink
-TEMP_DIR=$path/tmp
-mkdir -p $TEMP_DIR
-
-GDB_SCRIPT=$TEMP_DIR/gdbinit
+GDB_SCRIPT=$SCRIPT_TEMP_DIR/gdbinit
 cp gdb/gdbinit $GDB_SCRIPT
 
 GDB=${COMPILER_PATH}/bin/${COMPILER_TYPE}gdb
