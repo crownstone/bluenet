@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 #TODO: crc calculation has a problem for bootloader and softdevice,
 # but works for application ??!!
