@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 from termcolor import colored
 import time, datetime
 
