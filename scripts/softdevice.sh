@@ -1,26 +1,31 @@
 #!/bin/bash
 
-cmd=${1:? "$0 requires \"cmd\" as first argument"}
+usage() {
+	echo "Usage: $0 {build|upload|clean|all} [target]"
+}
+
+cmd=${1:-help}
+if [[ $cmd == "help" ]]; then
+	usage
+	exit 0
+fi
 
 # optional target, use crownstone as default
 target=${2:-crownstone}
 
-# get working path in absolute sense
+# Get the scripts path: the path where this file is located.
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 
-if [[ $cmd != "help" ]]; then
+cs_info "Load configuration from: ${path}/_check_targets.sh $target"
+source ${path}/_check_targets.sh $target
 
-	# adjust targets and sets serial_num
-	# call it with the . so that it get's the same arguments as the call to this script
-	# and so that the variables assigned in the script will be persistent afterwards
-	source ${path}/_check_targets.sh $target
+cs_info "Load configuration from: ${path}/_config.sh"
+source $path/_config.sh
 
-	# configure environment variables, load configuration files
-	source $path/_config.sh
+SD_BINDIR=${BLUENET_BIN_DIR}
 
-	SD_BINDIR=${BLUENET_BIN_DIR}
-fi
+
 
 build() {
 	cs_log "There is no real building step. Nordic provides a binary blob as SoftDevice"
@@ -40,10 +45,7 @@ clean() {
 
 all() {
 	build
-	if [ $? -eq 0 ]; then
-		sleep 1
-		upload
-	fi
+	upload
 }
 
 case "$cmd" in
@@ -60,6 +62,6 @@ case "$cmd" in
 		all
 		;;
 	*)
-		cs_info "Usage: $0 {build|upload|clean|all}"
-		exit 1
+		usage
+		exit $CS_ERR_ARGUMENTS
 esac

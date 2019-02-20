@@ -2,7 +2,9 @@
 
 # assign default BLUENET_DIR environment variable to the parent folder of the folder containing this script
 if [ -z "${BLUENET_DIR}" ]; then
-	export BLUENET_DIR=$(readlink -m $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..)
+#	export BLUENET_DIR=$(readlink -m $( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/..)
+	path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+	export BLUENET_DIR="$( cd "${path}/.." && pwd )"
 fi
 
 # load environment variables from env.config (if it exists)
