@@ -1,7 +1,8 @@
 #!/bin/bash
 
-path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source "$path/_utils.sh"
+# Don't use path here as variable name, as it will overwrite "path" of other scripts.
+script_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source "$script_path/_utils.sh"
 
 log_config() {
 	cs_info "[_config.sh] BLUENET_WORKSPACE_DIR is ${BLUENET_WORKSPACE_DIR}"
@@ -62,6 +63,6 @@ if [[ -z $SOFTDEVICE_DIR_HEX ]]; then
 fi
 
 # Define jlink and temp script dir.
-JLINK_SCRIPT_DIR="$path/jlink"
-SCRIPT_TEMP_DIR="$path/tmp"
+JLINK_SCRIPT_DIR="$script_path/jlink"
+SCRIPT_TEMP_DIR="$script_path/tmp"
 mkdir -p "$SCRIPT_TEMP_DIR"
