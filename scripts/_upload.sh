@@ -8,10 +8,6 @@ path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 source $path/_config.sh
 
-SCRIPT_DIR=$path/jlink
-TEMP_DIR=$path/tmp
-mkdir -p $TEMP_DIR
-
 if [ ! -e ${FILE} ]; then
 	cs_err "Error: ${FILE} does not exist..."
 	exit $CS_ERR_FILE_NOT_FOUND
@@ -33,7 +29,7 @@ fi
 
 cs_log "Write to address: $ADDRESS"
 
-sed "s|@BIN@|$FILE|" $SCRIPT_DIR/upload.script > $TEMP_DIR/upload.script
-sed -i "s|@START_ADDRESS@|$ADDRESS|" $TEMP_DIR/upload.script
+sed "s|@BIN@|$FILE|" $JLINK_SCRIPT_DIR/upload.script > $SCRIPT_TEMP_DIR/upload.script
+sed -i "s|@START_ADDRESS@|$ADDRESS|" $SCRIPT_TEMP_DIR/upload.script
 
-$path/jlink.sh $TEMP_DIR/upload.script $SERIAL_NUM
+$path/jlink.sh $SCRIPT_TEMP_DIR/upload.script $SERIAL_NUM
