@@ -1,41 +1,42 @@
 #!/bin/bash
 
-cmd=${1:? "$0 requires \"cmd\" as first argument"}
+usage() {
+	echo "Usage: $0 {build|upload|clean|all} [target]"
+}
+
+cmd=${1:-help}
+if [[ $cmd == "help" ]]; then
+	usage
+	exit 0
+fi
 
 # optional target, use crownstone as default
 target=${2:-crownstone}
 
-# get working path in absolute sense
+# Get the scripts path: the path where this file is located.
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 
-if [[ $cmd != "help" ]]; then
+cs_info "Load configuration from: ${path}/_check_targets.sh $target"
+source ${path}/_check_targets.sh $target
 
-	# adjust targets and sets serial_num
-	# call it with the . so that it get's the same arguments as the call to this script
-	# and so that the variables assigned in the script will be persistent afterwards
-	source ${path}/_check_targets.sh $target
+cs_info "Load configuration from: ${path}/_config.sh"
+source $path/_config.sh
 
-	# configure environment variables, load configuration files
-	source $path/_config.sh
+SD_BINDIR=${BLUENET_BIN_DIR}
 
-	SD_BINDIR=${BLUENET_BIN_DIR}
-fi
+
 
 build() {
 	cs_log "There is no real building step. Nordic provides a binary blob as SoftDevice"
 	cs_log "However, we still need to extract the binary and the config blob from $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX"
 	$path/_softdevice_objcopy.sh $SOFTDEVICE_DIR/$SOFTDEVICE_DIR_HEX $SD_BINDIR $SOFTDEVICE $COMPILER_PATH $COMPILER_TYPE $SOFTDEVICE_NO_SEPARATE_UICR_SECTION
-	result=$?
-	checkError $result "Error with building softdevice"
+	checkError "Error with building softdevice"
 }
 
 upload() {
 	$path/_softdevice_upload.sh $SD_BINDIR $serial_num
-	result=$?
-	checkError $result "Error with uploading softdevice"
-	echo "Check which version we have uploaded"
-	./software_firmware_id.sh
+	checkError "Error with uploading softdevice"
 }
 
 clean() {
@@ -44,11 +45,7 @@ clean() {
 
 all() {
 	build
-	result=$?
-	if [ $result -eq 0 ]; then
-		sleep 1
-		upload
-	fi
+	upload
 }
 
 case "$cmd" in
@@ -65,6 +62,6 @@ case "$cmd" in
 		all
 		;;
 	*)
-		cs_info "Usage: $0 {build|upload|clean|all}"
-		exit 1
+		usage
+		exit $CS_ERR_ARGUMENTS
 esac

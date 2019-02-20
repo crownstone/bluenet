@@ -1,5 +1,17 @@
 #!/bin/sh
 
+export CS_ERR_GETOPT_TEST=101
+export CS_ERR_GETOPT_PARSE=102
+export CS_ERR_ARGUMENTS=103
+export CS_ERR_UNKNOWN_COMMAND=104
+export CS_ERR_VERIFY_HARDWARE_LOCALLY=105
+export CS_ERR_HARDWARE_VERSION_UNSET=106
+export CS_ERR_JLINK_NOT_FOUND=107
+export CS_ERR_HARDWARE_VERSION_MISMATCH=108
+export CS_ERR_CONFIG=109
+export CS_ERR_NO_COMMAND=110
+export CS_ERR_NOTHING_INCLUDED=111
+
 # colour assignments, see -> http://linuxtidbits.wordpress.com/2008/08/13/output-color-on-bash-scripts-advanced/
 # ORANGE="\033[38;5;214m"
 # GREEN="\033[38;5;46m"

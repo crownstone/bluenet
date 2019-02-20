@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage() {
-	echo "Usage: $0 {build|unit-test-host|unit-test-nrf5|release|upload|debug|clean} [target [address|gdb_port]]"
+	echo "Usage: $0 {build|upload|debug|clean} [target [address|gdb_port]]"
 }
 
 cmd=${1:-help}
@@ -43,51 +43,44 @@ address=${address:-$APPLICATION_START_ADDRESS}
 
 
 build() {
-	cd ${path}/..
-	cs_info "Execute make cross-compile-target"
-	make ${make_flag} cross-compile-target
-	checkError "Build failed"
-	cd $path
-}
-
-unit-test-host() {
-	cd ${path}/..
-	cs_info "Execute make host-compile-target"
-	make ${make_flag} host-compile-target
-	checkError "Failed to build unit test host"
-	cd $path
+	if [ -d "${BLUENET_BOOTLOADER_DIR}" ]; then
+		cs_info "Build bootloader ..."
+		${BLUENET_BOOTLOADER_DIR}/scripts/all.sh $target
+		checkError "Build failed"
+		cs_succ "Build DONE"
+	else
+		cs_err "BLUENET_BOOTLOADER_DIR not defined."
+		exit $CS_ERR_CONFIG
+	fi
 }
 
 release() {
-	cd ${path}/..
-	cs_info "Execute make release"
-	make ${make_flag} release
-	checkError "Failed to build release"
-	cd $path
+	build
 }
 
 upload() {
-	${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num
+	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
 	checkError "Uploading failed"
 }
 
 debug() {
-	${path}/_debug.sh $BLUENET_BIN_DIR/$target.elf $serial_num $gdb_port
+	${path}/_debug.sh $BLUENET_BIN_DIR/bootloader.elf $serial_num $gdb_port
 	checkError "Debugging failed"
 }
 
 clean() {
-	cd ${path}/..
-	make ${make_flag} clean
-	checkError "Cleanup failed"
+	if [ -d "${BLUENET_BOOTLOADER_DIR}" ]; then
+		${BLUENET_BOOTLOADER_DIR}/scripts/clean.sh $target
+		checkError "Cleanup failed"
+	else
+		cs_err "BLUENET_BOOTLOADER_DIR not defined."
+		exit $CS_ERR_CONFIG
+	fi
 }
 
 case "$cmd" in
-	build|unit-test-nrf5)
+	build)
 		build
-		;;
-	unit-test-host)
-		unit-test-host
 		;;
 	release)
 		release
