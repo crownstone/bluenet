@@ -63,6 +63,7 @@ read() {
 # If nothing is written, it will give an error.
 check() {
 	verify_board_version_defined
+	read
 	HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BLUENET_DIR/include/cfg/cs_Boards.h | grep -oP "\d+$")
 	config_board_version=$(printf "%08x" $HARDWARE_BOARD_INT)
 	if [ "$hardware_board_version" == 'FFFFFFFF' ] || [ "$hardware_board_version" == 'ffffffff' ]; then
