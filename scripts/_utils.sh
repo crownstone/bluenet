@@ -49,7 +49,7 @@ cs_err() {
 }
 
 cs_warn() {
-	printf "$yellow$bold$prefix $1$magenta\n"
+	printf "$yellow$bold$prefix $1$normal\n"
 }
 
 cs_info() {
