@@ -434,7 +434,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | G | S
 --- | --- | --- | --- | :---: | :---: | :---: | :--:
 0 | Switch | uint 8 | Switch power, 0 = OFF, 100 = FULL ON | x | x | x |
 1 | PWM | uint 8 | Set PWM to value, 0 = OFF, 100 = FULL ON | x | x | x |
-2 | Set Time | uint 32 | Set time to value, where value is seconds since 1970-01-01 00:00:00 | x | x |
+2 | Set time | uint 32 | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
 3 | Goto DFU | - | Reset device to DFU mode | x
 4 | Reset | - | Reset device | x
 5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x
