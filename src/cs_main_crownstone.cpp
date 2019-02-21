@@ -714,11 +714,11 @@ void Crownstone::tick() {
 		}
 	}
 
-//	// 2Hz
+//	// 2 Hz loop
 //	static int tickCount = 0;
 //	static int phase = 0;
 //	tickCount++;
-//	if (tickCount % 4 == 0) {
+//	if (tickCount % 30 == 0) {
 //		phase++;
 //		switch(phase % 8) {
 //		case 0: _switch->setSwitch(99); break;
