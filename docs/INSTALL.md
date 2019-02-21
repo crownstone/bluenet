@@ -189,16 +189,26 @@ You will have to attach a programmer/debugger, like the JLink. Towards that you 
 
 ### Compiling, uploading and debugging
 
-First build and upload the SoftDevice:
+First erase the flash memory:
 
     cd $BLUENET_DIR/scripts
-    ./softdevice.sh build
-    ./softdevice.sh upload
+    ./bluenet.sh -e
 
-Now we can build our own software:
+After erasing, you have to write the board version in a `UICR` register:
 
     cd $BLUENET_DIR/scripts
-    ./firmware.sh --command=build --target=default
+    ./bluenet.sh -u -H
+
+Then build and upload the SoftDevice:
+
+    cd $BLUENET_DIR/scripts
+    ./bluenet.sh -b -S
+    ./bluenet.sh -u -S
+
+Now we can build our own application:
+
+    cd $BLUENET_DIR/scripts
+    ./bluenet.sh -b -F
 
 By default, the code is built inside the `$BLUENET_WORKSPACE_DIR/build` folder and if successful, the compiled binaries (\*.hex, \*.elf, \*.bin) are copied to `$BLUENET_WORKSPACE_DIR/bin`. If you want to change either folder, you can uncomment and assign the following environment variables in `$BLUENET_DIR/env.config`
 
@@ -209,31 +219,21 @@ If the compilation fails due to misconfiguration, you might have to remove the b
 
 To upload the application with the JLink you can use:
 
-    ./firmware.sh --command=upload --target=default
+    ./bluenet.sh -u -F
 
 To debug with `gdb` you can use:
 
-    ./firmware.sh --command=debug --target=default
+    ./bluenet.sh -d -F
 
-There is a shortcut to build and upload you can use:
+### Combinations
 
-    ./firmware.sh --command=run --target=default
+You can use multiple commands in one go. For example, to erase the flash, build and upload the board version, firmware and softdevice, and lastly debug the firmware, you can use the following command:
 
-And another shortcut to build, upload, and debug:
+    ./bluenet.sh -bud -FSH
 
-    ./firmware.sh --command=all --target=default
+You can also build and upload a binary that combines the application, the softdevice, the bootloader, and board version.
 
-### Uploading combined files
-
-You can also upload a binary that combines the application, the softdevice, and the bootloader. Let us explain these with short options (`-c` rather than `--command` for example). The following uploads the softdevice (`-s`), and the bootloader (`-b`) as well:
-
-    ./firmware.sh -c upload -t default -s -b
-
-This uploads all these binaries separately. It is also possible to combine everything into one binary (`-u`, or `--use_combined`):
-
-    ./firmware.sh -c upload -t default -u
-    
-In the combined binary the hardware version is set as well in a `UICR` register. It also writes an app valid bit.
+    ./bluenet.sh -bu -FSBHC
 
 ### Advanced Usage
 
@@ -274,18 +274,11 @@ Now you can call the scripts above together with the target at the end of the ca
 
 E.g. to build and upload target `BLUE` execute:
 
-    ./firmware.sh --command=run --target=BLUE
+    ./bluenet.sh -bu -F -t BLUE
 
 and to build, upload and debug target `RED` call:
 
-    ./firmware.sh --command=all --target=RED
-
-The following scripts support multi targets:
-
-- `firmware.sh`. Usage `./firmware.sh --command=<COMMAND> --target=<TARGET>`
-- `softdevice.sh`. Usage `./softdevice.sh <COMMAND> <TARGET>`
-- `hardware_version.sh`. Usage `./hardware_version.sh <TARGET>`
-- `all.sh`. Usage `./all.sh <TARGET>`
+    ./bluenet.sh -bud -F -t BLUE
 
 ### Different Devices
 
@@ -327,16 +320,16 @@ and then enter `ShowEmuList`, which gives a list of connected devices, e.g.
     J-Link[1]: Connection: USB, Serial number: 518005793, ProductName: J-Link Lite Cortex-M-9
     JLink>
 
-Now if you call one of the scripts, with target `BLUE`,  e.g. `./firmware.sh run BLUE` it will compile config `BLUE` at `$BLUENET_CONFIG_DIR/BLUE/CMakeBuild.config` and upload it to `DEVICE1`. While calling `./firmware.sh run RED` will compile config `RED` at `$BLUENET_CONFIG_DIR/RED/CMakeBuild.config` and upload it to `DEVICE2`.
+Now if you call one of the scripts, with target `BLUE`,  e.g. `./bluenet.sh -bu -F -t BLUE` it will compile using config `BLUE` at `$BLUENET_CONFIG_DIR/BLUE/CMakeBuild.config` and upload it to `DEVICE1`. While calling `./bluenet.sh -bu -F -t RED` will compile using config `RED` at `$BLUENET_CONFIG_DIR/RED/CMakeBuild.config` and upload it to `DEVICE2`.
 
-And if you call `./firmware.sh run` it will compile the default config at `$BLUENET_CONFIG_DIR/CMakeBuild.config` and upload it to device `DEVICE2`.
+And if you call `./bluenet.sh -bu -F` it will compile the default config at `$BLUENET_CONFIG_DIR/CMakeBuild.config` and upload it to device `DEVICE2`.
 
 ## Unit tests
 
 You can also run unit tests for host or the target board through:
 
-    ./firmware.sh --command=unit-test-host --target=test
-    ./firmware.sh --command=unit-test-nrf5 --target=test
+    ./bluenet.sh --unit_test_host -t test
+    ./bluenet.sh --unit-test-nrf5 -t test
 
 Set `TEST_TARGET=`nrf5` in your `CMakeBuild.config` file in `test` to actually run the unit tests.
 
