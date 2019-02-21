@@ -315,7 +315,7 @@ cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const Persis
 				break;
 			}
 			st_file_data_t ram_data = _data_in_ram[index];		
-			LOGd("Storage write [0x%x,...] for %i", ram_data.value[0], ram_data.type);
+			LOGd("Storage write [0x%x,...] size=%u type=%u", ram_data.value[0], ram_data.size, ram_data.type);
 			return _storage->write(FILE_CONFIGURATION, ram_data);
 		}
 		case PersistenceMode::FIRMWARE_DEFAULT: {
