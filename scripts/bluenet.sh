@@ -48,7 +48,7 @@ if [[ $? -ne 4 ]]; then
 fi
 
 SHORT=t:a:beudcyhFBSHC
-LONG=target:,address:build,erase,upload,debug,clean,yes,help,firmware,bootloader,softdevice,hardware_version,combined
+LONG=target:,address:build,erase,upload,debug,clean,yes,help,firmware,bootloader,softdevice,hardware_version,combined,unit_test_host,unit_test_nrf5
 
 PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
