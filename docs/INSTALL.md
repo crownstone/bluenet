@@ -329,7 +329,7 @@ And if you call `./bluenet.sh -bu -F` it will compile the default config at `$BL
 You can also run unit tests for host or the target board through:
 
     ./bluenet.sh --unit_test_host -t test
-    ./bluenet.sh --unit-test-nrf5 -t test
+    ./bluenet.sh --unit_test_nrf5 -t test
 
 Set `TEST_TARGET=`nrf5` in your `CMakeBuild.config` file in `test` to actually run the unit tests.
 
