@@ -7,13 +7,14 @@ import time, datetime
 ## LOG HELPER
 
 def info(text):
-	print colored(text, "yellow")
+	print colored(text, "blue")
 
 def log(text):
 	print text
+	print text
 
 def warn(text):
-	print colored(text, "magenta")
+	print colored(text, "yellow")
 
 def err(text):
 	print colored(text, "red")
