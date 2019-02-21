@@ -117,8 +117,10 @@ void Switch::start() {
 	// This means we will assume that the pwm is already powered and just set the _pwmPowered flag.
 	// TODO: Really? Why can't we just organize this with events?
 	bool switchcraftEnabled = State::getInstance().isSet(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
-	if (switchcraftEnabled) {
+	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0)) {
 		_pwmPowered = true;
+		event_t event(CS_TYPE::EVT_PWM_POWERED);
+		EventDispatcher::getInstance().dispatch(event);
 	}
 
 	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
