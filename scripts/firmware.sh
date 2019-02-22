@@ -13,11 +13,6 @@ fi
 # optional target, use crownstone as default
 target=${2:-crownstone}
 
-# optional address, use APPLICATION_START_ADDRESS as default
-address=${3:-$APPLICATION_START_ADDRESS}
-
-gdb_port=${$3:-$gdb_port}
-
 # Get the scripts path: the path where this file is located.
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
@@ -28,6 +23,10 @@ source ${path}/_check_targets.sh $target
 cs_info "Load configuration from: ${path}/_config.sh"
 source $path/_config.sh
 
+# optional address, use APPLICATION_START_ADDRESS as default
+address=${3:-$APPLICATION_START_ADDRESS}
+
+gdb_port=${3:-$gdb_port}
 
 if [ "$VERBOSE" == "1" ]; then
 	cs_info "Verbose mode"
