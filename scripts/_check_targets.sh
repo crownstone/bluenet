@@ -9,7 +9,7 @@ path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 
 if [[ -e "$BLUENET_CONFIG_DIR/_targets.sh" ]]; then
-	# Adjusts target and sets serial_num
+	# Adjusts target and sets serial_num and gdb_port
 	source $BLUENET_CONFIG_DIR/_targets.sh $target
 	target_set=true
 else
