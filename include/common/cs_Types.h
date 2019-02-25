@@ -31,18 +31,14 @@ enum TypeBases {
  * This can be used in the following way.
  *
  *   CS_TYPE type = CONFIG_TX_POWER;
- *   uint8_t raw_value = enum_class_to_int(type);
+ *   uint8_t raw_value = to_underlying_type(type);
  *
  * This should be used very rarely. Use the CS_TYPE wherever possible.
  */
-//template <typename T>
-//constexpr auto operator+(T e) noexcept
-//-> std::enable_if_t<std::is_enum<T>::value, std::underlying_type_t<T>> {
-//	return static_cast<std::underlying_type_t<T>>(e);
-//}
-template<typename E>
-constexpr auto enum_class_to_int(E e) -> typename std::underlying_type<E>::type {
-   return static_cast<typename std::underlying_type<E>::type>(e);
+template <typename T>
+constexpr auto to_underlying_type(T e) noexcept
+-> std::enable_if_t<std::is_enum<T>::value, std::underlying_type_t<T>> {
+	return static_cast<std::underlying_type_t<T>>(e);
 }
 
 /** State variable types
@@ -1333,7 +1329,7 @@ constexpr void getDefault(st_file_data_t & data) {
 		*(TYPIFY(STATE_ERROR_DIMMER_OFF_FAILURE)*)data.value = STATE_ERROR_DIMMER_OFF_FAILURE_DEFAULT;
 		break;
 	default:
-		LOGw("Unknown default for %i", enum_class_to_int(data.type));
+		LOGw("Unknown default for %i", to_underlying_type(data.type));
 		break;
 
 	}

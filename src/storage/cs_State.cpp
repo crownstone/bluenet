@@ -60,7 +60,7 @@ cs_ret_code_t State::readFromStorage(CS_TYPE type, StreamBuffer<uint8_t>* stream
 	error_code = get(type, payload, plen, PersistenceMode::FLASH);
 	if (SUCCESS(error_code)) {
 		streamBuffer->setPayload(payload, plen);
-		uint8_t unsafe_type = enum_class_to_int(type);
+		uint8_t unsafe_type = to_underlying_type(type);
 		streamBuffer->setType(unsafe_type);
 	}
 	return error_code;
