@@ -136,7 +136,7 @@ bool FactoryReset::performFactoryReset() {
 	LOGf("factory reset");
 
 	//! Go into factory reset mode after next reset.
-	uint8_t mode = +OperationMode::OPERATION_MODE_FACTORY_RESET;
+	uint8_t mode = enum_class_to_int(OperationMode::OPERATION_MODE_FACTORY_RESET);
 	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::STRATEGY1);
 
 	LOGi("Going into factory reset mode, rebooting device in 2s ...");
@@ -161,7 +161,7 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 	State::getInstance().factoryReset(FACTORY_RESET_CODE);
 
 	// Lastly, go into setup mode after next reset
-	uint8_t mode = +OperationMode::OPERATION_MODE_SETUP;
+	uint8_t mode = enum_class_to_int(OperationMode::OPERATION_MODE_SETUP);
 	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::STRATEGY1);
 
 	LOGi("Factory reset done, rebooting device in 2s ...");

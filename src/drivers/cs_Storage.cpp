@@ -113,7 +113,7 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 	ret_code_t ret_code;
 
 	record.file_id           = file_id;
-	record.key               = +file_data.type;
+	record.key               = enum_class_to_int(file_data.type);
 	record.data.p_data       = file_data.value;
 	record.data.length_words = file_data.size >> 2; 
 	LOGnone("Store 0x%x of size %i", record.data.p_data, record.data.length_words);
@@ -173,7 +173,7 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 	initSearch();
 	bool break_on_first = false; 
 	bool found = false;
-	while (fds_record_find(file_id, +file_data.type, &record_desc, &_ftok) == FDS_SUCCESS) {
+	while (fds_record_find(file_id, enum_class_to_int(file_data.type), &record_desc, &_ftok) == FDS_SUCCESS) {
 
 		LOGnone("Read record %i", +file_data.type);
 		if (!found) {
@@ -218,7 +218,7 @@ ret_code_t Storage::remove(st_file_id_t file_id, CS_TYPE type) {
 
 	// go through all records with given file_id and key (can be multiple)
 	initSearch();
-	while (fds_record_find(file_id, +type, &record_desc, &_ftok) == FDS_SUCCESS) {
+	while (fds_record_find(file_id, enum_class_to_int(type), &record_desc, &_ftok) == FDS_SUCCESS) {
 		ret_code = fds_record_delete(&record_desc);
 		if (ret_code != FDS_SUCCESS) break;
 	}
@@ -249,10 +249,10 @@ ret_code_t Storage::exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t
 	}
 	initSearch();
 	result = false;
-	while (fds_record_find(file_id, +type, &record_desc, &_ftok) == FDS_SUCCESS) {
+	while (fds_record_find(file_id, enum_class_to_int(type), &record_desc, &_ftok) == FDS_SUCCESS) {
 		if (result) {
 			// remove all subsequent records...
-			LOGd("Delete record %i desc %i", +type, &record_desc);
+			LOGd("Delete record %i desc %i", enum_class_to_int(type), &record_desc);
 			fds_record_delete(&record_desc);
 		}
 		if (!result) {

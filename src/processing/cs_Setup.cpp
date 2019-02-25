@@ -76,10 +76,10 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 
 	// Set operation mode to normal mode
 	_persistenceMode = OperationMode::OPERATION_MODE_NORMAL;
-	mode = +_persistenceMode;
+	mode = enum_class_to_int(_persistenceMode);
 	value.u32 = 0;
 	value.u8 = mode;
-	_last_record_key = +CS_TYPE::STATE_OPERATION_MODE;
+	_last_record_key = enum_class_to_int(CS_TYPE::STATE_OPERATION_MODE);
 	LOGi("Set mode NORMAL");
 	LOGi("Set mode %x", value.u32);
 	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::FLASH);
