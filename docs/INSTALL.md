@@ -155,7 +155,7 @@ E.g.
 - enable meshing by setting `BUILD_MESHING=1` and `MESHING=1`
 - enable device scanner by setting `INTERVAL_SCANNER_ENABLED=1`
 - enable the power service by setting `POWER_SERVICE=1`
-- set serial verbosity to debug by setting `SERIAL_VERBOSITY=DEBUG`
+- set serial verbosity to debug by setting `SERIAL_VERBOSITY=SERIAL_DEBUG`
 
 ### Advanced Configuration
 
