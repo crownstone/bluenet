@@ -14,6 +14,7 @@ extern "C" {
 #include <ble/cs_Nordic.h>
 
 #include "stdint.h"
+#include "cstring"
 
 #ifdef HOST_TARGET
 #include "stdio.h"
@@ -67,17 +68,9 @@ typedef enum {
 				   cs_write(fmt, ##__VA_ARGS__); \
 			   }
 
-#ifdef INCLUDE_TIMESTAMPS
-
-	#define logLN(level, fmt, ...) \
-		_log(level, "[%-20.20s : %-5d](%d) " fmt SERIAL_CRLF, _FILE, __LINE__, now(), ##__VA_ARGS__)
-
-#else
-
 	#define logLN(level, fmt, ...) \
 		_log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
 
-#endif
 
 #else
 	#define _log(level, fmt, ...)
