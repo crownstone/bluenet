@@ -1236,12 +1236,12 @@ constexpr void getDefault(st_file_data_t & data) {
 		*(TYPIFY(CONFIG_MESH_ACCESS_ADDRESS)*)data.value = MESH_ACCESS_ADDRESS;
 		break;
 	case CS_TYPE::CONFIG_PWM_PERIOD:
-		LOGd("Got PWM period: %li", PWM_PERIOD);
+		LOGd("Got PWM period: %u", PWM_PERIOD);
 		LOGd("Data value ptr: %p", data.value);
 		*((uint32_t*)data.value) = 1;
-		LOGd("data.value: %li", *((uint32_t*)data.value));
+		LOGd("data.value: %u", *((uint32_t*)data.value));
 		*(TYPIFY(CONFIG_PWM_PERIOD)*)data.value = (TYPIFY(CONFIG_PWM_PERIOD))PWM_PERIOD;
-		LOGd("data.value: %li", *((uint32_t*)data.value));
+		LOGd("data.value: %u", *((uint32_t*)data.value));
 		break;
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
 		*(TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD)*)data.value = CURRENT_USAGE_THRESHOLD;
