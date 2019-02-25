@@ -96,23 +96,25 @@ define cross-compile-target-prepare
 endef
 
 define cross-compile-target-cleanup
-	@rm -f CMakeLists.txt 
-	@rm -f arm.toolchain.cmake 
+	printf "++ Clean up files that were copied to bluenet dir\n"
+	@rm -f CMakeLists.txt
+	@rm -f arm.toolchain.cmake
 	@rm -f CMakeBuild.config.default 
-	@rm -f CMakeConfig.cmake 
-	printf "++ Copy binaries to ${BLUENET_BIN_DIR}\n"
-	@mkdir -p "${BLUENET_BIN_DIR}"
-	@cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf "$(BLUENET_BIN_DIR)"
+	@rm -f CMakeConfig.cmake
 endef
 
 define host-compile-target-prepare
 	printf "++ Use CMakeList.host_target.txt as CMakeLists.txt\n"
 	@cp conf/cmake/CMakeLists.host_target.txt CMakeLists.txt
+	@cp conf/cmake/CMakeBuild.config.default .
+	@cp conf/cmake/CMakeConfig.cmake .
 endef
 
 define host-compile-target-cleanup
-	printf "++ Clean up CMakeLists.txt\n"
+	printf "++ Clean up files that were copied to bluenet dir\n"
 	@rm -f CMakeLists.txt
+	@rm -f CMakeBuild.config.default
+	@rm -f CMakeConfig.cmake
 endef
 
 #######################################################################################################################
