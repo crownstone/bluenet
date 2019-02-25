@@ -57,7 +57,7 @@ INCLUDE(crownstone.defs)
 
 #######################################################################################################################
 
-SET(DEFAULT_CXX_FLAGS        "-std=c++0x")
+SET(DEFAULT_CXX_FLAGS        "-std=c++14")
 SET(DEFAULT_C_FLAGS          "-std=gnu99")
 SET(DEFAULT_C_AND_CXX_FLAGS  "-g3 -Wall")
 

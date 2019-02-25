@@ -10,6 +10,7 @@
 #include <cfg/cs_Config.h>
 #include <cstdint>
 #include <type_traits>
+#include <cstddef> // For NULL
 #include <drivers/cs_Serial.h>
 
 typedef uint8_t* buffer_ptr_t;
