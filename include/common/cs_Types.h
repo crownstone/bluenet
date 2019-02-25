@@ -1167,7 +1167,7 @@ constexpr void getDefault(st_file_data_t & data) {
 		break;
 	case CS_TYPE::CONFIG_PASSKEY:
 		data.size = MIN(data.size, sizeof(STRINGIFY(STATIC_PASSKEY)));
-		memcpy(data.value, STRINGIFY(CONFIG_PASSKEY), data.size);
+		memcpy(data.value, STRINGIFY(STATIC_PASSKEY), data.size);
 		break;
 	case CS_TYPE::CONFIG_MIN_ENV_TEMP:
 		*(TYPIFY(CONFIG_MIN_ENV_TEMP)*)data.value = MIN_ENV_TEMP;
