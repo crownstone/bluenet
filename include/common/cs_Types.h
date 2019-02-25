@@ -1262,7 +1262,7 @@ constexpr void getDefault(st_file_data_t & data) {
 		*(TYPIFY(CONFIG_MESH_CHANNEL)*)data.value = MESH_CHANNEL;
 		break;
 	case CS_TYPE::CONFIG_UART_ENABLED:
-		*(TYPIFY(CONFIG_UART_ENABLED)*)data.value = UART_ENABLED;
+		*(TYPIFY(CONFIG_UART_ENABLED)*)data.value = CS_SERIAL_ENABLED;
 		break;
 	case CS_TYPE::STATE_RESET_COUNTER:
 		*(TYPIFY(STATE_RESET_COUNTER)*)data.value = STATE_RESET_COUNTER_DEFAULT;
