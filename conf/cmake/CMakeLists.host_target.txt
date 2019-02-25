@@ -57,7 +57,8 @@ INCLUDE(crownstone.defs)
 
 #######################################################################################################################
 
-SET(DEFAULT_CXX_FLAGS        "-std=c++14")
+# Use C++14, for version before 5.2 you need to use -std=c++1y, in later versions you can use -std=c++14
+SET(DEFAULT_CXX_FLAGS        "-std=c++1y")
 SET(DEFAULT_C_FLAGS          "-std=gnu99")
 SET(DEFAULT_C_AND_CXX_FLAGS  "-g3 -Wall")
 
