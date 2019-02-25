@@ -23,5 +23,5 @@ CROWNSTONE_SERVICE=1
 ## Optional but recommended:
 
 - set the serial verbosity to NONE
-SERIAL_VERBOSITY=NONE
+SERIAL_VERBOSITY=SERIAL_NONE
 
