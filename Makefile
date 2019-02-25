@@ -129,9 +129,9 @@ endef
 		sed ''s/:\\\([0-9]\\+\\\):/$$(printf "[\033[33m")\\1$$(printf "\033[0m]:")/'' | \
 		head
 
-all: 
+all:
 	@echo "Please call make with cross-compile-target or host-compile target"
-	@echo "It is recommended to use the scripts/firmware.sh script"
+	@echo "It is recommended to use the scripts/bluenet.sh script"
 
 .ONESHELL:
 release:
@@ -166,14 +166,17 @@ host-compile-target:
 	@cd $(BLUENET_BUILD_DIR) && cmake $(RELEASE_COMPILE_FLAGS) \
 		$(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
 	$(call host-compile-target-cleanup)
+	return $$result
 
 clean:
 	$(call cross-compile-target-cleanup)
 	$(call host-compile-target-cleanup)
+	return $$result
 
 clean-all:
 	@mkdir -p $(BLUENET_BUILD_DIR)
 	@cd $(BLUENET_BUILD_DIR) && make clean
+	return $$result
 
 list:
 	@$(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' | sort | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' | xargs
