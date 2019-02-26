@@ -61,7 +61,9 @@ typedef enum {
 #if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
 
 	#include "string.h"
-	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+//	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
+//  #define STRING_BACK(s, l) (sizeof(s) > l ? s + (sizeof(s)-l-1) : s)
+	#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__)
 
 	#define _log(level, fmt, ...) \
 			   if (level <= SERIAL_VERBOSITY) { \
