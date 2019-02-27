@@ -344,16 +344,17 @@ if [ $do_upload ]; then
 			upload_bootloader
 			done_upload=true
 		fi
+		# Write board version before uploading firmware, else firmware writes it.
+		if [ $include_board_version ]; then
+			upload_board_version
+			done_upload=true
+		fi
 		if [ $include_firmware ]; then
 			upload_firmware
 			upload_valid_app_mark
 			done_upload=true
 		else
 			upload_invalid_app_mark
-		fi
-		if [ $include_board_version ]; then
-			upload_board_version
-			done_upload=true
 		fi
 	fi
 	verify_board_version_written
