@@ -157,6 +157,13 @@ cross-compile-target:
 		$(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS} 
 	result=$$?
 	@echo "++ Result of make command (0 means success): $$result"
+	
+#	ifeq ($(result),0)
+	@echo "++ Copy binaries to ${BLUENET_BIN_DIR}\n"
+	@mkdir -p "${BLUENET_BIN_DIR}"
+	@cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf "$(BLUENET_BIN_DIR)"
+#	endif
+
 	$(call cross-compile-target-cleanup)
 	return $$result
 
