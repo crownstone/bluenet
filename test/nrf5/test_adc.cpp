@@ -3,7 +3,7 @@
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_Timer.h>
 
-#include "third/nrf/nrf_drv_config.h"
+//#include "third/nrf/nrf_drv_config.h"
 
 /**
  * Identified issue:
@@ -29,11 +29,12 @@
 #include <processing/cs_PowerSampling.h>
 #endif
 
+/*
 const nrf_clock_lf_cfg_t defaultClockSource = {  .source        = NRF_CLOCK_LF_SRC_XTAL,                     \
                                                  .rc_ctiv       = 0,                                         \
                                                  .rc_temp_ctiv  = 0,                                         \
                                                  .xtal_accuracy = NRF_CLOCK_LF_XTAL_ACCURACY_20_PPM};
-
+*/
 static uint8_t buf_index;
 
 void adc_test_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
@@ -41,22 +42,22 @@ void adc_test_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
 	for (int i=0; i<size; i++) {
 		if (i % 2 == 0) {
 			if (buf[i] > threshold) {
-				write("buf: ");
+				cs_write("buf: ");
 				for (int j=0; j<size; j++) {
-					write("%d ", buf[j]);
-					if ((j+1) % 30 == 0) write("\r\n");
+					cs_write("%d ", buf[j]);
+					if ((j+1) % 30 == 0) cs_write("\r\n");
 				}
-				write("\r\n");
+				cs_write("\r\n");
 			}
 			assert(buf[i] <= threshold, "wrong pin A!");
 		} else {
 			if (buf[i] < threshold) {
-				write("buf: ");
+				cs_write("buf: ");
 				for (int j=0; j<size; j++) {
-					write("%d ", buf[j]);
-					if ((j+1) % 30 == 0) write("\r\n");
+					cs_write("%d ", buf[j]);
+					if ((j+1) % 30 == 0) cs_write("\r\n");
 				}
-				write("\r\n");
+				cs_write("\r\n");
 			}
 			assert(buf[i] >= threshold, "wrong pin B!");
 		}
@@ -76,7 +77,7 @@ void adc_test_callback(nrf_saadc_value_t* buf, uint16_t size, uint8_t bufNum) {
 #else
 	LOGd("buf=%d size=%d bufCount=%d", buf, size, bufNum);
 #endif
-	write("%d %d %d ... %d\r\n", buf[0], buf[1], buf[2], buf[size-1]); 
+	cs_write("%d %d %d ... %d\r\n", buf[0], buf[1], buf[2], buf[size-1]);
 	ADC::getInstance().releaseBuffer(buf_index);
 }
 
@@ -89,7 +90,8 @@ int main() {
 	errCode = configure_board(&board);
 	APP_ERROR_CHECK(errCode);
 
-	config_uart(8, 6);
+	serial_config(board.pinGpioRx, board.pinGpioTx);
+	serial_init(SERIAL_ENABLE_RX_AND_TX);
 
 	LOGd("Test ADC in separate program");
 
@@ -103,10 +105,9 @@ int main() {
 		BLE_CALL(sd_softdevice_disable, ());
 	}
 	
-	nrf_clock_lf_cfg_t _clock_source = defaultClockSource;
-
-	//! Some apeshit 
-	SOFTDEVICE_HANDLER_APPSH_INIT(&_clock_source, true);
+//	nrf_clock_lf_cfg_t _clock_source = defaultClockSource;
+//	//! Some apeshit
+//	SOFTDEVICE_HANDLER_APPSH_INIT(&_clock_source, true);
 
 #ifdef POWER_SAMPLING
 	PowerSampling::getInstance().init(board);
