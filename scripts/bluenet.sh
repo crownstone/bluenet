@@ -282,6 +282,17 @@ verify_board_version_written() {
 
 # Main
 done_something=false
+
+if [ $do_unit_test_nrf5 ]; then
+	cs_info "Unit test NRF5: You can also just build firmware, as long as TEST_TARGET=\"nrf5\" is in the config."
+	if [ "$TEST_TARGET" != "nrf5" ]; then
+		cs_err "Target needs to have TEST_TARGET=\"nrf5\" in config."
+		exit $CS_ERR_CONFIG
+	fi
+	do_build=true
+	include_firmware=true
+fi
+
 if [ $do_build ]; then
 	done_something=true
 	done_built=false
@@ -390,12 +401,6 @@ fi
 if [ $do_unit_test_host ]; then
 	done_something=true
 	build_unit_test_host
-fi
-
-
-if [ $do_unit_test_nrf5 ]; then
-	done_something=true
-	cs_warn "TODO: unit_test_nrf5"
 fi
 
 
