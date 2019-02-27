@@ -5,77 +5,84 @@ MESSAGE(STATUS "[test/nrf5/test_generate]")
 INCLUDE_DIRECTORIES(${INCLUDE_DIR})
 
 # Add to the -I flags
+# This is required for the Nordic files internally. They refer only to header files without component paths.
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/ble/ble_services")
 INCLUDE_DIRECTORIES("${NRF5_DIR}/components/ble/common")
-#INCLUDE_DIRECTORIES("${NRF5_DIR}/components/ble/ble_services")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/ble/device_manager")
 INCLUDE_DIRECTORIES("${NRF5_DIR}/components/device/")
 INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/common/")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/gpiote/")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/delay/")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/hal/")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/ppi/")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/pstorage/")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/timer/")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/saadc/")
 INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/comp/")
-#INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/pwm")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/util/")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/timer/")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/scheduler/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/atomic/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/atomic_fifo/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/balloc/")
 INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/crc16/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/delay/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/experimental_log/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/experimental_log/src/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/experimental_memobj/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/experimental_section_vars/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/fds/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/fstorage/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/log/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/log/src/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/memobj/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/ringbuf/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/scheduler/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/strerror/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/timer/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/trace/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/libraries/util/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/softdevice/common/")
 INCLUDE_DIRECTORIES("${NRF5_DIR}/components/softdevice/common/softdevice_handler/")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/softdevice/s132/headers/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/headers")
 INCLUDE_DIRECTORIES("${NRF5_DIR}/components/toolchain/")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/toolchain/gcc")
-INCLUDE_DIRECTORIES("${NRF5_DIR}/components/toolchain/CMSIS/Include")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/toolchain/cmsis/include")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/toolchain/gcc/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/external/fprintf/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/integration/nrfx/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/modules/nrfx/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/modules/nrfx/drivers/include/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/modules/nrfx/hal/")
+INCLUDE_DIRECTORIES("${NRF5_DIR}/modules/nrfx/mdk/")
 
-MESSAGE(STATUS "[test/adc_test/CMakeLists.txt]: Compiler: ${CMAKE_C_COMPILER}") 
+# Required for the UART backend
+INCLUDE_DIRECTORIES("${NRF5_DIR}/integration/nrfx/legacy/")
+
+MESSAGE(STATUS "[test/adc_test/CMakeLists.txt]: Compiler: ${CMAKE_C_COMPILER}")
 
 set(TEST test_adc)
 
 set(TEST_SOURCE_DIR "test/nrf5")
 
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/saadc/nrf_drv_saadc.c")
-
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/ppi/nrf_drv_ppi.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/hal/nrf_saadc.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/common/nrf_drv_common.c")
-
 # lpcomp should not be here
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/comp/nrf_drv_comp.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_comp.c")
 LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/scheduler/app_scheduler.c")
 LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_util_platform.c")
-
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/softdevice_handler/softdevice_handler.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/softdevice_handler/softdevice_handler_appsh.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/timer/app_timer_appsh.c")
 
 LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/crc16/crc16.c")
 
 # In case of adding powersampling
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/drivers_nrf/pstorage/pstorage.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
 
 # RTC1_IRQHandler
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/nrf/app_timer.c")
+LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/timer/app_timer.c")
 
 list(APPEND FOLDER_SOURCE "${NORDIC_SOURCE}")
 
 
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_sysNrf51.c") 
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c") 
+list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_sysNrf.c")
+list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cfg/cs_Boards.c")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Error.cpp")   
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")   
+list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Error.cpp")
+list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")
 
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_ADC.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Serial.cpp")
 
 # In case of adding powersampling
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_PowerSampling.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_Settings.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_State.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_StorageHelper.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_EventDispatcher.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_PowerSamples.cpp")
 

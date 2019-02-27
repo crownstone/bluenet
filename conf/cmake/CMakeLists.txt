@@ -32,7 +32,7 @@ SET(VERBOSITY                                "4"           CACHE STRING "Verbosi
 SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
 SET(GIT_BRANCH                               "unset"       CACHE STRING "Current git branch")
 SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
-SET(NRF5_DIR                             "unset"       CACHE STRING "The nRF5 sdk directory")
+SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 
 #######################################################################################################################
 # Show variables
@@ -82,7 +82,7 @@ LIST(APPEND INCLUDE_DIR "${NRF5_DIR}/components/libraries/experimental_section_v
 
 SET(BOOTLOADER "_bootloader_.hex")
 
-IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "nrf5")
+IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "\"nrf5\"")
 	MESSAGE(STATUS "Run test target. This will include source files as necessary")
 ELSE()
 	INCLUDE(crownstone.src)
@@ -199,7 +199,6 @@ ELSE()
 	INCLUDE_DIRECTORIES("${NRF5_DIR}/components/softdevice/common/")
 	INCLUDE_DIRECTORIES("${NRF5_DIR}/components/softdevice/common/softdevice_handler/")
 	INCLUDE_DIRECTORIES("${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/headers")
-	INCLUDE_DIRECTORIES("${NRF5_DIR}/components/softdevice/s132/headers/")
 	INCLUDE_DIRECTORIES("${NRF5_DIR}/components/toolchain/")
 	INCLUDE_DIRECTORIES("${NRF5_DIR}/components/toolchain/cmsis/include")
 	INCLUDE_DIRECTORIES("${NRF5_DIR}/components/toolchain/gcc/")
@@ -232,7 +231,7 @@ IF(NOT (DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
 	SET(${SOFTDEVICE_DIR_HEX}, "hex")
 ENDIF()
 
-IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "nrf5")
+IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "\"nrf5\"")
 	MESSAGE(STATUS "CMakeLists: Add testing files")
 
 	ENABLE_TESTING()
