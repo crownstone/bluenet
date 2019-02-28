@@ -175,7 +175,7 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 	bool found = false;
 	while (fds_record_find(file_id, to_underlying_type(file_data.type), &record_desc, &_ftok) == FDS_SUCCESS) {
 
-		LOGnone("Read record %i", +file_data.type);
+		LOGd("Read record %u", to_underlying_type(file_data.type));
 		if (!found) {
 			ret_code = fds_record_open(&record_desc, &flash_record);
 			if (ret_code != FDS_SUCCESS) {

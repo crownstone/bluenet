@@ -782,7 +782,7 @@ void Crownstone::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 			break;
 		default:
-			LOGnone("Event: %s [%i]", TypeName(event.type), +event.type);
+			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
 	}
 
 	bool reconfigureBeacon = false;
