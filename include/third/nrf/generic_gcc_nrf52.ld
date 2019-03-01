@@ -1,4 +1,6 @@
 /* Linker script to configure memory regions. */
+/* This is a slightly adjust copy from $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld */
+/* TODO: make RAM (rwx) :  ORIGIN = 0x200021B0, LENGTH = 0xDE50 be filled in from RAM_R1_BASE and RAM_APPLICATION_AMOUNT */
 /*
 MEMORY
 {
@@ -32,7 +34,7 @@ GROUP(-lgcc -lc -lnosys)
 MEMORY
 {
   FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0x5A000
-  RAM (rwx) :  ORIGIN = 0x200020B0, LENGTH = 0xDF50
+  RAM (rwx) :  ORIGIN = 0x200021B0, LENGTH = 0xDE50
 }
 
 SECTIONS
