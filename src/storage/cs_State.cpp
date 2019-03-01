@@ -224,9 +224,9 @@ cs_ret_code_t State::storeInRam(const st_file_data_t & data, size16_t & index_in
 			st_file_data_t & ram_data = _data_in_ram[i];
 			if (ram_data.size != data.size) { 
 				free(ram_data.value);
+				ram_data.value = (uint8_t*)malloc(sizeof(uint8_t) * data.size); // TODO: don't malloc when size is similar?
 			}
 			ram_data.size = data.size;
-			ram_data.value = (uint8_t*)malloc(sizeof(uint8_t) * data.size);
 			memcpy(ram_data.value, data.value, data.size);
 			exist = true;
 			index_in_ram = i;
