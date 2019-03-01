@@ -136,6 +136,7 @@ cs_ret_code_t State::get(const CS_TYPE type, void* target, size16_t & size, cons
 	data.size = size;
 	data.value = (uint8_t*)target;
 	ret_code_t ret_code = get(data, mode);
+	// TODO: size check: stored size might differ from given size?
 	LOGnone("Got type %s (%i) of size %i", TypeName(data.type), data.type, data.size);
 	memcpy(target, data.value, data.size);
 	size = data.size;
@@ -217,6 +218,7 @@ cs_ret_code_t State::storeInRam(const st_file_data_t & data) {
  */
 cs_ret_code_t State::storeInRam(const st_file_data_t & data, size16_t & index_in_ram) {
 	// TODO: Check if enough RAM is available
+	LOGd("storeInRam type=%u size=%u", to_underlying_type(data.type), data.size);
 	bool exist = false;
 	for (size16_t i = 0; i < _data_in_ram.size(); ++i) {
 		if (_data_in_ram[i].type == data.type) {
@@ -316,7 +318,7 @@ cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const Persis
 				break;
 			}
 			st_file_data_t ram_data = _data_in_ram[index];		
-			LOGd("Storage write [0x%x,...] size=%u type=%u", ram_data.value[0], ram_data.size, ram_data.type);
+			LOGd("Storage write type=%u size=%u data=[0x%X,...]", ram_data.type, ram_data.size, ram_data.value[0]);
 			return _storage->write(FILE_CONFIGURATION, ram_data);
 		}
 		case PersistenceMode::FIRMWARE_DEFAULT: {

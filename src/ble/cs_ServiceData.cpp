@@ -778,7 +778,6 @@ void ServiceData::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::STATE_ACCUMULATED_ENERGY: {
-			LOGw("Explicit cast, int32_t");
 			int32_t energyUsed = (*(TYPIFY(STATE_ACCUMULATED_ENERGY)*)event.data) / 1000 / 1000 / 64;
 			updateAccumulatedEnergy(energyUsed);
 			// todo create mesh state event if changes significantly

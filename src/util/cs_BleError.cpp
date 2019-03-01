@@ -27,7 +27,7 @@ void app_error_handler (uint32_t error_code, uint32_t line_num, const uint8_t * 
 
 	const char * str_error __attribute__((unused)) = NordicTypeName(error);
 	LOGe("%s", str_error);
-	LOGf("FATAL ERROR 0x%x, at %s:%d", error, file, line);
+	LOGf("FATAL ERROR 0x%X, at %s:%d", error, file, line);
 
 	__asm("BKPT");
 	while(1) {}
@@ -42,7 +42,7 @@ void app_error_handler_bare(ret_code_t error_code)
 
 	const char * str_error __attribute__((unused)) = NordicTypeName(error);
 	LOGe("%s", str_error);
-	LOGf("FATAL ERROR 0x%x", error);
+	LOGf("FATAL ERROR 0x%X", error);
 
 	__asm("BKPT");
 	while(1) {}

@@ -99,7 +99,7 @@ ret_code_t Storage::garbageCollect() {
 	if (ret_code != FDS_SUCCESS) {
 		LOGw("No success garbage collection (err=%i)", ret_code);
 	}
-	LOGnone("Garbage collected");
+	LOGd("Garbage collected");
 	return ret_code;
 }
 
@@ -115,18 +115,18 @@ ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
 	record.file_id           = file_id;
 	record.key               = to_underlying_type(file_data.type);
 	record.data.p_data       = file_data.value;
-	record.data.length_words = file_data.size >> 2; 
-	LOGnone("Store 0x%x of size %i", record.data.p_data, record.data.length_words);
+	record.data.length_words = file_data.size >> 2; // Size is in bytes, each word is 4B.
+	LOGd("Store %p of word size %u", record.data.p_data, record.data.length_words);
 
 	bool f_exists = false;
 	ret_code = exists(file_id, file_data.type, record_desc, f_exists);
 	if (f_exists) {
-		LOGd("Update file %i record %i", file_id, record.key);
+		LOGd("Update file %u record %u", file_id, record.key);
 		ret_code = fds_record_update(&record_desc, &record);
 		FDS_ERROR_CHECK(ret_code);
 	}
 	else {
-		LOGnone("Write file %i, record %i, ptr %p", file_id, record.key, record.data.p_data);
+		LOGd("Write file %u, record %u, ptr %p", file_id, record.key, record.data.p_data);
 		ret_code = fds_record_write(&record_desc, &record);
 		FDS_ERROR_CHECK(ret_code);
 		static bool garbage_collection = false;
@@ -201,7 +201,7 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 	} 
 
 	if (!found) {
-		LOGnone("Record not found");
+		LOGd("Record not found");
 	}
 	return ret_code;
 }

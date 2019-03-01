@@ -375,7 +375,7 @@ void Crownstone::configureAdvertisement() {
 	_state->get(CS_TYPE::CONFIG_IBEACON_MINOR, &minor, PersistenceMode::STRATEGY1);
 	_state->get(CS_TYPE::CONFIG_IBEACON_UUID, uuid.uuid128, PersistenceMode::STRATEGY1);
 	_state->get(CS_TYPE::CONFIG_IBEACON_TXPOWER, &rssi, PersistenceMode::STRATEGY1);
-	LOGd("iBeacon: major=%i, minor=%i, rssi_on_1m=%i", major, minor, (int8_t)rssi);
+	LOGd("iBeacon: major=%u, minor=%u, rssi_on_1m=%i", major, minor, (int8_t)rssi);
 
 	_beacon = new IBeacon(uuid, major, minor, rssi);
 
@@ -717,13 +717,11 @@ void Crownstone::startUp() {
  * persists over reboots.
  */
 void Crownstone::increaseResetCounter() {
-	//st_value_t resetCounter;
 	uint32_t resetCounter;
 	resetCounter = 0;
 	_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, PersistenceMode::STRATEGY1);
-	LOGi("Get counter 0x%x", resetCounter);
 	resetCounter++;
-//	LOGi("Set counter 0x%x", resetCounter.u32);
+	LOGi("Reset counter at %u", resetCounter);
 	_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), PersistenceMode::STRATEGY1);
 }
 
@@ -732,6 +730,10 @@ void Crownstone::increaseResetCounter() {
  * TODO: describe function calls and why they are required.
  */
 void Crownstone::tick() {
+	LOG_MEMORY; // To check for memory leaks
+	// TODO: warning when close to out of memory
+	// TODO: maybe detect memory leaks?
+
 	st_value_t temperature;
 	temperature.s32 = getTemperature();
 	_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature), PersistenceMode::STRATEGY1);

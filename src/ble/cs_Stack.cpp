@@ -181,8 +181,11 @@ void Stack::initRadio() {
 	LOGi(FMT_INIT, "radio");
 	// Enable BLE stack
 	uint32_t ram_start = RAM_R1_BASE;
+//	uint32_t ram_start = 0;
 	_conn_cfg_tag = 1;
 	LOGd("nrf_sdh_ble_default_cfg_set at %p", ram_start);
+	// TODO: make a seperate function, that tells you what to set RAM_R1_BASE to.
+	// TODO: make a unit test for that.
 	ret_code = nrf_sdh_ble_default_cfg_set(_conn_cfg_tag, &ram_start); 
 	switch(ret_code) {
 		case NRF_ERROR_NO_MEM:
@@ -207,12 +210,13 @@ void Stack::initRadio() {
 			LOGe("BLE: invalid memory address");
 			break;
 		case NRF_ERROR_NO_MEM:
-			LOGe("BLE: no memory available");
+			LOGe("BLE: no memory available"); // Set ram_start to 0, then read out ram_start, use that as RAM_R1_BASE, and adjust RAM_APPLICATION_AMOUNT.
 			break;
 		case NRF_SUCCESS:
 			LOGi("Softdevice enabled");
 			break;
 	}
+	NRF_LOG_FLUSH();
 	APP_ERROR_CHECK(ret_code);
 
 
@@ -760,7 +764,9 @@ void Stack::setAdvertisementData() {
 		LOGv("Length is: %i", _adv_data.adv_data.len);
 		err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
 		APP_ERROR_CHECK(err);
-	} else {
+	}
+	else {
+		// TODO: use 2 buffers and switch between them. Should be explained in the migration doc (from sdk 14 to 15).
 		// TODO: for now, just do nothing
 		return;
 		// update now does not just allow adv_data to point to something else...
@@ -862,7 +868,7 @@ void Stack::on_ble_evt(const ble_evt_t * p_ble_evt) {
 
 	if (p_ble_evt->header.evt_id !=  BLE_GAP_EVT_RSSI_CHANGED) {
 		const char *evt_name __attribute__((unused)) = NordicEventTypeName(p_ble_evt->header.evt_id);
-		LOGd("Event %i (0x%X) %s", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id, evt_name);
+		LOGd("BLE event %i (0x%X) %s", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id, evt_name);
 	}
 
 	if (_dm_initialized) {

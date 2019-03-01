@@ -46,7 +46,8 @@ constexpr auto to_underlying_type(T e) noexcept
  * Use in the characteristic to read and write state variables in <CommonService>.
  */
 enum class CS_TYPE: uint16_t {
-	CONFIG_NAME                             = Configuration_Base,
+// TODO: start with CONFIG_DO_NOT_USE, move CONFIG_NAME to another number.
+	CONFIG_NAME                             = Configuration_Base,   // TODO: Record keys should be in the range 0x0001 - 0xBFFF. The value 0x0000 is reserved by the system. The values from 0xC000 to 0xFFFF are reserved for use by the Peer Manager module and can only be used in applications that do not include Peer Manager.
 	CONFIG_DEVICE_TYPE                      = 1,      //  0x01
 	CONFIG_ROOM                             = 2,      //  0x02
 	CONFIG_FLOOR                            = 3,      //  0x03
@@ -297,7 +298,7 @@ struct st_file_data_t {
 #ifndef TYPIFY
 #define TYPIFY(NAME) NAME ## _TYPE 
 #endif
-
+//TODO: check the types
 typedef uint16_t TYPIFY(CONFIG_ADV_INTERVAL);
 typedef uint16_t TYPIFY(CONFIG_BOOT_DELAY);
 typedef     bool TYPIFY(CONFIG_CONT_POWER_SAMPLER_ENABLED);

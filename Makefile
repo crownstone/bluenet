@@ -44,6 +44,7 @@ VERBOSITY=1
 endif
 
 # TODO: Why not just use the -j flag instead of introducing a new one? This should not be hardcoded.
+# TODO: Use config file, then pass it on via CMAKE_BUILD_PARALLEL_LEVEL.
 
 ifndef COMPILE_WITH_J_PROCESSORS
 COMPILE_WITH_J_PROCESSORS=1
