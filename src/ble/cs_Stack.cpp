@@ -31,9 +31,6 @@ extern "C" {
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 19
 
-// BLE_CONN_HANDLE_INVALID is 0xFFFF (32 bits)
-#define BLE_ADV_HANDLE_INVALID 0xFF
-
 Stack::Stack() :
 	_appearance(BLE_APPEARANCE_GENERIC_TAG), //_clock_source(defaultClockSource),
 	_tx_power_level(TX_POWER), _sec_mode({ }),
@@ -48,7 +45,7 @@ Stack::Stack() :
 	_lowPowerTimeoutId(NULL),
 	_secReqTimerId(NULL),
 	_connectionKeepAliveTimerId(NULL),
-	_adv_handle(BLE_ADV_HANDLE_INVALID),
+	_adv_handle(BLE_GAP_ADV_SET_HANDLE_NOT_SET),
 	_advInterleaveCounter(0),
 	_adv_manuf_data(NULL),
 	_serviceData(NULL)
@@ -240,7 +237,7 @@ void Stack::initRadio() {
 	ret_code = sd_ble_gap_addr_get(&_nonconnectable_address);
 	APP_ERROR_CHECK(ret_code);
 	// have non-connectable address one value higher than connectable one
-	_nonconnectable_address.addr[0] += 0x1; 
+//	_nonconnectable_address.addr[0] += 0x1;
 
 	setInitialized(C_RADIO_INITIALIZED);
 
@@ -387,7 +384,7 @@ void Stack::setTxPowerLevel(int8_t powerLevel) {
  */
 void Stack::updateTxPowerLevel() {
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	if (_adv_handle == BLE_ADV_HANDLE_INVALID) {
+	if (_adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
 		LOGw("Invalid handle");
 		return;
 	}
@@ -588,24 +585,32 @@ void Stack::configureAdvertisementParameters() {
 }
 
 void Stack::setConnectable() {
+	// TODO: Have a function that sets address, which sends an event "set address" that makes the scanner pause (etc).
+	LOGd("setConnectable");
 	_adv_params.properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
-	uint32_t ret_code;
-	do {
-		ret_code = sd_ble_gap_addr_set(&_connectable_address);
-	} while (ret_code == NRF_ERROR_INVALID_STATE);
-	APP_ERROR_CHECK(ret_code);
+	// TODO: The identity address cannot be changed while advertising, scanning or creating a connection.
+//	uint32_t ret_code;
+//	do {
+//		ret_code = sd_ble_gap_addr_set(&_connectable_address);
+//	} while (ret_code == NRF_ERROR_INVALID_STATE);
+//	NRF_LOG_FLUSH();
+//	APP_ERROR_CHECK(ret_code);
 }
 
 void Stack::setNonConnectable() {
+	LOGd("setNonConnectable");
 	_adv_params.properties.type = BLE_GAP_ADV_TYPE_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED;
-	uint32_t ret_code;
-	do {
-		ret_code = sd_ble_gap_addr_set(&_nonconnectable_address);
-	} while (ret_code == NRF_ERROR_INVALID_STATE);
-	APP_ERROR_CHECK(ret_code);
+	// TODO: The identity address cannot be changed while advertising, scanning or creating a connection.
+//	uint32_t ret_code;
+//	do {
+//		ret_code = sd_ble_gap_addr_set(&_nonconnectable_address);
+//	} while (ret_code == NRF_ERROR_INVALID_STATE);
+//	NRF_LOG_FLUSH();
+//	APP_ERROR_CHECK(ret_code);
 }
 
 void Stack::restartAdvertising() {
+	// TODO: do we still need to restart advertising to update advertisement?
 	LOGd("Restart advertising");
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
 
@@ -631,7 +636,7 @@ void Stack::startAdvertising() {
 			LOGd("Suppress further messages about adv start");
 		}
 	}
-	uint32_t ret_code = sd_ble_gap_adv_start(_adv_handle, _conn_cfg_tag);
+	uint32_t ret_code = sd_ble_gap_adv_start(_adv_handle, _conn_cfg_tag); // Only one advertiser may be active at any time.
 	if (ret_code == NRF_SUCCESS) {
 		_advertising = true;
 	}
@@ -651,7 +656,6 @@ void Stack::stopAdvertising() {
 	// see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 	APP_ERROR_CHECK_EXCEPT(ret_code, NRF_ERROR_INVALID_STATE);
 
-	_adv_handle = BLE_ADV_HANDLE_INVALID;
 	//LOGi(MSG_BLE_ADVERTISING_STOPPED);
 
 	_advertising = false;
@@ -659,22 +663,31 @@ void Stack::stopAdvertising() {
 
 /** Update the advertisement package.
  *
- * This function toggles between connectable and non-connectable advertisements. If we are connected or scanning we
- * will not advertise.
+ * This function toggles between connectable and non-connectable advertisements.
+ * If we are connected we will not advertise connectable advertisements.
  *
  * @param toggle  When false, use connectable, when true toggle between connectable and non-connectable.
  */
+// TODO: rename this function.
 void Stack::updateAdvertisement(bool toggle) {
 	if (!checkCondition(C_ADVERTISING, true)) return;
 
-	if (isConnected() || isScanning()) {
+	if (isScanning()) {
+		// Skip while scanning or we will get invalid state results when stopping/starting advertisement. TODO: is that so???
 		return;
-	} 
+	}
+
+	if (isConnected()) {
+		// No need to restart, since it's already non-connectable.
+		return;
+	}
 
 	bool connectable = true;
 	if (toggle) {
 		connectable = (++_advInterleaveCounter % 2);
 	}
+	LOGd("updateAdvertisement connectable %i", connectable);
+	NRF_LOG_FLUSH();
 
 	if (connectable) {
 		setConnectable();
@@ -734,7 +747,7 @@ void Stack::setAdvertisementData() {
 	uint32_t err;
 
 	bool first_time = false;
-	if (_adv_handle == BLE_ADV_HANDLE_INVALID) {
+	if (_adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
 		first_time = true;
 	}
 	

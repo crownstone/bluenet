@@ -115,7 +115,7 @@ protected:
 	app_timer_t                                 _connectionKeepAliveTimerData;
 	app_timer_id_t                              _connectionKeepAliveTimerId;
 
-	uint8_t                                     _adv_handle;
+	uint8_t                                     _adv_handle; // Advertisement handle is set by first call to: sd_ble_gap_adv_set_configure()
 	ble_advdata_t                               _config_advdata;
 	ble_advdata_t                               _config_scanrsp;
 	

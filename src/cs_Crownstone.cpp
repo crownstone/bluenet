@@ -335,7 +335,10 @@ void Crownstone::configureStack() {
 		uint32_t gpregret_msk = 0xFF;
 		sd_power_gpregret_clr(gpregret_id, gpregret_msk);
 
+		// Can't advertise connectable advertisements when already connected.
+		// TODO: move this code to stack?
 		_stack->setNonConnectable();
+		_stack->restartAdvertising();
 	});
 
 	// Set callback handler for a disconnection event
@@ -346,7 +349,7 @@ void Crownstone::configureStack() {
 		}
 
 		_state->disableNotifications();
-
+		// TODO: move this code to stack?
 		_stack->setConnectable();
 		_stack->restartAdvertising();
 	});
