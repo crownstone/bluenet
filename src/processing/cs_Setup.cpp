@@ -81,8 +81,8 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	value.u8 = mode;
 	_last_record_key = to_underlying_type(CS_TYPE::STATE_OPERATION_MODE);
 	LOGi("Set mode NORMAL");
-	LOGi("Set mode %x", value.u32);
-	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::FLASH);
+	LOGi("Set mode 0x%X", value.u32);
+	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::STRATEGY1);
 
 	// Switch relay on
 	event_t event0(CS_TYPE::EVT_POWER_ON);
@@ -122,8 +122,8 @@ void Setup::handleEvent(event_t & event) {
 	
 			State &state = State::getInstance();
 			uint8_t mode = 0;
-			state.get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::FLASH);
-			LOGd("New mode is %x", mode);
+			state.get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
+			LOGd("New mode is 0x%X", mode);
 			OperationMode _tmpOperationMode = static_cast<OperationMode>(mode);
 			LOGd("Operation mode: %s", TypeName(_tmpOperationMode));
 			if (!ValidMode(_tmpOperationMode)) {

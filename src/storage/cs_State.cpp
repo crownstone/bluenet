@@ -287,6 +287,7 @@ cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const Persis
 			return storeInRam(data);
 		}
 		case PersistenceMode::FLASH: {
+			// TODO: By the time the data is written to flash, the data pointer might be invalid.
 			return _storage->write(FILE_CONFIGURATION, data);
 		}
 		case PersistenceMode::STRATEGY1: {

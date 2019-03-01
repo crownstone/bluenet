@@ -166,8 +166,8 @@ void Crownstone::init() {
 	
 	LOGi(FMT_HEADER, "mode");
 	uint8_t mode;
-	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::FLASH);
-	LOGd("Mode is %x", mode);
+	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
+	LOGd("Mode is 0x%X", mode);
 	OperationMode newOperationMode = static_cast<OperationMode>(mode);
 	switchMode(newOperationMode);
 	NRF_LOG_FLUSH();

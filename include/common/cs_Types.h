@@ -466,7 +466,7 @@ typedef  uint8_t TYPIFY(EVT_TRACKED_DEVICE_NOT_NEARBY);
  * automatically.
  */
 enum class PersistenceMode: uint8_t {
-	FLASH,
+	FLASH, // TODO: Do we have a use case for this mode?
 	RAM,
 	FIRMWARE_DEFAULT,
 	STRATEGY1,
