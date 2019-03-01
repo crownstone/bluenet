@@ -185,7 +185,7 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 			found = true;
 
 			// map flash_record.p_data to value
-			file_data.size = flash_record.p_header->length_words;
+			file_data.size = flash_record.p_header->length_words << 2; // Size is in bytes, each word is 4B.
 			memcpy(file_data.value, flash_record.p_data, file_data.size);
 
 			// invalidates the record	

@@ -119,7 +119,7 @@ cs_ret_code_t State::verify(CS_TYPE type, uint8_t* payload, uint8_t size) {
 }
 
 cs_ret_code_t State::get(const CS_TYPE type, void* target, const PersistenceMode mode) {
-	size16_t size = 0;
+	size16_t size = TypeSize(type);
 	return get(type, target, size, mode);
 }
 
