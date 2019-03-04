@@ -9,13 +9,6 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <nrf_error.h>
 
-// overwrite the type defined by the board if the DEVICE_TYPE was defined in the config
-#ifdef DEVICE_TYPE
-#define ASSIGN_DEVICE_TYPE(type) DEVICE_TYPE
-#else
-#define ASSIGN_DEVICE_TYPE(type) type
-#endif
-
 void asACR01B1D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
@@ -38,7 +31,7 @@ void asACR01B1D(boards_config_t* p_config) {
 	p_config->flags.hasAdcZeroRef                = false;
 	p_config->flags.pwmTempInverted              = false;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 
 	p_config->voltageMultiplier                  = 0.2f;
 	p_config->currentMultiplier                  = 0.0044f;
@@ -77,7 +70,7 @@ void asACR01B1D(boards_config_t* p_config) {
 ////	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 //	p_config->flags.pwmTempInverted              = true;
 //
-//	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+//	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 //
 //	p_config->voltageMultiplier                  = 0.171f; // TODO: calibrate
 //	p_config->currentMultiplier                  = 0.0042f; // TODO: calibrate
@@ -119,7 +112,7 @@ void asACR01B1D(boards_config_t* p_config) {
 ////	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 //	p_config->flags.pwmTempInverted              = true;
 //
-//	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+//	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 //
 //	p_config->voltageMultiplier                  = 0.171f; // TODO: calibrate
 //	p_config->currentMultiplier                  = 0.0042f; // TODO: calibrate
@@ -161,7 +154,7 @@ void asACR01B7B(boards_config_t* p_config) {
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 
 //	p_config->voltageMultiplier                  = 0.257f; // for range -1800 - 1800 mV
 //	p_config->currentMultiplier                  = 0.00294f; // for range -3000 - 3000 mV on pin 5
@@ -207,7 +200,7 @@ void asACR01B9A(boards_config_t* p_config) {
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 
 //	p_config->voltageMultiplier                  = 0.257f; // for range -1800 - 1800 mV
 //	p_config->currentMultiplier                  = 0.00294f; // for range -3000 - 3000 mV on pin 5
@@ -252,7 +245,7 @@ void asACR01B9B(boards_config_t* p_config) {
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 
 //	p_config->voltageMultiplier                  = 0.257f; // for range -1800 - 1800 mV
 //	p_config->currentMultiplier                  = 0.00294f; // for range -3000 - 3000 mV on pin 5
@@ -299,7 +292,7 @@ void asACR01B9C(boards_config_t* p_config) {
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 
 //	p_config->voltageMultiplier                  = 0.257f; // for range -1800 - 1800 mV
 //	p_config->currentMultiplier                  = 0.00294f; // for range -3000 - 3000 mV on pin 5
@@ -346,7 +339,7 @@ void asACR01B9D(boards_config_t* p_config) {
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 
 //	p_config->voltageMultiplier                  = 0.257f; // for range -1800 - 1800 mV
 //	p_config->currentMultiplier                  = 0.00294f; // for range -3000 - 3000 mV on pin 5
@@ -393,7 +386,7 @@ void asACR01B9E(boards_config_t* p_config) {
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 
 //	p_config->voltageMultiplier                  = 0.257f; // for range -1800 - 1800 mV
 //	p_config->currentMultiplier                  = 0.00294f; // for range -3000 - 3000 mV on pin 5
@@ -442,7 +435,7 @@ void asACR01B9F(boards_config_t* p_config) {
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_BUILTIN);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 
 	p_config->voltageMultiplier                  = 0.253f; // for range -1800 - 1800 mV
 	p_config->currentMultiplier                  = 0.0071f; // for range -600 - 600 mV on pin 6
@@ -486,7 +479,7 @@ void asACR01B2C(boards_config_t* p_config) {
 	p_config->flags.hasAdcZeroRef                = false;
 	p_config->flags.pwmTempInverted              = false;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
 
 	p_config->voltageMultiplier                  = 0.2f;
 	p_config->currentMultiplier                  = 0.0045f;
@@ -524,7 +517,7 @@ void asACR01B2G(boards_config_t* p_config) {
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
 
 	p_config->voltageMultiplier                  = 0.171f;  // Calibrated by average of 10 production crownstones
 
@@ -569,7 +562,7 @@ void asPca10040(boards_config_t* p_config) {
 	p_config->flags.hasAdcZeroRef                = false;
 	p_config->flags.pwmTempInverted              = false;
 
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_PLUG);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG;
 
 	p_config->voltageMultiplier                  = 0.0; // set to 0 to disable sampling checks
 	p_config->currentMultiplier                  = 0.0; // set to 0 to disable sampling checks
@@ -591,7 +584,7 @@ void asPca10040(boards_config_t* p_config) {
 
 void asUsbDongle(boards_config_t* p_config) {
 	asPca10040(p_config);
-	p_config->deviceType                         = ASSIGN_DEVICE_TYPE(DEVICE_CROWNSTONE_USB);
+	p_config->deviceType                         = DEVICE_CROWNSTONE_USB;
 }
 
 void asGuidestone(boards_config_t* p_config) {
@@ -612,7 +605,7 @@ void asGuidestone(boards_config_t* p_config) {
 	p_config->flags.hasSerial      = false;
 	p_config->flags.hasLed         = false;
 
-	p_config->deviceType           = ASSIGN_DEVICE_TYPE(DEVICE_GUIDESTONE);
+	p_config->deviceType           = DEVICE_GUIDESTONE;
 
 //	p_config->voltageMultiplier   = ; // unused
 //	p_config->currentMultiplier   = ; // unused

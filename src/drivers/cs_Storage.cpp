@@ -33,7 +33,7 @@ Storage::Storage() : EventListener() {
 	EventDispatcher::getInstance().addListener(this);
 }
 
-ret_code_t Storage::remove(st_file_id_t file_id) {
+ret_code_t Storage::remove(cs_file_id_t file_id) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -103,7 +103,7 @@ ret_code_t Storage::garbageCollect() {
 	return ret_code;
 }
 
-ret_code_t Storage::write(st_file_id_t file_id, st_file_data_t file_data) {
+ret_code_t Storage::write(cs_file_id_t file_id, cs_file_data_t file_data) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -157,7 +157,7 @@ void Storage::print(const std::string & prefix, CS_TYPE type) {
 	LOGd("%s %s (%i)", prefix.c_str(), TypeName(type), type);
 }
 
-ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
+ret_code_t Storage::read(cs_file_id_t file_id, cs_file_data_t file_data) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -206,7 +206,7 @@ ret_code_t Storage::read(st_file_id_t file_id, st_file_data_t file_data) {
 	return ret_code;
 }
 
-ret_code_t Storage::remove(st_file_id_t file_id, CS_TYPE type) {
+ret_code_t Storage::remove(cs_file_id_t file_id, CS_TYPE type) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -225,7 +225,7 @@ ret_code_t Storage::remove(st_file_id_t file_id, CS_TYPE type) {
 	return ret_code;
 }
 
-ret_code_t Storage::exists(st_file_id_t file_id, bool & result) {
+ret_code_t Storage::exists(cs_file_id_t file_id, bool & result) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -234,7 +234,7 @@ ret_code_t Storage::exists(st_file_id_t file_id, bool & result) {
 	return false;
 }
 
-ret_code_t Storage::exists(st_file_id_t file_id, CS_TYPE type, bool & result) {
+ret_code_t Storage::exists(cs_file_id_t file_id, CS_TYPE type, bool & result) {
 	fds_record_desc_t record_desc;
 	return exists(file_id, type, record_desc, result);
 }
@@ -242,7 +242,7 @@ ret_code_t Storage::exists(st_file_id_t file_id, CS_TYPE type, bool & result) {
 /**
  * Check if a record exists and removes duplicate record items. We only support one record field.
  */
-ret_code_t Storage::exists(st_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc, bool & result) {
+ret_code_t Storage::exists(cs_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc, bool & result) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -278,7 +278,7 @@ void Storage::handleSuccessfulEvent(fds_evt_t const * p_fds_evt) {
 		break;
 	case FDS_EVT_WRITE:
 	case FDS_EVT_UPDATE: {
-		uint8_t record_key = p_fds_evt->write.record_key;
+		CS_TYPE record_key = CS_TYPE(p_fds_evt->write.record_key);
 		LOGd("Dispatch write/update event, record %i", record_key);
 		event_t event1(CS_TYPE::EVT_STORAGE_WRITE_DONE, (void*)&record_key, sizeof(record_key));
 		EventDispatcher::getInstance().dispatch(event1);

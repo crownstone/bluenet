@@ -10,13 +10,6 @@
 #include <structs/cs_ScanResult.h>
 #include <events/cs_EventListener.h>
 
-#define SCAN_FILTER_CROWNSTONE_BIT    0
-#define SCAN_FILTER_GUIDESTONE_BIT    1
-
-#define SCAN_FILTER_CROWNSTONE_MSK    (1 << SCAN_FILTER_CROWNSTONE_BIT)
-#define SCAN_FILTER_GUIDESTONE_MSK    (1 << SCAN_FILTER_GUIDESTONE_BIT)
-#define SCAN_FILTER_DOBOTS_MSK        SCAN_FILTER_CROWNSTONE_MSK | SCAN_FILTER_GUIDESTONE_MSK
-
 /** Scanner scans for BLE devices.
  */
 class Scanner : EventListener {

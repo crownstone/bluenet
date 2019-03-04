@@ -110,7 +110,6 @@ void Scheduler::tick() {
 				//! TODO: use an event instead
 				uint8_t switchState = entry->pwm.pwm;
 				Switch::getInstance().setSwitch(switchState);
-				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::STRATEGY1);
 				break;
 			}
 			case SCHEDULE_ACTION_TYPE_FADE: {
@@ -119,12 +118,10 @@ void Scheduler::tick() {
 				//TODO: if (entry->fade.fadeDuration == 0), then just use SCHEDULE_ACTION_TYPE_PWM
 				uint8_t switchState = entry->fade.pwmEnd;
 				Switch::getInstance().setSwitch(switchState);
-				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::STRATEGY1);
 				break;
 			}
 			case SCHEDULE_ACTION_TYPE_TOGGLE: {
 				Switch::getInstance().toggle();
-				State::getInstance().set(CS_TYPE::STATE_IGNORE_BITMASK, &entry->overrideMask, sizeof(entry->overrideMask), PersistenceMode::STRATEGY1);
 				break;
 			}
 		}

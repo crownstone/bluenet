@@ -727,6 +727,10 @@ void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 #endif
 
 void ServiceData::handleEvent(event_t & event) {
+	if (event.size != TypeSize(event.type)) {
+		LOGe("Invalid size! type=%u size=%u", to_underlying_type(event.type), event.size);
+		return;
+	}
 	// Keep track of the BLE connection status. If we are connected we do not need to update the packet.
 	switch(event.type) {
 		case CS_TYPE::EVT_BLE_CONNECT: {
@@ -748,10 +752,7 @@ void ServiceData::handleEvent(event_t & event) {
 			break;
 		case CS_TYPE::STATE_ERRORS: {
 			LOGd("Event: %s", TypeName(event.type));
-			if (event.size != sizeof(state_errors_t)) {
-				break;
-			}
-			state_errors_t* stateErrors = (state_errors_t*)event.data;
+			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*)event.data;
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors->asInt);
 			break;
 		}
@@ -771,7 +772,8 @@ void ServiceData::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::STATE_SWITCH_STATE: {
-			updateSwitchState(*(TYPIFY(STATE_SWITCH_STATE)*)event.data);
+			switch_state_t* state = (TYPIFY(STATE_SWITCH_STATE)*)event.data;
+			updateSwitchState(state->asInt);
 #if BUILD_MESHING == 1
 			sendMeshState(true, STATE_SWITCH_STATE);
 #endif

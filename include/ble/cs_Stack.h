@@ -104,7 +104,6 @@ protected:
 
 	ble_user_mem_block_t 						_user_mem_block; //! used for user memory (long write)
 
-	uint8_t                            			_passkey[BLE_GAP_PASSKEY_LEN];
 	//dm_application_instance_t                   _dm_app_handle;
 	bool                                        _dm_initialized;
 

@@ -14,7 +14,6 @@
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_Scanner.h>
-#include <processing/cs_Tracker.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <util/cs_Utils.h>
@@ -57,9 +56,6 @@ Stack::Stack() :
 	_secReqTimerId = &_secReqTimerData;
 	_connectionKeepAliveTimerData = { {0} };
 	_connectionKeepAliveTimerId = &_connectionKeepAliveTimerData;
-
-	//! setup default values.
-	memcpy(_passkey, STATIC_PASSKEY, BLE_GAP_PASSKEY_LEN);
 
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&_sec_mode);
 
@@ -246,7 +242,6 @@ void Stack::initRadio() {
 	setInitialized(C_RADIO_INITIALIZED);
 
 	updateConnParams();
-	updatePasskey();
 	LOGw("Update TX Power not possible yet");
 	//updateTxPowerLevel();
 }
@@ -828,23 +823,6 @@ void Stack::setAesEncrypted(bool encrypted) {
 	for (Service* svc : _services) {
 		svc->setAesEncrypted(encrypted);
 	}
-}
-
-void Stack::setPasskey(uint8_t* passkey) {
-#ifdef PRINT_STACK_VERBOSE
-	LOGd(FMT_SET_STR_VAL, "passkey", std::string((char*)passkey, BLE_GAP_PASSKEY_LEN).c_str());
-#endif
-	memcpy(_passkey, passkey, BLE_GAP_PASSKEY_LEN);
-
-	updatePasskey();
-}
-
-void Stack::updatePasskey() {
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	LOGd("Update pass key");
-	ble_opt_t static_pin_option;
-	static_pin_option.gap_opt.passkey.p_passkey = _passkey;
-	BLE_CALL(sd_ble_opt_set, (BLE_GAP_OPT_PASSKEY, &static_pin_option));
 }
 
 void Stack::lowPowerTimeout(void* p_context) {

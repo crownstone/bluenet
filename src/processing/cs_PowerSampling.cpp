@@ -82,8 +82,8 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	PersistenceMode pmode = PersistenceMode::STRATEGY1;
 	settings.get(CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER, &_voltageMultiplier, pmode);
 	settings.get(CS_TYPE::CONFIG_CURRENT_MULTIPLIER, &_currentMultiplier, pmode);
-	settings.get(CS_TYPE::CONFIG_VOLTAGE_ZERO, &_voltageZero, pmode);
-	settings.get(CS_TYPE::CONFIG_CURRENT_ZERO, &_currentZero, pmode);
+	settings.get(CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO, &_voltageZero, pmode);
+	settings.get(CS_TYPE::CONFIG_CURRENT_ADC_ZERO, &_currentZero, pmode);
 	settings.get(CS_TYPE::CONFIG_POWER_ZERO, &_powerZero, pmode);
 	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentMilliAmpThreshold, pmode);
 	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentMilliAmpThresholdPwm, pmode);
@@ -751,7 +751,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, size, PersistenceMode::STRATEGY1);
 	_lastSwitchState = switchState;
 
-	if (switchState.relay_state == 0 && switchState.pwm_state == 0 && (prevSwitchState.relay_state || prevSwitchState.pwm_state)) {
+	if (switchState.state.relay == 0 && switchState.state.dimmer == 0 && (prevSwitchState.state.relay || prevSwitchState.state.dimmer)) {
 		// switch has been turned off
 		_lastSwitchOffTicksValid = true;
 		_lastSwitchOffTicks = RTC::getCount();
@@ -797,7 +797,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		switch_state_t switchState;
 		size16_t size = sizeof(switch_state_t);
 		State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, size, PersistenceMode::STRATEGY1);
-		if (switchState.pwm_state != 0) {
+		if (switchState.state.dimmer != 0) {
 			// If the pwm was on:
 			LOGw("current above pwm threshold");
 			// Dispatch the event that will turn off the pwm
@@ -806,9 +806,9 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 			// Set overcurrent error.
 			uint8_t error = 1;
 			size = sizeof(error);
-			State::getInstance().set(CS_TYPE::STATE_ERROR_OVER_CURRENT_PWM, &error, size, PersistenceMode::STRATEGY1);
+			State::getInstance().set(CS_TYPE::STATE_ERROR_OVER_CURRENT_DIMMER, &error, size, PersistenceMode::STRATEGY1);
 		}
-		else if (switchState.relay_state == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
+		else if (switchState.state.relay == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
 			LOGe("IGBT failure detected");
 			event_t event(CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED);

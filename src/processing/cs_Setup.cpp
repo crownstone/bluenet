@@ -10,7 +10,7 @@
 
 Setup::Setup() {
 	EventDispatcher::getInstance().addListener(this);
-	_last_record_key = 0;
+	_lastWrittenType = CS_TYPE::CONFIG_DO_NOT_USE;
 }
 
 cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
@@ -49,6 +49,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 		return ERR_WRONG_PARAMETER;
 	}
 
+	// TODO: what good is this padding?
 	// Save all settings, use a padded struct.
 	padded_setup_data_t setup_data;
 	setup_data.data = *setupData;
@@ -63,8 +64,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	state.set(CS_TYPE::CONFIG_KEY_ADMIN, sd.adminKey, sizeof(sd.adminKey), PersistenceMode::STRATEGY1);
 	state.set(CS_TYPE::CONFIG_KEY_MEMBER, sd.memberKey, sizeof(sd.memberKey), PersistenceMode::STRATEGY1);
 	state.set(CS_TYPE::CONFIG_KEY_GUEST, sd.guestKey, sizeof(sd.guestKey), PersistenceMode::STRATEGY1);
-	state.set(CS_TYPE::CONFIG_MESH_ACCESS_ADDRESS, &(sd.meshAccessAddress), sizeof(sd.meshAccessAddress), 
-			PersistenceMode::STRATEGY1);
+//	state.set(CS_TYPE::CONFIG_MESH_ACCESS_ADDRESS, &(sd.meshAccessAddress), sizeof(sd.meshAccessAddress), PersistenceMode::STRATEGY1);
 	state.set(CS_TYPE::CONFIG_IBEACON_UUID, &(sd.ibeaconUuid.uuid128), sizeof(sd.ibeaconUuid), 
 			PersistenceMode::STRATEGY1);
 	value.u32 = 0;
@@ -79,7 +79,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	mode = to_underlying_type(_persistenceMode);
 	value.u32 = 0;
 	value.u8 = mode;
-	_last_record_key = to_underlying_type(CS_TYPE::STATE_OPERATION_MODE);
+	_lastWrittenType = CS_TYPE::STATE_OPERATION_MODE;
 	LOGi("Set mode NORMAL");
 	LOGi("Set mode 0x%X", value.u32);
 	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::STRATEGY1);
@@ -112,9 +112,9 @@ void Setup::handleEvent(event_t & event) {
 	}
 	switch (event.type) {
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
-		uint8_t record_key = *(uint8_t*)event.data;
+		CS_TYPE writtenType = *(CS_TYPE*)event.data;
 
-		if (record_key == _last_record_key) {
+		if (writtenType == _lastWrittenType) {
 			LOGi("Setup done... Reset crownstone");
 			// set char value
 			event_t event1(CS_TYPE::EVT_SETUP_DONE);
@@ -137,8 +137,9 @@ void Setup::handleEvent(event_t & event) {
 			payload.delayMs = 1000;
 			event_t event2(CS_TYPE::EVT_DO_RESET_DELAYED, &payload, sizeof(payload));
 			EventDispatcher::getInstance().dispatch(event2);
-		} else {
-			LOGnone("Compare key %i with %i", record_key, _last_record_key);
+		}
+		else {
+			LOGnone("Compare key %i with %i", writtenType, _lastWrittenType);
 		}
 		break;
 	}

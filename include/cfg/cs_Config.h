@@ -181,7 +181,6 @@
 #define CURRENT_ZERO                             1997
 #define POWER_ZERO                               1500
 */
-//#define POWER_ZERO_AVG_WINDOW                    100
 // Octave: a=0.05; x=[0:1000]; y=(1-a).^x; y2=cumsum(y)*a; figure(1); plot(x,y); figure(2); plot(x,y2); find(y2 > 0.99)(1)
 #define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            20  // Is divided by 1000, so 20 is a discount of 0.02. // 99% of the average is influenced by the last 228 values
 //#define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            1000 // No averaging
@@ -304,12 +303,6 @@ const uint32_t PWM_PERIOD = 10000;
 #define CONFIG_SCANNER_DEFAULT 0
 #endif
 
-#if defined CONTINUOUS_POWER_SAMPLER 
-#define CONFIG_POWER_SAMPLER_DEFAULT CONTINUOUS_POWER_SAMPLER
-#else
-#define CONFIG_POWER_SAMPLER_DEFAULT 0
-#endif
-
 #if defined DEFAULT_ON 
 #define CONFIG_RELAY_START_DEFAULT DEFAULT_ON
 #else
@@ -328,23 +321,12 @@ const uint32_t PWM_PERIOD = 10000;
 #define CONFIG_SWITCH_LOCK_DEFAULT 0
 #endif
 
-#if defined CONFIG_FLOOR 
-#define CONFIG_FLOOR_DEFAULT CONFIG_FLOOR 
-#else
-#define CONFIG_FLOOR_DEFAULT 0
-#endif
-
 #if defined SWITCHCRAFT 
 #define CONFIG_SWITCHCRAFT_DEFAULT SWITCHCRAFT
 #else
 #define CONFIG_SWITCHCRAFT_DEFAULT 0
 #endif
 	    
-#if defined CONFIG_SCANNER_NEARBY_TIMEOUT_DEFAULT
-#else
-#define CONFIG_SCANNER_NEARBY_TIMEOUT_DEFAULT 1
-#endif
-
 #if defined CROWNSTONE_ID
 #define CONFIG_CROWNSTONE_ID_DEFAULT CROWNSTONE_ID
 #else
@@ -411,10 +393,6 @@ const uint32_t PWM_PERIOD = 10000;
 #define STATE_RESET_COUNTER_DEFAULT 0
 #endif
 
-#ifndef STATE_TRACKED_DEVICES_DEFAULT
-#define STATE_TRACKED_DEVICES_DEFAULT 0
-#endif
-
 #ifndef STATE_SCHEDULE_DEFAULT
 #define STATE_SCHEDULE_DEFAULT 0
 #endif
@@ -443,10 +421,6 @@ const uint32_t PWM_PERIOD = 10000;
 #define STATE_ERROR_OVER_CURRENT_DEFAULT 0
 #endif
 
-#ifndef STATE_LEARNED_SWITCHES_DEFAULT
-#define STATE_LEARNED_SWITCHES_DEFAULT 0
-#endif
-
 #ifndef STATE_ERROR_OVER_CURRENT_PWM_DEFAULT
 #define STATE_ERROR_OVER_CURRENT_PWM_DEFAULT 0
 #endif
@@ -455,20 +429,8 @@ const uint32_t PWM_PERIOD = 10000;
 #define STATE_ERROR_PWM_TEMP_DEFAULT 0
 #endif
 
-#ifndef STATE_IGNORE_BITMASK_DEFAULT
-#define STATE_IGNORE_BITMASK_DEFAULT 0
-#endif
-
 #ifndef STATE_ERROR_CHIP_TEMP_DEFAULT
 #define STATE_ERROR_CHIP_TEMP_DEFAULT 0
-#endif
-
-#ifndef STATE_IGNORE_ALL_DEFAULT
-#define STATE_IGNORE_ALL_DEFAULT 0
-#endif
-
-#ifndef STATE_IGNORE_LOCATION_DEFAULT
-#define STATE_IGNORE_LOCATION_DEFAULT 0
 #endif
 
 #ifndef STATE_ERROR_DIMMER_ON_FAILURE_DEFAULT

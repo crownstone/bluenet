@@ -89,7 +89,7 @@ void Switch::init(const boards_config_t& board) {
 	// Retrieve last switch state from persistent storage
 	size16_t size = sizeof(switch_state_t);
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::STRATEGY1);
-	LOGd("Obtained last switch state: pwm=%u relay=%u", _switchValue.pwm_state, _switchValue.relay_state);
+	LOGd("Obtained last switch state: pwm=%u relay=%u", _switchValue.state.dimmer, _switchValue.state.relay);
 
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_switchTimerId, 
@@ -125,17 +125,17 @@ void Switch::start() {
 
 	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
 	// TODO: What does this sentence mean?
-	if (_switchValue.pwm_state != 0) {
+	if (_switchValue.state.dimmer != 0) {
 		switch_state_t oldVal = _switchValue;
 		if (_pwmPowered) {
-			_setPwm(_switchValue.pwm_state);
+			_setPwm(_switchValue.state.dimmer);
 			_relayOff();
 		}
 		else {
 			// This is in case of a wall switch.
 			// You don't want to hear the relay turn on and off every time you power the crownstone.
 			// TODO: So, why does it call _relayOn() if it is supposed to do nothing...?
-			_switchValue.pwm_state = 0;
+			_switchValue.state.dimmer = 0;
 			_relayOn();
 			storeState(oldVal);
 		}
@@ -143,7 +143,7 @@ void Switch::start() {
 	else {
 		// Make sure the relay is in the stored position (no need to store).
 		// TODO: Why is it not stored?
-		if (_switchValue.relay_state == 1) {
+		if (_switchValue.state.relay == 1) {
 			_relayOn();
 		}
 		else {
@@ -159,8 +159,8 @@ void Switch::startPwm() {
 	_pwmPowered = true;
 
 	// Restore the pwm state.
-	bool success = _setPwm(_switchValue.pwm_state);
-	if (success && _switchValue.pwm_state != 0 && _switchValue.relay_state == 1) {
+	bool success = _setPwm(_switchValue.state.dimmer);
+	if (success && _switchValue.state.dimmer != 0 && _switchValue.state.relay == 1) {
 		// Don't use relayOff(), as that checks for switchLocked.
 		switch_state_t oldVal = _switchValue;
 		_relayOff();
@@ -179,9 +179,9 @@ void Switch::startPwm() {
 void Switch::storeState(switch_state_t oldVal) {
 	bool persistent = false;
 	if (memcmp(&oldVal, &_switchValue, sizeof(switch_state_t)) != 0) {
-		LOGd("Store switch state %i, %i", _switchValue.relay_state, _switchValue.pwm_state);
+		LOGd("Store switch state %i, %i", _switchValue.state.relay, _switchValue.state.dimmer);
 		//LOGd("storeState: %u", _switchValue);
-		persistent = (oldVal.relay_state != _switchValue.relay_state);
+		persistent = (oldVal.state.relay != _switchValue.state.relay);
 		PersistenceMode pmode = persistent ? PersistenceMode::STRATEGY1 : PersistenceMode::STRATEGY1;
 		size16_t size = sizeof(switch_state_t);
 		State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, pmode);
@@ -208,7 +208,7 @@ void Switch::delayedStoreStateExecute() {
 
 	// Just write to persistent storage
 //	LOGd("write to storage: %u", _switchValue);
-	LOGd("Write switch state %i, %i", _switchValue.relay_state, _switchValue.pwm_state);
+	LOGd("Write switch state %i, %i", _switchValue.state.relay, _switchValue.state.dimmer);
 	size16_t size = sizeof(switch_state_t);
 	State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::STRATEGY1);
 }
@@ -217,7 +217,7 @@ void Switch::delayedStoreStateExecute() {
 switch_state_t Switch::getSwitchState() {
 #ifdef PRINT_SWITCH_VERBOSE
 //LOGd(FMT_GET_INT_VAL, "Switch state", _switchValue);
-	LOGd("Switch state %i, %i", _switchValue.relay_state, _switchValue.pwm_state);
+	LOGd("Switch state %i, %i", _switchValue.state.relay, _switchValue.state.dimmer);
 #endif
 	return _switchValue;
 }
@@ -242,7 +242,7 @@ void Switch::turnOff() {
 
 void Switch::toggle() {
 	// TODO: maybe check if pwm is larger than some value?
-	if (_switchValue.relay_state == 1 || _switchValue.pwm_state > 0) {
+	if (_switchValue.state.relay == 1 || _switchValue.state.dimmer > 0) {
 		setSwitch(0);
 	}
 	else {
@@ -274,7 +274,7 @@ void Switch::setPwm(uint8_t value) {
 	bool success = _setPwm(value);
 	// Turn on relay instead, when trying to dim too soon after boot.
 	// Dimmer state will be restored when startPwm() is called.
-	if (!success && _switchValue.relay_state == 0) {
+	if (!success && _switchValue.state.relay == 0) {
 		_relayOn();
 	}
 	storeState(oldVal);
@@ -282,7 +282,7 @@ void Switch::setPwm(uint8_t value) {
 
 
 uint8_t Switch::getPwm() {
-	return _switchValue.pwm_state;
+	return _switchValue.state.dimmer;
 }
 
 
@@ -317,7 +317,7 @@ void Switch::relayOff() {
 
 
 bool Switch::getRelayState() {
-	return _switchValue.relay_state;
+	return _switchValue.state.relay;
 }
 
 
@@ -361,12 +361,12 @@ void Switch::setSwitch(uint8_t switchState) {
 			// Relay on when value >= 100, or when trying to dim, but that was unsuccessful.
 			// Else off (as the dimmer is parallel)
 			if (switchState >= SWITCH_ON || !pwmOnSuccess) {
-				if (_switchValue.relay_state == 0) {
+				if (_switchValue.state.relay == 0) {
 					_relayOn();
 				}
 			}
 			else {
-				if (_switchValue.relay_state == 1) {
+				if (_switchValue.state.relay == 1) {
 					_relayOff();
 				}
 			}
@@ -450,7 +450,7 @@ void Switch::delayedSwitchExecute() {
 
 void Switch::pwmNotAllowed() {
 	switch_state_t oldVal = _switchValue;
-	if (_switchValue.pwm_state != 0) {
+	if (_switchValue.state.dimmer != 0) {
 		_setPwm(0);
 		_relayOn();
 	}
@@ -468,7 +468,7 @@ bool Switch::_setPwm(uint8_t value) {
 	LOGd("Dimming allowed: %u", pwm_allowed);
 	if (value != 0 && !pwm_allowed) {
 		LOGd("Dimming not allowed");
-		_switchValue.pwm_state = 0;
+		_switchValue.state.dimmer = 0;
 		return false;
 	}
 
@@ -477,7 +477,7 @@ bool Switch::_setPwm(uint8_t value) {
 		value = SWITCH_ON;
 	}
 	PWM::getInstance().setValue(0, value);
-	_switchValue.pwm_state = value;
+	_switchValue.state.dimmer = value;
 	if (!_pwmPowered) {
 		// State stored, but not executed yet, so return false.
 		return false;
@@ -502,7 +502,7 @@ void Switch::_relayOn() {
 		nrf_delay_ms(_relayHighDuration);
 		nrf_gpio_pin_clear(_pinRelayOn);
 	}
-	_switchValue.relay_state = 1;
+	_switchValue.state.relay = 1;
 }
 
 void Switch::_relayOff() {
@@ -520,7 +520,7 @@ void Switch::_relayOff() {
 		nrf_delay_ms(_relayHighDuration);
 		nrf_gpio_pin_clear(_pinRelayOff);
 	}
-	_switchValue.relay_state = 0;
+	_switchValue.state.relay = 0;
 }
 
 void Switch::forcePwmOff() {
@@ -588,15 +588,7 @@ bool Switch::allowRelayOn() {
 void Switch::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::EVT_POWER_ON:
-		case CS_TYPE::EVT_TRACKED_DEVICE_IS_NEARBY: {
-			turnOn();
-			break;
-		}
 		case CS_TYPE::EVT_POWER_OFF:
-		case CS_TYPE::EVT_TRACKED_DEVICE_NOT_NEARBY: {
-			turnOff();
-			break;
-		}
 		case CS_TYPE::EVT_POWER_TOGGLE: {
 			toggle();
 			break;

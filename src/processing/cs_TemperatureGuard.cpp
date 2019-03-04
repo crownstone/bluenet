@@ -112,7 +112,7 @@ void TemperatureGuard::tick() {
 		// Set pwm temp error
 		st_value_t error;
 		error.u8 = pwmTempError;
-		State::getInstance().set(CS_TYPE::STATE_ERROR_PWM_TEMP, &error, sizeof(error), PersistenceMode::STRATEGY1);
+		State::getInstance().set(CS_TYPE::STATE_ERROR_DIMMER_TEMP, &error, sizeof(error), PersistenceMode::STRATEGY1);
 	}
 
 	if (curEvent != _lastPwmTempEvent) {

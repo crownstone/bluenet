@@ -50,5 +50,5 @@ private:
 	Setup();
 
 	// Used to check if last record has been written
-	uint8_t _last_record_key;
+	CS_TYPE _lastWrittenType;
 };

@@ -15,14 +15,12 @@
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
 #include <processing/cs_CommandHandler.h>
-#include <processing/cs_EnOceanHandler.h>
 #include <processing/cs_FactoryReset.h>
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
-#include <processing/cs_Tracker.h>
 #include <processing/cs_Watchdog.h>
 #include <services/cs_CrownstoneService.h>
 #include <services/cs_DeviceInformationService.h>
@@ -154,7 +152,6 @@ private:
     TemperatureGuard* _temperatureGuard;
     PowerSampling* _powerSampler;
     Watchdog* _watchdog;
-    EnOceanHandler* _enOceanHandler;
 
     // services
     DeviceInformationService* _deviceInformationService;
@@ -171,7 +168,6 @@ private:
 #endif
     CommandHandler* _commandHandler;
     Scanner* _scanner;
-    Tracker* _tracker;
     Scheduler* _scheduler;
     FactoryReset* _factoryReset;
 

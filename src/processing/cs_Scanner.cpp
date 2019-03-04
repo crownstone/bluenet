@@ -26,10 +26,7 @@ Scanner::Scanner() :
 	_scanning(false),
 	_running(false),
 	_scanDuration(SCAN_DURATION),
-	_scanSendDelay(SCAN_SEND_DELAY),
 	_scanBreakDuration(SCAN_BREAK_DURATION),
-	_scanFilter(SCAN_FILTER),
-	_filterSendFraction(SCAN_FILTER_SEND_FRACTION),
 	_scanCount(0),
 #if (NORDIC_SDK_VERSION >= 11)
 	_appTimerId(NULL),
@@ -56,9 +53,7 @@ Scanner::Scanner() :
 void Scanner::init() {
 	State& settings = State::getInstance();
 	settings.get(CS_TYPE::CONFIG_SCAN_DURATION, &_scanDuration, PersistenceMode::STRATEGY1);
-	settings.get(CS_TYPE::CONFIG_SCAN_SEND_DELAY, &_scanSendDelay, PersistenceMode::STRATEGY1);
 	settings.get(CS_TYPE::CONFIG_SCAN_BREAK_DURATION, &_scanBreakDuration, PersistenceMode::STRATEGY1);
-	settings.get(CS_TYPE::CONFIG_SCAN_FILTER, &_scanFilter, PersistenceMode::STRATEGY1);
 
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t)Scanner::staticTick);
@@ -244,71 +239,6 @@ void Scanner::onBleEvent(ble_evt_t * p_ble_evt) {
 }
 
 bool Scanner::isFiltered(data_t* p_adv_data) {
-	//! If we want to send filtered scans once every N times, and now is that time, then just return false
-	if (_filterSendFraction > 0 && _scanCount == 0) {
-		return false;
-	}
-
-	data_t type_data;
-
-	uint32_t err_code = BLEutil::adv_report_parse(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
-										 p_adv_data,
-										 &type_data);
-	if (err_code == NRF_SUCCESS) {
-//		_logFirst(SERIAL_INFO, "found manufac data:");
-//		BLEutil::printArray(type_data.p_data, type_data.data_len);
-
-		//! [28.01.16] can't cast to uint16_t because it's possible that p_data is not
-		//! word aligned!! So have to shift it by hand
-		uint16_t companyIdentifier = type_data.p_data[1] << 8 | type_data.p_data[0];
-		if (type_data.data_len >= 3 &&
-			companyIdentifier == CROWNSTONE_COMPANY_ID) {
-//			LOGi("is dobots device!");
-
-//			_logFirst(SERIAL_INFO, "parse data");
-//			BLEutil::printArray(type_data.p_data+2, type_data.data_len-2);
-//
-			CrownstoneManufacturer CrownstoneManufacturer;
-			CrownstoneManufacturer.parse(type_data.p_data+2, type_data.data_len-2);
-
-			switch (CrownstoneManufacturer.getDeviceType()) {
-			case DEVICE_GUIDESTONE: {
-//				LOGi("found guidestone");
-				return _scanFilter & SCAN_FILTER_GUIDESTONE_MSK;
-			}
-			case DEVICE_CROWNSTONE_PLUG: {
-//				LOGi("found crownstone");
-				return _scanFilter & SCAN_FILTER_CROWNSTONE_MSK;
-			}
-			default:
-				return false;
-			}
-
-		}
-	}
-
-	err_code = BLEutil::adv_report_parse(BLE_GAP_AD_TYPE_SERVICE_DATA,
-										 p_adv_data,
-										 &type_data);
-	if (err_code == NRF_SUCCESS) {
-		if (type_data.data_len == 19) {
-			uint16_t companyIdentifier = type_data.p_data[1] << 8 | type_data.p_data[0];
-			switch (companyIdentifier) {
-			case GUIDESTONE_SERVICE_DATA_UUID: {
-//				LOGi("found guidestone");
-				return _scanFilter & SCAN_FILTER_GUIDESTONE_MSK;
-			}
-			case CROWNSTONE_PLUG_SERVICE_DATA_UUID:
-			case CROWNSTONE_BUILT_SERVICE_DATA_UUID: {
-//				LOGi("found crownstone");
-				return _scanFilter & SCAN_FILTER_CROWNSTONE_MSK;
-			}
-			default:
-				return false;
-			}
-		}
-	}
-
 	return false;
 }
 
@@ -347,20 +277,8 @@ void Scanner::handleEvent(event_t & event) {
 			_scanDuration = *(TYPIFY(CONFIG_SCAN_DURATION)*)event.data;
 			break;
 		}
-		case CS_TYPE::CONFIG_SCAN_SEND_DELAY: {
-			_scanSendDelay = *(TYPIFY(CONFIG_SCAN_SEND_DELAY)*)event.data;
-			break;
-		}
 		case CS_TYPE::CONFIG_SCAN_BREAK_DURATION: {
 			_scanBreakDuration = *(TYPIFY(CONFIG_SCAN_BREAK_DURATION)*)event.data;
-			break;
-		}
-		case CS_TYPE::CONFIG_SCAN_FILTER: {
-			_scanFilter = *(TYPIFY(CONFIG_SCAN_FILTER)*)event.data;
-			break;
-		}
-		case CS_TYPE::CONFIG_SCAN_FILTER_SEND_FRACTION: {
-			_filterSendFraction = *(TYPIFY(CONFIG_SCAN_FILTER_SEND_FRACTION)*)event.data;
 			break;
 		}
 		default:

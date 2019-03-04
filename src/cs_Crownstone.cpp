@@ -100,13 +100,13 @@ void handleZeroCrossing() {
  */
 Crownstone::Crownstone(boards_config_t& board) :
 	_boardsConfig(board),
-	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL), _watchdog(NULL), _enOceanHandler(NULL),
+	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL), _watchdog(NULL),
 	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
 	_serviceData(NULL), _beacon(NULL),
 #if BUILD_MESHING == 1
 	_mesh(NULL),
 #endif
-	_commandHandler(NULL), _scanner(NULL), _tracker(NULL), _scheduler(NULL), _factoryReset(NULL),
+	_commandHandler(NULL), _scanner(NULL), _scheduler(NULL), _factoryReset(NULL),
 	_mainTimerId(NULL),
 	_operationMode(OperationMode::OPERATION_MODE_UNINITIALIZED)
 {
@@ -125,9 +125,6 @@ Crownstone::Crownstone(boards_config_t& board) :
 	_factoryReset = &FactoryReset::getInstance();
 
 	_scanner = &Scanner::getInstance();
-#if CHAR_TRACK_DEVICES == 1
-	_tracker = &Tracker::getInstance();
-#endif
 #if BUILD_MESHING == 1
 	_mesh = &Mesh::getInstance();
 #endif
@@ -137,7 +134,6 @@ Crownstone::Crownstone(boards_config_t& board) :
 		_temperatureGuard = &TemperatureGuard::getInstance();
 		_powerSampler = &PowerSampling::getInstance();
 		_watchdog = &Watchdog::getInstance();
-		_enOceanHandler = &EnOceanHandler::getInstance();
 	}
 
 };
@@ -317,10 +313,6 @@ void Crownstone::configureStack() {
 	uint16_t advInterval;
 	_state->get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, PersistenceMode::STRATEGY1);
 	_stack->setAdvertisingInterval(advInterval);
-
-	// Retrieve and Set the PASSKEY for pairing
-	uint8_t passkey[BLE_GAP_PASSKEY_LEN];
-	_state->get(CS_TYPE::CONFIG_PASSKEY, passkey, PersistenceMode::STRATEGY1);
 
 	// Set callback handler for a connection event
 	_stack->onConnect([&](uint16_t conn_handle) {
@@ -564,13 +556,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 		case OperationMode::OPERATION_MODE_NORMAL:
 			_scanner->init();
 			_scanner->setStack(_stack);
-
-#if CHAR_TRACK_DEVICES == 1
-			if (_state->isSet(CONFIG_TRACKER_ENABLED)) {
-				_tracker->init();
-			}
-#endif
-
 			_scheduler = &Scheduler::getInstance();
 
 #if BUILD_MESHING == 1
@@ -591,15 +576,16 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	}
 }
 
+// TODO: what is this for?
 /**
  * Write temperature, time, and state errors to (persistent) memory.
  */
 void Crownstone::writeDefaults() {
-	st_value_t value;
-	value.u32 = 0;
-	_state->set(CS_TYPE::STATE_TEMPERATURE, &value, sizeof(value), PersistenceMode::STRATEGY1);
-	_state->set(CS_TYPE::STATE_TIME, &value, sizeof(value), PersistenceMode::STRATEGY1);
-	_state->set(CS_TYPE::STATE_ERRORS, &value, sizeof(value), PersistenceMode::STRATEGY1);
+//	st_value_t value;
+//	value.u32 = 0;
+//	_state->set(CS_TYPE::STATE_TEMPERATURE, &value, sizeof(value), PersistenceMode::STRATEGY1);
+//	_state->set(CS_TYPE::STATE_TIME, &value, sizeof(value), PersistenceMode::STRATEGY1);
+//	_state->set(CS_TYPE::STATE_ERRORS, &value, sizeof(value), PersistenceMode::STRATEGY1);
 }
 
 /**
@@ -673,12 +659,6 @@ void Crownstone::startUp() {
 			uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
 			_scanner->delayedStart(delay);
 		}
-
-#if CHAR_TRACK_DEVICES == 1
-		if (_state->isSet(CONFIG_TRACKER_ENABLED)) {
-			_tracker->startTracking();
-		}
-#endif
 
 		if (_state->isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
 #if BUILD_MESHING == 1
@@ -825,10 +805,6 @@ void Crownstone::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CONFIG_ADV_INTERVAL: {
 			_stack->updateAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data, true);
-			break;
-		}
-		case CS_TYPE::CONFIG_PASSKEY: {
-			_stack->setPasskey((uint8_t*)event.data);
 			break;
 		}
 		case CS_TYPE::EVT_ENABLE_ADVERTISEMENT: {

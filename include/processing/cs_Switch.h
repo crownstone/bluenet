@@ -17,11 +17,6 @@
 
 #define SWITCH_ON 100
 
-struct __attribute__((__packed__)) __attribute__((__aligned__(4))) switch_state_t {
-	uint8_t pwm_state : 7;
-	uint8_t relay_state : 1;
-};
-
 /* Power Switch
  * 
  * The Switch class governs the two (separate) pathways that enable power to the load (switch ON) 
