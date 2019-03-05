@@ -10,10 +10,12 @@
 #include <iostream>
 #include <limits>
 #include <stdint.h>
+#include <drivers/cs_Serial.h>
 
 using namespace std;
 
 int main() {
+	LOGd("test");
 	cout << "Test MeshMessageCounter implementation" << endl;
 
 	MeshMessageCounter msgCounter;
