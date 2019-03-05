@@ -10,7 +10,7 @@
 
 Setup::Setup() {
 	EventDispatcher::getInstance().addListener(this);
-	_lastWrittenType = CS_TYPE::CONFIG_DO_NOT_USE;
+	_lastStoredType = CS_TYPE::CONFIG_DO_NOT_USE;
 }
 
 cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
@@ -79,7 +79,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	mode = to_underlying_type(_persistenceMode);
 	value.u32 = 0;
 	value.u8 = mode;
-	_lastWrittenType = CS_TYPE::STATE_OPERATION_MODE;
+	_lastStoredType = CS_TYPE::STATE_OPERATION_MODE;
 	LOGi("Set mode NORMAL");
 	LOGi("Set mode 0x%X", value.u32);
 	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::STRATEGY1);
@@ -112,9 +112,9 @@ void Setup::handleEvent(event_t & event) {
 	}
 	switch (event.type) {
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
-		CS_TYPE writtenType = *(CS_TYPE*)event.data;
+		CS_TYPE storedType = *(CS_TYPE*)event.data;
 
-		if (writtenType == _lastWrittenType) {
+		if (storedType == _lastStoredType) {
 			LOGi("Setup done... Reset crownstone");
 			// set char value
 			event_t event1(CS_TYPE::EVT_SETUP_DONE);
@@ -139,7 +139,7 @@ void Setup::handleEvent(event_t & event) {
 			EventDispatcher::getInstance().dispatch(event2);
 		}
 		else {
-			LOGnone("Compare key %i with %i", writtenType, _lastWrittenType);
+			LOGnone("Compare key %i with %i", storedType, _lastStoredType);
 		}
 		break;
 	}

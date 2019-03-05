@@ -50,5 +50,5 @@ private:
 	Setup();
 
 	// Used to check if last record has been written
-	CS_TYPE _lastWrittenType;
+	CS_TYPE _lastStoredType;
 };
