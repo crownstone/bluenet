@@ -7,7 +7,7 @@ before_install:
     - sudo add-apt-repository -y ppa:jonathonf/gcc-7.1
     - sudo apt -q update
     - sudo apt -y install gcc-7
-    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7.1 100
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100
     - source scripts/setup_environment.sh
     
 install: scripts/bluenet.sh --unit_test_host --target test
