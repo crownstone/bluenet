@@ -173,6 +173,8 @@ host-compile-target:
 	@mkdir -p $(BLUENET_BUILD_DIR)
 	@cd $(BLUENET_BUILD_DIR) && cmake $(RELEASE_COMPILE_FLAGS) \
 		$(SOURCE_DIR) && make -j${COMPILE_WITH_J_PROCESSORS}
+	result=$$?
+	@echo "++ Result of make command (0 means success): $$result"
 	$(call host-compile-target-cleanup)
 	return $$result
 
