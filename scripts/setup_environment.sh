@@ -2,6 +2,10 @@
 
 script_path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
+sudo add-apt-repository ppa:jonathonf/gcc-7.1
+sudo apt update
+sudo apt install gcc-7
+
 source $script_path/env.sh
 
 target="test"
