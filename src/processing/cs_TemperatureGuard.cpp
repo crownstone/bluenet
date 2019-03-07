@@ -40,7 +40,7 @@ void TemperatureGuard::init(const boards_config_t& boardConfig) {
 //	_comp->setEventCallback(comp_event_callback);
 
 	_lastChipTempEvent = CS_TYPE::EVT_CHIP_TEMP_OK;
-	_lastPwmTempEvent = CS_TYPE::EVT_PWM_TEMP_OK;
+	_lastPwmTempEvent = CS_TYPE::EVT_DIMMER_TEMP_OK;
 }
 
 
@@ -101,10 +101,10 @@ void TemperatureGuard::tick() {
 	}
 
 	if (pwmTempError) {
-		curEvent = CS_TYPE::EVT_PWM_TEMP_ABOVE_THRESHOLD;
+		curEvent = CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD;
 	}
 	else {
-		curEvent = CS_TYPE::EVT_PWM_TEMP_OK;
+		curEvent = CS_TYPE::EVT_DIMMER_TEMP_OK;
 	}
 
 	// Set state before dispatching event, so that errors are set when handling the event.

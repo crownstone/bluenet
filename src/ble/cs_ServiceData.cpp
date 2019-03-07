@@ -744,7 +744,7 @@ void ServiceData::handleEvent(event_t & event) {
 			updateAdvertisement(false);
 			break;
 		}
-		case CS_TYPE::EVT_PWM_FORCED_OFF:
+		case CS_TYPE::EVT_DIMMER_FORCED_OFF:
 		case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 		case CS_TYPE::EVT_RELAY_FORCED_ON:
 			LOGd("Event: %s", TypeName(event.type));
@@ -798,11 +798,11 @@ void ServiceData::handleEvent(event_t & event) {
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_TIME_SET, true);
 			break;
 		}
-		case CS_TYPE::EVT_PWM_POWERED: {
+		case CS_TYPE::EVT_DIMMER_POWERED: {
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_DIMMING_AVAILABLE, true);
 			break;
 		}
-		case CS_TYPE::EVT_PWM_ALLOWED: {
+		case CS_TYPE::EVT_DIMMING_ALLOWED: {
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, *(bool*)event.data);
 			break;
 		}

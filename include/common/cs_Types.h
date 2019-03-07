@@ -23,7 +23,6 @@ enum TypeBases {
 	Configuration_Base = 0x000,
 	State_Base         = 0x080,
 	General_Base       = 0x100,
-	Uart_Base          = 0x180,
 };
 
 /** Cast to underlying type.
@@ -130,72 +129,71 @@ enum class CS_TYPE: uint16_t {
 	STATE_ERROR_DIMMER_ON_FAILURE,                    //  0x93 - 147
 	STATE_ERROR_DIMMER_OFF_FAILURE,                   //  0x94 - 148
 
-	EVT_POWER_OFF = General_Base,                     // 0x100 - 256
-	EVT_POWER_ON,
-	EVT_POWER_TOGGLE,
-	EVT_ADVERTISEMENT_UPDATED,
-	EVT_SCAN_STARTED,
-	EVT_SCAN_STOPPED,
-	EVT_SCANNED_DEVICES,
-	EVT_DEVICE_SCANNED,
-	EVT_POWER_SAMPLES_START,
-	EVT_POWER_SAMPLES_END,
-	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM,
-	EVT_CURRENT_USAGE_ABOVE_THRESHOLD,
-	EVT_DIMMER_ON_FAILURE_DETECTED,
-	EVT_DIMMER_OFF_FAILURE_DETECTED,
-//	EVT_POWER_CONSUMPTION,
-//	EVT_ENABLED_MESH,
-//	EVT_ENABLED_ENCRYPTION,
-//	EVT_ENABLED_IBEACON,
-//	EVT_CHARACTERISTICS_UPDATED,
+	/*
+	 * Internal commands and events.
+	 * These don't need a specific order, as they're not exposed.
+	 * Start at General_Base
+	 */
+	CMD_SWITCH_OFF = General_Base,                    // Sent to turn switch off.
+	CMD_SWITCH_ON,                                    // Sent to turn switch on.
+	CMD_SWITCH_TOGGLE,                                // Sent to toggle switch.
+	EVT_ADVERTISEMENT_UPDATED,                        // Sent when advertisement was updated. TODO: advertisement data as payload?
+	EVT_SCAN_STARTED,                                 // Sent when scanner started scanning.
+	EVT_SCAN_STOPPED,                                 // Sent when scanner stopped scanning.
+//	EVT_SCANNED_DEVICES,
+	EVT_DEVICE_SCANNED,                               // Sent when a device was scanned. -- Payload is scanned_device_t.
+	EVT_POWER_SAMPLES_START,                          // Sent when the power samples buffer (for characteristic) is being filled with new data.
+	EVT_POWER_SAMPLES_END,                            // Sent when the power samples buffer (for characteristic) has been filled with new data.
+	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER,         // Sent when current usage goes over the dimmer threshold, while dimmer is on.
+	EVT_CURRENT_USAGE_ABOVE_THRESHOLD,                // Sent when current usage goes over the threshold.
+	EVT_DIMMER_ON_FAILURE_DETECTED,                   // Sent when dimmer leaks current, while it's off.
+	EVT_DIMMER_OFF_FAILURE_DETECTED,                  // Sent when dimmer blocks current, while it's on.
 	EVT_MESH_TIME,                                    // Sent when the mesh received the current time
-	EVT_SCHEDULE_ENTRIES_UPDATED,
-	EVT_BLE_EVENT,
-	EVT_BLE_CONNECT,
-	EVT_BLE_DISCONNECT,
-	EVT_STATE_NOTIFICATION,
-	EVT_BROWNOUT_IMPENDING,
-	EVT_SESSION_NONCE_SET,
-	EVT_KEEP_ALIVE,
-	EVT_PWM_FORCED_OFF,
-	EVT_SWITCH_FORCED_OFF,
-	EVT_RELAY_FORCED_ON,
-	EVT_CHIP_TEMP_ABOVE_THRESHOLD,
-	EVT_CHIP_TEMP_OK,
-	EVT_PWM_TEMP_ABOVE_THRESHOLD,
-	EVT_PWM_TEMP_OK,
-	EVT_EXTERNAL_STATE_MSG_CHAN_0,
-	EVT_EXTERNAL_STATE_MSG_CHAN_1,
-	EVT_TIME_SET,                                      // Sent when the time has been set or changed.
-	EVT_PWM_POWERED,
-	EVT_PWM_ALLOWED,                                   // Sent when pwm allowed flag is set. Payload is boolean.
-	EVT_SWITCH_LOCKED,                                 // Sent when switch locked flag is set. Payload is boolean.
-	EVT_STORAGE_WRITE_DONE,                            // Sent when storage write is done and queue is empty. Payload is CS_TYPE, the type that was written.
-	EVT_SETUP_DONE,                                    // Sent when setup was done (and settings are stored).
-	EVT_DO_RESET_DELAYED,                              // Sent to perform a reset in a few seconds.
-	EVT_SWITCHCRAFT_ENABLED,                           // Sent when switchcraft flag is set. Payload is boolean.
-	EVT_STORAGE_WRITE,                                 // Sent when an item is going to be written to storage.
-	EVT_STORAGE_ERASE,                                 // Sent when a flash page is going to be erased.
-	EVT_ADC_RESTARTED,                                 // Sent when ADC has been restarted.
-
-	EVT_SET_LOG_LEVEL = Uart_Base,                     // 0x180 - 384
-	EVT_ENABLE_LOG_POWER,
-	EVT_ENABLE_LOG_CURRENT,
-	EVT_ENABLE_LOG_VOLTAGE,
-	EVT_ENABLE_LOG_FILTERED_CURRENT,
-	EVT_CMD_RESET,
-	EVT_ENABLE_ADVERTISEMENT,
-	EVT_ENABLE_MESH,
-	EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN,
-	EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT,
-	EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,
-	EVT_INC_VOLTAGE_RANGE,
-	EVT_DEC_VOLTAGE_RANGE,
-	EVT_INC_CURRENT_RANGE,
-	EVT_DEC_CURRENT_RANGE,
-	EVT_RX_CONTROL,
-	EVT_CROWNSTONE_SWITCH_MODE,
+	EVT_SCHEDULE_ENTRIES_UPDATED,      // TODO: deprecate and use STATE event for this.                // Sent when schedule entries were changed. Payload is schedule_list_t.
+//	EVT_BLE_EVENT,
+	EVT_BLE_CONNECT,                                  // Sent when device connected.
+	EVT_BLE_DISCONNECT,                               // Sent when device disconnected.
+//	EVT_STATE_NOTIFICATION,            // Deprecated  // Sent when a state was updated.
+	EVT_BROWNOUT_IMPENDING,                           // Sent when brownout is impending (low chip supply voltage)
+	EVT_SESSION_NONCE_SET,                            // Sent when a session nonce is generated. -- Payload is the session nonce.
+	EVT_KEEP_ALIVE,                                   // Sent when a keep alive has been received. -- Payload is keep_alive_state_message_payload_t.
+	EVT_DIMMER_FORCED_OFF,                            // Sent when dimmer was forced off.
+	EVT_SWITCH_FORCED_OFF,                            // Sent when switch (relay and dimmer) was forced off.
+	EVT_RELAY_FORCED_ON,                              // Sent when relay was forced on.
+	EVT_CHIP_TEMP_ABOVE_THRESHOLD,                    // Sent when chip temperature is above threshold.
+	EVT_CHIP_TEMP_OK,                                 // Sent when chip temperature is ok again.
+	EVT_DIMMER_TEMP_ABOVE_THRESHOLD,                  // Sent when dimmer temperature is above threshold.
+	EVT_DIMMER_TEMP_OK,                               // Sent when dimmer temperature is ok again.
+//	EVT_EXTERNAL_STATE_MSG_CHAN_0,     // Deprecated
+//	EVT_EXTERNAL_STATE_MSG_CHAN_1,     // Deprecated
+	EVT_TIME_SET,                                     // Sent when the time is set or changed. TODO: time as payload?
+	EVT_DIMMER_POWERED,                               // Sent when dimmer is powered, and ready to be used.
+	EVT_DIMMING_ALLOWED,                              // Sent when allow dimming is changed. -- Payload is bool.
+	EVT_SWITCH_LOCKED,                                // Sent when switch locked flag is set. -- Payload is bool.
+	EVT_STORAGE_WRITE_DONE,                           // Sent when an item has been written to storage. -- Payload is CS_TYPE, the type that was written.
+	EVT_SETUP_DONE,                                   // Sent when setup was done (and settings are stored).
+//	EVT_DO_RESET_DELAYED,                             // Sent to perform a reset in a few seconds.
+	EVT_SWITCHCRAFT_ENABLED,                          // Sent when switchcraft flag is set. -- Payload is boolean.
+//	EVT_STORAGE_WRITE,                                // Sent when an item is going to be written to storage.
+//	EVT_STORAGE_ERASE,                                // Sent when a flash page is going to be erased.
+	EVT_ADC_RESTARTED,                                // Sent when ADC has been restarted.
+//	CMD_SET_LOG_LEVEL,
+	CMD_ENABLE_LOG_POWER,                             // Sent to enable/disable power calculations logging. -- Payload is bool.
+	CMD_ENABLE_LOG_CURRENT,                           // Sent to enable/disable current samples logging. -- Payload is bool.
+	CMD_ENABLE_LOG_VOLTAGE,                           // Sent to enable/disable voltage samples logging. -- Payload is bool.
+	CMD_ENABLE_LOG_FILTERED_CURRENT,                  // Sent to enable/disable filtered current samples logging. -- Payload is bool.
+	CMD_RESET_DELAYED,                                // Sent to reboot. -- Payload is reset_delayed_t.
+	CMD_ENABLE_ADVERTISEMENT,                         // Sent to enable/disable advertising. -- Payload is bool.
+	CMD_ENABLE_MESH,                                  // Sent to enable/disable mesh. -- Payload is bool.
+	CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN,         // Sent to toggle ADC voltage pin. TODO: pin as payload?
+	CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT,              // Sent to toggle differential mode on current pin. -- Payload is bool.
+	CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,              // Sent to toggle differential mode on voltage pin. -- Payload is bool.
+	CMD_INC_VOLTAGE_RANGE,                            // Sent to increase voltage range.
+	CMD_DEC_VOLTAGE_RANGE,                            // Sent to decrease voltage range.
+	CMD_INC_CURRENT_RANGE,                            // Sent to increase current range.
+	CMD_DEC_CURRENT_RANGE,                            // Sent to decrease current range.
+	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is stream_header_t
+	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
 }; 
 
 /*---------------------------------------------------------------------------------------------------------------------
@@ -227,8 +225,8 @@ union state_errors_t {
 
 union __attribute__((__packed__)) __attribute__((__aligned__(4))) switch_state_t {
 	struct __attribute__((packed)) {
-	uint8_t dimmer : 7;
-	uint8_t relay : 1;
+		uint8_t dimmer : 7;
+		uint8_t relay : 1;
 	} state;
 	uint8_t asInt;
 	switch_state_t(): asInt(0) {}
@@ -239,6 +237,25 @@ union __attribute__((__packed__)) __attribute__((__aligned__(4))) switch_state_t
 	}
 };
 
+#define SESSION_NONCE_LENGTH 5
+struct __attribute__((packed)) session_nonce_t {
+	uint8_t data[SESSION_NONCE_LENGTH];
+};
+
+// TODO: check if this length is similar to BLE_GAP_ADDR_LEN
+#define MAC_ADDRESS_LEN 6
+#define ADVERTISEMENT_DATA_MAX_SIZE 31
+
+struct __attribute__((packed)) scanned_device_t {
+	int8_t rssi;
+	uint8_t address[MAC_ADDRESS_LEN];
+	uint8_t channel;
+	uint8_t dataSize;
+//	uint8_t data[ADVERTISEMENT_DATA_MAX_SIZE];
+	uint8_t *data;
+	// See ble_gap_evt_adv_report_t
+	// More possibilities: addressType, connectable, isScanResponse, directed, scannable, extended advertisements, etc.
+};
 
 
 // TODO: these definitions (also the structs) should be moved to somewhere else.
@@ -309,6 +326,29 @@ struct __attribute__((__packed__)) schedule_list_t {
 	schedule_list_t(uint8_t size): size(size) {}
 };
 
+/** Header of a stream buffer
+ *
+ */
+struct __attribute__((__packed__)) stream_buffer_header_t {
+	uint8_t type;
+	uint8_t opCode; //! can be used as op code, see <OpCode>
+	uint16_t length;
+};
+
+enum class OperationMode {
+	OPERATION_MODE_SETUP                       = 0x00,
+	OPERATION_MODE_DFU                         = 0x01,
+	OPERATION_MODE_FACTORY_RESET               = 0x02,
+	OPERATION_MODE_NORMAL                      = 0x10,
+	OPERATION_MODE_UNINITIALIZED               = 0xFF,
+};
+
+struct __attribute__((packed)) reset_delayed_t {
+	uint8_t resetCode;
+	uint16_t delayMs;
+};
+
+
 
 
 struct event_t {
@@ -323,13 +363,6 @@ struct event_t {
 	void *data;
 
 	size16_t size;
-};
-
-struct __attribute__((packed)) evt_do_reset_delayed_t {
-
-	uint8_t resetCode;
-
-	uint16_t delayMs;
 };
 
 typedef uint16_t cs_file_id_t;
@@ -427,71 +460,62 @@ typedef switch_state_t TYPIFY(STATE_SWITCH_STATE);
 typedef   int8_t TYPIFY(STATE_TEMPERATURE);
 typedef uint32_t TYPIFY(STATE_TIME);
 
-typedef  uint8_t TYPIFY(EVT_ADC_RESTARTED);
-typedef  uint8_t TYPIFY(EVT_ADVERTISEMENT_UPDATED);
-typedef  uint8_t TYPIFY(EVT_BLE_CONNECT);
-typedef  uint8_t TYPIFY(EVT_BLE_DISCONNECT);
-typedef  uint8_t TYPIFY(EVT_BLE_EVENT);
-typedef  uint8_t TYPIFY(EVT_BROWNOUT_IMPENDING);
+typedef  void TYPIFY(EVT_ADC_RESTARTED);
+typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
+typedef  void TYPIFY(EVT_BLE_CONNECT);
+typedef  void TYPIFY(EVT_BLE_DISCONNECT);
+typedef  void TYPIFY(EVT_BROWNOUT_IMPENDING);
 //typedef  uint8_t TYPIFY(EVT_CHARACTERISTICS_UPDATED);
-typedef  uint8_t TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
-typedef  uint8_t TYPIFY(EVT_CHIP_TEMP_OK);
-typedef  uint8_t TYPIFY(EVT_CMD_RESET);
-typedef  uint8_t TYPIFY(EVT_CROWNSTONE_SWITCH_MODE);
-typedef  uint8_t TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
-typedef  uint8_t TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
-typedef  uint8_t TYPIFY(EVT_DEC_CURRENT_RANGE);
-typedef  uint8_t TYPIFY(EVT_DEC_VOLTAGE_RANGE);
-typedef  uint8_t TYPIFY(EVT_DEVICE_SCANNED);
-typedef  uint8_t TYPIFY(EVT_DIMMER_ON_FAILURE_DETECTED);
-typedef  uint8_t TYPIFY(EVT_DIMMER_OFF_FAILURE_DETECTED);
-typedef  uint8_t TYPIFY(EVT_DO_RESET_DELAYED);
+typedef  void TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
+typedef  void TYPIFY(EVT_CHIP_TEMP_OK);
+typedef reset_delayed_t TYPIFY(CMD_RESET_DELAYED);
+typedef  OperationMode TYPIFY(CMD_SET_OPERATION_MODE);
+typedef  void TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER);
+typedef  void TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
+typedef  void TYPIFY(CMD_DEC_CURRENT_RANGE);
+typedef  void TYPIFY(CMD_DEC_VOLTAGE_RANGE);
+typedef  scanned_device_t TYPIFY(EVT_DEVICE_SCANNED);
+typedef  void TYPIFY(EVT_DIMMER_ON_FAILURE_DETECTED);
+typedef  void TYPIFY(EVT_DIMMER_OFF_FAILURE_DETECTED);
 //typedef  uint8_t TYPIFY(EVT_ENABLED_MESH);
 //typedef  uint8_t TYPIFY(EVT_ENABLED_ENCRYPTION);
 //typedef  uint8_t TYPIFY(EVT_ENABLED_IBEACON);
-typedef  uint8_t TYPIFY(EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT);
-typedef  uint8_t TYPIFY(EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE);
-typedef  uint8_t TYPIFY(EVT_ENABLE_ADVERTISEMENT);
-typedef  uint8_t TYPIFY(EVT_ENABLE_LOG_CURRENT);
-typedef  uint8_t TYPIFY(EVT_ENABLE_LOG_FILTERED_CURRENT);
-typedef  uint8_t TYPIFY(EVT_ENABLE_LOG_POWER);
-typedef  uint8_t TYPIFY(EVT_ENABLE_LOG_VOLTAGE);
-typedef  uint8_t TYPIFY(EVT_ENABLE_MESH);
-typedef  uint8_t TYPIFY(EVT_EXTERNAL_STATE_MSG_CHAN_0);
-typedef  uint8_t TYPIFY(EVT_EXTERNAL_STATE_MSG_CHAN_1);
-typedef  uint8_t TYPIFY(EVT_INC_VOLTAGE_RANGE);
-typedef  uint8_t TYPIFY(EVT_INC_CURRENT_RANGE);
-typedef  uint8_t TYPIFY(EVT_KEEP_ALIVE);
+typedef  bool TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT);
+typedef  bool TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE);
+typedef  bool TYPIFY(CMD_ENABLE_ADVERTISEMENT);
+typedef  bool TYPIFY(CMD_ENABLE_LOG_CURRENT);
+typedef  bool TYPIFY(CMD_ENABLE_LOG_FILTERED_CURRENT);
+typedef  bool TYPIFY(CMD_ENABLE_LOG_POWER);
+typedef  bool TYPIFY(CMD_ENABLE_LOG_VOLTAGE);
+typedef  bool TYPIFY(CMD_ENABLE_MESH);
+typedef  void TYPIFY(CMD_INC_VOLTAGE_RANGE);
+typedef  void TYPIFY(CMD_INC_CURRENT_RANGE);
+typedef  void TYPIFY(EVT_KEEP_ALIVE);
 typedef uint32_t TYPIFY(EVT_MESH_TIME);
 //typedef  uint8_t TYPIFY(EVT_POWER_CONSUMPTION);
-typedef  uint8_t TYPIFY(EVT_POWER_OFF);
-typedef  uint8_t TYPIFY(EVT_POWER_ON);
-typedef  uint8_t TYPIFY(EVT_POWER_SAMPLES_END);
-typedef  uint8_t TYPIFY(EVT_POWER_SAMPLES_START);
-typedef  uint8_t TYPIFY(EVT_POWER_TOGGLE);
-typedef  uint8_t TYPIFY(EVT_PWM_ALLOWED);
-typedef  uint8_t TYPIFY(EVT_PWM_FORCED_OFF);
-typedef  uint8_t TYPIFY(EVT_PWM_POWERED);
-typedef  uint8_t TYPIFY(EVT_PWM_TEMP_ABOVE_THRESHOLD);
-typedef  uint8_t TYPIFY(EVT_PWM_TEMP_OK);
-typedef  uint8_t TYPIFY(EVT_RELAY_FORCED_ON);
-typedef  uint8_t TYPIFY(EVT_RX_CONTROL);
-typedef  uint8_t TYPIFY(EVT_SCAN_STARTED);
-typedef  uint8_t TYPIFY(EVT_SCAN_STOPPED);
-typedef  uint8_t TYPIFY(EVT_SCANNED_DEVICES);
-typedef  uint8_t TYPIFY(EVT_SCHEDULE_ENTRIES_UPDATED);
-typedef  uint8_t TYPIFY(EVT_SETUP_DONE);
-typedef  uint8_t TYPIFY(EVT_SET_LOG_LEVEL);
-typedef  uint8_t TYPIFY(EVT_SESSION_NONCE_SET);
-typedef  uint8_t TYPIFY(EVT_STATE_NOTIFICATION);
-typedef  uint8_t TYPIFY(EVT_STORAGE_ERASE);
-typedef  uint8_t TYPIFY(EVT_STORAGE_WRITE);
+typedef  void TYPIFY(CMD_SWITCH_OFF);
+typedef  void TYPIFY(CMD_SWITCH_ON);
+typedef  void TYPIFY(EVT_POWER_SAMPLES_END);
+typedef  void TYPIFY(EVT_POWER_SAMPLES_START);
+typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
+typedef  bool TYPIFY(EVT_DIMMING_ALLOWED);
+typedef  void TYPIFY(EVT_DIMMER_FORCED_OFF);
+typedef  void TYPIFY(EVT_DIMMER_POWERED);
+typedef  void TYPIFY(EVT_DIMMER_TEMP_ABOVE_THRESHOLD);
+typedef  void TYPIFY(EVT_DIMMER_TEMP_OK);
+typedef  void TYPIFY(EVT_RELAY_FORCED_ON);
+typedef  stream_buffer_header_t TYPIFY(CMD_CONTROL_CMD);
+typedef  void TYPIFY(EVT_SCAN_STARTED);
+typedef  void TYPIFY(EVT_SCAN_STOPPED);
+typedef  schedule_list_t TYPIFY(EVT_SCHEDULE_ENTRIES_UPDATED);
+typedef  void TYPIFY(EVT_SETUP_DONE);
+typedef  session_nonce_t TYPIFY(EVT_SESSION_NONCE_SET);
 typedef  CS_TYPE TYPIFY(EVT_STORAGE_WRITE_DONE);
-typedef     bool TYPIFY(EVT_SWITCHCRAFT_ENABLED);
-typedef  uint8_t TYPIFY(EVT_SWITCH_FORCED_OFF);
-typedef  uint8_t TYPIFY(EVT_SWITCH_LOCKED);
-typedef  uint8_t TYPIFY(EVT_TIME_SET);
-typedef  uint8_t TYPIFY(EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
+typedef  bool TYPIFY(EVT_SWITCHCRAFT_ENABLED);
+typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
+typedef  bool TYPIFY(EVT_SWITCH_LOCKED);
+typedef  void TYPIFY(EVT_TIME_SET);
+typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
@@ -650,34 +674,32 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(STATE_ERROR_DIMMER_ON_FAILURE));
 	case CS_TYPE::STATE_ERROR_DIMMER_OFF_FAILURE:
 		return sizeof(TYPIFY(STATE_ERROR_DIMMER_OFF_FAILURE));
-	case CS_TYPE::EVT_POWER_OFF:
-		return sizeof(TYPIFY(EVT_POWER_OFF));
-	case CS_TYPE::EVT_POWER_ON:
-		return sizeof(TYPIFY(EVT_POWER_ON));
-	case CS_TYPE::EVT_POWER_TOGGLE:
-		return sizeof(TYPIFY(EVT_POWER_TOGGLE));
+	case CS_TYPE::CMD_SWITCH_OFF:
+		return 0;
+	case CS_TYPE::CMD_SWITCH_ON:
+		return 0;
+	case CS_TYPE::CMD_SWITCH_TOGGLE:
+		return 0;
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
-		return sizeof(TYPIFY(EVT_ADVERTISEMENT_UPDATED));
+		return 0;
 	case CS_TYPE::EVT_SCAN_STARTED:
-		return sizeof(TYPIFY(EVT_SCAN_STARTED));
+		return 0;
 	case CS_TYPE::EVT_SCAN_STOPPED:
-		return sizeof(TYPIFY(EVT_SCAN_STOPPED));
-	case CS_TYPE::EVT_SCANNED_DEVICES:
-		return sizeof(TYPIFY(EVT_SCANNED_DEVICES));
+		return 0;
 	case CS_TYPE::EVT_DEVICE_SCANNED:
 		return sizeof(TYPIFY(EVT_DEVICE_SCANNED));
 	case CS_TYPE::EVT_POWER_SAMPLES_START:
-		return sizeof(TYPIFY(EVT_POWER_SAMPLES_START));
+		return 0;
 	case CS_TYPE::EVT_POWER_SAMPLES_END:
-		return sizeof(TYPIFY(EVT_POWER_SAMPLES_END));
-	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM:
-		return sizeof(TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM));
+		return 0;
+	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
+		return 0;
 	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
-		return sizeof(TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD));
+		return 0;
 	case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
-		return sizeof(TYPIFY(EVT_DIMMER_ON_FAILURE_DETECTED));
+		return 0;
 	case CS_TYPE::EVT_DIMMER_OFF_FAILURE_DETECTED:
-		return sizeof(TYPIFY(EVT_DIMMER_OFF_FAILURE_DETECTED));
+		return 0;
 	//case CS_TYPE::EVT_POWER_CONSUMPTION:
 	//	return sizeof(TYPIFY(EVT_POWER_CONSUMPTION));
 	//case CS_TYPE::EVT_ENABLED_MESH:
@@ -692,94 +714,78 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(EVT_MESH_TIME));
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
 		return sizeof(TYPIFY(EVT_SCHEDULE_ENTRIES_UPDATED));
-	case CS_TYPE::EVT_BLE_EVENT:
-		return sizeof(TYPIFY(EVT_BLE_EVENT));
 	case CS_TYPE::EVT_BLE_CONNECT:
-		return sizeof(TYPIFY(EVT_BLE_CONNECT));
+		return 0;
 	case CS_TYPE::EVT_BLE_DISCONNECT:
-		return sizeof(TYPIFY(EVT_BLE_DISCONNECT));
-	case CS_TYPE::EVT_STATE_NOTIFICATION:
-		return sizeof(TYPIFY(EVT_STATE_NOTIFICATION));
+		return 0;
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
-		return sizeof(TYPIFY(EVT_BROWNOUT_IMPENDING));
+		return 0;
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
 		return sizeof(TYPIFY(EVT_SESSION_NONCE_SET));
 	case CS_TYPE::EVT_KEEP_ALIVE:
-		return sizeof(TYPIFY(EVT_KEEP_ALIVE));
-	case CS_TYPE::EVT_PWM_FORCED_OFF:
-		return sizeof(TYPIFY(EVT_PWM_FORCED_OFF));
+		return 0;
+	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
+		return 0;
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
-		return sizeof(TYPIFY(EVT_SWITCH_FORCED_OFF));
+		return 0;
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
-		return sizeof(TYPIFY(EVT_RELAY_FORCED_ON));
+		return 0;
 	case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
-		return sizeof(TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD));
+		return 0;
 	case CS_TYPE::EVT_CHIP_TEMP_OK:
-		return sizeof(TYPIFY(EVT_CHIP_TEMP_OK));
-	case CS_TYPE::EVT_PWM_TEMP_ABOVE_THRESHOLD:
-		return sizeof(TYPIFY(EVT_PWM_TEMP_ABOVE_THRESHOLD));
-	case CS_TYPE::EVT_PWM_TEMP_OK:
-		return sizeof(TYPIFY(EVT_PWM_TEMP_OK));
-	case CS_TYPE::EVT_EXTERNAL_STATE_MSG_CHAN_0:
-		return sizeof(TYPIFY(EVT_EXTERNAL_STATE_MSG_CHAN_0));
-	case CS_TYPE::EVT_EXTERNAL_STATE_MSG_CHAN_1:
-		return sizeof(TYPIFY(EVT_EXTERNAL_STATE_MSG_CHAN_1));
+		return 0;
+	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
+		return 0;
+	case CS_TYPE::EVT_DIMMER_TEMP_OK:
+		return 0;
 	case CS_TYPE::EVT_TIME_SET:
-		return sizeof(TYPIFY(EVT_TIME_SET));
-	case CS_TYPE::EVT_PWM_POWERED:
-		return sizeof(TYPIFY(EVT_PWM_POWERED));
-	case CS_TYPE::EVT_PWM_ALLOWED:
-		return sizeof(TYPIFY(EVT_PWM_ALLOWED));
+		return 0;
+	case CS_TYPE::EVT_DIMMER_POWERED:
+		return 0;
+	case CS_TYPE::EVT_DIMMING_ALLOWED:
+		return sizeof(TYPIFY(EVT_DIMMING_ALLOWED));
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 		return sizeof(TYPIFY(EVT_SWITCH_LOCKED));
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 		return sizeof(TYPIFY(EVT_STORAGE_WRITE_DONE));
 	case CS_TYPE::EVT_SETUP_DONE:
-		return sizeof(TYPIFY(EVT_SETUP_DONE));
-	case CS_TYPE::EVT_DO_RESET_DELAYED:
-		return sizeof(TYPIFY(EVT_DO_RESET_DELAYED));
+		return 0;
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 		return sizeof(TYPIFY(EVT_SWITCHCRAFT_ENABLED));
-	case CS_TYPE::EVT_STORAGE_WRITE:
-		return sizeof(TYPIFY(EVT_STORAGE_WRITE));
-	case CS_TYPE::EVT_STORAGE_ERASE:
-		return sizeof(TYPIFY(EVT_STORAGE_ERASE));
 	case CS_TYPE::EVT_ADC_RESTARTED:
-		return sizeof(TYPIFY(EVT_ADC_RESTARTED));
-	case CS_TYPE::EVT_SET_LOG_LEVEL:
-		return sizeof(TYPIFY(EVT_SET_LOG_LEVEL));
-	case CS_TYPE::EVT_ENABLE_LOG_POWER:
-		return sizeof(TYPIFY(EVT_ENABLE_LOG_POWER));
-	case CS_TYPE::EVT_ENABLE_LOG_CURRENT:
-		return sizeof(TYPIFY(EVT_ENABLE_LOG_CURRENT));
-	case CS_TYPE::EVT_ENABLE_LOG_VOLTAGE:
-		return sizeof(TYPIFY(EVT_ENABLE_LOG_VOLTAGE));
-	case CS_TYPE::EVT_ENABLE_LOG_FILTERED_CURRENT:
-		return sizeof(TYPIFY(EVT_ENABLE_LOG_FILTERED_CURRENT));
-	case CS_TYPE::EVT_CMD_RESET:
-		return sizeof(TYPIFY(EVT_CMD_RESET));
-	case CS_TYPE::EVT_ENABLE_ADVERTISEMENT:
-		return sizeof(TYPIFY(EVT_ENABLE_ADVERTISEMENT));
-	case CS_TYPE::EVT_ENABLE_MESH:
-		return sizeof(TYPIFY(EVT_ENABLE_MESH));
-	case CS_TYPE::EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
-		return sizeof(TYPIFY(EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN));
-	case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT:
-		return sizeof(TYPIFY(EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT));
-	case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
-		return sizeof(TYPIFY(EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE));
-	case CS_TYPE::EVT_INC_VOLTAGE_RANGE:
-		return sizeof(TYPIFY(EVT_INC_VOLTAGE_RANGE));
-	case CS_TYPE::EVT_DEC_VOLTAGE_RANGE:
-		return sizeof(TYPIFY(EVT_DEC_VOLTAGE_RANGE));
-	case CS_TYPE::EVT_INC_CURRENT_RANGE:
-		return sizeof(TYPIFY(EVT_INC_CURRENT_RANGE));
-	case CS_TYPE::EVT_DEC_CURRENT_RANGE:
-		return sizeof(TYPIFY(EVT_DEC_CURRENT_RANGE));
-	case CS_TYPE::EVT_RX_CONTROL:
-		return sizeof(TYPIFY(EVT_RX_CONTROL));
-	case CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE:
-		return sizeof(TYPIFY(EVT_CROWNSTONE_SWITCH_MODE));
+		return 0;
+	case CS_TYPE::CMD_ENABLE_LOG_POWER:
+		return sizeof(TYPIFY(CMD_ENABLE_LOG_POWER));
+	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
+		return sizeof(TYPIFY(CMD_ENABLE_LOG_CURRENT));
+	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
+		return sizeof(TYPIFY(CMD_ENABLE_LOG_VOLTAGE));
+	case CS_TYPE::CMD_ENABLE_LOG_FILTERED_CURRENT:
+		return sizeof(TYPIFY(CMD_ENABLE_LOG_FILTERED_CURRENT));
+	case CS_TYPE::CMD_RESET_DELAYED:
+		return sizeof(TYPIFY(CMD_RESET_DELAYED));
+	case CS_TYPE::CMD_ENABLE_ADVERTISEMENT:
+		return sizeof(TYPIFY(CMD_ENABLE_ADVERTISEMENT));
+	case CS_TYPE::CMD_ENABLE_MESH:
+		return sizeof(TYPIFY(CMD_ENABLE_MESH));
+	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
+		return 0;
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT:
+		return sizeof(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT));
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
+		return sizeof(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE));
+	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
+		return 0;
+	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
+		return 0;
+	case CS_TYPE::CMD_INC_CURRENT_RANGE:
+		return 0;
+	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
+		return 0;
+	case CS_TYPE::CMD_CONTROL_CMD:
+		return sizeof(TYPIFY(CMD_CONTROL_CMD));
+	case CS_TYPE::CMD_SET_OPERATION_MODE:
+		return sizeof(TYPIFY(CMD_SET_OPERATION_MODE));
 	}
 	// should never happen
 	return 0;
@@ -839,62 +845,53 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: return "EVT_ADVERTISEMENT_UPDATED";
 	case CS_TYPE::EVT_BLE_CONNECT: return "EVT_BLE_CONNECT";
 	case CS_TYPE::EVT_BLE_DISCONNECT: return "EVT_BLE_DISCONNECT";
-	case CS_TYPE::EVT_BLE_EVENT: return "EVT_BLE_EVENT";
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING: return "EVT_BROWNOUT_IMPENDING";
 	case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD: return "EVT_CHIP_TEMP_ABOVE_THRESHOLD";
 	case CS_TYPE::EVT_CHIP_TEMP_OK: return "EVT_CHIP_TEMP_OK";
-	case CS_TYPE::EVT_CMD_RESET: return "EVT_CMD_RESET";
-	case CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE: return "EVT_CROWNSTONE_SWITCH_MODE";
+	case CS_TYPE::CMD_RESET_DELAYED: return "EVT_CMD_RESET";
+	case CS_TYPE::CMD_SET_OPERATION_MODE: return "CMD_SET_OPERATION_MODE";
 	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD: return "EVT_CURRENT_USAGE_ABOVE_THRESHOLD";
-	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM: return "EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM";
-	case CS_TYPE::EVT_DEC_CURRENT_RANGE: return "EVT_DEC_CURRENT_RANGE";
-	case CS_TYPE::EVT_DEC_VOLTAGE_RANGE: return "EVT_DEC_VOLTAGE_RANGE";
+	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER: return "EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM";
+	case CS_TYPE::CMD_DEC_CURRENT_RANGE: return "EVT_DEC_CURRENT_RANGE";
+	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE: return "EVT_DEC_VOLTAGE_RANGE";
 	case CS_TYPE::EVT_DEVICE_SCANNED: return "EVT_DEVICE_SCANNED";
 	case CS_TYPE::EVT_DIMMER_OFF_FAILURE_DETECTED: return "EVT_DIMMER_OFF_FAILURE_DETECTED";
 	case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED: return "EVT_DIMMER_ON_FAILURE_DETECTED";
-	case CS_TYPE::EVT_DO_RESET_DELAYED: return "EVT_DO_RESET_DELAYED";
-	case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT: return "EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT";
-	case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE: return "EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE";
-	case CS_TYPE::EVT_ENABLE_ADVERTISEMENT: return "EVT_ENABLE_ADVERTISEMENT";
-	case CS_TYPE::EVT_ENABLE_LOG_CURRENT: return "EVT_ENABLE_LOG_CURRENT";
-	case CS_TYPE::EVT_ENABLE_LOG_FILTERED_CURRENT: return "EVT_ENABLE_LOG_FILTERED_CURRENT";
-	case CS_TYPE::EVT_ENABLE_LOG_POWER: return "EVT_ENABLE_LOG_POWER";
-	case CS_TYPE::EVT_ENABLE_LOG_VOLTAGE: return "EVT_ENABLE_LOG_VOLTAGE";
-	case CS_TYPE::EVT_ENABLE_MESH: return "EVT_ENABLE_MESH";
-	case CS_TYPE::EVT_EXTERNAL_STATE_MSG_CHAN_0: return "EVT_EXTERNAL_STATE_MSG_CHAN_0";
-	case CS_TYPE::EVT_EXTERNAL_STATE_MSG_CHAN_1: return "EVT_EXTERNAL_STATE_MSG_CHAN_1";
-	case CS_TYPE::EVT_INC_CURRENT_RANGE: return "EVT_INC_CURRENT_RANGE";
-	case CS_TYPE::EVT_INC_VOLTAGE_RANGE: return "EVT_INC_VOLTAGE_RANGE";
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT: return "EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT";
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE: return "EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE";
+	case CS_TYPE::CMD_ENABLE_ADVERTISEMENT: return "EVT_ENABLE_ADVERTISEMENT";
+	case CS_TYPE::CMD_ENABLE_LOG_CURRENT: return "EVT_ENABLE_LOG_CURRENT";
+	case CS_TYPE::CMD_ENABLE_LOG_FILTERED_CURRENT: return "EVT_ENABLE_LOG_FILTERED_CURRENT";
+	case CS_TYPE::CMD_ENABLE_LOG_POWER: return "EVT_ENABLE_LOG_POWER";
+	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE: return "EVT_ENABLE_LOG_VOLTAGE";
+	case CS_TYPE::CMD_ENABLE_MESH: return "EVT_ENABLE_MESH";
+	case CS_TYPE::CMD_INC_CURRENT_RANGE: return "EVT_INC_CURRENT_RANGE";
+	case CS_TYPE::CMD_INC_VOLTAGE_RANGE: return "EVT_INC_VOLTAGE_RANGE";
 	case CS_TYPE::EVT_KEEP_ALIVE: return "EVT_KEEP_ALIVE";
 	case CS_TYPE::EVT_MESH_TIME: return "EVT_MESH_TIME";
-	case CS_TYPE::EVT_POWER_OFF: return "EVT_POWER_OFF";
-	case CS_TYPE::EVT_POWER_ON: return "EVT_POWER_ON";
+	case CS_TYPE::CMD_SWITCH_OFF: return "EVT_POWER_OFF";
+	case CS_TYPE::CMD_SWITCH_ON: return "EVT_POWER_ON";
 	case CS_TYPE::EVT_POWER_SAMPLES_END: return "EVT_POWER_SAMPLES_END";
 	case CS_TYPE::EVT_POWER_SAMPLES_START: return "EVT_POWER_SAMPLES_START";
-	case CS_TYPE::EVT_POWER_TOGGLE: return "EVT_POWER_TOGGLE";
-	case CS_TYPE::EVT_PWM_ALLOWED: return "EVT_PWM_ALLOWED";
-	case CS_TYPE::EVT_PWM_FORCED_OFF: return "EVT_PWM_FORCED_OFF";
-	case CS_TYPE::EVT_PWM_POWERED: return "EVT_PWM_POWERED";
-	case CS_TYPE::EVT_PWM_TEMP_ABOVE_THRESHOLD: return "EVT_PWM_TEMP_ABOVE_THRESHOLD";
-	case CS_TYPE::EVT_PWM_TEMP_OK: return "EVT_PWM_TEMP_OK";
+	case CS_TYPE::CMD_SWITCH_TOGGLE: return "EVT_POWER_TOGGLE";
+	case CS_TYPE::EVT_DIMMING_ALLOWED: return "EVT_DIMMING_ALLOWED";
+	case CS_TYPE::EVT_DIMMER_FORCED_OFF: return "EVT_DIMMER_FORCED_OFF";
+	case CS_TYPE::EVT_DIMMER_POWERED: return "EVT_DIMMER_POWERED";
+	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD: return "EVT_PWM_TEMP_ABOVE_THRESHOLD";
+	case CS_TYPE::EVT_DIMMER_TEMP_OK: return "EVT_PWM_TEMP_OK";
 	case CS_TYPE::EVT_RELAY_FORCED_ON: return "EVT_RELAY_FORCED_ON";
-	case CS_TYPE::EVT_RX_CONTROL: return "EVT_RX_CONTROL";
-	case CS_TYPE::EVT_SCANNED_DEVICES: return "EVT_SCANNED_DEVICES";
+	case CS_TYPE::CMD_CONTROL_CMD: return "EVT_RX_CONTROL";
 	case CS_TYPE::EVT_SCAN_STARTED: return "EVT_SCAN_STARTED";
 	case CS_TYPE::EVT_SCAN_STOPPED: return "EVT_SCAN_STOPPED";
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED: return "EVT_SCHEDULE_ENTRIES_UPDATED";
 	case CS_TYPE::EVT_SESSION_NONCE_SET: return "EVT_SESSION_NONCE_SET";
 	case CS_TYPE::EVT_SETUP_DONE: return "EVT_SETUP_DONE";
-	case CS_TYPE::EVT_SET_LOG_LEVEL: return "EVT_SET_LOG_LEVEL";
-	case CS_TYPE::EVT_STATE_NOTIFICATION: return "EVT_STATE_NOTIFICATION";
-	case CS_TYPE::EVT_STORAGE_ERASE: return "EVT_STORAGE_ERASE";
-	case CS_TYPE::EVT_STORAGE_WRITE: return "EVT_STORAGE_WRITE";
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: return "EVT_STORAGE_WRITE_DONE";
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: return "EVT_SWITCHCRAFT_ENABLED";
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF: return "EVT_SWITCH_FORCED_OFF";
 	case CS_TYPE::EVT_SWITCH_LOCKED: return "EVT_SWITCH_LOCKED";
 	case CS_TYPE::EVT_TIME_SET: return "EVT_TIME_SET";
-	case CS_TYPE::EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN: return "EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN";
+	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN: return "EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN";
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY: return "STATE_ACCUMULATED_ENERGY";
 	case CS_TYPE::STATE_ERRORS: return "STATE_ERRORS";
 	case CS_TYPE::STATE_ERROR_CHIP_TEMP: return "STATE_ERROR_CHIP_TEMP";
@@ -959,12 +956,12 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_UART_ENABLED:
 	case CS_TYPE::STATE_RESET_COUNTER:
 	case CS_TYPE::STATE_OPERATION_MODE:
+	case CS_TYPE::STATE_SWITCH_STATE:
+	case CS_TYPE::STATE_SCHEDULE:
 		return PersistenceMode::STRATEGY1;
 	case CS_TYPE::CONFIG_DO_NOT_USE:
-	case CS_TYPE::STATE_SWITCH_STATE:
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
-	case CS_TYPE::STATE_SCHEDULE:
 	case CS_TYPE::STATE_TEMPERATURE:
 	case CS_TYPE::STATE_TIME:
 	case CS_TYPE::STATE_FACTORY_RESET:
@@ -975,17 +972,16 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_ERROR_DIMMER_TEMP:
 	case CS_TYPE::STATE_ERROR_DIMMER_ON_FAILURE:
 	case CS_TYPE::STATE_ERROR_DIMMER_OFF_FAILURE:
-	case CS_TYPE::EVT_POWER_OFF:
-	case CS_TYPE::EVT_POWER_ON:
-	case CS_TYPE::EVT_POWER_TOGGLE:
+	case CS_TYPE::CMD_SWITCH_OFF:
+	case CS_TYPE::CMD_SWITCH_ON:
+	case CS_TYPE::CMD_SWITCH_TOGGLE:
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 	case CS_TYPE::EVT_SCAN_STARTED:
 	case CS_TYPE::EVT_SCAN_STOPPED:
-	case CS_TYPE::EVT_SCANNED_DEVICES:
 	case CS_TYPE::EVT_DEVICE_SCANNED:
 	case CS_TYPE::EVT_POWER_SAMPLES_START:
 	case CS_TYPE::EVT_POWER_SAMPLES_END:
-	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM:
+	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
 	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
 	case CS_TYPE::EVT_DIMMER_OFF_FAILURE_DETECTED:
@@ -996,50 +992,42 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	//case CS_TYPE::EVT_CHARACTERISTICS_UPDATED:
 	case CS_TYPE::EVT_MESH_TIME:
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
-	case CS_TYPE::EVT_BLE_EVENT:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
-	case CS_TYPE::EVT_STATE_NOTIFICATION:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
 	case CS_TYPE::EVT_KEEP_ALIVE:
-	case CS_TYPE::EVT_PWM_FORCED_OFF:
+	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
 	case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_CHIP_TEMP_OK:
-	case CS_TYPE::EVT_PWM_TEMP_ABOVE_THRESHOLD:
-	case CS_TYPE::EVT_PWM_TEMP_OK:
-	case CS_TYPE::EVT_EXTERNAL_STATE_MSG_CHAN_0:
-	case CS_TYPE::EVT_EXTERNAL_STATE_MSG_CHAN_1:
+	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
+	case CS_TYPE::EVT_DIMMER_TEMP_OK:
 	case CS_TYPE::EVT_TIME_SET:
-	case CS_TYPE::EVT_PWM_POWERED:
-	case CS_TYPE::EVT_PWM_ALLOWED:
+	case CS_TYPE::EVT_DIMMER_POWERED:
+	case CS_TYPE::EVT_DIMMING_ALLOWED:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 	case CS_TYPE::EVT_SETUP_DONE:
-	case CS_TYPE::EVT_DO_RESET_DELAYED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
-	case CS_TYPE::EVT_STORAGE_WRITE:
-	case CS_TYPE::EVT_STORAGE_ERASE:
 	case CS_TYPE::EVT_ADC_RESTARTED:
-	case CS_TYPE::EVT_SET_LOG_LEVEL:
-	case CS_TYPE::EVT_ENABLE_LOG_POWER:
-	case CS_TYPE::EVT_ENABLE_LOG_CURRENT:
-	case CS_TYPE::EVT_ENABLE_LOG_VOLTAGE:
-	case CS_TYPE::EVT_ENABLE_LOG_FILTERED_CURRENT:
-	case CS_TYPE::EVT_CMD_RESET:
-	case CS_TYPE::EVT_ENABLE_ADVERTISEMENT:
-	case CS_TYPE::EVT_ENABLE_MESH:
-	case CS_TYPE::EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
-	case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT:
-	case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
-	case CS_TYPE::EVT_INC_VOLTAGE_RANGE:
-	case CS_TYPE::EVT_DEC_VOLTAGE_RANGE:
-	case CS_TYPE::EVT_INC_CURRENT_RANGE:
-	case CS_TYPE::EVT_DEC_CURRENT_RANGE:
-	case CS_TYPE::EVT_RX_CONTROL:
-	case CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE:
+	case CS_TYPE::CMD_ENABLE_LOG_POWER:
+	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
+	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
+	case CS_TYPE::CMD_ENABLE_LOG_FILTERED_CURRENT:
+	case CS_TYPE::CMD_RESET_DELAYED:
+	case CS_TYPE::CMD_ENABLE_ADVERTISEMENT:
+	case CS_TYPE::CMD_ENABLE_MESH:
+	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT:
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
+	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
+	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
+	case CS_TYPE::CMD_INC_CURRENT_RANGE:
+	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
+	case CS_TYPE::CMD_CONTROL_CMD:
+	case CS_TYPE::CMD_SET_OPERATION_MODE:
 		return PersistenceMode::RAM;
 	}
 	// should not reach this
@@ -1203,7 +1191,7 @@ constexpr void getDefault(cs_file_data_t & data) {
 		*(TYPIFY(STATE_POWER_USAGE)*)data.value = STATE_POWER_USAGE_DEFAULT;
 		break;
 	case CS_TYPE::STATE_SCHEDULE:
-		*(TYPIFY(STATE_SCHEDULE)*)data.value = schedule_list_t(STATE_SCHEDULE_DEFAULT);
+		*(TYPIFY(STATE_SCHEDULE)*)data.value = schedule_list_t(STATE_SCHEDULE_DEFAULT); // This is a copy
 		break;
 	case CS_TYPE::STATE_OPERATION_MODE:
 		*(TYPIFY(STATE_OPERATION_MODE)*)data.value = STATE_OPERATION_MODE_DEFAULT;

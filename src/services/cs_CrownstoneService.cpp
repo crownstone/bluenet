@@ -193,7 +193,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 	// handled in the commandHandler
 
 	cs_ret_code_t errCode;
-	CommandHandlerTypes type = CMD_UNKNOWN;
+	CommandHandlerTypes type = CTRL_CMD_UNKNOWN;
 	MasterBuffer& mb = MasterBuffer::getInstance();
 	// at this point it is too late to check if mb was locked, because the softdevice doesn't care
 	// if the mb was locked, it writes to the buffer in any case
@@ -484,39 +484,27 @@ cs_ret_code_t CrownstoneService::stateOnWrite(const EncryptionAccessLevel access
     uint8_t opCode = _streamBuffer->opCode();
 
     switch (opCode) {
-    case OPCODE_NOTIFY_VALUE: {
-	if (_streamBuffer->length() == 1) {
-	    bool enable = *((bool*) _streamBuffer->payload());
-	    State::getInstance().setNotify(type, enable);
-	    errCode = ERR_SUCCESS;
-	}
-	else {
-	    LOGe(FMT_WRONG_PAYLOAD_LENGTH, _streamBuffer->length());
-	    errCode = ERR_WRONG_PAYLOAD_LENGTH;
-	}
-	// No break, fall through to read value.
-    }
     case OPCODE_READ_VALUE: {
-	errCode = State::getInstance().readFromStorage(type, _streamBuffer);
-	LOGd(FMT_SELECT_TYPE, STR_CHAR_STATE, type);
-	if (SUCCESS(errCode)) {
-	    _streamBuffer->setOpCode(OPCODE_READ_VALUE);
-	    _stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
-	    _stateReadCharacteristic->updateValue();
+    	errCode = State::getInstance().readFromStorage(type, _streamBuffer);
+    	LOGd(FMT_SELECT_TYPE, STR_CHAR_STATE, type);
+    	if (SUCCESS(errCode)) {
+    		_streamBuffer->setOpCode(OPCODE_READ_VALUE);
+    		_stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
+    		_stateReadCharacteristic->updateValue();
 
-	    // Writing the error code would overwrite the value on the read characteristic.
-	    writeErrCode = false;
-	}
-	break;
+    		// Writing the error code would overwrite the value on the read characteristic.
+    		writeErrCode = false;
+    	}
+    	break;
     }
     case OPCODE_WRITE_VALUE: {
-	LOGd(FMT_WRITE_TYPE, STR_CHAR_STATE, type);
-	errCode = State::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length(), 
-		PersistenceMode::STRATEGY1);
-	break;
+    	LOGd(FMT_WRITE_TYPE, STR_CHAR_STATE, type);
+    	errCode = State::getInstance().writeToStorage(type, _streamBuffer->payload(), _streamBuffer->length(),
+    			PersistenceMode::STRATEGY1);
+    	break;
     }
     default:
-	errCode = ERR_UNKNOWN_OP_CODE;
+    	errCode = ERR_UNKNOWN_OP_CODE;
     }
     mb.unlock();
     return errCode;
@@ -524,50 +512,35 @@ cs_ret_code_t CrownstoneService::stateOnWrite(const EncryptionAccessLevel access
 
 
 void CrownstoneService::handleEvent(event_t & event) {
-    switch(event.type) {
-    case CS_TYPE::EVT_SESSION_NONCE_SET: {
-	// Check if this characteristic exists first. In case of setup mode it does not for instance.
-	if (_sessionNonceCharacteristic != NULL) {
-	    _sessionNonceCharacteristic->setValueLength(event.size);
-	    _sessionNonceCharacteristic->setValue((TYPIFY(EVT_SESSION_NONCE_SET) *) event.data);
-	    _sessionNonceCharacteristic->updateValue(ECB_GUEST_CAFEBABE);
+	switch(event.type) {
+	case CS_TYPE::EVT_SESSION_NONCE_SET: {
+		// Check if this characteristic exists first. In case of setup mode it does not for instance.
+		if (_sessionNonceCharacteristic != NULL) {
+			_sessionNonceCharacteristic->setValueLength(event.size);
+			_sessionNonceCharacteristic->setValue((uint8_t*)event.data);
+			_sessionNonceCharacteristic->updateValue(ECB_GUEST_CAFEBABE);
+		}
+		break;
 	}
-	break;
-    }
-    case CS_TYPE::EVT_BLE_CONNECT: {
-	// Check if this characteristic exists first. In case of setup mode it does not for instance.
-	if (_factoryResetCharacteristic != NULL) {
-	    _factoryResetCharacteristic->operator=(0);
+	case CS_TYPE::EVT_BLE_CONNECT: {
+		// Check if this characteristic exists first. In case of setup mode it does not for instance.
+		if (_factoryResetCharacteristic != NULL) {
+			_factoryResetCharacteristic->operator=(0);
+		}
+		break;
 	}
-	break;
-    }
-    case CS_TYPE::EVT_BLE_DISCONNECT: {
-	//! Check if this characteristic exists first. In case of setup mode it does not for instance.
-	if (_sessionNonceCharacteristic != NULL) {
-	    _sessionNonceCharacteristic->setValueLength(0);
+	case CS_TYPE::EVT_BLE_DISCONNECT: {
+		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
+		if (_sessionNonceCharacteristic != NULL) {
+			_sessionNonceCharacteristic->setValueLength(0);
+		}
+		break;
 	}
-	break;
-    }
-    case CS_TYPE::EVT_STATE_NOTIFICATION: {
-	if (_stateReadCharacteristic != NULL) {
-	    state_vars_notifaction notification = *(state_vars_notifaction*)event.data;
-	    //			log(SERIAL_DEBUG, "send notification for %d, value:", notification.type);
-	    //			BLEutil::printArray(notification.data, notification.dataLength);
-
-	    _streamBuffer->setPayload(notification.data, notification.dataLength);
-	    _streamBuffer->setType(notification.type);
-	    _streamBuffer->setOpCode(OPCODE_NOTIFY_VALUE);
-
-	    _stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
-	    _stateReadCharacteristic->updateValue();
+	case CS_TYPE::EVT_SETUP_DONE: {
+		controlWriteErrorCode(CTRL_CMD_SETUP, ERR_SUCCESS);
+		break;
 	}
-	break;
-    }
-    case CS_TYPE::EVT_SETUP_DONE: {
-	controlWriteErrorCode(CMD_SETUP, ERR_SUCCESS);
-	break;
-    }
-    default: {}
-    }
+	default: {}
+	}
 }
 

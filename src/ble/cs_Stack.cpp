@@ -911,7 +911,8 @@ void Stack::on_ble_evt(const ble_evt_t * p_ble_evt) {
 				}
 			}
 
-		} else {
+		}
+		else {
 			for (Service* svc : _services) {
 				svc->on_write(p_ble_evt->evt.gatts_evt.params.write, p_ble_evt->evt.gatts_evt.params.write.handle);
 			}
@@ -943,7 +944,15 @@ void Stack::on_ble_evt(const ble_evt_t * p_ble_evt) {
 	}
 
 	case BLE_GAP_EVT_ADV_REPORT: {
-		event_t event(CS_TYPE::EVT_BLE_EVENT, (void*)p_ble_evt, sizeof(p_ble_evt));
+		const ble_gap_evt_adv_report_t* advReport = &(p_ble_evt->evt.gap_evt.params.adv_report);
+		scanned_device_t scan;
+		memcpy(scan.address, advReport->peer_addr.addr, sizeof(scan.address));
+		scan.rssi = advReport->rssi;
+		scan.channel = advReport->ch_index;
+		scan.dataSize = advReport->data.len;
+		scan.data = advReport->data.p_data;
+
+		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&scan, sizeof(scan));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}

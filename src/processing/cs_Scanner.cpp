@@ -39,15 +39,6 @@ Scanner::Scanner() :
 	_appTimerData = { {0} };
 	_appTimerId = &_appTimerData;
 #endif
-
-	_scanResult = new ScanResult();
-
-	//! [29.01.16] the scan result needs it's own buffer, not the master buffer,
-	//! since it is now decoupled from writing to a characteristic.
-	//! if we used the master buffer we would overwrite the scan results
-	//! if we write / read from a characteristic that uses the master buffer
-	//! during a scan!
-	_scanResult->assign(_scanBuffer, sizeof(_scanBuffer));
 }
 
 void Scanner::init() {
@@ -70,7 +61,6 @@ void Scanner::manualStartScan() {
 	}
 
 //	LOGi(FMT_INIT, "scan result");
-	_scanResult->clear();
 	_scanning = true;
 
 	if (!_stack->isScanning()) {
@@ -104,10 +94,6 @@ bool Scanner::isScanning() {
 	}
 
 	return _scanning && _stack->isScanning();
-}
-
-ScanResult* Scanner::getResults() {
-	return _scanResult;
 }
 
 void Scanner::staticTick(Scanner* ptr) {
@@ -192,16 +178,6 @@ void Scanner::executeScan() {
 		//! Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanSendDelay), this);
 
-		_opCode = SCAN_SEND_RESULT;
-		break;
-	}
-	case SCAN_SEND_RESULT: {
-
-		notifyResults();
-
-		//! Wait SCAN_BREAK ms, then start scanning again
-		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
-
 		_opCode = SCAN_START;
 		break;
 	}
@@ -209,70 +185,8 @@ void Scanner::executeScan() {
 
 }
 
-void Scanner::notifyResults() {
-
-#ifdef PRINT_SCANNER_VERBOSE
-	LOGd("Notify scan results");
-#endif
-
-#if BUILD_MESHING == 1
-	if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
-		MeshControl::getInstance().sendScanMessage(_scanResult->getList()->list, _scanResult->getSize());
-	}
-#endif
-
-	buffer_ptr_t buffer;
-	uint16_t length;
-	_scanResult->getBuffer(buffer, length);
-
-	event_t event(CS_TYPE::EVT_SCANNED_DEVICES, buffer, length);
-	EventDispatcher::getInstance().dispatch(event);
-}
-
-void Scanner::onBleEvent(ble_evt_t * p_ble_evt) {
-
-	switch (p_ble_evt->header.evt_id) {
-	case BLE_GAP_EVT_ADV_REPORT:
-		onAdvertisement(&p_ble_evt->evt.gap_evt.params.adv_report);
-		break;
-	}
-}
-
-bool Scanner::isFiltered(data_t* p_adv_data) {
-	return false;
-}
-
-/** Advertisement handler
- *
- * We do so-called "active" scanning. This means we will get a scan response besides the advertisement packet itself
- * when the device we are scanning for supports this. For now we ignore devices that do not send a scan response.
- * The advantage is that we avoid handling a device twice (once for the advertisement and once for the scan response).
- * This is of course only useful as long as we do not care about the advertisement data.
- */
-void Scanner::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
-
-	if (!isScanning()) return;
-
-	event_t event(CS_TYPE::EVT_DEVICE_SCANNED, p_adv_report, sizeof(ble_gap_evt_adv_report_t));
-	EventDispatcher::getInstance().dispatch(event);
-	if (p_adv_report->type.scan_response) {
-		data_t adv_data;
-
-		adv_data.p_data = p_adv_report->data.p_data;
-		adv_data.data_len = p_adv_report->data.len;
-
-		if (!isFiltered(&adv_data)) {
-			_scanResult->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
-		}
-	}
-}
-
 void Scanner::handleEvent(event_t & event) {
 	switch (event.type) {
-		case CS_TYPE::EVT_BLE_EVENT: {
-			onBleEvent((ble_evt_t*)event.data);
-			return;
-		}
 		case CS_TYPE::CONFIG_SCAN_DURATION: {
 			_scanDuration = *(TYPIFY(CONFIG_SCAN_DURATION)*)event.data;
 			break;

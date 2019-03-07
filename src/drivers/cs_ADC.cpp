@@ -602,14 +602,6 @@ void ADC::stopTimeout() {
 
 void ADC::handleEvent(event_t & event) {
 	switch(event.type) {
-		case CS_TYPE::EVT_STORAGE_WRITE: {
-			//		stop();
-			break;
-		}
-		case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
-			//		start();
-			break;
-		}
 		default: {}
 	}
 }

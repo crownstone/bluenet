@@ -30,8 +30,6 @@ public:
 
 	bool isScanning();
 
-	ScanResult* getResults();
-
 	static void staticTick(Scanner* ptr);
 
 	void init();
@@ -53,7 +51,6 @@ private:
 	enum SCAN_OP_CODE {
 		SCAN_START,
 		SCAN_STOP,
-		SCAN_SEND_RESULT
 	};
 
 	SCAN_OP_CODE _opCode;
@@ -83,15 +80,12 @@ private:
 
 	Stack* _stack;
 
-	uint8_t _scanBuffer[sizeof(peripheral_device_list_t)];
-	ScanResult* _scanResult;
+//	uint8_t _scanBuffer[sizeof(peripheral_device_list_t)];
+//	ScanResult* _scanResult;
 
 	Scanner();
 
-	bool isFiltered(data_t* p_adv_data);
-
 	void executeScan();
-	void notifyResults();
 
 	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
 };

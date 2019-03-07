@@ -25,14 +25,15 @@ public:
 		ptr->tick();
 	}
 
+	/**
+	 * Returns the current time as posix time
+	 * returns 0 when no time was set yet
+	 */
 	inline uint32_t getTime() {
 		return _posixTimeStamp;
 	}
 
-	// todo: move time / set time to separate class
-	/** Returns the current time as posix time
-	 * returns 0 when no time was set yet
-	 */
+	// TODO: move time / set time to separate class
 	void setTime(uint32_t time);
 
 	void start() {

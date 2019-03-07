@@ -85,7 +85,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::STRATEGY1);
 
 	// Switch relay on
-	event_t event0(CS_TYPE::EVT_POWER_ON);
+	event_t event0(CS_TYPE::CMD_SWITCH_ON);
 	EventDispatcher::getInstance().dispatch(event0);
 
 	// Reboot will be done when persistent storage is done.
@@ -132,10 +132,10 @@ void Setup::handleEvent(event_t & event) {
 			}
 
 			// reset after 1000 ms
-			evt_do_reset_delayed_t payload;
-			payload.resetCode = GPREGRET_SOFT_RESET;
-			payload.delayMs = 1000;
-			event_t event2(CS_TYPE::EVT_DO_RESET_DELAYED, &payload, sizeof(payload));
+			reset_delayed_t resetDelayed;
+			resetDelayed.resetCode = GPREGRET_SOFT_RESET;
+			resetDelayed.delayMs = 1000;
+			event_t event2(CS_TYPE::CMD_RESET_DELAYED, &resetDelayed, sizeof(resetDelayed));
 			EventDispatcher::getInstance().dispatch(event2);
 		}
 		else {

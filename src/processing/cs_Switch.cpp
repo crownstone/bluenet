@@ -119,7 +119,7 @@ void Switch::start() {
 	bool switchcraftEnabled = State::getInstance().isSet(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
 	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0)) {
 		_pwmPowered = true;
-		event_t event(CS_TYPE::EVT_PWM_POWERED);
+		event_t event(CS_TYPE::EVT_DIMMER_POWERED);
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
@@ -166,7 +166,7 @@ void Switch::startPwm() {
 		_relayOff();
 		storeState(oldVal);
 	}
-	event_t event(CS_TYPE::EVT_PWM_POWERED);
+	event_t event(CS_TYPE::EVT_DIMMER_POWERED);
 	EventDispatcher::getInstance().dispatch(event);
 }
 
@@ -528,7 +528,7 @@ void Switch::forcePwmOff() {
 	switch_state_t oldVal = _switchValue;
 	_setPwm(0);
 	storeState(oldVal);
-	event_t event(CS_TYPE::EVT_PWM_FORCED_OFF);
+	event_t event(CS_TYPE::EVT_DIMMER_FORCED_OFF);
 	EventDispatcher::getInstance().dispatch(event);
 }
 
@@ -587,14 +587,14 @@ bool Switch::allowRelayOn() {
 
 void Switch::handleEvent(event_t & event) {
 	switch(event.type) {
-		case CS_TYPE::EVT_POWER_ON:
-		case CS_TYPE::EVT_POWER_OFF:
-		case CS_TYPE::EVT_POWER_TOGGLE: {
+		case CS_TYPE::CMD_SWITCH_ON:
+		case CS_TYPE::CMD_SWITCH_OFF:
+		case CS_TYPE::CMD_SWITCH_TOGGLE: {
 			toggle();
 			break;
 		}
-		case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM:
-		case CS_TYPE::EVT_PWM_TEMP_ABOVE_THRESHOLD:
+		case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
+		case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
 		case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
 			// First set relay on, so that the switch doesn't first turn off, and later on again.
 			// The relay protects the dimmer, because the current will flow through the relay.
@@ -605,8 +605,8 @@ void Switch::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
 			forceSwitchOff();
 			break;
-		case CS_TYPE::EVT_PWM_ALLOWED:
-			if (*(TYPIFY(EVT_PWM_ALLOWED)*)event.data == false) {
+		case CS_TYPE::EVT_DIMMING_ALLOWED:
+			if (*(TYPIFY(EVT_DIMMING_ALLOWED)*)event.data == false) {
 				pwmNotAllowed();
 			}
 			break;

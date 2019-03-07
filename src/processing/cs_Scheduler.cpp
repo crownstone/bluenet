@@ -39,12 +39,12 @@ Scheduler::Scheduler() :
 }
 
 
-// todo: move time / set time to separate class
-/** Returns the current time as posix time
- * returns 0 when no time was set yet
- */
+// TODO: move time / set time to separate class
 void Scheduler::setTime(uint32_t time) {
 	LOGi("Set time to %i", time);
+	if (time == 0) {
+		return;
+	}
 
 	// Update time
 	int64_t diff = time - _posixTimeStamp;
@@ -136,7 +136,11 @@ void Scheduler::writeScheduleList(bool store) {
 	buffer_ptr_t buffer;
 	uint16_t size;
 	_scheduleList->getBuffer(buffer, size);
+	// TODO: schedule list is in ram 2x, should be possible to not have a copy.
 	State::getInstance().set(CS_TYPE::STATE_SCHEDULE, buffer, size, PersistenceMode::STRATEGY1);
+//	if (store) {
+	// TODO: only write to flash when store is true
+//	}
 }
 
 void Scheduler::readScheduleList() {

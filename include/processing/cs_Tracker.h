@@ -30,8 +30,6 @@ public:
 
 	void readTrackedDevices();
 
-	void onBleEvent(ble_evt_t * p_ble_evt);
-
 	void startTracking();
 
 	void stopTracking();
@@ -57,7 +55,7 @@ protected:
 
 	void publishTrackedDevices();
 
-	void onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report);
+	void onAdvertisement(scanned_device_t* scan);
 
 private:
 	Tracker();

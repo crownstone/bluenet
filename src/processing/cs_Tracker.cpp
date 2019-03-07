@@ -47,10 +47,10 @@ void Tracker::init() {
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) Tracker::staticTick);
 }
 
-void Tracker::onAdvertisement(ble_gap_evt_adv_report_t* p_adv_report) {
+void Tracker::onAdvertisement(scanned_device_t* scan) {
 //	if (isTracking()) {
 		if (isTracking() && _trackedDeviceList != NULL) {
-			_trackedDeviceList->update(p_adv_report->peer_addr.addr, p_adv_report->rssi);
+			_trackedDeviceList->update(scan->address, scan->rssi);
 		}
 //	}
 }
@@ -186,15 +186,6 @@ TrackedDeviceList* Tracker::getTrackedDevices() {
 	return _trackedDeviceList;
 }
 
-void Tracker::onBleEvent(ble_evt_t * p_ble_evt) {
-
-	switch (p_ble_evt->header.evt_id) {
-	case BLE_GAP_EVT_ADV_REPORT:
-		onAdvertisement(&p_ble_evt->evt.gap_evt.params.adv_report);
-		break;
-	}
-}
-
 bool Tracker::isTracking() {
 //	if (!_stack) {
 //		LOGe(STR_ERR_FORGOT_TO_ASSIGN_STACK);
@@ -261,8 +252,10 @@ void Tracker::handleTrackedDeviceCommand(buffer_ptr_t buffer, uint16_t size) {
 
 void Tracker::handleEvent(event_t & event) {
 	switch (event.type) {
-		case CS_TYPE::EVT_BLE_EVENT: {
-			onBleEvent((ble_evt_t*)event.data);
+		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			if (event.size == sizeof(scanned_device_t)) {
+				onAdvertisement((scanned_device_t*)event.data);
+			}
 			break;
 		}
 		default: {}

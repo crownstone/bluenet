@@ -362,30 +362,6 @@ bool State::isSet(CS_TYPE type) {
 	return enabled;
 }
 
-bool State::isNotifying(CS_TYPE type) {
-	std::vector<CS_TYPE>::iterator it = find(_notifyingStates.begin(), _notifyingStates.end(), type);
-	return it != _notifyingStates.end();
-}
-
-void State::setNotify(CS_TYPE type, bool enable) {
-	if (enable) {
-		if (!isNotifying(type)) {
-			_notifyingStates.push_back(type);
-			_notifyingStates.shrink_to_fit();
-		}
-	} else {
-		std::vector<CS_TYPE>::iterator it = find(_notifyingStates.begin(), _notifyingStates.end(), type);
-		if (it != _notifyingStates.end()) {
-			_notifyingStates.erase(it);
-			_notifyingStates.shrink_to_fit();
-		}
-	}
-}
-
-void State::disableNotifications() {
-	_notifyingStates.clear();
-}
-
 void State::factoryReset(uint32_t resetCode) {
 	if (resetCode != FACTORY_RESET_CODE) {
 		LOGe("Wrong reset code!");

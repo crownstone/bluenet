@@ -43,11 +43,7 @@ public:
 	 */
 	void init(const boards_config_t* board);
 
-	/** Handle a particular command directly.
-	 *
-	 * Examples of the types of commands that can be given to the CommandHandler: CMD_NOP, CMD_GOTO_DFU, CMD_RESET,
-	 * CMD_ENABLE_MESH, CMD_ENABLE_ENCRYPTION, CMD_ENABLE_IBEACON, CMD_ENABLE_SCANNER, CMD_SCAN_DEVICES,
-	 * CMD_REQUEST_SERVICE_DATA, and many more.
+	/** Handle a command without payload, and assuming admin level access.
 	 */
 	cs_ret_code_t handleCommand(const CommandHandlerTypes type);
 
@@ -93,7 +89,6 @@ private:
 	cs_ret_code_t handleCmdEnableEncryption      (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdEnableIbeacon         (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdEnableScanner         (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	cs_ret_code_t handleCmdScanDevices           (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdRequestServiceData    (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdFactoryReset          (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdSetTime               (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);

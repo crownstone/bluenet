@@ -387,9 +387,9 @@ inline bool pop_state_item(state_message_t* message, state_item_t* item) {
 //! Maximum size of id list + command payload
 #define MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH (MAX_MESH_MESSAGE_LENGTH - MIN_COMMAND_HEADER_SIZE)
 
-using control_mesh_message_t = stream_t<uint8_t, (MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)>;
-using config_mesh_message_t =  stream_t<uint8_t, (MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)>;
-using state_mesh_message_t =   stream_t<uint8_t, (MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)>;
+using control_mesh_message_t = stream_buffer_t<uint8_t, (MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)>;
+using config_mesh_message_t =  stream_buffer_t<uint8_t, (MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)>;
+using state_mesh_message_t =   stream_buffer_t<uint8_t, (MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH - SB_HEADER_SIZE)>;
 
 /** Beacon mesh message
  */
@@ -520,7 +520,7 @@ struct __attribute__((__packed__)) status_reply_item_t {
  */
 struct __attribute__((__packed__)) config_reply_item_t {
 	stone_id_t id;
-	stream_t<uint8_t, MAX_CONFIG_REPLY_DATA_LENGTH> data;
+	stream_buffer_t<uint8_t, MAX_CONFIG_REPLY_DATA_LENGTH> data;
 };
 
 #define MAX_STATE_REPLY_DATA_LENGTH (MAX_REPLY_LIST_SIZE - sizeof(stone_id_t) - SB_HEADER_SIZE)
@@ -531,7 +531,7 @@ struct __attribute__((__packed__)) config_reply_item_t {
  */
 struct __attribute__((__packed__)) state_reply_item_t {
 	stone_id_t id;
-	stream_t<uint8_t, MAX_STATE_REPLY_DATA_LENGTH> data;
+	stream_buffer_t<uint8_t, MAX_STATE_REPLY_DATA_LENGTH> data;
 };
 
 /** Reply for any type of message.

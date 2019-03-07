@@ -272,19 +272,19 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 
 	switch (header->opCode) {
 	    case UART_OPCODE_RX_CONTROL: {
-		event_t event(CS_TYPE::EVT_RX_CONTROL, payload, header->size);
+		event_t event(CS_TYPE::CMD_CONTROL_CMD, payload, header->size);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_ENABLE_ADVERTISEMENT: {
 		if (header->size < 1) { break; }
-		event_t event(CS_TYPE::EVT_ENABLE_ADVERTISEMENT, payload, 1);
+		event_t event(CS_TYPE::CMD_ENABLE_ADVERTISEMENT, payload, 1);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_ENABLE_MESH: {
 		if (header->size < 1) { break; }
-		event_t event(CS_TYPE::EVT_ENABLE_MESH, payload, 1);
+		event_t event(CS_TYPE::CMD_ENABLE_MESH, payload, 1);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
@@ -303,61 +303,61 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 		break;
 	    }
 	    case UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_CURRENT: {
-		event_t event(CS_TYPE::EVT_INC_CURRENT_RANGE);
+		event_t event(CS_TYPE::CMD_INC_CURRENT_RANGE);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_CURRENT: {
-		event_t event(CS_TYPE::EVT_DEC_CURRENT_RANGE);
+		event_t event(CS_TYPE::CMD_DEC_CURRENT_RANGE);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_VOLTAGE: {
-		event_t event(CS_TYPE::EVT_INC_VOLTAGE_RANGE);
+		event_t event(CS_TYPE::CMD_INC_VOLTAGE_RANGE);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_VOLTAGE: {
-		event_t event(CS_TYPE::EVT_DEC_VOLTAGE_RANGE);
+		event_t event(CS_TYPE::CMD_DEC_VOLTAGE_RANGE);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_CURRENT: {
-		event_t event(CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT, payload, 1);
+		event_t event(CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT, payload, 1);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_VOLTAGE: {
-		event_t event(CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE, payload, 1);
+		event_t event(CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE, payload, 1);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_ADC_CONFIG_VOLTAGE_PIN: {
-		event_t event(CS_TYPE::EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
+		event_t event(CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_POWER_LOG_CURRENT: {
 		if (header->size < 1) { break; }
-		event_t event(CS_TYPE::EVT_ENABLE_LOG_CURRENT, payload, 1);
+		event_t event(CS_TYPE::CMD_ENABLE_LOG_CURRENT, payload, 1);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_POWER_LOG_VOLTAGE: {
 		if (header->size < 1) { break; }
-		event_t event(CS_TYPE::EVT_ENABLE_LOG_VOLTAGE, payload, 1);
+		event_t event(CS_TYPE::CMD_ENABLE_LOG_VOLTAGE, payload, 1);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_POWER_LOG_FILTERED_CURRENT: {
 		if (header->size < 1) { break; }
-		event_t event(CS_TYPE::EVT_ENABLE_LOG_FILTERED_CURRENT, payload, 1);
+		event_t event(CS_TYPE::CMD_ENABLE_LOG_FILTERED_CURRENT, payload, 1);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }
 	    case UART_OPCODE_RX_POWER_LOG_POWER: {
 		if (header->size < 1) { break; }
-		event_t event(CS_TYPE::EVT_ENABLE_LOG_POWER, payload, 1);
+		event_t event(CS_TYPE::CMD_ENABLE_LOG_POWER, payload, 1);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	    }

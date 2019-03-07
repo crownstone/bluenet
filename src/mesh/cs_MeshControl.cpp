@@ -518,7 +518,7 @@ bool MeshControl::handleControlCommand(control_mesh_message_t* controlMsg, uint1
 	}
 
 	switch(controlType) {
-	case CMD_ENABLE_SCANNER: {
+	case CTRL_CMD_ENABLE_SCANNER: {
 		if (controlPayloadLength < sizeof(enable_scanner_message_payload_t)) {
 			LOGe(FMT_WRONG_PAYLOAD_LENGTH, controlPayloadLength);
 			BLEutil::printArray(controlPayload, controlPayloadLength);
@@ -549,7 +549,7 @@ bool MeshControl::handleControlCommand(control_mesh_message_t* controlMsg, uint1
 		statusResult = CommandHandler::getInstance().handleCommand(controlType, (uint8_t*)&scannerPayload, sizeof(enable_scanner_message_payload_t));
 		return true;
 	}
-	case CMD_REQUEST_SERVICE_DATA: {
+	case CTRL_CMD_REQUEST_SERVICE_DATA: {
 		//! need to delay the sending of the service data or all devices will write their
 		//! service data to the mesh at the same time. so solution for now, use crownstone
 		//! id (if set) as the delay

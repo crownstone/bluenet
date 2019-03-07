@@ -195,37 +195,37 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
 
 void PowerSampling::handleEvent(event_t & event) {
 	switch(event.type) {
-		case CS_TYPE::EVT_ENABLE_LOG_POWER:
-			_logsEnabled.flags.power = *(TYPIFY(EVT_ENABLE_LOG_POWER)*)event.data;
+		case CS_TYPE::CMD_ENABLE_LOG_POWER:
+			_logsEnabled.flags.power = *(TYPIFY(CMD_ENABLE_LOG_POWER)*)event.data;
 			break;
-		case CS_TYPE::EVT_ENABLE_LOG_CURRENT:
-			_logsEnabled.flags.current = *(TYPIFY(EVT_ENABLE_LOG_CURRENT)*)event.data;
+		case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
+			_logsEnabled.flags.current = *(TYPIFY(CMD_ENABLE_LOG_CURRENT)*)event.data;
 			break;
-		case CS_TYPE::EVT_ENABLE_LOG_VOLTAGE:
-			_logsEnabled.flags.voltage = *(TYPIFY(EVT_ENABLE_LOG_VOLTAGE)*)event.data;
+		case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
+			_logsEnabled.flags.voltage = *(TYPIFY(CMD_ENABLE_LOG_VOLTAGE)*)event.data;
 			break;
-		case CS_TYPE::EVT_ENABLE_LOG_FILTERED_CURRENT:
-			_logsEnabled.flags.filteredCurrent = *(TYPIFY(EVT_ENABLE_LOG_FILTERED_CURRENT)*)event.data;
+		case CS_TYPE::CMD_ENABLE_LOG_FILTERED_CURRENT:
+			_logsEnabled.flags.filteredCurrent = *(TYPIFY(CMD_ENABLE_LOG_FILTERED_CURRENT)*)event.data;
 			break;
-		case CS_TYPE::EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
+		case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 			toggleVoltageChannelInput();
 			break;
-		case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT:
-			enableDifferentialModeCurrent(*(TYPIFY(EVT_ENABLE_ADC_DIFFERENTIAL_CURRENT)*)event.data);
+		case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT:
+			enableDifferentialModeCurrent(*(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT)*)event.data);
 			break;
-		case CS_TYPE::EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
-			enableDifferentialModeVoltage(*(TYPIFY(EVT_ENABLE_ADC_DIFFERENTIAL_VOLTAGE)*)event.data);
+		case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
+			enableDifferentialModeVoltage(*(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE)*)event.data);
 			break;
-		case CS_TYPE::EVT_INC_VOLTAGE_RANGE:
+		case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
 			changeRange(VOLTAGE_CHANNEL_IDX, 600);
 			break;
-		case CS_TYPE::EVT_DEC_VOLTAGE_RANGE:
+		case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
 			changeRange(VOLTAGE_CHANNEL_IDX, -600);
 			break;
-		case CS_TYPE::EVT_INC_CURRENT_RANGE:
+		case CS_TYPE::CMD_INC_CURRENT_RANGE:
 			changeRange(CURRENT_CHANNEL_IDX, 600);
 			break;
-		case CS_TYPE::EVT_DEC_CURRENT_RANGE:
+		case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 			changeRange(CURRENT_CHANNEL_IDX, -600);
 			break;
 		case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -323,7 +323,7 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	bool switch_detected = RecognizeSwitch::getInstance().detect(prevIndex, power.voltageIndex);
 	if (switch_detected) {
 		LOGd("Switch event detected!");
-		event_t event(CS_TYPE::EVT_POWER_TOGGLE);
+		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE);
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
@@ -801,7 +801,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 			// If the pwm was on:
 			LOGw("current above pwm threshold");
 			// Dispatch the event that will turn off the pwm
-			event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_PWM);
+			event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER);
 			EventDispatcher::getInstance().dispatch(event);
 			// Set overcurrent error.
 			uint8_t error = 1;

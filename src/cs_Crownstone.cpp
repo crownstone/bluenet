@@ -340,7 +340,6 @@ void Crownstone::configureStack() {
 			_stack->changeToLowTxPowerMode();
 		}
 
-		_state->disableNotifications();
 		// TODO: move this code to stack?
 		_stack->setConnectable();
 		_stack->restartAdvertising();
@@ -502,7 +501,8 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			break;
 		case OperationMode::OPERATION_MODE_DFU: 
 			LOGd("Configure DFU mode");
-			CommandHandler::getInstance().handleCommand(CMD_GOTO_DFU);
+			// TODO: have this function somewhere else.
+			CommandHandler::getInstance().handleCommand(CTRL_CMD_GOTO_DFU);
 			_stack->changeToNormalTxPowerMode();
 			break;
 		default:
@@ -569,7 +569,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {
 				serial_enable(SERIAL_ENABLE_RX_ONLY);
 			}
-
+			break;
 		default:
 			// nothing to be done
 			;
@@ -807,18 +807,19 @@ void Crownstone::handleEvent(event_t & event) {
 			_stack->updateAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data, true);
 			break;
 		}
-		case CS_TYPE::EVT_ENABLE_ADVERTISEMENT: {
-			TYPIFY(EVT_ENABLE_ADVERTISEMENT) enable = *(TYPIFY(EVT_ENABLE_ADVERTISEMENT)*)event.data;
+		case CS_TYPE::CMD_ENABLE_ADVERTISEMENT: {
+			TYPIFY(CMD_ENABLE_ADVERTISEMENT) enable = *(TYPIFY(CMD_ENABLE_ADVERTISEMENT)*)event.data;
 			if (enable) {
 				_stack->startAdvertising();
 			}
 			else {
 				_stack->stopAdvertising();
 			}
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, &enable, 1);
+			// TODO: should be done via event.
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, (uint8_t*)&enable, 1);
 			break;
 		}
-		case CS_TYPE::EVT_ENABLE_MESH: {
+		case CS_TYPE::CMD_ENABLE_MESH: {
 #if BUILD_MESHING == 1
 			uint8_t enable = *(uint8_t*)event.data;
 			if (enable) {
@@ -871,11 +872,7 @@ void Crownstone::handleEvent(event_t & event) {
 			sd_nvic_SystemReset();
 			break;
 		}
-		case CS_TYPE::EVT_CMD_RESET: {
-			CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
-			break;
-		}
-		case CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE: {
+		case CS_TYPE::CMD_SET_OPERATION_MODE: {
 			OperationMode mode = *(OperationMode*)event.data;
 			switchMode(mode);
 			break;

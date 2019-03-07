@@ -95,7 +95,6 @@ cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type) {
 	return handleCommand(type, NULL, 0);
 }
 
-
 cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size, 
 		const EncryptionAccessLevel accessLevel) {
 	LOGd("cmd=%u lvl=%u", type, accessLevel);
@@ -103,75 +102,69 @@ cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type, buff
 		return ERR_NO_ACCESS;
 	}
 	switch (type) {
-	case CMD_NOP:
+	case CTRL_CMD_NOP:
 		return handleCmdNop(buffer, size, accessLevel);
-	case CMD_GOTO_DFU:
+	case CTRL_CMD_GOTO_DFU:
 		return handleCmdGotoDfu(buffer, size, accessLevel);
-	case CMD_RESET:
+	case CTRL_CMD_RESET:
 		return handleCmdReset(buffer, size, accessLevel);
-	case CMD_ENABLE_MESH:
+	case CTRL_CMD_ENABLE_MESH:
 		return handleCmdEnableMesh(buffer, size, accessLevel);
-	case CMD_ENABLE_ENCRYPTION:
+	case CTRL_CMD_ENABLE_ENCRYPTION:
 		return handleCmdEnableEncryption(buffer, size, accessLevel);
-	case CMD_ENABLE_IBEACON:
+	case CTRL_CMD_ENABLE_IBEACON:
 		return handleCmdEnableIbeacon(buffer, size, accessLevel);
-	case CMD_ENABLE_SCANNER:
+	case CTRL_CMD_ENABLE_SCANNER:
 		return handleCmdEnableScanner(buffer, size, accessLevel);
-	case CMD_SCAN_DEVICES:
-		return handleCmdScanDevices(buffer, size, accessLevel);
-	case CMD_REQUEST_SERVICE_DATA:
+	case CTRL_CMD_REQUEST_SERVICE_DATA:
 		return handleCmdRequestServiceData(buffer, size, accessLevel);
-	case CMD_FACTORY_RESET:
+	case CTRL_CMD_FACTORY_RESET:
 		return handleCmdFactoryReset(buffer, size, accessLevel);
-	case CMD_SET_TIME:
+	case CTRL_CMD_SET_TIME:
 		return handleCmdSetTime(buffer, size, accessLevel);
-	case CMD_SCHEDULE_ENTRY_SET:
+	case CTRL_CMD_SCHEDULE_ENTRY_SET:
 		return handleCmdScheduleEntrySet(buffer, size, accessLevel);
-	case CMD_SCHEDULE_ENTRY_CLEAR:
+	case CTRL_CMD_SCHEDULE_ENTRY_CLEAR:
 		return handleCmdScheduleEntryClear(buffer, size, accessLevel);
-	case CMD_INCREASE_TX:
+	case CTRL_CMD_INCREASE_TX:
 		return handleCmdIncreaseTx(buffer, size, accessLevel);
-	case CMD_VALIDATE_SETUP:
-		return handleCmdValidateSetup(buffer, size, accessLevel);
-	case CMD_KEEP_ALIVE:
+	case CTRL_CMD_KEEP_ALIVE:
 		return handleCmdKeepAlive(buffer, size, accessLevel);
-	case CMD_KEEP_ALIVE_STATE:
+	case CTRL_CMD_KEEP_ALIVE_STATE:
 		return handleCmdKeepAliveState(buffer, size, accessLevel);
-	case CMD_KEEP_ALIVE_REPEAT_LAST:
+	case CTRL_CMD_KEEP_ALIVE_REPEAT_LAST:
 		return handleCmdKeepAliveRepeatLast(buffer, size, accessLevel);
-	case CMD_KEEP_ALIVE_MESH:
+	case CTRL_CMD_KEEP_ALIVE_MESH:
 		return handleCmdKeepAliveMesh(buffer, size, accessLevel);
-	case CMD_USER_FEEDBACK:
+	case CTRL_CMD_USER_FEEDBACK:
 		return handleCmdUserFeedBack(buffer, size, accessLevel);
-	case CMD_DISCONNECT:
+	case CTRL_CMD_DISCONNECT:
 		return handleCmdDisconnect(buffer, size, accessLevel);
-	case CMD_SET_LED:
+	case CTRL_CMD_SET_LED:
 		return handleCmdSetLed(buffer, size, accessLevel);
-	case CMD_RESET_ERRORS:
+	case CTRL_CMD_RESET_ERRORS:
 		return handleCmdResetErrors(buffer, size, accessLevel);
-	case CMD_PWM:
+	case CTRL_CMD_PWM:
 		return handleCmdPwm(buffer, size, accessLevel);
-	case CMD_SWITCH:
+	case CTRL_CMD_SWITCH:
 		return handleCmdSwitch(buffer, size, accessLevel);
-	case CMD_RELAY:
+	case CTRL_CMD_RELAY:
 		return handleCmdRelay(buffer, size, accessLevel);
-	case CMD_MULTI_SWITCH:
+	case CTRL_CMD_MULTI_SWITCH:
 		return handleCmdMultiSwitch(buffer, size, accessLevel);
-	case CMD_MESH_COMMAND:
+	case CTRL_CMD_MESH_COMMAND:
 		return handleCmdMeshCommand(buffer, size, accessLevel);
-	case CMD_ENABLE_CONT_POWER_MEASURE:
-		return handleCmdEnableContPowerMeasure(buffer, size, accessLevel);
-	case CMD_ALLOW_DIMMING:
+	case CTRL_CMD_ALLOW_DIMMING:
 		return handleCmdAllowDimming(buffer, size, accessLevel);
-	case CMD_LOCK_SWITCH:
+	case CTRL_CMD_LOCK_SWITCH:
 		return handleCmdLockSwitch(buffer, size, accessLevel);
-	case CMD_SETUP:
+	case CTRL_CMD_SETUP:
 		return handleCmdSetup(buffer, size, accessLevel);
-	case CMD_ENABLE_SWITCHCRAFT:
+	case CTRL_CMD_ENABLE_SWITCHCRAFT:
 		return handleCmdEnableSwitchcraft(buffer, size, accessLevel);
-	case CMD_UART_MSG:
+	case CTRL_CMD_UART_MSG:
 		return handleCmdUartMsg(buffer, size, accessLevel);
-	case CMD_UART_ENABLE:
+	case CTRL_CMD_UART_ENABLE:
 		return handleCmdUartEnable(buffer, size, accessLevel);
 	default:
 		LOGe("Unknown type: %u", type);
@@ -180,14 +173,11 @@ cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type, buff
 	return ERR_SUCCESS;
 }
 
-
-
 cs_ret_code_t CommandHandler::handleCmdNop(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	// A no operation command to keep the connection alive.
 	// No need to do anything here, the connection keep alive is handled in the stack.
 	return ERR_SUCCESS;
 }
-
 
 cs_ret_code_t CommandHandler::handleCmdGotoDfu(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
@@ -196,14 +186,12 @@ cs_ret_code_t CommandHandler::handleCmdGotoDfu(buffer_ptr_t buffer, const uint16
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdReset(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "reset");
 	resetDelayed(GPREGRET_SOFT_RESET);
 	return ERR_SUCCESS;
 }
-
 
 cs_ret_code_t CommandHandler::handleCmdEnableMesh(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
@@ -231,7 +219,6 @@ cs_ret_code_t CommandHandler::handleCmdEnableMesh(buffer_ptr_t buffer, const uin
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdEnableEncryption(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "enable encryption, tbd");
@@ -253,7 +240,6 @@ cs_ret_code_t CommandHandler::handleCmdEnableEncryption(buffer_ptr_t buffer, con
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdEnableIbeacon(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "enable ibeacon");
@@ -271,7 +257,6 @@ cs_ret_code_t CommandHandler::handleCmdEnableIbeacon(buffer_ptr_t buffer, const 
 
 	return ERR_SUCCESS;
 }
-
 
 cs_ret_code_t CommandHandler::handleCmdEnableScanner(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
@@ -307,54 +292,6 @@ cs_ret_code_t CommandHandler::handleCmdEnableScanner(buffer_ptr_t buffer, const 
 	return ERR_SUCCESS;
 }
 
-
-cs_ret_code_t CommandHandler::handleCmdScanDevices(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-	LOGi(STR_HANDLE_COMMAND, "scan devices");
-
-	if (size != sizeof(enable_message_payload_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
-		return ERR_WRONG_PAYLOAD_LENGTH;
-	}
-
-	// TODO: deprecate this function?
-	return ERR_NOT_IMPLEMENTED;
-
-	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-	bool start = payload->enable;
-
-	if (start) {
-		Scanner::getInstance().manualStartScan();
-	}
-	else {
-		// todo: if not tracking. do we need that still?
-//				if (!_trackMode) {
-		Scanner::getInstance().manualStopScan();
-
-		ScanResult* results = Scanner::getInstance().getResults();
-
-#ifdef PRINT_DEBUG
-		results->print();
-#endif
-
-		buffer_ptr_t buffer;
-		uint16_t dataLength;
-		results->getBuffer(buffer, dataLength);
-
-		event_t event(CS_TYPE::EVT_SCANNED_DEVICES, buffer, dataLength);
-		EventDispatcher::getInstance().dispatch(event);
-
-#if BUILD_MESHING == 1
-		if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
-			MeshControl::getInstance().sendScanMessage(results->getList()->list, results->getSize());
-		}
-#endif
-	}
-
-	return ERR_SUCCESS;
-}
-
-
 cs_ret_code_t CommandHandler::handleCmdRequestServiceData(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "request service data");
@@ -389,7 +326,6 @@ cs_ret_code_t CommandHandler::handleCmdRequestServiceData(buffer_ptr_t buffer, c
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdFactoryReset(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "factory reset");
@@ -409,7 +345,6 @@ cs_ret_code_t CommandHandler::handleCmdFactoryReset(buffer_ptr_t buffer, const u
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdSetTime(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "set time:");
@@ -426,7 +361,6 @@ cs_ret_code_t CommandHandler::handleCmdSetTime(buffer_ptr_t buffer, const uint16
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdScheduleEntrySet(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "schedule entry");
@@ -441,7 +375,6 @@ cs_ret_code_t CommandHandler::handleCmdScheduleEntrySet(buffer_ptr_t buffer, con
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdScheduleEntryClear(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	if (size < 1) {
@@ -454,7 +387,6 @@ cs_ret_code_t CommandHandler::handleCmdScheduleEntryClear(buffer_ptr_t buffer, c
 	}
 	return ERR_SUCCESS;
 }
-
 
 cs_ret_code_t CommandHandler::handleCmdIncreaseTx(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "increase TX");
@@ -469,19 +401,11 @@ cs_ret_code_t CommandHandler::handleCmdIncreaseTx(buffer_ptr_t buffer, const uin
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdSetup(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "setup");
 	cs_ret_code_t errCode = Setup::getInstance().handleCommand(buffer, size);
 	return errCode;
 }
-
-
-cs_ret_code_t CommandHandler::handleCmdValidateSetup(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-	LOGi(STR_HANDLE_COMMAND, "validate setup");
-	return ERR_NOT_IMPLEMENTED;
-}
-
 
 cs_ret_code_t CommandHandler::handleCmdKeepAlive(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
@@ -491,7 +415,6 @@ cs_ret_code_t CommandHandler::handleCmdKeepAlive(buffer_ptr_t buffer, const uint
 	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
-
 
 cs_ret_code_t CommandHandler::handleCmdKeepAliveState(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
@@ -507,7 +430,6 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveState(buffer_ptr_t buffer, const
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdKeepAliveRepeatLast(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "keep alive repeat");
@@ -516,7 +438,6 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveRepeatLast(buffer_ptr_t buffer, 
 #endif
 	return ERR_SUCCESS;
 }
-
 
 cs_ret_code_t CommandHandler::handleCmdKeepAliveMesh(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
@@ -529,13 +450,11 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveMesh(buffer_ptr_t buffer, const 
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdUserFeedBack(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "user feedback");
 	return ERR_NOT_IMPLEMENTED;
 }
-
 
 cs_ret_code_t CommandHandler::handleCmdDisconnect(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
@@ -543,7 +462,6 @@ cs_ret_code_t CommandHandler::handleCmdDisconnect(buffer_ptr_t buffer, const uin
 	Stack::getInstance().disconnect();
 	return ERR_SUCCESS;
 }
-
 
 cs_ret_code_t CommandHandler::handleCmdSetLed(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
@@ -577,7 +495,6 @@ cs_ret_code_t CommandHandler::handleCmdSetLed(buffer_ptr_t buffer, const uint16_
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdResetErrors(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "reset errors");
@@ -594,7 +511,6 @@ cs_ret_code_t CommandHandler::handleCmdResetErrors(buffer_ptr_t buffer, const ui
 	State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, sizeof(stateErrors), PersistenceMode::STRATEGY1);
 	return ERR_SUCCESS;
 }
-
 
 cs_ret_code_t CommandHandler::handleCmdPwm(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
@@ -620,7 +536,6 @@ cs_ret_code_t CommandHandler::handleCmdPwm(buffer_ptr_t buffer, const uint16_t s
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdSwitch(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
 		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
@@ -639,7 +554,6 @@ cs_ret_code_t CommandHandler::handleCmdSwitch(buffer_ptr_t buffer, const uint16_
 	Switch::getInstance().setSwitch(payload->switchState);
 	return ERR_SUCCESS;
 }
-
 
 cs_ret_code_t CommandHandler::handleCmdRelay(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
@@ -666,7 +580,6 @@ cs_ret_code_t CommandHandler::handleCmdRelay(buffer_ptr_t buffer, const uint16_t
 	return ERR_SUCCESS;
 }
 
-
 cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "multi switch");
@@ -677,7 +590,6 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 #endif
 	return ERR_SUCCESS;
 }
-
 
 cs_ret_code_t CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
@@ -713,18 +625,6 @@ cs_ret_code_t CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const ui
 	return ERR_SUCCESS;
 }
 
-
-cs_ret_code_t CommandHandler::handleCmdEnableContPowerMeasure(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
-		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
-		return ERR_NOT_AVAILABLE;
-	}
-
-//	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-	LOGi(STR_HANDLE_COMMAND, "enable cont power measure");
-	return ERR_NOT_IMPLEMENTED;
-}
-
 cs_ret_code_t CommandHandler::handleCmdAllowDimming(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "allow dimming");
 
@@ -747,7 +647,7 @@ cs_ret_code_t CommandHandler::handleCmdAllowDimming(buffer_ptr_t buffer, const u
 	}
 
 	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &enable, sizeof(enable), PersistenceMode::STRATEGY1);
-	event_t event(CS_TYPE::EVT_PWM_ALLOWED, &enable, sizeof(bool));
+	event_t event(CS_TYPE::EVT_DIMMING_ALLOWED, &enable, sizeof(bool));
 	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
@@ -824,80 +724,45 @@ cs_ret_code_t CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const uin
 
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
-//	switch (type) {
-//	case CMD_SWITCH:
-//	case CMD_PWM:
-//	case CMD_SET_TIME:
-//	case CMD_GOTO_DFU:
-//	case CMD_RESET:
-//	case CMD_FACTORY_RESET:
-//	case CMD_KEEP_ALIVE_STATE:
-//	case CMD_KEEP_ALIVE:
-//	case CMD_ENABLE_MESH:
-//	case CMD_ENABLE_ENCRYPTION:
-//	case CMD_ENABLE_IBEACON:
-//	case CMD_ENABLE_CONT_POWER_MEASURE:
-//	case CMD_ENABLE_SCANNER:
-//	case CMD_SCAN_DEVICES:
-//	case CMD_USER_FEEDBACK:
-//	case CMD_SCHEDULE_ENTRY_SET:
-//	case CMD_RELAY:
-//	case CMD_VALIDATE_SETUP:
-//	case CMD_REQUEST_SERVICE_DATA:
-//	case CMD_DISCONNECT:
-//	case CMD_SET_LED:
-//	case CMD_NOP:
-//	case CMD_INCREASE_TX:
-//	case CMD_RESET_ERRORS:
-//	case CMD_KEEP_ALIVE_REPEAT_LAST:
-//	case CMD_MULTI_SWITCH:
-//	case CMD_SCHEDULE_ENTRY_CLEAR:
-//	case CMD_KEEP_ALIVE_MESH:
-//	case CMD_MESH_COMMAND:
-//	}
-
 	switch (type) {
-	case CMD_VALIDATE_SETUP:
-	case CMD_INCREASE_TX:
-	case CMD_SETUP:
+	case CTRL_CMD_INCREASE_TX:
+	case CTRL_CMD_SETUP:
 		return GUEST; // These commands are only available in setup mode.
 
-	case CMD_SWITCH:
-	case CMD_PWM:
-	case CMD_RELAY:
-	case CMD_KEEP_ALIVE:
-	case CMD_DISCONNECT:
-	case CMD_NOP:
-	case CMD_KEEP_ALIVE_REPEAT_LAST:
-	case CMD_MULTI_SWITCH:
-	case CMD_MESH_COMMAND:
+	case CTRL_CMD_SWITCH:
+	case CTRL_CMD_PWM:
+	case CTRL_CMD_RELAY:
+	case CTRL_CMD_KEEP_ALIVE:
+	case CTRL_CMD_DISCONNECT:
+	case CTRL_CMD_NOP:
+	case CTRL_CMD_KEEP_ALIVE_REPEAT_LAST:
+	case CTRL_CMD_MULTI_SWITCH:
+	case CTRL_CMD_MESH_COMMAND:
 		return GUEST;
 
-	case CMD_SET_TIME:
-	case CMD_KEEP_ALIVE_STATE:
-	case CMD_SCHEDULE_ENTRY_SET:
-	case CMD_REQUEST_SERVICE_DATA:
-	case CMD_SCHEDULE_ENTRY_CLEAR:
-	case CMD_KEEP_ALIVE_MESH:
+	case CTRL_CMD_SET_TIME:
+	case CTRL_CMD_KEEP_ALIVE_STATE:
+	case CTRL_CMD_SCHEDULE_ENTRY_SET:
+	case CTRL_CMD_REQUEST_SERVICE_DATA:
+	case CTRL_CMD_SCHEDULE_ENTRY_CLEAR:
+	case CTRL_CMD_KEEP_ALIVE_MESH:
 		return MEMBER;
 
-	case CMD_GOTO_DFU:
-	case CMD_RESET:
-	case CMD_FACTORY_RESET:
-	case CMD_ENABLE_MESH:
-	case CMD_ENABLE_ENCRYPTION:
-	case CMD_ENABLE_IBEACON:
-	case CMD_ENABLE_CONT_POWER_MEASURE:
-	case CMD_ENABLE_SCANNER:
-	case CMD_SCAN_DEVICES:
-	case CMD_USER_FEEDBACK:
-	case CMD_SET_LED:
-	case CMD_RESET_ERRORS:
-	case CMD_ALLOW_DIMMING:
-	case CMD_LOCK_SWITCH:
-	case CMD_ENABLE_SWITCHCRAFT:
-	case CMD_UART_MSG:
-	case CMD_UART_ENABLE:
+	case CTRL_CMD_GOTO_DFU:
+	case CTRL_CMD_RESET:
+	case CTRL_CMD_FACTORY_RESET:
+	case CTRL_CMD_ENABLE_MESH:
+	case CTRL_CMD_ENABLE_ENCRYPTION:
+	case CTRL_CMD_ENABLE_IBEACON:
+	case CTRL_CMD_ENABLE_SCANNER:
+	case CTRL_CMD_USER_FEEDBACK:
+	case CTRL_CMD_SET_LED:
+	case CTRL_CMD_RESET_ERRORS:
+	case CTRL_CMD_ALLOW_DIMMING:
+	case CTRL_CMD_LOCK_SWITCH:
+	case CTRL_CMD_ENABLE_SWITCHCRAFT:
+	case CTRL_CMD_UART_MSG:
+	case CTRL_CMD_UART_ENABLE:
 		return ADMIN;
 	default:
 		return NOT_SET;
@@ -906,22 +771,22 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 
 bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 	switch (type) {
-	case CMD_SWITCH:
-	case CMD_PWM:
-	case CMD_RELAY:
-	case CMD_SET_TIME:
-	case CMD_RESET:
-	case CMD_FACTORY_RESET:
-	case CMD_KEEP_ALIVE_STATE:
-	case CMD_KEEP_ALIVE:
-	case CMD_ENABLE_SCANNER:
-	case CMD_USER_FEEDBACK:
-	case CMD_SCHEDULE_ENTRY_SET:
-	case CMD_REQUEST_SERVICE_DATA:
-	case CMD_SET_LED:
-	case CMD_RESET_ERRORS:
-	case CMD_SCHEDULE_ENTRY_CLEAR:
-	case CMD_UART_MSG:
+	case CTRL_CMD_SWITCH:
+	case CTRL_CMD_PWM:
+	case CTRL_CMD_RELAY:
+	case CTRL_CMD_SET_TIME:
+	case CTRL_CMD_RESET:
+	case CTRL_CMD_FACTORY_RESET:
+	case CTRL_CMD_KEEP_ALIVE_STATE:
+	case CTRL_CMD_KEEP_ALIVE:
+	case CTRL_CMD_ENABLE_SCANNER:
+	case CTRL_CMD_USER_FEEDBACK:
+	case CTRL_CMD_SCHEDULE_ENTRY_SET:
+	case CTRL_CMD_REQUEST_SERVICE_DATA:
+	case CTRL_CMD_SET_LED:
+	case CTRL_CMD_RESET_ERRORS:
+	case CTRL_CMD_SCHEDULE_ENTRY_CLEAR:
+	case CTRL_CMD_UART_MSG:
 		return true;
 	default:
 		return false;
@@ -931,23 +796,24 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 
 void CommandHandler::handleEvent(event_t & event) {
 	switch (event.type) {
-		case CS_TYPE::EVT_DO_RESET_DELAYED: {
-			if (event.size != sizeof(evt_do_reset_delayed_t)) {
+		case CS_TYPE::CMD_RESET_DELAYED: {
+			if (event.size != TypeSize(CS_TYPE::CMD_RESET_DELAYED)) {
 				LOGe(FMT_WRONG_PAYLOAD_LENGTH, event.size);
 				return;
 			}
-			evt_do_reset_delayed_t* payload = (evt_do_reset_delayed_t*)event.data;
+			reset_delayed_t* payload = (reset_delayed_t*)event.data;
 			resetDelayed(payload->resetCode, payload->delayMs);
 			break;
 		}
-		case CS_TYPE::EVT_RX_CONTROL: {
-			stream_header_t* streamHeader = (stream_header_t*)event.data;
-			if ((event.size < sizeof(stream_header_t)) || (event.size - sizeof(stream_header_t) < streamHeader->length)) {
+		case CS_TYPE::CMD_CONTROL_CMD: {
+			stream_buffer_header_t* streamHeader = (stream_buffer_header_t*)event.data;
+			if ((event.size < sizeof(stream_buffer_header_t)) || (event.size - sizeof(stream_buffer_header_t) < streamHeader->length)) {
 				LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 				break;
 			}
-			uint8_t* streamPayload = (uint8_t*)event.data + sizeof(stream_header_t);
+			uint8_t* streamPayload = (uint8_t*)event.data + sizeof(stream_buffer_header_t);
 			handleCommand((CommandHandlerTypes)streamHeader->type, streamPayload, streamHeader->length);
+			break;
 		}
 		default: {}
 	}

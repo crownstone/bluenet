@@ -29,20 +29,11 @@
 enum OpCode {
 	OPCODE_READ_VALUE       = 0,
 	OPCODE_WRITE_VALUE      = 1,
-	OPCODE_NOTIFY_VALUE     = 2,
+//	OPCODE_NOTIFY_VALUE     = 2, // Deprecated
 	OPCODE_ERR_VALUE        = 3
 };
 
-/** Header of a stream buffer
- *
- */
-struct __attribute__((__packed__)) stream_header_t {
-	uint8_t type;
-	uint8_t opCode; //! can be used as op code, see <OpCode>
-	uint16_t length;
-};
-
-#define SB_HEADER_SIZE                           sizeof(stream_header_t)
+#define SB_HEADER_SIZE                           sizeof(stream_buffer_header_t)
 
 /** Structure for a StreamBuffer
  *
@@ -50,8 +41,8 @@ struct __attribute__((__packed__)) stream_header_t {
  * typename U defines the number of elements in the payload
  */
 template <typename T, int U>
-struct __attribute__((__packed__)) stream_t {
-	stream_header_t header;
+struct __attribute__((__packed__)) stream_buffer_t {
+	stream_buffer_header_t header;
 	T payload[U];
 };
 
@@ -86,7 +77,7 @@ public:
 		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, size);
 #endif
 
-		_buffer = (stream_t<T, U>*)buffer;
+		_buffer = (stream_buffer_t<T, U>*)buffer;
 		_maxLength = size;
 		return 0;
 	}
@@ -276,7 +267,7 @@ public:
 protected:
 	/** Pointer to the data to be sent
 	 */
-	stream_t<T, U>* _buffer;
+	stream_buffer_t<T, U>* _buffer;
 
 private:
 	uint16_t _maxLength;
