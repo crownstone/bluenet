@@ -155,17 +155,6 @@ cs_ret_code_t State::get(cs_file_data_t & data, const PersistenceMode mode) {
 		case PersistenceMode::FLASH:
 			return _storage->read(FILE_CONFIGURATION, data);
 		case PersistenceMode::STRATEGY1: {
-			switch(DefaultLocation(data.type)) {
-				case PersistenceMode::RAM: {
-					bool exist = loadFromRam(data);
-					return exist ? ERR_SUCCESS : ERR_NOT_FOUND;
-				}
-				case PersistenceMode::FLASH:
-					break;
-				default:
-					LOGe("PM not implemented");
-					return ERR_NOT_IMPLEMENTED;
-			}
 			bool exist = loadFromRam(data);
 			if (exist) {
 				LOGnone("Loaded from RAM: %s", TypeName(data.type));
