@@ -26,14 +26,14 @@ MedianFilter::~MedianFilter() {
 }
 
 void MedianFilter::init(uint8_t sliding_window_size) {
-	// create linked list 
+	// create linked list
 	for (uint8_t i = 0; i < sliding_window_size - 1; ++i) {
-		
+
 	}
 }
 
 /**
- * Use an insert operation that has some state information. 
+ * Use an insert operation that has some state information.
  */
 void MedianFilter::sorted_insert(value_id_t value_id, value_t value, bool & start) {
 	value_t pvalue = _buffer.getValue(buffer_id, channel_id, _nodes[0].index);
@@ -50,7 +50,7 @@ void MedianFilter::sorted_insert(value_id_t value_id, value_t value, bool & star
 /**
  * Set buffer. We're assuming several things about this buffer:
  *   - Values before and after the buffer can be accessed as well and used as padding for the median filter.
- *   - The buffer is assumed 
+ *   - The buffer is assumed
  */
 void MedianFilter::setBuffer(InterleavedBuffer* buffer) {
 	_buffer = buffer;

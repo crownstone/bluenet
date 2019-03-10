@@ -28,9 +28,9 @@ extern "C" {
  *
  * The log levels follow more or less common conventions with a few exeptions. There are some modes in which we run
  * where even fatal messages will not be written to console. In production we use SERIAL_NONE, SERIAL_READ_ONLY, or
- * SERIAL_BYTE_PROTOCOL_ONLY. 
+ * SERIAL_BYTE_PROTOCOL_ONLY.
  *
- * TODO: Somehow all namespaces are removed. This leads to conflicts! The function "log" means something if you 
+ * TODO: Somehow all namespaces are removed. This leads to conflicts! The function "log" means something if you
  * include <cmath>...
  */
 #define SERIAL_NONE                 0
@@ -80,7 +80,7 @@ typedef enum {
 #endif
 
 
-#define LOG_IGNORE(fmt, ...) 
+#define LOG_IGNORE(fmt, ...)
 
 // To disable particular logs, but without commenting it.
 #define LOGnone LOG_IGNORE
@@ -106,7 +106,7 @@ typedef enum {
 	void* sp; \
 	asm("mov %0, sp" : "=r"(sp) : : ); \
 	LOGd("Memory %s() heap=%p, stack=%p", __func__, p, (uint8_t*)sp); \
-	free(p); 
+	free(p);
 
 #if SERIAL_VERBOSITY<SERIAL_VERBOSE
 #undef LOGv

@@ -22,7 +22,7 @@ static const cs_file_id_t FILE_CONFIGURATION  = 0x0003;
 
 /** Class to store items persistently in flash (persistent) memory.
  *
- * This class provides functions to initialize, clear, write and read persistent memory (flash) through the use of 
+ * This class provides functions to initialize, clear, write and read persistent memory (flash) through the use of
  * Flash Data Storage.
  *
  * CS_TYPE is used as record key.
@@ -43,7 +43,7 @@ public:
 	}
 
 	ret_code_t init();
-	
+
 	inline bool isInitialized() {
 		return _initialized;
 	}
@@ -57,7 +57,7 @@ public:
 	ret_code_t read(cs_file_id_t file_id, cs_file_data_t file_contents);
 
 	ret_code_t remove(cs_file_id_t file_id);
-	
+
 	ret_code_t remove(cs_file_id_t file_id, CS_TYPE type);
 
 	ret_code_t exists(cs_file_id_t file_id, bool & result);
@@ -65,7 +65,7 @@ public:
 	ret_code_t exists(cs_file_id_t file_id, CS_TYPE type, bool & result);
 
 	/** Check if a type of record exists and return the record descriptor.
-	 * 
+	 *
 	 * @param[in] file_id                        Unique file
 	 * @param[in] type                           One of the Crownstone types
 	 * @param[in,out] record_desc                Record descriptor
@@ -81,7 +81,7 @@ public:
 	void handleFileStorageEvent(fds_evt_t const * p_fds_evt);
 
 	void handleSuccessfulEvent(fds_evt_t const * p_fds_evt);
-	
+
 	ret_code_t garbageCollect();
 
 private:
@@ -93,7 +93,7 @@ private:
 
 	fds_find_token_t _ftok;
 
-	std::vector<cs_file_data_t> _records_in_memory;	
+	std::vector<cs_file_data_t> _records_in_memory;
 
 	// Use before ftok
 	void initSearch();

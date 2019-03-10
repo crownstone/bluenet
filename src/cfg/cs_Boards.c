@@ -612,7 +612,7 @@ void asGuidestone(boards_config_t* p_config) {
 //	p_config->voltageZero         = ; // unused
 //	p_config->currentZero         = ; // unused
 //	p_config->powerZero           = ; // unused
-	
+
 	p_config->minTxPower          = -20;
 }
 

@@ -211,25 +211,25 @@ const uint32_t PWM_PERIOD = 10000;
 // See: https://devzone.nordicsemi.com/question/60/what-is-connection-parameters/
 
 /*
- * Determines how often the Central will ask for data from the Peripheral. When the Peripheral requests an update, it 
- * supplies a maximum and a minimum wanted interval. The connection interval must be between 7.5 ms and 4 s. 
+ * Determines how often the Central will ask for data from the Peripheral. When the Peripheral requests an update, it
+ * supplies a maximum and a minimum wanted interval. The connection interval must be between 7.5 ms and 4 s.
  */
 #define MIN_CONNECTION_INTERVAL                  6   // In units of 1.25ms. Lowest possible, see https://devzone.nordicsemi.com/question/161154/minimum-connection-interval/
 #define MAX_CONNECTION_INTERVAL                  16  // In units of 1.25ms.
 
 /*
- * This timeout determines the timeout from the last data exchange till a link is considered lost. A Central will not 
- * start trying to reconnect before the timeout has passed, so if you have a device which goes in and out of range 
+ * This timeout determines the timeout from the last data exchange till a link is considered lost. A Central will not
+ * start trying to reconnect before the timeout has passed, so if you have a device which goes in and out of range
  * often, and you need to notice when that happens, it might make sense to have a short timeout.
  */
 #define CONNECTION_SUPERVISION_TIMEOUT           400 // In units of 10ms.
 
-/* 
- * By setting a non-zero slave latency, the Peripheral can choose to not answer when the Central asks for data up to 
- * the slave latency number of times. However, if the Peripheral has data to send, it can choose to send data at any 
- * time. This enables a peripheral to stay sleeping for a longer time, if it doesn't have data to send, but still send 
- * data fast if needed. The text book example of such device is for example keyboard and mice, which want to be 
- * sleeping for as long as possible when there is no data to send, but still have low latency (and for the mouse: 
+/*
+ * By setting a non-zero slave latency, the Peripheral can choose to not answer when the Central asks for data up to
+ * the slave latency number of times. However, if the Peripheral has data to send, it can choose to send data at any
+ * time. This enables a peripheral to stay sleeping for a longer time, if it doesn't have data to send, but still send
+ * data fast if needed. The text book example of such device is for example keyboard and mice, which want to be
+ * sleeping for as long as possible when there is no data to send, but still have low latency (and for the mouse:
  * low connection interval) when needed.
  */
 #define SLAVE_LATENCY                            10  // See: https://devzone.nordicsemi.com/question/14029/slave-latency-for-s110s120-connection/
@@ -279,7 +279,7 @@ const uint32_t PWM_PERIOD = 10000;
  * For now, a lot of these variables has not yet been made conform to the above naming scheme.
  */
 
-#if defined MESHING 
+#if defined MESHING
 #define CONFIG_MESH_DEFAULT MESHING
 #else
 #define CONFIG_MESH_DEFAULT 0
@@ -291,42 +291,42 @@ const uint32_t PWM_PERIOD = 10000;
 #define CONFIG_ENCRYPTION_DEFAULT 0
 #endif
 
-#if defined IBEACON 
+#if defined IBEACON
 #define CONFIG_IBEACON_DEFAULT IBEACON
 #else
 #define CONFIG_IBEACON_DEFAULT 0
 #endif
 
-#if defined INTERVAL_SCANNER_ENABLED 
+#if defined INTERVAL_SCANNER_ENABLED
 #define CONFIG_SCANNER_DEFAULT INTERVAL_SCANNER_ENABLED
 #else
 #define CONFIG_SCANNER_DEFAULT 0
 #endif
 
-#if defined DEFAULT_ON 
+#if defined DEFAULT_ON
 #define CONFIG_RELAY_START_DEFAULT DEFAULT_ON
 #else
 #define CONFIG_RELAY_START_DEFAULT 0
 #endif
 
-#if defined PWM 
+#if defined PWM
 #define CONFIG_PWM_DEFAULT PWM
 #else
 #define CONFIG_PWM_DEFAULT 0
 #endif
 
-#if defined SWITCH_LOCK 
+#if defined SWITCH_LOCK
 #define CONFIG_SWITCH_LOCK_DEFAULT SWITCH_LOCK
 #else
 #define CONFIG_SWITCH_LOCK_DEFAULT 0
 #endif
 
-#if defined SWITCHCRAFT 
+#if defined SWITCHCRAFT
 #define CONFIG_SWITCHCRAFT_DEFAULT SWITCHCRAFT
 #else
 #define CONFIG_SWITCHCRAFT_DEFAULT 0
 #endif
-	    
+
 #if defined CROWNSTONE_ID
 #define CONFIG_CROWNSTONE_ID_DEFAULT CROWNSTONE_ID
 #else

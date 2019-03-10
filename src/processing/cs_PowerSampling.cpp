@@ -67,7 +67,7 @@ static int printPower = 0;
 #endif
 
 /*
- * At this moment in time is the function adc_done_callback already decoupled from the ADC interrupt. 
+ * At this moment in time is the function adc_done_callback already decoupled from the ADC interrupt.
  */
 void adc_done_callback(cs_adc_buffer_id_t bufIndex) {
 	PowerSampling::getInstance().powerSampleAdcDone(bufIndex);
@@ -248,7 +248,7 @@ void PowerSampling::handleEvent(event_t & event) {
  * Responsibilities of this function:
  *
  * 1. This function fills first a power struct with information about the number of channels, which is the voltage and
- * which the current channel, the current buffer, the buffer size, the sample interval and the AC period in 
+ * which the current channel, the current buffer, the buffer size, the sample interval and the AC period in
  * microseconds.
  * 2. The function filters the current curve.
  * 3. The zero-crossings of voltage and current are calculated.
@@ -273,7 +273,7 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	power.numChannels = 2;
 	power.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	power.acPeriodUs = 20000;
-	
+
 	cs_adc_buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
 
 #ifdef DELAY_FILTERING_VOLTAGE
@@ -336,7 +336,7 @@ void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
 
 /**
  * Fill the number of samples in the Bluetooth Low Energy characteristic. This clears the old samples actively. A
- * warning is dispatched beforehand, EVT_POWER_SAMPLES_START so other listeners know (which ones) they should 
+ * warning is dispatched beforehand, EVT_POWER_SAMPLES_START so other listeners know (which ones) they should
  * invalidate the current buffer.
  *
  * @param[in] power                              Reference to buffer, current and voltage channel
@@ -379,14 +379,14 @@ void PowerSampling::initAverages() {
 }
 
 /**
- * This just returns the given currentIndex. 
+ * This just returns the given currentIndex.
  */
 uint16_t PowerSampling::determineCurrentIndex(power_t power) {
 	return power.currentIndex;
 }
 
 /**
- * The voltage curve is a distorted sinusoid. We calculate the zero(-crossing) by averaging over the buffer over 
+ * The voltage curve is a distorted sinusoid. We calculate the zero(-crossing) by averaging over the buffer over
  * exactly one cycle (positive and negative) of the sinusoid. The cycle does not start at a particular known phase.
  *
  * @param buf                                    Series of samples for voltage and current (we skip every numChannel).
@@ -401,14 +401,14 @@ uint16_t PowerSampling::determineCurrentIndex(power_t power) {
  * period in microseconds and the sample interval also in microseconds.
  */
 void PowerSampling::calculateVoltageZero(power_t power) {
-	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs; 
+	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
 
 	int64_t sum = 0;
 	for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 		sum += power.buf[i];
 	}
 	int32_t zeroVoltage = sum * 1000 / numSamples;
-	
+
 //	if (!_zeroVoltageInitialized) {
 //		_avgZeroVoltage = zeroVoltage;
 //		_zeroVoltageInitialized = true;
@@ -430,7 +430,7 @@ void PowerSampling::calculateVoltageZero(power_t power) {
  * The same as for the voltage curve, but for the current.
  */
 void PowerSampling::calculateCurrentZero(power_t power) {
-	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs; 
+	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
 
 	int64_t sum = 0;
 	// Use filtered samples to calculate the zero.
@@ -464,19 +464,19 @@ void PowerSampling::calculateCurrentZero(power_t power) {
  * that it is logical to use a linked list. This means that the MedianFilter object we use requires us copying the
  * data into it. An expensive operation.
  *
- * TODO: Do not work with "half window sizes". Just work with a window size and enforce its size to be odd. That 
- * to pick the median you only need to sort half of the values (plus one) is an implementation detail. 
+ * TODO: Do not work with "half window sizes". Just work with a window size and enforce its size to be odd. That
+ * to pick the median you only need to sort half of the values (plus one) is an implementation detail.
  *
  * TODO: Create an in-place version of a median filter. It is possible to have a linked list (of half the window size
  * plus one) that contains a list of indices into the array with values. For example, let us assume a full window size
  * of 5 and ignore the border starting at index 2. Now let's sort the first 5 values [4 2 0 1 3]. Hence, the value at
  * index 4 is the smallest. We replace value at index 2 with the middle one (which is at index 0). Now we shift to the
  * right, hence index 0 falls out [4 2 1 3], and index 5 shifts in. Let's assume 5 is a value between 4 and 2, then we
- * have [4 5 2 1 3] and replace the value at index 3 with the value at index 2. Note that the value at index 0 is 
+ * have [4 5 2 1 3] and replace the value at index 3 with the value at index 2. Note that the value at index 0 is
  * copied into 2 and then into 3. If we do not want this, we need to have a separate array the size of the sliding
  * window and only copy the value when it is shifted out. We will have a copy assignment operation for each value,
- * however still our RAM use is much less because we only need place for values at the window. Note that we can 
- * actually sort up to the half so the examples should be [4 2 0 ? ?], then [4 2 ? ?], then [4 5 2 ? ?]. In the 
+ * however still our RAM use is much less because we only need place for values at the window. Note that we can
+ * actually sort up to the half so the examples should be [4 2 0 ? ?], then [4 2 ? ?], then [4 5 2 ? ?]. In the
  * particular case where 5 > 2 we need an additional value [4 2 1 ?] or we do not know if it should be [4 2 5 ? ?] or
  * [4 2 1 ? ?]. So in this case we would need a min(.) operation on half (minus one) of the remaining array.
  *
@@ -490,7 +490,7 @@ void PowerSampling::calculateCurrentZero(power_t power) {
  * This function performs a median filter with respect to the given channel.
  */
 void PowerSampling::filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id) {
-	
+
 	// Pad the start of the input vector with the first sample in the buffer
 	uint16_t j = 0;
 	value_t padded_value = InterleavedBuffer::getInstance().getValue(buffer_id, channel_id, 0);
@@ -512,7 +512,7 @@ void PowerSampling::filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id
 	sort_median(*_filterParams, *_inputSamples, *_outputSamples);
 
 	// TODO: Note that this is a lot of copying back and forth. Filtering should actually be done in-place.
-	
+
 	// Copy the result back into the buffer
 	for (int i = 0; i < InterleavedBuffer::getInstance().getChannelLength() - 1; ++i) {
 		InterleavedBuffer::getInstance().setValue(buffer_id, channel_id, i, _outputSamples->at(i));
@@ -526,7 +526,7 @@ void PowerSampling::filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id
  */
 void PowerSampling::calculatePower(power_t power) {
 
-	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs; 
+	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
 
 	if ((int)power.bufSize < numSamples * power.numChannels) {
 		LOGe("Should have at least a whole period in a buffer!");

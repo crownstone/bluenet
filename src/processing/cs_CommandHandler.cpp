@@ -79,7 +79,7 @@ void CommandHandler::resetDelayed(uint8_t opCode, uint16_t delayMs) {
 //	while(true) {}; //! TODO: this doesn't seem to work
 }
 
-cs_ret_code_t CommandHandler::handleCommandDelayed(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size, 
+cs_ret_code_t CommandHandler::handleCommandDelayed(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size,
 		const uint32_t delay) {
 	delayed_command_t* buf = new delayed_command_t();
 	buf->type = type;
@@ -95,7 +95,7 @@ cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type) {
 	return handleCommand(type, NULL, 0);
 }
 
-cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size, 
+cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size,
 		const EncryptionAccessLevel accessLevel) {
 	LOGd("cmd=%u lvl=%u", type, accessLevel);
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {

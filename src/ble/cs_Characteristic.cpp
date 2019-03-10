@@ -58,7 +58,7 @@ void CharacteristicBase::init(Service* svc) {
     ci.cccd_md.vloc = BLE_GATTS_VLOC_STACK;
     ci.cccd_md.vlen = 1;
 
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.read_perm); 
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.read_perm);
     BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.write_perm);
 
     ci.char_md.p_cccd_md = &ci.cccd_md; //! the client characteristic metadata.
@@ -154,23 +154,23 @@ void CharacteristicBase::init(Service* svc) {
  *
  * Structure has the following layout:
  *   // Characteristic Properties.
- *   ble_gatt_char_props_t       char_props;               
+ *   ble_gatt_char_props_t       char_props;
  *   // Characteristic Extended Properties.
- *   ble_gatt_char_ext_props_t   char_ext_props;           
+ *   ble_gatt_char_ext_props_t   char_ext_props;
  *   // Pointer to a UTF-8, NULL if the descriptor is not required.
- *   uint8_t                    *p_char_user_desc;         
+ *   uint8_t                    *p_char_user_desc;
  *   // The maximum size in bytes of the user description descriptor.
- *   uint16_t                    char_user_desc_max_size;  
+ *   uint16_t                    char_user_desc_max_size;
  *   // The size of the user description, must be smaller or equal to char_user_desc_max_size.
- *   uint16_t                    char_user_desc_size;      
+ *   uint16_t                    char_user_desc_size;
  *   // Pointer to a presentation format structure or NULL if the descriptor is not required.
- *   ble_gatts_char_pf_t*        p_char_pf;                
+ *   ble_gatts_char_pf_t*        p_char_pf;
  *   // Attribute metadata for the User Description descriptor, or NULL for default values.
- *   ble_gatts_attr_md_t*        p_user_desc_md;           
+ *   ble_gatts_attr_md_t*        p_user_desc_md;
  *   // Attribute metadata for the Client Characteristic Configuration Descriptor, or NULL for default values.
- *   ble_gatts_attr_md_t*        p_cccd_md;                
+ *   ble_gatts_attr_md_t*        p_cccd_md;
  *   // Attribute metadata for the Server Characteristic Configuration Descriptor, or NULL for default values.
- *   ble_gatts_attr_md_t*        p_sccd_md;                
+ *   ble_gatts_attr_md_t*        p_sccd_md;
  */
 void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 	ci.char_md.char_props.read = 1; //! allow read
@@ -337,7 +337,7 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 		dataLen = MIN(valueLength - offset, MAX_NOTIFICATION_LEN);
 //
 		notification_t notification = {};
-		
+
 		// TODO: [Alex 22.08] verify if the oldVal is required. I do not think we use this.
 		uint8_t oldVal[sizeof(notification_t)];
 

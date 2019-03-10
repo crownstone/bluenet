@@ -1,5 +1,5 @@
 /**
- * @file 
+ * @file
  * Bluetooth Low Energy characteristics.
  *
  * @authors Crownstone Team, Christopher Mason
@@ -182,7 +182,7 @@ public:
 	void setName(const char * const name);
 
 	const char* getName() {
-		return _name; 
+		return _name;
 	}
 
 	const UUID & getUUID() {

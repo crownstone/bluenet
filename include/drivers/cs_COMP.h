@@ -46,7 +46,7 @@ struct comp_event_cb_data_t {
 
 /**
  * The comparator is a hardware peripheral on the nRF52. It is addressed through the COMP HAL which is addressed through the COMP
- * driver. 
+ * driver.
  * Requires a real-time clock, the RTC to attach timestamps to the events.
  *
  * TODO: Use VOLTAGE_THRESHOLD_TO_INT
@@ -63,15 +63,15 @@ public:
 	 * The COMP unit gets initialized by indicating a pin.
 	 * TODO: use const where appropriate
 	 * TODO: use nrf_drv_comp_ain_to_gpio in implementation
-	 * 
+	 *
 	 * @param[in] ainPin           An input pin, TODO: use pin_id_t or nrf_comp_input_t, not uint8_t
 	 * @param[in] thresholdDown    Threshold to be triggered when input drops below a certain value. TODO: check.
-	 * @param[in] thresholdUp      Threshold to be triggered when input goes beyond a certain value. TODO: check. 
+	 * @param[in] thresholdUp      Threshold to be triggered when input goes beyond a certain value. TODO: check.
 	 */
 	void init(uint8_t ainPin, float thresholdDown, float thresholdUp);
 
 	/**
-	 * The hardware peripheral is started. First, init() has to be called. 
+	 * The hardware peripheral is started. First, init() has to be called.
 	 *
 	 * @param[in] event            Start the comparator with "event" as additional configuration option.
 	 */
@@ -86,7 +86,7 @@ public:
 	 */
 	uint32_t sample();
 
-	/** 
+	/**
 	 * Set the callback which is called on an event. This callback is put in the scheduler and not executed directly.
 	 *
 	 * @param[in] callback         A struct with a function and parameter for that function.

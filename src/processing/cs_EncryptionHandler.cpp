@@ -81,7 +81,7 @@ bool EncryptionHandler::allowedToWrite() {
  * This method does not use the AES CTR method but straight ECB.
  * It encrypts the block with the GUEST key.
  */
-bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength, 
+bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength,
 		EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
 	LOGnone("Encrypt ECB");
 	uint32_t err_code;
@@ -191,7 +191,7 @@ bool EncryptionHandler::decryptMesh(uint8_t* encryptedDataPacket, uint16_t encry
 	// copy the mesh overhead of the encrypted data packet to be used as IV (first nonce, second part random)
 	memcpy(_block.cleartext, encryptedDataPacket, MESH_OVERHEAD);
 
-	if (_decryptCTR((uint8_t*)nonce, encryptedDataPacket + MESH_OVERHEAD, sourceNetLength, target, 
+	if (_decryptCTR((uint8_t*)nonce, encryptedDataPacket + MESH_OVERHEAD, sourceNetLength, target,
 				targetLength) == false) {
 		LOGe("Error while decrypting");
 		return false;
@@ -204,7 +204,7 @@ bool EncryptionHandler::decryptMesh(uint8_t* encryptedDataPacket, uint16_t encry
 /**
  * Perform encryption:
  */
-bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, 
+bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength,
 		EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
 	if (encryptionType == CTR || encryptionType == CTR_CAFEBABE) {
 		return _prepareEncryptCTR(data,dataLength,target,targetLength,userLevel,encryptionType);
@@ -215,9 +215,9 @@ bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* tar
 
 /**
  */
-bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, 
+bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength,
 		EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
-	LOGd("Encrypt CTR");	
+	LOGd("Encrypt CTR");
 
 	// check if the userLevel has been set
 	if (_checkAndSetKey(userLevel) == false) {
@@ -263,7 +263,7 @@ bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, u
 
 
 
-bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, 
+bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target,
 		uint16_t targetLength, EncryptionAccessLevel& levelOfPackage, EncryptionType encryptionType) {
 	if (!(encryptionType == CTR || encryptionType == CTR_CAFEBABE)) {
 		LOGe("Cannot decrypt ECB");

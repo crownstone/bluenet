@@ -62,7 +62,7 @@ void TrackedDeviceList::update(const uint8_t * addrs_ptr, int8_t rssi) {
 uint8_t TrackedDeviceList::isNearby() {
 	//! special case in which nothing needs to be tracked
 	if (!getSize()) return TDL_NOT_TRACKING;
-	
+
 	bool is_nearby = false;
 	uint8_t result;
 //	print();

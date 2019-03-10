@@ -40,7 +40,7 @@ public:
 	 * @obj                     Reference to the object on which the function should be executed
 	 */
 	void start(app_timer_id_t& timer_handle, uint32_t ticks, void* obj);
-	
+
 	/** Stop a timer
 	 * @timer_handle            Reference to previously created timer
 	 */

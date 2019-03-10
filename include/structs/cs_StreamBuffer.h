@@ -1,7 +1,7 @@
 /** StreamBuffer wraps an array of U elements of type T.
  *
  * The number of elements in the StreamBuffer is defined at compile time to be U. The type of the elements is T.
- * The StreamBuffer also contains a so-called header that defines a type, opcode and length. 
+ * The StreamBuffer also contains a so-called header that defines a type, opcode and length.
  *   The type typically is set to e.g. 'STATE_SWITCH_STATE', 'STATE_TEMPERATURE', etc.
  *   The opcode is meant for advertising, e.g. 'READ', 'WRITE', 'NOTIFY'.
  *   The memory allows U chunks, however the length parameter allows the use of fewer than U elements.
@@ -155,18 +155,18 @@ public:
 	 *
 	 * @return the type, see <ConfigurationTypes>
 	 */
-	inline uint8_t type() const { 
+	inline uint8_t type() const {
 		if (!_buffer) {
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 		}
-		return _buffer->header.type; 
+		return _buffer->header.type;
 	}
 
 	/** Get the length/size of the payload in number of elements
 	 *
 	 * @return number of elements stored
 	 */
-	inline uint16_t length() const { 
+	inline uint16_t length() const {
 		if (!_buffer) {
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 		}
@@ -178,44 +178,44 @@ public:
 	 * @return pointer to the array used to store
 	 *   the elements of the stream buffer
 	 */
-	inline T* payload() const { 
+	inline T* payload() const {
 		if (!_buffer) {
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 		}
-		return _buffer->payload; 
+		return _buffer->payload;
 	}
 
 	/** Set the type for this stream buffer
 	 *
 	 * @type the type, see <ConfigurationTypes>
 	 */
-	inline void setType(uint8_t type) { 
+	inline void setType(uint8_t type) {
 		if (!_buffer) {
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 		}
-		_buffer->header.type = type; 
+		_buffer->header.type = type;
 	}
 
 	/** Return the opcode assigned to the SreamBuffer
 	 *
 	 * @return the opcode, see <OpCode>
 	 */
-	inline uint8_t opCode() const { 
+	inline uint8_t opCode() const {
 		if (!_buffer) {
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 		}
-		return _buffer->header.opCode; 
+		return _buffer->header.opCode;
 	}
 
 	/** Set the opcode for this stream buffer
 	 *
 	 * @opcode the opcode, see <OpCode>
 	 */
-	inline void setOpCode(uint8_t opCode) { 
+	inline void setOpCode(uint8_t opCode) {
 		if (!_buffer) {
 			LOGe(FMT_NOT_INITIALIZED, "Buffer");
 		}
-		_buffer->header.opCode = opCode; 
+		_buffer->header.opCode = opCode;
 	}
 
 	/** Set payload of the buffer.

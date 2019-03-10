@@ -191,7 +191,7 @@ private:
 	/** Initialize the moving averages
 	 */
 	void initAverages();
-	
+
 	/** Determine which index is actually the current index, this should not be necessary!
 	 */
 	uint16_t determineCurrentIndex(power_t power);

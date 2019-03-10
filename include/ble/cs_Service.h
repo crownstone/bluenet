@@ -26,7 +26,7 @@ public:
 	enum condition_t { C_SERVICE_INITIALIZED };
 
 	//! The "Generic Service"
-	static const char* defaultServiceName; 
+	static const char* defaultServiceName;
 
 	//! A container with characteristics (underlying data format is a std::vector).
 	typedef tuple<CharacteristicBase*> Characteristics_t;
@@ -69,7 +69,7 @@ public:
 	uint16_t getHandle() {
 		return _service_handle;
 	}
-	
+
 	virtual void stopAdvertising() {};
 
 protected:
@@ -81,13 +81,13 @@ protected:
 	UUID                     _uuid;
 	std::string              _name;
 	//! Service handle will be obtained from SoftDevice
-	uint16_t                 _service_handle; 
+	uint16_t                 _service_handle;
 
 	//! List of characteristics
 	Characteristics_t _characteristics;
 
 	virtual void createCharacteristics() = 0;
-	
+
 	/** Initialization of the service.
 	 *
 	 * The initialization can be different for each service.
@@ -96,7 +96,7 @@ protected:
 
 	virtual void on_ble_event(const ble_evt_t * p_ble_evt);
 
-	virtual void on_connect(uint16_t conn_handle, const ble_gap_evt_connected_t& gap_evt); 
+	virtual void on_connect(uint16_t conn_handle, const ble_gap_evt_connected_t& gap_evt);
 
 	virtual void on_disconnect(uint16_t conn_handle, const ble_gap_evt_disconnected_t& gap_evt);
 

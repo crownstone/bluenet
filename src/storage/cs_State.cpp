@@ -53,7 +53,7 @@ cs_ret_code_t State::readFromStorage(CS_TYPE type, StreamBuffer<uint8_t>* stream
 		error_code = ERR_UNKNOWN_TYPE;
 		return error_code;
 	}
-	
+
 	// temporarily put data on stack(?)
 	size16_t plen = TypeSize(type);
 	uint8_t payload[plen];
@@ -97,7 +97,7 @@ cs_ret_code_t State::verify(CS_TYPE type, uint8_t* payload, uint8_t size) {
 	bool correct = false;
 	if (check_size == size) {
 		correct = true;
-	} 
+	}
 	// handle CONFIG_NAME separately, check_size can be size (which is just the maximum size)
 	if ((check_size > size) && (type == CS_TYPE::CONFIG_NAME)) {
 		correct = true;
@@ -125,7 +125,7 @@ cs_ret_code_t State::get(const CS_TYPE type, void* target, const PersistenceMode
 /** Get value from FLASH or RAM.
  *
  * The implementation casts type to the underlying type. The pointer to target is stored in data.value and the
- * size is written in data.size. 
+ * size is written in data.size.
  *
  * Here it assumed that the pointer *target is already allocated to the right size...
  */
@@ -212,7 +212,7 @@ cs_ret_code_t State::storeInRam(const cs_file_data_t & data, size16_t & index_in
 		if (_data_in_ram[i].type == data.type) {
 			LOGnone("Update RAM");
 			cs_file_data_t & ram_data = _data_in_ram[i];
-			if (ram_data.size != data.size) { 
+			if (ram_data.size != data.size) {
 				free(ram_data.value);
 				ram_data.value = (uint8_t*)malloc(sizeof(uint8_t) * data.size); // TODO: don't malloc when size is similar?
 			}
@@ -305,7 +305,7 @@ cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const Persis
 				ret_code = ERR_WRITE_NOT_ALLOWED;
 				break;
 			}
-			cs_file_data_t ram_data = _data_in_ram[index];		
+			cs_file_data_t ram_data = _data_in_ram[index];
 			LOGd("Storage write type=%u size=%u data=[0x%X,...]", ram_data.type, ram_data.size, ram_data.value[0]);
 			return _storage->write(FILE_CONFIGURATION, ram_data);
 		}

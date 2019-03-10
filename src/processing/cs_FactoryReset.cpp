@@ -129,7 +129,7 @@ bool FactoryReset::factoryReset(uint32_t resetCode) {
 }
 
 /**
- * A factory reset will actually commence. This first starts with a reset, afterwards the code will ensure that 
+ * A factory reset will actually commence. This first starts with a reset, afterwards the code will ensure that
  * finishFactoryReset will be called.
  */
 bool FactoryReset::performFactoryReset() {

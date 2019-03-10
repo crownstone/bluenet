@@ -14,8 +14,8 @@
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <util/cs_BleError.h>
 
-SetupService::SetupService() : 
-    _macAddressCharacteristic(NULL), 
+SetupService::SetupService() :
+    _macAddressCharacteristic(NULL),
     _setupKeyCharacteristic(NULL),
     _gotoDfuCharacteristic(NULL)
 {
@@ -31,7 +31,7 @@ void SetupService::createCharacteristics() {
     uint16_t maxLength = 0;
 
     _streamBuffer = getStreamBuffer(buffer, maxLength);
-    
+
     addControlCharacteristic(buffer, maxLength, SETUP_CONTROL_UUID, SETUP);
     LOGi(FMT_CHAR_ADD, STR_CHAR_CONTROL);
 

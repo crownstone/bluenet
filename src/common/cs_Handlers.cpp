@@ -73,7 +73,7 @@ NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, cr
 
 /**
  * Called by the Softdevice handler on any BLE event. It is initialized from the SoftDevice using the app scheduler.
- * This means that the callback runs on the main thread. 
+ * This means that the callback runs on the main thread.
  */
 
 void ble_sdh_evt_dispatch(const ble_evt_t * p_ble_evt, void * p_context) {
@@ -121,19 +121,19 @@ static void crownstone_state_handler(nrf_sdh_state_evt_t state, void * p_context
 	}
 }
 
-/** 
+/**
  * There seems to be an NULL pointer exception in the code at nrf_sdh.c::117, namely when calling
  * sdh_request_observer_notify.
  */
 /*
 NRF_SDH_REQUEST_OBSERVER(m_crownstone_request_observer, CROWNSTONE_REQUEST_OBSERVER_PRIO) =
 {
-	.handler   = crownstone_request_evt_handler, 
+	.handler   = crownstone_request_evt_handler,
 	.p_context = NULL
 };*/
 
 NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRIO) =
-{ 
+{
 	.handler   = crownstone_state_handler,
 	.p_context = NULL
 };

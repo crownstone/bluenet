@@ -12,7 +12,7 @@ state_message::iterator state_message::end() {
 	auto index = _state_message_t.head + _state_message_t.size;
 	return state_message::iterator(&_state_message_t, index);
 }
-		
+
 void state_message::push_back(state_item_t item) {
 	// decide what to do if too many items are pushed in the buffer
 	// 1.) write over previous items and also update head

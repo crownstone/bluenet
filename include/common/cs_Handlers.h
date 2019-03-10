@@ -1,6 +1,6 @@
 /**
  * @file
- * System event handlers 
+ * System event handlers
  *
  * @authors Crownstone Team
  * @copyright Crownstone B.V.

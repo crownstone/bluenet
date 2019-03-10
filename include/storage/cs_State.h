@@ -48,12 +48,12 @@ constexpr int ValidMode(OperationMode const & mode) {
 
 /**
  * Load settings from and save settings to FLASH (persistent storage) and or RAM. If we save values to FLASH we
- * should only do that if the values are different from the FIRMWARE_DEFAULT. 
+ * should only do that if the values are different from the FIRMWARE_DEFAULT.
  *
  * If we read vales from FLASH and they are not written in FLASH, we should get them from the FIRMWARE_DEFAULT instead.
- * 
+ *
  * To prevent a round-trip to search for records in FLASH, we always will cache the records in RAM. So, if a record
- * is present in RAM we will use that value, we will not read it from FLASH. 
+ * is present in RAM we will use that value, we will not read it from FLASH.
  *
  * Default FLASH read procedure:
  *   1. Read RAM
@@ -71,15 +71,15 @@ constexpr int ValidMode(OperationMode const & mode) {
  *     - if same, return success
  *   3. Write to FLASH and copy to RAM
  *
- * Note. The above has a bug. When a value has been written to FLASH and then the FIRMWARE_DEFAULT needs to be 
- * written the above protocol fails to write FIRMWARE_DEFAULT values. 
+ * Note. The above has a bug. When a value has been written to FLASH and then the FIRMWARE_DEFAULT needs to be
+ * written the above protocol fails to write FIRMWARE_DEFAULT values.
  *
  * Default FLASH write procedure:
  *   1. Compare with RAM
  *     - if same, return success
  *   2. Write to FLASH
  *
- * We assume here that a value even if it is the same as FIRMWARE_DEFAULT it will still be written. To remove a 
+ * We assume here that a value even if it is the same as FIRMWARE_DEFAULT it will still be written. To remove a
  * value should be a deliberate action.
  *
  * Default RAM read procedure:
@@ -92,7 +92,7 @@ constexpr int ValidMode(OperationMode const & mode) {
  *
  * It would be cumbersome to decide per item if it needs to be written to or read from FLASH or from RAM. So, we have
  * an overarching read and write procedure
- * 
+ *
  * Default read procedure:
  *   1. Obtain default location
  *     a. Case default location is RAM
@@ -107,7 +107,7 @@ constexpr int ValidMode(OperationMode const & mode) {
  *     b. Case default location is FLASH
  *       - WRITE FLASH
  *
- * The above means quite a sophisticated setup in reading/writing, so it is encapsulated in a dedicated 
+ * The above means quite a sophisticated setup in reading/writing, so it is encapsulated in a dedicated
  * PersistenceMode, which is called STRATEGY1.
  */
 class State: public BaseClass<> {
@@ -146,8 +146,8 @@ public:
 
 	/* The function gets an item from memory.
 	 *
-	 * It is most "clean" to not use thousands of arguments, but have a struct as argument. Yes, this means that 
-	 * the person calling this function has to write the arguments into a struct. However, it makes it much 
+	 * It is most "clean" to not use thousands of arguments, but have a struct as argument. Yes, this means that
+	 * the person calling this function has to write the arguments into a struct. However, it makes it much
 	 * easier to add an additional argument.
 	 *
 	 * @param[in] type          One of the types from the CS_TYPE enumeration class.
@@ -196,7 +196,7 @@ private:
 
 	//! State constructor, singleton, thus made private
 	State();
-	
+
 	//! State copy constructor, singleton, thus made private
 	State(State const&);
 

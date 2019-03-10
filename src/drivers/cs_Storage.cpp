@@ -65,7 +65,7 @@ ret_code_t Storage::init() {
 		LOGe("Registering FDS event handler failed (err=%i)", ret_code);
 		return ret_code;
 	}
-		
+
 
 	LOGd("fds_init");
 	ret_code = fds_init();
@@ -171,7 +171,7 @@ ret_code_t Storage::read(cs_file_id_t file_id, cs_file_data_t file_data) {
 	//LOGd("Read from file %i record %i", file_id, file_data.key);
 	// go through all records with given file_id and key (can be multiple)
 	initSearch();
-	bool break_on_first = false; 
+	bool break_on_first = false;
 	bool found = false;
 	while (fds_record_find(file_id, to_underlying_type(file_data.type), &record_desc, &_ftok) == FDS_SUCCESS) {
 
@@ -188,7 +188,7 @@ ret_code_t Storage::read(cs_file_id_t file_id, cs_file_data_t file_data) {
 			file_data.size = flash_record.p_header->length_words << 2; // Size is in bytes, each word is 4B.
 			memcpy(file_data.value, flash_record.p_data, file_data.size);
 
-			// invalidates the record	
+			// invalidates the record
 			ret_code = fds_record_close(&record_desc);
 			if (ret_code != FDS_SUCCESS) {
 				LOGw("Error on closing record");
@@ -198,7 +198,7 @@ ret_code_t Storage::read(cs_file_id_t file_id, cs_file_data_t file_data) {
 				break;
 			}
 		}
-	} 
+	}
 
 	if (!found) {
 		LOGd("Record not found");
@@ -312,7 +312,7 @@ void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 		LOGe("Not found on %s (%i)", NordicFDSEventTypeName(p_fds_evt->id), p_fds_evt->id);
 		LOGe("Record %s (%i)", TypeName(static_cast<CS_TYPE>(p_fds_evt->write.record_id)), p_fds_evt->write.record_id);
 		break;
-	case FDS_SUCCESS: 
+	case FDS_SUCCESS:
 		handleSuccessfulEvent(p_fds_evt);
 		break;
 	default:

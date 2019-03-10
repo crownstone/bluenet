@@ -9,7 +9,7 @@
 #include <drivers/cs_Serial.h>
 #include <cfg/cs_Strings.h>
 #include <util/cs_BleError.h>
-	
+
 Timer& Timer::getInstance() {
 	static Timer instance;
 	return instance;
@@ -21,7 +21,7 @@ void Timer::init() {
 	APP_ERROR_CHECK(err_code);
 	APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
 }
-	
+
 void Timer::createSingleShot(app_timer_id_t& timer_handle, app_timer_timeout_handler_t func) {
 	BLE_CALL(app_timer_create, (&timer_handle, APP_TIMER_MODE_SINGLE_SHOT, func));
 }

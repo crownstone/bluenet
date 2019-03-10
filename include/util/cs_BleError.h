@@ -28,7 +28,7 @@ void assert_nrf_callback (uint16_t line_num, const uint8_t *file_name);
 void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name);
 
 /**
- * Check the following website for the error codes. They change with every SoftDevice release, so check them 
+ * Check the following website for the error codes. They change with every SoftDevice release, so check them
  * regularly!
  *
  * https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.s132.api.v6.0.0/group___b_l_e___c_o_m_m_o_n.html
@@ -271,7 +271,7 @@ constexpr const char* NordicEventTypeName(uint32_t nordic_type) {
 
 	//! A macro to throw an std::exception if the given function does not have the result NRF_SUCCESS
 	//#define BLE_CALL(function, args) do { uint32_t result = function args; if (result != NRF_SUCCESS) throw ble_exception(#function, __FILE__, __LINE__); } while(0)
-	
+
 	#define BLE_CALL(function, args)                                    \
 			do {                                                        \
 				uint32_t result = function args;                        \

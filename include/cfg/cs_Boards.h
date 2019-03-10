@@ -8,7 +8,7 @@
  *
  * NOTE 2: If you add a new BOARD, also update the function get_hardware_version in cs_HardwareVersions.h.
  *
- * NOTE 3: If you add a new BOARD that has a different pin layout or other board changes, define a new function and 
+ * NOTE 3: If you add a new BOARD that has a different pin layout or other board changes, define a new function and
  * add it as a switch case to the configure_board function
  */
 
@@ -168,7 +168,7 @@ typedef struct  {
 	uint32_t currentRange;
 
 	/** The minimum radio transmission power to be used.
-	 * 
+	 *
 	 * Builtins need higher TX power than plugs because of surrounding metal and wall material.
 	 */
 	int8_t minTxPower;

@@ -7,7 +7,7 @@
 #pragma once
 
 #include <cstdlib>
-//#include <nrf.h> 
+//#include <nrf.h>
 #include <cfg/cs_Config.h>
 #include <util/cs_Error.h>
 #include <drivers/cs_Serial.h>
@@ -91,14 +91,14 @@ public:
 	inline const value_t getBufferCount() {
 		return INTERLEAVED_BUFFER_COUNT;
 	}
-	
+
 	/**
 	 * Expose channel lengths to accessors.
 	 */
 	inline const ext_value_id_t getChannelLength() {
 		return INTERLEAVED_CHANNEL_LENGTH;
 	}
-	
+
 	/**
 	 * Get number of channels.
 	 */
@@ -111,7 +111,7 @@ public:
 	 */
 	buffer_id_t getIndex(value_t *buffer) {
 		for (buffer_id_t i = 0; i < getBufferCount(); ++i) {
-			if (buffer == _buf[i]) 
+			if (buffer == _buf[i])
 				return i;
 		}
 		return getBufferCount();
@@ -125,7 +125,7 @@ public:
 	}
 
 	/**
-	 * Uses getIndex to find out if this pointer exists. 
+	 * Uses getIndex to find out if this pointer exists.
 	 */
 	bool exists(value_t *buffer) {
 		return (getIndex(buffer) != getBufferCount());
@@ -139,7 +139,7 @@ public:
 	}
 
 	/**
-	 * Get the previous buffer index. This will just use the total static buffer count and use a modulus operation to 
+	 * Get the previous buffer index. This will just use the total static buffer count and use a modulus operation to
 	 * wrap around the first buffer.
 	 *
 	 * @param[in] buffer_id                      Index to the buffer (0 up to getBufferCount() - 1)
@@ -150,7 +150,7 @@ public:
 	}
 
 	/**
-	 * Get the next buffer index. This will just use the total static buffer count and use a modulus operation to 
+	 * Get the next buffer index. This will just use the total static buffer count and use a modulus operation to
 	 * wrap around the first buffer.
 	 *
 	 * @param[in] buffer_id                      Index to the buffer (0 up to getBufferCount() - 1)
@@ -163,7 +163,7 @@ public:
 	/**
 	 * Get a particular value from a buffer. We allow some "magic" behavior here. The value_id is a signed value. If it
 	 * is negative it retrieves a value from the previous buffer. If it is larger than getBufferLength() - 1 it
-	 * retrieves a value from the next buffer. 
+	 * retrieves a value from the next buffer.
 	 *
 	 * The value_id is a reference to the index of a value within a channel (half of the buffer length).
 	 *
@@ -187,7 +187,7 @@ public:
 			value_id_in_channel = value_id_in_channel * getChannelCount() + channel_id;
 			assert(value_id_in_channel >= 0, "Index should be positive");
 
-			// a value such as -1 will be multiplied by 2, hence -2 and then used to count from the back of the 
+			// a value such as -1 will be multiplied by 2, hence -2 and then used to count from the back of the
 			// previous buffer, say of length 100, value_id = -1 will hence retrieve the last item from the
 			// previous buffer, prev_buffer[98] or prev_buffer[99] depending on channel_id
 			buf = getBuffer(prev_buffer_id);
@@ -195,13 +195,13 @@ public:
 
 		} else if (value_id >= getChannelLength()) {
 			// use next buffer, e.g. for padding
-			
+
 			uint8_t shift = (value_id / getChannelLength());
-			
+
 			buffer_id_t next_buffer_id = getNext(buffer_id, shift);
 			bool buffer_exists = exists(next_buffer_id);
 			assert (buffer_exists, "Next buffer does not exist!");
-			
+
 			value_id_t value_id_in_channel = (value_id - getChannelLength() * shift);
 			value_id_in_channel = value_id_in_channel * getChannelCount() + channel_id;
 			assert(value_id_in_channel >= 0, "Index should be positive");
@@ -223,7 +223,7 @@ public:
 	}
 
 	/**
-	 * For in-place filtering it is necessary to write a particular value into the buffer. 
+	 * For in-place filtering it is necessary to write a particular value into the buffer.
 	 *
 	 * @param[in] buffer_id                      Index to the buffer (0 up to getBufferCount() - 1)
 	 * @param[in] channel_id                     Particular channel within this buffer (0 or 1)

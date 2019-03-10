@@ -402,14 +402,14 @@ struct __attribute__((__packed__)) beacon_mesh_message_t {
 
 /** A command message that can be sent over the mesh.
  *
- * A command message exists out of a message type, the number of node identifiers, and data. The data can be in 
+ * A command message exists out of a message type, the number of node identifiers, and data. The data can be in
  * structured or raw form (size MAX_COMMAND_MESSAGE_PAYLOAD_LENGTH). The structure are the node identifiers themselves
- * and the payload stemming from these nodes. The payload is a message: a beacon message, command message, or 
+ * and the payload stemming from these nodes. The payload is a message: a beacon message, command message, or
  * configuration message.
  *
  * TODO: The construction of this struct makes use of nested anonymous unions. It surprisingly compiles with g++, but
  * will probably fail with other compilers. Both ids[] and payload[] are dynamic (so the size of the struct is hard to
- * extract). Moreover, the size of beacon_mesh_message_t does not seem to be forced to be the same as that of 
+ * extract). Moreover, the size of beacon_mesh_message_t does not seem to be forced to be the same as that of
  * control_mesh_message_t.
  */
 struct __attribute__((__packed__)) command_message_t {

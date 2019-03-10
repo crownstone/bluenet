@@ -44,9 +44,9 @@ Switch::Switch():
 }
 
 /**
- * Initialize the "switch". The switch class encapsulates both the relay for switching high-power loads and the 
+ * Initialize the "switch". The switch class encapsulates both the relay for switching high-power loads and the
  * IGBTs for very fast switching of low-power loads. The latter enables all types of dimming. The following types
- * of dimming exists: 
+ * of dimming exists:
  *   + pulse width modulation (PWM)
  *   + leading edge dimming
  *   + trailing edge dimming
@@ -54,7 +54,7 @@ Switch::Switch():
  * TODO: The PWM class concerns dimming in general. It should be called "Dimmer", not just "PWM".
  */
 void Switch::init(const boards_config_t& board) {
-	
+
 	LOGd(FMT_INIT, "switch");
 
 	PWM& pwm = PWM::getInstance();
@@ -92,16 +92,16 @@ void Switch::init(const boards_config_t& board) {
 	LOGd("Obtained last switch state: pwm=%u relay=%u", _switchValue.state.dimmer, _switchValue.state.relay);
 
 	EventDispatcher::getInstance().addListener(this);
-	Timer::getInstance().createSingleShot(_switchTimerId, 
+	Timer::getInstance().createSingleShot(_switchTimerId,
 			(app_timer_timeout_handler_t)Switch::staticTimedSwitch);
-	Timer::getInstance().createSingleShot(_switchStoreStateTimerId, 
+	Timer::getInstance().createSingleShot(_switchStoreStateTimerId,
 			(app_timer_timeout_handler_t)Switch::staticTimedStoreSwitch);
 }
 
-/** 
+/**
  * TODO: Remove function. This should be self-contained... If it is required to wait a bit after init, this type of
  * decision should be part of this class. If there is a message exchange required with the current sensing module,
- * then this should be done over the event bus. 
+ * then this should be done over the event bus.
  *
  * The PWM is required for syncing with zero-crossings.
  */
@@ -173,7 +173,7 @@ void Switch::startPwm() {
 /**
  * TODO: Why is the old value stored as STATE_SWITCH_STATE and not as STATE_OLD_SWITCH_STATE? On a reboot of the
  * Crownstone through Switchcraft you probably want to restore it to the proper dimming state. This is why the old
- * state is required. However, in that case it should be called STATE_PREVIOUS_SWITCH_STATE or something indicating 
+ * state is required. However, in that case it should be called STATE_PREVIOUS_SWITCH_STATE or something indicating
  * this.
  */
 void Switch::storeState(switch_state_t oldVal) {

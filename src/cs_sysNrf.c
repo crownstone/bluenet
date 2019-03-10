@@ -123,7 +123,7 @@ void (* const gVectors[])(void) =
 	PendSV_Handler,
 	SysTick_Handler,
 
-//! External Interrupts 
+//! External Interrupts
 	POWER_CLOCK_IRQHandler,
 	RADIO_IRQHandler,
 	UART0_IRQHandler,

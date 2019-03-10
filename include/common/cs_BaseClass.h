@@ -11,7 +11,7 @@
 
 /** BaseClass
  */
-template<uint8_t N=1> 
+template<uint8_t N=1>
 class BaseClass {
 public:
 	BaseClass() {
@@ -27,7 +27,7 @@ public:
 	inline void setInitialized(uint8_t i = 0) {
 		_initialized[i] = true;
 	}
-	
+
 	inline void setUninitialized(uint8_t i = 0) {
 		_initialized[i] = false;
 	}

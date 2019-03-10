@@ -8,7 +8,7 @@
 
 #include <drivers/cs_Timer.h>
 
-/** 
+/**
  * Clock frequency of the RTC timer.
  *
  * TODO: Collect all macros in general file.
@@ -28,7 +28,7 @@
  * With the current clock frequency and max counter val, the RTC overflows every 512s.
  *
  * TODO: Implementation should be in a .cpp file
- * TODO: Get rid of all these static functions. 
+ * TODO: Get rid of all these static functions.
  * TODO: We have hardware floating points now. Get rid of ROUNDED_DIV macro, etc.
  */
 class RTC {

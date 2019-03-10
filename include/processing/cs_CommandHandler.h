@@ -26,10 +26,10 @@ struct delayed_command_t {
 };
 
 /**
- * Every command goes through the CommandHandler. 
+ * Every command goes through the CommandHandler.
  *
  * TODO: In handleCommand is every function by default executed at ADMIN level. This should be at the lowest privilege
- * level. 
+ * level.
  */
 class CommandHandler : EventListener {
 public:
@@ -51,15 +51,15 @@ public:
 	 *
 	 * The security level is ADMIN by default.
 	 */
-	cs_ret_code_t handleCommand(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size, 
+	cs_ret_code_t handleCommand(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size,
 			const EncryptionAccessLevel accessLevel = ADMIN);
 
 	/** Handle a particular command, but with a specified delay.
 	 */
-	cs_ret_code_t handleCommandDelayed(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size, 
+	cs_ret_code_t handleCommandDelayed(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size,
 			const uint32_t delay);
 
-	/** Reset, after a delay (2 seconds). 
+	/** Reset, after a delay (2 seconds).
 	 *
 	 * There is a DFU reset or a GPREGRET reset.
 	 */

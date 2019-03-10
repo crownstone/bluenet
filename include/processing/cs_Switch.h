@@ -18,18 +18,18 @@
 #define SWITCH_ON 100
 
 /* Power Switch
- * 
- * The Switch class governs the two (separate) pathways that enable power to the load (switch ON) 
+ *
+ * The Switch class governs the two (separate) pathways that enable power to the load (switch ON)
  * or disable power to the load (switch OFF)
  * The two pathways are:
  * * the Relay (for high current loads but slow switching times)
  * * the IGBTs (for low current loads but fast switching times)
  * Switching the IGBT pathway is done through Pulse Width Modulation (PWM)
- * 
+ *
  * #define variables used in this class
  *   - CONFIG_PWM_PERIOD          		Time between consecutive switch ON actions during PWM dim cycle
  * 	 - CONFIG_RELAY_HIGH_DURATION		Duration of time in which power is supplied to the relay in order to switch it
- * 
+ *
  * There are several things that influence the switch behavior (in order of importance):
  *   - IGBT overload (soft fuse).
  *   - Relay overload (soft fuse).

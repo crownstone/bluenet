@@ -8,7 +8,7 @@
 /**********************************************************************************************************************
  *
  * The Crownstone is a high-voltage (110-240V) switch. It can be used for indoor localization and building automation.
- * It is an essential building block for smart homes. Contemporary switches do come with smartphone apps. However, 
+ * It is an essential building block for smart homes. Contemporary switches do come with smartphone apps. However,
  * this does not simplify their use. The user needs to unlock her phone, open the app, navigate to the right screen,
  * and click a particular icon. A truly smart home knows that the user wants the lights on. For this, indoor
  * localization on a room level is required. Now, a smart home can turn on the lights there were the user resides.
@@ -20,13 +20,13 @@
  *
  * Read more on: https://crownstone.rocks
  *
- * Crownstone uses quite a sophisticated build system. It has to account for multiple devices and multiple 
- * configuration options. For that the CMake system is used in parallel. Configuration options are set in a file 
+ * Crownstone uses quite a sophisticated build system. It has to account for multiple devices and multiple
+ * configuration options. For that the CMake system is used in parallel. Configuration options are set in a file
  * called CMakeBuild.config. Details can be found in the following documents:
  *
  * - Development/Installation:         https://github.com/crownstone/bluenet/blob/master/docs/INSTALL.md
  * - Protocol Definition:              https://github.com/crownstone/bluenet/blob/master/docs/PROTOCOL.md
- * - Firmware Specifications:          https://github.com/crownstone/bluenet/blob/master/docs/FIRMWARE_SPECS.md 
+ * - Firmware Specifications:          https://github.com/crownstone/bluenet/blob/master/docs/FIRMWARE_SPECS.md
  *
  *********************************************************************************************************************/
 
@@ -69,25 +69,25 @@ void handleZeroCrossing() {
 }
 
 /** Allocate Crownstone class and internal references.
- * 
+ *
  * Create buffers, timers, storage, state, etc. We are running on an embedded device. Only allocate something in a
- * constructor. For dynamic information use the stack. Do not allocate/deallocate anything during runtime. It is 
- * too risky. It might not be freed and memory might overflow. This type of hardware should run months without 
+ * constructor. For dynamic information use the stack. Do not allocate/deallocate anything during runtime. It is
+ * too risky. It might not be freed and memory might overflow. This type of hardware should run months without
  * interruption.
  *
  * There is a function IS_CROWNSTONE. What this actually is contrasted with are other BLE type devices, in particular
  * the Guidestone. The latter devices do not have the ability to switch, dim, or measure power consumption.
  *
- * The order with which items are created. 
+ * The order with which items are created.
  *
  *  + buffers
  *  + event distpatcher
- *  + BLE stack 
+ *  + BLE stack
  *  + timer
  *  + persistent storage
  *  + state
  *  + command handler
- *  + factory reset 
+ *  + factory reset
  *  + scanner
  *  + tracker
  *  + mesh
@@ -112,7 +112,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 {
 	_mainTimerData = { {0} };
 	_mainTimerId = &_mainTimerData;
-	
+
 	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
 	EventDispatcher::getInstance().addListener(this);
@@ -139,7 +139,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 };
 
 /**
- * Initialize Crownstone firmware. First drivers are initialized (log modules, storage modules, ADC conversion, 
+ * Initialize Crownstone firmware. First drivers are initialized (log modules, storage modules, ADC conversion,
  * timers). Then everything is configured independent of the mode (everything that is common to whatever mode the
  * Crownstone runs on). A callback to the local staticTick function for a timer is set up. Then the mode of
  * operation is switched and the BLE services are initialized.
@@ -159,7 +159,7 @@ void Crownstone::init() {
 	LOGi(FMT_CREATE, "timer");
 	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
 	NRF_LOG_FLUSH();
-	
+
 	LOGi(FMT_HEADER, "mode");
 	uint8_t mode;
 	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
@@ -185,7 +185,7 @@ void Crownstone::initDrivers() {
 	LOGi("Init driver");
 	_stack->init();
 	_timer->init();
-	
+
 	_stack->initSoftdevice();
 
 	_storage->init();
@@ -198,7 +198,7 @@ void Crownstone::initDrivers() {
 	resetCounter.u32 = 6;
 	LOGi("Set reset counter to: %d", resetCounter.u8);
 	_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), PersistenceMode::FLASH);
-	
+
 	increaseResetCounter();
 #endif
 
@@ -219,7 +219,7 @@ void Crownstone::initDrivers() {
 
 	LOGi(FMT_INIT, "encryption handler");
 	EncryptionHandler::getInstance().init();
-	
+
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		// switch / PWM init
@@ -257,7 +257,7 @@ void Crownstone::initDrivers() {
 /**
  * Configure the Bluetooth stack. This also increments the reset counter.
  *
- * The order within this function is important. For example setName() sets the BLE device name and 
+ * The order within this function is important. For example setName() sets the BLE device name and
  * configureAdvertisements() defines advertisement parameters on appearance. These have to be called after
  * the storage has been initialized.
  */
@@ -266,7 +266,7 @@ void Crownstone::configure() {
 	assert(_storage != NULL, "Storage");
 
 	LOGi("> stack ...");
-	
+
 	_stack->initRadio();
 
 	configureStack();
@@ -274,7 +274,7 @@ void Crownstone::configure() {
 	_storage->garbageCollect();
 
 	increaseResetCounter();
-	
+
 	setName();
 
 	writeDefaults();
@@ -378,7 +378,7 @@ void Crownstone::configureAdvertisement() {
 	// The service data is populated with State information, but only in NORMAL mode.
 	if (_tmpOperationMode == OperationMode::OPERATION_MODE_NORMAL) {
 		LOGd("Normal mode, fill with state info");
-		
+
 		// Write crownstone id to the service data object.
 		uint16_t crownstoneId;
 		_state->get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, PersistenceMode::STRATEGY1);
@@ -393,7 +393,7 @@ void Crownstone::configureAdvertisement() {
 		// Write temperature to the service data object.
 		_serviceData->updateTemperature(getTemperature());
 	}
-	
+
 	// assign service data to stack
 	_stack->setServiceData(_serviceData);
 
@@ -439,10 +439,10 @@ void Crownstone::createService(const ServiceEvent event) {
  * also different entities are started (for example a scanner, or the BLE mesh).
  */
 void Crownstone::switchMode(const OperationMode & newMode) {
-	
+
 	LOGd("Current mode: %s", TypeName(_operationMode));
-	LOGd("Switch to mode: %s", TypeName(newMode));	
-	
+	LOGd("Switch to mode: %s", TypeName(newMode));
+
 	switch(_operationMode) {
 		case OperationMode::OPERATION_MODE_UNINITIALIZED:
 			break;
@@ -458,7 +458,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	}
 
 	_stack->halt();
-	
+
 	// Remove services that belong to the current operation mode.
 	// This is not done... It is impossible to remove services in the SoftDevice.
 
@@ -481,25 +481,25 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			break;
 		default:
 			// nothing to do
-			;	
+			;
 	}
 
 	// Loop through all services added to the stack and create the characteristics.
 	_stack->createCharacteristics();
-	
+
 	_stack->resume();
-			
+
 	switch(newMode) {
 		case OperationMode::OPERATION_MODE_SETUP:
 			LOGd("Configure setup mode");
 			_stack->changeToLowTxPowerMode();
 			break;
-		case OperationMode::OPERATION_MODE_FACTORY_RESET: 
+		case OperationMode::OPERATION_MODE_FACTORY_RESET:
 			LOGd("Configure factory reset mode");
 			FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
 			_stack->changeToNormalTxPowerMode();
 			break;
-		case OperationMode::OPERATION_MODE_DFU: 
+		case OperationMode::OPERATION_MODE_DFU:
 			LOGd("Configure DFU mode");
 			// TODO: have this function somewhere else.
 			CommandHandler::getInstance().handleCommand(CTRL_CMD_GOTO_DFU);
@@ -543,7 +543,7 @@ void Crownstone::setName() {
 	} else {
 		deviceName = std::string(device_name, size);
 	}
-	_stack->updateDeviceName(deviceName); 
+	_stack->updateDeviceName(deviceName);
 
 }
 
@@ -617,16 +617,16 @@ void Crownstone::startUp() {
 	//! start advertising
 	LOGi("Start advertising");
 	_stack->startAdvertising();
-	
+
 	// Have to give the stack a moment of pause to start advertising, otherwise we get into race conditions.
-	// TODO: Is this still the case? Can we solve this differently? 
+	// TODO: Is this still the case? Can we solve this differently?
 	nrf_delay_ms(50);
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		//! Start switch, so it can be used.
 		_switch->start();
 
-		if (_operationMode == OperationMode::OPERATION_MODE_SETUP && 
+		if (_operationMode == OperationMode::OPERATION_MODE_SETUP &&
 				_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
 			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
 		}
@@ -678,7 +678,7 @@ void Crownstone::startUp() {
 	APP_ERROR_CHECK(err_code);
 
 	_log(SERIAL_INFO, "\r\n");
-	_log(SERIAL_INFO, "\t\t\tAddress: ");	
+	_log(SERIAL_INFO, "\t\t\tAddress: ");
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN);
 	_log(SERIAL_INFO, "\r\n");
 
@@ -918,7 +918,7 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	LOGi("Compilation date: %s", COMPILATION_DAY);
 	LOGi("Compilation time: %s", __TIME__);
 	LOGi("Hardware version: %s", get_hardware_version());
-	LOGi("Verbosity: %i", SERIAL_VERBOSITY); 
+	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
 	LOG_MEMORY;
 }
 
@@ -928,10 +928,10 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
  *
  * The firmware is compiled with particular defaults. When a particular product comes from the factory line it has
  * by default FFFF FFFF in this UICR location. If this is the case, there are two options to cope with this:
- *   1. Create a custom firmware per device type where this field is adjusted at runtime. 
+ *   1. Create a custom firmware per device type where this field is adjusted at runtime.
  *   2. Create a custom firmware per device type with the UICR field state in the .hex file. In the latter case,
  *      if the UICR fields are already set, this might lead to a conflict.
- * There is chosen for the first option. Even if rare cases where there are devices types with FFFF FFFF in the field, 
+ * There is chosen for the first option. Even if rare cases where there are devices types with FFFF FFFF in the field,
  * the runtime always tries to overwrite it with the (let's hope) proper state.
  */
 void overwrite_hardware_version() {

@@ -1,7 +1,7 @@
 /** General information not depending on Nordic libraries
  *
  * This file contains general fields, structs, etc. that do have very few dependencies.
- * 
+ *
  *   - This means that they can be used by unit tests without pulling in hardware specific details
  */
 

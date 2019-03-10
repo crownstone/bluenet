@@ -194,7 +194,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_DEC_CURRENT_RANGE,                            // Sent to decrease current range.
 	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is stream_header_t
 	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
-}; 
+};
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
@@ -376,7 +376,7 @@ union st_value_t {
 	uint32_t  u32;
 } __ALIGN(4);
 
-struct cs_file_data_t { 
+struct cs_file_data_t {
 	CS_TYPE type;
 	uint8_t *value;
 	uint16_t size;
@@ -405,7 +405,7 @@ struct cs_file_data_t {
  *-------------------------------------------------------------------------------------------------------------------*/
 
 #ifndef TYPIFY
-#define TYPIFY(NAME) NAME ## _TYPE 
+#define TYPIFY(NAME) NAME ## _TYPE
 #endif
 //TODO: check the types
 typedef uint16_t TYPIFY(CONFIG_ADV_INTERVAL);
@@ -418,11 +418,11 @@ typedef     bool TYPIFY(CONFIG_ENCRYPTION_ENABLED);
 typedef     bool TYPIFY(CONFIG_IBEACON_ENABLED);
 typedef uint16_t TYPIFY(CONFIG_IBEACON_MINOR);
 typedef uint16_t TYPIFY(CONFIG_IBEACON_MAJOR);
-typedef   int8_t TYPIFY(CONFIG_IBEACON_TXPOWER); 
+typedef   int8_t TYPIFY(CONFIG_IBEACON_TXPOWER);
 typedef   int8_t TYPIFY(CONFIG_LOW_TX_POWER);
 typedef   int8_t TYPIFY(CONFIG_MAX_CHIP_TEMP);
 typedef     bool TYPIFY(CONFIG_MESH_ENABLED);
-typedef  int32_t TYPIFY(CONFIG_POWER_ZERO); 
+typedef  int32_t TYPIFY(CONFIG_POWER_ZERO);
 typedef uint32_t TYPIFY(CONFIG_PWM_PERIOD);
 typedef    float TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP);
 typedef    float TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN);
@@ -434,12 +434,12 @@ typedef uint16_t TYPIFY(CONFIG_SCAN_DURATION);
 typedef uint16_t TYPIFY(CONFIG_SCAN_INTERVAL);
 typedef uint16_t TYPIFY(CONFIG_SCAN_WINDOW);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD);
-typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM); 
+typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM);
 typedef     bool TYPIFY(CONFIG_SWITCH_LOCKED);
 typedef     bool TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
-typedef    float TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD); 
+typedef    float TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD);
 typedef   int8_t TYPIFY(CONFIG_TX_POWER);
-typedef  uint8_t TYPIFY(CONFIG_UART_ENABLED); 
+typedef  uint8_t TYPIFY(CONFIG_UART_ENABLED);
 typedef    float TYPIFY(CONFIG_VOLTAGE_MULTIPLIER);
 typedef  int32_t TYPIFY(CONFIG_VOLTAGE_ADC_ZERO);
 
@@ -524,25 +524,25 @@ typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
  *-------------------------------------------------------------------------------------------------------------------*/
 
 /**
- * Store values in FLASH or RAM. Load values from FIRMWARE_DEFAULT, FLASH or RAM. 
+ * Store values in FLASH or RAM. Load values from FIRMWARE_DEFAULT, FLASH or RAM.
  *
  * 1. Values that are written fairly often and are not important over reboots should be stored in and read from RAM.
- * For example, we can measure continuously the temperature of the chip. We can also all the time read this value 
+ * For example, we can measure continuously the temperature of the chip. We can also all the time read this value
  * from one of the BLE services. There is no reason to do a roundtrip to FLASH.
  *
  * 2. Values like CONFIG_BOOT_DELAY should be known over reboots of the device. Moreover, they should also persist
  * over firmware updates. These values are stored in FLASH. If the values are actually not changed by the user (or via
- * the smartphone app), they should NOT be stored to FLASH. They can then immediately be read from the 
+ * the smartphone app), they should NOT be stored to FLASH. They can then immediately be read from the
  * FIRMWARE_DEFAULT. They will be stored only if they are explicitly overwritten. If these values are stored in FLASH
- * they always take precedence over FIRMWARE_DEFAULT values. 
+ * they always take precedence over FIRMWARE_DEFAULT values.
  *
  * 3. Most values can be written to and read from FLASH using RAM as a cache. We can also use FIRMWARE_DEFAULT as
  * a fallback when the FLASH value is not present. Moreover, we can have a list that specifies if a value should be
  * in RAM or in FLASH by default. This complete persistence strategy is called STRATEGY1.
  *
- * NOTE. Suppose we have a new firmware available and we definitely want to use a new FIRMWARE_DEFAULT value. For 
- * example, we use more peripherals and need to have a CONFIG_BOOT_DELAY that is higher or else it will be in an 
- * infinite reboot loop. Before we upload the new firmware to the Crownstone, we need to explicitly clear the value. 
+ * NOTE. Suppose we have a new firmware available and we definitely want to use a new FIRMWARE_DEFAULT value. For
+ * example, we use more peripherals and need to have a CONFIG_BOOT_DELAY that is higher or else it will be in an
+ * infinite reboot loop. Before we upload the new firmware to the Crownstone, we need to explicitly clear the value.
  * Only after we have deleted the FLASH record we can upload the new firmware. Then the new FIRMWARE_DEFAULT is used
  * automatically.
  */
@@ -1040,9 +1040,9 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
  *
  *-------------------------------------------------------------------------------------------------------------------*/
 
-/** Gets the default. 
+/** Gets the default.
  *
- * Note that if data.value is not aligned at a word boundary, the result still isn't. Use st_value_t to align 
+ * Note that if data.value is not aligned at a word boundary, the result still isn't. Use st_value_t to align
  * (u)int8_t, (u)int16_t, float, etc. on word boundaries.
  *
  * There is no allocation done in this function. It is assumed that data.value points to an array or single
@@ -1060,47 +1060,47 @@ constexpr void getDefault(cs_file_data_t & data) {
 		memcpy(data.value, BLUETOOTH_NAME, data.size);
 		break;
 	}
-	case CS_TYPE::CONFIG_MESH_ENABLED: 
+	case CS_TYPE::CONFIG_MESH_ENABLED:
 		*(TYPIFY(CONFIG_MESH_ENABLED)*)data.value = CONFIG_MESH_DEFAULT;
 		break;
-	case CS_TYPE::CONFIG_ENCRYPTION_ENABLED: 
+	case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
 		*(TYPIFY(CONFIG_ENCRYPTION_ENABLED)*)data.value = CONFIG_ENCRYPTION_DEFAULT;
 		break;
-	case CS_TYPE::CONFIG_IBEACON_ENABLED: 
+	case CS_TYPE::CONFIG_IBEACON_ENABLED:
 		*(TYPIFY(CONFIG_IBEACON_ENABLED)*)data.value = CONFIG_IBEACON_DEFAULT;
 		break;
-	case CS_TYPE::CONFIG_SCANNER_ENABLED: 
+	case CS_TYPE::CONFIG_SCANNER_ENABLED:
 		*(TYPIFY(CONFIG_SCANNER_ENABLED)*)data.value = CONFIG_SCANNER_DEFAULT;
 		break;
-	case CS_TYPE::CONFIG_DEFAULT_ON: 
+	case CS_TYPE::CONFIG_DEFAULT_ON:
 		*(TYPIFY(CONFIG_DEFAULT_ON)*)data.value = CONFIG_RELAY_START_DEFAULT;
 		break;
-	case CS_TYPE::CONFIG_PWM_ALLOWED: 
+	case CS_TYPE::CONFIG_PWM_ALLOWED:
 		*(TYPIFY(CONFIG_PWM_ALLOWED)*)data.value = CONFIG_PWM_DEFAULT;
 		break;
-	case CS_TYPE::CONFIG_SWITCH_LOCKED: 
+	case CS_TYPE::CONFIG_SWITCH_LOCKED:
 		*(TYPIFY(CONFIG_SWITCH_LOCKED)*)data.value = CONFIG_SWITCH_LOCK_DEFAULT;
 		break;
-	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: 
+	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
 		*(TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)*)data.value = CONFIG_SWITCHCRAFT_DEFAULT;
 		break;
-	case CS_TYPE::CONFIG_IBEACON_MAJOR: 
+	case CS_TYPE::CONFIG_IBEACON_MAJOR:
 		*(TYPIFY(CONFIG_IBEACON_MAJOR)*)data.value = BEACON_MAJOR;
 		break;
-	case CS_TYPE::CONFIG_IBEACON_MINOR: 
+	case CS_TYPE::CONFIG_IBEACON_MINOR:
 		*(TYPIFY(CONFIG_IBEACON_MINOR)*)data.value = BEACON_MINOR;
 		break;
-	case CS_TYPE::CONFIG_IBEACON_UUID: 
+	case CS_TYPE::CONFIG_IBEACON_UUID:
 		data.size = MIN(data.size, sizeof(STRINGIFY(BEACON_UUID)));
 		memcpy(data.value, STRINGIFY(BEACON_UUID), data.size);
 		break;
-	case CS_TYPE::CONFIG_IBEACON_TXPOWER: 
+	case CS_TYPE::CONFIG_IBEACON_TXPOWER:
 		*(TYPIFY(CONFIG_IBEACON_TXPOWER)*)data.value = BEACON_RSSI;
 		break;
-	case CS_TYPE::CONFIG_TX_POWER: 
+	case CS_TYPE::CONFIG_TX_POWER:
 		*(TYPIFY(CONFIG_TX_POWER)*)data.value = TX_POWER;
 		break;
-	case CS_TYPE::CONFIG_ADV_INTERVAL: 
+	case CS_TYPE::CONFIG_ADV_INTERVAL:
 		*(TYPIFY(CONFIG_ADV_INTERVAL)*)data.value = ADVERTISEMENT_INTERVAL;
 		break;
 	case CS_TYPE::CONFIG_SCAN_DURATION:

@@ -65,7 +65,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	state.set(CS_TYPE::CONFIG_KEY_MEMBER, sd.memberKey, sizeof(sd.memberKey), PersistenceMode::STRATEGY1);
 	state.set(CS_TYPE::CONFIG_KEY_GUEST, sd.guestKey, sizeof(sd.guestKey), PersistenceMode::STRATEGY1);
 //	state.set(CS_TYPE::CONFIG_MESH_ACCESS_ADDRESS, &(sd.meshAccessAddress), sizeof(sd.meshAccessAddress), PersistenceMode::STRATEGY1);
-	state.set(CS_TYPE::CONFIG_IBEACON_UUID, &(sd.ibeaconUuid.uuid128), sizeof(sd.ibeaconUuid), 
+	state.set(CS_TYPE::CONFIG_IBEACON_UUID, &(sd.ibeaconUuid.uuid128), sizeof(sd.ibeaconUuid),
 			PersistenceMode::STRATEGY1);
 	value.u32 = 0;
 	value.u16 = sd.ibeaconMajor;
@@ -89,7 +89,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	EventDispatcher::getInstance().dispatch(event0);
 
 	// Reboot will be done when persistent storage is done.
-	
+
 //	_setupDone = true;
 
 //	event_t event1(CS_TYPE::EVT_CROWNSTONE_SWITCH_MODE, (void*)&_persistenceMode, sizeof(_persistenceMode));
@@ -119,7 +119,7 @@ void Setup::handleEvent(event_t & event) {
 			// set char value
 			event_t event1(CS_TYPE::EVT_SETUP_DONE);
 			EventDispatcher::getInstance().dispatch(event1);
-	
+
 			State &state = State::getInstance();
 			uint8_t mode = 0;
 			state.get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);

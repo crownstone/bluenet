@@ -44,8 +44,8 @@
 class Crownstone : EventListener {
 public:
 
-    enum ServiceEvent { 
-	CREATE_DEVICE_INFO_SERVICE, CREATE_SETUP_SERVICE, CREATE_CROWNSTONE_SERVICE, 
+    enum ServiceEvent {
+	CREATE_DEVICE_INFO_SERVICE, CREATE_SETUP_SERVICE, CREATE_CROWNSTONE_SERVICE,
 	REMOVE_DEVICE_INFO_SERVICE, REMOVE_SETUP_SERVICE, REMOVE_CROWNSTONE_SERVICE };
 
     /**
@@ -106,7 +106,7 @@ protected:
     void writeDefaults();
 
     void createService(const ServiceEvent event);
-    
+
     /** Create services available in setup mode
      */
     void createSetupServices();
@@ -115,8 +115,8 @@ protected:
      */
     void createCrownstoneServices();
 
-    /** Start operation for Crownstone. 
-     * 
+    /** Start operation for Crownstone.
+     *
      * This currently only enables parts in Normal operation mode. This includes:
      *    - prepare mesh
      *    - prepare scanner
@@ -124,7 +124,7 @@ protected:
      *    - ...
      */
     void startOperationMode(const OperationMode & mode);
-    
+
     void switchMode(const OperationMode & mode);
 
     /** tick function for crownstone to update/execute periodically

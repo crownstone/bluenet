@@ -35,8 +35,8 @@ Stack::Stack() :
 	_tx_power_level(TX_POWER), _sec_mode({ }),
 	_interval(defaultAdvertisingInterval_0_625_ms), _timeout(defaultAdvertisingTimeout_seconds),
 	_gap_conn_params( { }),
-	_advertising(false), 
-	_advertisingConfigured(false), 
+	_advertising(false),
+	_advertisingConfigured(false),
 	_scanning(false),
 	_conn_handle(BLE_CONN_HANDLE_INVALID),
 	_radio_notify(0),
@@ -63,7 +63,7 @@ Stack::Stack() :
 	_gap_conn_params.max_conn_interval = MAX_CONNECTION_INTERVAL;
 	_gap_conn_params.slave_latency = SLAVE_LATENCY;
 	_gap_conn_params.conn_sup_timeout = CONNECTION_SUPERVISION_TIMEOUT;
-	
+
 	// default stack state (will be used in halt/resume)
 	_stack_state.advertising = false;
 }
@@ -80,7 +80,7 @@ Stack::~Stack() {
 void Stack::init() {
 	if (checkCondition(C_STACK_INITIALIZED, false)) return;
 	LOGi(FMT_INIT, "stack");
-	
+
 	ret_code_t ret_code;
 
 	// Check if SoftDevice is already running and disable it in that case (to restart later)
@@ -102,10 +102,10 @@ void Stack::init() {
 	// set threshold value, if power falls below threshold,
 	// an NRF_EVT_POWER_FAILURE_WARNING will be triggered.
 	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
-	
+
 	_adv_data.adv_data.p_data = NULL;
 	_adv_data.adv_data.len = 0;
-	
+
 	_adv_data.scan_rsp_data.p_data = NULL;
 	_adv_data.scan_rsp_data.len = 0;
 
@@ -117,7 +117,7 @@ void Stack::init() {
 /**
  * This function calls nrf_sdh_enable_request. Somehow, when called after a reboot. This works fine. However, when
  * called for the first time this leads to a hard fault. APP_ERROR_CHECK is not even called. The second time it
- * goes through the event that the Storage is initialized doesn't come through. 
+ * goes through the event that the Storage is initialized doesn't come through.
  */
 void Stack::initSoftdevice() {
 
@@ -136,7 +136,7 @@ void Stack::initSoftdevice() {
 		LOGd("Softdevice is currently not suspended");
 	}
 	LOGd("nrf_sdh_enable_request");
-	ret_code = nrf_sdh_enable_request(); 
+	ret_code = nrf_sdh_enable_request();
 	if (ret_code == NRF_ERROR_INVALID_STATE) {
 		LOGw("Softdevice, already initialized");
 		return;
@@ -173,7 +173,7 @@ void Stack::initRadio() {
 	if (checkCondition(C_RADIO_INITIALIZED, false)) return;
 
 	ret_code_t ret_code;
-	
+
 	LOGi(FMT_INIT, "radio");
 	// Enable BLE stack
 	uint32_t ram_start = RAM_R1_BASE;
@@ -182,7 +182,7 @@ void Stack::initRadio() {
 	LOGd("nrf_sdh_ble_default_cfg_set at %p", ram_start);
 	// TODO: make a seperate function, that tells you what to set RAM_R1_BASE to.
 	// TODO: make a unit test for that.
-	ret_code = nrf_sdh_ble_default_cfg_set(_conn_cfg_tag, &ram_start); 
+	ret_code = nrf_sdh_ble_default_cfg_set(_conn_cfg_tag, &ram_start);
 	switch(ret_code) {
 		case NRF_ERROR_NO_MEM:
 			LOGe("Unrecoverable, memory softdevice and app overlaps: %p", ram_start);
@@ -227,7 +227,7 @@ void Stack::initRadio() {
 	LOGv("sd_ble_gap_device_name_set");
 	ret_code = sd_ble_gap_device_name_set(&_sec_mode, (uint8_t*) device_name.c_str(), device_name.length());
 	APP_ERROR_CHECK(ret_code);
-	
+
 	ret_code = sd_ble_gap_appearance_set(_appearance);
 	APP_ERROR_CHECK(ret_code);
 
@@ -307,7 +307,7 @@ void Stack::updateDeviceName(const std::string& deviceName) {
 	std::string name = _device_name.empty() ? "not set..." : deviceName;
 
 	uint32_t ret_code;
-	ret_code = sd_ble_gap_device_name_set(&_sec_mode, (uint8_t*) name.c_str(), 
+	ret_code = sd_ble_gap_device_name_set(&_sec_mode, (uint8_t*) name.c_str(),
 			name.length());
 	APP_ERROR_CHECK(ret_code);
 }
@@ -333,7 +333,7 @@ void Stack::initServices() {
 	for (Service* svc : _services) {
 		svc->init(this);
 	}
-	
+
 	setInitialized(C_SERVICES_INITIALIZED);
 }
 
@@ -364,10 +364,10 @@ void Stack::setTxPowerLevel(int8_t powerLevel) {
 #endif
 
 	switch (powerLevel) {
-		case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4: 
+		case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4:
 			// accepted values
 			break;
-		default: 
+		default:
 			// other values are not accepted
 			return;
 	}
@@ -377,9 +377,9 @@ void Stack::setTxPowerLevel(int8_t powerLevel) {
 	}
 }
 
-/** 
+/**
  * It seems that if we have a connectable advertisement and a subsequent connection, we cannot update the TX
- * power while already being connected. At least it returns a BLE_ERROR_INVALID_ADV_HANDLE. 
+ * power while already being connected. At least it returns a BLE_ERROR_INVALID_ADV_HANDLE.
  */
 void Stack::updateTxPowerLevel() {
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
@@ -443,7 +443,7 @@ void Stack::configureIBeaconAdvData(IBeacon* beacon) {
 	LOGd("Configure iBeacon adv data");
 
 	memset(&_manufac_apple, 0, sizeof(_manufac_apple));
-	_manufac_apple.company_identifier = 0x004C; 
+	_manufac_apple.company_identifier = 0x004C;
 	_manufac_apple.data.p_data = beacon->getArray();
 	_manufac_apple.data.size = beacon->size();
 
@@ -461,7 +461,7 @@ void Stack::configureIBeaconAdvData(IBeacon* beacon) {
 	}
 	LOGd("Create advertisement of size %i", _adv_data.adv_data.len);
 	ret_code = ble_advdata_encode(&_config_advdata, _adv_data.adv_data.p_data, &_adv_data.adv_data.len);
-	LOGv("First bytes in encoded buffer: [%02x %02x %02x %02x]", 
+	LOGv("First bytes in encoded buffer: [%02x %02x %02x %02x]",
 			_adv_data.adv_data.p_data[0], _adv_data.adv_data.p_data[1],
 			_adv_data.adv_data.p_data[2], _adv_data.adv_data.p_data[3]
 	    );
@@ -650,8 +650,8 @@ void Stack::stopAdvertising() {
 
 	// This function call can take 31ms
 	LOGd("sd_ble_gap_adv_stop(_adv_handle=%i", _adv_handle);
-	uint32_t ret_code = sd_ble_gap_adv_stop(_adv_handle); 
-	// Ignore invalid state error, 
+	uint32_t ret_code = sd_ble_gap_adv_stop(_adv_handle);
+	// Ignore invalid state error,
 	// see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 	APP_ERROR_CHECK_EXCEPT(ret_code, NRF_ERROR_INVALID_STATE);
 
@@ -698,7 +698,7 @@ void Stack::updateAdvertisement(bool toggle) {
 }
 
 /** Utility function which logs unexpected state
- * 
+ *
  */
 bool Stack::checkCondition(condition_t condition, bool expectation) {
 	bool field = false;
@@ -721,7 +721,7 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
 			LOGw("Services init %s", field ? "true" : "false");
 		}
 		break;
-	case C_ADVERTISING: 
+	case C_ADVERTISING:
 		field = _advertising;
 		if (expectation != field) {
 			LOGw("Advertising init %s", field ? "true" : "false");
@@ -735,7 +735,7 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
  * After this function _adv_handle should be valid. Note, that we are not allowed to:
  *
  *   call sd_ble_gap_adv_set_configure with adv_params != NULL while advertising
- *   call sd_ble_gap_adv_set_configure again with the same pointer to _adv_data 
+ *   call sd_ble_gap_adv_set_configure again with the same pointer to _adv_data
  *
  * If adv_params != NULL we are temporarily stopping advertising.
  * If our data is different we have to provide a different pointer to _adv_data.
@@ -749,10 +749,10 @@ void Stack::setAdvertisementData() {
 	if (_adv_handle == BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
 		first_time = true;
 	}
-	
+
 	if (first_time) {
 		LOGv("sd_ble_gap_adv_set_configure(_adv_handle=%i,...,...)", _adv_handle);
-		LOGv("First bytes in encoded buffer: [%02x %02x %02x %02x]", 
+		LOGv("First bytes in encoded buffer: [%02x %02x %02x %02x]",
 				_adv_data.adv_data.p_data[0], _adv_data.adv_data.p_data[1],
 				_adv_data.adv_data.p_data[2], _adv_data.adv_data.p_data[3]
 		    );
@@ -776,7 +776,7 @@ void Stack::setAdvertisementData() {
 		if (temporary_stop_advertising) {
 			startAdvertising();
 		}
-	} 
+	}
 }
 
 void Stack::startScanning() {
@@ -960,7 +960,7 @@ void Stack::on_ble_evt(const ble_evt_t * p_ble_evt) {
 		LOGw("Timeout!");
 		// BLE_GAP_TIMEOUT_SRC_ADVERTISING does not exist anymore...
 //		if (p_ble_evt->evt.gap_evt.params.timeout.src == BLE_GAP_TIMEOUT_SRC_ADVERTISING) {
-//			_advertising = false; 
+//			_advertising = false;
 //			//! Advertising stops, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 //		}
 		break;

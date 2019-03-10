@@ -67,7 +67,7 @@ inline std::string get_hardware_revision(void) {
 	}
 
 	char hardware_revision[34];
-	sprintf(hardware_revision, "%11.11s%.4s%.4s%.8s%.6s", get_hardware_version(), production_run.c_str(), 
+	sprintf(hardware_revision, "%11.11s%.4s%.4s%.8s%.6s", get_hardware_version(), production_run.c_str(),
 			housing_id.c_str(), reserved.c_str(), nordic_chip_version);
 	return std::string(hardware_revision, 34);
 }

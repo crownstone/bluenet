@@ -23,7 +23,7 @@ Service::Service():
 		{
 }
 
-/** Initialize service. 
+/** Initialize service.
  *
  * This initializes each characteristic. A pointer to the stack is stored locally. By default characteristics are not
  * encrypted. If required, setAesEncrypted() should be called next. This will encrypt all characteristics in this
@@ -64,9 +64,9 @@ void Service::setAesEncrypted(bool encrypted) {
 	}
 }
 
-/** 
+/**
  * Set the UUID. It is only possible to do before starting the service. Nordic does not support removing a service.
- * There is only a sd_ble_gatts_service_changed call. If the UUID needs changed in the mean-time, restart the 
+ * There is only a sd_ble_gatts_service_changed call. If the UUID needs changed in the mean-time, restart the
  * SoftDevice. Calling setUUID when running will only evoke an error. It will have no consequences.
  */
 Service& Service::setUUID(const UUID& uuid) {
@@ -151,7 +151,7 @@ bool Service::on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_ha
 
 				//! get length of data, header does not contain full length but rather the "step size"
 				uint16_t length = 0;
-				cs_sd_ble_gatts_value_get(getStack()->getConnectionHandle(), characteristic->getValueHandle(), 
+				cs_sd_ble_gatts_value_get(getStack()->getConnectionHandle(), characteristic->getValueHandle(),
 						&length, NULL);
 				characteristic->written(length);
 			}

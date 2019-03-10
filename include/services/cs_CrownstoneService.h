@@ -55,7 +55,7 @@ protected:
 
 	/** Enable the control characteristic.
  	 */
-	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, uint16_t charUuid, 
+	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, uint16_t charUuid,
 			EncryptionAccessLevel minimumAccessLevel = GUEST);
 
 	/** Enable the set configuration characteristic.
@@ -64,12 +64,12 @@ protected:
 	 * characteristic.
 	 * See <_setConfigurationCharacteristic>.
 	 */
-	void addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size, 
+	void addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size,
 			EncryptionAccessLevel minimumAccessLevel = ADMIN);
 
 	/** Enable the get configuration characteristic.
 	 */
-	void addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size, 
+	void addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size,
 			EncryptionAccessLevel minimumAccessLevel = ADMIN);
 
 	inline void addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
@@ -78,7 +78,7 @@ protected:
 
 	inline void addFactoryResetCharacteristic();
 
-	void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size, 
+	void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size,
 			EncryptionAccessLevel minimumAccessLevel = GUEST);
 
 	/** Enable the mesh characteristic.

@@ -106,7 +106,7 @@ enum adc_saadc_state_t {
  *
  * There is only one SAADC hardware peripheral, hence this class conforms to the singleton design pattern.
  *
- * The constructor does NOT have arguments you might expect, such as the number of buffers to use, or the size of the 
+ * The constructor does NOT have arguments you might expect, such as the number of buffers to use, or the size of the
  * buffers. These are all set through preprocessor macros. The ADC class requires access to the following macros
  * (see below).
  *
@@ -156,7 +156,7 @@ public:
 	 */
 	void stop();
 
-	/** Release a buffer, so it can be used again by the ADC. 
+	/** Release a buffer, so it can be used again by the ADC.
 	 *
 	 * @param[in] buf                  Pointer to the buffer, as received in the done callback.
 	 * @return                         Boolean indicating success (true) or failure (false).
@@ -230,7 +230,7 @@ private:
 
 	// This class is singleton, deny implementation
 	ADC(ADC const&);
-	
+
 	// This class is singleton, deny implementation
 	void operator=(ADC const &);
 
@@ -291,7 +291,7 @@ private:
 //		return (_doneCallbackData.callback != NULL);
 		return (_doneCallback != NULL);
 	}
-	
+
 	// The zero crossing callback.
 	// **Used in interrupt!**
 	adc_zero_crossing_cb_t _zeroCrossingCallback;

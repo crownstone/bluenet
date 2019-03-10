@@ -95,12 +95,12 @@ class state_message { // Rename to StateMessage ?
 				friend class state_message;
 
 				state_message_t *_smt; // Rename to something more readable?
-				
+
 				uint8_t _current; // What is this for?
-				
+
 				iterator(uint8_t current = 0): _current(current) {
 				}
-				
+
 				iterator(state_message_t * smt, uint8_t current = 0): _smt(smt), _current(current) {
 				}
 
@@ -139,7 +139,7 @@ class state_message { // Rename to StateMessage ?
 		iterator begin();
 
 		/**
-		 * Return pointer to last element. Note that this iterator is "equality comparable". Only random access 
+		 * Return pointer to last element. Note that this iterator is "equality comparable". Only random access
 		 * iterators are relationally comparable. That's why you always use a for-loop like this:
 		 *
 		 * for (iter = sm.begin(); iter != sm.end(); iter++) {

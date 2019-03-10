@@ -57,9 +57,9 @@ public:
 	//! Maximum number of services (currently set to 5)
 	static const uint8_t MAX_SERVICE_COUNT = 5;
 
-	typedef fixed_tuple<Service*, MAX_SERVICE_COUNT> Services_t;  
+	typedef fixed_tuple<Service*, MAX_SERVICE_COUNT> Services_t;
 
-	//! The default BLE appearance, for unknown reason set to generic tag. 
+	//! The default BLE appearance, for unknown reason set to generic tag.
 	// See: https://devzone.nordicsemi.com/question/2973/an36-ble_appearance/
 	static const uint16_t                  defaultAppearance = BLE_APPEARANCE_GENERIC_TAG;
 	//! The low-frequency clock, currently generated from the high frequency clock
@@ -78,7 +78,7 @@ protected:
 
 	// might want to change this to a linked list or something that
 	// we can loop over but doesn't allocate more space than needed
-	Services_t                                  _services;  
+	Services_t                                  _services;
 
 	nrf_clock_lf_cfg_t                          _clock_source;
 	int8_t                                      _tx_power_level;
@@ -100,7 +100,7 @@ protected:
 	callback_disconnected_t                     _callback_disconnected;  //! 16
 	callback_radio_t                            _callback_radio;  //! 16
 	//! 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
-	volatile uint8_t                            _radio_notify; 
+	volatile uint8_t                            _radio_notify;
 
 	ble_user_mem_block_t 						_user_mem_block; //! used for user memory (long write)
 
@@ -117,7 +117,7 @@ protected:
 	uint8_t                                     _adv_handle; // Advertisement handle is set by first call to: sd_ble_gap_adv_set_configure()
 	ble_advdata_t                               _config_advdata;
 	ble_advdata_t                               _config_scanrsp;
-	
+
 	ble_gap_adv_data_t                          _adv_data;
 	//ble_data_t                                  _data_advdata;
 	//ble_data_t                                  _data_scanrsp;
@@ -138,7 +138,7 @@ protected:
 
 	ble_gap_addr_t                              _connectable_address;
 	ble_gap_addr_t                              _nonconnectable_address;
-	
+
 	struct stack_state {
 		bool advertising;
 	} _stack_state;
@@ -160,7 +160,7 @@ public:
 	 *   - set the callback for BLE events (if we use Source/sd_common/softdevice_handler.c in Nordic's SDK)
 	 */
 	void init();
-	
+
 	//! Temporarily halt the stack
 	void halt();
 
@@ -171,7 +171,7 @@ public:
 	 *
 	 */
 	void initRadio();
-	
+
 	void initSoftdevice();
 
 	void createCharacteristics();
@@ -416,8 +416,8 @@ protected:
 private:
 	/** Constructor of the BLE stack on the NRF5 series.
 	 *
-	 * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set. 
-	 * However, the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the 
+	 * The constructor sets up very little! Only enough memory is allocated. Also there are a lot of defaults set.
+	 * However, the SoftDevice is not enabled yet, nor any function on the SoftDevice is called. This is done in the
 	 * init() function.
 	 */
 	Stack();
