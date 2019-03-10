@@ -6,8 +6,6 @@
  */
 
 #include <structs/cs_ScanResult.h>
-#include <cfg/cs_WhiteList.h>
-#include <cfg/cs_BlackList.h>
 
 //#define PRINT_SCANRESULT_VERBOSE
 //#define PRINT_DEBUG
@@ -25,33 +23,6 @@ void ScanResult::clear() {
 	memset(_buffer, 0, sizeof(peripheral_device_list_t));
 }
 
-//bool filter(uint8_t * adrs_ptr) {
-//	//! Check if the address is in the white list
-//	//! If not, return
-//	bool whiteListed = false;
-//	for (int i=0; i<WHITELIST_LENGTH; i++) {
-//		if (memcmp(adrs_ptr, WhiteList + i*BLE_GAP_ADDR_LEN, BLE_GAP_ADDR_LEN) == 0) {
-//			whiteListed = true;
-//			break;
-//		}
-//	}
-//	if (!whiteListed) {
-//      LOGi("address is not in whitelist");
-//		return true;
-//	}
-//
-//	//! Check if the address is in the black list
-//	//! If so, return
-//	for (int i=0; i<BLACKLIST_LENGTH; i++) {
-//		if (memcmp(adrs_ptr, BlackList + i*BLE_GAP_ADDR_LEN, BLE_GAP_ADDR_LEN) == 0) {
-//      	LOGi("address is in blacklist");
-//			return true;
-//		}
-//	}
-//
-//	return false;
-//}
-
 void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 
 	if (_buffer == NULL) {
@@ -64,10 +35,6 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 					adrs_ptr[4], adrs_ptr[3], adrs_ptr[2], adrs_ptr[1],
 					adrs_ptr[0], rssi);
 #endif
-
-//	if (filter(adrs_ptr)) {
-//		return;
-//	}
 
 	for (int i = 0; i < getSize(); ++i) {
 
@@ -83,7 +50,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 				adrs_ptr[0], rssi);
 #endif
 
-			//! TODO: Any reason not to break here?
+			// TODO: Any reason not to break here?
 			return;
 		}
 	}
