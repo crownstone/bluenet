@@ -42,8 +42,6 @@ public:
 	//! stop scan immediately (no results will be sent)
 	void stop();
 
-//	uint32_t getInterval() { return (uint32_t)_scanDuration + _scanSendDelay + _scanBreakDuration; }
-
 	void handleEvent(event_t & event);
 
 private:
@@ -59,29 +57,15 @@ private:
 	bool _running;
 	//! scan for ... ms
 	uint16_t _scanDuration;
-	//! wait ... ms before sending the scan result
-	uint16_t _scanSendDelay;
 	//! wait ... ms before starting the next scan
 	uint16_t _scanBreakDuration;
-	//! filter out devices based on mask
-	uint8_t _scanFilter;
-	//! Filtered out devices are still sent once every N scan intervals
-	//! Set to 0 to not send them ever
-	uint16_t _filterSendFraction;
 
 	uint16_t _scanCount;
 
-#if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t              _appTimerData;
 	app_timer_id_t           _appTimerId;
-#else
-	uint32_t                 _appTimerId;
-#endif
 
 	Stack* _stack;
-
-//	uint8_t _scanBuffer[sizeof(peripheral_device_list_t)];
-//	ScanResult* _scanResult;
 
 	Scanner();
 

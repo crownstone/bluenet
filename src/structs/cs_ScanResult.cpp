@@ -58,7 +58,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 	int8_t minRssi = INT8_MAX;
 	int8_t idx  = -1;
 	if (getSize() >= SR_MAX_NR_DEVICES) {
-		//! history full, throw out item with lowest rssi
+		// history full, throw out item with lowest rssi
 		for (int i = 0; i < SR_MAX_NR_DEVICES; ++i) {
 			if (_buffer->list[i].rssi < minRssi && _buffer->list[i].rssi < rssi) {
 				minRssi = _buffer->list[i].rssi;
@@ -74,7 +74,7 @@ void ScanResult::update(uint8_t * adrs_ptr, int8_t rssi) {
 		idx = _buffer->size++;
 	}
 
-	//! If a spot has been found, write it to that position
+	// If a spot has been found, write it to that position
 	if (idx >= 0) {
 
 #ifdef PRINT_SCANRESULT_VERBOSE

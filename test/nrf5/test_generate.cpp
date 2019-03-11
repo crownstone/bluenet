@@ -57,7 +57,6 @@ int main() {
 	
 	//nrf_clock_lf_cfg_t _clock_source = defaultClockSource;
 
-	//! Some apeshit 
 //	SOFTDEVICE_HANDLER_APPSH_INIT(&_clock_source, true);
 	
 	LOGd("Run");

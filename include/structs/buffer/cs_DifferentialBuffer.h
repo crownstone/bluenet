@@ -26,7 +26,7 @@ struct __attribute__((__packed__)) differential_buffer_t {
 	T lastVal;
 
 	/** Pointer to the array storing the difference of elements compared to the previous element */
-	int8_t array[1]; //! Dummy length
+	int8_t array[1]; // Dummy length
 };
 
 /** Struct with fixed length, useful when sending as payload.
@@ -72,7 +72,7 @@ public:
 		if (_buffer != NULL) {
 			return false;
 		}
-		//! Allocate memory
+		// Allocate memory
 		_buffer = (differential_buffer_t<T>*)calloc(getMaxByteSize(), sizeof(uint8_t));
 		if (_buffer == NULL) {
 			LOGw("Could not allocate memory");
@@ -80,7 +80,7 @@ public:
 		}
 //		LOGd("Allocated memory at %u", _buffer);
 		_allocatedSelf = true;
-		//! Also call clear to make sure we start with a clean buffer
+		// Also call clear to make sure we start with a clean buffer
 		clear();
 		return true;
 	}
@@ -102,7 +102,7 @@ public:
 		}
 //		LOGd("assign at %u", buffer);
 		_buffer = (differential_buffer_t<T>*) buffer;
-		//! Also call clear to make sure we start with a clean buffer
+		// Also call clear to make sure we start with a clean buffer
 		clear();
 		return true;
 	}

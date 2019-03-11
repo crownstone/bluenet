@@ -80,33 +80,42 @@ private:
 	void checkForMessages();
 	void handleMeshMessage(rbc_mesh_event_t* evt);
 
-	//! Decrypts a message
-	//! Copies from encoded to decoded msg.
+	/**
+	 * Decrypts a message
+	 * Copies from encoded to decoded msg.
+	 */
 	bool decodeMessage(encrypted_mesh_message_t* encoded, uint16_t encodedLength,
 			mesh_message_t* decoded, uint16_t decodedLength);
 
-	//! Encrypts a message
-	//! Copies from decoded to encoded msg.
+	/**
+	 * Encrypts a message
+	 * Copies from decoded to encoded msg.
+	 */
 	bool encodeMessage(mesh_message_t* decoded, uint16_t decodedLength,
 			encrypted_mesh_message_t* encoded, uint16_t encodedLength);
 
-	//! Allocates 2 mesh_message_t msgs, decrypts the two messages to those structs.
-	//! For the reply channel: send the one with the highest message counter, merge when equal.
-	//! For the state change and broadcast channels: merge
-
-	//! TODO: split up in a function per handle
+	/**
+	 * Allocates 2 mesh_message_t msgs, decrypts the two messages to those structs.
+	 * For the reply channel: send the one with the highest message counter, merge when equal.
+	 * For the state change and broadcast channels: merge
+	 * TODO: split up in a function per handle
+	 */
 	void resolveConflict(mesh_handle_t handle, encrypted_mesh_message_t* p_old, uint16_t length_old,
 			encrypted_mesh_message_t* p_new, uint16_t length_new);
 
 	//! Returns the index of a given handle. Returns INVALID_HANDLE if it has no index.
 	uint16_t getHandleIndex(mesh_handle_t handle);
 
-	//! Returns the message counter of a given handle index
-	//! Returns NULL for an invalid handle index
+	/**
+	 * Returns the message counter of a given handle index
+	 * Returns NULL for an invalid handle index
+	 */
 	MeshMessageCounter& getMessageCounterFromIndex(uint16_t handleIndex);
 
-	//! Returns the message counter of a given handle
-	//! Does not check if handle is valid!
+	/**
+	 * Returns the message counter of a given handle
+	 * Does not check if handle is valid!
+	 */
 	MeshMessageCounter& getMessageCounter(mesh_handle_t handle);
 
 	//! Converts tx number to enum.
@@ -145,19 +154,23 @@ public:
 
 	void printRssiList();
 
-	//! Send message
-	//! This allocates a mesh_message_t on stack, and copies given data to it
-	//!   then allocates an encrypted_mesh_message_t and encrypts the message with encodeMessage()
-	//!   then sets the value of that handle in the rbc_mesh.
-	//! Returns message counter (or 0 when failed).
-	//! TODO: can we not do so much copying and allocating?
+	/**
+	 * Send message
+	 * This allocates a mesh_message_t on stack, and copies given data to it
+	 *   then allocates an encrypted_mesh_message_t and encrypts the message with encodeMessage()
+	 *   then sets the value of that handle in the rbc_mesh.
+	 * Returns message counter (or 0 when failed).
+	 * TODO: can we not do so much copying and allocating?
+	 */
 	uint32_t send(mesh_handle_t handle, void* p_data, uint16_t length);
 
-	//! Returns last message on channel
-	//! p_data should be a pointer to allocated data, length the size of allocated.
-	//! This allocates an encrypted_mesh_message_t, then allocates a mesh_message_t and decrypts to that.
-	//! The resulting message is then copied to p_data.
-	//! TODO: have a better way to do this
+	/**
+	 * Returns last message on channel
+	 * p_data should be a pointer to allocated data, length the size of allocated.
+	 * This allocates an encrypted_mesh_message_t, then allocates a mesh_message_t and decrypts to that.
+	 * The resulting message is then copied to p_data.
+	 * TODO: have a better way to do this
+	 */
 	bool getLastMessage(mesh_handle_t handle, void* p_data, uint16_t length);
 
 	// Implementation of EventListener.

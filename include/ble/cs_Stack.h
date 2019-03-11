@@ -72,7 +72,7 @@ public:
 protected:
 	enum condition_t { C_STACK_INITIALIZED, C_RADIO_INITIALIZED, C_SERVICES_INITIALIZED, C_ADVERTISING };
 
-	std::string                                 _device_name; //! 4
+	std::string                                 _device_name; // 4
 	uint16_t                                    _appearance;
 	bool                                        _disconnectingInProgress = false;
 
@@ -82,10 +82,10 @@ protected:
 
 	nrf_clock_lf_cfg_t                          _clock_source;
 	int8_t                                      _tx_power_level;
-	ble_gap_conn_sec_mode_t                     _sec_mode;  //1
+	ble_gap_conn_sec_mode_t                     _sec_mode;  // 1
 	uint16_t                                    _interval;
 	uint16_t                                    _timeout;
-	ble_gap_conn_params_t                       _gap_conn_params; //! 8
+	ble_gap_conn_params_t                       _gap_conn_params; // 8
 
 	//bool                                        _initializedStack;
 	//bool                                        _initializedServices;
@@ -96,9 +96,9 @@ protected:
 
 	uint16_t                                    _conn_handle;
 
-	callback_connected_t                        _callback_connected;  //! 16
-	callback_disconnected_t                     _callback_disconnected;  //! 16
-	callback_radio_t                            _callback_radio;  //! 16
+	callback_connected_t                        _callback_connected;  // 16
+	callback_disconnected_t                     _callback_disconnected;  // 16
+	callback_radio_t                            _callback_radio;  // 16
 	//! 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
 	volatile uint8_t                            _radio_notify;
 
@@ -215,7 +215,7 @@ public:
 	void setAdvertisingInterval(uint16_t advertisingInterval);
 
 	void setAdvertisingTimeoutSeconds(uint16_t advertisingTimeoutSeconds) {
-		//! TODO: stop advertising?
+		// TODO: stop advertising?
 		_timeout = advertisingTimeoutSeconds;
 	}
 
@@ -343,7 +343,7 @@ public:
 	bool connected() {
 		return _conn_handle != BLE_CONN_HANDLE_INVALID;
 	}
-	uint16_t getConnectionHandle() {  //! TODO are multiple connections supported?
+	uint16_t getConnectionHandle() {
 		return _conn_handle;
 	}
 

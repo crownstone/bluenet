@@ -662,7 +662,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	}
 	return;
 
-	//! Get the current state errors
+	// Get the current state errors
 	state_errors_t stateErrors;
 	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
 

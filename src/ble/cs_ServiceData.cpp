@@ -89,7 +89,7 @@ void ServiceData::init() {
 #endif
 
 #if BUILD_MESHING == 1
-	//! Init advertisedIds
+	// Init advertisedIds
 	_advertisedIds.size = 0;
 	_advertisedIds.head = 0;
 	_numAdvertiseChangedStates = 0;
@@ -719,7 +719,7 @@ void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 			// Start timer of MESH_STATE_REFRESH_PERIOD + rand ms
 			uint8_t rand8;
 			RNG::fillBuffer(&rand8, 1);
-			uint32_t randMs = rand8*78; //! Range is 0-19890 ms (about 0-20s)
+			uint32_t randMs = rand8*78; // Range is 0-19890 ms (about 0-20s)
 			Timer::getInstance().start(_meshStateTimerId, MS_TO_TICKS(MESH_STATE_REFRESH_PERIOD) + MS_TO_TICKS(randMs), this);
 //		}
 	}

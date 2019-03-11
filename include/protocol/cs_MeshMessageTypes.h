@@ -72,8 +72,10 @@ struct __attribute__((__packed__)) encrypted_mesh_message_t {
 
 //! This struct will be encrypted, so the size has to be a multiple of 16
 struct __attribute__((__packed__)) mesh_message_t {
-	//! Counter, must be the same number as the one in the encrypted_mesh_message_t
-	//! Counter should never be 0
+	/**
+	 * Counter, must be the same number as the one in the encrypted_mesh_message_t
+	 * Counter should never be 0
+	 */
 	uint32_t messageCounter;
 	uint8_t payload[MAX_MESH_MESSAGE_LENGTH];
 };
@@ -148,8 +150,10 @@ inline bool is_valid_keep_alive_msg(keep_alive_message_t* msg, uint16_t length) 
 	return true;
 }
 
-//! Returns true when given id is in the message
-//! Sets cmd to the command for given id.
+/**
+ * Returns true when given id is in the message
+ * Sets cmd to the command for given id.
+ */
 inline bool has_keep_alive_item(keep_alive_message_t* message, stone_id_t id, keep_alive_cmd_t& cmd) {
 	switch (message->type) {
 	case SAME_TIMEOUT:{
@@ -246,8 +250,10 @@ inline bool is_valid_multi_switch_message(multi_switch_message_t* msg, uint16_t 
 	return true;
 }
 
-//! Returns true when given id is in the message
-//! Sets cmd to the command for given id.
+/**
+ * Returns true when given id is in the message
+ * Sets cmd to the command for given id.
+ */
 inline bool has_multi_switch_item(multi_switch_message_t* message, stone_id_t id, multi_switch_cmd_t& cmd) {
 	switch(message->type) {
 	case LIST:{
@@ -291,20 +297,20 @@ inline bool is_valid_state_msg(state_message_t* message) {
 }
 
 inline bool is_valid_state_msg(state_message_t* msg, uint16_t length) {
-//	//! First check if the header fits in the message
+//	// First check if the header fits in the message
 //	if (length < STATE_HEADER_SIZE) {
 //		return false;
 //	}
-//	//! Then check the header
+//	// Then check the header
 //	if (length < STATE_HEADER_SIZE + msg->size * sizeof(state_item_t)) {
 //		return false;
 //	}
-//	//! Check if the message is not too large
+//	// Check if the message is not too large
 //	if (length > sizeof(state_message_t)) {
 //		return false;
 //	}
 
-	//! Since this message can't be send via characteristic, the size should always be >= the message size
+	// Since this message can't be send via characteristic, the size should always be >= the message size
 	if (length < sizeof(state_message_t)) {
 		return false;
 	}
@@ -485,9 +491,11 @@ inline bool is_command_for_us(command_message_t* message, stone_id_t id) {
 	return false;
 }
 
-//! Gets the payload data.
-//! Sets payloadLength to the length of the payload, based on the command message size.
-//! Assumes already checked if is_valid_command_message()!
+/**
+ * Gets the payload data.
+ * Sets payloadLength to the length of the payload, based on the command message size.
+ * Assumes already checked if is_valid_command_message()!
+ */
 inline void get_command_msg_payload(command_message_t* message, uint16_t messageLength, uint8_t** payload, uint16_t& payloadLength) {
 	payloadLength =  messageLength - MIN_COMMAND_HEADER_SIZE - message->idCount * sizeof(stone_id_t);
 	*payload = (uint8_t*)message + MIN_COMMAND_HEADER_SIZE + message->idCount * sizeof(stone_id_t);
@@ -567,16 +575,16 @@ inline bool is_valid_reply_msg(reply_message_t* msg) {
 }
 
 inline bool is_valid_reply_msg(reply_message_t* msg, uint16_t length) {
-	//! First check if the header fits in the message
+	// First check if the header fits in the message
 	if (length < REPLY_HEADER_SIZE) {
 		return false;
 	}
-	//! Check if the message is not too large
+	// Check if the message is not too large
 //	if (length > sizeof(reply_message_t)) { this doesn't work, due to unused bytes
 	if (length > MAX_MESH_MESSAGE_LENGTH) {
 		return false;
 	}
-	//! Check array size
+	// Check array size
 	if (!is_valid_reply_msg(msg)) {
 		return false;
 	}
@@ -632,18 +640,18 @@ struct __attribute__((__packed__)) scan_result_message_t {
 };
 
 inline bool is_valid_scan_result_message(scan_result_message_t* msg, uint16_t length) {
-	//! First check if the header fits in the message
+	// First check if the header fits in the message
 	if (length < SCAN_RESULT_HEADER_SIZE) {
 		return false;
 	}
-	//! Then check the header
+	// Then check the header
 	if (msg->numOfResults > MAX_SCAN_RESULT_ITEMS) {
 		return false;
 	}
 	if (length < SCAN_RESULT_HEADER_SIZE + msg->numOfResults * sizeof(scan_result_item_t)) {
 		return false;
 	}
-	//! Check if the message is not too large
+	// Check if the message is not too large
 //	if (length > sizeof(scan_result_message_t)) { this doesn't work, due to unused bytes
 	if (length > MAX_MESH_MESSAGE_LENGTH) {
 		return false;

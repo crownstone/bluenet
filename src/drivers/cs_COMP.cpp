@@ -27,7 +27,7 @@ COMP::COMP() {
 
 void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 #ifdef SDK15_UPGRADE_DONE
-	//! thresholdDown has to be lower than thresholdUp, else the comp shows weird behaviour (main thread hangs)
+	// thresholdDown has to be lower than thresholdUp, else the comp shows weird behaviour (main thread hangs)
 
 	// TODO: If memory is not initialized, this assert becomes false!
 #ifdef ALLOW_ASSERTS
@@ -176,7 +176,7 @@ void COMP::handleEvent(nrf_comp_event_t & event) {
 	}
 
 
-	//! Decouple callback from the interrupt handler, and put it on app scheduler instead
+	// Decouple callback from the interrupt handler, and put it on app scheduler instead
 	if (_eventCallbackData.callback != NULL) {
 		uint32_t curTime = RTC::getCount();
 		uint32_t timeDiff = RTC::difference(curTime, _lastEventTimestamp);

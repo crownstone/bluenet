@@ -177,7 +177,7 @@ public:
 	/** Prints the schedule entry list */
 	void print() const;
 
-	////////////! BufferAccessor ////////////////////////////
+	//////////// BufferAccessor ////////////////////////////
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {

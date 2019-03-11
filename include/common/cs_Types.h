@@ -277,9 +277,11 @@ struct __attribute__((packed)) scanned_device_t {
 #define SCHEDULE_ACTION_TYPE_TOGGLE    2
 
 struct __attribute__((__packed__)) schedule_time_daily_t {
-	//! Only perform action on certain days these days of the week. Bitmask, see DAILY_REPEAT_*.
-	//! Check against (1 << current_day_of_week)
-	//! If (dayOfWeek & DAILY_REPEAT_ALL_DAYS), then the other bits are ignored.
+	/**
+	 * Only perform action on certain days these days of the week. Bitmask, see DAILY_REPEAT_*.
+	 * Check against (1 << current_day_of_week)
+	 * If (dayOfWeek & DAILY_REPEAT_ALL_DAYS), then the other bits are ignored.
+	 */
 	uint8_t dayOfWeekBitmask;
 	uint8_t reserved;
 };

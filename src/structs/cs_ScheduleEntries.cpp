@@ -26,7 +26,7 @@ bool ScheduleEntry::isActionTime(schedule_entry_t* entry, uint32_t timestamp) {
 	case SCHEDULE_TIME_TYPE_REPEAT:
 		break;
 	case SCHEDULE_TIME_TYPE_DAILY: {
-		//! Check day of week
+		// Check day of week
 		uint8_t dayOfWeek = getDayOfWeek(entry->nextTimestamp);
 		if (!isActionDay(entry->daily.dayOfWeekBitmask, dayOfWeek)) {
 			result = false;
@@ -76,16 +76,16 @@ bool ScheduleEntry::syncTime(schedule_entry_t* entry, uint32_t timestamp, int64_
 	}
 	bool adjusted = false;
 
-	//! TODO: what to do with a large negative timeDiff ?
+	// TODO: what to do with a large negative timeDiff ?
 
-	//! Make sure nextTimestamp >= currentTime
+	// Make sure nextTimestamp >= currentTime
 	if (entry->nextTimestamp < timestamp) {
 		switch (ScheduleEntry::getTimeType(entry)) {
 		case SCHEDULE_TIME_TYPE_REPEAT: {
 			uint32_t secondsPerRepeat = entry->repeat.repeatTime * 60;
 			if (timeDiff <= SCHEDULE_BIG_TIME_JUMP && secondsPerRepeat/2 > timeDiff) {
-				//! For small time jumps, we don't want to skip the action of entries that may have happened in between.
-				//! But the repeat time has to be large enough not to trigger twice.
+				// For small time jumps, we don't want to skip the action of entries that may have happened in between.
+				// But the repeat time has to be large enough not to trigger twice.
 				break;
 			}
 			uint32_t repeatDiff = (timestamp - entry->nextTimestamp + secondsPerRepeat - 1) / secondsPerRepeat;
@@ -95,7 +95,7 @@ bool ScheduleEntry::syncTime(schedule_entry_t* entry, uint32_t timestamp, int64_
 		}
 		case SCHEDULE_TIME_TYPE_DAILY:{
 			if (timeDiff <= SCHEDULE_BIG_TIME_JUMP) {
-				//! For small time jumps, we don't want to skip the action of entries that may have happened in between.
+				// For small time jumps, we don't want to skip the action of entries that may have happened in between.
 				break;
 			}
 			uint32_t daysDiff = (timestamp - entry->nextTimestamp + SECONDS_PER_DAY - 1) / SECONDS_PER_DAY;
@@ -105,7 +105,7 @@ bool ScheduleEntry::syncTime(schedule_entry_t* entry, uint32_t timestamp, int64_
 		}
 		case SCHEDULE_TIME_TYPE_ONCE:
 			if (timeDiff <= SCHEDULE_BIG_TIME_JUMP) {
-				//! For small time jumps, we don't want to skip the action of entries that may have happened in between.
+				// For small time jumps, we don't want to skip the action of entries that may have happened in between.
 				break;
 			}
 			entry->nextTimestamp = 0; // Clear entry
@@ -216,7 +216,7 @@ void ScheduleList::clear() {
 bool ScheduleList::checkAllEntries() {
 	bool adjusted = _buffer->size != MAX_SCHEDULE_ENTRIES;
 
-	//! If entry is invalid: clear the entry
+	// If entry is invalid: clear the entry
 	for (uint8_t i=0; i<_buffer->size; ++i) {
 		if (!ScheduleEntry::isValidEntry(&(_buffer->list[i]))) {
 			clear(i);
@@ -224,7 +224,7 @@ bool ScheduleList::checkAllEntries() {
 		}
 	}
 
-	//! Make sure all entries exist
+	// Make sure all entries exist
 	for (uint8_t i=_buffer->size; i<MAX_SCHEDULE_ENTRIES; ++i) {
 		_buffer->list[i].nextTimestamp = 0;
 	}

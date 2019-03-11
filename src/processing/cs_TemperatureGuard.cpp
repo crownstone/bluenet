@@ -78,7 +78,7 @@ void TemperatureGuard::tick() {
 
 	// Set state before dispatching event, so that errors are set when handling the event.
 	if (chipTempError && !stateErrors.errors.chipTemp) {
-		//! Set chip temp error
+		// Set chip temp error
 		State::getInstance().set(CS_TYPE::STATE_ERROR_CHIP_TEMP, &chipTempError, sizeof(chipTempError), PersistenceMode::STRATEGY1);
 	}
 

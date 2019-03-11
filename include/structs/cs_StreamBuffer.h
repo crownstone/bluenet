@@ -246,7 +246,7 @@ public:
 		BLEutil::printArray((uint8_t*)_buffer, getDataLength());
 	}
 
-	///////////! Bufferaccessor ////////////////////////////
+	/////////// Bufferaccessor ////////////////////////////
 
 	/** @inherit */
 	uint16_t getDataLength() const {

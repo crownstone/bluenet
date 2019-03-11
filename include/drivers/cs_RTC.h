@@ -59,7 +59,7 @@ public:
 
 	/** Return time in ms, given time in ticks */
 	inline static uint32_t ticksToMs(uint32_t ticks) {
-		//! Order of multiplication and division is important, because it shouldn't lose too much precision, but also not overflow
+		// Order of multiplication and division is important, because it shouldn't lose too much precision, but also not overflow
 		return (uint32_t)ROUNDED_DIV(ticks, (uint64_t)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
 	}
 
@@ -67,7 +67,7 @@ public:
 	 * Make sure time in ms is not too large! (limit is 512,000 ms with current frequency)
 	 */
 	inline static uint32_t msToTicks(uint32_t ms) {
-		//! Order of multiplication and division is important, because it shouldn't lose too much precision, but also not overflow
+		// Order of multiplication and division is important, because it shouldn't lose too much precision, but also not overflow
 		return (uint64_t)ms * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000;
 	}
 };

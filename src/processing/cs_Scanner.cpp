@@ -28,17 +28,11 @@ Scanner::Scanner() :
 	_scanDuration(SCAN_DURATION),
 	_scanBreakDuration(SCAN_BREAK_DURATION),
 	_scanCount(0),
-#if (NORDIC_SDK_VERSION >= 11)
 	_appTimerId(NULL),
-#else
-	_appTimerId(UINT32_MAX),
-#endif
 	_stack(NULL)
 {
-#if (NORDIC_SDK_VERSION >= 11)
 	_appTimerData = { {0} };
 	_appTimerId = &_appTimerData;
-#endif
 }
 
 void Scanner::init() {
@@ -133,7 +127,7 @@ void Scanner::stop() {
 		_opCode = SCAN_STOP;
 		LOGi("Force STOP");
 		manualStopScan();
-		//! no need to execute scan on stop is there? we want to stop after all
+		// no need to execute scan on stop is there? we want to stop after all
 	//	executeScan();
 	//	_running = false;
 	} else if (_scanning) {
@@ -154,13 +148,10 @@ void Scanner::executeScan() {
 	switch(_opCode) {
 	case SCAN_START: {
 
-		//! start scanning
+		// start scanning
 		manualStartScan();
-		if (_filterSendFraction > 0) {
-			_scanCount = (_scanCount+1) % _filterSendFraction;
-		}
 
-		//! set timer to trigger in SCAN_DURATION sec, then stop again
+		// set timer to trigger in SCAN_DURATION sec, then stop again
 		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanDuration), this);
 
 		_opCode = SCAN_STOP;
@@ -168,15 +159,15 @@ void Scanner::executeScan() {
 	}
 	case SCAN_STOP: {
 
-		//! stop scanning
+		// stop scanning
 		manualStopScan();
 
 #ifdef PRINT_DEBUG
 		_scanResult->print();
 #endif
 
-		//! Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
-		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanSendDelay), this);
+		// Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
+		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
 
 		_opCode = SCAN_START;
 		break;

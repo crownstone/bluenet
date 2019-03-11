@@ -30,10 +30,10 @@ Scheduler::Scheduler() :
 	printDebug();
 	readScheduleList();
 
-	//! Subscribe for events.
+	// Subscribe for events.
 	EventDispatcher::getInstance().addListener(this);
 
-	//! Init and start the timer.
+	// Init and start the timer.
 	Timer::getInstance().createSingleShot(_appTimerId, (app_timer_timeout_handler_t) Scheduler::staticTick);
 	scheduleNextTick();
 }
@@ -91,11 +91,11 @@ cs_ret_code_t Scheduler::clearScheduleEntry(uint8_t id) {
 }
 
 void Scheduler::tick() {
-	//! RTC can overflow every 512s
+	// RTC can overflow every 512s
 	uint32_t tickDiff = RTC::difference(RTC::getCount(), _rtcTimeStamp);
 
-	//! If more than 1s elapsed since last set rtc timestamp:
-	//! add 1s to posix time and subtract 1s from tickDiff, by increasing the rtc timestamp 1s
+	// If more than 1s elapsed since last set rtc timestamp:
+	// add 1s to posix time and subtract 1s from tickDiff, by increasing the rtc timestamp 1s
 	if (_posixTimeStamp && tickDiff > RTC::msToTicks(1000)) {
 		_posixTimeStamp++;
 		_rtcTimeStamp += RTC::msToTicks(1000);
@@ -107,7 +107,7 @@ void Scheduler::tick() {
 	if (entry != NULL) {
 		switch (ScheduleEntry::getActionType(entry)) {
 			case SCHEDULE_ACTION_TYPE_PWM: {
-				//! TODO: use an event instead
+				// TODO: use an event instead
 				uint8_t switchState = entry->pwm.pwm;
 				Switch::getInstance().setSwitch(switchState);
 				break;

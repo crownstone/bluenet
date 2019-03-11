@@ -42,7 +42,7 @@ CrownstoneService::CrownstoneService() : EventListener(),
 }
 
 StreamBuffer<uint8_t>* CrownstoneService::getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength) {
-    //! if it is not created yet, create a new stream buffer and assign the master buffer to it
+    // if it is not created yet, create a new stream buffer and assign the master buffer to it
     if (_streamBuffer == NULL) {
 	_streamBuffer = new StreamBuffer<uint8_t>();
 
@@ -54,7 +54,7 @@ StreamBuffer<uint8_t>* CrownstoneService::getStreamBuffer(buffer_ptr_t& buffer, 
 	_streamBuffer->assign(buffer, size);
 	maxLength = _streamBuffer->getMaxLength();
     } else {
-	//! otherwise use the same buffer
+	// otherwise use the same buffer
 	_streamBuffer->getBuffer(buffer, maxLength);
 	maxLength = _streamBuffer->getMaxLength();
     }
@@ -530,7 +530,7 @@ void CrownstoneService::handleEvent(event_t & event) {
 		break;
 	}
 	case CS_TYPE::EVT_BLE_DISCONNECT: {
-		//! Check if this characteristic exists first. In case of setup mode it does not for instance.
+		// Check if this characteristic exists first. In case of setup mode it does not for instance.
 		if (_sessionNonceCharacteristic != NULL) {
 			_sessionNonceCharacteristic->setValueLength(0);
 		}

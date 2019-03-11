@@ -46,7 +46,7 @@ public:
 		if (_buffer != NULL) {
 			return false;
 		}
-		//! Allocate memory
+		// Allocate memory
 		_buffer = (stack_buffer_t<T>*)calloc(getMaxByteSize(), sizeof(uint8_t));
 		if (_buffer == NULL) {
 			LOGw("Could not allocate memory");
@@ -54,7 +54,7 @@ public:
 		}
 //		LOGd("Allocated memory at %u", _buffer);
 		_allocatedSelf = true;
-		//! Also call clear to make sure we start with a clean buffer
+		// Also call clear to make sure we start with a clean buffer
 		clear();
 		return true;
 	}
@@ -75,7 +75,7 @@ public:
 		}
 		_buffer = (stack_buffer_t<T>*) buffer;
 //		LOGd("assign at %u array=%u", buffer, _buffer->array);
-		//! Also call clear to make sure we start with a clean buffer
+		// Also call clear to make sure we start with a clean buffer
 		clear();
 		return true;
 	}

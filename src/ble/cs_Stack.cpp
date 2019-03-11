@@ -481,7 +481,7 @@ void Stack::configureIBeaconAdvData(IBeacon* beacon) {
  */
 void Stack::configureBleDeviceAdvData() {
 
-	//! check if (and how many) services where enabled
+	// check if (and how many) services where enabled
 	uint8_t uidCount = _services.size();
 	if (uidCount == 0) {
 		LOGw(MSG_BLE_NO_CUSTOM_SERVICES);
@@ -792,7 +792,7 @@ void Stack::startScanning() {
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &p_scan_params.interval, PersistenceMode::STRATEGY1);
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &p_scan_params.window, PersistenceMode::STRATEGY1);
 
-	//! todo: which fields to set here?
+	// TODO: which fields to set here?
 	// TODO: p_adv_report_buffer
 	//BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params));
 	_scanning = true;
@@ -873,7 +873,7 @@ void Stack::on_ble_evt(const ble_evt_t * p_ble_evt) {
 		break;
 	}
 	case BLE_EVT_USER_MEM_RELEASE:
-		//! nothing to do
+		// nothing to do
 		break;
 	case BLE_GAP_EVT_DISCONNECTED: {
 		on_disconnected(p_ble_evt);
@@ -961,7 +961,7 @@ void Stack::on_ble_evt(const ble_evt_t * p_ble_evt) {
 		// BLE_GAP_TIMEOUT_SRC_ADVERTISING does not exist anymore...
 //		if (p_ble_evt->evt.gap_evt.params.timeout.src == BLE_GAP_TIMEOUT_SRC_ADVERTISING) {
 //			_advertising = false;
-//			//! Advertising stops, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
+//			// Advertising stops, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 //		}
 		break;
 
@@ -1004,7 +1004,7 @@ void Stack::resetConnectionAliveTimer() {
 void Stack::on_connected(const ble_evt_t * p_ble_evt) {
 	LOGd("Connection event");
 	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
-	_advertising = false; //! Advertising stops on connect, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
+	_advertising = false; // Advertising stops on connect, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
 	_disconnectingInProgress = false;
 	BLE_CALL(sd_ble_gap_conn_param_update, (p_ble_evt->evt.gap_evt.conn_handle, &_gap_conn_params));
 
@@ -1038,13 +1038,13 @@ void Stack::on_disconnected(const ble_evt_t * p_ble_evt) {
 }
 
 void Stack::disconnect() {
-	//! Only disconnect when we are actually connected to something
+	// Only disconnect when we are actually connected to something
 	if (_conn_handle != BLE_CONN_HANDLE_INVALID && _disconnectingInProgress == false) {
 		_disconnectingInProgress = true;
 		LOGi("Forcibly disconnecting from device");
-		//! It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
-		//! This sometimes gives us an NRF_ERROR_INVALID_STATE (disconnection is already in progress)
-		//! NRF_ERROR_INVALID_STATE can safely be ignored, see: https://devzone.nordicsemi.com/question/81108/handling-nrf_error_invalid_state-error-code/
+		// It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
+		// This sometimes gives us an NRF_ERROR_INVALID_STATE (disconnection is already in progress)
+		// NRF_ERROR_INVALID_STATE can safely be ignored, see: https://devzone.nordicsemi.com/question/81108/handling-nrf_error_invalid_state-error-code/
 		uint32_t errorCode = sd_ble_gap_disconnect(_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
 		if (errorCode != NRF_ERROR_INVALID_STATE) {
 			APP_ERROR_CHECK(errorCode);

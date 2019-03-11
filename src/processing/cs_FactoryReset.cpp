@@ -39,7 +39,7 @@ void FactoryReset::init() {
 void FactoryReset::resetTimeout() {
 	_recoveryEnabled = true;
 	_rtcStartTime = RTC::getCount();
-	//! stop the currently running timer, this does not cause problems if the timer has not been set yet.
+	// stop the currently running timer, this does not cause problems if the timer has not been set yet.
 	Timer::getInstance().stop(_recoveryDisableTimerId);
 	Timer::getInstance().start(_recoveryDisableTimerId, MS_TO_TICKS(FACTORY_RESET_TIMEOUT), this);
 }
@@ -80,7 +80,7 @@ void FactoryReset::enableRecovery(bool enable) {
 }
 
 bool FactoryReset::recover(uint32_t resetCode) {
-	//! we check the RTC in case the Timer is busy.
+	// we check the RTC in case the Timer is busy.
 	if (!_recoveryEnabled || RTC::difference(RTC::getCount(), _rtcStartTime) > RTC::msToTicks(FACTORY_RESET_TIMEOUT)) {
 		LOGi("recovery off")
 		return false;
@@ -95,7 +95,7 @@ bool FactoryReset::recover(uint32_t resetCode) {
 	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState, PersistenceMode::STRATEGY1);
 	switch (resetState) {
 	case FACTORY_RESET_STATE_NORMAL:
-		//! just in case, we stop the timer so we cannot flood this mechanism.
+		// just in case, we stop the timer so we cannot flood this mechanism.
 		Timer::getInstance().stop(_recoveryProcessTimerId);
 		Timer::getInstance().start(_recoveryProcessTimerId, MS_TO_TICKS(FACTORY_PROCESS_TIMEOUT), this);
 		return true;
@@ -135,7 +135,7 @@ bool FactoryReset::factoryReset(uint32_t resetCode) {
 bool FactoryReset::performFactoryReset() {
 	LOGf("factory reset");
 
-	//! Go into factory reset mode after next reset.
+	// Go into factory reset mode after next reset.
 	uint8_t mode = to_underlying_type(OperationMode::OPERATION_MODE_FACTORY_RESET);
 	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::STRATEGY1);
 

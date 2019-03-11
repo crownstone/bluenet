@@ -133,7 +133,7 @@ public:
 	/** Resets the timeout counters **/
 	void resetTimeoutCounters();
 
-	////////////! BufferAccessor ////////////////////////////
+	//////////// BufferAccessor ////////////////////////////
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {

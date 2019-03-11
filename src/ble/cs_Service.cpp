@@ -57,7 +57,7 @@ void Service::init(Stack* stack) {
  * The encryption has to be done by the characteristic itself.
  */
 void Service::setAesEncrypted(bool encrypted) {
-	//! set all characteristics to encrypted
+	// set all characteristics to encrypted
 	LOGd("Enable AES encryption for %s", _name.c_str());
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 		characteristic->setAesEncrypted(encrypted);
@@ -106,7 +106,7 @@ void Service::on_ble_event(const ble_evt_t * p_ble_evt) {
  * memory only when a user is connected.
  */
 void Service::on_connect(uint16_t conn_handle, const ble_gap_evt_connected_t& gap_evt) {
-	//! nothing here yet.
+	// nothing here yet.
 }
 
 /** On disconnect event for an individual service
@@ -115,7 +115,7 @@ void Service::on_connect(uint16_t conn_handle, const ble_gap_evt_connected_t& ga
  * is connected.
  */
 void Service::on_disconnect(uint16_t conn_handle, const ble_gap_evt_disconnected_t& gap_evt) {
-	//! nothing here yet.
+	// nothing here yet.
 }
 
 /** Write incoming value to data structures on the device.
@@ -134,12 +134,12 @@ bool Service::on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_ha
 	for (CharacteristicBase* characteristic : getCharacteristics()) {
 
 		if (characteristic->getCccdHandle() == write_evt.handle && write_evt.len == 2) {
-			//! received write to enable/disable notification
+			// received write to enable/disable notification
 			characteristic->setNotifyingEnabled(ble_srv_is_notification_enabled(write_evt.data));
 			return true;
 
 		} else if (characteristic->getValueHandle() == value_handle) {
-			//! TODO: make a map.
+			// TODO: make a map.
 
 			if (write_evt.op == BLE_GATTS_OP_WRITE_REQ
 					|| write_evt.op == BLE_GATTS_OP_WRITE_CMD
@@ -149,7 +149,7 @@ bool Service::on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_ha
 
 			} else if (write_evt.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
 
-				//! get length of data, header does not contain full length but rather the "step size"
+				// get length of data, header does not contain full length but rather the "step size"
 				uint16_t length = 0;
 				cs_sd_ble_gatts_value_get(getStack()->getConnectionHandle(), characteristic->getValueHandle(),
 						&length, NULL);

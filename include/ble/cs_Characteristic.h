@@ -70,8 +70,9 @@ struct Status {
 	 * tx operations are completed
 	 */
 	bool notificationPending                     : 1;
-	//! shared encryption buffer, if false, a buffer is allocated for the characteristic, if true,
-	//! the global EncryptionBuffer is used. In particular, big characteristics should use the global EncryptionBuffer
+	/** shared encryption buffer, if false, a buffer is allocated for the characteristic, if true,
+	 * the global EncryptionBuffer is used. In particular, big characteristics should use the global EncryptionBuffer
+	 */
 	bool sharedEncryptionBuffer                  : 1;
 };
 
@@ -154,7 +155,7 @@ public:
 	}
 
 	void setNotifyingEnabled(bool enabled) {
-		//!        	LOGd("[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
+//		LOGd("[%s] notfying enabled: %s", _name.c_str(), enabled ? "true" : "false");
 		_status.notifyingEnabled = enabled;
 	}
 
@@ -505,7 +506,7 @@ protected:
 	 *  aes encryption enabled. then calls the on write callback.
 	 */
 	void written(uint16_t len) {
-		//! We can flood the chip with writes and a potential forced disconnect will be delayed and could crash the chip.
+		// We can flood the chip with writes and a potential forced disconnect will be delayed and could crash the chip.
 		//TODO: have this from the stack directly.
 		if (EncryptionHandler::getInstance().allowedToWrite()) {
 			LOGi("Not allowed to write, disconnect in progress")

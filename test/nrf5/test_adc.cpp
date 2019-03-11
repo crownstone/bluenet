@@ -97,7 +97,6 @@ int main() {
 
 	Timer::getInstance().init();
 	
-	//! Initialise SoftDevice
 	uint8_t enabled;
 	BLE_CALL(sd_softdevice_is_enabled, (&enabled));
 	if (enabled) {
@@ -106,7 +105,6 @@ int main() {
 	}
 	
 //	nrf_clock_lf_cfg_t _clock_source = defaultClockSource;
-//	//! Some apeshit
 //	SOFTDEVICE_HANDLER_APPSH_INIT(&_clock_source, true);
 
 #ifdef POWER_SAMPLING

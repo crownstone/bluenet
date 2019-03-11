@@ -274,26 +274,26 @@ uint32_t CharacteristicBase::notify() {
 	    case NRF_SUCCESS:
 		break;
 	    case NRF_ERROR_RESOURCES:
-		//! Dominik: this happens if several characteristics want to send a notification,
-		//!   but the system only has a limited number of tx buffers available. so queueing up
-		//!   notifications faster than being able to send them out from the stack results
-		//!   in this error.
+		// Dominik: this happens if several characteristics want to send a notification,
+		//   but the system only has a limited number of tx buffers available. so queueing up
+		//   notifications faster than being able to send them out from the stack results
+		//   in this error.
 		onNotifyTxError();
 		break;
 	    case NRF_ERROR_INVALID_STATE:
-		//! Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
-		//!   it can happen that it tries to update it's value although notification was disabled in
-		//!   in the meantime, in which case an invalid state error is returned. but this case we can
-		//!   ignore
+		// Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
+		//   it can happen that it tries to update it's value although notification was disabled in
+		//   in the meantime, in which case an invalid state error is returned. but this case we can
+		//   ignore
 
-		//! this is not a serious error, but better to at least write it to the log
+		// this is not a serious error, but better to at least write it to the log
 		LOGe("cs_ret_code_t: %d (0x%X)", err_code, err_code);
 
 		// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
 		_status.notificationPending = false;
 		break;
 	    case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
-		//! TODO: Currently excluded from APP_ERROR_CHECK, seems to originate from MESH code
+		// TODO: Currently excluded from APP_ERROR_CHECK, seems to originate from MESH code
 		break;
 	    default:
 		APP_ERROR_CHECK(err_code);
@@ -318,7 +318,7 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 
 	uint32_t err_code = NRF_SUCCESS;
 
-	//! get the data length of the value (encrypted)
+	// get the data length of the value (encrypted)
 	uint16_t valueLength = getGattValueLength();
 	uint8_t* valueGattAddress = getGattValuePtr();
 
@@ -376,21 +376,21 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 		if (err_code != NRF_SUCCESS) {
 
 			if (err_code == NRF_ERROR_RESOURCES) {
-				//! Dominik: this happens if several characteristics want to send a notification,
-				//!   but the system only has a limited number of tx buffers available. so queueing up
-				//!   notifications faster than being able to send them out from the stack results
-				//!   in this error.
+				// Dominik: this happens if several characteristics want to send a notification,
+				//   but the system only has a limited number of tx buffers available. so queueing up
+				//   notifications faster than being able to send them out from the stack results
+				//   in this error.
 				onNotifyTxError();
 				_notificationPendingOffset = offset;
 				return err_code;
 //				return NRF_SUCCESS;
 			} else if (err_code == NRF_ERROR_INVALID_STATE) {
-				//! Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
-				//!   it can happen that it tries to update it's value although notification was disabled in
-				//!   in the meantime, in which case an invalid state error is returned. but this case we can
-				//!   ignore
+				// Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
+				//   it can happen that it tries to update it's value although notification was disabled in
+				//   in the meantime, in which case an invalid state error is returned. but this case we can
+				//   ignore
 
-				//! this is not a serious error, but better to at least write it to the log
+				// this is not a serious error, but better to at least write it to the log
 				LOGe("cs_ret_code_t: %d (0x%X)", err_code, err_code);
 
 				// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
@@ -398,7 +398,7 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 				_status.notificationPending = false;
 				return err_code;
 			} else if (err_code == BLE_ERROR_GATTS_SYS_ATTR_MISSING) {
-				//! Anne: do not complain for now... (meshing)
+				// Anne: do not complain for now... (meshing)
 			} else {
 				APP_ERROR_CHECK(err_code);
 			}
@@ -416,10 +416,10 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 /** When a previous transmission is successful send the next.
  */
 void CharacteristicBase::onTxComplete(const ble_common_evt_t * p_ble_evt) {
-	//! if we have a notification pending, try to send it
+	// if we have a notification pending, try to send it
 	if (_status.notificationPending) {
-		//! this-> is necessary so that the call of notify depends on the template
-		//! parameter T
+		// this-> is necessary so that the call of notify depends on the template
+		// parameter T
 		uint32_t err_code = this->notify();
 		if (err_code == NRF_SUCCESS) {
 //				LOGi("ontx success");
@@ -429,10 +429,10 @@ void CharacteristicBase::onTxComplete(const ble_common_evt_t * p_ble_evt) {
 }
 
 void Characteristic<buffer_ptr_t>::onTxComplete(const ble_common_evt_t * p_ble_evt) {
-	//! if we have a notification pending, try to send it
+	// if we have a notification pending, try to send it
 	if (_status.notificationPending) {
-		//! this-> is necessary so that the call of notify depends on the template
-		//! parameter T
+		// this-> is necessary so that the call of notify depends on the template
+		// parameter T
 		uint32_t err_code = this->notify();
 		if (err_code == NRF_SUCCESS) {
 //				LOGi("ontx success");

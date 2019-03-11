@@ -18,7 +18,7 @@ typedef uint32_t ret_code_t;
 //#include <nrf_drv_comp.h>
 
 
-//! The header files in the Nordic SDK. Keep all the includes here, not dispersed over all the header files.
+// The header files in the Nordic SDK. Keep all the includes here, not dispersed over all the header files.
 #include <app_scheduler.h>
 #include <app_util.h>
 #include <ble.h>

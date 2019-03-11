@@ -10,7 +10,7 @@
 
 #include "util/cs_BleError.h"
 
-//! TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean, methodical and understandable way
+// TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean, methodical and understandable way
 
 ///! UUID //////////////////////////////////////////////////////////////////////////////////////////
 
@@ -36,7 +36,7 @@ uint16_t UUID::init() {
 	} else if (_type == BLE_UUID_TYPE_UNKNOWN) {
 		BLE_THROW("TODO generate random UUID");
 	} else {
-		//! nothing to do.
+		// nothing to do.
 	}
 	return _type;
 }
@@ -70,7 +70,7 @@ UUID::operator ble_uuid128_t() {
 			vv = c - 'a' + 10;
 		} else {
 			BLE_THROW("invalid character");
-//				char cc[] = {c};//! can't just call std::string(c) apparently.
+//				char cc[] = {c};// can't just call std::string(c) apparently.
 //				BLE_THROW(std::string("Invalid character ") + std::string(1,cc[0]) + " in UUID.");
 		}
 

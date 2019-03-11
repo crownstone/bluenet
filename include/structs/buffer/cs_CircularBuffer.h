@@ -47,7 +47,7 @@ public:
 		if (_array != NULL) {
 			return false;
 		}
-		//! Allocate memory
+		// Allocate memory
 		_array = (T*)calloc(_capacity, sizeof(T));
 		if (_array == NULL) {
 			LOGw(STR_ERR_ALLOCATE_MEMORY);
@@ -59,7 +59,7 @@ public:
 #endif
 
 		_allocatedSelf = true;
-		//! Also call clear to make sure we start with a clean buffer
+		// Also call clear to make sure we start with a clean buffer
 		clear();
 		return true;
 	}
@@ -93,7 +93,7 @@ public:
 		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, bufferSize);
 #endif
 
-		//! Also call clear to make sure we start with a clean buffer
+		// Also call clear to make sure we start with a clean buffer
 		clear();
 		return true;
 	}

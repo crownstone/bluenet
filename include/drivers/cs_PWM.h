@@ -37,8 +37,10 @@ public:
 		return instance;
 	}
 
-	//! Initialize the PWM settings.
-	//! config can be safely deleted after calling this function.
+	/**
+	 * Initialize the PWM settings.
+	 * config can be safely deleted after calling this function.
+	 */
 	uint32_t init(const pwm_config_t& config);
 
 	//! De-Initialize the PWM instance, i.e. free allocated resources
@@ -50,8 +52,10 @@ public:
 	 */
 	uint32_t start(bool onZeroCrossing);
 
-	//! Set the value of a specific channel.
-	//! TODO: currently calling this twice within 10ms, will lead to errors!
+	/**
+	 * Set the value of a specific channel.
+	 * TODO: currently calling this twice within 10ms, will lead to errors!
+	 */
 	void setValue(uint8_t channel, uint16_t value);
 
 	//! Get current value of a specific channel.
@@ -107,8 +111,10 @@ private:
 	//! Max value of channel, in ticks. Adjusted to sync with zero crossings.
 	uint32_t _adjustedMaxTickVal;
 
-	//! New duty cycle values of the channels in percentage.
-	//! Used in case the value couldn't be adjusted yet at the moment of calling setValue.
+	/**
+	 * New duty cycle values of the channels in percentage.
+	 * Used in case the value couldn't be adjusted yet at the moment of calling setValue.
+	 */
 	uint32_t _nextValues[CS_PWM_MAX_CHANNELS];
 
 	//! Duty cycle values of the channels in ticks.

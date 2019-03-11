@@ -117,7 +117,7 @@ public:
 		return _buffer;
 	}
 
-	////////////! BufferAccessor ////////////////////////////
+	//////////// BufferAccessor ////////////////////////////
 
 	/** @inherit */
 	int assign(buffer_ptr_t buffer, uint16_t maxLength) {

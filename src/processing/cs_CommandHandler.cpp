@@ -35,7 +35,7 @@ void reset(void* p_context) {
 	}
 
 	LOGi("Executing reset: %d", cmd);
-	//! copy to make sure this is nothing more than one value
+	// copy to make sure this is nothing more than one value
 	uint8_t err_code;
 	uint32_t gpregret_id = 0;
 	uint32_t gpregret_msk = 0xFF;
@@ -75,8 +75,8 @@ void CommandHandler::resetDelayed(uint8_t opCode, uint16_t delayMs) {
 	LOGi("Reset in %u ms, code=%u", delayMs, opCode);
 	static uint8_t resetOpCode = opCode;
 	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(delayMs), &resetOpCode);
-//	//! Loop until reset trigger
-//	while(true) {}; //! TODO: this doesn't seem to work
+//	// Loop until reset trigger
+//	while(true) {}; // This doesn't seem to work
 }
 
 cs_ret_code_t CommandHandler::handleCommandDelayed(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size,
