@@ -122,7 +122,6 @@ list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_PowerSampling.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_State.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_EventDispatcher.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_PowerSamples.cpp")
 
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/SortMedian.cc")
 

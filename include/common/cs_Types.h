@@ -142,8 +142,8 @@ enum class CS_TYPE: uint16_t {
 	EVT_SCAN_STOPPED,                                 // Sent when scanner stopped scanning.
 //	EVT_SCANNED_DEVICES,
 	EVT_DEVICE_SCANNED,                               // Sent when a device was scanned. -- Payload is scanned_device_t.
-	EVT_POWER_SAMPLES_START,                          // Sent when the power samples buffer (for characteristic) is being filled with new data.
-	EVT_POWER_SAMPLES_END,                            // Sent when the power samples buffer (for characteristic) has been filled with new data.
+//	EVT_POWER_SAMPLES_START,                          // Sent when the power samples buffer (for characteristic) is being filled with new data.
+//	EVT_POWER_SAMPLES_END,                            // Sent when the power samples buffer (for characteristic) has been filled with new data.
 	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER,         // Sent when current usage goes over the dimmer threshold, while dimmer is on.
 	EVT_CURRENT_USAGE_ABOVE_THRESHOLD,                // Sent when current usage goes over the threshold.
 	EVT_DIMMER_ON_FAILURE_DETECTED,                   // Sent when dimmer leaks current, while it's off.
@@ -495,8 +495,6 @@ typedef uint32_t TYPIFY(EVT_MESH_TIME);
 //typedef  uint8_t TYPIFY(EVT_POWER_CONSUMPTION);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
-typedef  void TYPIFY(EVT_POWER_SAMPLES_END);
-typedef  void TYPIFY(EVT_POWER_SAMPLES_START);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
 typedef  bool TYPIFY(EVT_DIMMING_ALLOWED);
 typedef  void TYPIFY(EVT_DIMMER_FORCED_OFF);
@@ -688,10 +686,6 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return 0;
 	case CS_TYPE::EVT_DEVICE_SCANNED:
 		return sizeof(TYPIFY(EVT_DEVICE_SCANNED));
-	case CS_TYPE::EVT_POWER_SAMPLES_START:
-		return 0;
-	case CS_TYPE::EVT_POWER_SAMPLES_END:
-		return 0;
 	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
 		return 0;
 	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
@@ -871,8 +865,6 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_MESH_TIME: return "EVT_MESH_TIME";
 	case CS_TYPE::CMD_SWITCH_OFF: return "EVT_POWER_OFF";
 	case CS_TYPE::CMD_SWITCH_ON: return "EVT_POWER_ON";
-	case CS_TYPE::EVT_POWER_SAMPLES_END: return "EVT_POWER_SAMPLES_END";
-	case CS_TYPE::EVT_POWER_SAMPLES_START: return "EVT_POWER_SAMPLES_START";
 	case CS_TYPE::CMD_SWITCH_TOGGLE: return "EVT_POWER_TOGGLE";
 	case CS_TYPE::EVT_DIMMING_ALLOWED: return "EVT_DIMMING_ALLOWED";
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF: return "EVT_DIMMER_FORCED_OFF";
@@ -979,8 +971,6 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SCAN_STARTED:
 	case CS_TYPE::EVT_SCAN_STOPPED:
 	case CS_TYPE::EVT_DEVICE_SCANNED:
-	case CS_TYPE::EVT_POWER_SAMPLES_START:
-	case CS_TYPE::EVT_POWER_SAMPLES_END:
 	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
 	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:

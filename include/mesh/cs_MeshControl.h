@@ -30,8 +30,6 @@ public:
 	 */
 	void sendScanMessage(peripheral_device_t* p_list, uint8_t size);
 
-//	void sendPowerSamplesMessage(power_samples_mesh_message_t* samples);
-
 	/** Send a service data message (state broadcast or state change) over the mesh
 	 *
 	 * @stateItem the state item to be appended to the message in the mesh

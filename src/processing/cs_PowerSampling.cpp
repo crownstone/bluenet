@@ -35,8 +35,6 @@
 PowerSampling::PowerSampling() :
 		_isInitialized(false),
 		_adc(NULL),
-		_powerSamplingSentDoneTimerId(NULL),
-		_powerSamplesBuffer(NULL),
 		_consecutivePwmOvercurrent(0),
 		_lastEnergyCalculationTicks(0),
 		_energyUsedmicroJoule(0),
@@ -44,8 +42,6 @@ PowerSampling::PowerSampling() :
 		_lastSwitchOffTicksValid(false),
 		_igbtFailureDetectionStarted(false)
 {
-	_powerSamplingReadTimerData = { {0} };
-	_powerSamplingSentDoneTimerId = &_powerSamplingReadTimerData;
 	_adc = &(ADC::getInstance());
 	_powerMilliWattHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
 	_currentRmsMilliAmpHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
@@ -74,10 +70,6 @@ void adc_done_callback(cs_adc_buffer_id_t bufIndex) {
 }
 
 void PowerSampling::init(const boards_config_t& boardConfig) {
-//	memcpy(&_config, &config, sizeof(power_sampling_config_t));
-
-	Timer::getInstance().createSingleShot(_powerSamplingSentDoneTimerId, (app_timer_timeout_handler_t)PowerSampling::staticPowerSampleRead);
-
 	State& settings = State::getInstance();
 	PersistenceMode pmode = PersistenceMode::STRATEGY1;
 	settings.get(CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER, &_voltageMultiplier, pmode);
@@ -105,16 +97,8 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	_avgZeroVoltageDiscount = VOLTAGE_ZERO_EXP_AVG_DISCOUNT;
 	_avgZeroCurrentDiscount = CURRENT_ZERO_EXP_AVG_DISCOUNT;
 	_avgPowerDiscount = POWER_EXP_AVG_DISCOUNT;
-	_sendingSamples = false;
 
 	LOGi(FMT_INIT, "buffers");
-	uint16_t burstSize = _powerSamples.getMaxLength();
-
-	size16_t size = burstSize;
-	_powerSamplesBuffer = (buffer_ptr_t) calloc(size, sizeof(uint8_t));
-	LOGd("power sample buffer=%u size=%u", _powerSamplesBuffer, size);
-
-	_powerSamples.assign(_powerSamplesBuffer, size);
 	_powerMilliWattHist->init(); // Allocates buffer
 	_currentRmsMilliAmpHist->init(); // Allocates buffer
 	_voltageRmsMilliVoltHist->init(); // Allocates buffer
@@ -174,17 +158,12 @@ void PowerSampling::startSampling() {
 
 	event_t event(CS_TYPE::EVT_POWER_SAMPLES_START);
 	EventDispatcher::getInstance().dispatch(event);
-	_powerSamples.clear();
 
 	_adc->start();
 }
 
 void PowerSampling::stopSampling() {
-	// todo:
-}
-
-void PowerSampling::sentDone() {
-	_sendingSamples = false;
+	// TODO
 }
 
 void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) {
@@ -305,10 +284,6 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	calculateEnergy();
 
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
-		// Note, sendingSamples is a mutex. If we are already sending smples, we will not wait and just skip.
-		if (!_sendingSamples) {
-			copyBufferToPowerSamples(power);
-		}
 		// TODO: use State.set() for this.
 		event_t event1(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
 		EventDispatcher::getInstance().dispatch(event1);
@@ -328,48 +303,6 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	}
 
 	_adc->releaseBuffer(bufIndex);
-}
-
-void PowerSampling::getBuffer(buffer_ptr_t& buffer, uint16_t& size) {
-	_powerSamples.getBuffer(buffer, size);
-}
-
-/**
- * Fill the number of samples in the Bluetooth Low Energy characteristic. This clears the old samples actively. A
- * warning is dispatched beforehand, EVT_POWER_SAMPLES_START so other listeners know (which ones) they should
- * invalidate the current buffer.
- *
- * @param[in] power                              Reference to buffer, current and voltage channel
- */
-void PowerSampling::copyBufferToPowerSamples(power_t power) {
-	event_t event(CS_TYPE::EVT_POWER_SAMPLES_START);
-	EventDispatcher::getInstance().dispatch(event);
-	_powerSamples.clear();
-	uint32_t startTime = RTC::getCount(); // Not really the start time
-
-	_powerSamples.setTimestamp(startTime);
-	for (int i = 0; i < power.bufSize; i += power.numChannels) {
-		if (_powerSamples.getCurrentSamplesBuffer()->full() || _powerSamples.getVoltageSamplesBuffer()->full()) {
-			readyToSendPowerSamples();
-			return;
-		}
-		_powerSamples.getCurrentSamplesBuffer()->push(power.buf[i+power.currentIndex]);
-		_powerSamples.getVoltageSamplesBuffer()->push(power.buf[i+power.voltageIndex]);
-	}
-	// TODO: are we actually ready here?
-	readyToSendPowerSamples();
-}
-
-void PowerSampling::readyToSendPowerSamples() {
-	// Mark that the power samples are being sent now
-	_sendingSamples = true;
-
-	// Dispatch event that samples are now filled and ready to be sent
-	event_t event(CS_TYPE::EVT_POWER_SAMPLES_END, _powerSamplesBuffer, _powerSamples.getDataLength());
-	EventDispatcher::getInstance().dispatch(event);
-
-	// Simply use an amount of time for sending, should be event based or polling based
-	Timer::getInstance().start(_powerSamplingSentDoneTimerId, MS_TO_TICKS(3000), this);
 }
 
 void PowerSampling::initAverages() {

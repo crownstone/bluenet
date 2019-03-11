@@ -12,7 +12,6 @@
 #include <processing/cs_Switch.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_CircularBuffer.h>
-#include <structs/cs_PowerSamples.h>
 #include <third/Median.h>
 
 typedef void (*ps_zero_crossing_cb_t) ();
@@ -46,21 +45,10 @@ public:
 	 */
 	void powerSampleAdcDone(cs_adc_buffer_id_t bufIndex);
 
-	/** Called at a short interval.
-	 *  Reads out the buffer.
-	 *  Sends the samples via notifications and/or mesh.
-	 */
-	void sentDone();
-	static void staticPowerSampleRead(PowerSampling *ptr) {
-		ptr->sentDone();
-	}
-
 	/** Fill up the current curve and send it out over bluetooth
 	 * @type specifies over which characteristic the current curve should be sent.
 	 */
 	void sampleCurrentDone(uint8_t type);
-
-	void getBuffer(buffer_ptr_t& buffer, uint16_t& size);
 
 	/** Enable zero crossing detection on given channel, generating interrupts.
 	 *
@@ -95,26 +83,14 @@ private:
 	//! Reference to the ADC instance
 	ADC* _adc;
 
-	//! Timer instance
-	app_timer_t              _powerSamplingReadTimerData;
-	app_timer_id_t           _powerSamplingSentDoneTimerId;
-
 	//! Operation mode of this device.
 	OperationMode _operationMode;
-
-	//! Buffer that holds the data of the power samples.
-	buffer_ptr_t _powerSamplesBuffer;
-
-	//! Power samples to be sent via characteristic.
-	PowerSamples _powerSamples;
 
 	float _voltageMultiplier; //! Voltage multiplier from settings.
 	float _currentMultiplier; //! Current multiplier from settings.
 	int32_t _voltageZero; //! Voltage zero from settings.
 	int32_t _currentZero; //! Current zero from settings.
 	int32_t _powerZero; //! Power zero from settings.
-
-	bool _sendingSamples; //! Whether or not currently sending power samples.
 
 	uint16_t _avgZeroCurrentDiscount;
 	uint16_t _avgZeroVoltageDiscount;
@@ -179,14 +155,6 @@ private:
 		} flags;
 		uint32_t asInt;
 	} _logsEnabled;
-
-	/** Copies the adc samples to the power samples struct, to be sent over bluetooth
-	 */
-	void copyBufferToPowerSamples(power_t power);
-
-	/** Function to be called when the power samples struct is ready to be sent over bluetooth
-	 */
-	void readyToSendPowerSamples();
 
 	/** Initialize the moving averages
 	 */

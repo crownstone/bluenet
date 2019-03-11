@@ -870,19 +870,6 @@ void MeshControl::sendScanMessage(peripheral_device_t* p_list, uint8_t size) {
 
 }
 
-//void MeshControl::sendPowerSamplesMessage(power_samples_mesh_message_t* samples) {
-//
-//#ifdef PRINT_MESHCONTROL_VERBOSE
-//	LOGd("Send PowerSamplesMessage");
-//#endif
-//
-//	hub_mesh_message_t* message = createHubMessage(POWER_SAMPLES_MESSAGE);
-//	memcpy(&message.powerSamplesMsg, samples, sizeof(power_samples_mesh_message_t));
-//	uint16_t handle = (message.header.address[0] % (MESH_HANDLE_COUNT-2-1)) + 3;
-//	Mesh::getInstance().send(handle, message, sizeof(hub_mesh_message_t));
-//	free(message);
-//}
-
 void MeshControl::sendServiceDataMessage(state_item_t& stateItem, bool event) {
 	LOGi("Send state event=%u", event);
 #ifdef PRINT_VERBOSE_STATE

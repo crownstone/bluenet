@@ -10,8 +10,6 @@
 
 #include <structs/cs_ScanResult.h>
 #include <structs/cs_StreamBuffer.h>
-#include <structs/cs_PowerSamples.h>
-
 #include <protocol/mesh/cs_MeshMessageCommon.h>
 #include <protocol/mesh/cs_MeshMessageState.h>
 
