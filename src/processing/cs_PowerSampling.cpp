@@ -156,9 +156,6 @@ void PowerSampling::startSampling() {
 	// Get operation mode
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, PersistenceMode::STRATEGY1);
 
-	event_t event(CS_TYPE::EVT_POWER_SAMPLES_START);
-	EventDispatcher::getInstance().dispatch(event);
-
 	_adc->start();
 }
 
