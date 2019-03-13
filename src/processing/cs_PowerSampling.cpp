@@ -664,21 +664,18 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 
 	// Get the current state errors
 	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
-
-	// Get the current switch state before we dispatch any event (as that may change the switch).
-	switch_state_t switchState;
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
 
 	// TODO: implement this differently
 	if (RTC::getCount() > RTC::msToTicks(5000)) {
 		startIgbtFailureDetection();
 	}
 
-
-	// ---------- TODO: this should be kept up in the state ---------
+	// TODO: this should be kept up in the state?
 	switch_state_t prevSwitchState = _lastSwitchState;
-	size16_t size = sizeof(switch_state_t);
-	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, size, PersistenceMode::STRATEGY1);
+	// Get the current switch state before we dispatch any event (as that may change the switch).
+	switch_state_t switchState;
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, PersistenceMode::STRATEGY1);
 	_lastSwitchState = switchState;
 
 	if (switchState.state.relay == 0 && switchState.state.dimmer == 0 && (prevSwitchState.state.relay || prevSwitchState.state.dimmer)) {
@@ -707,8 +704,8 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		LOGw("current above threshold");
 		event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 		EventDispatcher::getInstance().dispatch(event);
-		uint8_t error = 1;
-		State::getInstance().set(CS_TYPE::STATE_ERROR_OVER_CURRENT, &error, sizeof(error), PersistenceMode::STRATEGY1);
+		stateErrors.errors.overCurrent = true;
+		State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors), PersistenceMode::RAM);
 		return;
 	}
 
@@ -722,30 +719,29 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	else {
 		_consecutivePwmOvercurrent = 0;
 	}
-	if ((_consecutivePwmOvercurrent > 20) && (!stateErrors.errors.overCurrentPwm)) {
-		// Get the current pwm state before we dispatch the event (as that may change the pwm).
-		switch_state_t switchState;
-		size16_t size = sizeof(switch_state_t);
-		State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, size, PersistenceMode::STRATEGY1);
+	if ((_consecutivePwmOvercurrent > 20) && (!stateErrors.errors.overCurrentDimmer)) {
+//		// Get the current pwm state before we dispatch the event (as that may change the pwm).
+//		switch_state_t switchState;
+//		size16_t size = sizeof(switch_state_t);
+//		State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, size, PersistenceMode::STRATEGY1);
 		if (switchState.state.dimmer != 0) {
 			// If the pwm was on:
 			LOGw("current above pwm threshold");
 			// Dispatch the event that will turn off the pwm
 			event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER);
 			EventDispatcher::getInstance().dispatch(event);
-			// Set overcurrent error.
-			uint8_t error = 1;
-			size = sizeof(error);
-			State::getInstance().set(CS_TYPE::STATE_ERROR_OVER_CURRENT_DIMMER, &error, size, PersistenceMode::STRATEGY1);
+
+			stateErrors.errors.overCurrentDimmer = true;
+			State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors), PersistenceMode::RAM);
 		}
 		else if (switchState.state.relay == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
 			LOGe("IGBT failure detected");
 			event_t event(CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED);
 			EventDispatcher::getInstance().dispatch(event);
-			uint8_t error = 1;
-			size = sizeof(error);
-			State::getInstance().set(CS_TYPE::STATE_ERROR_DIMMER_ON_FAILURE, &error, size, PersistenceMode::STRATEGY1);
+
+			stateErrors.errors.dimmerOn = true;
+			State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors), PersistenceMode::RAM);
 		}
 	}
 }

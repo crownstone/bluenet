@@ -41,6 +41,7 @@ ServiceData::ServiceData() :
 	,_meshNextEventType(0)
 #endif
 {
+//	_stateErrors.asInt = 0;
 	// Initialize the service data
 	memset(_serviceData.array, 0, sizeof(_serviceData.array));
 };
@@ -168,15 +169,16 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 		bool serviceDataSet = false;
 
-		state_errors_t stateErrors;
-		State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
-
 		uint32_t timestamp;
-		State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, PersistenceMode::STRATEGY1);
+		State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, PersistenceMode::RAM);
 
 //		// Update flag
 //		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
 //		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED));
+
+		state_errors_t stateErrors;
+		State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, PersistenceMode::RAM);
+		updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors.asInt);
 
 		// Set error timestamp
 		if (stateErrors.asInt == 0) {
@@ -744,18 +746,19 @@ void ServiceData::handleEvent(event_t & event) {
 			updateAdvertisement(false);
 			break;
 		}
-		case CS_TYPE::EVT_DIMMER_FORCED_OFF:
-		case CS_TYPE::EVT_SWITCH_FORCED_OFF:
-		case CS_TYPE::EVT_RELAY_FORCED_ON:
-			LOGd("Event: %s", TypeName(event.type));
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, true);
-			break;
-		case CS_TYPE::STATE_ERRORS: {
-			LOGd("Event: %s", TypeName(event.type));
-			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*)event.data;
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors->asInt);
-			break;
-		}
+//		// TODO: do we need to keep up the error? Or we can simply retrieve it every service data update?
+//		case CS_TYPE::EVT_DIMMER_FORCED_OFF:
+//		case CS_TYPE::EVT_SWITCH_FORCED_OFF:
+//		case CS_TYPE::EVT_RELAY_FORCED_ON:
+//			LOGd("Event: %s", TypeName(event.type));
+//			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, true);
+//			break;
+//		case CS_TYPE::STATE_ERRORS: {
+//			LOGd("Event: %s", TypeName(event.type));
+//			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*) event.data;
+//			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors->asInt);
+//			break;
+//		}
 		default: {
 			// continue with the rest of the method.
 		}

@@ -6,8 +6,6 @@
  */
 #pragma once
 
-#include "structs/cs_ScheduleEntries.h"
-
 //TODO: make a enum class of these
 enum CommandHandlerTypes {
 	CTRL_CMD_SWITCH                      = 0,     //! 0x00

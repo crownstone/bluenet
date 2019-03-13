@@ -7,7 +7,6 @@
 #pragma once
 
 #include <ble/cs_Stack.h>
-#include <structs/cs_ScanResult.h>
 #include <events/cs_EventListener.h>
 
 /** Scanner scans for BLE devices.

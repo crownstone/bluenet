@@ -200,6 +200,13 @@ public:
 	 */
 	void updateTemperature(int8_t temperature);
 
+	/** Set the cached state errors
+	 *
+	 * @param[in] type            Type of error
+	 * @param[in] set             Whether to set the error.
+	 */
+	void updateStateErrors(CS_TYPE type, bool set);
+
 	/** Update the advertisement.
 	 *
 	 * Update the advertisement with the latest data, and encrypt the data.
@@ -258,6 +265,9 @@ private:
 
 	//! Store timestamp of first error
 	uint32_t _firstErrorTimestamp; // TODO: use State for this?
+
+//	//! Store the error state, so that they don't have to be retrieved every time.
+//	state_errors_t _stateErrors;
 
 	//! Store the operation mode.
 	OperationMode _operationMode;

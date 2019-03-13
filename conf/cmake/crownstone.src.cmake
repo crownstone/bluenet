@@ -31,7 +31,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_DeviceInformationService.cp
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/services/cs_SetupService.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_State.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_ScanResult.cpp")
-LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_ScheduleEntries.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_ScheduleEntriesAccessor.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/structs/cs_TrackDevices.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/SortMedian.cc")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")

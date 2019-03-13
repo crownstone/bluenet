@@ -12,12 +12,15 @@
 #include <type_traits>
 #include <cstddef> // For NULL
 #include <drivers/cs_Serial.h>
+#include <protocol/cs_Packets.h>
 
 typedef uint8_t* buffer_ptr_t;
 typedef uint16_t buffer_size_t;
 typedef uint16_t cs_ret_code_t;
 typedef uint8_t  stone_id_t;
 typedef uint16_t size16_t;
+//! Boolean with fixed size.
+typedef uint8_t BOOL;
 
 enum TypeBases {
 	Configuration_Base = 0x000,
@@ -118,16 +121,16 @@ enum class CS_TYPE: uint16_t {
 	STATE_TIME,                                       //  0x88 - 136
 	STATE_FACTORY_RESET,                              //  0x89 - 137
 //	STATE_LEARNED_SWITCHES,                           //  0x8A - 138
-	STATE_ERRORS,                                     //  0x8B - 139 // TODO: deprecate
-	STATE_ERROR_OVER_CURRENT,                         //  0x8C - 140
-	STATE_ERROR_OVER_CURRENT_DIMMER,                  //  0x8D - 141
-	STATE_ERROR_CHIP_TEMP,                            //  0x8E - 142
-	STATE_ERROR_DIMMER_TEMP,                          //  0x8F - 143
+	STATE_ERRORS,                                     //  0x8B - 139
+//	STATE_ERROR_OVER_CURRENT,                         //  0x8C - 140
+//	STATE_ERROR_OVER_CURRENT_DIMMER,                  //  0x8D - 141
+//	STATE_ERROR_CHIP_TEMP,                            //  0x8E - 142
+//	STATE_ERROR_DIMMER_TEMP,                          //  0x8F - 143
 //	STATE_IGNORE_BITMASK,                             //  0x90 - 144
 //	STATE_IGNORE_ALL,                                 //  0x91 - 145
 //	STATE_IGNORE_LOCATION,                            //  0x92 - 146
-	STATE_ERROR_DIMMER_ON_FAILURE,                    //  0x93 - 147
-	STATE_ERROR_DIMMER_OFF_FAILURE,                   //  0x94 - 148
+//	STATE_ERROR_DIMMER_ON_FAILURE,                    //  0x93 - 147
+//	STATE_ERROR_DIMMER_OFF_FAILURE,                   //  0x94 - 148
 
 	/*
 	 * Internal commands and events.
@@ -144,10 +147,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_DEVICE_SCANNED,                               // Sent when a device was scanned. -- Payload is scanned_device_t.
 //	EVT_POWER_SAMPLES_START,                          // Sent when the power samples buffer (for characteristic) is being filled with new data.
 //	EVT_POWER_SAMPLES_END,                            // Sent when the power samples buffer (for characteristic) has been filled with new data.
-	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER,         // Sent when current usage goes over the dimmer threshold, while dimmer is on.
-	EVT_CURRENT_USAGE_ABOVE_THRESHOLD,                // Sent when current usage goes over the threshold.
-	EVT_DIMMER_ON_FAILURE_DETECTED,                   // Sent when dimmer leaks current, while it's off.
-	EVT_DIMMER_OFF_FAILURE_DETECTED,                  // Sent when dimmer blocks current, while it's on.
+
 	EVT_MESH_TIME,                                    // Sent when the mesh received the current time
 	EVT_SCHEDULE_ENTRIES_UPDATED,      // TODO: deprecate and use STATE event for this.                // Sent when schedule entries were changed. Payload is schedule_list_t.
 //	EVT_BLE_EVENT,
@@ -157,37 +157,42 @@ enum class CS_TYPE: uint16_t {
 	EVT_BROWNOUT_IMPENDING,                           // Sent when brownout is impending (low chip supply voltage)
 	EVT_SESSION_NONCE_SET,                            // Sent when a session nonce is generated. -- Payload is the session nonce.
 	EVT_KEEP_ALIVE,                                   // Sent when a keep alive has been received. -- Payload is keep_alive_state_message_payload_t.
+	EVT_CURRENT_USAGE_ABOVE_THRESHOLD,        // TODO: deprecate, use STATE_ERRORS        // Sent when current usage goes over the threshold.
+	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER, // TODO: deprecate, use STATE_ERRORS        // Sent when current usage goes over the dimmer threshold, while dimmer is on.
+	EVT_DIMMER_ON_FAILURE_DETECTED,           // TODO: deprecate, use STATE_ERRORS        // Sent when dimmer leaks current, while it's supposed to be off.
+	EVT_DIMMER_OFF_FAILURE_DETECTED,          // TODO: deprecate, use STATE_ERRORS        // Sent when dimmer blocks current, while it's supposed to be on.
+	EVT_CHIP_TEMP_ABOVE_THRESHOLD,            // TODO: deprecate, use STATE_ERRORS        // Sent when chip temperature is above threshold.
+	EVT_CHIP_TEMP_OK,                         // TODO: deprecate, use STATE_ERRORS        // Sent when chip temperature is ok again.
+	EVT_DIMMER_TEMP_ABOVE_THRESHOLD,          // TODO: deprecate, use STATE_ERRORS        // Sent when dimmer temperature is above threshold.
+	EVT_DIMMER_TEMP_OK,                       // TODO: deprecate, use STATE_ERRORS        // Sent when dimmer temperature is ok again.
 	EVT_DIMMER_FORCED_OFF,                            // Sent when dimmer was forced off.
 	EVT_SWITCH_FORCED_OFF,                            // Sent when switch (relay and dimmer) was forced off.
 	EVT_RELAY_FORCED_ON,                              // Sent when relay was forced on.
-	EVT_CHIP_TEMP_ABOVE_THRESHOLD,                    // Sent when chip temperature is above threshold.
-	EVT_CHIP_TEMP_OK,                                 // Sent when chip temperature is ok again.
-	EVT_DIMMER_TEMP_ABOVE_THRESHOLD,                  // Sent when dimmer temperature is above threshold.
-	EVT_DIMMER_TEMP_OK,                               // Sent when dimmer temperature is ok again.
+
 //	EVT_EXTERNAL_STATE_MSG_CHAN_0,     // Deprecated
 //	EVT_EXTERNAL_STATE_MSG_CHAN_1,     // Deprecated
 	EVT_TIME_SET,                                     // Sent when the time is set or changed. TODO: time as payload?
 	EVT_DIMMER_POWERED,                               // Sent when dimmer is powered, and ready to be used.
-	EVT_DIMMING_ALLOWED,                              // Sent when allow dimming is changed. -- Payload is bool.
-	EVT_SWITCH_LOCKED,                                // Sent when switch locked flag is set. -- Payload is bool.
+	EVT_DIMMING_ALLOWED, // TODO: Deprecate, use cfg  // Sent when allow dimming is changed. -- Payload is BOOL.
+	EVT_SWITCH_LOCKED,   // TODO: Deprecate, use cfg  // Sent when switch locked flag is set. -- Payload is BOOL.
 	EVT_STORAGE_WRITE_DONE,                           // Sent when an item has been written to storage. -- Payload is CS_TYPE, the type that was written.
 	EVT_SETUP_DONE,                                   // Sent when setup was done (and settings are stored).
 //	EVT_DO_RESET_DELAYED,                             // Sent to perform a reset in a few seconds.
-	EVT_SWITCHCRAFT_ENABLED,                          // Sent when switchcraft flag is set. -- Payload is boolean.
+	EVT_SWITCHCRAFT_ENABLED, // TODO: Deprecate, use cfg   // Sent when switchcraft flag is set. -- Payload is BOOL.
 //	EVT_STORAGE_WRITE,                                // Sent when an item is going to be written to storage.
 //	EVT_STORAGE_ERASE,                                // Sent when a flash page is going to be erased.
 	EVT_ADC_RESTARTED,                                // Sent when ADC has been restarted.
 //	CMD_SET_LOG_LEVEL,
-	CMD_ENABLE_LOG_POWER,                             // Sent to enable/disable power calculations logging. -- Payload is bool.
-	CMD_ENABLE_LOG_CURRENT,                           // Sent to enable/disable current samples logging. -- Payload is bool.
-	CMD_ENABLE_LOG_VOLTAGE,                           // Sent to enable/disable voltage samples logging. -- Payload is bool.
-	CMD_ENABLE_LOG_FILTERED_CURRENT,                  // Sent to enable/disable filtered current samples logging. -- Payload is bool.
+	CMD_ENABLE_LOG_POWER,                             // Sent to enable/disable power calculations logging. -- Payload is BOOL.
+	CMD_ENABLE_LOG_CURRENT,                           // Sent to enable/disable current samples logging. -- Payload is BOOL.
+	CMD_ENABLE_LOG_VOLTAGE,                           // Sent to enable/disable voltage samples logging. -- Payload is BOOL.
+	CMD_ENABLE_LOG_FILTERED_CURRENT,                  // Sent to enable/disable filtered current samples logging. -- Payload is BOOL.
 	CMD_RESET_DELAYED,                                // Sent to reboot. -- Payload is reset_delayed_t.
-	CMD_ENABLE_ADVERTISEMENT,                         // Sent to enable/disable advertising. -- Payload is bool.
-	CMD_ENABLE_MESH,                                  // Sent to enable/disable mesh. -- Payload is bool.
+	CMD_ENABLE_ADVERTISEMENT,                         // Sent to enable/disable advertising. -- Payload is BOOL.
+	CMD_ENABLE_MESH,                                  // Sent to enable/disable mesh. -- Payload is BOOL.
 	CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN,         // Sent to toggle ADC voltage pin. TODO: pin as payload?
-	CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT,              // Sent to toggle differential mode on current pin. -- Payload is bool.
-	CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,              // Sent to toggle differential mode on voltage pin. -- Payload is bool.
+	CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT,              // Sent to toggle differential mode on current pin. -- Payload is BOOL.
+	CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,              // Sent to toggle differential mode on voltage pin. -- Payload is BOOL.
 	CMD_INC_VOLTAGE_RANGE,                            // Sent to increase voltage range.
 	CMD_DEC_VOLTAGE_RANGE,                            // Sent to decrease voltage range.
 	CMD_INC_CURRENT_RANGE,                            // Sent to increase current range.
@@ -202,131 +207,11 @@ enum class CS_TYPE: uint16_t {
  *
  *-------------------------------------------------------------------------------------------------------------------*/
 
-struct state_vars_notifaction {
-	uint8_t type;
-	uint8_t* data;
-	uint16_t dataLength;
-};
 
-union state_errors_t {
-	struct __attribute__((packed)) {
-		uint8_t overCurrent: 1;
-		uint8_t overCurrentPwm: 1;
-		uint8_t chipTemp: 1;
-		uint8_t pwmTemp: 1;
-		uint8_t dimmerOn: 1;
-		uint8_t dimmerOff: 1;
-		uint32_t reserved: 26;
-	} errors;
-	uint32_t asInt;
-	state_errors_t(): asInt(0) {}
-	state_errors_t(uint32_t val): asInt(val) {}
-};
-
-union __attribute__((__packed__)) __attribute__((__aligned__(4))) switch_state_t {
-	struct __attribute__((packed)) {
-		uint8_t dimmer : 7;
-		uint8_t relay : 1;
-	} state;
-	uint8_t asInt;
-	switch_state_t(): asInt(0) {}
-	switch_state_t(uint8_t val) {
-//		state.relay = val & 0x80;
-//		state.dimmer = val & 0x7F;
-		asInt = val;
-	}
-};
-
-#define SESSION_NONCE_LENGTH 5
-struct __attribute__((packed)) session_nonce_t {
-	uint8_t data[SESSION_NONCE_LENGTH];
-};
-
-// TODO: check if this length is similar to BLE_GAP_ADDR_LEN
-#define MAC_ADDRESS_LEN 6
-#define ADVERTISEMENT_DATA_MAX_SIZE 31
-
-struct __attribute__((packed)) scanned_device_t {
-	int8_t rssi;
-	uint8_t address[MAC_ADDRESS_LEN];
-	uint8_t channel;
-	uint8_t dataSize;
-//	uint8_t data[ADVERTISEMENT_DATA_MAX_SIZE];
-	uint8_t *data;
-	// See ble_gap_evt_adv_report_t
-	// More possibilities: addressType, connectable, isScanResponse, directed, scannable, extended advertisements, etc.
-};
 
 
 // TODO: these definitions (also the structs) should be moved to somewhere else.
-#define DAILY_REPEAT_BIT_SUNDAYS    0
-#define DAILY_REPEAT_BIT_MONDAYS    1
-#define DAILY_REPEAT_BIT_TUESDAYS   2
-#define DAILY_REPEAT_BIT_WEDNESDAYS 3
-#define DAILY_REPEAT_BIT_THURSDAYS  4
-#define DAILY_REPEAT_BIT_FRIDAYS    5
-#define DAILY_REPEAT_BIT_SATURDAYS  6
-#define DAILY_REPEAT_BIT_ALL_DAYS   7
 
-#define SCHEDULE_TIME_TYPE_REPEAT      0
-#define SCHEDULE_TIME_TYPE_DAILY       1
-#define SCHEDULE_TIME_TYPE_ONCE        2
-
-#define SCHEDULE_ACTION_TYPE_PWM       0
-#define SCHEDULE_ACTION_TYPE_FADE      1
-#define SCHEDULE_ACTION_TYPE_TOGGLE    2
-
-struct __attribute__((__packed__)) schedule_time_daily_t {
-	/**
-	 * Only perform action on certain days these days of the week. Bitmask, see DAILY_REPEAT_*.
-	 * Check against (1 << current_day_of_week)
-	 * If (dayOfWeek & DAILY_REPEAT_ALL_DAYS), then the other bits are ignored.
-	 */
-	uint8_t dayOfWeekBitmask;
-	uint8_t reserved;
-};
-
-struct __attribute__((__packed__)) schedule_time_repeat_t {
-	uint16_t repeatTime; //! Repeat every X minutes. 0 is not allowed.
-};
-
-struct __attribute__((__packed__)) schedule_action_pwm_t {
-	uint8_t pwm;
-	uint8_t reserved[2];
-};
-
-struct __attribute__((__packed__)) schedule_action_fade_t {
-	uint8_t pwmEnd;
-	uint16_t fadeDuration; //! Number of seconds it takes to get to pwmEnd.
-};
-
-struct __attribute__((__packed__)) schedule_entry_t {
-	uint8_t reserved;
-
-	// Combined time and action type.
-	// Defined as SCHEDULE_TIME_TYPE_.. + (SCHEDULE_ACTION_TYPE_.. << 4)
-	uint8_t type;
-
-	uint8_t overrideMask; //! What to override. Bitmask, see SCHEDULE_OVERRIDE_*
-
-	uint32_t nextTimestamp;
-	union {
-		schedule_time_repeat_t repeat;
-		schedule_time_daily_t daily;
-	};
-	union {
-		schedule_action_pwm_t pwm;
-		schedule_action_fade_t fade;
-	};
-};
-
-// Size: 1 + 12*MAX_SCHEDULE_ENTRIES
-struct __attribute__((__packed__)) schedule_list_t {
-	uint8_t size;
-	schedule_entry_t list[MAX_SCHEDULE_ENTRIES];
-	schedule_list_t(): size(0) {}
-	schedule_list_t(uint8_t size): size(size) {}
-};
 
 /** Header of a stream buffer
  *
@@ -349,9 +234,6 @@ struct __attribute__((packed)) reset_delayed_t {
 	uint8_t resetCode;
 	uint16_t delayMs;
 };
-
-
-
 
 struct event_t {
 	event_t(CS_TYPE type, void * data, size16_t size): type(type), data(data), size(size) {
@@ -415,30 +297,30 @@ typedef uint16_t TYPIFY(CONFIG_BOOT_DELAY);
 typedef uint16_t TYPIFY(CONFIG_CROWNSTONE_ID);
 typedef    float TYPIFY(CONFIG_CURRENT_MULTIPLIER);
 typedef  int32_t TYPIFY(CONFIG_CURRENT_ADC_ZERO);
-typedef     bool TYPIFY(CONFIG_DEFAULT_ON);
-typedef     bool TYPIFY(CONFIG_ENCRYPTION_ENABLED);
-typedef     bool TYPIFY(CONFIG_IBEACON_ENABLED);
+typedef     BOOL TYPIFY(CONFIG_DEFAULT_ON);
+typedef     BOOL TYPIFY(CONFIG_ENCRYPTION_ENABLED);
+typedef     BOOL TYPIFY(CONFIG_IBEACON_ENABLED);
 typedef uint16_t TYPIFY(CONFIG_IBEACON_MINOR);
 typedef uint16_t TYPIFY(CONFIG_IBEACON_MAJOR);
 typedef   int8_t TYPIFY(CONFIG_IBEACON_TXPOWER);
 typedef   int8_t TYPIFY(CONFIG_LOW_TX_POWER);
 typedef   int8_t TYPIFY(CONFIG_MAX_CHIP_TEMP);
-typedef     bool TYPIFY(CONFIG_MESH_ENABLED);
+typedef     BOOL TYPIFY(CONFIG_MESH_ENABLED);
 typedef  int32_t TYPIFY(CONFIG_POWER_ZERO);
 typedef uint32_t TYPIFY(CONFIG_PWM_PERIOD);
 typedef    float TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP);
 typedef    float TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN);
-typedef     bool TYPIFY(CONFIG_PWM_ALLOWED);
+typedef     BOOL TYPIFY(CONFIG_PWM_ALLOWED);
 typedef uint16_t TYPIFY(CONFIG_RELAY_HIGH_DURATION);
-typedef     bool TYPIFY(CONFIG_SCANNER_ENABLED);
+typedef     BOOL TYPIFY(CONFIG_SCANNER_ENABLED);
 typedef uint16_t TYPIFY(CONFIG_SCAN_BREAK_DURATION);
 typedef uint16_t TYPIFY(CONFIG_SCAN_DURATION);
 typedef uint16_t TYPIFY(CONFIG_SCAN_INTERVAL);
 typedef uint16_t TYPIFY(CONFIG_SCAN_WINDOW);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM);
-typedef     bool TYPIFY(CONFIG_SWITCH_LOCKED);
-typedef     bool TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
+typedef     BOOL TYPIFY(CONFIG_SWITCH_LOCKED);
+typedef     BOOL TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
 typedef    float TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD);
 typedef   int8_t TYPIFY(CONFIG_TX_POWER);
 typedef  uint8_t TYPIFY(CONFIG_UART_ENABLED);
@@ -447,12 +329,6 @@ typedef  int32_t TYPIFY(CONFIG_VOLTAGE_ADC_ZERO);
 
 typedef  int32_t TYPIFY(STATE_ACCUMULATED_ENERGY);
 typedef state_errors_t TYPIFY(STATE_ERRORS);
-typedef     bool TYPIFY(STATE_ERROR_CHIP_TEMP);
-typedef     bool TYPIFY(STATE_ERROR_DIMMER_OFF_FAILURE);
-typedef     bool TYPIFY(STATE_ERROR_DIMMER_ON_FAILURE);
-typedef     bool TYPIFY(STATE_ERROR_OVER_CURRENT);
-typedef     bool TYPIFY(STATE_ERROR_OVER_CURRENT_DIMMER);
-typedef     bool TYPIFY(STATE_ERROR_DIMMER_TEMP);
 typedef  uint8_t TYPIFY(STATE_FACTORY_RESET);
 typedef  uint8_t TYPIFY(STATE_OPERATION_MODE);
 typedef  int32_t TYPIFY(STATE_POWER_USAGE);
@@ -482,14 +358,14 @@ typedef  void TYPIFY(EVT_DIMMER_OFF_FAILURE_DETECTED);
 //typedef  uint8_t TYPIFY(EVT_ENABLED_MESH);
 //typedef  uint8_t TYPIFY(EVT_ENABLED_ENCRYPTION);
 //typedef  uint8_t TYPIFY(EVT_ENABLED_IBEACON);
-typedef  bool TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT);
-typedef  bool TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE);
-typedef  bool TYPIFY(CMD_ENABLE_ADVERTISEMENT);
-typedef  bool TYPIFY(CMD_ENABLE_LOG_CURRENT);
-typedef  bool TYPIFY(CMD_ENABLE_LOG_FILTERED_CURRENT);
-typedef  bool TYPIFY(CMD_ENABLE_LOG_POWER);
-typedef  bool TYPIFY(CMD_ENABLE_LOG_VOLTAGE);
-typedef  bool TYPIFY(CMD_ENABLE_MESH);
+typedef  BOOL TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT);
+typedef  BOOL TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE);
+typedef  BOOL TYPIFY(CMD_ENABLE_ADVERTISEMENT);
+typedef  BOOL TYPIFY(CMD_ENABLE_LOG_CURRENT);
+typedef  BOOL TYPIFY(CMD_ENABLE_LOG_FILTERED_CURRENT);
+typedef  BOOL TYPIFY(CMD_ENABLE_LOG_POWER);
+typedef  BOOL TYPIFY(CMD_ENABLE_LOG_VOLTAGE);
+typedef  BOOL TYPIFY(CMD_ENABLE_MESH);
 typedef  void TYPIFY(CMD_INC_VOLTAGE_RANGE);
 typedef  void TYPIFY(CMD_INC_CURRENT_RANGE);
 typedef  void TYPIFY(EVT_KEEP_ALIVE);
@@ -498,7 +374,7 @@ typedef uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
-typedef  bool TYPIFY(EVT_DIMMING_ALLOWED);
+typedef  BOOL TYPIFY(EVT_DIMMING_ALLOWED);
 typedef  void TYPIFY(EVT_DIMMER_FORCED_OFF);
 typedef  void TYPIFY(EVT_DIMMER_POWERED);
 typedef  void TYPIFY(EVT_DIMMER_TEMP_ABOVE_THRESHOLD);
@@ -511,9 +387,9 @@ typedef  schedule_list_t TYPIFY(EVT_SCHEDULE_ENTRIES_UPDATED);
 typedef  void TYPIFY(EVT_SETUP_DONE);
 typedef  session_nonce_t TYPIFY(EVT_SESSION_NONCE_SET);
 typedef  CS_TYPE TYPIFY(EVT_STORAGE_WRITE_DONE);
-typedef  bool TYPIFY(EVT_SWITCHCRAFT_ENABLED);
+typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
-typedef  bool TYPIFY(EVT_SWITCH_LOCKED);
+typedef  BOOL TYPIFY(EVT_SWITCH_LOCKED);
 typedef  void TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
 
@@ -662,18 +538,6 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(STATE_FACTORY_RESET));
 	case CS_TYPE::STATE_ERRORS:
 		return sizeof(TYPIFY(STATE_ERRORS));
-	case CS_TYPE::STATE_ERROR_OVER_CURRENT:
-		return sizeof(TYPIFY(STATE_ERROR_OVER_CURRENT));
-	case CS_TYPE::STATE_ERROR_OVER_CURRENT_DIMMER:
-		return sizeof(TYPIFY(STATE_ERROR_OVER_CURRENT_DIMMER));
-	case CS_TYPE::STATE_ERROR_CHIP_TEMP:
-		return sizeof(TYPIFY(STATE_ERROR_CHIP_TEMP));
-	case CS_TYPE::STATE_ERROR_DIMMER_TEMP:
-		return sizeof(TYPIFY(STATE_ERROR_DIMMER_TEMP));
-	case CS_TYPE::STATE_ERROR_DIMMER_ON_FAILURE:
-		return sizeof(TYPIFY(STATE_ERROR_DIMMER_ON_FAILURE));
-	case CS_TYPE::STATE_ERROR_DIMMER_OFF_FAILURE:
-		return sizeof(TYPIFY(STATE_ERROR_DIMMER_OFF_FAILURE));
 	case CS_TYPE::CMD_SWITCH_OFF:
 		return 0;
 	case CS_TYPE::CMD_SWITCH_ON:
@@ -888,12 +752,6 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN: return "EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN";
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY: return "STATE_ACCUMULATED_ENERGY";
 	case CS_TYPE::STATE_ERRORS: return "STATE_ERRORS";
-	case CS_TYPE::STATE_ERROR_CHIP_TEMP: return "STATE_ERROR_CHIP_TEMP";
-	case CS_TYPE::STATE_ERROR_DIMMER_OFF_FAILURE: return "STATE_ERROR_DIMMER_OFF_FAILURE";
-	case CS_TYPE::STATE_ERROR_DIMMER_ON_FAILURE: return "STATE_ERROR_DIMMER_ON_FAILURE";
-	case CS_TYPE::STATE_ERROR_OVER_CURRENT: return "STATE_ERROR_OVER_CURRENT";
-	case CS_TYPE::STATE_ERROR_OVER_CURRENT_DIMMER: return "STATE_ERROR_OVER_CURRENT_DIMMER";
-	case CS_TYPE::STATE_ERROR_DIMMER_TEMP: return "STATE_ERROR_DIMMER_TEMP";
 	case CS_TYPE::STATE_FACTORY_RESET: return "STATE_FACTORY_RESET";
 	case CS_TYPE::STATE_OPERATION_MODE: return "STATE_OPERATION_MODE";
 	case CS_TYPE::STATE_POWER_USAGE: return "STATE_POWER_USAGE";
@@ -960,12 +818,6 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_TIME:
 	case CS_TYPE::STATE_FACTORY_RESET:
 	case CS_TYPE::STATE_ERRORS:
-	case CS_TYPE::STATE_ERROR_OVER_CURRENT:
-	case CS_TYPE::STATE_ERROR_OVER_CURRENT_DIMMER:
-	case CS_TYPE::STATE_ERROR_CHIP_TEMP:
-	case CS_TYPE::STATE_ERROR_DIMMER_TEMP:
-	case CS_TYPE::STATE_ERROR_DIMMER_ON_FAILURE:
-	case CS_TYPE::STATE_ERROR_DIMMER_OFF_FAILURE:
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
@@ -1040,6 +892,9 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
  * There is no allocation done in this function. It is assumed that data.value points to an array or single
  * variable that needs to be written. The allocation of strings or arrays is limited by TypeSize which in that case
  * can be considered as MaxTypeSize.
+ *
+ * This function does not check if data size fits the default value.
+ * TODO: check how to check this at compile time.
  */
 constexpr void getDefault(cs_file_data_t & data) {
 
@@ -1143,7 +998,7 @@ constexpr void getDefault(cs_file_data_t & data) {
 	case CS_TYPE::CONFIG_POWER_ZERO:
 		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = CONFIG_POWER_ZERO_DEFAULT;
 		break;
-	case CS_TYPE::CONFIG_PWM_PERIOD:
+	case CS_TYPE::CONFIG_PWM_PERIOD: {
 		LOGd("Got PWM period: %u", PWM_PERIOD);
 		LOGd("Data value ptr: %p", data.value);
 		*((uint32_t*)data.value) = 1;
@@ -1151,6 +1006,7 @@ constexpr void getDefault(cs_file_data_t & data) {
 		*(TYPIFY(CONFIG_PWM_PERIOD)*)data.value = (TYPIFY(CONFIG_PWM_PERIOD))PWM_PERIOD;
 		LOGd("data.value: %u", *((uint32_t*)data.value));
 		break;
+	}
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
 		*(TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD)*)data.value = CURRENT_USAGE_THRESHOLD;
 		break;
@@ -1173,7 +1029,8 @@ constexpr void getDefault(cs_file_data_t & data) {
 		*(TYPIFY(STATE_RESET_COUNTER)*)data.value = STATE_RESET_COUNTER_DEFAULT;
 		break;
 	case CS_TYPE::STATE_SWITCH_STATE: {
-		*(TYPIFY(STATE_SWITCH_STATE)*)data.value = switch_state_t(STATE_SWITCH_STATE_DEFAULT);
+		switch_state_t *state = (TYPIFY(STATE_SWITCH_STATE)*)data.value;
+		cs_switch_state_set_default(state);
 		break;
 	}
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
@@ -1182,9 +1039,11 @@ constexpr void getDefault(cs_file_data_t & data) {
 	case CS_TYPE::STATE_POWER_USAGE:
 		*(TYPIFY(STATE_POWER_USAGE)*)data.value = STATE_POWER_USAGE_DEFAULT;
 		break;
-	case CS_TYPE::STATE_SCHEDULE:
-		*(TYPIFY(STATE_SCHEDULE)*)data.value = schedule_list_t(STATE_SCHEDULE_DEFAULT); // This is a copy
+	case CS_TYPE::STATE_SCHEDULE: {
+		schedule_list_t *schedule = (TYPIFY(STATE_SCHEDULE)*)data.value;
+		cs_schedule_list_set_default(schedule);
 		break;
+	}
 	case CS_TYPE::STATE_OPERATION_MODE:
 		*(TYPIFY(STATE_OPERATION_MODE)*)data.value = STATE_OPERATION_MODE_DEFAULT;
 		break;
@@ -1197,27 +1056,11 @@ constexpr void getDefault(cs_file_data_t & data) {
 	case CS_TYPE::STATE_FACTORY_RESET:
 		*(TYPIFY(STATE_FACTORY_RESET)*)data.value = STATE_FACTORY_RESET_DEFAULT;
 		break;
-	case CS_TYPE::STATE_ERRORS:
-		*(TYPIFY(STATE_ERRORS)*)data.value = state_errors_t(STATE_ERRORS_DEFAULT);
+	case CS_TYPE::STATE_ERRORS: {
+		state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*)data.value;
+		cs_state_errors_set_default(stateErrors);
 		break;
-	case CS_TYPE::STATE_ERROR_OVER_CURRENT:
-		*(TYPIFY(STATE_ERROR_OVER_CURRENT)*)data.value = STATE_ERROR_OVER_CURRENT_DEFAULT;
-		break;
-	case CS_TYPE::STATE_ERROR_OVER_CURRENT_DIMMER:
-		*(TYPIFY(STATE_ERROR_OVER_CURRENT_DIMMER)*)data.value = STATE_ERROR_OVER_CURRENT_PWM_DEFAULT;
-		break;
-	case CS_TYPE::STATE_ERROR_CHIP_TEMP:
-		*(TYPIFY(STATE_ERROR_CHIP_TEMP)*)data.value = STATE_ERROR_CHIP_TEMP_DEFAULT;
-		break;
-	case CS_TYPE::STATE_ERROR_DIMMER_TEMP:
-		*(TYPIFY(STATE_ERROR_DIMMER_TEMP)*)data.value = STATE_ERROR_PWM_TEMP_DEFAULT;
-		break;
-	case CS_TYPE::STATE_ERROR_DIMMER_ON_FAILURE:
-		*(TYPIFY(STATE_ERROR_DIMMER_ON_FAILURE)*)data.value = STATE_ERROR_DIMMER_ON_FAILURE_DEFAULT;
-		break;
-	case CS_TYPE::STATE_ERROR_DIMMER_OFF_FAILURE:
-		*(TYPIFY(STATE_ERROR_DIMMER_OFF_FAILURE)*)data.value = STATE_ERROR_DIMMER_OFF_FAILURE_DEFAULT;
-		break;
+	}
 	default:
 		LOGw("Unknown default for %i", to_underlying_type(data.type));
 		break;

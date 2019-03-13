@@ -127,7 +127,7 @@ cs_ret_code_t State::get(const CS_TYPE type, void* target, const PersistenceMode
  * The implementation casts type to the underlying type. The pointer to target is stored in data.value and the
  * size is written in data.size.
  *
- * Here it assumed that the pointer *target is already allocated to the right size...
+ * TODO: it assumed that the pointer *target is already allocated to the right size...
  */
 cs_ret_code_t State::get(const CS_TYPE type, void* target, size16_t & size, const PersistenceMode mode) {
 	cs_file_data_t data;
@@ -149,14 +149,20 @@ cs_ret_code_t State::get(cs_file_data_t & data, const PersistenceMode mode) {
 			getDefault(data);
 			break;
 		case PersistenceMode::RAM: {
-			bool exist = loadFromRam(data);
-			return exist ? ERR_SUCCESS : ERR_NOT_FOUND;
+			bool exists = loadFromRam(data);
+			if (exists) {
+				return ERR_SUCCESS;
+			}
+			LOGnone("Loaded default: %s", TypeName(data.type));
+			getDefault(data);
+//			storeInRam(data); // TODO: store or not?
+			return ERR_SUCCESS;
 		}
 		case PersistenceMode::FLASH:
 			return _storage->read(FILE_CONFIGURATION, data);
 		case PersistenceMode::STRATEGY1: {
-			bool exist = loadFromRam(data);
-			if (exist) {
+			bool exists = loadFromRam(data);
+			if (exists) {
 				LOGnone("Loaded from RAM: %s", TypeName(data.type));
 				return ERR_SUCCESS;
 			}

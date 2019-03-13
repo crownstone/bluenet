@@ -5,7 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "structs/cs_ScheduleEntries.h"
+#include "structs/cs_ScheduleEntriesAccessor.h"
 #include <util/cs_BleError.h>
 
 #define PRINT_DEBUG
@@ -207,10 +207,7 @@ uint16_t ScheduleList::getSize() const {
 }
 
 void ScheduleList::clear() {
-	for (uint16_t i=0; i<MAX_SCHEDULE_ENTRIES; ++i) {
-		_buffer->list[i].nextTimestamp = 0;
-	}
-	_buffer->size = MAX_SCHEDULE_ENTRIES;
+	cs_schedule_list_set_default(_buffer);
 }
 
 bool ScheduleList::checkAllEntries() {

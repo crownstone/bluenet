@@ -6,16 +6,10 @@
  */
 #include "processing/cs_Scanner.h"
 
-#if BUILD_MESHING == 1
-#include <mesh/cs_MeshControl.h>
-#endif
 #include <storage/cs_State.h>
-
 #include <cfg/cs_DeviceTypes.h>
 #include <ble/cs_CrownstoneManufacturer.h>
-
 #include <events/cs_EventDispatcher.h>
-
 #include <cfg/cs_UuidConfig.h>
 
 //#define PRINT_SCANNER_VERBOSE

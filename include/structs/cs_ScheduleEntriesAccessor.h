@@ -6,6 +6,7 @@
  */
 #pragma once
 
+#include <protocol/cs_ScheduleEntries.h>
 #include "cfg/cs_Config.h"
 #include "structs/cs_BufferAccessor.h"
 #include <drivers/cs_Serial.h>

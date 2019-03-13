@@ -557,23 +557,23 @@ void Switch::forceSwitchOff() {
 
 bool Switch::allowPwmOn() {
 	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
 	LOGd("errors=%d", stateErrors.asInt);
 
-	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
+	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentDimmer || stateErrors.errors.dimmerTemp || stateErrors.errors.dimmerOn);
 }
 
 bool Switch::allowRelayOff() {
 	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
-	return !(stateErrors.errors.overCurrentPwm || stateErrors.errors.pwmTemp || stateErrors.errors.dimmerOn);
+	return !(stateErrors.errors.overCurrentDimmer || stateErrors.errors.dimmerTemp || stateErrors.errors.dimmerOn);
 }
 
 bool Switch::allowRelayOn() {
 	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
 	LOGd("errors=%d", stateErrors.asInt);
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.

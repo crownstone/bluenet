@@ -62,10 +62,8 @@ void TemperatureGuard::handleCompEvent(CompEvent_t event) {
 
 void TemperatureGuard::tick() {
 	CS_TYPE curEvent;
-
-	// Get the current state errors
 	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, PersistenceMode::RAM);
 
 	// Check chip temperature, send event if it changed
 	uint8_t chipTempError = getTemperature() > _maxChipTemp ? 1 : 0;
@@ -78,8 +76,8 @@ void TemperatureGuard::tick() {
 
 	// Set state before dispatching event, so that errors are set when handling the event.
 	if (chipTempError && !stateErrors.errors.chipTemp) {
-		// Set chip temp error
-		State::getInstance().set(CS_TYPE::STATE_ERROR_CHIP_TEMP, &chipTempError, sizeof(chipTempError), PersistenceMode::STRATEGY1);
+		stateErrors.errors.chipTemp = true;
+		State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors), PersistenceMode::RAM);
 	}
 
 	if (curEvent != _lastChipTempEvent) {
@@ -92,15 +90,15 @@ void TemperatureGuard::tick() {
 
 	// Check PWM temperature, send event if it changed
 	uint32_t compVal = _comp->sample();
-	uint8_t pwmTempError;
+	uint8_t dimmerTempError;
 	if (_pwmTempInverted) {
-		pwmTempError = compVal > 0 ? 0 : 1;
+		dimmerTempError = compVal > 0 ? 0 : 1;
 	}
 	else {
-		pwmTempError = compVal > 0 ? 1 : 0;
+		dimmerTempError = compVal > 0 ? 1 : 0;
 	}
 
-	if (pwmTempError) {
+	if (dimmerTempError) {
 		curEvent = CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD;
 	}
 	else {
@@ -108,11 +106,9 @@ void TemperatureGuard::tick() {
 	}
 
 	// Set state before dispatching event, so that errors are set when handling the event.
-	if (pwmTempError && !stateErrors.errors.pwmTemp) {
-		// Set pwm temp error
-		st_value_t error;
-		error.u8 = pwmTempError;
-		State::getInstance().set(CS_TYPE::STATE_ERROR_DIMMER_TEMP, &error, sizeof(error), PersistenceMode::STRATEGY1);
+	if (dimmerTempError && !stateErrors.errors.dimmerTemp) {
+		stateErrors.errors.dimmerTemp = true;
+		State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors), PersistenceMode::RAM);
 	}
 
 	if (curEvent != _lastPwmTempEvent) {

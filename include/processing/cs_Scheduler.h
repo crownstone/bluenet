@@ -8,7 +8,7 @@
 
 #include <ble/cs_Nordic.h>
 #include <drivers/cs_Timer.h>
-#include <structs/cs_ScheduleEntries.h>
+#include <structs/cs_ScheduleEntriesAccessor.h>
 #include <events/cs_EventListener.h>
 
 #define SCHEDULER_UPDATE_FREQUENCY 2
