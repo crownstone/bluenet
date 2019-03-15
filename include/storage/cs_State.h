@@ -47,6 +47,73 @@ constexpr int ValidMode(OperationMode const & mode) {
 #define FACTORY_RESET_STATE_RESET  2
 
 /**
+ * Stores state values in RAM and/or FLASH.
+ *
+ * Each state type always have a FIRMWARE_DEFAULT value.
+ * Values that are set, always take precedence over FIRMWARE_DEFAULT.
+ *
+ * Values like chip temperature, that don't have to be stored over reboots should be stored in and read from RAM.
+ * This complete persistence strategy is called RAM_OR_DEFAULT.
+ *
+ * Values like CONFIG_BOOT_DELAY should be known over reboots of the device. Moreover, they should also persist
+ * over firmware updates. These values are stored in FLASH.
+ * If the values are not changed, they should NOT be stored to FLASH. They can then immediately be read from the
+ * FIRMWARE_DEFAULT. If these values are stored in FLASH, they always take precedence over FIRMWARE_DEFAULT values.
+ * Values that are stored in FLASH will be cached in RAM, to prevent having to read from FLASH every time.
+ * This complete persistence strategy is called CACHED_FLASH_OR_DEFAULT.
+ *
+ * If a new firmware has a new FIRMWARE_DEFAULT that should be enforced, we need to explicitly remove the value from
+ * FLASH before updating the firmware.
+ * For example, a new CONFIG_BOOT_DELAY may have to be enforced, or else it might go into an infinite reboot loop.
+ *
+ * For each state type it is defined whether it should be stored in RAM or FLASH.
+ */
+
+/**
+ * Get copy of a state value.
+ *
+ * @param[in] type           The state type.
+ * @param[in] data           Pointer to the state data to.
+ * @param[in,out] size       Available size of data pointer. Afterwards it will have the size of the state data.
+ */
+cs_ret_code_t getCopy(CS_TYPE type, void* data, size16_t dataSize);
+cs_ret_code_t getCopy(cs_state_data_t& data);
+
+/**
+ * Set state to new value.
+ *
+ * The data will be copied.
+ *
+ * @param[in] type           The state type.
+ * @param[in] data           Pointer to the data.
+ * @param[in] size           Size of the data.
+ */
+cs_ret_code_t set(CS_TYPE type, void* data, size16_t dataSize);
+cs_ret_code_t set(cs_state_data_t& data);
+
+/**
+ * Get pointer to state value.
+ *
+ * You can use this to avoid copying large state value. However, you have to make sure to call setByRef() after any
+ * change made in the data.
+ *
+ * @param[in] type           The state type.
+ * @param[out] data          Pointer to the state data.
+ * @param[out] size          Size of the state data.
+ */
+cs_ret_code_t getByRef(CS_TYPE type, void* data, size16_t dataSize);
+cs_ret_code_t getByRef(cs_state_data_t& data);
+
+/**
+ * Update state value.
+ *
+ * Call this function after data in ram has been changed. This makes sure the update will be propagated correctly.
+ */
+cs_ret_code_t setByRef(CS_TYPE type);
+
+
+
+/**
  * Load settings from and save settings to FLASH (persistent storage) and or RAM. If we save values to FLASH we
  * should only do that if the values are different from the FIRMWARE_DEFAULT.
  *
