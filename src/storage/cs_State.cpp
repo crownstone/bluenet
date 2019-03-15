@@ -147,8 +147,14 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	switch(mode) {
 		case PersistenceMode::FIRMWARE_DEFAULT:
 			getDefault(data);
-			break;
+			return ERR_SUCCESS;
 		case PersistenceMode::RAM: {
+			bool exists = loadFromRam(data);
+			return exists ? ERR_SUCCESS : ERR_NOT_FOUND;
+		}
+		case PersistenceMode::FLASH:
+			return _storage->read(FILE_CONFIGURATION, data);
+		case PersistenceMode::RAM_OR_DEFAULT: {
 			bool exists = loadFromRam(data);
 			if (exists) {
 				return ERR_SUCCESS;
@@ -158,15 +164,13 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 //			storeInRam(data); // TODO: store or not?
 			return ERR_SUCCESS;
 		}
-		case PersistenceMode::FLASH:
-			return _storage->read(FILE_CONFIGURATION, data);
+
 		case PersistenceMode::STRATEGY1: {
 			bool exists = loadFromRam(data);
 			if (exists) {
 				LOGnone("Loaded from RAM: %s", TypeName(data.type));
 				return ERR_SUCCESS;
 			}
-
 			ret_code = _storage->read(FILE_CONFIGURATION, data);
 			switch(ret_code) {
 				case FDS_SUCCESS: {
@@ -314,6 +318,9 @@ cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const Persis
 			cs_state_data_t ram_data = _data_in_ram[index];
 			LOGd("Storage write type=%u size=%u data=[0x%X,...]", ram_data.type, ram_data.size, ram_data.value[0]);
 			return _storage->write(FILE_CONFIGURATION, ram_data);
+		}
+		case PersistenceMode::RAM_OR_DEFAULT: {
+			return storeInRam(data);
 		}
 		case PersistenceMode::FIRMWARE_DEFAULT: {
 			LOGe("Default cannot be written");

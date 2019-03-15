@@ -414,7 +414,7 @@ typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
  *
  * 3. Most values can be written to and read from FLASH using RAM as a cache. We can also use FIRMWARE_DEFAULT as
  * a fallback when the FLASH value is not present. Moreover, we can have a list that specifies if a value should be
- * in RAM or in FLASH by default. This complete persistence strategy is called STRATEGY1.
+ * in RAM or in FLASH by default. This complete persistence strategy is called CACHED_FLASH_OR_DEFAULT.
  *
  * NOTE. Suppose we have a new firmware available and we definitely want to use a new FIRMWARE_DEFAULT value. For
  * example, we use more peripherals and need to have a CONFIG_BOOT_DELAY that is higher or else it will be in an
@@ -423,10 +423,11 @@ typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
  * automatically.
  */
 enum class PersistenceMode: uint8_t {
-	FLASH, // TODO: Do we have a use case for this mode?
+	FLASH,
 	RAM,
 	FIRMWARE_DEFAULT,
-	STRATEGY1,
+	STRATEGY1, // CACHED_FLASH_OR_DEFAULT
+	RAM_OR_DEFAULT,
 };
 
 /**

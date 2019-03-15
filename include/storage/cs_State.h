@@ -50,7 +50,7 @@ constexpr int ValidMode(OperationMode const & mode) {
  * Load settings from and save settings to FLASH (persistent storage) and or RAM. If we save values to FLASH we
  * should only do that if the values are different from the FIRMWARE_DEFAULT.
  *
- * If we read vales from FLASH and they are not written in FLASH, we should get them from the FIRMWARE_DEFAULT instead.
+ * If we read values from FLASH and they are not written in FLASH, we should get them from the FIRMWARE_DEFAULT instead.
  *
  * To prevent a round-trip to search for records in FLASH, we always will cache the records in RAM. So, if a record
  * is present in RAM we will use that value, we will not read it from FLASH.
