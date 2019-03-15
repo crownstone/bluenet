@@ -130,7 +130,7 @@ cs_ret_code_t State::get(const CS_TYPE type, void* target, const PersistenceMode
  * TODO: it assumed that the pointer *target is already allocated to the right size...
  */
 cs_ret_code_t State::get(const CS_TYPE type, void* target, size16_t & size, const PersistenceMode mode) {
-	cs_file_data_t data;
+	cs_state_data_t data;
 	data.type = type;
 	data.size = size;
 	data.value = (uint8_t*)target;
@@ -142,7 +142,7 @@ cs_ret_code_t State::get(const CS_TYPE type, void* target, size16_t & size, cons
 	return ret_code;
 }
 
-cs_ret_code_t State::get(cs_file_data_t & data, const PersistenceMode mode) {
+cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	ret_code_t ret_code = FDS_ERR_NOT_FOUND;
 	switch(mode) {
 		case PersistenceMode::FIRMWARE_DEFAULT:
@@ -198,7 +198,7 @@ cs_ret_code_t State::get(cs_file_data_t & data, const PersistenceMode mode) {
  * you have called this function. Note that every record occupies RAM. If things have to persist, but do not need
  * to be stored in RAM, and when timing is not important, use set() with the FLASH mode argument.
  */
-cs_ret_code_t State::storeInRam(const cs_file_data_t & data) {
+cs_ret_code_t State::storeInRam(const cs_state_data_t & data) {
 	size16_t temp = 0;
 	return storeInRam(data, temp);
 }
@@ -210,14 +210,14 @@ cs_ret_code_t State::storeInRam(const cs_file_data_t & data) {
  *		LOGe("Unaligned type: %s: %p", TypeName(type), data.value);
  *	}
  */
-cs_ret_code_t State::storeInRam(const cs_file_data_t & data, size16_t & index_in_ram) {
+cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_in_ram) {
 	// TODO: Check if enough RAM is available
 	LOGd("storeInRam type=%u size=%u", to_underlying_type(data.type), data.size);
 	bool exist = false;
 	for (size16_t i = 0; i < _data_in_ram.size(); ++i) {
 		if (_data_in_ram[i].type == data.type) {
 			LOGnone("Update RAM");
-			cs_file_data_t & ram_data = _data_in_ram[i];
+			cs_state_data_t & ram_data = _data_in_ram[i];
 			if (ram_data.size != data.size) {
 				free(ram_data.value);
 				ram_data.value = (uint8_t*)malloc(sizeof(uint8_t) * data.size); // TODO: don't malloc when size is similar?
@@ -231,7 +231,7 @@ cs_ret_code_t State::storeInRam(const cs_file_data_t & data, size16_t & index_in
 	}
 	if (!exist) {
 		LOGnone("Store %i in RAM", data.type);
-		cs_file_data_t &ram_data = *(cs_file_data_t*)malloc(sizeof(cs_file_data_t));
+		cs_state_data_t &ram_data = *(cs_state_data_t*)malloc(sizeof(cs_state_data_t));
 		ram_data.type = data.type;
 		ram_data.size = data.size;
 		LOGnone("Allocate value array of size %i", data.size);
@@ -248,11 +248,11 @@ cs_ret_code_t State::storeInRam(const cs_file_data_t & data, size16_t & index_in
  * Load from RAM. It is assumed that the caller does not know the data length. Hence, what is returned is a copy of
  * the data and allocation is done within loadFromRam.
  */
-cs_ret_code_t State::loadFromRam(cs_file_data_t & data) {
+cs_ret_code_t State::loadFromRam(cs_state_data_t & data) {
 	bool exist = false;
 	for (size16_t i = 0; i < _data_in_ram.size(); ++i) {
 		if (_data_in_ram[i].type == data.type) {
-			cs_file_data_t & ram_data = _data_in_ram[i];
+			cs_state_data_t & ram_data = _data_in_ram[i];
 			data.size = ram_data.size;
 			data.value = (uint8_t*)malloc(sizeof(uint8_t) * data.size);
 			memcpy(data.value, ram_data.value, data.size);
@@ -272,7 +272,7 @@ cs_ret_code_t State::loadFromRam(cs_file_data_t & data) {
  *   STRATEGY: store item depending on its default location, keep a copy in RAM.
  */
 cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const PersistenceMode mode) {
-	cs_file_data_t data;
+	cs_state_data_t data;
 	data.type = type;
 	data.value = (uint8_t*)target;
 	LOGnone("Set value: %s: %i", TypeName(type), type);
@@ -311,7 +311,7 @@ cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const Persis
 				ret_code = ERR_WRITE_NOT_ALLOWED;
 				break;
 			}
-			cs_file_data_t ram_data = _data_in_ram[index];
+			cs_state_data_t ram_data = _data_in_ram[index];
 			LOGd("Storage write type=%u size=%u data=[0x%X,...]", ram_data.type, ram_data.size, ram_data.value[0]);
 			return _storage->write(FILE_CONFIGURATION, ram_data);
 		}

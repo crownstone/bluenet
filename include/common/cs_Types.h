@@ -260,12 +260,12 @@ union st_value_t {
 	uint32_t  u32;
 } __ALIGN(4);
 
-struct cs_file_data_t {
+struct cs_state_data_t {
 	CS_TYPE type;
 	uint8_t *value;
 	uint16_t size;
 
-	friend bool operator==(const cs_file_data_t data0, const cs_file_data_t & data1) {
+	friend bool operator==(const cs_state_data_t data0, const cs_state_data_t & data1) {
 		if (data0.type != data1.type || data0.size != data1.size) {
 			return false;
 		}
@@ -276,7 +276,7 @@ struct cs_file_data_t {
 		}
 		return true;
 	}
-	friend bool operator!=(const cs_file_data_t data0, const cs_file_data_t & data1) {
+	friend bool operator!=(const cs_state_data_t data0, const cs_state_data_t & data1) {
 		return !(data0 == data1);
 	}
 
@@ -896,7 +896,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
  * This function does not check if data size fits the default value.
  * TODO: check how to check this at compile time.
  */
-constexpr void getDefault(cs_file_data_t & data) {
+constexpr void getDefault(cs_state_data_t & data) {
 
 	// for all non-string types we already know the to-be expected size
 	data.size = TypeSize(data.type);

@@ -165,7 +165,7 @@ public:
 	 * @param[in,out] data      Data struct (contains type, pointer to data, and size).
 	 * @param[in] mode          Indicates to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
 	 */
-	cs_ret_code_t get(cs_file_data_t & data, const PersistenceMode mode);
+	cs_ret_code_t get(cs_state_data_t & data, const PersistenceMode mode);
 
 	cs_ret_code_t set(CS_TYPE type, void* data, size16_t size, PersistenceMode mode);
 
@@ -182,15 +182,15 @@ protected:
 
 	bool readFlag(CS_TYPE type, bool& value);
 
-	cs_ret_code_t storeInRam(const cs_file_data_t & data);
+	cs_ret_code_t storeInRam(const cs_state_data_t & data);
 
-	cs_ret_code_t loadFromRam(cs_file_data_t & data);
+	cs_ret_code_t loadFromRam(cs_state_data_t & data);
 
-	cs_ret_code_t storeInRam(const cs_file_data_t & data, size16_t & index_in_ram);
+	cs_ret_code_t storeInRam(const cs_state_data_t & data, size16_t & index_in_ram);
 
 //	std::vector<CS_TYPE> _notifyingStates;
 
-	std::vector<cs_file_data_t> _data_in_ram;
+	std::vector<cs_state_data_t> _data_in_ram;
 
 private:
 
