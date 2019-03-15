@@ -42,25 +42,71 @@ public:
 		return instance;
 	}
 
-	ret_code_t init();
+	cs_ret_code_t init();
 
 	inline bool isInitialized() {
 		return _initialized;
 	}
 
-	/** Write to persistent storage.
-	*/
-	ret_code_t write(cs_file_id_t file_id, cs_file_data_t file_contents);
-
 	/** Read from persistent storage.
 	 */
-	ret_code_t read(cs_file_id_t file_id, cs_file_data_t file_contents);
+	cs_ret_code_t read(cs_file_id_t file_id, cs_state_data_t data);
 
-	ret_code_t remove(cs_file_id_t file_id);
+	/** Write to persistent storage.
+	*/
+	cs_ret_code_t write(cs_file_id_t file_id, cs_state_data_t data);
 
-	ret_code_t remove(cs_file_id_t file_id, CS_TYPE type);
+	/**
+	 * Removes a whole flash page.
+	 */
+	cs_ret_code_t remove(cs_file_id_t file_id);
 
-	ret_code_t exists(cs_file_id_t file_id, bool & result);
+	/**
+	 * Removes a type from a flash page.
+	 */
+	cs_ret_code_t remove(cs_file_id_t file_id, CS_TYPE type);
+
+	/**
+	 * Garbage collection reclaims the flash space that is occupied by records that have been deleted,
+	 * or that failed to be completely written due to, for example, a power loss.
+	 *
+	 * This function is asynchronous.
+	 */
+	cs_ret_code_t garbageCollect();
+
+	// Handle Crownstone events
+	void handleEvent(event_t & event) {};
+
+	void handleFileStorageEvent(fds_evt_t const * p_fds_evt);
+
+	void handleSuccessfulEvent(fds_evt_t const * p_fds_evt);
+
+private:
+	Storage();
+	Storage(Storage const&);
+	void operator=(Storage const &);
+
+	bool _initialized;
+
+	fds_find_token_t _ftok;
+
+	std::vector<cs_state_data_t> _records_in_memory;
+
+	// Use before ftok
+	void initSearch();
+
+	cs_ret_code_t getErrorCode(ret_code_t code);
+
+
+
+
+
+
+	/** Write to persistent storage.
+	*/
+	ret_code_t writeInternal(cs_file_id_t file_id, cs_state_data_t file_contents);
+
+//	ret_code_t exists(cs_file_id_t file_id, bool & result);
 
 	ret_code_t exists(cs_file_id_t file_id, CS_TYPE type, bool & result);
 
@@ -73,29 +119,8 @@ public:
 	 */
 	ret_code_t exists(cs_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc, bool & result);
 
+	ret_code_t garbageCollectInternal();
+
 	inline void print(const std::string & prefix, CS_TYPE type);
-
-	// Handle Crownstone events
-	void handleEvent(event_t & event) {};
-
-	void handleFileStorageEvent(fds_evt_t const * p_fds_evt);
-
-	void handleSuccessfulEvent(fds_evt_t const * p_fds_evt);
-
-	ret_code_t garbageCollect();
-
-private:
-	Storage();
-	Storage(Storage const&);
-	void operator=(Storage const &);
-
-	bool _initialized;
-
-	fds_find_token_t _ftok;
-
-	std::vector<cs_file_data_t> _records_in_memory;
-
-	// Use before ftok
-	void initSearch();
 };
 

@@ -33,25 +33,9 @@ Storage::Storage() : EventListener() {
 	EventDispatcher::getInstance().addListener(this);
 }
 
-ret_code_t Storage::remove(cs_file_id_t file_id) {
-	if (!_initialized) {
-		LOGe("Storage not initialized");
-		return ERR_NOT_INITIALIZED;
-	}
-	LOGi("Delete file, removes all configuration values!");
-	ret_code_t ret_code;
-	ret_code = fds_file_delete(file_id);
-	return ret_code;
-}
-
-void Storage::initSearch() {
-	// clear fds token before every use
-	memset(&_ftok, 0x00, sizeof(fds_find_token_t));
-}
-
-ret_code_t Storage::init() {
+cs_ret_code_t Storage::init() {
 	LOGi(FMT_INIT, "storage");
-	ret_code_t ret_code;
+	ret_code_t fds_ret_code;
 
 	uint8_t enabled = nrf_sdh_is_enabled();
 	if (!enabled) {
@@ -60,18 +44,18 @@ ret_code_t Storage::init() {
 
 	// register and initialize module
 	LOGd("fds_register");
-	ret_code = fds_register(fds_evt_handler);
-	if (ret_code != FDS_SUCCESS) {
-		LOGe("Registering FDS event handler failed (err=%i)", ret_code);
-		return ret_code;
+	fds_ret_code = fds_register(fds_evt_handler);
+	if (fds_ret_code != FDS_SUCCESS) {
+		LOGe("Registering FDS event handler failed (err=%i)", fds_ret_code);
+		return getErrorCode(fds_ret_code);
 	}
 
 
 	LOGd("fds_init");
-	ret_code = fds_init();
-	if (ret_code != FDS_SUCCESS) {
-		LOGe("Init FDS failed (err=%i)", ret_code);
-		return ret_code;
+	fds_ret_code = fds_init();
+	if (fds_ret_code != FDS_SUCCESS) {
+		LOGe("Init FDS failed (err=%i)", fds_ret_code);
+		return getErrorCode(fds_ret_code);
 	}
 //	LOGd("Storage init done (wait for FDS_EVT_INIT)");
 
@@ -81,36 +65,44 @@ ret_code_t Storage::init() {
 		(void) sd_app_evt_wait();
 	}*/
 
-	return ret_code;
+	return getErrorCode(fds_ret_code);
 }
 
-ret_code_t Storage::garbageCollect() {
+cs_ret_code_t Storage::garbageCollect() {
+	return getErrorCode(garbageCollectInternal());
+}
+
+ret_code_t Storage::garbageCollectInternal() {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
-	ret_code_t ret_code;
+	ret_code_t fds_ret_code;
 	uint8_t enabled = nrf_sdh_is_enabled();
 	if (!enabled) {
 		LOGe("Softdevice is not enabled yet!");
 	}
 	LOGnone("fds_gc");
-	ret_code = fds_gc();
-	if (ret_code != FDS_SUCCESS) {
-		LOGw("No success garbage collection (err=%i)", ret_code);
+	fds_ret_code = fds_gc();
+	if (fds_ret_code != FDS_SUCCESS) {
+		LOGw("No success garbage collection (err=%i)", fds_ret_code);
 	}
 	LOGd("Garbage collected");
-	return ret_code;
+	return fds_ret_code;
 }
 
-ret_code_t Storage::write(cs_file_id_t file_id, cs_file_data_t file_data) {
+cs_ret_code_t Storage::write(cs_file_id_t file_id, cs_state_data_t file_data) {
+	return getErrorCode(writeInternal(file_id, file_data));
+}
+
+ret_code_t Storage::writeInternal(cs_file_id_t file_id, cs_state_data_t file_data) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
-	fds_record_t        record;
-	fds_record_desc_t   record_desc;
-	ret_code_t ret_code;
+	fds_record_t record;
+	fds_record_desc_t record_desc;
+	ret_code_t fds_ret_code;
 
 	record.file_id           = file_id;
 	record.key               = to_underlying_type(file_data.type);
@@ -119,54 +111,55 @@ ret_code_t Storage::write(cs_file_id_t file_id, cs_file_data_t file_data) {
 	LOGd("Store %p of word size %u", record.data.p_data, record.data.length_words);
 
 	bool f_exists = false;
-	ret_code = exists(file_id, file_data.type, record_desc, f_exists);
+	fds_ret_code = exists(file_id, file_data.type, record_desc, f_exists);
 	if (f_exists) {
 		LOGd("Update file %u record %u", file_id, record.key);
-		ret_code = fds_record_update(&record_desc, &record);
-		FDS_ERROR_CHECK(ret_code);
+		fds_ret_code = fds_record_update(&record_desc, &record);
+		FDS_ERROR_CHECK(fds_ret_code);
 	}
 	else {
 		LOGd("Write file %u, record %u, ptr %p", file_id, record.key, record.data.p_data);
-		ret_code = fds_record_write(&record_desc, &record);
-		FDS_ERROR_CHECK(ret_code);
-		static bool garbage_collection = false;
+		fds_ret_code = fds_record_write(&record_desc, &record);
+		FDS_ERROR_CHECK(fds_ret_code);
+		static bool garbage_collection = false; //TODO: why not a member variable?
 		f_exists = false;
-		switch(ret_code) {
+		switch(fds_ret_code) {
 			case FDS_ERR_NO_SPACE_IN_FLASH:
 				if (!garbage_collection) {
+					// TODO: is this going to help? Garbage collection is asynch, so we retry to write before GC is done.
 					garbage_collection = true;
 					garbageCollect();
 					// try again, just once
-					ret_code = write(file_id, file_data);
+					fds_ret_code = write(file_id, file_data);
 					garbage_collection = false;
 				}
 				break;
 			case FDS_SUCCESS:
 				LOGnone("Write successful");
-				ret_code = exists(file_id, file_data.type, record_desc, f_exists);
+				fds_ret_code = exists(file_id, file_data.type, record_desc, f_exists);
 				if (!f_exists) {
 					LOGw("Warning: written with delay");
 				}
 				break;
 		}
 	}
-	return ret_code;
+	return fds_ret_code;
 }
 
 void Storage::print(const std::string & prefix, CS_TYPE type) {
 	LOGd("%s %s (%i)", prefix.c_str(), TypeName(type), type);
 }
 
-ret_code_t Storage::read(cs_file_id_t file_id, cs_file_data_t file_data) {
+cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t file_data) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	fds_flash_record_t flash_record;
-	fds_record_desc_t  record_desc;
-	ret_code_t         ret_code;
+	fds_record_desc_t record_desc;
+	ret_code_t fds_ret_code;
 
-	ret_code = FDS_ERR_NOT_FOUND;
+	fds_ret_code = FDS_ERR_NOT_FOUND;
 
 	//LOGd("Read from file %i record %i", file_id, file_data.key);
 	// go through all records with given file_id and key (can be multiple)
@@ -174,11 +167,10 @@ ret_code_t Storage::read(cs_file_id_t file_id, cs_file_data_t file_data) {
 	bool break_on_first = false;
 	bool found = false;
 	while (fds_record_find(file_id, to_underlying_type(file_data.type), &record_desc, &_ftok) == FDS_SUCCESS) {
-
 		LOGd("Read record %u", to_underlying_type(file_data.type));
 		if (!found) {
-			ret_code = fds_record_open(&record_desc, &flash_record);
-			if (ret_code != FDS_SUCCESS) {
+			fds_ret_code = fds_record_open(&record_desc, &flash_record);
+			if (fds_ret_code != FDS_SUCCESS) {
 				LOGw("Error on opening record");
 				break;
 			}
@@ -189,8 +181,8 @@ ret_code_t Storage::read(cs_file_id_t file_id, cs_file_data_t file_data) {
 			memcpy(file_data.value, flash_record.p_data, file_data.size);
 
 			// invalidates the record
-			ret_code = fds_record_close(&record_desc);
-			if (ret_code != FDS_SUCCESS) {
+			fds_ret_code = fds_record_close(&record_desc);
+			if (fds_ret_code != FDS_SUCCESS) {
 				LOGw("Error on closing record");
 			}
 
@@ -199,40 +191,50 @@ ret_code_t Storage::read(cs_file_id_t file_id, cs_file_data_t file_data) {
 			}
 		}
 	}
-
 	if (!found) {
 		LOGd("Record not found");
 	}
-	return ret_code;
+	return getErrorCode(fds_ret_code);
 }
 
-ret_code_t Storage::remove(cs_file_id_t file_id, CS_TYPE type) {
+cs_ret_code_t Storage::remove(cs_file_id_t file_id) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
+	LOGi("Delete file, removes all configuration values!");
+	ret_code_t fds_ret_code;
+	fds_ret_code = fds_file_delete(file_id);
+	return getErrorCode(fds_ret_code);
+}
+
+cs_ret_code_t Storage::remove(cs_file_id_t file_id, CS_TYPE type) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	fds_record_desc_t record_desc;
-	ret_code_t        ret_code;
+	ret_code_t fds_ret_code;
 
-	ret_code = FDS_ERR_NOT_FOUND;
+	fds_ret_code = FDS_ERR_NOT_FOUND;
 
 	// go through all records with given file_id and key (can be multiple)
 	initSearch();
 	while (fds_record_find(file_id, to_underlying_type(type), &record_desc, &_ftok) == FDS_SUCCESS) {
-		ret_code = fds_record_delete(&record_desc);
-		if (ret_code != FDS_SUCCESS) break;
+		fds_ret_code = fds_record_delete(&record_desc);
+		if (fds_ret_code != FDS_SUCCESS) break;
 	}
-	return ret_code;
+	return getErrorCode(fds_ret_code);
 }
 
-ret_code_t Storage::exists(cs_file_id_t file_id, bool & result) {
-	if (!_initialized) {
-		LOGe("Storage not initialized");
-		return ERR_NOT_INITIALIZED;
-	}
-	// not yet implemented
-	return false;
-}
+//cs_ret_code_t Storage::exists(cs_file_id_t file_id, bool & result) {
+//	if (!_initialized) {
+//		LOGe("Storage not initialized");
+//		return ERR_NOT_INITIALIZED;
+//	}
+//	// TODO: not yet implemented
+//	return false;
+//}
 
 ret_code_t Storage::exists(cs_file_id_t file_id, CS_TYPE type, bool & result) {
 	fds_record_desc_t record_desc;
@@ -241,6 +243,7 @@ ret_code_t Storage::exists(cs_file_id_t file_id, CS_TYPE type, bool & result) {
 
 /**
  * Check if a record exists and removes duplicate record items. We only support one record field.
+ * TODO: why is duplicate removal part of the function "exists" ?
  */
 ret_code_t Storage::exists(cs_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc, bool & result) {
 	if (!_initialized) {
@@ -266,6 +269,25 @@ ret_code_t Storage::exists(cs_file_id_t file_id, CS_TYPE type, fds_record_desc_t
 	return ERR_SUCCESS;
 }
 
+void Storage::initSearch() {
+	// clear fds token before every use
+	memset(&_ftok, 0x00, sizeof(fds_find_token_t));
+}
+
+/**
+ * Returns cs_ret_code_t given a ret_code_t from FDS.
+ */
+cs_ret_code_t Storage::getErrorCode(ret_code_t code) {
+	switch (code) {
+	case FDS_SUCCESS:
+		return ERR_SUCCESS;
+	case FDS_ERR_NOT_FOUND:
+		return ERR_NOT_FOUND;
+	default:
+		return ERR_UNSPECIFIED;
+	}
+}
+
 /**
  * Receives only successful events via the callback handler registered in the SoftDevice. On the moment we propagate
  * successful write events so it can be used by other modules to respond to.
@@ -289,7 +311,7 @@ void Storage::handleSuccessfulEvent(fds_evt_t const * p_fds_evt) {
 		break;
 	case FDS_EVT_DEL_FILE:
 		LOGi("File successfully deleted");
-		fds_gc();
+//		fds_gc(); // TODO: why would we gc every time? It only leads to more flash erases.
 		break;
 	default:
 		LOGd("Storage evt %i with value %i", p_fds_evt->id, p_fds_evt->result);
