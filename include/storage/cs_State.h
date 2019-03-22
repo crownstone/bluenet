@@ -42,6 +42,16 @@ constexpr int ValidMode(OperationMode const & mode) {
     return 0;
 }
 
+// TODO: what to do when for invalid operation mode?
+// TODO: how can we use TYPIFY() as parameter type?
+constexpr OperationMode getOperationMode(uint8_t mode) {
+	OperationMode opMode = static_cast<OperationMode>(mode);
+	if (ValidMode(opMode)) {
+		return opMode;
+	}
+	return OperationMode::OPERATION_MODE_UNINITIALIZED;
+}
+
 #define FACTORY_RESET_STATE_NORMAL 0
 #define FACTORY_RESET_STATE_LOWTX  1
 #define FACTORY_RESET_STATE_RESET  2
@@ -68,50 +78,6 @@ constexpr int ValidMode(OperationMode const & mode) {
  *
  * For each state type it is defined whether it should be stored in RAM or FLASH.
  */
-
-/**
- * Get copy of a state value.
- *
- * @param[in] type           The state type.
- * @param[in] data           Pointer to the state data to.
- * @param[in,out] size       Available size of data pointer. Afterwards it will have the size of the state data.
- */
-cs_ret_code_t getCopy(CS_TYPE type, void* data, size16_t dataSize);
-cs_ret_code_t getCopy(cs_state_data_t& data);
-
-/**
- * Set state to new value.
- *
- * The data will be copied.
- *
- * @param[in] type           The state type.
- * @param[in] data           Pointer to the data.
- * @param[in] size           Size of the data.
- */
-cs_ret_code_t set(CS_TYPE type, void* data, size16_t dataSize);
-cs_ret_code_t set(cs_state_data_t& data);
-
-/**
- * Get pointer to state value.
- *
- * You can use this to avoid copying large state value. However, you have to make sure to call setByRef() after any
- * change made in the data.
- *
- * @param[in] type           The state type.
- * @param[out] data          Pointer to the state data.
- * @param[out] size          Size of the state data.
- */
-cs_ret_code_t getByRef(CS_TYPE type, void* data, size16_t dataSize);
-cs_ret_code_t getByRef(cs_state_data_t& data);
-
-/**
- * Update state value.
- *
- * Call this function after data in ram has been changed. This makes sure the update will be propagated correctly.
- */
-cs_ret_code_t setByRef(CS_TYPE type);
-
-
 
 /**
  * Load settings from and save settings to FLASH (persistent storage) and or RAM. If we save values to FLASH we
@@ -188,56 +154,89 @@ public:
 
 	/** Initialize the State object with the board configuration.
 	 *
-	 * @param[in] boardsConfig  Board configuration (pin layout, etc.).
+	 * @param[in] boardsConfig    Board configuration (pin layout, etc.).
 	 */
 	void init(boards_config_t* boardsConfig);
 
-	/** Write the buffer to flash or ram.
+	/**
+	 * Get copy of a state value.
+	 *
+	 * @param[in,out] data        Data struct with state type, target, and size.
+	 * @param[in] mode            Indicates to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
 	 */
-	cs_ret_code_t writeToStorage(CS_TYPE type, uint8_t* data, size16_t size, PersistenceMode mode);
-
-	/** Read the configuration from storage and write to streambuffer (to be read from characteristic)
-	 */
-	cs_ret_code_t readFromStorage(CS_TYPE type, StreamBuffer<uint8_t>* streamBuffer);
+	cs_ret_code_t get(cs_state_data_t & data, const PersistenceMode mode = PersistenceMode::STRATEGY1);
 
 	/**
-	 * Shorthand for get(data, PersistenceMode::STRATEGY1) for boolean data types.
+	 * Convenience function for get().
 	 */
-	bool isSet(CS_TYPE type);
+	cs_ret_code_t get(const CS_TYPE type, void *value, const size16_t size);
 
 	/**
+	 * Shorthand for get() for boolean data types.
+	 */
+	bool isTrue(CS_TYPE type, const PersistenceMode mode = PersistenceMode::STRATEGY1);
+
+	/**
+	 * Set state to new value, via copy.
+	 *
+	 * @param[in] data            Data struct with state type, data, and size.
+	 * @param[in] mode            Indicates to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
+	 */
+	cs_ret_code_t set(const cs_state_data_t & data, PersistenceMode mode = PersistenceMode::STRATEGY1);
+
+	/**
+	 * Convenience function for set().
+	 */
+	cs_ret_code_t set(const CS_TYPE type, void *value, const size16_t size);
+
+	/**
+	 * Verify user data for getting a state.
+	 *
+	 * Checks include:
+	 * - size check
+	 *
+	 * @param[in] data            Data struct with state type, target, and size.
+	 */
+	cs_ret_code_t verifyForGet(cs_state_data_t & data);
+
+	/**
+	 * Verify user data for setting a state.
+	 *
+	 * Checks include:
+	 * - size
+	 *
+	 * @param[in] data            Data struct with state type, data, and size.
+	 */
+	cs_ret_code_t verifyForSet(cs_state_data_t & data);
+
+	/**
+	 * Remove a state variable.
+	 */
+	cs_ret_code_t remove(CS_TYPE type, const PersistenceMode mode = PersistenceMode::STRATEGY1);
+
+	/**
+	 * Erase all used persistent storage.
 	 */
 	void factoryReset(uint32_t resetCode);
 
-	cs_ret_code_t get(const CS_TYPE type, void* data, const PersistenceMode mode);
-
-	/* The function gets an item from memory.
+	/**
+	 * Get pointer to state value.
 	 *
-	 * It is most "clean" to not use thousands of arguments, but have a struct as argument. Yes, this means that
-	 * the person calling this function has to write the arguments into a struct. However, it makes it much
-	 * easier to add an additional argument.
+	 * You can use this to avoid copying large state values of fixed length.
+	 * However, you have to make sure to call setViaPointer() immediately after any change made in the data.
 	 *
-	 * @param[in] type          One of the types from the CS_TYPE enumeration class.
-	 * @param[out] data         Pointer to where we have to write the data.
-	 * @param[in,out] size      If size is non-zero, it will indicate maximum size available. Afterwards it will have
-	 *                          the size of the data.
-	 * @param[in] mode          Indicates to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
-	 *
-	 * @deprecated              Use get(st_file_data_t, mode).
+	 * @param[in,out] data        Data struct with state type and size.
 	 */
-	cs_ret_code_t get(const CS_TYPE type, void* data, size16_t & size, const PersistenceMode mode);
+	cs_ret_code_t getViaPointer(cs_state_data_t & data, const PersistenceMode mode = PersistenceMode::STRATEGY1);
 
-	/* The function gets an item from memory.
+	/**
+	 * Update state value.
 	 *
-	 * @param[in,out] data      Data struct (contains type, pointer to data, and size).
-	 * @param[in] mode          Indicates to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
+	 * Call this function after data has been changed via pointer. This makes sure the update will be propagated correctly.
+	 *
+	 * @param[in] type            The state type that has been changed.
 	 */
-	cs_ret_code_t get(cs_state_data_t & data, const PersistenceMode mode);
-
-	cs_ret_code_t set(CS_TYPE type, void* data, size16_t size, PersistenceMode mode);
-
-	cs_ret_code_t remove(CS_TYPE type, const PersistenceMode mode);
-
+	cs_ret_code_t setViaPointer(CS_TYPE type);
 
 protected:
 
@@ -245,15 +244,22 @@ protected:
 
 	boards_config_t* _boardsConfig;
 
-	cs_ret_code_t verify(CS_TYPE type, uint8_t* payload, uint8_t length);
+//	cs_ret_code_t verify(CS_TYPE type, uint8_t* payload, uint8_t length);
 
-	bool readFlag(CS_TYPE type, bool& value);
+//	bool readFlag(CS_TYPE type, bool& value);
 
 	cs_ret_code_t storeInRam(const cs_state_data_t & data);
 
 	cs_ret_code_t loadFromRam(cs_state_data_t & data);
 
+	/**
+	 * Stores state variable in ram.
+	 *
+	 * Allocates memory when not in ram yet, or when size changed.
+	 */
 	cs_ret_code_t storeInRam(const cs_state_data_t & data, size16_t & index_in_ram);
+
+	cs_ret_code_t allocate(cs_state_data_t & data);
 
 //	std::vector<CS_TYPE> _notifyingStates;
 
@@ -267,6 +273,6 @@ private:
 	//! State copy constructor, singleton, thus made private
 	State(State const&);
 
-	//! Aassignment operator, singleton, thus made private
+	//! Assignment operator, singleton, thus made private
 	void operator=(State const &);
 };

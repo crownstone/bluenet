@@ -100,7 +100,7 @@ void Scheduler::tick() {
 		_posixTimeStamp++;
 		_rtcTimeStamp += RTC::msToTicks(1000);
 
-		State::getInstance().set(CS_TYPE::STATE_TIME, &_posixTimeStamp, sizeof(_posixTimeStamp), PersistenceMode::STRATEGY1);
+		State::getInstance().set(CS_TYPE::STATE_TIME, &_posixTimeStamp, sizeof(_posixTimeStamp));
 	}
 
 	schedule_entry_t* entry = _scheduleList->isActionTime(_posixTimeStamp);
@@ -133,11 +133,14 @@ void Scheduler::tick() {
 
 void Scheduler::writeScheduleList(bool store) {
 	LOGe("store");
-	buffer_ptr_t buffer;
-	uint16_t size;
-	_scheduleList->getBuffer(buffer, size);
 	// TODO: schedule list is in ram 2x, should be possible to not have a copy.
-	State::getInstance().set(CS_TYPE::STATE_SCHEDULE, buffer, size, PersistenceMode::STRATEGY1);
+//	buffer_ptr_t buffer;
+//	uint16_t size;
+//	_scheduleList->getBuffer(buffer, size);
+	cs_state_data_t stateData(CS_TYPE::STATE_SCHEDULE, NULL, 0);
+	_scheduleList->getBuffer(stateData.value, stateData.size);
+	State::getInstance().set(stateData);
+
 //	if (store) {
 	// TODO: only write to flash when store is true
 //	}
@@ -148,8 +151,7 @@ void Scheduler::readScheduleList() {
 	uint16_t length;
 	_scheduleList->getBuffer(buffer, length);
 	length = _scheduleList->getMaxLength();
-
-	State::getInstance().get(CS_TYPE::STATE_SCHEDULE, buffer, length, PersistenceMode::STRATEGY1);
+	State::getInstance().get(CS_TYPE::STATE_SCHEDULE, buffer, length);
 	bool adjusted = _scheduleList->checkAllEntries();
 	if (adjusted) {
 		writeScheduleList(true);

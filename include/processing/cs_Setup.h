@@ -27,10 +27,6 @@ struct __attribute__((__packed__)) setup_data_t {
 	uint16_t       ibeaconMinor;
 };
 
-struct padded_setup_data_t {
-	uint8_t        dummy[2];
-	setup_data_t   data;
-} __ALIGN(4);
 
 class Setup : EventListener {
 public:
@@ -45,7 +41,7 @@ public:
 	// Handle events as EventListener
 	void handleEvent(event_t & event);
 
-	OperationMode _persistenceMode;
+	OperationMode _operationMode;
 private:
 	Setup();
 

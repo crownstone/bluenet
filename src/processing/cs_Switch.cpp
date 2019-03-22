@@ -58,9 +58,8 @@ void Switch::init(const boards_config_t& board) {
 	LOGd(FMT_INIT, "switch");
 
 	PWM& pwm = PWM::getInstance();
-	uint32_t pwmPeriod = 0L;
-	LOGd("PWM period ptr: %p", &pwmPeriod);
-	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, PersistenceMode::STRATEGY1);
+	TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;
+	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
 	LOGd("PWM period %i pin %d", pwmPeriod, board.pinGpioPwm);
 	NRF_LOG_FLUSH();
 
@@ -78,7 +77,7 @@ void Switch::init(const boards_config_t& board) {
 		_pinRelayOff = board.pinGpioRelayOff;
 		_pinRelayOn = board.pinGpioRelayOn;
 
-		State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, &_relayHighDuration, PersistenceMode::STRATEGY1);
+		State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, &_relayHighDuration, sizeof(_relayHighDuration));
 
 		nrf_gpio_cfg_output(_pinRelayOff);
 		nrf_gpio_pin_clear(_pinRelayOff);
@@ -87,8 +86,7 @@ void Switch::init(const boards_config_t& board) {
 	}
 
 	// Retrieve last switch state from persistent storage
-	size16_t size = sizeof(switch_state_t);
-	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::STRATEGY1);
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, sizeof(_switchValue));
 	LOGd("Obtained last switch state: pwm=%u relay=%u", _switchValue.state.dimmer, _switchValue.state.relay);
 
 	EventDispatcher::getInstance().addListener(this);
@@ -116,7 +114,7 @@ void Switch::start() {
 	// If switchcraft is enabled, assume a boot is due to a brownout caused by a too slow wall switch.
 	// This means we will assume that the pwm is already powered and just set the _pwmPowered flag.
 	// TODO: Really? Why can't we just organize this with events?
-	bool switchcraftEnabled = State::getInstance().isSet(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
+	bool switchcraftEnabled = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
 	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0)) {
 		_pwmPowered = true;
 		event_t event(CS_TYPE::EVT_DIMMER_POWERED);
@@ -178,13 +176,12 @@ void Switch::startPwm() {
  */
 void Switch::storeState(switch_state_t oldVal) {
 	bool persistent = false;
-	if (memcmp(&oldVal, &_switchValue, sizeof(switch_state_t)) != 0) {
+	if (oldVal.asInt != _switchValue.asInt) {
 		LOGd("Store switch state %i, %i", _switchValue.state.relay, _switchValue.state.dimmer);
-		//LOGd("storeState: %u", _switchValue);
 		persistent = (oldVal.state.relay != _switchValue.state.relay);
-		PersistenceMode pmode = persistent ? PersistenceMode::STRATEGY1 : PersistenceMode::STRATEGY1;
-		size16_t size = sizeof(switch_state_t);
-		State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, pmode);
+		PersistenceMode persistenceMode = persistent ? PersistenceMode::STRATEGY1 : PersistenceMode::RAM;
+		cs_state_data_t stateData(CS_TYPE::STATE_SWITCH_STATE, (uint8_t*)&_switchValue, sizeof(_switchValue));
+		State::getInstance().set(stateData, persistenceMode);
 	}
 
 	// If not written to persistent storage immediately, do it after a delay.
@@ -205,12 +202,8 @@ void Switch::delayedStoreStateExecute() {
 	if (!_delayedStoreStatePending) {
 		return;
 	}
-
-	// Just write to persistent storage
-//	LOGd("write to storage: %u", _switchValue);
 	LOGd("Write switch state %i, %i", _switchValue.state.relay, _switchValue.state.dimmer);
-	size16_t size = sizeof(switch_state_t);
-	State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, size, PersistenceMode::STRATEGY1);
+	State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, sizeof(_switchValue));
 }
 
 
@@ -267,7 +260,7 @@ void Switch::setPwm(uint8_t value) {
 #ifdef PRINT_SWITCH_VERBOSE
 	LOGd("set PWM %d", value);
 #endif
-	if (State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
@@ -287,7 +280,7 @@ uint8_t Switch::getPwm() {
 
 
 void Switch::relayOn() {
-	if (State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
@@ -306,7 +299,7 @@ void Switch::relayOn() {
  * TODO: Get rid of almost similar functions with relay/switch/pwm.
  */
 void Switch::relayOff() {
-	if (State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
@@ -326,7 +319,7 @@ void Switch::setSwitch(uint8_t switchState) {
 	LOGi("Set switch state: %d", switchState);
 #endif
 	switch_state_t oldVal = _switchValue;
-	if (State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
+	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("Switch locked!");
 		return;
 	}
@@ -464,7 +457,7 @@ bool Switch::_setPwm(uint8_t value) {
 		return false;
 	}
 
-	bool pwm_allowed = State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED);
+	bool pwm_allowed = State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED);
 	LOGd("Dimming allowed: %u", pwm_allowed);
 	if (value != 0 && !pwm_allowed) {
 		LOGd("Dimming not allowed");
@@ -556,24 +549,24 @@ void Switch::forceSwitchOff() {
 }
 
 bool Switch::allowPwmOn() {
-	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
+	TYPIFY(STATE_ERRORS) stateErrors;
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 	LOGd("errors=%d", stateErrors.asInt);
 
 	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentDimmer || stateErrors.errors.dimmerTemp || stateErrors.errors.dimmerOn);
 }
 
 bool Switch::allowRelayOff() {
-	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
+	TYPIFY(STATE_ERRORS) stateErrors;
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
 	return !(stateErrors.errors.overCurrentDimmer || stateErrors.errors.dimmerTemp || stateErrors.errors.dimmerOn);
 }
 
 bool Switch::allowRelayOn() {
-	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
+	TYPIFY(STATE_ERRORS) stateErrors;
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 	LOGd("errors=%d", stateErrors.asInt);
 
 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.

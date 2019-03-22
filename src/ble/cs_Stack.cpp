@@ -789,8 +789,8 @@ void Stack::startScanning() {
 	p_scan_params.active = 0;
 	p_scan_params.timeout = 0x0000;
 
-	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &p_scan_params.interval, PersistenceMode::STRATEGY1);
-	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &p_scan_params.window, PersistenceMode::STRATEGY1);
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &p_scan_params.interval, sizeof(p_scan_params.interval));
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &p_scan_params.window, sizeof(p_scan_params.window));
 
 	// TODO: which fields to set here?
 	// TODO: p_adv_report_buffer
@@ -831,14 +831,14 @@ void Stack::lowPowerTimeout(void* p_context) {
 }
 
 void Stack::changeToLowTxPowerMode() {
-	int8_t lowTxPower;
-	State::getInstance().get(CS_TYPE::CONFIG_LOW_TX_POWER, &lowTxPower, PersistenceMode::STRATEGY1);
+	TYPIFY(CONFIG_LOW_TX_POWER) lowTxPower;
+	State::getInstance().get(CS_TYPE::CONFIG_LOW_TX_POWER, &lowTxPower, sizeof(lowTxPower));
 	setTxPowerLevel(lowTxPower);
 }
 
 void Stack::changeToNormalTxPowerMode() {
-	int8_t txPower;
-	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, PersistenceMode::STRATEGY1);
+	TYPIFY(CONFIG_TX_POWER) txPower;
+	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
 	setTxPowerLevel(txPower);
 }
 

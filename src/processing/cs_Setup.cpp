@@ -5,6 +5,7 @@
  * Triple-license: LGPLv3+, Apache License, and/or MIT
  */
 
+#include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
 #include <processing/cs_Setup.h>
 
@@ -14,10 +15,11 @@ Setup::Setup() {
 }
 
 cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
-	uint8_t mode;
-	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
-	_persistenceMode = static_cast<OperationMode>(mode);
-	if (_persistenceMode != OperationMode::OPERATION_MODE_SETUP) {
+	TYPIFY(STATE_OPERATION_MODE) mode;
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	_operationMode = getOperationMode(mode);
+
+	if (_operationMode != OperationMode::OPERATION_MODE_SETUP) {
 		LOGw("only available in setup mode");
 		return ERR_NOT_AVAILABLE;
 	}
@@ -49,40 +51,31 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 		return ERR_WRONG_PARAMETER;
 	}
 
-	// TODO: what good is this padding?
-	// Save all settings, use a padded struct.
-	padded_setup_data_t setup_data;
-	setup_data.data = *setupData;
-	setup_data_t & sd = setup_data.data;
+//	// TODO: what good is this padding?
+//	// Save all settings, use a padded struct.
+//	padded_setup_data_t setup_data;
+//	setup_data.data = *setupData;
+//	setup_data_t & sd = setup_data.data;
 
 	LOGd("Store keys, mesh address, and other config data");
-	st_value_t value;
 	State &state = State::getInstance();
-	value.u32 = 0;
-	value.u8 = sd.id;
-	state.set(CS_TYPE::CONFIG_CROWNSTONE_ID, &value, sizeof(value), PersistenceMode::STRATEGY1);
-	state.set(CS_TYPE::CONFIG_KEY_ADMIN, sd.adminKey, sizeof(sd.adminKey), PersistenceMode::STRATEGY1);
-	state.set(CS_TYPE::CONFIG_KEY_MEMBER, sd.memberKey, sizeof(sd.memberKey), PersistenceMode::STRATEGY1);
-	state.set(CS_TYPE::CONFIG_KEY_GUEST, sd.guestKey, sizeof(sd.guestKey), PersistenceMode::STRATEGY1);
+//	TYPIFY(CONFIG_CROWNSTONE_ID) stoneId = setupData->id;
+	state.set(CS_TYPE::CONFIG_CROWNSTONE_ID, &(setupData->id), sizeof(setupData->id)); // TODO: this should fail.
+	state.set(CS_TYPE::CONFIG_KEY_ADMIN, &(setupData->adminKey), sizeof(setupData->adminKey));
+	state.set(CS_TYPE::CONFIG_KEY_MEMBER, &(setupData->memberKey), sizeof(setupData->memberKey));
+	state.set(CS_TYPE::CONFIG_KEY_GUEST, &(setupData->guestKey), sizeof(setupData->guestKey));
 //	state.set(CS_TYPE::CONFIG_MESH_ACCESS_ADDRESS, &(sd.meshAccessAddress), sizeof(sd.meshAccessAddress), PersistenceMode::STRATEGY1);
-	state.set(CS_TYPE::CONFIG_IBEACON_UUID, &(sd.ibeaconUuid.uuid128), sizeof(sd.ibeaconUuid),
-			PersistenceMode::STRATEGY1);
-	value.u32 = 0;
-	value.u16 = sd.ibeaconMajor;
-	state.set(CS_TYPE::CONFIG_IBEACON_MAJOR, &value, sizeof(value), PersistenceMode::STRATEGY1);
-	value.u32 = 0;
-	value.u16 = sd.ibeaconMinor;
-	state.set(CS_TYPE::CONFIG_IBEACON_MINOR, &value, sizeof(value), PersistenceMode::STRATEGY1);
+	state.set(CS_TYPE::CONFIG_IBEACON_UUID, &(setupData->ibeaconUuid.uuid128), sizeof(setupData->ibeaconUuid.uuid128));
+	state.set(CS_TYPE::CONFIG_IBEACON_MAJOR, &(setupData->ibeaconMajor), sizeof(setupData->ibeaconMajor));
+	state.set(CS_TYPE::CONFIG_IBEACON_MINOR, &(setupData->ibeaconMinor), sizeof(setupData->ibeaconMinor));
 
 	// Set operation mode to normal mode
-	_persistenceMode = OperationMode::OPERATION_MODE_NORMAL;
-	mode = to_underlying_type(_persistenceMode);
-	value.u32 = 0;
-	value.u8 = mode;
+	_operationMode = OperationMode::OPERATION_MODE_NORMAL;
+	mode = to_underlying_type(_operationMode);
 	_lastStoredType = CS_TYPE::STATE_OPERATION_MODE;
 	LOGi("Set mode NORMAL");
-	LOGi("Set mode 0x%X", value.u32);
-	state.set(CS_TYPE::STATE_OPERATION_MODE, &value, sizeof(value), PersistenceMode::STRATEGY1);
+	LOGi("Set mode 0x%X", mode);
+	state.set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
 	// Switch relay on
 	event_t event0(CS_TYPE::CMD_SWITCH_ON);
@@ -121,8 +114,8 @@ void Setup::handleEvent(event_t & event) {
 			EventDispatcher::getInstance().dispatch(event1);
 
 			State &state = State::getInstance();
-			uint8_t mode = 0;
-			state.get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
+			TYPIFY(STATE_OPERATION_MODE) mode;
+			state.get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 			LOGd("New mode is 0x%X", mode);
 			OperationMode _tmpOperationMode = static_cast<OperationMode>(mode);
 			LOGd("Operation mode: %s", TypeName(_tmpOperationMode));

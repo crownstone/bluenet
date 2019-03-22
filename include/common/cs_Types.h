@@ -13,6 +13,8 @@
 #include <cstddef> // For NULL
 #include <drivers/cs_Serial.h>
 #include <protocol/cs_Packets.h>
+#include <protocol/cs_ErrorCodes.h>
+#include <util/cs_UuidParser.h>
 
 typedef uint8_t* buffer_ptr_t;
 typedef uint16_t buffer_size_t;
@@ -22,10 +24,20 @@ typedef uint16_t size16_t;
 //! Boolean with fixed size.
 typedef uint8_t BOOL;
 
+enum EncryptionAccessLevel {
+	ADMIN               = 0,
+	MEMBER              = 1,
+	GUEST               = 2,
+	SETUP               = 100,
+	NOT_SET             = 201,
+	ENCRYPTION_DISABLED = 254,
+	NO_ONE              = 255
+};
+
 enum TypeBases {
 	Configuration_Base = 0x000,
 	State_Base         = 0x080,
-	General_Base       = 0x100,
+	General_Base       = 0x100, // Configuration and state types are assumed to fit in a uint8_t, so lower than 256.
 };
 
 /** Cast to underlying type.
@@ -201,6 +213,115 @@ enum class CS_TYPE: uint16_t {
 	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
 };
 
+constexpr CS_TYPE toCsType(uint16_t type) {
+	CS_TYPE csType = static_cast<CS_TYPE>(type);
+	switch(csType) {
+	case CS_TYPE::CONFIG_DO_NOT_USE:
+	case CS_TYPE::CONFIG_NAME:
+	case CS_TYPE::CONFIG_PWM_PERIOD:
+	case CS_TYPE::CONFIG_IBEACON_MAJOR:
+	case CS_TYPE::CONFIG_IBEACON_MINOR:
+	case CS_TYPE::CONFIG_IBEACON_UUID:
+	case CS_TYPE::CONFIG_IBEACON_TXPOWER:
+	case CS_TYPE::CONFIG_TX_POWER:
+	case CS_TYPE::CONFIG_ADV_INTERVAL:
+	case CS_TYPE::CONFIG_SCAN_DURATION:
+	case CS_TYPE::CONFIG_SCAN_BREAK_DURATION:
+	case CS_TYPE::CONFIG_BOOT_DELAY:
+	case CS_TYPE::CONFIG_MAX_CHIP_TEMP:
+	case CS_TYPE::CONFIG_CURRENT_LIMIT:
+	case CS_TYPE::CONFIG_MESH_ENABLED:
+	case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
+	case CS_TYPE::CONFIG_IBEACON_ENABLED:
+	case CS_TYPE::CONFIG_SCANNER_ENABLED:
+	case CS_TYPE::CONFIG_CROWNSTONE_ID:
+	case CS_TYPE::CONFIG_KEY_ADMIN:
+	case CS_TYPE::CONFIG_KEY_MEMBER:
+	case CS_TYPE::CONFIG_KEY_GUEST:
+	case CS_TYPE::CONFIG_DEFAULT_ON:
+	case CS_TYPE::CONFIG_SCAN_INTERVAL:
+	case CS_TYPE::CONFIG_SCAN_WINDOW:
+	case CS_TYPE::CONFIG_RELAY_HIGH_DURATION:
+	case CS_TYPE::CONFIG_LOW_TX_POWER:
+	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER:
+	case CS_TYPE::CONFIG_CURRENT_MULTIPLIER:
+	case CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO:
+	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO:
+	case CS_TYPE::CONFIG_POWER_ZERO:
+	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
+	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM:
+	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
+	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
+	case CS_TYPE::CONFIG_PWM_ALLOWED:
+	case CS_TYPE::CONFIG_SWITCH_LOCKED:
+	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
+	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
+	case CS_TYPE::CONFIG_UART_ENABLED:
+	case CS_TYPE::STATE_RESET_COUNTER:
+	case CS_TYPE::STATE_OPERATION_MODE:
+	case CS_TYPE::STATE_SWITCH_STATE:
+	case CS_TYPE::STATE_SCHEDULE:
+	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
+	case CS_TYPE::STATE_POWER_USAGE:
+	case CS_TYPE::STATE_TEMPERATURE:
+	case CS_TYPE::STATE_TIME:
+	case CS_TYPE::STATE_FACTORY_RESET:
+	case CS_TYPE::STATE_ERRORS:
+	case CS_TYPE::CMD_SWITCH_OFF:
+	case CS_TYPE::CMD_SWITCH_ON:
+	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
+	case CS_TYPE::EVT_SCAN_STARTED:
+	case CS_TYPE::EVT_SCAN_STOPPED:
+	case CS_TYPE::EVT_DEVICE_SCANNED:
+	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
+	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
+	case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
+	case CS_TYPE::EVT_DIMMER_OFF_FAILURE_DETECTED:
+	case CS_TYPE::EVT_MESH_TIME:
+	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
+	case CS_TYPE::EVT_BLE_CONNECT:
+	case CS_TYPE::EVT_BLE_DISCONNECT:
+	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
+	case CS_TYPE::EVT_SESSION_NONCE_SET:
+	case CS_TYPE::EVT_KEEP_ALIVE:
+	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
+	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
+	case CS_TYPE::EVT_RELAY_FORCED_ON:
+	case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
+	case CS_TYPE::EVT_CHIP_TEMP_OK:
+	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
+	case CS_TYPE::EVT_DIMMER_TEMP_OK:
+	case CS_TYPE::EVT_TIME_SET:
+	case CS_TYPE::EVT_DIMMER_POWERED:
+	case CS_TYPE::EVT_DIMMING_ALLOWED:
+	case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
+	case CS_TYPE::EVT_SETUP_DONE:
+	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
+	case CS_TYPE::EVT_ADC_RESTARTED:
+	case CS_TYPE::CMD_ENABLE_LOG_POWER:
+	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
+	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
+	case CS_TYPE::CMD_ENABLE_LOG_FILTERED_CURRENT:
+	case CS_TYPE::CMD_RESET_DELAYED:
+	case CS_TYPE::CMD_ENABLE_ADVERTISEMENT:
+	case CS_TYPE::CMD_ENABLE_MESH:
+	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT:
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
+	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
+	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
+	case CS_TYPE::CMD_INC_CURRENT_RANGE:
+	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
+	case CS_TYPE::CMD_CONTROL_CMD:
+	case CS_TYPE::CMD_SET_OPERATION_MODE:
+		return csType;
+	default:
+		return CS_TYPE::CONFIG_DO_NOT_USE;
+	}
+}
+
 /*---------------------------------------------------------------------------------------------------------------------
  *
  *                                               Custom structs
@@ -213,14 +334,7 @@ enum class CS_TYPE: uint16_t {
 // TODO: these definitions (also the structs) should be moved to somewhere else.
 
 
-/** Header of a stream buffer
- *
- */
-struct __attribute__((__packed__)) stream_buffer_header_t {
-	uint8_t type;
-	uint8_t opCode; //! can be used as op code, see <OpCode>
-	uint16_t length;
-};
+
 
 enum class OperationMode {
 	OPERATION_MODE_SETUP                       = 0x00,
@@ -251,19 +365,18 @@ struct event_t {
 
 typedef uint16_t cs_file_id_t;
 
-union st_value_t {
-	int8_t    s8;
-	int16_t   s16;
-	int32_t   s32;
-	uint8_t   u8;
-	uint16_t  u16;
-	uint32_t  u32;
-} __ALIGN(4);
-
+/**
+ * Struct to communicate state variables.
+ *
+ * type       The state type.
+ * value      Pointer to the state value.
+ * size       Size of the state value. When getting a state, this should be set to available size of value pointer.
+ *            Afterwards, it will be set to the size of the state value.
+ */
 struct cs_state_data_t {
 	CS_TYPE type;
 	uint8_t *value;
-	uint16_t size;
+	size16_t size;
 
 	friend bool operator==(const cs_state_data_t data0, const cs_state_data_t & data1) {
 		if (data0.type != data1.type || data0.size != data1.size) {
@@ -279,6 +392,16 @@ struct cs_state_data_t {
 	friend bool operator!=(const cs_state_data_t data0, const cs_state_data_t & data1) {
 		return !(data0 == data1);
 	}
+	cs_state_data_t():
+		type(CS_TYPE::CONFIG_DO_NOT_USE),
+		value(NULL),
+		size(0)
+	{}
+	cs_state_data_t(CS_TYPE type, uint8_t *value, size16_t size):
+		type(type),
+		value(value),
+		size(size)
+	{}
 
 };
 
@@ -291,7 +414,6 @@ struct cs_state_data_t {
 #ifndef TYPIFY
 #define TYPIFY(NAME) NAME ## _TYPE
 #endif
-//TODO: check the types
 typedef uint16_t TYPIFY(CONFIG_ADV_INTERVAL);
 typedef uint16_t TYPIFY(CONFIG_BOOT_DELAY);
 typedef uint16_t TYPIFY(CONFIG_CROWNSTONE_ID);
@@ -323,7 +445,7 @@ typedef     BOOL TYPIFY(CONFIG_SWITCH_LOCKED);
 typedef     BOOL TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
 typedef    float TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD);
 typedef   int8_t TYPIFY(CONFIG_TX_POWER);
-typedef  uint8_t TYPIFY(CONFIG_UART_ENABLED);
+typedef  uint8_t TYPIFY(CONFIG_UART_ENABLED); //TODO: serial_enable_t
 typedef    float TYPIFY(CONFIG_VOLTAGE_MULTIPLIER);
 typedef  int32_t TYPIFY(CONFIG_VOLTAGE_ADC_ZERO);
 
@@ -343,7 +465,6 @@ typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
 typedef  void TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
 typedef  void TYPIFY(EVT_BROWNOUT_IMPENDING);
-//typedef  uint8_t TYPIFY(EVT_CHARACTERISTICS_UPDATED);
 typedef  void TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_CHIP_TEMP_OK);
 typedef reset_delayed_t TYPIFY(CMD_RESET_DELAYED);
@@ -355,9 +476,6 @@ typedef  void TYPIFY(CMD_DEC_VOLTAGE_RANGE);
 typedef  scanned_device_t TYPIFY(EVT_DEVICE_SCANNED);
 typedef  void TYPIFY(EVT_DIMMER_ON_FAILURE_DETECTED);
 typedef  void TYPIFY(EVT_DIMMER_OFF_FAILURE_DETECTED);
-//typedef  uint8_t TYPIFY(EVT_ENABLED_MESH);
-//typedef  uint8_t TYPIFY(EVT_ENABLED_ENCRYPTION);
-//typedef  uint8_t TYPIFY(EVT_ENABLED_IBEACON);
 typedef  BOOL TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT);
 typedef  BOOL TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE);
 typedef  BOOL TYPIFY(CMD_ENABLE_ADVERTISEMENT);
@@ -370,7 +488,6 @@ typedef  void TYPIFY(CMD_INC_VOLTAGE_RANGE);
 typedef  void TYPIFY(CMD_INC_CURRENT_RANGE);
 typedef  void TYPIFY(EVT_KEEP_ALIVE);
 typedef uint32_t TYPIFY(EVT_MESH_TIME);
-//typedef  uint8_t TYPIFY(EVT_POWER_CONSUMPTION);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
@@ -427,7 +544,6 @@ enum class PersistenceMode: uint8_t {
 	RAM,
 	FIRMWARE_DEFAULT,
 	STRATEGY1, // CACHED_FLASH_OR_DEFAULT
-	RAM_OR_DEFAULT,
 };
 
 /**
@@ -561,16 +677,6 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return 0;
 	case CS_TYPE::EVT_DIMMER_OFF_FAILURE_DETECTED:
 		return 0;
-	//case CS_TYPE::EVT_POWER_CONSUMPTION:
-	//	return sizeof(TYPIFY(EVT_POWER_CONSUMPTION));
-	//case CS_TYPE::EVT_ENABLED_MESH:
-	//	return sizeof(TYPIFY(EVT_ENABLED_MESH));
-	//case CS_TYPE::EVT_ENABLED_ENCRYPTION:
-	//	return sizeof(TYPIFY(EVT_ENABLED_ENCRYPTION));
-	//case CS_TYPE::EVT_ENABLED_IBEACON:
-	//	return sizeof(TYPIFY(EVT_ENABLED_IBEACON));
-	//case CS_TYPE::EVT_CHARACTERISTICS_UPDATED:
-	//	return sizeof(TYPIFY(EVT_CHARACTERISTICS_UPDATED));
 	case CS_TYPE::EVT_MESH_TIME:
 		return sizeof(TYPIFY(EVT_MESH_TIME));
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
@@ -661,7 +767,6 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 constexpr const char* TypeName(CS_TYPE const & type) {
 
 	switch(type) {
-	case CS_TYPE::CONFIG_DO_NOT_USE: return "CONFIG_DO_NOT_USE";
 	case CS_TYPE::CONFIG_ADV_INTERVAL: return "CONFIG_ADV_INTERVAL";
 	case CS_TYPE::CONFIG_BOOT_DELAY: return "CONFIG_BOOT_DELAY";
 	case CS_TYPE::CONFIG_CROWNSTONE_ID: return "CONFIG_CROWNSTONE_ID";
@@ -669,6 +774,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO: return "CONFIG_CURRENT_ADC_ZERO";
 	case CS_TYPE::CONFIG_CURRENT_LIMIT: return "CONFIG_CURRENT_LIMIT";
 	case CS_TYPE::CONFIG_DEFAULT_ON: return "CONFIG_DEFAULT_ON";
+	case CS_TYPE::CONFIG_DO_NOT_USE: return "CONFIG_DO_NOT_USE";
 	case CS_TYPE::CONFIG_ENCRYPTION_ENABLED: return "CONFIG_ENCRYPTION_ENABLED";
 	case CS_TYPE::CONFIG_IBEACON_ENABLED: return "CONFIG_IBEACON_ENABLED";
 	case CS_TYPE::CONFIG_IBEACON_MAJOR: return "CONFIG_IBEACON_MAJOR";
@@ -811,7 +917,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_OPERATION_MODE:
 	case CS_TYPE::STATE_SWITCH_STATE:
 	case CS_TYPE::STATE_SCHEDULE:
-		return PersistenceMode::STRATEGY1;
+		return PersistenceMode::FLASH;
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
@@ -830,11 +936,6 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
 	case CS_TYPE::EVT_DIMMER_OFF_FAILURE_DETECTED:
-	//case CS_TYPE::EVT_POWER_CONSUMPTION:
-	//case CS_TYPE::EVT_ENABLED_MESH:
-	//case CS_TYPE::EVT_ENABLED_ENCRYPTION:
-	//case CS_TYPE::EVT_ENABLED_IBEACON:
-	//case CS_TYPE::EVT_CHARACTERISTICS_UPDATED:
 	case CS_TYPE::EVT_MESH_TIME:
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
 	case CS_TYPE::EVT_BLE_CONNECT:
@@ -887,8 +988,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 
 /** Gets the default.
  *
- * Note that if data.value is not aligned at a word boundary, the result still isn't. Use st_value_t to align
- * (u)int8_t, (u)int16_t, float, etc. on word boundaries.
+ * Note that if data.value is not aligned at a word boundary, the result still isn't.
  *
  * There is no allocation done in this function. It is assumed that data.value points to an array or single
  * variable that needs to be written. The allocation of strings or arrays is limited by TypeSize which in that case
@@ -897,7 +997,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
  * This function does not check if data size fits the default value.
  * TODO: check how to check this at compile time.
  */
-constexpr void getDefault(cs_state_data_t & data) {
+constexpr cs_ret_code_t getDefault(cs_state_data_t & data) {
 
 	// for all non-string types we already know the to-be expected size
 	data.size = TypeSize(data.type);
@@ -938,10 +1038,10 @@ constexpr void getDefault(cs_state_data_t & data) {
 	case CS_TYPE::CONFIG_IBEACON_MINOR:
 		*(TYPIFY(CONFIG_IBEACON_MINOR)*)data.value = BEACON_MINOR;
 		break;
-	case CS_TYPE::CONFIG_IBEACON_UUID:
-		data.size = MIN(data.size, sizeof(STRINGIFY(BEACON_UUID)));
-		memcpy(data.value, STRINGIFY(BEACON_UUID), data.size);
+	case CS_TYPE::CONFIG_IBEACON_UUID: {
+		BLEutil::parseUuid(STRINGIFY(BEACON_UUID), sizeof(STRINGIFY(BEACON_UUID)), data.value);
 		break;
+	}
 	case CS_TYPE::CONFIG_IBEACON_TXPOWER:
 		*(TYPIFY(CONFIG_IBEACON_TXPOWER)*)data.value = BEACON_RSSI;
 		break;
@@ -1064,8 +1164,121 @@ constexpr void getDefault(cs_state_data_t & data) {
 	}
 	default:
 		LOGw("Unknown default for %i", to_underlying_type(data.type));
+		return ERR_NOT_FOUND;
 		break;
+	}
+	return ERR_SUCCESS;
+}
 
+/**
+ * Gives the required access level to set a state type.
+ */
+constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
+	switch (type) {
+	case CS_TYPE::CONFIG_ADV_INTERVAL:
+	case CS_TYPE::CONFIG_BOOT_DELAY:
+	case CS_TYPE::CONFIG_CROWNSTONE_ID:
+	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO:
+//	case CS_TYPE::CONFIG_CURRENT_LIMIT:
+	case CS_TYPE::CONFIG_CURRENT_MULTIPLIER:
+	case CS_TYPE::CONFIG_DEFAULT_ON:
+	case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
+	case CS_TYPE::CONFIG_IBEACON_ENABLED:
+	case CS_TYPE::CONFIG_IBEACON_MAJOR:
+	case CS_TYPE::CONFIG_IBEACON_MINOR:
+	case CS_TYPE::CONFIG_IBEACON_UUID:
+	case CS_TYPE::CONFIG_IBEACON_TXPOWER:
+//	case CS_TYPE::CONFIG_KEY_ADMIN:
+//	case CS_TYPE::CONFIG_KEY_MEMBER:
+//	case CS_TYPE::CONFIG_KEY_GUEST:
+	case CS_TYPE::CONFIG_LOW_TX_POWER:
+	case CS_TYPE::CONFIG_MAX_CHIP_TEMP:
+	case CS_TYPE::CONFIG_MESH_ENABLED:
+	case CS_TYPE::CONFIG_NAME:
+	case CS_TYPE::CONFIG_POWER_ZERO:
+	case CS_TYPE::CONFIG_PWM_ALLOWED:
+	case CS_TYPE::CONFIG_PWM_PERIOD:
+	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
+	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
+	case CS_TYPE::CONFIG_RELAY_HIGH_DURATION:
+	case CS_TYPE::CONFIG_SCAN_BREAK_DURATION:
+	case CS_TYPE::CONFIG_SCAN_DURATION:
+	case CS_TYPE::CONFIG_SCANNER_ENABLED:
+	case CS_TYPE::CONFIG_SCAN_INTERVAL:
+	case CS_TYPE::CONFIG_SCAN_WINDOW:
+	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
+	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM:
+	case CS_TYPE::CONFIG_SWITCH_LOCKED:
+	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
+	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
+	case CS_TYPE::CONFIG_TX_POWER:
+	case CS_TYPE::CONFIG_UART_ENABLED:
+	case CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO:
+	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER:
+		return ADMIN;
+	default:
+		return NO_ONE;
 	}
 }
 
+/**
+ * Gives the required access level to get a state type.
+ */
+constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
+	switch (type) {
+	case CS_TYPE::CONFIG_ADV_INTERVAL:
+	case CS_TYPE::CONFIG_BOOT_DELAY:
+	case CS_TYPE::CONFIG_CROWNSTONE_ID:
+	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO:
+//	case CS_TYPE::CONFIG_CURRENT_LIMIT:
+	case CS_TYPE::CONFIG_CURRENT_MULTIPLIER:
+	case CS_TYPE::CONFIG_DEFAULT_ON:
+	case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
+	case CS_TYPE::CONFIG_IBEACON_ENABLED:
+	case CS_TYPE::CONFIG_IBEACON_MAJOR:
+	case CS_TYPE::CONFIG_IBEACON_MINOR:
+	case CS_TYPE::CONFIG_IBEACON_UUID:
+	case CS_TYPE::CONFIG_IBEACON_TXPOWER:
+//	case CS_TYPE::CONFIG_KEY_ADMIN:
+//	case CS_TYPE::CONFIG_KEY_MEMBER:
+//	case CS_TYPE::CONFIG_KEY_GUEST:
+	case CS_TYPE::CONFIG_LOW_TX_POWER:
+	case CS_TYPE::CONFIG_MAX_CHIP_TEMP:
+	case CS_TYPE::CONFIG_MESH_ENABLED:
+	case CS_TYPE::CONFIG_NAME:
+	case CS_TYPE::CONFIG_POWER_ZERO:
+	case CS_TYPE::CONFIG_PWM_ALLOWED:
+	case CS_TYPE::CONFIG_PWM_PERIOD:
+	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
+	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
+	case CS_TYPE::CONFIG_RELAY_HIGH_DURATION:
+	case CS_TYPE::CONFIG_SCAN_BREAK_DURATION:
+	case CS_TYPE::CONFIG_SCAN_DURATION:
+	case CS_TYPE::CONFIG_SCANNER_ENABLED:
+	case CS_TYPE::CONFIG_SCAN_INTERVAL:
+	case CS_TYPE::CONFIG_SCAN_WINDOW:
+	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
+	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM:
+	case CS_TYPE::CONFIG_SWITCH_LOCKED:
+	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
+	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
+	case CS_TYPE::CONFIG_TX_POWER:
+	case CS_TYPE::CONFIG_UART_ENABLED:
+	case CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO:
+	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER:
+		return ADMIN;
+	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
+	case CS_TYPE::STATE_ERRORS:
+//	case CS_TYPE::STATE_FACTORY_RESET:
+//	case CS_TYPE::STATE_OPERATION_MODE:
+	case CS_TYPE::STATE_POWER_USAGE:
+	case CS_TYPE::STATE_RESET_COUNTER:
+	case CS_TYPE::STATE_SCHEDULE:
+	case CS_TYPE::STATE_SWITCH_STATE:
+	case CS_TYPE::STATE_TEMPERATURE:
+	case CS_TYPE::STATE_TIME:
+		return MEMBER;
+	default:
+		return NO_ONE;
+	}
+}

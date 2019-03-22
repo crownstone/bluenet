@@ -47,14 +47,14 @@ void FactoryReset::resetTimeout() {
 void FactoryReset::timeout() {
 	_recoveryEnabled = false;
 	LOGi("Recovery period expired")
-	st_value_t resetState;
-	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState.u8, PersistenceMode::STRATEGY1);
-	if (resetState.u8 == FACTORY_RESET_STATE_LOWTX) {
+	TYPIFY(STATE_FACTORY_RESET) resetState;
+	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
+	if (resetState == FACTORY_RESET_STATE_LOWTX) {
 		LOGi("Change to normal mode")
 		Stack::getInstance().changeToNormalTxPowerMode();
 	}
-	resetState.u8 = FACTORY_RESET_STATE_NORMAL;
-	State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState), PersistenceMode::STRATEGY1);
+	resetState = FACTORY_RESET_STATE_NORMAL;
+	State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
 }
 
 /**
@@ -62,11 +62,11 @@ void FactoryReset::timeout() {
  * Without the timer (and without logging) the disconenct is too fast for us to read the result.
  */
 void FactoryReset::process() {
-	uint8_t resetState;
-	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState, PersistenceMode::STRATEGY1);
+	TYPIFY(STATE_FACTORY_RESET) resetState;
+	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
 	if (resetState == FACTORY_RESET_STATE_NORMAL) {
 		resetState = FACTORY_RESET_STATE_LOWTX;
-		State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState), PersistenceMode::STRATEGY1);
+		State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
 		LOGd("recovery: go to low tx");
 		Stack::getInstance().changeToLowTxPowerMode();
 		Stack::getInstance().disconnect();
@@ -91,8 +91,8 @@ bool FactoryReset::recover(uint32_t resetCode) {
 		return false;
 	}
 
-	uint8_t resetState;
-	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState, PersistenceMode::STRATEGY1);
+	TYPIFY(STATE_FACTORY_RESET) resetState;
+	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
 	switch (resetState) {
 	case FACTORY_RESET_STATE_NORMAL:
 		// just in case, we stop the timer so we cannot flood this mechanism.
@@ -102,7 +102,7 @@ bool FactoryReset::recover(uint32_t resetCode) {
 //		break;
 	case FACTORY_RESET_STATE_LOWTX:
 		resetState = FACTORY_RESET_STATE_NORMAL;
-		State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState), PersistenceMode::STRATEGY1);
+		State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
 		LOGd("recovery: factory reset");
 
 		// the reset delayed in here should be sufficient
@@ -136,8 +136,8 @@ bool FactoryReset::performFactoryReset() {
 	LOGf("factory reset");
 
 	// Go into factory reset mode after next reset.
-	uint8_t mode = to_underlying_type(OperationMode::OPERATION_MODE_FACTORY_RESET);
-	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::STRATEGY1);
+	TYPIFY(STATE_OPERATION_MODE) mode = to_underlying_type(OperationMode::OPERATION_MODE_FACTORY_RESET);
+	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
 	LOGi("Going into factory reset mode, rebooting device in 2s ...");
 	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
@@ -161,8 +161,8 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 	State::getInstance().factoryReset(FACTORY_RESET_CODE);
 
 	// Lastly, go into setup mode after next reset
-	uint8_t mode = to_underlying_type(OperationMode::OPERATION_MODE_SETUP);
-	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode), PersistenceMode::STRATEGY1);
+	TYPIFY(STATE_OPERATION_MODE) mode = to_underlying_type(OperationMode::OPERATION_MODE_SETUP);
+	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
 	LOGi("Factory reset done, rebooting device in 2s ...");
 	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);

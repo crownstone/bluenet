@@ -71,19 +71,18 @@ void adc_done_callback(cs_adc_buffer_id_t bufIndex) {
 
 void PowerSampling::init(const boards_config_t& boardConfig) {
 	State& settings = State::getInstance();
-	PersistenceMode pmode = PersistenceMode::STRATEGY1;
-	settings.get(CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER, &_voltageMultiplier, pmode);
-	settings.get(CS_TYPE::CONFIG_CURRENT_MULTIPLIER, &_currentMultiplier, pmode);
-	settings.get(CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO, &_voltageZero, pmode);
-	settings.get(CS_TYPE::CONFIG_CURRENT_ADC_ZERO, &_currentZero, pmode);
-	settings.get(CS_TYPE::CONFIG_POWER_ZERO, &_powerZero, pmode);
-	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentMilliAmpThreshold, pmode);
-	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentMilliAmpThresholdPwm, pmode);
-	bool switchcraftEnabled = settings.isSet(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
+	settings.get(CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER, &_voltageMultiplier, sizeof(_voltageMultiplier));
+	settings.get(CS_TYPE::CONFIG_CURRENT_MULTIPLIER, &_currentMultiplier, sizeof(_currentMultiplier));
+	settings.get(CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO, &_voltageZero, sizeof(_voltageZero));
+	settings.get(CS_TYPE::CONFIG_CURRENT_ADC_ZERO, &_currentZero, sizeof(_currentZero));
+	settings.get(CS_TYPE::CONFIG_POWER_ZERO, &_powerZero, sizeof(_powerZero));
+	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentMilliAmpThreshold, sizeof(_currentMilliAmpThreshold));
+	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentMilliAmpThresholdPwm, sizeof(_currentMilliAmpThresholdPwm));
+	bool switchcraftEnabled = settings.isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
 
 	RecognizeSwitch::getInstance().init();
-	float switchcraftThreshold;
-	settings.get(CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD, &switchcraftThreshold, pmode);
+	TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD) switchcraftThreshold;
+	settings.get(CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD, &switchcraftThreshold, sizeof(switchcraftThreshold));
 	RecognizeSwitch::getInstance().configure(switchcraftThreshold);
 	enableSwitchcraft(switchcraftEnabled);
 
@@ -153,14 +152,12 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 
 void PowerSampling::startSampling() {
 	LOGi(FMT_START, "power sample");
-	// Get operation mode
-	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &_operationMode, PersistenceMode::STRATEGY1);
+
+	TYPIFY(STATE_OPERATION_MODE) mode;
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	_operationMode = getOperationMode(mode);
 
 	_adc->start();
-}
-
-void PowerSampling::stopSampling() {
-	// TODO
 }
 
 void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) {
@@ -663,8 +660,8 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	return;
 
 	// Get the current state errors
-	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::RAM);
+	TYPIFY(STATE_ERRORS) stateErrors;
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, sizeof(stateErrors));
 
 	// TODO: implement this differently
 	if (RTC::getCount() > RTC::msToTicks(5000)) {
@@ -674,8 +671,8 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	// TODO: this should be kept up in the state?
 	switch_state_t prevSwitchState = _lastSwitchState;
 	// Get the current switch state before we dispatch any event (as that may change the switch).
-	switch_state_t switchState;
-	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, PersistenceMode::STRATEGY1);
+	TYPIFY(STATE_SWITCH_STATE) switchState;
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
 	_lastSwitchState = switchState;
 
 	if (switchState.state.relay == 0 && switchState.state.dimmer == 0 && (prevSwitchState.state.relay || prevSwitchState.state.dimmer)) {
@@ -705,7 +702,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 		EventDispatcher::getInstance().dispatch(event);
 		stateErrors.errors.overCurrent = true;
-		State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors), PersistenceMode::RAM);
+		State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 		return;
 	}
 
@@ -721,9 +718,8 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	}
 	if ((_consecutivePwmOvercurrent > 20) && (!stateErrors.errors.overCurrentDimmer)) {
 //		// Get the current pwm state before we dispatch the event (as that may change the pwm).
-//		switch_state_t switchState;
-//		size16_t size = sizeof(switch_state_t);
-//		State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, size, PersistenceMode::STRATEGY1);
+//		TYPIFY(STATE_SWITCH_STATE) switchState;
+//		State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState);
 		if (switchState.state.dimmer != 0) {
 			// If the pwm was on:
 			LOGw("current above pwm threshold");
@@ -732,7 +728,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 			EventDispatcher::getInstance().dispatch(event);
 
 			stateErrors.errors.overCurrentDimmer = true;
-			State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors), PersistenceMode::RAM);
+			State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 		}
 		else if (switchState.state.relay == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
@@ -741,7 +737,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 			EventDispatcher::getInstance().dispatch(event);
 
 			stateErrors.errors.dimmerOn = true;
-			State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors), PersistenceMode::RAM);
+			State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 		}
 	}
 }

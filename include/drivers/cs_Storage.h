@@ -57,6 +57,14 @@ public:
 	cs_ret_code_t write(cs_file_id_t file_id, cs_state_data_t data);
 
 	/**
+	 * Allocate ram that is correctly aligned and padded.
+	 *
+	 * @param[in,out] size        Requested size, afterwards set to the allocated size.
+	 * @return                    Pointer to allocated memory.
+	 */
+	uint8_t* allocate(size16_t& size);
+
+	/**
 	 * Removes a whole flash page.
 	 */
 	cs_ret_code_t remove(cs_file_id_t file_id);

@@ -32,157 +32,84 @@ void State::init(boards_config_t* boardsConfig) {
 	setInitialized();
 }
 
-cs_ret_code_t State::writeToStorage(CS_TYPE type, uint8_t* data, size16_t size, PersistenceMode mode) {
-
-	cs_ret_code_t error_code = ERR_NOT_IMPLEMENTED;
-	error_code = verify(type, data, size);
-	if (SUCCESS(error_code)) {
-		LOGi("Write to storage");
-		error_code = set(type, data, size, mode);
-		event_t event(type, data, size);
-		EventDispatcher::getInstance().dispatch(event);
+cs_ret_code_t State::verifyForGet(cs_state_data_t & data) {
+//	cs_ret_code_t error_code = ERR_NOT_IMPLEMENTED;
+	size16_t typeSize = TypeSize(data.type);
+	if (typeSize == 0) {
+		LOGw(FMT_CONFIGURATION_NOT_FOUND, data.type);
+		return ERR_UNKNOWN_TYPE;
 	}
-	return error_code;
+	if (data.size < typeSize) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
+	return ERR_SUCCESS;
 }
 
-cs_ret_code_t State::readFromStorage(CS_TYPE type, StreamBuffer<uint8_t>* streamBuffer) {
-
-	cs_ret_code_t error_code = ERR_NOT_IMPLEMENTED;
-	if (TypeSize(type) == 0) {
-		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
-		error_code = ERR_UNKNOWN_TYPE;
-		return error_code;
+cs_ret_code_t State::verifyForSet(cs_state_data_t & data) {
+	size16_t typeSize = TypeSize(data.type);
+	if (typeSize == 0) {
+		LOGw(FMT_CONFIGURATION_NOT_FOUND, data.type);
+		return ERR_UNKNOWN_TYPE;
 	}
-
-	// temporarily put data on stack(?)
-	size16_t plen = TypeSize(type);
-	uint8_t payload[plen];
-	error_code = get(type, payload, plen, PersistenceMode::FLASH);
-	if (SUCCESS(error_code)) {
-		streamBuffer->setPayload(payload, plen);
-		uint8_t unsafe_type = to_underlying_type(type);
-		streamBuffer->setType(unsafe_type);
-	}
-	return error_code;
-}
-
-cs_ret_code_t State::verify(CS_TYPE type, uint8_t* payload, uint8_t size) {
-
-	cs_ret_code_t error_code = ERR_NOT_IMPLEMENTED;
-
-	size16_t check_size = TypeSize(type);
-	if (check_size == 0) {
-		LOGw(FMT_CONFIGURATION_NOT_FOUND, type);
-		error_code = ERR_UNKNOWN_TYPE;
-		return error_code;
-	}
-
-	switch(type) {
-		case CS_TYPE::CONFIG_MESH_ENABLED :
-		case CS_TYPE::CONFIG_ENCRYPTION_ENABLED :
-		case CS_TYPE::CONFIG_IBEACON_ENABLED :
-		case CS_TYPE::CONFIG_SCANNER_ENABLED :
-		case CS_TYPE::CONFIG_PWM_ALLOWED:
-		case CS_TYPE::CONFIG_SWITCH_LOCKED:
-		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: {
-			LOGe("Write disabled. Use commands to enable/disable");
-			error_code = ERR_WRITE_NOT_ALLOWED;
-			return error_code;
+	switch (data.type) {
+	case CS_TYPE::CONFIG_NAME: {
+		if (data.size > typeSize) {
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		default:
-			// go on
-			;
+		break;
 	}
-
-	bool correct = false;
-	if (check_size == size) {
-		correct = true;
-	}
-	// handle CONFIG_NAME separately, check_size can be size (which is just the maximum size)
-	if ((check_size > size) && (type == CS_TYPE::CONFIG_NAME)) {
-		correct = true;
-	}
-
-	if (correct) {
-		if (size == 1) {
-			LOGi(FMT_SET_INT_TYPE_VAL, type, (int)payload[0]);
-		} else {
-			LOGi(FMT_SET_STR_TYPE_VAL, type, std::string((char*)payload, size).c_str());
+	default: {
+		if (data.size != typeSize) {
+			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
-		error_code = ERR_SUCCESS;
-	} else {
-		LOGw(FMT_ERR_EXPECTED, "check_size");
-		error_code = ERR_WRONG_PAYLOAD_LENGTH;
+		break;
 	}
-	return error_code;
-}
-
-cs_ret_code_t State::get(const CS_TYPE type, void* target, const PersistenceMode mode) {
-	size16_t size = TypeSize(type);
-	return get(type, target, size, mode);
-}
-
-/** Get value from FLASH or RAM.
- *
- * The implementation casts type to the underlying type. The pointer to target is stored in data.value and the
- * size is written in data.size.
- *
- * TODO: it assumed that the pointer *target is already allocated to the right size...
- */
-cs_ret_code_t State::get(const CS_TYPE type, void* target, size16_t & size, const PersistenceMode mode) {
-	cs_state_data_t data;
-	data.type = type;
-	data.size = size;
-	data.value = (uint8_t*)target;
-	ret_code_t ret_code = get(data, mode);
-	// TODO: size check: stored size might differ from given size?
-	LOGnone("Got type %s (%i) of size %i", TypeName(data.type), data.type, data.size);
-	memcpy(target, data.value, data.size);
-	size = data.size;
-	return ret_code;
+	}
+	return ERR_SUCCESS;
 }
 
 cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
-	ret_code_t ret_code = FDS_ERR_NOT_FOUND;
+	ret_code_t ret_code = ERR_NOT_FOUND;
+	if (data.size < TypeSize(data.type)) { // TODO: make this an assert?
+		return ERR_BUFFER_TOO_SMALL;
+	}
+
 	switch(mode) {
 		case PersistenceMode::FIRMWARE_DEFAULT:
-			getDefault(data);
-			return ERR_SUCCESS;
-		case PersistenceMode::RAM: {
-			bool exists = loadFromRam(data);
-			return exists ? ERR_SUCCESS : ERR_NOT_FOUND;
-		}
+			return getDefault(data);
+		case PersistenceMode::RAM:
+			return loadFromRam(data);
 		case PersistenceMode::FLASH:
 			return _storage->read(FILE_CONFIGURATION, data);
-		case PersistenceMode::RAM_OR_DEFAULT: {
-			bool exists = loadFromRam(data);
-			if (exists) {
-				return ERR_SUCCESS;
-			}
-			LOGnone("Loaded default: %s", TypeName(data.type));
-			getDefault(data);
-//			storeInRam(data); // TODO: store or not?
-			return ERR_SUCCESS;
-		}
-
 		case PersistenceMode::STRATEGY1: {
+			// First check if it's already in ram.
 			bool exists = loadFromRam(data);
 			if (exists) {
 				LOGnone("Loaded from RAM: %s", TypeName(data.type));
 				return ERR_SUCCESS;
 			}
+
+			// See if we need to check flash.
+			if (DefaultLocation(data.type) == PersistenceMode::RAM) {
+				LOGnone("Loaded default: %s", TypeName(data.type));
+				ret_code = getDefault(data);
+				storeInRam(data);
+				return ret_code;
+			}
+
+			// Check flash, else use default.
 			ret_code = _storage->read(FILE_CONFIGURATION, data);
 			switch(ret_code) {
-				case FDS_SUCCESS: {
+				case ERR_SUCCESS: {
 					LOGnone("Loaded from FLASH: %s", TypeName(data.type));
 					storeInRam(data);
 					return ret_code;
 				}
-				case FDS_ERR_NOT_FOUND: {
+				case ERR_NOT_FOUND: {
 					LOGnone("Loaded default: %s", TypeName(data.type));
-					getDefault(data);
+					ret_code = getDefault(data);
 					storeInRam(data);
-					return ERR_SUCCESS;
+					return ret_code;
 				}
 				default: {
 					LOGe("Should not happen");
@@ -197,22 +124,13 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	return ret_code;
 }
 
-/**
- * Store item in RAM. This will copy everything into a new struct. The original can be adjusted immediately after
- * you have called this function. Note that every record occupies RAM. If things have to persist, but do not need
- * to be stored in RAM, and when timing is not important, use set() with the FLASH mode argument.
- */
 cs_ret_code_t State::storeInRam(const cs_state_data_t & data) {
 	size16_t temp = 0;
 	return storeInRam(data, temp);
 }
 
 /**
- * Maybe we should check if data is stored at right boundary.
- *
- * if ((uint32_t)data.value % 4u != 0) {
- *		LOGe("Unaligned type: %s: %p", TypeName(type), data.value);
- *	}
+ * Store size of state variable, not of allocated size.
  */
 cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_in_ram) {
 	// TODO: Check if enough RAM is available
@@ -224,9 +142,9 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 			cs_state_data_t & ram_data = _data_in_ram[i];
 			if (ram_data.size != data.size) {
 				free(ram_data.value);
-				ram_data.value = (uint8_t*)malloc(sizeof(uint8_t) * data.size); // TODO: don't malloc when size is similar?
+				ram_data.size = data.size;
+				allocate(ram_data);
 			}
-			ram_data.size = data.size;
 			memcpy(ram_data.value, data.value, data.size);
 			exist = true;
 			index_in_ram = i;
@@ -234,12 +152,12 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 		}
 	}
 	if (!exist) {
-		LOGnone("Store %i in RAM", data.type);
+		LOGnone("Store in RAM type=%u", data.type);
 		cs_state_data_t &ram_data = *(cs_state_data_t*)malloc(sizeof(cs_state_data_t));
 		ram_data.type = data.type;
 		ram_data.size = data.size;
-		LOGnone("Allocate value array of size %i", data.size);
-		ram_data.value = (uint8_t*)malloc(sizeof(uint8_t) * data.size);
+		LOGnone("Allocate value array of size %u", data.size);
+		allocate(ram_data);
 		memcpy(ram_data.value, data.value, data.size);
 		_data_in_ram.push_back(ram_data);
 		LOGd("RAM buffer now of size %i", _data_in_ram.size());
@@ -249,22 +167,34 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 }
 
 /**
- * Load from RAM. It is assumed that the caller does not know the data length. Hence, what is returned is a copy of
- * the data and allocation is done within loadFromRam.
+ * If memory is used for flash, then let storage do the allocation.
+ */
+cs_ret_code_t State::allocate(cs_state_data_t & data) {
+	if (DefaultLocation(data.type) == PersistenceMode::FLASH) {
+		size16_t tempSize = data.size;
+		data.value = _storage->allocate(tempSize);
+	}
+	else {
+		data.value = (uint8_t*)malloc(sizeof(uint8_t) * data.size);
+	}
+	return ERR_SUCCESS;
+}
+
+/**
+ * Copies from ram to target buffer.
+ *
+ * Does not check if target buffer has a large enough size.
  */
 cs_ret_code_t State::loadFromRam(cs_state_data_t & data) {
-	bool exist = false;
 	for (size16_t i = 0; i < _data_in_ram.size(); ++i) {
 		if (_data_in_ram[i].type == data.type) {
 			cs_state_data_t & ram_data = _data_in_ram[i];
 			data.size = ram_data.size;
-			data.value = (uint8_t*)malloc(sizeof(uint8_t) * data.size);
 			memcpy(data.value, ram_data.value, data.size);
-			exist = true;
-			break;
+			return ERR_SUCCESS;
 		}
 	}
-	return exist;
+	return ERR_NOT_FOUND;
 }
 
 // TODO: deleteFromRam to limit RAM usage
@@ -275,24 +205,22 @@ cs_ret_code_t State::loadFromRam(cs_state_data_t & data) {
  *   FLASH: store item in persistent memory
  *   STRATEGY: store item depending on its default location, keep a copy in RAM.
  */
-cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const PersistenceMode mode) {
-	cs_state_data_t data;
-	data.type = type;
-	data.value = (uint8_t*)target;
+cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mode) {
 	LOGnone("Set value: %s: %i", TypeName(type), type);
-	data.size = size;
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	switch(mode) {
 		case PersistenceMode::RAM: {
 			return storeInRam(data);
 		}
 		case PersistenceMode::FLASH: {
-			// TODO: By the time the data is written to flash, the data pointer might be invalid.
-			return _storage->write(FILE_CONFIGURATION, data);
+			return ERR_NOT_AVAILABLE;
+			// By the time the data is written to flash, the data pointer might be invalid.
+			// There is also no guarantee that the data pointer is aligned.
+			//return _storage->write(FILE_CONFIGURATION, data);
 		}
 		case PersistenceMode::STRATEGY1: {
 			// first get if default location is RAM or FLASH
-			switch(DefaultLocation(type)) {
+			switch(DefaultLocation(data.type)) {
 				case PersistenceMode::RAM:
 					return storeInRam(data);
 				case PersistenceMode::FLASH:
@@ -316,11 +244,8 @@ cs_ret_code_t State::set(CS_TYPE type, void* target, size16_t size, const Persis
 				break;
 			}
 			cs_state_data_t ram_data = _data_in_ram[index];
-			LOGd("Storage write type=%u size=%u data=[0x%X,...]", ram_data.type, ram_data.size, ram_data.value[0]);
+			LOGd("Storage write type=%u size=%u data=%p [0x%X,...]", ram_data.type, ram_data.size, ram_data.value, ram_data.value[0]);
 			return _storage->write(FILE_CONFIGURATION, ram_data);
-		}
-		case PersistenceMode::RAM_OR_DEFAULT: {
-			return storeInRam(data);
 		}
 		case PersistenceMode::FIRMWARE_DEFAULT: {
 			LOGe("Default cannot be written");
@@ -344,9 +269,18 @@ cs_ret_code_t State::remove(CS_TYPE type, const PersistenceMode mode) {
 	return ret_code;
 }
 
+cs_ret_code_t State::get(const CS_TYPE type, void *value, const size16_t size) {
+	cs_state_data_t data(type, (uint8_t*)value, size);
+	return get(data);
+}
 
-bool State::isSet(CS_TYPE type) {
-	bool enabled = false;
+cs_ret_code_t State::set(const CS_TYPE type, void *value, const size16_t size) {
+	cs_state_data_t data(type, (uint8_t*)value, size);
+	return set(data);
+}
+
+bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
+	TYPIFY(CONFIG_MESH_ENABLED) enabled = false;
 	switch(type) {
 		case CS_TYPE::CONFIG_MESH_ENABLED:
 		case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
@@ -356,8 +290,8 @@ bool State::isSet(CS_TYPE type) {
 		case CS_TYPE::CONFIG_PWM_ALLOWED:
 		case CS_TYPE::CONFIG_SWITCH_LOCKED:
 		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: {
-			size16_t size = sizeof(enabled);
-			get(type, (void*)&enabled, size, PersistenceMode::STRATEGY1);
+			cs_state_data_t data(type, &enabled, sizeof(enabled));
+			get(data);
 		}
 		default: {}
 	}
@@ -370,6 +304,5 @@ void State::factoryReset(uint32_t resetCode) {
 		return;
 	}
 	LOGw("Perform factory reset!");
-
 	_storage->remove(FILE_CONFIGURATION);
 }

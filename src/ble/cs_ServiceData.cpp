@@ -53,9 +53,9 @@ void ServiceData::init() {
 	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
 
 	// get the operation mode from state
-	uint8_t mode;
-	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
-	_operationMode = static_cast<OperationMode>(mode);
+	TYPIFY(STATE_OPERATION_MODE) mode;
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	_operationMode = getOperationMode(mode);
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -103,9 +103,9 @@ void ServiceData::init() {
 #endif
 
 	// Init flags
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED));
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, State::getInstance().isSet(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED));
 
 	// set the initial advertisement.
 	updateAdvertisement(true);
@@ -169,15 +169,15 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 		bool serviceDataSet = false;
 
-		uint32_t timestamp;
-		State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, PersistenceMode::RAM);
+		TYPIFY(STATE_TIME) timestamp;
+		State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
 
 //		// Update flag
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED));
 
-		state_errors_t stateErrors;
-		State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, PersistenceMode::RAM);
+		TYPIFY(STATE_ERRORS) stateErrors;
+		State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 		updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors.asInt);
 
 		// Set error timestamp
@@ -247,7 +247,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 //		Mesh::getInstance().printRssiList();
 
 		// encrypt the array using the guest key ECB if encryption is enabled.
-		if (State::getInstance().isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) && _operationMode != OperationMode::OPERATION_MODE_SETUP) {
+		if (State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) && _operationMode != OperationMode::OPERATION_MODE_SETUP) {
 			EncryptionHandler::getInstance().encrypt(
 					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
 					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
@@ -274,7 +274,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& serviceData) {
 #if BUILD_MESHING == 1 && defined(ADVERTISE_EXTERNAL_DATA)
 
-	if (_operationMode != OPERATION_MODE_NORMAL || State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED) == false) {
+	if (_operationMode != OPERATION_MODE_NORMAL || State::getInstance().isTrue(CS_TYPE::CONFIG_MESH_ENABLED) == false) {
 		return false;
 	}
 
@@ -664,11 +664,11 @@ void ServiceData::_sendMeshState() {
 
 #if BUILD_MESHING == 1
 void ServiceData::sendMeshState(bool event, uint16_t eventType) {
-	if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
+	if (State::getInstance().isTrue(CS_TYPE::CONFIG_MESH_ENABLED)) {
 
 //		// Update flag
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED));
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED));
+//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED));
 
 		uint32_t rtcCount = RTC::getCount();
 
@@ -680,8 +680,8 @@ void ServiceData::sendMeshState(bool event, uint16_t eventType) {
 			return;
 		}
 
-		uint32_t timestamp;
-		State::getInstance().get(CS_TYPE::STATE_TIME, timestamp);
+		TYPIFY(STATE_TIME) timestamp;
+		State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
 
 		state_item_t stateItem = {};
 		if (event) {

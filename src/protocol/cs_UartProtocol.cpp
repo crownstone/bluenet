@@ -289,8 +289,8 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 		break;
 	    }
 	    case UART_OPCODE_RX_GET_ID: {
-		uint16_t crownstoneId;
-		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, PersistenceMode::STRATEGY1);
+		TYPIFY(CONFIG_CROWNSTONE_ID) crownstoneId;
+		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, sizeof(crownstoneId));
 		writeMsg(UART_OPCODE_TX_OWN_ID, (uint8_t*)&crownstoneId, sizeof(crownstoneId));
 		break;
 	    }

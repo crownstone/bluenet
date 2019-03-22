@@ -6,6 +6,9 @@
  */
 #pragma once
 
+#include <common/cs_Types.h>
+#include <protocol/cs_Packets.h>
+
 //TODO: make a enum class of these
 enum CommandHandlerTypes {
 	CTRL_CMD_SWITCH                      = 0,     //! 0x00
@@ -54,7 +57,7 @@ struct __attribute__((__packed__)) opcode_message_payload_t {
 };
 
 struct __attribute__((__packed__)) enable_message_payload_t {
-	bool enable;
+	BOOL enable;
 };
 
 struct __attribute__((__packed__)) enable_scanner_message_payload_t {

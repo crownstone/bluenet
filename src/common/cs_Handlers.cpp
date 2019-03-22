@@ -78,7 +78,7 @@ NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, cr
 
 void ble_sdh_evt_dispatch(const ble_evt_t * p_ble_evt, void * p_context) {
 #if BUILD_MESHING == 1
-    if (State::getInstance().isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
+    if (State::getInstance().isTrue(CS_TYPE::CONFIG_MESH_ENABLED)) {
 	rbc_mesh_ble_evt_handler(p_ble_evt);
     }
 #endif

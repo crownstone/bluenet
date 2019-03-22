@@ -20,6 +20,15 @@
  */
 
 /**
+ * Header of a stream buffer
+ */
+struct __attribute__((__packed__)) stream_buffer_header_t {
+	uint8_t type;
+	uint8_t opCode; //! can be used as op code, see <OpCode>
+	uint16_t length;
+};
+
+/**
  * State errors: collection of errors that influence the switch behaviour.
  */
 union __attribute__((__packed__)) state_errors_t {

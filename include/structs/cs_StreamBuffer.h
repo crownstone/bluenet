@@ -71,7 +71,7 @@ public:
 
 	/** @inherit */
 	int assign(uint8_t *buffer, uint16_t size) {
-		assert(SB_HEADER_SIZE + _max_items*_item_size <= size, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		assert(SB_HEADER_SIZE + _max_items * _item_size <= size, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 
 #ifdef PRINT_STREAMBUFFER_VERBOSE
 		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, size);
@@ -241,6 +241,27 @@ public:
 		memcpy(_buffer->payload, payload, length * _item_size);
 		return SB_SUCCESS;
 	}
+
+//	/**
+//	 * Set the payload size, in bytes.
+//	 *
+//	 * Use this after you set the payload directly via pointer.
+//	 */
+//	cs_ret_code_t setPayloadSize(uint16_t size) {
+//		if (size > _max_items * _item_size) {
+//			LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+//			return SB_BUFFER_NOT_LARGE_ENOUGH;
+//		}
+//		_buffer->header.length = size / _item_size;
+//		return SB_SUCCESS;
+//	}
+//
+//	/**
+//	 * Returns the max size, in bytes, that the payload can be.
+//	 */
+//	uint16_t getMaxPayloadSize() {
+//		return getMaxLength() * _item_size - SB_HEADER_SIZE;
+//	}
 
 	void print() {
 		BLEutil::printArray((uint8_t*)_buffer, getDataLength());

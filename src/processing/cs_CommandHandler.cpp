@@ -203,10 +203,10 @@ cs_ret_code_t CommandHandler::handleCmdEnableMesh(buffer_ptr_t buffer, const uin
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-	bool enable = payload->enable;
+	TYPIFY(CONFIG_MESH_ENABLED) enable = payload->enable;
 
 	LOGi("%s mesh", enable ? STR_ENABLE : STR_DISABLE);
-	State::getInstance().set(CS_TYPE::CONFIG_MESH_ENABLED, (void*)&enable, sizeof(enable), PersistenceMode::STRATEGY1);
+	State::getInstance().set(CS_TYPE::CONFIG_MESH_ENABLED, &enable, sizeof(enable));
 
 #if BUILD_MESHING == 1
 	if (enable) {
@@ -232,10 +232,10 @@ cs_ret_code_t CommandHandler::handleCmdEnableEncryption(buffer_ptr_t buffer, con
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-	bool enable = payload->enable;
+	TYPIFY(CONFIG_ENCRYPTION_ENABLED) enable = payload->enable;
 
 	LOGi("%s encryption", enable ? STR_ENABLE : STR_DISABLE);
-	State::getInstance().set(CS_TYPE::CONFIG_ENCRYPTION_ENABLED, (void*)&enable, sizeof(enable), PersistenceMode::STRATEGY1);
+	State::getInstance().set(CS_TYPE::CONFIG_ENCRYPTION_ENABLED, &enable, sizeof(enable));
 
 	return ERR_SUCCESS;
 }
@@ -250,10 +250,10 @@ cs_ret_code_t CommandHandler::handleCmdEnableIbeacon(buffer_ptr_t buffer, const 
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-	bool enable = payload->enable;
+	TYPIFY(CONFIG_IBEACON_ENABLED) enable = payload->enable;
 
 	LOGi("%s ibeacon", enable ? STR_ENABLE : STR_DISABLE);
-	State::getInstance().set(CS_TYPE::CONFIG_IBEACON_ENABLED, (void*)&enable, sizeof(enable), PersistenceMode::STRATEGY1);
+	State::getInstance().set(CS_TYPE::CONFIG_IBEACON_ENABLED, &enable, sizeof(enable));
 
 	return ERR_SUCCESS;
 }
@@ -265,7 +265,7 @@ cs_ret_code_t CommandHandler::handleCmdEnableScanner(buffer_ptr_t buffer, const 
 	// TODO: make it only apply after reset?
 
 	enable_scanner_message_payload_t* payload = (enable_scanner_message_payload_t*) buffer;
-	bool enable = payload->enable;
+	TYPIFY(CONFIG_SCANNER_ENABLED) enable = payload->enable;
 	uint16_t delay = payload->delay;
 
 	if (size != sizeof(enable_scanner_message_payload_t)) {
@@ -287,7 +287,7 @@ cs_ret_code_t CommandHandler::handleCmdEnableScanner(buffer_ptr_t buffer, const 
 	}
 
 	// TODO: first update flag, then start scanner? The scanner is stopped to write to pstorage anyway.
-	State::getInstance().set(CS_TYPE::CONFIG_SCANNER_ENABLED, (void*)&enable, sizeof(enable), PersistenceMode::STRATEGY1);
+	State::getInstance().set(CS_TYPE::CONFIG_SCANNER_ENABLED, &enable, sizeof(enable));
 
 	return ERR_SUCCESS;
 }
@@ -297,33 +297,6 @@ cs_ret_code_t CommandHandler::handleCmdRequestServiceData(buffer_ptr_t buffer, c
 	LOGi(STR_HANDLE_COMMAND, "request service data");
 
 	return ERR_NOT_IMPLEMENTED;
-
-	// TODO: use ServiceData function for this?
-//#if BUILD_MESHING == 1
-//		state_item_t stateItem;
-//		memset(&stateItem, 0, sizeof(stateItem));
-//
-//		State& state = State::getInstance();
-//		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &stateItem.id);
-//
-//		state.get(STATE_SWITCH_STATE, stateItem.switchState);
-//
-//		// TODO: implement setting the eventBitmask in a better way
-//		// Maybe get it from service data directly? Or should we store the eventBitmask in the State?
-//		state_errors_t state_errors;
-//		state.get(STATE_ERRORS, &state_errors, sizeof(state_errors_t));
-//		stateItem.eventBitmask = 0;
-//		if (state_errors.asInt != 0) {
-//			stateItem.eventBitmask |= 1 << SERVICE_BITMASK_ERROR;
-//		}
-//
-//		state.get(STATE_POWER_USAGE, (int32_t&)stateItem.powerUsage);
-//		state.get(STATE_ACCUMULATED_ENERGY, (int32_t&)stateItem.accumulatedEnergy);
-//
-//		MeshControl::getInstance().sendServiceDataMessage(stateItem, true);
-//#endif
-
-	return ERR_SUCCESS;
 }
 
 cs_ret_code_t CommandHandler::handleCmdFactoryReset(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
@@ -390,13 +363,6 @@ cs_ret_code_t CommandHandler::handleCmdScheduleEntryClear(buffer_ptr_t buffer, c
 
 cs_ret_code_t CommandHandler::handleCmdIncreaseTx(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "increase TX");
-//	if (!EncryptionHandler::getInstance().allowAccess(SETUP, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-//	uint8_t opMode;
-//	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, opMode);
-//	if (opMode != OPERATION_MODE_SETUP) {
-//		LOGw("only available in setup mode");
-//		return ERR_NOT_AVAILABLE;
-//	}
 	Stack::getInstance().changeToNormalTxPowerMode();
 	return ERR_SUCCESS;
 }
@@ -503,12 +469,12 @@ cs_ret_code_t CommandHandler::handleCmdResetErrors(buffer_ptr_t buffer, const ui
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	state_errors_t* payload = (state_errors_t*) buffer;
-	state_errors_t stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, PersistenceMode::STRATEGY1);
+	TYPIFY(STATE_ERRORS) stateErrors;
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 	LOGd("old errors %u - reset %u", stateErrors.asInt, payload->asInt);
 	stateErrors.asInt &= ~(payload->asInt);
 	LOGd("new errors %u", stateErrors.asInt);
-	State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, sizeof(stateErrors), PersistenceMode::STRATEGY1);
+	State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 	return ERR_SUCCESS;
 }
 
@@ -634,20 +600,20 @@ cs_ret_code_t CommandHandler::handleCmdAllowDimming(buffer_ptr_t buffer, const u
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-	bool enable = payload->enable;
+	TYPIFY(CONFIG_PWM_ALLOWED) enable = payload->enable;
 
 	LOGi("allow dimming: %u", enable);
 
-	if (enable && State::getInstance().isSet(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
+	if (enable && State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("unlock switch");
-		bool lockEnable = false;
-		State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &lockEnable, sizeof(lockEnable), PersistenceMode::STRATEGY1);
-		event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &lockEnable, sizeof(bool));
+		TYPIFY(CONFIG_SWITCH_LOCKED) lockEnable = false;
+		State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &lockEnable, sizeof(lockEnable));
+		event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &lockEnable, sizeof(lockEnable));
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
-	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &enable, sizeof(enable), PersistenceMode::STRATEGY1);
-	event_t event(CS_TYPE::EVT_DIMMING_ALLOWED, &enable, sizeof(bool));
+	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &enable, sizeof(enable));
+	event_t event(CS_TYPE::EVT_DIMMING_ALLOWED, &enable, sizeof(enable));
 	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
@@ -661,17 +627,17 @@ cs_ret_code_t CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uin
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-	bool enable = payload->enable;
+	TYPIFY(CONFIG_SWITCH_LOCKED) enable = payload->enable;
 
 	LOGi("lock switch: %u", enable);
 
-	if (enable && State::getInstance().isSet(CS_TYPE::CONFIG_PWM_ALLOWED)) {
+	if (enable && State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED)) {
 		LOGw("can't lock switch");
 		return ERR_NOT_AVAILABLE;
 	}
 
-	State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &enable, sizeof(enable), PersistenceMode::STRATEGY1);
-	event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &enable, sizeof(bool));
+	State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &enable, sizeof(enable));
+	event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &enable, sizeof(enable));
 	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
@@ -685,10 +651,9 @@ cs_ret_code_t CommandHandler::handleCmdEnableSwitchcraft(buffer_ptr_t buffer, co
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-	bool enable = payload->enable;
-
-	State::getInstance().set(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED, &enable, sizeof(enable), PersistenceMode::STRATEGY1);
-	event_t event(CS_TYPE::EVT_SWITCHCRAFT_ENABLED, &enable, sizeof(bool));
+	TYPIFY(CONFIG_SWITCHCRAFT_ENABLED) enable = payload->enable;
+	State::getInstance().set(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED, &enable, sizeof(enable));
+	event_t event(CS_TYPE::EVT_SWITCHCRAFT_ENABLED, &enable, sizeof(enable));
 	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
@@ -712,8 +677,8 @@ cs_ret_code_t CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const uin
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-	uint8_t enable = *(uint8_t*) buffer;
-	cs_ret_code_t errCode = State::getInstance().set(CS_TYPE::CONFIG_UART_ENABLED, buffer, size, PersistenceMode::STRATEGY1);
+	TYPIFY(CONFIG_UART_ENABLED) enable = *(uint8_t*) buffer;
+	cs_ret_code_t errCode = State::getInstance().set(CS_TYPE::CONFIG_UART_ENABLED, &enable, sizeof(enable));
 	if (errCode != ERR_SUCCESS) {
 		return errCode;
 	}

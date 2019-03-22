@@ -28,15 +28,6 @@ typedef uint32_t mesh_nonce_t;
 
 #define MESH_OVERHEAD (MESH_RANDOM_LENGTH + MESH_SESSION_NONCE_LENGTH)
 
-enum EncryptionAccessLevel {
-	ADMIN               = 0,
-	MEMBER              = 1,
-	GUEST               = 2,
-	SETUP               = 100,
-	NOT_SET             = 201,
-	ENCRYPTION_DISABLED = 255
-};
-
 enum EncryptionType {
 	CTR,
 	CTR_CAFEBABE,

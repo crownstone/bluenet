@@ -103,8 +103,6 @@ protected:
     void configureAdvertisement();
     void setName();
 
-    void writeDefaults();
-
     void createService(const ServiceEvent event);
 
     /** Create services available in setup mode

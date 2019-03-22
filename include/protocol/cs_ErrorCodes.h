@@ -12,6 +12,7 @@ enum ErrorCodesGeneral {
 
 	ERR_BUFFER_UNASSIGNED           = 0x10,
 	ERR_BUFFER_LOCKED               = 0x11,
+	ERR_BUFFER_TOO_SMALL            = 0x12,
 
 	ERR_WRONG_PAYLOAD_LENGTH        = 0x20,
 	ERR_WRONG_PARAMETER             = 0x21,

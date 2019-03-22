@@ -28,8 +28,6 @@ public:
 
 	void init(const boards_config_t& boardConfig);
 
-	void stopSampling();
-
 	/** Initializes and starts the ADC, also starts interval timer.
 	 */
 	void powerSampleFirstStart();
@@ -86,11 +84,11 @@ private:
 	//! Operation mode of this device.
 	OperationMode _operationMode;
 
-	float _voltageMultiplier; //! Voltage multiplier from settings.
-	float _currentMultiplier; //! Current multiplier from settings.
-	int32_t _voltageZero; //! Voltage zero from settings.
-	int32_t _currentZero; //! Current zero from settings.
-	int32_t _powerZero; //! Power zero from settings.
+	TYPIFY(CONFIG_VOLTAGE_MULTIPLIER) _voltageMultiplier; //! Voltage multiplier from settings.
+	TYPIFY(CONFIG_CURRENT_MULTIPLIER) _currentMultiplier; //! Current multiplier from settings.
+	TYPIFY(CONFIG_VOLTAGE_ADC_ZERO) _voltageZero; //! Voltage zero from settings.
+	TYPIFY(CONFIG_CURRENT_ADC_ZERO) _currentZero; //! Current zero from settings.
+	TYPIFY(CONFIG_POWER_ZERO) _powerZero; //! Power zero from settings.
 
 	uint16_t _avgZeroCurrentDiscount;
 	uint16_t _avgZeroVoltageDiscount;
@@ -121,8 +119,8 @@ private:
 	uint16_t _consecutivePwmOvercurrent;
 
 
-	uint16_t _currentMilliAmpThreshold;    //! Current threshold from settings.
-	uint16_t _currentMilliAmpThresholdPwm; //! Current threshold when using dimmer from settings.
+	TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD) _currentMilliAmpThreshold;    //! Current threshold from settings.
+	TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM) _currentMilliAmpThresholdPwm; //! Current threshold when using dimmer from settings.
 
 	uint32_t _lastEnergyCalculationTicks; //! Ticks of RTC when last energy calculation was performed.
 	int64_t _energyUsedmicroJoule; //! Energy used in micro joule

@@ -16,9 +16,9 @@
 void EncryptionHandler::init() {
 	_defaultValidationKey.b = DEFAULT_SESSION_KEY;
 	EventDispatcher::getInstance().addListener(this);
-	uint8_t mode;
-	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
-	_operationMode = static_cast<OperationMode>(mode);
+	TYPIFY(STATE_OPERATION_MODE) mode;
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	_operationMode = getOperationMode(mode);
 }
 
 uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength, EncryptionType encryptionType) {
@@ -54,7 +54,7 @@ uint16_t EncryptionHandler::calculateDecryptionBufferLength(uint16_t encryptedPa
 void EncryptionHandler::handleEvent(event_t & event) {
 	switch (event.type) {
 	case CS_TYPE::EVT_BLE_CONNECT:
-		if (State::getInstance().isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED))
+		if (State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED))
 			_generateSessionNonce();
 		break;
 	default: {}
@@ -136,8 +136,7 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 
 
 bool EncryptionHandler::encryptMesh(mesh_nonce_t nonce, uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength) {
-
-	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, PersistenceMode::STRATEGY1);
+	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, SOC_ECB_CIPHERTEXT_LENGTH);
 
 	// first MESH_OVERHEAD bytes of the target are overhead, which is a random number + nonce (message number)
 	uint16_t targetNetLength = targetLength - MESH_OVERHEAD;
@@ -176,8 +175,7 @@ bool EncryptionHandler::decryptMesh(uint8_t* encryptedDataPacket, uint16_t encry
 //		LOGe("Encryted data packet is smaller than the minimum possible size of a block and overhead (20 bytes).");
 		return false;
 	}
-
-	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, PersistenceMode::STRATEGY1);
+	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, SOC_ECB_CIPHERTEXT_LENGTH);
 
 	// the actual encrypted part is after the overhead
 	uint16_t sourceNetLength = encryptedDataPacketLength - MESH_OVERHEAD;
@@ -532,7 +530,7 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 		LOGd("Get key - level %i - from storage", userLevel);
 		log_once = 0;
 	}
-	State::getInstance().get(keyConfigType, _block.key, PersistenceMode::STRATEGY1);
+	State::getInstance().get(keyConfigType, _block.key, SOC_ECB_CIPHERTEXT_LENGTH);
 	return true;
 }
 
@@ -598,7 +596,7 @@ bool EncryptionHandler::_validateBlockLength(uint16_t length) {
 
 bool EncryptionHandler::allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided) {
 	// always allow access when encryption is disabled.
-	if (State::getInstance().isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) == false) {
+	if (State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) == false) {
 		return true;
 	}
 

@@ -239,7 +239,7 @@ private:
 	bool _hasRelay;
 	uint8_t _pinRelayOn;
 	uint8_t _pinRelayOff;
-	uint16_t _relayHighDuration;
+	TYPIFY(CONFIG_RELAY_HIGH_DURATION) _relayHighDuration;
 
 	bool _delayedSwitchPending;
 	uint8_t _delayedSwitchState;

@@ -52,6 +52,20 @@ inline uint32_t convertEndian32(uint32_t val) {
 		 | ((val & 0xFF) << 24);
 }
 
+/**
+ * Macro that rounds up to the next multiple of given number
+ *
+ * Does not work for negative values.
+ */
+#define CS_ROUND_UP_TO_MULTIPLE_OF(num, multiple) (((num + multiple - 1) / multiple) * multiple)
+/**
+ * Macro that rounds up to the next multiple of given number that is a power of 2.
+ *
+ * Also works for negative values.
+ */
+#define CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(num, multiple) ((num + multiple - 1) & -multiple)
+
+
 /** Macro that returns the length of an array
  *
  * @a the array whose length should be calculated

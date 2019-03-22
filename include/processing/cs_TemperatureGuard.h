@@ -56,7 +56,7 @@ private:
 
 	app_timer_t              _appTimerData;
 	app_timer_id_t           _appTimerId;
-	int8_t _maxChipTemp;
+	TYPIFY(CONFIG_MAX_CHIP_TEMP) _maxChipTemp;
 	COMP* _comp;
 	CS_TYPE _lastChipTempEvent;
 	CS_TYPE _lastPwmTempEvent;

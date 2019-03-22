@@ -55,9 +55,9 @@ private:
 	bool _scanning;
 	bool _running;
 	//! scan for ... ms
-	uint16_t _scanDuration;
+	TYPIFY(CONFIG_SCAN_DURATION) _scanDuration;
 	//! wait ... ms before starting the next scan
-	uint16_t _scanBreakDuration;
+	TYPIFY(CONFIG_SCAN_BREAK_DURATION) _scanBreakDuration;
 
 	uint16_t _scanCount;
 

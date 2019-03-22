@@ -146,6 +146,22 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, cs_state_data_t file_dat
 	return fds_ret_code;
 }
 
+/**
+ * Maybe we should check if data is stored at right boundary.
+ *
+ * if ((uint32_t)data.value % 4u != 0) {
+ *		LOGe("Unaligned type: %s: %p", TypeName(type), data.value);
+ *	}
+ */
+uint8_t* Storage::allocate(size16_t& size) {
+	size16_t flashSize = CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(size, 4);
+	size16_t paddingSize = flashSize - size;
+	uint8_t* ptr = (uint8_t*) malloc(sizeof(uint8_t) * flashSize);
+	memset(ptr + size, 0xFF, paddingSize);
+	size = flashSize;
+	return ptr;
+}
+
 void Storage::print(const std::string & prefix, CS_TYPE type) {
 	LOGd("%s %s (%i)", prefix.c_str(), TypeName(type), type);
 }

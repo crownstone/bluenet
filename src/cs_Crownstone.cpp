@@ -161,10 +161,10 @@ void Crownstone::init() {
 	NRF_LOG_FLUSH();
 
 	LOGi(FMT_HEADER, "mode");
-	uint8_t mode;
-	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
+	TYPIFY(STATE_OPERATION_MODE) mode;
+	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	OperationMode newOperationMode = getOperationMode(mode);
 	LOGd("Mode is 0x%X", mode);
-	OperationMode newOperationMode = static_cast<OperationMode>(mode);
 	switchMode(newOperationMode);
 	NRF_LOG_FLUSH();
 
@@ -194,10 +194,9 @@ void Crownstone::initDrivers() {
 #ifdef ANNE_TEST_FACTORY_RESET
 	LOGi("Factory reset");
 	 _state->factoryReset(FACTORY_RESET_CODE);
-	st_value_t resetCounter;
-	resetCounter.u32 = 6;
-	LOGi("Set reset counter to: %d", resetCounter.u8);
-	_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), PersistenceMode::FLASH);
+	TYPIFY(STATE_RESET_COUNTER) resetCounter = 6;
+	LOGi("Set reset counter to: %i", resetCounter);
+	_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
 
 	increaseResetCounter();
 #endif
@@ -206,8 +205,8 @@ void Crownstone::initDrivers() {
 	// TODO: make into a class with proper init() function
 	if (!_boardsConfig.flags.hasSerial) {
 		serial_config(_boardsConfig.pinGpioRx, _boardsConfig.pinGpioTx);
-		uint8_t uartEnabled;
-		_state->get(CS_TYPE::CONFIG_UART_ENABLED, &uartEnabled, PersistenceMode::STRATEGY1);
+		TYPIFY(CONFIG_UART_ENABLED) uartEnabled;
+		_state->get(CS_TYPE::CONFIG_UART_ENABLED, &uartEnabled, sizeof(uartEnabled));
 		serial_enable((serial_enable_t)uartEnabled);
 	}
 
@@ -277,8 +276,6 @@ void Crownstone::configure() {
 
 	setName();
 
-	writeDefaults();
-
 	LOGi("> advertisement ...");
 	configureAdvertisement();
 }
@@ -305,13 +302,13 @@ void Crownstone::configure() {
  */
 void Crownstone::configureStack() {
 	// Set the stored tx power
-	int8_t txPower = 0;
-	_state->get(CS_TYPE::CONFIG_TX_POWER, &txPower, PersistenceMode::STRATEGY1);
+	TYPIFY(CONFIG_TX_POWER) txPower = 0;
+	_state->get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
 	_stack->setTxPowerLevel(txPower);
 
 	// Set the stored advertisement interval
-	uint16_t advInterval;
-	_state->get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, PersistenceMode::STRATEGY1);
+	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;
+	_state->get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, sizeof(advInterval));
 	_stack->setAdvertisingInterval(advInterval);
 
 	// Set callback handler for a connection event
@@ -351,22 +348,21 @@ void Crownstone::configureStack() {
  * (the _operationMode var is not used).
  */
 void Crownstone::configureAdvertisement() {
-
-	// Initialize service data
-	uint8_t mode;
-	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, PersistenceMode::STRATEGY1);
-	OperationMode _tmpOperationMode = static_cast<OperationMode>(mode);
-	LOGd("Operation mode: %s", TypeName(_tmpOperationMode));
-
 	// Create the iBeacon parameter object which will be used to configure the advertisement as an iBeacon.
-	uint16_t major, minor;
+	TYPIFY(CONFIG_IBEACON_MAJOR) major;
+	TYPIFY(CONFIG_IBEACON_MINOR) minor;
 	TYPIFY(CONFIG_IBEACON_TXPOWER) rssi;
 	ble_uuid128_t uuid;
-	_state->get(CS_TYPE::CONFIG_IBEACON_MAJOR, &major, PersistenceMode::STRATEGY1);
-	_state->get(CS_TYPE::CONFIG_IBEACON_MINOR, &minor, PersistenceMode::STRATEGY1);
-	_state->get(CS_TYPE::CONFIG_IBEACON_UUID, uuid.uuid128, PersistenceMode::STRATEGY1);
-	_state->get(CS_TYPE::CONFIG_IBEACON_TXPOWER, &rssi, PersistenceMode::STRATEGY1);
-	LOGd("iBeacon: major=%u, minor=%u, rssi_on_1m=%i", major, minor, (int8_t)rssi);
+//	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+		_state->get(CS_TYPE::CONFIG_IBEACON_MAJOR, &major, sizeof(major));
+		_state->get(CS_TYPE::CONFIG_IBEACON_MINOR, &minor, sizeof(minor));
+		_state->get(CS_TYPE::CONFIG_IBEACON_UUID, uuid.uuid128, sizeof(uuid.uuid128));
+		_state->get(CS_TYPE::CONFIG_IBEACON_TXPOWER, &rssi, sizeof(rssi));
+//	}
+//	else {
+//		// TODO: Get default!
+//	}
+	LOGd("iBeacon: major=%u, minor=%u, rssi_on_1m=%i", major, minor, rssi);
 
 	_beacon = new IBeacon(uuid, major, minor, rssi);
 
@@ -376,19 +372,19 @@ void Crownstone::configureAdvertisement() {
 	_serviceData->init();
 
 	// The service data is populated with State information, but only in NORMAL mode.
-	if (_tmpOperationMode == OperationMode::OPERATION_MODE_NORMAL) {
+	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
 		LOGd("Normal mode, fill with state info");
 
 		// Write crownstone id to the service data object.
-		uint16_t crownstoneId;
-		_state->get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, PersistenceMode::STRATEGY1);
+		TYPIFY(CONFIG_CROWNSTONE_ID) crownstoneId;
+		_state->get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, sizeof(crownstoneId));
 		_serviceData->updateCrownstoneId(crownstoneId);
 		LOGi("Set crownstone id to %u", crownstoneId);
 
 		// Write switch state to the service data object.
-		uint8_t switchState;
-		_state->get(CS_TYPE::STATE_SWITCH_STATE, &switchState, PersistenceMode::STRATEGY1);
-		_serviceData->updateSwitchState(switchState);
+		TYPIFY(STATE_SWITCH_STATE) switchState;
+		_state->get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
+		_serviceData->updateSwitchState(switchState.asInt);
 
 		// Write temperature to the service data object.
 		_serviceData->updateTemperature(getTemperature());
@@ -397,7 +393,7 @@ void Crownstone::configureAdvertisement() {
 	// assign service data to stack
 	_stack->setServiceData(_serviceData);
 
-	if (_state->isSet(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
+	if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
 		LOGd("Configure iBeacon");
 		_stack->configureIBeacon(_beacon, _boardsConfig.deviceType);
 	} else {
@@ -510,7 +506,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	}
 
 	// Enable AES encryption.
-	if (_state->isSet(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
+	if (_state->isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
 		LOGi(FMT_ENABLE, "AES encryption");
 		_stack->setAesEncrypted(true);
 	}
@@ -527,24 +523,22 @@ void Crownstone::setName() {
 #if CHANGE_NAME_ON_RESET==1
 	addResetCounterToName = true;
 #endif
-
+//	TYPIFY(CONFIG_NAME)
 	char device_name[32];
-	size16_t size = 0;
-	_state->get(CS_TYPE::CONFIG_NAME, device_name, size, PersistenceMode::STRATEGY1);
+	cs_state_data_t stateNameData(CS_TYPE::CONFIG_NAME, (uint8_t*)device_name, sizeof(device_name));
+	_state->get(stateNameData);
 	std::string deviceName;
 	if (addResetCounterToName) {
 		//! clip name to 5 chars and add reset counter at the end
-		uint16_t resetCounter;
-		size16_t resetCounterSize = sizeof(resetCounter);
-		_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, resetCounterSize, PersistenceMode::STRATEGY1);
+		TYPIFY(STATE_RESET_COUNTER) resetCounter;
+		_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
 		char devicename_resetCounter[32];
-		sprintf(devicename_resetCounter, "%.*s_%d", MIN(size, 5), device_name, resetCounter);
+		sprintf(devicename_resetCounter, "%.*s_%d", MIN(stateNameData.size, 5), device_name, resetCounter);
 		deviceName = std::string(devicename_resetCounter);
 	} else {
-		deviceName = std::string(device_name, size);
+		deviceName = std::string(device_name, stateNameData.size);
 	}
 	_stack->updateDeviceName(deviceName);
-
 }
 
 /**
@@ -576,18 +570,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	}
 }
 
-// TODO: what is this for?
-/**
- * Write temperature, time, and state errors to (persistent) memory.
- */
-void Crownstone::writeDefaults() {
-//	st_value_t value;
-//	value.u32 = 0;
-//	_state->set(CS_TYPE::STATE_TEMPERATURE, &value, sizeof(value), PersistenceMode::STRATEGY1);
-//	_state->set(CS_TYPE::STATE_TIME, &value, sizeof(value), PersistenceMode::STRATEGY1);
-//	_state->set(CS_TYPE::STATE_ERRORS, &value, sizeof(value), PersistenceMode::STRATEGY1);
-}
-
 /**
  * After allocation of all modules, after initialization of each module, and after configuration of each module, we
  * are ready to "start". This means:
@@ -607,8 +589,8 @@ void Crownstone::startUp() {
 	sd_power_gpregret_get(gpregret_id, &gpregret);
 	LOGi("Content gpregret register: %d", gpregret);
 
-	uint16_t bootDelay;
-	_state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, PersistenceMode::STRATEGY1);
+	TYPIFY(CONFIG_BOOT_DELAY) bootDelay;
+	_state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
 	if (bootDelay) {
 		LOGi("Boot delay: %d ms", bootDelay);
 		nrf_delay_ms(bootDelay);
@@ -654,13 +636,13 @@ void Crownstone::startUp() {
 
 		_scheduler->start();
 
-		if (_state->isSet(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
+		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
 			uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
 			_scanner->delayedStart(delay);
 		}
 
-		if (_state->isSet(CS_TYPE::CONFIG_MESH_ENABLED)) {
+		if (_state->isTrue(CS_TYPE::CONFIG_MESH_ENABLED)) {
 #if BUILD_MESHING == 1
 //			nrf_delay_ms(500);
 			//! TODO: start with delay please
@@ -697,12 +679,11 @@ void Crownstone::startUp() {
  * persists over reboots.
  */
 void Crownstone::increaseResetCounter() {
-	uint32_t resetCounter;
-	resetCounter = 0;
-	_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, PersistenceMode::STRATEGY1);
+	TYPIFY(STATE_RESET_COUNTER) resetCounter = 0;
+	_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
 	resetCounter++;
 	LOGi("Reset counter at %u", resetCounter);
-	_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter), PersistenceMode::STRATEGY1);
+	_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
 }
 
 /**
@@ -714,9 +695,8 @@ void Crownstone::tick() {
 	// TODO: warning when close to out of memory
 	// TODO: maybe detect memory leaks?
 
-	st_value_t temperature;
-	temperature.s32 = getTemperature();
-	_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature), PersistenceMode::STRATEGY1);
+	TYPIFY(STATE_TEMPERATURE) temperature = getTemperature();
+	_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature));
 
 	// Update advertisement parameter (only in operation mode NORMAL)
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
@@ -856,9 +836,7 @@ void Crownstone::handleEvent(event_t & event) {
 			_scanner->stop();
 
 			if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-				// [11-jul-2017] Since we store the switch state, we don't have to switch here.
-				//			_switch->setSwitch(0);
-				_powerSampler->stopSampling();
+				//	_powerSampler->stopSampling();
 			}
 
 			uint32_t gpregret_id = 0;
@@ -880,7 +858,7 @@ void Crownstone::handleEvent(event_t & event) {
 		default: return;
 	}
 
-	if (reconfigureBeacon && _state->isSet(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
+	if (reconfigureBeacon && _state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
 		_stack->setAdvertisementData();
 	}
 }
