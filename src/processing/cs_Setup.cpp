@@ -59,7 +59,6 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 
 	LOGd("Store keys, mesh address, and other config data");
 	State &state = State::getInstance();
-//	TYPIFY(CONFIG_CROWNSTONE_ID) stoneId = setupData->id;
 	state.set(CS_TYPE::CONFIG_CROWNSTONE_ID, &(setupData->id), sizeof(setupData->id)); // TODO: this should fail.
 	state.set(CS_TYPE::CONFIG_KEY_ADMIN, &(setupData->adminKey), sizeof(setupData->adminKey));
 	state.set(CS_TYPE::CONFIG_KEY_MEMBER, &(setupData->memberKey), sizeof(setupData->memberKey));

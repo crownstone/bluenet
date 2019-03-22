@@ -540,7 +540,7 @@ Type nr | Type name | Payload type | Description
 27 | Scanner enabled | uint 8 | Stores if device scanning is enabled. *read only*
 28 | Continuous power measurement enabled | uint 8 | Stores if continuous power measurement is enabled. *read only*
 29 | Tracker enabled | uint 8 | Stores if device tracking is enabled. *read only*
-34 | <a name="crownstone_identifier"></a>Crownstone Identifier | uint 16 | Crownstone identifier used in advertisement package.
+34 | <a name="crownstone_identifier"></a>Crownstone Identifier | uint 8 | Crownstone identifier used in advertisement package.
 35 | <a name="admin_key"></a>Admin encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions.
 36 | <a name="user_key"></a>Member encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions.
 37 | <a name="guest_key"></a>Guest encryption key | uint 8 [16] | 16 byte key used to encrypt/decrypt guest access functions.

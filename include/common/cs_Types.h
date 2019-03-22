@@ -416,7 +416,7 @@ struct cs_state_data_t {
 #endif
 typedef uint16_t TYPIFY(CONFIG_ADV_INTERVAL);
 typedef uint16_t TYPIFY(CONFIG_BOOT_DELAY);
-typedef uint16_t TYPIFY(CONFIG_CROWNSTONE_ID);
+typedef uint8_t  TYPIFY(CONFIG_CROWNSTONE_ID);
 typedef    float TYPIFY(CONFIG_CURRENT_MULTIPLIER);
 typedef  int32_t TYPIFY(CONFIG_CURRENT_ADC_ZERO);
 typedef     BOOL TYPIFY(CONFIG_DEFAULT_ON);
