@@ -387,7 +387,7 @@ cs_ret_code_t CrownstoneService::configOnWrite(const EncryptionAccessLevel acces
 //		cs_state_data_t stateData(type, sbPayload, sbSize);
 		uint8_t stateDataValue[TypeSize(type)];
 		cs_state_data_t stateData(type, stateDataValue, sizeof(stateDataValue));
-		errCode = State::getInstance().verifyForGet(stateData);
+		errCode = State::getInstance().verifySizeForGet(stateData);
 		if (FAILURE(errCode)) {
 			break;
 		}
@@ -410,7 +410,7 @@ cs_ret_code_t CrownstoneService::configOnWrite(const EncryptionAccessLevel acces
 			break;
 		}
 		cs_state_data_t stateData(type, _streamBuffer->payload(), _streamBuffer->length());
-		errCode = State::getInstance().verifyForSet(stateData);
+		errCode = State::getInstance().verifySizeForSet(stateData);
 		if (FAILURE(errCode)) {
 			break;
 		}
@@ -481,7 +481,7 @@ cs_ret_code_t CrownstoneService::stateOnWrite(const EncryptionAccessLevel access
 //		cs_state_data_t stateData(type, sbPayload, sbSize);
 		uint8_t stateDataValue[TypeSize(type)];
 		cs_state_data_t stateData(type, stateDataValue, sizeof(stateDataValue));
-		errCode = State::getInstance().verifyForGet(stateData);
+		errCode = State::getInstance().verifySizeForGet(stateData);
 		if (FAILURE(errCode)) {
 			break;
 		}
@@ -504,7 +504,7 @@ cs_ret_code_t CrownstoneService::stateOnWrite(const EncryptionAccessLevel access
 			break;
 		}
 		cs_state_data_t stateData(type, _streamBuffer->payload(), _streamBuffer->length());
-		errCode = State::getInstance().verifyForSet(stateData);
+		errCode = State::getInstance().verifySizeForSet(stateData);
 		if (FAILURE(errCode)) {
 			break;
 		}

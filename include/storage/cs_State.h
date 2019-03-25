@@ -168,6 +168,8 @@ public:
 
 	/**
 	 * Convenience function for get().
+	 *
+	 * Avoids having to create a temp every time you want to get a state variable.
 	 */
 	cs_ret_code_t get(const CS_TYPE type, void *value, const size16_t size);
 
@@ -186,28 +188,24 @@ public:
 
 	/**
 	 * Convenience function for set().
+	 *
+	 * Avoids having to create a temp every time you want to set a state variable.
 	 */
 	cs_ret_code_t set(const CS_TYPE type, void *value, const size16_t size);
 
 	/**
-	 * Verify user data for getting a state.
-	 *
-	 * Checks include:
-	 * - size check
+	 * Verify size of user data for getting a state.
 	 *
 	 * @param[in] data            Data struct with state type, target, and size.
 	 */
-	cs_ret_code_t verifyForGet(cs_state_data_t & data);
+	cs_ret_code_t verifySizeForGet(const cs_state_data_t & data);
 
 	/**
-	 * Verify user data for setting a state.
-	 *
-	 * Checks include:
-	 * - size
+	 * Verify size of user data for setting a state.
 	 *
 	 * @param[in] data            Data struct with state type, data, and size.
 	 */
-	cs_ret_code_t verifyForSet(cs_state_data_t & data);
+	cs_ret_code_t verifySizeForSet(const cs_state_data_t & data);
 
 	/**
 	 * Remove a state variable.

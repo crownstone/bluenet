@@ -32,8 +32,7 @@ void State::init(boards_config_t* boardsConfig) {
 	setInitialized();
 }
 
-cs_ret_code_t State::verifyForGet(cs_state_data_t & data) {
-//	cs_ret_code_t error_code = ERR_NOT_IMPLEMENTED;
+cs_ret_code_t State::verifySizeForGet(const cs_state_data_t & data) {
 	size16_t typeSize = TypeSize(data.type);
 	if (typeSize == 0) {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, data.type);
@@ -45,7 +44,7 @@ cs_ret_code_t State::verifyForGet(cs_state_data_t & data) {
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t State::verifyForSet(cs_state_data_t & data) {
+cs_ret_code_t State::verifySizeForSet(const cs_state_data_t & data) {
 	size16_t typeSize = TypeSize(data.type);
 	if (typeSize == 0) {
 		LOGw(FMT_CONFIGURATION_NOT_FOUND, data.type);
@@ -53,12 +52,14 @@ cs_ret_code_t State::verifyForSet(cs_state_data_t & data) {
 	}
 	switch (data.type) {
 	case CS_TYPE::CONFIG_NAME: {
-		if (data.size > typeSize) {
+		// Case where type size is the max size, but can be smaller.
+		if (data.size < 1 || data.size > typeSize) {
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
 		break;
 	}
 	default: {
+		// Case with fixed type size.
 		if (data.size != typeSize) {
 			return ERR_WRONG_PAYLOAD_LENGTH;
 		}
@@ -292,6 +293,7 @@ bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
 		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: {
 			cs_state_data_t data(type, &enabled, sizeof(enabled));
 			get(data);
+			break;
 		}
 		default: {}
 	}
