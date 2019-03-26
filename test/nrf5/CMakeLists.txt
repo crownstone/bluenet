@@ -55,6 +55,7 @@ set(TEST_SOURCE_DIR "test/nrf5")
 
 # Reset_Handler, etc.
 LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
+set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
 
 # lpcomp should not be here
 LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_comp.c")
@@ -65,7 +66,6 @@ LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/crc16/crc16.c")
 
 # In case of adding powersampling
 LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fds/fds.c")
-
 LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
 LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
 
@@ -111,17 +111,24 @@ list(APPEND FOLDER_SOURCE "${NORDIC_SOURCE}")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_sysNrf.c")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cfg/cs_Boards.c")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Handlers.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Error.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")
 
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_ADC.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Serial.cpp")
+list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Timer.cpp")
+
+list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Stack.cpp")
 
 # In case of adding powersampling
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_PowerSampling.cpp")
+list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_RecognizeSwitch.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_State.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_EventDispatcher.cpp")
+
+
 
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/SortMedian.cc")
 
@@ -277,94 +284,15 @@ TARGET_LINK_LIBRARIES(${TEST} ${LIBS})
 
 
 
+list(APPEND FOLDER_SOURCE "${NORDIC_SOURCE_${TEST}}")
 
-
-
-
-MESSAGE(STATUS "[test/state_test/CMakeLists.txt]: Compiler: ${CMAKE_C_COMPILER}")
+MESSAGE(STATUS "${NORDIC_SOURCE_${TEST}}")
 
 set(TEST test_state)
 
-set(TEST_SOURCE_DIR "test/nrf5")
-
-# Reset_Handler, etc.
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
-
-# lpcomp should not be here
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_comp.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/scheduler/app_scheduler.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_util_platform.c")
-
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/crc16/crc16.c")
-
-# In case of adding powersampling
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fds/fds.c")
-
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
-
-# RTC1_IRQHandler
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/timer/app_timer.c")
-
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/util/app_error_weak.c")
-
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh_ble.c")
-
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/atomic/nrf_atomic.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/atomic_fifo/nrf_atfifo.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/experimental_section_vars/nrf_section_iter.c")
-
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/memobj/nrf_memobj.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/ringbuf/nrf_ringbuf.c")
-
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh_soc.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_comp.c")
-#	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_saadc.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uart.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/prs/nrfx_prs.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uarte.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/hal/nrf_nvmc.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/system_nrf51.c")
-	
-# Required for the UART backend
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_frontend.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_default_backends.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_uart.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_serial.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_str_formatter.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/external/fprintf/nrf_fprintf.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/external/fprintf/nrf_fprintf_format.c")
-LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/integration/nrfx/legacy/nrf_drv_uart.c")
-	
-
-list(APPEND FOLDER_SOURCE "${NORDIC_SOURCE}")
-
-
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_sysNrf.c")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cfg/cs_Boards.c")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Error.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")
-
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_ADC.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Serial.cpp")
-
-# In case of adding powersampling
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_PowerSampling.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_State.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Storage.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_EventDispatcher.cpp")
-
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/third/SortMedian.cc")
-
-# Somehow the following files are pulled in as well..., not nice..., should not be necessary
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_UUID.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/cs_UartProtocol.cpp")
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/events/cs_EventDispatcher.cpp")
-
 set(TEST_SOURCE_FILES "${FOLDER_SOURCE}")
+
+INCLUDE_DIRECTORIES("${NRF5_DIR}/components/drivers_nrf/pwm/")
 
 set(SOURCE_FILES ${TEST_SOURCE_DIR}/${TEST}.cpp ${TEST_SOURCE_FILES}) 
 add_executable(${TEST} ${SOURCE_FILES} ${TEST}.tmp)
@@ -419,7 +347,6 @@ ADD_CUSTOM_TARGET(analyze-${TEST}
 	COMMENT "Read headers ${TEST}.elf"
 	)
 
-#LIST(APPEND NORDIC_SOURCE_${TEST} "${NRF5_DIR}/components/drivers_nrf/pwm/nrf_drv_pwm.c")
 SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${TEST}.bin)
 
 TARGET_LINK_LIBRARIES(${TEST} ${LIBS})
