@@ -354,7 +354,8 @@ if [ $do_upload ]; then
 			upload_valid_app_mark
 			done_upload=true
 		else
-			upload_invalid_app_mark
+#			upload_invalid_app_mark
+			:
 		fi
 	fi
 	verify_board_version_written
