@@ -91,11 +91,11 @@ ret_code_t Storage::garbageCollectInternal() {
 	return fds_ret_code;
 }
 
-cs_ret_code_t Storage::write(cs_file_id_t file_id, cs_state_data_t file_data) {
+cs_ret_code_t Storage::write(cs_file_id_t file_id, const cs_state_data_t & file_data) {
 	return getErrorCode(writeInternal(file_id, file_data));
 }
 
-ret_code_t Storage::writeInternal(cs_file_id_t file_id, cs_state_data_t file_data) {
+ret_code_t Storage::writeInternal(cs_file_id_t file_id, const cs_state_data_t & file_data) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -107,7 +107,9 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, cs_state_data_t file_dat
 	record.file_id           = file_id;
 	record.key               = to_underlying_type(file_data.type);
 	record.data.p_data       = file_data.value;
-	record.data.length_words = file_data.size >> 2; // Size is in bytes, each word is 4B.
+	// Assume the allocation was done by storage.
+	// Size is in bytes, each word is 4B.
+	record.data.length_words = getPaddedSize(file_data.size) >> 2;
 	LOGd("Store %p of word size %u", record.data.p_data, record.data.length_words);
 
 	bool f_exists = false;
@@ -121,7 +123,7 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, cs_state_data_t file_dat
 		LOGd("Write file %u, record %u, ptr %p", file_id, record.key, record.data.p_data);
 		fds_ret_code = fds_record_write(&record_desc, &record);
 		FDS_ERROR_CHECK(fds_ret_code);
-		static bool garbage_collection = false; //TODO: why not a member variable?
+		static bool garbage_collection = false; // TODO: why not a member variable?
 		f_exists = false;
 		switch(fds_ret_code) {
 			case FDS_ERR_NO_SPACE_IN_FLASH:
@@ -136,7 +138,7 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, cs_state_data_t file_dat
 				break;
 			case FDS_SUCCESS:
 				LOGnone("Write successful");
-				fds_ret_code = exists(file_id, file_data.type, record_desc, f_exists);
+				fds_ret_code = exists(file_id, file_data.type, record_desc, f_exists); // TODO: why do we check if file exists again? Doesn't this always returns false?
 				if (!f_exists) {
 					LOGw("Warning: written with delay");
 				}
@@ -154,7 +156,7 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, cs_state_data_t file_dat
  *	}
  */
 uint8_t* Storage::allocate(size16_t& size) {
-	size16_t flashSize = CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(size, 4);
+	size16_t flashSize = getPaddedSize(size);
 	size16_t paddingSize = flashSize - size;
 	uint8_t* ptr = (uint8_t*) malloc(sizeof(uint8_t) * flashSize);
 	memset(ptr + size, 0xFF, paddingSize);
@@ -162,11 +164,16 @@ uint8_t* Storage::allocate(size16_t& size) {
 	return ptr;
 }
 
+size16_t Storage::getPaddedSize(size16_t size) {
+	size16_t flashSize = CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(size, 4);
+	return flashSize;
+}
+
 void Storage::print(const std::string & prefix, CS_TYPE type) {
 	LOGd("%s %s (%i)", prefix.c_str(), TypeName(type), type);
 }
 
-cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t file_data) {
+cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t & file_data) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -176,11 +183,12 @@ cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t file_data) {
 	ret_code_t fds_ret_code;
 
 	fds_ret_code = FDS_ERR_NOT_FOUND;
+	cs_ret_code_t cs_ret_code = ERR_SUCCESS;
 
 	//LOGd("Read from file %i record %i", file_id, file_data.key);
 	// go through all records with given file_id and key (can be multiple)
 	initSearch();
-	bool break_on_first = false;
+	bool break_on_first = true;
 	bool found = false;
 	while (fds_record_find(file_id, to_underlying_type(file_data.type), &record_desc, &_ftok) == FDS_SUCCESS) {
 		LOGd("Read record %u", to_underlying_type(file_data.type));
@@ -193,13 +201,21 @@ cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t file_data) {
 			found = true;
 
 			// map flash_record.p_data to value
-			file_data.size = flash_record.p_header->length_words << 2; // Size is in bytes, each word is 4B.
-			memcpy(file_data.value, flash_record.p_data, file_data.size);
+			size_t flashSize = flash_record.p_header->length_words << 2; // Size is in bytes, each word is 4B.
+			if (flashSize != getPaddedSize(file_data.size)) {
+				LOGe("stored size = %u ram size = %u", flashSize, file_data.size);
+				// TODO: remove this record?
+				cs_ret_code = ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			else {
+				memcpy(file_data.value, flash_record.p_data, file_data.size);
+			}
 
 			// invalidates the record
 			fds_ret_code = fds_record_close(&record_desc);
 			if (fds_ret_code != FDS_SUCCESS) {
-				LOGw("Error on closing record");
+				// TODO: maybe still return success? But how to handle the close error?
+				LOGe("Error on closing record");
 			}
 
 			if (break_on_first) {
@@ -209,6 +225,9 @@ cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t file_data) {
 	}
 	if (!found) {
 		LOGd("Record not found");
+	}
+	if (cs_ret_code != ERR_SUCCESS) {
+		return cs_ret_code;
 	}
 	return getErrorCode(fds_ret_code);
 }

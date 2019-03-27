@@ -48,13 +48,29 @@ public:
 		return _initialized;
 	}
 
-	/** Read from persistent storage.
+	/**
+	 * Read from persistent storage.
+	 *
+	 * Checks if given size matches stored size, else it returns ERR_WRONG_PAYLOAD_LENGTH.
+	 *
+	 * @param[in] file_id         File id to read from.
+	 * @param[in,out] data        Data struct with type to read. Pointer and size will be set afterwards.
+	 *
+	 * @retval ERR_SUCCESS                  When successful.
+	 * @retval ERR_NOT_FOUND                When the type was not found.
+	 * @retval ERR_WRONG_PAYLOAD_LENGTH     When the given size does not match the stored size.
 	 */
-	cs_ret_code_t read(cs_file_id_t file_id, cs_state_data_t data);
+	cs_ret_code_t read(cs_file_id_t file_id, cs_state_data_t & data);
 
-	/** Write to persistent storage.
-	*/
-	cs_ret_code_t write(cs_file_id_t file_id, cs_state_data_t data);
+	/**
+	 * Write to persistent storage.
+	 *
+	 * It is assumed that data pointer was allocated by this class.
+	 *
+	 * @param[in] file_id         File id to write to.
+	 * @param[in] data            Data struct with type, data pointer, and size.
+	 */
+	cs_ret_code_t write(cs_file_id_t file_id, const cs_state_data_t & data);
 
 	/**
 	 * Allocate ram that is correctly aligned and padded.
@@ -105,14 +121,12 @@ private:
 
 	cs_ret_code_t getErrorCode(ret_code_t code);
 
-
-
-
-
+	// Returns size after padding for flash.
+	size16_t getPaddedSize(size16_t size);
 
 	/** Write to persistent storage.
 	*/
-	ret_code_t writeInternal(cs_file_id_t file_id, cs_state_data_t file_contents);
+	ret_code_t writeInternal(cs_file_id_t file_id, const cs_state_data_t & data);
 
 //	ret_code_t exists(cs_file_id_t file_id, bool & result);
 

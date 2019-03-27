@@ -257,11 +257,22 @@ protected:
 	 */
 	cs_ret_code_t storeInRam(const cs_state_data_t & data, size16_t & index_in_ram);
 
+	/**
+	 * Adds a new state_data struct to ram.
+	 *
+	 * Allocates the struct and the data pointer.
+	 *
+	 * @param[in] type            State type.
+	 * @param[in] size            State variable size.
+	 * @return                    Struct with allocated data pointer.
+	 */
+	cs_state_data_t & addToRam(const CS_TYPE & type, size16_t size);
+
 	cs_ret_code_t allocate(cs_state_data_t & data);
 
 //	std::vector<CS_TYPE> _notifyingStates;
 
-	std::vector<cs_state_data_t> _data_in_ram;
+	std::vector<cs_state_data_t> _ram_data_index;
 
 private:
 
