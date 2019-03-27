@@ -46,6 +46,7 @@ int main() {
 	serial_config(board.pinGpioRx, board.pinGpioTx);
 	serial_init(SERIAL_ENABLE_RX_AND_TX);
 	_log(SERIAL_INFO, SERIAL_CRLF);
+	LOGi("##### Main #####");
 
 	// from crownstone constructor
 	EventDispatcher::getInstance();
@@ -60,10 +61,14 @@ int main() {
 	timer->init();
 	stack->initSoftdevice();
 	storage->init();
+
+	// Uhh, wait for storage to be initialized??
+	NRF_LOG_FLUSH();
+
 	state->init(&board);
 
 
-	// Start of tests
+	LOGi("##### Tests #####");
 	TestState test;
 	test.getSet();
 
@@ -101,7 +106,7 @@ void TestState::getSet() {
 	uint32_t errCode;
 
 	// Get and set a state var that is smaller than 4 bytes.
-	TYPIFY(CONFIG_PWM_PERIOD) bootDelay;
+	TYPIFY(CONFIG_BOOT_DELAY) bootDelay;
 	LOGi("get bootDelay");
 	errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
 	LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
