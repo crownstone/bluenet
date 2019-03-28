@@ -11,6 +11,14 @@
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_Timer.h>
 #include <ble/cs_Stack.h>
+#include <structs/cs_ScheduleEntriesAccessor.h>
+#include <drivers/cs_Timer.h>
+
+enum TestResult {
+	DONE,
+	DONE_BUT_WAIT_FOR_WRITE,
+	NOT_DONE_WAIT_FOR_WRITE,
+};
 
 class TestState : EventListener {
 public:
@@ -19,16 +27,32 @@ public:
 		_state = &State::getInstance();
 	}
 
-	void getSet();
+	void assertSuccess(cs_ret_code_t retCode);
+	void assertError(cs_ret_code_t retCode);
+	uint16_t getResetCount();
+	void setResetCount(uint16_t count);
 	void waitForStore(CS_TYPE type);
+	void continueTest();
 	void handleEvent(event_t & event);
+
+	TestResult getAndSetUint16(uint16_t resetCount);
+	TestResult getAndSetInvalid(uint16_t resetCount);
+	TestResult getAndSetLargeStruct(uint16_t resetCount);
+
 private:
-	CS_TYPE _lastStoredType = CS_TYPE::CONFIG_DO_NOT_USE;
+	uint32_t _test = 0;
+	uint16_t _resetCount;
+	uint32_t _getAndSetUint16 = 0;
+	uint32_t _getAndSetInvalid = 0;
+	uint32_t _getAndSetLargeStruct = 0;
+
+	volatile CS_TYPE _lastStoredType = CS_TYPE::CONFIG_DO_NOT_USE;
 	State *_state;
 };
 
 int main() {
 	// from crownstone main
+	// this enabled the hard float, without it, we get a hardfault
 	SCB->CPACR |= (3UL << 20) | (3UL << 22); __DSB(); __ISB();
 
 //	atexit(on_exit);
@@ -36,7 +60,7 @@ int main() {
 	NRF_LOG_INIT(NULL);
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
 	NRF_LOG_INFO("Main");
-	NRF_LOG_FLUSH();
+//	NRF_LOG_FLUSH();
 
 	uint32_t errCode;
 	boards_config_t board = {};
@@ -46,6 +70,7 @@ int main() {
 	serial_config(board.pinGpioRx, board.pinGpioTx);
 	serial_init(SERIAL_ENABLE_RX_AND_TX);
 	_log(SERIAL_INFO, SERIAL_CRLF);
+	LOGi("");
 	LOGi("##### Main #####");
 
 	// from crownstone constructor
@@ -53,7 +78,8 @@ int main() {
 	Stack *stack = &Stack::getInstance();
 	Timer *timer = &Timer::getInstance();
 	Storage *storage = &Storage::getInstance();
-	State *state = &State::getInstance();
+//	State *state = &State::getInstance();
+	__attribute__((unused)) TestState test;
 
 	// from crownstone init
 	LOGi("Init drivers");
@@ -61,40 +87,73 @@ int main() {
 	timer->init();
 	stack->initSoftdevice();
 	storage->init();
+	// Code continues at event storage initialized.
 
-	// Uhh, wait for storage to be initialized??
-	NRF_LOG_FLUSH();
-
-	state->init(&board);
-
-
-	LOGi("##### Tests #####");
-	TestState test;
-	test.getSet();
-
-
-	NRF_LOG_FLUSH();
-}
-
-void TestState::waitForStore(CS_TYPE type) {
-	_lastStoredType = type;
 	while (1) {
 		app_sched_execute();
 		sd_app_evt_wait();
-		NRF_LOG_FLUSH();
-		if (_lastStoredType == CS_TYPE::CONFIG_DO_NOT_USE) {
+//		NRF_LOG_FLUSH();
+	}
+}
+
+void TestState::waitForStore(CS_TYPE type) {
+	LOGi("waitForStore type=%u", type);
+	_lastStoredType = type;
+}
+
+void TestState::continueTest() {
+	TestResult result = DONE;
+	switch (_test) {
+		case 0:
+			result = getAndSetInvalid(_resetCount);
 			break;
-		}
+		case 1:
+			result = getAndSetUint16(_resetCount);
+			break;
+		case 2:
+			result = getAndSetLargeStruct(_resetCount);
+			break;
+		default:
+			LOGi("");
+			LOGi("##### Tests complete! #####");
+			return;
+	}
+	switch (result) {
+	case DONE_BUT_WAIT_FOR_WRITE:
+		_test++;
+		break;
+	case DONE:
+		_test++;
+		continueTest();
+		break;
+	case NOT_DONE_WAIT_FOR_WRITE:
+		break;
 	}
 }
 
 void TestState::handleEvent(event_t & event) {
+	LOGi("event %u", event.type);
+//	NRF_LOG_FLUSH();
 	switch (event.type) {
+	case CS_TYPE::EVT_STORAGE_INITIALIZED: {
+		LOGi("storage initialized");
+		boards_config_t board = {};
+		uint32_t errCode = configure_board(&board);
+		APP_ERROR_CHECK(errCode);
+		State::getInstance().init(&board);
+		LOGi("");
+		LOGi("##### Tests #####");
+
+		_resetCount = getResetCount();
+		setResetCount(_resetCount + 1);
+		break;
+	}
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
 		CS_TYPE storedType = *(CS_TYPE*)event.data;
-		if (_lastStoredType == storedType) {
-			_lastStoredType = CS_TYPE::CONFIG_DO_NOT_USE;
-		}
+		LOGi("lastStoredType=%u storedType=%u", _lastStoredType, storedType);
+		assert(_lastStoredType == storedType, "Wrong type written");
+		_lastStoredType = CS_TYPE::CONFIG_DO_NOT_USE;
+		continueTest();
 		break;
 	}
 	default:
@@ -102,27 +161,216 @@ void TestState::handleEvent(event_t & event) {
 	}
 }
 
-void TestState::getSet() {
-	uint32_t errCode;
-
-	// Get and set a state var that is smaller than 4 bytes.
-	TYPIFY(CONFIG_BOOT_DELAY) bootDelay;
-	LOGi("get bootDelay");
-	errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
-	LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
-
-	bootDelay = 1234;
-	LOGi("set boot delay to %u", bootDelay);
-	errCode = _state->set(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
-	LOGi("errCode=%u", errCode);
-
-	LOGi("get bootDelay before write is done");
-	errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
-	LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
-
-	waitForStore(CS_TYPE::CONFIG_BOOT_DELAY);
-
-	LOGi("get bootDelay after write is done");
-	errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
-	LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
+void TestState::assertSuccess(cs_ret_code_t retCode) {
+	assert(retCode == ERR_SUCCESS, "Expected ERR_SUCCESS");
+//	if (retCode != ERR_SUCCESS) {
+//		LOGe("Expected ERR_SUCCESS");
+//		NRF_LOG_FLUSH();
+//	}
 }
+
+void TestState::assertError(cs_ret_code_t retCode) {
+	assert(retCode != ERR_SUCCESS, "Expected error");
+//	if (retCode == ERR_SUCCESS) {
+//		LOGe("Expected error");
+//		NRF_LOG_FLUSH();
+//	}
+}
+
+uint16_t TestState::getResetCount() {
+	LOGi("##### Get reset count #####");
+	cs_ret_code_t errCode;
+	TYPIFY(STATE_RESET_COUNTER) resetCount;
+	LOGi("get reset count");
+	errCode = _state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCount, sizeof(resetCount));
+	LOGi("errCode=%u resetCount=%u", errCode, resetCount);
+	assertSuccess(errCode);
+	return resetCount;
+}
+
+void TestState::setResetCount(uint16_t count) {
+	LOGi("##### Set reset count #####");
+	cs_ret_code_t errCode;
+	TYPIFY(STATE_RESET_COUNTER) resetCount = count;
+	LOGi("set reset count to %u", resetCount);
+	errCode = _state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCount, sizeof(resetCount));
+	LOGi("errCode=%u", errCode);
+	assertSuccess(errCode);
+	waitForStore(CS_TYPE::STATE_RESET_COUNTER);
+}
+
+TestResult TestState::getAndSetUint16(uint16_t resetCount) {
+	LOGi("");
+	LOGi("##### Get and set uint16 #####");
+	cs_ret_code_t errCode;
+	TYPIFY(CONFIG_BOOT_DELAY) bootDelay;
+
+	if (resetCount == 0) {
+		switch (_getAndSetUint16) {
+		case 0:{
+			LOGi("## get default boot delay");
+			errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+			LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
+			assertSuccess(errCode);
+			assert(bootDelay == CONFIG_BOOT_DELAY_DEFAULT, "Expected CONFIG_BOOT_DELAY_DEFAULT");
+
+			bootDelay = 1234;
+			LOGi("## set boot delay to %u", bootDelay);
+			errCode = _state->set(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+			LOGi("errCode=%u", errCode);
+			assertSuccess(errCode);
+
+			LOGi("## get boot delay before write is done");
+			errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+			LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
+			assertSuccess(errCode);
+			assert(bootDelay == 1234, "Expected 1234");
+
+			waitForStore(CS_TYPE::CONFIG_BOOT_DELAY);
+			_getAndSetUint16++;
+			return NOT_DONE_WAIT_FOR_WRITE;
+		}
+		case 1: {
+			LOGi("## get bootDelay after write is done");
+			errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+			LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
+			assertSuccess(errCode);
+			assert(bootDelay == 1234, "Expected 1234");
+
+			bootDelay = 65432;
+			LOGi("## set boot delay to %u", bootDelay);
+			errCode = _state->set(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+			LOGi("errCode=%u", errCode);
+			assertSuccess(errCode);
+
+			waitForStore(CS_TYPE::CONFIG_BOOT_DELAY);
+			_getAndSetUint16++;
+			return NOT_DONE_WAIT_FOR_WRITE;
+		}
+		case 2: {
+			LOGi("## get boot delay after write is done");
+			errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+			LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
+			assertSuccess(errCode);
+			assert(bootDelay == 65432, "Expected 65432");
+			return DONE;
+		}
+		}
+	}
+	else {
+		LOGi("## get boot delay after reset");
+		errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+		LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
+		assertSuccess(errCode);
+		assert(bootDelay == 65432, "Expected 65432");
+		return DONE;
+	}
+	return DONE;
+}
+
+TestResult TestState::getAndSetInvalid(uint16_t resetCount) {
+	LOGi("");
+	LOGi("##### Get and set invalid types and sizes #####");
+	cs_ret_code_t errCode;
+
+	if (resetCount == 0) {
+		uint8_t bootDelay;
+
+		LOGi("## get boot delay with wrong size");
+		errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+		LOGi("errCode=%u bootDelay=%u", errCode, bootDelay);
+		assertError(errCode);
+
+		LOGi("## set boot delay with wrong size");
+		bootDelay = 200;
+		errCode = _state->set(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
+		LOGi("errCode=%u", errCode);
+		assertError(errCode);
+
+		uint32_t val;
+		LOGi("## get brownout");
+		errCode = _state->get(CS_TYPE::EVT_BROWNOUT_IMPENDING, &val, sizeof(val));
+		LOGi("errCode=%u val=%u", errCode, val);
+		assertError(errCode);
+
+		LOGi("## set brownout");
+		val = 200;
+		errCode = _state->set(CS_TYPE::EVT_BROWNOUT_IMPENDING, &val, sizeof(val));
+		LOGi("errCode=%u", errCode);
+		assertError(errCode);
+	}
+
+	return DONE;
+}
+
+TestResult TestState::getAndSetLargeStruct(uint16_t resetCount) {
+	LOGi("");
+	LOGi("##### Get and set a large struct #####");
+	cs_ret_code_t errCode;
+
+	ScheduleList scheduleAccessor;
+	TYPIFY(STATE_SCHEDULE) schedule;
+	scheduleAccessor.assign((uint8_t*)&schedule, sizeof(schedule));
+
+	if (resetCount == 0) {
+		switch (_getAndSetLargeStruct) {
+		case 0: {
+			LOGi("## get default schedule");
+			errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
+			LOGi("errCode=%u", errCode);
+			assertSuccess(errCode);
+			scheduleAccessor.print();
+
+
+			schedule.list[3].nextTimestamp = 1234567;
+			LOGi("## set schedule");
+			errCode = _state->set(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
+			LOGi("errCode=%u", errCode);
+			assertSuccess(errCode);
+
+			waitForStore(CS_TYPE::STATE_SCHEDULE);
+			_getAndSetLargeStruct++;
+			return NOT_DONE_WAIT_FOR_WRITE;
+		}
+		case 1: {
+			LOGi("## get schedule after write is done");
+			errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
+			LOGi("errCode=%u", errCode);
+			assertSuccess(errCode);
+			scheduleAccessor.print();
+			assert(schedule.list[3].nextTimestamp == 1234567, "Expected 1234567");
+
+			schedule.list[3].nextTimestamp = 7654321;
+			LOGi("## set schedule");
+			errCode = _state->set(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
+			LOGi("errCode=%u", errCode);
+			assertSuccess(errCode);
+
+			waitForStore(CS_TYPE::STATE_SCHEDULE);
+			_getAndSetLargeStruct++;
+			return NOT_DONE_WAIT_FOR_WRITE;
+		}
+		case 2:{
+			LOGi("## get schedule after write is done");
+			errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
+			LOGi("errCode=%u", errCode);
+			assertSuccess(errCode);
+			scheduleAccessor.print();
+			assert(schedule.list[3].nextTimestamp == 7654321, "Expected 7654321");
+
+			return DONE;
+		}
+		}
+	}
+	else {
+		LOGi("## get schedule after reset");
+		errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
+		LOGi("errCode=%u", errCode);
+		assertSuccess(errCode);
+		scheduleAccessor.print();
+		assert(schedule.list[3].nextTimestamp == 7654321, "Expected 7654321");
+	}
+	return DONE;
+}
+
+
