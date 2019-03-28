@@ -139,11 +139,21 @@ NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRI
 };
 
 /**
+ * The decoupled FDS event handler.
+ */
+void fds_evt_decoupled_handler(void * p_event_data, uint16_t event_size) {
+	LOGnone("fds_evt_handler");
+	fds_evt_t* p_fds_evt = (fds_evt_t*) p_event_data;
+	Storage::getInstance().handleFileStorageEvent(p_fds_evt);
+}
+
+/**
  * The FDS event handler is registered in the cs_Storage class.
+ *
+ * Decouple these events via the app scheduler.
  */
 void fds_evt_handler(fds_evt_t const * const p_fds_evt) {
-    LOGnone("fds_evt_handler");
-    Storage::getInstance().handleFileStorageEvent(p_fds_evt);
+    app_sched_event_put(p_fds_evt, sizeof(*p_fds_evt), fds_evt_decoupled_handler);
 }
 
 #ifdef __cplusplus
