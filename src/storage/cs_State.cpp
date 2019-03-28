@@ -71,9 +71,12 @@ cs_ret_code_t State::verifySizeForSet(const cs_state_data_t & data) {
 
 cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	ret_code_t ret_code = ERR_NOT_FOUND;
-	size16_t typeSize = TypeSize(data.type);
 	CS_TYPE type = data.type;
-	if (data.size < typeSize) { // TODO: make this an assert?
+	size16_t typeSize = TypeSize(type);
+	if (typeSize == 0) {
+		return ERR_UNKNOWN_TYPE;
+	}
+	if (data.size < typeSize) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
 
@@ -173,7 +176,7 @@ cs_state_data_t & State::addToRam(const CS_TYPE & type, size16_t size) {
 	data.size = size;
 	allocate(data);
 	_ram_data_index.push_back(data);
-	LOGd("Added type=%u size=%u val=%u", data.type, data.size, data.value);
+	LOGd("Added type=%u size=%u val=%p", data.type, data.size, data.value);
 	LOGd("RAM index now of size %i", _ram_data_index.size());
 	return data;
 }
@@ -221,6 +224,14 @@ cs_ret_code_t State::loadFromRam(cs_state_data_t & data) {
 cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mode) {
 	LOGd("Set value: %s: %u", TypeName(data.type), data.type);
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
+	CS_TYPE type = data.type;
+	size16_t typeSize = TypeSize(type);
+	if (typeSize == 0) {
+		return ERR_UNKNOWN_TYPE;
+	}
+	if (data.size < typeSize) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
 	switch(mode) {
 		case PersistenceMode::RAM: {
 			return storeInRam(data);
