@@ -149,7 +149,9 @@ public:
 	}
 
 	/** Returns the current size of the list */
-	uint16_t getSize() const;
+	uint16_t getSize() const {
+		return _buffer->size;
+	}
 
 	/** Clears the list. */
 	void clear();

@@ -201,11 +201,6 @@ void ScheduleEntry::print(const schedule_entry_t* entry) {
 }
 
 
-
-uint16_t ScheduleList::getSize() const {
-	return _buffer->size;
-}
-
 void ScheduleList::clear() {
 	cs_schedule_list_set_default(_buffer);
 }
