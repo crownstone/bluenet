@@ -187,6 +187,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_DIMMER_POWERED,                               // Sent when dimmer is powered, and ready to be used.
 	EVT_DIMMING_ALLOWED, // TODO: Deprecate, use cfg  // Sent when allow dimming is changed. -- Payload is BOOL.
 	EVT_SWITCH_LOCKED,   // TODO: Deprecate, use cfg  // Sent when switch locked flag is set. -- Payload is BOOL.
+	EVT_STORAGE_INITIALIZED,                          // Sent when Storage is initialized, storage is only usable after this event!
 	EVT_STORAGE_WRITE_DONE,                           // Sent when an item has been written to storage. -- Payload is CS_TYPE, the type that was written.
 	EVT_SETUP_DONE,                                   // Sent when setup was done (and settings are stored).
 //	EVT_DO_RESET_DELAYED,                             // Sent to perform a reset in a few seconds.
@@ -296,6 +297,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_DIMMER_POWERED:
 	case CS_TYPE::EVT_DIMMING_ALLOWED:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -466,7 +468,7 @@ typedef  void TYPIFY(EVT_BLE_DISCONNECT);
 typedef  void TYPIFY(EVT_BROWNOUT_IMPENDING);
 typedef  void TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_CHIP_TEMP_OK);
-typedef reset_delayed_t TYPIFY(CMD_RESET_DELAYED);
+typedef  reset_delayed_t TYPIFY(CMD_RESET_DELAYED);
 typedef  OperationMode TYPIFY(CMD_SET_OPERATION_MODE);
 typedef  void TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER);
 typedef  void TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
@@ -486,7 +488,7 @@ typedef  BOOL TYPIFY(CMD_ENABLE_MESH);
 typedef  void TYPIFY(CMD_INC_VOLTAGE_RANGE);
 typedef  void TYPIFY(CMD_INC_CURRENT_RANGE);
 typedef  void TYPIFY(EVT_KEEP_ALIVE);
-typedef uint32_t TYPIFY(EVT_MESH_TIME);
+typedef  uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
@@ -502,6 +504,7 @@ typedef  void TYPIFY(EVT_SCAN_STOPPED);
 typedef  schedule_list_t TYPIFY(EVT_SCHEDULE_ENTRIES_UPDATED);
 typedef  void TYPIFY(EVT_SETUP_DONE);
 typedef  session_nonce_t TYPIFY(EVT_SESSION_NONCE_SET);
+typedef  void TYPIFY(EVT_STORAGE_INITIALIZED);
 typedef  CS_TYPE TYPIFY(EVT_STORAGE_WRITE_DONE);
 typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
@@ -712,6 +715,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(EVT_DIMMING_ALLOWED));
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 		return sizeof(TYPIFY(EVT_SWITCH_LOCKED));
+	case CS_TYPE::EVT_STORAGE_INITIALIZED:
+		return 0;
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 		return sizeof(TYPIFY(EVT_STORAGE_WRITE_DONE));
 	case CS_TYPE::EVT_SETUP_DONE:
@@ -850,6 +855,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED: return "EVT_SCHEDULE_ENTRIES_UPDATED";
 	case CS_TYPE::EVT_SESSION_NONCE_SET: return "EVT_SESSION_NONCE_SET";
 	case CS_TYPE::EVT_SETUP_DONE: return "EVT_SETUP_DONE";
+	case CS_TYPE::EVT_STORAGE_INITIALIZED: return "EVT_STORAGE_INITIALIZED";
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: return "EVT_STORAGE_WRITE_DONE";
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: return "EVT_SWITCHCRAFT_ENABLED";
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF: return "EVT_SWITCH_FORCED_OFF";
@@ -953,6 +959,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_DIMMER_POWERED:
 	case CS_TYPE::EVT_DIMMING_ALLOWED:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -1209,6 +1216,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data) {
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
 	case CS_TYPE::EVT_SETUP_DONE:
+	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
@@ -1320,6 +1328,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
 	case CS_TYPE::EVT_SETUP_DONE:
+	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
@@ -1432,6 +1441,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
 	case CS_TYPE::EVT_SETUP_DONE:
+	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:

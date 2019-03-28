@@ -329,14 +329,17 @@ cs_ret_code_t Storage::getErrorCode(ret_code_t code) {
  */
 void Storage::handleSuccessfulEvent(fds_evt_t const * p_fds_evt) {
 	switch (p_fds_evt->id) {
-	case FDS_EVT_INIT:
-		LOGd("Successfully initialized");
+	case FDS_EVT_INIT:{
+		LOGd("Storage initialized");
 		_initialized = true;
+		event_t event(CS_TYPE::EVT_STORAGE_INITIALIZED);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
+	}
 	case FDS_EVT_WRITE:
 	case FDS_EVT_UPDATE: {
 		CS_TYPE record_key = CS_TYPE(p_fds_evt->write.record_key);
-		LOGd("Dispatch write/update event, record %i", record_key);
+		LOGd("Dispatch write/update event, record_key=%i or type=%u", p_fds_evt->write.record_key, to_underlying_type(record_key));
 		event_t event1(CS_TYPE::EVT_STORAGE_WRITE_DONE, (void*)&record_key, sizeof(record_key));
 		EventDispatcher::getInstance().dispatch(event1);
 		break;

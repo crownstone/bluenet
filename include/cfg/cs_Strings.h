@@ -181,6 +181,6 @@
 
 #define FMT_ALLOCATE_MEMORY                      "Allocated memory at %p"
 #define FMT_ERR_ASSIGN_BUFFER                    "Could not assign buffer at %p with size %d"
-#define FMT_ASSIGN_BUFFER_LEN                    "Assign buffer at %u, len: %d"
+#define FMT_ASSIGN_BUFFER_LEN                    "Assign buffer at %p, len: %d"
 
 #define FMT_ENABLE                               "Enable %s"
