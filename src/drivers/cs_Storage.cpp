@@ -27,6 +27,9 @@
 
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
+// Define as LOGd to get debug logs.
+#define LOGStorageDebug LOGnone
+
 Storage::Storage() : EventListener() {
 	LOGd(FMT_CREATE, "storage");
 
@@ -43,7 +46,7 @@ cs_ret_code_t Storage::init() {
 	}
 
 	// register and initialize module
-	LOGd("fds_register");
+	LOGStorageDebug("fds_register");
 	fds_ret_code = fds_register(fds_evt_handler);
 	if (fds_ret_code != FDS_SUCCESS) {
 		LOGe("Registering FDS event handler failed (err=%i)", fds_ret_code);
@@ -51,7 +54,7 @@ cs_ret_code_t Storage::init() {
 	}
 
 
-	LOGd("fds_init");
+	LOGStorageDebug("fds_init");
 	fds_ret_code = fds_init();
 	if (fds_ret_code != FDS_SUCCESS) {
 		LOGe("Init FDS failed (err=%i)", fds_ret_code);
@@ -82,7 +85,7 @@ ret_code_t Storage::garbageCollectInternal() {
 	if (!enabled) {
 		LOGe("Softdevice is not enabled yet!");
 	}
-	LOGnone("fds_gc");
+	LOGStorageDebug("fds_gc");
 	fds_ret_code = fds_gc();
 	if (fds_ret_code != FDS_SUCCESS) {
 		LOGw("No success garbage collection (err=%i)", fds_ret_code);
@@ -110,17 +113,17 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, const cs_state_data_t & 
 	// Assume the allocation was done by storage.
 	// Size is in bytes, each word is 4B.
 	record.data.length_words = getPaddedSize(file_data.size) >> 2;
-	LOGd("Store %p of word size %u", record.data.p_data, record.data.length_words);
+	LOGStorageDebug("Store %p of word size %u", record.data.p_data, record.data.length_words);
 
 	bool f_exists = false;
 	fds_ret_code = exists(file_id, file_data.type, record_desc, f_exists);
 	if (f_exists) {
-		LOGd("Update file %u record %u", file_id, record.key);
+		LOGStorageDebug("Update file %u record %u", file_id, record.key);
 		fds_ret_code = fds_record_update(&record_desc, &record);
 		FDS_ERROR_CHECK(fds_ret_code);
 	}
 	else {
-		LOGd("Write file %u, record %u, ptr %p", file_id, record.key, record.data.p_data);
+		LOGStorageDebug("Write file %u, record %u, ptr %p", file_id, record.key, record.data.p_data);
 		fds_ret_code = fds_record_write(&record_desc, &record);
 		FDS_ERROR_CHECK(fds_ret_code);
 		static bool garbage_collection = false; // TODO: why not a member variable?
@@ -137,7 +140,7 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, const cs_state_data_t & 
 				}
 				break;
 			case FDS_SUCCESS:
-				LOGnone("Write successful");
+				LOGStorageDebug("Write successful");
 				fds_ret_code = exists(file_id, file_data.type, record_desc, f_exists); // TODO: why do we check if file exists again? Doesn't this always returns false?
 				if (!f_exists) {
 					LOGw("Warning: written with delay");
@@ -339,7 +342,7 @@ void Storage::handleSuccessfulEvent(fds_evt_t const * p_fds_evt) {
 	case FDS_EVT_WRITE:
 	case FDS_EVT_UPDATE: {
 		CS_TYPE record_key = CS_TYPE(p_fds_evt->write.record_key);
-		LOGd("Dispatch write/update event, record_key=%i or type=%u", p_fds_evt->write.record_key, to_underlying_type(record_key));
+		LOGStorageDebug("Dispatch write/update event, record_key=%i or type=%u", p_fds_evt->write.record_key, to_underlying_type(record_key));
 		event_t event1(CS_TYPE::EVT_STORAGE_WRITE_DONE, (void*)&record_key, sizeof(record_key));
 		EventDispatcher::getInstance().dispatch(event1);
 		break;
@@ -366,7 +369,7 @@ void Storage::handleSuccessfulEvent(fds_evt_t const * p_fds_evt) {
  */
 void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 
-	LOGnone("FS: %i: %i", p_fds_evt->result, p_fds_evt->id);
+	LOGStorageDebug("FS: %i: %i", p_fds_evt->result, p_fds_evt->id);
 	switch(p_fds_evt->result) {
 	case FDS_ERR_NOT_FOUND:
 		LOGe("Not found on %s (%i)", NordicFDSEventTypeName(p_fds_evt->id), p_fds_evt->id);

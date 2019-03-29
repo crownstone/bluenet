@@ -16,6 +16,9 @@
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
 
+// Define as LOGd to get debug logs.
+#define LOGStateDebug LOGnone
+
 State::State() : _storage(NULL), _boardsConfig(NULL) {
 };
 
@@ -91,7 +94,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 			// First check if it's already in ram.
 			ret_code = loadFromRam(data);
 			if (ret_code == ERR_SUCCESS) {
-				LOGd("Loaded from RAM: %s", TypeName(data.type));
+				LOGStateDebug("Loaded from RAM: %s", TypeName(data.type));
 				return ERR_SUCCESS;
 			}
 			// Else we're going to add a new type to the ram data.
@@ -99,7 +102,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 
 			// See if we need to check flash.
 			if (DefaultLocation(type) == PersistenceMode::RAM) {
-				LOGd("Load default: %s", TypeName(ram_data.type));
+				LOGStateDebug("Load default: %s", TypeName(ram_data.type));
 				ret_code = getDefault(ram_data);
 				if (ret_code != ERR_SUCCESS) {
 					return ret_code;
@@ -113,7 +116,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 					}
 					case ERR_NOT_FOUND:
 					default: {
-						LOGd("Load default: %s", TypeName(ram_data.type));
+						LOGStateDebug("Load default: %s", TypeName(ram_data.type));
 						ret_code = getDefault(ram_data);
 						if (ret_code != ERR_SUCCESS) {
 							return ret_code;
@@ -143,11 +146,11 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data) {
  */
 cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_in_ram) {
 	// TODO: Check if enough RAM is available
-	LOGd("storeInRam type=%u size=%u", to_underlying_type(data.type), data.size);
+	LOGStateDebug("storeInRam type=%u size=%u", to_underlying_type(data.type), data.size);
 	bool exist = false;
 	for (size16_t i = 0; i < _ram_data_index.size(); ++i) {
 		if (_ram_data_index[i].type == data.type) {
-			LOGd("Update RAM");
+			LOGStateDebug("Update RAM");
 			cs_state_data_t & ram_data = _ram_data_index[i];
 			if (ram_data.size != data.size) {
 				LOGe("Should not happen: ram_data.size=%u data.size=%u", ram_data.size, data.size);
@@ -162,7 +165,7 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 		}
 	}
 	if (!exist) {
-		LOGd("Store in RAM type=%u", data.type);
+		LOGStateDebug("Store in RAM type=%u", data.type);
 		cs_state_data_t & ram_data = addToRam(data.type, data.size);
 		memcpy(ram_data.value, data.value, data.size);
 		index_in_ram = _ram_data_index.size() - 1;
@@ -176,8 +179,8 @@ cs_state_data_t & State::addToRam(const CS_TYPE & type, size16_t size) {
 	data.size = size;
 	allocate(data);
 	_ram_data_index.push_back(data);
-	LOGd("Added type=%u size=%u val=%p", data.type, data.size, data.value);
-	LOGd("RAM index now of size %i", _ram_data_index.size());
+	LOGStateDebug("Added type=%u size=%u val=%p", data.type, data.size, data.value);
+	LOGStateDebug("RAM index now of size %i", _ram_data_index.size());
 	return data;
 }
 
@@ -189,10 +192,10 @@ cs_state_data_t & State::addToRam(const CS_TYPE & type, size16_t size) {
  * Let storage do the allocation, so that it's of the correct size and alignment.
  */
 cs_ret_code_t State::allocate(cs_state_data_t & data) {
-	LOGd("Allocate value array of size %u", data.size);
+	LOGStateDebug("Allocate value array of size %u", data.size);
 	size16_t tempSize = data.size;
 	data.value = _storage->allocate(tempSize);
-	LOGd("Actually allocated %u", tempSize);
+	LOGStateDebug("Actually allocated %u", tempSize);
 	return ERR_SUCCESS;
 }
 
@@ -222,7 +225,7 @@ cs_ret_code_t State::loadFromRam(cs_state_data_t & data) {
  *   STRATEGY: store item depending on its default location, keep a copy in RAM.
  */
 cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mode) {
-	LOGd("Set value: %s: %u", TypeName(data.type), data.type);
+	LOGStateDebug("Set value: %s: %u", TypeName(data.type), data.type);
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	CS_TYPE type = data.type;
 	size16_t typeSize = TypeSize(type);
@@ -257,7 +260,7 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 			// we first store the data in RAM
 			size16_t index = 0;
 			ret_code = storeInRam(data, index);
-			LOGd("Item stored in RAM: %i", index);
+			LOGStateDebug("Item stored in RAM: %i", index);
 			if (ret_code != ERR_SUCCESS) {
 				LOGw("Failure to store in RAM, will still try to store in FLASH");
 			}
@@ -268,7 +271,7 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 				break;
 			}
 			cs_state_data_t ram_data = _ram_data_index[index];
-			LOGd("Storage write type=%u size=%u data=%p [0x%X,...]", ram_data.type, ram_data.size, ram_data.value, ram_data.value[0]);
+			LOGStateDebug("Storage write type=%u size=%u data=%p [0x%X,...]", ram_data.type, ram_data.size, ram_data.value, ram_data.value[0]);
 			return _storage->write(FILE_CONFIGURATION, ram_data);
 		}
 		case PersistenceMode::FIRMWARE_DEFAULT: {
