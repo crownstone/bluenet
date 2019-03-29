@@ -14,6 +14,14 @@
 #include <structs/cs_ScheduleEntriesAccessor.h>
 #include <drivers/cs_Timer.h>
 
+/**
+ * File to test the state / storage.
+ *
+ * Since writing to flash is asynchronous, the tests consist of multiple steps.
+ * Also, we need to check persistence, so the tests will continue after a reboot.
+ * To make things a bit readable, the individual tests can be read from top to bottom, as that's the order of execution.
+ */
+
 enum TestResult {
 	DONE,
 	DONE_BUT_WAIT_FOR_WRITE,
@@ -35,23 +43,21 @@ public:
 	void continueTest();
 	void handleEvent(event_t & event);
 
-	TestResult getAndSetUint16(uint16_t resetCount);
-	TestResult getAndSetInvalid(uint16_t resetCount);
-	TestResult getAndSetLargeStruct(uint16_t resetCount);
+	TestResult getAndSetUint16(uint16_t resetCount, uint32_t step);
+	TestResult getAndSetInvalid(uint16_t resetCount, uint32_t step);
+	TestResult getAndSetLargeStruct(uint16_t resetCount, uint32_t step);
 
 private:
-	uint32_t _test = 0;
 	uint16_t _resetCount;
-	uint32_t _getAndSetUint16 = 0;
-	uint32_t _getAndSetInvalid = 0;
-	uint32_t _getAndSetLargeStruct = 0;
+	uint32_t _test = 0;
+	uint32_t _testStep = 0;
 
 	volatile CS_TYPE _lastStoredType = CS_TYPE::CONFIG_DO_NOT_USE;
 	State *_state;
 };
 
 int main() {
-	// from crownstone main
+	// Mostly copied from crownstone main.
 	// this enabled the hard float, without it, we get a hardfault
 	SCB->CPACR |= (3UL << 20) | (3UL << 22); __DSB(); __ISB();
 
@@ -59,8 +65,6 @@ int main() {
 
 	NRF_LOG_INIT(NULL);
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
-	NRF_LOG_INFO("Main");
-//	NRF_LOG_FLUSH();
 
 	uint32_t errCode;
 	boards_config_t board = {};
@@ -87,12 +91,12 @@ int main() {
 	timer->init();
 	stack->initSoftdevice();
 	storage->init();
-	// Code continues at event storage initialized.
+	// Code continues at storage initialized event.
 
 	while (1) {
 		app_sched_execute();
 		sd_app_evt_wait();
-//		NRF_LOG_FLUSH();
+		NRF_LOG_FLUSH();
 	}
 }
 
@@ -101,19 +105,30 @@ void TestState::waitForStore(CS_TYPE type) {
 	_lastStoredType = type;
 }
 
+/**
+ * This is where the tests get called.
+ *
+ * Keep up at which test we are, and the step within that test.
+ */
 void TestState::continueTest() {
 	TestResult result = DONE;
 	switch (_test) {
 		case 0:
-			result = getAndSetInvalid(_resetCount);
+			result = getAndSetInvalid(_resetCount, _testStep);
 			break;
 		case 1:
-			result = getAndSetUint16(_resetCount);
+			result = getAndSetUint16(_resetCount, _testStep);
 			break;
 		case 2:
-			result = getAndSetLargeStruct(_resetCount);
+			result = getAndSetLargeStruct(_resetCount, _testStep);
 			break;
 		default:
+			if (_resetCount == 0) {
+				LOGi("");
+				LOGi("##### Reboot #####");
+				sd_nvic_SystemReset();
+				return;
+			}
 			LOGi("");
 			LOGi("##### Tests complete! #####");
 			return;
@@ -121,19 +136,20 @@ void TestState::continueTest() {
 	switch (result) {
 	case DONE_BUT_WAIT_FOR_WRITE:
 		_test++;
+		_testStep = 0;
 		break;
 	case DONE:
 		_test++;
+		_testStep = 0;
 		continueTest();
 		break;
 	case NOT_DONE_WAIT_FOR_WRITE:
+		_testStep++;
 		break;
 	}
 }
 
 void TestState::handleEvent(event_t & event) {
-	LOGi("event %u", event.type);
-//	NRF_LOG_FLUSH();
 	switch (event.type) {
 	case CS_TYPE::EVT_STORAGE_INITIALIZED: {
 		LOGi("storage initialized");
@@ -141,11 +157,12 @@ void TestState::handleEvent(event_t & event) {
 		uint32_t errCode = configure_board(&board);
 		APP_ERROR_CHECK(errCode);
 		State::getInstance().init(&board);
-		LOGi("");
-		LOGi("##### Tests #####");
 
+		LOGi("");
+		LOGi("##### Start tests #####");
 		_resetCount = getResetCount();
 		setResetCount(_resetCount + 1);
+		// Wait for reset count to be set, code continues at storage write done event.
 		break;
 	}
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
@@ -163,18 +180,10 @@ void TestState::handleEvent(event_t & event) {
 
 void TestState::assertSuccess(cs_ret_code_t retCode) {
 	assert(retCode == ERR_SUCCESS, "Expected ERR_SUCCESS");
-//	if (retCode != ERR_SUCCESS) {
-//		LOGe("Expected ERR_SUCCESS");
-//		NRF_LOG_FLUSH();
-//	}
 }
 
 void TestState::assertError(cs_ret_code_t retCode) {
 	assert(retCode != ERR_SUCCESS, "Expected error");
-//	if (retCode == ERR_SUCCESS) {
-//		LOGe("Expected error");
-//		NRF_LOG_FLUSH();
-//	}
 }
 
 uint16_t TestState::getResetCount() {
@@ -199,14 +208,16 @@ void TestState::setResetCount(uint16_t count) {
 	waitForStore(CS_TYPE::STATE_RESET_COUNTER);
 }
 
-TestResult TestState::getAndSetUint16(uint16_t resetCount) {
-	LOGi("");
-	LOGi("##### Get and set uint16 #####");
+TestResult TestState::getAndSetUint16(uint16_t resetCount, uint32_t step) {
+	if (step == 0) {
+		LOGi("");
+		LOGi("##### Get and set uint16 #####");
+	}
 	cs_ret_code_t errCode;
 	TYPIFY(CONFIG_BOOT_DELAY) bootDelay;
 
 	if (resetCount == 0) {
-		switch (_getAndSetUint16) {
+		switch (step) {
 		case 0:{
 			LOGi("## get default boot delay");
 			errCode = _state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
@@ -227,7 +238,6 @@ TestResult TestState::getAndSetUint16(uint16_t resetCount) {
 			assert(bootDelay == 1234, "Expected 1234");
 
 			waitForStore(CS_TYPE::CONFIG_BOOT_DELAY);
-			_getAndSetUint16++;
 			return NOT_DONE_WAIT_FOR_WRITE;
 		}
 		case 1: {
@@ -244,7 +254,6 @@ TestResult TestState::getAndSetUint16(uint16_t resetCount) {
 			assertSuccess(errCode);
 
 			waitForStore(CS_TYPE::CONFIG_BOOT_DELAY);
-			_getAndSetUint16++;
 			return NOT_DONE_WAIT_FOR_WRITE;
 		}
 		case 2: {
@@ -268,9 +277,11 @@ TestResult TestState::getAndSetUint16(uint16_t resetCount) {
 	return DONE;
 }
 
-TestResult TestState::getAndSetInvalid(uint16_t resetCount) {
-	LOGi("");
-	LOGi("##### Get and set invalid types and sizes #####");
+TestResult TestState::getAndSetInvalid(uint16_t resetCount, uint32_t step) {
+	if (step == 0) {
+		LOGi("");
+		LOGi("##### Get and set invalid types and sizes #####");
+	}
 	cs_ret_code_t errCode;
 
 	if (resetCount == 0) {
@@ -303,24 +314,26 @@ TestResult TestState::getAndSetInvalid(uint16_t resetCount) {
 	return DONE;
 }
 
-TestResult TestState::getAndSetLargeStruct(uint16_t resetCount) {
-	LOGi("");
-	LOGi("##### Get and set a large struct #####");
+TestResult TestState::getAndSetLargeStruct(uint16_t resetCount, uint32_t step) {
+	if (step == 0) {
+		LOGi("");
+		LOGi("##### Get and set a large struct #####");
+	}
 	cs_ret_code_t errCode;
+	bool printSchedules = false;
 
 	ScheduleList scheduleAccessor;
 	TYPIFY(STATE_SCHEDULE) schedule;
 	scheduleAccessor.assign((uint8_t*)&schedule, sizeof(schedule));
 
 	if (resetCount == 0) {
-		switch (_getAndSetLargeStruct) {
+		switch (step) {
 		case 0: {
 			LOGi("## get default schedule");
 			errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
 			LOGi("errCode=%u", errCode);
 			assertSuccess(errCode);
-			scheduleAccessor.print();
-
+			if (printSchedules) scheduleAccessor.print();
 
 			schedule.list[3].nextTimestamp = 1234567;
 			LOGi("## set schedule");
@@ -329,7 +342,6 @@ TestResult TestState::getAndSetLargeStruct(uint16_t resetCount) {
 			assertSuccess(errCode);
 
 			waitForStore(CS_TYPE::STATE_SCHEDULE);
-			_getAndSetLargeStruct++;
 			return NOT_DONE_WAIT_FOR_WRITE;
 		}
 		case 1: {
@@ -337,7 +349,7 @@ TestResult TestState::getAndSetLargeStruct(uint16_t resetCount) {
 			errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
 			LOGi("errCode=%u", errCode);
 			assertSuccess(errCode);
-			scheduleAccessor.print();
+			if (printSchedules) scheduleAccessor.print();
 			assert(schedule.list[3].nextTimestamp == 1234567, "Expected 1234567");
 
 			schedule.list[3].nextTimestamp = 7654321;
@@ -347,7 +359,6 @@ TestResult TestState::getAndSetLargeStruct(uint16_t resetCount) {
 			assertSuccess(errCode);
 
 			waitForStore(CS_TYPE::STATE_SCHEDULE);
-			_getAndSetLargeStruct++;
 			return NOT_DONE_WAIT_FOR_WRITE;
 		}
 		case 2:{
@@ -355,7 +366,7 @@ TestResult TestState::getAndSetLargeStruct(uint16_t resetCount) {
 			errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
 			LOGi("errCode=%u", errCode);
 			assertSuccess(errCode);
-			scheduleAccessor.print();
+			if (printSchedules) scheduleAccessor.print();
 			assert(schedule.list[3].nextTimestamp == 7654321, "Expected 7654321");
 
 			return DONE;
@@ -367,7 +378,7 @@ TestResult TestState::getAndSetLargeStruct(uint16_t resetCount) {
 		errCode = _state->get(CS_TYPE::STATE_SCHEDULE, &schedule, sizeof(schedule));
 		LOGi("errCode=%u", errCode);
 		assertSuccess(errCode);
-		scheduleAccessor.print();
+		if (printSchedules) scheduleAccessor.print();
 		assert(schedule.list[3].nextTimestamp == 7654321, "Expected 7654321");
 	}
 	return DONE;
