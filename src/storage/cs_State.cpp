@@ -130,8 +130,6 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 			memcpy(data.value, ram_data.value, ram_data.size);
 			break;
 		}
-		default:
-			LOGw("Unknown persistence p_mode");
 	}
 	return ret_code;
 }
@@ -262,7 +260,8 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 			ret_code = storeInRam(data, index);
 			LOGStateDebug("Item stored in RAM: %i", index);
 			if (ret_code != ERR_SUCCESS) {
-				LOGw("Failure to store in RAM, will still try to store in FLASH");
+				LOGw("Failure to store in RAM");
+				return ret_code;
 			}
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
 			if (index >= _ram_data_index.size()) {
