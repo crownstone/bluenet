@@ -715,11 +715,14 @@ void Crownstone::tick() {
 		}
 	}
 
+	event_t event(CS_TYPE::EVT_TICK);
+	EventDispatcher::getInstance().dispatch(event);
+
 	scheduleNextTick();
 }
 
 void Crownstone::scheduleNextTick() {
-	Timer::getInstance().start(_mainTimerId, HZ_TO_TICKS(CROWNSTONE_UPDATE_FREQUENCY), this);
+	Timer::getInstance().start(_mainTimerId, MS_TO_TICKS(TICK_INTERVAL_MS), this);
 }
 
 /**
@@ -855,7 +858,8 @@ void Crownstone::handleEvent(event_t & event) {
 			switchMode(mode);
 			break;
 		}
-		default: return;
+		default:
+			return;
 	}
 
 	if (reconfigureBeacon && _state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {

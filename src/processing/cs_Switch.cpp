@@ -31,16 +31,12 @@ Switch::Switch():
 	_pinRelayOff(0),
 	_relayHighDuration(0),
 	_delayedSwitchPending(false),
-	_delayedSwitchState(0),
-	_delayedStoreStatePending(false)
+	_delayedSwitchState(0)
 {
 	LOGd(FMT_CREATE, "switch");
 
 	_switchTimerData = { {0} };
 	_switchTimerId = &_switchTimerData;
-
-	_switchStoreStateTimerData = { {0} };
-	_switchStoreStateTimerId = &_switchStoreStateTimerData;
 }
 
 /**
@@ -92,8 +88,6 @@ void Switch::init(const boards_config_t& board) {
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_switchTimerId,
 			(app_timer_timeout_handler_t)Switch::staticTimedSwitch);
-	Timer::getInstance().createSingleShot(_switchStoreStateTimerId,
-			(app_timer_timeout_handler_t)Switch::staticTimedStoreSwitch);
 }
 
 /**
@@ -169,43 +163,25 @@ void Switch::startPwm() {
 }
 
 /**
- * TODO: Why is the old value stored as STATE_SWITCH_STATE and not as STATE_OLD_SWITCH_STATE? On a reboot of the
- * Crownstone through Switchcraft you probably want to restore it to the proper dimming state. This is why the old
- * state is required. However, in that case it should be called STATE_PREVIOUS_SWITCH_STATE or something indicating
- * this.
+ * Store the state immediately when relay value changed, as the dim value often changes a lot in bursts.
+ * Compare it against given oldVal, instead of switch state stored in State, as that is always changed immediately
+ * (just not the value on flash).
  */
 void Switch::storeState(switch_state_t oldVal) {
-	bool persistent = false;
+	bool persistNow = false;
 	if (oldVal.asInt != _switchValue.asInt) {
 		LOGd("Store switch state %i, %i", _switchValue.state.relay, _switchValue.state.dimmer);
-		persistent = (oldVal.state.relay != _switchValue.state.relay);
-		PersistenceMode persistenceMode = persistent ? PersistenceMode::STRATEGY1 : PersistenceMode::RAM;
-		cs_state_data_t stateData(CS_TYPE::STATE_SWITCH_STATE, (uint8_t*)&_switchValue, sizeof(_switchValue));
-		State::getInstance().set(stateData, persistenceMode);
+		persistNow = (oldVal.state.relay != _switchValue.state.relay);
 	}
 
-	// If not written to persistent storage immediately, do it after a delay.
-	if (!persistent) {
-		delayedStoreState(SWITCH_DELAYED_STORE_MS);
+	cs_state_data_t stateData(CS_TYPE::STATE_SWITCH_STATE, (uint8_t*)&_switchValue, sizeof(_switchValue));
+	if (persistNow) {
+		State::getInstance().set(stateData);
+	}
+	else {
+		State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
 	}
 }
-
-void Switch::delayedStoreState(uint32_t delayMs) {
-	if (_delayedStoreStatePending) {
-		Timer::getInstance().stop(_switchStoreStateTimerId);
-	}
-	_delayedStoreStatePending = true;
-	Timer::getInstance().start(_switchStoreStateTimerId, MS_TO_TICKS(delayMs), this);
-}
-
-void Switch::delayedStoreStateExecute() {
-	if (!_delayedStoreStatePending) {
-		return;
-	}
-	LOGd("Write switch state %i, %i", _switchValue.state.relay, _switchValue.state.dimmer);
-	State::getInstance().set(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, sizeof(_switchValue));
-}
-
 
 switch_state_t Switch::getSwitchState() {
 #ifdef PRINT_SWITCH_VERBOSE

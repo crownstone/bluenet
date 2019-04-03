@@ -152,6 +152,24 @@ enum class CS_TYPE: uint16_t {
 	CMD_SWITCH_OFF = General_Base,                    // Sent to turn switch off.
 	CMD_SWITCH_ON,                                    // Sent to turn switch on.
 	CMD_SWITCH_TOGGLE,                                // Sent to toggle switch.
+//	CMD_SET_LOG_LEVEL,
+	CMD_ENABLE_LOG_POWER,                             // Sent to enable/disable power calculations logging. -- Payload is BOOL.
+	CMD_ENABLE_LOG_CURRENT,                           // Sent to enable/disable current samples logging. -- Payload is BOOL.
+	CMD_ENABLE_LOG_VOLTAGE,                           // Sent to enable/disable voltage samples logging. -- Payload is BOOL.
+	CMD_ENABLE_LOG_FILTERED_CURRENT,                  // Sent to enable/disable filtered current samples logging. -- Payload is BOOL.
+	CMD_RESET_DELAYED,                                // Sent to reboot. -- Payload is reset_delayed_t.
+	CMD_ENABLE_ADVERTISEMENT,                         // Sent to enable/disable advertising. -- Payload is BOOL.
+	CMD_ENABLE_MESH,                                  // Sent to enable/disable mesh. -- Payload is BOOL.
+	CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN,         // Sent to toggle ADC voltage pin. TODO: pin as payload?
+	CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT,              // Sent to toggle differential mode on current pin. -- Payload is BOOL.
+	CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,              // Sent to toggle differential mode on voltage pin. -- Payload is BOOL.
+	CMD_INC_VOLTAGE_RANGE,                            // Sent to increase voltage range.
+	CMD_DEC_VOLTAGE_RANGE,                            // Sent to decrease voltage range.
+	CMD_INC_CURRENT_RANGE,                            // Sent to increase current range.
+	CMD_DEC_CURRENT_RANGE,                            // Sent to decrease current range.
+	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is stream_header_t
+	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
+	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 	EVT_ADVERTISEMENT_UPDATED,                        // Sent when advertisement was updated. TODO: advertisement data as payload?
 	EVT_SCAN_STARTED,                                 // Sent when scanner started scanning.
 	EVT_SCAN_STOPPED,                                 // Sent when scanner stopped scanning.
@@ -195,23 +213,6 @@ enum class CS_TYPE: uint16_t {
 //	EVT_STORAGE_WRITE,                                // Sent when an item is going to be written to storage.
 //	EVT_STORAGE_ERASE,                                // Sent when a flash page is going to be erased.
 	EVT_ADC_RESTARTED,                                // Sent when ADC has been restarted.
-//	CMD_SET_LOG_LEVEL,
-	CMD_ENABLE_LOG_POWER,                             // Sent to enable/disable power calculations logging. -- Payload is BOOL.
-	CMD_ENABLE_LOG_CURRENT,                           // Sent to enable/disable current samples logging. -- Payload is BOOL.
-	CMD_ENABLE_LOG_VOLTAGE,                           // Sent to enable/disable voltage samples logging. -- Payload is BOOL.
-	CMD_ENABLE_LOG_FILTERED_CURRENT,                  // Sent to enable/disable filtered current samples logging. -- Payload is BOOL.
-	CMD_RESET_DELAYED,                                // Sent to reboot. -- Payload is reset_delayed_t.
-	CMD_ENABLE_ADVERTISEMENT,                         // Sent to enable/disable advertising. -- Payload is BOOL.
-	CMD_ENABLE_MESH,                                  // Sent to enable/disable mesh. -- Payload is BOOL.
-	CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN,         // Sent to toggle ADC voltage pin. TODO: pin as payload?
-	CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT,              // Sent to toggle differential mode on current pin. -- Payload is BOOL.
-	CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,              // Sent to toggle differential mode on voltage pin. -- Payload is BOOL.
-	CMD_INC_VOLTAGE_RANGE,                            // Sent to increase voltage range.
-	CMD_DEC_VOLTAGE_RANGE,                            // Sent to decrease voltage range.
-	CMD_INC_CURRENT_RANGE,                            // Sent to increase current range.
-	CMD_DEC_CURRENT_RANGE,                            // Sent to decrease current range.
-	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is stream_header_t
-	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
 };
 
 constexpr CS_TYPE toCsType(uint16_t type) {
@@ -293,6 +294,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_CHIP_TEMP_OK:
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
+	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_DIMMER_POWERED:
 	case CS_TYPE::EVT_DIMMING_ALLOWED:
@@ -509,6 +511,7 @@ typedef  CS_TYPE TYPIFY(EVT_STORAGE_WRITE_DONE);
 typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
 typedef  BOOL TYPIFY(EVT_SWITCH_LOCKED);
+typedef  void TYPIFY(EVT_TICK);
 typedef  void TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
 
@@ -614,7 +617,7 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_CURRENT_MULTIPLIER:
 		return sizeof(TYPIFY(CONFIG_CURRENT_MULTIPLIER));
 	case CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO:
-		return 0; // TODO
+		return sizeof(TYPIFY(CONFIG_VOLTAGE_ADC_ZERO));
 	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO:
 		return sizeof(TYPIFY(CONFIG_CURRENT_ADC_ZERO));
 	case CS_TYPE::CONFIG_POWER_ZERO:
@@ -706,6 +709,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
 		return 0;
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
+		return 0;
+	case CS_TYPE::EVT_TICK:
 		return 0;
 	case CS_TYPE::EVT_TIME_SET:
 		return 0;
@@ -860,6 +865,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: return "EVT_SWITCHCRAFT_ENABLED";
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF: return "EVT_SWITCH_FORCED_OFF";
 	case CS_TYPE::EVT_SWITCH_LOCKED: return "EVT_SWITCH_LOCKED";
+	case CS_TYPE::EVT_TICK: return "EVT_TICK";
 	case CS_TYPE::EVT_TIME_SET: return "EVT_TIME_SET";
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN: return "EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN";
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY: return "STATE_ACCUMULATED_ENERGY";
@@ -955,6 +961,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_CHIP_TEMP_OK:
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
+	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_DIMMER_POWERED:
 	case CS_TYPE::EVT_DIMMING_ALLOWED:
@@ -1221,6 +1228,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data) {
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
+	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 		return ERR_NOT_FOUND;
 	}
@@ -1333,6 +1341,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
+	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 		return NO_ONE;
 	}
@@ -1446,6 +1455,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
+	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 		return NO_ONE;
 	}

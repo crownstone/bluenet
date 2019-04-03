@@ -20,6 +20,8 @@ enum ErrorCodesGeneral {
 	ERR_UNKNOWN_OP_CODE             = 0x23,
 	ERR_UNKNOWN_TYPE                = 0x24,
 	ERR_NOT_FOUND                   = 0x25,
+	ERR_NO_SPACE                    = 0x26,
+	ERR_BUSY                        = 0x27,
 
 	ERR_NO_ACCESS                   = 0x30,
 

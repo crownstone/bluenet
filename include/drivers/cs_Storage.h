@@ -28,7 +28,8 @@ static const cs_file_id_t FILE_CONFIGURATION  = 0x0003;
  * CS_TYPE is used as record key.
  *
  * The information on the Flash Data Storage from Nordic can be found at the link:
- *   https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk%2Fdita%2Fsdk%2Fnrf5_sdk.html
+ *   https://www.nordicsemi.com/DocLib/Content/SDK_Doc/nRF5_SDK/v15-2-0/lib_fds
+ *   old: https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk%2Fdita%2Fsdk%2Fnrf5_sdk.html
  */
 class Storage : public EventListener {
 public:
@@ -103,21 +104,30 @@ public:
 
 	void handleFileStorageEvent(fds_evt_t const * p_fds_evt);
 
-	void handleSuccessfulEvent(fds_evt_t const * p_fds_evt);
+	void handleWriteEvent(fds_evt_t const * p_fds_evt);
+	void handleRemoveRecordEvent(fds_evt_t const * p_fds_evt);
+	void handleRemoveFileEvent(fds_evt_t const * p_fds_evt);
+	void handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt);
 
 private:
 	Storage();
 	Storage(Storage const&);
 	void operator=(Storage const &);
 
-	bool _initialized;
+	bool _initialized = false;
+
+	bool _collectingGarbage = false;
 
 	fds_find_token_t _ftok;
 
-	std::vector<cs_state_data_t> _records_in_memory;
+	std::vector<uint16_t> _busy_record_keys;
 
 	// Use before ftok
 	void initSearch();
+
+	void setBusy(uint16_t recordKey);
+	void clearBusy(uint16_t recordKey);
+	bool isBusy(uint16_t recordKey);
 
 	cs_ret_code_t getErrorCode(ret_code_t code);
 

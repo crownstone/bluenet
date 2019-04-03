@@ -204,6 +204,7 @@ const uint32_t PWM_PERIOD = 10000;
 #define KEEP_ALIVE_INTERVAL                      (2 * 60) // 2 minutes, in seconds
 
 #define SWITCH_DELAYED_STORE_MS                  10000 // Timeout before storing the pwm switch value is stored.
+#define STATE_RETRY_STORE_DELAY_MS               1000 // Time before retrying to store a varable to flash.
 
 #define PWM_BOOT_DELAY_MS                        60000 // Delay after boot until pwm can be used. Has to be smaller than overflow time of RTC.
 
@@ -278,6 +279,8 @@ const uint32_t PWM_PERIOD = 10000;
  *
  * For now, a lot of these variables has not yet been made conform to the above naming scheme.
  */
+
+#define TICK_INTERVAL_MS 500
 
 #if defined MESHING
 #define CONFIG_MESH_DEFAULT MESHING

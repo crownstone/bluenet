@@ -155,10 +155,6 @@ public:
 
 	/** Used internally
 	 */
-	static void staticTimedStoreSwitch(Switch* ptr) { ptr->delayedStoreStateExecute(); }
-
-	/** Used internally
-	 */
 	void handleEvent(event_t & event);
 
 #if BUILD_MESHING == 1
@@ -202,12 +198,6 @@ private:
 	//! Store the switch state.
 	void storeState(switch_state_t oldVal);
 
-	//! Store the switch state after a delay.
-	void delayedStoreState(uint32_t delayMs);
-
-	//! Store the switch state after the delay time has passed.
-	void delayedStoreStateExecute();
-
 	//! Set switch after the delay time has passed.
 	void delayedSwitchExecute();
 
@@ -227,10 +217,6 @@ private:
 	app_timer_t              _switchTimerData;
 	app_timer_id_t           _switchTimerId;
 
-	//! Timer used to write the switch state to storage with a delay.
-	app_timer_t              _switchStoreStateTimerData;
-	app_timer_id_t           _switchStoreStateTimerId;
-
 //	uint8_t _nextRelayVal;
 
 	bool _pwmPowered; //! Whether or not the pwm has enough power to be used.
@@ -243,8 +229,6 @@ private:
 
 	bool _delayedSwitchPending;
 	uint8_t _delayedSwitchState;
-
-	bool _delayedStoreStatePending;
 
 	uint32_t _hardwareBoard;
 

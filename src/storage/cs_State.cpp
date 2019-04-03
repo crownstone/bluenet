@@ -31,7 +31,7 @@ void State::init(boards_config_t* boardsConfig) {
 		LOGe(FMT_NOT_INITIALIZED, "Storage");
 		return;
 	}
-
+	EventDispatcher::getInstance().addListener(this);
 	setInitialized();
 }
 
@@ -70,6 +70,116 @@ cs_ret_code_t State::verifySizeForSet(const cs_state_data_t & data) {
 	}
 	}
 	return ERR_SUCCESS;
+}
+
+cs_ret_code_t State::findInRam(const CS_TYPE & type, size16_t & index_in_ram) {
+	for (size16_t i = 0; i < _ram_data_register.size(); ++i) {
+		if (_ram_data_register[i].type == type) {
+			index_in_ram = i;
+			return ERR_SUCCESS;
+		}
+	}
+	return ERR_NOT_FOUND;
+}
+
+cs_ret_code_t State::storeInRam(const cs_state_data_t & data) {
+	size16_t temp = 0;
+	return storeInRam(data, temp);
+}
+
+/**
+ * Store size of state variable, not of allocated size.
+ */
+cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_in_ram) {
+	// TODO: Check if enough RAM is available
+	LOGStateDebug("storeInRam type=%u size=%u", to_underlying_type(data.type), data.size);
+	cs_ret_code_t ret_code = findInRam(data.type, index_in_ram);
+	if (ret_code == ERR_SUCCESS) {
+		LOGStateDebug("Update RAM");
+		cs_state_data_t & ram_data = _ram_data_register[index_in_ram];
+		if (ram_data.size != data.size) {
+			LOGe("Should not happen: ram_data.size=%u data.size=%u", ram_data.size, data.size);
+			free(ram_data.value);
+			ram_data.size = data.size;
+			allocate(ram_data);
+		}
+		memcpy(ram_data.value, data.value, data.size);
+	}
+	else {
+		LOGStateDebug("Store in RAM type=%u", data.type);
+		cs_state_data_t & ram_data = addToRam(data.type, data.size);
+		memcpy(ram_data.value, data.value, data.size);
+		index_in_ram = _ram_data_register.size() - 1;
+	}
+	return ERR_SUCCESS;
+}
+
+cs_state_data_t & State::addToRam(const CS_TYPE & type, size16_t size) {
+	cs_state_data_t & data = *(cs_state_data_t*)malloc(sizeof(cs_state_data_t));
+	data.type = type;
+	data.size = size;
+	allocate(data);
+	_ram_data_register.push_back(data);
+	LOGStateDebug("Added type=%u size=%u val=%p", data.type, data.size, data.value);
+	LOGStateDebug("RAM index now of size %i", _ram_data_register.size());
+	return data;
+}
+
+//cs_ret_code_t State::getDefault(cs_state_data_t & ram_data, cs_state_data_t & data) {
+//
+//}
+
+/**
+ * Let storage do the allocation, so that it's of the correct size and alignment.
+ */
+cs_ret_code_t State::allocate(cs_state_data_t & data) {
+	LOGStateDebug("Allocate value array of size %u", data.size);
+	size16_t tempSize = data.size;
+	data.value = _storage->allocate(tempSize);
+	LOGStateDebug("Actually allocated %u", tempSize);
+	return ERR_SUCCESS;
+}
+
+/**
+ * Copies from ram to target buffer.
+ *
+ * Does not check if target buffer has a large enough size.
+ */
+cs_ret_code_t State::loadFromRam(cs_state_data_t & data) {
+	size16_t index_in_ram;
+	cs_ret_code_t ret_code = findInRam(data.type, index_in_ram);
+	if (ret_code != ERR_SUCCESS) {
+		return ret_code;
+	}
+	cs_state_data_t & ram_data = _ram_data_register[index_in_ram];
+	data.size = ram_data.size;
+	memcpy(data.value, ram_data.value, data.size);
+	return ERR_SUCCESS;
+}
+
+/**
+ * Since this function is called while iterating over the queue, don't automatically add things to queue here.
+ * Instead, just return ERR_BUSY, and let the called put it in queue..
+ */
+cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
+	if (index_in_ram >= _ram_data_register.size()) {
+		LOGe("Invalid index");
+		return ERR_WRITE_NOT_ALLOWED;
+	}
+	cs_state_data_t ram_data = _ram_data_register[index_in_ram];
+	LOGStateDebug("Storage write type=%u size=%u data=%p [0x%X,...]", ram_data.type, ram_data.size, ram_data.value, ram_data.value[0]);
+	cs_ret_code_t ret_code = _storage->write(FILE_CONFIGURATION, ram_data);
+	switch (ret_code) {
+	case ERR_BUSY: {
+		return ERR_BUSY;
+	}
+	case ERR_NO_SPACE: {
+		// TODO: remove things from flash..
+		return ERR_NO_SPACE;
+	}
+	default:
+		return ret_code;
+	}
 }
 
 cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
@@ -134,86 +244,6 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	return ret_code;
 }
 
-cs_ret_code_t State::storeInRam(const cs_state_data_t & data) {
-	size16_t temp = 0;
-	return storeInRam(data, temp);
-}
-
-/**
- * Store size of state variable, not of allocated size.
- */
-cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_in_ram) {
-	// TODO: Check if enough RAM is available
-	LOGStateDebug("storeInRam type=%u size=%u", to_underlying_type(data.type), data.size);
-	bool exist = false;
-	for (size16_t i = 0; i < _ram_data_index.size(); ++i) {
-		if (_ram_data_index[i].type == data.type) {
-			LOGStateDebug("Update RAM");
-			cs_state_data_t & ram_data = _ram_data_index[i];
-			if (ram_data.size != data.size) {
-				LOGe("Should not happen: ram_data.size=%u data.size=%u", ram_data.size, data.size);
-				free(ram_data.value);
-				ram_data.size = data.size;
-				allocate(ram_data);
-			}
-			memcpy(ram_data.value, data.value, data.size);
-			exist = true;
-			index_in_ram = i;
-			break;
-		}
-	}
-	if (!exist) {
-		LOGStateDebug("Store in RAM type=%u", data.type);
-		cs_state_data_t & ram_data = addToRam(data.type, data.size);
-		memcpy(ram_data.value, data.value, data.size);
-		index_in_ram = _ram_data_index.size() - 1;
-	}
-	return ERR_SUCCESS;
-}
-
-cs_state_data_t & State::addToRam(const CS_TYPE & type, size16_t size) {
-	cs_state_data_t & data = *(cs_state_data_t*)malloc(sizeof(cs_state_data_t));
-	data.type = type;
-	data.size = size;
-	allocate(data);
-	_ram_data_index.push_back(data);
-	LOGStateDebug("Added type=%u size=%u val=%p", data.type, data.size, data.value);
-	LOGStateDebug("RAM index now of size %i", _ram_data_index.size());
-	return data;
-}
-
-//cs_ret_code_t State::getDefault(cs_state_data_t & ram_data, cs_state_data_t & data) {
-//
-//}
-
-/**
- * Let storage do the allocation, so that it's of the correct size and alignment.
- */
-cs_ret_code_t State::allocate(cs_state_data_t & data) {
-	LOGStateDebug("Allocate value array of size %u", data.size);
-	size16_t tempSize = data.size;
-	data.value = _storage->allocate(tempSize);
-	LOGStateDebug("Actually allocated %u", tempSize);
-	return ERR_SUCCESS;
-}
-
-/**
- * Copies from ram to target buffer.
- *
- * Does not check if target buffer has a large enough size.
- */
-cs_ret_code_t State::loadFromRam(cs_state_data_t & data) {
-	for (size16_t i = 0; i < _ram_data_index.size(); ++i) {
-		if (_ram_data_index[i].type == data.type) {
-			cs_state_data_t & ram_data = _ram_data_index[i];
-			data.size = ram_data.size;
-			memcpy(data.value, ram_data.value, data.size);
-			return ERR_SUCCESS;
-		}
-	}
-	return ERR_NOT_FOUND;
-}
-
 // TODO: deleteFromRam to limit RAM usage
 
 /**
@@ -228,6 +258,7 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 	CS_TYPE type = data.type;
 	size16_t typeSize = TypeSize(type);
 	if (typeSize == 0) {
+		LOGw("Wrong type %u", data.type)
 		return ERR_UNKNOWN_TYPE;
 	}
 	if (data.size < typeSize) {
@@ -264,14 +295,11 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 				return ret_code;
 			}
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
-			if (index >= _ram_data_index.size()) {
-				LOGe("RAM corrupted");
-				ret_code = ERR_WRITE_NOT_ALLOWED;
-				break;
+			ret_code = storeInFlash(index);
+			if (ret_code == ERR_BUSY) {
+				return addToQueue(type, STATE_RETRY_STORE_DELAY_MS / 1000);
 			}
-			cs_state_data_t ram_data = _ram_data_index[index];
-			LOGStateDebug("Storage write type=%u size=%u data=%p [0x%X,...]", ram_data.type, ram_data.size, ram_data.value, ram_data.value[0]);
-			return _storage->write(FILE_CONFIGURATION, ram_data);
+			break;
 		}
 		case PersistenceMode::FIRMWARE_DEFAULT: {
 			LOGe("Default cannot be written");
@@ -282,17 +310,74 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 	return ret_code;
 }
 
-cs_ret_code_t State::remove(CS_TYPE type, const PersistenceMode mode) {
-	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
-	switch(mode) {
-		case PersistenceMode::FLASH: {
-			return _storage->remove(FILE_CONFIGURATION, type);
-		}
-		default:
-			LOGe("Not implemented");
-			return ERR_NOT_IMPLEMENTED;
+/**
+ * Always first store to ram, use set() for this so that data struct is already validated.
+ * Check if type is already queued. If so, overwrite the counter, so that the write to storage is pushed forward in
+ * time, thus avoiding multiple writes to storage.
+ */
+cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delay) {
+	if (delay == 0) {
+		return ERR_WRONG_PARAMETER;
 	}
-	return ret_code;
+	cs_ret_code_t ret_code = set(data, PersistenceMode::RAM);
+	if (ret_code != ERR_SUCCESS) {
+		return ret_code;
+	}
+
+	return addToQueue(data.type, delay);
+}
+
+cs_ret_code_t State::addToQueue(const CS_TYPE & type, uint8_t delay) {
+	uint32_t delayTicks = delay * 1000 / TICK_INTERVAL_MS;
+	LOGStateDebug("Add to queue type=%s delay=%u ticks=%u", TypeName(type), delay, delayTicks);
+	bool found = false;
+	for (size_t i=0; i<_store_queue.size(); ++i) {
+		if (_store_queue[i].type == type) {
+			_store_queue[i].counter = delayTicks;
+			found = true;
+			break;
+		}
+	}
+	if (!found) {
+		cs_state_store_queue_t item;
+		item.type = type;
+		item.counter = delay;
+		_store_queue.push_back(item);
+	}
+	LOGStateDebug("queue is now of size %u", _store_queue.size());
+	return ERR_SUCCESS;
+}
+
+/**
+ * Each tick, decrease the counter of all items.
+ * If a counter is 0, store that item, and remove it from the list.
+ * But if storage is busy, retry later by not removing item from queue, and setting counter again.
+ */
+void State::delayedStoreTick() {
+	if (!_store_queue.empty()) {
+		LOGStateDebug("delayedStoreTick");
+	}
+	cs_ret_code_t ret_code;
+	size16_t index_in_ram;
+	for (auto it = _store_queue.begin(); it != _store_queue.end(); /*it++*/) {
+		if (it->counter == 0) {
+			ret_code = findInRam(it->type, index_in_ram);
+			if (ret_code == ERR_SUCCESS) {
+				ret_code = storeInFlash(index_in_ram);
+				if (ret_code == ERR_BUSY) {
+					// Add to queue again.
+					it->counter = STATE_RETRY_STORE_DELAY_MS / TICK_INTERVAL_MS;
+					// Don't erase it
+					continue;
+				}
+			}
+			it = _store_queue.erase(it);
+		}
+		else {
+			it->counter--;
+			it++;
+		}
+	}
 }
 
 cs_ret_code_t State::get(const CS_TYPE type, void *value, const size16_t size) {
@@ -326,10 +411,21 @@ bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
 }
 
 void State::factoryReset(uint32_t resetCode) {
+	// TODO: don't erase reset count.
 	if (resetCode != FACTORY_RESET_CODE) {
 		LOGe("Wrong reset code!");
 		return;
 	}
 	LOGw("Perform factory reset!");
 	_storage->remove(FILE_CONFIGURATION);
+}
+
+void State::handleEvent(event_t & event) {
+	switch (event.type) {
+	case CS_TYPE::EVT_TICK:
+		delayedStoreTick();
+		break;
+	default:
+		break;
+	}
 }

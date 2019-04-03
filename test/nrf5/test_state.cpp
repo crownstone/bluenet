@@ -22,6 +22,10 @@
  * To make things a bit readable, the individual tests can be read from top to bottom, as that's the order of execution.
  */
 
+// Don't know where to get this from nicely, but the NRF52 has a page size of 4kB.
+//#define FLASH_PAGE_SIZE 4096
+#define FLASH_PAGE_SIZE (4*FDS_VIRTUAL_PAGE_SIZE)
+
 enum TestResult {
 	DONE,
 	DONE_BUT_WAIT_FOR_WRITE,
@@ -33,6 +37,8 @@ public:
 	TestState() {
 		EventDispatcher::getInstance().addListener(this);
 		_state = &State::getInstance();
+		_tickTimerData = { {0} };
+		_tickTimerId = &_tickTimerData;
 	}
 
 	void assertSuccess(cs_ret_code_t retCode);
@@ -42,18 +48,29 @@ public:
 	void waitForStore(CS_TYPE type);
 	void continueTest();
 	void handleEvent(event_t & event);
+	static void staticTick(TestState *ptr) {
+		ptr->tick();
+	}
 
 	TestResult getAndSetUint16(uint16_t resetCount, uint32_t step);
 	TestResult getAndSetInvalid(uint16_t resetCount, uint32_t step);
 	TestResult getAndSetLargeStruct(uint16_t resetCount, uint32_t step);
+	TestResult testGarbageCollection(uint16_t resetCount, uint32_t step);
+	TestResult testMultipleWrites(uint16_t resetCount, uint32_t step);
+	TestResult testDelayedSet(uint16_t resetCount, uint32_t step);
 
 private:
-	uint16_t _resetCount;
+	uint16_t _resetCount = 0;
 	uint32_t _test = 0;
 	uint32_t _testStep = 0;
 
 	volatile CS_TYPE _lastStoredType = CS_TYPE::CONFIG_DO_NOT_USE;
 	State *_state;
+
+	app_timer_t              _tickTimerData;
+	app_timer_id_t           _tickTimerId;
+
+	void tick();
 };
 
 int main() {
@@ -122,6 +139,15 @@ void TestState::continueTest() {
 		case 2:
 			result = getAndSetLargeStruct(_resetCount, _testStep);
 			break;
+		case 3:
+			result = testGarbageCollection(_resetCount, _testStep);
+			break;
+		case 4:
+			result = testMultipleWrites(_resetCount, _testStep);
+			break;
+		case 5:
+			result = testDelayedSet(_resetCount, _testStep);
+			break;
 		default:
 			if (_resetCount == 0) {
 				LOGi("");
@@ -130,7 +156,7 @@ void TestState::continueTest() {
 				return;
 			}
 			LOGi("");
-			LOGi("##### Tests complete! #####");
+			LOGi("##### All tests successful! #####");
 			return;
 	}
 	switch (result) {
@@ -158,6 +184,10 @@ void TestState::handleEvent(event_t & event) {
 		APP_ERROR_CHECK(errCode);
 		State::getInstance().init(&board);
 
+		Timer::getInstance().createSingleShot(_tickTimerId, (app_timer_timeout_handler_t)TestState::staticTick);
+		Timer::getInstance().start(_tickTimerId, MS_TO_TICKS(TICK_INTERVAL_MS), this);
+
+
 		LOGi("");
 		LOGi("##### Start tests #####");
 		_resetCount = getResetCount();
@@ -178,11 +208,23 @@ void TestState::handleEvent(event_t & event) {
 	}
 }
 
+void TestState::tick() {
+	event_t event(CS_TYPE::EVT_TICK);
+	EventDispatcher::getInstance().dispatch(event);
+	Timer::getInstance().start(_tickTimerId, MS_TO_TICKS(TICK_INTERVAL_MS), this);
+}
+
 void TestState::assertSuccess(cs_ret_code_t retCode) {
+	if (retCode != ERR_SUCCESS) {
+		LOGe("errCode=%u", retCode);
+	}
 	assert(retCode == ERR_SUCCESS, "Expected ERR_SUCCESS");
 }
 
 void TestState::assertError(cs_ret_code_t retCode) {
+	if (retCode == ERR_SUCCESS) {
+		LOGe("errCode=%u", retCode);
+	}
 	assert(retCode != ERR_SUCCESS, "Expected error");
 }
 
@@ -382,6 +424,78 @@ TestResult TestState::getAndSetLargeStruct(uint16_t resetCount, uint32_t step) {
 		assert(schedule.list[3].nextTimestamp == 7654321, "Expected 7654321");
 	}
 	return DONE;
+}
+
+TestResult TestState::testGarbageCollection(uint16_t resetCount, uint32_t step) {
+	// Let's do this test after reboot.
+	if (resetCount != 1) {
+		return DONE;
+	}
+	if (step == 0) {
+		LOGi("");
+		LOGi("##### Test garbage collection #####");
+	}
+	cs_ret_code_t errCode;
+	TYPIFY(CONFIG_CURRENT_ADC_ZERO) currentZero = step;
+
+	uint32_t numStepsToFillPage = FLASH_PAGE_SIZE / (sizeof(fds_header_t) + sizeof(currentZero));
+	if (step < numStepsToFillPage) {
+		errCode = _state->set(CS_TYPE::CONFIG_CURRENT_ADC_ZERO, &currentZero, sizeof(currentZero));
+		assertSuccess(errCode);
+		waitForStore(CS_TYPE::CONFIG_CURRENT_ADC_ZERO);
+		return NOT_DONE_WAIT_FOR_WRITE;
+	}
+	return DONE;
+}
+
+TestResult TestState::testMultipleWrites(uint16_t resetCount, uint32_t step) {
+	// Let's do this test after reboot.
+	if (resetCount != 1) {
+		return DONE;
+	}
+	if (step == 0) {
+		LOGi("");
+		LOGi("##### Test multiple writes without wait #####");
+	}
+	cs_ret_code_t errCode;
+	TYPIFY(CONFIG_CURRENT_ADC_ZERO) currentZero = 0;
+
+	switch (step) {
+	case 0: {
+		uint32_t numSteps = 10;
+		for (uint32_t i=0; i<numSteps; ++i) {
+			currentZero = i;
+			errCode = _state->set(CS_TYPE::CONFIG_CURRENT_ADC_ZERO, &currentZero, sizeof(currentZero));
+			assertSuccess(errCode);
+		}
+		waitForStore(CS_TYPE::CONFIG_CURRENT_ADC_ZERO);
+		return NOT_DONE_WAIT_FOR_WRITE;
+	}
+	case 1: {
+		// Another write done event is expected.
+		waitForStore(CS_TYPE::CONFIG_CURRENT_ADC_ZERO);
+		return DONE_BUT_WAIT_FOR_WRITE;
+	}
+	}
+	return DONE;
+}
+
+TestResult TestState::testDelayedSet(uint16_t resetCount, uint32_t step) {
+	// Let's do this test after reboot.
+	if (resetCount != 1) {
+		return DONE;
+	}
+	if (step == 0) {
+		LOGi("");
+		LOGi("##### Test delayed set #####");
+	}
+	cs_ret_code_t errCode;
+	TYPIFY(CONFIG_VOLTAGE_ADC_ZERO) voltageZero = 1234;
+	cs_state_data_t data(CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO, (uint8_t*)&voltageZero, sizeof(voltageZero));
+	errCode = _state->setDelayed(data, 3);
+	assertSuccess(errCode);
+	waitForStore(CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO);
+	return DONE_BUT_WAIT_FOR_WRITE;
 }
 
 

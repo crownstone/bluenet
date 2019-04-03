@@ -12,6 +12,7 @@
 #include <drivers/cs_Storage.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <structs/cs_StreamBuffer.h>
+#include <drivers/cs_Timer.h>
 
 constexpr const char* TypeName(OperationMode const & mode) {
     switch(mode) {
@@ -55,6 +56,16 @@ constexpr OperationMode getOperationMode(uint8_t mode) {
 #define FACTORY_RESET_STATE_NORMAL 0
 #define FACTORY_RESET_STATE_LOWTX  1
 #define FACTORY_RESET_STATE_RESET  2
+
+/**
+ * Struct for a type of which storing to flash is queued or delayed.
+ *
+ * The type will be stored once the counter is 0.
+ */
+struct __attribute__((__packed__)) cs_state_store_queue_t {
+	CS_TYPE type;
+	uint16_t counter;
+};
 
 /**
  * Stores state values in RAM and/or FLASH.
@@ -143,7 +154,7 @@ constexpr OperationMode getOperationMode(uint8_t mode) {
  * The above means quite a sophisticated setup in reading/writing, so it is encapsulated in a dedicated
  * PersistenceMode, which is called STRATEGY1.
  */
-class State: public BaseClass<> {
+class State: public BaseClass<>, EventListener {
 public:
 	/** Get a reference to the State object.
 	 */
@@ -194,6 +205,18 @@ public:
 	cs_ret_code_t set(const CS_TYPE type, void *value, const size16_t size);
 
 	/**
+	 * Set the state to a new value, but delay the write to flash.
+	 *
+	 * Assumes persistence mode STRATEGY1.
+	 * Use this when you know a lot of sets of the same type may be done in a short time period.
+	 * Each time this function is called, the timeout is reset.
+	 *
+	 * @param[in] data            Data struct with state type, data, and size.
+	 * @param[in] delay           How long the delay should be, in seconds.
+	 */
+	cs_ret_code_t setDelayed(const cs_state_data_t & data, uint8_t delay);
+
+	/**
 	 * Verify size of user data for getting a state.
 	 *
 	 * @param[in] data            Data struct with state type, target, and size.
@@ -209,6 +232,8 @@ public:
 
 	/**
 	 * Remove a state variable.
+	 *
+	 * TODO: implement.
 	 */
 	cs_ret_code_t remove(CS_TYPE type, const PersistenceMode mode = PersistenceMode::STRATEGY1);
 
@@ -220,6 +245,7 @@ public:
 	/**
 	 * Get pointer to state value.
 	 *
+	 * TODO: implement
 	 * You can use this to avoid copying large state values of fixed length.
 	 * However, you have to make sure to call setViaPointer() immediately after any change made in the data.
 	 *
@@ -230,11 +256,17 @@ public:
 	/**
 	 * Update state value.
 	 *
+	 * TODO: implement
 	 * Call this function after data has been changed via pointer. This makes sure the update will be propagated correctly.
 	 *
 	 * @param[in] type            The state type that has been changed.
 	 */
 	cs_ret_code_t setViaPointer(CS_TYPE type);
+
+	/**
+	 * Handle (crownstone) events.
+	 */
+	void handleEvent(event_t & event);
 
 protected:
 
@@ -245,6 +277,16 @@ protected:
 //	cs_ret_code_t verify(CS_TYPE type, uint8_t* payload, uint8_t length);
 
 //	bool readFlag(CS_TYPE type, bool& value);
+
+	/**
+	 * Find given type in ram.
+	 *
+	 * @param[in]                 Type to search for.
+	 * @param[out]                Index in ram register where the type was found.
+	 * @return                    ERR_SUCCESS when type was found.
+	 * @return                    ERR_NOT_FOUND when type was not found.
+	 */
+	cs_ret_code_t findInRam(const CS_TYPE & type, size16_t & index_in_ram);
 
 	cs_ret_code_t storeInRam(const cs_state_data_t & data);
 
@@ -258,6 +300,11 @@ protected:
 	cs_ret_code_t storeInRam(const cs_state_data_t & data, size16_t & index_in_ram);
 
 	/**
+	 * Writes state variable in ram to flash.
+	 */
+	cs_ret_code_t storeInFlash(size16_t & index_in_ram);
+
+	/**
 	 * Adds a new state_data struct to ram.
 	 *
 	 * Allocates the struct and the data pointer.
@@ -268,11 +315,17 @@ protected:
 	 */
 	cs_state_data_t & addToRam(const CS_TYPE & type, size16_t size);
 
+	cs_ret_code_t addToQueue(const CS_TYPE & type, uint8_t delay);
+
 	cs_ret_code_t allocate(cs_state_data_t & data);
+
+	void delayedStoreTick();
 
 //	std::vector<CS_TYPE> _notifyingStates;
 
-	std::vector<cs_state_data_t> _ram_data_index;
+	std::vector<cs_state_data_t> _ram_data_register;
+
+	std::vector<cs_state_store_queue_t> _store_queue;
 
 private:
 
