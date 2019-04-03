@@ -333,6 +333,10 @@ if [ $do_upload ]; then
 	done_something=true
 	done_upload=false
 	if [ $use_combined ]; then
+		if [ $include_softdevice -o $include_bootloader -o $include_firmware -o $include_board_version ]; then
+			# I guess it makes sense to rebuild the combined when one of the others was included?
+			build_combined
+		fi
 		upload_combined
 		done_upload=true
 	else
