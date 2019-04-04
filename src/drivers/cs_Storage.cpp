@@ -77,14 +77,27 @@ void Storage::clearBusy(uint16_t recordKey) {
 }
 
 bool Storage::isBusy(uint16_t recordKey) {
+	if (_collectingGarbage || _removingFile) {
+		LOGw("Busy: gc=%u rm_file=%u", _collectingGarbage, _removingFile);
+		return true;
+	}
 	for (auto it = _busy_record_keys.begin(); it != _busy_record_keys.end(); it++) {
 		if (*it == recordKey) {
+			LOGw("Busy with record %u", recordKey);
 			return true;
 		}
 	}
 	return false;
 	// This costs us 400B or so, not really worth it..
 //	return (std::find(_busy_record_keys.begin(), _busy_record_keys.end(), recordKey) != _busy_record_keys.end());
+}
+
+bool Storage::isBusy() {
+	if (_collectingGarbage || _removingFile || !_busy_record_keys.empty()) {
+		LOGw("Busy: gc=%u rm_file=%u records=%u", _collectingGarbage, _removingFile, _busy_record_keys.size());
+		return true;
+	}
+	return false;
 }
 
 cs_ret_code_t Storage::garbageCollect() {
@@ -101,8 +114,7 @@ ret_code_t Storage::garbageCollectInternal() {
 	if (!enabled) {
 		LOGe("Softdevice is not enabled yet!");
 	}
-	if (_collectingGarbage) {
-		LOGw("Already collecting garbage");
+	if (isBusy()) {
 		return FDS_ERR_BUSY;
 	}
 	LOGStorageDebug("fds_gc");
@@ -130,12 +142,8 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, const cs_state_data_t & 
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
-	if (_collectingGarbage) {
-		return FDS_ERR_BUSY;
-	}
 	uint16_t recordKey = to_underlying_type(file_data.type);
 	if (isBusy(recordKey)) {
-		LOGw("Already busy with %u", recordKey);
 		return FDS_ERR_BUSY;
 	}
 	fds_record_t record;
@@ -151,7 +159,7 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, const cs_state_data_t & 
 	LOGStorageDebug("Store %p of word size %u", record.data.p_data, record.data.length_words);
 
 	bool f_exists = false;
-	fds_ret_code = exists(file_id, file_data.type, record_desc, f_exists);
+	fds_ret_code = exists(file_id, recordKey, record_desc, f_exists);
 	if (f_exists) {
 		LOGStorageDebug("Update file %u record %u", file_id, record.key);
 		fds_ret_code = fds_record_update(&record_desc, &record);
@@ -211,9 +219,6 @@ cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t & file_data) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
-	if (_collectingGarbage) {
-		return ERR_BUSY;
-	}
 	uint16_t recordKey = to_underlying_type(file_data.type);
 	if (isBusy(recordKey)) {
 		return ERR_BUSY;
@@ -225,23 +230,14 @@ cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t & file_data) {
 
 	fds_ret_code = FDS_ERR_NOT_FOUND;
 	cs_ret_code_t cs_ret_code = ERR_SUCCESS;
+	bool done = false;
 
-	//LOGd("Read from file %i record %i", file_id, file_data.key);
-	// go through all records with given file_id and key (can be multiple)
 	initSearch();
-	bool break_on_first = true;
-	bool found = false;
 	while (fds_record_find(file_id, recordKey, &record_desc, &_ftok) == FDS_SUCCESS) {
-		LOGd("Read record %u", to_underlying_type(file_data.type));
-		if (!found) {
-			fds_ret_code = fds_record_open(&record_desc, &flash_record);
-			if (fds_ret_code != FDS_SUCCESS) {
-				LOGw("Error on opening record");
-				break;
-			}
-			found = true;
-
-			// map flash_record.p_data to value
+		LOGd("Read record %u", recordKey);
+		fds_ret_code = fds_record_open(&record_desc, &flash_record);
+		switch (fds_ret_code) {
+		case FDS_SUCCESS: {
 			size_t flashSize = flash_record.p_header->length_words << 2; // Size is in bytes, each word is 4B.
 			if (flashSize != getPaddedSize(file_data.size)) {
 				LOGe("stored size = %u ram size = %u", flashSize, file_data.size);
@@ -251,20 +247,27 @@ cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t & file_data) {
 			else {
 				memcpy(file_data.value, flash_record.p_data, file_data.size);
 			}
-
-			// invalidates the record
 			fds_ret_code = fds_record_close(&record_desc);
 			if (fds_ret_code != FDS_SUCCESS) {
 				// TODO: maybe still return success? But how to handle the close error?
-				LOGe("Error on closing record");
+				LOGe("Error on closing record %u", fds_ret_code);
 			}
-
-			if (break_on_first) {
-				break;
-			}
+			done = true;
+			break;
+		}
+		case FDS_ERR_CRC_CHECK_FAILED:
+			LOGw("CRC check failed");
+			// TODO: remove file.
+			break;
+		case FDS_ERR_NOT_FOUND:
+		default:
+			LOGw("unhandled error: %u", fds_ret_code);
+		}
+		if (done) {
+			break;
 		}
 	}
-	if (!found) {
+	if (fds_ret_code == FDS_ERR_NOT_FOUND) {
 		LOGd("Record not found");
 	}
 	if (cs_ret_code != ERR_SUCCESS) {
@@ -278,9 +281,15 @@ cs_ret_code_t Storage::remove(cs_file_id_t file_id) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
+	if (isBusy()) {
+		return ERR_BUSY;
+	}
 	LOGi("Delete file, removes all configuration values!");
 	ret_code_t fds_ret_code;
 	fds_ret_code = fds_file_delete(file_id);
+	if (fds_ret_code == FDS_SUCCESS) {
+		_removingFile = true;
+	}
 	return getErrorCode(fds_ret_code);
 }
 
@@ -288,9 +297,6 @@ cs_ret_code_t Storage::remove(cs_file_id_t file_id, CS_TYPE type) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
-	}
-	if (_collectingGarbage) {
-		return ERR_BUSY;
 	}
 	uint16_t recordKey = to_underlying_type(type);
 	if (isBusy(recordKey)) {
@@ -301,54 +307,42 @@ cs_ret_code_t Storage::remove(cs_file_id_t file_id, CS_TYPE type) {
 
 	fds_ret_code = FDS_ERR_NOT_FOUND;
 
-	// go through all records with given file_id and key (can be multiple)
+	// Go through all records with given file_id and key (can be multiple).
+	// Record key can be set busy multiple times.
 	initSearch();
-	while (fds_record_find(file_id, to_underlying_type(type), &record_desc, &_ftok) == FDS_SUCCESS) {
+	while (fds_record_find(file_id, recordKey, &record_desc, &_ftok) == FDS_SUCCESS) {
 		fds_ret_code = fds_record_delete(&record_desc);
-		if (fds_ret_code != FDS_SUCCESS) break;
+		if (fds_ret_code == FDS_SUCCESS) {
+			setBusy(recordKey);
+		}
+		else {
+			break;
+		}
 	}
-	setBusy(recordKey);
 	return getErrorCode(fds_ret_code);
 }
 
-//cs_ret_code_t Storage::exists(cs_file_id_t file_id, bool & result) {
-//	if (!_initialized) {
-//		LOGe("Storage not initialized");
-//		return ERR_NOT_INITIALIZED;
-//	}
-//	// TODO: not yet implemented
-//	return false;
-//}
-
-ret_code_t Storage::exists(cs_file_id_t file_id, CS_TYPE type, bool & result) {
+ret_code_t Storage::exists(cs_file_id_t file_id, uint16_t recordKey, bool & result) {
 	fds_record_desc_t record_desc;
-	return exists(file_id, type, record_desc, result);
+	return exists(file_id, recordKey, record_desc, result);
 }
 
 /**
- * Check if a record exists and removes duplicate record items. We only support one record field.
- * TODO: why is duplicate removal part of the function "exists" ?
+ * Check if a record exists.
+ * Warns when it's found multiple times, but doesn't delete them. That would require to make a copy of the first found
+ * record_desc.
  */
-ret_code_t Storage::exists(cs_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc, bool & result) {
-	if (!_initialized) {
-		LOGe("Storage not initialized");
-		return ERR_NOT_INITIALIZED;
-	}
+ret_code_t Storage::exists(cs_file_id_t file_id, uint16_t recordKey, fds_record_desc_t & record_desc, bool & result) {
 	initSearch();
 	result = false;
-	while (fds_record_find(file_id, to_underlying_type(type), &record_desc, &_ftok) == FDS_SUCCESS) {
+	while (fds_record_find(file_id, recordKey, &record_desc, &_ftok) == FDS_SUCCESS) {
 		if (result) {
-			// remove all subsequent records...
-			LOGw("Delete record %u desc=%p addr=%p", to_underlying_type(type), &record_desc, _ftok.p_addr);
-			fds_record_delete(&record_desc);
+			LOGw("Duplicate record %u desc=%p addr=%p", recordKey, &record_desc, _ftok.p_addr);
+//			fds_record_delete(&record_desc);
 		}
 		if (!result) {
-			//print("Exists:", type);
 			result = true;
 		}
-	}
-	if (!result) {
-		//print("Does not exist:", type);
 	}
 	return ERR_SUCCESS;
 }
@@ -411,6 +405,7 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 }
 
 void Storage::handleRemoveFileEvent(fds_evt_t const * p_fds_evt) {
+	_removingFile = false;
 	switch (p_fds_evt->result) {
 	case FDS_SUCCESS:
 		LOGi("File successfully deleted");

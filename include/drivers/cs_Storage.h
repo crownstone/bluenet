@@ -20,7 +20,8 @@ static const cs_file_id_t FILE_STATE          = 0x0001;
 static const cs_file_id_t FILE_GENERAL        = 0x0002;
 static const cs_file_id_t FILE_CONFIGURATION  = 0x0003;
 
-/** Class to store items persistently in flash (persistent) memory.
+/**
+ * Class to store items persistently in flash (persistent) memory.
  *
  * This class provides functions to initialize, clear, write and read persistent memory (flash) through the use of
  * Flash Data Storage.
@@ -30,6 +31,9 @@ static const cs_file_id_t FILE_CONFIGURATION  = 0x0003;
  * The information on the Flash Data Storage from Nordic can be found at the link:
  *   https://www.nordicsemi.com/DocLib/Content/SDK_Doc/nRF5_SDK/v15-2-0/lib_fds
  *   old: https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk%2Fdita%2Fsdk%2Fnrf5_sdk.html
+ *
+ * Some operations will block other operations. For example, you can't write a record while performing garbage
+ * collection. You can't write a record while it's already being written. This is what the "busy" functions are for.
  */
 class Storage : public EventListener {
 public:
@@ -60,6 +64,7 @@ public:
 	 * @retval ERR_SUCCESS                  When successful.
 	 * @retval ERR_NOT_FOUND                When the type was not found.
 	 * @retval ERR_WRONG_PAYLOAD_LENGTH     When the given size does not match the stored size.
+	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
 	cs_ret_code_t read(cs_file_id_t file_id, cs_state_data_t & data);
 
@@ -68,8 +73,14 @@ public:
 	 *
 	 * It is assumed that data pointer was allocated by this class.
 	 *
+	 * Automatically starts garbage collection when needed.
+	 *
 	 * @param[in] file_id         File id to write to.
 	 * @param[in] data            Data struct with type, data pointer, and size.
+	 *
+	 * @retval ERR_SUCCESS                  When successfully started to write.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 * @retval ERR_NO_SPACE                 When there is no space, not even after garbage collection.
 	 */
 	cs_ret_code_t write(cs_file_id_t file_id, const cs_state_data_t & data);
 
@@ -82,12 +93,28 @@ public:
 	uint8_t* allocate(size16_t& size);
 
 	/**
-	 * Removes a whole flash page.
+	 * Removes a whole file.
+	 *
+	 * TODO: test this function
+	 *
+	 * @param[in] file_id         File id to remove.
+	 *
+	 * @retval ERR_SUCCESS                  When successfully started removing the file.
+	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
 	cs_ret_code_t remove(cs_file_id_t file_id);
 
 	/**
-	 * Removes a type from a flash page.
+	 * Removes a type from a file.
+	 *
+	 * TODO: test this function
+	 *
+	 * @param[in] file_id         File id to remove type from.
+	 * @param[in] type            Type to remove
+	 *
+	 * @retval ERR_SUCCESS                  When successfully started removing the type.
+	 * @retval ERR_NOT_FOUND                When type was not found on file.
+	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
 	cs_ret_code_t remove(cs_file_id_t file_id, CS_TYPE type);
 
@@ -95,19 +122,20 @@ public:
 	 * Garbage collection reclaims the flash space that is occupied by records that have been deleted,
 	 * or that failed to be completely written due to, for example, a power loss.
 	 *
-	 * This function is asynchronous.
+	 * @retval ERR_SUCCESS                  When successfully started garbage collection.
+	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
 	cs_ret_code_t garbageCollect();
 
-	// Handle Crownstone events
+	/**
+	 * Handle Crownstone events
+	 */
 	void handleEvent(event_t & event) {};
 
+	/**
+	 * Handle FDS events
+	 */
 	void handleFileStorageEvent(fds_evt_t const * p_fds_evt);
-
-	void handleWriteEvent(fds_evt_t const * p_fds_evt);
-	void handleRemoveRecordEvent(fds_evt_t const * p_fds_evt);
-	void handleRemoveFileEvent(fds_evt_t const * p_fds_evt);
-	void handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt);
 
 private:
 	Storage();
@@ -120,6 +148,7 @@ private:
 
 	fds_find_token_t _ftok;
 
+	bool _removingFile = false;
 	std::vector<uint16_t> _busy_record_keys;
 
 	// Use before ftok
@@ -128,6 +157,7 @@ private:
 	void setBusy(uint16_t recordKey);
 	void clearBusy(uint16_t recordKey);
 	bool isBusy(uint16_t recordKey);
+	bool isBusy();
 
 	cs_ret_code_t getErrorCode(ret_code_t code);
 
@@ -138,20 +168,24 @@ private:
 	*/
 	ret_code_t writeInternal(cs_file_id_t file_id, const cs_state_data_t & data);
 
-//	ret_code_t exists(cs_file_id_t file_id, bool & result);
+	ret_code_t exists(cs_file_id_t file_id, uint16_t recordKey, bool & result);
 
-	ret_code_t exists(cs_file_id_t file_id, CS_TYPE type, bool & result);
-
-	/** Check if a type of record exists and return the record descriptor.
+	/**
+	 * Check if a type of record exists and return the record descriptor.
 	 *
-	 * @param[in] file_id                        Unique file
-	 * @param[in] type                           One of the Crownstone types
-	 * @param[in,out] record_desc                Record descriptor
-	 * @param[out] result                        True if descriptor exists.
+	 * @param[in] file_id                        File id to search.
+	 * @param[in] recordKey                      Record key to search for.
+	 * @param[out] record_desc                   Record descriptor, used to manipulate records.
+	 * @param[out] result                        True if record was found.
 	 */
-	ret_code_t exists(cs_file_id_t file_id, CS_TYPE type, fds_record_desc_t & record_desc, bool & result);
+	ret_code_t exists(cs_file_id_t file_id, uint16_t recordKey, fds_record_desc_t & record_desc, bool & result);
 
 	ret_code_t garbageCollectInternal();
+
+	void handleWriteEvent(fds_evt_t const * p_fds_evt);
+	void handleRemoveRecordEvent(fds_evt_t const * p_fds_evt);
+	void handleRemoveFileEvent(fds_evt_t const * p_fds_evt);
+	void handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt);
 
 	inline void print(const std::string & prefix, CS_TYPE type);
 };
