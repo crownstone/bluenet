@@ -78,7 +78,7 @@ checkError() {
 	result=$?
 	if [ $result -ne 0 ]; then
 		if [ -n "$1" ]; then
-			cs_err "$1"
+			cs_err "$1 (error code $result)"
 		fi
 		exit $result
 	fi

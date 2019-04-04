@@ -322,6 +322,10 @@ if [ $do_upload ]; then
 	done_something=true
 	done_upload=false
 	if [ $use_combined ]; then
+		if [ $include_softdevice -o $include_bootloader -o $include_firmware -o $include_board_version ]; then
+			# I guess it makes sense to rebuild the combined when one of the others was included?
+			build_combined
+		fi
 		upload_combined
 		done_upload=true
 	else
@@ -333,16 +337,18 @@ if [ $do_upload ]; then
 			upload_bootloader
 			done_upload=true
 		fi
+		# Write board version before uploading firmware, else firmware writes it.
+		if [ $include_board_version ]; then
+			upload_board_version
+			done_upload=true
+		fi
 		if [ $include_firmware ]; then
 			upload_firmware
 			upload_valid_app_mark
 			done_upload=true
 		else
-			upload_invalid_app_mark
-		fi
-		if [ $include_board_version ]; then
-			upload_board_version
-			done_upload=true
+#			upload_invalid_app_mark
+			:
 		fi
 	fi
 	verify_board_version_written
