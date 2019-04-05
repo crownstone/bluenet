@@ -70,89 +70,51 @@ struct __attribute__((__packed__)) cs_state_store_queue_t {
 /**
  * Stores state values in RAM and/or FLASH.
  *
- * Each state type always have a FIRMWARE_DEFAULT value.
- * Values that are set, always take precedence over FIRMWARE_DEFAULT.
+ * Each state type always has a FIRMWARE_DEFAULT value.
+ * Values that are set, always take precedence over the FIRMWARE_DEFAULT.
  *
  * Values like chip temperature, that don't have to be stored over reboots should be stored in and read from RAM.
- * This complete persistence strategy is called RAM_OR_DEFAULT.
  *
  * Values like CONFIG_BOOT_DELAY should be known over reboots of the device. Moreover, they should also persist
  * over firmware updates. These values are stored in FLASH.
  * If the values are not changed, they should NOT be stored to FLASH. They can then immediately be read from the
  * FIRMWARE_DEFAULT. If these values are stored in FLASH, they always take precedence over FIRMWARE_DEFAULT values.
  * Values that are stored in FLASH will be cached in RAM, to prevent having to read from FLASH every time.
- * This complete persistence strategy is called CACHED_FLASH_OR_DEFAULT.
+ * This complete persistence strategy is called STRATEGY1.
  *
  * If a new firmware has a new FIRMWARE_DEFAULT that should be enforced, we need to explicitly remove the value from
  * FLASH before updating the firmware.
  * For example, a new CONFIG_BOOT_DELAY may have to be enforced, or else it might go into an infinite reboot loop.
  *
  * For each state type it is defined whether it should be stored in RAM or FLASH.
- */
-
-/**
- * Load settings from and save settings to FLASH (persistent storage) and or RAM. If we save values to FLASH we
- * should only do that if the values are different from the FIRMWARE_DEFAULT.
  *
- * If we read values from FLASH and they are not written in FLASH, we should get them from the FIRMWARE_DEFAULT instead.
+ * All values that are stored to flash should also be stored in RAM. This is required, because storing to flash is
+ * asynchronous, the value must remain in RAM at least until the write is done.
  *
- * To prevent a round-trip to search for records in FLASH, we always will cache the records in RAM. So, if a record
- * is present in RAM we will use that value, we will not read it from FLASH.
+ * Storing to flash can also fail, in which case it can be retried later. The state type will be put in a queue and
+ * retried after about STATE_RETRY_STORE_DELAY_MS ms.
  *
- * Default FLASH read procedure:
+ *
+ * Get procedure:
  *   1. Read RAM
  *     - if present, return RAM value.
- *   2. Read FLASH
- *     - if present, copy to RAM, return RAM value.
- *   3. Read FIRMWARE_DEFAULT
- *     - if present, copy to RAM, return RAM value
- *     - if not present, should be impossible: compile-time error please!
+ *   2. Get location (FLASH or RAM)
+ *   3a. If RAM
+ *     - get default value.
+ *     - store default value in RAM.
+ *   3b. If FLASH
+ *     - read FLASH
+ *     - if present, copy FLASH value to RAM.
+ *     - if not present, get default value, store default value in RAM.
+ *   4. Copy RAM value to return value.
  *
- * Default FLASH write procedure (outdated):
- *   1. Compare FIRMWARE_DEFAULT
- *     - if same, return success
- *   2. Compare FLASH
- *     - if same, return success
- *   3. Write to FLASH and copy to RAM
- *
- * Note. The above has a bug. When a value has been written to FLASH and then the FIRMWARE_DEFAULT needs to be
- * written the above protocol fails to write FIRMWARE_DEFAULT values.
- *
- * Default FLASH write procedure:
- *   1. Compare with RAM
- *     - if same, return success
- *   2. Write to FLASH
- *
- * We assume here that a value even if it is the same as FIRMWARE_DEFAULT it will still be written. To remove a
- * value should be a deliberate action.
- *
- * Default RAM read procedure:
- *   1. Read RAM
- *     - if present, return RAM value
- *     - if not present, return failure
- *
- * Default RAM write procedure:
- *   1. Write to RAM (no comparison, just writing is faster than first checking if it is the same)
- *
- * It would be cumbersome to decide per item if it needs to be written to or read from FLASH or from RAM. So, we have
- * an overarching read and write procedure
- *
- * Default read procedure:
- *   1. Obtain default location
- *     a. Case default location is RAM
- *       - READ RAM
- *     b. Case default location is FLASH
- *       - READ FLASH
- *
- * Default write procedure:
- *   1. Obtain default location
- *     a. Case default location is RAM
- *       - WRITE RAM
- *     b. Case default location is FLASH
- *       - WRITE FLASH
- *
- * The above means quite a sophisticated setup in reading/writing, so it is encapsulated in a dedicated
- * PersistenceMode, which is called STRATEGY1.
+ * Set procedure:
+ *   1. Copy value to RAM.
+ *   2. Get location (FLASH or RAM)
+ *     - If RAM, return.
+ *   3. Write to storage.
+ *     - If success, return.
+ *     - If busy, add state type to queue, return.
  */
 class State: public BaseClass<>, EventListener {
 public:

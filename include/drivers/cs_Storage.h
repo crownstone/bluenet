@@ -26,14 +26,24 @@ static const cs_file_id_t FILE_CONFIGURATION  = 0x0003;
  * This class provides functions to initialize, clear, write and read persistent memory (flash) through the use of
  * Flash Data Storage.
  *
- * CS_TYPE is used as record key.
- *
  * The information on the Flash Data Storage from Nordic can be found at the link:
  *   https://www.nordicsemi.com/DocLib/Content/SDK_Doc/nRF5_SDK/v15-2-0/lib_fds
  *   old: https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk%2Fdita%2Fsdk%2Fnrf5_sdk.html
  *
+ * CS_TYPE is used as record key.
+ *
+ * Garbage collection will be automatically started by this class when needed.
+ *
+ * When a record is corrupted, most likely in case of power loss while writing, the CRC check will fail when opening a
+ * file. In this case the record will be deleted (TODO).
+ *
+ * Only one record for each record key should exist. In case there are multiple (duplicates), they will be removed
+ * (TODO). Since FDS always appends records, it is assumed that the last valid record should be kept. Checking for
+ * duplicates is done for each write and each read.
+ *
  * Some operations will block other operations. For example, you can't write a record while performing garbage
  * collection. You can't write a record while it's already being written. This is what the "busy" functions are for.
+ * Each type can be set busy multiple times, for example in case multiple records of the same type are being deleted.
  */
 class Storage : public EventListener {
 public:
