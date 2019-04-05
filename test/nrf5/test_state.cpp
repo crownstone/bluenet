@@ -58,6 +58,8 @@ public:
 	TestResult testGarbageCollection(uint16_t resetCount, uint32_t step);
 	TestResult testMultipleWrites(uint16_t resetCount, uint32_t step);
 	TestResult testDelayedSet(uint16_t resetCount, uint32_t step);
+	TestResult testDuplicateRecords(uint16_t resetCount, uint32_t step);
+
 
 private:
 	uint16_t _resetCount = 0;
@@ -147,6 +149,9 @@ void TestState::continueTest() {
 			break;
 		case 5:
 			result = testDelayedSet(_resetCount, _testStep);
+			break;
+		case 6:
+			result = testDuplicateRecords(_resetCount, _testStep);
 			break;
 		default:
 			if (_resetCount == 0) {
@@ -427,7 +432,7 @@ TestResult TestState::getAndSetLargeStruct(uint16_t resetCount, uint32_t step) {
 }
 
 TestResult TestState::testGarbageCollection(uint16_t resetCount, uint32_t step) {
-	// Let's do this test after reboot.
+	// Let's do this test only once, after reboot.
 	if (resetCount != 1) {
 		return DONE;
 	}
@@ -449,7 +454,7 @@ TestResult TestState::testGarbageCollection(uint16_t resetCount, uint32_t step) 
 }
 
 TestResult TestState::testMultipleWrites(uint16_t resetCount, uint32_t step) {
-	// Let's do this test after reboot.
+	// Let's do this test only once, after reboot.
 	if (resetCount != 1) {
 		return DONE;
 	}
@@ -481,21 +486,76 @@ TestResult TestState::testMultipleWrites(uint16_t resetCount, uint32_t step) {
 }
 
 TestResult TestState::testDelayedSet(uint16_t resetCount, uint32_t step) {
-	// Let's do this test after reboot.
-	if (resetCount != 1) {
-		return DONE;
-	}
 	if (step == 0) {
 		LOGi("");
 		LOGi("##### Test delayed set #####");
 	}
 	cs_ret_code_t errCode;
-	TYPIFY(CONFIG_VOLTAGE_ADC_ZERO) voltageZero = 1234;
-	cs_state_data_t data(CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO, (uint8_t*)&voltageZero, sizeof(voltageZero));
-	errCode = _state->setDelayed(data, 3);
-	assertSuccess(errCode);
-	waitForStore(CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO);
-	return DONE_BUT_WAIT_FOR_WRITE;
+	TYPIFY(CONFIG_VOLTAGE_ADC_ZERO) voltageZero = 0;
+	if (resetCount == 0) {
+		cs_ret_code_t errCode;
+		voltageZero = -1234;
+		cs_state_data_t data(CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO, (uint8_t*)&voltageZero, sizeof(voltageZero));
+		errCode = _state->setDelayed(data, 3);
+		assertSuccess(errCode);
+		waitForStore(CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO);
+		return DONE_BUT_WAIT_FOR_WRITE;
+	}
+	else {
+		errCode = _state->get(CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO, (uint8_t*)&voltageZero, sizeof(voltageZero));
+		LOGi("errCode=%u voltageZero=%i", errCode, voltageZero);
+		assertSuccess(errCode);
+		assert(voltageZero == -1234, "Expected -1234");
+		return DONE;
+	}
 }
 
-
+/**
+ * First write the same type multiple times to FDS. Uses raw FDS functions in order to do so.
+ * Then write and read the type, see what happens.
+ */
+TestResult TestState::testDuplicateRecords(uint16_t resetCount, uint32_t step) {
+	// Let's do this test only once, after reboot.
+//	if (resetCount != 1) {
+//		return DONE;
+//	}
+	if (step == 0) {
+		LOGi("");
+		LOGi("##### Test duplicate records #####");
+	}
+	cs_ret_code_t errCode;
+	uint32_t pwmPeriod = 0;
+	fds_record_t record;
+	if (resetCount == 0) {
+		switch (step) {
+		case 0:
+		case 1:
+		case 2: {
+			pwmPeriod = 10000 + step;
+			record.file_id           = FILE_CONFIGURATION;
+			record.key               = to_underlying_type(CS_TYPE::CONFIG_PWM_PERIOD);
+			record.data.p_data       = &pwmPeriod;
+			record.data.length_words = 1;
+			uint32_t fdsRet = fds_record_write(NULL, &record);
+			assert(fdsRet == FDS_SUCCESS, "Expected FDS_SUCCESS");
+			waitForStore(CS_TYPE::CONFIG_PWM_PERIOD);
+			return NOT_DONE_WAIT_FOR_WRITE;
+		}
+		case 3: {
+			pwmPeriod = 1235468790;
+			errCode = _state->set(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
+			assertSuccess(errCode);
+			waitForStore(CS_TYPE::CONFIG_PWM_PERIOD);
+			return DONE_BUT_WAIT_FOR_WRITE;
+		}
+		}
+	}
+	else {
+		errCode = _state->get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
+		LOGi("errCode=%u pwmPeriod=%u", errCode, pwmPeriod);
+		assertSuccess(errCode);
+		assert(pwmPeriod == 1235468790, "Expected 1235468790");
+		return DONE;
+	}
+	return DONE;
+}
