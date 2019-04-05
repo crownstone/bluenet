@@ -214,6 +214,9 @@ void Storage::print(const std::string & prefix, CS_TYPE type) {
 	LOGd("%s %s (%i)", prefix.c_str(), TypeName(type), type);
 }
 
+/**
+ * Iterate over all records, so that in case of duplicates, the last written record will be used to read.
+ */
 cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t & file_data) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
@@ -231,13 +234,16 @@ cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t & file_data) {
 	fds_ret_code = FDS_ERR_NOT_FOUND;
 	cs_ret_code_t cs_ret_code = ERR_SUCCESS;
 	bool done = false;
-
+	LOGd("Read record %u", recordKey);
 	initSearch();
 	while (fds_record_find(file_id, recordKey, &record_desc, &_ftok) == FDS_SUCCESS) {
-		LOGd("Read record %u", recordKey);
+		if (done) {
+			LOGw("Duplicate record key=%u addr=%p", recordKey, _ftok.p_addr);
+		}
 		fds_ret_code = fds_record_open(&record_desc, &flash_record);
 		switch (fds_ret_code) {
 		case FDS_SUCCESS: {
+			LOGStorageDebug("Opened record id=%u addr=%p", flash_record.p_header->record_id, record_desc.p_record);
 			size_t flashSize = flash_record.p_header->length_words << 2; // Size is in bytes, each word is 4B.
 			if (flashSize != getPaddedSize(file_data.size)) {
 				LOGe("stored size = %u ram size = %u", flashSize, file_data.size);
@@ -257,15 +263,15 @@ cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t & file_data) {
 		}
 		case FDS_ERR_CRC_CHECK_FAILED:
 			LOGw("CRC check failed");
-			// TODO: remove file.
+			// TODO: remove record.
 			break;
 		case FDS_ERR_NOT_FOUND:
 		default:
-			LOGw("unhandled error: %u", fds_ret_code);
+			LOGw("Unhandled open error: %u", fds_ret_code);
 		}
-		if (done) {
-			break;
-		}
+//		if (done) {
+//			break;
+//		}
 	}
 	if (fds_ret_code == FDS_ERR_NOT_FOUND) {
 		LOGd("Record not found");
@@ -331,13 +337,14 @@ ret_code_t Storage::exists(cs_file_id_t file_id, uint16_t recordKey, bool & resu
  * Check if a record exists.
  * Warns when it's found multiple times, but doesn't delete them. That would require to make a copy of the first found
  * record_desc.
+ * Returns the last found record.
  */
 ret_code_t Storage::exists(cs_file_id_t file_id, uint16_t recordKey, fds_record_desc_t & record_desc, bool & result) {
 	initSearch();
 	result = false;
 	while (fds_record_find(file_id, recordKey, &record_desc, &_ftok) == FDS_SUCCESS) {
 		if (result) {
-			LOGw("Duplicate record %u desc=%p addr=%p", recordKey, &record_desc, _ftok.p_addr);
+			LOGw("Duplicate record key=%u addr=%p", recordKey, _ftok.p_addr);
 //			fds_record_delete(&record_desc);
 		}
 		if (!result) {
