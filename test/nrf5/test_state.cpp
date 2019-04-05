@@ -22,6 +22,8 @@
  * To make things a bit readable, the individual tests can be read from top to bottom, as that's the order of execution.
  */
 
+#define LOGTestDebug LOGnone
+
 // Don't know where to get this from nicely, but the NRF52 has a page size of 4kB.
 //#define FLASH_PAGE_SIZE 4096
 #define FLASH_PAGE_SIZE (4*FDS_VIRTUAL_PAGE_SIZE)
@@ -59,7 +61,7 @@ public:
 	TestResult testMultipleWrites(uint16_t resetCount, uint32_t step);
 	TestResult testDelayedSet(uint16_t resetCount, uint32_t step);
 	TestResult testDuplicateRecords(uint16_t resetCount, uint32_t step);
-
+	TestResult testCorruptedRecords(uint16_t resetCount, uint32_t step);
 
 private:
 	uint16_t _resetCount = 0;
@@ -120,7 +122,7 @@ int main() {
 }
 
 void TestState::waitForStore(CS_TYPE type) {
-	LOGi("waitForStore type=%u", type);
+	LOGTestDebug("waitForStore type=%u", type);
 	_lastStoredType = type;
 }
 
@@ -152,6 +154,9 @@ void TestState::continueTest() {
 			break;
 		case 6:
 			result = testDuplicateRecords(_resetCount, _testStep);
+			break;
+		case 7:
+			result = testCorruptedRecords(_resetCount, _testStep);
 			break;
 		default:
 			if (_resetCount == 0) {
@@ -202,7 +207,7 @@ void TestState::handleEvent(event_t & event) {
 	}
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
 		CS_TYPE storedType = *(CS_TYPE*)event.data;
-		LOGi("lastStoredType=%u storedType=%u", _lastStoredType, storedType);
+		LOGTestDebug("lastStoredType=%u storedType=%u", _lastStoredType, storedType);
 		assert(_lastStoredType == storedType, "Wrong type written");
 		_lastStoredType = CS_TYPE::CONFIG_DO_NOT_USE;
 		continueTest();
@@ -512,19 +517,21 @@ TestResult TestState::testDelayedSet(uint16_t resetCount, uint32_t step) {
 
 /**
  * First write the same type multiple times to FDS. Uses raw FDS functions in order to do so.
- * Then write and read the type, see what happens.
+ * Then set via state, and get after a reboot.
+ *
+ * Use a word sized state variable for this so we don't need any padding.
+ * Allocate a data pointer, as a variable on stack will not last long enough for the write action, and result in CRC
+ * failures. The allocation leaks some memory, but we don't care about this for this test.
  */
 TestResult TestState::testDuplicateRecords(uint16_t resetCount, uint32_t step) {
-	// Let's do this test only once, after reboot.
-//	if (resetCount != 1) {
-//		return DONE;
-//	}
 	if (step == 0) {
 		LOGi("");
 		LOGi("##### Test duplicate records #####");
 	}
 	cs_ret_code_t errCode;
+
 	uint32_t pwmPeriod = 0;
+	uint32_t *data = (uint32_t*)malloc(sizeof(pwmPeriod));
 	fds_record_t record;
 	if (resetCount == 0) {
 		switch (step) {
@@ -532,9 +539,10 @@ TestResult TestState::testDuplicateRecords(uint16_t resetCount, uint32_t step) {
 		case 1:
 		case 2: {
 			pwmPeriod = 10000 + step;
+			*data = pwmPeriod;
 			record.file_id           = FILE_CONFIGURATION;
 			record.key               = to_underlying_type(CS_TYPE::CONFIG_PWM_PERIOD);
-			record.data.p_data       = &pwmPeriod;
+			record.data.p_data       = data;
 			record.data.length_words = 1;
 			uint32_t fdsRet = fds_record_write(NULL, &record);
 			assert(fdsRet == FDS_SUCCESS, "Expected FDS_SUCCESS");
@@ -542,7 +550,12 @@ TestResult TestState::testDuplicateRecords(uint16_t resetCount, uint32_t step) {
 			return NOT_DONE_WAIT_FOR_WRITE;
 		}
 		case 3: {
-			pwmPeriod = 1235468790;
+			errCode = _state->get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
+			LOGi("errCode=%u pwmPeriod=%u", errCode, pwmPeriod);
+			assertSuccess(errCode);
+			assert(pwmPeriod == 10002, "Expected 10002");
+
+			pwmPeriod = 1234567890;
 			errCode = _state->set(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
 			assertSuccess(errCode);
 			waitForStore(CS_TYPE::CONFIG_PWM_PERIOD);
@@ -554,7 +567,72 @@ TestResult TestState::testDuplicateRecords(uint16_t resetCount, uint32_t step) {
 		errCode = _state->get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
 		LOGi("errCode=%u pwmPeriod=%u", errCode, pwmPeriod);
 		assertSuccess(errCode);
-		assert(pwmPeriod == 1235468790, "Expected 1235468790");
+		assert(pwmPeriod == 1234567890, "Expected 1234567890");
+		return DONE;
+	}
+	return DONE;
+}
+
+/**
+ * Corrupt a record by changing the value in ram while FDS is writing it to flash.
+ * This hopefully leads to corrupt data in flash, and should lead to a CRC mismatch.
+ *
+ * Use a word sized state variable for this so we don't need any padding.
+ * Allocate a data pointer, variable on stack will not last long enough for the write action.
+ * The allocation leaks some memory, but we don't care about this for this test.
+ */
+TestResult TestState::testCorruptedRecords(uint16_t resetCount, uint32_t step) {
+	if (step == 0) {
+		LOGi("");
+		LOGi("##### Test corrupted records #####");
+	}
+	cs_ret_code_t errCode;
+	int32_t powerZero = 0;
+	int32_t *data = (int32_t*)malloc(sizeof(powerZero));
+	uint16_t recordKey = to_underlying_type(CS_TYPE::CONFIG_POWER_ZERO);
+	fds_record_t record;
+	if (resetCount == 0) {
+		switch (step) {
+		case 0: {
+			LOGi("Write to flash");
+			powerZero = 123456;
+			*data = powerZero;
+			record.file_id           = FILE_CONFIGURATION;
+			record.key               = recordKey;
+			record.data.p_data       = data;
+			record.data.length_words = 1;
+			uint32_t fdsRet = fds_record_write(NULL, &record);
+			// Modify data while FDS is writing.
+			for (uint32_t i=0; i<100000; ++i) {
+				*data = i;
+			}
+			assert(fdsRet == FDS_SUCCESS, "Expected FDS_SUCCESS");
+			waitForStore(CS_TYPE::CONFIG_POWER_ZERO);
+			return NOT_DONE_WAIT_FOR_WRITE;
+		}
+		case 1: {
+			LOGi("Read from flash");
+			fds_flash_record_t flash_record;
+			fds_record_desc_t record_desc;
+			fds_find_token_t ftok;
+			memset(&ftok, 0x00, sizeof(fds_find_token_t));
+			uint32_t fdsRet = fds_record_find(FILE_CONFIGURATION, recordKey, &record_desc, &ftok);
+			assert(fdsRet == FDS_SUCCESS, "Expected FDS_SUCCESS");
+			fdsRet = fds_record_open(&record_desc, &flash_record);
+			assert(fdsRet == FDS_ERR_CRC_CHECK_FAILED, "Expected FDS_ERR_CRC_CHECK_FAILED");
+
+			LOGi("Get from state");
+			powerZero = 0xDEADBEEF;
+			errCode = _state->get(CS_TYPE::CONFIG_POWER_ZERO, &powerZero, sizeof(powerZero));
+			LOGi("errCode=%u powerZero=%u", errCode, powerZero);
+			assertSuccess(errCode);
+			assert(powerZero == CONFIG_POWER_ZERO_DEFAULT, "Expected default");
+
+			return DONE;
+		}
+		}
+	}
+	else {
 		return DONE;
 	}
 	return DONE;
