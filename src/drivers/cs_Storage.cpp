@@ -168,8 +168,11 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, const cs_state_data_t & 
 		LOGStorageDebug("Write file %u, record %u, ptr %p", file_id, record.key, record.data.p_data);
 		fds_ret_code = fds_record_write(&record_desc, &record);
 	}
-	FDS_ERROR_CHECK(fds_ret_code);
 	switch(fds_ret_code) {
+	case FDS_SUCCESS:
+		setBusy(recordKey);
+		LOGStorageDebug("Started writing");
+		break;
 	case FDS_ERR_NO_SPACE_IN_FLASH: {
 		LOGi("Flash is full, start garbage collection");
 		ret_code_t gc_ret_code = garbageCollect();
@@ -181,10 +184,11 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, const cs_state_data_t & 
 		}
 		break;
 	}
-	case FDS_SUCCESS:
-		setBusy(recordKey);
-		LOGStorageDebug("Started writing");
+	case FDS_ERR_NO_SPACE_IN_QUEUES:
+	case FDS_ERR_BUSY:
 		break;
+	default:
+		LOGw("Unhandled write error: %u", fds_ret_code);
 	}
 	return fds_ret_code;
 }
@@ -238,7 +242,7 @@ cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t & file_data) {
 	initSearch();
 	while (fds_record_find(file_id, recordKey, &record_desc, &_ftok) == FDS_SUCCESS) {
 		if (done) {
-			LOGw("Duplicate record key=%u addr=%p", recordKey, _ftok.p_addr);
+			LOGe("Duplicate record key=%u addr=%p", recordKey, _ftok.p_addr);
 		}
 		fds_ret_code = fds_record_open(&record_desc, &flash_record);
 		switch (fds_ret_code) {
@@ -256,13 +260,13 @@ cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t & file_data) {
 			fds_ret_code = fds_record_close(&record_desc);
 			if (fds_ret_code != FDS_SUCCESS) {
 				// TODO: maybe still return success? But how to handle the close error?
-				LOGe("Error on closing record %u", fds_ret_code);
+				LOGe("Error on closing record err=%u", fds_ret_code);
 			}
 			done = true;
 			break;
 		}
 		case FDS_ERR_CRC_CHECK_FAILED:
-			LOGw("CRC check failed");
+			LOGw("CRC check failed addr=%p", record_desc.p_record);
 			// TODO: remove record.
 			break;
 		case FDS_ERR_NOT_FOUND:
@@ -344,7 +348,7 @@ ret_code_t Storage::exists(cs_file_id_t file_id, uint16_t recordKey, fds_record_
 	result = false;
 	while (fds_record_find(file_id, recordKey, &record_desc, &_ftok) == FDS_SUCCESS) {
 		if (result) {
-			LOGw("Duplicate record key=%u addr=%p", recordKey, _ftok.p_addr);
+			LOGe("Duplicate record key=%u addr=%p", recordKey, _ftok.p_addr);
 //			fds_record_delete(&record_desc);
 		}
 		if (!result) {
