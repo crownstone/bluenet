@@ -237,7 +237,7 @@ void Stack::initRadio() {
 	ret_code = sd_ble_gap_addr_get(&_nonconnectable_address);
 	APP_ERROR_CHECK(ret_code);
 	// have non-connectable address one value higher than connectable one
-//	_nonconnectable_address.addr[0] += 0x1;
+	_nonconnectable_address.addr[0] += 0x1;
 
 	setInitialized(C_RADIO_INITIALIZED);
 
@@ -455,7 +455,7 @@ void Stack::configureIBeaconAdvData(IBeacon* beacon) {
 	_config_advdata.include_appearance = false;
 
 	ret_code_t ret_code;
-	_adv_data.adv_data.len = sizeof(_config_advdata);
+	_adv_data.adv_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
 	if (_adv_data.adv_data.p_data == NULL) {
 		_adv_data.adv_data.p_data = (uint8_t*)calloc(sizeof(uint8_t), _adv_data.adv_data.len);
 	}
@@ -500,7 +500,7 @@ void Stack::configureBleDeviceAdvData() {
  *   N bytes for name         (1 byte for type,  N-1 bytes for data)
  */
 void Stack::configureScanResponse(uint8_t deviceType) {
-	LOGd("Configurate scan response and call ble_advdata_encode");
+	LOGd("Configure scan response and call ble_advdata_encode");
 
 	uint8_t serviceDataLength = 0;
 
@@ -537,7 +537,7 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 
 	// we now have to encode the data by an explicit call
 	ret_code_t ret_code;
-	_adv_data.scan_rsp_data.len = sizeof(_config_scanrsp);
+	_adv_data.scan_rsp_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
 	LOGd("Create scan response of size %i", _adv_data.scan_rsp_data.len);
 	if (_adv_data.scan_rsp_data.p_data == NULL) {
 		_adv_data.scan_rsp_data.p_data = (uint8_t*)calloc(sizeof(uint8_t),_adv_data.scan_rsp_data.len);
@@ -599,6 +599,7 @@ void Stack::setConnectable() {
 void Stack::setNonConnectable() {
 	LOGd("setNonConnectable");
 	_adv_params.properties.type = BLE_GAP_ADV_TYPE_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED;
+//	_adv_params.properties.type = BLE_GAP_ADV_TYPE_NONCONNECTABLE_SCANNABLE_UNDIRECTED;
 	// TODO: The identity address cannot be changed while advertising, scanning or creating a connection.
 //	uint32_t ret_code;
 //	do {
@@ -616,7 +617,91 @@ void Stack::restartAdvertising() {
 	if (_advertising) {
 		stopAdvertising();
 	}
+	bool connectable = false;
+	bool scannable = false;
 
+	switch (_adv_params.properties.type) {
+	case BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_CONNECTABLE_NONSCANNABLE_DIRECTED_HIGH_DUTY_CYCLE:
+	case BLE_GAP_ADV_TYPE_CONNECTABLE_NONSCANNABLE_DIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_CONNECTABLE_NONSCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_CONNECTABLE_NONSCANNABLE_DIRECTED:
+		connectable = true;
+		break;
+	case BLE_GAP_ADV_TYPE_NONCONNECTABLE_SCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_NONCONNECTABLE_SCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_NONCONNECTABLE_SCANNABLE_DIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_NONCONNECTABLE_NONSCANNABLE_DIRECTED:
+	default:
+		connectable = false;
+		break;
+	}
+
+	switch (_adv_params.properties.type) {
+	case BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_NONCONNECTABLE_SCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_NONCONNECTABLE_SCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_NONCONNECTABLE_SCANNABLE_DIRECTED:
+		scannable = true;
+		break;
+	case BLE_GAP_ADV_TYPE_CONNECTABLE_NONSCANNABLE_DIRECTED_HIGH_DUTY_CYCLE:
+	case BLE_GAP_ADV_TYPE_CONNECTABLE_NONSCANNABLE_DIRECTED:
+	case BLE_GAP_ADV_TYPE_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_CONNECTABLE_NONSCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_CONNECTABLE_NONSCANNABLE_DIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED:
+	case BLE_GAP_ADV_TYPE_EXTENDED_NONCONNECTABLE_NONSCANNABLE_DIRECTED:
+	default:
+		scannable = false;
+		break;
+	}
+
+	if (scannable) {
+		ret_code_t ret_code;
+		_adv_data.scan_rsp_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
+		if (_adv_data.scan_rsp_data.p_data == NULL) {
+			_adv_data.scan_rsp_data.p_data = (uint8_t*)calloc(sizeof(uint8_t),_adv_data.scan_rsp_data.len);
+		}
+		ret_code = ble_advdata_encode(&_config_scanrsp, _adv_data.scan_rsp_data.p_data, &_adv_data.scan_rsp_data.len);
+		APP_ERROR_CHECK(ret_code);
+	}
+	else {
+		if (_adv_data.scan_rsp_data.p_data != NULL) {
+			free(_adv_data.scan_rsp_data.p_data);
+		}
+		_adv_data.scan_rsp_data.p_data = NULL;
+		_adv_data.scan_rsp_data.len = 0;
+	}
+
+	if (connectable) {
+		// TODO: The identity address cannot be changed while advertising, scanning or creating a connection.
+		uint32_t ret_code;
+		do {
+			ret_code = sd_ble_gap_addr_set(&_connectable_address);
+		} while (ret_code == NRF_ERROR_INVALID_STATE);
+		NRF_LOG_FLUSH();
+		APP_ERROR_CHECK(ret_code);
+
+	}
+	else {
+		// TODO: The identity address cannot be changed while advertising, scanning or creating a connection.
+		uint32_t ret_code;
+		do {
+			ret_code = sd_ble_gap_addr_set(&_nonconnectable_address);
+		} while (ret_code == NRF_ERROR_INVALID_STATE);
+		NRF_LOG_FLUSH();
+		APP_ERROR_CHECK(ret_code);
+	}
+
+	uint32_t err;
+	err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
+//	err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, NULL);
+	if (err != NRF_SUCCESS) {
+		printAdvertisement();
+	}
+	APP_ERROR_CHECK(err);
 	startAdvertising();
 }
 
@@ -751,12 +836,13 @@ void Stack::setAdvertisementData() {
 	}
 
 	if (first_time) {
-		LOGv("sd_ble_gap_adv_set_configure(_adv_handle=%i,...,...)", _adv_handle);
-		LOGv("First bytes in encoded buffer: [%02x %02x %02x %02x]",
-				_adv_data.adv_data.p_data[0], _adv_data.adv_data.p_data[1],
-				_adv_data.adv_data.p_data[2], _adv_data.adv_data.p_data[3]
-		    );
-		LOGv("Length is: %i", _adv_data.adv_data.len);
+		printAdvertisement();
+//		LOGv("sd_ble_gap_adv_set_configure(_adv_handle=%i,...,...)", _adv_handle);
+//		LOGv("First bytes in encoded buffer: [%02x %02x %02x %02x]",
+//				_adv_data.adv_data.p_data[0], _adv_data.adv_data.p_data[1],
+//				_adv_data.adv_data.p_data[2], _adv_data.adv_data.p_data[3]
+//		    );
+//		LOGv("Length is: %i", _adv_data.adv_data.len);
 		err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
 		APP_ERROR_CHECK(err);
 	}
@@ -770,13 +856,51 @@ void Stack::setAdvertisementData() {
 		if (temporary_stop_advertising) {
 			stopAdvertising();
 		}
-		//LOGd("sd_ble_gap_adv_set_configure");
+
+		// TODO: If we want to change the adv data without stopping, the adv_data should be a new buffer,
+		// and adv_params should be NULL.
 		err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
 		APP_ERROR_CHECK(err);
 		if (temporary_stop_advertising) {
 			startAdvertising();
 		}
 	}
+}
+
+void Stack::printAdvertisement() {
+	LOGd("_adv_handle=%u", _adv_handle);
+
+	LOGd("adv_data len=%u data:", _adv_data.adv_data.len);
+	char str[4*8+1] = {0};
+	int strIndex = 0;
+	for (size_t i=0; i<_adv_data.adv_data.len; ++i) {
+		strIndex += sprintf(&(str[strIndex]), "%3u ", _adv_data.adv_data.p_data[i]);
+		if (i % 8 == 8-1) {
+			LOGd("%s", str);
+			memset(str, 0, sizeof(str));
+			strIndex = 0;
+		}
+	}
+
+	LOGd("scan_rsp_data len=%u data:", _adv_data.scan_rsp_data.len);
+	memset(str, 0, sizeof(str));
+	strIndex = 0;
+	for (size_t i=0; i<_adv_data.scan_rsp_data.len; ++i) {
+		strIndex += sprintf(&(str[strIndex]), "%3u ", _adv_data.scan_rsp_data.p_data[i]);
+		if (i % 8 == 8-1) {
+			LOGd("%s", str);
+			memset(str, 0, sizeof(str));
+			strIndex = 0;
+		}
+	}
+
+	LOGd("type=%u", _adv_params.properties.type);
+	LOGd("channel mask: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
+			_adv_params.channel_mask[0],
+			_adv_params.channel_mask[1],
+			_adv_params.channel_mask[2],
+			_adv_params.channel_mask[3],
+			_adv_params.channel_mask[4]);
 }
 
 void Stack::startScanning() {

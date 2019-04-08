@@ -401,6 +401,7 @@ protected:
 //	void on_advertisement(const ble_evt_t * p_ble_evt);
 
 	void configureAdvertisementParameters();
+	void printAdvertisement();
 
 	/** Transmission complete event
 	 *
