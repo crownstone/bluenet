@@ -144,34 +144,42 @@ Crownstone::Crownstone(boards_config_t& board) :
  * Crownstone runs on). A callback to the local staticTick function for a timer is set up. Then the mode of
  * operation is switched and the BLE services are initialized.
  */
-void Crownstone::init() {
-	//! initialize drivers
-	LOGi(FMT_HEADER, "init");
-	initDrivers();
-	LOG_MEMORY;
-	NRF_LOG_FLUSH();
+void Crownstone::init(uint16_t step) {
+	switch (step) {
+	case 0: {
+		LOGi(FMT_HEADER, "init");
+		initDrivers(step);
+		break;
+	}
+	case 1: {
+		initDrivers(step);
+		LOG_MEMORY;
+		NRF_LOG_FLUSH();
 
-	//! configure the crownstone
-	LOGi(FMT_HEADER, "configure");
-	configure();
-	NRF_LOG_FLUSH();
+		//! configure the crownstone
+		LOGi(FMT_HEADER, "configure");
+		configure();
+		NRF_LOG_FLUSH();
 
-	LOGi(FMT_CREATE, "timer");
-	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
-	NRF_LOG_FLUSH();
+		LOGi(FMT_CREATE, "timer");
+		_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
+		NRF_LOG_FLUSH();
 
-	LOGi(FMT_HEADER, "mode");
-	TYPIFY(STATE_OPERATION_MODE) mode;
-	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
-	OperationMode newOperationMode = getOperationMode(mode);
-	LOGd("Mode is 0x%X", mode);
-	switchMode(newOperationMode);
-	NRF_LOG_FLUSH();
+		LOGi(FMT_HEADER, "mode");
+		TYPIFY(STATE_OPERATION_MODE) mode;
+		_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+		OperationMode newOperationMode = getOperationMode(mode);
+		LOGd("Mode is 0x%X", mode);
+		switchMode(newOperationMode);
+		NRF_LOG_FLUSH();
 
-	LOGi(FMT_HEADER, "init services");
+		LOGi(FMT_HEADER, "init services");
 
-	_stack->initServices();
-	NRF_LOG_FLUSH();
+		_stack->initServices();
+		NRF_LOG_FLUSH();
+		break;
+	}
+	}
 }
 
 /**
@@ -181,75 +189,83 @@ void Crownstone::init() {
  *   3. Storage.             Definitely after the stack has been initialized.
  *   4. State.               Storage should be initialized here.
  */
-void Crownstone::initDrivers() {
-	LOGi("Init driver");
-	_stack->init();
-	_timer->init();
+void Crownstone::initDrivers(uint16_t step) {
+	switch (step) {
+	case 0: {
+		LOGi("Init drivers");
+		_stack->init();
+		_timer->init();
 
-	_stack->initSoftdevice();
+		_stack->initSoftdevice();
 
-	_storage->init();
-	_state->init(&_boardsConfig);
-
-#ifdef ANNE_TEST_FACTORY_RESET
-	LOGi("Factory reset");
-	 _state->factoryReset(FACTORY_RESET_CODE);
-	TYPIFY(STATE_RESET_COUNTER) resetCounter = 6;
-	LOGi("Set reset counter to: %i", resetCounter);
-	_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
-
-	increaseResetCounter();
-#endif
-
-	// If not done already, init UART
-	// TODO: make into a class with proper init() function
-	if (!_boardsConfig.flags.hasSerial) {
-		serial_config(_boardsConfig.pinGpioRx, _boardsConfig.pinGpioTx);
-		TYPIFY(CONFIG_UART_ENABLED) uartEnabled;
-		_state->get(CS_TYPE::CONFIG_UART_ENABLED, &uartEnabled, sizeof(uartEnabled));
-		serial_enable((serial_enable_t)uartEnabled);
+		_storage->init();
+		break;
 	}
+	case 1: {
+		_state->init(&_boardsConfig);
 
-	LOGi(FMT_INIT, "command handler");
-	_commandHandler->init(&_boardsConfig);
+	#ifdef ANNE_TEST_FACTORY_RESET
+		LOGi("Factory reset");
+		 _state->factoryReset(FACTORY_RESET_CODE);
+		TYPIFY(STATE_RESET_COUNTER) resetCounter = 6;
+		LOGi("Set reset counter to: %i", resetCounter);
+		_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
 
-	LOGi(FMT_INIT, "factory reset");
-	_factoryReset->init();
+		increaseResetCounter();
+	#endif
 
-	LOGi(FMT_INIT, "encryption handler");
-	EncryptionHandler::getInstance().init();
+		// If not done already, init UART
+		// TODO: make into a class with proper init() function
+		if (!_boardsConfig.flags.hasSerial) {
+			serial_config(_boardsConfig.pinGpioRx, _boardsConfig.pinGpioTx);
+			TYPIFY(CONFIG_UART_ENABLED) uartEnabled;
+			_state->get(CS_TYPE::CONFIG_UART_ENABLED, &uartEnabled, sizeof(uartEnabled));
+			serial_enable((serial_enable_t)uartEnabled);
+		}
+
+		LOGi(FMT_INIT, "command handler");
+		_commandHandler->init(&_boardsConfig);
+
+		LOGi(FMT_INIT, "factory reset");
+		_factoryReset->init();
+
+		LOGi(FMT_INIT, "encryption handler");
+		EncryptionHandler::getInstance().init();
 
 
-	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-		// switch / PWM init
-		LOGi(FMT_INIT, "switch / PWM");
-		_switch->init(_boardsConfig);
+		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
+			// switch / PWM init
+			LOGi(FMT_INIT, "switch / PWM");
+			_switch->init(_boardsConfig);
 
-		LOGi(FMT_INIT, "temperature guard");
-		_temperatureGuard->init(_boardsConfig);
+			LOGi(FMT_INIT, "temperature guard");
+			_temperatureGuard->init(_boardsConfig);
 
-		LOGi(FMT_INIT, "power sampler");
-		_powerSampler->init(_boardsConfig);
+			LOGi(FMT_INIT, "power sampler");
+			_powerSampler->init(_boardsConfig);
 
-		LOGi(FMT_INIT, "watchdog");
-		_watchdog->init();
+			LOGi(FMT_INIT, "watchdog");
+			_watchdog->init();
+		}
+
+		// init GPIOs
+		if (_boardsConfig.flags.hasLed) {
+			LOGi("Configure LEDs");
+			// Note: DO NOT USE THEM WHILE SCANNING OR MESHING
+			nrf_gpio_cfg_output(_boardsConfig.pinLedRed);
+			nrf_gpio_cfg_output(_boardsConfig.pinLedGreen);
+			// Turn the leds off
+			if (_boardsConfig.flags.ledInverted) {
+				nrf_gpio_pin_set(_boardsConfig.pinLedRed);
+				nrf_gpio_pin_set(_boardsConfig.pinLedGreen);
+			}
+			else {
+				nrf_gpio_pin_clear(_boardsConfig.pinLedRed);
+				nrf_gpio_pin_clear(_boardsConfig.pinLedGreen);
+			}
+		}
+		break;
 	}
-
-	// init GPIOs
-	if (_boardsConfig.flags.hasLed) {
-		LOGi("Configure LEDs");
-		// Note: DO NOT USE THEM WHILE SCANNING OR MESHING
-		nrf_gpio_cfg_output(_boardsConfig.pinLedRed);
-		nrf_gpio_cfg_output(_boardsConfig.pinLedGreen);
-		// Turn the leds off
-		if (_boardsConfig.flags.ledInverted) {
-			nrf_gpio_pin_set(_boardsConfig.pinLedRed);
-			nrf_gpio_pin_set(_boardsConfig.pinLedGreen);
-		}
-		else {
-			nrf_gpio_pin_clear(_boardsConfig.pinLedRed);
-			nrf_gpio_pin_clear(_boardsConfig.pinLedGreen);
-		}
 	}
 }
 
@@ -270,7 +286,8 @@ void Crownstone::configure() {
 
 	configureStack();
 
-	_storage->garbageCollect();
+	// Don't do garbage collection now, it will block reading flash.
+//	_storage->garbageCollect();
 
 	increaseResetCounter();
 
@@ -747,7 +764,10 @@ void Crownstone::run() {
 void Crownstone::handleEvent(event_t & event) {
 
 	switch(event.type) {
-		case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
+		case CS_TYPE::EVT_STORAGE_INITIALIZED:
+			init(1);
+			startUp();
+			NRF_LOG_FLUSH();
 			break;
 		default:
 			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
@@ -993,14 +1013,10 @@ int main() {
 	overwrite_hardware_version();
 
 	// init drivers, configure(), create services and chars,
-	crownstone.init(); // 13 ms
+	crownstone.init(0);
 	NRF_LOG_FLUSH();
 
-	//! start up phase, start ticking (depends on the operation mode) ...
-	crownstone.startUp(); // 500 ms
-	NRF_LOG_FLUSH();
-
-	//! run forever ...
+	// run forever ...
 	crownstone.run();
 
 	return 0;

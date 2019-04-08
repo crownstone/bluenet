@@ -51,7 +51,8 @@ public:
      */
     Crownstone(boards_config_t& board);
 
-    /** initialize the crownstone:
+    /**
+     * Initialize the crownstone:
      *    1. start UART
      *    2. configure (drivers, stack, advertisement)
      *    3. check operation mode
@@ -59,8 +60,11 @@ public:
      *    		3b. for normal operation mode, create crownstone services
      *    			and prepare Crownstone for operation
      *    4. initialize services
+     *
+     * Since some classes initialize asynchronous, this function is called multiple times to continue the process.
+     * When the class is initialized, the init done event will continue the initialization of other classes.
      */
-    void init();
+    void init(uint16_t step);
 
     /** startup the crownstone:
      * 	  1. start advertising
@@ -88,7 +92,7 @@ protected:
 
     /** initialize drivers (stack, timer, storage, pwm, etc), loads settings from storage.
     */
-    void initDrivers();
+    void initDrivers(uint16_t step);
 
     /** configure the crownstone. this will call the other configureXXX functions in turn
      *    1. configure ble stack

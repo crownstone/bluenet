@@ -458,6 +458,9 @@ void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 			event_t event(CS_TYPE::EVT_STORAGE_INITIALIZED);
 			EventDispatcher::getInstance().dispatch(event);
 		}
+		else {
+			LOGe("Failed to init storage: %u", p_fds_evt->result);
+		}
 		break;
 	}
 	case FDS_EVT_WRITE:
