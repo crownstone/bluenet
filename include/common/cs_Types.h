@@ -452,7 +452,7 @@ typedef  uint8_t TYPIFY(CONFIG_UART_ENABLED); //TODO: serial_enable_t
 typedef    float TYPIFY(CONFIG_VOLTAGE_MULTIPLIER);
 typedef  int32_t TYPIFY(CONFIG_VOLTAGE_ADC_ZERO);
 
-typedef  int32_t TYPIFY(STATE_ACCUMULATED_ENERGY);
+typedef  int64_t TYPIFY(STATE_ACCUMULATED_ENERGY);
 typedef state_errors_t TYPIFY(STATE_ERRORS);
 typedef  uint8_t TYPIFY(STATE_FACTORY_RESET);
 typedef  uint8_t TYPIFY(STATE_OPERATION_MODE);
