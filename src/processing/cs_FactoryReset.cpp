@@ -14,20 +14,14 @@
 #include "processing/cs_Switch.h"
 
 FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
-#if (NORDIC_SDK_VERSION >= 11)
 		_recoveryDisableTimerId(NULL),
 		_recoveryProcessTimerId(NULL)
-#else
-		_recoveryDisableTimerId(UINT32_MAX)
-#endif
 {
-#if (NORDIC_SDK_VERSION >= 11)
 	_recoveryDisableTimerData = { {0} };
 	_recoveryDisableTimerId = &_recoveryDisableTimerData;
 
 	_recoveryProcessTimerData = { {0} };
 	_recoveryProcessTimerId = &_recoveryProcessTimerData;
-#endif
 }
 
 void FactoryReset::init() {
