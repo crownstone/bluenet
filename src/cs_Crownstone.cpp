@@ -110,6 +110,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 	_mainTimerId(NULL),
 	_operationMode(OperationMode::OPERATION_MODE_UNINITIALIZED)
 {
+	// TODO: can be replaced by: APP_TIMER_DEF(_mainTimerId); Though that makes _mainTimerId a static variable.
 	_mainTimerData = { {0} };
 	_mainTimerId = &_mainTimerData;
 

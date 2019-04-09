@@ -54,13 +54,9 @@ private:
 	bool _recoveryEnabled;
 	uint32_t _rtcStartTime;
 
-#if (NORDIC_SDK_VERSION >= 11)
 	app_timer_t              _recoveryDisableTimerData;
 	app_timer_id_t           _recoveryDisableTimerId;
 
 	app_timer_t              _recoveryProcessTimerData;
 	app_timer_id_t           _recoveryProcessTimerId;
-#else
-	uint32_t                 _recoveryDisableTimerId;
-#endif
 };
