@@ -162,6 +162,9 @@ cs_ret_code_t State::loadFromRam(cs_state_data_t & data) {
  * Instead, just return ERR_BUSY, and let the called put it in queue..
  */
 cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
+	if (!_startedWritingToFlash) {
+		return ERR_BUSY;
+	}
 	if (index_in_ram >= _ram_data_register.size()) {
 		LOGe("Invalid index");
 		return ERR_WRITE_NOT_ALLOWED;
@@ -408,6 +411,11 @@ bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
 		default: {}
 	}
 	return enabled;
+}
+
+void State::startWritesToFlash() {
+	LOGd("startWritesToFlash");
+	_startedWritingToFlash = true;
 }
 
 void State::factoryReset(uint32_t resetCode) {

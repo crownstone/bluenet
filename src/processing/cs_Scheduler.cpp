@@ -132,7 +132,7 @@ void Scheduler::tick() {
 }
 
 void Scheduler::writeScheduleList(bool store) {
-	LOGe("store");
+	LOGe("store flash=%u", store);
 	// TODO: schedule list is in ram 2x, should be possible to not have a copy.
 //	buffer_ptr_t buffer;
 //	uint16_t size;

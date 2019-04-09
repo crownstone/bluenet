@@ -682,6 +682,8 @@ void Crownstone::startUp() {
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN);
 	_log(SERIAL_INFO, "\r\n");
 
+	_state->startWritesToFlash();
+
 #ifdef RELAY_DEFAULT_ON
 #if RELAY_DEFAULT_ON==0
 	Switch::getInstance().turnOff();

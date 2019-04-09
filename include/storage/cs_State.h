@@ -226,6 +226,16 @@ public:
 	cs_ret_code_t setViaPointer(CS_TYPE type);
 
 	/**
+	 * After calling this, state is allowed to write to flash. Should be called once all reads are finished.
+	 *
+	 * This is a quickfix to prevent failing flash reads during garbage collection.
+	 * To properly fix this, read should be blocking. This can be done by handling FDS events in the interrupt, instead
+	 * of via the app_scheduler. In those events, the busy state can be cleared, while cs events can be dispatched via
+	 * the app_scheduler. Then, the read function can just wait with nrf_delay() until no longer busy.
+	 */
+	void startWritesToFlash();
+
+	/**
 	 * Handle (crownstone) events.
 	 */
 	void handleEvent(event_t & event);
@@ -288,6 +298,8 @@ protected:
 	std::vector<cs_state_data_t> _ram_data_register;
 
 	std::vector<cs_state_store_queue_t> _store_queue;
+
+	bool _startedWritingToFlash = false;
 
 private:
 
