@@ -677,22 +677,19 @@ void Stack::restartAdvertising() {
 
 	if (connectable) {
 		// TODO: The identity address cannot be changed while advertising, scanning or creating a connection.
-		uint32_t ret_code;
-		do {
-			ret_code = sd_ble_gap_addr_set(&_connectable_address);
-		} while (ret_code == NRF_ERROR_INVALID_STATE);
-		NRF_LOG_FLUSH();
-		APP_ERROR_CHECK(ret_code);
-
+//		uint32_t ret_code;
+//		do {
+//			ret_code = sd_ble_gap_addr_set(&_connectable_address);
+//		} while (ret_code == NRF_ERROR_INVALID_STATE);
+//		APP_ERROR_CHECK(ret_code);
 	}
 	else {
 		// TODO: The identity address cannot be changed while advertising, scanning or creating a connection.
-		uint32_t ret_code;
-		do {
-			ret_code = sd_ble_gap_addr_set(&_nonconnectable_address);
-		} while (ret_code == NRF_ERROR_INVALID_STATE);
-		NRF_LOG_FLUSH();
-		APP_ERROR_CHECK(ret_code);
+//		uint32_t ret_code;
+//		do {
+//			ret_code = sd_ble_gap_addr_set(&_nonconnectable_address);
+//		} while (ret_code == NRF_ERROR_INVALID_STATE);
+//		APP_ERROR_CHECK(ret_code);
 	}
 
 	uint32_t err;
