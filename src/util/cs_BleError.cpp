@@ -70,3 +70,21 @@ void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t 
 }
 
 */
+
+#include <app_error.h>
+
+void mesh_assertion_handler(uint32_t pc)
+{
+    assert_info_t assert_info =
+    {
+        .line_num    = 0,
+        .p_file_name = (uint8_t *)"",
+    };
+#if NRF_SD_BLE_API_VERSION == 1
+    app_error_handler(NRF_FAULT_ID_SDK_ASSERT, pc, (const uint8_t *) "error");
+#elif NRF_SD_BLE_API_VERSION >= 2
+    app_error_fault_handler(NRF_FAULT_ID_SDK_ASSERT, pc, (uint32_t)(&assert_info));
+#endif
+
+    UNUSED_VARIABLE(assert_info);
+}

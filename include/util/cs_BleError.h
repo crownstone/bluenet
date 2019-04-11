@@ -27,6 +27,8 @@ void assert_nrf_callback (uint16_t line_num, const uint8_t *file_name);
 //called by soft device when it has an internal error.
 void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name);
 
+void mesh_assertion_handler(uint32_t pc);
+
 /**
  * Check the following website for the error codes. They change with every SoftDevice release, so check them
  * regularly!

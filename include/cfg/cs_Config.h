@@ -131,10 +131,12 @@
 
 // ----- PPI -----
 // Soft device uses 17-31
-#define CS_ADC_PPI_CHANNEL_START                 0
-#define CS_ADC_PPI_CHANNEL_COUNT                 4
-#define CS_PWM_PPI_CHANNEL_START                 (CS_ADC_PPI_CHANNEL_START + CS_ADC_PPI_CHANNEL_COUNT)
+// Mesh SDK uses 8-11
+#define CS_PWM_PPI_CHANNEL_START                 0
 #define CS_PWM_PPI_CHANNEL_COUNT                 (2 + 2 * CS_PWM_MAX_CHANNELS)
+//#define CS_ADC_PPI_CHANNEL_START                 (CS_PWM_PPI_CHANNEL_START + CS_PWM_PPI_CHANNEL_COUNT)
+#define CS_ADC_PPI_CHANNEL_START                 12
+#define CS_ADC_PPI_CHANNEL_COUNT                 4
 
 // ----- PPI groups -----
 // Soft device uses 4-5

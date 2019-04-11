@@ -185,7 +185,7 @@ void Stack::initRadio() {
 	ret_code = nrf_sdh_ble_default_cfg_set(_conn_cfg_tag, &ram_start);
 	switch(ret_code) {
 		case NRF_ERROR_NO_MEM:
-			LOGe("Unrecoverable, memory softdevice and app overlaps: %p", ram_start);
+			LOGe("Unrecoverable, memory softdevice and app overlaps. RAM_R1_BASE should be: %p", ram_start);
 			break;
 		case NRF_ERROR_INVALID_LENGTH:
 			LOGe("RAM, invalid length");
@@ -206,7 +206,8 @@ void Stack::initRadio() {
 			LOGe("BLE: invalid memory address");
 			break;
 		case NRF_ERROR_NO_MEM:
-			LOGe("BLE: no memory available"); // Set ram_start to 0, then read out ram_start, use that as RAM_R1_BASE, and adjust RAM_APPLICATION_AMOUNT.
+			 // Read out ram_start, use that as RAM_R1_BASE, and adjust RAM_APPLICATION_AMOUNT.
+			LOGe("BLE: no memory available, RAM_R1_BASE should be %p", ram_start);
 			break;
 		case NRF_SUCCESS:
 			LOGi("Softdevice enabled");

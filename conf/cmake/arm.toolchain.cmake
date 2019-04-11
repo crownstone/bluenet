@@ -71,7 +71,9 @@ SET(CMAKE_CXX_COMPILER_ID_RUN TRUE CACHE INTERNAL "")
 SET(DEFAULT_CXX_FLAGS       "-std=c++14 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")
 #SET(DEFAULT_C_FLAGS         "-std=gnu99") // but why
 SET(DEFAULT_C_FLAGS         "")
-SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -fdiagnostics-color=always")
+#SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -fdiagnostics-color=always")
+SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -Wno-error=format -fdiagnostics-color=always")
+#SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -Wno-error=format -Wno-error=int-in-bool-context -fdiagnostics-color=always")
 
 SET(ASM_OPTIONS "-x assembler-with-cpp")
 SET(CMAKE_ASM_FLAGS "${CFLAGS} ${ASM_OPTIONS}" )

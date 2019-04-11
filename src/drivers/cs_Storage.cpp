@@ -449,7 +449,7 @@ void Storage::handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt) {
  *   del { record_id, file_id, record_key }
  */
 void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
-	LOGStorageDebug("FS: %i: %i", p_fds_evt->result, p_fds_evt->id);
+	LOGStorageDebug("FS: res=%u id=%u", p_fds_evt->result, p_fds_evt->id);
 	switch(p_fds_evt->id) {
 	case FDS_EVT_INIT: {
 		if (p_fds_evt->result == FDS_SUCCESS) {
