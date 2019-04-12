@@ -193,10 +193,10 @@ void TestState::handleEvent(event_t & event) {
 		uint32_t errCode = configure_board(&board);
 		APP_ERROR_CHECK(errCode);
 		State::getInstance().init(&board);
+		State::getInstance().startWritesToFlash();
 
 		Timer::getInstance().createSingleShot(_tickTimerId, (app_timer_timeout_handler_t)TestState::staticTick);
 		Timer::getInstance().start(_tickTimerId, MS_TO_TICKS(TICK_INTERVAL_MS), this);
-
 
 		LOGi("");
 		LOGi("##### Start tests #####");
