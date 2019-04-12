@@ -33,7 +33,7 @@ static void app_gen_onoff_client_transaction_status_cb(access_model_handle_t mod
 
 /* This callback is called periodically if model is configured for periodic publishing */
 static void app_gen_onoff_client_publish_interval_cb(access_model_handle_t handle, void * p_self) {
-    LOGw("Publish desired message here.");
+	LOGw("Publish desired message here.");
 }
 
 /* Generic OnOff client model interface: Process the received status message in this callback */
@@ -41,7 +41,7 @@ static void app_generic_onoff_client_status_cb(const generic_onoff_client_t * p_
                                                const access_message_rx_meta_t * p_meta,
                                                const generic_onoff_status_params_t * p_in)
 {
-   	LOGi("status: state=%u target=%u remaining_time=%u", p_in->present_on_off, p_in->target_on_off, p_in->remaining_time_ms);
+	LOGi("status: state=%u target=%u remaining_time=%u", p_in->present_on_off, p_in->target_on_off, p_in->remaining_time_ms);
 }
 
 /* Acknowledged transaction status callback, if acknowledged transfer fails, application can
@@ -52,38 +52,35 @@ static void app_gen_onoff_client_transaction_status_cb(access_model_handle_t mod
                                                        void * p_args,
                                                        access_reliable_status_t status)
 {
-    switch(status) {
-        case ACCESS_RELIABLE_TRANSFER_SUCCESS:
-            LOGi("Acknowledged transfer success.");
-            break;
-
-        case ACCESS_RELIABLE_TRANSFER_TIMEOUT:
-        	LOGi("Acknowledged transfer timeout.");
-            break;
-
-        case ACCESS_RELIABLE_TRANSFER_CANCELLED:
-        	LOGi("Acknowledged transfer cancelled.");
-            break;
-
-        default:
-        	APP_ERROR_CHECK(NRF_ERROR_INTERNAL);
-            break;
-    }
+	switch(status) {
+	case ACCESS_RELIABLE_TRANSFER_SUCCESS:
+		LOGi("Acknowledged transfer success.");
+		break;
+	case ACCESS_RELIABLE_TRANSFER_TIMEOUT:
+		LOGi("Acknowledged transfer timeout.");
+		break;
+	case ACCESS_RELIABLE_TRANSFER_CANCELLED:
+		LOGi("Acknowledged transfer cancelled.");
+		break;
+	default:
+		APP_ERROR_CHECK(NRF_ERROR_INTERNAL);
+		break;
+	}
 }
 
 static void config_server_evt_cb(const config_server_evt_t * p_evt) {
-    if (p_evt->type == CONFIG_SERVER_EVT_NODE_RESET) {
-    	LOGi("----- Node reset  -----");
-    	/* This function may return if there are ongoing flash operations. */
-    	mesh_stack_device_reset();
-    }
+	if (p_evt->type == CONFIG_SERVER_EVT_NODE_RESET) {
+		LOGi("----- Node reset  -----");
+		/* This function may return if there are ongoing flash operations. */
+		mesh_stack_device_reset();
+	}
 }
 
 const generic_onoff_client_callbacks_t client_cbs =
 {
-    .onoff_status_cb = app_generic_onoff_client_status_cb,
-    .ack_transaction_status_cb = app_gen_onoff_client_transaction_status_cb,
-    .periodic_publish_cb = app_gen_onoff_client_publish_interval_cb
+		.onoff_status_cb = app_generic_onoff_client_status_cb,
+		.ack_transaction_status_cb = app_gen_onoff_client_transaction_status_cb,
+		.periodic_publish_cb = app_gen_onoff_client_publish_interval_cb
 };
 
 
