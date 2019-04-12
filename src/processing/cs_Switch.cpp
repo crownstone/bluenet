@@ -355,34 +355,6 @@ void Switch::setSwitch(uint8_t switchState) {
 	storeState(oldVal);
 }
 
-
-#if BUILD_MESHING == 1
-void Switch::handleMultiSwitch(multi_switch_cmd_t* cmd) {
-
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGi("handle multi switch");
-	LOGi("  intent: %d, switchState: %d, timeout: %d", cmd->intent, cmd->switchState, cmd->timeout);
-#endif
-
-	// todo: handle different intents
-	switch (cmd->intent) {
-	case SPHERE_ENTER:
-	case SPHERE_EXIT:
-	case ENTER:
-	case EXIT:
-	case MANUAL:
-		if (cmd->timeout == 0) {
-			setSwitch(cmd->switchState);
-		}
-		else {
-			delayedSwitch(cmd->switchState, cmd->timeout);
-		}
-	}
-
-}
-#endif
-
-
 void Switch::delayedSwitch(uint8_t switchState, uint16_t delay) {
 
 #ifdef PRINT_SWITCH_VERBOSE

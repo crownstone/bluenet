@@ -12,7 +12,6 @@
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <float.h>
-#include <mesh/cs_Mesh.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 //#include <algorithm>

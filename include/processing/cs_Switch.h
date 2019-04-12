@@ -11,10 +11,6 @@
 #include <events/cs_EventListener.h>
 #include <cfg/cs_Boards.h>
 
-#if BUILD_MESHING == 1
-#include <protocol/cs_MeshMessageTypes.h>
-#endif
-
 #define SWITCH_ON 100
 
 /* Power Switch
@@ -156,12 +152,6 @@ public:
 	/** Used internally
 	 */
 	void handleEvent(event_t & event);
-
-#if BUILD_MESHING == 1
-	/** Used internally
-	 */
-	void handleMultiSwitch(multi_switch_cmd_t* cmd);
-#endif
 
 private:
 	Switch();

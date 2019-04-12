@@ -19,10 +19,6 @@
 #include <third/SortMedian.h>
 #include <third/optmed.h>
 
-#if BUILD_MESHING == 1
-#include <mesh/cs_MeshControl.h>
-#endif
-
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 20
 

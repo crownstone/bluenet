@@ -18,12 +18,6 @@
 #include <protocol/cs_UartProtocol.h>
 #include <storage/cs_State.h>
 
-#if BUILD_MESHING == 1
-#include <ble/cs_NordicMesh.h>
-#include <mesh/cs_MeshControl.h>
-#include <mesh/cs_Mesh.h>
-#endif
-
 void reset(void* p_context) {
 
 	uint32_t cmd = *(int32_t*) p_context;
@@ -194,28 +188,18 @@ cs_ret_code_t CommandHandler::handleCmdReset(buffer_ptr_t buffer, const uint16_t
 }
 
 cs_ret_code_t CommandHandler::handleCmdEnableMesh(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "enable mesh");
-
 	if (size != sizeof(enable_message_payload_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
+	LOGi("%s mesh", payload->enable ? STR_ENABLE : STR_DISABLE);
 	TYPIFY(CONFIG_MESH_ENABLED) enable = payload->enable;
-
-	LOGi("%s mesh", enable ? STR_ENABLE : STR_DISABLE);
 	State::getInstance().set(CS_TYPE::CONFIG_MESH_ENABLED, &enable, sizeof(enable));
-
-#if BUILD_MESHING == 1
-	if (enable) {
-		Mesh::getInstance().start();
-	} else {
-		Mesh::getInstance().stop();
-	}
-#endif
-
+	TYPIFY(CMD_ENABLE_MESH) cmdEnable = payload->enable;
+	event_t event(CS_TYPE::CMD_ENABLE_MESH, &cmdEnable, sizeof(cmdEnable));
+	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
 
@@ -398,21 +382,13 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveState(buffer_ptr_t buffer, const
 
 cs_ret_code_t CommandHandler::handleCmdKeepAliveRepeatLast(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-	LOGi(STR_HANDLE_COMMAND, "keep alive repeat");
-#if BUILD_MESHING == 1
-	MeshControl::getInstance().sendLastKeepAliveMessage();
-#endif
+	LOGi(STR_HANDLE_COMMAND, "mesh keep alive repeat");
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t CommandHandler::handleCmdKeepAliveMesh(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-	LOGi(STR_HANDLE_COMMAND, "keep alive mesh");
-#if BUILD_MESHING == 1
-	keep_alive_message_t* keepAliveMsg = (keep_alive_message_t*) buffer;
-	// This function also checks the validity of the msg.
-	return MeshControl::getInstance().sendKeepAliveMessage(keepAliveMsg, size);
-#endif
+	LOGi(STR_HANDLE_COMMAND, "mesh keep alive");
 	return ERR_SUCCESS;
 }
 
@@ -549,45 +525,12 @@ cs_ret_code_t CommandHandler::handleCmdRelay(buffer_ptr_t buffer, const uint16_t
 cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "multi switch");
-#if BUILD_MESHING == 1
-	multi_switch_message_t* multiSwitchMsg = (multi_switch_message_t*) buffer;
-	// This function also checks the validity of the msg.
-	return MeshControl::getInstance().sendMultiSwitchMessage(multiSwitchMsg, size);
-#endif
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "mesh command");
-#if BUILD_MESHING == 1
-	command_message_t* commandMsg = (command_message_t*) buffer;
-	if (!is_valid_command_message(commandMsg, size)) {
-		return ERR_WRONG_PAYLOAD_LENGTH;
-	}
-	uint8_t* payload;
-	uint16_t payloadLength;
-	get_command_msg_payload(commandMsg, size, &payload, payloadLength);
-	bool sendMeshMsg = false;
-	EncryptionAccessLevel requiredAccessLevel = NOT_SET;
-	switch (commandMsg->messageType) {
-	case CONTROL_MESSAGE: {
-		control_mesh_message_t* controlMsg = (control_mesh_message_t*)payload;
-		if (!is_valid_command_control_mesh_message(controlMsg, payloadLength)) {
-			return ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		if (allowedAsMeshCommand((CommandHandlerTypes)controlMsg->header.type)) {
-			sendMeshMsg = true;
-			requiredAccessLevel = getRequiredAccessLevel((CommandHandlerTypes)controlMsg->header.type);
-		}
-		break;
-	}
-	}
-	if (sendMeshMsg && EncryptionHandler::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
-		// Send the message into the mesh.
-		MeshControl::getInstance().sendCommandMessage(commandMsg, size);
-	}
-#endif
 	return ERR_SUCCESS;
 }
 

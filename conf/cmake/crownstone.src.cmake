@@ -45,62 +45,24 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/processing/cs_Watchdog.cpp")
 # should be only when creating iBeacon
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_iBeacon.cpp")
 
-IF(MESHING AND "${MESHING}" STRGREATER "0" AND BUILD_MESHING AND "${BUILD_MESHING}" STREQUAL "0")
+IF (MESHING AND "${MESHING}" STRGREATER "0" AND BUILD_MESHING AND "${BUILD_MESHING}" STREQUAL "0")
 	MESSAGE(FATAL_ERROR "Need to set BUILD_MESHING=1 if MESHING should be enabled!")
 ENDIF()
 
-IF(DEFINED BUILD_MESHING AND "${BUILD_MESHING}" STRGREATER "0")
-
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_MeshControl.cpp")
+IF (BUILD_MESHING)
+#	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_MeshControl.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_Mesh.cpp")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshMessageState.cpp")
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshMessageCounter.cpp")
+#	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshMessageState.cpp")
+#	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshMessageCounter.cpp")
 
-	IF(DEFINED MESH_DIR) 
-	ELSE() 
-		IF(DEFINED MESH_SUBDIR AND DEFINED BLUENET_WORKSPACE_DIR)
-			SET(MESH_DIR ${BLUENET_WORKSPACE_DIR}/${MESH_SUBDIR})
-		ELSE()
-			MESSAGE(FATAL_ERROR "Neither MESH_DIR nor the pair BLUENET_WORKSPACE_DIR/MESH_SUBDIR is defined!")
-		ENDIF()
+	IF (NOT DEFINED MESH_SDK_DIR)
+		MESSAGE(FATAL_ERROR "MESH_SDK_DIR is not defined!")
 	ENDIF()
 
-	IF(IS_DIRECTORY "${MESH_DIR}")
-		MESSAGE(STATUS "crownstone.src.cmake: Use directory ${MESH_DIR} for the mesh")
+	IF(IS_DIRECTORY "${MESH_SDK_DIR}")
+		MESSAGE(STATUS "crownstone.src.cmake: Use directory ${MESH_SDK_DIR} for the mesh")
 	ELSE()
-		MESSAGE(FATAL_ERROR "crownstone.src.cmake: Directory \"${MESH_DIR}\" does not exist! Clone https://github.com/crownstone/nRF51-ble-bcast-mesh and switch to the bluenet branch.")
+		MESSAGE(FATAL_ERROR "crownstone.src.cmake: Directory \"${MESH_SDK_DIR}\" does not exist!")
 	ENDIF()
-
-	EXECUTE_PROCESS(
-		COMMAND git rev-parse --abbrev-ref HEAD
-		WORKING_DIRECTORY "${MESH_DIR}"
-		OUTPUT_VARIABLE MESH_BRANCH
-		OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-	IF(MESH_BRANCH STREQUAL "bluenet")
-		MESSAGE(STATUS "crownstone.src.cmake: Using bluenet branch for the Mesh")
-	ELSE()
-		MESSAGE(FATAL_ERROR "crownstone.src.cmake: Switch ${MESH_DIR} to bluenet branch. The master branch is not bluenet-compatible yet.")
-	ENDIF()
-
-	SET(INCLUDE_DIR "${INCLUDE_DIR}" "${MESH_DIR}" "${MESH_DIR}/include")
-
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/event_handler.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/fifo.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/handle_storage.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/mesh_aci.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/mesh_gatt.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/mesh_packet.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/notification_buffer.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/radio_control.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/rand.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/rbc_mesh.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/timer.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/timeslot.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/timer_scheduler.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/transport_control.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/trickle.c")
-	LIST(APPEND FOLDER_SOURCE "${MESH_DIR}/src/version_handler.c")
-
 ENDIF()
 

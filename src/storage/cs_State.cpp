@@ -20,7 +20,7 @@
 #define LOGStateDebug LOGnone
 
 State::State() : _storage(NULL), _boardsConfig(NULL) {
-};
+}
 
 void State::init(boards_config_t* boardsConfig) {
 	LOGi(FMT_INIT, "board config");

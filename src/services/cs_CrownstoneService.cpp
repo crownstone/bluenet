@@ -11,9 +11,6 @@
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
-#if BUILD_MESHING == 1
-#include <mesh/cs_MeshControl.h>
-#endif
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
 #include <storage/cs_State.h>
@@ -25,10 +22,6 @@ _controlCharacteristic(NULL),
 _configurationControlCharacteristic(NULL),
 _configurationReadCharacteristic(NULL),
 _streamBuffer(NULL),
-#if BUILD_MESHING == 1
-_meshControlCharacteristic(NULL),
-_meshCommand(NULL),
-#endif
 _stateControlCharacteristic(NULL),
 _stateReadCharacteristic(NULL),
 _sessionNonceCharacteristic(NULL),
@@ -75,13 +68,6 @@ void CrownstoneService::createCharacteristics() {
 	LOGi(FMT_CHAR_SKIP, STR_CHAR_CONTROL);
 #endif
 
-#if (BUILD_MESHING == 1) && (CHAR_MESHING == 1)
-	LOGi(FMT_CHAR_ADD, STR_CHAR_MESH);
-	addMeshCharacteristic();
-#else
-	LOGi(FMT_CHAR_SKIP, STR_CHAR_MESH);
-#endif
-
 #if CHAR_CONFIGURATION==1
 	{
 		LOGi(FMT_CHAR_ADD, STR_CHAR_CONFIGURATION);
@@ -112,61 +98,6 @@ void CrownstoneService::createCharacteristics() {
 	addFactoryResetCharacteristic();
 
 	updatedCharacteristics();
-}
-
-void CrownstoneService::addMeshCharacteristic() {
-#if BUILD_MESHING == 1
-	if (_meshControlCharacteristic != NULL) {
-		LOGe(FMT_CHAR_EXISTS, STR_CHAR_MESH_CONTROL);
-		return;
-	}
-	_meshCommand = new MeshCommand();
-
-	MasterBuffer& mb = MasterBuffer::getInstance();
-	buffer_ptr_t buffer = NULL;
-	uint16_t size = 0;
-	mb.getBuffer(buffer, size);
-
-	_meshCommand->assign(buffer, size);
-
-	_meshControlCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_meshControlCharacteristic);
-
-	_meshControlCharacteristic->setUUID(UUID(getUUID(), MESH_CONTROL_UUID));
-	_meshControlCharacteristic->setName(BLE_CHAR_MESH_CONTROL);
-	_meshControlCharacteristic->setWritable(true);
-	_meshControlCharacteristic->setValue(buffer);
-	_meshControlCharacteristic->setMinAccessLevel(MEMBER);
-	_meshControlCharacteristic->setMaxGattValueLength(size);
-	_meshControlCharacteristic->setValueLength(0);
-	_meshControlCharacteristic->onWrite([&](
-			const EncryptionAccessLevel accessLevel,
-			const buffer_ptr_t& value,
-			uint16_t length) -> void {
-		// Encryption level authentication is done in the decrypting step based on the setMinAccessLevel level.
-		// This is only for characteristics that the user writes to. The ones that are read are encrypted using
-		// the setMinAccessLevel level.
-		// If the user writes to this characteristic with insufficient rights, this onWrite() method is not called.
-
-		LOGi(MSG_MESH_MESSAGE_WRITE);
-
-		uint8_t handle = _meshCommand->type();
-		uint8_t* p_data = _meshCommand->payload();
-		cs_ret_code_t error_code;
-		if (length < _meshCommand->getDataLength()) {
-			error_code = ERR_WRONG_PAYLOAD_LENGTH;
-		}
-		else {
-			error_code = MeshControl::getInstance().send(handle, p_data, length);
-		}
-
-		LOGv("Mesh onWrite error_code: %d", error_code);
-		memcpy(value, &error_code, sizeof(error_code));
-		_meshControlCharacteristic->setValueLength(sizeof(error_code));
-		_meshControlCharacteristic->updateValue();
-
-	});
-#endif
 }
 
 void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, uint16_t charUuid, EncryptionAccessLevel minimumAccessLevel) {

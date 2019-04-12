@@ -17,11 +17,6 @@
 
 #include <cstring>
 
-#if BUILD_MESHING == 1
-#include <protocol/cs_MeshMessageTypes.h>
-#endif
-
-// TODO: #define BUILD_MESHING 1
 #define SERVICE_DATA_VALIDATION 0xFA
 
 enum ServiceDataFlagBits {
@@ -361,99 +356,5 @@ private:
 	uint16_t getPartialTimestampOrCounter(uint32_t timestamp, uint32_t counter);
 
 
-#if BUILD_MESHING == 1
-	//! Timer used to periodically send the state to the mesh.
-	app_timer_t    _meshStateTimerData;
-	app_timer_id_t _meshStateTimerId;
-
-	//! Counter used to count how often the state has been sent over the mesh.
-	uint16_t _meshSendCount;
-
-	//! RTC counter when last mesh message was sent. RTC overflows every 512s!
-	uint32_t _meshLastSentTimestamp;
-
-	//! Event type of next mesh message. 0 for the regular interval msg.
-	uint16_t _meshNextEventType;
-
-	struct __attribute__((packed)) advertised_ids_t {
-		uint8_t   size;
-		int8_t    head; // Index of last crownstone ID that was advertised
-		stone_id_t list[MESH_STATE_HANDLE_COUNT * MAX_STATE_ITEMS];
-	};
-
-	struct __attribute__((packed)) last_seen_id_t {
-		stone_id_t id;
-		uint32_t  timestamp;
-		uint16_t  hash;
-		uint8_t   timedout; // 0 when not timed out, 1 when timed out.
-		                   // We need this, or a clock overflow could mark a state as not timed out again.
-	};
-
-	//! List of external crownstone IDs that have been advertised, used to determine which external crownstone to advertise.
-	advertised_ids_t _advertisedIds;
-
-	//! List of external crownstone IDs with timestamp when they were last seen, and a hash of its data.
-	last_seen_id_t _lastSeenIds[MESH_STATE_HANDLE_COUNT][LAST_SEEN_COUNT_PER_STATE_CHAN];
-
-	/** Number of times we should still only advertise states triggered by events.
-	 *  This is set to some number when a 'state triggered by event' was received, and then counts down.
-	 */
-	uint8_t _numAdvertiseChangedStates;
-
-	/** Process a received mesh state message.
-	 *
-	 * Checks whether the last state was triggered by event.
-	 *
-	 * @param[in] ownId           Id of this Crownstone.
-	 * @param[in] stateMsg        Pointer to the mesh state message.
-	 * @param[in] stateChan       Which state channel the message was received.
-	 */
-	void onMeshStateMsg(stone_id_t ownId, state_message_t* stateMsg, uint16_t stateChan);
-
-	/** Process a mesh state item, keeps up the last seen table.
-	 *
-	 * When the id of this state is already in the table: update the timestamp, if the hash is different.
-	 * Otherwise overwrite a spot that has id 0, is timed out, or has the oldest timestamp (in that order).
-	 *
-	 * @param[in] ownId           Id of this Crownstone.
-	 * @param[in] stateMsg        Pointer to the mesh state message.
-	 * @param[in] stateChan       Which state channel the message was received.
-	 */
-	void onMeshStateSeen(stone_id_t ownId, state_item_t* stateItem, uint16_t stateChan);
-
-	/** Check if the state of given id is considered timed out.
-	 *
-	 * The state of a Crownstone is considered not timed out when:
-	 * a) It's in the table with a recent timestamp, or b) when all entries in the table are not timed out.
-	 *
-	 * @param[in] id              Id to check.
-	 * @param[in] stateChan       On which state channel given id is found.
-	 * @param[in] currentTime     Current time (RTC ticks).
-	 * @return                    True when state is not considered timed out.
-	 */
-	bool isMeshStateNotTimedOut(stone_id_t id, uint16_t stateChan, uint32_t currentTime);
-
-	/** Choose an external id to advertise the state of.
-	 *
-	 * @param[in] ownId           Id of this Crownstone.
-	 * @param[in] stateMsgs       All the current state messages in the mesh.
-	 * @param[in] hasStateMsg     Whether or not the state messages are valid.
-	 * @param[in] eventOnly       True when only allowed to choose states which were triggered by event.
-	 * @return                    The chosen id.
-	 */
-	stone_id_t chooseExternalId(stone_id_t ownId, state_message_t stateMsgs[], bool hasStateMsg[], bool eventOnly);
-
-	/** Send the state over the mesh.
-	 *
-	 * @param[in] event           True when calling this function because the state changed significantly.
-	 * @param[in] eventType       Type of the event, only to be used when event is true.
-	 */
-	void sendMeshState(bool event, uint16_t eventType);
-
-	/* Static function for the timeout */
-	static void meshStateTick(ServiceData *ptr) {
-		ptr->_sendMeshState();
-	}
-#endif
 };
 

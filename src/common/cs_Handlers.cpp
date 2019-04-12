@@ -13,10 +13,6 @@
 extern "C" {
 #endif
 
-#if BUILD_MESHING == 1
-#include <rbc_mesh.h>
-#endif
-
 #define CROWNSTONE_STACK_OBSERVER_PRIO           0
 #define CROWNSTONE_REQUEST_OBSERVER_PRIO         0
 #define CROWNSTONE_SOC_OBSERVER_PRIO             0
@@ -57,15 +53,6 @@ void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
 	    LOGd("Unhandled event: %i", evt_id);
 	}
     }
-
-#if BUILD_MESHING == 1
-    Settings& settings = Settings::getInstance();
-    if (settings.isInitialized() && settings.isSet(CONFIG_MESH_ENABLED)) {
-		rbc_mesh_sd_evt_handler(evt_id);
-		//storage_sys_evt_handler(sys_evt);
-    }
-#endif
-
 }
 
 NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, crownstone_soc_evt_handler, NULL);
@@ -77,11 +64,6 @@ NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, cr
  */
 
 void ble_sdh_evt_dispatch(const ble_evt_t * p_ble_evt, void * p_context) {
-#if BUILD_MESHING == 1
-    if (State::getInstance().isTrue(CS_TYPE::CONFIG_MESH_ENABLED)) {
-	rbc_mesh_ble_evt_handler(p_ble_evt);
-    }
-#endif
     Stack::getInstance().on_ble_evt(p_ble_evt);
 }
 

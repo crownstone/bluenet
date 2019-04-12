@@ -571,7 +571,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			_scheduler = &Scheduler::getInstance();
 
 #if BUILD_MESHING == 1
-			if (_state->isEnabled(CONFIG_MESH_ENABLED)) {
+			if (_state->isTrue(CS_TYPE::CONFIG_MESH_ENABLED)) {
 				_mesh->init();
 			}
 #endif
@@ -857,7 +857,7 @@ void Crownstone::handleEvent(event_t & event) {
 			LOGf("brownout impending!! force shutdown ...")
 
 #if BUILD_MESHING == 1
-			rbc_mesh_stop();
+			_mesh->stop();
 #endif
 			_scanner->stop();
 

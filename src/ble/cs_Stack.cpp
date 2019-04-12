@@ -18,12 +18,6 @@
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <util/cs_Utils.h>
 
-#if BUILD_MESHING == 1
-extern "C" {
-	#include <rbc_mesh.h>
-}
-#endif
-
 
 //#define PRINT_STACK_VERBOSE
 
