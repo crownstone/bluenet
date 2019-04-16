@@ -82,7 +82,7 @@ SET(CMAKE_ASM_FLAGS "${CFLAGS} ${ASM_OPTIONS}" )
 # We are optimizing for SIZE for now. If size turns out to be abundant, enable -O3 optimization.
 # Interesting options: -ffast-math, -flto (link time optimization)
 # Regarding size of the binary -ffast-math nor -flto makes a difference
-SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -O0 -fomit-frame-pointer")
+SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -Os -fomit-frame-pointer")
 
 # There is a bug in CMAKE_OBJCOPY, it doesn't exist on execution for the first time
 SET(CMAKE_OBJCOPY_OVERLOAD                       ${COMPILER_PATH}/bin/${COMPILER_TYPE}objcopy)
