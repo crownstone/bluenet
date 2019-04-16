@@ -50,13 +50,30 @@ extern "C" {
 #define SERIAL_VERBOSITY SERIAL_NONE
 #endif
 
-//#define INCLUDE_TIMESTAMPS
-
 typedef enum {
 	SERIAL_ENABLE_NONE      = 0,
 	SERIAL_ENABLE_RX_ONLY   = 1,
 	SERIAL_ENABLE_RX_AND_TX = 3,
 } serial_enable_t;
+
+
+#define LOG_IGNORE(fmt, ...)
+
+// To disable particular logs, but without commenting it.
+#define LOGnone LOG_IGNORE
+
+#if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED == 1)
+//#warning NRF_LOG
+#define LOGv NRF_LOG_DEBUG
+#define LOGd NRF_LOG_DEBUG
+#define LOGi NRF_LOG_INFO
+#define LOGw NRF_LOG_WARNING
+#define LOGe NRF_LOG_ERROR
+#define LOGf NRF_LOG_ERROR
+#define _log(level, fmt, ...)
+#define logLN(level, fmt, ...)
+#define LOG_FLUSH NRF_LOG_FLUSH
+#else
 
 #if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
 
@@ -79,26 +96,14 @@ typedef enum {
 	#define logLN(level, fmt, ...)
 #endif
 
-
-#define LOG_IGNORE(fmt, ...)
-
-// To disable particular logs, but without commenting it.
-#define LOGnone LOG_IGNORE
-
-#ifndef HOST_TARGET
-#define LOGv NRF_LOG_DEBUG
-#define LOGd NRF_LOG_DEBUG
-#define LOGi NRF_LOG_INFO
-#define LOGw NRF_LOG_WARNING
-#define LOGe NRF_LOG_ERROR
-#define LOGf NRF_LOG_ERROR
-#else
 #define LOGv(fmt, ...) logLN(SERIAL_VERBOSE, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__)
-#define LOGd(fmt, ...) logLN(SERIAL_DEBUG, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__)
-#define LOGi(fmt, ...) logLN(SERIAL_INFO,  "\033[34;1m" fmt "\033[0m", ##__VA_ARGS__)
-#define LOGw(fmt, ...) logLN(SERIAL_WARN,  "\033[33;1m" fmt "\033[0m", ##__VA_ARGS__)
-#define LOGe(fmt, ...) logLN(SERIAL_ERROR, "\033[35;1m" fmt "\033[0m", ##__VA_ARGS__)
-#define LOGf(fmt, ...) logLN(SERIAL_FATAL, "\033[31;1m" fmt "\033[0m", ##__VA_ARGS__)
+#define LOGd(fmt, ...) logLN(SERIAL_DEBUG,   "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__)
+#define LOGi(fmt, ...) logLN(SERIAL_INFO,    "\033[34;1m" fmt "\033[0m", ##__VA_ARGS__)
+#define LOGw(fmt, ...) logLN(SERIAL_WARN,    "\033[33;1m" fmt "\033[0m", ##__VA_ARGS__)
+#define LOGe(fmt, ...) logLN(SERIAL_ERROR,   "\033[35;1m" fmt "\033[0m", ##__VA_ARGS__)
+#define LOGf(fmt, ...) logLN(SERIAL_FATAL,   "\033[31;1m" fmt "\033[0m", ##__VA_ARGS__)
+#define LOG_NOTHING()
+#define LOG_FLUSH LOG_NOTHING
 #endif
 
 #define LOG_MEMORY \
@@ -110,12 +115,12 @@ typedef enum {
 
 #if SERIAL_VERBOSITY<SERIAL_VERBOSE
 #undef LOGv
-#define LOGv(fmt, ...) do { if (false) logLN(SERIAL_VERBOSE, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__); } while(0)
+#define LOGv(fmt, ...)
 #endif
 
 #if SERIAL_VERBOSITY<SERIAL_DEBUG
 #undef LOGd
-#define LOGd(fmt, ...) do { if (false) logLN(SERIAL_DEBUG, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__); } while(0)
+#define LOGd(fmt, ...)
 #endif
 
 #if SERIAL_VERBOSITY<SERIAL_INFO
@@ -180,10 +185,6 @@ void writeBytes(uint8_t* data, const uint16_t size);
 /** Write the start byte
  */
 void writeStartByte();
-
-#ifdef INCLUDE_TIMESTAMPS
-int now();
-#endif
 
 #ifdef __cplusplus
 }

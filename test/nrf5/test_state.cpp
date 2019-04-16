@@ -117,7 +117,7 @@ int main() {
 	while (1) {
 		app_sched_execute();
 		sd_app_evt_wait();
-		NRF_LOG_FLUSH();
+		LOG_FLUSH();
 	}
 }
 

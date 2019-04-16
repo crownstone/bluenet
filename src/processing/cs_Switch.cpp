@@ -57,7 +57,6 @@ void Switch::init(const boards_config_t& board) {
 	TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
 	LOGd("PWM period %i pin %d", pwmPeriod, board.pinGpioPwm);
-	NRF_LOG_FLUSH();
 
 	pwm_config_t pwmConfig;
 	pwmConfig.channelCount = 1;

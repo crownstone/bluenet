@@ -207,7 +207,7 @@ void Stack::initRadio() {
 			LOGi("Softdevice enabled");
 			break;
 	}
-	NRF_LOG_FLUSH();
+	LOG_FLUSH();
 	APP_ERROR_CHECK(ret_code);
 
 
@@ -587,7 +587,6 @@ void Stack::setConnectable() {
 //	do {
 //		ret_code = sd_ble_gap_addr_set(&_connectable_address);
 //	} while (ret_code == NRF_ERROR_INVALID_STATE);
-//	NRF_LOG_FLUSH();
 //	APP_ERROR_CHECK(ret_code);
 }
 
@@ -600,7 +599,6 @@ void Stack::setNonConnectable() {
 //	do {
 //		ret_code = sd_ble_gap_addr_set(&_nonconnectable_address);
 //	} while (ret_code == NRF_ERROR_INVALID_STATE);
-//	NRF_LOG_FLUSH();
 //	APP_ERROR_CHECK(ret_code);
 }
 
@@ -763,7 +761,6 @@ void Stack::updateAdvertisement(bool toggle) {
 		connectable = (++_advInterleaveCounter % 2);
 	}
 	LOGd("updateAdvertisement connectable %i", connectable);
-	NRF_LOG_FLUSH();
 
 	if (connectable) {
 		setConnectable();

@@ -148,6 +148,12 @@ CS_SERIAL_ENABLED=0
 
 CS_UART_BINARY_PROTOCOL_ENABLED=1
 
+# Use the NRF logger module, instead of bluenet serial.
+# Breaks TX and binary protocol, but handy when debugging NRF modules.
+# Also, the pin is defined at compile time.
+CS_SERIAL_NRF_LOG_ENABLED=0
+CS_SERIAL_NRF_LOG_PIN_TX=6
+
 NRF_SERIES=NRF52
 
 # Default transmission power

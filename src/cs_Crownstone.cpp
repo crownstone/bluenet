@@ -155,16 +155,16 @@ void Crownstone::init(uint16_t step) {
 	case 1: {
 		initDrivers(step);
 		LOG_MEMORY;
-		NRF_LOG_FLUSH();
+		LOG_FLUSH();
 
 		//! configure the crownstone
 		LOGi(FMT_HEADER, "configure");
 		configure();
-		NRF_LOG_FLUSH();
+		LOG_FLUSH();
 
 		LOGi(FMT_CREATE, "timer");
 		_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
-		NRF_LOG_FLUSH();
+		LOG_FLUSH();
 
 		LOGi(FMT_HEADER, "mode");
 		TYPIFY(STATE_OPERATION_MODE) mode;
@@ -172,12 +172,12 @@ void Crownstone::init(uint16_t step) {
 		OperationMode newOperationMode = getOperationMode(mode);
 		LOGd("Mode is 0x%X", mode);
 		switchMode(newOperationMode);
-		NRF_LOG_FLUSH();
+		LOG_FLUSH();
 
 		LOGi(FMT_HEADER, "init services");
 
 		_stack->initServices();
-		NRF_LOG_FLUSH();
+		LOG_FLUSH();
 		break;
 	}
 	}
@@ -756,7 +756,7 @@ void Crownstone::run() {
 	while(1) {
 		app_sched_execute();
 		sd_app_evt_wait();
-		NRF_LOG_FLUSH();
+		LOG_FLUSH();
 	}
 }
 
@@ -770,7 +770,7 @@ void Crownstone::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_STORAGE_INITIALIZED:
 			init(1);
 			startUp();
-			NRF_LOG_FLUSH();
+			LOG_FLUSH();
 			break;
 		default:
 			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
@@ -966,10 +966,12 @@ int main() {
 
 	atexit(on_exit);
 
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
 	NRF_LOG_INIT(NULL);
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
 	NRF_LOG_INFO("Main");
 	NRF_LOG_FLUSH();
+#endif
 
 	uint32_t errCode;
 	boards_config_t board = {};
@@ -996,7 +998,7 @@ int main() {
 	if (board.flags.hasSerial) {
 		// init uart, be nice and say hello
 		welcome(board.pinGpioRx, board.pinGpioTx);
-		NRF_LOG_FLUSH();
+		LOG_FLUSH();
 	}
 
 	Crownstone crownstone(board); // 250 ms
@@ -1011,13 +1013,13 @@ int main() {
 	}
 #endif
 	LOGd("NFC pins: %p", NRF_UICR->NFCPINS);
-	NRF_LOG_FLUSH();
+	LOG_FLUSH();
 
 	overwrite_hardware_version();
 
 	// init drivers, configure(), create services and chars,
 	crownstone.init(0);
-	NRF_LOG_FLUSH();
+	LOG_FLUSH();
 
 	// run forever ...
 	crownstone.run();

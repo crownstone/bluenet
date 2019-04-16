@@ -20,10 +20,6 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
-#ifdef INCLUDE_TIMESTAMPS
-#include <drivers/cs_RTC.h>
-#endif
-
 // Define test pins to enable gpio debug.
 //#define RX_PIN      20
 //#define ERROR_PIN   22
@@ -48,15 +44,11 @@ void serial_config(uint8_t pinRx, uint8_t pinTx) {
 // Initializes anything but the UART peripheral.
 // Only to be called once.
 void init() {
-
-	// TODO: Anne, make sure UART gets operational again
-	return;
-
 	if (_initialized) {
 		return;
 	}
 	_initialized = true;
-
+#if CS_SERIAL_NRF_LOG_ENABLED != 1
 #ifdef RX_PIN
 	nrf_gpio_cfg_output(RX_PIN);
 #endif
@@ -85,14 +77,11 @@ void init() {
 	APP_ERROR_CHECK(err_code);
 	err_code = sd_nvic_EnableIRQ(UARTE0_UART0_IRQn);
 	APP_ERROR_CHECK(err_code);
+#endif
 }
 
 // Initializes the UART peripheral, and enables interrupt.
 void init_uart() {
-
-	// TODO: Anne, make sure UART gets operational again
-	return;
-
 	if (_initializedUart) {
 		return;
 	}
@@ -100,6 +89,11 @@ void init_uart() {
 #ifdef INIT_UART_PIN
 	nrf_gpio_pin_toggle(INIT_UART_PIN);
 #endif
+
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+//	NRF_LOG_INIT(NULL);
+//	NRF_LOG_DEFAULT_BACKENDS_INIT();
+#else
 
 	// Configure UART pins
 	NRF_UART0->PSELRXD = _pinRx;
@@ -114,6 +108,7 @@ void init_uart() {
 
 	// Enable UART
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
+#endif
 #ifdef INIT_UART_PIN
 	nrf_gpio_pin_toggle(INIT_UART_PIN);
 #endif
@@ -127,9 +122,12 @@ void deinit_uart() {
 #ifdef INIT_UART_PIN
 	nrf_gpio_pin_toggle(INIT_UART_PIN);
 #endif
-
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+	// Can't deinit nrf logger
+#else
 	// Disable UART
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Disabled << UART_ENABLE_ENABLE_Pos;
+#endif
 #ifdef INIT_UART_PIN
 	nrf_gpio_pin_toggle(INIT_UART_PIN);
 #endif
@@ -143,7 +141,9 @@ void init_rx() {
 #ifdef INIT_RX_PIN
 	nrf_gpio_pin_toggle(INIT_RX_PIN);
 #endif
-
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+	// Can't do RX with nrf logger
+#else
 	// Enable RX ready interrupts
 	NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk;
 	// TODO: handle error event.
@@ -152,6 +152,7 @@ void init_rx() {
 	// Start RX
 	NRF_UART0->TASKS_STARTRX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
+#endif
 #ifdef INIT_RX_PIN
 	nrf_gpio_pin_toggle(INIT_RX_PIN);
 #endif
@@ -165,7 +166,8 @@ void deinit_rx() {
 #ifdef INIT_RX_PIN
 	nrf_gpio_pin_toggle(INIT_RX_PIN);
 #endif
-
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+#else
 	// Disable interrupt
 	NRF_UART0->INTENCLR = UART_INTENSET_RXDRDY_Msk | UART_INTENSET_ERROR_Msk | UART_INTENSET_RXTO_Msk;
 
@@ -174,6 +176,7 @@ void deinit_rx() {
 	NRF_UART0->EVENTS_RXDRDY = 0;
 	NRF_UART0->EVENTS_ERROR = 0;
 	NRF_UART0->EVENTS_RXTO = 0;
+#endif
 #ifdef INIT_RX_PIN
 	nrf_gpio_pin_toggle(INIT_RX_PIN);
 #endif
@@ -187,10 +190,12 @@ void init_tx() {
 #ifdef INIT_TX_PIN
 	nrf_gpio_pin_toggle(INIT_TX_PIN);
 #endif
-
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+#else
 	// Start TX
 	NRF_UART0->TASKS_STARTTX = 1;
 	NRF_UART0->EVENTS_TXDRDY = 0;
+#endif
 #ifdef INIT_TX_PIN
 	nrf_gpio_pin_toggle(INIT_TX_PIN);
 #endif
@@ -204,34 +209,18 @@ void deinit_tx() {
 #ifdef INIT_TX_PIN
 	nrf_gpio_pin_toggle(INIT_TX_PIN);
 #endif
-
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+#else
 	// Stop TX
 	NRF_UART0->TASKS_STOPTX = 1;
 	NRF_UART0->EVENTS_TXDRDY = 0;
+#endif
 #ifdef INIT_TX_PIN
 	nrf_gpio_pin_toggle(INIT_TX_PIN);
 #endif
 }
 
 void serial_init(serial_enable_t enabled) {
-
-	// TODO: Anne, set back later, mmm. This is legacy. What's the new way to do this?
-	/*
-	 *
-    nrf_drv_uart_config_t config = NRF_DRV_UART_DEFAULT_CONFIG;
-    config.pseltxd  = NRF_LOG_BACKEND_UART_TX_PIN;
-    config.pselrxd  = NRF_UART_PSEL_DISCONNECTED;
-    config.pselcts  = NRF_UART_PSEL_DISCONNECTED;
-    config.pselrts  = NRF_UART_PSEL_DISCONNECTED;
-    config.baudrate = (nrf_uart_baudrate_t)NRF_LOG_BACKEND_UART_BAUDRATE;
-	 *
-	nrf_drv_uart_config_t config = NRF_DRV_UART_DEFAULT_CONFIG;
-	config.pselrxd = _pinRx;
-	config.pseltxd = _pinTx;
-	config.bandwidth = UART_BAUDRATE_BAUDRATE_Baud230400;
-	ret_code = nrf_drv_uart_init(&config, NULL);
-	*/
-	/*
 #if SERIAL_VERBOSITY>SERIAL_NONE
 	_state = enabled;
 	init();
@@ -258,7 +247,6 @@ void serial_init(serial_enable_t enabled) {
 	deinit_tx();
 	deinit_uart();
 #endif
-*/
 }
 
 void serial_enable(serial_enable_t enabled) {
@@ -345,21 +333,12 @@ void writeStartByte() {
 #endif
 }
 
-#ifdef INCLUDE_TIMESTAMPS
-
-int now() {
-	return RTC::now();
-}
-
-#endif
 
 
-
-// UART interrupt handler
-// TODO: Anne, disabled for now
-/*
+#if CS_SERIAL_NRF_LOG_ENABLED != 1
 static uint8_t readByte;
 
+// UART interrupt handler
 extern "C" void UART0_IRQHandler(void) {
 	if (NRF_UART0->EVENTS_ERROR && nrf_uart_int_enable_check(NRF_UART0, NRF_UART_INT_MASK_ERROR)) {
 #ifdef ERROR_PIN
@@ -393,4 +372,4 @@ extern "C" void UART0_IRQHandler(void) {
 		// TODO: init and start UART.
 	}
 }
-*/
+#endif

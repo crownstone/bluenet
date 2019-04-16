@@ -34,8 +34,6 @@ typedef uint32_t ret_code_t;
 #include <nrf_fstorage.h>
 #include <nrf_gpio.h>
 #include <nrf_gpiote.h>
-#include <nrf_log_ctrl.h>
-#include <nrf_log_default_backends.h>
 #include <nrf_nvic.h>
 #include <nrf_sdh.h>
 #include <nrf_sdh_ble.h>
@@ -43,9 +41,14 @@ typedef uint32_t ret_code_t;
 #include <nrf_sdm.h>
 // legacy #include <nrf_drv_uart.h>
 #include <nrfx_glue.h>
-#include <nrfx_log.h>
 //#include <nordic_common.h>
 //#include <nrf_serial.h>
+
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+#include <nrfx_log.h>
+#include <nrf_log_ctrl.h>
+#include <nrf_log_default_backends.h>
+#endif
 
 #ifndef BOOTLOADER_COMPILATION
 #include <crc16.h>
