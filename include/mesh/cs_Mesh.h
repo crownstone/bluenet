@@ -57,4 +57,5 @@ private:
 	void operator=(Mesh const &);
 
 	generic_onoff_client_t _clients[CLIENT_MODEL_INSTANCE_COUNT];
+	bool _isProvisioned = false;
 };

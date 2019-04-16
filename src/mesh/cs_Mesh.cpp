@@ -13,6 +13,9 @@ extern "C" {
 #include <mesh_stack.h>
 #include <access.h>
 #include <config_server_events.h>
+#include <mesh_provisionee.h>
+#include <nrf_mesh_configure.h>
+#include <uri.h>
 }
 
 #include <cfg/cs_Boards.h>
@@ -83,6 +86,17 @@ const generic_onoff_client_callbacks_t client_cbs =
 		.periodic_publish_cb = app_gen_onoff_client_publish_interval_cb
 };
 
+static void provisioning_complete_cb(void) {
+	LOGi("Successfully provisioned");
+
+	dsm_local_unicast_address_t node_address;
+	dsm_local_unicast_addresses_get(&node_address);
+	LOGi("Node Address: 0x%04x", node_address.address_start);
+}
+
+
+
+
 
 
 
@@ -126,13 +140,30 @@ void Mesh::init() {
 	init_params.models.models_init_cb   = staticModelsInitCallback;
 	init_params.models.config_server_cb = config_server_evt_cb;
 
-	bool isProvisioned;
-	uint32_t retCode = mesh_stack_init(&init_params, &isProvisioned);
+	uint32_t retCode = mesh_stack_init(&init_params, &_isProvisioned);
 	APP_ERROR_CHECK(retCode);
 }
 
 void Mesh::start() {
-	// TODO: implement
+	uint32_t retCode;
+	if (!_isProvisioned) {
+		static const uint8_t static_auth_data[NRF_MESH_KEY_SIZE] = STATIC_AUTH_DATA;
+		mesh_provisionee_start_params_t prov_start_params;
+		prov_start_params.p_static_data    = static_auth_data;
+		prov_start_params.prov_complete_cb = provisioning_complete_cb;
+		prov_start_params.prov_device_identification_start_cb = NULL;
+		prov_start_params.prov_device_identification_stop_cb = NULL;
+		prov_start_params.prov_abort_cb = NULL;
+		prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Client example";
+		retCode = mesh_provisionee_prov_start(&prov_start_params);
+		APP_ERROR_CHECK(retCode);
+	}
+
+//	const uint8_t *p_uuid = nrf_mesh_configure_device_uuid_get();
+//	LOGi("Device UUID");
+//	NRF_LOG_RAW_HEXDUMP_INFO(p_uuid, NRF_MESH_UUID_SIZE);
+	retCode = mesh_stack_start();
+	APP_ERROR_CHECK(retCode);
 }
 
 void Mesh::stop() {
