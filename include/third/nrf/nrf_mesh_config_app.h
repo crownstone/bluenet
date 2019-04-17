@@ -93,10 +93,22 @@
 
 
 /** Enable logging module. */
-#define NRF_MESH_LOG_ENABLE 1
+#define NRF_MESH_LOG_ENABLE 0
 
 /** Default log level. Messages with lower criticality is filtered. */
-#define LOG_LEVEL_DEFAULT LOG_LEVEL_WARN
+// LOG_LEVEL_ASSERT ( 0) /**< Log level for assertions */
+// LOG_LEVEL_ERROR  ( 1) /**< Log level for error messages. */
+// LOG_LEVEL_WARN   ( 2) /**< Log level for warning messages. */
+// LOG_LEVEL_REPORT ( 3) /**< Log level for report messages. */
+// LOG_LEVEL_INFO   ( 4) /**< Log level for information messages. */
+// LOG_LEVEL_DBG1   ( 5) /**< Log level for debug messages (debug level 1). */
+// LOG_LEVEL_DBG2   ( 6) /**< Log level for debug messages (debug level 2). */
+// LOG_LEVEL_DBG3   ( 7) /**< Log level for debug messages (debug level 3). */
+// EVT_LEVEL_BASE   ( 8) /**< Base level for event logging. For internal use only. */
+// EVT_LEVEL_ERROR  ( 9) /**< Critical error event logging level. For internal use only. */
+// EVT_LEVEL_INFO   (10) /**< Normal event logging level. For internal use only. */
+// EVT_LEVEL_DATA   (11) /**< Event data logging level. For internal use only. */
+#define LOG_LEVEL_DEFAULT 7
 
 /** Enable logging with RTT callback. */
 //#define LOG_ENABLE_RTT 0
@@ -118,7 +130,9 @@
 
 #include "fds.h"
 #include "fds_internal_defs.h"
-
+/** Number of flash pages to be reserved between the flash manager recovery page and the bootloader.
+ *  @note This value will be ignored if FLASH_MANAGER_RECOVERY_PAGE is set.
+ */
 #define FLASH_MANAGER_RECOVERY_PAGE_OFFSET_PAGES FDS_PHY_PAGES
 
 /** Device company identifier. */

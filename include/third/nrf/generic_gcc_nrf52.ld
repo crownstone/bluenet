@@ -71,6 +71,12 @@ SECTIONS
     KEEP(*(.fs_data))
     PROVIDE(__stop_fs_data = .);
   } > RAM
+  .nrf_mesh_ram :
+  {
+    PROVIDE(__start_nrf_mesh_ram = .);
+    KEEP(*(SORT(.nrf_mesh_ram.*)))
+    PROVIDE(__stop_nrf_mesh_ram = .);
+  } > RAM
 
 } INSERT AFTER .data;
 
@@ -151,7 +157,12 @@ SECTIONS
     KEEP(*(SORT(.pwr_mgmt_data*)))
     PROVIDE(__stop_pwr_mgmt_data = .);
   } > FLASH
-
+  .nrf_mesh_flash :
+  {
+    PROVIDE(__start_nrf_mesh_flash = .);
+    KEEP(*(SORT(.nrf_mesh_flash.*)))
+    PROVIDE(__stop_nrf_mesh_flash = .);
+  } > FLASH
 } INSERT AFTER .text
 
 INCLUDE "nrf_common.ld"

@@ -22,6 +22,7 @@ extern "C" {
 
 #include <drivers/cs_Serial.h>
 #include <util/cs_BleError.h>
+#include <util/cs_Utils.h>
 
 
 
@@ -159,9 +160,9 @@ void Mesh::start() {
 		APP_ERROR_CHECK(retCode);
 	}
 
-//	const uint8_t *p_uuid = nrf_mesh_configure_device_uuid_get();
-//	LOGi("Device UUID");
-//	NRF_LOG_RAW_HEXDUMP_INFO(p_uuid, NRF_MESH_UUID_SIZE);
+	const uint8_t *uuid = nrf_mesh_configure_device_uuid_get();
+	LOGi("Device UUID:");
+	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
 	retCode = mesh_stack_start();
 	APP_ERROR_CHECK(retCode);
 }
