@@ -44,11 +44,13 @@ void serial_config(uint8_t pinRx, uint8_t pinTx) {
 // Initializes anything but the UART peripheral.
 // Only to be called once.
 void init() {
+#if CS_SERIAL_NRF_LOG_ENABLED == 2
+	return;
+#endif
 	if (_initialized) {
 		return;
 	}
 	_initialized = true;
-#if CS_SERIAL_NRF_LOG_ENABLED != 1
 #ifdef RX_PIN
 	nrf_gpio_cfg_output(RX_PIN);
 #endif
@@ -77,7 +79,6 @@ void init() {
 	APP_ERROR_CHECK(err_code);
 	err_code = sd_nvic_EnableIRQ(UARTE0_UART0_IRQn);
 	APP_ERROR_CHECK(err_code);
-#endif
 }
 
 // Initializes the UART peripheral, and enables interrupt.
@@ -89,11 +90,6 @@ void init_uart() {
 #ifdef INIT_UART_PIN
 	nrf_gpio_pin_toggle(INIT_UART_PIN);
 #endif
-
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
-//	NRF_LOG_INIT(NULL);
-//	NRF_LOG_DEFAULT_BACKENDS_INIT();
-#else
 
 	// Configure UART pins
 	NRF_UART0->PSELRXD = _pinRx;
@@ -108,7 +104,6 @@ void init_uart() {
 
 	// Enable UART
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Enabled << UART_ENABLE_ENABLE_Pos;
-#endif
 #ifdef INIT_UART_PIN
 	nrf_gpio_pin_toggle(INIT_UART_PIN);
 #endif
@@ -122,12 +117,8 @@ void deinit_uart() {
 #ifdef INIT_UART_PIN
 	nrf_gpio_pin_toggle(INIT_UART_PIN);
 #endif
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
-	// Can't deinit nrf logger
-#else
 	// Disable UART
 	NRF_UART0->ENABLE = UART_ENABLE_ENABLE_Disabled << UART_ENABLE_ENABLE_Pos;
-#endif
 #ifdef INIT_UART_PIN
 	nrf_gpio_pin_toggle(INIT_UART_PIN);
 #endif
@@ -141,9 +132,6 @@ void init_rx() {
 #ifdef INIT_RX_PIN
 	nrf_gpio_pin_toggle(INIT_RX_PIN);
 #endif
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
-	// Can't do RX with nrf logger
-#else
 	// Enable RX ready interrupts
 	NRF_UART0->INTENSET = UART_INTENSET_RXDRDY_Msk;
 	// TODO: handle error event.
@@ -152,7 +140,6 @@ void init_rx() {
 	// Start RX
 	NRF_UART0->TASKS_STARTRX = 1;
 	NRF_UART0->EVENTS_RXDRDY = 0;
-#endif
 #ifdef INIT_RX_PIN
 	nrf_gpio_pin_toggle(INIT_RX_PIN);
 #endif
@@ -166,8 +153,6 @@ void deinit_rx() {
 #ifdef INIT_RX_PIN
 	nrf_gpio_pin_toggle(INIT_RX_PIN);
 #endif
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
-#else
 	// Disable interrupt
 	NRF_UART0->INTENCLR = UART_INTENSET_RXDRDY_Msk | UART_INTENSET_ERROR_Msk | UART_INTENSET_RXTO_Msk;
 
@@ -176,7 +161,6 @@ void deinit_rx() {
 	NRF_UART0->EVENTS_RXDRDY = 0;
 	NRF_UART0->EVENTS_ERROR = 0;
 	NRF_UART0->EVENTS_RXTO = 0;
-#endif
 #ifdef INIT_RX_PIN
 	nrf_gpio_pin_toggle(INIT_RX_PIN);
 #endif
@@ -190,12 +174,9 @@ void init_tx() {
 #ifdef INIT_TX_PIN
 	nrf_gpio_pin_toggle(INIT_TX_PIN);
 #endif
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
-#else
 	// Start TX
 	NRF_UART0->TASKS_STARTTX = 1;
 	NRF_UART0->EVENTS_TXDRDY = 0;
-#endif
 #ifdef INIT_TX_PIN
 	nrf_gpio_pin_toggle(INIT_TX_PIN);
 #endif
@@ -209,18 +190,18 @@ void deinit_tx() {
 #ifdef INIT_TX_PIN
 	nrf_gpio_pin_toggle(INIT_TX_PIN);
 #endif
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
-#else
 	// Stop TX
 	NRF_UART0->TASKS_STOPTX = 1;
 	NRF_UART0->EVENTS_TXDRDY = 0;
-#endif
 #ifdef INIT_TX_PIN
 	nrf_gpio_pin_toggle(INIT_TX_PIN);
 #endif
 }
 
 void serial_init(serial_enable_t enabled) {
+#if CS_SERIAL_NRF_LOG_ENABLED == 2
+	return;
+#endif
 #if SERIAL_VERBOSITY>SERIAL_NONE
 	_state = enabled;
 	init();
@@ -335,7 +316,7 @@ void writeStartByte() {
 
 
 
-#if CS_SERIAL_NRF_LOG_ENABLED != 1
+#if CS_SERIAL_NRF_LOG_ENABLED != 2
 static uint8_t readByte;
 
 // UART interrupt handler

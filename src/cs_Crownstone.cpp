@@ -966,7 +966,7 @@ int main() {
 
 	atexit(on_exit);
 
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
+#if CS_SERIAL_NRF_LOG_ENABLED > 0
 	NRF_LOG_INIT(NULL);
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
 	NRF_LOG_INFO("Main");

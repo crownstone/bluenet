@@ -44,7 +44,7 @@ typedef uint32_t ret_code_t;
 //#include <nordic_common.h>
 //#include <nrf_serial.h>
 
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
+#if CS_SERIAL_NRF_LOG_ENABLED > 0
 #include <nrfx_log.h>
 #include <nrf_log_ctrl.h>
 #include <nrf_log_default_backends.h>

@@ -62,7 +62,14 @@ typedef enum {
 // To disable particular logs, but without commenting it.
 #define LOGnone LOG_IGNORE
 
-#if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED == 1)
+#if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED > 0)
+#define LOG_FLUSH NRF_LOG_FLUSH
+#else
+#define LOG_NOTHING()
+#define LOG_FLUSH LOG_NOTHING
+#endif
+
+#if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED == 2)
 //#warning NRF_LOG
 #define LOGv NRF_LOG_DEBUG
 #define LOGd NRF_LOG_DEBUG
@@ -72,7 +79,6 @@ typedef enum {
 #define LOGf NRF_LOG_ERROR
 #define _log(level, fmt, ...)
 #define logLN(level, fmt, ...)
-#define LOG_FLUSH NRF_LOG_FLUSH
 #else
 
 #if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
@@ -102,8 +108,6 @@ typedef enum {
 #define LOGw(fmt, ...) logLN(SERIAL_WARN,    "\033[33;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGe(fmt, ...) logLN(SERIAL_ERROR,   "\033[35;1m" fmt "\033[0m", ##__VA_ARGS__)
 #define LOGf(fmt, ...) logLN(SERIAL_FATAL,   "\033[31;1m" fmt "\033[0m", ##__VA_ARGS__)
-#define LOG_NOTHING()
-#define LOG_FLUSH LOG_NOTHING
 #endif
 
 #define LOG_MEMORY \
