@@ -19,7 +19,7 @@
 #include <util/cs_Utils.h>
 
 
-//#define PRINT_STACK_VERBOSE
+#define LOGStackDebug LOGnone
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 19
@@ -580,7 +580,7 @@ void Stack::configureAdvertisementParameters() {
 
 void Stack::setConnectable() {
 	// TODO: Have a function that sets address, which sends an event "set address" that makes the scanner pause (etc).
-	LOGd("setConnectable");
+	LOGStackDebug("setConnectable");
 	_adv_params.properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
 	// TODO: The identity address cannot be changed while advertising, scanning or creating a connection.
 //	uint32_t ret_code;
@@ -591,7 +591,7 @@ void Stack::setConnectable() {
 }
 
 void Stack::setNonConnectable() {
-	LOGd("setNonConnectable");
+	LOGStackDebug("setNonConnectable");
 	_adv_params.properties.type = BLE_GAP_ADV_TYPE_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED;
 //	_adv_params.properties.type = BLE_GAP_ADV_TYPE_NONCONNECTABLE_SCANNABLE_UNDIRECTED;
 	// TODO: The identity address cannot be changed while advertising, scanning or creating a connection.
@@ -604,7 +604,7 @@ void Stack::setNonConnectable() {
 
 void Stack::restartAdvertising() {
 	// TODO: do we still need to restart advertising to update advertisement?
-	LOGd("Restart advertising");
+	LOGStackDebug("Restart advertising");
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
 
 	if (_advertising) {
@@ -724,7 +724,7 @@ void Stack::stopAdvertising() {
 	}
 
 	// This function call can take 31ms
-	LOGd("sd_ble_gap_adv_stop(_adv_handle=%i", _adv_handle);
+	LOGStackDebug("sd_ble_gap_adv_stop(_adv_handle=%i", _adv_handle);
 	uint32_t ret_code = sd_ble_gap_adv_stop(_adv_handle);
 	// Ignore invalid state error,
 	// see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
@@ -760,7 +760,7 @@ void Stack::updateAdvertisement(bool toggle) {
 	if (toggle) {
 		connectable = (++_advInterleaveCounter % 2);
 	}
-	LOGd("updateAdvertisement connectable %i", connectable);
+	LOGStackDebug("updateAdvertisement connectable %i", connectable);
 
 	if (connectable) {
 		setConnectable();

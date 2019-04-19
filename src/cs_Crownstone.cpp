@@ -711,7 +711,10 @@ void Crownstone::increaseResetCounter() {
  * TODO: describe function calls and why they are required.
  */
 void Crownstone::tick() {
-	LOG_MEMORY; // To check for memory leaks
+	static uint32_t mainTickCrount = 0;
+	if (++mainTickCrount % (60*1000 / TICK_INTERVAL_MS) == 0) {
+		LOG_MEMORY; // To check for memory leaks
+	}
 	// TODO: warning when close to out of memory
 	// TODO: maybe detect memory leaks?
 
