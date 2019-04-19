@@ -218,7 +218,7 @@ const generic_onoff_client_callbacks_t client_cbs =
 void Mesh::modelsInitCallback() {
     LOGi("Initializing and adding models");
     uint32_t retCode;
-    uint8_t elementIndex = 1;
+    uint8_t elementIndex = 0;
     for (uint32_t i = 0; i < CLIENT_MODEL_INSTANCE_COUNT; ++i) {
         _clients[i].settings.p_callbacks = &client_cbs;
         _clients[i].settings.timeout = 0;
@@ -271,6 +271,7 @@ void Mesh::init() {
 
 	uint32_t retCode = mesh_stack_init(&init_params, &_isProvisioned);
 	APP_ERROR_CHECK(retCode);
+	LOGi("Mesh isProvisioned=%u", _isProvisioned);
 }
 
 void Mesh::start() {

@@ -58,10 +58,10 @@
 #define CLIENT_NODE_COUNT            (1)
 
 /** Number of On-Off client models on the Switch Node */
-#define CLIENT_MODEL_INSTANCE_COUNT  (2)
+#define CLIENT_MODEL_INSTANCE_COUNT  (0)
 
 /** Number of group address being used in this example */
-#define GROUP_ADDR_COUNT             (2)
+#define GROUP_ADDR_COUNT             (0)
 
 /** Static authentication data */
 #define STATIC_AUTH_DATA {0x6E, 0x6F, 0x72, 0x64, 0x69, 0x63, 0x5F, 0x65, 0x78, 0x61, 0x6D, 0x70, 0x6C, 0x65, 0x5F, 0x31}
@@ -155,7 +155,7 @@
 /**
  * The default TTL value for the node.
  */
-#define ACCESS_DEFAULT_TTL (SERVER_NODE_COUNT > NRF_MESH_TTL_MAX ? NRF_MESH_TTL_MAX : SERVER_NODE_COUNT)
+#define ACCESS_DEFAULT_TTL (4)
 
 /**
  * The number of models in the application.
@@ -165,8 +165,8 @@
  */
 #define ACCESS_MODEL_COUNT (1 + /* Configuration server */  \
                             1 + /* Health server */  \
-                            2 + /* Generic OnOff client (2 groups) */ \
-                            2 +  /* Generic OnOff client (2 unicast) */ \
+                            GROUP_ADDR_COUNT + /* Generic OnOff client (2 groups) */ \
+                            CLIENT_MODEL_INSTANCE_COUNT +  /* Generic OnOff client (2 unicast) */ \
 							1 /* Generic OnOff server */)
 
 /**
@@ -175,7 +175,8 @@
  * @warning If the application is to support _multiple instances_ of the _same_ model, these instances
  * cannot be in the same element and a separate element is needed for each new instance of the same model.
  */
-#define ACCESS_ELEMENT_COUNT (1 + CLIENT_MODEL_INSTANCE_COUNT + 1) /* One element per Generic OnOff client instance */
+//#define ACCESS_ELEMENT_COUNT (1 + CLIENT_MODEL_INSTANCE_COUNT + 1) /* One element per Generic OnOff client instance */
+#define ACCESS_ELEMENT_COUNT (1)
 
 /**
  * The number of allocated subscription lists for the application.
@@ -183,7 +184,8 @@
  * @note This value must equal @ref ACCESS_MODEL_COUNT minus the number of
  * models operating on shared states.
  */
-#define ACCESS_SUBSCRIPTION_LIST_COUNT (ACCESS_MODEL_COUNT)
+//#define ACCESS_SUBSCRIPTION_LIST_COUNT (ACCESS_MODEL_COUNT)
+#define ACCESS_SUBSCRIPTION_LIST_COUNT (1)
 
 /**
  * The number of pages of flash storage reserved for the access layer for persistent data storage.
@@ -210,15 +212,23 @@
  * @{
  */
 /** Maximum number of subnetworks. */
-#define DSM_SUBNET_MAX                                  (1)
+//#define DSM_SUBNET_MAX                                  (1)
+#define DSM_SUBNET_MAX                                  (4)
 /** Maximum number of applications. */
-#define DSM_APP_MAX                                     (1)
+//#define DSM_APP_MAX                                     (1)
+#define DSM_APP_MAX                                     (8)
 /** Maximum number of device keys. */
 #define DSM_DEVICE_MAX                                  (1)
 /** Maximum number of virtual addresses. */
 #define DSM_VIRTUAL_ADDR_MAX                            (1)
 /** Maximum number of non-virtual addresses. One for each of the servers and a group address. */
-#define DSM_NONVIRTUAL_ADDR_MAX                         (ACCESS_MODEL_COUNT + 1)
+//#define DSM_NONVIRTUAL_ADDR_MAX                         (ACCESS_MODEL_COUNT + 1)
+/** Maximum number of non-virtual addresses.
+ * - Generic OnOff publication
+ * - Health publication
+ * - Subscription address
+ */
+#define DSM_NONVIRTUAL_ADDR_MAX                         (3)
 /** Number of flash pages reserved for the DSM storage. */
 #define DSM_FLASH_PAGE_COUNT                            (1)
 /** @} end of DSM_CONFIG */
