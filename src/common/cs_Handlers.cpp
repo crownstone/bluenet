@@ -13,6 +13,10 @@
 extern "C" {
 #endif
 
+#if BUILD_MESHING == 1
+#include <nrf_mesh.h>
+#endif
+
 #define CROWNSTONE_STACK_OBSERVER_PRIO           0
 #define CROWNSTONE_REQUEST_OBSERVER_PRIO         0
 #define CROWNSTONE_SOC_OBSERVER_PRIO             0
@@ -119,6 +123,16 @@ NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRI
 	.handler   = crownstone_state_handler,
 	.p_context = NULL
 };
+
+#if BUILD_MESHING == 1
+// From: ble_softdevice_support.c
+#define MESH_SOC_OBSERVER_PRIO 0
+static void mesh_soc_evt_handler(uint32_t evt_id, void * p_context)
+{
+    nrf_mesh_on_sd_evt(evt_id);
+}
+NRF_SDH_SOC_OBSERVER(m_mesh_soc_observer, MESH_SOC_OBSERVER_PRIO, mesh_soc_evt_handler, NULL);
+#endif
 
 /**
  * The decoupled FDS event handler.
