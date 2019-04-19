@@ -8223,7 +8223,7 @@
 // <e> NRF_LOG_ENABLED - Logging module for nRF5 SDK
 //==========================================================
 #ifndef NRF_LOG_ENABLED
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
+#if CS_SERIAL_NRF_LOG_ENABLED > 0
 #define NRF_LOG_ENABLED 1
 #else
 #define NRF_LOG_ENABLED 0
