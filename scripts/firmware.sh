@@ -66,12 +66,12 @@ release() {
 }
 
 upload() {
-	${path}/_upload.sh $BLUENET_BIN_DIR/$target.hex $address $serial_num
+	${path}/_upload.sh $BLUENET_BIN_DIR/crownstone.hex $address $serial_num
 	checkError "Uploading failed"
 }
 
 debug() {
-	${path}/_debug.sh $BLUENET_BIN_DIR/$target.elf $serial_num $gdb_port
+	${path}/_debug.sh $BLUENET_BIN_DIR/crownstone.elf $serial_num $gdb_port
 	checkError "Debugging failed"
 }
 

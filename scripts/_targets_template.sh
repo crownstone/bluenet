@@ -41,17 +41,6 @@
 
 target=${1:-crownstone}
 
-if [[ $target != "crownstone" ]]; then
-	BLUENET_CONFIG_DIR=${BLUENET_CONFIG_DIR:+$BLUENET_CONFIG_DIR/$target}
-	BLUENET_BUILD_DIR=${BLUENET_BUILD_DIR:+$BLUENET_BUILD_DIR/$target}
-	BLUENET_BIN_DIR=${BLUENET_BIN_DIR:+$BLUENET_BIN_DIR/$target}
-	BLUENET_RELEASE_DIR=${BLUENET_RELEASE_DIR:+$BLUENET_RELEASE_DIR/$target}
-else
-	BLUENET_BUILD_DIR=${BLUENET_BUILD_DIR:+$BLUENET_BUILD_DIR/default}
-	BLUENET_BIN_DIR=${BLUENET_BIN_DIR:+$BLUENET_BIN_DIR/default}
-	BLUENET_RELEASE_DIR=${BLUENET_RELEASE_DIR:+$BLUENET_RELEASE_DIR/default}
-fi
-
 case "$target" in
 	# ENTER NEW TARGETS HERE in the form of:
 	# <target name>)
@@ -74,4 +63,3 @@ case "$target" in
 	#	gdb_port=2331
 	#	;;
 esac
-target=crownstone
