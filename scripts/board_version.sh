@@ -51,7 +51,7 @@ upload() {
 	fi
 }
 
-read() {
+read_board_version() {
 	cs_log "Find board version via ${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num"
 	hardware_board_version=$(${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num)
 	checkError "Failed to read board version"
@@ -63,7 +63,7 @@ read() {
 # If nothing is written, it will give an error.
 check() {
 	verify_board_version_defined
-	read
+	read_board_version
 	HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BLUENET_DIR/include/cfg/cs_Boards.h | grep -oP "\d+$")
 	config_board_version=$(printf "%08x" $HARDWARE_BOARD_INT)
 	if [ "$hardware_board_version" == 'FFFFFFFF' ] || [ "$hardware_board_version" == 'ffffffff' ]; then
@@ -112,7 +112,7 @@ check() {
 
 case "$cmd" in
 	read)
-		read
+		read_board_version
 		;;
 	check)
 		check
