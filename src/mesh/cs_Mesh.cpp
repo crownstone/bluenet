@@ -16,6 +16,7 @@ extern "C" {
 #include <mesh_provisionee.h>
 #include <nrf_mesh_configure.h>
 #include <uri.h>
+#include <utils.h>
 }
 
 #include <cfg/cs_Boards.h>
@@ -23,6 +24,126 @@ extern "C" {
 #include <drivers/cs_Serial.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
+
+
+//static void generic_onoff_state_get_cb(const generic_onoff_server_t * p_self,
+//                                       const access_message_rx_meta_t * p_meta,
+//                                       generic_onoff_status_params_t * p_out);
+//static void generic_onoff_state_set_cb(const generic_onoff_server_t * p_self,
+//                                       const access_message_rx_meta_t * p_meta,
+//                                       const generic_onoff_set_params_t * p_in,
+//                                       const model_transition_t * p_in_transition,
+//                                       generic_onoff_status_params_t * p_out);
+//
+//static void generic_onoff_state_get_cb(const generic_onoff_server_t * p_self,
+//                                       const access_message_rx_meta_t * p_meta,
+//                                       generic_onoff_status_params_t * p_out)
+//{
+//    LOGi("msg: GET");
+//
+//    app_onoff_server_t   * p_server = PARENT_BY_FIELD_GET(app_onoff_server_t, server, p_self);
+//
+//    /* Requirement: Provide the current value of the OnOff state */
+//    p_server->onoff_get_cb(p_server, &p_server->state.present_onoff);
+//    p_out->present_on_off = p_server->state.present_onoff;
+//    p_out->target_on_off = p_server->state.target_onoff;
+//
+//    /* Requirement: Always report remaining time */
+//    if (p_server->state.remaining_time_ms > 0 && p_server->state.delay_ms == 0)
+//    {
+//        uint32_t delta = (1000ul * app_timer_cnt_diff_compute(app_timer_cnt_get(), p_server->last_rtc_counter)) / APP_TIMER_CLOCK_FREQ;
+//        if (p_server->state.remaining_time_ms >= delta && delta > 0)
+//        {
+//            p_out->remaining_time_ms = p_server->state.remaining_time_ms - delta;
+//        }
+//        else
+//        {
+//            p_out->remaining_time_ms = 0;
+//        }
+//    }
+//    else
+//    {
+//        p_out->remaining_time_ms = p_server->state.remaining_time_ms;
+//    }
+//}
+//
+//static void generic_onoff_state_set_cb(const generic_onoff_server_t * p_self,
+//                                       const access_message_rx_meta_t * p_meta,
+//                                       const generic_onoff_set_params_t * p_in,
+//                                       const model_transition_t * p_in_transition,
+//                                       generic_onoff_status_params_t * p_out)
+//{
+//    LOGi("msg: SET: %d\n", p_in->on_off);
+//
+//    app_onoff_server_t   * p_server = PARENT_BY_FIELD_GET(app_onoff_server_t, server, p_self);
+//
+//    /* Update internal representation of OnOff value, process timing */
+//    p_server->value_updated = false;
+//    p_server->state.target_onoff = p_in->on_off;
+//    if (p_in_transition == NULL)
+//    {
+//        p_server->state.delay_ms = 0;
+//        p_server->state.remaining_time_ms = 0;
+//    }
+//    else
+//    {
+//        p_server->state.delay_ms = p_in_transition->delay_ms;
+//        p_server->state.remaining_time_ms = p_in_transition->transition_time_ms;
+//    }
+//
+//    onoff_state_value_update(p_server);
+//    onoff_state_process_timing(p_server);
+//
+//    /* Prepare response */
+//    if (p_out != NULL)
+//    {
+//        p_out->present_on_off = p_server->state.present_onoff;
+//        p_out->target_on_off = p_server->state.target_onoff;
+//        p_out->remaining_time_ms = p_server->state.remaining_time_ms;
+//    }
+//}
+
+
+
+
+static void app_onoff_server_set_cb(const app_onoff_server_t * p_server, bool onoff);
+static void app_onoff_server_get_cb(const app_onoff_server_t * p_server, bool * p_present_onoff);
+static bool switchVal = false;
+
+/* Callback for updating the hardware state */
+static void app_onoff_server_set_cb(const app_onoff_server_t * p_server, bool onoff)
+{
+	/* Resolve the server instance here if required, this example uses only 1 instance. */
+	LOGi("Set switch: %d", onoff);
+	switchVal = onoff;
+}
+
+/* Callback for reading the hardware state */
+static void app_onoff_server_get_cb(const app_onoff_server_t * p_server, bool * p_present_onoff)
+{
+	*p_present_onoff = switchVal;
+}
+
+
+
+
+static void device_identification_start_cb(uint8_t attention_duration_s)
+{
+	LOGi("device identification start");
+}
+
+static void provisioning_aborted_cb(void)
+{
+	LOGi("provisioning aborted");
+}
+
+static void provisioning_complete_cb(void) {
+	LOGi("provisioning complete");
+
+	dsm_local_unicast_address_t node_address;
+	dsm_local_unicast_addresses_get(&node_address);
+	LOGi("Node Address: 0x%04x", node_address.address_start);
+}
 
 
 
@@ -87,14 +208,6 @@ const generic_onoff_client_callbacks_t client_cbs =
 		.periodic_publish_cb = app_gen_onoff_client_publish_interval_cb
 };
 
-static void provisioning_complete_cb(void) {
-	LOGi("Successfully provisioned");
-
-	dsm_local_unicast_address_t node_address;
-	dsm_local_unicast_addresses_get(&node_address);
-	LOGi("Node Address: 0x%04x", node_address.address_start);
-}
-
 
 
 
@@ -104,6 +217,8 @@ static void provisioning_complete_cb(void) {
 
 void Mesh::modelsInitCallback() {
     LOGi("Initializing and adding models");
+    uint32_t retCode;
+    uint8_t elementIndex = 1;
     for (uint32_t i = 0; i < CLIENT_MODEL_INSTANCE_COUNT; ++i) {
         _clients[i].settings.p_callbacks = &client_cbs;
         _clients[i].settings.timeout = 0;
@@ -111,14 +226,26 @@ void Mesh::modelsInitCallback() {
         _clients[i].settings.force_segmented = false;
         /* Controls the MIC size used by the model instance for sending the mesh messages. */
         _clients[i].settings.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
-        uint32_t retCode = generic_onoff_client_init(&_clients[i], i + 1);
+        retCode = generic_onoff_client_init(&_clients[i], elementIndex++);
         APP_ERROR_CHECK(retCode);
     }
+
+    // Server
+    retCode = app_onoff_init(&_server, elementIndex++);
+    APP_ERROR_CHECK(retCode);
+    LOGi("Server handle: %d", _server.server.model_handle);
 }
 
 
 Mesh::Mesh() {
+	_serverTimerData = { {0} };
+	_serverTimerId = &_serverTimerData;
 
+	_server.server.settings.force_segmented = false;
+	_server.server.settings.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
+	_server.p_timer_id = &_serverTimerId;
+	_server.onoff_set_cb = app_onoff_server_set_cb;
+	_server.onoff_get_cb = app_onoff_server_get_cb;
 }
 
 Mesh& Mesh::getInstance() {
@@ -138,6 +265,7 @@ void Mesh::init() {
 	init_params.core.irq_priority       = NRF_MESH_IRQ_PRIORITY_LOWEST;
 	init_params.core.lfclksrc           = lfclksrc;
 	init_params.core.p_uuid             = NULL;
+	init_params.core.relay_cb           = NULL;
 	init_params.models.models_init_cb   = staticModelsInitCallback;
 	init_params.models.config_server_cb = config_server_evt_cb;
 
@@ -152,10 +280,11 @@ void Mesh::start() {
 		mesh_provisionee_start_params_t prov_start_params;
 		prov_start_params.p_static_data    = static_auth_data;
 		prov_start_params.prov_complete_cb = provisioning_complete_cb;
-		prov_start_params.prov_device_identification_start_cb = NULL;
+		prov_start_params.prov_device_identification_start_cb = device_identification_start_cb;
 		prov_start_params.prov_device_identification_stop_cb = NULL;
-		prov_start_params.prov_abort_cb = NULL;
-		prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Client example";
+		prov_start_params.prov_abort_cb = provisioning_aborted_cb;
+//		prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Client example";
+		prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Server example";
 		retCode = mesh_provisionee_prov_start(&prov_start_params);
 		APP_ERROR_CHECK(retCode);
 	}

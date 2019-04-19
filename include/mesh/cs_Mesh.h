@@ -9,6 +9,7 @@
 
 extern "C" {
 #include <generic_onoff_client.h>
+#include <app_onoff.h>
 #include <nrf_mesh_config_app.h>
 }
 
@@ -57,5 +58,8 @@ private:
 	void operator=(Mesh const &);
 
 	generic_onoff_client_t _clients[CLIENT_MODEL_INSTANCE_COUNT];
+	app_onoff_server_t _server;
+	app_timer_t _serverTimerData;
+	app_timer_id_t _serverTimerId;
 	bool _isProvisioned = false;
 };
