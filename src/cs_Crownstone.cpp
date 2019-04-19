@@ -758,7 +758,14 @@ void Crownstone::run() {
 
 	while(1) {
 		app_sched_execute();
+#if BUILD_MESHING == 1
+		bool done = nrf_mesh_process();
+		if (done) {
+			sd_app_evt_wait();
+		}
+#else
 		sd_app_evt_wait();
+#endif
 		LOG_FLUSH();
 	}
 }

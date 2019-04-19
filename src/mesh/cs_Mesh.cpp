@@ -262,7 +262,8 @@ void Mesh::init() {
 	lfclksrc.accuracy = NRF_CLOCK_LF_ACCURACY_20_PPM;
 
 	mesh_stack_init_params_t init_params;
-	init_params.core.irq_priority       = NRF_MESH_IRQ_PRIORITY_LOWEST;
+//	init_params.core.irq_priority       = NRF_MESH_IRQ_PRIORITY_LOWEST;
+	init_params.core.irq_priority       = NRF_MESH_IRQ_PRIORITY_THREAD;
 	init_params.core.lfclksrc           = lfclksrc;
 	init_params.core.p_uuid             = NULL;
 	init_params.core.relay_cb           = NULL;
