@@ -93,7 +93,8 @@
 
 
 /** Enable logging module. */
-#define NRF_MESH_LOG_ENABLE 0
+#include <sdk_config.h>
+#define NRF_MESH_LOG_ENABLE NRF_LOG_BACKEND_RTT_ENABLED
 
 /** Default log level. Messages with lower criticality is filtered. */
 // LOG_LEVEL_ASSERT ( 0) /**< Log level for assertions */
