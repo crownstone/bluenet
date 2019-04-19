@@ -47,6 +47,7 @@ if [ ! -e ${BLUENET_CONFIG_DIR}/CMakeBuild.config ]; then
 	exit 1
 fi
 
+cs_log "source ${BLUENET_CONFIG_DIR}/CMakeBuild.config"
 source ${BLUENET_CONFIG_DIR}/CMakeBuild.config
 
 ## Use by default the softdevice folders from the SDK, if not otherwise specified
