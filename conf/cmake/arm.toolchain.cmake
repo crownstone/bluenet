@@ -72,7 +72,7 @@ SET(DEFAULT_CXX_FLAGS       "-std=c++14 -fno-exceptions -fdelete-dead-exceptions
 #SET(DEFAULT_C_FLAGS         "-std=gnu99") // but why
 SET(DEFAULT_C_FLAGS         "")
 #SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -fdiagnostics-color=always")
-SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -Wno-error=format -fdiagnostics-color=always")
+SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -Wno-error=format -fdiagnostics-color=always -fno-builtin -flto")
 #SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -Wno-error=format -Wno-error=int-in-bool-context -fdiagnostics-color=always")
 
 SET(ASM_OPTIONS "-x assembler-with-cpp")
@@ -80,8 +80,9 @@ SET(CMAKE_ASM_FLAGS "${CFLAGS} ${ASM_OPTIONS}" )
 
 # Collect flags that have to do with optimization
 # We are optimizing for SIZE for now. If size turns out to be abundant, enable -O3 optimization.
-# Interesting options: -ffast-math, -flto (link time optimization)
-# Regarding size of the binary -ffast-math nor -flto makes a difference
+# Interesting options: -ffast-math, -flto (link time optimization), -fno-rtti
+# Regarding size of the binary -ffast-math made a very small difference (4B), while -flto made a difference of almost 13kB.
+# When adding -flto to C_FLAGS, you also need -fno-builtin, else it gives an error of multiple definitions of _exit().
 SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -Os -fomit-frame-pointer")
 
 # There is a bug in CMAKE_OBJCOPY, it doesn't exist on execution for the first time
