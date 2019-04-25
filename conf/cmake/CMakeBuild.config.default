@@ -223,7 +223,7 @@ NRF51_USE_SOFTDEVICE=1
 # the directory with /Source and /Include subdirectories from the Nordic SDK
 NRF5_DIR=
 # the nordic sdk version
-NORDIC_SDK_VERSION=11
+NORDIC_SDK_VERSION=15
 
 # starting with SoftDevice S110 v7 there is no separate UICR section
 SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
