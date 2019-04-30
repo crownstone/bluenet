@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage() {
-	echo "Usage: $0 {build|unit-test-host|unit-test-nrf5|release|upload|debug|clean} [target [address|gdb_port]]"
+	echo "Usage: $0 {build|unit-test-host|unit-test-nrf5|release|upload|debug|clean} [target [address [gdb_port]]]"
 }
 
 cmd=${1:-help}
@@ -26,7 +26,7 @@ source $path/_config.sh
 # optional address, use APPLICATION_START_ADDRESS as default
 address=${3:-$APPLICATION_START_ADDRESS}
 
-gdb_port=${3:-$gdb_port}
+gdb_port=${4:-$gdb_port}
 
 if [ "$VERBOSE" == "1" ]; then
 	cs_info "Verbose mode"
@@ -35,9 +35,6 @@ else
 	cs_info "Silent mode"
 	make_flag="-s"
 fi
-
-# use $APPLICATION_START_ADDRESS as default if no address defined
-address=${address:-$APPLICATION_START_ADDRESS}
 
 
 
