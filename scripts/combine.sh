@@ -111,12 +111,17 @@ fi
 if [[ $include_softdevice ]]; then
 	ADD_SOFTDEVICE="${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel"
 fi
+
 if [[ $include_firmware ]]; then
 	ADD_BINARY="crownstone.bin -binary -offset $APPLICATION_START_ADDRESS"
-	BINARY_VALID_FLAG="-exclude 0x7F000 0x7F004 -generate 0x7F000 0x7F004 -le-constant 0x00000001 4"
+	#BINARY_VALID_FLAG="-exclude 0x7F000 0x7F004 -generate 0x7F000 0x7F004 -le-constant 0x00000001 4"
 fi
 
-cs_log "srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $HARDWARE_BOARD_CONFIG $ADD_BINARY $BINARY_VALID_FLAG $BOOTLOADER_SETTINGS -o combined.hex -intel"
-srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $HARDWARE_BOARD_CONFIG $ADD_BINARY $BINARY_VALID_FLAG $BOOTLOADER_SETTINGS -o combined.hex -intel
+if [ $include_firmware ] && [ $include_bootloader ]; then
+	ADD_BOOTLOADER_SETTINGS="bootloader-settings.hex -intel"
+fi
+
+cs_log "srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $HARDWARE_BOARD_CONFIG $ADD_BINARY $ADD_BOOTLOADER_SETTINGS -o combined.hex -intel"
+srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $HARDWARE_BOARD_CONFIG $ADD_BINARY $ADD_BOOTLOADER_SETTINGS -o combined.hex -intel
 checkError "ERROR: srec_cat failed, check the results"
 cs_log "Combined binary is: ${BLUENET_BIN_DIR}/combined.hex"

@@ -46,12 +46,29 @@ build() {
 	cd $path
 }
 
+build-settings() {
+	if [ ! -f $BLUENET_BIN_DIR/crownstone.hex ]; then
+		cs_err "File not found: $BLUENET_BIN_DIR/crownstone.hex"
+		cs_err "Build the firmware first"
+		exit $CS_ERR_FILE_NOT_FOUND
+	fi
+	cs_info "Generate bootloader settings"
+	cs_warn "Assuming application-version 1 and bootloader-version 1 for now."
+	nrfutil settings generate --family NRF52 --application "${BLUENET_BIN_DIR}/crownstone.hex" --application-version 1 --bootloader-version 1 --bl-settings-version 1 "${BLUENET_BIN_DIR}/bootloader-settings.hex"
+	checkError "Generating bootloader settings. Do you have 'nrfutil' installed?"
+}
+
 release() {
 	build
 }
 
 upload() {
 	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $address $serial_num
+	checkError "Uploading failed"
+}
+
+upload-settings() {
+	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader-settings.hex $address $serial_num
 	checkError "Uploading failed"
 }
 
@@ -69,6 +86,9 @@ clean() {
 case "$cmd" in
 	build)
 		build
+		;;
+	build-settings)
+		build-settings
 		;;
 	release)
 		release

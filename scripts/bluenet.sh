@@ -177,6 +177,11 @@ build_firmware_release() {
 	checkError "Error building firmware release"
 }
 
+build_bootloader_settings() {
+	${path}/bootloader.sh build-settings $target
+	checkError "Error building bootloader settings"
+}
+
 build_bootloader() {
 	${path}/bootloader.sh build $target
 	checkError "Error building bootloader"
@@ -209,6 +214,11 @@ upload_firmware() {
 	checkError "Error uploading firmware"
 }
 
+upload_bootloader_settings() {
+	${path}/bootloader.sh upload-settings $target
+	checkError "Error uploading bootloader settings"
+}
+
 upload_bootloader() {
 	${path}/bootloader.sh upload $target
 	checkError "Error uploading bootloader"
@@ -238,20 +248,6 @@ debug_firmware() {
 debug_bootloader() {
 	${path}/bootloader.sh debug $target
 	checkError "Error debugging bootloader"
-}
-
-
-
-upload_valid_app_mark() {
-	cs_info "Mark current app as valid"
-	${path}/_writebyte.sh 0x0007F000 1 $serial_num
-	checkError "Error marking app valid"
-}
-
-upload_invalid_app_mark() {
-	cs_info "Mark current app as invalid"
-	${path}/_writebyte.sh 0x0007F000 0 $serial_num
-	checkError "Error marking app invalid"
 }
 
 
@@ -302,6 +298,7 @@ if [ $do_build ]; then
 		else
 			build_firmware
 		fi
+		build_bootloader_settings
 		done_built=true
 	fi
 	if [ $include_bootloader ]; then
@@ -355,10 +352,9 @@ if [ $do_upload ]; then
 		fi
 		if [ $include_firmware ]; then
 			upload_firmware
-			upload_valid_app_mark
+			upload_bootloader_settings
 			done_upload=true
 		else
-#			upload_invalid_app_mark
 			:
 		fi
 	fi
