@@ -23,8 +23,8 @@ source ${path}/_check_targets.sh $target
 cs_info "Load configuration from: ${path}/_config.sh"
 source $path/_config.sh
 
-# optional address, use APPLICATION_START_ADDRESS as default
-address=${3:-$APPLICATION_START_ADDRESS}
+# optional address, use BOOTLOADER_START_ADDRESS as default
+address=${3:-$BOOTLOADER_START_ADDRESS}
 
 gdb_port=${3:-$gdb_port}
 
@@ -36,21 +36,17 @@ else
 	make_flag="-s"
 fi
 
-# use $APPLICATION_START_ADDRESS as default if no address defined
-address=${address:-$APPLICATION_START_ADDRESS}
+# use $BOOTLOADER_START_ADDRESS as default if no address defined
+address=${address:-$BOOTLOADER_START_ADDRESS}
 
 
 
 build() {
-	if [ -d "${BLUENET_BOOTLOADER_DIR}" ]; then
-		cs_info "Build bootloader ..."
-		${BLUENET_BOOTLOADER_DIR}/scripts/all.sh $target
-		checkError "Build failed"
-		cs_succ "Build DONE"
-	else
-		cs_err "BLUENET_BOOTLOADER_DIR not defined."
-		exit $CS_ERR_CONFIG
-	fi
+	cd ${path}/..
+	cs_info "Execute make bootloader-compile-target"
+	make ${make_flag} bootloader-compile-target
+	checkError "Build failed"
+	cd $path
 }
 
 release() {
@@ -58,7 +54,7 @@ release() {
 }
 
 upload() {
-	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $BOOTLOADER_START_ADDRESS $serial_num
+	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $address $serial_num
 	checkError "Uploading failed"
 }
 
@@ -68,13 +64,9 @@ debug() {
 }
 
 clean() {
-	if [ -d "${BLUENET_BOOTLOADER_DIR}" ]; then
-		${BLUENET_BOOTLOADER_DIR}/scripts/clean.sh $target
-		checkError "Cleanup failed"
-	else
-		cs_err "BLUENET_BOOTLOADER_DIR not defined."
-		exit $CS_ERR_CONFIG
-	fi
+	cd ${path}/..
+	make ${make_flag} clean
+	checkError "Cleanup failed"
 }
 
 case "$cmd" in

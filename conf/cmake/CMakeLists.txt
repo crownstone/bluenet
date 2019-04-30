@@ -104,13 +104,13 @@ ELSE()
 
 	# We add the source files explicitly. This is recommended in the cmake system and will also force us all the time to
 	# consider the size of the final binary. Do not include things, if not necessary!
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
 
+	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
 	set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
 
 	# The following files are only added for the logging module by Nordic. It might be good to remove these files to
 	# save space in production. It should then be enclosed within a macro.
-	# Those files are: nrf_balloc.c, nrf_memobj.c, nrf_ringbuf.c, nrf_log_frontend.c, nrf_strerror.c
+	# Those files are: nrf_strerror.c
 
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/common/ble_advdata.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/common/ble_srv_common.c")
@@ -134,7 +134,6 @@ ELSE()
 	# should be our own code, but SystemInit here contains a lot of PANs we don't have to solve subsequently...
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/system_nrf52.c")
 	
-	# Required for the UART backend
 	IF (CS_SERIAL_NRF_LOG_ENABLED)
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_serial.c")

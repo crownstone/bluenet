@@ -6,6 +6,8 @@ The global layout of the the flash is shown below:
 
 ![Flash memory layout](../docs/diagrams/flash-memory-layout.png)
 
+TODO: update
+
 The bootloader start address is defined in the _CMakeBuild.config_ as `BOOTLOADER_START_ADDRESS`.
 
 The application start address is defined in the _CMakeBuild.config_ as `APPLICATION_START_ADDRESS`.

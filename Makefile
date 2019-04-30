@@ -100,7 +100,7 @@ define cross-compile-target-cleanup
 	printf "++ Clean up files that were copied to bluenet dir\n"
 	@rm -f CMakeLists.txt
 	@rm -f arm.toolchain.cmake
-	@rm -f CMakeBuild.config.default 
+	@rm -f CMakeBuild.config.default
 	@rm -f CMakeConfig.cmake
 endef
 
@@ -118,17 +118,24 @@ define host-compile-target-cleanup
 	@rm -f CMakeConfig.cmake
 endef
 
+define bootloader-compile-target-prepare
+	@cp bootloader/CMakeLists.txt .
+	@cp conf/cmake/arm.toolchain.cmake .
+	@cp conf/cmake/CMakeBuild.config.default .
+	@cp conf/cmake/CMakeConfig.cmake .
+endef
+
+define bootloader-compile-target-cleanup
+	printf "++ Clean up files that were copied to bluenet dir\n"
+	@rm -f CMakeLists.txt
+	@rm -f arm.toolchain.cmake
+	@rm -f CMakeBuild.config.default
+	@rm -f CMakeConfig.cmake
+endef
+
 #######################################################################################################################
 # Targets
 #######################################################################################################################
-	#> log.txt 2>&1
-	#@cat log.txt | sed 's/CMakeFiles\/crownstone.dir//g' | \
-		sed 's/\/home\/anne\/software\/nrf5_sdk\/nRF5_SDK_15.0.0_a53641a/$$NRF5_DIR/g' | \
-		sed 's/\/home\/anne\/workspace\/bluenet\/source//g' | \
-		sed ''s/\\\(error\\\)/$$(printf "\\\n\\\t\033[31m")\\1$$(printf "\033[0m")/'' | \
-		sed ''s/\\\(undefined\ reference\\\)/$$(printf "\\\n\\\t\033[31m")\\1$$(printf "\033[0m")/'' | \
-		sed ''s/:\\\([0-9]\\+\\\):/$$(printf "[\033[33m")\\1$$(printf "\033[0m]:")/'' | \
-		head
 
 all:
 	@echo "Please call make with cross-compile-target or host-compile target"
@@ -138,10 +145,10 @@ all:
 release:
 	$(call cross-compile-target-prepare)
 	@mkdir -p $(BLUENET_BUILD_DIR)
-	@cd $(BLUENET_BUILD_DIR) 
+	@cd $(BLUENET_BUILD_DIR)
 	@echo "++ Jumped to directory `pwd`"
 	cmake $(RELEASE_COMPILE_FLAGS) \
-		$(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS} 
+		$(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS}
 	result=$$?
 	@echo "++ Result of make command (0 means success): $$result"
 	$(call cross-compile-target-cleanup)
@@ -155,17 +162,38 @@ cross-compile-target:
 	@echo "++ Jumped to directory `pwd`"
 	@rm -f log.txt
 	@cmake $(DEBUG_COMPILE_FLAGS) \
-		$(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS} 
+		$(SOURCE_DIR) -DBOOTLOADER=0 -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS}
 	result=$$?
 	@echo "++ Result of make command (0 means success): $$result"
 	
 #	ifeq ($(result),0)
 	@echo "++ Copy binaries to ${BLUENET_BIN_DIR}\n"
 	@mkdir -p "${BLUENET_BIN_DIR}"
-	@cp $(BLUENET_BUILD_DIR)/*.hex $(BLUENET_BUILD_DIR)/*.bin $(BLUENET_BUILD_DIR)/*.elf "$(BLUENET_BIN_DIR)"
+	@cp $(BLUENET_BUILD_DIR)/crownstone.hex $(BLUENET_BUILD_DIR)/crownstone.bin $(BLUENET_BUILD_DIR)/crownstone.elf "$(BLUENET_BIN_DIR)"
 #	endif
 
 	$(call cross-compile-target-cleanup)
+	return $$result
+
+.ONESHELL:
+bootloader-compile-target:
+	$(call bootloader-compile-target-prepare)
+	@mkdir -p $(BLUENET_BUILD_DIR)
+	@cd $(BLUENET_BUILD_DIR)
+	@echo "++ Jumped to directory `pwd`"
+	@rm -f log.txt
+	@cmake $(DEBUG_COMPILE_FLAGS) \
+		$(SOURCE_DIR) -DBOOTLOADER=1 -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS}
+	result=$$?
+	@echo "++ Result of make command (0 means success): $$result"
+	
+#	ifeq ($(result),0)
+	@echo "++ Copy binaries to ${BLUENET_BIN_DIR}\n"
+	@mkdir -p "${BLUENET_BIN_DIR}"
+	@cp $(BLUENET_BUILD_DIR)/bootloader.hex $(BLUENET_BUILD_DIR)/bootloader.bin $(BLUENET_BUILD_DIR)/bootloader.elf "$(BLUENET_BIN_DIR)"
+#	endif
+
+	$(call bootloader-compile-target-cleanup)
 	return $$result
 
 host-compile-target:
@@ -181,6 +209,7 @@ host-compile-target:
 clean:
 	$(call cross-compile-target-cleanup)
 	$(call host-compile-target-cleanup)
+	$(call bootloader-compile-target-cleanup)
 	return $$result
 
 clean-all:

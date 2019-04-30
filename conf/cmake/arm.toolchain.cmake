@@ -146,10 +146,16 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 #SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")
 #SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
 
-SET(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
-#SET(PATH_FILE_MEMORY "-L${NRF5_DIR}/config/nrf52832/armgcc/")
-SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
-
+MESSAGE(STATUS "BOOTLOADER: ${BOOTLOADER}")
+IF (BOOTLOADER MATCHES 1)
+	#SET(FILE_MEMORY_LAYOUT "-Tbootloader_nrf52832_xxAA.ld")
+	SET(FILE_MEMORY_LAYOUT "-Tsecure_bootloader_gcc_nrf52.ld")
+	SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/bootloader/")
+ELSE()
+	SET(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
+	#SET(PATH_FILE_MEMORY "-L${NRF5_DIR}/config/nrf52832/armgcc/")
+	SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
+ENDIF()
 SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
 
 # http://public.kitware.com/Bug/view.php?id=12652
