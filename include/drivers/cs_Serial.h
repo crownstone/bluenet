@@ -83,23 +83,23 @@ typedef enum {
 
 #if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
 
-	#include "string.h"
+#include "string.h"
 //	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 //  #define STRING_BACK(s, l) (sizeof(s) > l ? s + (sizeof(s)-l-1) : s)
-	#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__)
+#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__)
 
-	#define _log(level, fmt, ...) \
-			   if (level <= SERIAL_VERBOSITY) { \
-				   cs_write(fmt, ##__VA_ARGS__); \
-			   }
+#define _log(level, fmt, ...) \
+		if (level <= SERIAL_VERBOSITY) { \
+			cs_write(fmt, ##__VA_ARGS__); \
+		}
 
-	#define logLN(level, fmt, ...) \
+#define logLN(level, fmt, ...) \
 		_log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
 
 
 #else
-	#define _log(level, fmt, ...)
-	#define logLN(level, fmt, ...)
+#define _log(level, fmt, ...)
+#define logLN(level, fmt, ...)
 #endif
 
 #define LOGv(fmt, ...) logLN(SERIAL_VERBOSE, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__)
