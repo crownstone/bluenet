@@ -335,6 +335,9 @@ if [ $do_upload ]; then
 			build_combined
 		fi
 		upload_combined
+#		if [ $include_bootloader ]; then
+#			${path}/_writebyte.sh 0x10001014 $BOOTLOADER_START_ADDRESS
+#		fi
 		done_upload=true
 	else
 		if [ $include_softdevice ]; then
@@ -352,7 +355,9 @@ if [ $do_upload ]; then
 		fi
 		if [ $include_firmware ]; then
 			upload_firmware
-			upload_bootloader_settings
+			if [ $include_bootloader ]; then
+				upload_bootloader_settings
+			fi
 			done_upload=true
 		else
 			:

@@ -93,6 +93,8 @@ if [[ $include_bootloader ]]; then
 	# These settings are already incorporated in the bootloader.hex binary, so no need to add them here as well
 	#BOOTLOADER_SETTINGS="-exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00"
 	ADD_BOOTLOADER="bootloader.hex -intel"
+	cs_info "Set bootloader address (${BOOTLOADER_START_ADDRESS}) to UICR.NRFFW[0] (0x10001014)"
+	BOOTLOADER_START_ADDRESS="-exclude 0x10001014 0x10001018 -generate 0x10001014 0x10001018 -l-e-constant $BOOTLOADER_START_ADDRESS 4"
 fi
 
 if [[ $include_hardware_version ]]; then
@@ -105,6 +107,7 @@ if [[ $include_hardware_version ]]; then
 	fi
 	HARDWARE_BOARD_HEX=$(printf "0x%08x" $HARDWARE_BOARD_INT)
 	cs_info "Write $HARDWARE_BOARD_HEX to address: $HARDWARE_BOARD_ADDRESS"
+	cs_info "Set hardware board (${HARDWARE_BOARD_HEX}) to $HARDWARE_BOARD_ADDRESS (UICR.CUSTOMER[x])"
 	HARDWARE_BOARD_CONFIG="-exclude 0x10001084 0x10001088 -generate 0x10001084 0x10001088 -l-e-constant $HARDWARE_BOARD_HEX 4"
 fi
 
@@ -121,7 +124,7 @@ if [ $include_firmware ] && [ $include_bootloader ]; then
 	ADD_BOOTLOADER_SETTINGS="bootloader-settings.hex -intel"
 fi
 
-cs_log "srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $HARDWARE_BOARD_CONFIG $ADD_BINARY $ADD_BOOTLOADER_SETTINGS -o combined.hex -intel"
-srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $HARDWARE_BOARD_CONFIG $ADD_BINARY $ADD_BOOTLOADER_SETTINGS -o combined.hex -intel
+cs_log "srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $BOOTLOADER_START_ADDRESS $HARDWARE_BOARD_CONFIG $ADD_BINARY $ADD_BOOTLOADER_SETTINGS -o combined.hex -intel"
+srec_cat $ADD_SOFTDEVICE $ADD_BOOTLOADER $BOOTLOADER_START_ADDRESS $HARDWARE_BOARD_CONFIG $ADD_BINARY $ADD_BOOTLOADER_SETTINGS -o combined.hex -intel
 checkError "ERROR: srec_cat failed, check the results"
 cs_log "Combined binary is: ${BLUENET_BIN_DIR}/combined.hex"

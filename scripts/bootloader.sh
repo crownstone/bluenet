@@ -1,7 +1,7 @@
 #!/bin/bash
 
 usage() {
-	echo "Usage: $0 {build|upload|debug|clean} [target [address [gdb_port]]]"
+	echo "Usage: $0 {build|build-settings|upload|upload-settings|debug|clean} [target [address [gdb_port]]]"
 }
 
 cmd=${1:-help}
@@ -64,6 +64,7 @@ release() {
 
 upload() {
 	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $address $serial_num
+	${path}/_writebyte.sh 0x10001014 $address
 	checkError "Uploading failed"
 }
 
@@ -95,6 +96,9 @@ case "$cmd" in
 		;;
 	upload)
 		upload
+		;;
+	upload-settings)
+		upload-settings
 		;;
 	debug)
 		debug
