@@ -234,7 +234,7 @@ SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
 # Bootloader with debug:
 BOOTLOADER_START_ADDRESS=0x00072000
 BOOTLOADER_LENGTH=0xC000
-# Has to match values in: bootloader/secure_bootloader_gcc_nrf52.ld and dfu_types.h
+# Has to match values in: bootloader/secure_bootloader_gcc_nrf52.ld
 # 0x00080000 - BOOTLOADER_START_ADDRESS - 1000 - 1000 = 6000
 # nrf52: length = 0x00080000 - bootloader_start_address - size(bootloader_settings)=0x1000 - size(mbr_params_page)=0x1000
 

@@ -161,7 +161,11 @@ SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
 # http://public.kitware.com/Bug/view.php?id=12652
 # CMake does send the compiler flags also to the linker
 
-SET(FLAG_WRITE_MAP_FILE "-Wl,-Map,prog.map")
+IF (BOOTLOADER MATCHES 1)
+	SET(FLAG_WRITE_MAP_FILE "-Wl,-Map,bootloader.map")
+ELSE()
+	SET(FLAG_WRITE_MAP_FILE "-Wl,-Map,prog.map")
+ENDIF()
 #SET(FLAG_REMOVE_UNWINDING_CODE "-Wl,--wrap,__aeabi_unwind_cpp_pr0")
 SET(FLAG_REMOVE_UNWINDING_CODE "")
 
