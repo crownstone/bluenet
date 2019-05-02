@@ -197,8 +197,11 @@ void cs_check_gpregret() {
 		start_dfu = true;
 	}
 	if (start_dfu) {
+		NRF_LOG_INFO("Start DFU");
 		NRF_POWER->GPREGRET = BOOTLOADER_DFU_START;
 	}
+	gpregret = NRF_POWER->GPREGRET;
+	NRF_LOG_INFO("GPREGRET=%u", gpregret);
 }
 
 /**@brief Function for application main entry. */
@@ -209,6 +212,10 @@ int main(void)
 	boards_config_t board = {};
 	configure_board(&board);
 	cs_gpio_init(&board);
+
+	(void) NRF_LOG_INIT(nrf_bootloader_dfu_timer_counter_get);
+	NRF_LOG_DEFAULT_BACKENDS_INIT();
+
 	cs_check_gpregret();
 
 	// Protect MBR and bootloader code from being overwritten.
@@ -217,10 +224,8 @@ int main(void)
 	ret_val = nrf_bootloader_flash_protect(BOOTLOADER_START_ADDR, BOOTLOADER_SIZE, false);
 	APP_ERROR_CHECK(ret_val);
 
-	(void) NRF_LOG_INIT(nrf_bootloader_dfu_timer_counter_get);
-	NRF_LOG_DEFAULT_BACKENDS_INIT();
-
 	NRF_LOG_INFO("Inside main");
+	NRF_LOG_FLUSH();
 
 	// Need to adjust dfu_enter_check().
 	// Or we can simply use NRF_BL_DFU_ENTER_METHOD_GPREGRET
@@ -228,6 +233,9 @@ int main(void)
 	// See https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.3.0/group__nrf__bootloader__config.html
 	ret_val = nrf_bootloader_init(dfu_observer);
 	APP_ERROR_CHECK(ret_val);
+
+	NRF_LOG_INFO("Start app");
+	NRF_LOG_FLUSH();
 
 	// Either there was no DFU functionality enabled in this project or the DFU module detected
 	// no ongoing DFU operation and found a valid main application.
