@@ -232,9 +232,9 @@ static bool crc_on_valid_app_required(void)
         ret = false;
     }
     else if (NRF_BL_APP_CRC_CHECK_SKIPPED_ON_GPREGRET2 &&
-            (nrf_power_gpregret2_get() & BOOTLOADER_DFU_SKIP_CRC))
+            (nrf_power_gpregret2_get() & BOOTLOADER_DFU_SKIP_CRC) == BOOTLOADER_DFU_SKIP_CRC)
     {
-        nrf_power_gpregret2_set(nrf_power_gpregret2_get() & ~BOOTLOADER_DFU_SKIP_CRC);
+        nrf_power_gpregret2_set(nrf_power_gpregret2_get() & (~BOOTLOADER_DFU_SKIP_CRC));
         ret = false;
     }
     else
@@ -261,10 +261,10 @@ static void dfu_enter_flags_clear(void)
     }
 
     if (NRF_BL_DFU_ENTER_METHOD_GPREGRET &&
-       (nrf_power_gpregret_get() & BOOTLOADER_DFU_START))
+       (nrf_power_gpregret_get() & BOOTLOADER_DFU_START) == BOOTLOADER_DFU_START)
     {
         // Clear DFU mark in GPREGRET register.
-        nrf_power_gpregret_set(nrf_power_gpregret_get() & ~BOOTLOADER_DFU_START);
+        nrf_power_gpregret_set(nrf_power_gpregret_get() & (~BOOTLOADER_DFU_START));
     }
 
     if (NRF_BL_DFU_ENTER_METHOD_BUTTONLESS &&
