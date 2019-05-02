@@ -72,8 +72,10 @@ SET(DEFAULT_CXX_FLAGS       "-std=c++14 -fno-exceptions -fdelete-dead-exceptions
 #SET(DEFAULT_C_FLAGS         "-std=gnu99") // but why
 SET(DEFAULT_C_FLAGS         "")
 #SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -fdiagnostics-color=always")
-SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -Wno-error=format -fdiagnostics-color=always -fno-builtin -flto")
+#SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -Wno-error=format -fdiagnostics-color=always")
+#SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -Wno-error=format -fdiagnostics-color=always -fno-builtin -flto")
 #SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -Wno-error=format -Wno-error=int-in-bool-context -fdiagnostics-color=always")
+SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -g3 -Wall -Werror -fdiagnostics-color=always -fno-strict-aliasing -fno-builtin -fshort-enums -Wno-error=format -Wno-error=unused-function")
 
 SET(ASM_OPTIONS "-x assembler-with-cpp")
 SET(CMAKE_ASM_FLAGS "${CFLAGS} ${ASM_OPTIONS}" )
@@ -89,12 +91,13 @@ SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -Os -fomit-frame-pointer
 SET(CMAKE_OBJCOPY_OVERLOAD                       ${COMPILER_PATH}/bin/${COMPILER_TYPE}objcopy)
 
 # The following require FORCE. Without it, the FLAGS end up to have duplication.
-SET(CMAKE_CXX_FLAGS                              ${DEFAULT_CXX_FLAGS}          CACHE STRING "C++ flags" FORCE)
-SET(CMAKE_C_FLAGS                                ${DEFAULT_C_FLAGS}            CACHE STRING "C flags" FORCE)
+SET(CMAKE_CXX_FLAGS                              "${DEFAULT_CXX_FLAGS}"          CACHE STRING "C++ flags" FORCE)
+SET(CMAKE_C_FLAGS                                "${DEFAULT_C_FLAGS}"            CACHE STRING "C flags" FORCE)
 SET(CMAKE_C_AND_CXX_FLAGS                        ${DEFAULT_C_AND_CXX_FLAGS}    CACHE STRING "C and C++ flags" FORCE)
 SET(CMAKE_SHARED_LINKER_FLAGS                    ""                            CACHE STRING "Shared linker flags" FORCE)
 SET(CMAKE_MODULE_LINKER_FLAGS                    ""                            CACHE STRING "Module linker flags" FORCE)
-SET(CMAKE_EXE_LINKER_FLAGS                       "-Wl,-z,nocopyreloc"          CACHE STRING "Executable linker flags" FORCE)
+#SET(CMAKE_EXE_LINKER_FLAGS                       "-Wl,-z,nocopyreloc"          CACHE STRING "Executable linker flags" FORCE)
+SET(CMAKE_EXE_LINKER_FLAGS                       "-Wl,-z,nocopyreloc -Wl,--gc-sections --specs=nano.specs"          CACHE STRING "Executable linker flags" FORCE)
 SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS            "")
 SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS          "")
 
