@@ -20,6 +20,7 @@ void Timer::init() {
 	uint32_t err_code = app_timer_init();
 	APP_ERROR_CHECK(err_code);
 	APP_SCHED_INIT(SCHED_MAX_EVENT_DATA_SIZE, SCHED_QUEUE_SIZE);
+	LOGi("Scheduler requires %uB ram. Evt size=%u", (SCHED_MAX_EVENT_DATA_SIZE + APP_SCHED_EVENT_HEADER_SIZE) * (SCHED_QUEUE_SIZE + 1), SCHED_MAX_EVENT_DATA_SIZE);
 }
 
 void Timer::createSingleShot(app_timer_id_t& timer_handle, app_timer_timeout_handler_t func) {

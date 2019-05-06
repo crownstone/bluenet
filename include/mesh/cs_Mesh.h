@@ -7,13 +7,16 @@
 
 #pragma once
 
+#include "events/cs_EventListener.h"
+#include <common/cs_Types.h>
+
 extern "C" {
 #include <generic_onoff_client.h>
 #include <app_onoff.h>
 #include <nrf_mesh_config_app.h>
 }
 
-class Mesh {
+class Mesh : EventListener {
 public:
 	/**
 	 * Get a reference to the State object.
@@ -46,6 +49,8 @@ public:
 		Mesh::getInstance().modelsInitCallback();
 	}
 	void modelsInitCallback();
+
+	void handleEvent(event_t & event);
 
 private:
 	//! State constructor, singleton, thus made private

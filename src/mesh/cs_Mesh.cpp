@@ -24,6 +24,8 @@ extern "C" {
 #include <drivers/cs_Serial.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
+#include <ble/cs_Stack.h>
+#include <events/cs_EventDispatcher.h>
 
 
 //static void generic_onoff_state_get_cb(const generic_onoff_server_t * p_self,
@@ -329,8 +331,25 @@ void Mesh::start() {
 	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
 	retCode = mesh_stack_start();
 	APP_ERROR_CHECK(retCode);
+
+	EventDispatcher::getInstance().addListener(this);
 }
 
 void Mesh::stop() {
 	// TODO: implement
+}
+
+void Mesh::handleEvent(event_t & event) {
+	switch (event.type) {
+	case CS_TYPE::EVT_TICK:
+		if (Stack::getInstance().isScanning()) {
+//			Stack::getInstance().stopScanning();
+		}
+		else {
+			Stack::getInstance().startScanning();
+		}
+		break;
+	default:
+		break;
+	}
 }

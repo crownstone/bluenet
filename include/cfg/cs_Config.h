@@ -43,24 +43,20 @@
  *  Meaning: amount of timers that can be started simultaneously.
  */
 //#define APP_TIMER_OP_QUEUE_SIZE                  10
-#define APP_TIMER_OP_QUEUE_SIZE                  20
+#define APP_TIMER_OP_QUEUE_SIZE                  16
 
-/** Maximum size of scheduler events. */
-/*
-#define SCHED_MAX_EVENT_DATA_SIZE                ((CEIL_DIV(MAX(MAX(BLE_STACK_EVT_MSG_BUF_SIZE,    \
-                                                                    ANT_STACK_EVT_STRUCT_SIZE),    \
-                                                                SYS_EVT_MSG_BUF_SIZE),             \
-                                                            sizeof(uint32_t))) * sizeof(uint32_t))
-*/
-#define SCHED_MAX_EVENT_DATA_SIZE               20
-//(MAX(20, APP_TIMER_SCHED_EVT_SIZE))
+/**
+ * Maximum size of scheduler events.
+ * TODO: NRF_SDH_BLE_EVT_BUF_SIZE is very large, check if we can use something smaller.
+ */
+#define SCHED_MAX_EVENT_DATA_SIZE               (MAX(20, MAX(APP_TIMER_SCHED_EVENT_DATA_SIZE, NRF_SDH_BLE_EVT_BUF_SIZE)))
 
 /** Maximum number of events in the scheduler queue.
  *
  *  The scheduler will require a buffer of size:
  *  (SCHED_MAX_EVENT_DATA_SIZE + APP_SCHED_EVENT_HEADER_SIZE) * (SCHED_QUEUE_SIZE + 1)
  */
-#define SCHED_QUEUE_SIZE                         40
+#define SCHED_QUEUE_SIZE                         32
 
 // See https://devzone.nordicsemi.com/question/84767/s132-scan-intervalwindow-adv-interval/
 // Old https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/

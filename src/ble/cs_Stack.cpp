@@ -894,20 +894,35 @@ void Stack::printAdvertisement() {
 
 void Stack::startScanning() {
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	if (_scanning)
+	if (_scanning) {
 		return;
+	}
 
-	LOGi(FMT_START, "scanning");
+//	LOGi(FMT_START, "scanning");
 	ble_gap_scan_params_t p_scan_params;
-	p_scan_params.active = 0;
-	p_scan_params.timeout = 0x0000;
+	p_scan_params.extended = 0;
+	p_scan_params.report_incomplete_evts = 0;
+	p_scan_params.active = 1;
+	p_scan_params.filter_policy = BLE_GAP_SCAN_FP_ACCEPT_ALL; // Scanning filter policy. See BLE_GAP_SCAN_FILTER_POLICIES
+	p_scan_params.scan_phys = BLE_GAP_PHY_1MBPS;
+	p_scan_params.interval = 320; // Scan interval in 625 us units. See BLE_GAP_SCAN_INTERVALS.
+	p_scan_params.window = p_scan_params.interval-1; // Scan window in 625 us units. See BLE_GAP_SCAN_WINDOW.
+	p_scan_params.timeout = BLE_GAP_SCAN_TIMEOUT_UNLIMITED; // Scan timeout in 10 ms units. See BLE_GAP_SCAN_TIMEOUT.
+	p_scan_params.channel_mask[0] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	p_scan_params.channel_mask[1] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	p_scan_params.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	p_scan_params.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	p_scan_params.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+
 
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &p_scan_params.interval, sizeof(p_scan_params.interval));
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &p_scan_params.window, sizeof(p_scan_params.window));
 
 	// TODO: which fields to set here?
 	// TODO: p_adv_report_buffer
-	//BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params));
+	uint32_t retVal = sd_ble_gap_scan_start(&p_scan_params, &scan_buffer_struct);
+	APP_ERROR_CHECK(retVal);
+	//BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params), (&scan_buffer_struct));
 	_scanning = true;
 
 	event_t event(CS_TYPE::EVT_SCAN_STARTED, NULL, 0);
@@ -920,7 +935,7 @@ void Stack::stopScanning() {
 	if (!_scanning)
 		return;
 
-	LOGi(FMT_STOP, "scanning");
+//	LOGi(FMT_STOP, "scanning");
 	BLE_CALL(sd_ble_gap_scan_stop, ());
 	_scanning = false;
 
@@ -955,9 +970,9 @@ void Stack::changeToNormalTxPowerMode() {
 	setTxPowerLevel(txPower);
 }
 
-void Stack::on_ble_evt(const ble_evt_t * p_ble_evt) {
+void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 
-	if (p_ble_evt->header.evt_id !=  BLE_GAP_EVT_RSSI_CHANGED) {
+	if (p_ble_evt->header.evt_id !=  BLE_GAP_EVT_RSSI_CHANGED && p_ble_evt->header.evt_id != BLE_GAP_EVT_ADV_REPORT) {
 		const char *evt_name __attribute__((unused)) = NordicEventTypeName(p_ble_evt->header.evt_id);
 		LOGd("BLE event %i (0x%X) %s", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id, evt_name);
 	}
@@ -1060,13 +1075,24 @@ void Stack::on_ble_evt(const ble_evt_t * p_ble_evt) {
 		const ble_gap_evt_adv_report_t* advReport = &(p_ble_evt->evt.gap_evt.params.adv_report);
 		scanned_device_t scan;
 		memcpy(scan.address, advReport->peer_addr.addr, sizeof(scan.address));
+//		uint8_t* scanData = new uint8_t[advReport->data.len];
+//		memcpy(scanData, advReport->data.p_data, advReport->data.len);
 		scan.rssi = advReport->rssi;
 		scan.channel = advReport->ch_index;
 		scan.dataSize = advReport->data.len;
 		scan.data = advReport->data.p_data;
+		uint16_t type = *((uint16_t*)&(advReport->type));
 
+//		const uint8_t* p = scan.data;
+//		if (p[1] == 0xFF && p[2] == 0xCD && p[3] == 0xAB) {
+			const uint8_t* addr = scan.address;
+			LOGi("Stack scan: address=%02X:%02X:%02X:%02X:%02X:%02X type=%u rssi=%i channel=%u ISR=%u", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], type, scan.rssi, scan.channel, BLEutil::getInterruptLevel());
+//			LOGd("  adv_type=%u len=%u data=", type, scan.dataSize);
+//			BLEutil::printArray(scan.data, scan.dataSize);
+//		}
 		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&scan, sizeof(scan));
 		EventDispatcher::getInstance().dispatch(event);
+//		free(scanData);
 		break;
 	}
 	case BLE_GAP_EVT_TIMEOUT:
@@ -1087,6 +1113,36 @@ void Stack::on_ble_evt(const ble_evt_t * p_ble_evt) {
 
 	}
 }
+
+/**
+ * Function to decouple ble events via app scheduler.
+ */
+void csBleEventHandler(void * p_event_data, uint16_t event_size) {
+	ble_evt_t* p_ble_evt = (ble_evt_t*) p_event_data;
+	Stack::getInstance().onBleEventDecoupled(p_ble_evt);
+}
+
+void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt) {
+	switch (p_ble_evt->header.evt_id) {
+	case BLE_GAP_EVT_ADV_REPORT: {
+		// Handle scan via app scheduler. The app scheduler copies the data.
+		uint32_t retVal;
+		retVal = app_sched_event_put(p_ble_evt, sizeof(ble_evt_t), csBleEventHandler);
+		APP_ERROR_CHECK(retVal);
+
+		// Resume scanning: ignore _scanning state as this is executed in an interrupt. Rely on return value instead.
+		retVal = sd_ble_gap_scan_start(NULL, &scan_buffer_struct);
+		switch (retVal) {
+		case NRF_ERROR_INVALID_STATE:
+			break;
+		default:
+			APP_ERROR_CHECK(retVal);
+		}
+		break;
+	}
+	}
+}
+
 
 #if CONNECTION_ALIVE_TIMEOUT>0
 static void connection_keep_alive_timeout(void* p_context) {
@@ -1190,3 +1246,4 @@ void Stack::onConnect(const callback_connected_t& callback) {
 void Stack::onDisconnect(const callback_disconnected_t& callback) {
 	_callback_disconnected = callback;
 }
+

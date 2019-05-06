@@ -143,6 +143,9 @@ protected:
 		bool advertising;
 	} _stack_state;
 
+	uint8_t scan_buffer[40];
+	ble_data_t scan_buffer_struct = { scan_buffer, 40 };
+
 public:
 
 	/** Initialization of the BLE stack
@@ -367,8 +370,8 @@ public:
 	 * TODO: Currently we loop through every service and send e.g. BLE_GATTS_EVT_WRITE only when some handle matches. It
 	 * is faster to set up maps from handles to directly the right function.
 	 */
-	//void on_ble_evt(ble_evt_t * p_ble_evt, void * p_event);
-	void on_ble_evt(const ble_evt_t * p_ble_evt);
+	void onBleEvent(const ble_evt_t * p_ble_evt);
+	void onBleEventInterrupt(const ble_evt_t * p_ble_evt);
 
 	void secReqTimeoutHandler(void * p_context);
 

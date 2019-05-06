@@ -17,23 +17,33 @@ extern "C" {
 #include <nrf_mesh.h>
 #endif
 
-#define CROWNSTONE_STACK_OBSERVER_PRIO           0
-#define CROWNSTONE_REQUEST_OBSERVER_PRIO         0
-#define CROWNSTONE_SOC_OBSERVER_PRIO             0
-#define CROWNSTONE_STATE_OBSERVER_PRIO           0
-
-#define CROWNSTONE_BLE_OBSERVER_PRIO             1
+//#define CROWNSTONE_STACK_OBSERVER_PRIO           0
+#define CROWNSTONE_SOC_OBSERVER_PRIO             0 // Flash events, power failure events, radio events, etc.
+//#define CROWNSTONE_REQUEST_OBSERVER_PRIO         0 // SoftDevice enable/disable requests.
+#define CROWNSTONE_STATE_OBSERVER_PRIO           0 // SoftDevice state events (enabled/disabled)
+#define CROWNSTONE_BLE_OBSERVER_PRIO             1 // BLE events: connection, scans, rssi
 
 /**
- * This handle is called by the Softdevice. It is run on the main thread through the app scheduler.
- * The purpose of this function is:
- * 	+ to propagate flash events towards the storage event handler
- * 	+ to propagate a power failure warning when a brown-out is impending
- * 	+ to propagate all events to the mesh event handler
+ * Define handlers of events.
  *
- * The sys_evt_dispatch function has been removed in SDK14 in favor of NRF_SDH_SOC_OBSERVER.
- * From this function storage_sys_evt_handler was called. It's now fs_sys_event_handler.
+ * SoftDevice handlers can be executed via app scheduler or directly in the interrupt, see NRF_SDH_DISPATCH_MODEL in
+ * sdk_config.h. Also see: "SoftDevice Handler" in SDK common libraries.
+ *
+ * Mesh handlers are executed in thread mode, this is defined in the init parameters, mesh_stack_init_params_t.
+ *
+ * FDS uses a SoftDevice handler too, so this probably has the same interrupt level as the SoftDevice handlers.
+ *
+ * I think we should keep the SDH at interrupt level, since SDK libraries also execute at that level.
+ * Then, the events can always be passed on via the scheduler to get it on the main thread.
  */
+
+
+
+void cs_brownout_handler(void * p_event_data, uint16_t event_size) {
+	event_t event(CS_TYPE::EVT_BROWNOUT_IMPENDING, NULL, 0);
+	EventDispatcher::getInstance().dispatch(event);
+}
+
 void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
     //LOGd("SOC event: %i", evt_id);
 
@@ -49,8 +59,8 @@ void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
 	    LOGw("NRF_EVT_FLASH_OPERATION_ERROR, unhandled");
 	    break;
 	case NRF_EVT_POWER_FAILURE_WARNING: {
-	    event_t event(CS_TYPE::EVT_BROWNOUT_IMPENDING, NULL, 0);
-	    EventDispatcher::getInstance().dispatch(event);
+		uint32_t retVal = app_sched_event_put(NULL, 0, cs_brownout_handler);
+		APP_ERROR_CHECK(retVal);
 	    break;
 	}
 	case NRF_EVT_RADIO_BLOCKED: {
@@ -61,35 +71,50 @@ void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
 	}
     }
 }
-
 NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, crownstone_soc_evt_handler, NULL);
 
 
 /**
- * Called by the Softdevice handler on any BLE event. It is initialized from the SoftDevice using the app scheduler.
- * This means that the callback runs on the main thread.
+ * Decoupled BLE events.
  */
-
-void ble_sdh_evt_dispatch(const ble_evt_t * p_ble_evt, void * p_context) {
-    Stack::getInstance().on_ble_evt(p_ble_evt);
+void cs_ble_handler(void * p_event_data, uint16_t event_size) {
+	ble_evt_t* p_ble_evt = (ble_evt_t*) p_event_data;
+	Stack::getInstance().onBleEvent(p_ble_evt);
 }
 
-NRF_SDH_BLE_OBSERVER(m_stack, CROWNSTONE_BLE_OBSERVER_PRIO, ble_sdh_evt_dispatch, NULL);
-
-/*
-static bool crownstone_request_evt_handler(nrf_sdh_req_evt_t request, void * p_context) {
-	switch (request) {
-	case NRF_SDH_EVT_ENABLE_REQUEST:
-		LOGd("Enable request");
+/**
+ * Called by the SoftDevice on any BLE event.
+ * Some event should be handled on interrupt level, while most are decouple via app scheduler.
+ */
+void ble_sdh_evt_dispatch(const ble_evt_t * p_ble_evt, void * p_context) {
+	switch (p_ble_evt->header.evt_id) {
+	case BLE_GAP_EVT_ADV_REPORT:
+		Stack::getInstance().onBleEventInterrupt(p_ble_evt);
 		break;
-	case NRF_SDH_EVT_DISABLE_REQUEST:
-		LOGd("Disable request");
+	case BLE_GAP_EVT_CONNECTED:
+	case BLE_GAP_EVT_DISCONNECTED:
+	case BLE_GAP_EVT_PASSKEY_DISPLAY:
+	case BLE_GAP_EVT_TIMEOUT:
+	case BLE_EVT_USER_MEM_REQUEST:
+	case BLE_EVT_USER_MEM_RELEASE:
+	case BLE_GATTS_EVT_WRITE:
+	case BLE_GATTS_EVT_HVN_TX_COMPLETE:
+	case BLE_GATTS_EVT_SYS_ATTR_MISSING: {
+		uint32_t retVal = app_sched_event_put(p_ble_evt, sizeof(ble_evt_t), cs_ble_handler);
+		APP_ERROR_CHECK(retVal);
+		break;
+	}
+	case BLE_GAP_EVT_RSSI_CHANGED:
+	case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
+	case BLE_GATTS_EVT_TIMEOUT:
 		break;
 	default:
-		LOGd("Unknown request");
+		break;
 	}
-	return true;
-}*/
+}
+NRF_SDH_BLE_OBSERVER(m_stack, CROWNSTONE_BLE_OBSERVER_PRIO, ble_sdh_evt_dispatch, NULL);
+
+
 
 static void crownstone_state_handler(nrf_sdh_state_evt_t state, void * p_context) {
 	switch (state) {
@@ -109,18 +134,6 @@ static void crownstone_state_handler(nrf_sdh_state_evt_t state, void * p_context
 			LOGd("Unknown state change");
 	}
 }
-
-/**
- * There seems to be an NULL pointer exception in the code at nrf_sdh.c::117, namely when calling
- * sdh_request_observer_notify.
- */
-/*
-NRF_SDH_REQUEST_OBSERVER(m_crownstone_request_observer, CROWNSTONE_REQUEST_OBSERVER_PRIO) =
-{
-	.handler   = crownstone_request_evt_handler,
-	.p_context = NULL
-};*/
-
 NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRIO) =
 {
 	.handler   = crownstone_state_handler,
@@ -151,7 +164,8 @@ void fds_evt_decoupled_handler(void * p_event_data, uint16_t event_size) {
  * Decouple these events via the app scheduler.
  */
 void fds_evt_handler(fds_evt_t const * const p_fds_evt) {
-    app_sched_event_put(p_fds_evt, sizeof(*p_fds_evt), fds_evt_decoupled_handler);
+	uint32_t retVal = app_sched_event_put(p_fds_evt, sizeof(*p_fds_evt), fds_evt_decoupled_handler);
+	APP_ERROR_CHECK(retVal);
 }
 
 #ifdef __cplusplus
