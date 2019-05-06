@@ -79,7 +79,7 @@ void printInlineArray(T* arr, uint16_t len) {
 	__attribute__((unused)) uint8_t* ptr = (uint8_t*)arr;
 	for (int i = 0; i < len; ++i) {
 		_log(SERIAL_DEBUG, " %02X", ptr[i]);
-		if ((i+1) % 30 == 0) {
+		if ((i+1) % 32 == 0) {
 			_log(SERIAL_DEBUG, SERIAL_CRLF);
 		}
 	}
@@ -189,6 +189,29 @@ inline uint16_t calcHash(const uint8_t* data, const uint16_t size) {
 		hash = ((hash << 5) + hash) + data[i];
 	}
 	return hash;
+}
+
+inline uint32_t getInterruptLevel() {
+//	return __get_IPSR() & 0x1FF;
+	return __get_IPSR();
+//	0 = Thread mode
+//	1 = Reserved
+//	2 = NMI
+//	3 = HardFault
+//	4 = MemManage
+//	5 = BusFault
+//	6 = UsageFault
+//	7-10 = Reserved
+//	11 = SVCall
+//	12 = Reserved for Debug
+//	13 = Reserved
+//	14 = PendSV
+//	15 = SysTick
+//	16 = IRQ0.
+//	17 = IRQ1.
+//	18 = IRQ2.
+//	..
+//	n+16 = IRQn
 }
 
 }

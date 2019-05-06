@@ -125,8 +125,6 @@ static void app_onoff_server_get_cb(const app_onoff_server_t * p_server, bool * 
 }
 
 
-
-
 static void device_identification_start_cb(uint8_t attention_duration_s)
 {
 	LOGi("device identification start");
@@ -208,7 +206,40 @@ const generic_onoff_client_callbacks_t client_cbs =
 		.periodic_publish_cb = app_gen_onoff_client_publish_interval_cb
 };
 
+static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
+	switch (p_rx_data->p_metadata->source) {
+	case NRF_MESH_RX_SOURCE_SCANNER:{
+//	    timestamp_t timestamp; /**< Device local timestamp of the start of the advertisement header of the packet in microseconds. */
+//	    uint32_t access_addr; /**< Access address the packet was received on. */
+//	    uint8_t  channel; /**< Channel the packet was received on. */
+//	    int8_t   rssi; /**< RSSI value of the received packet. */
+//	    ble_gap_addr_t adv_addr; /**< Advertisement address in the packet. */
+//	    uint8_t adv_type;  /**< BLE GAP advertising type. */
+		const uint8_t* addr = p_rx_data->p_metadata->params.scanner.adv_addr.addr;
+//		const uint8_t* p = p_rx_data->p_payload;
+//		if (p[1] == 0xFF && p[2] == 0xCD && p[3] == 0xAB) {
+			LOGd("Mesh scan: address=%02X:%02X:%02X:%02X:%02X:%02X type=%u rssi=%i channel=%u ISR=%u", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], p_rx_data->p_metadata->params.scanner.adv_type, p_rx_data->p_metadata->params.scanner.rssi, p_rx_data->p_metadata->params.scanner.channel, BLEutil::getInterruptLevel());
+//			LOGd("  adv_type=%u len=%u data=", p_rx_data->adv_type, p_rx_data->length);
+//			BLEutil::printArray(p_rx_data->p_payload, p_rx_data->length);
+//		}
+		break;
+	}
+	case NRF_MESH_RX_SOURCE_GATT:
 
+		break;
+	case NRF_MESH_RX_SOURCE_FRIEND:
+
+		break;
+	case NRF_MESH_RX_SOURCE_LOW_POWER:
+
+		break;
+	case NRF_MESH_RX_SOURCE_INSTABURST:
+
+		break;
+	case NRF_MESH_RX_SOURCE_LOOPBACK:
+		break;
+	}
+}
 
 
 
@@ -262,8 +293,7 @@ void Mesh::init() {
 	lfclksrc.accuracy = NRF_CLOCK_LF_ACCURACY_20_PPM;
 
 	mesh_stack_init_params_t init_params;
-//	init_params.core.irq_priority       = NRF_MESH_IRQ_PRIORITY_LOWEST;
-	init_params.core.irq_priority       = NRF_MESH_IRQ_PRIORITY_THREAD;
+	init_params.core.irq_priority       = NRF_MESH_IRQ_PRIORITY_THREAD; // See mesh_interrupt_priorities.md
 	init_params.core.lfclksrc           = lfclksrc;
 	init_params.core.p_uuid             = NULL;
 	init_params.core.relay_cb           = NULL;
@@ -273,6 +303,9 @@ void Mesh::init() {
 	uint32_t retCode = mesh_stack_init(&init_params, &_isProvisioned);
 	APP_ERROR_CHECK(retCode);
 	LOGi("Mesh isProvisioned=%u", _isProvisioned);
+
+	nrf_mesh_rx_cb_set(scan_cb);
+//	EventDispatcher::getInstance().addListener(this);
 }
 
 void Mesh::start() {
