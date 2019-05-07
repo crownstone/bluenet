@@ -1,14 +1,14 @@
 /**
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: 4 Nov., 2014
+ * Date: 12 Apr., 2019
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
 #pragma once
 
 #include "events/cs_EventListener.h"
-#include <common/cs_Types.h>
+#include "common/cs_Types.h"
 
 extern "C" {
 #include <generic_onoff_client.h>
