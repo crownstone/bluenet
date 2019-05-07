@@ -143,7 +143,7 @@ protected:
 		bool advertising;
 	} _stack_state;
 
-	uint8_t _scanBuffer[31];
+	uint8_t _scanBuffer[31]; // Same size as buffer in cs_stack_scan_t.
 	ble_data_t _scanBufferStruct = { _scanBuffer, sizeof(_scanBuffer) };
 
 public:

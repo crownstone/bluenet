@@ -217,15 +217,26 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 //	    int8_t   rssi; /**< RSSI value of the received packet. */
 //	    ble_gap_addr_t adv_addr; /**< Advertisement address in the packet. */
 //	    uint8_t adv_type;  /**< BLE GAP advertising type. */
-		const uint8_t* addr = p_rx_data->p_metadata->params.scanner.adv_addr.addr;
-		const uint8_t* p = p_rx_data->p_payload;
-		if (p[0] == 0x15 && p[1] == 0x16 && p[2] == 0x01 && p[3] == 0xC0 && p[4] == 0x05) {
-//		if (p[1] == 0xFF && p[2] == 0xCD && p[3] == 0xAB) {
-//		if (addr[5] == 0xE7 && addr[4] == 0x09 && addr[3] == 0x62) { // E7:09:62:02:91:3D
-			LOGd("Mesh scan: address=%02X:%02X:%02X:%02X:%02X:%02X type=%u rssi=%i chan=%u", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], p_rx_data->p_metadata->params.scanner.adv_type, p_rx_data->p_metadata->params.scanner.rssi, p_rx_data->p_metadata->params.scanner.channel);
-			LOGd("  adv_type=%u len=%u data=", p_rx_data->adv_type, p_rx_data->length);
-			BLEutil::printArray(p_rx_data->p_payload, p_rx_data->length);
-		}
+
+//		const uint8_t* addr = p_rx_data->p_metadata->params.scanner.adv_addr.addr;
+//		const uint8_t* p = p_rx_data->p_payload;
+//		if (p[0] == 0x15 && p[1] == 0x16 && p[2] == 0x01 && p[3] == 0xC0 && p[4] == 0x05) {
+////		if (p[1] == 0xFF && p[2] == 0xCD && p[3] == 0xAB) {
+////		if (addr[5] == 0xE7 && addr[4] == 0x09 && addr[3] == 0x62) { // E7:09:62:02:91:3D
+//			LOGd("Mesh scan: address=%02X:%02X:%02X:%02X:%02X:%02X type=%u rssi=%i chan=%u", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], p_rx_data->p_metadata->params.scanner.adv_type, p_rx_data->p_metadata->params.scanner.rssi, p_rx_data->p_metadata->params.scanner.channel);
+//			LOGd("  adv_type=%u len=%u data=", p_rx_data->adv_type, p_rx_data->length);
+//			BLEutil::printArray(p_rx_data->p_payload, p_rx_data->length);
+//		}
+
+		scanned_device_t scan;
+		memcpy(scan.address, p_rx_data->p_metadata->params.scanner.adv_addr.addr, sizeof(scan.address)); // TODO: check addr_type and addr_id_peer
+		scan.addressType = (p_rx_data->p_metadata->params.scanner.adv_addr.addr_type & 0x7F) & ((p_rx_data->p_metadata->params.scanner.adv_addr.addr_id_peer & 0x01) << 7);
+		scan.rssi = p_rx_data->p_metadata->params.scanner.rssi;
+		scan.channel = p_rx_data->p_metadata->params.scanner.channel;
+		scan.dataSize = p_rx_data->length;
+		scan.data = (uint8_t*)(p_rx_data->p_payload);
+		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&scan, sizeof(scan));
+		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
 	case NRF_MESH_RX_SOURCE_GATT:
