@@ -914,8 +914,6 @@ void Stack::startScanning() {
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &p_scan_params.interval, sizeof(p_scan_params.interval));
 	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &p_scan_params.window, sizeof(p_scan_params.window));
 
-	// TODO: which fields to set here?
-	// TODO: p_adv_report_buffer
 	uint32_t retVal = sd_ble_gap_scan_start(&p_scan_params, &_scanBufferStruct);
 	APP_ERROR_CHECK(retVal);
 	//BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params), (&scan_buffer_struct));
