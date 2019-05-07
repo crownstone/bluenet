@@ -81,6 +81,7 @@ struct __attribute__((packed)) session_nonce_t {
 struct __attribute__((packed)) scanned_device_t {
 	int8_t rssi;
 	uint8_t address[MAC_ADDRESS_LEN];
+	uint8_t addressType;
 	uint8_t channel;
 	uint8_t dataSize;
 //	uint8_t data[ADVERTISEMENT_DATA_MAX_SIZE];

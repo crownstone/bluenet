@@ -218,12 +218,14 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 //	    ble_gap_addr_t adv_addr; /**< Advertisement address in the packet. */
 //	    uint8_t adv_type;  /**< BLE GAP advertising type. */
 		const uint8_t* addr = p_rx_data->p_metadata->params.scanner.adv_addr.addr;
-//		const uint8_t* p = p_rx_data->p_payload;
+		const uint8_t* p = p_rx_data->p_payload;
+		if (p[0] == 0x15 && p[1] == 0x16 && p[2] == 0x01 && p[3] == 0xC0 && p[4] == 0x05) {
 //		if (p[1] == 0xFF && p[2] == 0xCD && p[3] == 0xAB) {
-			LOGd("Mesh scan: address=%02X:%02X:%02X:%02X:%02X:%02X type=%u rssi=%i channel=%u ISR=%u", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], p_rx_data->p_metadata->params.scanner.adv_type, p_rx_data->p_metadata->params.scanner.rssi, p_rx_data->p_metadata->params.scanner.channel, BLEutil::getInterruptLevel());
-//			LOGd("  adv_type=%u len=%u data=", p_rx_data->adv_type, p_rx_data->length);
-//			BLEutil::printArray(p_rx_data->p_payload, p_rx_data->length);
-//		}
+//		if (addr[5] == 0xE7 && addr[4] == 0x09 && addr[3] == 0x62) { // E7:09:62:02:91:3D
+			LOGd("Mesh scan: address=%02X:%02X:%02X:%02X:%02X:%02X type=%u rssi=%i chan=%u", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], p_rx_data->p_metadata->params.scanner.adv_type, p_rx_data->p_metadata->params.scanner.rssi, p_rx_data->p_metadata->params.scanner.channel);
+			LOGd("  adv_type=%u len=%u data=", p_rx_data->adv_type, p_rx_data->length);
+			BLEutil::printArray(p_rx_data->p_payload, p_rx_data->length);
+		}
 		break;
 	}
 	case NRF_MESH_RX_SOURCE_GATT:

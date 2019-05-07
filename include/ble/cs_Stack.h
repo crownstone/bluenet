@@ -143,8 +143,8 @@ protected:
 		bool advertising;
 	} _stack_state;
 
-	uint8_t scan_buffer[40];
-	ble_data_t scan_buffer_struct = { scan_buffer, 40 };
+	uint8_t _scanBuffer[31];
+	ble_data_t _scanBufferStruct = { _scanBuffer, sizeof(_scanBuffer) };
 
 public:
 
@@ -294,6 +294,14 @@ public:
 	void stopAdvertising();
 
 	bool checkCondition(condition_t condition, bool expectation);
+
+	/**
+	 * We want to be able to:
+	 * - set connectable / non connectable, also while advertising
+	 * - set service data, also while advertising
+	 * - set mac address, also while advertising
+	 * - set iBeacon, not necessarily while advertising
+	 */
 
 	void setAdvertisementData();
 
