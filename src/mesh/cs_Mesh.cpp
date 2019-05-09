@@ -306,6 +306,10 @@ Mesh& Mesh::getInstance() {
 }
 
 void Mesh::init() {
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+	__LOG_INIT(LOG_SRC_APP | LOG_SRC_PROV | LOG_SRC_ACCESS | LOG_SRC_BEARER, LOG_LEVEL_DBG3, LOG_CALLBACK_DEFAULT);
+	__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "----- Mesh init -----\n");
+#endif
 	nrf_clock_lf_cfg_t lfclksrc;
 	lfclksrc.source = NRF_SDH_CLOCK_LF_SRC;
 	lfclksrc.rc_ctiv = NRF_SDH_CLOCK_LF_RC_CTIV;

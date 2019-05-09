@@ -38,7 +38,7 @@
 #ifndef NRF_MESH_CONFIG_APP_H__
 #define NRF_MESH_CONFIG_APP_H__
 
-
+// See more options in nrf_mesh_config_*.h
 
 
 /** Number of active servers.
@@ -112,7 +112,7 @@
 #define LOG_LEVEL_DEFAULT 7
 
 /** Enable logging with RTT callback. */
-//#define LOG_ENABLE_RTT 0
+#define LOG_ENABLE_RTT NRF_LOG_BACKEND_RTT_ENABLED
 
 
 /**
