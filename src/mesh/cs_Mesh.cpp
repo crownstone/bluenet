@@ -111,7 +111,12 @@ extern "C" {
 //}
 
 
+static void cs_mesh_event_handler(const nrf_mesh_evt_t * p_evt) {
 
+}
+static nrf_mesh_evt_handler_t cs_mesh_event_handler_struct = {
+		cs_mesh_event_handler
+};
 
 static void app_onoff_server_set_cb(const app_onoff_server_t * p_server, bool onoff);
 static void app_onoff_server_get_cb(const app_onoff_server_t * p_server, bool * p_present_onoff);
@@ -327,6 +332,8 @@ void Mesh::init() {
 	uint32_t retCode = mesh_stack_init(&init_params, &_isProvisioned);
 	APP_ERROR_CHECK(retCode);
 	LOGi("Mesh isProvisioned=%u", _isProvisioned);
+
+	nrf_mesh_evt_handler_add(&cs_mesh_event_handler_struct);
 
 	nrf_mesh_rx_cb_set(scan_cb);
 //	EventDispatcher::getInstance().addListener(this);
