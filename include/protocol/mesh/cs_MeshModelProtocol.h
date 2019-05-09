@@ -7,6 +7,12 @@
 
 #pragma once
 
+/**
+ * Message opcodes.
+ *
+ * Must be in the range 0xC0 - 0xFF
+ * See access_opcode_t
+ */
 enum cs_mesh_model_opcode_t {
-	CS_MESH_MODEL_OPCODE_MSG = 0,
+	CS_MESH_MODEL_OPCODE_MSG = 0xC0,
 };

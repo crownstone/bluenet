@@ -272,24 +272,26 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 
 
 void Mesh::modelsInitCallback() {
-    LOGi("Initializing and adding models");
-    uint32_t retCode;
-    uint8_t elementIndex = 0;
-    for (uint32_t i = 0; i < CLIENT_MODEL_INSTANCE_COUNT; ++i) {
-        _clients[i].settings.p_callbacks = &client_cbs;
-        _clients[i].settings.timeout = 0;
-        /* Controls if the model instance should force all mesh messages to be segmented messages. */
-        _clients[i].settings.force_segmented = false;
-        /* Controls the MIC size used by the model instance for sending the mesh messages. */
-        _clients[i].settings.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
-        retCode = generic_onoff_client_init(&_clients[i], elementIndex++);
-        APP_ERROR_CHECK(retCode);
-    }
+	LOGi("Initializing and adding models");
+//	uint32_t retCode;
+//	uint8_t elementIndex = 0;
+//	for (uint32_t i = 0; i < CLIENT_MODEL_INSTANCE_COUNT; ++i) {
+//		_clients[i].settings.p_callbacks = &client_cbs;
+//		_clients[i].settings.timeout = 0;
+//		/* Controls if the model instance should force all mesh messages to be segmented messages. */
+//		_clients[i].settings.force_segmented = false;
+//		/* Controls the MIC size used by the model instance for sending the mesh messages. */
+//		_clients[i].settings.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
+//		retCode = generic_onoff_client_init(&_clients[i], elementIndex++);
+//		APP_ERROR_CHECK(retCode);
+//	}
+//
+//	// Server
+//	retCode = app_onoff_init(&_server, elementIndex++);
+//	APP_ERROR_CHECK(retCode);
+//	LOGi("Server handle: %d", _server.server.model_handle);
 
-    // Server
-    retCode = app_onoff_init(&_server, elementIndex++);
-    APP_ERROR_CHECK(retCode);
-    LOGi("Server handle: %d", _server.server.model_handle);
+	_model.init();
 }
 
 
@@ -336,24 +338,50 @@ void Mesh::init() {
 	nrf_mesh_evt_handler_add(&cs_mesh_event_handler_struct);
 
 	nrf_mesh_rx_cb_set(scan_cb);
+
 //	EventDispatcher::getInstance().addListener(this);
+	TYPIFY(CONFIG_CROWNSTONE_ID) id;
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
+	if (!_isProvisioned) {
+		provisionSelf(id);
+	}
+	else {
+		provisionLoad();
+	}
+
+	retCode = dsm_address_publish_add(0xC51E, &_groupAddressHandle);
+	APP_ERROR_CHECK(retCode);
+
+//    retCode = dsm_address_subscription_add(0xC51E, &subscriptionAddressHandle);
+    retCode = dsm_address_subscription_add_handle(_groupAddressHandle);
+    APP_ERROR_CHECK(retCode);
+
+	access_model_handle_t handle = _model.getAccessModelHandle();
+	retCode = access_model_application_bind(handle, _appkeyHandle);
+	APP_ERROR_CHECK(retCode);
+	retCode = access_model_publish_application_set(handle, _appkeyHandle);
+	APP_ERROR_CHECK(retCode);
+	retCode = access_model_publish_address_set(handle, _groupAddressHandle);
+	APP_ERROR_CHECK(retCode);
+	retCode = access_model_subscription_add(handle, _groupAddressHandle);
+	APP_ERROR_CHECK(retCode);
 }
 
 void Mesh::start() {
 	uint32_t retCode;
-	if (!_isProvisioned) {
-		static const uint8_t static_auth_data[NRF_MESH_KEY_SIZE] = STATIC_AUTH_DATA;
-		mesh_provisionee_start_params_t prov_start_params;
-		prov_start_params.p_static_data    = static_auth_data;
-		prov_start_params.prov_complete_cb = provisioning_complete_cb;
-		prov_start_params.prov_device_identification_start_cb = device_identification_start_cb;
-		prov_start_params.prov_device_identification_stop_cb = NULL;
-		prov_start_params.prov_abort_cb = provisioning_aborted_cb;
-//		prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Client example";
-		prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Server example";
-		retCode = mesh_provisionee_prov_start(&prov_start_params);
-		APP_ERROR_CHECK(retCode);
-	}
+//	if (!_isProvisioned) {
+//		static const uint8_t static_auth_data[NRF_MESH_KEY_SIZE] = STATIC_AUTH_DATA;
+//		mesh_provisionee_start_params_t prov_start_params;
+//		prov_start_params.p_static_data    = static_auth_data;
+//		prov_start_params.prov_complete_cb = provisioning_complete_cb;
+//		prov_start_params.prov_device_identification_start_cb = device_identification_start_cb;
+//		prov_start_params.prov_device_identification_stop_cb = NULL;
+//		prov_start_params.prov_abort_cb = provisioning_aborted_cb;
+////		prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Client example";
+//		prov_start_params.p_device_uri = URI_SCHEME_EXAMPLE "URI for LS Server example";
+//		retCode = mesh_provisionee_prov_start(&prov_start_params);
+//		APP_ERROR_CHECK(retCode);
+//	}
 
 	const uint8_t *uuid = nrf_mesh_configure_device_uuid_get();
 	LOGi("Device UUID:");
@@ -368,16 +396,97 @@ void Mesh::stop() {
 	// TODO: implement
 }
 
+void Mesh::provisionSelf(uint16_t id) {
+	LOGd("provisionSelf");
+	uint32_t retCode;
+
+	for (int i=0; i<NRF_MESH_KEY_SIZE; ++i) {
+		_netkey[i] = i;
+		_appkey[i] = i+1;
+		_devkey[i] = i+2;
+	}
+
+	// Used provisioner_helper.c::prov_helper_provision_self() as example.
+	// Also see mesh_stack_provisioning_data_store()
+	// And https://devzone.nordicsemi.com/f/nordic-q-a/44515/mesh-node-self-provisioning
+
+	// Store provisioning data in DSM.
+	dsm_local_unicast_address_t local_address;
+	local_address.address_start = id;
+	local_address.count = 1;
+	retCode = dsm_local_unicast_addresses_set(&local_address);
+	APP_ERROR_CHECK(retCode);
+
+	retCode = dsm_subnet_add(0, _netkey, &_netkeyHandle);
+	APP_ERROR_CHECK(retCode);
+
+	retCode = dsm_appkey_add(0, _netkeyHandle, _appkey, &_appkeyHandle);
+	APP_ERROR_CHECK(retCode);
+
+	retCode = dsm_devkey_add(id, _netkeyHandle, _devkey, &_devkeyHandle);
+	APP_ERROR_CHECK(retCode);
+
+	uint8_t key[NRF_MESH_KEY_SIZE];
+	LOGi("netKeyHandle=%u netKey=", _netkeyHandle);
+	dsm_subnet_key_get(_netkeyHandle, key);
+	BLEutil::printArray(key, NRF_MESH_KEY_SIZE);
+	LOGi("appKeyHandle=%u appKey=", _appkeyHandle);
+	LOGi("devKeyHandle=%u devKey=", _devkeyHandle);
+
+	retCode = net_state_iv_index_set(0,0);
+	APP_ERROR_CHECK(retCode);
+
+    // Bind config server to the device key
+	retCode = config_server_bind(_devkeyHandle);
+	APP_ERROR_CHECK(retCode);
+
+	access_flash_config_store();
+}
+
+void Mesh::provisionLoad() {
+	LOGd("provisionLoad");
+	// Used provisioner_helper.c::prov_helper_device_handles_load() as example.
+	uint32_t retCode;
+	dsm_local_unicast_address_t local_addr;
+	uint32_t netKeyCount = 1;
+
+	// TODO: why is the handle used as index, and then passed on as handle?
+	retCode = dsm_subnet_get_all(&_netkeyHandle, &netKeyCount);
+	APP_ERROR_CHECK(retCode);
+
+	if (netKeyCount != 1) {
+		APP_ERROR_CHECK(ERR_UNSPECIFIED);
+	}
+
+	retCode = dsm_appkey_get_all(_netkeyHandle, &_appkeyHandle, &netKeyCount);
+	APP_ERROR_CHECK(retCode);
+
+	dsm_local_unicast_addresses_get(&local_addr);
+	retCode = dsm_devkey_handle_get(local_addr.address_start, &_devkeyHandle);
+	APP_ERROR_CHECK(retCode);
+
+	LOGi("unicast address=%u", local_addr.address_start);
+	uint8_t key[NRF_MESH_KEY_SIZE];
+	LOGi("netKeyHandle=%u netKey=", _netkeyHandle);
+	dsm_subnet_key_get(_netkeyHandle, key);
+	BLEutil::printArray(key, NRF_MESH_KEY_SIZE);
+	LOGi("appKeyHandle=%u appKey=", _appkeyHandle);
+	LOGi("devKeyHandle=%u devKey=", _devkeyHandle);
+}
+
 void Mesh::handleEvent(event_t & event) {
 	switch (event.type) {
-	case CS_TYPE::EVT_TICK:
+	case CS_TYPE::EVT_TICK: {
 		if (Stack::getInstance().isScanning()) {
 //			Stack::getInstance().stopScanning();
 		}
 		else {
-			Stack::getInstance().startScanning();
+//			Stack::getInstance().startScanning();
 		}
+		uint8_t data[20] = { 0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9 };
+		_model.sendMsg(data, sizeof(data), 1);
 		break;
+	}
 	default:
 		break;
 	}
