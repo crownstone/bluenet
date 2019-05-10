@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "protocol/cs_Typedefs.h"
+
 /**
  * Message opcodes.
  *
