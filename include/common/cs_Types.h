@@ -16,13 +16,6 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <util/cs_UuidParser.h>
 
-typedef uint8_t* buffer_ptr_t;
-typedef uint16_t buffer_size_t;
-typedef uint16_t cs_ret_code_t;
-typedef uint8_t  stone_id_t;
-typedef uint16_t size16_t;
-//! Boolean with fixed size.
-typedef uint8_t BOOL;
 
 enum EncryptionAccessLevel {
 	ADMIN               = 0,
@@ -169,6 +162,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_DEC_CURRENT_RANGE,                            // Sent to decrease current range.
 	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is stream_header_t
 	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
+	CMD_SEND_MESH_MSG,                                // Sent to send a mesh message.
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 	EVT_ADVERTISEMENT_UPDATED,                        // Sent when advertisement was updated. TODO: advertisement data as payload?
 	EVT_SCAN_STARTED,                                 // Sent when scanner started scanning.
@@ -304,6 +298,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
+	case CS_TYPE::CMD_SEND_MESH_MSG:
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
 	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
 	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
@@ -367,6 +362,14 @@ struct event_t {
 };
 
 typedef uint16_t cs_file_id_t;
+
+/**
+ * Struct to communicate a mesh message.
+ */
+struct cs_mesh_msg_t {
+	uint8_t* msg;
+	size16_t size;
+};
 
 /**
  * Struct to communicate state variables.
@@ -494,6 +497,7 @@ typedef  uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
+typedef  cs_mesh_msg_t TYPIFY(CMD_SEND_MESH_MSG);
 typedef  BOOL TYPIFY(EVT_DIMMING_ALLOWED);
 typedef  void TYPIFY(EVT_DIMMER_FORCED_OFF);
 typedef  void TYPIFY(EVT_DIMMER_POWERED);
@@ -762,6 +766,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(CMD_CONTROL_CMD));
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
 		return sizeof(TYPIFY(CMD_SET_OPERATION_MODE));
+	case CS_TYPE::CMD_SEND_MESH_MSG:
+		return sizeof(TYPIFY(CMD_SEND_MESH_MSG));
 	}
 	// should never happen
 	return 0;
@@ -878,6 +884,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::STATE_SWITCH_STATE: return "STATE_SWITCH_STATE";
 	case CS_TYPE::STATE_TEMPERATURE: return "STATE_TEMPERATURE";
 	case CS_TYPE::STATE_TIME: return "STATE_TIME";
+	case CS_TYPE::CMD_SEND_MESH_MSG: return "CMD_SEND_MESH_MSG";
 	}
 	return "Unknown";
 }
@@ -987,6 +994,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
+	case CS_TYPE::CMD_SEND_MESH_MSG:
 		return PersistenceMode::RAM;
 	}
 	// should not reach this
@@ -1193,6 +1201,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data) {
 	case CS_TYPE::CMD_INC_CURRENT_RANGE:
 	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
 	case CS_TYPE::CMD_RESET_DELAYED:
+	case CS_TYPE::CMD_SEND_MESH_MSG:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
@@ -1306,6 +1315,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_INC_CURRENT_RANGE:
 	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
 	case CS_TYPE::CMD_RESET_DELAYED:
+	case CS_TYPE::CMD_SEND_MESH_MSG:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
@@ -1420,6 +1430,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_INC_CURRENT_RANGE:
 	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
 	case CS_TYPE::CMD_RESET_DELAYED:
+	case CS_TYPE::CMD_SEND_MESH_MSG:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:

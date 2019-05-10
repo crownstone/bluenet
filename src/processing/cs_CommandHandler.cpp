@@ -5,18 +5,19 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <cfg/cs_Boards.h>
-#include <cfg/cs_Strings.h>
-#include <drivers/cs_Serial.h>
-#include <processing/cs_CommandHandler.h>
-#include <processing/cs_Scanner.h>
-#include <processing/cs_Scheduler.h>
-#include <processing/cs_FactoryReset.h>
-#include <processing/cs_Setup.h>
-#include <processing/cs_Switch.h>
-#include <processing/cs_TemperatureGuard.h>
-#include <protocol/cs_UartProtocol.h>
-#include <storage/cs_State.h>
+#include "cfg/cs_Boards.h"
+#include "cfg/cs_Strings.h"
+#include "drivers/cs_Serial.h"
+#include "processing/cs_CommandHandler.h"
+#include "processing/cs_Scanner.h"
+#include "processing/cs_Scheduler.h"
+#include "processing/cs_FactoryReset.h"
+#include "processing/cs_Setup.h"
+#include "processing/cs_Switch.h"
+#include "processing/cs_TemperatureGuard.h"
+#include "protocol/cs_UartProtocol.h"
+#include "storage/cs_State.h"
+#include "protocol/mesh/cs_MeshModelPacketHelper.h"
 
 void reset(void* p_context) {
 
@@ -531,6 +532,65 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 cs_ret_code_t CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "mesh command");
+#if BUILD_MESHING == 1
+	// Only support control command NOOP and SET_TIME for now, with idCount of 0. These are the only ones used by the app.
+	// Command packet: type, flags, count, {control packet: type, reserved, length, length, payload...}
+	//                 0     1      2                       3     4          5      6       7
+	if (size < 3) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
+	// Check command type, flags, id count.
+	if (buffer[0] != 0 || buffer[1] != 0 || buffer[2] != 0) {
+		return ERR_NOT_IMPLEMENTED;
+	}
+	if (size < 3+4) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
+	uint16_t payloadSize = *((uint16_t*)&(buffer[5]));
+	if (size < 3+4+payloadSize) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
+	// Check control type and payload size
+	switch (buffer[3]) {
+	case CTRL_CMD_NOP:{
+		break;
+	}
+	case CTRL_CMD_SET_TIME:{
+		if (payloadSize != sizeof(uint32_t)) {
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		break;
+	}
+	default:
+		return ERR_NOT_IMPLEMENTED;
+	}
+	// Check access
+	EncryptionAccessLevel requiredAccessLevel = getRequiredAccessLevel((CommandHandlerTypes)buffer[3]);
+	if (!EncryptionHandler::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
+		return ERR_NO_ACCESS;
+	}
+
+	bool success = false;
+	cs_mesh_msg_t meshMsg;
+	meshMsg.msg = NULL;
+	switch (buffer[3]) {
+	case CTRL_CMD_NOP:
+		meshMsg.size = CSMeshModel::getMeshMessageSize(CS_MESH_MODEL_TYPE_CMD_NOOP);
+		meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
+		success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_NOOP, NULL, 0, meshMsg.msg, meshMsg.size);
+		break;
+	case CTRL_CMD_SET_TIME:
+		meshMsg.size = CSMeshModel::getMeshMessageSize(CS_MESH_MODEL_TYPE_CMD_TIME);
+		meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
+		success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_TIME, &(buffer[7]), sizeof(uint32_t), meshMsg.msg, meshMsg.size);
+		break;
+	}
+	if (success) {
+		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+		EventDispatcher::getInstance().dispatch(cmd);
+		free(meshMsg.msg);
+	}
+#endif
 	return ERR_SUCCESS;
 }
 

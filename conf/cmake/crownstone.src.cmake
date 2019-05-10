@@ -53,6 +53,7 @@ IF (BUILD_MESHING)
 #	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_MeshControl.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_Mesh.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_MeshModel.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshModelPacketHelper.cpp")
 #	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshMessageState.cpp")
 #	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshMessageCounter.cpp")
 

@@ -483,8 +483,13 @@ void Mesh::handleEvent(event_t & event) {
 		else {
 //			Stack::getInstance().startScanning();
 		}
-		uint8_t data[20] = { 0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9 };
-		_model.sendMsg(data, sizeof(data), 1);
+//		uint8_t data[20] = { 0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9 };
+//		_model.sendMsg(data, sizeof(data), 1);
+		break;
+	}
+	case CS_TYPE::CMD_SEND_MESH_MSG: {
+		cs_mesh_msg_t* msg = (cs_mesh_msg_t*)event.data;
+		_model.sendMsg(msg->msg, msg->size);
 		break;
 	}
 	default:

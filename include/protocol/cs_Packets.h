@@ -10,6 +10,7 @@
 #include "cfg/cs_Config.h"
 #include "protocol/cs_ScheduleEntries.h"
 #include "protocol/cs_Typedefs.h"
+#include "protocol/mesh/cs_MeshModelPackets.h"
 
 /**
  * Packets (structs) that are used internally and/or over the air.

@@ -6,7 +6,7 @@
  */
 
 #include "mesh/cs_MeshModel.h"
-#include "protocol/mesh/cs_MeshModelProtocol.h"
+#include "protocol/mesh/cs_MeshModelPackets.h"
 #include "cfg/cs_Config.h"
 #include "common/cs_Types.h"
 #include "drivers/cs_Serial.h"
@@ -56,7 +56,7 @@ access_model_handle_t MeshModel::getAccessModelHandle() {
  * TODO: wait for NRF_MESH_EVT_TX_COMPLETE before sending next msg (in case of segmented msg?).
  * TODO: repeat publishing the msg.
  */
-cs_ret_code_t MeshModel::sendMsg(uint8_t* data, uint16_t len, uint8_t repeats) {
+cs_ret_code_t MeshModel::sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats) {
 	access_message_tx_t accessMsg;
 	accessMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
 	accessMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_MSG;
@@ -129,8 +129,4 @@ void MeshModel::printMeshAddress(const char* prefix, const nrf_mesh_address_t* a
 		LOGd("%s type=group id=%u", prefix, addr->value);
 		break;
 	}
-}
-
-void MeshModel::handleEvent(event_t & event) {
-
 }
