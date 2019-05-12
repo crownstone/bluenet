@@ -5,12 +5,13 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <drivers/cs_Serial.h>
-#include <drivers/cs_RTC.h>
-#include <events/cs_EventDispatcher.h>
-#include <processing/cs_Scheduler.h>
-#include <processing/cs_Switch.h>
-#include <storage/cs_State.h>
+#include "common/cs_Types.h"
+#include "drivers/cs_Serial.h"
+#include "drivers/cs_RTC.h"
+#include "events/cs_EventDispatcher.h"
+#include "processing/cs_Scheduler.h"
+#include "processing/cs_Switch.h"
+#include "storage/cs_State.h"
 
 //#define SCHEDULER_PRINT_DEBUG
 
@@ -186,6 +187,12 @@ void Scheduler::handleEvent(event_t & event) {
 			// Only set the time if there is currently no time set, as these timestamps may be old
 			if (_posixTimeStamp == 0 && event.size == sizeof(TYPIFY(EVT_MESH_TIME))) {
 				setTime(*((TYPIFY(EVT_MESH_TIME)*)event.data));
+			}
+			break;
+		}
+		case CS_TYPE::CMD_SET_TIME: {
+			if (event.size == sizeof(TYPIFY(CMD_SET_TIME))) {
+				setTime(*((TYPIFY(CMD_SET_TIME)*)event.data));
 			}
 			break;
 		}
