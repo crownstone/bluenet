@@ -384,12 +384,30 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveState(buffer_ptr_t buffer, const
 cs_ret_code_t CommandHandler::handleCmdKeepAliveRepeatLast(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "mesh keep alive repeat");
+//#if BUILD_MESHING == 1
+
+//#endif
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t CommandHandler::handleCmdKeepAliveMesh(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "mesh keep alive");
+//#if BUILD_MESHING == 1
+	cs_mesh_model_msg_keep_alive_t* keepAlivePacket = (cs_mesh_model_msg_keep_alive_t*)buffer;
+	if (!CSMeshModel::keepAliveIsValid(keepAlivePacket, size)) {
+		return ERR_INVALID_MESSAGE;
+	}
+	cs_mesh_msg_t meshMsg;
+	meshMsg.size = CSMeshModel::getMeshMessageSize(size);
+	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
+	bool success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE, (uint8_t*)keepAlivePacket, size, meshMsg.msg, meshMsg.size);
+	if (success) {
+		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+		EventDispatcher::getInstance().dispatch(cmd);
+	}
+	free(meshMsg.msg);
+//#endif
 	return ERR_SUCCESS;
 }
 
@@ -526,16 +544,34 @@ cs_ret_code_t CommandHandler::handleCmdRelay(buffer_ptr_t buffer, const uint16_t
 cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "multi switch");
+//#if BUILD_MESHING == 1
+	cs_mesh_model_msg_multi_switch_t* multiSwitchPacket = (cs_mesh_model_msg_multi_switch_t*)buffer;
+	if (!CSMeshModel::multiSwitchIsValid(multiSwitchPacket, size)) {
+		return ERR_INVALID_MESSAGE;
+	}
+	cs_mesh_msg_t meshMsg;
+	meshMsg.size = CSMeshModel::getMeshMessageSize(size);
+	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
+	bool success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, (uint8_t*)multiSwitchPacket, size, meshMsg.msg, meshMsg.size);
+	if (success) {
+		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+		EventDispatcher::getInstance().dispatch(cmd);
+	}
+	free(meshMsg.msg);
+//#endif
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "mesh command");
-#if BUILD_MESHING == 1
+	BLEutil::printArray(buffer, size);
+//#if BUILD_MESHING == 1
 	// Only support control command NOOP and SET_TIME for now, with idCount of 0. These are the only ones used by the app.
 	// Command packet: type, flags, count, {control packet: type, reserved, length, length, payload...}
 	//                 0     1      2                       3     4          5      6       7
+	//                 00    00     00                      15    01         00     00
+	//                 00    00     00                      02    01         04     00      56 34 12 00
 	if (size < 3) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
@@ -547,12 +583,16 @@ cs_ret_code_t CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const ui
 		return ERR_BUFFER_TOO_SMALL;
 	}
 	uint16_t payloadSize = *((uint16_t*)&(buffer[5]));
+	uint8_t* payload = &(buffer[7]);
 	if (size < 3+4+payloadSize) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
 	// Check control type and payload size
 	switch (buffer[3]) {
 	case CTRL_CMD_NOP:{
+		if (payloadSize != 0) {
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		}
 		break;
 	}
 	case CTRL_CMD_SET_TIME:{
@@ -572,25 +612,22 @@ cs_ret_code_t CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const ui
 
 	bool success = false;
 	cs_mesh_msg_t meshMsg;
-	meshMsg.msg = NULL;
+	meshMsg.size = CSMeshModel::getMeshMessageSize(payloadSize);
+	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
 	switch (buffer[3]) {
 	case CTRL_CMD_NOP:
-		meshMsg.size = CSMeshModel::getMeshMessageSize(CS_MESH_MODEL_TYPE_CMD_NOOP);
-		meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
-		success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_NOOP, NULL, 0, meshMsg.msg, meshMsg.size);
+		success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_NOOP, payload, payloadSize, meshMsg.msg, meshMsg.size);
 		break;
 	case CTRL_CMD_SET_TIME:
-		meshMsg.size = CSMeshModel::getMeshMessageSize(CS_MESH_MODEL_TYPE_CMD_TIME);
-		meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
-		success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_TIME, &(buffer[7]), sizeof(uint32_t), meshMsg.msg, meshMsg.size);
+		success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_TIME, payload, payloadSize, meshMsg.msg, meshMsg.size);
 		break;
 	}
 	if (success) {
 		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 		EventDispatcher::getInstance().dispatch(cmd);
-		free(meshMsg.msg);
 	}
-#endif
+	free(meshMsg.msg);
+//#endif
 	return ERR_SUCCESS;
 }
 
