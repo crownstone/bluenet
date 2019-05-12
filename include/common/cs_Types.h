@@ -145,6 +145,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SWITCH_OFF = General_Base,                    // Sent to turn switch off.
 	CMD_SWITCH_ON,                                    // Sent to turn switch on.
 	CMD_SWITCH_TOGGLE,                                // Sent to toggle switch.
+	CMD_MULTI_SWITCH,                                 // Sent to set switch. -- Payload is cs_mesh_model_msg_multi_switch_item_t. TODO: change payload type.
 //	CMD_SET_LOG_LEVEL,
 	CMD_ENABLE_LOG_POWER,                             // Sent to enable/disable power calculations logging. -- Payload is BOOL.
 	CMD_ENABLE_LOG_CURRENT,                           // Sent to enable/disable current samples logging. -- Payload is BOOL.
@@ -160,9 +161,10 @@ enum class CS_TYPE: uint16_t {
 	CMD_DEC_VOLTAGE_RANGE,                            // Sent to decrease voltage range.
 	CMD_INC_CURRENT_RANGE,                            // Sent to increase current range.
 	CMD_DEC_CURRENT_RANGE,                            // Sent to decrease current range.
-	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is stream_header_t
+	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is stream_buffer_header_t.
 	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
-	CMD_SEND_MESH_MSG,                                // Sent to send a mesh message.
+	CMD_SEND_MESH_MSG,                                // Sent to send a mesh message. -- Payload is cs_mesh_msg_t.
+	CMD_SET_TIME,                                     // Sent to set the time. -- Payload is uint32_t timestamp.
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 	EVT_ADVERTISEMENT_UPDATED,                        // Sent when advertisement was updated. TODO: advertisement data as payload?
 	EVT_SCAN_STARTED,                                 // Sent when scanner started scanning.
@@ -172,7 +174,7 @@ enum class CS_TYPE: uint16_t {
 //	EVT_POWER_SAMPLES_START,                          // Sent when the power samples buffer (for characteristic) is being filled with new data.
 //	EVT_POWER_SAMPLES_END,                            // Sent when the power samples buffer (for characteristic) has been filled with new data.
 
-	EVT_MESH_TIME,                                    // Sent when the mesh received the current time
+	EVT_MESH_TIME,                                    // Sent when the mesh received the current time. -- Payload is uint32_t timestamp.
 	EVT_SCHEDULE_ENTRIES_UPDATED,      // TODO: deprecate and use STATE event for this.                // Sent when schedule entries were changed. Payload is schedule_list_t.
 //	EVT_BLE_EVENT,
 	EVT_BLE_CONNECT,                                  // Sent when device connected.
@@ -266,6 +268,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 	case CS_TYPE::EVT_SCAN_STARTED:
 	case CS_TYPE::EVT_SCAN_STOPPED:
@@ -299,6 +302,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
 	case CS_TYPE::CMD_SEND_MESH_MSG:
+	case CS_TYPE::CMD_SET_TIME:
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
 	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
 	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
@@ -497,7 +501,9 @@ typedef  uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
+typedef  cs_mesh_model_msg_multi_switch_item_t TYPIFY(CMD_MULTI_SWITCH);
 typedef  cs_mesh_msg_t TYPIFY(CMD_SEND_MESH_MSG);
+typedef  uint32_t TYPIFY(CMD_SET_TIME);
 typedef  BOOL TYPIFY(EVT_DIMMING_ALLOWED);
 typedef  void TYPIFY(EVT_DIMMER_FORCED_OFF);
 typedef  void TYPIFY(EVT_DIMMER_POWERED);
@@ -670,6 +676,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return 0;
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
 		return 0;
+	case CS_TYPE::CMD_MULTI_SWITCH:
+		return sizeof(TYPIFY(CMD_MULTI_SWITCH));
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 		return 0;
 	case CS_TYPE::EVT_SCAN_STARTED:
@@ -768,6 +776,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(CMD_SET_OPERATION_MODE));
 	case CS_TYPE::CMD_SEND_MESH_MSG:
 		return sizeof(TYPIFY(CMD_SEND_MESH_MSG));
+	case CS_TYPE::CMD_SET_TIME:
+		return sizeof(TYPIFY(CMD_SET_TIME));
 	}
 	// should never happen
 	return 0;
@@ -854,6 +864,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_OFF: return "EVT_POWER_OFF";
 	case CS_TYPE::CMD_SWITCH_ON: return "EVT_POWER_ON";
 	case CS_TYPE::CMD_SWITCH_TOGGLE: return "EVT_POWER_TOGGLE";
+	case CS_TYPE::CMD_MULTI_SWITCH: return "CMD_MULYI_SWITCH";
 	case CS_TYPE::EVT_DIMMING_ALLOWED: return "EVT_DIMMING_ALLOWED";
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF: return "EVT_DIMMER_FORCED_OFF";
 	case CS_TYPE::EVT_DIMMER_POWERED: return "EVT_DIMMER_POWERED";
@@ -885,6 +896,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::STATE_TEMPERATURE: return "STATE_TEMPERATURE";
 	case CS_TYPE::STATE_TIME: return "STATE_TIME";
 	case CS_TYPE::CMD_SEND_MESH_MSG: return "CMD_SEND_MESH_MSG";
+	case CS_TYPE::CMD_SET_TIME: return "CMD_SET_TIME";
 	}
 	return "Unknown";
 }
@@ -946,6 +958,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 	case CS_TYPE::EVT_SCAN_STARTED:
 	case CS_TYPE::EVT_SCAN_STOPPED:
@@ -995,6 +1008,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
 	case CS_TYPE::CMD_SEND_MESH_MSG:
+	case CS_TYPE::CMD_SET_TIME:
 		return PersistenceMode::RAM;
 	}
 	// should not reach this
@@ -1203,9 +1217,11 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data) {
 	case CS_TYPE::CMD_RESET_DELAYED:
 	case CS_TYPE::CMD_SEND_MESH_MSG:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
+	case CS_TYPE::CMD_SET_TIME:
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
@@ -1317,9 +1333,11 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_RESET_DELAYED:
 	case CS_TYPE::CMD_SEND_MESH_MSG:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
+	case CS_TYPE::CMD_SET_TIME:
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
@@ -1432,9 +1450,11 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_RESET_DELAYED:
 	case CS_TYPE::CMD_SEND_MESH_MSG:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
+	case CS_TYPE::CMD_SET_TIME:
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:

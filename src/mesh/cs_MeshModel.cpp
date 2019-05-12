@@ -7,9 +7,13 @@
 
 #include "mesh/cs_MeshModel.h"
 #include "protocol/mesh/cs_MeshModelPackets.h"
+#include "protocol/mesh/cs_MeshModelPacketHelper.h"
+#include "protocol/cs_CommandTypes.h"
 #include "cfg/cs_Config.h"
 #include "common/cs_Types.h"
 #include "drivers/cs_Serial.h"
+#include "events/cs_EventDispatcher.h"
+#include "storage/cs_State.h"
 #include "util/cs_Utils.h"
 #include "util/cs_BleError.h"
 #include <cstddef> // For NULL
@@ -80,7 +84,70 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	printMeshAddress("  Src: ", &(accessMsg->meta_data.src));
 	printMeshAddress("  Dst: ", &(accessMsg->meta_data.dst));
 	LOGi("  Data:")
-	BLEutil::printArray(accessMsg->p_data, accessMsg->length);
+	uint8_t* msg = (uint8_t*)(accessMsg->p_data);
+	uint16_t size = accessMsg->length;
+	BLEutil::printArray(msg, size);
+	if (!CSMeshModel::isValidMeshMessage(msg, size)) {
+		LOGw("Invalid mesh message");
+		return;
+	}
+	cs_mesh_model_msg_type_t msgType = CSMeshModel::getType(msg);
+	uint8_t* payload = NULL;
+	size16_t payloadSize;
+	CSMeshModel::getPayload(msg, size, payload, payloadSize);
+
+	switch (msgType) {
+	case CS_MESH_MODEL_TYPE_STATE_TIME: {
+		event_t event(CS_TYPE::EVT_MESH_TIME, payload, payloadSize);
+		EventDispatcher::getInstance().dispatch(event);
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_CMD_TIME: {
+		event_t event(CS_TYPE::CMD_SET_TIME, payload, payloadSize);
+		EventDispatcher::getInstance().dispatch(event);
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_CMD_NOOP: {
+		TYPIFY(CMD_CONTROL_CMD) streamHeader;
+		streamHeader.type = CTRL_CMD_NOP;
+		streamHeader.length = 0;
+		event_t event(CS_TYPE::CMD_CONTROL_CMD, &streamHeader, sizeof(streamHeader));
+		EventDispatcher::getInstance().dispatch(event);
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
+		cs_mesh_model_msg_multi_switch_t* packet = (cs_mesh_model_msg_multi_switch_t*)payload;
+		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
+		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
+		cs_mesh_model_msg_multi_switch_item_t* item = NULL;
+		if (CSMeshModel::multiSwitchHasItem(packet, myId, item)) {
+			event_t event(CS_TYPE::CMD_MULTI_SWITCH, item, sizeof(*item));
+			EventDispatcher::getInstance().dispatch(event);
+		}
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE: {
+		cs_mesh_model_msg_keep_alive_t* packet = (cs_mesh_model_msg_keep_alive_t*)payload;
+		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
+		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
+		cs_mesh_model_msg_keep_alive_item_t* item = NULL;
+		if (CSMeshModel::keepAliveHasItem(packet, myId, item)) {
+			keep_alive_state_message_payload_t keepAlive;
+			if (item->actionSwitchCmd == 255) {
+				keepAlive.action = NO_CHANGE;
+				keepAlive.switchState.switchState = 0;
+			}
+			else {
+				keepAlive.action = CHANGE;
+				keepAlive.switchState.switchState = item->actionSwitchCmd;
+			}
+			keepAlive.timeout = packet->timeout;
+			event_t event(CS_TYPE::EVT_KEEP_ALIVE, &keepAlive, sizeof(keepAlive));
+			EventDispatcher::getInstance().dispatch(event);
+		}
+		break;
+	}
+	}
 }
 
 int8_t MeshModel::getRssi(const nrf_mesh_rx_metadata_t* metaData) {
