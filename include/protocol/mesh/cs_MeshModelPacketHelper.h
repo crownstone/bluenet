@@ -12,10 +12,26 @@
 
 namespace CSMeshModel {
 
-bool multiSwitchIsValid(cs_mesh_model_msg_multi_switch_t* msg, size16_t msgSize);
-bool keepAliveIsValid(cs_mesh_model_msg_keep_alive_t* msg, size16_t msgSize);
+bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize);
+bool timeIsValid(const cs_mesh_model_msg_time_t* msg, size16_t msgSize);
+bool noopIsValid(const uint8_t* msg, size16_t msgSize);
+bool multiSwitchIsValid(const cs_mesh_model_msg_multi_switch_t* msg, size16_t msgSize);
+bool keepAliveIsValid(const cs_mesh_model_msg_keep_alive_t* msg, size16_t msgSize);
 
-size16_t getMeshMessageSize(cs_mesh_model_msg_type_t type);
+cs_mesh_model_msg_type_t getType(const uint8_t* meshMsg);
+
+/**
+ * Get payload of a mesh message.
+ *
+ * Assumes message is valid.
+ * @param[in]      meshMsg        Mesh message..
+ * @param[in]      meshMsgSize    Size of the mesh message.
+ * @param[out]     payload        Set to payload.
+ * @param[out]     payloadSize    Set to size of the payload.
+ */
+void getPayload(uint8_t* meshMsg, size16_t meshMsgSize, uint8_t* payload, size16_t& payloadSize);
+
+size16_t getMeshMessageSize(size16_t payloadSize);
 
 /**
  * Create a mesh message.
@@ -31,6 +47,7 @@ size16_t getMeshMessageSize(cs_mesh_model_msg_type_t type);
  */
 bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size16_t payloadSize, uint8_t* meshMsg, size16_t& meshMsgSize);
 
+bool setMeshPayload(uint8_t* meshMsg, size16_t meshMsgSize, const uint8_t* payload, size16_t payloadSize);
 
 /**
  * Search for item with given stone id.

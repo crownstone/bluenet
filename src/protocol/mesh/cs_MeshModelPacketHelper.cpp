@@ -10,6 +10,36 @@
 
 namespace CSMeshModel {
 
+bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize) {
+	if (msgSize < MESH_HEADER_SIZE) {
+		return false;
+	}
+	uint8_t* payload = NULL;
+	size16_t payloadSize;
+	getPayload(meshMsg, msgSize, payload, payloadSize);
+	switch (getType(meshMsg)) {
+	case CS_MESH_MODEL_TYPE_STATE_TIME:
+		return timeIsValid((cs_mesh_model_msg_time_t*)payload, payloadSize);
+	case CS_MESH_MODEL_TYPE_CMD_TIME:
+		return timeIsValid((cs_mesh_model_msg_time_t*)payload, payloadSize);
+	case CS_MESH_MODEL_TYPE_CMD_NOOP:
+		return noopIsValid(payload, payloadSize);
+	case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH:
+		return multiSwitchIsValid((cs_mesh_model_msg_multi_switch_t*)payload, payloadSize);
+	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE:
+		return keepAliveIsValid((cs_mesh_model_msg_keep_alive_t*)payload, payloadSize);
+	}
+	return false;
+}
+
+bool timeIsValid(const cs_mesh_model_msg_time_t* msg, size16_t msgSize) {
+	return msgSize == sizeof(cs_mesh_model_msg_time_t);
+}
+
+bool noopIsValid(const uint8_t* msg, size16_t msgSize) {
+	return msgSize == 0;
+}
+
 bool multiSwitchIsValid(const cs_mesh_model_msg_multi_switch_t* msg, size16_t msgSize) {
 	if (msgSize < MESH_MESH_MULTI_SWITCH_HEADER_SIZE) {
 		return false;
@@ -45,30 +75,28 @@ bool keepAliveIsValid(const cs_mesh_model_msg_keep_alive_t* msg, size16_t msgSiz
 	return true;
 }
 
-size16_t getMeshMessageSize(cs_mesh_model_msg_type_t type) {
-	switch (type) {
-		case CS_MESH_MODEL_TYPE_STATE_TIME:
-		case CS_MESH_MODEL_TYPE_CMD_TIME:
-			return MESH_HEADER_SIZE + sizeof(cs_mesh_model_msg_time_t);
-		case CS_MESH_MODEL_TYPE_CMD_NOOP:
-			return MESH_HEADER_SIZE + 0;
-		case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH:
-			return MESH_HEADER_SIZE + sizeof(cs_mesh_model_msg_multi_switch_t);
-		case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE:
-			return MESH_HEADER_SIZE + sizeof(cs_mesh_model_msg_keep_alive_t);
-		}
-	return 0;
+cs_mesh_model_msg_type_t getType(const uint8_t* meshMsg) {
+	return (cs_mesh_model_msg_type_t)meshMsg[0];
+}
+
+void getPayload(uint8_t* meshMsg, size16_t meshMsgSize, uint8_t* payload, size16_t& payloadSize) {
+	payload = meshMsg + MESH_HEADER_SIZE;
+	payloadSize = meshMsgSize - MESH_HEADER_SIZE;
+}
+
+size16_t getMeshMessageSize(size16_t payloadSize) {
+	return MESH_HEADER_SIZE + payloadSize;
 }
 
 bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size16_t payloadSize, uint8_t* meshMsg, size16_t& meshMsgSize) {
-	if (meshMsgSize < getMeshMessageSize(type)) {
+	if (meshMsgSize < getMeshMessageSize(payloadSize)) {
 		return false;
 	}
 	meshMsg[0] = type;
 	if (payloadSize) {
 		memcpy(meshMsg + MESH_HEADER_SIZE, payload, payloadSize);
 	}
-	meshMsgSize = getMeshMessageSize(type);
+	meshMsgSize = getMeshMessageSize(payloadSize);
 	return true;
 }
 
