@@ -528,9 +528,22 @@ bool Switch::allowRelayOn() {
 void Switch::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::CMD_SWITCH_ON:
+			turnOn();
+			break;
 		case CS_TYPE::CMD_SWITCH_OFF:
-		case CS_TYPE::CMD_SWITCH_TOGGLE: {
+			turnOff();
+			break;
+		case CS_TYPE::CMD_SWITCH_TOGGLE:
 			toggle();
+			break;
+		case CS_TYPE::CMD_MULTI_SWITCH: {
+			TYPIFY(CMD_MULTI_SWITCH)* packet = (TYPIFY(CMD_MULTI_SWITCH)*) event.data;
+			if (packet->timeout) {
+				delayedSwitch(packet->switchCmd, packet->timeout);
+			}
+			else {
+				setSwitch(packet->switchCmd);
+			}
 			break;
 		}
 		case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
@@ -545,11 +558,12 @@ void Switch::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
 			forceSwitchOff();
 			break;
-		case CS_TYPE::EVT_DIMMING_ALLOWED:
+		case CS_TYPE::EVT_DIMMING_ALLOWED: {
 			if (*(TYPIFY(EVT_DIMMING_ALLOWED)*)event.data == false) {
 				pwmNotAllowed();
 			}
 			break;
+		}
 		default: {}
 	}
 }
