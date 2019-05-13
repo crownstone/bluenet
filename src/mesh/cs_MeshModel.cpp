@@ -126,7 +126,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		}
 		break;
 	}
-	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE: {
+	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE: {
 		cs_mesh_model_msg_keep_alive_t* packet = (cs_mesh_model_msg_keep_alive_t*)payload;
 		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
@@ -142,9 +142,14 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 				keepAlive.switchState.switchState = item->actionSwitchCmd;
 			}
 			keepAlive.timeout = packet->timeout;
-			event_t event(CS_TYPE::EVT_KEEP_ALIVE, &keepAlive, sizeof(keepAlive));
+			event_t event(CS_TYPE::EVT_KEEP_ALIVE_STATE, &keepAlive, sizeof(keepAlive));
 			EventDispatcher::getInstance().dispatch(event);
 		}
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE: {
+		event_t event(CS_TYPE::EVT_KEEP_ALIVE);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
 	}

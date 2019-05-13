@@ -38,7 +38,8 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_CMD_TIME = 1,          // Payload: cs_mesh_model_msg_time_t
 	CS_MESH_MODEL_TYPE_CMD_NOOP = 2,          // Payload: none
 	CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH = 3,  // Payload: cs_mesh_model_msg_multi_switch_t
-	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE = 4,    // Payload: cs_mesh_model_msg_keep_alive_t
+	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE = 4, // Payload: cs_mesh_model_msg_keep_alive_t
+	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE = 5,    // Payload: none
 };
 
 

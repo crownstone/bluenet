@@ -16,7 +16,8 @@ bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize);
 bool timeIsValid(const cs_mesh_model_msg_time_t* msg, size16_t msgSize);
 bool noopIsValid(const uint8_t* msg, size16_t msgSize);
 bool multiSwitchIsValid(const cs_mesh_model_msg_multi_switch_t* msg, size16_t msgSize);
-bool keepAliveIsValid(const cs_mesh_model_msg_keep_alive_t* msg, size16_t msgSize);
+bool keepAliveStateIsValid(const cs_mesh_model_msg_keep_alive_t* msg, size16_t msgSize);
+bool keepAliveIsValid(const uint8_t* msg, size16_t msgSize);
 
 cs_mesh_model_msg_type_t getType(const uint8_t* meshMsg);
 

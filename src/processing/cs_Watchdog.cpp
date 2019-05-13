@@ -37,7 +37,7 @@
 #include <processing/cs_CommandHandler.h>
 #include <drivers/cs_Timer.h>
 
-//#define PRINT_VERBOSE_WATCHDOG
+#define LOGWatchdogDebug LOGnone
 
 void keep_alive_timeout(void* p_context) {
 	Watchdog::getInstance().keepAliveTimeout();
@@ -60,9 +60,7 @@ void Watchdog::init() {
 void Watchdog::keepAlive() {
 	if (_hasKeepAliveState) {
 		uint32_t timeout = _lastKeepAlive.timeout * 1000;
-#ifdef PRINT_VERBOSE_WATCHDOG
-		LOGd("Reset keep alive, timeout in %d ms", timeout);
-#endif
+		LOGWatchdogDebug("Reset keep alive, timeout in %d ms", timeout);
 		Timer::getInstance().reset(_keepAliveTimerId, MS_TO_TICKS(timeout), NULL);
 	}
 	else {
@@ -72,7 +70,6 @@ void Watchdog::keepAlive() {
 
 void Watchdog::keepAliveTimeout() {
 	LOGi("Keep alive timeout");
-
 	if (_hasKeepAliveState) {
 		if (_lastKeepAlive.action != NO_CHANGE) {
 			Switch::getInstance().setSwitch(_lastKeepAlive.switchState.switchState);
@@ -88,14 +85,14 @@ void Watchdog::keepAliveTimeout() {
 
 void Watchdog::handleEvent(event_t & event) {
 	switch(event.type) {
+		case CS_TYPE::EVT_KEEP_ALIVE_STATE: {
+			_lastKeepAlive = *(TYPIFY(EVT_KEEP_ALIVE_STATE)*)event.data;
+			LOGWatchdogDebug("action=%u switch=%u timeout=%u", _lastKeepAlive.action, _lastKeepAlive.switchState.switchState, _lastKeepAlive.timeout);
+			_hasKeepAliveState = true;
+			keepAlive();
+			break;
+		}
 		case CS_TYPE::EVT_KEEP_ALIVE: {
-			if (event.size != 0 && event.size == sizeof(keep_alive_state_message_payload_t)) {
-				_lastKeepAlive = *(keep_alive_state_message_payload_t*)event.data;
-#ifdef PRINT_VERBOSE_WATCHDOG
-				LOGd("action=%u switch=%u timeout=%u", _lastKeepAlive.action, _lastKeepAlive.switchState.switchState, _lastKeepAlive.timeout);
-#endif
-				_hasKeepAliveState = true;
-			}
 			keepAlive();
 			break;
 		}

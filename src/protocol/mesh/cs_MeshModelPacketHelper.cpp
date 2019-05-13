@@ -30,8 +30,10 @@ bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize) {
 		return noopIsValid(payload, payloadSize);
 	case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH:
 		return multiSwitchIsValid((cs_mesh_model_msg_multi_switch_t*)payload, payloadSize);
+	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE:
+		return keepAliveStateIsValid((cs_mesh_model_msg_keep_alive_t*)payload, payloadSize);
 	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE:
-		return keepAliveIsValid((cs_mesh_model_msg_keep_alive_t*)payload, payloadSize);
+		return keepAliveIsValid(payload, payloadSize);
 	}
 	return false;
 }
@@ -64,7 +66,7 @@ bool multiSwitchIsValid(const cs_mesh_model_msg_multi_switch_t* msg, size16_t ms
 	return true;
 }
 
-bool keepAliveIsValid(const cs_mesh_model_msg_keep_alive_t* msg, size16_t msgSize) {
+bool keepAliveStateIsValid(const cs_mesh_model_msg_keep_alive_t* msg, size16_t msgSize) {
 	if (msgSize < MESH_MESH_KEEP_ALIVE_HEADER_SIZE) {
 		LOGMeshModelPacketHelperDebug("size=%u < header=%u", msgSize, MESH_MESH_KEEP_ALIVE_HEADER_SIZE);
 		return false;
@@ -87,6 +89,11 @@ bool keepAliveIsValid(const cs_mesh_model_msg_keep_alive_t* msg, size16_t msgSiz
 	}
 	return true;
 }
+
+bool keepAliveIsValid(const uint8_t* msg, size16_t msgSize) {
+	return msgSize == 0;
+}
+
 
 cs_mesh_model_msg_type_t getType(const uint8_t* meshMsg) {
 	return (cs_mesh_model_msg_type_t)meshMsg[0];

@@ -6,7 +6,7 @@
  */
 #pragma once
 
-#include <common/cs_Types.h>
+#include <protocol/cs_Typedefs.h>
 #include <protocol/cs_Packets.h>
 
 //TODO: make a enum class of these

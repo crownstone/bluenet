@@ -13,6 +13,7 @@
 #include <cstddef> // For NULL
 #include <drivers/cs_Serial.h>
 #include <protocol/cs_Packets.h>
+#include <protocol/cs_CommandTypes.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <util/cs_UuidParser.h>
 
@@ -182,7 +183,8 @@ enum class CS_TYPE: uint16_t {
 //	EVT_STATE_NOTIFICATION,            // Deprecated  // Sent when a state was updated.
 	EVT_BROWNOUT_IMPENDING,                           // Sent when brownout is impending (low chip supply voltage)
 	EVT_SESSION_NONCE_SET,                            // Sent when a session nonce is generated. -- Payload is the session nonce.
-	EVT_KEEP_ALIVE,                                   // Sent when a keep alive has been received. -- Payload is keep_alive_state_message_payload_t.
+	EVT_KEEP_ALIVE,                                   // Sent when a keep alive witout action has been received.
+	EVT_KEEP_ALIVE_STATE,                             // Sent when a keep alive with action has been received. -- Payload is keep_alive_state_message_payload_t.
 	EVT_CURRENT_USAGE_ABOVE_THRESHOLD,        // TODO: deprecate, use STATE_ERRORS        // Sent when current usage goes over the threshold.
 	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER, // TODO: deprecate, use STATE_ERRORS        // Sent when current usage goes over the dimmer threshold, while dimmer is on.
 	EVT_DIMMER_ON_FAILURE_DETECTED,           // TODO: deprecate, use STATE_ERRORS        // Sent when dimmer leaks current, while it's supposed to be off.
@@ -284,6 +286,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
 	case CS_TYPE::EVT_KEEP_ALIVE:
+	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
@@ -497,6 +500,7 @@ typedef  BOOL TYPIFY(CMD_ENABLE_MESH);
 typedef  void TYPIFY(CMD_INC_VOLTAGE_RANGE);
 typedef  void TYPIFY(CMD_INC_CURRENT_RANGE);
 typedef  void TYPIFY(EVT_KEEP_ALIVE);
+typedef  keep_alive_state_message_payload_t TYPIFY(EVT_KEEP_ALIVE_STATE);
 typedef  uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
@@ -708,6 +712,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(EVT_SESSION_NONCE_SET));
 	case CS_TYPE::EVT_KEEP_ALIVE:
 		return 0;
+	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
+		return sizeof(TYPIFY(EVT_KEEP_ALIVE_STATE));
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
 		return 0;
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
@@ -860,6 +866,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_INC_CURRENT_RANGE: return "EVT_INC_CURRENT_RANGE";
 	case CS_TYPE::CMD_INC_VOLTAGE_RANGE: return "EVT_INC_VOLTAGE_RANGE";
 	case CS_TYPE::EVT_KEEP_ALIVE: return "EVT_KEEP_ALIVE";
+	case CS_TYPE::EVT_KEEP_ALIVE_STATE: return "EVT_KEEP_ALIVE_STATE";
 	case CS_TYPE::EVT_MESH_TIME: return "EVT_MESH_TIME";
 	case CS_TYPE::CMD_SWITCH_OFF: return "EVT_POWER_OFF";
 	case CS_TYPE::CMD_SWITCH_ON: return "EVT_POWER_ON";
@@ -974,6 +981,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
 	case CS_TYPE::EVT_KEEP_ALIVE:
+	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
@@ -1241,6 +1249,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data) {
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
 	case CS_TYPE::EVT_DIMMING_ALLOWED:
 	case CS_TYPE::EVT_KEEP_ALIVE:
+	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_MESH_TIME:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
 	case CS_TYPE::EVT_SCAN_STARTED:
@@ -1357,6 +1366,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
 	case CS_TYPE::EVT_DIMMING_ALLOWED:
 	case CS_TYPE::EVT_KEEP_ALIVE:
+	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_MESH_TIME:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
 	case CS_TYPE::EVT_SCAN_STARTED:
@@ -1474,6 +1484,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
 	case CS_TYPE::EVT_DIMMING_ALLOWED:
 	case CS_TYPE::EVT_KEEP_ALIVE:
+	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_MESH_TIME:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
 	case CS_TYPE::EVT_SCAN_STARTED:

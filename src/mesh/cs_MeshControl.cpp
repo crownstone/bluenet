@@ -163,7 +163,7 @@ cs_ret_code_t MeshControl::handleKeepAlive(keep_alive_message_t* msg, uint16_t l
 				keepAlive.action, keepAlive.switchState.switchState, keepAlive.timeout);
 #endif
 
-		EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE, &keepAlive, sizeof(keepAlive));
+		EventDispatcher::getInstance().dispatch(EVT_KEEP_ALIVE_STATE, &keepAlive, sizeof(keepAlive));
 	}
 	else {
 #if defined(PRINT_DEBUG) && defined(PRINT_VERBOSE_KEEPALIVE)

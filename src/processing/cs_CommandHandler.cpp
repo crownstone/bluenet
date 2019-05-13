@@ -376,7 +376,7 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveState(buffer_ptr_t buffer, const
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	event_t event(CS_TYPE::EVT_KEEP_ALIVE, buffer, size);
+	event_t event(CS_TYPE::EVT_KEEP_ALIVE_STATE, buffer, size);
 	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
@@ -385,7 +385,15 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveRepeatLast(buffer_ptr_t buffer, 
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "mesh keep alive repeat");
 //#if BUILD_MESHING == 1
-
+	cs_mesh_msg_t meshMsg;
+	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(0);
+	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
+	bool success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE, NULL, 0, meshMsg.msg, meshMsg.size);
+	if (success) {
+		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+		EventDispatcher::getInstance().dispatch(cmd);
+	}
+	free(meshMsg.msg);
 //#endif
 	return ERR_SUCCESS;
 }
@@ -395,13 +403,13 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveMesh(buffer_ptr_t buffer, const 
 	LOGi(STR_HANDLE_COMMAND, "mesh keep alive");
 //#if BUILD_MESHING == 1
 	cs_mesh_model_msg_keep_alive_t* keepAlivePacket = (cs_mesh_model_msg_keep_alive_t*)buffer;
-	if (!MeshModelPacketHelper::keepAliveIsValid(keepAlivePacket, size)) {
+	if (!MeshModelPacketHelper::keepAliveStateIsValid(keepAlivePacket, size)) {
 		return ERR_INVALID_MESSAGE;
 	}
 	cs_mesh_msg_t meshMsg;
 	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(size);
 	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
-	bool success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE, (uint8_t*)keepAlivePacket, size, meshMsg.msg, meshMsg.size);
+	bool success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE, (uint8_t*)keepAlivePacket, size, meshMsg.msg, meshMsg.size);
 	if (success) {
 		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 		EventDispatcher::getInstance().dispatch(cmd);
