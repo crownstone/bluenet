@@ -16,7 +16,7 @@ extern "C" {
 class MeshModel {
 public:
 	void init();
-	cs_ret_code_t sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats=3);
+	cs_ret_code_t sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats=1);
 
 	access_model_handle_t getAccessModelHandle();
 
