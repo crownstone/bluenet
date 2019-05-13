@@ -22,6 +22,10 @@ void EventDispatcher::dispatch(event_t & event) {
 #ifdef PRINT_EVENTDISPATCHER_VERBOSE
 	LOGi("dispatch event: %d", event.type);
 #endif
+	if (event.size != TypeSize(event.type)) {
+		LOGe("Invalid size! type=%u size=%u should be %u", to_underlying_type(event.type), event.size, TypeSize(event.type));
+		return;
+	}
 
 	for (int i = 0; i < _listenerCount; i++) {
 		_listeners[i]->handleEvent(event);

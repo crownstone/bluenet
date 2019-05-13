@@ -228,10 +228,6 @@ bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& ser
 
 
 void ServiceData::handleEvent(event_t & event) {
-	if (event.size != TypeSize(event.type)) {
-		LOGe("Invalid size! type=%u size=%u", to_underlying_type(event.type), event.size);
-		return;
-	}
 	// Keep track of the BLE connection status. If we are connected we do not need to update the packet.
 	switch(event.type) {
 		case CS_TYPE::EVT_BLE_CONNECT: {
