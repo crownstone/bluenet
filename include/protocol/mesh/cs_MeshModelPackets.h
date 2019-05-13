@@ -22,11 +22,13 @@ enum cs_mesh_model_opcode_t {
 /**
  * Max message size.
  * TODO: define a max per type, since the mesh supports variable length messages.
- * When you send packets that are longer than 11 bytes, they will be sent as segmented packets.
- * The minimum advertising interval that mesh are using now is 20ms, so you can't send any faster than 20ms.
- * About 3 parts, fits a multi switch message with 5 items.
+ * When you send packets that are longer than 15? bytes (including opCode of 1-3B, and MIC of 4 or 8B), they will be sent
+ * as segmented packets of 12? byte each.
+ * See https://devzone.nordicsemi.com/f/nordic-q-a/32854/max-size-of-data-to-send-from-one-node-to-other-ble-mesh
+ * Multi switch message with 5 items is 28 + 3 (opCode) + 4 (MIC) = 35, so 3 segments.
+ * The minimum advertising interval that mesh are using now is 20ms, so each advertisement / segment, takes 20ms.
  */
-#define MAX_MESH_MSG_SIZE 30
+#define MAX_MESH_MSG_SIZE (3 * 12 - 3 - 4)
 
 /**
  * Size of the header of each mesh model message.
