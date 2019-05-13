@@ -91,8 +91,8 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		LOGw("Invalid mesh message");
 		return;
 	}
-	uint8_t* payload = NULL;
 	cs_mesh_model_msg_type_t msgType = MeshModelPacketHelper::getType(msg);
+	uint8_t* payload;
 	size16_t payloadSize;
 	MeshModelPacketHelper::getPayload(msg, size, payload, payloadSize);
 
@@ -119,7 +119,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		cs_mesh_model_msg_multi_switch_t* packet = (cs_mesh_model_msg_multi_switch_t*)payload;
 		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
-		cs_mesh_model_msg_multi_switch_item_t* item = NULL;
+		cs_mesh_model_msg_multi_switch_item_t* item;
 		if (MeshModelPacketHelper::multiSwitchHasItem(packet, myId, item)) {
 			event_t event(CS_TYPE::CMD_MULTI_SWITCH, item, sizeof(*item));
 			EventDispatcher::getInstance().dispatch(event);
@@ -130,7 +130,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		cs_mesh_model_msg_keep_alive_t* packet = (cs_mesh_model_msg_keep_alive_t*)payload;
 		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
-		cs_mesh_model_msg_keep_alive_item_t* item = NULL;
+		cs_mesh_model_msg_keep_alive_item_t* item;
 		if (MeshModelPacketHelper::keepAliveHasItem(packet, myId, item)) {
 			keep_alive_state_message_payload_t keepAlive;
 			if (item->actionSwitchCmd == 255) {

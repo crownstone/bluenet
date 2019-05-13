@@ -29,7 +29,7 @@ cs_mesh_model_msg_type_t getType(const uint8_t* meshMsg);
  * @param[out]     payload        Set to payload.
  * @param[out]     payloadSize    Set to size of the payload.
  */
-void getPayload(uint8_t* meshMsg, size16_t meshMsgSize, uint8_t* payload, size16_t& payloadSize);
+void getPayload(uint8_t* meshMsg, size16_t meshMsgSize, uint8_t*& payload, size16_t& payloadSize);
 
 size16_t getMeshMessageSize(size16_t payloadSize);
 
@@ -41,12 +41,23 @@ size16_t getMeshMessageSize(size16_t payloadSize);
  * @param[in]      type           Payload type.
  * @param[in]      payload        Payload packet.
  * @param[in]      payloadSize    Size of the payload.
- * @param[in,out]  meshMsg        Mesh message that can be sent over the mesh, must already be allocated.
+ * @param[in,out]  meshMsg        Mesh message, must already be allocated.
  * @param[in,out]  meshMsgSize    Size of allocated the mesh message, set to size of the message on success.
  * @retval                        True on success.
  */
 bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size16_t payloadSize, uint8_t* meshMsg, size16_t& meshMsgSize);
 
+/**
+ * Set payload of a mesh message.
+ *
+ * Copies the payload into the mesh message.
+ * Assumes payload is valid.
+ * @param[in]      payload        Payload packet.
+ * @param[in]      payloadSize    Size of the payload.
+ * @param[in,out]  meshMsg        Mesh message, must already be allocated.
+ * @param[in,out]  meshMsgSize    Size of allocated the mesh message, set to size of the message on success.
+ * @retval                        True on success.
+ */
 bool setMeshPayload(uint8_t* meshMsg, size16_t meshMsgSize, const uint8_t* payload, size16_t payloadSize);
 
 /**
@@ -58,7 +69,7 @@ bool setMeshPayload(uint8_t* meshMsg, size16_t meshMsgSize, const uint8_t* paylo
  * @param[out] item     Set to item with given stoneId.
  * @retval              true when stone id was found.
  */
-bool multiSwitchHasItem(cs_mesh_model_msg_multi_switch_t* packet, stone_id_t stoneId, cs_mesh_model_msg_multi_switch_item_t* item);
-bool keepAliveHasItem(cs_mesh_model_msg_keep_alive_t* packet, stone_id_t stoneId, cs_mesh_model_msg_keep_alive_item_t* item);
+bool multiSwitchHasItem(cs_mesh_model_msg_multi_switch_t* packet, stone_id_t stoneId, cs_mesh_model_msg_multi_switch_item_t*& item);
+bool keepAliveHasItem(cs_mesh_model_msg_keep_alive_t* packet, stone_id_t stoneId, cs_mesh_model_msg_keep_alive_item_t*& item);
 
 }
