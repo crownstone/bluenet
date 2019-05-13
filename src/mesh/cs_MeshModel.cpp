@@ -87,14 +87,14 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	uint8_t* msg = (uint8_t*)(accessMsg->p_data);
 	uint16_t size = accessMsg->length;
 	BLEutil::printArray(msg, size);
-	if (!CSMeshModel::isValidMeshMessage(msg, size)) {
+	if (!MeshModelPacketHelper::isValidMeshMessage(msg, size)) {
 		LOGw("Invalid mesh message");
 		return;
 	}
-	cs_mesh_model_msg_type_t msgType = CSMeshModel::getType(msg);
 	uint8_t* payload = NULL;
+	cs_mesh_model_msg_type_t msgType = MeshModelPacketHelper::getType(msg);
 	size16_t payloadSize;
-	CSMeshModel::getPayload(msg, size, payload, payloadSize);
+	MeshModelPacketHelper::getPayload(msg, size, payload, payloadSize);
 
 	switch (msgType) {
 	case CS_MESH_MODEL_TYPE_STATE_TIME: {
@@ -120,7 +120,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 		cs_mesh_model_msg_multi_switch_item_t* item = NULL;
-		if (CSMeshModel::multiSwitchHasItem(packet, myId, item)) {
+		if (MeshModelPacketHelper::multiSwitchHasItem(packet, myId, item)) {
 			event_t event(CS_TYPE::CMD_MULTI_SWITCH, item, sizeof(*item));
 			EventDispatcher::getInstance().dispatch(event);
 		}
@@ -131,7 +131,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 		cs_mesh_model_msg_keep_alive_item_t* item = NULL;
-		if (CSMeshModel::keepAliveHasItem(packet, myId, item)) {
+		if (MeshModelPacketHelper::keepAliveHasItem(packet, myId, item)) {
 			keep_alive_state_message_payload_t keepAlive;
 			if (item->actionSwitchCmd == 255) {
 				keepAlive.action = NO_CHANGE;

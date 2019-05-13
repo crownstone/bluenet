@@ -8,7 +8,7 @@
 #include "protocol/mesh/cs_MeshModelPacketHelper.h"
 #include <cstring> // For memcpy
 
-namespace CSMeshModel {
+namespace MeshModelPacketHelper {
 
 bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize) {
 	if (msgSize < MESH_HEADER_SIZE) {

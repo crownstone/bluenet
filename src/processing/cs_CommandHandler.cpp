@@ -395,13 +395,13 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveMesh(buffer_ptr_t buffer, const 
 	LOGi(STR_HANDLE_COMMAND, "mesh keep alive");
 //#if BUILD_MESHING == 1
 	cs_mesh_model_msg_keep_alive_t* keepAlivePacket = (cs_mesh_model_msg_keep_alive_t*)buffer;
-	if (!CSMeshModel::keepAliveIsValid(keepAlivePacket, size)) {
+	if (!MeshModelPacketHelper::keepAliveIsValid(keepAlivePacket, size)) {
 		return ERR_INVALID_MESSAGE;
 	}
 	cs_mesh_msg_t meshMsg;
-	meshMsg.size = CSMeshModel::getMeshMessageSize(size);
+	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(size);
 	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
-	bool success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE, (uint8_t*)keepAlivePacket, size, meshMsg.msg, meshMsg.size);
+	bool success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE, (uint8_t*)keepAlivePacket, size, meshMsg.msg, meshMsg.size);
 	if (success) {
 		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 		EventDispatcher::getInstance().dispatch(cmd);
@@ -546,13 +546,13 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 	LOGi(STR_HANDLE_COMMAND, "multi switch");
 //#if BUILD_MESHING == 1
 	cs_mesh_model_msg_multi_switch_t* multiSwitchPacket = (cs_mesh_model_msg_multi_switch_t*)buffer;
-	if (!CSMeshModel::multiSwitchIsValid(multiSwitchPacket, size)) {
+	if (!MeshModelPacketHelper::multiSwitchIsValid(multiSwitchPacket, size)) {
 		return ERR_INVALID_MESSAGE;
 	}
 	cs_mesh_msg_t meshMsg;
-	meshMsg.size = CSMeshModel::getMeshMessageSize(size);
+	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(size);
 	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
-	bool success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, (uint8_t*)multiSwitchPacket, size, meshMsg.msg, meshMsg.size);
+	bool success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, (uint8_t*)multiSwitchPacket, size, meshMsg.msg, meshMsg.size);
 	if (success) {
 		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 		EventDispatcher::getInstance().dispatch(cmd);
@@ -612,14 +612,14 @@ cs_ret_code_t CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const ui
 
 	bool success = false;
 	cs_mesh_msg_t meshMsg;
-	meshMsg.size = CSMeshModel::getMeshMessageSize(payloadSize);
+	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(payloadSize);
 	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
 	switch (buffer[3]) {
 	case CTRL_CMD_NOP:
-		success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_NOOP, payload, payloadSize, meshMsg.msg, meshMsg.size);
+		success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_NOOP, payload, payloadSize, meshMsg.msg, meshMsg.size);
 		break;
 	case CTRL_CMD_SET_TIME:
-		success = CSMeshModel::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_TIME, payload, payloadSize, meshMsg.msg, meshMsg.size);
+		success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_TIME, payload, payloadSize, meshMsg.msg, meshMsg.size);
 		break;
 	}
 	if (success) {

@@ -10,7 +10,7 @@
 #include "protocol/mesh/cs_MeshModelPackets.h"
 #include "protocol/cs_Typedefs.h"
 
-namespace CSMeshModel {
+namespace MeshModelPacketHelper {
 
 bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize);
 bool timeIsValid(const cs_mesh_model_msg_time_t* msg, size16_t msgSize);
