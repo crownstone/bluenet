@@ -200,6 +200,9 @@
 /** Number of the allowed parallel transfers (size of the internal context pool). */
 #define ACCESS_RELIABLE_TRANSFER_COUNT (ACCESS_MODEL_COUNT)
 
+/** Define for acknowledging message transaction timeout, in micro seconds. */
+#define MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT  (SEC_TO_US(3))
+
 /** @} end of ACCESS_RELIABLE_CONFIG */
 
 

@@ -17,6 +17,8 @@
  */
 enum cs_mesh_model_opcode_t {
 	CS_MESH_MODEL_OPCODE_MSG = 0xC0,
+	CS_MESH_MODEL_OPCODE_RELIABLE_MSG = 0xC1,
+	CS_MESH_MODEL_OPCODE_REPLY = 0xC2,
 };
 
 /**
@@ -36,16 +38,21 @@ enum cs_mesh_model_opcode_t {
  */
 #define MESH_HEADER_SIZE 1
 enum cs_mesh_model_msg_type_t {
-	CS_MESH_MODEL_TYPE_STATE_TIME = 0,        // Payload: cs_mesh_model_msg_time_t
-	CS_MESH_MODEL_TYPE_CMD_TIME = 1,          // Payload: cs_mesh_model_msg_time_t
-	CS_MESH_MODEL_TYPE_CMD_NOOP = 2,          // Payload: none
-	CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH = 3,  // Payload: cs_mesh_model_msg_multi_switch_t
-	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE = 4, // Payload: cs_mesh_model_msg_keep_alive_t
-	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE = 5,    // Payload: none
+	CS_MESH_MODEL_TYPE_TEST = 0,              // Payload: cs_mesh_model_msg_test_t
+	CS_MESH_MODEL_TYPE_ACK = 1,               // Payload: none
+	CS_MESH_MODEL_TYPE_STATE_TIME = 2,        // Payload: cs_mesh_model_msg_time_t
+	CS_MESH_MODEL_TYPE_CMD_TIME = 3,          // Payload: cs_mesh_model_msg_time_t
+	CS_MESH_MODEL_TYPE_CMD_NOOP = 4,          // Payload: none
+	CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH = 5,  // Payload: cs_mesh_model_msg_multi_switch_t
+	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE = 6, // Payload: cs_mesh_model_msg_keep_alive_t
+	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE = 7,    // Payload: none
 };
 
 
-
+struct __attribute__((__packed__)) cs_mesh_model_msg_test_t {
+	uint32_t counter;
+	uint32_t dummy[3];
+};
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_time_t {
 	uint32_t timestamp;

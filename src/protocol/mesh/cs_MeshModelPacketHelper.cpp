@@ -9,7 +9,7 @@
 #include "drivers/cs_Serial.h"
 #include <cstring> // For memcpy
 
-#define LOGMeshModelPacketHelperDebug LOGd
+#define LOGMeshModelPacketHelperDebug LOGnone
 
 namespace MeshModelPacketHelper {
 
@@ -22,6 +22,10 @@ bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize) {
 	getPayload(meshMsg, msgSize, payload, payloadSize);
 	LOGMeshModelPacketHelperDebug("meshMsg=%p size=%u type=%u payload=%p size=%u", meshMsg, msgSize, getType(meshMsg), payload, payloadSize);
 	switch (getType(meshMsg)) {
+	case CS_MESH_MODEL_TYPE_TEST:
+		return testIsValid((cs_mesh_model_msg_test_t*)payload, payloadSize);
+	case CS_MESH_MODEL_TYPE_ACK:
+		return ackIsValid(payload, payloadSize);
 	case CS_MESH_MODEL_TYPE_STATE_TIME:
 		return timeIsValid((cs_mesh_model_msg_time_t*)payload, payloadSize);
 	case CS_MESH_MODEL_TYPE_CMD_TIME:
@@ -38,60 +42,68 @@ bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize) {
 	return false;
 }
 
-bool timeIsValid(const cs_mesh_model_msg_time_t* msg, size16_t msgSize) {
-	return msgSize == sizeof(cs_mesh_model_msg_time_t);
+bool testIsValid(const cs_mesh_model_msg_test_t* packet, size16_t size) {
+	return size == sizeof(cs_mesh_model_msg_test_t);
 }
 
-bool noopIsValid(const uint8_t* msg, size16_t msgSize) {
-	return msgSize == 0;
+bool ackIsValid(const uint8_t* packet, size16_t size) {
+	return size == 0;
 }
 
-bool multiSwitchIsValid(const cs_mesh_model_msg_multi_switch_t* msg, size16_t msgSize) {
-	if (msgSize < MESH_MESH_MULTI_SWITCH_HEADER_SIZE) {
-		LOGMeshModelPacketHelperDebug("size=%u < header=%u", msgSize, MESH_MESH_MULTI_SWITCH_HEADER_SIZE);
+bool timeIsValid(const cs_mesh_model_msg_time_t* packet, size16_t size) {
+	return size == sizeof(cs_mesh_model_msg_time_t);
+}
+
+bool noopIsValid(const uint8_t* packet, size16_t size) {
+	return size == 0;
+}
+
+bool multiSwitchIsValid(const cs_mesh_model_msg_multi_switch_t* packet, size16_t size) {
+	if (size < MESH_MESH_MULTI_SWITCH_HEADER_SIZE) {
+		LOGMeshModelPacketHelperDebug("size=%u < header=%u", size, MESH_MESH_MULTI_SWITCH_HEADER_SIZE);
 		return false;
 	}
-	if (msg->type != 0) {
-		LOGMeshModelPacketHelperDebug("type=%u != 0", msg->type);
+	if (packet->type != 0) {
+		LOGMeshModelPacketHelperDebug("type=%u != 0", packet->type);
 		return false;
 	}
-	if (msg->count > MESH_MESH_MULTI_SWITCH_MAX_ITEM_COUNT) {
-		LOGMeshModelPacketHelperDebug("count=%u > max=%u", msg->count, MESH_MESH_MULTI_SWITCH_MAX_ITEM_COUNT);
+	if (packet->count > MESH_MESH_MULTI_SWITCH_MAX_ITEM_COUNT) {
+		LOGMeshModelPacketHelperDebug("count=%u > max=%u", packet->count, MESH_MESH_MULTI_SWITCH_MAX_ITEM_COUNT);
 		return false;
 	}
-	if (msgSize < MESH_MESH_MULTI_SWITCH_HEADER_SIZE + msg->count * sizeof(cs_mesh_model_msg_multi_switch_item_t)) {
-		LOGMeshModelPacketHelperDebug("size=%u < header=%u + count=%u * itemSize=%u", msgSize, MESH_MESH_MULTI_SWITCH_HEADER_SIZE, msg->count, sizeof(cs_mesh_model_msg_multi_switch_item_t));
+	if (size < MESH_MESH_MULTI_SWITCH_HEADER_SIZE + packet->count * sizeof(cs_mesh_model_msg_multi_switch_item_t)) {
+		LOGMeshModelPacketHelperDebug("size=%u < header=%u + count=%u * itemSize=%u", size, MESH_MESH_MULTI_SWITCH_HEADER_SIZE, packet->count, sizeof(cs_mesh_model_msg_multi_switch_item_t));
 		return false;
 	}
 	return true;
 }
 
-bool keepAliveStateIsValid(const cs_mesh_model_msg_keep_alive_t* msg, size16_t msgSize) {
-	if (msgSize < MESH_MESH_KEEP_ALIVE_HEADER_SIZE) {
-		LOGMeshModelPacketHelperDebug("size=%u < header=%u", msgSize, MESH_MESH_KEEP_ALIVE_HEADER_SIZE);
+bool keepAliveStateIsValid(const cs_mesh_model_msg_keep_alive_t* packet, size16_t size) {
+	if (size < MESH_MESH_KEEP_ALIVE_HEADER_SIZE) {
+		LOGMeshModelPacketHelperDebug("size=%u < header=%u", size, MESH_MESH_KEEP_ALIVE_HEADER_SIZE);
 		return false;
 	}
-	if (msg->type != 1) {
-		LOGMeshModelPacketHelperDebug("type=%u != 1", msg->type);
+	if (packet->type != 1) {
+		LOGMeshModelPacketHelperDebug("type=%u != 1", packet->type);
 		return false;
 	}
-	if (msg->timeout == 0) {
+	if (packet->timeout == 0) {
 		LOGMeshModelPacketHelperDebug("timeout = 0");
 		return false;
 	}
-	if (msg->count > MESH_MESH_KEEP_ALIVE_MAX_ITEM_COUNT) {
-		LOGMeshModelPacketHelperDebug("count=%u > max=%u", msg->count, MESH_MESH_KEEP_ALIVE_MAX_ITEM_COUNT);
+	if (packet->count > MESH_MESH_KEEP_ALIVE_MAX_ITEM_COUNT) {
+		LOGMeshModelPacketHelperDebug("count=%u > max=%u", packet->count, MESH_MESH_KEEP_ALIVE_MAX_ITEM_COUNT);
 		return false;
 	}
-	if (msgSize < MESH_MESH_KEEP_ALIVE_HEADER_SIZE + msg->count * sizeof(cs_mesh_model_msg_keep_alive_item_t)) {
-		LOGMeshModelPacketHelperDebug("size=%u < header=%u + count=%u * itemSize=%u", msgSize, MESH_MESH_KEEP_ALIVE_HEADER_SIZE, msg->count, sizeof(cs_mesh_model_msg_keep_alive_item_t));
+	if (size < MESH_MESH_KEEP_ALIVE_HEADER_SIZE + packet->count * sizeof(cs_mesh_model_msg_keep_alive_item_t)) {
+		LOGMeshModelPacketHelperDebug("size=%u < header=%u + count=%u * itemSize=%u", size, MESH_MESH_KEEP_ALIVE_HEADER_SIZE, packet->count, sizeof(cs_mesh_model_msg_keep_alive_item_t));
 		return false;
 	}
 	return true;
 }
 
-bool keepAliveIsValid(const uint8_t* msg, size16_t msgSize) {
-	return msgSize == 0;
+bool keepAliveIsValid(const uint8_t* packet, size16_t size) {
+	return size == 0;
 }
 
 

@@ -13,11 +13,13 @@
 namespace MeshModelPacketHelper {
 
 bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize);
-bool timeIsValid(const cs_mesh_model_msg_time_t* msg, size16_t msgSize);
-bool noopIsValid(const uint8_t* msg, size16_t msgSize);
-bool multiSwitchIsValid(const cs_mesh_model_msg_multi_switch_t* msg, size16_t msgSize);
-bool keepAliveStateIsValid(const cs_mesh_model_msg_keep_alive_t* msg, size16_t msgSize);
-bool keepAliveIsValid(const uint8_t* msg, size16_t msgSize);
+bool testIsValid(const cs_mesh_model_msg_test_t* packet, size16_t size);
+bool ackIsValid(const uint8_t* packet, size16_t size);
+bool timeIsValid(const cs_mesh_model_msg_time_t* packet, size16_t size);
+bool noopIsValid(const uint8_t* packet, size16_t size);
+bool multiSwitchIsValid(const cs_mesh_model_msg_multi_switch_t* packet, size16_t size);
+bool keepAliveStateIsValid(const cs_mesh_model_msg_keep_alive_t* packet, size16_t size);
+bool keepAliveIsValid(const uint8_t* packet, size16_t size);
 
 cs_mesh_model_msg_type_t getType(const uint8_t* meshMsg);
 

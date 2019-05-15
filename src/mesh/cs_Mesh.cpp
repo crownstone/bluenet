@@ -32,171 +32,97 @@ extern "C" {
 #include "ble/cs_Stack.h"
 #include "events/cs_EventDispatcher.h"
 
-
-//static void generic_onoff_state_get_cb(const generic_onoff_server_t * p_self,
-//                                       const access_message_rx_meta_t * p_meta,
-//                                       generic_onoff_status_params_t * p_out);
-//static void generic_onoff_state_set_cb(const generic_onoff_server_t * p_self,
-//                                       const access_message_rx_meta_t * p_meta,
-//                                       const generic_onoff_set_params_t * p_in,
-//                                       const model_transition_t * p_in_transition,
-//                                       generic_onoff_status_params_t * p_out);
-//
-//static void generic_onoff_state_get_cb(const generic_onoff_server_t * p_self,
-//                                       const access_message_rx_meta_t * p_meta,
-//                                       generic_onoff_status_params_t * p_out)
-//{
-//    LOGi("msg: GET");
-//
-//    app_onoff_server_t   * p_server = PARENT_BY_FIELD_GET(app_onoff_server_t, server, p_self);
-//
-//    /* Requirement: Provide the current value of the OnOff state */
-//    p_server->onoff_get_cb(p_server, &p_server->state.present_onoff);
-//    p_out->present_on_off = p_server->state.present_onoff;
-//    p_out->target_on_off = p_server->state.target_onoff;
-//
-//    /* Requirement: Always report remaining time */
-//    if (p_server->state.remaining_time_ms > 0 && p_server->state.delay_ms == 0)
-//    {
-//        uint32_t delta = (1000ul * app_timer_cnt_diff_compute(app_timer_cnt_get(), p_server->last_rtc_counter)) / APP_TIMER_CLOCK_FREQ;
-//        if (p_server->state.remaining_time_ms >= delta && delta > 0)
-//        {
-//            p_out->remaining_time_ms = p_server->state.remaining_time_ms - delta;
-//        }
-//        else
-//        {
-//            p_out->remaining_time_ms = 0;
-//        }
-//    }
-//    else
-//    {
-//        p_out->remaining_time_ms = p_server->state.remaining_time_ms;
-//    }
-//}
-//
-//static void generic_onoff_state_set_cb(const generic_onoff_server_t * p_self,
-//                                       const access_message_rx_meta_t * p_meta,
-//                                       const generic_onoff_set_params_t * p_in,
-//                                       const model_transition_t * p_in_transition,
-//                                       generic_onoff_status_params_t * p_out)
-//{
-//    LOGi("msg: SET: %d\n", p_in->on_off);
-//
-//    app_onoff_server_t   * p_server = PARENT_BY_FIELD_GET(app_onoff_server_t, server, p_self);
-//
-//    /* Update internal representation of OnOff value, process timing */
-//    p_server->value_updated = false;
-//    p_server->state.target_onoff = p_in->on_off;
-//    if (p_in_transition == NULL)
-//    {
-//        p_server->state.delay_ms = 0;
-//        p_server->state.remaining_time_ms = 0;
-//    }
-//    else
-//    {
-//        p_server->state.delay_ms = p_in_transition->delay_ms;
-//        p_server->state.remaining_time_ms = p_in_transition->transition_time_ms;
-//    }
-//
-//    onoff_state_value_update(p_server);
-//    onoff_state_process_timing(p_server);
-//
-//    /* Prepare response */
-//    if (p_out != NULL)
-//    {
-//        p_out->present_on_off = p_server->state.present_onoff;
-//        p_out->target_on_off = p_server->state.target_onoff;
-//        p_out->remaining_time_ms = p_server->state.remaining_time_ms;
-//    }
-//}
-
+#define LOGMeshDebug LOGnone
 
 static void cs_mesh_event_handler(const nrf_mesh_evt_t * p_evt) {
 //	LOGi("Mesh event type=%u", p_evt->type);
 	switch(p_evt->type) {
 	case NRF_MESH_EVT_MESSAGE_RECEIVED:
-		LOGi("NRF_MESH_EVT_MESSAGE_RECEIVED");
+		LOGMeshDebug("NRF_MESH_EVT_MESSAGE_RECEIVED");
+//		LOGi("NRF_MESH_EVT_MESSAGE_RECEIVED");
+//		LOGi("src=%u data:", p_evt->params.message.p_metadata->source);
+//		BLEutil::printArray(p_evt->params.message.p_buffer, p_evt->params.message.length);
 		break;
 	case NRF_MESH_EVT_TX_COMPLETE:
-		LOGi("NRF_MESH_EVT_TX_COMPLETE");
+		LOGMeshDebug("NRF_MESH_EVT_TX_COMPLETE");
 		break;
 	case NRF_MESH_EVT_IV_UPDATE_NOTIFICATION:
-		LOGi("NRF_MESH_EVT_IV_UPDATE_NOTIFICATION");
+		LOGMeshDebug("NRF_MESH_EVT_IV_UPDATE_NOTIFICATION");
 		break;
 	case NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION:
-		LOGi("NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION");
+		LOGMeshDebug("NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION");
 		break;
 	case NRF_MESH_EVT_NET_BEACON_RECEIVED:
-		LOGi("NRF_MESH_EVT_NET_BEACON_RECEIVED");
+		LOGMeshDebug("NRF_MESH_EVT_NET_BEACON_RECEIVED");
 		break;
 	case NRF_MESH_EVT_HB_MESSAGE_RECEIVED:
-		LOGi("NRF_MESH_EVT_HB_MESSAGE_RECEIVED");
+		LOGMeshDebug("NRF_MESH_EVT_HB_MESSAGE_RECEIVED");
 		break;
 	case NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE:
-		LOGi("NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE");
+		LOGMeshDebug("NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE");
 		break;
 	case NRF_MESH_EVT_DFU_REQ_RELAY:
-		LOGi("NRF_MESH_EVT_DFU_REQ_SOURCE");
+		LOGMeshDebug("NRF_MESH_EVT_DFU_REQ_SOURCE");
 		break;
 	case NRF_MESH_EVT_DFU_REQ_SOURCE:
-		LOGi("NRF_MESH_EVT_DFU_REQ_SOURCE");
+		LOGMeshDebug("NRF_MESH_EVT_DFU_REQ_SOURCE");
 		break;
 	case NRF_MESH_EVT_DFU_START:
-		LOGi("NRF_MESH_EVT_DFU_START");
+		LOGMeshDebug("NRF_MESH_EVT_DFU_START");
 		break;
 	case NRF_MESH_EVT_DFU_END:
-		LOGi("NRF_MESH_EVT_DFU_END");
+		LOGMeshDebug("NRF_MESH_EVT_DFU_END");
 		break;
 	case NRF_MESH_EVT_DFU_BANK_AVAILABLE:
-		LOGi("NRF_MESH_EVT_DFU_BANK_AVAILABLE");
+		LOGMeshDebug("NRF_MESH_EVT_DFU_BANK_AVAILABLE");
 		break;
 	case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED:
-		LOGi("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED");
+		LOGMeshDebug("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED");
 		break;
 	case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH:
-		LOGi("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH");
+		LOGMeshDebug("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH");
 		break;
 	case NRF_MESH_EVT_FLASH_STABLE:
-		LOGi("NRF_MESH_EVT_FLASH_STABLE");
+		LOGMeshDebug("NRF_MESH_EVT_FLASH_STABLE");
 		break;
 	case NRF_MESH_EVT_RX_FAILED:
-		LOGi("NRF_MESH_EVT_RX_FAILED");
+		LOGMeshDebug("NRF_MESH_EVT_RX_FAILED");
 		break;
 	case NRF_MESH_EVT_SAR_FAILED:
-		LOGi("NRF_MESH_EVT_SAR_FAILED");
+		LOGMeshDebug("NRF_MESH_EVT_SAR_FAILED");
 		break;
 	case NRF_MESH_EVT_FLASH_FAILED:
-		LOGi("NRF_MESH_EVT_FLASH_FAILED");
+		LOGMeshDebug("NRF_MESH_EVT_FLASH_FAILED");
 		break;
 	case NRF_MESH_EVT_CONFIG_STABLE:
-		LOGi("NRF_MESH_EVT_CONFIG_STABLE");
+		LOGMeshDebug("NRF_MESH_EVT_CONFIG_STABLE");
 		break;
 	case NRF_MESH_EVT_CONFIG_STORAGE_FAILURE:
-		LOGi("NRF_MESH_EVT_CONFIG_STORAGE_FAILURE");
+		LOGMeshDebug("NRF_MESH_EVT_CONFIG_STORAGE_FAILURE");
 		break;
 	case NRF_MESH_EVT_CONFIG_LOAD_FAILURE:
-		LOGi("NRF_MESH_EVT_CONFIG_LOAD_FAILURE");
+		LOGMeshDebug("NRF_MESH_EVT_CONFIG_LOAD_FAILURE");
 		break;
 	case NRF_MESH_EVT_LPN_FRIEND_OFFER:
-		LOGi("NRF_MESH_EVT_LPN_FRIEND_OFFER");
+		LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_OFFER");
 		break;
 	case NRF_MESH_EVT_LPN_FRIEND_UPDATE:
-		LOGi("NRF_MESH_EVT_LPN_FRIEND_UPDATE");
+		LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_UPDATE");
 		break;
 	case NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT:
-		LOGi("NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT");
+		LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT");
 		break;
 	case NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE:
-		LOGi("NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE");
+		LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE");
 		break;
 	case NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED:
-		LOGi("NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED");
+		LOGMeshDebug("NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED");
 		break;
 	case NRF_MESH_EVT_FRIENDSHIP_TERMINATED:
-		LOGi("NRF_MESH_EVT_FRIENDSHIP_TERMINATED");
+		LOGMeshDebug("NRF_MESH_EVT_FRIENDSHIP_TERMINATED");
 		break;
 	case NRF_MESH_EVT_DISABLED:
-		LOGi("NRF_MESH_EVT_DISABLED");
+		LOGMeshDebug("NRF_MESH_EVT_DISABLED");
 		break;
 	}
 }
@@ -204,90 +130,7 @@ static nrf_mesh_evt_handler_t cs_mesh_event_handler_struct = {
 		cs_mesh_event_handler
 };
 
-static void app_onoff_server_set_cb(const app_onoff_server_t * p_server, bool onoff);
-static void app_onoff_server_get_cb(const app_onoff_server_t * p_server, bool * p_present_onoff);
-static bool switchVal = false;
 
-/* Callback for updating the hardware state */
-static void app_onoff_server_set_cb(const app_onoff_server_t * p_server, bool onoff)
-{
-	/* Resolve the server instance here if required, this example uses only 1 instance. */
-	LOGi("Set switch: %d", onoff);
-	switchVal = onoff;
-}
-
-/* Callback for reading the hardware state */
-static void app_onoff_server_get_cb(const app_onoff_server_t * p_server, bool * p_present_onoff)
-{
-	*p_present_onoff = switchVal;
-}
-
-
-static void device_identification_start_cb(uint8_t attention_duration_s)
-{
-	LOGi("device identification start");
-}
-
-static void provisioning_aborted_cb(void)
-{
-	LOGi("provisioning aborted");
-}
-
-static void provisioning_complete_cb(void) {
-	LOGi("provisioning complete");
-
-	dsm_local_unicast_address_t node_address;
-	dsm_local_unicast_addresses_get(&node_address);
-	LOGi("Node Address: 0x%04x", node_address.address_start);
-}
-
-
-
-
-static void app_gen_onoff_client_publish_interval_cb(access_model_handle_t handle, void * p_self);
-static void app_generic_onoff_client_status_cb(const generic_onoff_client_t * p_self,
-                                               const access_message_rx_meta_t * p_meta,
-                                               const generic_onoff_status_params_t * p_in);
-static void app_gen_onoff_client_transaction_status_cb(access_model_handle_t model_handle,
-                                                       void * p_args,
-                                                       access_reliable_status_t status);
-
-/* This callback is called periodically if model is configured for periodic publishing */
-static void app_gen_onoff_client_publish_interval_cb(access_model_handle_t handle, void * p_self) {
-	LOGw("Publish desired message here.");
-}
-
-/* Generic OnOff client model interface: Process the received status message in this callback */
-static void app_generic_onoff_client_status_cb(const generic_onoff_client_t * p_self,
-                                               const access_message_rx_meta_t * p_meta,
-                                               const generic_onoff_status_params_t * p_in)
-{
-	LOGi("status: state=%u target=%u remaining_time=%u", p_in->present_on_off, p_in->target_on_off, p_in->remaining_time_ms);
-}
-
-/* Acknowledged transaction status callback, if acknowledged transfer fails, application can
-* determine suitable course of action (e.g. re-initiate previous transaction) by using this
-* callback.
-*/
-static void app_gen_onoff_client_transaction_status_cb(access_model_handle_t model_handle,
-                                                       void * p_args,
-                                                       access_reliable_status_t status)
-{
-	switch(status) {
-	case ACCESS_RELIABLE_TRANSFER_SUCCESS:
-		LOGi("Acknowledged transfer success.");
-		break;
-	case ACCESS_RELIABLE_TRANSFER_TIMEOUT:
-		LOGi("Acknowledged transfer timeout.");
-		break;
-	case ACCESS_RELIABLE_TRANSFER_CANCELLED:
-		LOGi("Acknowledged transfer cancelled.");
-		break;
-	default:
-		APP_ERROR_CHECK(NRF_ERROR_INTERNAL);
-		break;
-	}
-}
 
 static void config_server_evt_cb(const config_server_evt_t * p_evt) {
 	if (p_evt->type == CONFIG_SERVER_EVT_NODE_RESET) {
@@ -297,12 +140,7 @@ static void config_server_evt_cb(const config_server_evt_t * p_evt) {
 	}
 }
 
-const generic_onoff_client_callbacks_t client_cbs =
-{
-		.onoff_status_cb = app_generic_onoff_client_status_cb,
-		.ack_transaction_status_cb = app_gen_onoff_client_transaction_status_cb,
-		.periodic_publish_cb = app_gen_onoff_client_publish_interval_cb
-};
+
 
 static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 	switch (p_rx_data->p_metadata->source) {
@@ -359,37 +197,13 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 
 void Mesh::modelsInitCallback() {
 	LOGi("Initializing and adding models");
-//	uint32_t retCode;
-//	uint8_t elementIndex = 0;
-//	for (uint32_t i = 0; i < CLIENT_MODEL_INSTANCE_COUNT; ++i) {
-//		_clients[i].settings.p_callbacks = &client_cbs;
-//		_clients[i].settings.timeout = 0;
-//		/* Controls if the model instance should force all mesh messages to be segmented messages. */
-//		_clients[i].settings.force_segmented = false;
-//		/* Controls the MIC size used by the model instance for sending the mesh messages. */
-//		_clients[i].settings.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
-//		retCode = generic_onoff_client_init(&_clients[i], elementIndex++);
-//		APP_ERROR_CHECK(retCode);
-//	}
-//
-//	// Server
-//	retCode = app_onoff_init(&_server, elementIndex++);
-//	APP_ERROR_CHECK(retCode);
-//	LOGi("Server handle: %d", _server.server.model_handle);
-
 	_model.init();
+	_model.setOwnAddress(_ownAddress);
 }
 
 
 Mesh::Mesh() {
-	_serverTimerData = { {0} };
-	_serverTimerId = &_serverTimerData;
 
-	_server.server.settings.force_segmented = false;
-	_server.server.settings.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
-	_server.p_timer_id = &_serverTimerId;
-	_server.onoff_set_cb = app_onoff_server_set_cb;
-	_server.onoff_get_cb = app_onoff_server_get_cb;
 }
 
 Mesh& Mesh::getInstance() {
@@ -417,6 +231,10 @@ void Mesh::init() {
 	init_params.models.models_init_cb   = staticModelsInitCallback;
 	init_params.models.config_server_cb = config_server_evt_cb;
 
+	TYPIFY(CONFIG_CROWNSTONE_ID) id;
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
+	_ownAddress = id;
+
 	uint32_t retCode = mesh_stack_init(&init_params, &_isProvisioned);
 	APP_ERROR_CHECK(retCode);
 	LOGi("Mesh isProvisioned=%u", _isProvisioned);
@@ -426,10 +244,8 @@ void Mesh::init() {
 	nrf_mesh_rx_cb_set(scan_cb);
 
 //	EventDispatcher::getInstance().addListener(this);
-	TYPIFY(CONFIG_CROWNSTONE_ID) id;
-	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
 	if (!_isProvisioned) {
-		provisionSelf(id);
+		provisionSelf(_ownAddress);
 	}
 	else {
 		provisionLoad();
@@ -569,8 +385,10 @@ void Mesh::handleEvent(event_t & event) {
 		else {
 //			Stack::getInstance().startScanning();
 		}
-//		uint8_t data[20] = { 0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9 };
-//		_model.sendMsg(data, sizeof(data), 1);
+//		static uint32_t tickCount = 0;
+//		if (++tickCount % 10 == 0) {
+			_model.sendTestMsg();
+//		}
 		break;
 	}
 	case CS_TYPE::CMD_SEND_MESH_MSG: {

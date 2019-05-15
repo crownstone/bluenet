@@ -64,7 +64,7 @@ void Watchdog::keepAlive() {
 		Timer::getInstance().reset(_keepAliveTimerId, MS_TO_TICKS(timeout), NULL);
 	}
 	else {
-		LOGw("No keep alive state found!!");
+		LOGWatchdogDebug("No keep alive state found!!");
 	}
 }
 

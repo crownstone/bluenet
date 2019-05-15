@@ -12,8 +12,6 @@
 #include "mesh/cs_MeshModel.h"
 
 extern "C" {
-#include <generic_onoff_client.h>
-#include <app_onoff.h>
 #include <nrf_mesh_config_app.h>
 #include <nrf_mesh_defines.h>
 #include <device_state_manager.h>
@@ -68,11 +66,9 @@ private:
 	void provisionSelf(uint16_t id);
 	void provisionLoad();
 
-	generic_onoff_client_t _clients[CLIENT_MODEL_INSTANCE_COUNT];
-	app_onoff_server_t _server;
-	app_timer_t _serverTimerData;
-	app_timer_id_t _serverTimerId;
 	bool _isProvisioned = false;
+	/** Address of this node */
+	uint16_t _ownAddress;
 
 	uint8_t _netkey[NRF_MESH_KEY_SIZE];
 	dsm_handle_t _netkeyHandle = DSM_HANDLE_INVALID;
