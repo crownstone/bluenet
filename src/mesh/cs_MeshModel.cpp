@@ -311,7 +311,7 @@ void MeshModel::sendTestMsg() {
 	cs_mesh_model_msg_test_t test;
 	test.counter = _nextSendCounter;
 	MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_TEST, (uint8_t*)&test, sizeof(test), msg, msgSize);
-	uint32_t retVal = sendMsg(msg, msgSize, 3);
+	uint32_t retVal = sendMsg(msg, msgSize, 8);
 //	uint32_t retVal = sendReliableMsg(msg, msgSize);
 	if (retVal != NRF_SUCCESS) {
 		LOGw("sendTestMsg retVal=%u", retVal);
@@ -327,14 +327,12 @@ void MeshModel::sendTestMsg() {
 
 /**
  * Add a msg to an empty spot in the queue (repeats == 0).
- * Start looking at SendIndex, then reverse iterate over the queue.
- * Then set the new SendIndex at the newly added item, so that it will be send first.
- * We do the reverse iterate, so that the old SendIndex should be handled early (for a large enough queue).
+ * Start looking at SendIndex, then iterate over the queue.
  */
 cs_ret_code_t MeshModel::addToQueue(const uint8_t* msg, size16_t msgSize, uint8_t repeats, bool reliable) {
 	uint8_t index;
-	LOGd("addToQueue sendInd=%u", _queueSendIndex);
-	for (int i = _queueSendIndex + MESH_MODEL_QUEUE_SIZE; i > _queueSendIndex; --i) {
+//	for (int i = _queueSendIndex + MESH_MODEL_QUEUE_SIZE; i > _queueSendIndex; --i) {
+	for (int i = _queueSendIndex; i < _queueSendIndex + MESH_MODEL_QUEUE_SIZE; ++i) {
 		index = i % 5;
 		cs_mesh_model_queued_msg_t* item = &(_queue[index]);
 		if (item->repeats == 0) {
@@ -342,7 +340,7 @@ cs_ret_code_t MeshModel::addToQueue(const uint8_t* msg, size16_t msgSize, uint8_
 			item->repeats = repeats;
 			item->msgSize = msgSize;
 			memcpy(item->msg, msg, msgSize);
-			_queueSendIndex = index;
+//			_queueSendIndex = index;
 			LOGd("added to ind=%u", index);
 			return ERR_SUCCESS;
 		}
@@ -354,7 +352,8 @@ cs_ret_code_t MeshModel::addToQueue(const uint8_t* msg, size16_t msgSize, uint8_
 /**
  * Check if there is a msg in queue with more than 0 repeats.
  * If so, send that message.
- * Start looking at index SendIndex as that item should be sent first.
+ * Start looking at index SendIndex as that item should be completed first.
+ * Once item at SendIndex is completed, check the next in queue.
  */
 void MeshModel::processQueue() {
 //	LOGd("processQueue sendInd=%u", _queueSendIndex);
@@ -363,7 +362,6 @@ void MeshModel::processQueue() {
 		index = _queueSendIndex;
 //		LOGd("check ind=%u", _queueSendIndex);
 		cs_mesh_model_queued_msg_t* item = &(_queue[_queueSendIndex]);
-		_queueSendIndex = (_queueSendIndex + 1) % MESH_MODEL_QUEUE_SIZE;
 		if (item->repeats > 0) {
 			if (item->reliable) {
 				_sendReliableMsg(item->msg, item->msgSize);
@@ -372,9 +370,10 @@ void MeshModel::processQueue() {
 				_sendMsg(item->msg, item->msgSize, 1);
 			}
 			--(item->repeats);
-			LOGd("sent ind=%u repeats=%u", index, item->repeats);
+			LOGd("sent ind=%u repeats left=%u", index, item->repeats);
 			break;
 		}
+		_queueSendIndex = (_queueSendIndex + 1) % MESH_MODEL_QUEUE_SIZE;
 	}
 }
 
