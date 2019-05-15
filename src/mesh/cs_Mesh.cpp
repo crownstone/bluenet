@@ -391,6 +391,8 @@ void Mesh::handleEvent(event_t & event) {
 		if (tickCount % (500/TICK_INTERVAL_MS) == 0) {
 			_model.sendTestMsg();
 		}
+
+		_model.tick(tickCount);
 		break;
 	}
 	case CS_TYPE::CMD_SEND_MESH_MSG: {

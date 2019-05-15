@@ -24,13 +24,14 @@ enum cs_mesh_model_opcode_t {
 /**
  * Max message size.
  * TODO: define a max per type, since the mesh supports variable length messages.
- * When you send packets that are longer than 15? bytes (including opCode of 1-3B, and MIC of 4 or 8B), they will be sent
+ * When you send packets that are longer than 15 bytes (including opCode of 1-3B, and MIC of 4 or 8B), they will be sent
  * as segmented packets of 12? byte each.
  * See https://devzone.nordicsemi.com/f/nordic-q-a/32854/max-size-of-data-to-send-from-one-node-to-other-ble-mesh
  * Multi switch message with 5 items is 28 + 3 (opCode) + 4 (MIC) = 35, so 3 segments.
  * The minimum advertising interval that mesh are using now is 20ms, so each advertisement / segment, takes 20ms.
  */
 #define MAX_MESH_MSG_SIZE (3 * 12 - 3 - 4)
+#define MAX_MESH_MSG_NON_SEGMENTED_SIZE (15 - 4 - 3)
 
 /**
  * Size of the header of each mesh model message.
@@ -48,10 +49,11 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE = 7,    // Payload: none
 };
 
-
 struct __attribute__((__packed__)) cs_mesh_model_msg_test_t {
 	uint32_t counter;
-	uint32_t dummy[3];
+//	uint8_t dummy[3]; // non segmented
+//	uint8_t dummy[11]; // 2 segments
+	uint8_t dummy[23]; // 3 segments
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_time_t {
