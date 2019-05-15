@@ -284,7 +284,7 @@ const uint32_t PWM_PERIOD = 10000;
  * For now, a lot of these variables has not yet been made conform to the above naming scheme.
  */
 
-#define TICK_INTERVAL_MS 500
+#define TICK_INTERVAL_MS 100
 
 #if defined MESHING
 #define CONFIG_MESH_ENABLED_DEFAULT MESHING

@@ -172,6 +172,7 @@ private:
 
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;
+	TYPIFY(EVT_TICK) _tickCount = 0;
 
 	OperationMode _operationMode;
 

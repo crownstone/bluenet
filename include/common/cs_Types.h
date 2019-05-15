@@ -166,7 +166,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
 	CMD_SEND_MESH_MSG,                                // Sent to send a mesh message. -- Payload is cs_mesh_msg_t.
 	CMD_SET_TIME,                                     // Sent to set the time. -- Payload is uint32_t timestamp.
-	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
+	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms. -- Payload is uint32_t counter.
 	EVT_ADVERTISEMENT_UPDATED,                        // Sent when advertisement was updated. TODO: advertisement data as payload?
 	EVT_SCAN_STARTED,                                 // Sent when scanner started scanning.
 	EVT_SCAN_STOPPED,                                 // Sent when scanner stopped scanning.
@@ -525,7 +525,7 @@ typedef  CS_TYPE TYPIFY(EVT_STORAGE_WRITE_DONE);
 typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
 typedef  BOOL TYPIFY(EVT_SWITCH_LOCKED);
-typedef  void TYPIFY(EVT_TICK);
+typedef  uint32_t TYPIFY(EVT_TICK);
 typedef  void TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
 
@@ -729,7 +729,7 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
 		return 0;
 	case CS_TYPE::EVT_TICK:
-		return 0;
+		return sizeof(uint32_t);
 	case CS_TYPE::EVT_TIME_SET:
 		return 0;
 	case CS_TYPE::EVT_DIMMER_POWERED:

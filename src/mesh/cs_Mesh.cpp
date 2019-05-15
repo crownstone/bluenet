@@ -379,16 +379,18 @@ void Mesh::provisionLoad() {
 void Mesh::handleEvent(event_t & event) {
 	switch (event.type) {
 	case CS_TYPE::EVT_TICK: {
-		if (Stack::getInstance().isScanning()) {
-//			Stack::getInstance().stopScanning();
+		TYPIFY(EVT_TICK) tickCount = *((TYPIFY(EVT_TICK)*)event.data);
+		if (tickCount % (500/TICK_INTERVAL_MS) == 0) {
+			if (Stack::getInstance().isScanning()) {
+//				Stack::getInstance().stopScanning();
+			}
+			else {
+//				Stack::getInstance().startScanning();
+			}
 		}
-		else {
-//			Stack::getInstance().startScanning();
-		}
-//		static uint32_t tickCount = 0;
-//		if (++tickCount % 10 == 0) {
+		if (tickCount % (500/TICK_INTERVAL_MS) == 0) {
 			_model.sendTestMsg();
-//		}
+		}
 		break;
 	}
 	case CS_TYPE::CMD_SEND_MESH_MSG: {

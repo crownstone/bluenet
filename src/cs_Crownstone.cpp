@@ -738,8 +738,9 @@ void Crownstone::tick() {
 		}
 	}
 
-	event_t event(CS_TYPE::EVT_TICK);
+	event_t event(CS_TYPE::EVT_TICK, &_tickCount, sizeof(_tickCount));
 	EventDispatcher::getInstance().dispatch(event);
+	++_tickCount;
 
 	scheduleNextTick();
 }
