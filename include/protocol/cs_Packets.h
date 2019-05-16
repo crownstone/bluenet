@@ -70,6 +70,49 @@ constexpr void cs_switch_state_set_default(switch_state_t *state) {
 	state->asInt = STATE_SWITCH_STATE_DEFAULT;
 }
 
+/**
+ * A single multi switch command.
+ * switchCmd: 0 = off, 100 = fully on.
+ * timeout: delay in seconds.
+ */
+struct __attribute__((packed)) multi_switch_item_cmd_t {
+	uint8_t switchCmd;
+	uint16_t timeout; // timeout in seconds
+};
+
+/**
+ * A single multi switch packet, with target id.
+ */
+struct __attribute__((packed)) multi_switch_item_t {
+	stone_id_t id;
+	multi_switch_item_cmd_t cmd;
+};
+
+
+enum KeepAliveActionTypes {
+	NO_CHANGE = 0,
+	CHANGE    = 1
+};
+
+/**
+ * A single keep alive command.
+ * action: see KeepAliveActionTypes.
+ * switchCmd: 0 = off, 100 = fully on.
+ * timeout: delay in seconds.
+ */
+struct __attribute__((__packed__)) keep_alive_state_item_cmd_t {
+	uint8_t action;
+	uint8_t switchCmd;
+	uint16_t timeout;
+};
+
+/**
+ * A single keep alive packet, with target id.
+ */
+struct __attribute__((packed)) keep_alive_state_item_t {
+	stone_id_t id;
+	keep_alive_state_item_cmd_t cmd;
+};
 
 #define SESSION_NONCE_LENGTH 5
 struct __attribute__((packed)) session_nonce_t {

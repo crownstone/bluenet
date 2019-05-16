@@ -33,7 +33,7 @@ private:
 	void keepAlive();
 
 	bool                               _hasKeepAliveState;
-	keep_alive_state_message_payload_t _lastKeepAlive;
+	keep_alive_state_item_cmd_t        _lastKeepAlive;
 
 	app_timer_t                        _keepAliveTimerData;
 	app_timer_id_t                     _keepAliveTimerId;

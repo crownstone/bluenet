@@ -711,22 +711,21 @@ void Crownstone::increaseResetCounter() {
  * TODO: describe function calls and why they are required.
  */
 void Crownstone::tick() {
-	static uint32_t mainTickCrount = 0;
-	if (++mainTickCrount % (60*1000 / TICK_INTERVAL_MS) == 0) {
+	if (_tickCount % (60*1000/TICK_INTERVAL_MS) == 0) {
 		LOG_MEMORY; // To check for memory leaks
 	}
 	// TODO: warning when close to out of memory
 	// TODO: maybe detect memory leaks?
 
-	TYPIFY(STATE_TEMPERATURE) temperature = getTemperature();
-	_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature));
+	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
+		TYPIFY(STATE_TEMPERATURE) temperature = getTemperature();
+		_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature));
+	}
 
 	// Update advertisement parameter (only in operation mode NORMAL)
-	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
-
+	if (_tickCount % (500/TICK_INTERVAL_MS) == 0 && _operationMode == OperationMode::OPERATION_MODE_NORMAL) {
 		// update advertisement parameters (to improve scanning on (some) android phones)
 		_stack->updateAdvertisement(true);
-
 		// update advertisement (to update service data)
 		_stack->setAdvertisementData();
 	}

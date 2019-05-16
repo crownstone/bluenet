@@ -16,7 +16,7 @@ extern "C" {
 
 #define MESH_MODEL_TEST_MSG_DROP_ENABLED
 
-#define MESH_MODEL_QUEUE_SIZE 5
+#define MESH_MODEL_QUEUE_SIZE 20
 
 /**
  * Mesh message of max size.
@@ -28,13 +28,26 @@ struct __attribute__((__packed__)) cs_mesh_model_queued_msg_t {
 	uint8_t msg[MAX_MESH_MSG_SIZE];
 };
 
+struct __attribute__((__packed__)) cs_mesh_model_queued_item_t {
+	bool priority : 1;
+	uint8_t repeats : 7;
+	stone_id_t id;   // 0 for broadcast
+	uint8_t type;
+	uint8_t payloadSize;
+	uint8_t payload[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
+};
+
+
 class MeshModel {
 public:
 	MeshModel();
 	void init();
 	void setOwnAddress(uint16_t address);
-	cs_ret_code_t sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats=1, cs_mesh_model_opcode_t opcode=CS_MESH_MODEL_OPCODE_MSG);
+	cs_ret_code_t sendMsg(uint8_t* data, uint16_t len, uint8_t repeats=1);
 	cs_ret_code_t sendReliableMsg(const uint8_t* data, uint16_t len);
+
+	cs_ret_code_t sendMultiSwitchItem(const multi_switch_item_t* item, uint8_t repeats=1);
+	cs_ret_code_t sendKeepAliveItem(const keep_alive_state_item_t* item, uint8_t repeats=1);
 
 	access_model_handle_t getAccessModelHandle();
 
@@ -60,12 +73,14 @@ private:
 	access_message_tx_t _accessReplyMsg;
 	uint8_t _replyMsg[MESH_HEADER_SIZE + 0];
 
-	cs_mesh_model_queued_msg_t _queue[MESH_MODEL_QUEUE_SIZE] = {0};
+	cs_mesh_model_queued_item_t _queue[MESH_MODEL_QUEUE_SIZE] = {0};
 	uint8_t _queueSendIndex = 0;
-	cs_ret_code_t addToQueue(const uint8_t* msg, size16_t msgSize, uint8_t repeats, bool reliable);
+	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
+	int getNextItemInQueue(bool priority); // Returns -1 if none found.
 	void processQueue();
 
-	cs_ret_code_t _sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats=1, cs_mesh_model_opcode_t opcode=CS_MESH_MODEL_OPCODE_MSG);
+
+	cs_ret_code_t _sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats=1);
 	cs_ret_code_t _sendReliableMsg(const uint8_t* data, uint16_t len);
 	cs_ret_code_t sendReply(const access_message_rx_t * accessMsg);
 	int8_t getRssi(const nrf_mesh_rx_metadata_t* metaData);

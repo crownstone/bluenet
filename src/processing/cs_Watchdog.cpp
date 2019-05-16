@@ -72,7 +72,7 @@ void Watchdog::keepAliveTimeout() {
 	LOGi("Keep alive timeout");
 	if (_hasKeepAliveState) {
 		if (_lastKeepAlive.action != NO_CHANGE) {
-			Switch::getInstance().setSwitch(_lastKeepAlive.switchState.switchState);
+			Switch::getInstance().setSwitch(_lastKeepAlive.switchCmd);
 		}
 		else {
 			LOGi("No change");
@@ -87,7 +87,7 @@ void Watchdog::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::EVT_KEEP_ALIVE_STATE: {
 			_lastKeepAlive = *(TYPIFY(EVT_KEEP_ALIVE_STATE)*)event.data;
-			LOGWatchdogDebug("action=%u switch=%u timeout=%u", _lastKeepAlive.action, _lastKeepAlive.switchState.switchState, _lastKeepAlive.timeout);
+			LOGWatchdogDebug("action=%u switch=%u timeout=%u", _lastKeepAlive.action, _lastKeepAlive.switchCmd, _lastKeepAlive.timeout);
 			_hasKeepAliveState = true;
 			keepAlive();
 			break;

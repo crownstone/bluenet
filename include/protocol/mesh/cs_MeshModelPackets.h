@@ -39,21 +39,21 @@ enum cs_mesh_model_opcode_t {
  */
 #define MESH_HEADER_SIZE 1
 enum cs_mesh_model_msg_type_t {
-	CS_MESH_MODEL_TYPE_TEST = 0,              // Payload: cs_mesh_model_msg_test_t
-	CS_MESH_MODEL_TYPE_ACK = 1,               // Payload: none
-	CS_MESH_MODEL_TYPE_STATE_TIME = 2,        // Payload: cs_mesh_model_msg_time_t
-	CS_MESH_MODEL_TYPE_CMD_TIME = 3,          // Payload: cs_mesh_model_msg_time_t
-	CS_MESH_MODEL_TYPE_CMD_NOOP = 4,          // Payload: none
-	CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH = 5,  // Payload: cs_mesh_model_msg_multi_switch_t
-	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE = 6, // Payload: cs_mesh_model_msg_keep_alive_t
-	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE = 7,    // Payload: none
+	CS_MESH_MODEL_TYPE_TEST = 0,                 // Payload: cs_mesh_model_msg_test_t
+	CS_MESH_MODEL_TYPE_ACK = 1,                  // Payload: none
+	CS_MESH_MODEL_TYPE_STATE_TIME = 2,           // Payload: cs_mesh_model_msg_time_t
+	CS_MESH_MODEL_TYPE_CMD_TIME = 3,             // Payload: cs_mesh_model_msg_time_t
+	CS_MESH_MODEL_TYPE_CMD_NOOP = 4,             // Payload: none
+	CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH = 5,     // Payload: multi_switch_item_t
+	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE = 6, // Payload: keep_alive_state_item_t
+	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE = 7,       // Payload: none
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_test_t {
 	uint32_t counter;
-//	uint8_t dummy[3]; // non segmented
+	uint8_t dummy[3]; // non segmented
 //	uint8_t dummy[11]; // 2 segments
-	uint8_t dummy[23]; // 3 segments
+//	uint8_t dummy[23]; // 3 segments
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_time_t {
@@ -67,7 +67,6 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_multi_switch_item_t {
 	stone_id_t id;
 	uint8_t switchCmd;
 	uint16_t timeout;
-	uint8_t intent;
 };
 /**
  * Size of the multi switch header.

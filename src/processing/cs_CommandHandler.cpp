@@ -371,7 +371,7 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveState(buffer_ptr_t buffer, const
 //	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "keep alive state");
 
-	if (size != sizeof(keep_alive_state_message_payload_t)) {
+	if (size != sizeof(keep_alive_state_item_cmd_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
@@ -406,15 +406,21 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveMesh(buffer_ptr_t buffer, const 
 	if (!MeshModelPacketHelper::keepAliveStateIsValid(keepAlivePacket, size)) {
 		return ERR_INVALID_MESSAGE;
 	}
-	cs_mesh_msg_t meshMsg;
-	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(size);
-	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
-	bool success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE, (uint8_t*)keepAlivePacket, size, meshMsg.msg, meshMsg.size);
-	if (success) {
-		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+	for (int i=0; i<keepAlivePacket->count; ++i) {
+		TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE) item;
+		item.id = keepAlivePacket->items[i].id;
+		item.cmd.timeout = keepAlivePacket->timeout;
+		if (keepAlivePacket->items[i].actionSwitchCmd == 255) {
+			item.cmd.action = NO_CHANGE;
+			item.cmd.switchCmd = 0;
+		}
+		else {
+			item.cmd.action = CHANGE;
+			item.cmd.switchCmd = keepAlivePacket->items[i].actionSwitchCmd;
+		}
+		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE, &item, sizeof(item));
 		EventDispatcher::getInstance().dispatch(cmd);
 	}
-	free(meshMsg.msg);
 //#endif
 	return ERR_SUCCESS;
 }
@@ -557,15 +563,14 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 	if (!MeshModelPacketHelper::multiSwitchIsValid(multiSwitchPacket, size)) {
 		return ERR_INVALID_MESSAGE;
 	}
-	cs_mesh_msg_t meshMsg;
-	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(size);
-	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
-	bool success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, (uint8_t*)multiSwitchPacket, size, meshMsg.msg, meshMsg.size);
-	if (success) {
-		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+	for (int i=0; i<multiSwitchPacket->count; ++i) {
+		TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH) item;
+		item.id = multiSwitchPacket->items[i].id;
+		item.cmd.switchCmd = multiSwitchPacket->items[i].switchCmd;
+		item.cmd.timeout = multiSwitchPacket->items[i].timeout;
+		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH, &item, sizeof(item));
 		EventDispatcher::getInstance().dispatch(cmd);
 	}
-	free(meshMsg.msg);
 //#endif
 	return ERR_SUCCESS;
 }

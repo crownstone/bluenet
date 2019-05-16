@@ -396,8 +396,18 @@ void Mesh::handleEvent(event_t & event) {
 		break;
 	}
 	case CS_TYPE::CMD_SEND_MESH_MSG: {
-		cs_mesh_msg_t* msg = (cs_mesh_msg_t*)event.data;
+		TYPIFY(CMD_SEND_MESH_MSG)* msg = (TYPIFY(CMD_SEND_MESH_MSG)*)event.data;
 		_model.sendMsg(msg->msg, msg->size);
+		break;
+	}
+	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE: {
+		TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE)* packet = (TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE)*)event.data;
+		_model.sendKeepAliveItem(packet);
+		break;
+	}
+	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH: {
+		TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)* packet = (TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)*)event.data;
+		_model.sendMultiSwitchItem(packet);
 		break;
 	}
 	default:

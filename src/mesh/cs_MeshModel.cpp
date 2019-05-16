@@ -71,20 +71,30 @@ access_model_handle_t MeshModel::getAccessModelHandle() {
 	return _accessHandle;
 }
 
-cs_ret_code_t MeshModel::sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats, cs_mesh_model_opcode_t opcode) {
-	cs_ret_code_t retVal = addToQueue(data, len, repeats, false);
-	if (retVal == ERR_SUCCESS) {
-		processQueue();
+cs_ret_code_t MeshModel::sendMsg(uint8_t* data, uint16_t len, uint8_t repeats) {
+	if (len > MAX_MESH_MSG_NON_SEGMENTED_SIZE) {
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
-	return retVal;
+	cs_mesh_model_msg_type_t type = MeshModelPacketHelper::getType(data);
+	uint8_t* payload = NULL;
+	size16_t payloadSize;
+	MeshModelPacketHelper::getPayload(data, len, payload, payloadSize);
+	return addToQueue(type, 0, payload, payloadSize, repeats, false);
 }
 
+
+
+cs_ret_code_t MeshModel::sendMultiSwitchItem(const multi_switch_item_t* item, uint8_t repeats) {
+	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id, (uint8_t*)item, sizeof(*item), repeats, true);
+}
+
+cs_ret_code_t MeshModel::sendKeepAliveItem(const keep_alive_state_item_t* item, uint8_t repeats) {
+	return addToQueue(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE, item->id, (uint8_t*)item, sizeof(*item), repeats, false);
+}
+
+
 cs_ret_code_t MeshModel::sendReliableMsg(const uint8_t* data, uint16_t len) {
-	cs_ret_code_t retVal = addToQueue(data, len, 1, true);
-	if (retVal == ERR_SUCCESS) {
-		processQueue();
-	}
-	return retVal;
+	return ERR_NOT_IMPLEMENTED;
 }
 
 /**
@@ -92,10 +102,10 @@ cs_ret_code_t MeshModel::sendReliableMsg(const uint8_t* data, uint16_t len) {
  * TODO: wait for NRF_MESH_EVT_TX_COMPLETE before sending next msg (in case of segmented msg?).
  * TODO: repeat publishing the msg.
  */
-cs_ret_code_t MeshModel::_sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats, cs_mesh_model_opcode_t opcode) {
+cs_ret_code_t MeshModel::_sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats) {
 	access_message_tx_t accessMsg;
 	accessMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessMsg.opcode.opcode = opcode;
+	accessMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_MSG;
 	accessMsg.p_buffer = data;
 	accessMsg.length = len;
 	accessMsg.force_segmented = false;
@@ -242,33 +252,23 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
-		cs_mesh_model_msg_multi_switch_t* packet = (cs_mesh_model_msg_multi_switch_t*)payload;
 		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
-		cs_mesh_model_msg_multi_switch_item_t* item;
-		if (MeshModelPacketHelper::multiSwitchHasItem(packet, myId, item)) {
-			event_t event(CS_TYPE::CMD_MULTI_SWITCH, item, sizeof(*item));
+		multi_switch_item_t* item = (multi_switch_item_t*) payload;
+		if (item->id == myId) {
+			TYPIFY(CMD_MULTI_SWITCH)* cmd = &(item->cmd);
+			event_t event(CS_TYPE::CMD_MULTI_SWITCH, cmd, sizeof(*cmd));
 			EventDispatcher::getInstance().dispatch(event);
 		}
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE: {
-		cs_mesh_model_msg_keep_alive_t* packet = (cs_mesh_model_msg_keep_alive_t*)payload;
 		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
-		cs_mesh_model_msg_keep_alive_item_t* item;
-		if (MeshModelPacketHelper::keepAliveHasItem(packet, myId, item)) {
-			keep_alive_state_message_payload_t keepAlive;
-			if (item->actionSwitchCmd == 255) {
-				keepAlive.action = NO_CHANGE;
-				keepAlive.switchState.switchState = 0;
-			}
-			else {
-				keepAlive.action = CHANGE;
-				keepAlive.switchState.switchState = item->actionSwitchCmd;
-			}
-			keepAlive.timeout = packet->timeout;
-			event_t event(CS_TYPE::EVT_KEEP_ALIVE_STATE, &keepAlive, sizeof(keepAlive));
+		keep_alive_state_item_t* item = (keep_alive_state_item_t*) payload;
+		if (item->id == myId) {
+			TYPIFY(EVT_KEEP_ALIVE_STATE)* keepAlive = &(item->cmd);
+			event_t event(CS_TYPE::EVT_KEEP_ALIVE_STATE, keepAlive, sizeof(*keepAlive));
 			EventDispatcher::getInstance().dispatch(event);
 		}
 		break;
@@ -327,20 +327,23 @@ void MeshModel::sendTestMsg() {
 
 /**
  * Add a msg to an empty spot in the queue (repeats == 0).
- * Start looking at SendIndex, then iterate over the queue.
+ * Start looking at SendIndex, then reverse iterate over the queue.
+ * Then set the new SendIndex at the newly added item, so that it will be send first.
+ * We do the reverse iterate, so that the old SendIndex should be handled early (for a large enough queue).
  */
-cs_ret_code_t MeshModel::addToQueue(const uint8_t* msg, size16_t msgSize, uint8_t repeats, bool reliable) {
+cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority) {
 	uint8_t index;
-//	for (int i = _queueSendIndex + MESH_MODEL_QUEUE_SIZE; i > _queueSendIndex; --i) {
-	for (int i = _queueSendIndex; i < _queueSendIndex + MESH_MODEL_QUEUE_SIZE; ++i) {
-		index = i % 5;
-		cs_mesh_model_queued_msg_t* item = &(_queue[index]);
+//	for (int i = _queueSendIndex; i < _queueSendIndex + MESH_MODEL_QUEUE_SIZE; ++i) {
+	for (int i = _queueSendIndex + MESH_MODEL_QUEUE_SIZE; i > _queueSendIndex; --i) {
+		index = i % MESH_MODEL_QUEUE_SIZE;
+		cs_mesh_model_queued_item_t* item = &(_queue[index]);
 		if (item->repeats == 0) {
-			item->reliable = reliable;
+			item->priority = priority;
 			item->repeats = repeats;
-			item->msgSize = msgSize;
-			memcpy(item->msg, msg, msgSize);
-//			_queueSendIndex = index;
+			item->id = id;
+			item->type = type;
+			item->payloadSize = payloadSize;
+			memcpy(item->payload, payload, payloadSize);
 			LOGd("added to ind=%u", index);
 			return ERR_SUCCESS;
 		}
@@ -351,31 +354,50 @@ cs_ret_code_t MeshModel::addToQueue(const uint8_t* msg, size16_t msgSize, uint8_
 
 /**
  * Check if there is a msg in queue with more than 0 repeats.
- * If so, send that message.
- * Start looking at index SendIndex as that item should be completed first.
- * Once item at SendIndex is completed, check the next in queue.
+ * If so, return that index.
+ * Start looking at index SendIndex as that item should be sent first.
+ */
+int MeshModel::getNextItemInQueue(bool priority) {
+	int index;
+	for (int i = _queueSendIndex; i < _queueSendIndex + MESH_MODEL_QUEUE_SIZE; i++) {
+		index = i % MESH_MODEL_QUEUE_SIZE;
+		if ((!priority || _queue[index].priority) && _queue[index].repeats > 0) {
+			return index;
+		}
+	}
+	return -1;
+}
+
+/** Generate a message to be sent
+ * TODO: for now it's just 1 item per message, later we could add multiple items to a message.
+ * TODO: item->id can be used for unicast address.
+ * TODO: use opcode for type.
+ *
  */
 void MeshModel::processQueue() {
-//	LOGd("processQueue sendInd=%u", _queueSendIndex);
-	uint8_t index;
-	for (int i=0; i<MESH_MODEL_QUEUE_SIZE; i++) {
-		index = _queueSendIndex;
-//		LOGd("check ind=%u", _queueSendIndex);
-		cs_mesh_model_queued_msg_t* item = &(_queue[_queueSendIndex]);
-		if (item->repeats > 0) {
-			if (item->reliable) {
-				_sendReliableMsg(item->msg, item->msgSize);
-			}
-			else {
-				_sendMsg(item->msg, item->msgSize, 1);
-			}
-			--(item->repeats);
-			LOGd("sent ind=%u repeats left=%u", index, item->repeats);
-			break;
-		}
-		_queueSendIndex = (_queueSendIndex + 1) % MESH_MODEL_QUEUE_SIZE;
+	int index = getNextItemInQueue(true);
+	if (index == -1) {
+		index = getNextItemInQueue(false);
 	}
+	if (index == -1) {
+		return;
+	}
+	cs_mesh_model_queued_item_t* item = &(_queue[index]);
+	cs_mesh_msg_t meshMsg;
+	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(item->payloadSize);
+	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
+	bool success = MeshModelPacketHelper::setMeshMessage((cs_mesh_model_msg_type_t)item->type, item->payload, item->payloadSize, meshMsg.msg, meshMsg.size);
+	if (success) {
+		_sendMsg(meshMsg.msg, meshMsg.size, 1);
+	}
+	free(meshMsg.msg);
+	--(item->repeats);
+	LOGd("sent ind=%u repeats left=%u", index, item->repeats);
+
+	// Next item will be sent next, so that items are sent interleaved.
+	_queueSendIndex = (index + 1) % MESH_MODEL_QUEUE_SIZE;
 }
+
 
 void MeshModel::tick(TYPIFY(EVT_TICK) tickCount) {
 	if (tickCount % (500/TICK_INTERVAL_MS) == 0) {

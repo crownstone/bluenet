@@ -69,17 +69,6 @@ struct __attribute__((__packed__)) factory_reset_message_payload_t {
 	uint32_t resetCode;
 };
 
-enum KeepAliveActionTypes {
-	NO_CHANGE = 0,
-	CHANGE    = 1
-};
-
-struct __attribute__((__packed__)) keep_alive_state_message_payload_t {
-	uint8_t action;
-	switch_message_payload_t switchState;
-	uint16_t timeout; // timeout in seconds
-};
-
 struct __attribute__((__packed__)) led_message_payload_t {
 	uint8_t led;
 	bool enable;
