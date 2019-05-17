@@ -143,69 +143,6 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 }
 
 
-bool EncryptionHandler::encryptMesh(mesh_nonce_t nonce, uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength) {
-	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, SOC_ECB_CIPHERTEXT_LENGTH);
-
-	// first MESH_OVERHEAD bytes of the target are overhead, which is a random number + nonce (message number)
-	uint16_t targetNetLength = targetLength - MESH_OVERHEAD;
-
-	// check if the input would still fit if the nonce is added.
-	if (dataLength + VALIDATION_NONCE_LENGTH > targetNetLength) {
-		LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
-		return false;
-	}
-
-	// put the nonce
-	memcpy(target, &nonce, MESH_SESSION_NONCE_LENGTH);
-
-	// fill the random number
-	RNG::fillBuffer(target + MESH_SESSION_NONCE_LENGTH, MESH_RANDOM_LENGTH);
-
-	// Set the nonce to zero to ensure it is consistent.
-	// Since we only have 1 uint8_t as counter doing this once is enough.
-	memset(_block.cleartext, 0x00, SOC_ECB_CLEARTEXT_LENGTH);
-	// use the mesh overhead as IV (first nonce, second part random)
-	memcpy(_block.cleartext, target, MESH_OVERHEAD);
-
-	if (_encryptCTR((uint8_t*)&nonce, data, dataLength, target + MESH_OVERHEAD, targetNetLength) == false) {
-		LOGe("Error while encrypting");
-		return false;
-	}
-
-	return true;
-}
-
-bool EncryptionHandler::decryptMesh(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, mesh_nonce_t* nonce, uint8_t* target, uint16_t targetLength) {
-
-	// check if the size of the encrypted data packet makes sense: min 1 block and overhead
-	if (encryptedDataPacketLength < SOC_ECB_CIPHERTEXT_LENGTH + MESH_OVERHEAD) {
-		LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
-//		LOGe("Encryted data packet is smaller than the minimum possible size of a block and overhead (20 bytes).");
-		return false;
-	}
-	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _block.key, SOC_ECB_CIPHERTEXT_LENGTH);
-
-	// the actual encrypted part is after the overhead
-	uint16_t sourceNetLength = encryptedDataPacketLength - MESH_OVERHEAD;
-
-	// get the nonce
-	memcpy(nonce, encryptedDataPacket, MESH_SESSION_NONCE_LENGTH);
-
-	// Set the nonce to zero to ensure it is consistent.
-	// Since we only have 1 uint8_t as counter doing this once is enough.
-	memset(_block.cleartext, 0x00, SOC_ECB_CLEARTEXT_LENGTH);
-	// copy the mesh overhead of the encrypted data packet to be used as IV (first nonce, second part random)
-	memcpy(_block.cleartext, encryptedDataPacket, MESH_OVERHEAD);
-
-	if (_decryptCTR((uint8_t*)nonce, encryptedDataPacket + MESH_OVERHEAD, sourceNetLength, target,
-				targetLength) == false) {
-		LOGe("Error while decrypting");
-		return false;
-	}
-
-	return true;
-}
-
 
 /**
  * Perform encryption:
@@ -460,6 +397,7 @@ bool EncryptionHandler::RC5InitKey(EncryptionAccessLevel accessLevel) {
 	return _RC5PrepareKey(_block.key, SOC_ECB_KEY_LENGTH);
 }
 
+// See https://en.wikipedia.org/wiki/RC5
 bool EncryptionHandler::RC5Decrypt(uint16_t* encryptedData, uint16_t encryptedDataLength, uint16_t* target, uint16_t targetLength) {
 	if (encryptedDataLength != 4 || targetLength != 4) {
 		return false;
@@ -467,19 +405,18 @@ bool EncryptionHandler::RC5Decrypt(uint16_t* encryptedData, uint16_t encryptedDa
 	uint16_t a = encryptedData[0];
 	uint16_t b = encryptedData[1];
 	uint16_t sum;
-//	LOGd("a=%u b=%u", a, b);
 	for (uint16_t i=RC5_ROUNDS; i>0; --i) {
 		sum = b - _rc5SubKeys[2*i + 1];
 		b = ROTR_16BIT(sum, a % 16) ^ a;
 		sum = a - _rc5SubKeys[2*i];
 		a = ROTR_16BIT(sum, b % 16) ^ b;
-//		LOGd("i=%u a=%u b=%u", i, a, b);
 	}
 	target[0] = a - _rc5SubKeys[0];
 	target[1] = b - _rc5SubKeys[1];
 	return true;
 }
 
+// See https://en.wikipedia.org/wiki/RC5
 bool EncryptionHandler::_RC5PrepareKey(uint8_t* key, uint8_t keyLength) {
 	if (keyLength != RC5_KEYLEN) {
 		return false;
@@ -488,46 +425,24 @@ bool EncryptionHandler::_RC5PrepareKey(uint8_t* key, uint8_t keyLength) {
 	int loops = 3 * (RC5_NUM_SUBKEYS > keyLenWords ? RC5_NUM_SUBKEYS : keyLenWords);
 	uint16_t L[keyLenWords] = {0}; // L[] - A temporary working array used during key scheduling. initialized to the key in words.
 
-//	// LOG
-//	LOGd("key=");
-//	BLEutil::printArray(key, keyLength);
-
-//	memcpy(L, key, keyLength);
 	for (int i = 0; i<keyLenWords; ++i) {
 		L[i] = (key[2*i+1] << 8) + key[2*i];
 	}
-
-//	// LOG
-//	LOGd("L=");
-//	for (int i=0; i<keyLenWords; ++i) {
-//		_logSerial(SERIAL_DEBUG, " %u", L[i]);
-//	}
-//	_logSerial(SERIAL_DEBUG, SERIAL_CRLF);
 
 	_rc5SubKeys[0] = RC5_16BIT_P;
 	for (int i = 1; i < RC5_NUM_SUBKEYS; ++i) {
 		_rc5SubKeys[i] = _rc5SubKeys[i-1] + RC5_16BIT_Q;
 	}
 
-//	// LOG
-//	LOGd("rc5SubKeys=");
-//	for (int i=0; i<RC5_NUM_SUBKEYS; ++i) {
-//		_logSerial(SERIAL_DEBUG, " %u", _rc5SubKeys[i]);
-//		if (i % 8 == 0) { _logSerial(SERIAL_DEBUG, SERIAL_CRLF); }
-//	}
-//	_logSerial(SERIAL_DEBUG, SERIAL_CRLF);
-
 	uint16_t i = 0;
 	uint16_t j = 0;
 	uint16_t a = 0;
 	uint16_t b = 0;
-//	uint16_t shift;
 	uint16_t sum;
 	for (int k=0; k<loops; ++k) {
 		sum = _rc5SubKeys[i] + a + b;
 		a = ROTL_16BIT(sum, 3);
 		_rc5SubKeys[i] = a;
-//		shift = (a+b) % 16;
 		sum = L[j] + a + b;
 		b = ROTL_16BIT(sum, (a+b) % 16);
 		L[j] = b;
@@ -535,16 +450,7 @@ bool EncryptionHandler::_RC5PrepareKey(uint8_t* key, uint8_t keyLength) {
 		++j;
 		i %= RC5_NUM_SUBKEYS;
 		j %= keyLenWords;
-//		LOGd("S=%u L=%u a=%u b=%u i=%u j=%u k=%u (a+b)%16=%u sum=%u", _rc5SubKeys[i], L[j], a, b, i, j, k, shift, sum);
 	}
-
-//	// LOG
-//	LOGd("rc5SubKeys=");
-//	for (int i=0; i<RC5_NUM_SUBKEYS; ++i) {
-//		_logSerial(SERIAL_DEBUG, " %u", _rc5SubKeys[i]);
-//		if (i % 8 == 0) { _logSerial(SERIAL_DEBUG, SERIAL_CRLF); }
-//	}
-//	_logSerial(SERIAL_DEBUG, SERIAL_CRLF);
 
 	return true;
 }
