@@ -388,9 +388,9 @@ void Mesh::handleEvent(event_t & event) {
 //				Stack::getInstance().startScanning();
 			}
 		}
-		if (tickCount % (500/TICK_INTERVAL_MS) == 0) {
-			_model.sendTestMsg();
-		}
+//		if (tickCount % (5000/TICK_INTERVAL_MS) == 0) {
+//			_model.sendTestMsg();
+//		}
 
 		_model.tick(tickCount);
 		break;

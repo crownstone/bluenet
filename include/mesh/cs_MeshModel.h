@@ -14,7 +14,7 @@ extern "C" {
 #include "access_reliable.h"
 }
 
-#define MESH_MODEL_TEST_MSG_DROP_ENABLED
+//#define MESH_MODEL_TEST_MSG_DROP_ENABLED
 
 #define MESH_MODEL_QUEUE_SIZE 20
 
@@ -22,6 +22,11 @@ extern "C" {
  * Interval at which processQueue() gets called.
  */
 #define MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS 100
+
+/**
+ * Number of messages sent each time processQueue() gets called.
+ */
+#define MESH_MODEL_QUEUE_BURST_COUNT 3
 
 /**
  * Mesh message of max size.
@@ -48,11 +53,11 @@ public:
 	MeshModel();
 	void init();
 	void setOwnAddress(uint16_t address);
-	cs_ret_code_t sendMsg(uint8_t* data, uint16_t len, uint8_t repeats=1);
+	cs_ret_code_t sendMsg(uint8_t* data, uint16_t len, uint8_t repeats=5);
 	cs_ret_code_t sendReliableMsg(const uint8_t* data, uint16_t len);
 
-	cs_ret_code_t sendMultiSwitchItem(const multi_switch_item_t* item, uint8_t repeats=1);
-	cs_ret_code_t sendKeepAliveItem(const keep_alive_state_item_t* item, uint8_t repeats=1);
+	cs_ret_code_t sendMultiSwitchItem(const multi_switch_item_t* item, uint8_t repeats=10);
+	cs_ret_code_t sendKeepAliveItem(const keep_alive_state_item_t* item, uint8_t repeats=5);
 
 	access_model_handle_t getAccessModelHandle();
 
@@ -78,10 +83,16 @@ private:
 	access_message_tx_t _accessReplyMsg;
 	uint8_t _replyMsg[MESH_HEADER_SIZE + 0];
 
+	TYPIFY(CMD_MULTI_SWITCH) _lastReceivedMultiSwitch = {0};
+	TYPIFY(EVT_KEEP_ALIVE_STATE) _lastReceivedKeepAlive = {0};
+	TYPIFY(CMD_SET_TIME) _lastReveivedSetTime = 0;
+
 	cs_mesh_model_queued_item_t _queue[MESH_MODEL_QUEUE_SIZE] = {0};
 	uint8_t _queueSendIndex = 0;
 	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
+	cs_ret_code_t remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t id);
 	int getNextItemInQueue(bool priority); // Returns -1 if none found.
+	bool sendMsgFromQueue(); // Returns true when message was sent, false when no more messages to be sent.
 	void processQueue();
 
 

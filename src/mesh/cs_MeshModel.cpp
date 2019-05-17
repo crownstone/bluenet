@@ -80,19 +80,30 @@ cs_ret_code_t MeshModel::sendMsg(uint8_t* data, uint16_t len, uint8_t repeats) {
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	cs_mesh_model_msg_type_t type = MeshModelPacketHelper::getType(data);
+	bool priority = false;
+	switch (type) {
+	case CS_MESH_MODEL_TYPE_CMD_TIME:
+		priority = true;
+		break;
+	default:
+		break;
+	}
 	uint8_t* payload = NULL;
 	size16_t payloadSize;
 	MeshModelPacketHelper::getPayload(data, len, payload, payloadSize);
-	return addToQueue(type, 0, payload, payloadSize, repeats, false);
+	remFromQueue(type, 0);
+	return addToQueue(type, 0, payload, payloadSize, repeats, priority);
 }
 
 
 
 cs_ret_code_t MeshModel::sendMultiSwitchItem(const multi_switch_item_t* item, uint8_t repeats) {
+	remFromQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id);
 	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id, (uint8_t*)item, sizeof(*item), repeats, true);
 }
 
 cs_ret_code_t MeshModel::sendKeepAliveItem(const keep_alive_state_item_t* item, uint8_t repeats) {
+	remFromQueue(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE, item->id);
 	return addToQueue(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE, item->id, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
@@ -202,8 +213,8 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	MeshModelPacketHelper::getPayload(msg, size, payload, payloadSize);
 
 	switch (msgType) {
-#ifdef MESH_MODEL_TEST_MSG_DROP_ENABLED
 	case CS_MESH_MODEL_TYPE_TEST: {
+#ifdef MESH_MODEL_TEST_MSG_DROP_ENABLED
 		if (ownMsg) {
 			break;
 		}
@@ -231,9 +242,9 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			_received++;
 		}
 		LOGi("received=%u dropped=%u (%u%%)", _received, _dropped, (_dropped * 100) / (_received + _dropped));
+#endif
 		break;
 	}
-#endif
 	case CS_MESH_MODEL_TYPE_ACK: {
 		break;
 	}
@@ -243,8 +254,11 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_TIME: {
-		event_t event(CS_TYPE::CMD_SET_TIME, payload, payloadSize);
-		EventDispatcher::getInstance().dispatch(event);
+		if (*(TYPIFY(CMD_SET_TIME)*)payload != _lastReveivedSetTime) {
+			_lastReveivedSetTime = *(TYPIFY(CMD_SET_TIME)*)payload;
+			event_t event(CS_TYPE::CMD_SET_TIME, payload, payloadSize);
+			EventDispatcher::getInstance().dispatch(event);
+		}
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_NOOP: {
@@ -260,9 +274,16 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 		multi_switch_item_t* item = (multi_switch_item_t*) payload;
 		if (item->id == myId) {
+			LOGi("recieved multi switch for me");
 			TYPIFY(CMD_MULTI_SWITCH)* cmd = &(item->cmd);
-			event_t event(CS_TYPE::CMD_MULTI_SWITCH, cmd, sizeof(*cmd));
-			EventDispatcher::getInstance().dispatch(event);
+			if (memcmp(&_lastReceivedMultiSwitch, cmd, sizeof(*cmd)) != 0) {
+				memcpy(&_lastReceivedMultiSwitch, cmd, sizeof(*cmd));
+				event_t event(CS_TYPE::CMD_MULTI_SWITCH, cmd, sizeof(*cmd));
+				EventDispatcher::getInstance().dispatch(event);
+			}
+			else {
+				LOGd("ignore keep alive");
+			}
 		}
 		break;
 	}
@@ -271,9 +292,16 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 		keep_alive_state_item_t* item = (keep_alive_state_item_t*) payload;
 		if (item->id == myId) {
-			TYPIFY(EVT_KEEP_ALIVE_STATE)* keepAlive = &(item->cmd);
-			event_t event(CS_TYPE::EVT_KEEP_ALIVE_STATE, keepAlive, sizeof(*keepAlive));
-			EventDispatcher::getInstance().dispatch(event);
+			LOGi("recieved keep alive for me");
+			TYPIFY(EVT_KEEP_ALIVE_STATE)* cmd = &(item->cmd);
+			if (memcmp(&_lastReceivedKeepAlive, cmd, sizeof(*cmd)) != 0) {
+				memcpy(&_lastReceivedKeepAlive, cmd, sizeof(*cmd));
+				event_t event(CS_TYPE::EVT_KEEP_ALIVE_STATE, cmd, sizeof(*cmd));
+				EventDispatcher::getInstance().dispatch(event);
+			}
+			else {
+				LOGd("ignore keep alive");
+			}
 		}
 		break;
 	}
@@ -349,11 +377,23 @@ cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id
 			item->payloadSize = payloadSize;
 			memcpy(item->payload, payload, payloadSize);
 			LOGd("added to ind=%u", index);
+//			BLEutil::printArray(payload, payloadSize);
+			_queueSendIndex = index;
 			return ERR_SUCCESS;
 		}
 	}
 	LOGw("queue is full");
 	return ERR_BUSY;
+}
+
+cs_ret_code_t MeshModel::remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t id) {
+	for (int i = 0; i < MESH_MODEL_QUEUE_SIZE; ++i) {
+		if (_queue[i].id == id && _queue[i].type == type) {
+			_queue[i].repeats = 0;
+			return ERR_SUCCESS;
+		}
+	}
+	return ERR_NOT_FOUND;
 }
 
 /**
@@ -372,19 +412,18 @@ int MeshModel::getNextItemInQueue(bool priority) {
 	return -1;
 }
 
-/** Generate a message to be sent
+/** Generate and send a message.
  * TODO: for now it's just 1 item per message, later we could add multiple items to a message.
  * TODO: item->id can be used for unicast address.
  * TODO: use opcode for type.
- *
  */
-void MeshModel::processQueue() {
+bool MeshModel::sendMsgFromQueue() {
 	int index = getNextItemInQueue(true);
 	if (index == -1) {
 		index = getNextItemInQueue(false);
 	}
 	if (index == -1) {
-		return;
+		return false;
 	}
 	cs_mesh_model_queued_item_t* item = &(_queue[index]);
 	cs_mesh_msg_t meshMsg;
@@ -397,9 +436,20 @@ void MeshModel::processQueue() {
 	free(meshMsg.msg);
 	--(item->repeats);
 	LOGd("sent ind=%u repeats left=%u", index, item->repeats);
+//	BLEutil::printArray(meshMsg.msg, meshMsg.size);
 
 	// Next item will be sent next, so that items are sent interleaved.
 	_queueSendIndex = (index + 1) % MESH_MODEL_QUEUE_SIZE;
+	return true;
+}
+
+
+void MeshModel::processQueue() {
+	for (int i=0; i<MESH_MODEL_QUEUE_BURST_COUNT; ++i) {
+		if (!sendMsgFromQueue()) {
+			break;
+		}
+	}
 }
 
 

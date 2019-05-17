@@ -418,8 +418,10 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveMesh(buffer_ptr_t buffer, const 
 			item.cmd.action = CHANGE;
 			item.cmd.switchCmd = keepAlivePacket->items[i].actionSwitchCmd;
 		}
-		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE, &item, sizeof(item));
-		EventDispatcher::getInstance().dispatch(cmd);
+		if (cs_keep_alive_state_item_is_valid(&item, sizeof(item))) {
+			event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE, &item, sizeof(item));
+			EventDispatcher::getInstance().dispatch(cmd);
+		}
 	}
 //#endif
 	return ERR_SUCCESS;
@@ -568,8 +570,10 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 		item.id = multiSwitchPacket->items[i].id;
 		item.cmd.switchCmd = multiSwitchPacket->items[i].switchCmd;
 		item.cmd.timeout = multiSwitchPacket->items[i].timeout;
-		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH, &item, sizeof(item));
-		EventDispatcher::getInstance().dispatch(cmd);
+		if (cs_multi_switch_item_is_valid(&item, sizeof(item))) {
+			event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH, &item, sizeof(item));
+			EventDispatcher::getInstance().dispatch(cmd);
+		}
 	}
 //#endif
 	return ERR_SUCCESS;

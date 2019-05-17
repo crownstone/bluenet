@@ -88,6 +88,10 @@ struct __attribute__((packed)) multi_switch_item_t {
 	multi_switch_item_cmd_t cmd;
 };
 
+inline bool cs_multi_switch_item_is_valid(multi_switch_item_t* item, size16_t size) {
+	return (size == sizeof(multi_switch_item_t) && item->id != 0);
+}
+
 
 enum KeepAliveActionTypes {
 	NO_CHANGE = 0,
@@ -113,6 +117,10 @@ struct __attribute__((packed)) keep_alive_state_item_t {
 	stone_id_t id;
 	keep_alive_state_item_cmd_t cmd;
 };
+
+inline bool cs_keep_alive_state_item_is_valid(keep_alive_state_item_t* item, size16_t size) {
+	return (size == sizeof(keep_alive_state_item_t) && item->id != 0 && item->cmd.timeout != 0);
+}
 
 #define SESSION_NONCE_LENGTH 5
 struct __attribute__((packed)) session_nonce_t {
