@@ -8,18 +8,29 @@
 
 #include <cstdint>
 #include "cfg/cs_Config.h"
+#include "protocol/cs_CommandTypes.h"
 #include "protocol/cs_ScheduleEntries.h"
 #include "protocol/cs_Typedefs.h"
 #include "protocol/mesh/cs_MeshModelPackets.h"
 
 /**
- * Packets (structs) that are used internally and/or over the air.
+ * Packets (structs) that are used over the air.
  *
  * These should be plain structs, without constructors, or member functions.
  * Instead of a constructor, you can add a function that fills a struct.
  *
  * If the definition becomes large, move it to its own file and include it in this file.
  */
+
+enum EncryptionAccessLevel {
+	ADMIN               = 0,
+	MEMBER              = 1,
+	GUEST               = 2,
+	SETUP               = 100,
+	NOT_SET             = 201,
+	ENCRYPTION_DISABLED = 254,
+	NO_ONE              = 255
+};
 
 /**
  * Header of a stream buffer
@@ -70,75 +81,72 @@ constexpr void cs_switch_state_set_default(switch_state_t *state) {
 	state->asInt = STATE_SWITCH_STATE_DEFAULT;
 }
 
-/**
- * A single multi switch command.
- * switchCmd: 0 = off, 100 = fully on.
- * timeout: delay in seconds.
- */
-struct __attribute__((packed)) multi_switch_item_cmd_t {
-	uint8_t switchCmd;
-	uint16_t timeout; // timeout in seconds
-};
 
 /**
- * A single multi switch packet, with target id.
+ * A single multi switch item.
+ * switchCmd: 0 = off, 100 = fully on.
  */
 struct __attribute__((packed)) multi_switch_item_t {
 	stone_id_t id;
-	multi_switch_item_cmd_t cmd;
+	uint8_t switchCmd;
 };
-
+/**
+ * Returns true when a multi switch item is valid.
+ */
 inline bool cs_multi_switch_item_is_valid(multi_switch_item_t* item, size16_t size) {
 	return (size == sizeof(multi_switch_item_t) && item->id != 0);
 }
 
-
-enum KeepAliveActionTypes {
-	NO_CHANGE = 0,
-	CHANGE    = 1
-};
-
 /**
- * A single keep alive command.
- * action: see KeepAliveActionTypes.
- * switchCmd: 0 = off, 100 = fully on.
- * timeout: delay in seconds.
+ * Multi switch packet.
  */
-struct __attribute__((__packed__)) keep_alive_state_item_cmd_t {
-	uint8_t action;
-	uint8_t switchCmd;
-	uint16_t timeout;
+struct __attribute__((packed)) multi_switch_t {
+	uint8_t count;
+	multi_switch_item_t items[5];
 };
-
 /**
- * A single keep alive packet, with target id.
+ * Returns true when a multi switch packet is valid.
  */
-struct __attribute__((packed)) keep_alive_state_item_t {
-	stone_id_t id;
-	keep_alive_state_item_cmd_t cmd;
-};
-
-inline bool cs_keep_alive_state_item_is_valid(keep_alive_state_item_t* item, size16_t size) {
-	return (size == sizeof(keep_alive_state_item_t) && item->id != 0 && item->cmd.timeout != 0);
+inline bool cs_multi_switch_packet_is_valid(multi_switch_t* packet, size16_t size) {
+	return (size == 1 + packet->count * sizeof(multi_switch_item_t));
 }
+
+
+
+struct __attribute__((__packed__)) switch_message_payload_t {
+	uint8_t switchState;
+};
+
+struct __attribute__((__packed__)) opcode_message_payload_t {
+	uint8_t opCode;
+};
+
+struct __attribute__((__packed__)) enable_message_payload_t {
+	BOOL enable;
+};
+
+struct __attribute__((__packed__)) enable_scanner_message_payload_t {
+	bool enable;
+	uint16_t delay;
+};
+
+struct __attribute__((__packed__)) factory_reset_message_payload_t {
+	uint32_t resetCode;
+};
+
+struct __attribute__((__packed__)) led_message_payload_t {
+	uint8_t led;
+	bool enable;
+};
+
+struct __attribute__((__packed__)) schedule_command_t {
+	uint8_t id;
+	schedule_entry_t entry;
+};
+
+
 
 #define SESSION_NONCE_LENGTH 5
 struct __attribute__((packed)) session_nonce_t {
 	uint8_t data[SESSION_NONCE_LENGTH];
-};
-
-// TODO: check if this length is similar to BLE_GAP_ADDR_LEN
-#define MAC_ADDRESS_LEN 6
-#define ADVERTISEMENT_DATA_MAX_SIZE 31
-
-struct __attribute__((packed)) scanned_device_t {
-	int8_t rssi;
-	uint8_t address[MAC_ADDRESS_LEN];
-	uint8_t addressType; // (ble_gap_addr_t.addr_type) & (ble_gap_addr_t.addr_id_peer << 7).
-	uint8_t channel;
-	uint8_t dataSize;
-//	uint8_t data[ADVERTISEMENT_DATA_MAX_SIZE];
-	uint8_t *data;
-	// See ble_gap_evt_adv_report_t
-	// More possibilities: addressType, connectable, isScanResponse, directed, scannable, extended advertisements, etc.
 };

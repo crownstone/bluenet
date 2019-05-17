@@ -12,21 +12,11 @@
 #include <type_traits>
 #include <cstddef> // For NULL
 #include <drivers/cs_Serial.h>
-#include <protocol/cs_Packets.h>
+#include <structs/cs_PacketsInternal.h>
 #include <protocol/cs_CommandTypes.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <util/cs_UuidParser.h>
 
-
-enum EncryptionAccessLevel {
-	ADMIN               = 0,
-	MEMBER              = 1,
-	GUEST               = 2,
-	SETUP               = 100,
-	NOT_SET             = 201,
-	ENCRYPTION_DISABLED = 254,
-	NO_ONE              = 255
-};
 
 enum TypeBases {
 	Configuration_Base = 0x000,
@@ -169,6 +159,8 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Sent to send a switch mesh message. -- Payload is multi_switch_item_t.
 	CMD_SET_TIME,                                     // Sent to set the time. -- Payload is uint32_t timestamp.
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms. -- Payload is uint32_t counter.
+	EVT_ADV_BACKGROUND,                               // Sent when a background advertisement has been received. -- Payload: adv_background_t.
+	EVT_ADV_BACKGROUND_PARSED,                        // Sent when a background advertisement has been validated and parsed. -- Payload: adv_background_payload_t.
 	EVT_ADVERTISEMENT_UPDATED,                        // Sent when advertisement was updated. TODO: advertisement data as payload?
 	EVT_SCAN_STARTED,                                 // Sent when scanner started scanning.
 	EVT_SCAN_STOPPED,                                 // Sent when scanner stopped scanning.
@@ -273,6 +265,8 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
 	case CS_TYPE::CMD_MULTI_SWITCH:
+	case CS_TYPE::EVT_ADV_BACKGROUND:
+	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 	case CS_TYPE::EVT_SCAN_STARTED:
 	case CS_TYPE::EVT_SCAN_STOPPED:
@@ -478,6 +472,8 @@ typedef   int8_t TYPIFY(STATE_TEMPERATURE);
 typedef uint32_t TYPIFY(STATE_TIME);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
+typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
+typedef  adv_background_payload_t TYPIFY(EVT_ADV_BACKGROUND_PARSED);
 typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
 typedef  void TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
@@ -509,10 +505,10 @@ typedef  uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
-typedef  multi_switch_item_cmd_t TYPIFY(CMD_MULTI_SWITCH);
+typedef  internal_multi_switch_item_cmd_t TYPIFY(CMD_MULTI_SWITCH);
 typedef  cs_mesh_msg_t TYPIFY(CMD_SEND_MESH_MSG);
 typedef  keep_alive_state_item_t TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE);
-typedef  multi_switch_item_t TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH);
+typedef  internal_multi_switch_item_t TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH);
 typedef  uint32_t TYPIFY(CMD_SET_TIME);
 typedef  BOOL TYPIFY(EVT_DIMMING_ALLOWED);
 typedef  void TYPIFY(EVT_DIMMER_FORCED_OFF);
@@ -520,7 +516,7 @@ typedef  void TYPIFY(EVT_DIMMER_POWERED);
 typedef  void TYPIFY(EVT_DIMMER_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_DIMMER_TEMP_OK);
 typedef  void TYPIFY(EVT_RELAY_FORCED_ON);
-typedef  stream_buffer_header_t TYPIFY(CMD_CONTROL_CMD);
+typedef  control_command_packet_t TYPIFY(CMD_CONTROL_CMD);
 typedef  void TYPIFY(EVT_SCAN_STARTED);
 typedef  void TYPIFY(EVT_SCAN_STOPPED);
 typedef  schedule_list_t TYPIFY(EVT_SCHEDULE_ENTRIES_UPDATED);
@@ -688,6 +684,10 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return 0;
 	case CS_TYPE::CMD_MULTI_SWITCH:
 		return sizeof(TYPIFY(CMD_MULTI_SWITCH));
+	case CS_TYPE::EVT_ADV_BACKGROUND:
+		return sizeof(TYPIFY(EVT_ADV_BACKGROUND));
+	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
+		return sizeof(TYPIFY(EVT_ADV_BACKGROUND_PARSED));
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 		return 0;
 	case CS_TYPE::EVT_SCAN_STARTED:
@@ -850,6 +850,8 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER: return "CONFIG_VOLTAGE_MULTIPLIER";
 	case CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO: return "CONFIG_VOLTAGE_ADC_ZERO";
 	case CS_TYPE::EVT_ADC_RESTARTED: return "EVT_ADC_RESTARTED";
+	case CS_TYPE::EVT_ADV_BACKGROUND: return "EVT_ADV_BACKGROUND";
+	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: return "EVT_ADV_BACKGROUND_PARSED";
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: return "EVT_ADVERTISEMENT_UPDATED";
 	case CS_TYPE::EVT_BLE_CONNECT: return "EVT_BLE_CONNECT";
 	case CS_TYPE::EVT_BLE_DISCONNECT: return "EVT_BLE_DISCONNECT";
@@ -888,7 +890,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD: return "EVT_PWM_TEMP_ABOVE_THRESHOLD";
 	case CS_TYPE::EVT_DIMMER_TEMP_OK: return "EVT_PWM_TEMP_OK";
 	case CS_TYPE::EVT_RELAY_FORCED_ON: return "EVT_RELAY_FORCED_ON";
-	case CS_TYPE::CMD_CONTROL_CMD: return "EVT_RX_CONTROL";
+	case CS_TYPE::CMD_CONTROL_CMD: return "CMD_CONTROL_CMD";
 	case CS_TYPE::EVT_SCAN_STARTED: return "EVT_SCAN_STARTED";
 	case CS_TYPE::EVT_SCAN_STOPPED: return "EVT_SCAN_STOPPED";
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED: return "EVT_SCHEDULE_ENTRIES_UPDATED";
@@ -978,6 +980,8 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
 	case CS_TYPE::CMD_MULTI_SWITCH:
+	case CS_TYPE::EVT_ADV_BACKGROUND:
+	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 	case CS_TYPE::EVT_SCAN_STARTED:
 	case CS_TYPE::EVT_SCAN_STOPPED:
@@ -1248,6 +1252,8 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data) {
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:
+	case CS_TYPE::EVT_ADV_BACKGROUND:
+	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
@@ -1367,6 +1373,8 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:
+	case CS_TYPE::EVT_ADV_BACKGROUND:
+	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
@@ -1487,6 +1495,8 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:
+	case CS_TYPE::EVT_ADV_BACKGROUND:
+	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:

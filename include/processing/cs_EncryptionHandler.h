@@ -28,6 +28,10 @@ typedef uint32_t mesh_nonce_t;
 
 #define MESH_OVERHEAD (MESH_RANDOM_LENGTH + MESH_SESSION_NONCE_LENGTH)
 
+#define RC5_ROUNDS 12
+#define RC5_NUM_SUBKEYS (2*(RC5_ROUNDS+1)) // t = 2(r+1) - the number of round subkeys required.
+#define RC5_KEYLEN 16
+
 enum EncryptionType {
 	CTR,
 	CTR_CAFEBABE,
@@ -50,6 +54,7 @@ private:
 
 	conv8_32 _defaultValidationKey;
 	uint8_t _overhead = PACKET_NONCE_LENGTH + USER_LEVEL_LENGTH;
+	uint16_t _rc5SubKeys[RC5_NUM_SUBKEYS]; // S[] - The round subkey words.
 
 public:
 	static EncryptionHandler& getInstance() {
@@ -83,6 +88,21 @@ public:
 	 * the result will be validated and the target will be populated.
 	 */
 	bool decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel& userLevelInPackage, EncryptionType encryptionType = CTR);
+
+	/**
+	 * Decrypt a single block in CTR mode.
+	 */
+	bool decryptBlockCTR(uint8_t* encryptedData, uint16_t encryptedDataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel accessLevel, uint8_t* nonce, uint8_t nonceLength);
+
+	/**
+	 * Initialized the key, using the key of given access level.
+	 */
+	bool RC5InitKey(EncryptionAccessLevel accessLevel);
+
+	/**
+	 * Decrypt data with RC5.
+	 */
+	bool RC5Decrypt(uint16_t* encryptedData, uint16_t encryptedDataLength, uint16_t* target, uint16_t targetLength);
 
 	/**
 	 * make sure we create a new nonce for each connection
@@ -139,6 +159,6 @@ private:
 	void _generateSessionNonce();
 	void _generateNonceInTarget(uint8_t* target);
 	void _createIV(uint8_t* target, uint8_t* nonce, EncryptionType encryptionType);
-
+	bool _RC5PrepareKey(uint8_t* key, uint8_t keyLength);
 };
 

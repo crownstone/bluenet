@@ -56,7 +56,7 @@ public:
 	cs_ret_code_t sendMsg(uint8_t* data, uint16_t len, uint8_t repeats=5);
 	cs_ret_code_t sendReliableMsg(const uint8_t* data, uint16_t len);
 
-	cs_ret_code_t sendMultiSwitchItem(const multi_switch_item_t* item, uint8_t repeats=10);
+	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats=10);
 	cs_ret_code_t sendKeepAliveItem(const keep_alive_state_item_t* item, uint8_t repeats=5);
 
 	access_model_handle_t getAccessModelHandle();

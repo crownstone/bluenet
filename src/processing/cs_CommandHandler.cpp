@@ -147,6 +147,8 @@ cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type, buff
 		return handleCmdRelay(buffer, size, accessLevel);
 	case CTRL_CMD_MULTI_SWITCH:
 		return handleCmdMultiSwitch(buffer, size, accessLevel);
+	case CTRL_CMD_MULTI_SWITCH_LEGACY:
+		return handleCmdMultiSwitchLegacy(buffer, size, accessLevel);
 	case CTRL_CMD_MESH_COMMAND:
 		return handleCmdMeshCommand(buffer, size, accessLevel);
 	case CTRL_CMD_ALLOW_DIMMING:
@@ -557,9 +559,9 @@ cs_ret_code_t CommandHandler::handleCmdRelay(buffer_ptr_t buffer, const uint16_t
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+cs_ret_code_t CommandHandler::handleCmdMultiSwitchLegacy(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 //	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
-	LOGi(STR_HANDLE_COMMAND, "multi switch");
+	LOGi(STR_HANDLE_COMMAND, "legacy multi switch");
 //#if BUILD_MESHING == 1
 	cs_mesh_model_msg_multi_switch_t* multiSwitchPacket = (cs_mesh_model_msg_multi_switch_t*)buffer;
 	if (!MeshModelPacketHelper::multiSwitchIsValid(multiSwitchPacket, size)) {
@@ -576,6 +578,25 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 		}
 	}
 //#endif
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+	LOGi(STR_HANDLE_COMMAND, "multi switch");
+	multi_switch_t* multiSwitchPacket = (multi_switch_t*)buffer;
+	if (!cs_multi_switch_packet_is_valid(multiSwitchPacket, size)) {
+		return ERR_INVALID_MESSAGE;
+	}
+	for (int i=0; i<multiSwitchPacket->count; ++i) {
+		TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH) item;
+		item.id = multiSwitchPacket->items[i].id;
+		item.cmd.switchCmd = multiSwitchPacket->items[i].switchCmd;
+		item.cmd.timeout = 0;
+		if (cs_multi_switch_item_is_valid(&item, sizeof(item))) {
+			event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH, &item, sizeof(item));
+			EventDispatcher::getInstance().dispatch(cmd);
+		}
+	}
 	return ERR_SUCCESS;
 }
 
@@ -759,6 +780,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CTRL_CMD_NOP:
 	case CTRL_CMD_KEEP_ALIVE_REPEAT_LAST:
 	case CTRL_CMD_MULTI_SWITCH:
+	case CTRL_CMD_MULTI_SWITCH_LEGACY:
 	case CTRL_CMD_MESH_COMMAND:
 		return GUEST;
 
@@ -828,13 +850,8 @@ void CommandHandler::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::CMD_CONTROL_CMD: {
-			stream_buffer_header_t* streamHeader = (stream_buffer_header_t*)event.data;
-			if ((event.size < sizeof(stream_buffer_header_t)) || (event.size - sizeof(stream_buffer_header_t) < streamHeader->length)) {
-				LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
-				break;
-			}
-			uint8_t* streamPayload = (uint8_t*)event.data + sizeof(stream_buffer_header_t);
-			handleCommand((CommandHandlerTypes)streamHeader->type, streamPayload, streamHeader->length);
+			TYPIFY(CMD_CONTROL_CMD)* cmd = (TYPIFY(CMD_CONTROL_CMD)*)event.data;
+			handleCommand(cmd->type, cmd->data, cmd->size, cmd->accessLevel);
 			break;
 		}
 		default: {}

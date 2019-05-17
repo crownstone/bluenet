@@ -107,6 +107,7 @@ private:
 	cs_ret_code_t handleCmdPwm                   (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdSwitch                (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdRelay                 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	cs_ret_code_t handleCmdMultiSwitchLegacy     (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdMultiSwitch           (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdMeshCommand           (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdEnableContPowerMeasure(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);

@@ -6,7 +6,7 @@
  */
 
 #include "protocol/mesh/cs_MeshModelPacketHelper.h"
-#include "protocol/cs_Packets.h"
+#include "structs/cs_PacketsInternal.h"
 #include "drivers/cs_Serial.h"
 #include <cstring> // For memcpy
 
@@ -35,7 +35,7 @@ bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize) {
 		return noopIsValid(payload, payloadSize);
 	case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH:
 //		return multiSwitchIsValid((cs_mesh_model_msg_multi_switch_t*)payload, payloadSize);
-		return cs_multi_switch_item_is_valid((multi_switch_item_t*)payload, payloadSize);
+		return cs_multi_switch_item_is_valid((internal_multi_switch_item_t*)payload, payloadSize);
 	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE:
 //		return keepAliveStateIsValid((cs_mesh_model_msg_keep_alive_t*)payload, payloadSize);
 		return cs_keep_alive_state_item_is_valid((keep_alive_state_item_t*)payload, payloadSize);

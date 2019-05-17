@@ -17,9 +17,9 @@
 /** @brief Variable length data encapsulation in terms of length and pointer to data */
 typedef struct
 {
-    uint8_t     * p_data;                                         /** < Pointer to data. */
-    uint16_t      data_len;                                       /** < Length of data. */
-} data_t;
+    uint8_t*  data;     /** < Pointer to data. */
+    uint16_t  len;      /** < Length of data. */
+} cs_data_t;
 
 /** @namespace BLEutil
  *
@@ -138,40 +138,36 @@ inline bool clearBit(T& value, uint8_t bit) {
 }
 
 /**
- * @brief Parses advertisement data, providing length and location of the field in case
- *        matching data is found.
+ * @brief Parses advertisement data, providing length and location of the field in case matching data is found.
  *
- * @param[in]  Type of data to be looked for in advertisement data.
- * @param[in]  Advertisement report length and pointer to report.
- * @param[out] If data type requested is found in the data report, type data length and
- *             pointer to data will be populated here.
+ * @param[in]  Type of data to be looked for in advertisement data. See https://www.bluetooth.com/specifications/assigned-numbers/generic-access-profile
+ * @param[in]  Pointer to advertisement data.
+ * @param[in]  Advertisement data length.
+ * @param[out] If data type requested is found: pointer to data of given type.
+ * @param[out] If data type requested is found: length of data of given type.
  *
- * @retval NRF_SUCCESS if the data type is found in the report.
- * @retval NRF_ERROR_NOT_FOUND if the data type could not be found.
+ * @retval ERR_SUCCESS if the data type is found in the report.
+ * @retval ERR_NOT_FOUND if the type could not be found.
  */
-inline uint32_t adv_report_parse(uint8_t type, data_t * p_advdata, data_t * p_typedata)
-{
-    uint32_t index = 0;
-    uint8_t * p_data;
+inline static uint32_t findAdvType(uint8_t type, uint8_t* advData, uint8_t advLen, cs_data_t* foundData) {
+	int index = 0;
+	foundData->data = NULL;
+	foundData->len = 0;
+	while (index < advLen-1) {
+		uint8_t fieldLen = advData[index];
+		uint8_t fieldType = advData[index+1];
+		if (index + fieldLen >= advLen) {
+			return ERR_NOT_FOUND;
+		}
 
-    p_data = p_advdata->p_data;
-
-    while (index < p_advdata->data_len)
-    {
-        uint8_t field_length = p_data[index];
-        uint8_t field_type = p_data[index+1];
-
-        if (field_type == type)
-        {
-            p_typedata->p_data = &p_data[index+2];
-            p_typedata->data_len = field_length-1;
-            return ERR_SUCCESS;
-//            return NRF_SUCCESS;
-        }
-        index += field_length+1;
-    }
-    return ERR_NOT_FOUND;
-//    return NRF_ERROR_NOT_FOUND;
+		if (fieldType == type) {
+			foundData->data = &advData[index+2];
+			foundData->len = fieldLen-1;
+			return ERR_SUCCESS;
+		}
+		index += fieldLen+1;
+	}
+	return ERR_NOT_FOUND;
 }
 
 

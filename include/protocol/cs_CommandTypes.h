@@ -6,8 +6,6 @@
  */
 #pragma once
 
-#include <protocol/cs_Typedefs.h>
-#include <protocol/cs_Packets.h>
 
 //TODO: make a enum class of these
 enum CommandHandlerTypes {
@@ -34,7 +32,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_INCREASE_TX                 = 22,    //! 0x16
 	CTRL_CMD_RESET_ERRORS                = 23,    //! 0x17
 	CTRL_CMD_KEEP_ALIVE_REPEAT_LAST      = 24,    //! 0x18
-	CTRL_CMD_MULTI_SWITCH                = 25,    //! 0x19
+	CTRL_CMD_MULTI_SWITCH_LEGACY         = 25,    //! 0x19 // Deprecate
 	CTRL_CMD_SCHEDULE_ENTRY_CLEAR        = 26,    //! 0x1A
 	CTRL_CMD_KEEP_ALIVE_MESH             = 27,    //! 0x1B
 	CTRL_CMD_MESH_COMMAND                = 28,    //! 0x1C
@@ -44,38 +42,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_ENABLE_SWITCHCRAFT          = 32,    //! 0x20
 	CTRL_CMD_UART_MSG                    = 33,    //! 0x21
 	CTRL_CMD_UART_ENABLE                 = 34,    //! 0x22
+	CTRL_CMD_MULTI_SWITCH                = 35,
 
 	CTRL_CMD_UNKNOWN                     = 0xFF
 };
-
-struct __attribute__((__packed__)) switch_message_payload_t {
-	uint8_t switchState;
-};
-
-struct __attribute__((__packed__)) opcode_message_payload_t {
-	uint8_t opCode;
-};
-
-struct __attribute__((__packed__)) enable_message_payload_t {
-	BOOL enable;
-};
-
-struct __attribute__((__packed__)) enable_scanner_message_payload_t {
-	bool enable;
-	uint16_t delay;
-};
-
-struct __attribute__((__packed__)) factory_reset_message_payload_t {
-	uint32_t resetCode;
-};
-
-struct __attribute__((__packed__)) led_message_payload_t {
-	uint8_t led;
-	bool enable;
-};
-
-struct __attribute__((__packed__)) schedule_command_t {
-	uint8_t id;
-	schedule_entry_t entry;
-};
-

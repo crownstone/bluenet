@@ -13,6 +13,14 @@
 
 //#define TESTING_ENCRYPTION
 
+// Rotate functions for 16 bit integers
+#define ROTL_16BIT(x, shift) ((x)<<(shift) | (x)>>(16-(shift)))
+#define ROTR_16BIT(x, shift) ((x)>>(shift) | (x)<<(16-(shift)))
+
+// Magic numbers for RC5 with 16 bit words.
+#define RC5_16BIT_P 0xB7E1
+#define RC5_16BIT_Q 0x9E37
+
 void EncryptionHandler::init() {
 	_defaultValidationKey.b = DEFAULT_SESSION_KEY;
 	EventDispatcher::getInstance().addListener(this);
@@ -410,6 +418,134 @@ bool EncryptionHandler::_validateDecryption(uint8_t* buffer, uint8_t* validation
 			return false;
 		}
 	}
+	return true;
+}
+
+bool EncryptionHandler::decryptBlockCTR(uint8_t* encryptedData, uint16_t encryptedDataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel accessLevel, uint8_t* nonce, uint8_t nonceLength) {
+	if (encryptedDataLength < SOC_ECB_CIPHERTEXT_LENGTH || targetLength < SOC_ECB_CIPHERTEXT_LENGTH) {
+		LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		return false;
+	}
+
+	// Sets the key in _block.
+	if (!_checkAndSetKey(accessLevel)) {
+		return false;
+	}
+//	LOGd("key:");
+//	BLEutil::printArray(_block.key, 16);
+
+	// Set the IV in the cleartext. IV is simply nonce with zero padding, since the counter is 0.
+	memset(_block.cleartext, 0x00, SOC_ECB_CLEARTEXT_LENGTH);
+	memcpy(_block.cleartext, nonce, nonceLength);
+//	LOGd("cleartext:");
+//	BLEutil::printArray(_block.cleartext, 16);
+
+	// encrypts the cleartext and puts it in ciphertext
+	uint32_t errCode = sd_ecb_block_encrypt(&_block);
+	APP_ERROR_CHECK(errCode);
+
+	// XOR the ciphertext with the encrypted data to finish decrypting the block.
+	for (uint8_t i = 0; i < SOC_ECB_CIPHERTEXT_LENGTH; i++) {
+		target[i] = _block.ciphertext[i] ^ encryptedData[i];
+	}
+
+	return true;
+}
+
+bool EncryptionHandler::RC5InitKey(EncryptionAccessLevel accessLevel) {
+	// Sets the key in _block.
+	if (!_checkAndSetKey(accessLevel)) {
+		return false;
+	}
+	return _RC5PrepareKey(_block.key, SOC_ECB_KEY_LENGTH);
+}
+
+bool EncryptionHandler::RC5Decrypt(uint16_t* encryptedData, uint16_t encryptedDataLength, uint16_t* target, uint16_t targetLength) {
+	if (encryptedDataLength != 4 || targetLength != 4) {
+		return false;
+	}
+	uint16_t a = encryptedData[0];
+	uint16_t b = encryptedData[1];
+	uint16_t sum;
+//	LOGd("a=%u b=%u", a, b);
+	for (uint16_t i=RC5_ROUNDS; i>0; --i) {
+		sum = b - _rc5SubKeys[2*i + 1];
+		b = ROTR_16BIT(sum, a % 16) ^ a;
+		sum = a - _rc5SubKeys[2*i];
+		a = ROTR_16BIT(sum, b % 16) ^ b;
+//		LOGd("i=%u a=%u b=%u", i, a, b);
+	}
+	target[0] = a - _rc5SubKeys[0];
+	target[1] = b - _rc5SubKeys[1];
+	return true;
+}
+
+bool EncryptionHandler::_RC5PrepareKey(uint8_t* key, uint8_t keyLength) {
+	if (keyLength != RC5_KEYLEN) {
+		return false;
+	}
+	int keyLenWords = ((RC5_KEYLEN-1)/sizeof(uint16_t))+1; // c - The length of the key in words (or 1, if keyLength = 0).
+	int loops = 3 * (RC5_NUM_SUBKEYS > keyLenWords ? RC5_NUM_SUBKEYS : keyLenWords);
+	uint16_t L[keyLenWords] = {0}; // L[] - A temporary working array used during key scheduling. initialized to the key in words.
+
+//	// LOG
+//	LOGd("key=");
+//	BLEutil::printArray(key, keyLength);
+
+//	memcpy(L, key, keyLength);
+	for (int i = 0; i<keyLenWords; ++i) {
+		L[i] = (key[2*i+1] << 8) + key[2*i];
+	}
+
+//	// LOG
+//	LOGd("L=");
+//	for (int i=0; i<keyLenWords; ++i) {
+//		_logSerial(SERIAL_DEBUG, " %u", L[i]);
+//	}
+//	_logSerial(SERIAL_DEBUG, SERIAL_CRLF);
+
+	_rc5SubKeys[0] = RC5_16BIT_P;
+	for (int i = 1; i < RC5_NUM_SUBKEYS; ++i) {
+		_rc5SubKeys[i] = _rc5SubKeys[i-1] + RC5_16BIT_Q;
+	}
+
+//	// LOG
+//	LOGd("rc5SubKeys=");
+//	for (int i=0; i<RC5_NUM_SUBKEYS; ++i) {
+//		_logSerial(SERIAL_DEBUG, " %u", _rc5SubKeys[i]);
+//		if (i % 8 == 0) { _logSerial(SERIAL_DEBUG, SERIAL_CRLF); }
+//	}
+//	_logSerial(SERIAL_DEBUG, SERIAL_CRLF);
+
+	uint16_t i = 0;
+	uint16_t j = 0;
+	uint16_t a = 0;
+	uint16_t b = 0;
+//	uint16_t shift;
+	uint16_t sum;
+	for (int k=0; k<loops; ++k) {
+		sum = _rc5SubKeys[i] + a + b;
+		a = ROTL_16BIT(sum, 3);
+		_rc5SubKeys[i] = a;
+//		shift = (a+b) % 16;
+		sum = L[j] + a + b;
+		b = ROTL_16BIT(sum, (a+b) % 16);
+		L[j] = b;
+		++i;
+		++j;
+		i %= RC5_NUM_SUBKEYS;
+		j %= keyLenWords;
+//		LOGd("S=%u L=%u a=%u b=%u i=%u j=%u k=%u (a+b)%16=%u sum=%u", _rc5SubKeys[i], L[j], a, b, i, j, k, shift, sum);
+	}
+
+//	// LOG
+//	LOGd("rc5SubKeys=");
+//	for (int i=0; i<RC5_NUM_SUBKEYS; ++i) {
+//		_logSerial(SERIAL_DEBUG, " %u", _rc5SubKeys[i]);
+//		if (i % 8 == 0) { _logSerial(SERIAL_DEBUG, SERIAL_CRLF); }
+//	}
+//	_logSerial(SERIAL_DEBUG, SERIAL_CRLF);
+
 	return true;
 }
 

@@ -97,7 +97,7 @@ cs_ret_code_t MeshModel::sendMsg(uint8_t* data, uint16_t len, uint8_t repeats) {
 
 
 
-cs_ret_code_t MeshModel::sendMultiSwitchItem(const multi_switch_item_t* item, uint8_t repeats) {
+cs_ret_code_t MeshModel::sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats) {
 	remFromQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id);
 	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id, (uint8_t*)item, sizeof(*item), repeats, true);
 }
@@ -262,17 +262,19 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_NOOP: {
-		TYPIFY(CMD_CONTROL_CMD) streamHeader;
-		streamHeader.type = CTRL_CMD_NOP;
-		streamHeader.length = 0;
-		event_t event(CS_TYPE::CMD_CONTROL_CMD, &streamHeader, sizeof(streamHeader));
+		TYPIFY(CMD_CONTROL_CMD) controlCmd;
+		controlCmd.type = CTRL_CMD_NOP;
+		controlCmd.accessLevel = ADMIN;
+		controlCmd.data = NULL;
+		controlCmd.size = 0;
+		event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
 		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
-		multi_switch_item_t* item = (multi_switch_item_t*) payload;
+		internal_multi_switch_item_t* item = (internal_multi_switch_item_t*) payload;
 		if (item->id == myId) {
 			LOGi("recieved multi switch for me");
 			TYPIFY(CMD_MULTI_SWITCH)* cmd = &(item->cmd);
