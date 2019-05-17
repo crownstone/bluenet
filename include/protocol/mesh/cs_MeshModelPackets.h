@@ -67,6 +67,7 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_multi_switch_item_t {
 	stone_id_t id;
 	uint8_t switchCmd;
 	uint16_t timeout;
+	uint8_t intent;
 };
 /**
  * Size of the multi switch header.
