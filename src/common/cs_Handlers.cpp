@@ -8,6 +8,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
 #include <ble/cs_Stack.h>
+#include <third/nrf/sdk_config.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -106,8 +107,38 @@ void ble_sdh_evt_dispatch(const ble_evt_t * p_ble_evt, void * p_context) {
 	}
 	case BLE_GAP_EVT_RSSI_CHANGED:
 	case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
-	case BLE_GATTS_EVT_TIMEOUT:
 		break;
+	case BLE_GAP_EVT_PHY_UPDATE_REQUEST: {
+		ble_gap_phys_t phys;
+		phys.rx_phys = BLE_GAP_PHY_AUTO;
+		phys.tx_phys = BLE_GAP_PHY_AUTO;
+		uint32_t retVal = sd_ble_gap_phy_update(p_ble_evt->evt.gap_evt.conn_handle, &phys);
+		APP_ERROR_CHECK(retVal);
+		break;
+	}
+	case BLE_GATTC_EVT_TIMEOUT: {
+		// Disconnect on GATT Client timeout event.
+		uint32_t retVal = sd_ble_gap_disconnect(p_ble_evt->evt.gattc_evt.conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+		APP_ERROR_CHECK(retVal);
+		break;
+	}
+	case BLE_GATTS_EVT_TIMEOUT: {
+		// Disconnect on GATT Server timeout event.
+		uint32_t retVal = sd_ble_gap_disconnect(p_ble_evt->evt.gatts_evt.conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+		APP_ERROR_CHECK(retVal);
+		break;
+	}
+	case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST: {
+		uint32_t retVal = sd_ble_gap_data_length_update(p_ble_evt->evt.gatts_evt.conn_handle, NULL, NULL);
+		APP_ERROR_CHECK(retVal);
+		break;
+	}
+	case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST: {
+//		uint32_t retVal = sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle, BLE_GATT_ATT_MTU_DEFAULT);
+		uint32_t retVal = sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle, NRF_SDH_BLE_GATT_MAX_MTU_SIZE);
+		APP_ERROR_CHECK(retVal);
+		break;
+	}
 	default:
 		break;
 	}
