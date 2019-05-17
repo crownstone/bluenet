@@ -3,13 +3,13 @@
 option=${1:? "Usage: $0 (generate|memory_map|publish|view)"}
 
 # optional target, have default option
-target=${1:-crownstone}
+target=${2:-crownstone}
 
 # Obtain current path and utils
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
-#source $path/_check_targets.sh $target
-#source $path/_config.sh
+source $path/_check_targets.sh $target
+source $path/_config.sh
 
 generate() {
 	cs_info "Run doxygen with doxygen.config as configuration file"
