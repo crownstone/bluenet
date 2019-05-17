@@ -250,6 +250,10 @@ const uint32_t PWM_PERIOD = 10000;
 
 #define SWITCH_ON_AT_SETUP_BOOT_DELAY            3600  // Seconds until the switch turns on when in setup mode (Crownstone built-in only)
 
+/**
+ * Interval in milliseconds at which tick events are dispatched.
+ */
+#define TICK_INTERVAL_MS 100
 
 /**
  * The configuration parameters here will have the following format:
@@ -284,7 +288,6 @@ const uint32_t PWM_PERIOD = 10000;
  * For now, a lot of these variables has not yet been made conform to the above naming scheme.
  */
 
-#define TICK_INTERVAL_MS 100
 
 #if defined MESHING
 #define CONFIG_MESH_ENABLED_DEFAULT MESHING

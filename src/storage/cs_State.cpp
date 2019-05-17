@@ -16,6 +16,10 @@
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
 
+#if TICK_INTERVAL_MS > STATE_RETRY_STORE_DELAY_MS
+#error "TICK_INTERVAL_MS must not be larger than STATE_RETRY_STORE_DELAY_MS"
+#endif
+
 // Define as LOGd to get debug logs.
 #define LOGStateDebug LOGnone
 
@@ -300,7 +304,7 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
 			ret_code = storeInFlash(index);
 			if (ret_code == ERR_BUSY) {
-				return addToQueue(type, STATE_RETRY_STORE_DELAY_MS / 1000);
+				return addToQueue(type, STATE_RETRY_STORE_DELAY_MS);
 			}
 			break;
 		}
@@ -326,12 +330,12 @@ cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delay) {
 	if (ret_code != ERR_SUCCESS) {
 		return ret_code;
 	}
-
-	return addToQueue(data.type, delay);
+	uint32_t delayMs = 1000 * delay;
+	return addToQueue(data.type, delayMs);
 }
 
-cs_ret_code_t State::addToQueue(const CS_TYPE & type, uint8_t delay) {
-	uint32_t delayTicks = delay * 1000 / TICK_INTERVAL_MS;
+cs_ret_code_t State::addToQueue(const CS_TYPE & type, uint32_t delayMs) {
+	uint32_t delayTicks = delayMs / TICK_INTERVAL_MS;
 	LOGStateDebug("Add to queue type=%s delay=%u ticks=%u", TypeName(type), delay, delayTicks);
 	bool found = false;
 	for (size_t i=0; i<_store_queue.size(); ++i) {
@@ -344,7 +348,7 @@ cs_ret_code_t State::addToQueue(const CS_TYPE & type, uint8_t delay) {
 	if (!found) {
 		cs_state_store_queue_t item;
 		item.type = type;
-		item.counter = delay;
+		item.counter = delayTicks;
 		_store_queue.push_back(item);
 	}
 	LOGStateDebug("queue is now of size %u", _store_queue.size());

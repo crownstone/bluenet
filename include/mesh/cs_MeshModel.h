@@ -19,6 +19,11 @@ extern "C" {
 #define MESH_MODEL_QUEUE_SIZE 20
 
 /**
+ * Interval at which processQueue() gets called.
+ */
+#define MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS 100
+
+/**
  * Mesh message of max size.
  */
 struct __attribute__((__packed__)) cs_mesh_model_queued_msg_t {

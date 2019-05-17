@@ -287,7 +287,7 @@ protected:
 	 */
 	cs_state_data_t & addToRam(const CS_TYPE & type, size16_t size);
 
-	cs_ret_code_t addToQueue(const CS_TYPE & type, uint8_t delay);
+	cs_ret_code_t addToQueue(const CS_TYPE & type, uint32_t delayMs);
 
 	cs_ret_code_t allocate(cs_state_data_t & data);
 

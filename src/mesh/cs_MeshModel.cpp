@@ -25,6 +25,10 @@ extern "C" {
 #include "nrf_mesh.h"
 }
 
+#if TICK_INTERVAL_MS > MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS
+#error "TICK_INTERVAL_MS must not be larger than MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS"
+#endif
+
 #define LOGMeshModelDebug LOGnone
 
 
@@ -400,7 +404,7 @@ void MeshModel::processQueue() {
 
 
 void MeshModel::tick(TYPIFY(EVT_TICK) tickCount) {
-	if (tickCount % (500/TICK_INTERVAL_MS) == 0) {
+	if (tickCount % (MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS / TICK_INTERVAL_MS) == 0) {
 		processQueue();
 	}
 }
