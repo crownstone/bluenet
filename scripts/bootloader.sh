@@ -26,6 +26,8 @@ source $path/_config.sh
 # optional address, use BOOTLOADER_START_ADDRESS as default
 address=${3:-$BOOTLOADER_START_ADDRESS}
 
+cs_info "Use bootloader address $address"
+
 gdb_port=${4:-$gdb_port}
 
 if [ "$VERBOSE" == "1" ]; then
@@ -54,6 +56,7 @@ build-settings() {
 	fi
 	cs_info "Generate bootloader settings"
 	cs_warn "Assuming application-version 1 and bootloader-version 1 for now."
+	cs_info "nrfutil settings generate --family NRF52 --application ${BLUENET_BIN_DIR}/crownstone.hex --application-version 1 --app-boot-validation NO_VALIDATION --bootloader-version 1 --bl-settings-version 1 ${BLUENET_BIN_DIR}/bootloader-settings.hex"
 	nrfutil settings generate --family NRF52 --application "${BLUENET_BIN_DIR}/crownstone.hex" --application-version 1 --bootloader-version 1 --bl-settings-version 1 "${BLUENET_BIN_DIR}/bootloader-settings.hex"
 	checkError "Generating bootloader settings. Do you have 'nrfutil' installed?"
 }
@@ -63,13 +66,33 @@ release() {
 }
 
 upload() {
-	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $address $serial_num
-	${path}/_writebyte.sh 0x10001014 $address
+	#${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $address $serial_num
+	#${path}/_writebyte.sh 0x10001014 $address
+	if [ $serial_num ]; then
+		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/bootloader.hex --sectorerase --snr $serial_num
+		echo nrfjprog -f nrf52 --memwr 0x10001014 --val $address --snr $serial_num
+		nrfjprog -f nrf52 --memwr 0x10001014 --val $address --snr $serial_num
+		# TODO: check address first
+	else
+		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/bootloader.hex --sectorerase 
+		check_address=$(nrfjprog -f nrf52 --memrd 0x10001014 | awk '{print $2}')
+		check_address=$(echo "0x$check_address")
+		cs_info "Check address: $check_address vs $address"
+		if [ $check_address != $address ]; then
+			cs_info "Update address to $address"
+			nrfjprog -f nrf52 --memwr 0x10001014 --val $address 
+		fi
+	fi
 	checkError "Uploading failed"
 }
 
 upload-settings() {
-	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader-settings.hex $address $serial_num
+	if [ $serial_num ]; then
+		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/bootloader-settings.hex --sectorerase --snr $serial_num
+	else
+		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/bootloader-settings.hex --sectorerase 
+	fi
+	#${path}/_upload.sh $BLUENET_BIN_DIR/bootloader-settings.hex $address $serial_num
 	checkError "Uploading failed"
 }
 

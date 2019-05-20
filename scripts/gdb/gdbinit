@@ -8,6 +8,10 @@ set history remove-duplicates 100
 set history expansion on
 set history size 1024
 
+#directory /home/anne/software/nrf5_sdk/nRF5_SDK_15.2.0_9412b96/
+#add-symbol-file /home/anne/workspace/bluenet/bin/sdk15/bootloader.elf 0x07d000
+add-symbol-file /home/anne/workspace/bluenet/bin/sdk15/crownstone.elf 0x26000
+
 set print object
 set print static off
 set print elements 1
@@ -24,6 +28,9 @@ target remote localhost:@gdb_port@
 set remote memory-write-packet-size 1024
 #set remote memory-write-packet-size fixed
 load
+
+info files
+
 monitor reset
 
 # If you want to enable a breakpoint before program start
@@ -32,7 +39,7 @@ monitor reset
 #b softdevice_assertion_handler
 
 # The function main() is called from nRF51822.c
-# b ResetHandler
+#b Reset_Handler
 
 # This does not work so well for header files: variables get optimized out...
 #b BluetoothLE.h:313
@@ -78,6 +85,46 @@ monitor reset
 #c
 #end
 
+#b nrf_bootloader_app_start_final
+
+#b nrf_sdh_ble_enable
+
+#watch p_app_ram_start
+#b sdh_request_observer_notify
+#
+
+#b nrf_bootloader_init
+#b main
+b _start
+
+#b __START
+
+#b SystemInit
+
+# If even Reset_Handler is not reached... Check symbol in interrupt vector table
+#b Reset_Handler
+
+#b main
+
+# Cause segfault, will be at start immediately
+#b *0
+# Same as Reset_Handler, not reached?
+#b *0x6883c 
+
+# First sdh_soc_observers
+#b *0x00029965
+
+#b .sdh_req_observers
+#b *0x0003832D
+
+#b *0x00029AB1
+
+b nrf_dfu_mbr_irq_forward_address_set
+
+# is not reached
+b nrf_bootloader_app_start_final
 #catch throw
 c
+#starti
+
 info break
