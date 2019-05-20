@@ -409,7 +409,7 @@ void asACR01B9E(boards_config_t* p_config) {
 }
 
 
-void asACR01B9F(boards_config_t* p_config) {
+void asACR01B10A(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 14;
 	p_config->pinGpioRelayOff                    = 13;
@@ -455,6 +455,12 @@ void asACR01B9F(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThresholdDown        = 0.3; // About 82 degrees C
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
+
+//	// For NTC voltage advertising.
+//	p_config->pinAinCurrentGainLow               = 2; // actually the IGBT NTC pin, make sure to disable differential measurements.
+//	p_config->pinAinPwmTemp                      = 0; // actually zero ref: 1.2V, so always above the threshold voltage, so always below temperature threshold.
+//	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
+//	p_config->currentRange                       = 3000; // 0-3V
 }
 
 
@@ -632,8 +638,8 @@ uint32_t configure_board(boards_config_t* p_config) {
 		asACR01B1D(p_config);
 		break;
 
-	case ACR01B9F:
-		asACR01B9F(p_config);
+	case ACR01B10A:
+		asACR01B10A(p_config);
 		break;
 
 	case ACR01B2A:
