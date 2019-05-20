@@ -31,8 +31,8 @@ timeoutCounter(0)
 }
 
 void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
-//	logSerial(SERIAL_DEBUG, "adv: ");
-//	_logSerial(SERIAL_DEBUG, "rssi=%i addressType=%u MAC=", scannedDevice->rssi, scannedDevice->addressType);
+//	_log(SERIAL_DEBUG, "adv: ");
+//	_log(SERIAL_DEBUG, "rssi=%i addressType=%u MAC=", scannedDevice->rssi, scannedDevice->addressType);
 //	BLEutil::printAddress((uint8_t*)(scannedDevice->address), MAC_ADDRESS_LEN);
 // addressType:
 //#define BLE_GAP_ADDR_TYPE_PUBLIC                        0x00 /**< Public address. */
@@ -65,11 +65,11 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 
 #ifdef COMMAND_ADV_VERBOSE
 	LOGd("rssi=%i", scannedDevice->rssi);
-	logSerial(SERIAL_DEBUG, "16bit services: ");
+	_log(SERIAL_DEBUG, "16bit services: ");
 	BLEutil::printArray(services16bit.data, services16bit.len);
 #endif
 #ifdef COMMAND_ADV_VERBOSE
-	logSerial(SERIAL_DEBUG, "128bit services: ");
+	_log(SERIAL_DEBUG, "128bit services: ");
 	BLEutil::printArray(services128bit.data, services128bit.len); // Received as uint128, so bytes are reversed.
 #endif
 
@@ -195,7 +195,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		return false;
 	}
 #ifdef COMMAND_ADV_VERBOSE
-	logSerial(SERIAL_DEBUG, "decrypted data: ");
+	_log(SERIAL_DEBUG, "decrypted data: ");
 	BLEutil::printArray(decryptedData, 16);
 #endif
 
@@ -210,16 +210,18 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	if (validationTimestamp != 0xCAFEBABE) {
 		return false;
 	}
-
+#ifdef COMMAND_ADV_VERBOSE
 	LOGd("timeoutCounter=%u time=%u validation=%u type=%u length=%u data:", timeoutCounter, timestamp, validationTimestamp, type, length);
 	BLEutil::printArray(commandData, length);
-
+#endif
 	// Let a phone claim the advertisement commands.
 	// Do this after validation, so that validation can still take place.
+#ifdef COMMAND_ADV_VERBOSE
 	if (timeoutCounter) {
 		LOGd("timeout: memcmp=%i address=", memcmp(timeoutAddress, scannedDevice->address, MAC_ADDRESS_LEN));
 		BLEutil::printAddress(scannedDevice->address, MAC_ADDRESS_LEN);
 	}
+#endif
 	if ((timeoutCounter) && (memcmp(timeoutAddress, scannedDevice->address, MAC_ADDRESS_LEN) != 0)) {
 		return true;
 	}
@@ -258,6 +260,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	controlCmd.accessLevel = accessLevel;
 	controlCmd.data = commandData;
 	controlCmd.size = length;
+	LOGd("send cmd type=%u", controlCmd.type);
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 	EventDispatcher::getInstance().dispatch(event);
 //	LOGd("this=%p instance=%p timeoutCounter=%u %p", this, &(CommandAdvertisementHandler::getInstance()), timeoutCounter, &timeoutCounter);
@@ -305,7 +308,9 @@ void CommandAdvHandler::handleEvent(event_t & event) {
 	case CS_TYPE::EVT_TICK: {
 		if (timeoutCounter) {
 			timeoutCounter--;
+#ifdef COMMAND_ADV_VERBOSE
 			LOGd("timeoutCounter=%u", timeoutCounter);
+#endif
 		}
 		break;
 	}
