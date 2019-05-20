@@ -83,8 +83,8 @@ private:
 	access_message_tx_t _accessReplyMsg;
 	uint8_t _replyMsg[MESH_HEADER_SIZE + 0];
 
-	TYPIFY(CMD_MULTI_SWITCH) _lastReceivedMultiSwitch = {0};
-	TYPIFY(EVT_KEEP_ALIVE_STATE) _lastReceivedKeepAlive = {0};
+	TYPIFY(CMD_MULTI_SWITCH) _lastReceivedMultiSwitch = {0xFF};
+	TYPIFY(EVT_KEEP_ALIVE_STATE) _lastReceivedKeepAlive = {0xFF};
 	TYPIFY(CMD_SET_TIME) _lastReveivedSetTime = 0;
 
 	cs_mesh_model_queued_item_t _queue[MESH_MODEL_QUEUE_SIZE] = {0};

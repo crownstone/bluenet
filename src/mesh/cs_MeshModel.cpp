@@ -276,15 +276,16 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 		internal_multi_switch_item_t* item = (internal_multi_switch_item_t*) payload;
 		if (item->id == myId) {
-			LOGi("recieved multi switch for me");
+//			LOGi("recieved multi switch for me");
 			TYPIFY(CMD_MULTI_SWITCH)* cmd = &(item->cmd);
 			if (memcmp(&_lastReceivedMultiSwitch, cmd, sizeof(*cmd)) != 0) {
 				memcpy(&_lastReceivedMultiSwitch, cmd, sizeof(*cmd));
+//				LOGi("dispatch multi switch");
 				event_t event(CS_TYPE::CMD_MULTI_SWITCH, cmd, sizeof(*cmd));
 				EventDispatcher::getInstance().dispatch(event);
 			}
 			else {
-				LOGd("ignore keep alive");
+//				LOGd("ignore multi switch");
 			}
 		}
 		break;
@@ -294,7 +295,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 		keep_alive_state_item_t* item = (keep_alive_state_item_t*) payload;
 		if (item->id == myId) {
-			LOGi("recieved keep alive for me");
+//			LOGi("recieved keep alive for me");
 			TYPIFY(EVT_KEEP_ALIVE_STATE)* cmd = &(item->cmd);
 			if (memcmp(&_lastReceivedKeepAlive, cmd, sizeof(*cmd)) != 0) {
 				memcpy(&_lastReceivedKeepAlive, cmd, sizeof(*cmd));
@@ -302,7 +303,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 				EventDispatcher::getInstance().dispatch(event);
 			}
 			else {
-				LOGd("ignore keep alive");
+//				LOGd("ignore keep alive");
 			}
 		}
 		break;
