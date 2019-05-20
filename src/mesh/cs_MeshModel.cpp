@@ -426,6 +426,11 @@ bool MeshModel::sendMsgFromQueue() {
 	cs_mesh_msg_t meshMsg;
 	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(item->payloadSize);
 	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
+	if (item->type == CS_MESH_MODEL_TYPE_CMD_TIME) {
+		// Update time in set time command.
+		cs_mesh_model_msg_time_t* timePayload = (cs_mesh_model_msg_time_t*) item->payload;
+		State::getInstance().get(CS_TYPE::STATE_TIME, &(timePayload->timestamp), sizeof(timePayload->timestamp));
+	}
 	bool success = MeshModelPacketHelper::setMeshMessage((cs_mesh_model_msg_type_t)item->type, item->payload, item->payloadSize, meshMsg.msg, meshMsg.size);
 	if (success) {
 		_sendMsg(meshMsg.msg, meshMsg.size, 1);
