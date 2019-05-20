@@ -108,7 +108,7 @@ struct __attribute__((packed)) multi_switch_t {
  * Returns true when a multi switch packet is valid.
  */
 inline bool cs_multi_switch_packet_is_valid(multi_switch_t* packet, size16_t size) {
-	return (size == 1 + packet->count * sizeof(multi_switch_item_t));
+	return (size >= 1 + packet->count * sizeof(multi_switch_item_t));
 }
 
 

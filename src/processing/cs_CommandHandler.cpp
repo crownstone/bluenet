@@ -585,6 +585,7 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 	LOGi(STR_HANDLE_COMMAND, "multi switch");
 	multi_switch_t* multiSwitchPacket = (multi_switch_t*)buffer;
 	if (!cs_multi_switch_packet_is_valid(multiSwitchPacket, size)) {
+		LOGw("invalid message");
 		return ERR_INVALID_MESSAGE;
 	}
 	for (int i=0; i<multiSwitchPacket->count; ++i) {
@@ -595,6 +596,9 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 		if (cs_multi_switch_item_is_valid(&item, sizeof(item))) {
 			event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH, &item, sizeof(item));
 			EventDispatcher::getInstance().dispatch(cmd);
+		}
+		else {
+			LOGw("invalid item");
 		}
 	}
 	return ERR_SUCCESS;
