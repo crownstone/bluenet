@@ -262,13 +262,6 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_NOOP: {
-		TYPIFY(CMD_CONTROL_CMD) controlCmd;
-		controlCmd.type = CTRL_CMD_NOP;
-		controlCmd.accessLevel = ADMIN;
-		controlCmd.data = NULL;
-		controlCmd.size = 0;
-		event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
-		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
