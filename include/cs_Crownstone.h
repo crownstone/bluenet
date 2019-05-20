@@ -14,6 +14,7 @@
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
+#include <processing/cs_CommandAdvHandler.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
 #include <processing/cs_PowerSampling.h>
@@ -147,28 +148,29 @@ private:
 	Storage* _storage;
 	State* _state;
 
-	Switch* _switch;
-	TemperatureGuard* _temperatureGuard;
-	PowerSampling* _powerSampler;
-	Watchdog* _watchdog;
+	Switch* _switch = NULL;
+	TemperatureGuard* _temperatureGuard = NULL;
+	PowerSampling* _powerSampler = NULL;
+	Watchdog* _watchdog = NULL;
 
 	// services
-	DeviceInformationService* _deviceInformationService;
-	CrownstoneService* _crownstoneService;
-	SetupService* _setupService;
+	DeviceInformationService* _deviceInformationService = NULL;
+	CrownstoneService* _crownstoneService = NULL;
+	SetupService* _setupService = NULL;
 
 	// advertise
-	ServiceData* _serviceData;
-	IBeacon* _beacon;
+	ServiceData* _serviceData = NULL;
+	IBeacon* _beacon = NULL;
 
 	// processing
 #if BUILD_MESHING == 1
-	Mesh* _mesh;
+	Mesh* _mesh = NULL;
 #endif
-	CommandHandler* _commandHandler;
-	Scanner* _scanner;
-	Scheduler* _scheduler;
-	FactoryReset* _factoryReset;
+	CommandHandler* _commandHandler = NULL;
+	Scanner* _scanner = NULL;
+	Scheduler* _scheduler = NULL;
+	FactoryReset* _factoryReset = NULL;
+	CommandAdvHandler* _commandAdvHandler = NULL;
 
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;

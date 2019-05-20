@@ -100,13 +100,6 @@ void handleZeroCrossing() {
  */
 Crownstone::Crownstone(boards_config_t& board) :
 	_boardsConfig(board),
-	_switch(NULL), _temperatureGuard(NULL), _powerSampler(NULL), _watchdog(NULL),
-	_deviceInformationService(NULL), _crownstoneService(NULL), _setupService(NULL),
-	_serviceData(NULL), _beacon(NULL),
-#if BUILD_MESHING == 1
-	_mesh(NULL),
-#endif
-	_commandHandler(NULL), _scanner(NULL), _scheduler(NULL), _factoryReset(NULL),
 	_mainTimerId(NULL),
 	_operationMode(OperationMode::OPERATION_MODE_UNINITIALIZED)
 {
@@ -575,6 +568,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 				_mesh->init();
 			}
 #endif
+			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			break;
 		case OperationMode::OPERATION_MODE_SETUP:
 			// TODO: Why this hack?
