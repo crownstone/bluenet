@@ -150,6 +150,10 @@ void Crownstone::init(uint16_t step) {
 		LOG_MEMORY;
 		LOG_FLUSH();
 
+		TYPIFY(STATE_OPERATION_MODE) mode;
+		_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+		_operationMode = getOperationMode(mode);
+
 		//! configure the crownstone
 		LOGi(FMT_HEADER, "configure");
 		configure();
@@ -160,11 +164,7 @@ void Crownstone::init(uint16_t step) {
 		LOG_FLUSH();
 
 		LOGi(FMT_HEADER, "mode");
-		TYPIFY(STATE_OPERATION_MODE) mode;
-		_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
-		OperationMode newOperationMode = getOperationMode(mode);
-		LOGd("Mode is 0x%X", mode);
-		switchMode(newOperationMode);
+		switchMode(_operationMode);
 		LOG_FLUSH();
 
 		LOGi(FMT_HEADER, "init services");
@@ -447,10 +447,10 @@ void Crownstone::createService(const ServiceEvent event) {
  */
 void Crownstone::switchMode(const OperationMode & newMode) {
 
-	LOGd("Current mode: %s", TypeName(_operationMode));
+	LOGd("Current mode: %s", TypeName(_oldOperationMode));
 	LOGd("Switch to mode: %s", TypeName(newMode));
 
-	switch(_operationMode) {
+	switch(_oldOperationMode) {
 		case OperationMode::OPERATION_MODE_UNINITIALIZED:
 			break;
 		case OperationMode::OPERATION_MODE_DFU:
@@ -475,13 +475,13 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	// Create services that belong to the new mode.
 	switch(newMode) {
 		case OperationMode::OPERATION_MODE_NORMAL:
-			if (_operationMode == OperationMode::OPERATION_MODE_UNINITIALIZED) {
+			if (_oldOperationMode == OperationMode::OPERATION_MODE_UNINITIALIZED) {
 				createService(CREATE_DEVICE_INFO_SERVICE);
 			}
 			createService(CREATE_CROWNSTONE_SERVICE);
 			break;
 		case OperationMode::OPERATION_MODE_SETUP:
-			if (_operationMode == OperationMode::OPERATION_MODE_UNINITIALIZED) {
+			if (_oldOperationMode == OperationMode::OPERATION_MODE_UNINITIALIZED) {
 				createService(CREATE_DEVICE_INFO_SERVICE);
 			}
 			createService(CREATE_SETUP_SERVICE);
@@ -522,7 +522,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 		_stack->setAesEncrypted(true);
 	}
 
-	_operationMode = newMode;
+//	_operationMode = newMode;
 }
 
 /**

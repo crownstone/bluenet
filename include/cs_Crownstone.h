@@ -177,6 +177,7 @@ private:
 	TYPIFY(EVT_TICK) _tickCount = 0;
 
 	OperationMode _operationMode;
+	OperationMode _oldOperationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
 };
 
