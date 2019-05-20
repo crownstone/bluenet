@@ -106,18 +106,18 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_UART_ENABLED                     = 59,     //  0x3B
 	CONFIG_NAME                             = 60,     //  0x3C
 
-	STATE_RESET_COUNTER = State_Base,                 //  0x80 - 128
-	STATE_SWITCH_STATE,                               //  0x81 - 129
-	STATE_ACCUMULATED_ENERGY,                         //  0x82 - 130
-	STATE_POWER_USAGE,                                //  0x83 - 131
+	STATE_RESET_COUNTER                     = State_Base,  //    128
+	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
+	STATE_ACCUMULATED_ENERGY                = 130,    //  0x82 - 130
+	STATE_POWER_USAGE                       = 131,    //  0x83 - 131
 //	STATE_TRACKED_DEVICES,                            //  0x84 - 132
-	STATE_SCHEDULE,                                   //  0x85 - 133
-	STATE_OPERATION_MODE,                             //  0x86 - 134
-	STATE_TEMPERATURE,                                //  0x87 - 135
-	STATE_TIME,                                       //  0x88 - 136
-	STATE_FACTORY_RESET,                              //  0x89 - 137
+	STATE_SCHEDULE                          = 133,    //  0x85 - 133
+	STATE_OPERATION_MODE                    = 134,    //  0x86 - 134
+	STATE_TEMPERATURE                       = 135,    //  0x87 - 135
+	STATE_TIME                              = 136,    //  0x88 - 136
+	STATE_FACTORY_RESET                     = 137,    //  0x89 - 137
 //	STATE_LEARNED_SWITCHES,                           //  0x8A - 138
-	STATE_ERRORS,                                     //  0x8B - 139
+	STATE_ERRORS                            = 139,    //  0x8B - 139
 //	STATE_ERROR_OVER_CURRENT,                         //  0x8C - 140
 //	STATE_ERROR_OVER_CURRENT_DIMMER,                  //  0x8D - 141
 //	STATE_ERROR_CHIP_TEMP,                            //  0x8E - 142
