@@ -384,8 +384,9 @@ cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id
 
 cs_ret_code_t MeshModel::remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t id) {
 	for (int i = 0; i < MESH_MODEL_QUEUE_SIZE; ++i) {
-		if (_queue[i].id == id && _queue[i].type == type) {
+		if (_queue[i].id == id && _queue[i].type == type && _queue[i].repeats != 0) {
 			_queue[i].repeats = 0;
+			LOGd("removed from queue: ind=%u", i);
 			return ERR_SUCCESS;
 		}
 	}
@@ -431,7 +432,7 @@ bool MeshModel::sendMsgFromQueue() {
 	}
 	free(meshMsg.msg);
 	--(item->repeats);
-	LOGd("sent ind=%u repeats left=%u", index, item->repeats);
+	LOGd("sent ind=%u repeats left=%u type=%u id=%u", index, item->repeats, item->type, item->id);
 //	BLEutil::printArray(meshMsg.msg, meshMsg.size);
 
 	// Next item will be sent next, so that items are sent interleaved.
