@@ -9,7 +9,7 @@
 
 // TODO: requires symbol names to be preceded by std::
 #include <cstdint>
-#include <cs_Nordic.h>
+#include "ble/cs_Nordic.h"
 
 /**
  * Compare events indicate if the sampled values (be it current, voltage, or temperature) go through a predefined threshold from

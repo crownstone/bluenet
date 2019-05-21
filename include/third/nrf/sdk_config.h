@@ -2427,7 +2427,7 @@
 // <e> COMP_ENABLED - nrf_drv_comp - COMP peripheral driver - legacy layer
 //==========================================================
 #ifndef COMP_ENABLED
-#define COMP_ENABLED 0
+#define COMP_ENABLED 1
 #endif
 // <o> COMP_CONFIG_REF  - Reference voltage
 

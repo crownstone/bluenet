@@ -7,10 +7,12 @@
 
 #include "drivers/cs_COMP.h"
 
-#include <nrf.h>
+//#include <nrf.h>
 #include "util/cs_BleError.h"
 #include "drivers/cs_Serial.h"
 #include "drivers/cs_RTC.h"
+#include "ble/cs_Nordic.h"
+#include "protocol/cs_ErrorCodes.h"
 
 extern "C" void comp_callback(nrf_comp_event_t event);
 
@@ -26,19 +28,13 @@ COMP::COMP() {
  */
 
 void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
-#ifdef SDK15_UPGRADE_DONE
 	// thresholdDown has to be lower than thresholdUp, else the comp shows weird behaviour (main thread hangs)
 
-	// TODO: If memory is not initialized, this assert becomes false!
-#ifdef ALLOW_ASSERTS
-	assert(thresholdDown < thresholdUp, "thresholdDown should be lower than thresholdUp");
-#else
 	if (thresholdDown >= thresholdUp) {
-		thresholdUp = thresholdDown + 100;
+		APP_ERROR_CHECK(ERR_WRONG_PARAMETER);
 	}
-#endif
 
-	LOGd("init pin=%u down=%i up=%i", ainPin, VOLTAGE_THRESHOLD_TO_INT(thresholdDown, 3.3), VOLTAGE_THRESHOLD_TO_INT(thresholdUp, 3.3));
+	LOGd("init pin=%u down=%i up=%i", ainPin, NRFX_VOLTAGE_THRESHOLD_TO_INT(thresholdDown, 3.3), NRFX_VOLTAGE_THRESHOLD_TO_INT(thresholdUp, 3.3));
 	_lastEventTimestamp = RTC::getCount();
 #ifdef NRF52_PAN_12
 	applyWorkarounds();
@@ -49,100 +45,80 @@ void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 			.th_down = NRFX_VOLTAGE_THRESHOLD_TO_INT(thresholdDown, 3.3),
 			.th_up = NRFX_VOLTAGE_THRESHOLD_TO_INT(thresholdUp, 3.3)
 	};
-//	nrf_comp_th_t threshold;
-//	threshold.th_down = 30;
-//	threshold.th_up = 34;
 
-	nrf_drv_comp_config_t config;
-	config.reference = NRFX_COMP_REF_VDD;
-	config.main_mode = NRFX_COMP_MAIN_MODE_SE; // Single ended, not differential
+	nrfx_comp_config_t config;
+	config.reference = NRF_COMP_REF_VDD;
+	config.main_mode = NRF_COMP_MAIN_MODE_SE; // Single ended, not differential
 	config.threshold = threshold;
-	config.speed_mode = NRFX_COMP_SP_MODE_Low; // Delay of 0.6us
-	config.hyst = NRFX_COMP_HYST_NoHyst; // Not used in single ended mode
-	config.isource = NRFX_COMP_ISOURCE_Off; // Should be off in our case and due to PAN 84
+	config.speed_mode = NRF_COMP_SP_MODE_Low; // Delay of 0.6us
+	config.hyst = NRF_COMP_HYST_NoHyst; // Not used in single ended mode
+	config.isource = NRF_COMP_ISOURCE_Off; // Should be off in our case and due to PAN 84
 	config.interrupt_priority = APP_IRQ_PRIORITY_LOW;
 
-	assert(ainPin < 8, "Comp: wrong pin number");
+	if (ainPin > 7) {
+		APP_ERROR_CHECK(ERR_WRONG_PARAMETER);
+	}
 	switch(ainPin) {
 	case 0:
-		config.input = NRFX_COMP_INPUT_0; // AIN0, gpio 2
+		config.input = NRF_COMP_INPUT_0; // AIN0, gpio 2
 		break;
 	case 1:
-		config.input = NRFX_COMP_INPUT_1; // AIN1, gpio 3
+		config.input = NRF_COMP_INPUT_1; // AIN1, gpio 3
 		break;
 	case 2:
-		config.input = NRFX_COMP_INPUT_2; // AIN2, gpio 4
+		config.input = NRF_COMP_INPUT_2; // AIN2, gpio 4
 		break;
 	case 3:
-		config.input = NRFX_COMP_INPUT_3; // AIN3, gpio 5
+		config.input = NRF_COMP_INPUT_3; // AIN3, gpio 5
 		break;
 	case 4:
-		config.input = NRFX_COMP_INPUT_4; // AIN4
+		config.input = NRF_COMP_INPUT_4; // AIN4
 		break;
 	case 5:
-		config.input = NRFX_COMP_INPUT_5; // AIN5
+		config.input = NRF_COMP_INPUT_5; // AIN5
 		break;
 	case 6:
-		config.input = NRFX_COMP_INPUT_6; // AIN6
+		config.input = NRF_COMP_INPUT_6; // AIN6
 		break;
 	case 7:
-		config.input = NRFX_COMP_INPUT_7; // AIN7
+		config.input = NRF_COMP_INPUT_7; // AIN7
 		break;
 	}
 
-	ret_code_t err_code = nrf_drv_comp_init(&config, comp_callback);
-	switch(err_code) {
-		case NRFX_ERROR_INVALID_PARAM:
-			LOGe("Comparator: invalid param");
-			break;
-		case NRFX_ERROR_INVALID_STATE:
-			LOGe("Comparator: invalid state");
-			break;
-		case NRFX_ERROR_BUSY:
-			LOGe("Comparator: is already initialized");
-			break;
-	}
-	return; // for now skip check
+	ret_code_t err_code = nrfx_comp_init(&config, comp_callback);
 	APP_ERROR_CHECK(err_code);
-#endif
 }
 
 void COMP::start(CompEvent_t event) {
-#ifdef SDK15_UPGRADE_DONE
 	LOGd("start");
 	uint32_t evtMask;
 	switch(event) {
 	case COMP_EVENT_BOTH:
-		evtMask = NRFX_DRV_COMP_EVT_EN_UP_MASK | NRFX_DRV_COMP_EVT_EN_DOWN_MASK;
+		evtMask = NRF_COMP_EVENT_UP | NRF_COMP_EVENT_DOWN;
 		break;
 	case COMP_EVENT_UP:
-		evtMask = NRFX_DRV_COMP_EVT_EN_UP_MASK;
+		evtMask = NRF_COMP_EVENT_UP;
 		break;
 	case COMP_EVENT_DOWN:
-		evtMask = NRFX_DRV_COMP_EVT_EN_DOWN_MASK;
+		evtMask = NRF_COMP_EVENT_DOWN;
 		break;
 	case COMP_EVENT_CROSS:
-		evtMask = NRFX_DRV_COMP_EVT_EN_CROSS_MASK;
+		evtMask = NRF_COMP_EVENT_CROSS;
 		break;
 	case COMP_EVENT_NONE:
 	default:
 		return;
 	}
-	nrf_drv_comp_start(evtMask, 0);
+	nrfx_comp_start(evtMask, 0);
 //	nrf_comp_int_enable(COMP_INTENSET_UP_Msk | COMP_INTENSET_DOWN_Msk);
 //	nrf_comp_task_trigger(NRFX_COMP_TASK_START);
-#endif
 }
 
 uint32_t COMP::sample() {
-#ifdef SDK15_UPGRADE_DONE
-	uint32_t sample = nrf_drv_comp_sample();
+	uint32_t sample = nrfx_comp_sample();
 //	nrf_comp_task_trigger(NRFX_COMP_TASK_SAMPLE);
 //	uint32_t sample = nrf_comp_result_get();
 	return sample;
-#else
-	return 0;
-#endif
 }
 
 void COMP::setEventCallback(comp_event_cb_t callback) {
@@ -155,19 +131,18 @@ void compEventCallback(void * p_event_data, uint16_t event_size) {
 }
 
 void COMP::handleEvent(nrf_comp_event_t & event) {
-#ifdef SDK15_UPGRADE_DONE
 	switch (event) {
-	case NRFX_COMP_EVENT_READY:
+	case NRF_COMP_EVENT_READY:
 		break;
-	case NRFX_COMP_EVENT_DOWN:
+	case NRF_COMP_EVENT_DOWN:
 		_eventCallbackData.event = COMP_EVENT_DOWN;
 //		LOGd("down");
 		break;
-	case NRFX_COMP_EVENT_UP:
+	case NRF_COMP_EVENT_UP:
 		_eventCallbackData.event = COMP_EVENT_UP;
 //		LOGd("up");
 		break;
-	case NRFX_COMP_EVENT_CROSS:
+	case NRF_COMP_EVENT_CROSS:
 		_eventCallbackData.event = COMP_EVENT_CROSS;
 //		LOGd("cross");
 		break;
@@ -186,7 +161,6 @@ void COMP::handleEvent(nrf_comp_event_t & event) {
 		}
 		_lastEventTimestamp = RTC::getCount();
 	}
-#endif
 }
 
 extern "C" void comp_callback(nrf_comp_event_t nrf_comp_event) {
