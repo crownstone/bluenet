@@ -1267,9 +1267,15 @@ void Stack::disconnect() {
 		// It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
 		// This sometimes gives us an NRF_ERROR_INVALID_STATE (disconnection is already in progress)
 		// NRF_ERROR_INVALID_STATE can safely be ignored, see: https://devzone.nordicsemi.com/question/81108/handling-nrf_error_invalid_state-error-code/
+		// BLE_ERROR_INVALID_CONN_HANDLE can safely be ignored, see: https://devzone.nordicsemi.com/f/nordic-q-a/34353/error-0x3002/132078#132078
 		uint32_t errorCode = sd_ble_gap_disconnect(_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-		if (errorCode != NRF_ERROR_INVALID_STATE) {
+		switch (errorCode) {
+		case BLE_ERROR_INVALID_CONN_HANDLE:
+		case NRF_ERROR_INVALID_STATE:
+			break;
+		default:
 			APP_ERROR_CHECK(errorCode);
+			break;
 		}
 	}
 }
