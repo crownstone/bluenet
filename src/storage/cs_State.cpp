@@ -263,7 +263,7 @@ cs_ret_code_t State::getDefaultValue(cs_state_data_t & data) {
  *   FLASH: store item in persistent memory
  *   STRATEGY: store item depending on its default location, keep a copy in RAM.
  */
-cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mode) {
+cs_ret_code_t State::setInternal(const cs_state_data_t & data, const PersistenceMode mode) {
 	LOGStateDebug("Set value: %s: %u", TypeName(data.type), data.type);
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	CS_TYPE type = data.type;
@@ -399,6 +399,18 @@ cs_ret_code_t State::get(const CS_TYPE type, void *value, const size16_t size) {
 cs_ret_code_t State::set(const CS_TYPE type, void *value, const size16_t size) {
 	cs_state_data_t data(type, (uint8_t*)value, size);
 	return set(data);
+}
+
+cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mode) {
+	cs_ret_code_t retVal = setInternal(data, mode);
+	if (retVal == ERR_SUCCESS) {
+		event_t event(data.type, data.value, data.size);
+		EventDispatcher::getInstance().dispatch(event);
+	}
+	else {
+		LOGe("failed to set %u", data.type);
+	}
+	return retVal;
 }
 
 bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
