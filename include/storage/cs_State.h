@@ -311,4 +311,6 @@ private:
 
 	//! Assignment operator, singleton, thus made private
 	void operator=(State const &);
+
+	cs_ret_code_t getDefaultValue(cs_state_data_t & data);
 };
