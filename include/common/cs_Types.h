@@ -6,16 +6,17 @@
  */
 #pragma once
 
-#include <ble/cs_Nordic.h>
-#include <cfg/cs_Config.h>
+#include "ble/cs_Nordic.h"
+#include "cfg/cs_Config.h"
+#include "cfg/cs_Boards.h"
+#include "drivers/cs_Serial.h"
+#include "protocol/cs_CommandTypes.h"
+#include "protocol/cs_ErrorCodes.h"
+#include "structs/cs_PacketsInternal.h"
+#include "util/cs_UuidParser.h"
+#include <cstddef> // For NULL
 #include <cstdint>
 #include <type_traits>
-#include <cstddef> // For NULL
-#include <drivers/cs_Serial.h>
-#include <structs/cs_PacketsInternal.h>
-#include <protocol/cs_CommandTypes.h>
-#include <protocol/cs_ErrorCodes.h>
-#include <util/cs_UuidParser.h>
 
 
 enum TypeBases {
@@ -1058,7 +1059,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
  * This function does not check if data size fits the default value.
  * TODO: check how to check this at compile time.
  */
-constexpr cs_ret_code_t getDefault(cs_state_data_t & data) {
+constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsConfig) {
 
 	// for all non-string types we already know the to-be expected size
 	data.size = TypeSize(data.type);
@@ -1143,22 +1144,28 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data) {
 		*(TYPIFY(CONFIG_RELAY_HIGH_DURATION)*)data.value = RELAY_HIGH_DURATION;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_LOW_TX_POWER:
-		*(TYPIFY(CONFIG_LOW_TX_POWER)*)data.value = CONFIG_LOW_TX_POWER_DEFAULT;
+//		*(TYPIFY(CONFIG_LOW_TX_POWER)*)data.value = CONFIG_LOW_TX_POWER_DEFAULT;
+		*(TYPIFY(CONFIG_LOW_TX_POWER)*)data.value = boardsConfig.minTxPower;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER:
-		*(TYPIFY(CONFIG_VOLTAGE_MULTIPLIER)*)data.value = CONFIG_VOLTAGE_MULTIPLIER_DEFAULT;
+//		*(TYPIFY(CONFIG_VOLTAGE_MULTIPLIER)*)data.value = CONFIG_VOLTAGE_MULTIPLIER_DEFAULT;
+		*(TYPIFY(CONFIG_VOLTAGE_MULTIPLIER)*)data.value = boardsConfig.voltageMultiplier;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_CURRENT_MULTIPLIER:
-		*(TYPIFY(CONFIG_CURRENT_MULTIPLIER)*)data.value = CONFIG_CURRENT_MULTIPLIER_DEFAULT;
+//		*(TYPIFY(CONFIG_CURRENT_MULTIPLIER)*)data.value = CONFIG_CURRENT_MULTIPLIER_DEFAULT;
+		*(TYPIFY(CONFIG_CURRENT_MULTIPLIER)*)data.value = boardsConfig.currentMultiplier;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO:
-		*(TYPIFY(CONFIG_VOLTAGE_ADC_ZERO)*)data.value = CONFIG_VOLTAGE_ZERO_DEFAULT;
+//		*(TYPIFY(CONFIG_VOLTAGE_ADC_ZERO)*)data.value = CONFIG_VOLTAGE_ZERO_DEFAULT;
+		*(TYPIFY(CONFIG_VOLTAGE_ADC_ZERO)*)data.value = boardsConfig.voltageZero;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO:
-		*(TYPIFY(CONFIG_CURRENT_ADC_ZERO)*)data.value = CONFIG_CURRENT_ZERO_DEFAULT;
+//		*(TYPIFY(CONFIG_CURRENT_ADC_ZERO)*)data.value = CONFIG_CURRENT_ZERO_DEFAULT;
+		*(TYPIFY(CONFIG_CURRENT_ADC_ZERO)*)data.value = boardsConfig.currentZero;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_POWER_ZERO:
-		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = CONFIG_POWER_ZERO_DEFAULT;
+//		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = CONFIG_POWER_ZERO_DEFAULT;
+		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = boardsConfig.powerZero;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_PWM_PERIOD: {
 		LOGd("Got PWM period: %u", PWM_PERIOD);
@@ -1176,10 +1183,12 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data) {
 		*(TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM)*)data.value = CURRENT_USAGE_THRESHOLD_PWM;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
-		*(TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP)*)data.value = CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP_DEFAULT;
+//		*(TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP)*)data.value = CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP_DEFAULT;
+		*(TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP)*)data.value = boardsConfig.pwmTempVoltageThreshold;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
-		*(TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN)*)data.value = CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN_DEFAULT;
+//		*(TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN)*)data.value = CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN_DEFAULT;
+		*(TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN)*)data.value = boardsConfig.pwmTempVoltageThresholdDown;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
 		*(TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)*)data.value = SWITCHCRAFT_THRESHOLD;

@@ -202,7 +202,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 
 	switch(mode) {
 		case PersistenceMode::FIRMWARE_DEFAULT:
-			return getDefault(data);
+			return getDefaultValue(data);
 		case PersistenceMode::RAM:
 			return loadFromRam(data);
 		case PersistenceMode::FLASH:
@@ -220,7 +220,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 			// See if we need to check flash.
 			if (DefaultLocation(type) == PersistenceMode::RAM) {
 				LOGStateDebug("Load default: %s", TypeName(ram_data.type));
-				ret_code = getDefault(ram_data);
+				ret_code = getDefaultValue(ram_data);
 				if (ret_code != ERR_SUCCESS) {
 					return ret_code;
 				}
@@ -234,7 +234,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 					case ERR_NOT_FOUND:
 					default: {
 						LOGStateDebug("Load default: %s", TypeName(ram_data.type));
-						ret_code = getDefault(ram_data);
+						ret_code = getDefaultValue(ram_data);
 						if (ret_code != ERR_SUCCESS) {
 							return ret_code;
 						}
@@ -249,6 +249,10 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 		}
 	}
 	return ret_code;
+}
+
+cs_ret_code_t State::getDefaultValue(cs_state_data_t & data) {
+	return getDefault(data, *_boardsConfig);
 }
 
 // TODO: deleteFromRam to limit RAM usage
