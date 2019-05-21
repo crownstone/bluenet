@@ -273,7 +273,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			TYPIFY(CMD_MULTI_SWITCH)* cmd = &(item->cmd);
 			if (memcmp(&_lastReceivedMultiSwitch, cmd, sizeof(*cmd)) != 0) {
 				memcpy(&_lastReceivedMultiSwitch, cmd, sizeof(*cmd));
-//				LOGi("dispatch multi switch");
+				LOGi("dispatch multi switch");
 				event_t event(CS_TYPE::CMD_MULTI_SWITCH, cmd, sizeof(*cmd));
 				EventDispatcher::getInstance().dispatch(event);
 			}
@@ -292,6 +292,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			TYPIFY(EVT_KEEP_ALIVE_STATE)* cmd = &(item->cmd);
 			if (memcmp(&_lastReceivedKeepAlive, cmd, sizeof(*cmd)) != 0) {
 				memcpy(&_lastReceivedKeepAlive, cmd, sizeof(*cmd));
+				LOGi("dispatch keep alive");
 				event_t event(CS_TYPE::EVT_KEEP_ALIVE_STATE, cmd, sizeof(*cmd));
 				EventDispatcher::getInstance().dispatch(event);
 			}
