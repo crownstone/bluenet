@@ -12,6 +12,7 @@
 #include "protocol/cs_ScheduleEntries.h"
 #include "protocol/cs_Typedefs.h"
 #include "protocol/mesh/cs_MeshModelPackets.h"
+#include "protocol/cs_ServiceDataPackets.h"
 
 /**
  * Packets (structs) that are used over the air.
