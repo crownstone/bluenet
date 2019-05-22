@@ -79,4 +79,5 @@ private:
 	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
 
 	MeshModel _model;
+	uint32_t _sendStateTimeCountdown = MESH_SEND_TIME_INTERVAL_MS / TICK_INTERVAL_MS;
 };

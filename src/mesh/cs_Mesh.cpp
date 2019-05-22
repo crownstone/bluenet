@@ -27,6 +27,7 @@ extern "C" {
 
 #include "cfg/cs_Boards.h"
 #include "drivers/cs_Serial.h"
+#include "drivers/cs_RNG.h"
 #include "util/cs_BleError.h"
 #include "util/cs_Utils.h"
 #include "ble/cs_Stack.h"
