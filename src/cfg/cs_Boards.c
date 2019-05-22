@@ -5,9 +5,10 @@
  * Triple-license: LGPLv3+, Apache License, and/or MIT
  */
 
-#include <cfg/cs_Boards.h>
-#include <cfg/cs_DeviceTypes.h>
-#include <nrf_error.h>
+#include "cfg/cs_Boards.h"
+#include "cfg/cs_DeviceTypes.h"
+#include "nrf_error.h"
+#include "nrf52.h"
 
 void asACR01B1D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;

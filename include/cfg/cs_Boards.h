@@ -18,8 +18,8 @@
 extern "C" {
 #endif
 
-#include "stdbool.h"
-#include "nrf52.h"
+#include <stdint.h>
+#include <stdbool.h>
 
 /**
  *  We use part of the UICR to store information about the hardware board. So the firmware is independent on the
