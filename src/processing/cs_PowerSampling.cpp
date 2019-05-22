@@ -500,7 +500,7 @@ void PowerSampling::calculatePower(power_t power) {
 	else {
 		int64_t currentRmsSumMA = 0;
 		for (uint16_t i=0; i<_filteredCurrentRmsHistMA->size(); ++i) {
-			currentRmsSumMA += _filteredCurrentRmsHistMA->operator [](i);
+			currentRmsSumMA += _filteredCurrentRmsHistMA->operator[](i);
 		}
 		filteredCurrentRmsMedianMA = currentRmsSumMA / _filteredCurrentRmsHistMA->size();
 	}
@@ -527,7 +527,7 @@ void PowerSampling::calculatePower(power_t power) {
 	else {
 		int64_t currentRmsMilliAmpSum = 0;
 		for (uint16_t i=0; i<_currentRmsMilliAmpHist->size(); ++i) {
-			currentRmsMilliAmpSum += _currentRmsMilliAmpHist->operator [](i);
+			currentRmsMilliAmpSum += _currentRmsMilliAmpHist->operator[](i);
 		}
 		currentRmsMedianMA = currentRmsMilliAmpSum / _currentRmsMilliAmpHist->size();
 	}
@@ -547,7 +547,7 @@ void PowerSampling::calculatePower(power_t power) {
 	else {
 		int64_t voltageRmsMilliVoltSum = 0;
 		for (uint16_t i=0; i<_voltageRmsMilliVoltHist->size(); ++i) {
-			voltageRmsMilliVoltSum += _voltageRmsMilliVoltHist->operator [](i);
+			voltageRmsMilliVoltSum += _voltageRmsMilliVoltHist->operator[](i);
 		}
 		_avgVoltageRmsMilliVolt = voltageRmsMilliVoltSum / _voltageRmsMilliVoltHist->size();
 	}

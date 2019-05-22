@@ -31,6 +31,7 @@ public:
 	/** Default destructor
 	 */
 	virtual ~CircularBuffer() {
+		deinit();
 	}
 
 	uint16_t getMaxByteSize(uint16_t capacity) { return capacity * sizeof(T); }
@@ -169,7 +170,7 @@ public:
 	 * removed from the beginning. If the buffer is full
 	 * the oldest element will be overwritten.
 	 */
-	void push(T value) {
+	void push(T& value) {
 		incTail();
 		if (_contentsSize > _capacity) {
 			incHead();
@@ -184,7 +185,7 @@ public:
 	 *
 	 * @return the value of the oldest element
 	 */
-	T pop() {
+	T& pop() {
 		T res = peek();
 		incHead();
 		return res;
@@ -198,7 +199,7 @@ public:
 	 *
 	 * @return the value of the oldest element
 	 */
-	T peek() const {
+	T& peek() const {
 		return _array[_head];
 	}
 
@@ -206,7 +207,7 @@ public:
 	 *
 	 * Does NOT check if you reached the end, make sure you read no more than size().
 	 */
-	T operator[](uint16_t idx) const {
+	T& operator[](uint16_t idx) const {
 		return _array[(_head+idx)%_capacity];
 	}
 
