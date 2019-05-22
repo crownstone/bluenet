@@ -6,13 +6,19 @@
  */
 
 #include "protocol/mesh/cs_MeshModelPacketHelper.h"
-#include "structs/cs_PacketsInternal.h"
 #include "drivers/cs_Serial.h"
 #include <cstring> // For memcpy
 
 #define LOGMeshModelPacketHelperDebug LOGnone
 
 namespace MeshModelPacketHelper {
+
+bool isValidMeshMessage(cs_mesh_msg_t* meshMsg) {
+	if (meshMsg->reliability == CS_MESH_RELIABILITY_INVALID || meshMsg->size > MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE) {
+		return false;
+	}
+	return isValidMeshPayload(meshMsg->type, meshMsg->payload, meshMsg->size);
+}
 
 bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize) {
 	if (msgSize < MESH_HEADER_SIZE) {
@@ -22,7 +28,11 @@ bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize) {
 	size16_t payloadSize;
 	getPayload(meshMsg, msgSize, payload, payloadSize);
 	LOGMeshModelPacketHelperDebug("meshMsg=%p size=%u type=%u payload=%p size=%u", meshMsg, msgSize, getType(meshMsg), payload, payloadSize);
-	switch (getType(meshMsg)) {
+	return isValidMeshPayload(getType(meshMsg), payload, payloadSize);
+}
+
+bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_t payloadSize) {
+	switch (type) {
 	case CS_MESH_MODEL_TYPE_TEST:
 		return testIsValid((cs_mesh_model_msg_test_t*)payload, payloadSize);
 	case CS_MESH_MODEL_TYPE_ACK:
@@ -41,6 +51,10 @@ bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize) {
 		return cs_keep_alive_state_item_is_valid((keep_alive_state_item_t*)payload, payloadSize);
 	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE:
 		return keepAliveIsValid(payload, payloadSize);
+	case CS_MESH_MODEL_TYPE_STATE_0:
+		return state0IsValid((cs_mesh_model_msg_state_0_t*)payload, payloadSize);
+	case CS_MESH_MODEL_TYPE_STATE_1:
+		return state1IsValid((cs_mesh_model_msg_state_1_t*)payload, payloadSize);
 	}
 	return false;
 }
@@ -59,6 +73,14 @@ bool timeIsValid(const cs_mesh_model_msg_time_t* packet, size16_t size) {
 
 bool noopIsValid(const uint8_t* packet, size16_t size) {
 	return size == 0;
+}
+
+bool state0IsValid(const cs_mesh_model_msg_state_0_t* packet, size16_t size) {
+	return size == sizeof(cs_mesh_model_msg_state_0_t);
+}
+
+bool state1IsValid(const cs_mesh_model_msg_state_1_t* packet, size16_t size) {
+	return size == sizeof(cs_mesh_model_msg_state_1_t);
 }
 
 bool multiSwitchIsValid(const cs_mesh_model_msg_multi_switch_t* packet, size16_t size) {

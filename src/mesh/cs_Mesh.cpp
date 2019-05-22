@@ -393,13 +393,22 @@ void Mesh::handleEvent(event_t & event) {
 //		if (tickCount % (5000/TICK_INTERVAL_MS) == 0) {
 //			_model.sendTestMsg();
 //		}
+		if (_sendStateTimeCountdown-- == 0) {
+			uint8_t rand8;
+			RNG::fillBuffer(&rand8, 1);
+			uint32_t randMs = MESH_SEND_TIME_INTERVAL_MS + rand8 * MESH_SEND_TIME_INTERVAL_MS_VARIATION / 255;
+			_sendStateTimeCountdown = randMs / TICK_INTERVAL_MS;
+			cs_mesh_model_msg_time_t packet;
+			State::getInstance().get(CS_TYPE::STATE_TIME, &(packet.timestamp), sizeof(packet.timestamp));
+			_model.sendTime(&packet);
+		}
 
 		_model.tick(tickCount);
 		break;
 	}
 	case CS_TYPE::CMD_SEND_MESH_MSG: {
 		TYPIFY(CMD_SEND_MESH_MSG)* msg = (TYPIFY(CMD_SEND_MESH_MSG)*)event.data;
-		_model.sendMsg(msg->msg, msg->size);
+		_model.sendMsg(msg);
 		break;
 	}
 	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE: {

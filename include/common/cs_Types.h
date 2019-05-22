@@ -370,14 +370,6 @@ struct event_t {
 typedef uint16_t cs_file_id_t;
 
 /**
- * Struct to communicate a mesh message.
- */
-struct cs_mesh_msg_t {
-	uint8_t* msg;
-	size16_t size;
-};
-
-/**
  * Struct to communicate state variables.
  *
  * type       The state type.

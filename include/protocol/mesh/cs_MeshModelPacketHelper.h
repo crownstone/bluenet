@@ -8,11 +8,14 @@
 #pragma once
 
 #include "protocol/mesh/cs_MeshModelPackets.h"
+#include "structs/cs_PacketsInternal.h"
 #include "protocol/cs_Typedefs.h"
 
 namespace MeshModelPacketHelper {
 
+bool isValidMeshMessage(cs_mesh_msg_t* meshMsg);
 bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize);
+bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_t payloadSize);
 bool testIsValid(const cs_mesh_model_msg_test_t* packet, size16_t size);
 bool ackIsValid(const uint8_t* packet, size16_t size);
 bool timeIsValid(const cs_mesh_model_msg_time_t* packet, size16_t size);
@@ -20,6 +23,8 @@ bool noopIsValid(const uint8_t* packet, size16_t size);
 bool multiSwitchIsValid(const cs_mesh_model_msg_multi_switch_t* packet, size16_t size);
 bool keepAliveStateIsValid(const cs_mesh_model_msg_keep_alive_t* packet, size16_t size);
 bool keepAliveIsValid(const uint8_t* packet, size16_t size);
+bool state0IsValid(const cs_mesh_model_msg_state_0_t* packet, size16_t size);
+bool state1IsValid(const cs_mesh_model_msg_state_1_t* packet, size16_t size);
 
 cs_mesh_model_msg_type_t getType(const uint8_t* meshMsg);
 

@@ -388,14 +388,13 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveRepeatLast(buffer_ptr_t buffer, 
 	LOGi(STR_HANDLE_COMMAND, "mesh keep alive repeat");
 //#if BUILD_MESHING == 1
 	cs_mesh_msg_t meshMsg;
-	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(0);
-	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
-	bool success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE, NULL, 0, meshMsg.msg, meshMsg.size);
-	if (success) {
-		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
-		EventDispatcher::getInstance().dispatch(cmd);
-	}
-	free(meshMsg.msg);
+	meshMsg.type = CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE;
+	meshMsg.payload = NULL;
+	meshMsg.size = 0;
+	meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
+	meshMsg.urgency = CS_MESH_URGENCY_LOW;
+	event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+	EventDispatcher::getInstance().dispatch(cmd);
 //#endif
 	return ERR_SUCCESS;
 }
@@ -652,23 +651,27 @@ cs_ret_code_t CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const ui
 		return ERR_NO_ACCESS;
 	}
 
-	bool success = false;
 	cs_mesh_msg_t meshMsg;
-	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(payloadSize);
-	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
 	switch (buffer[3]) {
 	case CTRL_CMD_NOP:
-		success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_NOOP, payload, payloadSize, meshMsg.msg, meshMsg.size);
+		meshMsg.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
+		meshMsg.payload = payload;
+		meshMsg.size = payloadSize;
+		meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
+		meshMsg.urgency = CS_MESH_URGENCY_LOW;
 		break;
 	case CTRL_CMD_SET_TIME:
-		success = MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_CMD_TIME, payload, payloadSize, meshMsg.msg, meshMsg.size);
+		meshMsg.type = CS_MESH_MODEL_TYPE_CMD_TIME;
+		meshMsg.payload = payload;
+		meshMsg.size = payloadSize;
+		meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
+		meshMsg.urgency = CS_MESH_URGENCY_LOW; // Timestamp in message gets updated before actually sending.
 		break;
+	default:
+		return ERR_NOT_IMPLEMENTED;
 	}
-	if (success) {
-		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
-		EventDispatcher::getInstance().dispatch(cmd);
-	}
-	free(meshMsg.msg);
+	event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+	EventDispatcher::getInstance().dispatch(cmd);
 //#endif
 	return ERR_SUCCESS;
 }

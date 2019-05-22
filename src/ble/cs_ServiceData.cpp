@@ -5,14 +5,15 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <ble/cs_ServiceData.h>
-#include <drivers/cs_RNG.h>
-#include <drivers/cs_RTC.h>
-#include <drivers/cs_Serial.h>
-#include <processing/cs_EncryptionHandler.h>
-#include <protocol/cs_UartProtocol.h>
-#include <storage/cs_State.h>
-#include <util/cs_Utils.h>
+#include "ble/cs_ServiceData.h"
+#include "drivers/cs_RNG.h"
+#include "drivers/cs_RTC.h"
+#include "drivers/cs_Serial.h"
+#include "processing/cs_EncryptionHandler.h"
+#include "protocol/cs_UartProtocol.h"
+#include "storage/cs_State.h"
+#include "util/cs_Utils.h"
+#include "protocol/mesh/cs_MeshModelPacketHelper.h"
 
 #define ADVERTISE_EXTERNAL_DATA
 //#define PRINT_DEBUG_EXTERNAL_DATA
@@ -309,6 +310,16 @@ void ServiceData::handleEvent(event_t & event) {
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, *(bool*)event.data);
 			break;
 		}
+		case CS_TYPE::EVT_TICK: {
+			if (_sendStateCountdown-- == 0) {
+				uint8_t rand8;
+				RNG::fillBuffer(&rand8, 1);
+				uint32_t randMs = MESH_SEND_STATE_INTERVAL_MS + rand8 * MESH_SEND_STATE_INTERVAL_MS_VARIATION / 255;
+				_sendStateCountdown = randMs / TICK_INTERVAL_MS;
+				sendMeshState();
+			}
+			break;
+		}
 		// TODO: add bitmask events
 		default:
 			return;
@@ -358,4 +369,44 @@ uint16_t ServiceData::getPartialTimestampOrCounter(uint32_t timestamp, uint32_t 
 		return counter;
 	}
 	return timestampToPartialTimestamp(timestamp);
+}
+
+void ServiceData::sendMeshState() {
+//#ifdef BUILD_MESHING
+	LOGi("sendMeshState");
+	TYPIFY(STATE_TIME) timestamp;
+	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
+
+	cs_mesh_msg_t meshMsg;
+	meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
+	meshMsg.urgency = CS_MESH_URGENCY_LOW;
+	{
+		cs_mesh_model_msg_state_0_t packet;
+		packet.switchState = _switchState;
+		packet.flags = _flags;
+		packet.powerFactor = _powerFactor;
+		packet.powerUsageReal = _powerUsageReal;
+		packet.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+
+		meshMsg.type = CS_MESH_MODEL_TYPE_STATE_0;
+		meshMsg.payload = (uint8_t*)&packet;
+		meshMsg.size = sizeof(packet);
+
+		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+		EventDispatcher::getInstance().dispatch(cmd);
+	}
+	{
+		cs_mesh_model_msg_state_1_t packet;
+		packet.temperature = _temperature;
+		packet.energyUsed = _energyUsed;
+		packet.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+
+		meshMsg.type = CS_MESH_MODEL_TYPE_STATE_1;
+		meshMsg.payload = (uint8_t*)&packet;
+		meshMsg.size = sizeof(packet);
+
+		event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+		EventDispatcher::getInstance().dispatch(cmd);
+	}
+//#endif
 }

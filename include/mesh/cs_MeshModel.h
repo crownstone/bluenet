@@ -47,17 +47,18 @@ struct __attribute__((__packed__)) cs_mesh_model_queued_item_t {
 	uint8_t payload[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
 };
 
-
 class MeshModel {
 public:
 	MeshModel();
 	void init();
 	void setOwnAddress(uint16_t address);
-	cs_ret_code_t sendMsg(uint8_t* data, uint16_t len, uint8_t repeats=5);
+//	cs_ret_code_t sendMsg(uint8_t* data, uint16_t len, uint8_t repeats=5);
+	cs_ret_code_t sendMsg(cs_mesh_msg_t *meshMsg);
 	cs_ret_code_t sendReliableMsg(const uint8_t* data, uint16_t len);
 
 	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats=10);
 	cs_ret_code_t sendKeepAliveItem(const keep_alive_state_item_t* item, uint8_t repeats=5);
+	cs_ret_code_t sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats=1);
 
 	access_model_handle_t getAccessModelHandle();
 

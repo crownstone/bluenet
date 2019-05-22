@@ -209,6 +209,10 @@ const uint32_t PWM_PERIOD = 10000;
 
 #define SWITCH_DELAYED_STORE_MS                  10000 // Timeout before storing the pwm switch value is stored.
 #define STATE_RETRY_STORE_DELAY_MS               1000 // Time before retrying to store a varable to flash.
+#define MESH_SEND_TIME_INTERVAL_MS               60000 // Interval at which the time is sent via the mesh.
+#define MESH_SEND_TIME_INTERVAL_MS_VARIATION     10000 // Max amount that gets added to interval.
+#define MESH_SEND_STATE_INTERVAL_MS              60000 // Interval at which the stone state is sent via the mesh.
+#define MESH_SEND_STATE_INTERVAL_MS_VARIATION    10000 // Max amount that gets added to interval.
 
 #define PWM_BOOT_DELAY_MS                        60000 // Delay after boot until pwm can be used. Has to be smaller than overflow time of RTC.
 

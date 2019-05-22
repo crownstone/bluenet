@@ -225,10 +225,6 @@ public:
 	 */
 	uint16_t getArraySize();
 
-	/** Send the state over the mesh, to be called by timer.
-	 */
-	void _sendMeshState();
-
 private:
 	//! Timer used to periodically update the advertisement.
 	app_timer_t    _updateTimerData;
@@ -260,6 +256,8 @@ private:
 
 	//! Store timestamp of first error
 	uint32_t _firstErrorTimestamp; // TODO: use State for this?
+
+	uint32_t _sendStateCountdown = MESH_SEND_STATE_INTERVAL_MS / TICK_INTERVAL_MS;
 
 //	//! Store the error state, so that they don't have to be retrieved every time.
 //	state_errors_t _stateErrors;
@@ -355,6 +353,8 @@ private:
 	 */
 	uint16_t getPartialTimestampOrCounter(uint32_t timestamp, uint32_t counter);
 
-
+	/** Send the state over the mesh.
+	 */
+	void sendMeshState();
 };
 

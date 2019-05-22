@@ -103,6 +103,45 @@ struct __attribute__((packed)) control_command_packet_t {
 };
 
 /**
+ * How reliable a mesh message should be.
+ *
+ * For now, the associated number is the number of times the message gets sent.
+ */
+enum cs_mesh_msg_reliability {
+	CS_MESH_RELIABILITY_INVALID = 0,
+	CS_MESH_RELIABILITY_LOWEST = 1,
+	CS_MESH_RELIABILITY_LOW = 3,
+	CS_MESH_RELIABILITY_MEDIUM = 5,
+	CS_MESH_RELIABILITY_HIGH = 10
+};
+
+/**
+ * How urgent a message is.
+ *
+ * Lower urgency means that it's okay if the message is not sent immediately.
+ */
+enum cs_mesh_msg_urgency {
+	CS_MESH_URGENCY_LOW,
+	CS_MESH_URGENCY_HIGH
+};
+
+/**
+ * Struct to communicate a mesh message.
+ * type            Type of message.
+ * payload         The payload.
+ * size            Size of the payload.
+ * reliability     How reliable the message should be.
+ * urgency         How quick the message should be sent.
+ */
+struct cs_mesh_msg_t {
+	cs_mesh_model_msg_type_t type;
+	uint8_t* payload;
+	size16_t size = 0;
+	cs_mesh_msg_reliability reliability = CS_MESH_RELIABILITY_LOW;
+	cs_mesh_msg_urgency urgency = CS_MESH_URGENCY_LOW;
+};
+
+/**
  * Background advertisement.
  */
 struct __attribute__((__packed__)) adv_background_t {

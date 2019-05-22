@@ -75,24 +75,19 @@ access_model_handle_t MeshModel::getAccessModelHandle() {
 	return _accessHandle;
 }
 
-cs_ret_code_t MeshModel::sendMsg(uint8_t* data, uint16_t len, uint8_t repeats) {
-	if (len > MAX_MESH_MSG_NON_SEGMENTED_SIZE) {
-		return ERR_WRONG_PAYLOAD_LENGTH;
+//cs_ret_code_t MeshModel::sendMsg(uint8_t* data, uint16_t len, uint8_t repeats) {
+cs_ret_code_t MeshModel::sendMsg(cs_mesh_msg_t *meshMsg) {
+	if (!MeshModelPacketHelper::isValidMeshMessage(meshMsg)) {
+		return ERR_INVALID_MESSAGE;
 	}
-	cs_mesh_model_msg_type_t type = MeshModelPacketHelper::getType(data);
-	bool priority = false;
-	switch (type) {
-	case CS_MESH_MODEL_TYPE_CMD_TIME:
-		priority = true;
-		break;
-	default:
-		break;
-	}
-	uint8_t* payload = NULL;
-	size16_t payloadSize;
-	MeshModelPacketHelper::getPayload(data, len, payload, payloadSize);
-	remFromQueue(type, 0);
-	return addToQueue(type, 0, payload, payloadSize, repeats, priority);
+	uint8_t repeats = meshMsg->reliability;
+	bool priority = meshMsg->urgency == CS_MESH_URGENCY_HIGH;
+//	cs_mesh_model_msg_type_t type = MeshModelPacketHelper::getType(meshMsg->msg);
+//	uint8_t* payload = NULL;
+//	size16_t payloadSize;
+//	MeshModelPacketHelper::getPayload(meshMsg->msg, meshMsg->size, payload, payloadSize);
+	remFromQueue(meshMsg->type, 0);
+	return addToQueue(meshMsg->type, 0, meshMsg->payload, meshMsg->size, repeats, priority);
 }
 
 
@@ -107,6 +102,10 @@ cs_ret_code_t MeshModel::sendKeepAliveItem(const keep_alive_state_item_t* item, 
 	return addToQueue(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE, item->id, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
+cs_ret_code_t MeshModel::sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats) {
+	remFromQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0);
+	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+}
 
 cs_ret_code_t MeshModel::sendReliableMsg(const uint8_t* data, uint16_t len) {
 	return ERR_NOT_IMPLEMENTED;
@@ -249,6 +248,9 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_STATE_TIME: {
+		if (ownMsg) {
+			break;
+		}
 		event_t event(CS_TYPE::EVT_MESH_TIME, payload, payloadSize);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
@@ -305,6 +307,18 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE: {
 		event_t event(CS_TYPE::EVT_KEEP_ALIVE);
 		EventDispatcher::getInstance().dispatch(event);
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_STATE_0: {
+		cs_mesh_model_msg_state_0_t* packet = (cs_mesh_model_msg_state_0_t*) payload;
+		uint8_t srcId = accessMsg->meta_data.src.value;
+		LOGd("id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_STATE_1: {
+		cs_mesh_model_msg_state_1_t* packet = (cs_mesh_model_msg_state_1_t*) payload;
+		uint8_t srcId = accessMsg->meta_data.src.value;
+		LOGd("id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
 		break;
 	}
 	}
@@ -424,19 +438,18 @@ bool MeshModel::sendMsgFromQueue() {
 		return false;
 	}
 	cs_mesh_model_queued_item_t* item = &(_queue[index]);
-	cs_mesh_msg_t meshMsg;
-	meshMsg.size = MeshModelPacketHelper::getMeshMessageSize(item->payloadSize);
-	meshMsg.msg = (uint8_t*)malloc(meshMsg.size);
+	size16_t msgSize = MeshModelPacketHelper::getMeshMessageSize(item->payloadSize);
+	uint8_t* msg = (uint8_t*)malloc(msgSize);
 	if (item->type == CS_MESH_MODEL_TYPE_CMD_TIME) {
 		// Update time in set time command.
 		cs_mesh_model_msg_time_t* timePayload = (cs_mesh_model_msg_time_t*) item->payload;
 		State::getInstance().get(CS_TYPE::STATE_TIME, &(timePayload->timestamp), sizeof(timePayload->timestamp));
 	}
-	bool success = MeshModelPacketHelper::setMeshMessage((cs_mesh_model_msg_type_t)item->type, item->payload, item->payloadSize, meshMsg.msg, meshMsg.size);
+	bool success = MeshModelPacketHelper::setMeshMessage((cs_mesh_model_msg_type_t)item->type, item->payload, item->payloadSize, msg, msgSize);
 	if (success) {
-		_sendMsg(meshMsg.msg, meshMsg.size, 1);
+		_sendMsg(msg, msgSize, 1);
 	}
-	free(meshMsg.msg);
+	free(msg);
 	--(item->repeats);
 	LOGd("sent ind=%u repeats left=%u type=%u id=%u", index, item->repeats, item->type, item->id);
 //	BLEutil::printArray(meshMsg.msg, meshMsg.size);
