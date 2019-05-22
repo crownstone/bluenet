@@ -49,6 +49,7 @@ void ServiceData::init() {
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 	_operationMode = getOperationMode(mode);
 
+	_externalStates = new CircularBuffer<service_data_encrypted_t>(EXTERNAL_STATE_LIST_COUNT);
 	_externalStates->init();
 
 	// start the update timer
