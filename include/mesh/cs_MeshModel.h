@@ -47,6 +47,12 @@ struct __attribute__((__packed__)) cs_mesh_model_queued_item_t {
 	uint8_t payload[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
 };
 
+struct cs_mesh_model_ext_state_t {
+	uint16_t address = 0;
+	uint8_t partsReceived = 0;
+	TYPIFY(EVT_STATE_EXTERNAL_STONE) state;
+};
+
 class MeshModel {
 public:
 	MeshModel();
@@ -87,6 +93,7 @@ private:
 	TYPIFY(CMD_MULTI_SWITCH) _lastReceivedMultiSwitch = {0xFF};
 	TYPIFY(EVT_KEEP_ALIVE_STATE) _lastReceivedKeepAlive = {0xFF};
 	TYPIFY(CMD_SET_TIME) _lastReveivedSetTime = 0;
+	cs_mesh_model_ext_state_t _lastReceivedState;
 
 	cs_mesh_model_queued_item_t _queue[MESH_MODEL_QUEUE_SIZE] = {0};
 	uint8_t _queueSendIndex = 0;

@@ -14,6 +14,7 @@
 #include "storage/cs_State.h"
 #include "drivers/cs_Timer.h"
 #include "cfg/cs_Config.h"
+#include "structs/buffer/cs_CircularBuffer.h"
 
 #include <cstring>
 
@@ -138,6 +139,8 @@ private:
 	uint32_t _firstErrorTimestamp; // TODO: use State for this?
 
 	uint32_t _sendStateCountdown = MESH_SEND_STATE_INTERVAL_MS / TICK_INTERVAL_MS;
+
+	CircularBuffer<service_data_encrypted_t>* _externalStates;
 
 //	//! Store the error state, so that they don't have to be retrieved every time.
 //	state_errors_t _stateErrors;

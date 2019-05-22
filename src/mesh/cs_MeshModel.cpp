@@ -310,15 +310,40 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_STATE_0: {
+		if (ownMsg) {
+			break;
+		}
 		cs_mesh_model_msg_state_0_t* packet = (cs_mesh_model_msg_state_0_t*) payload;
 		uint8_t srcId = accessMsg->meta_data.src.value;
 		LOGd("id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
+		_lastReceivedState.address = srcId;
+		_lastReceivedState.partsReceived = 1;
+		_lastReceivedState.state.extState.id = srcId;
+		_lastReceivedState.state.extState.switchState = packet->switchState;
+		_lastReceivedState.state.extState.flags = packet->flags;
+		_lastReceivedState.state.extState.powerFactor = packet->powerFactor;
+		_lastReceivedState.state.extState.powerUsageReal = packet->powerUsageReal;
+		_lastReceivedState.state.extState.partialTimestamp = packet->partialTimestamp;
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_STATE_1: {
+		if (ownMsg) {
+			break;
+		}
 		cs_mesh_model_msg_state_1_t* packet = (cs_mesh_model_msg_state_1_t*) payload;
 		uint8_t srcId = accessMsg->meta_data.src.value;
 		LOGd("id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
+		if (	_lastReceivedState.address == accessMsg->meta_data.src.value &&
+				_lastReceivedState.partsReceived == 1 &&
+				_lastReceivedState.state.extState.id == srcId &&
+				_lastReceivedState.state.extState.partialTimestamp == packet->partialTimestamp
+				) {
+			_lastReceivedState.state.extState.temperature = packet->temperature;
+			_lastReceivedState.state.extState.energyUsed = packet->energyUsed;
+			_lastReceivedState.state.extState.rssi = getRssi(accessMsg->meta_data.p_core_metadata);
+			event_t event(CS_TYPE::EVT_STATE_EXTERNAL_STONE, &(_lastReceivedState.state), sizeof(_lastReceivedState.state));
+			EventDispatcher::getInstance().dispatch(event);
+		}
 		break;
 	}
 	}

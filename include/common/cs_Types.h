@@ -206,6 +206,7 @@ enum class CS_TYPE: uint16_t {
 //	EVT_STORAGE_WRITE,                                // Sent when an item is going to be written to storage.
 //	EVT_STORAGE_ERASE,                                // Sent when a flash page is going to be erased.
 	EVT_ADC_RESTARTED,                                // Sent when ADC has been restarted.
+	EVT_STATE_EXTERNAL_STONE                          // Sent when the state of another stone has been received. -- Payload is service_data_encrypted_t
 };
 
 constexpr CS_TYPE toCsType(uint16_t type) {
@@ -296,6 +297,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_DIMMER_POWERED:
 	case CS_TYPE::EVT_DIMMING_ALLOWED:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 	case CS_TYPE::EVT_SETUP_DONE:
@@ -515,6 +517,7 @@ typedef  void TYPIFY(EVT_SCAN_STOPPED);
 typedef  schedule_list_t TYPIFY(EVT_SCHEDULE_ENTRIES_UPDATED);
 typedef  void TYPIFY(EVT_SETUP_DONE);
 typedef  session_nonce_t TYPIFY(EVT_SESSION_NONCE_SET);
+typedef  service_data_encrypted_t TYPIFY(EVT_STATE_EXTERNAL_STONE);
 typedef  void TYPIFY(EVT_STORAGE_INITIALIZED);
 typedef  CS_TYPE TYPIFY(EVT_STORAGE_WRITE_DONE);
 typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
@@ -737,6 +740,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(EVT_DIMMING_ALLOWED));
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 		return sizeof(TYPIFY(EVT_SWITCH_LOCKED));
+	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
+		return sizeof(TYPIFY(EVT_STATE_EXTERNAL_STONE));
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 		return 0;
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
@@ -889,6 +894,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED: return "EVT_SCHEDULE_ENTRIES_UPDATED";
 	case CS_TYPE::EVT_SESSION_NONCE_SET: return "EVT_SESSION_NONCE_SET";
 	case CS_TYPE::EVT_SETUP_DONE: return "EVT_SETUP_DONE";
+	case CS_TYPE::EVT_STATE_EXTERNAL_STONE: return "EVT_STATE_EXTERNAL_STONE";
 	case CS_TYPE::EVT_STORAGE_INITIALIZED: return "EVT_STORAGE_INITIALIZED";
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: return "EVT_STORAGE_WRITE_DONE";
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: return "EVT_SWITCHCRAFT_ENABLED";
@@ -1003,6 +1009,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_DIMMER_POWERED:
 	case CS_TYPE::EVT_DIMMING_ALLOWED:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 	case CS_TYPE::EVT_SETUP_DONE:
@@ -1280,6 +1287,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
 	case CS_TYPE::EVT_SETUP_DONE:
+	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
@@ -1401,6 +1409,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
 	case CS_TYPE::EVT_SETUP_DONE:
+	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
@@ -1523,6 +1532,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
 	case CS_TYPE::EVT_SETUP_DONE:
+	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
