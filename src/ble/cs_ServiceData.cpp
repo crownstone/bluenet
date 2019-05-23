@@ -49,8 +49,7 @@ void ServiceData::init() {
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 	_operationMode = getOperationMode(mode);
 
-	_externalStates = new CircularBuffer<service_data_encrypted_t>(EXTERNAL_STATE_LIST_COUNT);
-	_externalStates->init();
+	_externalStates.init();
 
 	// start the update timer
 	Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
@@ -227,7 +226,12 @@ void ServiceData::updateAdvertisement(bool initial) {
 }
 
 bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& serviceData) {
-	return false;
+	service_data_encrypted_t* extState = _externalStates.getNextState();
+	if (extState == NULL) {
+		return false;
+	}
+	memcpy(&serviceData.params.encrypted, extState, sizeof(*extState));
+	return true;
 }
 
 
@@ -325,8 +329,7 @@ void ServiceData::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::EVT_STATE_EXTERNAL_STONE: {
 			TYPIFY(EVT_STATE_EXTERNAL_STONE)* extState = (TYPIFY(EVT_STATE_EXTERNAL_STONE)*)event.data;
-			LOGi("external state: id=%u flags=%u switch=%u power=%i ts=%u", extState->extState.id, extState->extState.flags, extState->extState.switchState, extState->extState.powerUsageReal, extState->extState.partialTimestamp)
-			_externalStates->push(*extState);
+			_externalStates.receivedState(extState);
 			break;
 		}
 		// TODO: add bitmask events

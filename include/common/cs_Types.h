@@ -206,7 +206,7 @@ enum class CS_TYPE: uint16_t {
 //	EVT_STORAGE_WRITE,                                // Sent when an item is going to be written to storage.
 //	EVT_STORAGE_ERASE,                                // Sent when a flash page is going to be erased.
 	EVT_ADC_RESTARTED,                                // Sent when ADC has been restarted.
-	EVT_STATE_EXTERNAL_STONE                          // Sent when the state of another stone has been received. -- Payload is service_data_encrypted_t
+	EVT_STATE_EXTERNAL_STONE                          // Sent when the state of another stone has been received. -- Payload is state_external_stone_t
 };
 
 constexpr CS_TYPE toCsType(uint16_t type) {
@@ -517,7 +517,7 @@ typedef  void TYPIFY(EVT_SCAN_STOPPED);
 typedef  schedule_list_t TYPIFY(EVT_SCHEDULE_ENTRIES_UPDATED);
 typedef  void TYPIFY(EVT_SETUP_DONE);
 typedef  session_nonce_t TYPIFY(EVT_SESSION_NONCE_SET);
-typedef  service_data_encrypted_t TYPIFY(EVT_STATE_EXTERNAL_STONE);
+typedef  state_external_stone_t TYPIFY(EVT_STATE_EXTERNAL_STONE);
 typedef  void TYPIFY(EVT_STORAGE_INITIALIZED);
 typedef  CS_TYPE TYPIFY(EVT_STORAGE_WRITE_DONE);
 typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);

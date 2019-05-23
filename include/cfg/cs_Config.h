@@ -247,10 +247,8 @@ const uint32_t PWM_PERIOD = 10000;
 #define ADVERTISING_REFRESH_PERIOD               1000 // Push the changes in the advertisement packet to the stack every x milliseconds
 #define ADVERTISING_REFRESH_PERIOD_SETUP         100  // Push the changes in the advertisement packet to the stack every x milliseconds
 
-#define MESH_STATE_REFRESH_PERIOD                50000 // (ms) Every refresh period (+ some random amount of seconds), the state is sent over the mesh.
-#define MESH_STATE_MIN_INTERVAL                  3000  // (ms) There should be at least this much time between 2 mesh state messages.
-#define MESH_STATE_TIMEOUT                       (3*MESH_STATE_REFRESH_PERIOD) // ms until state of a crownstone is considered to be timed out.
-#define LAST_SEEN_COUNT_PER_STATE_CHAN           3 // Number of last seen timestamps to store per state channel.
+#define EXTERNAL_STATE_LIST_COUNT                10 // Number of stones to cache the state of, for advertising external state.
+#define EXTERNAL_STATE_TIMEOUT_MS                60000 // Time after which a state of another stone is considered to be timed out.
 
 #define SWITCH_ON_AT_SETUP_BOOT_DELAY            3600  // Seconds until the switch turns on when in setup mode (Crownstone built-in only)
 

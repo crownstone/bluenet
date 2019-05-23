@@ -9,14 +9,12 @@
  */
 #pragma once
 
+#include "processing/cs_ExternalStates.h"
 #include "events/cs_EventListener.h"
 #include "events/cs_EventDispatcher.h"
 #include "storage/cs_State.h"
 #include "drivers/cs_Timer.h"
 #include "cfg/cs_Config.h"
-#include "structs/buffer/cs_CircularBuffer.h"
-
-#include <cstring>
 
 class ServiceData : EventListener {
 
@@ -140,8 +138,6 @@ private:
 
 	uint32_t _sendStateCountdown = MESH_SEND_STATE_INTERVAL_MS / TICK_INTERVAL_MS;
 
-	CircularBuffer<service_data_encrypted_t>* _externalStates;
-
 //	//! Store the error state, so that they don't have to be retrieved every time.
 //	state_errors_t _stateErrors;
 
@@ -153,6 +149,8 @@ private:
 
 	//! Counter that keeps up the number of times that the advertisement has been updated.
 	uint32_t _updateCount;
+
+	ExternalStates _externalStates;
 
 	/* Static function for the timeout */
 	static void staticTimeout(ServiceData *ptr) {

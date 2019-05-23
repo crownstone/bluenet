@@ -318,12 +318,12 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		LOGd("id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
 		_lastReceivedState.address = srcId;
 		_lastReceivedState.partsReceived = 1;
-		_lastReceivedState.state.extState.id = srcId;
-		_lastReceivedState.state.extState.switchState = packet->switchState;
-		_lastReceivedState.state.extState.flags = packet->flags;
-		_lastReceivedState.state.extState.powerFactor = packet->powerFactor;
-		_lastReceivedState.state.extState.powerUsageReal = packet->powerUsageReal;
-		_lastReceivedState.state.extState.partialTimestamp = packet->partialTimestamp;
+		_lastReceivedState.state.data.state.id = srcId;
+		_lastReceivedState.state.data.extState.switchState = packet->switchState;
+		_lastReceivedState.state.data.extState.flags = packet->flags;
+		_lastReceivedState.state.data.extState.powerFactor = packet->powerFactor;
+		_lastReceivedState.state.data.extState.powerUsageReal = packet->powerUsageReal;
+		_lastReceivedState.state.data.extState.partialTimestamp = packet->partialTimestamp;
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_STATE_1: {
@@ -335,12 +335,18 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		LOGd("id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
 		if (	_lastReceivedState.address == accessMsg->meta_data.src.value &&
 				_lastReceivedState.partsReceived == 1 &&
-				_lastReceivedState.state.extState.id == srcId &&
-				_lastReceivedState.state.extState.partialTimestamp == packet->partialTimestamp
+				_lastReceivedState.state.data.extState.id == srcId &&
+				_lastReceivedState.state.data.extState.partialTimestamp == packet->partialTimestamp
 				) {
-			_lastReceivedState.state.extState.temperature = packet->temperature;
-			_lastReceivedState.state.extState.energyUsed = packet->energyUsed;
-			_lastReceivedState.state.extState.rssi = getRssi(accessMsg->meta_data.p_core_metadata);
+			_lastReceivedState.state.data.extState.temperature = packet->temperature;
+			_lastReceivedState.state.data.extState.energyUsed = packet->energyUsed;
+			// We don't actually know the RSSI to the source of this message.
+			// We only get RSSI to a mac address, but we don't know what id a mac address has.
+			// So for now, just assume we don't have direct contact with the source stone.
+			_lastReceivedState.state.data.extState.rssi = 0;
+			_lastReceivedState.state.rssi = 0;
+			_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
+			_lastReceivedState.state.data.type = SERVICE_DATA_TYPE_EXT_STATE;
 			event_t event(CS_TYPE::EVT_STATE_EXTERNAL_STONE, &(_lastReceivedState.state), sizeof(_lastReceivedState.state));
 			EventDispatcher::getInstance().dispatch(event);
 		}

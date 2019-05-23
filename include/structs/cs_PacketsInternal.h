@@ -142,6 +142,16 @@ struct cs_mesh_msg_t {
 };
 
 /**
+ * Struct to communicate received state of other stones.
+ * rssi            RSSI to this stone, or 0 if not received the state directly from that stone.
+ * serviceData     State of the stone.
+ */
+struct state_external_stone_t {
+	int8_t rssi;
+	service_data_encrypted_t data;
+};
+
+/**
  * Background advertisement.
  */
 struct __attribute__((__packed__)) adv_background_t {
