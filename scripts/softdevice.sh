@@ -37,7 +37,7 @@ build() {
 upload() {
 	if [ $serial_num ]; then
 		echo nrfjprog -f nrf52 --program $SD_BINDIR/softdevice_mainpart.hex --sectorerase --snr $serial_num
-		nrfjprog -f nrf52 --program $SD_BINDIR/softdevice_mainpart.hex.hex --sectorerase --snr $serial_num
+		nrfjprog -f nrf52 --program $SD_BINDIR/softdevice_mainpart.hex --sectorerase --snr $serial_num
 	else
 		echo nrfjprog -f nrf52 --program $SD_BINDIR/softdevice_mainpart.hex --sectorerase
 		nrfjprog -f nrf52 --program $SD_BINDIR/softdevice_mainpart.hex --sectorerase 
