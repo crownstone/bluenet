@@ -278,9 +278,9 @@ HARDWARE_BOARD_ADDRESS=0x10001084
 # S132 6.0 (comes with SDK 15)
 #######################################################################################################################
 SOFTDEVICE_MAJOR=6
-SOFTDEVICE_MINOR=0
+SOFTDEVICE_MINOR=1
 SOFTDEVICE_SERIES=132
-SOFTDEVICE=s132_nrf52_6.1.0
+SOFTDEVICE=s132_nrf52_6.1.1
 
 # We get APPLICATION_START_ADDRESS from $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld
 # We repeat them here, but you will have to adjust that file...
