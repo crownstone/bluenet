@@ -44,8 +44,15 @@ upload() {
 		cs_info "HARDWARE_BOARD $HARDWARE_BOARD = $HARDWARE_BOARD_INT"
 		HARDWARE_BOARD_HEX=$(printf "%x" $HARDWARE_BOARD_INT)
 		if [ $serial_num ]; then
-			nrfjprog -f nrf52 --memwr $HARDWARE_BOARD_ADDRESS --val $HARDWARE_BOARD_HEX --snr $serial_num
-			# TODO check address first
+			check_value=$(nrfjprog -f nrf52 --memrd $HARDWARE_BOARD_ADDRESS --snr $serial_num | awk '{print $2}')
+			check_value=$(echo "$check_value+0" | bc )
+			cs_log "Check value: $check_value vs $HARDWARE_BOARD_INT"
+			if [ $check_value != $HARDWARE_BOARD_HEX ]; then
+				echo nrfjprog -f nrf52 --memwr $HARDWARE_BOARD_ADDRESS --val "0x$HARDWARE_BOARD_HEX" --snr $serial_num
+				nrfjprog -f nrf52 --memwr $HARDWARE_BOARD_ADDRESS --val "0x$HARDWARE_BOARD_HEX" --snr $serial_num
+			else
+				cs_log "Value already set to $HARDWARE_BOARD_HEX"
+			fi
 		else
 			check_value=$(nrfjprog -f nrf52 --memrd $HARDWARE_BOARD_ADDRESS | awk '{print $2}')
 			check_value=$(echo "$check_value+0" | bc )
