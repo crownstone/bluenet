@@ -284,8 +284,8 @@ ENDIF()
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES} ${PROJECT_NAME}.tmp)
 
-#SET(INCLUDE_ONLY_SECTIONS, "-j .text -j .data -j .sdh_soc_observers -j .sdh_ble_observers -j .sdh_state_observers -j .sdh_stack_observers -j .sdh_req_observers -j .nrf_balloc")
-SET(INCLUDE_ONLY_SECTIONS, "")
+#SET(INCLUDE_ONLY_SECTIONS "-j .text -j .data -j .sdh_soc_observers -j .sdh_ble_observers -j .sdh_state_observers -j .sdh_stack_observers -j .sdh_req_observers -j .nrf_balloc")
+SET(INCLUDE_ONLY_SECTIONS "")
 
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.tmp
 	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.tmp

@@ -572,8 +572,8 @@ ELSE()
 	ELSE()
 		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.tmp)
 
-		#SET(INCLUDE_ONLY_SECTIONS, "-j .text -j .data -j .sdh_soc_observers -j .sdh_ble_observers -j .sdh_state_observers -j .sdh_stack_observers -j .sdh_req_observers -j .nrf_balloc")
-		SET(INCLUDE_ONLY_SECTIONS, "")
+		#SET(INCLUDE_ONLY_SECTIONS "-j .text -j .data -j .sdh_soc_observers -j .sdh_ble_observers -j .sdh_state_observers -j .sdh_stack_observers -j .sdh_req_observers -j .nrf_balloc")
+		SET(INCLUDE_ONLY_SECTIONS "")
 
 		# https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
 		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.tmp
