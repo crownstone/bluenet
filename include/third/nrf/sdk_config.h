@@ -49,7 +49,7 @@
 // <h> nRF_ANT
 
 #ifndef FDS_VIRTUAL_PAGES_RESERVED
-#define FDS_VIRTUAL_PAGES_RESERVED 3
+#define FDS_VIRTUAL_PAGES_RESERVED 0
 #endif
 
 //==========================================================
