@@ -8,9 +8,7 @@ set history remove-duplicates 100
 set history expansion on
 set history size 1024
 
-#directory /home/anne/software/nrf5_sdk/nRF5_SDK_15.2.0_9412b96/
-#add-symbol-file /home/anne/workspace/bluenet/bin/sdk15/bootloader.elf 0x07d000
-add-symbol-file /home/anne/workspace/bluenet/bin/sdk15/crownstone.elf 0x26000
+@add-symbol-file@
 
 set print object
 set print static off
@@ -95,7 +93,7 @@ monitor reset
 
 #b nrf_bootloader_init
 #b main
-b _start
+#b _start
 
 #b __START
 
@@ -119,12 +117,12 @@ b _start
 
 #b *0x00029AB1
 
-b nrf_dfu_mbr_irq_forward_address_set
+#b nrf_dfu_mbr_irq_forward_address_set
 
 # is not reached
-b nrf_bootloader_app_start_final
+#b nrf_bootloader_app_start_final
 #catch throw
 c
 #starti
 
-info break
+#info break

@@ -73,7 +73,7 @@ upload() {
 }
 
 debug() {
-	${path}/_debug.sh $BLUENET_BIN_DIR/crownstone.elf $serial_num $gdb_port
+	${path}/_debug.sh $BLUENET_BIN_DIR/crownstone.elf $target
 	checkError "Debugging failed"
 }
 

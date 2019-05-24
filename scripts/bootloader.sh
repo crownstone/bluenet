@@ -97,7 +97,11 @@ upload-settings() {
 }
 
 debug() {
-	${path}/_debug.sh $BLUENET_BIN_DIR/bootloader.elf $serial_num $gdb_port
+	if [ -e $BLUENET_BIN_DIR/crownstone.elf ]; then
+		${path}/_debug.sh $BLUENET_BIN_DIR/bootloader.elf $target $BLUENET_BIN_DIR/crownstone.elf $APPLICATION_START_ADDRESS
+	else
+		${path}/_debug.sh $BLUENET_BIN_DIR/bootloader.elf $target
+	fi
 	checkError "Debugging failed"
 }
 
