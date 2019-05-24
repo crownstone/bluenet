@@ -204,7 +204,12 @@ build_unit_test_host() {
 
 
 erase_flash() {
-	${path}/_erase_flash.sh $serial_num
+	if [ $serial_num ]; then
+		nrfjprog -f nrf52 --eraseall --snr $serial_num
+	else
+		nrfjprog -f nrf52 --eraseall 
+	fi
+	#${path}/_erase_flash.sh $serial_num
 	checkError "Error erasing flash"
 }
 
@@ -302,6 +307,7 @@ if [ $do_build ]; then
 		done_built=true
 	fi
 	if [ $include_bootloader ]; then
+		build_bootloader_settings
 		build_bootloader
 		done_built=true
 	fi
@@ -346,6 +352,12 @@ if [ $do_upload ]; then
 		fi
 		if [ $include_bootloader ]; then
 			upload_bootloader
+			# If not including here as well, it is very annoying that consecutive builds do not including settings.
+			# Consecutive calls to
+			# ./bluenet -uF
+			# ./bluenet -uB
+			# should have same result as ./bluenet -uBF
+			upload_bootloader_settings
 			done_upload=true
 		fi
 		# Write board version before uploading firmware, else firmware writes it.

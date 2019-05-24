@@ -186,6 +186,7 @@ ELSE()
 
 	MESSAGE(STATUS "CMakeLists: nrf log: ${CS_SERIAL_NRF_LOG_ENABLED}")
 	IF (CS_SERIAL_NRF_LOG_ENABLED)
+		MESSAGE(STATUS "CMakeLists: SERIAL log enabled")
 		LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_serial.c")
 		LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/log/src/nrf_log_default_backends.c")
 		LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/log/src/nrf_log_frontend.c")
@@ -203,6 +204,8 @@ ELSE()
 			LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/integration/nrfx/legacy/nrf_drv_uart.c")
 			LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uart.c")
 		ENDIF()
+	ELSE()
+		MESSAGE(STATUS "CMakeLists: SERIAL log disabled")
 	ENDIF()
 	
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
@@ -231,6 +234,7 @@ ELSE()
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/crypto/backend/nrf_hw")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/crypto/backend/nrf_sw")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/crypto/backend/oberon")
+	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/crypto/backend/optiga")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/delay")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/experimental_section_vars")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/fstorage")
@@ -271,7 +275,7 @@ ELSE()
 	LIST(APPEND BOOTLOADER_LIBS "${NRF5_DIR}/external/micro-ecc/nrf52hf_armgcc/armgcc/micro_ecc_lib_nrf52.a")
 
 	# oberon
-	LIST(APPEND BOOTLOADER_LIBS "${NRF5_DIR}/external/nrf_oberon/lib/nrf52/liboberon_2.0.5.a")
+	LIST(APPEND BOOTLOADER_LIBS "${NRF5_DIR}/external/nrf_oberon/lib/cortex-m4/hard-float/liboberon_2.0.7.a")
 
 	ADD_DEFINITIONS("-DNRF_DFU_SETTINGS_VERSION=1")
 	
@@ -280,10 +284,12 @@ ENDIF()
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES} ${PROJECT_NAME}.tmp)
 
+#SET(INCLUDE_ONLY_SECTIONS, "-j .text -j .data -j .sdh_soc_observers -j .sdh_ble_observers -j .sdh_state_observers -j .sdh_stack_observers -j .sdh_req_observers -j .nrf_balloc")
+SET(INCLUDE_ONLY_SECTIONS, "")
 
 ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.tmp
-	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -j .text -j .data -O binary ${PROJECT_NAME} ${PROJECT_NAME}.tmp
-	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -j .text -j .data -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
+	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.tmp
+	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
 	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME}.tmp ${PROJECT_NAME}.bin
 	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
 	COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf

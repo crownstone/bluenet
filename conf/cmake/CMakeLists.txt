@@ -1,4 +1,4 @@
-#######################################################################################################################
+######################################################################################################################
 # The build systems uses CMake. All the automatically generated code falls under the Lesser General Public License
 # (LGPL GNU v3), the Apache License, or the MIT license, your choice.
 #
@@ -50,8 +50,9 @@ MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
 
-MESSAGE(STATUS "CMakeLists: Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF51822-softdevice.ld)
+MESSAGE(STATUS "CMakeLists: Do not set application start address")
+#MESSAGE(STATUS "CMakeLists: Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
+#CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF-softdevice.ld)
 
 # Libraries (math, stdc++ libraries, etc.) 
 # Note! We CANNOT use the size-constrained *_s versions! anymore
@@ -95,7 +96,7 @@ ELSE()
 
 	IF(VERBOSITY GREATER 4)
 		FOREACH(crownstone_file ${FOLDER_SOURCE})
-			MESSAGE(STATUS "Include Crownstone file: " ${crownstone_file})
+			MESSAGE(STATUS "CMakeLists: Include Crownstone file: " ${crownstone_file})
 		ENDFOREACH()
 	ENDIF()
 
@@ -135,6 +136,7 @@ ELSE()
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/system_nrf52.c")
 	
 	IF (CS_SERIAL_NRF_LOG_ENABLED)
+		MESSAGE(STATUS "CMakeLists: SERIAL from NORDIC enabled")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_serial.c")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_default_backends.c")
@@ -154,6 +156,8 @@ ELSE()
 			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/integration/nrfx/legacy/nrf_drv_uart.c")
 			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uart.c")
 		ENDIF()
+	ELSE()
+		MESSAGE(STATUS "CMakeLists: SERIAL from NORDIC disabled")
 	ENDIF()
 
 	IF (BUILD_MESHING)
@@ -444,7 +448,7 @@ ELSE()
 
 	IF(VERBOSITY GREATER 4)
 		FOREACH(nordic_file ${NORDIC_SOURCE})
-			MESSAGE(STATUS "Include Nordic file: " ${nordic_file})
+			MESSAGE(STATUS "CMakeLists: Include Nordic file: " ${nordic_file})
 		ENDFOREACH()
 	ENDIF()
 
@@ -497,7 +501,9 @@ ELSE()
 	INCLUDE_DIRECTORIES("${NRF5_DIR}/modules/nrfx/mdk/")
 	INCLUDE_DIRECTORIES("${NRF5_DIR}/external/segger_rtt")
 	INCLUDE_DIRECTORIES("${NRF5_DIR}/integration/nrfx/legacy/")
-	
+
+	INCLUDE_DIRECTORIES("${NRF5_DIR}/components/softdevice/s132/headers/nrf52")
+
 	IF (BUILD_MESHING)
 		INCLUDE_DIRECTORIES("${MESH_SDK_DIR}/mesh/stack/api")
 #		INCLUDE_DIRECTORIES("${MESH_SDK_DIR}/mesh/serial/api")
@@ -566,10 +572,13 @@ ELSE()
 	ELSE()
 		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.tmp)
 
+		#SET(INCLUDE_ONLY_SECTIONS, "-j .text -j .data -j .sdh_soc_observers -j .sdh_ble_observers -j .sdh_state_observers -j .sdh_stack_observers -j .sdh_req_observers -j .nrf_balloc")
+		SET(INCLUDE_ONLY_SECTIONS, "")
+
 		# https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
 		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.tmp
-			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -j .text -j .data -O binary ${PROJECT_NAME} ${PROJECT_NAME}.tmp
-			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -j .text -j .data -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
+			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.tmp
+			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME}.tmp ${PROJECT_NAME}.bin
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
 			COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf

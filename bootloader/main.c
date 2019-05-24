@@ -218,13 +218,16 @@ int main(void)
 
 	cs_check_gpregret();
 
+	NRF_LOG_INFO("Protect");
+	NRF_LOG_FLUSH();
+
 	// Protect MBR and bootloader code from being overwritten.
 	ret_val = nrf_bootloader_flash_protect(0, MBR_SIZE, false);
 	APP_ERROR_CHECK(ret_val);
 	ret_val = nrf_bootloader_flash_protect(BOOTLOADER_START_ADDR, BOOTLOADER_SIZE, false);
 	APP_ERROR_CHECK(ret_val);
-
-	NRF_LOG_INFO("Inside main");
+	
+	NRF_LOG_INFO("Init");
 	NRF_LOG_FLUSH();
 
 	// Need to adjust dfu_enter_check().

@@ -63,12 +63,17 @@ release() {
 }
 
 upload() {
-	${path}/_upload.sh $BLUENET_BIN_DIR/crownstone.hex $address $serial_num
+	if [ $serial_num ]; then
+		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/crownstone.hex --sectorerase --snr $serial_num
+	else
+		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/crownstone.hex --sectorerase 
+	fi
+	#${path}/_upload.sh $BLUENET_BIN_DIR/crownstone.hex $address $serial_num
 	checkError "Uploading failed"
 }
 
 debug() {
-	${path}/_debug.sh $BLUENET_BIN_DIR/crownstone.elf $serial_num $gdb_port
+	${path}/_debug.sh $BLUENET_BIN_DIR/crownstone.elf $target
 	checkError "Debugging failed"
 }
 

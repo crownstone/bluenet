@@ -43,7 +43,28 @@ upload() {
 	if [ $? -eq 0 ] && [ -n "$HARDWARE_BOARD_INT" ]; then
 		cs_info "HARDWARE_BOARD $HARDWARE_BOARD = $HARDWARE_BOARD_INT"
 		HARDWARE_BOARD_HEX=$(printf "%x" $HARDWARE_BOARD_INT)
-		${path}/_writebyte.sh $HARDWARE_BOARD_ADDRESS $HARDWARE_BOARD_HEX $serial_num
+		if [ $serial_num ]; then
+			check_value=$(nrfjprog -f nrf52 --memrd $HARDWARE_BOARD_ADDRESS --snr $serial_num | awk '{print $2}')
+			check_value=$(echo "$check_value+0" | bc )
+			cs_log "Check value: $check_value vs $HARDWARE_BOARD_INT"
+			if [ $check_value != $HARDWARE_BOARD_HEX ]; then
+				echo nrfjprog -f nrf52 --memwr $HARDWARE_BOARD_ADDRESS --val "0x$HARDWARE_BOARD_HEX" --snr $serial_num
+				nrfjprog -f nrf52 --memwr $HARDWARE_BOARD_ADDRESS --val "0x$HARDWARE_BOARD_HEX" --snr $serial_num
+			else
+				cs_log "Value already set to $HARDWARE_BOARD_HEX"
+			fi
+		else
+			check_value=$(nrfjprog -f nrf52 --memrd $HARDWARE_BOARD_ADDRESS | awk '{print $2}')
+			check_value=$(echo "$check_value+0" | bc )
+			cs_log "Check value: $check_value vs $HARDWARE_BOARD_INT"
+			if [ $check_value != $HARDWARE_BOARD_HEX ]; then
+				echo nrfjprog -f nrf52 --memwr $HARDWARE_BOARD_ADDRESS --val "0x$HARDWARE_BOARD_HEX"
+				nrfjprog -f nrf52 --memwr $HARDWARE_BOARD_ADDRESS --val "0x$HARDWARE_BOARD_HEX"
+			else
+				cs_log "Value already set to $HARDWARE_BOARD_HEX"
+			fi
+		fi
+		#${path}/_writebyte.sh $HARDWARE_BOARD_ADDRESS $HARDWARE_BOARD_HEX $serial_num
 		checkError "Error writing board version"
 	else
 		cs_err "Failed to extract HARDWARE_BOARD=$HARDWARE_BOARD from $BLUENET_DIR/include/cfg/cs_Boards.h"
@@ -75,6 +96,8 @@ check() {
 		else
 			echo -n "Do you want to overwrite the board version [Y/n]? "
 			read overwrite_board_version
+			# default overwrite
+			overwrite_board_version=${overwrite_board_version:-y}
 		fi
 		# Default yes
 		if [ "$autoyes" == 'true' ] || [ "$overwrite_board_version" == 'Y' ] || [ "$overwrite_board_version" == 'y' ]; then 

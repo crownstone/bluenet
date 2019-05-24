@@ -27,6 +27,8 @@ NRF_UICR_BIN=${SD_BINDIR}/softdevice_uicr.bin
 # Output main file
 NRF_MAIN_BIN=${SD_BINDIR}/softdevice_mainpart.bin
 
+NRF_MAIN_HEX=${SD_BINDIR}/softdevice_mainpart.hex
+
 # Remove old files
 rm -f ${NRF_MAIN_BIN}
 rm -f ${NRF_UICR_BIN}
@@ -36,7 +38,8 @@ OBJCOPY=${COMPILER_PATH}/bin/${COMPILER_TYPE}objcopy
 
 if [ $SOFTDEVICE_NO_SEPARATE_UICR_SECTION == 1 ]; then
 	cs_log "SoftDevice has no separate UICR section"
-	cs_log "$OBJCOPY -Iihex -Obinary ${FULLNAME_SOFTDEVICE} ${NRF_MAIN_BIN}"
+	cs_log "$OBJCOPY -Iihex -Obinary (hex file) (obj file)"
+	cp ${FULLNAME_SOFTDEVICE} ${NRF_MAIN_HEX}
 	$OBJCOPY -Iihex -Obinary ${FULLNAME_SOFTDEVICE} ${NRF_MAIN_BIN}
 else
 	cs_log "Separately copy main and UICR section"
