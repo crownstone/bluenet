@@ -312,11 +312,6 @@ void Crownstone::configure() {
  *   [29.06.16] restart the mesh disabled, this was limited to pca10000, it does crash dobeacon v0.7
  */
 void Crownstone::configureStack() {
-	// Set the stored tx power
-	TYPIFY(CONFIG_TX_POWER) txPower = 0;
-	_state->get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
-	_stack->setTxPowerLevel(txPower);
-
 	// Set the stored advertisement interval
 	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;
 	_state->get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, sizeof(advInterval));
@@ -612,6 +607,11 @@ void Crownstone::startUp() {
 	//! start advertising
 	LOGi("Start advertising");
 	_stack->startAdvertising();
+
+	// Set the stored tx power, must be done after advertising has started.
+	TYPIFY(CONFIG_TX_POWER) txPower = 0;
+	_state->get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
+	_stack->setTxPowerLevel(txPower);
 
 	// Have to give the stack a moment of pause to start advertising, otherwise we get into race conditions.
 	// TODO: Is this still the case? Can we solve this differently?

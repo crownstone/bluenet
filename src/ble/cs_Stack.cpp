@@ -26,7 +26,7 @@
 
 Stack::Stack() :
 	_appearance(BLE_APPEARANCE_GENERIC_TAG), //_clock_source(defaultClockSource),
-	_tx_power_level(TX_POWER), _sec_mode({ }),
+	_tx_power_level(0), _sec_mode({ }),
 	_interval(defaultAdvertisingInterval_0_625_ms), _timeout(defaultAdvertisingTimeout_seconds),
 	_gap_conn_params( { }),
 	_advertising(false),
