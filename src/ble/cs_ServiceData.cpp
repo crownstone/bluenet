@@ -280,6 +280,7 @@ void ServiceData::handleEvent(event_t & event) {
 		case CS_TYPE::STATE_SWITCH_STATE: {
 			switch_state_t* state = (TYPIFY(STATE_SWITCH_STATE)*)event.data;
 			updateSwitchState(state->asInt);
+			sendMeshState();
 			break;
 		}
 		case CS_TYPE::STATE_ACCUMULATED_ENERGY: {
@@ -383,15 +384,21 @@ uint16_t ServiceData::getPartialTimestampOrCounter(uint32_t timestamp, uint32_t 
 	return timestampToPartialTimestamp(timestamp);
 }
 
-void ServiceData::sendMeshState() {
+void ServiceData::sendMeshState(bool event) {
 //#ifdef BUILD_MESHING
 	LOGi("sendMeshState");
 	TYPIFY(STATE_TIME) timestamp;
 	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
 
 	cs_mesh_msg_t meshMsg;
-	meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
-	meshMsg.urgency = CS_MESH_URGENCY_LOW;
+	if (event) {
+		meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
+		meshMsg.urgency = CS_MESH_URGENCY_HIGH;
+	}
+	else {
+		meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
+		meshMsg.urgency = CS_MESH_URGENCY_LOW;
+	}
 	{
 		cs_mesh_model_msg_state_0_t packet;
 		packet.switchState = _switchState;

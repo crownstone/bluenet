@@ -235,7 +235,9 @@ private:
 	uint16_t getPartialTimestampOrCounter(uint32_t timestamp, uint32_t counter);
 
 	/** Send the state over the mesh.
+	 *
+	 * @param[in] event           True when sending state because of an event.
 	 */
-	void sendMeshState();
+	void sendMeshState(bool event);
 };
 
