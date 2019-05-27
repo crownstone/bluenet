@@ -436,6 +436,7 @@ void Stack::updateConnParams() {
  */
 void Stack::configureIBeaconAdvData(IBeacon* beacon) {
 	LOGd("Configure iBeacon adv data");
+	return;
 
 	memset(&_manufac_apple, 0, sizeof(_manufac_apple));
 	_manufac_apple.company_identifier = 0x004C;
@@ -500,7 +501,11 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 	uint8_t serviceDataLength = 0;
 
 	memset(&_config_scanrsp, 0, sizeof(_config_scanrsp));
+
 	_config_scanrsp.name_type = BLE_ADVDATA_SHORT_NAME;
+
+	_config_scanrsp.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
+	_config_scanrsp.include_appearance = false;
 
 	if (_serviceData && deviceType != DEVICE_UNDEF) {
 		memset(&_service_data, 0, sizeof(_service_data));
@@ -517,9 +522,8 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 		serviceDataLength += 2 + sizeof(_service_data.service_uuid) + _service_data.data.size;
 	}
 
-	const uint8_t maxDataLength = 29;
-	uint8_t nameLength = maxDataLength - serviceDataLength;
-	LOGd("Maximum data length minus service data length: %i - %i = %i", maxDataLength, serviceDataLength, nameLength);
+	uint8_t nameLength = 31 - 3 - serviceDataLength - 2; // 3 For flags field, 2 for name field header.
+	LOGd("Max name length = %u", nameLength);
 	uint8_t deviceNameLength = getDeviceName().length();
 	nameLength = std::min(nameLength, deviceNameLength);
 	LOGd("Set BLE name to length %i", nameLength);
@@ -532,12 +536,17 @@ void Stack::configureScanResponse(uint8_t deviceType) {
 
 	// we now have to encode the data by an explicit call
 	ret_code_t ret_code;
-	_adv_data.scan_rsp_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
-	LOGd("Create scan response of size %i", _adv_data.scan_rsp_data.len);
-	if (_adv_data.scan_rsp_data.p_data == NULL) {
-		_adv_data.scan_rsp_data.p_data = (uint8_t*)calloc(sizeof(uint8_t),_adv_data.scan_rsp_data.len);
+//	_adv_data.scan_rsp_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
+//	LOGd("Create scan response of size %i", _adv_data.scan_rsp_data.len);
+//	if (_adv_data.scan_rsp_data.p_data == NULL) {
+//		_adv_data.scan_rsp_data.p_data = (uint8_t*)calloc(sizeof(uint8_t),_adv_data.scan_rsp_data.len);
+//	}
+//	ret_code = ble_advdata_encode(&_config_scanrsp, _adv_data.scan_rsp_data.p_data, &_adv_data.scan_rsp_data.len);
+	_adv_data.adv_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
+	if (_adv_data.adv_data.p_data == NULL) {
+		_adv_data.adv_data.p_data = (uint8_t*)calloc(sizeof(uint8_t), _adv_data.adv_data.len);
 	}
-	ret_code = ble_advdata_encode(&_config_scanrsp, _adv_data.scan_rsp_data.p_data, &_adv_data.scan_rsp_data.len);
+	ret_code = ble_advdata_encode(&_config_scanrsp, _adv_data.adv_data.p_data, &_adv_data.adv_data.len);
 	APP_ERROR_CHECK(ret_code);
 }
 
@@ -652,13 +661,13 @@ void Stack::restartAdvertising() {
 	}
 
 	if (scannable) {
-		ret_code_t ret_code;
-		_adv_data.scan_rsp_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
-		if (_adv_data.scan_rsp_data.p_data == NULL) {
-			_adv_data.scan_rsp_data.p_data = (uint8_t*)calloc(sizeof(uint8_t),_adv_data.scan_rsp_data.len);
-		}
-		ret_code = ble_advdata_encode(&_config_scanrsp, _adv_data.scan_rsp_data.p_data, &_adv_data.scan_rsp_data.len);
-		APP_ERROR_CHECK(ret_code);
+//		ret_code_t ret_code;
+//		_adv_data.scan_rsp_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
+//		if (_adv_data.scan_rsp_data.p_data == NULL) {
+//			_adv_data.scan_rsp_data.p_data = (uint8_t*)calloc(sizeof(uint8_t),_adv_data.scan_rsp_data.len);
+//		}
+//		ret_code = ble_advdata_encode(&_config_scanrsp, _adv_data.scan_rsp_data.p_data, &_adv_data.scan_rsp_data.len);
+//		APP_ERROR_CHECK(ret_code);
 	}
 	else {
 		if (_adv_data.scan_rsp_data.p_data != NULL) {

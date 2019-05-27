@@ -379,6 +379,29 @@ void Mesh::provisionLoad() {
 	LOGi("devKeyHandle=%u devKey=", _devkeyHandle);
 }
 
+void Mesh::advertise(IBeacon* ibeacon) {
+	LOGd("advertise ibeacon major=%u minor=%u", ibeacon->getMajor(), ibeacon->getMinor());
+	_advertiser.init();
+
+//	ble_gap_addr_t address;
+//	uint32_t retCode = sd_ble_gap_addr_get(&address);
+//	APP_ERROR_CHECK(retCode);
+//	// have non-connectable address one value higher than connectable one
+//	address.addr[0] += 0x1;
+//	_advertiser.setMacAddress(address.addr);
+
+	// TODO: get from state
+//	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;
+//	State::getInstance()->get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, sizeof(advInterval));
+	_advertiser.setInterval(100);
+
+	// TODO: get from state
+	_advertiser.setTxPower(4);
+
+	_advertiser.setIbeaconData(ibeacon);
+	_advertiser.start();
+}
+
 void Mesh::handleEvent(event_t & event) {
 	switch (event.type) {
 	case CS_TYPE::EVT_TICK: {

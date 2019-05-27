@@ -407,7 +407,8 @@ void Crownstone::configureAdvertisement() {
 	if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
 		LOGd("Configure iBeacon");
 		_stack->configureIBeacon(_beacon, _boardsConfig.deviceType);
-	} else {
+	}
+	else {
 		LOGd("Configure BLE device");
 		_stack->configureBleDevice(_boardsConfig.deviceType);
 	}
@@ -659,6 +660,7 @@ void Crownstone::startUp() {
 //			nrf_delay_ms(500);
 			//! TODO: start with delay please
 			_mesh->start();
+			_mesh->advertise(_beacon);
 #endif
 		} else {
 			LOGi("Mesh not enabled");

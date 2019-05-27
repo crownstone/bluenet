@@ -10,6 +10,7 @@
 #include "events/cs_EventListener.h"
 #include "common/cs_Types.h"
 #include "mesh/cs_MeshModel.h"
+#include <mesh/cs_MeshAdvertiser.h>
 
 extern "C" {
 #include <nrf_mesh_config_app.h>
@@ -42,6 +43,11 @@ public:
 	 * Stops all radio usage.
 	 */
 	void stop();
+
+	/**
+	 * Advertise as iBeacon.
+	 */
+	void advertise(IBeacon* ibeacon);
 
 	/**
 	 * Internal usage
@@ -78,6 +84,7 @@ private:
 	dsm_handle_t _devkeyHandle = DSM_HANDLE_INVALID;
 	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
 
+	MeshAdvertiser _advertiser;
 	MeshModel _model;
 	uint32_t _sendStateTimeCountdown = MESH_SEND_TIME_INTERVAL_MS / TICK_INTERVAL_MS;
 };
