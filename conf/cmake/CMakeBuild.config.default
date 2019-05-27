@@ -165,24 +165,7 @@ TX_POWER=4
 
 # Default advertisement interval, in units of 0.625 ms
 # Must be between 32 and 16384
-# When meshing: must be >= timeslot period used by rbc_mesh (atm 100ms)
 ADVERTISEMENT_INTERVAL=160
-
-## Mesh settings ##
-# Minimum interval in ms for broadcasting values of handles (has to be smaller or equal to advertisement interval)
-MESH_INTERVAL_MIN_MS=100
-# Don't process first mesh messages after boot for some time (ms)
-# Max interval of mesh is currently MESH_TRICKLE_I_MAX * MESH_INTERVAL_MIN_MS, which now is 12.8s
-MESH_BOOT_TIME=30000
-
-RBC_MESH_DEBUG=0
-#RBC_MESH_VALUE_MAX_LEN=104
-RBC_MESH_HANDLE_CACHE_ENTRIES=20
-RBC_MESH_DATA_CACHE_ENTRIES=10
-RBC_MESH_APP_EVENT_QUEUE_LENGTH=16
-RADIO_PCNF1_MAXLEN=118UL
-RADIO_PCNF0_S1LEN=1UL
-RADIO_PCNF0_LFLEN=7UL
 
 # Maximal chip temperature in degrees celsius
 MAX_CHIP_TEMP=75
