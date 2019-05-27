@@ -10,6 +10,7 @@
 extern "C" {
 #include "nrf_mesh.h"
 #include "mesh_config.h"
+#include "mesh_opt_core.h"
 #include "mesh_stack.h"
 #include "access.h"
 #include "access_config.h"
@@ -249,6 +250,28 @@ void Mesh::init() {
 
 	nrf_mesh_rx_cb_set(scan_cb);
 
+	ble_gap_addr_t macAddress;
+	retCode = sd_ble_gap_addr_get(&macAddress);
+	APP_ERROR_CHECK(retCode);
+	// have non-connectable address one value higher than connectable one
+	macAddress.addr[0] -= 1;
+	macAddress.addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC;
+
+	radio_tx_power_t radioTxPower = RADIO_POWER_NRF_0DBM;
+	TYPIFY(CONFIG_TX_POWER) txPower;
+	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
+	switch (txPower) {
+	case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4:
+		radioTxPower = (radio_tx_power_t)txPower;
+		break;
+	default:
+		return;
+	}
+	for (uint8_t i=0; i<CORE_TX_ROLE_COUNT; ++i) {
+		mesh_opt_core_adv_addr_set((core_tx_role_t)i, &macAddress);
+		mesh_opt_core_tx_power_set((core_tx_role_t)i, radioTxPower);
+	}
+
 //	EventDispatcher::getInstance().addListener(this);
 	if (!_isProvisioned) {
 		provisionSelf(_ownAddress);
@@ -388,7 +411,7 @@ void Mesh::advertise(IBeacon* ibeacon) {
 	uint32_t retCode = sd_ble_gap_addr_get(&address);
 	APP_ERROR_CHECK(retCode);
 	// have non-connectable address one value higher than connectable one
-	address.addr[0] += 0x1;
+	address.addr[0] += 1;
 	_advertiser.setMacAddress(address.addr);
 
 	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;

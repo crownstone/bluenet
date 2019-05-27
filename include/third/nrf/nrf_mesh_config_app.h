@@ -129,6 +129,10 @@
  * @{
  */
 
+
+/** Relay feature */
+#define MESH_FEATURE_RELAY_ENABLED (1)
+
 #include "fds.h"
 #include "fds_internal_defs.h"
 /** Number of flash pages to be reserved between the flash manager recovery page and the bootloader.
