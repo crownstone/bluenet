@@ -51,15 +51,16 @@ fi
 # Run JLink gdb server
 if [ -z $SERIAL_NUM ]; then
 	cs_log "$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
-	$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &
+	$JLINK_GDB_SERVER -Device $DEVICE -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT > /dev/null 2>&1 &
 else
 	cs_log "$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SERIAL_NUM -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &"
-	$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SERIAL_NUM -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT &
+	$JLINK_GDB_SERVER -Device $DEVICE -select usb=$SERIAL_NUM -If SWD -speed 4000 -port $GDB_PORT -swoport $SWO_PORT -telnetport $TELNET_PORT > /dev/null 2>&1 &
 fi
 
 # Stop running processes on exit of script
 cleanup() {
 	local pids=$(jobs -pr)
+	cs_info "Clean up all jobs ($pids)"
 	[ -n "$pids" ] && kill $pids
 }
 trap "cleanup" INT QUIT TERM EXIT
