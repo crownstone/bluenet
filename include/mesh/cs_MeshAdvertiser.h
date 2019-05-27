@@ -14,7 +14,13 @@ extern "C" {
 #include "advertiser.h"
 }
 
-#define MESH_ADVERTISER_BUF_SIZE ADVERTISER_PACKET_BUFFER_PACKET_MAXLEN
+/**
+ * Buffer for the advertising packet.
+ *
+ * For some reason the buffer needs to be a bit larger, else we get stuck in an infinite loop in
+ * packet_buffer.c::packet_buffer_packets_ready_to_pop()
+ */
+#define MESH_ADVERTISER_BUF_SIZE (ADVERTISER_PACKET_BUFFER_PACKET_MAXLEN + 4)
 
 class MeshAdvertiser {
 public:

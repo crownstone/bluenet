@@ -57,7 +57,7 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_IBEACON_TXPOWER                  = 9,      //  0x09
 //	CONFIG_WIFI_SETTINGS                    = 10,     //  0x0A
 	CONFIG_TX_POWER                         = 11,     //  0x0B
-	CONFIG_ADV_INTERVAL                     = 12,     //  0x0C
+	CONFIG_ADV_INTERVAL                     = 12,     //  0x0C   // Advertising interval in units of 0.625ms.
 //	CONFIG_PASSKEY                          = 13,     //  0x0D
 //	CONFIG_MIN_ENV_TEMP                     = 14,     //  0x0E
 //	CONFIG_MAX_ENV_TEMP                     = 15,     //  0x0F

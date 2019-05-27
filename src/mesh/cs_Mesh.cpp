@@ -32,6 +32,7 @@ extern "C" {
 #include "util/cs_Utils.h"
 #include "ble/cs_Stack.h"
 #include "events/cs_EventDispatcher.h"
+#include "storage/cs_State.h"
 
 #define LOGMeshDebug LOGnone
 
@@ -383,20 +384,21 @@ void Mesh::advertise(IBeacon* ibeacon) {
 	LOGd("advertise ibeacon major=%u minor=%u", ibeacon->getMajor(), ibeacon->getMinor());
 	_advertiser.init();
 
-//	ble_gap_addr_t address;
-//	uint32_t retCode = sd_ble_gap_addr_get(&address);
-//	APP_ERROR_CHECK(retCode);
-//	// have non-connectable address one value higher than connectable one
-//	address.addr[0] += 0x1;
-//	_advertiser.setMacAddress(address.addr);
+	ble_gap_addr_t address;
+	uint32_t retCode = sd_ble_gap_addr_get(&address);
+	APP_ERROR_CHECK(retCode);
+	// have non-connectable address one value higher than connectable one
+	address.addr[0] += 0x1;
+	_advertiser.setMacAddress(address.addr);
 
-	// TODO: get from state
-//	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;
-//	State::getInstance()->get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, sizeof(advInterval));
-	_advertiser.setInterval(100);
+	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;
+	State::getInstance().get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, sizeof(advInterval));
+	uint32_t advIntervalMs = advInterval * 625 / 1000;
+	_advertiser.setInterval(advIntervalMs);
 
-	// TODO: get from state
-	_advertiser.setTxPower(4);
+	TYPIFY(CONFIG_TX_POWER) txPower;
+	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
+	_advertiser.setTxPower(txPower);
 
 	_advertiser.setIbeaconData(ibeacon);
 	_advertiser.start();

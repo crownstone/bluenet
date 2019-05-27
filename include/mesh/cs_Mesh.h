@@ -21,7 +21,7 @@ extern "C" {
 class Mesh : EventListener {
 public:
 	/**
-	 * Get a reference to the State object.
+	 * Get a reference to the Mesh object.
 	 */
 	static Mesh& getInstance();
 
@@ -60,10 +60,10 @@ public:
 	void handleEvent(event_t & event);
 
 private:
-	//! State constructor, singleton, thus made private
+	//! Constructor, singleton, thus made private
 	Mesh();
 
-	//! State copy constructor, singleton, thus made private
+	//! Copy constructor, singleton, thus made private
 	Mesh(Mesh const&);
 
 	//! Assignment operator, singleton, thus made private

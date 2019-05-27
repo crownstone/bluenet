@@ -9,9 +9,9 @@
 #include "storage/cs_State.h"
 #include "util/cs_BleError.h"
 
-void txComplete(advertiser_t * p_adv, nrf_mesh_tx_token_t token, timestamp_t timestamp) {
-	LOGd("tx");
-}
+//void txComplete(advertiser_t * p_adv, nrf_mesh_tx_token_t token, timestamp_t timestamp) {
+//	LOGd("tx complete int=%u", BLEutil::getInterruptLevel());
+//}
 
 void MeshAdvertiser::init() {
 	static advertiser_t advertiser;
@@ -69,7 +69,6 @@ void MeshAdvertiser::setIbeaconData(IBeacon* ibeacon) {
 //	memcpy(&(_advPacket[9]), ) // iBeacon UUID
 	memcpy(&(_advPacket->packet.payload[7]), ibeacon->getArray(), ibeacon->size());
 	_advPacket->config.repeats = ADVERTISER_REPEAT_INFINITE;
-//	_advPacket->config.repeats = 0xFE;
 }
 
 void MeshAdvertiser::start() {
