@@ -2,6 +2,7 @@
 #   https://github.com/cyrus-and/gdb-dashboard
 #   Would have been nice, but requires Python support for gdb
 #source ~/.gdbinit
+
 set history filename .gdb_history
 set history save
 set history remove-duplicates 100
@@ -15,6 +16,7 @@ set print static off
 set print elements 1
 set confirm off
 set print pretty on
+set pagination off
 
 define reset
 	!make last
@@ -24,7 +26,6 @@ end
 
 target remote localhost:@gdb_port@
 set remote memory-write-packet-size 1024
-#set remote memory-write-packet-size fixed
 load
 
 info files
@@ -34,95 +35,5 @@ monitor reset
 # If you want to enable a breakpoint before program start
 #b main
 
-#b softdevice_assertion_handler
+continue 
 
-# The function main() is called from nRF51822.c
-#b Reset_Handler
-
-# This does not work so well for header files: variables get optimized out...
-#b BluetoothLE.h:313
-#commands
-#p _value
-#c
-#end
-#
-#b BluetoothLE.h:317
-#commands
-#p _value
-#c
-#end
-
-#b cs_Stack.cpp:Stack::initRadio()
-
-#b main_fitbit.cpp:107
-
-#b main_ble.cpp:92
-
-#b main_blink.c:67
-
-#b main_ble.cpp:89
-#commands
-#p nr
-#p value
-#c
-#end
-
-# it is just not possible to set trace points
-#trace BluetoothLE.h:738
-
-#b BluetoothLE.h:738
-#commands
-#p rssi
-#c
-#end
-
-#watch rssi
-#commands
-#c
-#end
-#c
-#end
-
-#b nrf_bootloader_app_start_final
-
-#b nrf_sdh_ble_enable
-
-#watch p_app_ram_start
-#b sdh_request_observer_notify
-#
-
-#b nrf_bootloader_init
-#b main
-#b _start
-
-#b __START
-
-#b SystemInit
-
-# If even Reset_Handler is not reached... Check symbol in interrupt vector table
-#b Reset_Handler
-
-#b main
-
-# Cause segfault, will be at start immediately
-#b *0
-# Same as Reset_Handler, not reached?
-#b *0x6883c 
-
-# First sdh_soc_observers
-#b *0x00029965
-
-#b .sdh_req_observers
-#b *0x0003832D
-
-#b *0x00029AB1
-
-#b nrf_dfu_mbr_irq_forward_address_set
-
-# is not reached
-#b nrf_bootloader_app_start_final
-#catch throw
-c
-#starti
-
-#info break
