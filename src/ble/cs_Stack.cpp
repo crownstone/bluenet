@@ -694,6 +694,9 @@ void Stack::restartAdvertising() {
 //		APP_ERROR_CHECK(ret_code);
 	}
 
+	ret_code_t ret_code = ble_advdata_encode(&_config_scanrsp, _adv_data.adv_data.p_data, &_adv_data.adv_data.len);
+	APP_ERROR_CHECK(ret_code);
+
 	uint32_t err;
 	err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
 //	err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, NULL);
