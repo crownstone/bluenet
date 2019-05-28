@@ -56,7 +56,7 @@ build-settings() {
 	fi
 	cs_info "Generate bootloader settings"
 	cs_warn "Assuming application-version 1 and bootloader-version 1 for now."
-	cs_info "nrfutil settings generate --family NRF52 --application ${BLUENET_BIN_DIR}/crownstone.hex --application-version 1 --app-boot-validation NO_VALIDATION --bootloader-version 1 --bl-settings-version 1 ${BLUENET_BIN_DIR}/bootloader-settings.hex"
+	cs_info "nrfutil settings generate --family NRF52 --application ${BLUENET_BIN_DIR}/crownstone.hex --application-version 1 --bootloader-version 1 --bl-settings-version 1 ${BLUENET_BIN_DIR}/bootloader-settings.hex"
 	nrfutil settings generate --family NRF52 --application "${BLUENET_BIN_DIR}/crownstone.hex" --application-version 1 --bootloader-version 1 --bl-settings-version 1 "${BLUENET_BIN_DIR}/bootloader-settings.hex"
 	checkError "Generating bootloader settings. Do you have 'nrfutil' installed?"
 }
