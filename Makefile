@@ -47,7 +47,7 @@ endif
 # TODO: Use config file, then pass it on via CMAKE_BUILD_PARALLEL_LEVEL.
 
 ifndef COMPILE_WITH_J_PROCESSORS
-COMPILE_WITH_J_PROCESSORS=1
+COMPILE_WITH_J_PROCESSORS=8
 endif
 
 #######################################################################################################################
