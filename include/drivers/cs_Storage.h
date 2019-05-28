@@ -20,6 +20,14 @@ static const cs_file_id_t FILE_STATE          = 0x0001;
 static const cs_file_id_t FILE_GENERAL        = 0x0002;
 static const cs_file_id_t FILE_CONFIGURATION  = 0x0003;
 
+enum cs_storage_operation_t {
+	CS_STORAGE_OP_READ,
+	CS_STORAGE_OP_WRITE,
+	CS_STORAGE_OP_REMOVE,
+};
+
+typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, cs_file_id_t fileId, CS_TYPE type);
+
 /**
  * Class to store items persistently in flash (persistent) memory.
  *
@@ -62,6 +70,15 @@ public:
 	inline bool isInitialized() {
 		return _initialized;
 	}
+
+	/**
+	 * Set the callback for errors.
+	 *
+	 * These are errors like timeouts, that come in after a write/read/remove function returned.
+	 *
+	 * @param[in] callback                  Function to be called when an error occurred.
+	 */
+	void setErrorCallback(cs_storage_error_callback_t callback);
 
 	/**
 	 * Read from persistent storage.
@@ -153,6 +170,7 @@ private:
 	void operator=(Storage const &);
 
 	bool _initialized = false;
+	cs_storage_error_callback_t _errorCallback = NULL;
 
 	bool _collectingGarbage = false;
 

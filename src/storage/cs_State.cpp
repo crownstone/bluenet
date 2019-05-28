@@ -23,6 +23,10 @@
 // Define as LOGd to get debug logs.
 #define LOGStateDebug LOGnone
 
+void storageErrorCallback(cs_storage_operation_t operation, cs_file_id_t fileId, CS_TYPE type) {
+	State::getInstance().handleStorageError(operation, fileId, type);
+}
+
 State::State() : _storage(NULL), _boardsConfig(NULL) {
 }
 
@@ -35,6 +39,7 @@ void State::init(boards_config_t* boardsConfig) {
 		LOGe(FMT_NOT_INITIALIZED, "Storage");
 		return;
 	}
+	_storage->setErrorCallback(storageErrorCallback);
 	EventDispatcher::getInstance().addListener(this);
 	setInitialized();
 }
@@ -446,6 +451,20 @@ void State::factoryReset(uint32_t resetCode) {
 	}
 	LOGw("Perform factory reset!");
 	_storage->remove(FILE_CONFIGURATION);
+}
+
+void State::handleStorageError(cs_storage_operation_t operation, cs_file_id_t fileId, CS_TYPE type) {
+	switch (operation) {
+	case CS_STORAGE_OP_WRITE:
+		LOGw("error writing type=%u, retrying later", type);
+		addToQueue(type, STATE_RETRY_STORE_DELAY_MS);
+		break;
+	case CS_STORAGE_OP_READ:
+		break;
+	case CS_STORAGE_OP_REMOVE:
+		LOGw("unhandled storage remove error type=%u", type);
+		break;
+	}
 }
 
 void State::handleEvent(event_t & event) {

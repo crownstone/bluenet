@@ -55,9 +55,8 @@ void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
 	    LOGnone("NRF_EVT_FLASH_OPERATION_SUCCESS, unhandled");
 	    break;
 	case NRF_EVT_FLASH_OPERATION_ERROR:
-	    // Why is it unhandled here? If there is a call to a filesystem event handler, is it supposed to change
-	    // evt_id as a side-effect?
-	    LOGw("NRF_EVT_FLASH_OPERATION_ERROR, unhandled");
+	    // This is handled by fstorage / FDS.
+	    LOGnone("NRF_EVT_FLASH_OPERATION_ERROR, unhandled");
 	    break;
 	case NRF_EVT_POWER_FAILURE_WARNING: {
 		uint32_t retVal = app_sched_event_put(NULL, 0, cs_brownout_handler);

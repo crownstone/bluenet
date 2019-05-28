@@ -236,6 +236,11 @@ public:
 	void startWritesToFlash();
 
 	/**
+	 * Internal usage
+	 */
+	void handleStorageError(cs_storage_operation_t operation, cs_file_id_t fileId, CS_TYPE type);
+
+	/**
 	 * Handle (crownstone) events.
 	 */
 	void handleEvent(event_t & event);

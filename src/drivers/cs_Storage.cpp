@@ -62,6 +62,10 @@ cs_ret_code_t Storage::init() {
 	return getErrorCode(fds_ret_code);
 }
 
+void Storage::setErrorCallback(cs_storage_error_callback_t callback) {
+	_errorCallback = callback;
+}
+
 void Storage::setBusy(uint16_t recordKey) {
 	_busy_record_keys.push_back(recordKey);
 }
@@ -393,12 +397,18 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 	case FDS_SUCCESS: {
 		CS_TYPE type = CS_TYPE(p_fds_evt->write.record_key);
 		LOGStorageDebug("Write done, record_key=%u or type=%u", p_fds_evt->write.record_key, to_underlying_type(type));
-		event_t event1(CS_TYPE::EVT_STORAGE_WRITE_DONE, (void*)&type, sizeof(type));
-		EventDispatcher::getInstance().dispatch(event1);
+		event_t event(CS_TYPE::EVT_STORAGE_WRITE_DONE, &type, sizeof(type));
+		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
 	default:
-		LOGw("Unhandled write error: %u record_key=%u", p_fds_evt->result, p_fds_evt->write.record_key);
+		if (_errorCallback) {
+			CS_TYPE type = toCsType(p_fds_evt->write.record_key);
+			_errorCallback(CS_STORAGE_OP_WRITE, p_fds_evt->write.file_id, type);
+		}
+		else {
+			LOGw("Unhandled write error: %u record_key=%u", p_fds_evt->result, p_fds_evt->write.record_key);
+		}
 		break;
 	}
 }
@@ -410,7 +420,13 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 		LOGi("Record successfully deleted");
 		break;
 	default:
-		LOGw("Unhandled rem record error: %u record_key=%u", p_fds_evt->result, p_fds_evt->del.record_key);
+		if (_errorCallback) {
+			CS_TYPE type = toCsType(p_fds_evt->del.record_key);
+			_errorCallback(CS_STORAGE_OP_REMOVE, p_fds_evt->del.file_id, type);
+		}
+		else {
+			LOGw("Unhandled rem record error: %u record_key=%u", p_fds_evt->result, p_fds_evt->del.record_key);
+		}
 	}
 }
 
