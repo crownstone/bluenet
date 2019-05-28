@@ -379,6 +379,7 @@ if [ $do_upload ]; then
 		cs_err "Nothing was uploaded. Please specify what to upload."
 		exit $CS_ERR_NOTHING_INCLUDED
 	fi
+	reset
 fi
 
 
@@ -426,5 +427,4 @@ if [ "$done_something" != true ]; then
 	cs_err "Nothing was done. Please specify a command."
 	exit $CS_ERR_NO_COMMAND
 fi
-reset
 cs_succ "Done!"
