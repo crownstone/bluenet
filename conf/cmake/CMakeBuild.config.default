@@ -1,7 +1,7 @@
 # Configuration options, used by build systems and scripts.
 
 # The name that is advertised.
-# Should be 8 characters or less
+# Should be 4 characters or less
 BLUETOOTH_NAME="Test"
 
 FIRMWARE_VERSION="undefined"
@@ -35,45 +35,30 @@ BOOTLOADER_VERSION="undefined"
 # This value will also be written to UICR.
 DEFAULT_HARDWARE_BOARD=ACR01B2C
 
-# To avoid confusion when trying to enable functionality through compiler flags, the
-# persistent storage for flags is disabled by default, set to 0 if enabling disabling functionality through
-# the characteristics / command should be persistently stored!
-PERSISTENT_FLAGS_DISABLED=0
-
 # Add reset counter at end of name
 CHANGE_NAME_ON_RESET=0
-
-# Switches between connectable and non-connectable advertisement to improve scanning on android
-ADVERTISEMENT_IMPROVEMENT=1
 
 # Enable or disable meshing (1 or 0)
 MESHING=1
 BUILD_MESHING=1
 
-# Use separate github repository https://github.com/crownstone/nRF51-ble-bcast-mesh/
-MESH_SUBDIR=nRF51-ble-bcast-mesh/nRF51/rbc_mesh
-
-# Switch on dimming by default (1 or 0)
-DIMMING=1
-
-# Build as iBeacon (Crownstone will advertise itself as iBeacon)
+# Advertise iBeacon packets.
 IBEACON=1
 
 # Set if crownstone should set power on by default when turning on
-# TODO: remove this?
+# TODO: remove this
 DEFAULT_ON=0
 
 # Enable or disable interval scanner, will scann every
 # SCAN_DURATION + SCAN_BREAK_DURATION ms, for SCAN_DURATION ms
 INTERVAL_SCANNER_ENABLED=0
 
-# Options to save energy
-LOW_POWER_MODE=0
+# Enables the dimmer.
 PWM_ENABLE=1
 
-# define the iBeacon advertisement package parameters
-# the proximity UUID.
+# Define the iBeacon advertisement package parameters
 # only applies if IBEACON==1
+# the proximity UUID.
 BEACON_UUID="a643423e-e175-4af0-a2e4-31e32f729a8a"
 # the major number
 BEACON_MAJOR=0
@@ -85,51 +70,18 @@ BEACON_RSSI=0xC4
 # Set to 1 to enable encryption of BLE (characteristics and advertisements)
 ENCRYPTION=1
 
-# Enable or disable different services (at times required to preserve memory)
-CROWNSTONE_SERVICE=1
-INDOOR_SERVICE=1
-GENERAL_SERVICE=1
-POWER_SERVICE=1
-SCHEDULE_SERVICE=1
-
 # Maximum number of vendor specific services
-# NOTE: increasing this will also need to increase the RAM_R1_BASE (increasing services by one causes an increase
-#  in RAM_R1_BASE by 16 bytes)
-MAX_NUM_VS_SERVICES=6
+# NOTE: increasing this will also need to increase the RAM_R1_BASE
+MAX_NUM_VS_SERVICES=2
 
 # Enable or disable characteristics
-# Crownstone Service
 CHAR_CONTROL=1
-CHAR_MESHING=0
 CHAR_CONFIGURATION=1
 CHAR_STATE=1
-
-## General Service
-CHAR_TEMPERATURE=1
-CHAR_RESET=1
-
-## Power Service
-CHAR_PWM=1
-CHAR_RELAY=1
-CHAR_SAMPLE_CURRENT=1
-CHAR_CURRENT_LIMIT=1
-
-## Indoor Localization Service
-CHAR_RSSI=1
-CHAR_SCAN_DEVICES=1
-CHAR_TRACK_DEVICES=0
-
-## Schedule Service
-CHAR_SCHEDULE=1
 
 # Size of the master buffer
 # Currently this should not be larger than BLE_GATTS_VAR_ATTR_LEN_MAX (512)
 MASTER_BUFFER_SIZE=300
-
-# set default operation mode (OPERATION_MODE_NORMAL) at first start, for release, this will need to be
-# set to OPERATION_MODE_SETUP so that it first starts into setup mode, but as long as
-# we are developing, leave it on normal mode
-DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP
 
 # Verbosity of the UART
 # SERIAL_DEBUG     0
@@ -177,10 +129,13 @@ BOOT_DELAY=400
 SCAN_DURATION=2000
 SCAN_BREAK_DURATION=7000
 
-# Some config introduced by anne
-RSSI_ENABLE=1
+# Enable RSSI measurements when connected.
+ENABLE_RSSI_FOR_CONNECTION=1
 
-# connection alive timeout. if no write command received within timeout the connection is closed by the device.
+# Connection alive timeout.
+# If no valid control command is received within timeout,
+# the connection is closed by the device.
+# Set to 0 to disable the timeout.
 CONNECTION_ALIVE_TIMEOUT=20000
 
 # This is the directory where the cross-compiler resides
@@ -285,7 +240,6 @@ APPLICATION_LENGTH=0x5A000
 # Adjust them in $BLUENET_DIR/include/third/nrf/generic_gcc_nrf52.ld for now! (adjusted version of $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld)
 
 ATTR_TABLE_SIZE=0x500
-MAX_NUM_VS_SERVICES=2
 
 RAM_R1_BASE=0x20002380
 # This is 0x20010000 - RAM_R1_BASE

@@ -3,20 +3,13 @@
 ########################################################################################################################
 
 # The name that is advertised.
-# Should be 8 characters or less. You can use up to 25, but the name in the advertisement package will be
-# truncated to 8 characters.
+# Should be 4 characters or less. You can use up to 25, but the name in the advertisement package will be
+# truncated to 4 characters.
 # BLUETOOTH_NAME=
 
 # The hardware board where you want to upload the firmware
-# By default, if you use a dev board, use
-#   HARDWARE_BOARD=CROWNSTONE4
-# or if you use a PCA10000, then set
-#   HARDWARE_BOARD=PCA10000
 # For the complete overview of the hardware boards, see $BLUENET_DIR/CMakeBuild.config.default
 # HARDWARE_BOARD=
-
-# Version of the nrf51 chip, use script/hardware_version.sh to check your version
-# HARDWARE_VERSION=
 
 # By default, the values from the CmakeBuild.config.default
 # are used
@@ -25,19 +18,8 @@
 #   MESHING=1
 # or enable device scanner by setting
 #   INTERVAL_SCANNER_ENABLED=1
-# or enable the power service by setting
-#   POWER_SERVICE=1
 # or set serial verbosity to debug by setting
 #   SERIAL_VERBOSITY=DEBUG
-
-########################################################################################################################
-# Softdevice
-# By default we are using the Softdevice s130 v1.0 from the Nordic SDK. If you want to use the
-# Softdevice s110 instead, copy over and uncomment the block Softdevice s110 from the
-# $BLUENET_DIR/CMakeBuild.config.default
-# If you download a different version of the softdevice, you also need to adjust the variables
-# SOFTDEVICE_DIR, SOFTDEVICE_DIR_API and SOFTDEVICE_DIR_HEX
-########################################################################################################################
 
 
 ########################################################################################################################
@@ -59,3 +41,6 @@
 
 # Location of the Nordic Software Development Kit
 # NRF5_DIR=
+
+# Location of the mesh SDK
+# MESH_SDK_DIR=

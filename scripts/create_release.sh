@@ -227,14 +227,8 @@ if [[ $existing == 0 ]]; then
 	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $directory/CMakeBuild.config
 
 	sed -i "s/CROWNSTONE_SERVICE=.*/CROWNSTONE_SERVICE=1/" $directory/CMakeBuild.config
-	sed -i "s/INDOOR_SERVICE=.*/INDOOR_SERVICE=0/" $directory/CMakeBuild.config
-	sed -i "s/GENERAL_SERVICE=.*/GENERAL_SERVICE=0/" $directory/CMakeBuild.config
-	sed -i "s/POWER_SERVICE=.*/POWER_SERVICE=0/" $directory/CMakeBuild.config
-	sed -i "s/SCHEDULE_SERVICE=.*/SCHEDULE_SERVICE=0/" $directory/CMakeBuild.config
 
-	sed -i "s/PERSISTENT_FLAGS_DISABLED=.*/PERSISTENT_FLAGS_DISABLED=0/" $directory/CMakeBuild.config
 	sed -i "s/SERIAL_VERBOSITY=.*/SERIAL_VERBOSITY=SERIAL_BYTE_PROTOCOL_ONLY/" $directory/CMakeBuild.config
-	sed -i "s/DEFAULT_OPERATION_MODE=.*/DEFAULT_OPERATION_MODE=OPERATION_MODE_SETUP/" $directory/CMakeBuild.config
 
 	xdg-open $directory/CMakeBuild.config &> /dev/null
 

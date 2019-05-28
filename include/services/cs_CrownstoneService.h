@@ -12,8 +12,6 @@
 #include <ble/cs_Characteristic.h>
 #include <events/cs_EventListener.h>
 
-#define CROWNSTONE_SERVICE_UPDATE_FREQUENCY 10 //! hz
-
 /** General Service for the Crownstone
  *
  * There are several characteristics that fit into the general service description. There is a characteristic

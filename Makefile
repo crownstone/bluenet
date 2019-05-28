@@ -30,7 +30,7 @@ $(error BLUENET_CONFIG_DIR not defined!)
 endif
 
 ifndef BLUENET_WORKSPACE_DIR
-	# do not throw error, but MESH_SUBDIR cannot be used: MESH_DIR with complete path is required
+	# Do not throw error, but relative paths cannot be used.
 endif
 
 #######################################################################################################################

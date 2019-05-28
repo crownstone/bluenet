@@ -322,7 +322,7 @@ void Crownstone::configureStack() {
 		LOGi("onConnect...");
 		// TODO: see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
 		// be neater about it... we do not need to stop, only after a disconnect we do...
-#if RSSI_ENABLE==1
+#if ENABLE_RSSI_FOR_CONNECTION==1
 		sd_ble_gap_rssi_stop(conn_handle);
 		sd_ble_gap_rssi_start(conn_handle, 0, 0);
 #endif
