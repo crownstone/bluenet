@@ -280,7 +280,7 @@ void ServiceData::handleEvent(event_t & event) {
 		case CS_TYPE::STATE_SWITCH_STATE: {
 			switch_state_t* state = (TYPIFY(STATE_SWITCH_STATE)*)event.data;
 			updateSwitchState(state->asInt);
-			sendMeshState();
+			sendMeshState(true);
 			break;
 		}
 		case CS_TYPE::STATE_ACCUMULATED_ENERGY: {
@@ -324,7 +324,7 @@ void ServiceData::handleEvent(event_t & event) {
 				RNG::fillBuffer(&rand8, 1);
 				uint32_t randMs = MESH_SEND_STATE_INTERVAL_MS + rand8 * MESH_SEND_STATE_INTERVAL_MS_VARIATION / 255;
 				_sendStateCountdown = randMs / TICK_INTERVAL_MS;
-				sendMeshState();
+				sendMeshState(false);
 			}
 			break;
 		}
