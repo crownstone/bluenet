@@ -390,7 +390,7 @@ if [ $do_debug ]; then
 	elif [ $include_firmware ]; then
 		debug_firmware
 	else
-		debug_bootloader
+		debug_firmware
 	fi
 fi
 
