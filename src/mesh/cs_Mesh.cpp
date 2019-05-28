@@ -378,14 +378,16 @@ void Mesh::provisionLoad() {
 	uint32_t retCode;
 	dsm_local_unicast_address_t local_addr;
 	uint32_t netKeyCount = 1;
+	mesh_key_index_t keyIndices[netKeyCount] = {0};
 
-	// TODO: why is the handle used as index, and then passed on as handle?
-	retCode = dsm_subnet_get_all(&_netkeyHandle, &netKeyCount);
+	retCode = dsm_subnet_get_all(keyIndices, &netKeyCount);
 	APP_ERROR_CHECK(retCode);
 
 	if (netKeyCount != 1) {
 		APP_ERROR_CHECK(ERR_UNSPECIFIED);
 	}
+
+	_netkeyHandle = dsm_net_key_index_to_subnet_handle(keyIndices[0]);
 
 	retCode = dsm_appkey_get_all(_netkeyHandle, &_appkeyHandle, &netKeyCount);
 	APP_ERROR_CHECK(retCode);
