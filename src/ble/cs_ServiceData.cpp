@@ -256,23 +256,12 @@ void ServiceData::handleEvent(event_t & event) {
 //			LOGd("Event: %s", TypeName(event.type));
 //			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, true);
 //			break;
-//		case CS_TYPE::STATE_ERRORS: {
-//			LOGd("Event: %s", TypeName(event.type));
-//			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*) event.data;
-//			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors->asInt);
-//			break;
-//		}
-		default: {
-			// continue with the rest of the method.
+		case CS_TYPE::STATE_ERRORS: {
+			LOGd("Event: %s", TypeName(event.type));
+			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*) event.data;
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors->asInt);
+			break;
 		}
-	}
-
-	// In case the operation mode is setup, we have a different advertisement package.
-	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
-		return;
-	}
-
-	switch(event.type) {
 		case CS_TYPE::CONFIG_CROWNSTONE_ID: {
 			updateCrownstoneId(*(TYPIFY(CONFIG_CROWNSTONE_ID)*)event.data);
 			break;
