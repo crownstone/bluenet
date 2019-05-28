@@ -66,37 +66,13 @@ release() {
 }
 
 upload() {
-	#${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $address $serial_num
-	#${path}/_writebyte.sh 0x10001014 $address
-	if [ $serial_num ]; then
-		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/bootloader.hex --sectorerase --snr $serial_num
-		check_address=$(nrfjprog -f nrf52 --memrd 0x10001014 --snr $serial_num | awk '{print $2}')
-		check_address=$(echo "0x$check_address")
-		cs_info "Check address: $check_address vs $address"
-		if [ $check_address != $address ]; then
-			cs_info "Update address to $address"
-			nrfjprog -f nrf52 --memwr 0x10001014 --val $address --snr $serial_num
-		fi
-	else
-		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/bootloader.hex --sectorerase 
-		check_address=$(nrfjprog -f nrf52 --memrd 0x10001014 | awk '{print $2}')
-		check_address=$(echo "0x$check_address")
-		cs_info "Check address: $check_address vs $address"
-		if [ $check_address != $address ]; then
-			cs_info "Update address to $address"
-			nrfjprog -f nrf52 --memwr 0x10001014 --val $address 
-		fi
-	fi
+	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $serial_num
+	${path}/_writebyte.sh 0x10001014 $address
 	checkError "Uploading failed"
 }
 
 upload-settings() {
-	if [ $serial_num ]; then
-		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/bootloader-settings.hex --sectorerase --snr $serial_num
-	else
-		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/bootloader-settings.hex --sectorerase 
-	fi
-	#${path}/_upload.sh $BLUENET_BIN_DIR/bootloader-settings.hex $address $serial_num
+	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader-settings.hex $serial_num
 	checkError "Uploading failed"
 }
 

@@ -204,12 +204,7 @@ build_unit_test_host() {
 
 
 erase_flash() {
-	if [ $serial_num ]; then
-		nrfjprog -f nrf52 --eraseall --snr $serial_num
-	else
-		nrfjprog -f nrf52 --eraseall 
-	fi
-	#${path}/_erase_flash.sh $serial_num
+	${path}/_erase_flash.sh $serial_num
 	checkError "Error erasing flash"
 }
 
@@ -236,7 +231,7 @@ upload_softdevice() {
 
 upload_combined() {
 	cs_info "Upload all at once"
-	${path}/_upload.sh $BLUENET_BIN_DIR/combined.hex $address $serial_num
+	${path}/_upload.sh $BLUENET_BIN_DIR/combined.hex $serial_num
 	checkError "Error uploading combined binary"
 }
 
@@ -278,6 +273,10 @@ clean_softdevice() {
 verify_board_version_written() {
 	${path}/board_version.sh check $target
 	checkError "Error: no correct board version is written."
+}
+
+reset() {
+	${path}/reset.sh $serial_num
 }
 
 
@@ -427,4 +426,5 @@ if [ "$done_something" != true ]; then
 	cs_err "Nothing was done. Please specify a command."
 	exit $CS_ERR_NO_COMMAND
 fi
+reset
 cs_succ "Done!"

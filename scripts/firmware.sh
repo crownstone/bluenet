@@ -63,12 +63,7 @@ release() {
 }
 
 upload() {
-	if [ $serial_num ]; then
-		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/crownstone.hex --sectorerase --snr $serial_num
-	else
-		nrfjprog -f nrf52 --program  $BLUENET_BIN_DIR/crownstone.hex --sectorerase 
-	fi
-	#${path}/_upload.sh $BLUENET_BIN_DIR/crownstone.hex $address $serial_num
+	${path}/_upload.sh $BLUENET_BIN_DIR/crownstone.hex $serial_num
 	checkError "Uploading failed"
 }
 

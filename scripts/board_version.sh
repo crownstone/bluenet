@@ -43,28 +43,7 @@ upload() {
 	if [ $? -eq 0 ] && [ -n "$HARDWARE_BOARD_INT" ]; then
 		cs_info "HARDWARE_BOARD $HARDWARE_BOARD = $HARDWARE_BOARD_INT"
 		HARDWARE_BOARD_HEX=$(printf "%x" $HARDWARE_BOARD_INT)
-		if [ $serial_num ]; then
-			check_value=$(nrfjprog -f nrf52 --memrd $HARDWARE_BOARD_ADDRESS --snr $serial_num | awk '{print $2}')
-			check_value=$(echo "$check_value+0" | bc )
-			cs_log "Check value: $check_value vs $HARDWARE_BOARD_INT"
-			if [ $check_value != $HARDWARE_BOARD_HEX ]; then
-				echo nrfjprog -f nrf52 --memwr $HARDWARE_BOARD_ADDRESS --val "0x$HARDWARE_BOARD_HEX" --snr $serial_num
-				nrfjprog -f nrf52 --memwr $HARDWARE_BOARD_ADDRESS --val "0x$HARDWARE_BOARD_HEX" --snr $serial_num
-			else
-				cs_log "Value already set to $HARDWARE_BOARD_HEX"
-			fi
-		else
-			check_value=$(nrfjprog -f nrf52 --memrd $HARDWARE_BOARD_ADDRESS | awk '{print $2}')
-			check_value=$(echo "$check_value+0" | bc )
-			cs_log "Check value: $check_value vs $HARDWARE_BOARD_INT"
-			if [ $check_value != $HARDWARE_BOARD_HEX ]; then
-				echo nrfjprog -f nrf52 --memwr $HARDWARE_BOARD_ADDRESS --val "0x$HARDWARE_BOARD_HEX"
-				nrfjprog -f nrf52 --memwr $HARDWARE_BOARD_ADDRESS --val "0x$HARDWARE_BOARD_HEX"
-			else
-				cs_log "Value already set to $HARDWARE_BOARD_HEX"
-			fi
-		fi
-		#${path}/_writebyte.sh $HARDWARE_BOARD_ADDRESS $HARDWARE_BOARD_HEX $serial_num
+		$path/_writebyte.sh $HARDWARE_BOARD_ADDRESS "0x$HARDWARE_BOARD_HEX" $serial_num
 		checkError "Error writing board version"
 	else
 		cs_err "Failed to extract HARDWARE_BOARD=$HARDWARE_BOARD from $BLUENET_DIR/include/cfg/cs_Boards.h"
@@ -76,7 +55,7 @@ read_board_version() {
 	cs_log "Find board version via ${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num"
 	hardware_board_version=$(${path}/_readbyte.sh $HARDWARE_BOARD_ADDRESS $serial_num)
 	checkError "Failed to read board version"
-	echo hardware_board_version
+	echo "$hardware_board_version"
 }
 
 # Checks if a board version is already written.
@@ -86,8 +65,8 @@ check() {
 	verify_board_version_defined
 	read_board_version
 	HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BLUENET_DIR/include/cfg/cs_Boards.h | grep -oP "\d+$")
-	config_board_version=$(printf "%08x" $HARDWARE_BOARD_INT)
-	if [ "$hardware_board_version" == 'FFFFFFFF' ] || [ "$hardware_board_version" == 'ffffffff' ]; then
+	config_board_version=$(printf "0x%08x" $HARDWARE_BOARD_INT)
+	if [ "$hardware_board_version" == '0xFFFFFFFF' ] || [ "$hardware_board_version" == '0xffffffff' ]; then
 #		cs_log "No board version is written yet, writing the one from config."
 #		upload
 		cs_info "Board version is not written."

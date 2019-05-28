@@ -1,8 +1,7 @@
 #!/bin/bash
 
 FILE=${1:? "$0 requires \"file\" as argument"}
-ADDRESS=${2:? "$0 requires \"address\" as argument"}
-SERIAL_NUM=$3
+SERIAL_NUM=$2
 
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
@@ -27,9 +26,14 @@ if [[ $FILE != *.hex ]]; then
 	exit $CS_ERR_WRONG_FILE_TYPE
 fi
 
-cs_log "Write to address: $ADDRESS"
+#sed "s|@BIN@|$FILE|" $JLINK_SCRIPT_DIR/upload.script > $SCRIPT_TEMP_DIR/upload.script
+#sed -i "s|@START_ADDRESS@|$ADDRESS|" $SCRIPT_TEMP_DIR/upload.script
+#$path/_jlink.sh $SCRIPT_TEMP_DIR/upload.script $SERIAL_NUM
 
-sed "s|@BIN@|$FILE|" $JLINK_SCRIPT_DIR/upload.script > $SCRIPT_TEMP_DIR/upload.script
-sed -i "s|@START_ADDRESS@|$ADDRESS|" $SCRIPT_TEMP_DIR/upload.script
-
-$path/_jlink.sh $SCRIPT_TEMP_DIR/upload.script $SERIAL_NUM
+if [ $SERIAL_NUM ]; then
+	cs_info "nrfjprog -f nrf52 --program $FILE --sectorerase --snr $SERIAL_NUM"
+	nrfjprog -f nrf52 --program  $FILE --sectorerase --snr $SERIAL_NUM
+else
+	cs_info "nrfjprog -f nrf52 --program $FILE --sectorerase"
+	nrfjprog -f nrf52 --program  $FILE --sectorerase 
+fi

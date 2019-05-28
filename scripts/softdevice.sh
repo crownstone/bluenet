@@ -35,14 +35,7 @@ build() {
 }
 
 upload() {
-	if [ $serial_num ]; then
-		echo nrfjprog -f nrf52 --program $SD_BINDIR/softdevice_mainpart.hex --sectorerase --snr $serial_num
-		nrfjprog -f nrf52 --program $SD_BINDIR/softdevice_mainpart.hex --sectorerase --snr $serial_num
-	else
-		echo nrfjprog -f nrf52 --program $SD_BINDIR/softdevice_mainpart.hex --sectorerase
-		nrfjprog -f nrf52 --program $SD_BINDIR/softdevice_mainpart.hex --sectorerase 
-	fi
-	#$path/_softdevice_upload.sh $SD_BINDIR $serial_num
+	$path/_upload.sh $SD_BINDIR/softdevice_mainpart.hex $serial_num
 	checkError "Error with uploading softdevice"
 }
 
