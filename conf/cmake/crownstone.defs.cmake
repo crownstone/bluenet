@@ -69,6 +69,9 @@ IF (BUILD_MESHING)
 	ADD_DEFINITIONS("-DBEARER_ACTION_TIMER_INDEX=3")
 ENDIF()
 
+# Overwrite sdk config options
+ADD_DEFINITIONS("-DUSE_APP_CONFIG")
+
 # Pass variables in defined in the configuration file to the compiler
 ADD_DEFINITIONS("-DNRF5_DIR=${NRF5_DIR}")
 ADD_DEFINITIONS("-DNORDIC_SDK_VERSION=${NORDIC_SDK_VERSION}")

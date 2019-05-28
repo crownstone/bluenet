@@ -1,0 +1,213 @@
+/**
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: 28 May, 2019
+ * Triple-license: LGPLv3+, Apache License, and/or MIT
+ */
+#pragma once
+
+/**
+ * Use this config file to overwrite values in sdk_config.h.
+ *
+ * The sdk_config.h is a copy of SDK_15-3/config/nrf52832/config/sdk_config.h
+ */
+
+
+#define APP_SCHEDULER_ENABLED 1
+
+#define APP_TIMER_ENABLED 1
+#define APP_TIMER_CONFIG_OP_QUEUE_SIZE 40
+#define APP_TIMER_CONFIG_USE_SCHEDULER 1
+
+
+#define FDS_ENABLED 1
+#define FDS_VIRTUAL_PAGES 3
+#define FDS_VIRTUAL_PAGE_SIZE 1024
+#define FDS_VIRTUAL_PAGES_RESERVED 0
+#define FDS_OP_QUEUE_SIZE 4
+#define FDS_CRC_CHECK_ON_READ 1
+#define FDS_MAX_USERS 2
+
+#define NRF_FSTORAGE_ENABLED 1
+#define NRF_FSTORAGE_SD_QUEUE_SIZE 4
+
+
+#define HARDFAULT_HANDLER_ENABLED 1
+
+
+
+#if CS_SERIAL_NRF_LOG_ENABLED > 0
+#define NRF_LOG_ENABLED 1
+#else
+#define NRF_LOG_ENABLED 0
+#endif
+
+//! Log data is buffered and can be processed in idle
+#define NRF_LOG_DEFERRED 1
+#define NRF_LOG_DEFAULT_LEVEL 3
+#define NRF_LOG_USES_COLORS 1
+#define NRF_LOG_WARNING_COLOR 4
+#define NRF_LOG_USES_TIMESTAMP 0
+#define NRF_FPRINTF_ENABLED 1
+#define NRF_FPRINTF_FLAG_AUTOMATIC_CR_ON_LF_ENABLED 1
+
+
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+#define NRF_LOG_BACKEND_RTT_ENABLED 1
+#else
+#define NRF_LOG_BACKEND_RTT_ENABLED 0
+#endif
+
+#if CS_SERIAL_NRF_LOG_ENABLED == 2
+#define NRF_LOG_BACKEND_UART_ENABLED 1
+#else
+#define NRF_LOG_BACKEND_UART_ENABLED 0
+#endif
+
+#define NRF_LOG_BACKEND_UART_TX_PIN CS_SERIAL_NRF_LOG_PIN_TX
+
+// <323584=> 1200 baud
+// <643072=> 2400 baud
+// <1290240=> 4800 baud
+// <2576384=> 9600 baud
+// <3862528=> 14400 baud
+// <5152768=> 19200 baud
+// <7716864=> 28800 baud
+// <10289152=> 38400 baud
+// <15400960=> 57600 baud
+// <20615168=> 76800 baud
+// <30801920=> 115200 baud
+// <61865984=> 230400 baud
+// <67108864=> 250000 baud
+// <121634816=> 460800 baud
+// <251658240=> 921600 baud
+// <268435456=> 1000000 baud
+#define NRF_LOG_BACKEND_UART_BAUDRATE 61865984
+
+// <o> NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE - Size of buffer for partially processed strings.
+// <i> Size of the buffer is a trade-off between RAM usage and processing.
+// <i> if buffer is smaller then strings will often be fragmented.
+// <i> It is recommended to use size which will fit typical log and only the
+// <i> longer one will be fragmented.
+#ifndef NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE
+#define NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE 64
+#endif
+
+
+
+#define NRF_SDH_BLE_ENABLED 1
+#define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 1
+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69
+#define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE ATTR_TABLE_SIZE
+#define NRF_SDH_BLE_VS_UUID_COUNT MAX_NUM_VS_SERVICES
+#define NRF_SDH_BLE_SERVICE_CHANGED 1
+#define NRF_SDH_BLE_OBSERVER_PRIO_LEVELS 2
+#define NRF_SDH_ENABLED 1
+#define NRF_SDH_REQ_OBSERVER_PRIO_LEVELS 1
+#define NRF_SDH_STATE_OBSERVER_PRIO_LEVELS 1
+#define NRF_SDH_BLE_STACK_OBSERVER_PRIO 1
+#define NRF_SDH_SOC_ENABLED 1
+#define NRF_SDH_SOC_OBSERVER_PRIO_LEVELS 1
+
+// Required for FDS
+#define CRC16_ENABLED 1
+
+// Used by cs_Comp
+#define COMP_ENABLED 1
+
+//#define NRFX_SAADC_ENABLED 1
+
+
+//#define NRFX_RTC_ENABLED 1
+//#define NRFX_RTC0_ENABLED 1
+//#define NRFX_RTC1_ENABLED 1
+//#define NRFX_RTC2_ENABLED 1
+
+
+//#define NRFX_TIMER_ENABLED 1
+//#define NRFX_TIMER0_ENABLED 1
+//#define NRFX_TIMER1_ENABLED 1
+//#define NRFX_TIMER2_ENABLED 1
+//#define NRFX_TIMER3_ENABLED 1
+//#define NRFX_TIMER4_ENABLED 1
+
+//#define UART_ENABLED 1
+//#define UART_EASY_DMA_SUPPORT 0
+//#define UART0_ENABLED 1
+//#define UART0_CONFIG_USE_EASY_DMA 0
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Settings below were missing from the sdk_config.h
+ * They're copied from example some sdk_config.h
+ */
+
+
+// <o> NRF_LOG_BACKEND_RTT_TEMP_BUFFER_SIZE - Size of buffer for partially processed strings.
+// <i> Size of the buffer is a trade-off between RAM usage and processing.
+// <i> if buffer is smaller then strings will often be fragmented.
+// <i> It is recommended to use size which will fit typical log and only the
+// <i> longer one will be fragmented.
+#ifndef NRF_LOG_BACKEND_RTT_TEMP_BUFFER_SIZE
+#define NRF_LOG_BACKEND_RTT_TEMP_BUFFER_SIZE 64
+#endif
+
+// <o> NRF_LOG_BACKEND_RTT_TX_RETRY_DELAY_MS - Period before retrying writing to RTT
+#ifndef NRF_LOG_BACKEND_RTT_TX_RETRY_DELAY_MS
+#define NRF_LOG_BACKEND_RTT_TX_RETRY_DELAY_MS 1
+#endif
+
+// <o> NRF_LOG_BACKEND_RTT_TX_RETRY_CNT - Writing to RTT retries.
+// <i> If RTT fails to accept any new data after retries
+// <i> module assumes that host is not active and on next
+// <i> request it will perform only one write attempt.
+// <i> On successful writing, module assumes that host is active
+// <i> and scheme with retry is applied again.
+#ifndef NRF_LOG_BACKEND_RTT_TX_RETRY_CNT
+#define NRF_LOG_BACKEND_RTT_TX_RETRY_CNT 3
+#endif
+
+// <o> SEGGER_RTT_CONFIG_BUFFER_SIZE_UP - Size of upstream buffer.
+// <i> Note that either @ref NRF_LOG_BACKEND_RTT_OUTPUT_BUFFER_SIZE
+// <i> or this value is actually used. It depends on which one is bigger.
+#ifndef SEGGER_RTT_CONFIG_BUFFER_SIZE_UP
+#define SEGGER_RTT_CONFIG_BUFFER_SIZE_UP 4096
+#endif
+
+// <o> SEGGER_RTT_CONFIG_MAX_NUM_UP_BUFFERS - Maximum number of upstream buffers.
+#ifndef SEGGER_RTT_CONFIG_MAX_NUM_UP_BUFFERS
+#define SEGGER_RTT_CONFIG_MAX_NUM_UP_BUFFERS 2
+#endif
+
+// <o> SEGGER_RTT_CONFIG_BUFFER_SIZE_DOWN - Size of downstream buffer.
+#ifndef SEGGER_RTT_CONFIG_BUFFER_SIZE_DOWN
+#define SEGGER_RTT_CONFIG_BUFFER_SIZE_DOWN 16
+#endif
+
+// <o> SEGGER_RTT_CONFIG_MAX_NUM_DOWN_BUFFERS - Maximum number of downstream buffers.
+#ifndef SEGGER_RTT_CONFIG_MAX_NUM_DOWN_BUFFERS
+#define SEGGER_RTT_CONFIG_MAX_NUM_DOWN_BUFFERS 2
+#endif
+
+// <o> SEGGER_RTT_CONFIG_DEFAULT_MODE  - RTT behavior if the buffer is full.
+// <i> The following modes are supported:
+// <i> - SKIP  - Do not block, output nothing.
+// <i> - TRIM  - Do not block, output as much as fits.
+// <i> - BLOCK - Wait until there is space in the buffer.
+// <0=> SKIP
+// <1=> TRIM
+// <2=> BLOCK_IF_FIFO_FULL
+#ifndef SEGGER_RTT_CONFIG_DEFAULT_MODE
+#define SEGGER_RTT_CONFIG_DEFAULT_MODE 0
+#endif
