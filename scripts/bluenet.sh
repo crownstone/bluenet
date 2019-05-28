@@ -385,12 +385,12 @@ fi
 
 if [ $do_debug ]; then
 	done_something=true
-	if [ $include_firmware ]; then
-		debug_firmware
-	elif [ $include_bootloader ]; then
+	if [ $include_bootloader ]; then
 		debug_bootloader
-	else
+	elif [ $include_firmware ]; then
 		debug_firmware
+	else
+		debug_bootloader
 	fi
 fi
 
