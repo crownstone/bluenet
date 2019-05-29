@@ -284,23 +284,23 @@ ENDIF()
 # Overwrite sdk config options
 ADD_DEFINITIONS("-DUSE_APP_CONFIG")
 
-ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES} ${PROJECT_NAME}.tmp)
+ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES})
 
-#SET(INCLUDE_ONLY_SECTIONS "-j .text -j .data -j .sdh_soc_observers -j .sdh_ble_observers -j .sdh_state_observers -j .sdh_stack_observers -j .sdh_req_observers -j .nrf_balloc")
-SET(INCLUDE_ONLY_SECTIONS "")
+# Use .elf extension by default
+SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}" SUFFIX ".elf")
 
-ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.tmp
-	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.tmp
-	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME}.tmp ${PROJECT_NAME}.bin
-	COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
-	COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf
-	COMMAND stat ${PROJECT_NAME}.bin | grep -i size | tr -d ':' |  tr -s ' ' | cut -f3 -d ' ' | xargs printf "** Size: %s bytes"
-	COMMAND echo
-	DEPENDS ${PROJECT_NAME}
-	COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
+# Remove sections that are part of UICR (so objcopy does not generate very large files)
+SET(REMOVE_SECTIONS --remove-section .uicr_bootloader_start_address  --remove-section .uicr_mbr_params_page)
 
-SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
+# Add post-build target to display size information
+ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND ${CMAKE_SIZE} --format=berkeley "${PROJECT_NAME}.elf"
+	COMMAND stat ${PROJECT_NAME}.elf | grep -i size | tr -d ':' |  tr -s ' ' | cut -f3 -d ' ' | xargs printf "** Size: %s bytes")
+
+# Add post-build target to generate the .hex file (to be used in nrfjprog or jlink)
+ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND echo ${CMAKE_OBJCOPY_OVERLOAD} ${REMOVE_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
+	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${REMOVE_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex)
 
 # Some debug information
 IF(VERBOSITY GREATER 4)
@@ -308,7 +308,6 @@ IF(VERBOSITY GREATER 4)
 	MESSAGE(STATUS "CMakeLists: Include dirs: ${BOOTLOADER_INCLUDE_DIRS}")
 	MESSAGE(STATUS "CMakeLists: Linked libraries: ${BOOTLOADER_LIBS}")
 ENDIF()
-
 
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PUBLIC ${BOOTLOADER_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${BOOTLOADER_LIBS})
