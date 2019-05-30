@@ -190,7 +190,7 @@ bootloader-compile-target:
 #	ifeq ($(result),0)
 	@echo "++ Copy binaries to ${BLUENET_BIN_DIR}\n"
 	@mkdir -p "${BLUENET_BIN_DIR}"
-	@cp $(BLUENET_BUILD_DIR)/bootloader.hex $(BLUENET_BUILD_DIR)/bootloader.bin $(BLUENET_BUILD_DIR)/bootloader.elf "$(BLUENET_BIN_DIR)"
+	@cp $(BLUENET_BUILD_DIR)/bootloader.hex $(BLUENET_BUILD_DIR)/bootloader.elf "$(BLUENET_BIN_DIR)"
 #	endif
 
 	$(call bootloader-compile-target-cleanup)
