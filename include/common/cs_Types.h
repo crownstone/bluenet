@@ -200,6 +200,10 @@ enum class CS_TYPE: uint16_t {
 	EVT_SWITCH_LOCKED,   // TODO: Deprecate, use cfg  // Sent when switch locked flag is set. -- Payload is BOOL.
 	EVT_STORAGE_INITIALIZED,                          // Sent when Storage is initialized, storage is only usable after this event!
 	EVT_STORAGE_WRITE_DONE,                           // Sent when an item has been written to storage. -- Payload is CS_TYPE, the type that was written.
+	EVT_STORAGE_REMOVE_DONE,                          // Sent when an item has been invalidated at storage. -- Payload is CS_TYPE, the type that was invalidated.
+	EVT_STORAGE_REMOVE_FILE_DONE,                     // Sent when a file has been invalidated at storage. -- Payload is cs_file_id_t, the file that was invalidated.
+	EVT_STORAGE_GC_DONE,                              // Sent when garbage collection is done, invalidated data is actually removed at this point.
+	EVT_STORAGE_FACTORY_RESET,                        // Sent when factory reset of storage is done.
 	EVT_SETUP_DONE,                                   // Sent when setup was done (and settings are stored).
 //	EVT_DO_RESET_DELAYED,                             // Sent to perform a reset in a few seconds.
 	EVT_SWITCHCRAFT_ENABLED, // TODO: Deprecate, use cfg   // Sent when switchcraft flag is set. -- Payload is BOOL.
@@ -300,6 +304,10 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
+	case CS_TYPE::EVT_STORAGE_GC_DONE:
+	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
@@ -520,6 +528,10 @@ typedef  session_nonce_t TYPIFY(EVT_SESSION_NONCE_SET);
 typedef  state_external_stone_t TYPIFY(EVT_STATE_EXTERNAL_STONE);
 typedef  void TYPIFY(EVT_STORAGE_INITIALIZED);
 typedef  CS_TYPE TYPIFY(EVT_STORAGE_WRITE_DONE);
+typedef  CS_TYPE TYPIFY(EVT_STORAGE_REMOVE_DONE);
+typedef  cs_file_id_t TYPIFY(EVT_STORAGE_REMOVE_FILE_DONE);
+typedef  void TYPIFY(EVT_STORAGE_GC_DONE);
+typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET);
 typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
 typedef  BOOL TYPIFY(EVT_SWITCH_LOCKED);
@@ -746,6 +758,14 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return 0;
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
 		return sizeof(TYPIFY(EVT_STORAGE_WRITE_DONE));
+	case CS_TYPE::EVT_STORAGE_REMOVE_DONE:
+		return sizeof(TYPIFY(EVT_STORAGE_REMOVE_DONE));
+	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
+		return sizeof(TYPIFY(EVT_STORAGE_REMOVE_FILE_DONE));
+	case CS_TYPE::EVT_STORAGE_GC_DONE:
+		return 0;
+	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+		return 0;
 	case CS_TYPE::EVT_SETUP_DONE:
 		return 0;
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -897,6 +917,10 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE: return "EVT_STATE_EXTERNAL_STONE";
 	case CS_TYPE::EVT_STORAGE_INITIALIZED: return "EVT_STORAGE_INITIALIZED";
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: return "EVT_STORAGE_WRITE_DONE";
+	case CS_TYPE::EVT_STORAGE_REMOVE_DONE: return "EVT_STORAGE_REMOVE_DONE";
+	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE: return "EVT_STORAGE_REMOVE_FILE_DONE";
+	case CS_TYPE::EVT_STORAGE_GC_DONE: return "EVT_STORAGE_GC_DONE";
+	case CS_TYPE::EVT_STORAGE_FACTORY_RESET: return "EVT_STORAGE_FACTORY_RESET";
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: return "EVT_SWITCHCRAFT_ENABLED";
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF: return "EVT_SWITCH_FORCED_OFF";
 	case CS_TYPE::EVT_SWITCH_LOCKED: return "EVT_SWITCH_LOCKED";
@@ -1012,6 +1036,10 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
+	case CS_TYPE::EVT_STORAGE_GC_DONE:
+	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
@@ -1290,6 +1318,10 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
+	case CS_TYPE::EVT_STORAGE_GC_DONE:
+	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -1412,6 +1444,10 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
+	case CS_TYPE::EVT_STORAGE_GC_DONE:
+	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -1535,6 +1571,10 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
+	case CS_TYPE::EVT_STORAGE_GC_DONE:
+	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:

@@ -14,14 +14,20 @@
 
 
 #define APP_SCHEDULER_ENABLED 1
-
 #define APP_TIMER_ENABLED 1
 #define APP_TIMER_CONFIG_OP_QUEUE_SIZE 40
 #define APP_TIMER_CONFIG_USE_SCHEDULER 1
 
 
 #define FDS_ENABLED 1
-#define FDS_VIRTUAL_PAGES 3
+/**
+ * Number of flash pages for FDS to use.
+ * One page for GC
+ * One page for config
+ * One page for behaviour
+ * One page for sure
+ */
+#define FDS_VIRTUAL_PAGES 4
 #define FDS_VIRTUAL_PAGE_SIZE 1024
 #define FDS_VIRTUAL_PAGES_RESERVED 0
 #define FDS_OP_QUEUE_SIZE 4
@@ -89,7 +95,7 @@
 
 #define NRF_SDH_BLE_ENABLED 1
 #define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 1
-#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69
+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69 // Advised by mesh
 #define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE ATTR_TABLE_SIZE
 #define NRF_SDH_BLE_VS_UUID_COUNT MAX_NUM_VS_SERVICES
 #define NRF_SDH_BLE_SERVICE_CHANGED 1
@@ -142,7 +148,7 @@
 
 /**
  * Settings below were missing from the sdk_config.h
- * They're copied from example some sdk_config.h
+ * They're copied from some example sdk_config.h
  */
 
 

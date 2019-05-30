@@ -24,6 +24,8 @@ enum cs_storage_operation_t {
 	CS_STORAGE_OP_READ,
 	CS_STORAGE_OP_WRITE,
 	CS_STORAGE_OP_REMOVE,
+	CS_STORAGE_OP_REMOVE_FILE,
+	CS_STORAGE_OP_GC,
 };
 
 typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, cs_file_id_t fileId, CS_TYPE type);
@@ -140,7 +142,7 @@ public:
 	 * @param[in] type            Type to remove
 	 *
 	 * @retval ERR_SUCCESS                  When successfully started removing the type.
-	 * @retval ERR_NOT_FOUND                When type was not found on file.
+	 * @retval ERR_NOT_FOUND                When type was not found on file, consider this a success, but don't wait for an event.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
 	cs_ret_code_t remove(cs_file_id_t file_id, CS_TYPE type);

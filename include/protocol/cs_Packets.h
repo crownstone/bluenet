@@ -68,7 +68,7 @@ constexpr void cs_state_errors_set_default(state_errors_t *state) {
  * Relay:  0 = off, 1 = on
  * Dimmer: 0 = off, 100 = fully on
  */
-union __attribute__((__packed__)) __attribute__((__aligned__(4))) switch_state_t {
+union __attribute__((__packed__)) switch_state_t {
 	struct __attribute__((packed)) {
 		uint8_t dimmer : 7;
 		uint8_t relay  : 1;

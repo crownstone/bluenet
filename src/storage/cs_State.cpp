@@ -313,7 +313,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
 			ret_code = storeInFlash(index);
 			if (ret_code == ERR_BUSY) {
-				return addToQueue(type, STATE_RETRY_STORE_DELAY_MS);
+				return addToQueue(CS_STATE_QUEUE_OP_WRITE, FILE_CONFIGURATION, type, STATE_RETRY_STORE_DELAY_MS);
 			}
 			break;
 		}
@@ -340,22 +340,42 @@ cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delay) {
 		return ret_code;
 	}
 	uint32_t delayMs = 1000 * delay;
-	return addToQueue(data.type, delayMs);
+	return addToQueue(CS_STATE_QUEUE_OP_WRITE, FILE_CONFIGURATION, data.type, delayMs);
 }
 
-cs_ret_code_t State::addToQueue(const CS_TYPE & type, uint32_t delayMs) {
+cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, cs_file_id_t fileId, const CS_TYPE & type, uint32_t delayMs) {
 	uint32_t delayTicks = delayMs / TICK_INTERVAL_MS;
-	LOGStateDebug("Add to queue type=%s delay=%u ticks=%u", TypeName(type), delay, delayTicks);
+	LOGStateDebug("Add to queue op=%u fileId=%u type=%s delay=%u ticks=%u", operation, fileId, TypeName(type), delay, delayTicks);
 	bool found = false;
-	for (size_t i=0; i<_store_queue.size(); ++i) {
-		if (_store_queue[i].type == type) {
-			_store_queue[i].counter = delayTicks;
-			found = true;
-			break;
+	switch (operation) {
+	case CS_STATE_QUEUE_OP_WRITE:
+	case CS_STATE_QUEUE_OP_REM:{
+		for (size_t i=0; i<_store_queue.size(); ++i) {
+			if ((_store_queue[i].operation == operation) && (_store_queue[i].type == type)) {
+				_store_queue[i].counter = delayTicks;
+				found = true;
+				break;
+			}
 		}
+		break;
+	}
+	case CS_STATE_QUEUE_OP_REM_FILE:{
+		for (size_t i=0; i<_store_queue.size(); ++i) {
+			if ((_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_FILE) && (_store_queue[i].fileId == fileId)) {
+				_store_queue[i].counter = delayTicks;
+				found = true;
+				break;
+			}
+		}
+		break;
+	}
+	case CS_STATE_QUEUE_OP_GC:
+		break;
 	}
 	if (!found) {
 		cs_state_store_queue_t item;
+		item.operation = operation;
+		item.fileId = fileId;
 		item.type = type;
 		item.counter = delayTicks;
 		_store_queue.push_back(item);
@@ -377,17 +397,48 @@ void State::delayedStoreTick() {
 	size16_t index_in_ram;
 	for (auto it = _store_queue.begin(); it != _store_queue.end(); /*it++*/) {
 		if (it->counter == 0) {
-			ret_code = findInRam(it->type, index_in_ram);
-			if (ret_code == ERR_SUCCESS) {
-				ret_code = storeInFlash(index_in_ram);
-				if (ret_code == ERR_BUSY) {
-					// Add to queue again.
-					it->counter = STATE_RETRY_STORE_DELAY_MS / TICK_INTERVAL_MS;
-					// Don't erase it
-					continue;
+			bool removeItem = true;
+			switch (it->operation) {
+			case CS_STATE_QUEUE_OP_WRITE: {
+				ret_code = findInRam(it->type, index_in_ram);
+				if (ret_code == ERR_SUCCESS) {
+					ret_code = storeInFlash(index_in_ram);
+					if (ret_code == ERR_BUSY) {
+						removeItem = false;
+					}
 				}
+				break;
 			}
-			it = _store_queue.erase(it);
+			case CS_STATE_QUEUE_OP_REM: {
+				ret_code = _storage->remove(FILE_CONFIGURATION, it->type);
+				if (ret_code == ERR_BUSY) {
+					removeItem = false;
+				}
+				break;
+			}
+			case CS_STATE_QUEUE_OP_REM_FILE: {
+				ret_code = _storage->remove(it->fileId);
+				if (ret_code == ERR_BUSY) {
+					removeItem = false;
+				}
+				break;
+			}
+			case CS_STATE_QUEUE_OP_GC: {
+				ret_code = _storage->garbageCollect();
+				if (ret_code == ERR_BUSY) {
+					removeItem = false;
+				}
+				break;
+			}
+			}
+			if (removeItem) {
+				it = _store_queue.erase(it);
+			}
+			else {
+				// Add to queue again.
+				it->counter = STATE_RETRY_STORE_DELAY_MS / TICK_INTERVAL_MS;
+				it++;
+			}
 		}
 		else {
 			it->counter--;
@@ -450,19 +501,35 @@ void State::factoryReset(uint32_t resetCode) {
 		return;
 	}
 	LOGw("Perform factory reset!");
-	_storage->remove(FILE_CONFIGURATION);
+	cs_ret_code_t retCode = _storage->remove(FILE_CONFIGURATION);
+	switch (retCode) {
+	case ERR_BUSY:
+		// Retry again later.
+		addToQueue(CS_STATE_QUEUE_OP_REM_FILE, FILE_CONFIGURATION, CS_TYPE::CONFIG_DO_NOT_USE, STATE_RETRY_STORE_DELAY_MS);
+		break;
+	default:
+		break;
+	}
 }
 
 void State::handleStorageError(cs_storage_operation_t operation, cs_file_id_t fileId, CS_TYPE type) {
 	switch (operation) {
 	case CS_STORAGE_OP_WRITE:
 		LOGw("error writing type=%u, retrying later", type);
-		addToQueue(type, STATE_RETRY_STORE_DELAY_MS);
+		addToQueue(CS_STATE_QUEUE_OP_WRITE, FILE_CONFIGURATION, type, STATE_RETRY_STORE_DELAY_MS);
 		break;
 	case CS_STORAGE_OP_READ:
 		break;
 	case CS_STORAGE_OP_REMOVE:
-		LOGw("unhandled storage remove error type=%u", type);
+		LOGw("error removing error type=%u", type);
+		addToQueue(CS_STATE_QUEUE_OP_REM, FILE_CONFIGURATION, type, STATE_RETRY_STORE_DELAY_MS);
+		break;
+	case CS_STORAGE_OP_REMOVE_FILE:
+		LOGw("error removing error file=%u", fileId);
+		addToQueue(CS_STATE_QUEUE_OP_REM_FILE, fileId, CS_TYPE::CONFIG_DO_NOT_USE, STATE_RETRY_STORE_DELAY_MS);
+		break;
+	case CS_STORAGE_OP_GC:
+		LOGw("error collecting garbage");
 		break;
 	}
 }
@@ -472,6 +539,30 @@ void State::handleEvent(event_t & event) {
 	case CS_TYPE::EVT_TICK:
 		delayedStoreTick();
 		break;
+	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE: {
+		TYPIFY(EVT_STORAGE_REMOVE_FILE_DONE) fileId = *(TYPIFY(EVT_STORAGE_REMOVE_FILE_DONE)*)event.data;
+		if (fileId == FILE_CONFIGURATION) {
+			_performingFactoryReset = true;
+			cs_ret_code_t retCode = _storage->garbageCollect();
+			switch (retCode) {
+			case ERR_BUSY:
+				// Retry again later.
+				addToQueue(CS_STATE_QUEUE_OP_GC, 0, CS_TYPE::CONFIG_DO_NOT_USE, STATE_RETRY_STORE_DELAY_MS);
+				break;
+			default:
+				break;
+			}
+		}
+		break;
+	}
+	case CS_TYPE::EVT_STORAGE_GC_DONE: {
+		if (_performingFactoryReset) {
+			event_t resetEvent(CS_TYPE::EVT_STORAGE_FACTORY_RESET);
+			EventDispatcher::getInstance().dispatch(resetEvent);
+		}
+		break;
+	}
+
 	default:
 		break;
 	}

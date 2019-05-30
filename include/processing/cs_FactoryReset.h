@@ -9,8 +9,9 @@
 
 #include <cstdint>
 #include "drivers/cs_Timer.h"
+#include "events/cs_EventListener.h"
 
-class FactoryReset {
+class FactoryReset: public EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static FactoryReset& getInstance() {
@@ -41,6 +42,11 @@ public:
 	static void staticProcess(FactoryReset *ptr) {
 		ptr->process();
 	}
+
+	/**
+	 * Handle events.
+	 */
+	void handleEvent(event_t & event);
 
 private:
 	FactoryReset();

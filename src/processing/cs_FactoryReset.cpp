@@ -12,6 +12,7 @@
 #include "ble/cs_Stack.h"
 #include "processing/cs_CommandHandler.h"
 #include "processing/cs_Switch.h"
+#include "events/cs_EventDispatcher.h"
 
 FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
 		_recoveryDisableTimerId(NULL),
@@ -27,6 +28,7 @@ FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
 void FactoryReset::init() {
 	Timer::getInstance().createSingleShot(_recoveryDisableTimerId, (app_timer_timeout_handler_t)FactoryReset::staticTimeout);
 	Timer::getInstance().createSingleShot(_recoveryProcessTimerId, (app_timer_timeout_handler_t)FactoryReset::staticProcess);
+	EventDispatcher::getInstance().addListener(this);
 	resetTimeout();
 }
 
@@ -134,8 +136,12 @@ bool FactoryReset::performFactoryReset() {
 	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
 	LOGi("Going into factory reset mode, rebooting device in 2s ...");
-	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
-
+//	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
+	TYPIFY(CMD_RESET_DELAYED) resetCmd;
+	resetCmd.resetCode = GPREGRET_SOFT_RESET;
+	resetCmd.delayMs = 2000;
+	event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
+	EventDispatcher::getInstance().dispatch(eventReset);
 	return true;
 }
 
@@ -148,6 +154,9 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 		// Set switch to initial value: off
 		// TODO: Is it? Should be back to default value isn't it?
 		LOGw("Does not use default value");
+//		TYPIFY(STATE_SWITCH_STATE) switchVal;
+//		cs_state_data_t data(CS_TYPE::STATE_SWITCH_STATE, &switchVal, sizeof(switchVal));
+//		getDefault(data);
 		Switch::getInstance().setSwitch(0);
 	}
 
@@ -158,7 +167,23 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 	TYPIFY(STATE_OPERATION_MODE) mode = to_underlying_type(OperationMode::OPERATION_MODE_SETUP);
 	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
-	LOGi("Factory reset done, rebooting device in 2s ...");
-	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
+//	LOGi("Factory reset done, rebooting device in 2s ...");
+//	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
 	return true;
+}
+
+void FactoryReset::handleEvent(event_t & event) {
+	switch (event.type) {
+	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:{
+		LOGi("Factory reset done, rebooting device");
+		TYPIFY(CMD_RESET_DELAYED) resetCmd;
+		resetCmd.resetCode = GPREGRET_SOFT_RESET;
+		resetCmd.delayMs = 100;
+		event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
+		EventDispatcher::getInstance().dispatch(eventReset);
+		break;
+	}
+	default:
+		break;
+	}
 }

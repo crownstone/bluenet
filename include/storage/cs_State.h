@@ -57,12 +57,21 @@ constexpr OperationMode getOperationMode(uint8_t mode) {
 #define FACTORY_RESET_STATE_LOWTX  1
 #define FACTORY_RESET_STATE_RESET  2
 
+enum cs_state_queue_op_t {
+	CS_STATE_QUEUE_OP_WRITE,
+	CS_STATE_QUEUE_OP_REM,
+	CS_STATE_QUEUE_OP_REM_FILE,
+	CS_STATE_QUEUE_OP_GC,
+};
+
 /**
  * Struct for a type of which storing to flash is queued or delayed.
  *
  * The type will be stored once the counter is 0.
  */
 struct __attribute__((__packed__)) cs_state_store_queue_t {
+	cs_state_queue_op_t operation;
+	cs_file_id_t fileId;
 	CS_TYPE type;
 	uint16_t counter;
 };
@@ -292,7 +301,7 @@ protected:
 	 */
 	cs_state_data_t & addToRam(const CS_TYPE & type, size16_t size);
 
-	cs_ret_code_t addToQueue(const CS_TYPE & type, uint32_t delayMs);
+	cs_ret_code_t addToQueue(cs_state_queue_op_t operation, cs_file_id_t fileId, const CS_TYPE & type, uint32_t delayMs);
 
 	cs_ret_code_t allocate(cs_state_data_t & data);
 
@@ -305,6 +314,8 @@ protected:
 	std::vector<cs_state_store_queue_t> _store_queue;
 
 	bool _startedWritingToFlash = false;
+
+	bool _performingFactoryReset = false;
 
 private:
 

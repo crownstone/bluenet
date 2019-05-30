@@ -297,7 +297,7 @@ cs_ret_code_t Storage::remove(cs_file_id_t file_id) {
 	if (isBusy()) {
 		return ERR_BUSY;
 	}
-	LOGi("Delete file, removes all configuration values!");
+	LOGi("Delete file, invalidates all configuration values, but does not remove them yet!");
 	ret_code_t fds_ret_code;
 	fds_ret_code = fds_file_delete(file_id);
 	if (fds_ret_code == FDS_SUCCESS) {
@@ -416,9 +416,13 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 	clearBusy(p_fds_evt->del.record_key);
 	switch (p_fds_evt->result) {
-	case FDS_SUCCESS:
-		LOGi("Record successfully deleted");
+	case FDS_SUCCESS: {
+		CS_TYPE type = CS_TYPE(p_fds_evt->del.record_key);
+		LOGi("Remove done, record_key=%u or type=%u", p_fds_evt->del.record_key, to_underlying_type(type));
+		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_DONE, &type, sizeof(type));
+		EventDispatcher::getInstance().dispatch(event);
 		break;
+	}
 	default:
 		if (_errorCallback) {
 			CS_TYPE type = toCsType(p_fds_evt->del.record_key);
@@ -433,26 +437,41 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 void Storage::handleRemoveFileEvent(fds_evt_t const * p_fds_evt) {
 	_removingFile = false;
 	switch (p_fds_evt->result) {
-	case FDS_SUCCESS:
-		LOGi("File successfully deleted");
+	case FDS_SUCCESS: {
+		cs_file_id_t fileId = p_fds_evt->del.file_id;
+		LOGi("Remove file done, file_id=%u", fileId);
+		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE, &fileId, sizeof(fileId));
+		EventDispatcher::getInstance().dispatch(event);
 		break;
+	}
 	default:
-		LOGw("Unhandled rem file error: %u", p_fds_evt->result);
+		if (_errorCallback) {
+			_errorCallback(CS_STORAGE_OP_REMOVE_FILE, p_fds_evt->del.file_id, CS_TYPE::CONFIG_DO_NOT_USE);
+		}
+		else {
+			LOGw("Unhandled rem file error: %u file_id=%u", p_fds_evt->result, p_fds_evt->del.file_id);
+		}
 	}
 }
 
 void Storage::handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt) {
 	_collectingGarbage = false;
 	switch (p_fds_evt->result) {
-	case FDS_SUCCESS:
+	case FDS_SUCCESS: {
 		LOGi("Garbage collection successful");
+		event_t event(CS_TYPE::EVT_STORAGE_GC_DONE);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
+	}
 	case FDS_ERR_OPERATION_TIMEOUT:
 		LOGw("Garbage collection timeout");
-		// Resume garbage collection later.
-		break;
 	default:
-		LOGw("Unhandled GC error: %u", p_fds_evt->result);
+		if (_errorCallback) {
+			_errorCallback(CS_STORAGE_OP_GC, 0, CS_TYPE::CONFIG_DO_NOT_USE);
+		}
+		else {
+			LOGw("Unhandled GC error: %u", p_fds_evt->result);
+		}
 	}
 }
 
