@@ -41,6 +41,14 @@
 //! Device information service.
 #define BLE_DIS_ENABLED 1
 
+/**
+ * By default, the bootloader changes MAC address when in bootloader mode.
+ * This prevents connect issues, where services are cached etc.
+ * But, sice iOS devices don't get to see the MAC address, they don't know which device is in bootloader mode.
+ * So we adjusted the code to make the bootloader not change MAC address with this define, so that it's easy to find.
+ */
+#define CS_DFU_CHANGE_MAC_ADDRESS 0
+
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
 #define NRF_LOG_BACKEND_RTT_ENABLED 1
 #else

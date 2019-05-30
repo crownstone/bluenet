@@ -897,6 +897,7 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
 
 
 #if (!NRF_DFU_BLE_REQUIRES_BONDS)
+#if (CS_DFU_CHANGE_MAC_ADDRESS == 1)
 static uint32_t gap_address_change(void)
 {
     uint32_t       err_code;
@@ -913,6 +914,7 @@ static uint32_t gap_address_change(void)
 
     return NRF_SUCCESS;
 }
+#endif
 #endif
 
 
@@ -932,8 +934,10 @@ static uint32_t gap_params_init(void)
 
 #if (!NRF_DFU_BLE_REQUIRES_BONDS)
 
+#if (CS_DFU_CHANGE_MAC_ADDRESS == 1)
     err_code = gap_address_change();
     VERIFY_SUCCESS(err_code);
+#endif
 
     if ((m_flags & DFU_BLE_FLAG_USE_ADV_NAME) != 0)
     {
