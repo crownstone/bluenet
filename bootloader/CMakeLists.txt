@@ -34,6 +34,14 @@ MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
 # Include your own FindX cmake files and options in the following file!
 #######################################################################################################################
 
+# Collect flags that are used in the code, as macros
+SET(CONFIG_FILE ${CMAKE_SOURCE_DIR}/conf/cmake/CMakeConfig.cmake)
+IF(EXISTS "${CONFIG_FILE}")
+	MESSAGE(STATUS "CMakeLists: Load config file ${CONFIG_FILE}")
+	INCLUDE(${CONFIG_FILE})
+ELSE()
+	MESSAGE(FATAL_ERROR "CMakeLists: Cannot find config file ${CONFIG_FILE}")
+ENDIF()
 
 #######################################################################################################################
 
@@ -117,10 +125,12 @@ ELSE()
 
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/dfu_public_key.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/cfg/cs_Boards.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/dev_info_service.c")
 
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
 	set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/modules/nrfx/mdk/system_nrf52.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/ble/ble_services/ble_dis/ble_dis.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/util/app_error_weak.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/scheduler/app_scheduler.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/util/app_util_platform.c")
@@ -160,7 +170,8 @@ ELSE()
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/crypto/backend/nrf_sw/nrf_sw_backend_hash.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/dfu/dfu-cc.pb.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/dfu/nrf_dfu.c")
-	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/ble_dfu/nrf_dfu_ble.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/nrf_dfu_ble.c")
+#	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/ble_dfu/nrf_dfu_ble.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/dfu/nrf_dfu_flash.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/dfu/nrf_dfu_handling_error.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/bootloader/dfu/nrf_dfu_mbr.c")
@@ -218,6 +229,7 @@ ELSE()
 	
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/ble/common")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/boards")
+	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/ble/ble_services/ble_dis")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/atomic")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/atomic_fifo")
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${NRF5_DIR}/components/libraries/balloc")
@@ -283,6 +295,8 @@ ENDIF()
 
 # Overwrite sdk config options
 ADD_DEFINITIONS("-DUSE_APP_CONFIG")
+
+ADD_DEFINITIONS("-DBOOTLOADER_VERSION=${BOOTLOADER_VERSION}")
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES} ${PROJECT_NAME}.tmp)
 

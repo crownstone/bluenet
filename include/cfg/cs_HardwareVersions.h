@@ -7,7 +7,6 @@
 #pragma once
 
 #include <cfg/cs_Boards.h>
-#include <util/cs_BleError.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,7 +34,7 @@ extern "C" {
 	  |--------------------  Family: 1 Crownstone
 */
 
-inline const char* get_hardware_version() {
+static inline const char* get_hardware_version() {
 
 	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (hardwareBoard == 0xFFFFFFFF) {
@@ -80,7 +79,7 @@ inline const char* get_hardware_version() {
 
 	// Can't use LOGe here, as the bootloader also uses this file.
 //	LOGe("Failed to define version for hardware board");
-	APP_ERROR_CHECK(1);
+//	APP_ERROR_CHECK(1);
 
 	return "Unknown";
 }

@@ -58,7 +58,6 @@
 #include "nrf_bootloader_dfu_timers.h"
 #include "app_scheduler.h"
 #include "nrf_dfu_validation.h"
-#include "crc32.h"
 
 static nrf_dfu_observer_t m_user_observer; //<! Observer callback set by the user.
 static volatile bool m_flash_write_done;
@@ -234,7 +233,6 @@ static void dfu_enter_button_init(void)
 static bool crc_on_valid_app_required(void)
 {
     bool ret = true;
-
     if (NRF_BL_APP_CRC_CHECK_SKIPPED_ON_SYSTEMOFF_RESET &&
         (nrf_power_resetreas_get() & NRF_POWER_RESETREAS_OFF_MASK))
     {
@@ -259,87 +257,10 @@ static bool crc_on_valid_app_required(void)
 
 static bool boot_validate(boot_validation_t const * p_validation, uint32_t data_addr, uint32_t data_len, bool do_crc)
 {
-
     if (!do_crc && (p_validation->type == VALIDATE_CRC))
     {
         return true;
     }
-    if (data_len != 0) {
-        NRF_LOG_INFO("App address: 0x%x", data_addr);
-        NRF_LOG_INFO("App size: 0x%x", data_len);
-        uint32_t current_crc = *(uint32_t *)p_validation->bytes;
-        uint32_t crc = crc32_compute((uint8_t*)data_addr, data_len, NULL); 
-        NRF_LOG_INFO("App current  CRC: 0x%x", current_crc);
-        NRF_LOG_INFO("App computed CRC 0x%x-0x%x: 0x%x", data_addr, data_addr + data_len, crc);
-
-        /*
-        for (int i = 120; i < 130; i++) {
-            crc = crc32_compute((uint8_t*)data_addr, (i+1)*1024, NULL); 
-            NRF_LOG_INFO("CRC 0x%x-0x%x: 0x%x", data_addr, data_addr+(i+1)*1024, crc);
-        }*/
-        
-        uint32_t len;
-        
-        len = 0x20100;
-        crc = crc32_compute((uint8_t*)data_addr, len, NULL); 
-        NRF_LOG_INFO("Computed CRC %p-%p: 0x%8x", data_addr, data_addr + len, crc);
-        
-        len = 0x20180;
-        crc = crc32_compute((uint8_t*)data_addr, len, NULL); 
-        NRF_LOG_INFO("Computed CRC %p-%p: 0x%8x", data_addr, data_addr + len, crc);
-        
-        len = 0x20190;
-        crc = crc32_compute((uint8_t*)data_addr, len, NULL); 
-        NRF_LOG_INFO("Computed CRC %p-%p: 0x%8x", data_addr, data_addr + len, crc);
-        
-        len = 0x201a0;
-        crc = crc32_compute((uint8_t*)data_addr, len, NULL); 
-        NRF_LOG_INFO("Computed CRC %p-%p: 0x%8x", data_addr, data_addr + len, crc);
-        
-        len = 0x201b0;
-        crc = crc32_compute((uint8_t*)data_addr, len, NULL); 
-        NRF_LOG_INFO("Computed CRC %p-%p: 0x%8x", data_addr, data_addr + len, crc);
-        
-        len = 0x20200;
-        crc = crc32_compute((uint8_t*)data_addr, len, NULL); 
-        NRF_LOG_INFO("Computed CRC %p-%p: 0x%8x", data_addr, data_addr + len, crc);
-        
-        len = 0x20400;
-        crc = crc32_compute((uint8_t*)data_addr, len, NULL); 
-        NRF_LOG_INFO("Computed CRC %p-%p: 0x%8x", data_addr, data_addr + len, crc);
-        
-        uint32_t *addr;
-//        0x00046180 - 0x00046190 is .sdh_soc_observers
-        
-        addr = (uint32_t*) 0x46180;
-        for (int i = 0; i < 4; ++i, addr += 0x4) {
-            NRF_LOG_INFO(".sdh_soc_observers [%p]: %p", addr, *addr);
-        }
-        addr = (uint32_t*) 0x46190;
-        for (int i = 0; i < 3; ++i, addr += 0x4) {
-            NRF_LOG_INFO(".sdh_ble_observers [%p]: %p", addr, *addr);
-        }
-        addr = (uint32_t*) 0x46198;
-        for (int i = 0; i < 4; ++i, addr += 0x4) {
-            NRF_LOG_INFO(".sdh_state_observers [%p]: %p", addr, *addr);
-        }
-        addr = (uint32_t*) 0x461a8;
-        for (int i = 0; i < 4; ++i, addr += 0x4) {
-            NRF_LOG_INFO(".sdh_stack_observers [%p]: %p", addr, *addr);
-        }
-        addr = (uint32_t*) 0x461b8;
-        for (int i = 0; i < 2; ++i, addr += 0x4) {
-            NRF_LOG_INFO(".sdh_req_observers [%p]: %p", addr, *addr);
-        }
-
-        addr = (uint32_t*) 0x46200;
-        NRF_LOG_INFO(".nrf_balloc [0x%x]: 0x%x", addr, *addr);
-        addr = (uint32_t*) 0x46214;
-        NRF_LOG_INFO(".ARM.exidx [0x%x]: 0x%x", addr, *addr);
-        addr = (uint32_t*) 0x46218;
-        NRF_LOG_INFO(".ARM.exidx [0x%x]: 0x%x", addr, *addr);
-    }
-
     return nrf_dfu_validation_boot_validate(p_validation, data_addr, data_len);
 }
 
@@ -445,10 +366,9 @@ static bool dfu_enter_check(void)
         return true;
     }
 
-    NRF_LOG_INFO("GPREGRET=%u BOOTLOADER_DFU_START=%u", nrf_power_gpregret_get(), BOOTLOADER_DFU_START);
-    NRF_LOG_FLUSH();
     if (NRF_BL_DFU_ENTER_METHOD_GPREGRET &&
-       (nrf_power_gpregret_get() & BOOTLOADER_DFU_START) == BOOTLOADER_DFU_START)
+       ((nrf_power_gpregret_get() & BOOTLOADER_DFU_GPREGRET_MASK) == BOOTLOADER_DFU_GPREGRET)
+            && (nrf_power_gpregret_get() & BOOTLOADER_DFU_START_BIT_MASK))
     {
         NRF_LOG_DEBUG("DFU mode requested via GPREGRET.");
         return true;
@@ -577,7 +497,6 @@ ret_code_t nrf_bootloader_init(nrf_dfu_observer_t observer)
     }
     else
     {
-        NRF_LOG_DEBUG("Enter app start");
         // Erase additional data like peer data or advertisement name
         ret_val = nrf_dfu_settings_additional_erase();
         if (ret_val != NRF_SUCCESS)

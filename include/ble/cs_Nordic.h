@@ -14,11 +14,9 @@ extern "C"
 #ifndef HOST_TARGET
 #include <app_util_platform.h>
 typedef uint32_t ret_code_t;
-#include <nrfx_comp.h>
-//#include <nrf_drv_comp.h>
-
 
 // The header files in the Nordic SDK. Keep all the includes here, not dispersed over all the header files.
+#include <sdk_config.h>
 #include <app_scheduler.h>
 #include <app_util.h>
 #include <ble.h>
@@ -43,6 +41,8 @@ typedef uint32_t ret_code_t;
 #include <nrfx_glue.h>
 //#include <nordic_common.h>
 //#include <nrf_serial.h>
+#include <nrfx_comp.h>
+//#include <nrf_drv_comp.h>
 
 #if CS_SERIAL_NRF_LOG_ENABLED > 0
 #include <nrfx_log.h>

@@ -5,8 +5,8 @@ GROUP(-lgcc -lc -lnosys)
 
 MEMORY
 {
-  /* Without debug: FLASH (rx) : ORIGIN = 0x78000, LENGTH = 0x6000 */
-  /* With debug:    FLASH (rx) : ORIGIN = 0x72000, LENGTH = 0xc000 */
+  /* Without debug: FLASH (rx) : ORIGIN = 0x76000, LENGTH = 0x8000 */
+  /* With debug:    FLASH (rx) : ORIGIN = 0x71000, LENGTH = 0xd000 */
   /* FLASH (rx) : ORIGIN = 0x71000, LENGTH = 0xd000 */
   /* Without gc-sections: FLASH (rx) : ORIGIN = 0x68000, LENGTH = 0x10000 */
   FLASH (rx) : ORIGIN = 0x71000, LENGTH = 0xd000
