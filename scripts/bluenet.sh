@@ -24,6 +24,8 @@ usage() {
 	echo "What to build and/or upload:"
 	echo "   -F, --firmware                       include firmware"
 	echo "   -B, --bootloader                     include bootloader"
+	echo "   -P, --bootloader_settings            include bootloader settings page"
+	echo "                                        this page should be build and uploaded together with the firmware if a bootloader is present"
 	echo "   -S, --softdevice                     include softdevice"
 	echo "   -H, --hardware_board_version         include hardware board version"
 	echo "   -C, --combined                       build and/or upload combined binary, always includes firmware, bootloader, softdevice, and hardware version"
@@ -47,8 +49,8 @@ if [[ $? -ne 4 ]]; then
 	exit $CS_ERR_GETOPT_TEST
 fi
 
-SHORT=t:a:beudcyhFBSHC
-LONG=target:,address:build,erase,upload,debug,clean,yes,help,firmware,bootloader,softdevice,hardware_version,combined,unit_test_host,unit_test_nrf5
+SHORT=t:a:beudcyhFBPSHC
+LONG=target:,address:build,erase,upload,debug,clean,yes,help,firmware,bootloader,bootloader_settings,softdevice,hardware_version,combined,unit_test_host,unit_test_nrf5
 
 PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -95,6 +97,10 @@ while true; do
 			;;
 		-B|--bootloader)
 			include_bootloader=true
+			shift 1
+			;;
+		-P|--bootloader_settings)
+			include_bootloader_settings=true
 			shift 1
 			;;
 		-S|--softdevice)
@@ -302,12 +308,14 @@ if [ $do_build ]; then
 		else
 			build_firmware
 		fi
-		build_bootloader_settings
 		done_built=true
 	fi
 	if [ $include_bootloader ]; then
-		build_bootloader_settings
 		build_bootloader
+		done_built=true
+	fi
+	if [ $include_bootloader_settings ]; then
+		build_bootloader_settings
 		done_built=true
 	fi
 	if [ $include_softdevice ]; then
@@ -351,12 +359,6 @@ if [ $do_upload ]; then
 		fi
 		if [ $include_bootloader ]; then
 			upload_bootloader
-			# If not including here as well, it is very annoying that consecutive builds do not including settings.
-			# Consecutive calls to
-			# ./bluenet -uF
-			# ./bluenet -uB
-			# should have same result as ./bluenet -uBF
-			upload_bootloader_settings
 			done_upload=true
 		fi
 		# Write board version before uploading firmware, else firmware writes it.
@@ -366,12 +368,11 @@ if [ $do_upload ]; then
 		fi
 		if [ $include_firmware ]; then
 			upload_firmware
-			if [ $include_bootloader ]; then
-				upload_bootloader_settings
-			fi
 			done_upload=true
-		else
-			:
+		fi
+		if [ $include_bootloader_settings ]; then
+			upload_bootloader_settings
+			done_upload=true
 		fi
 	fi
 	verify_board_version_written
