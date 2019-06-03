@@ -13,7 +13,6 @@ set history size 1024
 
 set print object
 set print static off
-set print elements 1
 set confirm off
 set print pretty on
 set pagination off
@@ -34,6 +33,19 @@ monitor reset
 
 # If you want to enable a breakpoint before program start
 #b main
+
+# We indeed do end up in the scanner
+#b scanner.c:scanner_init
+
+#b radio_send_scan_request
+#b radio_setup_next_operation
+
+#b radio_handle_tx_end_event
+#b radio_state_txidle_handle
+#b scanner.c:297
+
+# Seems to trigger wrong one
+#b radio_state_tx_handle
 
 continue 
 
