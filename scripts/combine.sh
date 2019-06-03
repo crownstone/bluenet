@@ -105,7 +105,7 @@ if [[ $include_hardware_version ]]; then
 		cs_err "ERROR: No hardware board defined (check target=$target in $BOARD_FILE)"
 		exit $CS_ERR_CONFIG
 	fi
-	HARDWARE_BOARD_HEX=$(printf "0x%08x" $HARDWARE_BOARD_INT)
+	HARDWARE_BOARD_HEX=$(printf "0x%08X" $HARDWARE_BOARD_INT)
 	cs_info "Write $HARDWARE_BOARD_HEX to address: $HARDWARE_BOARD_ADDRESS"
 	cs_info "Set hardware board (${HARDWARE_BOARD_HEX}) to $HARDWARE_BOARD_ADDRESS (UICR.CUSTOMER[x])"
 	HARDWARE_BOARD_CONFIG="-exclude 0x10001084 0x10001088 -generate 0x10001084 0x10001088 -l-e-constant $HARDWARE_BOARD_HEX 4"

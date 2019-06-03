@@ -22,9 +22,13 @@ current_value="0x$current_value"
 new_value=$VALUE
 # remove the "0x"
 new_value=${new_value:2}
+# change to upper case
+new_value=$(echo $new_value | tr '[:lower:]' '[:upper:]')
 # remove leading zeroes
 new_value=$(echo "obase=16;ibase=16;$new_value+0" | bc )
+# add the "0x" again
 new_value="0x$new_value"
+
 
 cs_info "Check value: $current_value vs $new_value"
 if [ $current_value != $new_value ]; then
