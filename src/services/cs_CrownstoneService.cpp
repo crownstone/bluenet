@@ -426,8 +426,8 @@ cs_ret_code_t CrownstoneService::stateOnWrite(const EncryptionAccessLevel access
 //			_streamBuffer->setPayloadSize(stateData.size);
 			_streamBuffer->setPayload(stateData.value, stateData.size);
 			_streamBuffer->setOpCode(OPCODE_READ_VALUE);
-			_configurationReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
-			_configurationReadCharacteristic->updateValue();
+			_stateReadCharacteristic->setValueLength(_streamBuffer->getDataLength());
+			_stateReadCharacteristic->updateValue();
 			// Writing the error code would overwrite the value on the read characteristic.
 			writeErrCode = false;
 		}
