@@ -40,10 +40,10 @@ monitor reset
 #b radio_send_scan_request
 #b radio_setup_next_operation
 
-b radio_handle_tx_end_event
-b radio_state_txidle_handle
+#b radio_handle_tx_end_event
+#b radio_state_txidle_handle
+#b scanner.c:297
 
-b scanner.c:297
 # Seems to trigger wrong one
 #b radio_state_tx_handle
 
