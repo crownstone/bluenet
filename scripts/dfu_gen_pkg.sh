@@ -16,9 +16,10 @@ source $path/_utils.sh
 usage() {
 	echo "Options:"
 	echo "   -f, --firmware                       add firmware   to dfu package"
-	echo "   -b, --build                          add bootloader to dfu package"
+	echo "   -b, --bootloader                     add bootloader to dfu package"
 	echo "   -s, --softdevice                     add softdevice to dfu package (not working yet)"
 	echo "   -t target, --target target           specify config target"
+	echo "   -k keyfile, --key keyfile            add a keyfile to sign the dfu package"
 }
 
 
@@ -33,8 +34,8 @@ if [[ $? -ne 4 ]]; then
 	exit $CS_ERR_GETOPT_TEST
 fi
 
-SHORT=t:fbs
-LONG=target:,firmware,bootloader,softdevice
+SHORT=t:k:fbs
+LONG=target:key:,firmware,bootloader,softdevice
 
 PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -60,6 +61,10 @@ while true; do
 			;;
 		-t|--target)
 			target=$2
+			shift 2
+			;;
+		-k|--key)
+			key_file=$2
 			shift 2
 			;;
 		--)
@@ -103,11 +108,23 @@ fi
 if [ $add_softdevice ]; then
 	args="$args --softdevice $BLUENET_BIN_DIR/softdevice_mainpart.hex"
 	pkg_name="softdevice${pkg_name}"
+	if [ ! $key_file ]; then
+		cs_err "You need to sign a package with softdevice."
+		exit 1
+	fi
 fi
 
 if [ $add_bootloader ]; then
 	args="$args --bootloader $BLUENET_BIN_DIR/bootloader.hex --bootloader-version 1"
 	pkg_name="bootloader${pkg_name}"
+	if [ ! $key_file ]; then
+		cs_err "You need to sign a package with bootloader."
+		exit 1
+	fi
+fi
+
+if [ $key_file ]; then
+	args="$args --key-file $key_file"
 fi
 
 cs_info "nrfutil pkg generate $args $BLUENET_BIN_DIR/${pkg_name}"
