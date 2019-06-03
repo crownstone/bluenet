@@ -42,8 +42,8 @@ upload() {
 	HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BLUENET_DIR/include/cfg/cs_Boards.h | grep -oP "\d+$")
 	if [ $? -eq 0 ] && [ -n "$HARDWARE_BOARD_INT" ]; then
 		cs_info "HARDWARE_BOARD $HARDWARE_BOARD = $HARDWARE_BOARD_INT"
-		HARDWARE_BOARD_HEX=$(printf "%x" $HARDWARE_BOARD_INT)
-		$path/_writebyte.sh $HARDWARE_BOARD_ADDRESS "0x$HARDWARE_BOARD_HEX" $serial_num
+		HARDWARE_BOARD_HEX=$(printf "%X" $HARDWARE_BOARD_INT)
+		$path/_writebyte.sh $HARDWARE_BOARD_ADDRESS "0x${HARDWARE_BOARD_HEX}" $serial_num
 		checkError "Error writing board version"
 	else
 		cs_err "Failed to extract HARDWARE_BOARD=$HARDWARE_BOARD from $BLUENET_DIR/include/cfg/cs_Boards.h"
@@ -65,7 +65,7 @@ check() {
 	verify_board_version_defined
 	read_board_version
 	HARDWARE_BOARD_INT=$(grep -oP "#define\s+$HARDWARE_BOARD\s+\d+" $BLUENET_DIR/include/cfg/cs_Boards.h | grep -oP "\d+$")
-	config_board_version=$(printf "0x%08x" $HARDWARE_BOARD_INT)
+	config_board_version=$(printf "0x%08X" $HARDWARE_BOARD_INT)
 	if [ "$hardware_board_version" == '0xFFFFFFFF' ] || [ "$hardware_board_version" == '0xffffffff' ]; then
 #		cs_log "No board version is written yet, writing the one from config."
 #		upload
