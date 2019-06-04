@@ -19,7 +19,11 @@ usage() {
 	echo "   -b, --bootloader                     add bootloader to dfu package"
 	echo "   -s, --softdevice                     add softdevice to dfu package (not working yet)"
 	echo "   -t target, --target target           specify config target"
+	echo "   -F hexfile, --fwhex hexfile          add specified file as firmware   to dfu package"
+	echo "   -B hexfile, --blhex hexfile          add specified file as bootloader to dfu package"
+	echo "   -S hexfile, --sdhex hexfile          add specified file as softdevice to dfu package"
 	echo "   -k keyfile, --key keyfile            add a keyfile to sign the dfu package"
+	echo "   -o filename, --output filename       use given filename as output file"
 }
 
 
@@ -34,8 +38,8 @@ if [[ $? -ne 4 ]]; then
 	exit $CS_ERR_GETOPT_TEST
 fi
 
-SHORT=t:k:fbs
-LONG=target:key:,firmware,bootloader,softdevice
+SHORT=t:k:F:B:S:o:fbs
+LONG=target:key:fwhex:blhex:sdhex:output:,firmware,bootloader,softdevice
 
 PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -47,17 +51,32 @@ eval set -- "$PARSED"
 
 while true; do
 	case "$1" in
-		-b|--bootloader)
-			add_bootloader=true
-			shift 1
-			;;
 		-f|--firmware)
 			add_firmware=true
+			shift 1
+			;;
+		-b|--bootloader)
+			add_bootloader=true
 			shift 1
 			;;
 		-s|--softdevice)
 			add_softdevice=true
 			shift 1
+			;;
+		-F|--fwhex)
+			add_firmware=true
+			firmware_hex="$2"
+			shift 2
+			;;
+		-B|--blhex)
+			add_bootloader=true
+			bootloader_hex="$2"
+			shift 2
+			;;
+		-S|--sdhex)
+			add_softdevice=true
+			softdevice_hex="$2"
+			shift 2
 			;;
 		-t|--target)
 			target=$2
@@ -65,6 +84,10 @@ while true; do
 			;;
 		-k|--key)
 			key_file=$2
+			shift 2
+			;;
+		-o|--output)
+			output_file="$2"
 			shift 2
 			;;
 		--)
@@ -101,31 +124,35 @@ if [ $add_firmware ]; then
 		cs_err "Can't add bootloader of softdevice in same package as firmware."
 		exit 1
 	fi
-	args="$args --application $BLUENET_BIN_DIR/crownstone.hex --application-version 1"
+	firmware_hex=${firmware_hex:-$BLUENET_BIN_DIR/crownstone.hex}
+	args="$args --application $firmware_hex --application-version 1"
 	pkg_name="firmware${pkg_name}"
 fi
 
 if [ $add_softdevice ]; then
-	args="$args --softdevice $BLUENET_BIN_DIR/softdevice_mainpart.hex"
-	pkg_name="softdevice${pkg_name}"
 	if [ ! $key_file ]; then
 		cs_err "You need to sign a package with softdevice."
 		exit 1
 	fi
+	softdevice_hex=${softdevice_hex:-$BLUENET_BIN_DIR/softdevice_mainpart.hex}
+	args="$args --softdevice $softdevice_hex"
+	pkg_name="softdevice${pkg_name}"
 fi
 
 if [ $add_bootloader ]; then
-	args="$args --bootloader $BLUENET_BIN_DIR/bootloader.hex --bootloader-version 1"
-	pkg_name="bootloader${pkg_name}"
 	if [ ! $key_file ]; then
 		cs_err "You need to sign a package with bootloader."
 		exit 1
 	fi
+	bootloader_hex=${bootloader_hex:-$BLUENET_BIN_DIR/bootloader.hex}
+	args="$args --bootloader $bootloader_hex --bootloader-version 1"
+	pkg_name="bootloader${pkg_name}"
 fi
 
 if [ $key_file ]; then
 	args="$args --key-file $key_file"
 fi
 
-cs_info "nrfutil pkg generate $args $BLUENET_BIN_DIR/${pkg_name}"
-nrfutil pkg generate $args "$BLUENET_BIN_DIR/${pkg_name}"
+output_file=${output_file:-$BLUENET_BIN_DIR/${pkg_name}}
+cs_info "nrfutil pkg generate $args $output_file"
+nrfutil pkg generate $args "$output_file"
