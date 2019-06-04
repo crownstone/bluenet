@@ -16,7 +16,7 @@
 /** size of the header used for long write
  * has to be a multiple of 4 (word alignment), even though only 6 are needed
  */
-#define DEFAULT_OFFSET 8
+#define CS_MASTER_BUFFER_DEFAULT_OFFSET 8
 
 /** MasterBuffer is a byte array with header.
  *
@@ -50,7 +50,7 @@ public:
 
 	void alloc(uint16_t size) {
 		LOGd("Allocate buffer [%d]", size);
-		_size = size + DEFAULT_OFFSET;
+		_size = size + CS_MASTER_BUFFER_DEFAULT_OFFSET;
 		_buffer = (buffer_ptr_t)calloc(_size, sizeof(uint8_t));
 		//LOGd("buffer: %p", _buffer);
 	}
@@ -84,7 +84,7 @@ public:
 
 	bool isLocked() { return _locked; }
 
-	bool getBuffer(buffer_ptr_t& buffer, uint16_t& maxLength, uint16_t offset = DEFAULT_OFFSET) {
+	bool getBuffer(buffer_ptr_t& buffer, uint16_t& maxLength, uint16_t offset = CS_MASTER_BUFFER_DEFAULT_OFFSET) {
 //		LOGd("getBuffer");
 		if (_buffer) {
 			buffer = _buffer + offset;
@@ -99,6 +99,6 @@ public:
 //		return _buffer;
 //	}
 
-	uint16_t size(uint16_t offset = DEFAULT_OFFSET) { return _size - offset; }
+	uint16_t size(uint16_t offset = CS_MASTER_BUFFER_DEFAULT_OFFSET) { return _size - offset; }
 
 };

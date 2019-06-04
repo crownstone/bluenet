@@ -62,6 +62,8 @@ Stack::Stack() :
 	_stack_state.advertising = false;
 }
 
+#define CS_STACK_LONG_WRITE_HEADER_SIZE 6
+
 Stack::~Stack() {
 	shutdown();
 }
@@ -998,10 +1000,10 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 
 		buffer_ptr_t buffer = NULL;
 		uint16_t size = 0;
-		MasterBuffer::getInstance().getBuffer(buffer, size);
+		MasterBuffer::getInstance().getBuffer(buffer, size, CS_MASTER_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
 
-		_user_mem_block.len = size+6;
-		_user_mem_block.p_mem = buffer-6;
+		_user_mem_block.len = size;
+		_user_mem_block.p_mem = buffer;
 		BLE_CALL(sd_ble_user_mem_reply, (getConnectionHandle(), &_user_mem_block));
 
 		break;
@@ -1030,9 +1032,7 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 			buffer_ptr_t buffer = NULL;
 			uint16_t size = 0;
 
-			// we want to have the actual payload word aligned, but header only needs 6 bytes,
-			// so we need to skip the first 2 bytes
-			MasterBuffer::getInstance().getBuffer(buffer, size, 2);
+			MasterBuffer::getInstance().getBuffer(buffer, size, CS_MASTER_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
 
 			uint16_t* header = (uint16_t*)buffer;
 
