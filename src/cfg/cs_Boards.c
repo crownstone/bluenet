@@ -438,7 +438,7 @@ void asACR01B10A(boards_config_t* p_config) {
 
 	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
 
-	p_config->voltageMultiplier                  = 0.253f; // for range -1800 - 1800 mV
+	p_config->voltageMultiplier                  = -0.253f; // for range -1800 - 1800 mV
 	p_config->currentMultiplier                  = 0.0071f; // for range -600 - 600 mV on pin 6
 //	p_config->voltageMultiplier                  = 0.0f;
 //	p_config->currentMultiplier                  = 0.0f;
