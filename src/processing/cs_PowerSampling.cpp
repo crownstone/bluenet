@@ -5,19 +5,20 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <drivers/cs_RTC.h>
-#include <drivers/cs_Serial.h>
-#include <events/cs_EventDispatcher.h>
+#include "processing/cs_PowerSampling.h"
+#include "common/cs_Types.h"
+#include "drivers/cs_RTC.h"
+#include "drivers/cs_Serial.h"
+#include "events/cs_EventDispatcher.h"
+#include "processing/cs_RecognizeSwitch.h"
+#include "processing/cs_Switch.h"
+#include "protocol/cs_UartMsgTypes.h"
+#include "protocol/cs_UartProtocol.h"
+#include "storage/cs_State.h"
+#include "structs/buffer/cs_InterleavedBuffer.h"
+#include "third/SortMedian.h"
+#include "third/optmed.h"
 #include <cmath>
-#include <processing/cs_PowerSampling.h>
-#include <processing/cs_RecognizeSwitch.h>
-#include <processing/cs_Switch.h>
-#include <protocol/cs_UartMsgTypes.h>
-#include <protocol/cs_UartProtocol.h>
-#include <storage/cs_State.h>
-#include <structs/buffer/cs_InterleavedBuffer.h>
-#include <third/SortMedian.h>
-#include <third/optmed.h>
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 20
@@ -164,50 +165,50 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
 
 void PowerSampling::handleEvent(event_t & event) {
 	switch(event.type) {
-		case CS_TYPE::CMD_ENABLE_LOG_POWER:
-			_logsEnabled.flags.power = *(TYPIFY(CMD_ENABLE_LOG_POWER)*)event.data;
-			break;
-		case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
-			_logsEnabled.flags.current = *(TYPIFY(CMD_ENABLE_LOG_CURRENT)*)event.data;
-			break;
-		case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
-			_logsEnabled.flags.voltage = *(TYPIFY(CMD_ENABLE_LOG_VOLTAGE)*)event.data;
-			break;
-		case CS_TYPE::CMD_ENABLE_LOG_FILTERED_CURRENT:
-			_logsEnabled.flags.filteredCurrent = *(TYPIFY(CMD_ENABLE_LOG_FILTERED_CURRENT)*)event.data;
-			break;
-		case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
-			toggleVoltageChannelInput();
-			break;
-		case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT:
-			enableDifferentialModeCurrent(*(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT)*)event.data);
-			break;
-		case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
-			enableDifferentialModeVoltage(*(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE)*)event.data);
-			break;
-		case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
-			changeRange(VOLTAGE_CHANNEL_IDX, 600);
-			break;
-		case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
-			changeRange(VOLTAGE_CHANNEL_IDX, -600);
-			break;
-		case CS_TYPE::CMD_INC_CURRENT_RANGE:
-			changeRange(CURRENT_CHANNEL_IDX, 600);
-			break;
-		case CS_TYPE::CMD_DEC_CURRENT_RANGE:
-			changeRange(CURRENT_CHANNEL_IDX, -600);
-			break;
-		case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
-			enableSwitchcraft(*(TYPIFY(EVT_SWITCHCRAFT_ENABLED)*)event.data);
-			break;
-		case CS_TYPE::EVT_ADC_RESTARTED:
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
-			RecognizeSwitch::getInstance().skip(2);
-			break;
-		case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
-			RecognizeSwitch::getInstance().configure(*(TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)*)event.data);
-			break;
-		default: {}
+	case CS_TYPE::CMD_ENABLE_LOG_POWER:
+		_logsEnabled.flags.power = *(TYPIFY(CMD_ENABLE_LOG_POWER)*)event.data;
+		break;
+	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
+		_logsEnabled.flags.current = *(TYPIFY(CMD_ENABLE_LOG_CURRENT)*)event.data;
+		break;
+	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
+		_logsEnabled.flags.voltage = *(TYPIFY(CMD_ENABLE_LOG_VOLTAGE)*)event.data;
+		break;
+	case CS_TYPE::CMD_ENABLE_LOG_FILTERED_CURRENT:
+		_logsEnabled.flags.filteredCurrent = *(TYPIFY(CMD_ENABLE_LOG_FILTERED_CURRENT)*)event.data;
+		break;
+	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
+		toggleVoltageChannelInput();
+		break;
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT:
+		enableDifferentialModeCurrent(*(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT)*)event.data);
+		break;
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
+		enableDifferentialModeVoltage(*(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE)*)event.data);
+		break;
+	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
+		changeRange(VOLTAGE_CHANNEL_IDX, 600);
+		break;
+	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
+		changeRange(VOLTAGE_CHANNEL_IDX, -600);
+		break;
+	case CS_TYPE::CMD_INC_CURRENT_RANGE:
+		changeRange(CURRENT_CHANNEL_IDX, 600);
+		break;
+	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
+		changeRange(CURRENT_CHANNEL_IDX, -600);
+		break;
+	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
+		enableSwitchcraft(*(TYPIFY(EVT_SWITCHCRAFT_ENABLED)*)event.data);
+		break;
+	case CS_TYPE::EVT_ADC_RESTARTED:
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
+		RecognizeSwitch::getInstance().skip(2);
+		break;
+	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
+		RecognizeSwitch::getInstance().configure(*(TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)*)event.data);
+		break;
+	default: {}
 	}
 }
 
@@ -291,6 +292,23 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE);
 		EventDispatcher::getInstance().dispatch(event);
 	}
+
+#if SWITCHCRAFT_DEBUG_BUFFERS==true
+	// Copy buffers to state, so that switch craft can be debugged.
+	InterleavedBuffer & ib = InterleavedBuffer::getInstance();
+	State::getInstance()._switchcraftBuf1.clear();
+	State::getInstance()._switchcraftBuf2.clear();
+	State::getInstance()._switchcraftBuf3.clear();
+	for (int i=0; i<ib.getChannelLength(); ++i) {
+		State::getInstance()._switchcraftBuf1.push(ib.getValue(prevIndex, power.voltageIndex, i));
+	}
+	for (int i=0; i<ib.getChannelLength(); ++i) {
+		State::getInstance()._switchcraftBuf2.push(ib.getValue(prevIndex, power.voltageIndex, i + ib.getChannelLength()));
+	}
+	for (int i=0; i<ib.getChannelLength(); ++i) {
+		State::getInstance()._switchcraftBuf3.push(ib.getValue(prevIndex, power.voltageIndex, i + 2 * ib.getChannelLength()));
+	}
+#endif
 
 	_adc->releaseBuffer(bufIndex);
 }
@@ -648,12 +666,12 @@ void PowerSampling::calculateEnergy() {
  */
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {
 
-	static int warning = 0;
-	if (!warning) {
-		LOGw("Disabled soft fuse for now!");
-		warning++;
-	}
-	return;
+//	static int warning = 0;
+//	if (!warning) {
+//		LOGw("Disabled soft fuse for now!");
+//		warning++;
+//	}
+//	return;
 
 	// Get the current state errors
 	TYPIFY(STATE_ERRORS) stateErrors;
