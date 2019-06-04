@@ -147,8 +147,15 @@ static void config_server_evt_cb(const config_server_evt_t * p_evt) {
 	}
 }
 
-
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
 static uint8_t start_address[3];
+#endif
+
+/**
+ * Variable to copy scanned data to, so that it doesn't get created on the stack all the time.
+ * Made static, since the callback isn't part of the class.
+ */
+static scanned_device_t _scannedDevice;
 
 static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 	switch (p_rx_data->p_metadata->source) {
@@ -169,16 +176,13 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 //			LOGd("  adv_type=%u len=%u data=", p_rx_data->adv_type, p_rx_data->length);
 //			BLEutil::printArray(p_rx_data->p_payload, p_rx_data->length);
 //		}
-
-		scanned_device_t scan;
-		memset(&scan, 0, sizeof(scan));
-		memcpy(scan.address, p_rx_data->p_metadata->params.scanner.adv_addr.addr, sizeof(scan.address)); // TODO: check addr_type and addr_id_peer
-		scan.addressType = (p_rx_data->p_metadata->params.scanner.adv_addr.addr_type & 0x7F) & ((p_rx_data->p_metadata->params.scanner.adv_addr.addr_id_peer & 0x01) << 7);
-		scan.rssi = p_rx_data->p_metadata->params.scanner.rssi;
-		scan.channel = p_rx_data->p_metadata->params.scanner.channel;
-		scan.dataSize = p_rx_data->length;
-		scan.data = (uint8_t*)(p_rx_data->p_payload);
-		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&scan, sizeof(scan));
+		memcpy(_scannedDevice.address, p_rx_data->p_metadata->params.scanner.adv_addr.addr, sizeof(_scannedDevice.address)); // TODO: check addr_type and addr_id_peer
+		_scannedDevice.addressType = (p_rx_data->p_metadata->params.scanner.adv_addr.addr_type & 0x7F) & ((p_rx_data->p_metadata->params.scanner.adv_addr.addr_id_peer & 0x01) << 7);
+		_scannedDevice.rssi = p_rx_data->p_metadata->params.scanner.rssi;
+		_scannedDevice.channel = p_rx_data->p_metadata->params.scanner.channel;
+		_scannedDevice.dataSize = p_rx_data->length;
+		_scannedDevice.data = (uint8_t*)(p_rx_data->p_payload);
+		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&_scannedDevice, sizeof(_scannedDevice));
 		EventDispatcher::getInstance().dispatch(event);
 
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
@@ -269,6 +273,8 @@ void Mesh::init() {
 
 	nrf_mesh_evt_handler_add(&cs_mesh_event_handler_struct);
 
+	// Init scanned device variable before registering the callback.
+	memset(&_scannedDevice, 0, sizeof(_scannedDevice));
 	nrf_mesh_rx_cb_set(scan_cb);
 
 	ble_gap_addr_t macAddress;
