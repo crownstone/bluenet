@@ -116,7 +116,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].pin = boardConfig.pinAinVoltage;
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].rangeMilliVolt = boardConfig.voltageRange;
 	adcConfig.channels[VOLTAGE_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrentGainMed;
+	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrentGainLow;
 	adcConfig.channels[CURRENT_CHANNEL_IDX].rangeMilliVolt = boardConfig.currentRange;
 	adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
 	adcConfig.samplingPeriodUs = CS_ADC_SAMPLE_INTERVAL_US;

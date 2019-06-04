@@ -14,7 +14,7 @@ void asACR01B1D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinCurrentGainMed               = 2;
+	p_config->pinAinCurrentGainLow               = 2;
 	p_config->pinAinVoltage                      = 1;
 //	p_config->pinAinZeroRef                      = -1; // Non existing
 	p_config->pinAinPwmTemp                      = 3;
@@ -53,7 +53,7 @@ void asACR01B1D(boards_config_t* p_config) {
 //	p_config->pinGpioPwm                         = 8;
 //	p_config->pinGpioRelayOn                     = 6;
 //	p_config->pinGpioRelayOff                    = 7;
-//	p_config->pinAinCurrentGainMed               = 2;
+//	p_config->pinAinCurrentGainLow               = 2;
 //	p_config->pinAinVoltage                      = 1;
 //	p_config->pinAinZeroRef                      = 0;
 //	p_config->pinAinPwmTemp                      = 3;
@@ -469,7 +469,7 @@ void asACR01B2C(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinCurrentGainMed               = 2;
+	p_config->pinAinCurrentGainLow               = 2;
 	p_config->pinAinVoltage                      = 1;
 //	p_config->pinAinZeroRef                      = -1; // Non existing
 	p_config->pinAinPwmTemp                      = 3;
@@ -506,7 +506,7 @@ void asACR01B2G(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinCurrentGainMed               = 2;
+	p_config->pinAinCurrentGainLow               = 2;
 	p_config->pinAinVoltage                      = 1;
 	p_config->pinAinZeroRef	                     = 0;
 	p_config->pinAinPwmTemp                      = 3;
@@ -551,7 +551,7 @@ void asPca10040(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 17;
 	p_config->pinGpioRelayOn                     = 11; // something unused
 	p_config->pinGpioRelayOff                    = 12; // something unused
-	p_config->pinAinCurrentGainMed               = 1; // gpio3
+	p_config->pinAinCurrentGainLow               = 1; // gpio3
 	p_config->pinAinVoltage                      = 2; // gpio4
 	p_config->pinAinZeroRef	                     = 4; // gpio28
 	p_config->pinAinPwmTemp                      = 0; // gpio2
