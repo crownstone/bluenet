@@ -340,7 +340,8 @@ void Crownstone::configureStack() {
 	_stack->onDisconnect([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
 		if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
-			_stack->changeToLowTxPowerMode();
+//			_stack->changeToLowTxPowerMode();
+			_stack->changeToNormalTxPowerMode();
 		}
 
 		// TODO: move this code to stack?
@@ -495,7 +496,8 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	switch(newMode) {
 		case OperationMode::OPERATION_MODE_SETUP:
 			LOGd("Configure setup mode");
-			_stack->changeToLowTxPowerMode();
+//			_stack->changeToLowTxPowerMode();
+			_stack->changeToNormalTxPowerMode();
 			break;
 		case OperationMode::OPERATION_MODE_FACTORY_RESET:
 			LOGd("Configure factory reset mode");
