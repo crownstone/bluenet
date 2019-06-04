@@ -148,6 +148,7 @@ static void config_server_evt_cb(const config_server_evt_t * p_evt) {
 }
 
 
+static uint8_t start_address[3];
 
 static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 	switch (p_rx_data->p_metadata->source) {
@@ -170,6 +171,7 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 //		}
 
 		scanned_device_t scan;
+		memset(&scan, 0, sizeof(scan));
 		memcpy(scan.address, p_rx_data->p_metadata->params.scanner.adv_addr.addr, sizeof(scan.address)); // TODO: check addr_type and addr_id_peer
 		scan.addressType = (p_rx_data->p_metadata->params.scanner.adv_addr.addr_type & 0x7F) & ((p_rx_data->p_metadata->params.scanner.adv_addr.addr_id_peer & 0x01) << 7);
 		scan.rssi = p_rx_data->p_metadata->params.scanner.rssi;
@@ -178,6 +180,25 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 		scan.data = (uint8_t*)(p_rx_data->p_payload);
 		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&scan, sizeof(scan));
 		EventDispatcher::getInstance().dispatch(event);
+
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+		const uint8_t* addr = p_rx_data->p_metadata->params.scanner.adv_addr.addr;
+		bool same_address = false;
+		if ( addr[5] == start_address[0] && addr[4] == start_address[1] && addr[3] == start_address[2] ) {
+		    same_address = true;
+		}
+		if (p_rx_data->p_metadata->params.scanner.adv_type == 0x06 || same_address)  { 
+		    __LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "  %02X:%02X:%02X:%02X:%02X:%02X type=%u chan=%u\n", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], p_rx_data->p_metadata->params.scanner.adv_type, p_rx_data->p_metadata->params.scanner.channel);
+		    __LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "[%02X,%02X,...] %02X\n", p_rx_data->p_payload[0], p_rx_data->p_payload[1], p_rx_data->length);
+		    if (!same_address) {
+			start_address[0] = addr[5];
+			start_address[1] = addr[4];
+			start_address[2] = addr[3];
+		    }
+		}
+//		BLEutil::printArray(p_rx_data->p_payload, p_rx_data->length);
+#endif
+
 		break;
 	}
 	case NRF_MESH_RX_SOURCE_GATT:
