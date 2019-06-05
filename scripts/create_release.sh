@@ -217,7 +217,7 @@ if [[ $existing == 0 ]]; then
 		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Guide\"/" $directory/CMakeBuild.config
 		sed -i "s/DEFAULT_HARDWARE_BOARD=.*/DEFAULT_HARDWARE_BOARD=GUIDESTONE/" $directory/CMakeBuild.config
 	else
-		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Crown\"/" $directory/CMakeBuild.config
+		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"CS\"/" $directory/CMakeBuild.config
 		sed -i "s/DEFAULT_HARDWARE_BOARD=.*/DEFAULT_HARDWARE_BOARD=ACR01B2C/" $directory/CMakeBuild.config
 	fi
 
@@ -229,6 +229,8 @@ if [[ $existing == 0 ]]; then
 	sed -i "s/CROWNSTONE_SERVICE=.*/CROWNSTONE_SERVICE=1/" $directory/CMakeBuild.config
 
 	sed -i "s/SERIAL_VERBOSITY=.*/SERIAL_VERBOSITY=SERIAL_BYTE_PROTOCOL_ONLY/" $directory/CMakeBuild.config
+	sed -i "s/CS_UART_BINARY_PROTOCOL_ENABLED=.*/CS_UART_BINARY_PROTOCOL_ENABLED=1/" $directory/CMakeBuild.config
+	sed -i "s/CS_SERIAL_NRF_LOG_ENABLED=.*/CS_SERIAL_NRF_LOG_ENABLED=0/" $directory/CMakeBuild.config
 
 	xdg-open $directory/CMakeBuild.config &> /dev/null
 
@@ -316,7 +318,7 @@ cs_succ "Softdevice DONE"
 ###################
 
 cs_info "Build firmware ..."
-./firmware.sh -c release
+./firmware.sh release
 checkError
 cs_succ "Build DONE"
 popd &> /dev/null
@@ -329,7 +331,7 @@ popd &> /dev/null
 pushd $BLUENET_DIR/scripts &> /dev/null
 
 cs_info "Create DFU package ..."
-./dfuGenPkg.py -a "$BLUENET_BIN_DIR/crownstone.hex" -o $model"_"$version
+./dfu_gen_pkg.sh -F "$BLUENET_BIN_DIR/crownstone.hex" -o "${model}_${version}.zip"
 checkError
 
 sha1sum "${BLUENET_BIN_DIR}/${model}_${version}.zip" | cut -f1 -d " " > "${BLUENET_BIN_DIR}/${model}_${version}.zip.sha1"
@@ -353,10 +355,10 @@ pushd $BLUENET_DIR/scripts &> /dev/null
 #checkError
 #cs_succ "Build DONE"
 
-cs_info "Copy docs to release dir ..."
-cp -r $BLUENET_DIR/docs $BLUENET_RELEASE_DIR/docs
-checkError
-cs_succ "Copy DONE"
+#cs_info "Copy docs to release dir ..."
+#cp -r $BLUENET_DIR/docs $BLUENET_RELEASE_DIR/docs
+#checkError
+#cs_succ "Copy DONE"
 
 #cs_info "Publish docs to git ..."
 #git add $BLUENET_DIR/docs
@@ -411,8 +413,8 @@ if [[ $stable == 1 ]]; then
 fi
 
 cs_log "Create tag"
-git tag -a -m "Tagging version $version" "v$version"
+git tag -a -m "Tagging version ${version} v${version}"
 
-cs_succ "DONE. Created Release "$model_$version
+cs_succ "DONE. Created Release ${model}_${version}"
 
 popd &> /dev/null
