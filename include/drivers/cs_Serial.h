@@ -102,12 +102,12 @@ typedef enum {
 #define logLN(level, fmt, ...)
 #endif
 
-#define LOGv(fmt, ...) logLN(SERIAL_VERBOSE, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__)
-#define LOGd(fmt, ...) logLN(SERIAL_DEBUG,   "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__)
-#define LOGi(fmt, ...) logLN(SERIAL_INFO,    "\033[34;1m" fmt "\033[0m", ##__VA_ARGS__)
-#define LOGw(fmt, ...) logLN(SERIAL_WARN,    "\033[33;1m" fmt "\033[0m", ##__VA_ARGS__)
-#define LOGe(fmt, ...) logLN(SERIAL_ERROR,   "\033[35;1m" fmt "\033[0m", ##__VA_ARGS__)
-#define LOGf(fmt, ...) logLN(SERIAL_FATAL,   "\033[31;1m" fmt "\033[0m", ##__VA_ARGS__)
+#define LOGv(fmt, ...) logLN(SERIAL_VERBOSE, "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__) // White
+#define LOGd(fmt, ...) logLN(SERIAL_DEBUG,   "\033[37;1m" fmt "\033[0m", ##__VA_ARGS__) // White
+#define LOGi(fmt, ...) logLN(SERIAL_INFO,    "\033[34;1m" fmt "\033[0m", ##__VA_ARGS__) // Blue
+#define LOGw(fmt, ...) logLN(SERIAL_WARN,    "\033[33;1m" fmt "\033[0m", ##__VA_ARGS__) // Yellow
+#define LOGe(fmt, ...) logLN(SERIAL_ERROR,   "\033[35;1m" fmt "\033[0m", ##__VA_ARGS__) // Purple
+#define LOGf(fmt, ...) logLN(SERIAL_FATAL,   "\033[31;1m" fmt "\033[0m", ##__VA_ARGS__) // Red
 #endif
 
 #define LOG_MEMORY \
