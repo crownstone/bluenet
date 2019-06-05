@@ -210,7 +210,7 @@ bool ScheduleList::checkAllEntries() {
 
 	// If entry is invalid: clear the entry
 	for (uint8_t i=0; i<_buffer->size; ++i) {
-		if (!ScheduleEntry::isValidEntry(&(_buffer->list[i]))) {
+		if (_buffer->list[i].nextTimestamp != 0 && !ScheduleEntry::isValidEntry(&(_buffer->list[i]))) {
 			clear(i);
 			adjusted = true;
 		}
