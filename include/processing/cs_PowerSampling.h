@@ -129,6 +129,7 @@ private:
 	uint32_t _lastSwitchOffTicks;    //! RTC ticks when the switch was last turned off.
 	bool _lastSwitchOffTicksValid;   //! Keep up whether the last switch off time is valid.
 	bool _igbtFailureDetectionStarted; //! Keep up whether the IGBT failure detection has started yet.
+	uint32_t _calibratePowerZeroCountDown = 4000 / TICK_INTERVAL_MS;
 
 	//! Store the adc config, so that the actual adc config can be changed.
 	struct __attribute__((packed)) {
@@ -177,6 +178,15 @@ private:
 	/** Calculate the average power usage
 	 */
 	void calculatePower(power_t power);
+
+	/**
+	 * Determines measured power usage with no load.
+	 *
+	 * When successful, sets the value in state.
+	 *
+	 * Careful: make sure this doesn't interfere with dimmer on failure detection.
+	 */
+	void calibratePowerZero(int32_t powerMilliWatt);
 
 	/** Calculate the energy used
 	 */

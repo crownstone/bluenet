@@ -23,18 +23,8 @@
 /**
  * The Switch class takes care of switching loads and configures also the Dimmer.
  */
-Switch::Switch():
-	_pwmPowered(false),
-	_relayPowered(false),
-	_hasRelay(false),
-	_pinRelayOn(0),
-	_pinRelayOff(0),
-	_relayHighDuration(0),
-	_delayedSwitchPending(false),
-	_delayedSwitchState(0)
-{
+Switch::Switch() {
 	LOGd(FMT_CREATE, "switch");
-
 	_switchTimerData = { {0} };
 	_switchTimerId = &_switchTimerData;
 }
@@ -108,9 +98,10 @@ void Switch::start() {
 	// This means we will assume that the pwm is already powered and just set the _pwmPowered flag.
 	// TODO: Really? Why can't we just organize this with events?
 	bool switchcraftEnabled = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
-	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0)) {
+	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0) || _hardwareBoard == ACR01B10A) {
+		LOGd("dimmer powered on start");
 		_pwmPowered = true;
-		event_t event(CS_TYPE::EVT_DIMMER_POWERED);
+		event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
@@ -147,6 +138,7 @@ void Switch::startPwm() {
 	if (_pwmPowered) {
 		return;
 	}
+	LOGd("dimmer powered");
 	_pwmPowered = true;
 
 	// Restore the pwm state.
@@ -157,7 +149,7 @@ void Switch::startPwm() {
 		_relayOff();
 		storeState(oldVal);
 	}
-	event_t event(CS_TYPE::EVT_DIMMER_POWERED);
+	event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
 	EventDispatcher::getInstance().dispatch(event);
 }
 
@@ -523,6 +515,28 @@ bool Switch::allowRelayOn() {
 	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent);
 }
 
+void Switch::checkDimmerPower() {
+	// Check if dimmer is on, but power usage is low.
+	// In that case, assume the dimmer isn't working due to a cold boot.
+	// So turn dimmer off and relay on.
+	if (_switchValue.state.dimmer == 0) {
+		return;
+	}
+	TYPIFY(STATE_POWER_USAGE) powerUsage;
+	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
+	TYPIFY(CONFIG_POWER_ZERO) powerZero;
+	State::getInstance().get(CS_TYPE::CONFIG_POWER_ZERO, &powerZero, sizeof(powerZero));
+	LOGd("powerUsage=%i powerZero=%i", powerUsage, powerZero);
+	if (powerUsage < DIMMER_BOOT_CHECK_POWER_MW ||
+			(powerUsage < DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED && powerZero == CONFIG_POWER_ZERO_INVALID)) {
+		_pwmPowered = false;
+		event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
+		EventDispatcher::getInstance().dispatch(event);
+		setSwitch(SWITCH_ON);
+		return;
+	}
+}
+
 void Switch::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::CMD_SWITCH_ON:
@@ -562,6 +576,13 @@ void Switch::handleEvent(event_t & event) {
 			}
 			break;
 		}
+		case CS_TYPE::EVT_TICK:
+			if (_dimmerCheckCountdown) {
+				if (--_dimmerCheckCountdown == 0) {
+					checkDimmerPower();
+				}
+			}
+			break;
 		default: {}
 	}
 }

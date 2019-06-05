@@ -215,6 +215,9 @@ const uint32_t PWM_PERIOD = 10000;
 #define MESH_SEND_STATE_INTERVAL_MS_VARIATION    10000 // Max amount that gets added to interval.
 
 #define PWM_BOOT_DELAY_MS                        60000 // Delay after boot until pwm can be used. Has to be smaller than overflow time of RTC.
+#define DIMMER_BOOT_CHECK_DELAY_MS               5000  // Delay after boot until power measurement is checked to see if dimmer works.
+#define DIMMER_BOOT_CHECK_POWER_MW               5000  // Threshold in milliWatt above which the dimmer is considered to be working.
+#define DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED  10000 // Threshold in milliWatt above which the dimmer is considered to be working, in case power zero is not calibrated yet.
 
 // Stack config values
 // See: https://devzone.nordicsemi.com/question/60/what-is-connection-parameters/
@@ -380,6 +383,7 @@ const uint32_t PWM_PERIOD = 10000;
 #else
 #define CONFIG_POWER_ZERO_DEFAULT 0
 #endif
+#define CONFIG_POWER_ZERO_INVALID 0x7FFFFFFF
 
 #if defined CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP_DEFAULT
 #else

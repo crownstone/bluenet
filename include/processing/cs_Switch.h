@@ -6,10 +6,11 @@
  */
 #pragma once
 
-#include <ble/cs_Nordic.h>
-#include <drivers/cs_Timer.h>
-#include <events/cs_EventListener.h>
-#include <cfg/cs_Boards.h>
+#include "ble/cs_Nordic.h"
+#include "common/cs_Types.h"
+#include "drivers/cs_Timer.h"
+#include "events/cs_EventListener.h"
+#include "cfg/cs_Boards.h"
 
 #define SWITCH_ON 100
 
@@ -201,6 +202,8 @@ private:
 	bool allowRelayOff();
 	bool allowRelayOn();
 
+	void checkDimmerPower();
+
 	switch_state_t _switchValue;
 
 	//! Timer used to set the switch state with a delay.
@@ -209,17 +212,20 @@ private:
 
 //	uint8_t _nextRelayVal;
 
-	bool _pwmPowered; //! Whether or not the pwm has enough power to be used.
-	bool _relayPowered; //! Whether or not the relay has enough power to be used.
+	//! Whether or not the pwm has enough power to be used.
+	TYPIFY(EVT_DIMMER_POWERED) _pwmPowered = false;
+	//! Whether or not the relay has enough power to be used.
+	bool _relayPowered = false;
 
-	bool _hasRelay;
-	uint8_t _pinRelayOn;
-	uint8_t _pinRelayOff;
-	TYPIFY(CONFIG_RELAY_HIGH_DURATION) _relayHighDuration;
+	bool _hasRelay = false;
+	uint8_t _pinRelayOn = 0;
+	uint8_t _pinRelayOff = 0;
+	TYPIFY(CONFIG_RELAY_HIGH_DURATION) _relayHighDuration = 0;
 
-	bool _delayedSwitchPending;
-	uint8_t _delayedSwitchState;
+	bool _delayedSwitchPending = false;
+	uint8_t _delayedSwitchState = 0;
 
-	uint32_t _hardwareBoard;
+	uint32_t _hardwareBoard = 0;
+	uint32_t _dimmerCheckCountdown = (DIMMER_BOOT_CHECK_DELAY_MS / TICK_INTERVAL_MS);
 
 };

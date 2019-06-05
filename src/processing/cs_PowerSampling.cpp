@@ -208,6 +208,11 @@ void PowerSampling::handleEvent(event_t & event) {
 	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
 		RecognizeSwitch::getInstance().configure(*(TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)*)event.data);
 		break;
+	case CS_TYPE::EVT_TICK:
+		if (_calibratePowerZeroCountDown) {
+			--_calibratePowerZeroCountDown;
+		}
+		break;
 	default: {}
 	}
 }
@@ -275,11 +280,8 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	calculateEnergy();
 
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
-		// TODO: use State.set() for this.
-		event_t event1(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
-		EventDispatcher::getInstance().dispatch(event1);
-		event_t event2(CS_TYPE::STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
-		EventDispatcher::getInstance().dispatch(event2);
+		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
+		State::getInstance().set(CS_TYPE::STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
 	}
 
 #ifdef TEST_PIN
@@ -490,7 +492,7 @@ void PowerSampling::calculatePower(power_t power) {
 		vSquareSum += (voltage * voltage) / (1000*1000);
 		pSum +=       (current * voltage) / (1000*1000);
 	}
-	int32_t powerMilliWattReal = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples - _powerZero;
+	int32_t powerMilliWattReal = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples;
 	int32_t currentRmsMA = sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
 	int32_t voltageRmsMilliVolt = sqrt((double)vSquareSum * _voltageMultiplier * _voltageMultiplier / numSamples) * 1000;
 
@@ -573,9 +575,17 @@ void PowerSampling::calculatePower(power_t power) {
 	// Calculate apparent power: current_rms * voltage_rms
 	__attribute__((unused)) uint32_t powerMilliWattApparent = (int64_t)_avgCurrentRmsMilliAmp * _avgVoltageRmsMilliVolt / 1000;
 
+	if (_powerZero == CONFIG_POWER_ZERO_INVALID) {
+		calibratePowerZero(_avgPowerMilliWatt);
+	}
+	else {
+		powerMilliWattReal -= _powerZero;
+	}
+
 	// Exponential moving average
 	int64_t avgPowerDiscount = _avgPowerDiscount;
 	_avgPowerMilliWatt = ((1000-avgPowerDiscount) * _avgPowerMilliWatt + avgPowerDiscount * powerMilliWattReal) / 1000;
+
 
 	/////////////////////////////////////////////////////////
 	// Debug prints
@@ -644,6 +654,21 @@ void PowerSampling::calculatePower(power_t power) {
 	}
 	++printPower;
 #endif
+}
+
+void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
+	TYPIFY(STATE_SWITCH_STATE) switchState;
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
+	if (_calibratePowerZeroCountDown != 0 || switchState.asInt != 0) {
+		return;
+	}
+	if (powerMilliWatt < -10000 || powerMilliWatt > 10000) {
+		// Measured power without load shouldn't be more than 10W.
+		// It might be a dimmer on failure instead.
+		return;
+	}
+	_powerZero = powerMilliWatt;
+	State::getInstance().set(CS_TYPE::CONFIG_POWER_ZERO, &_powerZero, sizeof(_powerZero));
 }
 
 /**

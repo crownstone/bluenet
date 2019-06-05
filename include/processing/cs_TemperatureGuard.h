@@ -7,9 +7,10 @@
 
 #pragma once
 
+#include <cstdint>
+#include "common/cs_Types.h"
 #include "drivers/cs_Timer.h"
 #include "drivers/cs_Temperature.h"
-#include <cstdint>
 #include "storage/cs_State.h"
 #include "events/cs_EventListener.h"
 #include "events/cs_EventDispatcher.h"

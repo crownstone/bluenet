@@ -109,8 +109,8 @@ enum class CS_TYPE: uint16_t {
 
 	STATE_RESET_COUNTER                     = State_Base,  //    128
 	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
-	STATE_ACCUMULATED_ENERGY                = 130,    //  0x82 - 130
-	STATE_POWER_USAGE                       = 131,    //  0x83 - 131
+	STATE_ACCUMULATED_ENERGY                = 130,    //  0x82 - 130   Energy used in μJ.
+	STATE_POWER_USAGE                       = 131,    //  0x83 - 131   Power usage in mW.
 //	STATE_TRACKED_DEVICES,                            //  0x84 - 132
 	STATE_SCHEDULE                          = 133,    //  0x85 - 133
 	STATE_OPERATION_MODE                    = 134,    //  0x86 - 134
@@ -195,7 +195,7 @@ enum class CS_TYPE: uint16_t {
 //	EVT_EXTERNAL_STATE_MSG_CHAN_0,     // Deprecated
 //	EVT_EXTERNAL_STATE_MSG_CHAN_1,     // Deprecated
 	EVT_TIME_SET,                                     // Sent when the time is set or changed. TODO: time as payload?
-	EVT_DIMMER_POWERED,                               // Sent when dimmer is powered, and ready to be used.
+	EVT_DIMMER_POWERED,                               // Sent when dimmer being powered is changed. -- Payload is BOOL, true when powered, and ready to be used.
 	EVT_DIMMING_ALLOWED, // TODO: Deprecate, use cfg  // Sent when allow dimming is changed. -- Payload is BOOL.
 	EVT_SWITCH_LOCKED,   // TODO: Deprecate, use cfg  // Sent when switch locked flag is set. -- Payload is BOOL.
 	EVT_STORAGE_INITIALIZED,                          // Sent when Storage is initialized, storage is only usable after this event!
@@ -515,7 +515,7 @@ typedef  internal_multi_switch_item_t TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH);
 typedef  uint32_t TYPIFY(CMD_SET_TIME);
 typedef  BOOL TYPIFY(EVT_DIMMING_ALLOWED);
 typedef  void TYPIFY(EVT_DIMMER_FORCED_OFF);
-typedef  void TYPIFY(EVT_DIMMER_POWERED);
+typedef  BOOL TYPIFY(EVT_DIMMER_POWERED);
 typedef  void TYPIFY(EVT_DIMMER_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_DIMMER_TEMP_OK);
 typedef  void TYPIFY(EVT_RELAY_FORCED_ON);
@@ -747,7 +747,7 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TIME_SET:
 		return 0;
 	case CS_TYPE::EVT_DIMMER_POWERED:
-		return 0;
+		return sizeof(TYPIFY(EVT_DIMMER_POWERED));
 	case CS_TYPE::EVT_DIMMING_ALLOWED:
 		return sizeof(TYPIFY(EVT_DIMMING_ALLOWED));
 	case CS_TYPE::EVT_SWITCH_LOCKED:
@@ -1192,7 +1192,8 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_POWER_ZERO:
 //		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = CONFIG_POWER_ZERO_DEFAULT;
-		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = boardsConfig.powerZero;
+//		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = boardsConfig.powerZero;
+		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = CONFIG_POWER_ZERO_INVALID;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_PWM_PERIOD: {
 		LOGd("Got PWM period: %u", PWM_PERIOD);

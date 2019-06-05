@@ -292,19 +292,19 @@ void ServiceData::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_DIMMER_POWERED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_DIMMING_AVAILABLE, true);
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_DIMMING_AVAILABLE, *(TYPIFY(EVT_DIMMER_POWERED)*)event.data);
 			break;
 		}
 		case CS_TYPE::EVT_DIMMING_ALLOWED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, *(bool*)event.data);
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, *(TYPIFY(EVT_DIMMING_ALLOWED)*)event.data);
 			break;
 		}
 		case CS_TYPE::EVT_SWITCH_LOCKED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, *(bool*)event.data);
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, *(TYPIFY(EVT_SWITCH_LOCKED)*)event.data);
 			break;
 		}
 		case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, *(bool*)event.data);
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, *(TYPIFY(EVT_SWITCHCRAFT_ENABLED)*)event.data);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {
