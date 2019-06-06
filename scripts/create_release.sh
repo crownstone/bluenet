@@ -461,9 +461,9 @@ fi
 
 cs_log "Create tag"
 if [ $release_bootloader == "true" ]; then
-	git tag -a -m "Tagging bootloader version ${version} bootloader-${version}"
+	git tag -a -m "Tagging bootloader version ${version}" "bootloader-${version}"
 else
-	git tag -a -m "Tagging version ${version} v${version}"
+	git tag -a -m "Tagging version ${version}" "v${version}"
 fi
 popd &> /dev/null
 cs_succ "DONE. Created Release ${model}_${version}"
