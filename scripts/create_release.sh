@@ -18,28 +18,33 @@
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 
-if [ $0 -lt 2 ]; then
-	cs_err "Usage: $1 <firmware|bootloader>"
+if [ $# -lt 1 ]; then
+	cs_err "Usage: $0 <firmware|bootloader>"
 	exit 1
 fi
 
 if [ "$1" != "firmware" ] && [ "$1" != "bootloader" ]; then
-	cs_err "Usage: $1 <firmware|bootloader>"
+	cs_err "Usage: $0 <firmware|bootloader>"
 	exit 1
 fi
 
-release_firmware=1
-release_bootloader=0
+release_firmware="true"
+release_bootloader="false"
 version_file="${BLUENET_DIR}/VERSION"
 changes_file="${BLUENET_DIR}/CHANGES"
 if [ "$1" == "bootloader" ]; then
-	release_firmware=0
-	release_bootloader=1
+	release_firmware="false"
+	release_bootloader="true"
 	version_file="${BLUENET_DIR}/bootloader/VERSION"
 	changes_file="${BLUENET_DIR}/bootloader/CHANGES"
 fi
 
-
+if [ $release_bootloader == "true" ]; then
+	cs_info "Create bootloader release"
+else
+	cs_info "Create firmware release"
+fi
+exit 0
 
 ############################
 ### Pre Script Verification
@@ -150,7 +155,7 @@ while [[ $valid == 0 ]]; do
 	fi
 
 	if [[ $version =~ ^[0-9]{1,2}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-		if [ $release_bootloader ]; then
+		if [ $release_bootloader == "true" ]; then
 			model="bootloader"
 		else
 			cs_info "Select model:"
@@ -243,7 +248,7 @@ if [[ $existing == 0 ]]; then
 	fi
 
 	sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"CS\"/" $directory/CMakeBuild.config
-	if [ $release_bootloader ]; then
+	if [ $release_bootloader == "true" ]; then
 		sed -i "s/BOOTLOADER_VERSION=\".*\"/BOOTLOADER_VERSION=\"$version\"/" $directory/CMakeBuild.config
 	else
 		sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $directory/CMakeBuild.config
@@ -335,7 +340,7 @@ checkError
 popd &> /dev/null
 cs_succ "Softdevice DONE"
 
-if [ $release_bootloader ]; then
+if [ $release_bootloader == "true" ]; then
 	cs_info "Build bootloader ..."
 	pushd $BLUENET_DIR/scripts &> /dev/null
 	./bootloader.sh release
@@ -357,7 +362,7 @@ fi
 
 cs_info "Create DFU package ..."
 pushd $BLUENET_DIR/scripts &> /dev/null
-if [ $release_bootloader ]; then
+if [ $release_bootloader == "true" ]; then
 	./dfu_gen_pkg.sh -B "$BLUENET_BIN_DIR/bootloader.hex" -o "${model}_${version}.zip"
 	checkError
 else
@@ -436,7 +441,7 @@ if [[ $stable == 1 ]]; then
 
 	cs_log "Add to git"
 	git add "$version_file" "$changes_file"
-	if [ $release_bootloader ]; then
+	if [ $release_bootloader == "true" ]; then
 		git commit -m "Bootloader version bump to $version"
 	else
 		git commit -m "Version bump to $version"
@@ -444,7 +449,7 @@ if [[ $stable == 1 ]]; then
 fi
 
 cs_log "Create tag"
-if [ $release_bootloader ]; then
+if [ $release_bootloader == "true" ]; then
 	git tag -a -m "Tagging bootloader version ${version} bootloader-${version}"
 else
 	git tag -a -m "Tagging version ${version} v${version}"
