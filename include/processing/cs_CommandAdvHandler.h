@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include "common/cs_Types.h"
 #include "events/cs_EventListener.h"
 #include "util/cs_Utils.h"
 
@@ -40,15 +41,16 @@ public:
 		static CommandAdvHandler staticInstance;
 		return staticInstance;
 	}
+	void init();
 	void handleEvent(event_t & event);
 
 
 private:
 	CommandAdvHandler();
-	uint32_t lastVerifiedEncryptedData; // Part of the encrypted data of last verified command advertisement. Used to prevent double handling of command advertisements.
-//	uint32_t lastTimestamp = 0; // Decrypted timestamp of last command
-	uint8_t timeoutCounter;
-	uint8_t timeoutAddress[BLE_GAP_ADDR_LEN];
+	uint32_t _lastVerifiedEncryptedData = 0; // Part of the encrypted data of last verified command advertisement. Used to prevent double handling of command advertisements.
+	uint8_t _timeoutCounter = 0;
+	uint8_t _timeoutAddress[BLE_GAP_ADDR_LEN];
+	TYPIFY(CONFIG_SPHERE_ID) _sphereId = 0;
 
 	void parseAdvertisement(scanned_device_t* scannedDevice);
 	// Return true when validated command payload.

@@ -567,6 +567,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			}
 #endif
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
+			_commandAdvHandler->init();
 			break;
 		case OperationMode::OPERATION_MODE_SETUP:
 			// TODO: Why this hack?

@@ -21,13 +21,12 @@
 #error "Timeout counter will overflow."
 #endif
 
-CommandAdvHandler::CommandAdvHandler():
-lastVerifiedEncryptedData(0),
-timeoutCounter(0)
-{
-	LOGd("constructor");
+CommandAdvHandler::CommandAdvHandler() {
+}
+
+void CommandAdvHandler::init() {
+	State::getInstance().get(CS_TYPE::CONFIG_SPHERE_ID, &_sphereId, sizeof(_sphereId));
 	EventDispatcher::getInstance().addListener(this);
-//	LOGd("this=%p timeoutCounter=%u %p", this, timeoutCounter, &timeoutCounter);
 }
 
 void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
@@ -123,6 +122,10 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 		}
 	}
 
+	if (header.sphereId != _sphereId) {
+		return;
+	}
+
 #ifdef COMMAND_ADV_VERBOSE
 //	uint8_t* pHeader = (uint8_t*)&header;
 //	LOGd("header pointer=%p size=%u", pHeader, sizeof(header));
@@ -159,7 +162,7 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 
 // Return true when validated command payload.
 bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedDevice, const command_adv_header_t& header, const cs_data_t& nonce, cs_data_t& encryptedPayload) {
-	if (memcmp(&lastVerifiedEncryptedData, encryptedPayload.data + 4, sizeof(lastVerifiedEncryptedData)) == 0) {
+	if (memcmp(&_lastVerifiedEncryptedData, encryptedPayload.data + 4, sizeof(_lastVerifiedEncryptedData)) == 0) {
 		// Ignore this command, as it has already been handled.
 #ifdef COMMAND_ADV_VERBOSE
 		LOGd("Ignore similar payload");
@@ -211,18 +214,18 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		return false;
 	}
 #ifdef COMMAND_ADV_VERBOSE
-	LOGd("timeoutCounter=%u time=%u validation=%u type=%u length=%u data:", timeoutCounter, timestamp, validationTimestamp, type, length);
+	LOGd("timeoutCounter=%u time=%u validation=%u type=%u length=%u data:", _timeoutCounter, timestamp, validationTimestamp, type, length);
 	BLEutil::printArray(commandData, length);
 #endif
 	// Let a phone claim the advertisement commands.
 	// Do this after validation, so that validation can still take place.
 #ifdef COMMAND_ADV_VERBOSE
-	if (timeoutCounter) {
-		LOGd("timeout: memcmp=%i address=", memcmp(timeoutAddress, scannedDevice->address, MAC_ADDRESS_LEN));
+	if (_timeoutCounter) {
+		LOGd("timeout: memcmp=%i address=", memcmp(_timeoutAddress, scannedDevice->address, MAC_ADDRESS_LEN));
 		BLEutil::printAddress(scannedDevice->address, MAC_ADDRESS_LEN);
 	}
 #endif
-	if ((timeoutCounter) && (memcmp(timeoutAddress, scannedDevice->address, MAC_ADDRESS_LEN) != 0)) {
+	if ((_timeoutCounter) && (memcmp(_timeoutAddress, scannedDevice->address, MAC_ADDRESS_LEN) != 0)) {
 		return true;
 	}
 
@@ -235,7 +238,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	// After validation, remember the last verified data.
 	// TODO: this doesn't check the whole encrypted payload, while changing the Nth byte in the decrypted payload, only changes the Nth byte in the encrypted payload.
 	// For now: check byte 4-7: the bytes that will change.
-	memcpy(&lastVerifiedEncryptedData, encryptedPayload.data + 4, sizeof(lastVerifiedEncryptedData));
+	memcpy(&_lastVerifiedEncryptedData, encryptedPayload.data + 4, sizeof(_lastVerifiedEncryptedData));
 //	lastTimestamp = validationTimestamp;
 
 	CommandHandlerTypes commandType = CTRL_CMD_UNKNOWN;
@@ -252,8 +255,8 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	// TODO: for some reason, "this" changes after the call to CommandHandler::getInstance().handleCommand(). This is why we set timeoutCounter before the command handler.
 
 //	LOGd("this=%p instance=%p timeoutCounter=%u %p", this, &(CommandAdvertisementHandler::getInstance()), timeoutCounter, &timeoutCounter);
-	timeoutCounter = CMD_ADV_CLAIM_TIME_MS / TICK_INTERVAL_MS;
-	memcpy(timeoutAddress, scannedDevice->address, MAC_ADDRESS_LEN);
+	_timeoutCounter = CMD_ADV_CLAIM_TIME_MS / TICK_INTERVAL_MS;
+	memcpy(_timeoutAddress, scannedDevice->address, MAC_ADDRESS_LEN);
 //	LOGd("this=%p instance=%p timeoutCounter=%u %p", this, &(CommandAdvertisementHandler::getInstance()), timeoutCounter, &timeoutCounter);
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
 	controlCmd.type = commandType;
@@ -306,10 +309,10 @@ void CommandAdvHandler::handleEvent(event_t & event) {
 		break;
 	}
 	case CS_TYPE::EVT_TICK: {
-		if (timeoutCounter) {
-			timeoutCounter--;
+		if (_timeoutCounter) {
+			_timeoutCounter--;
 #ifdef COMMAND_ADV_VERBOSE
-			LOGd("timeoutCounter=%u", timeoutCounter);
+			LOGd("timeoutCounter=%u", _timeoutCounter);
 #endif
 		}
 		break;
