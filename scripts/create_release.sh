@@ -430,7 +430,7 @@ fi
 
 cs_info "Add release config"
 pushd $BLUENET_DIR &> /dev/null
-git add $directory
+git add $release_config_dir
 git commit -m "Add release config for ${model}_${version}"
 
 if [[ $stable == 1 ]]; then
