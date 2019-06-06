@@ -366,7 +366,7 @@ fi
 
 # These days, the default target ends up in the dir "default".
 #mv $BLUENET_BIN_DIR/default/* "$BLUENET_BIN_DIR"
-find "$BLUENET_BIN_DIR/default" -type f -exec mv {} "$BLUENET_BIN_DIR"
+find "$BLUENET_BIN_DIR/default" -type f -exec mv {} "$BLUENET_BIN_DIR" \;
 rmdir "$$BLUENET_BIN_DIR/default"
 
 ###################
