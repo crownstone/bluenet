@@ -496,6 +496,7 @@ void State::startWritesToFlash() {
 
 void State::factoryReset(uint32_t resetCode) {
 	// TODO: don't erase reset count.
+	// TODO: erase mesh settings.
 	if (resetCode != FACTORY_RESET_CODE) {
 		LOGe("Wrong reset code!");
 		return;

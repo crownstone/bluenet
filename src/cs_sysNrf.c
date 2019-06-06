@@ -9,6 +9,7 @@
 
 #include <ble/cs_Nordic.h>
 
+//extern int main (void);
 /*
 extern unsigned const long _stext;
 extern unsigned const long _etext;
@@ -173,6 +174,7 @@ void SystemInit(void) {
 }
 #endif
 
+//#define NOT_USING_NORDIC_RESET_HANDLER
 #ifdef NOT_USING_NORDIC_RESET_HANDLER
 
 __attribute__ ((section(".startup")))

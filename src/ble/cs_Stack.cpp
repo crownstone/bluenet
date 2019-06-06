@@ -761,7 +761,8 @@ void Stack::updateAdvertisement(bool toggle) {
 	if (!checkCondition(C_ADVERTISING, true)) return;
 
 	if (isScanning()) {
-		// Skip while scanning or we will get invalid state results when stopping/starting advertisement. TODO: is that so???
+		// Skip while scanning or we will get invalid state results when stopping/starting advertisement.
+		// TODO: is that so???
 		return;
 	}
 
