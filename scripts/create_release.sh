@@ -183,7 +183,7 @@ while [[ $valid == 0 ]]; do
 			done
 			printf "$normal"
 		fi
-		directory="${BLUENET_DIR}/release/${model}_${version}"
+		release_config_dir="${BLUENET_DIR}/release/${model}_${version}"
 
 		# If release candidate, find the dir that doesn't exist yet. Keep up the RC number
 		rc_prefix="-RC"
@@ -192,8 +192,8 @@ while [[ $valid == 0 ]]; do
 		if [[ $stable == 0 ]]; then
 			while true; do
 				rc_str="${rc_prefix}${rc_count}"
-				directory="${BLUENET_DIR}/release/${model}_${version}${rc_str}"
-				if [[ ! -d $directory ]]; then
+				release_config_dir="${BLUENET_DIR}/release/${model}_${version}${rc_str}"
+				if [[ ! -d $release_config_dir ]]; then
 					break
 				fi
 				((rc_count++))
@@ -201,7 +201,7 @@ while [[ $valid == 0 ]]; do
 			version="${version}${rc_str}"
 		fi
 
-		if [ -d $directory ]; then
+		if [ -d $release_config_dir ]; then
 			cs_err "Version already exists, are you sure? [y/N]: "
 			read version_response
 			if [[ $version_response == "y" ]]; then
@@ -232,41 +232,40 @@ fi
 # create directory in bluenet with new config file. copy from default and open to edit
 
 if [[ $existing == 0 ]]; then
-	cs_log "Creating new directory: "$directory
-	mkdir $directory &> /dev/null
+	cs_log "Creating new directory: "$release_config_dir
+	mkdir $release_config_dir &> /dev/null
 
-	cp $BLUENET_DIR/conf/cmake/CMakeBuild.config.default $directory/CMakeBuild.config
+	cp $BLUENET_DIR/conf/cmake/CMakeBuild.config.default $release_config_dir/CMakeBuild.config
 
 ###############################
 ### Fill Default Config Values
 ###############################
 
 	if [[ $model == "guidestone" ]]; then
-		sed -i "s/DEFAULT_HARDWARE_BOARD=.*/DEFAULT_HARDWARE_BOARD=GUIDESTONE/" $directory/CMakeBuild.config
+		sed -i "s/DEFAULT_HARDWARE_BOARD=.*/DEFAULT_HARDWARE_BOARD=GUIDESTONE/" $release_config_dir/CMakeBuild.config
 	else
-		sed -i "s/DEFAULT_HARDWARE_BOARD=.*/DEFAULT_HARDWARE_BOARD=ACR01B2C/" $directory/CMakeBuild.config
+		sed -i "s/DEFAULT_HARDWARE_BOARD=.*/DEFAULT_HARDWARE_BOARD=ACR01B2C/" $release_config_dir/CMakeBuild.config
 	fi
 
-	sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"CS\"/" $directory/CMakeBuild.config
+	sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"CS\"/" $release_config_dir/CMakeBuild.config
 	if [ $release_bootloader == "true" ]; then
-		sed -i "s/BOOTLOADER_VERSION=\".*\"/BOOTLOADER_VERSION=\"$version\"/" $directory/CMakeBuild.config
+		sed -i "s/BOOTLOADER_VERSION=\".*\"/BOOTLOADER_VERSION=\"$version\"/" $release_config_dir/CMakeBuild.config
 	else
-		sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $directory/CMakeBuild.config
+		sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $release_config_dir/CMakeBuild.config
 	fi
 
-	sed -i "s/NRF5_DIR=/#NRF5_DIR=/" $directory/CMakeBuild.config
-	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $directory/CMakeBuild.config
+	sed -i "s/NRF5_DIR=/#NRF5_DIR=/" $release_config_dir/CMakeBuild.config
+	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $release_config_dir/CMakeBuild.config
 
-	sed -i "s/CROWNSTONE_SERVICE=.*/CROWNSTONE_SERVICE=1/" $directory/CMakeBuild.config
+	sed -i "s/CROWNSTONE_SERVICE=.*/CROWNSTONE_SERVICE=1/" $release_config_dir/CMakeBuild.config
 
-	sed -i "s/SERIAL_VERBOSITY=.*/SERIAL_VERBOSITY=SERIAL_BYTE_PROTOCOL_ONLY/" $directory/CMakeBuild.config
-	sed -i "s/CS_UART_BINARY_PROTOCOL_ENABLED=.*/CS_UART_BINARY_PROTOCOL_ENABLED=1/" $directory/CMakeBuild.config
-	sed -i "s/CS_SERIAL_NRF_LOG_ENABLED=.*/CS_SERIAL_NRF_LOG_ENABLED=0/" $directory/CMakeBuild.config
+	sed -i "s/SERIAL_VERBOSITY=.*/SERIAL_VERBOSITY=SERIAL_BYTE_PROTOCOL_ONLY/" $release_config_dir/CMakeBuild.config
+	sed -i "s/CS_UART_BINARY_PROTOCOL_ENABLED=.*/CS_UART_BINARY_PROTOCOL_ENABLED=1/" $release_config_dir/CMakeBuild.config
+	sed -i "s/CS_SERIAL_NRF_LOG_ENABLED=.*/CS_SERIAL_NRF_LOG_ENABLED=0/" $release_config_dir/CMakeBuild.config
 
-	xdg-open $directory/CMakeBuild.config &> /dev/null
-
+	xdg-open "$release_config_dir/CMakeBuild.config" &> /dev/null
 	if [[ $? != 0 ]]; then
-		cs_info "Open $directory/CMakeBuild.config in to edit the config"
+		cs_info "Open $release_config_dir/CMakeBuild.config in to edit the config"
 	fi
 
 	cs_log "After editing the config file, press [ENTER] to continue"
@@ -302,8 +301,8 @@ popd &> /dev/null
 ###  modify paths
 ############################
 
-export BLUENET_CONFIG_DIR=$directory
-export BLUENET_BUILD_DIR=$BLUENET_BUILD_DIR/$model"_"$version
+export BLUENET_CONFIG_DIR=$release_config_dir
+export BLUENET_BUILD_DIR="$BLUENET_BUILD_DIR/${model}_${version}"
 if [[ $stable == 0 ]]; then
 	# if [ -z $BLUENET_RELEASE_CANDIDATE_DIR ]; then
 	# 	cs_err "$BLUENET_RELEASE_CANDIDATE_DIR does not exist!"
@@ -311,7 +310,11 @@ if [[ $stable == 0 ]]; then
 	# fi
 	export BLUENET_RELEASE_DIR=$BLUENET_RELEASE_CANDIDATE_DIR
 fi
-export BLUENET_RELEASE_DIR=$BLUENET_RELEASE_DIR/firmwares/$model"_"$version
+if [ $release_bootloader == "true" ]; then
+	export BLUENET_RELEASE_DIR="$BLUENET_RELEASE_DIR/bootloaders/${model}_${version}"
+else
+	export BLUENET_RELEASE_DIR="$BLUENET_RELEASE_DIR/firmwares/${model}_${version}"
+fi
 export BLUENET_BIN_DIR=$BLUENET_RELEASE_DIR/bin
 
 ############################
