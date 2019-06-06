@@ -9,7 +9,7 @@ MEMORY
   /* With debug:    FLASH (rx) : ORIGIN = 0x71000, LENGTH = 0xd000 */
   /* FLASH (rx) : ORIGIN = 0x71000, LENGTH = 0xd000 */
   /* Without gc-sections: FLASH (rx) : ORIGIN = 0x68000, LENGTH = 0x10000 */
-  FLASH (rx) : ORIGIN = 0x71000, LENGTH = 0xd000
+  FLASH (rx) : ORIGIN = 0x76000, LENGTH = 0x8000
   RAM (rwx) :  ORIGIN = 0x200057b8, LENGTH = 0xa848
   mbr_params_page (r) : ORIGIN = 0x0007E000, LENGTH = 0x1000
   bootloader_settings_page (r) : ORIGIN = 0x0007F000, LENGTH = 0x1000

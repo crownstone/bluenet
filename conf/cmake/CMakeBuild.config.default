@@ -168,11 +168,11 @@ SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
 
 # Bootloader without debug:
 # We actually don't need 0x8000, but it's to reserve some space for future bootloaders.
-#BOOTLOADER_START_ADDRESS=0x00076000
-#BOOTLOADER_LENGTH=0x8000
+BOOTLOADER_START_ADDRESS=0x00076000
+BOOTLOADER_LENGTH=0x8000
 # Bootloader with debug:
-BOOTLOADER_START_ADDRESS=0x00071000
-BOOTLOADER_LENGTH=0xD000
+#BOOTLOADER_START_ADDRESS=0x00071000
+#BOOTLOADER_LENGTH=0xD000
 
 
 # Has to match values in: bootloader/secure_bootloader_gcc_nrf52.ld
