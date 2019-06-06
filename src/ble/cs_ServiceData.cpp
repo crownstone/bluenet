@@ -205,7 +205,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 			EncryptionHandler::getInstance().encrypt(
 					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
 					_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
-					GUEST, ECB_GUEST);
+					SERVICE_DATA, ECB_GUEST);
 //			EncryptionHandler::getInstance().encrypt((_serviceData.array) + 1, sizeof(service_data_t) - 1, _encryptedParams.payload,
 //			                                         sizeof(_encryptedParams.payload), GUEST, ECB_GUEST);
 		}

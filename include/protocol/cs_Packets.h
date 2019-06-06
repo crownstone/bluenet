@@ -26,8 +26,9 @@
 enum EncryptionAccessLevel {
 	ADMIN               = 0,
 	MEMBER              = 1,
-	GUEST               = 2,
+	BASIC               = 2,
 	SETUP               = 100,
+	SERVICE_DATA        = 101,
 	NOT_SET             = 201,
 	ENCRYPTION_DISABLED = 254,
 	NO_ONE              = 255

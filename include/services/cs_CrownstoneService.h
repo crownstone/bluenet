@@ -51,7 +51,7 @@ protected:
 	/** Enable the control characteristic.
  	 */
 	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, uint16_t charUuid,
-			EncryptionAccessLevel minimumAccessLevel = GUEST);
+			EncryptionAccessLevel minimumAccessLevel = BASIC);
 
 	/** Enable the set configuration characteristic.
 	 *
@@ -74,7 +74,7 @@ protected:
 	inline void addFactoryResetCharacteristic();
 
 	void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size,
-			EncryptionAccessLevel minimumAccessLevel = GUEST);
+			EncryptionAccessLevel minimumAccessLevel = BASIC);
 
 	StreamBuffer<uint8_t>* getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength);
 

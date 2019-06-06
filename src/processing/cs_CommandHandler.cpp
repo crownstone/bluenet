@@ -177,14 +177,12 @@ cs_ret_code_t CommandHandler::handleCmdNop(buffer_ptr_t buffer, const uint16_t s
 }
 
 cs_ret_code_t CommandHandler::handleCmdGotoDfu(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "goto dfu");
 	resetDelayed(GPREGRET_DFU_RESET);
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t CommandHandler::handleCmdReset(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "reset");
 	resetDelayed(GPREGRET_SOFT_RESET);
 	return ERR_SUCCESS;
@@ -207,7 +205,6 @@ cs_ret_code_t CommandHandler::handleCmdEnableMesh(buffer_ptr_t buffer, const uin
 }
 
 cs_ret_code_t CommandHandler::handleCmdEnableEncryption(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "enable encryption, tbd");
 
 	// TODO: make it only apply after reset.
@@ -228,7 +225,6 @@ cs_ret_code_t CommandHandler::handleCmdEnableEncryption(buffer_ptr_t buffer, con
 }
 
 cs_ret_code_t CommandHandler::handleCmdEnableIbeacon(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "enable ibeacon");
 
 	if (size != sizeof(enable_message_payload_t)) {
@@ -246,7 +242,6 @@ cs_ret_code_t CommandHandler::handleCmdEnableIbeacon(buffer_ptr_t buffer, const 
 }
 
 cs_ret_code_t CommandHandler::handleCmdEnableScanner(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "enable scanner");
 
 	// TODO: make it only apply after reset?
@@ -280,14 +275,12 @@ cs_ret_code_t CommandHandler::handleCmdEnableScanner(buffer_ptr_t buffer, const 
 }
 
 cs_ret_code_t CommandHandler::handleCmdRequestServiceData(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "request service data");
 
 	return ERR_NOT_IMPLEMENTED;
 }
 
 cs_ret_code_t CommandHandler::handleCmdFactoryReset(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "factory reset");
 
 	if (size != sizeof(FACTORY_RESET_CODE)) {
@@ -306,7 +299,6 @@ cs_ret_code_t CommandHandler::handleCmdFactoryReset(buffer_ptr_t buffer, const u
 }
 
 cs_ret_code_t CommandHandler::handleCmdSetTime(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "set time:");
 
 	if (size != sizeof(uint32_t)) {
@@ -322,7 +314,6 @@ cs_ret_code_t CommandHandler::handleCmdSetTime(buffer_ptr_t buffer, const uint16
 }
 
 cs_ret_code_t CommandHandler::handleCmdScheduleEntrySet(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "schedule entry");
 	if (size < sizeof(schedule_command_t)) {
 		return ERR_WRONG_PAYLOAD_LENGTH;
@@ -336,7 +327,6 @@ cs_ret_code_t CommandHandler::handleCmdScheduleEntrySet(buffer_ptr_t buffer, con
 }
 
 cs_ret_code_t CommandHandler::handleCmdScheduleEntryClear(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	if (size < 1) {
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
@@ -361,7 +351,6 @@ cs_ret_code_t CommandHandler::handleCmdSetup(buffer_ptr_t buffer, const uint16_t
 }
 
 cs_ret_code_t CommandHandler::handleCmdKeepAlive(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "keep alive");
 
 	event_t event(CS_TYPE::EVT_KEEP_ALIVE);
@@ -370,7 +359,6 @@ cs_ret_code_t CommandHandler::handleCmdKeepAlive(buffer_ptr_t buffer, const uint
 }
 
 cs_ret_code_t CommandHandler::handleCmdKeepAliveState(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "keep alive state");
 
 	if (size != sizeof(keep_alive_state_item_cmd_t)) {
@@ -384,7 +372,6 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveState(buffer_ptr_t buffer, const
 }
 
 cs_ret_code_t CommandHandler::handleCmdKeepAliveRepeatLast(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "mesh keep alive repeat");
 //#if BUILD_MESHING == 1
 	cs_mesh_msg_t meshMsg;
@@ -400,7 +387,6 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveRepeatLast(buffer_ptr_t buffer, 
 }
 
 cs_ret_code_t CommandHandler::handleCmdKeepAliveMesh(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "mesh keep alive");
 //#if BUILD_MESHING == 1
 	cs_mesh_model_msg_keep_alive_t* keepAlivePacket = (cs_mesh_model_msg_keep_alive_t*)buffer;
@@ -429,20 +415,17 @@ cs_ret_code_t CommandHandler::handleCmdKeepAliveMesh(buffer_ptr_t buffer, const 
 }
 
 cs_ret_code_t CommandHandler::handleCmdUserFeedBack(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(MEMBER, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "user feedback");
 	return ERR_NOT_IMPLEMENTED;
 }
 
 cs_ret_code_t CommandHandler::handleCmdDisconnect(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "disconnect");
 	Stack::getInstance().disconnect();
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t CommandHandler::handleCmdSetLed(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "set led");
 
 	if (_boardConfig->flags.hasLed) {
@@ -474,7 +457,6 @@ cs_ret_code_t CommandHandler::handleCmdSetLed(buffer_ptr_t buffer, const uint16_
 }
 
 cs_ret_code_t CommandHandler::handleCmdResetErrors(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(ADMIN, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "reset errors");
 	if (size != sizeof(state_errors_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
@@ -496,7 +478,6 @@ cs_ret_code_t CommandHandler::handleCmdPwm(buffer_ptr_t buffer, const uint16_t s
 		return ERR_NOT_AVAILABLE;
 	}
 
-//	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "PWM");
 
 	if (size != sizeof(switch_message_payload_t)) {
@@ -520,7 +501,6 @@ cs_ret_code_t CommandHandler::handleCmdSwitch(buffer_ptr_t buffer, const uint16_
 		return ERR_NOT_AVAILABLE;
 	}
 
-//	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "switch");
 
 	if (size != sizeof(switch_message_payload_t)) {
@@ -539,7 +519,6 @@ cs_ret_code_t CommandHandler::handleCmdRelay(buffer_ptr_t buffer, const uint16_t
 		return ERR_NOT_AVAILABLE;
 	}
 
-//	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "relay");
 
 	if (size != sizeof(switch_message_payload_t)) {
@@ -559,7 +538,6 @@ cs_ret_code_t CommandHandler::handleCmdRelay(buffer_ptr_t buffer, const uint16_t
 }
 
 cs_ret_code_t CommandHandler::handleCmdMultiSwitchLegacy(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "legacy multi switch");
 //#if BUILD_MESHING == 1
 	cs_mesh_model_msg_multi_switch_t* multiSwitchPacket = (cs_mesh_model_msg_multi_switch_t*)buffer;
@@ -604,7 +582,6 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 }
 
 cs_ret_code_t CommandHandler::handleCmdMeshCommand(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
-//	if (!EncryptionHandler::getInstance().allowAccess(GUEST, accessLevel)) return ERR_ACCESS_NOT_ALLOWED;
 	LOGi(STR_HANDLE_COMMAND, "mesh command");
 	BLEutil::printArray(buffer, size);
 //#if BUILD_MESHING == 1
@@ -777,7 +754,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	switch (type) {
 	case CTRL_CMD_INCREASE_TX:
 	case CTRL_CMD_SETUP:
-		return GUEST; // These commands are only available in setup mode.
+		return BASIC; // These commands are only available in setup mode.
 
 	case CTRL_CMD_SWITCH:
 	case CTRL_CMD_PWM:
@@ -789,7 +766,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CTRL_CMD_MULTI_SWITCH:
 	case CTRL_CMD_MULTI_SWITCH_LEGACY:
 	case CTRL_CMD_MESH_COMMAND:
-		return GUEST;
+		return BASIC;
 
 	case CTRL_CMD_SET_TIME:
 	case CTRL_CMD_KEEP_ALIVE_STATE:

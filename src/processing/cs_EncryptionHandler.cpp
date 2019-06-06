@@ -231,7 +231,7 @@ bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encrypted
 		case 1:
 			levelOfPackage = MEMBER; break;
 		case 2:
-			levelOfPackage = GUEST; break;
+			levelOfPackage = BASIC; break;
 		case 100:
 			levelOfPackage = SETUP; break;
 	}
@@ -549,8 +549,11 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 	case MEMBER:
 		keyConfigType = CS_TYPE::CONFIG_KEY_MEMBER;
 		break;
-	case GUEST:
-		keyConfigType = CS_TYPE::CONFIG_KEY_GUEST;
+	case BASIC:
+		keyConfigType = CS_TYPE::CONFIG_KEY_BASIC;
+		break;
+	case SERVICE_DATA:
+		keyConfigType = CS_TYPE::CONFIG_KEY_SERVICE_DATA;
 		break;
 	case SETUP: {
 		if (_operationMode == OperationMode::OPERATION_MODE_SETUP && _setupKeyValid) {

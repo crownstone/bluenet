@@ -358,9 +358,9 @@ void Mesh::provisionSelf(uint16_t id) {
 	LOGd("provisionSelf");
 	uint32_t retCode;
 
-	State::getInstance().get(CS_TYPE::CONFIG_KEY_ADMIN, _devkey, sizeof(_devkey));
-	State::getInstance().get(CS_TYPE::CONFIG_KEY_MEMBER, _appkey, sizeof(_appkey));
-	State::getInstance().get(CS_TYPE::CONFIG_KEY_GUEST, _netkey, sizeof(_netkey));
+	State::getInstance().get(CS_TYPE::CONFIG_MESH_DEVICE_KEY, _devkey, sizeof(_devkey));
+	State::getInstance().get(CS_TYPE::CONFIG_MESH_APP_KEY, _appkey, sizeof(_appkey));
+	State::getInstance().get(CS_TYPE::CONFIG_MESH_NET_KEY, _netkey, sizeof(_netkey));
 
 	// Used provisioner_helper.c::prov_helper_provision_self() as example.
 	// Also see mesh_stack_provisioning_data_store()

@@ -176,7 +176,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		accessLevel = MEMBER;
 		break;
 	case 2:
-		accessLevel = GUEST;
+		accessLevel = BASIC;
 		break;
 	case 4:
 		accessLevel = SETUP;
