@@ -148,9 +148,14 @@ release:
 	@cd $(BLUENET_BUILD_DIR)
 	@echo "++ Jumped to directory `pwd`"
 	cmake $(RELEASE_COMPILE_FLAGS) \
-		$(SOURCE_DIR) -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS}
+		$(SOURCE_DIR) -DBOOTLOADER=0 -DCMAKE_TOOLCHAIN_FILE=$(SOURCE_DIR)/arm.toolchain.cmake && make -j${COMPILE_WITH_J_PROCESSORS}
 	result=$$?
 	@echo "++ Result of make command (0 means success): $$result"
+	
+	@echo "++ Copy binaries to ${BLUENET_BIN_DIR}\n"
+	@mkdir -p "${BLUENET_BIN_DIR}"
+	@cp $(BLUENET_BUILD_DIR)/crownstone.hex $(BLUENET_BUILD_DIR)/crownstone.bin $(BLUENET_BUILD_DIR)/crownstone.elf "$(BLUENET_BIN_DIR)"
+	
 	$(call cross-compile-target-cleanup)
 	return $$result
 
