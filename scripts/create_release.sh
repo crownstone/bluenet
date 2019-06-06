@@ -374,19 +374,17 @@ rmdir "$$BLUENET_BIN_DIR/default"
 ###################
 
 cs_info "Create DFU package ..."
-pushd $BLUENET_DIR/scripts &> /dev/null
 if [ $release_bootloader == "true" ]; then
-	./dfu_gen_pkg.sh -B "$BLUENET_BIN_DIR/bootloader.hex" -o "${model}_${version}.zip"
+	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -B "$BLUENET_BIN_DIR/bootloader.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip"
 	checkError
 else
-	./dfu_gen_pkg.sh -F "$BLUENET_BIN_DIR/crownstone.hex" -o "${model}_${version}.zip"
+	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -F "$BLUENET_BIN_DIR/crownstone.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip"
 	checkError
 fi
 
 sha1sum "${BLUENET_BIN_DIR}/${model}_${version}.zip" | cut -f1 -d " " > "${BLUENET_BIN_DIR}/${model}_${version}.zip.sha1"
 checkError
 
-popd &> /dev/null
 cs_succ "DFU DONE"
 
 
