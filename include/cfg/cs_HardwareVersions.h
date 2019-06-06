@@ -46,13 +46,13 @@ static inline const char* get_hardware_version() {
 //	BLEutil::printArray((uint8_t*)NRF_UICR->CUSTOMER, 128);
 
 	// CROWNSTONE BUILTINS
-	if (hardwareBoard == ACR01B1A) return "10103000100";
-	if (hardwareBoard == ACR01B1B) return "10103000200";
-	if (hardwareBoard == ACR01B1C) return "10103000300";
-	if (hardwareBoard == ACR01B1D) return "10103000400";
-	if (hardwareBoard == ACR01B1E) return "10103000500";
-//	if (hardwareBoard == ACR01B6C) return "10103010500";
-//	if (hardwareBoard == ACR01B6D) return "10103010600";
+	if (hardwareBoard == ACR01B1A)  return "10103000100";
+	if (hardwareBoard == ACR01B1B)  return "10103000200";
+	if (hardwareBoard == ACR01B1C)  return "10103000300";
+	if (hardwareBoard == ACR01B1D)  return "10103000400";
+	if (hardwareBoard == ACR01B1E)  return "10103000500";
+//	if (hardwareBoard == ACR01B6C)  return "10103010500";
+//	if (hardwareBoard == ACR01B6D)  return "10103010600";
 	if (hardwareBoard == ACR01B10A) return "10103020000";
 
 	// CROWNSTONE PLUGS
