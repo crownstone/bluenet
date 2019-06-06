@@ -19,12 +19,12 @@ path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 
 if [ $0 < 2 ]; then
-	cs_error "Usage: $1 <firmware|bootloader>"
+	cs_err "Usage: $1 <firmware|bootloader>"
 	exit 1
 fi
 
 if [ "$1" != "firmware" ] && [ "$1" != "bootloader" ]; then
-	cs_error "Usage: $1 <firmware|bootloader>"
+	cs_err "Usage: $1 <firmware|bootloader>"
 	exit 1
 fi
 
