@@ -4,18 +4,42 @@
 # Create a new release
 #
 # This will:
-#  - Create a new CMakeBuild.config in $BLUENET_DIR/release/model_version/
-#  - Build firmware, DFU package and docs and copy them to $BLUENET_RELEASE_DIR/firmwares/
+#  - Create a new CMakeBuild.config in $BLUENET_DIR/release
+#  - Build firmware, DFU package and docs and copy them to $BLUENET_RELEASE_DIR
 #  - Update the index.json file in $BLUENET_RELEASE_DIR to keep
-#    track of stable, latest, and release dates (for cloud)
+#    track of stable, latest, and release dates
 #  - Create a change log file from git commits since last release
 #  - Create a git tag with the version number
 #
 #############################################################################
 
-path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-source $BLUENET_DIR/scripts/_utils.sh
+# Get the scripts path: the path where this file is located.
+path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_utils.sh
+
+if [ $0 < 2 ]; then
+	cs_error "Usage: $1 <firmware|bootloader>"
+	exit 1
+fi
+
+if [ "$1" != "firmware" ] && [ "$1" != "bootloader" ]; then
+	cs_error "Usage: $1 <firmware|bootloader>"
+	exit 1
+fi
+
+release_firmware=1
+release_bootloader=0
+version_file="${BLUENET_DIR}/VERSION"
+changes_file="${BLUENET_DIR}/CHANGES"
+if [ "$1" == "bootloader" ];
+	release_firmware=0
+	release_bootloader=1
+	version_file="${BLUENET_DIR}/bootloader/VERSION"
+	changes_file="${BLUENET_DIR}/bootloader/CHANGES"
+fi
+
+
 
 ############################
 ### Pre Script Verification
@@ -91,9 +115,6 @@ popd &> /dev/null
 ### Prepare
 ############################
 
-# check version number
-# enter version number?
-
 cs_info "Stable version? [y/N]: "
 read stable
 if [[ $stable == "y" ]]; then
@@ -106,8 +127,8 @@ valid=0
 existing=0
 
 # Get old version number
-if [ -f $BLUENET_DIR/VERSION ]; then
-	current_version_str=`cat $BLUENET_DIR/VERSION`
+if [ -f $version_file ]; then
+	current_version_str=`cat $version_file`
 	version_list=(`echo $current_version_str | tr '.' ' '`)
 	v_major=${version_list[0]}
 	v_minor=${version_list[1]}
@@ -129,31 +150,34 @@ while [[ $valid == 0 ]]; do
 	fi
 
 	if [[ $version =~ ^[0-9]{1,2}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-		cs_info "Select model:"
-		printf "$yellow"
-		options=("Crownstone" "Guidestone" "Dongle")
-		select opt in "${options[@]}"
-		do
-			case $opt in
-				"Crownstone")
-					model="crownstone"
-					# device_type="DEVICE_CROWNSTONE_PLUG"
-					break
-					;;
-				"Guidestone")
-					model="guidestone"
-					# device_type="DEVICE_GUIDESTONE"
-					break
-					;;
-				"Dongle")
-					model="dongle"
-					break
-					;;
-				*) echo invalid option;;
-			esac
-		done
-		printf "$normal"
-
+		if [ $release_bootloader ]; then
+			model="bootloader"
+		else
+			cs_info "Select model:"
+			printf "$yellow"
+			options=("Crownstone" "Guidestone" "Dongle")
+			select opt in "${options[@]}"
+			do
+				case $opt in
+					"Crownstone")
+						model="crownstone"
+						# device_type="DEVICE_CROWNSTONE_PLUG"
+						break
+						;;
+					"Guidestone")
+						model="guidestone"
+						# device_type="DEVICE_GUIDESTONE"
+						break
+						;;
+					"Dongle")
+						model="dongle"
+						break
+						;;
+					*) echo invalid option;;
+				esac
+			done
+			printf "$normal"
+		fi
 		directory="${BLUENET_DIR}/release/${model}_${version}"
 
 		# If release candidate, find the dir that doesn't exist yet. Keep up the RC number
@@ -183,7 +207,7 @@ while [[ $valid == 0 ]]; do
 			valid=1
 		fi
 	else
-		cs_err "Version does not match pattern"
+		cs_err "Version (${version}) does not match pattern"
 	fi
 done
 
@@ -212,16 +236,18 @@ if [[ $existing == 0 ]]; then
 ### Fill Default Config Values
 ###############################
 
-	# if [[ $model == "crownstone" ]]; then
 	if [[ $model == "guidestone" ]]; then
-		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"Guide\"/" $directory/CMakeBuild.config
 		sed -i "s/DEFAULT_HARDWARE_BOARD=.*/DEFAULT_HARDWARE_BOARD=GUIDESTONE/" $directory/CMakeBuild.config
 	else
-		sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"CS\"/" $directory/CMakeBuild.config
 		sed -i "s/DEFAULT_HARDWARE_BOARD=.*/DEFAULT_HARDWARE_BOARD=ACR01B2C/" $directory/CMakeBuild.config
 	fi
 
-	sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $directory/CMakeBuild.config
+	sed -i "s/BLUETOOTH_NAME=\".*\"/BLUETOOTH_NAME=\"CS\"/" $directory/CMakeBuild.config
+	if [ $release_bootloader ]; then
+		sed -i "s/BOOTLOADER_VERSION=\".*\"/BOOTLOADER_VERSION=\"$version\"/" $directory/CMakeBuild.config
+	else
+		sed -i "s/FIRMWARE_VERSION=\".*\"/FIRMWARE_VERSION=\"$version\"/" $directory/CMakeBuild.config
+	fi
 
 	sed -i "s/NRF5_DIR=/#NRF5_DIR=/" $directory/CMakeBuild.config
 	sed -i "s/COMPILER_PATH=/#COMPILER_PATH=/" $directory/CMakeBuild.config
@@ -291,57 +317,60 @@ export BLUENET_BIN_DIR=$BLUENET_RELEASE_DIR/bin
 ### Config File
 ###################
 
-#create new config directory in release directory
-mkdir -p $BLUENET_RELEASE_DIR/config
-
 cs_info "Copy configuration to release dir ..."
+mkdir -p $BLUENET_RELEASE_DIR/config
 cp $BLUENET_CONFIG_DIR/CMakeBuild.config $BLUENET_RELEASE_DIR/config
-
 checkError
 cs_succ "Copy DONE"
 
-###################
-### Softdevice
-###################
 
-# goto bluenet scripts dir
-pushd $BLUENET_DIR/scripts &> /dev/null
+###################
+### Build
+###################
 
 cs_info "Build softdevice ..."
+pushd $BLUENET_DIR/scripts &> /dev/null
 ./softdevice.sh build
-
 checkError
+popd &> /dev/null
 cs_succ "Softdevice DONE"
 
-###################
-### Firmware
-###################
+if [ $release_bootloader ]; then
+	cs_info "Build bootloader ..."
+	pushd $BLUENET_DIR/scripts &> /dev/null
+	./bootloader.sh release
+	checkError
+	popd &> /dev/null
+	cs_succ "Build DONE"
+else
+	cs_info "Build firmware ..."
+	pushd $BLUENET_DIR/scripts &> /dev/null
+	./firmware.sh release
+	checkError
+	popd &> /dev/null
+	cs_succ "Build DONE"
+fi
 
-cs_info "Build firmware ..."
-./firmware.sh release
-checkError
-cs_succ "Build DONE"
-popd &> /dev/null
-
 ###################
-### DFU
+### DFU package
 ###################
-
-# goto bluenet scripts dir
-pushd $BLUENET_DIR/scripts &> /dev/null
 
 cs_info "Create DFU package ..."
-./dfu_gen_pkg.sh -F "$BLUENET_BIN_DIR/crownstone.hex" -o "${model}_${version}.zip"
-checkError
+pushd $BLUENET_DIR/scripts &> /dev/null
+if [ $release_bootloader ]; then
+	./dfu_gen_pkg.sh -B "$BLUENET_BIN_DIR/bootloader.hex" -o "${model}_${version}.zip"
+	checkError
+else
+	./dfu_gen_pkg.sh -F "$BLUENET_BIN_DIR/crownstone.hex" -o "${model}_${version}.zip"
+	checkError
+fi
 
 sha1sum "${BLUENET_BIN_DIR}/${model}_${version}.zip" | cut -f1 -d " " > "${BLUENET_BIN_DIR}/${model}_${version}.zip.sha1"
 checkError
 
+popd &> /dev/null
 cs_succ "DFU DONE"
 
-popd &> /dev/null
-
-# build doc and copy to release directory
 
 ###################
 ### Documentation
@@ -380,17 +409,15 @@ if [[ $git_response == "n" ]]; then
 	exit 1
 fi
 
-pushd $BLUENET_DIR &> /dev/null
 
 cs_info "Add release config"
-
-# add new generated config to git
+pushd $BLUENET_DIR &> /dev/null
 git add $directory
-git commit -m "Add release config for "$model"_"$version
+git commit -m "Add release config for ${model}_${version}"
 
 if [[ $stable == 1 ]]; then
 	cs_info "Create git commit for release"
-	echo $version > VERSION
+	echo $version > "$version_file"
 
 	cs_log "Updating changes overview"
 	if [[ $current_version_str ]]; then
@@ -398,23 +425,29 @@ if [[ $stable == 1 ]]; then
 		git log --pretty=format:" - %s" "v$current_version_str"...HEAD >> tmpfile
 		echo "" >> tmpfile
 		echo "" >> tmpfile
-		cat CHANGES >> tmpfile
-		mv tmpfile CHANGES
+		cat "$changes_file" >> tmpfile
+		mv tmpfile "$changes_file"
 	else
-		echo "Version $version:" > CHANGES
-		git log --pretty=format:" - %s" >> CHANGES
-		echo "" >> CHANGES
-		echo "" >> CHANGES
+		echo "Version $version:" > "$changes_file"
+		git log --pretty=format:" - %s" >> "$changes_file"
+		echo "" >> "$changes_file"
+		echo "" >> "$changes_file"
 	fi
 
 	cs_log "Add to git"
-	git add VERSION CHANGES
-	git commit -m "Version bump to $version"
+	git add "$version_file" "$changes_file"
+	if [ $release_bootloader ]; then
+		git commit -m "Bootloader version bump to $version"
+	else
+		git commit -m "Version bump to $version"
+	fi
 fi
 
 cs_log "Create tag"
-git tag -a -m "Tagging version ${version} v${version}"
-
-cs_succ "DONE. Created Release ${model}_${version}"
-
+if [ $release_bootloader ]; then
+	git tag -a -m "Tagging bootloader version ${version} bootloader-${version}"
+else
+	git tag -a -m "Tagging version ${version} v${version}"
+fi
 popd &> /dev/null
+cs_succ "DONE. Created Release ${model}_${version}"
