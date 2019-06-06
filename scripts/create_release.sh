@@ -32,7 +32,7 @@ release_firmware=1
 release_bootloader=0
 version_file="${BLUENET_DIR}/VERSION"
 changes_file="${BLUENET_DIR}/CHANGES"
-if [ "$1" == "bootloader" ];
+if [ "$1" == "bootloader" ]; then
 	release_firmware=0
 	release_bootloader=1
 	version_file="${BLUENET_DIR}/bootloader/VERSION"
