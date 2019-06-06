@@ -359,6 +359,15 @@ else
 	cs_succ "Build DONE"
 fi
 
+
+###################
+### Move binaries
+###################
+
+# These days, the default target ends up in the dir "default".
+mv "$BLUENET_BIN_DIR/default/*" "$BLUENET_BIN_DIR"
+rmdir "$$BLUENET_BIN_DIR/default"
+
 ###################
 ### DFU package
 ###################
