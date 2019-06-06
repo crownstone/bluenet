@@ -44,7 +44,7 @@ if [ $release_bootloader == "true" ]; then
 else
 	cs_info "Create firmware release"
 fi
-exit 0
+
 
 ############################
 ### Pre Script Verification
