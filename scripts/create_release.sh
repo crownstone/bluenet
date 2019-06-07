@@ -149,7 +149,7 @@ if [ -f $version_file ]; then
 	cs_log "Current version int: $current_version_int"
 	# v_minor=$((v_minor + 1))
 	# v_patch=0
-	suggested_version_str="$v_major.$v_minor.$v_patch"
+	suggested_version="$v_major.$v_minor.$v_patch"
 else
 	cs_err "Version file (${version_file}) is missing."
 	exit 1
