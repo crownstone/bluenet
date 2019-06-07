@@ -19,10 +19,10 @@ path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 
 usage() {
-	cs_info "Usage: $0 <firmware|bootloader> <keyfile>"
+	cs_info "Usage: $0 <firmware|bootloader> [keyfile]"
 }
 
-if [ $# -lt 2 ]; then
+if [ $# -lt 1 ]; then
 	usage
 	exit 1
 fi
@@ -395,13 +395,41 @@ rmdir "$$BLUENET_BIN_DIR/default"
 ###################
 
 cs_info "Create DFU package ..."
+dfu_gen_args=""
 if [ $release_bootloader == "true" ]; then
+	dfu_gen_args='$dfu_gen_args -B "$BLUENET_BIN_DIR/bootloader.hex"'
+else
+	dfu_gen_args='$dfu_gen_args -F "$BLUENET_BIN_DIR/crownstone.hex"'
+fi
+if [ $key_file == "" ]; then
+	dfu_gen_args='$dfu_gen_args -K'
+else
+	dfu_gen_args='$dfu_gen_args -k "$key_file"'
+fi
+dfu_gen_args='$dfu_gen_args -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int'
+$BLUENET_DIR/scripts/dfu_gen_pkg.sh $dfu_gen_args
+checkError
+
+
+cs_info "Create DFU package ..."
+args=""
+if [ $release_bootloader == "true" ]; then
+	args='$args -B "$BLUENET_BIN_DIR/bootloader.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip"'
 	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -k "$key_file" -B "$BLUENET_BIN_DIR/bootloader.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int
 	checkError
 else
+	args='$args -F "$BLUENET_BIN_DIR/crownstone.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip"'
 	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -k "$key_file" -F "$BLUENET_BIN_DIR/crownstone.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int
 	checkError
 fi
+if [ $key_file == "" ]; then
+	args='$args -K'
+else
+	args='$args -k "$key_file"'
+fi
+args='$args -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int'
+$BLUENET_DIR/scripts/dfu_gen_pkg.sh $args
+checkError
 
 sha1sum "${BLUENET_BIN_DIR}/${model}_${version}.zip" | cut -f1 -d " " > "${BLUENET_BIN_DIR}/${model}_${version}.zip.sha1"
 checkError
