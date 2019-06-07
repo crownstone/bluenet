@@ -18,15 +18,21 @@
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $path/_utils.sh
 
-if [ $# -lt 1 ]; then
-	cs_err "Usage: $0 <firmware|bootloader>"
+usage() {
+	cs_info "Usage: $0 <firmware|bootloader> <keyfile>"
+}
+
+if [ $# -lt 2 ]; then
+	usage
 	exit 1
 fi
 
 if [ "$1" != "firmware" ] && [ "$1" != "bootloader" ]; then
-	cs_err "Usage: $0 <firmware|bootloader>"
+	usage
 	exit 1
 fi
+
+key_file="$2"
 
 release_firmware="true"
 release_bootloader="false"
@@ -131,22 +137,25 @@ fi
 valid=0
 existing=0
 
-# Get old version number
+# Get old version
 if [ -f $version_file ]; then
-	current_version_str=`cat $version_file`
+	current_version_str=`head -1 $version_file`
 	version_list=(`echo $current_version_str | tr '.' ' '`)
 	v_major=${version_list[0]}
 	v_minor=${version_list[1]}
 	v_patch=${version_list[2]}
+	current_version_int=`head -2 $version_file | tail -1`
 	cs_log "Current version: $current_version_str"
+	cs_log "Current version int: $current_version_int"
 	# v_minor=$((v_minor + 1))
 	# v_patch=0
-	suggested_version="$v_major.$v_minor.$v_patch"
+	suggested_version_str="$v_major.$v_minor.$v_patch"
 else
-	suggested_version="1.0.0"
+	cs_err "Version file (${version_file}) is missing."
+	exit 1
 fi
 
-# Ask for new version number
+# Ask for new version string
 while [[ $valid == 0 ]]; do
 	cs_info "Enter a version number [$suggested_version]:"
 	read -e version
@@ -216,14 +225,17 @@ while [[ $valid == 0 ]]; do
 	fi
 done
 
+new_version_int=$(($current_version_int + 1))
+
 if [[ $stable == 0 ]]; then
-	cs_info "Release candidate ${rc_count} (version ${version}), is that correct? [Y/n]"
+	cs_info "Release candidate ${rc_count} (version ${version}  int ${new_version_int}), is that correct? [Y/n]"
 	read version_response
 	if [[ $version_response == "n" ]]; then
 		cs_info "abort"
 		exit 1
 	fi
 fi
+
 
 #####################################
 ### Create Config file and directory
@@ -301,6 +313,7 @@ popd &> /dev/null
 ###  modify paths
 ############################
 
+# TODO: use <model>_<version> as target instead.
 export BLUENET_CONFIG_DIR=$release_config_dir
 export BLUENET_BUILD_DIR="$BLUENET_BUILD_DIR/${model}_${version}"
 if [[ $stable == 0 ]]; then
@@ -357,6 +370,13 @@ else
 	checkError
 	popd &> /dev/null
 	cs_succ "Build DONE"
+	
+	cs_info "Build bootloader settings ..."
+	pushd $BLUENET_DIR/scripts &> /dev/null
+	./bootloader.sh build-settings
+	checkError
+	popd &> /dev/null
+	cs_succ "Build DONE"
 fi
 
 
@@ -364,6 +384,7 @@ fi
 ### Move binaries
 ###################
 
+cs_info "Move binaries ..."
 # These days, the default target ends up in the dir "default".
 #mv $BLUENET_BIN_DIR/default/* "$BLUENET_BIN_DIR"
 find "$BLUENET_BIN_DIR/default" -type f -exec mv {} "$BLUENET_BIN_DIR" \;
@@ -375,10 +396,10 @@ rmdir "$$BLUENET_BIN_DIR/default"
 
 cs_info "Create DFU package ..."
 if [ $release_bootloader == "true" ]; then
-	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -B "$BLUENET_BIN_DIR/bootloader.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip"
+	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -k "$key_file" -B "$BLUENET_BIN_DIR/bootloader.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int
 	checkError
 else
-	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -F "$BLUENET_BIN_DIR/crownstone.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip"
+	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -k "$key_file" -F "$BLUENET_BIN_DIR/crownstone.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int -V "$version"
 	checkError
 fi
 
@@ -425,17 +446,32 @@ if [[ $git_response == "n" ]]; then
 	exit 1
 fi
 
+cs_info "Creating git commit for release"
 
 cs_info "Add release config"
 pushd $BLUENET_DIR &> /dev/null
 git add $release_config_dir
 git commit -m "Add release config for ${model}_${version}"
 
+cs_info "Update version file"
 if [[ $stable == 1 ]]; then
-	cs_info "Create git commit for release"
 	echo $version > "$version_file"
+	echo $new_version_int >> "$version_file"
+else
+	echo $current_version_str > "$version_file"
+	echo $new_version_int >> "$version_file"
+fi
 
-	cs_log "Updating changes overview"
+cs_log "Add version to git"
+git add "$version_file"
+if [ $release_bootloader == "true" ]; then
+	git commit -m "Bootloader version bump to $version  int: $new_version_int"
+else
+	git commit -m "Version bump to $version  int: $new_version_int"
+fi
+
+if [[ $stable == 1 ]]; then
+	cs_log "Update changes overview"
 	if [[ $current_version_str ]]; then
 		echo "Version $version:" > tmpfile
 		git log --pretty=format:" - %s" "v$current_version_str"...HEAD >> tmpfile
@@ -450,12 +486,12 @@ if [[ $stable == 1 ]]; then
 		echo "" >> "$changes_file"
 	fi
 
-	cs_log "Add to git"
-	git add "$version_file" "$changes_file"
+	cs_log "Add changes to git"
+	git add "$changes_file"
 	if [ $release_bootloader == "true" ]; then
-		git commit -m "Bootloader version bump to $version"
+		git commit -m "Changes for bootloader $version"
 	else
-		git commit -m "Version bump to $version"
+		git commit -m "Changes for $version"
 	fi
 fi
 
