@@ -399,7 +399,7 @@ if [ $release_bootloader == "true" ]; then
 	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -k "$key_file" -B "$BLUENET_BIN_DIR/bootloader.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int
 	checkError
 else
-	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -k "$key_file" -F "$BLUENET_BIN_DIR/crownstone.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int -V "$version"
+	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -k "$key_file" -F "$BLUENET_BIN_DIR/crownstone.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int
 	checkError
 fi
 
