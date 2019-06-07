@@ -142,11 +142,16 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 			LOGe(MSG_BUFFER_IS_LOCKED);
 			errCode = ERR_BUFFER_LOCKED;
 		}
-		// App doesn't use the error code, except for setup command.
+		// App doesn't use the error code, except for some commands.
 		// When writing multiple control commands, the return code sometimes overwrites the command.
-		// So stop writing the return code, except for the setup command.
-		if (type == CTRL_CMD_SETUP) {
+		// So only write the return code for some commands.
+		switch (type) {
+		case CTRL_CMD_SETUP:
+		case CTRL_CMD_FACTORY_RESET:
 			controlWriteErrorCode(type, errCode);
+			break;
+		default:
+			break;
 		}
 	});
 }
