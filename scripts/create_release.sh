@@ -32,7 +32,9 @@ if [ "$1" != "firmware" ] && [ "$1" != "bootloader" ]; then
 	exit 1
 fi
 
-key_file="$2"
+if [ $2 ]; then
+	key_file="$2"
+fi
 
 release_firmware="true"
 release_bootloader="false"
@@ -346,6 +348,20 @@ cs_succ "Copy DONE"
 
 
 ###################
+### Version file
+###################
+
+# Update version file before building the bootloader settings page.
+cs_info "Update version file"
+if [[ $stable == 1 ]]; then
+	echo $version > "$version_file"
+	echo $new_version_int >> "$version_file"
+else
+	echo $current_version_str > "$version_file"
+	echo $new_version_int >> "$version_file"
+fi
+
+###################
 ### Build
 ###################
 
@@ -388,7 +404,7 @@ cs_info "Move binaries ..."
 # These days, the default target ends up in the dir "default".
 #mv $BLUENET_BIN_DIR/default/* "$BLUENET_BIN_DIR"
 find "$BLUENET_BIN_DIR/default" -type f -exec mv {} "$BLUENET_BIN_DIR" \;
-rmdir "$$BLUENET_BIN_DIR/default"
+rmdir "$BLUENET_BIN_DIR/default"
 
 ###################
 ### DFU package
@@ -397,38 +413,17 @@ rmdir "$$BLUENET_BIN_DIR/default"
 cs_info "Create DFU package ..."
 dfu_gen_args=""
 if [ $release_bootloader == "true" ]; then
-	dfu_gen_args='$dfu_gen_args -B "$BLUENET_BIN_DIR/bootloader.hex"'
+	dfu_gen_args="$dfu_gen_args -B $BLUENET_BIN_DIR/bootloader.hex"
 else
-	dfu_gen_args='$dfu_gen_args -F "$BLUENET_BIN_DIR/crownstone.hex"'
+	dfu_gen_args="$dfu_gen_args -F $BLUENET_BIN_DIR/crownstone.hex"
 fi
-if [ $key_file == "" ]; then
-	dfu_gen_args='$dfu_gen_args -K'
+if [ $key_file ]; then
+	dfu_gen_args="$dfu_gen_args -k $key_file"
 else
-	dfu_gen_args='$dfu_gen_args -k "$key_file"'
+	dfu_gen_args="$dfu_gen_args -K"
 fi
-dfu_gen_args='$dfu_gen_args -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int'
+dfu_gen_args="$dfu_gen_args -o $BLUENET_BIN_DIR/${model}_${version}.zip -v $new_version_int"
 $BLUENET_DIR/scripts/dfu_gen_pkg.sh $dfu_gen_args
-checkError
-
-
-cs_info "Create DFU package ..."
-args=""
-if [ $release_bootloader == "true" ]; then
-	args='$args -B "$BLUENET_BIN_DIR/bootloader.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip"'
-	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -k "$key_file" -B "$BLUENET_BIN_DIR/bootloader.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int
-	checkError
-else
-	args='$args -F "$BLUENET_BIN_DIR/crownstone.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip"'
-	$BLUENET_DIR/scripts/dfu_gen_pkg.sh -k "$key_file" -F "$BLUENET_BIN_DIR/crownstone.hex" -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int
-	checkError
-fi
-if [ $key_file == "" ]; then
-	args='$args -K'
-else
-	args='$args -k "$key_file"'
-fi
-args='$args -o "$BLUENET_BIN_DIR/${model}_${version}.zip" -v $new_version_int'
-$BLUENET_DIR/scripts/dfu_gen_pkg.sh $args
 checkError
 
 sha1sum "${BLUENET_BIN_DIR}/${model}_${version}.zip" | cut -f1 -d " " > "${BLUENET_BIN_DIR}/${model}_${version}.zip.sha1"
@@ -480,15 +475,6 @@ cs_info "Add release config"
 pushd $BLUENET_DIR &> /dev/null
 git add $release_config_dir
 git commit -m "Add release config for ${model}_${version}"
-
-cs_info "Update version file"
-if [[ $stable == 1 ]]; then
-	echo $version > "$version_file"
-	echo $new_version_int >> "$version_file"
-else
-	echo $current_version_str > "$version_file"
-	echo $new_version_int >> "$version_file"
-fi
 
 cs_log "Add version to git"
 git add "$version_file"
