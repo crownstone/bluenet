@@ -69,8 +69,9 @@ release() {
 
 upload() {
 	${path}/_upload.sh $BLUENET_BIN_DIR/bootloader.hex $serial_num
+	checkError "Failed to upload bootloader"
 	${path}/_writebyte.sh 0x10001014 $address
-	checkError "Uploading failed"
+	checkError "Failed to write bootloader address"
 }
 
 upload-settings() {
