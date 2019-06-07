@@ -127,7 +127,7 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 #ifdef GIT_HASH
 	std::string firmware_version = STRINGIFY(GIT_HASH);
 #else
-	std::string firmware_version = STRINGIFY(FIRMWARE_VERSION);
+	std::string firmware_version = FIRMWARE_VERSION;
 #endif
 
 	_firmwareRevisionCharacteristic->setUUID(BLE_UUID_FIRMWARE_REVISION_STRING_CHAR);
