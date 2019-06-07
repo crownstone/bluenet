@@ -129,6 +129,12 @@ source $path/_config.sh
 args="--hw-version 52 --sd-req 0xB7"
 pkg_name="_dfu.zip"
 
+if [ $key_from_pass ]; then
+	key_file=$(mktemp)
+	trap "rm -f $key_file" EXIT
+	pass dfu-pkg-sign-key > $key_file
+fi
+
 if [ $add_firmware ]; then
 	if [ $add_softdevice ] || [ $add_bootloader ]; then
 		cs_err "Can't add bootloader of softdevice in same package as firmware."
