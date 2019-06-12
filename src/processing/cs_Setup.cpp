@@ -39,14 +39,6 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 		LOGw("sphereId=0");
 		return ERR_WRONG_PARAMETER;
 	}
-	if (setupData->ibeaconMajor == 0) {
-		LOGw("major=0");
-		return ERR_WRONG_PARAMETER;
-	}
-	if (setupData->ibeaconMinor == 0) {
-		LOGw("minor=0");
-		return ERR_WRONG_PARAMETER;
-	}
 
 	LOGd("Store keys, mesh address, and other config data");
 	State &state = State::getInstance();
