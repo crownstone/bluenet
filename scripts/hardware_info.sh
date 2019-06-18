@@ -172,7 +172,7 @@ temperature_slope_4=$(./readbytes.sh 10000414 4)
 format_remove_leading_f $temperature_slope_4
 echo "Temperature slope A4:\t\t $result"
 
-temperature_slope_5=$(./readbytes.sh 10000418 5)
+temperature_slope_5=$(./readbytes.sh 10000418 4)
 format_remove_leading_f $temperature_slope_5
 echo "Temperature slope A5:\t\t $result"
 
