@@ -198,16 +198,6 @@ void Crownstone::initDrivers(uint16_t step) {
 	case 1: {
 		_state->init(&_boardsConfig);
 
-	#ifdef ANNE_TEST_FACTORY_RESET
-		LOGi("Factory reset");
-		 _state->factoryReset(FACTORY_RESET_CODE);
-		TYPIFY(STATE_RESET_COUNTER) resetCounter = 6;
-		LOGi("Set reset counter to: %i", resetCounter);
-		_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
-
-		increaseResetCounter();
-	#endif
-
 		// If not done already, init UART
 		// TODO: make into a class with proper init() function
 		if (!_boardsConfig.flags.hasSerial) {
