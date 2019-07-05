@@ -17,7 +17,7 @@ STEP_X = 50
 STEP_Y = 150
 MARGIN = 12
 BOX_WIDTH = 4
-MAX_VAR_LEN = 8
+MAX_VAR_LEN = 6
 DEFAULT_VAR_LEN = 6
 
 # Define the colors we will use in RGB format
@@ -123,9 +123,11 @@ colorDict['rand'] = GREYS[4]
 colorDict['payload'] = CHARTS[2]
 colorDict['encrypted payload'] = CHARTS[2]
 colorDict['data'] = CHARTS[2]
+colorDict['data part'] = CHARTS[2]
 colorDict['list'] = CHARTS[2]
 colorDict['encrypted data'] = CHARTS[2]
-
+colorDict['service data'] = CHARTS[2]
+colorDict['command payload'] = CHARTS[2]
 
 
 def drawRect(rect, color):
