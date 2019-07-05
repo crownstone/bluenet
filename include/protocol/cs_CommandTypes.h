@@ -18,7 +18,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_KEEP_ALIVE_STATE            = 6,     //! 0x06
 	CTRL_CMD_KEEP_ALIVE                  = 7,     //! 0x07
 	CTRL_CMD_ENABLE_MESH                 = 8,     //! 0x08
-	CTRL_CMD_ENABLE_ENCRYPTION           = 9,     //! 0x09
+	CTRL_CMD_ENABLE_ENCRYPTION           = 9,     //! 0x09 // Deprecate, can be done via config
 	CTRL_CMD_ENABLE_IBEACON              = 10,    //! 0x0A
 	CTRL_CMD_ENABLE_SCANNER              = 12,    //! 0x0C
 //	CTRL_CMD_SCAN_DEVICES                = 13,    //! 0x0D // Removed

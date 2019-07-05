@@ -22,6 +22,7 @@ struct __attribute__((__packed__)) setup_data_t {
 	uint8_t        memberKey[ENCRYPTION_KEY_LENGTH];
 	uint8_t        basicKey[ENCRYPTION_KEY_LENGTH];
 	uint8_t        serviceDataKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        localizationKey[ENCRYPTION_KEY_LENGTH];
 	uint8_t        meshDeviceKey[ENCRYPTION_KEY_LENGTH];
 	uint8_t        meshAppKey[ENCRYPTION_KEY_LENGTH];
 	uint8_t        meshNetKey[ENCRYPTION_KEY_LENGTH];
@@ -38,6 +39,7 @@ enum SetupConfigBit {
 	SETUP_CONFIG_BIT_MEMBER_KEY,
 	SETUP_CONFIG_BIT_BASIC_KEY,
 	SETUP_CONFIG_BIT_SERVICE_DATA_KEY,
+	SETUP_CONFIG_BIT_LOCALIZATION_KEY,
 	SETUP_CONFIG_BIT_MESH_DEVICE_KEY,
 	SETUP_CONFIG_BIT_MESH_APP_KEY,
 	SETUP_CONFIG_BIT_MESH_NET_KEY,

@@ -83,7 +83,7 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_KEY_ADMIN                        = 35,     //  0x23
 	CONFIG_KEY_MEMBER                       = 36,     //  0x24
 	CONFIG_KEY_BASIC                        = 37,     //  0x25
-	CONFIG_DEFAULT_ON                       = 38,     //  0x26
+	CONFIG_DEFAULT_ON                       = 38,     //  0x26   // Deprecate
 	CONFIG_SCAN_INTERVAL                    = 39,     //  0x27
 	CONFIG_SCAN_WINDOW                      = 40,     //  0x28
 	CONFIG_RELAY_HIGH_DURATION              = 41,     //  0x29
@@ -110,6 +110,7 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_MESH_DEVICE_KEY                  = 62,     //  0x3E
 	CONFIG_MESH_APP_KEY                     = 63,     //  0x3F
 	CONFIG_MESH_NET_KEY                     = 64,     //  0x40
+	CONFIG_KEY_LOCALIZATION                 = 65,     //  0x41
 
 	STATE_RESET_COUNTER                     = State_Base,  //    128
 	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
@@ -247,6 +248,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 	case CS_TYPE::CONFIG_DEFAULT_ON:
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
 	case CS_TYPE::CONFIG_SCAN_WINDOW:
@@ -646,6 +648,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return ENCRYPTION_KEY_LENGTH;
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
 		return ENCRYPTION_KEY_LENGTH;
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
+		return ENCRYPTION_KEY_LENGTH;
 	case CS_TYPE::CONFIG_DEFAULT_ON:
 		return sizeof(TYPIFY(CONFIG_DEFAULT_ON));
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
@@ -868,6 +872,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY: return "CONFIG_MESH_DEVICE_KEY";
 	case CS_TYPE::CONFIG_MESH_APP_KEY: return "CONFIG_MESH_APP_KEY";
 	case CS_TYPE::CONFIG_MESH_NET_KEY: return "CONFIG_MESH_NET_KEY";
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION: return "CONFIG_KEY_LOCALIZATION";
 	case CS_TYPE::CONFIG_LOW_TX_POWER: return "CONFIG_LOW_TX_POWER";
 	case CS_TYPE::CONFIG_MAX_CHIP_TEMP: return "CONFIG_MAX_CHIP_TEMP";
 	case CS_TYPE::CONFIG_MESH_ENABLED: return "CONFIG_MESH_ENABLED";
@@ -998,6 +1003,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 	case CS_TYPE::CONFIG_DEFAULT_ON:
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
 	case CS_TYPE::CONFIG_SCAN_WINDOW:
@@ -1201,6 +1207,8 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
+		return ERR_SUCCESS;
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
 		*(TYPIFY(CONFIG_SCAN_INTERVAL)*)data.value = SCAN_INTERVAL;
@@ -1425,6 +1433,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_ERRORS:
@@ -1565,6 +1574,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::STATE_FACTORY_RESET:
 	case CS_TYPE::STATE_OPERATION_MODE:
