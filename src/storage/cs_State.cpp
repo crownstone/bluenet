@@ -180,7 +180,7 @@ cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
 	}
 	cs_state_data_t ram_data = _ram_data_register[index_in_ram];
 	LOGStateDebug("Storage write type=%u size=%u data=%p [0x%X,...]", ram_data.type, ram_data.size, ram_data.value, ram_data.value[0]);
-	cs_ret_code_t ret_code = _storage->write(FILE_CONFIGURATION, ram_data);
+	cs_ret_code_t ret_code = _storage->write(getFileId(ram_data.type), ram_data);
 	switch (ret_code) {
 	case ERR_BUSY: {
 		return ERR_BUSY;
@@ -211,7 +211,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 		case PersistenceMode::RAM:
 			return loadFromRam(data);
 		case PersistenceMode::FLASH:
-			return _storage->read(FILE_CONFIGURATION, data);
+			return _storage->read(getFileId(type), data);
 		case PersistenceMode::STRATEGY1: {
 			// First check if it's already in ram.
 			ret_code = loadFromRam(data);
@@ -231,7 +231,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 				}
 			}
 			else {
-				ret_code = _storage->read(FILE_CONFIGURATION, ram_data);
+				ret_code = _storage->read(getFileId(type), ram_data);
 				switch(ret_code) {
 					case ERR_SUCCESS: {
 						break;
@@ -288,7 +288,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			return ERR_NOT_AVAILABLE;
 			// By the time the data is written to flash, the data pointer might be invalid.
 			// There is also no guarantee that the data pointer is aligned.
-			//return _storage->write(FILE_CONFIGURATION, data);
+			//return _storage->write(getFileId(type), data);
 		}
 		case PersistenceMode::STRATEGY1: {
 			// first get if default location is RAM or FLASH
@@ -313,7 +313,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
 			ret_code = storeInFlash(index);
 			if (ret_code == ERR_BUSY) {
-				return addToQueue(CS_STATE_QUEUE_OP_WRITE, FILE_CONFIGURATION, type, STATE_RETRY_STORE_DELAY_MS);
+				return addToQueue(CS_STATE_QUEUE_OP_WRITE, getFileId(type), type, STATE_RETRY_STORE_DELAY_MS);
 			}
 			break;
 		}
@@ -340,7 +340,7 @@ cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delay) {
 		return ret_code;
 	}
 	uint32_t delayMs = 1000 * delay;
-	return addToQueue(CS_STATE_QUEUE_OP_WRITE, FILE_CONFIGURATION, data.type, delayMs);
+	return addToQueue(CS_STATE_QUEUE_OP_WRITE, getFileId(data.type), data.type, delayMs);
 }
 
 cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, cs_file_id_t fileId, const CS_TYPE & type, uint32_t delayMs) {
@@ -410,7 +410,7 @@ void State::delayedStoreTick() {
 				break;
 			}
 			case CS_STATE_QUEUE_OP_REM: {
-				ret_code = _storage->remove(FILE_CONFIGURATION, it->type);
+				ret_code = _storage->remove(it->fileId, it->type);
 				if (ret_code == ERR_BUSY) {
 					removeItem = false;
 				}
@@ -495,7 +495,6 @@ void State::startWritesToFlash() {
 }
 
 void State::factoryReset(uint32_t resetCode) {
-	// TODO: don't erase reset count.
 	// TODO: erase mesh settings.
 	if (resetCode != FACTORY_RESET_CODE) {
 		LOGe("Wrong reset code!");
@@ -517,13 +516,13 @@ void State::handleStorageError(cs_storage_operation_t operation, cs_file_id_t fi
 	switch (operation) {
 	case CS_STORAGE_OP_WRITE:
 		LOGw("error writing type=%u, retrying later", type);
-		addToQueue(CS_STATE_QUEUE_OP_WRITE, FILE_CONFIGURATION, type, STATE_RETRY_STORE_DELAY_MS);
+		addToQueue(CS_STATE_QUEUE_OP_WRITE, fileId, type, STATE_RETRY_STORE_DELAY_MS);
 		break;
 	case CS_STORAGE_OP_READ:
 		break;
 	case CS_STORAGE_OP_REMOVE:
 		LOGw("error removing error type=%u", type);
-		addToQueue(CS_STATE_QUEUE_OP_REM, FILE_CONFIGURATION, type, STATE_RETRY_STORE_DELAY_MS);
+		addToQueue(CS_STATE_QUEUE_OP_REM, fileId, type, STATE_RETRY_STORE_DELAY_MS);
 		break;
 	case CS_STORAGE_OP_REMOVE_FILE:
 		LOGw("error removing error file=%u", fileId);
@@ -548,7 +547,7 @@ void State::handleEvent(event_t & event) {
 			switch (retCode) {
 			case ERR_BUSY:
 				// Retry again later.
-				addToQueue(CS_STATE_QUEUE_OP_GC, 0, CS_TYPE::CONFIG_DO_NOT_USE, STATE_RETRY_STORE_DELAY_MS);
+				addToQueue(CS_STATE_QUEUE_OP_GC, FILE_DO_NOT_USE, CS_TYPE::CONFIG_DO_NOT_USE, STATE_RETRY_STORE_DELAY_MS);
 				break;
 			default:
 				break;
