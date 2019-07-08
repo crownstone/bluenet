@@ -15,10 +15,6 @@
 #include <vector>
 
 
-static const cs_file_id_t FILE_DO_NOT_USE     = 0x0000;
-static const cs_file_id_t FILE_KEEP_FOREVER   = 0x0001;
-static const cs_file_id_t FILE_CONFIGURATION  = 0x0003;
-
 enum cs_storage_operation_t {
 	CS_STORAGE_OP_READ,
 	CS_STORAGE_OP_WRITE,
