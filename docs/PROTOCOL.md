@@ -417,19 +417,19 @@ Type nr | Type name | Payload type | Payload Description | A | M | B | S
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Stone ID | 1 | Crownstone ID.
-uint 8 | Sphere ID | 1 | Sphere ID.
+uint 8 | Stone ID | 1 | Crownstone ID. Should be unique per sphere.
+uint 8 | Sphere ID | 1 | Short sphere ID. Should be the same for each Crownstone in the sphere.
 uint 8[] | Admin key  | 16 | 16 byte key used to encrypt/decrypt admin access functions.
 uint 8[] | Member key | 16 | 16 byte key used to encrypt/decrypt member access functions.
 uint 8[] | Basic key  | 16 | 16 byte key used to encrypt/decrypt basic access functions.
 uint 8[] | Service data key  | 16 | 16 byte key used to encrypt/decrypt service data.
 uint 8[] | Localization key  | 16 | 16 byte key used to encrypt/decrypt localization messages.
-uint 8[] | Mesh device key  | 16 | 16 byte key used to encrypt/decrypt mesh config, should be different per Crownstone.
-uint 8[] | Mesh app key  | 16 | 16 byte key used to encrypt/decrypt mesh messages.
-uint 8[] | Mesh net key  | 16 | 16 byte key used to encrypt/decrypt relays of mesh messages.
-uint 8[] | iBeacon UUID | 16 | The iBeacon UUID.
-uint 16 | iBeacon major | 2 | The iBeacon major.
-uint 16 | iBeacon minor | 2 | The iBeacon minor.
+uint 8[] | Mesh device key  | 16 | 16 byte key used to encrypt/decrypt mesh config. Should be different for each Crownstone.
+uint 8[] | Mesh app key  | 16 | 16 byte key used to encrypt/decrypt mesh messages. Should be the same for each Crownstone in the sphere.
+uint 8[] | Mesh net key  | 16 | 16 byte key used to encrypt/decrypt relays of mesh messages. Should be the same for each Crownstone in the sphere.
+uint 8[] | iBeacon UUID | 16 | The iBeacon UUID. Should be the same for each Crownstone in the sphere.
+uint 16 | iBeacon major | 2 | The iBeacon major. Together with the minor, should be unique per sphere.
+uint 16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should be unique per sphere.
 
 
 <a name="cmd_keep_alive_payload"></a>
@@ -437,9 +437,9 @@ uint 16 | iBeacon minor | 2 | The iBeacon minor.
 
 Type | Name | Description
 --- | --- | ---
-uint 8 | Action | Action, 0 = No Change, 1 = Change
-uint 8 | Switch | Switch power, 0 = OFF, 100 = FULL ON
-uint 16 | Timeout | Timeout in seconds after which the Switch should be adjusted to the Switch value
+uint 8 | Action | Action, 0 = No Change, 1 = Change.
+uint 8 | Switch | Switch power, 0 = OFF, 100 = FULL ON.
+uint 16 | Timeout | Timeout in seconds after which the Switch should be adjusted to the Switch value.
 
 
 

@@ -37,7 +37,7 @@ Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint8 | Protocol | 2 | Protocol version.
 uint8 | Sphere ID | 8 | Hash of the sphere ID, acts as filter, so that not every advertisement has to be decrypted.
-uint16 [] | Payload | 32 | Encrypted [payload](#background_adv_payload), using 32b RC5 with 128b guest key.
+uint16 [] | Payload | 32 | Encrypted [payload](#background_adv_payload), using 32b RC5 with 128b localization key.
 
 
 <a name="background_adv_payload"></a>
@@ -96,16 +96,16 @@ Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint8 | Sequence | 2 | 0: Sequence of this service UUID.
 uint8 | Protocol | 3 | Protocol version.
-uint8 | Sphere ID | 8 | Hash of the sphere ID.
+uint8 | Sphere ID | 8 | Sphere ID that must be the same as given during setup. Used to filter out broadcasts that are not meant for this Crownstone.
 uint8 | Access level | 3 | Shortened access level: 0=admin, 1=member, 2=basic, 4=setup.
 uint8 | Sequence | 2 | 1: Sequence of this service UUID.
 uint16 | Reserved | 10 | Reserved for future use.
-uint16 | Background payload | 4 | First 4 bits of first block of [encrypted background payload](#background_adv_data).
+uint16 | Background payload | 4 | First 4 bits of first block of [encrypted background payload](#background_adv_payload).
 uint8 | Sequence | 2 | 2: Sequence of this service UUID.
-uint16 | Background payload | 12 | Last 12 bits of first block of [encrypted background payload](#background_adv_data).
-uint16 | Background payload | 2 | First 2 bits of second block of [encrypted background payload](#background_adv_data).
+uint16 | Background payload | 12 | Last 12 bits of first block of [encrypted background payload](#background_adv_payload).
+uint16 | Background payload | 2 | First 2 bits of second block of [encrypted background payload](#background_adv_payload).
 uint8 | Sequence | 2 | 3: Sequence of this service UUID.
-uint16 | Background payload | 14 | Last 14 bits of second block of [encrypted background payload](#background_adv_data).
+uint16 | Background payload | 14 | Last 14 bits of second block of [encrypted background payload](#background_adv_payload).
 
 <a name="command_adv_payload"></a>
 #### Command broadcast payload
@@ -116,7 +116,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint32 | Validation | 4 | Validation in the form of a local time unix timestamp.
 uint8 | Command type | 1 | See the list of [types](#command_adv_types).
-uint8[] | Command data | 11 | Or less data, depends on command type.
+uint8[] | Command data | 11 | Depends on command type.
 
 <a name="command_adv_types"></a>
 #### Command broadcast types
@@ -133,8 +133,8 @@ Type nr | Type name | Payload type | Payload Description | A | M | B | S
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Count | 1 | Number of entries.
-[Multi switch short entry](#multi_switch_short_entry_packet) [] | List | N | A list of switch commands.
+uint 8 | Count | 1 | Number of valid entries.
+[Multi switch short entry](#multi_switch_short_entry_packet) [] | List | 10 | A list of switch commands.
 
 
 <a name="multi_switch_short_entry_packet"></a>
