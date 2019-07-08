@@ -1,13 +1,14 @@
 # Bluenet protocol v3.0.0
 -------------------------
 
-This only documents the latest service data protocol, older versions can be found in the git history.
+This only documents the latest protocol, older versions can be found in the git history.
 
 # Index
 
 - [Setup](#setup). How to setup the crownstone.
 - [Encryption](#encryption). How to encrypt and decrypt the data.
 - [Advertisements](#advertisement_data). What data is broadcasted by the crownstones.
+- [Broadcast commands](#broadcasts). Broadcast commands.
 - [Services and characteristics](#services). Which Bluetooth GATT services and characteristics the crownstones have.
 - [Data structures](#data_structs). The data structures used for the characteristics, advertisements, and mesh.
 
@@ -185,6 +186,14 @@ uint 16 | Service UUID | 2 | Service UUID: 0xC001, 0xC002, or 0xC003. The last t
 uint 8 | AD Length | 1 | Length of the next AD structure.
 uint 8 | AD Type | 1 | 0x08: shortened local name.
 char [] | Name | length-1 | The shortened name of this device.
+
+
+
+<a name="broadcasts"></a>
+# Broadcast commands
+
+Some commands can also be sent via broadcasts. This is the prefered way, as there is no need to connect to the Crownstone, which takes quite some time.
+The broadcast protocol is documented in the [broadcast protocol](BROADCAST_PROTOCOL.md) document.
 
 
 
