@@ -51,19 +51,23 @@ Opcodes for messages sent by the Crownstone.
 Type  | Packet | Description
 ----- | ------ | ----
 0     | ?      | Ack. (Not implemented yet)
-2     | [Service data](../docs/PROTOCOL.md#scan_response_servicedata_packet) | Service data of this Crownstone (before encryption).
-100   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 0).
-101   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 1).
+2     | [Service data](../docs/SERVICE_DATA.md) | Service data of this Crownstone (unencrypted).
+3     | string | As requested via control command `UART message`.
+100   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 0). **Deprecated**
+101   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 1). **Deprecated**
+102   | [Service data](../docs/SERVICE_DATA.md#service_data_encrypted) | State of other Crownstones in the mesh (unencrypted). **Not implemented yet**
+
 10000 | uint8  | Whether advertising is enabled.
 10001 | uint8  | Whether mesh is enabled.
 10002 | uint8  | Own Crownstone ID.
 10003 | MAC    | Own mac address (6 bytes).
-10100 | ?      | ADC config. (Not implemented yet)
+10100 | [ADC config](#adc_channel_config_packet) | ADC configuration.
 10200 | [Current samples](#current_samples_packet) | Raw ADC samples of the current channel.
 10201 | [Voltage samples](#voltage_samples_packet) | Raw ADC samples of the voltage channel.
 10202 | [Filtered current samples](#current_samples_packet) | Filtered ADC samples of the current channel.
 10203 | [Filtered voltage samples](#voltage_samples_packet) | Filtered ADC samples of the voltage channel.
 10204 | [Power calculations](#power_calculation_packet) | Calculated power values.
+20000 | string | Debug strings.
 
 ## Packets
 
@@ -76,7 +80,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Count | 1 | Number of channels.
 [channel_config](#adc_channel_config_packet)[] | Channels |  | List of channel configs.
-uint32 | Sampling period | 4 | Sampling period in μs, each period all channels are sampled once.
+uint32 | Sampling period | 4 | Sampling period in μs. Each period, all channels are sampled once.
 
 
 <a name="adc_channel_config_packet"></a>

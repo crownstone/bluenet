@@ -40,8 +40,9 @@ You can verify if you can decrypt the service data by checking if the validation
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Device type](#device_type) | 1 | Type of stone: plug, builtin, guidestone, etc.
-uint 8[] | Encrypted data | 16 | Encrypted data, see below.
+uint 8[] | [Encrypted data](#service_data_encrypted) | 16 | Encrypted data, see below.
 
+<a name="service_data_encrypted"></a>
 Encrypted data:
 
 ![Encrypted service data](../docs/diagrams/service-data-encrypted-2.png)

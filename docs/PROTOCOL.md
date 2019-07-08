@@ -169,10 +169,10 @@ uint 16 | Minor | 2 | Configurable number.
 int 8 | TX power | 1 | Received signal strength at 1 meter.
 
 <a name="service_data_adv_packet"></a>
-### Service data advertisement packet
+### Service data advertisement
 This packet contains the state of the Crownstone.
 
-![Scan Response packet](../docs/diagrams/advertisement-service-data-packet.png)
+![Service data advertisement](../docs/diagrams/advertisement-service-data-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
