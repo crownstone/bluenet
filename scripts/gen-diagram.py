@@ -4,10 +4,11 @@ import re
 import pygame
 from pygame.locals import *
 from random import randint
+import os
 
 DIR = "../docs/diagrams/"
 GEN_DIR = "../docs/diagrams/generated/"
-FILENAMES = ["../docs/PROTOCOL.md", "../docs/SERVICE_DATA.md", "../docs/SERVICE_DATA_DEPRECATED.md"]
+FILENAMES = ["../docs/PROTOCOL.md", "../docs/SERVICE_DATA.md", "../docs/SERVICE_DATA_DEPRECATED.md", "../docs/BROADCAST_PROTOCOL.md"]
 
 fontPath = "../docs/diagrams/fonts/LiberationSans-Regular.ttf"
 fontSizeBlocks = 24
@@ -128,7 +129,7 @@ colorDict['list'] = CHARTS[2]
 colorDict['encrypted data'] = CHARTS[2]
 colorDict['service data'] = CHARTS[2]
 colorDict['command payload'] = CHARTS[2]
-
+colorDict['command data'] = CHARTS[2]
 
 def drawRect(rect, color):
 	# Rect: left, top, width, height
@@ -430,6 +431,9 @@ def parseFile(textFilename):
 		# Draw last table
 		drawVarList(varList, filename)
 
+if not os.path.exists(GEN_DIR):
+	print "Make dir " + GEN_DIR
+	os.makedirs(GEN_DIR)
 
 pygame.init()
 screen = None
@@ -439,9 +443,9 @@ fontBlocks = pygame.font.Font(fontPath, fontSizeBlocks)
 fontBytes = pygame.font.Font(fontPath, fontSizeBytes)
 
 # Regex patterns
-patternFileNameString = "\\(" + DIR + "([^\\)]+)\\)" 
+patternFileNameString = "\\(" + DIR + "([^\\)]+)\\)"
 patternFileName = re.compile(patternFileNameString)
-patternTableHeader = re.compile("Type +\\| +Name +\\| +Length +\\| +Description")
+patternTableHeader = re.compile("Type +\\| +Name +\\| +Length (in bits)? *\\| +Description")
 patternTableRow = re.compile("[^|]\\|([^|]+)\\|([^|]+)\\|.*")
 patternLink = re.compile("\\[([^]]+)\\]\\([^\\)]+\\)")
 
