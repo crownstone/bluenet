@@ -20,7 +20,7 @@ Download Nordic's SDK and unzip:
 
 - [Nordic nRF5 SDK 15.3.0](https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/)
 
-By default, we use the Softdevices provided in the Nordic SDK. For SDK 11, this is the [Nordic S132 Softdevice 2.0](https://www.nordicsemi.com/eng/Products/S132-SoftDevice), so you don't need to download any softdevices separately. However, if you want to use a different Softdevice version, you can download it and later adapt the config to use the new softdevice.
+By default, we use the Softdevices provided in the Nordic SDK. For SDK 15, this is the [Nordic S132 Softdevice](https://www.nordicsemi.com/eng/Products/S132-SoftDevice), so you don't need to download any softdevices separately. However, if you want to use a different Softdevice version, you can download it and later adapt the config to use the new softdevice.
 
 There is a bug in Nordic's SDK code, search for files named `nrf_svc.h`.
 In those files, replace the assembly line:
