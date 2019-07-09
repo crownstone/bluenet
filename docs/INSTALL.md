@@ -64,7 +64,7 @@ Assuming you have a 64 bit system, you might have to install 32 bit packages:
     sudo apt-get update
     sudo apt-get install libstdc++6:i386 libncurses5:i386
 
-If the cross-compiler does not work, make sure you check if all its dependencies are met with `ldd arm-none-eabi-gcc`.
+If the cross-compiler does not work, make sure you check if all its dependencies are met with `ldd arm-none-eabi-gcc`. Also make sure that the correct libraries are loaded. In the config file (see below) you have to specify the directory where the cross-compiler binaries and libraries can be found. For example `/opt/compilers/gcc-arm-none-eabi-7-2018-q2-update`. Note that this is the parent directory of the `bin` and the `lib` directory.
 
 ### Misc.
 
