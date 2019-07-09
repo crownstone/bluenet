@@ -286,7 +286,7 @@ and to build, upload and debug target `crownstone-red` call:
 
 ### Different Devices
 
-To take the case of the different configurations a bit further, we can also assign the different configurations to different devices. E.g. if you are using 2 PCA10000 boards, each one has a different serial number. If you try to upload firmware to one of the devices, while having both plugged in, JLink will return with an error because it doesn't know to which device to upload the firmware. To solve this issue, follow the steps aboth to create two new configurations. (target `BLUE` and target `RED`)
+To take the case of the different configurations a bit further, we can also assign the different configurations to different devices. E.g. if you are using 2 PCA10000 boards, each one has a different serial number. If you try to upload firmware to one of the devices, while having both plugged in, JLink will return with an error because it doesn't know to which device to upload the firmware. To solve this issue, follow the steps aboth to create two new configurations. (target `crownstone-blue` and target `crownstone-red`)
 
 After completing the steps above, open the file `$BLUENET_CONFIG_DIR/_targets.sh` and between the lines
 
@@ -312,7 +312,7 @@ Note: It's also a good practice to define one of the devices as the default, whi
       serial_num=<SERIAL NUMBER DEVICE2>
       ;;
     *)
-      serial_num=<SERIAL NUMBER DEVICE2>
+      serial_num=<DEFAULT SERIAL NUMBER>
       ;;
 
 
