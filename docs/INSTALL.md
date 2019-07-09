@@ -152,11 +152,11 @@ The following variables have to be set before you can build the code:
     - external
     - SVD
 
-Last, copy any lines that you want to adjust over from the default configuration.
+Last, copy any lines that you want to adjust over from the [default configuration](https://github.com/crownstone/bluenet/blob/master/conf/cmake/CMakeBuild.config.default). 
 
 E.g.
 
-- enable meshing by setting `BUILD_MESHING=1` and `MESHING=1`
+- disable meshing by setting `BUILD_MESHING=0` and `MESHING=0`
 - enable device scanner by setting `INTERVAL_SCANNER_ENABLED=1`
 - enable the power service by setting `POWER_SERVICE=1`
 - set serial verbosity to debug by setting `SERIAL_VERBOSITY=SERIAL_DEBUG`
