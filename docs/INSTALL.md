@@ -359,3 +359,17 @@ If all goes well, you should see text appearing whenever the crownstone is reboo
 The verbosity of the debug ouptut can be set in the CMakeBuild.conifg through the variable `SERIAL_VERBOSITY`. Highest level is `DEBUG`, lowest level is `FATAL`. If you want to disable logging totally, set verbosity to `NONE`.
 
 For verbosity level `DEBUG`, you can add even more verbosity per class files by enabling the flags in `/include/cfg/cs_Debug.h`.
+
+## Troubleshooting
+
+Suppose, there's the following error in the build process:
+
+    arm-none-eabi-g++: error trying to exec 'cc1plus': execvp: No such file or directory
+    CMakeFiles/crownstone.dir/build.make:144: recipe for target 'CMakeFiles/crownstone.dir/src/ble/cs_ServiceData.cpp.obj' failed
+    make[3]: *** [CMakeFiles/crownstone.dir/src/ble/cs_ServiceData.cpp.obj] Error 1
+
+This very likely means that although the cross-compiler itself has been found, the shared libraries are not. Make sure that the configuration file, say `$BLUENET_CONFIG_DIR/default/CMakeBuild.config`, contains the right `COMPILER_PATH`, for example:
+
+    COMPILER_PATH=/opt/compilers/gcc-arm-none-eabi-7-2018-q2-update
+    
+Both the directories `bin` and `lib` should be present in this directory. Check with `ldd` if the right `.so` files are linked.
