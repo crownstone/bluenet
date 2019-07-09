@@ -14,8 +14,6 @@ To compile and run the bluenet firmware, the following prerequisites are needed:
 
 ### Nordic SDK
 
-IMPORTANT NOTE: THIS VERSION OF BLUENET IS ONLY COMPATIBLE WITH THE NEWER CHIP NRF52. USE THE OLDER BRANCH SDK_8 FOR THE NRF51 CHIPS!
-
 Download Nordic's SDK and unzip:
 
 - [Nordic nRF5 SDK 15.3.0](https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/)
