@@ -2,7 +2,7 @@
 
 This is a step-by-step instruction to install the bluenet build system. If you prefer a simple install script, you can use the `install.sh` script provided in the [crownstone-sdk](https://github.com/crownstone/crownstone-sdk#bluenet_lib_configs) repository.
 
-The installation has been tested on Ubuntu 14.04 and assumes you use the J-Link Lite CortexM-9 programmer.
+The installation has been tested on Ubuntu 14.04 (should work on newer ones as well) and assumes you use the J-Link Lite CortexM-9 programmer.
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ IMPORTANT NOTE: THIS VERSION OF BLUENET IS ONLY COMPATIBLE WITH THE NEWER CHIP N
 
 Download Nordic's SDK and unzip:
 
-- [Nordic nRF5 SDK 11](https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v11.x.x/)
+- [Nordic nRF5 SDK 15.3.0](https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/)
 
 By default, we use the Softdevices provided in the Nordic SDK. For SDK 11, this is the [Nordic S132 Softdevice 2.0](https://www.nordicsemi.com/eng/Products/S132-SoftDevice), so you don't need to download any softdevices separately. However, if you want to use a different Softdevice version, you can download it and later adapt the config to use the new softdevice.
 
