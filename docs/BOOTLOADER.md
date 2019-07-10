@@ -14,25 +14,25 @@ The code for the bootloader is already there if you have downloaded the Nordic S
 
 To flash the bootloader to the device, use instructions from the [INSTALL](https://github.com/crownstone/bluenet/blob/master/docs/INSTALL.md) document.
 
-  ./bluenet.sh -buB -t default
+    ./bluenet.sh -buB -t default
   
 Note. If you set general breakpoints like `b main`, note that `gdb` will set the breakpoint both in the main of the bootloader and that of the firmware. 
 
-  ./bluenet.sh -dB -t default
+    ./bluenet.sh -dB -t default
 
 It has no way to distinghuish them. If you debug the firmware, `gdb` will start at the application address and breakpoints in the bootloader are skipped.
 
-  ./bluenet.sh -dF -t default
+    ./bluenet.sh -dF -t default
 
 ### Start address and bootloader size
 
-The start address and size of the bootloader are defined in the linker script (`secure_bootloader_gcc_nrf52.ld` based on SDK_15_3/examples/dfu/secure_bootloader/pca10040_ble/armgcc/secure_bootloader_gcc_nrf52.ld).
+The start address and size of the bootloader are defined in the linker script `secure_bootloader_gcc_nrf52.ld`. It is based on the script with the same name in `examples/dfu/secure_bootloader/pca10040_ble/armgcc`).
+
 ```
 FLASH (rx) : ORIGIN = 0x78000, LENGTH = 0x6000
 ```
 
-When the device boots, it will look at MBR_BOOTLOADER_ADDR or UICR.BOOTLOADERADDR (UICR.NRFFW[1], or 0x10001014) for the start address of the bootloader.
-The size of the bootloader is fixed for the lifetime of the device. This is because the location (MBR_BOOTLOADER_ADDR) that stores the start address of the bootloader is not (safely) updateable.
+When the device boots, it will look at `MBR_BOOTLOADER_ADDR` or `UICR.BOOTLOADERADDR` (`UICR.NRFFW[1]`, or `0x10001014`) for the start address of the bootloader. The size of the bootloader is fixed for the lifetime of the device. This is because the location (`MBR_BOOTLOADER_ADDR`) that stores the start address of the bootloader is not (safely) updateable.
 
 ### Challenge
 
