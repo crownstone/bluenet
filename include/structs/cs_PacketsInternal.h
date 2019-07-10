@@ -66,22 +66,7 @@ inline bool cs_multi_switch_item_is_valid(internal_multi_switch_item_t* item, si
 }
 
 
-enum KeepAliveActionTypes {
-	NO_CHANGE = 0,
-	CHANGE    = 1
-};
 
-/**
- * A single keep alive command.
- * action: see KeepAliveActionTypes.
- * switchCmd: 0 = off, 100 = fully on.
- * timeout: delay in seconds.
- */
-struct __attribute__((__packed__)) keep_alive_state_item_cmd_t {
-	uint8_t action;
-	uint8_t switchCmd;
-	uint16_t timeout;
-};
 
 /**
  * A single keep alive packet, with target id.

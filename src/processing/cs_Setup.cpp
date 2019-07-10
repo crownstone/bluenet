@@ -48,6 +48,7 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	state.set(CS_TYPE::CONFIG_KEY_MEMBER,       &(setupData->memberKey), sizeof(setupData->memberKey));
 	state.set(CS_TYPE::CONFIG_KEY_BASIC,        &(setupData->basicKey), sizeof(setupData->basicKey));
 	state.set(CS_TYPE::CONFIG_KEY_SERVICE_DATA, &(setupData->serviceDataKey), sizeof(setupData->serviceDataKey));
+	state.set(CS_TYPE::CONFIG_KEY_LOCALIZATION, &(setupData->localizationKey), sizeof(setupData->localizationKey));
 	state.set(CS_TYPE::CONFIG_MESH_DEVICE_KEY,  &(setupData->meshDeviceKey), sizeof(setupData->meshDeviceKey));
 	state.set(CS_TYPE::CONFIG_MESH_APP_KEY,     &(setupData->meshAppKey), sizeof(setupData->meshAppKey));
 	state.set(CS_TYPE::CONFIG_MESH_NET_KEY,     &(setupData->meshNetKey), sizeof(setupData->meshNetKey));
@@ -115,6 +116,9 @@ void Setup::onStorageDone(const CS_TYPE& type) {
 		break;
 	case CS_TYPE::CONFIG_KEY_SERVICE_DATA:
 		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SERVICE_DATA_KEY);
+		break;
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
+		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_LOCALIZATION_KEY);
 		break;
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
 		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_MESH_DEVICE_KEY);

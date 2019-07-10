@@ -1,4 +1,4 @@
-# Bluenet service data v2.1.0
+# Bluenet service data v3.0.0
 -----------------------------
 
 The service data contains the state of the Crownstone.
@@ -32,16 +32,17 @@ Type | Packet
 
 <a name="servicedata_device_type"></a>
 # Device type and encrypted service data
-This packet contains the device type and the state info. If encryption is enabled, the data is encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the guest key.
-You receive a MAC address on Android and an UUID on iOS for each advertisement packet. This allows you to get the Crownstone ID associated with the packet and you verify the decryption by checking the expected Crownstone ID against the one in the packet.
+This packet contains the device type and the state info. If encryption is enabled, the data is encrypted using [AES 128 ECB](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29) using the service data key.
+You can verify if you can decrypt the service data by checking if the validation is the correct value, and if the Crownstone ID remains the same after decryption (while the encrypted service data changes).
 
 ![Device type and encrypted service data](../docs/diagrams/service-data-device-type-and-encrypted.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Device type](#device_type) | 1 | Type of stone: plug, builtin, guidestone, etc.
-uint 8[] | Encrypted data | 16 | Encrypted data, see below.
+uint 8[] | [Encrypted data](#service_data_encrypted) | 16 | Encrypted data, see below.
 
+<a name="service_data_encrypted"></a>
 Encrypted data:
 
 ![Encrypted service data](../docs/diagrams/service-data-encrypted-2.png)
@@ -197,6 +198,19 @@ Bit | Name |  Description
 5 | Switchcraft | If this is 1, switchcraft is enabled on this Crownstone.
 6 | Reserved | Reserved for future use.
 7 | Reserved | Reserved for future use.
+
+<a name="state_error_bitmask"></a>
+#### Error Bitmask
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Overcurrent | If this is 1, overcurrent was detected.
+1 | Overcurrent dimmer | If this is 1, overcurrent for the dimmer was detected.
+2 | Chip temperature | If this is 1, the chip temperature is too high.
+3 | Dimmer temperature | If this is 1, the dimmer temperature is too high.
+4 | Dimmer on failure | If this is 1, the dimmer is broken, in an always (partial) on state.
+5 | Dimmer off failure | If this is 1, the dimmer is broken, in an always (partial) off state.
+6-31 | Reserved | Reserved for future use.
 
 <a name="device_type"></a>
 #### Device type

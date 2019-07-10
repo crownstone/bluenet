@@ -29,6 +29,7 @@ enum EncryptionAccessLevel {
 	BASIC               = 2,
 	SETUP               = 100,
 	SERVICE_DATA        = 101,
+	LOCALIZATION        = 102, // Used for RC5 encryption.
 	NOT_SET             = 201,
 	ENCRYPTION_DISABLED = 254,
 	NO_ONE              = 255
@@ -113,6 +114,23 @@ inline bool cs_multi_switch_packet_is_valid(multi_switch_t* packet, size16_t siz
 	return (size >= 1 + packet->count * sizeof(multi_switch_item_t));
 }
 
+
+enum KeepAliveActionTypes {
+	NO_CHANGE = 0,
+	CHANGE    = 1
+};
+
+/**
+ * A single keep alive command.
+ * action: see KeepAliveActionTypes.
+ * switchCmd: 0 = off, 100 = fully on.
+ * timeout: delay in seconds.
+ */
+struct __attribute__((__packed__)) keep_alive_state_item_cmd_t {
+	uint8_t action;
+	uint8_t switchCmd;
+	uint16_t timeout;
+};
 
 
 struct __attribute__((__packed__)) switch_message_payload_t {

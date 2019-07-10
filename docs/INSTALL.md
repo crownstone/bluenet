@@ -2,7 +2,7 @@
 
 This is a step-by-step instruction to install the bluenet build system. If you prefer a simple install script, you can use the `install.sh` script provided in the [crownstone-sdk](https://github.com/crownstone/crownstone-sdk#bluenet_lib_configs) repository.
 
-The installation has been tested on Ubuntu 14.04 and assumes you use the J-Link Lite CortexM-9 programmer.
+The installation has been tested on Ubuntu 14.04 (should work on newer ones as well) and assumes you use the J-Link Lite CortexM-9 programmer.
 
 ## Prerequisites
 
@@ -14,13 +14,11 @@ To compile and run the bluenet firmware, the following prerequisites are needed:
 
 ### Nordic SDK
 
-IMPORTANT NOTE: THIS VERSION OF BLUENET IS ONLY COMPATIBLE WITH THE NEWER CHIP NRF52. USE THE OLDER BRANCH SDK_8 FOR THE NRF51 CHIPS!
-
 Download Nordic's SDK and unzip:
 
-- [Nordic nRF5 SDK 11](https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v11.x.x/)
+- [Nordic nRF5 SDK 15.3.0](https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/)
 
-By default, we use the Softdevices provided in the Nordic SDK. For SDK 11, this is the [Nordic S132 Softdevice 2.0](https://www.nordicsemi.com/eng/Products/S132-SoftDevice), so you don't need to download any softdevices separately. However, if you want to use a different Softdevice version, you can download it and later adapt the config to use the new softdevice.
+By default, we use the Softdevices provided in the Nordic SDK. For SDK 15, this is the [Nordic S132 Softdevice](https://www.nordicsemi.com/eng/Products/S132-SoftDevice), so you don't need to download any softdevices separately. However, if you want to use a different Softdevice version, you can download it and later adapt the config to use the new softdevice.
 
 There is a bug in Nordic's SDK code, search for files named `nrf_svc.h`.
 In those files, replace the assembly line:
@@ -64,7 +62,7 @@ Assuming you have a 64 bit system, you might have to install 32 bit packages:
     sudo apt-get update
     sudo apt-get install libstdc++6:i386 libncurses5:i386
 
-If the cross-compiler does not work, make sure you check if all its dependencies are met with `ldd arm-none-eabi-gcc`.
+If the cross-compiler does not work, make sure you check if all its dependencies are met with `ldd arm-none-eabi-gcc`. Also make sure that the correct libraries are loaded. In the config file (see below) you have to specify the directory where the cross-compiler binaries and libraries can be found. For example `/opt/compilers/gcc-arm-none-eabi-7-2018-q2-update`. Note that this is the parent directory of the `bin` and the `lib` directory.
 
 ### Misc.
 
@@ -121,26 +119,31 @@ If you have another shell, please do the above for your own shell.
 
 ## Get the mesh code
 
-The mesh code we use is a modification of Nordics OpenMesh.
+The mesh code can be downloaded from Nordic. This used to be the Nordic OpenMesh. The installation instructions are different from that in the past for the OpenMesh. You can download the Mesh code from [Nordic's website](https://www.nordicsemi.com/Software-and-Tools/Software/nRF5-SDK-for-Mesh/Download). This is the direct link for the version [3.1.0](https://www.nordicsemi.com/-/media/Software-and-other-downloads/SDKs/nRF5-SDK-for-Mesh/nrf5SDKforMeshv310src.zip).
 
     cd $BLUENET_WORKSPACE_DIR
-    git clone -b bluenet https://github.com/crownstone/nRF51-ble-bcast-mesh
+    mkdir mesh
+    cd mesh
+    unzip nrf5SDKforMeshv310src.zip .
+
+Do not forget to set the `MESH_SDK_DIR` in your `CMakeBuild.config` file.
 
 ## Configuration
 
-Copy the template config file to your config directory:
+We allow for multiple configurations. This means that the `$BLUENET_CONFIG_DIR` can contain multiple directories. Here we assume you like to create a `default` target directory. Copy subsequently the template config file to your config directory:
 
-    cp $BLUENET_DIR/conf/cmake/CMakeBuild.config.template $BLUENET_CONFIG_DIR/CMakeBuild.config
+    mkdir -p $BLUENET_CONFIG_DIR/default
+    cp $BLUENET_DIR/conf/cmake/CMakeBuild.config.template $BLUENET_CONFIG_DIR/default/CMakeBuild.config
 
 then open it to customize
 
-    gedit $BLUENET_CONFIG_DIR/CMakeBuild.config &
+    xdg-open $BLUENET_CONFIG_DIR/default/CMakeBuild.config 
 
 The following variables have to be set before you can build the code:
 
-- Set `BLUETOOTH_NAME` to something you like, but make sure it's short (<9).
+- Set `BLUETOOTH_NAME` to something you like, but make sure it's short (<6 tokens).
 - Set `HARDWARE_BOARD` to the board you're using. This determines the pin layout.
-- Set `COMPILER_PATH` to the path where the compiler can be found (it should contain the `/bin` subdir).
+- Set `COMPILER_PATH` to the path where the compiler can be found (it should be the parent directory of the cross-compiler `bin` and `lib` directories).
 - Set `NRF5_DIR` to wherever you installed the Nordic SDK. It should have the following subdirectories:
     - components
     - documentation
@@ -148,11 +151,11 @@ The following variables have to be set before you can build the code:
     - external
     - SVD
 
-Last, copy any lines that you want to adjust over from the default configuration.
+Last, copy any lines that you want to adjust over from the [default configuration](https://github.com/crownstone/bluenet/blob/master/conf/cmake/CMakeBuild.config.default). 
 
 E.g.
 
-- enable meshing by setting `BUILD_MESHING=1` and `MESHING=1`
+- disable meshing by setting `BUILD_MESHING=0` and `MESHING=0`
 - enable device scanner by setting `INTERVAL_SCANNER_ENABLED=1`
 - enable the power service by setting `POWER_SERVICE=1`
 - set serial verbosity to debug by setting `SERIAL_VERBOSITY=SERIAL_DEBUG`
@@ -189,26 +192,28 @@ You will have to attach a programmer/debugger, like the JLink. Towards that you 
 
 ### Compiling, uploading and debugging
 
-First erase the flash memory:
+These commands use the `nrfjprog` binary under the hood. It writes the firmware to a Crownstone or a development board. The configuration is obtained from the `$BLUENET_CONFIG/default/CMakeBuild.config` file. Hence, the target here is `default`.
+
+First erase (`-e`) the flash memory:
 
     cd $BLUENET_DIR/scripts
-    ./bluenet.sh -e
+    ./bluenet.sh -e -t default
 
-After erasing, you have to write the board version in a `UICR` register:
-
-    cd $BLUENET_DIR/scripts
-    ./bluenet.sh -u -H
-
-Then build and upload the SoftDevice:
+After erasing, you have to upload (`-u`) the hardware board version in a `UICR` register (`-H`):
 
     cd $BLUENET_DIR/scripts
-    ./bluenet.sh -b -S
-    ./bluenet.sh -u -S
+    ./bluenet.sh -u -H -t default
 
-Now we can build our own application:
+Then build (`-b`) and upload (`-u`) the SoftDevice (`-S`):
 
     cd $BLUENET_DIR/scripts
-    ./bluenet.sh -b -F
+    ./bluenet.sh -b -S -t default
+    ./bluenet.sh -u -S -t default
+
+Now we can build (`-b`) our own application/firmware (`-F`):
+
+    cd $BLUENET_DIR/scripts
+    ./bluenet.sh -b -F -t default
 
 By default, the code is built inside the `$BLUENET_WORKSPACE_DIR/build` folder and if successful, the compiled binaries (\*.hex, \*.elf, \*.bin) are copied to `$BLUENET_WORKSPACE_DIR/bin`. If you want to change either folder, you can uncomment and assign the following environment variables in `$BLUENET_DIR/env.config`
 
@@ -217,23 +222,23 @@ By default, the code is built inside the `$BLUENET_WORKSPACE_DIR/build` folder a
 
 If the compilation fails due to misconfiguration, you might have to remove the build dir and then try again.
 
-To upload the application with the JLink you can use:
+To upload (`-u`) the application/firwmare (`-F`) with the JLink you can use:
 
-    ./bluenet.sh -u -F
+    ./bluenet.sh -u -F -t default
 
-To debug with `gdb` you can use:
+To debug (`-d`) the firmware (`-F`) with the cross-compiled gdb tool you can use:
 
-    ./bluenet.sh -d -F
+    ./bluenet.sh -d -F -t default
 
 ### Combinations
 
 You can use multiple commands in one go. For example, to erase the flash, build and upload the board version, firmware and softdevice, and lastly debug the firmware, you can use the following command:
 
-    ./bluenet.sh -bud -FSH
+    ./bluenet.sh -bud -FSH -t default
 
 You can also build and upload a binary that combines the application, the softdevice, the bootloader, and board version.
 
-    ./bluenet.sh -bu -FSBHC
+    ./bluenet.sh -bu -FSBHC -t default
 
 ### Advanced Usage
 
@@ -242,7 +247,7 @@ The above scripts and configuration are sufficient if you work with one device a
 #### Local config file
 
 There are options which are the same for all configurations, such as the paths (`NRF5_DIR`, `COMPILER_PATH`, etc.). Instead of defining them in every configuration file, you can create a file `$BLUENET_DIR/CMakeBuild.config.local` and store common configuration values there.
-This file is optional and not required. If it is available, it will overwrite the default values from $BLUENET_DIR/CMakeBuild.config.default`. The order of precedence of the configuration values in the 3 files is as follows:
+This file is optional and not required. If it is available, it will overwrite the default values from `$BLUENET_DIR/CMakeBuild.config.default`. The order of precedence of the configuration values in the 3 files is as follows:
 
 1. Values are loaded from `$BLUENET_DIR/conf/cmake/CMakeBuild.config.default`
 2. Values are loaded from `$BLUENET_DIR/conf/cmake/CMakeBuild.config.local`. This file is only read if it is present. It overwrites the values loaded at step 1.
@@ -250,39 +255,38 @@ This file is optional and not required. If it is available, it will overwrite th
 
 #### Different Configurations
 
-If you quickly want to switch between different configurations, you can create sub folders in the `$BLUENET_CONFIG_DIR` with different names. E.g. let's create two additional config files, one called BLUE and one called RED (We call these henceforth targets, eg. target BLUE and target RED). You can create two subdirectories
+If you quickly want to switch between different configurations, you can create sub folders in the `$BLUENET_CONFIG_DIR` with different names. E.g. let's create two additional config files, one called BLUE and one called RED (We call these henceforth targets, eg. target `crownstone-blue` and target `crownstone-red`). You can create two subdirectories:
 
-- `$BLUENET_CONFIG_DIR/BLUE`
-- `$BLUENET_CONFIG_DIR/RED`
+    mkdir -p $BLUENET_CONFIG_DIR/crownstone-blue
+    mkdir -p $BLUENET_CONFIG_DIR/crownstone-red
 
-Then create in each subdirectory a file called CMakeBuild.config (or copy it over from an existing file, the template or the default).
+Then create in each subdirectory a `CMakeBuild.config` file (or copy it over from an existing file, the template or the default).
 
 The new structure in the `$BLUENET_CONFIG_DIR` would now be:
 
-- `$BLUENET_CONFIG_DIR`
-    - `BLUE`
-        - `CMakeBuild.config`
-    - `RED`
-        - `CMakeBuild.config`
-    - `CMakeBuild.config`
+    $BLUENET_CONFIG_DIR
+      crownstone-blue
+        CMakeBuild.config
+      crownstone-red
+        CMakeBuild.config
 
-Last, execute the following command to enable multi target / configurations:
+If you require different debug sessions per target, you will need to specify this in a `_target.sh` file. It allows you to set non-default `serial_num` and `gdb_port` values. See, next section.
 
     cp $BLUENET_DIR/scripts/_targets_template.sh $BLUENET_CONFIG_DIR/_targets.sh
 
-Now you can call the scripts above together with the target at the end of the call.
+You can call the scripts with the target (`-t target`) just as indicated above as well.
 
-E.g. to build and upload target `BLUE` execute:
+E.g. to build and upload target `crownstone-blue`, execute:
 
-    ./bluenet.sh -bu -F -t BLUE
+    ./bluenet.sh -bu -F -t crownstone-blue
 
-and to build, upload and debug target `RED` call:
+and to build, upload and debug target `crownstone-red` call:
 
-    ./bluenet.sh -bud -F -t BLUE
+    ./bluenet.sh -bud -F -t crownstone-red
 
 ### Different Devices
 
-To take the case of the different configurations a bit further, we can also assign the different configurations to different devices. E.g. if you are using 2 PCA10000 boards, each one has a different serial number. If you try to upload firmware to one of the devices, while having both plugged in, JLink will return with an error because it doesn't know to which device to upload the firmware. To solve this issue, follow the steps aboth to create two new configurations. (target `BLUE` and target `RED`)
+To take the case of the different configurations a bit further, we can also assign the different configurations to different devices. E.g. if you are using 2 PCA10000 boards, each one has a different serial number. If you try to upload firmware to one of the devices, while having both plugged in, JLink will return with an error because it doesn't know to which device to upload the firmware. To solve this issue, follow the steps aboth to create two new configurations. (target `crownstone-blue` and target `crownstone-red`)
 
 After completing the steps above, open the file `$BLUENET_CONFIG_DIR/_targets.sh` and between the lines
 
@@ -292,22 +296,25 @@ After completing the steps above, open the file `$BLUENET_CONFIG_DIR/_targets.sh
 
 add your new targets as
 
-    BLUE)
+    crownstone-blue)
       serial_num=<SERIAL NUMBER DEVICE1>
       ;;
-    RED)
+    crownstone-red)
       serial_num=<SERIAL NUMBER DEVICE2>
       ;;
 
-Note: It's also a good practice to define one of the devices as the default, which will be used if no target is supplied to the scripts, or if you want to add different configurations, without adding a new entry every time. So let's say the device with the configuration `RED` is the default, the code above will be adapted to
+Note: It's also a good practice to define one of the devices as the default, which will be used if no target is supplied to the scripts, or if you want to add different configurations, without adding a new entry every time:
 
-    BLUE)
+    crownstone-blue)
       serial_num=<SERIAL NUMBER DEVICE1>
       ;;
-    RED)
+    crownstone-red)
+      serial_num=<SERIAL NUMBER DEVICE2>
+      ;;
     *)
-      serial_num=<SERIAL NUMBER DEVICE2>
+      serial_num=<DEFAULT SERIAL NUMBER>
       ;;
+
 
 To obtain the serial number of the JLink devices, run
 
@@ -320,9 +327,7 @@ and then enter `ShowEmuList`, which gives a list of connected devices, e.g.
     J-Link[1]: Connection: USB, Serial number: 518005793, ProductName: J-Link Lite Cortex-M-9
     JLink>
 
-Now if you call one of the scripts, with target `BLUE`,  e.g. `./bluenet.sh -bu -F -t BLUE` it will compile using config `BLUE` at `$BLUENET_CONFIG_DIR/BLUE/CMakeBuild.config` and upload it to `DEVICE1`. While calling `./bluenet.sh -bu -F -t RED` will compile using config `RED` at `$BLUENET_CONFIG_DIR/RED/CMakeBuild.config` and upload it to `DEVICE2`.
-
-And if you call `./bluenet.sh -bu -F` it will compile the default config at `$BLUENET_CONFIG_DIR/CMakeBuild.config` and upload it to device `DEVICE2`.
+Now if you call one of the scripts, with target `crownstone-blue`,  e.g. `./bluenet.sh -bu -F -t crownstone-blue` it will compile using config `crownstone-blue` at `$BLUENET_CONFIG_DIR/crownstone-blue/CMakeBuild.config` and upload it to `DEVICE1`. While calling `./bluenet.sh -bu -F -t crownstone-red` will compile using config `crownstone-red` at `$BLUENET_CONFIG_DIR/crownstone-red/CMakeBuild.config` and upload it to `DEVICE2`.
 
 ## Unit tests
 
@@ -331,7 +336,7 @@ You can also run unit tests for host or the target board through:
     ./bluenet.sh --unit_test_host -t test
     ./bluenet.sh --unit_test_nrf5 -t test
 
-Set `TEST_TARGET=`nrf5` in your `CMakeBuild.config` file in `test` to actually run the unit tests.
+Set `TEST_TARGET=nrf5` in your `CMakeBuild.config` file in `test` to actually run the unit tests.
 
 ## UART
 
@@ -354,3 +359,17 @@ If all goes well, you should see text appearing whenever the crownstone is reboo
 The verbosity of the debug ouptut can be set in the CMakeBuild.conifg through the variable `SERIAL_VERBOSITY`. Highest level is `DEBUG`, lowest level is `FATAL`. If you want to disable logging totally, set verbosity to `NONE`.
 
 For verbosity level `DEBUG`, you can add even more verbosity per class files by enabling the flags in `/include/cfg/cs_Debug.h`.
+
+## Troubleshooting
+
+Suppose, there's the following error in the build process:
+
+    arm-none-eabi-g++: error trying to exec 'cc1plus': execvp: No such file or directory
+    CMakeFiles/crownstone.dir/build.make:144: recipe for target 'CMakeFiles/crownstone.dir/src/ble/cs_ServiceData.cpp.obj' failed
+    make[3]: *** [CMakeFiles/crownstone.dir/src/ble/cs_ServiceData.cpp.obj] Error 1
+
+This very likely means that although the cross-compiler itself has been found, the shared libraries are not. Make sure that the configuration file, say `$BLUENET_CONFIG_DIR/default/CMakeBuild.config`, contains the right `COMPILER_PATH`, for example:
+
+    COMPILER_PATH=/opt/compilers/gcc-arm-none-eabi-7-2018-q2-update
+    
+Both the directories `bin` and `lib` should be present in this directory. Check with `ldd` if the right `.so` files are linked.
