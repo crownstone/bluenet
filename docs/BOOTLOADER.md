@@ -22,8 +22,14 @@ Set the compiler (again, sorry!):
 Build the lib:
 
     ${NRF5_DIR}/external/micro-ecc/build_all.sh
-    
-Read more on the crypto backend at the [Infocenter](https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.3.0/lib_crypto_backend_micro_ecc.html)
+
+If the script is not executable, set it's exec bit:
+
+    chmod u+x ${NRF5_DIR}/external/micro-ecc/build_all.sh
+
+If it contains windows line-endings, remove them ([stackoverflow will do](https://stackoverflow.com/questions/11680815/removing-windows-newlines-on-linux-sed-vs-awk)).
+
+Read more on the crypto backend at the [Infocenter](https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.3.0/lib_crypto_backend_micro_ecc.html). 
 
 To flash the bootloader to the device, use instructions from the [INSTALL](https://github.com/crownstone/bluenet/blob/master/docs/INSTALL.md) document.
 
