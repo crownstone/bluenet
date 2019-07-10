@@ -12,6 +12,19 @@ You can find the information at the [Infocenter - Bootloader and DFU modules](ht
 
 The code for the bootloader is already there if you have downloaded the Nordic SDK. In the `CMakeList` file in the bootloader directory you see that the main file is set to `bootloader/main.c`. The `cs_Boards.h` file is included so the right pins for serial are used. Including the logging functionalities by Nordic increases the binary size of the bootloader a lot. For release, make sure debugging output over serial is disabled.
 
+A prerequisite to building the bootloader is a compiled encryption library (`micro-eec`):
+Om de bootloader te bouwen, is er een gecompileerde lib nodig:
+
+Set the compiler (again, sorry!):
+    
+    xdg-open ${NRF5_DIR}/components/toolchain/gcc/Makefile.posix
+
+Build the lib:
+
+    ${NRF5_DIR}/external/micro-ecc/build_all.sh
+    
+Read more on the crypto backend at the [Infocenter](https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.3.0/lib_crypto_backend_micro_ecc.html)
+
 To flash the bootloader to the device, use instructions from the [INSTALL](https://github.com/crownstone/bluenet/blob/master/docs/INSTALL.md) document.
 
     ./bluenet.sh -buB -t default
@@ -23,6 +36,8 @@ Note. If you set general breakpoints like `b main`, note that `gdb` will set the
 It has no way to distinghuish them. If you debug the firmware, `gdb` will start at the application address and breakpoints in the bootloader are skipped.
 
     ./bluenet.sh -dF -t default
+
+To debug use the option `CS_SERIAL_NRF_LOG_ENABLED`. Set to `1` it will use `RTT`. Set to `2` it will use `UART`.
 
 ### Start address and bootloader size
 
