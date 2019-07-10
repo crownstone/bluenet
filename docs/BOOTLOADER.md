@@ -50,10 +50,28 @@ To debug use the option `CS_SERIAL_NRF_LOG_ENABLED`. Set to `1` it will use `RTT
 The start address and size of the bootloader are defined in the linker script `secure_bootloader_gcc_nrf52.ld`. It is based on the script with the same name in `examples/dfu/secure_bootloader/pca10040_ble/armgcc`).
 
 ```
-FLASH (rx) : ORIGIN = 0x78000, LENGTH = 0x6000
+FLASH (rx) : ORIGIN = 0x76000, LENGTH = 0x8000
 ```
 
 When the device boots, it will look at `MBR_BOOTLOADER_ADDR` or `UICR.BOOTLOADERADDR` (`UICR.NRFFW[1]`, or `0x10001014`) for the start address of the bootloader. The size of the bootloader is fixed for the lifetime of the device. This is because the location (`MBR_BOOTLOADER_ADDR`) that stores the start address of the bootloader is not (safely) updateable.
+
+If you enable debugging, you will need more space for the bootloader. You will get an overflow error at link time if there has not been enough space reserved.
+
+```
+FLASH (rx) : ORIGIN = 0x71000, LENGTH = 0xd000
+```
+
+There are currently actually **two** locations where you have to define the start of the bootloader.
+
+1. The [secure_bootloader_gcc_nrf52.ld](https://github.com/crownstone/bluenet/blob/master/bootloader/secure_bootloader_gcc_nrf52.ld) script in the `bootloader` directory (see above).
+2. The `CMakeBuild.config` file for the target you are building for. The default comes from [CMakeBuild.config.default](https://github.com/crownstone/bluenet/blob/master/conf/cmake/CMakeBuild.config.default). 
+
+To allow for the additional space for debugging, starting at 0x71000 up to (almost!) the end of FLASH should be sufficient (adds up to `0x7E000`). Note, it's not up to `0x7FFFF`. 
+
+```
+BOOTLOADER_START_ADDRESS=0x00071000
+BOOTLOADER_LENGTH=0xD000
+```
 
 ### Challenge
 
