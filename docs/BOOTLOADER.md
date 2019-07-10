@@ -27,7 +27,7 @@ If the script is not executable, set its exec bit:
 
     chmod u+x ${NRF5_DIR}/external/micro-ecc/build_all.sh
 
-If it contains windows line-endings, remove them ([stackoverflow will do](https://stackoverflow.com/questions/11680815/removing-windows-newlines-on-linux-sed-vs-awk)).
+If it contains windows line-endings, remove them ([stackoverflow will do](https://stackoverflow.com/questions/11680815/removing-windows-newlines-on-linux-sed-vs-awk)). Bug report filed [at Nordic](https://devzone.nordicsemi.com/f/nordic-q-a/47429/bug-windows-line-ending-characters).
 
 Read more on the crypto backend at the [Infocenter](https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.3.0/lib_crypto_backend_micro_ecc.html). 
 
