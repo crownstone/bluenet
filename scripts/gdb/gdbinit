@@ -32,7 +32,7 @@ info files
 monitor reset
 
 # If you want to enable a breakpoint before program start
-#b main
+b main
 
 # We indeed do end up in the scanner
 #b scanner.c:scanner_init
