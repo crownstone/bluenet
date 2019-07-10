@@ -23,7 +23,7 @@ Build the lib:
 
     ${NRF5_DIR}/external/micro-ecc/build_all.sh
 
-If the script is not executable, set it's exec bit:
+If the script is not executable, set its exec bit:
 
     chmod u+x ${NRF5_DIR}/external/micro-ecc/build_all.sh
 
