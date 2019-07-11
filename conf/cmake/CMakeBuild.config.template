@@ -16,10 +16,8 @@
 # Copy any value over from the $BLUENET_DIR/CMakeBuild.config.default that you want to change. E.g.
 # enable meshing by setting
 #   MESHING=1
-# or enable device scanner by setting
-#   INTERVAL_SCANNER_ENABLED=1
 # or set serial verbosity to debug by setting
-#   SERIAL_VERBOSITY=DEBUG
+#   SERIAL_VERBOSITY=SERIAL_DEBUG
 
 
 ########################################################################################################################
@@ -34,10 +32,10 @@
 # COMPILER_TYPE=arm-none-eabi
 
 # The JLink utility (when using the Segger to flash the nRF)
-# JLINK=
+# JLINK=/usr/bin/JLinkExe
 
 # The JLink utilty that can be used with gdb
-# JLINK_GDB_SERVER=
+# JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
 
 # Location of the Nordic Software Development Kit
 # NRF5_DIR=
