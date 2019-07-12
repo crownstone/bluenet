@@ -19,7 +19,7 @@ In the intermediate bootloader, along with the existing bootloader commands, one
 * A reset is performed.
 
 #### Challenge
-The current implementation done by Nordic is to use dual bank mode (bank-1) to obtain the bootloader into the flash first. Once, the bootloader is verified is presence and validity, it is copied using MBR commands, which doesn't allow the change in the destination/target address.
+The current implementation done by Nordic is to use dual bank mode to obtain the bootloader into the flash first (into bank-1). Once, the bootloader verifies its presence and validity, it is copied using MBR commands, which doesn't allow the change in the destination/target address. Making the bootloader's address fixed.
 
 * **Solution 1:** The bootloader after receiving the new bootloader into bank-1, it should hand-off the control to firmware, but before it does so, it writes into a persistent register a unique trigger value. The firmware after reading this trigger value, copies the image of bootloader which is present in bank-1 to the new location safely and later resetting itself. This seems like a most reliable solution.
 
