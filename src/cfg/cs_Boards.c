@@ -436,7 +436,7 @@ void asACR01B10A(boards_config_t* p_config) {
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
-	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
 
 	p_config->voltageMultiplier                  = -0.253f; // for range -1800 - 1800 mV
 	p_config->currentMultiplier                  = 0.0071f; // for range -600 - 600 mV on pin 6

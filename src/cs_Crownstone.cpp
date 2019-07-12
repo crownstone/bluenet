@@ -616,7 +616,8 @@ void Crownstone::startUp() {
 		_switch->start();
 
 		if (_operationMode == OperationMode::OPERATION_MODE_SETUP &&
-				_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
+				(_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN || _boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN_ONE)
+				) {
 			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
 		}
 
