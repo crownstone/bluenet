@@ -21,7 +21,7 @@ In the intermediate bootloader, along with the existing bootloader commands, one
 #### Challenge
 The current implementation done by Nordic is to use dual bank mode (bank-1) to obtain the bootloader into the flash first. Once, the bootloader is verified is presence and validity, it is copied using MBR commands, which doesn't allow the change in the destination/target address.
 
-* **Solution 1:** This should be used as a last restort as this requires adding one-time code into the firmware, although it is not an issue to do so. The bootloader after receiving the new bootloader into bank-1, it should hand-off the control to firmware, but before it does so, it writes into a persistent register a unique trigger value. The firmware after reading this trigger value, copies the image of bootloader which is present in bank-1 to the new location safely and later resetting itself. This seems like a most reliable solution.
+* **Solution 1:** The bootloader after receiving the new bootloader into bank-1, it should hand-off the control to firmware, but before it does so, it writes into a persistent register a unique trigger value. The firmware after reading this trigger value, copies the image of bootloader which is present in bank-1 to the new location safely and later resetting itself. This seems like a most reliable solution.
 
 * **Solution 2:** Not sure if this works. This solution is based on the assumption that the MBR_BL_COPY command uses the UICR.NRFFW[0] value as the destination address. If this is true, the copy would place the bootloader already in the right place.
 
