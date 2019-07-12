@@ -26,3 +26,6 @@ The current implementation done by Nordic is to use dual bank mode to obtain the
 * **Solution 2:** Not sure if this works. This solution is based on the assumption that the MBR_BL_COPY command uses the UICR.NRFFW[0] value as the destination address. If this is true, the copy would place the bootloader already in the right place.
 
 * Solution 3: Use the image copy function provided by the nRF SDK to copy the BL image from Bank-1 to the new Bootloader location. As long as the image copy function is part of Soft-Device, it's perfectly fine. Otherwise, we are shooting in our foot. **Update** image copy function belongs to the bootloader. So this solution is *infeasible*.
+
+#### Additional updates
+It has been verified that Bank-0 (Application) is about 155 kB long. Which is about half the size of the total available application area. (328 kB). Therefore, the new secure bootloader can safely fit into the bank-1 size.
