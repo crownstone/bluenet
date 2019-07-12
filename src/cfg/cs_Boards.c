@@ -410,7 +410,7 @@ void asACR01B9E(boards_config_t* p_config) {
 }
 
 
-void asACR01B10A(boards_config_t* p_config) {
+void asACR01B10B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 14;
 	p_config->pinGpioRelayOff                    = 13;
@@ -639,8 +639,8 @@ uint32_t configure_board(boards_config_t* p_config) {
 		asACR01B1D(p_config);
 		break;
 
-	case ACR01B10A:
-		asACR01B10A(p_config);
+	case ACR01B10B:
+		asACR01B10B(p_config);
 		break;
 
 	case ACR01B2A:

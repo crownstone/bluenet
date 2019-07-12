@@ -98,7 +98,7 @@ void Switch::start() {
 	// This means we will assume that the pwm is already powered and just set the _pwmPowered flag.
 	// TODO: Really? Why can't we just organize this with events?
 	bool switchcraftEnabled = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
-	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0) || _hardwareBoard == ACR01B10A) {
+	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0) || _hardwareBoard == ACR01B10B) {
 		LOGd("dimmer powered on start");
 		_pwmPowered = true;
 		event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
