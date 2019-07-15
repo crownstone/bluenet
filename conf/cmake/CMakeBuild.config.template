@@ -1,5 +1,5 @@
 ########################################################################################################################
-# Configuration options, used by build systems and scripts. Please fill in the following variables.
+# Configuration options, used by build systems and scripts.
 ########################################################################################################################
 
 # The name that is advertised.
@@ -16,11 +16,15 @@
 # Copy any value over from the $BLUENET_DIR/CMakeBuild.config.default that you want to change. E.g.
 # enable meshing by setting
 #   MESHING=1
-# or enable device scanner by setting
-#   INTERVAL_SCANNER_ENABLED=1
 # or set serial verbosity to debug by setting
-#   SERIAL_VERBOSITY=DEBUG
-
+#   SERIAL_VERBOSITY=SERIAL_DEBUG
+#
+# By default, a Crownstone has its serial disabled, which can be enabled via a bluetooth command.
+# You can change the default value:
+# CS_SERIAL_ENABLED=SERIAL_ENABLE_RX_AND_TX
+#
+# If you have serial enabled, you probably want to disable the binary protocol, so that you only get debug text.
+# CS_UART_BINARY_PROTOCOL_ENABLED=0
 
 ########################################################################################################################
 # Build System Configuration. This variables need to be adjusted to your build system paths.
@@ -34,10 +38,10 @@
 # COMPILER_TYPE=arm-none-eabi
 
 # The JLink utility (when using the Segger to flash the nRF)
-# JLINK=
+# JLINK=/usr/bin/JLinkExe
 
 # The JLink utilty that can be used with gdb
-# JLINK_GDB_SERVER=
+# JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
 
 # Location of the Nordic Software Development Kit
 # NRF5_DIR=

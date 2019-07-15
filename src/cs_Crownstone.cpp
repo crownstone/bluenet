@@ -616,7 +616,8 @@ void Crownstone::startUp() {
 		_switch->start();
 
 		if (_operationMode == OperationMode::OPERATION_MODE_SETUP &&
-				_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
+				(_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN || _boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN_ONE)
+				) {
 			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
 		}
 
@@ -712,8 +713,9 @@ void Crownstone::tick() {
 		_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature));
 	}
 
-	// Update advertisement parameter (only in operation mode NORMAL)
-	if (_tickCount % (500/TICK_INTERVAL_MS) == 0 && _operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+	// Update advertisement service data
+	// TODO: synchronize with servicedata.updateAdvertisement()
+	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
 		// update advertisement parameters (to improve scanning on (some) android phones)
 		_stack->updateAdvertisement(true);
 		// update advertisement (to update service data)
