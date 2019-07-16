@@ -75,7 +75,7 @@ Crownstone also integrates their hardware technology in third-party products, ra
 
 # Copyrights
 
-Copyrights belong to the team of Crownstone B.V. and are provided under an noncontagious open-source license:
+Copyrights belong to the team of Crownstone B.V. and are provided under a noncontagious open-source license:
 
 * Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Alex de Mulder, Christian Haas
 * Date: 27 Jan. 2014
