@@ -209,6 +209,11 @@ int main(void)
 {
 	uint32_t ret_val;
 
+	// NRF_LOG_ERROR("Processing...");
+	// NRF_LOG_FLUSH();
+
+	// nrf_delay_ms(1000);
+
 	boards_config_t board = {};
 	configure_board(&board);
 	cs_gpio_init(&board);
@@ -221,11 +226,15 @@ int main(void)
 	NRF_LOG_INFO("Protect");
 	NRF_LOG_FLUSH();
 
+	nrf_gpio_pin_dir_set(19,NRF_GPIO_PIN_DIR_OUTPUT);
+	nrf_gpio_pin_set(19);
+	nrf_gpio_pin_clear(19);
+
 	// Protect MBR and bootloader code from being overwritten.
-	ret_val = nrf_bootloader_flash_protect(0, MBR_SIZE, false);
-	APP_ERROR_CHECK(ret_val);
-	ret_val = nrf_bootloader_flash_protect(BOOTLOADER_START_ADDR, BOOTLOADER_SIZE, false);
-	APP_ERROR_CHECK(ret_val);
+	// ret_val = nrf_bootloader_flash_protect(0, MBR_SIZE, false);
+	// APP_ERROR_CHECK(ret_val);
+	// ret_val = nrf_bootloader_flash_protect(BOOTLOADER_START_ADDR, BOOTLOADER_SIZE, false);
+	// APP_ERROR_CHECK(ret_val);
 	
 	NRF_LOG_INFO("Init");
 	NRF_LOG_FLUSH();

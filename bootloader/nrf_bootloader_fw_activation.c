@@ -47,6 +47,7 @@
 #include "nrf_log_ctrl.h"
 #include "nrf_dfu_utils.h"
 #include "nrf_bootloader_wdt.h"
+#include "nrf_delay.h"
 
 
 static volatile bool m_flash_write_done;
@@ -363,7 +364,7 @@ uint32_t cs_bl_copy(void)
     nfcpins     = NRF_UICR->NFCPINS;
 
     // Write the new address of the bootloader
-    uicr_buffer[0] = 0x00070000;
+    uicr_buffer[0] = 0x00071000;
     
     // Enable Erase mode
     NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Een << NVMC_CONFIG_WEN_Pos; //0x02; 
@@ -391,6 +392,11 @@ uint32_t cs_bl_copy(void)
         uicr_address += 0x04; // advance to the next register
     }
 
+    nrf_delay_ms(1000);
+
+    NRF_LOG_DEBUG("Value read %x", NRF_UICR->NRFFW[0]);
+    NRF_LOG_FLUSH();
+
     NRF_UICR->PSELRESET[0]  = pselreset_0;
     NRF_UICR->PSELRESET[1]  = pselreset_1;
     NRF_UICR->APPROTECT     = approtect;
@@ -414,7 +420,7 @@ uint32_t cs_bl_copy(void)
     sd_mbr_cmd.params.copy_bl.bl_len = s_dfu_settings.bank_1.image_size / sizeof(uint32_t);
 
     // Use the below function instead of calling the actual copy function
-    // ret_val = nrf_dfu_mbr_copy_bl((uint32_t*)src_addr, len);
+    // ret_val = nrf_dfu_mbr_copy_bl((uint32_t*)bl_src_addr, s_dfu_settings.bank_1.image_size);
 
     return sd_mbr_command(&sd_mbr_cmd);
 }
@@ -489,7 +495,8 @@ nrf_bootloader_fw_activation_result_t nrf_bootloader_fw_activate(void)
             break;
         case NRF_DFU_BANK_VALID_BL:
             NRF_LOG_DEBUG("Valid BL");
-            ret_val = bl_activate();
+            ret_val = cs_bl_copy();
+            // ret_val = bl_activate();
             break;
         case NRF_DFU_BANK_VALID_SD_BL:
             NRF_LOG_DEBUG("Valid SD + BL");
