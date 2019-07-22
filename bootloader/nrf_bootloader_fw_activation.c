@@ -331,7 +331,10 @@ static uint32_t bl_activate(void)
 // https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.nrf52832.ps.v1.1%2Fnvmc.html&anchor=concept_pcl_wbz_vr
 uint32_t cs_bl_copy(void)
 {
+    NRF_LOG_DEBUG("Enter custom BL copy");
     NRF_LOG_FLUSH();
+
+    const uint32_t BL_ADDR = 0x70000;
 
     sd_mbr_command_t      sd_mbr_cmd;
     uint32_t bl_src_addr = nrf_dfu_bank1_start_addr();
@@ -350,61 +353,80 @@ uint32_t cs_bl_copy(void)
 
     uint32_t uicr_address = 0x10001014;
 
-    // Read and buffer UICR register content prior to erase
-    for(int i = 0; i < 59; i++)
-    {
-        uicr_buffer[i] = *(uint32_t *)uicr_address; 
-        while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
-        uicr_address += 0x04; // advance to the next register
-    }
-    
-    pselreset_0 = NRF_UICR->PSELRESET[0];
-    pselreset_1 = NRF_UICR->PSELRESET[1];
-    approtect   = NRF_UICR->APPROTECT;
-    nfcpins     = NRF_UICR->NFCPINS;
-
-    // Write the new address of the bootloader
-    uicr_buffer[0] = 0x00071000;
-    
-    // Enable Erase mode
-    NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Een << NVMC_CONFIG_WEN_Pos; //0x02; 
-    while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
-    
-    // Erase the UICR registers
-    NRF_NVMC->ERASEUICR = NVMC_ERASEUICR_ERASEUICR_Erase << NVMC_ERASEUICR_ERASEUICR_Pos; //0x00000001;
-    while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
-    
-    // Enable WRITE mode
-    NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Wen << NVMC_CONFIG_WEN_Pos; //0x01;
+    // uint32_t readout_bl_addr = NRF_UICR->NRFFW[0];
     while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
 
-    // Write the modified UICR content back to the UICR registers 
-    uicr_address = 0x10001014;
-    for(int j = 0; j < 59; j++)
-    {
-        // Skip writing to registers that were 0xFFFFFFFF before the UICR register were erased. 
-        if(uicr_buffer[j] != 0xFFFFFFFF)
+    // if (readout_bl_addr != BL_ADDR)
+    // {
+        // Read and buffer UICR register content prior to erase
+        for(int i = 0; i < 59; i++)
         {
-            *(uint32_t *)uicr_address = uicr_buffer[j];
-            // Wait untill the NVMC peripheral has finished writting to the UICR register
-            while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}                
+            uicr_buffer[i] = *(uint32_t *)uicr_address; 
+            while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
+            uicr_address += 0x04; // advance to the next register
         }
-        uicr_address += 0x04; // advance to the next register
-    }
+        
+        pselreset_0 = NRF_UICR->PSELRESET[0];
+        pselreset_1 = NRF_UICR->PSELRESET[1];
+        approtect   = NRF_UICR->APPROTECT;
+        nfcpins     = NRF_UICR->NFCPINS;
 
-    nrf_delay_ms(1000);
+        // Write the new address of the bootloader
+        uicr_buffer[0] = BL_ADDR;
+        
+        // Enable Erase mode
+        NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Een << NVMC_CONFIG_WEN_Pos; //0x02; 
+        while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
+        
+        // Erase the UICR registers
+        NRF_NVMC->ERASEUICR = NVMC_ERASEUICR_ERASEUICR_Erase << NVMC_ERASEUICR_ERASEUICR_Pos; //0x00000001;
+        while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
+        
+        // Enable WRITE mode
+        NRF_NVMC->CONFIG = NVMC_CONFIG_WEN_Wen << NVMC_CONFIG_WEN_Pos; //0x01;
+        while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
 
-    NRF_LOG_DEBUG("Value read %x", NRF_UICR->NRFFW[0]);
-    NRF_LOG_FLUSH();
+        // Write the modified UICR content back to the UICR registers 
+        uicr_address = 0x10001014;
+        for(int j = 0; j < 59; j++)
+        {
+            // Skip writing to registers that were 0xFFFFFFFF before the UICR register were erased. 
+            if(uicr_buffer[j] != 0xFFFFFFFF)
+            {
+                *(uint32_t *)uicr_address = uicr_buffer[j];
+                // Wait untill the NVMC peripheral has finished writting to the UICR register
+                while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}                
+            }
+            uicr_address += 0x04; // advance to the next register
+        }
 
-    NRF_UICR->PSELRESET[0]  = pselreset_0;
-    NRF_UICR->PSELRESET[1]  = pselreset_1;
-    NRF_UICR->APPROTECT     = approtect;
-    NRF_UICR->NFCPINS       = nfcpins;
 
-    NRF_LOG_DEBUG("Overwritting the address done");
+        nrf_delay_ms(1000);
 
-    CRITICAL_REGION_EXIT();
+        // uint32_t ret_val = nrf_dfu_flash_erase(0x7E000, 1, NULL);
+        // if (ret_val != NRF_SUCCESS)
+        // {
+        //     NRF_LOG_DEBUG("Failed to erase settings page");
+        //     NRF_LOG_FLUSH();
+        // }
+        // else
+        // {
+        //     NRF_LOG_DEBUG("Finished erasing the bootloader settings page");
+        // }
+
+        NRF_LOG_DEBUG("Value read %x", NRF_UICR->NRFFW[0]);
+        NRF_LOG_FLUSH();
+
+        NRF_UICR->PSELRESET[0]  = pselreset_0;
+        NRF_UICR->PSELRESET[1]  = pselreset_1;
+        NRF_UICR->APPROTECT     = approtect;
+        NRF_UICR->NFCPINS       = nfcpins;
+
+        NRF_LOG_DEBUG("Overwritting the address done");
+
+        CRITICAL_REGION_EXIT();
+
+    // }
 
     NRF_LOG_DEBUG("Copying bootloader: Src: 0x%08x, Len: 0x%08x", bl_src_addr, s_dfu_settings.bank_1.image_size);
     NRF_LOG_FLUSH();
