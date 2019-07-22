@@ -53,13 +53,30 @@ uint8 | Profile ID | 3 | ID of the profile the user is using.
 uint8 | RSSI offset | 4 | Offset from standard signal strength. Divide by 2, then add 8.
 uint8 | flags | 3 | [Flags](#background_adv_flags).
 
+
+<a name="rc5_adv_payload"></a>
+#### RC5 broadcast payload
+
+![RC5 broadcast payload](../docs/diagrams/rc5_broadcast_payload.png)
+
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+uint8 | Counter | 8 | Count of the broadcast command. This value should be increased for each newly broadcasted command.
+uint8 | Reserved | 8 | Reserved for future use.
+uint8 | Location ID | 6 | ID of the location where the user is.
+uint8 | Profile ID | 3 | ID of the profile the user is using.
+uint8 | RSSI offset | 4 | Offset from standard signal strength. Divide by 2, then add 8.
+uint8 | flags | 3 | [Flags](#background_adv_flags).
+
+
+
 <a name="background_adv_flags"></a>
 #### Background broadcast flags
 
 Bit | Name |  Description
 --- | --- | ---
-0 |  | 
-1 |  | 
+0 | Reserved | Reserved for future use.
+1 | Ignore for behaviour | Set to 1 when this broadcast should be ignored for behaviour rules.
 2 | Tap to toggle | Set to 1 when this phone has tap to toggle enabled.
 
 
@@ -99,7 +116,8 @@ uint8 | Protocol | 3 | Protocol version, currently 0.
 uint8 | Sphere ID | 8 | Sphere ID that must be the same as given during setup. Used to filter out broadcasts that are not meant for this Crownstone.
 uint8 | Access level | 3 | Shortened access level: 0=admin, 1=member, 2=basic, 4=setup.
 uint8 | Sequence | 2 | 1: Sequence of this service UUID.
-uint16 | Reserved | 10 | Reserved for future use.
+uint8 | Reserved | 2 | Reserved for future use.
+uint8 | Device token | 8 | Token of this device, should be unique per device (phone) in the sphere.
 uint16 | Background payload | 4 | First 4 bits of first block of [encrypted background payload](#background_adv_payload).
 uint8 | Sequence | 2 | 2: Sequence of this service UUID.
 uint16 | Background payload | 12 | Last 12 bits of first block of [encrypted background payload](#background_adv_payload).
