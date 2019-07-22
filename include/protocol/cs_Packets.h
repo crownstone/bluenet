@@ -13,6 +13,7 @@
 #include "protocol/cs_Typedefs.h"
 #include "protocol/mesh/cs_MeshModelPackets.h"
 #include "protocol/cs_ServiceDataPackets.h"
+#include "protocol/cs_CmdSource.h"
 
 /**
  * Packets (structs) that are used over the air.
@@ -112,6 +113,43 @@ struct __attribute__((packed)) multi_switch_t {
  */
 inline bool cs_multi_switch_packet_is_valid(multi_switch_t* packet, size16_t size) {
 	return (size >= 1 + packet->count * sizeof(multi_switch_item_t));
+}
+
+
+
+struct __attribute__((__packed__)) cs_legacy_multi_switch_item_t {
+	stone_id_t id;
+	uint8_t switchCmd;
+	uint16_t timeout;
+	uint8_t intent;
+};
+
+#define LEGACY_MULTI_SWITCH_HEADER_SIZE (1+1)
+#define LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT 18
+struct __attribute__((__packed__)) cs_legacy_multi_switch_t {
+	uint8_t type; // Always 0 (type list).
+	uint8_t count;
+	cs_legacy_multi_switch_item_t items[LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT];
+};
+
+inline bool cs_legacy_multi_switch_item_is_valid(cs_legacy_multi_switch_item_t* item, size16_t size) {
+	return (size == sizeof(cs_legacy_multi_switch_item_t) && item->id != 0);
+}
+
+inline bool cs_legacy_multi_switch_is_valid(const cs_legacy_multi_switch_t* packet, size16_t size) {
+	if (size < LEGACY_MULTI_SWITCH_HEADER_SIZE) {
+		return false;
+	}
+	if (packet->type != 0) {
+		return false;
+	}
+	if (packet->count > LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT) {
+		return false;
+	}
+	if (size < LEGACY_MULTI_SWITCH_HEADER_SIZE + packet->count * sizeof(cs_legacy_multi_switch_item_t)) {
+		return false;
+	}
+	return true;
 }
 
 

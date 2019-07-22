@@ -497,7 +497,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 		case OperationMode::OPERATION_MODE_DFU:
 			LOGd("Configure DFU mode");
 			// TODO: have this function somewhere else.
-			CommandHandler::getInstance().handleCommand(CTRL_CMD_GOTO_DFU);
+			CommandHandler::getInstance().handleCommand(CTRL_CMD_GOTO_DFU, cmd_source_t(CS_CMD_SOURCE_INTERNAL));
 			_stack->changeToNormalTxPowerMode();
 			break;
 		default:
@@ -559,6 +559,8 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::BASIC); // BackgroundAdvertisementHandler needs RC5.
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
+
+			_multiSwitchHandler->init();
 			break;
 		case OperationMode::OPERATION_MODE_SETUP:
 			// TODO: Why this hack?

@@ -17,6 +17,7 @@
 #include <processing/cs_CommandAdvHandler.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
+#include <processing/cs_MultiSwitchHandler.h>
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
@@ -171,6 +172,7 @@ private:
 	Scheduler* _scheduler = NULL;
 	FactoryReset* _factoryReset = NULL;
 	CommandAdvHandler* _commandAdvHandler = NULL;
+	MultiSwitchHandler* _multiSwitchHandler = NULL;
 
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;

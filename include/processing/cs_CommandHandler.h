@@ -11,19 +11,6 @@
 #include <common/cs_Types.h>
 #include <protocol/cs_CommandTypes.h>
 
-/** Commands to be executed at a later stage.
- *
- * A command can be exected later. Arguments are stored in the delayed_command_t struct within a buffer of variable
- * size.
- */
-struct delayed_command_t {
-	//! Type of command
-	CommandHandlerTypes type;
-	//! Size of buffer (can be 0)
-	uint16_t size;
-	//! Pointer to buffer
-	buffer_ptr_t buffer;
-};
 
 /**
  * Every command goes through the CommandHandler.
@@ -45,25 +32,23 @@ public:
 
 	/** Handle a command without payload, and assuming admin level access.
 	 */
-	cs_ret_code_t handleCommand(const CommandHandlerTypes type);
+	cs_ret_code_t handleCommand(const CommandHandlerTypes type, const cmd_source_t source);
 
 	/** Handle a particular command with additional arguments stored in a buffer at a security level.
 	 *
 	 * The security level is ADMIN by default.
 	 */
-	cs_ret_code_t handleCommand(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size,
-			const EncryptionAccessLevel accessLevel = ADMIN);
+	cs_ret_code_t handleCommand(
+			const CommandHandlerTypes type,
+			buffer_ptr_t buffer,
+			const uint16_t size,
+			const cmd_source_t source,
+			const EncryptionAccessLevel accessLevel = ADMIN
+			);
 
-	/** Handle a particular command, but with a specified delay.
-	 */
-	cs_ret_code_t handleCommandDelayed(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size,
-			const uint32_t delay);
 
-	/** Reset, after a delay (2 seconds).
-	 *
-	 * There is a DFU reset or a GPREGRET reset.
-	 */
-	void resetDelayed(uint8_t opCode, uint16_t delayMs=2000);
+
+
 
 	// Handle events as EventListener
 	void handleEvent(event_t & event);
@@ -72,8 +57,6 @@ private:
 
 	CommandHandler();
 
-	app_timer_t      _delayTimerData;
-	app_timer_id_t   _delayTimerId;
 	app_timer_t      _resetTimerData;
 	app_timer_id_t   _resetTimerId;
 
@@ -108,7 +91,7 @@ private:
 	cs_ret_code_t handleCmdSwitch                (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdRelay                 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdMultiSwitchLegacy     (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	cs_ret_code_t handleCmdMultiSwitch           (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	cs_ret_code_t handleCmdMultiSwitch           (buffer_ptr_t buffer, const uint16_t size, const cmd_source_t source, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdMeshCommand           (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdEnableContPowerMeasure(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdAllowDimming          (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
@@ -118,5 +101,10 @@ private:
 	cs_ret_code_t handleCmdUartMsg               (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdUartEnable            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 
+	/**
+	 * Reset, after a delay.
+	 * TODO: This function doesn't belong in this class.
+	 */
+	void resetDelayed(uint8_t opCode, uint16_t delayMs=2000);
 };
 

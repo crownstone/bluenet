@@ -83,26 +83,6 @@ bool state1IsValid(const cs_mesh_model_msg_state_1_t* packet, size16_t size) {
 	return size == sizeof(cs_mesh_model_msg_state_1_t);
 }
 
-bool multiSwitchIsValid(const cs_mesh_model_msg_multi_switch_t* packet, size16_t size) {
-	if (size < MESH_MESH_MULTI_SWITCH_HEADER_SIZE) {
-		LOGMeshModelPacketHelperDebug("size=%u < header=%u", size, MESH_MESH_MULTI_SWITCH_HEADER_SIZE);
-		return false;
-	}
-	if (packet->type != 0) {
-		LOGMeshModelPacketHelperDebug("type=%u != 0", packet->type);
-		return false;
-	}
-	if (packet->count > MESH_MESH_MULTI_SWITCH_MAX_ITEM_COUNT) {
-		LOGMeshModelPacketHelperDebug("count=%u > max=%u", packet->count, MESH_MESH_MULTI_SWITCH_MAX_ITEM_COUNT);
-		return false;
-	}
-	if (size < MESH_MESH_MULTI_SWITCH_HEADER_SIZE + packet->count * sizeof(cs_mesh_model_msg_multi_switch_item_t)) {
-		LOGMeshModelPacketHelperDebug("size=%u < header=%u + count=%u * itemSize=%u", size, MESH_MESH_MULTI_SWITCH_HEADER_SIZE, packet->count, sizeof(cs_mesh_model_msg_multi_switch_item_t));
-		return false;
-	}
-	return true;
-}
-
 bool keepAliveStateIsValid(const cs_mesh_model_msg_keep_alive_t* packet, size16_t size) {
 	if (size < MESH_MESH_KEEP_ALIVE_HEADER_SIZE) {
 		LOGMeshModelPacketHelperDebug("size=%u < header=%u", size, MESH_MESH_KEEP_ALIVE_HEADER_SIZE);
@@ -155,17 +135,6 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
 	}
 	meshMsgSize = getMeshMessageSize(payloadSize);
 	return true;
-}
-
-bool multiSwitchHasItem(cs_mesh_model_msg_multi_switch_t* packet, stone_id_t stoneId, cs_mesh_model_msg_multi_switch_item_t*& item) {
-	bool found = false;
-	for (int i=0; i<packet->count; ++i) {
-		if (packet->items[i].id == stoneId) {
-			item = &(packet->items[i]);
-			found = true;
-		}
-	}
-	return found;
 }
 
 bool keepAliveHasItem(cs_mesh_model_msg_keep_alive_t* packet, stone_id_t stoneId, cs_mesh_model_msg_keep_alive_item_t*& item) {

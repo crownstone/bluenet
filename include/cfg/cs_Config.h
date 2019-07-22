@@ -84,6 +84,8 @@
 
 #define SECURITY_REQUEST_DELAY                   1500                                        /**< Delay after connection until security request is sent, if necessary (ms). */
 
+#define SWITCH_CLAIM_TIME_MS                     1500                                        /**< Time that switch commands of other sources are ignored. */
+
 // tx power used for low power mode during bonding
 /* moved to boards config in cs_Boards.c
 #define LOW_TX_POWER                             -40

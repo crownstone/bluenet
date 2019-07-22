@@ -133,7 +133,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, uint16_t s
 				errCode = ERR_WRONG_PAYLOAD_LENGTH;
 			}
 			else {
-				errCode = CommandHandler::getInstance().handleCommand(type, payload, payloadLength, accessLevel);
+				errCode = CommandHandler::getInstance().handleCommand(type, payload, payloadLength, cmd_source_t(CS_CMD_SOURCE_CONNECTION), accessLevel);
 			}
 
 			mb.unlock();

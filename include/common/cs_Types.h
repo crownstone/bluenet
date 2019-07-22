@@ -142,7 +142,8 @@ enum class CS_TYPE: uint16_t {
 	CMD_SWITCH_OFF = General_Base,                    // Sent to turn switch off.
 	CMD_SWITCH_ON,                                    // Sent to turn switch on.
 	CMD_SWITCH_TOGGLE,                                // Sent to toggle switch.
-	CMD_MULTI_SWITCH,                                 // Sent to set switch. -- Payload is multi_switch_item_cmd_t.
+	CMD_SWITCH,                                       // Sent to set switch.
+	CMD_MULTI_SWITCH,                                 // Sent to handle a multi switch. -- Payload is internal_multi_switch_item_cmd_t.
 //	CMD_SET_LOG_LEVEL,
 	CMD_ENABLE_LOG_POWER,                             // Sent to enable/disable power calculations logging. -- Payload is BOOL.
 	CMD_ENABLE_LOG_CURRENT,                           // Sent to enable/disable current samples logging. -- Payload is BOOL.
@@ -158,7 +159,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_DEC_VOLTAGE_RANGE,                            // Sent to decrease voltage range.
 	CMD_INC_CURRENT_RANGE,                            // Sent to increase current range.
 	CMD_DEC_CURRENT_RANGE,                            // Sent to decrease current range.
-	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is stream_buffer_header_t.
+	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is control_command_packet_t.
 	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
 	CMD_SEND_MESH_MSG,                                // Sent to send a mesh message. -- Payload is cs_mesh_msg_t.
 	CMD_SEND_MESH_MSG_KEEP_ALIVE,                     // Sent to send a switch mesh message. -- Payload is keep_alive_state_item_t.
@@ -281,6 +282,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::EVT_ADV_BACKGROUND:
 	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
@@ -524,7 +526,8 @@ typedef  uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
-typedef  internal_multi_switch_item_cmd_t TYPIFY(CMD_MULTI_SWITCH);
+typedef  internal_multi_switch_item_cmd_t TYPIFY(CMD_SWITCH);
+typedef  internal_multi_switch_item_t TYPIFY(CMD_MULTI_SWITCH);
 typedef  cs_mesh_msg_t TYPIFY(CMD_SEND_MESH_MSG);
 typedef  keep_alive_state_item_t TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE);
 typedef  internal_multi_switch_item_t TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH);
@@ -718,6 +721,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return 0;
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
 		return 0;
+	case CS_TYPE::CMD_SWITCH:
+		return sizeof(TYPIFY(CMD_SWITCH));
 	case CS_TYPE::CMD_MULTI_SWITCH:
 		return sizeof(TYPIFY(CMD_MULTI_SWITCH));
 	case CS_TYPE::EVT_ADV_BACKGROUND:
@@ -935,6 +940,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_OFF: return "EVT_POWER_OFF";
 	case CS_TYPE::CMD_SWITCH_ON: return "EVT_POWER_ON";
 	case CS_TYPE::CMD_SWITCH_TOGGLE: return "EVT_POWER_TOGGLE";
+	case CS_TYPE::CMD_SWITCH: return "CMD_SWITCH";
 	case CS_TYPE::CMD_MULTI_SWITCH: return "CMD_MULTI_SWITCH";
 	case CS_TYPE::EVT_DIMMING_ALLOWED: return "EVT_DIMMING_ALLOWED";
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF: return "EVT_DIMMER_FORCED_OFF";
@@ -1042,6 +1048,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::EVT_ADV_BACKGROUND:
 	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
@@ -1176,6 +1183,7 @@ constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::EVT_ADV_BACKGROUND:
 	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
@@ -1474,6 +1482,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:
@@ -1606,6 +1615,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:
@@ -1739,6 +1749,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:
