@@ -9,6 +9,9 @@
 #include "events/cs_EventDispatcher.h"
 #include "storage/cs_State.h"
 
+MultiSwitchHandler::MultiSwitchHandler() {
+}
+
 void MultiSwitchHandler::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
 	EventDispatcher::getInstance().addListener(this);
