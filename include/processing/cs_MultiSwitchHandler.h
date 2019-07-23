@@ -11,8 +11,17 @@
 #include "common/cs_Types.h"
 
 class MultiSwitchHandler : EventListener {
-
+private:
+	MultiSwitchHandler();
 public:
+	//! Gets a static singleton (no dynamic memory allocation)
+	static MultiSwitchHandler& getInstance() {
+		static MultiSwitchHandler instance;
+		return instance;
+	}
+	MultiSwitchHandler(MultiSwitchHandler const&) = delete;
+	void operator=(MultiSwitchHandler const&) = delete;
+
 	void init();
 	void handleMultiSwitch(internal_multi_switch_item_t* cmd);
 	// Handle events as EventListener

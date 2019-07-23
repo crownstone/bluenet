@@ -560,6 +560,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
 
+			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
 			_multiSwitchHandler->init();
 			break;
 		case OperationMode::OPERATION_MODE_SETUP:
