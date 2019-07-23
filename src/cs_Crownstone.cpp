@@ -556,7 +556,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 				_mesh->init();
 			}
 #endif
-			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::BASIC); // BackgroundAdvertisementHandler needs RC5.
+			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::LOCALIZATION);
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
 

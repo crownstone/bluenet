@@ -75,7 +75,11 @@ private:
 
 	void handleDecryptedRC5Payload(scanned_device_t* scannedDevice, const command_adv_header_t& header, uint16_t decryptedPayload[2]);
 
-	// Return index of claim with this device token, but only if the encryptedData is different than previous.
+	/**
+	 * Return index of claim with this device token.
+	 * Returns -1 when the device token was not found.
+	 * Returns -2 when the device token was found, but the previous encryptedData is similar.
+	 */
 	int checkSimilarCommand(uint8_t deviceToken, uint32_t encryptedData);
 
 	// Return true when device claimed successfully: when there's a claim spot.

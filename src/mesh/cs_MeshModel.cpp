@@ -494,7 +494,7 @@ bool MeshModel::sendMsgFromQueue() {
 	}
 	free(msg);
 	--(item->repeats);
-	LOGd("sent ind=%u repeats left=%u type=%u id=%u", index, item->repeats, item->type, item->id);
+	LOGd("sent ind=%u repeats_left=%u type=%u id=%u", index, item->repeats, item->type, item->id);
 //	BLEutil::printArray(meshMsg.msg, meshMsg.size);
 
 	// Next item will be sent next, so that items are sent interleaved.

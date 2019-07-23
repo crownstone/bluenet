@@ -13,7 +13,21 @@
 #include "processing/cs_EncryptionHandler.h"
 #include "storage/cs_State.h"
 
+// Defines to enable extra debug logs.
+//#define COMMAND_ADV_DEBUG
 //#define COMMAND_ADV_VERBOSE
+
+#ifdef COMMAND_ADV_DEBUG
+#define LOGCommandAdvDebug LOGd
+#else
+#define LOGCommandAdvDebug LOGnone
+#endif
+
+#ifdef COMMAND_ADV_VERBOSE
+#define LOGCommandAdvVerbose LOGd
+#else
+#define LOGCommandAdvVerbose LOGnone
+#endif
 
 #if CMD_ADV_CLAIM_TIME_MS / TICK_INTERVAL_MS > 250
 #error "Timeout counter will overflow."
@@ -61,7 +75,7 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	}
 
 #ifdef COMMAND_ADV_VERBOSE
-	LOGd("rssi=%i", scannedDevice->rssi);
+	LOGCommandAdvVerbose("rssi=%i", scannedDevice->rssi);
 	_log(SERIAL_DEBUG, "16bit services: ");
 	BLEutil::printArray(services16bit.data, services16bit.len);
 #endif
@@ -83,9 +97,7 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	// Fill the nonce with the service data in the correct order.
 	for (int i=0; i < CMD_ADV_NUM_SERVICES_16BIT; ++i) {
 		uint16_t serviceUuid = ((uint16_t*)services16bit.data)[i];
-#ifdef COMMAND_ADV_VERBOSE
-		LOGd("uuid=%u", serviceUuid);
-#endif
+		LOGCommandAdvVerbose("uuid=%u", serviceUuid);
 		uint8_t sequence = (serviceUuid >> (16-2)) & 0x0003;
 		foundSequences[sequence] = true;
 		switch (sequence) {
@@ -118,11 +130,13 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	}
 	for (int i=0; i < CMD_ADV_NUM_SERVICES_16BIT; ++i) {
 		if (!foundSequences[i]) {
+			LOGCommandAdvVerbose("Missing UUID with sequence %i", i)
 			return;
 		}
 	}
 
 	if (header.sphereId != _sphereId) {
+		LOGCommandAdvVerbose("Wrong sphereId got=%u stored=%u", header.sphereId, _sphereId);
 		return;
 	}
 
@@ -142,10 +156,8 @@ int CommandAdvHandler::checkSimilarCommand(uint8_t deviceToken, uint32_t encrypt
 	for (int i=0; i<CMD_ADV_MAX_CLAIM_COUNT; ++i) {
 		if (_claims[i].deviceToken == deviceToken) {
 			if (_claims[i].timeoutCounter && _claims[i].encryptedData == encryptedData) {
-#ifdef COMMAND_ADV_VERBOSE
-				LOGd("Ignore similar payload");
-#endif
-				return -1;
+				LOGCommandAdvDebug("Ignore similar payload");
+				return -2;
 			}
 			index = i;
 			break;
@@ -171,9 +183,7 @@ bool CommandAdvHandler::claim(uint8_t deviceToken, uint32_t encryptedData, int i
 		_claims[index].encryptedData = encryptedData;
 		return true;
 	}
-#ifdef COMMAND_ADV_VERBOSE
-	LOGd("No more claim spots");
-#endif
+	LOGCommandAdvDebug("No more claim spots");
 	return false;
 }
 
@@ -191,8 +201,8 @@ uint32_t CommandAdvHandler::getPartOfEncryptedData(cs_data_t& encryptedPayload) 
 
 bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedDevice, const command_adv_header_t& header, const cs_data_t& nonce, cs_data_t& encryptedPayload, uint16_t encryptedPayloadRC5[2], uint16_t decryptedPayloadRC5[2]) {
 	int claimIndex = checkSimilarCommand(header.deviceToken, getPartOfEncryptedData(encryptedPayload));
-	if (claimIndex == -1) {
-		// Ignore this command, as it has already been handled.
+	if (claimIndex == -2) {
+		LOGCommandAdvVerbose("Ignore already handled command");
 		return false;
 	}
 
@@ -215,12 +225,14 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		break;
 	}
 	if (accessLevel == NOT_SET) {
+		LOGw("Invalid access level %u", header.accessLevel);
 		return false;
 	}
 
 	// TODO: can decrypt to same buffer?
 	uint8_t decryptedData[16];
 	if (!EncryptionHandler::getInstance().decryptBlockCTR(encryptedPayload.data, encryptedPayload.len, decryptedData, 16, accessLevel, nonce.data, nonce.len)) {
+		LOGCommandAdvVerbose("Decrypt failed");
 		return false;
 	}
 #ifdef COMMAND_ADV_VERBOSE
@@ -243,6 +255,15 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	if (!decryptRC5Payload(encryptedPayloadRC5, decryptedPayloadRC5)) {
 		return false;
 	}
+
+	LOGCommandAdvVerbose("RC5: locationId=%u profileId=%u rssiOffset=%u flags=%u count=%u (not %u)",
+			(decryptedPayloadRC5[1] >> (16-6)) & 0x3F,
+			(decryptedPayloadRC5[1] >> (16-6-3)) & 0x07,
+			(decryptedPayloadRC5[1] >> (16-6-3-4)) & 0x0F,
+			(decryptedPayloadRC5[1] >> (16-6-3-4-3)) & 0x07,
+			(decryptedPayloadRC5[0] >> 8) & 0xFF,
+			(decryptedPayloadRC5[0] >> 0) & 0xFF
+			);
 
 	CommandHandlerTypes commandType = CTRL_CMD_UNKNOWN;
 	switch (type) {
@@ -269,20 +290,16 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	controlCmd.source.flagExternal = false;
 	controlCmd.source.sourceId = CS_CMD_SOURCE_DEVICE_TOKEN + header.deviceToken;
 	controlCmd.source.count = (decryptedPayloadRC5[0] >> 8) & 0xFF;
-	LOGd("send cmd type=%u", controlCmd.type);
+	LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 	EventDispatcher::getInstance().dispatch(event);
 	return true;
 }
 
 bool CommandAdvHandler::decryptRC5Payload(uint16_t encryptedPayload[2], uint16_t decryptedPayload[2]) {
-#ifdef COMMAND_ADV_VERBOSE
-	LOGd("encrypted RC5=[%u %u]", encryptedPayload[0], encryptedPayload[1]);
-#endif
+	LOGCommandAdvVerbose("encrypted RC5=[%u %u]", encryptedPayload[0], encryptedPayload[1]);
 	bool success = EncryptionHandler::getInstance().RC5Decrypt(encryptedPayload, sizeof(uint16_t) * 2, decryptedPayload, sizeof(uint16_t) * 2); // Can't use sizeof(encryptedPayload) as that returns size of pointer.
-#ifdef COMMAND_ADV_VERBOSE
-	LOGd("decrypted RC5=[%u %u]", decryptedPayload[0], decryptedPayload[1]);
-#endif
+	LOGCommandAdvVerbose("decrypted RC5=[%u %u]", decryptedPayload[0], decryptedPayload[1]);
 	return success;
 }
 

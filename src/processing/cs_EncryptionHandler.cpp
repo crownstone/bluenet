@@ -427,6 +427,7 @@ bool EncryptionHandler::_RC5PrepareKey(uint8_t* key, uint8_t keyLength) {
 
 	for (int i = 0; i<keyLenWords; ++i) {
 		L[i] = (key[2*i+1] << 8) + key[2*i];
+//		LOGd("L[i]=%u", L[i]);
 	}
 
 	_rc5SubKeys[0] = RC5_16BIT_P;
@@ -440,18 +441,24 @@ bool EncryptionHandler::_RC5PrepareKey(uint8_t* key, uint8_t keyLength) {
 	uint16_t b = 0;
 	uint16_t sum;
 	for (int k=0; k<loops; ++k) {
+//		LOGd("i=%u j=%u a=%u b=%u L[j]=%u key[i]=%u", i, j, a, b, L[j], _rc5SubKeys[i]);
 		sum = _rc5SubKeys[i] + a + b;
 		a = ROTL_16BIT(sum, 3);
 		_rc5SubKeys[i] = a;
 		sum = L[j] + a + b;
 		b = ROTL_16BIT(sum, (a+b) % 16);
 		L[j] = b;
+//		LOGd("  i=%u j=%u a=%u b=%u L[j]=%u key[i]=%u", i, j, a, b, L[j], _rc5SubKeys[i]);
 		++i;
 		++j;
 		i %= RC5_NUM_SUBKEYS;
 		j %= keyLenWords;
 	}
-
+//	LOGi("key=");
+//	BLEutil::printArray(key, keyLength);
+//	for (int i=0; i<RC5_NUM_SUBKEYS; ++i) {
+//		LOGi("RC5 key[%i] = %u", i, _rc5SubKeys[i]);
+//	}
 	return true;
 }
 
@@ -554,6 +561,9 @@ bool EncryptionHandler::_checkAndSetKey(uint8_t userLevel) {
 		break;
 	case SERVICE_DATA:
 		keyConfigType = CS_TYPE::CONFIG_KEY_SERVICE_DATA;
+		break;
+	case LOCALIZATION:
+		keyConfigType = CS_TYPE::CONFIG_KEY_LOCALIZATION;
 		break;
 	case SETUP: {
 		if (_operationMode == OperationMode::OPERATION_MODE_SETUP && _setupKeyValid) {

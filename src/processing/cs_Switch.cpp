@@ -553,10 +553,12 @@ bool Switch::checkAndSetOwner(cmd_source_t source) {
 	}
 	if (_source.sourceId != source.sourceId) {
 		// Switch is claimed by other source.
+		LOGd("Already claimed by %u", _source.sourceId);
 		return false;
 	}
 	if (!BLEutil::isNewer(_source.count, source.count)) {
 		// A command with newer counter has been received already.
+		LOGd("Old command: %u, already got: %u", source.count, _source.count);
 		return false;
 	}
 	_source = source;
