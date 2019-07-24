@@ -49,6 +49,7 @@
 #include "nrf_bootloader_wdt.h"
 #include "nrf_delay.h"
 #include "nrf_bootloader_app_start.h"
+#include "nrf_gpio.h"
 
 
 static volatile bool m_flash_write_done;
@@ -326,6 +327,12 @@ static uint32_t bl_activate(void)
     return ret_val;
 }
 
+static void flash_write_callback(void * p_context)
+{
+    UNUSED_PARAMETER(p_context);
+    m_flash_write_done = true;
+}
+
 // Code from dfu_bl_image_swap() (below reference)
 // https://devzone.nordicsemi.com/f/nordic-q-a/18199/dfu---updating-from-legacy-sdk-v11-0-0-bootloader-to-secure-sdk-v12-x-0-bootloader
 // Other reference:
@@ -348,7 +355,7 @@ static uint32_t bl_activate(void)
  */
 static uint32_t new_bl_activate(void)
 {
-    const uint32_t BL_ADDR = 0x70000;
+    const uint32_t BL_ADDR = 0x70000; // There should be a better way to init the address
 
     NRF_LOG_DEBUG("Enter custom BL copy, bootloader target address: 0x%x", BL_ADDR);
     NRF_LOG_FLUSH();
@@ -438,14 +445,32 @@ static uint32_t new_bl_activate(void)
         CRITICAL_REGION_EXIT();
     }
 
+    if ((ret_val != NRF_SUCCESS) &&
+        (memcmp((void *)BL_ADDR, (void *)src_addr, len) == 0))
+    {
+        NRF_LOG_DEBUG("No copy needed as Bank-1:0x%x and Destination:0x%x have the same content", src_addr, BL_ADDR);
+        NRF_LOG_FLUSH();
+        ret_val =  NRF_SUCCESS;
+    }
+    else {
+        // only copy it now, On success this function won't return.
+
+        // HACK, invalidate Bank 0 to prevent repeated execution
+        // nrf_dfu_bank_invalidate(p_bank);
+        // m_flash_write_done = false;
+        // ret_val = nrf_dfu_settings_write_and_backup(flash_write_callback);
+        // ASSERT(m_flash_write_done); /* At this point flash module is performing blocking operation. It is expected that operation is already performed. */
+        ret_val = nrf_dfu_mbr_copy_bl((uint32_t*)src_addr, len);
+        if (ret_val != NRF_SUCCESS)
+        {
+            NRF_LOG_ERROR("Request to copy BL failed");
+        }
+    }
+
     NRF_LOG_FLUSH();
 
-    // On success this function won't return.
-    ret_val = nrf_dfu_mbr_copy_bl((uint32_t*)src_addr, len);
-    if (ret_val != NRF_SUCCESS)
-    {
-        NRF_LOG_ERROR("Request to copy BL failed");
-    }
+
+    // s_dfu_settings.bank_1.bank_code = NRF_DFU_BANK_VALID_BL;
 
     return ret_val;
 }
@@ -487,14 +512,6 @@ static uint32_t sd_bl_activate()
     return ret_val;
 }
 
-
-static void flash_write_callback(void * p_context)
-{
-    UNUSED_PARAMETER(p_context);
-    m_flash_write_done = true;
-}
-
-
 nrf_bootloader_fw_activation_result_t nrf_bootloader_fw_activate(void)
 {
     nrf_bootloader_fw_activation_result_t result;
@@ -517,7 +534,9 @@ nrf_bootloader_fw_activation_result_t nrf_bootloader_fw_activate(void)
             break;
         case NRF_DFU_BANK_VALID_BL:
             NRF_LOG_DEBUG("Valid BL");
+            nrf_gpio_pin_set(19);
             ret_val = new_bl_activate();
+            // ret_val = bl_activate();
             break;
         case NRF_DFU_BANK_VALID_SD_BL:
             NRF_LOG_DEBUG("Valid SD + BL");
