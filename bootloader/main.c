@@ -209,11 +209,6 @@ int main(void)
 {
 	uint32_t ret_val;
 
-	// NRF_LOG_ERROR("Processing...");
-	// NRF_LOG_FLUSH();
-
-	// nrf_delay_ms(1000);
-
 	boards_config_t board = {};
 	configure_board(&board);
 	cs_gpio_init(&board);
