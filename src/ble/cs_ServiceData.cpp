@@ -408,7 +408,7 @@ void ServiceData::sendMeshState(bool event) {
 		packet.switchState = _switchState;
 		packet.flags = _flags;
 		packet.powerFactor = _powerFactor;
-		packet.powerUsageReal = _powerUsageReal;
+		packet.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
 		packet.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
 
 		meshMsg.type = CS_MESH_MODEL_TYPE_STATE_0;
