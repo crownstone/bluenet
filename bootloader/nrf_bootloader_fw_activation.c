@@ -452,14 +452,9 @@ static uint32_t new_bl_activate(void)
         NRF_LOG_FLUSH();
         ret_val =  NRF_SUCCESS;
     }
-    else {
-        // only copy it now, On success this function won't return.
-
-        // HACK, invalidate Bank 0 to prevent repeated execution
-        // nrf_dfu_bank_invalidate(p_bank);
-        // m_flash_write_done = false;
-        // ret_val = nrf_dfu_settings_write_and_backup(flash_write_callback);
-        // ASSERT(m_flash_write_done); /* At this point flash module is performing blocking operation. It is expected that operation is already performed. */
+    else 
+    {
+        // only copy it now, on success this function won't return.
         ret_val = nrf_dfu_mbr_copy_bl((uint32_t*)src_addr, len);
         if (ret_val != NRF_SUCCESS)
         {
@@ -468,9 +463,6 @@ static uint32_t new_bl_activate(void)
     }
 
     NRF_LOG_FLUSH();
-
-
-    // s_dfu_settings.bank_1.bank_code = NRF_DFU_BANK_VALID_BL;
 
     return ret_val;
 }
