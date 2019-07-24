@@ -35,7 +35,7 @@ uint8 [] | Services bitmask | 16 | Consists of 3x the same [data](#background_ad
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
-uint8 | Protocol | 2 | Protocol version.
+uint8 | Protocol | 2 | Protocol version, currently 0.
 uint8 | Sphere ID | 8 | Hash of the sphere ID, acts as filter, so that not every advertisement has to be decrypted.
 uint16 [] | Payload | 32 | Encrypted [payload](#background_adv_payload), using 32b RC5 with 128b localization key.
 
@@ -95,7 +95,7 @@ uint64[] | 128bit service | 16 | Single 128 bit service UUID, which is used as [
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint8 | Sequence | 2 | 0: Sequence of this service UUID.
-uint8 | Protocol | 3 | Protocol version.
+uint8 | Protocol | 3 | Protocol version, currently 0.
 uint8 | Sphere ID | 8 | Sphere ID that must be the same as given during setup. Used to filter out broadcasts that are not meant for this Crownstone.
 uint8 | Access level | 3 | Shortened access level: 0=admin, 1=member, 2=basic, 4=setup.
 uint8 | Sequence | 2 | 1: Sequence of this service UUID.

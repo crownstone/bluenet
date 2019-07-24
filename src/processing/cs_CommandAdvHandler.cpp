@@ -288,8 +288,8 @@ void CommandAdvHandler::handleEncryptedRC5Payload(scanned_device_t* scannedDevic
 
 	adv_background_t backgroundAdv;
 	switch (header.protocol) {
-	case 1:
-		backgroundAdv.protocol = 1;
+	case 0:
+		backgroundAdv.protocol = 0;
 	}
 	backgroundAdv.sphereId = header.sphereId;
 	backgroundAdv.data = (uint8_t*)(decryptedPayload);
