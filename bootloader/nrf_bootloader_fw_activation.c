@@ -48,6 +48,7 @@
 #include "nrf_dfu_utils.h"
 #include "nrf_bootloader_wdt.h"
 #include "nrf_delay.h"
+#include "nrf_bootloader_app_start.h"
 
 
 static volatile bool m_flash_write_done;
@@ -325,19 +326,42 @@ static uint32_t bl_activate(void)
     return ret_val;
 }
 
-// Code adapted from dfu_bl_image_swap() (below reference)
+// Code from dfu_bl_image_swap() (below reference)
 // https://devzone.nordicsemi.com/f/nordic-q-a/18199/dfu---updating-from-legacy-sdk-v11-0-0-bootloader-to-secure-sdk-v12-x-0-bootloader
 // Other reference:
 // https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.nrf52832.ps.v1.1%2Fnvmc.html&anchor=concept_pcl_wbz_vr
-uint32_t cs_bl_copy(void)
-{
-    NRF_LOG_DEBUG("Enter custom BL copy");
-    NRF_LOG_FLUSH();
 
+/** @brief Function to continue bootloader update.
+ *
+ * @details     This function will be called after reset if there is a valid bootloader in Bank 0 or Bank 1
+ *              required to be relocated and activated through MBR commands.
+ *
+ * @return This function will not return if the bootloader is copied successfully.
+ *         After the copy is verified, the device will reset and start the new bootloader.
+ *
+ * @retval NRF_SUCCESS Continuation was successful.
+ * @retval NRF_ERROR_INVALID_LENGTH Invalid length of flash operation.
+ * @retval NRF_ERROR_NO_MEM If no parameter page is provided (see sds for more info).
+ * @retval NRF_ERROR_INVALID_PARAM If an invalid command is given.
+ * @retval NRF_ERROR_INTERNAL Internal error that should not happen.
+ * @retval NRF_ERROR_FORBIDDEN If NRF_UICR->BOOTADDR is not set.
+ */
+static uint32_t new_bl_activate(void)
+{
     const uint32_t BL_ADDR = 0x70000;
 
-    sd_mbr_command_t      sd_mbr_cmd;
-    uint32_t bl_src_addr = nrf_dfu_bank1_start_addr();
+    NRF_LOG_DEBUG("Enter custom BL copy, bootloader target address: 0x%x", BL_ADDR);
+    NRF_LOG_FLUSH();
+
+    uint32_t         ret_val  = NRF_ERROR_INVALID_DATA;
+    nrf_dfu_bank_t * p_bank   = &s_dfu_settings.bank_1;
+    uint32_t         len      = p_bank->image_size;
+
+    uint32_t src_addr = nrf_dfu_bank1_start_addr(); // The bootloader is copied into bank-1 by DFU
+
+    NRF_LOG_DEBUG("Copying bootloader: Src: 0x%08x, Len: 0x%08x", src_addr, len);
+
+    nrf_bootloader_wdt_feed();
 
     // Storage buffers and variables to hold the UICR register content
     static uint32_t uicr_buffer[59]    = {0x00000000};
@@ -345,27 +369,25 @@ uint32_t cs_bl_copy(void)
     static uint32_t pselreset_1        = 0x00000000;
     static uint32_t approtect          = 0x00000000;
     static uint32_t nfcpins            = 0x00000000;
-    
-
-    // Do the following only if the bootloader needs to be displaced.
-    // Optional code start
-    CRITICAL_REGION_ENTER();
 
     uint32_t uicr_address = 0x10001014;
 
-    // uint32_t readout_bl_addr = NRF_UICR->NRFFW[0];
+    uint32_t present_uicr_addr = *(uint32_t *)uicr_address;
     while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
+    
+    if (present_uicr_addr != BL_ADDR)
+    {
+        NRF_LOG_DEBUG("Relocating bootloader from 0x%x to 0x%x", present_uicr_addr, BL_ADDR);
 
-    // if (readout_bl_addr != BL_ADDR)
-    // {
-        // Read and buffer UICR register content prior to erase
+        CRITICAL_REGION_ENTER();
+
         for(int i = 0; i < 59; i++)
         {
             uicr_buffer[i] = *(uint32_t *)uicr_address; 
             while (NRF_NVMC->READY == NVMC_READY_READY_Busy){}
             uicr_address += 0x04; // advance to the next register
         }
-        
+
         pselreset_0 = NRF_UICR->PSELRESET[0];
         pselreset_1 = NRF_UICR->PSELRESET[1];
         approtect   = NRF_UICR->APPROTECT;
@@ -388,6 +410,7 @@ uint32_t cs_bl_copy(void)
 
         // Write the modified UICR content back to the UICR registers 
         uicr_address = 0x10001014;
+
         for(int j = 0; j < 59; j++)
         {
             // Skip writing to registers that were 0xFFFFFFFF before the UICR register were erased. 
@@ -400,51 +423,31 @@ uint32_t cs_bl_copy(void)
             uicr_address += 0x04; // advance to the next register
         }
 
-
         nrf_delay_ms(1000);
-
-        // uint32_t ret_val = nrf_dfu_flash_erase(0x7E000, 1, NULL);
-        // if (ret_val != NRF_SUCCESS)
-        // {
-        //     NRF_LOG_DEBUG("Failed to erase settings page");
-        //     NRF_LOG_FLUSH();
-        // }
-        // else
-        // {
-        //     NRF_LOG_DEBUG("Finished erasing the bootloader settings page");
-        // }
-
-        NRF_LOG_DEBUG("Value read %x", NRF_UICR->NRFFW[0]);
-        NRF_LOG_FLUSH();
 
         NRF_UICR->PSELRESET[0]  = pselreset_0;
         NRF_UICR->PSELRESET[1]  = pselreset_1;
         NRF_UICR->APPROTECT     = approtect;
         NRF_UICR->NFCPINS       = nfcpins;
+        
+        NRF_LOG_DEBUG("Value read %x", NRF_UICR->NRFFW[0]);
+        NRF_LOG_FLUSH();
 
         NRF_LOG_DEBUG("Overwritting the address done");
 
         CRITICAL_REGION_EXIT();
+    }
 
-    // }
-
-    NRF_LOG_DEBUG("Copying bootloader: Src: 0x%08x, Len: 0x%08x", bl_src_addr, s_dfu_settings.bank_1.image_size);
     NRF_LOG_FLUSH();
 
-    //TODO: displace the application data, which would be occupied by the new bootloader
+    // On success this function won't return.
+    ret_val = nrf_dfu_mbr_copy_bl((uint32_t*)src_addr, len);
+    if (ret_val != NRF_SUCCESS)
+    {
+        NRF_LOG_ERROR("Request to copy BL failed");
+    }
 
-    // Optional code ends
-
-    nrf_bootloader_wdt_feed();
-
-    sd_mbr_cmd.command               = SD_MBR_COMMAND_COPY_BL;
-    sd_mbr_cmd.params.copy_bl.bl_src = (uint32_t *)(bl_src_addr);
-    sd_mbr_cmd.params.copy_bl.bl_len = s_dfu_settings.bank_1.image_size / sizeof(uint32_t);
-
-    // Use the below function instead of calling the actual copy function
-    // ret_val = nrf_dfu_mbr_copy_bl((uint32_t*)bl_src_addr, s_dfu_settings.bank_1.image_size);
-
-    return sd_mbr_command(&sd_mbr_cmd);
+    return ret_val;
 }
 
 
@@ -505,10 +508,7 @@ nrf_bootloader_fw_activation_result_t nrf_bootloader_fw_activate(void)
     {
        case NRF_DFU_BANK_VALID_APP:
             NRF_LOG_DEBUG("Valid App but this is my stubbed code");
-            // ret_val = app_activate();
-            // ret_val = cs_bl_copy_new();
-            ret_val = cs_bl_copy();
-            // ret_val = bl_activate();
+            ret_val = app_activate();
             break;
        case NRF_DFU_BANK_VALID_SD:
             NRF_LOG_DEBUG("Valid SD");
@@ -517,8 +517,7 @@ nrf_bootloader_fw_activation_result_t nrf_bootloader_fw_activate(void)
             break;
         case NRF_DFU_BANK_VALID_BL:
             NRF_LOG_DEBUG("Valid BL");
-            ret_val = cs_bl_copy();
-            // ret_val = bl_activate();
+            ret_val = new_bl_activate();
             break;
         case NRF_DFU_BANK_VALID_SD_BL:
             NRF_LOG_DEBUG("Valid SD + BL");
