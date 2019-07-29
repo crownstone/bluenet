@@ -32,7 +32,14 @@ And similarly:
 
 # Upload firmware
 
-To upload just the application, use something like (or use the above GUI):
+The utility can be used like this:
+
+![Nordic tools](../docs/images/pc_nordic_tools.png)
+![Start dfu](../docs/images/pc_nordic_start_dfu.png)
+![Transferring](../docs/images/pc_nordic_transferring.png)
+
+
+You can also use the command line to upload an application. Use something like:
 
     nrfutil dfu ble -pkg ./firmware_dfu.zip -ic NRF52
 
@@ -68,4 +75,4 @@ To solve, run:
     JLinkExe
     > MSDDisable
 
-Now, it should flash!
+Reset the device and now it should be able to flash another board!
