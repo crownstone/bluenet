@@ -24,9 +24,9 @@ uint 8[] | Data |  | Remaining data, length depends on type.
 
 Type | Packet
 --- | ---
-0-4 | Deprecated, see this [document](SERVICE_DATA_DEPRECATED.md)
-5 | [Device type + data](#servicedata_device_type). Advertised when in normal mode.
+0-5 | Deprecated, see this [document](SERVICE_DATA_DEPRECATED.md)
 6 | [Device type + data](#servicedata_device_type_setup). Advertised when in setup mode.
+7 | [Device type + data](#servicedata_device_type). Advertised when in normal mode.
 
 
 

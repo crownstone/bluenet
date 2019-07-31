@@ -24,7 +24,7 @@ enum ServiceDataFlagBits {
 };
 
 enum ServiceDataUnencryptedType {
-	SERVICE_DATA_TYPE_ENCRYPTED = 5,
+	SERVICE_DATA_TYPE_ENCRYPTED = 7,
 	SERVICE_DATA_TYPE_SETUP = 6,
 };
 
