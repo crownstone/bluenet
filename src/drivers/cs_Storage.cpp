@@ -159,7 +159,7 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, const cs_state_data_t & 
 	// Assume the allocation was done by storage.
 	// Size is in bytes, each word is 4B.
 	record.data.length_words = getPaddedSize(file_data.size) >> 2;
-	LOGd("Write record=%u or type=%u", p_fds_evt->write.record_key, to_underlying_type(type));
+	LOGd("Write record=%u or type=%u", record.key, recordKey);
 	LOGStorageDebug("Data=%p word size=%u", record.data.p_data, record.data.length_words);
 
 	bool f_exists = false;
