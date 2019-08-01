@@ -159,7 +159,8 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, const cs_state_data_t & 
 	// Assume the allocation was done by storage.
 	// Size is in bytes, each word is 4B.
 	record.data.length_words = getPaddedSize(file_data.size) >> 2;
-	LOGStorageDebug("Store %p of word size %u", record.data.p_data, record.data.length_words);
+	LOGd("Write record=%u or type=%u", p_fds_evt->write.record_key, to_underlying_type(type));
+	LOGStorageDebug("Data=%p word size=%u", record.data.p_data, record.data.length_words);
 
 	bool f_exists = false;
 	fds_ret_code = exists(file_id, recordKey, record_desc, f_exists);
@@ -183,6 +184,7 @@ ret_code_t Storage::writeInternal(cs_file_id_t file_id, const cs_state_data_t & 
 			fds_ret_code = FDS_ERR_BUSY;
 		}
 		else {
+			LOGe("Failed to start GC: %u", gc_ret_code);
 			fds_ret_code = gc_ret_code;
 		}
 		break;
@@ -396,7 +398,7 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 	switch (p_fds_evt->result) {
 	case FDS_SUCCESS: {
 		CS_TYPE type = CS_TYPE(p_fds_evt->write.record_key);
-		LOGStorageDebug("Write done, record_key=%u or type=%u", p_fds_evt->write.record_key, to_underlying_type(type));
+		LOGd("Write done, record=%u or type=%u", p_fds_evt->write.record_key, to_underlying_type(type));
 		event_t event(CS_TYPE::EVT_STORAGE_WRITE_DONE, &type, sizeof(type));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
@@ -407,7 +409,7 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 			_errorCallback(CS_STORAGE_OP_WRITE, p_fds_evt->write.file_id, type);
 		}
 		else {
-			LOGw("Unhandled write error: %u record_key=%u", p_fds_evt->result, p_fds_evt->write.record_key);
+			LOGw("Unhandled write error: %u record=%u", p_fds_evt->result, p_fds_evt->write.record_key);
 		}
 		break;
 	}
@@ -418,7 +420,7 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 	switch (p_fds_evt->result) {
 	case FDS_SUCCESS: {
 		CS_TYPE type = CS_TYPE(p_fds_evt->del.record_key);
-		LOGi("Remove done, record_key=%u or type=%u", p_fds_evt->del.record_key, to_underlying_type(type));
+		LOGi("Remove done, record=%u or type=%u", p_fds_evt->del.record_key, to_underlying_type(type));
 		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_DONE, &type, sizeof(type));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
@@ -429,7 +431,7 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 			_errorCallback(CS_STORAGE_OP_REMOVE, p_fds_evt->del.file_id, type);
 		}
 		else {
-			LOGw("Unhandled rem record error: %u record_key=%u", p_fds_evt->result, p_fds_evt->del.record_key);
+			LOGw("Unhandled rem record error: %u record=%u", p_fds_evt->result, p_fds_evt->del.record_key);
 		}
 	}
 }
