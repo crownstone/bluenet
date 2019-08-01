@@ -406,12 +406,12 @@ bool Switch::_setPwm(uint8_t value) {
 	if (value >= (SWITCH_ON - 1)) {
 		value = SWITCH_ON;
 	}
-	PWM::getInstance().setValue(0, value);
 	_switchValue.state.dimmer = value;
-	if (!_pwmPowered) {
+	if (value != 0 && !_pwmPowered) {
 		// State stored, but not executed yet, so return false.
 		return false;
 	}
+	PWM::getInstance().setValue(0, value);
 	return true;
 }
 
