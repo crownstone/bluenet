@@ -34,7 +34,8 @@
 #define ZERO_CROSSING_CAPTURE_TASK  NRF_TIMER_TASK_CAPTURE3
 
 // Define test pin to enable gpio debug.
-//#define TEST_PIN 20
+//#define PWM_DEBUG_PIN_ZERO_CROSSING_INT 16
+//#define PWM_DEBUG_PIN_TIMER_INT 17
 
 PWM::PWM() :
 		_initialized(false),
@@ -96,8 +97,11 @@ uint32_t PWM::init(const pwm_config_t& config) {
 	_numSyncs = 0;
 	_syncFrequency = true;
 
-#ifdef TEST_PIN
-    nrf_gpio_cfg_output(TEST_PIN);
+#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
+    nrf_gpio_cfg_output(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
+#endif
+#ifdef PWM_DEBUG_PIN_TIMER_INT
+    nrf_gpio_cfg_output(PWM_DEBUG_PIN_TIMER_INT);
 #endif
 
     _initialized = true;
@@ -177,10 +181,6 @@ static void staticZeroCrossingStart(void* p_data, uint16_t len) {
 }
 
 void PWM::start() {
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
-
 	// Start the timer as soon as possible.
 	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
 
@@ -330,6 +330,9 @@ uint16_t PWM::getValue(uint8_t channel) {
 }
 
 void PWM::onZeroCrossing() {
+#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
+	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
+#endif
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
@@ -339,6 +342,9 @@ void PWM::onZeroCrossing() {
 		if (_startOnZeroCrossing) {
 			start();
 		}
+#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
+	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
+#endif
 		return;
 	}
 
@@ -360,6 +366,9 @@ void PWM::onZeroCrossing() {
 
 	if (_syncFrequency) {
 		if (_zeroCrossingCounter < DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE) {
+#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
+	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
+#endif
 			return;
 		}
 		_zeroCrossingCounter = 0;
@@ -385,6 +394,9 @@ void PWM::onZeroCrossing() {
 		_offsetSlopes3[_numSyncs] = slopeMedian(_offsetSlopes2);
 		++_numSyncs;
 		if (_numSyncs < DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC) {
+#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
+	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
+#endif
 			return;
 		}
 		_numSyncs = 0;
@@ -414,6 +426,9 @@ void PWM::onZeroCrossing() {
 		_zeroCrossOffsetIntegral += errTicks;
 
 		if (_zeroCrossingCounter < DIMMER_NUM_CROSSINGS_FOR_START_SYNC) {
+#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
+	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
+#endif
 			return;
 		}
 		_zeroCrossingCounter = 0;
@@ -461,6 +476,8 @@ void PWM::onZeroCrossing() {
 			_syncFrequency = true;
 		}
 
+//		cs_write();
+
 		// Set the new period time at the end of the current period.
 		enableInterrupt();
 	}
@@ -485,6 +502,10 @@ void PWM::onZeroCrossing() {
 	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_CLEAR);
 	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
 #endif // ndef PWM_SYNC_IMMEDIATELY
+
+#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
+	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
+#endif
 }
 
 
@@ -495,8 +516,8 @@ void PWM::onZeroCrossing() {
 
 
 void PWM::enableInterrupt() {
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
+#ifdef PWM_DEBUG_PIN_TIMER_INT
+	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_TIMER_INT);
 #endif
 
 	// The order of the function calls below are important:
@@ -723,8 +744,8 @@ nrf_ppi_task_t PWM::getPpiTaskDisable(uint8_t index) {
 
 // Timer interrupt handler
 extern "C" void CS_PWM_TIMER_IRQ(void) {
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
+#ifdef PWM_DEBUG_PIN_TIMER_INT
+	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_TIMER_INT);
 #endif
 //	if (nrf_timer_event_check(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX))) {
 	// Clear and disable interrupt until next change.
