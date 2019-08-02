@@ -330,6 +330,9 @@ uint16_t PWM::getValue(uint8_t channel) {
 }
 
 void PWM::onZeroCrossing() {
+	// Capture timer value as soon as possible.
+	nrf_timer_task_trigger(CS_PWM_TIMER, ZERO_CROSSING_CAPTURE_TASK);
+
 #ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
 	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
 #endif
@@ -347,9 +350,6 @@ void PWM::onZeroCrossing() {
 #endif
 		return;
 	}
-
-#ifndef PWM_SYNC_IMMEDIATELY
-	nrf_timer_task_trigger(CS_PWM_TIMER, ZERO_CROSSING_CAPTURE_TASK);
 	uint32_t ticks = nrf_timer_cc_read(CS_PWM_TIMER, getTimerChannel(ZERO_CROSSING_CHANNEL_IDX));
 
 	int32_t targetTicks = 0;
@@ -358,6 +358,8 @@ void PWM::onZeroCrossing() {
 	// Correct error for wrap around.
 	int32_t maxTickVal = _maxTickVal;
 	wrapAround(errTicks, maxTickVal);
+
+//	cs_write("ticks=%u err=%i \r\n", ticks, errTicks);
 
 	// Store error.
 	_offsets[_zeroCrossingCounter] = errTicks;
@@ -416,6 +418,8 @@ void PWM::onZeroCrossing() {
 
 		// Done with frequency synchronization.
 		_syncFrequency = false;
+
+//		cs_write("slope=%i ticks=%u \r\n", medianSlope, _adjustedMaxTickVal);
 
 		// Set the new period time at the end of the current period.
 		enableInterrupt();
@@ -476,33 +480,11 @@ void PWM::onZeroCrossing() {
 			_syncFrequency = true;
 		}
 
-//		cs_write();
+//		cs_write("medErr=%i errInt=%i P=%i I=%i ticks=%u \r\n", medianError, _zeroCrossOffsetIntegral, deltaP, deltaI, _adjustedMaxTickVal);
 
 		// Set the new period time at the end of the current period.
 		enableInterrupt();
 	}
-
-#else
-	// Start a new period
-	// Need to stop the timer, else the gpio state at start is not consistent.
-	// I guess this is because the gpiote toggle sometimes happens before, sometimes after the nrf_gpiote_task_force()
-	nrf_timer_event_clear(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX));
-	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_STOP);
-
-	for (uint8_t i=0; i<_config.channelCount; ++i) {
-		if (_isPwmEnabled[i]) {
-#ifdef PWM_CENTERED
-			gpioteForce(i, false);
-#else
-			gpioteForce(i, true);
-#endif
-		}
-	}
-	// Set the counter back to 0, and start the timer again.
-	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_CLEAR);
-	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
-#endif // ndef PWM_SYNC_IMMEDIATELY
-
 #ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
 	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
 #endif
