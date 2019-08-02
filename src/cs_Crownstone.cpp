@@ -720,7 +720,7 @@ void Crownstone::tick() {
 	// TODO: synchronize with servicedata.updateAdvertisement()
 	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
 		// update advertisement parameters (to improve scanning on (some) android phones)
-		_stack->updateAdvertisement(true);
+		_stack->updateAdvertisement(false);
 		// update advertisement (to update service data)
 		_stack->setAdvertisementData();
 	}

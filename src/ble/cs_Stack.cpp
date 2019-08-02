@@ -766,12 +766,11 @@ void Stack::updateAdvertisement(bool toggle) {
 		return;
 	}
 
+	bool connectable = true;
 	if (isConnected()) {
-		// No need to restart, since it's already non-connectable.
-		return;
+		connectable = false;
 	}
 
-	bool connectable = true;
 	if (toggle) {
 		connectable = (++_advInterleaveCounter % 2);
 	}
