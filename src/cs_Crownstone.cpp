@@ -1007,6 +1007,22 @@ int main() {
 		LOG_FLUSH();
 	}
 
+//	// Make a "clicker"
+//	nrf_delay_ms(1000);
+//	nrf_gpio_pin_set(board.pinGpioRelayOn);
+//	nrf_delay_ms(RELAY_HIGH_DURATION);
+//	nrf_gpio_pin_clear(board.pinGpioRelayOn);
+//	while (true) {
+//		nrf_delay_ms(1 * 60 * 1000); // 1 minute on
+//		nrf_gpio_pin_set(board.pinGpioRelayOff);
+//		nrf_delay_ms(RELAY_HIGH_DURATION);
+//		nrf_gpio_pin_clear(board.pinGpioRelayOff);
+//		nrf_delay_ms(5 * 60 * 1000); // 5 minutes off
+//		nrf_gpio_pin_set(board.pinGpioRelayOn);
+//		nrf_delay_ms(RELAY_HIGH_DURATION);
+//		nrf_gpio_pin_clear(board.pinGpioRelayOn);
+//	}
+
 	Crownstone crownstone(board); // 250 ms
 
 	// initialize crownstone (depends on the operation mode) ...
