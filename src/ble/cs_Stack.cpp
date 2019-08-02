@@ -703,10 +703,13 @@ void Stack::restartAdvertising() {
 	err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, &_adv_params);
 //	err = sd_ble_gap_adv_set_configure(&_adv_handle, &_adv_data, NULL);
 	if (err != NRF_SUCCESS) {
+		LOGw("sd_ble_gap_adv_set_configure failed: %u", err);
 		printAdvertisement();
+//		APP_ERROR_CHECK(err);
 	}
-	APP_ERROR_CHECK(err);
-	startAdvertising();
+	else {
+		startAdvertising();
+	}
 }
 
 void Stack::startAdvertising() {
@@ -728,7 +731,12 @@ void Stack::startAdvertising() {
 	if (ret_code == NRF_SUCCESS) {
 		_advertising = true;
 	}
-	APP_ERROR_CHECK(ret_code);
+	else {
+		// This often fails because this function is called, while the SD is already connected.
+		// The on connect event is scheduled, but not processed by us yet.
+		LOGw("startAdvertising failed: %u", ret_code);
+//		APP_ERROR_CHECK(ret_code);
+	}
 }
 
 void Stack::stopAdvertising() {
@@ -737,14 +745,12 @@ void Stack::stopAdvertising() {
 		return;
 	}
 
-	// This function call can take 31ms
 	LOGStackDebug("sd_ble_gap_adv_stop(_adv_handle=%i", _adv_handle);
 	uint32_t ret_code = sd_ble_gap_adv_stop(_adv_handle);
-	// Ignore invalid state error,
-	// see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
-	APP_ERROR_CHECK_EXCEPT(ret_code, NRF_ERROR_INVALID_STATE);
 
-	//LOGi(MSG_BLE_ADVERTISING_STOPPED);
+	// This often fails because this function is called, while the SD is already connected, thus advertising was stopped.
+	// The on connect event is scheduled, but not processed by us yet.
+	APP_ERROR_CHECK_EXCEPT(ret_code, NRF_ERROR_INVALID_STATE);
 
 	_advertising = false;
 }
