@@ -10,7 +10,6 @@
 #include "drivers/cs_Serial.h"
 #include "cfg/cs_Strings.h"
 #include "protocol/cs_ErrorCodes.h"
-#include "third/optmed.h"
 
 #include <nrf.h>
 #include <app_util_platform.h>
@@ -34,8 +33,7 @@
 #define ZERO_CROSSING_CAPTURE_TASK  NRF_TIMER_TASK_CAPTURE3
 
 // Define test pin to enable gpio debug.
-//#define PWM_DEBUG_PIN_ZERO_CROSSING_INT 16
-//#define PWM_DEBUG_PIN_TIMER_INT 17
+//#define TEST_PIN 20
 
 PWM::PWM() :
 		_initialized(false),
@@ -92,16 +90,11 @@ uint32_t PWM::init(const pwm_config_t& config) {
 	// Init zero crossing variables
 	_zeroCrossingCounter = 0;
 	_adjustedMaxTickVal = _maxTickVal;
-	_freqSyncedMaxTickVal = _maxTickVal;
-	_zeroCrossOffsetIntegral = 0;
-	_numSyncs = 0;
-	_syncFrequency = true;
+	_zeroCrossDeviationIntegral = 0;
+	_zeroCrossTicksDeviationAvg = 0;
 
-#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
-    nrf_gpio_cfg_output(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
-#endif
-#ifdef PWM_DEBUG_PIN_TIMER_INT
-    nrf_gpio_cfg_output(PWM_DEBUG_PIN_TIMER_INT);
+#ifdef TEST_PIN
+    nrf_gpio_cfg_output(TEST_PIN);
 #endif
 
     _initialized = true;
@@ -181,6 +174,10 @@ static void staticZeroCrossingStart(void* p_data, uint16_t len) {
 }
 
 void PWM::start() {
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
+#endif
+
 	// Start the timer as soon as possible.
 	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
 
@@ -330,12 +327,6 @@ uint16_t PWM::getValue(uint8_t channel) {
 }
 
 void PWM::onZeroCrossing() {
-	// Capture timer value as soon as possible.
-	nrf_timer_task_trigger(CS_PWM_TIMER, ZERO_CROSSING_CAPTURE_TASK);
-
-#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
-	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
-#endif
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
@@ -345,118 +336,55 @@ void PWM::onZeroCrossing() {
 		if (_startOnZeroCrossing) {
 			start();
 		}
-#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
-	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
-#endif
 		return;
 	}
+
+#ifndef PWM_SYNC_IMMEDIATELY
+	nrf_timer_task_trigger(CS_PWM_TIMER, ZERO_CROSSING_CAPTURE_TASK);
 	uint32_t ticks = nrf_timer_cc_read(CS_PWM_TIMER, getTimerChannel(ZERO_CROSSING_CHANNEL_IDX));
 
-	int32_t targetTicks = 0;
-	int32_t errTicks = ticks - targetTicks;
+	int64_t targetTicks = 0;
+	int64_t errTicks = targetTicks - ticks;
 
 	// Correct error for wrap around.
-	int32_t maxTickVal = _maxTickVal;
-	wrapAround(errTicks, maxTickVal);
-
-//	cs_write("ticks=%u err=%i \r\n", ticks, errTicks);
-
-	// Store error.
-	_offsets[_zeroCrossingCounter] = errTicks;
-	++_zeroCrossingCounter;
-
-
-	if (_syncFrequency) {
-		if (_zeroCrossingCounter < DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE) {
-#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
-	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
-#endif
-			return;
-		}
-		_zeroCrossingCounter = 0;
-
-		// https://en.wikipedia.org/wiki/Repeated_median_regression
-        // This way we only need to calculate the median of (DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC - 1) values,
-		// but have to do that DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC times.
-		int k = 0;
-		for (int i=0; i<DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE; ++i) {
-			int n = 0;
-			for (int j=0; j<DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE; ++j) {
-				if (i == j) {
-					continue;
-				}
-				int32_t dy = _offsets[j] - _offsets[i];
-				wrapAround(dy, maxTickVal);
-				int32_t slope = dy / (j - i);
-				_offsetSlopes[n] = slope;
-				++n;
-			}
-			_offsetSlopes2[k] = slopeMedian(_offsetSlopes);
-		}
-		_offsetSlopes3[_numSyncs] = slopeMedian(_offsetSlopes2);
-		++_numSyncs;
-		if (_numSyncs < DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC) {
-#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
-	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
-#endif
-			return;
-		}
-		_numSyncs = 0;
-		int32_t medianSlope = medianSlopeMedian(_offsetSlopes3);
-		// Every full cycle (~20ms), the offset increases by slope.
-		// So the maxTickVal (half cycle, ~10ms) should be increased by half the slope.
-		_adjustedMaxTickVal += medianSlope / 2;
-
-		// Make sure the minimum max ticks > 0.99 * _maxTickVal, else dimming at 99% won't work anymore.
-		uint32_t minMaxTickVal = _maxTickVal * 99 / 100 + 1;
-		if (_adjustedMaxTickVal < minMaxTickVal) {
-			_adjustedMaxTickVal = minMaxTickVal;
-		}
-
-		// Store frequency synchronized max ticks.
-		_freqSyncedMaxTickVal = _adjustedMaxTickVal;
-
-		// Done with frequency synchronization.
-		_syncFrequency = false;
-
-//		cs_write("slope=%i ticks=%u \r\n", medianSlope, _adjustedMaxTickVal);
-
-		// Set the new period time at the end of the current period.
-		enableInterrupt();
+	int64_t maxTickVal = _maxTickVal;
+//	errTicks = (errTicks + maxTickVal/2) % maxTickVal - maxTickVal/2; // Doesn't work?
+	if (errTicks > maxTickVal / 2) {
+		errTicks -= maxTickVal;
 	}
-	else {
-		// Integrate error, but limit the integrated error (to prevent overshoot).
-		// Careful that this doesn't overflow.
-		_zeroCrossOffsetIntegral += errTicks;
+	else if (errTicks < -maxTickVal / 2) {
+		errTicks += maxTickVal;
+	}
 
-		if (_zeroCrossingCounter < DIMMER_NUM_CROSSINGS_FOR_START_SYNC) {
-#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
-	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
-#endif
-			return;
-		}
-		_zeroCrossingCounter = 0;
+	// Integrate error, but limit the integrated error (to prevent overflow and overshoot)
+	_zeroCrossDeviationIntegral += -errTicks;
+	int64_t integralAbsMax = maxTickVal * 1000;
+	if (_zeroCrossDeviationIntegral > integralAbsMax) {
+		_zeroCrossDeviationIntegral = integralAbsMax;
+	}
+	if (_zeroCrossDeviationIntegral < -integralAbsMax) {
+		_zeroCrossDeviationIntegral = -integralAbsMax;
+	}
 
-		// Bound integral
-		int32_t integralAbsMax = maxTickVal * DIMMER_NUM_CROSSINGS_FOR_START_SYNC * 100;
-		if (_zeroCrossOffsetIntegral > integralAbsMax) {
-			_zeroCrossOffsetIntegral = integralAbsMax;
-		}
-		if (_zeroCrossOffsetIntegral < -integralAbsMax) {
-			_zeroCrossOffsetIntegral = -integralAbsMax;
-		}
 
-		int32_t medianError = errorMedian(_offsets);
+	// Exponential moving average
+	uint32_t alpha = 1000; // 1000: no averaging
+//	uint32_t alpha = 800; // Discount factor
+	_zeroCrossTicksDeviationAvg = ((1000-alpha) * _zeroCrossTicksDeviationAvg + alpha * errTicks) / 1000;
+
+	++_zeroCrossingCounter;
+	if (_zeroCrossingCounter % 10 == 0) {
+		// Calculate the new period value.
+		int32_t delta = 0;
 
 		// Proportional part
-		int32_t deltaP = medianError * 1000 / maxTickVal;
+		int32_t deltaP = -errTicks / (maxTickVal/400);
 
 		// Add an integral part to the delta.
-		int32_t deltaI = _zeroCrossOffsetIntegral * 2 / DIMMER_NUM_CROSSINGS_FOR_START_SYNC / maxTickVal;
+		int32_t deltaI = _zeroCrossDeviationIntegral / 1000 / (maxTickVal/400);
 
-		int32_t delta = deltaP + deltaI;
-
-		// Limit the delta.
+		delta = deltaP + deltaI;
+		// Limit the output, make sure the minimum newMaxTicks > 0.99 * _maxTickVal, else dimming at 99% won't work anymore.
 		int32_t limitDelta = maxTickVal / 120;
 		if (delta > limitDelta) {
 			delta = limitDelta;
@@ -464,30 +392,41 @@ void PWM::onZeroCrossing() {
 		if (delta < -limitDelta) {
 			delta = -limitDelta;
 		}
-
-		_adjustedMaxTickVal = _freqSyncedMaxTickVal + delta;
-
-		// Make sure the minimum max ticks > 0.99 * _maxTickVal, else dimming at 99% won't work anymore.
-		uint32_t minMaxTickVal = _maxTickVal * 99 / 100 + 1;
-		if (_adjustedMaxTickVal < minMaxTickVal) {
-			_adjustedMaxTickVal = minMaxTickVal;
-		}
-
-		++_numSyncs;
-		if (_numSyncs == DIMMER_NUM_START_SYNCS_BETWEEN_FREQ_SYNC) {
-			_numSyncs = 0;
-			_zeroCrossOffsetIntegral = 0;
-			_syncFrequency = true;
-		}
-
-//		cs_write("medErr=%i errInt=%i P=%i I=%i ticks=%u \r\n", medianError, _zeroCrossOffsetIntegral, deltaP, deltaI, _adjustedMaxTickVal);
+		uint32_t newMaxTicks = maxTickVal + delta;
+		_adjustedMaxTickVal = newMaxTicks;
 
 		// Set the new period time at the end of the current period.
 		enableInterrupt();
+
+		if (ticks > _maxTickVal + maxTickVal / 120) {
+			LOGe("%u  %u  %u\r\n", ticks, errTicks, newMaxTicks);
+		}
+
+		if (_zeroCrossingCounter % 50 == 0) {
+//			write("%u  %lli  %lli  %lli %i %u\r\n", ticks, errTicks, _zeroCrossTicksDeviationAvg, _zeroCrossDeviationIntegral, deltaI, newMaxTicks);
+		}
 	}
-#ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
-	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
+
+#else
+	// Start a new period
+	// Need to stop the timer, else the gpio state at start is not consistent.
+	// I guess this is because the gpiote toggle sometimes happens before, sometimes after the nrf_gpiote_task_force()
+	nrf_timer_event_clear(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX));
+	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_STOP);
+
+	for (uint8_t i=0; i<_config.channelCount; ++i) {
+		if (_isPwmEnabled[i]) {
+#ifdef PWM_CENTERED
+			gpioteForce(i, false);
+#else
+			gpioteForce(i, true);
 #endif
+		}
+	}
+	// Set the counter back to 0, and start the timer again.
+	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_CLEAR);
+	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
+#endif // ndef PWM_SYNC_IMMEDIATELY
 }
 
 
@@ -498,8 +437,8 @@ void PWM::onZeroCrossing() {
 
 
 void PWM::enableInterrupt() {
-#ifdef PWM_DEBUG_PIN_TIMER_INT
-	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_TIMER_INT);
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
 	// The order of the function calls below are important:
@@ -571,16 +510,6 @@ void PWM::writeCC(uint8_t channelIdx, uint32_t ticks) {
 
 uint32_t PWM::readCC(uint8_t channelIdx) {
 	return nrf_timer_cc_read(CS_PWM_TIMER, getTimerChannel(channelIdx));
-}
-
-void PWM::wrapAround(int32_t& val, int32_t max) {
-//	val = (val + max / 2) % max - max / 2;
-	if (val > max / 2) {
-		val -= max;
-	}
-	else if (val < -max / 2) {
-		val += max;
-	}
 }
 
 nrf_timer_cc_channel_t PWM::getTimerChannel(uint8_t index) {
@@ -726,8 +655,8 @@ nrf_ppi_task_t PWM::getPpiTaskDisable(uint8_t index) {
 
 // Timer interrupt handler
 extern "C" void CS_PWM_TIMER_IRQ(void) {
-#ifdef PWM_DEBUG_PIN_TIMER_INT
-	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_TIMER_INT);
+#ifdef TEST_PIN
+	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 //	if (nrf_timer_event_check(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX))) {
 	// Clear and disable interrupt until next change.

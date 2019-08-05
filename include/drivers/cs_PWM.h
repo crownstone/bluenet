@@ -13,26 +13,6 @@
 
 #define ERR_PWM_NOT_ENABLED 1
 
-/**
- * Number of zero crossings to calculate the slope of the error.
- */
-#define DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE 10
-
-/**
- * Number of slope estimates until the timer max ticks are adjusted to synchronize with the grid frequency.
- */
-#define DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC 5
-
-/**
- * Number of zero crossings until the timer max ticks is adjusted to synchronize the timer start with the grid zero crossing.
- */
-#define DIMMER_NUM_CROSSINGS_FOR_START_SYNC 9
-
-/**
- * Number of timer start synchronizations until synchronizing frequency again.
- */
-#define DIMMER_NUM_START_SYNCS_BETWEEN_FREQ_SYNC 100
-
 
 typedef struct {
 	uint16_t pin;
@@ -125,13 +105,10 @@ private:
 	// ----- Implementation specific -----
 	// -----------------------------------
 
-	//! Max value of channel, in timer ticks. Set at init.
+	//! Max value of channel, in ticks. Set at init
 	uint32_t _maxTickVal;
 
-	//! Max value of channel, in timer ticks. Adjusted to sync frequency with zero crossings.
-	uint32_t _freqSyncedMaxTickVal;
-
-	//! Max value of channel, in timer ticks. Adjusted to sync with zero crossings.
+	//! Max value of channel, in ticks. Adjusted to sync with zero crossings.
 	uint32_t _adjustedMaxTickVal;
 
 	/**
@@ -160,27 +137,13 @@ private:
 	bool _isPwmEnabled[CS_PWM_MAX_CHANNELS];
 
 	//! Counter to keep up the number of zero crossing callbacks.
-	uint32_t _zeroCrossingCounter = 0;
+	uint32_t _zeroCrossingCounter;
 
-	//! Array of tick counts at the moment of a zero crossing interrupt.
-	int32_t _offsets[MAX(DIMMER_NUM_CROSSINGS_FOR_START_SYNC, DIMMER_NUM_CROSSINGS_FOR_START_SYNC)];
+	//! Moving average amount of timer ticks deviation compared to when the zero crossing callback was called.
+	int64_t _zeroCrossTicksDeviationAvg;
 
-	//! Array of calculated slopes between 1 point and all other points.
-	int32_t _offsetSlopes[DIMMER_NUM_CROSSINGS_FOR_START_SYNC];
-	//! Array of median of calculated slopes.
-	int32_t _offsetSlopes2[DIMMER_NUM_CROSSINGS_FOR_START_SYNC];
-	//! Array of median of median of calculated slopes.
-	int32_t _offsetSlopes3[DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC];
-
-	//! Integral of the tick offset.
-	int32_t _zeroCrossOffsetIntegral;
-
-	//! Whether currently synchronizing frequency (else synchronizing timer start).
-	bool _syncFrequency;
-
-	//! Number of times we performed synchronization since last change of _syncFrequency..
-	uint32_t _numSyncs;
-
+	//! Integral of the tick deviations.
+	int64_t _zeroCrossDeviationIntegral;
 
 	//! Sets pin on
 	void turnOn(uint8_t channel);
@@ -218,8 +181,6 @@ private:
 	void writeCC(uint8_t channelIdx, uint32_t ticks);
 	//! Read CC of timer
 	uint32_t readCC(uint8_t channelIdx);
-	//! Wrap around a value, so that it ends up in the range [-max/2, max/2]
-	void wrapAround(int32_t& val, int32_t max);
 
 
 	//! Enables the timer interrupt, to change the pwm value.
@@ -238,51 +199,3 @@ private:
 	//! Helper function to get the ppi disable task, given the group index.
 	nrf_ppi_task_t getPpiTaskDisable(uint8_t index);
 };
-
-#if DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE == 4
-#define slopeMedian(arr) opt_med3(arr)
-#elif DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE == 6
-#define slopeMedian(arr) opt_med5(arr)
-#elif DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE == 7
-#define slopeMedian(arr) opt_med6(arr)
-#elif DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE == 8
-#define slopeMedian(arr) opt_med7(arr)
-#elif DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE == 10
-#define slopeMedian(arr) opt_med9(arr)
-#elif DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE == 26
-#define slopeMedian(arr) opt_med25(arr)
-#else
-#error "Invalid value for DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE"
-#endif
-
-#if DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC == 3
-#define medianSlopeMedian(arr) opt_med3(arr)
-#elif DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC == 5
-#define medianSlopeMedian(arr) opt_med5(arr)
-#elif DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC == 6
-#define medianSlopeMedian(arr) opt_med6(arr)
-#elif DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC == 7
-#define medianSlopeMedian(arr) opt_med7(arr)
-#elif DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC == 9
-#define medianSlopeMedian(arr) opt_med9(arr)
-#elif DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC == 25
-#define medianSlopeMedian(arr) opt_med25(arr)
-#else
-#error "Invalid value for DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC"
-#endif
-
-#if DIMMER_NUM_CROSSINGS_FOR_START_SYNC == 3
-#define errorMedian(arr) opt_med3(arr)
-#elif DIMMER_NUM_CROSSINGS_FOR_START_SYNC == 5
-#define errorMedian(arr) opt_med5(arr)
-#elif DIMMER_NUM_CROSSINGS_FOR_START_SYNC == 6
-#define errorMedian(arr) opt_med6(arr)
-#elif DIMMER_NUM_CROSSINGS_FOR_START_SYNC == 7
-#define errorMedian(arr) opt_med7(arr)
-#elif DIMMER_NUM_CROSSINGS_FOR_START_SYNC == 9
-#define errorMedian(arr) opt_med9(arr)
-#elif DIMMER_NUM_CROSSINGS_UNTIL_ADJUSTMENT == 25
-#define errorMedian(arr) opt_med25(arr)
-#else
-#error "Invalid value for DIMMER_NUM_CROSSINGS_FOR_START_SYNC"
-#endif
