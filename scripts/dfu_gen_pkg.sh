@@ -132,7 +132,7 @@ pkg_name="_dfu.zip"
 if [ $key_from_pass ]; then
 	key_file=$(mktemp)
 	trap "rm -f $key_file" EXIT
-	pass dfu-pkg-sign-key > $key_file
+	pass dfu_pkg_signing_key > $key_file
 fi
 
 if [ $add_firmware ]; then
