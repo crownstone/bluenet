@@ -989,9 +989,12 @@ int main() {
 		nrf_gpio_cfg_output(board.pinGpioPwm);
 		if (board.flags.pwmInverted) {
 			nrf_gpio_pin_set(board.pinGpioPwm);
-		} else {
+		}
+		else {
 			nrf_gpio_pin_clear(board.pinGpioPwm);
 		}
+		nrf_gpio_cfg_output(board.pinGpioEnablePwm);
+		nrf_gpio_pin_clear(board.pinGpioEnablePwm);
 		//! Relay pins
 		if (board.flags.hasRelay) {
 			nrf_gpio_cfg_output(board.pinGpioRelayOff);
