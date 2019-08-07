@@ -48,3 +48,7 @@
 
 # Location of the mesh SDK
 # MESH_SDK_DIR=
+
+# The bootloader start address and size 
+# BOOTLOADER_START_ADDRESS=
+# BOOTLOADER_LENGTH=

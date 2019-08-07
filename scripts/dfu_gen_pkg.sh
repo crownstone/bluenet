@@ -23,7 +23,7 @@ usage() {
 	echo "   -B hexfile, --blhex hexfile          add specified file as bootloader to dfu package"
 	echo "   -S hexfile, --sdhex hexfile          add specified file as softdevice to dfu package"
 	echo "   -k keyfile, --key keyfile            add a keyfile to sign the dfu package"
-	echo "   -K, --key-from-pass                  add key from pass"
+	echo "   -K passfile, --key-from-pass         add key from pass"
 	echo "   -v version, --version version        add a version int to the dfu package"
 	echo "   -o filename, --output filename       use given filename as output file"
 }
@@ -40,8 +40,8 @@ if [[ $? -ne 4 ]]; then
 	exit $CS_ERR_GETOPT_TEST
 fi
 
-SHORT=t:k:v:F:B:S:o:fbsK
-LONG=target:key:version:fwhex:blhex:sdhex:output:,firmware,bootloader,softdevice,key-from-pass
+SHORT=t:k:v:F:B:S:o:fbsK:
+LONG=target:key:version:fwhex:blhex:sdhex:output:,firmware,bootloader,softdevice,key-from-pass:
 
 PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -90,7 +90,8 @@ while true; do
 			;;
 		-K|--key-from-pass)
 			key_from_pass=true
-			shift 1
+			passfile="$2"
+			shift 2
 			;;
 		-v|--version)
 			version_int=$2
@@ -132,7 +133,7 @@ pkg_name="_dfu.zip"
 if [ $key_from_pass ]; then
 	key_file=$(mktemp)
 	trap "rm -f $key_file" EXIT
-	pass dfu_pkg_signing_key > $key_file
+	pass $passfile > $key_file
 fi
 
 if [ $add_firmware ]; then
