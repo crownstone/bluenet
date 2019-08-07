@@ -420,7 +420,7 @@ fi
 if [ $key_file ]; then
 	dfu_gen_args="$dfu_gen_args -k $key_file"
 else
-	dfu_gen_args="$dfu_gen_args -K dfu-pkg-sign-key"
+	dfu_gen_args="$dfu_gen_args -K dfu_pkg_signing_key"
 fi
 dfu_gen_args="$dfu_gen_args -o $BLUENET_BIN_DIR/${model}_${version}.zip -v $new_version_int"
 $BLUENET_DIR/scripts/dfu_gen_pkg.sh $dfu_gen_args
