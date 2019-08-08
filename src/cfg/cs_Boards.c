@@ -497,7 +497,7 @@ void asACR01B10C(boards_config_t* p_config) {
 	p_config->flags.hasRelay                     = true;
 	p_config->flags.pwmInverted                  = false;
 	p_config->flags.hasSerial                    = false;
-	p_config->flags.hasSerial                    = true;
+//	p_config->flags.hasSerial                    = true;
 	p_config->flags.hasLed                       = false;
 	p_config->flags.ledInverted                  = false;
 	p_config->flags.hasAdcZeroRef                = true;
