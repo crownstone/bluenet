@@ -161,7 +161,10 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 	}
 
 	// Clear other data
-	State::getInstance().factoryReset(FACTORY_RESET_CODE);
+	event_t factoryReset(CS_TYPE::CMD_FACTORY_RESET);
+	EventDispatcher::getInstance().dispatch(factoryReset);
+//	State::getInstance().factoryReset(FACTORY_RESET_CODE);
+
 
 	// Lastly, go into setup mode after next reset
 	TYPIFY(STATE_OPERATION_MODE) mode = to_underlying_type(OperationMode::OPERATION_MODE_SETUP);
