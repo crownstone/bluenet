@@ -119,12 +119,15 @@ If you have another shell, please do the above for your own shell.
 
 ## Get the mesh code
 
-The mesh code can be downloaded from Nordic. This used to be the Nordic OpenMesh. The installation instructions are different from that in the past for the OpenMesh. You can download the Mesh code from [Nordic's website](https://www.nordicsemi.com/Software-and-Tools/Software/nRF5-SDK-for-Mesh/Download). This is the direct link for the version [3.1.0](https://www.nordicsemi.com/-/media/Software-and-other-downloads/SDKs/nRF5-SDK-for-Mesh/nrf5SDKforMeshv310src.zip).
+The mesh code can be downloaded from Nordic. This used to be the Nordic OpenMesh. The installation instructions are different from that in the past for the OpenMesh. You can download the Mesh code from [Nordic's website](https://www.nordicsemi.com/Software-and-Tools/Software/nRF5-SDK-for-Mesh/Download).
+This is the direct link for the version [3.2.0](https://www.nordicsemi.com/-/media/Software-and-other-downloads/SDKs/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip).
+
+
 
     cd $BLUENET_WORKSPACE_DIR
     mkdir mesh
     cd mesh
-    unzip nrf5SDKforMeshv310src.zip .
+    unzip nrf5SDKforMeshv320src.zip .
 
 Do not forget to set the `MESH_SDK_DIR` in your `CMakeBuild.config` file.
 
