@@ -212,6 +212,7 @@ ELSE()
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/timeslot_timer.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/aes_cmac.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/log.c")
+		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/core_tx_local.c")
 
 		# All C files in mesh/bearer/src
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bearer/src/bearer_handler.c")
@@ -241,7 +242,7 @@ ELSE()
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_publish_retransmission.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_reliable.c")
-		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_loopback.c")
+#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_loopback.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_publish.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/device_state_manager.c")
 

@@ -189,7 +189,7 @@
  * models operating on shared states.
  */
 //#define ACCESS_SUBSCRIPTION_LIST_COUNT (ACCESS_MODEL_COUNT)
-#define ACCESS_SUBSCRIPTION_LIST_COUNT (1)
+#define ACCESS_SUBSCRIPTION_LIST_COUNT (2)
 
 /**
  * The number of pages of flash storage reserved for the access layer for persistent data storage.

@@ -525,14 +525,14 @@ int8_t MeshModel::getRssi(const nrf_mesh_rx_metadata_t* metaData) {
 	case NRF_MESH_RX_SOURCE_GATT:
 		// TODO: return connection rssi?
 		return -10;
-	case NRF_MESH_RX_SOURCE_FRIEND:
-		// TODO: is this correct?
-		return metaData->params.scanner.rssi;
-		break;
-	case NRF_MESH_RX_SOURCE_LOW_POWER:
-		// TODO: is this correct?
-		return metaData->params.scanner.rssi;
-		break;
+//	case NRF_MESH_RX_SOURCE_FRIEND:
+//		// TODO: is this correct?
+//		return metaData->params.scanner.rssi;
+//		break;
+//	case NRF_MESH_RX_SOURCE_LOW_POWER:
+//		// TODO: is this correct?
+//		return metaData->params.scanner.rssi;
+//		break;
 	case NRF_MESH_RX_SOURCE_INSTABURST:
 		return metaData->params.instaburst.rssi;
 		break;

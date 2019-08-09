@@ -131,6 +131,13 @@ static void cs_mesh_event_handler(const nrf_mesh_evt_t * p_evt) {
 	case NRF_MESH_EVT_DISABLED:
 		LOGMeshDebug("NRF_MESH_EVT_DISABLED");
 		break;
+	case NRF_MESH_EVT_PROXY_STOPPED:
+		LOGMeshDebug("NRF_MESH_EVT_PROXY_STOPPED");
+		break;
+	case NRF_MESH_EVT_FRIEND_REQUEST:
+		LOGMeshDebug("NRF_MESH_EVT_FRIEND_REQUEST");
+		break;
+
 	}
 }
 static nrf_mesh_evt_handler_t cs_mesh_event_handler_struct = {
@@ -208,12 +215,12 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 	case NRF_MESH_RX_SOURCE_GATT:
 
 		break;
-	case NRF_MESH_RX_SOURCE_FRIEND:
-
-		break;
-	case NRF_MESH_RX_SOURCE_LOW_POWER:
-
-		break;
+//	case NRF_MESH_RX_SOURCE_FRIEND:
+//
+//		break;
+//	case NRF_MESH_RX_SOURCE_LOW_POWER:
+//
+//		break;
 	case NRF_MESH_RX_SOURCE_INSTABURST:
 
 		break;
