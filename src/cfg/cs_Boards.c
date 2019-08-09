@@ -12,7 +12,7 @@
 
 void asACR01B1D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                  = 11; // Something unused
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
 	p_config->pinAinCurrentGainLow               = 2;
@@ -134,7 +134,7 @@ void asACR01B1D(boards_config_t* p_config) {
 
 void asACR01B7B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                  = 11; // Something unused
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -181,7 +181,7 @@ void asACR01B7B(boards_config_t* p_config) {
 
 void asACR01B9A(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                  = 11; // Something unused
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 10;
 	p_config->pinGpioRelayOff                    = 9;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -227,7 +227,7 @@ void asACR01B9A(boards_config_t* p_config) {
 
 void asACR01B9B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                  = 11; // Something unused
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 15;
 	p_config->pinGpioRelayOff                    = 14;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -275,7 +275,7 @@ void asACR01B9B(boards_config_t* p_config) {
 
 void asACR01B9C(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                  = 11; // Something unused
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 14;
 	p_config->pinGpioRelayOff                    = 13;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -322,7 +322,7 @@ void asACR01B9C(boards_config_t* p_config) {
 
 void asACR01B9D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                  = 11; // Something unused
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 14;
 	p_config->pinGpioRelayOff                    = 13;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -370,7 +370,7 @@ void asACR01B9D(boards_config_t* p_config) {
 
 void asACR01B9E(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                  = 11; // Something unused
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 14;
 	p_config->pinGpioRelayOff                    = 13;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -479,7 +479,7 @@ void asACR01B10B(boards_config_t* p_config) {
 void asACR01B10C(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 //	p_config->pinGpioPwm                         = 15;
-	p_config->pinGpioEnablePwm                  = 10; // Only for v21, but on v20 this pin is not connected.
+	p_config->pinGpioEnablePwm                   = 10; // Only for v21, but on v20 this pin is not connected.
 	p_config->pinGpioRelayOn                     = 14;
 	p_config->pinGpioRelayOff                    = 13;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -537,7 +537,7 @@ void asACR01B10C(boards_config_t* p_config) {
 
 void asACR01B2C(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                  = 11; // Something unused
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
 	p_config->pinAinCurrentGainLow               = 2;
@@ -575,7 +575,7 @@ void asACR01B2C(boards_config_t* p_config) {
 
 void asACR01B2G(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
-	p_config->pinGpioEnablePwm                  = 11; // Something unused
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
 	p_config->pinAinCurrentGainLow               = 2;
@@ -621,7 +621,7 @@ void asACR01B2G(boards_config_t* p_config) {
 
 void asPca10040(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 17;
-	p_config->pinGpioEnablePwm                  = 22; // Something unused
+	p_config->pinGpioEnablePwm                   = 22; // Something unused
 	p_config->pinGpioRelayOn                     = 11; // something unused
 	p_config->pinGpioRelayOff                    = 12; // something unused
 	p_config->pinAinCurrentGainLow               = 1; // gpio3
