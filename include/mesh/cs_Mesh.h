@@ -45,6 +45,13 @@ public:
 	void stop();
 
 	/**
+	 * Factory reset.
+	 *
+	 * Clear all stored data.
+	 */
+	void factoryReset();
+
+	/**
 	 * Advertise as iBeacon.
 	 */
 	void advertise(IBeacon* ibeacon);
