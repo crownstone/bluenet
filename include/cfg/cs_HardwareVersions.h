@@ -29,7 +29,7 @@ extern "C" {
 	  |  |  |    |  |  |---  Patch number of PCB version
 	  |  |  |    |  |------  Minor number of PCB version
 	  |  |  |    |---------  Major number of PCB version
-	  |  |  |--------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 dongle
+	  |  |  |--------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 dongle, 6 Builtin One
 	  |  |-----------------  Market: 1 EU, 2 US
 	  |--------------------  Family: 1 Crownstone
 */
@@ -55,8 +55,8 @@ static inline const char* get_hardware_version() {
 //	if (hardwareBoard == ACR01B6D)  return "10103010600";
 
 	// CROWNSTONE BUILTIN ONES
-	if (hardwareBoard == ACR01B10B) return "10103010000";
-	if (hardwareBoard == ACR01B10C) return "10103010100";
+	if (hardwareBoard == ACR01B10B) return "10106000000";
+	if (hardwareBoard == ACR01B10C) return "10106000100";
 
 	// CROWNSTONE PLUGS
 	if (hardwareBoard == ACR01B2A) return "10102000100";
