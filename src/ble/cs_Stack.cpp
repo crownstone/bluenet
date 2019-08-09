@@ -973,6 +973,7 @@ void Stack::lowPowerTimeout(void* p_context) {
 }
 
 void Stack::changeToLowTxPowerMode() {
+	// TODO: get from board config.
 	TYPIFY(CONFIG_LOW_TX_POWER) lowTxPower;
 	State::getInstance().get(CS_TYPE::CONFIG_LOW_TX_POWER, &lowTxPower, sizeof(lowTxPower));
 	setTxPowerLevel(lowTxPower);

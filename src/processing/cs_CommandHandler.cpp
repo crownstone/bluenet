@@ -561,7 +561,7 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 			EventDispatcher::getInstance().dispatch(cmd);
 		}
 		else {
-			LOGw("invalid item");
+			LOGw("invalid item ind=%u id=%u", i, item.id);
 		}
 	}
 	return ERR_SUCCESS;
