@@ -19,8 +19,10 @@ ENDIF()
 
 MESSAGE(STATUS "crownstone.defs.cmake: Build type: ${CMAKE_BUILD_TYPE}")
 IF(CMAKE_BUILD_TYPE MATCHES "Debug")
+	MESSAGE(WARNING "Debug build")
 	ADD_DEFINITIONS("-DGIT_HASH=${GIT_HASH}")
 	ADD_DEFINITIONS("-DGIT_BRANCH=${GIT_BRANCH}")
+	ADD_DEFINITIONS("-DDEBUG")
 ENDIF()
 
 # The bluetooth name is not optional
