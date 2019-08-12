@@ -18,6 +18,8 @@
 #define APP_TIMER_CONFIG_OP_QUEUE_SIZE 40
 #define APP_TIMER_CONFIG_USE_SCHEDULER 1
 
+// Get SoftDevice events via app scheduler.
+#define NRF_SDH_DISPATCH_MODEL 1
 
 #define FDS_ENABLED 1
 /**
