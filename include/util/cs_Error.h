@@ -26,6 +26,3 @@ extern "C" {
 	}
 
 #endif
-
-#define NRF51_CRASH(x) __asm("BKPT"); \
-	while (1) {}
