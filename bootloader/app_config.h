@@ -12,7 +12,6 @@
  * The sdk_config.h is a copy of SDK_15-3/examples/dfu/secure_bootloader/pca10040_ble_debug/config/sdk_config.h
  */
 
-
 #define NRF_BL_DFU_ENTER_METHOD_BUTTON 0
 #define NRF_BL_DFU_ENTER_METHOD_PINRESET 0
 #define NRF_BL_DFU_ENTER_METHOD_GPREGRET 1
@@ -45,10 +44,15 @@
 /**
  * By default, the bootloader changes MAC address when in bootloader mode.
  * This prevents connect issues, where services are cached etc.
- * But, sice iOS devices don't get to see the MAC address, they don't know which device is in bootloader mode.
+ * But, since iOS devices don't get to see the MAC address, they don't know which device is in bootloader mode.
  * So we adjusted the code to make the bootloader not change MAC address with this define, so that it's easy to find.
  */
 #define CS_DFU_CHANGE_MAC_ADDRESS 0
+
+/**
+ * For iOS, the absence of the service changed characteristic makes it always discover services.
+ */
+#define NRF_SDH_BLE_SERVICE_CHANGED 1
 
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
 #define NRF_LOG_BACKEND_RTT_ENABLED 1

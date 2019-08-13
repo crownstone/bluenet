@@ -112,6 +112,9 @@
 #define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69 // Advised by mesh
 #define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE ATTR_TABLE_SIZE
 #define NRF_SDH_BLE_VS_UUID_COUNT MAX_NUM_VS_SERVICES
+/**
+ * For iOS, the absence of the service changed characteristic makes it always discover services.
+ */
 #define NRF_SDH_BLE_SERVICE_CHANGED 1
 #define NRF_SDH_BLE_OBSERVER_PRIO_LEVELS 2
 #define NRF_SDH_ENABLED 1
