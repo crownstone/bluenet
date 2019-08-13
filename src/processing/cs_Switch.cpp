@@ -142,6 +142,7 @@ void Switch::startPwm() {
 	}
 	LOGd("dimmer powered");
 	_pwmPowered = true;
+	nrf_gpio_pin_set(_pinEnableDimmer);
 
 	// Restore the pwm state.
 	bool success = _setPwm(_switchValue.state.dimmer);
