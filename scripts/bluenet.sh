@@ -49,8 +49,8 @@ if [[ $? -ne 4 ]]; then
 	exit $CS_ERR_GETOPT_TEST
 fi
 
-SHORT=t:a:beudcyhFBPSHC
-LONG=target:,address:build,erase,upload,debug,clean,yes,help,firmware,bootloader,bootloader_settings,softdevice,hardware_version,combined,unit_test_host,unit_test_nrf5
+SHORT=t:a:beudcryhFBPSHC
+LONG=target:,address:build,erase,upload,debug,clean,release_build,yes,help,firmware,bootloader,bootloader_settings,softdevice,hardware_version,combined,unit_test_host,unit_test_nrf5
 
 PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
