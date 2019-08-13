@@ -74,6 +74,18 @@
 
 #define NRF_LOG_BACKEND_UART_TX_PIN CS_SERIAL_NRF_LOG_PIN_TX
 
+#if CS_SERIAL_NRF_LOG_ENABLED == 2
+// UARTE_ENABLED is overwritten by apply_old_config.h
+#define UARTE_ENABLED 1
+#define UART0_ENABLED 1
+#define UART_ENABLED 1
+// It wouldn't compile when using UARTE, so use normal UART instead.
+#define UART_LEGACY_SUPPORT 1
+#define UART_EASY_DMA_SUPPORT 0
+#define NRFX_UARTE_DEFAULT_CONFIG_HWFC 0
+#define NRFX_UARTE_DEFAULT_CONFIG_PARITY 0
+#endif
+
 // <323584=> 1200 baud
 // <643072=> 2400 baud
 // <1290240=> 4800 baud
