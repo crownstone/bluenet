@@ -67,6 +67,8 @@ public:
 
 	void handleEvent(event_t & event);
 
+	void factoryResetDone();
+
 private:
 	//! Constructor, singleton, thus made private
 	Mesh();
@@ -79,8 +81,6 @@ private:
 
 	void provisionSelf(uint16_t id);
 	void provisionLoad();
-
-	void factoryResetDone();
 
 	bool _isProvisioned = false;
 	/** Address of this node */
