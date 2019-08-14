@@ -91,6 +91,7 @@ static void cs_mesh_event_handler(const nrf_mesh_evt_t * p_evt) {
 		break;
 	case NRF_MESH_EVT_FLASH_STABLE:
 		LOGMeshDebug("NRF_MESH_EVT_FLASH_STABLE");
+		Mesh::getInstance().factoryResetDone();
 		break;
 	case NRF_MESH_EVT_RX_FAILED:
 		LOGMeshDebug("NRF_MESH_EVT_RX_FAILED");
@@ -384,7 +385,21 @@ void Mesh::factoryReset() {
 
 	nrf_mesh_evt_handler_add(&cs_mesh_event_handler_struct);
 
-	mesh_config_clear();
+	mesh_stack_config_clear(); // Check if flash_is_stable, or wait for NRF_MESH_EVT_FLASH_STABLE
+	_performingFactoryReset = true;
+	if (flash_manager_is_stable()) {
+		factoryResetDone();
+	}
+}
+
+void Mesh::factoryResetDone() {
+	if (!_performingFactoryReset) {
+		return;
+	}
+	LOGi("factoryResetDone");
+	_performingFactoryReset = false;
+	event_t event(CS_TYPE::EVT_MESH_FACTORY_RESET);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 void Mesh::provisionSelf(uint16_t id) {

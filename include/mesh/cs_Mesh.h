@@ -48,6 +48,7 @@ public:
 	 * Factory reset.
 	 *
 	 * Clear all stored data.
+	 * Will send event EVT_MESH_FACTORY_RESET when done.
 	 */
 	void factoryReset();
 
@@ -79,6 +80,8 @@ private:
 	void provisionSelf(uint16_t id);
 	void provisionLoad();
 
+	void factoryResetDone();
+
 	bool _isProvisioned = false;
 	/** Address of this node */
 	uint16_t _ownAddress;
@@ -94,4 +97,5 @@ private:
 	MeshAdvertiser _advertiser;
 	MeshModel _model;
 	uint32_t _sendStateTimeCountdown = MESH_SEND_TIME_INTERVAL_MS / TICK_INTERVAL_MS;
+	bool _performingFactoryReset = false;
 };
