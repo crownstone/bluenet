@@ -930,6 +930,11 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	LOGi("Compilation time: %s", __TIME__);
 	LOGi("Hardware version: %s", get_hardware_version());
 	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
+#ifdef DEBUG
+	LOGi("DEBUG: defined")
+#else
+	LOGi("DEBUG: undefined")
+#endif
 	LOG_MEMORY;
 }
 
