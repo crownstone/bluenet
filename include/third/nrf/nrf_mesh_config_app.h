@@ -38,62 +38,17 @@
 #ifndef NRF_MESH_CONFIG_APP_H__
 #define NRF_MESH_CONFIG_APP_H__
 
+#include "sdk_config.h"
+#include "fds.h"
+#include "fds_internal_defs.h"
+#include "cfg/cs_Config.h"
+
 // See more options in nrf_mesh_config_*.h
 
-
-/** Number of active servers.
- * Note: If the value of SERVER_NODE_COUNT is increased, you may need to scale up the the replay
- * protection list size (@ref REPLAY_CACHE_ENTRIES), by the appropriate amount, for the provisioner and
- * client examples. For the provisioner example to work as expected, its replay protection list size should
- * be greater than or equal to the total number of nodes it is going to configure after provisioning them.
- * The replay protection list size of the client example should be greater than or equal to the total
- * number of unicast addresses in the network that it can receive a message from.
- */
-#define SERVER_NODE_COUNT (30)
-#if SERVER_NODE_COUNT > 30
-#error Maximum 30 servers currently supported by client example.
-#endif
-
-/** Number of active clients nodes. */
-#define CLIENT_NODE_COUNT            (1)
-
-/** Number of On-Off client models on the Switch Node */
-#define CLIENT_MODEL_INSTANCE_COUNT  (0)
-
-/** Number of group address being used in this example */
-#define GROUP_ADDR_COUNT             (0)
-
-/** Static authentication data */
-#define STATIC_AUTH_DATA {0x6E, 0x6F, 0x72, 0x64, 0x69, 0x63, 0x5F, 0x65, 0x78, 0x61, 0x6D, 0x70, 0x6C, 0x65, 0x5F, 0x31}
-
-/** UUID prefix length */
-#define NODE_UUID_PREFIX_LEN         (4)
-
-/** UUID prefix length */
-#define COMMON_UUID_PREFIX_LEN       (3)
-
-/** Common UUID prefix for client nodes */
-#define COMMON_CLIENT_UUID              0x00, 0x59, 0xCC
-
-/** Light switch client UUID */
-#define CLIENT_NODE_UUID_PREFIX         {COMMON_CLIENT_UUID, 0xAA}
-
-/** Light switch level client UUID */
-#define LEVEL_CLIENT_NODE_UUID_PREFIX   {COMMON_CLIENT_UUID, 0xBB}
-
-/** Common UUID prefix for server nodes */
-#define COMMON_SERVER_UUID              0x00, 0x59, 0x55
-
-/** UUID prefix for other nodes */
-#define SERVER_NODE_UUID_PREFIX         {COMMON_SERVER_UUID, 0xAA}
-
-/** UUID prefix for other level server nodes */
-#define LEVEL_SERVER_NODE_UUID_PREFIX   {COMMON_SERVER_UUID, 0xBB}
 
 
 
 /** Enable logging module. */
-#include <sdk_config.h>
 #define NRF_MESH_LOG_ENABLE NRF_LOG_BACKEND_RTT_ENABLED
 
 /** Default log level. Messages with lower criticality is filtered. */
@@ -133,17 +88,16 @@
 /** Relay feature */
 #define MESH_FEATURE_RELAY_ENABLED (1)
 
-#define PERSISTENT_STORAGE 0
+#define PERSISTENT_STORAGE 1
 
-#include "fds.h"
-#include "fds_internal_defs.h"
+
 /** Number of flash pages to be reserved between the flash manager recovery page and the bootloader.
  *  @note This value will be ignored if FLASH_MANAGER_RECOVERY_PAGE is set.
  */
 #define FLASH_MANAGER_RECOVERY_PAGE_OFFSET_PAGES FDS_PHY_PAGES
 
 /** Device company identifier. */
-#define DEVICE_COMPANY_ID (ACCESS_COMPANY_ID_NORDIC)
+#define DEVICE_COMPANY_ID (CROWNSTONE_COMPANY_ID)
 
 /** Device product identifier. */
 #define DEVICE_PRODUCT_ID (0x0000)
@@ -171,9 +125,7 @@
  */
 #define ACCESS_MODEL_COUNT (1 + /* Configuration server */  \
                             1 + /* Health server */  \
-                            GROUP_ADDR_COUNT + /* Generic OnOff client (2 groups) */ \
-                            CLIENT_MODEL_INSTANCE_COUNT +  /* Generic OnOff client (2 unicast) */ \
-							1 /* Generic OnOff server */)
+							1 /* Crownstone model */)
 
 /**
  * The number of elements in the application.
@@ -181,7 +133,6 @@
  * @warning If the application is to support _multiple instances_ of the _same_ model, these instances
  * cannot be in the same element and a separate element is needed for each new instance of the same model.
  */
-//#define ACCESS_ELEMENT_COUNT (1 + CLIENT_MODEL_INSTANCE_COUNT + 1) /* One element per Generic OnOff client instance */
 #define ACCESS_ELEMENT_COUNT (1)
 
 /**
@@ -190,8 +141,7 @@
  * @note This value must equal @ref ACCESS_MODEL_COUNT minus the number of
  * models operating on shared states.
  */
-//#define ACCESS_SUBSCRIPTION_LIST_COUNT (ACCESS_MODEL_COUNT)
-#define ACCESS_SUBSCRIPTION_LIST_COUNT (2)
+#define ACCESS_SUBSCRIPTION_LIST_COUNT (ACCESS_MODEL_COUNT)
 
 /**
  * The number of pages of flash storage reserved for the access layer for persistent data storage.
@@ -230,14 +180,12 @@
 #define DSM_DEVICE_MAX                                  (1)
 /** Maximum number of virtual addresses. */
 #define DSM_VIRTUAL_ADDR_MAX                            (1)
-/** Maximum number of non-virtual addresses. One for each of the servers and a group address. */
-//#define DSM_NONVIRTUAL_ADDR_MAX                         (ACCESS_MODEL_COUNT + 1)
-/** Maximum number of non-virtual addresses.
+/** Maximum number of non-virtual addresses. One for each of the servers and a group address.
  * - Generic OnOff publication
  * - Health publication
  * - Subscription address
  */
-#define DSM_NONVIRTUAL_ADDR_MAX                         (3)
+#define DSM_NONVIRTUAL_ADDR_MAX                         (ACCESS_MODEL_COUNT + 1)
 /** Number of flash pages reserved for the DSM storage. */
 #define DSM_FLASH_PAGE_COUNT                            (1)
 /** @} end of DSM_CONFIG */

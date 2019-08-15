@@ -57,7 +57,16 @@
 
 //! Log data is buffered and can be processed in idle
 #define NRF_LOG_DEFERRED 1
+// <0=> Off
+// <1=> Error
+// <2=> Warning
+// <3=> Info
+// <4=> Debug
 #define NRF_LOG_DEFAULT_LEVEL 3
+#define NRF_SDH_SOC_LOG_LEVEL 3
+#define NRF_SDH_BLE_LOG_LEVEL 3
+#define NRF_SDH_LOG_LEVEL 3
+
 #define NRF_LOG_USES_COLORS 1
 #define NRF_LOG_WARNING_COLOR 4
 #define NRF_LOG_USES_TIMESTAMP 0
