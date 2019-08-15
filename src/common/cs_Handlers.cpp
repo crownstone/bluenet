@@ -20,6 +20,7 @@ extern "C" {
 
 //#define CROWNSTONE_STACK_OBSERVER_PRIO           0
 #define CROWNSTONE_SOC_OBSERVER_PRIO             0 // Flash events, power failure events, radio events, etc.
+#define MESH_SOC_OBSERVER_PRIO                   0
 //#define CROWNSTONE_REQUEST_OBSERVER_PRIO         0 // SoftDevice enable/disable requests.
 #define CROWNSTONE_STATE_OBSERVER_PRIO           0 // SoftDevice state events (enabled/disabled)
 #define CROWNSTONE_BLE_OBSERVER_PRIO             1 // BLE events: connection, scans, rssi
@@ -38,15 +39,30 @@ extern "C" {
  * Then, the events can always be passed on via the scheduler to get it on the main thread.
  */
 
+// Change to LOGd to log the interrupt levels.
+#define LOGInterruptLevel LOGnone
 
 
-void cs_brownout_handler(void * p_event_data, uint16_t event_size) {
-	event_t event(CS_TYPE::EVT_BROWNOUT_IMPENDING, NULL, 0);
-	EventDispatcher::getInstance().dispatch(event);
+/**
+ * The decoupled SOC event handler, should run in thread mode.
+ */
+void crownstone_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
+	LOGInterruptLevel("soc evt decoupled int=%u", BLEutil::getInterruptLevel());
+	uint32_t evt_id = *(uint32_t*)p_event_data;
+	switch (evt_id) {
+	case NRF_EVT_POWER_FAILURE_WARNING: {
+		event_t event(CS_TYPE::EVT_BROWNOUT_IMPENDING);
+		EventDispatcher::getInstance().dispatch(event);
+		break;
+	}
+	default:
+		break;
+	}
 }
 
 void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
     //LOGd("SOC event: %i", evt_id);
+	LOGInterruptLevel("soc evt int=%u", BLEutil::getInterruptLevel());
 
     //fs_sys_event_handler(evt_id);
 
@@ -59,8 +75,12 @@ void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
 	    LOGnone("NRF_EVT_FLASH_OPERATION_ERROR, unhandled");
 	    break;
 	case NRF_EVT_POWER_FAILURE_WARNING: {
-		uint32_t retVal = app_sched_event_put(NULL, 0, cs_brownout_handler);
+#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
+		uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), crownstone_soc_evt_handler_decoupled);
 		APP_ERROR_CHECK(retVal);
+#else
+		crownstone_soc_evt_handler_decoupled(&evt_id, sizeof(evt_id));
+#endif
 	    break;
 	}
 	case NRF_EVT_RADIO_BLOCKED: {
@@ -75,21 +95,29 @@ NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, cr
 
 
 /**
- * Decoupled BLE events.
+ * Decoupled BLE event handler, should run in thread mode.
  */
-void cs_ble_handler(void * p_event_data, uint16_t event_size) {
+void crownstone_sdh_ble_evt_handler_decoupled(const void * p_event_data, uint16_t event_size) {
+	LOGInterruptLevel("sdh ble evt decoupled int=%u", BLEutil::getInterruptLevel());
 	ble_evt_t* p_ble_evt = (ble_evt_t*) p_event_data;
 	Stack::getInstance().onBleEvent(p_ble_evt);
 }
-
+void crownstone_sdh_ble_evt_handler_sched(void * p_event_data, uint16_t event_size) {
+	crownstone_sdh_ble_evt_handler_decoupled(p_event_data, event_size);
+}
 /**
  * Called by the SoftDevice on any BLE event.
  * Some event should be handled on interrupt level, while most are decouple via app scheduler.
  */
-void ble_sdh_evt_dispatch(const ble_evt_t * p_ble_evt, void * p_context) {
+void crownstone_sdh_ble_evt_handler(const ble_evt_t * p_ble_evt, void * p_context) {
+	LOGInterruptLevel("sdh ble evt int=%u", BLEutil::getInterruptLevel());
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_ADV_REPORT:
-		Stack::getInstance().onBleEventInterrupt(p_ble_evt);
+#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
+		Stack::getInstance().onBleEventInterrupt(p_ble_evt, true);
+#else
+		Stack::getInstance().onBleEventInterrupt(p_ble_evt, false);
+#endif
 		break;
 	case BLE_GAP_EVT_CONNECTED:
 	case BLE_GAP_EVT_DISCONNECTED:
@@ -100,8 +128,12 @@ void ble_sdh_evt_dispatch(const ble_evt_t * p_ble_evt, void * p_context) {
 	case BLE_GATTS_EVT_WRITE:
 	case BLE_GATTS_EVT_HVN_TX_COMPLETE:
 	case BLE_GATTS_EVT_SYS_ATTR_MISSING: {
-		uint32_t retVal = app_sched_event_put(p_ble_evt, sizeof(ble_evt_t), cs_ble_handler);
+#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
+		uint32_t retVal = app_sched_event_put(p_ble_evt, sizeof(ble_evt_t), crownstone_sdh_ble_evt_handler_sched);
 		APP_ERROR_CHECK(retVal);
+#else
+		crownstone_sdh_ble_evt_handler_decoupled(p_ble_evt, sizeof(ble_evt_t));
+#endif
 		break;
 	}
 	case BLE_GAP_EVT_RSSI_CHANGED:
@@ -142,11 +174,12 @@ void ble_sdh_evt_dispatch(const ble_evt_t * p_ble_evt, void * p_context) {
 		break;
 	}
 }
-NRF_SDH_BLE_OBSERVER(m_stack, CROWNSTONE_BLE_OBSERVER_PRIO, ble_sdh_evt_dispatch, NULL);
+NRF_SDH_BLE_OBSERVER(m_stack, CROWNSTONE_BLE_OBSERVER_PRIO, crownstone_sdh_ble_evt_handler, NULL);
 
 
 
-static void crownstone_state_handler(nrf_sdh_state_evt_t state, void * p_context) {
+static void crownstone_sdh_state_evt_handler(nrf_sdh_state_evt_t state, void * p_context) {
+	LOGInterruptLevel("sdh state evt int=%u", BLEutil::getInterruptLevel());
 	switch (state) {
 		case NRF_SDH_EVT_STATE_ENABLE_PREPARE:
 			LOGd("Softdevice is about to be enabled");
@@ -166,36 +199,53 @@ static void crownstone_state_handler(nrf_sdh_state_evt_t state, void * p_context
 }
 NRF_SDH_STATE_OBSERVER(m_crownstone_state_handler, CROWNSTONE_STATE_OBSERVER_PRIO) =
 {
-	.handler   = crownstone_state_handler,
+	.handler   = crownstone_sdh_state_evt_handler,
 	.p_context = NULL
 };
 
 #if BUILD_MESHING == 1
 // From: ble_softdevice_support.c
-#define MESH_SOC_OBSERVER_PRIO 0
-static void mesh_soc_evt_handler(uint32_t evt_id, void * p_context)
-{
+void mesh_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_size) {
+	LOGInterruptLevel("mesh soc evt decoupled int=%u", BLEutil::getInterruptLevel());
+	uint32_t evt_id = *(uint32_t*)p_event_data;
+	nrf_mesh_on_sd_evt(evt_id);
+}
+
+static void mesh_soc_evt_handler(uint32_t evt_id, void * p_context) {
+	LOGInterruptLevel("mesh soc evt int=%u", BLEutil::getInterruptLevel());
+#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
+	uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), mesh_soc_evt_handler_decoupled);
+	APP_ERROR_CHECK(retVal);
+#else
     nrf_mesh_on_sd_evt(evt_id);
+#endif
 }
 NRF_SDH_SOC_OBSERVER(m_mesh_soc_observer, MESH_SOC_OBSERVER_PRIO, mesh_soc_evt_handler, NULL);
 #endif
 
 /**
- * The decoupled FDS event handler.
+ * The decoupled FDS event handler, should run in thread mode.
  */
-void fds_evt_decoupled_handler(void * p_event_data, uint16_t event_size) {
+void fds_evt_handler_decoupled(const void * p_event_data, uint16_t event_size) {
+	LOGInterruptLevel("fds evt decoupled int=%u", BLEutil::getInterruptLevel());
 	fds_evt_t* p_fds_evt = (fds_evt_t*) p_event_data;
 	Storage::getInstance().handleFileStorageEvent(p_fds_evt);
+}
+void fds_evt_handler_sched(void * p_event_data, uint16_t event_size) {
+	fds_evt_handler_decoupled(p_event_data, event_size);
 }
 
 /**
  * The FDS event handler is registered in the cs_Storage class.
- *
- * Decouple these events via the app scheduler.
  */
 void fds_evt_handler(fds_evt_t const * const p_fds_evt) {
-	uint32_t retVal = app_sched_event_put(p_fds_evt, sizeof(*p_fds_evt), fds_evt_decoupled_handler);
+	LOGInterruptLevel("fds evt int=%u", BLEutil::getInterruptLevel());
+#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
+	uint32_t retVal = app_sched_event_put(p_fds_evt, sizeof(*p_fds_evt), fds_evt_handler_sched);
 	APP_ERROR_CHECK(retVal);
+#else
+	fds_evt_handler_decoupled(p_fds_evt, sizeof(*p_fds_evt));
+#endif
 }
 
 #ifdef __cplusplus

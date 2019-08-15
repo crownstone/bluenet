@@ -18,7 +18,12 @@
 #define APP_TIMER_CONFIG_OP_QUEUE_SIZE 40
 #define APP_TIMER_CONFIG_USE_SCHEDULER 1
 
-// Get SoftDevice events via app scheduler.
+// <i> NRF_SDH_DISPATCH_MODEL_INTERRUPT: SoftDevice events are passed to the application from the interrupt context.
+// <i> NRF_SDH_DISPATCH_MODEL_APPSH: SoftDevice events are scheduled using @ref app_scheduler.
+// <i> NRF_SDH_DISPATCH_MODEL_POLLING: SoftDevice events are to be fetched manually.
+// <0=> NRF_SDH_DISPATCH_MODEL_INTERRUPT
+// <1=> NRF_SDH_DISPATCH_MODEL_APPSH
+// <2=> NRF_SDH_DISPATCH_MODEL_POLLING
 #define NRF_SDH_DISPATCH_MODEL 1
 
 #define FDS_ENABLED 1

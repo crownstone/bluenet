@@ -1132,25 +1132,13 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 	}
 }
 
-/**
- * Function to decouple ble events via app scheduler.
- */
-void csBleEventHandler(void * p_event_data, uint16_t event_size) {
-	ble_evt_t* p_ble_evt = (ble_evt_t*) p_event_data;
-	Stack::getInstance().onBleEvent(p_ble_evt);
-}
-
 struct cs_stack_scan_t {
 	ble_gap_evt_adv_report_t advReport;
 	uint8_t dataSize;
 	uint8_t data[31]; // Same size as _scanBuffer
 };
 
-void csStackOnScan(void * p_event_data, uint16_t event_size) {
-	cs_stack_scan_t* scanEvent = (cs_stack_scan_t*)p_event_data;
-	scanEvent->advReport.data.p_data = scanEvent->data;
-	const ble_gap_evt_adv_report_t* advReport = &(scanEvent->advReport);
-
+void csStackOnScan(const ble_gap_evt_adv_report_t* advReport) {
 	scanned_device_t scan;
 	memcpy(scan.address, advReport->peer_addr.addr, sizeof(scan.address)); // TODO: check addr_type and addr_id_peer
 	scan.addressType = (advReport->peer_addr.addr_type & 0x7F) & ((advReport->peer_addr.addr_id_peer & 0x01) << 7);
@@ -1174,7 +1162,14 @@ void csStackOnScan(void * p_event_data, uint16_t event_size) {
 	EventDispatcher::getInstance().dispatch(event);
 }
 
-void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt) {
+void csStackOnScan(void * p_event_data, uint16_t event_size) {
+	cs_stack_scan_t* scanEvent = (cs_stack_scan_t*)p_event_data;
+	scanEvent->advReport.data.p_data = scanEvent->data;
+	const ble_gap_evt_adv_report_t* advReport = &(scanEvent->advReport);
+	csStackOnScan(advReport);
+}
+
+void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt) {
 	switch (p_ble_evt->header.evt_id) {
 	case BLE_GAP_EVT_ADV_REPORT: {
 		const uint16_t status = p_ble_evt->evt.gap_evt.params.adv_report.type.status;
@@ -1183,27 +1178,32 @@ void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt) {
 			break;
 		}
 
-		// Handle scan via app scheduler. The app scheduler copies the data.
-		// But, since the payload data is a pointer, that will not be copied.
-		// So copy the payload data as well.
-		// This copy of advReport + payload data will be copied again by the scheduler.
-		// TODO: use multiple scan buffers
-		cs_stack_scan_t scan;
-		memcpy(&(scan.advReport), &(p_ble_evt->evt.gap_evt.params.adv_report), sizeof(ble_gap_evt_adv_report_t));
-		scan.dataSize = p_ble_evt->evt.gap_evt.params.adv_report.data.len;
-		memcpy(scan.data, p_ble_evt->evt.gap_evt.params.adv_report.data.p_data, scan.dataSize);
-		scan.advReport.data.p_data = NULL; // This pointer can't be set now, as the data is copied by scheduler.
+		if (isInterrupt) {
+			// Handle scan via app scheduler. The app scheduler copies the data.
+			// But, since the payload data is a pointer, that will not be copied.
+			// So copy the payload data as well.
+			// This copy of advReport + payload data will be copied again by the scheduler.
+			// TODO: use multiple scan buffers?
+			cs_stack_scan_t scan;
+			memcpy(&(scan.advReport), &(p_ble_evt->evt.gap_evt.params.adv_report), sizeof(ble_gap_evt_adv_report_t));
+			scan.dataSize = p_ble_evt->evt.gap_evt.params.adv_report.data.len;
+			memcpy(scan.data, p_ble_evt->evt.gap_evt.params.adv_report.data.p_data, scan.dataSize);
+			scan.advReport.data.p_data = NULL; // This pointer can't be set now, as the data is copied by scheduler.
 
-		uint32_t retVal;
-		retVal = app_sched_event_put(&scan, sizeof(scan), csStackOnScan);
-		APP_ERROR_CHECK(retVal);
+			uint32_t retVal = app_sched_event_put(&scan, sizeof(scan), csStackOnScan);
+			APP_ERROR_CHECK(retVal);
+		}
+		else {
+			// Handle scan immediately, since we're already on thread level.
+			csStackOnScan(&(p_ble_evt->evt.gap_evt.params.adv_report));
+		}
 
 		// If ble_gap_adv_report_type_t::status is set to BLE_GAP_ADV_DATA_STATUS_INCOMPLETE_MORE_DATA,
 		//      not all fields in the advertising report may be available.
 		// Else, scanning will be paused. To continue scanning, call sd_ble_gap_scan_start.
 
 		// Resume scanning: ignore _scanning state as this is executed in an interrupt. Rely on return value instead.
-		retVal = sd_ble_gap_scan_start(NULL, &_scanBufferStruct);
+		uint32_t retVal = sd_ble_gap_scan_start(NULL, &_scanBufferStruct);
 		switch (retVal) {
 		case NRF_ERROR_INVALID_STATE:
 			break;
