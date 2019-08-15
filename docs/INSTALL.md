@@ -131,6 +131,8 @@ This is the direct link for the version [3.2.0](https://www.nordicsemi.com/-/med
 
 Do not forget to set the `MESH_SDK_DIR` in your `CMakeBuild.config` file.
 
+Currently the mesh will crash because there is not enough margin for the timeslot. Set `TIMESLOT_END_SAFETY_MARGIN_US` to `1000UL` in `timeslot.h`.
+
 ## Configuration
 
 We allow for multiple configurations. This means that the `$BLUENET_CONFIG_DIR` can contain multiple directories. Here we assume you like to create a `default` target directory. Copy subsequently the template config file to your config directory:
