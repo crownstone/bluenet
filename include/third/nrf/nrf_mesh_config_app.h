@@ -88,7 +88,7 @@
 /** Relay feature */
 #define MESH_FEATURE_RELAY_ENABLED (1)
 
-#define PERSISTENT_STORAGE 1
+#define PERSISTENT_STORAGE 0
 
 
 /** Number of flash pages to be reserved between the flash manager recovery page and the bootloader.
