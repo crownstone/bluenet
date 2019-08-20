@@ -17,11 +17,10 @@ source $path/_config.sh >/dev/null
 #result1=$(echo "$result0" | cut -f2 -d'=' | sed 's/^ //g' | sed 's/ $//g' | tr -s ' ' ':')
 #echo "$result1" | awk -v FS=":" '{print $4,$3,$2,$1}' | tr -d ' ' | tr '[:upper:]' '[:lower:]'
 
+# No logs/prints/echoes here, the logs are the return value.
 if [ $SERIAL_NUM ]; then
-	cs_log "nrfjprog -f nrf52 --memrd $ADDRESS --snr $SERIAL_NUM"
 	read_value=$(nrfjprog -f nrf52 --memrd $ADDRESS --snr $SERIAL_NUM | awk '{print $2}')
 else
-	cs_log "nrfjprog -f nrf52 --memrd $ADDRESS"
 	read_value=$(nrfjprog -f nrf52 --memrd $ADDRESS | awk '{print $2}')
 fi
 checkError "failed to read"
