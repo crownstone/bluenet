@@ -582,8 +582,8 @@ void Switch::handleEvent(event_t & event) {
 			break;
 		case CS_TYPE::CMD_SWITCH: {
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) event.data;
-			if (packet->timeout) {
-				delayedSwitch(packet->switchCmd, packet->timeout);
+			if (packet->delay) {
+				delayedSwitch(packet->switchCmd, packet->delay);
 			}
 			else {
 				if (checkAndSetOwner(packet->source)) {

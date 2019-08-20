@@ -531,7 +531,7 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitchLegacy(buffer_ptr_t buffer, co
 		TYPIFY(CMD_MULTI_SWITCH) item;
 		item.id = multiSwitchPacket->items[i].id;
 		item.cmd.switchCmd = multiSwitchPacket->items[i].switchCmd;
-		item.cmd.timeout = multiSwitchPacket->items[i].timeout;
+		item.cmd.delay = multiSwitchPacket->items[i].timeout;
 		item.cmd.source.flagExternal = false;
 		item.cmd.source.sourceId = CS_CMD_SOURCE_CONNECTION;
 		if (cs_multi_switch_item_is_valid(&item, sizeof(item))) {
@@ -554,7 +554,7 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 		TYPIFY(CMD_MULTI_SWITCH) item;
 		item.id = multiSwitchPacket->items[i].id;
 		item.cmd.switchCmd = multiSwitchPacket->items[i].switchCmd;
-		item.cmd.timeout = 0;
+		item.cmd.delay = 0;
 		item.cmd.source = source;
 		if (cs_multi_switch_item_is_valid(&item, sizeof(item))) {
 			event_t cmd(CS_TYPE::CMD_MULTI_SWITCH, &item, sizeof(item));

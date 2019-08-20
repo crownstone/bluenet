@@ -98,7 +98,7 @@ cs_ret_code_t MeshModel::sendMultiSwitchItem(const internal_multi_switch_item_t*
 	cs_mesh_model_msg_multi_switch_item_t meshItem;
 	meshItem.id = item->id;
 	meshItem.switchCmd = item->cmd.switchCmd;
-	meshItem.timeout = item->cmd.timeout;
+	meshItem.delay = item->cmd.delay;
 	meshItem.source = item->cmd.source;
 	remFromQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id);
 	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id, (uint8_t*)(&meshItem), sizeof(meshItem), repeats, true);
@@ -289,7 +289,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			TYPIFY(CMD_MULTI_SWITCH) internalItem;
 			internalItem.id = item->id;
 			internalItem.cmd.switchCmd = item->switchCmd;
-			internalItem.cmd.timeout = item->timeout;
+			internalItem.cmd.delay = item->delay;
 			internalItem.cmd.source = item->source;
 			internalItem.cmd.source.flagExternal = true;
 
