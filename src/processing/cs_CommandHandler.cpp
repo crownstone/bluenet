@@ -161,6 +161,37 @@ cs_ret_code_t CommandHandler::handleCmdNop(buffer_ptr_t buffer, const uint16_t s
 
 cs_ret_code_t CommandHandler::handleCmdGotoDfu(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "goto dfu");
+	switch (_boardConfig->hardwareBoard) {
+	case PCA10036:
+	case PCA10040:
+	case ACR01B1A:
+	case ACR01B1B:
+	case ACR01B1C:
+	case ACR01B1D:
+	case ACR01B1E:
+	case ACR01B10B:
+	case ACR01B2A:
+	case ACR01B2B:
+	case ACR01B2C:
+	case ACR01B2E:
+	case ACR01B2G: {
+		// Turn relay on, as the bootloader doesn't manage to turn off the dimmer fast enough.
+		TYPIFY(CMD_SWITCH) switchVal;
+		switchVal.switchCmd = 100;
+		switchVal.delay = 0;
+		switchVal.source = cmd_source_t(CS_CMD_SOURCE_CONNECTION);
+		event_t cmd(CS_TYPE::CMD_SWITCH, &switchVal, sizeof(switchVal));
+		EventDispatcher::getInstance().dispatch(cmd);
+		break;
+	}
+	case GUIDESTONE:
+	case CS_USB_DONGLE:
+	case ACR01B10C:
+		break;
+	default:
+		LOGe("Unknown board");
+		break;
+	}
 	resetDelayed(GPREGRET_DFU_RESET);
 	return ERR_SUCCESS;
 }
