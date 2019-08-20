@@ -282,7 +282,7 @@ verify_board_version_written() {
 }
 
 reset() {
-	${path}/reset.sh $serial_num
+	${path}/reset.sh $target
 }
 
 

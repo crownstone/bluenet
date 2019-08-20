@@ -13,7 +13,7 @@ source ${path}/_check_targets.sh $target
 cs_info "Load configuration from: ${path}/_config.sh"
 source $path/_config.sh
 
-cs_info "resetting device"
+cs_info "resetting device $serial_num"
 if [ $serial_num ]; then
 	nrfjprog -f nrf52 --reset --snr $serial_num
 else
