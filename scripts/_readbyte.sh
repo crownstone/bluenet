@@ -18,8 +18,10 @@ source $path/_config.sh >/dev/null
 #echo "$result1" | awk -v FS=":" '{print $4,$3,$2,$1}' | tr -d ' ' | tr '[:upper:]' '[:lower:]'
 
 if [ $SERIAL_NUM ]; then
+	cs_log "nrfjprog -f nrf52 --memrd $ADDRESS --snr $SERIAL_NUM"
 	read_value=$(nrfjprog -f nrf52 --memrd $ADDRESS --snr $SERIAL_NUM | awk '{print $2}')
 else
+	cs_log "nrfjprog -f nrf52 --memrd $ADDRESS"
 	read_value=$(nrfjprog -f nrf52 --memrd $ADDRESS | awk '{print $2}')
 fi
 checkError "failed to read"
