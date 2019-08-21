@@ -47,5 +47,15 @@ monitor reset
 # Seems to trigger wrong one
 #b radio_state_tx_handle
 
-continue 
+continue
 
+#define my_test
+#	while(1)
+#		b FactoryReset::timeout
+#		continue
+#		bt
+#		reset
+#	end
+#end
+
+#my_test
