@@ -387,6 +387,14 @@ else
 	popd &> /dev/null
 	cs_succ "Build DONE"
 	
+	cs_info "Check mesh setting ..."
+	#mesh_timeslot_margin=$(grep -hoaP "TIMESLOT_END_SAFETY_MARGIN_US.\([^\(]+\)" "$BLUENET_BUILD_DIR/default/crownstone.elf" | grep -oP "\d+")
+	grep_result=$(grep -hoaP "TIMESLOT_END_SAFETY_MARGIN_US.\(1000UL\)" "$BLUENET_BUILD_DIR/default/crownstone.elf")
+	if [ $grep_result == "" ]; then
+		cs_err "TIMESLOT_END_SAFETY_MARGIN_US is not set to 1000"
+		exit $CS_ERR_CONFIG
+	fi
+	
 	cs_info "Build bootloader settings ..."
 	pushd $BLUENET_DIR/scripts &> /dev/null
 	./bootloader.sh build-settings
