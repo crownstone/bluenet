@@ -241,7 +241,6 @@
 #define SEGGER_RTT_CONFIG_DEFAULT_MODE 0
 #endif
 
-
 // <o> NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE - Size of buffer for partially processed strings.
 // <i> Size of the buffer is a trade-off between RAM usage and processing.
 // <i> if buffer is smaller then strings will often be fragmented.
