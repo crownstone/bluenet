@@ -272,6 +272,9 @@ private:
 	// True when next buffer is the first after start.
 	bool _firstBuffer;
 
+	// True when next limit interrupt is the first after start.
+	bool _firstLimitInterrupt;
+
 	// State of this class.
 	adc_state_t _state;
 

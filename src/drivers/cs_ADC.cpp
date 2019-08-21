@@ -64,6 +64,7 @@ ADC::ADC() :
 		_queuedBufferIndex(BUFFER_INDEX_NONE),
 		_numBuffersQueued(0),
 		_firstBuffer(true),
+		_firstLimitInterrupt(true),
 		_state(ADC_STATE_IDLE),
 		_saadcState(ADC_SAADC_STATE_IDLE),
 		_zeroCrossingChannel(0),
@@ -435,6 +436,7 @@ void ADC::start() {
 		APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
 	}
 	_firstBuffer = true;
+	_firstLimitInterrupt = true;
 
 	nrf_ppi_channel_enable(_ppiChannelStart); // Start saadc on end event
 	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CLEAR); // Clear timeout counter
@@ -652,15 +654,18 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 		nrf_gpio_pin_toggle(TEST_PIN_ZERO_CROSS);
 #endif
 
-		// Only call zero crossing callback when there was about 20ms between the two events.
-		// This makes it more likely that this was an actual zero crossing.
-		uint32_t curTime = RTC::getCount();
-		uint32_t diffTicks = RTC::difference(curTime, _lastZeroCrossUpTime);
-		if ((_zeroCrossingCallback != NULL) && (diffTicks > RTC::msToTicks(19)) && (diffTicks < RTC::msToTicks(21))) {
-			_zeroCrossingCallback();
+		if (!_firstLimitInterrupt) {
+			// Only call zero crossing callback when there was about 20ms between the two events.
+			// This makes it more likely that this was an actual zero crossing.
+			uint32_t curTime = RTC::getCount();
+			uint32_t diffTicks = RTC::difference(curTime, _lastZeroCrossUpTime);
+			if ((_zeroCrossingCallback != NULL) && (diffTicks > RTC::msToTicks(19)) && (diffTicks < RTC::msToTicks(21))) {
+				_zeroCrossingCallback();
+			}
+			_lastZeroCrossUpTime = curTime;
 		}
-		_lastZeroCrossUpTime = curTime;
 	}
+	_firstLimitInterrupt = false;
 }
 
 void ADC::_handleTimeoutInterrupt() {
