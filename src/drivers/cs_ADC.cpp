@@ -572,6 +572,8 @@ void ADC::setLimitUp() {
 
 	int_mask = nrf_saadc_limit_int_get(_zeroCrossingChannel, NRF_SAADC_LIMIT_HIGH);
 	nrf_saadc_int_enable(int_mask);
+
+	_limitUp = true;
 }
 
 // No logs, this function can be called from interrupt
@@ -583,12 +585,34 @@ void ADC::setLimitDown() {
 
 	int_mask = nrf_saadc_limit_int_get(_zeroCrossingChannel, NRF_SAADC_LIMIT_HIGH);
 	nrf_saadc_int_disable(int_mask);
+
+	_limitUp = false;
 }
 
 void ADC::stopTimeout() {
 	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_STOP);
 }
 
+void ADC::calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex) {
+	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
+	// Keep up whether the last non-zero value was below (-1) or above (1) zero.
+	// Starts at unknown value.
+	int8_t state = 0;
+	for (uint16_t i = _zeroCrossingChannel; i < CS_ADC_BUF_SIZE; i += _config.channelCount) {
+		if (buf[i] > _zeroValue) {
+			if (state == -1) {
+				// Found an upwards zero crossing.
+			}
+			state = 1;
+		}
+		else if (buf[i] < _zeroValue) {
+			if (state == 1) {
+				// Found a downwards zero crossing.
+			}
+			state = -1;
+		}
+	}
+}
 
 void ADC::handleEvent(event_t & event) {
 	switch(event.type) {
@@ -614,6 +638,7 @@ void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	nrf_gpio_pin_toggle(TEST_PIN_PROCESS);
 #endif
 
+	calculateZeroCrossingOffsetTime(bufIndex);
 
 	if (dataCallbackRegistered()) {
 		_inProgress[bufIndex] = true;
@@ -654,6 +679,7 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 		nrf_gpio_pin_toggle(TEST_PIN_ZERO_CROSS);
 #endif
 
+		// Skip the first limit interrupt, as it probably wasn't a zero crossing.
 		if (!_firstLimitInterrupt) {
 			// Only call zero crossing callback when there was about 20ms between the two events.
 			// This makes it more likely that this was an actual zero crossing.
