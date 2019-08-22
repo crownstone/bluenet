@@ -662,8 +662,11 @@ void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	nrf_gpio_pin_toggle(TEST_PIN_PROCESS);
 #endif
 
-	int zeroCrossingTimeOffset = calculateZeroCrossingOffsetTime(bufIndex);
-
+	if (_zeroCrossingEnabled) {
+		TYPIFY(EVT_ZERO_CROSSING_TIME_OFFSET) zeroCrossingTimeOffset = calculateZeroCrossingOffsetTime(bufIndex);
+		event_t event(CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET, &zeroCrossingTimeOffset, sizeof(zeroCrossingTimeOffset));
+		EventDispatcher::getInstance().dispatch(event);
+	}
 
 	if (dataCallbackRegistered()) {
 		_inProgress[bufIndex] = true;
