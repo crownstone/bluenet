@@ -10,6 +10,7 @@
 
 #include "ble/cs_Nordic.h"
 #include "cfg/cs_Config.h"
+#include "events/cs_EventDispatcher.h"
 
 #define ERR_PWM_NOT_ENABLED 1
 
@@ -49,7 +50,7 @@ typedef struct {
  *
  * To turn on/off the power, as well as all intermediate stages, for example with dimming, the PWM class is used.
  */
-class PWM {
+class PWM : EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation) of the PWM class
 	static PWM& getInstance() {
@@ -89,6 +90,9 @@ public:
 
 	//! Interrupt handler: internal function, implementation specific.
 	void _handleInterrupt();
+
+	//! Event handler: to measure the offset between the detected zero crossing timer value and the true zero timer value
+	void handleEvent(event_t & event);
 
 private:
 	//! Private PWM constructor
