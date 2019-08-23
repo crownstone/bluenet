@@ -356,7 +356,7 @@ private:
 
 	// Calculate how much time in μs after the actual zero crossing, the last zero crossing interrupt was triggered.
 	// Returns -1 when it couldn't calculate the offset.
-	int calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex);
+	int calculateZeroCrossingTimeOffset(cs_adc_buffer_id_t bufIndex);
 
 	// Helper function that returns the adc pin number, given the AIN number.
 	nrf_saadc_input_t getAdcPin(cs_adc_pin_id_t pinNum);

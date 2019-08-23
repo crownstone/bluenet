@@ -493,11 +493,16 @@ void PWM::onZeroCrossing() {
 #endif
 }
 
+void PWM::onZeroCrossingTimeOffset(int32_t offset) {
+	// Although it might happen that we subtract from the wrong entry, it should improve the measurements.
+	_offsets[_zeroCrossingCounter] -= nrf_timer_us_to_ticks(offset, CS_PWM_TIMER_FREQ);
+}
 
 void PWM::handleEvent(event_t & event) {
 	if (event.type == CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET) {
-		int32_t lastKnownTimeOffset = *(TYPIFY(EVT_ZERO_CROSSING_TIME_OFFSET)*)event.data;
-		cs_write("off=%i \r\n", lastKnownTimeOffset);
+		int32_t offset = *(TYPIFY(EVT_ZERO_CROSSING_TIME_OFFSET)*)event.data;
+		cs_write("off=%i \r\n", offset);
+		onZeroCrossingTimeOffset(offset);
 	}
 }
 

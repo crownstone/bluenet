@@ -224,7 +224,8 @@ private:
 	uint32_t readCC(uint8_t channelIdx);
 	//! Wrap around a value, so that it ends up in the range [-max/2, max/2]
 	void wrapAround(int32_t& val, int32_t max);
-
+	//! Function to be called when the offset (in μs) of the previous zero crossing was calculated.
+	void onZeroCrossingTimeOffset(int32_t offset);
 
 	//! Enables the timer interrupt, to change the pwm value.
 	void enableInterrupt();

@@ -596,7 +596,7 @@ void ADC::stopTimeout() {
 	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_STOP);
 }
 
-int ADC::calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex) {
+int ADC::calculateZeroCrossingTimeOffset(cs_adc_buffer_id_t bufIndex) {
 	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
 
 	if (RTC::difference(_lastEndTime, _lastZeroCrossUpTime) > RTC::difference(_lastZeroCrossUpTime, _lastEndTime)) {
@@ -668,7 +668,7 @@ void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 #endif
 
 	if (_zeroCrossingEnabled) {
-		TYPIFY(EVT_ZERO_CROSSING_TIME_OFFSET) zeroCrossingTimeOffset = calculateZeroCrossingOffsetTime(bufIndex);
+		TYPIFY(EVT_ZERO_CROSSING_TIME_OFFSET) zeroCrossingTimeOffset = calculateZeroCrossingTimeOffset(bufIndex);
 		if (zeroCrossingTimeOffset > -1) {
 			event_t event(CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET, &zeroCrossingTimeOffset, sizeof(zeroCrossingTimeOffset));
 			EventDispatcher::getInstance().dispatch(event);
