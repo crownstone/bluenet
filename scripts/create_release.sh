@@ -288,29 +288,6 @@ else
 	cs_warn "Warn: Using existing configuration"
 fi
 
-########################
-### Update release index
-########################
-
-# NOTE: do this before modifying the paths otherwise BLUENET_RELEASE_DIR will point the the subdirectory
-#   but the index file is located in the root directory
-
-# goto bluenet scripts dir
-pushd $BLUENET_DIR/scripts &> /dev/null
-
-cs_info "Update release index ..."
-if [[ $stable == 1 ]]; then
-	./update_release_index.py -t $model -v $version -s
-else
-	:
-	# ./update_release_index.py -t $model -v $version
-fi
-
-checkError "Failed"
-cs_succ "Copy DONE"
-
-popd &> /dev/null
-
 ############################
 ###  modify paths
 ############################
