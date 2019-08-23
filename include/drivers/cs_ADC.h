@@ -171,6 +171,8 @@ public:
 
 	/** Set the callback which is called on a zero crossing interrupt.
 	 *
+	 * Currently only called when going from below to above the zero.
+	 *
 	 * @param[in] callback             Function to be called on a zero crossing event. This function will run at interrupt level!
 	 */
 	void setZeroCrossingCallback(adc_zero_crossing_cb_t callback);

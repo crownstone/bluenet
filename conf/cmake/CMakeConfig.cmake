@@ -18,8 +18,10 @@ IF(EXISTS ${INSPECT_FILE})
 	foreach(NameAndValue ${ConfigContents})
 		# Strip leading spaces
 		string(REGEX REPLACE "^[ ]+" "" NameAndValue ${NameAndValue})
+		# Strip trailing spaces
+		string(REGEX REPLACE "[ ]+$" "" NameAndValue "${NameAndValue}")
 		# Ignore comments
-		string(REGEX REPLACE "^\#.*" "" NameAndValue ${NameAndValue})
+		string(REGEX REPLACE "^\#.*" "" NameAndValue "${NameAndValue}")
 
 		if(NOT NameAndValue STREQUAL "")
 			# Find variable name

@@ -930,6 +930,11 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	LOGi("Compilation time: %s", __TIME__);
 	LOGi("Hardware version: %s", get_hardware_version());
 	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
+#ifdef DEBUG
+	LOGi("DEBUG: defined")
+#else
+	LOGi("DEBUG: undefined")
+#endif
 	LOG_MEMORY;
 }
 
@@ -989,9 +994,12 @@ int main() {
 		nrf_gpio_cfg_output(board.pinGpioPwm);
 		if (board.flags.pwmInverted) {
 			nrf_gpio_pin_set(board.pinGpioPwm);
-		} else {
+		}
+		else {
 			nrf_gpio_pin_clear(board.pinGpioPwm);
 		}
+		nrf_gpio_cfg_output(board.pinGpioEnablePwm);
+		nrf_gpio_pin_clear(board.pinGpioEnablePwm);
 		//! Relay pins
 		if (board.flags.hasRelay) {
 			nrf_gpio_cfg_output(board.pinGpioRelayOff);

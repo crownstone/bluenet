@@ -16,7 +16,7 @@
   |  |  |    |  |  |--------------------------------------------  Patch number of PCB version
   |  |  |    |  |-----------------------------------------------  Minor number of PCB version
   |  |  |    |--------------------------------------------------  Major number of PCB version
-  |  |  |-------------------------------------------------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone
+  |  |  |-------------------------------------------------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 USB dongle, 6 Builtin One
   |  |----------------------------------------------------------  Market: 1 EU, 2 US
   |-------------------------------------------------------------  Family: 1 Crownstone
 
@@ -40,7 +40,7 @@
   |  |  |   | | |------------------------------  PCB with metal assembly line
   |  |  |   | |--------------------------------  PCB pick & place assembly line
   |  |  |   |----------------------------------  PCB manufacturing line
-  |  |  |--------------------------------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone
+  |  |  |--------------------------------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 USB dongle, 6 Builtin One
   |  |-----------------------------------------  Market: 1 EU, 2 US
   |--------------------------------------------  Family: 1 Crownstone
 

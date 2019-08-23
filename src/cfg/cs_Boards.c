@@ -12,6 +12,7 @@
 
 void asACR01B1D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
 	p_config->pinAinCurrentGainLow               = 2;
@@ -133,6 +134,7 @@ void asACR01B1D(boards_config_t* p_config) {
 
 void asACR01B7B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -179,6 +181,7 @@ void asACR01B7B(boards_config_t* p_config) {
 
 void asACR01B9A(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 10;
 	p_config->pinGpioRelayOff                    = 9;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -224,6 +227,7 @@ void asACR01B9A(boards_config_t* p_config) {
 
 void asACR01B9B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 15;
 	p_config->pinGpioRelayOff                    = 14;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -271,6 +275,7 @@ void asACR01B9B(boards_config_t* p_config) {
 
 void asACR01B9C(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 14;
 	p_config->pinGpioRelayOff                    = 13;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -317,6 +322,7 @@ void asACR01B9C(boards_config_t* p_config) {
 
 void asACR01B9D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 14;
 	p_config->pinGpioRelayOff                    = 13;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -364,6 +370,7 @@ void asACR01B9D(boards_config_t* p_config) {
 
 void asACR01B9E(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 14;
 	p_config->pinGpioRelayOff                    = 13;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -409,9 +416,70 @@ void asACR01B9E(boards_config_t* p_config) {
 	p_config->minTxPower                         = -20; // higher tx power for builtins
 }
 
-
+/*
 void asACR01B10B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
+//	p_config->pinGpioPwm                         = 15;
+	p_config->pinGpioPwmEnabled                  = 11; // Something unused
+	p_config->pinGpioRelayOn                     = 14;
+	p_config->pinGpioRelayOff                    = 13;
+	p_config->pinAinCurrentGainHigh              = 4; // highest gain
+	p_config->pinAinCurrentGainMed               = 5;
+	p_config->pinAinCurrentGainLow               = 6; // lowest gain
+	p_config->pinAinVoltage                      = 1;
+//	p_config->pinAinVoltage                      = 3; // actually the 14V pin
+	p_config->pinAinZeroRef                      = 0;
+	p_config->pinAinPwmTemp                      = 2;
+	p_config->pinGpioRx                          = 20;
+	p_config->pinGpioTx                          = 19;
+	p_config->pinLedRed                          = 6; // Not there
+	p_config->pinLedGreen                        = 7; // Not there
+
+	p_config->flags.hasRelay                     = true;
+	p_config->flags.pwmInverted                  = false;
+	p_config->flags.hasSerial                    = false;
+	p_config->flags.hasSerial                    = true;
+	p_config->flags.hasLed                       = false;
+	p_config->flags.ledInverted                  = false;
+	p_config->flags.hasAdcZeroRef                = true;
+//	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
+	p_config->flags.pwmTempInverted              = true;
+
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
+
+	p_config->voltageMultiplier                  = -0.253f; // for range -1800 - 1800 mV
+	p_config->currentMultiplier                  = 0.0071f; // for range -600 - 600 mV on pin 6
+//	p_config->voltageMultiplier                  = 0.0f;
+//	p_config->currentMultiplier                  = 0.0f;
+	p_config->voltageZero                        = 500; // for range -1800 - 1800 mV
+	p_config->currentZero                        = -125; // for range -600 - 600 mV on pin 6
+	p_config->powerZero                          = 0;
+	p_config->voltageRange                       = 1800;
+	p_config->currentRange                       = 600;
+
+	// See https://en.wikipedia.org/wiki/Thermistor#B_or_%CE%B2_parameter_equation B=3380, T0=25, R0=10000
+	// Python: temp=82; r=10000*math.exp(3380*(1/(temp+273.15)-1/(25+273.15))); 3.3/(16000+r)*r
+//	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
+//	p_config->pwmTempVoltageThreshold            = 0.4;  // About 70 degrees C
+	p_config->pwmTempVoltageThreshold            = 0.35; // About 76 degrees C
+//	p_config->pwmTempVoltageThresholdDown        = 0.5;  // About 60 degrees C
+//	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
+	p_config->pwmTempVoltageThresholdDown        = 0.3; // About 82 degrees C
+
+	p_config->minTxPower                         = -20; // higher tx power for builtins
+
+//	// For NTC voltage advertising.
+//	p_config->pinAinCurrentGainLow               = 2; // actually the IGBT NTC pin, make sure to disable differential measurements.
+//	p_config->pinAinPwmTemp                      = 0; // actually zero ref: 1.2V, so always above the threshold voltage, so always below temperature threshold.
+//	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
+//	p_config->currentRange                       = 3000; // 0-3V
+}
+*/
+
+void asACR01B10C(boards_config_t* p_config) {
+	p_config->pinGpioPwm                         = 8;
+//	p_config->pinGpioPwm                         = 15;
+	p_config->pinGpioEnablePwm                   = 10; // Only for v21, but on v20 this pin is not connected.
 	p_config->pinGpioRelayOn                     = 14;
 	p_config->pinGpioRelayOff                    = 13;
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain
@@ -469,6 +537,7 @@ void asACR01B10B(boards_config_t* p_config) {
 
 void asACR01B2C(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
 	p_config->pinAinCurrentGainLow               = 2;
@@ -506,6 +575,7 @@ void asACR01B2C(boards_config_t* p_config) {
 
 void asACR01B2G(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
 	p_config->pinAinCurrentGainLow               = 2;
@@ -551,6 +621,7 @@ void asACR01B2G(boards_config_t* p_config) {
 
 void asPca10040(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 17;
+	p_config->pinGpioEnablePwm                   = 22; // Something unused
 	p_config->pinGpioRelayOn                     = 11; // something unused
 	p_config->pinGpioRelayOff                    = 12; // something unused
 	p_config->pinAinCurrentGainLow               = 1; // gpio3
@@ -642,7 +713,8 @@ uint32_t configure_board(boards_config_t* p_config) {
 		break;
 
 	case ACR01B10B:
-		asACR01B10B(p_config);
+	case ACR01B10C:
+		asACR01B10C(p_config);
 		break;
 
 	case ACR01B2A:

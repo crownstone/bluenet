@@ -379,7 +379,7 @@ public:
 	 * is faster to set up maps from handles to directly the right function.
 	 */
 	void onBleEvent(const ble_evt_t * p_ble_evt);
-	void onBleEventInterrupt(const ble_evt_t * p_ble_evt);
+	void onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt);
 
 	void secReqTimeoutHandler(void * p_context);
 

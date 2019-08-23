@@ -161,6 +161,37 @@ cs_ret_code_t CommandHandler::handleCmdNop(buffer_ptr_t buffer, const uint16_t s
 
 cs_ret_code_t CommandHandler::handleCmdGotoDfu(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "goto dfu");
+	switch (_boardConfig->hardwareBoard) {
+	case PCA10036:
+	case PCA10040:
+	case ACR01B1A:
+	case ACR01B1B:
+	case ACR01B1C:
+	case ACR01B1D:
+	case ACR01B1E:
+	case ACR01B10B:
+	case ACR01B2A:
+	case ACR01B2B:
+	case ACR01B2C:
+	case ACR01B2E:
+	case ACR01B2G: {
+		// Turn relay on, as the bootloader doesn't manage to turn off the dimmer fast enough.
+		TYPIFY(CMD_SWITCH) switchVal;
+		switchVal.switchCmd = 100;
+		switchVal.delay = 0;
+		switchVal.source = cmd_source_t(CS_CMD_SOURCE_CONNECTION);
+		event_t cmd(CS_TYPE::CMD_SWITCH, &switchVal, sizeof(switchVal));
+		EventDispatcher::getInstance().dispatch(cmd);
+		break;
+	}
+	case GUIDESTONE:
+	case CS_USB_DONGLE:
+	case ACR01B10C:
+		break;
+	default:
+		LOGe("Unknown board");
+		break;
+	}
 	resetDelayed(GPREGRET_DFU_RESET);
 	return ERR_SUCCESS;
 }
@@ -531,7 +562,7 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitchLegacy(buffer_ptr_t buffer, co
 		TYPIFY(CMD_MULTI_SWITCH) item;
 		item.id = multiSwitchPacket->items[i].id;
 		item.cmd.switchCmd = multiSwitchPacket->items[i].switchCmd;
-		item.cmd.timeout = multiSwitchPacket->items[i].timeout;
+		item.cmd.delay = multiSwitchPacket->items[i].timeout;
 		item.cmd.source.flagExternal = false;
 		item.cmd.source.sourceId = CS_CMD_SOURCE_CONNECTION;
 		if (cs_multi_switch_item_is_valid(&item, sizeof(item))) {
@@ -554,14 +585,14 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 		TYPIFY(CMD_MULTI_SWITCH) item;
 		item.id = multiSwitchPacket->items[i].id;
 		item.cmd.switchCmd = multiSwitchPacket->items[i].switchCmd;
-		item.cmd.timeout = 0;
+		item.cmd.delay = 0;
 		item.cmd.source = source;
 		if (cs_multi_switch_item_is_valid(&item, sizeof(item))) {
 			event_t cmd(CS_TYPE::CMD_MULTI_SWITCH, &item, sizeof(item));
 			EventDispatcher::getInstance().dispatch(cmd);
 		}
 		else {
-			LOGw("invalid item");
+			LOGw("invalid item ind=%u id=%u", i, item.id);
 		}
 	}
 	return ERR_SUCCESS;

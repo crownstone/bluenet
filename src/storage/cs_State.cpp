@@ -494,12 +494,7 @@ void State::startWritesToFlash() {
 	_startedWritingToFlash = true;
 }
 
-void State::factoryReset(uint32_t resetCode) {
-	// TODO: erase mesh settings.
-	if (resetCode != FACTORY_RESET_CODE) {
-		LOGe("Wrong reset code!");
-		return;
-	}
+void State::factoryReset() {
 	LOGw("Perform factory reset!");
 	cs_ret_code_t retCode = _storage->remove(FILE_CONFIGURATION);
 	switch (retCode) {
@@ -562,7 +557,10 @@ void State::handleEvent(event_t & event) {
 		}
 		break;
 	}
-
+	case CS_TYPE::CMD_FACTORY_RESET: {
+		factoryReset();
+		break;
+	}
 	default:
 		break;
 	}

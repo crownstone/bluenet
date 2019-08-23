@@ -45,6 +45,14 @@ public:
 	void stop();
 
 	/**
+	 * Factory reset.
+	 *
+	 * Clear all stored data.
+	 * Will send event EVT_MESH_FACTORY_RESET when done.
+	 */
+	void factoryReset();
+
+	/**
 	 * Advertise as iBeacon.
 	 */
 	void advertise(IBeacon* ibeacon);
@@ -58,6 +66,8 @@ public:
 	void modelsInitCallback();
 
 	void handleEvent(event_t & event);
+
+	void factoryResetDone();
 
 private:
 	//! Constructor, singleton, thus made private
@@ -87,4 +97,5 @@ private:
 	MeshAdvertiser _advertiser;
 	MeshModel _model;
 	uint32_t _sendStateTimeCountdown = MESH_SEND_TIME_INTERVAL_MS / TICK_INTERVAL_MS;
+	bool _performingFactoryReset = false;
 };

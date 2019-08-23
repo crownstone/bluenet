@@ -303,6 +303,12 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES})
 # Use .elf extension by default
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}" SUFFIX ".elf")
 
+MESSAGE(STATUS "CMakeList: Bootloader parameters: ${BOOTLOADER_START_ADDRESS}, ${BOOTLOADER_LENGTH}")
+
+SET(CS_LINKER_FLAGS "-Wl,--defsym=BOOTLOADER_START_ADDRESS=${BOOTLOADER_START_ADDRESS} -Wl,--defsym=BOOTLOADER_LENGTH=${BOOTLOADER_LENGTH}")
+
+SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${CS_LINKER_FLAGS}")
+
 # Remove sections that are part of UICR (so objcopy does not generate very large files)
 SET(REMOVE_SECTIONS --remove-section .uicr_bootloader_start_address  --remove-section .uicr_mbr_params_page)
 

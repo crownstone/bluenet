@@ -165,6 +165,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_KEEP_ALIVE,                     // Sent to send a switch mesh message. -- Payload is keep_alive_state_item_t.
 	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Sent to send a switch mesh message. -- Payload is multi_switch_item_t.
 	CMD_SET_TIME,                                     // Sent to set the time. -- Payload is uint32_t timestamp.
+	CMD_FACTORY_RESET,                                // Sent when a factory reset should be performed: clear all data.
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms. -- Payload is uint32_t counter.
 	EVT_ADV_BACKGROUND,                               // Sent when a background advertisement has been received. -- Payload: adv_background_t.
 	EVT_ADV_BACKGROUND_PARSED,                        // Sent when a background advertisement has been validated and parsed. -- Payload: adv_background_payload_t.
@@ -210,6 +211,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_STORAGE_REMOVE_FILE_DONE,                     // Sent when a file has been invalidated at storage. -- Payload is cs_file_id_t, the file that was invalidated.
 	EVT_STORAGE_GC_DONE,                              // Sent when garbage collection is done, invalidated data is actually removed at this point.
 	EVT_STORAGE_FACTORY_RESET,                        // Sent when factory reset of storage is done.
+	EVT_MESH_FACTORY_RESET,                           // Sent when factory reset of mesh storage is done.
 	EVT_SETUP_DONE,                                   // Sent when setup was done (and settings are stored).
 //	EVT_DO_RESET_DELAYED,                             // Sent to perform a reset in a few seconds.
 	EVT_SWITCHCRAFT_ENABLED, // TODO: Deprecate, use cfg   // Sent when switchcraft flag is set. -- Payload is BOOL.
@@ -322,6 +324,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
@@ -330,6 +333,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE:
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH:
 	case CS_TYPE::CMD_SET_TIME:
+	case CS_TYPE::CMD_FACTORY_RESET:
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
 	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
 	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
@@ -535,6 +539,7 @@ typedef  cs_mesh_msg_t TYPIFY(CMD_SEND_MESH_MSG);
 typedef  keep_alive_state_item_t TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE);
 typedef  internal_multi_switch_item_t TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH);
 typedef  uint32_t TYPIFY(CMD_SET_TIME);
+typedef  void TYPIFY(CMD_FACTORY_RESET);
 typedef  BOOL TYPIFY(EVT_DIMMING_ALLOWED);
 typedef  void TYPIFY(EVT_DIMMER_FORCED_OFF);
 typedef  BOOL TYPIFY(EVT_DIMMER_POWERED);
@@ -554,6 +559,7 @@ typedef  CS_TYPE TYPIFY(EVT_STORAGE_REMOVE_DONE);
 typedef  cs_file_id_t TYPIFY(EVT_STORAGE_REMOVE_FILE_DONE);
 typedef  void TYPIFY(EVT_STORAGE_GC_DONE);
 typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET);
+typedef  void TYPIFY(EVT_MESH_FACTORY_RESET);
 typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
 typedef  BOOL TYPIFY(EVT_SWITCH_LOCKED);
@@ -802,6 +808,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return 0;
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
 		return 0;
+	case CS_TYPE::EVT_MESH_FACTORY_RESET:
+		return 0;
 	case CS_TYPE::EVT_SETUP_DONE:
 		return 0;
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -850,6 +858,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH));
 	case CS_TYPE::CMD_SET_TIME:
 		return sizeof(TYPIFY(CMD_SET_TIME));
+	case CS_TYPE::CMD_FACTORY_RESET:
+		return 0;
 	}
 	// should never happen
 	return 0;
@@ -967,6 +977,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE: return "EVT_STORAGE_REMOVE_FILE_DONE";
 	case CS_TYPE::EVT_STORAGE_GC_DONE: return "EVT_STORAGE_GC_DONE";
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET: return "EVT_STORAGE_FACTORY_RESET";
+	case CS_TYPE::EVT_MESH_FACTORY_RESET: return "EVT_MESH_FACTORY_RESET";
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: return "EVT_SWITCHCRAFT_ENABLED";
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF: return "EVT_SWITCH_FORCED_OFF";
 	case CS_TYPE::EVT_SWITCH_LOCKED: return "EVT_SWITCH_LOCKED";
@@ -987,6 +998,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE: return "CMD_SEND_MESH_MSG_KEEP_ALIVE";
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH: return "CMD_SEND_MESH_MSG_MULTI_SWITCH";
 	case CS_TYPE::CMD_SET_TIME: return "CMD_SET_TIME";
+	case CS_TYPE::CMD_FACTORY_RESET: return "CMD_FACTORY_RESET";
 	}
 	return "Unknown";
 }
@@ -1093,6 +1105,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
@@ -1117,6 +1130,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE:
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH:
 	case CS_TYPE::CMD_SET_TIME:
+	case CS_TYPE::CMD_FACTORY_RESET:
 		return PersistenceMode::RAM;
 	}
 	// should not reach this
@@ -1229,6 +1243,7 @@ constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
@@ -1253,6 +1268,7 @@ constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE:
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH:
 	case CS_TYPE::CMD_SET_TIME:
+	case CS_TYPE::CMD_FACTORY_RESET:
 		return FILE_DO_NOT_USE;
 	}
 	// should not reach this
@@ -1479,6 +1495,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
 	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
 	case CS_TYPE::CMD_ENABLE_MESH:
+	case CS_TYPE::CMD_FACTORY_RESET:
 	case CS_TYPE::CMD_INC_CURRENT_RANGE:
 	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
 	case CS_TYPE::CMD_RESET_DELAYED:
@@ -1528,6 +1545,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -1613,6 +1631,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
 	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
 	case CS_TYPE::CMD_ENABLE_MESH:
+	case CS_TYPE::CMD_FACTORY_RESET:
 	case CS_TYPE::CMD_INC_CURRENT_RANGE:
 	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
 	case CS_TYPE::CMD_RESET_DELAYED:
@@ -1662,6 +1681,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -1748,6 +1768,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
 	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
 	case CS_TYPE::CMD_ENABLE_MESH:
+	case CS_TYPE::CMD_FACTORY_RESET:
 	case CS_TYPE::CMD_INC_CURRENT_RANGE:
 	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
 	case CS_TYPE::CMD_RESET_DELAYED:
@@ -1797,6 +1818,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:

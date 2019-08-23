@@ -85,12 +85,15 @@ CHAR_STATE=1
 MASTER_BUFFER_SIZE=300
 
 # Verbosity of the UART
-# SERIAL_DEBUG     0
-# SERIAL_INFO      1
-# SERIAL_WARNING   2
-# SERIAL_ERROR     3
-# SERIAL_FATAL     4
-# SERIAL_NONE      5
+# SERIAL_NONE                 0
+# SERIAL_READ_ONLY            1
+# SERIAL_BYTE_PROTOCOL_ONLY   2
+# SERIAL_FATAL                3
+# SERIAL_ERROR                4
+# SERIAL_WARN                 5
+# SERIAL_INFO                 6
+# SERIAL_DEBUG                7
+# SERIAL_VERBOSE              8
 SERIAL_VERBOSITY=SERIAL_DEBUG
 
 # Uart mode
