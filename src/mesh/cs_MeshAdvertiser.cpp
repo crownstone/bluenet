@@ -14,6 +14,9 @@
 //}
 
 void MeshAdvertiser::init() {
+	if (_advertiser != NULL) {
+		return;
+	}
 	static advertiser_t advertiser;
 	_advertiser = &advertiser;
 	_buffer = (uint8_t*)malloc(MESH_ADVERTISER_BUF_SIZE);

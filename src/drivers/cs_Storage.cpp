@@ -404,6 +404,7 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 		break;
 	}
 	default:
+		LOGw("Write FDSerror=%u record=%u", p_fds_evt->result, p_fds_evt->write.record_key);
 		if (_errorCallback) {
 			CS_TYPE type = toCsType(p_fds_evt->write.record_key);
 			_errorCallback(CS_STORAGE_OP_WRITE, p_fds_evt->write.file_id, type);
@@ -426,6 +427,7 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 		break;
 	}
 	default:
+		LOGw("Remove FDSerror=%u record=%u", p_fds_evt->result, p_fds_evt->del.record_key);
 		if (_errorCallback) {
 			CS_TYPE type = toCsType(p_fds_evt->del.record_key);
 			_errorCallback(CS_STORAGE_OP_REMOVE, p_fds_evt->del.file_id, type);
@@ -447,6 +449,7 @@ void Storage::handleRemoveFileEvent(fds_evt_t const * p_fds_evt) {
 		break;
 	}
 	default:
+		LOGw("Remove FDSerror=%u file=%u", p_fds_evt->result, p_fds_evt->del.file_id);
 		if (_errorCallback) {
 			_errorCallback(CS_STORAGE_OP_REMOVE_FILE, p_fds_evt->del.file_id, CS_TYPE::CONFIG_DO_NOT_USE);
 		}

@@ -63,7 +63,7 @@ inline std::string get_hardware_revision(void) {
 	}
 
 	for (uint8_t i = 0; i < 4; ++i) {
-		nordic_chip_version[i+2] = variant.u8[3-i];
+		nordic_chip_version[i+2] = variant.u8[i];
 	}
 
 	char hardware_revision[34];

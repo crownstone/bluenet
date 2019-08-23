@@ -81,7 +81,7 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_state_1_t {
 struct __attribute__((__packed__)) cs_mesh_model_msg_multi_switch_item_t {
 	stone_id_t id;
 	uint8_t switchCmd;
-	uint16_t timeout;
+	uint16_t delay;
 	cmd_source_t source;
 };
 

@@ -182,7 +182,6 @@ void Scanner::handleEvent(event_t & event) {
 		}
 		default:
 			// no other types should be handled
-			;
+			break;
 	}
-
 }

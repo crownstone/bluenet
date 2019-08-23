@@ -667,6 +667,7 @@ void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
 		// It might be a dimmer on failure instead.
 		return;
 	}
+	LOGi("Power zero calibrated: %i", powerMilliWatt);
 	_powerZero = powerMilliWatt;
 	State::getInstance().set(CS_TYPE::CONFIG_POWER_ZERO, &_powerZero, sizeof(_powerZero));
 }
@@ -690,13 +691,6 @@ void PowerSampling::calculateEnergy() {
  * TODO: What does this do?
  */
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {
-
-//	static int warning = 0;
-//	if (!warning) {
-//		LOGw("Disabled soft fuse for now!");
-//		warning++;
-//	}
-//	return;
 
 	// Get the current state errors
 	TYPIFY(STATE_ERRORS) stateErrors;

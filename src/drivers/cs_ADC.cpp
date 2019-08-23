@@ -593,15 +593,38 @@ void ADC::stopTimeout() {
 	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_STOP);
 }
 
-void ADC::calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex) {
+int ADC::calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex) {
 	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
+
+	if (RTC::difference(_lastEndTime, _lastZeroCrossUpTime) > RTC::difference(_lastZeroCrossUpTime, _lastEndTime)) {
+		// A zero crossing interrupt already triggered in the current buffer,
+		// before we got to calculate the offset of the previous.
+		// Our best guess is an offset of half the sampling rate.
+		return CS_ADC_SAMPLE_INTERVAL_US / 2;
+	}
+
 	// Keep up whether the last non-zero value was below (-1) or above (1) zero.
 	// Starts at unknown value.
 	int8_t state = 0;
+	int timeOffset = 0;
 	for (uint16_t i = _zeroCrossingChannel; i < CS_ADC_BUF_SIZE; i += _config.channelCount) {
 		if (buf[i] > _zeroValue) {
 			if (state == -1) {
 				// Found an upwards zero crossing.
+				/* Calculate the time offset by linear interpolation:
+
+				                buf[i]
+				               o
+				        b {   /
+				zero --------/-------------------
+				        a { /
+				           o
+				   buf[i-1]
+
+				*/
+				float dy = buf[i] - buf[i-1]; // a + b
+				float b = buf[i] - _zeroValue;
+				timeOffset = b / dy * CS_ADC_SAMPLE_INTERVAL_US;
 			}
 			state = 1;
 		}
@@ -612,6 +635,7 @@ void ADC::calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex) {
 			state = -1;
 		}
 	}
+	return timeOffset;
 }
 
 void ADC::handleEvent(event_t & event) {
@@ -638,7 +662,11 @@ void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	nrf_gpio_pin_toggle(TEST_PIN_PROCESS);
 #endif
 
-	calculateZeroCrossingOffsetTime(bufIndex);
+	if (_zeroCrossingEnabled) {
+		TYPIFY(EVT_ZERO_CROSSING_TIME_OFFSET) zeroCrossingTimeOffset = calculateZeroCrossingOffsetTime(bufIndex);
+		event_t event(CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET, &zeroCrossingTimeOffset, sizeof(zeroCrossingTimeOffset));
+		EventDispatcher::getInstance().dispatch(event);
+	}
 
 	if (dataCallbackRegistered()) {
 		_inProgress[bufIndex] = true;
@@ -710,6 +738,8 @@ void ADC::_handleAdcInterrupt() {
 #ifdef TEST_PIN_INT_END
 		nrf_gpio_pin_toggle(TEST_PIN_INT_END);
 #endif
+
+		_lastEndTime = RTC::getCount();
 
 		cs_adc_buffer_id_t bufIndex = _bufferIndex;
 		__attribute__((unused)) uint16_t bufSize = nrf_saadc_amount_get();

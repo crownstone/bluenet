@@ -57,6 +57,7 @@ void Switch::init(const boards_config_t& board) {
 
 	_hardwareBoard = board.hardwareBoard;
 
+	_pinEnableDimmer = board.pinGpioEnablePwm;
 	_hasRelay = board.flags.hasRelay;
 	if (_hasRelay) {
 		_pinRelayOff = board.pinGpioRelayOff;
@@ -98,9 +99,10 @@ void Switch::start() {
 	// This means we will assume that the pwm is already powered and just set the _pwmPowered flag.
 	// TODO: Really? Why can't we just organize this with events?
 	bool switchcraftEnabled = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
-	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0) || _hardwareBoard == ACR01B10B) {
+	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0) || _hardwareBoard == ACR01B10B || _hardwareBoard == ACR01B10C) {
 		LOGd("dimmer powered on start");
 		_pwmPowered = true;
+		nrf_gpio_pin_set(_pinEnableDimmer);
 		event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
 		EventDispatcher::getInstance().dispatch(event);
 	}
@@ -140,6 +142,7 @@ void Switch::startPwm() {
 	}
 	LOGd("dimmer powered");
 	_pwmPowered = true;
+	nrf_gpio_pin_set(_pinEnableDimmer);
 
 	// Restore the pwm state.
 	bool success = _setPwm(_switchValue.state.dimmer);
@@ -579,8 +582,8 @@ void Switch::handleEvent(event_t & event) {
 			break;
 		case CS_TYPE::CMD_SWITCH: {
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) event.data;
-			if (packet->timeout) {
-				delayedSwitch(packet->switchCmd, packet->timeout);
+			if (packet->delay) {
+				delayedSwitch(packet->switchCmd, packet->delay);
 			}
 			else {
 				if (checkAndSetOwner(packet->source)) {

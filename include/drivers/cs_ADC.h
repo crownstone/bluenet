@@ -171,6 +171,8 @@ public:
 
 	/** Set the callback which is called on a zero crossing interrupt.
 	 *
+	 * Currently only called when going from below to above the zero.
+	 *
 	 * @param[in] callback             Function to be called on a zero crossing event. This function will run at interrupt level!
 	 */
 	void setZeroCrossingCallback(adc_zero_crossing_cb_t callback);
@@ -322,6 +324,10 @@ private:
 	// **Used in interrupt!**
 	uint32_t _lastZeroCrossUpTime;
 
+	// Store the timestamp of the last END interrupt.
+	// **Used in interrupt!**
+	uint32_t _lastEndTime;
+
 	// Store the zero value used to detect zero crossings.
 	// **Used in interrupt!**
 	int32_t _zeroValue;
@@ -348,8 +354,8 @@ private:
 	// Function to stop the timeout timer.
 	void stopTimeout();
 
-	// Calculate how much time after the actual zero crossing, the last zero crossing interrupt was triggered.
-	void calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex);
+	// Calculate how much time in μs after the actual zero crossing, the last zero crossing interrupt was triggered.
+	int calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex);
 
 	// Helper function that returns the adc pin number, given the AIN number.
 	nrf_saadc_input_t getAdcPin(cs_adc_pin_id_t pinNum);

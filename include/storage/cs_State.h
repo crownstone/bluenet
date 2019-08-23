@@ -211,7 +211,7 @@ public:
 	/**
 	 * Erase all used persistent storage.
 	 */
-	void factoryReset(uint32_t resetCode);
+	void factoryReset();
 
 	/**
 	 * Get pointer to state value.

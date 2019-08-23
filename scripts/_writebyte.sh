@@ -34,8 +34,10 @@ cs_info "Check value: $current_value vs $new_value"
 if [ $current_value != $new_value ]; then
 	cs_info "Write $new_value to $ADDRESS"
 	if [ $SERIAL_NUM ]; then
+		cs_info "nrfjprog -f nrf52 --memwr $ADDRESS --val $new_value --snr $SERIAL_NUM"
 		nrfjprog -f nrf52 --memwr $ADDRESS --val $new_value --snr $SERIAL_NUM
 	else
+		cs_info "nrfjprog -f nrf52 --memwr $ADDRESS --val $new_value"
 		nrfjprog -f nrf52 --memwr $ADDRESS --val $new_value
 	fi
 fi

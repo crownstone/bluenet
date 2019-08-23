@@ -91,6 +91,7 @@ static void cs_mesh_event_handler(const nrf_mesh_evt_t * p_evt) {
 		break;
 	case NRF_MESH_EVT_FLASH_STABLE:
 		LOGMeshDebug("NRF_MESH_EVT_FLASH_STABLE");
+		Mesh::getInstance().factoryResetDone();
 		break;
 	case NRF_MESH_EVT_RX_FAILED:
 		LOGMeshDebug("NRF_MESH_EVT_RX_FAILED");
@@ -131,6 +132,13 @@ static void cs_mesh_event_handler(const nrf_mesh_evt_t * p_evt) {
 	case NRF_MESH_EVT_DISABLED:
 		LOGMeshDebug("NRF_MESH_EVT_DISABLED");
 		break;
+	case NRF_MESH_EVT_PROXY_STOPPED:
+		LOGMeshDebug("NRF_MESH_EVT_PROXY_STOPPED");
+		break;
+	case NRF_MESH_EVT_FRIEND_REQUEST:
+		LOGMeshDebug("NRF_MESH_EVT_FRIEND_REQUEST");
+		break;
+
 	}
 }
 static nrf_mesh_evt_handler_t cs_mesh_event_handler_struct = {
@@ -208,12 +216,12 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 	case NRF_MESH_RX_SOURCE_GATT:
 
 		break;
-	case NRF_MESH_RX_SOURCE_FRIEND:
-
-		break;
-	case NRF_MESH_RX_SOURCE_LOW_POWER:
-
-		break;
+//	case NRF_MESH_RX_SOURCE_FRIEND:
+//
+//		break;
+//	case NRF_MESH_RX_SOURCE_LOW_POWER:
+//
+//		break;
 	case NRF_MESH_RX_SOURCE_INSTABURST:
 
 		break;
@@ -352,6 +360,46 @@ void Mesh::start() {
 
 void Mesh::stop() {
 	// TODO: implement
+}
+
+void Mesh::factoryReset() {
+	LOGw("factoryReset");
+
+
+	nrf_clock_lf_cfg_t lfclksrc;
+	lfclksrc.source = NRF_SDH_CLOCK_LF_SRC;
+	lfclksrc.rc_ctiv = NRF_SDH_CLOCK_LF_RC_CTIV;
+	lfclksrc.rc_temp_ctiv = NRF_SDH_CLOCK_LF_RC_TEMP_CTIV;
+	lfclksrc.accuracy = NRF_CLOCK_LF_ACCURACY_20_PPM;
+
+	mesh_stack_init_params_t init_params;
+	init_params.core.irq_priority       = NRF_MESH_IRQ_PRIORITY_THREAD; // See mesh_interrupt_priorities.md
+	init_params.core.lfclksrc           = lfclksrc;
+	init_params.core.p_uuid             = NULL;
+	init_params.core.relay_cb           = NULL;
+	init_params.models.models_init_cb   = NULL;
+	init_params.models.config_server_cb = NULL;
+
+	uint32_t retCode = mesh_stack_init(&init_params, &_isProvisioned);
+	APP_ERROR_CHECK(retCode);
+
+	nrf_mesh_evt_handler_add(&cs_mesh_event_handler_struct);
+
+	mesh_stack_config_clear(); // Check if flash_is_stable, or wait for NRF_MESH_EVT_FLASH_STABLE
+	_performingFactoryReset = true;
+	if (flash_manager_is_stable()) {
+		factoryResetDone();
+	}
+}
+
+void Mesh::factoryResetDone() {
+	if (!_performingFactoryReset) {
+		return;
+	}
+	LOGi("factoryResetDone");
+	_performingFactoryReset = false;
+	event_t event(CS_TYPE::EVT_MESH_FACTORY_RESET);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 void Mesh::provisionSelf(uint16_t id) {
@@ -497,6 +545,10 @@ void Mesh::handleEvent(event_t & event) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH: {
 		TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)* packet = (TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)*)event.data;
 		_model.sendMultiSwitchItem(packet);
+		break;
+	}
+	case CS_TYPE::CMD_FACTORY_RESET: {
+		factoryReset();
 		break;
 	}
 	default:

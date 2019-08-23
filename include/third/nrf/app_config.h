@@ -18,6 +18,13 @@
 #define APP_TIMER_CONFIG_OP_QUEUE_SIZE 40
 #define APP_TIMER_CONFIG_USE_SCHEDULER 1
 
+// <i> NRF_SDH_DISPATCH_MODEL_INTERRUPT: SoftDevice events are passed to the application from the interrupt context.
+// <i> NRF_SDH_DISPATCH_MODEL_APPSH: SoftDevice events are scheduled using @ref app_scheduler.
+// <i> NRF_SDH_DISPATCH_MODEL_POLLING: SoftDevice events are to be fetched manually.
+// <0=> NRF_SDH_DISPATCH_MODEL_INTERRUPT
+// <1=> NRF_SDH_DISPATCH_MODEL_APPSH
+// <2=> NRF_SDH_DISPATCH_MODEL_POLLING
+#define NRF_SDH_DISPATCH_MODEL 1
 
 #define FDS_ENABLED 1
 /**
@@ -50,7 +57,16 @@
 
 //! Log data is buffered and can be processed in idle
 #define NRF_LOG_DEFERRED 1
+// <0=> Off
+// <1=> Error
+// <2=> Warning
+// <3=> Info
+// <4=> Debug
 #define NRF_LOG_DEFAULT_LEVEL 3
+#define NRF_SDH_SOC_LOG_LEVEL 3
+#define NRF_SDH_BLE_LOG_LEVEL 3
+#define NRF_SDH_LOG_LEVEL 3
+
 #define NRF_LOG_USES_COLORS 1
 #define NRF_LOG_WARNING_COLOR 4
 #define NRF_LOG_USES_TIMESTAMP 0
@@ -71,6 +87,18 @@
 #endif
 
 #define NRF_LOG_BACKEND_UART_TX_PIN CS_SERIAL_NRF_LOG_PIN_TX
+
+#if CS_SERIAL_NRF_LOG_ENABLED == 2
+// UARTE_ENABLED is overwritten by apply_old_config.h
+#define UARTE_ENABLED 1
+#define UART0_ENABLED 1
+#define UART_ENABLED 1
+// It wouldn't compile when using UARTE, so use normal UART instead.
+#define UART_LEGACY_SUPPORT 1
+#define UART_EASY_DMA_SUPPORT 0
+#define NRFX_UARTE_DEFAULT_CONFIG_HWFC 0
+#define NRFX_UARTE_DEFAULT_CONFIG_PARITY 0
+#endif
 
 // <323584=> 1200 baud
 // <643072=> 2400 baud
@@ -98,6 +126,9 @@
 #define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69 // Advised by mesh
 #define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE ATTR_TABLE_SIZE
 #define NRF_SDH_BLE_VS_UUID_COUNT MAX_NUM_VS_SERVICES
+/**
+ * For iOS, the absence of the service changed characteristic makes it always discover services.
+ */
 #define NRF_SDH_BLE_SERVICE_CHANGED 1
 #define NRF_SDH_BLE_OBSERVER_PRIO_LEVELS 2
 #define NRF_SDH_ENABLED 1
@@ -209,7 +240,6 @@
 #ifndef SEGGER_RTT_CONFIG_DEFAULT_MODE
 #define SEGGER_RTT_CONFIG_DEFAULT_MODE 0
 #endif
-
 
 // <o> NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE - Size of buffer for partially processed strings.
 // <i> Size of the buffer is a trade-off between RAM usage and processing.
