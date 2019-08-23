@@ -604,7 +604,7 @@ int ADC::calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex) {
 		// before we got to calculate the offset of the previous.
 		// Our best guess is an offset of half the sampling rate.
 		LOGAdcZeroCrossing("New interrupt already happened: end=%u int=%u", _lastEndTime, _lastZeroCrossUpTime);
-		return CS_ADC_SAMPLE_INTERVAL_US / 2;
+		return -1;
 	}
 
 	// Keep up whether the last non-zero value was below (-1) or above (1) zero.
@@ -629,7 +629,7 @@ int ADC::calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex) {
 				float dy = buf[i] - buf[i-_config.channelCount]; // a + b
 				float b = buf[i] - _zeroValue;
 				timeOffset = b / dy * CS_ADC_SAMPLE_INTERVAL_US;
-				LOGAdcZeroCrossing("buf[i-2]=%i buf[i]=%i dy=%i b=%i offset=%i", buf[i-_config.channelCount], buf[i], (int)(1000*dy), (int)(1000*b), timeOffset);
+				LOGAdcZeroCrossing("buf[i-2]=%i buf[i]=%i dy=%i b=%i offset=%i", buf[i-_config.channelCount], buf[i], (int)dy, (int)b, timeOffset);
 			}
 			state = 1;
 		}
@@ -669,8 +669,10 @@ void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 
 	if (_zeroCrossingEnabled) {
 		TYPIFY(EVT_ZERO_CROSSING_TIME_OFFSET) zeroCrossingTimeOffset = calculateZeroCrossingOffsetTime(bufIndex);
-		event_t event(CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET, &zeroCrossingTimeOffset, sizeof(zeroCrossingTimeOffset));
-		EventDispatcher::getInstance().dispatch(event);
+		if (zeroCrossingTimeOffset > -1) {
+			event_t event(CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET, &zeroCrossingTimeOffset, sizeof(zeroCrossingTimeOffset));
+			EventDispatcher::getInstance().dispatch(event);
+		}
 	}
 
 	if (dataCallbackRegistered()) {

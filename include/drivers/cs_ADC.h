@@ -355,6 +355,7 @@ private:
 	void stopTimeout();
 
 	// Calculate how much time in μs after the actual zero crossing, the last zero crossing interrupt was triggered.
+	// Returns -1 when it couldn't calculate the offset.
 	int calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex);
 
 	// Helper function that returns the adc pin number, given the AIN number.
