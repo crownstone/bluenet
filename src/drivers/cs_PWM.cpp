@@ -91,7 +91,6 @@ uint32_t PWM::init(const pwm_config_t& config) {
 
 	// Init zero crossing variables
 	_zeroCrossingCounter = 0;
-	_medianCounter = 0;
 	_adjustedMaxTickVal = _maxTickVal;
 	_freqSyncedMaxTickVal = _maxTickVal;
 	_zeroCrossOffsetIntegral = 0;
@@ -360,75 +359,22 @@ void PWM::onZeroCrossing() {
 	int32_t maxTickVal = _maxTickVal;
 	wrapAround(errTicks, maxTickVal);
 
-	cs_write("err=%i \r\n", errTicks);
+//	cs_write("ticks=%u err=%i \r\n", ticks, errTicks);
 
 	// Store error.
 	_offsets[_zeroCrossingCounter] = errTicks;
 	++_zeroCrossingCounter;
 
-	if (_syncFrequency) {
 
-		// First collect the error window for calculating the median error
-		if (_zeroCrossingCounter < DIMMER_NUM_CROSSINGS_PER_MEDIAN_CALCULATION) {
+	if (_syncFrequency) {
+		if (_zeroCrossingCounter < DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE) {
 #ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
 	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
 #endif
 			return;
 		}
-
 		_zeroCrossingCounter = 0;
 
-		// Calculate the median of the errors recorded
-		int32_t errorMed2 = offsetMedian(_offsets);
-
-		// cs_write("median_slope=%i \r\n", errorMed2);
-
-		_offsetMedians[_medianCounter] = errorMed2;
-
-		if (_medianCounter > 0) {
-			_totalErr += errorMed2 - _offsetMedians[_medianCounter-1];
-		}
-
-		_medianCounter++;
-
-		if (_medianCounter < DIMMER_NUM_MEDIANS_FOR_FREQUENCY_SYNC) {
-			return;
-		}
-
-		// Average slope over the total number of iterations
-		int32_t avgErr = _totalErr/((DIMMER_NUM_MEDIANS_FOR_FREQUENCY_SYNC-1)*DIMMER_NUM_CROSSINGS_PER_MEDIAN_CALCULATION);
-		cs_write("avg_slope=%i \r\n", avgErr);
-
-		_medianCounter = 0;
-		_totalErr = 0;
-
-		// Every full cycle (~20ms), the offset increases by slope.
-		// So the maxTickVal (half cycle, ~10ms) should be increased by half the slope.
-		_adjustedMaxTickVal += avgErr / 2;
-
-		// Make sure the minimum max ticks > 0.99 * _maxTickVal, else dimming at 99% won't work anymore.
-		uint32_t minMaxTickVal = _maxTickVal * 99 / 100 + 1;
-		if (_adjustedMaxTickVal < minMaxTickVal) {
-			_adjustedMaxTickVal = minMaxTickVal;
-		}
-
-		// Store frequency synchronized max ticks.
-		_freqSyncedMaxTickVal = _adjustedMaxTickVal;
-
-		// Done with frequency synchronization.
-		_syncFrequency = false;
-
-//		cs_write("slope=%i ticks=%u \r\n", medianSlope, _adjustedMaxTickVal);
-
-		// Set the new period time at the end of the current period.
-		enableInterrupt();
-
-
-		// On avg this is the tick count by which the CS drifts
-
-		/* TODO: FILL IN THE APPROPRIATE CODE
-		 *
-		 *
 		// https://en.wikipedia.org/wiki/Repeated_median_regression
         // This way we only need to calculate the median of (DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC - 1) values,
 		// but have to do that DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC times.
@@ -477,8 +423,6 @@ void PWM::onZeroCrossing() {
 
 		// Set the new period time at the end of the current period.
 		enableInterrupt();
-
-		*/
 	}
 	else {
 		// Integrate error, but limit the integrated error (to prevent overshoot).
@@ -630,16 +574,13 @@ uint32_t PWM::readCC(uint8_t channelIdx) {
 }
 
 void PWM::wrapAround(int32_t& val, int32_t max) {
-    val = (val + max / 2) % max - max / 2;
-
-    /*    a different (albeit incorrect) implementation
-    if (val > max / 2) {
+//	val = (val + max / 2) % max - max / 2;
+	if (val > max / 2) {
 		val -= max;
 	}
 	else if (val < -max / 2) {
 		val += max;
 	}
-	*/
 }
 
 nrf_timer_cc_channel_t PWM::getTimerChannel(uint8_t index) {

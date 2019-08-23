@@ -14,16 +14,6 @@
 #define ERR_PWM_NOT_ENABLED 1
 
 /**
- * Number of slope estimates until the timer max ticks are adjusted to synchronize with the grid frequency.
- */
-# define DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC 9
-
-/**
- * Number of zero crossings to consider for median calculation
- */
-#define DIMMER_NUM_CROSSINGS_PER_MEDIAN_CALCULATION 5
-
-/**
  * Number of zero crossings to calculate the slope of the error.
  */
 #define DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE 10
@@ -31,7 +21,7 @@
 /**
  * Number of slope estimates until the timer max ticks are adjusted to synchronize with the grid frequency.
  */
-#define DIMMER_NUM_MEDIANS_FOR_FREQUENCY_SYNC 9
+#define DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC 5
 
 /**
  * Number of zero crossings until the timer max ticks is adjusted to synchronize the timer start with the grid zero crossing.
@@ -172,21 +162,15 @@ private:
 	//! Counter to keep up the number of zero crossing callbacks.
 	uint32_t _zeroCrossingCounter = 0;
 
-	//! Counter to keep up the number of median windows of zero crossing callbacks.
-	uint32_t _medianCounter = 0;
-
 	//! Array of tick counts at the moment of a zero crossing interrupt.
 	int32_t _offsets[MAX(DIMMER_NUM_CROSSINGS_FOR_START_SYNC, DIMMER_NUM_CROSSINGS_FOR_START_SYNC)];
-
-	//! Array of median values of tick offsets
-	int32_t _offsetMedians[DIMMER_NUM_MEDIANS_FOR_FREQUENCY_SYNC];
 
 	//! Array of calculated slopes between 1 point and all other points.
 	int32_t _offsetSlopes[DIMMER_NUM_CROSSINGS_FOR_START_SYNC];
 	//! Array of median of calculated slopes.
 	int32_t _offsetSlopes2[DIMMER_NUM_CROSSINGS_FOR_START_SYNC];
 	//! Array of median of median of calculated slopes.
-	// int32_t _offsetSlopes3[DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC];
+	int32_t _offsetSlopes3[DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC];
 
 	//! Integral of the tick offset.
 	int32_t _zeroCrossOffsetIntegral;
@@ -254,12 +238,6 @@ private:
 	//! Helper function to get the ppi disable task, given the group index.
 	nrf_ppi_task_t getPpiTaskDisable(uint8_t index);
 };
-
-#if DIMMER_NUM_CROSSINGS_PER_MEDIAN_CALCULATION == 5
-#define offsetMedian(arr) opt_med5(arr)
-#elif DIMMER_NUM_CROSSINGS_PER_MEDIAN_CALCULATION == 9
-#define offsetMedian(arr) opt_med9(arr)
-#endif
 
 #if DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE == 4
 #define slopeMedian(arr) opt_med3(arr)
