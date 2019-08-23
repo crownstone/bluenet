@@ -108,6 +108,8 @@ uint32_t PWM::init(const pwm_config_t& config) {
     return ERR_SUCCESS;
 #endif
 
+    EventDispatcher::getInstance().addListener(this);
+
     return ERR_PWM_NOT_ENABLED;
 }
 
@@ -488,6 +490,14 @@ void PWM::onZeroCrossing() {
 #ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
 	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
 #endif
+}
+
+
+void PWM::handleEvent(event_t & event) {
+	if (event.type == CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET) {
+		int32_t lastKnownTimeOffset = *(TYPIFY(EVT_ZERO_CROSSING_TIME_OFFSET)*)event.data;
+		cs_write("off=%i \r\n", lastKnownTimeOffset);
+	}
 }
 
 
