@@ -394,10 +394,19 @@ void PWM::onZeroCrossing() {
 				_offsetSlopes[n] = slope;
 				++n;
 			}
-			_offsetSlopes2[k] = slopeMedian(_offsetSlopes);
+			_offsetSlopes2[k] = opt_med6(_offsetSlopes);
+			++k;
 		}
-		_offsetSlopes3[_numSyncs] = slopeMedian(_offsetSlopes2);
+		_offsetSlopes3[_numSyncs] = opt_med7(_offsetSlopes2);
 		++_numSyncs;
+
+		cs_write("offsets:");
+		for (int i=0; i<DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE; ++i) {
+			cs_write(" %i", _offsets[i]);
+		}
+		cs_write("\r\n");
+		cs_write("slope=%i\r\n", _offsetSlopes3[_numSyncs]);
+
 		if (_numSyncs < DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC) {
 #ifdef PWM_DEBUG_PIN_ZERO_CROSSING_INT
 	nrf_gpio_pin_toggle(PWM_DEBUG_PIN_ZERO_CROSSING_INT);
@@ -495,7 +504,10 @@ void PWM::onZeroCrossing() {
 
 void PWM::onZeroCrossingTimeOffset(int32_t offset) {
 	// Although it might happen that we subtract from the wrong entry, it should improve the measurements.
-	_offsets[_zeroCrossingCounter] -= nrf_timer_us_to_ticks(offset, CS_PWM_TIMER_FREQ);
+	// TODO: at the last sample, the counter was set to 0, making it not being compensated by the offset.
+	if (_zeroCrossingCounter > 0) {
+		_offsets[_zeroCrossingCounter - 1] -= nrf_timer_us_to_ticks(offset, CS_PWM_TIMER_FREQ);
+	}
 }
 
 void PWM::handleEvent(event_t & event) {

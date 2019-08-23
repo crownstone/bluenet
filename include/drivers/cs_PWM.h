@@ -16,8 +16,9 @@
 
 /**
  * Number of zero crossings to calculate the slope of the error.
+ * /!\ Currently hard coded to be 7 /!\
  */
-#define DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE 10
+#define DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE 7
 
 /**
  * Number of slope estimates until the timer max ticks are adjusted to synchronize with the grid frequency.
@@ -167,12 +168,12 @@ private:
 	uint32_t _zeroCrossingCounter = 0;
 
 	//! Array of tick counts at the moment of a zero crossing interrupt.
-	int32_t _offsets[MAX(DIMMER_NUM_CROSSINGS_FOR_START_SYNC, DIMMER_NUM_CROSSINGS_FOR_START_SYNC)];
+	int32_t _offsets[MAX(DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE, DIMMER_NUM_CROSSINGS_FOR_START_SYNC)];
 
 	//! Array of calculated slopes between 1 point and all other points.
-	int32_t _offsetSlopes[DIMMER_NUM_CROSSINGS_FOR_START_SYNC];
+	int32_t _offsetSlopes[DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE-1];
 	//! Array of median of calculated slopes.
-	int32_t _offsetSlopes2[DIMMER_NUM_CROSSINGS_FOR_START_SYNC];
+	int32_t _offsetSlopes2[DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE];
 	//! Array of median of median of calculated slopes.
 	int32_t _offsetSlopes3[DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC];
 
