@@ -105,11 +105,12 @@ uint32_t PWM::init(const pwm_config_t& config) {
 #endif
 
     _initialized = true;
+
+    EventDispatcher::getInstance().addListener(this);
     return ERR_SUCCESS;
 #endif
 
     EventDispatcher::getInstance().addListener(this);
-
     return ERR_PWM_NOT_ENABLED;
 }
 
