@@ -21,6 +21,9 @@
 // Define as LOGd to log ADC restarts.
 #define LOGAdcStart LOGnone
 
+// Define as LOGd to log zero crossing calculations.
+#define LOGAdcZeroCrossing LOGnone
+
 // Define as LOGd to log queuing, processing, and releasing of buffers with samples.
 #define LOGAdcVerbose LOGnone
 
@@ -600,6 +603,7 @@ int ADC::calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex) {
 		// A zero crossing interrupt already triggered in the current buffer,
 		// before we got to calculate the offset of the previous.
 		// Our best guess is an offset of half the sampling rate.
+		LOGAdcZeroCrossing("New interrupt already happened: end=%u int=%u", _lastEndTime, _lastZeroCrossUpTime);
 		return CS_ADC_SAMPLE_INTERVAL_US / 2;
 	}
 
@@ -622,9 +626,10 @@ int ADC::calculateZeroCrossingOffsetTime(cs_adc_buffer_id_t bufIndex) {
 				   buf[i-1]
 
 				*/
-				float dy = buf[i] - buf[i-1]; // a + b
+				float dy = buf[i] - buf[i-_config.channelCount]; // a + b
 				float b = buf[i] - _zeroValue;
 				timeOffset = b / dy * CS_ADC_SAMPLE_INTERVAL_US;
+				LOGAdcZeroCrossing("buf[i-2]=%i buf[i]=%i dy=%i b=%i offset=%i", buf[i-_config.channelCount], buf[i], (int)(1000*dy), (int)(1000*b), timeOffset);
 			}
 			state = 1;
 		}
