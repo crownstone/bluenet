@@ -307,6 +307,8 @@ void ServiceData::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {
+			TYPIFY(EVT_TICK) tickCount = *(TYPIFY(EVT_TICK)*)event.data;
+			_externalStates.tick(tickCount);
 			if (_sendStateCountdown-- == 0) {
 				uint8_t rand8;
 				RNG::fillBuffer(&rand8, 1);
