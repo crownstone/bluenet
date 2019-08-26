@@ -1,3 +1,1180 @@
+Version 2.0.0:
+ - Bootloader version bump to 2.0.0  int: 7
+ - Add release config for bootloader_2.0.0
+ - Changes for 3.0.1
+ - Version bump to 3.0.1  int: 16
+ - Add release config for crownstone_3.0.1
+ - Improved logs of external states.
+ - Timeout external states.
+ - Fixed mesh setting check.
+ - Changes for 3.0.0
+ - Version bump to 3.0.0  int: 15
+ - Add release config for crownstone_3.0.0
+ - Don't use the index anymore.
+ - Added little example how to loop in gdbinit.
+ - Explain when the zerocrossing callback is called.
+ - Made nrf uart working for the bootloader.
+ - Check TIMESLOT_END_SAFETY_MARGIN_US when creating a release.
+ - Serial verbosity definitions changed a while ago.
+ - Can't print debug info in _readbyte.
+ - Version bump to 3.0.0-RC14  int: 14
+ - Add release config for crownstone_3.0.0-RC14
+ - Turn relay on when going to dfu mode.
+ - Use correct serial num. Print nrfjprog commands.
+ - Print actual reset command.
+ - Renamed switch timeout to delay.
+ - Use target instead of serial number for reset.
+ - Version bump to 3.0.0-RC13  int: 13
+ - Add release config for crownstone_3.0.0-RC13
+ - Do not use mesh persistent storage yet.
+ - Version bump to 3.0.0-RC12  int: 12
+ - Add release config for crownstone_3.0.0-RC12
+ - Don't even call NRF_BREAKPOINT_COND in a non debug build.
+ - Parse lines with only white space correctly.
+ - Check if already initialized.
+ - Version bump to 3.0.0-RC11  int: 11
+ - Add release config for crownstone_3.0.0-RC11
+ - Added instruction to adjust TIMESLOT_END_SAFETY_MARGIN_US to 1000.
+ - Bootloader version bump to 2.0.0-RC5  int: 6
+ - Add release config for bootloader_2.0.0-RC5
+ - Cleaned up mesh config.
+ - Make handlers work for all settings of NRF_SDH_DISPATCH_MODEL.
+ - Use target as argument .
+ - factoryResetDone() has to be public
+ - Log whether DEBUG is defined.
+ - Mesh factory reset now sends out event when done.
+ - Remove old define.
+ - Also power dimmer after delay.
+ - Always have the service changed characteristic, so that iOS will discover services.
+ - Make nrf log with uart backend work again.
+ - Remove old mesh structs.
+ - Actually added option to do a release build.
+ - Version bump to 3.0.0-RC10  int: 10
+ - Add release config for crownstone_3.0.0-RC10
+ - According to mesh docs, NRF_SDH_DISPATCH_MODEL should be set to 1.
+ - Don't persist mesh data at all.
+ - With mesh, there are 8 flash pages used for app data.
+ - Add break in default case.
+ - Define DEBUG, used by NRF, for a debug build.
+ - Use nordics error handlers.
+ - Version bump to 3.0.0-RC9  int: 9
+ - Add release config for crownstone_3.0.0-RC9
+ - Updated doc to mesh 3.2.0.
+ - Update to mesh 3.2.0. TODO: why do we need ACCESS_SUBSCRIPTION_LIST_COUNT to be 2?
+ - Log when power zero is calibrated.
+ - align
+ - Added product type Builtin One. Fixed chip version string.
+ - Some more debug logs.
+ - Start on mesh factory reset.
+ - Factory reset via event.
+ - Don't enable uart by default.
+ - Changed dfu pkg key pass name.
+ - Merge branch 'bootloader'
+ - Version bump to 3.0.0-RC8  int: 8
+ - Add release config for crownstone_3.0.0-RC8
+ - changed key entry
+ - Added board ACR01B10C aka v21. Added PWM enable pin.
+ - Reverted PWM to old code, develop it in a different branch.
+ - Don't crash when advertising start/stop fails. This can easily happen when a connect already took place in the SD before the advertisement is restarted.
+ - Capture pwm timer asap. Added some commented out debug for pwm.
+ - Added some commented out code to make a "ticker".
+ - Update advertisement while connected. Don't advertise non-connectable when no device is connected.
+ - Added debug pins.
+ - oops
+ - Always log storage writes.
+ - Fixed dimmer being set while not powered.
+ - Implemented new dimmer synchronization. It still doesn't work well..
+ - Increased protocol version in service data, since this is encrypted with a different key.
+ - Add screenshots
+ - Add explanation on Nordic tools
+ - Add option to custom pass file for key
+ - Decrease dimmer temperature hysteresis.
+ - Version bump to 3.0.0-RC7  int: 7
+ - Add release config for crownstone_3.0.0-RC7
+ - Fixed power usage in mesh state packet.
+ - Bootloader version bump to 2.0.0-RC4  int: 5
+ - Add release config for bootloader_2.0.0-RC4
+ - Version bump to 3.0.0-RC6  int: 6
+ - Add release config for crownstone_3.0.0-RC6
+ - Increase claim time to 2s, a bit longer than how long phones broadcast.
+ - Don't send mesh state so often, bit hacky solution for now.
+ - Use localization key for the RC5 payload. Fixed not handling commands with new device tokens. Added a lot of debug.
+ - Added null check.
+ - forgot ctor implementation
+ - Fixed crash because multiswitch wasn't constructed.
+ - Claim switch with device token and command counter, received via mesh or broadcast. Removed delayed control command.
+ - Added device token and counter to command broadcast protocol.
+ - Fixed table in uart protocol.
+ - Update README.md
+ - One point to set bootloader config values
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Add 15.3.0 version of S132
+ - Latest builtin is ACR01B10B.
+ - Version bump to 3.0.0-RC5  int: 5
+ - Add release config for crownstone_3.0.0-RC5
+ - Updated template cmake build config.
+ - Added device type builtin one.
+ - Update service data in setup mode.
+ - Broadcast protocol is currently 0.
+ - Fixed template cmake build config.
+ - Setting bootloader address at multiple locations
+ - Update BOOTLOADER.md
+ - Update BOOTLOADER.md
+ - Update BOOTLOADER.md
+ - Add encryption dependency to doc
+ - Update BOOTLOADER.md
+ - Info on the bootloader
+ - Move BOOTLOADER.md to docs/
+ - Rename ADD_BOARD.MD to ADD_BOARD.md
+ - Rename bootloader.md to BOOTLOADER.md
+ - Troubleshooting
+ - Update INSTALL.md
+ - Update INSTALL.md
+ - Remove ability to not specify a target from the docs
+ - Update INSTALL.md
+ - Bluetooth Mesh documentation
+ - Update INSTALL.md
+ - Update INSTALL.md
+ - Update INSTALL.md
+ - Moved file id definitions.
+ - Use different file id for reset counter, so that it's persisted even after a factory reset.
+ - Travis doesn't support bionic yet.
+ - Updated UART protocol.
+ - Documentation fixes.
+ - Added broadcasts to protocol doc.
+ - Added broadcast protocol.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Updated diagram generator.
+ - Init RC5 key.
+ - Added localization key.
+ - Updated protocol.
+ - Add comments to gdbreset
+ - Accidental increment of register size of slope A5 in hardware_info.sh
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Add script to parse hardware info from device.
+ - Removed some test code.
+ - Disable reset pin.
+ - Ibeacon major and minor can be 0.
+ - Bootloader version bump to 2.0.0-RC3  int: 4
+ - Add release config for bootloader_2.0.0-RC3
+ - Bootloader version bump to 2.0.0-RC2  int: 3
+ - Add release config for bootloader_2.0.0-RC2
+ - Version bump to 3.0.0-RC4  int: 4
+ - Add release config for crownstone_3.0.0-RC4
+ - Write MBR page address to UICR.
+ - Write result of factory reset as well.
+ - Version bump to 3.0.0-RC3  int: 3
+ - Add release config for crownstone_3.0.0-RC3
+ - Remove double quotes.
+ - Bootloader version bump to 2.0.0-RC1  int: 2
+ - Add release config for bootloader_2.0.0-RC1
+ - Version bump to 3.0.0-RC2  int: 2
+ - Add release config for crownstone_3.0.0-RC2
+ - Bootloader version bump to 2.0.0-RC0  int: 1
+ - Add release config for bootloader_2.0.0-RC0
+ - Version bump to 3.0.0-RC1  int: 1
+ - Add release config for crownstone_3.0.0-RC1
+ - Set correct version for bootloader setting page. Fixed optional key?
+ - Use version in bootloader settings page gen.
+ - Make keyfile optional.
+ - Don't add version string to dfu package.
+ - Store signing key in pass.
+ - Removed version string, as it overwrites the version int.
+ - Final public signing key.
+ - fixed version suggestion bug
+ - Set initial version int to 0.
+ - Added key file and version int to create release script.
+ - Added version to dfu gen pkg.
+ - Removed release index script.
+ - Fixed release tag.
+ - Add release config for crownstone_3.0.0-RC0
+ - Create dfu package in correct dir.
+ - Fixed little bug in create release script.
+ - Fixed move command even better.
+ - Fixed move command.
+ - Move binaries.
+ - Use bit more specific variable name.
+ - Copy binaries for release build too.
+ - Removed exit.
+ - Fixed release type check.
+ - Fixed little bug in create release script.
+ - Fixed little bug in create release script.
+ - Copied change log and version from old bootloader repo.
+ - Fixed little bug in create release script.
+ - Merge remote-tracking branch 'origin/develop' into sdk15
+ - Added bootloader to create release script.
+ - Added key gen script.
+ - Some todo's commit.
+ - Set default bootloader address and length to non-debug version.
+ - Removed backup configs.
+ - Updated print app data script.
+ - Accep same firmware version at dfu.
+ - Check sphere id before decrypting command advertisement.
+ - Changed setup: Check if every variable has been written to storage. Added more keys, removed mesh access address.
+ - Added script to parse files with FDS flash prints.
+ - Started fixing create release script.
+ - Write down which colors these numbers are.
+ - Delay didn't need to be larger, dimmer power gets drained when programming, so it worked as intended.
+ - Don't store empty schedule lists.
+ - Check later, but lower the power threshold.
+ - Try restoring dim state on boot. If no power is measured, assume the dimmer isn't powered, and turn on relay. Auto calibrate power measurement at zero load.
+ - Added options to specify files.
+ - Make scanned device variable static, so that it doesn't get created all the time.
+ - Merge branch 'sdk15' of github.com:crownstone/bluenet into sdk15
+ - Use normal TX power in setup mode.
+ - Enabled softfuse again
+ - The new builtin has the current signal inversed.
+ - Clarify the master buffer offset a bit. TODO: implement this properly, the offset is confusing.
+ - Print incoming advertisement that has scan response and print scan response
+ - Merge branch 'sdk15' of github.com:crownstone/bluenet into sdk15
+ - Current measure pin with low gain is default.
+ - Fixed state read.
+ - Merge branch 'sdk15' of github.com:crownstone/bluenet into sdk15
+ - Fixed hardware board version write and check.
+ - Merge branch 'sdk15' of github.com:crownstone/bluenet into sdk15
+ - Merge branch 'sdk15' of github.com:crownstone/bluenet into sdk15
+ - Added option to include bootloader settings.
+ - Added signing key to dfu gen pkg. Changed name of dfu gen pkg.
+ - Add .vimrc to gitignore
+ - Remove breakpoints
+ - Print all elements, not just 1
+ - Merge branch 'sdk15' of github.com:crownstone/bluenet into sdk15
+ - Make MAC address change in bootloader optional.
+ - Added device information service to bootloader. Removed debug code. Reserve space for future bootloader.
+ - Wait for storage to be done before rebooting when performing a factory reset. Perform garbage collection at factory reset. Queue removes as well. Reserve 4 pages for FDS.
+ - Clean up post-build process in cmake for bootloader
+ - Create dfu packages with nrfutil.
+ - print correct command
+ - NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE is also not our choice
+ - Use app_config.h to modify the sdk_config.h settings.
+ - Reset only after upload.
+ - Moved nrfjprog to the lower level scripts. Fixed board version check. Added reset.
+ - Handle storage write errors.
+ - Removed a bunch of old config variables.
+ - Use multiple threads by default.
+ - We can also udpate the service data when in setup mode.
+ - Don't use index as handle.
+ - debug firmware as default though
+ - debug bootloader has priority
+ - oops
+ - Send state over mesh on events.
+ - Removed old mesh settings.
+ - Set TX power after advertising started.
+ - Set MAC address and TX power for mesh.
+ - Merge branch 'sdk15' of github.com:crownstone/bluenet into sdk15
+ - Update service data again.
+ - Fixed mesh advertiser. Now advertises with a different mac address.
+ - Clean up gdbinit
+ - Do not stdout for gdbserver so it does not capture Ctrl+C
+ - Added mesh advertiser. Removed ibeacon advertisements from stack. Moved service data to advertisement instead of scan response.
+ - Don't offset FDS pages.
+ - No comma in set command. There's still some section that inflates the binary a lot.
+ - Merge branch 'sdk15-debug' into sdk15
+ - Fixed board version check.
+ - Fixed uploading of softdevice.
+ - Add option to add another elf file to gdb debug.
+ - Removed some commented out code in cmakelists.
+ - Set correct softdevice.
+ - Include all sections for bootloader too.
+ - Keep up states of other stones. Advertise state of other stones.
+ - Forgot to construct buffer.
+ - Receive state of external stones in service data. Receive state of external stones via mesh.
+ - Moved service data structs to seperate file.
+ - Pass values by ref in circular buffer.
+ - Fixed host build?
+ - Forgot this in prev commit.
+ - Added regular sending of time. Added regular sending of state, not sure if this is the way to go. Changed send mesh msg event.
+ - Fixed crash when trying to disconnect already disconnected link.
+ - Send state change events.
+ - Log when dispatching command.
+ - Fixed comp.
+ - forgot header
+ - Use board config for default value.
+ - Quick fixed operation mode being read too late.
+ - Use admin/member/guest keys for mesh.
+ - Update time in set time command.
+ - Fixed removing from queue.
+ - No need to handle NOOP.
+ - Fixed multi switch / keep alive ignore check.
+ - Fixed multi switch valid check.
+ - Less debug from command advertisement handler.
+ - Init command advertisement handler.
+ - State types need fixed numbers.
+ - Changed 1B9F to 1B10A.
+ - Unused bootloader linker file
+ - Update scripts so they use nrfjprog.
+ - Update linker files.
+ - Note, nrf_bootloader_app_start.c should not do an NRF_LOG_FLUSH after disabling interrupts.
+ - Reply on requests: did the minimal amount to let an iphone connect.
+ - Cleaned up encryption handler a bit.
+ - Added command advertisement handler (copied from ces2019 branch). Moved around some structs.
+ - Use correct target for documentation.
+ - Check validity of multi switch and keep alive items. Try not to execute the same command multiple times. Send bursts of messages. When adding items to queue, overwrite old items with same type and id.
+ - Multi switch packet must be according to protocol.
+ - Stop writing control command return code, as it can overwrite the next command.
+ - Fixed bug in delayed store. Define and check intervals.
+ - Mesh: only send unsegmented messages. Keep alive and multi switch items are sent in seperate messages. Using interleaved queue with priority.
+ - Tried simple, non interleaved, queue. Didn't help much.
+ - Added queue that sends messages interleaved. Results are not good for segmented messages (msg drop of 87%).
+ - Changed tick interval to 100ms. Added counter to tick event.
+ - Added reliable msg. Added msg for packet drop tests. Removed generic on/off server.
+ - Try no mesh msg repeats.
+ - Disable char verbose prints.
+ - Add more mesh debug.
+ - Check size of every event.
+ - Found some documentation about mesh message segmentation.
+ - Added keep alive without action.
+ - Fixed bug: pointer has to be passed by ref. Added some debug to mesh model packet helper.
+ - Renamed namespace CSMeshModel to MeshModelPacketHelper.
+ - Set switch to 99 when turning on, so that dimmer is used when available. TODO: have this logic in setSwitch() ?
+ - Handle switch commands.
+ - Handle set time command.
+ - Handle muli switch and mesh keep alive commands.
+ - Handle mesh messages.
+ - Maybe always build mesh model packet helper, so can have less BUILD_MESHING checks.
+ - Added more mesh model packet helper functions.
+ - Quickly added some old mesh commands: keep alive and noop. Added type to cmd send mesh message.
+ - Moved some typedefs to seperate files.
+ - Self provision (with dummy keys for now), and use MeshModel instead of generic_on_off model.
+ - Add mesh event handler.
+ - Fixed mesh logging.
+ - Use quotes for includes.
+ - Started on MeshModel.
+ - Reset creation date.
+ - Done with these.
+ - Clarified scan interval and scan window.
+ - Scanning fixed, though multiple buffers would work better, see todo. Mesh scans now dispatch an event too.
+ - Fixing decoupling of scanner.
+ - Fixed scanning. Fixed SD handler. Test scanning while meshing.
+ - Added mesh scan callback, with some spammy test code.
+ - Also fixed the other similar bugs in nrf_bootloader. See https://devzone.nordicsemi.com/f/nordic-q-a/39477/dfu-enter-check/153063#153063
+ - Use RTT from the SDK 15 dir instead of mesh SDK dir.
+ - no indent for precompiler instructions
+ - Added more defines, taken from nordic examples.
+ - LTO seemed to break the firmware. Added extra flags that are used in nordic examples.
+ - Make debug via UART possible in bootloader.
+ - Fixed bug in bootloader: the GPREGRET check was wrong at nrf_bootloader.c:307.
+ - Output different map file for bootloader.
+ - Added uploading of bootloader settings page, and bootloader start address. TODO: not sure if combined hex works yet.
+ - Use correct bootloader settings.
+ - Optional gdb port.
+ - Updated build tools so that bootloader compiles.
+ - Added bootloader, based on secure bootloader example.
+ - Set correct default board define for SDK code.
+ - Why were we still using nrf51.c ?
+ - Set correct sdk version.
+ - Add link time optimization, reduced the size of firmware by around 10%!
+ - Set correct IRQ priority. Call nrf_mesh_process() in mainloop.
+ - Remove mesh on/off client. Provisioning by demo provisioner now actually works.
+ - add color to nrf logs
+ - Less spammy logs
+ - Fixed logs
+ - Fixed target not being handled correctly.
+ - Fixed read overload.
+ - Also enable nrf logger in case of RTT.
+ - Register mesh sd event handler.
+ - Added on/off server model to mesh.
+ - Less spammy logs.
+ - Only enable mesh logging when NRF RTT logging is enabled.
+ - Add option to use RTT for NRF logger.
+ - Test mesh now starts without crashing.
+ - Change default config enabled names.
+ - start mesh
+ - Make the page longer.
+ - Use target.
+ - Make NRF logger optional. Use bluenet uart by default.
+ - Optimize for size
+ - Don't enable serial by default.
+ - Fixed state/storage test.
+ - fixed indent
+ - Removed all old mesh code. Started with new mesh.
+ - Compile mesh SDK objects, not used yet. Define MESH_SDK_DIR in your config to compile the mesh.
+ - Use tabs for indent.
+ - Don't change MAC address for now.
+ - Quickfix to prevent failing flash reads. TODO: blocking read.
+ - Remove old timer id.
+ - Remove old timer id.
+ - Interleaved advertising works again. Also with changing MAC address, but this won't work when scanning.
+ - Accumulated energy event is int64_t.
+ - Fixed storage init, it's asynchronous now.
+ - Updated comments.
+ - Added test for CRC. Fixed duplicates test.
+ - Better log msgs.
+ - Added test with duplicate records. Improved delayed set test.
+ - Always read last found record.
+ - Better error handling for storage.
+ - Write board version before uploading firmware, else firmware writes it.
+ - Added board ACR01B10A, replaces ACR01B9F.
+ - Make new combined hex when fw, bl, sd, or hw is defined.
+ - Use CRC for file system. We only need 1 FDS user.
+ - [State] Added delayed set, to delay the store to flash. [State] Automatically retry writing to flash when Storage is busy. [Storage] Correctly handle garbage collection. [Storage] Make sure that updating a certain record blocks other calls to that record. Added tick event that triggers at a regular interval.
+ - Automatically reboot. Cleaned up.
+ - Don't store to flash when storing to ram failed.
+ - Disabled debug logs.
+ - Test state now works. TODO: comments and cleanup.
+ - Decouple FDS events.
+ - Added checks for state get and set.
+ - Fixed schedule entries accessor.
+ - Sent when Storage is initialized, storage is only usable after this event.
+ - Fixed test state. TODO: init of storage is async, but treated as sync in firmware.
+ - Fixed state and storage. When getting: always first copy to ram, then from ram to user data. We only store state variables of fixed size. No matter what the default location is, always allocate padded size.
+ - NRF unit test fully compiles again.
+ - Added test_state.
+ - Don't mark app invalid?
+ - Use BOOT_DELAY as default.
+ - Changed name to verify for size.
+ - Don't use default in switch statement, so that we get a compiler error when we forgot a type.
+ - Changed crownstone id to uint8_t in storage.
+ - Use correct types. State.get() now checks size. Allocate word sized bytes for flash.
+ - Added proposal for State class.
+ - Added RAM_OR_DEFAULT.
+ - renamed cs_file_data_t to cs_state_data_t.
+ - Return cs_ret_code_t. TODO: garbage collection.
+ - Moved structs to packet.h. Get default state, when not in ram. Removed seperate state errors, put them all in single struct. Added BOOL type, a bool with fixed length.
+ - Changed a bunch of comments to (not) be used by doxygen.
+ - power samples start event has been removed
+ - Removed power samples for characteristic. Removed lpcomp, tracker, and enocean handler.
+ - Removed scan result white and black list.
+ - Remove trailing whitespace
+ - Fixed state get.
+ - Use correct data types for event types. Rename: - all internal commands are prefixed with CMD - all control characteristic commands are prefixed with CTRL_CMD Removed: - scan results - state notifications - validate setup
+ - g++ too
+ - fixed default gcc
+ - Moved install of GCC to travis file.
+ - Add auto yes.
+ - Test serial as well?
+ - change variable name
+ - Since travis doesn't have ubuntu 18.04 yet, install a newer GCC version manually.
+ - Check result of unit-test-host build.
+ - Removed unused config types. Removed tracker and enOcean.  Set correct type for state and configs types. Changed st_file_id_t to cs_file_id_t.
+ - Added a more logs, and some TODO's.
+ - Fixed a memory leak.
+ - Make sure we don't advertise connectable advertisements when already connected. Don't change MAC address for now.
+ - PersistenceMode FLASH doesn't work well.
+ - Use correct size.
+ - Increased gat attr tab size, so that it fits device info service and crownstone service in normal mode.
+ - Merge branch 'sdk15' of github.com:crownstone/bluenet into sdk15
+ - +operator should be to_underlying_type
+ - Add lots of additional dependencies (especially for UART).
+ - Copy binaries to bin dir.
+ - Unit tests nrf5 now compile, but don't link yet.
+ - Write board version before uploading firmware, else firmware writes it.
+ - Do something for unit_test_nrf5.
+ - Fixed CMakeLists so that unit test nrf5 at least starts compiling.
+ - Try sizeof instead of strrchr, maybe then it can be used in a constexpr?
+ - Try if cstring strrchr is constexpr.
+ - Return result
+ - Use enabled_if_t again, upgrade travis to ubuntu trusty.
+ - Changed function to cast enum class to underlying type: More verbose function name, so it's easy to find where it's used. Drop enable_if_t, as older compiler doesn't support that.
+ - -std=c++14 doesn't work for older gcc versions.
+ - Host build also needs config files.
+ - Made host unit test compilable.
+ - STATIC_PASSKEY is the default value.
+ - uint32 is not printed with %li but with %u
+ - Moved config to crownstone.defs. Added serial enabled.
+ - Replaced NONE with correct SERIAL_NONE
+ - Use tabs, not random amount of spaces for indent.
+ - Include config in host target.
+ - Replaced NONE with correct SERIAL_NONE
+ - Fixed default for gdb_port.
+ - Minor jlink script fixes
+ - Fixed default for gdb_port.
+ - Fixed checkError
+ - When pwm boot delay is 0, send EVT_PWM_POWERED, and don't call startPwm() anymore.
+ - more delay for softfuse, to avoid false positives of dimmer overcurrent
+ - Give some more time for zero to initialize?
+ - Use first zero value as initial average.
+ - Don't send an extra byte for mac address.
+ - Added size check for uart commands.
+ - Roughly calibrated ACR01B9F.
+ - Longer settle time for power measurements, to avoid false detection of igbt failure.
+ - hasSerial should be false.
+ - Updated to proto 1B9F.
+ - Added proto boards.
+ - Better init log of comp
+ - Added configs for 1B9A, 1B9B, 1B9C.
+ - Version bump to 2.1.4
+ - GDB dashboard
+ - Update cross-compiler paragraph
+ - Update JLink paragraph
+ - Update README.md
+ - Version bump to 2.1.3
+ - Add release config for guidestone_2.1.3
+ - Version bump to 2.1.2
+ - Add release config for crownstone_2.1.2
+ - using underscores instead of dash
+ - Updated travis to use new build script.
+ - Actually added unit test to long options.
+ - Updated INSTALL doc for new scripts.
+ - Changed colors.
+ - Updated dfuGenPkg script.
+ - Moved upload over the air script to graveyard: it doesn't look completed.
+ - Clarified set time.
+ - ignore .metadata: dir from eclipse
+ - Fixed color not ending.
+ - using underscores instead of dash
+ - Fixed "path" being set by config script.
+ - Actually read board version.
+ - Clarified that timestamp is unix time.
+ - Added jlink script to call with target instead of serial num.
+ - Moved jlink.sh to _jlink.sh
+ - Define jlink and temp script dir in config.sh.
+ - hardware script is deprecated
+ - default target is "crownstone"
+ - Cleaned up scripts that use jlink.
+ - Removed old firmware script.
+ - Moved board_version and bootloader to their own scripts. Don't use readlink, as it doesn't work on MACs. Moved exit error codes to _utils.sh.
+ - Added firmware script: now only deals with firmware again.
+ - removing current firmware script
+ - Added print UICR script
+ - Todo: check_targets gives a warning when target was already set (as config_dir was changed).
+ - Removed unused jlink scripts.
+ - Added bluenet script, replaces firmware script.
+ - Utils: added bluenet logo, added bold, changed colors.
+ - Added clean to softdevice script.
+ - Removed some sleeps from jlink scripts.
+ - Added erase flash script. Removed erase from softdevice script.
+ - Updated travis to use new build script.
+ - Actually added unit test to long options.
+ - Updated INSTALL doc for new scripts.
+ - Enable switchcraft debug by default.
+ - Clarified it's a 2hz loop, toggle every 15s.
+ - Changed colors.
+ - Add options to combine.sh.
+ - update baudrate
+ - Add release config for crownstone_2.1.4
+ - Add release config for crownstone_2.1.4-RC0
+ - calibrated 1B2G with production run
+ - improved calibration for 1B2G
+ - fixed link to python lib
+ - changed order of service data doc a bit
+ - add switch state packet
+ - updated protocol docs and diagrams
+ - Added device type list to protocol doc.
+ - currentPinGainMed is the default pin.
+ - bit more debug info when writing to storage
+ - Updated dfuGenPkg script.
+ - Moved upload over the air script to graveyard: it doesn't look completed.
+ - Clarified set time.
+ - ignore .metadata: dir from eclipse
+ - Fixed color not ending.
+ - Fixed "path" being set by config script.
+ - Actually read board version.
+ - Clarified that timestamp is unix time.
+ - Added jlink script to call with target instead of serial num.
+ - Moved jlink.sh to _jlink.sh
+ - Define jlink and temp script dir in config.sh.
+ - hardware script is deprecated
+ - default target is "crownstone"
+ - Cleaned up scripts that use jlink.
+ - Removed old firmware script.
+ - Moved board_version and bootloader to their own scripts. Don't use readlink, as it doesn't work on MACs. Moved exit error codes to _utils.sh.
+ - Added firmware script: now only deals with firmware again.
+ - removing current firmware script
+ - Added print UICR script
+ - Todo: check_targets gives a warning when target was already set (as config_dir was changed).
+ - Removed unused jlink scripts.
+ - Added bluenet script, replaces firmware script.
+ - Utils: added bluenet logo, added bold, changed colors.
+ - Added clean to softdevice script.
+ - Removed some sleeps from jlink scripts.
+ - Added erase flash script. Removed erase from softdevice script.
+ - Add options to combine.sh.
+ - more delay for softfuse, to avoid false positives of dimmer overcurrent
+ - Give some more time for zero to initialize?
+ - Use first zero value as initial average.
+ - Switchcraft debug buffers now work.
+ - Added example NTC voltage advertising as commented out code.
+ - Disable switchcraft buffers by default.
+ - Fixed check for switchcraft debug buffers.
+ - Added switchcraft debug buffers.
+ - Use PWM boot delay of 0 for now. Should be board dependent.
+ - Don't send an extra byte for mac address.
+ - When pwm boot delay is 0, send EVT_PWM_POWERED, and don't call startPwm() anymore.
+ - Added size check for uart commands.
+ - Added comment about why we enable UART RX in setup mode.
+ - Use softdevice 132 6.1.0
+ - Longer settle time for power measurements, to avoid false detection of igbt failure.
+ - Decrease dimmer boot delay to 1s.
+ - Roughly calibrated ACR01B9F.
+ - hasSerial should be false.
+ - Updated to proto 1B9F.
+ - "power on" is no longer a valid jlink command.
+ - Function get_hardware_version() can be static. This also fixes compiling the bootloader.
+ - Merge branch 'master' into develop
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Made code compilable again for new compiler.
+ - Added some commented out code for development.
+ - Added proto boards.
+ - Merge branch 'master' into develop
+ - Oops... Null pointer in data.value disallowed defaults to written to it. C++ though, so no runtime error.
+ - Solved quite a few bugs. Reading RAM is not going well yet. Mode is not read properly as Setup mode.
+ - Somehow fds_record_update does not seem to update the record.
+ - Better init log of comp
+ - Solving issue https://github.com/crownstone/bluenet/issues/59.
+ - Added configs for 1B9A, 1B9B, 1B9C.
+ - Merge branch 'develop' of github.com:crownstone/bluenet into develop
+ - update baudrate
+ - Version bump to 2.1.4
+ - Add release config for crownstone_2.1.4
+ - Add release config for crownstone_2.1.4-RC0
+ - Enabled NRF_LOG module.
+ - calibrated 1B2G with production run
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - improved calibration for 1B2G
+ - fixed link to python lib
+ - Enabling Nordic Logging over UART (seems to be initialized in Bluenet as well, even when SERIAL_VERBOSITY=NONE
+ - GDB dashboard
+ - Update cross-compiler paragraph
+ - Update JLink paragraph
+ - changed order of service data doc a bit
+ - add switch state packet
+ - updated protocol docs and diagrams
+ - Added device type list to protocol doc.
+ - Update README.md
+ - State: delete/new of StreamBuffer is not going well yet.
+ - Operational setup procedure.
+ - Genius removing namespaces... Math function log conflicted with log() over Serial. Latter function removed.
+ - Half way writing proper destructors for services/characteristics.
+ - Empty beacon messages due to misunderstood copy by value rather than pointer: _adv_data.adv_data = x is not a pointer!
+ - Call encode for advertisements, but the data does not appear in the ads.
+ - Implement standard STRATEGY1 for reading/writing to FLASH/RAM.
+ - Explain very clearly the different RAM/FLASH options.
+ - Simplify event handling through event_t. Merge different types into CS_TYPE.
+ - Test enum class
+ - Check if writes actually succeed. Exists always returns false.
+ - Merge State/Settings.
+ - Have script stop if error has been generated
+ - Implement all defaults
+ - Settings, storage, and defaults.
+ - Verify or get size of items in Settings.
+ - Add script for softdevice firmware version
+ - Start address...
+ - Compiles and links. Now right starting address and tables are required.
+ - Including references and enabling modules in sdk_config.h
+ - Compiles. Next: should link
+ - Slowly going on... Still busy with the Stack file.
+ - Busy with ads
+ - Update SDK 15
+ - Further sdk-15 issues
+ - Remove large parts in Settings and Storage. Write from scratch later.
+ - First few files adjusted... Much to do.
+ - currentPinGainMed is the default pin.
+ - Update install doc.
+ - Add more firmware options
+ - Add documentation on softdevice, bootloader, and combined upload
+ - Add BINARY_VALID_FLAG to combined hex.
+ - Firmware script can use combine and combine includes board identifier
+ - Add software/firmware flags to firmware.sh
+ - Add yes/no option if hardware board has not been set before.
+ - Set default adc current pin to be medium, calibrated 1B7B a bit. Enable changing adc config to use gain 2 and 4 too.
+ - Version bump to 2.1.3
+ - Add release config for guidestone_2.1.3
+ - Version bump to 2.1.2
+ - Add release config for crownstone_2.1.2
+ - Set range for voltage pin.
+ - Added board ACR01B7B, removed ACR01B6C and ACR01B6D.
+ - Fixed turning differential on/off via uart.
+ - Fixed crash due to changing serial enabled. Added serial enable command.
+ - Enable uart TX in setup mode. Change uart on config change. TODO: causes crashes
+ - Fixed typo.
+ - Merge branch 'master' into develop
+ - Add release config for crownstone_2.1.2-RC0
+ - Change default mesh channel to 37, as the signal strenght seems better on that channel.
+ - Made serial enableable. Only used on boot for now, but should work while running.
+ - Make use of mesh channel config.
+ - Added UART enabled and mesh channel configs.
+ - Fixed keep-alive-mesh-packet doc.
+ - Fixed keep-alive-mesh-packet doc.
+ - fixed adc doc
+ - added adc explanation doc
+ - Added config-change to generate.sh
+ - Added config change uml diagram.
+ - Changing adc config on the fly works again.
+ - Version bump to 2.1.1
+ - Add release config for guidestone_2.1.1
+ - Version bump to 2.1.0
+ - Add release config for crownstone_2.1.0
+ - Add release config for guidestone_2.1.0-RC0
+ - Add release config for crownstone_2.1.0-RC1
+ - Apply switchcraft threshold without reset.
+ - Increase default switchcraft threshold.
+ - Switchcraft threshold is now configurable.
+ - Don't have verbose prints on by default.
+ - Use event to dispatch control command.
+ - Fixed uart bug causing RX to stop working. UART now only enabled for certain board types. TODO: handle uart error.
+ - Don't addListener in reset function.
+ - reset counter is uint16
+ - Add release config for crownstone_2.1.0-RC0
+ - Merge branch 'sluusje'
+ - control characteristic uuid in setup service changed.
+ - Improved cyclic storage: use pstorage_store() instead of pstorage_update() most of the times.
+ - Fixed: set correct switchcraft flag on boot.
+ - Added deprecated service data as input file.
+ - Fixed: missing header.
+ - Added command uart msg.
+ - Added switchcraft bit in service data flags.
+ - Updated protocol doc: - added cs id in mesh packet - (re)moved some deprecated things
+ - Call delayedSwitch() after starting the switch.
+ - If switchcraft is enabled, assume a boot is due to a brownout caused by a too slow wall switch, so the pwm is already powered.
+ - Less ADC debug prints.
+ - Added ratio threshold.
+ - Changed recognize switch algorithm.
+ - 12 bit adc
+ - Cleaned up ADC code.
+ - Added sequence diagrams for adc delayed processing and delayed interrupts.
+ - Add ADC restart to uart protocol.
+ - ADC uses 4 PPI channels, instead of 5.
+ - Added ADC sequence diagram.
+ - ADC: implemented timeout, seems to work well now!
+ - ADC sampling now seems stable, and automatically restarts when buffer is released too late. TODO: when interrupt is delayed a lot, the adc isn't restarted, this should be done by the timeout timer.
+ - Back to 100 samples per 50Hz wave.
+ - Don't use saadc_drv, implement it in cs_ADC instead.
+ - Define bootloader version in config.
+ - Updated release script: added device type dongle.
+ - Baudrate increased to 230400.
+ - Make it compilable without debug too.
+ - Added crownstone usb dongle board type.
+ - Added crownstone usb dongle board type.
+ - WIP: Tried timeout timer and bookkeeping of num samples.
+ - WIP: timeout timer for ADC.
+ - Fixed ADC queueing buffer while not started.
+ - Remove logs of gatt data.
+ - Fixed printRssiList.
+ - Bugfix: queue too many buffers.
+ - WIP: stop adc when writing to flash.
+ - No asserts.
+ - Don't process adc buffers when storage is busy. Added event when ADC has been "restarted".
+ - Oops, should be added with previous commit.
+ - Use a different time to reboot for setup.
+ - Write down what timers and ppi the soft device uses.
+ - Don't use PAN_28 workaround. /!\ THIS REQUIRES YOU TO EDIT NRF_DRV_SAADC /!\
+ - Do toggle power when wall switch was detected.
+ - Make it compile without debug logs
+ - Power calculations still make use of _outputSamples, so filter current last.
+ - Make sure the ADC keeps sampling, else the buffer starts at a different point in the period.
+ - Don't commit code that disables softfuses.
+ - Don't commit code that disables soft fuses.
+ - Fixed hardware board regex.
+ - Added define to only print debug text.
+ - Enable/disable switchcraft via command. Only init switchcraft when enabled.
+ - Typo was fixed.
+ - Use camel case varnames.
+ - Merge branch 'mesh-rssi' into sluusje
+ - Added switchcraft enable config and command.
+ - Write out all opcodes.
+ - Removed old setup command.
+ - added service data protocol doc
+ - ignore generated diagrams dir
+ - Updated protocol: - added multipart notification - tried to better explain encryption - added command result packet - protocol version now matches firmware version
+ - Diagram generator: don't use random colors, but cycle through color palette.
+ - Added generated diagrams.
+ - Moved old diagrams to another dir.
+ - Just some debug/comments.
+ - Disable old setup command.
+ - Change uuid of setup control char. Remove config chars of setup service.
+ - Changed error codes.
+ - Control characteristic: enable notifications. Characteristics: check length. Control characteristics: use streambuffer for returning error code.
+ - Made setup command work. Didn't test response code yet.
+ - Added new setup process to protocol doc.
+ - Added setup command: - All settings done at once. - Control char will notify when completely done (also storage).
+ - Added device type crownstone usb.
+ - Added an event for storage done. When pstorage write buffer is full, use own queue. Researched what interrupt level the sys and ble handler is running.
+ - Switch works 90% of the time.
+ - gen-diagrams: better color picking, fixed trailing spaces issue.
+ - Improved protocol docs.
+ - Added fonts for gen-diagram.
+ - gen-diagram: center byte numbers
+ - Diagram generator: add byte numbers.
+ - Crownstone id is now correctly set as address in mesh. Added a debug function for the rssi averaging.
+ - Device type is now correctly set in service data.
+ - Added script to generate diagrams for documentation.
+ - Add rssi to other crownstones in service data. Added device type in service data. Updated protocol.
+ - Enable getting RSSI between mesh nodes.
+ - Version bump to 2.0.2
+ - Add release config for guidestone_2.0.2
+ - Add release config for guidestone_2.0.2-RC0
+ - Fixed small bug in release script.
+ - Enable UART binary parts again.
+ - Move default hardware board to config. Move UICR layout to config.
+ - Second implementation of switch detection by using deltas and thresholding this.
+ - Added option to write board guidestone to UICR. Don't use a magic address.
+ - Submit update license script. Should become in the end script that checks all headers properly.
+ - Update license also in .c files
+ - Some more license updates.
+ - Define TX and RX pins for guidestone, as the UART is used in releases.
+ - Factory reset: only switch when device type is crownstone.
+ - Update copyright and license info
+ - Comment stuff not used in octave script.
+ - Add matlab test unit
+ - Use opcode for UART
+ - Add script to generate switch like behavior
+ - Have separate RecognizeSwitch class.
+ - Make use of InterleavedBuffer in filter()
+ - Spelling encryption
+ - Create getValue in InterleavedBuffer class that can get values in previous/next buffers for wrapping.
+ - Add test_generate file. Does not use PWM yet.
+ - Make the nrf5/test_adc file compilable.
+ - Remove nrf_drv_timer.c from CMakeLists.txt
+ - Add crc16 include dir
+ - Version bump to 2.0.1
+ - Add release config for crownstone_2.0.1
+ - Add explanation of preferred median filter implementation.
+ - Add release config for crownstone_2.0.1-RC2
+ - Quickfix: error flag in service data was not set again when error were reset, but chip temp was still too high.
+ - First functional implementation of switchcraft / sluusje.
+ - Just do not check yet if they are in progress.
+ - Merge branch 'develop' into sluusje
+ - Add scp script
+ - Compile for 4 buffers in ADC.
+ - Up to saadc_callback
+ - Start refactoring to more than 2 buffers in ADC sampler.
+ - Add release config for crownstone_2.0.1-RC1
+ - Added check to see if RC number is ok.
+ - Fixed issue with release script, and changed release dir for RCs.
+ - Merge branch 'master' into develop
+ - Mesh now uses TX power from config.
+ - Generate sha1 for dfu packet.
+ - Add release config for crownstone_2.0.1-RC0
+ - fixed bug in release script
+ - fixed bug in release script
+ - Re-added generation of change log.
+ - Updated release script to allow for release candidates.
+ - Re-added generation of change log.
+ - Updated release script to allow for release candidates.
+ - Merge branch 'master' into develop
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Moved definition of stone_id_t to common types.
+ - should compile again when BUILD_MESHING=0.
+ - Send state over mesh at most once per 3s.
+ - Don't restore pwm state on boot, only turn on relay.
+ - Disable switch lock when enabling pwm. Don't enable switch lock when pwm is enabled.
+ - Use same rtccount for all uart power msgs.
+ - should compile again when BUILD_MESHING=0.
+ - Update CHOICES.md
+ - Don't try to turn relay on when it's already on, and vice versa.
+ - Send state over mesh at most once per 3s.
+ - Don't try to turn relay on when it's already on, and vice versa.
+ - Update CHOICES.md
+ - Merge branch 'master' into develop
+ - Fixed relay being turned off when dimming not allowed and relay already on.
+ - ADC: Apply config only after callback is done.
+ - Fixed possible crash, when changing adc config.
+ - Merge branch 'master' into develop
+ - oops
+ - Merge branch 'master' into develop
+ - Set (currently) correct max app size.
+ - Start PWM earlier, so it can already sync with zero crossings.
+ - Added comments, cleaned up some old code. Changed some test pins. Removed ADC applyConfig() from the interrupt for now, should be looked into.
+ - added some TODOs
+ - Wrap logs in uart protocol.
+ - Changed differential mode to enable instead of toggle.
+ - Uart protocol now uses "enable" args.
+ - Made adc config structs packed.
+ - -
+ - Added service data to uart protocol.
+ - Added ID and MAC address to UART protocol.
+ - Merge branch 'master' into develop
+ - Don't add bootloader to firmware release.
+ - Version bump to 2.0.0
+ - Add release config for crownstone_2.0.0
+ - Set serial verbosity to "byte protocol only" for releases.
+ - send every power sample.
+ - oops.
+ - Incrased baudrate to 230400. Added timestamp to power msgs.
+ - Expanded uart protocol doc.
+ - Started on uart protocol doc
+ - Added uart protocol for hardware tests. Reduced app scheduler event size. Added functions to write uart msgs without the need for a buffer.
+ - Changed power samples struct.
+ - Increase igbt failure detection ignore time to 2s.
+ - Ignore igbt failure detection for 1s after boot.
+ - Added more comments to switch.h
+ - Fixed softfuse being overriden bij switch lock.
+ - Don't start pwm when in setup mode.
+ - Only include string.h when serial verbosity is fatal or lower.
+ - Fixed false positives for IGBT failure detection: was triggered by power measurement smoothing.
+ - Made energy calculation a bit more precise.
+ - Cleaned up some timers, and increased timer queue size.
+ - log uart crc mismatch
+ - Added first implementation of energy used calculation.
+ - Updated test doc: repeat power measurement test for several crownstones.
+ - Updated test plan doc: - disable switch lock before checking if you can't change switch state - added soft fuse tests in setup mode
+ - Expanded test doc: added switch lock to soft fuses, add testing of different ways to set switch.
+ - Added to test plan: - dimming available - dimming allowed - switch lock - setup mode for built-in
+ - Use default ibeacon config when not in normal operation mode.
+ - Added option to get the default value from config.
+ - Uart: implemented writeMsg().
+ - Rename uart parser to uart protocol.
+ - Uart parsing now works, had to change streambuffer a bit.
+ - Working on uart rx.
+ - Fixed advertising of unknown mesh state messages.
+ - Fixed case: switch being locked during dimmer boot delay.
+ - -
+ - Poll mesh messages more often, to decrease the hop delay.
+ - Fixed "allow dimming".
+ - Added switch locked and pwm allowed. Actually update pwm and switch service data flags.
+ - Remove some spammy debug by default.
+ - Use relay instead of dimmer, when dimmer is set too soon after boot.
+ - Turn off relay when restoring pwm state.
+ - Send compressed power usage instead of mW over the mesh.
+ - Added validation to ext state and ext error service data.
+ - Fixed service data to set correct opcode when encrypted.
+ - Updated test.
+ - Protocol update: partial timestamp is replaced by a counter, when time is not set.
+ - Fixed crash in factory reset mode (timer wasn't created).
+ - Use 1B stone id. Changed service data and mesh protocol, according to protocol 0.13.
+ - Added "time set" flag.
+ - Fixed doc of scan-result-mesh-packet.
+ - Removed title from packet diagram.
+ - Updated protocol.
+ - Merge branch 'mesh-state-broadcast' of github.com:crownstone/bluenet into mesh-state-broadcast
+ - Should divide real power by power factor to get apparent power.
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Added simple IGBT failure detection, dimmer boot delay, dimming allowed for all boards. Publish state updates before storing them (reduces delays).
+ - Added counter to setup service data.
+ - Re-added error flag.
+ - No need for timestamp in setup mode: time is not set in setup mode.
+ - Added new flags, changed setup mode packet.
+ - Added another idea for a compressed timestamp.
+ - Merge branch 'mesh-state-broadcast' of github.com:crownstone/bluenet into mesh-state-broadcast
+ - Changed proposal protocol again..
+ - Update CHOICES.md
+ - Updated proposal protocol for service data and state mesh msgs.
+ - Merge branch 'mesh-state-broadcast' of github.com:crownstone/bluenet into mesh-state-broadcast
+ - Merge branch 'master' into mesh-state-broadcast
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Update CHOICES.md
+ - Version bump to 1.7.1
+ - Add release config for crownstone_1.7.1
+ - Changed tests for soft fuses, as soft fuses changed. Added dimmer and power measurements tests.
+ - Added choices for soft fuses.
+ - Changed softfuse. When dimmer has issues: turn on relay.
+ - Added service data protocol v3. Finished change of mesh state item.
+ - work in progress: adding service data protocol v3.
+ - Use 16 bits for real power, as that's what is most interesting.
+ - Fixed list numbering.
+ - Added mesh state propagation considerations to choices doc.
+ - more power data logs.
+ - Power usage over mesh is different from service data.
+ - Send mesh message before handling them.
+ - Updated protocol, advertised power usage is apparent, since it can't be negative.
+ - Oops, switched pins of 1B6D at 1B2G.
+ - Use variables in combine.sh, and add optional targets.
+ - Added ACR01B6D to hardware versions.
+ - Updated protocol: power usage is reporting real power usage.
+ - Added board ACR01B6D. Added more current sense pins, can be selected to be used for the voltage channel.
+ - Version bump to 1.7.0
+ - Add release config for crownstone_1.7.0
+ - Added comments to cs_serviceData.
+ - Started on style doc.
+ - Mesh state timeout detection done. This relies on noise power measurements though.
+ - Fixed overflow in msToTicks().
+ - apparant -> apparent
+ - Started on mesh state timeout, with last seen table.
+ - Merge branch 'master' into mesh-state-broadcast
+ - Try real power again.
+ - Fixed testing doc.
+ - Added power measurement to test doc.
+ - Added dimmer tests to testing doc.
+ - Merge branch 'master' into mesh-state-broadcast
+ - First change pwm, then relay.
+ - Improved dealing with invalid handles.
+ - Merge branch 'master' into mesh-state-broadcast
+ - Don't crash when mesh message is unavailable.
+ - Reply message only need 1 byte for type.
+ - Check access level before handling the commands.
+ - Added setup level as encryption requirement. Added function that determines required access level for each command type. Added function that tells for each command type if it can be used in a mesh command message.
+ - Added setup access level to doc.
+ - Split up command handler function into seperate functions. Updated protocol doc.
+ - Changed handle of mesh command channel.
+ - Added bitmask to mesh command message. Added control command to send a mesh command message.
+ - Added control cmd: keep alive mesh.
+ - Fixed choosing external service data.
+ - Updated protocol: mesh messages has breaking changes.
+ - Changed mesh keep alive, and multi switch structs.
+ - Work in progress: changing keep-alive and multi-switch msgs.
+ - Change mesh channel to 39, so that it doesn't break old firmware.
+ - Fixed unit test.
+ - State mesh messages: - Use 2 broadcast channels - Added power factor to state messages - Use "external data" bit to flag state items being triggered by an event.
+ - Fixed crash when receiving a mesh message on an invalid handle.
+ - Fixed advertising not starting after connect.
+ - Fixed crash when receiving a mesh message on an invalid handle.
+ - Fixed advertising not starting after connect.
+ - Changed state handles to 9 and 10, to prepare for new protocol.
+ - Added compatible lights
+ - Small fixes in dimmer doc.
+ - Added dimmer doc.
+ - Improved integration doc.
+ - Update INTEGRATION.md
+ - Create INTEGRATION.md
+ - Protocol: User -> Member
+ - Multiple keys section
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Added uart commands: switch voltage channel pin, change adc range, toggle differential mode.
+ - Update License texts
+ - Add some more explanation to cs_Config.h
+ - Added uart commands: "m" to toggle mesh, "a" to toggle advertising.
+ - Little cs_Stack.cpp cleanup. Still plenty to do. - Seperated radio init from init. - Tried to make setX() and updateX() consistent. - Only restart advertising when already advertising.
+ - Updated advertisements v2 protocol. Energy used should now only overflow after 1 year of continuous 4000W power usage.
+ - Added new service data protocol.
+ - Event speed up: Removed eventListeners for just 1 event. Removed function to remove listeners.
+ - Increased max number of event listeners
+ - Decouple zero crossing interrupt from starting pwm with correct duty cycle.
+ - Store the switch state to persistent storage with a timeout of 10s.
+ - Fixed "F" uart command bug.
+ - Added option to use gpio debug for main.
+ - Added option for PWM to start on zero crossing.
+ - Added read_only option for uart. Added command "r" for reset.
+ - Added uart reading. Power sampling logs are now toggleable via uart.
+ - Added factory reset test.
+ - Fixed switch being set to 100 instead of 1 after setup. Enabled dimming in scheduler.
+ - Use hardware board to decide whether to allow dimming or not.
+ - Actually set boardConfig.hardwareBoard.
+ - Don't print extra mesh debug by default.
+ - Don't print power samples by default.
+ - Make sure calculations of zero line of power sampling are in int64_t.
+ - Improved / tidied up some uart debug. Added some commented out options for debugging.
+ - Added some explanation about how to get the meshing to work.
+ - PWM: added limit to error integral.
+ - Try out larger pwm period deviation limits.
+ - Check number of consecutive overcurrents for softfuse.
+ - Extended testing doc.
+ - Make the default name not the same as the release name.
+ - Filter current curve before calculating cZero. Fixed calculation of Irms of filtered current curve.
+ - Moving median filter is now used less hacky.
+ - First attempt at filtering the current curve with a median filter.
+ - Powersampling: calculate Irms and Vrms and filter it by taking the median. Then calculate power = Irms * Vrms and average the power a bit.
+ - Remove debug output of pwm.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Added integral part for the zero crossing sync.
+ - Update FIRMWARE_SPECS.md
+ - Fixed pwm low/high swap (see enableInterrupt function). Increased priority of interrupts, at APP LOW the interrupts seems to have equal priority to the main thread.. Removed test code to do dimming directly from ADC.
+ - Don't generate html documentation in the release script.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Commands to clone docs/html
+ - Version bump to 1.6.0
+ - Add release config for crownstone_1.6.0
+ - commit of some commented out code.
+ - Turn pwm off again on init, else the state can be incorrect.
+ - Changed / removed board versions. Copied calibration of ACR01B2G to ACR01B6C.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Improved test plan.
+ - Pictures of contributors
+ - Added check to delayed switch: delay should not be 0.
+ - Set current and voltage multipliers of ACR01B2A again.
+ - Tweaked power measurement calibration a bit.
+ - When switch is forced off, try twice to be sure.
+ - Actual first working calibrated ACR01B2E.
+ - power sampling choices
+ - added zero crossing choices
+ - added ADC choices
+ - Started choices.md.
+ - Added index to protocol doc.
+ - Punctuation.
+ - Added chip temp soft fuse test.
+ - First draft of testing doc.
+ - First working calibration of ACR01B2E
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - First attempt to calibrate ACR01B2G.
+ - Added more doc comments to pwm and adc.
+ - Found the source of the wrong dimmer temp voltage, now set the correct values. Gain of differential ADC was calculated wrongly as well.
+ - Adjusted dimmer temp voltages for acr01b6a and acr01b2e. Still not well calibrated.
+ - Set pwm temp pin. Removed boards crownstone5 and flexprint.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Remove README symbols.
+ - Fixed set/get switch state.
+ - Cleaned up pwm a bit.
+ - Enabled temperatureguard again
+ - No need for nrf_drv of timer, ppi, gpiote anymore.
+ - Set pwm to be called on zero crossing.
+ - Zero crossing is now nicely implemented: configurable and decoupled.
+ - Set some board config fields.
+ - Update documentation.sh script, publish target
+ - Update release script documentation. Remove docs/html
+ - Ignore docs/html
+ - TemperatureGuard: added support for inverted dimmer temperature sensors. *untested*
+ - Don't use nrf_drv for timer1.
+ - ADC: configurable gain and mode per channel, configurable zero crossing callback, use HAL for timer and ppi instead of the nrf_drv. Power sampling: undid changes for now (use averaging again).
+ - When the user wants to dim at 99%, assume the user actually wants full on, but doesn't want to use the relay.
+ - Deprecated: ADC sample rate, power sample interval, power sample cont num samples.
+ - Added todo: delayed start of mesh.
+ - Working pwm, which changes duty cycle via ppi enable, without interrupt. Syncing to zero crossings still uses interrupt.
+ - Added colors to logs.
+ - Started working on a different way to set pwm value.
+ - Tried to fix the gpio state at start of period, didn't work yet.
+ - Don't write pstorage when only pwm changes.
+ - More tweaks.
+ - Little tweaks
+ - Working trailing edge pwm sync, by adaptive period.
+ - Working test with pwm around peak. Still bugs (output inverts) when changing pwm value.
+ - Init gpio early in the firmware.
+ - Working test on ACR01B2C. Next implement using pwm instead of only using interrupts.
+ - PWM sync works! Test environment: 50Hz, min 0.7V, max 1.1V on pin 4, 0V on pin 28, pwm output on pin 17, zero crossing output on pin 22.
+ - Trying without nrf_drv_timer.
+ - First attempt with timer + ppi + gpiote
+ - Tried with pwm peripheral
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - merged
+ - Fixed all.sh to also write hardware version.
+ - TX power of -30 doesn't exist on nrf52, use -20.
+ - Use BOOTLOADER_COMPILATION. Add option RELAY_DEFAULT_ON. Tx power -30 does not even exist on nRF52.
+ - Merge with config change
+ - Play around with ADC. Update documentation
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Increase lowTxPower to -30 to eaze the setup process for phones with bad reception.
+ - Read firmware properly (set to lowercase etc.).
+ - Separate out check for hardware version locally.
+ - Check actually for firmware version on the hardware itself.
+ - Add  command to jlink section in readme
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Write unit test for ADC. Does not show spurious values.
+ - Version bump to 1.5.1
+ - Add release config for crownstone_1.5.1
+ - Put firmware in the firmwares dir.
+ - Add docs dir to commit when publishing documentation.
+ - Enable mesh by default.
+ - updated docs
+ - Version bump to 1.5.0
+ - Add release config for crownstone_1.5.0
+ - Docs for 1.5.0 release
+ - Since we changed to only using the state broadcast, we don't have to send another message to the state broadcast channel on event.
+ - When multiple schedule entries should be executed: execute the one with the largest timestamp. For timejumps smaller than 1.25h: don't sync the schedule entries.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Fixed bug in schedule entries sync function.
+ - Add explanation of nRF5 unit test to docs/INSTALL file
+ - Mesh: removed command replies, state broadcast, and service.
+ - Improved scheduler logging a bit.
+ - Disable meshing char for now.
+ - Protocol had reversed the overrideMask and type of schedule entry packet.
+ - Add unit-test-nrf5 as help option
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Show "use default value" log also for big chunks of data.
+ - Make sure a full schedule list is there when flash is default value.
+ - Make the delays of sending the state broadcast more random.
+ - Added define to disable advertising external data, until it's working well enough.
+ - Export color variables to use in other scripts
+ - Forgotten shebang at #/bin/sh
+ - Removed old app_timer structs.
+ - Scheduler always has 10 entries, which can be set and cleared. This is done via 2 different commands. Added validity checks for added schedule entries and loaded schedule list from pstorage.
+ - Merge branch 'master' of github.com:crownstone/bluenet
+ - Changed schedule protocol: id is now the Nth entry of the list. This makes removal easier (no need to shift entries).
+ - Updated protocol to v0.11.0.
+ - Fixed scheduler: fixed day of week, push changes to state, fixed sync. Still todo: Removal of entries that are marked for deletion. Checks in addScheduleEntry.
+ - Disabled the use of the state change channel, as it led to advertising old states.
+ - Don't switch on brownout.
+ - Changed ain pins for pca10040.
+ - Reset switch on a factory reset.
+ - Turn built-in on after some time after boot in setup mode.
+ - Made soft fuses configurable.
+ - Update error bit in service data when state errors change.
+ - Update README.md
+
 Version 1.4.0:
  - Add release config for bootloader_1.4.0
  - Add release config for bootloader_1.4.0-RC0
