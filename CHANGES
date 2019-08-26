@@ -1,3 +1,10 @@
+Version 3.0.1:
+ - Version bump to 3.0.1  int: 16
+ - Add release config for crownstone_3.0.1
+ - Improved logs of external states.
+ - Timeout external states.
+ - Fixed mesh setting check.
+
 Version 3.0.0:
  - Version bump to 3.0.0  int: 15
  - Add release config for crownstone_3.0.0
