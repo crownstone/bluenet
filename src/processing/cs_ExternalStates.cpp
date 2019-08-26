@@ -38,7 +38,7 @@ void ExternalStates::init() {
 }
 
 void ExternalStates::receivedState(state_external_stone_t* state) {
-	LOGExternalStatesDebug("extState: id=%u flags=%u switch=%u power=%i ts=%u",
+	LOGExternalStatesDebug("received: id=%u flags=%u switch=%u power=%i ts=%u",
 			state->data.extState.id,
 			state->data.extState.flags,
 			state->data.extState.switchState,
@@ -88,7 +88,7 @@ service_data_encrypted_t* ExternalStates::getNextState() {
 		int index = i % EXTERNAL_STATE_LIST_COUNT;
 		if (_states[index].timeoutCount != 0) {
 			_broadcastIndex = (index + 1) % EXTERNAL_STATE_LIST_COUNT;
-			LOGExternalStatesDebug("picked ind=%u id=%u", index, _states[index].id);
+			LOGExternalStatesDebug("picked ind=%u id=%u timeout=%u", index, _states[index].id, _states[index].timeoutCount);
 			fixState(&(_states[index].state));
 			return &(_states[index].state.data);
 		}
