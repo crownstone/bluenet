@@ -19,11 +19,6 @@ class EventDispatcher {
 private:
 	EventDispatcher();
 
-	//! This class is singleton, deny implementation
-	EventDispatcher(EventDispatcher const&);
-	//! This class is singleton, deny implementation
-	void operator=(EventDispatcher const &);
-
 	//! Array of listeners
 	EventListener* _listeners[MAX_EVENT_LISTENERS];
 
@@ -35,6 +30,9 @@ public:
 		static EventDispatcher instance;
 		return instance;
 	}
+
+	EventDispatcher(EventDispatcher const&) = delete;
+	void operator=(EventDispatcher const&)  = delete;
 
 	//! Add a listener
 	bool addListener(EventListener *listener);

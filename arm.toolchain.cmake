@@ -7,9 +7,10 @@
 #
 # Copyright © 2013 Crownstone B.V. <team@crownstone.rocks>
 #######################################################################################################################
-#Check http://www.cmake.org/Wiki/CMake_Cross_Compiling
 #
-# Note that the arm.toolchain.cmake is run BEFORE the variables of the CMakeLists.txt are set!
+# Check http://www.cmake.org/Wiki/CMake_Cross_Compiling
+#
+# Compiler options are already set through the main CMakeLists.txt file that loads this as an ExternalProject.
 
 # Set to Generic, or tests will fail (they will fail anyway)
 SET(CMAKE_SYSTEM_NAME Generic)
@@ -19,19 +20,10 @@ SET(CMAKE_SYSTEM_VERSION 1)
 SET(CMAKE_SYSTEM_PROCESSOR arm)
 SET(CMAKE_CROSSCOMPILING 1)
 
-# Load compiler options from the configuration file. This is done through CMakeConfig.cmake which on its turn will 
-# get the configuration data from the proper CMakeBuild.config file from some configuration directory.
-SET(CONFIG_FILE ${CMAKE_SOURCE_DIR}/CMakeConfig.cmake)
-IF(EXISTS "${CONFIG_FILE}")
-	MESSAGE(STATUS "arm.toolchain.cmake: Load config file ${CONFIG_FILE}")
-	INCLUDE(${CONFIG_FILE})
-ELSE()
-	MESSAGE(WARNING "arm.toolchain.cmake: Cannot find config file ${CONFIG_FILE}")
-ENDIF()
-
 MESSAGE(STATUS "arm.toolchain.cmake: Bluetooth name ${BLUETOOTH_NAME}")
 
 #######################################################################################################################
+
 # type of compiler we want to use, the COMPILER_TYPE can be empty if normal gcc and g++ compilers are intended
 SET(COMPILER_TYPE_PREFIX ${COMPILER_TYPE})
 
@@ -56,7 +48,7 @@ SET(CMAKE_SIZE                         ${COMPILER_PATH}/bin/${COMPILER_TYPE}size
 SET(CMAKE_NM                           ${COMPILER_PATH}/bin/${COMPILER_TYPE}nm)
 
 #ENABLE_LANGUAGE(ASM)
-	
+
 # Pure magic according following http://stackoverflow.com/questions/41589430/cmake-c-compiler-identification-fails
 # to get rid of the many try_compile attempts by CMake
 SET(CMAKE_C_COMPILER_WORKS TRUE CACHE INTERNAL "")
@@ -180,34 +172,12 @@ SET(FLAG_REMOVE_UNWINDING_CODE "")
 SET(FLAG_HARDCODE_STARTING_ADDRESS "")
 
 # do not define above as multiple linker flags, or else you will get redefines of MEMORY etc.
-#SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} -Wl,--gc-sections ${CMAKE_EXE_LINKER_FLAGS} ${FLOAT_FLAGS} ${FLAG_WRITE_MAP_FILE} ${FLAG_REMOVE_UNWINDING_CODE} ${FLAG_HARDCODE_STARTING_ADDRESS}")
 SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS} ${FLOAT_FLAGS} ${FLAG_WRITE_MAP_FILE} ${FLAG_REMOVE_UNWINDING_CODE} ${FLAG_HARDCODE_STARTING_ADDRESS}")
 
-# We preferably want to run the cross-compiler tests without all the flags. This namely means we have to add for example the object out of syscalls.c to the compilation, etc. Or, differently, have different flags for the compiler tests. This is difficult to do!
+# We preferably want to run the cross-compiler tests without all the flags. This namely means we have to add for 
+# example the object out of syscalls.c to the compilation, etc. Or, differently, have different flags for the 
+# compiler tests. This is difficult to do!
 #SET(CMAKE_C_FLAGS "-nostdlib")
-
-# find the libraries
-# http://qmcpack.cmscc.org/getting-started/using-cmake-toolchain-file
-
-# set the installation root (should contain usr/local and usr/lib directories)
-SET(DESTDIR /data/arm)
-
-# here will the header files be installed on "make install"
-SET(CMAKE_INSTALL_PREFIX ${DESTDIR}/usr/local)
-
-# add the libraries from the installation directory (if they have been build before)
-#LINK_DIRECTORIES("${DESTDIR}/usr/local/lib")
-#LINK_DIRECTORIES("${COMPILER_PATH}/${COMPILER_TYPE}/lib")
-
-# the following doesn't seem to work so well
-SET(CMAKE_INCLUDE_PATH ${DESTDIR}/usr/local/include)
-MESSAGE(STATUS "arm.toolchain.cmake: Add include path: ${CMAKE_INCLUDE_PATH}")
-
-# indicate where the linker is allowed to search for library / headers
-#SET(CMAKE_FIND_ROOT_PATH
-	#${ARM_LINUX_SYSROOT}
-	#	${DESTDIR})
-#SET(CMAKE_FIND_ROOT_PATH ${CMAKE_FIND_ROOT_PATH} ${ARM_LINUX_SYSROOT})
 
 # search for programs in the build host directories
 SET(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

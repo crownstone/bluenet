@@ -1123,8 +1123,8 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 
 	switch(data.type) {
 	case CS_TYPE::CONFIG_NAME: {
-		data.size = MIN(data.size, sizeof(BLUETOOTH_NAME));
-		memcpy(data.value, BLUETOOTH_NAME, data.size);
+		data.size = MIN(data.size, sizeof(STRINGIFY(BLUETOOTH_NAME)));
+		memcpy(data.value, STRINGIFY(BLUETOOTH_NAME), data.size);
 		return ERR_SUCCESS;
 	}
 	case CS_TYPE::CONFIG_MESH_ENABLED:

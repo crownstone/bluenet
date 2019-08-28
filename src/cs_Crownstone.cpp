@@ -921,7 +921,7 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 #define FIRMWARE_VERSION GIT_HASH
 #endif
 
-	LOGi("Welcome! Bluenet firmware, version %s", FIRMWARE_VERSION);
+	LOGi("Welcome! Bluenet firmware, version %s", STRINGIFY(FIRMWARE_VERSION));
 	LOGi("\033[35;1m");
 	LOGi(" _|_|_|    _|                                            _|     ");
 	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");
@@ -930,7 +930,7 @@ void welcome(uint8_t pinRx, uint8_t pinTx) {
 	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
 	LOGi("\033[0m");
 
-	LOGi("Compilation date: %s", COMPILATION_DAY);
+	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_DAY));
 	LOGi("Compilation time: %s", __TIME__);
 	LOGi("Hardware version: %s", get_hardware_version());
 	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
