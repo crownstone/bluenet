@@ -966,7 +966,13 @@ void enableNfcPins() {
 }
 
 void printNfcPins() {
-	LOGd("NFC pins: %p", NRF_UICR->NFCPINS);
+	uint32_t val = NRF_UICR->NFCPINS;
+	if (val == 0) {
+		LOGd("NFC pins enabled (%p)", val);
+	}
+	else {
+		LOGd("NFC pins disabled (%p)", val);
+	}
 }
 
 /**********************************************************************************************************************
