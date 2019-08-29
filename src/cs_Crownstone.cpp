@@ -55,11 +55,6 @@ extern "C" {
 // Define test pin to enable gpio debug.
 #define TEST_PIN 18
 
-// Define to enable leds. WARNING: this is stored in UICR and not easily reversible!
-//#define ENABLE_LEDS
-
-//#define ANNE_TEST_FACTORY_RESET
-
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
@@ -907,7 +902,7 @@ void on_exit(void) {
  * For DFU, application should be at (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED). For
  * example, for (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes).
  */
-void welcome(uint8_t pinRx, uint8_t pinTx) {
+void initUart(uint8_t pinRx, uint8_t pinTx) {
 	serial_config(pinRx, pinTx);
 	serial_init(SERIAL_ENABLE_RX_AND_TX);
 	_log(SERIAL_INFO, SERIAL_CRLF);
@@ -959,6 +954,21 @@ void overwrite_hardware_version() {
 	LOGd("Board: %p", hardwareBoard);
 }
 
+/** Enable NFC pins to be used as GPIO.
+ *
+ * Warning: this is stored in UICR, so it's persistent.
+ * Warning: NFC pins leak a bit of current when not at same voltage level.
+ */
+void enableNfcPins() {
+	if (NRF_UICR->NFCPINS != 0) {
+		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
+	}
+}
+
+void printNfcPins() {
+	LOGd("NFC pins: %p", NRF_UICR->NFCPINS);
+}
+
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
  * the code within the bootloader has been processed before. But also after the bootloader, the code in
@@ -989,7 +999,14 @@ int main() {
 	errCode = configure_board(&board);
 	APP_ERROR_CHECK(errCode);
 
-	// Init gpio pins early in the process!
+	// Init GPIO pins early in the process!
+	switch (board.hardwareBoard) {
+	case ACR01B10C:
+		enableNfcPins();
+		break;
+	default:
+		break;
+	}
 	if (IS_CROWNSTONE(board.deviceType)) {
 		nrf_gpio_cfg_output(board.pinGpioPwm);
 		if (board.flags.pwmInverted) {
@@ -1010,10 +1027,12 @@ int main() {
 	}
 
 	if (board.flags.hasSerial) {
-		// init uart, be nice and say hello
-		welcome(board.pinGpioRx, board.pinGpioTx);
+		initUart(board.pinGpioRx, board.pinGpioTx);
 		LOG_FLUSH();
 	}
+
+	printNfcPins();
+	LOG_FLUSH();
 
 //	// Make a "clicker"
 //	nrf_delay_ms(1000);
@@ -1031,19 +1050,7 @@ int main() {
 //		nrf_gpio_pin_clear(board.pinGpioRelayOn);
 //	}
 
-	Crownstone crownstone(board); // 250 ms
-
-	// initialize crownstone (depends on the operation mode) ...
-
-#ifdef ENABLE_LEDS
-	// WARNING: this is stored in UICR and not easily reversible!
-	if (NRF_UICR->NFCPINS != 0) {
-		LOGw("enable gpio LEDs");
-		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
-	}
-#endif
-	LOGd("NFC pins: %p", NRF_UICR->NFCPINS);
-	LOG_FLUSH();
+	Crownstone crownstone(board);
 
 	overwrite_hardware_version();
 
