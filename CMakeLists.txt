@@ -13,6 +13,8 @@ set(WORKSPACE_PATH ${CMAKE_CURRENT_LIST_DIR})
 set(DEFAULT_CONF_CMAKE_PATH ${WORKSPACE_PATH}/source/conf/cmake)
 set(DEFAULT_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules)
 
+project(${board_target})
+
 #######################################################################################################################
 # Load modules
 #######################################################################################################################
@@ -152,7 +154,7 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_PATH
 # Build bluenet as external project
 #######################################################################################################################
 
-ExternalProject_Add(Crownstone
+ExternalProject_Add(bluenet
   SOURCE_DIR ${WORKSPACE_PATH}/source
   BINARY_DIR ${WORKSPACE_PATH}/build/${board_target}
   INSTALL_DIR ${WORKSPACE_PATH}/bin/${board_target}
@@ -162,4 +164,6 @@ ExternalProject_Add(Crownstone
   BUILD_ALWAYS 1
   )
 
-
+add_dependencies(bluenet gcc_arm_none_eabi)
+add_dependencies(bluenet nordic_sdk)
+add_dependencies(bluenet nordic_mesh_sdk)
