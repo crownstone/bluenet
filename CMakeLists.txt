@@ -4,6 +4,8 @@ cmake_minimum_required(VERSION 3.10)
 # Set board target 
 #######################################################################################################################
 
+option(DOWNLOAD_JLINK "Download JLink" ON)
+
 set(board_target default CACHE STRING "Board target to compile for")
 
 set(WORKSPACE_PATH ${CMAKE_CURRENT_LIST_DIR})
@@ -64,27 +66,29 @@ ExternalProject_Add(nordic_mesh_sdk
 set(MESH_SDK_DIR ${WORKSPACE_PATH}/tools/mesh_sdk)
 list(APPEND CMAKE_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
+if(DOWNLOAD_JLINK) 
 
-set(JLINK_DOWNLOAD_URL https://www.segger.com/downloads/jlink)
-set(JLINK_DEB_FILE JLink_Linux_V650_x86_64.deb)
-set(JLINK_LINUX_DOWNLOAD_URL ${JLINK_DOWNLOAD_URL}/${JLINK_DEB_FILE})
-set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
+  set(JLINK_DOWNLOAD_URL https://www.segger.com/downloads/jlink)
+  set(JLINK_DEB_FILE JLink_Linux_V650_x86_64.deb)
+  set(JLINK_LINUX_DOWNLOAD_URL ${JLINK_DOWNLOAD_URL}/${JLINK_DEB_FILE})
+  set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
 
-ExternalProject_Add(jlink
-  DOWNLOAD_COMMAND wget  --post-data "accept_license_agreement=accepted" ${JLINK_LINUX_DOWNLOAD_URL} -O ${WORKSPACE_PATH}/downloads/${JLINK_DEB_FILE} 
-  DOWNLOAD_DIR ${WORKSPACE_PATH}/downloads
-  URL ${JLINK_LINUX_DOWNLOAD_URL}
-  URL_MD5 ${JLINK_MD5}
-  DOWNLOAD_NO_EXTRACT 1
-  CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-  BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-  INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_PATH}/downloads/${JLINK_DEB_FILE} 
-  )
+  ExternalProject_Add(jlink
+    DOWNLOAD_COMMAND wget  --post-data "accept_license_agreement=accepted" ${JLINK_LINUX_DOWNLOAD_URL} -O ${WORKSPACE_PATH}/downloads/${JLINK_DEB_FILE} 
+    DOWNLOAD_DIR ${WORKSPACE_PATH}/downloads
+    URL ${JLINK_LINUX_DOWNLOAD_URL}
+    URL_MD5 ${JLINK_MD5}
+    DOWNLOAD_NO_EXTRACT 1
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+    BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+    INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_PATH}/downloads/${JLINK_DEB_FILE} 
+    )
+endif()
 
 set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2?revision=c34d758a-be0c-476e-a2de-af8c6e16a8a2?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2019-q3-update)
 set(GCC_ARM_NONE_EABI_MD5 6341f11972dac8de185646d0fbd73bfc)
 
-ExternalProject_Add(arm-gnue
+ExternalProject_Add(gcc_arm_none_eabi
   DOWNLOAD_DIR ${WORKSPACE_PATH}/downloads
   URL ${GCC_ARM_NONE_EABI_DOWNLOAD_URL}
   URL_MD5 ${GCC_ARM_NONE_EABI_MD5}
@@ -96,7 +100,6 @@ ExternalProject_Add(arm-gnue
 
 set(COMPILER_PATH ${WORKSPACE_PATH}/tools/gcc_arm_none_eabi)
 list(APPEND CMAKE_ARGS "-DCOMPILER_PATH:STRING=${COMPILER_PATH}")
-
 
 
 #######################################################################################################################
