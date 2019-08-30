@@ -1,9 +1,5 @@
 bin/
 build/
-downloads/
-tmp/
-stamp/
-tools/
 tags
 .cproject
 .project
@@ -16,6 +12,7 @@ node_modules
 *.pyc
 *.swp
 nohup.out
+docs/html
 .metadata/
 .vimrc
 .ctags/

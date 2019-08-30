@@ -1,0 +1,4 @@
+99c99
+< #define NRF_MESH_STATIC_ASSERT(cond) typedef char static_assert[(cond) ? 1 : -1]
+---
+> #define NRF_MESH_STATIC_ASSERT(cond) typedef char static_assert_nordic_issue[(cond) ? 1 : -1]
