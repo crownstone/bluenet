@@ -106,6 +106,7 @@ list(APPEND CMAKE_ARGS "-DCOMPILER_PATH:STRING=${COMPILER_PATH}")
 
 if(DOWNLOAD_NRFUTIL)
   set(NRFUTIL_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-downloads/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/nRFCommandLineTools1030Linuxamd64tar.gz)
+  set(NRFUTIL_DEB_FILE nRF-Command-Line-Tools_10_3_0_Linux-amd64.deb)
   set(NRFUTIL_MD5 545df3556fc1a70da7a99926fb426eb3)
 
   ExternalProject_Add(nrfutil
@@ -115,7 +116,7 @@ if(DOWNLOAD_NRFUTIL)
     SOURCE_DIR ${WORKSPACE_PATH}/tools/nrfutil
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
     BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-    INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+    INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_PATH}/tools/nrfutil/${NRFUTIL_DEB_FILE} 
     )
 endif()
 
