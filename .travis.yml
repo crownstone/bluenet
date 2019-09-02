@@ -12,7 +12,7 @@ before_install:
 install: 
 - mkdir build
 - cd build
-- cmake .. -DDOWNLOAD_JLINK=OFF
+- cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF
 
 script:
 - make

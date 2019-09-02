@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 3.10)
 # Set board target 
 #######################################################################################################################
 
-option(DOWNLOAD_JLINK "Download JLink" ON)
+option(DOWNLOAD_JLINK        "Download JLink"              ON)
+option(DOWNLOAD_NRFUTIL      "Download nrfutil"            ON)
 
 set(board_target default CACHE STRING "Board target to compile for")
 
@@ -103,6 +104,20 @@ ExternalProject_Add(gcc_arm_none_eabi
 set(COMPILER_PATH ${WORKSPACE_PATH}/tools/gcc_arm_none_eabi)
 list(APPEND CMAKE_ARGS "-DCOMPILER_PATH:STRING=${COMPILER_PATH}")
 
+if(DOWNLOAD_NRFUTIL)
+  set(NRFUTIL_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-downloads/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/nRFCommandLineTools1030Linuxamd64tar.gz)
+  set(NRFUTIL_MD5 545df3556fc1a70da7a99926fb426eb3)
+
+  ExternalProject_Add(nrfutil
+    DOWNLOAD_DIR ${WORKSPACE_PATH}/downloads
+    URL ${NRFUTIL_DOWNLOAD_URL}
+    URL_MD5 ${NRFUTIL_MD5}
+    SOURCE_DIR ${WORKSPACE_PATH}/tools/nrfutil
+    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+    BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+    )
+endif()
 
 #######################################################################################################################
 # Load configuration values from multiple files
