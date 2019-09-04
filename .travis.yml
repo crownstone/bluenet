@@ -1,24 +1,24 @@
 sudo: false
-dist: xenial
+# Use as OS Ubuntu 18.04 (bionic)
+dist: bionic
 
+# We should actually not specify a compiler
 compiler: gcc
 
 before_install:
-    - sudo add-apt-repository -y ppa:jonathonf/gcc-7.1
-    - sudo apt -q update
-    - sudo apt -y install gcc-7 g++-7
-    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 100
-    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-7 100
-    - source scripts/setup_environment.sh
-    
-install: scripts/bluenet.sh --unit_test_host --target test
+- cmake --version
+
+install: 
+- mkdir build
+- cd build
+- cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF
+
+script:
+- make
 
 git:
     depth: 3
 
-env:
-- BLUENET_WORKSPACE_DIR=$HOME/workspace BLUENET_DIR=$TRAVIS_BUILD_DIR
-  
 # blocklist
 branches:
     except:
