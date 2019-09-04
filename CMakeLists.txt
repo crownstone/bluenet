@@ -37,10 +37,8 @@ set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-do
 # If files are updated... Also update the md5 hash, e.g. through `md5sum downloads/*`
 set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/nRF5/Binaries/nRF5SDK153059ac345.zip)
 set(NORDIC_NRF5_SDK_MD5 46a8c9cd4b5d7ee4c5142e8fae3444c4)
-set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/nRF5-SDK-for-Mesh/nrf5SDKforMeshv310src.zip)
-set(NORDIC_MESH_SDK_MD5 1789b5c5d3962f5298d890e3958764b5)
-#set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip)
-#set(NORDIC_MESH_SDK_MD5 29e813a85e209fd07837c4fd3c616178)
+set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip)
+set(NORDIC_MESH_SDK_MD5 29e813a85e209fd07837c4fd3c616178)
 
 ExternalProject_Add(nordic_sdk
   DOWNLOAD_DIR ${WORKSPACE_PATH}/downloads
@@ -63,7 +61,7 @@ ExternalProject_Add(nordic_mesh_sdk
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
   BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
   INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-  PATCH_COMMAND patch ${WORKSPACE_PATH}/tools/mesh_sdk/mesh/core/api/nrf_mesh_assert.h ${WORKSPACE_PATH}/patch/00mesh.patch
+  PATCH_COMMAND cd ${WORKSPACE_PATH} && patch -p0 < patch/00mesh.patch
   )
 
 set(MESH_SDK_DIR ${WORKSPACE_PATH}/tools/mesh_sdk)
