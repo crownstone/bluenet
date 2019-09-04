@@ -630,6 +630,16 @@ ELSE()
 			DEPENDS ${PROJECT_NAME}.tmp
 			COMMENT "Read headers ${PROJECT_NAME}.elf"
 			)
+		
+		ADD_CUSTOM_TARGET(upload
+			COMMAND echo
+			COMMAND echo "** Use nrfjprog to upload binary"
+			COMMAND echo
+			COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase
+			DEPENDS ${PROJECT_NAME}.tmp
+			COMMENT "Flashes binary to remote target board"
+			)
+
 
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
 		
