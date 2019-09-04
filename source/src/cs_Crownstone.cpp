@@ -198,16 +198,6 @@ void Crownstone::initDrivers(uint16_t step) {
 	case 1: {
 		_state->init(&_boardsConfig);
 
-	#ifdef ANNE_TEST_FACTORY_RESET
-		LOGi("Factory reset");
-		 _state->factoryReset(FACTORY_RESET_CODE);
-		TYPIFY(STATE_RESET_COUNTER) resetCounter = 6;
-		LOGi("Set reset counter to: %i", resetCounter);
-		_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
-
-		increaseResetCounter();
-	#endif
-
 		// If not done already, init UART
 		// TODO: make into a class with proper init() function
 		if (!_boardsConfig.flags.hasSerial) {
@@ -507,7 +497,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 		case OperationMode::OPERATION_MODE_DFU:
 			LOGd("Configure DFU mode");
 			// TODO: have this function somewhere else.
-			CommandHandler::getInstance().handleCommand(CTRL_CMD_GOTO_DFU);
+			CommandHandler::getInstance().handleCommand(CTRL_CMD_GOTO_DFU, cmd_source_t(CS_CMD_SOURCE_INTERNAL));
 			_stack->changeToNormalTxPowerMode();
 			break;
 		default:
@@ -566,8 +556,12 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 				_mesh->init();
 			}
 #endif
+			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::LOCALIZATION);
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
+
+			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
+			_multiSwitchHandler->init();
 			break;
 		case OperationMode::OPERATION_MODE_SETUP:
 			// TODO: Why this hack?
@@ -625,7 +619,8 @@ void Crownstone::startUp() {
 		_switch->start();
 
 		if (_operationMode == OperationMode::OPERATION_MODE_SETUP &&
-				_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN) {
+				(_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN || _boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN_ONE)
+				) {
 			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
 		}
 
@@ -721,8 +716,9 @@ void Crownstone::tick() {
 		_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature));
 	}
 
-	// Update advertisement parameter (only in operation mode NORMAL)
-	if (_tickCount % (500/TICK_INTERVAL_MS) == 0 && _operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+	// Update advertisement service data
+	// TODO: synchronize with servicedata.updateAdvertisement()
+	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
 		// update advertisement parameters (to improve scanning on (some) android phones)
 		_stack->updateAdvertisement(true);
 		// update advertisement (to update service data)

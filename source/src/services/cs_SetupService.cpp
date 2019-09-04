@@ -102,7 +102,12 @@ void SetupService::addGoToDfuCharacteristic() {
     _gotoDfuCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value, uint16_t length) -> void {
 	    if (value == GPREGRET_DFU_RESET) {
                 LOGi("goto dfu");
-	        CommandHandler::getInstance().resetDelayed(value);
+//	        CommandHandler::getInstance().resetDelayed(value);
+	    	TYPIFY(CMD_RESET_DELAYED) resetCmd;
+	    	resetCmd.resetCode = value;
+	    	resetCmd.delayMs = 2000;
+	    	event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
+	    	EventDispatcher::getInstance().dispatch(eventReset);
 	    }
 	    else {
 	        LOGe("goto dfu failed, wrong value: %d", value);

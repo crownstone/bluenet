@@ -46,11 +46,13 @@ struct __attribute__((packed)) scanned_device_t {
 /**
  * A single multi switch command.
  * switchCmd: 0 = off, 100 = fully on.
- * timeout: delay in seconds.
+ * timeout: Delay in seconds.
+ * source: The source that issued the command.
  */
 struct __attribute__((packed)) internal_multi_switch_item_cmd_t {
 	uint8_t switchCmd;
-	uint16_t timeout; // timeout in seconds
+	uint16_t timeout;
+	cmd_source_t source;
 };
 
 /**
@@ -66,22 +68,7 @@ inline bool cs_multi_switch_item_is_valid(internal_multi_switch_item_t* item, si
 }
 
 
-enum KeepAliveActionTypes {
-	NO_CHANGE = 0,
-	CHANGE    = 1
-};
 
-/**
- * A single keep alive command.
- * action: see KeepAliveActionTypes.
- * switchCmd: 0 = off, 100 = fully on.
- * timeout: delay in seconds.
- */
-struct __attribute__((__packed__)) keep_alive_state_item_cmd_t {
-	uint8_t action;
-	uint8_t switchCmd;
-	uint16_t timeout;
-};
 
 /**
  * A single keep alive packet, with target id.
@@ -100,6 +87,7 @@ struct __attribute__((packed)) control_command_packet_t {
 	buffer_ptr_t data;
 	size16_t size;
 	EncryptionAccessLevel accessLevel;
+	cmd_source_t source;
 };
 
 /**

@@ -37,6 +37,10 @@ bool EventDispatcher::addListener(EventListener *listener) {
 		APP_ERROR_CHECK(NRF_ERROR_NO_MEM);
 		return false;
 	}
+	if (listener == NULL) {
+		APP_ERROR_CHECK(NRF_ERROR_NULL);
+		return false;
+	}
 #ifdef PRINT_EVENTDISPATCHER_VERBOSE
 	LOGi("add listener: %u", _listenerCount);
 #endif

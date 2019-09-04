@@ -1,0 +1,125 @@
+Version 1.4.0:
+ - Add release config for bootloader_1.4.0
+ - Add release config for bootloader_1.4.0-RC0
+ - release script: fixed bluenet git hash
+ - Updated release script: write down bluenet git hash.
+ - Updated release script.
+ - Fixed getting bootloader version from config.
+ - Get bootloader version from config.
+ - Changed some of the debug strings.
+ - Added default hardware board. Moved UICR layout to config.
+ - APP_TIMER_MAX_TIMERS is deprecated.
+ - Add SERIAL_BYTE_PROTOCOL_ONLY. Set baudrate to 230400.
+
+Version 1.3.0:
+ - Fixed release script: set version.
+
+Version 1.3.0:
+ - Changed release path.
+ - Config uart after initializing gpio (igbt and relay pins).
+ - Add BOOTLOADER_COMPILATION flag so we can exclude headers from cs_Nordic.h (such as the ones for ADC).
+ - Reduced size of some logs.
+ - Optimize compiler by using -flto (optimizes globally rather than only for individual compilation units).
+
+Version 1.2.2:
+ - Don't write bootloader version as firmware version for release.
+ - Fixed bug in release script.
+ - Updated release script. Now overwrites some config values.
+
+Version 1.2.2:
+ - Fixed logging functions.
+ - Fixed missing DFU_APP_DATA_RESERVED, which would brick the crownstone.
+ - Merge branch 'master' of github.com:dobots/nrf51-dfu-bootloader-for-gcc-compiler
+ - Fixes for new build scripts. Check me please.
+
+ - added success to create_release
+ - added create_release script updated all.sh and Makefile for release build
+ - bugfix bootloader
+ - Version bump to 1.2.0
+ - made bootloader independent of hardware board / device type. reads out board and type from UICR
+ - updated dfu_bl_image_validate to avoid bricking bootloader when updating from 1.0.0 becasue APP_DATA_RESERVED value changed
+ - Version bump to 1.1.0
+ - Merge branch 'master' of github.com:crownstone/bluenet-bootloader
+ - fixe for app reserved data (use value directly from BLUENET pstorage_platform.h) optional, let APP_DATA_RESERVED overwrite value (but allow only increased value)
+ - silly commit!
+ - Version bump to 1.0.0
+ - updated hardware version updated device type check
+ - updated README
+ - moved device info service to separate dev_info_service.c use hardware version from bluenet fixed multi target build/clean
+ - added device information service to bootloader with hardware version and firmware version
+ - fixed path in scripts to call outside scripts folder
+ - replace echo by printf
+ - improved scripts, added colors, added error reporting
+ - moved check_targets out of config.sh again (buggy)
+ - use config script from BLUENET_DIR scripts folder copy binaries to BLUENET_BIN_DIR instead of build dir
+ - Use BLUENET_BUILD_DIR to copy binaries to
+ - works?
+ - Compiles for nrf52, sdk11, s132
+ - Merge branch 'master' of github.com:dobots/nrf51-dfu-bootloader-for-gcc-compiler
+ - Make sure the switch gpio is in the correct state on boot
+ - updated README
+ - include CMakeBuild.config.local if present
+ - use softdevice of nordic sdk if not specified otherwise
+ - update bootloader to handle brownouts
+ - detect accidental resets and go into dfu mode after a number of resets
+ - bugfix VERBOSE if SERIAL_VERBOSITY=NONE
+ - Removed bug fixes from README (don't have any of the fixes and it worked for s130 v1.0, so I assume they are obsolete)
+ - moved include, gcc and arm folders out of source folder to root folder
+ - Merge branch 'sdk_8' of github.com:dobots/nrf51-dfu-bootloader-for-gcc-compiler into sdk_8
+ - clear reset register by default after entering bootloader
+ - adjusted log messages
+ - adjusted log messages
+ - merged with bootloader from nrf sdk 11
+ - cleanup
+ - reorganized. removed everything unneccessary
+ - also output a .hex file for dfu
+ - increase timeout to 4 minutes, so that we can definitely send 120kB
+ - Enable app size of larger than 64k
+ - removed old code
+ - Include the .default and .local config files
+ - Merge branch 'sdk_8' of github.com:dobots/nrf51-dfu-bootloader-for-gcc-compiler into sdk_8
+ - removed leds
+ - Update README.md
+ - ignore generated file
+ - Use config file settings
+ - Now works for S110
+ - copied files from sdk 8.1 and used sdk 8.1 example
+ - compiles for sdk 8.1, s130 1.0.0
+ - update to targets script
+ - added check_targets (to compile bootloader for different targets)
+ - removed boards_h replaced LED_x by PIN_GPIO_LEDx
+ - Merge with adaptations from Bart
+ - 1.) Remove dobots_boards.h. 2.) Adapt Makefile so cs_Boards.h from BLUENET directory will be used. 3.) Update references. 4.) Rename all BOARD macros to HARDWARE_BOARD
+ - BLUENET_DIR is now BLUENET_CONFIG_DIR, added new boards
+ - 1. Add goto script. 2. Use board parameter in CMakeBuild.config and emit error if not defined
+ - Add copyright
+ - Update README with difference between S110 and S130
+ - Merge branch 'master' into s110
+ - Working for S110 as well as S130
+ - Remove all references to LEDs. If pins are high when the 220V is applied. This won't be fun
+ - Use bluenet config options
+ - Use synthesized clock for the Crownstone
+ - Add BOARD=X option
+ - Typo size instead of objsize
+ - On startup application was not recognized. Now it is.
+ - Add printing info.
+ - Add functionality at main that reads the register set by the normal binary
+ - Make error actually cause a BPKT
+ - Set bootloader to 0x34000 address.
+ - Add script to build
+ - Add macro to change bootloader start address. But don't do it yet.
+ - #define DISABLE_TURN_OFF_FOR_S130
+ - Update Makefile for S110
+ - Correct casting
+ - Switch back to S110
+ - Explain a bit about configuration and how to flash
+ - Explain more in README
+ - Add scripts for compilation, extractions, and copying
+ - Make bootloader working for S130 device
+ - Adjust makefiles and code to make use of S130
+ - Delete hci_mem_pool_internal.h
+ - Update README.md
+ - Update README.md
+ - Code initialization
+ - Initial commit
+

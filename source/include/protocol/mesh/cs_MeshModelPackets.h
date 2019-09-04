@@ -8,6 +8,7 @@
 #pragma once
 
 #include "protocol/cs_Typedefs.h"
+#include "protocol/cs_CmdSource.h"
 
 /**
  * Message opcodes.
@@ -77,33 +78,12 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_state_1_t {
 	uint16_t partialTimestamp;
 };
 
-
-
-
 struct __attribute__((__packed__)) cs_mesh_model_msg_multi_switch_item_t {
 	stone_id_t id;
 	uint8_t switchCmd;
 	uint16_t timeout;
-	uint8_t intent;
+	cmd_source_t source;
 };
-/**
- * Size of the multi switch header.
- * 1B for multi switch type.
- * 1B for the item count.
- */
-#define MESH_MESH_MULTI_SWITCH_HEADER_SIZE (1+1)
-/**
- * Maximum number of multi switch items in the list.
- */
-#define MESH_MESH_MULTI_SWITCH_MAX_ITEM_COUNT ((MAX_MESH_MSG_SIZE - MESH_HEADER_SIZE - MESH_MESH_MULTI_SWITCH_HEADER_SIZE) / sizeof(cs_mesh_model_msg_multi_switch_item_t))
-struct __attribute__((__packed__)) cs_mesh_model_msg_multi_switch_t {
-	uint8_t type; // Always 0 (type list).
-	uint8_t count;
-	cs_mesh_model_msg_multi_switch_item_t items[MESH_MESH_MULTI_SWITCH_MAX_ITEM_COUNT];
-};
-
-
-
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_keep_alive_item_t {
 	stone_id_t id;

@@ -269,7 +269,9 @@ void ServiceData::handleEvent(event_t & event) {
 		case CS_TYPE::STATE_SWITCH_STATE: {
 			switch_state_t* state = (TYPIFY(STATE_SWITCH_STATE)*)event.data;
 			updateSwitchState(state->asInt);
-			sendMeshState(true);
+//			sendMeshState(true);
+			// Abuse the state update timeout.
+			_sendStateCountdown = 300 / TICK_INTERVAL_MS;
 			break;
 		}
 		case CS_TYPE::STATE_ACCUMULATED_ENERGY: {
@@ -389,14 +391,12 @@ void ServiceData::sendMeshState(bool event) {
 		meshMsg.urgency = CS_MESH_URGENCY_LOW;
 	}
 	{
-		cs_mesh_model_msg_state_0_t packet;
-		packet.switchState = _switchState;
-		packet.flags = _flags;
-		packet.powerFactor = _powerFactor;
-		packet.powerUsageReal = _powerUsageReal;
+		cs_mesh_model_msg_state_1_t packet;
+		packet.temperature = _temperature;
+		packet.energyUsed = _energyUsed;
 		packet.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
 
-		meshMsg.type = CS_MESH_MODEL_TYPE_STATE_0;
+		meshMsg.type = CS_MESH_MODEL_TYPE_STATE_1;
 		meshMsg.payload = (uint8_t*)&packet;
 		meshMsg.size = sizeof(packet);
 
@@ -404,12 +404,14 @@ void ServiceData::sendMeshState(bool event) {
 		EventDispatcher::getInstance().dispatch(cmd);
 	}
 	{
-		cs_mesh_model_msg_state_1_t packet;
-		packet.temperature = _temperature;
-		packet.energyUsed = _energyUsed;
+		cs_mesh_model_msg_state_0_t packet;
+		packet.switchState = _switchState;
+		packet.flags = _flags;
+		packet.powerFactor = _powerFactor;
+		packet.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
 		packet.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
 
-		meshMsg.type = CS_MESH_MODEL_TYPE_STATE_1;
+		meshMsg.type = CS_MESH_MODEL_TYPE_STATE_0;
 		meshMsg.payload = (uint8_t*)&packet;
 		meshMsg.size = sizeof(packet);
 

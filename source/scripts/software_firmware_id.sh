@@ -59,6 +59,10 @@ case $softdevice_firmware_version in
 		version="S132 v6.1.0"
 		echo $version
 		;;
+	00B7)
+		version="SDK 15.3.0 (S132)"
+		echo $version
+		;;
 	FFFE)
 		version="development/any"
 		echo $version

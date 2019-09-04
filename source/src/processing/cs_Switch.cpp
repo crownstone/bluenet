@@ -98,7 +98,7 @@ void Switch::start() {
 	// This means we will assume that the pwm is already powered and just set the _pwmPowered flag.
 	// TODO: Really? Why can't we just organize this with events?
 	bool switchcraftEnabled = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
-	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0) || _hardwareBoard == ACR01B10A) {
+	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0) || _hardwareBoard == ACR01B10B) {
 		LOGd("dimmer powered on start");
 		_pwmPowered = true;
 		event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
@@ -537,6 +537,35 @@ void Switch::checkDimmerPower() {
 	}
 }
 
+/**
+ * For now, only deal with device tokens and let all other sources overrule (but not actually claim).
+ */
+bool Switch::checkAndSetOwner(cmd_source_t source) {
+	if (source.sourceId < CS_CMD_SOURCE_DEVICE_TOKEN) {
+		// Non device token command can always set the switch.
+		return true;
+	}
+	if (_ownerTimeoutCountdown == 0) {
+		// Switch isn't claimed yet.
+		_source = source;
+		_ownerTimeoutCountdown = SWITCH_CLAIM_TIME_MS / TICK_INTERVAL_MS;
+		return true;
+	}
+	if (_source.sourceId != source.sourceId) {
+		// Switch is claimed by other source.
+		LOGd("Already claimed by %u", _source.sourceId);
+		return false;
+	}
+	if (!BLEutil::isNewer(_source.count, source.count)) {
+		// A command with newer counter has been received already.
+		LOGd("Old command: %u, already got: %u", source.count, _source.count);
+		return false;
+	}
+	_source = source;
+	_ownerTimeoutCountdown = SWITCH_CLAIM_TIME_MS / TICK_INTERVAL_MS;
+	return true;
+}
+
 void Switch::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::CMD_SWITCH_ON:
@@ -548,13 +577,15 @@ void Switch::handleEvent(event_t & event) {
 		case CS_TYPE::CMD_SWITCH_TOGGLE:
 			toggle();
 			break;
-		case CS_TYPE::CMD_MULTI_SWITCH: {
-			TYPIFY(CMD_MULTI_SWITCH)* packet = (TYPIFY(CMD_MULTI_SWITCH)*) event.data;
+		case CS_TYPE::CMD_SWITCH: {
+			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) event.data;
 			if (packet->timeout) {
 				delayedSwitch(packet->switchCmd, packet->timeout);
 			}
 			else {
-				setSwitch(packet->switchCmd);
+				if (checkAndSetOwner(packet->source)) {
+					setSwitch(packet->switchCmd);
+				}
 			}
 			break;
 		}
@@ -581,6 +612,14 @@ void Switch::handleEvent(event_t & event) {
 				if (--_dimmerCheckCountdown == 0) {
 					checkDimmerPower();
 				}
+			}
+			if (_ownerTimeoutCountdown) {
+				--_ownerTimeoutCountdown;
+//				if (--_ownerTimeoutCountdown == 0) {
+//					_source.flagExternal = false;
+//					_source.sourceId = CS_CMD_SOURCE_NONE;
+//					_source.count = 0;
+//				}
 			}
 			break;
 		default: {}

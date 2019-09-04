@@ -36,7 +36,9 @@ build() {
 
 upload() {
 	$path/_upload.sh $SD_BINDIR/softdevice_mainpart.hex $serial_num
-	checkError "Error with uploading softdevice"
+	checkError "Failed to upload softdevice"
+	$path/_writebyte.sh 0x10001018 0x7E000
+	checkError "Failed to write MBR page address"
 }
 
 clean() {

@@ -83,7 +83,7 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_KEY_ADMIN                        = 35,     //  0x23
 	CONFIG_KEY_MEMBER                       = 36,     //  0x24
 	CONFIG_KEY_BASIC                        = 37,     //  0x25
-	CONFIG_DEFAULT_ON                       = 38,     //  0x26
+	CONFIG_DEFAULT_ON                       = 38,     //  0x26   // Deprecate
 	CONFIG_SCAN_INTERVAL                    = 39,     //  0x27
 	CONFIG_SCAN_WINDOW                      = 40,     //  0x28
 	CONFIG_RELAY_HIGH_DURATION              = 41,     //  0x29
@@ -110,6 +110,7 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_MESH_DEVICE_KEY                  = 62,     //  0x3E
 	CONFIG_MESH_APP_KEY                     = 63,     //  0x3F
 	CONFIG_MESH_NET_KEY                     = 64,     //  0x40
+	CONFIG_KEY_LOCALIZATION                 = 65,     //  0x41
 
 	STATE_RESET_COUNTER                     = State_Base,  //    128
 	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
@@ -141,7 +142,8 @@ enum class CS_TYPE: uint16_t {
 	CMD_SWITCH_OFF = General_Base,                    // Sent to turn switch off.
 	CMD_SWITCH_ON,                                    // Sent to turn switch on.
 	CMD_SWITCH_TOGGLE,                                // Sent to toggle switch.
-	CMD_MULTI_SWITCH,                                 // Sent to set switch. -- Payload is multi_switch_item_cmd_t.
+	CMD_SWITCH,                                       // Sent to set switch.
+	CMD_MULTI_SWITCH,                                 // Sent to handle a multi switch. -- Payload is internal_multi_switch_item_cmd_t.
 //	CMD_SET_LOG_LEVEL,
 	CMD_ENABLE_LOG_POWER,                             // Sent to enable/disable power calculations logging. -- Payload is BOOL.
 	CMD_ENABLE_LOG_CURRENT,                           // Sent to enable/disable current samples logging. -- Payload is BOOL.
@@ -157,7 +159,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_DEC_VOLTAGE_RANGE,                            // Sent to decrease voltage range.
 	CMD_INC_CURRENT_RANGE,                            // Sent to increase current range.
 	CMD_DEC_CURRENT_RANGE,                            // Sent to decrease current range.
-	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is stream_buffer_header_t.
+	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is control_command_packet_t.
 	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
 	CMD_SEND_MESH_MSG,                                // Sent to send a mesh message. -- Payload is cs_mesh_msg_t.
 	CMD_SEND_MESH_MSG_KEEP_ALIVE,                     // Sent to send a switch mesh message. -- Payload is keep_alive_state_item_t.
@@ -247,6 +249,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 	case CS_TYPE::CONFIG_DEFAULT_ON:
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
 	case CS_TYPE::CONFIG_SCAN_WINDOW:
@@ -279,6 +282,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::EVT_ADV_BACKGROUND:
 	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
@@ -387,6 +391,10 @@ struct event_t {
 };
 
 typedef uint16_t cs_file_id_t;
+
+static const cs_file_id_t FILE_DO_NOT_USE     = 0x0000;
+static const cs_file_id_t FILE_KEEP_FOREVER   = 0x0001;
+static const cs_file_id_t FILE_CONFIGURATION  = 0x0003;
 
 /**
  * Struct to communicate state variables.
@@ -518,7 +526,8 @@ typedef  uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
-typedef  internal_multi_switch_item_cmd_t TYPIFY(CMD_MULTI_SWITCH);
+typedef  internal_multi_switch_item_cmd_t TYPIFY(CMD_SWITCH);
+typedef  internal_multi_switch_item_t TYPIFY(CMD_MULTI_SWITCH);
 typedef  cs_mesh_msg_t TYPIFY(CMD_SEND_MESH_MSG);
 typedef  keep_alive_state_item_t TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE);
 typedef  internal_multi_switch_item_t TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH);
@@ -646,6 +655,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return ENCRYPTION_KEY_LENGTH;
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
 		return ENCRYPTION_KEY_LENGTH;
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
+		return ENCRYPTION_KEY_LENGTH;
 	case CS_TYPE::CONFIG_DEFAULT_ON:
 		return sizeof(TYPIFY(CONFIG_DEFAULT_ON));
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
@@ -710,6 +721,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return 0;
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
 		return 0;
+	case CS_TYPE::CMD_SWITCH:
+		return sizeof(TYPIFY(CMD_SWITCH));
 	case CS_TYPE::CMD_MULTI_SWITCH:
 		return sizeof(TYPIFY(CMD_MULTI_SWITCH));
 	case CS_TYPE::EVT_ADV_BACKGROUND:
@@ -868,6 +881,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY: return "CONFIG_MESH_DEVICE_KEY";
 	case CS_TYPE::CONFIG_MESH_APP_KEY: return "CONFIG_MESH_APP_KEY";
 	case CS_TYPE::CONFIG_MESH_NET_KEY: return "CONFIG_MESH_NET_KEY";
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION: return "CONFIG_KEY_LOCALIZATION";
 	case CS_TYPE::CONFIG_LOW_TX_POWER: return "CONFIG_LOW_TX_POWER";
 	case CS_TYPE::CONFIG_MAX_CHIP_TEMP: return "CONFIG_MAX_CHIP_TEMP";
 	case CS_TYPE::CONFIG_MESH_ENABLED: return "CONFIG_MESH_ENABLED";
@@ -926,6 +940,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_OFF: return "EVT_POWER_OFF";
 	case CS_TYPE::CMD_SWITCH_ON: return "EVT_POWER_ON";
 	case CS_TYPE::CMD_SWITCH_TOGGLE: return "EVT_POWER_TOGGLE";
+	case CS_TYPE::CMD_SWITCH: return "CMD_SWITCH";
 	case CS_TYPE::CMD_MULTI_SWITCH: return "CMD_MULTI_SWITCH";
 	case CS_TYPE::EVT_DIMMING_ALLOWED: return "EVT_DIMMING_ALLOWED";
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF: return "EVT_DIMMER_FORCED_OFF";
@@ -998,6 +1013,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 	case CS_TYPE::CONFIG_DEFAULT_ON:
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
 	case CS_TYPE::CONFIG_SCAN_WINDOW:
@@ -1032,6 +1048,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::EVT_ADV_BACKGROUND:
 	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
@@ -1098,6 +1115,142 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	// should not reach this
 	return PersistenceMode::RAM;
 }
+
+/**
+ * Get the storage file id of a given a type.
+ */
+constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
+	switch(type) {
+	case CS_TYPE::CONFIG_NAME:
+	case CS_TYPE::CONFIG_PWM_PERIOD:
+	case CS_TYPE::CONFIG_IBEACON_MAJOR:
+	case CS_TYPE::CONFIG_IBEACON_MINOR:
+	case CS_TYPE::CONFIG_IBEACON_UUID:
+	case CS_TYPE::CONFIG_IBEACON_TXPOWER:
+	case CS_TYPE::CONFIG_TX_POWER:
+	case CS_TYPE::CONFIG_ADV_INTERVAL:
+	case CS_TYPE::CONFIG_SCAN_DURATION:
+	case CS_TYPE::CONFIG_SCAN_BREAK_DURATION:
+	case CS_TYPE::CONFIG_BOOT_DELAY:
+	case CS_TYPE::CONFIG_MAX_CHIP_TEMP:
+	case CS_TYPE::CONFIG_CURRENT_LIMIT:
+	case CS_TYPE::CONFIG_MESH_ENABLED:
+	case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
+	case CS_TYPE::CONFIG_IBEACON_ENABLED:
+	case CS_TYPE::CONFIG_SCANNER_ENABLED:
+	case CS_TYPE::CONFIG_SPHERE_ID:
+	case CS_TYPE::CONFIG_CROWNSTONE_ID:
+	case CS_TYPE::CONFIG_KEY_ADMIN:
+	case CS_TYPE::CONFIG_KEY_MEMBER:
+	case CS_TYPE::CONFIG_KEY_BASIC:
+	case CS_TYPE::CONFIG_KEY_SERVICE_DATA:
+	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
+	case CS_TYPE::CONFIG_MESH_APP_KEY:
+	case CS_TYPE::CONFIG_MESH_NET_KEY:
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
+	case CS_TYPE::CONFIG_DEFAULT_ON:
+	case CS_TYPE::CONFIG_SCAN_INTERVAL:
+	case CS_TYPE::CONFIG_SCAN_WINDOW:
+	case CS_TYPE::CONFIG_RELAY_HIGH_DURATION:
+	case CS_TYPE::CONFIG_LOW_TX_POWER:
+	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER:
+	case CS_TYPE::CONFIG_CURRENT_MULTIPLIER:
+	case CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO:
+	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO:
+	case CS_TYPE::CONFIG_POWER_ZERO:
+	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
+	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM:
+	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
+	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
+	case CS_TYPE::CONFIG_PWM_ALLOWED:
+	case CS_TYPE::CONFIG_SWITCH_LOCKED:
+	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
+	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
+	case CS_TYPE::CONFIG_UART_ENABLED:
+	case CS_TYPE::STATE_OPERATION_MODE:
+	case CS_TYPE::STATE_SWITCH_STATE:
+	case CS_TYPE::STATE_SCHEDULE:
+		return FILE_CONFIGURATION;
+	case CS_TYPE::STATE_RESET_COUNTER:
+		return FILE_KEEP_FOREVER;
+	case CS_TYPE::CONFIG_DO_NOT_USE:
+	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
+	case CS_TYPE::STATE_POWER_USAGE:
+	case CS_TYPE::STATE_TEMPERATURE:
+	case CS_TYPE::STATE_TIME:
+	case CS_TYPE::STATE_FACTORY_RESET:
+	case CS_TYPE::STATE_ERRORS:
+	case CS_TYPE::CMD_SWITCH_OFF:
+	case CS_TYPE::CMD_SWITCH_ON:
+	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
+	case CS_TYPE::CMD_MULTI_SWITCH:
+	case CS_TYPE::EVT_ADV_BACKGROUND:
+	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED:
+	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
+	case CS_TYPE::EVT_SCAN_STARTED:
+	case CS_TYPE::EVT_SCAN_STOPPED:
+	case CS_TYPE::EVT_DEVICE_SCANNED:
+	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
+	case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
+	case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
+	case CS_TYPE::EVT_DIMMER_OFF_FAILURE_DETECTED:
+	case CS_TYPE::EVT_MESH_TIME:
+	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
+	case CS_TYPE::EVT_BLE_CONNECT:
+	case CS_TYPE::EVT_BLE_DISCONNECT:
+	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
+	case CS_TYPE::EVT_SESSION_NONCE_SET:
+	case CS_TYPE::EVT_KEEP_ALIVE:
+	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
+	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
+	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
+	case CS_TYPE::EVT_RELAY_FORCED_ON:
+	case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
+	case CS_TYPE::EVT_CHIP_TEMP_OK:
+	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
+	case CS_TYPE::EVT_DIMMER_TEMP_OK:
+	case CS_TYPE::EVT_TICK:
+	case CS_TYPE::EVT_TIME_SET:
+	case CS_TYPE::EVT_DIMMER_POWERED:
+	case CS_TYPE::EVT_DIMMING_ALLOWED:
+	case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
+	case CS_TYPE::EVT_STORAGE_INITIALIZED:
+	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_DONE:
+	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
+	case CS_TYPE::EVT_STORAGE_GC_DONE:
+	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_SETUP_DONE:
+	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
+	case CS_TYPE::EVT_ADC_RESTARTED:
+	case CS_TYPE::CMD_ENABLE_LOG_POWER:
+	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
+	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
+	case CS_TYPE::CMD_ENABLE_LOG_FILTERED_CURRENT:
+	case CS_TYPE::CMD_RESET_DELAYED:
+	case CS_TYPE::CMD_ENABLE_ADVERTISEMENT:
+	case CS_TYPE::CMD_ENABLE_MESH:
+	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT:
+	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
+	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
+	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
+	case CS_TYPE::CMD_INC_CURRENT_RANGE:
+	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
+	case CS_TYPE::CMD_CONTROL_CMD:
+	case CS_TYPE::CMD_SET_OPERATION_MODE:
+	case CS_TYPE::CMD_SEND_MESH_MSG:
+	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE:
+	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH:
+	case CS_TYPE::CMD_SET_TIME:
+		return FILE_DO_NOT_USE;
+	}
+	// should not reach this
+	return FILE_DO_NOT_USE;
+}
+
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
@@ -1201,6 +1354,8 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
+		return ERR_SUCCESS;
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
 		*(TYPIFY(CONFIG_SCAN_INTERVAL)*)data.value = SCAN_INTERVAL;
@@ -1327,6 +1482,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:
@@ -1425,6 +1581,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_ERRORS:
@@ -1458,6 +1615,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:
@@ -1565,6 +1723,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_MESH_DEVICE_KEY:
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
+	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::STATE_FACTORY_RESET:
 	case CS_TYPE::STATE_OPERATION_MODE:
@@ -1590,6 +1749,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
+	case CS_TYPE::CMD_SWITCH:
 	case CS_TYPE::CMD_MULTI_SWITCH:
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
 	case CS_TYPE::EVT_ADC_RESTARTED:

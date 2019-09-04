@@ -286,6 +286,7 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 		controlCmd.accessLevel = ADMIN;
 		controlCmd.data = payload + sizeof(*streamHeader);
 		controlCmd.size = streamHeader->length;
+		controlCmd.source = cmd_source_t(CS_CMD_SOURCE_UART);
 		event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 		EventDispatcher::getInstance().dispatch(event);
 		break;

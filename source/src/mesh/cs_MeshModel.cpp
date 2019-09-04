@@ -65,6 +65,8 @@ void MeshModel::init() {
 	APP_ERROR_CHECK(retVal);
 	retVal = access_model_subscription_list_alloc(_accessHandle);
 	APP_ERROR_CHECK(retVal);
+
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
 }
 
 void MeshModel::setOwnAddress(uint16_t address) {
@@ -93,8 +95,13 @@ cs_ret_code_t MeshModel::sendMsg(cs_mesh_msg_t *meshMsg) {
 
 
 cs_ret_code_t MeshModel::sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats) {
+	cs_mesh_model_msg_multi_switch_item_t meshItem;
+	meshItem.id = item->id;
+	meshItem.switchCmd = item->cmd.switchCmd;
+	meshItem.timeout = item->cmd.timeout;
+	meshItem.source = item->cmd.source;
 	remFromQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id);
-	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id, (uint8_t*)item, sizeof(*item), repeats, true);
+	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id, (uint8_t*)(&meshItem), sizeof(meshItem), repeats, true);
 }
 
 cs_ret_code_t MeshModel::sendKeepAliveItem(const keep_alive_state_item_t* item, uint8_t repeats) {
@@ -267,29 +274,34 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
-		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
-		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
-		internal_multi_switch_item_t* item = (internal_multi_switch_item_t*) payload;
-		if (item->id == myId) {
+		if (ownMsg) {
+			break;
+		}
+		cs_mesh_model_msg_multi_switch_item_t* item = (cs_mesh_model_msg_multi_switch_item_t*) payload;
+		if (item->id == _ownId) {
 //			LOGi("recieved multi switch for me");
-			TYPIFY(CMD_MULTI_SWITCH)* cmd = &(item->cmd);
-			if (memcmp(&_lastReceivedMultiSwitch, cmd, sizeof(*cmd)) != 0) {
-				memcpy(&_lastReceivedMultiSwitch, cmd, sizeof(*cmd));
-				LOGi("dispatch multi switch");
-				event_t event(CS_TYPE::CMD_MULTI_SWITCH, cmd, sizeof(*cmd));
-				EventDispatcher::getInstance().dispatch(event);
-			}
-			else {
+			if (memcmp(&_lastReceivedMultiSwitch, item, sizeof(*item)) == 0) {
 //				LOGd("ignore multi switch");
+				break;
 			}
+			memcpy(&_lastReceivedMultiSwitch, item, sizeof(*item));
+
+			TYPIFY(CMD_MULTI_SWITCH) internalItem;
+			internalItem.id = item->id;
+			internalItem.cmd.switchCmd = item->switchCmd;
+			internalItem.cmd.timeout = item->timeout;
+			internalItem.cmd.source = item->source;
+			internalItem.cmd.source.flagExternal = true;
+
+			LOGi("dispatch multi switch");
+			event_t event(CS_TYPE::CMD_MULTI_SWITCH, &internalItem, sizeof(internalItem));
+			EventDispatcher::getInstance().dispatch(event);
 		}
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE: {
-		TYPIFY(CONFIG_CROWNSTONE_ID) myId;
-		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 		keep_alive_state_item_t* item = (keep_alive_state_item_t*) payload;
-		if (item->id == myId) {
+		if (item->id == _ownId) {
 //			LOGi("recieved keep alive for me");
 			TYPIFY(EVT_KEEP_ALIVE_STATE)* cmd = &(item->cmd);
 			if (memcmp(&_lastReceivedKeepAlive, cmd, sizeof(*cmd)) != 0) {
@@ -482,7 +494,7 @@ bool MeshModel::sendMsgFromQueue() {
 	}
 	free(msg);
 	--(item->repeats);
-	LOGd("sent ind=%u repeats left=%u type=%u id=%u", index, item->repeats, item->type, item->id);
+	LOGd("sent ind=%u repeats_left=%u type=%u id=%u", index, item->repeats, item->type, item->id);
 //	BLEutil::printArray(meshMsg.msg, meshMsg.size);
 
 	// Next item will be sent next, so that items are sent interleaved.

@@ -90,7 +90,9 @@ private:
 	access_message_tx_t _accessReplyMsg;
 	uint8_t _replyMsg[MESH_HEADER_SIZE + 0];
 
-	TYPIFY(CMD_MULTI_SWITCH) _lastReceivedMultiSwitch = {0xFF};
+	TYPIFY(CONFIG_CROWNSTONE_ID) _ownId = 0;
+
+	cs_mesh_model_msg_multi_switch_item_t _lastReceivedMultiSwitch = {0xFF};
 	TYPIFY(EVT_KEEP_ALIVE_STATE) _lastReceivedKeepAlive = {0xFF};
 	TYPIFY(CMD_SET_TIME) _lastReveivedSetTime = 0;
 	cs_mesh_model_ext_state_t _lastReceivedState;

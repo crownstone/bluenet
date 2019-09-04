@@ -138,6 +138,14 @@ inline bool clearBit(T& value, uint8_t bit) {
 }
 
 /**
+ * Returns true when newValue is newer than previousValue, for a value that is increased all the time and overflows.
+ */
+inline bool isNewer(uint8_t previousValue, uint8_t newValue) {
+	int8_t diff = newValue - previousValue;
+	return diff > 0;
+}
+
+/**
  * @brief Parses advertisement data, providing length and location of the field in case matching data is found.
  *
  * @param[in]  Type of data to be looked for in advertisement data. See https://www.bluetooth.com/specifications/assigned-numbers/generic-access-profile

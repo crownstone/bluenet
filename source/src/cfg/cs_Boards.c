@@ -410,7 +410,7 @@ void asACR01B9E(boards_config_t* p_config) {
 }
 
 
-void asACR01B10A(boards_config_t* p_config) {
+void asACR01B10B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioRelayOn                     = 14;
 	p_config->pinGpioRelayOff                    = 13;
@@ -436,7 +436,7 @@ void asACR01B10A(boards_config_t* p_config) {
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 	p_config->flags.pwmTempInverted              = true;
 
-	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
 
 	p_config->voltageMultiplier                  = -0.253f; // for range -1800 - 1800 mV
 	p_config->currentMultiplier                  = 0.0071f; // for range -600 - 600 mV on pin 6
@@ -450,7 +450,9 @@ void asACR01B10A(boards_config_t* p_config) {
 
 	// See https://en.wikipedia.org/wiki/Thermistor#B_or_%CE%B2_parameter_equation B=3380, T0=25, R0=10000
 	// Python: temp=82; r=10000*math.exp(3380*(1/(temp+273.15)-1/(25+273.15))); 3.3/(16000+r)*r
-	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
+//	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
+//	p_config->pwmTempVoltageThreshold            = 0.4;  // About 70 degrees C
+	p_config->pwmTempVoltageThreshold            = 0.35; // About 76 degrees C
 //	p_config->pwmTempVoltageThresholdDown        = 0.5;  // About 60 degrees C
 //	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
 	p_config->pwmTempVoltageThresholdDown        = 0.3; // About 82 degrees C
@@ -639,8 +641,8 @@ uint32_t configure_board(boards_config_t* p_config) {
 		asACR01B1D(p_config);
 		break;
 
-	case ACR01B10A:
-		asACR01B10A(p_config);
+	case ACR01B10B:
+		asACR01B10B(p_config);
 		break;
 
 	case ACR01B2A:

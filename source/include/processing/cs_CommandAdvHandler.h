@@ -18,19 +18,35 @@
  */
 #define CMD_ADV_CLAIM_TIME_MS 1500
 
+/**
+ * Number of devices that can simultaneously advertise commands
+ */
+#define CMD_ADV_MAX_CLAIM_COUNT 3
+
+/**
+ * Struct used to prevent double handling of similar command advertisements.
+ * And to prevent handling command advertisements of many devices at once.
+ */
+struct __attribute__((__packed__)) command_adv_claim_t {
+	uint8_t deviceToken;
+	uint8_t timeoutCounter;
+	uint32_t encryptedData;
+};
+
 struct __attribute__((__packed__)) command_adv_header_t {
-	uint8_t sequence0 : 2;
+//	uint8_t sequence0 : 2;
 	uint8_t protocol : 3;
 	uint8_t sphereId : 8;
 	uint8_t accessLevel : 3;
-//
+
 //	uint8_t sequence1 : 2;
-//	uint16_t reserved : 10;
+//	uint8_t reserved : 2;
+	uint8_t deviceToken : 8;
 //	uint16_t payload1 : 4;
-//
+
 //	uint8_t sequence2 : 2;
 //	uint16_t payload2 : 14;
-//
+
 //	uint8_t sequence3 : 2;
 //	uint16_t payload3 : 14;
 };
@@ -47,13 +63,30 @@ public:
 
 private:
 	CommandAdvHandler();
-	uint32_t _lastVerifiedEncryptedData = 0; // Part of the encrypted data of last verified command advertisement. Used to prevent double handling of command advertisements.
-	uint8_t _timeoutCounter = 0;
-	uint8_t _timeoutAddress[BLE_GAP_ADDR_LEN];
+	command_adv_claim_t _claims[CMD_ADV_MAX_CLAIM_COUNT];
 	TYPIFY(CONFIG_SPHERE_ID) _sphereId = 0;
 
 	void parseAdvertisement(scanned_device_t* scannedDevice);
-	// Return true when validated command payload.
-	bool handleEncryptedCommandPayload(scanned_device_t* scannedDevice, const command_adv_header_t& header, const cs_data_t& nonce, cs_data_t& encryptedPayload);
-	void handleEncryptedRC5Payload(scanned_device_t* scannedDevice, const command_adv_header_t& header, uint16_t encryptedPayload[2]);
+
+	// Return true when command payload is validated, and RC5 payload is decrypted.
+	bool handleEncryptedCommandPayload(scanned_device_t* scannedDevice, const command_adv_header_t& header, const cs_data_t& nonce, cs_data_t& encryptedPayload, uint16_t encryptedPayloadRC5[2], uint16_t decryptedPayloadRC5[2]);
+
+	bool decryptRC5Payload(uint16_t encryptedPayload[2], uint16_t decryptedPayload[2]);
+
+	void handleDecryptedRC5Payload(scanned_device_t* scannedDevice, const command_adv_header_t& header, uint16_t decryptedPayload[2]);
+
+	/**
+	 * Return index of claim with this device token.
+	 * Returns -1 when the device token was not found.
+	 * Returns -2 when the device token was found, but the previous encryptedData is similar.
+	 */
+	int checkSimilarCommand(uint8_t deviceToken, uint32_t encryptedData);
+
+	// Return true when device claimed successfully: when there's a claim spot.
+	bool claim(uint8_t deviceToken, uint32_t encryptedData, int indexOfDevice);
+
+	void tickClaims();
+
+	// Returns a part of the encrypted data, the part that's most likely to change.
+	uint32_t getPartOfEncryptedData(cs_data_t& encryptedPayload);
 };

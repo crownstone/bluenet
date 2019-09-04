@@ -41,20 +41,11 @@ void reset(void* p_context) {
 	sd_nvic_SystemReset();
 }
 
-void execute_delayed(void * p_context) {
-	delayed_command_t* buf = (delayed_command_t*)p_context;
-	CommandHandler::getInstance().handleCommand(buf->type, buf->buffer, buf->size);
-	free(buf->buffer);
-	free(buf);
-}
 
 CommandHandler::CommandHandler() :
-		_delayTimerId(NULL),
 		_resetTimerId(NULL),
 		_boardConfig(NULL)
 {
-		_delayTimerData = { {0} };
-		_delayTimerId = &_delayTimerData;
 		_resetTimerData = { {0} };
 		_resetTimerId = &_resetTimerData;
 }
@@ -62,7 +53,6 @@ CommandHandler::CommandHandler() :
 void CommandHandler::init(const boards_config_t* board) {
 	_boardConfig = board;
 	EventDispatcher::getInstance().addListener(this);
-	Timer::getInstance().createSingleShot(_delayTimerId, execute_delayed);
 	Timer::getInstance().createSingleShot(_resetTimerId, (app_timer_timeout_handler_t) reset);
 }
 
@@ -74,23 +64,16 @@ void CommandHandler::resetDelayed(uint8_t opCode, uint16_t delayMs) {
 //	while(true) {}; // This doesn't seem to work
 }
 
-cs_ret_code_t CommandHandler::handleCommandDelayed(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size,
-		const uint32_t delay) {
-	delayed_command_t* buf = new delayed_command_t();
-	buf->type = type;
-	buf->buffer = new uint8_t[size];
-	memcpy(buf->buffer, buffer, size);
-	buf->size = size;
-	Timer::getInstance().start(_delayTimerId, MS_TO_TICKS(delay), buf);
-	LOGi("execute with delay %d", delay);
-	return NRF_SUCCESS;
+
+cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type, const cmd_source_t source) {
+	return handleCommand(type, NULL, 0, source);
 }
 
-cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type) {
-	return handleCommand(type, NULL, 0);
-}
-
-cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type, buffer_ptr_t buffer, const uint16_t size,
+cs_ret_code_t CommandHandler::handleCommand(
+		const CommandHandlerTypes type,
+		buffer_ptr_t buffer,
+		const uint16_t size,
+		const cmd_source_t source,
 		const EncryptionAccessLevel accessLevel) {
 	LOGd("cmd=%u lvl=%u", type, accessLevel);
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
@@ -146,7 +129,7 @@ cs_ret_code_t CommandHandler::handleCommand(const CommandHandlerTypes type, buff
 	case CTRL_CMD_RELAY:
 		return handleCmdRelay(buffer, size, accessLevel);
 	case CTRL_CMD_MULTI_SWITCH:
-		return handleCmdMultiSwitch(buffer, size, accessLevel);
+		return handleCmdMultiSwitch(buffer, size, source, accessLevel);
 	case CTRL_CMD_MULTI_SWITCH_LEGACY:
 		return handleCmdMultiSwitchLegacy(buffer, size, accessLevel);
 	case CTRL_CMD_MESH_COMMAND:
@@ -540,17 +523,19 @@ cs_ret_code_t CommandHandler::handleCmdRelay(buffer_ptr_t buffer, const uint16_t
 cs_ret_code_t CommandHandler::handleCmdMultiSwitchLegacy(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "legacy multi switch");
 //#if BUILD_MESHING == 1
-	cs_mesh_model_msg_multi_switch_t* multiSwitchPacket = (cs_mesh_model_msg_multi_switch_t*)buffer;
-	if (!MeshModelPacketHelper::multiSwitchIsValid(multiSwitchPacket, size)) {
+	cs_legacy_multi_switch_t* multiSwitchPacket = (cs_legacy_multi_switch_t*)buffer;
+	if (!cs_legacy_multi_switch_is_valid(multiSwitchPacket, size)) {
 		return ERR_INVALID_MESSAGE;
 	}
 	for (int i=0; i<multiSwitchPacket->count; ++i) {
-		TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH) item;
+		TYPIFY(CMD_MULTI_SWITCH) item;
 		item.id = multiSwitchPacket->items[i].id;
 		item.cmd.switchCmd = multiSwitchPacket->items[i].switchCmd;
 		item.cmd.timeout = multiSwitchPacket->items[i].timeout;
+		item.cmd.source.flagExternal = false;
+		item.cmd.source.sourceId = CS_CMD_SOURCE_CONNECTION;
 		if (cs_multi_switch_item_is_valid(&item, sizeof(item))) {
-			event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH, &item, sizeof(item));
+			event_t cmd(CS_TYPE::CMD_MULTI_SWITCH, &item, sizeof(item));
 			EventDispatcher::getInstance().dispatch(cmd);
 		}
 	}
@@ -558,7 +543,7 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitchLegacy(buffer_ptr_t buffer, co
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
+cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const uint16_t size, const cmd_source_t source, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "multi switch");
 	multi_switch_t* multiSwitchPacket = (multi_switch_t*)buffer;
 	if (!cs_multi_switch_packet_is_valid(multiSwitchPacket, size)) {
@@ -566,12 +551,13 @@ cs_ret_code_t CommandHandler::handleCmdMultiSwitch(buffer_ptr_t buffer, const ui
 		return ERR_INVALID_MESSAGE;
 	}
 	for (int i=0; i<multiSwitchPacket->count; ++i) {
-		TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH) item;
+		TYPIFY(CMD_MULTI_SWITCH) item;
 		item.id = multiSwitchPacket->items[i].id;
 		item.cmd.switchCmd = multiSwitchPacket->items[i].switchCmd;
 		item.cmd.timeout = 0;
+		item.cmd.source = source;
 		if (cs_multi_switch_item_is_valid(&item, sizeof(item))) {
-			event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH, &item, sizeof(item));
+			event_t cmd(CS_TYPE::CMD_MULTI_SWITCH, &item, sizeof(item));
 			EventDispatcher::getInstance().dispatch(cmd);
 		}
 		else {
@@ -835,7 +821,7 @@ void CommandHandler::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CMD_CONTROL_CMD: {
 			TYPIFY(CMD_CONTROL_CMD)* cmd = (TYPIFY(CMD_CONTROL_CMD)*)event.data;
-			handleCommand(cmd->type, cmd->data, cmd->size, cmd->accessLevel);
+			handleCommand(cmd->type, cmd->data, cmd->size, cmd->source, cmd->accessLevel);
 			break;
 		}
 		default: {}

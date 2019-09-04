@@ -1,5 +1,4 @@
 sudo: false
-
 # Use as OS Ubuntu 18.04 (bionic)
 dist: bionic
 
