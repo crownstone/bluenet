@@ -35,6 +35,27 @@ The installation is changing to use more CMake instead of bash scripts. To start
 This will download the required programs and libraries. The installation has been tested on Ubuntu 18.04 (should work on newer ones as well) and assumes you use a J-Link programmer.
 
 
+## Environment variables
+
+Now we need to set up the environment variables to keep track of the different folders required to build bluenet
+
+    cp source/conf/cmake/env.config.template config/env.config
+
+Set `BLUENET_WORKSPACE_DIR` to the top directory of the repository, e.g.
+
+    BLUENET_WORKSPACE_DIR=~/bluenet
+
+Last we want to load the environments by default for every terminal session. For example with the following command:
+
+    echo "source ~/bluenet/source/scripts/env.sh" >> ~/.bashrc
+
+Apply the environment variables:
+
+    source ~/.bashrc
+
+If you have another shell, please do the above for your own shell.
+
+
 ## Configuration
 
 We allow for multiple configurations. This means that the config dir can contain multiple directories. A config directory `default` is already included, with a `CMakeBuild.config` that is a copy of `source/conf/cmake/CMakeBuild.config.template`. Open it to customize:
