@@ -433,8 +433,8 @@ private:
 	 * init() function.
 	 */
 	Stack();
-	Stack(Stack const&);
-	void operator=(Stack const &);
+	Stack(Stack const&) = delete;
+	void operator=(Stack const &) = delete;
 
 	/**
 	 * The destructor shuts down the stack.
