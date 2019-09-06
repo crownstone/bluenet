@@ -74,10 +74,10 @@ private:
 	Mesh();
 
 	//! Copy constructor, singleton, thus made private
-	Mesh(Mesh const&);
+	Mesh(Mesh const&) = delete;
 
 	//! Assignment operator, singleton, thus made private
-	void operator=(Mesh const &);
+	void operator=(Mesh const &) = delete;
 
 	void provisionSelf(uint16_t id);
 	void provisionLoad();

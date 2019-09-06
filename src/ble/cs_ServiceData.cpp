@@ -130,27 +130,19 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 	TYPIFY(STATE_ERRORS) stateErrors;
 	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
+
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors.asInt);
 
 	// Set error timestamp
 	if (stateErrors.asInt == 0) {
 		_firstErrorTimestamp = 0;
-	}
-	else if (_firstErrorTimestamp != 0) {
+	} else if (_firstErrorTimestamp != 0) {
 		_firstErrorTimestamp = timestamp;
 	}
 
 	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
 		// In setup mode, only advertise this state.
-		_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_SETUP;
-		_serviceData.params.setup.type = 0;
-		_serviceData.params.setup.state.switchState = _switchState;
-		_serviceData.params.setup.state.flags = _flags;
-		_serviceData.params.setup.state.temperature = _temperature;
-		_serviceData.params.setup.state.powerFactor = _powerFactor;
-		_serviceData.params.setup.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
-		_serviceData.params.setup.state.errors = stateErrors.asInt;
-		_serviceData.params.setup.state.counter = _updateCount;
+		setServiceDataModeSetup(stateErrors);
 		memset(_serviceData.params.setup.state.reserved, 0, sizeof(_serviceData.params.setup.state.reserved));
 		serviceDataSet = true;
 	}
@@ -158,15 +150,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 	// Every 2 updates, we advertise the errors (if any), or the state of another crownstone.
 	if (!serviceDataSet && _updateCount % 2 == 0) {
 		if (stateErrors.asInt != 0) {
-			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
-			_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_ERROR;
-			_serviceData.params.encrypted.error.id = _crownstoneId;
-			_serviceData.params.encrypted.error.errors = stateErrors.asInt;
-			_serviceData.params.encrypted.error.timestamp = _firstErrorTimestamp;
-			_serviceData.params.encrypted.error.flags = _flags;
-			_serviceData.params.encrypted.error.temperature = _temperature;
-			_serviceData.params.encrypted.error.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-			_serviceData.params.encrypted.error.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
+			setServiceDataError(stateErrors,timestamp);
 			serviceDataSet = true;
 		}
 		else if (getExternalAdvertisement(_crownstoneId, _serviceData)) {
@@ -175,18 +159,8 @@ void ServiceData::updateAdvertisement(bool initial) {
 	}
 
 	if (!serviceDataSet) {
-		_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
-		_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_STATE;
-		_serviceData.params.encrypted.state.id = _crownstoneId;
-		_serviceData.params.encrypted.state.switchState = _switchState;
-		_serviceData.params.encrypted.state.flags = _flags;
-		_serviceData.params.encrypted.state.temperature = _temperature;
-		_serviceData.params.encrypted.state.powerFactor = _powerFactor;
-		_serviceData.params.encrypted.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
-		_serviceData.params.encrypted.state.energyUsed = _energyUsed;
-		_serviceData.params.encrypted.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-		_serviceData.params.encrypted.state.reserved = 0;
-		_serviceData.params.encrypted.state.validation = SERVICE_DATA_VALIDATION;
+		setServiceDataDefault(timestamp);
+		serviceDataSet = true;
 	}
 
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
@@ -194,6 +168,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 	BLEutil::printArray(_serviceData.array, sizeof(service_data_t));
 //		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u", serviceData->params.type, serviceData->params.crownstoneId, serviceData->params.switchState, serviceData->params.flagBitmask, serviceData->params.temperature, serviceData->params.powerUsageReal, serviceData->params.accumulatedEnergy, serviceData->params.partialTimestamp);
 #endif
+
 	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_SERVICE_DATA, _serviceData.array, sizeof(service_data_t));
 
 //		Mesh::getInstance().printRssiList();
@@ -220,6 +195,49 @@ void ServiceData::updateAdvertisement(bool initial) {
 	else {
 		Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
 	}
+}
+
+void ServiceData::setServiceDataError(
+		const TYPIFY(STATE_ERRORS) &stateErrors, 
+		const TYPIFY(STATE_TIME) &timestamp){
+	_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
+	_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_ERROR;
+	_serviceData.params.encrypted.error.id = _crownstoneId;
+	_serviceData.params.encrypted.error.errors = stateErrors.asInt;
+	_serviceData.params.encrypted.error.timestamp = _firstErrorTimestamp;
+	_serviceData.params.encrypted.error.flags = _flags;
+	_serviceData.params.encrypted.error.temperature = _temperature;
+	_serviceData.params.encrypted.error.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+	_serviceData.params.encrypted.error.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
+}
+
+void ServiceData::setServiceDataModeSetup(
+		const TYPIFY(STATE_ERRORS) &stateErrors){
+	_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_SETUP;
+	_serviceData.params.setup.type = 0;
+	_serviceData.params.setup.state.switchState = _switchState;
+	_serviceData.params.setup.state.flags = _flags;
+	_serviceData.params.setup.state.temperature = _temperature;
+	_serviceData.params.setup.state.powerFactor = _powerFactor;
+	_serviceData.params.setup.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
+	_serviceData.params.setup.state.errors = stateErrors.asInt;
+	_serviceData.params.setup.state.counter = _updateCount;
+}
+
+void ServiceData::setServiceDataDefault(
+		const TYPIFY(STATE_TIME) & timestamp){
+	_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
+		_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_STATE;
+		_serviceData.params.encrypted.state.id = _crownstoneId;
+		_serviceData.params.encrypted.state.switchState = _switchState;
+		_serviceData.params.encrypted.state.flags = _flags;
+		_serviceData.params.encrypted.state.temperature = _temperature;
+		_serviceData.params.encrypted.state.powerFactor = _powerFactor;
+		_serviceData.params.encrypted.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
+		_serviceData.params.encrypted.state.energyUsed = _energyUsed;
+		_serviceData.params.encrypted.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+		_serviceData.params.encrypted.state.reserved = 0;
+		_serviceData.params.encrypted.state.validation = SERVICE_DATA_VALIDATION;
 }
 
 bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& serviceData) {

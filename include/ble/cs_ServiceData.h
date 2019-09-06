@@ -173,7 +173,26 @@ private:
 	 */
 	void handleEvent(event_t & event);
 
-
+	/** Sets _serviceData to DATA_TYPE_ERROR and populate relevant fields.
+	 * 
+	 * @param[in] stateErrors 		the error state of the event.
+	 * @param[in] timestamp			the timestamp of the event.
+	 */
+	void setServiceDataError(
+		const TYPIFY(STATE_ERRORS) &stateErrors, 
+		const TYPIFY(STATE_TIME) &timestamp);
+	
+	/** Sets _serviceData to type 0 and populate relevant fields
+	 * 
+	 * @param[in] stateErrors 		the error state of the event (if any).
+	 */
+	void setServiceDataModeSetup(const TYPIFY(STATE_ERRORS) &stateErrors);
+	
+	/** Sets _serviceData to SERVICE_DATA_TYPE_STATE and populate relevant fields.
+	 * 
+	 * @param[in] timestamp			the timestamp of the event.
+	 */
+	void setServiceDataDefault(const TYPIFY(STATE_TIME) & timestamp);
 
 	/** Compress power usage, according to service data protocol v3.
 	 *
