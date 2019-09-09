@@ -65,7 +65,7 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	uint32_t errCode;
 	cs_data_t services16bit;
 	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE, scannedDevice->data, scannedDevice->dataSize, &services16bit);
-	if (errCode != ERR_SUCCESS) {
+	if (errCode != ERR_SUCCESS || services16bit.len < (CMD_ADV_NUM_SERVICES_16BIT * sizeof(uint16_t))) {
 		return;
 	}
 	cs_data_t services128bit;
@@ -84,56 +84,13 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	BLEutil::printArray(services128bit.data, services128bit.len); // Received as uint128, so bytes are reversed.
 #endif
 
-	if (services16bit.len < (CMD_ADV_NUM_SERVICES_16BIT * sizeof(uint16_t))) {
-		return;
-	}
-
 	command_adv_header_t header = command_adv_header_t();
-	bool foundSequences[CMD_ADV_NUM_SERVICES_16BIT] = { false };
 	uint8_t nonce[CMD_ADV_NUM_SERVICES_16BIT * sizeof(uint16_t)];
 	uint16_t encryptedPayloadRC5[2];
-	// Fill the struct with data from the 4 service UUIDs.
-	// Keep up which sequence numbers have been handled.
-	// Fill the nonce with the service data in the correct order.
-	for (int i=0; i < CMD_ADV_NUM_SERVICES_16BIT; ++i) {
-		uint16_t serviceUuid = ((uint16_t*)services16bit.data)[i];
-		LOGCommandAdvVerbose("uuid=%u", serviceUuid);
-		uint8_t sequence = (serviceUuid >> (16-2)) & 0x0003;
-		foundSequences[sequence] = true;
-		switch (sequence) {
-		case 0:
-//			header.sequence0 = sequence;                               // 2 bits sequence
-			header.protocol =    (serviceUuid >> (16-2-3)) & 0x07;     // 3 bits protocol
-			header.sphereId =    (serviceUuid >> (16-2-3-8)) & 0xFF;   // 8 bits sphereId
-			header.accessLevel = (serviceUuid >> (16-2-3-8-3)) & 0x07; // 3 bits access level
-			memcpy(nonce+0, &serviceUuid, sizeof(uint16_t));
-			break;
-		case 1:
-//			header.sequence1 = sequence;                                  // 2 bits sequence
-//			header.reserved = ;                                           // 2 bits reserved
-			header.deviceToken =      (serviceUuid >> (16-2-2-8)) & 0xFF; // 8 bits device token
-			encryptedPayloadRC5[0] = ((serviceUuid >> (16-2-2-8-4)) & 0x0F) << (16-4);    // Last 4 bits of this service UUID are first 4 bits of encrypted payload[0].
-			memcpy(nonce+2, &serviceUuid, sizeof(uint16_t));
-			break;
-		case 2:
-//			header.sequence2 = sequence;
-			encryptedPayloadRC5[0] += ((serviceUuid >> (16-2-12)) & 0x0FFF) << (16-4-12); // Bits 2 - 13 of this service UUID are last 12 bits of encrypted payload[0].
-			encryptedPayloadRC5[1] = ((serviceUuid >> (16-2-12-2)) & 0x03) << (16-2);     // Last 2 bits of this service UUID are first 2 bits of encrypted payload[1].
-			memcpy(nonce+4, &serviceUuid, sizeof(uint16_t));
-			break;
-		case 3:
-//			header.sequence3 = sequence;
-			encryptedPayloadRC5[1] += ((serviceUuid >> (16-2-14)) & 0x3FFF) << (16-2-14); // Last 14 bits of this service UUID are last 14 bits of encrypted payload[1].
-			memcpy(nonce+6, &serviceUuid, sizeof(uint16_t));
-			break;
-		}
-	}
-	for (int i=0; i < CMD_ADV_NUM_SERVICES_16BIT; ++i) {
-		if (!foundSequences[i]) {
-			LOGCommandAdvVerbose("Missing UUID with sequence %i", i)
-			return;
-		}
-	}
+
+	if( ! obtainData(services16bit,header,nonce,encryptedPayloadRC5)){
+		return;
+	};
 
 	if (header.sphereId != _sphereId) {
 		LOGCommandAdvVerbose("Wrong sphereId got=%u stored=%u", header.sphereId, _sphereId);
@@ -149,6 +106,67 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	if (validated) {
 		handleDecryptedRC5Payload(scannedDevice, header, encryptedPayloadRC5);
 	}
+}
+
+bool CommandAdvHandler::obtainData( 
+		const cs_data_t &services16bit,
+		command_adv_header_t &header,
+		uint8_t *nonce,
+		uint16_t *encryptedPayloadRC5){
+	bool foundSequences[CMD_ADV_NUM_SERVICES_16BIT] = { false };
+
+	// Fill the struct with data from the 4 service UUIDs.
+	// Keep up which sequence numbers have been handled.
+	// Fill the nonce with the service data in the correct order.
+	for (int i=0; i < CMD_ADV_NUM_SERVICES_16BIT; ++i) {
+		uint16_t serviceUuid = reinterpret_cast<uint16_t*>(services16bit.data)[i];
+		uint8_t sequence = (serviceUuid >> (16-2)) & 0x0003;
+		foundSequences[sequence] = true;
+
+		LOGCommandAdvVerbose("uuid=%u", serviceUuid);
+
+		switch (sequence) {
+			case 0:{
+	//			header.sequence0 = sequence;                               // 2 bits sequence
+				header.protocol =    (serviceUuid >> (16-2-3)) & 0x07;     // 3 bits protocol
+				header.sphereId =    (serviceUuid >> (16-2-3-8)) & 0xFF;   // 8 bits sphereId
+				header.accessLevel = (serviceUuid >> (16-2-3-8-3)) & 0x07; // 3 bits access level
+				memcpy(nonce+0, &serviceUuid, sizeof(uint16_t));
+				break;
+			}
+			case 1:{
+	//			header.sequence1 = sequence;                                  // 2 bits sequence
+	//			header.reserved = ;                                           // 2 bits reserved
+				header.deviceToken =      (serviceUuid >> (16-2-2-8)) & 0xFF; // 8 bits device token
+				encryptedPayloadRC5[0] = ((serviceUuid >> (16-2-2-8-4)) & 0x0F) << (16-4);    // Last 4 bits of this service UUID are first 4 bits of encrypted payload[0].
+				memcpy(nonce+2, &serviceUuid, sizeof(uint16_t));
+				break;
+			}
+			case 2:{
+	//			header.sequence2 = sequence;
+				encryptedPayloadRC5[0] += ((serviceUuid >> (16-2-12)) & 0x0FFF) << (16-4-12); // Bits 2 - 13 of this service UUID are last 12 bits of encrypted payload[0].
+				encryptedPayloadRC5[1] = ((serviceUuid >> (16-2-12-2)) & 0x03) << (16-2);     // Last 2 bits of this service UUID are first 2 bits of encrypted payload[1].
+				memcpy(nonce+4, &serviceUuid, sizeof(uint16_t));
+				break;
+			}
+			case 3:{
+	//			header.sequence3 = sequence;
+				encryptedPayloadRC5[1] += ((serviceUuid >> (16-2-14)) & 0x3FFF) << (16-2-14); // Last 14 bits of this service UUID are last 14 bits of encrypted payload[1].
+				memcpy(nonce+6, &serviceUuid, sizeof(uint16_t));
+				break;
+			}
+		}
+	}
+
+	// validate found sequences
+	for (int i=0; i < CMD_ADV_NUM_SERVICES_16BIT; ++i) {
+		if (!foundSequences[i]) {
+			LOGCommandAdvVerbose("Missing UUID with sequence %i", i)
+			return false;
+		}
+	}
+
+	return true;
 }
 
 int CommandAdvHandler::checkSimilarCommand(uint8_t deviceToken, uint32_t encryptedData) {
