@@ -89,4 +89,13 @@ private:
 
 	// Returns a part of the encrypted data, the part that's most likely to change.
 	uint32_t getPartOfEncryptedData(cs_data_t& encryptedPayload);
+
+	// fills in the parameters [header] [nonce] and [encryptedPayloadRC5] 
+	// given [services16bit] as input.
+	// returns false if there was a Missing UUID.
+	bool obtainData( 
+		const cs_data_t &services16bit,
+		command_adv_header_t &header,
+		uint8_t *nonce,
+		uint16_t *encryptedPayloadRC5);
 };
