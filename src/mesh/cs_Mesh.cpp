@@ -184,12 +184,17 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 //			LOGd("  adv_type=%u len=%u data=", p_rx_data->adv_type, p_rx_data->length);
 //			BLEutil::printArray(p_rx_data->p_payload, p_rx_data->length);
 //		}
-		memcpy(_scannedDevice.address, p_rx_data->p_metadata->params.scanner.adv_addr.addr, sizeof(_scannedDevice.address)); // TODO: check addr_type and addr_id_peer
-		_scannedDevice.addressType = (p_rx_data->p_metadata->params.scanner.adv_addr.addr_type & 0x7F) & ((p_rx_data->p_metadata->params.scanner.adv_addr.addr_id_peer & 0x01) << 7);
+		memcpy(_scannedDevice.address, 
+			p_rx_data->p_metadata->params.scanner.adv_addr.addr, 
+			sizeof(_scannedDevice.address)); // TODO: check addr_type and addr_id_peer
+		
+		_scannedDevice.addressType = (p_rx_data->p_metadata->params.scanner.adv_addr.addr_type & 0x7F) 
+			& ((p_rx_data->p_metadata->params.scanner.adv_addr.addr_id_peer & 0x01) << 7);
 		_scannedDevice.rssi = p_rx_data->p_metadata->params.scanner.rssi;
 		_scannedDevice.channel = p_rx_data->p_metadata->params.scanner.channel;
 		_scannedDevice.dataSize = p_rx_data->length;
-		_scannedDevice.data = (uint8_t*)(p_rx_data->p_payload);
+		_scannedDevice.data = const_cast<uint8_t*>(p_rx_data->p_payload);
+
 		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&_scannedDevice, sizeof(_scannedDevice));
 		EventDispatcher::getInstance().dispatch(event);
 
