@@ -15,6 +15,7 @@
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
 #include <processing/cs_CommandAdvHandler.h>
+#include <processing/cs_ScannedDeviceHandler.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
 #include <processing/cs_MultiSwitchHandler.h>
@@ -149,30 +150,31 @@ private:
 	Storage* _storage;
 	State* _state;
 
-	Switch* _switch = NULL;
-	TemperatureGuard* _temperatureGuard = NULL;
-	PowerSampling* _powerSampler = NULL;
-	Watchdog* _watchdog = NULL;
+	Switch* _switch = nullptr;
+	TemperatureGuard* _temperatureGuard = nullptr;
+	PowerSampling* _powerSampler = nullptr;
+	Watchdog* _watchdog = nullptr;
 
 	// services
-	DeviceInformationService* _deviceInformationService = NULL;
-	CrownstoneService* _crownstoneService = NULL;
-	SetupService* _setupService = NULL;
+	DeviceInformationService* _deviceInformationService = nullptr;
+	CrownstoneService* _crownstoneService = nullptr;
+	SetupService* _setupService = nullptr;
 
 	// advertise
-	ServiceData* _serviceData = NULL;
-	IBeacon* _beacon = NULL;
+	ServiceData* _serviceData = nullptr;
+	IBeacon* _beacon = nullptr;
 
 	// processing
 #if BUILD_MESHING == 1
-	Mesh* _mesh = NULL;
+	Mesh* _mesh = nullptr;
 #endif
-	CommandHandler* _commandHandler = NULL;
-	Scanner* _scanner = NULL;
-	Scheduler* _scheduler = NULL;
-	FactoryReset* _factoryReset = NULL;
-	CommandAdvHandler* _commandAdvHandler = NULL;
-	MultiSwitchHandler* _multiSwitchHandler = NULL;
+	CommandHandler* _commandHandler = nullptr;
+	Scanner* _scanner = nullptr;
+	Scheduler* _scheduler = nullptr;
+	FactoryReset* _factoryReset = nullptr;
+	CommandAdvHandler* _commandAdvHandler = nullptr;
+	ScannedDeviceHandler _scannedDeviceHandler;
+	MultiSwitchHandler* _multiSwitchHandler = nullptr;
 
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;
