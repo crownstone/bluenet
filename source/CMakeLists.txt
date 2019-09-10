@@ -676,13 +676,13 @@ ELSE()
 			)
 	
 		# The gdb server can be started with configuration specific information
-		ADD_CUSTOM_TARGET(debug-server
+		ADD_CUSTOM_TARGET(debug_server
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
 			COMMAND JLinkGDBServer -Device nRF52832_xxAA -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT}
 			COMMENT "Debug server, runs in background"
 			)
 		
-		ADD_CUSTOM_TARGET(rtt-client
+		ADD_CUSTOM_TARGET(rtt_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** RTT client, keep running in separate shell"
 			COMMAND JLinkRTTClient
 			COMMENT "RTT client, runs in background"
@@ -703,6 +703,12 @@ ELSE()
 			DEPENDS ${PROJECT_NAME}.hex
 			COMMENT "Flashes binary to remote target board"
 			)
+		
+		#	ADD_CUSTOM_TARGET(upload_bootloader
+		#	COMMAND make upload 
+		#	WORKING_DIRECTORY bootloader 
+		#	COMMENT "Flashes bootloader to remote target board"
+		#	)
 		
 		ADD_CUSTOM_TARGET(read_bootloader_address
 			COMMAND ${CMAKE_COMMAND} -E echo

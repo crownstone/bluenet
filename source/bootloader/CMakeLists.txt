@@ -326,6 +326,15 @@ ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND echo ${CMAKE_OBJCOPY_OVERLOAD} ${REMOVE_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
 	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${REMOVE_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex)
+		
+ADD_CUSTOM_TARGET(upload_bootloader
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload ${PROJECT_NAME}"
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase
+	COMMENT "Flashes binary to remote target board"
+	)
+		
 
 # Some debug information
 IF(VERBOSITY GREATER 4)

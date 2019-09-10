@@ -251,7 +251,6 @@ ADD_CUSTOM_TARGET(${BOARD_TARGET}
   WORKING_DIRECTORY ${BOARD_TARGET}
   DEPENDS 
     bluenet
-    ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
   COMMENT "Build firmware"
   )
 
@@ -261,7 +260,6 @@ ADD_CUSTOM_TARGET(debug
   WORKING_DIRECTORY ${BOARD_TARGET}
   DEPENDS 
     bluenet
-    ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
   COMMENT "Debug binary"
   )
 
@@ -270,16 +268,21 @@ ADD_CUSTOM_TARGET(write_hw_version
   WORKING_DIRECTORY ${BOARD_TARGET}
   DEPENDS 
     bluenet
-    ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
   COMMENT "Write hardware version"
   )
 
 ADD_CUSTOM_TARGET(upload 
-  #COMMAND cmake ..
   COMMAND make upload 
   WORKING_DIRECTORY ${BOARD_TARGET}
   DEPENDS 
     bluenet
-    ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
+  COMMENT "Upload binary"
+  )
+
+ADD_CUSTOM_TARGET(upload_bootloader
+  COMMAND make upload_bootloader 
+  WORKING_DIRECTORY ${BOARD_TARGET}
+  DEPENDS 
+    bluenet
   COMMENT "Upload binary"
   )
