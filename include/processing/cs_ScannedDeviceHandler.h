@@ -16,6 +16,11 @@ class ScannedDeviceHandler : public EventListener{
     private:
     void handleEvtDeviceScanned(TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice);
 
+    void handleState(const service_data_encrypted_state_t& state);
+    void handleError(const service_data_encrypted_error_t& error);
+    void handleExtState(const service_data_encrypted_ext_state_t& extState);
+    void handleExtError(const service_data_encrypted_ext_error_t& extError);
+
     bool unpackToServiceData(cs_data_t* services16bit,service_data_t*& incomingServiceData);
     bool decryptServiceData(service_data_t* incomingServiceData);
 

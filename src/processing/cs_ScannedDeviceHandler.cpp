@@ -70,18 +70,42 @@ void ScannedDeviceHandler::handleEvtDeviceScanned(TYPIFY(EVT_DEVICE_SCANNED)* sc
 
         // dispatch to subhandlers
         switch(incomingServiceData->params.encrypted.type){
-            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_STATE:{break;}
-            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_ERROR:{break;}
-            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_EXT_STATE:{break;}
-            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_EXT_ERROR:{break;}
+            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_STATE:{
+                handleState(incomingServiceData->params.encrypted.state);    
+                break;
+            }
+            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_ERROR:{
+                handleError(incomingServiceData->params.encrypted.error);
+                break;
+            }
+            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_EXT_STATE:{
+                handleExtState(incomingServiceData->params.encrypted.extState);
+                break;
+            }
+            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_EXT_ERROR:{
+                handleExtError(incomingServiceData->params.encrypted.extError);
+                break;
+            }
             default:{
                 LOG("Unrecognized ServiceDataencryptedType: %d",incomingServiceData->params.encrypted.type);
                 return;
             }
         }
-
-        LOG("end of handler reached");
 }
+
+void ScannedDeviceHandler::handleState(const service_data_encrypted_state_t& state){
+    LOG("ScannedDeviceHandler::handleState");
+}
+void ScannedDeviceHandler::handleError(const service_data_encrypted_error_t& error){
+    LOG("ScannedDeviceHandler::handleError");
+}
+void ScannedDeviceHandler::handleExtState(const service_data_encrypted_ext_state_t& extState){
+    LOG("ScannedDeviceHandler::handleExtState");
+}
+void ScannedDeviceHandler::handleExtError(const service_data_encrypted_ext_error_t& extError){
+    LOG("ScannedDeviceHandler::handleExtError");
+}
+
 
 bool ScannedDeviceHandler::unpackToServiceData(cs_data_t* services16bit, service_data_t*& incomingServiceData){
         if(services16bit->len != 2 + sizeof(service_data_t)){
