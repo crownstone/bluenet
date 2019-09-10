@@ -16,6 +16,8 @@ project(${BOARD_TARGET})
 
 list(APPEND CMAKE_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
 list(APPEND CMAKE_ARGS "-DBOARD_TARGET:STRING=${BOARD_TARGET}")
+list(APPEND CMAKE_ARGS "-DDEFAULT_CONF_CMAKE_PATH:STRING=${DEFAULT_CONF_CMAKE_PATH}")
+list(APPEND CMAKE_ARGS "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
 
 #######################################################################################################################
 # Load modules
@@ -49,6 +51,7 @@ ExternalProject_Add(nordic_sdk
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
   BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
   INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+  PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/01nrf5.patch
   )
 
 set(NRF5_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk)
@@ -171,6 +174,15 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}
 # Build bluenet as external project
 #######################################################################################################################
 
+ADD_CUSTOM_TARGET(micro_eec
+  COMMAND chmod u+x build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
+  COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${WORKSPACE_DIR}/tools/gcc_arm_none_eabi/bin/" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
+  COMMENT "Build micro-eec"
+  DEPENDS 
+    nordic_sdk
+    gcc_arm_none_eabi
+  )
+
 ExternalProject_Add(bluenet
   SOURCE_DIR ${WORKSPACE_DIR}/source
   BINARY_DIR ${WORKSPACE_DIR}/build/${BOARD_TARGET}
@@ -180,7 +192,26 @@ ExternalProject_Add(bluenet
   CMAKE_CACHE_ARGS "${CMAKE_ARGS}"
   CMAKE_ARGS "${CMAKE_ARGS}"
   BUILD_ALWAYS 1
+  DEPENDS micro_eec
   )
+
+#list(APPEND CMAKE_BOOTLOADER_ARGS ${CMAKE_ARGS})
+#list(APPEND CMAKE_BOOTLOADER_ARGS "-DBOOTLOADER_START_ADDRESS:STRING=${BOOTLOADER_START_ADDRESS}")
+#list(APPEND CMAKE_BOOTLOADER_ARGS "-DBOOTLOADER_LENGTH:STRING=${BOOTLOADER_LENGTH}")
+#list(APPEND CMAKE_BOOTLOADER_ARGS "-DBOOTLOADER_VERSION:STRING=${BOOTLOADER_VERSION}")
+#list(APPEND CMAKE_BOOTLOADER_ARGS "-DBOARD_TARGET:STRING=${BOARD_TARGET}")
+
+#ExternalProject_Add(bootloader
+#  SOURCE_DIR ${WORKSPACE_DIR}/source/bootloader
+#  BINARY_DIR ${WORKSPACE_DIR}/build/bootloader/${BOARD_TARGET}
+#  INSTALL_DIR ${WORKSPACE_DIR}/bin/${BOARD_TARGET}
+#  STAMP_DIR ${WORKSPACE_DIR}/stamp/bootloader/${BOARD_TARGET}
+#  TMP_DIR ${WORKSPACE_DIR}/tmp/bootloader/${BOARD_TARGET}
+#  CMAKE_CACHE_ARGS "${CMAKE_BOOTLOADER_ARGS}"
+#  CMAKE_ARGS "${CMAKE_BOOTLOADER_ARGS}"
+#  BUILD_ALWAYS 1
+#  DEPENDS micro_eec
+#  )
 
 add_dependencies(bluenet gcc_arm_none_eabi)
 add_dependencies(bluenet nordic_sdk)

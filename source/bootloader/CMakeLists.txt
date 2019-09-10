@@ -7,10 +7,11 @@ SET(APPLICATION_SHORTHAND "bootloader")
 SET(PROJECT_NAME ${APPLICATION_SHORTHAND})
 
 # Start a project
-PROJECT(${PROJECT_NAME}) # ${TEST_COMPILERS})
+PROJECT(${PROJECT_NAME}) 
 
 # The directory with some of the FindXXX modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake")
+#SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${DEFAULT_MODULES_PATH}")
 MESSAGE(STATUS "CMakeLists: Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 #######################################################################################################################
@@ -20,6 +21,10 @@ SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile f
 SET(GIT_BRANCH                               "unset"       CACHE STRING "Current git branch")
 SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
+SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
+SET(BOARD_TARGET                             "unset"       CACHE STRING "The board target")
+SET(BOOTLOADER_START_ADDRESS                 "unset"       CACHE STRING "Start address of bootloader")
+SET(BOOTLOADER_LENGTH                        "unset"       CACHE STRING "Size of bootloader")
 
 #######################################################################################################################
 # Show variables
@@ -35,13 +40,13 @@ MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
 #######################################################################################################################
 
 # Collect flags that are used in the code, as macros
-SET(CONFIG_FILE ${CMAKE_SOURCE_DIR}/conf/cmake/CMakeConfig.cmake)
-IF(EXISTS "${CONFIG_FILE}")
-	MESSAGE(STATUS "CMakeLists: Load config file ${CONFIG_FILE}")
-	INCLUDE(${CONFIG_FILE})
-ELSE()
-	MESSAGE(FATAL_ERROR "CMakeLists: Cannot find config file ${CONFIG_FILE}")
-ENDIF()
+#SET(CONFIG_FILE ${CMAKE_SOURCE_DIR}/conf/cmake/CMakeConfig.cmake)
+#IF(EXISTS "${CONFIG_FILE}")
+#	MESSAGE(STATUS "CMakeLists: Load config file ${CONFIG_FILE}")
+#	INCLUDE(${CONFIG_FILE})
+#ELSE()
+#	MESSAGE(FATAL_ERROR "CMakeLists: Cannot find config file ${CONFIG_FILE}")
+#ENDIF()
 
 #######################################################################################################################
 
@@ -303,7 +308,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES})
 # Use .elf extension by default
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}" SUFFIX ".elf")
 
-MESSAGE(STATUS "CMakeList: Bootloader parameters: ${BOOTLOADER_START_ADDRESS}, ${BOOTLOADER_LENGTH}")
+MESSAGE(STATUS "CMakeLists: Bootloader parameters: ${BOOTLOADER_START_ADDRESS}, ${BOOTLOADER_LENGTH}")
 
 SET(CS_LINKER_FLAGS "-Wl,--defsym=BOOTLOADER_START_ADDRESS=${BOOTLOADER_START_ADDRESS} -Wl,--defsym=BOOTLOADER_LENGTH=${BOOTLOADER_LENGTH}")
 
@@ -329,7 +334,18 @@ IF(VERBOSITY GREATER 4)
 	MESSAGE(STATUS "CMakeLists: Linked libraries: ${BOOTLOADER_LIBS}")
 ENDIF()
 
+MESSAGE(STATUS "CMakeLists: Target ${BOARD_TARGET}")
+
+SET_SOURCE_FILES_PROPERTIES(${BOOTLOADER_SOURCE_FILES}
+	PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
+)
+	
+SET(FILE_MEMORY_LAYOUT "-Tsecure_bootloader_gcc_nrf52.ld")
+SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/bootloader/")
+SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
+SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS}")
+
 TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PUBLIC ${BOOTLOADER_INCLUDE_DIRS})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${BOOTLOADER_LIBS})
-INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${WORKSPACE_DIR}/bin/${BOARD_TARGET})
 

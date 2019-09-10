@@ -30,6 +30,7 @@ SET(COMPILER_TYPE_PREFIX ${COMPILER_TYPE})
 #######################################################################################################################
 
 # The extension .obj is just ugly, set it back to .o (does not work)
+SET(CMAKE_C_OUTPUT_EXTENSION .o)
 SET(CMAKE_CXX_OUTPUT_EXTENSION .o)
 
 # Make cross-compiler easy to find (but we will use absolute paths anyway)
@@ -97,7 +98,7 @@ SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS            "")
 SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS          "")
 
 # The directory with some of the FindXXX modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake")
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake;${DEFAULT_MODULES_PATH};${DEFAULT_CONF_CMAKE_PATH}")
 
 MESSAGE(STATUS "arm.toolchain.cmake: C Compiler: ${CMAKE_C_COMPILER}")
 MESSAGE(STATUS "arm.toolchain.cmake: Search for FindX files in ${CMAKE_MODULE_PATH}")
@@ -144,17 +145,21 @@ SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 #SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")
 #SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
 
-MESSAGE(STATUS "BOOTLOADER: ${BOOTLOADER}")
+if (THISWORKS MATCHES 1)
 IF (BOOTLOADER MATCHES 1)
+	MESSAGE(STATUS "Bootloader flag is set: ${BOOTLOADER}")
 	#SET(FILE_MEMORY_LAYOUT "-Tbootloader_nrf52832_xxAA.ld")
 	SET(FILE_MEMORY_LAYOUT "-Tsecure_bootloader_gcc_nrf52.ld")
 	SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/bootloader/")
 ELSE()
+	MESSAGE(STATUS "Bootloader flag is not set: ${BOOTLOADER}")
 	SET(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
 	#SET(PATH_FILE_MEMORY "-L${NRF5_DIR}/config/nrf52832/armgcc/")
 	SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
 ENDIF()
+MESSAGE(STATUS "File memory path set to ${PATH_FILE_MEMORY}")
 SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
+
 
 # http://public.kitware.com/Bug/view.php?id=12652
 # CMake does send the compiler flags also to the linker
@@ -164,7 +169,10 @@ IF (BOOTLOADER MATCHES 1)
 ELSE()
 	SET(FLAG_WRITE_MAP_FILE "-Wl,-Map,prog.map")
 ENDIF()
+endif()
+
 #SET(FLAG_REMOVE_UNWINDING_CODE "-Wl,--wrap,__aeabi_unwind_cpp_pr0")
+
 SET(FLAG_REMOVE_UNWINDING_CODE "")
 
 # Hardcode start address

@@ -82,7 +82,10 @@ ENDIF()
 SET(SOURCE_DIR "src")
 
 # Add separately include directories if we are to lazy to specify e.g. "#include <protocol/rbc_mesh.h>"
-SET(INCLUDE_DIR "include" "include/ble" "include/third" "include/third/nrf")
+# We have removed include/third/nrf from here. This needs to be specified separately for the firmware versus the
+# bootloader. Both need namely a different sdk_config.h file...
+SET(INCLUDE_DIR "include" "include/ble" "include/third")
+#SET(INCLUDE_DIR "include" "include/ble" "include/third" "include/third/nrf")
 
 # TODO: Just only include th NRF5 directory and refer to the header files using that relative path in the source files
 # Then we do not need to update the CMakeLists.txt file all the time
@@ -593,11 +596,16 @@ ELSE()
 		MESSAGE(FATAL_ERROR "No source code files found. Please add something")
 	ELSE()
 
+		MESSAGE(STATUS "CMakeLists: Descend into bootloader directory and compile if needed")
+		add_subdirectory(bootloader)
+
 		SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
 			PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
 			)
 
 		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
+
+		target_include_directories(${PROJECT_NAME} PRIVATE "include/third/nrf")
 
 		# This does lead to a cmake reeconfigure when the file changes... However, nothing else gets rebuild after
 		# the reconfiguration
@@ -606,6 +614,8 @@ ELSE()
 		#SET(INCLUDE_ONLY_SECTIONS "-j .text -j .data -j .sdh_soc_observers -j .sdh_ble_observers -j .sdh_state_observers -j .sdh_stack_observers -j .sdh_req_observers -j .nrf_balloc")
 		SET(INCLUDE_ONLY_SECTIONS "")
 	
+		#		add_subdirectory(bootloader)
+
 		# https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
 		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.bin
 			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.bin
@@ -736,6 +746,11 @@ ELSE()
 
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.elf)
+	
+		SET(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
+		SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
+		SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
+		SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS}")
 		
 		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBS})
 		INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
