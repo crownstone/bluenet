@@ -1,0 +1,23 @@
+# Disabled the following:
+#   https://github.com/cyrus-and/gdb-dashboard
+#   Would have been nice, but requires Python support for gdb
+
+set history filename .gdb_history
+set history save
+set history remove-duplicates 100
+set history expansion on
+set history size 1024
+
+set print object
+set print static off
+set confirm off
+set print pretty on
+set pagination off
+
+define reset
+	!make last
+	load
+	monitor reset
+end
+
+echo Finished loading\n

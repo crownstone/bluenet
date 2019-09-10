@@ -10,6 +10,10 @@
  *
  * NOTE 3: If you add a new BOARD that has a different pin layout or other board changes, define a new function and
  * add it as a switch case to the configure_board function
+ *
+ * NOTE 4: This is the only place where the versions are maintained. There is a separate cmake module that knows
+ * how to extract the BOARD_VERSION from this header file. It uses a particular regular expression. If you add
+ * weird define statements, this module might choke on that.
  */
 
 #pragma once

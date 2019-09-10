@@ -4,17 +4,18 @@ cmake_minimum_required(VERSION 3.10)
 # Set board target 
 #######################################################################################################################
 
-option(DOWNLOAD_JLINK        "Download JLink"              ON)
-option(DOWNLOAD_NRFUTIL      "Download nrfutil"            ON)
+option(DOWNLOAD_JLINK                            "Download JLink"              ON)
+option(DOWNLOAD_NRFUTIL                          "Download nrfutil"            ON)
 
-set(board_target default CACHE STRING "Board target to compile for")
+set(BOARD_TARGET                                 default CACHE STRING "Board target to compile for")
+set(WORKSPACE_DIR                                ${CMAKE_CURRENT_LIST_DIR})
+set(DEFAULT_CONF_CMAKE_PATH                      ${WORKSPACE_DIR}/source/conf/cmake)
+set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modules)
 
-set(WORKSPACE_PATH ${CMAKE_CURRENT_LIST_DIR})
+project(${BOARD_TARGET})
 
-set(DEFAULT_CONF_CMAKE_PATH ${WORKSPACE_PATH}/source/conf/cmake)
-set(DEFAULT_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules)
-
-project(${board_target})
+list(APPEND CMAKE_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
+list(APPEND CMAKE_ARGS "-DBOARD_TARGET:STRING=${BOARD_TARGET}")
 
 #######################################################################################################################
 # Load modules
@@ -41,8 +42,8 @@ set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/nRF5-SDK-for-Mesh/nrf5SD
 set(NORDIC_MESH_SDK_MD5 29e813a85e209fd07837c4fd3c616178)
 
 ExternalProject_Add(nordic_sdk
-  DOWNLOAD_DIR ${WORKSPACE_PATH}/downloads
-  SOURCE_DIR ${WORKSPACE_PATH}/tools/nrf5_sdk
+  DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+  SOURCE_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk
   URL ${NORDIC_NRF5_SDK_DOWNLOAD_URL}
   URL_MD5 ${NORDIC_NRF5_SDK_MD5}
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
@@ -50,21 +51,21 @@ ExternalProject_Add(nordic_sdk
   INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
   )
 
-set(NRF5_DIR ${WORKSPACE_PATH}/tools/nrf5_sdk)
+set(NRF5_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk)
 list(APPEND CMAKE_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
 ExternalProject_Add(nordic_mesh_sdk
-  DOWNLOAD_DIR ${WORKSPACE_PATH}/downloads
-  SOURCE_DIR ${WORKSPACE_PATH}/tools/mesh_sdk
+  DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+  SOURCE_DIR ${WORKSPACE_DIR}/tools/mesh_sdk
   URL ${NORDIC_MESH_SDK_DOWNLOAD_URL}
   URL_MD5 ${NORDIC_MESH_SDK_MD5}
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
   BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
   INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-  PATCH_COMMAND cd ${WORKSPACE_PATH} && patch -p0 < patch/00mesh.patch
+  PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/00mesh.patch
   )
 
-set(MESH_SDK_DIR ${WORKSPACE_PATH}/tools/mesh_sdk)
+set(MESH_SDK_DIR ${WORKSPACE_DIR}/tools/mesh_sdk)
 list(APPEND CMAKE_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
 if(DOWNLOAD_JLINK) 
@@ -75,14 +76,14 @@ if(DOWNLOAD_JLINK)
   set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
 
   ExternalProject_Add(jlink
-    DOWNLOAD_COMMAND wget  --post-data "accept_license_agreement=accepted" ${JLINK_LINUX_DOWNLOAD_URL} -O ${WORKSPACE_PATH}/downloads/${JLINK_DEB_FILE} 
-    DOWNLOAD_DIR ${WORKSPACE_PATH}/downloads
+    DOWNLOAD_COMMAND wget  --post-data "accept_license_agreement=accepted" ${JLINK_LINUX_DOWNLOAD_URL} -O ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
+    DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
     URL ${JLINK_LINUX_DOWNLOAD_URL}
     URL_MD5 ${JLINK_MD5}
     DOWNLOAD_NO_EXTRACT 1
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
     BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-    INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_PATH}/downloads/${JLINK_DEB_FILE} 
+    INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
     )
 endif()
 
@@ -90,16 +91,16 @@ set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downl
 set(GCC_ARM_NONE_EABI_MD5 6341f11972dac8de185646d0fbd73bfc)
 
 ExternalProject_Add(gcc_arm_none_eabi
-  DOWNLOAD_DIR ${WORKSPACE_PATH}/downloads
+  DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
   URL ${GCC_ARM_NONE_EABI_DOWNLOAD_URL}
   URL_MD5 ${GCC_ARM_NONE_EABI_MD5}
-  SOURCE_DIR ${WORKSPACE_PATH}/tools/gcc_arm_none_eabi
+  SOURCE_DIR ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
   BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
   INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
   )
 
-set(COMPILER_PATH ${WORKSPACE_PATH}/tools/gcc_arm_none_eabi)
+set(COMPILER_PATH ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi)
 list(APPEND CMAKE_ARGS "-DCOMPILER_PATH:STRING=${COMPILER_PATH}")
 
 if(DOWNLOAD_NRFUTIL)
@@ -108,13 +109,13 @@ if(DOWNLOAD_NRFUTIL)
   set(NRFUTIL_MD5 545df3556fc1a70da7a99926fb426eb3)
 
   ExternalProject_Add(nrfutil
-    DOWNLOAD_DIR ${WORKSPACE_PATH}/downloads
+    DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
     URL ${NRFUTIL_DOWNLOAD_URL}
     URL_MD5 ${NRFUTIL_MD5}
-    SOURCE_DIR ${WORKSPACE_PATH}/tools/nrfutil
+    SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfutil
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
     BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-    INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_PATH}/tools/nrfutil/${NRFUTIL_DEB_FILE} 
+    INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_DIR}/tools/nrfutil/${NRFUTIL_DEB_FILE} 
     )
 endif()
 
@@ -123,23 +124,25 @@ endif()
 #######################################################################################################################
 
 set(DEFAULT_CONFIGURATION_FILE ${DEFAULT_CONF_CMAKE_PATH}/CMakeBuild.config.default)
-set(VARIANT_CONFIGURATION_FILE ${WORKSPACE_PATH}/config/${board_target}/CMakeBuild.config)
+set(VARIANT_CONFIGURATION_FILE ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
 
 load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
+message(STATUS "Load configuration file ${DEFAULT_CONFIGURATION_FILE}")
 load_configuration("${VARIANT_CONFIGURATION_FILE}" CMAKE_ARGS)
+message(STATUS "Load configuration file ${VARIANT_CONFIGURATION_FILE}")
 
 # For now only cross-compilation
-list(APPEND CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_PATH}/source/arm.toolchain.cmake")
+list(APPEND CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
 #list(APPEND CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_CONF_CMAKE_PATH}/arm.toolchain.cmake")
 
 # Setting INSTALL_DIR is not sufficient, also CMAKE_INSTALL_PREFIX is required
-list(APPEND CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:FILEPATH=${WORKSPACE_PATH}/bin/${board_target}")
+list(APPEND CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:FILEPATH=${WORKSPACE_DIR}/bin/${BOARD_TARGET}")
 
 if(VERBOSITY GREATER 5)
   message(STATUS "list: ${CMAKE_ARGS}")
 endif()
 
-git_info("${WORKSPACE_PATH}/source" GIT_BRANCH GIT_HASH)
+git_info("${WORKSPACE_DIR}/source" GIT_BRANCH GIT_HASH)
 
 if(NOT GIT_BRANCH STREQUAL "")
   list(APPEND CMAKE_ARGS "-DGIT_BRANCH:STRING=${GIT_BRANCH}")
@@ -161,23 +164,91 @@ if(NOT COMPILATION_DAY STREQUAL "")
   list(APPEND CMAKE_ARGS "-DCOMPILATION_DAY:STRING=${COMPILATION_DAY}")
 endif()
 
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_PATH}/stamp/${board_target})
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_PATH}/tmp/${board_target})
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}/stamp/${BOARD_TARGET})
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}/tmp/${BOARD_TARGET})
 
 #######################################################################################################################
 # Build bluenet as external project
 #######################################################################################################################
 
 ExternalProject_Add(bluenet
-  SOURCE_DIR ${WORKSPACE_PATH}/source
-  BINARY_DIR ${WORKSPACE_PATH}/build/${board_target}
-  INSTALL_DIR ${WORKSPACE_PATH}/bin/${board_target}
-  STAMP_DIR ${WORKSPACE_PATH}/stamp/${board_target}
-  TMP_DIR ${WORKSPACE_PATH}/tmp/${board_target}
+  SOURCE_DIR ${WORKSPACE_DIR}/source
+  BINARY_DIR ${WORKSPACE_DIR}/build/${BOARD_TARGET}
+  INSTALL_DIR ${WORKSPACE_DIR}/bin/${BOARD_TARGET}
+  STAMP_DIR ${WORKSPACE_DIR}/stamp/${BOARD_TARGET}
+  TMP_DIR ${WORKSPACE_DIR}/tmp/${BOARD_TARGET}
   CMAKE_CACHE_ARGS "${CMAKE_ARGS}"
+  CMAKE_ARGS "${CMAKE_ARGS}"
   BUILD_ALWAYS 1
   )
 
 add_dependencies(bluenet gcc_arm_none_eabi)
 add_dependencies(bluenet nordic_sdk)
 add_dependencies(bluenet nordic_mesh_sdk)
+		
+ADD_CUSTOM_TARGET(softdevice
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload softdevice"
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND nrfjprog -f nrf52 --program ${WORKSPACE_DIR}/tools/nrf5_sdk/components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex --sectorerase
+  DEPENDS bluenet
+  COMMENT "Flashes binary to remote target board"
+  )
+
+ADD_CUSTOM_TARGET(read_softdevice_version
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to get version of softdevice"
+  COMMAND nrfjprog -f nrf52 --memrd 0x000300C
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND ${CMAKE_COMMAND} -E echo "** Version FFFF00A8 = S132 6.0.0"
+  COMMAND ${CMAKE_COMMAND} -E echo "** Version FFFF00AF = S132 6.1.0"
+  COMMAND ${CMAKE_COMMAND} -E echo "** Version FFFF00B7 = S132 6.1.1"
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMENT "Reads version of softdevice"
+  )
+
+ADD_CUSTOM_TARGET(erase
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to erase target board"
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND nrfjprog -f nrf52 --eraseall
+  COMMENT "Erase everything on target board"
+  )
+
+ADD_CUSTOM_TARGET(${BOARD_TARGET}
+  COMMAND make
+  WORKING_DIRECTORY ${BOARD_TARGET}
+  DEPENDS 
+    bluenet
+    ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
+  COMMENT "Build firmware"
+  )
+
+ADD_CUSTOM_TARGET(debug
+  COMMAND cmake ..
+  COMMAND make debug
+  WORKING_DIRECTORY ${BOARD_TARGET}
+  DEPENDS 
+    bluenet
+    ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
+  COMMENT "Debug binary"
+  )
+
+ADD_CUSTOM_TARGET(write_hw_version
+  COMMAND make write_hw_version
+  WORKING_DIRECTORY ${BOARD_TARGET}
+  DEPENDS 
+    bluenet
+    ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
+  COMMENT "Write hardware version"
+  )
+
+ADD_CUSTOM_TARGET(upload 
+  #COMMAND cmake ..
+  COMMAND make upload 
+  WORKING_DIRECTORY ${BOARD_TARGET}
+  DEPENDS 
+    bluenet
+    ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
+  COMMENT "Upload binary"
+  )

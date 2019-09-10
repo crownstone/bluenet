@@ -23,7 +23,10 @@ SET(MAIN_FILE "cs_Crownstone.cpp")
 PROJECT(${PROJECT_NAME}) 
 
 # The directory with some of the FindXXX modules
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake")
+set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
+set(DEFAULT_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules)
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH}")
+
 MESSAGE(STATUS "CMakeLists: Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 #######################################################################################################################
@@ -33,6 +36,13 @@ SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile f
 SET(GIT_BRANCH                               "unset"       CACHE STRING "Current git branch")
 SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
+SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
+SET(BOARD_TARGET                             "unset"       CACHE STRING "The board target")
+SET(GDB_PORT                                 "2331"        CACHE STRING "The gdb port for the debug server")
+SET(SWO_PORT                                 "2332"        CACHE STRING "The swoport for the debug server")
+SET(TELNET_PORT                              "2333"        CACHE STRING "The telnet port for the debug server")
+# Get the following information via JlinkExe and then ShowEmuList
+SET(SERIAL_NUM                               ""            CACHE STRING "The serial number of the JLink")
 
 #######################################################################################################################
 # Show variables
@@ -42,6 +52,8 @@ MESSAGE(STATUS "CMakeLists: Set verbosity to level: ${VERBOSITY}")
 MESSAGE(STATUS "CMakeLists: Git branch: ${GIT_BRANCH}")
 MESSAGE(STATUS "CMakeLists: Day of compilation: ${COMPILATION_DAY}")
 MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
+
+MESSAGE(STATUS "CMakeLists: BLE name ${BLUETOOTH_NAME}")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
@@ -460,6 +472,7 @@ ELSE()
 		ENDFOREACH()
 	ENDIF()
 
+	# We now have a variable FOLDER_SOURCE with all source files
 	LIST(APPEND FOLDER_SOURCE ${NORDIC_SOURCE})
 
 	# For Visual Studio group the files
@@ -559,7 +572,7 @@ IF(VERBOSITY GREATER 4)
 		MESSAGE(STATUS "CMakeLists: Add to the include directories: '${dir}'")
 	ENDFOREACH()
 ENDIF()
-
+		
 IF(NOT (DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
 	SET(${SOFTDEVICE_DIR}, "${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
 	SET(${SOFTDEVICE_DIR_HEX}, "hex")
@@ -579,22 +592,43 @@ ELSE()
 	IF(FOLDER_SOURCE STREQUAL "")
 		MESSAGE(FATAL_ERROR "No source code files found. Please add something")
 	ELSE()
-		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.tmp)
+
+		SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
+			PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
+			)
+
+		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
+
+		# This does lead to a cmake reeconfigure when the file changes... However, nothing else gets rebuild after
+		# the reconfiguration
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
 
 		#SET(INCLUDE_ONLY_SECTIONS "-j .text -j .data -j .sdh_soc_observers -j .sdh_ble_observers -j .sdh_state_observers -j .sdh_stack_observers -j .sdh_req_observers -j .nrf_balloc")
 		SET(INCLUDE_ONLY_SECTIONS "")
-
+	
 		# https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
-		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.tmp
-			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.tmp
+		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.bin
+			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O binary ${PROJECT_NAME} ${PROJECT_NAME}.bin
+			COMMAND stat -t ${PROJECT_NAME}.bin | cut -f2 -d ' ' | xargs printf "** Firmware size : %s bytes"
+			COMMAND ${CMAKE_COMMAND} -E echo ""
+			COMMAND ${CMAKE_COMMAND} -E echo "** Available size: 360kB, that is 512kB - softdevice - bootloader - app storage"
+			COMMAND ${CMAKE_COMMAND} -E echo "** Dual bank Size: 180kB = DFU_IMAGE_MAX_SIZE_BANKED"
+			DEPENDS 
+				${PROJECT_NAME}
+			COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
+		
+		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.hex
 			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
-			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME}.tmp ${PROJECT_NAME}.bin
+			DEPENDS 
+				${PROJECT_NAME}
+			COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.hex")
+		
+		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.elf
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
 			COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf
-			COMMAND stat ${PROJECT_NAME}.bin | grep -i size | tr -d ':' |  tr -s ' ' | cut -f3 -d ' ' | xargs printf "** Size: %s bytes - totally available: 512kB - 110kB {softdevice} - {bootloader} - {app storage} = 360kB . In dual bank: 180kB = DFU_IMAGE_MAX_SIZE_BANKED"
-			COMMAND echo
-			DEPENDS ${PROJECT_NAME}
-			COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
+			DEPENDS 
+				${PROJECT_NAME}
+			COMMENT "Copy ${PROJECT_NAME} to ${PROJECT_NAME}.elf")
 
 		ADD_CUSTOM_TARGET(generate-dat
 			COMMAND echo
@@ -602,7 +636,7 @@ ELSE()
 			COMMAND echo
 			COMMAND echo "srec_cat ${PROJECT_NAME}.hex -intel -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o ${PROJECT_NAME}.dat -intel"
 			COMMAND srec_cat ${PROJECT_NAME}.hex -intel -exclude 0x3FC00 0x3FC20 -generate 0x3FC00 0x3FC04 -l-e-constant 0x01 4 -generate 0x3FC04 0x3FC08 -l-e-constant 0x00 4 -generate 0x3FC08 0x3FC0C -l-e-constant 0xFE 4 -generate 0x3FC0C 0x3FC20 -constant 0x00 -o ${PROJECT_NAME}.dat -intel
-			DEPENDS ${PROJECT_NAME}.tmp
+			DEPENDS ${PROJECT_NAME}.hex
 			COMMENT "Generate the INIT .dat file for the DFU"
 			)
 
@@ -612,7 +646,7 @@ ELSE()
 			COMMAND echo
 			COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
 			COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
-			DEPENDS ${PROJECT_NAME}.tmp
+			DEPENDS ${PROJECT_NAME}.bin
 			COMMENT "Combine as one hex file"
 			)
 
@@ -627,21 +661,81 @@ ELSE()
 			COMMAND echo
 			COMMAND echo "** Show size of sections"
 			COMMAND ${CMAKE_SIZE} -A -d ${PROJECT_NAME}.elf
-			DEPENDS ${PROJECT_NAME}.tmp
+			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Read headers ${PROJECT_NAME}.elf"
+			)
+	
+		# The gdb server can be started with configuration specific information
+		ADD_CUSTOM_TARGET(debug-server
+			COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
+			COMMAND JLinkGDBServer -Device nRF52832_xxAA -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT}
+			COMMENT "Debug server, runs in background"
+			)
+		
+		ADD_CUSTOM_TARGET(rtt-client
+			COMMAND ${CMAKE_COMMAND} -E echo "** RTT client, keep running in separate shell"
+			COMMAND JLinkRTTClient
+			COMMENT "RTT client, runs in background"
+			)
+		
+		ADD_CUSTOM_TARGET(debug
+			COMMAND ${CMAKE_COMMAND} -E echo "** Debug"
+			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf 
+			DEPENDS ${PROJECT_NAME}.elf
+			COMMENT "Debug ${PROJECT_NAME}.elf"
 			)
 		
 		ADD_CUSTOM_TARGET(upload
-			COMMAND echo
-			COMMAND echo "** Use nrfjprog to upload binary"
-			COMMAND echo
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload binary"
+			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase
-			DEPENDS ${PROJECT_NAME}.tmp
+			DEPENDS ${PROJECT_NAME}.hex
+			COMMENT "Flashes binary to remote target board"
+			)
+		
+		ADD_CUSTOM_TARGET(read_bootloader_address
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Read bootloader address from UICR register"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND nrfjprog -f nrf52 --memrd 0x10001014
+			COMMENT "Flashes binary to remote target board"
+			)
+	
+		# Actually piping over the command line might fail in another OS, this might be replaced by a particular
+		# cmake utility function
+		ADD_CUSTOM_TARGET(read_board_version
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Read board version from UICR register"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND nrfjprog -f nrf52 --memrd 0x10000104 | cut -f2 -d'|'A
+			COMMAND ${CMAKE_COMMAND} -P ${DEFAULT_MODULES_PATH}/nrfjprog_memrd.cmake -DADDRESS=0x10001014
+			COMMENT "Flashes binary to remote target board"
+			)
+		
+		ADD_CUSTOM_TARGET(read_hw_version
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Read hardware version from UICR register ${HARDWARE_BOARD_ADDRESS}"
+			COMMAND nrfjprog -f nrf52 --memrd ${HARDWARE_BOARD_ADDRESS} | cut -f2 -d':' | cut -f1 -d'|'
+			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Flashes binary to remote target board"
 			)
 
+		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
+		set(LOAD_BOARD_HARDWARE_VERSION "")
+		include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
+		load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${DEFAULT_HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
+
+		ADD_CUSTOM_TARGET(write_hw_version
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Write hardware version ${LOAD_BOARD_HARDWARE_VERSION}"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND nrfjprog -f nrf52 --memwr ${HARDWARE_BOARD_ADDRESS} --val ${LOAD_BOARD_HARDWARE_VERSION}
+			COMMENT "Flashes binary to remote target board"
+			)
 
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
+		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.elf)
 		
 		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBS})
 		INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)

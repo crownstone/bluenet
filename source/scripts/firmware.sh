@@ -39,9 +39,9 @@ fi
 
 
 build() {
-	cd ${path}/..
+	cd ${path}/../../build
 	cs_info "Execute make cross-compile-target"
-	make ${make_flag} cross-compile-target
+	make ${make_flag} 
 	checkError "Build failed"
 	cd $path
 }
@@ -49,6 +49,7 @@ build() {
 unit-test-host() {
 	cd ${path}/..
 	cs_info "Execute make host-compile-target"
+	echo "Does not exist for now"
 	make ${make_flag} host-compile-target
 	checkError "Failed to build unit test host"
 	cd $path

@@ -1,0 +1,13 @@
+# Disabled the following:
+#   https://github.com/cyrus-and/gdb-dashboard
+#   Would have been nice, but requires Python support for gdb
+
+set remote memory-write-packet-size 1024
+load
+
+info files
+
+monitor reset
+
+continue
+
