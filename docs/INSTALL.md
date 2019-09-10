@@ -10,7 +10,7 @@ Bluenet uses a cmake build system, so you will need it:
 
 ## Getting the Bluenet code
 
-The best way is to first [fork](https://github.com/dobots/bluenet/fork) the bluenet repository. Then create a workspace folder where all the necessary files and folders will be stored, e.g.
+The best way is to first [fork](https://github.com/crownstone/bluenet/fork) the bluenet repository. Then create a workspace folder where all the necessary files and folders will be stored, e.g.
 
     mkdir -p ~/workspace
 
@@ -29,7 +29,7 @@ The installation uses CMake. To start, you can simply use:
 
     cd bluenet
     mkdir build && cd build
-    cmake .. & make
+    cmake .. && make
 
 This will download the required programs and libraries. The installation has been tested on Ubuntu 18.04 (should work on newer ones as well) and assumes you use a J-Link programmer.
 
