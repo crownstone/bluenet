@@ -78,8 +78,6 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	LOGCommandAdvVerbose("rssi=%i", scannedDevice->rssi);
 	_log(SERIAL_DEBUG, "16bit services: ");
 	BLEutil::printArray(services16bit.data, services16bit.len);
-#endif
-#ifdef COMMAND_ADV_VERBOSE
 	_log(SERIAL_DEBUG, "128bit services: ");
 	BLEutil::printArray(services128bit.data, services128bit.len); // Received as uint128, so bytes are reversed.
 #endif

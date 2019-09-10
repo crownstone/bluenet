@@ -178,6 +178,18 @@ inline static uint32_t findAdvType(uint8_t type, uint8_t* advData, uint8_t advLe
 	return ERR_NOT_FOUND;
 }
 
+inline void printAdvTypes(uint8_t* advdata, uint8_t advlen){
+	if(advlen == 0){
+		return;
+	}
+	
+	uint8_t fieldLen = 0;
+	for(auto index = 0; index < advlen-1; index += fieldLen+1) {
+		fieldLen =  advdata[index];
+		LOGd("fieldtype: %x",advdata[index+1]);
+	}
+}
+
 
 /**
  * @brief Calculates a hash of given data.
