@@ -29,7 +29,7 @@ The installation uses CMake. To start, you can simply use:
 
     cd bluenet
     mkdir build && cd build
-    cmake .. & make
+    cmake .. && make
 
 This will download the required programs and libraries. The installation has been tested on Ubuntu 18.04 (should work on newer ones as well) and assumes you use a J-Link programmer.
 
