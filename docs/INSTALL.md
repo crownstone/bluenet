@@ -93,7 +93,7 @@ For your convenience, most commands, can be run from the build directory:
 
 To start debugging the target, run first in a separate console:
 
-    cd build
+    cd build/default
     make debug_server
 
 Then run the debug session in another console:
@@ -120,6 +120,32 @@ Go to the build
 
 The other commands are as in the usual setting.
 
+## Advanced
+
+It is possible to have a second file in your target directory that overwrites values in your `CMakeBuild.config`.
+The file is called `CMakeBuild.overwrite.config`.
+
+For example to flash to two different boards, both attached to a USB port.
+
+    cd build
+    make list_jlinks
+
+Note the serial number of your JLink device and add it to for example `config/default/CMakeBuild.overwrite.config`.
+
+    SERIAL_NUM=682450212
+
+On the moment there is no rebuild triggered when the values in this file change.
+
+Another convenient variable to set there is `GDB_PORT`. To have both running in parallel:
+
+    cd build
+    cmake .. -DBOARD_TARGET=board0 && make
+    cd build/board0
+    make debug_server
+    cmake .. -DBOARD_TARGET=board1 && make
+    cd build/board1
+    make debug_server
+
 ## Feedback
 
 If there are bugs in the build process, please indicate so. 
@@ -130,3 +156,5 @@ building button:
 [![Build Status](https://travis-ci.org/crownstone/bluenet.svg?branch=master)](https://travis-ci.org/crownstone/bluenet)
 
 In that case, check your system to see if you've done something peculiar. :-)
+
+

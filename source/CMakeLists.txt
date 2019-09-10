@@ -39,10 +39,11 @@ SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
 SET(BOARD_TARGET                             "unset"       CACHE STRING "The board target")
 SET(GDB_PORT                                 "2331"        CACHE STRING "The gdb port for the debug server")
-SET(SWO_PORT                                 "2332"        CACHE STRING "The swoport for the debug server")
-SET(TELNET_PORT                              "2333"        CACHE STRING "The telnet port for the debug server")
 # Get the following information via JlinkExe and then ShowEmuList
 SET(SERIAL_NUM                               ""            CACHE STRING "The serial number of the JLink")
+
+MATH(EXPR SWO_PORT       "${GDB_PORT}+1")
+MATH(EXPR TELNET_PORT "  ${GDB_PORT}+2")
 
 #######################################################################################################################
 # Show variables
@@ -596,6 +597,10 @@ ELSE()
 		MESSAGE(FATAL_ERROR "No source code files found. Please add something")
 	ELSE()
 
+		IF(SERIAL_NUM) 
+			SET(SERIAL_NUM_SWITCH "--snr")
+		ENDIF()
+
 		MESSAGE(STATUS "CMakeLists: Descend into bootloader directory and compile if needed")
 		add_subdirectory(bootloader)
 
@@ -695,11 +700,11 @@ ELSE()
 			COMMENT "Debug ${PROJECT_NAME}.elf"
 			)
 		
-		ADD_CUSTOM_TARGET(upload
+		ADD_CUSTOM_TARGET(upload 
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload binary"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase
+			COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 			DEPENDS ${PROJECT_NAME}.hex
 			COMMENT "Flashes binary to remote target board"
 			)
@@ -714,7 +719,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Read bootloader address from UICR register"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --memrd 0x10001014
+			COMMAND nrfjprog -f nrf52 --memrd 0x10001014 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 			COMMENT "Flashes binary to remote target board"
 			)
 	
@@ -724,7 +729,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Read board version from UICR register"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --memrd 0x10000104 | cut -f2 -d'|'A
+			COMMAND nrfjprog -f nrf52 --memrd 0x10000104 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} | cut -f2 -d'|'A
 			COMMAND ${CMAKE_COMMAND} -P ${DEFAULT_MODULES_PATH}/nrfjprog_memrd.cmake -DADDRESS=0x10001014
 			COMMENT "Flashes binary to remote target board"
 			)
@@ -732,7 +737,7 @@ ELSE()
 		ADD_CUSTOM_TARGET(read_hw_version
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Read hardware version from UICR register ${HARDWARE_BOARD_ADDRESS}"
-			COMMAND nrfjprog -f nrf52 --memrd ${HARDWARE_BOARD_ADDRESS} | cut -f2 -d':' | cut -f1 -d'|'
+			COMMAND nrfjprog -f nrf52 --memrd ${HARDWARE_BOARD_ADDRESS} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} | cut -f2 -d':' | cut -f1 -d'|'
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Flashes binary to remote target board"
 			)
@@ -746,7 +751,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Write hardware version ${LOAD_BOARD_HARDWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --memwr ${HARDWARE_BOARD_ADDRESS} --val ${LOAD_BOARD_HARDWARE_VERSION}
+			COMMAND nrfjprog -f nrf52 --memwr ${HARDWARE_BOARD_ADDRESS} --val ${LOAD_BOARD_HARDWARE_VERSION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} 
 			COMMENT "Flashes binary to remote target board"
 			)
 

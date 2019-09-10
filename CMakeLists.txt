@@ -127,12 +127,12 @@ endif()
 #######################################################################################################################
 
 set(DEFAULT_CONFIGURATION_FILE ${DEFAULT_CONF_CMAKE_PATH}/CMakeBuild.config.default)
-set(VARIANT_CONFIGURATION_FILE ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
+set(BOARD_TARGET_CONFIGURATION_FILE ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
+set(BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
 
 load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
-message(STATUS "Load configuration file ${DEFAULT_CONFIGURATION_FILE}")
-load_configuration("${VARIANT_CONFIGURATION_FILE}" CMAKE_ARGS)
-message(STATUS "Load configuration file ${VARIANT_CONFIGURATION_FILE}")
+load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
+load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
 
 # For now only cross-compilation
 list(APPEND CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
@@ -201,6 +201,7 @@ ExternalProject_Add(bluenet
 #list(APPEND CMAKE_BOOTLOADER_ARGS "-DBOOTLOADER_VERSION:STRING=${BOOTLOADER_VERSION}")
 #list(APPEND CMAKE_BOOTLOADER_ARGS "-DBOARD_TARGET:STRING=${BOARD_TARGET}")
 
+message(STATUS "GDB server port: ${GDB_PORT}")
 #ExternalProject_Add(bootloader
 #  SOURCE_DIR ${WORKSPACE_DIR}/source/bootloader
 #  BINARY_DIR ${WORKSPACE_DIR}/build/bootloader/${BOARD_TARGET}
@@ -217,11 +218,15 @@ add_dependencies(bluenet gcc_arm_none_eabi)
 add_dependencies(bluenet nordic_sdk)
 add_dependencies(bluenet nordic_mesh_sdk)
 		
+IF(SERIAL_NUM) 
+  SET(SERIAL_NUM_SWITCH "--snr")
+ENDIF()
+		
 ADD_CUSTOM_TARGET(softdevice
   COMMAND ${CMAKE_COMMAND} -E echo
   COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload softdevice"
   COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND nrfjprog -f nrf52 --program ${WORKSPACE_DIR}/tools/nrf5_sdk/components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex --sectorerase
+  COMMAND nrfjprog -f nrf52 --program ${WORKSPACE_DIR}/tools/nrf5_sdk/components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
   DEPENDS bluenet
   COMMENT "Flashes binary to remote target board"
   )
@@ -229,7 +234,7 @@ ADD_CUSTOM_TARGET(softdevice
 ADD_CUSTOM_TARGET(read_softdevice_version
   COMMAND ${CMAKE_COMMAND} -E echo
   COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to get version of softdevice"
-  COMMAND nrfjprog -f nrf52 --memrd 0x000300C
+  COMMAND nrfjprog -f nrf52 --memrd 0x000300C ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
   COMMAND ${CMAKE_COMMAND} -E echo
   COMMAND ${CMAKE_COMMAND} -E echo "** Version FFFF00A8 = S132 6.0.0"
   COMMAND ${CMAKE_COMMAND} -E echo "** Version FFFF00AF = S132 6.1.0"
@@ -242,7 +247,7 @@ ADD_CUSTOM_TARGET(erase
   COMMAND ${CMAKE_COMMAND} -E echo
   COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to erase target board"
   COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND nrfjprog -f nrf52 --eraseall
+  COMMAND nrfjprog -f nrf52 --eraseall ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
   COMMENT "Erase everything on target board"
   )
 
@@ -267,6 +272,7 @@ ADD_CUSTOM_TARGET(write_hw_version
   COMMAND make write_hw_version
   WORKING_DIRECTORY ${BOARD_TARGET}
   DEPENDS 
+    nrfutil
     bluenet
   COMMENT "Write hardware version"
   )
@@ -275,7 +281,16 @@ ADD_CUSTOM_TARGET(upload
   COMMAND make upload 
   WORKING_DIRECTORY ${BOARD_TARGET}
   DEPENDS 
+    nrfutil
     bluenet
+  COMMENT "Upload binary"
+  )
+
+ADD_CUSTOM_TARGET(list_jlinks
+  COMMAND JLinkExe -commanderscript list.jlink
+  WORKING_DIRECTORY ${WORKSPACE_DIR}/source/conf/jlink
+  DEPENDS 
+    jlink
   COMMENT "Upload binary"
   )
 

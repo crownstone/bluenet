@@ -1,5 +1,6 @@
 function(load_configuration CONFIG_FILE CONFIG_LIST)
   if(EXISTS ${CONFIG_FILE})
+    message(STATUS "Load configuration file: ${CONFIG_FILE}")
     file(STRINGS ${CONFIG_FILE} ConfigContents)
     foreach(NameAndValue ${ConfigContents})
       # Strip leading spaces
@@ -30,7 +31,7 @@ function(load_configuration CONFIG_FILE CONFIG_LIST)
       endif()
     endforeach()
   else()
-    message(FATAL_ERROR "Cannot find configuration file: ${CONFIG_FILE}")
+    message(STATUS "Cannot find configuration file: ${CONFIG_FILE}")
   endif()
   # Append original variable list to the result
   list(APPEND TOTAL_LIST ${${CONFIG_LIST}})
