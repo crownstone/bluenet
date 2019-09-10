@@ -4,10 +4,10 @@
 #include "common/cs_Types.h"
 #include "events/cs_EventListener.h"
 #include "events/cs_EventDispatcher.h"
+#include "processing/cs_EncryptionHandler.h"
 #include "protocol/cs_ServiceDataPackets.h"
 #include "util/cs_Error.h"
 #include "util/cs_Utils.h"
-
 #include "drivers/cs_Serial.h"
 
 #include <app_util.h>
@@ -43,6 +43,7 @@ void ScannedDeviceHandler::handleEvent(event_t & event){
 void ScannedDeviceHandler::handleEvtDeviceScanned(TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice){
      BLEutil::printAdvTypes(scannedDevice->data,scannedDevice->dataSize);
 
+        // find relevant advertized type
         cs_data_t services16bit;
         if(BLEutil::findAdvType(BLE_GAP_AD_TYPE_SERVICE_DATA,
                 scannedDevice->data,
@@ -52,24 +53,79 @@ void ScannedDeviceHandler::handleEvtDeviceScanned(TYPIFY(EVT_DEVICE_SCANNED)* sc
             return;
         }
 
-        // ------------
-
-        if(services16bit.len != 2 + sizeof(service_data_t)){
-            LOG("ServiceData lenght mismatch, %d != %d",
-                services16bit.len, 
-                sizeof(service_data_t));
+        //  unpack and validate cs_data_t to service_data_t
+        service_data_t* incomingServiceData = nullptr;
+        if( ! unpackToServiceData(&services16bit,incomingServiceData)){
             return;
         }
 
-        auto incomingAdvDataService_uuid = services16bit.data[1] << 8 | services16bit.data[0];
+        LOG("protocv %d, devicetype %d",
+            incomingServiceData->params.protocolVersion,
+            incomingServiceData->params.deviceType);
+        
+        // decrypt
+        if( ! decryptServiceData(incomingServiceData)){
+            return;
+        }
 
+        // dispatch to subhandlers
+        switch(incomingServiceData->params.encrypted.type){
+            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_STATE:{break;}
+            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_ERROR:{break;}
+            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_EXT_STATE:{break;}
+            case  ServiceDataEncryptedType::SERVICE_DATA_TYPE_EXT_ERROR:{break;}
+            default:{
+                LOG("Unrecognized ServiceDataencryptedType: %d",incomingServiceData->params.encrypted.type);
+                return;
+            }
+        }
+
+        LOG("end of handler reached");
+}
+
+bool ScannedDeviceHandler::unpackToServiceData(cs_data_t* services16bit, service_data_t*& incomingServiceData){
+        if(services16bit->len != 2 + sizeof(service_data_t)){
+            LOG("ServiceData lenght mismatch, %d != %d",
+                services16bit->len, 
+                sizeof(service_data_t));
+            return false;
+        }
+
+        auto incomingAdvDataService_uuid = services16bit->data[1] << 8 | services16bit->data[0];
         if(incomingAdvDataService_uuid != CROWNSTONE_PLUG_SERVICE_DATA_UUID ){
             LOG("SERVICE_DATA_UUID mismatch, %x != %x",incomingAdvDataService_uuid,CROWNSTONE_PLUG_SERVICE_DATA_UUID);
-            return;
+            return false;
         }
 
-        auto incomingServiceData = reinterpret_cast<service_data_t*>(services16bit.data + 2);
-        LOG("protocv %d, devicetype %d",incomingServiceData->params.protocolVersion,incomingServiceData->params.deviceType);
-        
-        (void)incomingServiceData;
+        incomingServiceData = reinterpret_cast<service_data_t*>(services16bit->data + 2);
+        return true;
+}
+
+bool ScannedDeviceHandler::decryptServiceData(service_data_t* incomingServiceData){
+    if(incomingServiceData->params.protocolVersion == ServiceDataUnencryptedType::SERVICE_DATA_TYPE_ENCRYPTED){
+            EncryptionAccessLevel requested_accesslevel;
+            
+            if( ! EncryptionHandler::getInstance().decrypt(
+                incomingServiceData->params.encryptedArray,             //uint8_t* encryptedDataPacket, 
+                sizeof(incomingServiceData->params.encryptedArray),     //int16_t encryptedDataPacketLength, 
+				incomingServiceData->params.encryptedArray,             //uint8_t* target, 
+                sizeof(incomingServiceData->params.encryptedArray),     //uint16_t targetLength, 
+                requested_accesslevel,                   //EncryptionAccessLevel& userLevelInPackage, 
+                EncryptionType::ECB_GUEST                              //EncryptionType encryptionType = CTR);
+            )){
+                return false;
+            }
+
+            if(requested_accesslevel != EncryptionAccessLevel::SERVICE_DATA){
+                LOG("Unexpected value for RequestedAccessLevel");
+                return false;
+            }
+
+        } else {
+            // what to do with other protocolVersion types?
+            LOG("ServiceData decryption for protocolVersion %d unsupported",incomingServiceData->params.protocolVersion);
+            return false;
+        }
+
+    return true;
 }
