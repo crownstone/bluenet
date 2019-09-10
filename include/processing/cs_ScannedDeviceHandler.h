@@ -1,3 +1,4 @@
+#include "common/cs_Types.h"
 #include "events/cs_EventListener.h"
 
 class ScannedDeviceHandler : public EventListener{
@@ -9,5 +10,8 @@ class ScannedDeviceHandler : public EventListener{
     void init();
 
     virtual void handleEvent(event_t &event);
+
+    private:
+    void handleEvtDeviceScanned(TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice);
 
 };
