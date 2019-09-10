@@ -1,74 +1,12 @@
 # Installation
 
-This is a step-by-step instruction to install the bluenet build system. If you prefer a simple install script, you can use the `install.sh` script provided in the [crownstone-sdk](https://github.com/crownstone/crownstone-sdk#bluenet_lib_configs) repository.
-
-The installation has been tested on Ubuntu 14.04 (should work on newer ones as well) and assumes you use the J-Link Lite CortexM-9 programmer.
 
 ## Prerequisites
-
-To compile and run the bluenet firmware, the following prerequisites are needed:
-
-1. Nordic SDK
-2. Cross-compiler for ARM
-3. JLink utilities from Segger
-
-### Nordic SDK
-
-Download Nordic's SDK and unzip:
-
-- [Nordic nRF5 SDK 15.3.0](https://developer.nordicsemi.com/nRF5_SDK/nRF5_SDK_v15.x.x/)
-
-By default, we use the Softdevices provided in the Nordic SDK. For SDK 15, this is the [Nordic S132 Softdevice](https://www.nordicsemi.com/eng/Products/S132-SoftDevice), so you don't need to download any softdevices separately. However, if you want to use a different Softdevice version, you can download it and later adapt the config to use the new softdevice.
-
-There is a bug in Nordic's SDK code, search for files named `nrf_svc.h`.
-In those files, replace the assembly line:
-
-    #define GCC_CAST_CPP (uint8_t)
-
-With:
-
-    #define GCC_CAST_CPP (uint16_t)
-
-You can do that manually, or use
-
-    perl -p -i -e 's/#define GCC_CAST_CPP \(uint8_t\)/#define GCC_CAST_CPP \(uint16_t\)/g' `grep -ril "#define GCC_CAST_CPP (uint8_t)" *`
-
-from the root folder of the Nordic SDK to do it for you.
-
-In SDK 11, there is another bug that has to be fixed. In the file `nrf_drv_saadc.h`, replace the define of high limit disabled with:
-
-    #define NRF_DRV_SAADC_LIMITH_DISABLED (4095)
-
-
-
-### J-Link
-
-Download and install J-Link Segger’s [software](https://www.segger.com/downloads/jlink). The current version is V6.34f (direct link to [64 bit .deb](https://www.segger.com/downloads/jlink/JLink_Linux_x86_64.deb)) and can be found at the "J-Link Software and Documentation Pack" section. 
-
-Then install it:
-
-    sudo dpkg -i JLink_Linux_x86_64.deb
-
-Check the [Segger forums](http://forum.segger.com/index.php?page=Thread&threadID=4089) for some help with the udev rules (there is one that comes with the Segger software). One thing that you might want to do is disable or deinstall the modemmanager on Ubuntu: `sudo systemctl disable ModemManager.service`.
-Note that it might be the case that UART is not enabled (idProduct `0101` rather than `0105`). You can enable this by typing `vcom enable` on the JLink command line.
-
-### Cross compiler
-
-The GCC cross-compiler for ARM can be found at the [ARM website](https://developer.arm.com/open-source/gnu-toolchain/gnu-rm/downloads). It's now at version 7, in Q2 2018: [64 bit tar ball](https://developer.arm.com/-/media/Files/downloads/gnu-rm/7-2018q2/gcc-arm-none-eabi-7-2018-q2-update-linux.tar.bz2?revision=bc2c96c0-14b5-4bb4-9f18-bceb4050fee7?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,7-2018-q2-update). You might also just use the cross-compiler if it's in a PPA. It's nice if you have one with Python support enabled so you can use this [GDB dashboard](https://github.com/cyrus-and/gdb-dashboard), but this is optional.
-
-Assuming you have a 64 bit system, you might have to install 32 bit packages:
-
-    sudo dpkg --add-architecture i386
-    sudo apt-get update
-    sudo apt-get install libstdc++6:i386 libncurses5:i386
-
-If the cross-compiler does not work, make sure you check if all its dependencies are met with `ldd arm-none-eabi-gcc`. Also make sure that the correct libraries are loaded. In the config file (see below) you have to specify the directory where the cross-compiler binaries and libraries can be found. For example `/opt/compilers/gcc-arm-none-eabi-7-2018-q2-update`. Note that this is the parent directory of the `bin` and the `lib` directory.
-
-### Misc.
 
 Bluenet uses a cmake build system, so you will need it:
 
     sudo apt-get install cmake
+
 
 ## Getting the Bluenet code
 
@@ -86,30 +24,30 @@ and set the correct upstream:
     cd source
     git remote add upstream git@github.com:crownstone/bluenet.git
 
-Next make a dir for your config file(s), by default, this should be called `config` and be placed inside the workspace.
 
-    mkdir ~/bluenet-workspace/config
+## Setup
+
+The installation is changing to use more CMake instead of bash scripts. To start, you can simply use:
+
+    mkdir build && cd build
+    cmake .. & make
+
+This will download the required programs and libraries. The installation has been tested on Ubuntu 18.04 (should work on newer ones as well) and assumes you use a J-Link programmer.
+
+
+## Environment variables
 
 Now we need to set up the environment variables to keep track of the different folders required to build bluenet
 
-    cd ~/bluenet_workspace/source
-    cp conf/cmake/env.config.template env.config
+    cp source/conf/cmake/env.config.template config/env.config
 
-Open the file then uncomment and assign the variable `BLUENET_WORKSPACE_DIR` to your workspace path, e.g.
+Set `BLUENET_WORKSPACE_DIR` to the top directory of the repository, e.g.
 
-    BLUENET_WORKSPACE_DIR=~/bluenet_workspace
+    BLUENET_WORKSPACE_DIR=~/bluenet
 
-And you can - if you like to - point to all folders independently:
+Last we want to load the environments by default for every terminal session. For example with the following command:
 
-    BLUENET_DIR=~/bluenet_workspace/source
-    BLUENET_CONFIG_DIR=~/bluenet_workspace/config
-    BLUENET_BIN_DIR=~/bluenet_workspace/bin
-    BLUENET_BUILD_DIR=~/bluenet_workspace/build
-    BLUENET_RELEASE_DIR=~/bluenet_workspace/release
-
-Last we want to load the environments by default for every terminal session with the following command:
-
-    echo "source ~/bluenet_workspace/source/scripts/env.sh" >> ~/.bashrc
+    echo "source ~/bluenet/source/scripts/env.sh" >> ~/.bashrc
 
 Apply the environment variables:
 
@@ -117,53 +55,20 @@ Apply the environment variables:
 
 If you have another shell, please do the above for your own shell.
 
-## Get the mesh code
-
-The mesh code can be downloaded from Nordic. This used to be the Nordic OpenMesh. The installation instructions are different from that in the past for the OpenMesh. You can download the Mesh code from [Nordic's website](https://www.nordicsemi.com/Software-and-Tools/Software/nRF5-SDK-for-Mesh/Download).
-This is the direct link for the version [3.2.0](https://www.nordicsemi.com/-/media/Software-and-other-downloads/SDKs/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip).
-
-
-
-    cd $BLUENET_WORKSPACE_DIR
-    mkdir mesh
-    cd mesh
-    unzip nrf5SDKforMeshv320src.zip .
-
-Do not forget to set the `MESH_SDK_DIR` in your `CMakeBuild.config` file.
-
-Currently the mesh will crash because there is not enough margin for the timeslot. Set `TIMESLOT_END_SAFETY_MARGIN_US` to `1000UL` in `timeslot.h`.
 
 ## Configuration
 
-We allow for multiple configurations. This means that the `$BLUENET_CONFIG_DIR` can contain multiple directories. Here we assume you like to create a `default` target directory. Copy subsequently the template config file to your config directory:
+We allow for multiple configurations. This means that the config dir can contain multiple directories. A config directory `default` is already included, with a `CMakeBuild.config` that is a copy of `source/conf/cmake/CMakeBuild.config.template`. Open it to customize:
 
-    mkdir -p $BLUENET_CONFIG_DIR/default
-    cp $BLUENET_DIR/conf/cmake/CMakeBuild.config.template $BLUENET_CONFIG_DIR/default/CMakeBuild.config
-
-then open it to customize
-
-    xdg-open $BLUENET_CONFIG_DIR/default/CMakeBuild.config 
+    xdg-open config/default/CMakeBuild.config
 
 The following variables have to be set before you can build the code:
 
-- Set `BLUETOOTH_NAME` to something you like, but make sure it's short (<6 tokens).
+- Set `BLUETOOTH_NAME` to something you like, but make sure it's short.
 - Set `HARDWARE_BOARD` to the board you're using. This determines the pin layout.
-- Set `COMPILER_PATH` to the path where the compiler can be found (it should be the parent directory of the cross-compiler `bin` and `lib` directories).
-- Set `NRF5_DIR` to wherever you installed the Nordic SDK. It should have the following subdirectories:
-    - components
-    - documentation
-    - examples
-    - external
-    - SVD
 
-Last, copy any lines that you want to adjust over from the [default configuration](https://github.com/crownstone/bluenet/blob/master/conf/cmake/CMakeBuild.config.default). 
+Last, copy any lines that you want to adjust over from the default configuration: `source/conf/cmake/CMakeBuild.config.default`.
 
-E.g.
-
-- disable meshing by setting `BUILD_MESHING=0` and `MESHING=0`
-- enable device scanner by setting `INTERVAL_SCANNER_ENABLED=1`
-- enable the power service by setting `POWER_SERVICE=1`
-- set serial verbosity to debug by setting `SERIAL_VERBOSITY=SERIAL_DEBUG`
 
 ### Advanced Configuration
 
@@ -190,10 +95,12 @@ And set the following variables to the correct paths:
 
 - If you run into memory issues, you can play around with `HEAP_SIZE`. Increasing the heap size (dynamic memory), will reduce the stack size (static memory).
 
+
 ## Usage
 
 Once everything is installed and configured, the code can be compiled and uploaded.
 You will have to attach a programmer/debugger, like the JLink. Towards that you only need four pins: `GND`, `3V`, `SWDIO / RESET`, and `SWCLK / FACTORY`. The pin layout of the JLink connector is written out on the [Crownstone blog](https://crownstone.rocks/2015/01/23/programming-the-nrf51822-with-the-st-link).
+
 
 ### Compiling, uploading and debugging
 
