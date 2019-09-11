@@ -22,6 +22,11 @@ SET(MAIN_FILE "cs_Crownstone.cpp")
 # Start a project
 PROJECT(${PROJECT_NAME}) 
 
+#enable_language(CXX)
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_STANDARD_REQUIRED on)
+#set(CMAKE_CXX_EXTENSIONS OFF)
+
 # The directory with some of the FindXXX modules
 set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
 set(DEFAULT_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules)
@@ -43,7 +48,7 @@ SET(GDB_PORT                                 "2331"        CACHE STRING "The gdb
 SET(SERIAL_NUM                               ""            CACHE STRING "The serial number of the JLink")
 
 MATH(EXPR SWO_PORT       "${GDB_PORT}+1")
-MATH(EXPR TELNET_PORT "  ${GDB_PORT}+2")
+MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
 
 #######################################################################################################################
 # Show variables
@@ -59,7 +64,6 @@ MESSAGE(STATUS "CMakeLists: BLE name ${BLUETOOTH_NAME}")
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
 #######################################################################################################################
-
 
 #######################################################################################################################
 
@@ -599,6 +603,7 @@ ELSE()
 
 		IF(SERIAL_NUM) 
 			SET(SERIAL_NUM_SWITCH "--snr")
+  			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 		ENDIF()
 
 		MESSAGE(STATUS "CMakeLists: Descend into bootloader directory and compile if needed")
@@ -699,7 +704,10 @@ ELSE()
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Debug ${PROJECT_NAME}.elf"
 			)
-		
+	
+		SET(DEFAULT_NRFUTIL_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
+		SET(DEFAULT_NRFUTIL_READ_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH};-DINSTRUCTION:STRING=READ")
+
 		ADD_CUSTOM_TARGET(upload 
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload binary"
@@ -709,37 +717,22 @@ ELSE()
 			COMMENT "Flashes binary to remote target board"
 			)
 		
-		#	ADD_CUSTOM_TARGET(upload_bootloader
-		#	COMMAND make upload 
-		#	WORKING_DIRECTORY bootloader 
-		#	COMMENT "Flashes bootloader to remote target board"
-		#	)
-		
 		ADD_CUSTOM_TARGET(read_bootloader_address
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Read bootloader address from UICR register"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --memrd 0x10001014 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
-			COMMENT "Flashes binary to remote target board"
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x10001014 ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMENT "Read bootloader address"
 			)
 	
 		# Actually piping over the command line might fail in another OS, this might be replaced by a particular
 		# cmake utility function
 		ADD_CUSTOM_TARGET(read_board_version
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Read board version from UICR register"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --memrd 0x10000104 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} | cut -f2 -d'|'A
-			COMMAND ${CMAKE_COMMAND} -P ${DEFAULT_MODULES_PATH}/nrfjprog_memrd.cmake -DADDRESS=0x10001014
-			COMMENT "Flashes binary to remote target board"
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x10000100 ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x10000104 ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMENT "Read board version"
 			)
 		
 		ADD_CUSTOM_TARGET(read_hw_version
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Read hardware version from UICR register ${HARDWARE_BOARD_ADDRESS}"
-			COMMAND nrfjprog -f nrf52 --memrd ${HARDWARE_BOARD_ADDRESS} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} | cut -f2 -d':' | cut -f1 -d'|'
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMENT "Flashes binary to remote target board"
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=${HARDWARE_BOARD_ADDRESS} ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMENT "Read hardware version"
 			)
 
 		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
@@ -762,9 +755,16 @@ ELSE()
 		SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
 		SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
 		SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS}")
-		
+	
 		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBS})
-		INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
+
+		# We actually do not need the file without extension
+		#INSTALL(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION .)
+
+		# TARGETS are not accepted from other directoreis
+		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin" DESTINATION .)
+		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf" DESTINATION .)
+		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" DESTINATION .)
 	ENDIF()
 
 ENDIF()

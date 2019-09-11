@@ -32,16 +32,46 @@ include(${DEFAULT_MODULES_PATH}/git_info.cmake)
 include(${DEFAULT_MODULES_PATH}/compilation_info.cmake)
 
 #######################################################################################################################
-# Download dependencies
+# Download urls and hashes
 #######################################################################################################################
 
-set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-downloads/SDKs)
+# If you update the version of a file, also update the md5 hashh, e.g. through `md5sum downloads/*`
 
-# If files are updated... Also update the md5 hash, e.g. through `md5sum downloads/*`
-set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/nRF5/Binaries/nRF5SDK153059ac345.zip)
+set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-downloads)
+
+# The Nordic SDK
+set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5/Binaries/nRF5SDK153059ac345.zip)
 set(NORDIC_NRF5_SDK_MD5 46a8c9cd4b5d7ee4c5142e8fae3444c4)
-set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip)
+
+# The mesh
+set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/sDKS/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip)
 set(NORDIC_MESH_SDK_MD5 29e813a85e209fd07837c4fd3c616178)
+
+# The nrfutil
+set(NRFUTIL_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/nRFCommandLineTools1030Linuxamd64tar.gz)
+set(NRFUTIL_DEB_FILE nRF-Command-Line-Tools_10_3_0_Linux-amd64.deb)
+set(NRFUTIL_MD5 545df3556fc1a70da7a99926fb426eb3)
+
+# The cross-compiler
+set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2?revision=c34d758a-be0c-476e-a2de-af8c6e16a8a2?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2019-q3-update)
+set(GCC_ARM_NONE_EABI_MD5 6341f11972dac8de185646d0fbd73bfc)
+
+# The JLink tool
+set(JLINK_DOWNLOAD_URL https://www.segger.com/downloads/jlink)
+set(JLINK_DEB_FILE JLink_Linux_V650_x86_64.deb)
+set(JLINK_LINUX_DOWNLOAD_URL ${JLINK_DOWNLOAD_URL}/${JLINK_DEB_FILE})
+set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
+
+#######################################################################################################################
+# Local names
+#######################################################################################################################
+
+set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex)
+
+
+#######################################################################################################################
+# Download dependencies
+#######################################################################################################################
 
 ExternalProject_Add(nordic_sdk
   DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
@@ -72,12 +102,6 @@ set(MESH_SDK_DIR ${WORKSPACE_DIR}/tools/mesh_sdk)
 list(APPEND CMAKE_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
 if(DOWNLOAD_JLINK) 
-
-  set(JLINK_DOWNLOAD_URL https://www.segger.com/downloads/jlink)
-  set(JLINK_DEB_FILE JLink_Linux_V650_x86_64.deb)
-  set(JLINK_LINUX_DOWNLOAD_URL ${JLINK_DOWNLOAD_URL}/${JLINK_DEB_FILE})
-  set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
-
   ExternalProject_Add(jlink
     DOWNLOAD_COMMAND wget  --post-data "accept_license_agreement=accepted" ${JLINK_LINUX_DOWNLOAD_URL} -O ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
     DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
@@ -89,9 +113,6 @@ if(DOWNLOAD_JLINK)
     INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
     )
 endif()
-
-set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2?revision=c34d758a-be0c-476e-a2de-af8c6e16a8a2?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2019-q3-update)
-set(GCC_ARM_NONE_EABI_MD5 6341f11972dac8de185646d0fbd73bfc)
 
 ExternalProject_Add(gcc_arm_none_eabi
   DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
@@ -107,10 +128,6 @@ set(COMPILER_PATH ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi)
 list(APPEND CMAKE_ARGS "-DCOMPILER_PATH:STRING=${COMPILER_PATH}")
 
 if(DOWNLOAD_NRFUTIL)
-  set(NRFUTIL_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-downloads/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/nRFCommandLineTools1030Linuxamd64tar.gz)
-  set(NRFUTIL_DEB_FILE nRF-Command-Line-Tools_10_3_0_Linux-amd64.deb)
-  set(NRFUTIL_MD5 545df3556fc1a70da7a99926fb426eb3)
-
   ExternalProject_Add(nrfutil
     DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
     URL ${NRFUTIL_DOWNLOAD_URL}
@@ -136,7 +153,6 @@ load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
 
 # For now only cross-compilation
 list(APPEND CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")
-#list(APPEND CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${CMAKE_CONF_CMAKE_PATH}/arm.toolchain.cmake")
 
 # Setting INSTALL_DIR is not sufficient, also CMAKE_INSTALL_PREFIX is required
 list(APPEND CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:FILEPATH=${WORKSPACE_DIR}/bin/${BOARD_TARGET}")
@@ -171,7 +187,7 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}/tmp/${BOARD_TARGET})
 
 #######################################################################################################################
-# Build bluenet as external project
+# Build encryption library (required by bootloader)
 #######################################################################################################################
 
 ADD_CUSTOM_TARGET(micro_eec
@@ -182,6 +198,10 @@ ADD_CUSTOM_TARGET(micro_eec
     nordic_sdk
     gcc_arm_none_eabi
   )
+
+#######################################################################################################################
+# Build bluenet as external project
+#######################################################################################################################
 
 ExternalProject_Add(bluenet
   SOURCE_DIR ${WORKSPACE_DIR}/source
@@ -195,51 +215,30 @@ ExternalProject_Add(bluenet
   DEPENDS micro_eec
   )
 
-#list(APPEND CMAKE_BOOTLOADER_ARGS ${CMAKE_ARGS})
-#list(APPEND CMAKE_BOOTLOADER_ARGS "-DBOOTLOADER_START_ADDRESS:STRING=${BOOTLOADER_START_ADDRESS}")
-#list(APPEND CMAKE_BOOTLOADER_ARGS "-DBOOTLOADER_LENGTH:STRING=${BOOTLOADER_LENGTH}")
-#list(APPEND CMAKE_BOOTLOADER_ARGS "-DBOOTLOADER_VERSION:STRING=${BOOTLOADER_VERSION}")
-#list(APPEND CMAKE_BOOTLOADER_ARGS "-DBOARD_TARGET:STRING=${BOARD_TARGET}")
-
-message(STATUS "GDB server port: ${GDB_PORT}")
-#ExternalProject_Add(bootloader
-#  SOURCE_DIR ${WORKSPACE_DIR}/source/bootloader
-#  BINARY_DIR ${WORKSPACE_DIR}/build/bootloader/${BOARD_TARGET}
-#  INSTALL_DIR ${WORKSPACE_DIR}/bin/${BOARD_TARGET}
-#  STAMP_DIR ${WORKSPACE_DIR}/stamp/bootloader/${BOARD_TARGET}
-#  TMP_DIR ${WORKSPACE_DIR}/tmp/bootloader/${BOARD_TARGET}
-#  CMAKE_CACHE_ARGS "${CMAKE_BOOTLOADER_ARGS}"
-#  CMAKE_ARGS "${CMAKE_BOOTLOADER_ARGS}"
-#  BUILD_ALWAYS 1
-#  DEPENDS micro_eec
-#  )
-
 add_dependencies(bluenet gcc_arm_none_eabi)
 add_dependencies(bluenet nordic_sdk)
 add_dependencies(bluenet nordic_mesh_sdk)
+
+#######################################################################################################################
+# Upload softdevice and read version of softdevice
+#######################################################################################################################
 		
 IF(SERIAL_NUM) 
-  SET(SERIAL_NUM_SWITCH "--snr")
+  set(SERIAL_NUM_SWITCH "--snr")
+  set(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 ENDIF()
 		
 ADD_CUSTOM_TARGET(softdevice
   COMMAND ${CMAKE_COMMAND} -E echo
   COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload softdevice"
   COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND nrfjprog -f nrf52 --program ${WORKSPACE_DIR}/tools/nrf5_sdk/components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+  COMMAND nrfjprog -f nrf52 --program ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
   DEPENDS bluenet
   COMMENT "Flashes binary to remote target board"
   )
 
 ADD_CUSTOM_TARGET(read_softdevice_version
-  COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to get version of softdevice"
-  COMMAND nrfjprog -f nrf52 --memrd 0x000300C ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
-  COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND ${CMAKE_COMMAND} -E echo "** Version FFFF00A8 = S132 6.0.0"
-  COMMAND ${CMAKE_COMMAND} -E echo "** Version FFFF00AF = S132 6.1.0"
-  COMMAND ${CMAKE_COMMAND} -E echo "** Version FFFF00B7 = S132 6.1.1"
-  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND ${CMAKE_COMMAND} -DINSTRUCTION:STRING=READ -DADDRESS:STRING=0x000300C ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
   COMMENT "Reads version of softdevice"
   )
 
@@ -250,6 +249,10 @@ ADD_CUSTOM_TARGET(erase
   COMMAND nrfjprog -f nrf52 --eraseall ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
   COMMENT "Erase everything on target board"
   )
+
+#######################################################################################################################
+# Forward commands for a particular board towards its build directory 
+#######################################################################################################################
 
 ADD_CUSTOM_TARGET(${BOARD_TARGET}
   COMMAND make
@@ -286,6 +289,18 @@ ADD_CUSTOM_TARGET(upload
   COMMENT "Upload binary"
   )
 
+ADD_CUSTOM_TARGET(upload_bootloader
+  COMMAND make upload_bootloader 
+  WORKING_DIRECTORY ${BOARD_TARGET}
+  DEPENDS 
+    bluenet
+  COMMENT "Upload binary"
+  )
+
+#######################################################################################################################
+# Some more utility functions
+#######################################################################################################################
+
 ADD_CUSTOM_TARGET(list_jlinks
   COMMAND JLinkExe -commanderscript list.jlink
   WORKING_DIRECTORY ${WORKSPACE_DIR}/source/conf/jlink
@@ -294,10 +309,5 @@ ADD_CUSTOM_TARGET(list_jlinks
   COMMENT "Upload binary"
   )
 
-ADD_CUSTOM_TARGET(upload_bootloader
-  COMMAND make upload_bootloader 
-  WORKING_DIRECTORY ${BOARD_TARGET}
-  DEPENDS 
-    bluenet
-  COMMENT "Upload binary"
-  )
+
+

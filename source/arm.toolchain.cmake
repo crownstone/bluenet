@@ -64,6 +64,7 @@ SET(CMAKE_CXX_COMPILER_ID_RUN TRUE CACHE INTERNAL "")
 SET(DEBUG_LEVEL "-g3")
 #SET(DEBUG_LEVEL "-g0")
 
+#message(STATUS "
 SET(DEFAULT_CXX_FLAGS       "-std=c++14 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")
 SET(DEFAULT_C_FLAGS         "")
 SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -Wall -Werror -fdiagnostics-color=always -fno-strict-aliasing -fno-builtin -fshort-enums -Wno-error=format -Wno-error=unused-function ${DEBUG_LEVEL}")
@@ -140,36 +141,9 @@ MESSAGE(STATUS "arm.toolchain.cmake: C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
 
-
-# Tell the linker that we use a special memory layout
-#SET(FILE_MEMORY_LAYOUT "-TnRF51822-softdevice.ld")
-#SET(PATH_FILE_MEMORY "-L${PROJECT_SOURCE_DIR}/conf")
-
-if (THISWORKS MATCHES 1)
-IF (BOOTLOADER MATCHES 1)
-	MESSAGE(STATUS "Bootloader flag is set: ${BOOTLOADER}")
-	#SET(FILE_MEMORY_LAYOUT "-Tbootloader_nrf52832_xxAA.ld")
-	SET(FILE_MEMORY_LAYOUT "-Tsecure_bootloader_gcc_nrf52.ld")
-	SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/bootloader/")
-ELSE()
-	MESSAGE(STATUS "Bootloader flag is not set: ${BOOTLOADER}")
-	SET(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
-	#SET(PATH_FILE_MEMORY "-L${NRF5_DIR}/config/nrf52832/armgcc/")
-	SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
-ENDIF()
-MESSAGE(STATUS "File memory path set to ${PATH_FILE_MEMORY}")
-SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
-
-
-# http://public.kitware.com/Bug/view.php?id=12652
-# CMake does send the compiler flags also to the linker
-
-IF (BOOTLOADER MATCHES 1)
-	SET(FLAG_WRITE_MAP_FILE "-Wl,-Map,bootloader.map")
-ELSE()
-	SET(FLAG_WRITE_MAP_FILE "-Wl,-Map,prog.map")
-ENDIF()
-endif()
+# The linker has to be told to use a special memory layout 
+# However this is different from the firmware versus the bootloader. 
+# That's why it has been moved to the CMakeLists.txt file.
 
 #SET(FLAG_REMOVE_UNWINDING_CODE "-Wl,--wrap,__aeabi_unwind_cpp_pr0")
 

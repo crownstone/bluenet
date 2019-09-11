@@ -66,10 +66,12 @@ To upload the firwmare
     cd build/default
     make upload
 
-The bootloader is build automatically when you build the firmware, it can also be flashed to the target board
+The bootloader is build automatically when you build the firmware, it can also be flashed to the target board. The
+value of its start address is written to UICR separately.
 
     cd build/default
     make upload_bootloader
+    make write_bootloader_address
 
 It is necessary for the firmware to also write a hardware version
 
@@ -87,6 +89,7 @@ For your convenience, most commands, can be run from the build directory:
     make write_hw_version
     make softdevice
     make upload_bootloader
+    make write_bootloader_address
     make upload
 
 ## Debug

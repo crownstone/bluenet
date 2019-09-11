@@ -9,6 +9,13 @@ SET(PROJECT_NAME ${APPLICATION_SHORTHAND})
 # Start a project
 PROJECT(${PROJECT_NAME}) 
 
+# Enabling C and CXX might lead to problems because we are cross-compiling, check in later CMake versions of this is
+# still the case
+#enable_language(CXX)
+#set(CMAKE_CXX_STANDARD 17)
+#set(CMAKE_CXX_STANDARD_REQUIRED on)
+#set(CMAKE_CXX_EXTENSIONS OFF)
+
 # The directory with some of the FindXXX modules
 #SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake")
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${DEFAULT_MODULES_PATH}")
@@ -38,15 +45,6 @@ MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
 #######################################################################################################################
-
-# Collect flags that are used in the code, as macros
-#SET(CONFIG_FILE ${CMAKE_SOURCE_DIR}/conf/cmake/CMakeConfig.cmake)
-#IF(EXISTS "${CONFIG_FILE}")
-#	MESSAGE(STATUS "CMakeLists: Load config file ${CONFIG_FILE}")
-#	INCLUDE(${CONFIG_FILE})
-#ELSE()
-#	MESSAGE(FATAL_ERROR "CMakeLists: Cannot find config file ${CONFIG_FILE}")
-#ENDIF()
 
 #######################################################################################################################
 
@@ -305,6 +303,9 @@ ADD_DEFINITIONS("-DBOOTLOADER_VERSION=${BOOTLOADER_VERSION}")
 
 ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES})
 
+# Setting properties like this does not work, perhaps CMake finds it difficult to find the right compiler
+# target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)
+
 # Use .elf extension by default
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}" SUFFIX ".elf")
 
@@ -327,14 +328,26 @@ ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND echo ${CMAKE_OBJCOPY_OVERLOAD} ${REMOVE_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
 	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${REMOVE_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex)
 		
+IF(SERIAL_NUM) 
+	SET(SERIAL_NUM_SWITCH "--snr")
+	SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
+ENDIF()
+
 ADD_CUSTOM_TARGET(upload_bootloader
 	COMMAND ${CMAKE_COMMAND} -E echo
 	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload ${PROJECT_NAME}"
 	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase
-	COMMENT "Flashes binary to remote target board"
+	COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+	COMMENT "Flashes bootloader to remote target board"
 	)
 		
+ADD_CUSTOM_TARGET(write_bootloader_address
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write bootloader address ${BOOTLOADER_START_ADDRESS} to UICR"
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND nrfjprog -f nrf52 --memwr 0x10001014 --val ${BOOTLOADER_START_ADDRESS} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+	COMMENT "Writes bootloader start addresss to UICR"
+	)
 
 # Some debug information
 IF(VERBOSITY GREATER 4)
