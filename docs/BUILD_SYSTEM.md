@@ -151,7 +151,7 @@ directory (which in its turn also compiles the bootloader). The latter is not do
 directly by `add_subdirectory`. This means that all cross-compilation information is directly available to it. It
 also means that the bootloader is build together with the firmware.
 
-# Similar named header files
+# Similarly named header files
 
 Both the firmware as well as the bootloader use an `sdk_config.h` file. They are located in different directories.
 Due to the fact that the bootloader is linked through `add_subdirectory` it inherits all the same include directories.
