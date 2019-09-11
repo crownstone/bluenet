@@ -1,6 +1,14 @@
 #!/usr/bin/python3
 
 # Parses FDS data read from flash.
+# Each page starts with: 0xDEADC0DE 0xF11E01FF (swap page) or 0xDEADC0DE 0xF11E01FE (data page)
+# FDS record:
+#   2B record key
+#   2B data length in words
+#   2B file ID
+#   2B CRC
+#   4B record ID
+#   data
 
 import re
 import sys
@@ -20,8 +28,10 @@ def getUint16(data, index):
 	#print("getUint16 index=", index, "b1=", int(data[index]), "b2=", int(data[index+1]))
 	return data[index] + (data[index + 1] << 8)
 
-def printTypeData(type, data):
-	if type >= 0:
+def printTypeData(type, data, sizeLeft):
+	for i in range(0, sizeLeft):
+		data.append(255)
+	if type > 0:
 		dataStr = ""
 		for b in data:
 			dataStr += "%02X " % b
@@ -70,6 +80,7 @@ def parseFile(textFilename):
 				else:
 					print("new page")
 					skip = pageHeaderSize
+					sizeLeft = 0
 
 			for i in range(0, 16):
 				if (skip > 0):
@@ -80,7 +91,7 @@ def parseFile(textFilename):
 					typedata.append(data[i])
 					sizeLeft -= 1
 				else:
-					printTypeData(type, typedata)
+					printTypeData(type, typedata, sizeLeft)
 					# New item
 					type = getUint16(data, i)
 					if (type == 0xFFFF):
@@ -91,7 +102,7 @@ def parseFile(textFilename):
 					sizeLeft = typeLen
 					skip = itemHeaderSize - 1
 					#print("new item type=", type, "len=", typeLen)
-	printTypeData(type, typedata)
+	printTypeData(type, typedata, sizeLeft)
 
 
 
