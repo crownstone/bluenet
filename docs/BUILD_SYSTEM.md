@@ -7,8 +7,15 @@ The purpose of [CMake](https://cmake.org/):
 
 * Compilation that is independent of platform and compiler.
 
-In practice we do not need so much to be independent of the compiler, but the independence of the platform, potentially
-means we can support development on both Linux, Mac, as well as Windows. 
+In practice we do not need so much to be independent of the compiler, but the independence of the platform potentially
+means we can support development on both Linux, Mac, as well as Windows. Moreover, it has the following benefits,
+especially if also used to download prerequisite tools.
+
+* More reliable code completion in code editors
+* Same versions of build tools for every developer
+* The version of the tools that have been used are checked into the code repository can can be used for reproduction.
+* Continuous integration by a few simple commands
+* Construction of a docker image by a few simple commands
 
 # Downloads
 
@@ -35,6 +42,32 @@ If you update the version of one of the supporting tools, you will also need to 
 
 If you upgrade to a new file, download it, and run `md5sum *` on the command line. Then update both name and hash in
 the `CMakeLists.txt` file.
+
+There are some other tools from Nordic that are convenient to use. However, they are optional. You can enable the
+download of `nrfconnect` by:
+
+    cmake .. -DDOWNLOAD_NRFCONNECT=ON
+    make
+
+It downloads a lot of stuff, amongst which also `nrfjprog` it it cannot find it. Make sure it does not lead to 
+version conflicts. You can run these by:
+
+    make nrfconnect_core_setup
+    make nrfconnect_core
+
+These run in separate shells. The `_setup` you at least have to run once. After that it can do continuous rebuilds.
+You can select the tool to use from the list of apps. By default there are now quite a few apps there. The 
+programmer can also be downloaded separately by setting the `-DDOWNLOAD_NRFCONNECT_PROGRAMMER` flag at `CMake`.
+
+## Patches
+
+There are at times patches required for the tools that are downloaded. They can be found in the `patch` directory.
+That directory contains a `README.md` file with general instructions and if lucky explanations of the patches. In
+general patches are generated through something like (take the mesh SDK as example):
+
+    diff -ruN tools/mesh_sdk tools/mesh_sdk_patched > patch/00mesh.patch
+
+A patch is applied in the workspace directory.
 
 # Configuration
 

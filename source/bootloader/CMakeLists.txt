@@ -321,12 +321,16 @@ SET(REMOVE_SECTIONS --remove-section .uicr_bootloader_start_address  --remove-se
 # Add post-build target to display size information
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
 	COMMAND ${CMAKE_SIZE} --format=berkeley "${PROJECT_NAME}.elf"
-	COMMAND stat ${PROJECT_NAME}.elf | grep -i size | tr -d ':' |  tr -s ' ' | cut -f3 -d ' ' | xargs printf "** Size: %s bytes")
+	COMMAND stat -t ${PROJECT_NAME}.elf | cut -f2 -d ' ' | xargs printf "** Firmware size : %s bytes"
+	COMMAND ${CMAKE_COMMAND} -E echo ""
+	#COMMAND stat ${PROJECT_NAME}.elf | grep -i size | tr -d ':' |  tr -s ' ' | cut -f3 -d ' ' | xargs printf "** Size: %s bytes")
+	)
 
 # Add post-build target to generate the .hex file (to be used in nrfjprog or jlink)
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
-	COMMAND echo ${CMAKE_OBJCOPY_OVERLOAD} ${REMOVE_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
-	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${REMOVE_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex)
+	COMMAND ${CMAKE_COMMAND} -E echo "** CMakeLists: Remove UICR sections for start address and MBR parameters"
+	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${REMOVE_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
+	)
 		
 IF(SERIAL_NUM) 
 	SET(SERIAL_NUM_SWITCH "--snr")

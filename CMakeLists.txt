@@ -4,8 +4,10 @@ cmake_minimum_required(VERSION 3.10)
 # Set board target 
 #######################################################################################################################
 
-option(DOWNLOAD_JLINK                            "Download JLink"              ON)
-option(DOWNLOAD_NRFUTIL                          "Download nrfutil"            ON)
+option(DOWNLOAD_JLINK                            "Download JLink"                        ON)
+option(DOWNLOAD_NRFUTIL                          "Download nrfutil"                      ON)
+option(DOWNLOAD_NRFCONNECT                       "Download nrfconnect"                   OFF)
+option(DOWNLOAD_NRFCONNECT_PROGRAMMER            "Download nrfconnect programmer"        OFF)
 
 set(BOARD_TARGET                                 default CACHE STRING "Board target to compile for")
 set(WORKSPACE_DIR                                ${CMAKE_CURRENT_LIST_DIR})
@@ -136,6 +138,31 @@ if(DOWNLOAD_NRFUTIL)
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
     BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
     INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_DIR}/tools/nrfutil/${NRFUTIL_DEB_FILE} 
+    )
+endif()
+
+if(DOWNLOAD_NRFCONNECT) 
+  ExternalProject_Add(git_nrfconnect_core
+    #GIT_REPOSITORY git@github.com:NordicSemiconductor/pc-nrfconnect-core
+    GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-core
+    SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
+    BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
+    CONFIGURE_COMMAND sudo apt install build-essential python2.7 libudev-dev libgconf-2-4
+    BUILD_COMMAND npm install
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${WORKSPACE_DIR}/tools/nrfconnect_apps 
+            COMMAND ${CMAKE_COMMAND} -E create_symlink ${WORKSPACE_DIR}/tools/nrfconnect_apps $ENV{HOME}/.nrfconnect-apps/local
+    )
+endif()
+
+if(DOWNLOAD_NRFCONNECT_PROGRAMMER) 
+  ExternalProject_Add(git_nrfconnect_apps
+    #GIT_REPOSITORY git@github.com:NordicSemiconductor/pc-nrfconnect-core
+    GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-programmer
+    SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
+    BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
+    CONFIGURE_COMMAND sudo apt install build-essential python2.7 libudev-dev libgconf-2-4
+    BUILD_COMMAND npm install
+    INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
     )
 endif()
 
@@ -309,5 +336,25 @@ ADD_CUSTOM_TARGET(list_jlinks
   COMMENT "Upload binary"
   )
 
+ADD_CUSTOM_TARGET(nrfconnect_core_setup
+  COMMAND ${CMAKE_COMMAND} -E echo "Run in separate shell. This is an electron app, debug with Ctrl+Shift+I"
+  COMMAND npm run dev
+  WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
+  #DEPENDS git_nrfconnect_core
+  COMMENT "Run nrf connect corey"
+  )
 
+ADD_CUSTOM_TARGET(nrfconnect_core
+  COMMAND ${CMAKE_COMMAND} -E echo "Run in separate shell. This is an electron app, debug with Ctrl+Shift+I"
+  COMMAND npm run app
+  WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
+  #DEPENDS git_nrfconnect_core
+  COMMENT "Run nrf connect corey"
+  )
 
+ADD_CUSTOM_TARGET(nrfconnect_programmer
+  COMMAND npm run app
+  WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-programmer
+  #DEPENDS git_nrfconnect_programmer
+  COMMENT "Run nrf connect corey"
+  )
