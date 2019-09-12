@@ -40,7 +40,6 @@ private:
 
 	OperationMode _operationMode;
 	uint8_t _sessionNonce[SESSION_NONCE_LENGTH];
-	nrf_ecb_hal_data_t _block __attribute__ ((aligned (4)));
 	uint8_t _setupKey[SOC_ECB_KEY_LENGTH];
 	bool _setupKeyValid = false;
 
@@ -49,6 +48,7 @@ private:
 	uint16_t _rc5SubKeys[RC5_NUM_SUBKEYS]; // S[] - The round subkey words.
 
 public:
+	nrf_ecb_hal_data_t _block __attribute__ ((aligned (4)));
 	static EncryptionHandler& getInstance() {
 		static EncryptionHandler instance;
 		return instance;
@@ -130,8 +130,33 @@ public:
 	 */
 	void invalidateSetupKey();
 
-
 	bool allowedToWrite();
+
+
+
+
+	void aggregateXor(uint8_t* dest, const uint8_t* const src_a, const uint8_t* const src_b,const size_t& len);
+
+	void EncryptCtr(
+		const uint8_t* const plainText,
+		size_t plainTextLength, 
+		uint8_t* cipherText,
+		size_t cipherTextLength,
+		nrf_ecb_hal_data_t& block);
+
+	void DecryptCtr(
+		uint8_t* plainText,
+		size_t plainTextLength, 
+		const uint8_t* const cipherText,
+		size_t cipherTextLength,
+		nrf_ecb_hal_data_t& block);
+
+	bool TestCtrEncryption();
+// TODO: undo this...
+	uint32_t EncryptCtrSingleBlock(
+		const uint8_t* const plainText, 
+		size_t plainTextLength, 
+		nrf_ecb_hal_data_t& block);
 private:
 
 	inline bool _encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType);

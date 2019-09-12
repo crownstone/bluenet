@@ -539,6 +539,145 @@ bool EncryptionHandler::_encryptCTR(uint8_t* validationNonce, uint8_t* input, ui
 }
 
 
+// dest may equal src_a or src_b, and more generally:
+// src_a and _src_b may point to dest+n for any n>=0.
+void EncryptionHandler::aggregateXor(uint8_t* dest, const uint8_t* const src_a, const uint8_t* const src_b,const size_t& len){
+	for(size_t c = 0; c < len; c++) {
+		dest[c] = src_a[c] ^ src_b[c];
+	}
+}
+
+/**
+ * Encrypts the [plainText] using the parameters set in [block]
+ * - block.cleartext is used as Nonce value, the last byte will be overwritten
+ *   and function as the block-counter, starting from 0.
+ * - block.key is used as key
+ * - block.ciphertext is left in undefined state.
+ * - cipherText is where the resulting ciphertext is written to
+ * - cipherTextLen must at least be equal to the smallest integer multiple of 
+ *   sizeof(soc_ecb_ciphertext_t) larger than plainTextLen
+ * 
+ * Note: the plain text will not be prepended with any data, (unlike _encryptCtr)
+ */
+void EncryptionHandler::EncryptCtr(
+		const uint8_t* const plainText,
+		size_t plainTextLength, 
+		uint8_t* cipherText,
+		size_t cipherTextLength,
+		nrf_ecb_hal_data_t& block){
+	if(plainTextLength == 0 
+		|| plainText == nullptr
+		|| cipherTextLength >= BLEutil::SmallestIntegerMultipleAbove(plainTextLength, sizeof(soc_ecb_ciphertext_t))){
+		LOGd("Early return in EncryptCtr");
+		return;
+	}
+	
+	uint8_t current_block_offset = 0;
+	size_t block_index = 0;
+
+	while(block_index < plainTextLength/sizeof(soc_ecb_ciphertext_t)){
+		// update nonce counter and encrypt single block
+		_block.cleartext[SOC_ECB_CLEARTEXT_LENGTH-1] = block_index;
+		uint32_t err_code = sd_ecb_block_encrypt(&block);
+		(void) err_code;
+		
+		// XOR with plaintext into destination
+		aggregateXor(
+			cipherText + current_block_offset,
+			plainText + current_block_offset,
+			block.ciphertext,
+			sizeof(soc_ecb_ciphertext_t)
+		);
+	
+		// update loop variables
+		block_index++;
+		current_block_offset += sizeof(soc_ecb_ciphertext_t);
+	}
+
+	// treat last block separate because it needs padding
+	if(size_t taillength = plainTextLength % sizeof(soc_ecb_ciphertext_t)){
+		// update nonce counter and encrypt single block
+		_block.cleartext[SOC_ECB_CLEARTEXT_LENGTH-1] = block_index;
+		uint32_t err_code = sd_ecb_block_encrypt(&block);
+		(void) err_code;
+		
+		// padd tail
+		uint8_t paddedPlainTextTail[sizeof(soc_ecb_ciphertext_t)] = {};
+		memcpy(paddedPlainTextTail, plainText + current_block_offset, taillength);
+
+		// XOR with plaintext into destination
+		aggregateXor(
+			cipherText + current_block_offset,
+			paddedPlainTextTail,
+			block.ciphertext,
+			sizeof(soc_ecb_ciphertext_t)
+		);
+	}
+}
+
+void EncryptionHandler::DecryptCtr(
+		uint8_t* plainText,
+		size_t plainTextLength, 
+		const uint8_t* const cipherText,
+		size_t cipherTextLength,
+		nrf_ecb_hal_data_t& block) {
+	// encryption is the same as decryption given the right key. 
+	// Just pass the ciphertext as plaintext.		
+	EncryptCtr(cipherText,cipherTextLength, plainText, plainTextLength,block);
+}
+
+bool EncryptionHandler::TestCtrEncryption(){
+		constexpr size_t c_len = sizeof(_block.cleartext);
+		uint8_t fixed_nonce__breaks_security [VALIDATION_NONCE_LENGTH] = 
+			{0xae,0xae, 0xae, 0xae};
+
+		memset(_block.cleartext, 0x00, sizeof(_block.cleartext));
+		memcpy(_block.cleartext, fixed_nonce__breaks_security, VALIDATION_NONCE_LENGTH);
+
+		uint8_t test_message[c_len] = 
+			{0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc,0xd,0xe,0xf};
+		uint8_t c_text[c_len] = {};
+
+		EncryptCtr(
+			test_message,c_len,
+			c_text, c_len,
+			_block
+		);
+
+		uint8_t decrypted_text[c_len];
+		DecryptCtr(
+			decrypted_text, c_len,
+			c_text, c_len,
+			_block
+		);
+
+		return std::equal(
+				std::begin(test_message),
+				std::end(test_message),
+				std::begin(decrypted_text));
+}
+
+/**
+ * Encrypts (CTR) using the parameters set in [block]. 
+ * - block.cleartext is used as Nonce/counter value
+ * - block.key is used as key
+ * - block.ciphertext is filled with the result.
+ * 
+ * - if plainTextLength is larger than sizeof(soc_ecb_ciphertext_t), the
+ *   first sizeof(soc_ecb_ciphertext_t) bytes of [plainText] will be encrypted.
+ * - if
+ */
+uint32_t EncryptionHandler::EncryptCtrSingleBlock(
+		const uint8_t* const plainText, size_t plainTextLength, 
+		nrf_ecb_hal_data_t& block){
+	plainTextLength = BLEutil::min(plainTextLength,sizeof(soc_ecb_ciphertext_t));
+
+	uint32_t err_code = sd_ecb_block_encrypt(&block);
+	aggregateXor(block.ciphertext, block.ciphertext, plainText,plainTextLength);
+	
+	return err_code;
+}
+
 /**
  * Check if the key that we need is set in the memory and if so, set it into the encryption block
  */
@@ -642,7 +781,9 @@ void EncryptionHandler::_createIV(uint8_t* IV, uint8_t* nonce, EncryptionType en
  * Verify if the block length is correct
  */
 bool EncryptionHandler::_validateBlockLength(uint16_t length) {
-	if (length % SOC_ECB_CLEARTEXT_LENGTH != 0 || length == 0) {
+	if ( length % SOC_ECB_CLEARTEXT_LENGTH != 0 
+		|| length == 0
+		|| length >= SOC_ECB_CIPHERTEXT_LENGTH *0x100) {
 		return false;
 	}
 	return true;

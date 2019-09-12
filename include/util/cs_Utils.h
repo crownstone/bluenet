@@ -137,6 +137,34 @@ inline bool clearBit(T& value, uint8_t bit) {
 	return value &= ~(1 << bit);
 }
 
+template<class T, class S>
+inline auto min(const T& a, const S& b){
+	return a < b ? a : b;
+}
+
+template<class T, class S>
+inline auto max(const T& a, const S& b){
+	return a > b? a: b;
+}
+
+template<class T, class S, class R>
+inline auto clamp(const R& min, const S& max, const T& val){
+	return val < min? min : (val > max? max: val);
+}
+
+/**
+ * Returns least integer multiple of [mul] strictly bigger than [val].
+ * 
+ * e.g.
+ * SmallestIntegerMultipleAbove(0, n) = n,
+ * SmallestIntegerMultipleAbove(n, 2) == n + 1 for uneven n,
+ * SmallestIntegerMultipleAbove(n, 2) == n + 2 for even n.
+ */
+template<class T>
+inline auto SmallestIntegerMultipleAbove(T val, T mul){
+	return mul * (1+ val/mul); // depends on integer division. 
+}
+
 /**
  * Returns true when newValue is newer than previousValue, for a value that is increased all the time and overflows.
  */
