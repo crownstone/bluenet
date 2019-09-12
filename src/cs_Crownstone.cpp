@@ -314,11 +314,6 @@ void Crownstone::configureStack() {
 		uint32_t gpregret_id = 0;
 		uint32_t gpregret_msk = 0xFF;
 		sd_power_gpregret_clr(gpregret_id, gpregret_msk);
-
-		// Can't advertise connectable advertisements when already connected.
-		// TODO: move this code to stack?
-		_stack->setNonConnectable();
-		_stack->restartAdvertising();
 	});
 
 	// Set callback handler for a disconnection event
@@ -328,10 +323,6 @@ void Crownstone::configureStack() {
 //			_stack->changeToLowTxPowerMode();
 			_stack->changeToNormalTxPowerMode();
 		}
-
-		// TODO: move this code to stack?
-		_stack->setConnectable();
-		_stack->restartAdvertising();
 	});
 }
 
@@ -385,14 +376,16 @@ void Crownstone::configureAdvertisement() {
 	// assign service data to stack
 	_stack->setServiceData(_serviceData);
 
-	if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
-		LOGd("Configure iBeacon");
-		_stack->configureIBeacon(_beacon, _boardsConfig.deviceType);
-	}
-	else {
-		LOGd("Configure BLE device");
-		_stack->configureBleDevice(_boardsConfig.deviceType);
-	}
+	_stack->configureAdvertisement(_beacon, _boardsConfig.deviceType);
+
+//	if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
+//		LOGd("Configure iBeacon");
+//		_stack->configureIBeacon(_beacon, _boardsConfig.deviceType);
+//	}
+//	else {
+//		LOGd("Configure BLE device");
+//		_stack->configureBleDevice(_boardsConfig.deviceType);
+//	}
 
 }
 
@@ -712,12 +705,9 @@ void Crownstone::tick() {
 	}
 
 	// Update advertisement service data
-	// TODO: synchronize with servicedata.updateAdvertisement()
+	// TODO: synchronize with servicedata.updateAdvertisementData()
 	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
-		// update advertisement parameters (to improve scanning on (some) android phones)
-		_stack->updateAdvertisement(false);
-		// update advertisement (to update service data)
-		_stack->setAdvertisementData();
+//		_stack->updateAdvertisement();
 	}
 
 	// Check for timeouts
@@ -782,8 +772,6 @@ void Crownstone::handleEvent(event_t & event) {
 
 		case CS_TYPE::CONFIG_NAME: {
 			_stack->updateDeviceName(std::string((char*)event.data, event.size));
-			_stack->configureScanResponse(_boardsConfig.deviceType);
-			_stack->setAdvertisementData();
 			break;
 		}
 		case CS_TYPE::CONFIG_IBEACON_MAJOR: {
@@ -841,16 +829,12 @@ void Crownstone::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CONFIG_IBEACON_ENABLED: {
 			TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
-			if (enabled) {
-				_stack->configureIBeaconAdvData(_beacon);
-			} else {
-				_stack->configureBleDeviceAdvData();
-			}
-			_stack->setAdvertisementData();
+			// 12-sep-2019 TODO: implement
+			LOGw("TODO ibeacon enabled=%i", enabled);
 			break;
 		}
 		case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: {
-			_stack->setAdvertisementData();
+			_stack->updateAdvertisementData();
 			break;
 		}
 		case CS_TYPE::EVT_BROWNOUT_IMPENDING: {
@@ -887,7 +871,7 @@ void Crownstone::handleEvent(event_t & event) {
 	}
 
 	if (reconfigureBeacon && _state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
-		_stack->setAdvertisementData();
+		_stack->updateAdvertisementData();
 	}
 }
 
