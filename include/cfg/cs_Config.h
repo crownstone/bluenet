@@ -249,7 +249,7 @@
 
 #define ADVERTISING_TIMEOUT                      0
 #define ADVERTISING_REFRESH_PERIOD               1000 // Push the changes in the advertisement packet to the stack every x milliseconds
-#define ADVERTISING_REFRESH_PERIOD_SETUP         100  // Push the changes in the advertisement packet to the stack every x milliseconds
+#define ADVERTISING_REFRESH_PERIOD_SETUP         500  // Push the changes in the advertisement packet to the stack every x milliseconds
 
 #define EXTERNAL_STATE_LIST_COUNT                10 // Number of stones to cache the state of, for advertising external state.
 #define EXTERNAL_STATE_TIMEOUT_MS                60000 // Time after which a state of another stone is considered to be timed out.
