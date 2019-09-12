@@ -10,6 +10,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_EncryptionHandler.h>
 #include <storage/cs_State.h>
+#include "util/cs_Utils.h"
 
 //#define TESTING_ENCRYPTION
 
@@ -171,6 +172,8 @@ bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, u
 	uint16_t targetNetLength = targetLength - _overhead;
 
 	// check if the input would still fit if the nonce is added.
+	// TODO(12-09-2019, Arend): Is this check strong enough? I think the lhs should be rounded up to
+	// a multiple of block size.
 	if (dataLength + VALIDATION_NONCE_LENGTH > targetNetLength) {
 		LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 	//		LOGe("Length of input block would be larger than the output block if we add the validation nonce.");
@@ -462,7 +465,6 @@ bool EncryptionHandler::_RC5PrepareKey(uint8_t* key, uint8_t keyLength) {
 	return true;
 }
 
-
 /**
  * This is where the magic happens. There are a few things that have to be done before this method is called:
  * 1) The correct key has to be set in the _block.key
@@ -483,7 +485,7 @@ bool EncryptionHandler::_encryptCTR(uint8_t* validationNonce, uint8_t* input, ui
 	uint32_t err_code;
 
 	// amount of blocks to loop over
-	uint16_t blockCount = outputLength / SOC_ECB_CIPHERTEXT_LENGTH;
+	uint8_t blockCount = outputLength / SOC_ECB_CIPHERTEXT_LENGTH;
 
 	// shift is the position in the data that is being encrypted.
 	uint16_t shift = 0;
@@ -498,7 +500,7 @@ bool EncryptionHandler::_encryptCTR(uint8_t* validationNonce, uint8_t* input, ui
 
 	// encrypt all blocks using AES 128 CTR block mode.
 	for (uint8_t counter = 0; counter < blockCount; counter++) {
-		// prepare the nonce for the next step by concatenating the nonce with the counter
+		// prepare the nonce for the next step by overwriting the last byte with current counter value
 		_block.cleartext[SOC_ECB_CLEARTEXT_LENGTH-1] = counter;
 
 #ifdef TESTING_ENCRYPTION
@@ -521,13 +523,12 @@ bool EncryptionHandler::_encryptCTR(uint8_t* validationNonce, uint8_t* input, ui
 			} else {
 				inputReadIndex = i + shift - VALIDATION_NONCE_LENGTH;
 
-				if (inputReadIndex < inputLength)
+				if (inputReadIndex < inputLength) {
 					_block.ciphertext[i] ^= input[inputReadIndex];
-				else
-					_block.ciphertext[i] ^= 0; // zero padding the data to fit in the block.
+				}
+				
 			}
 		}
-
 
 		// copy the encrypted block over to the target
 		// the buffer is shifted by the block count (output + shift -. pointer to output[shift])
