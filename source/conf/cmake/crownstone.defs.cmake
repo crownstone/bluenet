@@ -10,10 +10,16 @@ ENDIF()
 
 MESSAGE(STATUS "crownstone.defs.cmake: Build type: ${CMAKE_BUILD_TYPE}")
 IF(CMAKE_BUILD_TYPE MATCHES "Debug")
-	MESSAGE(WARNING "Debug build")
+	MESSAGE(INFO "Pay attention, this is a debug build (change with -DCMAKE_BUILD_TYPE=Release or RelWithDebInfo")
 	ADD_DEFINITIONS("-DGIT_HASH=${GIT_HASH}")
 	ADD_DEFINITIONS("-DGIT_BRANCH=${GIT_BRANCH}")
 	ADD_DEFINITIONS("-DDEBUG")
+ELSEIF(CMAKE_BUILD_TYPE MATCHES "Release")
+	MESSAGE(STATUS "Release build")
+ELSEIF(CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
+ELSEIF(CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
+ELSE()
+	MESSAGE(FATAL_ERROR "There should be a ${CMAKE_BUILD_TYPE} defined (and known)")
 ENDIF()
 
 # The bluetooth name is not optional

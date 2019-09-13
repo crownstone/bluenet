@@ -14,12 +14,15 @@ set(WORKSPACE_DIR                                ${CMAKE_CURRENT_LIST_DIR})
 set(DEFAULT_CONF_CMAKE_PATH                      ${WORKSPACE_DIR}/source/conf/cmake)
 set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modules)
 
+set(CMAKE_BUILD_TYPE                             Debug   CACHE STRING "Default build type")
+
 project(${BOARD_TARGET})
 
 list(APPEND CMAKE_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
 list(APPEND CMAKE_ARGS "-DBOARD_TARGET:STRING=${BOARD_TARGET}")
 list(APPEND CMAKE_ARGS "-DDEFAULT_CONF_CMAKE_PATH:STRING=${DEFAULT_CONF_CMAKE_PATH}")
 list(APPEND CMAKE_ARGS "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
+list(APPEND CMAKE_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 
 #######################################################################################################################
 # Load modules
@@ -227,14 +230,14 @@ ADD_CUSTOM_TARGET(micro_eec
   )
 
 #######################################################################################################################
-# Build bluenet as external project
+# Build mluenet as external project
 #######################################################################################################################
 
 ExternalProject_Add(bluenet
   SOURCE_DIR ${WORKSPACE_DIR}/source
   BINARY_DIR ${WORKSPACE_DIR}/build/${BOARD_TARGET}
   INSTALL_DIR ${WORKSPACE_DIR}/bin/${BOARD_TARGET}
-  STAMP_DIR ${WORKSPACE_DIR}/stamp/${BOARD_TARGET}
+  STAMP_DIR ${WORKSPACE_DIR}/build/${BOARD_TARGET}/stamp
   TMP_DIR ${WORKSPACE_DIR}/tmp/${BOARD_TARGET}
   CMAKE_CACHE_ARGS "${CMAKE_ARGS}"
   CMAKE_ARGS "${CMAKE_ARGS}"

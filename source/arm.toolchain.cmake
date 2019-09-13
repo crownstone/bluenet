@@ -34,13 +34,12 @@ SET(COMPILER_TYPE_PREFIX ${COMPILER_TYPE})
 
 #######################################################################################################################
 
-# The extension .obj is just ugly, set it back to .o (does not work)
-SET(CMAKE_C_OUTPUT_EXTENSION .o)
-SET(CMAKE_CXX_OUTPUT_EXTENSION .o)
-
 # Make cross-compiler easy to find (but we will use absolute paths anyway)
 SET(PATH "${PATH}:${COMPILER_PATH}/bin")
 MESSAGE(STATUS "PATH is set to: ${PATH}")
+
+# Actually add to PATH
+LIST(APPEND CMAKE_PROGRAM_PATH ${COMPILER_PATH}/bin)
 
 # Specify the cross compiler, linker, etc.
 SET(CMAKE_C_COMPILER                   ${COMPILER_PATH}/bin/${COMPILER_TYPE}gcc)
@@ -66,8 +65,8 @@ SET(CMAKE_CXX_COMPILER_FORCED TRUE CACHE INTERNAL "")
 SET(CMAKE_C_COMPILER_ID_RUN TRUE CACHE INTERNAL "")
 SET(CMAKE_CXX_COMPILER_ID_RUN TRUE CACHE INTERNAL "")
 
-SET(DEBUG_LEVEL "-g3")
-#SET(DEBUG_LEVEL "-g0")
+SET(DEBUG_FLAGS   "-g3")
+SET(RELEASE_FLAGS "-g0")
 
 #message(STATUS "
 SET(DEFAULT_CXX_FLAGS       "-std=c++14 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")
@@ -104,7 +103,6 @@ SET(CMAKE_OBJCOPY_OVERLOAD                       ${COMPILER_PATH}/bin/${COMPILER
 # The following require FORCE. Without it, the FLAGS end up to have duplication.
 SET(CMAKE_CXX_FLAGS                              "${DEFAULT_CXX_FLAGS}"        CACHE STRING "C++ flags" FORCE)
 SET(CMAKE_C_FLAGS                                "${DEFAULT_C_FLAGS}"          CACHE STRING "C flags" FORCE)
-SET(CMAKE_C_AND_CXX_FLAGS                        "${DEFAULT_C_AND_CXX_FLAGS}"  CACHE STRING "C and C++ flags" FORCE)
 SET(CMAKE_SHARED_LINKER_FLAGS                    ""                            CACHE STRING "Shared linker flags" FORCE)
 SET(CMAKE_MODULE_LINKER_FLAGS                    ""                            CACHE STRING "Module linker flags" FORCE)
 SET(CMAKE_EXE_LINKER_FLAGS                       "-Wl,-z,nocopyreloc ${GARBAGE_COLLECTION_OF_SECTIONS} ${OPTIMIZED_NEWLIB}"          CACHE STRING "Executable linker flags" FORCE)
@@ -115,6 +113,7 @@ SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS          "")
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake;${DEFAULT_MODULES_PATH};${DEFAULT_CONF_CMAKE_PATH}")
 
 MESSAGE(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
+MESSAGE(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 INCLUDE(crownstone.defs)
@@ -136,23 +135,32 @@ ENDFOREACH()
 
 # Only from nRF52 onwards we have a coprocessor for floating point operations
 IF(NRF_SERIES MATCHES NRF52)
-	SET(CMAKE_C_AND_CXX_FLAGS "${CMAKE_C_AND_CXX_FLAGS} -mcpu=cortex-m4")
-	SET(CMAKE_C_AND_CXX_FLAGS "${CMAKE_C_AND_CXX_FLAGS} -mfloat-abi=hard -mfpu=fpv4-sp-d16")
+	SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -mcpu=cortex-m4")
+	SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -mfloat-abi=hard -mfpu=fpv4-sp-d16")
 ENDIF()
 
 IF(PRINT_FLOATS)
-	SET(CMAKE_C_AND_CXX_FLAGS "${CMAKE_C_AND_CXX_FLAGS} -u _printf_float")
+	SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -u _printf_float")
 ENDIF()
 
 # Final collection of C/C++ compiler flags
 
-MESSAGE(STATUS "CXX flags: ${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
-MESSAGE(STATUS "C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
+MESSAGE(STATUS "CXX flags: ${CMAKE_CXX_FLAGS} ${DEFAULT_C_AND_CXX_FLAGS}")
+MESSAGE(STATUS "C flags: ${CMAKE_C_FLAGS} ${DEFAULT_C_AND_CXX_FLAGS}")
 
 # __STARTUP_CONFIG is defined in gcc_startup_nrf52.S
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS} ${DEFINES}")
+# Flags used in all configurations
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEFAULT_C_AND_CXX_FLAGS} ${DEFINES}")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${DEFAULT_C_AND_CXX_FLAGS} ${DEFINES}")
+
+# Flags used in debug configuration
+SET(CMAKE_CXX_FLAGS_DEBUG "${DEBUG_FLAGS}")
+SET(CMAKE_C_FLAGS_DEBUG   "${DEBUG_FLAGS}")
+
+# Flags used in release configuration
+SET(CMAKE_CXX_FLAGS_RELEASE "${RELEASE_FLAGS}")
+SET(CMAKE_C_FLAGS_RELEASE   "${RELEASE_FLAGS}")
 
 # The linker has to be told to use a special memory layout 
 # However this is different from the firmware versus the bootloader. 
