@@ -32,7 +32,7 @@ set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
 set(DEFAULT_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH}")
 
-MESSAGE(STATUS "CMakeLists: Search for FindX files in ${CMAKE_MODULE_PATH}")
+MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 #######################################################################################################################
 
@@ -54,12 +54,12 @@ MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
 # Show variables
 #######################################################################################################################
 
-MESSAGE(STATUS "CMakeLists: Set verbosity to level: ${VERBOSITY}")
-MESSAGE(STATUS "CMakeLists: Git branch: ${GIT_BRANCH}")
-MESSAGE(STATUS "CMakeLists: Day of compilation: ${COMPILATION_DAY}")
-MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
+MESSAGE(STATUS "Set verbosity to level: ${VERBOSITY}")
+MESSAGE(STATUS "Git branch: ${GIT_BRANCH}")
+MESSAGE(STATUS "Day of compilation: ${COMPILATION_DAY}")
+MESSAGE(STATUS "Compiler: ${CMAKE_C_COMPILER}")
 
-MESSAGE(STATUS "CMakeLists: BLE name ${BLUETOOTH_NAME}")
+MESSAGE(STATUS "BLE name ${BLUETOOTH_NAME}")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
@@ -67,8 +67,8 @@ MESSAGE(STATUS "CMakeLists: BLE name ${BLUETOOTH_NAME}")
 
 #######################################################################################################################
 
-MESSAGE(STATUS "CMakeLists: Do not set application start address")
-#MESSAGE(STATUS "CMakeLists: Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
+MESSAGE(STATUS "Do not set application start address")
+#MESSAGE(STATUS "Set application start address in linker script to ${APPLICATION_START_ADDRESS}")
 #CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/conf/nRF-softdevice.ld.in ${CMAKE_SOURCE_DIR}/conf/nRF-softdevice.ld)
 
 # Libraries (math, stdc++ libraries, etc.) 
@@ -79,8 +79,8 @@ SET(LIBS "")
 
 # Some debug information
 IF(VERBOSITY GREATER 4)
-	MESSAGE(STATUS "CMakeLists: \"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
-	MESSAGE(STATUS "CMakeLists: Linked libraries: ${LIBS}")
+	MESSAGE(STATUS "\"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
+	MESSAGE(STATUS "Linked libraries: ${LIBS}")
 ENDIF()
 
 # Source directory
@@ -116,7 +116,7 @@ ELSE()
 
 	IF(VERBOSITY GREATER 4)
 		FOREACH(crownstone_file ${FOLDER_SOURCE})
-			MESSAGE(STATUS "CMakeLists: Include Crownstone file: " ${crownstone_file})
+			MESSAGE(STATUS "Include Crownstone file: " ${crownstone_file})
 		ENDFOREACH()
 	ENDIF()
 
@@ -161,7 +161,7 @@ ELSE()
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/system_nrf52.c")
 	
 	IF (CS_SERIAL_NRF_LOG_ENABLED)
-		MESSAGE(STATUS "CMakeLists: SERIAL from NORDIC enabled")
+		MESSAGE(STATUS "SERIAL from NORDIC enabled")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/balloc/nrf_balloc.c")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_serial.c")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_default_backends.c")
@@ -183,7 +183,7 @@ ELSE()
 #			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uarte.c")
 		ENDIF()
 	ELSE()
-		MESSAGE(STATUS "CMakeLists: SERIAL from NORDIC disabled")
+		MESSAGE(STATUS "SERIAL from NORDIC disabled")
 	ENDIF()
 
 	IF (BUILD_MESHING)
@@ -476,7 +476,7 @@ ELSE()
 
 	IF(VERBOSITY GREATER 4)
 		FOREACH(nordic_file ${NORDIC_SOURCE})
-			MESSAGE(STATUS "CMakeLists: Include Nordic file: " ${nordic_file})
+			MESSAGE(STATUS "Include Nordic file: " ${nordic_file})
 		ENDFOREACH()
 	ENDIF()
 
@@ -577,7 +577,7 @@ ENDIF()
 GET_PROPERTY(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 IF(VERBOSITY GREATER 4)
 	FOREACH(dir ${dirs})
-		MESSAGE(STATUS "CMakeLists: Add to the include directories: '${dir}'")
+		MESSAGE(STATUS "Add to the include directories: '${dir}'")
 	ENDFOREACH()
 ENDIF()
 		
@@ -587,7 +587,7 @@ IF(NOT (DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
 ENDIF()
 
 IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "\"nrf5\"")
-	MESSAGE(STATUS "CMakeLists: Add testing files")
+	MESSAGE(STATUS "Add testing files")
 
 	ENABLE_TESTING()
 
@@ -606,7 +606,7 @@ ELSE()
   			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 		ENDIF()
 
-		MESSAGE(STATUS "CMakeLists: Descend into bootloader directory and compile if needed")
+		MESSAGE(STATUS "Descend into bootloader directory and compile if needed")
 		add_subdirectory(bootloader)
 
 		SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}

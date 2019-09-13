@@ -67,9 +67,9 @@ IF (BUILD_MESHING)
 	ENDIF()
 
 	IF(IS_DIRECTORY "${MESH_SDK_DIR}")
-		MESSAGE(STATUS "crownstone.src.cmake: Use directory ${MESH_SDK_DIR} for the mesh")
+		MESSAGE(STATUS "Use directory ${MESH_SDK_DIR} for the mesh")
 	ELSE()
-		MESSAGE(FATAL_ERROR "crownstone.src.cmake: Directory \"${MESH_SDK_DIR}\" does not exist!")
+		MESSAGE(FATAL_ERROR "Directory for the mesh, \"${MESH_SDK_DIR}\", does not exist!")
 	ENDIF()
 ENDIF()
 

@@ -12,6 +12,9 @@
 #
 # Compiler options are already set through the main CMakeLists.txt file that loads this as an ExternalProject.
 
+# Version to be used
+CMAKE_MINIMUM_REQUIRED(VERSION 3.9)
+
 # Set to Generic, or tests will fail (they will fail anyway)
 SET(CMAKE_SYSTEM_NAME Generic)
 
@@ -20,7 +23,9 @@ SET(CMAKE_SYSTEM_VERSION 1)
 SET(CMAKE_SYSTEM_PROCESSOR arm)
 SET(CMAKE_CROSSCOMPILING 1)
 
-MESSAGE(STATUS "arm.toolchain.cmake: Bluetooth name ${BLUETOOTH_NAME}")
+MESSAGE(STATUS "Bluetooth name ${BLUETOOTH_NAME}")
+
+INCLUDE(CheckIPOSupported)
 
 #######################################################################################################################
 
@@ -35,7 +40,7 @@ SET(CMAKE_CXX_OUTPUT_EXTENSION .o)
 
 # Make cross-compiler easy to find (but we will use absolute paths anyway)
 SET(PATH "${PATH}:${COMPILER_PATH}/bin")
-MESSAGE(STATUS "arm.toolchain.cmake: PATH is set to: ${PATH}")
+MESSAGE(STATUS "PATH is set to: ${PATH}")
 
 # Specify the cross compiler, linker, etc.
 SET(CMAKE_C_COMPILER                   ${COMPILER_PATH}/bin/${COMPILER_TYPE}gcc)
@@ -77,6 +82,14 @@ SET(CMAKE_ASM_FLAGS "${CFLAGS} ${ASM_OPTIONS}" )
 # Interesting options: -ffast-math, -flto (link time optimization), -fno-rtti
 # Regarding size of the binary -ffast-math made a very small difference (4B), while -flto made a difference of almost 13kB.
 # When adding -flto to C_FLAGS, you also need -fno-builtin, else it gives an error of multiple definitions of _exit().
+#SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -flto -fno-builtin")
+CHECK_IPO_SUPPORTED(RESULT result)
+IF(result)
+	MESSAGE(STATUS "Enabled interprocedural optimization: -lto")
+	SET(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+	MESSAGE(STATUS "Interprocedural optimization not enabled (might just be because cmake does not know if the compiler supports it)")
+ENDIF()
 SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -Os -fomit-frame-pointer")
 
 # The option --print-gc-section can be used to debug which sections are actually garbage collected
@@ -101,8 +114,8 @@ SET(CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS          "")
 # The directory with some of the FindXXX modules
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake;${DEFAULT_MODULES_PATH};${DEFAULT_CONF_CMAKE_PATH}")
 
-MESSAGE(STATUS "arm.toolchain.cmake: C Compiler: ${CMAKE_C_COMPILER}")
-MESSAGE(STATUS "arm.toolchain.cmake: Search for FindX files in ${CMAKE_MODULE_PATH}")
+MESSAGE(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
+MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 INCLUDE(crownstone.defs)
 
@@ -110,11 +123,11 @@ GET_DIRECTORY_PROPERTY( DirDefs DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITION
 
 FOREACH(definition ${DirDefs})
 	IF(VERBOSITY GREATER 4)
-		MESSAGE(STATUS "arm.toolchain.cmake: Definition: " ${definition})
+		MESSAGE(STATUS "Definition: " ${definition})
 	ENDIF()
 	IF(${definition} MATCHES "=$")
 		IF(NOT ${definition} MATCHES "COMPILATION_TIME")
-			MESSAGE(STATUS "arm.toolchain.cmake: Definition ${definition} is not defined" )
+			MESSAGE(STATUS "Definition ${definition} is not defined" )
 		ENDIF()
 	ENDIF()
 ENDFOREACH()
@@ -133,8 +146,8 @@ ENDIF()
 
 # Final collection of C/C++ compiler flags
 
-MESSAGE(STATUS "arm.toolchain.cmake: CXX flags: ${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
-MESSAGE(STATUS "arm.toolchain.cmake: C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
+MESSAGE(STATUS "CXX flags: ${CMAKE_CXX_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
+MESSAGE(STATUS "C flags: ${CMAKE_C_FLAGS} ${CMAKE_C_AND_CXX_FLAGS}")
 
 # __STARTUP_CONFIG is defined in gcc_startup_nrf52.S
 

@@ -19,7 +19,7 @@ PROJECT(${PROJECT_NAME})
 # The directory with some of the FindXXX modules
 #SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/conf;${CMAKE_SOURCE_DIR}/conf/cmake")
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${DEFAULT_MODULES_PATH}")
-MESSAGE(STATUS "CMakeLists: Search for FindX files in ${CMAKE_MODULE_PATH}")
+MESSAGE(STATUS "bootloader: Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 #######################################################################################################################
 
@@ -37,10 +37,10 @@ SET(BOOTLOADER_LENGTH                        "unset"       CACHE STRING "Size of
 # Show variables
 #######################################################################################################################
 
-MESSAGE(STATUS "CMakeLists: Set verbosity to level: ${VERBOSITY}")
-MESSAGE(STATUS "CMakeLists: Git branch: ${GIT_BRANCH}")
-MESSAGE(STATUS "CMakeLists: Day of compilation: ${COMPILATION_DAY}")
-MESSAGE(STATUS "CMakeLists: Compiler: ${CMAKE_C_COMPILER}")
+MESSAGE(STATUS "bootloader: Set verbosity to level: ${VERBOSITY}")
+MESSAGE(STATUS "bootloader: Git branch: ${GIT_BRANCH}")
+MESSAGE(STATUS "bootloader: Day of compilation: ${COMPILATION_DAY}")
+MESSAGE(STATUS "bootloader: Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
@@ -198,9 +198,9 @@ ELSE()
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/crypto/backend/oberon/oberon_backend_hash.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/crypto/backend/oberon/oberon_backend_hmac.c")
 
-	MESSAGE(STATUS "CMakeLists: nrf log: ${CS_SERIAL_NRF_LOG_ENABLED}")
+	MESSAGE(STATUS "bootloader: nrf log: ${CS_SERIAL_NRF_LOG_ENABLED}")
 	IF (CS_SERIAL_NRF_LOG_ENABLED)
-		MESSAGE(STATUS "CMakeLists: SERIAL log enabled")
+		MESSAGE(STATUS "bootloader: SERIAL log enabled")
 		LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_serial.c")
 		LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/log/src/nrf_log_default_backends.c")
 		LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/components/libraries/log/src/nrf_log_frontend.c")
@@ -219,7 +219,7 @@ ELSE()
 			LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uart.c")
 		ENDIF()
 	ELSE()
-		MESSAGE(STATUS "CMakeLists: SERIAL log disabled")
+		MESSAGE(STATUS "bootloader: SERIAL log disabled")
 	ENDIF()
 	
 	LIST(APPEND BOOTLOADER_INCLUDE_DIRS "${CMAKE_SOURCE_DIR}/include")
@@ -309,7 +309,7 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES})
 # Use .elf extension by default
 SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}" SUFFIX ".elf")
 
-MESSAGE(STATUS "CMakeLists: Bootloader parameters: ${BOOTLOADER_START_ADDRESS}, ${BOOTLOADER_LENGTH}")
+MESSAGE(STATUS "bootloader: Bootloader parameters: ${BOOTLOADER_START_ADDRESS}, ${BOOTLOADER_LENGTH}")
 
 SET(CS_LINKER_FLAGS "-Wl,--defsym=BOOTLOADER_START_ADDRESS=${BOOTLOADER_START_ADDRESS} -Wl,--defsym=BOOTLOADER_LENGTH=${BOOTLOADER_LENGTH}")
 
@@ -328,7 +328,7 @@ ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
 
 # Add post-build target to generate the .hex file (to be used in nrfjprog or jlink)
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E echo "** CMakeLists: Remove UICR sections for start address and MBR parameters"
+	COMMAND ${CMAKE_COMMAND} -E echo "** bootloader: Remove UICR sections for start address and MBR parameters"
 	COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${REMOVE_SECTIONS} -O ihex ${PROJECT_NAME}.elf ${PROJECT_NAME}.hex
 	)
 		
@@ -355,12 +355,12 @@ ADD_CUSTOM_TARGET(write_bootloader_address
 
 # Some debug information
 IF(VERBOSITY GREATER 4)
-	MESSAGE(STATUS "CMakeLists: \"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
-	MESSAGE(STATUS "CMakeLists: Include dirs: ${BOOTLOADER_INCLUDE_DIRS}")
-	MESSAGE(STATUS "CMakeLists: Linked libraries: ${BOOTLOADER_LIBS}")
+	MESSAGE(STATUS "bootloader: \"${PROJECT_NAME}\" uses the following CXX flags: \"${CMAKE_CXX_FLAGS}\" (can be empty)")
+	MESSAGE(STATUS "bootloader: Include dirs: ${BOOTLOADER_INCLUDE_DIRS}")
+	MESSAGE(STATUS "bootloader: Linked libraries: ${BOOTLOADER_LIBS}")
 ENDIF()
 
-MESSAGE(STATUS "CMakeLists: Target ${BOARD_TARGET}")
+MESSAGE(STATUS "bootloader: Target ${BOARD_TARGET}")
 
 SET_SOURCE_FILES_PROPERTIES(${BOOTLOADER_SOURCE_FILES}
 	PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
