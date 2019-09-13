@@ -303,7 +303,7 @@ void Crownstone::configureStack() {
 	_stack->setAdvertisingInterval(advInterval);
 
 	// Set callback handler for a connection event
-	_stack->onConnect([&](uint16_t conn_handle) {
+	_stack->setOnConnectCallback([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
 		// TODO: see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
 		// be neater about it... we do not need to stop, only after a disconnect we do...
@@ -317,7 +317,7 @@ void Crownstone::configureStack() {
 	});
 
 	// Set callback handler for a disconnection event
-	_stack->onDisconnect([&](uint16_t conn_handle) {
+	_stack->setOnDisconnectCallback([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
 		if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
 //			_stack->changeToLowTxPowerMode();
@@ -376,17 +376,12 @@ void Crownstone::configureAdvertisement() {
 	// assign service data to stack
 	_stack->setServiceData(_serviceData);
 
-	_stack->configureAdvertisement(_beacon, _boardsConfig.deviceType);
-
-//	if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
-//		LOGd("Configure iBeacon");
-//		_stack->configureIBeacon(_beacon, _boardsConfig.deviceType);
-//	}
-//	else {
-//		LOGd("Configure BLE device");
-//		_stack->configureBleDevice(_boardsConfig.deviceType);
-//	}
-
+	if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
+		_stack->configureAdvertisement(_beacon, _boardsConfig.deviceType);
+	}
+	else {
+		_stack->configureAdvertisement(NULL, _boardsConfig.deviceType);
+	}
 }
 
 /**
@@ -643,12 +638,13 @@ void Crownstone::startUp() {
 
 		if (_state->isTrue(CS_TYPE::CONFIG_MESH_ENABLED)) {
 #if BUILD_MESHING == 1
-//			nrf_delay_ms(500);
-			//! TODO: start with delay please
 			_mesh->start();
-			_mesh->advertise(_beacon);
+			if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
+				_mesh->advertise(_beacon);
+			}
 #endif
-		} else {
+		}
+		else {
 			LOGi("Mesh not enabled");
 		}
 
@@ -767,31 +763,9 @@ void Crownstone::handleEvent(event_t & event) {
 			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
 	}
 
-	bool reconfigureBeacon = false;
 	switch(event.type) {
-
 		case CS_TYPE::CONFIG_NAME: {
 			_stack->updateDeviceName(std::string((char*)event.data, event.size));
-			break;
-		}
-		case CS_TYPE::CONFIG_IBEACON_MAJOR: {
-			_beacon->setMajor(*(TYPIFY(CONFIG_IBEACON_MAJOR)*)event.data);
-			reconfigureBeacon = true;
-			break;
-		}
-		case CS_TYPE::CONFIG_IBEACON_MINOR: {
-			_beacon->setMinor(*(TYPIFY(CONFIG_IBEACON_MINOR)*)event.data);
-			reconfigureBeacon = true;
-			break;
-		}
-		case CS_TYPE::CONFIG_IBEACON_UUID: {
-			_beacon->setUUID(*(ble_uuid128_t*)event.data);
-			reconfigureBeacon = true;
-			break;
-		}
-		case CS_TYPE::CONFIG_IBEACON_TXPOWER: {
-			_beacon->setTxPower(*(TYPIFY(CONFIG_IBEACON_TXPOWER)*)event.data);
-			reconfigureBeacon = true;
 			break;
 		}
 		case CS_TYPE::CONFIG_TX_POWER: {
@@ -799,7 +773,7 @@ void Crownstone::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::CONFIG_ADV_INTERVAL: {
-			_stack->updateAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data, true);
+			_stack->updateAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data);
 			break;
 		}
 		case CS_TYPE::CMD_ENABLE_ADVERTISEMENT: {
@@ -868,10 +842,6 @@ void Crownstone::handleEvent(event_t & event) {
 		}
 		default:
 			return;
-	}
-
-	if (reconfigureBeacon && _state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
-		_stack->updateAdvertisementData();
 	}
 }
 
