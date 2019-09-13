@@ -68,10 +68,23 @@ SET(CMAKE_CXX_COMPILER_ID_RUN TRUE CACHE INTERNAL "")
 SET(DEBUG_FLAGS   "-g3")
 SET(RELEASE_FLAGS "-g0")
 
-#message(STATUS "
+# The default flags will be used in all build types
+# The C/C++ shared flags are in DEFAULT_C_AND_CXX_FLAGS, the ones particular for C or C++ in DEFAULT_X_FLAGS
+# The flags mean the following:
+#   * no-exceptions          disable exceptions support and use C++ libs without exceptions
+#   * delete-dead-exceptions throw away instructions which only purpose is to throw exceptions
+#   * no-unwind-tables       stack-walking code for backtrace generation (TODO: we might want to enable this in Debug!)
+#   * no-non-call-exceptions do not convert trapping instructions (SIGSEGV, etc) into exceptions 
+#   * thumb                  use Thumb mode (optimized instruction set)
+#   * function-sections      put every function in its own segment, now it can be garbage collected
+#   * data-sections          put every variable in its own segment
+#   * no-strict-aliasing     allow *int = *float aberrations
+#   * no-builtin             do not use abs, strcpy, and other built-in functions
+#   * short-enums            use a single byte for an enum if possible
+# 
 SET(DEFAULT_CXX_FLAGS       "-std=c++14 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")
 SET(DEFAULT_C_FLAGS         "")
-SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -Wall -Werror -fdiagnostics-color=always -fno-strict-aliasing -fno-builtin -fshort-enums -Wno-error=format -Wno-error=unused-function ${DEBUG_LEVEL}")
+SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -Wall -Werror -fdiagnostics-color=always -fno-strict-aliasing -fno-builtin -fshort-enums -Wno-error=format -Wno-error=unused-function")
 
 SET(ASM_OPTIONS "-x assembler-with-cpp")
 SET(CMAKE_ASM_FLAGS "${CFLAGS} ${ASM_OPTIONS}" )
@@ -87,14 +100,14 @@ IF(result)
 	MESSAGE(STATUS "Enabled interprocedural optimization: -lto")
 	SET(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 else()
-	MESSAGE(STATUS "Interprocedural optimization not enabled (might just be because cmake does not know if the compiler supports it)")
+	MESSAGE(INFO "Note! Interprocedural optimization not enabled (might just be because cmake does not know if the compiler supports it)")
 ENDIF()
 SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -Os -fomit-frame-pointer")
 
 # The option --print-gc-section can be used to debug which sections are actually garbage collected
-#SET(GARBAGE_COLLECTION_OF_SECTIONS "-Wl,--gc-sections,--print-gc-sections")
 SET(GARBAGE_COLLECTION_OF_SECTIONS "-Wl,--gc-sections")
-#SET(GARBAGE_COLLECTION_OF_SECTIONS "-Wl,--no-gc-sections")
+
+# Use of newlib-nano
 SET(OPTIMIZED_NEWLIB "--specs=nano.specs")
 
 # There is a bug in CMAKE_OBJCOPY, it doesn't exist on execution for the first time
