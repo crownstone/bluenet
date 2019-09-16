@@ -19,6 +19,12 @@
 //#define PRINT_DEBUG_EXTERNAL_DATA
 //#define PRINT_VERBOSE_EXTERNAL_DATA
 
+#define TEST_ENCRYPTION_CTR (1)
+
+#if TEST_ENCRYPTION_CTR != 0
+#warning "Test Encryption enabled, do not deploy this software!"
+#endif
+
 ServiceData::ServiceData() :
 	_updateTimerId(NULL)
 	,_crownstoneId(0)
@@ -175,21 +181,14 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 	// encrypt the array using the guest key ECB if encryption is enabled.
 	if (State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) && _operationMode != OperationMode::OPERATION_MODE_SETUP) {
-		// ----------- prev implementation start -----------
-		// EncryptionHandler::getInstance().encrypt(
-		// 		_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
-		// 		_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
-		// 		SERVICE_DATA, CTR);
-		// 
-		// ----------- prev implementation end -----------
-		
-		// ====== debug start ======
-		LOGd("vvv");
-
-		auto& EH = EncryptionHandler::getInstance();
-
+#ifdef TEST_ENCRYPTION_CTR == 0
+		EncryptionHandler::getInstance().encrypt(
+				_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
+				_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
+				SERVICE_DATA, CTR);
+#else
 		// encrypt servicedata with CTR using fixed nonce. 
-		
+		auto& EH = EncryptionHandler::getInstance();
 		EH._checkAndSetKey(EncryptionAccessLevel::SERVICE_DATA);
 		EH.SetCtrNonce_unsafe();
 		EH.EncryptCtr(
@@ -197,11 +196,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 			_serviceData.params.encryptedArray,sizeof(_serviceData.params.encryptedArray),
 			EH._block
 		);
-
-		LOGd("^^^");
-		// ====== debug end ======
-
-		// ----------------------
+#endif
 	}
 
 	if (!initial) {
