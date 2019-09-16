@@ -25,28 +25,16 @@
 //#define TEST_PIN 19
 
 Stack::Stack() :
-	_appearance(BLE_APPEARANCE_GENERIC_TAG),
 //	_clock_source(defaultClockSource),
-	_tx_power_level(0),
-	_sec_mode({ }),
 	_gap_conn_params({ }),
 	_scanning(false),
 	_conn_handle(BLE_CONN_HANDLE_INVALID),
 	_radio_notify(0),
-	_dm_initialized(false),
-	_lowPowerTimeoutId(NULL),
-	_secReqTimerId(NULL),
 	_connectionKeepAliveTimerId(NULL)
 {
 
-	_lowPowerTimeoutData = { {0} };
-	_lowPowerTimeoutId = &_lowPowerTimeoutData;
-	_secReqTimerData = { {0} };
-	_secReqTimerId = &_secReqTimerData;
 	_connectionKeepAliveTimerData = { {0} };
 	_connectionKeepAliveTimerId = &_connectionKeepAliveTimerData;
-
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&_sec_mode);
 
 	_gap_conn_params.min_conn_interval = MIN_CONNECTION_INTERVAL;
 	_gap_conn_params.max_conn_interval = MAX_CONNECTION_INTERVAL;
@@ -94,15 +82,8 @@ void Stack::init() {
 	// an NRF_EVT_POWER_FAILURE_WARNING will be triggered.
 	sd_power_pof_threshold_set(BROWNOUT_TRIGGER_THRESHOLD);
 
-	_advData.adv_data.p_data = NULL;
-	_advData.adv_data.len = 0;
-
-	_advData.scan_rsp_data.p_data = NULL;
-	_advData.scan_rsp_data.len = 0;
-
 	LOGd("Stack initialized");
 	setInitialized(C_STACK_INITIALIZED);
-
 }
 
 /**
@@ -170,9 +151,9 @@ void Stack::initRadio() {
 	uint32_t ram_start = RAM_R1_BASE;
 //	uint32_t ram_start = 0;
 	LOGd("nrf_sdh_ble_default_cfg_set at %p", ram_start);
-	// TODO: make a seperate function, that tells you what to set RAM_R1_BASE to.
+	// TODO: make a separate function, that tells you what to set RAM_R1_BASE to.
 	// TODO: make a unit test for that.
-	ret_code = nrf_sdh_ble_default_cfg_set(_conn_cfg_tag, &ram_start);
+	ret_code = nrf_sdh_ble_default_cfg_set(APP_BLE_CONN_CFG_TAG, &ram_start);
 	switch(ret_code) {
 		case NRF_ERROR_NO_MEM:
 			LOGe("Unrecoverable, memory softdevice and app overlaps. RAM_R1_BASE should be: %p", ram_start);
@@ -206,102 +187,33 @@ void Stack::initRadio() {
 	LOG_FLUSH();
 	APP_ERROR_CHECK(ret_code);
 
-
 	// Version is not saved or shown yet
 	ble_version_t version( { });
 	version.company_id = 12;
 	ret_code = sd_ble_version_get(&version);
 	APP_ERROR_CHECK(ret_code);
 
-	std::string device_name = _device_name.empty() ? "not set..." : _device_name;
-
-	LOGv("sd_ble_gap_device_name_set");
-	ret_code = sd_ble_gap_device_name_set(&_sec_mode, (uint8_t*) device_name.c_str(), device_name.length());
-	APP_ERROR_CHECK(ret_code);
-
-	ret_code = sd_ble_gap_appearance_set(_appearance);
-	APP_ERROR_CHECK(ret_code);
-
 	setInitialized(C_RADIO_INITIALIZED);
 
-	configureAdvertisementParameters();
 	updateConnParams();
-	LOGw("Update TX Power not possible yet");
-	//updateTxPowerLevel();
 }
 
 void Stack::halt() {
-	_stack_state.advertising = _advertising;
-	if (_advertising) {
-		stopAdvertising();
-	}
+//	_stack_state.advertising = _advertising;
+//	if (_advertising) {
+//		stopAdvertising();
+//	}
 }
 
 void Stack::resume() {
-	if (_stack_state.advertising) {
-		_stack_state.advertising = false;
-		startAdvertising();
-	}
-}
-
-void Stack::setAdvertisingTimeoutSeconds(uint16_t advertisingTimeoutSeconds) {
-	// TODO: stop advertising?
-	_advertisingTimeout = advertisingTimeoutSeconds;
-}
-
-void Stack::setAppearance(uint16_t appearance) {
-	_appearance = appearance;
-}
-
-void Stack::setDeviceName(const std::string& deviceName) {
-	_device_name = deviceName;
-}
-
-std::string & Stack::getDeviceName() {
-	return _device_name;
+//	if (_stack_state.advertising) {
+//		_stack_state.advertising = false;
+//		startAdvertising();
+//	}
 }
 
 void Stack::setClockSource(nrf_clock_lf_cfg_t clockSource) {
 	_clock_source = clockSource;
-}
-
-void Stack::setAdvertisingInterval(uint16_t advertisingInterval) {
-	if (advertisingInterval < 0x0020 || advertisingInterval > 0x4000) {
-		LOGw("Invalid advertising interval");
-		return;
-	}
-	_advertisingInterval = advertisingInterval;
-}
-
-void Stack::updateAdvertisingInterval(uint16_t advertisingInterval) {
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	LOGd("Update advertising interval");
-
-	setAdvertisingInterval(advertisingInterval);
-	configureAdvertisementParameters();
-	updateAdvertisementParams();
-}
-
-/**
- * Programming by side effect! Other functions assume _device_name to be set even if sd_ble_gap_device_name_set has
- * not been called yet.
- */
-void Stack::updateDeviceName(const std::string& deviceName) {
-	_device_name = deviceName;
-
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	LOGd("Set device name to %s", _device_name.c_str());
-
-	std::string name = _device_name.empty() ? "not set..." : deviceName;
-
-	uint32_t ret_code;
-	ret_code = sd_ble_gap_device_name_set(&_sec_mode, (uint8_t*) name.c_str(), name.length());
-	APP_ERROR_CHECK(ret_code);
-}
-
-void Stack::updateAppearance(uint16_t appearance) {
-	_appearance = appearance;
-	BLE_CALL(sd_ble_gap_appearance_set, (_appearance));
 }
 
 void Stack::createCharacteristics() {
@@ -325,64 +237,13 @@ void Stack::initServices() {
 }
 
 void Stack::shutdown() {
-	stopAdvertising();
-
-	for (Service* svc : _services) {
-		svc->stopAdvertising();
-	}
-
+	// 16-sep-2019 TODO: stop advertising
 	setUninitialized(C_STACK_INITIALIZED);
 }
 
 Stack& Stack::addService(Service* svc) {
 	_services.push_back(svc);
 	return *this;
-}
-
-/**
- * The accepted values are -40, -30, -20, -16, -12, -8, -4, 0, and 4 dBm.
- * The -30 is not accepted on the nRF52.
- *
- * This function can be called at any moment (also when advertising).
- */
-void Stack::setTxPowerLevel(int8_t powerLevel) {
-#ifdef PRINT_STACK_VERBOSE
-	LOGd(FMT_SET_INT_VAL, "TX power", powerLevel);
-#endif
-
-	switch (powerLevel) {
-		case -40: case -20: case -16: case -12: case -8: case -4: case 0: case 4:
-			// accepted values
-			break;
-		default:
-			// other values are not accepted
-			return;
-	}
-	if (_tx_power_level != powerLevel) {
-		_tx_power_level = powerLevel;
-		updateTxPowerLevel();
-	}
-}
-
-int8_t Stack::getTxPowerLevel() {
-	return _tx_power_level;
-}
-
-/**
- * It seems that if we have a connectable advertisement and a subsequent connection, we cannot update the TX
- * power while already being connected. At least it returns a BLE_ERROR_INVALID_ADV_HANDLE.
- */
-void Stack::updateTxPowerLevel() {
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	if (_advHandle == BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
-		LOGw("Invalid handle");
-		return;
-	}
-	uint32_t ret_code;
-	LOGd("Update tx power level %i for handle %i", _tx_power_level, _advHandle);
-
-	ret_code = sd_ble_gap_tx_power_set(BLE_GAP_TX_POWER_ROLE_ADV, _advHandle, _tx_power_level);
-	APP_ERROR_CHECK(ret_code);
 }
 
 void Stack::updateMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
@@ -419,244 +280,7 @@ void Stack::updateConnParams() {
 	APP_ERROR_CHECK(ret_code);
 }
 
-void Stack::configureIBeaconAdvData(IBeacon* beacon) {
-	LOGd("Configure iBeacon adv data");
 
-	memset(&_ibeaconManufData, 0, sizeof(_ibeaconManufData));
-	_ibeaconManufData.company_identifier = 0x004C;
-	_ibeaconManufData.data.p_data = beacon->getArray();
-	_ibeaconManufData.data.size = beacon->size();
-
-	memset(&_configAdvertisementData, 0, sizeof(_configAdvertisementData));
-
-	_configAdvertisementData.flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-	_configAdvertisementData.p_manuf_specific_data = &_ibeaconManufData;
-	_configAdvertisementData.name_type = BLE_ADVDATA_NO_NAME;
-	_configAdvertisementData.include_appearance = false;
-
-	_includeAdvertisementData = true;
-}
-
-void Stack::configureServiceData(uint8_t deviceType, bool asScanResponse) {
-	LOGd("Configure service data");
-
-	uint8_t serviceDataLength = 0;
-	ble_advdata_t* advData = &_configAdvertisementData;
-	if (asScanResponse) {
-		advData = &_configScanResponse;
-	}
-
-	memset(advData, 0, sizeof(*advData));
-
-	advData->name_type = BLE_ADVDATA_SHORT_NAME;
-
-	if (!asScanResponse) {
-		advData->flags = BLE_GAP_ADV_FLAGS_LE_ONLY_GENERAL_DISC_MODE;
-		advData->include_appearance = false;
-	}
-
-	if (_serviceData && deviceType != DEVICE_UNDEF) {
-		memset(&_crownstoneServiceData, 0, sizeof(_crownstoneServiceData));
-
-		_crownstoneServiceData.service_uuid = CROWNSTONE_PLUG_SERVICE_DATA_UUID;
-
-		_crownstoneServiceData.data.p_data = _serviceData->getArray();
-		_crownstoneServiceData.data.size = _serviceData->getArraySize();
-
-		advData->p_service_data_array = &_crownstoneServiceData;
-		advData->service_data_count = 1;
-
-		LOGd("Add UUID %X", _crownstoneServiceData.service_uuid);
-		serviceDataLength += 2 + sizeof(_crownstoneServiceData.service_uuid) + _crownstoneServiceData.data.size; // 2 For service data header.
-	}
-
-	uint8_t nameLength = 31 - 3 - serviceDataLength - 2; // 3 For flags field, 2 for name field header.
-	LOGd("Max name length = %u", nameLength);
-	uint8_t deviceNameLength = getDeviceName().length();
-	nameLength = std::min(nameLength, deviceNameLength);
-	LOGd("Set BLE name to length %i", nameLength);
-	advData->short_name_len = nameLength;
-
-	if (nameLength == 0) {
-		LOGe("Scan response payload too large or device name not set");
-		return;
-	}
-	if (asScanResponse) {
-		_includeScanResponseData = true;
-	}
-	else {
-		_includeAdvertisementData = true;
-	}
-}
-
-void Stack::configureAdvertisement(IBeacon* beacon, uint8_t deviceType) {
-//	configureIBeaconAdvData(beacon);
-	configureServiceData(deviceType, false);
-//	configureAdvertisementParameters();
-	updateAdvertisementData();
-}
-
-/**
- * It is only possible to include TX power if the advertisement is an "extended" type.
- */
-void Stack::configureAdvertisementParameters() {
-	LOGd("set _adv_params");
-	_advParams.primary_phy                 = BLE_GAP_PHY_1MBPS;
-	_advParams.properties.type             = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
-	_advParams.properties.anonymous        = 0;
-	_advParams.properties.include_tx_power = 0;
-	_advParams.p_peer_addr                 = NULL;
-	_advParams.filter_policy               = BLE_GAP_ADV_FP_ANY;
-	_advParams.interval                    = _advertisingInterval;
-	_advParams.duration                    = _advertisingTimeout;
-}
-
-void Stack::setConnectable(bool connectable) {
-	LOGStackDebug("setConnectable %i", connectable);
-	if (_isConnectable != connectable) {
-		_advParamsChanged = true;
-		_isConnectable = connectable;
-	}
-}
-
-uint32_t Stack::startAdvertising() {
-	LOGd("Start advertising");
-	if (_advertising) {
-		LOGStackDebug("Already advertising");
-		return NRF_SUCCESS;
-	}
-	_wantAdvertising = true;
-	uint32_t err;
-	LOGStackDebug("sd_ble_gap_adv_set_configure with params");
-	err = sd_ble_gap_adv_set_configure(&_advHandle, &_advData, &_advParams);
-	if (err != NRF_SUCCESS) {
-		LOGw("sd_ble_gap_adv_set_configure failed: %u", err);
-		printAdvertisement();
-		return err;
-	}
-	_advParamsChanged = false;
-	LOGStackDebug("sd_ble_gap_adv_start(_adv_handle=%u)", _advHandle);
-	err = sd_ble_gap_adv_start(_advHandle, _conn_cfg_tag); // Only one advertiser may be active at any time.
-	if (err == NRF_SUCCESS) {
-		_advertising = true;
-	}
-	else {
-		// This often fails because this function is called, while the SD is already connected.
-		// The on connect event is scheduled, but not processed by us yet.
-		LOGw("startAdvertising failed: %u", err);
-//			APP_ERROR_CHECK(err);
-	}
-	return err;
-}
-
-void Stack::stopAdvertising() {
-	LOGd("Stop advertising");
-	_wantAdvertising = false;
-	if (!_advertising) {
-		LOGStackDebug("Not advertising");
-		return;
-	}
-	LOGStackDebug("sd_ble_gap_adv_stop(_adv_handle=%u)", _advHandle);
-	uint32_t ret_code = sd_ble_gap_adv_stop(_advHandle);
-
-	// This often fails because this function is called, while the SD is already connected, thus advertising was stopped.
-	// The on connect event is scheduled, but not processed by us yet.
-	APP_ERROR_CHECK_EXCEPT(ret_code, NRF_ERROR_INVALID_STATE);
-	_advertising = false;
-}
-
-void Stack::setConnectableAdvParams() {
-	LOGStackDebug("setConnectableAdvParams");
-	// The mac address cannot be changed while advertising, scanning or creating a connection. Maybe Have a
-	// function that sets address, which sends an event "set address" that makes the scanner pause (etc).
-	_advParams.properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
-}
-
-void Stack::setNonConnectableAdvParams() {
-	LOGStackDebug("setNonConnectableAdvParams");
-	_advParams.properties.type = BLE_GAP_ADV_TYPE_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED;
-}
-
-void Stack::updateAdvertisementParams() {
-	if (!_advertising && !_wantAdvertising) {
-		return;
-	}
-
-	if (isScanning()) {
-		// Skip while scanning or we will get invalid state results when stopping/starting advertisement.
-		// TODO: is that so???
-		LOGd("Updating while scanning");
-//		return;
-	}
-
-	bool connectable = _isConnectable;
-	if (connectable && isConnected()) {
-		connectable = false;
-		_advParamsChanged = true;
-	}
-
-	LOGStackDebug("updateAdvertisementParams connectable=%i change=%i", connectable, _advParamsChanged);
-	if (_advParamsChanged) {
-		return;
-	}
-	if (connectable) {
-		setConnectableAdvParams();
-	}
-	else {
-		setNonConnectableAdvParams();
-	}
-	restartAdvertising();
-}
-
-void Stack::updateAdvertisementData() {
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-
-	uint32_t err;
-
-	uint8_t bufIndex = (_advBufferInUse + 1) % 2;
-	LOGStackDebug("updateAdvertisementData buf=%u", bufIndex);
-	_advBufferInUse = bufIndex;
-	if (_includeAdvertisementData) {
-		LOGStackDebug("include adv data");
-		_advData.adv_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
-		if (_advertisementDataBuffers[bufIndex] == NULL) {
-			_advertisementDataBuffers[bufIndex] = (uint8_t*)calloc(sizeof(uint8_t), _advData.adv_data.len);
-		}
-		_advData.adv_data.p_data = _advertisementDataBuffers[bufIndex];
-		err = ble_advdata_encode(&_configAdvertisementData, _advData.adv_data.p_data, &_advData.adv_data.len);
-		APP_ERROR_CHECK(err);
-	}
-	if (_includeScanResponseData) {
-		LOGStackDebug("include scan response");
-		_advData.scan_rsp_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
-		if (_scanResponseBuffers[bufIndex] == NULL) {
-			_scanResponseBuffers[bufIndex] = (uint8_t*)calloc(sizeof(uint8_t), _advData.scan_rsp_data.len);
-		}
-		_advData.scan_rsp_data.p_data = _scanResponseBuffers[bufIndex];
-		err = ble_advdata_encode(&_configScanResponse, _advData.scan_rsp_data.p_data, &_advData.scan_rsp_data.len);
-		APP_ERROR_CHECK(err);
-	}
-
-	if (_advHandle != BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
-		LOGStackDebug("sd_ble_gap_adv_set_configure without params");
-		err = sd_ble_gap_adv_set_configure(&_advHandle, &_advData, NULL);
-		APP_ERROR_CHECK(err);
-	}
-
-	// Sometimes startAdvertising fails, so for now, just retry in here.
-	if (!_advertising && _wantAdvertising) {
-		startAdvertising();
-	}
-}
-
-void Stack::restartAdvertising() {
-	LOGStackDebug("Restart advertising");
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	if (_advertising) {
-		stopAdvertising();
-	}
-	startAdvertising();
-}
 
 /** Utility function which logs unexpected state
  *
@@ -686,43 +310,6 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
 	return field;
 }
 
-
-
-void Stack::printAdvertisement() {
-	LOGd("_adv_handle=%u", _advHandle);
-
-	LOGd("adv_data len=%u data:", _advData.adv_data.len);
-	char str[4*8+1] = {0};
-	int strIndex = 0;
-	for (size_t i=0; i<_advData.adv_data.len; ++i) {
-		strIndex += sprintf(&(str[strIndex]), "%3u ", _advData.adv_data.p_data[i]);
-		if (i % 8 == 8-1) {
-			LOGd("%s", str);
-			memset(str, 0, sizeof(str));
-			strIndex = 0;
-		}
-	}
-
-	LOGd("scan_rsp_data len=%u data:", _advData.scan_rsp_data.len);
-	memset(str, 0, sizeof(str));
-	strIndex = 0;
-	for (size_t i=0; i<_advData.scan_rsp_data.len; ++i) {
-		strIndex += sprintf(&(str[strIndex]), "%3u ", _advData.scan_rsp_data.p_data[i]);
-		if (i % 8 == 8-1) {
-			LOGd("%s", str);
-			memset(str, 0, sizeof(str));
-			strIndex = 0;
-		}
-	}
-
-	LOGd("type=%u", _advParams.properties.type);
-	LOGd("channel mask: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
-			_advParams.channel_mask[0],
-			_advParams.channel_mask[1],
-			_advParams.channel_mask[2],
-			_advParams.channel_mask[3],
-			_advParams.channel_mask[4]);
-}
 
 void Stack::startScanning() {
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
@@ -779,33 +366,11 @@ void Stack::setAesEncrypted(bool encrypted) {
 	}
 }
 
-void Stack::lowPowerTimeout(void* p_context) {
-	LOGw("bonding timeout!");
-	((Stack*)p_context)->changeToNormalTxPowerMode();
-}
-
-void Stack::changeToLowTxPowerMode() {
-	// TODO: get from board config.
-	TYPIFY(CONFIG_LOW_TX_POWER) lowTxPower;
-	State::getInstance().get(CS_TYPE::CONFIG_LOW_TX_POWER, &lowTxPower, sizeof(lowTxPower));
-	setTxPowerLevel(lowTxPower);
-}
-
-void Stack::changeToNormalTxPowerMode() {
-	TYPIFY(CONFIG_TX_POWER) txPower;
-	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
-	setTxPowerLevel(txPower);
-}
-
 void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 
 	if (p_ble_evt->header.evt_id !=  BLE_GAP_EVT_RSSI_CHANGED && p_ble_evt->header.evt_id != BLE_GAP_EVT_ADV_REPORT) {
 		const char *evt_name __attribute__((unused)) = NordicEventTypeName(p_ble_evt->header.evt_id);
 		LOGd("BLE event %i (0x%X) %s", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id, evt_name);
-	}
-
-	if (_dm_initialized) {
-		// Note: peer manager is removed
 	}
 
 	switch (p_ble_evt->header.evt_id) {
@@ -1076,14 +641,6 @@ void Stack::onConnected(const ble_evt_t * p_ble_evt) {
 		svc->on_ble_event(p_ble_evt);
 	}
 	startConnectionAliveTimer();
-	// Advertising stops on connect, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
-	// Do this after _conn_handle is set, as that's used to check if isConnected().
-	// Also after callbacks, so that in the callback, parameters can be updated.
-	if (_advertising) {
-		_advertising = false;
-		setNonConnectableAdvParams();
-		startAdvertising();
-	}
 }
 
 void Stack::onDisconnected(const ble_evt_t * p_ble_evt) {
@@ -1096,9 +653,6 @@ void Stack::onDisconnected(const ble_evt_t * p_ble_evt) {
 		svc->on_ble_event(p_ble_evt);
 	}
 	stopConnectionAliveTimer();
-	// Do this after _conn_handle is set, as that's used to check if isConnected().
-	// Also after callbacks, so that in the callback, parameters can be updated.
-	updateAdvertisementParams();
 }
 
 void Stack::disconnect() {
