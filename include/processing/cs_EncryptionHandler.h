@@ -152,6 +152,14 @@ public:
 		nrf_ecb_hal_data_t& block);
 
 	bool TestCtrEncryption();
+
+	/**
+	 * Writes a fixed nonce into _block. (used for testing purposes only). 
+	 * Warning: this breaks CTR security, but it will be useful for checking CPU etc.
+	 */
+	void SetCtrNonce_unsafe();
+	bool _checkAndSetKey(uint8_t userLevel);
+
 // TODO: undo this...
 	uint32_t EncryptCtrSingleBlock(
 		const uint8_t* const plainText, 
@@ -163,7 +171,6 @@ private:
 	inline bool _prepareEncryptCTR(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType);
 	inline bool _encryptCTR(uint8_t* validationNonce, uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength);
 	inline bool _decryptCTR(uint8_t* validationNonce, uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength);
-	bool _checkAndSetKey(uint8_t userLevel);
 	bool _validateBlockLength(uint16_t length);
 	bool _validateDecryption(uint8_t* buffer, uint8_t* validationNonce);
 	void _generateSessionNonce();

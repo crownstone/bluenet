@@ -678,6 +678,11 @@ uint32_t EncryptionHandler::EncryptCtrSingleBlock(
 	return err_code;
 }
 
+void EncryptionHandler::SetCtrNonce_unsafe(){
+	uint8_t fixed_nonce[] = {0x0,0x1,0x2,0x3,0x4,0x5,0x6,0x7,0x8,0x9,0xa,0xb,0xc,0xd,0xe,0xf};
+	memcpy(_block.cleartext, fixed_nonce, sizeof(_block.cleartext));
+}
+
 /**
  * Check if the key that we need is set in the memory and if so, set it into the encryption block
  */
