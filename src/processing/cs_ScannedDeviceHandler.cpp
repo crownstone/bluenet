@@ -127,23 +127,32 @@ bool ScannedDeviceHandler::unpackToServiceData(cs_data_t* services16bit, service
 
 bool ScannedDeviceHandler::decryptServiceData(service_data_t* incomingServiceData){
     if(incomingServiceData->params.protocolVersion == ServiceDataUnencryptedType::SERVICE_DATA_TYPE_ENCRYPTED){
-            EncryptionAccessLevel requested_accesslevel;
-            
-            if( ! EncryptionHandler::getInstance().decrypt(
-                incomingServiceData->params.encryptedArray,             //uint8_t* encryptedDataPacket, 
-                sizeof(incomingServiceData->params.encryptedArray),     //int16_t encryptedDataPacketLength, 
-				incomingServiceData->params.encryptedArray,             //uint8_t* target, 
-                sizeof(incomingServiceData->params.encryptedArray),     //uint16_t targetLength, 
-                requested_accesslevel,                   //EncryptionAccessLevel& userLevelInPackage, 
-                EncryptionType::ECB_GUEST                              //EncryptionType encryptionType = CTR);
-            )){
-                return false;
-            }
 
-            if(requested_accesslevel != EncryptionAccessLevel::SERVICE_DATA){
-                LOG("Unexpected value for RequestedAccessLevel");
-                return false;
-            }
+            auto& EH = EncryptionHandler::getInstance();
+            EH._checkAndSetKey(EncryptionAccessLevel::SERVICE_DATA);
+            EH.SetCtrNonce_unsafe();
+            EH.DecryptCtr(
+                incomingServiceData->params.encryptedArray,sizeof(incomingServiceData->params.encryptedArray),
+                incomingServiceData->params.encryptedArray,sizeof(incomingServiceData->params.encryptedArray),
+                EH._block
+            );
+
+            // EncryptionAccessLevel requested_accesslevel;
+            // if( ! EncryptionHandler::getInstance().decrypt(
+            //     incomingServiceData->params.encryptedArray,             //uint8_t* encryptedDataPacket, 
+            //     sizeof(incomingServiceData->params.encryptedArray),     //int16_t encryptedDataPacketLength, 
+			// 	incomingServiceData->params.encryptedArray,             //uint8_t* target, 
+            //     sizeof(incomingServiceData->params.encryptedArray),     //uint16_t targetLength, 
+            //     requested_accesslevel,                   //EncryptionAccessLevel& userLevelInPackage, 
+            //     EncryptionType::ECB_GUEST                              //EncryptionType encryptionType = CTR);
+            // )){
+            //     return false;
+            // }
+
+            // if(requested_accesslevel != EncryptionAccessLevel::SERVICE_DATA){
+            //     LOG("Unexpected value for RequestedAccessLevel");
+            //     return false;
+            // }
 
         } else {
             // what to do with other protocolVersion types?

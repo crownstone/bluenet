@@ -175,12 +175,33 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 	// encrypt the array using the guest key ECB if encryption is enabled.
 	if (State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) && _operationMode != OperationMode::OPERATION_MODE_SETUP) {
-		EncryptionHandler::getInstance().encrypt(
-				_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
-				_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
-				SERVICE_DATA, ECB_GUEST);
-//			EncryptionHandler::getInstance().encrypt((_serviceData.array) + 1, sizeof(service_data_t) - 1, _encryptedParams.payload,
-//			                                         sizeof(_encryptedParams.payload), GUEST, ECB_GUEST);
+		// ----------- prev implementation start -----------
+		// EncryptionHandler::getInstance().encrypt(
+		// 		_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
+		// 		_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
+		// 		SERVICE_DATA, CTR);
+		// 
+		// ----------- prev implementation end -----------
+		
+		// ====== debug start ======
+		LOGd("vvv");
+
+		auto& EH = EncryptionHandler::getInstance();
+
+		// encrypt servicedata with CTR using fixed nonce. 
+		
+		EH._checkAndSetKey(EncryptionAccessLevel::SERVICE_DATA);
+		EH.SetCtrNonce_unsafe();
+		EH.EncryptCtr(
+			_serviceData.params.encryptedArray,sizeof(_serviceData.params.encryptedArray),
+			_serviceData.params.encryptedArray,sizeof(_serviceData.params.encryptedArray),
+			EH._block
+		);
+
+		LOGd("^^^");
+		// ====== debug end ======
+
+		// ----------------------
 	}
 
 	if (!initial) {
