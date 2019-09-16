@@ -11,6 +11,7 @@
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
+#include <events/cs_EventDispatcher.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
 #include <storage/cs_State.h>

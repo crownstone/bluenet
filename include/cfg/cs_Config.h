@@ -71,6 +71,8 @@
  */
 #define SCAN_WINDOW                              158 // 98.75 ms
 
+#define APP_BLE_CONN_CFG_TAG                     1 // Connection configuration identifier.
+
 // bonding / security
 #define SEC_PARAM_TIMEOUT                        30                                          /** < Timeout for Pairing Request or Security Request (in seconds). */
 #define SEC_PARAM_BOND                           1                                           /** < Perform bonding. */

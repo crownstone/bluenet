@@ -107,6 +107,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 	EventDispatcher::getInstance().addListener(this);
 
 	_stack = &Stack::getInstance();
+	_advertiser = &Advertiser::getInstance();
 	_timer = &Timer::getInstance();
 	_storage = &Storage::getInstance();
 	_state = &State::getInstance();
@@ -260,7 +261,6 @@ void Crownstone::configure() {
 	assert(_storage != NULL, "Storage");
 
 	LOGi("> stack ...");
-
 	_stack->initRadio();
 
 	configureStack();
@@ -297,11 +297,6 @@ void Crownstone::configure() {
  *   [29.06.16] restart the mesh disabled, this was limited to pca10000, it does crash dobeacon v0.7
  */
 void Crownstone::configureStack() {
-	// Set the stored advertisement interval
-	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;
-	_state->get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, sizeof(advInterval));
-	_stack->setAdvertisingInterval(advInterval);
-
 	// Set callback handler for a connection event
 	_stack->setOnConnectCallback([&](uint16_t conn_handle) {
 		LOGi("onConnect...");
@@ -320,8 +315,9 @@ void Crownstone::configureStack() {
 	_stack->setOnDisconnectCallback([&](uint16_t conn_handle) {
 		LOGi("onDisconnect...");
 		if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
-//			_stack->changeToLowTxPowerMode();
-			_stack->changeToNormalTxPowerMode();
+//			_advertiser->changeToLowTxPower();
+			_advertiser->changeToNormalTxPower();
+			_advertiser->updateAdvertisementParams();
 		}
 	});
 }
@@ -331,6 +327,12 @@ void Crownstone::configureStack() {
  * (the _operationMode var is not used).
  */
 void Crownstone::configureAdvertisement() {
+	// Set the stored advertisement interval
+	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;
+	_state->get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, sizeof(advInterval));
+	_advertiser->setAdvertisingInterval(advInterval);
+	_advertiser->init();
+
 	// Create the iBeacon parameter object which will be used to configure the advertisement as an iBeacon.
 	TYPIFY(CONFIG_IBEACON_MAJOR) major;
 	TYPIFY(CONFIG_IBEACON_MINOR) minor;
@@ -374,13 +376,13 @@ void Crownstone::configureAdvertisement() {
 	}
 
 	// assign service data to stack
-	_stack->setServiceData(_serviceData);
+	_advertiser->setServiceData(_serviceData);
 
 	if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
-		_stack->configureAdvertisement(_beacon, _boardsConfig.deviceType);
+		_advertiser->configureAdvertisement(_beacon, _boardsConfig.deviceType);
 	}
 	else {
-		_stack->configureAdvertisement(NULL, _boardsConfig.deviceType);
+		_advertiser->configureAdvertisement(NULL, _boardsConfig.deviceType);
 	}
 }
 
@@ -469,22 +471,22 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	switch(newMode) {
 		case OperationMode::OPERATION_MODE_SETUP:
 			LOGd("Configure setup mode");
-//			_stack->changeToLowTxPowerMode();
-			_stack->changeToNormalTxPowerMode();
+//			_advertiser->changeToLowTxPower();
+			_advertiser->changeToNormalTxPower();
 			break;
 		case OperationMode::OPERATION_MODE_FACTORY_RESET:
 			LOGd("Configure factory reset mode");
 			FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
-			_stack->changeToNormalTxPowerMode();
+			_advertiser->changeToNormalTxPower();
 			break;
 		case OperationMode::OPERATION_MODE_DFU:
 			LOGd("Configure DFU mode");
 			// TODO: have this function somewhere else.
 			CommandHandler::getInstance().handleCommand(CTRL_CMD_GOTO_DFU, cmd_source_t(CS_CMD_SOURCE_INTERNAL));
-			_stack->changeToNormalTxPowerMode();
+			_advertiser->changeToNormalTxPower();
 			break;
 		default:
-			_stack->changeToNormalTxPowerMode();
+			_advertiser->changeToNormalTxPower();
 	}
 
 	// Enable AES encryption.
@@ -520,7 +522,7 @@ void Crownstone::setName() {
 	} else {
 		deviceName = std::string(device_name, stateNameData.size);
 	}
-	_stack->updateDeviceName(deviceName);
+	_advertiser->updateDeviceName(deviceName);
 }
 
 /**
@@ -586,12 +588,12 @@ void Crownstone::startUp() {
 
 	//! start advertising
 	LOGi("Start advertising");
-	_stack->startAdvertising();
+	_advertiser->startAdvertising();
 
 	// Set the stored tx power, must be done after advertising has started.
 	TYPIFY(CONFIG_TX_POWER) txPower = 0;
 	_state->get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
-	_stack->setTxPowerLevel(txPower);
+	_advertiser->updateTxPower(txPower);
 
 	// Have to give the stack a moment of pause to start advertising, otherwise we get into race conditions.
 	// TODO: Is this still the case? Can we solve this differently?
@@ -765,24 +767,24 @@ void Crownstone::handleEvent(event_t & event) {
 
 	switch(event.type) {
 		case CS_TYPE::CONFIG_NAME: {
-			_stack->updateDeviceName(std::string((char*)event.data, event.size));
+			_advertiser->updateDeviceName(std::string((char*)event.data, event.size));
 			break;
 		}
 		case CS_TYPE::CONFIG_TX_POWER: {
-			_stack->setTxPowerLevel(*(TYPIFY(CONFIG_TX_POWER)*)event.data);
+			_advertiser->updateTxPower(*(TYPIFY(CONFIG_TX_POWER)*)event.data);
 			break;
 		}
 		case CS_TYPE::CONFIG_ADV_INTERVAL: {
-			_stack->updateAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data);
+			_advertiser->updateAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data);
 			break;
 		}
 		case CS_TYPE::CMD_ENABLE_ADVERTISEMENT: {
 			TYPIFY(CMD_ENABLE_ADVERTISEMENT) enable = *(TYPIFY(CMD_ENABLE_ADVERTISEMENT)*)event.data;
 			if (enable) {
-				_stack->startAdvertising();
+				_advertiser->startAdvertising();
 			}
 			else {
-				_stack->stopAdvertising();
+				_advertiser->stopAdvertising();
 			}
 			// TODO: should be done via event.
 			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, (uint8_t*)&enable, 1);
@@ -808,7 +810,7 @@ void Crownstone::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: {
-			_stack->updateAdvertisementData();
+			_advertiser->updateAdvertisementData();
 			break;
 		}
 		case CS_TYPE::EVT_BROWNOUT_IMPENDING: {

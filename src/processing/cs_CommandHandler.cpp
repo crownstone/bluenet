@@ -5,6 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include "ble/cs_Advertiser.h"
 #include "cfg/cs_Boards.h"
 #include "cfg/cs_Strings.h"
 #include "drivers/cs_Serial.h"
@@ -354,7 +355,7 @@ cs_ret_code_t CommandHandler::handleCmdScheduleEntryClear(buffer_ptr_t buffer, c
 
 cs_ret_code_t CommandHandler::handleCmdIncreaseTx(buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel) {
 	LOGi(STR_HANDLE_COMMAND, "increase TX");
-	Stack::getInstance().changeToNormalTxPowerMode();
+	Advertiser::getInstance().changeToNormalTxPower();
 	return ERR_SUCCESS;
 }
 

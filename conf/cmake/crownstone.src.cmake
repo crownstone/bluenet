@@ -1,4 +1,5 @@
 # List of Crownstone specific code
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Advertiser.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Characteristic.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_CrownstoneManufacturer.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/ble/cs_Service.cpp")

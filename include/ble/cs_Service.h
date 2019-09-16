@@ -70,8 +70,6 @@ public:
 		return _service_handle;
 	}
 
-	virtual void stopAdvertising() {};
-
 protected:
 	friend class Stack;
 

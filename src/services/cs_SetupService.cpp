@@ -7,6 +7,7 @@
 
 #include <cfg/cs_Strings.h>
 #include <cfg/cs_UuidConfig.h>
+#include <events/cs_EventDispatcher.h>
 #include <nrf_soc.h>
 #include <processing/cs_CommandHandler.h>
 #include <services/cs_SetupService.h>

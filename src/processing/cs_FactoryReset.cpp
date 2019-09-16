@@ -10,6 +10,7 @@
 #include "storage/cs_State.h"
 #include "drivers/cs_RTC.h"
 #include "ble/cs_Stack.h"
+#include "ble/cs_Advertiser.h"
 #include "processing/cs_CommandHandler.h"
 #include "processing/cs_Switch.h"
 #include "events/cs_EventDispatcher.h"
@@ -47,7 +48,7 @@ void FactoryReset::timeout() {
 	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
 	if (resetState == FACTORY_RESET_STATE_LOWTX) {
 		LOGi("Change to normal mode")
-		Stack::getInstance().changeToNormalTxPowerMode();
+		Advertiser::getInstance().changeToNormalTxPower();
 	}
 	resetState = FACTORY_RESET_STATE_NORMAL;
 	State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
@@ -64,7 +65,7 @@ void FactoryReset::process() {
 		resetState = FACTORY_RESET_STATE_LOWTX;
 		State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
 		LOGd("recovery: go to low tx");
-		Stack::getInstance().changeToLowTxPowerMode();
+		Advertiser::getInstance().changeToLowTxPower();
 		Stack::getInstance().disconnect();
 		resetTimeout();
 	}
