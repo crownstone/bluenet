@@ -19,7 +19,7 @@ ELSEIF(CMAKE_BUILD_TYPE MATCHES "Release")
 ELSEIF(CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
 ELSEIF(CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
 ELSE()
-	MESSAGE(FATAL_ERROR "There should be a ${CMAKE_BUILD_TYPE} defined (and known)")
+	MESSAGE(FATAL_ERROR "There should be a CMAKE_BUILD_TYPE defined (and known)")
 ENDIF()
 
 # The bluetooth name is not optional
