@@ -10,6 +10,7 @@ tags
 *~
 .idea/
 .settings/
+.vscode/
 .DS_Store
 env.config
 node_modules
