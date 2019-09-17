@@ -199,6 +199,33 @@ Another convenient variable to set there is `GDB_PORT`. To have both running in 
     cd build/board1
     make debug_server
 
+## Maintainers
+
+Not for everyday users, just for maintainers of this code base, there are more options. A few of the options are 
+described in the [Build System](docs/BUILD_SYSTEM.md) document.
+
+There are a few other options which can be found as well by typing `make`, a space and then TAB. Some examples:
+
+For a linter (cppcheck):
+
+    make check
+
+For documentation:
+
+    make generate_documentation
+    make view_documentation
+
+By the way, to remove dependency checking, `CMake` introduces for each target also a fast variant. For example, the
+`debug` target depends on the `${PROJECT_NAME}.elf` target
+
+    make debug
+
+To actually only run `debug`, just type:
+
+    make debug/fast
+
+This option exists for almost all targets.
+
 ## Feedback
 
 If there are bugs in the build process, please indicate so. 
