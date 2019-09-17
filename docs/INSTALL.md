@@ -202,7 +202,7 @@ Another convenient variable to set there is `GDB_PORT`. To have both running in 
 ## Maintainers
 
 Not for everyday users, just for maintainers of this code base, there are more options. A few of the options are 
-described in the [Build System](docs/BUILD_SYSTEM.md) document.
+described in the [Build System](BUILD_SYSTEM.md) document.
 
 There are a few other options which can be found as well by typing `make`, a space and then TAB. Some examples:
 
