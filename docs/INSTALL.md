@@ -119,15 +119,19 @@ should be something like:
 
 ## Summary
 
-For your convenience, most commands, can be run from the build directory:
+For your convenience, most commands, can be run from the build directory. To upload everything, you will for now need
+the following series of commands. 
 
     cd build
     make erase
     make write_hw_version
     make softdevice
     make upload_bootloader
+    make upload_bootloader_settings
     make write_bootloader_address
     make upload
+
+If the dust settles we might have one single `make upload_all` command as well. Keep tight. :-)
 
 ## Debug
 
