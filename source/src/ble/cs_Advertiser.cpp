@@ -21,7 +21,7 @@ Advertiser::Advertiser() {
 }
 
 void Advertiser::init() {
-	if (_isInitialized) {
+	if (!isInitialized(false)) {
 		LOGw("Already initialized");
 		return;
 	}
@@ -36,22 +36,25 @@ void Advertiser::init() {
 	configureAdvertisementParameters();
 }
 
-bool Advertiser::isInitialized() {
-	if (!_isInitialized) {
-		LOGw("Advertiser is not initialized");
+bool Advertiser::isInitialized(bool expected) {
+	if (expected != _isInitialized) {
+		LOGw("Advertiser is %sinitialized", expected ? "not " : "");
 	}
-	return _isInitialized;
+	return expected == _isInitialized;
 }
 
 void Advertiser::setAdvertisingTimeoutSeconds(uint16_t advertisingTimeoutSeconds) {
+	isInitialized(false);
 	_advertisingTimeout = advertisingTimeoutSeconds;
 }
 
 void Advertiser::setAppearance(uint16_t appearance) {
+	isInitialized(false);
 	_appearance = appearance;
 }
 
 void Advertiser::setDeviceName(const std::string& deviceName) {
+	isInitialized(false);
 	_device_name = deviceName;
 }
 
@@ -60,6 +63,7 @@ std::string & Advertiser::getDeviceName() {
 }
 
 void Advertiser::setAdvertisingInterval(uint16_t advertisingInterval) {
+	isInitialized(false);
 	if (advertisingInterval < 0x0020 || advertisingInterval > 0x4000) {
 		LOGw("Invalid advertising interval");
 		return;

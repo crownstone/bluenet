@@ -262,7 +262,7 @@ protected:
 	/**
 	 * Check if advertiser is initialized.
 	 */
-	bool isInitialized();
+	bool isInitialized(bool expected=true);
 
 	void onConnect();
 
