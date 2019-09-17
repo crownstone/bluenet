@@ -113,6 +113,7 @@ if(DOWNLOAD_JLINK)
     URL ${JLINK_LINUX_DOWNLOAD_URL}
     URL_MD5 ${JLINK_MD5}
     DOWNLOAD_NO_EXTRACT 1
+    SOURCE_DIR ${WORKSPACE_DIR}/tools/jlink
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
     BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
     INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
