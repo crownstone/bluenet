@@ -288,6 +288,14 @@ ADD_CUSTOM_TARGET(erase
   COMMENT "Erase everything on target board"
   )
 
+ADD_CUSTOM_TARGET(reset
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to reset target board"
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND nrfjprog -f nrf52 --reset
+  COMMENT "Reset target board"
+  )
+
 #######################################################################################################################
 # Forward commands for a particular board towards its build directory 
 #######################################################################################################################
