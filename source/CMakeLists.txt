@@ -724,6 +724,24 @@ ELSE()
 			DEPENDS ${PROJECT_NAME}.hex
 			COMMENT "Flashes binary to remote target board"
 			)
+
+		ADD_CUSTOM_TARGET(check
+			COMMAND cppcheck --enable=style --quiet ${CMAKE_SOURCE_DIR} 
+			COMMENT "Check for style or worse types of errors (linter)"
+			)
+		
+		ADD_CUSTOM_TARGET(generate_documentation
+			COMMAND ${CMAKE_COMMAND} -E echo "Run doxygen from ${CMAKE_SOURCE_DIR}"
+			COMMAND cd ${WORKSPACE_DIR} && doxygen source/doxygen.config
+			COMMENT "Run documentation generator"
+			)
+		
+		ADD_CUSTOM_TARGET(view_documentation
+			COMMAND ${CMAKE_COMMAND} -E echo "Open an .html viewer through xdg-open"
+			COMMAND xdg-open ${WORKSPACE_DIR}/docs/html/index.html
+			COMMENT "View documentation"
+			DEPENDS generate_documentation
+			)
 		
 		ADD_CUSTOM_TARGET(read_bootloader_address
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x10001014 ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
