@@ -72,7 +72,7 @@ set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
 #######################################################################################################################
 
 set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex)
-
+list(APPEND CMAKE_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FILE}")
 
 #######################################################################################################################
 # Download dependencies
