@@ -164,6 +164,15 @@ Go to the build
 
 The other commands are as in the usual setting.
 
+Note, now, if you change a configuration setting you will also need to run `CMake` again. It picks up the 
+configuration settings at configuration time and then passes them as defines to `CMake` in the bluenet directory.
+
+    cd build
+    cmake ..
+    make
+
+Only after this you can assume that the `make` targets in `build/default` or any other target are up to date.
+
 ## Advanced
 
 It is possible to have a second file in your target directory that overwrites values in your `CMakeBuild.config`.

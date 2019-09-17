@@ -34,6 +34,11 @@ set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH}")
 
 MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
+#include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
+#load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
+#load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
+#load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
+
 #######################################################################################################################
 
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
