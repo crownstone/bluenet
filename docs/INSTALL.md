@@ -89,10 +89,16 @@ contains information about the installed application and the firmware version. G
     make build_bootloader_settings
     make upload_bootloader_settings
 
-It is possible to create a dfu package through:
+To actually adjust the bootloader hex file so it contains the settings, run:
+
+    make merge_bootloader_settings
+
+Now it becomes possible to create a dfu package through:
 
     cd build/default
     make generate_dfu_package
+
+Dependencies between these steps might need to be included.
 
 ## Summary
 
