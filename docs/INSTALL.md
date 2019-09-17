@@ -66,6 +66,15 @@ To upload the firwmare
     cd build/default
     make upload
 
+It is necessary for the firmware to also write a hardware version
+
+    cd build/default
+    make write_hw_version
+
+This can also be read by `make read_hw_version`. It allows Crownstone to run the same binary on all our devices and
+decide per device what type of hardware is actually present. For example, on a Guidestone there will be no switch
+functionality available.
+
 The bootloader is build automatically when you build the firmware, it can also be flashed to the target board. The
 value of its start address is written to UICR separately.
 
@@ -73,12 +82,17 @@ value of its start address is written to UICR separately.
     make upload_bootloader
     make write_bootloader_address
 
-It is necessary for the firmware to also write a hardware version
+The bootloader requires a bootloader settings page that contains information about the current DFU process. It also
+contains information about the installed application and the firmware version. Generate and upload it through:
 
     cd build/default
-    make write_hw_version
+    make build_bootloader_settings
+    make upload_bootloader_settings
 
-This can also be read by `make read_hw_version`.
+It is possible to create a dfu package through:
+
+    cd build/default
+    make generate_dfu_package
 
 ## Summary
 
@@ -110,7 +124,7 @@ In a third console, you can also run an RTT Client
 ## Configuration
 
 If you want to configure for a different target, go to the `config` directory in the workspace and copy the default
-configuration files to a new directory, say `boardA`.
+configuration files to a new directory, say `board0`.
 
     cd config
     cp -r default board0

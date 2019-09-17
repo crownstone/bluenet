@@ -760,8 +760,8 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/crownstone.hex" --application-version ${FIRMWARE_VERSION} --bootloader-version ${BOOTLOADER_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader-settings.hex"
-			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${CMAKE_BINARY_DIR}/bootloader-settings.hex"
+			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/crownstone.hex" --application-version ${FIRMWARE_VERSION} --bootloader-version ${BOOTLOADER_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
+			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
 			COMMENT "Create bootloader settings"
 			)
 		
@@ -769,10 +769,17 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --program ${CMAKE_BINARY_DIR}/bootloader-settings.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMAND nrfjprog -f nrf52 --program ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 			COMMENT "Flashes bootloader settings to remote target board"
 			)
 	
+		ADD_CUSTOM_TARGET(merge_bootloader_settings
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use mergehex to combine bootloader with bootloader settings"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND mergehex -m ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex -o ${CMAKE_BINARY_DIR}/bootloader/bootloader_with_settings.hex
+			COMMENT "Merges bootloader with bootloader settings"
+			)
 
 		ADD_CUSTOM_TARGET(generate_dfu_package
 			COMMAND ${CMAKE_COMMAND} -E echo
@@ -781,14 +788,16 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo "     Softdevice: ${SOFTDEVICE_HEX_FILE}"
 			COMMAND ${CMAKE_COMMAND} -E echo "     Bootloader: bootloader.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "TODO: softdevice req/id needs to be extracted rather than hardcoded"
+			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use pass to get encrypted key file"
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Key file: ${KEY_FILE}"
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --sd-id 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_VERSION} ${PROJECT_NAME}.zip
+			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --sd-id 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader_with_settings.hex --bootloader-version ${BOOTLOADER_VERSION} ${PROJECT_NAME}.zip
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMENT "Flashes bootloader settings to remote target board"
+			COMMENT "Generate DFU package"
 			)
 
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
