@@ -271,9 +271,12 @@ ADD_CUSTOM_TARGET(softdevice
   DEPENDS bluenet
   COMMENT "Flashes binary to remote target board"
   )
+		
+SET(DEFAULT_NRFUTIL_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
+SET(DEFAULT_NRFUTIL_READ_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH};-DINSTRUCTION:STRING=READ")
 
 ADD_CUSTOM_TARGET(read_softdevice_version
-  COMMAND ${CMAKE_COMMAND} -DINSTRUCTION:STRING=READ -DADDRESS:STRING=0x000300C ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+  COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x000300C ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
   COMMENT "Reads version of softdevice"
   )
 
@@ -283,6 +286,14 @@ ADD_CUSTOM_TARGET(erase
   COMMAND ${CMAKE_COMMAND} -E echo
   COMMAND nrfjprog -f nrf52 --eraseall ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
   COMMENT "Erase everything on target board"
+  )
+
+ADD_CUSTOM_TARGET(reset
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to reset target board"
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND nrfjprog -f nrf52 --reset
+  COMMENT "Reset target board"
   )
 
 #######################################################################################################################

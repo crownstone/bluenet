@@ -764,7 +764,7 @@ ELSE()
 		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
 		set(LOAD_BOARD_HARDWARE_VERSION "")
 		include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
-		load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${DEFAULT_HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
+		load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
 
 		ADD_CUSTOM_TARGET(write_hw_version
 			COMMAND ${CMAKE_COMMAND} -E echo
