@@ -100,6 +100,23 @@ Now it becomes possible to create a dfu package through:
 
 Dependencies between these steps might need to be included.
 
+To generate a DFU package, it is assumed that the key file is encrypted using the utility `pass`. It is possible to
+overwrite the pass file per configuration:
+
+    PASS_FILE=your_pass_store/dfu_pkg_signing_key
+
+The contents of this file when executing on the command-line 
+
+    pass your_pass_store/dfu_pkg_signing_key
+
+should be something like:
+
+    -----BEGIN EC PRIVATE KEY------
+    ...
+    ...
+    -----END EC PRIVATE KEY------
+
+
 ## Summary
 
 For your convenience, most commands, can be run from the build directory:
