@@ -34,6 +34,7 @@
 #include <processing/cs_Watchdog.h>
 #include <storage/cs_State.h>
 #include <drivers/cs_RTC.h>
+#include <events/cs_EventDispatcher.h>
 #include <processing/cs_CommandHandler.h>
 #include <drivers/cs_Timer.h>
 

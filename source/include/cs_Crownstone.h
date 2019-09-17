@@ -11,6 +11,7 @@
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
 #include <ble/cs_Stack.h>
+#include <ble/cs_Advertiser.h>
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
@@ -145,6 +146,7 @@ private:
 
 	// drivers
 	Stack* _stack;
+	Advertiser* _advertiser;
 	Timer* _timer;
 	Storage* _storage;
 	State* _state;
