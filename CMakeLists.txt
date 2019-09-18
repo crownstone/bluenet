@@ -294,7 +294,7 @@ ADD_CUSTOM_TARGET(reset
   COMMAND ${CMAKE_COMMAND} -E echo
   COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to reset target board"
   COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND nrfjprog -f nrf52 --reset
+  COMMAND nrfjprog -f nrf52 --reset ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
   COMMENT "Reset target board"
   )
 
