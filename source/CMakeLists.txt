@@ -67,7 +67,15 @@ MESSAGE(STATUS "Git branch: ${GIT_BRANCH}")
 MESSAGE(STATUS "Day of compilation: ${COMPILATION_DAY}")
 MESSAGE(STATUS "Compiler: ${CMAKE_C_COMPILER}")
 
-MESSAGE(STATUS "BLE name ${BLUETOOTH_NAME}")
+IF(SERIAL_NUM STREQUAL "")
+	MESSAGE(STATUS "Default JLink device (serial number not specified)")
+ENDIF()
+MESSAGE(STATUS "Serial number of JLink device to use ${SERIAL_NUM}")
+
+IF(GDB_PORT STREQUAL "2331")
+	MESSAGE(STATUS "Default GDB port (2331)")
+ENDIF()
+MESSAGE(STATUS "GDB port to use ${GDB_PORT}")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
@@ -620,6 +628,11 @@ ELSE()
 		SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
 			PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
 			)
+		IF(EXISTS  ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+			SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
+				PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config
+				)
+		ENDIF()
 
 		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
 
@@ -628,6 +641,9 @@ ELSE()
 		# This does lead to a cmake reeconfigure when the file changes... However, nothing else gets rebuild after
 		# the reconfiguration
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
+		IF(EXISTS  ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+			set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+		ENDIF()
 
 		#SET(INCLUDE_ONLY_SECTIONS "-j .text -j .data -j .sdh_soc_observers -j .sdh_ble_observers -j .sdh_state_observers -j .sdh_stack_observers -j .sdh_req_observers -j .nrf_balloc")
 		SET(INCLUDE_ONLY_SECTIONS "")

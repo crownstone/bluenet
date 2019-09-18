@@ -24,6 +24,10 @@ list(APPEND CMAKE_ARGS "-DDEFAULT_CONF_CMAKE_PATH:STRING=${DEFAULT_CONF_CMAKE_PA
 list(APPEND CMAKE_ARGS "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
 list(APPEND CMAKE_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 
+# Trick to clear things in CMake... We might need to do this for all arguments that can be left undefined.
+list(APPEND CMAKE_ARGS "-UGDB_PORT")
+list(APPEND CMAKE_ARGS "-USERIAL_NUM")
+
 #######################################################################################################################
 # Load modules
 #######################################################################################################################
@@ -245,6 +249,12 @@ ExternalProject_Add(bluenet
   BUILD_ALWAYS 1
   DEPENDS micro_eec
   )
+
+		
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
+if(EXISTS  ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+endif()
 
 # Regretfully, this "trick" will make it impossible to pull after a change in CMakeBuild.config . 
 #ExternalProject_Add_Step(bluenet BUILD
