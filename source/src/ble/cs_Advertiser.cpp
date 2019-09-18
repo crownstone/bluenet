@@ -231,7 +231,7 @@ void Advertiser::configureServiceData(uint8_t deviceType, bool asScanResponse) {
 	}
 }
 
-void Advertiser::configureAdvertisement(IBeacon* beacon, uint8_t deviceType) {
+void Advertiser::configureAdvertisement(__attribute__((unused))IBeacon* beacon, uint8_t deviceType) {
 //	configureIBeaconAdvData(beacon);
 	configureServiceData(deviceType, false);
 //	configureAdvertisementParameters();

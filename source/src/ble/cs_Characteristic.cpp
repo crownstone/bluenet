@@ -415,7 +415,7 @@ uint32_t Characteristic<buffer_ptr_t>::notify() {
 
 /** When a previous transmission is successful send the next.
  */
-void CharacteristicBase::onTxComplete(const ble_common_evt_t * p_ble_evt) {
+void CharacteristicBase::onTxComplete(__attribute__((unused))const ble_common_evt_t * p_ble_evt) {
 	// if we have a notification pending, try to send it
 	if (_status.notificationPending) {
 		// this-> is necessary so that the call of notify depends on the template
@@ -428,7 +428,7 @@ void CharacteristicBase::onTxComplete(const ble_common_evt_t * p_ble_evt) {
 	}
 }
 
-void Characteristic<buffer_ptr_t>::onTxComplete(const ble_common_evt_t * p_ble_evt) {
+void Characteristic<buffer_ptr_t>::onTxComplete(__attribute__((unused))const ble_common_evt_t * p_ble_evt) {
 	// if we have a notification pending, try to send it
 	if (_status.notificationPending) {
 		// this-> is necessary so that the call of notify depends on the template

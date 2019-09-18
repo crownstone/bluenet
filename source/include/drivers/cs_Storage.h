@@ -154,7 +154,7 @@ public:
 	/**
 	 * Handle Crownstone events
 	 */
-	void handleEvent(event_t & event) {};
+	void handleEvent(event_t &) {};
 
 	/**
 	 * Handle FDS events

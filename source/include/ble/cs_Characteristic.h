@@ -223,7 +223,7 @@ public:
 	 *  dynamic length. When a value is received over BT we need to update
 	 *  the length of the data
 	 */
-	virtual void setGattValueLength(uint16_t length) {}
+	virtual void setGattValueLength(uint16_t ) {}
 
 	/** Return the actual length of the value used by the gatt server
 	 *  In the case of aes encryption, this is the length of the encrypted
@@ -267,7 +267,7 @@ public:
 	 *  the length of the data. same if we update a value to be read, the
 	 *  length of the available data has to be set.
 	 */
-	virtual void setValueLength(uint16_t length) {};
+	virtual void setValueLength(uint16_t ) {};
 
 	/** Return the actual length of the value
 	 *  In the case of aes encryption, this is the length of the unencrypted
