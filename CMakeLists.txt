@@ -246,10 +246,11 @@ ExternalProject_Add(bluenet
   DEPENDS micro_eec
   )
 
-ExternalProject_Add_Step(bluenet BUILD
-  COMMAND ${CMAKE_COMMAND} -E echo "-- Execute git update-index --skip-worktree for default config file to prevent accidental commits"
-  COMMAND git update-index --skip-worktree ${WORKSPACE_DIR}/config/default/CMakeBuild.config
-  )
+# Regretfully, this "trick" will make it impossible to pull after a change in CMakeBuild.config . 
+#ExternalProject_Add_Step(bluenet BUILD
+#  COMMAND ${CMAKE_COMMAND} -E echo "-- Execute git update-index --skip-worktree for default config file to prevent accidental commits"
+#  COMMAND git update-index --skip-worktree ${WORKSPACE_DIR}/config/default/CMakeBuild.config
+#  )
 
 add_dependencies(bluenet gcc_arm_none_eabi)
 add_dependencies(bluenet nordic_sdk)
