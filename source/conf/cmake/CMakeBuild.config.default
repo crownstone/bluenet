@@ -2,35 +2,35 @@
 
 # The name that is advertised.
 # Should be 4 characters or less
-BLUETOOTH_NAME="Test"
+BLUETOOTH_NAME=Test
 
-FIRMWARE_VERSION="undefined"
-BOOTLOADER_VERSION="undefined"
+FIRMWARE_VERSION=undefined
+BOOTLOADER_VERSION=undefined
 
-# The different boards that can be used:
-# ## old crownstones
-# CROWNSTONE5          0
-# PLUGIN_FLEXPRINT_01  1
-# ## nordic boards
+# The different boards that can be used (from cs_Boards.h):
+# ## Nordic boards
 # PCA10036             40
 # PCA10040             41
-# ## square guidestone
+# ## Guidestone
 # GUIDESTONE           100
-# ## crownstone builtin
+# ## Crownstone USB dongle
+# CS_USB_DONGLE        200
+# ## Crownstone Builtin
 # ACR01B1A             1000
 # ACR01B1B             1001
 # ACR01B1C             1002
 # ACR01B1D             1003
 # ACR01B1E             1004
-# ## crownstone builtin one
+# ## Crownstone Builtin One
 # ACR01B10B            1007
-# ## crownstone plug
+# ACR01B10C            1008
+# ## Crownstone Plug
 # ACR01B2A             1500
 # ACR01B2B             1501
 # ACR01B2C             1502
 # ACR01B2E             1503
 # ACR01B2G             1504
-# HARDWARE_BOARD=ACR01B2C
+#HARDWARE_BOARD=ACR01B2C
 
 # The default hardware board, in case no board is written in UICR.
 # This value will also be written to UICR.
