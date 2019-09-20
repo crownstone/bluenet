@@ -825,23 +825,58 @@ ELSE()
 			COMMENT "Merges bootloader with bootloader settings"
 			)
 
-		ADD_CUSTOM_TARGET(generate_dfu_package
+		ADD_CUSTOM_TARGET(generate_dfu_package_all
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to generate DFU package"
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
 			COMMAND ${CMAKE_COMMAND} -E echo "     Firmware:   ${PROJECT_NAME}.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo "     Softdevice: ${SOFTDEVICE_HEX_FILE}"
 			COMMAND ${CMAKE_COMMAND} -E echo "     Bootloader: bootloader.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "TODO: softdevice req/id needs to be extracted rather than hardcoded"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Use pass to get encrypted key file"
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use pass to get encrypted key file, using entry: ${PASS_FILE}"
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
-			COMMAND ${CMAKE_COMMAND} -E echo "     Key file: ${KEY_FILE}"
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --sd-id 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader_with_settings.hex --bootloader-version ${BOOTLOADER_VERSION} ${PROJECT_NAME}.zip
+			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
+			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --sd-id 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_VERSION} all_dfu.zip
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMENT "Generate DFU package"
+			COMMENT "Generate DFU package with Softdevice, bootloader, and application"
+			)
+		
+		ADD_CUSTOM_TARGET(generate_dfu_package_app
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
+			COMMAND ${CMAKE_COMMAND} -E echo "     Firmware:   ${PROJECT_NAME}.hex"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "TODO: softdevice req needs to be extracted rather than hardcoded"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use pass to get encrypted key file, using entry: ${PASS_FILE}"
+			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
+			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
+			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
+			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_VERSION} app_dfu.zip
+			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMENT "Generate DFU package with application only"
+			)
+
+
+		ADD_CUSTOM_TARGET(generate_dfu_package_bootloader
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
+			COMMAND ${CMAKE_COMMAND} -E echo "     Bootloader: bootloader.hex"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "TODO: softdevice req needs to be extracted rather than hardcoded"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use pass to get encrypted key file, using entry: ${PASS_FILE}"
+			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
+			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
+			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
+			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_VERSION} bootloader_dfu.zip
+			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMENT "Generate DFU package with bootloader only"
 			)
 
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
