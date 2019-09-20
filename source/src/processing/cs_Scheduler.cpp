@@ -110,7 +110,7 @@ void Scheduler::tick() {
 			case SCHEDULE_ACTION_TYPE_PWM: {
 				// TODO: use an event instead
 				uint8_t switchState = entry->pwm.pwm;
-				Switch::getInstance().setSwitch(switchState);
+				// Switch::getInstance().setSwitch(switchState);
 				break;
 			}
 			case SCHEDULE_ACTION_TYPE_FADE: {
@@ -118,11 +118,11 @@ void Scheduler::tick() {
 				//TODO: implement the fade function in the Switch class
 				//TODO: if (entry->fade.fadeDuration == 0), then just use SCHEDULE_ACTION_TYPE_PWM
 				uint8_t switchState = entry->fade.pwmEnd;
-				Switch::getInstance().setSwitch(switchState);
+				// Switch::getInstance().setSwitch(switchState);
 				break;
 			}
 			case SCHEDULE_ACTION_TYPE_TOGGLE: {
-				Switch::getInstance().toggle();
+				// Switch::getInstance().toggle();
 				break;
 			}
 		}
