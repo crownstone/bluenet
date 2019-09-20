@@ -16,7 +16,7 @@ The best way is to first [fork](https://github.com/crownstone/bluenet/fork) the 
 
 and download the code:
 
-    git clone https://github.com/YOUR_GITHUB_USERNAME/bluenet 
+    git clone https://github.com/YOUR_GITHUB_USERNAME/bluenet
 
 and set the correct upstream:
 
@@ -41,71 +41,76 @@ directory:
 
 ## Flashing
 
-Different commands to upload to a board (flashing) use nrfjprog under the hood.
+Different commands to write to a board (flashing) use `nrfjprog` under the hood.
 
-To clear the target device completely
+To clear the target device completely:
 
     cd build
     make erase
 
-To upload the softdevice
+To write the softdevice:
 
     cd build
-    make softdevice
+    make write_softdevice
 
 This will also erase the pages if there is already code on this.
 
-To check the version of a softdevice
+To check the version of a softdevice:
 
     make read_softdevice_version
 
 If you type `make ` and then TAB there should be tab completion that shows the possible targets.
 
-To upload the firwmare
+Before writing the application or bootloader, the board version should be written. It allows Crownstone to run the same binary on all our devices and decide per device what type of hardware is actually present. For example, on a Guidestone there will be no switch functionality available.
+It has to be written before the application runs, else the application will write a default.
 
     cd build/default
-    make upload
+    make write_board_version
 
-It is necessary for the firmware to also write a hardware version
+The bootloader is build automatically when you build the firmware, it can also be flashed to the target board. The value of its start address is written to UICR separately.
 
-    cd build/default
-    make write_hw_version
+To write the bootloader and its address:
 
-This can also be read by `make read_hw_version`. It allows Crownstone to run the same binary on all our devices and
-decide per device what type of hardware is actually present. For example, on a Guidestone there will be no switch
-functionality available.
-
-The bootloader is build automatically when you build the firmware, it can also be flashed to the target board. The
-value of its start address is written to UICR separately.
-
-    cd build/default
-    make upload_bootloader
+    cd build/default/bootloader
+    make write_bootloader
     make write_bootloader_address
 
-The bootloader requires a bootloader settings page that contains information about the current DFU process. It also
-contains information about the installed application and the firmware version. Generate and upload it through:
+Then write the application:
+
+    cd build/default
+    make write_application
+
+The bootloader requires a bootloader settings page that contains information about the current DFU process. It also contains information about the installed application and its version. The bootloader verifies if the application is correct by checking it against the bootloader settings, so each time the application changes, you the bootloader settings also change.
+
+To build and write the bootloader settings:
 
     cd build/default
     make build_bootloader_settings
-    make upload_bootloader_settings
+    make write_bootloader_settings
 
-To actually adjust the bootloader hex file so it contains the settings, run:
+Now that everything is written, the board has to be reset:
 
-    make merge_bootloader_settings
+    cd build
+    make reset
 
-Now it becomes possible to create a dfu package through:
+## DFU (over the air updates)
+
+In order to create DFU packages, the firmware has to be signed. For this, [pass](https://www.passwordstore.org/) is used to store the signing keys.
+
+TODO: make target to generate signing key.
+
+Now it becomes possible to create a dfu package to update the application through:
 
     cd build/default
-    make generate_dfu_package
+    make generate_dfu_package_application
 
 Dependencies between these steps might need to be included.
 
-To generate a DFU package, it is assumed that the key file is encrypted using the utility `pass`. It is possible to
-overwrite the pass file per configuration:
+It is possible to set what entry in `pass` is used:
 
     PASS_FILE=your_pass_store/dfu_pkg_signing_key
 
-The contents of this file when executing on the command-line 
+The contents of this file when executing on the command-line:
 
     pass your_pass_store/dfu_pkg_signing_key
 
@@ -119,19 +124,21 @@ should be something like:
 
 ## Summary
 
-For your convenience, most commands, can be run from the build directory. To upload everything, you will for now need
-the following series of commands. 
+All build specific commands should be run from the target directory, while non-build specific commands can be run from the build directory.
+To write everything, for now you will need the following series of commands.
 
     cd build
     make erase
-    make write_hw_version
-    make softdevice
-    make upload_bootloader
-    make upload_bootloader_settings
+    make write_softdevice
+    cd default
+    make write_board_version
+    make write_application
+    make write_bootloader_settings
+    cd bootloader
+    make write_bootloader
     make write_bootloader_address
-    make upload
 
-If the dust settles we might have one single `make upload_all` command as well. Keep tight. :-)
+If the dust settles we might have one single `make write_all` command as well. Keep tight. :-)
 
 ## Debug
 
@@ -142,7 +149,7 @@ To start debugging the target, run first in a separate console:
 
 Then run the debug session in another console:
 
-    make debug
+    make debug_application
 
 In a third console, you can also run an RTT Client
 
@@ -150,8 +157,7 @@ In a third console, you can also run an RTT Client
 
 ## Configuration
 
-If you want to configure for a different target, go to the `config` directory in the workspace and copy the default
-configuration files to a new directory, say `board0`.
+If you want to configure for a different target, go to the `config` directory in the workspace and copy the default configuration files to a new directory, say `board0`.
 
     cd config
     cp -r default board0
@@ -164,8 +170,8 @@ Go to the build
 
 The other commands are as in the usual setting.
 
-Note, now, if you change a configuration setting you will also need to run `CMake` again. It picks up the 
-configuration settings at configuration time and then passes them as defines to `CMake` in the bluenet directory.
+Note, now, if you change a configuration setting you will also need to run `CMake` again.
+It picks up the configuration settings at configuration time and then passes them as defines to `CMake` in the bluenet directory.
 
     cd build
     cmake ..
@@ -201,8 +207,8 @@ Another convenient variable to set there is `GDB_PORT`. To have both running in 
 
 ## Maintainers
 
-Not for everyday users, just for maintainers of this code base, there are more options. A few of the options are 
-described in the [Build System](BUILD_SYSTEM.md) document.
+Not for everyday users, just for maintainers of this code base, there are more options.
+A few of the options are described in the [Build System](BUILD_SYSTEM.md) document.
 
 There are a few other options which can be found as well by typing `make`, a space and then TAB. Some examples:
 
@@ -215,8 +221,7 @@ For documentation:
     make generate_documentation
     make view_documentation
 
-By the way, to remove dependency checking, `CMake` introduces for each target also a fast variant. For example, the
-`debug` target depends on the `${PROJECT_NAME}.elf` target
+By the way, to remove dependency checking, `CMake` introduces for each target also a fast variant. For example, the `debug` target depends on the `${PROJECT_NAME}.elf` target
 
     make debug
 
@@ -228,10 +233,9 @@ This option exists for almost all targets.
 
 ## Feedback
 
-If there are bugs in the build process, please indicate so. 
+If there are bugs in the build process, please indicate so.
 
-The default installation procedure is done through continuous integration. If it is successful you will see a proper
-building button:
+The default installation procedure is done through continuous integration. If it is successful you will see a proper building button:
 
 [![Build Status](https://travis-ci.org/crownstone/bluenet.svg?branch=master)](https://travis-ci.org/crownstone/bluenet)
 

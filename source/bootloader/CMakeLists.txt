@@ -337,9 +337,9 @@ IF(SERIAL_NUM)
 	SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 ENDIF()
 
-ADD_CUSTOM_TARGET(upload_bootloader
+ADD_CUSTOM_TARGET(write_bootloader
 	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload ${PROJECT_NAME}"
+	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write ${PROJECT_NAME}"
 	COMMAND ${CMAKE_COMMAND} -E echo
 	COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 	COMMENT "Flashes bootloader to remote target board"

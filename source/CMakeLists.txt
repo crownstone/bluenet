@@ -679,7 +679,7 @@ ELSE()
 				${PROJECT_NAME}
 			COMMENT "Copy ${PROJECT_NAME} to ${PROJECT_NAME}.elf")
 
-		ADD_CUSTOM_TARGET(generate-dat
+		ADD_CUSTOM_TARGET(generate_dat
 			COMMAND echo
 			COMMAND echo "** Use srec_cat to create the INIT .dat file for the DFU"
 			COMMAND echo
@@ -689,14 +689,15 @@ ELSE()
 			COMMENT "Generate the INIT .dat file for the DFU"
 			)
 
-		ADD_CUSTOM_TARGET(combine
+		ADD_CUSTOM_TARGET(merge_all
 			COMMAND echo
-			COMMAND echo "** Use srec_cat to create one combined softdevice+app file"
+			COMMAND echo "** Use srec_cat to create one merged file"
+			COMMAND echo "** Includes softdevice, bootloader, firmware, bootloader settings, and all UICR fields, except board version."
 			COMMAND echo
-			COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel"
-			COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.bin -binary -offset ${APPLICATION_START_ADDRESS} -o combined.hex -intel
+			COMMAND echo "srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.hex -intel bootloader-settings.hex -intel -exclude 0x10001014 0x10001018 -generate 0x10001014 0x10001018 -l-e-constant $BOOTLOADER_START_ADDRESS 4 -exclude 0x10001018 0x1000101C -generate 0x10001018 0x1000101C -l-e-constant 0x0007E000 4 -o combined.hex -intel"
+			COMMAND srec_cat ${SOFTDEVICE_DIR}/${SOFTDEVICE_DIR_HEX}/${SOFTDEVICE}_softdevice.hex -intel bootloader.hex -intel ${PROJECT_NAME}.hex -intel bootloader-settings.hex -intel -exclude 0x10001014 0x10001018 -generate 0x10001014 0x10001018 -l-e-constant $BOOTLOADER_START_ADDRESS 4 -exclude 0x10001018 0x1000101C -generate 0x10001018 0x1000101C -l-e-constant 0x0007E000 4 -o combined.hex -intel
 			DEPENDS ${PROJECT_NAME}.bin
-			COMMENT "Combine as one hex file"
+			COMMENT "Merge all but board version into one hex"
 			)
 
 		ADD_CUSTOM_TARGET(analyze
@@ -727,7 +728,7 @@ ELSE()
 			COMMENT "RTT client, runs in background"
 			)
 		
-		ADD_CUSTOM_TARGET(debug
+		ADD_CUSTOM_TARGET(debug_application
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug"
 			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf 
 			DEPENDS ${PROJECT_NAME}.elf
@@ -737,13 +738,13 @@ ELSE()
 		SET(DEFAULT_NRFUTIL_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
 		SET(DEFAULT_NRFUTIL_READ_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH};-DINSTRUCTION:STRING=READ")
 
-		ADD_CUSTOM_TARGET(upload 
+		ADD_CUSTOM_TARGET(write_application
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload binary"
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write binary"
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 			DEPENDS ${PROJECT_NAME}.hex
-			COMMENT "Flashes binary to remote target board"
+			COMMENT "Flashes application to remote target board"
 			)
 
 		ADD_CUSTOM_TARGET(check
@@ -771,15 +772,15 @@ ELSE()
 	
 		# Actually piping over the command line might fail in another OS, this might be replaced by a particular
 		# cmake utility function
-		ADD_CUSTOM_TARGET(read_board_version
+		ADD_CUSTOM_TARGET(read_nrf_chip_version
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x10000100 ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x10000104 ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
-			COMMENT "Read board version"
+			COMMENT "Read nRF chip version"
 			)
 		
-		ADD_CUSTOM_TARGET(read_hw_version
+		ADD_CUSTOM_TARGET(read_board_version
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=${HARDWARE_BOARD_ADDRESS} ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
-			COMMENT "Read hardware version"
+			COMMENT "Read board version"
 			)
 
 		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
@@ -787,12 +788,12 @@ ELSE()
 		include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
 		load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
 
-		ADD_CUSTOM_TARGET(write_hw_version
+		ADD_CUSTOM_TARGET(write_board_version
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Write hardware version ${LOAD_BOARD_HARDWARE_VERSION}"
+			COMMAND ${CMAKE_COMMAND} -E echo "** Write board version ${LOAD_BOARD_HARDWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND nrfjprog -f nrf52 --memwr ${HARDWARE_BOARD_ADDRESS} --val ${LOAD_BOARD_HARDWARE_VERSION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} 
-			COMMENT "Flashes binary to remote target board"
+			COMMENT "Flashes board version to remote target board"
 			)
 		
 		set(FIRMWARE_VERSION "")
@@ -804,14 +805,14 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/crownstone.hex" --application-version ${FIRMWARE_VERSION} --bootloader-version ${BOOTLOADER_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
+			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_VERSION} --bootloader-version ${BOOTLOADER_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
 			COMMENT "Create bootloader settings"
 			)
 		
-		ADD_CUSTOM_TARGET(upload_bootloader_settings
+		ADD_CUSTOM_TARGET(write_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND nrfjprog -f nrf52 --program ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 			COMMENT "Flashes bootloader settings to remote target board"
@@ -828,9 +829,9 @@ ELSE()
 		ADD_CUSTOM_TARGET(generate_dfu_package_all
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
-			COMMAND ${CMAKE_COMMAND} -E echo "     Firmware:   ${PROJECT_NAME}.hex"
-			COMMAND ${CMAKE_COMMAND} -E echo "     Softdevice: ${SOFTDEVICE_HEX_FILE}"
-			COMMAND ${CMAKE_COMMAND} -E echo "     Bootloader: bootloader.hex"
+			COMMAND ${CMAKE_COMMAND} -E echo "     Application: ${PROJECT_NAME}.hex"
+			COMMAND ${CMAKE_COMMAND} -E echo "     Softdevice:  ${SOFTDEVICE_HEX_FILE}"
+			COMMAND ${CMAKE_COMMAND} -E echo "     Bootloader:  bootloader.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "TODO: softdevice req/id needs to be extracted rather than hardcoded"
 			COMMAND ${CMAKE_COMMAND} -E echo
@@ -844,10 +845,10 @@ ELSE()
 			COMMENT "Generate DFU package with Softdevice, bootloader, and application"
 			)
 		
-		ADD_CUSTOM_TARGET(generate_dfu_package_app
+		ADD_CUSTOM_TARGET(generate_dfu_package_application
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
-			COMMAND ${CMAKE_COMMAND} -E echo "     Firmware:   ${PROJECT_NAME}.hex"
+			COMMAND ${CMAKE_COMMAND} -E echo "     Application: ${PROJECT_NAME}.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "TODO: softdevice req needs to be extracted rather than hardcoded"
 			COMMAND ${CMAKE_COMMAND} -E echo
@@ -855,7 +856,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_VERSION} app_dfu.zip
+			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_VERSION} application_dfu.zip
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with application only"
@@ -865,7 +866,7 @@ ELSE()
 		ADD_CUSTOM_TARGET(generate_dfu_package_bootloader
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
-			COMMAND ${CMAKE_COMMAND} -E echo "     Bootloader: bootloader.hex"
+			COMMAND ${CMAKE_COMMAND} -E echo "     Bootloader:  bootloader.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "TODO: softdevice req needs to be extracted rather than hardcoded"
 			COMMAND ${CMAKE_COMMAND} -E echo
@@ -899,4 +900,3 @@ ELSE()
 	ENDIF()
 
 ENDIF()
-
