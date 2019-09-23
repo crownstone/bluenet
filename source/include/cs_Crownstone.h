@@ -178,6 +178,7 @@ private:
 	CommandAdvHandler* _commandAdvHandler = NULL;
 	MultiSwitchHandler* _multiSwitchHandler = NULL;
 
+	void TestBehaviourHandler(uint32_t time, uint8_t presence);
 	BehaviourHandler _behaviourHandler;
 	BehaviourStore _behaviourStore;
 

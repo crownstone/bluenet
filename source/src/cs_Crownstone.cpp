@@ -534,7 +534,7 @@ void Crownstone::setName() {
  */
 void Crownstone::startOperationMode(const OperationMode & mode) {
 	switch(mode) {
-		case OperationMode::OPERATION_MODE_NORMAL:
+		case OperationMode::OPERATION_MODE_NORMAL: {
 			_scanner->init();
 			_scanner->setStack(_stack);
 			_scheduler = &Scheduler::getInstance();
@@ -551,18 +551,35 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			EventDispatcher::getInstance().addListener(&_behaviourHandler);
 			EventDispatcher::getInstance().addListener(&_behaviourStore);
 
+			Behaviour morningbehaviour(
+					9*60*60,
+					11*60*60,
+					0b10101010,
+					true
+				);
+			
+			event_t evt(CS_TYPE::EVT_UPDATE_BEHAVIOUR,
+				&morningbehaviour,
+				TypeSize(CS_TYPE::EVT_UPDATE_BEHAVIOUR)
+				);
+
+			EventDispatcher::getInstance().dispatch(evt);
+
 			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
 			_multiSwitchHandler->init();
 			break;
-		case OperationMode::OPERATION_MODE_SETUP:
+		} 
+		case OperationMode::OPERATION_MODE_SETUP:{
 			// TODO: Why this hack?
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {
 				serial_enable(SERIAL_ENABLE_RX_ONLY);
 			}
 			break;
-		default:
+		}
+		default:{
 			// nothing to be done
-			;
+			break;
+		}
 	}
 }
 
