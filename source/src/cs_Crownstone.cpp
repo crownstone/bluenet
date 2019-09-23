@@ -48,6 +48,9 @@
 #include <structs/buffer/cs_EncryptionBuffer.h>
 #include <util/cs_Utils.h>
 
+#include <processing/behaviour/cs_BehaviourHandler.h>
+#include <processing/behaviour/cs_BehaviourStore.h>
+
 extern "C" {
 #include <nrf_nvmc.h>
 }
@@ -544,6 +547,9 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::LOCALIZATION);
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
+
+			EventDispatcher::getInstance().addListener(&_behaviourHandler);
+			EventDispatcher::getInstance().addListener(&_behaviourStore);
 
 			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
 			_multiSwitchHandler->init();

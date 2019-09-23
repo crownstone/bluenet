@@ -25,6 +25,8 @@
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
 #include <processing/cs_Watchdog.h>
+#include <processing/behaviour/cs_BehaviourHandler.h>
+#include <processing/behaviour/cs_BehaviourStore.h>
 #include <services/cs_CrownstoneService.h>
 #include <services/cs_DeviceInformationService.h>
 #include <services/cs_SetupService.h>
@@ -175,6 +177,9 @@ private:
 	FactoryReset* _factoryReset = NULL;
 	CommandAdvHandler* _commandAdvHandler = NULL;
 	MultiSwitchHandler* _multiSwitchHandler = NULL;
+
+	BehaviourHandler _behaviourHandler;
+	BehaviourStore _behaviourStore;
 
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;
