@@ -7,6 +7,7 @@
 #pragma once
 
 #include "events/cs_EventListener.h"
+#include <processing/behaviour/cs_Behaviour.h>
 
 
 class BehaviourHandler : public EventListener {
@@ -32,6 +33,13 @@ class BehaviourHandler : public EventListener {
 
 
     private:
+    /**
+     * Acquires the current time and presence information. 
+     * Checks the intended state by looping over the active behaviours
+     * and if necessary dispatch an event to communicate a state update.
+     */
+    void update();
+
     void handleTime(TYPIFY(STATE_TIME)* time);
 
     /**
@@ -43,5 +51,7 @@ class BehaviourHandler : public EventListener {
      * Returns true if a valid behaviour is found.
      * In this case intendedState contains the desired state value.
      */
-    bool computeIntendedState(bool & intendedState);
+    public: bool computeIntendedState(bool& intendedState, 
+        Behaviour::time_t currenttime, 
+        Behaviour::presence_data_t currentpresence);
 };

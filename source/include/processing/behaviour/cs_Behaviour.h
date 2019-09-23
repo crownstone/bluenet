@@ -18,9 +18,10 @@
 class Behaviour {
     // TODO(Arend, 23-09-2019): datatypes and implementation still susceptible to change.
     public:
-    typedef uint16_t time_t;
+    typedef uint32_t time_t; // let's say, seconds since midnight (00:00)
     typedef uint8_t presence_data_t;
 
+    Behaviour() = default;
     Behaviour(time_t from, time_t until, 
       presence_data_t presencemask,
       bool intendedStateWhenBehaviourIsValid);
@@ -29,6 +30,9 @@ class Behaviour {
      * Returns the intended state when this behaviour is valid.
      */
     bool value() const;
+
+    inline time_t from() const {return behaviourappliesfrom; }
+    inline time_t until() const { return behaviourappliesuntil; }
 
     /**
      * Does the behaviour apply to the current situation?
@@ -39,10 +43,10 @@ class Behaviour {
     bool isValid(time_t currenttime) const;
     bool isValid(presence_data_t currentpresence) const;
 
-    time_t behaviourappliesfrom;
-    time_t behaviourappliesuntil;
-    presence_data_t requiredpresencebitmask;
+    time_t behaviourappliesfrom = 0x0000;
+    time_t behaviourappliesuntil = 0x0000;
+    presence_data_t requiredpresencebitmask = 0x00;
 
     // true if on, false if off.
-    bool intendedStateWhenBehaviourIsValid;
+    bool intendedStateWhenBehaviourIsValid = false;
 };

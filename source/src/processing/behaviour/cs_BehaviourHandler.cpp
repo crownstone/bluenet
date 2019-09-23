@@ -46,10 +46,14 @@ void BehaviourHandler::init(){
     EventDispatcher::getInstance().addListener(this);
 }
 
-bool BehaviourHandler::computeIntendedState(bool& intendedState){
-    Behaviour::time_t currentTime = 0xffff;
-    Behaviour::presence_data_t currentPresence = 0xff;
+void BehaviourHandler::update(){
 
+}
+
+bool BehaviourHandler::computeIntendedState(bool& intendedState,
+        Behaviour::time_t currentTime, 
+        Behaviour::presence_data_t currentPresence){
+    
     bool foundValidBehaviour = false;
     bool firstIntendedState = false;
 
@@ -76,3 +80,65 @@ bool BehaviourHandler::computeIntendedState(bool& intendedState){
 
     return false;
 }
+
+// void TestBehaviourHandler(uint32_t time, uint8_t presence){
+// 	bool intendedState = false;
+// 	if(_behaviourHandler.computeIntendedState(intendedState,
+// 			time,
+// 			presence)
+// 	){
+// 		LOGd("TestBehaviourHandler(%d,%d) -> valid: %d intent: %d",
+// 			time,presence,
+// 			true, intendedState? 1: 0);
+// 	} else {
+// 		LOGd("TestBehaviourHandler(%d,%d) -> valid: %d intent: %d",
+// 			time,presence,
+// 			false, intendedState? 1 : 0);
+// 	}
+// }
+
+// void TestCases(){
+//     // add some test behaviours to the store
+//     Behaviour morningbehaviour(
+//         9*60*60,
+//         11*60*60,
+//         0b10101010,
+//         true
+//     );
+//     Behaviour morningbehaviour_overlap(
+//         8*60*60,
+//         10*60*60,
+//         0b10101010,
+//         true
+//     );
+//     Behaviour morningbehaviour_conflict(
+//         10*60*60,
+//         12*60*60,
+//         0b10101010,
+//         false
+//     );
+//     Behaviour eveningbehaviour(
+//         22*60*60,
+//         23*60*60,
+//         0b10101010,
+//         true
+//     );
+
+//     saveBehaviour(morningbehaviour,0);
+//     saveBehaviour(eveningbehaviour,1);
+//     saveBehaviour(morningbehaviour_overlap,2);
+//     saveBehaviour(morningbehaviour_conflict,3);
+
+//     // check boundaries
+//     TestBehaviourHandler(22*60*60-1, 0xff); // 0 0
+//     TestBehaviourHandler(22*60*60,   0xff); // 1 1
+//     TestBehaviourHandler(23*60*60-1, 0xff); // 1 1
+//     TestBehaviourHandler(23*60*60,   0xff); // 0 0
+
+//     // check confict and overlap
+//     TestBehaviourHandler( 8*60*60, 0xff); // 1 1 // 1 behaviour
+//     TestBehaviourHandler( 9*60*60, 0xff); // 1 1 // 2 behaviours agree
+//     TestBehaviourHandler(10*60*60, 0xff); // 0 x // 2 behaviours conflict
+//     TestBehaviourHandler(11*60*60, 0xff); // 1 0 // 1 behaviour edge case
+//     TestBehaviourHandler(12*60*60, 0xff); // 0 0 // 0 behaviours
+// }

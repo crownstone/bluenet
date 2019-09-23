@@ -1,7 +1,7 @@
 /*
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: Dec 20, 2019
+ * Date: Sep 23, 2019
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
@@ -26,8 +26,9 @@ class BehaviourStore : public EventListener {
      */
     virtual void handleEvent(event_t& evt);
 
+    bool saveBehaviour(Behaviour b, size_t index);
+
     static inline const std::array<Behaviour,MaxBehaviours>& getActiveBehaviours() {
         return activeBehaviours;
     }
-
 };
