@@ -7,42 +7,13 @@
 
 #pragma once
 
-#include <events/cs_EventListener.h>
 #include <drivers/cs_Timer.h>
+#include <events/cs_EventListener.h>
+
+#include <time/cs_Time.h>
+#include <time/cs_TimeOfDay.h>
+
 #include <stdint.h>
-
-class TimeOfDay{
-    private:
-    uint32_t sec_since_midnight;
-
-    public:
-    TimeOfDay(uint32_t secondsSinceMidnight) : sec_since_midnight(secondsSinceMidnight % (24*60*60)){}
-
-    uint8_t h() {return sec_since_midnight / (60*60);}
-    uint8_t m() {return (sec_since_midnight % (60*60)) / 60;}
-    uint8_t s() {return sec_since_midnight % 60;}
-
-    /**
-     * Implicit cast operators
-     */
-    operator uint32_t(){ return sec_since_midnight; }
-
-};
-
-class Time {
-    private:
-    uint32_t posixTimeStamp;
-    
-    public:
-    Time(uint32_t posixTime)  : posixTimeStamp(posixTime){}
-
-    /**
-     * Implicit cast operators
-     */
-    operator uint32_t(){ return posixTimeStamp; }
-    operator TimeOfDay(){ return posixTimeStamp % (24*60*60); }
-
-};
 
 /**
  * This class keeps track of the real time in the current time zone.

@@ -12,6 +12,9 @@
 #include <storage/cs_State.h>
 #include <events/cs_EventDispatcher.h>
 
+#include <time/cs_Time.h>
+#include <time/cs_TimeOfDay.h>
+
 // ============== Static members ==============
 
 uint32_t SystemTime::rtcTimeStamp;

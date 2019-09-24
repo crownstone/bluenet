@@ -30,10 +30,11 @@
  *
  *********************************************************************************************************************/
 
+#include <cs_Crownstone.h>
+
 #include <ble/cs_CrownstoneManufacturer.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_HardwareVersions.h>
-#include <cs_Crownstone.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_PWM.h>
 #include <drivers/cs_RNG.h>
