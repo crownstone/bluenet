@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 
-class Scheduler : EventListener {
+class Scheduler : public EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
 	static Scheduler& getInstance() {

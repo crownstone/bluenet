@@ -5,6 +5,8 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#pragma once
+
 #include <events/cs_EventListener.h>
 #include <drivers/cs_Timer.h>
 #include <stdint.h>
@@ -14,7 +16,11 @@ class TimeOfDay{
     uint32_t sec_since_midnight;
 
     public:
-    TimeOfDay(uint32_t secondsSinceMidnight) : sec_since_midnight(secondsSinceMidnight){}
+    TimeOfDay(uint32_t secondsSinceMidnight) : sec_since_midnight(secondsSinceMidnight % (24*60*60)){}
+
+    uint8_t h() {return sec_since_midnight / (60*60);}
+    uint8_t m() {return (sec_since_midnight % (60*60)) / 60;}
+    uint8_t s() {return sec_since_midnight % 60;}
 
     /**
      * Implicit cast operators
@@ -43,7 +49,7 @@ class Time {
  * It may obtain its data through the mesh, or some other way and try
  * to keep up to date using on board timing functionality.
  */
-class SystemTime : EventListener {
+class SystemTime : public EventListener {
     public:
     static Time posix();
     static TimeOfDay now();

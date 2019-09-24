@@ -11,6 +11,7 @@
 
 #include <events/cs_EventDispatcher.h>
 #include <common/cs_Types.h>
+#include <util/cs_SystemTime.h>
 
 #include "drivers/cs_Serial.h"
 
@@ -33,12 +34,13 @@ void BehaviourHandler::handleTime(TYPIFY(STATE_TIME)* time){
 }
 
 void BehaviourHandler::update(){
-    LOGd("BehaviourHandler::update");
     // TODO(Arend 24-09-2019): get time from scheduler
     // TODO(Arend 24-09-2019): get presence from scheduler
     bool nextState = false;
-    Behaviour::time_t time = 0x00;
+    TimeOfDay time = SystemTime::now();
     Behaviour::presence_data_t presence = 0xff; // everyone present as dummy value.
+    
+    LOGd("BehaviourHandler::update %d:%d:%d",time.h(),time.m(),time.s());
 
     if(computeIntendedState(nextState, time, presence)){
         // TODO(Arend 24-09-2019): send nextState to SwitchController

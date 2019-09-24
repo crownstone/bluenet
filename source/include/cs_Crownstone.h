@@ -31,7 +31,10 @@
 #include <services/cs_DeviceInformationService.h>
 #include <services/cs_SetupService.h>
 #include <storage/cs_State.h>
-#include <storage/cs_State.h>
+
+#include <util/cs_SystemTime.h>
+#include <processing/cs_Scheduler.h>
+
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
 #endif
@@ -177,7 +180,7 @@ private:
 	CommandAdvHandler* _commandAdvHandler = NULL;
 	MultiSwitchHandler* _multiSwitchHandler = NULL;
 
-	void TestBehaviourHandler(uint32_t time, uint8_t presence);
+	SystemTime _systemTime;
 	BehaviourHandler _behaviourHandler;
 	BehaviourStore _behaviourStore;
 

@@ -654,6 +654,8 @@ void Crownstone::startUp() {
 		}
 
 		SystemTime::init();
+		EventDispatcher::getInstance().addListener(&_systemTime);
+		EventDispatcher::getInstance().addListener(&Scheduler::getInstance());
 
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
 			RNG rng;

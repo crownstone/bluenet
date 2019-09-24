@@ -38,6 +38,7 @@ void SystemTime::scheduleNextTick() {
 }
 
 void SystemTime::tick(void*) {
+    LOGd("SystemTime::tick() posix: %d rtc:%d",posixTimeStamp,rtcTimeStamp);
 	// RTC can overflow every 512s
 	uint32_t tickDiff = RTC::difference(RTC::getCount(), rtcTimeStamp);
 
