@@ -26,23 +26,34 @@ class Behaviour {
       presence_data_t presencemask,
       bool intendedStateWhenBehaviourIsValid);
 
+    // =========== Getters ===========
+
     /**
      * Returns the intended state when this behaviour is valid.
      */
     bool value() const;
 
-    inline time_t from() const {return behaviourappliesfrom; }
-    inline time_t until() const { return behaviourappliesuntil; }
+    /**
+     * Returns from (incl.) which time on this behaviour applies.
+     */
+    time_t from() const;
+
+    /**
+     * Returns until (excl.) which time on this behaviour applies.
+     */
+    time_t until() const;
+
+
+    // =========== Semantics ===========
 
     /**
      * Does the behaviour apply to the current situation?
      */
+    bool isValid(time_t currenttime) const;
+    bool isValid(presence_data_t currentpresence) const;
     bool isValid(time_t currenttime, presence_data_t currentpresence) const;
 
     private:
-    bool isValid(time_t currenttime) const;
-    bool isValid(presence_data_t currentpresence) const;
-
     time_t behaviourappliesfrom = 0x0000;
     time_t behaviourappliesuntil = 0x0000;
     presence_data_t requiredpresencebitmask = 0x00;

@@ -19,14 +19,22 @@ bool Behaviour::value() const {
     return intendedStateWhenBehaviourIsValid;
 }
 
+Behaviour::time_t Behaviour::from() const {
+    return behaviourappliesfrom; 
+}
+
+Behaviour::time_t Behaviour::until() const {
+    return behaviourappliesuntil; 
+}
+
 bool Behaviour::isValid(time_t currenttime, presence_data_t currentpresence) const{
     return isValid(currenttime) && isValid(currentpresence);
 }
 
 bool Behaviour::isValid(time_t currenttime) const{
-    return behaviourappliesfrom <= behaviourappliesuntil // ensure proper midnight roll-over 
-        ? (behaviourappliesfrom <= currenttime && currenttime < behaviourappliesuntil) 
-        : (behaviourappliesfrom <= currenttime || currenttime < behaviourappliesuntil);
+    return from() <= until() // ensure proper midnight roll-over 
+        ? (from() <= currenttime && currenttime < until()) 
+        : (from() <= currenttime || currenttime < until());
 }
 
 bool Behaviour::isValid(presence_data_t currentpresence) const{

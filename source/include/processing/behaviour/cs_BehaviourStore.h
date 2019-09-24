@@ -26,6 +26,13 @@ class BehaviourStore : public EventListener {
      */
     virtual void handleEvent(event_t& evt);
 
+    /**
+     * Stores the given behaviour [b] at given [index] in the activeBehaviours array.
+     * 
+     * Note: currently doesn't persist states.
+     * 
+     * Returns true on success, false if [index] is out of range.
+     */
     bool saveBehaviour(Behaviour b, size_t index);
 
     static inline const std::array<Behaviour,MaxBehaviours>& getActiveBehaviours() {
