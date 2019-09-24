@@ -173,7 +173,6 @@ private:
 #endif
 	CommandHandler* _commandHandler = NULL;
 	Scanner* _scanner = NULL;
-	Scheduler* _scheduler = NULL;
 	FactoryReset* _factoryReset = NULL;
 	CommandAdvHandler* _commandAdvHandler = NULL;
 	MultiSwitchHandler* _multiSwitchHandler = NULL;

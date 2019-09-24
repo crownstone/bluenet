@@ -19,6 +19,7 @@
 #include "protocol/cs_UartProtocol.h"
 #include "storage/cs_State.h"
 #include "protocol/mesh/cs_MeshModelPacketHelper.h"
+#include "util/cs_SystemTime.h"
 
 void reset(void* p_context) {
 
@@ -323,7 +324,7 @@ cs_ret_code_t CommandHandler::handleCmdSetTime(buffer_ptr_t buffer, const uint16
 
 	uint32_t value = *(uint32_t*)buffer;
 
-	Scheduler::getInstance().setTime(value);
+	SystemTime::setTime(value);
 
 	return ERR_SUCCESS;
 }

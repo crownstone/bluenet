@@ -47,6 +47,7 @@
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
 #include <util/cs_Utils.h>
+#include <util/cs_SystemTime.h>
 
 #include <processing/behaviour/cs_BehaviourHandler.h>
 #include <processing/behaviour/cs_BehaviourStore.h>
@@ -537,7 +538,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
 			_scanner->init();
 			_scanner->setStack(_stack);
-			_scheduler = &Scheduler::getInstance();
 
 #if BUILD_MESHING == 1
 			if (_state->isTrue(CS_TYPE::CONFIG_MESH_ENABLED)) {
@@ -653,7 +653,7 @@ void Crownstone::startUp() {
 			_powerSampler->enableZeroCrossingInterrupt(handleZeroCrossing);
 		}
 
-		_scheduler->start();
+		SystemTime::init();
 
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
