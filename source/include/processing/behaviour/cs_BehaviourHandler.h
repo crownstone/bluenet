@@ -14,23 +14,15 @@ class BehaviourHandler : public EventListener {
     public:
 
     /**
-     * Register at the EventDispatcher.
-     */
-    void init();
-
-    /**
      * Computes the intended state of this crownstone based on
      * the stored behaviours, and then dispatches a switch event
      * for that state.
      * 
      * Events:
-     * - sunrise/set.
-     * - Time.
-     * - OnEnter
-     * - OnExit
+     * - STATE_TIME
+     * - EVT_PRESENCE_MUTATION
      */
     virtual void handleEvent(event_t& evt);
-
 
     private:
     /**

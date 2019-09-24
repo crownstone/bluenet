@@ -18,18 +18,9 @@
 void BehaviourHandler::handleEvent(event_t& evt){
     // LOGd("BehaviourHandler::handleEvent %d", evt.type);
     switch(evt.type){
-        case CS_TYPE::STATE_TIME:{
-            LOGd("received time");
-            if(evt.size == sizeof(TYPIFY(STATE_TIME))) {
-				handleTime(reinterpret_cast<TYPIFY(STATE_TIME)*>(evt.data));
-            }
-        }
-        // case CS_TYPE::SPHERE_ENTER{
-
-        // }
-        // case CS_TYPE::SPHERE_EXIT{
-
-        // }
+        case CS_TYPE::STATE_TIME:
+        case CS_TYPE::EVT_PRESENCE_MUTATION:
+            update();
         default:{
             // ignore other events
             break;
@@ -41,13 +32,17 @@ void BehaviourHandler::handleTime(TYPIFY(STATE_TIME)* time){
     // update time cache
 }
 
-void BehaviourHandler::init(){
-    LOGd("BehaviourHandler::init");
-    EventDispatcher::getInstance().addListener(this);
-}
-
 void BehaviourHandler::update(){
+    LOGd("BehaviourHandler::update");
+    // TODO(Arend 24-09-2019): get time from scheduler
+    // TODO(Arend 24-09-2019): get presence from scheduler
+    bool nextState = false;
+    Behaviour::time_t time = 0x00;
+    Behaviour::presence_data_t presence = 0xff; // everyone present as dummy value.
 
+    if(computeIntendedState(nextState, time, presence)){
+        // TODO(Arend 24-09-2019): send nextState to SwitchController
+    }
 }
 
 bool BehaviourHandler::computeIntendedState(bool& intendedState,

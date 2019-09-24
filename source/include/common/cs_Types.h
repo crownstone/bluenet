@@ -222,7 +222,8 @@ enum class CS_TYPE: uint16_t {
 	EVT_STATE_EXTERNAL_STONE,                          // Sent when the state of another stone has been received. -- Payload is state_external_stone_t
 
 	// ------------------------
-	EVT_UPDATE_BEHAVIOUR,
+	EVT_UPDATE_BEHAVIOUR,						// when a user requests to save/update/delete a behaviour, this event fires.
+	EVT_PRESENCE_MUTATION,						// when a change in presence occurs this event fires.
 	// ------------------------
 };
 
@@ -354,6 +355,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
+	case CS_TYPE::EVT_PRESENCE_MUTATION:
 		return csType;
 	}
 	return CS_TYPE::CONFIG_DO_NOT_USE;
@@ -864,7 +866,10 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return 0;
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 		return sizeof(TYPIFY(EVT_UPDATE_BEHAVIOUR));
-	}
+	case CS_TYPE::EVT_PRESENCE_MUTATION:
+		return 0;
+	} // end switch
+
 	// should never happen
 	return 0;
 }
@@ -1003,6 +1008,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_TIME: return "CMD_SET_TIME";
 	case CS_TYPE::CMD_FACTORY_RESET: return "CMD_FACTORY_RESET";
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR: return "EVT_UPDATE_BEHAVIOUR";
+	case CS_TYPE::EVT_PRESENCE_MUTATION: return "EVT_PRESENCE_MUTATION";
 	}
 	return "Unknown";
 }
@@ -1135,6 +1141,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_TIME:
 	case CS_TYPE::CMD_FACTORY_RESET:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
+	case CS_TYPE::EVT_PRESENCE_MUTATION:
 		return PersistenceMode::RAM;
 	}
 	// should not reach this
@@ -1273,6 +1280,7 @@ constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_TIME:
 	case CS_TYPE::CMD_FACTORY_RESET:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
+	case CS_TYPE::EVT_PRESENCE_MUTATION:
 		return FILE_DO_NOT_USE;
 	}
 	// should not reach this
@@ -1556,6 +1564,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
+	case CS_TYPE::EVT_PRESENCE_MUTATION:
 		return ERR_NOT_FOUND;
 	}
 	return ERR_NOT_FOUND;
@@ -1692,6 +1701,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
+	case CS_TYPE::EVT_PRESENCE_MUTATION:
 		return NO_ONE;
 	}
 	return NO_ONE;
@@ -1829,6 +1839,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
+	case CS_TYPE::EVT_PRESENCE_MUTATION:
 		return NO_ONE;
 	}
 	return NO_ONE;
