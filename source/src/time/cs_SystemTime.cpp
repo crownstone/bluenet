@@ -5,7 +5,8 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <util/cs_SystemTime.h>
+#include <time/cs_SystemTime.h>
+
 #include <common/cs_Types.h>
 #include <drivers/cs_RTC.h>
 #include <storage/cs_State.h>

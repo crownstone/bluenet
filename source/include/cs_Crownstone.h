@@ -32,8 +32,7 @@
 #include <services/cs_SetupService.h>
 #include <storage/cs_State.h>
 
-#include <util/cs_SystemTime.h>
-#include <processing/cs_Scheduler.h>
+#include <time/cs_SystemTime.h>
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>

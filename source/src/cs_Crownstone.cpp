@@ -47,7 +47,7 @@
 #include <structs/buffer/cs_MasterBuffer.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
 #include <util/cs_Utils.h>
-#include <util/cs_SystemTime.h>
+#include <time/cs_SystemTime.h>
 
 #include <processing/behaviour/cs_BehaviourHandler.h>
 #include <processing/behaviour/cs_BehaviourStore.h>
