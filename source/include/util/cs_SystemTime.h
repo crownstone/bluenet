@@ -16,9 +16,10 @@ class TimeOfDay{
     public:
     TimeOfDay(uint32_t secondsSinceMidnight) : sec_since_midnight(secondsSinceMidnight){}
 
-    operator uint32_t(){
-        return sec_since_midnight;
-    }
+    /**
+     * Implicit cast operators
+     */
+    operator uint32_t(){ return sec_since_midnight; }
 
 };
 
@@ -27,14 +28,13 @@ class Time {
     uint32_t posixTimeStamp;
     
     public:
-    Time(uint32_t posixTime);
+    Time(uint32_t posixTime)  : posixTimeStamp(posixTime){}
 
     /**
-     * Castable to posixTimeStamp.
+     * Implicit cast operators
      */
-    operator uint32_t() { return posixTimeStamp; }
-    
-    operator TimeOfDay(){ return posixTimeStamp % (24*60*60);}
+    operator uint32_t(){ return posixTimeStamp; }
+    operator TimeOfDay(){ return posixTimeStamp % (24*60*60); }
 
 };
 
@@ -51,13 +51,12 @@ class SystemTime : EventListener {
     // static Month month();
     // static Date date();
 
-
     virtual void handleEvent(event_t& event);
 
     /**
-     * Changes the system wide time to the given value.
-     * Dispatches a EVT_TIME_SET event to signal any interested
-     * Listeners.
+     * Changes the system wide time (i.e. SystemTime::posixTimeStamp) 
+     * to the given value. Dispatches a EVT_TIME_SET event to signal 
+     * any interested Listeners.
      */
 	static void setTime(uint32_t time);
     
@@ -78,7 +77,7 @@ class SystemTime : EventListener {
     static void scheduleNextTick();
     static void tick(void* unused);
 
+    // settings
     static constexpr auto SCHEDULER_UPDATE_FREQUENCY = 2;
-
 };
 

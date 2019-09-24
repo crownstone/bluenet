@@ -202,7 +202,7 @@ enum class CS_TYPE: uint16_t {
 
 //	EVT_EXTERNAL_STATE_MSG_CHAN_0,     // Deprecated
 //	EVT_EXTERNAL_STATE_MSG_CHAN_1,     // Deprecated
-	EVT_TIME_SET,                                     // Sent when the time is set or changed. TODO: time as payload?
+	EVT_TIME_SET,                                     // Sent when the time is set or changed. payload: previous posix time
 	EVT_DIMMER_POWERED,                               // Sent when dimmer being powered is changed. -- Payload is BOOL, true when powered, and ready to be used.
 	EVT_DIMMING_ALLOWED, // TODO: Deprecate, use cfg  // Sent when allow dimming is changed. -- Payload is BOOL.
 	EVT_SWITCH_LOCKED,   // TODO: Deprecate, use cfg  // Sent when switch locked flag is set. -- Payload is BOOL.
@@ -569,7 +569,7 @@ typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
 typedef  BOOL TYPIFY(EVT_SWITCH_LOCKED);
 typedef  uint32_t TYPIFY(EVT_TICK);
-typedef  void TYPIFY(EVT_TIME_SET);
+typedef  uint32_t TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
 typedef Behaviour TYPIFY(EVT_UPDATE_BEHAVIOUR);
 
@@ -793,7 +793,7 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TICK:
 		return sizeof(uint32_t);
 	case CS_TYPE::EVT_TIME_SET:
-		return 0;
+		return sizeof(uint32_t);
 	case CS_TYPE::EVT_DIMMER_POWERED:
 		return sizeof(TYPIFY(EVT_DIMMER_POWERED));
 	case CS_TYPE::EVT_DIMMING_ALLOWED:

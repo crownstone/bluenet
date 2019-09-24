@@ -19,12 +19,7 @@ uint32_t SystemTime::posixTimeStamp;
 app_timer_t SystemTime::appTimerData = {{0}};
 app_timer_id_t SystemTime::appTimerId = &appTimerData;
 
-
-// ============= Time ==============
-
-Time::Time(uint32_t posixTime) : posixTimeStamp(posixTime){}
-
-// ============ SystemTime ===========
+// ============ SystemTime implementation ===========
 
 // Init and start the timer.
 void SystemTime::init(){
@@ -64,16 +59,16 @@ void SystemTime::setTime(uint32_t time) {
 	if (time == 0) {
 		return;
 	}
-
-    // Update time
-	int64_t diff = time - posixTimeStamp;
+    
+    uint32_t prevtime = posixTimeStamp;
 	posixTimeStamp = time;
 	rtcTimeStamp = RTC::getCount();
 
+	event_t event(
+        CS_TYPE::EVT_TIME_SET,
+        &prevtime,
+        sizeof(prevtime));
 
-    // TODO(Arend): put diff parameter into event
-    (void)diff;
-	event_t event(CS_TYPE::EVT_TIME_SET);
 	EventDispatcher::getInstance().dispatch(event);
 }
 

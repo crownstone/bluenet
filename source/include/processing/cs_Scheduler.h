@@ -45,7 +45,7 @@ protected:
 	void publishScheduleEntries();
 	void processScheduledAction();
 
-	void handleSetTimeEvent(uint64_t diff);
+	void handleSetTimeEvent(uint32_t prevtime);
 
 	void print();
 

@@ -37,9 +37,8 @@ void Scheduler::handleEvent(event_t & event){
 			processScheduledAction();
 		}
 		case CS_TYPE::EVT_TIME_SET:{
-			// TODO(Arend): add diff parameter to EVT_TIME_SET
-			uint64_t diff = 0;
-			handleSetTimeEvent(diff);
+			handleSetTimeEvent(
+				*reinterpret_cast<TYPIFY(EVT_TIME_SET)*>(event.data));
 		}
 		default:{
 			break;
@@ -49,8 +48,9 @@ void Scheduler::handleEvent(event_t & event){
 
 // ================= ScheduleList administration ================== 
 
-void Scheduler::handleSetTimeEvent(uint64_t diff) {
+void Scheduler::handleSetTimeEvent(uint32_t prevtime) {
 	uint32_t time = SystemTime::posix();
+	uint64_t diff = time - prevtime;
 
 	// If there is a time jump: sync the entries
 	printDebug();
