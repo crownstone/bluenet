@@ -12,6 +12,8 @@
 #include "events/cs_EventListener.h"
 #include "cfg/cs_Boards.h"
 
+#include "switch/cs_HwSwitch.h"
+
 #define SWITCH_ON 100
 
 /* Power Switch
@@ -243,4 +245,7 @@ private:
 	 */
 	cmd_source_t _source = cmd_source_t(CS_CMD_SOURCE_NONE);
 	uint32_t _ownerTimeoutCountdown = 0;
+
+	// New Implementation:
+	HwSwitch hwSwitch;
 };
