@@ -32,8 +32,6 @@ class BehaviourHandler : public EventListener {
      */
     void update();
 
-    void handleTime(TYPIFY(STATE_TIME)* time);
-
     /**
      * Given current time/presence, query the behaviourstore and check
      * if there any valid ones. 

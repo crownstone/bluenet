@@ -29,10 +29,6 @@ void BehaviourHandler::handleEvent(event_t& evt){
     }
 }
 
-void BehaviourHandler::handleTime(TYPIFY(STATE_TIME)* time){
-    // update time cache
-}
-
 void BehaviourHandler::update(){
     // TODO(Arend 24-09-2019): get time from scheduler
     // TODO(Arend 24-09-2019): get presence from scheduler
@@ -44,6 +40,12 @@ void BehaviourHandler::update(){
 
     if(computeIntendedState(nextState, time, presence)){
         // TODO(Arend 24-09-2019): send nextState to SwitchController
+        event_t behaviourStateChange(
+            CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE,
+            &nextState,
+            TypeSize(CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE)
+        );
+        EventDispatcher::getInstance().dispatch(behaviourStateChange);
     }
 }
 

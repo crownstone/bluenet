@@ -224,6 +224,7 @@ enum class CS_TYPE: uint16_t {
 	// ------------------------
 	EVT_UPDATE_BEHAVIOUR,						// when a user requests to save/update/delete a behaviour, this event fires.
 	EVT_PRESENCE_MUTATION,						// when a change in presence occurs this event fires.
+	EVT_BEHAVIOUR_SWITCH_STATE,					// when behaviour desires a stateswitch this event is fired.
 	// ------------------------
 };
 
@@ -356,6 +357,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
+	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 		return csType;
 	}
 	return CS_TYPE::CONFIG_DO_NOT_USE;
@@ -572,6 +574,7 @@ typedef  uint32_t TYPIFY(EVT_TICK);
 typedef  uint32_t TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
 typedef Behaviour TYPIFY(EVT_UPDATE_BEHAVIOUR);
+typedef bool TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
@@ -866,6 +869,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return 0;
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 		return sizeof(TYPIFY(EVT_UPDATE_BEHAVIOUR));
+	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
+		return sizeof(TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE));
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 		return 0;
 	} // end switch
@@ -1009,6 +1014,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_FACTORY_RESET: return "CMD_FACTORY_RESET";
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR: return "EVT_UPDATE_BEHAVIOUR";
 	case CS_TYPE::EVT_PRESENCE_MUTATION: return "EVT_PRESENCE_MUTATION";
+	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE: return "EVT_BEHAVIOUR_SWITCH_STATE";
 	}
 	return "Unknown";
 }
@@ -1142,6 +1148,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_FACTORY_RESET:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
+	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 		return PersistenceMode::RAM;
 	}
 	// should not reach this
@@ -1281,6 +1288,7 @@ constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
 	case CS_TYPE::CMD_FACTORY_RESET:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
+	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 		return FILE_DO_NOT_USE;
 	}
 	// should not reach this
@@ -1565,6 +1573,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
+	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 		return ERR_NOT_FOUND;
 	}
 	return ERR_NOT_FOUND;
@@ -1702,6 +1711,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
+	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 		return NO_ONE;
 	}
 	return NO_ONE;
@@ -1840,6 +1850,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
+	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 		return NO_ONE;
 	}
 	return NO_ONE;
