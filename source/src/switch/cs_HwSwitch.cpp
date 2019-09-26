@@ -1,17 +1,12 @@
 #include "switch/cs_HwSwitch.h"
 
-void Switch::_relayOn() {
-	LOGd("relayOn");
+void HwSwitch::relayOn() {
 	if (!allowRelayOn()) {
-		LOGi("Relay on not allowed");
 		return;
 	}
 
 
 	if (_hasRelay) {
-#ifdef PRINT_SWITCH_VERBOSE
-		LOGd("trigger relay on pin for %d ms", _relayHighDuration);
-#endif
 		nrf_gpio_pin_set(_pinRelayOn);
 		nrf_delay_ms(_relayHighDuration);
 		nrf_gpio_pin_clear(_pinRelayOn);
@@ -19,17 +14,12 @@ void Switch::_relayOn() {
 	_switchValue.state.relay = 1;
 }
 
-void Switch::_relayOff() {
-	LOGd("relayOff");
+void HwSwitch::relayOff() {
 	if (!allowRelayOff()) {
-		LOGi("Relay off not allowed");
 		return;
 	}
 
 	if (_hasRelay) {
-#ifdef PRINT_SWITCH_VERBOSE
-		LOGi("trigger relay off pin for %d ms", _relayHighDuration);
-#endif
 		nrf_gpio_pin_set(_pinRelayOff);
 		nrf_delay_ms(_relayHighDuration);
 		nrf_gpio_pin_clear(_pinRelayOff);
@@ -37,17 +27,13 @@ void Switch::_relayOff() {
 	_switchValue.state.relay = 0;
 }
 
-bool Switch::_setPwm(uint8_t value) {
-	LOGd("Set dimming to %u", value);
+bool HwSwitch::setPwm(uint8_t value) {
 	if (value > 0 && !allowPwmOn()) {
-		LOGi("Don't turn on pwm");
 		return false;
 	}
 
 	bool pwm_allowed = State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED);
-	LOGd("Dimming allowed: %u", pwm_allowed);
 	if (value != 0 && !pwm_allowed) {
-		LOGd("Dimming not allowed");
 		_switchValue.state.dimmer = 0;
 		return false;
 	}
@@ -65,13 +51,9 @@ bool Switch::_setPwm(uint8_t value) {
 	return true;
 }
 
-void Switch::setSwitch(uint8_t switchState) {
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGi("Set switch state: %d", switchState);
-#endif
+void HwSwitch::setSwitch(uint8_t switchState) {
 	switch_state_t oldVal = _switchValue;
 	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
-		LOGw("Switch locked!");
 		return;
 	}
 
@@ -120,9 +102,6 @@ void Switch::setSwitch(uint8_t switchState) {
 
 	// The new value overrules a timed switch.
 	if (_delayedSwitchPending) {
-#ifdef PRINT_SWITCH_VERBOSE
-		LOGi("clear delayed switch state");
-#endif
 		Timer::getInstance().stop(_switchTimerId);
 		_delayedSwitchPending = false;
 	}
@@ -130,11 +109,10 @@ void Switch::setSwitch(uint8_t switchState) {
 	storeState(oldVal);
 }
 
-void Switch::startPwm() {
+void HwSwitch::startPwm() {
 	if (_pwmPowered) {
 		return;
 	}
-	LOGd("dimmer powered");
 	_pwmPowered = true;
 	nrf_gpio_pin_set(_pinEnableDimmer);
 
@@ -159,14 +137,10 @@ void Switch::startPwm() {
  *   + leading edge dimming
  *   + trailing edge dimming
  */
-void Switch::init(const boards_config_t& board) {
-
-	LOGd(FMT_INIT, "switch");
-
+void HwSwitch::init(const boards_config_t& board) {
 	PWM& pwm = PWM::getInstance();
 	TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
-	LOGd("PWM period %i pin %d", pwmPeriod, board.pinGpioPwm);
 
 	pwm_config_t pwmConfig;
 	pwmConfig.channelCount = 1;
@@ -193,20 +167,19 @@ void Switch::init(const boards_config_t& board) {
 
 	// Retrieve last switch state from persistent storage
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, sizeof(_switchValue));
-	LOGd("Obtained last switch state: pwm=%u relay=%u", _switchValue.state.dimmer, _switchValue.state.relay);
 
 	EventDispatcher::getInstance().addListener(this);
 	Timer::getInstance().createSingleShot(_switchTimerId,
-			(app_timer_timeout_handler_t)Switch::staticTimedSwitch);
+			(app_timer_timeout_handler_t)HwSwitch::staticTimedSwitch);
 }
 
 
-void Switch::startPwm() {
+void HwSwitch::startPwm() {
 	if (_pwmPowered) {
 		return;
 	}
-	LOGd("dimmer powered");
-	_pwmPowered = true;
+    
+    _pwmPowered = true;
 	nrf_gpio_pin_set(_pinEnableDimmer);
 
 	// Restore the pwm state.
