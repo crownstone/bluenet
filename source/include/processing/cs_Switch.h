@@ -228,8 +228,7 @@ private:
 	bool _hasRelay = false;
 	uint8_t _pinRelayOn = 0;
 	uint8_t _pinRelayOff = 0;
-	TYPIFY(CONFIG_RELAY_HIGH_DURATION) _relayHighDuration = 0;
-	uint8_t _pinEnableDimmer = 0;
+
 
 	bool _delayedSwitchPending = false;
 	uint8_t _delayedSwitchState = 0;

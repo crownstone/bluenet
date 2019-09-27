@@ -10,13 +10,14 @@
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_Config.h>
 #include <drivers/cs_Serial.h>
-#include <drivers/cs_PWM.h>
+
 #include <storage/cs_State.h>
-#include <storage/cs_State.h>
+
 #include <cfg/cs_Strings.h>
 #include <ble/cs_Stack.h>
 #include <processing/cs_Scanner.h>
 #include <events/cs_EventDispatcher.h>
+#include <drivers/cs_PWM.h>
 
 #define PRINT_SWITCH_VERBOSE
 
@@ -51,7 +52,8 @@ void Switch::start() {
 	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0) || _hardwareBoard == ACR01B10B || _hardwareBoard == ACR01B10C) {
 		LOGd("dimmer powered on start");
 		_pwmPowered = true;
-		nrf_gpio_pin_set(_pinEnableDimmer);
+		hwSwitch.enableDimmer();
+		
 		event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
 		EventDispatcher::getInstance().dispatch(event);
 	}
@@ -256,11 +258,6 @@ void Switch::pwmNotAllowed() {
 	storeState(oldVal);
 }
 
-
-
-
-
-
 void Switch::forcePwmOff() {
 	LOGw("forcePwmOff");
 	switch_state_t oldVal = _switchValue;
@@ -432,4 +429,148 @@ void Switch::handleEvent(event_t & event) {
 			break;
 		default: {}
 	}
+}
+
+
+// ================= HwSwitch Wrapper =================
+
+void Switch::_relayOn(){
+	if (!allowRelayOn()) {
+		return;
+	}
+
+	hwSwitch.relayOn();
+
+	_switchValue.state.relay = 1;
+}
+
+void Switch::_relayOff() {
+	if (!allowRelayOff()) {
+		return;
+	}
+
+	hwSwitch.relayOff();
+
+	_switchValue.state.relay = 0;
+}
+
+bool Switch::_setPwm(uint8_t value){
+	if (value > 0 && !allowPwmOn()) {
+		return false;
+	}
+
+	bool pwm_allowed = State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED);
+	if (value != 0 && !pwm_allowed) {
+		_switchValue.state.dimmer = 0;
+		return false;
+	}
+
+	// When the user wants to dim at 99%, assume the user actually wants full on, but doesn't want to use the relay.
+	if (value >= (SWITCH_ON - 1)) {
+		value = SWITCH_ON;
+	}
+	_switchValue.state.dimmer = value;
+	if (value != 0 && !_pwmPowered) {
+		// State stored, but not executed yet, so return false.
+		return false;
+	}
+
+	hwSwitch.setPwm(value);
+
+	return true;
+}
+
+void Switch::startPwm(){
+	if (_pwmPowered) {
+		return;
+	}
+	_pwmPowered = true;
+	
+	hwSwitch.enableDimmer();
+
+	// Restore the pwm state.
+	bool success = _setPwm(_switchValue.state.dimmer);
+	if (success && _switchValue.state.dimmer != 0 && _switchValue.state.relay == 1) {
+		// Don't use relayOff(), as that checks for switchLocked.
+		switch_state_t oldVal = _switchValue;
+		_relayOff();
+		storeState(oldVal);
+	}
+	event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
+	EventDispatcher::getInstance().dispatch(event);
+}
+
+void Switch::setSwitch(uint8_t switchState) {
+	switch_state_t oldVal = _switchValue;
+	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
+		return;
+	}
+
+	switch (_hardwareBoard) {
+		case ACR01B1A: {
+			// Always use the relay
+			if (switchState) {
+				_relayOn();
+			}
+			else {
+				_relayOff();
+			}
+			_setPwm(0);
+			break;
+		}
+		default: {
+			// TODO: the pwm gets set at the start of a period, which lets the light flicker in case the relay is turned off..
+			// First pwm on, then relay off!
+			// Otherwise, if you go from 100 to 90, the power first turns off, then to 90.
+			// TODO: why not first relay on, then pwm off, when going from 90 to 100?
+
+			// Pwm when value is 1-99, else pwm off
+			bool pwmOnSuccess = true;
+			if (switchState > 0 && switchState < SWITCH_ON) {
+				pwmOnSuccess = _setPwm(switchState);
+			}
+			else {
+				_setPwm(0);
+			}
+
+			// Relay on when value >= 100, or when trying to dim, but that was unsuccessful.
+			// Else off (as the dimmer is parallel)
+			if (switchState >= SWITCH_ON || !pwmOnSuccess) {
+				if (_switchValue.state.relay == 0) {
+					_relayOn();
+				}
+			}
+			else {
+				if (_switchValue.state.relay == 1) {
+					_relayOff();
+				}
+			}
+			break;
+		}
+	}
+
+	// The new value overrules a timed switch.
+	if (_delayedSwitchPending) {
+		Timer::getInstance().stop(_switchTimerId);
+		_delayedSwitchPending = false;
+	}
+
+	storeState(oldVal);
+}
+
+void Switch::init(const boards_config_t& board){
+	TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;
+	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
+
+	uint16_t relayHighDuration = 0;
+	State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, &relayHighDuration, sizeof(relayHighDuration));
+
+	hwSwitch.init(board, pwmPeriod, relayHighDuration);
+
+	// Retrieve last switch state from persistent storage
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, sizeof(_switchValue));
+
+	EventDispatcher::getInstance().addListener(this);
+	Timer::getInstance().createSingleShot(_switchTimerId,
+			(app_timer_timeout_handler_t)Switch::staticTimedSwitch);
 }
