@@ -45,6 +45,7 @@ void HwSwitch::init(const boards_config_t& board, uint32_t pwmPeriod, uint16_t r
 	pwmConfig.channels[0].inverted = board.flags.pwmInverted;
 	PWM::getInstance().init(pwmConfig);
 
+	_pinEnableDimmer = board.pinGpioEnablePwm;
 	_hasRelay = board.flags.hasRelay;
     _relayHighDuration = relayHighDuration;
 	if (_hasRelay) {
