@@ -21,6 +21,8 @@
 #include "storage/cs_State.h"
 #include "time/cs_SystemTime.h"
 
+#include <switch/cs_SwitchAggregator.h>
+
 void reset(void* p_context) {
 
 	uint32_t cmd = *(int32_t*) p_context;
@@ -504,10 +506,9 @@ cs_ret_code_t CommandHandler::handleCmdPwm(buffer_ptr_t buffer, const uint16_t s
 	switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
 	uint8_t value = payload->switchState;
 
-	uint8_t current = Switch::getInstance().getPwm();
-	if (value != current) {
-		Switch::getInstance().setPwm(value);
-	}
+	// Switch::getInstance().setPwm(value);
+	SwitchAggregator::getInstance().developerSetIntensity(value);
+
 	return ERR_SUCCESS;
 }
 
@@ -526,6 +527,7 @@ cs_ret_code_t CommandHandler::handleCmdSwitch(buffer_ptr_t buffer, const uint16_
 
 	switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
 	Switch::getInstance().setSwitch(payload->switchState);
+
 	return ERR_SUCCESS;
 }
 
@@ -544,12 +546,15 @@ cs_ret_code_t CommandHandler::handleCmdRelay(buffer_ptr_t buffer, const uint16_t
 
 	switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
 	uint8_t value = payload->switchState;
-	if (value == 0) {
-		Switch::getInstance().relayOff();
-	}
-	else {
-		Switch::getInstance().relayOn();
-	}
+
+	SwitchAggregator::getInstance().developerSetRelay(value == 0);
+	
+	// if (value == 0) {
+	// 	Switch::getInstance().relayOff();
+	// }
+	// else {
+	// 	Switch::getInstance().relayOn();
+	// }
 	return ERR_SUCCESS;
 }
 

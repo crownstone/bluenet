@@ -50,6 +50,8 @@
 #include <util/cs_Utils.h>
 #include <time/cs_SystemTime.h>
 
+#include <switch/cs_SwitchAggregator.h>
+
 #include <processing/behaviour/cs_BehaviourHandler.h>
 #include <processing/behaviour/cs_BehaviourStore.h>
 
@@ -221,6 +223,22 @@ void Crownstone::initDrivers(uint16_t step) {
 		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 			// switch / PWM init
 			LOGi(FMT_INIT, "switch / PWM");
+
+			// Init SwitchAggregator
+			TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;
+			State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, 
+				&pwmPeriod, sizeof(pwmPeriod));
+
+			TYPIFY(CONFIG_RELAY_HIGH_DURATION) relayHighDuration = 0;
+			State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, 
+				&relayHighDuration, sizeof(relayHighDuration));
+
+			HwSwitch h(_boardsConfig, pwmPeriod, relayHighDuration);
+			SwSwitch s(h);
+			
+			SwitchAggregator::getInstance().init(s);
+			// End init switchaggregator
+
 			_switch->init(_boardsConfig);
 
 			LOGi(FMT_INIT, "temperature guard");
@@ -552,6 +570,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			EventDispatcher::getInstance().addListener(&_behaviourHandler);
 			EventDispatcher::getInstance().addListener(&_behaviourStore);
 
+			// DEBUG
 			Behaviour morningbehaviour(
 					9*60*60,
 					11*60*60,
@@ -563,6 +582,8 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 				&morningbehaviour,
 				TypeSize(CS_TYPE::EVT_UPDATE_BEHAVIOUR)
 				);
+
+			// END DEBUG
 
 			EventDispatcher::getInstance().dispatch(evt);
 

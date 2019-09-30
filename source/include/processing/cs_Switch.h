@@ -13,8 +13,11 @@
 #include "cfg/cs_Boards.h"
 
 #include "switch/cs_HwSwitch.h"
+#include "switch/cs_SwSwitch.h"
 
-#define SWITCH_ON 100
+#include <optional>
+
+constexpr auto SWITCH_ON = 100;
 
 /* Power Switch
  *
@@ -246,5 +249,5 @@ private:
 	uint32_t _ownerTimeoutCountdown = 0;
 
 	// New Implementation:
-	HwSwitch hwSwitch;
+	std::optional<SwSwitch> swSwitch;
 };

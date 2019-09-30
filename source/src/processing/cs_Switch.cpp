@@ -24,7 +24,7 @@
 /**
  * The Switch class takes care of switching loads and configures also the Dimmer.
  */
-Switch::Switch() {
+Switch::Switch() : swSwitch() {
 	LOGd(FMT_CREATE, "switch");
 	_switchTimerData = { {0} };
 	_switchTimerId = &_switchTimerData;
@@ -52,86 +52,79 @@ void Switch::start() {
 	if (switchcraftEnabled || (PWM_BOOT_DELAY_MS == 0) || _hardwareBoard == ACR01B10B || _hardwareBoard == ACR01B10C) {
 		LOGd("dimmer powered on start");
 		_pwmPowered = true;
-		hwSwitch.enableDimmer();
+		swSwitch->setDimmer(true);
 		
 		event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
-	// Use relay to restore pwm state instead of pwm, because the pwm can only be used after some time.
-	// TODO: What does this sentence mean?
 	if (_switchValue.state.dimmer != 0) {
-		switch_state_t oldVal = _switchValue;
 		if (_pwmPowered) {
-			_setPwm(_switchValue.state.dimmer);
-			_relayOff();
+			swSwitch->setIntensity(_switchValue.state.dimmer);
 		}
 		else {
 			// This is in case of a wall switch.
 			// You don't want to hear the relay turn on and off every time you power the crownstone.
 			// TODO: So, why does it call _relayOn() if it is supposed to do nothing...?
-			_switchValue.state.dimmer = 0;
-			_relayOn();
-			storeState(oldVal);
+			swSwitch->setRelay(true);
 		}
 	}
 	else {
 		// Make sure the relay is in the stored position (no need to store).
 		// TODO: Why is it not stored?
 		if (_switchValue.state.relay == 1) {
-			_relayOn();
+			swSwitch->setRelay(true);
 		}
 		else {
-			_relayOff();
+			swSwitch->setRelay(false);
 		}
 	}
 }
 
-/**
- * Store the state immediately when relay value changed, as the dim value often changes a lot in bursts.
- * Compare it against given oldVal, instead of switch state stored in State, as that is always changed immediately
- * (just not the value on flash).
- */
-void Switch::storeState(switch_state_t oldVal) {
-	bool persistNow = false;
-	if (oldVal.asInt != _switchValue.asInt) {
-		LOGd("Store switch state %i, %i", _switchValue.state.relay, _switchValue.state.dimmer);
-		persistNow = (oldVal.state.relay != _switchValue.state.relay);
-	}
+// /**
+//  * Store the state immediately when relay value changed, as the dim value often changes a lot in bursts.
+//  * Compare it against given oldVal, instead of switch state stored in State, as that is always changed immediately
+//  * (just not the value on flash).
+//  */
+// void Switch::storeState(switch_state_t oldVal) {
+// 	bool persistNow = false;
+// 	if (oldVal.asInt != _switchValue.asInt) {
+// 		LOGd("Store switch state %i, %i", _switchValue.state.relay, _switchValue.state.dimmer);
+// 		persistNow = (oldVal.state.relay != _switchValue.state.relay);
+// 	}
 
-	cs_state_data_t stateData(CS_TYPE::STATE_SWITCH_STATE, (uint8_t*)&_switchValue, sizeof(_switchValue));
-	if (persistNow) {
-		State::getInstance().set(stateData);
-	}
-	else {
-		State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
-	}
-}
+// 	cs_state_data_t stateData(CS_TYPE::STATE_SWITCH_STATE, (uint8_t*)&_switchValue, sizeof(_switchValue));
+// 	if (persistNow) {
+// 		State::getInstance().set(stateData);
+// 	}
+// 	else {
+// 		State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
+// 	}
+// }
 
-switch_state_t Switch::getSwitchState() {
-#ifdef PRINT_SWITCH_VERBOSE
-//LOGd(FMT_GET_INT_VAL, "Switch state", _switchValue);
-	LOGd("Switch state %i, %i", _switchValue.state.relay, _switchValue.state.dimmer);
-#endif
-	return _switchValue;
-}
-
-
-void Switch::turnOn() {
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGd("Turn ON");
-#endif
-	setSwitch(99);
-}
+// switch_state_t Switch::getSwitchState() {
+// #ifdef PRINT_SWITCH_VERBOSE
+// //LOGd(FMT_GET_INT_VAL, "Switch state", _switchValue);
+// 	LOGd("Switch state %i, %i", _switchValue.state.relay, _switchValue.state.dimmer);
+// #endif
+// 	return _switchValue;
+// }
 
 
-void Switch::turnOff() {
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGd("Turn OFF");
-#endif
-	setSwitch(0);
-}
+// void Switch::turnOn() {
+// #ifdef PRINT_SWITCH_VERBOSE
+// 	LOGd("Turn ON");
+// #endif
+// 	setSwitch(99);
+// }
 
+
+// void Switch::turnOff() {
+// #ifdef PRINT_SWITCH_VERBOSE
+// 	LOGd("Turn OFF");
+// #endif
+// 	setSwitch(0);
+// }
 
 void Switch::toggle() {
 	// TODO: maybe check if pwm is larger than some value?
@@ -143,50 +136,29 @@ void Switch::toggle() {
 	}
 }
 
+// void Switch::pwmOff() {
+// 	setPwm(0);
+// }
 
-void Switch::pwmOff() {
-	setPwm(0);
+// void Switch::pwmOn() {
+// 	setPwm(SWITCH_ON);
+// }
+
+void Switch::setPwm(uint8_t intensity){
+	swSwitch->setIntensity(intensity);
 }
 
-
-void Switch::pwmOn() {
-	setPwm(SWITCH_ON);
-}
-
-
-void Switch::setPwm(uint8_t value) {
-	switch_state_t oldVal = _switchValue;
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGd("set PWM %d", value);
-#endif
-	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
-		LOGw("Switch locked!");
-		return;
-	}
-	bool success = _setPwm(value);
-	// Turn on relay instead, when trying to dim too soon after boot.
-	// Dimmer state will be restored when startPwm() is called.
-	if (!success && _switchValue.state.relay == 0) {
-		_relayOn();
-	}
-	storeState(oldVal);
-}
-
-
-uint8_t Switch::getPwm() {
-	return _switchValue.state.dimmer;
-}
-
-
-void Switch::relayOn() {
-	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
-		LOGw("Switch locked!");
-		return;
-	}
-	switch_state_t oldVal = _switchValue;
-	_relayOn();
-	storeState(oldVal);
-}
+// void Switch::relayOn() {
+// 	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
+// 		LOGw("Switch locked!");
+// 		return;
+// 	}
+// 	switch_state_t oldVal = _switchValue;
+	
+// 	_relayOn();
+	
+// 	storeState(oldVal);
+// }
 
 /**
  * Wrapper function that has all kind of side-effects besides turning off the relay. It does the following things:
@@ -197,20 +169,17 @@ void Switch::relayOn() {
  * TODO: Get rid of almost similar functions relayOff(), _relayOff(), forceRelayOff().
  * TODO: Get rid of almost similar functions with relay/switch/pwm.
  */
-void Switch::relayOff() {
-	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
-		LOGw("Switch locked!");
-		return;
-	}
-	switch_state_t oldVal = _switchValue;
-	_relayOff();
-	storeState(oldVal);
-}
+// void Switch::relayOff() {
+// 	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
+// 		LOGw("Switch locked!");
+// 		return;
+// 	}
+// 	switch_state_t oldVal = _switchValue;
 
+// 	_relayOff();
 
-bool Switch::getRelayState() {
-	return _switchValue.state.relay;
-}
+// 	storeState(oldVal);
+// }
 
 
 
@@ -249,76 +218,82 @@ void Switch::delayedSwitchExecute() {
 	}
 }
 
-void Switch::pwmNotAllowed() {
-	switch_state_t oldVal = _switchValue;
-	if (_switchValue.state.dimmer != 0) {
-		_setPwm(0);
-		_relayOn();
-	}
-	storeState(oldVal);
-}
+// void Switch::pwmNotAllowed() {
+// 	switch_state_t oldVal = _switchValue;
+// 	if (_switchValue.state.dimmer != 0) {
+// 		_setPwm(0);
+// 		_relayOn();
+// 	}
+// 	storeState(oldVal);
+// }
 
-void Switch::forcePwmOff() {
-	LOGw("forcePwmOff");
-	switch_state_t oldVal = _switchValue;
-	_setPwm(0);
-	storeState(oldVal);
-	event_t event(CS_TYPE::EVT_DIMMER_FORCED_OFF);
-	EventDispatcher::getInstance().dispatch(event);
-}
+// void Switch::forcePwmOff() {
+// 	LOGw("forcePwmOff");
+// 	switch_state_t oldVal = _switchValue;
+// 	_setPwm(0);
+// 	storeState(oldVal);
+// 	event_t event(CS_TYPE::EVT_DIMMER_FORCED_OFF);
+// 	EventDispatcher::getInstance().dispatch(event);
+// }
 
-void Switch::forceRelayOn() {
-	LOGw("forceRelayOn");
-	switch_state_t oldVal = _switchValue;
-	_relayOn();
-	storeState(oldVal);
-	event_t event(CS_TYPE::EVT_RELAY_FORCED_ON);
-	EventDispatcher::getInstance().dispatch(event);
-	// Try again later, in case the first one didn't work..
-	delayedSwitch(SWITCH_ON, 5);
-}
+// void Switch::forceRelayOn() {
+// 	LOGw("forceRelayOn");
+// 	switch_state_t oldVal = _switchValue;
+// 	_relayOn();
+// 	storeState(oldVal);
+// 	event_t event(CS_TYPE::EVT_RELAY_FORCED_ON);
+// 	EventDispatcher::getInstance().dispatch(event);
+// 	// Try again later, in case the first one didn't work..
+// 	delayedSwitch(SWITCH_ON, 5);
+// }
 
-void Switch::forceSwitchOff() {
-	LOGw("forceSwitchOff");
-	switch_state_t oldVal = _switchValue;
-	_setPwm(0);
-	_relayOff();
-	storeState(oldVal);
-	event_t event(CS_TYPE::EVT_SWITCH_FORCED_OFF);
-	EventDispatcher::getInstance().dispatch(event);
-	// Try again later, in case the first one didn't work..
-	delayedSwitch(0, 5);
-}
+// void Switch::forceSwitchOff() {
+// 	LOGw("forceSwitchOff");
+// 	switch_state_t oldVal = _switchValue;
+// 	_setPwm(0);
+// 	_relayOff();
+// 	storeState(oldVal);
+// 	event_t event(CS_TYPE::EVT_SWITCH_FORCED_OFF);
+// 	EventDispatcher::getInstance().dispatch(event);
+// 	// Try again later, in case the first one didn't work..
+// 	delayedSwitch(0, 5);
+// }
 
-bool Switch::allowPwmOn() {
-	TYPIFY(STATE_ERRORS) stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
-	LOGd("errors=%d", stateErrors.asInt);
+// bool Switch::allowPwmOn() {
+// 	TYPIFY(STATE_ERRORS) stateErrors;
+// 	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
+// 	LOGd("errors=%d", stateErrors.asInt);
 
-	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent || stateErrors.errors.overCurrentDimmer || stateErrors.errors.dimmerTemp || stateErrors.errors.dimmerOn);
-}
+// 	return !(
+// 		stateErrors.errors.chipTemp 
+// 		|| stateErrors.errors.overCurrent 
+// 		|| stateErrors.errors.overCurrentDimmer 
+// 		|| stateErrors.errors.dimmerTemp 
+// 		|| stateErrors.errors.dimmerOn);
+// }
 
-bool Switch::allowRelayOff() {
-	TYPIFY(STATE_ERRORS) stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
+// bool Switch::allowRelayOff() {
+// 	TYPIFY(STATE_ERRORS) stateErrors;
+// 	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 
-	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
-	return !(stateErrors.errors.overCurrentDimmer || stateErrors.errors.dimmerTemp || stateErrors.errors.dimmerOn);
-}
+// 	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
+// 	return !(
+// 		stateErrors.errors.overCurrentDimmer 
+// 		|| stateErrors.errors.dimmerTemp 
+// 		|| stateErrors.errors.dimmerOn);
+// }
 
-bool Switch::allowRelayOn() {
-	TYPIFY(STATE_ERRORS) stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
-	LOGd("errors=%d", stateErrors.asInt);
+// bool Switch::allowRelayOn() {
+// 	TYPIFY(STATE_ERRORS) stateErrors;
+// 	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
+// 	LOGd("errors=%d", stateErrors.asInt);
 
-	// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
-	if (!allowRelayOff()) {
-		return true;
-	}
-
-	// Otherwise, relay should stay off when the overall temperature was too high, or there was over current.
-	return !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent);
-}
+// 	return 
+// 		// When dimmer has (had) problems, protect the dimmer by keeping the relay on.
+// 		!allowRelayOff()  
+// 		// Otherwise, relay should stay off when the overall temperature was too high, or there was over current.
+// 		|| !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent);
+// }
 
 void Switch::checkDimmerPower() {
 	// Check if dimmer is on, but power usage is low.
@@ -374,10 +349,10 @@ bool Switch::checkAndSetOwner(cmd_source_t source) {
 void Switch::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::CMD_SWITCH_ON:
-			turnOn();
+			setSwitch(99);
 			break;
 		case CS_TYPE::CMD_SWITCH_OFF:
-			turnOff();
+			setSwitch(0);
 			break;
 		case CS_TYPE::CMD_SWITCH_TOGGLE:
 			toggle();
@@ -391,24 +366,6 @@ void Switch::handleEvent(event_t & event) {
 				if (checkAndSetOwner(packet->source)) {
 					setSwitch(packet->switchCmd);
 				}
-			}
-			break;
-		}
-		case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
-		case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
-		case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
-			// First set relay on, so that the switch doesn't first turn off, and later on again.
-			// The relay protects the dimmer, because the current will flow through the relay.
-			forceRelayOn();
-			forcePwmOff();
-			break;
-		case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
-		case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
-			forceSwitchOff();
-			break;
-		case CS_TYPE::EVT_DIMMING_ALLOWED: {
-			if (*(TYPIFY(EVT_DIMMING_ALLOWED)*)event.data == false) {
-				pwmNotAllowed();
 			}
 			break;
 		}
@@ -434,140 +391,140 @@ void Switch::handleEvent(event_t & event) {
 
 // ================= HwSwitch Wrapper =================
 
-void Switch::_relayOn(){
-	if (!allowRelayOn()) {
-		return;
-	}
+// void Switch::_relayOn(){
+// 	if (!allowRelayOn()) {
+// 		return;
+// 	}
 
-	hwSwitch.relayOn();
+// 	hwSwitch.relayOn();
 
-	_switchValue.state.relay = 1;
-}
+// 	_switchValue.state.relay = 1;
+// }
 
-void Switch::_relayOff() {
-	if (!allowRelayOff()) {
-		return;
-	}
+// void Switch::_relayOff() {
+// 	if (!allowRelayOff()) {
+// 		return;
+// 	}
 
-	hwSwitch.relayOff();
+// 	hwSwitch.relayOff();
 
-	_switchValue.state.relay = 0;
-}
+// 	_switchValue.state.relay = 0;
+// }
 
-bool Switch::_setPwm(uint8_t value){
-	if (value > 0 && !allowPwmOn()) {
-		return false;
-	}
+// bool Switch::_setPwm(uint8_t value){
+// 	if (value > 0 && !allowPwmOn()) {
+// 		return false;
+// 	}
 
-	bool pwm_allowed = State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED);
-	if (value != 0 && !pwm_allowed) {
-		_switchValue.state.dimmer = 0;
-		return false;
-	}
+// 	bool pwm_allowed = State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED);
+// 	if (value != 0 && !pwm_allowed) {
+// 		_switchValue.state.dimmer = 0;
+// 		return false;
+// 	}
 
-	// When the user wants to dim at 99%, assume the user actually wants full on, but doesn't want to use the relay.
-	if (value >= (SWITCH_ON - 1)) {
-		value = SWITCH_ON;
-	}
-	_switchValue.state.dimmer = value;
-	if (value != 0 && !_pwmPowered) {
-		// State stored, but not executed yet, so return false.
-		return false;
-	}
+// 	// When the user wants to dim at 99%, assume the user actually wants full on, but doesn't want to use the relay.
+// 	if (value >= (SWITCH_ON - 1)) {
+// 		value = SWITCH_ON;
+// 	}
+// 	_switchValue.state.dimmer = value;
+// 	if (value != 0 && !_pwmPowered) {
+// 		// State stored, but not executed yet, so return false.
+// 		return false;
+// 	}
 
-	hwSwitch.setPwm(value);
+// 	swSwitch->setIntensity(value);
 
-	return true;
-}
+// 	return true;
+// }
 
 void Switch::startPwm(){
 	if (_pwmPowered) {
+		// early return
 		return;
 	}
 	_pwmPowered = true;
 	
-	hwSwitch.enableDimmer();
+	swSwitch->setDimmer(true);
 
-	// Restore the pwm state.
-	bool success = _setPwm(_switchValue.state.dimmer);
-	if (success && _switchValue.state.dimmer != 0 && _switchValue.state.relay == 1) {
-		// Don't use relayOff(), as that checks for switchLocked.
-		switch_state_t oldVal = _switchValue;
-		_relayOff();
-		storeState(oldVal);
-	}
+	// sw switch arranges that needs to happen on hw level, and it
+	// persists whatever data it sees necessary
+	swSwitch->setIntensity(_switchValue.state.dimmer); 
+
 	event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
 	EventDispatcher::getInstance().dispatch(event);
 }
 
-void Switch::setSwitch(uint8_t switchState) {
-	switch_state_t oldVal = _switchValue;
-	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
-		return;
-	}
+// void Switch::setSwitch(uint8_t switchState) {
+// 	switch_state_t oldVal = _switchValue;
+// 	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
+// 		return;
+// 	}
 
-	switch (_hardwareBoard) {
-		case ACR01B1A: {
-			// Always use the relay
-			if (switchState) {
-				_relayOn();
-			}
-			else {
-				_relayOff();
-			}
-			_setPwm(0);
-			break;
-		}
-		default: {
-			// TODO: the pwm gets set at the start of a period, which lets the light flicker in case the relay is turned off..
-			// First pwm on, then relay off!
-			// Otherwise, if you go from 100 to 90, the power first turns off, then to 90.
-			// TODO: why not first relay on, then pwm off, when going from 90 to 100?
+// 	switch (_hardwareBoard) {
+// 		case ACR01B1A: {
+// 			// Always use the relay
+// 			if (switchState) {
+// 				_relayOn();
+// 			}
+// 			else {
+// 				_relayOff();
+// 			}
+// 			_setPwm(0);
+// 			break;
+// 		}
+// 		default: {
+// 			// TODO: the pwm gets set at the start of a period, which lets the light flicker in case the relay is turned off..
+// 			// First pwm on, then relay off!
+// 			// Otherwise, if you go from 100 to 90, the power first turns off, then to 90.
+// 			// TODO: why not first relay on, then pwm off, when going from 90 to 100?
 
-			// Pwm when value is 1-99, else pwm off
-			bool pwmOnSuccess = true;
-			if (switchState > 0 && switchState < SWITCH_ON) {
-				pwmOnSuccess = _setPwm(switchState);
-			}
-			else {
-				_setPwm(0);
-			}
+// 			// Pwm when value is 1-99, else pwm off
+// 			bool pwmOnSuccess = true;
+// 			if (switchState > 0 && switchState < SWITCH_ON) {
+// 				pwmOnSuccess = _setPwm(switchState);
+// 			}
+// 			else {
+// 				_setPwm(0);
+// 			}
 
-			// Relay on when value >= 100, or when trying to dim, but that was unsuccessful.
-			// Else off (as the dimmer is parallel)
-			if (switchState >= SWITCH_ON || !pwmOnSuccess) {
-				if (_switchValue.state.relay == 0) {
-					_relayOn();
-				}
-			}
-			else {
-				if (_switchValue.state.relay == 1) {
-					_relayOff();
-				}
-			}
-			break;
-		}
-	}
+// 			// Relay on when value >= 100, or when trying to dim, but that was unsuccessful.
+// 			// Else off (as the dimmer is parallel)
+// 			if (switchState >= SWITCH_ON || !pwmOnSuccess) {
+// 				if (_switchValue.state.relay == 0) {
+// 					_relayOn();
+// 				}
+// 			}
+// 			else {
+// 				if (_switchValue.state.relay == 1) {
+// 					_relayOff();
+// 				}
+// 			}
+// 			break;
+// 		}
+// 	}
 
-	// The new value overrules a timed switch.
-	if (_delayedSwitchPending) {
-		Timer::getInstance().stop(_switchTimerId);
-		_delayedSwitchPending = false;
-	}
+// 	// The new value overrules a timed switch.
+// 	if (_delayedSwitchPending) {
+// 		Timer::getInstance().stop(_switchTimerId);
+// 		_delayedSwitchPending = false;
+// 	}
 
-	storeState(oldVal);
-}
+// 	storeState(oldVal);
+// }
 
 void Switch::init(const boards_config_t& board){
+	// Note: for SwitchAggregator these obtained values extracted as parameters.
 	TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
 
 	uint16_t relayHighDuration = 0;
 	State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, &relayHighDuration, sizeof(relayHighDuration));
 
-	hwSwitch.init(board, pwmPeriod, relayHighDuration);
+	HwSwitch hwSwitch(board, pwmPeriod, relayHighDuration);
+	swSwitch = SwSwitch(hwSwitch);
 
 	// Retrieve last switch state from persistent storage
+
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, sizeof(_switchValue));
 
 	EventDispatcher::getInstance().addListener(this);

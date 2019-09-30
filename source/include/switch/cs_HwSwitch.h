@@ -5,32 +5,37 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <cfg/cs_Boards.h>
+#pragma once
 
+#include <cfg/cs_Boards.h>
 #include <common/cs_Types.h>
+#include <switch/cs_ISwitch.h>
 
 /**
  * Provides the most low level interaction with the switch hardware.
  */
-class HwSwitch{
+class HwSwitch : public ISwitch {
     public:
     
-    // Functions copied from cs_Switch:
-    void relayOn();
-    void relayOff();
-    void setPwm(uint8_t value);
+    virtual void setRelay(bool is_on) override;
+    virtual void setDimmer(bool is_on) override;
+    virtual void setIntensity(uint8_t value) override;
     
-    void startPwm();
-    void init(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration);
+    /**
+     * configures the PWM module and the gpio relay on and relay off pins.
+     */
+    HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration);
+
+    private:
     
-    
-    bool _hasRelay;
-    uint8_t _pinRelayOn;
-    uint8_t _pinRelayOff;
+    bool _hasRelay = false;
+    uint8_t _pinRelayOn = 0;
+    uint8_t _pinRelayOff = 0;
     uint8_t _pinEnableDimmer = 0;
     TYPIFY(CONFIG_RELAY_HIGH_DURATION) _relayHighDuration = 0;
-    // end of functions copied from cs_Switch
 
+    void relayOn();
+    void relayOff();
     void enableDimmer();
-	void relayToggle();
+    void disableDimmer();
 };

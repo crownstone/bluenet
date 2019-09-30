@@ -82,7 +82,7 @@ SET(RELEASE_FLAGS "-g0")
 #   * no-builtin             do not use abs, strcpy, and other built-in functions
 #   * short-enums            use a single byte for an enum if possible
 # 
-SET(DEFAULT_CXX_FLAGS       "-std=c++14 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")
+SET(DEFAULT_CXX_FLAGS       "-std=c++17 -fno-exceptions -fdelete-dead-exceptions -fno-unwind-tables -fno-non-call-exceptions")
 SET(DEFAULT_C_FLAGS         "")
 SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -Wall -Werror -fdiagnostics-color=always -fno-strict-aliasing -fno-builtin -fshort-enums -Wno-error=format -Wno-error=unused-function")
 

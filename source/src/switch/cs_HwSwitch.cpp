@@ -25,7 +25,32 @@ void HwSwitch::relayOff() {
 	}
 }
 
-void HwSwitch::setPwm(uint8_t value) {
+void HwSwitch::enableDimmer(){
+	nrf_gpio_pin_set(_pinEnableDimmer);
+}
+
+void HwSwitch::disableDimmer(){
+	// Warning: untested.
+	nrf_gpio_pin_clear(_pinEnableDimmer);
+}
+
+void HwSwitch::setRelay(bool is_on){
+	if(is_on){
+		relayOn();
+	} else {
+		relayOff();
+	}
+}
+
+void HwSwitch::setDimmer(bool is_on){
+	if(is_on){
+		enableDimmer();
+	} else {
+		disableDimmer();
+	}
+}
+
+void HwSwitch::setIntensity(uint8_t value) {
 	PWM::getInstance().setValue(0, value);
 }
 
@@ -37,7 +62,7 @@ void HwSwitch::setPwm(uint8_t value) {
  *   + leading edge dimming
  *   + trailing edge dimming
  */
-void HwSwitch::init(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration) {
+HwSwitch::HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration) {
 	pwm_config_t pwmConfig;
 	pwmConfig.channelCount = 1;
 	pwmConfig.period_us = pwmPeriod;
@@ -59,6 +84,3 @@ void HwSwitch::init(const boards_config_t& board, uint32_t pwmPeriod, uint16_t r
 	}
 }
 
-void HwSwitch::enableDimmer(){
-	nrf_gpio_pin_set(_pinEnableDimmer);
-}
