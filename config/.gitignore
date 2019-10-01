@@ -1,1 +1,9 @@
-default/
+# Ignore everything
+*
+
+# Except the default config
+!.gitignore
+!default/
+
+# ...even if they are in subdirectories
+!*/
