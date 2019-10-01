@@ -68,6 +68,8 @@ HwSwitch::HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t re
 	pwmConfig.period_us = pwmPeriod;
 	pwmConfig.channels[0].pin = board.pinGpioPwm;
 	pwmConfig.channels[0].inverted = board.flags.pwmInverted;
+
+	PWM::getInstance().start(true);
 	PWM::getInstance().init(pwmConfig);
 
 	_pinEnableDimmer = board.pinGpioEnablePwm;

@@ -48,8 +48,6 @@ public:
 		return instance;
 	}
 
-	void init(const boards_config_t& board);
-
 	void start();
 
 	/** Starts the pwm, call when pwm is physically allowed to be used.
