@@ -98,33 +98,6 @@ bool Switch::checkAndSetOwner(cmd_source_t source) {
 	return true;
 }
 
-void Switch::handleEvent(event_t & event) {
-	switch(event.type) {
-		case CS_TYPE::CMD_SWITCH_ON:
-			if(swSwitch) swSwitch->setIntensity(100);
-			break;
-		case CS_TYPE::CMD_SWITCH_OFF:
-			if(swSwitch) swSwitch->setIntensity(0);
-			break;
-		case CS_TYPE::CMD_SWITCH_TOGGLE:
-			if(swSwitch) swSwitch->toggle();
-			break;
-		case CS_TYPE::CMD_SWITCH: {
-			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) event.data;
-			// if (packet->delay) {
-			// 	delayedSwitch(packet->switchCmd, packet->delay);
-			// }
-			// else {
-				if (checkAndSetOwner(packet->source)) {
-					if(swSwitch) swSwitch->setIntensity(packet->switchCmd);
-				}
-			// }
-			break;
-		}
-		default: {}
-	}
-}
-
 void Switch::init(const boards_config_t& board){
 	// Note: for SwitchAggregator these obtained values extracted as parameters.
 	TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;

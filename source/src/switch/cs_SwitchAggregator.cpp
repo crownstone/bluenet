@@ -22,7 +22,28 @@ void SwitchAggregator::init(SwSwitch s){
 }
 
 void SwitchAggregator::handleEvent(event_t& evt){
-    // EVT_TICK: swSwitch.checkDimmerPower
+    switch(evt.type){
+        case CS_TYPE::CMD_SWITCH_ON:{
+            if(swSwitch) swSwitch->setIntensity(100);
+            break;
+        }
+        case CS_TYPE::CMD_SWITCH_OFF:{
+            if(swSwitch) swSwitch->setIntensity(0);
+            break;
+        }
+        case CS_TYPE::CMD_SWITCH_TOGGLE:{
+            if(swSwitch) swSwitch->toggle();
+            break;
+        }
+        case CS_TYPE::CMD_SWITCH: {
+			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;		
+            if(swSwitch) swSwitch->setIntensity(packet->switchCmd);
+			break;
+		}
+        default:{
+            break;
+        }
+    }
 }
 
 void SwitchAggregator::developerForceOff(){
