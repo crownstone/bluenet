@@ -47,28 +47,6 @@ void Switch::start() {
 		event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
 		EventDispatcher::getInstance().dispatch(event);
 	}
-
-	if (_switchValue.state.dimmer != 0) {
-		if (_pwmPowered) {
-			swSwitch->setIntensity(_switchValue.state.dimmer);
-		}
-		else {
-			// This is in case of a wall switch.
-			// You don't want to hear the relay turn on and off every time you power the crownstone.
-			// TODO: So, why does it call _relayOn() if it is supposed to do nothing...?
-			swSwitch->setRelay(true);
-		}
-	}
-	else {
-		// Make sure the relay is in the stored position (no need to store).
-		// TODO: Why is it not stored?
-		if (_switchValue.state.relay == 1) {
-			swSwitch->setRelay(true);
-		}
-		else {
-			swSwitch->setRelay(false);
-		}
-	}
 }
 
 bool Switch::checkAndSetOwner(cmd_source_t source) {

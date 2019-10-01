@@ -64,9 +64,12 @@ class SwSwitch : public ISwitch, public EventListener {
     void forceSwitchOff();
     void forceDimmerOff();
 
+    // checks state and persists (doesn't call any virtual methods).
+    void resetToCurrentState();
+
     public:
     /**
-     * Restores state from.
+     * Restores state from persistent memory and tries to recover to that state.
      */
     SwSwitch(HwSwitch hw_switch);
 

@@ -100,7 +100,12 @@ bool SwSwitch::isSafeToTurnRelayOff(){
 }
 
 bool SwSwitch::isSafeToDim(){
-    return !hasDimmingFailed() && !isSwitchFried();
+    // lazy update
+    if(!isDimmerCircuitPowered){
+        checkDimmerPower();
+    }
+
+    return isDimmerCircuitPowered && !hasDimmingFailed() && !isSwitchFried();
 }
 
 // storage functionality
@@ -192,6 +197,40 @@ void SwSwitch::forceDimmerOff() {
 	EventDispatcher::getInstance().dispatch(event);
 }
 
+void SwSwitch::resetToCurrentState(){
+    switch_state_t actualNextState = {0};
+
+    if(currentState.state.dimmer){
+        if(isDimmerCircuitPowered && isSafeToDim()){
+            hwSwitch.setIntensity(currentState.state.dimmer);
+            hwSwitch.setRelay(false);
+
+            actualNextState.state.dimmer = currentState.state.dimmer;
+            actualNextState.state.relay = currentState.state.relay;
+        }
+    } else {
+        if(currentState.state.relay){
+            if(isSafeToTurnRelayOn()){
+                hwSwitch.setRelay(true);
+                hwSwitch.setIntensity(0);
+                
+                actualNextState.state.relay = true;
+                actualNextState.state.dimmer = 0;
+            }
+        } else {
+            if(isSafeToTurnRelayOff()){
+                hwSwitch.setRelay(false);
+                hwSwitch.setIntensity(0);
+
+                actualNextState.state.relay = false;
+                actualNextState.state.dimmer = 0;
+            }
+        }
+    }
+
+    store(actualNextState);
+}
+
 // ========================================================================
 // ================================ Public ================================
 // ========================================================================
@@ -199,13 +238,18 @@ void SwSwitch::forceDimmerOff() {
 // ================== Life Cycle ================
 
 SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
+    // load currentState from State. 
     State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &currentState, sizeof(currentState));
+
+    
+    resetToCurrentState();
 }
 
 void SwSwitch::setAllowDimming(bool allowed) {
     allowDimming = allowed;
 
     if(!allowDimming || hasDimmingFailed()){
+        // fix state on disallow
         setIntensity(0);
 
         if(currentState.state.dimmer != 0){
@@ -233,21 +277,12 @@ void SwSwitch::setRelay(bool is_on){
 }
 
 void SwSwitch::setIntensity(uint8_t value){
-    if(value > 0 && hasDimmingFailed()){
+    if(value > 0 && ! isSafeToDim()){
         // can't turn dimming on when it has failed.
 
         // Todo: should we try turn on fully if the value big and
         // if value is ambiguous resort to a default?
         return;
-    }
-
-    if(!isDimmerCircuitPowered){
-        checkDimmerPower();
-
-        if(!isDimmerCircuitPowered){
-            // dimmer circuit not powered somehow..
-            return;
-        }
     }
 
     // hwSwitch.setDimmer(true); // currently unnecessary because false is never used..
@@ -286,10 +321,6 @@ void SwSwitch::handleEvent(event_t& evt){
                     *reinterpret_cast<TYPIFY(EVT_DIMMING_ALLOWED)*>(evt.data)
                 );
             break;
-        }
-        case CS_TYPE::EVT_DIMMER_POWERED: {
-            // new handle. When device boots, at some point this will fire 
-            // and we can hook into that to restore previous dimmer values.
         }
         default: break;
     }
