@@ -24,7 +24,6 @@
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
-#include <processing/cs_Watchdog.h>
 #include <processing/behaviour/cs_BehaviourHandler.h>
 #include <processing/behaviour/cs_BehaviourStore.h>
 #include <services/cs_CrownstoneService.h>
@@ -158,7 +157,6 @@ private:
 	Switch* _switch = NULL;
 	TemperatureGuard* _temperatureGuard = NULL;
 	PowerSampling* _powerSampler = NULL;
-	Watchdog* _watchdog = NULL;
 
 	// services
 	DeviceInformationService* _deviceInformationService = NULL;

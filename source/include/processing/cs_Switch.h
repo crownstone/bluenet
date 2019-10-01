@@ -153,7 +153,7 @@ public:
 
 	/** Used internally
 	 */
-	static void staticTimedSwitch(Switch* ptr) { ptr->delayedSwitchExecute(); }
+	// static void staticTimedSwitch(Switch* ptr) { ptr->delayedSwitchExecute(); }
 
 	/** Used internally
 	 */

@@ -55,7 +55,7 @@ class SwSwitch : public ISwitch, public EventListener {
     SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){}
 
     // user settings
-    
+
     void setAllowDimming(bool allowed); // will setRelay(true) if dimmer was active
     void setAllowSwitching(bool allowed) {allowSwitching = allowed;}
 
@@ -108,5 +108,12 @@ class SwSwitch : public ISwitch, public EventListener {
 
     // Other functions
 
+    /**
+     * Checks the current state and tries to set it to the opposite.
+     */
+    void toggle() {/* TODO */}
+
+    template<class T,class S>
+    void delayedSwitch(){ /* TODO */ }
     // switch_state_t getSwitchState() {return currentState; }
 };

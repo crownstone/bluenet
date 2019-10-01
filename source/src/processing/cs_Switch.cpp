@@ -356,24 +356,24 @@ bool Switch::checkAndSetOwner(cmd_source_t source) {
 void Switch::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::CMD_SWITCH_ON:
-			setSwitch(99);
+			if(swSwitch) swSwitch->setIntensity(100);
 			break;
 		case CS_TYPE::CMD_SWITCH_OFF:
-			setSwitch(0);
+			if(swSwitch) swSwitch->setIntensity(0);
 			break;
 		case CS_TYPE::CMD_SWITCH_TOGGLE:
-			toggle();
+			if(swSwitch) swSwitch->toggle();
 			break;
 		case CS_TYPE::CMD_SWITCH: {
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) event.data;
-			if (packet->delay) {
-				delayedSwitch(packet->switchCmd, packet->delay);
-			}
-			else {
+			// if (packet->delay) {
+			// 	delayedSwitch(packet->switchCmd, packet->delay);
+			// }
+			// else {
 				if (checkAndSetOwner(packet->source)) {
-					setSwitch(packet->switchCmd);
+					if(swSwitch) swSwitch->setIntensity(packet->switchCmd);
 				}
-			}
+			// }
 			break;
 		}
 // 		case CS_TYPE::EVT_TICK:
@@ -535,6 +535,6 @@ void Switch::init(const boards_config_t& board){
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, sizeof(_switchValue));
 
 	EventDispatcher::getInstance().addListener(this);
-	Timer::getInstance().createSingleShot(_switchTimerId,
-			(app_timer_timeout_handler_t)Switch::staticTimedSwitch);
+	// Timer::getInstance().createSingleShot(_switchTimerId,
+	// 		(app_timer_timeout_handler_t)Switch::staticTimedSwitch);
 }

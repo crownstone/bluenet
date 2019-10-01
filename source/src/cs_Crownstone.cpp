@@ -96,7 +96,6 @@ void handleZeroCrossing() {
  *  + switch
  *  + temperature guard
  *  + power sampling
- *  + watchdog
  *
  * The initialization is done in separate function.
  */
@@ -130,7 +129,6 @@ Crownstone::Crownstone(boards_config_t& board) :
 		_switch = &Switch::getInstance();
 		_temperatureGuard = &TemperatureGuard::getInstance();
 		_powerSampler = &PowerSampling::getInstance();
-		_watchdog = &Watchdog::getInstance();
 	}
 
 };
@@ -246,9 +244,6 @@ void Crownstone::initDrivers(uint16_t step) {
 
 			LOGi(FMT_INIT, "power sampler");
 			_powerSampler->init(_boardsConfig);
-
-			LOGi(FMT_INIT, "watchdog");
-			_watchdog->init();
 		}
 
 		// init GPIOs
