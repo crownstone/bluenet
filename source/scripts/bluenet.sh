@@ -117,7 +117,6 @@ while true; do
 			use_combined=true
 			shift 1
 			;;
-
 		-t|--target)
 			target=$2
 			shift 2
@@ -165,7 +164,7 @@ jobs=${jobs:-1}
 
 # Load configuration files.
 cs_info "Load configuration from: ${path}/_config.sh"
-source $path/_config.sh
+source $path/_config.sh $target
 
 check_target_changed() {
 	# old_target="$(grep "BOARD_TARGET:STRING=.*" $BLUENET_BUILD_DIR/CMakeCache.txt | sed 's/BOARD_TARGET:STRING=//')"
@@ -254,6 +253,7 @@ upload_bootloader_settings() {
 upload_bootloader() {
 	cd "$BLUENET_BUILD_DIR/$target/bootloader"
 	make write_bootloader
+	make write_bootloader_address
 	checkError "Error uploading bootloader"
 }
 
