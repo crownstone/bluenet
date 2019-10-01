@@ -126,15 +126,15 @@ void Switch::start() {
 // 	setSwitch(0);
 // }
 
-void Switch::toggle() {
-	// TODO: maybe check if pwm is larger than some value?
-	if (_switchValue.state.relay == 1 || _switchValue.state.dimmer > 0) {
-		setSwitch(0);
-	}
-	else {
-		setSwitch(99);
-	}
-}
+// void Switch::toggle() {
+// 	// TODO: maybe check if pwm is larger than some value?
+// 	if (_switchValue.state.relay == 1 || _switchValue.state.dimmer > 0) {
+// 		setSwitch(0);
+// 	}
+// 	else {
+// 		setSwitch(99);
+// 	}
+// }
 
 // void Switch::pwmOff() {
 // 	setPwm(0);
@@ -144,9 +144,9 @@ void Switch::toggle() {
 // 	setPwm(SWITCH_ON);
 // }
 
-void Switch::setPwm(uint8_t intensity){
-	swSwitch->setIntensity(intensity);
-}
+// void Switch::setPwm(uint8_t intensity){
+// 	swSwitch->setIntensity(intensity);
+// }
 
 // void Switch::relayOn() {
 // 	if (State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
@@ -184,39 +184,39 @@ void Switch::setPwm(uint8_t intensity){
 
 
 
-void Switch::delayedSwitch(uint8_t switchState, uint16_t delay) {
+// void Switch::delayedSwitch(uint8_t switchState, uint16_t delay) {
 
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGi("trigger delayed switch state: %d, delay: %d", switchState, delay);
-#endif
+// #ifdef PRINT_SWITCH_VERBOSE
+// 	LOGi("trigger delayed switch state: %d, delay: %d", switchState, delay);
+// #endif
 
-	if (delay == 0) {
-		LOGw("delay can't be 0");
-		delay = 1;
-	}
+// 	if (delay == 0) {
+// 		LOGw("delay can't be 0");
+// 		delay = 1;
+// 	}
 
-	if (_delayedSwitchPending) {
-#ifdef PRINT_SWITCH_VERBOSE
-		LOGi("clear existing delayed switch state");
-#endif
-		Timer::getInstance().stop(_switchTimerId);
-	}
+// 	if (_delayedSwitchPending) {
+// #ifdef PRINT_SWITCH_VERBOSE
+// 		LOGi("clear existing delayed switch state");
+// #endif
+// 		Timer::getInstance().stop(_switchTimerId);
+// 	}
 
-	_delayedSwitchPending = true;
-	_delayedSwitchState = switchState;
-	Timer::getInstance().start(_switchTimerId, MS_TO_TICKS(delay * 1000), this);
-}
+// 	_delayedSwitchPending = true;
+// 	_delayedSwitchState = switchState;
+// 	Timer::getInstance().start(_switchTimerId, MS_TO_TICKS(delay * 1000), this);
+// }
 
 
-void Switch::delayedSwitchExecute() {
-#ifdef PRINT_SWITCH_VERBOSE
-	LOGi("execute delayed switch");
-#endif
+// void Switch::delayedSwitchExecute() {
+// #ifdef PRINT_SWITCH_VERBOSE
+// 	LOGi("execute delayed switch");
+// #endif
 
-	if (_delayedSwitchPending) {
-		setSwitch(_delayedSwitchState);
-	}
-}
+// 	if (_delayedSwitchPending) {
+// 		setSwitch(_delayedSwitchState);
+// 	}
+// }
 
 // void Switch::pwmNotAllowed() {
 // 	switch_state_t oldVal = _switchValue;
@@ -295,27 +295,34 @@ void Switch::delayedSwitchExecute() {
 // 		|| !(stateErrors.errors.chipTemp || stateErrors.errors.overCurrent);
 // }
 
-void Switch::checkDimmerPower() {
-	// Check if dimmer is on, but power usage is low.
-	// In that case, assume the dimmer isn't working due to a cold boot.
-	// So turn dimmer off and relay on.
-	if (_switchValue.state.dimmer == 0) {
-		return;
-	}
-	TYPIFY(STATE_POWER_USAGE) powerUsage;
-	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
-	TYPIFY(CONFIG_POWER_ZERO) powerZero;
-	State::getInstance().get(CS_TYPE::CONFIG_POWER_ZERO, &powerZero, sizeof(powerZero));
-	LOGd("powerUsage=%i powerZero=%i", powerUsage, powerZero);
-	if (powerUsage < DIMMER_BOOT_CHECK_POWER_MW ||
-			(powerUsage < DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED && powerZero == CONFIG_POWER_ZERO_INVALID)) {
-		_pwmPowered = false;
-		event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
-		EventDispatcher::getInstance().dispatch(event);
-		setSwitch(SWITCH_ON);
-		return;
-	}
-}
+// void Switch::checkDimmerPower() {
+// 	// Check if dimmer is on, but power usage is low.
+// 	// In that case, assume the dimmer isn't working due to a cold boot.
+// 	// So turn dimmer off and relay on.
+// 	if (_switchValue.state.dimmer == 0) {
+// 		return;
+// 	}
+
+// 	TYPIFY(STATE_POWER_USAGE) powerUsage;
+// 	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
+// 	TYPIFY(CONFIG_POWER_ZERO) powerZero;
+// 	State::getInstance().get(CS_TYPE::CONFIG_POWER_ZERO, &powerZero, sizeof(powerZero));
+
+// 	LOGd("powerUsage=%i powerZero=%i", powerUsage, powerZero);
+
+// 	if (powerUsage < DIMMER_BOOT_CHECK_POWER_MW 
+// 		|| (powerUsage < DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED 
+// 			&& powerZero == CONFIG_POWER_ZERO_INVALID)
+// 		) {
+// 		_pwmPowered = false;
+
+// 		event_t event(CS_TYPE::EVT_DIMMER_POWERED, &_pwmPowered, sizeof(_pwmPowered));
+// 		EventDispatcher::getInstance().dispatch(event);
+
+// 		setSwitch(SWITCH_ON);
+// 		return;
+// 	}
+// }
 
 /**
  * For now, only deal with device tokens and let all other sources overrule (but not actually claim).
@@ -369,21 +376,21 @@ void Switch::handleEvent(event_t & event) {
 			}
 			break;
 		}
-		case CS_TYPE::EVT_TICK:
-			if (_dimmerCheckCountdown) {
-				if (--_dimmerCheckCountdown == 0) {
-					checkDimmerPower();
-				}
-			}
-			if (_ownerTimeoutCountdown) {
-				--_ownerTimeoutCountdown;
-//				if (--_ownerTimeoutCountdown == 0) {
-//					_source.flagExternal = false;
-//					_source.sourceId = CS_CMD_SOURCE_NONE;
-//					_source.count = 0;
-//				}
-			}
-			break;
+// 		case CS_TYPE::EVT_TICK:
+// 			if (_dimmerCheckCountdown) {
+// 				if (--_dimmerCheckCountdown == 0) {
+// 					checkDimmerPower();
+// 				}
+// 			}
+// 			if (_ownerTimeoutCountdown) {
+// 				--_ownerTimeoutCountdown;
+// //				if (--_ownerTimeoutCountdown == 0) {
+// //					_source.flagExternal = false;
+// //					_source.sourceId = CS_CMD_SOURCE_NONE;
+// //					_source.count = 0;
+// //				}
+// 			}
+// 			break;
 		default: {}
 	}
 }

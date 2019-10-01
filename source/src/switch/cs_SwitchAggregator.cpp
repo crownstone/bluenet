@@ -22,5 +22,11 @@ void SwitchAggregator::init(SwSwitch s){
 }
 
 void SwitchAggregator::handleEvent(event_t& evt){
+    // EVT_TICK: swSwitch.checkDimmerPower
+}
 
+void SwitchAggregator::developerForceOff(){
+    developerSetRelay(false);
+    developerSetIntensity(0);
+    developerSetDimmer(false);
 }

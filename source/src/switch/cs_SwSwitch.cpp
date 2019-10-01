@@ -12,9 +12,54 @@
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
 
+
+#define SWSWITCH_DEBUG_NO_PERSISTANCE (true)
+#define SWSWITCH_DEBUG_NO_EVENTS (true)
+
 // =========================================================================
 // ================================ Private ================================
 // =========================================================================
+
+// hardware validation 
+
+void SwSwitch::checkDimmerPower() {
+	if (!allowDimming || currentState.state.dimmer == 0) {
+		return;
+	}
+
+	// Check if dimmer is on, but power usage is low.
+	// In that case, assume the dimmer isn't working due to a cold boot.
+	// So turn dimmer off and relay on.
+
+	TYPIFY(STATE_POWER_USAGE) powerUsage;
+	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
+	TYPIFY(CONFIG_POWER_ZERO) powerZero;
+	State::getInstance().get(CS_TYPE::CONFIG_POWER_ZERO, &powerZero, sizeof(powerZero));
+
+	LOGd("powerUsage=%i powerZero=%i", powerUsage, powerZero);
+
+	if (powerUsage < DIMMER_BOOT_CHECK_POWER_MW 
+		|| (powerUsage < DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED 
+			&& powerZero == CONFIG_POWER_ZERO_INVALID)
+		) {
+
+        if (isDimmerCircuitPowered){
+            // uh oh.. what do we do when dimmer circuit lost power?
+        }
+		isDimmerCircuitPowered = false;
+	} else {
+        if (!isDimmerCircuitPowered){
+            //Dimmer has finished powering
+            TYPIFY(EVT_DIMMER_POWERED) powered = isDimmerCircuitPowered;
+		    event_t event(CS_TYPE::EVT_DIMMER_POWERED, &powered, sizeof(powered));
+		    EventDispatcher::getInstance().dispatch(event);
+
+            isDimmerCircuitPowered = true;
+        } else {
+            // confirmed that the dimmer circuit is still powered. Yay.
+        }
+    }
+}
 
 // error state semantics
 
@@ -110,21 +155,9 @@ void SwSwitch::forceRelayOn() {
 	EventDispatcher::getInstance().dispatch(event);
 	
     // Try again later, in case the first one didn't work..
-    // Todo(Arend: 27-06-2019): this should be a delayed call forceRelayOn
-	delayedSwitch(100, 5);
-}
-
-void SwSwitch::forceDimmerOff() {
-	hwSwitch.setIntensity(0);
-
-    // as there is no mechanism to turn it back on this isn't done yet, 
-    // but it would be safer to cut power to the dimmer if in error I suppose.
-    // hwSwitch.setDimmer(false);
-
-    storeIntensityStateUpdate(0);
-
-	event_t event(CS_TYPE::EVT_DIMMER_FORCED_OFF);
-	EventDispatcher::getInstance().dispatch(event);
+    // Todo(Arend 01-10-2019) do we really need this? it would be better if 
+    // calling scope decides if another forceSwitchOn() call is necessary.
+	// delayedSwitch(100, 5);
 }
 
 void SwSwitch::forceSwitchOff() {
@@ -141,7 +174,22 @@ void SwSwitch::forceSwitchOff() {
 	EventDispatcher::getInstance().dispatch(event);
 	
     // Try again later, in case the first one didn't work..
-	delayedSwitch(0, 5);
+    // Todo(Arend 01-10-2019) do we really need this? it would be better if 
+    // calling scope decides if another forceSwitchOff() call is necessary.
+	// delayedSwitch(0, 5);
+}
+
+void SwSwitch::forceDimmerOff() {
+	hwSwitch.setIntensity(0);
+
+    // as there is no mechanism to turn it back on this isn't done yet, 
+    // but it would be safer to cut power to the dimmer if in error I suppose.
+    // hwSwitch.setDimmer(false);
+
+    storeIntensityStateUpdate(0);
+
+	event_t event(CS_TYPE::EVT_DIMMER_FORCED_OFF);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 // ========================================================================
@@ -181,7 +229,19 @@ void SwSwitch::setRelay(bool is_on){
 void SwSwitch::setIntensity(uint8_t value){
     if(value > 0 && hasDimmingFailed()){
         // can't turn dimming on when it has failed.
+
+        // Todo: should we try turn on fully if the value big and
+        // if value is ambiguous resort to a default?
         return;
+    }
+
+    if(!isDimmerCircuitPowered){
+        checkDimmerPower();
+
+        if(!isDimmerCircuitPowered){
+            // dimmer circuit not powered somehow..
+            return;
+        }
     }
 
     // hwSwitch.setDimmer(true); // currently unnecessary because false is never used..
@@ -192,7 +252,7 @@ void SwSwitch::setIntensity(uint8_t value){
     hwSwitch.setRelay(false);
 
     // persist the new state.
-    storeIntensityStateUpdate(value);   
+    storeIntensityStateUpdate(value);
 }
 
 void SwSwitch::setDimmer(bool is_on){

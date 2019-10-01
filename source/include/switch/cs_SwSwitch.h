@@ -23,8 +23,11 @@ class SwSwitch : public ISwitch, public EventListener {
     HwSwitch hwSwitch;
     switch_state_t currentState = {0};
 
+    bool isDimmerCircuitPowered = false;
+
     bool allowDimming = false;     // user/app setting
     bool allowSwitching = true;    // user/app setting "locked" if false
+
 
     // error state semantics
     TYPIFY(STATE_ERRORS) getErrorState();
@@ -44,16 +47,28 @@ class SwSwitch : public ISwitch, public EventListener {
     // void storeDimmerStateUpdate(bool is_on); // not implemented
 
     // exceptional methods (ignores error state but logs and persists)
+    void forceRelayOn();
     void forceSwitchOff();
     void forceDimmerOff();
-    void forceRelayOn();
 
     public:
     SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){}
 
+    // user settings
+    
     void setAllowDimming(bool allowed); // will setRelay(true) if dimmer was active
     void setAllowSwitching(bool allowed) {allowSwitching = allowed;}
 
+    // hardware validation
+
+    /**
+     * try to check if the dimmer is powered and save the value into
+     * isDimmerCircuitPowered.
+     * 
+     * If dimming isn't allowed or currentState has a dimmer intensity of
+     * zero, this method will have no effect.
+     */
+    void checkDimmerPower();
 
     // ISwitch
 
@@ -77,6 +92,9 @@ class SwSwitch : public ISwitch, public EventListener {
      * Checks if the dimmer is still okay and will set it to the 
      * desired value if possible.
      * 
+     * Will prefer to use dimmer features, but if impossible try
+     * to solve the request using the relay.
+     * 
      * Updates switchState and calls saveSwitchState.
      */
     void setIntensity(uint8_t value);
@@ -90,9 +108,5 @@ class SwSwitch : public ISwitch, public EventListener {
 
     // Other functions
 
-    switch_state_t getSwitchState() {return currentState; }
-
-    // todo: remove this function or add an actual implementation
-    template<class T, class S>
-    void delayedSwitch(T,S){}
+    // switch_state_t getSwitchState() {return currentState; }
 };

@@ -15,6 +15,8 @@
 #include "processing/cs_Switch.h"
 #include "events/cs_EventDispatcher.h"
 
+#include <switch/cs_SwitchAggregator.h>
+
 FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
 		_recoveryDisableTimerId(NULL),
 		_recoveryProcessTimerId(NULL)
@@ -158,7 +160,7 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 //		TYPIFY(STATE_SWITCH_STATE) switchVal;
 //		cs_state_data_t data(CS_TYPE::STATE_SWITCH_STATE, &switchVal, sizeof(switchVal));
 //		getDefault(data);
-		Switch::getInstance().setSwitch(0);
+		SwitchAggregator::getInstance().developerForceOff();
 	}
 
 	// Clear other data

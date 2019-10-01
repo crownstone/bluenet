@@ -526,7 +526,8 @@ cs_ret_code_t CommandHandler::handleCmdSwitch(buffer_ptr_t buffer, const uint16_
 	}
 
 	switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-	Switch::getInstance().setSwitch(payload->switchState);
+	SwitchAggregator::getInstance().userSetIntensity(payload->switchState);
+	// Switch::getInstance().setSwitch(payload->switchState);
 
 	return ERR_SUCCESS;
 }
