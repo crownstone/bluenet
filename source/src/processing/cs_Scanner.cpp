@@ -8,7 +8,6 @@
 
 #include <storage/cs_State.h>
 #include <cfg/cs_DeviceTypes.h>
-#include <ble/cs_CrownstoneManufacturer.h>
 #include <events/cs_EventDispatcher.h>
 #include <cfg/cs_UuidConfig.h>
 

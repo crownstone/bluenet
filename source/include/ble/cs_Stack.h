@@ -9,7 +9,6 @@
  */
 #pragma once
 
-#include <ble/cs_CrownstoneManufacturer.h>
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Service.h>
 #include <ble/cs_UUID.h>

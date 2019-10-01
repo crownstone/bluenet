@@ -32,7 +32,6 @@
 
 #include <cs_Crownstone.h>
 
-#include <ble/cs_CrownstoneManufacturer.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_HardwareVersions.h>
 #include <common/cs_Types.h>
@@ -126,7 +125,6 @@ Crownstone::Crownstone(boards_config_t& board) :
 #endif
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-		_switch = &Switch::getInstance();
 		_temperatureGuard = &TemperatureGuard::getInstance();
 		_powerSampler = &PowerSampling::getInstance();
 	}
@@ -236,8 +234,6 @@ void Crownstone::initDrivers(uint16_t step) {
 			
 			SwitchAggregator::getInstance().init(s);
 			// End init switchaggregator
-
-			_switch->init(_boardsConfig);
 
 			LOGi(FMT_INIT, "temperature guard");
 			_temperatureGuard->init(_boardsConfig);
@@ -640,9 +636,6 @@ void Crownstone::startUp() {
 	nrf_delay_ms(50);
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-		//! Start switch, so it can be used.
-		_switch->start();
-
 		//! Start temperature guard regardless of operation mode
 		LOGi(FMT_START, "temp guard");
 		_temperatureGuard->start();

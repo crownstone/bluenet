@@ -154,7 +154,6 @@ private:
 	Storage* _storage;
 	State* _state;
 
-	Switch* _switch = NULL;
 	TemperatureGuard* _temperatureGuard = NULL;
 	PowerSampling* _powerSampler = NULL;
 
