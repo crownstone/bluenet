@@ -160,7 +160,7 @@ public:
 	void handleEvent(event_t & event);
 
 private:
-	Switch();
+	Switch() = default;
 
 	/** Sets the pwm and udpates switch state.
 	 *
@@ -217,12 +217,6 @@ private:
 
 	switch_state_t _switchValue;
 
-	//! Timer used to set the switch state with a delay.
-	app_timer_t              _switchTimerData;
-	app_timer_id_t           _switchTimerId;
-
-//	uint8_t _nextRelayVal;
-
 	//! Whether or not the pwm has enough power to be used.
 	TYPIFY(EVT_DIMMER_POWERED) _pwmPowered = false;
 	//! Whether or not the relay has enough power to be used.
@@ -249,5 +243,5 @@ private:
 	uint32_t _ownerTimeoutCountdown = 0;
 
 	// New Implementation:
-	std::optional<SwSwitch> swSwitch;
+	std::optional<SwSwitch> swSwitch = {};
 };
