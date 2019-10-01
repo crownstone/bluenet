@@ -7,6 +7,7 @@
 
 #include "ble/cs_Advertiser.h"
 #include "cfg/cs_Boards.h"
+#include "cfg/cs_DeviceTypes.h"
 #include "cfg/cs_Strings.h"
 #include "drivers/cs_Serial.h"
 #include "processing/cs_CommandHandler.h"

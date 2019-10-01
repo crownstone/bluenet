@@ -7,6 +7,7 @@
 
 #include "processing/cs_FactoryReset.h"
 #include "cfg/cs_Config.h"
+#include "cfg/cs_DeviceTypes.h"
 #include "storage/cs_State.h"
 #include "drivers/cs_RTC.h"
 #include "ble/cs_Stack.h"

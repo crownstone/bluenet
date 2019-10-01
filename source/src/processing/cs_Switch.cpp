@@ -99,21 +99,12 @@ bool Switch::checkAndSetOwner(cmd_source_t source) {
 }
 
 void Switch::init(const boards_config_t& board){
-	// Note: for SwitchAggregator these obtained values extracted as parameters.
-	TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;
-	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
-
-	uint16_t relayHighDuration = 0;
-	State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, &relayHighDuration, sizeof(relayHighDuration));
-
-	HwSwitch hwSwitch(board, pwmPeriod, relayHighDuration);
-	swSwitch = SwSwitch(hwSwitch);
+	
 
 	// Retrieve last switch state from persistent storage
 
-	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &_switchValue, sizeof(_switchValue));
+	
 
-	EventDispatcher::getInstance().addListener(this);
 	// Timer::getInstance().createSingleShot(_switchTimerId,
 	// 		(app_timer_timeout_handler_t)Switch::staticTimedSwitch);
 }

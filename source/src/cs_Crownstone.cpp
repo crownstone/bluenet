@@ -33,6 +33,7 @@
 #include <cs_Crownstone.h>
 
 #include <cfg/cs_Boards.h>
+#include <cfg/cs_DeviceTypes.h>
 #include <cfg/cs_HardwareVersions.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_PWM.h>

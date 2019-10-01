@@ -65,7 +65,10 @@ class SwSwitch : public ISwitch, public EventListener {
     void forceDimmerOff();
 
     public:
-    SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){}
+    /**
+     * Restores state from.
+     */
+    SwSwitch(HwSwitch hw_switch);
 
     // user settings
 

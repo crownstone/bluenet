@@ -196,6 +196,12 @@ void SwSwitch::forceDimmerOff() {
 // ================================ Public ================================
 // ========================================================================
 
+// ================== Life Cycle ================
+
+SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
+    State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &currentState, sizeof(currentState));
+}
+
 void SwSwitch::setAllowDimming(bool allowed) {
     allowDimming = allowed;
 
