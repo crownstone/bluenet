@@ -643,12 +643,6 @@ void Crownstone::startUp() {
 		//! Start switch, so it can be used.
 		_switch->start();
 
-		if (_operationMode == OperationMode::OPERATION_MODE_SETUP &&
-				(_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN || _boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN_ONE)
-				) {
-			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
-		}
-
 		//! Start temperature guard regardless of operation mode
 		LOGi(FMT_START, "temp guard");
 		_temperatureGuard->start();
