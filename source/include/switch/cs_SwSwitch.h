@@ -28,6 +28,19 @@ class SwSwitch : public ISwitch, public EventListener {
     bool allowDimming = false;     // user/app setting
     bool allowSwitching = true;    // user/app setting "locked" if false
 
+    // hardware validation
+
+    /**
+     * try to check if the dimmer is powered and save the value into
+     * isDimmerCircuitPowered.
+     * 
+     * If dimming isn't allowed or currentState has a dimmer intensity of
+     * zero, this method will have no effect.
+     * 
+     * Will fire a EVT_DIMMER_POWERED event when it detects power while 
+     * previous know state was unpowered.
+     */
+    void checkDimmerPower();
 
     // error state semantics
     TYPIFY(STATE_ERRORS) getErrorState();
@@ -58,17 +71,6 @@ class SwSwitch : public ISwitch, public EventListener {
 
     void setAllowDimming(bool allowed); // will setRelay(true) if dimmer was active
     void setAllowSwitching(bool allowed) {allowSwitching = allowed;}
-
-    // hardware validation
-
-    /**
-     * try to check if the dimmer is powered and save the value into
-     * isDimmerCircuitPowered.
-     * 
-     * If dimming isn't allowed or currentState has a dimmer intensity of
-     * zero, this method will have no effect.
-     */
-    void checkDimmerPower();
 
     // ISwitch
 
