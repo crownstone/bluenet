@@ -9,7 +9,6 @@
 #include <cfg/cs_Boards.h>
 #include <drivers/cs_ADC.h>
 #include <events/cs_EventListener.h>
-#include <processing/cs_Switch.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_CircularBuffer.h>
 #include <third/Median.h>

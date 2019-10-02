@@ -22,7 +22,6 @@
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
-#include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
 #include <processing/behaviour/cs_BehaviourHandler.h>
 #include <processing/behaviour/cs_BehaviourStore.h>

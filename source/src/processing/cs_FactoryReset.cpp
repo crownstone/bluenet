@@ -13,7 +13,6 @@
 #include "ble/cs_Stack.h"
 #include "ble/cs_Advertiser.h"
 #include "processing/cs_CommandHandler.h"
-#include "processing/cs_Switch.h"
 #include "events/cs_EventDispatcher.h"
 
 #include <switch/cs_SwitchAggregator.h>

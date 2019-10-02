@@ -15,7 +15,6 @@
 #include "processing/cs_Scheduler.h"
 #include "processing/cs_FactoryReset.h"
 #include "processing/cs_Setup.h"
-#include "processing/cs_Switch.h"
 #include "processing/cs_TemperatureGuard.h"
 #include "protocol/cs_UartProtocol.h"
 #include "protocol/mesh/cs_MeshModelPacketHelper.h"
