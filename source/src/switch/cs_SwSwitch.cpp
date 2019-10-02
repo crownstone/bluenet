@@ -241,7 +241,11 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
     // load currentState from State. 
     State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &currentState, sizeof(currentState));
 
-    
+    // ensure the dimmer gets power as the rest of the SwSwitch code assumes 
+    // that setIntensity calls will have visible effect.
+    // note: dimmer power is not persisted, so we don't need to store this anywhere.
+    hwSwitch.setDimmer(true);
+
     resetToCurrentState();
 }
 
