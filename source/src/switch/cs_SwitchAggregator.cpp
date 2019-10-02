@@ -69,24 +69,29 @@ SwitchAggregator& SwitchAggregator::getInstance(){
 void SwitchAggregator::init(SwSwitch s){
     swSwitch = s;
     
+    EventDispatcher::getInstance().addListener(&swSwitch.value());
     EventDispatcher::getInstance().addListener(this);
 }
 
 void SwitchAggregator::handleEvent(event_t& evt){
     switch(evt.type){
         case CS_TYPE::CMD_SWITCH_ON:{
+            LOGd("SwitchAggregator::%s case CMD_SWITCH_ON",__func__);
             if(swSwitch) swSwitch->setIntensity(100);
             break;
         }
         case CS_TYPE::CMD_SWITCH_OFF:{
+            LOGd("SwitchAggregator::%s case CMD_SWITCH_OFF",__func__);
             if(swSwitch) swSwitch->setIntensity(0);
             break;
         }
         case CS_TYPE::CMD_SWITCH_TOGGLE:{
+            LOGd("SwitchAggregator::%s case CMD_SWITCH_TOGGLE",__func__);
             if(swSwitch) swSwitch->toggle();
             break;
         }
         case CS_TYPE::CMD_SWITCH: {
+            LOGd("SwitchAggregator::%s case CMD_SWITCH",__func__);
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;		
             if(swSwitch) swSwitch->setIntensity(packet->switchCmd);
 			break;

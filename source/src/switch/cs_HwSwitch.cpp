@@ -69,7 +69,16 @@ HwSwitch::HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t re
 	pwmConfig.channels[0].pin = board.pinGpioPwm;
 	pwmConfig.channels[0].inverted = board.flags.pwmInverted;
 
-	PWM::getInstance().start(true);
+	switch(board.hardwareBoard){
+		case PCA10036:
+		case PCA10040:
+			PWM::getInstance().start(false);
+			break;
+		default:
+			PWM::getInstance().start(true);
+			break;
+	}
+
 	PWM::getInstance().init(pwmConfig);
 
 	_pinEnableDimmer = board.pinGpioEnablePwm;

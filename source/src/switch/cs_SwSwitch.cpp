@@ -123,14 +123,24 @@ bool SwSwitch::isSafeToDim(){
  */
 void SwSwitch::store(switch_state_t nextState) {
     SWSWITCH_LOG();
+    LOGd("nextState: relay %d dim %d", nextState.state.relay,nextState.state.dimmer);
 	bool persistNow = false;
+    // TODO(Arend): handle persistNow/later...
 
 	if (nextState.asInt != currentState.asInt) {
 		persistNow = (nextState.state.relay != currentState.state.relay);
 	}
 
+    LOGd("nextState: %x -> %d", 
+         reinterpret_cast<uint8_t*>(&nextState),
+        *reinterpret_cast<uint8_t*>(&nextState));
+
 	cs_state_data_t stateData (CS_TYPE::STATE_SWITCH_STATE, 
-        &nextState.asInt, sizeof(nextState.asInt));
+        reinterpret_cast<uint8_t*>(&nextState), sizeof(nextState));
+
+    LOGd("stateData.value: %x -> %d", 
+         reinterpret_cast<uint8_t*>(stateData.value),
+        *reinterpret_cast<uint8_t*>(stateData.value));
 
 	if (persistNow) {
 		State::getInstance().set(stateData);
@@ -138,6 +148,7 @@ void SwSwitch::store(switch_state_t nextState) {
 		State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
 	}
 
+    LOGd("nextState: {relay=%d, dim=%x}", nextState.state.relay,nextState.state.dimmer);
     currentState = nextState;
 }
 
@@ -295,6 +306,8 @@ void SwSwitch::setRelay(bool is_on){
 
 void SwSwitch::setIntensity(uint8_t value){
     SWSWITCH_LOG();
+    LOGd("intensity: %d",value);
+
     if(value > 0 && ! isSafeToDim()){
         // can't turn dimming on when it has failed.
 
@@ -307,11 +320,11 @@ void SwSwitch::setIntensity(uint8_t value){
 
     // first ensure the dimmer value is correct
     hwSwitch.setIntensity(value);
+    storeIntensityStateUpdate(value);
+
     // and then turn off the relay (if it wasn't already off)
     hwSwitch.setRelay(false);
-
-    // persist the new state.
-    storeIntensityStateUpdate(value);
+    storeRelayStateUpdate(false);
 }
 
 void SwSwitch::setDimmer(bool is_on){
