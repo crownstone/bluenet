@@ -183,17 +183,19 @@ check_target_changed() {
 	cs_info "Running cmake"
 	cmake .. -DBOARD_TARGET=$target
 	checkError "Error running cmake"
-	# make -j1
-	# checkError "Error running first make"
+	make -j1
+	checkError "Error running first make"
 }
 
 build_firmware() {
+	cs_info "build firmware"
 	cd "$BLUENET_BUILD_DIR/$target"
 	make -j${jobs}
 	checkError "Error building firmware"
 }
 
 build_firmware_release() {
+	cs_info "build release firmware"
 	# ${path}/firmware.sh release $target
 	# checkError "Error building firmware release"
 	cs_err "TODO: build firmware release"
@@ -201,12 +203,14 @@ build_firmware_release() {
 }
 
 build_bootloader_settings() {
+	cs_info "build bootloader settings"
 	cd "$BLUENET_BUILD_DIR/$target"
 	make -j${jobs} build_bootloader_settings
 	checkError "Error building bootloader settings"
 }
 
 build_bootloader() {
+	cs_info "build bootloader"
 	cd "$BLUENET_BUILD_DIR/$target/bootloader"
 	make -j${jobs}
 	checkError "Error building bootloader"
@@ -217,6 +221,7 @@ build_softdevice() {
 }
 
 build_combined() {
+	cs_info "build combined"
 	# ${path}/combine.sh -f -b -s -h -t $target
 	# checkError "Error combining to binary"
 	cs_err "TODO: build combined"
@@ -224,6 +229,7 @@ build_combined() {
 }
 
 build_unit_test_host() {
+	cs_info "build unit test host"
 	# ${path}/firmware.sh unit-test-host $target
 	# checkError "Error building unit test host"
 	cs_err "TODO: build unit test host"
@@ -232,6 +238,7 @@ build_unit_test_host() {
 
 
 erase_flash() {
+	cs_info "erase flash"
 	cd "$BLUENET_BUILD_DIR"
 	make erase
 	checkError "Error erasing flash"
@@ -239,18 +246,21 @@ erase_flash() {
 
 
 upload_firmware() {
+	cs_info "upload firmware"
 	cd "$BLUENET_BUILD_DIR/$target"
 	make write_application
 	checkError "Error uploading firmware"
 }
 
 upload_bootloader_settings() {
+	cs_info "upload bootloader settings"
 	cd "$BLUENET_BUILD_DIR/$target"
 	make write_bootloader_settings
 	checkError "Error uploading bootloader settings"
 }
 
 upload_bootloader() {
+	cs_info "upload bootloader"
 	cd "$BLUENET_BUILD_DIR/$target/bootloader"
 	make write_bootloader
 	make write_bootloader_address
@@ -258,12 +268,14 @@ upload_bootloader() {
 }
 
 upload_softdevice() {
+	cs_info "upload softdevice"
 	cd "$BLUENET_BUILD_DIR"
 	make write_softdevice
 	checkError "Error uploading softdevice"
 }
 
 upload_combined() {
+	cs_info "upload combined"
 	# cs_info "Upload all at once"
 	# ${path}/_upload.sh $BLUENET_BIN_DIR/combined.hex $serial_num
 	# checkError "Error uploading combined binary"
@@ -272,12 +284,14 @@ upload_combined() {
 }
 
 upload_board_version() {
+	cs_info "upload board version"
 	cd "$BLUENET_BUILD_DIR/$target"
 	make write_board_version
 	checkError "Error uploading board version"
 }
 
 debug_firmware() {
+	cs_info "debug firmware"
 	# ${path}/firmware.sh debug $target
 	# checkError "Error debugging firmware"
 	cs_err "TODO: debug firmware"
@@ -285,6 +299,7 @@ debug_firmware() {
 }
 
 debug_bootloader() {
+	cs_info "debug bootloader"
 	# ${path}/bootloader.sh debug $target
 	# checkError "Error debugging bootloader"
 	cs_err "TODO: debug bootloader"
@@ -295,6 +310,7 @@ debug_bootloader() {
 
 
 clean_firmware() {
+	cs_info "clean firmware"
 	# ${path}/firmware.sh clean $target
 	# checkError "Error cleaning up firmware"
 	cs_err "TODO: clean firmware"
@@ -302,6 +318,7 @@ clean_firmware() {
 }
 
 clean_bootloader() {
+	cs_info "clean bootloader"
 	# ${path}/bootloader.sh clean $target
 	# checkError "Error cleaning up bootloader"
 	cs_err "TODO: clean bootloader"
@@ -309,6 +326,7 @@ clean_bootloader() {
 }
 
 clean_softdevice() {
+	cs_info "clean softdevice"
 	# ${path}/softdevice.sh clean $target
 	# checkError "Error cleaning up softdevice"
 	cs_err "TODO: clean softdevice"
@@ -318,12 +336,14 @@ clean_softdevice() {
 
 
 verify_board_version_written() {
+	cs_info "verify board version"
 	# ${path}/board_version.sh check $target
 	# checkError "Error: no correct board version is written."
 	cs_warn "TODO: verify board version"
 }
 
 reset() {
+	cs_info "reset"
 	cd "$BLUENET_BUILD_DIR"
 	make reset
 	checkError "Error when resetting"
