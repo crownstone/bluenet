@@ -7,10 +7,12 @@
 
 #pragma once
 
-#include <switch/cs_ISwitch.h>
-#include <switch/cs_HwSwitch.h>
-
+#include <drivers/cs_Serial.h>
 #include <events/cs_EventListener.h>
+#include <switch/cs_HwSwitch.h>
+#include <switch/cs_ISwitch.h>
+
+
 
 /**
  * Wrapper object to the underlying HwSwitch that adds safety features and 
@@ -119,9 +121,5 @@ class SwSwitch : public ISwitch, public EventListener {
     /**
      * Checks the current state and tries to set it to the opposite.
      */
-    void toggle() {/* TODO */}
-
-    template<class T,class S>
-    void delayedSwitch(){ /* TODO */ }
-    // switch_state_t getSwitchState() {return currentState; }
+    void toggle() { LOGd("SwSwitch::toggle"); /* TODO */}
 };

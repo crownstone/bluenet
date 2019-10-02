@@ -102,3 +102,23 @@ void SwitchAggregator::developerForceOff(){
     developerSetIntensity(0);
     developerSetDimmer(false);
 }
+
+void SwitchAggregator::developerSetRelay(bool is_on) {
+    LOGd("SwitchAggregator::%s",__func__);
+}
+void SwitchAggregator::developerSetDimmer(bool is_on) {
+    LOGd("SwitchAggregator::%s",__func__);
+}
+void SwitchAggregator::developerSetIntensity(uint8_t value) {
+    LOGd("SwitchAggregator::%s",__func__);
+}
+
+void SwitchAggregator::userSetRelay(bool is_on) {
+    LOGd("SwitchAggregator::%s",__func__);
+}
+void SwitchAggregator::userSetDimmer(bool is_on) {
+    LOGd("SwitchAggregator::%s",__func__);
+}
+void SwitchAggregator::userSetIntensity(uint8_t value) {
+    LOGd("SwitchAggregator::%s",__func__);
+}

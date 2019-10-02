@@ -7,11 +7,13 @@
 
 #include <switch/cs_SwSwitch.h>
 #include <common/cs_Types.h>
+#include <drivers/cs_Serial.h>
 #include <storage/cs_State.h>
 
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
 
+#define SWSWITCH_LOG() LOGd("SwSwitch::%s",__func__)
 
 #define SWSWITCH_DEBUG_NO_PERSISTANCE (true)
 #define SWSWITCH_DEBUG_NO_EVENTS (true)
@@ -23,6 +25,7 @@
 // hardware validation 
 
 void SwSwitch::checkDimmerPower() {
+    SWSWITCH_LOG();
 	if (!allowDimming || currentState.state.dimmer == 0) {
 		return;
 	}
@@ -119,6 +122,7 @@ bool SwSwitch::isSafeToDim(){
  * (just not the value on flash).
  */
 void SwSwitch::store(switch_state_t nextState) {
+    SWSWITCH_LOG();
 	bool persistNow = false;
 
 	if (nextState.asInt != currentState.asInt) {
@@ -139,12 +143,14 @@ void SwSwitch::store(switch_state_t nextState) {
 
 
 void SwSwitch::storeRelayStateUpdate(bool is_on){
+    SWSWITCH_LOG();
     switch_state_t nextState = currentState;
     nextState.state.relay = is_on;
     store(nextState);
 }
 
 void SwSwitch::storeIntensityStateUpdate(uint8_t intensity){
+    SWSWITCH_LOG();
     switch_state_t nextState = currentState;
     nextState.state.dimmer = intensity;
     store(nextState);
@@ -153,6 +159,7 @@ void SwSwitch::storeIntensityStateUpdate(uint8_t intensity){
 // forcing hardwareSwitch
 
 void SwSwitch::forceRelayOn() {
+    SWSWITCH_LOG();
     hwSwitch.setRelay(true);
     storeRelayStateUpdate(true);
 	
@@ -166,6 +173,7 @@ void SwSwitch::forceRelayOn() {
 }
 
 void SwSwitch::forceSwitchOff() {
+    SWSWITCH_LOG();
 	hwSwitch.setIntensity(0);
 	hwSwitch.setRelay(false);
     // hwSwitch.setDimmer(false);
@@ -185,6 +193,7 @@ void SwSwitch::forceSwitchOff() {
 }
 
 void SwSwitch::forceDimmerOff() {
+    SWSWITCH_LOG();
 	hwSwitch.setIntensity(0);
 
     // as there is no mechanism to turn it back on this isn't done yet, 
@@ -198,6 +207,7 @@ void SwSwitch::forceDimmerOff() {
 }
 
 void SwSwitch::resetToCurrentState(){
+    SWSWITCH_LOG();
     switch_state_t actualNextState = {0};
 
     if(currentState.state.dimmer){
@@ -238,6 +248,7 @@ void SwSwitch::resetToCurrentState(){
 // ================== Life Cycle ================
 
 SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
+    SWSWITCH_LOG();
     // load currentState from State. 
     State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &currentState, sizeof(currentState));
 
@@ -250,6 +261,7 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
 }
 
 void SwSwitch::setAllowDimming(bool allowed) {
+    SWSWITCH_LOG();
     allowDimming = allowed;
 
     if(!allowDimming || hasDimmingFailed()){
@@ -267,6 +279,7 @@ void SwSwitch::setAllowDimming(bool allowed) {
 // ================== ISwitch ==============
 
 void SwSwitch::setRelay(bool is_on){
+    SWSWITCH_LOG();
     if(is_on && !isSafeToTurnRelayOn()){
         // intent to turn on, but not safe
         return;
@@ -281,6 +294,7 @@ void SwSwitch::setRelay(bool is_on){
 }
 
 void SwSwitch::setIntensity(uint8_t value){
+    SWSWITCH_LOG();
     if(value > 0 && ! isSafeToDim()){
         // can't turn dimming on when it has failed.
 

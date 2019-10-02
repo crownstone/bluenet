@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <drivers/cs_Serial.h>
 #include "switch/cs_SwSwitch.h"
 #include "events/cs_EventListener.h"
 
@@ -26,15 +27,15 @@ class SwitchAggregator : public EventListener {
     virtual void handleEvent(event_t& evt) override;
  
     // ISwitch interface for dev
-    void developerSetRelay(bool is_on) {}
-    void developerSetDimmer(bool is_on) {}
-    void developerSetIntensity(uint8_t value) {}
+    void developerSetRelay(bool is_on);
+    void developerSetDimmer(bool is_on);
+    void developerSetIntensity(uint8_t value);
     void developerForceOff();
     
     // ISwitch interface for user/app
-    void userSetRelay(bool is_on) {}
-    void userSetDimmer(bool is_on) {}
-    void userSetIntensity(uint8_t value) {} // will sort
+    void userSetRelay(bool is_on);
+    void userSetDimmer(bool is_on);
+    void userSetIntensity(uint8_t value); // will sort
 
     // interface for overrideState switchcraft/system
 
