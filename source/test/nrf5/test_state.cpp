@@ -531,13 +531,13 @@ TestResult TestState::testDuplicateRecords(uint16_t resetCount, uint32_t step) {
 	cs_ret_code_t errCode;
 
 	uint32_t pwmPeriod = 0;
-	uint32_t *data = (uint32_t*)malloc(sizeof(pwmPeriod));
 	fds_record_t record;
 	if (resetCount == 0) {
 		switch (step) {
 		case 0:
 		case 1:
 		case 2: {
+			uint32_t *data = (uint32_t*)malloc(sizeof(pwmPeriod));	
 			pwmPeriod = 10000 + step;
 			*data = pwmPeriod;
 			record.file_id           = FILE_CONFIGURATION;
@@ -588,12 +588,12 @@ TestResult TestState::testCorruptedRecords(uint16_t resetCount, uint32_t step) {
 	}
 	cs_ret_code_t errCode;
 	int32_t powerZero = 0;
-	int32_t *data = (int32_t*)malloc(sizeof(powerZero));
 	uint16_t recordKey = to_underlying_type(CS_TYPE::CONFIG_POWER_ZERO);
 	fds_record_t record;
 	if (resetCount == 0) {
 		switch (step) {
 		case 0: {
+			int32_t *data = (int32_t*)malloc(sizeof(powerZero));
 			LOGi("Write to flash");
 			powerZero = 123456;
 			*data = powerZero;
