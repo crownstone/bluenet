@@ -112,7 +112,7 @@ list(APPEND CMAKE_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
 if(DOWNLOAD_JLINK) 
   ExternalProject_Add(jlink
-    DOWNLOAD_COMMAND wget  --post-data "accept_license_agreement=accepted" ${JLINK_LINUX_DOWNLOAD_URL} -O ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
+    DOWNLOAD_COMMAND wget --timestamping --post-data "accept_license_agreement=accepted" ${JLINK_LINUX_DOWNLOAD_URL} -O ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
     DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
     URL ${JLINK_LINUX_DOWNLOAD_URL}
     URL_MD5 ${JLINK_MD5}
