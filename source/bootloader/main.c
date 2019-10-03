@@ -63,6 +63,7 @@
 #include "nrf_gpio.h"
 #include "cfg/cs_Boards.h"
 #include "cfg/cs_DeviceTypes.h"
+#include "nrf_nvmc.h"
 
 /**
  * GPRegRet value when device was reset due to a soft reset.
@@ -149,6 +150,16 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
  * Make sure all GPIO is initialized.
  */
 void cs_gpio_init(boards_config_t* board) {
+	switch (board->hardwareBoard) {
+	case ACR01B10C:
+		// Enable NFC pins
+		if (NRF_UICR->NFCPINS != 0) {
+			nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
+		}
+		break;
+	default:
+		break;
+	}
 	if (IS_CROWNSTONE(board->deviceType)) {
 		// Turn dimmer off.
 		nrf_gpio_cfg_output(board->pinGpioPwm);
@@ -158,6 +169,8 @@ void cs_gpio_init(boards_config_t* board) {
 		else {
 			nrf_gpio_pin_clear(board->pinGpioPwm);
 		}
+		nrf_gpio_cfg_output(board->pinGpioEnablePwm);
+		nrf_gpio_pin_clear(board->pinGpioEnablePwm);
 		// Don't do anything with relay.
 		if (board->flags.hasRelay) {
 			nrf_gpio_cfg_output(board->pinGpioRelayOff);

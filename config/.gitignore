@@ -1,1 +1,7 @@
-default/
+# Ignore everything
+*
+
+# Except the default config
+!.gitignore
+!default/
+!default/*

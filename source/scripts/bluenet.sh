@@ -2,6 +2,7 @@
 
 # Get the scripts path: the path where this file is located.
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $path/_env.sh
 source $path/_utils.sh
 
 bluenet_logo
@@ -18,6 +19,7 @@ usage() {
 	echo "   -u, --upload                         upload binary to target"
 	echo "   -d, --debug                          debug firmware"
 	echo "   -c, --clean                          clean build dir"
+	echo "   -R, --reset                          reset the target"
 	echo "   --unit_test_host                     compile unit tests for host"
 	echo "   --unit_test_nrf5                     compile unit tests for nrf5"
 	echo
@@ -32,7 +34,7 @@ usage() {
 	echo
 	echo "Extra arguments:"
 	echo "   -t target, --target target           specify config target (files are generated in separate directories)"
-	echo "   -a address, --address address        specify address on flash to upload to"
+	echo "   -j N, --jobs N                       Allow N jobs at once"
 	echo "   -r, --release_build                  compile a release build"
 	echo "   -y, --yes                            automatically select default option (non-interactive mode)"
 	echo "   -h, --help                           show this help"
@@ -49,8 +51,8 @@ if [[ $? -ne 4 ]]; then
 	exit $CS_ERR_GETOPT_TEST
 fi
 
-SHORT=t:a:beudcryhFBPSHC
-LONG=target:,address:build,erase,upload,debug,clean,release_build,yes,help,firmware,bootloader,bootloader_settings,softdevice,hardware_version,combined,unit_test_host,unit_test_nrf5
+SHORT=t:j:beudcrRyhFBPSHC
+LONG=target:,jobs:,build,erase,upload,debug,clean,release_build,reset,yes,help,firmware,bootloader,bootloader_settings,softdevice,hardware_version,combined,unit_test_host,unit_test_nrf5
 
 PARSED=$(getopt --options $SHORT --longoptions $LONG --name "$0" -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -115,17 +117,20 @@ while true; do
 			use_combined=true
 			shift 1
 			;;
-
 		-t|--target)
 			target=$2
 			shift 2
 			;;
-		-a|--address)
-			address=$2
+		-j|--jobs)
+			jobs=$2
 			shift 2
 			;;
 		-r|--release_build)
 			release_build=true
+			shift 1
+			;;
+		-R|--reset)
+			do_reset=true
 			shift 1
 			;;
 		-y|--yes)
@@ -152,137 +157,196 @@ done
 
 
 # Default target
-target=${target:-crownstone}
+target=${target:-default}
 
-# Adjust config, build, bin, and release dirs. Assign serial_num and gdb_port from target.
-cs_info "Load configuration from: ${path}/_check_targets.sh $target"
-source ${path}/_check_targets.sh $target
+# Default jobs
+jobs=${jobs:-1}
 
-# Check environment variables, load configuration files.
+# Load configuration files.
 cs_info "Load configuration from: ${path}/_config.sh"
-source $path/_config.sh
+source $path/_config.sh $target
 
-# Use $APPLICATION_START_ADDRESS as default if no address defined.
-address=${address:-$APPLICATION_START_ADDRESS}
-
-cs_info "Configuration parameters loaded from files set up beforehand through e.g. _config.sh:"
-log_config
-echo
-
-
-
-
+check_target_changed() {
+	# old_target="$(grep "BOARD_TARGET:STRING=.*" $BLUENET_BUILD_DIR/CMakeCache.txt | sed 's/BOARD_TARGET:STRING=//')"
+	# if [ "$old_target" == "$target" ]; then
+	# 	cs_info "Similar target"
+	# else
+	# 	cs_warn "Target changed"
+	# 	cd "$BLUENET_BUILD_DIR"
+	#   cs_info "Running cmake"
+	# 	cmake .. -DBOARD_TARGET=$target
+	# 	checkError "Error running cmake"
+	# 	make -j1
+	# 	checkError "Error running first make"
+	# fi
+	cd "$BLUENET_BUILD_DIR"
+	cs_info "Running cmake"
+	cmake .. -DBOARD_TARGET=$target
+	checkError "Error running cmake"
+	make -j1
+	checkError "Error running first make"
+}
 
 build_firmware() {
-	${path}/firmware.sh build $target
+	cs_info "build firmware"
+	cd "$BLUENET_BUILD_DIR/$target"
+	make -j${jobs}
 	checkError "Error building firmware"
 }
 
 build_firmware_release() {
-	${path}/firmware.sh release $target
-	checkError "Error building firmware release"
+	cs_info "build release firmware"
+	# ${path}/firmware.sh release $target
+	# checkError "Error building firmware release"
+	cs_err "TODO: build firmware release"
+	exit 1
 }
 
 build_bootloader_settings() {
-	${path}/bootloader.sh build-settings $target
+	cs_info "build bootloader settings"
+	cd "$BLUENET_BUILD_DIR/$target"
+	make -j${jobs} build_bootloader_settings
 	checkError "Error building bootloader settings"
 }
 
 build_bootloader() {
-	${path}/bootloader.sh build $target
+	cs_info "build bootloader"
+	cd "$BLUENET_BUILD_DIR/$target/bootloader"
+	make -j${jobs}
 	checkError "Error building bootloader"
 }
 
 build_softdevice() {
-	${path}/softdevice.sh build $target
-	checkError "Error building softdevice"
+	cs_info "No need to build softdevice"
 }
 
 build_combined() {
-	${path}/combine.sh -f -b -s -h -t $target
-	checkError "Error combining to binary"
+	cs_info "build combined"
+	# ${path}/combine.sh -f -b -s -h -t $target
+	# checkError "Error combining to binary"
+	cs_err "TODO: build combined"
+	exit 1
 }
 
 build_unit_test_host() {
-	${path}/firmware.sh unit-test-host $target
-	checkError "Error building unit test host"
+	cs_info "build unit test host"
+	# ${path}/firmware.sh unit-test-host $target
+	# checkError "Error building unit test host"
+	cs_err "TODO: build unit test host"
+	exit 1
 }
 
 
 erase_flash() {
-	${path}/_erase_flash.sh $serial_num
+	cs_info "erase flash"
+	cd "$BLUENET_BUILD_DIR"
+	make erase
 	checkError "Error erasing flash"
 }
 
 
 upload_firmware() {
-	${path}/firmware.sh upload $target $address
+	cs_info "upload firmware"
+	cd "$BLUENET_BUILD_DIR/$target"
+	make write_application
 	checkError "Error uploading firmware"
 }
 
 upload_bootloader_settings() {
-	${path}/bootloader.sh upload-settings $target
+	cs_info "upload bootloader settings"
+	cd "$BLUENET_BUILD_DIR/$target"
+	make write_bootloader_settings
 	checkError "Error uploading bootloader settings"
 }
 
 upload_bootloader() {
-	${path}/bootloader.sh upload $target
+	cs_info "upload bootloader"
+	cd "$BLUENET_BUILD_DIR/$target/bootloader"
+	make write_bootloader
+	make write_bootloader_address
 	checkError "Error uploading bootloader"
 }
 
 upload_softdevice() {
-	${path}/softdevice.sh upload $target
+	cs_info "upload softdevice"
+	cd "$BLUENET_BUILD_DIR"
+	make write_softdevice
 	checkError "Error uploading softdevice"
 }
 
 upload_combined() {
-	cs_info "Upload all at once"
-	${path}/_upload.sh $BLUENET_BIN_DIR/combined.hex $serial_num
-	checkError "Error uploading combined binary"
+	cs_info "upload combined"
+	# cs_info "Upload all at once"
+	# ${path}/_upload.sh $BLUENET_BIN_DIR/combined.hex $serial_num
+	# checkError "Error uploading combined binary"
+	cs_err "TODO: upload combined"
+	exit 1
 }
 
 upload_board_version() {
-	${path}/board_version.sh upload $target
+	cs_info "upload board version"
+	cd "$BLUENET_BUILD_DIR/$target"
+	make write_board_version
 	checkError "Error uploading board version"
 }
 
 debug_firmware() {
-	${path}/firmware.sh debug $target
-	checkError "Error debugging firmware"
+	cs_info "debug firmware"
+	# ${path}/firmware.sh debug $target
+	# checkError "Error debugging firmware"
+	cs_err "TODO: debug firmware"
+	exit 1
 }
 
 debug_bootloader() {
-	${path}/bootloader.sh debug $target
-	checkError "Error debugging bootloader"
+	cs_info "debug bootloader"
+	# ${path}/bootloader.sh debug $target
+	# checkError "Error debugging bootloader"
+	cs_err "TODO: debug bootloader"
+	exit 1
 }
 
 
 
 
 clean_firmware() {
-	${path}/firmware.sh clean $target
-	checkError "Error cleaning up firmware"
+	cs_info "clean firmware"
+	# ${path}/firmware.sh clean $target
+	# checkError "Error cleaning up firmware"
+	cs_err "TODO: clean firmware"
+	exit 1
 }
 
 clean_bootloader() {
-	${path}/bootloader.sh clean $target
-	checkError "Error cleaning up bootloader"
+	cs_info "clean bootloader"
+	# ${path}/bootloader.sh clean $target
+	# checkError "Error cleaning up bootloader"
+	cs_err "TODO: clean bootloader"
+	exit 1
 }
 
 clean_softdevice() {
-	${path}/softdevice.sh clean $target
-	checkError "Error cleaning up softdevice"
+	cs_info "clean softdevice"
+	# ${path}/softdevice.sh clean $target
+	# checkError "Error cleaning up softdevice"
+	cs_err "TODO: clean softdevice"
+	exit 1
 }
 
 
 
 verify_board_version_written() {
-	${path}/board_version.sh check $target
-	checkError "Error: no correct board version is written."
+	cs_info "verify board version"
+	# ${path}/board_version.sh check $target
+	# checkError "Error: no correct board version is written."
+	cs_warn "TODO: verify board version"
 }
 
 reset() {
-	${path}/reset.sh $target
+	cs_info "reset"
+	cd "$BLUENET_BUILD_DIR"
+	make reset
+	checkError "Error when resetting"
 }
 
 
@@ -300,6 +364,7 @@ if [ $do_unit_test_nrf5 ]; then
 fi
 
 if [ $do_build ]; then
+	check_target_changed
 	done_something=true
 	done_built=false
 	if [ $include_firmware ]; then
@@ -340,6 +405,7 @@ fi
 
 
 if [ $do_upload ]; then
+	check_target_changed
 	done_something=true
 	done_upload=false
 	if [ $use_combined ]; then
@@ -385,6 +451,7 @@ fi
 
 
 if [ $do_debug ]; then
+	check_target_changed
 	done_something=true
 	if [ $include_bootloader ]; then
 		debug_bootloader
@@ -423,6 +490,10 @@ if [ $do_unit_test_host ]; then
 	build_unit_test_host
 fi
 
+if [ $do_reset ]; then
+	reset
+	done_something=true
+fi
 
 if [ "$done_something" != true ]; then
 	cs_err "Nothing was done. Please specify a command."

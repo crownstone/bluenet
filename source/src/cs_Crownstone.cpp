@@ -804,7 +804,7 @@ void Crownstone::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::CONFIG_IBEACON_ENABLED: {
-			TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
+			__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
 			// 12-sep-2019 TODO: implement
 			LOGw("TODO ibeacon enabled=%i", enabled);
 			break;
