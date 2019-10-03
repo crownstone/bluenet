@@ -66,7 +66,8 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	event_t event(CS_TYPE::CMD_SWITCH_ON);
 	EventDispatcher::getInstance().dispatch(event);
 
-	// Make sure the stored switch state is correct, as the switch command might not be executed (for example if the device has no switch).
+	// Make sure the stored switch state is correct, as the switch command might not be executed
+	// (for example if the device has no switch, or when the switch is already on).
 	// This is necessary because we wait for it to be set.
 	TYPIFY(STATE_SWITCH_STATE) switchState;
 	switchState.state.dimmer = 0;
