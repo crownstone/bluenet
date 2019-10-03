@@ -181,9 +181,9 @@ check_target_changed() {
 	# fi
 	cd "$BLUENET_BUILD_DIR"
 	cs_info "Running cmake"
-	cmake .. -DBOARD_TARGET=$target
+	cmake .. -DBOARD_TARGET=$target -DDOWNLOAD_JLINK=OFF
 	checkError "Error running cmake"
-	make -j1
+	make -j${jobs}
 	checkError "Error running first make"
 }
 
