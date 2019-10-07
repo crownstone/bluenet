@@ -231,9 +231,8 @@ void Crownstone::initDrivers(uint16_t step) {
 				&relayHighDuration, sizeof(relayHighDuration));
 
 			HwSwitch h(_boardsConfig, pwmPeriod, relayHighDuration);
-			SwSwitch s(h);
-			
-			SwitchAggregator::getInstance().init(s);
+						
+			SwitchAggregator::getInstance().init(SwSwitch(h));
 			// End init switchaggregator
 
 			LOGi(FMT_INIT, "temperature guard");

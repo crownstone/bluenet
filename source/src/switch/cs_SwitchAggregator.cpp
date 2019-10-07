@@ -9,6 +9,7 @@
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
 
+#include <optional>
 
 // NOTES:
 // bool switchcraftEnabled = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
@@ -66,8 +67,8 @@ SwitchAggregator& SwitchAggregator::getInstance(){
     return instance;
 }
 
-void SwitchAggregator::init(SwSwitch s){
-    swSwitch = s;
+void SwitchAggregator::init(SwSwitch&& s){
+    swSwitch.emplace(s);
     
     EventDispatcher::getInstance().addListener(&swSwitch.value());
     EventDispatcher::getInstance().addListener(this);

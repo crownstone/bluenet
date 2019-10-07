@@ -525,7 +525,11 @@ cs_ret_code_t CommandHandler::handleCmdSwitch(buffer_ptr_t buffer, const uint16_
 	}
 
 	switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-	SwitchAggregator::getInstance().userSetIntensity(payload->switchState);
+
+	TYPIFY(CMD_SWITCH) switch_cmd;
+	switch_cmd.switchCmd = payload->switchState;
+	event_t evt(CS_TYPE::CMD_SWITCH, &switch_cmd, sizeof(switch_cmd));
+	EventDispatcher::getInstance().dispatch(evt);
 
 	return ERR_SUCCESS;
 }
@@ -706,8 +710,7 @@ cs_ret_code_t CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uin
 	}
 
 	State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &enable, sizeof(enable));
-	// event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &enable, sizeof(enable));
-	// EventDispatcher::getInstance().dispatch(event);
+	
 	return ERR_SUCCESS;
 }
 

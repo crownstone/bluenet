@@ -24,10 +24,21 @@
 
 // hardware validation 
 
+void SwSwitch::startDimmerPowerCheck(){
+    SWSWITCH_LOG();
+
+    if(checkedDimmerPowerUsage || dimmerCheckCountDown != 0){
+        return;
+    }
+    dimmerCheckCountDown = dimmerCheckCountDown_initvalue;
+}
+
 void SwSwitch::checkDimmerPower() {
+
     SWSWITCH_LOG();
     LOGd("checkDimmerPower: allowDimming: %d - currentState.state.dimmer: %d", allowDimming, currentState.state.dimmer);
 	if (!allowDimming || currentState.state.dimmer == 0) {
+        // doesn't make sense to measure anything when the dimmer is turned off
 		return;
 	}
 
@@ -47,22 +58,29 @@ void SwSwitch::checkDimmerPower() {
 			&& powerZero == CONFIG_POWER_ZERO_INVALID)
 		) {
 
-        if (isDimmerCircuitPowered){
+        if (measuredDimmerPowerUsage){
             // uh oh.. what do we do when dimmer circuit lost power?
+            // strange, this would be a second call to checkDimmerPower,
+            // which shouldn't occur in the first place.
         }
-		isDimmerCircuitPowered = false;
+		measuredDimmerPowerUsage = false;
+        forceDimmerOff();
 	} else {
-        if (!isDimmerCircuitPowered){
+        if (!measuredDimmerPowerUsage){
             //Dimmer has finished powering
-            TYPIFY(EVT_DIMMER_POWERED) powered = isDimmerCircuitPowered;
+            TYPIFY(EVT_DIMMER_POWERED) powered = true;
 		    event_t event(CS_TYPE::EVT_DIMMER_POWERED, &powered, sizeof(powered));
 		    EventDispatcher::getInstance().dispatch(event);
 
-            isDimmerCircuitPowered = true;
+            measuredDimmerPowerUsage = true;
         } else {
             // confirmed that the dimmer circuit is still powered. Yay.
         }
     }
+}
+
+bool SwSwitch::isDimmerCircuitPowered(){
+    return dimmerPowerUpCountDown == 0 || measuredDimmerPowerUsage;
 }
 
 // error state semantics
@@ -104,12 +122,7 @@ bool SwSwitch::isSafeToTurnRelayOff(){
 }
 
 bool SwSwitch::isSafeToDim(){
-    // lazy update
-    if(!isDimmerCircuitPowered){
-        checkDimmerPower();
-    }
-
-    return isDimmerCircuitPowered && !hasDimmingFailed() && !isSwitchFried();
+    return !hasDimmingFailed() && !isSwitchFried();
 }
 
 // storage functionality
@@ -124,7 +137,7 @@ bool SwSwitch::isSafeToDim(){
  */
 void SwSwitch::store(switch_state_t nextState) {
     SWSWITCH_LOG();
-    LOGd("nextState: relay %d dim %d", nextState.state.relay,nextState.state.dimmer);
+
 	bool persistNow = false;
     // TODO(Arend): handle persistNow/later...
 
@@ -132,16 +145,8 @@ void SwSwitch::store(switch_state_t nextState) {
 		persistNow = (nextState.state.relay != currentState.state.relay);
 	}
 
-    LOGd("nextState: %x -> %d", 
-         reinterpret_cast<uint8_t*>(&nextState),
-        *reinterpret_cast<uint8_t*>(&nextState));
-
 	cs_state_data_t stateData (CS_TYPE::STATE_SWITCH_STATE, 
         reinterpret_cast<uint8_t*>(&nextState), sizeof(nextState));
-
-    LOGd("stateData.value: %x -> %d", 
-         reinterpret_cast<uint8_t*>(stateData.value),
-        *reinterpret_cast<uint8_t*>(stateData.value));
 
 	if (persistNow) {
 		State::getInstance().set(stateData);
@@ -223,7 +228,7 @@ void SwSwitch::resetToCurrentState(){
     switch_state_t actualNextState = {0};
 
     if(currentState.state.dimmer){
-        if(isDimmerCircuitPowered && isSafeToDim()){
+        if(isDimmerCircuitPowered() && isSafeToDim()){
             hwSwitch.setIntensity(currentState.state.dimmer);
             hwSwitch.setRelay(false);
 
@@ -251,6 +256,15 @@ void SwSwitch::resetToCurrentState(){
     }
 
     store(actualNextState);
+}
+
+void SwSwitch::setIntensity_unchecked(uint8_t value){
+    hwSwitch.setIntensity(value);
+    storeIntensityStateUpdate(value);
+
+    // and then turn off the relay (if it wasn't already off)
+    hwSwitch.setRelay(false);
+    storeRelayStateUpdate(false);
 }
 
 // ========================================================================
@@ -315,8 +329,8 @@ void SwSwitch::setIntensity(uint8_t value){
     SWSWITCH_LOG();
     LOGd("intensity: %d",value);
 
-    if(value > 0 && ! isSafeToDim()){
-        // can't turn dimming on when it has failed.
+    if( value > 0 && (!allowDimming || !isSafeToDim()) ){
+        // can't turn dimming on when it has failed or disallowed.
         // let's clamp the value to 'on' or 'off' if the value
         // clearly is one or the other.
         // Todo(Arend): double check if this is desired.
@@ -343,13 +357,33 @@ void SwSwitch::setIntensity(uint8_t value){
         return;
     }
 
-    // first ensure the dimmer value is correct
-    hwSwitch.setIntensity(value);
-    storeIntensityStateUpdate(value);
+    // allowDimming is true from here
+    // isSafeToDim is true from here
 
-    // and then turn off the relay (if it wasn't already off)
-    hwSwitch.setRelay(false);
-    storeRelayStateUpdate(false);
+    if( !checkedDimmerPowerUsage 
+            && !isDimmerCircuitPowered()
+            && value > 0) {
+        // TODO(Arend): maybe round value up to a minimal test intensity?
+        LOGw("early call to setIntenisty, setting timer for DimmerPower");
+        
+        // briefly set the dimmer intensity to [value] if this wasn't tried
+        // before
+        setIntensity_unchecked(value);
+
+        // Ensure that if the dimmer circuit isn't powered yet
+        // the dimmer will be switched off eventually.
+        // (Which will revert the intensity to 0 if unsuccessful)
+        startDimmerPowerCheck();
+
+        return;
+    }
+
+    if( isDimmerCircuitPowered() ){
+        LOGw("setIntensity: normal operation mode, calling setIntensity_unchecked");
+        // OK to set the intended value since it is safe to dim (or value is 0),
+        // and dimmer circuit is powered.
+        setIntensity_unchecked(value);
+    }
 }
 
 void SwSwitch::setDimmer(bool is_on){
@@ -379,6 +413,22 @@ void SwSwitch::handleEvent(event_t& evt){
             setAllowDimming(
                     *reinterpret_cast<TYPIFY(CONFIG_PWM_ALLOWED)*>(evt.data)
                 );
+            break;
+        }
+        case CS_TYPE::STATE_SWITCH_STATE: {
+            switch_state_t* typd = reinterpret_cast<TYPIFY(STATE_SWITCH_STATE)*>(evt.data);
+            LOGd("switch state update: relay(%d) dim(%d)", typd->state.relay, typd->state.dimmer);
+            break;
+        }
+        case CS_TYPE::EVT_TICK: {
+            if (dimmerPowerUpCountDown && --dimmerPowerUpCountDown == 0){
+                LOGw("dimmerPowerUpCountDown timed out");
+            }
+            if(dimmerCheckCountDown && --dimmerCheckCountDown == 0){
+                LOGw("dimmerCheckCountDown timed out");
+                checkDimmerPower();
+                checkedDimmerPowerUsage = true;
+            }
             break;
         }
         default: break;

@@ -25,12 +25,35 @@ class SwSwitch : public ISwitch, public EventListener {
     HwSwitch hwSwitch;
     switch_state_t currentState = {0};
 
-    bool isDimmerCircuitPowered = false;
-
+    // config
     bool allowDimming = false;     // user/app setting
     bool allowSwitching = true;    // user/app setting "locked" if false
 
     // hardware validation
+
+    // time it takes for a dimmer power check to finish
+    const uint32_t dimmerCheckCountDown_initvalue = DIMMER_BOOT_CHECK_DELAY_MS / TICK_INTERVAL_MS;
+    uint32_t dimmerCheckCountDown = 0;
+
+    // after this time, assume dimmer is powered  no matter what
+    uint32_t dimmerPowerUpCountDown = PWM_BOOT_DELAY_MS / TICK_INTERVAL_MS; 
+  
+    // flag to prevent multiple power checks, will be set by EVT_TICK handler after calling checkDimmerPower
+    bool checkedDimmerPowerUsage = false; 
+
+    // result of checkDimmerPower, true indicates that the dimmer is powered/ready for use.
+    bool measuredDimmerPowerUsage = false; 
+
+
+    /**
+     * Initializes the count down timer
+     */
+    void startDimmerPowerCheck();
+    /**
+     * Returns true if the dimmerCheckCountDown has expired or
+     * if a dimmer power check has successfully measured a correct state.
+     */
+    bool isDimmerCircuitPowered();
 
     /**
      * try to check if the dimmer is powered and save the value into
@@ -65,6 +88,7 @@ class SwSwitch : public ISwitch, public EventListener {
     void forceRelayOn();
     void forceSwitchOff();
     void forceDimmerOff();
+    void setIntensity_unchecked(uint8_t value);
 
     // checks state and persists (doesn't call any virtual methods).
     void resetToCurrentState();

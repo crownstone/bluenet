@@ -22,7 +22,7 @@ class SwitchAggregator : public EventListener {
     public:
     static SwitchAggregator& getInstance();
     
-    void init(SwSwitch s);
+    void init(SwSwitch&& s); // claims ownership over s.
 
     virtual void handleEvent(event_t& evt) override;
  
