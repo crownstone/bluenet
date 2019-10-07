@@ -26,6 +26,7 @@
 
 void SwSwitch::checkDimmerPower() {
     SWSWITCH_LOG();
+    LOGd("allowDimming: %d - currentState.state.dimmer: %d", allowDimming, currentState.state.dimmer);
 	if (!allowDimming || currentState.state.dimmer == 0) {
 		return;
 	}

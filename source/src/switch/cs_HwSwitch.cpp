@@ -9,7 +9,10 @@
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_PWM.h>
 
+#define HWSWITCH_LOG LOGd
+
 void HwSwitch::relayOn() {
+	HWSWITCH_LOG("%s", __func__);
 	if (_hasRelay) {
 		nrf_gpio_pin_set(_pinRelayOn);
 		nrf_delay_ms(_relayHighDuration);
@@ -18,6 +21,7 @@ void HwSwitch::relayOn() {
 }
 
 void HwSwitch::relayOff() {
+	HWSWITCH_LOG("%s", __func__);
 	if (_hasRelay) {
 		nrf_gpio_pin_set(_pinRelayOff);
 		nrf_delay_ms(_relayHighDuration);
@@ -26,10 +30,12 @@ void HwSwitch::relayOff() {
 }
 
 void HwSwitch::enableDimmer(){
+	HWSWITCH_LOG("%s", __func__);
 	nrf_gpio_pin_set(_pinEnableDimmer);
 }
 
 void HwSwitch::disableDimmer(){
+	HWSWITCH_LOG("%s", __func__);
 	// Warning: untested.
 	nrf_gpio_pin_clear(_pinEnableDimmer);
 }
@@ -51,6 +57,7 @@ void HwSwitch::setDimmer(bool is_on){
 }
 
 void HwSwitch::setIntensity(uint8_t value) {
+	HWSWITCH_LOG("%s (%d)", __func__, value);
 	PWM::getInstance().setValue(0, value);
 }
 
