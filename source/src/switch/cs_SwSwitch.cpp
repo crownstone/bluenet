@@ -317,14 +317,28 @@ void SwSwitch::setIntensity(uint8_t value){
 
     if(value > 0 && ! isSafeToDim()){
         // can't turn dimming on when it has failed.
+        // let's clamp the value to 'on' or 'off' if the value
+        // clearly is one or the other.
+        // Todo(Arend): double check if this is desired.
 
-        if (value > 75){
-            // Todo(Arend): double check if this is desired.
+        LOGw("setIntensity called but not safe/allowed to dim - attempting to resolve command");
+
+        constexpr uint8_t threshold = 25; // must be <50
+        
+        if (value > 50 + threshold){
+            LOGw("setIntensity resolved: on");
+            // bypass dimmer to turn on
             setRelay(true);
-            setIntensity(0);
-        }
+            storeRelayStateUpdate(true);
 
-        // Todo(Arend): if value is ambiguous (~50) resort to a default?
+            hwSwitch.setIntensity(0);
+            storeIntensityStateUpdate(0);
+        } else if(value < 50 - threshold){
+            LOGw("setIntensity resolved: off");
+            setIntensity(0); // (1-level recursion at most.)
+        } else {
+            LOGd("setIntensity can't use dimmer but parameter too ambiguous to make a guess")
+        }
 
         return;
     }
