@@ -92,7 +92,8 @@ void SwitchAggregator::handleEvent(event_t& evt){
         }
         case CS_TYPE::CMD_SWITCH: {
             LOGd("SwitchAggregator::%s case CMD_SWITCH",__func__);
-			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;		
+			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;
+            LOGd("packet intensity: %d", packet->switchCmd);
             if(swSwitch) swSwitch->setIntensity(packet->switchCmd);
 			break;
 		}

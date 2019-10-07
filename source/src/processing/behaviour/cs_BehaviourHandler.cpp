@@ -30,13 +30,12 @@ void BehaviourHandler::handleEvent(event_t& evt){
 }
 
 void BehaviourHandler::update(){
-    // TODO(Arend 24-09-2019): get time from scheduler
     // TODO(Arend 24-09-2019): get presence from scheduler
     bool nextState = false;
     TimeOfDay time = SystemTime::now();
     Behaviour::presence_data_t presence = 0xff; // everyone present as dummy value.
     
-    LOGd("BehaviourHandler::update %d:%d:%d",time.h(),time.m(),time.s());
+    LOGd("BehaviourHandler::update %02d:%02d:%02d",time.h(),time.m(),time.s());
 
     if(computeIntendedState(nextState, time, presence)){
         // TODO(Arend 24-09-2019): send nextState to SwitchController

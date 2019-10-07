@@ -26,7 +26,7 @@
 
 void SwSwitch::checkDimmerPower() {
     SWSWITCH_LOG();
-    LOGd("allowDimming: %d - currentState.state.dimmer: %d", allowDimming, currentState.state.dimmer);
+    LOGd("checkDimmerPower: allowDimming: %d - currentState.state.dimmer: %d", allowDimming, currentState.state.dimmer);
 	if (!allowDimming || currentState.state.dimmer == 0) {
 		return;
 	}
@@ -257,7 +257,7 @@ void SwSwitch::resetToCurrentState(){
 // ================================ Public ================================
 // ========================================================================
 
-// ================== Life Cycle ================
+// ================== SwSwitch ================
 
 SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
     SWSWITCH_LOG();
@@ -275,6 +275,12 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
 void SwSwitch::setAllowDimming(bool allowed) {
     SWSWITCH_LOG();
     allowDimming = allowed;
+
+    if (allowed && State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
+		LOGw("unlock switch because dimmer turned on");
+		TYPIFY(CONFIG_SWITCH_LOCKED) lockEnable = false;
+		State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &lockEnable, sizeof(lockEnable));
+	}
 
     if(!allowDimming || hasDimmingFailed()){
         // fix state on disallow
@@ -312,12 +318,16 @@ void SwSwitch::setIntensity(uint8_t value){
     if(value > 0 && ! isSafeToDim()){
         // can't turn dimming on when it has failed.
 
-        // Todo: should we try turn on fully if the value big and
-        // if value is ambiguous resort to a default?
+        if (value > 75){
+            // Todo(Arend): double check if this is desired.
+            setRelay(true);
+            setIntensity(0);
+        }
+
+        // Todo(Arend): if value is ambiguous (~50) resort to a default?
+
         return;
     }
-
-    // hwSwitch.setDimmer(true); // currently unnecessary because false is never used..
 
     // first ensure the dimmer value is correct
     hwSwitch.setIntensity(value);
@@ -332,13 +342,14 @@ void SwSwitch::setDimmer(bool is_on){
     hwSwitch.setDimmer(is_on);
 }
 
-// ================== Listener =============
+// ================== EventListener =============
 
 void SwSwitch::handleEvent(event_t& evt){
     switch(evt.type){
         case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
         case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
         case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
+            SWSWITCH_LOG();
             // First set relay on, so that the switch doesn't first turn off, and later on again.
             // The relay protects the dimmer, because the current will flow through the relay.
             forceRelayOn();
@@ -346,11 +357,13 @@ void SwSwitch::handleEvent(event_t& evt){
             break;
         case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
         case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
+            SWSWITCH_LOG();
             forceSwitchOff();
             break;
-        case CS_TYPE::EVT_DIMMING_ALLOWED: {
+        case CS_TYPE::CONFIG_PWM_ALLOWED: {
+            SWSWITCH_LOG();
             setAllowDimming(
-                    *reinterpret_cast<TYPIFY(EVT_DIMMING_ALLOWED)*>(evt.data)
+                    *reinterpret_cast<TYPIFY(CONFIG_PWM_ALLOWED)*>(evt.data)
                 );
             break;
         }

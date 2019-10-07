@@ -683,17 +683,7 @@ cs_ret_code_t CommandHandler::handleCmdAllowDimming(buffer_ptr_t buffer, const u
 
 	LOGi("allow dimming: %u", enable);
 
-	if (enable && State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
-		LOGw("unlock switch");
-		TYPIFY(CONFIG_SWITCH_LOCKED) lockEnable = false;
-		State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &lockEnable, sizeof(lockEnable));
-		event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &lockEnable, sizeof(lockEnable));
-		EventDispatcher::getInstance().dispatch(event);
-	}
-
 	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &enable, sizeof(enable));
-	event_t event(CS_TYPE::EVT_DIMMING_ALLOWED, &enable, sizeof(enable));
-	EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
 
@@ -716,8 +706,8 @@ cs_ret_code_t CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uin
 	}
 
 	State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &enable, sizeof(enable));
-	event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &enable, sizeof(enable));
-	EventDispatcher::getInstance().dispatch(event);
+	// event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &enable, sizeof(enable));
+	// EventDispatcher::getInstance().dispatch(event);
 	return ERR_SUCCESS;
 }
 
