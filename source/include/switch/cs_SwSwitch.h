@@ -50,9 +50,10 @@ class SwSwitch : public ISwitch, public EventListener {
 
 
     /**
-     * Initializes the count down timer
+     * Initializes the count down timer and sets the dimmer to given
+     * value.
      */
-    void startDimmerPowerCheck();
+    void startDimmerPowerCheck(uint8_t value);
     /**
      * Returns true if the dimmerCheckCountDown has expired or
      * if a dimmer power check has successfully measured a correct state.
@@ -146,7 +147,7 @@ class SwSwitch : public ISwitch, public EventListener {
      * Updates switchState and calls saveSwitchState.
      * Does not adjust intensity value.
      */
-    void setRelay(bool is_on);
+    void setRelay(bool is_on) override;
 
     /**
      * Checks if the dimmer is still okay and will set it to the 
@@ -155,7 +156,7 @@ class SwSwitch : public ISwitch, public EventListener {
      * Updates switchState and calls saveSwitchState.
      * Does not adjust relay value.
      */
-    void setIntensity(uint8_t intensity_value);
+    void setIntensity(uint8_t intensity_value) override;
 
     /**
      * Checks if the dimmer is still okay and will set it to the 
@@ -163,7 +164,7 @@ class SwSwitch : public ISwitch, public EventListener {
      * 
      * Updates switchState and calls saveSwitchState.
      */
-    void setDimmerPower(bool is_on);
+    void setDimmerPower(bool is_on) override;
 
     // EventListener
 

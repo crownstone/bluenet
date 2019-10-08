@@ -25,12 +25,18 @@
 
 // hardware validation 
 
-void SwSwitch::startDimmerPowerCheck(){
+void SwSwitch::startDimmerPowerCheck(uint8_t value){
     SWSWITCH_LOG();
 
-    if(checkedDimmerPowerUsage || dimmerCheckCountDown != 0){
+    if(checkedDimmerPowerUsage || dimmerCheckCountDown != 0 || !isSafeToDim() || value == 0){
         return;
     }
+
+    // briefly set the dimmer intensity to [value] if this wasn't tried
+    // before
+    setIntensity_unchecked(value);
+    setRelay_unchecked(false);
+
     dimmerCheckCountDown = dimmerCheckCountDown_initvalue;
 }
 
@@ -40,6 +46,8 @@ void SwSwitch::checkDimmerPower() {
     LOGd("checkDimmerPower: allowDimming: %d - currentState.state.dimmer: %d", allowDimming, currentState.state.dimmer);
 	if (!allowDimming || currentState.state.dimmer == 0) {
         // doesn't make sense to measure anything when the dimmer is turned off
+        // quite a bad condition to be in, better solve it!
+        forceDimmerOff();
 		return;
 	}
 
@@ -61,7 +69,7 @@ void SwSwitch::checkDimmerPower() {
 
         if (measuredDimmerPowerUsage){
             // uh oh.. what do we do when dimmer circuit lost power?
-            // strange, this would be a second call to checkDimmerPower,
+            // strange, this must be a second call to checkDimmerPower,
             // which shouldn't occur in the first place.
         }
 		measuredDimmerPowerUsage = false;
@@ -128,19 +136,11 @@ bool SwSwitch::isSafeToDim(){
 
 // storage functionality
 
-/**
- * Store the state immediately when relay value changed, 
- * as the dim value often changes a lot in bursts.
- * Compare it against given oldVal, instead of switch state 
- * stored in State, as that is always changed immediately
- * 
- * (just not the value on flash).
- */
 void SwSwitch::store(switch_state_t nextState) {
     SWSWITCH_LOG();
 
-	bool persistNow = false;
-    // TODO(Arend): handle persistNow/later...
+    // only immediately apply if relay state changes.
+	bool persistNow = nextState.state.relay != currentState.state.relay;
 
 	if (nextState.asInt != currentState.asInt) {
 		persistNow = (nextState.state.relay != currentState.state.relay);
@@ -226,15 +226,21 @@ void SwSwitch::forceDimmerOff() {
 
 void SwSwitch::resetToCurrentState(){
     SWSWITCH_LOG();
+    SWSWITCH_LOG_CURRENT_STATE();
     switch_state_t actualNextState = {0};
 
     if(currentState.state.dimmer){
-        if(isDimmerCircuitPowered() && isSafeToDim()){
-            hwSwitch.setIntensity(currentState.state.dimmer);
-            hwSwitch.setRelay(false);
+        if(isDimmerCircuitPowered()){
+            if(isSafeToDim()){
+                hwSwitch.setIntensity(currentState.state.dimmer);
+                hwSwitch.setRelay(false);
 
-            actualNextState.state.dimmer = currentState.state.dimmer;
-            actualNextState.state.relay = currentState.state.relay;
+                actualNextState.state.dimmer = currentState.state.dimmer;
+                actualNextState.state.relay = currentState.state.relay;
+            }
+        } else {
+            // dimmer not yet powered.
+            startDimmerPowerCheck(currentState.state.dimmer);
         }
     } else {
         if(currentState.state.relay){
@@ -360,7 +366,8 @@ void SwSwitch::setDimmer(uint8_t value){
             LOGw("setIntensity resolved: off");
             setIntensity(0); // (1-level recursion at most.)
         } else {
-            LOGd("setIntensity can't use dimmer but parameter too ambiguous to make a guess")
+            LOGd("setIntensity can't use dimmer but parameter too ambiguous to make a guess");
+            LOGd("allowDimming: %d, isSafeToDim: %d, value: %d",allowDimming, isSafeToDim(),value);
         }
 
         return;
@@ -372,15 +379,10 @@ void SwSwitch::setDimmer(uint8_t value){
         // TODO(Arend): maybe round value up to a minimal test intensity?
         LOGw("early call to setIntensity, setting timer for DimmerPower");
         
-        // briefly set the dimmer intensity to [value] if this wasn't tried
-        // before
-        setIntensity_unchecked(value);
-        setRelay_unchecked(false);
-
         // Ensure that if the dimmer circuit isn't powered yet
         // the dimmer will be switched off eventually.
         // (Which will revert the intensity to 0 if unsuccessful)
-        startDimmerPowerCheck();
+        startDimmerPowerCheck(value);
 
         return;
     }
