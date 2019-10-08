@@ -48,7 +48,7 @@ void HwSwitch::setRelay(bool is_on){
 	}
 }
 
-void HwSwitch::setDimmer(bool is_on){
+void HwSwitch::setDimmerPower(bool is_on){
 	if(is_on){
 		enableDimmer();
 	} else {

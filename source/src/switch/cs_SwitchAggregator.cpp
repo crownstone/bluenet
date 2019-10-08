@@ -106,8 +106,8 @@ void SwitchAggregator::handleEvent(event_t& evt){
         }
         case CS_TYPE::CMD_SET_DIMMER:{
             LOGd("CMD_SET_DIMMER");
-            // auto typd = reinterpret_cast<TYPIFY(CMD_SET_DIMMER)*>(evt.data);
-            // if(swSwitch) swSwitch->setDimmer_unchecked(*typd);
+            auto typd = reinterpret_cast<TYPIFY(CMD_SET_DIMMER)*>(evt.data);
+            if(swSwitch) swSwitch->setDimmer(*typd);
         }
         default:{
             break;

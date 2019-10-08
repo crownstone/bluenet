@@ -83,15 +83,15 @@ class SwSwitch : public ISwitch, public EventListener {
     void store(switch_state_t nextState);
     void storeRelayStateUpdate(bool is_on);
     void storeIntensityStateUpdate(uint8_t intensity);
-    // void storeDimmerStateUpdate(bool is_on); // not implemented
 
     // exceptional methods (ignores error state but logs and persists)
     void forceRelayOn();
     void forceSwitchOff();
     void forceDimmerOff();
     
-    void setState_unchecked(uint8_t dimmer_value, bool relay_state);
-    void setDimmer_unchecked(uint8_t dimmer_value);
+    // all hwSwitch access is looped through these methods.
+    // they set the respective values and persist that value.
+    void setIntensity_unchecked(uint8_t dimmer_value);
     void setRelay_unchecked(bool relay_state);
 
     // checks state and persists (doesn't call any virtual methods).
@@ -117,6 +117,22 @@ class SwSwitch : public ISwitch, public EventListener {
      */
     void toggle();
 
+    /**
+     * This is the smarter version of setDimmer(value).
+     * 
+     * Checks if the dimmer is still okay and will set it to the 
+     * desired value if possible.
+     * 
+     * Will prefer to use dimmer features, but if impossible try
+     * to solve the request using the relay.
+     * 
+     * Will attempt to use the dimmer after cold boot (and check if
+     * that worked after a few seconds).
+     * 
+     * Updates switchState and calls saveSwitchState.
+     */
+    void setIntensity(uint8_t intensity_value);
+
     // ISwitch
 
     /**
@@ -124,6 +140,7 @@ class SwSwitch : public ISwitch, public EventListener {
      * desired value if possible.
      * 
      * Updates switchState and calls saveSwitchState.
+     * Does not adjust intensity value.
      */
     void setRelay(bool is_on);
 
@@ -132,19 +149,17 @@ class SwSwitch : public ISwitch, public EventListener {
      * desired value if possible.
      * 
      * Updates switchState and calls saveSwitchState.
+     * Does not adjust relay value.
      */
-    void setDimmer(bool is_on);
+    void setDimmer(uint8_t value);
 
     /**
      * Checks if the dimmer is still okay and will set it to the 
      * desired value if possible.
      * 
-     * Will prefer to use dimmer features, but if impossible try
-     * to solve the request using the relay.
-     * 
      * Updates switchState and calls saveSwitchState.
      */
-    void setIntensity(uint8_t value);
+    void setDimmerPower(bool is_on);
 
     // EventListener
 

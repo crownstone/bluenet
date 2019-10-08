@@ -193,7 +193,7 @@ void SwSwitch::forceSwitchOff() {
     SWSWITCH_LOG();
 	hwSwitch.setIntensity(0);
 	hwSwitch.setRelay(false);
-    // hwSwitch.setDimmer(false);
+    // hwSwitch.setDimmerPower(false);
 
     switch_state_t nextState;
     nextState.state.dimmer = 0;
@@ -215,7 +215,7 @@ void SwSwitch::forceDimmerOff() {
 
     // as there is no mechanism to turn it back on this isn't done yet, 
     // but it would be safer to cut power to the dimmer if in error I suppose.
-    // hwSwitch.setDimmer(false);
+    // hwSwitch.setDimmerPower(false);
 
     storeIntensityStateUpdate(0);
 
@@ -258,6 +258,15 @@ void SwSwitch::resetToCurrentState(){
     store(actualNextState);
 }
 
+void SwSwitch::setIntensity_unchecked(uint8_t intensity_value){
+    hwSwitch.setIntensity(intensity_value);
+    storeIntensityStateUpdate(intensity_value);
+}
+
+void SwSwitch::setRelay_unchecked(bool relay_state){
+    hwSwitch.setRelay(relay_state);
+    storeRelayStateUpdate(relay_state);
+}
 
 // ========================================================================
 // ================================ Public ================================
@@ -273,7 +282,7 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
     // ensure the dimmer gets power as the rest of the SwSwitch code assumes 
     // that setIntensity calls will have visible effect.
     // note: dimmer power is not persisted, so we don't need to store this anywhere.
-    hwSwitch.setDimmer(true);
+    hwSwitch.setDimmerPower(true);
 
     resetToCurrentState();
 }
@@ -313,39 +322,7 @@ void SwSwitch::toggle(){
     }
 }
 
-void SwSwitch::setState_unchecked(uint8_t dimmer_value, bool relay_state){
-    setDimmer_unchecked(dimmer_value);
-    setRelay_unchecked(relay_state);
-}
-
-void SwSwitch::setDimmer_unchecked(uint8_t dimmer_value){
-    hwSwitch.setIntensity(dimmer_value);
-    storeIntensityStateUpdate(dimmer_value);
-}
-
-void SwSwitch::setRelay_unchecked(bool relay_state){
-    hwSwitch.setRelay(relay_state);
-    storeRelayStateUpdate(relay_state);
-}
-
-// ================== ISwitch ==============
-
-void SwSwitch::setRelay(bool is_on){
-    SWSWITCH_LOG();
-    if(is_on && !isSafeToTurnRelayOn()){
-        // intent to turn on, but not safe
-        return;
-    }
-    if(!is_on && !isSafeToTurnRelayOff()){
-        // intent to turn off, but not safe
-        return;
-    }
-
-    hwSwitch.setRelay(is_on);
-    storeRelayStateUpdate(is_on);
-}
-
-void SwSwitch::setIntensity(uint8_t value){
+void SwSwitch::setDimmer(uint8_t value){
     SWSWITCH_LOG();
     LOGd("intensity: %d",value);
 
@@ -363,11 +340,9 @@ void SwSwitch::setIntensity(uint8_t value){
         if (value > 50 + threshold){
             LOGw("setIntensity resolved: on");
             // bypass dimmer to turn on
-            setRelay(true);
-            storeRelayStateUpdate(true);
+            setRelay_unchecked(true);
+            setIntensity_unchecked(0);
 
-            hwSwitch.setIntensity(0);
-            storeIntensityStateUpdate(0);
         } else if(value < 50 - threshold){
             LOGw("setIntensity resolved: off");
             setIntensity(0); // (1-level recursion at most.)
@@ -378,9 +353,6 @@ void SwSwitch::setIntensity(uint8_t value){
         return;
     }
 
-    // allowDimming is true from here
-    // isSafeToDim is true from here
-
     if( !checkedDimmerPowerUsage 
             && !isDimmerCircuitPowered()
             && value > 0) {
@@ -389,7 +361,8 @@ void SwSwitch::setIntensity(uint8_t value){
         
         // briefly set the dimmer intensity to [value] if this wasn't tried
         // before
-        setState_unchecked(value,false);
+        setIntensity_unchecked(value);
+        setRelay_unchecked(false);
 
         // Ensure that if the dimmer circuit isn't powered yet
         // the dimmer will be switched off eventually.
@@ -403,12 +376,43 @@ void SwSwitch::setIntensity(uint8_t value){
         LOGw("setIntensity: normal operation mode, calling setState_unchecked");
         // OK to set the intended value since it is safe to dim (or value is 0),
         // and dimmer circuit is powered.
-        setState_unchecked(value,false);
+        setIntensity_unchecked(value);
+        setRelay_unchecked(false);
     }
 }
 
-void SwSwitch::setDimmer(bool is_on){
-    hwSwitch.setDimmer(is_on);
+// ================== ISwitch ==============
+
+void SwSwitch::setRelay(bool is_on){
+    SWSWITCH_LOG();
+
+    if(is_on && !isSafeToTurnRelayOn()){
+        // intent to turn on, but not safe
+        return;
+    }
+    if(!is_on && !isSafeToTurnRelayOff()){
+        // intent to turn off, but not safe
+        return;
+    }
+
+    setRelay_unchecked(is_on);
+}
+
+void SwSwitch::setIntensity(uint8_t value){
+    SWSWITCH_LOG();
+
+    if( value > 0 
+        &&( !allowDimming 
+            || !isSafeToDim()
+            || !isDimmerCircuitPowered()) ){
+        return;
+    }
+
+    setIntensity_unchecked(value); 
+}
+
+void SwSwitch::setDimmerPower(bool is_on){
+    hwSwitch.setDimmerPower(is_on);
 }
 
 // ================== EventListener =============

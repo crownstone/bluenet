@@ -18,7 +18,7 @@ class HwSwitch : public ISwitch {
     public:
     
     virtual void setRelay(bool is_on) override;
-    virtual void setDimmer(bool is_on) override;
+    virtual void setDimmerPower(bool is_on) override;
     virtual void setIntensity(uint8_t value) override;
     
     /**

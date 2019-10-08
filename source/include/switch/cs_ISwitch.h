@@ -14,6 +14,6 @@
  */
 class ISwitch {
     virtual void setRelay(bool is_on) = 0;
-    virtual void setDimmer(bool is_on) = 0;
+    virtual void setDimmerPower(bool is_on) = 0;
     virtual void setIntensity(uint8_t value) = 0;
 };
