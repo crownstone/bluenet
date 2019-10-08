@@ -204,8 +204,8 @@ enum class CS_TYPE: uint16_t {
 //	EVT_EXTERNAL_STATE_MSG_CHAN_1,     // Deprecated
 	EVT_TIME_SET,                                     // Sent when the time is set or changed. payload: previous posix time
 	EVT_DIMMER_POWERED,                               // Sent when dimmer being powered is changed. -- Payload is BOOL, true when powered, and ready to be used.
-	// EVT_DIMMING_ALLOWED, // TODO: Deprecate, use cfg  // Sent when allow dimming is changed. -- Payload is BOOL.
-	// EVT_SWITCH_LOCKED,   // TODO: Deprecate, use cfg  // Sent when switch locked flag is set. -- Payload is BOOL.
+	EVT_DIMMING_ALLOWED,	// Sent when commandhandler receives set request for allow dimming is changed. -- Payload is BOOL.
+	CMD_SWITCH_LOCKED,		// Sent when commandhandler receives set request for lock state. -- Payload is BOOL.
 	EVT_STORAGE_INITIALIZED,                          // Sent when Storage is initialized, storage is only usable after this event!
 	EVT_STORAGE_WRITE_DONE,                           // Sent when an item has been written to storage. -- Payload is CS_TYPE, the type that was written.
 	EVT_STORAGE_REMOVE_DONE,                          // Sent when an item has been invalidated at storage. -- Payload is CS_TYPE, the type that was invalidated.
@@ -323,8 +323,8 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_DIMMER_POWERED:
-	// case CS_TYPE::EVT_DIMMING_ALLOWED:
-	// case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::EVT_DIMMING_ALLOWED:
+	case CS_TYPE::CMD_SWITCH_LOCKED:
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
@@ -551,7 +551,7 @@ typedef  keep_alive_state_item_t TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE);
 typedef  internal_multi_switch_item_t TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH);
 typedef  uint32_t TYPIFY(CMD_SET_TIME);
 typedef  void TYPIFY(CMD_FACTORY_RESET);
-// typedef  BOOL TYPIFY(EVT_DIMMING_ALLOWED);
+typedef  BOOL TYPIFY(EVT_DIMMING_ALLOWED);
 typedef  void TYPIFY(EVT_DIMMER_FORCED_OFF);
 typedef  BOOL TYPIFY(EVT_DIMMER_POWERED);
 typedef  void TYPIFY(EVT_DIMMER_TEMP_ABOVE_THRESHOLD);
@@ -573,7 +573,7 @@ typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET);
 typedef  void TYPIFY(EVT_MESH_FACTORY_RESET);
 typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
-// typedef  BOOL TYPIFY(EVT_SWITCH_LOCKED);
+typedef  BOOL TYPIFY(CMD_SWITCH_LOCKED);
 typedef  uint32_t TYPIFY(EVT_TICK);
 typedef  uint32_t TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
@@ -805,10 +805,10 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(uint32_t);
 	case CS_TYPE::EVT_DIMMER_POWERED:
 		return sizeof(TYPIFY(EVT_DIMMER_POWERED));
-	// case CS_TYPE::EVT_DIMMING_ALLOWED:
-	// 	return sizeof(TYPIFY(EVT_DIMMING_ALLOWED));
-	// case CS_TYPE::EVT_SWITCH_LOCKED:
-	// 	return sizeof(TYPIFY(EVT_SWITCH_LOCKED));
+	case CS_TYPE::EVT_DIMMING_ALLOWED:
+		return sizeof(TYPIFY(EVT_DIMMING_ALLOWED));
+	case CS_TYPE::CMD_SWITCH_LOCKED:
+		return sizeof(TYPIFY(CMD_SWITCH_LOCKED));
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 		return sizeof(TYPIFY(EVT_STATE_EXTERNAL_STONE));
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
@@ -981,7 +981,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SWITCH_TOGGLE: return "EVT_POWER_TOGGLE";
 	case CS_TYPE::CMD_SWITCH: return "CMD_SWITCH";
 	case CS_TYPE::CMD_MULTI_SWITCH: return "CMD_MULTI_SWITCH";
-	// case CS_TYPE::EVT_DIMMING_ALLOWED: return "EVT_DIMMING_ALLOWED";
+	case CS_TYPE::EVT_DIMMING_ALLOWED: return "EVT_DIMMING_ALLOWED";
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF: return "EVT_DIMMER_FORCED_OFF";
 	case CS_TYPE::EVT_DIMMER_POWERED: return "EVT_DIMMER_POWERED";
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD: return "EVT_PWM_TEMP_ABOVE_THRESHOLD";
@@ -1003,7 +1003,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_MESH_FACTORY_RESET: return "EVT_MESH_FACTORY_RESET";
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: return "EVT_SWITCHCRAFT_ENABLED";
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF: return "EVT_SWITCH_FORCED_OFF";
-	// case CS_TYPE::EVT_SWITCH_LOCKED: return "EVT_SWITCH_LOCKED";
+	case CS_TYPE::CMD_SWITCH_LOCKED: return "CMD_SWITCH_LOCKED";
 	case CS_TYPE::EVT_TICK: return "EVT_TICK";
 	case CS_TYPE::EVT_TIME_SET: return "EVT_TIME_SET";
 	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN: return "EVT_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN";
@@ -1124,8 +1124,8 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_DIMMER_POWERED:
-	// case CS_TYPE::EVT_DIMMING_ALLOWED:
-	// case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::EVT_DIMMING_ALLOWED:
+	case CS_TYPE::CMD_SWITCH_LOCKED:
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
@@ -1266,8 +1266,8 @@ constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_DIMMER_POWERED:
-	// case CS_TYPE::EVT_DIMMING_ALLOWED:
-	// case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::EVT_DIMMING_ALLOWED:
+	case CS_TYPE::CMD_SWITCH_LOCKED:
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STORAGE_INITIALIZED:
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE:
@@ -1564,7 +1564,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::EVT_DIMMER_POWERED:
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
-	// case CS_TYPE::EVT_DIMMING_ALLOWED:
+	case CS_TYPE::EVT_DIMMING_ALLOWED:
 	case CS_TYPE::EVT_KEEP_ALIVE:
 	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_MESH_TIME:
@@ -1583,7 +1583,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
-	// case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::CMD_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
@@ -1704,7 +1704,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_DIMMER_POWERED:
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
-	// case CS_TYPE::EVT_DIMMING_ALLOWED:
+	case CS_TYPE::EVT_DIMMING_ALLOWED:
 	case CS_TYPE::EVT_KEEP_ALIVE:
 	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_MESH_TIME:
@@ -1723,7 +1723,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
-	// case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::CMD_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
@@ -1845,7 +1845,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_DIMMER_POWERED:
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
-	// case CS_TYPE::EVT_DIMMING_ALLOWED:
+	case CS_TYPE::EVT_DIMMING_ALLOWED:
 	case CS_TYPE::EVT_KEEP_ALIVE:
 	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_MESH_TIME:
@@ -1864,7 +1864,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
-	// case CS_TYPE::EVT_SWITCH_LOCKED:
+	case CS_TYPE::CMD_SWITCH_LOCKED:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:

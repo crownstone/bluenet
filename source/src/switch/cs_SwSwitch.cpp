@@ -290,6 +290,7 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
 
 void SwSwitch::setAllowSwitching(bool allowed) {
     allowSwitching = allowed;
+    State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &allowed, sizeof(allowed));
 }
 
 void SwSwitch::setAllowDimming(bool allowed) {
@@ -300,6 +301,9 @@ void SwSwitch::setAllowDimming(bool allowed) {
 
     SWSWITCH_LOG();
     allowDimming = allowed;
+    State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &enable, sizeof(enable));
+
+    // !!!! TODO remove the above or the below
 
     if (allowed && State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
 		LOGw("unlock switch because dimmer turned on");
@@ -464,15 +468,16 @@ void SwSwitch::handleEvent(event_t& evt){
             SWSWITCH_LOG();
             forceSwitchOff();
             break;
-        case CS_TYPE::CONFIG_PWM_ALLOWED: {
+        case CS_TYPE::EVT_DIMMING_ALLOWED: {
             SWSWITCH_LOG();
-            setAllowDimming(
-                    *reinterpret_cast<TYPIFY(CONFIG_PWM_ALLOWED)*>(evt.data)
-                );
+            auto typd = reinterpret_cast<TYPIFY(EVT_DIMMING_ALLOWED)*>(evt.data);
+            setAllowDimming(*typd);
             break;
         }
-        case CS_TYPE::CONFIG_SWITCH_LOCKED: {
-            setAllowSwitching(State::getInstance().isTrue(CS_TYPE_::CONFIG_SWITCH_LOCKED));
+        case CS_TYPE::EVT_SWITCH_LOCKED: {
+            SWSWITCH_LOG();
+            auto typd = reinterpret_cast<TYPIFY(EVT_SWITCH_LOCKED)*>(evt.data);
+            setAllowSwitching(*typd);
             break;
         }
         case CS_TYPE::STATE_SWITCH_STATE: {
