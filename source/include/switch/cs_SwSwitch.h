@@ -97,7 +97,8 @@ class SwSwitch : public ISwitch, public EventListener {
     void setIntensity_unchecked(uint8_t dimmer_value);
     void setRelay_unchecked(bool relay_state);
 
-    // checks state and persists (doesn't call any virtual methods).
+    // checks state and persists (safe to call from constructor: 
+    // doesn't call any virtual methods).
     void resetToCurrentState();
 
     public:
@@ -134,7 +135,7 @@ class SwSwitch : public ISwitch, public EventListener {
      * 
      * Updates switchState and calls saveSwitchState.
      */
-    void setIntensity(uint8_t intensity_value);
+    void setDimmer(uint8_t value);
 
     // ISwitch
 
@@ -154,7 +155,7 @@ class SwSwitch : public ISwitch, public EventListener {
      * Updates switchState and calls saveSwitchState.
      * Does not adjust relay value.
      */
-    void setDimmer(uint8_t value);
+    void setIntensity(uint8_t intensity_value);
 
     /**
      * Checks if the dimmer is still okay and will set it to the 

@@ -19,9 +19,6 @@
 #define SWSWITCH_LOG_STATE(s) LOGd("state: {relay=%d, dim=%x}", s.state.relay,s.state.dimmer)
 #define SWSWITCH_LOG_CURRENT_STATE() LOGd("current state: {relay=%d, dim=%x}", currentState.state.relay,currentState.state.dimmer)
 
-#define SWSWITCH_DEBUG_NO_PERSISTANCE (true)
-#define SWSWITCH_DEBUG_NO_EVENTS (true)
-
 // =========================================================================
 // ================================ Private ================================
 // =========================================================================

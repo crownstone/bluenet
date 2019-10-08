@@ -117,9 +117,7 @@ void SwitchAggregator::handleEvent(event_t& evt){
 
 void SwitchAggregator::developerForceOff(){
     if(swSwitch){
-        // TODO(Arend: 08-10-2019): this isn't forcefull enough
-        swSwitch->setRelay(0);
-        swSwitch->setIntensity(0);
         swSwitch->setDimmer(0);
+        swSwitch->setRelay(false);
     }
 }
