@@ -98,6 +98,17 @@ void SwitchAggregator::handleEvent(event_t& evt){
             if(swSwitch) swSwitch->setIntensity(packet->switchCmd);
 			break;
 		}
+        case CS_TYPE::CMD_SET_RELAY:{
+            LOGd("CMD_SET_RELAY");
+            auto typd = reinterpret_cast<TYPIFY(CMD_SET_RELAY)*>(evt.data);
+            if(swSwitch) swSwitch->setRelay(*typd);
+            break;
+        }
+        case CS_TYPE::CMD_SET_DIMMER:{
+            LOGd("CMD_SET_DIMMER");
+            // auto typd = reinterpret_cast<TYPIFY(CMD_SET_DIMMER)*>(evt.data);
+            // if(swSwitch) swSwitch->setDimmer_unchecked(*typd);
+        }
         default:{
             break;
         }
@@ -105,27 +116,10 @@ void SwitchAggregator::handleEvent(event_t& evt){
 }
 
 void SwitchAggregator::developerForceOff(){
-    developerSetRelay(false);
-    developerSetIntensity(0);
-    developerSetDimmer(false);
-}
-
-void SwitchAggregator::developerSetRelay(bool is_on) {
-    LOGd("SwitchAggregator::%s",__func__);
-}
-void SwitchAggregator::developerSetDimmer(bool is_on) {
-    LOGd("SwitchAggregator::%s",__func__);
-}
-void SwitchAggregator::developerSetIntensity(uint8_t value) {
-    LOGd("SwitchAggregator::%s",__func__);
-}
-
-void SwitchAggregator::userSetRelay(bool is_on) {
-    LOGd("SwitchAggregator::%s",__func__);
-}
-void SwitchAggregator::userSetDimmer(bool is_on) {
-    LOGd("SwitchAggregator::%s",__func__);
-}
-void SwitchAggregator::userSetIntensity(uint8_t value) {
-    LOGd("SwitchAggregator::%s",__func__);
+    if(swSwitch){
+        // TODO(Arend: 08-10-2019): this isn't forcefull enough
+        swSwitch->setRelay(0);
+        swSwitch->setIntensity(0);
+        swSwitch->setDimmer(0);
+    }
 }

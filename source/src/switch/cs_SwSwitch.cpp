@@ -258,14 +258,6 @@ void SwSwitch::resetToCurrentState(){
     store(actualNextState);
 }
 
-void SwSwitch::setIntensity_unchecked(uint8_t value){
-    hwSwitch.setIntensity(value);
-    storeIntensityStateUpdate(value);
-
-    // and then turn off the relay (if it wasn't already off)
-    hwSwitch.setRelay(false);
-    storeRelayStateUpdate(false);
-}
 
 // ========================================================================
 // ================================ Public ================================
@@ -308,6 +300,34 @@ void SwSwitch::setAllowDimming(bool allowed) {
     }
 }
 
+void SwSwitch::setAllowSwitching(bool allowed) {
+    allowSwitching = allowed;
+}
+
+void SwSwitch::toggle(){
+    // TODO(Arend, 08-10-2019): toggle should be upgraded when twilight is implemented
+    if(currentState.state.relay == 1 || currentState.state.dimmer > 0){
+        setIntensity(0);
+    } else {
+        setIntensity(100);
+    }
+}
+
+void SwSwitch::setState_unchecked(uint8_t dimmer_value, bool relay_state){
+    setDimmer_unchecked(dimmer_value);
+    setRelay_unchecked(relay_state);
+}
+
+void SwSwitch::setDimmer_unchecked(uint8_t dimmer_value){
+    hwSwitch.setIntensity(dimmer_value);
+    storeIntensityStateUpdate(dimmer_value);
+}
+
+void SwSwitch::setRelay_unchecked(bool relay_state){
+    hwSwitch.setRelay(relay_state);
+    storeRelayStateUpdate(relay_state);
+}
+
 // ================== ISwitch ==============
 
 void SwSwitch::setRelay(bool is_on){
@@ -335,7 +355,8 @@ void SwSwitch::setIntensity(uint8_t value){
         // clearly is one or the other.
         // Todo(Arend): double check if this is desired.
 
-        LOGw("setIntensity called but not safe/allowed to dim - attempting to resolve command");
+        LOGw("setIntensity called but not %s to dim - attempting to resolve command",
+            !allowDimming? "allowed" : "safe");
 
         constexpr uint8_t threshold = 25; // must be <50
         
@@ -364,11 +385,11 @@ void SwSwitch::setIntensity(uint8_t value){
             && !isDimmerCircuitPowered()
             && value > 0) {
         // TODO(Arend): maybe round value up to a minimal test intensity?
-        LOGw("early call to setIntenisty, setting timer for DimmerPower");
+        LOGw("early call to setIntensity, setting timer for DimmerPower");
         
         // briefly set the dimmer intensity to [value] if this wasn't tried
         // before
-        setIntensity_unchecked(value);
+        setState_unchecked(value,false);
 
         // Ensure that if the dimmer circuit isn't powered yet
         // the dimmer will be switched off eventually.
@@ -379,10 +400,10 @@ void SwSwitch::setIntensity(uint8_t value){
     }
 
     if( isDimmerCircuitPowered() ){
-        LOGw("setIntensity: normal operation mode, calling setIntensity_unchecked");
+        LOGw("setIntensity: normal operation mode, calling setState_unchecked");
         // OK to set the intended value since it is safe to dim (or value is 0),
         // and dimmer circuit is powered.
-        setIntensity_unchecked(value);
+        setState_unchecked(value,false);
     }
 }
 

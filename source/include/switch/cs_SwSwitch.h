@@ -12,7 +12,8 @@
 #include <switch/cs_HwSwitch.h>
 #include <switch/cs_ISwitch.h>
 
-
+// forward declaration used for friend definition.
+class SwitchAggregator;
 
 /**
  * Wrapper object to the underlying HwSwitch that adds safety features and 
@@ -88,7 +89,10 @@ class SwSwitch : public ISwitch, public EventListener {
     void forceRelayOn();
     void forceSwitchOff();
     void forceDimmerOff();
-    void setIntensity_unchecked(uint8_t value);
+    
+    void setState_unchecked(uint8_t dimmer_value, bool relay_state);
+    void setDimmer_unchecked(uint8_t dimmer_value);
+    void setRelay_unchecked(bool relay_state);
 
     // checks state and persists (doesn't call any virtual methods).
     void resetToCurrentState();
@@ -99,10 +103,19 @@ class SwSwitch : public ISwitch, public EventListener {
      */
     SwSwitch(HwSwitch hw_switch);
 
-    // user settings
+    // SwSwitch
 
-    void setAllowDimming(bool allowed); // will setRelay(true) if dimmer was active
-    void setAllowSwitching(bool allowed) {allowSwitching = allowed;}
+    // will setRelay(true) if dimmer was active
+    void setAllowDimming(bool allowed); 
+    
+    // if false is passed, no state changes may occur through
+    // the ISwitch interface.
+    void setAllowSwitching(bool allowed); // TODO(Arend): this isn't implemented!
+
+    /**
+     * Checks the current state and tries to set it to the opposite.
+     */
+    void toggle();
 
     // ISwitch
 
@@ -139,11 +152,4 @@ class SwSwitch : public ISwitch, public EventListener {
      * Listens to Allow Dimming, and Lock events and error states
      */
     virtual void handleEvent(event_t& evt) override;
-
-    // Other functions
-
-    /**
-     * Checks the current state and tries to set it to the opposite.
-     */
-    void toggle() { LOGd("SwSwitch::toggle"); /* TODO */}
 };

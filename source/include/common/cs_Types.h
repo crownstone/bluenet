@@ -225,6 +225,8 @@ enum class CS_TYPE: uint16_t {
 	EVT_UPDATE_BEHAVIOUR,						// when a user requests to save/update/delete a behaviour, this event fires.
 	EVT_PRESENCE_MUTATION,						// when a change in presence occurs this event fires.
 	EVT_BEHAVIOUR_SWITCH_STATE,					// when behaviour desires a stateswitch this event is fired.
+	CMD_SET_RELAY,								// when a user requests to set the relay to a specific state
+	CMD_SET_DIMMER,								// when a user requests to set the dimmer to a specific state
 	// ------------------------
 };
 
@@ -358,6 +360,8 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
+	case CS_TYPE::CMD_SET_RELAY:
+	case CS_TYPE::CMD_SET_DIMMER:
 		return csType;
 	}
 	return CS_TYPE::CONFIG_DO_NOT_USE;
@@ -575,6 +579,8 @@ typedef  uint32_t TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
 typedef Behaviour TYPIFY(EVT_UPDATE_BEHAVIOUR);
 typedef bool TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
+typedef bool TYPIFY(CMD_SET_RELAY);
+typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
@@ -873,6 +879,10 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE));
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 		return 0;
+	case CS_TYPE::CMD_SET_RELAY:
+		return sizeof(TYPIFY(CMD_SET_RELAY));
+	case CS_TYPE::CMD_SET_DIMMER:
+		return sizeof(TYPIFY(CMD_SET_DIMMER));	
 	} // end switch
 
 	// should never happen
@@ -1015,6 +1025,8 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR: return "EVT_UPDATE_BEHAVIOUR";
 	case CS_TYPE::EVT_PRESENCE_MUTATION: return "EVT_PRESENCE_MUTATION";
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE: return "EVT_BEHAVIOUR_SWITCH_STATE";
+	case CS_TYPE::CMD_SET_RELAY: return "CMD_SET_RELAY";
+	case CS_TYPE::CMD_SET_DIMMER: return "CMD_SET_DIMMER";
 	}
 	return "Unknown";
 }
@@ -1149,6 +1161,8 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
+	case CS_TYPE::CMD_SET_RELAY:
+	case CS_TYPE::CMD_SET_DIMMER:
 		return PersistenceMode::RAM;
 	}
 	// should not reach this
@@ -1289,6 +1303,8 @@ constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
+	case CS_TYPE::CMD_SET_RELAY:
+	case CS_TYPE::CMD_SET_DIMMER:
 		return FILE_DO_NOT_USE;
 	}
 	// should not reach this
@@ -1574,6 +1590,8 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
+	case CS_TYPE::CMD_SET_RELAY:
+	case CS_TYPE::CMD_SET_DIMMER:
 		return ERR_NOT_FOUND;
 	}
 	return ERR_NOT_FOUND;
@@ -1712,6 +1730,8 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
+	case CS_TYPE::CMD_SET_RELAY:
+	case CS_TYPE::CMD_SET_DIMMER:
 		return NO_ONE;
 	}
 	return NO_ONE;
@@ -1851,6 +1871,8 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_UPDATE_BEHAVIOUR:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
+	case CS_TYPE::CMD_SET_RELAY:
+	case CS_TYPE::CMD_SET_DIMMER:
 		return NO_ONE;
 	}
 	return NO_ONE;
