@@ -14,6 +14,7 @@
 #include <events/cs_EventDispatcher.h>
 
 #define SWSWITCH_LOG() LOGd("SwSwitch::%s",__func__)
+#define SWSWITCH_LOCKED_LOG() LOGd("refused because of lock: %s",__func__)
 
 #define SWSWITCH_DEBUG_NO_PERSISTANCE (true)
 #define SWSWITCH_DEBUG_NO_EVENTS (true)
@@ -287,7 +288,16 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
     resetToCurrentState();
 }
 
+void SwSwitch::setAllowSwitching(bool allowed) {
+    allowSwitching = allowed;
+}
+
 void SwSwitch::setAllowDimming(bool allowed) {
+    if(!allowSwitching){
+        SWSWITCH_LOCKED_LOG();
+        return;
+    }
+
     SWSWITCH_LOG();
     allowDimming = allowed;
 
@@ -309,11 +319,12 @@ void SwSwitch::setAllowDimming(bool allowed) {
     }
 }
 
-void SwSwitch::setAllowSwitching(bool allowed) {
-    allowSwitching = allowed;
-}
-
 void SwSwitch::toggle(){
+    if(!allowSwitching){
+        SWSWITCH_LOCKED_LOG();
+        return;
+    }
+
     // TODO(Arend, 08-10-2019): toggle should be upgraded when twilight is implemented
     if(currentState.state.relay == 1 || currentState.state.dimmer > 0){
         setIntensity(0);
@@ -323,6 +334,11 @@ void SwSwitch::toggle(){
 }
 
 void SwSwitch::setDimmer(uint8_t value){
+    if(!allowSwitching){
+        SWSWITCH_LOCKED_LOG();
+        return;
+    }
+
     SWSWITCH_LOG();
     LOGd("intensity: %d",value);
 
@@ -384,6 +400,11 @@ void SwSwitch::setDimmer(uint8_t value){
 // ================== ISwitch ==============
 
 void SwSwitch::setRelay(bool is_on){
+    if(!allowSwitching){
+        SWSWITCH_LOCKED_LOG();
+        return;
+    }
+
     SWSWITCH_LOG();
 
     if(is_on && !isSafeToTurnRelayOn()){
@@ -399,6 +420,11 @@ void SwSwitch::setRelay(bool is_on){
 }
 
 void SwSwitch::setIntensity(uint8_t value){
+    if(!allowSwitching){
+        SWSWITCH_LOCKED_LOG()
+        return;
+    }
+
     SWSWITCH_LOG();
 
     if( value > 0 
@@ -412,6 +438,11 @@ void SwSwitch::setIntensity(uint8_t value){
 }
 
 void SwSwitch::setDimmerPower(bool is_on){
+    if(!allowSwitching){
+        SWSWITCH_LOCKED_LOG();
+        return;
+    }
+
     hwSwitch.setDimmerPower(is_on);
 }
 
@@ -438,6 +469,10 @@ void SwSwitch::handleEvent(event_t& evt){
             setAllowDimming(
                     *reinterpret_cast<TYPIFY(CONFIG_PWM_ALLOWED)*>(evt.data)
                 );
+            break;
+        }
+        case CS_TYPE::CONFIG_SWITCH_LOCKED: {
+            setAllowSwitching(State::getInstance().isTrue(CS_TYPE_::CONFIG_SWITCH_LOCKED));
             break;
         }
         case CS_TYPE::STATE_SWITCH_STATE: {

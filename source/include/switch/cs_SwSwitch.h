@@ -28,7 +28,10 @@ class SwSwitch : public ISwitch, public EventListener {
 
     // config
     bool allowDimming = false;     // user/app setting
-    bool allowSwitching = true;    // user/app setting "locked" if false
+
+    // user/app setting "locked" if false. This prevents all public
+    // methods except setAllowSwitching and handleEvent from having any effect.
+    bool allowSwitching = true;
 
     // hardware validation
 
