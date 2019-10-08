@@ -16,6 +16,9 @@
 #define SWSWITCH_LOG() LOGd("SwSwitch::%s",__func__)
 #define SWSWITCH_LOCKED_LOG() LOGd("refused because of lock: %s",__func__)
 
+#define SWSWITCH_LOG_STATE(s) LOGd("state: {relay=%d, dim=%x}", s.state.relay,s.state.dimmer)
+#define SWSWITCH_LOG_CURRENT_STATE() LOGd("current state: {relay=%d, dim=%x}", currentState.state.relay,currentState.state.dimmer)
+
 #define SWSWITCH_DEBUG_NO_PERSISTANCE (true)
 #define SWSWITCH_DEBUG_NO_EVENTS (true)
 
@@ -155,8 +158,8 @@ void SwSwitch::store(switch_state_t nextState) {
 		State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
 	}
 
-    LOGd("nextState: {relay=%d, dim=%x}", nextState.state.relay,nextState.state.dimmer);
     currentState = nextState;
+    SWSWITCH_LOG_CURRENT_STATE();
 }
 
 
@@ -290,7 +293,8 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
 
 void SwSwitch::setAllowSwitching(bool allowed) {
     allowSwitching = allowed;
-    State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &allowed, sizeof(allowed));
+    bool switch_locked = !allowed;
+    State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &switch_locked, sizeof(switch_locked));
 }
 
 void SwSwitch::setAllowDimming(bool allowed) {
@@ -301,15 +305,7 @@ void SwSwitch::setAllowDimming(bool allowed) {
 
     SWSWITCH_LOG();
     allowDimming = allowed;
-    State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &enable, sizeof(enable));
-
-    // !!!! TODO remove the above or the below
-
-    if (allowed && State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
-		LOGw("unlock switch because dimmer turned on");
-		TYPIFY(CONFIG_SWITCH_LOCKED) lockEnable = false;
-		State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &lockEnable, sizeof(lockEnable));
-	}
+    State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &allowed, sizeof(allowed));
 
     if(!allowDimming || hasDimmingFailed()){
         // fix state on disallow
@@ -468,15 +464,15 @@ void SwSwitch::handleEvent(event_t& evt){
             SWSWITCH_LOG();
             forceSwitchOff();
             break;
-        case CS_TYPE::EVT_DIMMING_ALLOWED: {
+        case CS_TYPE::CMD_DIMMING_ALLOWED: {
             SWSWITCH_LOG();
-            auto typd = reinterpret_cast<TYPIFY(EVT_DIMMING_ALLOWED)*>(evt.data);
+            auto typd = reinterpret_cast<TYPIFY(CMD_DIMMING_ALLOWED)*>(evt.data);
             setAllowDimming(*typd);
             break;
         }
-        case CS_TYPE::EVT_SWITCH_LOCKED: {
+        case CS_TYPE::CMD_SWITCH_LOCKED: {
             SWSWITCH_LOG();
-            auto typd = reinterpret_cast<TYPIFY(EVT_SWITCH_LOCKED)*>(evt.data);
+            auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);
             setAllowSwitching(*typd);
             break;
         }

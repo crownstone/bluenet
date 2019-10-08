@@ -705,11 +705,11 @@ cs_ret_code_t CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const uin
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-	TYPIFY(CONFIG_SWITCH_LOCKED) enable = payload->enable;
+	TYPIFY(CONFIG_SWITCH_LOCKED) allow_switching = !payload->enable;
 
-	LOGi("lock switch: %u", enable);
+	LOGi("lock switch: %u", !allow_switching);
 
-	event_t evt(CS_TYPE::CMD_SWITCH_LOCKED,&enable,sizeof(enable));
+	event_t evt(CS_TYPE::CMD_SWITCH_LOCKED,&allow_switching,sizeof(allow_switching));
 	EventDispatcher::getInstance().dispatch(evt);
 
 	return ERR_SUCCESS;
