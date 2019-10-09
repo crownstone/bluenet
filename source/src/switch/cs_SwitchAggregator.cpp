@@ -76,6 +76,7 @@ void SwitchAggregator::init(SwSwitch&& s){
 
 void SwitchAggregator::handleEvent(event_t& evt){
     switch(evt.type){
+        // ============== 'User/App' Events ==============
         case CS_TYPE::CMD_SWITCH_ON:{
             LOGd("SwitchAggregator::%s case CMD_SWITCH_ON",__func__);
             if(swSwitch) swSwitch->setIntensity(100);
@@ -98,6 +99,10 @@ void SwitchAggregator::handleEvent(event_t& evt){
             if(swSwitch) swSwitch->setIntensity(packet->switchCmd);
 			break;
 		}
+
+        // ============== 'Behaviour' Events ==============
+
+        // ============== 'Developer' Events ==============
         case CS_TYPE::CMD_SET_RELAY:{
             LOGd("CMD_SET_RELAY");
             auto typd = reinterpret_cast<TYPIFY(CMD_SET_RELAY)*>(evt.data);

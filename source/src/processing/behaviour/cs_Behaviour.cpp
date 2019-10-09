@@ -8,14 +8,14 @@
 #include <processing/behaviour/cs_Behaviour.h>
 
 Behaviour::Behaviour(time_t from, time_t until, 
-      presence_data_t presencemask, bool intendedState) :
+      presence_data_t presencemask, uint8_t intendedState) :
     behaviourappliesfrom (from),
     behaviourappliesuntil (until),
     requiredpresencebitmask (presencemask),
     intendedStateWhenBehaviourIsValid (intendedState){
 }
 
-bool Behaviour::value() const {
+uint8_t Behaviour::value() const {
     return intendedStateWhenBehaviourIsValid;
 }
 

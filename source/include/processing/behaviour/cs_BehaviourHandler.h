@@ -9,6 +9,8 @@
 #include <events/cs_EventListener.h>
 #include <processing/behaviour/cs_Behaviour.h>
 
+#include <optional>
+
 
 class BehaviourHandler : public EventListener {
     public:
@@ -36,12 +38,13 @@ class BehaviourHandler : public EventListener {
      * Given current time/presence, query the behaviourstore and check
      * if there any valid ones. 
      * 
-     * Returns false when no valid behaviour is found, or more than one
-     * valid behaviours contradicted eachother.
-     * Returns true if a valid behaviour is found.
-     * In this case intendedState contains the desired state value.
+     * Returns an empty optional when no valid behaviour is found, or 
+     * more than one valid behaviours contradicted eachother.
+     * Returns a non-empty optional if a valid behaviour is found or
+     * multiple agreeing behaviours have been found.
+     * In this case its value contains the desired state value.
      */
-    public: bool computeIntendedState(bool& intendedState, 
+    std::optional<uint8_t> computeIntendedState(
         Behaviour::time_t currenttime, 
         Behaviour::presence_data_t currentpresence);
 };

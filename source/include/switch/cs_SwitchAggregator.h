@@ -34,12 +34,11 @@ class SwitchAggregator : public EventListener {
     virtual ~SwitchAggregator() noexcept {};
     SwitchAggregator& operator= (const SwitchAggregator&) = delete;
 
-    typedef uint16_t SwitchState;
-
     // when the swith aggregator is initialized with a board
     // that can switch, swSwitch contains that value.
     std::optional<SwSwitch> swSwitch;
 
-    SwitchState behaviourState;
-    SwitchState userOverrideState;
+    // the latest states requested by other parts of the system.
+    uint8_t behaviourState;
+    std::optional<uint8_t> userOverrideState = {};
 };

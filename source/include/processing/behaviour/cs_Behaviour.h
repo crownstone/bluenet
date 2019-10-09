@@ -24,14 +24,14 @@ class Behaviour {
     Behaviour() = default;
     Behaviour(time_t from, time_t until, 
       presence_data_t presencemask,
-      bool intendedStateWhenBehaviourIsValid);
+      uint8_t intendedStateWhenBehaviourIsValid);
 
     // =========== Getters ===========
 
     /**
      * Returns the intended state when this behaviour is valid.
      */
-    bool value() const;
+    uint8_t value() const;
 
     /**
      * Returns from (incl.) which time on this behaviour applies.
@@ -58,6 +58,5 @@ class Behaviour {
     time_t behaviourappliesuntil = 0x0000;
     presence_data_t requiredpresencebitmask = 0x00;
 
-    // true if on, false if off.
-    bool intendedStateWhenBehaviourIsValid = false;
+    uint8_t intendedStateWhenBehaviourIsValid = 0;
 };
