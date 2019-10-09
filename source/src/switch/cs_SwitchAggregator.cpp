@@ -102,6 +102,11 @@ void SwitchAggregator::handleEvent(event_t& evt){
 
         // ============== 'Behaviour' Events ==============
 
+        case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE : {
+            auto typd = reinterpret_cast<TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE)*>(evt.data);
+            LOGd("SwitchAggregator::%s case EVT_BEHAVIOUR_SWITCH_STATE value: %d",__func__, *typd);
+            break;
+        }
         // ============== 'Developer' Events ==============
         case CS_TYPE::CMD_SET_RELAY:{
             LOGd("CMD_SET_RELAY");

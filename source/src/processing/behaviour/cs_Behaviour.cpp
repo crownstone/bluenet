@@ -6,6 +6,7 @@
  */
 
 #include <processing/behaviour/cs_Behaviour.h>
+#include <drivers/cs_Serial.h>
 
 Behaviour::Behaviour(time_t from, time_t until, 
       presence_data_t presencemask, uint8_t intendedState) :
@@ -32,7 +33,7 @@ bool Behaviour::isValid(time_t currenttime, presence_data_t currentpresence) con
 }
 
 bool Behaviour::isValid(time_t currenttime) const{
-    return from() <= until() // ensure proper midnight roll-over 
+    return from() < until() // ensure proper midnight roll-over 
         ? (from() <= currenttime && currenttime < until()) 
         : (from() <= currenttime || currenttime < until());
 }

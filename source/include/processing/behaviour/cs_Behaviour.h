@@ -8,6 +8,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <time/cs_TimeOfDay.h>
 
 /**
  * Object that defines when a state transition should occur.
@@ -18,7 +19,7 @@
 class Behaviour {
     // TODO(Arend, 23-09-2019): datatypes and implementation still susceptible to change.
     public:
-    typedef uint32_t time_t; // let's say, seconds since midnight (00:00)
+    typedef TimeOfDay time_t; // let's say, seconds since midnight (00:00)
     typedef uint8_t presence_data_t;
 
     Behaviour() = default;
@@ -48,7 +49,8 @@ class Behaviour {
 
     /**
      * Does the behaviour apply to the current situation?
-     */
+     * If from() == until() the behaviour isValid all day.
+     **/
     bool isValid(time_t currenttime) const;
     bool isValid(presence_data_t currentpresence) const;
     bool isValid(time_t currenttime, presence_data_t currentpresence) const;

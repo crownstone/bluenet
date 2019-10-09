@@ -17,7 +17,6 @@
 
 
 void BehaviourHandler::handleEvent(event_t& evt){
-    // LOGd("BehaviourHandler::handleEvent %d", evt.type);
     switch(evt.type){
         case CS_TYPE::STATE_TIME:
         case CS_TYPE::EVT_PRESENCE_MUTATION:
@@ -55,16 +54,16 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
         Behaviour::presence_data_t currentPresence){
     std::optional<uint8_t> intendedValue = {};
     
-    for (const Behaviour& b : BehaviourStore::getActiveBehaviours()){
-        if (b.isValid(currentTime, currentPresence)){
+    for (const auto& b : BehaviourStore::getActiveBehaviours()){
+        if (b && b->isValid(currentTime, currentPresence)){
             if (intendedValue){
-                if (b.value() != intendedValue.value()){
+                if (b->value() != intendedValue.value()){
                     // found a conflicting behaviour
                     return std::nullopt;
                 }
             } else {
                 // found first valid behaviour
-                intendedValue = b.value();
+                intendedValue = b->value();
             }
         }
     }
