@@ -112,7 +112,7 @@ list(APPEND CMAKE_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
 if(DOWNLOAD_JLINK) 
   ExternalProject_Add(jlink
-    DOWNLOAD_COMMAND wget  --post-data "accept_license_agreement=accepted" ${JLINK_LINUX_DOWNLOAD_URL} -O ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
+    DOWNLOAD_COMMAND wget --timestamping --post-data "accept_license_agreement=accepted" ${JLINK_LINUX_DOWNLOAD_URL} -O ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
     DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
     URL ${JLINK_LINUX_DOWNLOAD_URL}
     URL_MD5 ${JLINK_MD5}
@@ -240,9 +240,9 @@ ADD_CUSTOM_TARGET(micro_eec
 
 ExternalProject_Add(bluenet
   SOURCE_DIR ${WORKSPACE_DIR}/source
-  BINARY_DIR ${WORKSPACE_DIR}/build/${BOARD_TARGET}
+  BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}
   INSTALL_DIR ${WORKSPACE_DIR}/bin/${BOARD_TARGET}
-  STAMP_DIR ${WORKSPACE_DIR}/build/${BOARD_TARGET}/stamp
+  STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/stamp
   TMP_DIR ${WORKSPACE_DIR}/tmp/${BOARD_TARGET}
   CMAKE_CACHE_ARGS "${CMAKE_ARGS}"
   CMAKE_ARGS "${CMAKE_ARGS}"
@@ -267,7 +267,7 @@ add_dependencies(bluenet nordic_sdk)
 add_dependencies(bluenet nordic_mesh_sdk)
 
 #######################################################################################################################
-# Upload softdevice and read version of softdevice
+# Write softdevice and read version of softdevice
 #######################################################################################################################
 		
 IF(SERIAL_NUM) 
@@ -275,13 +275,13 @@ IF(SERIAL_NUM)
   set(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 ENDIF()
 		
-ADD_CUSTOM_TARGET(softdevice
+ADD_CUSTOM_TARGET(write_softdevice
   COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to upload softdevice"
+  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write softdevice"
   COMMAND ${CMAKE_COMMAND} -E echo
   COMMAND nrfjprog -f nrf52 --program ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
   DEPENDS bluenet
-  COMMENT "Flashes binary to remote target board"
+  COMMENT "Flashes softdevice to remote target board"
   )
 		
 SET(DEFAULT_NRFUTIL_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
@@ -317,42 +317,42 @@ ADD_CUSTOM_TARGET(${BOARD_TARGET}
   WORKING_DIRECTORY ${BOARD_TARGET}
   DEPENDS 
     bluenet
-  COMMENT "Build firmware"
+  COMMENT "Build application"
   )
 
-ADD_CUSTOM_TARGET(debug
+ADD_CUSTOM_TARGET(debug_application
   COMMAND cmake ..
-  COMMAND make debug
+  COMMAND make debug_application
   WORKING_DIRECTORY ${BOARD_TARGET}
   DEPENDS 
     bluenet
-  COMMENT "Debug binary"
+  COMMENT "Debug application"
   )
 
-ADD_CUSTOM_TARGET(write_hw_version
-  COMMAND make write_hw_version
+ADD_CUSTOM_TARGET(write_board_version
+  COMMAND make write_board_version
   WORKING_DIRECTORY ${BOARD_TARGET}
   DEPENDS 
     nrfutil
     bluenet
-  COMMENT "Write hardware version"
+  COMMENT "Write board version"
   )
 
-ADD_CUSTOM_TARGET(upload 
-  COMMAND make upload 
+ADD_CUSTOM_TARGET(write_application
+  COMMAND make write_application
   WORKING_DIRECTORY ${BOARD_TARGET}
-  DEPENDS 
+  DEPENDS
     nrfutil
     bluenet
-  COMMENT "Upload binary"
+  COMMENT "Write application"
   )
 
-ADD_CUSTOM_TARGET(upload_bootloader
-  COMMAND make upload_bootloader 
+ADD_CUSTOM_TARGET(write_bootloader
+  COMMAND make write_bootloader
   WORKING_DIRECTORY ${BOARD_TARGET}
-  DEPENDS 
+  DEPENDS
     bluenet
-  COMMENT "Upload binary"
+  COMMENT "Write bootloader"
   )
 
 #######################################################################################################################
@@ -364,7 +364,7 @@ ADD_CUSTOM_TARGET(list_jlinks
   WORKING_DIRECTORY ${WORKSPACE_DIR}/source/conf/jlink
   DEPENDS 
     jlink
-  COMMENT "Upload binary"
+  COMMENT "List JLink devices"
   )
 
 ADD_CUSTOM_TARGET(nrfconnect_core_setup
@@ -372,7 +372,7 @@ ADD_CUSTOM_TARGET(nrfconnect_core_setup
   COMMAND npm run dev
   WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
   #DEPENDS git_nrfconnect_core
-  COMMENT "Run nrf connect corey"
+  COMMENT "Run nrf connect core"
   )
 
 ADD_CUSTOM_TARGET(nrfconnect_core
@@ -380,12 +380,12 @@ ADD_CUSTOM_TARGET(nrfconnect_core
   COMMAND npm run app
   WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
   #DEPENDS git_nrfconnect_core
-  COMMENT "Run nrf connect corey"
+  COMMENT "Run nrf connect core"
   )
 
 ADD_CUSTOM_TARGET(nrfconnect_programmer
   COMMAND npm run app
   WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-programmer
   #DEPENDS git_nrfconnect_programmer
-  COMMENT "Run nrf connect corey"
+  COMMENT "Run nrf connect core"
   )

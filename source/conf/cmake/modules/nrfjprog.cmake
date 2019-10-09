@@ -37,17 +37,17 @@ if(INSTRUCTION STREQUAL "READ")
       else()
 	message(STATUS "Unknown softdevice!!")
       endif() 
-    elseif ("${ADDRESS}" STREQUAL "0x10000100") # Board version
+    elseif ("${ADDRESS}" STREQUAL "0x10000100") # NRF chip version: Part
       string(REGEX MATCH "^0x([0-9a-fA-F]+): *([0-9a-fA-F]+)" Tmp ${output})
       set(Address ${CMAKE_MATCH_1})
       set(Value ${CMAKE_MATCH_2})
       #message(STATUS "Value read: ${Value}")
       if ("${Value}" STREQUAL "00052832") 
-	message(STATUS "Hardware version, the nRF52832 chipset")
+	message(STATUS "Part: nRF52832")
       else()
 	message(STATUS "Unknow chipset")
       endif() 
-    elseif ("${ADDRESS}" STREQUAL "0x10000104") # Board, part variant
+    elseif ("${ADDRESS}" STREQUAL "0x10000104") # NRF chip version: Variant
       string(REGEX MATCH "^0x([0-9a-fA-F]+): *([0-9a-fA-F]+)" Tmp ${output})
       set(Address ${CMAKE_MATCH_1})
       set(Value ${CMAKE_MATCH_2})

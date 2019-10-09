@@ -63,10 +63,17 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 	state.set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
 	// Switch relay on
-	event_t event0(CS_TYPE::CMD_SWITCH_ON);
-	EventDispatcher::getInstance().dispatch(event0);
+	event_t event(CS_TYPE::CMD_SWITCH_ON);
+	EventDispatcher::getInstance().dispatch(event);
 
-	// TODO: keep up if all configs are successfully stored, maybe with a bitmask.
+	// Make sure the stored switch state is correct, as the switch command might not be executed
+	// (for example if the device has no switch, or when the switch is already on).
+	// This is necessary because we wait for it to be set.
+	TYPIFY(STATE_SWITCH_STATE) switchState;
+	switchState.state.dimmer = 0;
+	switchState.state.relay = 1;
+	state.set(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
+
 	_successfullyStoredBitmask = 0;
 
 	LOGi("Setup completed");

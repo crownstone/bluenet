@@ -100,7 +100,7 @@ IF(result)
 	MESSAGE(STATUS "Enabled interprocedural optimization: -lto")
 	SET(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
 else()
-	MESSAGE(INFO "Note! Interprocedural optimization not enabled (might just be because cmake does not know if the compiler supports it)")
+	MESSAGE(STATUS "Note! Interprocedural optimization not enabled (might just be because cmake does not know if the compiler supports it)")
 ENDIF()
 SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -Os -fomit-frame-pointer")
 
