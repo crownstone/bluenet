@@ -9,7 +9,8 @@
 
 #include <common/cs_Types.h>
 
-struct event_t {
+class event_t {
+    public:
 	event_t(CS_TYPE type, void * data, size16_t size): type(type), data(data), size(size) {
 	}
 
@@ -21,4 +22,9 @@ struct event_t {
 	void *data;
 
 	size16_t size;
+
+    /**
+     * Validates [data] for nullptr and [size] to match expected size of [type].
+     */
+    void dispatch();
 };

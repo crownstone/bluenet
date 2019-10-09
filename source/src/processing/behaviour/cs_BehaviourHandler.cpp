@@ -45,7 +45,8 @@ void BehaviourHandler::update(){
             &intendedValue,
             TypeSize(CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE)
         );
-        EventDispatcher::getInstance().dispatch(behaviourStateChange);
+
+        behaviourStateChange.dispatch();
     }
 }
 
