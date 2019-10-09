@@ -61,3 +61,35 @@ struct cs_state_data_t {
  * TODO: check how to check this at compile time.
  */
 cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsConfig);
+
+/**
+ * Store values in FLASH or RAM. Load values from FIRMWARE_DEFAULT, FLASH or RAM.
+ *
+ * 1. Values that are written fairly often and are not important over reboots should be stored in and read from RAM.
+ * For example, we can measure continuously the temperature of the chip. We can also all the time read this value
+ * from one of the BLE services. There is no reason to do a roundtrip to FLASH.
+ *
+ * 2. Values like CONFIG_BOOT_DELAY should be known over reboots of the device. Moreover, they should also persist
+ * over firmware updates. These values are stored in FLASH. If the values are actually not changed by the user (or via
+ * the smartphone app), they should NOT be stored to FLASH. They can then immediately be read from the
+ * FIRMWARE_DEFAULT. They will be stored only if they are explicitly overwritten. If these values are stored in FLASH
+ * they always take precedence over FIRMWARE_DEFAULT values.
+ *
+ * 3. Most values can be written to and read from FLASH using RAM as a cache. We can also use FIRMWARE_DEFAULT as
+ * a fallback when the FLASH value is not present. Moreover, we can have a list that specifies if a value should be
+ * in RAM or in FLASH by default. This complete persistence strategy is called STRATEGY1.
+ *
+ * NOTE. Suppose we have a new firmware available and we definitely want to use a new FIRMWARE_DEFAULT value. For
+ * example, we use more peripherals and need to have a CONFIG_BOOT_DELAY that is higher or else it will be in an
+ * infinite reboot loop. Before we upload the new firmware to the Crownstone, we need to explicitly clear the value.
+ * Only after we have deleted the FLASH record we can upload the new firmware. Then the new FIRMWARE_DEFAULT is used
+ * automatically.
+ */
+enum class PersistenceMode: uint8_t {
+	FLASH,
+	RAM,
+	FIRMWARE_DEFAULT,
+	STRATEGY1,
+};
+
+PersistenceMode DefaultLocation(CS_TYPE const & type);
