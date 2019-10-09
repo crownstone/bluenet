@@ -619,6 +619,8 @@ ELSE()
 
 		IF(SERIAL_NUM) 
 			SET(SERIAL_NUM_SWITCH "--snr")
+			SET(SERIAL_NUM_GDB_SELECT "-select")
+			SET(SERIAL_NUM_GDB_PARAM "usb=${SERIAL_NUM}")
   			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 		ENDIF()
 
@@ -718,7 +720,7 @@ ELSE()
 		# The gdb server can be started with configuration specific information
 		ADD_CUSTOM_TARGET(debug_server
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
-			COMMAND JLinkGDBServer -Device nRF52832_xxAA -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT}
+			COMMAND JLinkGDBServer -Device nRF52832_xxAA ${SERIAL_NUM_GDB_SELECT} ${SERIAL_NUM_GDB_PARAM} -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT}
 			COMMENT "Debug server, runs in background"
 			)
 		
@@ -730,7 +732,7 @@ ELSE()
 		
 		ADD_CUSTOM_TARGET(debug_application
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug"
-			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf 
+			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf ${PROJECT_NAME}.elf
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Debug ${PROJECT_NAME}.elf"
 			)
