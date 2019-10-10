@@ -42,5 +42,17 @@ class SwitchAggregator : public EventListener {
 
     // the latest states requested by other parts of the system.
     std::optional<uint8_t> behaviourState = {};
-    std::optional<uint8_t> userOverrideState = {};
+    std::optional<uint8_t> overrideState = {};
+
+    /**
+     * Checks the behaviourState and overrideState,
+     * to set the swSwitch to the desired value:
+     * - when overrideState has a value, that value is used, else,
+     * - when behaviourState has a value, that value is used, else
+     * - no state change is made to swSwitch.
+     * 
+     * This method will clear the overrideState when it matches
+     * the behaviourState, unless 
+     */
+    void updateState();
 };

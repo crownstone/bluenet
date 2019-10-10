@@ -99,15 +99,27 @@ void SwitchAggregator::handleEvent(event_t& evt){
             if(swSwitch) swSwitch->setIntensity(packet->switchCmd);
 			break;
 		}
+        case CS_TYPE::CMD_DIMMING_ALLOWED: {
+            LOGd("SwitchAggregator::%s case CMD_DIMMING_ALLOWED",__func__);
+            auto typd = reinterpret_cast<TYPIFY(CMD_DIMMING_ALLOWED)*>(evt.data);
+            if(swSwitch) swSwitch->setAllowDimming(*typd);
+            break;
+        }
+        case CS_TYPE::CMD_SWITCH_LOCKED: {
+            LOGd("SwitchAggregator::%s case CMD_SWITCH_LOCKED",__func__);
+            auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);
+            if(swSwitch) swSwitch->setAllowSwitching(*typd);
+            break;
+        }
 
         // ============== 'Behaviour' Events ==============
-
         case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE : {
             auto typd = reinterpret_cast<TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE)*>(evt.data);
             LOGd("SwitchAggregator::%s case EVT_BEHAVIOUR_SWITCH_STATE value: %d",__func__, *typd);
             behaviourState = *typd;
             break;
         }
+        
         // ============== 'Developer' Events ==============
         case CS_TYPE::CMD_SET_RELAY:{
             LOGd("CMD_SET_RELAY");

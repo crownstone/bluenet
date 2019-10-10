@@ -467,18 +467,6 @@ void SwSwitch::handleEvent(event_t& evt){
             SWSWITCH_LOG();
             forceSwitchOff();
             break;
-        case CS_TYPE::CMD_DIMMING_ALLOWED: {
-            SWSWITCH_LOG();
-            auto typd = reinterpret_cast<TYPIFY(CMD_DIMMING_ALLOWED)*>(evt.data);
-            setAllowDimming(*typd);
-            break;
-        }
-        case CS_TYPE::CMD_SWITCH_LOCKED: {
-            SWSWITCH_LOG();
-            auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);
-            setAllowSwitching(*typd);
-            break;
-        }
         case CS_TYPE::STATE_SWITCH_STATE: {
             switch_state_t* typd = reinterpret_cast<TYPIFY(STATE_SWITCH_STATE)*>(evt.data);
             LOGd("switch state update: relay(%d) dim(%d)", typd->state.relay, typd->state.dimmer);
