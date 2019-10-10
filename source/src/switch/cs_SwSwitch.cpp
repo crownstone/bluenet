@@ -32,11 +32,11 @@ void SwSwitch::startDimmerPowerCheck(uint8_t value){
         return;
     }
 
-    // briefly set the dimmer intensity to [value] if this wasn't tried
-    // before
-    setIntensity_unchecked(value);
-    setRelay_unchecked(false);
+    // set the dimmer intensity to [value] if this wasn't tried
+    if(currentState.state.dimmer != value) { setIntensity_unchecked(value); }
+    if(currentState.state.relay != false) { setRelay_unchecked(false); }
 
+    // and set a time out to turn it off if it doesn't work.
     dimmerCheckCountDown = dimmerCheckCountDown_initvalue;
 }
 
@@ -322,20 +322,6 @@ void SwSwitch::setAllowDimming(bool allowed) {
     }
 }
 
-void SwSwitch::toggle(){
-    if(!allowSwitching){
-        SWSWITCH_LOCKED_LOG();
-        return;
-    }
-
-    // TODO(Arend, 08-10-2019): toggle should be upgraded when twilight is implemented
-    if(currentState.state.relay == 1 || currentState.state.dimmer > 0){
-        setIntensity(0);
-    } else {
-        setIntensity(100);
-    }
-}
-
 void SwSwitch::setDimmer(uint8_t value){
     if(!allowSwitching){
         SWSWITCH_LOCKED_LOG();
@@ -359,8 +345,8 @@ void SwSwitch::setDimmer(uint8_t value){
         if (value > 50 + threshold){
             LOGw("setIntensity resolved: on");
             // bypass dimmer to turn on
-            setRelay_unchecked(true);
-            setIntensity_unchecked(0);
+            if(currentState.state.relay != true) { setRelay_unchecked(true); }
+            if(currentState.state.dimmer != 0) { setIntensity_unchecked(0); }
 
         } else if(value < 50 - threshold){
             LOGw("setIntensity resolved: off");
@@ -391,8 +377,8 @@ void SwSwitch::setDimmer(uint8_t value){
         LOGw("setIntensity: normal operation mode, calling setState_unchecked");
         // OK to set the intended value since it is safe to dim (or value is 0),
         // and dimmer circuit is powered.
-        setIntensity_unchecked(value);
-        setRelay_unchecked(false);
+        if(currentState.state.dimmer != value) { setIntensity_unchecked(value); }
+        if(currentState.state.relay != false) {setRelay_unchecked(false); }
     }
 }
 
@@ -415,7 +401,9 @@ void SwSwitch::setRelay(bool is_on){
         return;
     }
 
-    setRelay_unchecked(is_on);
+    if(currentState.state.relay != is_on){
+        setRelay_unchecked(is_on);
+    }
 }
 
 void SwSwitch::setIntensity(uint8_t value){
@@ -433,7 +421,9 @@ void SwSwitch::setIntensity(uint8_t value){
         return;
     }
 
-    setIntensity_unchecked(value); 
+    if(currentState.state.dimmer != value){
+        setIntensity_unchecked(value); 
+    }
 }
 
 void SwSwitch::setDimmerPower(bool is_on){
@@ -463,18 +453,6 @@ void SwSwitch::handleEvent(event_t& evt){
             SWSWITCH_LOG();
             forceSwitchOff();
             break;
-        case CS_TYPE::CMD_DIMMING_ALLOWED: {
-            SWSWITCH_LOG();
-            auto typd = reinterpret_cast<TYPIFY(CMD_DIMMING_ALLOWED)*>(evt.data);
-            setAllowDimming(*typd);
-            break;
-        }
-        case CS_TYPE::CMD_SWITCH_LOCKED: {
-            SWSWITCH_LOG();
-            auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);
-            setAllowSwitching(*typd);
-            break;
-        }
         case CS_TYPE::STATE_SWITCH_STATE: {
             switch_state_t* typd = reinterpret_cast<TYPIFY(STATE_SWITCH_STATE)*>(evt.data);
             LOGd("switch state update: relay(%d) dim(%d)", typd->state.relay, typd->state.dimmer);

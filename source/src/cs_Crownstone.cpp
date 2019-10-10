@@ -562,21 +562,22 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			EventDispatcher::getInstance().addListener(&_behaviourStore);
 
 			// DEBUG
-			Behaviour morningbehaviour(
-					9*60*60,
-					11*60*60,
-					0b10101010,
-					true
-				);
-			
-			event_t evt(CS_TYPE::EVT_UPDATE_BEHAVIOUR,
-				&morningbehaviour,
-				TypeSize(CS_TYPE::EVT_UPDATE_BEHAVIOUR)
-				);
+			uint32_t h = 14;
+			uint32_t m = 50;
+			uint32_t s = 0;
+
+			for(auto i = 0; i < 10; i++){ // just add 10 behaviours
+				Behaviour behaviour(
+						TimeOfDay(h, m+i, s),
+						TimeOfDay(h, m+i, s+30),
+						0b10101010,
+						100-i
+					);
+				LOGd("debugbehaviour from(%d:%d:%d)",behaviour.from().h(),behaviour.from().m(),behaviour.from().s());
+				_behaviourStore.saveBehaviour(behaviour,i);
+			}
 
 			// END DEBUG
-
-			EventDispatcher::getInstance().dispatch(evt);
 
 			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
 			_multiSwitchHandler->init();

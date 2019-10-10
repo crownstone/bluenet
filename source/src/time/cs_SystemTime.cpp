@@ -51,7 +51,7 @@ void SystemTime::tick(void*) {
 	if (posixTimeStamp && tickDiff > RTC::msToTicks(1000)) {
 		posixTimeStamp++;
 		rtcTimeStamp += RTC::msToTicks(1000);
-
+		
 		State::getInstance().set(CS_TYPE::STATE_TIME, &posixTimeStamp, sizeof(posixTimeStamp));
 	}
 

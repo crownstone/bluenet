@@ -11,13 +11,14 @@
 #include <common/cs_Types.h>
 
 // allocate space for the behaviours.
-std::array<Behaviour,BehaviourStore::MaxBehaviours> BehaviourStore::activeBehaviours;
+std::array<std::optional<Behaviour>,BehaviourStore::MaxBehaviours> BehaviourStore::activeBehaviours;
 
 void BehaviourStore::handleEvent(event_t& evt){
     switch(evt.type){
         case CS_TYPE::EVT_UPDATE_BEHAVIOUR:{
             Behaviour* newBehaviour = reinterpret_cast<TYPIFY(EVT_UPDATE_BEHAVIOUR)*>(evt.data);
-            LOGd("newBehaviour: from %d, until %d", newBehaviour->from(), newBehaviour->until()); 
+            LOGd("newBehaviour: from %d, until %d", newBehaviour->from(), newBehaviour->until());
+
         }
         default:{
             break;

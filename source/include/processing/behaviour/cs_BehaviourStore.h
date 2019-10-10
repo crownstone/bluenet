@@ -11,6 +11,7 @@
 #include <processing/behaviour/cs_Behaviour.h>
 
 #include <array>
+#include <optional>
 
 /**
  * Keeps track of the behaviours that are active on this crownstone.
@@ -18,7 +19,7 @@
 class BehaviourStore : public EventListener {
     private:
     static constexpr size_t MaxBehaviours = 10;
-    static std::array<Behaviour,MaxBehaviours> activeBehaviours;
+    static std::array<std::optional<Behaviour>,MaxBehaviours> activeBehaviours;
     
     public:
     /**
@@ -35,7 +36,7 @@ class BehaviourStore : public EventListener {
      */
     bool saveBehaviour(Behaviour b, size_t index);
 
-    static inline const std::array<Behaviour,MaxBehaviours>& getActiveBehaviours() {
+    static inline const std::array<std::optional<Behaviour>,MaxBehaviours>& getActiveBehaviours() {
         return activeBehaviours;
     }
 };

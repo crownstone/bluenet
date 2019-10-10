@@ -24,9 +24,16 @@ class SwitchAggregator : public EventListener {
     
     void init(SwSwitch&& s); // claims ownership over s.
 
+    /**
+     * When swSwitch is locked, only CMD_SWITCH_LOCKED events will be handled.
+     * Else events may alter the intended states and subsequently trigger an 
+     * actual state change.
+     */
     virtual void handleEvent(event_t& evt) override;
  
-    // ISwitch interface for dev
+    /**
+     * sets dimmer and relay to 0, disregarding all other state/intentions.
+     */
     void developerForceOff();
     
     private:
@@ -34,12 +41,31 @@ class SwitchAggregator : public EventListener {
     virtual ~SwitchAggregator() noexcept {};
     SwitchAggregator& operator= (const SwitchAggregator&) = delete;
 
-    typedef uint16_t SwitchState;
-
     // when the swith aggregator is initialized with a board
     // that can switch, swSwitch contains that value.
     std::optional<SwSwitch> swSwitch;
 
-    SwitchState behaviourState;
-    SwitchState userOverrideState;
+    // the latest states requested by other parts of the system.
+    std::optional<uint8_t> behaviourState = {};
+    std::optional<uint8_t> overrideState = {};
+
+    /**
+     * Checks the behaviourState and overrideState,
+     * to set the swSwitch to the desired value:
+     * - if swSwitch doesn't allow switching, nothing happens, else,
+     * - when overrideState has a value, swSwitch is set to that value, else,
+     * - when behaviourState has a value, swSwitch is set to that value, else,
+     * - nothing happens.
+     * 
+     * This method will clear the overrideState when it matches
+     * the behaviourState, unless the switch is locked.
+     */
+    void updateState();
+
+
+    /**
+     * Triggers an updateState() call on all handled events and adjusts
+     * at least one of behaviourState or overrideState.
+     */
+    void handleStateIntentionEvents(event_t & evt);
 };

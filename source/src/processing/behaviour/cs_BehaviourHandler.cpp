@@ -17,7 +17,6 @@
 
 
 void BehaviourHandler::handleEvent(event_t& evt){
-    // LOGd("BehaviourHandler::handleEvent %d", evt.type);
     switch(evt.type){
         case CS_TYPE::STATE_TIME:
         case CS_TYPE::EVT_PRESENCE_MUTATION:
@@ -31,52 +30,52 @@ void BehaviourHandler::handleEvent(event_t& evt){
 
 void BehaviourHandler::update(){
     // TODO(Arend 24-09-2019): get presence from scheduler
-    bool nextState = false;
     TimeOfDay time = SystemTime::now();
     Behaviour::presence_data_t presence = 0xff; // everyone present as dummy value.
     
     LOGd("BehaviourHandler::update %02d:%02d:%02d",time.h(),time.m(),time.s());
 
-    if(computeIntendedState(nextState, time, presence)){
-        // TODO(Arend 24-09-2019): send nextState to SwitchController
+    auto intendedState = computeIntendedState(time, presence);
+    if(intendedState){
+        if(previousIntendedState == intendedState){
+            return;
+        }
+
+        previousIntendedState = intendedState;
+        
+        uint8_t intendedValue = intendedState.value();
         event_t behaviourStateChange(
             CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE,
-            &nextState,
+            &intendedValue,
             TypeSize(CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE)
         );
-        EventDispatcher::getInstance().dispatch(behaviourStateChange);
+
+        behaviourStateChange.dispatch();
     }
 }
 
-bool BehaviourHandler::computeIntendedState(bool& intendedState,
+std::optional<uint8_t> BehaviourHandler::computeIntendedState(
         Behaviour::time_t currentTime, 
         Behaviour::presence_data_t currentPresence){
+    std::optional<uint8_t> intendedValue = {};
     
-    bool foundValidBehaviour = false;
-    bool firstIntendedState = false;
-
-    for (const Behaviour& b : BehaviourStore::getActiveBehaviours()){
-        if (b.isValid(currentTime, currentPresence)){
-            if (foundValidBehaviour){
-                if (b.value() != firstIntendedState){
+    for (const auto& b : BehaviourStore::getActiveBehaviours()){
+        if (b && b->isValid(currentTime, currentPresence)){
+            if (intendedValue){
+                if (b->value() != intendedValue.value()){
                     // found a conflicting behaviour
-                    return false;
+                    // TODO(Arend): add more advance conflict resolution according to document.
+                    return std::nullopt;
                 }
             } else {
                 // found first valid behaviour
-                firstIntendedState = b.value();
-                foundValidBehaviour = true;
+                intendedValue = b->value();
             }
         }
     }
 
-    if(foundValidBehaviour){
-        // only set the ref parameter when no conflict was found
-        intendedState = firstIntendedState;
-        return true;
-    }
-
-    return false;
+    // reaching here means no conflict. An empty intendedValue should thus be resolved to 'off'
+    return intendedValue.value_or(0);
 }
 
 // void TestBehaviourHandler(uint32_t time, uint8_t presence){
