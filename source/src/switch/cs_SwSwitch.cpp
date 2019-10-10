@@ -32,11 +32,11 @@ void SwSwitch::startDimmerPowerCheck(uint8_t value){
         return;
     }
 
-    // briefly set the dimmer intensity to [value] if this wasn't tried
-    // before
-    setIntensity_unchecked(value);
-    setRelay_unchecked(false);
+    // set the dimmer intensity to [value] if this wasn't tried
+    if(currentState.state.dimmer != value) { setIntensity_unchecked(value); }
+    if(currentState.state.relay != false) { setRelay_unchecked(false); }
 
+    // and set a time out to turn it off if it doesn't work.
     dimmerCheckCountDown = dimmerCheckCountDown_initvalue;
 }
 
@@ -359,8 +359,8 @@ void SwSwitch::setDimmer(uint8_t value){
         if (value > 50 + threshold){
             LOGw("setIntensity resolved: on");
             // bypass dimmer to turn on
-            setRelay_unchecked(true);
-            setIntensity_unchecked(0);
+            if(currentState.state.relay != true) { setRelay_unchecked(true); }
+            if(currentState.state.dimmer != 0) { setIntensity_unchecked(0); }
 
         } else if(value < 50 - threshold){
             LOGw("setIntensity resolved: off");
@@ -391,8 +391,8 @@ void SwSwitch::setDimmer(uint8_t value){
         LOGw("setIntensity: normal operation mode, calling setState_unchecked");
         // OK to set the intended value since it is safe to dim (or value is 0),
         // and dimmer circuit is powered.
-        setIntensity_unchecked(value);
-        setRelay_unchecked(false);
+        if(currentState.state.dimmer != value) { setIntensity_unchecked(value); }
+        if(currentState.state.relay != false) {setRelay_unchecked(false); }
     }
 }
 
@@ -415,7 +415,9 @@ void SwSwitch::setRelay(bool is_on){
         return;
     }
 
-    setRelay_unchecked(is_on);
+    if(currentState.state.relay != is_on){
+        setRelay_unchecked(is_on);
+    }
 }
 
 void SwSwitch::setIntensity(uint8_t value){
@@ -433,7 +435,9 @@ void SwSwitch::setIntensity(uint8_t value){
         return;
     }
 
-    setIntensity_unchecked(value); 
+    if(currentState.state.dimmer != value){
+        setIntensity_unchecked(value); 
+    }
 }
 
 void SwSwitch::setDimmerPower(bool is_on){
