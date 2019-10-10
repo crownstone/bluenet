@@ -157,9 +157,9 @@ void SwitchAggregator::handleStateIntentionEvents(event_t& evt){
         }
 
         // ============== 'Developer' Events ==============
-        // TODO(Arend): should these get a separate override state?
-        // they currently need to early return in order not to be overwritten
-        // by the updateState call (and any subsequent call of this handler)
+        // temporarily change the state of the swSwitch to something else than the
+        // behaviourState or overrideState decided that they needed to be.
+        // as soon as any of the above handled events are triggered this will have been forgotten.
         case CS_TYPE::CMD_SET_RELAY:{
             LOGd("CMD_SET_RELAY");
             auto typd = reinterpret_cast<TYPIFY(CMD_SET_RELAY)*>(evt.data);
@@ -169,7 +169,7 @@ void SwitchAggregator::handleStateIntentionEvents(event_t& evt){
         case CS_TYPE::CMD_SET_DIMMER:{
             LOGd("CMD_SET_DIMMER");
             auto typd = reinterpret_cast<TYPIFY(CMD_SET_DIMMER)*>(evt.data);
-            if(swSwitch) swSwitch->setDimmer(*typd);
+            if(swSwitch) swSwitch->setIntensity(*typd);
             return;
         }
         default:{
