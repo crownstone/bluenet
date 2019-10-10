@@ -26,7 +26,9 @@ class SwitchAggregator : public EventListener {
 
     virtual void handleEvent(event_t& evt) override;
  
-    // ISwitch interface for dev
+    /**
+     * sets dimmer and relay to 0, disregarding all other state/intentions.
+     */
     void developerForceOff();
     
     private:
@@ -39,6 +41,6 @@ class SwitchAggregator : public EventListener {
     std::optional<SwSwitch> swSwitch;
 
     // the latest states requested by other parts of the system.
-    uint8_t behaviourState;
+    std::optional<uint8_t> behaviourState = {};
     std::optional<uint8_t> userOverrideState = {};
 };
