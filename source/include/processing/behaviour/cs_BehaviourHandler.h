@@ -30,7 +30,8 @@ class BehaviourHandler : public EventListener {
     /**
      * Acquires the current time and presence information. 
      * Checks the intended state by looping over the active behaviours
-     * and if necessary dispatch an event to communicate a state update.
+     * and if the intendedState differs from previousIntendedState
+     * dispatch an event to communicate a state update.
      */
     void update();
 
@@ -47,4 +48,6 @@ class BehaviourHandler : public EventListener {
     std::optional<uint8_t> computeIntendedState(
         Behaviour::time_t currenttime, 
         Behaviour::presence_data_t currentpresence);
+
+    std::optional<uint8_t> previousIntendedState = {};
 };

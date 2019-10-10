@@ -37,7 +37,12 @@ void BehaviourHandler::update(){
 
     auto intendedState = computeIntendedState(time, presence);
     if(intendedState){
-        // TODO(Arend 24-09-2019): send nextState to SwitchController
+        if(previousIntendedState == intendedState){
+            return;
+        }
+
+        previousIntendedState = intendedState;
+        
         uint8_t intendedValue = intendedState.value();
         event_t behaviourStateChange(
             CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE,
@@ -59,6 +64,7 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
             if (intendedValue){
                 if (b->value() != intendedValue.value()){
                     // found a conflicting behaviour
+                    // TODO(Arend): add more advance conflict resolution according to document.
                     return std::nullopt;
                 }
             } else {
@@ -68,7 +74,8 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
         }
     }
 
-    return intendedValue;
+    // reaching here means no conflict. An empty intendedValue should thus be resolved to 'off'
+    return intendedValue.value_or(0);
 }
 
 // void TestBehaviourHandler(uint32_t time, uint8_t presence){

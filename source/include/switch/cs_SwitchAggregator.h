@@ -52,7 +52,7 @@ class SwitchAggregator : public EventListener {
      * - no state change is made to swSwitch.
      * 
      * This method will clear the overrideState when it matches
-     * the behaviourState, unless 
+     * the behaviourState, unless the switch is locked.
      */
     void updateState();
 };

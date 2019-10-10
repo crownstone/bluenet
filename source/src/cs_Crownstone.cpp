@@ -562,42 +562,20 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			EventDispatcher::getInstance().addListener(&_behaviourStore);
 
 			// DEBUG
-			uint32_t h = 18;
-			uint32_t m = 22;
+			uint32_t h = 12;
+			uint32_t m = 30;
 			uint32_t s = 0;
 
-			Behaviour behaviour0(
-					TimeOfDay(h,m,s),
-					TimeOfDay(h,m,s+30),
-					0b10101010,
-					80
-				);
-
-			Behaviour behaviour1(
-					TimeOfDay(h,m+1,s),
-					TimeOfDay(h,m+1,s+30),
-					0b10101010,
-					100
-				);
-
-			LOGd("debugbehaviour0 from(%d:%d:%d)",behaviour0.from().h(),behaviour0.from().m(),behaviour0.from().s());
-			LOGd("debugbehaviour1 from(%d:%d:%d)",behaviour1.from().h(),behaviour1.from().m(),behaviour1.from().s());
-
-			_behaviourStore.saveBehaviour(behaviour0,0);
-			_behaviourStore.saveBehaviour(behaviour1,1);
-			
-			// event_t behaviourStoreUpdateEvent0(CS_TYPE::EVT_UPDATE_BEHAVIOUR,
-			// 	&behaviour0,
-			// 	TypeSize(CS_TYPE::EVT_UPDATE_BEHAVIOUR)
-			// 	);
-			// event_t behaviourStoreUpdateEvent1(CS_TYPE::EVT_UPDATE_BEHAVIOUR,
-			// 	&behaviour1,
-			// 	TypeSize(CS_TYPE::EVT_UPDATE_BEHAVIOUR)
-			// 	);
-
-			// behaviourStoreUpdateEvent0.dispatch();
-			// behaviourStoreUpdateEvent0.dispatch();
-			
+			for(auto i = 0; i < 10; i++){ // just add 10 behaviours
+				Behaviour behaviour(
+						TimeOfDay(h, m+i, s),
+						TimeOfDay(h, m+i, s+30),
+						0b10101010,
+						100-i
+					);
+				LOGd("debugbehaviour from(%d:%d:%d)",behaviour.from().h(),behaviour.from().m(),behaviour.from().s());
+				_behaviourStore.saveBehaviour(behaviour,i);
+			}
 
 			// END DEBUG
 
