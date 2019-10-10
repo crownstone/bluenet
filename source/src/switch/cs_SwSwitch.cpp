@@ -322,20 +322,6 @@ void SwSwitch::setAllowDimming(bool allowed) {
     }
 }
 
-void SwSwitch::toggle(){
-    if(!allowSwitching){
-        SWSWITCH_LOCKED_LOG();
-        return;
-    }
-
-    // TODO(Arend, 08-10-2019): toggle should be upgraded when twilight is implemented
-    if(currentState.state.relay == 1 || currentState.state.dimmer > 0){
-        setIntensity(0);
-    } else {
-        setIntensity(100);
-    }
-}
-
 void SwSwitch::setDimmer(uint8_t value){
     if(!allowSwitching){
         SWSWITCH_LOCKED_LOG();

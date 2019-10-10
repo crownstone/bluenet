@@ -24,6 +24,11 @@ class SwitchAggregator : public EventListener {
     
     void init(SwSwitch&& s); // claims ownership over s.
 
+    /**
+     * When swSwitch is locked, only CMD_SWITCH_LOCKED events will be handled.
+     * Else events may alter the intended states and subsequently trigger an 
+     * actual state change.
+     */
     virtual void handleEvent(event_t& evt) override;
  
     /**
@@ -47,12 +52,20 @@ class SwitchAggregator : public EventListener {
     /**
      * Checks the behaviourState and overrideState,
      * to set the swSwitch to the desired value:
-     * - when overrideState has a value, that value is used, else,
-     * - when behaviourState has a value, that value is used, else
-     * - no state change is made to swSwitch.
+     * - if swSwitch doesn't allow switching, nothing happens, else,
+     * - when overrideState has a value, swSwitch is set to that value, else,
+     * - when behaviourState has a value, swSwitch is set to that value, else,
+     * - nothing happens.
      * 
      * This method will clear the overrideState when it matches
      * the behaviourState, unless the switch is locked.
      */
     void updateState();
+
+
+    /**
+     * Triggers an updateState() call on all handled events and adjusts
+     * at least one of behaviourState or overrideState.
+     */
+    void handleStateIntentionEvents(event_t & evt);
 };

@@ -73,49 +73,78 @@ void SwitchAggregator::init(SwSwitch&& s){
 }
 
 void SwitchAggregator::updateState(){
-    if(overrideState){
-
+    if(!swSwitch || !swSwitch->isSwitchingAllowed()){
+        // shouldn't update overrideState when switch is locked.
+        return;
     }
+
+    // (swSwitch.has_value() is true from here)
+
+    if(overrideState){
+        swSwitch->setDimmer(overrideState.value());
+
+        if(behaviourState == overrideState){
+            // clear override on state match
+            overrideState = {};
+        }
+
+        return;
+    }
+
+    if(behaviourState){
+        swSwitch->setDimmer(behaviourState.value());
+    }
+
 }
 
 void SwitchAggregator::handleEvent(event_t& evt){
+    if(evt.type == CS_TYPE::CMD_SWITCH_LOCKED){
+        LOGd("SwitchAggregator::%s case CMD_SWITCH_LOCKED",__func__);
+        auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);
+        if(swSwitch) swSwitch->setAllowSwitching(*typd);
+
+        return;
+    }
+
+    if(swSwitch && !swSwitch->isSwitchingAllowed()){
+        return;
+    }
+
+    if(evt.type ==  CS_TYPE::CMD_DIMMING_ALLOWED){
+        LOGd("SwitchAggregator::%s case CMD_DIMMING_ALLOWED",__func__);
+        auto typd = reinterpret_cast<TYPIFY(CMD_DIMMING_ALLOWED)*>(evt.data);
+        if(swSwitch) swSwitch->setAllowDimming(*typd);
+
+        return;
+    }
+
+    handleStateIntentionEvents(evt);    
+}
+
+void SwitchAggregator::handleStateIntentionEvents(event_t& evt){
     switch(evt.type){
-        // ============== Switch Setting Events ==============
-
-        case CS_TYPE::CMD_DIMMING_ALLOWED: {
-            LOGd("SwitchAggregator::%s case CMD_DIMMING_ALLOWED",__func__);
-            auto typd = reinterpret_cast<TYPIFY(CMD_DIMMING_ALLOWED)*>(evt.data);
-            if(swSwitch) swSwitch->setAllowDimming(*typd);
-            break;
-        }
-        case CS_TYPE::CMD_SWITCH_LOCKED: {
-            LOGd("SwitchAggregator::%s case CMD_SWITCH_LOCKED",__func__);
-            auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);
-            if(swSwitch) swSwitch->setAllowSwitching(*typd);
-            break;
-        }
-
         // ============== overrideState Events ==============
         case CS_TYPE::CMD_SWITCH_ON:{
             LOGd("SwitchAggregator::%s case CMD_SWITCH_ON",__func__);
-            if(swSwitch) swSwitch->setIntensity(100);
+            overrideState = 100;
             break;
         }
         case CS_TYPE::CMD_SWITCH_OFF:{
             LOGd("SwitchAggregator::%s case CMD_SWITCH_OFF",__func__);
-            if(swSwitch) swSwitch->setIntensity(0);
+            overrideState = 0;
             break;
         }
         case CS_TYPE::CMD_SWITCH: {
             LOGd("SwitchAggregator::%s case CMD_SWITCH",__func__);
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;
             LOGd("packet intensity: %d", packet->switchCmd);
-            if(swSwitch) swSwitch->setIntensity(packet->switchCmd);
+            overrideState = packet->switchCmd;
 			break;
 		}
         case CS_TYPE::CMD_SWITCH_TOGGLE:{
             LOGd("SwitchAggregator::%s case CMD_SWITCH_TOGGLE",__func__);
-            if(swSwitch) swSwitch->toggle();
+            // TODO(Arend, 08-10-2019): toggle should be upgraded when twilight is implemented
+            overrideState = swSwitch->isOn() ? 0 : 100;
             break;
         }
 
@@ -128,21 +157,27 @@ void SwitchAggregator::handleEvent(event_t& evt){
         }
 
         // ============== 'Developer' Events ==============
+        // TODO(Arend): should these get a separate override state?
+        // they currently need to early return in order not to be overwritten
+        // by the updateState call (and any subsequent call of this handler)
         case CS_TYPE::CMD_SET_RELAY:{
             LOGd("CMD_SET_RELAY");
             auto typd = reinterpret_cast<TYPIFY(CMD_SET_RELAY)*>(evt.data);
             if(swSwitch) swSwitch->setRelay(*typd);
-            break;
+            return;
         }
         case CS_TYPE::CMD_SET_DIMMER:{
             LOGd("CMD_SET_DIMMER");
             auto typd = reinterpret_cast<TYPIFY(CMD_SET_DIMMER)*>(evt.data);
             if(swSwitch) swSwitch->setDimmer(*typd);
+            return;
         }
         default:{
-            break;
+            return;
         }
     }
+
+    updateState();
 }
 
 void SwitchAggregator::developerForceOff(){

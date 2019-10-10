@@ -118,11 +118,6 @@ class SwSwitch : public ISwitch, public EventListener {
     void setAllowSwitching(bool allowed); // TODO(Arend): this isn't implemented!
 
     /**
-     * Checks the current state and tries to set it to the opposite.
-     */
-    void toggle();
-
-    /**
      * This is the smarter version of setDimmer(value).
      * 
      * Checks if the dimmer is still okay and will set it to the 
@@ -172,4 +167,12 @@ class SwSwitch : public ISwitch, public EventListener {
      * Listens to Allow Dimming, and Lock events and error states
      */
     virtual void handleEvent(event_t& evt) override;
+
+    // Getters
+    bool isSwitchingAllowed() { return allowSwitching; }
+    bool isDimmingAllowed() { return allowSwitching; }
+    
+    uint8_t getIntensity() { return currentState.state.dimmer; }
+    bool isRelayOn() { return currentState.state.relay; }
+    bool isOn() { return currentState.asInt != 0; } // even dimming to 1% means 'on'
 };

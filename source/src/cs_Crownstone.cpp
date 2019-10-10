@@ -562,8 +562,8 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			EventDispatcher::getInstance().addListener(&_behaviourStore);
 
 			// DEBUG
-			uint32_t h = 12;
-			uint32_t m = 30;
+			uint32_t h = 14;
+			uint32_t m = 50;
 			uint32_t s = 0;
 
 			for(auto i = 0; i < 10; i++){ // just add 10 behaviours
