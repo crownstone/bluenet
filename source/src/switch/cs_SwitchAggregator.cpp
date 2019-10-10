@@ -11,8 +11,6 @@
 
 #include <optional>
 
-// NOTES:
-// bool switchcraftEnabled = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
 
 // =====================================================
 // ================== Old Owner logic ==================
@@ -74,31 +72,16 @@ void SwitchAggregator::init(SwSwitch&& s){
     EventDispatcher::getInstance().addListener(this);
 }
 
+void SwitchAggregator::updateState(){
+    if(overrideState){
+
+    }
+}
+
 void SwitchAggregator::handleEvent(event_t& evt){
     switch(evt.type){
-        // ============== 'User/App' Events ==============
-        case CS_TYPE::CMD_SWITCH_ON:{
-            LOGd("SwitchAggregator::%s case CMD_SWITCH_ON",__func__);
-            if(swSwitch) swSwitch->setIntensity(100);
-            break;
-        }
-        case CS_TYPE::CMD_SWITCH_OFF:{
-            LOGd("SwitchAggregator::%s case CMD_SWITCH_OFF",__func__);
-            if(swSwitch) swSwitch->setIntensity(0);
-            break;
-        }
-        case CS_TYPE::CMD_SWITCH_TOGGLE:{
-            LOGd("SwitchAggregator::%s case CMD_SWITCH_TOGGLE",__func__);
-            if(swSwitch) swSwitch->toggle();
-            break;
-        }
-        case CS_TYPE::CMD_SWITCH: {
-            LOGd("SwitchAggregator::%s case CMD_SWITCH",__func__);
-			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;
-            LOGd("packet intensity: %d", packet->switchCmd);
-            if(swSwitch) swSwitch->setIntensity(packet->switchCmd);
-			break;
-		}
+        // ============== Switch Setting Events ==============
+
         case CS_TYPE::CMD_DIMMING_ALLOWED: {
             LOGd("SwitchAggregator::%s case CMD_DIMMING_ALLOWED",__func__);
             auto typd = reinterpret_cast<TYPIFY(CMD_DIMMING_ALLOWED)*>(evt.data);
@@ -112,14 +95,38 @@ void SwitchAggregator::handleEvent(event_t& evt){
             break;
         }
 
-        // ============== 'Behaviour' Events ==============
+        // ============== overrideState Events ==============
+        case CS_TYPE::CMD_SWITCH_ON:{
+            LOGd("SwitchAggregator::%s case CMD_SWITCH_ON",__func__);
+            if(swSwitch) swSwitch->setIntensity(100);
+            break;
+        }
+        case CS_TYPE::CMD_SWITCH_OFF:{
+            LOGd("SwitchAggregator::%s case CMD_SWITCH_OFF",__func__);
+            if(swSwitch) swSwitch->setIntensity(0);
+            break;
+        }
+        case CS_TYPE::CMD_SWITCH: {
+            LOGd("SwitchAggregator::%s case CMD_SWITCH",__func__);
+			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;
+            LOGd("packet intensity: %d", packet->switchCmd);
+            if(swSwitch) swSwitch->setIntensity(packet->switchCmd);
+			break;
+		}
+        case CS_TYPE::CMD_SWITCH_TOGGLE:{
+            LOGd("SwitchAggregator::%s case CMD_SWITCH_TOGGLE",__func__);
+            if(swSwitch) swSwitch->toggle();
+            break;
+        }
+
+        // ============== behaviourState Events ==============
         case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE : {
             auto typd = reinterpret_cast<TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE)*>(evt.data);
             LOGd("SwitchAggregator::%s case EVT_BEHAVIOUR_SWITCH_STATE value: %d",__func__, *typd);
             behaviourState = *typd;
             break;
         }
-        
+
         // ============== 'Developer' Events ==============
         case CS_TYPE::CMD_SET_RELAY:{
             LOGd("CMD_SET_RELAY");
