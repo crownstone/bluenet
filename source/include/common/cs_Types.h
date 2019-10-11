@@ -218,6 +218,7 @@ enum class CS_TYPE: uint16_t {
 //	EVT_STORAGE_WRITE,                                // Sent when an item is going to be written to storage.
 //	EVT_STORAGE_ERASE,                                // Sent when a flash page is going to be erased.
 	EVT_ADC_RESTARTED,                                // Sent when ADC has been restarted.
+	EVT_ZERO_CROSSING_TIME_OFFSET,                    // Sent to tell the time offset (μs) of the last zero crossing interrupt. A positive value means it triggered after the actual zero crossing.
 	EVT_STATE_EXTERNAL_STONE                          // Sent when the state of another stone has been received. -- Payload is state_external_stone_t
 };
 
@@ -327,6 +328,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
+	case CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET:
 	case CS_TYPE::CMD_SEND_MESH_MSG:
 	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE:
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH:
@@ -497,6 +499,7 @@ typedef   int8_t TYPIFY(STATE_TEMPERATURE);
 typedef uint32_t TYPIFY(STATE_TIME);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
+typedef  int32_t TYPIFY(EVT_ZERO_CROSSING_TIME_OFFSET);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
 typedef  adv_background_payload_t TYPIFY(EVT_ADV_BACKGROUND_PARSED);
 typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
@@ -813,6 +816,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(EVT_SWITCHCRAFT_ENABLED));
 	case CS_TYPE::EVT_ADC_RESTARTED:
 		return 0;
+	case CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET:
+		return sizeof(TYPIFY(EVT_ZERO_CROSSING_TIME_OFFSET));
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
 		return sizeof(TYPIFY(CMD_ENABLE_LOG_POWER));
 	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
@@ -917,6 +922,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER: return "CONFIG_VOLTAGE_MULTIPLIER";
 	case CS_TYPE::CONFIG_VOLTAGE_ADC_ZERO: return "CONFIG_VOLTAGE_ADC_ZERO";
 	case CS_TYPE::EVT_ADC_RESTARTED: return "EVT_ADC_RESTARTED";
+	case CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET: return "EVT_ZERO_CROSSING_TIME_OFFSET";
 	case CS_TYPE::EVT_ADV_BACKGROUND: return "EVT_ADV_BACKGROUND";
 	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: return "EVT_ADV_BACKGROUND_PARSED";
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: return "EVT_ADVERTISEMENT_UPDATED";
@@ -1103,6 +1109,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
+	case CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET:
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
 	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
 	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
@@ -1240,6 +1247,7 @@ constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
+	case CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET:
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
 	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
 	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
@@ -1543,6 +1551,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
+	case CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET:
 		return ERR_NOT_FOUND;
 	}
 	return ERR_NOT_FOUND;
@@ -1678,6 +1687,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
+	case CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET:
 		return NO_ONE;
 	}
 	return NO_ONE;
@@ -1814,6 +1824,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
+	case CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET:
 		return NO_ONE;
 	}
 	return NO_ONE;
