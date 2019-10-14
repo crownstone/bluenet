@@ -92,6 +92,11 @@ public:
 
 protected:
 
+	/**
+	 * Start the 32 MHz external oscillator
+	 */
+	void startHFClock();
+
 	/** initialize drivers (stack, timer, storage, pwm, etc), loads settings from storage.
 	 */
 	void initDrivers(uint16_t step);
