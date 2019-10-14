@@ -129,6 +129,25 @@ Crownstone::Crownstone(boards_config_t& board) :
 };
 
 /**
+ * Start the high frequency clock which uses the external 32 MHz crystal oscillator. This provides very precise timing
+ * required for the PWM driver to synchronize with the mains supply.
+ * An alternative is to use the 32.768 kHz low frequency crystal oscillator for the PWM driver, but the SoftDevice's radio
+ * operations periodically turn on the 32 MHz crystal oscillator anyway
+ */
+void Crownstone::startHFClock() {
+	// Reference: https://devzone.nordicsemi.com/f/nordic-q-a/6394/use-external-32mhz-crystal
+
+	// Start the external high frequency crystal
+	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
+	NRF_CLOCK->TASKS_HFCLKSTART = 1;
+
+	// Wait for the external oscillator to start up
+	while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {}
+
+	LOGd("HF 32 MHz crystal clock started.");
+}
+
+/**
  * Initialize Crownstone firmware. First drivers are initialized (log modules, storage modules, ADC conversion,
  * timers). Then everything is configured independent of the mode (everything that is common to whatever mode the
  * Crownstone runs on). A callback to the local staticTick function for a timer is set up. Then the mode of
@@ -167,6 +186,7 @@ void Crownstone::init(uint16_t step) {
 
 		_stack->initServices();
 		LOG_FLUSH();
+
 		break;
 	}
 	}
@@ -996,6 +1016,7 @@ int main() {
 	printNfcPins();
 	LOG_FLUSH();
 
+
 //	// Make a "clicker"
 //	nrf_delay_ms(1000);
 //	nrf_gpio_pin_set(board.pinGpioRelayOn);
@@ -1015,6 +1036,9 @@ int main() {
 	Crownstone crownstone(board);
 
 	overwrite_hardware_version();
+
+	//! Set the clock source to the external 32 MHz crystal. Needed especially for the PWM driver's accurate timing
+	crownstone.startHFClock();
 
 	// init drivers, configure(), create services and chars,
 	crownstone.init(0);

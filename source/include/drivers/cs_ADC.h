@@ -274,6 +274,12 @@ private:
 	// True when next buffer is the first after start.
 	bool _firstBuffer;
 
+	// True when next limit interrupt is the first after start.
+	bool _firstLimitInterrupt;
+
+	// True when last limit interrupt was set to trigger above threshold.
+	bool _limitUp;
+
 	// State of this class.
 	adc_state_t _state;
 
@@ -318,6 +324,10 @@ private:
 	// **Used in interrupt!**
 	uint32_t _lastZeroCrossUpTime;
 
+	// Store the timestamp of the last END interrupt.
+	// **Used in interrupt!**
+	uint32_t _lastEndTime;
+
 	// Store the zero value used to detect zero crossings.
 	// **Used in interrupt!**
 	int32_t _zeroValue;
@@ -326,13 +336,13 @@ private:
 	// Function to initialize the adc channels.
 	cs_adc_error_t initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config);
 
-	// Set the adc limit such that it triggers when going above zero
+	// Set the ADC limit such that it triggers when going above zero.
 	void setLimitUp();
 
-	// Set the adc limit such that it triggers when going below zero
+	// Set the ADC limit such that it triggers when going below zero.
 	void setLimitDown();
 
-	// Initialize buffer queue
+	// Initialize buffer queue.
 	void initQueue();
 
 	// Function that puts a buffer in queue to be populated with adc values.
@@ -343,6 +353,10 @@ private:
 
 	// Function to stop the timeout timer.
 	void stopTimeout();
+
+	// Calculate how much time in μs after the actual zero crossing, the last zero crossing interrupt was triggered.
+	// Returns -1 when it couldn't calculate the offset.
+	int calculateZeroCrossingTimeOffset(cs_adc_buffer_id_t bufIndex);
 
 	// Helper function that returns the adc pin number, given the AIN number.
 	nrf_saadc_input_t getAdcPin(cs_adc_pin_id_t pinNum);
