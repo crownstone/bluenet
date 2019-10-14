@@ -152,14 +152,24 @@ public:
 	cs_ret_code_t garbageCollect();
 
 	/**
-	 * Handle Crownstone events
+	 * Handle Crownstone events.
 	 */
 	void handleEvent(event_t &) {};
 
 	/**
-	 * Handle FDS events
+	 * Handle FDS events.
 	 */
 	void handleFileStorageEvent(fds_evt_t const * p_fds_evt);
+
+	/**
+	 * Handle FDS SOC event NRF_EVT_FLASH_OPERATION_SUCCESS.
+	 */
+	void handleFlashOperationSuccess();
+
+	/**
+	 * Handle FDS SOC event NRF_EVT_FLASH_OPERATION_ERROR.
+	 */
+	void handleFlashOperationError();
 
 private:
 	Storage();
@@ -175,6 +185,31 @@ private:
 
 	bool _removingFile = false;
 	std::vector<uint16_t> _busy_record_keys;
+
+	/**
+	 * Next page to erase.
+	 *
+	 * Used by eraseAllPages().
+	 */
+	uint32_t _erasePage = 0;
+	/**
+	 * Page that should _not_ be erased.
+	 *
+	 * Used by eraseAllPages().
+	 */
+	uint32_t _eraseEndPage = 0;
+
+	/**
+	 * Erase all flash pages used by FDS.
+	 *
+	 * This should only be used to recover from a failing init.
+	 */
+	void eraseAllPages();
+
+	/**
+	 * Erase next page, started via eraseAllPages().
+	 */
+	void eraseNextPage();
 
 	// Use before ftok
 	void initSearch();
