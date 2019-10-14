@@ -522,6 +522,11 @@ void Storage::eraseAllPages() {
 	uint32_t startAddr = endAddr - flashSizeBytes;
 	uint32_t startPage = startAddr / pageSize;
 	uint32_t endPage = endAddr / pageSize;
+	if (startPage > endPage) {
+		APP_ERROR_CHECK(NRF_ERROR_INVALID_ADDR);
+	}
+
+	// Check if pages are already erased.
 	uint32_t* startAddrPointer = (uint32_t*)startAddr;
 	bool isErased = true;
 	for (uint32_t i = 0; i < flashSizeWords; ++i) {
