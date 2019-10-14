@@ -357,6 +357,8 @@ bool PWM::isInterruptMissed(){
 
 void PWM::onZeroCrossing() {
 
+	// TODO: Handle "jumps" in the zero crossing error values brought about by unforeseen delays in the ADC
+
 	// Capture timer value as soon as possible.
 	nrf_timer_task_trigger(CS_PWM_TIMER, ZERO_CROSSING_CAPTURE_TASK);
 
@@ -424,6 +426,154 @@ int32_t PWM::convert_us_to_ticks(int32_t time_us){
 	return one_us_in_ticks*time_us;
 }
 
+/**
+ * Sync the mains frequency perceived by the PWM driver coarsely to be close to the actual mains supply frequency
+ */
+void PWM::performCoarseFrequencySyncing(){
+
+	if (_zeroCrossingCounter < DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE) {
+		return;
+	}
+	_zeroCrossingCounter = 0;
+
+	// Correct error for wrap around.
+	int32_t maxTickVal = _freqSyncedMaxTickVal;
+
+	// https://en.wikipedia.org/wiki/Repeated_median_regression
+	// This way we only need to calculate the median of (DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC - 1) values,
+	// but have to do that DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC times.
+	int k = 0;
+	for (int i=0; i<DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE; ++i) {
+		int n = 0;
+		for (int j=0; j<DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE; ++j) {
+			if (i == j) {
+				continue;
+			}
+			int32_t dy = _offsets[j] - _offsets[i];
+			wrapAround(dy, maxTickVal);
+			int32_t slope = dy / (j - i);
+			_offsetSlopes[n] = slope;
+			++n;
+		}
+		_offsetSlopes2[k] = opt_med6(_offsetSlopes);
+		++k;
+	}
+	_offsetSlopes3[_numSyncs] = opt_med7(_offsetSlopes2);
+
+	++_numSyncs;
+	if (_numSyncs < DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC) {
+		return;
+	}
+	_numSyncs = 0;
+	int32_t medianSlope = medianSlopeMedian(_offsetSlopes3);
+
+
+	// cs_write("slope=%i \r\n", medianSlope);
+
+	// Every full cycle (~20ms), the offset increases by slope.
+	// So the maxTickVal (half cycle, ~10ms) should be increased by half the slope.
+	// BE CAREFUL: Changing the `_adjustedMaxTickVal` variable means that the timer compare value will change
+	_adjustedMaxTickVal += medianSlope / 2;
+
+	// Make sure the minimum max ticks > 0.99 * _maxTickVal, else dimming at 99% won't work anymore.
+	uint32_t minMaxTickVal = _maxTickVal * 99 / 100 + 1;
+	if (_adjustedMaxTickVal < minMaxTickVal) {
+		_adjustedMaxTickVal = minMaxTickVal;
+	}
+
+	// Store frequency synchronized max ticks.
+	_freqSyncedMaxTickVal = _adjustedMaxTickVal;
+
+	// Done with frequency synchronization.
+	_syncFrequency = false;
+
+	// cs_write("slope=%i ticks=%u \r\n", medianSlope, _adjustedMaxTickVal);
+
+	// Set the new period time at the end of the current period.
+	enableInterrupt();
+}
+
+/*
+ * This method is called based on the assumption that the PWM driver has a coarse estimate of the mains supply
+ * frequency and it only needs to apply minor corrections to the switch timing to be within a reasonable sync
+ * threshold of the zero crossings. It is essentially an estimation of the next zero crossing time based on:
+ * (i) The known mains supply frequency, and (ii) a history of errors between predicted and actual zero crossing values
+ */
+void PWM::performPWMTimerCorrections(){
+
+	int32_t errTicks =  _offsets[_zeroCrossingCounter];
+	int32_t maxTickVal = _adjustedMaxTickVal;
+
+	// Integrate error, but limit the integrated error (to prevent overshoot).
+	// Careful that this doesn't overflow.
+	_zeroCrossOffsetIntegral += errTicks;
+
+	if (_zeroCrossingCounter < DIMMER_NUM_CROSSINGS_FOR_START_SYNC) {
+		return;
+	}
+
+	_zeroCrossingCounter = 0;
+
+	// Bound integral
+	int32_t integralAbsMax = maxTickVal * DIMMER_NUM_CROSSINGS_FOR_START_SYNC * 100;
+	if (_zeroCrossOffsetIntegral > integralAbsMax) {
+		_zeroCrossOffsetIntegral = integralAbsMax;
+	}
+	if (_zeroCrossOffsetIntegral < -integralAbsMax) {
+		_zeroCrossOffsetIntegral = -integralAbsMax;
+	}
+
+	int32_t medianError = errorMedian(_offsets);
+
+	// Proportional part
+	int32_t deltaP = medianError * 1800 / maxTickVal;
+
+	// Add an integral part to the delta.
+	int32_t deltaI = _zeroCrossOffsetIntegral * 2 / DIMMER_NUM_CROSSINGS_FOR_START_SYNC / maxTickVal;
+
+	int32_t delta = deltaP + deltaI;
+
+	// Limit the delta.
+	int32_t limitDelta = maxTickVal / 200;
+	if (delta > limitDelta) {
+		// cs_write("LIMIT, U\r\n");
+		delta = limitDelta;
+	}
+	if (delta < -limitDelta) {
+		// cs_write("LIMIT, L\r\n");
+		delta = -limitDelta;
+	}
+
+	_adjustedMaxTickVal = _freqSyncedMaxTickVal + delta;
+
+	// Make sure the minimum max ticks > 0.99 * _maxTickVal, else dimming at 99% won't work anymore.
+	uint32_t minMaxTickVal = _maxTickVal * 99 / 100 + 1;
+	if (_adjustedMaxTickVal < minMaxTickVal) {
+		_adjustedMaxTickVal = minMaxTickVal;
+	}
+
+	++_numSyncs;
+
+	if (_numSyncs == DIMMER_NUM_START_SYNCS_BETWEEN_FREQ_SYNC) {
+		_zeroCrossOffsetIntegral = 0;
+		_numSyncs = 0;
+
+		// TODO: Evaluate whether just setting this flag to true is OK,
+		// or if the synced frequency value needs to be reset to the nominal frequency value
+		_syncFrequency = true;
+	}
+
+	// cs_write("medErr=%i errInt=%i P=%i I=%i ticks=%u \r\n",  medianError, _zeroCrossOffsetIntegral, deltaP, deltaI, _adjustedMaxTickVal);
+
+	// Set the new period time at the end of the current period.
+	enableInterrupt();
+}
+
+/**
+ * This callback is invoked via an event raised by the ADC driver when it is done sampling. At this point, we know
+ * reasonably accurately the time of the last zero crossing interrupt and hence we can perform calculations to predict
+ * the time at which the next zero crossing would occur.
+ */
 void PWM::onZeroCrossingTimeOffset(int32_t offset) {
 
 	// No point in compensating for an offset that does not exist in the records.
@@ -444,156 +594,18 @@ void PWM::onZeroCrossingTimeOffset(int32_t offset) {
 	}
 
 	if (_syncFrequency) {
-		if (_zeroCrossingCounter < DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE) {
-			return;
-		}
-		_zeroCrossingCounter = 0;
-
-		// Correct error for wrap around.
-		int32_t maxTickVal = _freqSyncedMaxTickVal;
-
-		// https://en.wikipedia.org/wiki/Repeated_median_regression
-        // This way we only need to calculate the median of (DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC - 1) values,
-		// but have to do that DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC times.
-		int k = 0;
-		for (int i=0; i<DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE; ++i) {
-			int n = 0;
-			for (int j=0; j<DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE; ++j) {
-				if (i == j) {
-					continue;
-				}
-				int32_t dy = _offsets[j] - _offsets[i];
-				wrapAround(dy, maxTickVal);
-				int32_t slope = dy / (j - i);
-				_offsetSlopes[n] = slope;
-				++n;
-			}
-			_offsetSlopes2[k] = opt_med6(_offsetSlopes);
-			++k;
-		}
-		_offsetSlopes3[_numSyncs] = opt_med7(_offsetSlopes2);
-		++_numSyncs;
-
-		/*
-		cs_write("offsets:");
-		for (int i=0; i<DIMMER_NUM_CROSSINGS_PER_SLOPE_ESTIMATE; ++i) {
-			cs_write(" %i", _offsets[i]);
-		}
-		*/
-
-		// cs_write("\r\n");
-		// cs_write("slope=%i\r\n", _offsetSlopes3[_numSyncs]);
-
-
-		if (_numSyncs < DIMMER_NUM_SLOPE_ESTIMATES_FOR_FREQUENCY_SYNC) {
-			return;
-		}
-		_numSyncs = 0;
-		int32_t medianSlope = medianSlopeMedian(_offsetSlopes3);
-
-
-		// cs_write("slope=%i \r\n", medianSlope);
-
-		// Every full cycle (~20ms), the offset increases by slope.
-		// So the maxTickVal (half cycle, ~10ms) should be increased by half the slope.
-		// BE CAREFUL: Changing the `_adjustedMaxTickVal` variable means that the timer compare value will change
-		_adjustedMaxTickVal += medianSlope / 2;
-
-		// Make sure the minimum max ticks > 0.99 * _maxTickVal, else dimming at 99% won't work anymore.
-		uint32_t minMaxTickVal = _maxTickVal * 99 / 100 + 1;
-		if (_adjustedMaxTickVal < minMaxTickVal) {
-			_adjustedMaxTickVal = minMaxTickVal;
-		}
-
-		// Store frequency synchronized max ticks.
-		_freqSyncedMaxTickVal = _adjustedMaxTickVal;
-
-		// Done with frequency synchronization.
-		_syncFrequency = false;
-
-		// cs_write("slope=%i ticks=%u \r\n", medianSlope, _adjustedMaxTickVal);
-
-		// Set the new period time at the end of the current period.
-		enableInterrupt();
-
-		return;
+		// Coarse sync to the mains supply frequency
+		performCoarseFrequencySyncing();
 	}
-
-	if (!_syncFrequency){
-
-		int32_t errTicks =  _offsets[_zeroCrossingCounter];
-		int32_t maxTickVal = _adjustedMaxTickVal;
-
-		// Integrate error, but limit the integrated error (to prevent overshoot).
-		// Careful that this doesn't overflow.
-		_zeroCrossOffsetIntegral += errTicks;
-
-		if (_zeroCrossingCounter < DIMMER_NUM_CROSSINGS_FOR_START_SYNC) {
-			return;
-		}
-
-		_zeroCrossingCounter = 0;
-
-		// Bound integral
-		int32_t integralAbsMax = maxTickVal * DIMMER_NUM_CROSSINGS_FOR_START_SYNC * 100;
-		if (_zeroCrossOffsetIntegral > integralAbsMax) {
-			_zeroCrossOffsetIntegral = integralAbsMax;
-		}
-		if (_zeroCrossOffsetIntegral < -integralAbsMax) {
-			_zeroCrossOffsetIntegral = -integralAbsMax;
-		}
-
-		int32_t medianError = errorMedian(_offsets);
-
-		// TODO: Use this accumulated error to sync frequency instead of the freerunning mechanism
-		// _accumulatedError += medianError;
-
-		// Proportional part
-		int32_t deltaP = medianError * 1800 / maxTickVal;
-
-		// Add an integral part to the delta.
-		int32_t deltaI = _zeroCrossOffsetIntegral * 2 / DIMMER_NUM_CROSSINGS_FOR_START_SYNC / maxTickVal;
-
-		int32_t delta = deltaP + deltaI;
-
-		// Limit the delta.
-		int32_t limitDelta = maxTickVal / 200;
-		if (delta > limitDelta) {
-			cs_write("LIMIT, U\r\n");
-			delta = limitDelta;
-		}
-		if (delta < -limitDelta) {
-			cs_write("LIMIT, L\r\n");
-			delta = -limitDelta;
-		}
-
-		_adjustedMaxTickVal = _freqSyncedMaxTickVal + delta;
-
-		// Make sure the minimum max ticks > 0.99 * _maxTickVal, else dimming at 99% won't work anymore.
-		uint32_t minMaxTickVal = _maxTickVal * 99 / 100 + 1;
-		if (_adjustedMaxTickVal < minMaxTickVal) {
-			_adjustedMaxTickVal = minMaxTickVal;
-		}
-
-		++_numSyncs;
-
-		if (_numSyncs == DIMMER_NUM_START_SYNCS_BETWEEN_FREQ_SYNC) {
-			_zeroCrossOffsetIntegral = 0;
-			_numSyncs = 0;
-
-			// TODO: Evaluate whether just setting this flag to true is OK,
-			// or if the synced frequency value needs to be reset to the nominal frequency value
-			_syncFrequency = true;
-		}
-
-		// cs_write("medErr=%i errInt=%i P=%i I=%i ticks=%u \r\n",  medianError, _zeroCrossOffsetIntegral, deltaP, deltaI, _adjustedMaxTickVal);
-
-		// Set the new period time at the end of the current period.
-		enableInterrupt();
+	else {
+		// Finer adjustments to the PWM zero crossing prediction
+		performPWMTimerCorrections();
 	}
 }
 
-
+/*
+ * The PWM driver expects events from the ADC driver for performing zero crossing offset calculations
+ */
 void PWM::handleEvent(event_t & event) {
 	switch (event.type) {
 	case (CS_TYPE::EVT_ZERO_CROSSING_TIME_OFFSET) : {

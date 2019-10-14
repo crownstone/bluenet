@@ -240,6 +240,12 @@ private:
 	//! Convert time from microseconds to ticks based on the timer's clock frequency
 	int32_t convert_us_to_ticks(int32_t time_us);
 
+	//! Get the PWM driver's synced frequency value to be as close as possible to the mains supply frequency value
+	void performCoarseFrequencySyncing();
+
+	//! Make minor corrections (i.e. predict next zero crossing values) once every few zero crossings
+	void performPWMTimerCorrections();
+
 	//! Function to be called when the offset (in μs) of the previous zero crossing was calculated.
 	void onZeroCrossingTimeOffset(int32_t offset);
 
