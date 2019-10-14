@@ -81,17 +81,28 @@ void SwitchAggregator::updateState(){
     // (swSwitch.has_value() is true from here)
 
     if(overrideState){
+        LOGd("updateState: set to overrideState value");
         swSwitch->setDimmer(overrideState.value());
 
-        if(behaviourState == overrideState){
-            // clear override on state match
-            overrideState = {};
+        if(behaviourState){
+            bool behaviourStateIsOn = behaviourState.value() != 0;
+            bool overrideStateIsOn = overrideState.value() != 0;
+
+            // note: if this check turns out to be too crude, add a check if 
+            // the absolute difference between the difference in intensity is not
+            // too big.
+            if(behaviourStateIsOn == overrideStateIsOn){
+                // clear override on state match
+                LOGd("State match, resetting override");
+                overrideState = {};
+            }
         }
 
         return;
     }
 
     if(behaviourState){
+        LOGd("updateState: set to behaviourState value");
         swSwitch->setDimmer(behaviourState.value());
     }
 
@@ -114,6 +125,8 @@ void SwitchAggregator::handleEvent(event_t& evt){
         LOGd("SwitchAggregator::%s case CMD_DIMMING_ALLOWED",__func__);
         auto typd = reinterpret_cast<TYPIFY(CMD_DIMMING_ALLOWED)*>(evt.data);
         if(swSwitch) swSwitch->setAllowDimming(*typd);
+
+        // Todo: if user adjust allow dimming, do we expect a recomputation of the state?
 
         return;
     }

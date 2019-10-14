@@ -563,7 +563,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 
 			// DEBUG
 			uint32_t h = 14;
-			uint32_t m = 50;
+			uint32_t m = 15;
 			uint32_t s = 0;
 
 			for(auto i = 0; i < 10; i++){ // just add 10 behaviours
@@ -571,7 +571,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 						TimeOfDay(h, m+i, s),
 						TimeOfDay(h, m+i, s+30),
 						0b10101010,
-						100-i
+						100 - (i%2 ? 50 : 0)
 					);
 				LOGd("debugbehaviour from(%d:%d:%d)",behaviour.from().h(),behaviour.from().m(),behaviour.from().s());
 				_behaviourStore.saveBehaviour(behaviour,i);
