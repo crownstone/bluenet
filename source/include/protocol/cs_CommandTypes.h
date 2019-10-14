@@ -42,7 +42,9 @@ enum CommandHandlerTypes {
 	CTRL_CMD_ENABLE_SWITCHCRAFT          = 32,    //! 0x20
 	CTRL_CMD_UART_MSG                    = 33,    //! 0x21
 	CTRL_CMD_UART_ENABLE                 = 34,    //! 0x22
-	CTRL_CMD_MULTI_SWITCH                = 35,
+	CTRL_CMD_MULTI_SWITCH                = 35,    //! 0x23
+
+	CTRL_CMD_SET_BEHAVIOUR               = 36,     //! 0x24
 
 	CTRL_CMD_UNKNOWN                     = 0xFF
 };

@@ -408,6 +408,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | B | S
 32 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
 33 | UART message | payload | Print the payload to UART. | x
 34 | UART enable | uint 8 | Set UART enabled, 0 = none, 1 = RX only, 3 = TX and RX | x
+36 | Set Behaviour | [Set Behaviour packet](#set_behaviour_packet) | Updates a specific Behaviour entry | x | x
 
 
 <a name="setup_packet"></a>
@@ -430,6 +431,11 @@ uint 8[] | Mesh net key  | 16 | 16 byte key used to encrypt/decrypt relays of me
 uint 8[] | iBeacon UUID | 16 | The iBeacon UUID. Should be the same for each Crownstone in the sphere.
 uint 16 | iBeacon major | 2 | The iBeacon major. Together with the minor, should be unique per sphere.
 uint 16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should be unique per sphere.
+
+<a name="set_behaviour_packet"></a>
+#### Set Behaviour Payload
+
+**TODO TODO TODO TODO**
 
 
 <a name="cmd_keep_alive_payload"></a>
