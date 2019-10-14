@@ -49,6 +49,10 @@ typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, c
  * Some operations will block other operations. For example, you can't write a record while performing garbage
  * collection. You can't write a record while it's already being written. This is what the "busy" functions are for.
  * Each type can be set busy multiple times, for example in case multiple records of the same type are being deleted.
+ *
+ * FDS internally uses events NRF_EVT_FLASH_OPERATION_SUCCESS and NRF_EVT_FLASH_OPERATION_ERROR.
+ * These events don't give any context of the operation, so it is not adviced to use FDS together with something else
+ * that writes to flash (like Flash Manager).
  */
 class Storage : public EventListener {
 public:
