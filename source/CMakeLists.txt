@@ -617,6 +617,11 @@ ELSE()
 		MESSAGE(FATAL_ERROR "No source code files found. Please add something")
 	ELSE()
 
+		# Get firmware and bootloader version
+		include(${DEFAULT_MODULES_PATH}/get_versions.cmake)
+		get_version_info("${WORKSPACE_DIR}/source" FIRMWARE_VERSION FIRMWARE_DFU_VERSION FIRMWARE_RC_VERSION)
+		get_version_info("${WORKSPACE_DIR}/source/bootloader" BOOTLOADER_VERSION BOOTLOADER_DFU_VERSION BOOTLOADER_RC_VERSION)
+		
 		IF(SERIAL_NUM) 
 			SET(SERIAL_NUM_SWITCH "--snr")
   			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
@@ -643,17 +648,17 @@ ELSE()
 
 		target_include_directories(${PROJECT_NAME} PRIVATE "include/third/nrf")
 
-		# This does lead to a cmake reeconfigure when the file changes... However, nothing else gets rebuild after
+		# This does lead to a cmake reconfigure when the file changes... However, nothing else gets rebuild after
 		# the reconfiguration
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
 		IF(EXISTS  ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
 			set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
 		ENDIF()
+		
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/source/VERSION)
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/source/bootloader/VERSION)
 
-		#SET(INCLUDE_ONLY_SECTIONS "-j .text -j .data -j .sdh_soc_observers -j .sdh_ble_observers -j .sdh_state_observers -j .sdh_stack_observers -j .sdh_req_observers -j .nrf_balloc")
 		SET(INCLUDE_ONLY_SECTIONS "")
-	
-		#		add_subdirectory(bootloader)
 
 		# https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
 		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.bin
@@ -764,6 +769,19 @@ ELSE()
 			COMMENT "View documentation"
 			DEPENDS generate_documentation
 			)
+			
+		# Create a new version, create new release directory
+		# Copy CMakeBuild.config.relesae.default.release to this directory
+		# Check fields (e.g. compare with CMakeBuild.config.default and see if fields are missing)
+		# Check if we are on the master branch
+		# Check if we are on the latest public commit
+		# Check if we have non-committed changes
+		# Check if git version does not exist
+		# Create git commit with this release version
+		ADD_CUSTOM_TARGET(create_git_release
+			COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release.cmake
+			COMMENT "Create git release"
+			)
 		
 		ADD_CUSTOM_TARGET(read_bootloader_address
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x10001014 ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
@@ -795,11 +813,6 @@ ELSE()
 			COMMAND nrfjprog -f nrf52 --memwr ${HARDWARE_BOARD_ADDRESS} --val ${LOAD_BOARD_HARDWARE_VERSION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} 
 			COMMENT "Flashes board version to remote target board"
 			)
-		
-		set(FIRMWARE_VERSION "")
-		set(BOOTLOADER_VERSION "")
-		include(${DEFAULT_MODULES_PATH}/get_versions.cmake)
-		get_versions("${WORKSPACE_DIR}/source" FIRMWARE_VERSION BOOTLOADER_VERSION)
 		
 		ADD_CUSTOM_TARGET(build_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
