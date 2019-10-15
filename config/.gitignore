@@ -5,3 +5,6 @@
 !.gitignore
 !default/
 !default/*
+
+# Oops, no, not again, also ignroe overwrites
+**/CMakeBuild.overwrite.config
