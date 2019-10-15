@@ -29,6 +29,7 @@ SET(GIT_BRANCH                               "unset"       CACHE STRING "Current
 SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
+SET(CONFIG_DIR                               "config"      CACHE STRING "The config main directory")
 SET(BOARD_TARGET                             "unset"       CACHE STRING "The board target")
 SET(BOOTLOADER_START_ADDRESS                 "unset"       CACHE STRING "Start address of bootloader")
 SET(BOOTLOADER_LENGTH                        "unset"       CACHE STRING "Size of bootloader")
@@ -363,7 +364,7 @@ ENDIF()
 MESSAGE(STATUS "bootloader: Target ${BOARD_TARGET}")
 
 SET_SOURCE_FILES_PROPERTIES(${BOOTLOADER_SOURCE_FILES}
-	PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
+	PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config
 )
 	
 SET(FILE_MEMORY_LAYOUT "-Tsecure_bootloader_gcc_nrf52.ld")
