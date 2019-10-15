@@ -44,21 +44,15 @@ cs_ret_code_t Storage::init() {
 		return getErrorCode(fds_ret_code);
 	}
 
-
 	LOGStorageDebug("fds_init");
 	fds_ret_code = fds_init();
 	if (fds_ret_code != FDS_SUCCESS) {
 		LOGe("Init FDS failed (err=%i)", fds_ret_code);
+		eraseAllPages();
 		return getErrorCode(fds_ret_code);
 	}
-//	LOGd("Storage init done (wait for FDS_EVT_INIT)");
 
-	/*
-	while (!_initialized)
-	{
-		(void) sd_app_evt_wait();
-	}*/
-
+	LOGi("Storage init success, wait for event.");
 	return getErrorCode(fds_ret_code);
 }
 
@@ -499,6 +493,8 @@ void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 		}
 		else {
 			LOGe("Failed to init storage: %u", p_fds_evt->result);
+			// Only option left is to reboot and see if things work out next time.
+			APP_ERROR_CHECK(p_fds_evt->result);
 		}
 		break;
 	}
@@ -518,3 +514,67 @@ void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 	}
 }
 
+void Storage::eraseAllPages() {
+	uint32_t const pageSize = NRF_FICR->CODEPAGESIZE;
+	uint32_t endAddr = fds_flash_end_addr();
+	uint32_t flashSizeWords = FDS_VIRTUAL_PAGES * FDS_VIRTUAL_PAGE_SIZE;
+	uint32_t flashSizeBytes = flashSizeWords * sizeof(uint32_t);
+	uint32_t startAddr = endAddr - flashSizeBytes;
+	uint32_t startPage = startAddr / pageSize;
+	uint32_t endPage = endAddr / pageSize;
+	if (startPage > endPage) {
+		APP_ERROR_CHECK(NRF_ERROR_INVALID_ADDR);
+	}
+
+	// Check if pages are already erased.
+	uint32_t* startAddrPointer = (uint32_t*)startAddr;
+	bool isErased = true;
+	for (uint32_t i = 0; i < flashSizeWords; ++i) {
+		if (startAddrPointer[i] != 0xFFFFFFFF) {
+			isErased = false;
+			break;
+		}
+	}
+	if (isErased) {
+		LOGw("Flash pages used for FDS are already erased");
+		// No use to erase pages again.
+		// Only option left is to reboot and see if things work out next time.
+		APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
+		return;
+	}
+	LOGw("Erase flash pages used for FDS: %u - %u", startAddr, endAddr);
+	_erasePage = startPage;
+	_eraseEndPage = endPage;
+	eraseNextPage();
+}
+
+void Storage::eraseNextPage() {
+	if (_erasePage != 0 && _eraseEndPage != 0 && _erasePage <= _eraseEndPage) {
+		if (_eraseEndPage == _erasePage) {
+			LOGi("Done erasing: reboot");
+			sd_nvic_SystemReset();
+		}
+		else {
+			uint32_t result = NRF_ERROR_BUSY;
+			while (result == NRF_ERROR_BUSY) {
+				LOGStorageDebug("Erase page %u", _erasePage);
+				result = sd_flash_page_erase(_erasePage);
+				LOGi("Erase result: %u", result);
+			}
+			APP_ERROR_CHECK(result);
+			_erasePage++;
+			LOGi("Wait for flash operation success");
+		}
+	}
+}
+
+void Storage::handleFlashOperationSuccess() {
+	eraseNextPage();
+}
+
+void Storage::handleFlashOperationError() {
+	LOGw("Flash operation error");
+	// Only option left is to reboot and see if things work out next time.
+	// Not sure this is the correct error to throw.
+	APP_ERROR_CHECK(NRF_ERROR_TIMEOUT);
+}
