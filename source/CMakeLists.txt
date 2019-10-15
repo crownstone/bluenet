@@ -670,7 +670,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_VERSION} --bootloader-version ${BOOTLOADER_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
+			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
 			COMMENT "Create bootloader settings"
 			)
@@ -691,6 +691,10 @@ ELSE()
 			COMMENT "Merges bootloader with bootloader settings"
 			)
 
+		SET(FIRMWARE_DFU_ZIP     crownstone_all_${FIRMWARE_VERSION}.zip)
+		SET(APPLICATION_DFU_ZIP  crownstone_${FIRMWARE_VERSION}.zip)
+		SET(BOOTLOADER_DFU_ZIP   bootloader_${FIRMWARE_VERSION}.zip)
+
 		ADD_CUSTOM_TARGET(generate_dfu_package_all
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
@@ -704,7 +708,8 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --sd-id 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_VERSION} all_dfu.zip
+			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --sd-id 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip
+			COMMAND ${CMAKE_COMMAND} -E make_directory firmwares}
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with Softdevice, bootloader, and application"
@@ -721,7 +726,9 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_VERSION} application_dfu.zip
+			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip
+			COMMAND ${CMAKE_COMMAND} -E make_directory firmwares}
+			COMMAND ${CMAKE_COMMAND} -E copy application_dfu.zip firmwares/crownstone_${BOOTLOADER_VERSION}.zip
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with application only"
@@ -739,7 +746,9 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_VERSION} bootloader_dfu.zip
+			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip
+			COMMAND ${CMAKE_COMMAND} -E make_directory bootloaders}
+			COMMAND ${CMAKE_COMMAND} -E copy bootloader_dfu.zip bootloaders/crownstone_${FIRMWARE_VERSION}.zip
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with bootloader only"
@@ -762,6 +771,8 @@ ELSE()
 		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin" DESTINATION .)
 		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf" DESTINATION .)
 		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" DESTINATION .)
+		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/firmwares"       DESTINATION . FILES_MATCHING PATTERN "*.zip")
+		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/bootloaders"     DESTINATION . FILES_MATCHING PATTERN "*.zip")
 	ENDIF()
 
 ENDIF()
