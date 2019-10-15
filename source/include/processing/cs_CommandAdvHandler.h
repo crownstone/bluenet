@@ -35,13 +35,13 @@ struct __attribute__((__packed__)) command_adv_claim_t {
 
 struct __attribute__((__packed__)) command_adv_header_t {
 //	uint8_t sequence0 : 2;
-	uint8_t protocol : 3;
-	uint8_t sphereId : 8;
-	uint8_t accessLevel : 3;
+	uint16_t protocol : 3;
+	uint16_t sphereId : 8;
+	uint16_t accessLevel : 3;
 
 //	uint8_t sequence1 : 2;
 //	uint8_t reserved : 2;
-	uint8_t deviceToken : 8;
+	uint16_t deviceToken : 8;
 //	uint16_t payload1 : 4;
 
 //	uint8_t sequence2 : 2;
