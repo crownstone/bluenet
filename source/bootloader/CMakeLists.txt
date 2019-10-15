@@ -317,7 +317,8 @@ SET(CS_LINKER_FLAGS "-Wl,--defsym=BOOTLOADER_START_ADDRESS=${BOOTLOADER_START_AD
 SET(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} ${CS_LINKER_FLAGS}")
 
 # Remove sections that are part of UICR (so objcopy does not generate very large files)
-SET(REMOVE_SECTIONS --remove-section .uicr_bootloader_start_address  --remove-section .uicr_mbr_params_page)
+MESSAGE(STATUS "Remove sections .uicr_bootloader_start_address and .uicr_mbr_params_page (or objcopy will generate huge files)")
+SET(REMOVE_SECTIONS --remove-section .uicr_bootloader_start_address --remove-section .uicr_mbr_params_page)
 
 # Add post-build target to display size information
 ADD_CUSTOM_COMMAND(TARGET ${PROJECT_NAME} POST_BUILD
