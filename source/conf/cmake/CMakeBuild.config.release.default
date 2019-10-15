@@ -146,7 +146,7 @@ SOFTDEVICE_MINOR=1
 SOFTDEVICE_SERIES=132
 SOFTDEVICE=s132_nrf52_6.1.1
 
-# The application start address (is after the bootloader)
+# The application start address (is after the softdevice)
 APPLICATION_START_ADDRESS=0x00026000
 
 # The maximum size of the application. On our chip with 512kB FLASH this is 0x80000 - 0x26000 = 0x5A000
