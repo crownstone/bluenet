@@ -6,5 +6,5 @@
 !default/
 !default/*
 
-# Oops, no, not again, also ignroe overwrites
+# Enable ignoring CMakeBuild.overwrite.config file again (also in default dir)
 **/CMakeBuild.overwrite.config
