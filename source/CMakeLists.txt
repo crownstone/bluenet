@@ -41,13 +41,18 @@ MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 #######################################################################################################################
 
+# TODO: Remove other arguments from the CACHE. If they require a default, only set it when it is not defined.
+if(NOT CONFIG_DIR)
+  set(CONFIG_DIR "config")
+endif()
+
+
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
 SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
 SET(GIT_BRANCH                               "unset"       CACHE STRING "Current git branch")
 SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
-SET(CONFIG_DIR                               "config"      CACHE STRING "The config main directory")
 SET(BOARD_TARGET                             "unset"       CACHE STRING "The board target")
 SET(GDB_PORT                                 "2331"        CACHE STRING "The gdb port for the debug server")
 # Get the following information via JlinkExe and then ShowEmuList
