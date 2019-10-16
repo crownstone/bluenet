@@ -24,7 +24,7 @@ set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modu
 
 set(CMAKE_BUILD_TYPE                             Debug   CACHE STRING "Default build type")
 
-project(${BOARD_TARGET})
+project(${BOARD_TARGET} NONE)
 
 list(APPEND CMAKE_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
 list(APPEND CMAKE_ARGS "-DCONFIG_DIR:STRING=${CONFIG_DIR}")
@@ -33,13 +33,14 @@ list(APPEND CMAKE_ARGS "-DDEFAULT_CONF_CMAKE_PATH:STRING=${DEFAULT_CONF_CMAKE_PA
 list(APPEND CMAKE_ARGS "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
 list(APPEND CMAKE_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 
-# Trick to clear things in CMake... We might need to do this for all arguments that can be left undefined.
-#list(APPEND CMAKE_ARGS "-UGDB_PORT")
-#list(APPEND CMAKE_ARGS "-USERIAL_NUM")
-
 #######################################################################################################################
 # Load modules
 #######################################################################################################################
+
+message(STATUS "Assumed to be installed:")
+message(STATUS "git  - sudo apt install git")
+message(STATUS "pip3 - sudo apt install python3-pip")
+message(STATUS "wget - sudo apt install wget")
 
 find_package(Git REQUIRED)
 
@@ -162,7 +163,7 @@ endif()
 
 if(DOWNLOAD_NRFUTIL)
   ExternalProject_Add(nrfutil
-    DOWNLOAD_COMMAND pip install nrfutil
+    DOWNLOAD_COMMAND pip3 install nrfutil
     DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
     SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfutil
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
