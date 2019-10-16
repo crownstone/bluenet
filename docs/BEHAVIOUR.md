@@ -5,14 +5,14 @@ This document describes the Crownstones' Behaviour concept in more technical det
 # Communication with (smartphone) applications
 
 To store, update and sync Behaviours, the application can communicate over the Crownstone bluetooth protocol
-by sending [Behaviour Packets](PROTOCOL.md#set_behaviour_packet). The API behind this packet is as follows.
+by sending [Behaviour Packets](PROTOCOL.md#behaviour_packet). The API behind this packet is as follows.
 
 The idea behind the API is that an application can only update or change the state of the stored Behaviours
-if its current knowledge/model of the state is correct - (which is checked by a hash). When an operation is executed,
-a `masterHash` value that is part of the Crownstone's advertised state is updated. An application can check
-its current model of the behaviour store by verifying this value. (Hence it can check if it's update was accepted.)
+if its current knowledge/model of the state is correct (which is checked by a hash). When an operation is executed,
+a master Hash value that is part of the Crownstone's advertised state is updated. An application can check
+its current model of the behaviour store is in sync by verifying this value.
 
-*Question: the master hash is a bit coarse to check for updates being accepted, but it is technically unnecessary to add return values. I'm not sure which route to go here.*
+
 
 ```C++
 /**
@@ -41,18 +41,18 @@ bool update(Behaviour b, uint32_t expected_hash, size_t index);
  * [expected_hash] nothing will happen and false is returned,
  * else the behaviour is removed from storage.
  */
-void remove(uint32_t expected_hash, size_t index);
+bool remove(uint32_t expected_hash, size_t index);
 
 /**
  *  returns the stored behaviour at [index].
  */
-Behaviour state(size_t index);
+Behaviour get(size_t index);
 
 /**
  * returns a map with the currently occupied indices and the 
  * behaviours at those indices.
  */
-std::vector<std::pair<size_t,Behaviour>> state();
+std::vector<std::pair<size_t,Behaviour>> get();
 
 /**
  * returns the hash of the behaviour at [index]. If no behaviour
@@ -71,3 +71,7 @@ uint32_t hash(size_t index);
  */
 uint32_t hash();
 ```
+
+# Firmware internals
+
+Description of how the `BehaviourStore`, the `BehaviourHandler` and `SwitchAggregator` are connected to eachother.
