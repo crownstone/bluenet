@@ -408,7 +408,89 @@ Type nr | Type name | Payload type | Payload Description | A | M | B | S
 32 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
 33 | UART message | payload | Print the payload to UART. | x
 34 | UART enable | uint 8 | Set UART enabled, 0 = none, 1 = RX only, 3 = TX and RX | x
+36 | Save Behaviour | [Save Behaviour packet](#save_behaviour_packet) | Save a Behaviour to an unoccupied index | x | x
+37 | Replace Behaviour | [Replace Behaviour packet](#replace_behaviour_packet) | Replace the Behaviour at given index | x | x
+38 | Remove Behaviour | [Remove Behaviour packet](#remove_behaviour_packet) | Remove the Behaviour at given index | x | x
+39 | Get Behaviour | [Get Behaviour packet](#get_behaviour_packet) | Obtain the Behaviour stored at given index | x | x
 
+### Behaviour Commands
+
+<a name="save_behaviour_packet"></a>
+#### Save Behaviour Payload
+
+![Save Behaviour](../docs/diagrams/behaviour-save.png)
+
+When a Save Behaviour packet is received by the Crownstone, it will try to store the Behaviour represented by `Data` 
+to its persistent memory. Upon success, it returns the `Index` (uint8) that can be used to refer to this behaviour. 
+If the `Hash` is not equal to the current master hash of the Behaviour State, the request will not be processed.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Behaviour](#behaviour_packet) | Data | 14 | Behaviour to save
+[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected master hash before operation is executed
+
+<a name="replace_behaviour_packet"></a>
+#### Replace Behaviour Payload
+
+![Replace Behaviour](../docs/diagrams/behaviour-replace.png)
+
+When a Replace Behaviour packet is received by the Crownstone, it will try to replace the behaviour at `index` by the
+Behaviour represented by `Data`. If the `Hash` is not equal to the hash of the current Behaviour at given index, the 
+request will not be processed.
+
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Behaviour](#behaviour_packet) | Data | 14 | Behaviour to replace the current one at given index with
+[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected hash of the Behaviour at given index before operation is executed
+uint8 | Index | 1 | Index of the behaviour to replace
+
+<a name="remove_behaviour_packet"></a>
+#### Remove Behaviour Payload
+
+![Remove Behaviour](../docs/diagrams/behaviour-remove.png)
+
+When a Remove Behaviour packet is received by the Crownstone, it will try to remove the behaviour at `index`.
+If the `Hash` is not equal to the hash of the current Behaviour at given index, the request will not be processed.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected hash of the Behaviour at given index before operation is executed
+uint8 | Index | 1 | Index of the behaviour to remove
+
+<a name="get_behaviour_packet"></a>
+#### Get Behaviour Payload
+
+![Get Behaviour](../docs/diagrams/behaviour-get.png)
+
+When a Get Behaviour packet is received by the Crownstone it will retrieve the behaviour at given `Index`. 
+If such behaviour exists, it is returned.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Index | 1 | Index of the behaviour to obtain. 0xff for 'get all'
+
+<a name="behaviour_payload"></a>
+#### Behaviour Payload
+
+![Behaviour Payload](../docs/diagrams/behaviour-payload.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
+uint8 | Active Days of Week | 1 | Bitmask, with bits 0-6 for Sunday-Saturday. Bit 7 must be 1.
+uint16 | From | 2 | The behaviour is active from, inclusive, this time of day. Units: seconds since midnight.
+uint16 | Until | 2 | The behaviour is active until, exclusive, this time of day. Units: seconds since midnight.
+uint64 | Presencemask | 8 | Bitmask, the behaviour is active if there exists a room with id `i` such that bit `i` is `1`. 
+
+<a name="behaviour_hash"></a>
+#### Behaviour Hash
+
+![Behaviour Hash](../docs/diagrams/behaviour-hash.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Hash | 4 | Fletcher32 hash of a [Behaviour Payload](#behaviour_packet)
 
 <a name="setup_packet"></a>
 #### Setup packet
@@ -430,7 +512,6 @@ uint 8[] | Mesh net key  | 16 | 16 byte key used to encrypt/decrypt relays of me
 uint 8[] | iBeacon UUID | 16 | The iBeacon UUID. Should be the same for each Crownstone in the sphere.
 uint 16 | iBeacon major | 2 | The iBeacon major. Together with the minor, should be unique per sphere.
 uint 16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should be unique per sphere.
-
 
 <a name="cmd_keep_alive_payload"></a>
 #### Keep alive payload

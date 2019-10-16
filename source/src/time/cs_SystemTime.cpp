@@ -59,10 +59,10 @@ void SystemTime::tick(void*) {
 }
 
 void SystemTime::setTime(uint32_t time) {
-    LOGi("Set time to %i", time);
 	if (time == 0) {
 		return;
 	}
+    LOGi("Set time to %i", time);
     
     uint32_t prevtime = posixTimeStamp;
 	posixTimeStamp = time;
