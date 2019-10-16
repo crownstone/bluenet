@@ -10,6 +10,7 @@ option(DOWNLOAD_NRFCONNECT                       "Download nrfconnect"          
 option(DOWNLOAD_NRFCONNECT_PROGRAMMER            "Download nrfconnect programmer"        OFF)
 
 set(BOARD_TARGET                                 default CACHE STRING "Board target to compile for")
+set(CONFIG_DIR                                   config  CACHE STRING "Configuration directory")
 set(WORKSPACE_DIR                                ${CMAKE_CURRENT_LIST_DIR})
 set(DEFAULT_CONF_CMAKE_PATH                      ${WORKSPACE_DIR}/source/conf/cmake)
 set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modules)
@@ -19,14 +20,15 @@ set(CMAKE_BUILD_TYPE                             Debug   CACHE STRING "Default b
 project(${BOARD_TARGET})
 
 list(APPEND CMAKE_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
+list(APPEND CMAKE_ARGS "-DCONFIG_DIR:STRING=${CONFIG_DIR}")
 list(APPEND CMAKE_ARGS "-DBOARD_TARGET:STRING=${BOARD_TARGET}")
 list(APPEND CMAKE_ARGS "-DDEFAULT_CONF_CMAKE_PATH:STRING=${DEFAULT_CONF_CMAKE_PATH}")
 list(APPEND CMAKE_ARGS "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
 list(APPEND CMAKE_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 
 # Trick to clear things in CMake... We might need to do this for all arguments that can be left undefined.
-list(APPEND CMAKE_ARGS "-UGDB_PORT")
-list(APPEND CMAKE_ARGS "-USERIAL_NUM")
+#list(APPEND CMAKE_ARGS "-UGDB_PORT")
+#list(APPEND CMAKE_ARGS "-USERIAL_NUM")
 
 #######################################################################################################################
 # Load modules
@@ -91,6 +93,7 @@ ExternalProject_Add(nordic_sdk
   BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
   INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
   PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/01nrf5.patch
+        COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/02nrf5.patch
   )
 
 set(NRF5_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk)
@@ -179,8 +182,8 @@ endif()
 #######################################################################################################################
 
 set(DEFAULT_CONFIGURATION_FILE ${DEFAULT_CONF_CMAKE_PATH}/CMakeBuild.config.default)
-set(BOARD_TARGET_CONFIGURATION_FILE ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
-set(BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+set(BOARD_TARGET_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
+set(BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
 
 load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
 load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
@@ -251,9 +254,9 @@ ExternalProject_Add(bluenet
   )
 
 		
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
-if(EXISTS  ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
-  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
+if(EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
 endif()
 
 # Regretfully, this "trick" will make it impossible to pull after a change in CMakeBuild.config . 

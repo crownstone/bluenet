@@ -55,6 +55,14 @@ void crownstone_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_si
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
+	case NRF_EVT_FLASH_OPERATION_SUCCESS: {
+		Storage::getInstance().handleFlashOperationSuccess();
+		break;
+	}
+	case NRF_EVT_FLASH_OPERATION_ERROR: {
+		Storage::getInstance().handleFlashOperationError();
+		break;
+	}
 	default:
 		break;
 	}
@@ -68,12 +76,7 @@ void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
 
     switch(evt_id) {
 	case NRF_EVT_FLASH_OPERATION_SUCCESS:
-	    LOGnone("NRF_EVT_FLASH_OPERATION_SUCCESS, unhandled");
-	    break;
 	case NRF_EVT_FLASH_OPERATION_ERROR:
-	    // This is handled by fstorage / FDS.
-	    LOGnone("NRF_EVT_FLASH_OPERATION_ERROR, unhandled");
-	    break;
 	case NRF_EVT_POWER_FAILURE_WARNING: {
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
 		uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), crownstone_soc_evt_handler_decoupled);

@@ -47,6 +47,7 @@ SET(GIT_BRANCH                               "unset"       CACHE STRING "Current
 SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
+SET(CONFIG_DIR                               "config"      CACHE STRING "The config main directory")
 SET(BOARD_TARGET                             "unset"       CACHE STRING "The board target")
 SET(GDB_PORT                                 "2331"        CACHE STRING "The gdb port for the debug server")
 # Get the following information via JlinkExe and then ShowEmuList
@@ -196,7 +197,6 @@ ELSE()
 			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/log/src/nrf_log_backend_uart.c")
 			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/integration/nrfx/legacy/nrf_drv_uart.c")
 			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uart.c")
-#			LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_uarte.c")
 		ENDIF()
 	ELSE()
 		MESSAGE(STATUS "SERIAL from NORDIC disabled")
@@ -276,7 +276,6 @@ ELSE()
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_beacon.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_utils.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_bearer_adv.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/nrf_mesh_prov_bearer_gatt.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/nrf_mesh_prov.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/prov/src/prov_provisioner.c")
 
@@ -284,7 +283,6 @@ ELSE()
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_publish_retransmission.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_reliable.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_loopback.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/access_publish.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/access/src/device_state_manager.c")
 
@@ -294,16 +292,10 @@ ELSE()
 		# All C files in mesh/stack/src
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/stack/src/mesh_stack.c")
 
-		# models/foundation/config/src/config_server.c
-		# models/foundation/config/src/composition_data.c
-		# models/foundation/config/src/packed_index_list.c
-		# models/foundation/health/src/health_server.c
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/config/src/config_server.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/config/src/composition_data.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/config/src/packed_index_list.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/health/src/health_server.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/config/src/config_client.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/foundation/health/src/health_client.c")
 
 		# Any other mesh models that are used in your application
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/models/model_spec/common/src/model_common.c")
@@ -314,156 +306,10 @@ ELSE()
 		# external/micro-ecc/uECC.c
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/external/micro-ecc/uECC.c")
 
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/examples/common/src/assertion_handler_weak.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/examples/common/src/mesh_provisionee.c")
+		# TODO: Do not use example files
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/examples/common/src/mesh_provisionee.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/examples/common/src/assertion_handler_weak.c")
 
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/nrf_mesh_serial.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_handler_openmesh.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_handler_prov.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_handler_dfu.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_handler_app.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_handler_mesh.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_uart.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_handler_access.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_handler_config.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_bearer.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_handler_models.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_handler_common.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/serial/src/serial_handler_device.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_timeslot_timer.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_generic_level_server.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_proxy_vectors.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_advertiser.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_timer.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_generic_level_client.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_handler_mesh.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_timer_scheduler.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_handler_device.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_mesh_gatt.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_handler_openmesh.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_generic_dtt_server.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_ad_listener.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_core_tx.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_proxy.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_composition_data.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_nrf_mesh.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_ccm_soft.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_bearer_event.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_generic_ponoff_client.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_mesh_stack.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_filters.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_timeslot.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_generic_dtt_client.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_packet_mgr.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_ccm_ad.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_uart.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_mesh_config_backend.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/flash_manager_test_util.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_access_publish_retransmission.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/test_serial_bearer_common.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_prov_utils.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_heartbeat.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/test_assert.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_handler_app.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/aes_soft.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_device_state_manager.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_core_tx_lpn.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_prov_bearer_adv.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_provisioning.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_prov_provisioning.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_nrf_mesh_configure.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_packet_buffer.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_transport.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_event.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/packet_mgr_linux.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_handler_models.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_radio_config.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_pb_remote_client.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_bearer_slip_enc.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_bearer_simple.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_config_client.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_net_beacon.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_core_tx_adv.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_generic_onoff_client.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_health_client.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_radio.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_bearer_handler.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_lpn.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/mtt_packet_mgr.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_virtual_addressing.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_aes_cmac.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_handler_config.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_network_vectors.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_msg_cache.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/proxy_test_common.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_mesh_lpn_subman.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_packet.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_network.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_bitfield.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_config_server.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_queue.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_access.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_msqueue.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_flash_manager.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_keygen.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_fifo.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_mesh_flash.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_mesh_config_flashman_glue.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_model_common.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_packet.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_handler_dfu.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_health_server.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_fsm.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_net_state.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_linked_list.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_transport_lpn.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_access_reliable.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_generic_ponoff_ss.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_flash_manager_defrag.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_net_packet.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_scanner.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_replay_cache.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_prov_beacon.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_generic_onoff_server.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_proxy_filter.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_access_publish.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_mesh_config.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_beacon.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_serial_handler_access.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/src/ut_enc.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/test/mttest/mttest.c")
-
-		
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/bootloader.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/rand.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/dfu_transfer_mesh.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/bootloader_util.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/bootloader_rtc.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/bootloader_app_bridge.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/dfu_util.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/dfu_mesh.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/serial_handler_uart.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/mesh_packet.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/fifo.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/mesh_aci.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/nrf_flash.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/transport.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/main.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/radio_control.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/dfu_bank.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/bootloader_info.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/bootloader/src/uECC.c")
-
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/gatt/src/proxy.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/gatt/src/proxy_filter.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/gatt/src/mesh_gatt.c")
-		
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/external/rtt/src/SEGGER_RTT.c")
-#		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/external/rtt/src/SEGGER_RTT_printf.c")
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/external/app_timer/app_timer_mesh.c")
 		
 		IF (MESH_MEM_BACKEND STREQUAL "stdlib")
@@ -552,16 +398,10 @@ ELSE()
 
 	IF (BUILD_MESHING)
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/stack/api")
-#		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/serial/api")
-#		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/serial/include")
-#		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/test/include")
-#		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/test/include/device_wrappers")
-#		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/test/mttest")
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/prov/api")
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/prov/include")
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/access/api")
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/access/include")
-#		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/bootloader/include")
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/dfu/api")
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/dfu/include")
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/mesh/core/api")
@@ -575,7 +415,6 @@ ELSE()
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/models/model_spec/common/include")
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/models/model_spec/generic_onoff/include")
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/external/micro-ecc")
-#		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/external/rtt/include")
 		INCLUDE_DIRECTORIES(SYSTEM "${MESH_SDK_DIR}/examples/common/include")
 		IF (MESH_MEM_BACKEND STREQUAL "mem_manager")
 			INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/mem_manager")
@@ -624,22 +463,32 @@ ELSE()
 		
 		IF(SERIAL_NUM) 
 			SET(SERIAL_NUM_SWITCH "--snr")
+			SET(SERIAL_NUM_GDB_SELECT "-select")
+			SET(SERIAL_NUM_GDB_PARAM "usb=${SERIAL_NUM}")
   			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 		ENDIF()
 
 		MESSAGE(STATUS "Descend into bootloader directory and compile if needed")
 		add_subdirectory(bootloader)
-
-		SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
-			PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config
-		)
-		IF(EXISTS  ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
-			SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
-				PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config
-				)
+		
+		IF(NOT EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
+			MESSAGE(FATAL_ERROR "There should be a CMakeBuild.config file in the ${CONFIG_DIR}/${BOARD_TARGET} directory")
 		ENDIF()
 		
-		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
+		SET_SOURCE_FILES_PROPERTIES(${NORDIC_SOURCE}
+			PROPERTIES COMPILE_FLAGS "-Wno-unused-function -Wno-unknown-pragmas"
+		)
+
+		SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
+			PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config
+		)
+		IF(EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+			SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
+				PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config
+			)
+		ENDIF()
+		
+		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
 		
 		# Be more strict about our own files (then about Nordic's files)
 		#SET(CROWNSTONE_ONLY_FLAGS "-W")
@@ -650,9 +499,9 @@ ELSE()
 
 		# This does lead to a cmake reconfigure when the file changes... However, nothing else gets rebuild after
 		# the reconfiguration
-		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.config)
-		IF(EXISTS  ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
-			set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/config/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
+		IF(EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}${BOARD_TARGET}/CMakeBuild.overwrite.config)
+			set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
 		ENDIF()
 		
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/source/VERSION)
@@ -723,7 +572,7 @@ ELSE()
 		# The gdb server can be started with configuration specific information
 		ADD_CUSTOM_TARGET(debug_server
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
-			COMMAND JLinkGDBServer -Device nRF52832_xxAA -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT}
+			COMMAND JLinkGDBServer -Device nRF52832_xxAA ${SERIAL_NUM_GDB_SELECT} ${SERIAL_NUM_GDB_PARAM} -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT}
 			COMMENT "Debug server, runs in background"
 			)
 		
@@ -735,7 +584,7 @@ ELSE()
 		
 		ADD_CUSTOM_TARGET(debug_application
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug"
-			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf 
+			COMMAND ${COMPILER_PATH}/bin/arm-none-eabi-gdb --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbinit --eval-command="target;remote;localhost:${GDB_PORT}" --command ${CMAKE_SOURCE_DIR}/conf/gdb/gdbstart --exec=${PROJECT_NAME}.elf ${PROJECT_NAME}.elf
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Debug ${PROJECT_NAME}.elf"
 			)
@@ -782,6 +631,8 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release.cmake
 			COMMENT "Create git release"
 			)
+
+		MESSAGE(STATUS "Persistent flags disabled: ${PERSISTENT_FLAGS_DISABLED}")
 		
 		ADD_CUSTOM_TARGET(read_bootloader_address
 			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x10001014 ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
@@ -802,9 +653,12 @@ ELSE()
 			)
 
 		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
-		set(LOAD_BOARD_HARDWARE_VERSION "")
-		include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
-		load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
+		IF(NOT CONFIG_DIR STREQUAL "release")
+			set(JLINK_LINUX_DOWNLOAD_URL_BOARD_HARDWARE_VERSION "")
+			include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
+			message(STATUS "Get version for hardware \"${HARDWARE_BOARD}\"")
+			load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
+		ENDIF()
 
 		ADD_CUSTOM_TARGET(write_board_version
 			COMMAND ${CMAKE_COMMAND} -E echo
@@ -818,7 +672,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_VERSION} --bootloader-version ${BOOTLOADER_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
+			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
 			COMMENT "Create bootloader settings"
 			)
@@ -839,6 +693,10 @@ ELSE()
 			COMMENT "Merges bootloader with bootloader settings"
 			)
 
+		SET(FIRMWARE_DFU_ZIP     crownstone_all_${FIRMWARE_VERSION}.zip)
+		SET(APPLICATION_DFU_ZIP  crownstone_${FIRMWARE_VERSION}.zip)
+		SET(BOOTLOADER_DFU_ZIP   bootloader_${FIRMWARE_VERSION}.zip)
+
 		ADD_CUSTOM_TARGET(generate_dfu_package_all
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
@@ -852,7 +710,8 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --sd-id 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_VERSION} all_dfu.zip
+			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --sd-id 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip
+			COMMAND ${CMAKE_COMMAND} -E make_directory firmwares}
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with Softdevice, bootloader, and application"
@@ -869,7 +728,9 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_VERSION} application_dfu.zip
+			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip
+			COMMAND ${CMAKE_COMMAND} -E make_directory firmwares}
+			COMMAND ${CMAKE_COMMAND} -E copy application_dfu.zip firmwares/crownstone_${BOOTLOADER_VERSION}.zip
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with application only"
@@ -887,7 +748,9 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_VERSION} bootloader_dfu.zip
+			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip
+			COMMAND ${CMAKE_COMMAND} -E make_directory bootloaders}
+			COMMAND ${CMAKE_COMMAND} -E copy bootloader_dfu.zip bootloaders/crownstone_${FIRMWARE_VERSION}.zip
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with bootloader only"
@@ -910,6 +773,8 @@ ELSE()
 		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin" DESTINATION .)
 		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf" DESTINATION .)
 		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" DESTINATION .)
+		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/firmwares"       DESTINATION . FILES_MATCHING PATTERN "*.zip")
+		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/bootloaders"     DESTINATION . FILES_MATCHING PATTERN "*.zip")
 	ENDIF()
 
 ENDIF()
