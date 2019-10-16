@@ -49,13 +49,13 @@ class BehaviourStore : public EventListener {
          size_t save(Behaviour b, uint32_t expected_master_hash);
 
         /**
-         * change the behaviour at [index] to [b], if the hash of the 
+         * Replace the behaviour at [index] with [b], if the hash of the 
          * currently saved behaviour at [index] is not equal to 
          * [expected_hash] nothing will happen and false is returned.
          * if these hashes coincide, postcondition is identical to the
          * postcondition of calling save(b) when it returns [index].
          */
-        bool update(Behaviour b, uint32_t expected_hash, size_t index);
+        bool replace(Behaviour b, uint32_t expected_hash, size_t index);
 
         /**
          * deletes the behaviour at [index], if the hash of the 
@@ -68,13 +68,13 @@ class BehaviourStore : public EventListener {
         /**
          *  returns the stored behaviour at [index].
          */
-        Behaviour state(size_t index);
+        Behaviour get(size_t index);
 
         /**
          * returns a map with the currently occupied indices and the 
          * behaviours at those indices.
          */
-        std::vector<std::pair<size_t,Behaviour>> state();
+        std::vector<std::pair<size_t,Behaviour>> get();
 
         /**
          * returns the hash of the behaviour at [index]. If no behaviour
