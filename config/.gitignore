@@ -5,3 +5,6 @@
 !.gitignore
 !default/
 !default/*
+
+# Enable ignoring CMakeBuild.overwrite.config file again (also in default dir)
+**/CMakeBuild.overwrite.config

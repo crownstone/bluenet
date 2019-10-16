@@ -10,7 +10,6 @@ ENDIF()
 
 MESSAGE(STATUS "crownstone.defs.cmake: Build type: ${CMAKE_BUILD_TYPE}")
 IF(CMAKE_BUILD_TYPE MATCHES "Debug")
-	MESSAGE(STATUS "Pay attention, this is a debug build (change with -DCMAKE_BUILD_TYPE=Release or RelWithDebInfo")
 	ADD_DEFINITIONS("-DGIT_HASH=${GIT_HASH}")
 	ADD_DEFINITIONS("-DGIT_BRANCH=${GIT_BRANCH}")
 	ADD_DEFINITIONS("-DDEBUG")
