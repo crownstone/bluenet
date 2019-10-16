@@ -426,8 +426,8 @@ If the `Hash` is not equal to the current master hash of the Behaviour State, th
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Behaviour](#behaviour_packet) | Data | See Behaviour Packet | Behaviour to save
-[Behaviour Hash](#behaviour_hash) | Hash | See Behaviour Has | Expected master hash before operation is executed
+[Behaviour](#behaviour_packet) | Data | 14 | Behaviour to save
+[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected master hash before operation is executed
 
 <a name="replace_behaviour_packet"></a>
 #### Replace Behaviour Payload
@@ -441,8 +441,8 @@ request will not be processed.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Behaviour](#behaviour_packet) | Data | See Behaviour Packet | Behaviour to replace the current one at given index with
-[Behaviour Hash](#behaviour_hash) | Hash | See Behaviour Hash | Expected hash of the Behaviour at given index before operation is executed
+[Behaviour](#behaviour_packet) | Data | 14 | Behaviour to replace the current one at given index with
+[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected hash of the Behaviour at given index before operation is executed
 uint8 | Index | 1 | Index of the behaviour to replace
 
 <a name="remove_behaviour_packet"></a>
@@ -455,7 +455,7 @@ If the `Hash` is not equal to the hash of the current Behaviour at given index, 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Behaviour Hash](#behaviour_hash) | Hash | See Behaviour Has | Expected hash of the Behaviour at given index before operation is executed
+[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected hash of the Behaviour at given index before operation is executed
 uint8 | Index | 1 | Index of the behaviour to remove
 
 <a name="get_behaviour_packet"></a>
