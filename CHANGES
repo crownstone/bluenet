@@ -1,3 +1,8 @@
+Version 3.0.2:
+ - Version bump to 3.0.2  int: 17
+ - Add release config for crownstone_3.0.2
+ - Start the HF xtal clock. Should improve dimming.
+
 Version 3.0.1:
  - Version bump to 3.0.1  int: 16
  - Add release config for crownstone_3.0.1
