@@ -89,6 +89,11 @@ public:
 		ptr->tick();
 	}
 
+	/**
+	 * Start the 32 MHz external oscillator
+	 */
+	void startHFClock();
+
 protected:
 
 	/** initialize drivers (stack, timer, storage, pwm, etc), loads settings from storage.
