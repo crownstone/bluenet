@@ -2,38 +2,42 @@
 
 This document describes the Crownstones' Behaviour concept in more technical detail.
 
-# Communication with (smartphone) applications
+# Table of Contents
+1. [Communication API for (smartphone) applications](#api_summary)
+2. [Protocol Packet Definitions](#behaviour_protocol)
+3. [Firmware Design Internals](#firmware_design)
+
+<a name="api_summary"></a>
+# Communication API for (smartphone) applications
 
 To store, update and sync Behaviours, the application can communicate over the Crownstone bluetooth protocol
-by sending [Behaviour Packets](PROTOCOL.md#behaviour_packet). The API behind this packet is as follows.
+by sending [Behaviour Packets](PROTOCOL.md#behaviour_packet).
 
 The idea behind the API is that an application can only update or change the state of the stored Behaviours
 if its current knowledge/model of the state is correct (which is checked by a hash). When an operation is executed,
 a master Hash value that is part of the Crownstone's advertised state is updated. An application can check
 its current model of the behaviour store is in sync by verifying this value.
 
-
-
 ```C++
 /**
  * If expected_master_hash is not equal to the current
  * value that hash() would return, nothing happens
- * and 0xffffffff is returned. Else,
- * returns an index in range [0,MaxBehaviours) on succes, 
- * or 0xffffffff if it couldn't be saved.
+ * and 0xff is returned. Else,
+ * returns an index in range [0,0xfe) on succes, 
+ * or 0xff if it couldn't be saved.
  * 
  * A hash is computed and saved together with [b].
  */
- size_t save(Behaviour b, uint32_t expected_master_hash);
+ uint8_t save(uint32_t expected_master_hash, Behaviour b);
 
 /**
- * change the behaviour at [index] to [b], if the hash of the 
+ * Replace the behaviour at [index] with [b], if the hash of the 
  * currently saved behaviour at [index] is not equal to 
  * [expected_hash] nothing will happen and false is returned.
  * if these hashes coincide, postcondition is identical to the
  * postcondition of calling save(b) when it returns [index].
  */
-bool update(Behaviour b, uint32_t expected_hash, size_t index);
+bool replace(uint32_t expected_hash, uint8_t index, Behaviour b);
 
 /**
  * deletes the behaviour at [index], if the hash of the 
@@ -41,37 +45,163 @@ bool update(Behaviour b, uint32_t expected_hash, size_t index);
  * [expected_hash] nothing will happen and false is returned,
  * else the behaviour is removed from storage.
  */
-bool remove(uint32_t expected_hash, size_t index);
+bool remove(uint32_t expected_hash, uint8_t index);
 
 /**
  *  returns the stored behaviour at [index].
  */
-Behaviour get(size_t index);
+Behaviour get(uint8_t index);
 
 /**
  * returns a map with the currently occupied indices and the 
  * behaviours at those indices.
  */
-std::vector<std::pair<size_t,Behaviour>> get();
-
-/**
- * returns the hash of the behaviour at [index]. If no behaviour
- * is stored at this index, 0xffffffff is returned.
- */
-uint32_t hash(size_t index);
-
-/**
- * returns a hash value that takes all state indices into account.
- * this value is expected to change after any call to update/save/remove.
- * 
- * A (phone) application can compute this value locally given the set of 
- * index/behaviour pairs it expects to be present on the Crownstone.
- * Checking if this differs from the one received in the crownstone state message
- * enables the application to resync.
- */
-uint32_t hash();
+std::vector<std::pair<uint8_t,Behaviour>> get();
 ```
 
-# Firmware internals
+<a name="behaviour_protocol"></a>
+# Protocol Packet Definitions
 
-Description of how the `BehaviourStore`, the `BehaviourHandler` and `SwitchAggregator` are connected to eachother.
+### Behaviour Commands
+
+<a name="save_behaviour_packet"></a>
+#### Save Behaviour Payload
+
+![Save Behaviour](../docs/diagrams/behaviour-save.png)
+
+When a Save Behaviour packet is received by the Crownstone, it will try to store the Behaviour represented by `Data` 
+to its persistent memory. Upon success, it returns the `Index` (uint8) that can be used to refer to this behaviour. 
+If the `Hash` is not equal to the current master hash of the Behaviour State, the request will not be processed.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected master hash before operation is executed
+[Behaviour](#behaviour_payload) | Data | ... | Behaviour to save
+
+<a name="replace_behaviour_packet"></a>
+#### Replace Behaviour Payload
+
+![Replace Behaviour](../docs/diagrams/behaviour-replace.png)
+
+When a Replace Behaviour packet is received by the Crownstone, it will try to replace the behaviour at `index` by the
+Behaviour represented by `Data`. If the `Hash` is not equal to the hash of the current Behaviour at given index, the 
+request will not be processed.
+
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Index | 1 | Index of the behaviour to replace
+[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected hash of the Behaviour at given index before operation is executed
+[Behaviour](#behaviour_payload) | Data | ... | Behaviour to replace the current one at given index with
+
+<a name="remove_behaviour_packet"></a>
+#### Remove Behaviour Payload
+
+![Remove Behaviour](../docs/diagrams/behaviour-remove.png)
+
+When a Remove Behaviour packet is received by the Crownstone, it will try to remove the behaviour at `index`.
+If the `Hash` is not equal to the hash of the current Behaviour at given index, the request will not be processed.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Index | 1 | Index of the behaviour to remove
+[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected hash of the Behaviour at given index before operation is executed
+
+<a name="get_behaviour_packet"></a>
+#### Get Behaviour Payload
+
+![Get Behaviour](../docs/diagrams/behaviour-get.png)
+
+When a Get Behaviour packet is received by the Crownstone it will retrieve the behaviour at given `Index`. 
+If such behaviour exists, it is returned.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Index | 1 | Index of the behaviour to obtain. 0xff for 'get all'
+
+<a name="behaviour_payload"></a>
+#### Behaviour Payload
+
+![Behaviour Payload](../docs/diagrams/behaviour-payload.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8_t | Type | 1 | <ol start="0"><li>[Switch Behaviour](#switch_behaviour)</li><li>[Twilight Behaviour](#twilight_behaviour)</li></ol>
+uint8_t[] | Data | ... | Type dependent
+
+<a name="switch_behaviour"></a>
+#### Switch Behaviour
+
+![Switch Behaviour](../docs/diagrams/switch-behaviour.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
+uint8 | Options | 1 | Bitmask, must be all 0 except for the following bits: <ol start="0"><li>Stay on until everyone has left the sphere</li><li>Stay on until everyone has left the room</li></ol>
+[Day Of Week Bitmask](#day_of_week_bitmask) | Active Days | 1 | Selects which days of the week this behaviour is active
+[Time Of Day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
+[Time Of Day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
+[Presence Description](#presence_description) | Presence | 8 | Description of the presence conditions that need to hold for this behaviour to be active. 
+
+<a name="twilight_behaviour"></a>
+#### Twilight Behaviour
+
+![Twilight Behaviour](../docs/diagrams/twilight-behaviour.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
+uint8 | Options | 1 | Bitmask, must be all 0 except for the following bits: <ol start="0"><li>Stay on until everyone has left the sphere</li><li>Stay on until everyone has left the room</li></ol>
+[Day Of Week Bitmask](#day_of_week_bitmask) | Active Days | 1 | Selects which days of the week this behaviour is active
+[Time Of Day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
+[Time Of Day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
+[Presence Description](#presence_description) | Presence | 8 | Description of the presence conditions that need to hold for this behaviour to be active. 
+
+<a name="behaviour_hash"></a>
+#### Behaviour Hash
+
+![Behaviour Hash](../docs/diagrams/behaviour-hash.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Hash | 4 | [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum) hash of a [Behaviour Payload](#behaviour_payload)
+
+<a name="time_of_day"></a>
+#### Time Of Day
+
+![Time Of Day](../docs/diagrams/time-of-day.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Type |  1 | <ol start="0"><li>Seconds since midnight </li><li>Seconds Since Sundown </li><li>Seconds Since Sunrise</li></ol>
+Type dependent | Time Payload | 4 | <ol start="0"><li>uint32</li><li>int32</li><li>int32</li></ol>
+
+<a name="day_of_week_bitmask"></a>
+#### Day Of Week Bitmask
+
+![Day Of Week](../docs/diagrams/day-of-week-bitmask.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Bitmask | 1 | 0: sunday - 6: saturday. 7: must be 0.
+
+<a name="presence_description"></a>
+#### Presence Description
+
+![Presence Description](../docs/diagrams/presence-description.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Type | 1 | <ol start="0"><li>Vaccuously true condition</li><li>Anyone in any of the rooms</li><li>Noone in any of the rooms</li></ol>
+uint64 | Active Rooms Mask | 8 | Room with id `i` corresponds to bit `i` in this mask.
+
+<a name="firmware_design"></a>
+# Firmware Design Internals
+
+In the diagram below the event flow concerning Behaviours and Twilights is depicted. Double arrows (annotated) indicate which `event`'s are received and handled by the node pointed to, red/dashed objects indicate not-yet implemented features, aggregation arrows indicate object ownership as in the sense of UML and lines indicate connection to physical domain.
+
+Main essence of the design is that there are multiple ways that a use can operate on the same switch. Each of these has their own semantics, and therefore a piece of software needs to aggregate between these input channels in order to decide what actually will have to happen. This is the job of the SwitchAggregator. The aggregator has a SystemSwitch object which takes care of the safety and integrity of the phyisical device by monitoring error states and for example blocking access in case of overheating. Any commands passed down from SystemSwitch onto HwSwitch will be pushed into the driver. This last layer allows to abstract away from any hardware specifics and later could be part of the mock-up surface.
+
+Storing behaviours and Twilights will require additional logic in order to ensure synchronisation accross different devices/phones. All communication from and to host devices regarding Behaviours and Twilights is extracted into a Store object, that takes care of this matter. The corresponding handler object can access the store to query the active Behaviours/Twilights whenever necessary through a static reference.
+
+![Behaviour Handler Overview](../docs/diagrams/behaviourhandler-overview.svg)

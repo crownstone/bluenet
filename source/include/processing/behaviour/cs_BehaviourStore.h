@@ -46,7 +46,7 @@ class BehaviourStore : public EventListener {
          * 
          * A hash is computed and saved together with [b].
          */
-         size_t save(Behaviour b, uint32_t expected_master_hash);
+         size_t save(uint32_t expected_master_hash, Behaviour b);
 
         /**
          * Replace the behaviour at [index] with [b], if the hash of the 
@@ -55,7 +55,7 @@ class BehaviourStore : public EventListener {
          * if these hashes coincide, postcondition is identical to the
          * postcondition of calling save(b) when it returns [index].
          */
-        bool replace(Behaviour b, uint32_t expected_hash, size_t index);
+        bool replace(size_t index, uint32_t expected_hash, Behaviour b);
 
         /**
          * deletes the behaviour at [index], if the hash of the 
@@ -63,7 +63,7 @@ class BehaviourStore : public EventListener {
          * [expected_hash] nothing will happen and false is returned,
          * else the behaviour is removed from storage.
          */
-        bool remove(uint32_t expected_hash, size_t index);
+        bool remove(size_t index, uint32_t expected_hash);
 
         /**
          *  returns the stored behaviour at [index].

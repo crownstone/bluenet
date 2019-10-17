@@ -73,7 +73,7 @@ void SystemTime::setTime(uint32_t time) {
         &prevtime,
         sizeof(prevtime));
 
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 }
 
 void SystemTime::handleEvent(event_t & event) {
