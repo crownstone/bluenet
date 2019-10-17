@@ -1,9 +1,27 @@
 # Bluenet
 
-[![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](http://www.gnu.org/licenses/lgpl-3.0)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Build Status](https://travis-ci.org/crownstone/bluenet.svg?branch=master)](https://travis-ci.org/crownstone/bluenet)
+<p align="center">
+  <a href="https://crownstone.rocks">
+    <img src="https://avatars0.githubusercontent.com/u/19687047?s=300&u=2bf39117bd4b49d941d1fe3d8d3a53957aafbc6b" alt="Crownstone">
+  </a>
+</p>
+
+<p align="center">
+  <a href="http://crownstone.github.io/bluenet/">
+    <img src="http://img.shields.io/badge/read_the-docs-2196f3.svg" alt="Documentation">
+  </a>
+  <a href="https://travis-ci.org/crownstone/bluenet">
+    <img src="https://travis-ci.org/crownstone/bluenet.svg?branch=master" alt="Build Status">
+  </a>
+  <a href="https://crownstone.slack.com/">
+    <img src="https://img.shields.io/badge/Forum-Slack-blue" alt="Forum">
+  </a>
+  <a href="https://twitter.com/CrownstoneRocks">
+    <img src="https://img.shields.io/badge/Twitter-CrownstoneRocks-blue" alt="Twitter">
+  </a>
+</p>
+
+<br>
 
 Bluenet is code running on [Crownstone](http://crownstone.rocks) compatible devices such as [electronic connectors](https://shop.crownstone.rocks/products/built-in-crownstone), [electronic EU plugs](https://shop.crownstone.rocks/products/crownstone-plugs) and [grid-powered beacons, GuideStones](https://shop.crownstone.rocks/products/guidestones). Each Crownstone or GuideStone is a node in a network that uses signal strength for indoor localization of smartphones and wearables.
 
@@ -25,12 +43,8 @@ We also provide libraries which implements this protocol (so if you build a smar
 - [iOS](https://github.com/crownstone/bluenet-ios-lib)
 - [Python](https://github.com/crownstone/bluenet-python-lib)
 
-
 # Build
 To build the bluenet code yourself, follow the [installation instructions](docs/INSTALL.md).
-
-### Bootloader
-The Crownstones and GuideStones come with a bootloader, which enables over the air updates. This bootloader is a small adaptation of the one provided by Nordic. The build instructions are described on the [bootloader repository](https://github.com/crownstone/nrf51-dfu-bootloader-for-gcc-compiler).
 
 # Communication
 You can best communicate bugs and feature requests via the [issue tracker](https://github.com/crownstone/bluenet/issues). For all other questions, please, feel free to ask us anything on our [website](http://crownstone.rocks).
@@ -83,3 +97,15 @@ Copyrights belong to the team of Crownstone B.V. and are provided under a noncon
 * Rotterdam, The Netherlands
 
 This code is built on the shoulders of giants. Our special thanks go to Christopher Mason for the initial C++ code base at [http://hg.cmason.com/nrf](http://hg.cmason.com/nrf) and Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and Nordic Semiconductor) for the meshing functionality ([OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh)) and Nordic Semiconductor for the beautiful SoftDevices they have developed. The code of Mason falls under the same triple license. The code by Nordic falls under the license from Nordic (and that code is not part of this repository).
+
+<p align="center">
+	<a href="http://www.gnu.org/licenses/lgpl-3.0">
+    <img src="https://img.shields.io/badge/License-LGPL%20v3-blue.svg" alt="License: LGPL v3">
+  </a>
+	<a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+  </a>
+	<a href="https://opensource.org/licenses/Apache-2.0">
+     <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0">
+  </a>
+</p>
