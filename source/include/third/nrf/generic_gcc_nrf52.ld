@@ -1,16 +1,17 @@
 /* Linker script to configure memory regions. */
-/* This is a slightly adjust copy from $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld */
-/* TODO: make RAM (rwx) :  ORIGIN = 0x200021B0, LENGTH = 0xDE50 be filled in from RAM_R1_BASE and RAM_APPLICATION_AMOUNT */
-/*
-MEMORY
-{
-  FLASH (rx) : ORIGIN = 0x2d000, LENGTH = 0x53000
-  RAM (rwx) :  ORIGIN = 0x20001f30, LENGTH = 0xe0d0
-}
-*/
+
+/* This is a slightly adjusted copy from the file: 
+ *    $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld 
+ */
 
 SEARCH_DIR(.)
 GROUP(-lgcc -lc -lnosys)
+
+APPLICATION_START_ADDRESS = DEFINED(APPLICATION_START_ADDRESS) ? APPLICATION_START_ADDRESS : 0x26000;
+APPLICATION_LENGTH = DEFINED(APPLICATION_LENGTH) ? APPLICATION_LENGTH : 0x5A000;
+
+RAM_R1_BASE = DEFINED(RAM_R1_BASE) ? RAM_R1_BASE : 0x20002380;
+RAM_APPLICATION_AMOUNT = DEFINED(RAM_APPLICATION_AMOUNT) ? RAM_APPLICATION_AMOUNT : 0xDC80;
 
 /**
  * See S132_nrf52_6.0.0_release_notes.pdf.
@@ -36,11 +37,10 @@ GROUP(-lgcc -lc -lnosys)
  *
  * Update the sections using a recent flash_placement.xml file...
  */
-
 MEMORY
 {
-  FLASH (rx) : ORIGIN = 0x26000, LENGTH = 0x4B000
-  RAM (rwx) :  ORIGIN = 0x20002380, LENGTH = 0xDC80
+  FLASH (rx) : ORIGIN = APPLICATION_START_ADDRESS, LENGTH = APPLICATION_LENGTH
+  RAM (rwx) :  ORIGIN = RAM_R1_BASE, LENGTH = RAM_APPLICATION_AMOUNT
   CORE_BL_RAM (rw) :     ORIGIN = 0x2000fd00, LENGTH = 0x300
   UICR_BOOTADDR (r) :    ORIGIN = 0x10001014, LENGTH = 0x04
   UICR_MBRPARAMADDR (r): ORIGIN = 0x10001018, LENGTH = 0x04
