@@ -40,6 +40,19 @@ In SDK 11, there is another bug that has to be fixed. In the file `nrf_drv_saadc
     #define NRF_DRV_SAADC_LIMITH_DISABLED (4095)
 
 
+Also, we need one function of FDS to be public.
+In `components/libraries/fds/fds.c`, replace:
+
+    static uint32_t flash_end_addr(void)
+
+With:
+
+    uint32_t fds_flash_end_addr(void)
+
+And to `components/libraries/fds/fds.h`, add:
+
+    uint32_t fds_flash_end_addr(void);
+
 
 ### J-Link
 
