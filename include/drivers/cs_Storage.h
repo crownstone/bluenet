@@ -49,6 +49,10 @@ typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, c
  * Some operations will block other operations. For example, you can't write a record while performing garbage
  * collection. You can't write a record while it's already being written. This is what the "busy" functions are for.
  * Each type can be set busy multiple times, for example in case multiple records of the same type are being deleted.
+ *
+ * FDS internally uses events NRF_EVT_FLASH_OPERATION_SUCCESS and NRF_EVT_FLASH_OPERATION_ERROR.
+ * These events don't give any context of the operation, so it is not adviced to use FDS together with something else
+ * that writes to flash (like Flash Manager).
  */
 class Storage : public EventListener {
 public:
@@ -152,14 +156,24 @@ public:
 	cs_ret_code_t garbageCollect();
 
 	/**
-	 * Handle Crownstone events
+	 * Handle Crownstone events.
 	 */
-	void handleEvent(event_t & event) {};
+	void handleEvent(event_t &) {};
 
 	/**
-	 * Handle FDS events
+	 * Handle FDS events.
 	 */
 	void handleFileStorageEvent(fds_evt_t const * p_fds_evt);
+
+	/**
+	 * Handle FDS SOC event NRF_EVT_FLASH_OPERATION_SUCCESS.
+	 */
+	void handleFlashOperationSuccess();
+
+	/**
+	 * Handle FDS SOC event NRF_EVT_FLASH_OPERATION_ERROR.
+	 */
+	void handleFlashOperationError();
 
 private:
 	Storage();
@@ -175,6 +189,31 @@ private:
 
 	bool _removingFile = false;
 	std::vector<uint16_t> _busy_record_keys;
+
+	/**
+	 * Next page to erase.
+	 *
+	 * Used by eraseAllPages().
+	 */
+	uint32_t _erasePage = 0;
+	/**
+	 * Page that should _not_ be erased.
+	 *
+	 * Used by eraseAllPages().
+	 */
+	uint32_t _eraseEndPage = 0;
+
+	/**
+	 * Erase all flash pages used by FDS.
+	 *
+	 * This should only be used to recover from a failing init.
+	 */
+	void eraseAllPages();
+
+	/**
+	 * Erase next page, started via eraseAllPages().
+	 */
+	void eraseNextPage();
 
 	// Use before ftok
 	void initSearch();
