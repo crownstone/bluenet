@@ -25,7 +25,8 @@
 
 Bluenet is code running on [Crownstone](http://crownstone.rocks) compatible devices such as [electronic connectors](https://shop.crownstone.rocks/products/built-in-crownstone), [electronic EU plugs](https://shop.crownstone.rocks/products/crownstone-plugs) and [grid-powered beacons, GuideStones](https://shop.crownstone.rocks/products/guidestones). Each Crownstone or GuideStone is a node in a network that uses signal strength for indoor localization of smartphones and wearables.
 
-### Features
+## Features
+
 - Made for indoor localization.
 - Includes a mesh network.
 - Power measuring.
@@ -33,22 +34,19 @@ Bluenet is code running on [Crownstone](http://crownstone.rocks) compatible devi
 - Configurable over the air.
 
 # Usage
+
 To use a device with bluenet code on it, you only need to know the Bluetooth protocol that bluenet uses. You can find the protocol definitions in the [protocol document](docs/PROTOCOL.md).
 
-### Libraries
-We also provide libraries which implements this protocol (so if you build a smartphone app you will not be bogged down into Bluetooth Low Energy details):
-
-- [Android](https://github.com/crownstone/bluenet-lib-android)
-- [iOS](https://github.com/crownstone/bluenet-ios-lib)
-- [Python](https://github.com/crownstone/bluenet-python-lib)
-
 # Build
+
 To build the bluenet code yourself, follow the [installation instructions](docs/INSTALL.md).
 
 # Communication
+
 You can best communicate bugs and feature requests via the [issue tracker](https://github.com/crownstone/bluenet/issues). For all other questions, please, feel free to ask us anything on our [website](http://crownstone.rocks).
 
 # Resources
+
 A short list for a quick overview:
 
 | Resource                                                                                              | Description                                                      |
@@ -57,6 +55,7 @@ A short list for a quick overview:
 | [Bluenet documentation](http://crownstone.github.io/bluenet/)                                         | Documentation of the firmware (doxygen-based)                    |
 | [Android library](https://github.com/crownstone/bluenet-android-lib)                                  | Android library (Kotlin)                                        |
 | [iOS library](https://github.com/crownstone/bluenet-ios-lib)                                          | iOS library (Swift)                                         |
+| [Python library](https://github.com/crownstone/bluenet-python-lib)                                    | Python library                                                      |
 | [Crownstone website](http://crownstone.rocks)                                                         | Website and shop for the Crownstone products                     |
 | [Crownstone Android app](https://play.google.com/store/apps/details?id=rocks.crownstone.consumerapp)  | Android app on the Play Store                                  |
 | [Crownstone iOS app](https://itunes.apple.com/us/app/crownstone/id1136616106?mt=8)                    | iOS app on the Apple Store                                     |
@@ -64,6 +63,7 @@ A short list for a quick overview:
 
 
 # Commercial use
+
 This code is used in a commercial product, the [Crownstone](http://crownstone.rocks). Our intellectual property exists on two levels:
 
 - The hardware is [patented](http://mijnoctrooi.rvo.nl/fo-eregister-view/search/details/1041053_NP/0/0/1/10/0/0/0/null_null/KG51bW1lcjooMTA0MTA1MykpIEFORCBwYXRlbnRSZWNvcmRTZXE6MQ==) under Dutch law with the main aim to protect you as a developer against fraudulent claims. 
@@ -71,11 +71,13 @@ This code is used in a commercial product, the [Crownstone](http://crownstone.ro
 
 Summarized, as a developer you can build your own services on top of the Crownstone stack. Benefit from our software development as much as you want! For PR reasons, it would be much appreciated to if you mention us of course!
 
-# Commercial activities
+# Help us
 
 Crownstone sells the Crownstone products through our [own channels](https://shop.crownstone.rocks). Buying our products is the best way in which you can support open-source projects like these! 
 
 Crownstone also integrates their hardware technology in third-party products, ranging from lights to desks.
+
+If you want to contribute yourself, please do! Fork this repository, work on your favorite feature, and issue a pull request!
 
 # Contributors
 
