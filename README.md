@@ -91,10 +91,10 @@ Crownstone also integrates their hardware technology in third-party products, ra
 Copyrights belong to the team of Crownstone B.V. and are provided under a noncontagious open-source license:
 
 * Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Alex de Mulder, Christian Haas
-* Date: 27 Jan. 2014
+* Creation date: 27 Jan. 2014
 * Triple-licensed: LGPL v3+, Apache, MIT
-* Crownstone B.V., http://crownstone.rocks
-* Rotterdam, The Netherlands
+* Crownstone B.V., https://crownstone.rocks
+* Stationsplein 45 d1.118, 3013 AK Rotterdam, The Netherlands
 
 This code is built on the shoulders of giants. Our special thanks go to Christopher Mason for the initial C++ code base at [http://hg.cmason.com/nrf](http://hg.cmason.com/nrf) and Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and Nordic Semiconductor) for the meshing functionality ([OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh)) and Nordic Semiconductor for the beautiful SoftDevices they have developed. The code of Mason falls under the same triple license. The code by Nordic falls under the license from Nordic (and that code is not part of this repository).
 
