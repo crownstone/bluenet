@@ -25,7 +25,6 @@
 
 Bluenet is code running on [Crownstone](http://crownstone.rocks) compatible devices such as [electronic connectors](https://shop.crownstone.rocks/products/built-in-crownstone), [electronic EU plugs](https://shop.crownstone.rocks/products/crownstone-plugs) and [grid-powered beacons, GuideStones](https://shop.crownstone.rocks/products/guidestones). Each Crownstone or GuideStone is a node in a network that uses signal strength for indoor localization of smartphones and wearables.
 
-
 ### Features
 - Made for indoor localization.
 - Includes a mesh network.
@@ -50,18 +49,18 @@ To build the bluenet code yourself, follow the [installation instructions](docs/
 You can best communicate bugs and feature requests via the [issue tracker](https://github.com/crownstone/bluenet/issues). For all other questions, please, feel free to ask us anything on our [website](http://crownstone.rocks).
 
 # Resources
-The different other software tools and online resources have been mentioned above, but here is a short list:
+A short list for a quick overview:
 
 | Resource                                                                                              | Description                                                      |
 | ---                                                                                                   | ---                                                              |
 | [Bluenet firmware](https://github.com/crownstone/bluenet)                                             | This repository, open-source firmware (C++) for smart plugs      |
 | [Bluenet documentation](http://crownstone.github.io/bluenet/)                                         | Documentation of the firmware (doxygen-based)                    |
-| [Android library](https://github.com/crownstone/bluenet-android-lib)                                  | Android library (Java)                                           |
-| [iOS library](https://github.com/crownstone/bluenet-ios-lib)                                          | iOS library (Swift)                                              |
-| [Crownstone website](http://crownstone.rocks)                                                         | Website and shop for the Crownstone plugs                        |
-| [Crownstone Android app](https://play.google.com/store/apps/details?id=rocks.crownstone.consumerapp)  | Android app on the Play Store                                    |
-| [Crownstone iOS app](https://itunes.apple.com/us/app/crownstone/id1136616106?mt=8)                    | iOS app on the Apple Store                                       |
-| [Crownstone app source](https://github.com/crownstone/crownstone-app)                                 | Source code for the cross-platform app (React Native)            |
+| [Android library](https://github.com/crownstone/bluenet-android-lib)                                  | Android library (Kotlin)                                        |
+| [iOS library](https://github.com/crownstone/bluenet-ios-lib)                                          | iOS library (Swift)                                         |
+| [Crownstone website](http://crownstone.rocks)                                                         | Website and shop for the Crownstone products                     |
+| [Crownstone Android app](https://play.google.com/store/apps/details?id=rocks.crownstone.consumerapp)  | Android app on the Play Store                                  |
+| [Crownstone iOS app](https://itunes.apple.com/us/app/crownstone/id1136616106?mt=8)                    | iOS app on the Apple Store                                     |
+| [Crownstone app source](https://github.com/crownstone/crownstone-app)                                 | Source code for the cross-platform app (React Native)           |
 
 
 # Commercial use
