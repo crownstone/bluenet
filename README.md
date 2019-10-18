@@ -73,11 +73,12 @@ Summarized, as a developer you can build your own services on top of the Crownst
 
 # Help us
 
-Crownstone sells the Crownstone products through our [own channels](https://shop.crownstone.rocks). Buying our products is the best way in which you can support open-source projects like these! 
+There are many ways to help us!
 
-Crownstone also integrates their hardware technology in third-party products, ranging from lights to desks.
-
-If you want to contribute yourself, please do! Fork this repository, work on your favorite feature, and issue a pull request!
+- Crownstone sells the Crownstone products through our [own channels](https://shop.crownstone.rocks). Buying our products is the best way in which you can support open-source projects like these! 
+- Crownstone also integrates their hardware technology in third-party products, ranging from lights to desks. Ask us for our expertise!
+- If you want to contribute yourself, please do! Fork this repository, work on your favorite feature, and issue a pull request!
+- If you appreciate open-source and privacy-oriented hardware projects, but you're not into this type of tech or product, feel free to help by starring :star: our repository! 
 
 # Contributors
 
