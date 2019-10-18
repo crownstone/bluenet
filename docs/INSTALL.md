@@ -3,9 +3,9 @@
 
 ## Prerequisites
 
-Bluenet uses a cmake build system, so you will need it:
+Bluenet uses the `cmake` build system, `git` as versioning system, and `wget` to retrieve other files.
 
-    sudo apt-get install cmake
+    sudo apt install cmake git wget
 
 
 ## Getting the Bluenet code
