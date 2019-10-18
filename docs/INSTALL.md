@@ -44,10 +44,14 @@ Also, we need one function of FDS to be public.
 In `components/libraries/fds/fds.c`, replace:
 
     static uint32_t flash_end_addr(void)
+    ...
+    flash_end_addr();
 
 With:
 
     uint32_t fds_flash_end_addr(void)
+    ...
+    fds_flash_end_addr();
 
 And to `components/libraries/fds/fds.h`, add:
 
