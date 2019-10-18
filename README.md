@@ -90,7 +90,7 @@ Crownstone also integrates their hardware technology in third-party products, ra
 
 Copyrights belong to the team of Crownstone B.V. and are provided under a noncontagious open-source license:
 
-* Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Alex de Mulder, Christian Haas
+* Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Alex de Mulder, Christian Haas, Naveen Chakravarthy, Aniket Samant
 * Creation date: 27 Jan. 2014
 * Triple-licensed: LGPL v3+, Apache, MIT
 * Crownstone B.V., https://crownstone.rocks
