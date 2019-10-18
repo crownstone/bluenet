@@ -1,3 +1,10 @@
+Version 3.0.3:
+ - Version bump to 3.0.3  int: 18
+ - Add release config for crownstone_3.0.3
+ - Forgot one fds patch.
+ - Updated install doc.
+ - Handle failure of FDS init.
+
 Version 3.0.2:
  - Version bump to 3.0.2  int: 17
  - Add release config for crownstone_3.0.2
