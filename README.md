@@ -23,7 +23,7 @@
 
 <br>
 
-Bluenet is code running on [Crownstone](http://crownstone.rocks) compatible devices such as [electronic connectors](https://shop.crownstone.rocks/products/built-in-crownstone), [electronic EU plugs](https://shop.crownstone.rocks/products/crownstone-plugs) and [grid-powered beacons, GuideStones](https://shop.crownstone.rocks/products/guidestones). Each Crownstone or GuideStone is a node in a network that uses signal strength for indoor localization of smartphones and wearables.
+Bluenet is code running on [Crownstone](http://crownstone.rocks) compatible devices such as [electronic connectors](https://shop.crownstone.rocks/products/built-in-crownstone), [electronic EU plugs](https://shop.crownstone.rocks/products/crownstone-plugs) and [grid-powered beacons, Guidestones](https://shop.crownstone.rocks/products/guidestones). Each Crownstone or Guidestone is a node in a network that uses signal strength for indoor localization of smartphones and wearables.
 
 ## Features
 
