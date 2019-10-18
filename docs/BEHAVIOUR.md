@@ -126,7 +126,7 @@ uint8 | Index | 1 | Index of the behaviour to obtain. 0xff for 'get all'
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | Type | 1 | <ol start="0"><li>[Switch Behaviour](#switch_behaviour)</li><li>[Twilight Behaviour](#twilight_behaviour)</li></ol>
+uint8_t | Type | 1 | <ol start="0"><li>[Switch Behaviour](#switch_behaviour)</li><li>[Twilight Behaviour](#twilight_behaviour)</li><li>[Smart Timer](#smart_timer)</li></ol>
 uint8_t[] | Data | ... | Type dependent
 
 <a name="switch_behaviour"></a>
@@ -151,11 +151,38 @@ uint8 | Options | 1 | Bitmask, must be all 0 except for the following bits: <ol 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
-uint8 | Options | 1 | Bitmask, must be all 0 except for the following bits: <ol start="0"><li>Stay on until everyone has left the sphere</li><li>Stay on until everyone has left the room</li></ol>
 [Day Of Week Bitmask](#day_of_week_bitmask) | Active Days | 1 | Selects which days of the week this behaviour is active
 [Time Of Day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
 [Time Of Day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
-[Presence Description](#presence_description) | Presence | 8 | Description of the presence conditions that need to hold for this behaviour to be active. 
+
+<a name="smart_timer"></a>
+#### Smart Timer
+
+A Smart Timer consists of a Switch Behaviour and an exit condition. This can be used to ensure that for example,
+when a timer expires it will wait until the room is empty before switching off the device. (Essentially extending the original behaviour.)
+
+At the 'Until'-time of the 'Core' behaviour, it is checked wether the behaviour is still active (i.e. its presence condition is still fullfilled).
+If that is the case, a temporary extension for the behaviour is created which is identical to the Core behaviour with the Presence condition replaced
+by the Extension Presence and the Until time replaced by the Extension Until time. This temporary rule will be destroyed after the Extension Until time
+expires. 
+
+![Smart Timer](../docs/diagrams/smart-timer.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Switch Behaviour](#switch_behaviour) | Core Behaviour | 20 | The core behaviour is interpreted identical to Switch Behaviour.
+[End Condition](#behaviour_end_condition) | Extension End Condition |  | 
+
+<a name="behaviour_end_condition"></a>
+#### Behaviour End Condition
+
+![End Condition](../docs/diagrams/behaviour-end-condition.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Type | 1 | <ol start="0"><li>Presence extension: Pertain until presence condition fails</li><li>Time Limited Presence Extension: also destroy after time-out</li></ol>
+[Presence Description](#presence_description) | Extension Presence | 8 | Description of the presence conditions that the Extension behaviour will use.
+[Time Difference](#time_difference) | Extension Until | 5 | Extend the core behaviour's 'Until' time by the given difference.
 
 <a name="behaviour_hash"></a>
 #### Behaviour Hash
@@ -166,6 +193,15 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint32 | Hash | 4 | [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum) hash of a [Behaviour Payload](#behaviour_payload)
 
+<a name="time_difference"></a>
+#### Time Difference
+
+![Time Difference](../docs/diagrams/time-difference.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+int32 | Time Payload | 4 | Signed difference in seconds since a known-from-context moment in time (future - past >= 0).
+
 <a name="time_of_day"></a>
 #### Time Of Day
 
@@ -173,8 +209,8 @@ uint32 | Hash | 4 | [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_chec
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Type |  1 | <ol start="0"><li>Seconds since midnight </li><li>Seconds Since Sundown </li><li>Seconds Since Sunrise</li></ol>
-Type dependent | Time Payload | 4 | <ol start="0"><li>uint32</li><li>int32</li><li>int32</li></ol>
+uint8 | Base Time |  1 | <ol start="0"><li>Midnight </li><li>Sundown </li><li>Sunrise</li></ol>
+[Time Difference](#time_difference) | Offset | 4 | 
 
 <a name="day_of_week_bitmask"></a>
 #### Day Of Week Bitmask

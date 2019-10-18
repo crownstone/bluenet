@@ -26,7 +26,7 @@ void BehaviourStore::handleEvent(event_t& evt){
     }
 }
 
-bool BehaviourStore::saveBehaviour(Behaviour b, size_t index){
+bool BehaviourStore::saveBehaviour(Behaviour b, uint8_t index){
     if(index > MaxBehaviours){
         return false;
     }

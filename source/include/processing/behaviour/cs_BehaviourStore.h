@@ -12,6 +12,7 @@
 
 #include <array>
 #include <optional>
+#include <vector>
 
 /**
  * Keeps track of the behaviours that are active on this crownstone.
@@ -34,7 +35,13 @@ class BehaviourStore : public EventListener {
      * 
      * Returns true on success, false if [index] is out of range.
      */
-    bool saveBehaviour(Behaviour b, size_t index);
+    bool saveBehaviour(Behaviour b, uint8_t index);
+
+    static inline const std::array<std::optional<Behaviour>,MaxBehaviours>& getActiveBehaviours() {
+        return activeBehaviours;
+    }
+
+    private:
 
     class InterfaceB {
         /**
@@ -46,7 +53,7 @@ class BehaviourStore : public EventListener {
          * 
          * A hash is computed and saved together with [b].
          */
-         size_t save(uint32_t expected_master_hash, Behaviour b);
+         uint8_t save(uint32_t expected_master_hash, Behaviour b);
 
         /**
          * Replace the behaviour at [index] with [b], if the hash of the 
@@ -55,7 +62,7 @@ class BehaviourStore : public EventListener {
          * if these hashes coincide, postcondition is identical to the
          * postcondition of calling save(b) when it returns [index].
          */
-        bool replace(size_t index, uint32_t expected_hash, Behaviour b);
+        bool replace(uint8_t index, uint32_t expected_hash, Behaviour b);
 
         /**
          * deletes the behaviour at [index], if the hash of the 
@@ -63,24 +70,24 @@ class BehaviourStore : public EventListener {
          * [expected_hash] nothing will happen and false is returned,
          * else the behaviour is removed from storage.
          */
-        bool remove(size_t index, uint32_t expected_hash);
+        bool remove(uint8_t index, uint32_t expected_hash);
 
         /**
          *  returns the stored behaviour at [index].
          */
-        Behaviour get(size_t index);
+        Behaviour get(uint8_t index);
 
         /**
          * returns a map with the currently occupied indices and the 
          * behaviours at those indices.
          */
-        std::vector<std::pair<size_t,Behaviour>> get();
+        std::vector<std::pair<uint8_t,Behaviour>> get();
 
         /**
          * returns the hash of the behaviour at [index]. If no behaviour
          * is stored at this index, 0xffffffff is returned.
          */
-        uint32_t hash(size_t index);
+        uint32_t hash(uint8_t index);
 
         /**
          * returns a hash value that takes all state indices into account.
@@ -94,9 +101,4 @@ class BehaviourStore : public EventListener {
         uint32_t hash();
 
     } interfaceB;
-
-
-    static inline const std::array<std::optional<Behaviour>,MaxBehaviours>& getActiveBehaviours() {
-        return activeBehaviours;
-    }
 };
