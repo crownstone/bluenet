@@ -10,7 +10,15 @@ Bluenet uses the `cmake` build system, `git` as versioning system, and `wget` to
 
 ## Getting the Bluenet code
 
-The best way is to first [fork](https://github.com/crownstone/bluenet/fork) the bluenet repository. Then create a workspace folder where all the necessary files and folders will be stored, e.g.
+The best way is to first [fork](https://github.com/crownstone/bluenet/fork) the bluenet repository.
+
+<p align="center">
+  <a href="https://github.com/crownstone/bluenet/fork">
+    <img src="https://img.shields.io/badge/fork-bluenet-blue" alt="Fork">
+  </a>
+</p>
+
+Create a workspace folder where all the necessary files and folders will be stored, e.g.
 
     mkdir -p ~/workspace
 
