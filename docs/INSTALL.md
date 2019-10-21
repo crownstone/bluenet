@@ -163,6 +163,10 @@ In a third console, you can also run an RTT Client
 
     make rtt_client
 
+Alternatively, you can use e.g. minicom over UART (`sudo apt install minicom`)
+    
+    make uart_client
+
 ## Configuration
 
 If you want to configure for a different target, go to the `config` directory in the workspace and copy the default configuration files to a new directory, say `board0`.

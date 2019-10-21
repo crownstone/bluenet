@@ -606,6 +606,12 @@ ELSE()
 			COMMENT "Debug server, runs in background"
 			)
 		
+		ADD_CUSTOM_TARGET(uart_client
+			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
+			COMMAND sudo minicom -b 230400 -c on -D /dev/ttyACM0
+			COMMENT "UART client, runs in background"
+			)
+		
 		ADD_CUSTOM_TARGET(rtt_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** RTT client, keep running in separate shell"
 			COMMAND JLinkRTTClient
