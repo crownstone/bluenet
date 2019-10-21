@@ -38,9 +38,9 @@ list(APPEND CMAKE_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 #######################################################################################################################
 
 message(STATUS "Assumed to be installed:")
-message(STATUS "git  - sudo apt install git")
-message(STATUS "pip3 - sudo apt install python3-pip")
-message(STATUS "wget - sudo apt install wget")
+message(STATUS "git  - sudo apt-get install git")
+message(STATUS "pip3 - sudo apt-get install python3-pip")
+message(STATUS "wget - sudo apt-get install wget")
 
 find_package(Git REQUIRED)
 
@@ -177,7 +177,7 @@ if(DOWNLOAD_NRFCONNECT)
     GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-core
     SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
     BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-    CONFIGURE_COMMAND sudo apt install build-essential python2.7 libudev-dev libgconf-2-4
+    CONFIGURE_COMMAND sudo apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
     BUILD_COMMAND npm install
     INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${WORKSPACE_DIR}/tools/nrfconnect_apps 
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${WORKSPACE_DIR}/tools/nrfconnect_apps $ENV{HOME}/.nrfconnect-apps/local
@@ -189,7 +189,7 @@ if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
     GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-programmer
     SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
     BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
-    CONFIGURE_COMMAND sudo apt install build-essential python2.7 libudev-dev libgconf-2-4
+    CONFIGURE_COMMAND sudo apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
     BUILD_COMMAND npm install
     INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
     )
