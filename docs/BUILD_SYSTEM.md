@@ -46,7 +46,7 @@ the `CMakeLists.txt` file.
 There are some other tools from Nordic that are convenient to use. They are optional, however, they are quite 
 convenient. For example, reading out the memory layout is implemented very nicely (see Figure).
 
-![Nordic Tools](docs/images/pc_nordic_tools.png)
+![Nordic Tools](images/pc_nordic_tools.png)
 
 You can enable the download of `nrfconnect` by:
 
