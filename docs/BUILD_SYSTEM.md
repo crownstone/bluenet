@@ -53,7 +53,7 @@ You can enable the download of `nrfconnect` by:
     cmake .. -DDOWNLOAD_NRFCONNECT=ON
     make
 
-It downloads a lot of stuff, amongst which also `nrfjprog` it it cannot find it. Make sure it does not lead to 
+This particular tool requires `npm`. Install it through something like `sudo apt install npm`. Subsequently, it downloads a lot of stuff, amongst which also `nrfjprog` it it cannot find it. Make sure it does not lead to 
 version conflicts. You can run these by:
 
     make nrfconnect_core_setup
