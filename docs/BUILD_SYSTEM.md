@@ -43,8 +43,12 @@ If you update the version of one of the supporting tools, you will also need to 
 If you upgrade to a new file, download it, and run `md5sum *` on the command line. Then update both name and hash in
 the `CMakeLists.txt` file.
 
-There are some other tools from Nordic that are convenient to use. However, they are optional. You can enable the
-download of `nrfconnect` by:
+There are some other tools from Nordic that are convenient to use. They are optional, however, they are quite 
+convenient. For example, reading out the memory layout is implemented very nicely (see Figure).
+
+![Nordic Tools](docs/images/pc_nordic_tools.png)
+
+You can enable the download of `nrfconnect` by:
 
     cmake .. -DDOWNLOAD_NRFCONNECT=ON
     make
