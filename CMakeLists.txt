@@ -231,15 +231,13 @@ endif()
 
 compilation_info(COMPILATION_DAY)
 
-if(VERBOSITY GREATER 4)
-  message(STATUS "git branch: ${GIT_BRANCH}")
-  message(STATUS "git hash: ${GIT_HASH}")
-  message(STATUS "compilation day: ${COMPILATION_DAY}")
-endif()
-
 if(NOT COMPILATION_DAY STREQUAL "")
   list(APPEND CMAKE_ARGS "-DCOMPILATION_DAY:STRING=${COMPILATION_DAY}")
 endif()
+
+message(STATUS "Git branch: ${GIT_BRANCH}")
+message(STATUS "Git hash: ${GIT_HASH}")
+message(STATUS "Compilation day: ${COMPILATION_DAY}")
 
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}/stamp/${BOARD_TARGET})
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}/tmp/${BOARD_TARGET})
