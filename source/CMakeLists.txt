@@ -74,6 +74,7 @@ SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The wor
 SET(SOFTDEVICE_HEX_FILE                      ""            CACHE STRING "Softdevice hex file")
 SET(PASS_FILE                                "dfu_pkg_signing_key" CACHE STRING "Pass file (containing key")
 SET(KEY_FILE                                 "temp.key"    CACHE STRING "Pass file (containing key")
+SET(SUPERUSER_SWITCH                         "sudo"        CACHE STRING "Switch to superuser")
 
 MATH(EXPR SWO_PORT       "${GDB_PORT}+1")
 MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
@@ -608,7 +609,7 @@ ELSE()
 		
 		ADD_CUSTOM_TARGET(uart_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
-			COMMAND sudo minicom -b 230400 -c on -D /dev/ttyACM0
+			COMMAND ${SUPERUSER_SWITCH} minicom -b 230400 -c on -D /dev/ttyACM0
 			COMMENT "UART client, runs in background"
 			)
 		

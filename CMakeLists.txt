@@ -23,6 +23,7 @@ set(DEFAULT_CONF_CMAKE_PATH                      ${WORKSPACE_DIR}/source/conf/cm
 set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modules)
 
 set(CMAKE_BUILD_TYPE                             Debug   CACHE STRING "Default build type")
+SET(SUPERUSER_SWITCH                             sudo    CACHE STRING "Switch to superuser")
 
 project(${BOARD_TARGET} NONE)
 
@@ -131,7 +132,7 @@ if(DOWNLOAD_JLINK)
     SOURCE_DIR ${WORKSPACE_DIR}/tools/jlink
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
     BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-    INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
+    INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
     # USES_TERMINAL_INSTALL 1 # Does not actually work
     )
 endif()
@@ -157,7 +158,7 @@ if(DOWNLOAD_NRFJPROG)
     SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfjprog
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
     BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-    INSTALL_COMMAND sudo dpkg -i ${WORKSPACE_DIR}/tools/nrfjprog/${NRFJPROG_DEB_FILE} 
+    INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/tools/nrfjprog/${NRFJPROG_DEB_FILE} 
     )
 endif()
 
@@ -177,7 +178,7 @@ if(DOWNLOAD_NRFCONNECT)
     GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-core
     SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
     BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-    CONFIGURE_COMMAND sudo apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
+    CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
     BUILD_COMMAND npm install
     INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${WORKSPACE_DIR}/tools/nrfconnect_apps 
             COMMAND ${CMAKE_COMMAND} -E create_symlink ${WORKSPACE_DIR}/tools/nrfconnect_apps $ENV{HOME}/.nrfconnect-apps/local
@@ -189,7 +190,7 @@ if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
     GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-programmer
     SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
     BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
-    CONFIGURE_COMMAND sudo apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
+    CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
     BUILD_COMMAND npm install
     INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
     )
