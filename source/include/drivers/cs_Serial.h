@@ -11,6 +11,7 @@ extern "C" {
 #endif
 
 #include <cfg/cs_Debug.h>
+#include <cfg/cs_Git.h>
 #include <ble/cs_Nordic.h>
 
 #include "stdint.h"

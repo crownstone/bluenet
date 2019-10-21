@@ -174,7 +174,6 @@ endif()
 
 if(DOWNLOAD_NRFCONNECT) 
   ExternalProject_Add(git_nrfconnect_core
-    #GIT_REPOSITORY git@github.com:NordicSemiconductor/pc-nrfconnect-core
     GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-core
     SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
     BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
@@ -187,7 +186,6 @@ endif()
 
 if(DOWNLOAD_NRFCONNECT_PROGRAMMER) 
   ExternalProject_Add(git_nrfconnect_apps
-    #GIT_REPOSITORY git@github.com:NordicSemiconductor/pc-nrfconnect-core
     GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-programmer
     SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
     BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
@@ -219,25 +217,24 @@ if(VERBOSITY GREATER 5)
   message(STATUS "list: ${CMAKE_ARGS}")
 endif()
 
-git_info("${WORKSPACE_DIR}/source" GIT_BRANCH GIT_HASH)
+#git_info("${WORKSPACE_DIR}/source" GIT_BRANCH GIT_HASH)
+#if(NOT GIT_BRANCH STREQUAL "")
+#  list(APPEND CMAKE_ARGS "-DGIT_BRANCH:STRING=${GIT_BRANCH}")
+#endif()
+#
+#if(NOT GIT_HASH STREQUAL "")
+#  list(APPEND CMAKE_ARGS "-DGIT_HASH:STRING=${GIT_HASH}")
+#endif()
+#
+#compilation_info(COMPILATION_DAY)
+#
+#if(NOT COMPILATION_DAY STREQUAL "")
+#  list(APPEND CMAKE_ARGS "-DCOMPILATION_DAY:STRING=${COMPILATION_DAY}")
+#endif()
 
-if(NOT GIT_BRANCH STREQUAL "")
-  list(APPEND CMAKE_ARGS "-DGIT_BRANCH:STRING=${GIT_BRANCH}")
-endif()
-
-if(NOT GIT_HASH STREQUAL "")
-  list(APPEND CMAKE_ARGS "-DGIT_HASH:STRING=${GIT_HASH}")
-endif()
-
-compilation_info(COMPILATION_DAY)
-
-if(NOT COMPILATION_DAY STREQUAL "")
-  list(APPEND CMAKE_ARGS "-DCOMPILATION_DAY:STRING=${COMPILATION_DAY}")
-endif()
-
-message(STATUS "Git branch: ${GIT_BRANCH}")
-message(STATUS "Git hash: ${GIT_HASH}")
-message(STATUS "Compilation day: ${COMPILATION_DAY}")
+#message(STATUS "Git branch: ${GIT_BRANCH}")
+#message(STATUS "Git hash: ${GIT_HASH}")
+#message(STATUS "Compilation day: ${COMPILATION_DAY}")
 
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}/stamp/${BOARD_TARGET})
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}/tmp/${BOARD_TARGET})

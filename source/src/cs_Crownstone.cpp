@@ -32,6 +32,7 @@
 
 #include <ble/cs_CrownstoneManufacturer.h>
 #include <cfg/cs_Boards.h>
+#include <cfg/cs_Git.h>
 #include <cfg/cs_HardwareVersions.h>
 #include <cs_Crownstone.h>
 #include <common/cs_Types.h>
@@ -868,7 +869,8 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 #define FIRMWARE_VERSION GIT_HASH
 #endif
 
-	LOGi("Welcome! Bluenet firmware, version %s", STRINGIFY(FIRMWARE_VERSION));
+	LOGi("Welcome! Bluenet firmware, version %s", g_GIT_SHA1);
+//	LOGi("Welcome! Bluenet firmware, version %s", STRINGIFY(FIRMWARE_VERSION));
 	LOGi("\033[35;1m");
 	LOGi(" _|_|_|    _|                                            _|     ");
 	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");

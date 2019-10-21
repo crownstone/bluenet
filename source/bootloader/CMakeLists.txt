@@ -25,8 +25,8 @@ MESSAGE(STATUS "bootloader: Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
 SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
-SET(GIT_BRANCH                               "unset"       CACHE STRING "Current git branch")
-SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
+#SET(GIT_BRANCH                               "unset"       CACHE STRING "Current git branch")
+#SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
 SET(CONFIG_DIR                               "config"      CACHE STRING "The config main directory")
@@ -39,8 +39,8 @@ SET(BOOTLOADER_LENGTH                        "unset"       CACHE STRING "Size of
 #######################################################################################################################
 
 MESSAGE(STATUS "bootloader: Set verbosity to level: ${VERBOSITY}")
-MESSAGE(STATUS "bootloader: Git branch: ${GIT_BRANCH}")
-MESSAGE(STATUS "bootloader: Day of compilation: ${COMPILATION_DAY}")
+#MESSAGE(STATUS "bootloader: Git branch: ${GIT_BRANCH}")
+#MESSAGE(STATUS "bootloader: Day of compilation: ${COMPILATION_DAY}")
 MESSAGE(STATUS "bootloader: Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
