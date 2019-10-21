@@ -41,22 +41,32 @@ MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 #######################################################################################################################
 
-# TODO: Remove other arguments from the CACHE. If they require a default, only set it when it is not defined.
 if(NOT CONFIG_DIR)
   set(CONFIG_DIR "config")
 endif()
 
+if(NOT GDB_PORT)
+  set(GDB_PORT "2331")
+endif()
+
+if(NOT BOARD_TARGET)
+  set(BOARD_TARGET "2331")
+endif()
+
+# Get the following information via JlinkExe and then ShowEmuList
+if(NOT SERIAL_NUM)
+  set(SERIAL_NUM "")
+endif()
+
+if(NOT GIT_BRANCH)
+  message(FATAL_ERROR "The code should live on a branch in a git repository")
+endif()
 
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
 SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
-SET(GIT_BRANCH                               "unset"       CACHE STRING "Current git branch")
 SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
-SET(BOARD_TARGET                             "unset"       CACHE STRING "The board target")
-SET(GDB_PORT                                 "2331"        CACHE STRING "The gdb port for the debug server")
-# Get the following information via JlinkExe and then ShowEmuList
-SET(SERIAL_NUM                               ""            CACHE STRING "The serial number of the JLink")
 SET(SOFTDEVICE_HEX_FILE                      ""            CACHE STRING "Softdevice hex file")
 SET(PASS_FILE                                "dfu_pkg_signing_key" CACHE STRING "Pass file (containing key")
 SET(KEY_FILE                                 "temp.key"    CACHE STRING "Pass file (containing key")
@@ -74,9 +84,10 @@ MESSAGE(STATUS "Day of compilation: ${COMPILATION_DAY}")
 MESSAGE(STATUS "Compiler: ${CMAKE_C_COMPILER}")
 
 IF(SERIAL_NUM STREQUAL "")
-	MESSAGE(STATUS "Default JLink device (serial number not specified)")
+  MESSAGE(STATUS "Default JLink device (serial number not specified)")
+ELSE()
+  MESSAGE(STATUS "Serial number of JLink device to use ${SERIAL_NUM}")
 ENDIF()
-MESSAGE(STATUS "Serial number of JLink device to use ${SERIAL_NUM}")
 
 IF(GDB_PORT STREQUAL "2331")
 	MESSAGE(STATUS "Default GDB port (2331)")
@@ -688,6 +699,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND nrfjprog -f nrf52 --program ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 			COMMENT "Flashes bootloader settings to remote target board"
+			DEPENDS build_bootloader_settings
 			)
 	
 		ADD_CUSTOM_TARGET(merge_bootloader_settings
