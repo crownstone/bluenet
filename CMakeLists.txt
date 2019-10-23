@@ -23,7 +23,9 @@ set(DEFAULT_CONF_CMAKE_PATH                      ${WORKSPACE_DIR}/source/conf/cm
 set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modules)
 
 set(CMAKE_BUILD_TYPE                             Debug   CACHE STRING "Default build type")
-SET(SUPERUSER_SWITCH                             sudo    CACHE STRING "Switch to superuser")
+set(SUPERUSER_SWITCH                             sudo    CACHE STRING "Switch to superuser")
+
+set(PYTHON_EXECUTABLE                            python3 CACHE STRING "The python executable")
 
 project(${BOARD_TARGET} NONE)
 
@@ -40,8 +42,10 @@ list(APPEND CMAKE_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 
 message(STATUS "Assumed to be installed:")
 message(STATUS "git  - sudo apt-get install git")
-message(STATUS "pip3 - sudo apt-get install python3-pip")
+message(STATUS "python/pip - sudo apt-get install python python-pip")
 message(STATUS "wget - sudo apt-get install wget")
+
+message(STATUS "Using python version: ${PYTHON_EXECUTABLE}")
 
 find_package(Git REQUIRED)
 
@@ -164,7 +168,7 @@ endif()
 
 if(DOWNLOAD_NRFUTIL)
   ExternalProject_Add(nrfutil
-    DOWNLOAD_COMMAND pip3 install nrfutil
+    DOWNLOAD_COMMAND ${PYTHON_EXECUTABLE} -m pip install nrfutil
     DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
     SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfutil
     CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
