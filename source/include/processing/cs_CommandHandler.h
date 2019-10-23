@@ -101,6 +101,9 @@ private:
 	cs_ret_code_t handleCmdUartMsg               (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	cs_ret_code_t handleCmdUartEnable            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 
+	cs_ret_code_t handleCmdSaveBehaviour         (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	
+
 	/**
 	 * Reset, after a delay.
 	 * TODO: This function doesn't belong in this class.

@@ -101,5 +101,4 @@ class TimeOfDay {
      * Implicit cast operators
      */
     operator uint32_t(){ return convert(BaseTime::Midnight).sec_since_base; }   
-
 };

@@ -203,7 +203,7 @@ Type | Name | Length | Description
 int32 | Time Payload | 4 | Signed difference in seconds since a known-from-context moment in time (future - past >= 0).
 
 <a name="time_of_day"></a>
-#### Time Of Day
+#### Time of Day
 
 ![Time Of Day](../docs/diagrams/time-of-day.png)
 
@@ -213,7 +213,7 @@ uint8 | Base Time |  1 | <ol start="0"><li>Midnight </li><li>Sundown </li><li>Su
 [Time Difference](#time_difference) | Offset | 4 | 
 
 <a name="day_of_week_bitmask"></a>
-#### Day Of Week Bitmask
+#### Day of Week Bitmask
 
 ![Day Of Week](../docs/diagrams/day-of-week-bitmask.png)
 
@@ -224,11 +224,14 @@ uint8 | Bitmask | 1 | 0: sunday - 6: saturday. 7: must be 0.
 <a name="presence_description"></a>
 #### Presence Description
 
+Given that for each room it is known if there are users present in that room or not, a Presence Description
+evaluates to 'true' or 'false'. It can be used to implement behaviours that take current presence into account.
+
 ![Presence Description](../docs/diagrams/presence-description.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Type | 1 | <ol start="0"><li>Vaccuously true condition</li><li>Anyone in any of the rooms</li><li>Noone in any of the rooms</li></ol>
+uint8 | Type | 1 | <ol start="0"><li>Vacuously true condition</li><li>Anyone in any of the rooms</li><li>Noone in any of the rooms</li><li>Anyone anywhere in sphere</li><li>Noone anywhere in sphere</li></ol>
 uint64 | Active Rooms Mask | 8 | Room with id `i` corresponds to bit `i` in this mask.
 
 <a name="firmware_design"></a>

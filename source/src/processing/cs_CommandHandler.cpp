@@ -148,6 +148,8 @@ cs_ret_code_t CommandHandler::handleCommand(
 		return handleCmdUartMsg(buffer, size, accessLevel);
 	case CTRL_CMD_UART_ENABLE:
 		return handleCmdUartEnable(buffer, size, accessLevel);
+	case CTRL_CMD_SAVE_BEHAVIOUR:
+		return handleCmdSaveBehaviour(buffer,size,accessLevel);
 	default:
 		LOGe("Unknown type: %u", type);
 		return ERR_UNKNOWN_TYPE;
@@ -758,6 +760,20 @@ cs_ret_code_t CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const uin
 	serial_enable((serial_enable_t)enable);
 	return ERR_SUCCESS;
 }
+
+
+cs_ret_code_t CommandHandler::handleCmdSaveBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+	LOGd(STR_HANDLE_COMMAND, "Save Behaviour");
+
+	if(size != 21){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	// not implemented.
+	return ERR_NOT_IMPLEMENTED;
+}
+	
 
 
 

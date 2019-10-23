@@ -7,26 +7,29 @@
 
 #pragma once
 
+#include <presence/cs_PresencePredicate.h>
+
+#include <algorithm>
 #include <cstdint>
 #include <cstddef>
 
 namespace WireFormat {
 
 template <class T>
-inline T deserialize(uint8_t* data, size_t len);
+T deserialize(uint8_t* data, size_t len);
 
-// full specialization required to be in cpp file 
-template<> 
-inline uint32_t WireFormat::deserialize(uint8_t* data, size_t len){
-    // assert(len == 4);
-    return data[3] << 8*3 | data[2] << 8*2 | data[1] << 8*1 | data[0]  << 8*0;
-}
+// ========== Specializations =========
 
 template<> 
-inline int32_t WireFormat::deserialize(uint8_t* data, size_t len){
-    // assert(len == 4);
-    return data[3] << 8*3 | data[2] << 8*2 | data[1] << 8*1 | data[0]  << 8*0;
-}
+uint32_t WireFormat::deserialize(uint8_t* data, size_t len);
+
+template<> 
+int32_t WireFormat::deserialize(uint8_t* data, size_t len);
+
+template<> 
+uint64_t WireFormat::deserialize(uint8_t* data, size_t len);
+
+template<>
+PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len);
 
 } // namespace WireFormat
-
