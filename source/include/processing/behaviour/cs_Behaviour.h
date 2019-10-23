@@ -56,8 +56,8 @@ class Behaviour {
     bool isValid(time_t currenttime, presence_data_t currentpresence) const;
 
     private:
-    time_t behaviourappliesfrom = 0x0000;
-    time_t behaviourappliesuntil = 0x0000;
+    time_t behaviourappliesfrom = TimeOfDay::Midnight();
+    time_t behaviourappliesuntil = TimeOfDay::Midnight();
     presence_data_t requiredpresencebitmask = 0x00;
 
     uint8_t intendedStateWhenBehaviourIsValid = 0;

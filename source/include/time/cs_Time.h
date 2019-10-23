@@ -7,8 +7,6 @@
 
 #pragma once
 
-#include <time/cs_TimeOfDay.h>
-
 #include <stdint.h>
 
 class Time {
@@ -22,6 +20,6 @@ class Time {
      * Implicit cast operators
      */
     operator uint32_t(){ return posixTimeStamp; }
-    operator TimeOfDay(){ return posixTimeStamp % (24*60*60); }
+    operator TimeOfDay(){ return TimeOfDay(TimeOfDay::BaseTime::Midnight,posixTimeStamp); }
 
 };
