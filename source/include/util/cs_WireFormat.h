@@ -8,6 +8,7 @@
 #pragma once
 
 #include <presence/cs_PresencePredicate.h>
+#include <time/cs_TimeOfDay.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -31,5 +32,8 @@ uint64_t WireFormat::deserialize(uint8_t* data, size_t len);
 
 template<>
 PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len);
+
+template<>
+TimeOfDay WireFormat::deserialize(uint8_t* data, size_t len);
 
 } // namespace WireFormat

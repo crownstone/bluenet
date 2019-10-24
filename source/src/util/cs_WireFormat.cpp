@@ -42,4 +42,12 @@ inline PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len){
     return PresencePredicate(d);
 }
 
+template<>
+inline TimeOfDay WireFormat::deserialize(uint8_t* data, size_t len){
+    // assert(len == 9)
+    std::array<uint8_t,5> d;
+    std::copy_n(data, 5, d.begin());
+    return TimeOfDay(d);
+}
+
 } // namespace WireFormat
