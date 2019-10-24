@@ -12,6 +12,7 @@
 #include <drivers/cs_Serial.h>
 #include <util/cs_BleError.h>
 #include <cfg/cs_Strings.h>
+#include <protocol/cs_ErrorCodes.h>
 
 #define PRINT_SCHEDULEENTRIES_VERBOSE
 
@@ -86,39 +87,39 @@ public:
 	//////////// BufferAccessor ////////////////////////////
 
 	/** @inherit */
-	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
-		assert(sizeof(schedule_entry_t) <= maxLength, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+	cs_ret_code_t assign(buffer_ptr_t buffer, cs_buffer_size_t size) {
+		assert(sizeof(schedule_entry_t) <= size, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 
 #ifdef PRINT_SCHEDULEENTRIES_VERBOSE
-		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, maxLength);
+		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, size);
 #endif
 
-		if (sizeof(schedule_entry_t) > maxLength) {
-			return 1;
+		if (sizeof(schedule_entry_t) > size) {
+			return ERR_BUFFER_TOO_SMALL;
 		}
 		_buffer = (schedule_entry_t*)buffer;
-		return 0;
+		return ERR_SUCCESS;
 	}
 
 	/** @inherit */
-	uint16_t getDataLength() const {
+	cs_buffer_size_t getDataSize() const {
 		return SCHEDULE_ENTRY_SERIALIZED_SIZE;
 	}
 
 	/** @inherit */
-	uint16_t getMaxLength() const {
+	cs_buffer_size_t getMaxSize() const {
 		return SCHEDULE_ENTRY_SERIALIZED_SIZE;
 	}
 
 	/** @inherit */
-	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
-
+	cs_data_t getData() {
 #ifdef PRINT_SCHEDULEENTRIES_VERBOSE
 		LOGd("getBuffer: %p", this);
 #endif
-
-		buffer = (buffer_ptr_t)_buffer;
-		dataLength = getDataLength();
+		cs_data_t data;
+		data.data = (buffer_ptr_t)_buffer;
+		data.len = getDataSize();
+		return data;
 	}
 
 };
@@ -183,31 +184,33 @@ public:
 	//////////// BufferAccessor ////////////////////////////
 
 	/** @inherit */
-	int assign(buffer_ptr_t buffer, uint16_t maxLength) {
-		assert(sizeof(schedule_list_t) <= maxLength, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+	cs_ret_code_t assign(buffer_ptr_t buffer, cs_buffer_size_t size) {
+		assert(sizeof(schedule_list_t) <= size, STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 
 #ifdef PRINT_SCHEDULEENTRIES_VERBOSE
-		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, maxLength);
+		LOGd(FMT_ASSIGN_BUFFER_LEN, buffer, size);
 #endif
 
 		_buffer = (schedule_list_t*)buffer;
-		return 0;
+		return ERR_SUCCESS;
 	}
 
 	/** @inherit */
-	uint16_t getDataLength() const {
+	cs_buffer_size_t getDataSize() const {
 		return SCHEDULE_LIST_HEADER_SIZE + SCHEDULE_ENTRY_SERIALIZED_SIZE * getSize();
 	}
 
 	/** @inherit */
-	uint16_t getMaxLength() const {
-    	return SCHEDULE_LIST_SERIALIZED_SIZE;
+	cs_buffer_size_t getMaxSize() const {
+		return SCHEDULE_LIST_SERIALIZED_SIZE;
 	}
 
 	/** @inherit */
-	void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) {
-		buffer = (buffer_ptr_t)_buffer;
-		dataLength = getDataLength();
+	cs_data_t getData() {
+		cs_data_t data;
+		data.data = (buffer_ptr_t)_buffer;
+		data.len = getDataSize();
+		return data;
 	}
 
 };

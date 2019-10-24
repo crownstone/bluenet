@@ -57,6 +57,16 @@
 #define SCHED_QUEUE_SIZE                         32
 
 /**
+ * Buffer size that is used for characteristics that the user reads from.
+ */
+#define CS_CHAR_READ_BUF_SIZE                    MASTER_BUFFER_SIZE
+
+/**
+ * Buffer size that is used for characteristics that the user writes to.
+ */
+#define CS_CHAR_WRITE_BUF_SIZE                   MASTER_BUFFER_SIZE
+
+/**
  * Determines scan interval in units of 0.625 millisecond.
  * Channel is changed every interval.
  */

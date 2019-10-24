@@ -45,7 +45,6 @@
 #include <processing/cs_EncryptionHandler.h>
 #include <protocol/cs_UartProtocol.h>
 #include <storage/cs_State.h>
-#include <structs/buffer/cs_MasterBuffer.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
 #include <util/cs_Utils.h>
 
@@ -103,7 +102,6 @@ Crownstone::Crownstone(boards_config_t& board) :
 	_mainTimerData = { {0} };
 	_mainTimerId = &_mainTimerData;
 
-	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
 	EventDispatcher::getInstance().addListener(this);
 
@@ -165,7 +163,6 @@ void Crownstone::init(uint16_t step) {
 		LOG_FLUSH();
 
 		LOGi(FMT_HEADER, "init services");
-
 		_stack->initServices();
 		LOG_FLUSH();
 		break;

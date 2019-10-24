@@ -138,9 +138,8 @@ void Scheduler::writeScheduleList(bool store) {
 //	buffer_ptr_t buffer;
 //	uint16_t size;
 //	_scheduleList->getBuffer(buffer, size);
-	cs_state_data_t stateData(CS_TYPE::STATE_SCHEDULE, NULL, 0);
-	_scheduleList->getBuffer(stateData.value, stateData.size);
-	State::getInstance().set(stateData);
+	cs_data_t scheduleBuf = _scheduleList->getData();
+	State::getInstance().set(CS_TYPE::STATE_SCHEDULE, scheduleBuf.data, scheduleBuf.len);
 
 //	if (store) {
 	// TODO: only write to flash when store is true
@@ -148,11 +147,9 @@ void Scheduler::writeScheduleList(bool store) {
 }
 
 void Scheduler::readScheduleList() {
-	buffer_ptr_t buffer;
-	uint16_t length;
-	_scheduleList->getBuffer(buffer, length);
-	length = _scheduleList->getMaxLength();
-	State::getInstance().get(CS_TYPE::STATE_SCHEDULE, buffer, length);
+	cs_data_t scheduleBuf = _scheduleList->getData();
+	cs_buffer_size_t maxBufSize = _scheduleList->getMaxSize();
+	State::getInstance().get(CS_TYPE::STATE_SCHEDULE, scheduleBuf.data, maxBufSize);
 	bool adjusted = _scheduleList->checkAllEntries();
 	if (adjusted) {
 		writeScheduleList(true);
@@ -166,10 +163,8 @@ void Scheduler::readScheduleList() {
 }
 
 void Scheduler::publishScheduleEntries() {
-	buffer_ptr_t buffer;
-	uint16_t size;
-	_scheduleList->getBuffer(buffer, size);
-	event_t event(CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED, buffer, size);
+	cs_data_t scheduleBuf = _scheduleList->getData();
+	event_t event(CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED, scheduleBuf.data, scheduleBuf.len);
 	EventDispatcher::getInstance().dispatch(event);
 }
 

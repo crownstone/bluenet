@@ -12,7 +12,7 @@
 #include <ble/cs_Softdevice.h>
 #include <storage/cs_State.h>
 
-//#define PRINT_CHARACTERISTIC_VERBOSE
+#define PRINT_CHARACTERISTIC_VERBOSE
 
 CharacteristicBase::CharacteristicBase() :
     _name(NULL),
@@ -79,7 +79,7 @@ void CharacteristicBase::init(Service* svc) {
     ci.attr_char_value.max_len = getGattValueMaxLength();
     ci.attr_char_value.p_value = getGattValuePtr();
 
-    LOGv("%s init with buffer[%i] with %p", _name, getGattValueMaxLength(), getGattValuePtr());
+    LOGd("%s init with buffer[%i] with %p", _name, getGattValueMaxLength(), getGattValuePtr());
 
     ////////////////////////
     //! attribute metadata //
@@ -205,16 +205,29 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 #endif
 
 		// we calculate what size buffer we need
-		uint16_t encryptionBufferLength = EncryptionHandler::calculateEncryptionBufferLength(
-			valueLength, encryptionType);
-		bool success = EncryptionHandler::getInstance().encrypt(getValuePtr(), valueLength, valueGattAddress,
-			encryptionBufferLength, _minAccessLevel, encryptionType);
+		cs_ret_code_t retVal = ERR_SUCCESS;
+		uint16_t encryptionBufferLength = EncryptionHandler::calculateEncryptionBufferLength(valueLength, encryptionType);
+		if (encryptionBufferLength > getGattValueMaxLength()) {
+			retVal = ERR_BUFFER_TOO_SMALL;
+		}
+		else {
+			bool success = EncryptionHandler::getInstance().encrypt(
+					getValuePtr(),
+					valueLength,
+					valueGattAddress,
+					encryptionBufferLength,
+					_minAccessLevel,
+					encryptionType
+			);
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
-		_log(SERIAL_DEBUG, "encrypted: ");
-		BLEutil::printArray(valueGattAddress, encryptionBufferLength);
+			_log(SERIAL_DEBUG, "encrypted: ");
+			BLEutil::printArray(valueGattAddress, encryptionBufferLength);
 #endif
-
-		if (!success) {
+			if (!success) {
+				retVal = ERR_UNSPECIFIED;
+			}
+		}
+		if (!SUCCESS(retVal)) {
 			// clear the partially encrypted buffer.
 			memset(valueGattAddress, 0x00, encryptionBufferLength);
 
@@ -224,7 +237,7 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 			// disconnect from the device.
 			EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
 			LOGe("error encrypting data.");
-			return NRF_ERROR_INTERNAL;
+			return retVal;
 		}
 
 		// on success, set the readable buffer length to the encryption package.
@@ -236,13 +249,13 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 
 
 	uint16_t gattValueLength = getGattValueLength();
-//	LOGi("gattValueLength %d", gattValueLength)
+	LOGi("gattValueLength=%u gattValueAddress=%p, gattValueMaxSize=%u", gattValueLength, valueGattAddress, getGattValueMaxLength());
 	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
 			_handles.value_handle, &gattValueLength, valueGattAddress));
 
 	//! stop here if we are not in notifying state
 	if ((!_status.notifies) || (!_service->getStack()->connected()) || !_status.notifyingEnabled) {
-		return NRF_SUCCESS;
+		return ERR_SUCCESS;
 	} else {
 		return notify();
 	}

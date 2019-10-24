@@ -6,43 +6,48 @@
  */
 #pragma once
 
-#include <common/cs_Types.h>
+#include "structs/cs_PacketsInternal.h"
 
-/** Base class for a buffer accessor object
+/**
+ * Base class for a buffer accessor object.
  *
  * Any object that works on a buffer can use this as a base class.
  */
 class BufferAccessor {
 public:
-	/** Default destructor
+	/**
+	 * Default destructor
 	 */
 	virtual ~BufferAccessor() {};
 
-	/** Assign the buffer used to hold the data.
-	 * @buffer                the buffer to be used
-	 * @maxLength             size of buffer (maximum number of bytes that can be stored)
+	/**
+	 * Assign the buffer used to hold the data.
 	 *
-	 * @return 0 on success
+	 * @param[in] buffer          The buffer to be used.
+	 * @param[in] size            Size of buffer in bytes.
+	 * @return                    ERR_SUCCESS on success.
 	 */
-	virtual int assign(buffer_ptr_t buffer, uint16_t maxLength) = 0; // TODO: should return cs_ret_code_t?
+	virtual cs_ret_code_t assign(buffer_ptr_t buffer, cs_buffer_size_t size) = 0;
 
-	/** Return the maximum possible length of the object
+	/**
+	 * Get the capacity of the buffer.
 	 *
-	 * @return maximum possible length
+	 * @return                    Maximum size of the buffer in bytes.
 	 */
-	virtual uint16_t getMaxLength() const = 0;
+	virtual cs_buffer_size_t getMaxSize() const = 0;
 
-	/** Return the length of the data in the buffer
+	/**
+	 * Get the size of the data in the buffer.
 	 *
-	 * @return data length
+	 * @return                    Size of the data in bytes.
 	 */
-	virtual uint16_t getDataLength() const = 0;
+	virtual cs_buffer_size_t getDataSize() const = 0;
 
-	/** Return the pointer to the buffer and the length of data in Bytes
-	 * @buffer       pointer to the buffer
-	 * @dataLength   length of data in the buffer (in bytes)
+	/**
+	 * Get the pointer to the data.
+	 *
+	 * @return                    Struct with pointer to buffer and size of the data in bytes.
 	 */
-	virtual void getBuffer(buffer_ptr_t& buffer, uint16_t& dataLength) = 0;
-
+	virtual cs_data_t getData() = 0;
 };
 

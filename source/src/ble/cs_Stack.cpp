@@ -15,7 +15,8 @@
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_Scanner.h>
 #include <storage/cs_State.h>
-#include <structs/buffer/cs_MasterBuffer.h>
+#include "structs/buffer/cs_CharacteristicReadBuffer.h"
+#include "structs/buffer/cs_CharacteristicWriteBuffer.h"
 #include <util/cs_Utils.h>
 
 
@@ -219,6 +220,11 @@ void Stack::setClockSource(nrf_clock_lf_cfg_t clockSource) {
 void Stack::createCharacteristics() {
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
 	LOGd("Create characteristics");
+
+	// Init buffers.
+	CharacteristicReadBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
+	CharacteristicWriteBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
+
 	for (Service* svc: _services) {
 		svc->createCharacteristics();
 	}
@@ -381,15 +387,12 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 		break;
 	}
 	case BLE_EVT_USER_MEM_REQUEST: {
-
-		buffer_ptr_t buffer = NULL;
-		uint16_t size = 0;
-		MasterBuffer::getInstance().getBuffer(buffer, size, CS_MASTER_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
-
-		_user_mem_block.len = size;
-		_user_mem_block.p_mem = buffer;
-		BLE_CALL(sd_ble_user_mem_reply, (getConnectionHandle(), &_user_mem_block));
-
+		// You can check which type is requested: p_ble_evt->evt.common_evt.params.user_mem_request.type
+		// Currently only option is: BLE_USER_MEM_TYPE_GATTS_QUEUED_WRITES
+		// See https://devzone.nordicsemi.com/f/nordic-q-a/33366/is-it-necessary-handle-ble_evt_user_mem_request-respectivly-is-it-required-to-support-prepared-writes
+		// And https://devzone.nordicsemi.com/f/nordic-q-a/53074/ble_evt_user_mem_request-if-data_length-is-180-bytes-on-ios-but-not-for-android
+		// Also see https://interrupt.memfault.com/blog/ble-throughput-primer
+		BLE_CALL(sd_ble_user_mem_reply, (p_ble_evt->evt.gap_evt.conn_handle, NULL));
 		break;
 	}
 	case BLE_EVT_USER_MEM_RELEASE:
@@ -410,16 +413,9 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 		break;
 	case BLE_GATTS_EVT_WRITE: {
 		resetConnectionAliveTimer();
-
 		if (p_ble_evt->evt.gatts_evt.params.write.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
-
-			buffer_ptr_t buffer = NULL;
-			uint16_t size = 0;
-
-			MasterBuffer::getInstance().getBuffer(buffer, size, CS_MASTER_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
-
-			uint16_t* header = (uint16_t*)buffer;
-
+			cs_data_t writeBuffer = CharacteristicWriteBuffer::getInstance().getBuffer(CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
+			uint16_t* header = (uint16_t*)(writeBuffer.data);
 			for (Service* svc : _services) {
 				// for a long write, don't have the service handle available to check for the correct
 				// service, so we just go through all the services and characteristics until we find
@@ -428,14 +424,12 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 					return;
 				}
 			}
-
 		}
 		else {
 			for (Service* svc : _services) {
 				svc->on_write(p_ble_evt->evt.gatts_evt.params.write, p_ble_evt->evt.gatts_evt.params.write.handle);
 			}
 		}
-
 		break;
 	}
 

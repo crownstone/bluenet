@@ -10,9 +10,8 @@
 #include <common/cs_BaseClass.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_Storage.h>
-#include <protocol/cs_ErrorCodes.h>
-#include <structs/cs_StreamBuffer.h>
 #include <drivers/cs_Timer.h>
+#include <protocol/cs_ErrorCodes.h>
 
 constexpr const char* TypeName(OperationMode const & mode) {
     switch(mode) {
