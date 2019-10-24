@@ -137,7 +137,7 @@ uint8_t[] | Data | ... | Type dependent
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
-uint8 | Options | 1 | Bitmask, must be all 0 except for the following bits: <ol start="0"><li>Stay on until everyone has left the sphere</li><li>Stay on until everyone has left the room</li></ol>
+uint8 | Options | 1 | Reserved for future use
 [Day Of Week Bitmask](#day_of_week_bitmask) | Active Days | 1 | Selects which days of the week this behaviour is active
 [Time Of Day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
 [Time Of Day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
@@ -182,7 +182,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Type | 1 | <ol start="0"><li>Presence extension: Pertain until presence condition fails</li><li>Time Limited Presence Extension: also destroy after time-out</li></ol>
 [Presence Description](#presence_description) | Extension Presence | 8 | Description of the presence conditions that the Extension behaviour will use.
-[Time Difference](#time_difference) | Extension Until | 5 | Extend the core behaviour's 'Until' time by the given difference.
+[Time Difference](#time_difference) | Extension Until | 4 | Extend the core behaviour's 'Until' time by the given difference.
 
 <a name="behaviour_hash"></a>
 #### Behaviour Hash
