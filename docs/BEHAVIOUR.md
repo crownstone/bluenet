@@ -141,7 +141,7 @@ uint8 | Options | 1 | Reserved for future use
 [Day Of Week Bitmask](#day_of_week_bitmask) | Active Days | 1 | Selects which days of the week this behaviour is active
 [Time Of Day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
 [Time Of Day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
-[Presence Description](#presence_description) | Presence | 8 | Description of the presence conditions that need to hold for this behaviour to be active. 
+[Presence Description](#presence_description) | Presence | 13 | Description of the presence conditions that need to hold for this behaviour to be active. 
 
 <a name="twilight_behaviour"></a>
 #### Twilight Behaviour
@@ -180,7 +180,6 @@ Type | Name | Length | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Type | 1 | <ol start="0"><li>Presence extension: Pertain until presence condition fails</li><li>Time Limited Presence Extension: also destroy after time-out</li></ol>
 [Presence Description](#presence_description) | Extension Presence | 8 | Description of the presence conditions that the Extension behaviour will use.
 [Time Difference](#time_difference) | Extension Until | 4 | Extend the core behaviour's 'Until' time by the given difference.
 
@@ -233,6 +232,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Type | 1 | <ol start="0"><li>Vacuously true condition</li><li>Anyone in any of the rooms</li><li>Noone in any of the rooms</li><li>Anyone anywhere in sphere</li><li>Noone anywhere in sphere</li></ol>
 uint64 | Active Rooms Mask | 8 | Room with id `i` corresponds to bit `i` in this mask.
+uint32_t | Timeout | 4 | 
 
 <a name="firmware_design"></a>
 # Firmware Design Internals
