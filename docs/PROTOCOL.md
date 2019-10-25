@@ -463,8 +463,8 @@ Setup access means the packet is available in setup mode, and encrypted with the
 - B: Basic
 - S: Setup
 
-Type nr | Type name | Payload type | Description | A | M | B | S
---- | --- | --- | ---
+Type nr | Type name | Payload type | Description | A | M | B
+------- | ---------- | ------------- | ------------ | --- | --- | ---
 5 | PWM period | uint 32 | Sets PWM period in μs for the dimmer. **Setting this to a wrong value may cause damage.**  | rw |  | 
 6 | iBeacon major | uint 16 | iBeacon major number.  | rw |  | 
 7 | iBeacon minor | uint 16 | iBeacon minor number.  | rw |  | 
