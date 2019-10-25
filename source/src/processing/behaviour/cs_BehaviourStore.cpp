@@ -15,10 +15,21 @@ std::array<std::optional<Behaviour>,BehaviourStore::MaxBehaviours> BehaviourStor
 
 void BehaviourStore::handleEvent(event_t& evt){
     switch(evt.type){
-        case CS_TYPE::EVT_UPDATE_BEHAVIOUR:{
-            Behaviour* newBehaviour = reinterpret_cast<TYPIFY(EVT_UPDATE_BEHAVIOUR)*>(evt.data);
+        case CS_TYPE::EVT_REPLACE_BEHAVIOUR:{
+            Behaviour* newBehaviour = reinterpret_cast<TYPIFY(EVT_REPLACE_BEHAVIOUR)*>(evt.data);
             LOGd("newBehaviour: from %d, until %d", newBehaviour->from(), newBehaviour->until());
 
+        }
+        case CS_TYPE::EVT_SAVE_BEHAVIOUR:{
+            Behaviour* newBehaviour = reinterpret_cast<TYPIFY(EVT_SAVE_BEHAVIOUR)*>(evt.data);
+            LOGd("save behaviour event: from %d, until %d", newBehaviour->from(), newBehaviour->until());
+
+            break;
+        }
+        case CS_TYPE::EVT_REMOVE_BEHAVIOUR:{
+            LOGd("remove behaviour event");
+
+            break;
         }
         default:{
             break;

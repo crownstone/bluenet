@@ -223,7 +223,9 @@ enum class CS_TYPE: uint16_t {
 	EVT_STATE_EXTERNAL_STONE,                          // Sent when the state of another stone has been received. -- Payload is state_external_stone_t
 
 	// ------------------------
-	EVT_UPDATE_BEHAVIOUR,						// when a user requests to save/update/delete a behaviour, this event fires.
+	EVT_SAVE_BEHAVIOUR, 						// when a user requests to save a behaviour, this event fires.
+	EVT_REPLACE_BEHAVIOUR,						// when a user requests to update a behaviour, this event fires.
+	EVT_REMOVE_BEHAVIOUR,						// when a user requests to remove a behaviour, this event fires.
 	EVT_PRESENCE_MUTATION,						// when a change in presence occurs this event fires.
 	EVT_BEHAVIOUR_SWITCH_STATE,					// when behaviour desires a stateswitch this event is fired.
 	CMD_SET_RELAY,								// when a user requests to set the relay to a specific state
@@ -385,7 +387,9 @@ typedef  BOOL TYPIFY(CMD_SWITCH_LOCKED);
 typedef  uint32_t TYPIFY(EVT_TICK);
 typedef  uint32_t TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
-typedef Behaviour TYPIFY(EVT_UPDATE_BEHAVIOUR);
+typedef Behaviour TYPIFY(EVT_SAVE_BEHAVIOUR);
+typedef Behaviour TYPIFY(EVT_REPLACE_BEHAVIOUR);
+typedef uint8_t TYPIFY(EVT_REMOVE_BEHAVIOUR); // index
 typedef uint8_t TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.

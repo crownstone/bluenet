@@ -11,25 +11,25 @@ namespace WireFormat {
 
 template<> 
 uint8_t WireFormat::deserialize(uint8_t* data, size_t len){
-    // assert(len == 4);
+    // TODO(Arend): assert length
     return data[0];
 }
 
 template<> 
 uint32_t WireFormat::deserialize(uint8_t* data, size_t len){
-    // assert(len == 4);
+    // TODO(Arend): assert length
     return data[3] << 8*3 | data[2] << 8*2 | data[1] << 8*1 | data[0]  << 8*0;
 }
 
 template<> 
 int32_t WireFormat::deserialize(uint8_t* data, size_t len){
-    // assert(len == 4);
+    // TODO(Arend): assert length
     return data[3] << 8*3 | data[2] << 8*2 | data[1] << 8*1 | data[0]  << 8*0;
 }
 
 template<> 
 uint64_t WireFormat::deserialize(uint8_t* data, size_t len){
-    // assert(len == 8);
+    // TODO(Arend): assert length
     return 
         static_cast<uint64_t>(data[7]) << 8*7 | 
         static_cast<uint64_t>(data[6]) << 8*6 | 
@@ -42,8 +42,16 @@ uint64_t WireFormat::deserialize(uint8_t* data, size_t len){
 }
 
 template<>
+TimeOfDay WireFormat::deserialize(uint8_t* data, size_t len){
+    // TODO(Arend): assert length
+    std::array<uint8_t,5> d;
+    std::copy_n(data, 5, d.begin());
+    return TimeOfDay(d);
+}
+
+template<>
 PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len){
-    // assert(len == 9)
+    // TODO(Arend): assert length
     std::array<uint8_t,9> d;
     std::copy_n(data, 9, d.begin());
     return PresencePredicate(d);
@@ -51,18 +59,19 @@ PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len){
 
 template<>
 PresenceCondition WireFormat::deserialize(uint8_t* data, size_t len){
-    // assert(len == 9)
+    // TODO(Arend): assert length
     std::array<uint8_t,13> d;
     std::copy_n(data, 13, d.begin());
     return PresenceCondition(d);
 }
 
 template<>
-TimeOfDay WireFormat::deserialize(uint8_t* data, size_t len){
-    // assert(len == 9)
-    std::array<uint8_t,5> d;
-    std::copy_n(data, 5, d.begin());
-    return TimeOfDay(d);
+Behaviour WireFormat::deserialize(uint8_t* data, size_t len){
+    // TODO(Arend): assert length
+    std::array<uint8_t,25> d;
+    std::copy_n(data, 25, d.begin());
+    return Behaviour(d);
 }
+
 
 } // namespace WireFormat

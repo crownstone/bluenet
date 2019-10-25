@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <processing/behaviour/cs_Behaviour.h>
 #include <presence/cs_PresencePredicate.h>
 #include <presence/cs_PresenceCondition.h>
 #include <time/cs_TimeOfDay.h>
@@ -44,6 +45,9 @@ PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len);
 
 template<>
 PresenceCondition WireFormat::deserialize(uint8_t* data, size_t len);
+
+template<>
+Behaviour WireFormat::deserialize(uint8_t* data, size_t len);
 
 
 } // namespace WireFormat

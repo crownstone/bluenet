@@ -21,6 +21,8 @@
 #include "storage/cs_State.h"
 #include "time/cs_SystemTime.h"
 
+#include <util/cs_WireFormat.h>
+
 void reset(void* p_context) {
 
 	uint32_t cmd = *(int32_t*) p_context;
@@ -765,13 +767,19 @@ cs_ret_code_t CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const uin
 cs_ret_code_t CommandHandler::handleCmdSaveBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
 	LOGd(STR_HANDLE_COMMAND, "Save Behaviour");
 
-	if(size != 21){
+	if(size != 25){
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
+	Behaviour b = WireFormat::deserialize<Behaviour>(buffer,size);
+
+	event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR,&b,sizeof(b));
+	
+	event.dispatch();
+
 	// not implemented.
-	return ERR_NOT_IMPLEMENTED;
+	return ERR_SUCCESS;
 }
 	
 

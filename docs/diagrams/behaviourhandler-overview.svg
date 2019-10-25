@@ -121,7 +121,7 @@
     </g>
     <g text-rendering="geometricPrecision" stroke-miterlimit="1.45" shape-rendering="geometricPrecision" transform="matrix(1,0,0,1,282,347)" stroke-linecap="butt">
       <path fill="none" d="M-21.2712 -289.34 L-21.2712 -286.34 L201.1875 -286.34 L201.1875 -254.1503 L196.4375 -257.0003 L202.6875 -242.0003 L208.9375 -257.0003 L204.1875 -254.1503 L204.1875 -287.84 L204.1875 -289.34 Z" clip-path="url(#clipPath2)"/>
-      <text x="-70.5575" xml:space="preserve" y="-238.3888" clip-path="url(#clipPath2)" font-family="sans-serif" stroke="none">EVT_UPDATE_BEHAVIOUR</text>
+      <text x="-70.5575" xml:space="preserve" y="-238.3888" clip-path="url(#clipPath2)" font-family="sans-serif" stroke="none">EVT_REPLACE_BEHAVIOUR</text>
       <text x="-70.5575" xml:space="preserve" y="-224.4201" clip-path="url(#clipPath2)" font-family="sans-serif" stroke="none">EVT_SAVE_BEHAVIOUR</text>
       <text x="-70.5575" xml:space="preserve" y="-210.4513" clip-path="url(#clipPath2)" font-family="sans-serif" stroke="none">EVT_REMOVE_BEHAVIOUR</text>
       <text x="-70.5575" xml:space="preserve" y="-196.4826" clip-path="url(#clipPath2)" font-family="sans-serif" stroke="none">EVT_GET_BEHAVIOUR</text>
