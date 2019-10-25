@@ -138,7 +138,7 @@ void Scheduler::writeScheduleList(bool store) {
 //	buffer_ptr_t buffer;
 //	uint16_t size;
 //	_scheduleList->getBuffer(buffer, size);
-	cs_data_t scheduleBuf = _scheduleList->getData();
+	cs_data_t scheduleBuf = _scheduleList->getSerializedBuffer();
 	State::getInstance().set(CS_TYPE::STATE_SCHEDULE, scheduleBuf.data, scheduleBuf.len);
 
 //	if (store) {
@@ -147,8 +147,8 @@ void Scheduler::writeScheduleList(bool store) {
 }
 
 void Scheduler::readScheduleList() {
-	cs_data_t scheduleBuf = _scheduleList->getData();
-	cs_buffer_size_t maxBufSize = _scheduleList->getMaxSize();
+	cs_data_t scheduleBuf = _scheduleList->getSerializedBuffer();
+	cs_buffer_size_t maxBufSize = _scheduleList->getBufferSize();
 	State::getInstance().get(CS_TYPE::STATE_SCHEDULE, scheduleBuf.data, maxBufSize);
 	bool adjusted = _scheduleList->checkAllEntries();
 	if (adjusted) {
@@ -163,7 +163,7 @@ void Scheduler::readScheduleList() {
 }
 
 void Scheduler::publishScheduleEntries() {
-	cs_data_t scheduleBuf = _scheduleList->getData();
+	cs_data_t scheduleBuf = _scheduleList->getSerializedBuffer();
 	event_t event(CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED, scheduleBuf.data, scheduleBuf.len);
 	EventDispatcher::getInstance().dispatch(event);
 }

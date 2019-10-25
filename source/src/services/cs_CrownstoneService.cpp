@@ -165,7 +165,7 @@ void CrownstoneService::writeResult(CommandHandlerTypes type, command_result_t r
 		LOGe("Unable to set result: %u", retVal);
 		return;
 	}
-	_resultCharacteristic->setValueLength(_resultPacketAccessor->getDataSize());
+	_resultCharacteristic->setValueLength(_resultPacketAccessor->getSerializedSize());
 	_resultCharacteristic->updateValue();
 }
 

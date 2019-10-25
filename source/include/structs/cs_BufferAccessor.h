@@ -34,20 +34,20 @@ public:
 	 *
 	 * @return                    Maximum size of the buffer in bytes.
 	 */
-	virtual cs_buffer_size_t getMaxSize() const = 0;
+	virtual cs_buffer_size_t getBufferSize() const = 0;
 
 	/**
-	 * Get the size of the data in the buffer.
+	 * Get the size of the serialized data in the buffer.
 	 *
-	 * @return                    Size of the data in bytes.
+	 * @return                    Size of the serialized data in bytes.
 	 */
-	virtual cs_buffer_size_t getDataSize() const = 0;
+	virtual cs_buffer_size_t getSerializedSize() const = 0;
 
 	/**
-	 * Get the pointer to the data.
+	 * Get the pointer to the buffer.
 	 *
-	 * @return                    Struct with pointer to buffer and size of the data in bytes.
+	 * @return                    Struct with pointer to buffer and size of the serialized data in bytes.
 	 */
-	virtual cs_data_t getData() = 0;
+	virtual cs_data_t getSerializedBuffer() = 0;
 };
 

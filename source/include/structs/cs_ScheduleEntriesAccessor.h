@@ -102,23 +102,23 @@ public:
 	}
 
 	/** @inherit */
-	cs_buffer_size_t getDataSize() const {
+	cs_buffer_size_t getSerializedSize() const {
 		return SCHEDULE_ENTRY_SERIALIZED_SIZE;
 	}
 
 	/** @inherit */
-	cs_buffer_size_t getMaxSize() const {
+	cs_buffer_size_t getBufferSize() const {
 		return SCHEDULE_ENTRY_SERIALIZED_SIZE;
 	}
 
 	/** @inherit */
-	cs_data_t getData() {
+	cs_data_t getSerializedBuffer() {
 #ifdef PRINT_SCHEDULEENTRIES_VERBOSE
 		LOGd("getBuffer: %p", this);
 #endif
 		cs_data_t data;
 		data.data = (buffer_ptr_t)_buffer;
-		data.len = getDataSize();
+		data.len = getSerializedSize();
 		return data;
 	}
 
@@ -196,20 +196,20 @@ public:
 	}
 
 	/** @inherit */
-	cs_buffer_size_t getDataSize() const {
+	cs_buffer_size_t getSerializedSize() const {
 		return SCHEDULE_LIST_HEADER_SIZE + SCHEDULE_ENTRY_SERIALIZED_SIZE * getSize();
 	}
 
 	/** @inherit */
-	cs_buffer_size_t getMaxSize() const {
+	cs_buffer_size_t getBufferSize() const {
 		return SCHEDULE_LIST_SERIALIZED_SIZE;
 	}
 
 	/** @inherit */
-	cs_data_t getData() {
+	cs_data_t getSerializedBuffer() {
 		cs_data_t data;
 		data.data = (buffer_ptr_t)_buffer;
-		data.len = getDataSize();
+		data.len = getSerializedSize();
 		return data;
 	}
 

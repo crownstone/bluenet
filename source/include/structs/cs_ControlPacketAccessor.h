@@ -90,23 +90,23 @@ public:
 	}
 
 	/** @inherit */
-	cs_buffer_size_t getDataSize() const {
+	cs_buffer_size_t getSerializedSize() const {
 		checkInitialized();
 		return sizeof(control_packet_header_t) + _buffer->header.payloadSize;
 	}
 
 	/** @inherit */
-	cs_buffer_size_t getMaxSize() const {
+	cs_buffer_size_t getBufferSize() const {
 		checkInitialized();
 		return sizeof(control_packet_header_t) + PAYLOAD_SIZE;
 	}
 
 	/** @inherit */
-	cs_data_t getData() {
+	cs_data_t getSerializedBuffer() {
 		checkInitialized();
 		cs_data_t data;
 		data.data = (buffer_ptr_t)_buffer;
-		data.len = getDataSize();
+		data.len = getSerializedSize();
 		return data;
 	}
 
