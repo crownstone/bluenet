@@ -369,38 +369,27 @@ Available command types:
 
 Type nr | Type name | Payload type | Description | A | M | B | S
 --- | --- | --- | --- | :---: | :---: | :---: | :--:
-0 | Switch | uint 8 | Switch power, 0 = OFF, 100 = FULL ON | x | x | x | x |
-1 | Dimmer | uint 8 | Set dimmer to value, 0 = OFF, 100 = FULL ON | x | x | x |
-2 | Set time | uint 32 | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
-3 | Goto DFU | - | Reset device to DFU mode | x
-4 | Reset | - | Reset device | x
-5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x
-6 | Get state | [State get packet](#state_get_packet) | Required access depends on the state type. | x | x | x
-7 | Set state | [State set packet](#state_set_packet) | Required access depends on the state type. | x | x | x
-8 |
-9 |
-10 |
-11 |
-12 |
-14 |
-15 |
-16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
-18 |
-19 | Disconnect | - | Causes the crownstone to disconnect | x | x | x
-21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
-22 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
-23 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
-24 |
-25 | Multi switch | [Multi switch packet](#multi_switch_mesh_packet) | Switch multiple crownstones with a command over the mesh. | x | x | x
-26 |
-27 |
-28 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. **Only no_operation, and set_time are implemented at this moment.** | x | x | x
-29 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x         TODO: Replace with set state?
-30 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x                  TODO: Replace with set state?
-31 | Setup | [Setup packet](#setup_packet) | Perform setup. |  |  |  | x
-32 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x                         TODO: Replace with set state?
-33 | UART message | payload | Print the payload to UART. | x
-34 | UART enable | uint 8 | Set UART enabled, 0 = none, 1 = RX only, 3 = TX and RX | x
+0 | Setup | [Setup packet](#setup_packet) | Perform setup. |  |  |  | x
+1 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x
+2 | Get state | [State get packet](#state_get_packet) | Required access depends on the state type. | x | x | x
+3 | Set state | [State set packet](#state_set_packet) | Required access depends on the state type. | x | x | x
+10 | Reset | - | Reset device | x
+11 | Goto DFU | - | Reset device to DFU mode | x
+12 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
+13 | Disconnect | - | Causes the crownstone to disconnect | x | x | x
+20 | Switch | uint 8 | Switch power, 0 = OFF, 100 = FULL ON | x | x | x | x |
+21 | Multi switch |
+22 | Dimmer | uint 8 | Set dimmer to value, 0 = OFF, 100 = FULL ON | x | x | x |
+23 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
+30 | Set time | uint 32 | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
+31 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
+32 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
+33 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. **Only no_operation, and set_time are implemented at this moment.** | x | x | x
+40 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
+41 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
+42 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
+50 | UART message | payload | Print the payload to UART. | x
+51 | UART enable | uint 8 | Set UART enabled, 0 = none, 1 = RX only, 3 = TX and RX | x
 
 
 <a name="setup_packet"></a>
