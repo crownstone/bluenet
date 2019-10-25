@@ -20,9 +20,8 @@
 
 
 enum TypeBases {
-	Configuration_Base = 0x000,
-	State_Base         = 0x080,
-	General_Base       = 0x100, // Configuration and state types are assumed to fit in a uint8_t, so lower than 256.
+	State_Base   = 0x000,
+	General_Base = 0x100, // Configuration and state types are assumed to fit in a uint8_t, so lower than 256.
 };
 
 /** Cast to underlying type.
@@ -45,7 +44,7 @@ constexpr auto to_underlying_type(T e) noexcept
  * Use in the characteristic to read and write state variables in <CommonService>.
  */
 enum class CS_TYPE: uint16_t {
-	CONFIG_DO_NOT_USE                       = Configuration_Base,   // Record keys should be in the range 0x0001 - 0xBFFF. The value 0x0000 is reserved by the system. The values from 0xC000 to 0xFFFF are reserved for use by the Peer Manager module and can only be used in applications that do not include Peer Manager.
+	CONFIG_DO_NOT_USE                       = State_Base,   // Record keys should be in the range 0x0001 - 0xBFFF. The value 0x0000 is reserved by the system. The values from 0xC000 to 0xFFFF are reserved for use by the Peer Manager module and can only be used in applications that do not include Peer Manager.
 //	CONFIG_DEVICE_TYPE                      = 1,      //  0x01
 //	CONFIG_ROOM                             = 2,      //  0x02
 //	CONFIG_FLOOR                            = 3,      //  0x03
@@ -112,7 +111,7 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_MESH_NET_KEY                     = 64,     //  0x40
 	CONFIG_KEY_LOCALIZATION                 = 65,     //  0x41
 
-	STATE_RESET_COUNTER                     = State_Base,  //    128
+	STATE_RESET_COUNTER                     = 128,    //  0x80 - 128
 	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
 	STATE_ACCUMULATED_ENERGY                = 130,    //  0x82 - 130   Energy used in μJ.
 	STATE_POWER_USAGE                       = 131,    //  0x83 - 131   Power usage in mW.
