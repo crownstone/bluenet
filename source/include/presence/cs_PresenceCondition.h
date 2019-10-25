@@ -7,18 +7,22 @@
 
 #pragma once
 
-#include <util/cs_WireFormat.h>
+#include <presence/cs_PresencePredicate.h>
+#include <array>
 
 class PresenceCondition{
     public:
     PresencePredicate pred;
     uint32_t timeOut;
 
-    PresenceCondition(PresencePredicate p, uint32_t t) : pred(p), timeOut(t){}
+    PresenceCondition(PresencePredicate p, uint32_t t);
+    PresenceCondition(std::array<uint8_t,9+4> arr);
 
-    PresenceCondition(std::array<uint8_t,9+4> arr): PresenceCondition(
-        WireFormat::deserialize<PresencePredicate>(arr + 0, 9),
-        WireFormat::deserialize<uint32_t>(         arr + 9, 4)){
-    }
-
+    /**
+     * Does this condition hold given the [currentPresence]?
+     * 
+     * TODO: cache result of previous call with timestamp and
+     * use those to implement the time out feature
+     */
+    bool operator()(PresenceStateDescription currentPresence) const;
 };

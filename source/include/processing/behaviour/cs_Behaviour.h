@@ -7,8 +7,11 @@
 
 #pragma once
 
-#include <stdint.h>
 #include <time/cs_TimeOfDay.h>
+#include <time/cs_DayOfWeek.h>
+#include <presence/cs_PresenceCondition.h>
+
+#include <stdint.h>
 
 /**
  * Object that defines when a state transition should occur.
@@ -17,15 +20,18 @@
  * "fade to 100% in 10 minutes, starting 30 minutes before sunrise, if anyone is in this room"
  */
 class Behaviour {
-    // TODO(Arend, 23-09-2019): datatypes and implementation still susceptible to change.
     public:
-    typedef TimeOfDay time_t; // let's say, seconds since midnight (00:00)
-    typedef uint8_t presence_data_t;
-
+    
     Behaviour() = default;
-    Behaviour(time_t from, time_t until, 
-      presence_data_t presencemask,
-      uint8_t intendedStateWhenBehaviourIsValid);
+    Behaviour(
+      uint8_t intensity,
+      DayOfWeekBitMask activedaysofweek,
+      TimeOfDay from, 
+      TimeOfDay until, 
+      PresenceCondition presencecondition
+      );
+
+    Behaviour(std::array<uint8_t, 25> arr);
 
     // =========== Getters ===========
 
@@ -37,12 +43,12 @@ class Behaviour {
     /**
      * Returns from (incl.) which time on this behaviour applies.
      */
-    time_t from() const;
+    TimeOfDay from() const;
 
     /**
      * Returns until (excl.) which time on this behaviour applies.
      */
-    time_t until() const;
+    TimeOfDay until() const;
 
 
     // =========== Semantics ===========
@@ -51,14 +57,15 @@ class Behaviour {
      * Does the behaviour apply to the current situation?
      * If from() == until() the behaviour isValid all day.
      **/
-    bool isValid(time_t currenttime) const;
-    bool isValid(presence_data_t currentpresence) const;
-    bool isValid(time_t currenttime, presence_data_t currentpresence) const;
+    bool isValid(TimeOfDay currenttime) const;
+    bool isValid(PresenceStateDescription currentpresence) const;
+    bool isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence) const;
 
     private:
-    time_t behaviourappliesfrom = TimeOfDay::Midnight();
-    time_t behaviourappliesuntil = TimeOfDay::Midnight();
-    presence_data_t requiredpresencebitmask = 0x00;
+    uint8_t activeIntensity = 0;
+    DayOfWeekBitMask activeDays;
+    TimeOfDay behaviourAppliesFrom = TimeOfDay::Midnight();
+    TimeOfDay behaviourAppliesUntil = TimeOfDay::Midnight();
+    PresenceCondition presenceCondition;
 
-    uint8_t intendedStateWhenBehaviourIsValid = 0;
 };

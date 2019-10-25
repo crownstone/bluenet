@@ -6,16 +6,16 @@
  */
 
 #include <presence/cs_PresencePredicate.h>
+#include <util/cs_WireFormat.h>
 
-
-
-PresencePredicate(std::array<uint8_t, 9> arr) : 
+PresencePredicate::PresencePredicate(std::array<uint8_t, 9> arr) : 
     PresencePredicate(
         static_cast<Condition>(arr[0]),
         WireFormat::deserialize<uint64_t>(arr.data(),8)) {
 }
 
-bool PresencePredicate::evaluate(uint64_t currentroomspresencebitmask){
+bool PresencePredicate::operator()(
+        PresenceStateDescription currentroomspresencebitmask) const{
     switch(cond){
         case Condition::VacuouslyTrue: 
             return true;
@@ -28,4 +28,6 @@ bool PresencePredicate::evaluate(uint64_t currentroomspresencebitmask){
         case Condition::NooneInSphere:
             return currentroomspresencebitmask == 0;
     }
+    
+    return false;
 }

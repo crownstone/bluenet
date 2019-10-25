@@ -55,6 +55,8 @@
 #include <processing/behaviour/cs_BehaviourHandler.h>
 #include <processing/behaviour/cs_BehaviourStore.h>
 
+#include <array> // DEBUG 
+
 extern "C" {
 #include <nrf_nvmc.h>
 }
@@ -568,14 +570,26 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 
 			for(auto i = 0; i < 10; i++){ // just add 10 behaviours
 				Behaviour behaviour(
+						100 - (i%2 ? 50 : 0),
+						Monday | Thursday | Friday,
 						TimeOfDay(h, m+i, s),
 						TimeOfDay(h, m+i, s+30),
-						0b10101010,
-						100 - (i%2 ? 50 : 0)
+						PresenceCondition(
+							PresencePredicate(
+								PresencePredicate::Condition::AnyoneAnyRoom,
+								0xffff0000ffff0000),
+							0)
 					);
-				LOGd("debugbehaviour from(%d:%d:%d)",behaviour.from().h(),behaviour.from().m(),behaviour.from().s());
+
+				LOGd("debugbehaviour from(%d:%d:%d)",
+					behaviour.from().h(),
+					behaviour.from().m(),
+					behaviour.from().s());
+
 				_behaviourStore.saveBehaviour(behaviour,i);
 			}
+
+			Behaviour(std::array<uint8_t, 25>{{0}});
 
 			// END DEBUG
 

@@ -5,12 +5,17 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+
 #include <processing/behaviour/cs_BehaviourHandler.h>
 #include <processing/behaviour/cs_BehaviourStore.h>
 #include <processing/behaviour/cs_Behaviour.h>
 
-#include <common/cs_Types.h>
+#include <presence/cs_PresenceDescription.h>
+
 #include <time/cs_SystemTime.h>
+#include <time/cs_TimeOfDay.h>
+
+#include <common/cs_Types.h>
 
 #include "drivers/cs_Serial.h"
 
@@ -30,7 +35,7 @@ void BehaviourHandler::handleEvent(event_t& evt){
 void BehaviourHandler::update(){
     // TODO(Arend 24-09-2019): get presence from scheduler
     TimeOfDay time = SystemTime::now();
-    Behaviour::presence_data_t presence = 0xff; // everyone present as dummy value.
+   PresenceStateDescription presence = 0xff; // everyone present as dummy value.
     
     LOGd("BehaviourHandler::update %02d:%02d:%02d",time.h(),time.m(),time.s());
 
@@ -54,8 +59,8 @@ void BehaviourHandler::update(){
 }
 
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
-        Behaviour::time_t currentTime, 
-        Behaviour::presence_data_t currentPresence){
+       TimeOfDay currentTime, 
+       PresenceStateDescription currentPresence){
     std::optional<uint8_t> intendedValue = {};
     
     for (const auto& b : BehaviourStore::getActiveBehaviours()){

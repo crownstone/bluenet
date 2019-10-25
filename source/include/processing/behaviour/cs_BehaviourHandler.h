@@ -46,8 +46,8 @@ class BehaviourHandler : public EventListener {
      * In this case its value contains the desired state value.
      */
     std::optional<uint8_t> computeIntendedState(
-        Behaviour::time_t currenttime, 
-        Behaviour::presence_data_t currentpresence);
+        TimeOfDay currenttime, 
+        PresenceStateDescription currentpresence);
 
     std::optional<uint8_t> previousIntendedState = {};
 };

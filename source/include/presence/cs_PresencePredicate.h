@@ -7,8 +7,10 @@
 
 #pragma once
 
-#include <util/cs_WireFormat.h>
+#include <presence/cs_PresenceDescription.h>
 #include <array>
+
+
 
 class PresencePredicate{
 
@@ -20,13 +22,14 @@ class PresencePredicate{
         NooneAnyRoom   = 3, 
         NooneInSphere  = 4
     };
+
     
     private: 
     Condition cond;
     uint64_t RoomsBitMask;
 
     public:
-    PresencePredicate(Condition c, uint64_t roomsMask): 
+    PresencePredicate(Condition c, PresenceStateDescription roomsMask): 
         cond(c), RoomsBitMask(roomsMask) {
     }
 
@@ -34,6 +37,6 @@ class PresencePredicate{
     
     // parameter bit i is 1 whenever there is presence detected in the
     // room with index i.
-    bool evaluate(uint64_t currentroomspresencebitmask);
+    bool operator()(PresenceStateDescription currentroomspresencebitmask) const;
 
 };

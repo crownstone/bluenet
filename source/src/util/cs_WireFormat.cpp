@@ -8,20 +8,27 @@
 #include <util/cs_WireFormat.h>
 
 namespace WireFormat {
+
 template<> 
-inline uint32_t WireFormat::deserialize(uint8_t* data, size_t len){
+uint8_t WireFormat::deserialize(uint8_t* data, size_t len){
+    // assert(len == 4);
+    return data[0];
+}
+
+template<> 
+uint32_t WireFormat::deserialize(uint8_t* data, size_t len){
     // assert(len == 4);
     return data[3] << 8*3 | data[2] << 8*2 | data[1] << 8*1 | data[0]  << 8*0;
 }
 
 template<> 
-inline int32_t WireFormat::deserialize(uint8_t* data, size_t len){
+int32_t WireFormat::deserialize(uint8_t* data, size_t len){
     // assert(len == 4);
     return data[3] << 8*3 | data[2] << 8*2 | data[1] << 8*1 | data[0]  << 8*0;
 }
 
 template<> 
-inline uint64_t WireFormat::deserialize(uint8_t* data, size_t len){
+uint64_t WireFormat::deserialize(uint8_t* data, size_t len){
     // assert(len == 8);
     return 
         static_cast<uint64_t>(data[7]) << 8*7 | 
@@ -35,7 +42,7 @@ inline uint64_t WireFormat::deserialize(uint8_t* data, size_t len){
 }
 
 template<>
-inline PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len){
+PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len){
     // assert(len == 9)
     std::array<uint8_t,9> d;
     std::copy_n(data, 9, d.begin());
@@ -43,7 +50,15 @@ inline PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len){
 }
 
 template<>
-inline TimeOfDay WireFormat::deserialize(uint8_t* data, size_t len){
+PresenceCondition WireFormat::deserialize(uint8_t* data, size_t len){
+    // assert(len == 9)
+    std::array<uint8_t,13> d;
+    std::copy_n(data, 13, d.begin());
+    return PresenceCondition(d);
+}
+
+template<>
+TimeOfDay WireFormat::deserialize(uint8_t* data, size_t len){
     // assert(len == 9)
     std::array<uint8_t,5> d;
     std::copy_n(data, 5, d.begin());

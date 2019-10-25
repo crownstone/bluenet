@@ -8,6 +8,7 @@
 #pragma once
 
 #include <presence/cs_PresencePredicate.h>
+#include <presence/cs_PresenceCondition.h>
 #include <time/cs_TimeOfDay.h>
 
 #include <algorithm>
@@ -16,10 +17,15 @@
 
 namespace WireFormat {
 
+// data will be copied as few times as possible, but the constructed
+// object is not emplaced over the [data] pointer passed as parameter.
 template <class T>
 T deserialize(uint8_t* data, size_t len);
 
 // ========== Specializations =========
+
+template<>
+uint8_t WireFormat::deserialize(uint8_t* data, size_t len);
 
 template<> 
 uint32_t WireFormat::deserialize(uint8_t* data, size_t len);
@@ -31,9 +37,13 @@ template<>
 uint64_t WireFormat::deserialize(uint8_t* data, size_t len);
 
 template<>
+TimeOfDay WireFormat::deserialize(uint8_t* data, size_t len);
+
+template<>
 PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len);
 
 template<>
-TimeOfDay WireFormat::deserialize(uint8_t* data, size_t len);
+PresenceCondition WireFormat::deserialize(uint8_t* data, size_t len);
+
 
 } // namespace WireFormat
