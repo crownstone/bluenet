@@ -14,6 +14,7 @@
 #include <float.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
+#include <util/cs_BleError.h>
 //#include <algorithm>
 
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)

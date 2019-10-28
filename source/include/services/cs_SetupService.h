@@ -46,7 +46,6 @@ class SetupService: public CrownstoneService {
 	ble_gap_addr_t _myAddr;
 
 	uint8_t _keyBuffer[SOC_ECB_KEY_LENGTH];
-	uint8_t _nonceBuffer[SESSION_NONCE_LENGTH];
 
 	Characteristic<buffer_ptr_t>* _macAddressCharacteristic;
 	Characteristic<buffer_ptr_t>* _setupKeyCharacteristic;

@@ -150,14 +150,17 @@ SOFTDEVICE=s132_nrf52_6.1.1
 APPLICATION_START_ADDRESS=0x00026000
 
 # The maximum size of the application. On our chip with 512kB FLASH this is 0x80000 - 0x26000 = 0x5A000
-APPLICATION_LENGTH=0x5A000
+APPLICATION_LENGTH=0x4B000
+
+# Start of RAM for the application
+RAM_R1_BASE=0x20002380
+
+# Amount of RAM for the application (0x20010000 - RAM_R1_BASE).
+RAM_APPLICATION_AMOUNT=0xDC80
 
 # TODO: Fix.
 # WARNING, WARNING
 # The following values are not used...
 # Adjust them in $BLUENET_DIR/include/third/nrf/generic_gcc_nrf52.ld for now! (adjusted version of $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld)
 ATTR_TABLE_SIZE=0x500
-RAM_R1_BASE=0x20002380
-# This is 0x20010000 - RAM_R1_BASE
-RAM_APPLICATION_AMOUNT=0xDC80
 HEAP_SIZE=20000

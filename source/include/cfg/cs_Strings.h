@@ -69,6 +69,7 @@
 //TODO: A lot of repetition, what is the difference between BLE_CHAR_HARDWARE_REVISION and STR_CHAR_HARDWARE_REVISION
 //#define STR_CROWNSTONE                           "Crownstone"
 #define STR_CHAR_CONTROL                         "Control"
+#define STR_CHAR_RESULT                          "Result"
 #define STR_CHAR_MESH                            "Mesh"
 #define STR_CHAR_CONFIGURATION                   "Configuration"
 #define STR_CHAR_STATE                           "State"

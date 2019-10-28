@@ -28,6 +28,12 @@ ELSE()
 	MESSAGE(FATAL_ERROR "We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. \"Crown\" (with quotes)")
 ENDIF()
 
+IF(NOT DEFINED CS_SERIAL_ENABLED OR CS_SERIAL_ENABLED STREQUAL "0")
+	MESSAGE(STATUS "Crownstone serial disabled")
+ELSE()
+	MESSAGE(STATUS "Crownstone serial enabled")
+ENDIF()
+
 # Copied from an example makefile.
 ADD_DEFINITIONS("-DBLE_STACK_SUPPORT_REQD")
 ADD_DEFINITIONS("-DBOARD_PCA10040")

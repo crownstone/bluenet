@@ -12,6 +12,7 @@
 #include <storage/cs_State.h>
 
 //#define TESTING_ENCRYPTION
+#define LOGEncryption LOGnone
 
 // Rotate functions for 16 bit integers
 #define ROTL_16BIT(x, shift) ((x)<<(shift) | (x)>>(16-(shift)))
@@ -91,7 +92,7 @@ bool EncryptionHandler::allowedToWrite() {
  */
 bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength,
 		EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
-	LOGnone("Encrypt ECB");
+	LOGEncryption("Encrypt ECB");
 	uint32_t err_code;
 	uint8_t softdevice_enabled;
 	err_code = sd_softdevice_is_enabled(&softdevice_enabled);
@@ -138,7 +139,7 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 	// copy result into target.
 	memcpy(target, _block.ciphertext, SOC_ECB_CIPHERTEXT_LENGTH);
 
-	LOGnone("ECB encrypted");
+	LOGEncryption("ECB encrypted");
 	return true;
 }
 
@@ -160,7 +161,7 @@ bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* tar
  */
 bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength,
 		EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
-	LOGd("Encrypt CTR");
+	LOGEncryption("Encrypt CTR");
 
 	// check if the userLevel has been set
 	if (_checkAndSetKey(userLevel) == false) {
@@ -268,7 +269,7 @@ bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encrypted
  *
  */
 bool EncryptionHandler::_decryptCTR(uint8_t* validationNonce, uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength) {
-	LOGd("Decrypt CTR");
+	LOGEncryption("Decrypt CTR");
 	if (_validateBlockLength(inputLength) == false) {
 		LOGe(STR_ERR_MULTIPLE_OF_16);
 //		LOGe("Length of input block does not match the expected length (N*16 Bytes).");

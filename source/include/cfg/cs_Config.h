@@ -57,6 +57,16 @@
 #define SCHED_QUEUE_SIZE                         32
 
 /**
+ * Buffer size that is used for characteristics that the user reads from.
+ */
+#define CS_CHAR_READ_BUF_SIZE                    MASTER_BUFFER_SIZE
+
+/**
+ * Buffer size that is used for characteristics that the user writes to.
+ */
+#define CS_CHAR_WRITE_BUF_SIZE                   MASTER_BUFFER_SIZE
+
+/**
  * Determines scan interval in units of 0.625 millisecond.
  * Channel is changed every interval.
  */
@@ -321,16 +331,15 @@
 #define CONFIG_SCANNER_ENABLED_DEFAULT 0
 #endif
 
-#if defined DEFAULT_ON
-#define CONFIG_RELAY_START_DEFAULT DEFAULT_ON
-#else
-#define CONFIG_RELAY_START_DEFAULT 0
-#endif
-
 #if defined PWM
 #define CONFIG_PWM_DEFAULT PWM
 #else
 #define CONFIG_PWM_DEFAULT 0
+#endif
+
+#if defined CONFIG_START_DIMMER_ON_ZERO_CROSSING_DEFAULT
+#else
+#define CONFIG_START_DIMMER_ON_ZERO_CROSSING_DEFAULT 1
 #endif
 
 #if defined SWITCH_LOCK

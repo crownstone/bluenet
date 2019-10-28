@@ -150,8 +150,8 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CLEAR);
 	nrf_timer_bit_width_set(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_BIT_WIDTH_32);
 //	nrf_timer_frequency_set(CS_ADC_TIMER, CS_ADC_TIMEOUT_TIMER_FREQ);
-	uint32_t timeoutCount = CS_ADC_BUF_SIZE / _config.channelCount - 2; // Timeout 2 samples before END event
-	LOGAdcVerbose("timeoutCount=%u", timeoutCount);
+	uint32_t timeoutCount = CS_ADC_BUF_SIZE / _config.channelCount - 5; // Timeout 4 samples before END event
+	LOGv("timeoutCount=%u", timeoutCount);
 	nrf_timer_cc_write(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_CC_CHANNEL0, timeoutCount);
 	nrf_timer_mode_set(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_MODE_COUNTER);
 	nrf_timer_event_clear(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(0));
