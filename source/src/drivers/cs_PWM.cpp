@@ -552,16 +552,20 @@ void PWM::performPWMTimerCorrections(){
 		_adjustedMaxTickVal = minMaxTickVal;
 	}
 
-	++_numSyncs;
-
-	if (_numSyncs == DIMMER_NUM_START_SYNCS_BETWEEN_FREQ_SYNC) {
-		_zeroCrossOffsetIntegral = 0;
-		_numSyncs = 0;
-
-		// TODO: Evaluate whether just setting this flag to true is OK,
-		// or if the synced frequency value needs to be reset to the nominal frequency value
-		_syncFrequency = true;
-	}
+// ********* TODO: This chunk of code needs to be revisited at some point. Periodic syncing of the mains supply frequency is
+// desired as this overall function is meant only for finer corrections. Not setting the _syncFrequency flag to true
+// means that coarse frequency syncing is performed only once initially, and not again until the Crownstone is reset ********
+//	++_numSyncs;
+//
+//	if (_numSyncs == DIMMER_NUM_START_SYNCS_BETWEEN_FREQ_SYNC) {
+//		_zeroCrossOffsetIntegral = 0;
+//		_numSyncs = 0;
+//
+//		// TODO: Evaluate whether just setting this flag to true is OK,
+//		// or if the synced frequency value needs to be reset to the nominal frequency value
+//		_syncFrequency = true;
+//	}
+// ********************************************************************************************************************
 
 	// cs_write("medErr=%i errInt=%i P=%i I=%i ticks=%u \r\n",  medianError, _zeroCrossOffsetIntegral, deltaP, deltaI, _adjustedMaxTickVal);
 
