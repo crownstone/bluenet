@@ -151,8 +151,8 @@ expires.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Switch Behaviour](#switch_behaviour) | Core Behaviour | 20 | The core behaviour is interpreted identical to Switch Behaviour.
-[End Condition](#behaviour_end_condition) | Extension End Condition |  | 
+[Switch Behaviour](#switch_behaviour) | Core Behaviour | 26 | The core behaviour is interpreted identical to Switch Behaviour.
+[End Condition](#behaviour_end_condition) | Extension End Condition | 17 | Describes the conditions that determine when this extension will be removed.
 
 <a name="behaviour_end_condition"></a>
 #### Behaviour End Condition
@@ -161,7 +161,7 @@ Type | Name | Length | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Presence Description](#presence_description) | Extension Presence | 8 | Description of the presence conditions that the Extension behaviour will use.
+[Presence Description](#presence_description) | Extension Presence | 13 | Description of the presence conditions that the Extension behaviour will use.
 [Time Difference](#time_difference) | Extension Until | 4 | Extend the core behaviour's 'Until' time by at least the given time difference, possibly longer if the extension presence condition is still satisfied after this time difference expires. Negative values will be rounded up to 0.
 
 <a name="behaviour_hash"></a>
