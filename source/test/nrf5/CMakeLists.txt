@@ -108,7 +108,6 @@ LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/integration/nrfx/legacy/nrf_drv_uart.c")
 list(APPEND FOLDER_SOURCE "${NORDIC_SOURCE}")
 
 
-list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cs_sysNrf.c")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cfg/cs_Boards.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/common/cs_Handlers.cpp")

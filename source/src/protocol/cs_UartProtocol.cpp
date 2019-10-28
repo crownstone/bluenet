@@ -5,20 +5,6 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-/**********************************************************************************************************************
- *
- * The Crownstone is a high-voltage (domestic) switch. It can be used for:
- *   - indoor localization
- *   - building automation
- *
- * It is one of the first, or the first(?), open-source Internet-of-Things devices entering the market.
- *
- * Read more on: https://crownstone.rocks
- *
- * Almost all configuration options should be set in CMakeBuild.config.
- *
- *********************************************************************************************************************/
-
 #include <ble/cs_Nordic.h>
 #include <common/cs_Types.h>
 #include <events/cs_EventDispatcher.h>
@@ -29,20 +15,15 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
-// Define both test pin to enable gpio debug.
-//#define TEST_PIN   22
-//#define TEST_PIN2  23
-
 UartProtocol::UartProtocol():
-    _initialized(false),
-    _readBuffer(NULL),
-    _readBufferIdx(0),
-    _startedReading(false),
-    _escapeNextByte(false),
-    _readPacketSize(0),
-    _readBusy(false)
+	_initialized(false),
+	_readBuffer(NULL),
+	_readBufferIdx(0),
+	_startedReading(false),
+	_escapeNextByte(false),
+	_readPacketSize(0),
+	_readBusy(false)
 {
-
 }
 
 void handle_msg(void * data, uint16_t size) {
@@ -55,20 +36,11 @@ void UartProtocol::init() {
 	}
 	_initialized = true;
 	_readBuffer = new uint8_t[UART_RX_BUFFER_SIZE];
-#ifdef TEST_PIN
-    nrf_gpio_cfg_output(TEST_PIN);
-#endif
-#ifdef TEST_PIN2
-    nrf_gpio_cfg_output(TEST_PIN2);
-#endif
-    EventDispatcher::getInstance().addListener(this);
+	EventDispatcher::getInstance().addListener(this);
 }
 
 void UartProtocol::reset() {
-	// No logs, this function can be called from interrupt
-#ifdef TEST_PIN2
-	nrf_gpio_pin_toggle(TEST_PIN2);
-#endif
+	// There are no logs written from this function. It can be called from an interrupt service routine.
 	_readBufferIdx = 0;
 	_startedReading = false;
 	_escapeNextByte = false;
@@ -173,19 +145,12 @@ void UartProtocol::onRead(uint8_t val) {
 	// Bad length? Reset. Over-run length of buffer? Reset.
 	// Haven't seen a start char in too long? Reset anyway.
 
-	// Can't read anything while processing the previous msg.
+	// Can't read anything while still processing the previous message.
 	if (_readBusy) {
-#ifdef TEST_PIN2
-		nrf_gpio_pin_toggle(TEST_PIN2);
-#endif
 		return;
 	}
 
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
-
-	// An escape shouldn't be followed by a special byte
+	// An escape shouldn't be followed by a special byte.
 	if (_escapeNextByte) {
 		switch (val) {
 		case UART_START_BYTE:
@@ -215,10 +180,6 @@ void UartProtocol::onRead(uint8_t val) {
 		unEscape(val);
 		_escapeNextByte = false;
 	}
-
-//#ifdef TEST_PIN
-//	nrf_gpio_pin_toggle(TEST_PIN);
-//#endif
 
 	_readBuffer[_readBufferIdx++] = val;
 
@@ -252,9 +213,6 @@ void UartProtocol::onRead(uint8_t val) {
 void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 	uint8_t* data = msgData->msg;
 	uint16_t size = msgData->msgSize;
-
-	//	LOGd("read:");
-	//	BLEutil::printArray(data, size);
 
 	// Check CRC
 	uint16_t calculatedCrc = crc16(data, size - sizeof(uart_msg_tail_t));
@@ -378,9 +336,8 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 	}
 	}
 
-
 	// When done, ALWAYS reset and set readBusy to false!
-	// Reset invalidates the data, right?
+	// TODO(@vliedel): Reset invalidates the data, right?
 	_readBusy = false;
 	reset();
 }

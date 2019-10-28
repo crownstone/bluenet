@@ -20,3 +20,4 @@ nohup.out
 .metadata/
 .vimrc
 .ctags/
+**/CMakeBuild.overwrite.config

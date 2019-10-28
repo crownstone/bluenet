@@ -89,19 +89,6 @@ SET(DEFAULT_C_AND_CXX_FLAGS "-mthumb -ffunction-sections -fdata-sections -Wall -
 SET(ASM_OPTIONS "-x assembler-with-cpp")
 SET(CMAKE_ASM_FLAGS "${CFLAGS} ${ASM_OPTIONS}" )
 
-# Collect flags that have to do with optimization
-# We are optimizing for SIZE for now. If size turns out to be abundant, enable -O3 optimization.
-# Interesting options: -ffast-math, -flto (link time optimization), -fno-rtti
-# Regarding size of the binary -ffast-math made a very small difference (4B), while -flto made a difference of almost 13kB.
-# When adding -flto to C_FLAGS, you also need -fno-builtin, else it gives an error of multiple definitions of _exit().
-#SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -flto -fno-builtin")
-CHECK_IPO_SUPPORTED(RESULT result)
-IF(result)
-	MESSAGE(STATUS "Enabled interprocedural optimization: -lto")
-	SET(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
-else()
-	MESSAGE(STATUS "Note! Interprocedural optimization not enabled (might just be because cmake does not know if the compiler supports it)")
-ENDIF()
 SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -Os -fomit-frame-pointer")
 
 # The option --print-gc-section can be used to debug which sections are actually garbage collected
@@ -130,6 +117,25 @@ MESSAGE(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 INCLUDE(crownstone.defs)
+INCLUDE(colors)
+
+# Collect flags that have to do with optimization
+# We are optimizing for SIZE for now. If size turns out to be abundant, enable -O3 optimization.
+# Interesting options: -ffast-math, -flto (link time optimization), -fno-rtti
+# Regarding size of the binary -ffast-math made a very small difference (4B), while -flto made a difference of almost 13kB.
+# When adding -flto to C_FLAGS, you also need -fno-builtin, else it gives an error of multiple definitions of _exit().
+#SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -flto -fno-builtin")
+CHECK_IPO_SUPPORTED(RESULT result)
+IF(result)
+	MESSAGE(STATUS "Enabled interprocedural optimization: -lto")
+	SET(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+	MESSAGE(STATUS "${Red}Note! Interprocedural optimization not enabled (might just be because cmake does not know if the compiler supports it)${ColourReset}")
+ENDIF()
+
+IF(CMAKE_BUILD_TYPE MATCHES "Debug")
+	MESSAGE(STATUS "${Red}Pay attention, this is a debug build (change with -DCMAKE_BUILD_TYPE=Release or RelWithDebInfo${ColourReset}")
+ENDIF()
 
 GET_DIRECTORY_PROPERTY( DirDefs DIRECTORY ${CMAKE_SOURCE_DIR} COMPILE_DEFINITIONS )
 

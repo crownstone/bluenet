@@ -35,6 +35,7 @@
  * One page for sure
  */
 #define FDS_VIRTUAL_PAGES 4
+// Virtual page size in words.
 #define FDS_VIRTUAL_PAGE_SIZE 1024
 #define FDS_VIRTUAL_PAGES_RESERVED 0
 #define FDS_OP_QUEUE_SIZE 4

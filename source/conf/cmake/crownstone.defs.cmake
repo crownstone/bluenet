@@ -10,7 +10,6 @@ ENDIF()
 
 MESSAGE(STATUS "crownstone.defs.cmake: Build type: ${CMAKE_BUILD_TYPE}")
 IF(CMAKE_BUILD_TYPE MATCHES "Debug")
-	MESSAGE(INFO "Pay attention, this is a debug build (change with -DCMAKE_BUILD_TYPE=Release or RelWithDebInfo")
 	ADD_DEFINITIONS("-DGIT_HASH=${GIT_HASH}")
 	ADD_DEFINITIONS("-DGIT_BRANCH=${GIT_BRANCH}")
 	ADD_DEFINITIONS("-DDEBUG")
@@ -27,6 +26,12 @@ IF(DEFINED BLUETOOTH_NAME)
 	ADD_DEFINITIONS("-DBLUETOOTH_NAME=${BLUETOOTH_NAME}")
 ELSE()
 	MESSAGE(FATAL_ERROR "We require a BLUETOOTH_NAME in CMakeBuild.config (5 characters or less), i.e. \"Crown\" (with quotes)")
+ENDIF()
+
+IF(NOT DEFINED CS_SERIAL_ENABLED OR CS_SERIAL_ENABLED STREQUAL "0")
+	MESSAGE(STATUS "Crownstone serial disabled")
+ELSE()
+	MESSAGE(STATUS "Crownstone serial enabled")
 ENDIF()
 
 # Copied from an example makefile.
