@@ -311,10 +311,10 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 11 | Goto DFU | - | Reset device to DFU mode | x
 12 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
 13 | Disconnect | - | Causes the crownstone to disconnect | x | x | x
-20 | Switch | uint 8 | Switch power, 0 = OFF, 100 = FULL ON | x | x | x | x |
-21 | Multi switch |
-22 | Dimmer | uint 8 | Set dimmer to value, 0 = OFF, 100 = FULL ON | x | x | x |
-23 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
+20 | Switch | uint 8 | Switch power, 0 = off, 100 = full on | x | x | x | x |
+21 | Multi switch | [Multi switch packet](#multi_switch_packet) | Switch multiple Crownstones (via mesh). | x | x | x
+22 | Dimmer | uint 8 | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
+23 | Relay | uint 8 | Switch relay, 0 = off, 1 = on | x | x | x
 30 | Set time | uint 32 | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
 31 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
 32 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
@@ -375,6 +375,27 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16  | [State type](#state_types) | 2 | Type of state.
 uint 8 | Payload | N | Payload data, depends on state type.
+
+
+<a name="multi_switch_packet"></a>
+##### Multi switch packet
+
+![Multi switch list](../docs/diagrams/multi_switch_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Count | 1 | Number of valid entries.
+[Multi switch entry](#multi_switch_entry_packet) [] | List | Count * 2 | A list of switch commands.
+
+<a name="multi_switch_entry_packet"></a>
+##### Multi switch entry
+
+![Multi switch short entry](../docs/diagrams/multi_switch_entry_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
+uint 8 | Switch value | 1 | The switch value to be set by the targeted crownstone. 0 = off, 100 = fully on.
 
 
 <a name="state_error_bitmask"></a>
