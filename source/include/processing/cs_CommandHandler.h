@@ -102,6 +102,9 @@ private:
 	cs_ret_code_t handleCmdUartEnable            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 
 	cs_ret_code_t handleCmdSaveBehaviour         (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	cs_ret_code_t handleCmdReplaceBehaviour		 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);  
+	cs_ret_code_t handleCmdRemoveBehaviour		 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);  
+	cs_ret_code_t handleCmdGetBehaviour			 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
 	
 
 	/**

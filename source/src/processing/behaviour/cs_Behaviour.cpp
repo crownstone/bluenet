@@ -23,7 +23,7 @@ Behaviour::Behaviour(
     {
 }
 
-Behaviour::Behaviour(std::array<uint8_t, 25> arr) : 
+Behaviour::Behaviour(std::array<uint8_t, 26> arr) : 
     Behaviour(
         WireFormat::deserialize<uint8_t>(arr.data() + 0, 1),
         // WireFormat::deserialize<uint8_t>(arr.data() + 1, 1), // unused byte, 'options'

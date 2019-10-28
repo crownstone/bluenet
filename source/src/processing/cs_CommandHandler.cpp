@@ -152,6 +152,12 @@ cs_ret_code_t CommandHandler::handleCommand(
 		return handleCmdUartEnable(buffer, size, accessLevel);
 	case CTRL_CMD_SAVE_BEHAVIOUR:
 		return handleCmdSaveBehaviour(buffer,size,accessLevel);
+	case CTRL_CMD_REPLACE_BEHAVIOUR :
+		return handleCmdReplaceBehaviour(buffer,size,accessLevel);
+	case CTRL_CMD_REMOVE_BEHAVIOUR :
+		return handleCmdRemoveBehaviour(buffer,size,accessLevel);  
+	case CTRL_CMD_GET_BEHAVIOUR    :
+		return handleCmdGetBehaviour(buffer,size,accessLevel);
 	default:
 		LOGe("Unknown type: %u", type);
 		return ERR_UNKNOWN_TYPE;
@@ -767,7 +773,8 @@ cs_ret_code_t CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const uin
 cs_ret_code_t CommandHandler::handleCmdSaveBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
 	LOGd(STR_HANDLE_COMMAND, "Save Behaviour");
 
-	if(size != 25){
+	// TODO(Arend): Only implements Switch behaviour at the moment...
+	if(size != 26){
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
@@ -781,7 +788,46 @@ cs_ret_code_t CommandHandler::handleCmdSaveBehaviour (buffer_ptr_t buffer, const
 	// not implemented.
 	return ERR_SUCCESS;
 }
+
+cs_ret_code_t CommandHandler::handleCmdReplaceBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+	LOGd(STR_HANDLE_COMMAND, "Replace Behaviour");
+
+	if(size != 1 + 26){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	LOGd("TODO");
 	
+	return ERR_SUCCESS;
+} 
+
+cs_ret_code_t CommandHandler::handleCmdRemoveBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+	LOGd(STR_HANDLE_COMMAND, "Remove Behaviour");
+
+	if(size != 1){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	LOGd("TODO");
+	
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t CommandHandler::handleCmdGetBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+	LOGd(STR_HANDLE_COMMAND, "Get Behaviour");
+
+	if(size != 1){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	LOGd("TODO");
+	
+	return ERR_SUCCESS;
+}
+
 
 
 

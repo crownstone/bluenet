@@ -34,6 +34,11 @@ void BehaviourStore::handleEvent(event_t& evt){
             activeBehaviours[0].reset();
             break;
         }
+        case CS_TYPE::EVT_GET_BEHAVIOUR:{
+            LOGd("remove behaviour event");
+            activeBehaviours[0].reset();
+            break;
+        }
         default:{
             break;
         }

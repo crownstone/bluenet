@@ -31,7 +31,7 @@ class Behaviour {
       PresenceCondition presencecondition
       );
 
-    Behaviour(std::array<uint8_t, 25> arr);
+    Behaviour(std::array<uint8_t, 26> arr);
 
     void print();
 

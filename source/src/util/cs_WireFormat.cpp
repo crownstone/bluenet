@@ -68,8 +68,8 @@ PresenceCondition WireFormat::deserialize(uint8_t* data, size_t len){
 template<>
 Behaviour WireFormat::deserialize(uint8_t* data, size_t len){
     // TODO(Arend): assert length
-    std::array<uint8_t,25> d;
-    std::copy_n(data, 25, d.begin());
+    std::array<uint8_t,26> d;
+    std::copy_n(data, 26, d.begin());
     return Behaviour(d);
 }
 

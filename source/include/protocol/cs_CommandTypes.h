@@ -45,7 +45,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_MULTI_SWITCH                = 35,    //! 0x23
 
 	CTRL_CMD_SAVE_BEHAVIOUR              = 36,     //! 0x24
-	CTRL_CMD_UPDATE_BEHAVIOUR            = 37,     //! 0x25
+	CTRL_CMD_REPLACE_BEHAVIOUR            = 37,     //! 0x25
 	CTRL_CMD_REMOVE_BEHAVIOUR            = 38,     //! 0x26
 	CTRL_CMD_GET_BEHAVIOUR               = 39,     //! 0x27
 
