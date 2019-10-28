@@ -72,6 +72,13 @@ struct __attribute__((__packed__)) result_packet_t {
 };
 
 /**
+ * State get/set header packet.
+ */
+struct __attribute__((__packed__)) state_packet_header_t {
+	uint16_t stateType;
+};
+
+/**
  * State errors: collection of errors that influence the switch behaviour.
  */
 union __attribute__((__packed__)) state_errors_t {

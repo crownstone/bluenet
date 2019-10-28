@@ -36,6 +36,5 @@ enum CommandHandlerTypes {
 	CTRL_CMD_UART_MSG                    = 50,
 	CTRL_CMD_UART_ENABLE                 = 51,
 
-
 	CTRL_CMD_UNKNOWN                     = 0xFFFF
 };

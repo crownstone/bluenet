@@ -1,4 +1,4 @@
-# Bluenet protocol v3.0.0
+# Bluenet protocol v4.0.0
 -------------------------
 
 This only documents the latest protocol, older versions can be found in the git history.
@@ -11,6 +11,9 @@ This only documents the latest protocol, older versions can be found in the git 
 - [Broadcast commands](#broadcasts). Broadcast commands.
 - [Services and characteristics](#services). Which Bluetooth GATT services and characteristics the crownstones have.
 - [Data structures](#data_structs). The data structures used for the characteristics, advertisements, and mesh.
+    - [Control](#command_types). Used to send commands to the Crownstone.
+    - [Result](#result_packet). The result of a command.
+    - [State](#state_types). State variables of the Crownstone.
 
 
 <a name="setup"></a>
@@ -25,7 +28,7 @@ The setup process goes as follows:
 The values are only valid for this connection session. The session key and the session nonce will be used to encrypt the rest of the setup phase using AES 128 CTR as explained [here](#encrypted_write_read).
 - Phone subscribes to [control](#setup_service) characteristic.
 - Phone commands Crownstone to setup via the control characteristic.
-- Phone waits for control characteristic result to become SUCCESS (See [result packet](#command_result_packet)).
+- Phone waits for control characteristic result to become SUCCESS (See [result packet](#result_packet)).
 - Crownstone will reboot to normal mode.
 
 
@@ -221,11 +224,11 @@ The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provide
 Characteristic | UUID | Date type | Description | A | M | B
 --- | --- | --- | --- | :---: | :---: | :---:
 Control        | 24f0000a-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone. | x | x | x
-Result         | 24f0000b-7d10-4805-bfc1-7663a01c3bff | [Result packet](#command_result_packet) | Read the result of a command from the crownstone. | x | x | x
+Result         | 24f0000b-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone. | x | x | x
 Session nonce  | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the [session nonce](#session_nonce). First 4 bytes are also used as validation key. |  |  | ECB
 Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |
 
-Every command written to the control characteristic returns a [result packet](#command_result_packet) on the result characteristic.
+Every command written to the control characteristic returns a [result packet](#result_packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
 
 
@@ -233,8 +236,8 @@ If commands have to be executed sequentially, make sure that the result packet o
 <a name="recovery"></a>
 #### Recovery
 If you lost your encryption keys you can use this characteristic to factory reset the Crownstone.
-This method is only available for 20 seconds after the Crownstone powers on.
-You need to write **0xDEADBEEF** to it. After this, the Crownstone disconnects and goes into Low TX mode so you'll have to be close to continue the factory reset. After this, you reconnect and write **0xDEADBEEF** again to this characteristic to factory reset the Crownstone.
+This method is only available for 60 seconds after the Crownstone powers on.
+You need to write **0xDEADBEEF** to it. Then, the Crownstone disconnects and goes into low TX mode so you'll have to be close to continue the factory reset. After this, you reconnect and write **0xDEADBEEF** again to this characteristic to factory reset the Crownstone.
 
 
 
@@ -252,9 +255,9 @@ Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the s
 GoTo DFU       | 24f10006-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 66 to go to DFU.
 Session nonce  | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the session nonce. First 4 bytes are also used as validation key.
 Control        | 24f1000a-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
-Result         | 24f1000b-7d10-4805-bfc1-7663a01c3bff | [Result packet](#command_result_packet) | Read the result of a command from the crownstone.
+Result         | 24f1000b-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone.
 
-Every command written to the control characteristic returns a [result packet](#command_result_packet) on the result characteristic.
+Every command written to the control characteristic returns a [result packet](#result_packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
 
 
@@ -264,78 +267,9 @@ If commands have to be executed sequentially, make sure that the result packet o
 
 Index:
 
-- [Result](#command_result_packet). Tells you about the result of a command.
-- [Control](#control_packet). Used to send commands to the crownstone.
-- [Mesh](#mesh_packets). Packets sent over the mesh.
-
-
-<a name="switch_state_packet"></a>
-#### Switch state
-To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
-
-![Switch State Packet](../docs/diagrams/switch_state_packet.png)
-
-Bit | Name |  Description
---- | --- | ---
-0 | Relay | Value of the relay, where 0 = OFF, 1 = ON.
-1-7 | Dimmer | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
-
-<a name="flags_bitmask"></a>
-#### Flags bitmask
-
-Bit | Name |  Description
---- | --- | ---
-0 | Dimming available | When dimming is physically available, this will be 1.
-1 | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
-2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](SERVICE_DATA.md#service_data_encrypted_error), or by reading the [error state](#state_packet).
-3 | Switch locked | When the switch state is locked, this will be 1.
-4 | Time set | If this is 1, the time is set on this Crownstone.
-5 | Switchcraft | If this is 1, switchcraft is enabled on this Crownstone.
-6 | Reserved | Reserved for future use.
-7 | Reserved | Reserved for future use.
-
-
-
-<a name="command_result_packet"></a>
-## Command result packet
-
-__If encryption is enabled, this packet will be encrypted using any of the keys where the box is checked.__
-
-![Command result packet](../docs/diagrams/command-result-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 16 | [Command type](#command_types) | 2 | Type of the command of which this packet is the result.
-uint 16 | [Result code](#result_codes) | 2 | The result code.
-uint 16 | Size | 2 | Size of the payload in bytes.
-uint 8 | Payload | Size | Payload data, depends on command type.
-
-<a name="result_codes"></a>
-#### Result codes
-
-Value | Name | Description
---- | --- | ---
-0 | SUCCESS | Completed successfully.
-1 | WAIT_FOR_SUCCESS | Command is successful so far, but you need to wait for SUCCESS.
-16 | BUFFER_UNASSIGNED | No buffer was assigned for the command.
-17 | BUFFER_LOCKED | Buffer is locked, failed queue command.
-18 | BUFFER_TOO_SMALL | Buffer is too small for operation.
-32 | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
-33 | WRONG_PARAMETER | Wrong parameter provided.
-34 | INVALID_MESSAGE | invalid message provided.
-35 | UNKNOWN_OP_CODE | Unknown operation code provided.
-36 | UNKNOWN_TYPE | Unknown type provided.
-37 | NOT_FOUND | The thing you were looking for was not found.
-38 | NO_SPACE | There is no space for this command.
-39 | BUSY | Wait for something to be done.
-48 | NO_ACCESS | Invalid access for this command.
-64 | NOT_AVAILABLE | Command currently not available.
-65 | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
-67 | NOT_INITIALIZED | Something must first be initialized.
-80 | WRITE_DISABLED | Write is disabled for given type.
-81 | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
-96 | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
-65535 | UNSPECIFIED | Unspecified error.
+- [Control](#command_types). Used to send commands to the Crownstone.
+- [Result](#result_packet). The result of a command.
+- [State](#state_types). State variables of the Crownstone.
 
 
 
@@ -384,12 +318,13 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 30 | Set time | uint 32 | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
 31 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
 32 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
-33 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. **Only no_operation, and set_time are implemented at this moment.** | x | x | x
+33 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. Required access depends on the command. | x | x | x
 40 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 42 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
 50 | UART message | payload | Print the payload to UART. | x
 51 | UART enable | uint 8 | Set UART enabled, 0 = none, 1 = RX only, 3 = TX and RX | x
+
 
 
 <a name="setup_packet"></a>
@@ -441,8 +376,88 @@ Type | Name | Length | Description
 uint 16  | [State type](#state_types) | 2 | Type of state.
 uint 8 | Payload | N | Payload data, depends on state type.
 
+
+<a name="state_error_bitmask"></a>
+#### Error Bitmask
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Overcurrent | If this is 1, overcurrent was detected.
+1 | Overcurrent dimmer | If this is 1, overcurrent for the dimmer was detected.
+2 | Chip temperature | If this is 1, the chip temperature is too high.
+3 | Dimmer temperature | If this is 1, the dimmer temperature is too high.
+4 | Dimmer on failure | If this is 1, the dimmer is broken, in an always (partial) on state.
+5 | Dimmer off failure | If this is 1, the dimmer is broken, in an always (partial) off state.
+6-31 | Reserved | Reserved for future use.
+
+
+<a name="command_mesh_packet"></a>
+#### Mesh command packet
+
+![Command packet](../docs/diagrams/command-mesh-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
+uint 8 | Reserved | 1 | Reserved for future use, should be 0 for now.
+uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast. **Currently, only 0 is implemented.**
+uint8 [] | List of target IDs | Count | Crownstone identifiers of the devices at which this message is aimed. For broadcast, no IDs are provided and the command follows directly after the count field.
+uint 8 | Command payload | N | The command payload data, which depends on the type.
+
+<a name="mesh_command_types"></a>
+##### Mesh command types
+
+Type nr | Type name | Payload type | Payload description
+--- | --- | --- | ---
+0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet. **Currently, only control commands `No operation` and `Set time` are implemented.**
+
+
+
+<a name="result_packet"></a>
+## Result packet
+
+__If encryption is enabled, this packet will be encrypted using any of the keys where the box is checked.__
+
+![Result packet](../docs/diagrams/result-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | [Command type](#command_types) | 2 | Type of the command of which this packet is the result.
+uint 16 | [Result code](#result_codes) | 2 | The result code.
+uint 16 | Size | 2 | Size of the payload in bytes.
+uint 8 | Payload | Size | Payload data, depends on command type.
+
+<a name="result_codes"></a>
+#### Result codes
+
+Value | Name | Description
+--- | --- | ---
+0 | SUCCESS | Completed successfully.
+1 | WAIT_FOR_SUCCESS | Command is successful so far, but you need to wait for SUCCESS.
+16 | BUFFER_UNASSIGNED | No buffer was assigned for the command.
+17 | BUFFER_LOCKED | Buffer is locked, failed queue command.
+18 | BUFFER_TOO_SMALL | Buffer is too small for operation.
+32 | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
+33 | WRONG_PARAMETER | Wrong parameter provided.
+34 | INVALID_MESSAGE | invalid message provided.
+35 | UNKNOWN_OP_CODE | Unknown operation code provided.
+36 | UNKNOWN_TYPE | Unknown type provided.
+37 | NOT_FOUND | The thing you were looking for was not found.
+38 | NO_SPACE | There is no space for this command.
+39 | BUSY | Wait for something to be done.
+48 | NO_ACCESS | Invalid access for this command.
+64 | NOT_AVAILABLE | Command currently not available.
+65 | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
+67 | NOT_INITIALIZED | Something must first be initialized.
+80 | WRITE_DISABLED | Write is disabled for given type.
+81 | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
+96 | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
+65535 | UNSPECIFIED | Unspecified error.
+
+
+
 <a name="state_types"></a>
-#### State types
+## State types
 
 The AMBS columns indicate which users have access to these states: `r` for read access, `w` for write access.
 Admin access means the packet is encrypted with the admin key.
@@ -508,255 +523,13 @@ Type nr | Type name | Payload type | Description | A | M | B
 139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors.  | r | r | 
 
 
+<a name="switch_state_packet"></a>
+#### Switch state
+To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
 
-<a name="state_error_bitmask"></a>
-#### Error Bitmask
-
-Bit | Name |  Description
---- | --- | ---
-0 | Overcurrent | If this is 1, overcurrent was detected.
-1 | Overcurrent dimmer | If this is 1, overcurrent for the dimmer was detected.
-2 | Chip temperature | If this is 1, the chip temperature is too high.
-3 | Dimmer temperature | If this is 1, the dimmer temperature is too high.
-4 | Dimmer on failure | If this is 1, the dimmer is broken, in an always (partial) on state.
-5 | Dimmer off failure | If this is 1, the dimmer is broken, in an always (partial) off state.
-6-31 | Reserved | Reserved for future use.
-
-
-
-<a name="schedule_list_packet"></a>
-### Schedule list packet
-
-![Schedule list packet](../docs/diagrams/schedule-list-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Size | 1 | Number of entries in the list.
-[schedule entry](#schedule_entry_packet) | Entries | size * 12 | Schedule entry list. Entries with timestamp=0 can be considered empty.
-
-<a name="schedule_command_packet"></a>
-### Schedule command packet
-
-![Schedule command packet](../docs/diagrams/schedule-command-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | index | 1 | Index of the entry (corresponds to the Nth entry in the list).
-[schedule entry](#schedule_entry_packet) | Entry | 12 | Schedule entry.
-
-<a name="schedule_entry_packet"></a>
-### Schedule entry packet
-
-![Schedule entry packet](../docs/diagrams/schedule-entry-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | reserved | 1 | Reserved for future use.
-uint 8 | Type | 1 | Combined repeat and action type. Defined as `repeatType + (actionType << 4)`.
-uint 8 | [Override mask](#schedule_override_mask) | 1 | Bitmask of switch commands to override.
-uint 32 | Next timestamp | 4 | Unix timestamp of the next time this entry triggers. Set to 0 to remove this entry.
-[schedule repeat](#schedule_repeat_packet) | Repeat data | 2 | Repeat time data, depends on the repeat type.
-[schedule action](#schedule_action_packet) | Action data | 3 | Action data, depends on the action type.
-
-<a name="schedule_override_mask"></a>
-### Schedule override mask
+![Switch State Packet](../docs/diagrams/switch_state_packet.png)
 
 Bit | Name |  Description
 --- | --- | ---
-0 | All | Ignore any switch command. ** Not implemented yet. **
-1 | Location | Ignore any switch command that comes from location updates (enter/exit room/sphere). ** Not implemented yet. **
-2-7 | Reserved | Reserved for future use.
-
-
-<a name="schedule_repeat_packet"></a>
-### Schedule repeat packet
-
-#### Repeat type 0
-Perform action every X minutes.
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 16 | Repeat time | 2 | Repeat every `<repeat time>` minutes, 0 is not allowed.
-
-#### Repeat type 1
-Perform action every 24h, but only on certain days these days of the week.
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Day of week | 1 | Bitmask, with bits 0-6 for Sunday-Saturday and bit 7 for all days.
-uint 8 | Reserved | 1 | Reserved for future use.
-
-#### Repeat type 2
-Perform action only once. Entry gets removed after action was performed.
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Reserved | 2 | Reserved for future use.
-
-
-<a name="schedule_action_packet"></a>
-### Schedule action packet
-
-#### Action type 0
-Set power switch to a given value.
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Switch | 1 | Power switch value. Range 0-100, where 0 is off and 100 is fully on.
-uint 8 | Reserved | 2 | Unused.
-
-#### Action type 1
-Fade from current power switch value to a given power switch value, in X seconds. Starts fading at *next timestamp*.
-** Not implemented yet. **
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Switch end | 1 | Power switch value after fading (at timestamp + fade duration).
-uint 16 | Fade duration | 2 | Fade duration in seconds.
-
-#### Action type 2
-Toggle the power switch.
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Reserved | 3 | Reserved for future use.
-
-
-
-
-<a name="mesh_packets"></a>
-## Mesh packets
-
-Packets which are sent via the mesh.
-
-
-
-### Mesh multi switch
-
-Switch multiple Crownstones at once.
-
-<a name="multi_switch_mesh_packet"></a>
-##### Multi switch packet
-
-![Multi switch packet](../docs/diagrams/multi-switch-mesh-packet.png)
-
-Type nr | Type name | Payload type | Description
---- | --- | --- | ---
-0 | [List](#multi_switch_list_mesh_packet) | Multi switch list | Different switch command for each Crownstone.
-
-
-<a name="multi_switch_list_mesh_packet"></a>
-##### Multi switch list packet
-
-![Multi switch packet](../docs/diagrams/multi-switch-list-mesh-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Count | 1 | Number of multi switch list items in the list.
-[Multi switch list item](#multi_switch_list_mesh_item) [] | List | N | A list of switch commands.
-
-
-<a name="multi_switch_list_mesh_item"></a>
-##### Multi switch list item
-
-![Multi switch list item](../docs/diagrams/multi-switch-list-item.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
-uint 8 | Switch state | 1 | The switch state to be set by the targeted crownstone after the timeout expires. 0 = off, 100 = fully on.
-uint 16 | Timeout | 2 | The timeout (in seconds) after which the state should be set.
-uint 8 | [Intent](#multi_switch_intent) | 1 | The intent of the switch, see the table below. **Not used.**
-
-<a name="multi_switch_intent"></a>
-###### Intent
-
-Value | Name
---- | ---
-0 | Sphere Enter
-1 | Sphere Exit
-2 | Enter
-3 | Exit
-4 | Manual
-
-
-
-### Mesh keep alive
-
-Send keep alive to multiple Crownstones at once.
-
-<a name="keep_alive_mesh_packet"></a>
-#### Mesh keep alive packet
-
-![Keep alive packet](../docs/diagrams/keep-alive-mesh-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | type | 1 | Determines type of packet, see below.
-uint 8 [] | payload | N | Depends on type of packet, see below.
-
-
-Type nr | Type name | Payload type | Description
---- | --- | --- | ---
-1 | [Same timeout](#keep_alive_same_timeout_mesh_packet) | Keep alive same timeout | Keep alive with same timeout for each Crownstone.
-
-
-<a name="keep_alive_same_timeout_mesh_packet"></a>
-#### Mesh keep alive same timeout packet
-
-![Keep alive same timeout packet](../docs/diagrams/keep-alive-same-timeout-mesh-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 16 | Timeout | 2 | Timeout (in seconds), applies to all stones present in the list.
-uint 8 | Count | 1 | Number of items in the list.
-[Keep alive item](#keep_alive_mesh_item) [] | List | N | The keep alive same timeout items.
-
-
-<a name="keep_alive_mesh_item"></a>
-##### Mesh keep alive same timeout item
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this keep alive item is targeted.
-[Action + switch state](#action_switch_state_keep_alive) | Action + switch state | 1 | A combined element for action and switch state, which should be executed by the targeted crownstone when the keep alive times out.
-
-
-<a name="action_switch_state_keep_alive"></a>
-##### Action + switch state
-
-Value | Name
---- | ---
-255 | No action
-... | ...
-0-100 | Switch power: 0 = off, 100 = on, dimmed in between.
-
-
-
-### Mesh command
-
-Send a generic command to multiple Crownstones at once.
-
-<a name="command_mesh_packet"></a>
-#### Mesh command packet
-
-![Command packet](../docs/diagrams/command-mesh-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
-uint 8 | Reserved | 1 | Reserved for future use.
-uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast.
-uint8 [] | List of target IDs | Count | Crownstone identifiers of the devices at which this message is aimed. For broadcast, no IDs are provided and the command follows directly after the Count element.
-uint 8 | Command payload | N | The command payload data, which depends on the type.
-
-
-<a name="mesh_command_types"></a>
-##### Mesh command types
-
-Type nr | Type name | Payload type | Payload description
---- | --- | --- | ---
-0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet.
-1 | Beacon | [Beacon Config](#beacon_mesh_data_packet) | Configure the iBeacon settings. **Not implemented.**
-2 | Config | [Configuration](#config_packet) | Send/Request a configuration setting, see configuration packet. **Not implemented.**
-3 | State | [State](#state_packet) | Send/Request a state variable, see state packet. **Not implemented.**
+0 | Relay | Value of the relay, where 0 = OFF, 1 = ON.
+1-7 | Dimmer | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
