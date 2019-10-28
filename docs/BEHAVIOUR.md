@@ -11,41 +11,28 @@ This document describes the Crownstones' Behaviour concept in more technical det
 # Communication API for (smartphone) applications
 
 To store, update and sync Behaviours, the application can communicate over the Crownstone bluetooth protocol
-by sending [Behaviour Packets](PROTOCOL.md#behaviour_packet).
+by sending [Behaviour Packets](PROTOCOL.md#behaviour_packet). The advertized state contains a [Behaviour Hash](#behaviour_hash)
+of all stored behaviours, which can be used to identify an out-of-sync condition.
 
-The idea behind the API is that an application can only update or change the state of the stored Behaviours
-if its current knowledge/model of the state is correct (which is checked by a hash). When an operation is executed,
-a master Hash value that is part of the Crownstone's advertised state is updated. An application can check
-its current model of the behaviour store is in sync by verifying this value.
 
 ```C++
 /**
- * If expected_master_hash is not equal to the current
- * value that hash() would return, nothing happens
- * and 0xff is returned. Else,
- * returns an index in range [0,0xfe) on succes, 
- * or 0xff if it couldn't be saved.
- * 
- * A hash is computed and saved together with [b].
+ * Returns an index in range [0,MaxBehaviours) on succes, 
+ * or 0xffffffff if it couldn't be saved.
  */
- uint8_t save(uint32_t expected_master_hash, Behaviour b);
+ uint8_t save(Behaviour b);
 
 /**
- * Replace the behaviour at [index] with [b], if the hash of the 
- * currently saved behaviour at [index] is not equal to 
- * [expected_hash] nothing will happen and false is returned.
- * if these hashes coincide, postcondition is identical to the
+ * Replace the behaviour at [index] with [b]
+ * postcondition is identical to the
  * postcondition of calling save(b) when it returns [index].
  */
-bool replace(uint32_t expected_hash, uint8_t index, Behaviour b);
+bool replace(uint8_t index, Behaviour b);
 
 /**
- * deletes the behaviour at [index], if the hash of the 
- * currently saved behaviour at [index] is not equal to 
- * [expected_hash] nothing will happen and false is returned,
- * else the behaviour is removed from storage.
+ * deletes the behaviour at [index] the behaviour is removed from storage.
  */
-bool remove(uint32_t expected_hash, uint8_t index);
+bool remove(uint8_t index);
 
 /**
  *  returns the stored behaviour at [index].
@@ -71,11 +58,9 @@ std::vector<std::pair<uint8_t,Behaviour>> get();
 
 When a Save Behaviour packet is received by the Crownstone, it will try to store the Behaviour represented by `Data` 
 to its persistent memory. Upon success, it returns the `Index` (uint8) that can be used to refer to this behaviour. 
-If the `Hash` is not equal to the current master hash of the Behaviour State, the request will not be processed.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected master hash before operation is executed
 [Behaviour](#behaviour_payload) | Data | ... | Behaviour to save
 
 <a name="replace_behaviour_packet"></a>
@@ -84,14 +69,12 @@ Type | Name | Length | Description
 ![Replace Behaviour](../docs/diagrams/behaviour-replace.png)
 
 When a Replace Behaviour packet is received by the Crownstone, it will try to replace the behaviour at `index` by the
-Behaviour represented by `Data`. If the `Hash` is not equal to the hash of the current Behaviour at given index, the 
-request will not be processed.
+Behaviour represented by `Data`.
 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to replace
-[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected hash of the Behaviour at given index before operation is executed
 [Behaviour](#behaviour_payload) | Data | ... | Behaviour to replace the current one at given index with
 
 <a name="remove_behaviour_packet"></a>
@@ -100,12 +83,10 @@ uint8 | Index | 1 | Index of the behaviour to replace
 ![Remove Behaviour](../docs/diagrams/behaviour-remove.png)
 
 When a Remove Behaviour packet is received by the Crownstone, it will try to remove the behaviour at `index`.
-If the `Hash` is not equal to the hash of the current Behaviour at given index, the request will not be processed.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to remove
-[Behaviour Hash](#behaviour_hash) | Hash | 4 | Expected hash of the Behaviour at given index before operation is executed
 
 <a name="get_behaviour_packet"></a>
 #### Get Behaviour Payload
@@ -181,7 +162,7 @@ Type | Name | Length | Description
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Presence Description](#presence_description) | Extension Presence | 8 | Description of the presence conditions that the Extension behaviour will use.
-[Time Difference](#time_difference) | Extension Until | 4 | Extend the core behaviour's 'Until' time by the given difference.
+[Time Difference](#time_difference) | Extension Until | 4 | Extend the core behaviour's 'Until' time by at least the given time difference, possibly longer if the extension presence condition is still satisfied after this time difference expires. Negative values will be rounded up to 0.
 
 <a name="behaviour_hash"></a>
 #### Behaviour Hash
