@@ -30,7 +30,8 @@ PROJECT(${PROJECT_NAME})
 # The directory with some of the FindXXX modules
 set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
 set(DEFAULT_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules)
-set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH}")
+set(THIRD_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules/third)
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH};${DEFAULT_MODULES_PATH};${THIRD_MODULES_PATH}")
 
 MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
@@ -39,22 +40,41 @@ MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 #load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
 #load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
 
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+
 #######################################################################################################################
+
+if(NOT CONFIG_DIR)
+  set(CONFIG_DIR "config")
+endif()
+
+if(NOT GDB_PORT)
+  set(GDB_PORT "2331")
+endif()
+
+if(NOT BOARD_TARGET)
+  set(BOARD_TARGET "2331")
+endif()
+
+# Get the following information via JlinkExe and then ShowEmuList
+if(NOT SERIAL_NUM)
+  set(SERIAL_NUM "")
+endif()
+
+#if(NOT GIT_BRANCH)
+#  message(FATAL_ERROR "The code should live on a branch in a git repository")
+#endif()
 
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
 SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
-SET(GIT_BRANCH                               "unset"       CACHE STRING "Current git branch")
-SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
+#SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
-SET(CONFIG_DIR                               "config"      CACHE STRING "The config main directory")
-SET(BOARD_TARGET                             "unset"       CACHE STRING "The board target")
-SET(GDB_PORT                                 "2331"        CACHE STRING "The gdb port for the debug server")
-# Get the following information via JlinkExe and then ShowEmuList
-SET(SERIAL_NUM                               ""            CACHE STRING "The serial number of the JLink")
 SET(SOFTDEVICE_HEX_FILE                      ""            CACHE STRING "Softdevice hex file")
 SET(PASS_FILE                                "dfu_pkg_signing_key" CACHE STRING "Pass file (containing key")
 SET(KEY_FILE                                 "temp.key"    CACHE STRING "Pass file (containing key")
+SET(SUPERUSER_SWITCH                         "sudo"        CACHE STRING "Switch to superuser")
 
 MATH(EXPR SWO_PORT       "${GDB_PORT}+1")
 MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
@@ -64,14 +84,15 @@ MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
 #######################################################################################################################
 
 MESSAGE(STATUS "Set verbosity to level: ${VERBOSITY}")
-MESSAGE(STATUS "Git branch: ${GIT_BRANCH}")
-MESSAGE(STATUS "Day of compilation: ${COMPILATION_DAY}")
+#MESSAGE(STATUS "Git branch: ${GIT_BRANCH}")
+#MESSAGE(STATUS "Day of compilation: ${COMPILATION_DAY}")
 MESSAGE(STATUS "Compiler: ${CMAKE_C_COMPILER}")
 
 IF(SERIAL_NUM STREQUAL "")
-	MESSAGE(STATUS "Default JLink device (serial number not specified)")
+  MESSAGE(STATUS "Default JLink device (serial number not specified)")
+ELSE()
+  MESSAGE(STATUS "Serial number of JLink device to use ${SERIAL_NUM}")
 ENDIF()
-MESSAGE(STATUS "Serial number of JLink device to use ${SERIAL_NUM}")
 
 IF(GDB_PORT STREQUAL "2331")
 	MESSAGE(STATUS "Default GDB port (2331)")
@@ -427,7 +448,7 @@ ELSE()
 	ENDIF()
 
 ENDIF()
-
+		
 # Show which directories are actually included to the user
 GET_PROPERTY(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 IF(VERBOSITY GREATER 4)
@@ -487,8 +508,12 @@ ELSE()
 				PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config
 			)
 		ENDIF()
+
+		message(STATUS "Configure cs_Git.cpp file")
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_Git.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp" @ONLY)
+		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp")
 		
-		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
+		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
 		
 		# Be more strict about our own files (then about Nordic's files)
 		#SET(CROWNSTONE_ONLY_FLAGS "-W")
@@ -508,6 +533,12 @@ ELSE()
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/source/bootloader/VERSION)
 
 		SET(INCLUDE_ONLY_SECTIONS "")
+
+		#		ADD_CUSTOM_TARGET(get_git_info
+		#	COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/git_info.cmake
+		#	COMMAND 
+		#	COMMENT "Get git info for new build"
+		#	)
 
 		# https://stackoverflow.com/questions/5278444/adding-a-custom-command-with-the-file-name-as-a-target
 		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.bin
@@ -576,6 +607,12 @@ ELSE()
 			COMMENT "Debug server, runs in background"
 			)
 		
+		ADD_CUSTOM_TARGET(uart_client
+			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
+			COMMAND ${SUPERUSER_SWITCH} minicom -b 230400 -c on -D /dev/ttyACM0
+			COMMENT "UART client, runs in background"
+			)
+		
 		ADD_CUSTOM_TARGET(rtt_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** RTT client, keep running in separate shell"
 			COMMAND JLinkRTTClient
@@ -604,6 +641,11 @@ ELSE()
 		ADD_CUSTOM_TARGET(check
 			COMMAND cppcheck --enable=style --quiet ${CMAKE_SOURCE_DIR} 
 			COMMENT "Check for style or worse types of errors (linter)"
+			)
+		
+		ADD_CUSTOM_TARGET(lint
+			COMMAND cpplint --filter=-whitespace/tab --linelength=120 --recursive ${CMAKE_SOURCE_DIR} 
+			COMMENT "Check for style according to Google C++ style guide"
 			)
 		
 		ADD_CUSTOM_TARGET(generate_documentation
@@ -683,6 +725,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND nrfjprog -f nrf52 --program ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 			COMMENT "Flashes bootloader settings to remote target board"
+			DEPENDS build_bootloader_settings
 			)
 	
 		ADD_CUSTOM_TARGET(merge_bootloader_settings

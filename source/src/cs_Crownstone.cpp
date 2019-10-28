@@ -32,6 +32,7 @@
 
 #include <ble/cs_CrownstoneManufacturer.h>
 #include <cfg/cs_Boards.h>
+#include <cfg/cs_Git.h>
 #include <cfg/cs_HardwareVersions.h>
 #include <cs_Crownstone.h>
 #include <common/cs_Types.h>
@@ -44,7 +45,6 @@
 #include <processing/cs_EncryptionHandler.h>
 #include <protocol/cs_UartProtocol.h>
 #include <storage/cs_State.h>
-#include <structs/buffer/cs_MasterBuffer.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
 #include <util/cs_Utils.h>
 
@@ -102,7 +102,6 @@ Crownstone::Crownstone(boards_config_t& board) :
 	_mainTimerData = { {0} };
 	_mainTimerId = &_mainTimerData;
 
-	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
 	EventDispatcher::getInstance().addListener(this);
 
@@ -183,7 +182,6 @@ void Crownstone::init(uint16_t step) {
 		LOG_FLUSH();
 
 		LOGi(FMT_HEADER, "init services");
-
 		_stack->initServices();
 		LOG_FLUSH();
 
@@ -888,7 +886,8 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 #define FIRMWARE_VERSION GIT_HASH
 #endif
 
-	LOGi("Welcome! Bluenet firmware, version %s", STRINGIFY(FIRMWARE_VERSION));
+	LOGi("Welcome! Bluenet firmware, version %s", g_GIT_SHA1);
+//	LOGi("Welcome! Bluenet firmware, version %s", STRINGIFY(FIRMWARE_VERSION));
 	LOGi("\033[35;1m");
 	LOGi(" _|_|_|    _|                                            _|     ");
 	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");

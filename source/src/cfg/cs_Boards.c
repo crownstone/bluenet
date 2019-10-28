@@ -477,14 +477,14 @@ void asACR01B10B(boards_config_t* p_config) {
 */
 
 void asACR01B10C(boards_config_t* p_config) {
-	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioPwm                         = 8; // 18 for v3
 //	p_config->pinGpioPwm                         = 15;
 	p_config->pinGpioEnablePwm                   = 10; // Only for v21, but on v20 this pin is not connected.
-	p_config->pinGpioRelayOn                     = 14;
-	p_config->pinGpioRelayOff                    = 13;
-	p_config->pinAinCurrentGainHigh              = 4; // highest gain
-	p_config->pinAinCurrentGainMed               = 5;
-	p_config->pinAinCurrentGainLow               = 6; // lowest gain
+	p_config->pinGpioRelayOn                     = 14; // 15 for v3
+	p_config->pinGpioRelayOff                    = 13; // 16 for v3
+	p_config->pinAinCurrentGainHigh              = 4; // highest gain   6 for v3
+	p_config->pinAinCurrentGainMed               = 5; //                4 for v3
+	p_config->pinAinCurrentGainLow               = 6; // lowest gain,   5 for v3
 	p_config->pinAinVoltage                      = 1;
 //	p_config->pinAinVoltage                      = 3; // actually the 14V pin
 	p_config->pinAinZeroRef                      = 0;

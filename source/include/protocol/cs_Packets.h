@@ -37,12 +37,45 @@ enum EncryptionAccessLevel {
 };
 
 /**
- * Header of a stream buffer
+ * Header of a control packet.
  */
-struct __attribute__((__packed__)) stream_buffer_header_t {
-	uint8_t type;
-	uint8_t opCode; //! can be used as op code, see <OpCode>
-	uint16_t length;
+struct __attribute__((__packed__)) control_packet_header_t {
+	cs_control_cmd_t commandType;
+	cs_buffer_size_t payloadSize;
+};
+
+/**
+ * Control packet.
+ */
+template<cs_buffer_size_t N>
+struct __attribute__((__packed__)) control_packet_t {
+	control_packet_header_t header;
+	uint8_t payload[N];
+};
+
+/**
+ * Header of a result packet.
+ */
+struct __attribute__((__packed__)) result_packet_header_t {
+	cs_control_cmd_t commandType;
+	cs_ret_code_t returnCode;
+	cs_buffer_size_t payloadSize;
+};
+
+/**
+ * Result packet.
+ */
+template<cs_buffer_size_t N>
+struct __attribute__((__packed__)) result_packet_t {
+	result_packet_header_t header;
+	uint8_t payload[N];
+};
+
+/**
+ * State get/set header packet.
+ */
+struct __attribute__((__packed__)) state_packet_header_t {
+	uint16_t stateType;
 };
 
 /**
