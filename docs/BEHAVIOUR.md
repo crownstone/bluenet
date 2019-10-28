@@ -213,7 +213,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Type | 1 | <ol start="0"><li>Vacuously true condition</li><li>Anyone in any of the rooms</li><li>Noone in any of the rooms</li><li>Anyone anywhere in sphere</li><li>Noone anywhere in sphere</li></ol>
 uint64 | Active Rooms Mask | 8 | Room with id `i` corresponds to bit `i` in this mask.
-uint32_t | Timeout | 4 | 
+uint32_t | Timeout | 4 | Whenever a presence description is satisfied (evaluates to true), it shall evaluate to true until this time out expires. Use to ignore. Units: seconds.
 
 <a name="firmware_design"></a>
 # Firmware Design Internals
