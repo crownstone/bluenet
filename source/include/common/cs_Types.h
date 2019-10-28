@@ -20,9 +20,8 @@
 
 
 enum TypeBases {
-	Configuration_Base = 0x000,
-	State_Base         = 0x080,
-	General_Base       = 0x100, // Configuration and state types are assumed to fit in a uint8_t, so lower than 256.
+	State_Base   = 0x000,
+	General_Base = 0x100, // Configuration and state types are assumed to fit in a uint8_t, so lower than 256.
 };
 
 /** Cast to underlying type.
@@ -45,7 +44,7 @@ constexpr auto to_underlying_type(T e) noexcept
  * Use in the characteristic to read and write state variables in <CommonService>.
  */
 enum class CS_TYPE: uint16_t {
-	CONFIG_DO_NOT_USE                       = Configuration_Base,   // Record keys should be in the range 0x0001 - 0xBFFF. The value 0x0000 is reserved by the system. The values from 0xC000 to 0xFFFF are reserved for use by the Peer Manager module and can only be used in applications that do not include Peer Manager.
+	CONFIG_DO_NOT_USE                       = State_Base,   // Record keys should be in the range 0x0001 - 0xBFFF. The value 0x0000 is reserved by the system. The values from 0xC000 to 0xFFFF are reserved for use by the Peer Manager module and can only be used in applications that do not include Peer Manager.
 //	CONFIG_DEVICE_TYPE                      = 1,      //  0x01
 //	CONFIG_ROOM                             = 2,      //  0x02
 //	CONFIG_FLOOR                            = 3,      //  0x03
@@ -83,7 +82,7 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_KEY_ADMIN                        = 35,     //  0x23
 	CONFIG_KEY_MEMBER                       = 36,     //  0x24
 	CONFIG_KEY_BASIC                        = 37,     //  0x25
-	CONFIG_DEFAULT_ON                       = 38,     //  0x26   // Deprecate
+//	CONFIG_DEFAULT_ON                       = 38,     //  0x26
 	CONFIG_SCAN_INTERVAL                    = 39,     //  0x27
 	CONFIG_SCAN_WINDOW                      = 40,     //  0x28
 	CONFIG_RELAY_HIGH_DURATION              = 41,     //  0x29
@@ -111,8 +110,9 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_MESH_APP_KEY                     = 63,     //  0x3F
 	CONFIG_MESH_NET_KEY                     = 64,     //  0x40
 	CONFIG_KEY_LOCALIZATION                 = 65,     //  0x41
+	CONFIG_START_DIMMER_ON_ZERO_CROSSING    = 66,     //  0x42
 
-	STATE_RESET_COUNTER                     = State_Base,  //    128
+	STATE_RESET_COUNTER                     = 128,    //  0x80 - 128
 	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
 	STATE_ACCUMULATED_ENERGY                = 130,    //  0x82 - 130   Energy used in μJ.
 	STATE_POWER_USAGE                       = 131,    //  0x83 - 131   Power usage in mW.
@@ -252,7 +252,6 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
 	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
-	case CS_TYPE::CONFIG_DEFAULT_ON:
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
 	case CS_TYPE::CONFIG_SCAN_WINDOW:
 	case CS_TYPE::CONFIG_RELAY_HIGH_DURATION:
@@ -267,6 +266,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
 	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
 	case CS_TYPE::CONFIG_PWM_ALLOWED:
+	case CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING:
 	case CS_TYPE::CONFIG_SWITCH_LOCKED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
@@ -455,7 +455,6 @@ typedef uint8_t  TYPIFY(CONFIG_SPHERE_ID);
 typedef uint8_t  TYPIFY(CONFIG_CROWNSTONE_ID);
 typedef    float TYPIFY(CONFIG_CURRENT_MULTIPLIER);
 typedef  int32_t TYPIFY(CONFIG_CURRENT_ADC_ZERO);
-typedef     BOOL TYPIFY(CONFIG_DEFAULT_ON);
 typedef     BOOL TYPIFY(CONFIG_ENCRYPTION_ENABLED);
 typedef     BOOL TYPIFY(CONFIG_IBEACON_ENABLED);
 typedef uint16_t TYPIFY(CONFIG_IBEACON_MINOR);
@@ -477,6 +476,7 @@ typedef uint16_t TYPIFY(CONFIG_SCAN_INTERVAL);
 typedef uint16_t TYPIFY(CONFIG_SCAN_WINDOW);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM);
+typedef     BOOL TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING);
 typedef     BOOL TYPIFY(CONFIG_SWITCH_LOCKED);
 typedef     BOOL TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
 typedef    float TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD);
@@ -663,8 +663,6 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return ENCRYPTION_KEY_LENGTH;
 	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 		return ENCRYPTION_KEY_LENGTH;
-	case CS_TYPE::CONFIG_DEFAULT_ON:
-		return sizeof(TYPIFY(CONFIG_DEFAULT_ON));
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
 		return sizeof(TYPIFY(CONFIG_SCAN_INTERVAL));
 	case CS_TYPE::CONFIG_SCAN_WINDOW:
@@ -693,6 +691,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN));
 	case CS_TYPE::CONFIG_PWM_ALLOWED:
 		return sizeof(TYPIFY(CONFIG_PWM_ALLOWED));
+	case CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING:
+		return sizeof(TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING));
 	case CS_TYPE::CONFIG_SWITCH_LOCKED:
 		return sizeof(TYPIFY(CONFIG_SWITCH_LOCKED));
 	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
@@ -876,7 +876,6 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_CURRENT_MULTIPLIER: return "CONFIG_CURRENT_MULTIPLIER";
 	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO: return "CONFIG_CURRENT_ADC_ZERO";
 	case CS_TYPE::CONFIG_CURRENT_LIMIT: return "CONFIG_CURRENT_LIMIT";
-	case CS_TYPE::CONFIG_DEFAULT_ON: return "CONFIG_DEFAULT_ON";
 	case CS_TYPE::CONFIG_DO_NOT_USE: return "CONFIG_DO_NOT_USE";
 	case CS_TYPE::CONFIG_ENCRYPTION_ENABLED: return "CONFIG_ENCRYPTION_ENABLED";
 	case CS_TYPE::CONFIG_IBEACON_ENABLED: return "CONFIG_IBEACON_ENABLED";
@@ -909,6 +908,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_SCAN_WINDOW: return "CONFIG_SCAN_WINDOW";
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD: return "CONFIG_SOFT_FUSE_CURRENT_THRESHOLD";
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM: return "CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM";
+	case CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING: return "CONFIG_START_DIMMER_ON_ZERO_CROSSING";
 	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: return "CONFIG_SWITCHCRAFT_ENABLED";
 	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD: return "CONFIG_SWITCHCRAFT_THRESHOLD";
 	case CS_TYPE::CONFIG_SWITCH_LOCKED: return "CONFIG_SWITCH_LOCKED";
@@ -1026,7 +1026,6 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
 	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
-	case CS_TYPE::CONFIG_DEFAULT_ON:
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
 	case CS_TYPE::CONFIG_SCAN_WINDOW:
 	case CS_TYPE::CONFIG_RELAY_HIGH_DURATION:
@@ -1041,6 +1040,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
 	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
 	case CS_TYPE::CONFIG_PWM_ALLOWED:
+	case CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING:
 	case CS_TYPE::CONFIG_SWITCH_LOCKED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
@@ -1162,7 +1162,6 @@ constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
 	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
-	case CS_TYPE::CONFIG_DEFAULT_ON:
 	case CS_TYPE::CONFIG_SCAN_INTERVAL:
 	case CS_TYPE::CONFIG_SCAN_WINDOW:
 	case CS_TYPE::CONFIG_RELAY_HIGH_DURATION:
@@ -1177,6 +1176,7 @@ constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP:
 	case CS_TYPE::CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN:
 	case CS_TYPE::CONFIG_PWM_ALLOWED:
+	case CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING:
 	case CS_TYPE::CONFIG_SWITCH_LOCKED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
@@ -1308,11 +1308,11 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::CONFIG_SCANNER_ENABLED:
 		*(TYPIFY(CONFIG_SCANNER_ENABLED)*)data.value = CONFIG_SCANNER_ENABLED_DEFAULT;
 		return ERR_SUCCESS;
-	case CS_TYPE::CONFIG_DEFAULT_ON:
-		*(TYPIFY(CONFIG_DEFAULT_ON)*)data.value = CONFIG_RELAY_START_DEFAULT;
-		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_PWM_ALLOWED:
 		*(TYPIFY(CONFIG_PWM_ALLOWED)*)data.value = CONFIG_PWM_DEFAULT;
+		return ERR_SUCCESS;
+	case CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING:
+		*(TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING)*)data.value = CONFIG_START_DIMMER_ON_ZERO_CROSSING_DEFAULT;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_SWITCH_LOCKED:
 		*(TYPIFY(CONFIG_SWITCH_LOCKED)*)data.value = CONFIG_SWITCH_LOCK_DEFAULT;
@@ -1559,9 +1559,6 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_CROWNSTONE_ID:
 	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO:
 	case CS_TYPE::CONFIG_CURRENT_MULTIPLIER:
-	case CS_TYPE::CONFIG_DEFAULT_ON:
-	case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
-	case CS_TYPE::CONFIG_IBEACON_ENABLED:
 	case CS_TYPE::CONFIG_IBEACON_MAJOR:
 	case CS_TYPE::CONFIG_IBEACON_MINOR:
 	case CS_TYPE::CONFIG_IBEACON_UUID:
@@ -1583,6 +1580,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_SCAN_WINDOW:
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM:
+	case CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING:
 	case CS_TYPE::CONFIG_SWITCH_LOCKED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
@@ -1592,6 +1590,8 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER:
 		return ADMIN;
 	case CS_TYPE::CONFIG_CURRENT_LIMIT:
+	case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
+	case CS_TYPE::CONFIG_IBEACON_ENABLED:
 	case CS_TYPE::CONFIG_KEY_ADMIN:
 	case CS_TYPE::CONFIG_KEY_MEMBER:
 	case CS_TYPE::CONFIG_KEY_BASIC:
@@ -1694,7 +1694,6 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_CROWNSTONE_ID:
 	case CS_TYPE::CONFIG_CURRENT_ADC_ZERO:
 	case CS_TYPE::CONFIG_CURRENT_MULTIPLIER:
-	case CS_TYPE::CONFIG_DEFAULT_ON:
 	case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
 	case CS_TYPE::CONFIG_IBEACON_ENABLED:
 	case CS_TYPE::CONFIG_IBEACON_MAJOR:
@@ -1718,6 +1717,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_SCAN_WINDOW:
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM:
+	case CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING:
 	case CS_TYPE::CONFIG_SWITCH_LOCKED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:

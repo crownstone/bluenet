@@ -48,27 +48,31 @@
 #define GUIDESTONE_SERVICE_DATA_UUID        0xC003 // Deprecated
 
 enum CrownstoneCharacteristicsIDs {
-	CONTROL_UUID                            = 0x1,
-	MESH_CONTROL_UUID                       = 0x2,
+//	CONTROL_UUID                            = 0x1, // Changed to A, because we the header is different, and we added the result characteristic.
+//	MESH_CONTROL_UUID                       = 0x2, // Removed.
 //	MESH_READ_UUID                          = 0x3,
-	CONFIG_CONTROL_UUID                     = 0x4,
-	CONFIG_READ_UUID                        = 0x5,
-	STATE_CONTROL_UUID                      = 0x6,
-	STATE_READ_UUID                         = 0x7,
+//	CONFIG_CONTROL_UUID                     = 0x4, // Removed.
+//	CONFIG_READ_UUID                        = 0x5, // Removed.
+//	STATE_CONTROL_UUID                      = 0x6, // Removed.
+//	STATE_READ_UUID                         = 0x7, // Removed.
 	SESSION_NONCE_UUID                      = 0x8,
 	FACTORY_RESET_UUID                      = 0x9,
+	CONTROL_UUID                            = 0xA,
+	RESULT_UUID                             = 0xB,
 };
 
 enum SetupCharacteristicsIDs {
 //	SETUP_CONTROL_UUID                      = 0x1, // Changed to 7, because old setup command is deprecated.
 	MAC_ADDRESS_UUID                        = 0x2,
 	SETUP_KEY_UUID                          = 0x3,
-//	CONFIG_CONTROL_UUID                     = 0x4, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
-//	CONFIG_READ_UUID                        = 0x5, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
+//	CONFIG_CONTROL_UUID                     = 0x4, // Removed.
+//	CONFIG_READ_UUID                        = 0x5, // Removed.
 	GOTO_DFU_UUID                           = 0x6,
 //	SETUP_CONTROL_UUID                      = 0x7, // Changed to 9, because we added more keys to setup.
 //	SESSION_NONCE_UUID                      = 0x8, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
-	SETUP_CONTROL_UUID                      = 0x9,
+//	SETUP_CONTROL_UUID                      = 0x9, // Changed to A, because we the header is different, and we added the result characteristic.
+	SETUP_CONTROL_UUID                      = 0xA,
+	SETUP_RESULT_UUID                       = 0xB,
 };
 
 enum GeneralCharacteristicsIDs {
