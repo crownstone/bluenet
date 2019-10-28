@@ -502,8 +502,8 @@ Type nr | Type name | Payload type | Description | A | M | B
 19 | Boot delay | uint 16 | Time to wait with radio after boot (ms). **Setting this to a wrong value may cause damage.**  | rw |  | 
 20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off. **Setting this to a wrong value may cause damage.**  | rw |  | 
 24 | Mesh enabled | uint 8 | Stores if mesh is enabled.  | rw |  | 
-25 | Encryption enabled | uint 8 | Stores if encryption is enabled. **Deprecated**  | rw |  | 
-26 | iBeacon enabled | uint 8 | Stores if iBeacon is enabled. **Deprecated**  | rw |  | 
+25 | Encryption enabled | uint 8 | Stores if encryption is enabled. **Not implemented**  |  |  | 
+26 | iBeacon enabled | uint 8 | Stores if iBeacon is enabled. **Not implemented**  |  |  | 
 27 | Scanner enabled | uint 8 | Stores if device scanning is enabled.  | rw |  | 
 33 | Sphere id | uint 8 | Short id of the sphere this Crownstone is part of.  | rw |  | 
 34 | Crownstone id | uint 8 | Crownstone identifier used in advertisement package.  | rw |  | 
