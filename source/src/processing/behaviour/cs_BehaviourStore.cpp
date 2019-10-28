@@ -17,18 +17,21 @@ void BehaviourStore::handleEvent(event_t& evt){
     switch(evt.type){
         case CS_TYPE::EVT_REPLACE_BEHAVIOUR:{
             Behaviour* newBehaviour = reinterpret_cast<TYPIFY(EVT_REPLACE_BEHAVIOUR)*>(evt.data);
-            LOGd("newBehaviour: from %d, until %d", newBehaviour->from(), newBehaviour->until());
-
+            LOGd("replace behaviour event to index 0");
+            newBehaviour->print();
+            saveBehaviour(*newBehaviour, 0);
         }
         case CS_TYPE::EVT_SAVE_BEHAVIOUR:{
             Behaviour* newBehaviour = reinterpret_cast<TYPIFY(EVT_SAVE_BEHAVIOUR)*>(evt.data);
-            LOGd("save behaviour event: from %d, until %d", newBehaviour->from(), newBehaviour->until());
+            LOGd("saving behaviour event to index 0");
+            newBehaviour->print();
+            saveBehaviour(*newBehaviour,0);
 
             break;
         }
         case CS_TYPE::EVT_REMOVE_BEHAVIOUR:{
             LOGd("remove behaviour event");
-
+            activeBehaviours[0].reset();
             break;
         }
         default:{

@@ -581,15 +581,25 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 							0)
 					);
 
-				LOGd("debugbehaviour from(%d:%d:%d)",
-					behaviour.from().h(),
-					behaviour.from().m(),
-					behaviour.from().s());
-
+				behaviour.print();
+				
 				_behaviourStore.saveBehaviour(behaviour,i);
 			}
 
-			Behaviour(std::array<uint8_t, 25>{{0}});
+			Behaviour b(
+				80,
+				Monday | Wednesday | Thursday | Friday,
+				TimeOfDay(11, 0, 0),
+				TimeOfDay(17,30, 0),
+				PresenceCondition(
+					PresencePredicate(
+						PresencePredicate::Condition::AnyoneAnyRoom,
+						0xffff0000ffff0000),
+					0)
+				);
+			b.print();
+			event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR,&b,sizeof(b));
+			event.dispatch();
 
 			// END DEBUG
 

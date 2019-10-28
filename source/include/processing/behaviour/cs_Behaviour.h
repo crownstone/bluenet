@@ -33,6 +33,8 @@ class Behaviour {
 
     Behaviour(std::array<uint8_t, 25> arr);
 
+    void print();
+
     // =========== Getters ===========
 
     /**

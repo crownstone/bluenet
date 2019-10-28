@@ -59,3 +59,11 @@ bool Behaviour::isValid(TimeOfDay currenttime) const{
 bool Behaviour::isValid(PresenceStateDescription currentpresence) const{
     return presenceCondition(currentpresence);
 }
+
+void Behaviour::print(){
+    LOGd("Behaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%",
+        from().h(),from().m(),from().s(),
+        until().h(),until().m(),until().s(),
+        activeIntensity
+    );
+}

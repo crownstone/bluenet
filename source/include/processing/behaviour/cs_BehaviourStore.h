@@ -45,32 +45,22 @@ class BehaviourStore : public EventListener {
 
     class InterfaceB {
         /**
-         * If expected_master_hash is not equal to the current
-         * value that hash() would return, nothing happens
-         * and 0xffffffff is returned. Else,
-         * returns an index in range [0,MaxBehaviours) on succes, 
+         * Returns an index in range [0,MaxBehaviours) on succes, 
          * or 0xffffffff if it couldn't be saved.
-         * 
-         * A hash is computed and saved together with [b].
          */
-         uint8_t save(uint32_t expected_master_hash, Behaviour b);
+         uint8_t save(Behaviour b);
 
         /**
-         * Replace the behaviour at [index] with [b], if the hash of the 
-         * currently saved behaviour at [index] is not equal to 
-         * [expected_hash] nothing will happen and false is returned.
-         * if these hashes coincide, postcondition is identical to the
+         * Replace the behaviour at [index] with [b]
+         * postcondition is identical to the
          * postcondition of calling save(b) when it returns [index].
          */
-        bool replace(uint8_t index, uint32_t expected_hash, Behaviour b);
+        bool replace(uint8_t index, Behaviour b);
 
         /**
-         * deletes the behaviour at [index], if the hash of the 
-         * currently saved behaviour at [index] is not equal to 
-         * [expected_hash] nothing will happen and false is returned,
-         * else the behaviour is removed from storage.
+         * deletes the behaviour at [index] the behaviour is removed from storage.
          */
-        bool remove(uint8_t index, uint32_t expected_hash);
+        bool remove(uint8_t index);
 
         /**
          *  returns the stored behaviour at [index].
