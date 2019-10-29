@@ -11,6 +11,9 @@
 #include <ble/cs_Service.h>
 #include <ble/cs_Characteristic.h>
 #include <events/cs_EventListener.h>
+#include <structs/cs_PacketsInternal.h>
+#include <structs/cs_ControlPacketAccessor.h>
+#include <structs/cs_ResultPacketAccessor.h>
 
 /** General Service for the Crownstone
  *
@@ -50,99 +53,41 @@ protected:
 
 	/** Enable the control characteristic.
  	 */
-	void addControlCharacteristic(buffer_ptr_t buffer, uint16_t size, uint16_t charUuid,
+	void addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid,
 			EncryptionAccessLevel minimumAccessLevel = BASIC);
 
-	/** Enable the set configuration characteristic.
-	 *
-	 * The parameter given with onWrite should actually also already be within the space allocated within the
-	 * characteristic.
-	 * See <_setConfigurationCharacteristic>.
+	/**
+	 * Enable the result characteristic.
 	 */
-	void addConfigurationControlCharacteristic(buffer_ptr_t buffer, uint16_t size,
-			EncryptionAccessLevel minimumAccessLevel = ADMIN);
-
-	/** Enable the get configuration characteristic.
-	 */
-	void addConfigurationReadCharacteristic(buffer_ptr_t buffer, uint16_t size,
-			EncryptionAccessLevel minimumAccessLevel = ADMIN);
-
-	inline void addStateControlCharacteristic(buffer_ptr_t buffer, uint16_t size);
-
-	inline void addStateReadCharacteristic(buffer_ptr_t buffer, uint16_t size);
-
-	inline void addFactoryResetCharacteristic();
-
-	void addSessionNonceCharacteristic(buffer_ptr_t buffer, uint16_t size,
+	void addResultCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid,
 			EncryptionAccessLevel minimumAccessLevel = BASIC);
 
-	StreamBuffer<uint8_t>* getStreamBuffer(buffer_ptr_t& buffer, uint16_t& maxLength);
+	void addFactoryResetCharacteristic();
+
+	void addSessionNonceCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size,
+			EncryptionAccessLevel minimumAccessLevel = BASIC);
+
+	void getReadBuffer(buffer_ptr_t& buffer, cs_buffer_size_t& maxLength);
+	void getWriteBuffer(buffer_ptr_t& buffer, cs_buffer_size_t& maxLength);
 
 	void removeBuffer();
 
 protected:
-	Characteristic<buffer_ptr_t>* _controlCharacteristic;
+	Characteristic<buffer_ptr_t>* _controlCharacteristic = NULL;
+	Characteristic<buffer_ptr_t>* _resultCharacteristic = NULL;
 
-	/** Set configuration characteristic
-	 *
-	 * The configuration characteristic reuses the format of the mesh messages. The type are identifiers that are
-	 * established:
-	 *
-	 *  * 0 name
-	 *  * 1 device type
-	 *  * 2 room
-	 *  * 3 floor level
-	 *
-	 * As you see these are similar to current characteristics and will replace them in the future to save space.
-	 * Every characteristic namely occupies a bit of RAM (governed by the SoftDevice, so not under our control).
-	 */
-	Characteristic<buffer_ptr_t>* _configurationControlCharacteristic;
+	ControlPacketAccessor<>* _controlPacketAccessor = NULL;
+	ResultPacketAccessor<>* _resultPacketAccessor = NULL;
 
-	/** Get configuration characteristic
-	 *
-	 * You will have first to select a configuration before you can read from it. You write the identifiers also
-	 * described in <_setConfigurationCharacteristic>.
-	 *
-	 * Then each of these returns a byte array, with e.g. a name, device type, room, etc.
-	 */
-	Characteristic<buffer_ptr_t>* _configurationReadCharacteristic;
-
-	//! buffer object to read/write configuration characteristics
-	StreamBuffer<uint8_t> *_streamBuffer;
-
-
-	/** Handle write on configuration write characteristic.
-	 *
-	 * @param[in]  accessLevel    Access level with which the value was written.
-	 * @param[in]  value          The (decrypted) data that was written.
-	 * @param[in]  length         Length of the data.
-	 * @param[out] writeErrCode   Whether or not to write the result.
-	 * @return                    Result of handling the data.
-	 */
-	cs_ret_code_t configOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length, bool& writeErrCode);
-
-	/** Handle write on state write characteristic.
-	 *
-	 * @param[in]  accessLevel    Access level with which the value was written.
-	 * @param[in]  value          The (decrypted) data that was written.
-	 * @param[in]  length         Length of the data.
-	 * @param[out] writeErrCode   Whether or not to write the result.
-	 * @return                    Result of handling the data.
-	 */
-	cs_ret_code_t stateOnWrite(const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length, bool& writeErrCode);
-
-	/** Write the error code to the control characteristic.
+	/** Write a result to the result characteristic.
 	 *
 	 * @param[in] type            The command type that was handled.
-	 * @param[in] errCode         The result of handling the command.
+	 * @param[in] result          The result of handling the command.
 	 */
-	void controlWriteErrorCode(uint8_t type, cs_ret_code_t errCode);
+	void writeResult(CommandHandlerTypes type, command_result_t result);
 
 
 private:
-	uint8_t _nonceBuffer[SESSION_NONCE_LENGTH];
-	Characteristic<buffer_ptr_t>* _stateControlCharacteristic;
-	Characteristic<buffer_ptr_t>* _stateReadCharacteristic;
-	Characteristic<buffer_ptr_t>* _sessionNonceCharacteristic;
-	Characteristic<uint32_t>*     _factoryResetCharacteristic;
+	Characteristic<buffer_ptr_t>* _sessionNonceCharacteristic = NULL;
+	Characteristic<uint32_t>*     _factoryResetCharacteristic = NULL;
 };

@@ -11,7 +11,7 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <protocol/cs_UartProtocol.h>
 #include <storage/cs_State.h>
-#include <structs/cs_StreamBuffer.h>
+#include <structs/cs_ControlPacketAccessor.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
@@ -230,20 +230,20 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 
 	switch (header->opCode) {
 	case UART_OPCODE_RX_CONTROL: {
-		stream_buffer_header_t* streamHeader = (stream_buffer_header_t*)payload;
-		if (header->size < sizeof(*streamHeader)) {
+		control_packet_header_t* controlHeader = (control_packet_header_t*)payload;
+		if (header->size < sizeof(*controlHeader)) {
 			LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			break;
 		}
-		if (header->size < streamHeader->length + sizeof(*streamHeader)) {
+		if (header->size < controlHeader->payloadSize + sizeof(*controlHeader)) {
 			LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			break;
 		}
 		TYPIFY(CMD_CONTROL_CMD) controlCmd;
-		controlCmd.type = (CommandHandlerTypes)streamHeader->type;
+		controlCmd.type = (CommandHandlerTypes)controlHeader->commandType;
 		controlCmd.accessLevel = ADMIN;
-		controlCmd.data = payload + sizeof(*streamHeader);
-		controlCmd.size = streamHeader->length;
+		controlCmd.data = payload + sizeof(*controlHeader);
+		controlCmd.size = controlHeader->payloadSize;
 		controlCmd.source = cmd_source_t(CS_CMD_SOURCE_UART);
 		event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 		EventDispatcher::getInstance().dispatch(event);

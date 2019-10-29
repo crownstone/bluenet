@@ -43,111 +43,111 @@ void CharacteristicBase::setName(const char * const name) {
  * and is read through another, this will resolve to nonsense to the user.
  */
 void CharacteristicBase::init(Service* svc) {
-    _service = svc;
+	_service = svc;
 
-    CharacteristicInit ci;
+	CharacteristicInit ci;
 
-    memset(&ci.char_md, 0, sizeof(ci.char_md));
-    setupWritePermissions(ci);
+	memset(&ci.char_md, 0, sizeof(ci.char_md));
+	setupWritePermissions(ci);
 
-    ////////////////////////////////////////////////////////////////
-    //! attribute metadata for client characteristic configuration //
-    ////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////
+	//! attribute metadata for client characteristic configuration //
+	////////////////////////////////////////////////////////////////
 
-    memset(&ci.cccd_md, 0, sizeof(ci.cccd_md));
-    ci.cccd_md.vloc = BLE_GATTS_VLOC_STACK;
-    ci.cccd_md.vlen = 1;
+	memset(&ci.cccd_md, 0, sizeof(ci.cccd_md));
+	ci.cccd_md.vloc = BLE_GATTS_VLOC_STACK;
+	ci.cccd_md.vlen = 1;
 
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.write_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.cccd_md.write_perm);
 
-    ci.char_md.p_cccd_md = &ci.cccd_md; //! the client characteristic metadata.
+	ci.char_md.p_cccd_md = &ci.cccd_md; //! the client characteristic metadata.
 
-    /////////////////////
-    //! attribute value //
-    /////////////////////
+	/////////////////////
+	//! attribute value //
+	/////////////////////
 
-    _uuid.init();
-    ble_uuid_t uuid = _uuid;
+	_uuid.init();
+	ble_uuid_t uuid = _uuid;
 
-    memset(&ci.attr_char_value, 0, sizeof(ci.attr_char_value));
+	memset(&ci.attr_char_value, 0, sizeof(ci.attr_char_value));
 
-    ci.attr_char_value.p_uuid = &uuid;
+	ci.attr_char_value.p_uuid = &uuid;
 
-    ci.attr_char_value.init_offs = 0;
-    ci.attr_char_value.init_len = getGattValueLength();
-    ci.attr_char_value.max_len = getGattValueMaxLength();
-    ci.attr_char_value.p_value = getGattValuePtr();
+	ci.attr_char_value.init_offs = 0;
+	ci.attr_char_value.init_len = getGattValueLength();
+	ci.attr_char_value.max_len = getGattValueMaxLength();
+	ci.attr_char_value.p_value = getGattValuePtr();
 
-    LOGv("%s init with buffer[%i] with %p", _name, getGattValueMaxLength(), getGattValuePtr());
+	LOGd("%s init with buffer[%i] at %p", _name, getGattValueMaxLength(), getGattValuePtr());
 
-    ////////////////////////
-    //! attribute metadata //
-    ////////////////////////
+	////////////////////////
+	//! attribute metadata //
+	////////////////////////
 
-    memset(&ci.attr_md, 0, sizeof(ci.attr_md));
-    ci.attr_md.vloc = BLE_GATTS_VLOC_USER;
-    ci.attr_md.vlen = 1;
+	memset(&ci.attr_md, 0, sizeof(ci.attr_md));
+	ci.attr_md.vloc = BLE_GATTS_VLOC_USER;
+	ci.attr_md.vlen = 1;
 
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.write_perm);
-    ci.attr_char_value.p_attr_md = &ci.attr_md;
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.read_perm);
+	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.attr_md.write_perm);
+	ci.attr_char_value.p_attr_md = &ci.attr_md;
 
-    //////////////////////////////////////
-    //! Characteristic User Description //
-    //////////////////////////////////////
+	//////////////////////////////////////
+	//! Characteristic User Description //
+	//////////////////////////////////////
 
-    //! these characteristic descriptors are optional, and I gather, not really used by anything.
-    //! we fill them in if the user specifies any of the data (eg name).
-    ci.char_md.p_char_user_desc = NULL;
-    ci.char_md.p_user_desc_md = NULL;
+	//! these characteristic descriptors are optional, and I gather, not really used by anything.
+	//! we fill them in if the user specifies any of the data (eg name).
+	ci.char_md.p_char_user_desc = NULL;
+	ci.char_md.p_user_desc_md = NULL;
 
-    std::string name = std::string(_name);
-    if (!name.empty()) {
-	ci.char_md.p_char_user_desc = (uint8_t*) name.c_str(); //! todo utf8 conversion?
-	ci.char_md.char_user_desc_size = name.length();
-	ci.char_md.char_user_desc_max_size = name.length();
+	std::string name = std::string(_name);
+	if (!name.empty()) {
+		ci.char_md.p_char_user_desc = (uint8_t*) name.c_str(); //! todo utf8 conversion?
+		ci.char_md.char_user_desc_size = name.length();
+		ci.char_md.char_user_desc_max_size = name.length();
 
-	//! This is the metadata (eg security settings) for the description of this characteristic.
-	memset(&ci.user_desc_metadata_md, 0, sizeof(ci.user_desc_metadata_md));
+		//! This is the metadata (eg security settings) for the description of this characteristic.
+		memset(&ci.user_desc_metadata_md, 0, sizeof(ci.user_desc_metadata_md));
 
-	ci.user_desc_metadata_md.vloc = BLE_GATTS_VLOC_STACK;
-	ci.user_desc_metadata_md.vlen = 1;
+		ci.user_desc_metadata_md.vloc = BLE_GATTS_VLOC_STACK;
+		ci.user_desc_metadata_md.vlen = 1;
 
-	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
+		BLE_GAP_CONN_SEC_MODE_SET_OPEN(&ci.user_desc_metadata_md.read_perm);
 
-	BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&ci.user_desc_metadata_md.write_perm); //! required
+		BLE_GAP_CONN_SEC_MODE_SET_NO_ACCESS(&ci.user_desc_metadata_md.write_perm); //! required
 
-	ci.char_md.p_user_desc_md = &ci.user_desc_metadata_md;
-    }
+		ci.char_md.p_user_desc_md = &ci.user_desc_metadata_md;
+	}
 
-    /////////////////////////
-    //! Presentation Format //
-    /////////////////////////
+	/////////////////////////
+	//! Presentation Format //
+	/////////////////////////
 
-    //! presentation format is optional, only fill out if characteristic supports
+	//! presentation format is optional, only fill out if characteristic supports
 
-    ci.char_md.p_char_pf = NULL;
-    if (configurePresentationFormat(ci.presentation_format)) {
-	ci.presentation_format.unit = 0; //_unit;
-	ci.char_md.p_char_pf = &ci.presentation_format;
-    }
+	ci.char_md.p_char_pf = NULL;
+	if (configurePresentationFormat(ci.presentation_format)) {
+		ci.presentation_format.unit = 0; //_unit;
+		ci.char_md.p_char_pf = &ci.presentation_format;
+	}
 
-    //! add all
-    uint32_t err_code = sd_ble_gatts_characteristic_add(svc->getHandle(), &ci.char_md, &ci.attr_char_value, &_handles);
-    if (err_code != NRF_SUCCESS) {
-	LOGe(MSG_BLE_CHAR_CREATION_ERROR);
-	APP_ERROR_CHECK(err_code);
-    }
+	//! add all
+	uint32_t err_code = sd_ble_gatts_characteristic_add(svc->getHandle(), &ci.char_md, &ci.attr_char_value, &_handles);
+	if (err_code != NRF_SUCCESS) {
+		LOGe(MSG_BLE_CHAR_CREATION_ERROR);
+		APP_ERROR_CHECK(err_code);
+	}
 
-    //BLE_CALL(sd_ble_gatts_characteristic_add, (svc_handle, &ci.char_md, &ci.attr_char_value, &_handles));
+	//BLE_CALL(sd_ble_gatts_characteristic_add, (svc_handle, &ci.char_md, &ci.attr_char_value, &_handles));
 
-    //! set initial value (default value)
-    updateValue();
-    //	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
-    //			_handles.value_handle, &ci.attr_char_value.init_len, ci.attr_char_value.p_value));
+	//! set initial value (default value)
+	updateValue();
+	//	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
+	//			_handles.value_handle, &ci.attr_char_value.init_len, ci.attr_char_value.p_value));
 
-    _status.initialized = true;
+	_status.initialized = true;
 }
 
 /** Setup default write permissions.
@@ -205,16 +205,29 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 #endif
 
 		// we calculate what size buffer we need
-		uint16_t encryptionBufferLength = EncryptionHandler::calculateEncryptionBufferLength(
-			valueLength, encryptionType);
-		bool success = EncryptionHandler::getInstance().encrypt(getValuePtr(), valueLength, valueGattAddress,
-			encryptionBufferLength, _minAccessLevel, encryptionType);
+		cs_ret_code_t retVal = ERR_SUCCESS;
+		uint16_t encryptionBufferLength = EncryptionHandler::calculateEncryptionBufferLength(valueLength, encryptionType);
+		if (encryptionBufferLength > getGattValueMaxLength()) {
+			retVal = ERR_BUFFER_TOO_SMALL;
+		}
+		else {
+			bool success = EncryptionHandler::getInstance().encrypt(
+					getValuePtr(),
+					valueLength,
+					valueGattAddress,
+					encryptionBufferLength,
+					_minAccessLevel,
+					encryptionType
+			);
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
-		_log(SERIAL_DEBUG, "encrypted: ");
-		BLEutil::printArray(valueGattAddress, encryptionBufferLength);
+			_log(SERIAL_DEBUG, "encrypted: ");
+			BLEutil::printArray(valueGattAddress, encryptionBufferLength);
 #endif
-
-		if (!success) {
+			if (!success) {
+				retVal = ERR_UNSPECIFIED;
+			}
+		}
+		if (!SUCCESS(retVal)) {
 			// clear the partially encrypted buffer.
 			memset(valueGattAddress, 0x00, encryptionBufferLength);
 
@@ -224,7 +237,7 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 			// disconnect from the device.
 			EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
 			LOGe("error encrypting data.");
-			return NRF_ERROR_INTERNAL;
+			return retVal;
 		}
 
 		// on success, set the readable buffer length to the encryption package.
@@ -236,13 +249,15 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 
 
 	uint16_t gattValueLength = getGattValueLength();
-//	LOGi("gattValueLength %d", gattValueLength)
+#ifdef PRINT_CHARACTERISTIC_VERBOSE
+	LOGd("gattValueLength=%u gattValueAddress=%p, gattValueMaxSize=%u", gattValueLength, valueGattAddress, getGattValueMaxLength());
+#endif
 	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
 			_handles.value_handle, &gattValueLength, valueGattAddress));
 
 	//! stop here if we are not in notifying state
 	if ((!_status.notifies) || (!_service->getStack()->connected()) || !_status.notifyingEnabled) {
-		return NRF_SUCCESS;
+		return ERR_SUCCESS;
 	} else {
 		return notify();
 	}

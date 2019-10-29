@@ -1,4 +1,4 @@
-# Bluenet protocol v3.0.0
+# Bluenet protocol v4.0.0
 -------------------------
 
 This only documents the latest protocol, older versions can be found in the git history.
@@ -11,6 +11,9 @@ This only documents the latest protocol, older versions can be found in the git 
 - [Broadcast commands](#broadcasts). Broadcast commands.
 - [Services and characteristics](#services). Which Bluetooth GATT services and characteristics the crownstones have.
 - [Data structures](#data_structs). The data structures used for the characteristics, advertisements, and mesh.
+    - [Control](#command_types). Used to send commands to the Crownstone.
+    - [Result](#result_packet). The result of a command.
+    - [State](#state_types). State variables of the Crownstone.
 
 
 <a name="setup"></a>
@@ -25,7 +28,7 @@ The setup process goes as follows:
 The values are only valid for this connection session. The session key and the session nonce will be used to encrypt the rest of the setup phase using AES 128 CTR as explained [here](#encrypted_write_read).
 - Phone subscribes to [control](#setup_service) characteristic.
 - Phone commands Crownstone to setup via the control characteristic.
-- Phone waits for control characteristic result to become SUCCESS (See [result packet](#command_result_packet)).
+- Phone waits for control characteristic result to become SUCCESS (See [result packet](#result_packet)).
 - Crownstone will reboot to normal mode.
 
 
@@ -220,22 +223,19 @@ The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provide
 
 Characteristic | UUID | Date type | Description | A | M | B
 --- | --- | --- | --- | :---: | :---: | :---:
-Control        | 24f00001-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone. | x | x | x
-Config control | 24f00004-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Write or select a config setting | x |
-Config read    | 24f00005-7d10-4805-bfc1-7663a01c3bff | [Config packet](#config_packet) | Read or notify on a previously selected config setting | x |
-State control  | 24f00006-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Select a state variable | x | x |
-State read     | 24f00007-7d10-4805-bfc1-7663a01c3bff | [State packet](#state_packet) | Read or notify on a previously selected state variable | x | x |
+Control        | 24f0000a-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone. | x | x | x
+Result         | 24f0000b-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone. | x | x | x
 Session nonce  | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the [session nonce](#session_nonce). First 4 bytes are also used as validation key. |  |  | ECB
 Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |
 
-The control characteristics (Control, Mesh Control, Config Control and State Control) can return a [result packet](#command_result_packet).
+Every command written to the control characteristic returns a [result packet](#result_packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
 
 <a name="recovery"></a>
 #### Recovery
 If you lost your encryption keys you can use this characteristic to factory reset the Crownstone.
-This method is only available for 20 seconds after the Crownstone powers on.
-You need to write **0xDEADBEEF** to it. After this, the Crownstone disconnects and goes into Low TX mode so you'll have to be close to continue the factory reset. After this, you reconnect and write **0xDEADBEEF** again to this characteristic to factory reset the Crownstone.
+This method is only available for 60 seconds after the Crownstone powers on.
+You need to write **0xDEADBEEF** to it. Then, the Crownstone disconnects and goes into low TX mode so you'll have to be close to continue the factory reset. After this, you reconnect and write **0xDEADBEEF** again to this characteristic to factory reset the Crownstone.
 
 
 
@@ -252,9 +252,10 @@ MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MA
 Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the session key that will be for encryption.
 GoTo DFU       | 24f10006-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 66 to go to DFU.
 Session nonce  | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the session nonce. First 4 bytes are also used as validation key.
-Control        | 24f10009-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
+Control        | 24f1000a-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
+Result         | 24f1000b-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone.
 
-The control characteristics (Control, Config control) can return a [result packet](#command_result_packet).
+Every command written to the control characteristic returns a [result packet](#result_packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
 
 
@@ -265,107 +266,36 @@ If commands have to be executed sequentially, make sure that the result packet o
 
 Index:
 
-- [Result](#command_result_packet). Tells you about the result of a command.
-- [Control](#control_packet). Used to send commands to the crownstone.
-- [Config](#config_packet). Used to configure a crownstone.
-- [State](#state_packet). Used to read the state of a crownstone.
-    - [Scheduler](#schedule_list_packet). Scheduler packets.
-- [Mesh](#mesh_packets). Packets sent over the mesh.
+- [Control](#command_types). Used to send commands to the Crownstone.
+- [Result](#result_packet). The result of a command.
+- [State](#state_types). State variables of the Crownstone.
 
 
 <a name="switch_state_packet"></a>
 #### Switch state
 To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
 
-![Switch State Packet](../docs/diagrams/switch_state_packet.png)
+<a name="control_packet"></a>
+## Control packet
 
-Bit | Name |  Description
---- | --- | ---
-0 | Relay | Value of the relay, where 0 = OFF, 1 = ON.
-1-7 | Dimmer | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
+__If encryption is enabled, this packet must be encrypted using any of the keys where the box is checked.__
 
-<a name="flags_bitmask"></a>
-#### Flags bitmask
-
-Bit | Name |  Description
---- | --- | ---
-0 | Dimming available | When dimming is physically available, this will be 1.
-1 | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
-2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](SERVICE_DATA.md#service_data_encrypted_error), or by reading the [error state](#state_packet).
-3 | Switch locked | When the switch state is locked, this will be 1.
-4 | Time set | If this is 1, the time is set on this Crownstone.
-5 | Switchcraft | If this is 1, switchcraft is enabled on this Crownstone.
-6 | Reserved | Reserved for future use.
-7 | Reserved | Reserved for future use.
-
-
-
-<a name="command_result_packet"></a>
-## Command result packet
-
-![Command result packet](../docs/diagrams/command-result-packet.png)
+![Control packet](../docs/diagrams/control-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Type | 1 | Type of the command.
-uint 8 | OpCode | 1 | Always 3.
-uint 16 | Length | 2 | Length of the payload in bytes.
-uint 8 | Payload | Length | A [result code packet](#result_code_packet).
+uint 16 | [Command type](#command_types) | 2 | Type of the command.
+uint 16 | Size | 2 | Size of the payload in bytes.
+uint 8 | Payload | Size | Payload data, depends on command type.
 
 
 <a name="result_code_packet"></a>
 ### Result code packet
 
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 16 | [Result code](#result_codes) | 2 | The result code.
+<a name="command_types"></a>
+## Command types
 
-<a name="result_codes"></a>
-#### Result codes
-
-Value | Name | Description
---- | --- | ---
-0 | SUCCESS | Completed successfully.
-1 | WAIT_FOR_SUCCESS | Command is successful so far, but you need to wait for SUCCESS.
-16 | BUFFER_UNASSIGNED | No buffer was assigned for the command.
-17 | BUFFER_LOCKED | Buffer is locked, failed queue command.
-18 | BUFFER_TOO_SMALL | Buffer is too small for operation.
-32 | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
-33 | WRONG_PARAMETER | Wrong parameter provided.
-34 | INVALID_MESSAGE | invalid message provided.
-35 | UNKNOWN_OP_CODE | Unknown operation code provided.
-36 | UNKNOWN_TYPE | Unknown type provided.
-37 | NOT_FOUND | The thing you were looking for was not found.
-38 | NO_SPACE | There is no space for this command.
-39 | BUSY | Wait for something to be done.
-48 | NO_ACCESS | Invalid access for this command.
-64 | NOT_AVAILABLE | Command currently not available.
-65 | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
-66 | NOT_INITIALIZED | Something must first be initialized.
-80 | WRITE_DISABLED | Write is disabled for given type.
-81 | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
-96 | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
-
-
-
-
-
-<a name="control_packet"></a>
-## Control packet
-
-![Control packet](../docs/diagrams/control-packet.png)
-
-__If encryption is enabled, this packet must be encrypted using any of the keys where the box is checked.__
-In the case of the setup mode, only the Validate Setup command is available unencrypted.
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8  | Type | 1 | Command type, see table below.
-uint 8  | Reserved | 1 | Not used: reserved for alignment.
-uint 16 | Length | 2 | Length of the payload in bytes.
-uint 8 | Payload | Length | Payload data, depends on type.
-
-The AUBS columns indicate which users have access to these commands if encryption is enabled.
+The AMBS columns indicate which users have access to these commands if encryption is enabled.
 Admin access means the packet is encrypted with the admin key.
 Setup access means the packet is available in setup mode, and encrypted with the temporary setup key, see [setup](#setup).
 - A: Admin
@@ -375,43 +305,33 @@ Setup access means the packet is available in setup mode, and encrypted with the
 
 Available command types:
 
-Type nr | Type name | Payload type | Payload Description | A | M | B | S
+Type nr | Type name | Payload type | Description | A | M | B | S
 --- | --- | --- | --- | :---: | :---: | :---: | :--:
-0 | Switch | uint 8 | Switch power, 0 = OFF, 100 = FULL ON | x | x | x | x |
-1 | Dimmer | uint 8 | Set dimmer to value, 0 = OFF, 100 = FULL ON | x | x | x |
-2 | Set time | uint 32 | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
-3 | Goto DFU | - | Reset device to DFU mode | x
-4 | Reset | - | Reset device | x
-5 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x
-6 | Keep alive state | [Keep alive payload](#cmd_keep_alive_payload) | Keep alive with state | x | x |
-7 | Keep alive | - | Keep alive without state, uses last state transmitted with Keep alive state command | x | x | x
-8 | Enable mesh | uint 8 | Enable/Disable mesh, 0 = OFF, other = ON **Not tested** | x
-9 | Enable encryption | uint 8 | Enable/Disable encryption, 0 = OFF, other = ON. Only has effect after a reset. **Deprecated** | x
-10 | Enable iBeacon | uint 8 | Enable/Disable iBeacon, 0 = OFF, other = ON **Not tested** | x
-12 | Enable scanner | uint 8 | Enable/Disable interval scanner, 0 = OFF, other = ON. By default off, as the mesh is already scanning. **Deprecated** | x
-14 | User feedback | ... | User feedback. **Not implemented yet** | x |
-15 | Schedule set | [Schedule command payload](#schedule_command_packet) | Set (overwrite) a schedule entry | x | x
-16 | Relay | uint 8 | Switch relay, 0 = OFF, 1 = ON | x | x | x
-18 | Request Service Data | - | Causes the crownstone to send its service data over the mesh. **Not implemented yet** | x | x |
-19 | Disconnect | - | Causes the crownstone to disconnect | x | x | x
-21 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
-22 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
-23 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
-24 | Keepalive repeat | - | Repeat the last keep alive message on the mesh. | x | x | x
-25 | Multi switch | [Multi switch packet](#multi_switch_mesh_packet) | Switch multiple crownstones with a command over the mesh. | x | x | x
-26 | Schedule remove | uint 8 | Clear the Nth schedule entry of the [list](#schedule_list_packet). | x | x
-27 | Keepalive mesh | [Keep alive mesh packet](#keep_alive_mesh_packet) | Send keep alives via the mesh. | x | x |
-28 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. **Only no_operation, and set_time are implemented at this moment.** | x | x | x
-29 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
-30 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
-31 | Setup | [Setup packet](#setup_packet) | Perform setup. |  |  |  | x
-32 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
-33 | UART message | payload | Print the payload to UART. | x
-34 | UART enable | uint 8 | Set UART enabled, 0 = none, 1 = RX only, 3 = TX and RX | x
-36 | Save Behaviour | [Save Behaviour packet](BEHAVIOUR.md#save_behaviour_packet) | Save a Behaviour to an unoccupied index | x | x
-37 | Replace Behaviour | [Replace Behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | Replace the Behaviour at given index | x | x
-38 | Remove Behaviour | [Remove Behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the Behaviour at given index | x | x
-39 | Get Behaviour | [Get Behaviour packet](BEHAVIOUR.md#get_behaviour_packet) | Obtain the Behaviour stored at given index | x | x
+0 | Setup | [Setup packet](#setup_packet) | Perform setup. |  |  |  | x
+1 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x
+2 | Get state | [State get packet](#state_get_packet) | Required access depends on the state type. | x | x | x
+3 | Set state | [State set packet](#state_set_packet) | Required access depends on the state type. | x | x | x
+10 | Reset | - | Reset device | x
+11 | Goto DFU | - | Reset device to DFU mode | x
+12 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
+13 | Disconnect | - | Causes the crownstone to disconnect | x | x | x
+20 | Switch | uint 8 | Switch power, 0 = off, 100 = full on | x | x | x | x |
+21 | Multi switch | [Multi switch packet](#multi_switch_packet) | Switch multiple Crownstones (via mesh). | x | x | x
+22 | Dimmer | uint 8 | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
+23 | Relay | uint 8 | Switch relay, 0 = off, 1 = on | x | x | x
+30 | Set time | uint 32 | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
+31 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
+32 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
+33 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. Required access depends on the command. | x | x | x
+40 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
+41 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
+42 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
+50 | UART message | payload | Print the payload to UART. | x
+51 | UART enable | uint 8 | Set UART enabled, 0 = none, 1 = RX only, 3 = TX and RX | x
+60 | Save Behaviour | [Save Behaviour packet](BEHAVIOUR.md#save_behaviour_packet) | Save a Behaviour to an unoccupied index | x | x
+61 | Replace Behaviour | [Replace Behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | Replace the Behaviour at given index | x | x
+62 | Remove Behaviour | [Remove Behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the Behaviour at given index | x | x
+63 | Get Behaviour | [Get Behaviour packet](BEHAVIOUR.md#get_behaviour_packet) | Obtain the Behaviour stored at given index | x | x
 
 
 
@@ -436,127 +356,56 @@ uint 8[] | iBeacon UUID | 16 | The iBeacon UUID. Should be the same for each Cro
 uint 16 | iBeacon major | 2 | The iBeacon major. Together with the minor, should be unique per sphere.
 uint 16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should be unique per sphere.
 
-<a name="cmd_keep_alive_payload"></a>
-#### Keep alive payload
 
-Type | Name | Description
---- | --- | ---
-uint 8 | Action | Action, 0 = No Change, 1 = Change.
-uint 8 | Switch | Switch power, 0 = OFF, 100 = FULL ON.
-uint 16 | Timeout | Timeout in seconds after which the Switch should be adjusted to the Switch value.
-
-
-<a name="config_packet"></a>
-## Configuration packet
-
-![Configuration packet](../docs/diagrams/config-packet.png)
-
-__If encryption is enabled, this packet must be encrypted using the admin key.__
+<a name="state_get_packet"></a>
+#### State get packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8  | Type | 1 | Type, see table with configuration types below.
-uint 8  | OpCode | 1 | The op code determines if it's a write or a read operation, see table with op codes below
-uint 16 | Length | 2 | Length of the payload in bytes.
-uint 8 | Payload | Length | Payload data, depends on type.
+uint 16  | [State type](#state_types) | 2 | Type of state to get.
+
+
+<a name="state_set_packet"></a>
+#### State set packet
+
+Most configuration changes will only be applied after a reboot.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16  | [State type](#state_types) | 2 | Type of state to set.
+uint 8 | Payload | N | Payload data, depends on state type.
 
 Most configuration changes will only be applied after a reboot.
 Available configurations types:
 
-Type nr | Type name | Payload type | Description
---- | --- | --- | ---
-5 | PWM period | uint 32 | Sets PWM period in μs for the dimmer. **Setting this to a wrong value may cause damage.**
-6 | iBeacon major | uint 16 | iBeacon major number.
-7 | iBeacon minor | uint 16 | iBeacon minor number.
-8 | iBeacon UUID | uint 8 [16] | iBeacon UUID.
-9 | iBeacon TX power | int 8 | iBeacon signal strength at 1 meter.
-11 | TX power | int 8 | TX power, can be: -40, -20, -16, -12, -8, -4, 0, or 4.
-12 | Advertisement interval | uint 16 | Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms.
-16 | Scan duration | uint 16 | Scan duration in ms. Only used by interval scanner, which isn't used by default. **Deprecated**
-18 | Scan break duration | uint 16 | Waiting time in ms to start next scan. Only used by interval scanner, which isn't used by default. **Deprecated**
-19 | Boot delay | uint 16 | Time to wait with radio after boot (ms).                                                          **Setting this to a wrong value may cause damage.**
-20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off. **Setting this to a wrong value may cause damage.**
-24 | Mesh enabled | uint 8 | Stores if mesh is enabled. *read only*
-25 | Encryption enabled | uint 8 | Stores if encryption is enabled. *read only*
-26 | iBeacon enabled | uint 8 | Stores if iBeacon is enabled. *read only*
-27 | Scanner enabled | uint 8 | Stores if device scanning is enabled. *read only*
-33 | Sphere id | uint 8 | Short id of the sphere this Crownstone is part of.
-34 | Crownstone id | uint 8 | Crownstone identifier used in advertisement package.
-35 | Admin key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions.
-36 | Member key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions.
-37 | Basic key | uint 8 [16] | 16 byte key used to encrypt/decrypt basic access functions.
-38 | Default on | uint 8 | Set's the default switch state to 255 if true, or to 0 if false. Value is 0 for false, or any other for true. **Deprecated**
-39 | Scan interval | uint 16 | Set the scan interval in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default.
-40 | Scan window | uint 16 | Set the scan window to in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default.
-41 | Relay high duration | uint 16 | Set the time/duration that the relay is powered for a switch (ms). **Setting this to a wrong value may cause damage.**
-42 | Low TX power | int 8 | Set the tx power used when in low transmission power for bonding (can be: -40, -20, -16, -12, -8, -4, 0, or 4).
-43 | Voltage multiplier | float | Set the voltage multiplier (for power measurement). **Setting this to a wrong value may cause damage.**
-44 | Current multiplier | float | Set the current multiplier (for power measurement). **Setting this to a wrong value may cause damage.**
-45 | Voltage zero | int 32 | Set the voltage zero level (for power measurement).      **Setting this to a wrong value may cause damage.**
-46 | Current zero | int 32 | Set the current zero level (for power measurement).      **Setting this to a wrong value may cause damage.**
-47 | Power zero | int 32 | Set the power zero level in mW (for power measurement).    **Setting this to a wrong value may cause damage.**
-50 | Current consumption threshold | uint 16 | At how much mA the switch will be turned off (soft fuse).            **Setting this to a wrong value may cause damage.**
-51 | Current consumption threshold dimmer | uint 16 | At how much mA the dimmer will be turned off (soft fuse).     **Setting this to a wrong value may cause damage.**
-52 | Dimmer temp up voltage | float | Voltage of upper threshold of the dimmer thermometer.                         **Setting this to a wrong value may cause damage.**
-53 | Dimmer temp down voltage | float | Voltage of lower threshold of the dimmer thermometer.                       **Setting this to a wrong value may cause damage.**
-54 | Dimming allowed | uint8 | Stores whether this Crownstone is allowed to dim. *read only*
-55 | Switch locked | uint8 | Stores whether this Crownstone is allowed to change the switch state. *read only*
-56 | Switchcraft enabled | uint8 | Stores whether this Crownstone has switchcraft enabled. *read only*
-57 | Switchcraft threshold | float | Sets the threshold for switchcraft. A higher threshold will usually make it less likely to detect a switch (less true and false positives). However, there are cases (for example when the net frequency is off or when the net is noisy) where a higher threshold may increase the likeliness switch being detected. **Setting this to a wrong value may cause damage.**
-59 | UART enabled | uint 8 | Whether UART is enabled, 0 = none, 1 = RX only, 3 = TX and RX.
-60 | Device name | char [] | Name of the device.
-61 | Service data key | uint 8 [16] | 16 byte key used to encrypt/decrypt service data.
-62 | Mesh device key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to configure this Crownstone.
-63 | Mesh application key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages for the application of this Crownstone.
-64 | Mesh network key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to be received or relayed by this Crownstone.
-65 | Localization key | uint 8 [16] | 16 byte key used to encrypt/decrypt messages to tell your location to this Crownstone.
-
-
-
-OpCodes:
-
-OpCode | Name | Description
---- | --- | ---
-0 | Read | Select the configuration setting for reading. will load it from storage, then write it to the Config Read Characteristic. Length and payload of the configuration packet will be ignored
-1 | Write | Write the configuration setting to storage.
-
-Note: On the Config Read Characteristic, the OpCode is set to Read (0), and the length and payload will have actual data depending on the type.
-
-
-
-<a name="state_packet"></a>
-## State packet
-
-![State packet](../docs/diagrams/state-packet.png)
+<a name="state_result_packet"></a>
+#### State result packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8  | Type | 1 | Type, see table with configuration types below.
-uint 8  | OpCode | 1 | The op code determines if it's a write, read, or notify operation, see table with op codes below
-uint 16 | Length | 2 | Length of the payload in bytes.
-uint 8 | Payload | Length | Payload data, depends on type.
+uint 16  | [State type](#state_types) | 2 | Type of state.
+uint 8 | Payload | N | Payload data, depends on state type.
 
-Available state variables:
 
-Type nr | Type name | Payload type | Description | Persistent
---- | --- | --- | --- | :---:
-128 | Reset counter | uint 16 | Counts the number of resets (DEBUG). | x
-129 | [Switch state](#switch_state_packet) | uint 8 | Current Switch state. |
-130 | Accumulated energy | int 64 | Accumulated energy in μJ | x
-131 | Power usage | int 32 | Current power usage in mW |
-133 | Schedule | [Schedule List](#schedule_list_packet) | Schedule list. | x
-134 | Operation Mode | uint 8 | ..., TBD | x
-135 | Temperature | int 8 | Chip temperature in °C. |
-136 | Time | uint 32 | Get the current time.
-139 | [Error bitmask](#state_error_bitmask) | uint 32 | Get the current error bitmask.
+<a name="multi_switch_packet"></a>
+##### Multi switch packet
 
-OpCodes:
+![Multi switch list](../docs/diagrams/multi_switch_packet.png)
 
-OpCode | Name | Description
---- | --- | ---
-0 | Read | Select the configuration setting for reading. Will load it from storage, then write it to the Config read characteristic. Length and payload of the configuration packet will be ignored.
-1 | Write | Write the state variable **disabled**.
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Count | 1 | Number of valid entries.
+[Multi switch entry](#multi_switch_entry_packet) [] | List | Count * 2 | A list of switch commands.
 
+<a name="multi_switch_entry_packet"></a>
+##### Multi switch entry
+
+![Multi switch short entry](../docs/diagrams/multi_switch_entry_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
+uint 8 | Switch value | 1 | The switch value to be set by the targeted crownstone. 0 = off, 100 = fully on.
 
 
 <a name="state_error_bitmask"></a>
@@ -573,220 +422,6 @@ Bit | Name |  Description
 6-31 | Reserved | Reserved for future use.
 
 
-
-<a name="schedule_list_packet"></a>
-### Schedule list packet
-
-![Schedule list packet](../docs/diagrams/schedule-list-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Size | 1 | Number of entries in the list.
-[schedule entry](#schedule_entry_packet) | Entries | size * 12 | Schedule entry list. Entries with timestamp=0 can be considered empty.
-
-<a name="schedule_command_packet"></a>
-### Schedule command packet
-
-![Schedule command packet](../docs/diagrams/schedule-command-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | index | 1 | Index of the entry (corresponds to the Nth entry in the list).
-[schedule entry](#schedule_entry_packet) | Entry | 12 | Schedule entry.
-
-<a name="schedule_entry_packet"></a>
-### Schedule entry packet
-
-![Schedule entry packet](../docs/diagrams/schedule-entry-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | reserved | 1 | Reserved for future use.
-uint 8 | Type | 1 | Combined repeat and action type. Defined as `repeatType + (actionType << 4)`.
-uint 8 | [Override mask](#schedule_override_mask) | 1 | Bitmask of switch commands to override.
-uint 32 | Next timestamp | 4 | Unix timestamp of the next time this entry triggers. Set to 0 to remove this entry.
-[schedule repeat](#schedule_repeat_packet) | Repeat data | 2 | Repeat time data, depends on the repeat type.
-[schedule action](#schedule_action_packet) | Action data | 3 | Action data, depends on the action type.
-
-<a name="schedule_override_mask"></a>
-### Schedule override mask
-
-Bit | Name |  Description
---- | --- | ---
-0 | All | Ignore any switch command. ** Not implemented yet. **
-1 | Location | Ignore any switch command that comes from location updates (enter/exit room/sphere). ** Not implemented yet. **
-2-7 | Reserved | Reserved for future use.
-
-
-<a name="schedule_repeat_packet"></a>
-### Schedule repeat packet
-
-#### Repeat type 0
-Perform action every X minutes.
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 16 | Repeat time | 2 | Repeat every `<repeat time>` minutes, 0 is not allowed.
-
-#### Repeat type 1
-Perform action every 24h, but only on certain days these days of the week.
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Day of week | 1 | Bitmask, with bits 0-6 for Sunday-Saturday and bit 7 for all days.
-uint 8 | Reserved | 1 | Reserved for future use.
-
-#### Repeat type 2
-Perform action only once. Entry gets removed after action was performed.
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Reserved | 2 | Reserved for future use.
-
-
-<a name="schedule_action_packet"></a>
-### Schedule action packet
-
-#### Action type 0
-Set power switch to a given value.
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Switch | 1 | Power switch value. Range 0-100, where 0 is off and 100 is fully on.
-uint 8 | Reserved | 2 | Unused.
-
-#### Action type 1
-Fade from current power switch value to a given power switch value, in X seconds. Starts fading at *next timestamp*.
-** Not implemented yet. **
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Switch end | 1 | Power switch value after fading (at timestamp + fade duration).
-uint 16 | Fade duration | 2 | Fade duration in seconds.
-
-#### Action type 2
-Toggle the power switch.
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Reserved | 3 | Reserved for future use.
-
-
-
-
-<a name="mesh_packets"></a>
-## Mesh packets
-
-Packets which are sent via the mesh.
-
-
-
-### Mesh multi switch
-
-Switch multiple Crownstones at once.
-
-<a name="multi_switch_mesh_packet"></a>
-##### Multi switch packet
-
-![Multi switch packet](../docs/diagrams/multi-switch-mesh-packet.png)
-
-Type nr | Type name | Payload type | Description
---- | --- | --- | ---
-0 | [List](#multi_switch_list_mesh_packet) | Multi switch list | Different switch command for each Crownstone.
-
-
-<a name="multi_switch_list_mesh_packet"></a>
-##### Multi switch list packet
-
-![Multi switch packet](../docs/diagrams/multi-switch-list-mesh-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Count | 1 | Number of multi switch list items in the list.
-[Multi switch list item](#multi_switch_list_mesh_item) [] | List | N | A list of switch commands.
-
-
-<a name="multi_switch_list_mesh_item"></a>
-##### Multi switch list item
-
-![Multi switch list item](../docs/diagrams/multi-switch-list-item.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
-uint 8 | Switch state | 1 | The switch state to be set by the targeted crownstone after the timeout expires. 0 = off, 100 = fully on.
-uint 16 | Timeout | 2 | The timeout (in seconds) after which the state should be set.
-uint 8 | [Intent](#multi_switch_intent) | 1 | The intent of the switch, see the table below. **Not used.**
-
-<a name="multi_switch_intent"></a>
-###### Intent
-
-Value | Name
---- | ---
-0 | Sphere Enter
-1 | Sphere Exit
-2 | Enter
-3 | Exit
-4 | Manual
-
-
-
-### Mesh keep alive
-
-Send keep alive to multiple Crownstones at once.
-
-<a name="keep_alive_mesh_packet"></a>
-#### Mesh keep alive packet
-
-![Keep alive packet](../docs/diagrams/keep-alive-mesh-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | type | 1 | Determines type of packet, see below.
-uint 8 [] | payload | N | Depends on type of packet, see below.
-
-
-Type nr | Type name | Payload type | Description
---- | --- | --- | ---
-1 | [Same timeout](#keep_alive_same_timeout_mesh_packet) | Keep alive same timeout | Keep alive with same timeout for each Crownstone.
-
-
-<a name="keep_alive_same_timeout_mesh_packet"></a>
-#### Mesh keep alive same timeout packet
-
-![Keep alive same timeout packet](../docs/diagrams/keep-alive-same-timeout-mesh-packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 16 | Timeout | 2 | Timeout (in seconds), applies to all stones present in the list.
-uint 8 | Count | 1 | Number of items in the list.
-[Keep alive item](#keep_alive_mesh_item) [] | List | N | The keep alive same timeout items.
-
-
-<a name="keep_alive_mesh_item"></a>
-##### Mesh keep alive same timeout item
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this keep alive item is targeted.
-[Action + switch state](#action_switch_state_keep_alive) | Action + switch state | 1 | A combined element for action and switch state, which should be executed by the targeted crownstone when the keep alive times out.
-
-
-<a name="action_switch_state_keep_alive"></a>
-##### Action + switch state
-
-Value | Name
---- | ---
-255 | No action
-... | ...
-0-100 | Switch power: 0 = off, 100 = on, dimmed in between.
-
-
-
-### Mesh command
-
-Send a generic command to multiple Crownstones at once.
-
 <a name="command_mesh_packet"></a>
 #### Mesh command packet
 
@@ -795,18 +430,149 @@ Send a generic command to multiple Crownstones at once.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
-uint 8 | Reserved | 1 | Reserved for future use.
-uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast.
-uint8 [] | List of target IDs | Count | Crownstone identifiers of the devices at which this message is aimed. For broadcast, no IDs are provided and the command follows directly after the Count element.
+uint 8 | Reserved | 1 | Reserved for future use, should be 0 for now.
+uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast. **Currently, only 0 is implemented.**
+uint8 [] | List of target IDs | Count | Crownstone identifiers of the devices at which this message is aimed. For broadcast, no IDs are provided and the command follows directly after the count field.
 uint 8 | Command payload | N | The command payload data, which depends on the type.
-
 
 <a name="mesh_command_types"></a>
 ##### Mesh command types
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
-0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet.
-1 | Beacon | [Beacon Config](#beacon_mesh_data_packet) | Configure the iBeacon settings. **Not implemented.**
-2 | Config | [Configuration](#config_packet) | Send/Request a configuration setting, see configuration packet. **Not implemented.**
-3 | State | [State](#state_packet) | Send/Request a state variable, see state packet. **Not implemented.**
+0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet. **Currently, only control commands `No operation` and `Set time` are implemented.**
+
+<a name="schedule_entry_packet"></a>
+### Schedule entry packet
+
+![Schedule entry packet](../docs/diagrams/schedule-entry-packet.png)
+
+<a name="result_packet"></a>
+## Result packet
+
+__If encryption is enabled, this packet will be encrypted using any of the keys where the box is checked.__
+
+![Result packet](../docs/diagrams/result-packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | [Command type](#command_types) | 2 | Type of the command of which this packet is the result.
+uint 16 | [Result code](#result_codes) | 2 | The result code.
+uint 16 | Size | 2 | Size of the payload in bytes.
+uint 8 | Payload | Size | Payload data, depends on command type.
+
+<a name="result_codes"></a>
+#### Result codes
+
+Value | Name | Description
+--- | --- | ---
+0 | SUCCESS | Completed successfully.
+1 | WAIT_FOR_SUCCESS | Command is successful so far, but you need to wait for SUCCESS.
+16 | BUFFER_UNASSIGNED | No buffer was assigned for the command.
+17 | BUFFER_LOCKED | Buffer is locked, failed queue command.
+18 | BUFFER_TOO_SMALL | Buffer is too small for operation.
+32 | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
+33 | WRONG_PARAMETER | Wrong parameter provided.
+34 | INVALID_MESSAGE | invalid message provided.
+35 | UNKNOWN_OP_CODE | Unknown operation code provided.
+36 | UNKNOWN_TYPE | Unknown type provided.
+37 | NOT_FOUND | The thing you were looking for was not found.
+38 | NO_SPACE | There is no space for this command.
+39 | BUSY | Wait for something to be done.
+48 | NO_ACCESS | Invalid access for this command.
+64 | NOT_AVAILABLE | Command currently not available.
+65 | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
+67 | NOT_INITIALIZED | Something must first be initialized.
+80 | WRITE_DISABLED | Write is disabled for given type.
+81 | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
+96 | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
+65535 | UNSPECIFIED | Unspecified error.
+
+#### Repeat type 2
+Perform action only once. Entry gets removed after action was performed.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Reserved | 2 | Reserved for future use.
+
+<a name="state_types"></a>
+## State types
+
+The AMBS columns indicate which users have access to these states: `r` for read access, `w` for write access.
+Admin access means the packet is encrypted with the admin key.
+Setup access means the packet is available in setup mode, and encrypted with the temporary setup key, see [setup](#setup).
+- A: Admin
+- M: Member
+- B: Basic
+- S: Setup
+
+Type nr | Type name | Payload type | Description | A | M | B
+------- | ---------- | ------------- | ------------ | --- | --- | ---
+5 | PWM period | uint 32 | Sets PWM period in μs for the dimmer. **Setting this to a wrong value may cause damage.**  | rw |  | 
+6 | iBeacon major | uint 16 | iBeacon major number.  | rw |  | 
+7 | iBeacon minor | uint 16 | iBeacon minor number.  | rw |  | 
+8 | iBeacon UUID | uint 8 [16] | iBeacon UUID.  | rw |  | 
+9 | iBeacon TX power | int 8 | iBeacon signal strength at 1 meter.  | rw |  | 
+11 | TX power | int 8 | TX power, can be: -40, -20, -16, -12, -8, -4, 0, or 4.  | rw |  | 
+12 | Advertisement interval | uint 16 | Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms.  | rw |  | 
+16 | Scan duration | uint 16 | Scan duration in ms. Only used by interval scanner, which isn't used by default. **Deprecated**  | rw |  | 
+18 | Scan break duration | uint 16 | Waiting time in ms to start next scan. Only used by interval scanner, which isn't used by default. **Deprecated**  | rw |  | 
+19 | Boot delay | uint 16 | Time to wait with radio after boot (ms). **Setting this to a wrong value may cause damage.**  | rw |  | 
+20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off. **Setting this to a wrong value may cause damage.**  | rw |  | 
+24 | Mesh enabled | uint 8 | Stores if mesh is enabled.  | rw |  | 
+25 | Encryption enabled | uint 8 | Stores if encryption is enabled. **Not implemented**  |  |  | 
+26 | iBeacon enabled | uint 8 | Stores if iBeacon is enabled. **Not implemented**  |  |  | 
+27 | Scanner enabled | uint 8 | Stores if device scanning is enabled.  | rw |  | 
+33 | Sphere id | uint 8 | Short id of the sphere this Crownstone is part of.  | rw |  | 
+34 | Crownstone id | uint 8 | Crownstone identifier used in advertisement package.  | rw |  | 
+35 | Admin key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions.  |  |  | 
+36 | Member key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions.  |  |  | 
+37 | Basic key | uint 8 [16] | 16 byte key used to encrypt/decrypt basic access functions.  |  |  | 
+39 | Scan interval | uint 16 | Set the scan interval in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default.  | rw |  | 
+40 | Scan window | uint 16 | Set the scan window to in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default.  | rw |  | 
+41 | Relay high duration | uint 16 | Set the time/duration that the relay is powered for a switch (ms). **Setting this to a wrong value may cause damage.**  | rw |  | 
+42 | Low TX power | int 8 | Set the tx power used when in low transmission power for bonding (can be: -40, -20, -16, -12, -8, -4, 0, or 4).  | rw |  | 
+43 | Voltage multiplier | float | Set the voltage multiplier (for power measurement). **Setting this to a wrong value may cause damage.**  | rw |  | 
+44 | Current multiplier | float | Set the current multiplier (for power measurement). **Setting this to a wrong value may cause damage.**  | rw |  | 
+45 | Voltage zero | int 32 | Set the voltage zero level (for power measurement).      **Setting this to a wrong value may cause damage.**  | rw |  | 
+46 | Current zero | int 32 | Set the current zero level (for power measurement).      **Setting this to a wrong value may cause damage.**  | rw |  | 
+47 | Power zero | int 32 | Set the power zero level in mW (for power measurement).    **Setting this to a wrong value may cause damage.**  | rw |  | 
+50 | Current consumption threshold | uint 16 | At how much mA the switch will be turned off (soft fuse).            **Setting this to a wrong value may cause damage.**  | rw |  | 
+51 | Current consumption threshold dimmer | uint 16 | At how much mA the dimmer will be turned off (soft fuse).     **Setting this to a wrong value may cause damage.**  | rw |  | 
+52 | Dimmer temp up voltage | float | Voltage of upper threshold of the dimmer thermometer.                         **Setting this to a wrong value may cause damage.**  | rw |  | 
+53 | Dimmer temp down voltage | float | Voltage of lower threshold of the dimmer thermometer.                       **Setting this to a wrong value may cause damage.**  | rw |  | 
+54 | Dimming allowed | uint8 | Stores whether this Crownstone is allowed to dim.  | rw |  | 
+55 | Switch locked | uint8 | Stores whether this Crownstone is allowed to change the switch state.  | rw |  | 
+56 | Switchcraft enabled | uint8 | Stores whether this Crownstone has switchcraft enabled.  | rw |  | 
+57 | Switchcraft threshold | float | Sets the threshold for switchcraft. A higher threshold will generally make it less likely to detect a switch (less true and false positives). **Setting this to a wrong value may cause damage.**  | rw |  | 
+59 | UART enabled | uint 8 | Whether UART is enabled, 0 = none, 1 = RX only, 3 = TX and RX.  | rw |  | 
+60 | Device name | char [] | Name of the device.  | rw |  | 
+61 | Service data key | uint 8 [16] | 16 byte key used to encrypt/decrypt service data.  |  |  | 
+62 | Mesh device key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to configure this Crownstone.  |  |  | 
+63 | Mesh application key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages for the application of this Crownstone.  |  |  | 
+64 | Mesh network key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to be received or relayed by this Crownstone.  |  |  | 
+65 | Localization key | uint 8 [16] | 16 byte key used to encrypt/decrypt messages to tell your location to this Crownstone.  |  |  | 
+128 | Reset counter | uint 16 | Counts the number of resets.  | r | r | 
+129 | [Switch state](#switch_state_packet) | uint 8 | Current switch state.  | r | r | 
+130 | Accumulated energy | int 64 | Accumulated energy in μJ  | r | r | 
+131 | Power usage | int 32 | Current power usage in mW  | r | r | 
+134 | Operation Mode | uint 8 | Internal usage.  |  |  | 
+135 | Temperature | int 8 | Chip temperature in °C.  | r | r | 
+136 | Time | uint 32 | The current time as unix timestamp.  | r | r | 
+139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors.  | r | r | 
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Switch | 1 | Power switch value. Range 0-100, where 0 is off and 100 is fully on.
+uint 8 | Reserved | 2 | Unused.
+
+<a name="switch_state_packet"></a>
+#### Switch state
+To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
+
+![Switch State Packet](../docs/diagrams/switch_state_packet.png)
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Relay | Value of the relay, where 0 = OFF, 1 = ON.
+1-7 | Dimmer | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.

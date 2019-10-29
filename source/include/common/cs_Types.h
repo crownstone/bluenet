@@ -9,7 +9,6 @@
 #include "ble/cs_Nordic.h"
 #include "cfg/cs_Config.h"
 #include "cfg/cs_Boards.h"
-
 #include "drivers/cs_Serial.h"
 #include "protocol/cs_CommandTypes.h"
 #include "protocol/cs_ErrorCodes.h"
@@ -22,9 +21,8 @@
 #include <processing/behaviour/cs_Behaviour.h>
 
 enum TypeBases {
-	Configuration_Base = 0x000,
-	State_Base         = 0x080,
-	General_Base       = 0x100, // Configuration and state types are assumed to fit in a uint8_t, so lower than 256.
+	State_Base   = 0x000,
+	General_Base = 0x100, // Configuration and state types are assumed to fit in a uint8_t, so lower than 256.
 };
 
 /** Cast to underlying type.
@@ -47,7 +45,7 @@ constexpr auto to_underlying_type(T e) noexcept
  * Use in the characteristic to read and write state variables in <CommonService>.
  */
 enum class CS_TYPE: uint16_t {
-	CONFIG_DO_NOT_USE                       = Configuration_Base,   // Record keys should be in the range 0x0001 - 0xBFFF. The value 0x0000 is reserved by the system. The values from 0xC000 to 0xFFFF are reserved for use by the Peer Manager module and can only be used in applications that do not include Peer Manager.
+	CONFIG_DO_NOT_USE                       = State_Base,   // Record keys should be in the range 0x0001 - 0xBFFF. The value 0x0000 is reserved by the system. The values from 0xC000 to 0xFFFF are reserved for use by the Peer Manager module and can only be used in applications that do not include Peer Manager.
 //	CONFIG_DEVICE_TYPE                      = 1,      //  0x01
 //	CONFIG_ROOM                             = 2,      //  0x02
 //	CONFIG_FLOOR                            = 3,      //  0x03
@@ -85,7 +83,7 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_KEY_ADMIN                        = 35,     //  0x23
 	CONFIG_KEY_MEMBER                       = 36,     //  0x24
 	CONFIG_KEY_BASIC                        = 37,     //  0x25
-	CONFIG_DEFAULT_ON                       = 38,     //  0x26   // Deprecate
+//	CONFIG_DEFAULT_ON                       = 38,     //  0x26
 	CONFIG_SCAN_INTERVAL                    = 39,     //  0x27
 	CONFIG_SCAN_WINDOW                      = 40,     //  0x28
 	CONFIG_RELAY_HIGH_DURATION              = 41,     //  0x29
@@ -113,8 +111,9 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_MESH_APP_KEY                     = 63,     //  0x3F
 	CONFIG_MESH_NET_KEY                     = 64,     //  0x40
 	CONFIG_KEY_LOCALIZATION                 = 65,     //  0x41
+	CONFIG_START_DIMMER_ON_ZERO_CROSSING    = 66,     //  0x42
 
-	STATE_RESET_COUNTER                     = State_Base,  //    128
+	STATE_RESET_COUNTER                     = 128,    //  0x80 - 128
 	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
 	STATE_ACCUMULATED_ENERGY                = 130,    //  0x82 - 130   Energy used in μJ.
 	STATE_POWER_USAGE                       = 131,    //  0x83 - 131   Power usage in mW.
@@ -280,7 +279,6 @@ typedef uint8_t  TYPIFY(CONFIG_SPHERE_ID);
 typedef uint8_t  TYPIFY(CONFIG_CROWNSTONE_ID);
 typedef    float TYPIFY(CONFIG_CURRENT_MULTIPLIER);
 typedef  int32_t TYPIFY(CONFIG_CURRENT_ADC_ZERO);
-typedef     BOOL TYPIFY(CONFIG_DEFAULT_ON);
 typedef     BOOL TYPIFY(CONFIG_ENCRYPTION_ENABLED);
 typedef     BOOL TYPIFY(CONFIG_IBEACON_ENABLED);
 typedef uint16_t TYPIFY(CONFIG_IBEACON_MINOR);
@@ -302,6 +300,7 @@ typedef uint16_t TYPIFY(CONFIG_SCAN_INTERVAL);
 typedef uint16_t TYPIFY(CONFIG_SCAN_WINDOW);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM);
+typedef     BOOL TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING);
 typedef     BOOL TYPIFY(CONFIG_SWITCH_LOCKED);
 typedef     BOOL TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
 typedef    float TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD);

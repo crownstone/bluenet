@@ -6,20 +6,10 @@
  */
 #pragma once
 
-//#include <cstdint>
 #include <string>
-#include <cstdlib>
-//
-
 #include "drivers/cs_Serial.h"
 #include "protocol/cs_ErrorCodes.h"
-
-/** @brief Variable length data encapsulation in terms of length and pointer to data */
-typedef struct
-{
-    uint8_t*  data;     /** < Pointer to data. */
-    uint16_t  len;      /** < Length of data. */
-} cs_data_t;
+#include "structs/cs_PacketsInternal.h"
 
 /** @namespace BLEutil
  *
