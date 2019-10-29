@@ -13,7 +13,7 @@ Setup::Setup() {
 	EventDispatcher::getInstance().addListener(this);
 }
 
-cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
+cs_ret_code_t Setup::handleCommand(cs_data_t data) {
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 	OperationMode operationMode = getOperationMode(mode);
@@ -23,12 +23,12 @@ cs_ret_code_t Setup::handleCommand(uint8_t* data, uint16_t size) {
 		return ERR_NOT_AVAILABLE;
 	}
 
-	if (size != sizeof(setup_data_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+	if (data.len != sizeof(setup_data_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, data.len);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	setup_data_t* setupData = (setup_data_t*) data;
+	setup_data_t* setupData = (setup_data_t*) data.data;
 
 	// Validate settings
 	if (setupData->stoneId == 0) {

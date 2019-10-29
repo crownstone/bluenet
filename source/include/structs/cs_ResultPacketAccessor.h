@@ -47,7 +47,7 @@ public:
 	}
 
 	/**
-	 * Get pointer to the payload.
+	 * Get the payload.
 	 *
 	 * @return                    Data struct with pointer to payload and size of the payload in bytes.
 	 */
@@ -64,11 +64,40 @@ public:
 	 *
 	 * Will never be larger than what fits in the buffer.
 	 *
-	 * @return                    Size of the payload.
+	 * @return                    Size of the payload in bytes.
 	 */
 	cs_buffer_size_t getPayloadSize() {
 		checkInitialized();
 		return std::min(_buffer->header.payloadSize, PAYLOAD_SIZE);
+	}
+
+	/**
+	 * Get the payload buffer.
+	 *
+	 * @return pointer to the payload buffer.
+	 */
+	buffer_ptr_t getPayloadBuffer() {
+		checkInitialized();
+		return _buffer->payload;
+	}
+
+	/**
+	 * Get the capacity of the payload.
+	 *
+	 * @return                    Max size of the payload in bytes.
+	 */
+	cs_buffer_size_t getMaxPayloadSize() {
+		checkInitialized();
+		return PAYLOAD_SIZE;
+	}
+
+	cs_ret_code_t setPayloadSize(cs_buffer_size_t size) {
+		checkInitialized();
+		if (size > getMaxPayloadSize()) {
+			return ERR_BUFFER_TOO_SMALL;
+		}
+		_buffer->header.payloadSize = size;
+		return ERR_SUCCESS;
 	}
 
 	/**

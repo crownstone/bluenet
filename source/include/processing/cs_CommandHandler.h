@@ -30,20 +30,27 @@ public:
 	 */
 	void init(const boards_config_t* board);
 
-	/** Handle a command without payload, and assuming admin level access.
+	/**
+	 * Handle a command, see handleCommand()
 	 */
 	command_result_t handleCommand(const CommandHandlerTypes type, const cmd_source_t source);
 
-	/** Handle a particular command with additional arguments stored in a buffer at a security level.
+	/**
+	 * Handle a a command.
 	 *
-	 * The security level is ADMIN by default.
+	 * @param[in]  type           Type of command.
+	 * @param[in]  commandData    Data of the command.
+	 * @param[in]  source         Source of the entity that issuce this command.
+	 * @param[in]  accessLevel    Access level of the entity that issued this command. Default is ADMIN.
+	 * @param[out] resultData     Buffer (that can be NULL) to put the result data in. Default is NULL.
+	 * @return                    Result of the command.
 	 */
 	command_result_t handleCommand(
 			const CommandHandlerTypes type,
-			buffer_ptr_t buffer,
-			const uint16_t size,
+			cs_data_t commandData,
 			const cmd_source_t source,
-			const EncryptionAccessLevel accessLevel = ADMIN
+			const EncryptionAccessLevel accessLevel = ADMIN,
+			cs_data_t resultData = cs_data_t()
 			);
 
 
@@ -65,33 +72,33 @@ private:
 	EncryptionAccessLevel getRequiredAccessLevel(const CommandHandlerTypes type);
 	bool allowedAsMeshCommand(const CommandHandlerTypes type);
 
-	command_result_t handleCmdNop                   (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdGotoDfu               (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdReset                 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdFactoryReset          (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdSetTime               (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdIncreaseTx            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdValidateSetup         (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdDisconnect            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdResetErrors           (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdPwm                   (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdSwitch                (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdRelay                 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdMultiSwitch           (buffer_ptr_t buffer, const uint16_t size, const cmd_source_t source, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdMeshCommand           (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdAllowDimming          (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdLockSwitch            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdSetup                 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdEnableSwitchcraft     (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdUartMsg               (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdUartEnable            (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdStateGet              (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	command_result_t handleCmdStateSet              (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdNop                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdGotoDfu               (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdReset                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdFactoryReset          (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdSetTime               (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdIncreaseTx            (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdValidateSetup         (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdDisconnect            (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdResetErrors           (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdPwm                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdSwitch                (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdRelay                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdMultiSwitch           (cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdMeshCommand           (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdAllowDimming          (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdLockSwitch            (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdSetup                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdEnableSwitchcraft     (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdUartMsg               (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdUartEnable            (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdStateGet              (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	command_result_t handleCmdStateSet              (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
 
-	cs_ret_code_t handleCmdSaveBehaviour         (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
-	cs_ret_code_t handleCmdReplaceBehaviour		 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);  
-	cs_ret_code_t handleCmdRemoveBehaviour		 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);  
-	cs_ret_code_t handleCmdGetBehaviour			 (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel);
+	cs_ret_code_t handleCmdSaveBehaviour         (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	cs_ret_code_t handleCmdReplaceBehaviour		 (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	cs_ret_code_t handleCmdRemoveBehaviour		 (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
+	cs_ret_code_t handleCmdGetBehaviour			 (cs_data_t commandData, const EncryptionAccessLevel accessLevel);
 	
 
 	/**
