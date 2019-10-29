@@ -11,17 +11,32 @@
 
 class event_t {
     public:
-	event_t(CS_TYPE type, void * data, size16_t size): type(type), data(data), size(size) {
-	}
+	event_t(CS_TYPE type, void * data, size16_t size) :
+		type(type),
+		data(data),
+		size(size),
+		returnCode(ERR_EVENT_UNHANDLED) 
+	{}
 
-	event_t(CS_TYPE type): type(type), data(NULL), size(0) {
-	}
+	event_t(CS_TYPE type) : 
+		event_t(type, NULL, 0)
+	{}
 
 	CS_TYPE type;
 
 	void *data;
 
 	size16_t size;
+
+	/**
+	 * Will be set to 
+	 */
+	cs_ret_code_t returnCode;
+	/**
+	 * A field that can be used by handlers to return a value to
+	 * the dispatching scope.
+	 */
+	cs_data_t result = {};
 
     /**
      * Validates [data] for nullptr and [size] to match expected size of [type].

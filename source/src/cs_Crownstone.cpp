@@ -563,7 +563,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 
 			// DEBUG
 			uint32_t h = 14;
-			uint32_t m = 15;
+			uint32_t m = 25;
 			uint32_t s = 0;
 
 			for(auto i = 0; i < 10; i++){ // just add 10 behaviours
@@ -596,8 +596,26 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 					0)
 				);
 			b.print();
+			
+			uint8_t result = 0xff;
 			event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR,&b,sizeof(b));
+
+			event.result.data = &result;
+			event.result.len = sizeof(result);
+
 			event.dispatch();
+
+			if(event.returnCode == EVENT_RESULT_SET){
+				LOGd("SaveBehaviourEvent handled, returnvalue: %x",result);
+			} else if(event.returnCode == ERR_NO_SPACE) {
+				LOGd("SaveBehaviourEvent not handled because the space is full");
+			} else if(event.returnCode == ERR_BUFFER_TOO_SMALL){
+				LOGd("SaveBehaviourEvent failed because event buffer was too small for return value");
+			} else if(event.returnCode == ERR_EVENT_UNHANDLED){
+				LOGd("SaveBehaviour event unhandled");
+			} else {
+				LOGd("SaveBehaviour event ended in undefined state");
+			}
 
 			// END DEBUG
 

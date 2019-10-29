@@ -69,6 +69,7 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
                 if (b->value() != intendedValue.value()){
                     // found a conflicting behaviour
                     // TODO(Arend): add more advance conflict resolution according to document.
+                    LOGd("conflicting behaviours found");
                     return std::nullopt;
                 }
             } else {

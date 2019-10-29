@@ -558,7 +558,7 @@ command_result_t CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const 
 }
 
 
-cs_ret_code_t CommandHandler::handleCmdSaveBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+command_result_t CommandHandler::handleCmdSaveBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
 	LOGd(STR_HANDLE_COMMAND, "Save Behaviour");
 
 	// TODO(Arend): Only implements Switch behaviour at the moment...
@@ -570,14 +570,22 @@ cs_ret_code_t CommandHandler::handleCmdSaveBehaviour (buffer_ptr_t buffer, const
 	Behaviour b = WireFormat::deserialize<Behaviour>(buffer,size);
 
 	event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR,&b,sizeof(b));
-	
-	event.dispatch();
+	// uint8_t localbuf[6];
+	// event.resultData.buff = localbuf;
+	// event.resultData.len = sizeof(localbuf);
 
-	// not implemented.
+	event.dispatch();
+	// if (event.result.returnCode == ERR_EVENT_UNHANDLED) {
+	// 	return command_result_t(ERR_NOT_IMPLEMENTED);
+	// }
+
+	// TODO handle stuff
+	
+	// return event.result;
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t CommandHandler::handleCmdReplaceBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+command_result_t CommandHandler::handleCmdReplaceBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
 	LOGd(STR_HANDLE_COMMAND, "Replace Behaviour");
 
 	if(size != 1 + 26){
@@ -590,7 +598,7 @@ cs_ret_code_t CommandHandler::handleCmdReplaceBehaviour (buffer_ptr_t buffer, co
 	return ERR_SUCCESS;
 } 
 
-cs_ret_code_t CommandHandler::handleCmdRemoveBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+command_result_t CommandHandler::handleCmdRemoveBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
 	LOGd(STR_HANDLE_COMMAND, "Remove Behaviour");
 
 	if(size != 1){
@@ -603,7 +611,7 @@ cs_ret_code_t CommandHandler::handleCmdRemoveBehaviour (buffer_ptr_t buffer, con
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t CommandHandler::handleCmdGetBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+command_result_t CommandHandler::handleCmdGetBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
 	LOGd(STR_HANDLE_COMMAND, "Get Behaviour");
 
 	if(size != 1){
