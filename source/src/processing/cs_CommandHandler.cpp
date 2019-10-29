@@ -86,55 +86,55 @@ command_result_t CommandHandler::handleCommand(
 	}
 	switch (type) {
 	case CTRL_CMD_NOP:
-		return handleCmdNop(commandData, accessLevel);
+		return handleCmdNop(commandData, accessLevel, resultData);
 	case CTRL_CMD_GOTO_DFU:
-		return handleCmdGotoDfu(commandData, accessLevel);
+		return handleCmdGotoDfu(commandData, accessLevel, resultData);
 	case CTRL_CMD_RESET:
-		return handleCmdReset(commandData, accessLevel);
+		return handleCmdReset(commandData, accessLevel, resultData);
 	case CTRL_CMD_FACTORY_RESET:
-		return handleCmdFactoryReset(commandData, accessLevel);
+		return handleCmdFactoryReset(commandData, accessLevel, resultData);
 	case CTRL_CMD_SET_TIME:
-		return handleCmdSetTime(commandData, accessLevel);
+		return handleCmdSetTime(commandData, accessLevel, resultData);
 	case CTRL_CMD_INCREASE_TX:
-		return handleCmdIncreaseTx(commandData, accessLevel);
+		return handleCmdIncreaseTx(commandData, accessLevel, resultData);
 	case CTRL_CMD_DISCONNECT:
-		return handleCmdDisconnect(commandData, accessLevel);
+		return handleCmdDisconnect(commandData, accessLevel, resultData);
 	case CTRL_CMD_RESET_ERRORS:
-		return handleCmdResetErrors(commandData, accessLevel);
+		return handleCmdResetErrors(commandData, accessLevel, resultData);
 	case CTRL_CMD_PWM:
-		return handleCmdPwm(commandData, accessLevel);
+		return handleCmdPwm(commandData, accessLevel, resultData);
 	case CTRL_CMD_SWITCH:
-		return handleCmdSwitch(commandData, accessLevel);
+		return handleCmdSwitch(commandData, accessLevel, resultData);
 	case CTRL_CMD_RELAY:
-		return handleCmdRelay(commandData, accessLevel);
+		return handleCmdRelay(commandData, accessLevel, resultData);
 	case CTRL_CMD_MULTI_SWITCH:
-		return handleCmdMultiSwitch(commandData, source, accessLevel);
+		return handleCmdMultiSwitch(commandData, source, accessLevel, resultData);
 	case CTRL_CMD_MESH_COMMAND:
-		return handleCmdMeshCommand(commandData, accessLevel);
+		return handleCmdMeshCommand(commandData, accessLevel, resultData);
 	case CTRL_CMD_ALLOW_DIMMING:
-		return handleCmdAllowDimming(commandData, accessLevel);
+		return handleCmdAllowDimming(commandData, accessLevel, resultData);
 	case CTRL_CMD_LOCK_SWITCH:
-		return handleCmdLockSwitch(commandData, accessLevel);
+		return handleCmdLockSwitch(commandData, accessLevel, resultData);
 	case CTRL_CMD_SETUP:
-		return handleCmdSetup(commandData, accessLevel);
+		return handleCmdSetup(commandData, accessLevel, resultData);
 	case CTRL_CMD_ENABLE_SWITCHCRAFT:
-		return handleCmdEnableSwitchcraft(commandData, accessLevel);
+		return handleCmdEnableSwitchcraft(commandData, accessLevel, resultData);
 	case CTRL_CMD_UART_MSG:
-		return handleCmdUartMsg(commandData, accessLevel);
+		return handleCmdUartMsg(commandData, accessLevel, resultData);
 	case CTRL_CMD_UART_ENABLE:
-		return handleCmdUartEnable(commandData, accessLevel);
+		return handleCmdUartEnable(commandData, accessLevel, resultData);
 	case CTRL_CMD_STATE_GET:
-		return handleCmdStateGet(commandData, accessLevel);
+		return handleCmdStateGet(commandData, accessLevel, resultData);
 	case CTRL_CMD_STATE_SET:
-		return handleCmdStateSet(commandData, accessLevel);
+		return handleCmdStateSet(commandData, accessLevel, resultData);
 	case CTRL_CMD_SAVE_BEHAVIOUR:
-		return handleCmdSaveBehaviour(commandData, accessLevel);
+		return handleCmdSaveBehaviour(commandData, accessLevel, resultData);
 	case CTRL_CMD_REPLACE_BEHAVIOUR:
-		return handleCmdReplaceBehaviour(commandData, accessLevel);
+		return handleCmdReplaceBehaviour(commandData, accessLevel, resultData);
 	case CTRL_CMD_REMOVE_BEHAVIOUR:
-		return handleCmdRemoveBehaviour(commandData, accessLevel);
+		return handleCmdRemoveBehaviour(commandData, accessLevel, resultData);
 	case CTRL_CMD_GET_BEHAVIOUR:
-		return handleCmdGetBehaviour(commandData, accessLevel);
+		return handleCmdGetBehaviour(commandData, accessLevel, resultData);
 	case CTRL_CMD_UNKNOWN:
 		return command_result_t(ERR_UNKNOWN_TYPE);
 	}
@@ -142,13 +142,13 @@ command_result_t CommandHandler::handleCommand(
 	return command_result_t(ERR_UNKNOWN_TYPE);
 }
 
-command_result_t CommandHandler::handleCmdNop(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdNop(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	// A no operation command to keep the connection alive.
 	// No need to do anything here, the connection keep alive is handled in the stack.
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "goto dfu");
 	switch (_boardConfig->hardwareBoard) {
 	case PCA10036:
@@ -185,13 +185,13 @@ command_result_t CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const E
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "reset");
 	resetDelayed(GPREGRET_SOFT_RESET);
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdFactoryReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdFactoryReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "factory reset");
 
 	if (commandData.len != sizeof(FACTORY_RESET_CODE)) {
@@ -209,7 +209,7 @@ command_result_t CommandHandler::handleCmdFactoryReset(cs_data_t commandData, co
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "state get");
 	if (commandData.len < sizeof(state_packet_header_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
@@ -220,24 +220,26 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 	if (!EncryptionHandler::getInstance().allowAccess(getUserAccessLevelGet(stateType), accessLevel)) {
 		return command_result_t(ERR_NO_ACCESS);
 	}
-	// When getting a value from state, it is copied to a buffer you provide it.
-	// When setting the result characteristic value, the buffer you provide is copied into the result char buffer.
-	// So for now, we need this temporary buffer in order to copy from state to the result char.
-	uint16_t typeSize = TypeSize(stateType);
-	uint8_t stateDataValue[typeSize];
-	cs_state_data_t stateData(stateType, stateDataValue, sizeof(stateDataValue));
+
+	if (resultData.len < sizeof(state_packet_header_t)) {
+		return command_result_t(ERR_BUFFER_TOO_SMALL);
+	}
+	cs_data_t stateDataBuf(resultData.data + sizeof(state_packet_header_t) , resultData.len - sizeof(state_packet_header_t));
+	state_packet_header_t* resultHeader = (state_packet_header_t*) resultData.data;
+	resultHeader->stateType = stateHeader->stateType;
+	cs_state_data_t stateData(stateType, stateDataBuf.data, stateDataBuf.len);
 	command_result_t result;
 	result.returnCode = State::getInstance().verifySizeForGet(stateData);
 	if (FAILURE(result.returnCode)) {
 		return result;
 	}
 	result.returnCode = State::getInstance().get(stateData);
-	result.data.data = stateDataValue;
-	result.data.len = sizeof(stateDataValue);
+	result.data.data = resultData.data;
+	result.data.len = sizeof(state_packet_header_t) + stateData.size;
 	return result;
 }
 
-command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "state set");
 	if (commandData.len < sizeof(state_packet_header_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
@@ -261,7 +263,7 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 }
 
 
-command_result_t CommandHandler::handleCmdSetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdSetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "set time:");
 
 	if (commandData.len != sizeof(uint32_t)) {
@@ -276,25 +278,25 @@ command_result_t CommandHandler::handleCmdSetTime(cs_data_t commandData, const E
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdIncreaseTx(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdIncreaseTx(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "increase TX");
 	Advertiser::getInstance().changeToNormalTxPower();
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdSetup(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdSetup(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "setup");
 	cs_ret_code_t errCode = Setup::getInstance().handleCommand(commandData);
 	return command_result_t(errCode);
 }
 
-command_result_t CommandHandler::handleCmdDisconnect(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdDisconnect(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "disconnect");
 	Stack::getInstance().disconnect();
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdResetErrors(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdResetErrors(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "reset errors");
 	if (commandData.len != sizeof(state_errors_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
@@ -310,7 +312,7 @@ command_result_t CommandHandler::handleCmdResetErrors(cs_data_t commandData, con
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdPwm(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdPwm(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
 		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
 		return command_result_t(ERR_NOT_AVAILABLE);
@@ -334,7 +336,7 @@ command_result_t CommandHandler::handleCmdPwm(cs_data_t commandData, const Encry
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdSwitch(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdSwitch(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
 		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
 		return command_result_t(ERR_NOT_AVAILABLE);
@@ -357,7 +359,7 @@ command_result_t CommandHandler::handleCmdSwitch(cs_data_t commandData, const En
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdRelay(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdRelay(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
 		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
 		return command_result_t(ERR_NOT_AVAILABLE);
@@ -379,7 +381,7 @@ command_result_t CommandHandler::handleCmdRelay(cs_data_t commandData, const Enc
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "multi switch");
 	multi_switch_t* multiSwitchPacket = (multi_switch_t*)commandData.data;
 	if (!cs_multi_switch_packet_is_valid(multiSwitchPacket, commandData.len)) {
@@ -403,7 +405,7 @@ command_result_t CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, con
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "mesh command");
 	uint16_t size = commandData.len;
 	buffer_ptr_t buffer = commandData.data;
@@ -477,7 +479,7 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdAllowDimming(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdAllowDimming(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "allow dimming");
 
 	if (commandData.len != sizeof(enable_message_payload_t)) {
@@ -496,7 +498,7 @@ command_result_t CommandHandler::handleCmdAllowDimming(cs_data_t commandData, co
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdLockSwitch(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdLockSwitch(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "lock switch");
 
 	if (commandData.len != sizeof(enable_message_payload_t)) {
@@ -515,7 +517,7 @@ command_result_t CommandHandler::handleCmdLockSwitch(cs_data_t commandData, cons
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdEnableSwitchcraft(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdEnableSwitchcraft(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "enable switchcraft");
 
 	if (commandData.len != sizeof(enable_message_payload_t)) {
@@ -531,7 +533,7 @@ command_result_t CommandHandler::handleCmdEnableSwitchcraft(cs_data_t commandDat
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGd(STR_HANDLE_COMMAND, "UART msg");
 
 	if (!commandData.len) {
@@ -543,7 +545,7 @@ command_result_t CommandHandler::handleCmdUartMsg(cs_data_t commandData, const E
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdUartEnable(cs_data_t commandData, const EncryptionAccessLevel accessLevel) {
+command_result_t CommandHandler::handleCmdUartEnable(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGd(STR_HANDLE_COMMAND, "UART enable");
 
 	if (commandData.len != 1) {
@@ -560,13 +562,13 @@ command_result_t CommandHandler::handleCmdUartEnable(cs_data_t commandData, cons
 }
 
 
-cs_ret_code_t CommandHandler::handleCmdSaveBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel){
+command_result_t CommandHandler::handleCmdSaveBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Save Behaviour");
 
 	// TODO(Arend): Only implements Switch behaviour at the moment...
 	if(commandData.len != 26){
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return ERR_WRONG_PAYLOAD_LENGTH;
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 
 	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data ,commandData.len);
@@ -576,46 +578,46 @@ cs_ret_code_t CommandHandler::handleCmdSaveBehaviour (cs_data_t commandData, con
 	event.dispatch();
 
 	// not implemented.
-	return ERR_SUCCESS;
+	return command_result_t(ERR_SUCCESS);
 }
 
-cs_ret_code_t CommandHandler::handleCmdReplaceBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel){
+command_result_t CommandHandler::handleCmdReplaceBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Replace Behaviour");
 
 	if(commandData.len != 1 + 26){
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return ERR_WRONG_PAYLOAD_LENGTH;
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 
 	LOGd("TODO");
 	
-	return ERR_SUCCESS;
+	return command_result_t(ERR_SUCCESS);
 } 
 
-cs_ret_code_t CommandHandler::handleCmdRemoveBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel){
+command_result_t CommandHandler::handleCmdRemoveBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Remove Behaviour");
 
 	if(commandData.len != 1){
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return ERR_WRONG_PAYLOAD_LENGTH;
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 
 	LOGd("TODO");
 	
-	return ERR_SUCCESS;
+	return command_result_t(ERR_SUCCESS);
 }
 
-cs_ret_code_t CommandHandler::handleCmdGetBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel){
+command_result_t CommandHandler::handleCmdGetBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Get Behaviour");
 
 	if(commandData.len != 1){
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return ERR_WRONG_PAYLOAD_LENGTH;
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 
 	LOGd("TODO");
 	
-	return ERR_SUCCESS;
+	return command_result_t(ERR_SUCCESS);
 }
 
 
