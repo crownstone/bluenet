@@ -7,7 +7,7 @@
 
 #include "ble/cs_Advertiser.h"
 #include "cfg/cs_Boards.h"
-//#include "cfg/cs_DeviceTypes.h"
+#include "cfg/cs_DeviceTypes.h"
 #include "cfg/cs_Strings.h"
 #include "drivers/cs_Serial.h"
 #include "processing/cs_CommandHandler.h"
@@ -637,6 +637,10 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		return BASIC;
 
 	case CTRL_CMD_SET_TIME:
+	case CTRL_CMD_SAVE_BEHAVIOUR:
+	case CTRL_CMD_REPLACE_BEHAVIOUR:
+	case CTRL_CMD_REMOVE_BEHAVIOUR:
+	case CTRL_CMD_GET_BEHAVIOUR:
 		return MEMBER;
 
 	case CTRL_CMD_GOTO_DFU:

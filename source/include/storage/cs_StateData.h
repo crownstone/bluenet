@@ -22,20 +22,6 @@ struct cs_state_data_t {
 	uint8_t *value;
 	size16_t size;
 
-	friend bool operator==(const cs_state_data_t data0, const cs_state_data_t & data1) {
-		if (data0.type != data1.type || data0.size != data1.size) {
-			return false;
-		}
-		for (int i = 0; i < data0.size; ++i) {
-			if (data0.value[i] != data1.value[i]) {
-				return false;
-			}
-		}
-		return true;
-	}
-	friend bool operator!=(const cs_state_data_t data0, const cs_state_data_t & data1) {
-		return !(data0 == data1);
-	}
 	cs_state_data_t():
 		type(CS_TYPE::CONFIG_DO_NOT_USE),
 		value(NULL),
