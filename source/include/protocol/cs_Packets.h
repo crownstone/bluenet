@@ -15,6 +15,12 @@
 #include "protocol/cs_ServiceDataPackets.h"
 #include "protocol/cs_CmdSource.h"
 
+
+#define LEGACY_MULTI_SWITCH_HEADER_SIZE (1+1)
+#define LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT 18
+
+#define SESSION_NONCE_LENGTH 5
+
 /**
  * Packets (structs) that are used over the air.
  *
@@ -92,12 +98,6 @@ union __attribute__((__packed__)) state_errors_t {
 	} errors;
 	uint32_t asInt;
 };
-/**
- * Sets the state errors to the default.
- */
-constexpr void cs_state_errors_set_default(state_errors_t *state) {
-	state->asInt = STATE_ERRORS_DEFAULT;
-}
 
 /**
  * Switch state: combination of relay and dimmer state.
@@ -111,13 +111,6 @@ union __attribute__((__packed__)) switch_state_t {
 	} state;
 	uint8_t asInt;
 };
-/**
- * Sets the switch state to the default.
- */
-constexpr void cs_switch_state_set_default(switch_state_t *state) {
-	state->asInt = STATE_SWITCH_STATE_DEFAULT;
-}
-
 
 /**
  * A single multi switch item.
@@ -127,12 +120,6 @@ struct __attribute__((packed)) multi_switch_item_t {
 	stone_id_t id;
 	uint8_t switchCmd;
 };
-/**
- * Returns true when a multi switch item is valid.
- */
-inline bool cs_multi_switch_item_is_valid(multi_switch_item_t* item, size16_t size) {
-	return (size == sizeof(multi_switch_item_t) && item->id != 0);
-}
 
 /**
  * Multi switch packet.
@@ -141,14 +128,6 @@ struct __attribute__((packed)) multi_switch_t {
 	uint8_t count;
 	multi_switch_item_t items[5];
 };
-/**
- * Returns true when a multi switch packet is valid.
- */
-inline bool cs_multi_switch_packet_is_valid(multi_switch_t* packet, size16_t size) {
-	return (size >= 1 + packet->count * sizeof(multi_switch_item_t));
-}
-
-
 
 struct __attribute__((__packed__)) cs_legacy_multi_switch_item_t {
 	stone_id_t id;
@@ -157,34 +136,11 @@ struct __attribute__((__packed__)) cs_legacy_multi_switch_item_t {
 	uint8_t intent;
 };
 
-#define LEGACY_MULTI_SWITCH_HEADER_SIZE (1+1)
-#define LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT 18
 struct __attribute__((__packed__)) cs_legacy_multi_switch_t {
 	uint8_t type; // Always 0 (type list).
 	uint8_t count;
 	cs_legacy_multi_switch_item_t items[LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT];
 };
-
-inline bool cs_legacy_multi_switch_item_is_valid(cs_legacy_multi_switch_item_t* item, size16_t size) {
-	return (size == sizeof(cs_legacy_multi_switch_item_t) && item->id != 0);
-}
-
-inline bool cs_legacy_multi_switch_is_valid(const cs_legacy_multi_switch_t* packet, size16_t size) {
-	if (size < LEGACY_MULTI_SWITCH_HEADER_SIZE) {
-		return false;
-	}
-	if (packet->type != 0) {
-		return false;
-	}
-	if (packet->count > LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT) {
-		return false;
-	}
-	if (size < LEGACY_MULTI_SWITCH_HEADER_SIZE + packet->count * sizeof(cs_legacy_multi_switch_item_t)) {
-		return false;
-	}
-	return true;
-}
-
 
 enum KeepAliveActionTypes {
 	NO_CHANGE = 0,
@@ -235,9 +191,56 @@ struct __attribute__((__packed__)) schedule_command_t {
 	schedule_entry_t entry;
 };
 
-
-
-#define SESSION_NONCE_LENGTH 5
 struct __attribute__((packed)) session_nonce_t {
 	uint8_t data[SESSION_NONCE_LENGTH];
 };
+
+// ========================= functions =========================
+
+/**
+ * Sets the switch state to the default.
+ */
+constexpr void cs_switch_state_set_default(switch_state_t *state) {
+	state->asInt = STATE_SWITCH_STATE_DEFAULT;
+}
+
+/**
+ * Sets the state errors to the default.
+ */
+constexpr void cs_state_errors_set_default(state_errors_t *state) {
+	state->asInt = STATE_ERRORS_DEFAULT;
+}
+
+/**
+ * Returns true when a multi switch item is valid.
+ */
+inline bool cs_multi_switch_item_is_valid(multi_switch_item_t* item, size16_t size) {
+	return (size == sizeof(multi_switch_item_t) && item->id != 0);
+}
+
+/**
+ * Returns true when a multi switch packet is valid.
+ */
+inline bool cs_multi_switch_packet_is_valid(multi_switch_t* packet, size16_t size) {
+	return (size >= 1 + packet->count * sizeof(multi_switch_item_t));
+}
+
+inline bool cs_legacy_multi_switch_item_is_valid(cs_legacy_multi_switch_item_t* item, size16_t size) {
+	return (size == sizeof(cs_legacy_multi_switch_item_t) && item->id != 0);
+}
+
+inline bool cs_legacy_multi_switch_is_valid(const cs_legacy_multi_switch_t* packet, size16_t size) {
+	if (size < LEGACY_MULTI_SWITCH_HEADER_SIZE) {
+		return false;
+	}
+	if (packet->type != 0) {
+		return false;
+	}
+	if (packet->count > LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT) {
+		return false;
+	}
+	if (size < LEGACY_MULTI_SWITCH_HEADER_SIZE + packet->count * sizeof(cs_legacy_multi_switch_item_t)) {
+		return false;
+	}
+	return true;
+}

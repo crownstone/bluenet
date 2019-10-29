@@ -294,12 +294,12 @@ void ServiceData::handleEvent(event_t & event) {
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_DIMMING_AVAILABLE, *(TYPIFY(EVT_DIMMER_POWERED)*)event.data);
 			break;
 		}
-		case CS_TYPE::EVT_DIMMING_ALLOWED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, *(TYPIFY(EVT_DIMMING_ALLOWED)*)event.data);
+		case CS_TYPE::CONFIG_PWM_ALLOWED: {
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, *(TYPIFY(CONFIG_PWM_ALLOWED)*)event.data);
 			break;
 		}
-		case CS_TYPE::EVT_SWITCH_LOCKED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, *(TYPIFY(EVT_SWITCH_LOCKED)*)event.data);
+		case CS_TYPE::CONFIG_SWITCH_LOCKED: {
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, *(TYPIFY(CONFIG_SWITCH_LOCKED)*)event.data);
 			break;
 		}
 		case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: {

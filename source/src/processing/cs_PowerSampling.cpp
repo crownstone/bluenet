@@ -6,18 +6,19 @@
  */
 
 #include "processing/cs_PowerSampling.h"
+
 #include "common/cs_Types.h"
 #include "drivers/cs_RTC.h"
 #include "drivers/cs_Serial.h"
 #include "events/cs_EventDispatcher.h"
 #include "processing/cs_RecognizeSwitch.h"
-#include "processing/cs_Switch.h"
 #include "protocol/cs_UartMsgTypes.h"
 #include "protocol/cs_UartProtocol.h"
 #include "storage/cs_State.h"
 #include "structs/buffer/cs_InterleavedBuffer.h"
 #include "third/SortMedian.h"
 #include "third/optmed.h"
+
 #include <cmath>
 
 // Define test pin to enable gpio debug.

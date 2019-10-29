@@ -268,7 +268,7 @@ schedule_entry_t* ScheduleList::isActionTime(uint32_t currentTime) {
 }
 
 bool ScheduleList::sync(uint32_t currentTime, int64_t timeDiff) {
-	LOGd("sync");
+	// LOGd("sync");
 	bool adjusted = false;
 	for (uint16_t i=0; i<getSize(); i++) {
 		bool entryAdjusted = ScheduleEntry::syncTime(&(_buffer->list[i]), currentTime, timeDiff);

@@ -28,6 +28,8 @@ typedef struct {
 /** Pulse Wide Modulation class
  *
  * To turn on/off the power, as well as all intermediate stages, for example with dimming, the PWM class is used.
+ * 
+ * TODO: The PWM class concerns dimming in general. It should be called "Dimmer", not just "PWM".
  */
 class PWM {
 public:

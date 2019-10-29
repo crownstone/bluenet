@@ -7,13 +7,15 @@
 
 #include "processing/cs_FactoryReset.h"
 #include "cfg/cs_Config.h"
+#include "cfg/cs_DeviceTypes.h"
 #include "storage/cs_State.h"
 #include "drivers/cs_RTC.h"
 #include "ble/cs_Stack.h"
 #include "ble/cs_Advertiser.h"
 #include "processing/cs_CommandHandler.h"
-#include "processing/cs_Switch.h"
 #include "events/cs_EventDispatcher.h"
+
+#include <switch/cs_SwitchAggregator.h>
 
 FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
 		_recoveryDisableTimerId(NULL),
@@ -158,7 +160,7 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 //		TYPIFY(STATE_SWITCH_STATE) switchVal;
 //		cs_state_data_t data(CS_TYPE::STATE_SWITCH_STATE, &switchVal, sizeof(switchVal));
 //		getDefault(data);
-		Switch::getInstance().setSwitch(0);
+		SwitchAggregator::getInstance().developerForceOff();
 	}
 
 	// Clear other data

@@ -22,14 +22,16 @@
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
-#include <processing/cs_Switch.h>
 #include <processing/cs_TemperatureGuard.h>
-#include <processing/cs_Watchdog.h>
+#include <processing/behaviour/cs_BehaviourHandler.h>
+#include <processing/behaviour/cs_BehaviourStore.h>
 #include <services/cs_CrownstoneService.h>
 #include <services/cs_DeviceInformationService.h>
 #include <services/cs_SetupService.h>
 #include <storage/cs_State.h>
-#include <storage/cs_State.h>
+
+#include <time/cs_SystemTime.h>
+
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
 #endif
@@ -151,10 +153,8 @@ private:
 	Storage* _storage;
 	State* _state;
 
-	Switch* _switch = NULL;
 	TemperatureGuard* _temperatureGuard = NULL;
 	PowerSampling* _powerSampler = NULL;
-	Watchdog* _watchdog = NULL;
 
 	// services
 	DeviceInformationService* _deviceInformationService = NULL;
@@ -171,10 +171,13 @@ private:
 #endif
 	CommandHandler* _commandHandler = NULL;
 	Scanner* _scanner = NULL;
-	Scheduler* _scheduler = NULL;
 	FactoryReset* _factoryReset = NULL;
 	CommandAdvHandler* _commandAdvHandler = NULL;
 	MultiSwitchHandler* _multiSwitchHandler = NULL;
+
+	SystemTime _systemTime;
+	BehaviourHandler _behaviourHandler;
+	BehaviourStore _behaviourStore;
 
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;

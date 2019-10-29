@@ -7,6 +7,7 @@
 
 #include "ble/cs_Advertiser.h"
 #include "cfg/cs_Boards.h"
+#include "cfg/cs_DeviceTypes.h"
 #include "cfg/cs_Strings.h"
 #include "drivers/cs_Serial.h"
 #include "processing/cs_CommandHandler.h"
@@ -14,11 +15,13 @@
 #include "processing/cs_Scheduler.h"
 #include "processing/cs_FactoryReset.h"
 #include "processing/cs_Setup.h"
-#include "processing/cs_Switch.h"
 #include "processing/cs_TemperatureGuard.h"
 #include "protocol/cs_UartProtocol.h"
-#include "storage/cs_State.h"
 #include "protocol/mesh/cs_MeshModelPacketHelper.h"
+#include "storage/cs_State.h"
+#include "time/cs_SystemTime.h"
+
+#include <util/cs_WireFormat.h>
 
 void reset(void* p_context) {
 
@@ -122,9 +125,18 @@ command_result_t CommandHandler::handleCommand(
 	case CTRL_CMD_STATE_GET:
 		return handleCmdStateGet(buffer, size, accessLevel);
 	case CTRL_CMD_STATE_SET:
-		return handleCmdStateSet(buffer, size, accessLevel);
+		return handleCmdStateSet(buffer, size, accessLevel);	
+	case CTRL_CMD_SAVE_BEHAVIOUR:
+		return handleCmdSaveBehaviour(buffer,size,accessLevel);
+	case CTRL_CMD_REPLACE_BEHAVIOUR :
+		return handleCmdReplaceBehaviour(buffer,size,accessLevel);
+	case CTRL_CMD_REMOVE_BEHAVIOUR :
+		return handleCmdRemoveBehaviour(buffer,size,accessLevel);  
+	case CTRL_CMD_GET_BEHAVIOUR    :
+		return handleCmdGetBehaviour(buffer,size,accessLevel);
 	case CTRL_CMD_UNKNOWN:
 		return command_result_t(ERR_UNKNOWN_TYPE);
+	
 	}
 	LOGe("Unknown type: %u", type);
 	return command_result_t(ERR_UNKNOWN_TYPE);
@@ -259,7 +271,7 @@ command_result_t CommandHandler::handleCmdSetTime(buffer_ptr_t buffer, const uin
 
 	uint32_t value = *(uint32_t*)buffer;
 
-	Scheduler::getInstance().setTime(value);
+	SystemTime::setTime(value);
 
 	return command_result_t(ERR_SUCCESS);
 }
@@ -312,12 +324,13 @@ command_result_t CommandHandler::handleCmdPwm(buffer_ptr_t buffer, const uint16_
 	}
 
 	switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-	uint8_t value = payload->switchState;
+	
+	TYPIFY(CMD_SET_DIMMER) switch_cmd;
+	switch_cmd = payload->switchState & ~0b10000000; // peels of the relay state
 
-	uint8_t current = Switch::getInstance().getPwm();
-	if (value != current) {
-		Switch::getInstance().setPwm(value);
-	}
+	event_t evt(CS_TYPE::CMD_SET_DIMMER, &switch_cmd, sizeof(switch_cmd));
+	EventDispatcher::getInstance().dispatch(evt);
+
 	return command_result_t(ERR_SUCCESS);
 }
 
@@ -335,7 +348,12 @@ command_result_t CommandHandler::handleCmdSwitch(buffer_ptr_t buffer, const uint
 	}
 
 	switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-	Switch::getInstance().setSwitch(payload->switchState);
+
+	TYPIFY(CMD_SWITCH) switch_cmd;
+	switch_cmd.switchCmd = payload->switchState;
+	event_t evt(CS_TYPE::CMD_SWITCH, &switch_cmd, sizeof(switch_cmd));
+	EventDispatcher::getInstance().dispatch(evt);
+
 	return command_result_t(ERR_SUCCESS);
 }
 
@@ -353,13 +371,11 @@ command_result_t CommandHandler::handleCmdRelay(buffer_ptr_t buffer, const uint1
 	}
 
 	switch_message_payload_t* payload = (switch_message_payload_t*) buffer;
-	uint8_t value = payload->switchState;
-	if (value == 0) {
-		Switch::getInstance().relayOff();
-	}
-	else {
-		Switch::getInstance().relayOn();
-	}
+	TYPIFY(CMD_SET_RELAY) relay_switch_state;
+	relay_switch_state = payload->switchState != 0;
+	event_t evt(CS_TYPE::CMD_SET_RELAY, &relay_switch_state, sizeof(relay_switch_state));
+	EventDispatcher::getInstance().dispatch(evt);
+	
 	return command_result_t(ERR_SUCCESS);
 }
 
@@ -472,17 +488,9 @@ command_result_t CommandHandler::handleCmdAllowDimming(buffer_ptr_t buffer, cons
 
 	LOGi("allow dimming: %u", enable);
 
-	if (enable && State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED)) {
-		LOGw("unlock switch");
-		TYPIFY(CONFIG_SWITCH_LOCKED) lockEnable = false;
-		State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &lockEnable, sizeof(lockEnable));
-		event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &lockEnable, sizeof(lockEnable));
-		EventDispatcher::getInstance().dispatch(event);
-	}
-
-	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &enable, sizeof(enable));
-	event_t event(CS_TYPE::EVT_DIMMING_ALLOWED, &enable, sizeof(enable));
-	EventDispatcher::getInstance().dispatch(event);
+	event_t evt(CS_TYPE::CMD_DIMMING_ALLOWED,&enable,sizeof(enable));
+	EventDispatcher::getInstance().dispatch(evt);
+	
 	return command_result_t(ERR_SUCCESS);
 }
 
@@ -495,18 +503,13 @@ command_result_t CommandHandler::handleCmdLockSwitch(buffer_ptr_t buffer, const 
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) buffer;
-	TYPIFY(CONFIG_SWITCH_LOCKED) enable = payload->enable;
+	TYPIFY(CONFIG_SWITCH_LOCKED) allow_switching = !payload->enable;
 
-	LOGi("lock switch: %u", enable);
+	LOGi("lock switch: %u", !allow_switching);
 
-	if (enable && State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED)) {
-		LOGw("can't lock switch");
-		return command_result_t(ERR_NOT_AVAILABLE);
-	}
+	event_t evt(CS_TYPE::CMD_SWITCH_LOCKED,&allow_switching,sizeof(allow_switching));
+	EventDispatcher::getInstance().dispatch(evt);
 
-	State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &enable, sizeof(enable));
-	event_t event(CS_TYPE::EVT_SWITCH_LOCKED, &enable, sizeof(enable));
-	EventDispatcher::getInstance().dispatch(event);
 	return command_result_t(ERR_SUCCESS);
 }
 
@@ -555,6 +558,66 @@ command_result_t CommandHandler::handleCmdUartEnable(buffer_ptr_t buffer, const 
 }
 
 
+cs_ret_code_t CommandHandler::handleCmdSaveBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+	LOGd(STR_HANDLE_COMMAND, "Save Behaviour");
+
+	// TODO(Arend): Only implements Switch behaviour at the moment...
+	if(size != 26){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	Behaviour b = WireFormat::deserialize<Behaviour>(buffer,size);
+
+	event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR,&b,sizeof(b));
+	
+	event.dispatch();
+
+	// not implemented.
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t CommandHandler::handleCmdReplaceBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+	LOGd(STR_HANDLE_COMMAND, "Replace Behaviour");
+
+	if(size != 1 + 26){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	LOGd("TODO");
+	
+	return ERR_SUCCESS;
+} 
+
+cs_ret_code_t CommandHandler::handleCmdRemoveBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+	LOGd(STR_HANDLE_COMMAND, "Remove Behaviour");
+
+	if(size != 1){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	LOGd("TODO");
+	
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t CommandHandler::handleCmdGetBehaviour (buffer_ptr_t buffer, const uint16_t size, const EncryptionAccessLevel accessLevel){
+	LOGd(STR_HANDLE_COMMAND, "Get Behaviour");
+
+	if(size != 1){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	LOGd("TODO");
+	
+	return ERR_SUCCESS;
+}
+
+
+
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
 	switch (type) {
@@ -574,6 +637,10 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		return BASIC;
 
 	case CTRL_CMD_SET_TIME:
+	case CTRL_CMD_SAVE_BEHAVIOUR:
+	case CTRL_CMD_REPLACE_BEHAVIOUR:
+	case CTRL_CMD_REMOVE_BEHAVIOUR:
+	case CTRL_CMD_GET_BEHAVIOUR:
 		return MEMBER;
 
 	case CTRL_CMD_GOTO_DFU:

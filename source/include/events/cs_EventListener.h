@@ -8,7 +8,7 @@
 #pragma once
 
 #include <cstdint>
-#include <common/cs_Types.h>
+#include <events/cs_Event.h>
 
 /**
  * Event listener.

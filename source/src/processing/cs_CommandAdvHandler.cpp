@@ -292,7 +292,9 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	controlCmd.source.count = (decryptedPayloadRC5[0] >> 8) & 0xFF;
 	LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
-	EventDispatcher::getInstance().dispatch(event);
+	
+	event.dispatch();
+	
 	return true;
 }
 

@@ -30,11 +30,12 @@
  *
  *********************************************************************************************************************/
 
-#include <ble/cs_CrownstoneManufacturer.h>
+#include <cs_Crownstone.h>
+
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_Git.h>
+#include <cfg/cs_DeviceTypes.h>
 #include <cfg/cs_HardwareVersions.h>
-#include <cs_Crownstone.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_PWM.h>
 #include <drivers/cs_RNG.h>
@@ -47,6 +48,14 @@
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
 #include <util/cs_Utils.h>
+#include <time/cs_SystemTime.h>
+
+#include <switch/cs_SwitchAggregator.h>
+
+#include <processing/behaviour/cs_BehaviourHandler.h>
+#include <processing/behaviour/cs_BehaviourStore.h>
+
+#include <array> // DEBUG 
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -89,7 +98,6 @@ void handleZeroCrossing() {
  *  + switch
  *  + temperature guard
  *  + power sampling
- *  + watchdog
  *
  * The initialization is done in separate function.
  */
@@ -119,10 +127,8 @@ Crownstone::Crownstone(boards_config_t& board) :
 #endif
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-		_switch = &Switch::getInstance();
 		_temperatureGuard = &TemperatureGuard::getInstance();
 		_powerSampler = &PowerSampling::getInstance();
-		_watchdog = &Watchdog::getInstance();
 	}
 
 };
@@ -214,16 +220,26 @@ void Crownstone::initDrivers(uint16_t step) {
 		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 			// switch / PWM init
 			LOGi(FMT_INIT, "switch / PWM");
-			_switch->init(_boardsConfig);
+
+			// Init SwitchAggregator
+			TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;
+			State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, 
+				&pwmPeriod, sizeof(pwmPeriod));
+
+			TYPIFY(CONFIG_RELAY_HIGH_DURATION) relayHighDuration = 0;
+			State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, 
+				&relayHighDuration, sizeof(relayHighDuration));
+
+			HwSwitch h(_boardsConfig, pwmPeriod, relayHighDuration);
+						
+			SwitchAggregator::getInstance().init(SwSwitch(h));
+			// End init switchaggregator
 
 			LOGi(FMT_INIT, "temperature guard");
 			_temperatureGuard->init(_boardsConfig);
 
 			LOGi(FMT_INIT, "power sampler");
 			_powerSampler->init(_boardsConfig);
-
-			LOGi(FMT_INIT, "watchdog");
-			_watchdog->init();
 		}
 
 		// init GPIOs
@@ -529,10 +545,9 @@ void Crownstone::setName() {
  */
 void Crownstone::startOperationMode(const OperationMode & mode) {
 	switch(mode) {
-		case OperationMode::OPERATION_MODE_NORMAL:
+		case OperationMode::OPERATION_MODE_NORMAL: {
 			_scanner->init();
 			_scanner->setStack(_stack);
-			_scheduler = &Scheduler::getInstance();
 
 #if BUILD_MESHING == 1
 			if (_state->isTrue(CS_TYPE::CONFIG_MESH_ENABLED)) {
@@ -543,18 +558,64 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
 
+			EventDispatcher::getInstance().addListener(&_behaviourHandler);
+			EventDispatcher::getInstance().addListener(&_behaviourStore);
+
+			// DEBUG
+			uint32_t h = 14;
+			uint32_t m = 15;
+			uint32_t s = 0;
+
+			for(auto i = 0; i < 10; i++){ // just add 10 behaviours
+				Behaviour behaviour(
+						100 - (i%2 ? 50 : 0),
+						Monday | Thursday | Friday,
+						TimeOfDay(h, m+i, s),
+						TimeOfDay(h, m+i, s+30),
+						PresenceCondition(
+							PresencePredicate(
+								PresencePredicate::Condition::AnyoneAnyRoom,
+								0xffff0000ffff0000),
+							0)
+					);
+
+				behaviour.print();
+				
+				_behaviourStore.saveBehaviour(behaviour,i);
+			}
+
+			Behaviour b(
+				80,
+				Monday | Wednesday | Thursday | Friday,
+				TimeOfDay(11, 0, 0),
+				TimeOfDay(17,30, 0),
+				PresenceCondition(
+					PresencePredicate(
+						PresencePredicate::Condition::AnyoneAnyRoom,
+						0xffff0000ffff0000),
+					0)
+				);
+			b.print();
+			event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR,&b,sizeof(b));
+			event.dispatch();
+
+			// END DEBUG
+
 			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
 			_multiSwitchHandler->init();
 			break;
-		case OperationMode::OPERATION_MODE_SETUP:
+		} 
+		case OperationMode::OPERATION_MODE_SETUP:{
 			// TODO: Why this hack?
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {
 				serial_enable(SERIAL_ENABLE_RX_ONLY);
 			}
 			break;
-		default:
+		}
+		default:{
 			// nothing to be done
-			;
+			break;
+		}
 	}
 }
 
@@ -598,15 +659,6 @@ void Crownstone::startUp() {
 	nrf_delay_ms(50);
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-		//! Start switch, so it can be used.
-		_switch->start();
-
-		if (_operationMode == OperationMode::OPERATION_MODE_SETUP &&
-				(_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN || _boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN_ONE)
-				) {
-			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
-		}
-
 		//! Start temperature guard regardless of operation mode
 		LOGi(FMT_START, "temp guard");
 		_temperatureGuard->start();
@@ -628,7 +680,9 @@ void Crownstone::startUp() {
 			_powerSampler->enableZeroCrossingInterrupt(handleZeroCrossing);
 		}
 
-		_scheduler->start();
+		SystemTime::init();
+		EventDispatcher::getInstance().addListener(&_systemTime);
+		EventDispatcher::getInstance().addListener(&Scheduler::getInstance());
 
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
@@ -706,15 +760,8 @@ void Crownstone::tick() {
 //		_stack->updateAdvertisement();
 	}
 
-	// Check for timeouts
-	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
-		if ((PWM_BOOT_DELAY_MS > 0) && (RTC::getCount() > RTC::msToTicks(PWM_BOOT_DELAY_MS))) {
-			_switch->startPwm();
-		}
-	}
-
 	event_t event(CS_TYPE::EVT_TICK, &_tickCount, sizeof(_tickCount));
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 	++_tickCount;
 
 	scheduleNextTick();

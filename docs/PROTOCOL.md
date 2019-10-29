@@ -231,8 +231,6 @@ Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recov
 Every command written to the control characteristic returns a [result packet](#result_packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
 
-
-
 <a name="recovery"></a>
 #### Recovery
 If you lost your encryption keys you can use this characteristic to factory reset the Crownstone.
@@ -262,6 +260,7 @@ If commands have to be executed sequentially, make sure that the result packet o
 
 
 
+
 <a name="data_structs"></a>
 # Data structures
 
@@ -272,6 +271,9 @@ Index:
 - [State](#state_types). State variables of the Crownstone.
 
 
+<a name="switch_state_packet"></a>
+#### Switch state
+To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
 
 <a name="control_packet"></a>
 ## Control packet
@@ -287,6 +289,8 @@ uint 16 | Size | 2 | Size of the payload in bytes.
 uint 8 | Payload | Size | Payload data, depends on command type.
 
 
+<a name="result_code_packet"></a>
+### Result code packet
 
 <a name="command_types"></a>
 ## Command types
@@ -324,6 +328,10 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 42 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
 50 | UART message | payload | Print the payload to UART. | x
 51 | UART enable | uint 8 | Set UART enabled, 0 = none, 1 = RX only, 3 = TX and RX | x
+60 | Save Behaviour | [Save Behaviour packet](BEHAVIOUR.md#save_behaviour_packet) | Save a Behaviour to an unoccupied index | x | x
+61 | Replace Behaviour | [Replace Behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | Replace the Behaviour at given index | x | x
+62 | Remove Behaviour | [Remove Behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the Behaviour at given index | x | x
+63 | Get Behaviour | [Get Behaviour packet](BEHAVIOUR.md#get_behaviour_packet) | Obtain the Behaviour stored at given index | x | x
 
 
 
@@ -367,6 +375,8 @@ Type | Name | Length | Description
 uint 16  | [State type](#state_types) | 2 | Type of state to set.
 uint 8 | Payload | N | Payload data, depends on state type.
 
+Most configuration changes will only be applied after a reboot.
+Available configurations types:
 
 <a name="state_result_packet"></a>
 #### State result packet
@@ -432,7 +442,10 @@ Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
 0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet. **Currently, only control commands `No operation` and `Set time` are implemented.**
 
+<a name="schedule_entry_packet"></a>
+### Schedule entry packet
 
+![Schedule entry packet](../docs/diagrams/schedule-entry-packet.png)
 
 <a name="result_packet"></a>
 ## Result packet
@@ -475,7 +488,12 @@ Value | Name | Description
 96 | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
 65535 | UNSPECIFIED | Unspecified error.
 
+#### Repeat type 2
+Perform action only once. Entry gets removed after action was performed.
 
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Reserved | 2 | Reserved for future use.
 
 <a name="state_types"></a>
 ## State types
@@ -543,6 +561,10 @@ Type nr | Type name | Payload type | Description | A | M | B
 136 | Time | uint 32 | The current time as unix timestamp.  | r | r | 
 139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors.  | r | r | 
 
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Switch | 1 | Power switch value. Range 0-100, where 0 is off and 100 is fully on.
+uint 8 | Reserved | 2 | Unused.
 
 <a name="switch_state_packet"></a>
 #### Switch state

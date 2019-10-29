@@ -36,5 +36,10 @@ enum CommandHandlerTypes {
 	CTRL_CMD_UART_MSG                    = 50,
 	CTRL_CMD_UART_ENABLE                 = 51,
 
+	CTRL_CMD_SAVE_BEHAVIOUR              = 60,
+	CTRL_CMD_REPLACE_BEHAVIOUR           = 61,
+	CTRL_CMD_REMOVE_BEHAVIOUR            = 62,
+	CTRL_CMD_GET_BEHAVIOUR               = 63,
+
 	CTRL_CMD_UNKNOWN                     = 0xFFFF
 };
