@@ -39,4 +39,14 @@ namespace CsMath{
         // m positive, v non-negative, yay C++ actually works in that case.
         return v%m;
     }
+
+    template<class T, class S>
+    auto min(T l, S r){
+        return l < r ? l : r;
+    }
+
+    template<class T, class S>
+    auto max(T l, S r){
+        return l > r ? l : r;
+    }
 }

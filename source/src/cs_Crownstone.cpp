@@ -56,6 +56,7 @@
 #include <processing/behaviour/cs_BehaviourStore.h>
 
 #include <array> // DEBUG 
+#include <util/cs_Hash.h> // DEBUG
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -616,6 +617,14 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			} else {
 				LOGd("SaveBehaviour event ended in undefined state");
 			}
+
+			uint8_t test0[] = {'a','b','c','d','e'};
+			uint8_t test1[] = {'a','b','c','d','e','f'};
+			uint8_t test2[] = {'a','b','c','d','e','f','g','h'};
+
+			LOGd("fletcher test 0: %x",Fletcher(test0,sizeof(test0)));
+			LOGd("fletcher test 1: %x",Fletcher(test1,sizeof(test1)));
+			LOGd("fletcher test 2: %x",Fletcher(test2,sizeof(test2)));
 
 			// END DEBUG
 

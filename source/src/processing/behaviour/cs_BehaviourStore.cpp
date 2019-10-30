@@ -22,6 +22,8 @@ void BehaviourStore::handleEvent(event_t& evt){
             LOGd("replace behaviour event to index 0");
             newBehaviour->print();
             saveBehaviour(*newBehaviour, 0);
+
+            // Return master hash
         }
         case CS_TYPE::EVT_SAVE_BEHAVIOUR:{
             LOGd("save behaviour event");
@@ -66,6 +68,8 @@ void BehaviourStore::handleEvent(event_t& evt){
                 evt.returnCode = ERR_NOT_FOUND;
             }
             
+            // add master hash
+
             break;
         }
         case CS_TYPE::EVT_GET_BEHAVIOUR:{

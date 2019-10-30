@@ -53,6 +53,7 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/time/cs_SystemTime.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/time/cs_TimeOfDay.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_BleError.cpp")
 #LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Error.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Hash.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_WireFormat.cpp")
 
