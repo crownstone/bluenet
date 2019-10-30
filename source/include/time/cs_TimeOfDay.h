@@ -18,7 +18,8 @@
  */
 class TimeOfDay {
     public:
-    enum class BaseTime { Midnight = 1, Sundown = 2, Sunrise = 3};
+    enum class BaseTime : uint8_t { Midnight = 1, Sundown = 2, Sunrise = 3};
+    typedef std::array<uint8_t,5> SerializedDataType;
     
     private:
 
@@ -38,7 +39,7 @@ class TimeOfDay {
 
     TimeOfDay(BaseTime basetime, int32_t secondsSinceBase);
     
-    TimeOfDay(std::array<uint8_t,5> rawData);
+    TimeOfDay(SerializedDataType rawData);
 
     // H:M:S constructor, creates a Midnight based TimeOfDay.
     TimeOfDay(uint32_t h, uint32_t m, uint32_t s);
@@ -51,6 +52,8 @@ class TimeOfDay {
     static TimeOfDay Sundown();
 
     // ===================== Conversions =====================
+
+    SerializedDataType serialize() const;
 
     // converts to a different base time in order to compare.
     // note that this conversion is in principle dependent on the season

@@ -13,9 +13,10 @@
 
 
 class PresencePredicate{
-
     public:
-    enum class Condition { 
+    typedef std::array<uint8_t, 9> SerializedDataType;
+
+    enum class Condition : uint8_t { 
         VacuouslyTrue  = 0, 
         AnyoneAnyRoom  = 1, 
         AnyoneInSphere = 2, 
@@ -29,11 +30,11 @@ class PresencePredicate{
     uint64_t RoomsBitMask;
 
     public:
-    PresencePredicate(Condition c, PresenceStateDescription roomsMask): 
-        cond(c), RoomsBitMask(roomsMask) {
-    }
+    PresencePredicate(Condition c, PresenceStateDescription roomsMask);
 
-    PresencePredicate(std::array<uint8_t, 9> arr);
+    PresencePredicate(SerializedDataType arr);
+
+    SerializedDataType serialize() const;
     
     // parameter bit i is 1 whenever there is presence detected in the
     // room with index i.

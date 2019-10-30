@@ -9,6 +9,8 @@
 #include <util/cs_WireFormat.h>
 #include <drivers/cs_Serial.h>
 
+#include <algorithm>
+
 Behaviour::Behaviour(
             uint8_t intensity,
             DayOfWeekBitMask activedaysofweek,
@@ -32,6 +34,16 @@ Behaviour::Behaviour(std::array<uint8_t, 26> arr) :
         WireFormat::deserialize<TimeOfDay>(arr.data() + 8, 5),
         WireFormat::deserialize<PresenceCondition>(arr.data() + 13, 13) ){
 
+}
+
+Behaviour::SerializedDataFormat Behaviour::serialize() const{
+    SerializedDataFormat result;
+    std::copy_n(std::begin(WireFormat::serialize(activeIntensity)),       1, std::begin(result) + 0);
+    std::copy_n(std::begin(WireFormat::serialize(activeDays)),            1, std::begin(result) + 2);
+    std::copy_n(std::begin(WireFormat::serialize(behaviourAppliesFrom)),  5, std::begin(result) + 3);
+    std::copy_n(std::begin(WireFormat::serialize(behaviourAppliesUntil)), 5, std::begin(result) + 8);
+    std::copy_n(std::begin(WireFormat::serialize(presenceCondition)),     13, std::begin(result) + 13);
+    return result;
 }
 
 uint8_t Behaviour::value() const {
