@@ -37,6 +37,12 @@ class BehaviourStore : public EventListener {
      */
     bool saveBehaviour(Behaviour b, uint8_t index);
 
+    /**
+     * Remove the behaviour at [index]. If [index] is out of bounds,
+     * or no behaviour exists at [index], false is returned. Else, true.
+     */
+    bool removeBehaviour(uint8_t index);
+
     static inline const std::array<std::optional<Behaviour>,MaxBehaviours>& getActiveBehaviours() {
         return activeBehaviours;
     }
