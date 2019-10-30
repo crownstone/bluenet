@@ -2,7 +2,7 @@ FROM ubuntu:18.04
 
 MAINTAINER Crownstone <ask@crownstone.rocks>
 
-RUN apt-get update && apt-get install -y git cmake wget 
+RUN apt-get update && apt-get install -y git cmake wget python3 python3-pip
 
 RUN git clone https://github.com/crownstone/bluenet 
 
