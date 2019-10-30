@@ -118,7 +118,7 @@ uint8_t[] | Data | ... | Type dependent
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
-uint8 | Options | 1 | Reserved for future use
+uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Currently unused)
 [Day Of Week Bitmask](#day_of_week_bitmask) | Active Days | 1 | Selects which days of the week this behaviour is active
 [Time Of Day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
 [Time Of Day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
@@ -132,6 +132,7 @@ uint8 | Options | 1 | Reserved for future use
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
+uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Currently unused)
 [Day Of Week Bitmask](#day_of_week_bitmask) | Active Days | 1 | Selects which days of the week this behaviour is active
 [Time Of Day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
 [Time Of Day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
@@ -213,7 +214,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Type | 1 | <ol start="0"><li>Vacuously true condition</li><li>Anyone in any of the rooms</li><li>Noone in any of the rooms</li><li>Anyone anywhere in sphere</li><li>Noone anywhere in sphere</li></ol>
 uint64 | Active Rooms Mask | 8 | Room with id `i` corresponds to bit `i` in this mask.
-uint32_t | Timeout | 4 | Whenever a presence description is satisfied (evaluates to true), it shall evaluate to true until this time out expires. Use to ignore. Units: seconds.
+uint32_t | Timeout | 4 | Whenever a presence description is satisfied (evaluates to true), it shall evaluate to true until this time out expires. Use 0 to ignore. Units: seconds.
 
 <a name="firmware_design"></a>
 # Firmware Design Internals
