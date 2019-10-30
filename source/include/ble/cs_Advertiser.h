@@ -176,7 +176,10 @@ protected:
 	bool                                        _advParamsChanged = false;
 
 	//! Whether we want to advertise being connectable.
-	bool                                        _isConnectable = true;
+	bool                                        _wantConnectable = true;
+
+	//! Whether the advertisement is connectable.
+	bool                                        _isConnectable = false;
 
 	//! Whether the advertisement data should be used.
 	bool                                        _includeAdvertisementData = false;

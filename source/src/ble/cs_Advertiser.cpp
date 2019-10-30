@@ -11,6 +11,7 @@
 #include "events/cs_EventDispatcher.h"
 
 #define LOGAdvertiserDebug LOGnone
+#define LOGAdvertiserVerbose LOGnone
 
 Advertiser::Advertiser() {
 	_stack = &(Stack::getInstance());
@@ -255,10 +256,7 @@ void Advertiser::configureAdvertisementParameters() {
 
 void Advertiser::setConnectable(bool connectable) {
 	LOGAdvertiserDebug("setConnectable %i", connectable);
-	if (_isConnectable != connectable) {
-		_advParamsChanged = true;
-		_isConnectable = connectable;
-	}
+	_wantConnectable = connectable;
 }
 
 uint32_t Advertiser::startAdvertising() {
@@ -309,6 +307,10 @@ void Advertiser::stopAdvertising() {
 
 	// This often fails because this function is called, while the SD is already connected, thus advertising was stopped.
 	// The on connect event is scheduled, but not processed by us yet.
+
+	// 30-10-2019 However: there also seems to be the case where stopAdvertising() is called right after startAdvertising()
+	// In this case, we also get the invalid state error, and advertising isn't actually stopped.
+	// So we can't really trust _advertising to be correct.
 	APP_ERROR_CHECK_EXCEPT(ret_code, NRF_ERROR_INVALID_STATE);
 	_advertising = false;
 }
@@ -318,11 +320,13 @@ void Advertiser::setConnectableAdvParams() {
 	// The mac address cannot be changed while advertising, scanning or creating a connection. Maybe Have a
 	// function that sets address, which sends an event "set address" that makes the scanner pause (etc).
 	_advParams.properties.type = BLE_GAP_ADV_TYPE_CONNECTABLE_SCANNABLE_UNDIRECTED;
+	_isConnectable = true;
 }
 
 void Advertiser::setNonConnectableAdvParams() {
 	LOGAdvertiserDebug("setNonConnectableAdvParams");
 	_advParams.properties.type = BLE_GAP_ADV_TYPE_NONCONNECTABLE_NONSCANNABLE_UNDIRECTED;
+	_isConnectable = false;
 }
 
 void Advertiser::updateAdvertisementParams() {
@@ -340,14 +344,16 @@ void Advertiser::updateAdvertisementParams() {
 //		return;
 	}
 
-	bool connectable = _isConnectable;
+	bool connectable = _wantConnectable;
 	if (connectable && _stack->isConnected()) {
 		connectable = false;
+	}
+	if (connectable && !_isConnectable) {
 		_advParamsChanged = true;
 	}
 
 	LOGAdvertiserDebug("updateAdvertisementParams connectable=%i change=%i", connectable, _advParamsChanged);
-	if (_advParamsChanged) {
+	if (!_advParamsChanged) {
 		return;
 	}
 	if (connectable) {
@@ -366,10 +372,10 @@ void Advertiser::updateAdvertisementData() {
 	uint32_t err;
 
 	uint8_t bufIndex = (_advBufferInUse + 1) % 2;
-	LOGAdvertiserDebug("updateAdvertisementData buf=%u", bufIndex);
+	LOGAdvertiserVerbose("updateAdvertisementData buf=%u", bufIndex);
 	_advBufferInUse = bufIndex;
 	if (_includeAdvertisementData) {
-		LOGAdvertiserDebug("include adv data");
+		LOGAdvertiserVerbose("include adv data");
 		_advData.adv_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
 		if (_advertisementDataBuffers[bufIndex] == NULL) {
 			_advertisementDataBuffers[bufIndex] = (uint8_t*)calloc(sizeof(uint8_t), _advData.adv_data.len);
@@ -379,7 +385,7 @@ void Advertiser::updateAdvertisementData() {
 		APP_ERROR_CHECK(err);
 	}
 	if (_includeScanResponseData) {
-		LOGAdvertiserDebug("include scan response");
+		LOGAdvertiserVerbose("include scan response");
 		_advData.scan_rsp_data.len = BLE_GAP_ADV_SET_DATA_SIZE_MAX;
 		if (_scanResponseBuffers[bufIndex] == NULL) {
 			_scanResponseBuffers[bufIndex] = (uint8_t*)calloc(sizeof(uint8_t), _advData.scan_rsp_data.len);
@@ -390,7 +396,7 @@ void Advertiser::updateAdvertisementData() {
 	}
 
 	if (_advHandle != BLE_GAP_ADV_SET_HANDLE_NOT_SET) {
-		LOGAdvertiserDebug("sd_ble_gap_adv_set_configure without params");
+		LOGAdvertiserVerbose("sd_ble_gap_adv_set_configure without params");
 		err = sd_ble_gap_adv_set_configure(&_advHandle, &_advData, NULL);
 		APP_ERROR_CHECK(err);
 	}
@@ -403,6 +409,8 @@ void Advertiser::updateAdvertisementData() {
 
 void Advertiser::restartAdvertising() {
 	LOGAdvertiserDebug("Restart advertising");
+	// 30-10-2019 See stopAdvertising(): _advertising isn't always up to date, so we might want to ignore it and stop
+	// regardless.
 	if (_advertising) {
 		stopAdvertising();
 	}

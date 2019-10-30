@@ -86,7 +86,13 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			LOGi(MSG_CHAR_VALUE_WRITE);
 			type = (CommandHandlerTypes) _controlPacketAccessor->getType();
 			cs_data_t payload = _controlPacketAccessor->getPayload();
-			result = CommandHandler::getInstance().handleCommand(type, payload.data, payload.len, cmd_source_t(CS_CMD_SOURCE_CONNECTION), accessLevel);
+			cs_data_t resultData;
+//			if (_resultPacketAccessor != NULL) {
+			assert(_resultPacketAccessor != NULL, "_resultPacketAccessor is null");
+			resultData.data = _resultPacketAccessor->getPayloadBuffer();
+			resultData.len = _resultPacketAccessor->getMaxPayloadSize();
+//			}
+			result = CommandHandler::getInstance().handleCommand(type, payload, cmd_source_t(CS_CMD_SOURCE_CONNECTION), accessLevel, resultData);
 			writeBuffer.unlock();
 		}
 		else {
@@ -158,13 +164,17 @@ void CrownstoneService::writeResult(CommandHandlerTypes type, command_result_t r
 		return;
 	}
 	assert(_resultPacketAccessor != NULL, "_resultPacketAccessor is null");
-	_resultPacketAccessor->setType(type);
-	_resultPacketAccessor->setResult(result.returnCode);
-	cs_ret_code_t retVal = _resultPacketAccessor->setPayload(result.data.data, result.data.len);
+	// Payload has already been set by command handler.
+	// But the size hasn't been set yet.
+//	cs_ret_code_t retVal = _resultPacketAccessor->setPayload(result.data.data, result.data.len);
+	cs_ret_code_t retVal = _resultPacketAccessor->setPayloadSize(result.data.len);
 	if (!SUCCESS(retVal)) {
 		LOGe("Unable to set result: %u", retVal);
-		return;
+		result.returnCode = retVal;
+		_resultPacketAccessor->setPayloadSize(0);
 	}
+	_resultPacketAccessor->setType(type);
+	_resultPacketAccessor->setResult(result.returnCode);
 	_resultCharacteristic->setValueLength(_resultPacketAccessor->getSerializedSize());
 	_resultCharacteristic->updateValue();
 }

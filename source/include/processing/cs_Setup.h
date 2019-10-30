@@ -61,7 +61,7 @@ public:
 		return instance;
 	}
 
-	cs_ret_code_t handleCommand(uint8_t* data, uint16_t size);
+	cs_ret_code_t handleCommand(cs_data_t data);
 
 	// Handle events as EventListener
 	void handleEvent(event_t & event);

@@ -34,6 +34,15 @@
 struct cs_data_t {
 	buffer_ptr_t data = NULL;      /** < Pointer to data. */
 	cs_buffer_size_t len = 0;      /** < Length of data. */
+
+	cs_data_t():
+		data(),
+		len()
+	{}
+	cs_data_t(buffer_ptr_t buf, cs_buffer_size_t size):
+		data(buf),
+		len(size)
+	{}
 };
 
 /**

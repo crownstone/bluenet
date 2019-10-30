@@ -281,6 +281,9 @@ protected:
 	 * Stores state variable in ram.
 	 *
 	 * Allocates memory when not in ram yet, or when size changed.
+	 * @param[in] data            Data to be stored.
+	 * @param[out] index_in_ram   Index where the data is stored.
+	 * @return                    Return code.
 	 */
 	cs_ret_code_t storeInRam(const cs_state_data_t & data, size16_t & index_in_ram);
 
