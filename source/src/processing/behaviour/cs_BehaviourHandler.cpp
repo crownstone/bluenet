@@ -51,7 +51,7 @@ void BehaviourHandler::update(){
         event_t behaviourStateChange(
             CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE,
             &intendedValue,
-            TypeSize(CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE)
+            sizeof(uint8_t)
         );
 
         behaviourStateChange.dispatch();

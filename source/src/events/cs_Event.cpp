@@ -9,12 +9,5 @@
 #include <events/cs_EventDispatcher.h>
 
 void event_t::dispatch(){
-    if(size != TypeSize(type)){
-        return;
-    }
-    if(size != 0 && data == nullptr){
-        return;
-    }
-
     EventDispatcher::getInstance().dispatch(*this);
 }

@@ -689,16 +689,12 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 void CommandHandler::handleEvent(event_t & event) {
 	switch (event.type) {
 		case CS_TYPE::CMD_RESET_DELAYED: {
-			if (event.size != TypeSize(CS_TYPE::CMD_RESET_DELAYED)) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH, event.size);
-				return;
-			}
-			reset_delayed_t* payload = (reset_delayed_t*)event.data;
+			auto payload = reinterpret_cast<TYPIFY(CMD_RESET_DELAYED)*>(event.data);
 			resetDelayed(payload->resetCode, payload->delayMs);
 			break;
 		}
 		case CS_TYPE::CMD_CONTROL_CMD: {
-			TYPIFY(CMD_CONTROL_CMD)* cmd = (TYPIFY(CMD_CONTROL_CMD)*)event.data;
+			auto cmd = reinterpret_cast<TYPIFY(CMD_CONTROL_CMD)*>(event.data);
 			handleCommand(cmd->type, cs_data_t(cmd->data, cmd->size), cmd->source, cmd->accessLevel);
 			break;
 		}

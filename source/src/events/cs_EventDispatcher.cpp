@@ -27,6 +27,11 @@ void EventDispatcher::dispatch(event_t & event) {
 		return;
 	}
 
+    if (event.size != 0 && event.data == nullptr) {
+		LOGe("data nullptr while size != 0");
+        return;
+    }
+
 	for (int i = 0; i < _listenerCount; i++) {
 		_listeners[i]->handleEvent(event);
 	}
