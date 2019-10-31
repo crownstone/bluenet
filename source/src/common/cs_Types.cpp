@@ -149,7 +149,18 @@ CS_TYPE toCsType(uint16_t type) {
 	return CS_TYPE::CONFIG_DO_NOT_USE;
 }
 
+// bool validateSize(cs_state_data_t const & data, size16_t size){
+// 	auto type = data.type;
+// 	switch (type) {
+// 		case CS_TYPE::CONFIG_BEHAVIOUR:{
+// 			return Behaviour::checkSize(data.data, data.size, size);
+// 		}
+// 	}
+// 	return size == TypeSize(type);
+// }
+
 size16_t TypeSize(CS_TYPE const & type){
+
 	switch(type) {
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 		return 0;

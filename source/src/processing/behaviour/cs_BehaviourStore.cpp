@@ -7,8 +7,9 @@
 
 #include <processing/behaviour/cs_BehaviourStore.h>
 
-#include <events/cs_EventListener.h>
 #include <common/cs_Types.h>
+#include <events/cs_EventListener.h>
+#include <protocol/cs_ErrorCodes.h>
 
 #include <algorithm>
 
@@ -17,14 +18,6 @@ std::array<std::optional<Behaviour>,BehaviourStore::MaxBehaviours> BehaviourStor
 
 void BehaviourStore::handleEvent(event_t& evt){
     switch(evt.type){
-        case CS_TYPE::EVT_REPLACE_BEHAVIOUR:{
-            Behaviour* newBehaviour = reinterpret_cast<TYPIFY(EVT_REPLACE_BEHAVIOUR)*>(evt.data);
-            LOGd("replace behaviour event to index 0");
-            newBehaviour->print();
-            saveBehaviour(*newBehaviour, 0);
-
-            // Return master hash
-        }
         case CS_TYPE::EVT_SAVE_BEHAVIOUR:{
             LOGd("save behaviour event");
 
@@ -45,17 +38,30 @@ void BehaviourStore::handleEvent(event_t& evt){
 
             if(saveBehaviour(*newBehaviour,empty_index)){
                 // found an empty spot in the list.
-                evt.returnCode = EVENT_RESULT_SET;
-                reinterpret_cast<uint8_t*>(evt.result.data)[0] = empty_index;
-                evt.result.len = sizeof(empty_index);
+                evt.returnCode = ERR_SUCCESS;
+                *reinterpret_cast<uint32_t*>(evt.result.data + 0) = masterHash();
+                *reinterpret_cast<uint8_t*>( evt.result.data + 4) = empty_index;
+                evt.result.len = sizeof(uint32_t) + sizeof(empty_index);
             } else {
                 // behaviour store is full!
                 evt.returnCode = ERR_NO_SPACE;
+                *reinterpret_cast<uint32_t*>(evt.result.data + 0) = masterHash();
+                evt.result.len = sizeof(uint32_t);
             }
 
-            // TODO add master hash
-
             break;
+        }
+        case CS_TYPE::EVT_REPLACE_BEHAVIOUR:{
+            auto replace_request = reinterpret_cast<TYPIFY(EVT_REPLACE_BEHAVIOUR)*>(evt.data);
+            
+            
+            if(saveBehaviour(std::get<1>(*replace_request), std::get<0>(*replace_request))){
+                LOGd("replace successful");
+            } else {
+                LOGd("replace failed");
+            }
+
+            // Return master hash
         }
         case CS_TYPE::EVT_REMOVE_BEHAVIOUR:{
             LOGd("remove behaviour event");
@@ -115,6 +121,13 @@ bool BehaviourStore::saveBehaviour(Behaviour b, uint8_t index){
         return false;
     }
 
+    b.print();
+    LOGd("save behaviour to index %d",index);
+
     activeBehaviours[index] = b;
     return true;
+}
+
+uint32_t BehaviourStore::masterHash(){
+    return 0x12345678;
 }

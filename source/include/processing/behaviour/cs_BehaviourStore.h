@@ -48,6 +48,7 @@ class BehaviourStore : public EventListener {
     }
 
     private:
+    static uint32_t masterHash();
 
     class InterfaceB {
         /**
