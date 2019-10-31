@@ -1,6 +1,6 @@
 # Behaviour
 
-This document describes the Crownstones' Behaviour concept in more technical detail.
+This document describes the Crownstones' Behaviour concept in more technical detail. (Note that some detail sections have been collapsed.)
 
 # Table of Contents
 1. [Communication API for (smartphone) applications](#api_summary)
@@ -52,34 +52,87 @@ std::vector<uint8_t> get();
 ### Behaviour Commands
 
 <a name="save_behaviour_packet"></a>
-#### Save Behaviour Payload
+#### Save Behaviour
 
-![Save Behaviour](../docs/diagrams/behaviour-save.png)
-
+<details>
+<summary>
 When a Save Behaviour packet is received by the Crownstone, it will try to store the Behaviour represented by `Data` 
 to its persistent memory. Upon success, it returns the `Index` (uint8) that can be used to refer to this behaviour. 
+
+##### Request Payload
+![Save Behaviour](../docs/diagrams/behaviour-save.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Behaviour](#behaviour_payload) | Data | ... | Behaviour to save
 
+</summary>
+<p>
+
+##### [Result Codes](PROTOCOL.md#result_codes)
+Value | Explanation
+--- | ---
+NO_SPACE | All behaviour slots have already been taken.
+BUSY | The memory was too busy to respond.
+SUCCESS | There was a slot free, and memory wasn't busy - request executed. See return payload for details.
+
+##### Return Payload
+
+The return payload will always contain the most current master hash. The `Index` will only be valid when the result
+was `SUCCESS`. Otherwise it is not returned. 
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
+uint8 | Index | 1 | The index at which the Behaviour requested to be saved was stored.
+
+</p>
+</details>
+
 <a name="replace_behaviour_packet"></a>
-#### Replace Behaviour Payload
+#### Replace Behaviour
 
-![Replace Behaviour](../docs/diagrams/behaviour-replace.png)
-
+<details>
+<summary>
 When a Replace Behaviour packet is received by the Crownstone, it will try to replace the behaviour at `index` by the
 Behaviour represented by `Data`.
 
+##### Request Payload
+
+![Replace Behaviour](../docs/diagrams/behaviour-replace.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to replace
 [Behaviour](#behaviour_payload) | Data | ... | Behaviour to replace the current one at given index with
 
+</summary>
+<p>
+
+##### [Result Codes](PROTOCOL.md#result_codes)
+
+Value | Explanation
+--- | ---
+WRONG_PARAMETER | The index is out of range.
+BUSY | The memory was too busy to respond.
+SUCCESS | The index is valid and memory could be queried. See return payload for details.
+
+##### Return Payload
+
+The return payload will always contain the most current master hash.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
+
+</p>
+</details>
+
 <a name="remove_behaviour_packet"></a>
 #### Remove Behaviour Payload
 
+<details>
+<summary>
 When a Remove Behaviour packet is received by the Crownstone, it will try to remove the behaviour at `index`.
 
 ##### Request Payload
@@ -90,12 +143,33 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to remove
 
+</summary>
+<p>
+
+##### [Result Codes](PROTOCOL.md#result_codes)
+
+Value | Explanation
+--- | ---
+WRONG_PARAMETER | The index is out of range.
+BUSY | The memory was too busy to respond.
+SUCCESS | The index is valid and memory could be queried. See return payload for details.
+
 ##### Return Payload
 
+The return payload will always contain the most current master hash.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
+
+</p>
+</details>
 
 <a name="get_behaviour_packet"></a>
 #### Get Behaviour
 
+<details>
+<summary>
 When a Get Behaviour packet is received by the Crownstone it will retrieve the behaviour at given `Index`. 
 If such behaviour exists, it is returned. This request can also be used to retrieve a list of available indices.
 
@@ -106,6 +180,9 @@ If such behaviour exists, it is returned. This request can also be used to retri
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to obtain. Send 0xff to get a list of all occupied indices.
+
+</summary>
+<p>
 
 ##### [Result Codes](PROTOCOL.md#result_codes)
 
@@ -129,7 +206,12 @@ If the `Index` parameter in the Get payload had the value `0xff`, the following 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8[] | indices | .. | List of all occupied indices.
+uint8[] | indices | ... | List of all occupied indices.
+
+</p>
+</details>
+
+### Behaviour related Data Types
 
 <a name="behaviour_payload"></a>
 #### Behaviour Payload
@@ -203,7 +285,7 @@ Type | Name | Length | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint32 | Hash | 4 | [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum) hash of a [Behaviour Payload](#behaviour_payload)
+uint32 | Hash | 4 | [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum) hash of a [Behaviour Payload](#behaviour_payload) in little endian, padded with zeroes if necessary.
 
 <a name="time_difference"></a>
 #### Time Difference
