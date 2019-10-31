@@ -43,7 +43,7 @@ Behaviour get(uint8_t index);
  * returns a map with the currently occupied indices and the 
  * behaviours at those indices.
  */
-std::vector<std::pair<uint8_t,Behaviour>> get();
+std::vector<uint8_t> get();
 ```
 
 <a name="behaviour_protocol"></a>
@@ -80,25 +80,56 @@ uint8 | Index | 1 | Index of the behaviour to replace
 <a name="remove_behaviour_packet"></a>
 #### Remove Behaviour Payload
 
-![Remove Behaviour](../docs/diagrams/behaviour-remove.png)
-
 When a Remove Behaviour packet is received by the Crownstone, it will try to remove the behaviour at `index`.
+
+##### Request Payload
+
+![Remove Behaviour](../docs/diagrams/behaviour-remove.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to remove
 
+##### Return Payload
+
+
 <a name="get_behaviour_packet"></a>
-#### Get Behaviour Payload
+#### Get Behaviour
+
+When a Get Behaviour packet is received by the Crownstone it will retrieve the behaviour at given `Index`. 
+If such behaviour exists, it is returned. This request can also be used to retrieve a list of available indices.
+
+##### Request Payload
 
 ![Get Behaviour](../docs/diagrams/behaviour-get.png)
 
-When a Get Behaviour packet is received by the Crownstone it will retrieve the behaviour at given `Index`. 
-If such behaviour exists, it is returned.
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Index | 1 | Index of the behaviour to obtain. Send 0xff to get a list of all occupied indices.
+
+##### [Result Codes](PROTOCOL.md#result_codes)
+
+Value | Explanation
+--- | ---
+WRONG_PARAMETER | The index is out of range.
+BUSY | The memory was too busy to respond.
+SUCCESS | The index is valid and memory could be queried. See return payload for details.
+
+##### Return Payload
+
+If the `Index` parameter in the request payload did not have the value `0xff` and there the `Index` is unoccupied, the return payload has length 0.
+
+If the `Index` parameter in the request payload did not have the value `0xff` and there exists a behaviour at that `Index` , the following packet will be returned:
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Index | 1 | Index of the behaviour to obtain. 0xff for 'get all'
+[Behaviour](#behaviour_payload) | Data | ... | The Behaviour that is stored at the given `Index`.
+
+If the `Index` parameter in the Get payload had the value `0xff`, the following packet will be returned:
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8[] | indices | .. | List of all occupied indices.
 
 <a name="behaviour_payload"></a>
 #### Behaviour Payload
