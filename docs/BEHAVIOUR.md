@@ -54,22 +54,30 @@ std::vector<uint8_t> get();
 <a name="save_behaviour_packet"></a>
 #### Save Behaviour
 
-<details>
-<summary>
 When a Save Behaviour packet is received by the Crownstone, it will try to store the Behaviour represented by `Data` 
 to its persistent memory. Upon success, it returns the `Index` (uint8) that can be used to refer to this behaviour. 
 
-##### Request Payload
+<details open>
+<summary>
+Request Payload
+</summary>
+<p>
+
 ![Save Behaviour](../docs/diagrams/behaviour-save.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Behaviour](#behaviour_payload) | Data | ... | Behaviour to save
 
+</p>
+</details>
+
+<details>
+<summary>
+Result Codes
 </summary>
 <p>
 
-##### [Result Codes](PROTOCOL.md#result_codes)
 Value | Explanation
 --- | ---
 NO_SPACE | All behaviour slots have already been taken.
@@ -77,7 +85,14 @@ BUSY | The memory was too busy to respond.
 SUCCESS | There was a slot free, and memory wasn't busy - request executed. See return payload for details.
 ... | Other cases may happen in case of exception.
 
-##### Return Payload
+</p>
+</details>
+
+<details>
+<summary>
+Return Payload
+</summary>
+<p>
 
 The return payload will always contain the most current master hash. The `Index` will only be valid when the result
 was `SUCCESS`. Otherwise it is not returned. 
@@ -93,12 +108,14 @@ uint8 | Index | 1 | The index at which the Behaviour requested to be saved was s
 <a name="replace_behaviour_packet"></a>
 #### Replace Behaviour
 
-<details>
-<summary>
 When a Replace Behaviour packet is received by the Crownstone, it will try to replace the behaviour at `index` by the
 Behaviour represented by `Data`.
 
-##### Request Payload
+<details open>
+<summary>
+Request Payload
+</summary>
+<p>
 
 ![Replace Behaviour](../docs/diagrams/behaviour-replace.png)
 
@@ -107,10 +124,14 @@ Type | Name | Length | Description
 uint8 | Index | 1 | Index of the behaviour to replace
 [Behaviour](#behaviour_payload) | Data | ... | Behaviour to replace the current one at given index with
 
+</p>
+</details>
+
+<details>
+<summary>
+Result Codes
 </summary>
 <p>
-
-##### [Result Codes](PROTOCOL.md#result_codes)
 
 Value | Explanation
 --- | ---
@@ -119,7 +140,14 @@ BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
 
-##### Return Payload
+</p>
+</details>
+
+<details>
+<summary>
+Return Payload
+</summary>
+<p>
 
 The return payload will always contain the most current master hash.
 
@@ -133,11 +161,13 @@ Type | Name | Length | Description
 <a name="remove_behaviour_packet"></a>
 #### Remove Behaviour Payload
 
-<details>
-<summary>
 When a Remove Behaviour packet is received by the Crownstone, it will try to remove the behaviour at `index`.
 
-##### Request Payload
+<details open>
+<summary>
+Request Payload
+</summary>
+<p>
 
 ![Remove Behaviour](../docs/diagrams/behaviour-remove.png)
 
@@ -145,10 +175,14 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to remove
 
+</p>
+</details>
+
+<details>
+<summary>
+Result Codes
 </summary>
 <p>
-
-##### [Result Codes](PROTOCOL.md#result_codes)
 
 Value | Explanation
 --- | ---
@@ -157,7 +191,14 @@ BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
 
-##### Return Payload
+</p>
+</details>
+
+<details>
+<summary>
+Return Payload
+</summary>
+<p>
 
 The return payload will always contain the most current master hash.
 
@@ -171,12 +212,14 @@ Type | Name | Length | Description
 <a name="get_behaviour_packet"></a>
 #### Get Behaviour
 
-<details>
-<summary>
 When a Get Behaviour packet is received by the Crownstone it will retrieve the behaviour at given `Index`. 
 If such behaviour exists, it is returned.
 
-##### Request Payload
+<details open>
+<summary>
+Request Payload
+</summary>
+<p>
 
 ![Get Behaviour](../docs/diagrams/behaviour-get.png)
 
@@ -184,20 +227,30 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to obtain.
 
+<p>
+</details>
+
+<details>
+<summary>
+Result Codes
 </summary>
 <p>
-
-##### [Result Codes](PROTOCOL.md#result_codes)
-
 Value | Explanation
 --- | ---
 NOT_FOUND | The index is out of range or no behaviour was found at given index.
 BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
+<p>
+</details>
 
-##### Return Payload
 
+<details>
+<summary>
+Return Payload
+</summary>
+
+<p>
 If the `Index` is unoccupied, the return payload has length 0.
 
 If there exists a behaviour at the `Index` , the following packet will be returned:
@@ -212,18 +265,24 @@ Type | Name | Length | Description
 <a name="get_behaviour_indices_packet"></a>
 #### Get Behaviour Indices
 
-<details>
-<summary>
 Query which indices in the behaviour store are currently occupied.
 
-##### Request Payload
-
-No additional payload necessary.
-
+<details open>
+<summary>
+Request Payload
 </summary>
 <p>
 
-##### [Result Codes](PROTOCOL.md#result_codes)
+No additional payload necessary.
+
+</p>
+</details>
+
+<details>
+<summary>
+Result Codes
+</summary>
+<p>
 
 Value | Explanation
 --- | ---
@@ -231,7 +290,14 @@ BUSY | The memory was too busy to respond.
 SUCCESS | Memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
 
-##### Return Payload
+</p>
+</details>
+
+<details>
+<summary>
+Return Payload
+</summary>
+<p>
 
 Type | Name | Length | Description
 --- | --- | --- | ---
