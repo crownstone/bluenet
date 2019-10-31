@@ -167,6 +167,7 @@ void CrownstoneService::writeResult(CommandHandlerTypes type, command_result_t r
 	// Payload has already been set by command handler.
 	// But the size hasn't been set yet.
 //	cs_ret_code_t retVal = _resultPacketAccessor->setPayload(result.data.data, result.data.len);
+	assert(result.data.data == _resultPacketAccessor->getPayloadBuffer(), "Wrong buffer");
 	cs_ret_code_t retVal = _resultPacketAccessor->setPayloadSize(result.data.len);
 	if (!SUCCESS(retVal)) {
 		LOGe("Unable to set result: %u", retVal);
