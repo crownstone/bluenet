@@ -332,6 +332,7 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 61 | Replace Behaviour | [Replace Behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | Replace the Behaviour at given index | x | x
 62 | Remove Behaviour | [Remove Behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the Behaviour at given index | x | x
 63 | Get Behaviour | [Get Behaviour packet](BEHAVIOUR.md#get_behaviour_packet) | Obtain the Behaviour stored at given index | x | x
+64 | Get Behaviour Indices | [Get Behaviour Indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the behaviour store | x | x 
 
 
 

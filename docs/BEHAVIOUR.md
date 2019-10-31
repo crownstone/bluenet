@@ -75,6 +75,7 @@ Value | Explanation
 NO_SPACE | All behaviour slots have already been taken.
 BUSY | The memory was too busy to respond.
 SUCCESS | There was a slot free, and memory wasn't busy - request executed. See return payload for details.
+... | Other cases may happen in case of exception.
 
 ##### Return Payload
 
@@ -116,6 +117,7 @@ Value | Explanation
 WRONG_PARAMETER | The index is out of range.
 BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
+... | Other cases may happen in case of exception.
 
 ##### Return Payload
 
@@ -150,9 +152,10 @@ uint8 | Index | 1 | Index of the behaviour to remove
 
 Value | Explanation
 --- | ---
-WRONG_PARAMETER | The index is out of range.
+NOT_FOUND | The index is out of range or no behaviour was found at given index.
 BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
+... | Other cases may happen in case of exception.
 
 ##### Return Payload
 
@@ -171,7 +174,7 @@ Type | Name | Length | Description
 <details>
 <summary>
 When a Get Behaviour packet is received by the Crownstone it will retrieve the behaviour at given `Index`. 
-If such behaviour exists, it is returned. This request can also be used to retrieve a list of available indices.
+If such behaviour exists, it is returned.
 
 ##### Request Payload
 
@@ -179,7 +182,7 @@ If such behaviour exists, it is returned. This request can also be used to retri
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Index | 1 | Index of the behaviour to obtain. Send 0xff to get a list of all occupied indices.
+uint8 | Index | 1 | Index of the behaviour to obtain.
 
 </summary>
 <p>
@@ -188,21 +191,47 @@ uint8 | Index | 1 | Index of the behaviour to obtain. Send 0xff to get a list of
 
 Value | Explanation
 --- | ---
-WRONG_PARAMETER | The index is out of range.
+NOT_FOUND | The index is out of range or no behaviour was found at given index.
 BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
+... | Other cases may happen in case of exception.
 
 ##### Return Payload
 
-If the `Index` parameter in the request payload did not have the value `0xff` and there the `Index` is unoccupied, the return payload has length 0.
+If the `Index` is unoccupied, the return payload has length 0.
 
-If the `Index` parameter in the request payload did not have the value `0xff` and there exists a behaviour at that `Index` , the following packet will be returned:
+If there exists a behaviour at the `Index` , the following packet will be returned:
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Behaviour](#behaviour_payload) | Data | ... | The Behaviour that is stored at the given `Index`.
 
-If the `Index` parameter in the Get payload had the value `0xff`, the following packet will be returned:
+</p>
+</details>
+
+<a name="get_behaviour_indices_packet"></a>
+#### Get Behaviour Indices
+
+<details>
+<summary>
+Query which indices in the behaviour store are currently occupied.
+
+##### Request Payload
+
+No additional payload necessary.
+
+</summary>
+<p>
+
+##### [Result Codes](PROTOCOL.md#result_codes)
+
+Value | Explanation
+--- | ---
+BUSY | The memory was too busy to respond.
+SUCCESS | Memory could be queried. See return payload for details.
+... | Other cases may happen in case of exception.
+
+##### Return Payload
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -210,6 +239,7 @@ uint8[] | indices | ... | List of all occupied indices.
 
 </p>
 </details>
+
 
 ### Behaviour related Data Types
 
