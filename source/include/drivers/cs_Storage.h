@@ -131,6 +131,7 @@ public:
 	 *
 	 * @retval ERR_SUCCESS                  When successfully started removing the file.
 	 * @retval ERR_BUSY                     When busy, try again later.
+	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
 	cs_ret_code_t remove(cs_file_id_t file_id);
 
@@ -145,6 +146,7 @@ public:
 	 * @retval ERR_SUCCESS                  When successfully started removing the type.
 	 * @retval ERR_NOT_FOUND                When type was not found on file, consider this a success, but don't wait for an event.
 	 * @retval ERR_BUSY                     When busy, try again later.
+	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
 	cs_ret_code_t remove(cs_file_id_t file_id, CS_TYPE type);
 
