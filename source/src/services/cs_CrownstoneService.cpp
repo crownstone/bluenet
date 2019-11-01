@@ -173,6 +173,7 @@ void CrownstoneService::writeResult(CommandHandlerTypes type, command_result_t r
 		result.returnCode = retVal;
 		_resultPacketAccessor->setPayloadSize(0);
 	}
+	LOGd("Result: type=%u code=%u size=%u", type, result.returnCode, result.data.len);
 	_resultPacketAccessor->setType(type);
 	_resultPacketAccessor->setResult(result.returnCode);
 	_resultCharacteristic->setValueLength(_resultPacketAccessor->getSerializedSize());
