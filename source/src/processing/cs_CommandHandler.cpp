@@ -135,6 +135,9 @@ command_result_t CommandHandler::handleCommand(
 		return handleCmdRemoveBehaviour(commandData, accessLevel, resultData);
 	case CTRL_CMD_GET_BEHAVIOUR:
 		return handleCmdGetBehaviour(commandData, accessLevel, resultData);
+	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
+		return handleCmdGetBehaviourIndices(commandData, accessLevel, resultData);
+
 	case CTRL_CMD_UNKNOWN:
 		return command_result_t(ERR_UNKNOWN_TYPE);
 	}
@@ -562,8 +565,8 @@ command_result_t CommandHandler::handleCmdUartEnable(cs_data_t commandData, cons
 }
 
 
-command_result_t CommandHandler::handleCmdSaveBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGd(STR_HANDLE_COMMAND, "Save Behaviour");
+command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
+	LOGd(STR_HANDLE_COMMAND, "Save behaviour");
 
 	// TODO(Arend): Only implements Switch behaviour at the moment...
 	if(commandData.len != 26){
@@ -571,9 +574,9 @@ command_result_t CommandHandler::handleCmdSaveBehaviour (cs_data_t commandData, 
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 
-	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data ,commandData.len);
+	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data, commandData.len);
 
-	event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR,&b,sizeof(b));
+	event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR, &b, sizeof(b));
 	// uint8_t localbuf[6];
 	// event.resultData.buff = localbuf;
 	// event.resultData.len = sizeof(localbuf);
@@ -587,46 +590,80 @@ command_result_t CommandHandler::handleCmdSaveBehaviour (cs_data_t commandData, 
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdReplaceBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGd(STR_HANDLE_COMMAND, "Replace Behaviour");
+command_result_t CommandHandler::handleCmdReplaceBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
+	LOGd(STR_HANDLE_COMMAND, "Replace behaviour");
 
-	if(commandData.len != 1 + 26){
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+//	if(commandData.len != 1 + 26){
+//		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+//		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+//	}
+
+	event_t event(CS_TYPE::EVT_REPLACE_BEHAVIOUR, commandData.data, commandData.len);
+	event.result = resultData;
+	event.dispatch();
+	command_result_t cmdResult;
+	cmdResult.returnCode = event.returnCode;
+	cmdResult.data = event.result;
+	if (event.returnCode == ERR_EVENT_UNHANDLED) {
+		cmdResult.data.len = 0;
 	}
-
-	LOGd("TODO");
-	
-	return command_result_t(ERR_SUCCESS);
-} 
-
-command_result_t CommandHandler::handleCmdRemoveBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGd(STR_HANDLE_COMMAND, "Remove Behaviour");
-
-	if(commandData.len != 1){
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-	}
-
-	LOGd("TODO");
-	
-	return command_result_t(ERR_SUCCESS);
+	return cmdResult;
 }
 
-command_result_t CommandHandler::handleCmdGetBehaviour (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGd(STR_HANDLE_COMMAND, "Get Behaviour");
+command_result_t CommandHandler::handleCmdRemoveBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
+	LOGd(STR_HANDLE_COMMAND, "Remove behaviour");
 
-	if(commandData.len != 1){
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+//	if(commandData.len != 1){
+//		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+//		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+//	}
+
+	event_t event(CS_TYPE::EVT_REMOVE_BEHAVIOUR, commandData.data, commandData.len);
+	event.result = resultData;
+	event.dispatch();
+	command_result_t cmdResult;
+	cmdResult.returnCode = event.returnCode;
+	cmdResult.data = event.result;
+	if (event.returnCode == ERR_EVENT_UNHANDLED) {
+		cmdResult.data.len = 0;
 	}
-
-	LOGd("TODO");
-	
-	return command_result_t(ERR_SUCCESS);
+	return cmdResult;
 }
 
+command_result_t CommandHandler::handleCmdGetBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
+	LOGd(STR_HANDLE_COMMAND, "Get behaviour");
 
+//	if(commandData.len != 1){
+//		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+//		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+//	}
+
+	event_t event(CS_TYPE::EVT_GET_BEHAVIOUR, commandData.data, commandData.len);
+	event.result = resultData;
+	event.dispatch();
+	command_result_t cmdResult;
+	cmdResult.returnCode = event.returnCode;
+	cmdResult.data = event.result;
+	if (event.returnCode == ERR_EVENT_UNHANDLED) {
+		cmdResult.data.len = 0;
+	}
+	return cmdResult;
+}
+
+command_result_t CommandHandler::handleCmdGetBehaviourIndices(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
+	LOGd(STR_HANDLE_COMMAND, "Get behaviour indices");
+
+	event_t event(CS_TYPE::EVT_GET_BEHAVIOUR_INDICES, commandData.data, commandData.len);
+	event.result = resultData;
+	event.dispatch();
+	command_result_t cmdResult;
+	cmdResult.returnCode = event.returnCode;
+	cmdResult.data = event.result;
+	if (event.returnCode == ERR_EVENT_UNHANDLED) {
+		cmdResult.data.len = 0;
+	}
+	return cmdResult;
+}
 
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
@@ -651,6 +688,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CTRL_CMD_REPLACE_BEHAVIOUR:
 	case CTRL_CMD_REMOVE_BEHAVIOUR:
 	case CTRL_CMD_GET_BEHAVIOUR:
+	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
 		return MEMBER;
 
 	case CTRL_CMD_GOTO_DFU:

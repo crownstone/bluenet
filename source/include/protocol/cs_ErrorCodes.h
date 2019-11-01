@@ -36,7 +36,6 @@ enum ErrorCodesGeneral {
 	ERR_ADC_INVALID_CHANNEL         = 0x60,
 
 	ERR_EVENT_UNHANDLED	            = 0x70,
-	EVENT_RESULT_SET                = 0x71,
 
 	ERR_UNSPECIFIED                 = 0xFFFF
 };
