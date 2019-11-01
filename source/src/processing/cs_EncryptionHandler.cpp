@@ -161,7 +161,7 @@ bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* tar
  */
 bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength,
 		EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
-	LOGEncryption("Encrypt CTR");
+	LOGEncryption("Encrypt CTR level=%u", userLevel);
 
 	// check if the userLevel has been set
 	if (_checkAndSetKey(userLevel) == false) {
