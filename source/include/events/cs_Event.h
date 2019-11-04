@@ -9,16 +9,39 @@
 
 #include <common/cs_Types.h>
 
+struct event_result_t {
+	/**
+	 * Return code.
+	 *
+	 * Should be set by the class that handles the event.
+	 */
+	cs_ret_code_t returnCode = ERR_EVENT_UNHANDLED;
+
+	/**
+	 * Buffer to put the result data in.
+	 *
+	 * Can be NULL.
+	 */
+	cs_data_t buf;
+
+	/**
+	 * Length of the data in the buffer.
+	 *
+	 * Should be set by the class that handles the event.
+	 */
+	cs_buffer_size_t dataSize = 0;
+};
+
 class event_t {
     public:
 	event_t(CS_TYPE type, void * data, size16_t size) :
 		type(type),
 		data(data),
 		size(size),
-		returnCode(ERR_EVENT_UNHANDLED) 
+		result()
 	{}
 
-	event_t(CS_TYPE type) : 
+	event_t(CS_TYPE type) :
 		event_t(type, NULL, 0)
 	{}
 
@@ -28,15 +51,17 @@ class event_t {
 
 	size16_t size;
 
-	/**
-	 * Will be set to 
-	 */
-	cs_ret_code_t returnCode;
-	/**
-	 * A field that can be used by handlers to return a value to
-	 * the dispatching scope.
-	 */
-	cs_data_t result = {};
+	event_result_t result;
+
+//	/**
+//	 * Will be set to
+//	 */
+//	cs_ret_code_t returnCode;
+//	/**
+//	 * A field that can be used by handlers to return a value to
+//	 * the dispatching scope.
+//	 */
+//	cs_data_t result = {};
 
     /**
      * Validates [data] for nullptr and [size] to match expected size of [type].

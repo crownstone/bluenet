@@ -39,25 +39,19 @@ void BehaviourStore::handleEvent(event_t& evt){
 
             if(saveBehaviour(*newBehaviour,empty_index)){
                 // found an empty spot in the list.
-                evt.returnCode = ERR_SUCCESS;
-                if(evt.result.data != nullptr && evt.result.len >= 5) {
+                evt.result.returnCode = ERR_SUCCESS;
+                if(evt.result.buf.data != nullptr && evt.result.buf.len >= 5) {
                 	uint8_t index = empty_index;
-					*reinterpret_cast<uint32_t*>(evt.result.data + 0) = masterHash();
-					*reinterpret_cast<uint8_t*>( evt.result.data + 4) = index;
-					evt.result.len = sizeof(uint32_t) + sizeof(index);
-                }
-                else {
-                	evt.result.len = 0;
+					*reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
+					*reinterpret_cast<uint8_t*>( evt.result.buf.data + 4) = index;
+					evt.result.dataSize = sizeof(uint32_t) + sizeof(index);
                 }
             } else {
                 // behaviour store is full!
-                evt.returnCode = ERR_NO_SPACE;
-                if(evt.result.data != nullptr && evt.result.len >= 4) {
-                    *reinterpret_cast<uint32_t*>(evt.result.data + 0) = masterHash();
-                    evt.result.len = sizeof(uint32_t);
-                }
-                else {
-                	evt.result.len = 0;
+                evt.result.returnCode = ERR_NO_SPACE;
+                if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
+                    *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
+                    evt.result.buf.len = sizeof(uint32_t);
                 }
             }
 
@@ -70,18 +64,15 @@ void BehaviourStore::handleEvent(event_t& evt){
             if(saveBehaviour(std::get<1>(*replace_request), std::get<0>(*replace_request))){
 
                 LOGd("replace successful");
-                evt.returnCode = ERR_SUCCESS;
+                evt.result.returnCode = ERR_SUCCESS;
             } else {
                 LOGd("replace failed");
-                evt.returnCode = ERR_UNSPECIFIED;
+                evt.result.returnCode = ERR_UNSPECIFIED;
             }
-            if(evt.result.data != nullptr && evt.result.len >= 4) {
+            if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
 				uint32_t hash = masterHash();
-				*reinterpret_cast<uint32_t*>(evt.result.data + 0) = hash;
-				evt.result.len = sizeof(hash);
-            }
-            else {
-            	evt.result.len = 0;
+				*reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = hash;
+				evt.result.dataSize = sizeof(hash);
             }
             break;
         }
@@ -90,17 +81,14 @@ void BehaviourStore::handleEvent(event_t& evt){
 
             uint8_t index = *reinterpret_cast<TYPIFY(EVT_REMOVE_BEHAVIOUR)*>(evt.data);
             if(removeBehaviour(index)){
-                evt.returnCode = ERR_SUCCESS;
+                evt.result.returnCode = ERR_SUCCESS;
             } else {
-                evt.returnCode = ERR_NOT_FOUND;
+                evt.result.returnCode = ERR_NOT_FOUND;
             }
-            if(evt.result.data != nullptr && evt.result.len >= 4) {
+            if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
 				uint32_t hash = masterHash();
-				*reinterpret_cast<uint32_t*>(evt.result.data + 0) = hash;
-				evt.result.len = sizeof(hash);
-            }
-            else {
-            	evt.result.len = 0;
+				*reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = hash;
+				evt.result.dataSize = sizeof(hash);
             }
             break;
         }
@@ -109,52 +97,47 @@ void BehaviourStore::handleEvent(event_t& evt){
             uint8_t index = *reinterpret_cast<TYPIFY(EVT_GET_BEHAVIOUR)*>(evt.data);
 
             if(index >= MaxBehaviours || !activeBehaviours[index].has_value()){
-                evt.result.len = 0;
-                evt.returnCode = ERR_NOT_FOUND;
+                evt.result.returnCode = ERR_NOT_FOUND;
                 return;
             }
 
-            if(evt.result.data == nullptr) {
-            	evt.result.len = 0;
-            	evt.returnCode = ERR_BUFFER_UNASSIGNED;
+            if(evt.result.buf.data == nullptr) {
+            	evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
             	return;
             }
 
             Behaviour::SerializedDataFormat bs = activeBehaviours[index]->serialize();
 
-            if(evt.result.len < bs.size()){
+            if(evt.result.buf.len < bs.size()){
                 // cannot communicate the result, so won't do anything.
-            	evt.result.len = 0;
-                evt.returnCode = ERR_BUFFER_TOO_SMALL;
+                evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
                 return;
             }
 
-            std::copy_n(bs.data(), bs.size(), evt.result.data);
-            evt.result.len = bs.size();
-            evt.returnCode = ERR_SUCCESS;
+            std::copy_n(bs.data(), bs.size(), evt.result.buf.data);
+            evt.result.dataSize = bs.size();
+            evt.result.returnCode = ERR_SUCCESS;
             break;
         }
         case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES: {
-        	if (evt.result.data == nullptr) {
-        		evt.result.len = 0;
-        		evt.returnCode = ERR_BUFFER_UNASSIGNED;
+        	if (evt.result.buf.data == nullptr) {
+        		evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
         		return;
         	}
 
         	uint8_t maxProfiles = 5;
-        	if (evt.result.len < MaxBehaviours * maxProfiles) {
-        		evt.result.len = 0;
-        		evt.returnCode = ERR_BUFFER_TOO_SMALL;
+        	if (evt.result.buf.len < MaxBehaviours * maxProfiles) {
+        		evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
         		return;
         	}
         	size_t listSize = 0;
         	for (uint8_t i = 0; i < MaxBehaviours; ++i) {
         		if (activeBehaviours[i].has_value()) {
-        			evt.result.data[listSize++] = i;
+        			evt.result.buf.data[listSize++] = i;
         		}
         	}
-        	evt.result.len = listSize;
-        	evt.returnCode = ERR_SUCCESS;
+        	evt.result.dataSize = listSize;
+        	evt.result.returnCode = ERR_SUCCESS;
         	break;
         }
         default:{

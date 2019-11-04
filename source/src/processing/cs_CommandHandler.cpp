@@ -592,76 +592,49 @@ command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, c
 
 command_result_t CommandHandler::handleCmdReplaceBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Replace behaviour");
-
-//	if(commandData.len != 1 + 26){
-//		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-//		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-//	}
-
 	event_t event(CS_TYPE::EVT_REPLACE_BEHAVIOUR, commandData.data, commandData.len);
-	event.result = resultData;
+	event.result.buf = resultData;
 	event.dispatch();
 	command_result_t cmdResult;
-	cmdResult.returnCode = event.returnCode;
-	cmdResult.data = event.result;
-	if (event.returnCode == ERR_EVENT_UNHANDLED) {
-		cmdResult.data.len = 0;
-	}
+	cmdResult.returnCode = event.result.returnCode;
+	cmdResult.data.data = event.result.buf.data;
+	cmdResult.data.len = event.result.dataSize;
 	return cmdResult;
 }
 
 command_result_t CommandHandler::handleCmdRemoveBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Remove behaviour");
-
-//	if(commandData.len != 1){
-//		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-//		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-//	}
-
 	event_t event(CS_TYPE::EVT_REMOVE_BEHAVIOUR, commandData.data, commandData.len);
-	event.result = resultData;
+	event.result.buf = resultData;
 	event.dispatch();
 	command_result_t cmdResult;
-	cmdResult.returnCode = event.returnCode;
-	cmdResult.data = event.result;
-	if (event.returnCode == ERR_EVENT_UNHANDLED) {
-		cmdResult.data.len = 0;
-	}
+	cmdResult.returnCode = event.result.returnCode;
+	cmdResult.data.data = event.result.buf.data;
+	cmdResult.data.len = event.result.dataSize;
 	return cmdResult;
 }
 
 command_result_t CommandHandler::handleCmdGetBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Get behaviour");
-
-//	if(commandData.len != 1){
-//		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-//		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-//	}
-
 	event_t event(CS_TYPE::EVT_GET_BEHAVIOUR, commandData.data, commandData.len);
-	event.result = resultData;
+	event.result.buf = resultData;
 	event.dispatch();
 	command_result_t cmdResult;
-	cmdResult.returnCode = event.returnCode;
-	cmdResult.data = event.result;
-	if (event.returnCode == ERR_EVENT_UNHANDLED) {
-		cmdResult.data.len = 0;
-	}
+	cmdResult.returnCode = event.result.returnCode;
+	cmdResult.data.data = event.result.buf.data;
+	cmdResult.data.len = event.result.dataSize;
 	return cmdResult;
 }
 
 command_result_t CommandHandler::handleCmdGetBehaviourIndices(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Get behaviour indices");
-
 	event_t event(CS_TYPE::EVT_GET_BEHAVIOUR_INDICES, commandData.data, commandData.len);
-	event.result = resultData;
+	event.result.buf = resultData;
 	event.dispatch();
 	command_result_t cmdResult;
-	cmdResult.returnCode = event.returnCode;
-	cmdResult.data = event.result;
-	if (event.returnCode == ERR_EVENT_UNHANDLED) {
-		cmdResult.data.len = 0;
-	}
+	cmdResult.returnCode = event.result.returnCode;
+	cmdResult.data.data = event.result.buf.data;
+	cmdResult.data.len = event.result.dataSize;
 	return cmdResult;
 }
 
