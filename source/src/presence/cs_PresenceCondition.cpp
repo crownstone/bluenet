@@ -12,10 +12,17 @@
 PresenceCondition::PresenceCondition(PresencePredicate p, uint32_t t) : 
     pred(p), timeOut(t){}
 
-PresenceCondition::PresenceCondition(std::array<uint8_t,9+4> arr): 
+PresenceCondition::PresenceCondition(SerializedDataType arr): 
     PresenceCondition(
         WireFormat::deserialize<PresencePredicate>(arr.data() + 0, 9),
         WireFormat::deserialize<uint32_t>(         arr.data() + 9, 4)){
+}
+
+PresenceCondition::SerializedDataType PresenceCondition::serialize() const{
+    SerializedDataType result;
+    std::copy_n(std::begin(WireFormat::serialize(pred)),    9, std::begin(result) + 0);
+    std::copy_n(std::begin(WireFormat::serialize(timeOut)), 4, std::begin(result) + 9);
+    return result;
 }
 
 bool PresenceCondition::operator()(PresenceStateDescription currentPresence) const{

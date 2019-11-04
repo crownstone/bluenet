@@ -21,6 +21,8 @@
  */
 class Behaviour {
     public:
+    typedef std::array<uint8_t, 26> SerializedDataFormat;
+
     
     Behaviour() = default;
     Behaviour(
@@ -31,7 +33,8 @@ class Behaviour {
       PresenceCondition presencecondition
       );
 
-    Behaviour(std::array<uint8_t, 26> arr);
+    Behaviour(SerializedDataFormat arr);
+    SerializedDataFormat serialize() const;
 
     void print();
 

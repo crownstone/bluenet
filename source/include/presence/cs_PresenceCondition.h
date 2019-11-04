@@ -12,11 +12,15 @@
 
 class PresenceCondition{
     public:
+    typedef std::array<uint8_t,9+4> SerializedDataType;
+
     PresencePredicate pred;
     uint32_t timeOut;
 
     PresenceCondition(PresencePredicate p, uint32_t t);
-    PresenceCondition(std::array<uint8_t,9+4> arr);
+    PresenceCondition(SerializedDataType arr);
+
+    SerializedDataType serialize() const;
 
     /**
      * Does this condition hold given the [currentPresence]?

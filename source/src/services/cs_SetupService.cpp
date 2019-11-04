@@ -37,7 +37,7 @@ void SetupService::createCharacteristics() {
 	cs_data_t readBuf = CharacteristicReadBuffer::getInstance().getBuffer();
 	_resultPacketAccessor = new ResultPacketAccessor<>();
 	_resultPacketAccessor->assign(readBuf.data, readBuf.len);
-	addResultCharacteristic(readBuf.data, readBuf.len, SETUP_RESULT_UUID);
+	addResultCharacteristic(readBuf.data, readBuf.len, SETUP_RESULT_UUID, SETUP);
 	LOGi(FMT_CHAR_ADD, STR_CHAR_RESULT);
 
 	addMacAddressCharacteristic();

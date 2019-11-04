@@ -9,6 +9,8 @@
 
 namespace WireFormat {
 
+// -------------------- specialization for deserialize --------------------
+
 template<> 
 uint8_t WireFormat::deserialize(uint8_t* data, size_t len){
     // TODO(Arend): assert length
@@ -73,5 +75,49 @@ Behaviour WireFormat::deserialize(uint8_t* data, size_t len){
     return Behaviour(d);
 }
 
+//template<>
+//std::tuple<uint8_t,Behaviour> WireFormat::deserialize(uint8_t* data, size_t len){
+//    // TODO(Arend): assert length
+//	uint8_t index = WireFormat::deserialize<uint8_t>(data, len);
+//    std::array<uint8_t,26> d;
+//    std::copy_n(data+1, 26, d.begin());
+//
+//    return std::tuple<uint8_t, Behaviour>(index, Behaviour(d));
+//}
+
+// -------------------- specialization for serialize --------------------
+
+
+std::array<uint8_t,1> serialize(const uint8_t& obj){
+    return {obj};
+}
+
+std::array<uint8_t,4> serialize(const uint32_t& obj){
+    return {
+        static_cast<uint8_t>(obj >> 0), 
+        static_cast<uint8_t>(obj >> 1), 
+        static_cast<uint8_t>(obj >> 2), 
+        static_cast<uint8_t>(obj >> 3)};
+}
+
+std::array<uint8_t,4> serialize(const int32_t& obj){
+    return {
+        static_cast<uint8_t>(obj >> 0), 
+        static_cast<uint8_t>(obj >> 1), 
+        static_cast<uint8_t>(obj >> 2), 
+        static_cast<uint8_t>(obj >> 3)};
+}
+
+std::array<uint8_t,8> serialize(const uint64_t& obj){
+    return {
+        static_cast<uint8_t>(obj >> 0), 
+        static_cast<uint8_t>(obj >> 1), 
+        static_cast<uint8_t>(obj >> 2), 
+        static_cast<uint8_t>(obj >> 3),
+        static_cast<uint8_t>(obj >> 4), 
+        static_cast<uint8_t>(obj >> 5), 
+        static_cast<uint8_t>(obj >> 6), 
+        static_cast<uint8_t>(obj >> 7)};
+}
 
 } // namespace WireFormat

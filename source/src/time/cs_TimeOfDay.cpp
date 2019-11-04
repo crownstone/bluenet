@@ -42,7 +42,7 @@ TimeOfDay::TimeOfDay(uint32_t h, uint32_t m, uint32_t s) :
     TimeOfDay(BaseTime::Midnight, s + 60*m + 60*60*h ) { 
 }
 
-TimeOfDay::TimeOfDay(std::array<uint8_t,5> rawData) : TimeOfDay(
+TimeOfDay::TimeOfDay(SerializedDataType rawData) : TimeOfDay(
     static_cast<BaseTime>(rawData[0]), 
     WireFormat::deserialize<int32_t>(rawData.data() + 1, 4)) {
 
@@ -62,6 +62,13 @@ TimeOfDay TimeOfDay::Sundown(){
 
 
 // ===================== Conversions =====================
+
+TimeOfDay::SerializedDataType TimeOfDay::serialize() const {
+    SerializedDataType result;
+    std::copy_n(std::begin(WireFormat::serialize(static_cast<uint8_t>(base))),  1, std::begin(result) + 0);
+    std::copy_n(std::begin(WireFormat::serialize(sec_since_base)),              4, std::begin(result) + 1);
+    return result;
+}
 
 TimeOfDay TimeOfDay::convert(BaseTime newBase){
     if (base == newBase){

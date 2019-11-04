@@ -94,11 +94,11 @@ private:
 	command_result_t handleCmdUartEnable            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdStateGet              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdStateSet              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-
 	command_result_t handleCmdSaveBehaviour         (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdReplaceBehaviour		(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdRemoveBehaviour		(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdGetBehaviour			(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdReplaceBehaviour      (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdRemoveBehaviour       (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdGetBehaviour          (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdGetBehaviourIndices   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	
 
 	/**

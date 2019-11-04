@@ -1,6 +1,6 @@
 # Behaviour
 
-This document describes the Crownstones' Behaviour concept in more technical detail.
+This document describes the Crownstones' Behaviour concept in more technical detail. (Note that some detail sections have been collapsed.)
 
 # Table of Contents
 1. [Communication API for (smartphone) applications](#api_summary)
@@ -43,7 +43,7 @@ Behaviour get(uint8_t index);
  * returns a map with the currently occupied indices and the 
  * behaviours at those indices.
  */
-std::vector<std::pair<uint8_t,Behaviour>> get();
+std::vector<uint8_t> get();
 ```
 
 <a name="behaviour_protocol"></a>
@@ -52,53 +52,262 @@ std::vector<std::pair<uint8_t,Behaviour>> get();
 ### Behaviour Commands
 
 <a name="save_behaviour_packet"></a>
-#### Save Behaviour Payload
-
-![Save Behaviour](../docs/diagrams/behaviour-save.png)
+#### Save Behaviour
 
 When a Save Behaviour packet is received by the Crownstone, it will try to store the Behaviour represented by `Data` 
 to its persistent memory. Upon success, it returns the `Index` (uint8) that can be used to refer to this behaviour. 
+
+<details open>
+<summary>
+Request Payload
+</summary>
+<p>
+
+![Save Behaviour](../docs/diagrams/behaviour-save.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Behaviour](#behaviour_payload) | Data | ... | Behaviour to save
 
-<a name="replace_behaviour_packet"></a>
-#### Replace Behaviour Payload
+</p>
+</details>
 
-![Replace Behaviour](../docs/diagrams/behaviour-replace.png)
+<details>
+<summary>
+Result Codes
+</summary>
+<p>
+
+Value | Explanation
+--- | ---
+NO_SPACE | All behaviour slots have already been taken.
+BUSY | The memory was too busy to respond.
+SUCCESS | There was a slot free, and memory wasn't busy - request executed. See return payload for details.
+... | Other cases may happen in case of exception.
+
+</p>
+</details>
+
+<details>
+<summary>
+Return Payload
+</summary>
+<p>
+
+The return payload will always contain the most current master hash. The `Index` will only be valid when the result
+was `SUCCESS`. Otherwise it is not returned. 
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
+uint8 | Index | 1 | The index at which the Behaviour requested to be saved was stored.
+
+</p>
+</details>
+
+<a name="replace_behaviour_packet"></a>
+#### Replace Behaviour
 
 When a Replace Behaviour packet is received by the Crownstone, it will try to replace the behaviour at `index` by the
 Behaviour represented by `Data`.
 
+<details open>
+<summary>
+Request Payload
+</summary>
+<p>
+
+![Replace Behaviour](../docs/diagrams/behaviour-replace.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to replace
 [Behaviour](#behaviour_payload) | Data | ... | Behaviour to replace the current one at given index with
 
+</p>
+</details>
+
+<details>
+<summary>
+Result Codes
+</summary>
+<p>
+
+Value | Explanation
+--- | ---
+WRONG_PARAMETER | The index is out of range.
+BUSY | The memory was too busy to respond.
+SUCCESS | The index is valid and memory could be queried. See return payload for details.
+... | Other cases may happen in case of exception.
+
+</p>
+</details>
+
+<details>
+<summary>
+Return Payload
+</summary>
+<p>
+
+The return payload will always contain the most current master hash.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
+
+</p>
+</details>
+
 <a name="remove_behaviour_packet"></a>
 #### Remove Behaviour Payload
 
-![Remove Behaviour](../docs/diagrams/behaviour-remove.png)
-
 When a Remove Behaviour packet is received by the Crownstone, it will try to remove the behaviour at `index`.
+
+<details open>
+<summary>
+Request Payload
+</summary>
+<p>
+
+![Remove Behaviour](../docs/diagrams/behaviour-remove.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to remove
 
-<a name="get_behaviour_packet"></a>
-#### Get Behaviour Payload
+</p>
+</details>
 
-![Get Behaviour](../docs/diagrams/behaviour-get.png)
+<details>
+<summary>
+Result Codes
+</summary>
+<p>
+
+Value | Explanation
+--- | ---
+NOT_FOUND | The index is out of range or no behaviour was found at given index.
+BUSY | The memory was too busy to respond.
+SUCCESS | The index is valid and memory could be queried. See return payload for details.
+... | Other cases may happen in case of exception.
+
+</p>
+</details>
+
+<details>
+<summary>
+Return Payload
+</summary>
+<p>
+
+The return payload will always contain the most current master hash.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
+
+</p>
+</details>
+
+<a name="get_behaviour_packet"></a>
+#### Get Behaviour
 
 When a Get Behaviour packet is received by the Crownstone it will retrieve the behaviour at given `Index`. 
 If such behaviour exists, it is returned.
 
+<details open>
+<summary>
+Request Payload
+</summary>
+<p>
+
+![Get Behaviour](../docs/diagrams/behaviour-get.png)
+
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Index | 1 | Index of the behaviour to obtain. 0xff for 'get all'
+uint8 | Index | 1 | Index of the behaviour to obtain.
+
+<p>
+</details>
+
+<details>
+<summary>
+Result Codes
+</summary>
+<p>
+Value | Explanation
+--- | ---
+NOT_FOUND | The index is out of range or no behaviour was found at given index.
+BUSY | The memory was too busy to respond.
+SUCCESS | The index is valid and memory could be queried. See return payload for details.
+... | Other cases may happen in case of exception.
+<p>
+</details>
+
+
+<details>
+<summary>
+Return Payload
+</summary>
+
+<p>
+If the `Index` is unoccupied, the return payload has length 0.
+
+If there exists a behaviour at the `Index` , the following packet will be returned:
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Behaviour](#behaviour_payload) | Data | ... | The Behaviour that is stored at the given `Index`.
+
+</p>
+</details>
+
+<a name="get_behaviour_indices_packet"></a>
+#### Get Behaviour Indices
+
+Query which indices in the behaviour store are currently occupied.
+
+<details open>
+<summary>
+Request Payload
+</summary>
+<p>
+
+No additional payload necessary.
+
+</p>
+</details>
+
+<details>
+<summary>
+Result Codes
+</summary>
+<p>
+
+Value | Explanation
+--- | ---
+BUSY | The memory was too busy to respond.
+SUCCESS | Memory could be queried. See return payload for details.
+... | Other cases may happen in case of exception.
+
+</p>
+</details>
+
+<details>
+<summary>
+Return Payload
+</summary>
+<p>
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8[] | indices | ... | List of all occupied indices.
+
+</p>
+</details>
+
+
+### Behaviour related Data Types
 
 <a name="behaviour_payload"></a>
 #### Behaviour Payload
@@ -118,7 +327,7 @@ uint8_t[] | Data | ... | Type dependent
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
-uint8 | Options | 1 | Reserved for future use
+uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Currently unused)
 [Day Of Week Bitmask](#day_of_week_bitmask) | Active Days | 1 | Selects which days of the week this behaviour is active
 [Time Of Day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
 [Time Of Day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
@@ -132,6 +341,7 @@ uint8 | Options | 1 | Reserved for future use
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
+uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Currently unused)
 [Day Of Week Bitmask](#day_of_week_bitmask) | Active Days | 1 | Selects which days of the week this behaviour is active
 [Time Of Day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
 [Time Of Day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
@@ -171,7 +381,7 @@ Type | Name | Length | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint32 | Hash | 4 | [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum) hash of a [Behaviour Payload](#behaviour_payload)
+uint32 | Hash | 4 | [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum) hash of a [Behaviour Payload](#behaviour_payload) in little endian, padded with zeroes if necessary.
 
 <a name="time_difference"></a>
 #### Time Difference
@@ -213,7 +423,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Type | 1 | <ol start="0"><li>Vacuously true condition</li><li>Anyone in any of the rooms</li><li>Noone in any of the rooms</li><li>Anyone anywhere in sphere</li><li>Noone anywhere in sphere</li></ol>
 uint64 | Active Rooms Mask | 8 | Room with id `i` corresponds to bit `i` in this mask.
-uint32_t | Timeout | 4 | Whenever a presence description is satisfied (evaluates to true), it shall evaluate to true until this time out expires. Use to ignore. Units: seconds.
+uint32_t | Timeout | 4 | Whenever a presence description is satisfied (evaluates to true), it shall evaluate to true until this time out expires. Use 0 to ignore. Units: seconds.
 
 <a name="firmware_design"></a>
 # Firmware Design Internals

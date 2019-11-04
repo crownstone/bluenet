@@ -140,6 +140,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_REPLACE_BEHAVIOUR:
 	case CS_TYPE::EVT_REMOVE_BEHAVIOUR:
 	case CS_TYPE::EVT_GET_BEHAVIOUR:
+	case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 	case CS_TYPE::CMD_SET_RELAY:
@@ -149,7 +150,18 @@ CS_TYPE toCsType(uint16_t type) {
 	return CS_TYPE::CONFIG_DO_NOT_USE;
 }
 
+// bool validateSize(cs_state_data_t const & data, size16_t size){
+// 	auto type = data.type;
+// 	switch (type) {
+// 		case CS_TYPE::CONFIG_BEHAVIOUR:{
+// 			return Behaviour::checkSize(data.data, data.size, size);
+// 		}
+// 	}
+// 	return size == TypeSize(type);
+// }
+
 size16_t TypeSize(CS_TYPE const & type){
+
 	switch(type) {
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 		return 0;
@@ -409,6 +421,8 @@ size16_t TypeSize(CS_TYPE const & type){
 		return sizeof(TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE));
 	case CS_TYPE::EVT_GET_BEHAVIOUR:
 		return sizeof(TYPIFY(EVT_GET_BEHAVIOUR));
+	case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES:
+		return 0;
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 		return 0;
 	case CS_TYPE::CMD_SET_RELAY:
@@ -552,6 +566,7 @@ const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_REPLACE_BEHAVIOUR: return "EVT_REPLACE_BEHAVIOUR";
 	case CS_TYPE::EVT_REMOVE_BEHAVIOUR: return "EVT_REMOVE_BEHAVIOUR";
 	case CS_TYPE::EVT_GET_BEHAVIOUR: return "EVT_GET_BEHAVIOUR";
+	case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES: return "EVT_GET_BEHAVIOUR_INDICES";
 	case CS_TYPE::EVT_PRESENCE_MUTATION: return "EVT_PRESENCE_MUTATION";
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE: return "EVT_BEHAVIOUR_SWITCH_STATE";
 	case CS_TYPE::CMD_SET_RELAY: return "CMD_SET_RELAY";
@@ -694,6 +709,7 @@ cs_file_id_t getFileId(CS_TYPE const & type){
 	case CS_TYPE::EVT_REPLACE_BEHAVIOUR:
 	case CS_TYPE::EVT_REMOVE_BEHAVIOUR:
 	case CS_TYPE::EVT_GET_BEHAVIOUR:
+	case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 	case CS_TYPE::CMD_SET_RELAY:
@@ -836,6 +852,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::EVT_REPLACE_BEHAVIOUR:
 	case CS_TYPE::EVT_REMOVE_BEHAVIOUR:
 	case CS_TYPE::EVT_GET_BEHAVIOUR:
+	case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 	case CS_TYPE::CMD_SET_RELAY:
@@ -977,6 +994,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_REPLACE_BEHAVIOUR:
 	case CS_TYPE::EVT_REMOVE_BEHAVIOUR:
 	case CS_TYPE::EVT_GET_BEHAVIOUR:
+	case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 	case CS_TYPE::CMD_SET_RELAY:

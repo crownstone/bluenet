@@ -392,7 +392,13 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 		// See https://devzone.nordicsemi.com/f/nordic-q-a/33366/is-it-necessary-handle-ble_evt_user_mem_request-respectivly-is-it-required-to-support-prepared-writes
 		// And https://devzone.nordicsemi.com/f/nordic-q-a/53074/ble_evt_user_mem_request-if-data_length-is-180-bytes-on-ios-but-not-for-android
 		// Also see https://interrupt.memfault.com/blog/ble-throughput-primer
-		BLE_CALL(sd_ble_user_mem_reply, (p_ble_evt->evt.gap_evt.conn_handle, NULL));
+//		BLE_CALL(sd_ble_user_mem_reply, (p_ble_evt->evt.gap_evt.conn_handle, NULL));
+
+		ble_user_mem_block_t memBlock;
+		cs_data_t writeBuffer = CharacteristicWriteBuffer::getInstance().getBuffer(CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
+		memBlock.p_mem = writeBuffer.data;
+		memBlock.len = writeBuffer.len;
+		BLE_CALL(sd_ble_user_mem_reply, (p_ble_evt->evt.gap_evt.conn_handle, &memBlock));
 		break;
 	}
 	case BLE_EVT_USER_MEM_RELEASE:

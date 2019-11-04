@@ -17,6 +17,7 @@
 #include <cstddef> // For NULL
 #include <cstdint>
 #include <type_traits>
+#include <tuple>
 
 #include <processing/behaviour/cs_Behaviour.h>
 
@@ -226,6 +227,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_REPLACE_BEHAVIOUR,						// when a user requests to update a behaviour, this event fires.
 	EVT_REMOVE_BEHAVIOUR,						// when a user requests to remove a behaviour, this event fires.
 	EVT_GET_BEHAVIOUR,							// when a user requests a currently active behaviour, this event fires.
+	EVT_GET_BEHAVIOUR_INDICES,                  // Sent when a user requests a list of indices with active behaviours.
 	EVT_PRESENCE_MUTATION,						// when a change in presence occurs this event fires.
 	EVT_BEHAVIOUR_SWITCH_STATE,					// when behaviour desires a stateswitch this event is fired.
 	CMD_SET_RELAY,								// when a user requests to set the relay to a specific state
@@ -388,9 +390,10 @@ typedef  uint32_t TYPIFY(EVT_TICK);
 typedef  uint32_t TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
 typedef Behaviour TYPIFY(EVT_SAVE_BEHAVIOUR);
-typedef Behaviour TYPIFY(EVT_REPLACE_BEHAVIOUR);
+typedef std::tuple<uint8_t,Behaviour> TYPIFY(EVT_REPLACE_BEHAVIOUR);
 typedef uint8_t TYPIFY(EVT_REMOVE_BEHAVIOUR); // index
 typedef uint8_t TYPIFY(EVT_GET_BEHAVIOUR); // index
+typedef void TYPIFY(EVT_GET_BEHAVIOUR_INDICES);
 typedef uint8_t TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.

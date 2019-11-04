@@ -8,6 +8,10 @@
 #include <presence/cs_PresencePredicate.h>
 #include <util/cs_WireFormat.h>
 
+PresencePredicate::PresencePredicate(Condition c, PresenceStateDescription roomsMask): 
+    cond(c), RoomsBitMask(roomsMask) {
+}
+
 PresencePredicate::PresencePredicate(std::array<uint8_t, 9> arr) : 
     PresencePredicate(
         static_cast<Condition>(arr[0]),
@@ -30,4 +34,11 @@ bool PresencePredicate::operator()(
     }
     
     return false;
+}
+
+PresencePredicate::SerializedDataType PresencePredicate::serialize() const {
+    SerializedDataType result;
+    std::copy_n(std::begin(WireFormat::serialize(static_cast<uint8_t>(cond))),  1, std::begin(result) + 0);
+    std::copy_n(std::begin(WireFormat::serialize(RoomsBitMask)),                8, std::begin(result) + 1);
+    return result;
 }

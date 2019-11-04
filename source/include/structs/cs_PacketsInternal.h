@@ -63,10 +63,12 @@ struct __attribute__((packed)) scanned_device_t {
 struct command_result_t {
 	cs_ret_code_t returnCode;
 	cs_data_t data;
+
 	command_result_t():
 		returnCode(),
 		data()
 	{}
+
 	command_result_t(cs_ret_code_t code):
 		returnCode(code),
 		data()
