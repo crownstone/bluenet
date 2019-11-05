@@ -20,7 +20,7 @@ std::array<std::optional<Behaviour>,BehaviourStore::MaxBehaviours> BehaviourStor
 void BehaviourStore::handleEvent(event_t& evt){
     switch(evt.type){
         case CS_TYPE::EVT_SAVE_BEHAVIOUR:{
-            LOGd("save behaviour event");
+            LOGd("save behaviour event, datalen: %d", evt.size);
 
             Behaviour* newBehaviour = reinterpret_cast<TYPIFY(EVT_SAVE_BEHAVIOUR)*>(evt.data);
             newBehaviour->print();
@@ -51,7 +51,7 @@ void BehaviourStore::handleEvent(event_t& evt){
                 evt.result.returnCode = ERR_NO_SPACE;
                 if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
                     *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
-                    evt.result.buf.len = sizeof(uint32_t);
+                    evt.result.dataSize = sizeof(uint32_t);
                 }
             }
 

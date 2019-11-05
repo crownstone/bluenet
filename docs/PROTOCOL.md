@@ -11,7 +11,7 @@ This only documents the latest protocol, older versions can be found in the git 
 - [Broadcast commands](#broadcasts). Broadcast commands.
 - [Services and characteristics](#services). Which Bluetooth GATT services and characteristics the crownstones have.
 - [Data structures](#data_structs). The data structures used for the characteristics, advertisements, and mesh.
-    - [Control](#command_types). Used to send commands to the Crownstone.
+    - [Control](#control_packet). Used to send commands to the Crownstone.
     - [Result](#result_packet). The result of a command.
     - [State](#state_types). State variables of the Crownstone.
 

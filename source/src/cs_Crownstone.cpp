@@ -545,6 +545,9 @@ void Crownstone::setName() {
  * the mesh. In setup mode we use the serial module (but only RX).
  */
 void Crownstone::startOperationMode(const OperationMode & mode) {
+	EventDispatcher::getInstance().addListener(&_behaviourHandler);
+	EventDispatcher::getInstance().addListener(&_behaviourStore);
+	
 	switch(mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
 			_scanner->init();
@@ -559,10 +562,10 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
 
-			EventDispatcher::getInstance().addListener(&_behaviourHandler);
-			EventDispatcher::getInstance().addListener(&_behaviourStore);
 
 //			// DEBUG
+			LOGd("behaviourStore listener added");
+
 //			uint32_t h = 14;
 //			uint32_t m = 25;
 //			uint32_t s = 0;

@@ -23,6 +23,8 @@
 
 #include <util/cs_WireFormat.h>
 
+#include <sstream>
+
 void reset(void* p_context) {
 
 	uint32_t cmd = *(int32_t*) p_context;
@@ -568,11 +570,20 @@ command_result_t CommandHandler::handleCmdUartEnable(cs_data_t commandData, cons
 command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Save behaviour");
 
-	// TODO(Arend): Only implements Switch behaviour at the moment...
+	// TODO(Arend): Only implements Switch behaviour at the moment so that we can deal with constant size...
 	if(commandData.len != 26){
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
+
+	uint8_t* dat = static_cast<uint8_t*>(commandData.data);
+	LOGd("%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",
+		dat[0], dat[1], dat[2], dat[3], dat[4], 
+		dat[5], dat[6], dat[7], dat[8], dat[9], 
+		dat[10], dat[11], dat[12], dat[13], dat[14], 
+		dat[15], dat[16], dat[17], dat[18], dat[19], 
+		dat[20], dat[21], dat[22], dat[23], dat[24], 
+		dat[25]);
 
 	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data, commandData.len);
 
@@ -582,6 +593,10 @@ command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, c
 	// event.resultData.len = sizeof(localbuf);
 
 	event.dispatch();
+
+	// TODO: return code
+
+	LOGd("after dispatch");
 	// if (event.result.returnCode == ERR_EVENT_UNHANDLED) {
 	// 	return command_result_t(ERR_NOT_IMPLEMENTED);
 	// }
@@ -592,13 +607,26 @@ command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, c
 
 command_result_t CommandHandler::handleCmdReplaceBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Replace behaviour");
-	event_t event(CS_TYPE::EVT_REPLACE_BEHAVIOUR, commandData.data, commandData.len);
-	event.result.buf = resultData;
+
+	if(commandData.len != 27){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+	}
+
+	uint8_t index = commandData.data[0];
+	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data + 1, commandData.len - 1);
+
+	auto tup = std::make_tuple<uint8_t,Behaviour>(std::move(index),std::move(b));
+
+
+	event_t event(CS_TYPE::EVT_REPLACE_BEHAVIOUR, &tup,sizeof(tup));
+
+	// event.result.buf = resultData;
 	event.dispatch();
 	command_result_t cmdResult;
-	cmdResult.returnCode = event.result.returnCode;
-	cmdResult.data.data = event.result.buf.data;
-	cmdResult.data.len = event.result.dataSize;
+	// cmdResult.returnCode = event.result.returnCode;
+	// cmdResult.data.data = event.result.buf.data;
+	// cmdResult.data.len = event.result.dataSize;
 	return cmdResult;
 }
 

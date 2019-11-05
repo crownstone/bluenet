@@ -33,7 +33,6 @@ Behaviour::Behaviour(std::array<uint8_t, 26> arr) :
         WireFormat::deserialize<TimeOfDay>(arr.data() + 3, 5),
         WireFormat::deserialize<TimeOfDay>(arr.data() + 8, 5),
         WireFormat::deserialize<PresenceCondition>(arr.data() + 13, 13) ){
-
 }
 
 Behaviour::SerializedDataFormat Behaviour::serialize() const{

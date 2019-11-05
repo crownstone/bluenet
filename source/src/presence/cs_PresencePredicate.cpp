@@ -7,6 +7,7 @@
 
 #include <presence/cs_PresencePredicate.h>
 #include <util/cs_WireFormat.h>
+#include <drivers/cs_Serial.h>
 
 PresencePredicate::PresencePredicate(Condition c, PresenceStateDescription roomsMask): 
     cond(c), RoomsBitMask(roomsMask) {
