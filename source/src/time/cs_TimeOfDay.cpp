@@ -7,6 +7,7 @@
 
 #include <time/cs_TimeOfDay.h>
 #include <util/cs_WireFormat.h>
+#include <drivers/cs_Serial.h>
 
 void TimeOfDay::wrap(){ 
     switch(base){
@@ -45,7 +46,18 @@ TimeOfDay::TimeOfDay(uint32_t h, uint32_t m, uint32_t s) :
 TimeOfDay::TimeOfDay(SerializedDataType rawData) : TimeOfDay(
     static_cast<BaseTime>(rawData[0]), 
     WireFormat::deserialize<int32_t>(rawData.data() + 1, 4)) {
+    bool basevalue_isok = false;
+    switch(base){
+        case BaseTime::Midnight:
+        case BaseTime::Sundown:
+        case BaseTime::Sunrise:
+            basevalue_isok = true;
+            break;
+    }
 
+    if(!basevalue_isok){
+        base = BaseTime::Midnight;
+    }
 }
 
 TimeOfDay TimeOfDay::Midnight(){ 
@@ -74,11 +86,9 @@ TimeOfDay TimeOfDay::convert(BaseTime newBase){
     if (base == newBase){
         return *this;
     }
-
     if (base == BaseTime::Midnight){
         return TimeOfDay(newBase, sec_since_base - baseTimeSinceMidnight(newBase));
     }
-
     return convert(BaseTime::Midnight).convert(newBase);
 }
 
