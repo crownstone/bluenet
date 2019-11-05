@@ -7,6 +7,7 @@
 #pragma once
 
 #include "protocol/cs_Packets.h"
+#include "protocol/cs_ErrorCodes.h"
 
 /**
  * Packets (structs) that are used internally.
@@ -65,7 +66,7 @@ struct command_result_t {
 	cs_data_t data;
 
 	command_result_t():
-		returnCode(),
+		returnCode(ERR_NOT_IMPLEMENTED),
 		data()
 	{}
 

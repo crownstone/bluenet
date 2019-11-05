@@ -576,33 +576,19 @@ command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, c
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 
-	uint8_t* dat = static_cast<uint8_t*>(commandData.data);
-	LOGd("%d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d, %d",
-		dat[0], dat[1], dat[2], dat[3], dat[4], 
-		dat[5], dat[6], dat[7], dat[8], dat[9], 
-		dat[10], dat[11], dat[12], dat[13], dat[14], 
-		dat[15], dat[16], dat[17], dat[18], dat[19], 
-		dat[20], dat[21], dat[22], dat[23], dat[24], 
-		dat[25]);
-
 	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data, commandData.len);
 
 	event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR, &b, sizeof(b));
-	// uint8_t localbuf[6];
-	// event.resultData.buff = localbuf;
-	// event.resultData.len = sizeof(localbuf);
+
+	event.result.buf = resultData;
 
 	event.dispatch();
 
-	// TODO: return code
-
-	LOGd("after dispatch");
-	// if (event.result.returnCode == ERR_EVENT_UNHANDLED) {
-	// 	return command_result_t(ERR_NOT_IMPLEMENTED);
-	// }
-
-	// not implemented.
-	return command_result_t(ERR_SUCCESS);
+	command_result_t cmdResult;
+	cmdResult.returnCode = event.result.returnCode;
+	cmdResult.data.data = event.result.buf.data;
+	cmdResult.data.len = event.result.dataSize;
+	return cmdResult;
 }
 
 command_result_t CommandHandler::handleCmdReplaceBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
@@ -620,13 +606,14 @@ command_result_t CommandHandler::handleCmdReplaceBehaviour(cs_data_t commandData
 
 
 	event_t event(CS_TYPE::EVT_REPLACE_BEHAVIOUR, &tup,sizeof(tup));
+	event.result.buf = resultData;
 
-	// event.result.buf = resultData;
 	event.dispatch();
+	
 	command_result_t cmdResult;
-	// cmdResult.returnCode = event.result.returnCode;
-	// cmdResult.data.data = event.result.buf.data;
-	// cmdResult.data.len = event.result.dataSize;
+	cmdResult.returnCode = event.result.returnCode;
+	cmdResult.data.data = event.result.buf.data;
+	cmdResult.data.len = event.result.dataSize;
 	return cmdResult;
 }
 
@@ -736,14 +723,23 @@ void CommandHandler::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CMD_CONTROL_CMD: {
 			auto cmd = reinterpret_cast<TYPIFY(CMD_CONTROL_CMD)*>(event.data);
-			uint8_t result_buffer[300];
-			handleCommand(
+			uint8_t result_buffer[300] = {};
+
+			auto result = handleCommand(
 				cmd->type, 
 				cs_data_t(cmd->data, cmd->size), 
 				cmd->source, 
 				cmd->accessLevel,
 				cs_data_t(result_buffer,sizeof(result_buffer))
 			);
+
+			LOGd("control command result.returnCode %d, len: %d", result.returnCode,result.data.len);
+			for(auto i = 0; i < 50; i+=10){
+				LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+				result_buffer[i+0],result_buffer[i+1],result_buffer[i+2],result_buffer[i+3],result_buffer[i+4],
+				result_buffer[i+5],result_buffer[i+6],result_buffer[i+7],result_buffer[i+8],result_buffer[i+9]);
+			}
+			
 			break;
 		}
 		default: {}

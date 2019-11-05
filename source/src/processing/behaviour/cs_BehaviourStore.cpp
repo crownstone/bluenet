@@ -25,12 +25,6 @@ void BehaviourStore::handleEvent(event_t& evt){
             Behaviour* newBehaviour = reinterpret_cast<TYPIFY(EVT_SAVE_BEHAVIOUR)*>(evt.data);
             newBehaviour->print();
             
-//            if(evt.result.data == nullptr || evt.result.len < sizeof(uint8_t)){
-//                // cannot communicate the result, so won't do anything.
-//                evt.returnCode = ERR_BUFFER_TOO_SMALL;
-//                return;
-//            }
-
             // find the first empty index.
             size_t empty_index = 0;
             while(activeBehaviours[empty_index].has_value() && empty_index < MaxBehaviours){
@@ -67,10 +61,13 @@ void BehaviourStore::handleEvent(event_t& evt){
                 LOGd("replace failed");
                 evt.result.returnCode = ERR_UNSPECIFIED;
             }
+
             if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
-				uint32_t hash = masterHash();
-				*reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = hash;
-				evt.result.dataSize = sizeof(hash);
+				*reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
+				evt.result.dataSize = sizeof(uint32_t);
+            } else {
+                LOGd("ERR_BUFFER_TOO_SMALL");
+                evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
             }
             break;
         }
