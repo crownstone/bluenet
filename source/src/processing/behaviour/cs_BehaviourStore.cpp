@@ -81,8 +81,10 @@ void BehaviourStore::handleEvent(event_t& evt){
 
             uint8_t index = *reinterpret_cast<TYPIFY(EVT_REMOVE_BEHAVIOUR)*>(evt.data);
             if(removeBehaviour(index)){
+                LOGd("ERR_SUCCESS");
                 evt.result.returnCode = ERR_SUCCESS;
             } else {
+                LOGd("ERR_NOT_FOUND");
                 evt.result.returnCode = ERR_NOT_FOUND;
             }
             if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
@@ -120,13 +122,16 @@ void BehaviourStore::handleEvent(event_t& evt){
             break;
         }
         case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES: {
+            LOGd("handle EVT_GET_BEHAVIOUR_INDICES");
         	if (evt.result.buf.data == nullptr) {
+                LOGd("ERR_BUFFER_UNASSIGNED");
         		evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
         		return;
         	}
 
         	uint8_t maxProfiles = 5;
         	if (evt.result.buf.len < MaxBehaviours * maxProfiles) {
+                LOGd("ERR_BUFFER_TOO_SMALL");
         		evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
         		return;
         	}
@@ -134,6 +139,7 @@ void BehaviourStore::handleEvent(event_t& evt){
         	for (uint8_t i = 0; i < MaxBehaviours; ++i) {
         		if (activeBehaviours[i].has_value()) {
         			evt.result.buf.data[listSize++] = i;
+                    LOGd("behaviour found at index %d",i);
         		}
         	}
         	evt.result.dataSize = listSize;

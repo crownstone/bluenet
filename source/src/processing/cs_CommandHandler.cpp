@@ -658,7 +658,9 @@ command_result_t CommandHandler::handleCmdGetBehaviourIndices(cs_data_t commandD
 	LOGd(STR_HANDLE_COMMAND, "Get behaviour indices");
 	event_t event(CS_TYPE::EVT_GET_BEHAVIOUR_INDICES, commandData.data, commandData.len);
 	event.result.buf = resultData;
+
 	event.dispatch();
+	
 	command_result_t cmdResult;
 	cmdResult.returnCode = event.result.returnCode;
 	cmdResult.data.data = event.result.buf.data;
@@ -734,7 +736,14 @@ void CommandHandler::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CMD_CONTROL_CMD: {
 			auto cmd = reinterpret_cast<TYPIFY(CMD_CONTROL_CMD)*>(event.data);
-			handleCommand(cmd->type, cs_data_t(cmd->data, cmd->size), cmd->source, cmd->accessLevel);
+			uint8_t result_buffer[300];
+			handleCommand(
+				cmd->type, 
+				cs_data_t(cmd->data, cmd->size), 
+				cmd->source, 
+				cmd->accessLevel,
+				cs_data_t(result_buffer,sizeof(result_buffer))
+			);
 			break;
 		}
 		default: {}
