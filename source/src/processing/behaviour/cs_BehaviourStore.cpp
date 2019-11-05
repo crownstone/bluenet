@@ -58,11 +58,9 @@ void BehaviourStore::handleEvent(event_t& evt){
             break;
         }
         case CS_TYPE::EVT_REPLACE_BEHAVIOUR:{
-            auto replace_request = reinterpret_cast<TYPIFY(EVT_REPLACE_BEHAVIOUR)*>(evt.data);
-            
+            auto replace_request = reinterpret_cast<TYPIFY(EVT_REPLACE_BEHAVIOUR)*>(evt.data);  
             
             if(saveBehaviour(std::get<1>(*replace_request), std::get<0>(*replace_request))){
-
                 LOGd("replace successful");
                 evt.result.returnCode = ERR_SUCCESS;
             } else {
@@ -99,11 +97,15 @@ void BehaviourStore::handleEvent(event_t& evt){
             uint8_t index = *reinterpret_cast<TYPIFY(EVT_GET_BEHAVIOUR)*>(evt.data);
 
             if(index >= MaxBehaviours || !activeBehaviours[index].has_value()){
+                LOGd("ERR_NOT_FOUND");
                 evt.result.returnCode = ERR_NOT_FOUND;
                 return;
             }
 
+            activeBehaviours[index]->print();
+
             if(evt.result.buf.data == nullptr) {
+                LOGd("ERR_BUFFER_UNASSIGNED");
             	evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
             	return;
             }
@@ -112,6 +114,7 @@ void BehaviourStore::handleEvent(event_t& evt){
 
             if(evt.result.buf.len < bs.size()){
                 // cannot communicate the result, so won't do anything.
+                LOGd("ERR_BUFFER_TOO_SMALL");
                 evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
                 return;
             }
@@ -165,8 +168,7 @@ bool BehaviourStore::saveBehaviour(Behaviour b, uint8_t index){
     if(index >= MaxBehaviours){
         return false;
     }
-
-    b.print();
+    
     LOGd("save behaviour to index %d",index);
 
     activeBehaviours[index] = b;
