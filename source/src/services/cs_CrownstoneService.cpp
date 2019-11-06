@@ -99,6 +99,14 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			LOGe(MSG_BUFFER_IS_LOCKED);
 			result = command_result_t(ERR_BUFFER_LOCKED);
 		}
+
+		LOGd("addControlCharacteristic result.returnCode %d, len: %d", result.returnCode,result.data.len);
+		for(auto i = 0; i < 50; i+=10){
+			LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+			result.data.data[i+0],result.data.data[i+1],result.data.data[i+2],result.data.data[i+3],result.data.data[i+4],
+			result.data.data[i+5],result.data.data[i+6],result.data.data[i+7],result.data.data[i+8],result.data.data[i+9]);
+		}
+
 		writeResult(type, result);
 	});
 }
