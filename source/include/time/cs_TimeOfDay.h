@@ -18,7 +18,7 @@
  */
 class TimeOfDay {
     public:
-    enum class BaseTime : uint8_t { Midnight = 1, Sundown = 2, Sunrise = 3};
+    enum class BaseTime : uint8_t { Midnight = 0, Sundown = 1, Sunrise = 2};
     typedef std::array<uint8_t,5> SerializedDataType;
     
     private:

@@ -83,13 +83,7 @@ TimeOfDay::SerializedDataType TimeOfDay::serialize() const {
 }
 
 TimeOfDay TimeOfDay::convert(BaseTime newBase){
-    if (base == newBase){
-        return *this;
-    }
-    if (newBase == BaseTime::Midnight){
-        return TimeOfDay(newBase, sec_since_base - baseTimeSinceMidnight(newBase));
-    }
-    return convert(BaseTime::Midnight).convert(newBase);
+    return TimeOfDay(newBase, sec_since_base + baseTimeSinceMidnight(base) - baseTimeSinceMidnight(newBase));
 }
 
 uint8_t TimeOfDay::h() {
