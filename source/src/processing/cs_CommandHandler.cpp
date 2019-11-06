@@ -570,27 +570,42 @@ command_result_t CommandHandler::handleCmdUartEnable(cs_data_t commandData, cons
 command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Save behaviour");
 
-	// TODO(Arend): Only implements Switch behaviour at the moment so that we can deal with constant size...
-	if(commandData.len != 27){
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+	uint8_t type = commandData.data[0];
+
+	switch(type){
+		case 0:{
+			// Its a switch behaviour packet!
+			if(commandData.len - 1 != sizeof(Behaviour::SerializedDataFormat)){
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: %d", commandData.len,type);
+				return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+			}
+
+			// assume its a switch behaviour for now.
+			Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data + 1, commandData.len - 1);
+
+			event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR, &b, sizeof(b));
+
+			event.result.buf = resultData;
+
+			event.dispatch();
+
+			command_result_t cmdResult;
+			cmdResult.returnCode = event.result.returnCode;
+			cmdResult.data.data = event.result.buf.data;
+			cmdResult.data.len = event.result.dataSize;
+			return cmdResult;
+		}
+		case 1:{
+			LOGe("Not implemented: save twilight");
+			break;
+		}
+		case 2:{
+			LOGe("Note implemented: save extended behaviour");
+		}
 	}
 
-	// assume its a switch behaviour for now.
-	// uint8_t type = commandData.data[0];
-	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data + 1, commandData.len - 1);
-
-	event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR, &b, sizeof(b));
-
-	event.result.buf = resultData;
-
-	event.dispatch();
-
-	command_result_t cmdResult;
-	cmdResult.returnCode = event.result.returnCode;
-	cmdResult.data.data = event.result.buf.data;
-	cmdResult.data.len = event.result.dataSize;
-	return cmdResult;
+	return command_result_t{};
+	
 }
 
 command_result_t CommandHandler::handleCmdReplaceBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
