@@ -21,6 +21,7 @@ extern "C" {
 #include "nrf_mesh_configure.h"
 #include "nrf_mesh_events.h"
 #include "net_state.h"
+#include "scanner.h"
 #include "uri.h"
 #include "utils.h"
 #include "log.h"
@@ -252,7 +253,7 @@ Mesh& Mesh::getInstance() {
 	return instance;
 }
 
-void Mesh::init() {
+void Mesh::init(const boards_config_t& board) {
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
 	__LOG_INIT(LOG_SRC_APP | LOG_SRC_PROV | LOG_SRC_ACCESS | LOG_SRC_BEARER | LOG_SRC_TRANSPORT | LOG_SRC_NETWORK, LOG_LEVEL_DBG3, LOG_CALLBACK_DEFAULT);
 	__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "----- Mesh init -----\n");
@@ -280,6 +281,9 @@ void Mesh::init() {
 	LOGi("Mesh isProvisioned=%u", _isProvisioned);
 
 	nrf_mesh_evt_handler_add(&cs_mesh_event_handler_struct);
+
+	LOGi("Scan interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
+	scanner_config_scan_time_set(board.scanIntervalUs, board.scanWindowUs);
 
 	// Init scanned device variable before registering the callback.
 	memset(&_scannedDevice, 0, sizeof(_scannedDevice));

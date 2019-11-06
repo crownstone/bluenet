@@ -572,7 +572,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 
 #if BUILD_MESHING == 1
 			if (_state->isTrue(CS_TYPE::CONFIG_MESH_ENABLED)) {
-				_mesh->init();
+				_mesh->init(_boardsConfig);
 			}
 #endif
 			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::LOCALIZATION);

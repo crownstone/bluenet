@@ -47,6 +47,9 @@ void asACR01B1D(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThresholdDown        = 0.41; // About 0.7kOhm --> 70-95C
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
+
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
 }
 
 
@@ -176,6 +179,9 @@ void asACR01B7B(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
+
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
 }
 
 
@@ -223,6 +229,9 @@ void asACR01B9A(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
+
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
 }
 
 void asACR01B9B(boards_config_t* p_config) {
@@ -270,6 +279,9 @@ void asACR01B9B(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThresholdDown        = 0.4; // About 71 degrees C
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
+
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
 }
 
 
@@ -318,6 +330,9 @@ void asACR01B9C(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThresholdDown        = 0.3; // About 82 degrees C
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
+
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
 }
 
 void asACR01B9D(boards_config_t* p_config) {
@@ -366,6 +381,9 @@ void asACR01B9D(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThresholdDown        = 0.3; // About 82 degrees C
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
+
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
 }
 
 void asACR01B9E(boards_config_t* p_config) {
@@ -414,6 +432,9 @@ void asACR01B9E(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThresholdDown        = 0.3; // About 82 degrees C
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
+
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
 }
 
 /*
@@ -532,6 +553,9 @@ void asACR01B10C(boards_config_t* p_config) {
 //	p_config->pinAinPwmTemp                      = 0; // actually zero ref: 1.2V, so always above the threshold voltage, so always below temperature threshold.
 //	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
 //	p_config->currentRange                       = 3000; // 0-3V
+
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
 }
 
 
@@ -571,6 +595,9 @@ void asACR01B2C(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThresholdDown        = 0.41; // About 0.7kOhm --> 70-95C
 
 	p_config->minTxPower                         = -20;
+
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
 }
 
 void asACR01B2G(boards_config_t* p_config) {
@@ -617,6 +644,9 @@ void asACR01B2G(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
 
 	p_config->minTxPower                         = -20;
+
+	p_config->scanIntervalUs                     = 200 * 1000;
+	p_config->scanWindowUs                       = 150 * 1000; // This board cannot provide enough power for 100% scanning.
 }
 
 void asPca10040(boards_config_t* p_config) {
@@ -660,6 +690,9 @@ void asPca10040(boards_config_t* p_config) {
 	p_config->pwmTempVoltageThresholdDown        = 1.0; // something
 
 	p_config->minTxPower                         = -40;
+
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
 }
 
 void asUsbDongle(boards_config_t* p_config) {
@@ -694,6 +727,9 @@ void asGuidestone(boards_config_t* p_config) {
 //	p_config->powerZero           = ; // unused
 
 	p_config->minTxPower          = -20;
+
+	p_config->scanIntervalUs      = 2000 * 1000;
+	p_config->scanWindowUs        = 2000 * 1000;
 }
 
 uint32_t configure_board(boards_config_t* p_config) {
