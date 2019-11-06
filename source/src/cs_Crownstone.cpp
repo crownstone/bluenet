@@ -188,6 +188,7 @@ void Crownstone::initDrivers(uint16_t step) {
 	switch (step) {
 	case 0: {
 		LOGi("Init drivers");
+		startHFClock();
 		_stack->init();
 		_timer->init();
 
@@ -1045,6 +1046,18 @@ void printNfcPins() {
 	else {
 		LOGd("NFC pins disabled (%p)", val);
 	}
+}
+
+void Crownstone::startHFClock() {
+	// Reference: https://devzone.nordicsemi.com/f/nordic-q-a/6394/use-external-32mhz-crystal
+
+	// Start the external high frequency crystal
+	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
+	NRF_CLOCK->TASKS_HFCLKSTART = 1;
+
+	// Wait for the external oscillator to start up
+	while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {}
+	LOGd("HF clock started");
 }
 
 /**********************************************************************************************************************
