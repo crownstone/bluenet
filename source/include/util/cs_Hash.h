@@ -9,4 +9,24 @@
 #include <cstdint>
 #include <cstddef>
 
-uint32_t Fletcher(uint8_t* data, const size_t len);
+/**
+ * Computes a Fletcher32 hash for the given data, interpreting it as a stream of
+ * little endian uint16_t.
+ * 
+ * As the Fletcher32 hash is effectively a uint16_t sized block stream hash, the computation
+ * of a hash of large amounts of data can be split.
+ * 
+ * E.g.
+ * 
+ * uint8_t part0[] = { __data__ }; size_t len0;
+ * uint8_t part1[] = { __data__ }; size_t len1;
+ * uint8_t part2[] = { __data__ }; size_t len2;
+ * 
+ * uint32_t fletch;
+ * fletch = Fletcher(part0,len0);
+ * fletch = Fletcher(part1,len1,fletch);
+ * fletch = Fletcher(part2,len2,fletch);
+ * ...
+ *  
+ */
+uint32_t Fletcher(uint8_t* data, const size_t len, uint32_t previousFletcherHash = 0);

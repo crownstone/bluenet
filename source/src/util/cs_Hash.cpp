@@ -11,10 +11,13 @@
 
 // based on source(30-10-2019): https://en.wikipedia.org/wiki/Fletcher%27s_checksum
 // adjusted to handle uint8_t arrays by padding with 0x00
-uint32_t Fletcher(uint8_t *data_8, const size_t len) {
+uint32_t Fletcher(uint8_t *data_8, const size_t len, uint32_t previousFletcherHash) {
         uint16_t* data_16 = reinterpret_cast<uint16_t*>(data_8);
-        uint32_t c0 = 0;
-        uint32_t c1 = 0;
+
+        // optimization of amount of operator% calls below still holds given a previous
+        // fletcher hash because the last operation always is a modulo operation.
+        uint32_t c0 = previousFletcherHash >> 0*8 & 0xffff;
+        uint32_t c1 = previousFletcherHash >> 2*8 & 0xffff;
 
         bool needs_padding = len % 2 !=0;
         size_t loop_len = len/2; // (this rounds down when necessary)
@@ -27,35 +30,29 @@ uint32_t Fletcher(uint8_t *data_8, const size_t len) {
                 size_t blocklen = CsMath::min(360u, loop_len);
 
                 for (size_t i = 0; i < blocklen; ++i) {
-                        LOGd("data: %x",*data_16);
-                        // c0 += data_8[0] <<8 | data_8[1];
-                        // data_8 += 2;
-
                         c0 += *data_16++;
                         c1 += c0;
-                        LOGd(". %x %x", c0,c1);
                 }
                 c0 = c0 % 0xffff;
                 c1 = c1 % 0xffff;
 
                 loop_len -= blocklen;
-                LOGd(">");
         }
 
         if(needs_padding){
             // intentionally skipped the last byte of data in the loop above
             // padd with 0x00 to finish the has.            
-            LOGd("data %x",data_8[len-1] | 0x00 << 8);
             c0 += data_8[len-1] | 0x00  << 8;
-            // c0 += *data_8 << 8 | 0x00;
-
             c1 += c0;
             
-            c0 = c0 % 65535;
-            c1 = c1 % 65535;
-            
-            LOGd("! %x %x", c0,c1);
+            c0 = c0 % 0xffff;
+            c1 = c1 % 0xffff;
         }
+
+        // at this point the following holds:
+        // c0 = \sum_{i=0}^{len} d_i \mod 0xffff
+        // c1 = \sum_{i=0}^{len} (len + 1 - i) d_i) \mod 0xffff
+        // (eventually can be used to parallelize the algorithm..)
 
         return (c1 << 16 | c0);
 }
