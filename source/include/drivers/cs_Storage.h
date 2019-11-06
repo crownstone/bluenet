@@ -160,6 +160,16 @@ public:
 	cs_ret_code_t garbageCollect();
 
 	/**
+	 * Erase all flash pages used by FDS.
+	 *
+	 * This should only be used to recover from a failing init.
+	 *
+	 * @retval ERR_SUCCESS                  When successfully started erasing all pages.
+	 * @retval ERR_NOT_AVAILABLE            When you can't use this function (storage initialized already).
+	 */
+	cs_ret_code_t eraseAllPages();
+
+	/**
 	 * Handle Crownstone events.
 	 */
 	void handleEvent(event_t &) {};
@@ -185,6 +195,7 @@ private:
 	void operator=(Storage const &);
 
 	bool _initialized = false;
+	bool _registeredFds = false;
 	cs_storage_error_callback_t _errorCallback = NULL;
 
 	bool _collectingGarbage = false;
@@ -207,12 +218,7 @@ private:
 	 */
 	uint32_t _eraseEndPage = 0;
 
-	/**
-	 * Erase all flash pages used by FDS.
-	 *
-	 * This should only be used to recover from a failing init.
-	 */
-	void eraseAllPages();
+	bool isErasingPages();
 
 	/**
 	 * Erase next page, started via eraseAllPages().
