@@ -29,12 +29,23 @@ int main(){
     }
 
     // aggregated computation:
-    uint32_t fletch_aggr = Fletcher(test2,4);
-    fletch_aggr = Fletcher(test2 + 4, 4, fletch_aggr);
+    uint32_t fletch_aggr0 = Fletcher(test2,4);
+    fletch_aggr0 = Fletcher(test2 + 4, 4, fletch_aggr0);
 
-    if(fletch_aggr != fletch2){
+    if(fletch_aggr0 != fletch2){
         LOGe("Fletcher test aggr broken"); 
 	    return -1;
+    }
+
+    uint32_t fletch_aggr1 = 0;
+    fletch_aggr1 = Fletcher(test3+0, 1, fletch_aggr1);
+    fletch_aggr1 = Fletcher(test3+2, 1, fletch_aggr1);
+    fletch_aggr1 = Fletcher(test3+4, 1, fletch_aggr1);
+    fletch_aggr1 = Fletcher(test3+6, 1, fletch_aggr1);
+
+    if(fletch_aggr1_1 != Fletcher(test3,sizeof(test3))){
+        LOGe("Fletcher test aggr1 broken");
+        return -1;
     }
     
     return 0;    

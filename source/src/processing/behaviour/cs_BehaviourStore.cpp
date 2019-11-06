@@ -11,6 +11,7 @@
 #include <drivers/cs_Serial.h>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <util/cs_Hash.h>
 
 #include <algorithm>
 
@@ -195,5 +196,20 @@ bool BehaviourStore::saveBehaviour(Behaviour b, uint8_t index){
 }
 
 uint32_t BehaviourStore::masterHash(){
-    return 0x12345678;
+    uint32_t fletch = 0;
+
+    for(uint8_t i = 0; i < MaxBehaviours; i++){
+        // append index as uint16_t to hash data
+        fletch = Fletcher(&i,sizeof(i), fletch); // Fletcher() will padd i to the correct width for us.
+
+        // append behaviour or empty array to hash data
+        if(activeBehaviours[i]){
+            fletch = Fletcher(activeBehaviours[i]->serialize().data(),sizeof(Behaviour::SerializedDataFormat), fletch);
+        } else {
+            Behaviour::SerializedDataFormat zeroes = {0};
+            fletch = Fletcher(zeroes.data(), sizeof(Behaviour::SerializedDataFormat), fletch);
+        }
+    }
+
+    return fletch;
 }
