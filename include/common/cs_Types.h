@@ -211,6 +211,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_STORAGE_REMOVE_FILE_DONE,                     // Sent when a file has been invalidated at storage. -- Payload is cs_file_id_t, the file that was invalidated.
 	EVT_STORAGE_GC_DONE,                              // Sent when garbage collection is done, invalidated data is actually removed at this point.
 	EVT_STORAGE_FACTORY_RESET,                        // Sent when factory reset of storage is done.
+	EVT_STORAGE_PAGES_ERASED,                         // Sent when all storage pages are completely erased.
 	EVT_MESH_FACTORY_RESET,                           // Sent when factory reset of mesh storage is done.
 	EVT_SETUP_DONE,                                   // Sent when setup was done (and settings are stored).
 //	EVT_DO_RESET_DELAYED,                             // Sent to perform a reset in a few seconds.
@@ -323,6 +324,7 @@ constexpr CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_STORAGE_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -556,6 +558,7 @@ typedef  CS_TYPE TYPIFY(EVT_STORAGE_REMOVE_DONE);
 typedef  cs_file_id_t TYPIFY(EVT_STORAGE_REMOVE_FILE_DONE);
 typedef  void TYPIFY(EVT_STORAGE_GC_DONE);
 typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET);
+typedef  void TYPIFY(EVT_STORAGE_PAGES_ERASED);
 typedef  void TYPIFY(EVT_MESH_FACTORY_RESET);
 typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
@@ -805,6 +808,8 @@ constexpr size16_t TypeSize(CS_TYPE const & type) {
 		return 0;
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
 		return 0;
+	case CS_TYPE::EVT_STORAGE_PAGES_ERASED:
+		return 0;
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 		return 0;
 	case CS_TYPE::EVT_SETUP_DONE:
@@ -971,6 +976,7 @@ constexpr const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE: return "EVT_STORAGE_REMOVE_FILE_DONE";
 	case CS_TYPE::EVT_STORAGE_GC_DONE: return "EVT_STORAGE_GC_DONE";
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET: return "EVT_STORAGE_FACTORY_RESET";
+	case CS_TYPE::EVT_STORAGE_PAGES_ERASED: return "EVT_STORAGE_PAGES_ERASED";
 	case CS_TYPE::EVT_MESH_FACTORY_RESET: return "EVT_MESH_FACTORY_RESET";
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: return "EVT_SWITCHCRAFT_ENABLED";
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF: return "EVT_SWITCH_FORCED_OFF";
@@ -1099,6 +1105,7 @@ constexpr PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_STORAGE_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -1236,6 +1243,7 @@ constexpr cs_file_id_t getFileId(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_STORAGE_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
@@ -1537,6 +1545,7 @@ constexpr cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_STORAGE_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
@@ -1672,6 +1681,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_STORAGE_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
@@ -1808,6 +1818,7 @@ constexpr EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE:
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:
+	case CS_TYPE::EVT_STORAGE_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_LOCKED:
