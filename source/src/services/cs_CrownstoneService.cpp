@@ -92,6 +92,17 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			resultData.data = _resultPacketAccessor->getPayloadBuffer();
 			resultData.len = _resultPacketAccessor->getMaxPayloadSize();
 //			}
+
+			// DEBUG
+			uint8_t* buf = _controlPacketAccessor->getSerializedBuffer().data;
+		LOGd("addControlCharacteristic result.returnCode %d, data len: %d", result.returnCode, result.data.len);
+		for(auto i = 0; i < 50; i+=10){
+			LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+			buf[i+0],buf[i+1],buf[i+2],buf[i+3],buf[i+4],
+			buf[i+5],buf[i+6],buf[i+7],buf[i+8],buf[i+9]);
+		}
+		// DEBUG
+		
 			result = CommandHandler::getInstance().handleCommand(type, payload, cmd_source_t(CS_CMD_SOURCE_CONNECTION), accessLevel, resultData);
 			writeBuffer.unlock();
 		}
@@ -100,11 +111,12 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			result = command_result_t(ERR_BUFFER_LOCKED);
 		}
 
-		LOGd("addControlCharacteristic result.returnCode %d, len: %d", result.returnCode,result.data.len);
+		uint8_t* buf = _resultPacketAccessor->getSerializedBuffer().data;
+		LOGd("addControlCharacteristic result.returnCode %d, data len: %d", result.returnCode, result.data.len);
 		for(auto i = 0; i < 50; i+=10){
 			LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
-			result.data.data[i+0],result.data.data[i+1],result.data.data[i+2],result.data.data[i+3],result.data.data[i+4],
-			result.data.data[i+5],result.data.data[i+6],result.data.data[i+7],result.data.data[i+8],result.data.data[i+9]);
+			buf[i+0],buf[i+1],buf[i+2],buf[i+3],buf[i+4],
+			buf[i+5],buf[i+6],buf[i+7],buf[i+8],buf[i+9]);
 		}
 
 		writeResult(type, result);

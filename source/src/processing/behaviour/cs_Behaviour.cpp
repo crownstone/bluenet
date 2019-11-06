@@ -72,6 +72,11 @@ bool Behaviour::isValid(PresenceStateDescription currentpresence) const{
 }
 
 void Behaviour::print(){
+    LOGd("behaviour, intenisty: %d activeDays %d",
+        activeIntensity,
+        activeDays
+    );
+
     LOGd("Behaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%",
         from().h(),from().m(),from().s(),
         until().h(),until().m(),until().s(),

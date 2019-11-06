@@ -86,7 +86,7 @@ TimeOfDay TimeOfDay::convert(BaseTime newBase){
     if (base == newBase){
         return *this;
     }
-    if (base == BaseTime::Midnight){
+    if (newBase == BaseTime::Midnight){
         return TimeOfDay(newBase, sec_since_base - baseTimeSinceMidnight(newBase));
     }
     return convert(BaseTime::Midnight).convert(newBase);

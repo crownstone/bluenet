@@ -571,12 +571,14 @@ command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, c
 	LOGd(STR_HANDLE_COMMAND, "Save behaviour");
 
 	// TODO(Arend): Only implements Switch behaviour at the moment so that we can deal with constant size...
-	if(commandData.len != 26){
+	if(commandData.len != 27){
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 
-	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data, commandData.len);
+	// assume its a switch behaviour for now.
+	// uint8_t type = commandData.data[0];
+	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data + 1, commandData.len - 1);
 
 	event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR, &b, sizeof(b));
 
@@ -594,13 +596,14 @@ command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, c
 command_result_t CommandHandler::handleCmdReplaceBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Replace behaviour");
 
-	if(commandData.len != 27){
+	if(commandData.len != 28){
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 
-	uint8_t index = commandData.data[0];
-	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data + 1, commandData.len - 1);
+	// uint8_t type = commandData.data[0];
+	uint8_t index = commandData.data[1];
+	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data + 2, commandData.len - 2);
 
 	auto tup = std::make_tuple<uint8_t,Behaviour>(std::move(index),std::move(b));
 
