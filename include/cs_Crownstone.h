@@ -186,6 +186,11 @@ private:
 	OperationMode _operationMode;
 	OperationMode _oldOperationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
+	/**
+	 * If storage was recovered by erasing all pages, we want to set some state variables
+	 * different than after a factory reset.
+	 */
+	bool _setStateValuesAfterStorageRecover = false;
 };
 
 

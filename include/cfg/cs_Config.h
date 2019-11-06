@@ -26,6 +26,16 @@
 #define GPREGRET_BROWNOUT_RESET                  96
 #define GPREGRET_SOFT_RESET                      1
 
+/**
+ * Values used to remember flags after a reboot.
+ *
+ * Make sure this doesn't interfere with the nrf bootloader values that are used. Like:
+ * - BOOTLOADER_DFU_GPREGRET2_MASK
+ * - BOOTLOADER_DFU_GPREGRET2
+ * - BOOTLOADER_DFU_SKIP_CRC_BIT_MASK
+ */
+#define GPREGRET2_STORAGE_RECOVERED              4
+
 /** Priorities of the different peripherals
  */
 //#define SAADC_TIMER_CONFIG_IRQ_PRIORITY          2
