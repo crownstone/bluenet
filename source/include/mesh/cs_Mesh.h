@@ -28,7 +28,7 @@ public:
 	/**
 	 * Init the mesh.
 	 */
-	void init();
+	void init(const boards_config_t& board);
 
 	/**
 	 * Start the mesh.

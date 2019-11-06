@@ -188,12 +188,23 @@ void Crownstone::initDrivers(uint16_t step) {
 	switch (step) {
 	case 0: {
 		LOGi("Init drivers");
+		startHFClock();
 		_stack->init();
 		_timer->init();
 
 		_stack->initSoftdevice();
 
-		_storage->init();
+		cs_ret_code_t retCode = _storage->init();
+		if (retCode != ERR_SUCCESS) {
+			// We can try to erase all pages.
+			retCode = _storage->eraseAllPages();
+			if (retCode != ERR_SUCCESS) {
+				// Only option left is to reboot and see if things work out next time.
+				APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
+			}
+			// Wait for pages erased event.
+		}
+		// Wait for storage initialized event.
 		break;
 	}
 	case 1: {
@@ -206,6 +217,27 @@ void Crownstone::initDrivers(uint16_t step) {
 			TYPIFY(CONFIG_UART_ENABLED) uartEnabled;
 			_state->get(CS_TYPE::CONFIG_UART_ENABLED, &uartEnabled, sizeof(uartEnabled));
 			serial_enable((serial_enable_t)uartEnabled);
+		}
+
+		uint32_t gpregret;
+		sd_power_gpregret_get(0, &gpregret);
+		uint32_t gpregret2;
+		sd_power_gpregret_get(1, &gpregret2);
+		LOGi("GPRegRet: %u %u", gpregret, gpregret2);
+
+		// For now, use GPREGRET2 instead.
+		sd_power_gpregret_get(1, &gpregret2);
+		if (gpregret2 & GPREGRET2_STORAGE_RECOVERED) {
+			_setStateValuesAfterStorageRecover = true;
+			sd_power_gpregret_clr(1, GPREGRET2_STORAGE_RECOVERED);
+		}
+		if (_setStateValuesAfterStorageRecover) {
+			LOGw("Set state values after storage recover.");
+			// Set switch state to on, as that's the most likely and preferred state of the switch.
+			TYPIFY(STATE_SWITCH_STATE) switchState;
+			switchState.state.dimmer = 0;
+			switchState.state.relay = 1;
+			_state->set(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
 		}
 
 		LOGi(FMT_INIT, "command handler");
@@ -555,7 +587,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 
 #if BUILD_MESHING == 1
 			if (_state->isTrue(CS_TYPE::CONFIG_MESH_ENABLED)) {
-				_mesh->init();
+				_mesh->init(_boardsConfig);
 			}
 #endif
 			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::LOCALIZATION);
@@ -654,11 +686,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 void Crownstone::startUp() {
 
 	LOGi(FMT_HEADER, "startup");
-
-	uint32_t gpregret_id = 0;
-	uint32_t gpregret;
-	sd_power_gpregret_get(gpregret_id, &gpregret);
-	LOGi("Content gpregret register: %d", gpregret);
 
 	TYPIFY(CONFIG_BOOT_DELAY) bootDelay;
 	_state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
@@ -828,6 +855,31 @@ void Crownstone::handleEvent(event_t & event) {
 			startUp();
 			LOG_FLUSH();
 			break;
+		case CS_TYPE::EVT_STORAGE_PAGES_ERASED: {
+			LOGi("Storage pages erased, init storage");
+			/*
+			 * FDS init can't be called a second time, because it remembers that it's initializing, though
+			 * doesn't continue doing so.
+			 *
+			 * The following commented out code could be used once FDS has been fixed.
+			 * For now, we use GPREGRET2 to remember and do it next boot.
+			 */
+//			cs_ret_code_t retCode = _storage->init();
+//			if (retCode != ERR_SUCCESS) {
+//				LOGf("Storage init failed after page erase");
+//				// Only option left is to reboot and see if things work out next time.
+//				APP_ERROR_CHECK(NRF_ERROR_INTERNAL);
+//			}
+//
+//			_setStateValuesAfterStorageRecover = true;
+//			// Wait for storage initialized event.
+			uint32_t gpregret;
+			sd_power_gpregret_get(1, &gpregret);
+			gpregret |= GPREGRET2_STORAGE_RECOVERED;
+			sd_power_gpregret_set(1, gpregret);
+			sd_nvic_SystemReset();
+			break;
+		}
 		default:
 			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
 	}
@@ -997,6 +1049,18 @@ void printNfcPins() {
 	else {
 		LOGd("NFC pins disabled (%p)", val);
 	}
+}
+
+void Crownstone::startHFClock() {
+	// Reference: https://devzone.nordicsemi.com/f/nordic-q-a/6394/use-external-32mhz-crystal
+
+	// Start the external high frequency crystal
+	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
+	NRF_CLOCK->TASKS_HFCLKSTART = 1;
+
+	// Wait for the external oscillator to start up
+	while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {}
+	LOGd("HF clock started");
 }
 
 /**********************************************************************************************************************

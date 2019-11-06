@@ -187,6 +187,20 @@ typedef struct  {
 	//! Voltage of PWM thermometer at which the dimmer is cool enough again.
 	float pwmTempVoltageThresholdDown;
 
+	/**
+	 * Scan interval in μs.
+	 *
+	 * Must not be larger than (1000 * BEARER_SCAN_INT_MAX_MS).
+	 */
+	uint32_t scanIntervalUs;
+
+	/**
+	 * Scan window in μs.
+	 *
+	 * Must not be larger than scan interval, and not smaller than (1000 * BEARER_SCAN_WIN_MIN_MS).
+	 */
+	uint32_t scanWindowUs;
+
 } boards_config_t;
 
 /** Configure board.

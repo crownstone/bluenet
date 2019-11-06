@@ -213,6 +213,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_STORAGE_REMOVE_FILE_DONE,                     // Sent when a file has been invalidated at storage. -- Payload is cs_file_id_t, the file that was invalidated.
 	EVT_STORAGE_GC_DONE,                              // Sent when garbage collection is done, invalidated data is actually removed at this point.
 	EVT_STORAGE_FACTORY_RESET,                        // Sent when factory reset of storage is done.
+	EVT_STORAGE_PAGES_ERASED,                         // Sent when all storage pages are completely erased.
 	EVT_MESH_FACTORY_RESET,                           // Sent when factory reset of mesh storage is done.
 	EVT_SETUP_DONE,                                   // Sent when setup was done (and settings are stored).
 //	EVT_DO_RESET_DELAYED,                             // Sent to perform a reset in a few seconds.
@@ -382,6 +383,7 @@ typedef  CS_TYPE TYPIFY(EVT_STORAGE_REMOVE_DONE);
 typedef  cs_file_id_t TYPIFY(EVT_STORAGE_REMOVE_FILE_DONE);
 typedef  void TYPIFY(EVT_STORAGE_GC_DONE);
 typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET);
+typedef  void TYPIFY(EVT_STORAGE_PAGES_ERASED);
 typedef  void TYPIFY(EVT_MESH_FACTORY_RESET);
 typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);

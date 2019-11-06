@@ -142,6 +142,14 @@ protected:
 	/** Increase reset counter. This will be stored in FLASH so it persists over reboots.
 	 */
 	void increaseResetCounter();
+
+	/**
+	 * Start the 32 MHz external oscillator.
+	 * This provides very precise timing, which is required for the PWM driver to synchronize with the mains supply.
+	 * An alternative is to use the low frequency crystal oscillator for the PWM driver, but the SoftDevice's radio
+	 * operations periodically turn on the 32 MHz crystal oscillator anyway.
+	 */
+	void startHFClock();
 private:
 
 	boards_config_t _boardsConfig;
@@ -186,6 +194,11 @@ private:
 	OperationMode _operationMode;
 	OperationMode _oldOperationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
+	/**
+	 * If storage was recovered by erasing all pages, we want to set some state variables
+	 * different than after a factory reset.
+	 */
+	bool _setStateValuesAfterStorageRecover = false;
 };
 
 
