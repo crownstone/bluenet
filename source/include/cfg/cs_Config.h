@@ -22,8 +22,8 @@
  *
  * This should be the same value as defined in the bootloader.
  */
-#define GPREGRET_DFU_RESET                       66
-#define GPREGRET_BROWNOUT_RESET                  96
+#define GPREGRET_DFU_RESET                       66 // 07-11-2019 TODO: why 66? It makes more sense to use 63 or 31.
+#define GPREGRET_BROWNOUT_RESET                  96 // 07-11-2019 TODO: why 96? It makes more sense to use 64 or 32.
 #define GPREGRET_SOFT_RESET                      1
 
 /**
