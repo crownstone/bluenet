@@ -570,17 +570,21 @@ command_result_t CommandHandler::handleCmdUartEnable(cs_data_t commandData, cons
 command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Save behaviour");
 
-	uint8_t type = commandData.data[0];
+	if(commandData.len < 1){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+	}
+
+	Behaviour::Type type = static_cast<Behaviour::Type>(commandData.data[0]);
 
 	switch(type){
-		case 0:{
-			// Its a switch behaviour packet!
+		case Behaviour::Type::Switch:{
+			// Its a switch behaviour packet, let's check the size
 			if(commandData.len - 1 != sizeof(Behaviour::SerializedDataFormat)){
 				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: %d", commandData.len,type);
 				return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 			}
 
-			// assume its a switch behaviour for now.
 			Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data + 1, commandData.len - 1);
 
 			event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR, &b, sizeof(b));
@@ -595,12 +599,15 @@ command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, c
 			cmdResult.data.len = event.result.dataSize;
 			return cmdResult;
 		}
-		case 1:{
+		case Behaviour::Type::Twilight:{
 			LOGe("Not implemented: save twilight");
 			break;
 		}
-		case 2:{
+		case Behaviour::Type::Extended:{
 			LOGe("Note implemented: save extended behaviour");
+		}
+		default:{
+			LOGe("Invalid behaviour type");
 		}
 	}
 
@@ -611,66 +618,70 @@ command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, c
 command_result_t CommandHandler::handleCmdReplaceBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Replace behaviour");
 
-	if(commandData.len != 28){
+	if(commandData.len < 2){
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 
-	// uint8_t type = commandData.data[0];
-	uint8_t index = commandData.data[1];
-	Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data + 2, commandData.len - 2);
-
-	auto tup = std::make_tuple<uint8_t,Behaviour>(std::move(index),std::move(b));
+	uint8_t index = commandData.data[0];
+	Behaviour::Type type = static_cast<Behaviour::Type>(commandData.data[1]);
 
 
-	event_t event(CS_TYPE::EVT_REPLACE_BEHAVIOUR, &tup,sizeof(tup));
-	event.result.buf = resultData;
+	switch(type){
+		case Behaviour::Type::Switch:{
+			// Its a switch behaviour packet, let's check the size
+			if(commandData.len -2 != sizeof(Behaviour::SerializedDataFormat)){
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+				return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+			}
 
-	event.dispatch();
-	
-	command_result_t cmdResult;
-	cmdResult.returnCode = event.result.returnCode;
-	cmdResult.data.data = event.result.buf.data;
-	cmdResult.data.len = event.result.dataSize;
-	return cmdResult;
+			Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data + 2, commandData.len - 2);
+
+			auto tup = std::make_tuple<uint8_t,Behaviour>(std::move(index),std::move(b));
+
+
+			event_t event(CS_TYPE::EVT_REPLACE_BEHAVIOUR, &tup,sizeof(tup));
+			event.result.buf = resultData;
+
+			event.dispatch();
+			
+			command_result_t cmdResult;
+			cmdResult.returnCode = event.result.returnCode;
+			cmdResult.data.data = event.result.buf.data;
+			cmdResult.data.len = event.result.dataSize;
+			return cmdResult;			
+		}
+		case Behaviour::Type::Twilight:{
+			LOGe("Not implemented: save twilight");
+			break;
+		}
+		case Behaviour::Type::Extended:{
+			LOGe("Note implemented: save extended behaviour");
+			break;
+		}
+		default:{
+			LOGe("Invalid behaviour type");
+			break;
+		}
+	}
+
+	return command_result_t{};
 }
 
 command_result_t CommandHandler::handleCmdRemoveBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Remove behaviour");
 	event_t event(CS_TYPE::EVT_REMOVE_BEHAVIOUR, commandData.data, commandData.len);
-	event.result.buf = resultData;
-	event.dispatch();
-	command_result_t cmdResult;
-	cmdResult.returnCode = event.result.returnCode;
-	cmdResult.data.data = event.result.buf.data;
-	cmdResult.data.len = event.result.dataSize;
-	return cmdResult;
+	return dispatchEventForCommand(CS_TYPE::EVT_REMOVE_BEHAVIOUR,commandData,resultData);
 }
 
 command_result_t CommandHandler::handleCmdGetBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Get behaviour");
-	event_t event(CS_TYPE::EVT_GET_BEHAVIOUR, commandData.data, commandData.len);
-	event.result.buf = resultData;
-	event.dispatch();
-	command_result_t cmdResult;
-	cmdResult.returnCode = event.result.returnCode;
-	cmdResult.data.data = event.result.buf.data;
-	cmdResult.data.len = event.result.dataSize;
-	return cmdResult;
+	return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR,commandData,resultData);
 }
 
 command_result_t CommandHandler::handleCmdGetBehaviourIndices(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Get behaviour indices");
-	event_t event(CS_TYPE::EVT_GET_BEHAVIOUR_INDICES, commandData.data, commandData.len);
-	event.result.buf = resultData;
-
-	event.dispatch();
-	
-	command_result_t cmdResult;
-	cmdResult.returnCode = event.result.returnCode;
-	cmdResult.data.data = event.result.buf.data;
-	cmdResult.data.len = event.result.dataSize;
-	return cmdResult;
+	return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR_INDICES,commandData,resultData);
 }
 
 
@@ -762,4 +773,18 @@ void CommandHandler::handleEvent(event_t & event) {
 		}
 		default: {}
 	}
+}
+
+command_result_t CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_data_t resultData){
+	event_t event(typ, commandData.data, commandData.len);
+	event.result.buf = resultData;
+
+	event.dispatch();
+	
+	command_result_t cmdResult;
+	cmdResult.returnCode = event.result.returnCode;
+	cmdResult.data.data = event.result.buf.data;
+	cmdResult.data.len = event.result.dataSize;
+
+	return cmdResult;
 }

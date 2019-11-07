@@ -100,6 +100,8 @@ private:
 	command_result_t handleCmdGetBehaviour          (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdGetBehaviourIndices   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	
+	// delegate a command in the form of an event of given [typ], passing the commandData and using the allocated [resultData]
+	command_result_t dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_data_t resultData);
 
 	/**
 	 * Reset, after a delay.

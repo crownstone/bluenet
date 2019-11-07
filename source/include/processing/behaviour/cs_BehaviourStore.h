@@ -19,7 +19,7 @@
  */
 class BehaviourStore : public EventListener {
     private:
-    static constexpr size_t MaxBehaviours = 10;
+    static constexpr size_t MaxBehaviours = 50;
     static std::array<std::optional<Behaviour>,MaxBehaviours> activeBehaviours;
     
     public:

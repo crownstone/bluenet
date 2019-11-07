@@ -212,9 +212,7 @@ uint32_t BehaviourStore::masterHash(){
     }
 
     // DEBUG
-    uint64_t event_fletch =  fletch * 1000 * 1000 * 64;
-    event_t evt(CS_TYPE::STATE_ACCUMULATED_ENERGY, &event_fletch,sizeof(event_fletch));
-    evt.dispatch();
+    LOGd("masterHash: %x", fletch);
     // DEBUG
 
     return fletch;
