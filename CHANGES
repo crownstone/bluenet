@@ -1,3 +1,8 @@
+Version 3.0.6:
+ - Version bump to 3.0.6  int: 22
+ - Add release config for crownstone_3.0.6
+ - Also set plug 1B2C and builtin 1B1D at 75% sanning.
+
 Version 3.0.5:
  - Version bump to 3.0.5  int: 21
  - Add release config for crownstone_3.0.5
