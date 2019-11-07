@@ -48,8 +48,8 @@ void asACR01B1D(boards_config_t* p_config) {
 
 	p_config->minTxPower                         = -20; // higher tx power for builtins
 
-	p_config->scanIntervalUs                     = 2000 * 1000;
-	p_config->scanWindowUs                       = 2000 * 1000;
+	p_config->scanIntervalUs                     = 200 * 1000;
+	p_config->scanWindowUs                       = 150 * 1000;
 }
 
 
@@ -596,8 +596,8 @@ void asACR01B2C(boards_config_t* p_config) {
 
 	p_config->minTxPower                         = -20;
 
-	p_config->scanIntervalUs                     = 2000 * 1000;
-	p_config->scanWindowUs                       = 2000 * 1000;
+	p_config->scanIntervalUs                     = 200 * 1000;
+	p_config->scanWindowUs                       = 150 * 1000;
 }
 
 void asACR01B2G(boards_config_t* p_config) {
