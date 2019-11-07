@@ -617,55 +617,7 @@ command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, c
 
 command_result_t CommandHandler::handleCmdReplaceBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Replace behaviour");
-
-	if(commandData.len < 2){
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-	}
-
-	uint8_t index = commandData.data[0];
-	Behaviour::Type type = static_cast<Behaviour::Type>(commandData.data[1]);
-
-
-	switch(type){
-		case Behaviour::Type::Switch:{
-			// Its a switch behaviour packet, let's check the size
-			if(commandData.len -2 != sizeof(Behaviour::SerializedDataFormat)){
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-				return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-			}
-
-			Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data + 2, commandData.len - 2);
-
-			auto tup = std::make_tuple<uint8_t,Behaviour>(std::move(index),std::move(b));
-
-
-			event_t event(CS_TYPE::EVT_REPLACE_BEHAVIOUR, &tup,sizeof(tup));
-			event.result.buf = resultData;
-
-			event.dispatch();
-			
-			command_result_t cmdResult;
-			cmdResult.returnCode = event.result.returnCode;
-			cmdResult.data.data = event.result.buf.data;
-			cmdResult.data.len = event.result.dataSize;
-			return cmdResult;			
-		}
-		case Behaviour::Type::Twilight:{
-			LOGe("Not implemented: save twilight");
-			break;
-		}
-		case Behaviour::Type::Extended:{
-			LOGe("Note implemented: save extended behaviour");
-			break;
-		}
-		default:{
-			LOGe("Invalid behaviour type");
-			break;
-		}
-	}
-
-	return command_result_t{};
+	return dispatchEventForCommand(CS_TYPE::EVT_REPLACE_BEHAVIOUR,commandData,resultData);
 }
 
 command_result_t CommandHandler::handleCmdRemoveBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){

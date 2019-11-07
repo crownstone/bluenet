@@ -9,6 +9,8 @@
 
 #include <common/cs_Types.h>
 
+#include <cstdint>
+
 struct event_result_t {
 	/**
 	 * Return code.
@@ -42,12 +44,13 @@ class event_t {
 	{}
 
 	event_t(CS_TYPE type) :
-		event_t(type, NULL, 0)
+		event_t(type, nullptr, 0)
 	{}
 
 	CS_TYPE type;
 
 	void *data;
+	inline uint8_t* getData(){ return static_cast<uint8_t*>(data); }
 
 	size16_t size;
 

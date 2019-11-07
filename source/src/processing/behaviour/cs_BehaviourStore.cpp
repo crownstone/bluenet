@@ -12,6 +12,7 @@
 #include <events/cs_EventListener.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <util/cs_Hash.h>
+#include <util/cs_WireFormat.h>
 
 #include <algorithm>
 
@@ -79,23 +80,59 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
 }
 
 void BehaviourStore::handleReplaceBehaviour(event_t& evt){
-    auto replace_request = reinterpret_cast<TYPIFY(EVT_REPLACE_BEHAVIOUR)*>(evt.data);  
-            
-    if(saveBehaviour(std::get<1>(*replace_request), std::get<0>(*replace_request))){
-        LOGd("replace successful");
-        evt.result.returnCode = ERR_SUCCESS;
-    } else {
-        LOGd("replace failed");
-        evt.result.returnCode = ERR_UNSPECIFIED;
-    }
+	if(evt.size < 2){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH " %d", evt.size);
+		evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+        return;
+	}
 
-    if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
-        *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
-        evt.result.dataSize = sizeof(uint32_t);
-    } else {
-        LOGd("ERR_BUFFER_TOO_SMALL");
-        evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
-    }
+    uint8_t* dat = static_cast<uint8_t*>(evt.data);
+	
+    uint8_t index = dat[0];
+	Behaviour::Type type = static_cast<Behaviour::Type>(dat[1]);
+
+	switch(type){
+		case Behaviour::Type::Switch:{
+			// Its a switch behaviour packet, let's check the size
+			if(evt.size -2 != sizeof(Behaviour::SerializedDataFormat)){
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH "(% d)", evt.size);
+				evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+                return;
+			}
+
+			Behaviour b = WireFormat::deserialize<Behaviour>(evt.getData() + 2, evt.size - 2);
+        
+            if(saveBehaviour(b, index)){
+                LOGd("replace successful");
+                evt.result.returnCode = ERR_SUCCESS;
+            } else {
+                LOGd("replace failed");
+                evt.result.returnCode = ERR_UNSPECIFIED;
+            }
+
+            if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
+                *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
+                evt.result.dataSize = sizeof(uint32_t);
+            } else {
+                LOGd("ERR_BUFFER_TOO_SMALL");
+                evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
+            }
+            break;
+		}
+		case Behaviour::Type::Twilight:{
+			LOGe("Not implemented: save twilight");
+			break;
+		}
+		case Behaviour::Type::Extended:{
+			LOGe("Note implemented: save extended behaviour");
+			break;
+		}
+		default:{
+			LOGe("Invalid behaviour type");
+			break;
+		}
+	}
+
 }
 
 void BehaviourStore::handleRemoveBehaviour(event_t& evt){
