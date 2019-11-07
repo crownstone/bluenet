@@ -130,15 +130,15 @@ command_result_t CommandHandler::handleCommand(
 	case CTRL_CMD_STATE_SET:
 		return handleCmdStateSet(commandData, accessLevel, resultData);
 	case CTRL_CMD_SAVE_BEHAVIOUR:
-		return handleCmdSaveBehaviour(commandData, accessLevel, resultData);
+		return dispatchEventForCommand(CS_TYPE::EVT_SAVE_BEHAVIOUR,commandData,resultData);
 	case CTRL_CMD_REPLACE_BEHAVIOUR:
-		return handleCmdReplaceBehaviour(commandData, accessLevel, resultData);
+		return dispatchEventForCommand(CS_TYPE::EVT_REPLACE_BEHAVIOUR,commandData,resultData);
 	case CTRL_CMD_REMOVE_BEHAVIOUR:
-		return handleCmdRemoveBehaviour(commandData, accessLevel, resultData);
+		return dispatchEventForCommand(CS_TYPE::EVT_REMOVE_BEHAVIOUR,commandData,resultData);
 	case CTRL_CMD_GET_BEHAVIOUR:
-		return handleCmdGetBehaviour(commandData, accessLevel, resultData);
+		return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR,commandData,resultData);
 	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
-		return handleCmdGetBehaviourIndices(commandData, accessLevel, resultData);
+		return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR_INDICES,commandData,resultData);
 
 	case CTRL_CMD_UNKNOWN:
 		return command_result_t(ERR_UNKNOWN_TYPE);
@@ -565,77 +565,6 @@ command_result_t CommandHandler::handleCmdUartEnable(cs_data_t commandData, cons
 	serial_enable((serial_enable_t)enable);
 	return command_result_t(ERR_SUCCESS);
 }
-
-
-command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGd(STR_HANDLE_COMMAND, "Save behaviour");
-
-	if(commandData.len < 1){
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-	}
-
-	Behaviour::Type type = static_cast<Behaviour::Type>(commandData.data[0]);
-
-	switch(type){
-		case Behaviour::Type::Switch:{
-			// Its a switch behaviour packet, let's check the size
-			if(commandData.len - 1 != sizeof(Behaviour::SerializedDataFormat)){
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: %d", commandData.len,type);
-				return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-			}
-
-			Behaviour b = WireFormat::deserialize<Behaviour>(commandData.data + 1, commandData.len - 1);
-
-			event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR, &b, sizeof(b));
-
-			event.result.buf = resultData;
-
-			event.dispatch();
-
-			command_result_t cmdResult;
-			cmdResult.returnCode = event.result.returnCode;
-			cmdResult.data.data = event.result.buf.data;
-			cmdResult.data.len = event.result.dataSize;
-			return cmdResult;
-		}
-		case Behaviour::Type::Twilight:{
-			LOGe("Not implemented: save twilight");
-			break;
-		}
-		case Behaviour::Type::Extended:{
-			LOGe("Note implemented: save extended behaviour");
-		}
-		default:{
-			LOGe("Invalid behaviour type");
-		}
-	}
-
-	return command_result_t{};
-	
-}
-
-command_result_t CommandHandler::handleCmdReplaceBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGd(STR_HANDLE_COMMAND, "Replace behaviour");
-	return dispatchEventForCommand(CS_TYPE::EVT_REPLACE_BEHAVIOUR,commandData,resultData);
-}
-
-command_result_t CommandHandler::handleCmdRemoveBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGd(STR_HANDLE_COMMAND, "Remove behaviour");
-	event_t event(CS_TYPE::EVT_REMOVE_BEHAVIOUR, commandData.data, commandData.len);
-	return dispatchEventForCommand(CS_TYPE::EVT_REMOVE_BEHAVIOUR,commandData,resultData);
-}
-
-command_result_t CommandHandler::handleCmdGetBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGd(STR_HANDLE_COMMAND, "Get behaviour");
-	return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR,commandData,resultData);
-}
-
-command_result_t CommandHandler::handleCmdGetBehaviourIndices(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGd(STR_HANDLE_COMMAND, "Get behaviour indices");
-	return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR_INDICES,commandData,resultData);
-}
-
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
 	switch (type) {

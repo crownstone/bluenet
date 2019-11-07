@@ -49,34 +49,66 @@ void BehaviourStore::handleEvent(event_t& evt){
 // ==================== handler functions ====================
 
 void BehaviourStore::handleSaveBehaviour(event_t& evt){
-    LOGd("save behaviour event, datalen: %d", evt.size);
 
-    Behaviour* newBehaviour = reinterpret_cast<TYPIFY(EVT_SAVE_BEHAVIOUR)*>(evt.data);
-    newBehaviour->print();
-    
-    // find the first empty index.
-    size_t empty_index = 0;
-    while(activeBehaviours[empty_index].has_value() && empty_index < MaxBehaviours){
-        empty_index++;
-    }
+	if(evt.size < 1){
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, evt.size);
+		evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+        return;
+	}
 
-    if(saveBehaviour(*newBehaviour,empty_index)){
-        // found an empty spot in the list.
-        evt.result.returnCode = ERR_SUCCESS;
-        if(evt.result.buf.data != nullptr && evt.result.buf.len >= 5) {
-            uint8_t index = empty_index;
-            *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
-            *reinterpret_cast<uint8_t*>( evt.result.buf.data + 4) = index;
-            evt.result.dataSize = sizeof(uint32_t) + sizeof(index);
-        }
-    } else {
-        // behaviour store is full!
-        evt.result.returnCode = ERR_NO_SPACE;
-        if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
-            *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
-            evt.result.dataSize = sizeof(uint32_t);
-        }
-    }
+	Behaviour::Type typ = static_cast<Behaviour::Type>(evt.getData()[0]);
+
+	switch(typ){
+		case Behaviour::Type::Switch:{
+			// Its a switch behaviour packet, let's check the size
+			if(evt.size - 1 != sizeof(Behaviour::SerializedDataFormat)){
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: size(%d) type (%d)", evt.size,typ);
+                evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+				return;
+			}
+
+			Behaviour b = WireFormat::deserialize<Behaviour>(evt.getData() + 1, evt.size - 1);
+
+            LOGd("save behaviour event, datalen: %d", evt.size);
+
+            // find the first empty index.
+            size_t empty_index = 0;
+            while(activeBehaviours[empty_index].has_value() && empty_index < MaxBehaviours){
+                empty_index++;
+            }
+
+            if(saveBehaviour(b,empty_index)){
+                // found an empty spot in the list.
+                evt.result.returnCode = ERR_SUCCESS;
+                if(evt.result.buf.data != nullptr && evt.result.buf.len >= 5) {
+                    uint8_t index = empty_index;
+                    *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
+                    *reinterpret_cast<uint8_t*>( evt.result.buf.data + 4) = index;
+                    evt.result.dataSize = sizeof(uint32_t) + sizeof(index);
+                }
+            } else {
+                // behaviour store is full!
+                evt.result.returnCode = ERR_NO_SPACE;
+                if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
+                    *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
+                    evt.result.dataSize = sizeof(uint32_t);
+                }
+            }
+
+			return;
+		}
+		case Behaviour::Type::Twilight:{
+			LOGe("Not implemented: save twilight");
+			break;
+		}
+		case Behaviour::Type::Extended:{
+			LOGe("Note implemented: save extended behaviour");
+		}
+		default:{
+			LOGe("Invalid behaviour type: %d", typ);
+		}
+	}
+
 }
 
 void BehaviourStore::handleReplaceBehaviour(event_t& evt){
