@@ -1,3 +1,15 @@
+Version 3.0.5:
+ - Version bump to 3.0.5  int: 21
+ - Add release config for crownstone_3.0.5
+ - Version bump to 3.0.5-RC0  int: 20
+ - Add release config for crownstone_3.0.5-RC0
+ - Handle brownout faster, as the 1B2G didn't manage to set gpregret otherwise. But don't actually do it yet, as the current bootloader doesn't handle the brownout gpregret value yet.
+ - Added event pages erased.
+ - Store in GPREGRET2 that we have to set some state values after storage recovery.
+ - Let the storage user decide to call erase pages and reboot.
+ - Fixed bug where setup is waiting forever for switch state to be set.
+ - Make mesh scan interval and window dependent on board.
+
 Version 3.0.4:
  - Version bump to 3.0.4  int: 19
  - Add release config for crownstone_3.0.4
