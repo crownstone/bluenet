@@ -69,15 +69,20 @@ void crownstone_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_si
 }
 
 void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
-    //LOGd("SOC event: %i", evt_id);
 	LOGInterruptLevel("soc evt int=%u", BLEutil::getInterruptLevel());
-
-    //fs_sys_event_handler(evt_id);
 
     switch(evt_id) {
 	case NRF_EVT_FLASH_OPERATION_SUCCESS:
 	case NRF_EVT_FLASH_OPERATION_ERROR:
 	case NRF_EVT_POWER_FAILURE_WARNING: {
+//		uint32_t gpregret_id = 0;
+//		uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
+//		// NOTE: do not clear the gpregret register, this way
+//		//   we can count the number of brownouts in the bootloader.
+//		sd_power_gpregret_set(gpregret_id, gpregret_msk);
+//		// Soft reset, because brownout can't be distinguished from hard reset otherwise.
+//		sd_nvic_SystemReset();
+
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
 		uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), crownstone_soc_evt_handler_decoupled);
 		APP_ERROR_CHECK(retVal);

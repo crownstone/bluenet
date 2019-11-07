@@ -930,27 +930,17 @@ void Crownstone::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_BROWNOUT_IMPENDING: {
-			// turn everything off that consumes power
-			LOGf("brownout impending!! force shutdown ...")
-
-#if BUILD_MESHING == 1
-			_mesh->stop();
-#endif
-			_scanner->stop();
-
-			if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-				//	_powerSampler->stopSampling();
-			}
-
-			uint32_t gpregret_id = 0;
-			uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
-			// now reset with brownout reset mask set.
-			// NOTE: do not clear the gpregret register, this way
-			//   we can count the number of brownouts in the bootloader
-			sd_power_gpregret_set(gpregret_id, gpregret_msk);
-			// soft reset, because brownout can't be distinguished from
-			// hard reset otherwise
-			sd_nvic_SystemReset();
+			// Don't log anything, immediately write gpregret and reboot.
+			// Do this in interrupt (cs_Handlers.cpp) instead, else we're still too late.
+//			LOGf("brownout impending!! force shutdown ...")
+//			uint32_t gpregret_id = 0;
+//			uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
+//			// now reset with brownout reset mask set.
+//			// NOTE: do not clear the gpregret register, this way
+//			//   we can count the number of brownouts in the bootloader
+//			sd_power_gpregret_set(gpregret_id, gpregret_msk);
+//			// Soft reset, because brownout can't be distinguished from hard reset otherwise.
+//			sd_nvic_SystemReset();
 			break;
 		}
 		case CS_TYPE::CMD_SET_OPERATION_MODE: {
