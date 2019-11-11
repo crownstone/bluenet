@@ -69,7 +69,8 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
 
 			Behaviour b = WireFormat::deserialize<Behaviour>(evt.getData() + 1, evt.size - 1);
 
-            LOGd("save behaviour event, datalen: %d", evt.size);
+            LOGd("save behaviour event");
+            b.print();
 
             // find the first empty index.
             size_t empty_index = 0;
@@ -133,6 +134,8 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 			}
 
 			Behaviour b = WireFormat::deserialize<Behaviour>(evt.getData() + 2, evt.size - 2);
+            LOGd("replace behaviour event");
+            b.print();
         
             if(saveBehaviour(b, index)){
                 LOGd("replace successful");
@@ -168,9 +171,9 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 }
 
 void BehaviourStore::handleRemoveBehaviour(event_t& evt){
-    LOGd("remove behaviour event");
-
     uint8_t index = *reinterpret_cast<TYPIFY(EVT_REMOVE_BEHAVIOUR)*>(evt.data);
+    LOGd("remove behaviour event %d", index);
+    
     if(removeBehaviour(index)){
         LOGd("ERR_SUCCESS");
         evt.result.returnCode = ERR_SUCCESS;
@@ -186,8 +189,8 @@ void BehaviourStore::handleRemoveBehaviour(event_t& evt){
 }
 
 void BehaviourStore::handleGetBehaviour(event_t& evt){
-    LOGd("Get behaviour event");
     uint8_t index = *reinterpret_cast<TYPIFY(EVT_GET_BEHAVIOUR)*>(evt.data);
+    LOGd("Get behaviour event %d ", index);
 
     if(index >= MaxBehaviours || !activeBehaviours[index].has_value()){
         LOGd("ERR_NOT_FOUND");

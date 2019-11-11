@@ -62,7 +62,9 @@ void SystemTime::setTime(uint32_t time) {
 	if (time == 0) {
 		return;
 	}
-    LOGi("Set time to %i", time);
+	TimeOfDay t(time);
+
+    LOGi("Set time to %02d:%02d:%02d", t.h(), t.m(), t.s());
     
     uint32_t prevtime = posixTimeStamp;
 	posixTimeStamp = time;

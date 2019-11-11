@@ -328,8 +328,7 @@ void SwSwitch::setDimmer(uint8_t value){
         return;
     }
 
-    SWSWITCH_LOG();
-    LOGd("intensity: %d",value);
+    LOGw("SwSwitch::setDimmer(%d) called",value);
 
     if( value > 0 && (!allowDimming || !isSafeToDim()) ){
         // can't turn dimming on when it has failed or disallowed.
@@ -374,12 +373,16 @@ void SwSwitch::setDimmer(uint8_t value){
     }
 
     if( isDimmerCircuitPowered() ){
-        LOGw("setIntensity: normal operation mode, calling setState_unchecked");
+        LOGw("setIntensity: success");
         // OK to set the intended value since it is safe to dim (or value is 0),
         // and dimmer circuit is powered.
         if(currentState.state.dimmer != value) { setIntensity_unchecked(value); }
         if(currentState.state.relay != false) {setRelay_unchecked(false); }
+
+        return;
     }
+
+    LOGw("setIntensity: not handled");
 }
 
 // ================== ISwitch ==============
