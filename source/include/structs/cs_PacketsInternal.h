@@ -186,9 +186,12 @@ struct __attribute__((__packed__)) adv_background_t {
 /**
  * Parsed background advertisement.
  */
-struct __attribute__((__packed__)) adv_background_payload_t {
+struct __attribute__((__packed__)) adv_background_parsed_t {
+	uint8_t protocol;
+	uint8_t sphereId;
+	uint8_t* macAddress;
+	int8_t  adjustedRssi;
 	uint8_t locationId;
 	uint8_t profileId;
-	uint8_t rssiOffset;
 	uint8_t flags;
 };

@@ -113,6 +113,7 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_MESH_NET_KEY                     = 64,     //  0x40
 	CONFIG_KEY_LOCALIZATION                 = 65,     //  0x41
 	CONFIG_START_DIMMER_ON_ZERO_CROSSING    = 66,     //  0x42
+	CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD     = 67,
 
 	STATE_RESET_COUNTER                     = 128,    //  0x80 - 128
 	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
@@ -170,7 +171,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_FACTORY_RESET,                                // Sent when a factory reset should be performed: clear all data.
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms. -- Payload is uint32_t counter.
 	EVT_ADV_BACKGROUND,                               // Sent when a background advertisement has been received. -- Payload: adv_background_t.
-	EVT_ADV_BACKGROUND_PARSED,                        // Sent when a background advertisement has been validated and parsed. -- Payload: adv_background_payload_t.
+	EVT_ADV_BACKGROUND_PARSED,                        // Sent when a background advertisement has been validated and parsed. -- Payload: adv_background_parsed_t.
 	EVT_ADVERTISEMENT_UPDATED,                        // Sent when advertisement was updated. TODO: advertisement data as payload?
 	EVT_SCAN_STARTED,                                 // Sent when scanner started scanning.
 	EVT_SCAN_STOPPED,                                 // Sent when scanner stopped scanning.
@@ -307,6 +308,7 @@ typedef     BOOL TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING);
 typedef     BOOL TYPIFY(CONFIG_SWITCH_LOCKED);
 typedef     BOOL TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
 typedef    float TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD);
+typedef   int8_t TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD);
 typedef   int8_t TYPIFY(CONFIG_TX_POWER);
 typedef  uint8_t TYPIFY(CONFIG_UART_ENABLED); //TODO: serial_enable_t
 typedef    float TYPIFY(CONFIG_VOLTAGE_MULTIPLIER);
@@ -325,7 +327,7 @@ typedef uint32_t TYPIFY(STATE_TIME);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
-typedef  adv_background_payload_t TYPIFY(EVT_ADV_BACKGROUND_PARSED);
+typedef  adv_background_parsed_t TYPIFY(EVT_ADV_BACKGROUND_PARSED);
 typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
 typedef  void TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
