@@ -454,7 +454,7 @@ void SwSwitch::handleEvent(event_t& evt){
             forceSwitchOff();
             break;
         case CS_TYPE::STATE_SWITCH_STATE: {
-            switch_state_t* typd = reinterpret_cast<TYPIFY(STATE_SWITCH_STATE)*>(evt.data);
+        	__attribute__((unused)) switch_state_t* typd = reinterpret_cast<TYPIFY(STATE_SWITCH_STATE)*>(evt.data);
             LOGd("switch state update: relay(%d) dim(%d)", typd->state.relay, typd->state.dimmer);
             break;
         }
