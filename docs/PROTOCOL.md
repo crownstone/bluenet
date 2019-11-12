@@ -266,7 +266,7 @@ If commands have to be executed sequentially, make sure that the result packet o
 
 Index:
 
-- [Control](#command_types). Used to send commands to the Crownstone.
+- [Control](#control_packet). Used to send commands to the Crownstone.
 - [Result](#result_packet). The result of a command.
 - [State](#state_types). State variables of the Crownstone.
 
@@ -508,47 +508,49 @@ Type nr | Type name | Payload type | Description | A | M | B
 18 | Scan break duration | uint 16 | Waiting time in ms to start next scan. Only used by interval scanner, which isn't used by default. **Deprecated**  | rw |  | 
 19 | Boot delay | uint 16 | Time to wait with radio after boot (ms). **Setting this to a wrong value may cause damage.**  | rw |  | 
 20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off. **Setting this to a wrong value may cause damage.**  | rw |  | 
-24 | Mesh enabled | uint 8 | Stores if mesh is enabled.  | rw |  | 
-25 | Encryption enabled | uint 8 | Stores if encryption is enabled. **Not implemented**  |  |  | 
-26 | iBeacon enabled | uint 8 | Stores if iBeacon is enabled. **Not implemented**  |  |  | 
-27 | Scanner enabled | uint 8 | Stores if device scanning is enabled.  | rw |  | 
-33 | Sphere id | uint 8 | Short id of the sphere this Crownstone is part of.  | rw |  | 
-34 | Crownstone id | uint 8 | Crownstone identifier used in advertisement package.  | rw |  | 
-35 | Admin key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions.  |  |  | 
-36 | Member key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions.  |  |  | 
-37 | Basic key | uint 8 [16] | 16 byte key used to encrypt/decrypt basic access functions.  |  |  | 
-39 | Scan interval | uint 16 | Set the scan interval in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default.  | rw |  | 
-40 | Scan window | uint 16 | Set the scan window to in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default.  | rw |  | 
-41 | Relay high duration | uint 16 | Set the time/duration that the relay is powered for a switch (ms). **Setting this to a wrong value may cause damage.**  | rw |  | 
-42 | Low TX power | int 8 | Set the tx power used when in low transmission power for bonding (can be: -40, -20, -16, -12, -8, -4, 0, or 4).  | rw |  | 
-43 | Voltage multiplier | float | Set the voltage multiplier (for power measurement). **Setting this to a wrong value may cause damage.**  | rw |  | 
-44 | Current multiplier | float | Set the current multiplier (for power measurement). **Setting this to a wrong value may cause damage.**  | rw |  | 
-45 | Voltage zero | int 32 | Set the voltage zero level (for power measurement).      **Setting this to a wrong value may cause damage.**  | rw |  | 
-46 | Current zero | int 32 | Set the current zero level (for power measurement).      **Setting this to a wrong value may cause damage.**  | rw |  | 
-47 | Power zero | int 32 | Set the power zero level in mW (for power measurement).    **Setting this to a wrong value may cause damage.**  | rw |  | 
-50 | Current consumption threshold | uint 16 | At how much mA the switch will be turned off (soft fuse).            **Setting this to a wrong value may cause damage.**  | rw |  | 
-51 | Current consumption threshold dimmer | uint 16 | At how much mA the dimmer will be turned off (soft fuse).     **Setting this to a wrong value may cause damage.**  | rw |  | 
-52 | Dimmer temp up voltage | float | Voltage of upper threshold of the dimmer thermometer.                         **Setting this to a wrong value may cause damage.**  | rw |  | 
-53 | Dimmer temp down voltage | float | Voltage of lower threshold of the dimmer thermometer.                       **Setting this to a wrong value may cause damage.**  | rw |  | 
-54 | Dimming allowed | uint8 | Stores whether this Crownstone is allowed to dim.  | rw |  | 
-55 | Switch locked | uint8 | Stores whether this Crownstone is allowed to change the switch state.  | rw |  | 
-56 | Switchcraft enabled | uint8 | Stores whether this Crownstone has switchcraft enabled.  | rw |  | 
-57 | Switchcraft threshold | float | Sets the threshold for switchcraft. A higher threshold will generally make it less likely to detect a switch (less true and false positives). **Setting this to a wrong value may cause damage.**  | rw |  | 
-59 | UART enabled | uint 8 | Whether UART is enabled, 0 = none, 1 = RX only, 3 = TX and RX.  | rw |  | 
-60 | Device name | char [] | Name of the device.  | rw |  | 
-61 | Service data key | uint 8 [16] | 16 byte key used to encrypt/decrypt service data.  |  |  | 
-62 | Mesh device key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to configure this Crownstone.  |  |  | 
-63 | Mesh application key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages for the application of this Crownstone.  |  |  | 
-64 | Mesh network key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to be received or relayed by this Crownstone.  |  |  | 
-65 | Localization key | uint 8 [16] | 16 byte key used to encrypt/decrypt messages to tell your location to this Crownstone.  |  |  | 
-128 | Reset counter | uint 16 | Counts the number of resets.  | r | r | 
-129 | [Switch state](#switch_state_packet) | uint 8 | Current switch state.  | r | r | 
-130 | Accumulated energy | int 64 | Accumulated energy in μJ  | r | r | 
-131 | Power usage | int 32 | Current power usage in mW  | r | r | 
-134 | Operation Mode | uint 8 | Internal usage.  |  |  | 
-135 | Temperature | int 8 | Chip temperature in °C.  | r | r | 
-136 | Time | uint 32 | The current time as unix timestamp.  | r | r | 
-139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors.  | r | r | 
+24 | Mesh enabled | uint 8 | Whether mesh is enabled.  | rw |  | 
+25 | Encryption enabled | uint 8 | Whether encryption is enabled. **Not implemented** |  |  | 
+26 | iBeacon enabled | uint 8 | Whether iBeacon is enabled. **Not implemented** |  |  | 
+27 | Scanner enabled | uint 8 | Whether device scanning is enabled. | rw |  | 
+33 | Sphere id | uint 8 | Short id of the sphere this Crownstone is part of. | rw |  | 
+34 | Crownstone id | uint 8 | Crownstone identifier used in advertisement package. | rw |  | 
+35 | Admin key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions. |  |  | 
+36 | Member key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions. |  |  | 
+37 | Basic key | uint 8 [16] | 16 byte key used to encrypt/decrypt basic access functions. |  |  | 
+39 | Scan interval | uint 16 | Set the scan interval in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default. | rw |  | 
+40 | Scan window | uint 16 | Set the scan window to in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default. | rw |  | 
+41 | Relay high duration | uint 16 | Set the time/duration that the relay is powered for a switch (ms). **Setting this to a wrong value may cause damage.** | rw |  | 
+42 | Low TX power | int 8 | Set the tx power used when in low transmission power for bonding (can be: -40, -20, -16, -12, -8, -4, 0, or 4). | rw |  | 
+43 | Voltage multiplier | float | Set the voltage multiplier (for power measurement). **Setting this to a wrong value may cause damage.** | rw |  | 
+44 | Current multiplier | float | Set the current multiplier (for power measurement). **Setting this to a wrong value may cause damage.** | rw |  | 
+45 | Voltage zero | int 32 | Set the voltage zero level (for power measurement).      **Setting this to a wrong value may cause damage.** | rw |  | 
+46 | Current zero | int 32 | Set the current zero level (for power measurement).      **Setting this to a wrong value may cause damage.** | rw |  | 
+47 | Power zero | int 32 | Set the power zero level in mW (for power measurement).    **Setting this to a wrong value may cause damage.** | rw |  | 
+50 | Current consumption threshold | uint 16 | At how much mA the switch will be turned off (soft fuse).            **Setting this to a wrong value may cause damage.** | rw |  | 
+51 | Current consumption threshold dimmer | uint 16 | At how much mA the dimmer will be turned off (soft fuse).     **Setting this to a wrong value may cause damage.** | rw |  | 
+52 | Dimmer temp up voltage | float | Voltage of upper threshold of the dimmer thermometer.                         **Setting this to a wrong value may cause damage.** | rw |  | 
+53 | Dimmer temp down voltage | float | Voltage of lower threshold of the dimmer thermometer.                       **Setting this to a wrong value may cause damage.** | rw |  | 
+54 | Dimming allowed | uint8 | Whether this Crownstone is allowed to dim. | rw |  | 
+55 | Switch locked | uint8 | Whether this Crownstone is allowed to change the switch state. | rw |  | 
+56 | Switchcraft enabled | uint8 | Whether this Crownstone has switchcraft enabled. | rw |  | 
+57 | Switchcraft threshold | float | Sets the threshold for switchcraft. A higher threshold will generally make it less likely to detect a switch (less true and false positives). **Setting this to a wrong value may cause damage.** | rw |  | 
+59 | UART enabled | uint 8 | Whether UART is enabled, 0 = none, 1 = RX only, 3 = TX and RX. | rw |  | 
+60 | Device name | char [] | Name of the device. | rw |  | 
+61 | Service data key | uint 8 [16] | 16 byte key used to encrypt/decrypt service data. |  |  | 
+62 | Mesh device key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to configure this Crownstone. |  |  | 
+63 | Mesh application key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages for the application of this Crownstone. |  |  | 
+64 | Mesh network key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to be received or relayed by this Crownstone. |  |  | 
+65 | Localization key | uint 8 [16] | 16 byte key used to encrypt/decrypt messages to tell your location to this Crownstone. |  |  | 
+66 | Start dimmer on zero crossing | uint 8 | Whether the dimmer should start on a zero crossing or not. | rw |  | 
+67 | Tap to toggle RSSI threshold | int 8 | RSSI threshold (after adjustment from the offset) above which tap to toggle will respond. | rw |  | 
+128 | Reset counter | uint 16 | Counts the number of resets. | r | r | 
+129 | [Switch state](#switch_state_packet) | uint 8 | Current switch state. | r | r | 
+130 | Accumulated energy | int 64 | Accumulated energy in μJ. | r | r | 
+131 | Power usage | int 32 | Current power usage in mW. | r | r | 
+134 | Operation Mode | uint 8 | Internal usage. |  |  | 
+135 | Temperature | int 8 | Chip temperature in °C. | r | r | 
+136 | Time | uint 32 | The current time as unix timestamp. | r | r | 
+139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors. | r | r | 
 
 <a name="switch_state_packet"></a>
 #### Switch state
