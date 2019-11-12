@@ -19,6 +19,7 @@
 
 #include "drivers/cs_Serial.h"
 
+#define LOGBehaviourHandler LOGnone
 
 void BehaviourHandler::handleEvent(event_t& evt){
     switch(evt.type){
@@ -37,7 +38,7 @@ void BehaviourHandler::update(){
     TimeOfDay time = SystemTime::now();
    PresenceStateDescription presence = 0xff; // everyone present as dummy value.
     
-    LOGd("BehaviourHandler::update %02d:%02d:%02d",time.h(),time.m(),time.s());
+   LOGBehaviourHandler("BehaviourHandler::update %02d:%02d:%02d",time.h(),time.m(),time.s());
 
     auto intendedState = computeIntendedState(time, presence);
     if(intendedState){
