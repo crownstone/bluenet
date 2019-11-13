@@ -319,6 +319,7 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 31 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
 32 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
 33 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. Required access depends on the command. | x | x | x
+34 | Set sun times | [Set sun time packet](#set_sun_time_packet) | Update the reference times for sunrise and sunset | x | x | 
 40 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 42 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
@@ -382,6 +383,17 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16  | [State type](#state_types) | 2 | Type of state.
 uint 8 | Payload | N | Payload data, depends on state type.
+
+
+<a name="set_sun_time_packet"></a>
+##### Set sun time packet
+
+![Set Sun Time Packet](../docs/diagrams/set_sun_time_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 32 | Sunrise | 4 | The moment when the upper limb of the sun appears on the horizon. Units: seconds since midnight.
+uint 32 | Sunset | 4 | The moment when the upper limb of the Sun disappears below the horizon. Units: seconds since midnight.
 
 
 <a name="multi_switch_packet"></a>

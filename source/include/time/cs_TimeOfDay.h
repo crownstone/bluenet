@@ -7,6 +7,7 @@
 
 #pragma once
 
+// #include <storage/cs_State.h>
 #include <util/cs_Math.h>
 
 #include <array>
@@ -65,7 +66,8 @@ class TimeOfDay {
     uint8_t s();
 
     /**
-     * Implicit cast operators
+     * Implicit cast operators, returns seconds since midnight
+     * (enables built in relational operators).
      */
     operator uint32_t();
 };

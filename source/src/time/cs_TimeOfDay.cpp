@@ -5,8 +5,10 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <common/cs_Types.h>
 #include <time/cs_TimeOfDay.h>
 #include <util/cs_WireFormat.h>
+
 #include <drivers/cs_Serial.h>
 
 void TimeOfDay::wrap(){ 
@@ -22,8 +24,18 @@ void TimeOfDay::wrap(){
 int32_t TimeOfDay::baseTimeSinceMidnight(BaseTime b){
     switch(b){
         case BaseTime::Midnight: return 0;
-        case BaseTime::Sunrise: return 60*60*7;
-        case BaseTime::Sundown: return 60*60*21;
+        case BaseTime::Sunrise: {
+            TYPIFY(STATE_SUN_TIME) suntime;
+            State::getInstance().get(CS_TYPE::STATE_SUN_TIME, &suntime, sizeof(suntime));
+            return suntime.sunrise;
+            //return 60*60*7;
+        }
+        case BaseTime::Sundown: {
+            TYPIFY(STATE_SUN_TIME) suntime;
+            State::getInstance().get(CS_TYPE::STATE_SUN_TIME, &suntime, sizeof(suntime));
+            return suntime.sunset;
+            // return 60*60*21;
+        }
     }
 
     return 0;

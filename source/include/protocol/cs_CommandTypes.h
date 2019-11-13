@@ -28,6 +28,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_INCREASE_TX                 = 31,
 	CTRL_CMD_RESET_ERRORS                = 32,
 	CTRL_CMD_MESH_COMMAND                = 33,
+	CTRL_CMD_SET_SUN_TIME                = 34,
 
 	CTRL_CMD_ALLOW_DIMMING               = 40,
 	CTRL_CMD_LOCK_SWITCH                 = 41,

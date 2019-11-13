@@ -77,6 +77,7 @@ private:
 	command_result_t handleCmdReset                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdFactoryReset          (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdSetTime               (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdSetSunTime            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdIncreaseTx            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdValidateSetup         (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdDisconnect            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);

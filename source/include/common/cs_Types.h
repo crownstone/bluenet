@@ -135,6 +135,7 @@ enum class CS_TYPE: uint16_t {
 //	STATE_IGNORE_LOCATION,                            //  0x92 - 146
 //	STATE_ERROR_DIMMER_ON_FAILURE,                    //  0x93 - 147
 //	STATE_ERROR_DIMMER_OFF_FAILURE,                   //  0x94 - 148
+	STATE_SUN_TIME                          = 149,
 
 	/*
 	 * Internal commands and events.
@@ -322,6 +323,7 @@ typedef schedule_list_t TYPIFY(STATE_SCHEDULE);
 typedef switch_state_t TYPIFY(STATE_SWITCH_STATE);
 typedef   int8_t TYPIFY(STATE_TEMPERATURE);
 typedef uint32_t TYPIFY(STATE_TIME);
+typedef set_sun_time_t TYPIFY(STATE_SUN_TIME);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
