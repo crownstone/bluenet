@@ -4,7 +4,7 @@ import re
 import os
 
 STATE_TYPE_FILE =   "../include/common/cs_Types.h"
-STATE_ACCESS_FILE = "../include/common/cs_Types.h"
+STATE_ACCESS_FILE = "../src/common/cs_Types.cpp"
 PROTOCOL_FILE = "../../docs/PROTOCOL.md"
 OUTPUT_FILE = "access.md"
 
@@ -35,7 +35,7 @@ PROTOCOL_STATE_TYPES_TABLE_END_PATTERN = re.compile('<a name=')
 PROTOCOL_STATE_TYPES_TABLE_ENTRY_PATTERN = re.compile("(\d+)(\s+\|\s+[^|]+){3}")
 
 def parseStateTypes():
-    file = open(STATE_ACCESS_FILE, "r")
+    file = open(STATE_TYPE_FILE, "r")
     bracketLevel = 0
     foundStart = False
     stateTypes = {}
@@ -119,7 +119,7 @@ def parseProtocol(startPattern, tableStartPattern, tableEndPattern, entryPattern
             match = entryPattern.match(line)
             if (match):
                 typeNum = match.group(1)
-                entry = match.group(0)
+                entry = match.group(0).rstrip()
                 # print("Found entry", typeNum, ":", entry)
                 tableEntries[typeNum] = entry
             match = tableEndPattern.match(line)

@@ -19,6 +19,7 @@
 
 #include "drivers/cs_Serial.h"
 
+#define LOGBehaviourHandler LOGnone
 
 void BehaviourHandler::handleEvent(event_t& evt){
     switch(evt.type){
@@ -35,16 +36,20 @@ void BehaviourHandler::handleEvent(event_t& evt){
 void BehaviourHandler::update(){
     // TODO(Arend 24-09-2019): get presence from scheduler
     TimeOfDay time = SystemTime::now();
-    PresenceStateDescription presence = 0xff; // everyone present as dummy value.
+==== BASE ====
+   PresenceStateDescription presence = 0xff; // everyone present as dummy value.
+    
+    LOGd("BehaviourHandler::update %02d:%02d:%02d",time.h(),time.m(),time.s());
+==== BASE ====
 
     auto intendedState = computeIntendedState(time, presence);
     if(intendedState){
         if(previousIntendedState == intendedState){
-            LOGd("%02d:%02d:%02d, no behaviour change",time.h(),time.m(),time.s());
+            LOGBehaviourHandler("%02d:%02d:%02d, no behaviour change",time.h(),time.m(),time.s());
             return;
         }
 
-        LOGd("%02d:%02d:%02d, new beahviour value",time.h(),time.m(),time.s());
+        LOGBehaviourHandler("%02d:%02d:%02d, new beahviour value",time.h(),time.m(),time.s());
         previousIntendedState = intendedState;
         
         uint8_t intendedValue = intendedState.value();
@@ -56,7 +61,7 @@ void BehaviourHandler::update(){
 
         behaviourStateChange.dispatch();
     } else {
-        LOGd("%02d:%02d:%02d, conflicting behaviours",time.h(),time.m(),time.s());
+        LOGBehaviourHandler("%02d:%02d:%02d, conflicting behaviours",time.h(),time.m(),time.s());
     }
 }
 

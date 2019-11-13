@@ -147,7 +147,7 @@ inline bool isNewer(uint8_t previousValue, uint8_t newValue) {
  * @retval ERR_SUCCESS if the data type is found in the report.
  * @retval ERR_NOT_FOUND if the type could not be found.
  */
-inline static uint32_t findAdvType(uint8_t type, uint8_t* advData, uint8_t advLen, cs_data_t* foundData) {
+inline static cs_ret_code_t findAdvType(uint8_t type, uint8_t* advData, uint8_t advLen, cs_data_t* foundData) {
 	int index = 0;
 	foundData->data = NULL;
 	foundData->len = 0;

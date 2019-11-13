@@ -38,11 +38,14 @@ void ExternalStates::init() {
 }
 
 void ExternalStates::receivedState(state_external_stone_t* state) {
-	LOGExternalStatesDebug("received: id=%u flags=%u switch=%u power=%i ts=%u",
+	LOGExternalStatesDebug("received: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u",
 			state->data.extState.id,
-			state->data.extState.flags,
 			state->data.extState.switchState,
+			state->data.extState.flags,
+			state->data.extState.temperature,
+			state->data.extState.powerFactor,
 			state->data.extState.powerUsageReal,
+			state->data.extState.energyUsed,
 			state->data.extState.partialTimestamp);
 
 	stone_id_t id = service_data_encrypted_get_id(&(state->data));
