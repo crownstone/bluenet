@@ -44,6 +44,8 @@
 #include <drivers/cs_Timer.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_EncryptionHandler.h>
+#include <processing/cs_BackgroundAdvHandler.h>
+#include <processing/cs_TapToToggle.h>
 #include <protocol/cs_UartProtocol.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
@@ -729,6 +731,8 @@ void Crownstone::startUp() {
 		SystemTime::init();
 		EventDispatcher::getInstance().addListener(&_systemTime);
 		EventDispatcher::getInstance().addListener(&Scheduler::getInstance());
+		BackgroundAdvertisementHandler::getInstance();
+		TapToToggle::getInstance();
 
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
