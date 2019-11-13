@@ -167,13 +167,13 @@ void BackgroundAdvertisementHandler::handleBackgroundAdvertisement(adv_backgroun
 	parsed.profileId =  (decryptedPayload[1] >> (16-6-3)) & 0x07;
 	int8_t rssiOffset = (decryptedPayload[1] >> (16-6-3-4)) & 0x0F;
 	parsed.flags =      (decryptedPayload[1] >> (16-6-3-4-3)) & 0x07;
-	parsed.adjustedRssi = adjustRssi(backgroundAdvertisement->rssi, rssiOffset);
+	parsed.adjustedRssi = getAdjustedRssi(backgroundAdvertisement->rssi, rssiOffset);
 	LOGd("validation=%u locationId=%u profileId=%u rssiOffset=%u flags=%u rssi=%i", decryptedPayload[0], parsed.locationId, parsed.profileId, rssiOffset, parsed.flags, parsed.adjustedRssi);
 	event_t event(CS_TYPE::EVT_ADV_BACKGROUND_PARSED, &parsed, sizeof(parsed));
 	EventDispatcher::getInstance().dispatch(event);
 }
 
-int8_t BackgroundAdvertisementHandler::adjustRssi(int16_t rssi, int16_t rssiOffset) {
+int8_t BackgroundAdvertisementHandler::getAdjustedRssi(int16_t rssi, int16_t rssiOffset) {
 	rssi += (rssiOffset - 8) * 2;
 	if (rssi > -1) {
 		rssi = -1;
