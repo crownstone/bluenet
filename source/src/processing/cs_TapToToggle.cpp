@@ -25,6 +25,7 @@ void TapToToggle::handleBackgroundAdvertisement(adv_background_parsed_t* adv) {
 	if (adv->adjustedRssi < rssiThreshold) {
 		return;
 	}
+	// 2019-11-12 TODO: don't use magic number 2.
 	if (!BLEutil::isBitSet(adv->flags, 2)) {
 		return;
 	}
