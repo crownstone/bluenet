@@ -5,6 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <storage/cs_State.h>
 #include <common/cs_Types.h>
 #include <time/cs_TimeOfDay.h>
 #include <util/cs_WireFormat.h>

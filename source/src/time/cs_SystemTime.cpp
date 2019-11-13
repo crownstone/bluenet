@@ -102,9 +102,7 @@ void SystemTime::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::STATE_SUN_TIME: {
-			LOGd("SystemTime received sun time update");
-			auto t = TimeOfDay(TimeOfDay::BaseTime::Sunrise, 0);
-			LOGd("SystemTime received sun time update sunrise: %02d:%02d:%02d" , t.h(), t.m(), t.s());
+			// Sunrise/sunset adjusted. No need to do anything as it is already persisted.
 		}
 		default: {}
 	}
