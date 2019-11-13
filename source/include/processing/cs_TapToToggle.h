@@ -15,9 +15,9 @@ struct __attribute__((__packed__)) t2t_entry_t {
 };
 
 #define T2T_LIST_COUNT 3
-#define T2T_SCORE_INC 4
-#define T2T_SCORE_THRESHOLD 6
-#define T2T_SCORE_MAX 10
+#define T2T_SCORE_INC (2000 / TICK_INTERVAL_MS)
+#define T2T_SCORE_THRESHOLD (3000 / TICK_INTERVAL_MS)
+#define T2T_SCORE_MAX (5000 / TICK_INTERVAL_MS)
 #define T2T_TIMEOUT_MS 1500
 
 /**
@@ -47,7 +47,7 @@ private:
 	/**
 	 * Used to count down the timeout.
 	 */
-	uint8_t timeoutCounter = 0;
+	uint16_t timeoutCounter = 0;
 
 	/**
 	 * RSSI threshold, above which score will be added.
