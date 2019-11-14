@@ -172,7 +172,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_FACTORY_RESET,                                // Sent when a factory reset should be performed: clear all data.
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms. -- Payload is uint32_t counter.
 	EVT_ADV_BACKGROUND,                               // Sent when a background advertisement has been received. -- Payload: adv_background_t.
-	EVT_ADV_BACKGROUND_PARSED,                        // Sent when a background advertisement has been validated and parsed. -- Payload: adv_background_parsed_t.
+	EVT_ADV_BACKGROUND_PARSED = 256+30,                        // Sent when a background advertisement has been validated and parsed. -- Payload: adv_background_parsed_t.
 	EVT_ADVERTISEMENT_UPDATED,                        // Sent when advertisement was updated. TODO: advertisement data as payload?
 	EVT_SCAN_STARTED,                                 // Sent when scanner started scanning.
 	EVT_SCAN_STOPPED,                                 // Sent when scanner stopped scanning.

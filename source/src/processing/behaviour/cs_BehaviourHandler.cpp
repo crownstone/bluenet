@@ -67,7 +67,7 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
     std::optional<uint8_t> intendedValue = {};
     
     for (const auto& b : BehaviourStore::getActiveBehaviours()){
-        if (b && b->isValid(currentTime, currentPresence)){
+        if (b.has_value() && b->isValid(currentTime, currentPresence)){
             if (intendedValue){
                 if (b->value() != intendedValue.value()){
                     // found a conflicting behaviour

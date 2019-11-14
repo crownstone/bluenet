@@ -31,6 +31,7 @@ class PresenceHandler: public EventListener{
     };
     static std::list<PresenceRecord> WhenWhoWhere;
 
+    void removeOldRecords();
     void print();
 
     public:

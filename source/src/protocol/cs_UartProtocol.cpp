@@ -336,7 +336,7 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 	}
 	#ifdef DEBUG
 	case UART_OPCODE_TX_EVT:{
-		LOGd("UART_OPCODE_TX_EVT");
+		LOGd("UART_OPCODE_TX_EVT, size: %d",header->size);
 		if (header->size < sizeof(uint16_t)) {
 			break;
 		}
@@ -344,8 +344,8 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 		CS_TYPE type = toCsType(reinterpret_cast<uint16_t*>(payload)[0]);
 		if(type == CS_TYPE::CONFIG_DO_NOT_USE){
 			break;
-		}
-
+		} 
+		// payload starts with CS_TYPE and follows with event payload. 
 		event_t evt(type, payload + sizeof(uint16_t),  header->size - sizeof(uint16_t));
 		evt.dispatch();
 

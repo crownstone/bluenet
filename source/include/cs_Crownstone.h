@@ -15,6 +15,7 @@
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
+#include <presence/cs_PresenceHandler.h>
 #include <processing/cs_CommandAdvHandler.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
@@ -186,6 +187,7 @@ private:
 	SystemTime _systemTime;
 	BehaviourHandler _behaviourHandler;
 	BehaviourStore _behaviourStore;
+	PresenceHandler _presenceHandler;
 
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;

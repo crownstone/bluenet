@@ -164,7 +164,7 @@ void SwitchAggregator::handleStateIntentionEvents(event_t& evt){
 
         // ============== behaviourState Events ==============
         case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE : {
-            auto typd = reinterpret_cast<TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE)*>(evt.data);
+            uint8_t* typd = reinterpret_cast<TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE)*>(evt.data);
             LOGd("EVT_BEHAVIOUR_SWITCH_STATE value: %d",__func__, *typd);
             behaviourState = *typd;
             break;
