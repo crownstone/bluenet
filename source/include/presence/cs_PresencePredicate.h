@@ -16,6 +16,7 @@ class PresencePredicate{
     public:
     typedef std::array<uint8_t, 9> SerializedDataType;
 
+    // user id restrictions?
     enum class Condition : uint8_t { 
         VacuouslyTrue  = 0, 
         AnyoneAnyRoom  = 1, 
@@ -28,6 +29,7 @@ class PresencePredicate{
     private: 
     Condition cond;
     uint64_t RoomsBitMask;
+    // user id
 
     public:
     PresencePredicate(Condition c, PresenceStateDescription roomsMask);

@@ -1,7 +1,7 @@
 /*
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: Dec 20, 2019
+ * Date: Okt 20, 2019
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
@@ -36,11 +36,7 @@ void BehaviourHandler::handleEvent(event_t& evt){
 void BehaviourHandler::update(){
     // TODO(Arend 24-09-2019): get presence from scheduler
     TimeOfDay time = SystemTime::now();
-==== BASE ====
-   PresenceStateDescription presence = 0xff; // everyone present as dummy value.
-    
-    LOGd("BehaviourHandler::update %02d:%02d:%02d",time.h(),time.m(),time.s());
-==== BASE ====
+    PresenceStateDescription presence = 0xff; // everyone present as dummy value.
 
     auto intendedState = computeIntendedState(time, presence);
     if(intendedState){
