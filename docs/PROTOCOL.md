@@ -11,7 +11,7 @@ This only documents the latest protocol, older versions can be found in the git 
 - [Broadcast commands](#broadcasts). Broadcast commands.
 - [Services and characteristics](#services). Which Bluetooth GATT services and characteristics the crownstones have.
 - [Data structures](#data_structs). The data structures used for the characteristics, advertisements, and mesh.
-    - [Control](#command_types). Used to send commands to the Crownstone.
+    - [Control](#control_packet). Used to send commands to the Crownstone.
     - [Result](#result_packet). The result of a command.
     - [State](#state_types). State variables of the Crownstone.
 
@@ -26,9 +26,9 @@ The setup process goes as follows:
 - Phone connects to the Crownstone.
 - Phone reads the **session key** and **session nonce** from the [setup service](#setup_service). These characteristics are not encrypted.
 The values are only valid for this connection session. The session key and the session nonce will be used to encrypt the rest of the setup phase using AES 128 CTR as explained [here](#encrypted_write_read).
-- Phone subscribes to [control](#setup_service) characteristic.
-- Phone commands Crownstone to setup via the control characteristic.
-- Phone waits for control characteristic result to become SUCCESS (See [result packet](#result_packet)).
+- Phone subscribes to [result](#setup_service) characteristic.
+- Phone commands Crownstone to [setup](#control_packet) via the control characteristic.
+- Phone waits for result to become SUCCESS (See [result packet](#result_packet)).
 - Crownstone will reboot to normal mode.
 
 
