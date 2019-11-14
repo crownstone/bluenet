@@ -542,7 +542,8 @@ Type nr | Type name | Payload type | Description | A | M | B
 64 | Mesh network key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to be received or relayed by this Crownstone. |  |  | 
 65 | Localization key | uint 8 [16] | 16 byte key used to encrypt/decrypt messages to tell your location to this Crownstone. |  |  | 
 66 | Start dimmer on zero crossing | uint 8 | Whether the dimmer should start on a zero crossing or not. | rw |  | 
-67 | Tap to toggle RSSI threshold | int 8 | RSSI threshold (after adjustment from the offset) above which tap to toggle will respond. | rw |  | 
+67 | Tap to toggle enabled | uint 8 | Whether tap to toggle is enabled on this Crownstone. | rw |  | 
+68 | Tap to toggle RSSI threshold | int 8 | RSSI threshold (after adjustment from the offset) above which tap to toggle will respond. | rw |  | 
 128 | Reset counter | uint 16 | Counts the number of resets. | r | r | 
 129 | [Switch state](#switch_state_packet) | uint 8 | Current switch state. | r | r | 
 130 | Accumulated energy | int 64 | Accumulated energy in μJ. | r | r | 

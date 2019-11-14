@@ -17,6 +17,7 @@
 #define LOGT2Tv LOGnone
 
 TapToToggle::TapToToggle() {
+	State::getInstance().get(CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED, &enabled, sizeof(enabled));
 	State::getInstance().get(CS_TYPE::CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD, &rssiThreshold, sizeof(rssiThreshold));
 	EventDispatcher::getInstance().addListener(this);
 }
@@ -94,6 +95,14 @@ void TapToToggle::handleEvent(event_t & event) {
 	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
 		TYPIFY(EVT_ADV_BACKGROUND_PARSED)* backgroundAdv = (TYPIFY(EVT_ADV_BACKGROUND_PARSED)*)event.data;
 		handleBackgroundAdvertisement(backgroundAdv);
+		break;
+	}
+	case CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED: {
+		enabled = *((TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED)*)event.data);
+		break;
+	}
+	case CS_TYPE::CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD: {
+		rssiThreshold = *((TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD)*)event.data);
 		break;
 	}
 	default:
