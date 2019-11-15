@@ -372,7 +372,7 @@ void SwSwitch::setDimmer(uint8_t value){
         return;
     }
 
-    if( isDimmerCircuitPowered() ){
+    if( isDimmerCircuitPowered() || value == 0){
         LOGw("setIntensity: success");
         // OK to set the intended value since it is safe to dim (or value is 0),
         // and dimmer circuit is powered.
