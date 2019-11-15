@@ -19,7 +19,7 @@
 class PresenceHandler: public EventListener{
     private:
     // after this amount of seconds a presence_record becomes invalid.
-    static const constexpr uint32_t presence_time_out = 60*5;
+    static const constexpr uint32_t presence_time_out = 30; // DEBUG, should be 60*5;
 
     // using a list because of constant time insertion/deletion of
     // any item in the container

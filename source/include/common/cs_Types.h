@@ -401,6 +401,7 @@ typedef uint8_t TYPIFY(EVT_REMOVE_BEHAVIOUR); // index
 typedef uint8_t TYPIFY(EVT_GET_BEHAVIOUR); // index
 typedef void TYPIFY(EVT_GET_BEHAVIOUR_INDICES);
 typedef uint8_t TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
+typedef void TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 

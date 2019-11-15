@@ -56,18 +56,8 @@ class event_t {
 
 	event_result_t result;
 
-//	/**
-//	 * Will be set to
-//	 */
-//	cs_ret_code_t returnCode;
-//	/**
-//	 * A field that can be used by handlers to return a value to
-//	 * the dispatching scope.
-//	 */
-//	cs_data_t result = {};
-
     /**
-     * Validates [data] for nullptr and [size] to match expected size of [type].
+     * Utility function so that not every file needs to include the eventdispatcher.
      */
     void dispatch();
 };

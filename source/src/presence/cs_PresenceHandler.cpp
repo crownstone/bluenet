@@ -55,7 +55,8 @@ void PresenceHandler::handleEvent(event_t& evt){
 
     print();
 
-    // TODO: propagate a EVT_PRESENCE_MUTATION event.
+    event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,nullptr,0);
+    presence_event.dispatch();
 
     // TODO: extract handling into method and clean up.
 }
