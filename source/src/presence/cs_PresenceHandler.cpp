@@ -87,7 +87,7 @@ PresenceStateDescription PresenceHandler::getCurrentPresenceDescription(){
             iter = WhenWhoWhere.erase(iter); // increments iter and invalidates previous value..
             continue;
         } else {
-            p |= 1 << CsMath::max(64,iter->where);
+            p |= 1 << CsMath::min(64-1,iter->where);
             ++iter;
         }
     }

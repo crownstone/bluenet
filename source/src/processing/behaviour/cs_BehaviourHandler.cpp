@@ -11,6 +11,7 @@
 #include <processing/behaviour/cs_Behaviour.h>
 
 #include <presence/cs_PresenceDescription.h>
+#include <presence/cs_PresenceHandler.h>
 
 #include <time/cs_SystemTime.h>
 #include <time/cs_TimeOfDay.h>
@@ -34,9 +35,10 @@ void BehaviourHandler::handleEvent(event_t& evt){
 }
 
 void BehaviourHandler::update(){
-    // TODO(Arend 24-09-2019): get presence from scheduler
     TimeOfDay time = SystemTime::now();
-    PresenceStateDescription presence = 0xff; // everyone present as dummy value.
+    PresenceStateDescription presence = PresenceHandler::getCurrentPresenceDescription();
+
+    LOGd("%x %x",  static_cast<uint32_t>(presence>>4*8), static_cast<uint32_t>(presence));
 
     auto intendedState = computeIntendedState(time, presence);
     if(intendedState){
