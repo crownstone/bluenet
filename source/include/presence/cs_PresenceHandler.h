@@ -29,6 +29,11 @@ class PresenceHandler: public EventListener{
         uint8_t who;
         uint8_t where;
     };
+
+    // keeps track of a short history of presence events.
+    // will be lazily updated to remove old entries: 
+    //  - when new presence is detected
+    //  - when getCurrentPresenceDescription() is called
     static std::list<PresenceRecord> WhenWhoWhere;
 
     void removeOldRecords();

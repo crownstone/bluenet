@@ -27,7 +27,7 @@ void PresenceHandler::handleEvent(event_t& evt){
         return;
     }
     
-    LOGd("presence handler got adv parsed event, sizeof: %d, evt.size:%d",sizeof(adv_background_parsed_t), evt.size);
+    LOGd("presence handler got adv parsed event");
 
     adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
 
@@ -38,20 +38,25 @@ void PresenceHandler::handleEvent(event_t& evt){
     Time now = SystemTime::posix();
     uint32_t time_out_threshold = now - presence_time_out;
 
-    WhenWhoWhere.remove_if( 
-        [&] (PresenceRecord www){ 
-            if(www.when < time_out_threshold){
-                LOGd("erasing old presence_record for user id %d because it's outdated", www.who);
-                return true;
-            }
-            if(www.who == parsed_adv_ptr->profileId){
-                LOGd("erasing old presence_record for user id %d because of new entry", www.who);
-                return true;
-            }
-            return false;
-        } 
-    );
-    WhenWhoWhere.push_front( {now, parsed_adv_ptr->profileId, parsed_adv_ptr->locationId} );
+    if(parsed_adv_ptr->profileId == 0xff && parsed_adv_ptr->locationId == 0xff){
+        LOGw("DEBUG: removing presence record data");
+        WhenWhoWhere.clear();
+    } else {
+        WhenWhoWhere.remove_if( 
+            [&] (PresenceRecord www){ 
+                if(www.when < time_out_threshold){
+                    LOGd("erasing old presence_record for user id %d because it's outdated", www.who);
+                    return true;
+                }
+                if(www.who == parsed_adv_ptr->profileId){
+                    LOGd("erasing old presence_record for user id %d because of new entry", www.who);
+                    return true;
+                }
+                return false;
+            } 
+        );
+        WhenWhoWhere.push_front( {now, parsed_adv_ptr->profileId, parsed_adv_ptr->locationId} );
+    }
 
     print();
 
