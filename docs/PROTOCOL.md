@@ -321,9 +321,7 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 33 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. Required access depends on the command. | x | x | x
 40 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
-42 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
 50 | UART message | payload | Print the payload to UART. | x
-51 | UART enable | uint 8 | Set UART enabled, 0 = none, 1 = RX only, 3 = TX and RX | x
 60 | Save Behaviour | [Save Behaviour packet](BEHAVIOUR.md#save_behaviour_packet) | Save a Behaviour to an unoccupied index | x | x
 61 | Replace Behaviour | [Replace Behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | Replace the Behaviour at given index | x | x
 62 | Remove Behaviour | [Remove Behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the Behaviour at given index | x | x

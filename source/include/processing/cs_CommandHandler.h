@@ -89,9 +89,7 @@ private:
 	command_result_t handleCmdAllowDimming          (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdLockSwitch            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdSetup                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdEnableSwitchcraft     (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdUartMsg               (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdUartEnable            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdStateGet              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdStateSet              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdSaveBehaviour         (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);

@@ -117,12 +117,8 @@ command_result_t CommandHandler::handleCommand(
 		return handleCmdLockSwitch(commandData, accessLevel, resultData);
 	case CTRL_CMD_SETUP:
 		return handleCmdSetup(commandData, accessLevel, resultData);
-	case CTRL_CMD_ENABLE_SWITCHCRAFT:
-		return handleCmdEnableSwitchcraft(commandData, accessLevel, resultData);
 	case CTRL_CMD_UART_MSG:
 		return handleCmdUartMsg(commandData, accessLevel, resultData);
-	case CTRL_CMD_UART_ENABLE:
-		return handleCmdUartEnable(commandData, accessLevel, resultData);
 	case CTRL_CMD_STATE_GET:
 		return handleCmdStateGet(commandData, accessLevel, resultData);
 	case CTRL_CMD_STATE_SET:
@@ -521,22 +517,6 @@ command_result_t CommandHandler::handleCmdLockSwitch(cs_data_t commandData, cons
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdEnableSwitchcraft(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
-	LOGi(STR_HANDLE_COMMAND, "enable switchcraft");
-
-	if (commandData.len != sizeof(enable_message_payload_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-	}
-
-	enable_message_payload_t* payload = (enable_message_payload_t*) commandData.data;
-	TYPIFY(CONFIG_SWITCHCRAFT_ENABLED) enable = payload->enable;
-	State::getInstance().set(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED, &enable, sizeof(enable));
-	event_t event(CS_TYPE::EVT_SWITCHCRAFT_ENABLED, &enable, sizeof(enable));
-	EventDispatcher::getInstance().dispatch(event);
-	return command_result_t(ERR_SUCCESS);
-}
-
 command_result_t CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGd(STR_HANDLE_COMMAND, "UART msg");
 
@@ -548,23 +528,6 @@ command_result_t CommandHandler::handleCmdUartMsg(cs_data_t commandData, const E
 	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_BLE_MSG, commandData.data, commandData.len);
 	return command_result_t(ERR_SUCCESS);
 }
-
-command_result_t CommandHandler::handleCmdUartEnable(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
-	LOGd(STR_HANDLE_COMMAND, "UART enable");
-
-	if (commandData.len != 1) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-	}
-	TYPIFY(CONFIG_UART_ENABLED) enable = *(uint8_t*) commandData.data;
-	cs_ret_code_t errCode = State::getInstance().set(CS_TYPE::CONFIG_UART_ENABLED, &enable, sizeof(enable));
-	if (errCode != ERR_SUCCESS) {
-		return command_result_t(errCode);
-	}
-	serial_enable((serial_enable_t)enable);
-	return command_result_t(ERR_SUCCESS);
-}
-
 
 command_result_t CommandHandler::handleCmdSaveBehaviour(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
 	LOGd(STR_HANDLE_COMMAND, "Save behaviour");
@@ -698,9 +661,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CTRL_CMD_RESET_ERRORS:
 	case CTRL_CMD_ALLOW_DIMMING:
 	case CTRL_CMD_LOCK_SWITCH:
-	case CTRL_CMD_ENABLE_SWITCHCRAFT:
 	case CTRL_CMD_UART_MSG:
-	case CTRL_CMD_UART_ENABLE:
 		return ADMIN;
 	case CTRL_CMD_UNKNOWN:
 		return NOT_SET;

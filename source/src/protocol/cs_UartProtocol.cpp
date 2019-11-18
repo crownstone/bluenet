@@ -343,4 +343,13 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 }
 
 void UartProtocol::handleEvent(event_t & event) {
+	switch(event.type) {
+	case CS_TYPE::CONFIG_UART_ENABLED: {
+		TYPIFY(CONFIG_UART_ENABLED) enabled = *(TYPIFY(CONFIG_UART_ENABLED)*)event.data;
+		serial_enable((serial_enable_t)enabled);
+		break;
+	}
+	default:
+		break;
+	}
 }

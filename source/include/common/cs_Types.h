@@ -219,7 +219,6 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_FACTORY_RESET,                           // Sent when factory reset of mesh storage is done.
 	EVT_SETUP_DONE,                                   // Sent when setup was done (and settings are stored).
 //	EVT_DO_RESET_DELAYED,                             // Sent to perform a reset in a few seconds.
-	EVT_SWITCHCRAFT_ENABLED, // TODO: Deprecate, use cfg   // Sent when switchcraft flag is set. -- Payload is BOOL.
 //	EVT_STORAGE_WRITE,                                // Sent when an item is going to be written to storage.
 //	EVT_STORAGE_ERASE,                                // Sent when a flash page is going to be erased.
 	EVT_ADC_RESTARTED,                                // Sent when ADC has been restarted.
@@ -389,7 +388,6 @@ typedef  void TYPIFY(EVT_STORAGE_GC_DONE);
 typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET);
 typedef  void TYPIFY(EVT_STORAGE_PAGES_ERASED);
 typedef  void TYPIFY(EVT_MESH_FACTORY_RESET);
-typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
 typedef  BOOL TYPIFY(CMD_SWITCH_LOCKED);
 typedef  uint32_t TYPIFY(EVT_TICK);

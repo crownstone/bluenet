@@ -271,7 +271,6 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::CMD_SWITCH_LOCKED:
-	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_SAVE_BEHAVIOUR:
@@ -395,7 +394,6 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SETUP_DONE:
-	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
 	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:

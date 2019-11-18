@@ -31,10 +31,8 @@ enum CommandHandlerTypes {
 
 	CTRL_CMD_ALLOW_DIMMING               = 40,
 	CTRL_CMD_LOCK_SWITCH                 = 41,
-	CTRL_CMD_ENABLE_SWITCHCRAFT          = 42,
 
 	CTRL_CMD_UART_MSG                    = 50,
-	CTRL_CMD_UART_ENABLE                 = 51,
 
 	CTRL_CMD_SAVE_BEHAVIOUR              = 60,
 	CTRL_CMD_REPLACE_BEHAVIOUR           = 61,
