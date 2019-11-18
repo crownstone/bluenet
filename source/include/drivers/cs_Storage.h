@@ -10,8 +10,10 @@
 #include <common/cs_Types.h>
 #include <events/cs_EventListener.h>
 #include <components/libraries/fds/fds.h>
-#include <string>
+#include <storage/cs_StateData.h>
 #include <util/cs_Utils.h>
+
+#include <string>
 #include <vector>
 
 
@@ -129,6 +131,7 @@ public:
 	 *
 	 * @retval ERR_SUCCESS                  When successfully started removing the file.
 	 * @retval ERR_BUSY                     When busy, try again later.
+	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
 	cs_ret_code_t remove(cs_file_id_t file_id);
 
@@ -143,6 +146,7 @@ public:
 	 * @retval ERR_SUCCESS                  When successfully started removing the type.
 	 * @retval ERR_NOT_FOUND                When type was not found on file, consider this a success, but don't wait for an event.
 	 * @retval ERR_BUSY                     When busy, try again later.
+	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
 	cs_ret_code_t remove(cs_file_id_t file_id, CS_TYPE type);
 
@@ -154,6 +158,16 @@ public:
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
 	cs_ret_code_t garbageCollect();
+
+	/**
+	 * Erase all flash pages used by FDS.
+	 *
+	 * This should only be used to recover from a failing init.
+	 *
+	 * @retval ERR_SUCCESS                  When successfully started erasing all pages.
+	 * @retval ERR_NOT_AVAILABLE            When you can't use this function (storage initialized already).
+	 */
+	cs_ret_code_t eraseAllPages();
 
 	/**
 	 * Handle Crownstone events.
@@ -181,6 +195,7 @@ private:
 	void operator=(Storage const &);
 
 	bool _initialized = false;
+	bool _registeredFds = false;
 	cs_storage_error_callback_t _errorCallback = NULL;
 
 	bool _collectingGarbage = false;
@@ -203,12 +218,7 @@ private:
 	 */
 	uint32_t _eraseEndPage = 0;
 
-	/**
-	 * Erase all flash pages used by FDS.
-	 *
-	 * This should only be used to recover from a failing init.
-	 */
-	void eraseAllPages();
+	bool isErasingPages();
 
 	/**
 	 * Erase next page, started via eraseAllPages().

@@ -5,7 +5,7 @@
 
 Bluenet uses the `cmake` build system, `git` as versioning system, and `wget` to retrieve other files.
 
-    sudo apt install cmake git wget
+    sudo apt install cmake git wget python3 python3-pip
 
 
 ## Getting the Bluenet code

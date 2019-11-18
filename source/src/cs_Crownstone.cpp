@@ -30,11 +30,12 @@
  *
  *********************************************************************************************************************/
 
-#include <ble/cs_CrownstoneManufacturer.h>
+#include <cs_Crownstone.h>
+
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_Git.h>
+#include <cfg/cs_DeviceTypes.h>
 #include <cfg/cs_HardwareVersions.h>
-#include <cs_Crownstone.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_PWM.h>
 #include <drivers/cs_RNG.h>
@@ -43,11 +44,21 @@
 #include <drivers/cs_Timer.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_EncryptionHandler.h>
+#include <processing/cs_BackgroundAdvHandler.h>
+#include <processing/cs_TapToToggle.h>
 #include <protocol/cs_UartProtocol.h>
 #include <storage/cs_State.h>
-#include <structs/buffer/cs_MasterBuffer.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
 #include <util/cs_Utils.h>
+#include <time/cs_SystemTime.h>
+
+#include <switch/cs_SwitchAggregator.h>
+
+#include <processing/behaviour/cs_BehaviourHandler.h>
+#include <processing/behaviour/cs_BehaviourStore.h>
+
+#include <array> // DEBUG 
+#include <util/cs_Hash.h> // DEBUG
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -90,7 +101,6 @@ void handleZeroCrossing() {
  *  + switch
  *  + temperature guard
  *  + power sampling
- *  + watchdog
  *
  * The initialization is done in separate function.
  */
@@ -103,7 +113,6 @@ Crownstone::Crownstone(boards_config_t& board) :
 	_mainTimerData = { {0} };
 	_mainTimerId = &_mainTimerData;
 
-	MasterBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
 	EventDispatcher::getInstance().addListener(this);
 
@@ -121,10 +130,8 @@ Crownstone::Crownstone(boards_config_t& board) :
 #endif
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-		_switch = &Switch::getInstance();
 		_temperatureGuard = &TemperatureGuard::getInstance();
 		_powerSampler = &PowerSampling::getInstance();
-		_watchdog = &Watchdog::getInstance();
 	}
 
 };
@@ -165,7 +172,6 @@ void Crownstone::init(uint16_t step) {
 		LOG_FLUSH();
 
 		LOGi(FMT_HEADER, "init services");
-
 		_stack->initServices();
 		LOG_FLUSH();
 		break;
@@ -184,12 +190,23 @@ void Crownstone::initDrivers(uint16_t step) {
 	switch (step) {
 	case 0: {
 		LOGi("Init drivers");
+		startHFClock();
 		_stack->init();
 		_timer->init();
 
 		_stack->initSoftdevice();
 
-		_storage->init();
+		cs_ret_code_t retCode = _storage->init();
+		if (retCode != ERR_SUCCESS) {
+			// We can try to erase all pages.
+			retCode = _storage->eraseAllPages();
+			if (retCode != ERR_SUCCESS) {
+				// Only option left is to reboot and see if things work out next time.
+				APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
+			}
+			// Wait for pages erased event.
+		}
+		// Wait for storage initialized event.
 		break;
 	}
 	case 1: {
@@ -202,6 +219,27 @@ void Crownstone::initDrivers(uint16_t step) {
 			TYPIFY(CONFIG_UART_ENABLED) uartEnabled;
 			_state->get(CS_TYPE::CONFIG_UART_ENABLED, &uartEnabled, sizeof(uartEnabled));
 			serial_enable((serial_enable_t)uartEnabled);
+		}
+
+		uint32_t gpregret;
+		sd_power_gpregret_get(0, &gpregret);
+		uint32_t gpregret2;
+		sd_power_gpregret_get(1, &gpregret2);
+		LOGi("GPRegRet: %u %u", gpregret, gpregret2);
+
+		// For now, use GPREGRET2 instead.
+		sd_power_gpregret_get(1, &gpregret2);
+		if (gpregret2 & GPREGRET2_STORAGE_RECOVERED) {
+			_setStateValuesAfterStorageRecover = true;
+			sd_power_gpregret_clr(1, GPREGRET2_STORAGE_RECOVERED);
+		}
+		if (_setStateValuesAfterStorageRecover) {
+			LOGw("Set state values after storage recover.");
+			// Set switch state to on, as that's the most likely and preferred state of the switch.
+			TYPIFY(STATE_SWITCH_STATE) switchState;
+			switchState.state.dimmer = 0;
+			switchState.state.relay = 1;
+			_state->set(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
 		}
 
 		LOGi(FMT_INIT, "command handler");
@@ -217,16 +255,26 @@ void Crownstone::initDrivers(uint16_t step) {
 		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 			// switch / PWM init
 			LOGi(FMT_INIT, "switch / PWM");
-			_switch->init(_boardsConfig);
+
+			// Init SwitchAggregator
+			TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;
+			State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, 
+				&pwmPeriod, sizeof(pwmPeriod));
+
+			TYPIFY(CONFIG_RELAY_HIGH_DURATION) relayHighDuration = 0;
+			State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, 
+				&relayHighDuration, sizeof(relayHighDuration));
+
+			HwSwitch h(_boardsConfig, pwmPeriod, relayHighDuration);
+						
+			SwitchAggregator::getInstance().init(SwSwitch(h));
+			// End init switchaggregator
 
 			LOGi(FMT_INIT, "temperature guard");
 			_temperatureGuard->init(_boardsConfig);
 
 			LOGi(FMT_INIT, "power sampler");
 			_powerSampler->init(_boardsConfig);
-
-			LOGi(FMT_INIT, "watchdog");
-			_watchdog->init();
 		}
 
 		// init GPIOs
@@ -532,32 +580,95 @@ void Crownstone::setName() {
  */
 void Crownstone::startOperationMode(const OperationMode & mode) {
 	switch(mode) {
-		case OperationMode::OPERATION_MODE_NORMAL:
+		case OperationMode::OPERATION_MODE_NORMAL: {
 			_scanner->init();
 			_scanner->setStack(_stack);
-			_scheduler = &Scheduler::getInstance();
 
 #if BUILD_MESHING == 1
 			if (_state->isTrue(CS_TYPE::CONFIG_MESH_ENABLED)) {
-				_mesh->init();
+				_mesh->init(_boardsConfig);
 			}
 #endif
 			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::LOCALIZATION);
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
 
+			EventDispatcher::getInstance().addListener(&_behaviourHandler);
+			EventDispatcher::getInstance().addListener(&_behaviourStore);
+
+//			// DEBUG
+//			uint32_t h = 14;
+//			uint32_t m = 25;
+//			uint32_t s = 0;
+//
+//			for(auto i = 0; i < 10; i++){ // just add 10 behaviours
+//				Behaviour behaviour(
+//						100 - (i%2 ? 50 : 0),
+//						Monday | Thursday | Friday,
+//						TimeOfDay(h, m+i, s),
+//						TimeOfDay(h, m+i, s+30),
+//						PresenceCondition(
+//							PresencePredicate(
+//								PresencePredicate::Condition::AnyoneAnyRoom,
+//								0xffff0000ffff0000),
+//							0)
+//					);
+//
+//				behaviour.print();
+//
+//				_behaviourStore.saveBehaviour(behaviour,i);
+//			}
+//
+//			Behaviour b(
+//				80,
+//				Monday | Wednesday | Thursday | Friday,
+//				TimeOfDay(11, 0, 0),
+//				TimeOfDay(17,30, 0),
+//				PresenceCondition(
+//					PresencePredicate(
+//						PresencePredicate::Condition::AnyoneAnyRoom,
+//						0xffff0000ffff0000),
+//					0)
+//				);
+//			b.print();
+//
+//			uint8_t result = 0xff;
+//			event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR,&b,sizeof(b));
+//
+//			event.returnCode = ERR_EVENT_UNHANDLED;
+//			event.result.data = &result;
+//			event.result.len = sizeof(result);
+//			event.dispatch();
+//
+//			if(event.returnCode == ERR_SUCCESS){
+//				LOGd("SaveBehaviourEvent handled, returnvalue: %x",result);
+//			} else if(event.returnCode == ERR_NO_SPACE) {
+//				LOGd("SaveBehaviourEvent not handled because the space is full");
+//			} else if(event.returnCode == ERR_BUFFER_TOO_SMALL){
+//				LOGd("SaveBehaviourEvent failed because event buffer was too small for return value");
+//			} else if(event.returnCode == ERR_EVENT_UNHANDLED){
+//				LOGd("SaveBehaviour event unhandled");
+//			} else {
+//				LOGd("SaveBehaviour event ended in undefined state: %u", event.returnCode);
+//			}
+//
+//			// END DEBUG
+
 			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
 			_multiSwitchHandler->init();
 			break;
-		case OperationMode::OPERATION_MODE_SETUP:
+		} 
+		case OperationMode::OPERATION_MODE_SETUP:{
 			// TODO: Why this hack?
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {
 				serial_enable(SERIAL_ENABLE_RX_ONLY);
 			}
 			break;
-		default:
+		}
+		default:{
 			// nothing to be done
-			;
+			break;
+		}
 	}
 }
 
@@ -574,11 +685,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 void Crownstone::startUp() {
 
 	LOGi(FMT_HEADER, "startup");
-
-	uint32_t gpregret_id = 0;
-	uint32_t gpregret;
-	sd_power_gpregret_get(gpregret_id, &gpregret);
-	LOGi("Content gpregret register: %d", gpregret);
 
 	TYPIFY(CONFIG_BOOT_DELAY) bootDelay;
 	_state->get(CS_TYPE::CONFIG_BOOT_DELAY, &bootDelay, sizeof(bootDelay));
@@ -601,15 +707,6 @@ void Crownstone::startUp() {
 	nrf_delay_ms(50);
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-		//! Start switch, so it can be used.
-		_switch->start();
-
-		if (_operationMode == OperationMode::OPERATION_MODE_SETUP &&
-				(_boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN || _boardsConfig.deviceType == DEVICE_CROWNSTONE_BUILTIN_ONE)
-				) {
-			_switch->delayedSwitch(SWITCH_ON, SWITCH_ON_AT_SETUP_BOOT_DELAY);
-		}
-
 		//! Start temperature guard regardless of operation mode
 		LOGi(FMT_START, "temp guard");
 		_temperatureGuard->start();
@@ -631,7 +728,11 @@ void Crownstone::startUp() {
 			_powerSampler->enableZeroCrossingInterrupt(handleZeroCrossing);
 		}
 
-		_scheduler->start();
+		SystemTime::init();
+		EventDispatcher::getInstance().addListener(&_systemTime);
+		EventDispatcher::getInstance().addListener(&Scheduler::getInstance());
+		BackgroundAdvertisementHandler::getInstance();
+		TapToToggle::getInstance();
 
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
@@ -709,15 +810,8 @@ void Crownstone::tick() {
 //		_stack->updateAdvertisement();
 	}
 
-	// Check for timeouts
-	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
-		if ((PWM_BOOT_DELAY_MS > 0) && (RTC::getCount() > RTC::msToTicks(PWM_BOOT_DELAY_MS))) {
-			_switch->startPwm();
-		}
-	}
-
 	event_t event(CS_TYPE::EVT_TICK, &_tickCount, sizeof(_tickCount));
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 	++_tickCount;
 
 	scheduleNextTick();
@@ -762,6 +856,31 @@ void Crownstone::handleEvent(event_t & event) {
 			startUp();
 			LOG_FLUSH();
 			break;
+		case CS_TYPE::EVT_STORAGE_PAGES_ERASED: {
+			LOGi("Storage pages erased, init storage");
+			/*
+			 * FDS init can't be called a second time, because it remembers that it's initializing, though
+			 * doesn't continue doing so.
+			 *
+			 * The following commented out code could be used once FDS has been fixed.
+			 * For now, we use GPREGRET2 to remember and do it next boot.
+			 */
+//			cs_ret_code_t retCode = _storage->init();
+//			if (retCode != ERR_SUCCESS) {
+//				LOGf("Storage init failed after page erase");
+//				// Only option left is to reboot and see if things work out next time.
+//				APP_ERROR_CHECK(NRF_ERROR_INTERNAL);
+//			}
+//
+//			_setStateValuesAfterStorageRecover = true;
+//			// Wait for storage initialized event.
+			uint32_t gpregret;
+			sd_power_gpregret_get(1, &gpregret);
+			gpregret |= GPREGRET2_STORAGE_RECOVERED;
+			sd_power_gpregret_set(1, gpregret);
+			sd_nvic_SystemReset();
+			break;
+		}
 		default:
 			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
 	}
@@ -815,27 +934,17 @@ void Crownstone::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_BROWNOUT_IMPENDING: {
-			// turn everything off that consumes power
-			LOGf("brownout impending!! force shutdown ...")
-
-#if BUILD_MESHING == 1
-			_mesh->stop();
-#endif
-			_scanner->stop();
-
-			if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-				//	_powerSampler->stopSampling();
-			}
-
-			uint32_t gpregret_id = 0;
-			uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
-			// now reset with brownout reset mask set.
-			// NOTE: do not clear the gpregret register, this way
-			//   we can count the number of brownouts in the bootloader
-			sd_power_gpregret_set(gpregret_id, gpregret_msk);
-			// soft reset, because brownout can't be distinguished from
-			// hard reset otherwise
-			sd_nvic_SystemReset();
+			// Don't log anything, immediately write gpregret and reboot.
+			// Do this in interrupt (cs_Handlers.cpp) instead, else we're still too late.
+//			LOGf("brownout impending!! force shutdown ...")
+//			uint32_t gpregret_id = 0;
+//			uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
+//			// now reset with brownout reset mask set.
+//			// NOTE: do not clear the gpregret register, this way
+//			//   we can count the number of brownouts in the bootloader
+//			sd_power_gpregret_set(gpregret_id, gpregret_msk);
+//			// Soft reset, because brownout can't be distinguished from hard reset otherwise.
+//			sd_nvic_SystemReset();
 			break;
 		}
 		case CS_TYPE::CMD_SET_OPERATION_MODE: {
@@ -931,6 +1040,18 @@ void printNfcPins() {
 	else {
 		LOGd("NFC pins disabled (%p)", val);
 	}
+}
+
+void Crownstone::startHFClock() {
+	// Reference: https://devzone.nordicsemi.com/f/nordic-q-a/6394/use-external-32mhz-crystal
+
+	// Start the external high frequency crystal
+	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
+	NRF_CLOCK->TASKS_HFCLKSTART = 1;
+
+	// Wait for the external oscillator to start up
+	while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {}
+	LOGd("HF clock started");
 }
 
 /**********************************************************************************************************************

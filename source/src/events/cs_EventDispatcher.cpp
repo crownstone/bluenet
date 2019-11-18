@@ -24,8 +24,15 @@ void EventDispatcher::dispatch(event_t & event) {
 #endif
 	if (event.size != TypeSize(event.type)) {
 		LOGe("Invalid size! type=%u size=%u should be %u", to_underlying_type(event.type), event.size, TypeSize(event.type));
+		event.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
+
+    if (event.size != 0 && event.data == nullptr) {
+		LOGe("data nullptr while size != 0");
+    	event.returnCode = ERR_BUFFER_UNASSIGNED;
+        return;
+    }
 
 	for (int i = 0; i < _listenerCount; i++) {
 		_listeners[i]->handleEvent(event);

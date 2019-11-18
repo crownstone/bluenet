@@ -6,20 +6,10 @@
  */
 #pragma once
 
-//#include <cstdint>
 #include <string>
-#include <cstdlib>
-//
-
 #include "drivers/cs_Serial.h"
 #include "protocol/cs_ErrorCodes.h"
-
-/** @brief Variable length data encapsulation in terms of length and pointer to data */
-typedef struct
-{
-    uint8_t*  data;     /** < Pointer to data. */
-    uint16_t  len;      /** < Length of data. */
-} cs_data_t;
+#include "structs/cs_PacketsInternal.h"
 
 /** @namespace BLEutil
  *
@@ -157,7 +147,7 @@ inline bool isNewer(uint8_t previousValue, uint8_t newValue) {
  * @retval ERR_SUCCESS if the data type is found in the report.
  * @retval ERR_NOT_FOUND if the type could not be found.
  */
-inline static uint32_t findAdvType(uint8_t type, uint8_t* advData, uint8_t advLen, cs_data_t* foundData) {
+inline static cs_ret_code_t findAdvType(uint8_t type, uint8_t* advData, uint8_t advLen, cs_data_t* foundData) {
 	int index = 0;
 	foundData->data = NULL;
 	foundData->len = 0;

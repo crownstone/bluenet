@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <ble/cs_UUID.h>
 #include <cfg/cs_Config.h>
+#include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
@@ -134,9 +135,19 @@ cs_state_data_t & State::addToRam(const CS_TYPE & type, size16_t size) {
 	return data;
 }
 
-//cs_ret_code_t State::getDefault(cs_state_data_t & ram_data, cs_state_data_t & data) {
-//
-//}
+cs_ret_code_t State::removeFromRam(const CS_TYPE & type) {
+	LOGStateDebug("removeFromRam type=%u", to_underlying_type(type));
+	size16_t index_in_ram;
+	cs_ret_code_t ret_code = findInRam(type, index_in_ram);
+	if (ret_code == ERR_SUCCESS) {
+		LOGStateDebug("Remove from RAM");
+		cs_state_data_t* ram_data = &(_ram_data_register[index_in_ram]);
+		free(ram_data->value);
+		_ram_data_register.erase(_ram_data_register.begin() + index_in_ram);
+		free(ram_data);
+	}
+	return ERR_SUCCESS;
+}
 
 /**
  * Let storage do the allocation, so that it's of the correct size and alignment.
@@ -189,6 +200,20 @@ cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
 		// TODO: remove things from flash..
 		return ERR_NO_SPACE;
 	}
+	default:
+		return ret_code;
+	}
+}
+
+cs_ret_code_t State::removeFromFlash(const CS_TYPE & type) {
+	if (!_startedWritingToFlash) {
+		return ERR_BUSY;
+	}
+	cs_ret_code_t ret_code = _storage->remove(getFileId(type), type);
+	switch(ret_code) {
+	case ERR_SUCCESS:
+	case ERR_NOT_FOUND:
+		return ERR_SUCCESS;
 	default:
 		return ret_code;
 	}
@@ -307,7 +332,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			ret_code = storeInRam(data, index);
 			LOGStateDebug("Item stored in RAM: %i", index);
 			if (ret_code != ERR_SUCCESS) {
-				LOGw("Failure to store in RAM");
+				LOGw("Failed to store in RAM");
 				return ret_code;
 			}
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
@@ -322,6 +347,50 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			ret_code = ERR_WRITE_NOT_ALLOWED;
 			break;
 		}
+	}
+	return ret_code;
+}
+
+cs_ret_code_t State::removeInternal(const CS_TYPE & type, const PersistenceMode mode) {
+	LOGStateDebug("Remove value: %s", TypeName(type));
+	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
+	switch(mode) {
+	case PersistenceMode::RAM: {
+
+		break;
+	}
+	case PersistenceMode::FLASH: {
+		return ERR_NOT_IMPLEMENTED;
+	}
+	case PersistenceMode::STRATEGY1: {
+		switch(DefaultLocation(type)) {
+		case PersistenceMode::RAM:
+			return removeFromRam(type);
+		case PersistenceMode::FLASH:
+			// fall-through
+			break;
+		default:
+			LOGe("PM not implemented");
+			return ERR_NOT_IMPLEMENTED;
+		}
+		// First remove from ram, this should always succeed.
+		ret_code = removeFromRam(type);
+		if (ret_code != ERR_SUCCESS) {
+			LOGw("Failed to remove from RAM");
+			return ret_code;
+		}
+		// Then remove from flash asynchronously.
+		ret_code = removeFromFlash(type);
+		if (ret_code == ERR_BUSY) {
+			return addToQueue(CS_STATE_QUEUE_OP_REM, getFileId(type), type, STATE_RETRY_STORE_DELAY_MS);
+		}
+		break;
+	}
+	case PersistenceMode::FIRMWARE_DEFAULT: {
+		LOGe("Default cannot be removed");
+		return ERR_NOT_AVAILABLE;
+		break;
+	}
 	}
 	return ret_code;
 }
@@ -351,7 +420,10 @@ cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, cs_file_id_t file
 	case CS_STATE_QUEUE_OP_WRITE:
 	case CS_STATE_QUEUE_OP_REM:{
 		for (size_t i=0; i<_store_queue.size(); ++i) {
-			if ((_store_queue[i].operation == operation) && (_store_queue[i].type == type)) {
+			// A write operation replaces a remove operation, and vice versa.
+			if ((_store_queue[i].type == type) &&
+					(_store_queue[i].operation == CS_STATE_QUEUE_OP_WRITE || _store_queue[i].operation == CS_STATE_QUEUE_OP_REM)
+					) {
 				_store_queue[i].counter = delayTicks;
 				found = true;
 				break;
@@ -410,7 +482,7 @@ void State::delayedStoreTick() {
 				break;
 			}
 			case CS_STATE_QUEUE_OP_REM: {
-				ret_code = _storage->remove(it->fileId, it->type);
+				ret_code = removeFromFlash(it->type);
 				if (ret_code == ERR_BUSY) {
 					removeItem = false;
 				}
@@ -469,6 +541,11 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 	return retVal;
 }
 
+cs_ret_code_t State::remove(const CS_TYPE & type, const PersistenceMode mode) {
+	return removeInternal(type, mode);
+	// 31-10-2019 TODO: send event?
+}
+
 bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
 	TYPIFY(CONFIG_MESH_ENABLED) enabled = false;
 	switch(type) {
@@ -476,7 +553,6 @@ bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
 		case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
 		case CS_TYPE::CONFIG_IBEACON_ENABLED:
 		case CS_TYPE::CONFIG_SCANNER_ENABLED:
-		case CS_TYPE::CONFIG_DEFAULT_ON:
 		case CS_TYPE::CONFIG_PWM_ALLOWED:
 		case CS_TYPE::CONFIG_SWITCH_LOCKED:
 		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: {

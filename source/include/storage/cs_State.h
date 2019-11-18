@@ -10,9 +10,9 @@
 #include <common/cs_BaseClass.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_Storage.h>
-#include <protocol/cs_ErrorCodes.h>
-#include <structs/cs_StreamBuffer.h>
 #include <drivers/cs_Timer.h>
+#include <protocol/cs_ErrorCodes.h>
+#include <vector>
 
 constexpr const char* TypeName(OperationMode const & mode) {
     switch(mode) {
@@ -127,14 +127,16 @@ struct __attribute__((__packed__)) cs_state_store_queue_t {
  */
 class State: public BaseClass<>, EventListener {
 public:
-	/** Get a reference to the State object.
+	/**
+	 * Get a reference to the State object.
 	 */
 	static State& getInstance() {
 		static State instance;
 		return instance;
 	}
 
-	/** Initialize the State object with the board configuration.
+	/**
+	 * Initialize the State object with the board configuration.
 	 *
 	 * @param[in] boardsConfig    Board configuration (pin layout, etc.).
 	 */
@@ -143,8 +145,9 @@ public:
 	/**
 	 * Get copy of a state value.
 	 *
-	 * @param[in,out] data        Data struct with state type, target, and size.
-	 * @param[in] mode            Indicates to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
+	 * @param[in,out] data        Data struct with state type, data, and size.
+	 * @param[in] mode            Indicates whether to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
+	 * @return                    Return code.
 	 */
 	cs_ret_code_t get(cs_state_data_t & data, const PersistenceMode mode = PersistenceMode::STRATEGY1);
 
@@ -157,6 +160,10 @@ public:
 
 	/**
 	 * Shorthand for get() for boolean data types.
+	 *
+	 * @param[in] type            State type.
+	 * @param[in] mode            Indicates whether to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
+	 * @return                    True when state type is true.
 	 */
 	bool isTrue(CS_TYPE type, const PersistenceMode mode = PersistenceMode::STRATEGY1);
 
@@ -164,7 +171,8 @@ public:
 	 * Set state to new value, via copy.
 	 *
 	 * @param[in] data            Data struct with state type, data, and size.
-	 * @param[in] mode            Indicates to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
+	 * @param[in] mode            Indicates whether to set data in RAM, FLASH, or a combination of this.
+	 * @return                    Return code.
 	 */
 	cs_ret_code_t set(const cs_state_data_t & data, PersistenceMode mode = PersistenceMode::STRATEGY1);
 
@@ -184,6 +192,7 @@ public:
 	 *
 	 * @param[in] data            Data struct with state type, data, and size.
 	 * @param[in] delay           How long the delay should be, in seconds.
+	 * @return                    Return code.
 	 */
 	cs_ret_code_t setDelayed(const cs_state_data_t & data, uint8_t delay);
 
@@ -191,6 +200,7 @@ public:
 	 * Verify size of user data for getting a state.
 	 *
 	 * @param[in] data            Data struct with state type, target, and size.
+	 * @return                    Return code.
 	 */
 	cs_ret_code_t verifySizeForGet(const cs_state_data_t & data);
 
@@ -198,15 +208,18 @@ public:
 	 * Verify size of user data for setting a state.
 	 *
 	 * @param[in] data            Data struct with state type, data, and size.
+	 * @return                    Return code.
 	 */
 	cs_ret_code_t verifySizeForSet(const cs_state_data_t & data);
 
 	/**
 	 * Remove a state variable.
 	 *
-	 * TODO: implement.
+	 * @param[in] type            The state type to be removed.
+	 * @param[in] mode            Indicates whether to remove data from RAM, FLASH, or a combination of this.
+	 * @return                    Return code.
 	 */
-	cs_ret_code_t remove(CS_TYPE type, const PersistenceMode mode = PersistenceMode::STRATEGY1);
+	cs_ret_code_t remove(const CS_TYPE & type, const PersistenceMode mode = PersistenceMode::STRATEGY1);
 
 	/**
 	 * Erase all used persistent storage.
@@ -282,13 +295,12 @@ protected:
 	 * Stores state variable in ram.
 	 *
 	 * Allocates memory when not in ram yet, or when size changed.
+	 *
+	 * @param[in] data            Data to be stored.
+	 * @param[out] index_in_ram   Index where the data is stored.
+	 * @return                    Return code.
 	 */
 	cs_ret_code_t storeInRam(const cs_state_data_t & data, size16_t & index_in_ram);
-
-	/**
-	 * Writes state variable in ram to flash.
-	 */
-	cs_ret_code_t storeInFlash(size16_t & index_in_ram);
 
 	/**
 	 * Adds a new state_data struct to ram.
@@ -301,16 +313,62 @@ protected:
 	 */
 	cs_state_data_t & addToRam(const CS_TYPE & type, size16_t size);
 
+	/**
+	 * Removed a state variable from ram.
+	 *
+	 * Frees the data pointer and struct.
+	 *
+	 * @param[in] type            State type.
+	 * @return                    Return code.
+	 */
+	cs_ret_code_t removeFromRam(const CS_TYPE & type);
+
+	/**
+	 * Writes state variable in ram to flash.
+	 *
+	 * Can return ERR_BUSY, in which case you have to retry again later.
+	 *
+	 * @param[in] index           Index in ram with the data to be written.
+	 * @return                    Return code.
+	 */
+	cs_ret_code_t storeInFlash(size16_t & index_in_ram);
+
+	/**
+	 * Remove a state variable from flash.
+	 *
+	 * Can return ERR_BUSY, in which case you have to retry again later.
+	 *
+	 * @param[in] type            State type.
+	 * @return                    Return code.
+	 */
+	cs_ret_code_t removeFromFlash(const CS_TYPE & type);
+
+	/**
+	 * Add an operation to queue.
+	 *
+	 * Entries with the same type and operation will be overwritten.
+	 * Write and remove of the same type will also overwrite each other.
+	 *
+	 * @param[in] operation       Type of operation.
+	 * @param[in] fileId          Flash file ID of the entry.
+	 * @param[in] type            State type.
+	 * @param[in] delayMs         Delay in ms.
+	 * @return                    Return code.
+	 */
 	cs_ret_code_t addToQueue(cs_state_queue_op_t operation, cs_file_id_t fileId, const CS_TYPE & type, uint32_t delayMs);
 
 	cs_ret_code_t allocate(cs_state_data_t & data);
 
 	void delayedStoreTick();
 
-//	std::vector<CS_TYPE> _notifyingStates;
-
+	/**
+	 * Stores state data structs with pointers to state data.
+	 */
 	std::vector<cs_state_data_t> _ram_data_register;
 
+	/**
+	 * Stores the queue of flash operations.
+	 */
 	std::vector<cs_state_store_queue_t> _store_queue;
 
 	bool _startedWritingToFlash = false;
@@ -328,7 +386,9 @@ private:
 	//! Assignment operator, singleton, thus made private
 	void operator=(State const &);
 
-	cs_ret_code_t setInternal(const cs_state_data_t & data, PersistenceMode mode = PersistenceMode::STRATEGY1);
+	cs_ret_code_t setInternal(const cs_state_data_t & data, PersistenceMode mode);
+
+	cs_ret_code_t removeInternal(const CS_TYPE & type, const PersistenceMode mode);
 
 	cs_ret_code_t getDefaultValue(cs_state_data_t & data);
 };

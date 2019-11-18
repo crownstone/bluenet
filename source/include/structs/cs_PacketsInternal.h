@@ -29,6 +29,23 @@
 #define ADVERTISEMENT_DATA_MAX_SIZE 31
 
 /**
+ * Variable length data encapsulation in terms of length and pointer to data.
+ */
+struct cs_data_t {
+	buffer_ptr_t data = NULL;      /** < Pointer to data. */
+	cs_buffer_size_t len = 0;      /** < Length of data. */
+
+	cs_data_t():
+		data(),
+		len()
+	{}
+	cs_data_t(buffer_ptr_t buf, cs_buffer_size_t size):
+		data(buf),
+		len(size)
+	{}
+};
+
+/**
  * Scanned device.
  */
 struct __attribute__((packed)) scanned_device_t {
@@ -41,6 +58,21 @@ struct __attribute__((packed)) scanned_device_t {
 	uint8_t *data;
 	// See ble_gap_evt_adv_report_t
 	// More possibilities: addressType, connectable, isScanResponse, directed, scannable, extended advertisements, etc.
+};
+
+struct command_result_t {
+	cs_ret_code_t returnCode;
+	cs_data_t data;
+
+	command_result_t():
+		returnCode(),
+		data()
+	{}
+
+	command_result_t(cs_ret_code_t code):
+		returnCode(code),
+		data()
+	{}
 };
 
 /**
@@ -154,9 +186,12 @@ struct __attribute__((__packed__)) adv_background_t {
 /**
  * Parsed background advertisement.
  */
-struct __attribute__((__packed__)) adv_background_payload_t {
+struct __attribute__((__packed__)) adv_background_parsed_t {
+	uint8_t protocol;
+	uint8_t sphereId;
+	uint8_t* macAddress;
+	int8_t  adjustedRssi;
 	uint8_t locationId;
 	uint8_t profileId;
-	uint8_t rssiOffset;
 	uint8_t flags;
 };

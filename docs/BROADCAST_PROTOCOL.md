@@ -1,4 +1,4 @@
-# Bluenet broadcast protocol v3.0.0
+# Bluenet broadcast protocol v4.0.0
 -----------------------------------
 
 This only documents the latest protocol, older versions can be found in the git history.

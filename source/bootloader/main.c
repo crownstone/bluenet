@@ -78,12 +78,21 @@
 /**
  * GPRegRet value when device was reset to start DFU.
  * Should be lower than BOOTLOADER_DFU_GPREGRET, in order not to interfere with the SDK bootloader GPRegRet usage.
+ * 07-11-2019 TODO: why 66? It makes more sense to use 63 or 31.
  */
 #define CS_GPREGRET_DFU 66
 
 /**
- *
+ * GPRegRet value when device was reset due to a brownout.
+ * 07-11-2019 TODO: why 96? It makes more sense to use 64 or 32.
  */
+#define CS_GPREGRET_BROWNOUT_RESET 96
+
+/**
+ * GPRegRet value when device has browned out too often.
+ * 07-11-2019 TODO: why 106? It makes more sense to use 127 or 63.
+ */
+#define CS_GPREGRET_BROWNOUT_DFU (CS_GPREGRET_BROWNOUT_RESET + 10)
 
 static void on_error(void)
 {
@@ -202,10 +211,14 @@ void cs_check_gpregret() {
 	case CS_GPREGRET_SOFT_RESET:
 		NRF_POWER->GPREGRET = GPREGRET_START_COUNT;
 		break;
+	case CS_GPREGRET_BROWNOUT_DFU:
+		start_dfu = true;
+		break;
 	default:
 		NRF_POWER->GPREGRET = gpregret + 1;
 	}
 	if (gpregret > CS_GPREGRET_DFU) {
+//	if (gpregret > CS_GPREGRET_BROWNOUT_DFU) {
 		NRF_LOG_ERROR("Should not happen");
 		start_dfu = true;
 	}

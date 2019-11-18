@@ -9,40 +9,38 @@
 
 //TODO: make a enum class of these
 enum CommandHandlerTypes {
-	CTRL_CMD_SWITCH                      = 0,     //! 0x00
-	CTRL_CMD_PWM                         = 1,     //! 0x01
-	CTRL_CMD_SET_TIME                    = 2,     //! 0x02
-	CTRL_CMD_GOTO_DFU                    = 3,     //! 0x03
-	CTRL_CMD_RESET                       = 4,     //! 0x04
-	CTRL_CMD_FACTORY_RESET               = 5,     //! 0x05
-	CTRL_CMD_KEEP_ALIVE_STATE            = 6,     //! 0x06
-	CTRL_CMD_KEEP_ALIVE                  = 7,     //! 0x07
-	CTRL_CMD_ENABLE_MESH                 = 8,     //! 0x08
-	CTRL_CMD_ENABLE_ENCRYPTION           = 9,     //! 0x09 // Deprecate, can be done via config
-	CTRL_CMD_ENABLE_IBEACON              = 10,    //! 0x0A
-	CTRL_CMD_ENABLE_SCANNER              = 12,    //! 0x0C
-//	CTRL_CMD_SCAN_DEVICES                = 13,    //! 0x0D // Removed
-	CTRL_CMD_USER_FEEDBACK               = 14,    //! 0x0E
-	CTRL_CMD_SCHEDULE_ENTRY_SET          = 15,    //! 0x0F
-	CTRL_CMD_RELAY                       = 16,    //! 0x10
-	CTRL_CMD_REQUEST_SERVICE_DATA        = 18,    //! 0x12 // Deprecated?
-	CTRL_CMD_DISCONNECT                  = 19,    //! 0x13
-	CTRL_CMD_SET_LED                     = 20,    //! 0x14 // Deprecated?
-	CTRL_CMD_NOP                         = 21,    //! 0x15
-	CTRL_CMD_INCREASE_TX                 = 22,    //! 0x16
-	CTRL_CMD_RESET_ERRORS                = 23,    //! 0x17
-	CTRL_CMD_KEEP_ALIVE_REPEAT_LAST      = 24,    //! 0x18
-	CTRL_CMD_MULTI_SWITCH_LEGACY         = 25,    //! 0x19 // Deprecate
-	CTRL_CMD_SCHEDULE_ENTRY_CLEAR        = 26,    //! 0x1A
-	CTRL_CMD_KEEP_ALIVE_MESH             = 27,    //! 0x1B
-	CTRL_CMD_MESH_COMMAND                = 28,    //! 0x1C
-	CTRL_CMD_ALLOW_DIMMING               = 29,    //! 0x1D
-	CTRL_CMD_LOCK_SWITCH                 = 30,    //! 0x1E
-	CTRL_CMD_SETUP                       = 31,    //! 0x1F
-	CTRL_CMD_ENABLE_SWITCHCRAFT          = 32,    //! 0x20
-	CTRL_CMD_UART_MSG                    = 33,    //! 0x21
-	CTRL_CMD_UART_ENABLE                 = 34,    //! 0x22
-	CTRL_CMD_MULTI_SWITCH                = 35,
+	CTRL_CMD_SETUP                       = 0,
+	CTRL_CMD_FACTORY_RESET               = 1,
+	CTRL_CMD_STATE_GET                   = 2,
+	CTRL_CMD_STATE_SET                   = 3,
 
-	CTRL_CMD_UNKNOWN                     = 0xFF
+	CTRL_CMD_RESET                       = 10,
+	CTRL_CMD_GOTO_DFU                    = 11,
+	CTRL_CMD_NOP                         = 12,
+	CTRL_CMD_DISCONNECT                  = 13,
+
+	CTRL_CMD_SWITCH                      = 20,
+	CTRL_CMD_MULTI_SWITCH                = 21,
+	CTRL_CMD_PWM                         = 22,
+	CTRL_CMD_RELAY                       = 23,
+
+	CTRL_CMD_SET_TIME                    = 30,
+	CTRL_CMD_INCREASE_TX                 = 31,
+	CTRL_CMD_RESET_ERRORS                = 32,
+	CTRL_CMD_MESH_COMMAND                = 33,
+
+	CTRL_CMD_ALLOW_DIMMING               = 40,
+	CTRL_CMD_LOCK_SWITCH                 = 41,
+	CTRL_CMD_ENABLE_SWITCHCRAFT          = 42,
+
+	CTRL_CMD_UART_MSG                    = 50,
+	CTRL_CMD_UART_ENABLE                 = 51,
+
+	CTRL_CMD_SAVE_BEHAVIOUR              = 60,
+	CTRL_CMD_REPLACE_BEHAVIOUR           = 61,
+	CTRL_CMD_REMOVE_BEHAVIOUR            = 62,
+	CTRL_CMD_GET_BEHAVIOUR               = 63,
+	CTRL_CMD_GET_BEHAVIOUR_INDICES       = 64,
+
+	CTRL_CMD_UNKNOWN                     = 0xFFFF
 };

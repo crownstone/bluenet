@@ -6,11 +6,13 @@ from pygame.locals import *
 from random import randint
 import os
 
-DIR = "../docs/diagrams/"
-GEN_DIR = "../docs/diagrams/generated/"
-FILENAMES = ["../docs/PROTOCOL.md", "../docs/SERVICE_DATA.md", "../docs/SERVICE_DATA_DEPRECATED.md", "../docs/BROADCAST_PROTOCOL.md"]
+DOCS_DIR_PREFIX = "../"
+DOCS_DIR = "../docs/"
+DIR = "diagrams/"
+GEN_DIR = DOCS_DIR_PREFIX + DOCS_DIR + DIR
+FILENAMES = [DOCS_DIR_PREFIX + DOCS_DIR + F for F in ["PROTOCOL.md", "BEHAVIOUR.md", "SERVICE_DATA.md", "SERVICE_DATA_DEPRECATED.md", "BROADCAST_PROTOCOL.md"]]
 
-fontPath = "../docs/diagrams/fonts/LiberationSans-Regular.ttf"
+fontPath = DOCS_DIR_PREFIX + DOCS_DIR + "diagrams/fonts/LiberationSans-Regular.ttf"
 fontSizeBlocks = 24
 fontSizeBytes = 16
 
@@ -443,13 +445,14 @@ fontBlocks = pygame.font.Font(fontPath, fontSizeBlocks)
 fontBytes = pygame.font.Font(fontPath, fontSizeBytes)
 
 # Regex patterns
-patternFileNameString = "\\(" + DIR + "([^\\)]+)\\)"
+patternFileNameString = "\\(" + DOCS_DIR + DIR + "([^\\)]+)\\)"
 patternFileName = re.compile(patternFileNameString)
 patternTableHeader = re.compile("Type +\\| +Name +\\| +Length (in bits)? *\\| +Description")
 patternTableRow = re.compile("[^|]\\|([^|]+)\\|([^|]+)\\|.*")
 patternLink = re.compile("\\[([^]]+)\\]\\([^\\)]+\\)")
 
 for filename in FILENAMES:
+	print filename
 	parseFile(filename)
 	
 

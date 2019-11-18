@@ -29,7 +29,9 @@ extern "C" {
 #error "TICK_INTERVAL_MS must not be larger than MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS"
 #endif
 
-#define LOGMeshModelDebug LOGnone
+#define LOGMeshModelInfo    LOGnone
+#define LOGMeshModelDebug   LOGnone
+#define LOGMeshModelVerbose LOGnone
 
 
 static void cs_mesh_model_msg_handler(access_model_handle_t handle, const access_message_rx_t * p_message, void * p_args) {
@@ -159,7 +161,7 @@ cs_ret_code_t MeshModel::sendReply(const access_message_rx_t * accessMsg) {
 	_accessReplyMsg.access_token = nrf_mesh_unique_token_get();
 
 	uint32_t retVal = access_model_reply(_accessHandle, accessMsg, &_accessReplyMsg);
-	LOGMeshModelDebug("send reply %u", retVal);
+	LOGMeshModelVerbose("send reply %u", retVal);
 	return retVal;
 }
 
@@ -193,10 +195,10 @@ cs_ret_code_t MeshModel::_sendReliableMsg(const uint8_t* data, uint16_t len) {
 
 void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	if (accessMsg->meta_data.p_core_metadata->source != NRF_MESH_RX_SOURCE_LOOPBACK) {
-		LOGMeshModelDebug("Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i", accessMsg->opcode.opcode, accessMsg->meta_data.appkey_handle, accessMsg->meta_data.subnet_handle, accessMsg->meta_data.ttl, getRssi(accessMsg->meta_data.p_core_metadata));
+		LOGMeshModelVerbose("Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i", accessMsg->opcode.opcode, accessMsg->meta_data.appkey_handle, accessMsg->meta_data.subnet_handle, accessMsg->meta_data.ttl, getRssi(accessMsg->meta_data.p_core_metadata));
 		printMeshAddress("  Src: ", &(accessMsg->meta_data.src));
 		printMeshAddress("  Dst: ", &(accessMsg->meta_data.dst));
-		LOGMeshModelDebug("ownAddress=%u  Data:", _ownAddress);
+		LOGMeshModelVerbose("ownAddress=%u  Data:", _ownAddress);
 //		BLEutil::printArray(msg, size);
 	}
 //	bool ownMsg = (_ownAddress == accessMsg->meta_data.src.value) && (accessMsg->meta_data.src.type == NRF_MESH_ADDRESS_TYPE_UNICAST);
@@ -236,7 +238,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		}
 		uint32_t expectedCounter = _lastReceivedCounter + 1;
 		_lastReceivedCounter = test->counter;
-		LOGMeshModelDebug("receivedCounter=%u expectedCounter=%u", _lastReceivedCounter, expectedCounter);
+		LOGMeshModelVerbose("receivedCounter=%u expectedCounter=%u", _lastReceivedCounter, expectedCounter);
 		if (expectedCounter == _lastReceivedCounter) {
 			_received++;
 		}
@@ -327,7 +329,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		}
 		cs_mesh_model_msg_state_0_t* packet = (cs_mesh_model_msg_state_0_t*) payload;
 		uint8_t srcId = accessMsg->meta_data.src.value;
-		LOGd("id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
+		LOGMeshModelDebug("id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
 		_lastReceivedState.address = srcId;
 		_lastReceivedState.partsReceived = 1;
 		_lastReceivedState.state.data.state.id = srcId;
@@ -344,7 +346,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		}
 		cs_mesh_model_msg_state_1_t* packet = (cs_mesh_model_msg_state_1_t*) payload;
 		uint8_t srcId = accessMsg->meta_data.src.value;
-		LOGd("id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
+		LOGMeshModelDebug("id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
 		if (	_lastReceivedState.address == accessMsg->meta_data.src.value &&
 				_lastReceivedState.partsReceived == 1 &&
 				_lastReceivedState.state.data.extState.id == srcId &&
@@ -359,6 +361,17 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			_lastReceivedState.state.rssi = 0;
 			_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
 			_lastReceivedState.state.data.type = SERVICE_DATA_TYPE_EXT_STATE;
+			LOGMeshModelInfo("received: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u",
+					_lastReceivedState.state.data.extState.id,
+					_lastReceivedState.state.data.extState.switchState,
+					_lastReceivedState.state.data.extState.flags,
+					_lastReceivedState.state.data.extState.temperature,
+					_lastReceivedState.state.data.extState.powerFactor,
+					_lastReceivedState.state.data.extState.powerUsageReal,
+					_lastReceivedState.state.data.extState.energyUsed,
+					_lastReceivedState.state.data.extState.partialTimestamp
+			);
+
 			event_t event(CS_TYPE::EVT_STATE_EXTERNAL_STONE, &(_lastReceivedState.state), sizeof(_lastReceivedState.state));
 			EventDispatcher::getInstance().dispatch(event);
 		}
@@ -370,7 +383,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 void MeshModel::handleReliableStatus(access_reliable_status_t status) {
 	switch (status) {
 	case ACCESS_RELIABLE_TRANSFER_SUCCESS:
-//		LOGMeshModelDebug("reliable msg success");
+//		LOGMeshModelVerbose("reliable msg success");
 		LOGi("reliable msg success");
 //		_received++;
 //		LOGi("received=%u dropped=%u (%u%%)", _received, _dropped, (_dropped * 100) / (_received + _dropped));
@@ -403,7 +416,7 @@ void MeshModel::sendTestMsg() {
 		LOGw("sendTestMsg retVal=%u", retVal);
 	}
 	else {
-		LOGMeshModelDebug("sendTestMsg retVal=%u", retVal);
+		LOGMeshModelVerbose("sendTestMsg retVal=%u", retVal);
 	}
 	if (retVal == NRF_SUCCESS) {
 		++_nextSendCounter;
@@ -430,7 +443,7 @@ cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id
 			item->type = type;
 			item->payloadSize = payloadSize;
 			memcpy(item->payload, payload, payloadSize);
-			LOGd("added to ind=%u", index);
+			LOGMeshModelDebug("added to ind=%u type=%u id=%u", index, type, id);
 //			BLEutil::printArray(payload, payloadSize);
 			_queueSendIndex = index;
 			return ERR_SUCCESS;
@@ -444,7 +457,7 @@ cs_ret_code_t MeshModel::remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t 
 	for (int i = 0; i < MESH_MODEL_QUEUE_SIZE; ++i) {
 		if (_queue[i].id == id && _queue[i].type == type && _queue[i].repeats != 0) {
 			_queue[i].repeats = 0;
-			LOGd("removed from queue: ind=%u", i);
+			LOGMeshModelDebug("removed from queue: ind=%u", i);
 			return ERR_SUCCESS;
 		}
 	}
@@ -494,7 +507,7 @@ bool MeshModel::sendMsgFromQueue() {
 	}
 	free(msg);
 	--(item->repeats);
-	LOGd("sent ind=%u repeats_left=%u type=%u id=%u", index, item->repeats, item->type, item->id);
+	LOGMeshModelInfo("sent ind=%u repeats_left=%u type=%u id=%u", index, item->repeats, item->type, item->id);
 //	BLEutil::printArray(meshMsg.msg, meshMsg.size);
 
 	// Next item will be sent next, so that items are sent interleaved.
@@ -546,10 +559,10 @@ int8_t MeshModel::getRssi(const nrf_mesh_rx_metadata_t* metaData) {
 void MeshModel::printMeshAddress(const char* prefix, const nrf_mesh_address_t* addr) {
 	switch (addr->type) {
 	case NRF_MESH_ADDRESS_TYPE_INVALID:
-		LOGMeshModelDebug("%s type=invalid", prefix);
+		LOGMeshModelVerbose("%s type=invalid", prefix);
 		break;
 	case NRF_MESH_ADDRESS_TYPE_UNICAST:
-		LOGMeshModelDebug("%s type=unicast id=%u", prefix, addr->value);
+		LOGMeshModelVerbose("%s type=unicast id=%u", prefix, addr->value);
 		break;
 	case NRF_MESH_ADDRESS_TYPE_VIRTUAL:{
 		//128-bit virtual label UUID,
@@ -557,11 +570,11 @@ void MeshModel::printMeshAddress(const char* prefix, const nrf_mesh_address_t* a
 		__attribute__((unused)) uint32_t* uuid2 = (uint32_t*)(addr->p_virtual_uuid + 4);
 		__attribute__((unused)) uint32_t* uuid3 = (uint32_t*)(addr->p_virtual_uuid + 8);
 		__attribute__((unused)) uint32_t* uuid4 = (uint32_t*)(addr->p_virtual_uuid + 12);
-		LOGMeshModelDebug("%s type=virtual id=%u uuid=%x%x%x%x", prefix, addr->value, uuid1, uuid2, uuid3, uuid4);
+		LOGMeshModelVerbose("%s type=virtual id=%u uuid=%x%x%x%x", prefix, addr->value, uuid1, uuid2, uuid3, uuid4);
 		break;
 	}
 	case NRF_MESH_ADDRESS_TYPE_GROUP:
-		LOGMeshModelDebug("%s type=group id=%u", prefix, addr->value);
+		LOGMeshModelVerbose("%s type=group id=%u", prefix, addr->value);
 		break;
 	}
 }
