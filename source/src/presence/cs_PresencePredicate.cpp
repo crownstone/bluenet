@@ -25,7 +25,7 @@ bool PresencePredicate::operator()(
     static uint32_t last_print_stamp = 0;
     if(SystemTime::posix() - last_print_stamp > 60){
         last_print_stamp = SystemTime::posix();
-        LOGd("DEBUG: PresencePredicate vacuously true.");
+        LOGd("DEBUG: Ignoring ALL PresencePredicates.");
     }
     return true;
 
