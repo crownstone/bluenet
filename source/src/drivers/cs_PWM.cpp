@@ -161,7 +161,10 @@ uint32_t PWM::deinit() {
 }
 
 uint32_t PWM::start(bool onZeroCrossing) {
+	assert(_initialized, "ERR_NOT_INITIALIZED");
+
 	LOGi("Start");
+
 	_startOnZeroCrossing = onZeroCrossing;
 	if (!onZeroCrossing) {
 		start();

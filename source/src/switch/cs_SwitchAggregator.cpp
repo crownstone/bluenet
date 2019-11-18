@@ -118,7 +118,6 @@ void SwitchAggregator::handleEvent(event_t& evt){
     }
 
     if(swSwitch && !swSwitch->isSwitchingAllowed()){
-        LOGd("SwitchAggregator can't respond to event, swSwitch locked");
         return;
     }
 

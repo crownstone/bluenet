@@ -212,13 +212,12 @@ void SwSwitch::forceSwitchOff() {
 
 void SwSwitch::forceDimmerOff() {
     SWSWITCH_LOG();
-	hwSwitch.setIntensity(0);
+
+    setIntensity_unchecked(0);
 
     // as there is no mechanism to turn it back on this isn't done yet, 
     // but it would be safer to cut power to the dimmer if in error I suppose.
     // hwSwitch.setDimmerPower(false);
-
-    storeIntensityStateUpdate(0);
 
 	event_t event(CS_TYPE::EVT_DIMMER_FORCED_OFF);
 	EventDispatcher::getInstance().dispatch(event);
@@ -286,6 +285,14 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
     // load currentState from State. 
     State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &currentState, sizeof(currentState));
 
+    // load locked state
+    bool switch_locked = false;
+    State::getInstance().get(CS_TYPE::CONFIG_SWITCH_LOCKED, &switch_locked, sizeof(switch_locked));
+    allowSwitching = ! switch_locked;
+
+    // load dimming allowed stated
+    State::getInstance().get(CS_TYPE::CONFIG_PWM_ALLOWED, &allowDimming, sizeof(allowDimming));
+
     // ensure the dimmer gets power as the rest of the SwSwitch code assumes 
     // that setIntensity calls will have visible effect.
     // note: dimmer power is not persisted, so we don't need to store this anywhere.
@@ -312,13 +319,15 @@ void SwSwitch::setAllowDimming(bool allowed) {
 
     if(!allowDimming || hasDimmingFailed()){
         // fix state on disallow
-        setIntensity(0);
-
         if(currentState.state.dimmer != 0){
             // turn on to full power if we were dimmed to some
             // percentage, but aren't allowed to.
             setRelay(true);
+        } else {
+            setRelay(false);
         }
+
+        setIntensity(0);
     }
 }
 
@@ -349,7 +358,7 @@ void SwSwitch::setDimmer(uint8_t value){
 
         } else if(value < 50 - threshold){
             LOGw("setIntensity resolved: off");
-            setIntensity(0); // (1-level recursion at most.)
+            setDimmer(0); // (1-level recursion at most.)
         } else {
             LOGd("setIntensity can't use dimmer but parameter too ambiguous to make a guess");
             LOGd("allowDimming: %d, isSafeToDim: %d, value: %d",allowDimming, isSafeToDim(),value);
