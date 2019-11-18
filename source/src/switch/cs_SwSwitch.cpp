@@ -456,7 +456,8 @@ void SwSwitch::handleEvent(event_t& evt){
         case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
             SWSWITCH_LOG();
             // First set relay on, so that the switch doesn't first turn off, and later on again.
-            // The relay protects the dimmer, because the current will flow through the relay.
+            // The relay protects the dimmer, because it opens a parallel circuit for the current
+            // to flow through.
             forceRelayOn();
             forceDimmerOff();
             break;
@@ -479,9 +480,15 @@ void SwSwitch::handleEvent(event_t& evt){
                 checkDimmerPower();
                 checkedDimmerPowerUsage = true;
             }
+            // TODO: error check in case primary fault-event did not solve the issue?
             break;
         }
-        default: break;
+        default: {
+            // early return prevents setting event return type to successful
+            return;
+        }
     }
+
+    evt.result.returnCode = ERR_SUCCESS;
 }
 

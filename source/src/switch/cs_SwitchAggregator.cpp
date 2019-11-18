@@ -114,10 +114,15 @@ void SwitchAggregator::handleEvent(event_t& evt){
         auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);
         if(swSwitch) swSwitch->setAllowSwitching(*typd);
 
+        evt.result.returnCode = ERR_SUCCESS;
+
         return;
     }
 
     if(swSwitch && !swSwitch->isSwitchingAllowed()){
+
+        evt.result.returnCode = ERR_SUCCESS;
+
         return;
     }
 
@@ -125,8 +130,8 @@ void SwitchAggregator::handleEvent(event_t& evt){
         LOGd("SwitchAggregator::%s case CMD_DIMMING_ALLOWED",__func__);
         auto typd = reinterpret_cast<TYPIFY(CMD_DIMMING_ALLOWED)*>(evt.data);
         if(swSwitch) swSwitch->setAllowDimming(*typd);
-
-        // Todo: if user adjust allow dimming, do we expect a recomputation of the state?
+        
+        evt.result.returnCode = ERR_SUCCESS;
 
         return;
     }
@@ -140,11 +145,13 @@ void SwitchAggregator::handleStateIntentionEvents(event_t& evt){
         case CS_TYPE::CMD_SWITCH_ON:{
             LOGd("CMD_SWITCH_ON",__func__);
             overrideState = 100;
+            updateState();
             break;
         }
         case CS_TYPE::CMD_SWITCH_OFF:{
             LOGd("CMD_SWITCH_OFF",__func__);
             overrideState = 0;
+            updateState();
             break;
         }
         case CS_TYPE::CMD_SWITCH: {
@@ -152,12 +159,14 @@ void SwitchAggregator::handleStateIntentionEvents(event_t& evt){
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;
             LOGd("packet intensity: %d", packet->switchCmd);
             overrideState = packet->switchCmd;
+            updateState();
 			break;
 		}
         case CS_TYPE::CMD_SWITCH_TOGGLE:{
             LOGd("CMD_SWITCH_TOGGLE",__func__);
             // TODO(Arend, 08-10-2019): toggle should be upgraded when twilight is implemented
             overrideState = swSwitch->isOn() ? 0 : 100;
+            updateState();
             break;
         }
 
@@ -166,6 +175,7 @@ void SwitchAggregator::handleStateIntentionEvents(event_t& evt){
             uint8_t* typd = reinterpret_cast<TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE)*>(evt.data);
             LOGd("EVT_BEHAVIOUR_SWITCH_STATE value: %d", *typd);
             behaviourState = *typd;
+            updateState();
             break;
         }
 
@@ -177,20 +187,20 @@ void SwitchAggregator::handleStateIntentionEvents(event_t& evt){
             LOGd("CMD_SET_RELAY");
             auto typd = reinterpret_cast<TYPIFY(CMD_SET_RELAY)*>(evt.data);
             if(swSwitch) swSwitch->setRelay(*typd);
-            return;
+            break;
         }
         case CS_TYPE::CMD_SET_DIMMER:{
             LOGd("CMD_SET_DIMMER");
             auto typd = reinterpret_cast<TYPIFY(CMD_SET_DIMMER)*>(evt.data);
             if(swSwitch) swSwitch->setIntensity(*typd);
-            return;
+            break;
         }
         default:{
             return;
         }
     }
 
-    updateState();
+    evt.result.returnCode = ERR_SUCCESS;
 }
 
 void SwitchAggregator::developerForceOff(){
