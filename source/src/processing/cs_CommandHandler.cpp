@@ -415,10 +415,10 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 	BLEutil::printArray(buffer, size);
 //#if BUILD_MESHING == 1
 	// Only support control command NOOP and SET_TIME for now, with idCount of 0. These are the only ones used by the app.
-	// Command packet: type, flags, count, {control packet: type, reserved, length, length, payload...}
-	//                 0     1      2                       3     4          5      6       7
-	//                 00    00     00                      15    01         00     00
-	//                 00    00     00                      02    01         04     00      56 34 12 00
+	// Command packet: type, flags, count, {control packet: type, type, length, length, payload...}
+	//                 0     1      2                       3     4     5      6       7
+	//                 00    00     00                      12    00    00     00
+	//                 00    00     00                      30    00    04     00      56 34 12 00
 	if (size < 3) {
 		return command_result_t(ERR_BUFFER_TOO_SMALL);
 	}
@@ -435,7 +435,8 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 		return command_result_t(ERR_BUFFER_TOO_SMALL);
 	}
 	// Check control type and payload size
-	switch (buffer[3]) {
+	uint8_t cmdType = buffer[3];
+	switch (cmdType) {
 	case CTRL_CMD_NOP:{
 		if (payloadSize != 0) {
 			return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
@@ -452,13 +453,13 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 		return command_result_t(ERR_NOT_IMPLEMENTED);
 	}
 	// Check access
-	EncryptionAccessLevel requiredAccessLevel = getRequiredAccessLevel((CommandHandlerTypes)buffer[3]);
+	EncryptionAccessLevel requiredAccessLevel = getRequiredAccessLevel((CommandHandlerTypes)cmdType);
 	if (!EncryptionHandler::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
 		return command_result_t(ERR_NO_ACCESS);
 	}
 
 	cs_mesh_msg_t meshMsg;
-	switch (buffer[3]) {
+	switch (cmdType) {
 	case CTRL_CMD_NOP:
 		meshMsg.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
 		meshMsg.payload = payload;
