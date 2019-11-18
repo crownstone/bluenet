@@ -21,6 +21,9 @@ PresencePredicate::PresencePredicate(std::array<uint8_t, 9> arr) :
 
 bool PresencePredicate::operator()(
         PresenceStateDescription currentroomspresencebitmask) const{
+    LOGd("DEBUG: PresencePredicate vacuously true.");
+    return true;
+
     switch(cond){
         case Condition::VacuouslyTrue: 
             return true;

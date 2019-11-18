@@ -26,10 +26,9 @@ class PresencePredicate{
     };
 
     
-    private: 
+    // private: DEBUG
     Condition cond;
     uint64_t RoomsBitMask;
-    // user id
 
     public:
     PresencePredicate(Condition c, PresenceStateDescription roomsMask);
