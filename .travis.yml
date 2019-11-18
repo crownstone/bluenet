@@ -14,7 +14,7 @@ install:
 - cmake .. -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF
 
 script:
-- VERBOSE=1 make
+- make
 
 git:
     depth: 3
