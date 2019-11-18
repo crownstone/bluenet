@@ -121,12 +121,8 @@ command_result_t CommandHandler::handleCommand(
 		return handleCmdLockSwitch(commandData, accessLevel, resultData);
 	case CTRL_CMD_SETUP:
 		return handleCmdSetup(commandData, accessLevel, resultData);
-	case CTRL_CMD_ENABLE_SWITCHCRAFT:
-		return handleCmdEnableSwitchcraft(commandData, accessLevel, resultData);
 	case CTRL_CMD_UART_MSG:
 		return handleCmdUartMsg(commandData, accessLevel, resultData);
-	case CTRL_CMD_UART_ENABLE:
-		return handleCmdUartEnable(commandData, accessLevel, resultData);
 	case CTRL_CMD_STATE_GET:
 		return handleCmdStateGet(commandData, accessLevel, resultData);
 	case CTRL_CMD_STATE_SET:
@@ -442,10 +438,10 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 	BLEutil::printArray(buffer, size);
 //#if BUILD_MESHING == 1
 	// Only support control command NOOP and SET_TIME for now, with idCount of 0. These are the only ones used by the app.
-	// Command packet: type, flags, count, {control packet: type, reserved, length, length, payload...}
-	//                 0     1      2                       3     4          5      6       7
-	//                 00    00     00                      15    01         00     00
-	//                 00    00     00                      02    01         04     00      56 34 12 00
+	// Command packet: type, flags, count, {control packet: type, type, length, length, payload...}
+	//                 0     1      2                       3     4     5      6       7
+	//                 00    00     00                      12    00    00     00
+	//                 00    00     00                      30    00    04     00      56 34 12 00
 	if (size < 3) {
 		return command_result_t(ERR_BUFFER_TOO_SMALL);
 	}
@@ -462,7 +458,8 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 		return command_result_t(ERR_BUFFER_TOO_SMALL);
 	}
 	// Check control type and payload size
-	switch (buffer[3]) {
+	uint8_t cmdType = buffer[3];
+	switch (cmdType) {
 	case CTRL_CMD_NOP:{
 		if (payloadSize != 0) {
 			return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
@@ -479,13 +476,13 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 		return command_result_t(ERR_NOT_IMPLEMENTED);
 	}
 	// Check access
-	EncryptionAccessLevel requiredAccessLevel = getRequiredAccessLevel((CommandHandlerTypes)buffer[3]);
+	EncryptionAccessLevel requiredAccessLevel = getRequiredAccessLevel((CommandHandlerTypes)cmdType);
 	if (!EncryptionHandler::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
 		return command_result_t(ERR_NO_ACCESS);
 	}
 
 	cs_mesh_msg_t meshMsg;
-	switch (buffer[3]) {
+	switch (cmdType) {
 	case CTRL_CMD_NOP:
 		meshMsg.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
 		meshMsg.payload = payload;
@@ -547,22 +544,6 @@ command_result_t CommandHandler::handleCmdLockSwitch(cs_data_t commandData, cons
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdEnableSwitchcraft(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
-	LOGi(STR_HANDLE_COMMAND, "enable switchcraft");
-
-	if (commandData.len != sizeof(enable_message_payload_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-	}
-
-	enable_message_payload_t* payload = (enable_message_payload_t*) commandData.data;
-	TYPIFY(CONFIG_SWITCHCRAFT_ENABLED) enable = payload->enable;
-	State::getInstance().set(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED, &enable, sizeof(enable));
-	event_t event(CS_TYPE::EVT_SWITCHCRAFT_ENABLED, &enable, sizeof(enable));
-	EventDispatcher::getInstance().dispatch(event);
-	return command_result_t(ERR_SUCCESS);
-}
-
 command_result_t CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGd(STR_HANDLE_COMMAND, "UART msg");
 
@@ -572,22 +553,6 @@ command_result_t CommandHandler::handleCmdUartMsg(cs_data_t commandData, const E
 	}
 
 	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_BLE_MSG, commandData.data, commandData.len);
-	return command_result_t(ERR_SUCCESS);
-}
-
-command_result_t CommandHandler::handleCmdUartEnable(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
-	LOGd(STR_HANDLE_COMMAND, "UART enable");
-
-	if (commandData.len != 1) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
-		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-	}
-	TYPIFY(CONFIG_UART_ENABLED) enable = *(uint8_t*) commandData.data;
-	cs_ret_code_t errCode = State::getInstance().set(CS_TYPE::CONFIG_UART_ENABLED, &enable, sizeof(enable));
-	if (errCode != ERR_SUCCESS) {
-		return command_result_t(errCode);
-	}
-	serial_enable((serial_enable_t)enable);
 	return command_result_t(ERR_SUCCESS);
 }
 
@@ -623,9 +588,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CTRL_CMD_RESET_ERRORS:
 	case CTRL_CMD_ALLOW_DIMMING:
 	case CTRL_CMD_LOCK_SWITCH:
-	case CTRL_CMD_ENABLE_SWITCHCRAFT:
 	case CTRL_CMD_UART_MSG:
-	case CTRL_CMD_UART_ENABLE:
 		return ADMIN;
 	case CTRL_CMD_UNKNOWN:
 		return NOT_SET;

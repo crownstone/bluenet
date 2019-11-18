@@ -113,7 +113,8 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_MESH_NET_KEY                     = 64,     //  0x40
 	CONFIG_KEY_LOCALIZATION                 = 65,     //  0x41
 	CONFIG_START_DIMMER_ON_ZERO_CROSSING    = 66,     //  0x42
-	CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD     = 67,
+	CONFIG_TAP_TO_TOGGLE_ENABLED            = 67,
+	CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD     = 68,
 
 	STATE_RESET_COUNTER                     = 128,    //  0x80 - 128
 	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
@@ -219,7 +220,6 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_FACTORY_RESET,                           // Sent when factory reset of mesh storage is done.
 	EVT_SETUP_DONE,                                   // Sent when setup was done (and settings are stored).
 //	EVT_DO_RESET_DELAYED,                             // Sent to perform a reset in a few seconds.
-	EVT_SWITCHCRAFT_ENABLED, // TODO: Deprecate, use cfg   // Sent when switchcraft flag is set. -- Payload is BOOL.
 //	EVT_STORAGE_WRITE,                                // Sent when an item is going to be written to storage.
 //	EVT_STORAGE_ERASE,                                // Sent when a flash page is going to be erased.
 	EVT_ADC_RESTARTED,                                // Sent when ADC has been restarted.
@@ -310,6 +310,7 @@ typedef     BOOL TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING);
 typedef     BOOL TYPIFY(CONFIG_SWITCH_LOCKED);
 typedef     BOOL TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
 typedef    float TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD);
+typedef     BOOL TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED);
 typedef   int8_t TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD);
 typedef   int8_t TYPIFY(CONFIG_TX_POWER);
 typedef  uint8_t TYPIFY(CONFIG_UART_ENABLED); //TODO: serial_enable_t
@@ -390,7 +391,6 @@ typedef  void TYPIFY(EVT_STORAGE_GC_DONE);
 typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET);
 typedef  void TYPIFY(EVT_STORAGE_PAGES_ERASED);
 typedef  void TYPIFY(EVT_MESH_FACTORY_RESET);
-typedef  BOOL TYPIFY(EVT_SWITCHCRAFT_ENABLED);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
 typedef  BOOL TYPIFY(CMD_SWITCH_LOCKED);
 typedef  uint32_t TYPIFY(EVT_TICK);

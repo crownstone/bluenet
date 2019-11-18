@@ -5,6 +5,8 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <cfg/cs_Config.h>
+#include <common/cs_Types.h>
 #include <storage/cs_StateData.h>
 
 cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsConfig)  {
@@ -41,6 +43,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
 		*(TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)*)data.value = CONFIG_SWITCHCRAFT_DEFAULT;
+		return ERR_SUCCESS;
+	case CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED:
+		*(TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED)*)data.value = CONFIG_TAP_TO_TOGGLE_ENABLED_DEFAULT;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD:
 		*(TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD)*)data.value = CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_DEFAULT;
@@ -268,7 +273,6 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::CMD_SWITCH_LOCKED:
-	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_TICK:
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_SAVE_BEHAVIOUR:
@@ -333,6 +337,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_SWITCH_LOCKED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
+	case CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED:
 	case CS_TYPE::CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD:
 	case CS_TYPE::CONFIG_UART_ENABLED:
 	case CS_TYPE::STATE_RESET_COUNTER:
@@ -393,7 +398,6 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_FACTORY_RESET:
 	case CS_TYPE::EVT_SETUP_DONE:
-	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
 	case CS_TYPE::EVT_ADC_RESTARTED:
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
 	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:

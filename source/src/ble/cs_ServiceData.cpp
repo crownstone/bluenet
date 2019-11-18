@@ -302,8 +302,8 @@ void ServiceData::handleEvent(event_t & event) {
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, *(TYPIFY(CONFIG_SWITCH_LOCKED)*)event.data);
 			break;
 		}
-		case CS_TYPE::EVT_SWITCHCRAFT_ENABLED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, *(TYPIFY(EVT_SWITCHCRAFT_ENABLED)*)event.data);
+		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: {
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, *(TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)*)event.data);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {

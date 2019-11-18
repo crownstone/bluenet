@@ -113,14 +113,15 @@ set(NRF5_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk)
 list(APPEND CMAKE_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
 ExternalProject_Add(nordic_mesh_sdk
-  DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+  #DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+  GIT_REPOSITORY https://github.com/crownstone/nRF5-SDK-for-Mesh
   SOURCE_DIR ${WORKSPACE_DIR}/tools/mesh_sdk
-  URL ${NORDIC_MESH_SDK_DOWNLOAD_URL}
-  URL_MD5 ${NORDIC_MESH_SDK_MD5}
+  #URL ${NORDIC_MESH_SDK_DOWNLOAD_URL}
+  #URL_MD5 ${NORDIC_MESH_SDK_MD5}
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
   BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
   INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-  PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/00mesh.patch
+  #PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/00mesh.patch
   )
 
 set(MESH_SDK_DIR ${WORKSPACE_DIR}/tools/mesh_sdk)
@@ -128,7 +129,7 @@ list(APPEND CMAKE_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
 if(DOWNLOAD_JLINK) 
   ExternalProject_Add(jlink
-    DOWNLOAD_COMMAND wget --timestamping --post-data "accept_license_agreement=accepted" ${JLINK_LINUX_DOWNLOAD_URL}
+    DOWNLOAD_COMMAND wget --timestamping --post-data "accept_license_agreement=accepted&non_emb_ctr=confirmed" ${JLINK_LINUX_DOWNLOAD_URL}
     DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
     URL ${JLINK_LINUX_DOWNLOAD_URL}
     URL_MD5 ${JLINK_MD5}

@@ -43,6 +43,11 @@ public:
 	void handleEvent(event_t & event);
 
 private:
+	/**
+	 * Whether tap to toggle is enabled on this crownstone.
+	 */
+	TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED) enabled = CONFIG_TAP_TO_TOGGLE_ENABLED_DEFAULT;
+
 	t2t_entry_t list[T2T_LIST_COUNT];
 	/**
 	 * Used to count down the timeout.

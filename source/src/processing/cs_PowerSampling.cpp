@@ -199,8 +199,8 @@ void PowerSampling::handleEvent(event_t & event) {
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 		changeRange(CURRENT_CHANNEL_IDX, -600);
 		break;
-	case CS_TYPE::EVT_SWITCHCRAFT_ENABLED:
-		enableSwitchcraft(*(TYPIFY(EVT_SWITCHCRAFT_ENABLED)*)event.data);
+	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
+		enableSwitchcraft(*(TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)*)event.data);
 		break;
 	case CS_TYPE::EVT_ADC_RESTARTED:
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);

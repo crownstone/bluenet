@@ -26,9 +26,9 @@ The setup process goes as follows:
 - Phone connects to the Crownstone.
 - Phone reads the **session key** and **session nonce** from the [setup service](#setup_service). These characteristics are not encrypted.
 The values are only valid for this connection session. The session key and the session nonce will be used to encrypt the rest of the setup phase using AES 128 CTR as explained [here](#encrypted_write_read).
-- Phone subscribes to [control](#setup_service) characteristic.
-- Phone commands Crownstone to setup via the control characteristic.
-- Phone waits for control characteristic result to become SUCCESS (See [result packet](#result_packet)).
+- Phone subscribes to [result](#setup_service) characteristic.
+- Phone commands Crownstone to [setup](#control_packet) via the control characteristic.
+- Phone waits for result to become SUCCESS (See [result packet](#result_packet)).
 - Crownstone will reboot to normal mode.
 
 
@@ -322,9 +322,7 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 34 | Set sun times | [Set sun time packet](#set_sun_time_packet) | Update the reference times for sunrise and sunset | x | x | 
 40 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
-42 | Enable switchcraft | uint 8 | Enable/disable switchcraft. | x
 50 | UART message | payload | Print the payload to UART. | x
-51 | UART enable | uint 8 | Set UART enabled, 0 = none, 1 = RX only, 3 = TX and RX | x
 60 | Save Behaviour | [Save Behaviour packet](BEHAVIOUR.md#save_behaviour_packet) | Save a Behaviour to an unoccupied index | x | x
 61 | Replace Behaviour | [Replace Behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | Replace the Behaviour at given index | x | x
 62 | Remove Behaviour | [Remove Behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the Behaviour at given index | x | x
@@ -554,7 +552,8 @@ Type nr | Type name | Payload type | Description | A | M | B
 64 | Mesh network key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to be received or relayed by this Crownstone. |  |  | 
 65 | Localization key | uint 8 [16] | 16 byte key used to encrypt/decrypt messages to tell your location to this Crownstone. |  |  | 
 66 | Start dimmer on zero crossing | uint 8 | Whether the dimmer should start on a zero crossing or not. | rw |  | 
-67 | Tap to toggle RSSI threshold | int 8 | RSSI threshold (after adjustment from the offset) above which tap to toggle will respond. | rw |  | 
+67 | Tap to toggle enabled | uint 8 | Whether tap to toggle is enabled on this Crownstone. | rw |  | 
+68 | Tap to toggle RSSI threshold | int 8 | RSSI threshold (after adjustment from the offset) above which tap to toggle will respond. | rw |  | 
 128 | Reset counter | uint 16 | Counts the number of resets. | r | r | 
 129 | [Switch state](#switch_state_packet) | uint 8 | Current switch state. | r | r | 
 130 | Accumulated energy | int 64 | Accumulated energy in μJ. | r | r | 
