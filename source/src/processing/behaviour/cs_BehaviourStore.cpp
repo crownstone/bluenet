@@ -17,7 +17,7 @@
 #include <algorithm>
 
 // allocate space for the behaviours.
-std::array<std::optional<Behaviour>,BehaviourStore::MaxBehaviours> BehaviourStore::activeBehaviours;
+std::array<std::optional<Behaviour>,BehaviourStore::MaxBehaviours> BehaviourStore::activeBehaviours = {};
 
 void BehaviourStore::handleEvent(event_t& evt){
     switch(evt.type){
