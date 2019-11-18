@@ -147,7 +147,7 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	uint16_t decryptedPayloadRC5[2];
 	bool validated = handleEncryptedCommandPayload(scannedDevice, header, nonceData, services128bit, encryptedPayloadRC5, decryptedPayloadRC5);
 	if (validated) {
-		handleDecryptedRC5Payload(scannedDevice, header, encryptedPayloadRC5);
+		handleDecryptedRC5Payload(scannedDevice, header, decryptedPayloadRC5);
 	}
 }
 

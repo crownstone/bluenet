@@ -172,7 +172,7 @@ struct state_external_stone_t {
 };
 
 /**
- * Background advertisement.
+ * Unparsed background advertisement.
  */
 struct __attribute__((__packed__)) adv_background_t {
 	uint8_t protocol;
