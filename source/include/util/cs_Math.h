@@ -49,4 +49,24 @@ namespace CsMath{
     auto max(T l, S r){
         return l > r ? l : r;
     }
+
+    /**
+     * Represents an interval by two unsigned integers [base, base + diff]
+     * allowing overflow safe containment checks.
+     */
+    template<class T>
+    class Interval{
+        private: 
+        T low,high;
+        public:
+        Interval(T base, T diff) : low(base), high(base+diff) {} // addition allowed to overflow/underflow
+
+        bool contains(T val){
+            return
+                low < high // reversed interval?
+                ? (low <= val && val < high)  // nope, both must hold
+                : (low <= val || val < high); // yup, only one can hold
+
+        }
+    };
 }

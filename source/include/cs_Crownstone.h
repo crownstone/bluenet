@@ -151,6 +151,7 @@ protected:
 	 * operations periodically turn on the 32 MHz crystal oscillator anyway.
 	 */
 	void startHFClock();
+
 private:
 
 	boards_config_t _boardsConfig;
@@ -191,7 +192,7 @@ private:
 
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;
-	TYPIFY(EVT_TICK) _tickCount = 0;
+	static TYPIFY(EVT_TICK) _tickCount;
 
 	OperationMode _operationMode;
 	OperationMode _oldOperationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
@@ -201,6 +202,10 @@ private:
 	 * different than after a factory reset.
 	 */
 	bool _setStateValuesAfterStorageRecover = false;
+
+
+	public:
+	static TYPIFY(EVT_TICK) getTickCount(){ return _tickCount; }
 };
 
 

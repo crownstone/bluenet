@@ -4,10 +4,10 @@
  * Date: Nov 13, 2019
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
-
-#include <time/cs_TimeOfDay.h>
-#include <time/cs_SystemTime.h>
 #include <presence/cs_PresenceHandler.h>
+
+#include <cs_Crownstone.h>
+#include <time/cs_TimeOfDay.h>
 #include <common/cs_Types.h>
 
 std::list<PresenceHandler::PresenceRecord> PresenceHandler::WhenWhoWhere;
@@ -35,16 +35,16 @@ void PresenceHandler::handleEvent(event_t& evt){
         WhenWhoWhere.pop_back();
     }
 
-    Time now = SystemTime::posix();
-    uint32_t time_out_threshold = now - presence_time_out;
+    uint32_t now = Crownstone::getTickCount();
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out,now);
 
     if(parsed_adv_ptr->profileId == 0xff && parsed_adv_ptr->locationId == 0xff){
         LOGw("DEBUG: removing presence record data");
         WhenWhoWhere.clear();
-    } else {
+    } else {        
         WhenWhoWhere.remove_if( 
             [&] (PresenceRecord www){ 
-                if(www.when < time_out_threshold){
+                if(!valid_time_interval.contains(www.when)){
                     LOGd("erasing old presence_record for user id %d because it's outdated", www.who);
                     return true;
                 }
@@ -67,32 +67,35 @@ void PresenceHandler::handleEvent(event_t& evt){
 }
 
 void PresenceHandler::removeOldRecords(){
-    Time now = SystemTime::posix();
-    uint32_t time_out_threshold = now - presence_time_out;
+    uint32_t now = Crownstone::getTickCount();
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out,now);
 
      WhenWhoWhere.remove_if( 
         [&] (PresenceRecord www){ 
-            if(www.when < time_out_threshold){
+            if(!valid_time_interval.contains(www.when)){
                 LOGd("erasing old presence_record for user id %d because it's outdated", www.who);
                 return true;
             }
            
             return false;
-        } 
+        }
     );
 }
 
 PresenceStateDescription PresenceHandler::getCurrentPresenceDescription(){
     PresenceStateDescription p = 0;
-    Time now = SystemTime::posix();
+    uint32_t now = Crownstone::getTickCount();
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out,now);
+
     for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ){
-        if(iter->when < now - presence_time_out){
-            LOGd("erasing old presence_record for user id %d because it's already %d sec old", 
+        if(!valid_time_interval.contains(iter->when)){
+            LOGd("erasing old presence_record for user id %d because it's already %d ticks old", 
                 iter->who, now - iter->when
             );
             iter = WhenWhoWhere.erase(iter); // increments iter and invalidates previous value..
             continue;
         } else {
+            // appearently iter is valid, so the .where field describes an occupied room.
             p |= 1 << CsMath::min(64-1,iter->where);
             ++iter;
         }
@@ -102,7 +105,6 @@ PresenceStateDescription PresenceHandler::getCurrentPresenceDescription(){
 
 void PresenceHandler::print(){
     for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); iter++){
-        TimeOfDay t = iter->when;
-        LOGd("at %02d:%02d:%02d user #%d was found in room %d", t.h(),t.m(),t.s(), iter->who, iter->where);
+        LOGd("at %d ticks after startup user #%d was found in room %d", iter->when, iter->who, iter->where);
     }
 }

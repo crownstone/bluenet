@@ -231,6 +231,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_REMOVE_BEHAVIOUR,						// when a user requests to remove a behaviour, this event fires.
 	EVT_GET_BEHAVIOUR,							// when a user requests a currently active behaviour, this event fires.
 	EVT_GET_BEHAVIOUR_INDICES,                  // Sent when a user requests a list of indices with active behaviours.
+	EVT_BEHAVIOURSTORE_MUTATION,				// Sent by BehaviourStore for other components to react _after_ a change to the behaviourstore occured.
 	EVT_PRESENCE_MUTATION,						// when a change in presence occurs this event fires.
 	EVT_BEHAVIOUR_SWITCH_STATE,					// when behaviour desires a stateswitch this event is fired.
 	CMD_SET_RELAY,								// when a user requests to set the relay to a specific state
@@ -400,6 +401,7 @@ typedef std::tuple<uint8_t,Behaviour> TYPIFY(EVT_REPLACE_BEHAVIOUR);
 typedef uint8_t TYPIFY(EVT_REMOVE_BEHAVIOUR); // index
 typedef uint8_t TYPIFY(EVT_GET_BEHAVIOUR); // index
 typedef void TYPIFY(EVT_GET_BEHAVIOUR_INDICES);
+typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef uint8_t TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
 typedef void TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);

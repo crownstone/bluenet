@@ -55,4 +55,6 @@ class BehaviourStore : public EventListener {
     void handleRemoveBehaviour(event_t& evt);
     void handleGetBehaviour(event_t& evt);
     void handleGetBehaviourIndices(event_t& evt);
+
+    void dispatchBehaviourMutationEvent();
 };

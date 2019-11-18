@@ -24,15 +24,10 @@
 
 void BehaviourHandler::handleEvent(event_t& evt){
     switch(evt.type){
-        case CS_TYPE::STATE_TIME:{
+        case CS_TYPE::STATE_TIME:
+        case CS_TYPE::EVT_PRESENCE_MUTATION:
+        case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:
             update();
-            break;
-        }
-        case CS_TYPE::EVT_PRESENCE_MUTATION:{
-            LOGd("presence update");
-            update();
-            break;
-        }
         default:{
             // ignore other events
             break;

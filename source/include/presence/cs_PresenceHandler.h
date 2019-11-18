@@ -4,6 +4,7 @@
  * Date: Nov 13, 2019
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
+#pragma once
 
 #include <events/cs_EventListener.h>
 #include <presence/cs_PresenceDescription.h>
@@ -18,16 +19,16 @@
  */
 class PresenceHandler: public EventListener{
     private:
-    // after this amount of seconds a presence_record becomes invalid.
-    static const constexpr uint32_t presence_time_out = 30; // DEBUG, should be 60*5;
+    // after this amount of ticks a presence_record becomes invalid.
+    static const constexpr uint32_t presence_time_out = 300; // DEBUG, should be 60*5*10;
 
     // using a list because of constant time insertion/deletion of
     // any item in the container
     static const constexpr uint8_t max_records = 20;
     struct PresenceRecord {
-        Time when;
-        uint8_t who;
-        uint8_t where;
+        uint32_t when;  // ticks since startup
+        uint8_t who;    // profile id
+        uint8_t where;  // room id
     };
 
     // keeps track of a short history of presence events.

@@ -23,14 +23,17 @@ void BehaviourStore::handleEvent(event_t& evt){
     switch(evt.type){
         case CS_TYPE::EVT_SAVE_BEHAVIOUR:{
             handleSaveBehaviour(evt);
+            dispatchBehaviourMutationEvent();
             break;
         }
         case CS_TYPE::EVT_REPLACE_BEHAVIOUR:{
             handleReplaceBehaviour(evt);
+            dispatchBehaviourMutationEvent();
             break;
         }
         case CS_TYPE::EVT_REMOVE_BEHAVIOUR:{
             handleRemoveBehaviour(evt);
+            dispatchBehaviourMutationEvent();
             break;
         }
         case CS_TYPE::EVT_GET_BEHAVIOUR:{
@@ -243,6 +246,11 @@ void BehaviourStore::handleGetBehaviourIndices(event_t& evt){
     }
     evt.result.dataSize = listSize;
     evt.result.returnCode = ERR_SUCCESS;
+}
+
+void BehaviourStore::dispatchBehaviourMutationEvent(){
+    event_t evt(CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION,nullptr,0);
+    evt.dispatch();
 }
 
 // ==================== public functions ====================
