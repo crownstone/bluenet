@@ -39,8 +39,6 @@ void BehaviourHandler::update(){
     TimeOfDay time = SystemTime::now();
     PresenceStateDescription presence = PresenceHandler::getCurrentPresenceDescription();
 
-    LOGd("%x %x",  static_cast<uint32_t>(presence>>4*8), static_cast<uint32_t>(presence));
-
     auto intendedState = computeIntendedState(time, presence);
     if(intendedState){
         if(previousIntendedState == intendedState){
@@ -48,7 +46,7 @@ void BehaviourHandler::update(){
             return;
         }
 
-        LOGBehaviourHandler("%02d:%02d:%02d, new beahviour value",time.h(),time.m(),time.s());
+        LOGBehaviourHandler("%02d:%02d:%02d, new behaviour value",time.h(),time.m(),time.s());
         previousIntendedState = intendedState;
         
         uint8_t intendedValue = intendedState.value();

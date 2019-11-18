@@ -10,6 +10,8 @@
 #include <time/cs_TimeOfDay.h>
 #include <common/cs_Types.h>
 
+#define LOGPresenceHandler(...) 
+
 std::list<PresenceHandler::PresenceRecord> PresenceHandler::WhenWhoWhere;
 
 void PresenceHandler::handleEvent(event_t& evt){
@@ -26,8 +28,6 @@ void PresenceHandler::handleEvent(event_t& evt){
     if(evt.type != CS_TYPE::EVT_ADV_BACKGROUND_PARSED){
         return;
     }
-    
-    LOGd("presence handler got adv parsed event");
 
     adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
 
@@ -45,11 +45,11 @@ void PresenceHandler::handleEvent(event_t& evt){
         WhenWhoWhere.remove_if( 
             [&] (PresenceRecord www){ 
                 if(!valid_time_interval.contains(www.when)){
-                    LOGd("erasing old presence_record for user id %d because it's outdated", www.who);
+                    LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated", www.who);
                     return true;
                 }
                 if(www.who == parsed_adv_ptr->profileId){
-                    LOGd("erasing old presence_record for user id %d because of new entry", www.who);
+                    LOGPresenceHandler("erasing old presence_record for user id %d because of new entry", www.who);
                     return true;
                 }
                 return false;
@@ -57,8 +57,6 @@ void PresenceHandler::handleEvent(event_t& evt){
         );
         WhenWhoWhere.push_front( {now, parsed_adv_ptr->profileId, parsed_adv_ptr->locationId} );
     }
-
-    print();
 
     event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,nullptr,0);
     presence_event.dispatch();
@@ -73,7 +71,7 @@ void PresenceHandler::removeOldRecords(){
      WhenWhoWhere.remove_if( 
         [&] (PresenceRecord www){ 
             if(!valid_time_interval.contains(www.when)){
-                LOGd("erasing old presence_record for user id %d because it's outdated", www.who);
+                LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated", www.who);
                 return true;
             }
            
@@ -89,7 +87,7 @@ PresenceStateDescription PresenceHandler::getCurrentPresenceDescription(){
 
     for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ){
         if(!valid_time_interval.contains(iter->when)){
-            LOGd("erasing old presence_record for user id %d because it's already %d ticks old", 
+            LOGPresenceHandler("erasing old presence_record for user id %d because it's already %d ticks old", 
                 iter->who, now - iter->when
             );
             iter = WhenWhoWhere.erase(iter); // increments iter and invalidates previous value..
