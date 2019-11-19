@@ -58,6 +58,7 @@ void ServiceData::init() {
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED));
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED));
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED));
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_TAP_TO_TOGGLE_ENABLED, State::getInstance().isTrue(CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED));
 
 	EventDispatcher::getInstance().addListener(this);
 
@@ -304,6 +305,10 @@ void ServiceData::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: {
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, *(TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)*)event.data);
+			break;
+		}
+		case CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED: {
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_TAP_TO_TOGGLE_ENABLED, *(TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED)*)event.data);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {

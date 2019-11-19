@@ -196,8 +196,8 @@ Bit | Name |  Description
 3 | Switch locked | When the switch state is locked, this will be 1.
 4 | Time set | If this is 1, the time is set on this Crownstone.
 5 | Switchcraft | If this is 1, switchcraft is enabled on this Crownstone.
-6 | Reserved | Reserved for future use.
-7 | Reserved | Reserved for future use.
+6 | Tap to toggle | If this is 1, tap to toggle is enabled on this Crownstone.
+7 | Behaviour overridden | If this is 1, behaviour is overridden.
 
 <a name="state_error_bitmask"></a>
 #### Error Bitmask
