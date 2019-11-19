@@ -165,12 +165,12 @@ void BackgroundAdvertisementHandler::handleBackgroundAdvertisement(adv_backgroun
 	parsed.macAddress = backgroundAdvertisement->macAddress;
 
 
-	parsed.locationId = (decryptedPayload[1] >> (16-6)) & 0x3F;
-	parsed.profileId =  (decryptedPayload[1] >> (16-6-3)) & 0x07;
-	int8_t rssiOffset = (decryptedPayload[1] >> (16-6-3-4)) & 0x0F;
-	parsed.flags =      (decryptedPayload[1] >> (16-6-3-4-3)) & 0x07;
+	parsed.locationId =  (decryptedPayload[1] >> (16-6)) & 0x3F;
+	parsed.profileId =   (decryptedPayload[1] >> (16-6-3)) & 0x07;
+	uint8_t rssiOffset = (decryptedPayload[1] >> (16-6-3-4)) & 0x0F;
+	parsed.flags =       (decryptedPayload[1] >> (16-6-3-4-3)) & 0x07;
 	parsed.adjustedRssi = getAdjustedRssi(backgroundAdvertisement->rssi, rssiOffset);
-	LOGBackgroundAdvDebug("validation=%u locationId=%u profileId=%u rssiOffset=%u flags=%u adjusted_rssi=%i", decryptedPayload[0], parsed.locationId, parsed.profileId, rssiOffset, parsed.flags, parsed.adjustedRssi);
+	LOGBackgroundAdvDebug("validation=%u locationId=%u profileId=%u rssiOffset=%u flags=%u rssi=%i adjusted_rssi=%i", decryptedPayload[0], parsed.locationId, parsed.profileId, rssiOffset, parsed.flags, backgroundAdvertisement->rssi, parsed.adjustedRssi);
 	event_t event(CS_TYPE::EVT_ADV_BACKGROUND_PARSED, &parsed, sizeof(parsed));
 	EventDispatcher::getInstance().dispatch(event);
 }
