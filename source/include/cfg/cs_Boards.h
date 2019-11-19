@@ -201,6 +201,11 @@ typedef struct  {
 	 */
 	uint32_t scanWindowUs;
 
+	/**
+	 * Default RSSI threshold, above which tap to toggle will trigger.
+	 */
+	int8_t tapToToggleDefaultRssiThreshold;
+
 } boards_config_t;
 
 /** Configure board.

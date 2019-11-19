@@ -40,6 +40,7 @@ public:
 		static TapToToggle instance;
 		return instance;
 	}
+	void init(int8_t rssiThreshold);
 	void handleEvent(event_t & event);
 
 private:
@@ -57,7 +58,12 @@ private:
 	/**
 	 * RSSI threshold, above which score will be added.
 	 */
-	int8_t rssiThreshold = CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_DEFAULT;
+	int8_t rssiThreshold = 0;
+
+	/**
+	 * Default RSSI threshold for this board.
+	 */
+	int8_t defaultRssiThreshold = 0;
 
 	/**
 	 * Score is increased with this value when rssi is above rssi threshold.
