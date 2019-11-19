@@ -17,6 +17,8 @@
 #include "storage/cs_State.h"
 
 //#define BACKGROUND_ADV_VERBOSE
+#define LOGBackgroundAdvDebug LOGnone
+
 
 #ifdef BACKGROUND_ADV_VERBOSE
 #define LOGBackgroundAdvVerbose LOGd
@@ -168,7 +170,7 @@ void BackgroundAdvertisementHandler::handleBackgroundAdvertisement(adv_backgroun
 	int8_t rssiOffset = (decryptedPayload[1] >> (16-6-3-4)) & 0x0F;
 	parsed.flags =      (decryptedPayload[1] >> (16-6-3-4-3)) & 0x07;
 	parsed.adjustedRssi = getAdjustedRssi(backgroundAdvertisement->rssi, rssiOffset);
-	LOGd("validation=%u locationId=%u profileId=%u rssiOffset=%u flags=%u adjusted_rssi=%i", decryptedPayload[0], parsed.locationId, parsed.profileId, rssiOffset, parsed.flags, parsed.adjustedRssi);
+	LOGBackgroundAdvDebug("validation=%u locationId=%u profileId=%u rssiOffset=%u flags=%u adjusted_rssi=%i", decryptedPayload[0], parsed.locationId, parsed.profileId, rssiOffset, parsed.flags, parsed.adjustedRssi);
 	event_t event(CS_TYPE::EVT_ADV_BACKGROUND_PARSED, &parsed, sizeof(parsed));
 	EventDispatcher::getInstance().dispatch(event);
 }
