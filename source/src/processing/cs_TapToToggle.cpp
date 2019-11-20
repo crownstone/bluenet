@@ -17,8 +17,16 @@
 #define LOGT2Tv LOGnone
 
 TapToToggle::TapToToggle() {
+
+}
+
+void TapToToggle::init(int8_t defaultRssiThreshold) {
+	this->defaultRssiThreshold = defaultRssiThreshold;
 	State::getInstance().get(CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED, &enabled, sizeof(enabled));
-	State::getInstance().get(CS_TYPE::CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD, &rssiThreshold, sizeof(rssiThreshold));
+	TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET) thresholdOffset;
+	State::getInstance().get(CS_TYPE::CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET, &thresholdOffset, sizeof(thresholdOffset));
+	rssiThreshold = defaultRssiThreshold + thresholdOffset;
+	LOGd("RSSI threshold = %i", rssiThreshold);
 	EventDispatcher::getInstance().addListener(this);
 }
 
@@ -101,8 +109,9 @@ void TapToToggle::handleEvent(event_t & event) {
 		enabled = *((TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED)*)event.data);
 		break;
 	}
-	case CS_TYPE::CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD: {
-		rssiThreshold = *((TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD)*)event.data);
+	case CS_TYPE::CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET: {
+		TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET) thresholdOffset = *((TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET)*)event.data);
+		rssiThreshold = defaultRssiThreshold + thresholdOffset;
 		break;
 	}
 	default:

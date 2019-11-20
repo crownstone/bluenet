@@ -738,7 +738,7 @@ void Crownstone::startUp() {
 		EventDispatcher::getInstance().addListener(&_systemTime);
 		EventDispatcher::getInstance().addListener(&Scheduler::getInstance());
 		BackgroundAdvertisementHandler::getInstance();
-		TapToToggle::getInstance();
+		TapToToggle::getInstance().init(_boardsConfig.tapToToggleDefaultRssiThreshold);
 
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
 			RNG rng;

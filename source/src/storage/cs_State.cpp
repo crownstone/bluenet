@@ -555,7 +555,8 @@ bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
 		case CS_TYPE::CONFIG_SCANNER_ENABLED:
 		case CS_TYPE::CONFIG_PWM_ALLOWED:
 		case CS_TYPE::CONFIG_SWITCH_LOCKED:
-		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: {
+		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
+		case CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED: {
 			cs_state_data_t data(type, &enabled, sizeof(enabled));
 			get(data);
 			break;
