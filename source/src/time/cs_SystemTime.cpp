@@ -19,6 +19,7 @@
 
 uint32_t SystemTime::rtcTimeStamp;
 uint32_t SystemTime::posixTimeStamp;
+uint32_t SystemTime::uptime_sec;
 
 app_timer_t SystemTime::appTimerData = {{0}};
 app_timer_id_t SystemTime::appTimerId = &appTimerData;
@@ -46,11 +47,14 @@ void SystemTime::tick(void*) {
 	uint32_t tickDiff = RTC::difference(RTC::getCount(), rtcTimeStamp);
 
 	// If more than 1s elapsed since last set rtc timestamp:
-	// add 1s to posix time and subtract 1s from tickDiff by
-    // increasing the rtc timestamp 1s and store the new time.
 	if (posixTimeStamp && tickDiff > RTC::msToTicks(1000)) {
+		// add 1s to posix time and subtract 1s from tickDiff by
+		// increasing the rtc timestamp 1s and store the new time.
 		posixTimeStamp++;
 		rtcTimeStamp += RTC::msToTicks(1000);
+		
+		// also increment uptime.
+		++uptime_sec; 
 		
 		State::getInstance().set(CS_TYPE::STATE_TIME, &posixTimeStamp, sizeof(posixTimeStamp));
 	}
@@ -114,4 +118,8 @@ TimeOfDay SystemTime::now(){
 
 Time SystemTime::posix(){
     return posixTimeStamp;
+}
+
+uint32_t SystemTime::up(){
+	return uptime_sec;
 }
