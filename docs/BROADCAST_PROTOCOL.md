@@ -141,6 +141,7 @@ uint8[] | Command data | 11 | Depends on command type.
 
 Type nr | Type name | Payload type | Payload Description | A | M | B | S
 --- | --- | --- | --- | :---: | :---: | :---: | :--:
+0 | No operation | - | None | x | x | x |
 1 | Multi switch | [Multi switch short list packet](#multi_switch_short_list_packet) | List of switch commands | x | x | x |
 
 
