@@ -38,6 +38,8 @@ void SwSwitch::startDimmerPowerCheck(uint8_t value){
 
     // and set a time out to turn it off if it doesn't work.
     dimmerCheckCountDown = dimmerCheckCountDown_initvalue;
+
+    checkedDimmerPowerUsage = true;
 }
 
 void SwSwitch::checkDimmerPower() {
@@ -72,20 +74,21 @@ void SwSwitch::checkDimmerPower() {
             // strange, this must be a second call to checkDimmerPower,
             // which shouldn't occur in the first place.
         }
+
 		measuredDimmerPowerUsage = false;
+
         forceDimmerOff();
 	} else {
         if (!measuredDimmerPowerUsage){
-            //Dimmer has finished powering
-            TYPIFY(EVT_DIMMER_POWERED) powered = true;
-		    event_t event(CS_TYPE::EVT_DIMMER_POWERED, &powered, sizeof(powered));
-		    EventDispatcher::getInstance().dispatch(event);
-
+            //Dimmer changed from not yet powered to powered.
             measuredDimmerPowerUsage = true;
         } else {
             // confirmed that the dimmer circuit is still powered. Yay.
         }
     }
+
+    event_t event(CS_TYPE::EVT_DIMMER_POWERED, &measuredDimmerPowerUsage, sizeof(measuredDimmerPowerUsage));
+    event.dispatch();
 }
 
 bool SwSwitch::isDimmerCircuitPowered(){
@@ -474,11 +477,15 @@ void SwSwitch::handleEvent(event_t& evt){
         case CS_TYPE::EVT_TICK: {
             if (dimmerPowerUpCountDown && --dimmerPowerUpCountDown == 0){
                 LOGw("dimmerPowerUpCountDown timed out");
+
+                // update service data through an event as it may not have happened before.
+                bool powered = isDimmerCircuitPowered();
+                event_t event(CS_TYPE::EVT_DIMMER_POWERED, &powered, sizeof(powered));
+                event.dispatch();
             }
             if(dimmerCheckCountDown && --dimmerCheckCountDown == 0){
                 LOGw("dimmerCheckCountDown timed out");
                 checkDimmerPower();
-                checkedDimmerPowerUsage = true;
             }
             // TODO: error check in case primary fault-event did not solve the issue?
             break;
