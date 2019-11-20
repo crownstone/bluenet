@@ -20,7 +20,8 @@
 
 #include "drivers/cs_Serial.h"
 
-#define LOGBehaviourHandler LOGnone
+#define LOGBehaviourHandler_V LOGnone
+#define LOGBehaviourHandler LOGd
 
 void BehaviourHandler::handleEvent(event_t& evt){
     switch(evt.type){
@@ -42,7 +43,7 @@ void BehaviourHandler::update(){
     auto intendedState = computeIntendedState(time, presence);
     if(intendedState){
         if(previousIntendedState == intendedState){
-            LOGBehaviourHandler("%02d:%02d:%02d, no behaviour change",time.h(),time.m(),time.s());
+            LOGBehaviourHandler_V("%02d:%02d:%02d, no behaviour change",time.h(),time.m(),time.s());
             return;
         }
 
@@ -58,7 +59,7 @@ void BehaviourHandler::update(){
 
         behaviourStateChange.dispatch();
     } else {
-        LOGBehaviourHandler("%02d:%02d:%02d, conflicting behaviours",time.h(),time.m(),time.s());
+        LOGBehaviourHandler_V("%02d:%02d:%02d, conflicting behaviours",time.h(),time.m(),time.s());
     }
 }
 
