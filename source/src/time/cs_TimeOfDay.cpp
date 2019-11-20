@@ -5,8 +5,12 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <storage/cs_State.h>
+#include <common/cs_Types.h>
 #include <time/cs_TimeOfDay.h>
 #include <util/cs_WireFormat.h>
+
+#include <drivers/cs_Serial.h>
 
 void TimeOfDay::wrap(){ 
     switch(base){
@@ -21,8 +25,18 @@ void TimeOfDay::wrap(){
 int32_t TimeOfDay::baseTimeSinceMidnight(BaseTime b){
     switch(b){
         case BaseTime::Midnight: return 0;
-        case BaseTime::Sunrise: return 60*60*7;
-        case BaseTime::Sundown: return 60*60*21;
+        case BaseTime::Sunrise: {
+            TYPIFY(STATE_SUN_TIME) suntime;
+            State::getInstance().get(CS_TYPE::STATE_SUN_TIME, &suntime, sizeof(suntime));
+            return suntime.sunrise;
+            //return 60*60*7;
+        }
+        case BaseTime::Sundown: {
+            TYPIFY(STATE_SUN_TIME) suntime;
+            State::getInstance().get(CS_TYPE::STATE_SUN_TIME, &suntime, sizeof(suntime));
+            return suntime.sunset;
+            // return 60*60*21;
+        }
     }
 
     return 0;
@@ -45,7 +59,18 @@ TimeOfDay::TimeOfDay(uint32_t h, uint32_t m, uint32_t s) :
 TimeOfDay::TimeOfDay(SerializedDataType rawData) : TimeOfDay(
     static_cast<BaseTime>(rawData[0]), 
     WireFormat::deserialize<int32_t>(rawData.data() + 1, 4)) {
+    bool basevalue_isok = false;
+    switch(base){
+        case BaseTime::Midnight:
+        case BaseTime::Sundown:
+        case BaseTime::Sunrise:
+            basevalue_isok = true;
+            break;
+    }
 
+    if(!basevalue_isok){
+        base = BaseTime::Midnight;
+    }
 }
 
 TimeOfDay TimeOfDay::Midnight(){ 
@@ -71,15 +96,7 @@ TimeOfDay::SerializedDataType TimeOfDay::serialize() const {
 }
 
 TimeOfDay TimeOfDay::convert(BaseTime newBase){
-    if (base == newBase){
-        return *this;
-    }
-
-    if (base == BaseTime::Midnight){
-        return TimeOfDay(newBase, sec_since_base - baseTimeSinceMidnight(newBase));
-    }
-
-    return convert(BaseTime::Midnight).convert(newBase);
+    return TimeOfDay(newBase, sec_since_base + baseTimeSinceMidnight(base) - baseTimeSinceMidnight(newBase));
 }
 
 uint8_t TimeOfDay::h() {

@@ -4,6 +4,7 @@
  * Date: Okt 18, 2019
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
+#include <algorithm>
 
 namespace CsMath{
 
@@ -49,4 +50,36 @@ namespace CsMath{
     auto max(T l, S r){
         return l > r ? l : r;
     }
+
+    /**
+     * Represents an interval by two unsigned integers [base, base + diff].
+     * (base + diff doesn't have to be representable in the current type,
+     * the interval represented will wrap around to 0)
+     */
+    template<class T, class S = T>
+    class Interval{
+        private: 
+        T low,high;
+        public:
+        Interval(T base, S diff) : low(base), high(base+diff) {
+            // notes:
+            // - addition base+diff is allowed to overflow/underflow.
+            // - having a different type S for diff allows negative 
+            // values without conflicting type resolutions.
+            if(diff < 0){
+                std::swap(low,high);
+            }
+        } 
+
+        // E.g.
+        // Interval<uint8_t> i(200,00)
+        // i.contains(0) == true.
+        bool contains(T val){
+            return
+                low < high // reversed interval?
+                ? (low <= val && val < high)  // nope, both must hold
+                : (low <= val || val < high); // yup, only one can hold
+
+        }
+    };
 }

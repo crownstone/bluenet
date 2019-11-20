@@ -80,6 +80,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 		command_result_t result;
 		CommandHandlerTypes type = CTRL_CMD_UNKNOWN;
 		CharacteristicWriteBuffer& writeBuffer = CharacteristicWriteBuffer::getInstance();
+		LOGd("controlCharacteristic onWrite");
 		// At this point it is too late to check if writeBuffer was locked, because the softdevice doesn't care if the writeBuffer was locked,
 		// it writes to the buffer in any case.
 		if (!writeBuffer.isLocked()) {
@@ -92,6 +93,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			resultData.data = _resultPacketAccessor->getPayloadBuffer();
 			resultData.len = _resultPacketAccessor->getMaxPayloadSize();
 //			}
+
 			result = CommandHandler::getInstance().handleCommand(type, payload, cmd_source_t(CS_CMD_SOURCE_CONNECTION), accessLevel, resultData);
 			writeBuffer.unlock();
 		}
@@ -99,6 +101,15 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			LOGe(MSG_BUFFER_IS_LOCKED);
 			result = command_result_t(ERR_BUFFER_LOCKED);
 		}
+
+		uint8_t* buf = _resultPacketAccessor->getSerializedBuffer().data;
+		LOGd("addControlCharacteristic result.returnCode %d, data len: %d", result.returnCode, result.data.len);
+		for(auto i = 0; i < 50; i+=10){
+			LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+			buf[i+0],buf[i+1],buf[i+2],buf[i+3],buf[i+4],
+			buf[i+5],buf[i+6],buf[i+7],buf[i+8],buf[i+9]);
+		}
+
 		writeResult(type, result);
 	});
 }

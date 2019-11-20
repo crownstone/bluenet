@@ -67,6 +67,8 @@ extern "C" {
 // Define test pin to enable gpio debug.
 #define TEST_PIN 18
 
+TYPIFY(EVT_TICK) Crownstone::_tickCount = 0;
+
 /**********************************************************************************************************************
  * Main functionality
  *********************************************************************************************************************/
@@ -579,6 +581,10 @@ void Crownstone::setName() {
  * the mesh. In setup mode we use the serial module (but only RX).
  */
 void Crownstone::startOperationMode(const OperationMode & mode) {
+	EventDispatcher::getInstance().addListener(&_behaviourHandler);
+	EventDispatcher::getInstance().addListener(&_behaviourStore);
+	EventDispatcher::getInstance().addListener(&_presenceHandler);
+	
 	switch(mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
 			_scanner->init();
@@ -593,10 +599,10 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
 
-			EventDispatcher::getInstance().addListener(&_behaviourHandler);
-			EventDispatcher::getInstance().addListener(&_behaviourStore);
 
 //			// DEBUG
+			LOGd("behaviourStore listener added");
+
 //			uint32_t h = 14;
 //			uint32_t m = 25;
 //			uint32_t s = 0;

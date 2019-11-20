@@ -19,7 +19,7 @@
  */
 class BehaviourStore : public EventListener {
     private:
-    static constexpr size_t MaxBehaviours = 10;
+    static constexpr size_t MaxBehaviours = 50;
     static std::array<std::optional<Behaviour>,MaxBehaviours> activeBehaviours;
     
     public:
@@ -50,52 +50,11 @@ class BehaviourStore : public EventListener {
     private:
     static uint32_t masterHash();
 
-    class InterfaceB {
-        /**
-         * Returns an index in range [0,MaxBehaviours) on succes, 
-         * or 0xffffffff if it couldn't be saved.
-         */
-         uint8_t save(Behaviour b);
+    void handleSaveBehaviour(event_t& evt);
+    void handleReplaceBehaviour(event_t& evt);
+    void handleRemoveBehaviour(event_t& evt);
+    void handleGetBehaviour(event_t& evt);
+    void handleGetBehaviourIndices(event_t& evt);
 
-        /**
-         * Replace the behaviour at [index] with [b]
-         * postcondition is identical to the
-         * postcondition of calling save(b) when it returns [index].
-         */
-        bool replace(uint8_t index, Behaviour b);
-
-        /**
-         * deletes the behaviour at [index] the behaviour is removed from storage.
-         */
-        bool remove(uint8_t index);
-
-        /**
-         *  returns the stored behaviour at [index].
-         */
-        Behaviour get(uint8_t index);
-
-        /**
-         * returns a map with the currently occupied indices and the 
-         * behaviours at those indices.
-         */
-        std::vector<std::pair<uint8_t,Behaviour>> get();
-
-        /**
-         * returns the hash of the behaviour at [index]. If no behaviour
-         * is stored at this index, 0xffffffff is returned.
-         */
-        uint32_t hash(uint8_t index);
-
-        /**
-         * returns a hash value that takes all state indices into account.
-         * this value is expected to change after any call to update/save/remove.
-         * 
-         * A (phone) application can compute this value locally given the set of 
-         * index/behaviour pairs it expects to be present on the Crownstone.
-         * Checking if this differs from the one received in the crownstone state message
-         * enables the application to resync.
-         */
-        uint32_t hash();
-
-    } interfaceB;
+    void dispatchBehaviourMutationEvent();
 };

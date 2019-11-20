@@ -377,11 +377,25 @@ Type | Name | Length | Description
 <a name="behaviour_hash"></a>
 #### Behaviour Hash
 
+The `BehaviourStore` can generate a hash that can be used to verify if an application is up to date. The data that is hashed is as in the following table. The hashing algorithm used is [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum). As this algorithm is based on 16-bit integer array as input each entry in the table below is padded with 0x00 at the end if its length is uneven.
+
+Type | Name | Length
+--- | --- | ---
+uint8 | Index0 | 1 (padded with 0x00)
+[Behaviour](#behaviour_payload) | Behaviour0 | size depends on the type of payload
+uint8 | Index1 | 1 (padded with 0x00)
+[Behaviour](#behaviour_payload) | Behaviour1 | size depends on the type of payload
+... | ... | ...
+uint8 | IndexMax | 1 (padded with 0x00)
+[Behaviour](#behaviour_payload) | BehaviourMax | size depends on the type of payload
+
+
+
 ![Behaviour Hash](../docs/diagrams/behaviour-hash.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint32 | Hash | 4 | [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum) hash of a [Behaviour Payload](#behaviour_payload) in little endian, padded with zeroes if necessary.
+uint32 | Hash | 4 | [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum) hash of the data in the above table in little endian, entries padded with zeroes where necessary.
 
 <a name="time_difference"></a>
 #### Time Difference

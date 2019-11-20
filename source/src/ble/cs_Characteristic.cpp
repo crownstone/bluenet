@@ -12,7 +12,7 @@
 #include <ble/cs_Softdevice.h>
 #include <storage/cs_State.h>
 
-//#define PRINT_CHARACTERISTIC_VERBOSE
+// #define PRINT_CHARACTERISTIC_VERBOSE
 
 CharacteristicBase::CharacteristicBase() :
     _name(NULL),

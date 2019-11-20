@@ -1,7 +1,7 @@
 /*
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: Dec 20, 2019
+ * Date: Okt 20, 2019
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
@@ -11,6 +11,7 @@
 #include <processing/behaviour/cs_Behaviour.h>
 
 #include <presence/cs_PresenceDescription.h>
+#include <presence/cs_PresenceHandler.h>
 
 #include <time/cs_SystemTime.h>
 #include <time/cs_TimeOfDay.h>
@@ -19,12 +20,14 @@
 
 #include "drivers/cs_Serial.h"
 
-#define LOGBehaviourHandler LOGnone
+#define LOGBehaviourHandler_V LOGnone
+#define LOGBehaviourHandler LOGd
 
 void BehaviourHandler::handleEvent(event_t& evt){
     switch(evt.type){
         case CS_TYPE::STATE_TIME:
         case CS_TYPE::EVT_PRESENCE_MUTATION:
+        case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:
             update();
         default:{
             // ignore other events
@@ -34,18 +37,17 @@ void BehaviourHandler::handleEvent(event_t& evt){
 }
 
 void BehaviourHandler::update(){
-    // TODO(Arend 24-09-2019): get presence from scheduler
     TimeOfDay time = SystemTime::now();
-   PresenceStateDescription presence = 0xff; // everyone present as dummy value.
-    
-   LOGBehaviourHandler("BehaviourHandler::update %02d:%02d:%02d",time.h(),time.m(),time.s());
+    PresenceStateDescription presence = PresenceHandler::getCurrentPresenceDescription();
 
     auto intendedState = computeIntendedState(time, presence);
     if(intendedState){
         if(previousIntendedState == intendedState){
+            LOGBehaviourHandler_V("%02d:%02d:%02d, no behaviour change",time.h(),time.m(),time.s());
             return;
         }
 
+        LOGBehaviourHandler("%02d:%02d:%02d, new behaviour value",time.h(),time.m(),time.s());
         previousIntendedState = intendedState;
         
         uint8_t intendedValue = intendedState.value();
@@ -56,6 +58,8 @@ void BehaviourHandler::update(){
         );
 
         behaviourStateChange.dispatch();
+    } else {
+        LOGBehaviourHandler_V("%02d:%02d:%02d, conflicting behaviours",time.h(),time.m(),time.s());
     }
 }
 
@@ -65,12 +69,11 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
     std::optional<uint8_t> intendedValue = {};
     
     for (const auto& b : BehaviourStore::getActiveBehaviours()){
-        if (b && b->isValid(currentTime, currentPresence)){
+        if (b.has_value() && b->isValid(currentTime, currentPresence)){
             if (intendedValue){
                 if (b->value() != intendedValue.value()){
                     // found a conflicting behaviour
                     // TODO(Arend): add more advance conflict resolution according to document.
-                    LOGd("conflicting behaviours found");
                     return std::nullopt;
                 }
             } else {

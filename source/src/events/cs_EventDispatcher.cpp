@@ -22,15 +22,15 @@ void EventDispatcher::dispatch(event_t & event) {
 #ifdef PRINT_EVENTDISPATCHER_VERBOSE
 	LOGi("dispatch event: %d", event.type);
 #endif
-	if (event.size != TypeSize(event.type)) {
-		LOGe("Invalid size! type=%u size=%u should be %u", to_underlying_type(event.type), event.size, TypeSize(event.type));
-		event.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-		return;
-	}
+	// if (event.size != TypeSize(event.type)) {
+	// 	LOGe("Invalid size! type=%u size=%u should be %u", to_underlying_type(event.type), event.size, TypeSize(event.type));
+	// 	event.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+	// 	return;
+	// }
 
     if (event.size != 0 && event.data == nullptr) {
 		LOGe("data nullptr while size != 0");
-    	event.returnCode = ERR_BUFFER_UNASSIGNED;
+    	event.result.returnCode = ERR_BUFFER_UNASSIGNED;
         return;
     }
 

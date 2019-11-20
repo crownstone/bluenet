@@ -23,6 +23,8 @@ class Behaviour {
     public:
     typedef std::array<uint8_t, 26> SerializedDataFormat;
 
+    enum class Type : uint8_t {Switch = 0, Twilight = 1, Extended = 2};
+
     
     Behaviour() = default;
     Behaviour(
@@ -36,7 +38,7 @@ class Behaviour {
     Behaviour(SerializedDataFormat arr);
     SerializedDataFormat serialize() const;
 
-    void print();
+    void print() const;
 
     // =========== Getters ===========
 

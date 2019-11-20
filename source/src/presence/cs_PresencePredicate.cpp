@@ -7,6 +7,8 @@
 
 #include <presence/cs_PresencePredicate.h>
 #include <util/cs_WireFormat.h>
+#include <drivers/cs_Serial.h>
+#include <time/cs_SystemTime.h>
 
 PresencePredicate::PresencePredicate(Condition c, PresenceStateDescription roomsMask): 
     cond(c), RoomsBitMask(roomsMask) {
@@ -20,6 +22,13 @@ PresencePredicate::PresencePredicate(std::array<uint8_t, 9> arr) :
 
 bool PresencePredicate::operator()(
         PresenceStateDescription currentroomspresencebitmask) const{
+    static uint32_t last_print_stamp = 0;
+    if(SystemTime::posix() - last_print_stamp > 60){
+        last_print_stamp = SystemTime::posix();
+        LOGw("DEBUG: Ignoring ALL PresencePredicates.");
+    }
+    return true;
+
     switch(cond){
         case Condition::VacuouslyTrue: 
             return true;

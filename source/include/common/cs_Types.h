@@ -137,6 +137,7 @@ enum class CS_TYPE: uint16_t {
 //	STATE_IGNORE_LOCATION,                            //  0x92 - 146
 //	STATE_ERROR_DIMMER_ON_FAILURE,                    //  0x93 - 147
 //	STATE_ERROR_DIMMER_OFF_FAILURE,                   //  0x94 - 148
+	STATE_SUN_TIME                          = 149,
 
 	/*
 	 * Internal commands and events.
@@ -172,7 +173,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_FACTORY_RESET,                                // Sent when a factory reset should be performed: clear all data.
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms. -- Payload is uint32_t counter.
 	EVT_ADV_BACKGROUND,                               // Sent when a background advertisement has been received. -- Payload: adv_background_t.
-	EVT_ADV_BACKGROUND_PARSED,                        // Sent when a background advertisement has been validated and parsed. -- Payload: adv_background_parsed_t.
+	EVT_ADV_BACKGROUND_PARSED = 256+30,                        // Sent when a background advertisement has been validated and parsed. -- Payload: adv_background_parsed_t.
 	EVT_ADVERTISEMENT_UPDATED,                        // Sent when advertisement was updated. TODO: advertisement data as payload?
 	EVT_SCAN_STARTED,                                 // Sent when scanner started scanning.
 	EVT_SCAN_STOPPED,                                 // Sent when scanner stopped scanning.
@@ -230,6 +231,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_REMOVE_BEHAVIOUR,						// when a user requests to remove a behaviour, this event fires.
 	EVT_GET_BEHAVIOUR,							// when a user requests a currently active behaviour, this event fires.
 	EVT_GET_BEHAVIOUR_INDICES,                  // Sent when a user requests a list of indices with active behaviours.
+	EVT_BEHAVIOURSTORE_MUTATION,				// Sent by BehaviourStore for other components to react _after_ a change to the behaviourstore occured.
 	EVT_PRESENCE_MUTATION,						// when a change in presence occurs this event fires.
 	EVT_BEHAVIOUR_SWITCH_STATE,					// when behaviour desires a stateswitch this event is fired.
 	CMD_SET_RELAY,								// when a user requests to set the relay to a specific state
@@ -325,6 +327,7 @@ typedef schedule_list_t TYPIFY(STATE_SCHEDULE);
 typedef switch_state_t TYPIFY(STATE_SWITCH_STATE);
 typedef   int8_t TYPIFY(STATE_TEMPERATURE);
 typedef uint32_t TYPIFY(STATE_TIME);
+typedef set_sun_time_t TYPIFY(STATE_SUN_TIME);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
@@ -398,7 +401,9 @@ typedef std::tuple<uint8_t,Behaviour> TYPIFY(EVT_REPLACE_BEHAVIOUR);
 typedef uint8_t TYPIFY(EVT_REMOVE_BEHAVIOUR); // index
 typedef uint8_t TYPIFY(EVT_GET_BEHAVIOUR); // index
 typedef void TYPIFY(EVT_GET_BEHAVIOUR_INDICES);
+typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef uint8_t TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
+typedef void TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 

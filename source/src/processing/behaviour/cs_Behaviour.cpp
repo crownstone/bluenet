@@ -33,7 +33,6 @@ Behaviour::Behaviour(std::array<uint8_t, 26> arr) :
         WireFormat::deserialize<TimeOfDay>(arr.data() + 3, 5),
         WireFormat::deserialize<TimeOfDay>(arr.data() + 8, 5),
         WireFormat::deserialize<PresenceCondition>(arr.data() + 13, 13) ){
-
 }
 
 Behaviour::SerializedDataFormat Behaviour::serialize() const{
@@ -72,10 +71,20 @@ bool Behaviour::isValid(PresenceStateDescription currentpresence) const{
     return presenceCondition(currentpresence);
 }
 
-void Behaviour::print(){
-    LOGd("Behaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%",
+void Behaviour::print() const {
+    LOGd("Behaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x), presencetype(%d) roommask(%x %x)",
         from().h(),from().m(),from().s(),
         until().h(),until().m(),until().s(),
-        activeIntensity
+        activeIntensity,
+        activeDays,
+        presenceCondition.pred.cond,
+        presenceCondition.pred.RoomsBitMask >> 32 & 0xffffffff,
+        presenceCondition.pred.RoomsBitMask >> 0  & 0xffffffff
     );
+
+    // auto ser = presenceCondition.pred.serialize();
+    // for(auto b : ser){
+    //     LOGd("%02x",b);
+    // }
+
 }

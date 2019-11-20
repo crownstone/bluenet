@@ -53,7 +53,7 @@ class SwSwitch : public ISwitch, public EventListener {
      * Initializes the count down timer and sets the dimmer to given
      * value.
      */
-    void startDimmerPowerCheck(uint8_t value);
+    bool startDimmerPowerCheck(uint8_t value);
     /**
      * Returns true if the dimmerCheckCountDown has expired or
      * if a dimmer power check has successfully measured a correct state.

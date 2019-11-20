@@ -194,6 +194,8 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_TIME:
 		*(TYPIFY(STATE_TIME)*)data.value = STATE_TIME_DEFAULT;
 		return ERR_SUCCESS;
+	case CS_TYPE::STATE_SUN_TIME:
+		*reinterpret_cast<TYPIFY(STATE_SUN_TIME)*>(data.value) = set_sun_time_t();
 	case CS_TYPE::STATE_FACTORY_RESET:
 		*(TYPIFY(STATE_FACTORY_RESET)*)data.value = STATE_FACTORY_RESET_DEFAULT;
 		return ERR_SUCCESS;
@@ -278,6 +280,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_REMOVE_BEHAVIOUR:
 	case CS_TYPE::EVT_GET_BEHAVIOUR:
 	case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES:
+	case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 	case CS_TYPE::CMD_SET_RELAY:
@@ -347,6 +350,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_POWER_USAGE:
 	case CS_TYPE::STATE_TEMPERATURE:
 	case CS_TYPE::STATE_TIME:
+	case CS_TYPE::STATE_SUN_TIME:
 	case CS_TYPE::STATE_FACTORY_RESET:
 	case CS_TYPE::STATE_ERRORS:
 	case CS_TYPE::CMD_SWITCH_OFF:
@@ -421,6 +425,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_REMOVE_BEHAVIOUR:
 	case CS_TYPE::EVT_GET_BEHAVIOUR:
 	case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES:
+	case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 	case CS_TYPE::CMD_SET_RELAY:

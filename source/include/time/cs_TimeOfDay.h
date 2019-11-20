@@ -7,6 +7,7 @@
 
 #pragma once
 
+
 #include <util/cs_Math.h>
 
 #include <array>
@@ -18,7 +19,7 @@
  */
 class TimeOfDay {
     public:
-    enum class BaseTime : uint8_t { Midnight = 1, Sundown = 2, Sunrise = 3};
+    enum class BaseTime : uint8_t { Midnight = 0, Sundown = 1, Sunrise = 2};
     typedef std::array<uint8_t,5> SerializedDataType;
     
     private:
@@ -65,7 +66,8 @@ class TimeOfDay {
     uint8_t s();
 
     /**
-     * Implicit cast operators
+     * Implicit cast operators, returns seconds since midnight
+     * (enables built in relational operators).
      */
     operator uint32_t();
 };

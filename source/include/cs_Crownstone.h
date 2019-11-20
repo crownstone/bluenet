@@ -15,6 +15,7 @@
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
+#include <presence/cs_PresenceHandler.h>
 #include <processing/cs_CommandAdvHandler.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
@@ -150,6 +151,7 @@ protected:
 	 * operations periodically turn on the 32 MHz crystal oscillator anyway.
 	 */
 	void startHFClock();
+
 private:
 
 	boards_config_t _boardsConfig;
@@ -186,10 +188,11 @@ private:
 	SystemTime _systemTime;
 	BehaviourHandler _behaviourHandler;
 	BehaviourStore _behaviourStore;
+	PresenceHandler _presenceHandler;
 
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;
-	TYPIFY(EVT_TICK) _tickCount = 0;
+	static TYPIFY(EVT_TICK) _tickCount;
 
 	OperationMode _operationMode;
 	OperationMode _oldOperationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
@@ -199,6 +202,10 @@ private:
 	 * different than after a factory reset.
 	 */
 	bool _setStateValuesAfterStorageRecover = false;
+
+
+	public:
+	static TYPIFY(EVT_TICK) getTickCount(){ return _tickCount; }
 };
 
 

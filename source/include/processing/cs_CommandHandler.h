@@ -77,6 +77,7 @@ private:
 	command_result_t handleCmdReset                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdFactoryReset          (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdSetTime               (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdSetSunTime            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdIncreaseTx            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdValidateSetup         (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdDisconnect            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
@@ -92,12 +93,9 @@ private:
 	command_result_t handleCmdUartMsg               (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdStateGet              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdStateSet              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdSaveBehaviour         (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdReplaceBehaviour      (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdRemoveBehaviour       (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdGetBehaviour          (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdGetBehaviourIndices   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	
+	// delegate a command in the form of an event of given [typ], passing the commandData and using the allocated [resultData]
+	command_result_t dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_data_t resultData);
 
 	/**
 	 * Reset, after a delay.
