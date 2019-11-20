@@ -25,12 +25,12 @@
 
 // hardware validation 
 
-void SwSwitch::startDimmerPowerCheck(uint8_t value){
-    SWSWITCH_LOG();
-
+bool SwSwitch::startDimmerPowerCheck(uint8_t value){
     if(checkedDimmerPowerUsage || dimmerCheckCountDown != 0 || !isSafeToDim() || value == 0){
-        return;
+        return false;
     }
+
+    SWSWITCH_LOG();
 
     // set the dimmer intensity to [value] if this wasn't tried
     if(currentState.state.dimmer != value) { setIntensity_unchecked(value); }
@@ -40,18 +40,24 @@ void SwSwitch::startDimmerPowerCheck(uint8_t value){
     dimmerCheckCountDown = dimmerCheckCountDown_initvalue;
 
     checkedDimmerPowerUsage = true;
+    return true;
 }
 
 void SwSwitch::checkDimmerPower() {
 
     SWSWITCH_LOG();
     LOGd("checkDimmerPower: allowDimming: %d - currentState.state.dimmer: %d", allowDimming, currentState.state.dimmer);
-	if (!allowDimming || currentState.state.dimmer == 0) {
+	if (!allowDimming) {
         // doesn't make sense to measure anything when the dimmer is turned off
         // quite a bad condition to be in, better solve it!
         forceDimmerOff();
 		return;
 	}
+    if(currentState.state.dimmer == 0){
+        // how did we schedule a dimmer check while value == 0?
+        // we can't really make a useful estimate now..
+        return;
+    }
 
 	// Check if dimmer is on, but power usage is low.
 	// In that case, assume the dimmer isn't working due to a cold boot.
@@ -141,6 +147,7 @@ bool SwSwitch::isSafeToDim(){
 
 void SwSwitch::store(switch_state_t nextState) {
     SWSWITCH_LOG();
+    SWSWITCH_LOG_STATE(nextState);
 
     // only immediately apply if relay state changes.
 	bool persistNow = nextState.state.relay != currentState.state.relay;
@@ -242,7 +249,29 @@ void SwSwitch::resetToCurrentState(){
             }
         } else {
             // dimmer not yet powered.
-            startDimmerPowerCheck(currentState.state.dimmer);
+            if(startDimmerPowerCheck(currentState.state.dimmer)){
+                actualNextState.state.dimmer = currentState.state.dimmer;
+                actualNextState.state.relay = false;
+            } else {
+                // is startDimmer refuses it already has initiated a measurement before, 
+                // it is in an error state or the value passed to it is 0.
+                // isDimmerCircuitPowered() returned false the dimmer isn't online yet.
+
+                if(dimmerCheckCountDown != 0){
+                    // measurement running: 
+                    //     leave the hwSwitch alone in this case.
+                    //     and leave the stored state as-is.
+                    return;
+                } else {
+                    // round dimmer state up to 100%.
+                    hwSwitch.setIntensity(0);
+                    hwSwitch.setRelay(true);
+
+                    actualNextState.state.dimmer = 0;
+                    actualNextState.state.relay = 1;
+
+                }
+            }
         }
     } else {
         if(currentState.state.relay){
@@ -295,6 +324,12 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
 
     // load dimming allowed stated
     State::getInstance().get(CS_TYPE::CONFIG_PWM_ALLOWED, &allowDimming, sizeof(allowDimming));
+
+    LOGd("SwSwitch startup in state: relay(%d), intensity(%d), lock(%d), dimming(%d)", 
+         currentState.state.relay, 
+         currentState.state.dimmer, 
+         switch_locked ? 1 : 0, 
+         allowDimming ? 1 : 0);
 
     // ensure the dimmer gets power as the rest of the SwSwitch code assumes 
     // that setIntensity calls will have visible effect.
@@ -394,7 +429,10 @@ void SwSwitch::setDimmer(uint8_t value){
         return;
     }
 
-    LOGw("setIntensity: not handled");
+    // only occurs when we checked the dimmer power but it wasn't powered up yet
+    // and the maximum timeout for pwm powerup hasn't expired yet.
+
+    LOGw("setIntensity: not handled, measurement wasn't conclusive to decide that the dimmer is ok. Waiting for timeout.");
 }
 
 // ================== ISwitch ==============

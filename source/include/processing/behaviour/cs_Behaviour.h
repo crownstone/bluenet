@@ -38,7 +38,7 @@ class Behaviour {
     Behaviour(SerializedDataFormat arr);
     SerializedDataFormat serialize() const;
 
-    void print();
+    void print() const;
 
     // =========== Getters ===========
 
