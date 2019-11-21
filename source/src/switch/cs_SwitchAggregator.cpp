@@ -57,8 +57,11 @@ SwitchAggregator& SwitchAggregator::getInstance(){
 void SwitchAggregator::init(SwSwitch&& s){
     swSwitch.emplace(s);
     
-    EventDispatcher::getInstance().addListener(&swSwitch.value());
     EventDispatcher::getInstance().addListener(this);
+    EventDispatcher::getInstance().addListener(&swSwitch.value());
+
+    overrideState = swSwitch.getIntendedState();
+    swSwitch.trySetIntendedState();
 }
 
 void SwitchAggregator::updateState(){

@@ -52,6 +52,17 @@ namespace CsMath{
     }
 
     /**
+     * Returns:
+     *  - lower if value <= lower
+     *  - upper if value >= upper
+     *  - value else.  
+     */
+    template<class V, class L, class U>
+    auto clamp(V value, L lower, U upper){
+        return min(max(value,lower),upper);
+    }
+
+    /**
      * Represents an interval by two unsigned integers [base, base + diff].
      * (base + diff doesn't have to be representable in the current type,
      * the interval represented will wrap around to 0)
