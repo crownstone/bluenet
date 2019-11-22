@@ -393,22 +393,15 @@ void SwSwitch::resolveIntendedState(){
         LOGw("setIntensity called but not %s to dim - attempting to resolve command",
             !allowDimming? "allowed" : "safe");
 
-        constexpr uint8_t threshold = 25; // must be <50
-        
-        if (value > 50 + threshold){
+        if (value > 50){
             LOGw("setIntensity resolved: on");
             // bypass dimmer to turn on
-            setIntensity(0);
             setRelay(true);
-
-        } else if(value < 50 - threshold){
-            LOGw("setIntensity resolved: off");
-            setDimmer(0); // (1-level recursion at most, dimmer may be good enough to set to 0%)
-        } else {
-            LOGd("setIntensity can't use dimmer but parameter too ambiguous to make a guess");
-            LOGd("allowDimming: %d, isSafeToDim: %d, value: %d",allowDimming, isSafeToDim(),value);
-            // kill the dimmer, assume the relay has a desired value.
             setIntensity(0);
+        } else {
+            LOGw("setIntensity resolved: off");
+            setIntensity(0);
+            setRelay(false);
         }
 
         return;
@@ -475,9 +468,7 @@ void SwSwitch::setRelay(bool is_on){
         return;
     }
 
-    if(currentState.state.relay != is_on){
-        setRelay_unchecked(is_on);
-    }
+    setRelay_unchecked(is_on);
 }
 
 void SwSwitch::setIntensity(uint8_t value){
@@ -495,9 +486,7 @@ void SwSwitch::setIntensity(uint8_t value){
         return;
     }
 
-    if(currentState.state.dimmer != value){
-        setIntensity_unchecked(value); 
-    }
+    setIntensity_unchecked(value); 
 }
 
 void SwSwitch::setDimmerPower(bool is_on){
