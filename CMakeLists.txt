@@ -16,7 +16,6 @@ endif()
 
 if(NOT BOARD_TARGET)
   set(BOARD_TARGET "default")
-	message(STATUS "setting BOARD_TARGET to default")
 endif()
 
 set(WORKSPACE_DIR                                ${CMAKE_CURRENT_LIST_DIR})
