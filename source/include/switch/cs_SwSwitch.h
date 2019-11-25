@@ -105,8 +105,8 @@ class SwSwitch : public ISwitch, public EventListener {
     
     // // all hwSwitch access is looped through these methods.
     // // they set the respective values and persist that value.
-    // void setIntensity_unchecked(uint8_t dimmer_value);
-    // void setRelay_unchecked(bool relay_state);
+    void setIntensity_unchecked(uint8_t dimmer_value);
+    void setRelay_unchecked(bool relay_state);
 
     public:
     /**
@@ -115,6 +115,18 @@ class SwSwitch : public ISwitch, public EventListener {
     SwSwitch(HwSwitch hw_switch);
 
     // SwSwitch
+
+    /**
+     * When the intended state and current state do not match, try to
+     * get these two more in sync.
+     * 
+     * This will ignore the [allowSwitching] bool as intendedState will
+     * not be changed when that value is false.
+     * It will take [allowDimming] and error states into account.
+     * 
+     * intendedState is not modified.
+     */
+    void resolveIntendedState();
 
     // will setRelay(true) if dimmer was active
     void setAllowDimming(bool allowed); 
@@ -138,18 +150,6 @@ class SwSwitch : public ISwitch, public EventListener {
      * Updates switchState and calls saveSwitchState.
      */
     void setDimmer(uint8_t value);
-
-    /**
-     * When the intended state and current state do not match, try to
-     * get these two more in sync.
-     * 
-     * This will ignore the [allowSwitching] bool as intendedState will
-     * not be changed when that value is false.
-     * It will take [allowDimming] and error states into account.
-     * 
-     * intendedState is not modified.
-     */
-    void resolveIntendedState();
 
     // ISwitch
 
@@ -194,6 +194,6 @@ class SwSwitch : public ISwitch, public EventListener {
     bool isRelayOn() { return currentState.state.relay; }
 
     uint8_t getCurrentState() { return currentState.asInt; }
-    uint8_t getIntendedState() { return intendedState.asInt; }
+    uint8_t getIntendedState() { return currentState.asInt; }
     bool isOn() { return currentState.asInt != 0; } // even dimming to 1% means 'on'
 };

@@ -19,7 +19,7 @@
 
 uint32_t SystemTime::rtcTimeStamp;
 uint32_t SystemTime::posixTimeStamp;
-uint32_t SystemTime::uptime_sec;
+uint32_t SystemTime::uptime_sec = 0;
 
 app_timer_t SystemTime::appTimerData = {{0}};
 app_timer_id_t SystemTime::appTimerId = &appTimerData;

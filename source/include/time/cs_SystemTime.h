@@ -52,7 +52,7 @@ class SystemTime : public EventListener {
     // state data
 	static uint32_t rtcTimeStamp;
 	static uint32_t posixTimeStamp;
-    static uint32_t uptime_sec = 0;
+    static uint32_t uptime_sec;
 
     // timing features
     static app_timer_t              appTimerData;// = {{0}};
