@@ -103,6 +103,10 @@ class SwSwitch : public ISwitch, public EventListener {
     void forceSwitchOff();
     void forceDimmerOff();
     
+    
+    void setRelay_unlocked(bool is_on);
+    void setIntensity_unlocked(uint8_t value);
+
     // // all hwSwitch access is looped through these methods.
     // // they set the respective values and persist that value.
     void setIntensity_unchecked(uint8_t dimmer_value);

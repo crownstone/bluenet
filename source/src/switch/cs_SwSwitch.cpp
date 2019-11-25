@@ -150,11 +150,12 @@ void SwSwitch::store(switch_state_t nextState) {
     SWSWITCH_LOG_STATE(nextState);
 
     // only immediately apply if relay state changes.
-	bool persistNow = nextState.state.relay != currentState.state.relay;
+    bool persistNow = false;
+	// bool persistNow = nextState.state.relay != currentState.state.relay;
 
-	if (nextState.asInt != currentState.asInt) {
-		persistNow = (nextState.state.relay != currentState.state.relay);
-	}
+	// if (nextState.asInt != currentState.asInt) {
+	// 	persistNow = (nextState.state.relay != currentState.state.relay);
+	// }
 
 	cs_state_data_t stateData (CS_TYPE::STATE_SWITCH_STATE, 
         reinterpret_cast<uint8_t*>(&nextState), sizeof(nextState));
@@ -165,7 +166,7 @@ void SwSwitch::store(switch_state_t nextState) {
 		State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
 	}
 
-    currentState = nextState;
+    // currentState = nextState;
     SWSWITCH_LOG_CURRENT_STATE();
 }
 
@@ -356,6 +357,7 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
 }
 
 void SwSwitch::setAllowSwitching(bool allowed) {
+    LOGd("setAllowSwitching(%s)", allowed ? "true" : "false");
     allowSwitching = allowed;
     bool switch_locked = !allowed;
     State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &switch_locked, sizeof(switch_locked));
@@ -367,7 +369,8 @@ void SwSwitch::setAllowDimming(bool allowed) {
         return;
     }
 
-    SWSWITCH_LOG();
+    LOGd("setAllowDimming(%s)", allowed ? "true" : "false");
+
     allowDimming = allowed;
     State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &allowed, sizeof(allowed));
 
@@ -387,24 +390,36 @@ void SwSwitch::setAllowDimming(bool allowed) {
 }
 
 void SwSwitch::resolveIntendedState(){
+    LOGd("resolveIntendedstate");
+
+    bool relay_on = currentState.state.relay != 0;
     auto value = currentState.state.dimmer;
+
+    if(relay_on){
+        LOGd("resolve: relay on");
+        // relay probably is in the correct state already,
+        // but that is up to hwSwitch to decide.
+        setRelay_unlocked(true);
+        setIntensity_unlocked(0);
+        return;
+    }
 
     if(value > 0 && (!allowDimming || !isSafeToDim()) ){
         // can't turn dimming on when it has failed or disallowed.
         // let's round the value to 'on' or 'off'
         // Todo(Arend): double check if this is desired.
 
-        LOGw("setIntensity called but not %s to dim - attempting to resolve command",
+        LOGw("resolve: clamp intensity because not %s to dim",
             !allowDimming? "allowed" : "safe");
 
         if (value > 50){
-            LOGw("setIntensity resolved: on");
-            setRelay(true);
-            setIntensity(0);
+            LOGw("resolved: on");
+            setRelay_unlocked(true);
+            setIntensity_unlocked(0);
         } else {
-            LOGw("setIntensity resolved: off");
-            setIntensity(0);
-            setRelay(false);
+            LOGw("resolved: off");
+            setIntensity_unlocked(0);
+            setRelay_unlocked(false);
         }
 
         return;
@@ -417,7 +432,7 @@ void SwSwitch::resolveIntendedState(){
         // ignore isSafeToDim() value here, we still need to measure that.
 
         // TODO(Arend): maybe round value up to a minimal test intensity?
-        LOGw("early call to setIntensity, setting timer for DimmerPower");
+        LOGw("resolve: start dimmer power check");
         
         // Ensure that if the dimmer circuit isn't powered yet
         // the dimmer will be switched off eventually.
@@ -428,10 +443,11 @@ void SwSwitch::resolveIntendedState(){
     }
 
     // SLERP with currentState?
+    LOGd("resolve: default case, using igbts only");
 
     // set[Intensity,Relay] check error conditions and won't do anything if there is a problem.
-    setIntensity(value);
-    setRelay(false);
+    setIntensity_unlocked(value);
+    setRelay_unlocked(false);
 }
 
 void SwSwitch::setDimmer(uint8_t value){
@@ -441,10 +457,12 @@ void SwSwitch::setDimmer(uint8_t value){
     }
 
     LOGw("SwSwitch::setDimmer(%d) called",value);
+
     currentState.state.dimmer = CsMath::clamp(value,0,100);
     currentState.state.relay = 0;
 
     // TODO: persist intended state.
+    store(currentState);
 
     resolveIntendedState();
 }
@@ -457,14 +475,18 @@ void SwSwitch::setRelay(bool is_on){
         return;
     }
 
-    SWSWITCH_LOG();
+    setRelay_unlocked(is_on);
+}
+
+void SwSwitch::setRelay_unlocked(bool is_on){
+    LOGd("SetRelay_unlocked(%d)", is_on);
 
     if(is_on && !isSafeToTurnRelayOn()){
-        // intent to turn on, but not safe
+        LOGw("SetRelay_unlocked refused: unsafe");
         return;
     }
     if(!is_on && !isSafeToTurnRelayOff()){
-        // intent to turn off, but not safe
+        LOGw("SetRelay_unlocked refused: unsafe");
         return;
     }
 
@@ -477,12 +499,18 @@ void SwSwitch::setIntensity(uint8_t value){
         return;
     }
 
-    SWSWITCH_LOG();
+    setIntensity_unlocked(value);
+}
+
+void SwSwitch::setIntensity_unlocked(uint8_t value){;
+
+    LOGd("SetIntensity_unlocked(%d)", value);
 
     if( value > 0 
         &&( !allowDimming 
             || !isSafeToDim()
             || !isDimmerCircuitPowered()) ){
+        LOGd("SetIntensity_unlocked refused: unsafe");
         return;
     }
 
@@ -531,7 +559,8 @@ void SwSwitch::handleEvent(event_t& evt){
                 event_t event(CS_TYPE::EVT_DIMMER_POWERED, &powered, sizeof(powered));
                 event.dispatch();
 
-                resolveIntendedState();
+                // should only be called if resolving slerps, because otherwise it is too abrupt.
+                // resolveIntendedState();
             }
             if(dimmerCheckCountDown && --dimmerCheckCountDown == 0){
                 LOGw("dimmerCheckCountDown timed out");
