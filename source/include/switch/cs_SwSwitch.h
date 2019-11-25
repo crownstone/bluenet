@@ -103,12 +103,13 @@ class SwSwitch : public ISwitch, public EventListener {
     void forceSwitchOff();
     void forceDimmerOff();
     
-    
+    // checks for safety issues and then calls the unchecked variant.
     void setRelay_unlocked(bool is_on);
     void setIntensity_unlocked(uint8_t value);
 
-    // // all hwSwitch access is looped through these methods.
-    // // they set the respective values and persist that value.
+    // all hwSwitch access is looped through these methods.
+    // they check if the would actually be a change in value
+    // before executing the action.
     void setIntensity_unchecked(uint8_t dimmer_value);
     void setRelay_unchecked(bool relay_state);
 

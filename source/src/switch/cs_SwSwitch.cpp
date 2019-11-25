@@ -146,16 +146,8 @@ bool SwSwitch::isSafeToDim(){
 // storage functionality
 
 void SwSwitch::store(switch_state_t nextState) {
-    SWSWITCH_LOG();
-    SWSWITCH_LOG_STATE(nextState);
 
-    // only immediately apply if relay state changes.
     bool persistNow = false;
-	// bool persistNow = nextState.state.relay != currentState.state.relay;
-
-	// if (nextState.asInt != currentState.asInt) {
-	// 	persistNow = (nextState.state.relay != currentState.state.relay);
-	// }
 
 	cs_state_data_t stateData (CS_TYPE::STATE_SWITCH_STATE, 
         reinterpret_cast<uint8_t*>(&nextState), sizeof(nextState));
@@ -166,7 +158,9 @@ void SwSwitch::store(switch_state_t nextState) {
 		State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
 	}
 
-    // currentState = nextState;
+    // this seems to be redundant as the only call to this function
+    // passes currentState as parameter.
+    currentState = nextState;
     SWSWITCH_LOG_CURRENT_STATE();
 }
 
@@ -233,73 +227,6 @@ void SwSwitch::forceDimmerOff() {
 	event_t event(CS_TYPE::EVT_DIMMER_FORCED_OFF);
 	EventDispatcher::getInstance().dispatch(event);
 }
-
-// void SwSwitch::resolveIntendedState(){
-//     SWSWITCH_LOG();
-//     SWSWITCH_LOG_CURRENT_STATE();
-//     switch_state_t actualNextState = {0};
-
-//     if(currentState.state.dimmer){
-//         if(isDimmerCircuitPowered()){
-//             if(isSafeToDim()){
-//                 hwSwitch.setIntensity(currentState.state.dimmer);
-//                 hwSwitch.setRelay(false);
-
-//                 actualNextState.state.dimmer = currentState.state.dimmer;
-//                 actualNextState.state.relay = currentState.state.relay;
-//             }
-//         } else {
-//             // dimmer not yet powered.
-//             if(startDimmerPowerCheck(currentState.state.dimmer)){
-//                 actualNextState.state.dimmer = currentState.state.dimmer;
-//                 actualNextState.state.relay = false;
-//             } else {
-//                 // is startDimmer refuses it already has initiated a measurement before, 
-//                 // it is in an error state or the value passed to it is 0.
-//                 // isDimmerCircuitPowered() returned false the dimmer isn't online yet.
-
-//                 if(dimmerCheckCountDown != 0){
-//                     // measurement running: 
-//                     //     leave the hwSwitch alone in this case.
-//                     //     and leave the stored state as-is.
-//                     return;
-//                 } else {
-//                     // round dimmer state up to 100%.
-//                     hwSwitch.setIntensity(0);
-//                     hwSwitch.setRelay(true);
-
-//                     actualNextState.state.dimmer = 0;
-//                     actualNextState.state.relay = 1;
-
-//                 }
-//             }
-//         }
-//     } else {
-//         if(currentState.state.relay){
-//             if(isSafeToTurnRelayOn()){
-//                 hwSwitch.setRelay(true);
-//                 hwSwitch.setIntensity(0);
-                
-//                 actualNextState.state.relay = true;
-//                 actualNextState.state.dimmer = 0;
-//             }
-//         } else {
-//             if(isSafeToTurnRelayOff()){
-//                 hwSwitch.setRelay(false);
-//                 hwSwitch.setIntensity(0);
-
-//                 actualNextState.state.relay = false;
-//                 actualNextState.state.dimmer = 0;
-//             }
-//         }
-//     }
-
-//     // print actual next state..
-
-//     // no need to store anything, the intendedState - which is the one that 
-//     // should be persisted -  wasn't adjusted.
-//     // store(actualNextState);
-// }
 
 void SwSwitch::setIntensity_unchecked(uint8_t intensity_value){
     if(actualState.state.dimmer == intensity_value){ 
@@ -442,7 +369,7 @@ void SwSwitch::resolveIntendedState(){
         return;
     }
 
-    // SLERP with currentState?
+    // SLERP with actualState?
     LOGd("resolve: default case, using igbts only");
 
     // set[Intensity,Relay] check error conditions and won't do anything if there is a problem.
@@ -568,6 +495,7 @@ void SwSwitch::handleEvent(event_t& evt){
                 resolveIntendedState();
             }
             // TODO: error check in case primary fault-event did not solve the issue?
+            // TODO: if currentState != actualState, try to resolveIntendedState() every once in a while?
             break;
         }
         default: {
