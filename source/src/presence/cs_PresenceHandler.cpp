@@ -36,7 +36,7 @@ void PresenceHandler::handleEvent(event_t& evt){
     }
 
     uint32_t now = Crownstone::getTickCount();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out,now);
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out_ticks,presence_time_out_ticks);
 
     if(parsed_adv_ptr->profileId == 0xff && parsed_adv_ptr->locationId == 0xff){
         LOGw("DEBUG: removing presence record data");
@@ -66,7 +66,7 @@ void PresenceHandler::handleEvent(event_t& evt){
 
 void PresenceHandler::removeOldRecords(){
     uint32_t now = Crownstone::getTickCount();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out,now);
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out_ticks,now);
 
      WhenWhoWhere.remove_if( 
         [&] (PresenceRecord www){ 
@@ -80,10 +80,14 @@ void PresenceHandler::removeOldRecords(){
     );
 }
 
-PresenceStateDescription PresenceHandler::getCurrentPresenceDescription(){
+std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription(){
+    if(SystemTime::up() < presence_uncertain_due_reboot_time_out_s){
+        return {};
+    }
+
     PresenceStateDescription p = 0;
     uint32_t now = Crownstone::getTickCount();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out,now);
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out_ticks,now);
 
     for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ){
         if(!valid_time_interval.contains(iter->when)){

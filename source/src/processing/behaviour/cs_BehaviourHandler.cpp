@@ -38,9 +38,14 @@ void BehaviourHandler::handleEvent(event_t& evt){
 
 void BehaviourHandler::update(){
     TimeOfDay time = SystemTime::now();
-    PresenceStateDescription presence = PresenceHandler::getCurrentPresenceDescription();
+    std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
 
-    auto intendedState = computeIntendedState(time, presence);
+    if(!presence){
+        LOGBehaviourHandler_V("%02d:%02d:%02d, not updating, because presence data is missing",time.h(),time.m(),time.s());
+        return;
+    }
+
+    auto intendedState = computeIntendedState(time, presence.value());
     if(intendedState){
         if(previousIntendedState == intendedState){
             LOGBehaviourHandler_V("%02d:%02d:%02d, no behaviour change",time.h(),time.m(),time.s());
