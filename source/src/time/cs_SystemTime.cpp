@@ -47,16 +47,21 @@ void SystemTime::tick(void*) {
 	uint32_t tickDiff = RTC::difference(RTC::getCount(), rtcTimeStamp);
 
 	// If more than 1s elapsed since last set rtc timestamp:
-	if (posixTimeStamp && tickDiff > RTC::msToTicks(1000)) {
-		// add 1s to posix time and subtract 1s from tickDiff by
-		// increasing the rtc timestamp 1s and store the new time.
-		posixTimeStamp++;
+	if (tickDiff > RTC::msToTicks(1000)) {
+		if(posixTimeStamp == 0){
+			// add 1s to posix time
+			posixTimeStamp++;
+			
+			// and store the new time
+			State::getInstance().set(CS_TYPE::STATE_TIME, &posixTimeStamp, sizeof(posixTimeStamp));
+		}
+
+		// update rtc timestamp subtract 1s from tickDiff by
+		// increasing the rtc timestamp 1s.
 		rtcTimeStamp += RTC::msToTicks(1000);
-		
-		// also increment uptime.
+
+		// increment uptime.
 		++uptime_sec; 
-		
-		State::getInstance().set(CS_TYPE::STATE_TIME, &posixTimeStamp, sizeof(posixTimeStamp));
 	}
 
 	scheduleNextTick();

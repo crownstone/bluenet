@@ -20,8 +20,8 @@
  */
 class PresenceHandler: public EventListener{
     private:
-    // after this amount of ticks a presence_record becomes invalid.
-    static const constexpr uint32_t presence_time_out_ticks = 300; // DEBUG, should be 60*5*10;
+    // after this amount of seconds a presence_record becomes invalid.
+    static const constexpr uint32_t presence_time_out_s = 60; // debug should be 5 minutes
 
     // after this amount of seconds it is assumed that presencehandler would have received 
     // a message from all devices in vicinity of this device.
