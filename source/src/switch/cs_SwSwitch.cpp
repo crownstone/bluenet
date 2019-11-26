@@ -13,11 +13,11 @@
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
 
-#define SWSWITCH_LOG() LOGd("SwSwitch::%s",__func__)
-#define SWSWITCH_LOCKED_LOG() LOGd("refused because of lock: %s",__func__)
+#define SWSWITCH_LOG_CALLFLOW LOGnone
 
-#define SWSWITCH_LOG_STATE(s) LOGd("state: {relay=%d, dim=%x}", s.state.relay,s.state.dimmer)
-#define SWSWITCH_LOG_CURRENT_STATE() LOGd("current state: {relay=%d, dim=%x}", currentState.state.relay,currentState.state.dimmer)
+#define SWSWITCH_LOG_FUNC() SWSWITCH_LOG_CALLFLOW("SwSwitch::%s",__func__)
+#define SWSWITCH_LOCKED_LOG() SWSWITCH_LOG_CALLFLOW("refused because of lock: %s",__func__)
+
 
 // =========================================================================
 // ================================ Private ================================
@@ -30,7 +30,7 @@ bool SwSwitch::startDimmerPowerCheck(uint8_t value){
         return false;
     }
 
-    SWSWITCH_LOG();
+    SWSWITCH_LOG_FUNC();
 
     // set the dimmer intensity to [value]
     setIntensity_unchecked(value);
@@ -44,9 +44,10 @@ bool SwSwitch::startDimmerPowerCheck(uint8_t value){
 }
 
 void SwSwitch::checkDimmerPower() {
+    SWSWITCH_LOG_CALLFLOW("checkDimmerPower: allowDimming: %d - currentState.state.dimmer: %d",
+        allowDimming, 
+        currentState.state.dimmer);
 
-    SWSWITCH_LOG();
-    LOGd("checkDimmerPower: allowDimming: %d - currentState.state.dimmer: %d", allowDimming, currentState.state.dimmer);
 	if (!allowDimming) {
         // doesn't make sense to measure anything when the dimmer is turned off
         // quite a bad condition to be in, better solve it!
@@ -68,7 +69,7 @@ void SwSwitch::checkDimmerPower() {
 	TYPIFY(CONFIG_POWER_ZERO) powerZero;
 	State::getInstance().get(CS_TYPE::CONFIG_POWER_ZERO, &powerZero, sizeof(powerZero));
 
-	LOGd("powerUsage=%i powerZero=%i", powerUsage, powerZero);
+	SWSWITCH_LOG_CALLFLOW("powerUsage=%i powerZero=%i", powerUsage, powerZero);
 
 	if (powerUsage < DIMMER_BOOT_CHECK_POWER_MW 
 		|| (powerUsage < DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED 
@@ -161,30 +162,19 @@ void SwSwitch::store(switch_state_t nextState) {
     // this seems to be redundant as the only call to this function
     // passes currentState as parameter.
     currentState = nextState;
-    SWSWITCH_LOG_CURRENT_STATE();
-}
 
-
-void SwSwitch::storeRelayStateUpdate(bool is_on){
-    SWSWITCH_LOG();
-    switch_state_t nextState = currentState;
-    nextState.state.relay = is_on;
-    store(nextState);
-}
-
-void SwSwitch::storeIntensityStateUpdate(uint8_t intensity){
-    SWSWITCH_LOG();
-    switch_state_t nextState = currentState;
-    nextState.state.dimmer = intensity;
-    store(nextState);
+    SWSWITCH_LOG_CALLFLOW("store(%s, %d%%)",
+        currentState.state.relay != 0? "on" : "off", 
+        currentState.state.dimmer);
 }
 
 // forcing hardwareSwitch
 
 void SwSwitch::forceRelayOn() {
-    SWSWITCH_LOG();
+    SWSWITCH_LOG_FUNC();
+
     hwSwitch.setRelay(true);
-    storeRelayStateUpdate(true);
+    actualState.state.relay = 1;
 	
 	event_t event(CS_TYPE::EVT_RELAY_FORCED_ON);
 	EventDispatcher::getInstance().dispatch(event);
@@ -196,7 +186,8 @@ void SwSwitch::forceRelayOn() {
 }
 
 void SwSwitch::forceSwitchOff() {
-    SWSWITCH_LOG();
+    SWSWITCH_LOG_FUNC();
+
 	hwSwitch.setIntensity(0);
 	hwSwitch.setRelay(false);
     // hwSwitch.setDimmerPower(false);
@@ -216,7 +207,7 @@ void SwSwitch::forceSwitchOff() {
 }
 
 void SwSwitch::forceDimmerOff() {
-    SWSWITCH_LOG();
+    SWSWITCH_LOG_FUNC();
 
     setIntensity_unchecked(0);
 
@@ -253,7 +244,8 @@ void SwSwitch::setRelay_unchecked(bool relay_state){
 // ================== SwSwitch ================
 
 SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
-    SWSWITCH_LOG();
+    SWSWITCH_LOG_FUNC();
+
     // SwSwitch always constructs in 'off' state
     actualState = {0};
     currentState = {0};
@@ -269,7 +261,7 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
     // load dimming allowed stated
     State::getInstance().get(CS_TYPE::CONFIG_PWM_ALLOWED, &allowDimming, sizeof(allowDimming));
 
-    LOGd("SwSwitch startup in state: relay(%d), intensity(%d), lock(%d), dimming(%d)", 
+    LOGd("SwSwitch constructed in state: relay(%d), intensity(%d), lock(%d), dimming(%d)", 
          currentState.state.relay, 
          currentState.state.dimmer, 
          switch_locked ? 1 : 0, 
@@ -279,12 +271,10 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
     // that setIntensity calls will have visible effect.
     // note: dimmer power is not persisted, so we don't need to store this anywhere.
     hwSwitch.setDimmerPower(true);
-
-    // resetToCurrentState();
 }
 
 void SwSwitch::setAllowSwitching(bool allowed) {
-    LOGd("setAllowSwitching(%s)", allowed ? "true" : "false");
+    SWSWITCH_LOG_CALLFLOW("setAllowSwitching(%s)", allowed ? "true" : "false");
     allowSwitching = allowed;
     bool switch_locked = !allowed;
     State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &switch_locked, sizeof(switch_locked));
@@ -296,7 +286,7 @@ void SwSwitch::setAllowDimming(bool allowed) {
         return;
     }
 
-    LOGd("setAllowDimming(%s)", allowed ? "true" : "false");
+    SWSWITCH_LOG_CALLFLOW("setAllowDimming(%s)", allowed ? "true" : "false");
 
     allowDimming = allowed;
     State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &allowed, sizeof(allowed));
@@ -317,13 +307,13 @@ void SwSwitch::setAllowDimming(bool allowed) {
 }
 
 void SwSwitch::resolveIntendedState(){
-    LOGd("resolveIntendedstate");
+    SWSWITCH_LOG_CALLFLOW("resolveIntendedstate");
 
     bool relay_on = currentState.state.relay != 0;
     auto value = currentState.state.dimmer;
 
     if(relay_on){
-        LOGd("resolve: relay on");
+        SWSWITCH_LOG_CALLFLOW("resolve: relay on");
         // relay probably is in the correct state already,
         // but that is up to hwSwitch to decide.
         setRelay_unlocked(true);
@@ -332,14 +322,10 @@ void SwSwitch::resolveIntendedState(){
     }
 
     if(value > 0 && (!allowDimming || !isSafeToDim()) ){
-        // can't turn dimming on when it has failed or disallowed.
-        // let's round the value to 'on' or 'off'
-        // Todo(Arend): double check if this is desired.
-
         LOGw("resolve: clamp intensity because not %s to dim",
             !allowDimming? "allowed" : "safe");
 
-        if (value > 50){
+        if (value > 5){
             LOGw("resolved: on");
             setRelay_unlocked(true);
             setIntensity_unlocked(0);
@@ -359,7 +345,7 @@ void SwSwitch::resolveIntendedState(){
         // ignore isSafeToDim() value here, we still need to measure that.
 
         // TODO(Arend): maybe round value up to a minimal test intensity?
-        LOGw("resolve: start dimmer power check");
+        LOGd("resolve: start dimmer power check");
         
         // Ensure that if the dimmer circuit isn't powered yet
         // the dimmer will be switched off eventually.
@@ -370,7 +356,7 @@ void SwSwitch::resolveIntendedState(){
     }
 
     // SLERP with actualState?
-    LOGd("resolve: default case, using igbts only");
+    SWSWITCH_LOG_CALLFLOW("resolve: default case, using igbts only");
 
     // set[Intensity,Relay] check error conditions and won't do anything if there is a problem.
     setIntensity_unlocked(value);
@@ -383,12 +369,11 @@ void SwSwitch::setDimmer(uint8_t value){
         return;
     }
 
-    LOGw("SwSwitch::setDimmer(%d) called",value);
+    SWSWITCH_LOG_CALLFLOW("SwSwitch::setDimmer(%d) called",value);
 
     currentState.state.dimmer = CsMath::clamp(value,0,100);
     currentState.state.relay = 0;
 
-    // TODO: persist intended state.
     store(currentState);
 
     resolveIntendedState();
@@ -405,8 +390,17 @@ void SwSwitch::setRelay(bool is_on){
     setRelay_unlocked(is_on);
 }
 
+void SwSwitch::setIntensity(uint8_t value){
+    if(!allowSwitching){
+        SWSWITCH_LOCKED_LOG()
+        return;
+    }
+
+    setIntensity_unlocked(value);
+}
+
 void SwSwitch::setRelay_unlocked(bool is_on){
-    LOGd("SetRelay_unlocked(%d)", is_on);
+    SWSWITCH_LOG_CALLFLOW("SetRelay_unlocked(%d)", is_on);
 
     if(is_on && !isSafeToTurnRelayOn()){
         LOGw("SetRelay_unlocked refused: unsafe");
@@ -420,24 +414,15 @@ void SwSwitch::setRelay_unlocked(bool is_on){
     setRelay_unchecked(is_on);
 }
 
-void SwSwitch::setIntensity(uint8_t value){
-    if(!allowSwitching){
-        SWSWITCH_LOCKED_LOG()
-        return;
-    }
-
-    setIntensity_unlocked(value);
-}
-
 void SwSwitch::setIntensity_unlocked(uint8_t value){;
 
-    LOGd("SetIntensity_unlocked(%d)", value);
+    SWSWITCH_LOG_CALLFLOW("SetIntensity_unlocked(%d)", value);
 
     if( value > 0 
         &&( !allowDimming 
             || !isSafeToDim()
             || !isDimmerCircuitPowered()) ){
-        LOGd("SetIntensity_unlocked refused: unsafe");
+        LOGw("SetIntensity_unlocked refused: unsafe");
         return;
     }
 
@@ -460,7 +445,7 @@ void SwSwitch::handleEvent(event_t& evt){
         case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER:
         case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
         case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
-            SWSWITCH_LOG();
+            SWSWITCH_LOG_FUNC();
             // First set relay on, so that the switch doesn't first turn off, and later on again.
             // The relay protects the dimmer, because it opens a parallel circuit for the current
             // to flow through.
@@ -469,17 +454,17 @@ void SwSwitch::handleEvent(event_t& evt){
             break;
         case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
         case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
-            SWSWITCH_LOG();
+            SWSWITCH_LOG_FUNC();
             forceSwitchOff();
             break;
         case CS_TYPE::STATE_SWITCH_STATE: {
         	__attribute__((unused)) switch_state_t* typd = reinterpret_cast<TYPIFY(STATE_SWITCH_STATE)*>(evt.data);
-            LOGd("switch state update: relay(%d) dim(%d)", typd->state.relay, typd->state.dimmer);
+            SWSWITCH_LOG_CALLFLOW("switch state update: relay(%d) dim(%d)", typd->state.relay, typd->state.dimmer);
             break;
         }
         case CS_TYPE::EVT_TICK: {
             if (dimmerPowerUpCountDown && --dimmerPowerUpCountDown == 0){
-                LOGw("dimmerPowerUpCountDown timed out");
+                SWSWITCH_LOG_CALLFLOW("dimmerPowerUpCountDown timed out");
 
                 // update service data through an event as it may not have happened before.
                 bool powered = isDimmerCircuitPowered();
@@ -490,8 +475,10 @@ void SwSwitch::handleEvent(event_t& evt){
                 // resolveIntendedState();
             }
             if(dimmerCheckCountDown && --dimmerCheckCountDown == 0){
-                LOGw("dimmerCheckCountDown timed out");
+                SWSWITCH_LOG_CALLFLOW("dimmerCheckCountDown timed out");
                 checkDimmerPower();
+
+                // see if a possible cold dimmer can be fixed 
                 resolveIntendedState();
             }
             // TODO: error check in case primary fault-event did not solve the issue?

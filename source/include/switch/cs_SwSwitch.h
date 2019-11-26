@@ -92,11 +92,7 @@ class SwSwitch : public ISwitch, public EventListener {
     bool isSafeToDim();
 
     // persistance features: 
-    // to update intended state, these functions should be used for persistance.
-    // these methods do not adjust the [actualState], they only change the [currentState].
     void store(switch_state_t nextState);
-    void storeRelayStateUpdate(bool is_on);
-    void storeIntensityStateUpdate(uint8_t intensity);
 
     // exceptional methods (ignores error state but logs and persists)
     void forceRelayOn();
