@@ -67,7 +67,7 @@ Request Payload
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Behaviour](#behaviour_payload) | Data | ... | Behaviour to save
+[Behaviour](#behaviour_payload) | Data | ... | Behaviour to save.
 
 </p>
 </details>
@@ -95,12 +95,13 @@ Return Payload
 <p>
 
 The return payload will always contain the most current master hash. The `Index` will only be valid when the result
-was `SUCCESS`. Otherwise it is not returned. 
+was `SUCCESS`. Otherwise it is not returned.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint8 | Index | 1 | The index at which the behaviour is stored, or 255 when not successful.
 [Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
-uint8 | Index | 1 | The index at which the Behaviour requested to be saved was stored.
+
 
 </p>
 </details>
@@ -121,8 +122,8 @@ Request Payload
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Index | 1 | Index of the behaviour to replace
-[Behaviour](#behaviour_payload) | Data | ... | Behaviour to replace the current one at given index with
+uint8 | Index | 1 | Index of the behaviour to replace.
+[Behaviour](#behaviour_payload) | Data | ... | Behaviour to replace the current one at given index with.
 
 </p>
 </details>
@@ -153,6 +154,7 @@ The return payload will always contain the most current master hash.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint8 | Index | 1 | The index at which the behaviour was replaced.
 [Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
 
 </p>
@@ -173,7 +175,7 @@ Request Payload
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Index | 1 | Index of the behaviour to remove
+uint8 | Index | 1 | Index of the behaviour to remove.
 
 </p>
 </details>
@@ -204,6 +206,7 @@ The return payload will always contain the most current master hash.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint8 | Index | 1 | The index from which the behaviour was removed.
 [Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
 
 </p>
@@ -257,6 +260,7 @@ If there exists a behaviour at the `Index` , the following packet will be return
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint8 | Index | 1 | The index of the requested behaviour.
 [Behaviour](#behaviour_payload) | Data | ... | The Behaviour that is stored at the given `Index`.
 
 </p>

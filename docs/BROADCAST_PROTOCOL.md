@@ -143,6 +143,8 @@ Type nr | Type name | Payload type | Payload Description | A | M | B | S
 --- | --- | --- | --- | :---: | :---: | :---: | :--:
 0 | No operation | - | None | x | x | x |
 1 | Multi switch | [Multi switch short list packet](#multi_switch_short_list_packet) | List of switch commands | x | x | x |
+2 | Set time | [Set time packet](#set_time_packet) | Current time. | x | x | |
+3 | Sun time | [Sun time packet](#sun_time_packet) | Sun rise and set times. | x | x | |
 
 
 <a name="multi_switch_short_list_packet"></a>
@@ -166,4 +168,25 @@ Type | Name | Length | Description
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
 uint 8 | Switch state | 1 | The switch state to be set by the targeted crownstone. 0 = off, 100 = fully on.
 
+<a name="set_time_packet"></a>
+##### Set time packet
 
+![Set time packet](../docs/diagrams/broadcast_set_time_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 32 | Timestamp | 4 | Current local time.
+uint 24 | Sunrise | 3 | Seconds after midnight that the sun rises.
+uint 24 | Sunset | 3 | Seconds after midnight that the sun sets.
+uint 8 | Reserved | 1 | Reserved for future use, should be 0 for now.
+
+<a name="sun_time_packet"></a>
+##### Sun time packet
+
+![Sun time packet](../docs/diagrams/broadcast_sun_time_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 24 | Sunrise | 3 | Seconds after midnight that the sun rises.
+uint 24 | Sunset | 3 | Seconds after midnight that the sun sets.
+uint 8[] | Reserved | 5 | Reserved for future use, should be 0 for now.
