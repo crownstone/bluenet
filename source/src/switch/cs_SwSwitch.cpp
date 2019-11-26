@@ -16,7 +16,7 @@
 #define SWSWITCH_LOG_CALLFLOW LOGnone
 
 #define SWSWITCH_LOG_FUNC() SWSWITCH_LOG_CALLFLOW("SwSwitch::%s",__func__)
-#define SWSWITCH_LOCKED_LOG() SWSWITCH_LOG_CALLFLOW("refused because of lock: %s",__func__)
+#define SWSWITCH_LOCKED_LOG() LOGd("refused because of lock: %s",__func__)
 
 
 // =========================================================================
