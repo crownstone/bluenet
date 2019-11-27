@@ -54,7 +54,10 @@ void BehaviourHandler::update(){
         return;
     } 
 
-    LOGBehaviourHandler("presencedescription: %x %x", (presence.value() && 0xffffffff), ((presence.value() >> 32) && 0xffffffff));
+    uint64_t p = presence.value();
+    uint32_t p0 = p & 0xffffffff;
+    uint32_t p1 = (p>>32) & 0xffffffff;
+    LOGd("presencedescription: %x %x", p1,p0);
 
     auto intendedState = computeIntendedState(time, presence.value());
     if(intendedState){

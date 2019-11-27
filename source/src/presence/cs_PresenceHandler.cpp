@@ -37,6 +37,8 @@ void PresenceHandler::handleEvent(event_t& evt){
         WhenWhoWhere.pop_back();
     }
 
+    // TODO inputvalidation
+
     uint32_t now = SystemTime::up();
     auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
 
@@ -104,9 +106,11 @@ std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescr
         } else {
             // appearently iter is valid, so the .where field describes an occupied room.
             p |= 1 << CsMath::min(64-1,iter->where);
+            LOGPresenceHandler("adding room %d to currentPresenceDescription", iter->where);
             ++iter;
         }
     }
+
     return p;
 }
 
