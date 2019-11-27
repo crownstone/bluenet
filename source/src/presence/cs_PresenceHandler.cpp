@@ -6,7 +6,6 @@
  */
 #include <presence/cs_PresenceHandler.h>
 
-#include <cs_Crownstone.h>
 #include <time/cs_TimeOfDay.h>
 #include <common/cs_Types.h>
 
@@ -49,7 +48,8 @@ void PresenceHandler::handleEvent(event_t& evt){
         WhenWhoWhere.remove_if( 
             [&] (PresenceRecord www){ 
                 if(!valid_time_interval.ClosureContains(www.when)){
-                    LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated", www.who);
+                    LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated: %d not contained in [%d %d]", 
+                        www.who,www.when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
                     return true;
                 }
                 if(www.who == parsed_adv_ptr->profileId){
@@ -71,13 +71,14 @@ void PresenceHandler::handleEvent(event_t& evt){
 }
 
 void PresenceHandler::removeOldRecords(){
-    uint32_t now = Crownstone::getTickCount();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,now);
+    uint32_t now = SystemTime::up();
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
 
      WhenWhoWhere.remove_if( 
         [&] (PresenceRecord www){ 
             if(!valid_time_interval.ClosureContains(www.when)){
-                LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated", www.who);
+                LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated: %d not contained in [%d %d]", 
+                        www.who,www.when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
                 return true;
             }
            
@@ -98,9 +99,9 @@ std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescr
 
     for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ){
         if(!valid_time_interval.ClosureContains(iter->when)){
-            LOGPresenceHandler("erasing old presence_record for user id %d because it's already %d seconds old", 
-                iter->who, now - iter->when
-            );
+            LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated: %d not contained in [%d %d]", 
+                        iter->who,iter->when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
+
             iter = WhenWhoWhere.erase(iter); // increments iter and invalidates previous value..
             continue;
         } else {
