@@ -34,6 +34,10 @@ void BehaviourHandler::handleEvent(event_t& evt){
             update();
             break;
         }
+        case CS_TYPE::EVT_TIME_SET: {
+            update();
+            break;
+        }
         case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:{
             update();
             break;
