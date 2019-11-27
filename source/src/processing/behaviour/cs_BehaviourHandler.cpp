@@ -25,10 +25,19 @@
 
 void BehaviourHandler::handleEvent(event_t& evt){
     switch(evt.type){
-        case CS_TYPE::STATE_TIME:
-        case CS_TYPE::EVT_PRESENCE_MUTATION:
-        case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:
+        case CS_TYPE::EVT_PRESENCE_MUTATION: {
+            LOGBehaviourHandler("Presence mutation event in BehaviourHandler");
             update();
+            break;
+        }
+        case CS_TYPE::STATE_TIME:{
+            update();
+            break;
+        }
+        case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:{
+            update();
+            break;
+        }
         default:{
             // ignore other events
             break;
@@ -43,7 +52,9 @@ void BehaviourHandler::update(){
     if(!presence){
         LOGBehaviourHandler_V("%02d:%02d:%02d, not updating, because presence data is missing",time.h(),time.m(),time.s());
         return;
-    }
+    } 
+
+    LOGBehaviourHandler("presencedescription: %x %x", (presence.value() && 0xffffffff), ((presence.value() >> 32) && 0xffffffff));
 
     auto intendedState = computeIntendedState(time, presence.value());
     if(intendedState){

@@ -46,7 +46,7 @@ void PresenceHandler::handleEvent(event_t& evt){
     } else {        
         WhenWhoWhere.remove_if( 
             [&] (PresenceRecord www){ 
-                if(!valid_time_interval.contains(www.when)){
+                if(!valid_time_interval.ClosureContains(www.when)){
                     LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated", www.who);
                     return true;
                 }
@@ -74,7 +74,7 @@ void PresenceHandler::removeOldRecords(){
 
      WhenWhoWhere.remove_if( 
         [&] (PresenceRecord www){ 
-            if(!valid_time_interval.contains(www.when)){
+            if(!valid_time_interval.ClosureContains(www.when)){
                 LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated", www.who);
                 return true;
             }
@@ -86,16 +86,17 @@ void PresenceHandler::removeOldRecords(){
 
 std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription(){
     if(SystemTime::up() < presence_uncertain_due_reboot_time_out_s){
+        LOGd("presence_uncertain_due_reboot_time_out_s hasn't expired");
         return {};
     }
 
     PresenceStateDescription p = 0;
-    uint32_t now = Crownstone::getTickCount();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,now);
+    uint32_t now = SystemTime::up();
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
 
     for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ){
-        if(!valid_time_interval.contains(iter->when)){
-            LOGPresenceHandler("erasing old presence_record for user id %d because it's already %d ticks old", 
+        if(!valid_time_interval.ClosureContains(iter->when)){
+            LOGPresenceHandler("erasing old presence_record for user id %d because it's already %d seconds old", 
                 iter->who, now - iter->when
             );
             iter = WhenWhoWhere.erase(iter); // increments iter and invalidates previous value..
