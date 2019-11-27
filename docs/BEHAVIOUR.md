@@ -11,7 +11,7 @@ This document describes the Crownstones' Behaviour concept in more technical det
 # Communication API for (smartphone) applications
 
 To store, update and sync Behaviours, the application can communicate over the Crownstone bluetooth protocol
-by sending [Behaviour Packets](PROTOCOL.md#behaviour_packet). The advertized state contains a [Behaviour Hash](#behaviour_hash)
+by sending [Behaviour Packets](PROTOCOL.md#behaviour_packet). The advertized state contains a [Behaviour Hash](#behaviour_master_hash)
 of all stored behaviours, which can be used to identify an out-of-sync condition.
 
 
@@ -94,13 +94,12 @@ Return Payload
 </summary>
 <p>
 
-The return payload will always contain the most current master hash. The `Index` will only be valid when the result
-was `SUCCESS`. Otherwise it is not returned.
+The return payload will always contain the most current master hash.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index at which the behaviour is stored, or 255 when not successful.
-[Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
+[Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
 
 
 </p>
@@ -155,7 +154,7 @@ The return payload will always contain the most current master hash.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index at which the behaviour was replaced.
-[Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
+[Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
 
 </p>
 </details>
@@ -207,7 +206,7 @@ The return payload will always contain the most current master hash.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index from which the behaviour was removed.
-[Hash](#behaviour_hash) | Master | 4 | The master hash after handling the request.
+[Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
 
 </p>
 </details>
@@ -305,7 +304,8 @@ Return Payload
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8[] | indices | ... | List of all occupied indices.
+[Index with hash](#index_and_hash)[] | list | ... | List of all occupied indices, and their hashes.
+
 
 </p>
 </details>
@@ -378,8 +378,8 @@ Type | Name | Length | Description
 [Presence Description](#presence_description) | Extension Presence | 13 | Description of the presence conditions that the Extension behaviour will use.
 [Time Difference](#time_difference) | Extension Until | 4 | Extend the core behaviour's 'Until' time by at least the given time difference, possibly longer if the extension presence condition is still satisfied after this time difference expires. Negative values will be rounded up to 0.
 
-<a name="behaviour_hash"></a>
-#### Behaviour Hash
+<a name="behaviour_master_hash"></a>
+#### Behaviour Master Hash
 
 The `BehaviourStore` can generate a hash that can be used to verify if an application is up to date. The data that is hashed is as in the following table. The hashing algorithm used is [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum). As this algorithm is based on 16-bit integer array as input each entry in the table below is padded with 0x00 at the end if its length is uneven.
 
@@ -392,6 +392,16 @@ uint8 | Index1 | 1 (padded with 0x00)
 ... | ... | ...
 uint8 | IndexMax | 1 (padded with 0x00)
 [Behaviour](#behaviour_payload) | BehaviourMax | size depends on the type of payload
+
+<a name="index_and_hash"></a>
+#### Index and hash
+
+For each behaviour individually, a hash can be calculated as well, similar to the [master hash](#behaviour_master_hash).
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | index | 1 | Index of an occupied behaviour.
+uint32 | Behaviour hash | 4 | The hash of the behaviour at this index.
 
 
 
