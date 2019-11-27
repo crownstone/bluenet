@@ -80,7 +80,10 @@ namespace CsMath{
             if(diff < 0){
                 std::swap(low,high);
             }
-        } 
+        }
+
+        T lowerbound() { return low; }
+        T upperbound() { return high; }
 
         // E.g.
         // Interval<uint8_t> i(200,00)
