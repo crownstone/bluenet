@@ -48,7 +48,7 @@ void SystemTime::tick(void*) {
 
 	// If more than 1s elapsed since last set rtc timestamp:
 	if (tickDiff > RTC::msToTicks(1000)) {
-		if(posixTimeStamp == 0){
+		if(posixTimeStamp != 0){
 			// add 1s to posix time
 			posixTimeStamp++;
 			
