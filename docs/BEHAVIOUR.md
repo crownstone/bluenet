@@ -417,7 +417,7 @@ int32 | Time Payload | 4 | Signed difference in seconds since a known-from-conte
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Base Time |  1 | <ol start="0"><li>Midnight </li><li>Sundown </li><li>Sunrise</li></ol>
+uint8 | Base Time |  1 | <ol start="0"><li>Midnight </li><li>Sunrise </li><li>Sunset</li></ol>
 [Time Difference](#time_difference) | Offset | 4 | 
 
 <a name="day_of_week_bitmask"></a>
