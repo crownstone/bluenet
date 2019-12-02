@@ -49,6 +49,16 @@ class SwitchAggregator : public EventListener {
     std::optional<uint8_t> behaviourState = {};
     std::optional<uint8_t> overrideState = {};
 
+    // the last state that was aggregated and passed on towards the SwSwitch.
+    std::optional<uint8_t> aggregatedState = {};
+
+    // // will be set to true when overrideState was set, and behaviourState
+    // // aggreed as far as 'on/off' state is concerned.
+    // // When a match has happend (this var. is true), the overrideState will be
+    // // removed at the moment that overrideState and behaviourState are no longer
+    // // in agreement.
+    // bool overrideStateMatched;
+
     /**
      * Checks the behaviourState and overrideState,
      * to set the swSwitch to the desired value:
@@ -61,6 +71,7 @@ class SwitchAggregator : public EventListener {
      * the behaviourState, unless the switch is locked.
      */
     void updateState();
+
 
 
     /**
