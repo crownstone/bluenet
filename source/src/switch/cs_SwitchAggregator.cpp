@@ -91,7 +91,11 @@ void SwitchAggregator::updateState(){
             nextAggregatedState = overrideState;
         }
     } else {
-        nextAggregatedState = overrideState.value_or(behaviourState.value_or(aggregatedState.value_or(std::nullopt)));
+        nextAggregatedState = 
+            overrideState ? overrideState : 
+            behaviourState ? behaviourState : 
+            aggregatedState ? aggregatedState : 
+            std::nullopt;
     }
 
     aggregatedState = nextAggregatedState;
