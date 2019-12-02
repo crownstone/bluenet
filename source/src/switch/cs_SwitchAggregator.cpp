@@ -58,7 +58,7 @@ void SwitchAggregator::init(SwSwitch&& s){
     swSwitch.emplace(s);
     
     EventDispatcher::getInstance().addListener(this);
-    EventDispatcher::getInstance().addListener(&swSwitch.value());
+    EventDispatcher::getInstance().addListener(&*swSwitch);
 
     overrideState = swSwitch->getIntendedState();
     swSwitch->resolveIntendedState();
@@ -75,9 +75,9 @@ void SwitchAggregator::updateState(){
     std::optional<uint8_t> nextAggregatedState = {};
 
     if(overrideState && behaviourState && aggregatedState){
-        bool overrideStateIsOn = overrideState.value() != 0;
-        bool aggregatedStateIsOn = aggregatedState.value() != 0;
-        bool behaviourStateIsOn = behaviourState.value() != 0;
+        bool overrideStateIsOn = *overrideState != 0;
+        bool aggregatedStateIsOn = *aggregatedState != 0;
+        bool behaviourStateIsOn = *behaviourState != 0;
 
         bool overrideMatchedAggregated = overrideStateIsOn == aggregatedStateIsOn;
         bool behaviourWantsToChangeState = behaviourStateIsOn != aggregatedStateIsOn;
@@ -100,7 +100,7 @@ void SwitchAggregator::updateState(){
 
     aggregatedState = nextAggregatedState;
     if(aggregatedState){
-        swSwitch->setDimmer(aggregatedState.value());
+        swSwitch->setDimmer(*aggregatedState);
     }
 
 }
