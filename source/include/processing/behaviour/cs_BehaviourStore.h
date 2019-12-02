@@ -28,6 +28,20 @@ class BehaviourStore : public EventListener {
      */
     virtual void handleEvent(event_t& evt);
 
+    static inline const std::array<std::optional<Behaviour>,MaxBehaviours>& getActiveBehaviours() {
+        return activeBehaviours;
+    }
+
+    private:
+
+    static uint32_t masterHash();
+
+    void handleSaveBehaviour(event_t& evt);
+    void handleReplaceBehaviour(event_t& evt);
+    void handleRemoveBehaviour(event_t& evt);
+    void handleGetBehaviour(event_t& evt);
+    void handleGetBehaviourIndices(event_t& evt);
+
     /**
      * Stores the given behaviour [b] at given [index] in the activeBehaviours array.
      * 
@@ -36,25 +50,12 @@ class BehaviourStore : public EventListener {
      * Returns true on success, false if [index] is out of range.
      */
     bool saveBehaviour(Behaviour b, uint8_t index);
-
+    
     /**
      * Remove the behaviour at [index]. If [index] is out of bounds,
      * or no behaviour exists at [index], false is returned. Else, true.
      */
     bool removeBehaviour(uint8_t index);
-
-    static inline const std::array<std::optional<Behaviour>,MaxBehaviours>& getActiveBehaviours() {
-        return activeBehaviours;
-    }
-
-    private:
-    static uint32_t masterHash();
-
-    void handleSaveBehaviour(event_t& evt);
-    void handleReplaceBehaviour(event_t& evt);
-    void handleRemoveBehaviour(event_t& evt);
-    void handleGetBehaviour(event_t& evt);
-    void handleGetBehaviourIndices(event_t& evt);
 
     void dispatchBehaviourMutationEvent();
 };
