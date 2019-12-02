@@ -42,7 +42,6 @@
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
-#include <events/cs_EventDispatcher.h>
 #include <processing/cs_EncryptionHandler.h>
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_TapToToggle.h>
@@ -116,7 +115,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 	_mainTimerId = &_mainTimerData;
 
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
-	EventDispatcher::getInstance().addListener(this);
+	this->listen(); // note: passing pointer to other class in constructor might be dangerous.
 
 	_stack = &Stack::getInstance();
 	_advertiser = &Advertiser::getInstance();
@@ -581,9 +580,9 @@ void Crownstone::setName() {
  * the mesh. In setup mode we use the serial module (but only RX).
  */
 void Crownstone::startOperationMode(const OperationMode & mode) {
-	EventDispatcher::getInstance().addListener(&_behaviourHandler);
-	EventDispatcher::getInstance().addListener(&_behaviourStore);
-	EventDispatcher::getInstance().addListener(&_presenceHandler);
+	_behaviourHandler.listen();
+	_behaviourStore.listen();
+	_presenceHandler.listen();
 	
 	switch(mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
@@ -598,67 +597,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::LOCALIZATION);
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
-
-
-//			// DEBUG
-			LOGd("behaviourStore listener added");
-
-//			uint32_t h = 14;
-//			uint32_t m = 25;
-//			uint32_t s = 0;
-//
-//			for(auto i = 0; i < 10; i++){ // just add 10 behaviours
-//				Behaviour behaviour(
-//						100 - (i%2 ? 50 : 0),
-//						Monday | Thursday | Friday,
-//						TimeOfDay(h, m+i, s),
-//						TimeOfDay(h, m+i, s+30),
-//						PresenceCondition(
-//							PresencePredicate(
-//								PresencePredicate::Condition::AnyoneAnyRoom,
-//								0xffff0000ffff0000),
-//							0)
-//					);
-//
-//				behaviour.print();
-//
-//				_behaviourStore.saveBehaviour(behaviour,i);
-//			}
-//
-//			Behaviour b(
-//				80,
-//				Monday | Wednesday | Thursday | Friday,
-//				TimeOfDay(11, 0, 0),
-//				TimeOfDay(17,30, 0),
-//				PresenceCondition(
-//					PresencePredicate(
-//						PresencePredicate::Condition::AnyoneAnyRoom,
-//						0xffff0000ffff0000),
-//					0)
-//				);
-//			b.print();
-//
-//			uint8_t result = 0xff;
-//			event_t event(CS_TYPE::EVT_SAVE_BEHAVIOUR,&b,sizeof(b));
-//
-//			event.returnCode = ERR_EVENT_UNHANDLED;
-//			event.result.data = &result;
-//			event.result.len = sizeof(result);
-//			event.dispatch();
-//
-//			if(event.returnCode == ERR_SUCCESS){
-//				LOGd("SaveBehaviourEvent handled, returnvalue: %x",result);
-//			} else if(event.returnCode == ERR_NO_SPACE) {
-//				LOGd("SaveBehaviourEvent not handled because the space is full");
-//			} else if(event.returnCode == ERR_BUFFER_TOO_SMALL){
-//				LOGd("SaveBehaviourEvent failed because event buffer was too small for return value");
-//			} else if(event.returnCode == ERR_EVENT_UNHANDLED){
-//				LOGd("SaveBehaviour event unhandled");
-//			} else {
-//				LOGd("SaveBehaviour event ended in undefined state: %u", event.returnCode);
-//			}
-//
-//			// END DEBUG
 
 			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
 			_multiSwitchHandler->init();
@@ -735,9 +673,9 @@ void Crownstone::startUp() {
 			_powerSampler->enableZeroCrossingInterrupt(handleZeroCrossing);
 		}
 
-		EventDispatcher::getInstance().addListener(&_systemTime);
-		EventDispatcher::getInstance().addListener(&Scheduler::getInstance());
-		BackgroundAdvertisementHandler::getInstance();
+		_systemTime.listen();
+		Scheduler::getInstance().listen();
+		
 		TapToToggle::getInstance().init(_boardsConfig.tapToToggleDefaultRssiThreshold);
 
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {

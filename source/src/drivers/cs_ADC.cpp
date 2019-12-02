@@ -12,7 +12,6 @@
 #include <drivers/cs_ADC.h>
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Serial.h>
-#include <events/cs_EventDispatcher.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <protocol/cs_UartProtocol.h>
 #include <structs/buffer/cs_InterleavedBuffer.h>
@@ -224,7 +223,7 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	}
 	initQueue();
 
-	EventDispatcher::getInstance().addListener(this);
+	this->listen();
 
 	return 0;
 }
@@ -637,7 +636,7 @@ void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 			LOGv("ADC restarted");
 #endif
 			event_t event(CS_TYPE::EVT_ADC_RESTARTED, NULL, 0);
-			EventDispatcher::getInstance().dispatch(event);
+			event.dispatch();
 		}
 		_firstBuffer = false;
 
