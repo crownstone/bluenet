@@ -84,19 +84,78 @@ public:
 	void setErrorCallback(cs_storage_error_callback_t callback);
 
 	/**
-	 * Read from persistent storage.
+	 * Find first id of stored values of given type.
+	 *
+	 * NOTE: you should complete or abort this findFirst() / findNext() before starting a new one.
+	 *
+	 * @param[in] type            Type to search for.
+	 * @param[out] id             ID of the found value.
+	 *
+	 * @retval ERR_SUCCESS                  When successful.
+	 * @retval ERR_NOT_FOUND                When the first id of this type was not found.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 */
+	cs_ret_code_t findFirst(CS_TYPE type, uint16_t & id);
+
+	/**
+	 * Find next id of stored values of given type.
+	 *
+	 * NOTE: must be called immediately after find(), no other storage operations should be done in between.
+	 *
+	 * @param[in] type            Type to search for.
+	 * @param[out] id             ID of the found value.
+	 *
+	 * @retval ERR_SUCCESS                  When successful.
+	 * @retval ERR_NOT_FOUND                When the next id of this type was not found.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 */
+	cs_ret_code_t findNext(CS_TYPE type, uint16_t & id);
+
+	/**
+	 * Find and read stored value of given type and id.
 	 *
 	 * Checks if given size matches stored size, else it returns ERR_WRONG_PAYLOAD_LENGTH.
 	 *
-	 * @param[in] file_id         File id to read from.
-	 * @param[in,out] data        Data struct with type to read. Pointer and size will be set afterwards.
+	 * @param[in,out] data        Data struct with type and id to read. Pointer and size will be set afterwards.
 	 *
 	 * @retval ERR_SUCCESS                  When successful.
 	 * @retval ERR_NOT_FOUND                When the type was not found.
 	 * @retval ERR_WRONG_PAYLOAD_LENGTH     When the given size does not match the stored size.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
-	cs_ret_code_t read(cs_file_id_t file_id, cs_state_data_t & data);
+	cs_ret_code_t read(cs_state_data_t & data);
+
+	/**
+	 * Find and read from first stored value of given type.
+	 *
+	 * NOTE: you should complete or abort this readFirst() / readNext() before starting a new one.
+	 *
+	 * Checks if given size matches stored size, else it returns ERR_WRONG_PAYLOAD_LENGTH.
+	 *
+	 * @param[in,out] data        Data struct with type to read. ID, pointer, and size will be set afterwards.
+	 *
+	 * @retval ERR_SUCCESS                  When successful.
+	 * @retval ERR_NOT_FOUND                When the type was not found.
+	 * @retval ERR_WRONG_PAYLOAD_LENGTH     When the given size does not match the stored size.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 */
+	cs_ret_code_t readFirst(cs_state_data_t & data);
+
+	/**
+	 * Find and read next stored value of given type.
+	 *
+	 * NOTE: must be called immediately after readFirst(), no other storage operations should be done in between.
+	 *
+	 * Checks if given size matches stored size, else it returns ERR_WRONG_PAYLOAD_LENGTH.
+	 *
+	 * @param[in,out] data        Data struct with type to read. ID, pointer, and size will be set afterwards.
+	 *
+	 * @retval ERR_SUCCESS                  When successful.
+	 * @retval ERR_NOT_FOUND                When the type was not found.
+	 * @retval ERR_WRONG_PAYLOAD_LENGTH     When the given size does not match the stored size.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 */
+	cs_ret_code_t readNext(cs_state_data_t & data);
 
 	/**
 	 * Write to persistent storage.
@@ -105,14 +164,13 @@ public:
 	 *
 	 * Automatically starts garbage collection when needed.
 	 *
-	 * @param[in] file_id         File id to write to.
 	 * @param[in] data            Data struct with type, data pointer, and size.
 	 *
 	 * @retval ERR_SUCCESS                  When successfully started to write.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NO_SPACE                 When there is no space, not even after garbage collection.
 	 */
-	cs_ret_code_t write(cs_file_id_t file_id, const cs_state_data_t & data);
+	cs_ret_code_t write(const cs_state_data_t & data);
 
 	/**
 	 * Allocate ram that is correctly aligned and padded.
@@ -122,33 +180,29 @@ public:
 	 */
 	uint8_t* allocate(size16_t& size);
 
-	/**
-	 * Removes a whole file.
-	 *
-	 * TODO: test this function
-	 *
-	 * @param[in] file_id         File id to remove.
-	 *
-	 * @retval ERR_SUCCESS                  When successfully started removing the file.
-	 * @retval ERR_BUSY                     When busy, try again later.
-	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
-	 */
-	cs_ret_code_t remove(cs_file_id_t file_id);
+//	/**
+//	 * Remove all values of a type.
+//	 *
+//	 * @param[in] type            Type to remove.
+//	 *
+//	 * @retval ERR_SUCCESS                  When successfully started removing the file.
+//	 * @retval ERR_BUSY                     When busy, try again later.
+//	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
+//	 */
+//	cs_ret_code_t remove(CS_TYPE type);
 
 	/**
-	 * Removes a type from a file.
+	 * Remove value of given type and id.
 	 *
-	 * TODO: test this function
-	 *
-	 * @param[in] file_id         File id to remove type from.
-	 * @param[in] type            Type to remove
+	 * @param[in] type            Type to remove.
+	 * @param[in] id              ID of value to remove.
 	 *
 	 * @retval ERR_SUCCESS                  When successfully started removing the type.
 	 * @retval ERR_NOT_FOUND                When type was not found on file, consider this a success, but don't wait for an event.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
-	cs_ret_code_t remove(cs_file_id_t file_id, CS_TYPE type);
+	cs_ret_code_t remove(CS_TYPE type, uint16_t id);
 
 	/**
 	 * Garbage collection reclaims the flash space that is occupied by records that have been deleted,
