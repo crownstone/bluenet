@@ -140,12 +140,16 @@ The above settings are not directly stored in separate registers, but concatenat
 
 The hardware board `0x3EC` corresponds to `1004` in decimal notation. In the [cs_Boards.h](https://github.com/crownstone/bluenet/blob/master/source/include/cfg/cs_Boards.h) file this is board `ACR01B1E`. Likewise `ACR01B10C` has number `1008` is `0x3F0`.
 
+The major/minor versions are currently generated from the hardware board id, see the [cs_HardwareVersions.h](https://github.com/crownstone/bluenet/blob/master/source/include/cfg/cs_HardwareVersions.h) file. A patch is a PCB patch which can be taken into account by the firmware to e.g. delay enabling the dimmer at boot. A minor update is done for any PCB alteration that does not change the pin layout. A major update means significant hardware changes, under which pin layout changes.
+
 The family / market / type triplet is different from the notation above. 
 
     Development Board     01
     Plug                  02
     Built-in              03
     Guidestone            04
+    Dongle                05
+    Built-in One          06
 
 If values are not written they are still `FF`.
 
