@@ -113,11 +113,10 @@ For questions, contact [Crownstone](https://crownstone.rocks/team/).
 
 # EAN
 
-| Name                           | VPN         | EAN           |
-| --                             | --          | --            |
-| Crownstone Built-in Kit Zero   | CR101M01/01 | 7091047158574 |
-| Crownstone Built-in Kit US     | CR101M02/01 | 7091048067899 |
-| Crownstone Built-in Kit One    | CR101M01/02 | 7091042712580 |
-| Crownstone Plugs Kit           | CR102M01/01 | 7091048321175 |
-| Crownstone Guidestone Kit      | CR201M01/01 | 7091047327949 |
-
+| Name                                              | VPN         | EAN           |
+| --                                                | --          | --            |
+| Crownstone Built-in Zero - Minimal Kit (3 units)  | CR101M01/01 | 7091047158574 |
+| Crownstone Plugs - Ready to Go Kit                | CR102M01/01 | 7091048321175 |
+| Crownstone Guidestone - Kit (10 units)            | CR201M01/01 | 7091047327949 |
+| Crownstone Built-in One - Starter Kit (10 units)  | CR101M01/02 | 8719326566085 |
+| Crownstone Built-in One - Extension Kit (1 unit)  | CR101M01/02 | 8719326566085 |
