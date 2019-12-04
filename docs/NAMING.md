@@ -101,16 +101,53 @@ Hence the product number is slightly more general (see below).
 
 # Product number (label on product itself)
 
-The product number should not specify the market. 
+The product number should not specify the market. You will see the following abbreviated VPN on the product itself:
 
-| Name                             | Description                                        | Certification | Variant   | VPN         |
-| --                               | --                                                 | --            | --        | --          |
-| Crownstone Built-in Kit Zero     | Professional kit with three built-in Crownstones   | CE            | 240V      | CR101MXX/01 |
-| Crownstone Built-in Kit One      | Professional kit with three built-in Crownstones   | CE & UL       | 110/240V  | CR101MXX/02 |
-| Crownstone Plugs Kit             | Ready-to-go kit with two Crownstone plugs          | CE            | Type F    | CR102MXX/01 |
-| Crownstone Guidestone Kit        | Guidestone kit                                     | CE            | 240V      | CR201MXX/01 |
+| Name                         | Description                                        | Certification | Variant   | VPN      |
+| --                           | --                                                 | --            | --        | --       |
+| Crownstone Built-in Zero     | Built-in Crownstone Generation Zero                | CE            | 240V      | CR101/01 |
+| Crownstone Built-in One      | Built-in Crownstone Generation One                 | CE & FCC      | 110/240V  | CR101/02 |
+| Crownstone Plug              | Crownstone Plug European Type F                    | CE            | Type F    | CR102/01 |
+| Crownstone Guidestone        | Guidestone                                         | CE            | 240V      | CR201/01 |
 
-For questions, contact [Crownstone](https://crownstone.rocks/team/).
+# Registers
+
+When the hardware is programmed the factory image contains information on the product as well. The following information is stored separately from the main firmware (which is identical for every device). Note that these are stored in registers and use fewer bits than the notations on the packaging, in the code, or in the documentation.
+
+| Setting                       | Description                 | Example             |
+| --                            | --                          | --                  |
+| MBR_SETTINGS                  | MBR settings page (start)   | 0x0007E000          |
+| UICR_BOOTLOADER_ADDRESS       | Bootloader address (start)  | 0x00076000          |
+| HARDWARE_BOARD                | PCB version                 | ACR01B10C           |
+| PRODUCT_FAMILY                | Family                      | 0x01                |
+| PRODUCT_MARKET                | Market (European / US)      | 0x01                |
+| PRODUCT_TYPE                  | Type (different from above) | 0x03                |
+| PRODUCT_MAJOR                 | Major version               | 0x00                |
+| PRODUCT_MINOR                 | Minor version               | 0x05                |
+| PRODUCT_PATCH                 | Patch version               | 0x00                |
+| PRODUCTION_YEAR               | Production year (2 digits)  | 19                  |
+| PRODUCTION_WEEK               | Production week (2 digits)  | 50                  |
+| PRODUCT_HOUSING_ID            | Housing id                  | 0x01                |
+
+The above settings are not directly stored in separate registers, but concatenated to preserve space.
+
+| UICR register    | Description             | Example             |
+| --               | --                      | --                  |
+| 0x10001084       | Hardware board          | 0x3EC               |
+| 0x10001088       | Family/market/type      | 0xFF010103          |
+| 0x1000108c       | Major/minor/patch       | 0xFF000500          |
+| 0x10001090       | Production date/housing | 0xFF191201          |
+
+The hardware board `0x3EC` corresponds to `1004` in decimal notation. In the [cs_Boards.h](https://github.com/crownstone/bluenet/blob/master/source/include/cfg/cs_Boards.h) file this is board `ACR01B1E`. Likewise `ACR01B10C` has number `1008` is `0x3F0`.
+
+The family / market / type triplet is different from the notation above. 
+
+    Development Board     01
+    Plug                  02
+    Built-in              03
+    Guidestone            04
+
+If values are not written they are still `FF`.
 
 # EAN
 
@@ -121,3 +158,5 @@ For questions, contact [Crownstone](https://crownstone.rocks/team/).
 | Crownstone Guidestone - Kit (10 units)            | CR201M01/01 | 7091047327949 |
 | Crownstone Built-in One - Starter Kit (10 units)  | CR101M01/02 | 8719326566085 |
 | Crownstone Built-in One - Extension Kit (1 unit)  | CR101M01/02 | 8719326566085 |
+
+For questions, contact [Crownstone](https://crownstone.rocks/team/).
