@@ -1,6 +1,8 @@
 # Naming Convention
 
-broad product line | product line | product | part | version i.e. 00 000000 00 X_Name 0.0.0
+A name is a concatenation of multiple fields:
+
+    broad product line | product line | product | part | version i.e. 00 000000 00 X_Name 0.0.0
 
 ## Product families
 
