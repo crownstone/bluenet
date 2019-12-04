@@ -695,12 +695,16 @@ ELSE()
 			)
 
 		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
-		IF(NOT CONFIG_DIR STREQUAL "release")
+		#IF(NOT CONFIG_DIR STREQUAL "release")
 			set(JLINK_LINUX_DOWNLOAD_URL_BOARD_HARDWARE_VERSION "")
 			include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
 			message(STATUS "Get version for hardware \"${HARDWARE_BOARD}\"")
 			load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
-		ENDIF()
+			message(STATUS "Got ${LOAD_BOARD_HARDWARE_VERSION}")
+			include(${DEFAULT_MODULES_PATH}/hex.cmake)
+			to_hex(${LOAD_BOARD_HARDWARE_VERSION} HARDWARE_BOARD_HEX)
+			message(STATUS "Hexadecimal ${HARDWARE_BOARD_HEX}")
+			#ENDIF()
 
 		ADD_CUSTOM_TARGET(write_board_version
 			COMMAND ${CMAKE_COMMAND} -E echo
@@ -731,6 +735,7 @@ ELSE()
 		ADD_CUSTOM_TARGET(merge_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use mergehex to combine bootloader with bootloader settings"
+			COMMAND ${CMAKE_COMMAND} -E echo "      Note that the settings can only be build with info from the application"
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND mergehex -m ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex -o ${CMAKE_BINARY_DIR}/bootloader/bootloader_with_settings.hex
 			COMMENT "Merges bootloader with bootloader settings"
@@ -754,7 +759,7 @@ ELSE()
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
 			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --sd-id 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip
-			COMMAND ${CMAKE_COMMAND} -E make_directory firmwares}
+			COMMAND ${CMAKE_COMMAND} -E make_directory firmwares
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with Softdevice, bootloader, and application"
@@ -771,14 +776,14 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
+			COMMAND echo nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip
 			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip
-			COMMAND ${CMAKE_COMMAND} -E make_directory firmwares}
+			COMMAND ${CMAKE_COMMAND} -E make_directory firmwares
 			COMMAND ${CMAKE_COMMAND} -E copy application_dfu.zip firmwares/crownstone_${BOOTLOADER_VERSION}.zip
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with application only"
 			)
-
 
 		ADD_CUSTOM_TARGET(generate_dfu_package_bootloader
 			COMMAND ${CMAKE_COMMAND} -E echo
@@ -792,12 +797,31 @@ ELSE()
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
 			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip
-			COMMAND ${CMAKE_COMMAND} -E make_directory bootloaders}
+			COMMAND ${CMAKE_COMMAND} -E make_directory bootloaders
 			COMMAND ${CMAKE_COMMAND} -E copy bootloader_dfu.zip bootloaders/crownstone_${FIRMWARE_VERSION}.zip
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with bootloader only"
 			)
+		
+		ADD_CUSTOM_TARGET(generate_factory_image
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Create factory images"
+			COMMAND ${CMAKE_COMMAND} -E echo "     MBR_SETTINGS: ${MBR_SETTINGS}"
+			COMMAND ${CMAKE_COMMAND} -E echo "     UICR_BOOTLOADER_ADDRESS: ${UICR_BOOTLOADER_ADDRESS}"
+			COMMAND ${CMAKE_COMMAND} -E echo "     BOARD_HARDWARE_VERSION: ${HARDWARE_BOARD_HEX}"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E make_directory factory-images
+			COMMAND srec_cat ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex 
+			-exclude 0x10001014 0x10001018 -generate 0x10001014 0x10001018 -l-e-constant ${UICR_BOOTLOADER_ADDRESS} 4 -exclude 0x10001018 0x1000101C -generate 0x10001018 0x1000101C -l-e-constant ${MBR_SETTINGS} 4 -exclude 0x10001084 0x10001088 -generate 0x10001084 0x10001088 -l-e-constant ${HARDWARE_BOARD_HEX} 4 -o factory-images/${PROJECT_NAME}.hex -intel
+			COMMENT "Generate a factory image"
+			)
+
+
+		if(NOT EXISTS ${CMAKE_BINARY_DIR}/factory-images)
+			message(STATUS "Create directory \"factory-images\"")
+			file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/factory-images)
+		endif()
 
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.elf)
@@ -818,6 +842,7 @@ ELSE()
 		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" DESTINATION .)
 		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/firmwares"       DESTINATION . FILES_MATCHING PATTERN "*.zip")
 		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/bootloaders"     DESTINATION . FILES_MATCHING PATTERN "*.zip")
+		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/factory-images"  DESTINATION . FILES_MATCHING PATTERN "*")
 	ENDIF()
 
 ENDIF()
