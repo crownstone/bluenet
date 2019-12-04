@@ -76,21 +76,19 @@ Current part list for the Crownstone Plug and Guidestone:
     01 001010 01 M_Pin
     01 001010 01 M_Ground_clip
 
-We need 1 board for the Guidestone and 4 for the Plug?
-
 # Vendor product number
 
 The product lines can also be used directly for a vendor product number (VPN). This number is communicated with
 distributors. It changes for each type of packaging.
 
-| Name                             | Description                                        | Certification | Variant   | VPN         |
-| --                               | --                                                 | --            | --        | --          |
-| Crownstone Built-in Kit Zero     | Professional kit with three built-in Crownstones   | CE            | 240V      | CR101M01/01 |
-| Crownstone Built-in Kit One      | Professional kit with three built-in Crownstones   | CE & UL       | 110/240V  | CR101M02/02 |
-| Crownstone Plugs Kit             | Ready-to-go kit with two Crownstone plugs          | CE            | Type F    | CR102M01/01 |
-| Crownstone Guidestone Kit        | Guidestone kit                                     | CE            | 240V      | CR201M01/01 |
+| Name                         | Description                                        | Certification | Variant   | VPN         |
+| --                           | --                                                 | --            | --        | --          |
+| Crownstone Built-in Zero     | Built-in Crownstone Generation Zero                | CE            | 240V      | CR101M01/01 |
+| Crownstone Built-in One      | Built-in Crownstone Generation One                 | CE & FCC      | 110/240V  | CR101M02/02 |
+| Crownstone Plug              | Crownstone Plug European Type F                    | CE            | Type F    | CR102M01/01 |
+| Crownstone Guidestone        | Guidestone                                         | CE            | 240V      | CR201M01/01 |
 
-The vendor product number exists of [CRfppMmm/vv] with:
+The vendor product number exists of `CRfppMmm/vv` with:
 
     f - family
     pp - product
