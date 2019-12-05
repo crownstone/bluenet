@@ -71,13 +71,14 @@ namespace CsMath{
     class Interval{
         private: 
         T low,high;
+        bool invert;
         public:
-        Interval(T base, S diff) : low(base), high(base+diff) {
+        Interval(T base, S diff, bool inv = false) : low(base), high(base + (inv? -diff: diff)), invert(inv) {
             // notes:
             // - addition base+diff is allowed to overflow/underflow.
             // - having a different type S for diff allows negative 
-            // values without conflicting type resolutions.
-            if(diff < 0){
+            //   values without conflicting type resolutions.
+            if( (diff < 0) ^ invert){
                 std::swap(low,high);
             }
         }
@@ -95,7 +96,6 @@ namespace CsMath{
                 low < high // reversed interval?
                 ? (low <= val && val < high)  // nope, both must hold
                 : (low <= val || val < high); // yup, only one can hold
-
         }
 
         // considers this interval as open ended so that the return value is 
@@ -110,7 +110,7 @@ namespace CsMath{
         // considers this interval as open ended so that the return value is 
         // true if [val] is strictly enclosed in the interval.
         bool InteriorContains(T val){
-                        return
+            return
                 low < high // reversed interval?
                 ? (low < val && val < high)  // nope, both must hold
                 : (low < val || val < high); // yup, only one can hold
