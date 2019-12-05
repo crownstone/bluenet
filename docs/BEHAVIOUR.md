@@ -63,11 +63,11 @@ Request Payload
 </summary>
 <p>
 
-![Save Behaviour](../docs/diagrams/behaviour-save.png)
+![Add Behaviour](../docs/diagrams/behaviour-add.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Behaviour](#behaviour_payload) | Data | ... | Behaviour to save.
+[Behaviour](#behaviour_payload) | Data | ... | Behaviour to add.
 
 </p>
 </details>
@@ -376,7 +376,6 @@ Type | Name | Length | Description
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Presence Description](#presence_description) | Extension Presence | 13 | Description of the presence conditions that the Extension behaviour will use.
-[Time Difference](#time_difference) | Extension Until | 4 | Extend the core behaviour's 'Until' time by at least the given time difference, possibly longer if the extension presence condition is still satisfied after this time difference expires. Negative values will be rounded up to 0.
 
 <a name="behaviour_master_hash"></a>
 #### Behaviour Master Hash
