@@ -188,9 +188,8 @@ Result Codes
 Value | Explanation
 --- | ---
 WRONG_PARAMETER | The index is out of range.
-NOT_FOUND | No behaviour was found at given index.
 BUSY | The memory was too busy to respond.
-SUCCESS | The index is valid and memory could be queried. See return payload for details.
+SUCCESS | Behaviour at given index is removed, or was already empty.
 ... | Other cases may happen in case of exception.
 
 </p>
