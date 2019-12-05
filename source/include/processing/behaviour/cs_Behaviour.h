@@ -68,7 +68,7 @@ class Behaviour {
     bool isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence);
 
     private:
-    bool isValid(TimeOfDay currenttime) const;
+    bool isValid(TimeOfDay currenttime);
 
     // Presence description is cached in order to prevent
     // that the behaviour flickers when a user is on the border of two rooms.
@@ -76,7 +76,7 @@ class Behaviour {
     // but it tries to describe the location as accurately as possible. Thus, when a user is
     // detected in another room, the presence is immediately updated.)
     bool isValid(PresenceStateDescription currentpresence); // cached version
-    bool _isValid(PresenceStateDescription currentpresence) const;  // uncached version
+    bool _isValid(PresenceStateDescription currentpresence);  // uncached version
 
 
     // serialized fields (settings)
@@ -90,5 +90,5 @@ class Behaviour {
     std::optional<uint32_t> prevIsValidTimeStamp = {}; // when was the last call to _isValid that returned true?
 
     // constants
-    uint32_t PresenceIsValidTimeOut_s = 5*60;
+    static constexpr uint32_t PresenceIsValidTimeOut_s = 10; // DEBUG 5*60;
 };

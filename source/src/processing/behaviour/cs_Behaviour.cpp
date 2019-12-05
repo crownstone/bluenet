@@ -60,10 +60,10 @@ TimeOfDay Behaviour::until() const {
 }
 
 bool Behaviour::isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence){
-    return isValid(static_cast<uint32_t>(currenttime)) && isValid(currentpresence);
+    return isValid(currenttime) && isValid(currentpresence);
 }
 
-bool Behaviour::isValid(TimeOfDay currenttime) const{
+bool Behaviour::isValid(TimeOfDay currenttime){
     return from() < until() // ensure proper midnight roll-over 
         ? (from() <= currenttime && currenttime < until()) 
         : (from() <= currenttime || currenttime < until());
@@ -76,11 +76,15 @@ bool Behaviour::isValid(PresenceStateDescription currentpresence){
     } 
     
     if(prevIsValidTimeStamp){
+        uint32_t up = SystemTime::up();
+        uint32_t before = up - PresenceIsValidTimeOut_s;
         if (CsMath::Interval<uint32_t>(SystemTime::up(), -PresenceIsValidTimeOut_s).contains(*prevIsValidTimeStamp)) {
             // presence invalid but we're in the grace period.
+            LOGd("grace period for Behaviour::isActive, %d in [%d %d]", *prevIsValidTimeStamp, before, up );
             return true;
         } else {
             // fell out of grace, lets delete prev val.
+            LOGd("grace period for Behaviour::isActive is over, %d in [%d %d]", *prevIsValidTimeStamp, before, up );
             prevIsValidTimeStamp.reset();
         }
     } 
@@ -88,7 +92,7 @@ bool Behaviour::isValid(PresenceStateDescription currentpresence){
     return false;
 }
 
-bool Behaviour::_isValid(PresenceStateDescription currentpresence) const{
+bool Behaviour::_isValid(PresenceStateDescription currentpresence){
     return presenceCondition(currentpresence);
 }
 
