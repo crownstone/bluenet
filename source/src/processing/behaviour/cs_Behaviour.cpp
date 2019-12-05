@@ -78,7 +78,7 @@ bool Behaviour::isValid(PresenceStateDescription currentpresence){
     if(prevIsValidTimeStamp){
         uint32_t up = SystemTime::up();
         uint32_t before = up - PresenceIsValidTimeOut_s;
-        if (CsMath::Interval<uint32_t>(SystemTime::up(), PresenceIsValidTimeOut_s,true).contains(*prevIsValidTimeStamp)) {
+        if (CsMath::Interval(SystemTime::up(), PresenceIsValidTimeOut_s,true).contains(*prevIsValidTimeStamp)) {
             // presence invalid but we're in the grace period.
             LOGd("grace period for Behaviour::isActive, %d in [%d %d]", *prevIsValidTimeStamp, before, up );
             return true;
