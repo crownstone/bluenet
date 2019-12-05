@@ -11,7 +11,7 @@
 
 #include <drivers/cs_Serial.h>
 
-#define LOGPresenceHandler(...) LOGd(__VA_ARGS__)
+#define LOGPresenceHandler(...) LOGnone(__VA_ARGS__)
 
 std::list<PresenceHandler::PresenceRecord> PresenceHandler::WhenWhoWhere;
 
@@ -89,7 +89,7 @@ void PresenceHandler::removeOldRecords(){
 
 std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription(){
     if(SystemTime::up() < presence_uncertain_due_reboot_time_out_s){
-        LOGd("presence_uncertain_due_reboot_time_out_s hasn't expired");
+        LOGPresenceHandler("presence_uncertain_due_reboot_time_out_s hasn't expired");
         return {};
     }
 

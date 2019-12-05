@@ -13,6 +13,8 @@
 
 #include <algorithm>
 
+#define LOGBehaviour_V LOGnone
+
 Behaviour::Behaviour(
             uint8_t intensity,
             DayOfWeekBitMask activedaysofweek,
@@ -76,15 +78,13 @@ bool Behaviour::isValid(PresenceStateDescription currentpresence){
     } 
     
     if(prevIsValidTimeStamp){
-        uint32_t up = SystemTime::up();
-        uint32_t before = up - PresenceIsValidTimeOut_s;
-        if (CsMath::Interval(SystemTime::up(), PresenceIsValidTimeOut_s,true).contains(*prevIsValidTimeStamp)) {
+        if (CsMath::Interval(SystemTime::up(), PresenceIsValidTimeOut_s, true).contains(*prevIsValidTimeStamp)) {
             // presence invalid but we're in the grace period.
-            LOGd("grace period for Behaviour::isActive, %d in [%d %d]", *prevIsValidTimeStamp, before, up );
+            LOGBehaviour_V("grace period for Behaviour::isActive, %d in [%d %d]", *prevIsValidTimeStamp, SystemTime::up() - *prevIsValidTimeStamp, SystemTime::up() );
             return true;
         } else {
             // fell out of grace, lets delete prev val.
-            LOGd("grace period for Behaviour::isActive is over, %d in [%d %d]", *prevIsValidTimeStamp, before, up );
+            LOGBehaviour_V("grace period for Behaviour::isActive is over, %d in [%d %d]", *prevIsValidTimeStamp, SystemTime::up() - *prevIsValidTimeStamp, SystemTime::up() );
             prevIsValidTimeStamp.reset();
         }
     } 
@@ -110,10 +110,4 @@ void Behaviour::print() const {
         presenceCondition.pred.cond,
         rooms[1],rooms[0]
     );
-
-    // auto ser = presenceCondition.pred.serialize();
-    // for(auto b : ser){
-    //     LOGd("%02x",b);
-    // }
-
 }
