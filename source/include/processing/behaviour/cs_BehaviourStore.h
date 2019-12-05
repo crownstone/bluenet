@@ -9,6 +9,7 @@
 
 #include <events/cs_EventListener.h>
 #include <processing/behaviour/cs_Behaviour.h>
+#include <protocol/cs_ErrorCodes.h>
 
 #include <array>
 #include <optional>
@@ -49,13 +50,27 @@ class BehaviourStore : public EventListener {
      * 
      * Returns true on success, false if [index] is out of range.
      */
-    bool saveBehaviour(Behaviour b, uint8_t index);
-    
+    ErrorCodesGeneral saveBehaviour(Behaviour b, uint8_t index);
+
+==== BASE ====
     /**
      * Remove the behaviour at [index]. If [index] is out of bounds,
      * or no behaviour exists at [index], false is returned. Else, true.
      */
-    bool removeBehaviour(uint8_t index);
+    ErrorCodesGeneral removeBehaviour(uint8_t index);
+
+    static inline std::array<std::optional<Behaviour>,MaxBehaviours>& getActiveBehaviours() {
+        return activeBehaviours;
+    }
+
+    private:
+    static uint32_t masterHash();
+
+    void handleSaveBehaviour(event_t& evt);
+    void handleReplaceBehaviour(event_t& evt);
+    void handleRemoveBehaviour(event_t& evt);
+    void handleGetBehaviour(event_t& evt);
+    void handleGetBehaviourIndices(event_t& evt);
 
     void dispatchBehaviourMutationEvent();
 };
