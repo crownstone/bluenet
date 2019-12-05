@@ -251,7 +251,8 @@ ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index){
     if(index >= MaxBehaviours){
         return ERR_WRONG_PARAMETER;
     } else if (!activeBehaviours[index].has_value()){
-        return ERR_NOT_FOUND;
+        LOGw("ERR_NOT_FOUND tried removing empty slot in behaviourstore");
+        return ERR_SUCCESS;
     }
     
     activeBehaviours[index].reset();
