@@ -187,7 +187,8 @@ Result Codes
 
 Value | Explanation
 --- | ---
-NOT_FOUND | The index is out of range or no behaviour was found at given index.
+WRONG_PARAMETER | The index is out of range.
+NOT_FOUND | No behaviour was found at given index.
 BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
@@ -214,7 +215,7 @@ uint8 | Index | 1 | The index from which the behaviour was removed.
 <a name="get_behaviour_packet"></a>
 #### Get Behaviour
 
-When a Get Behaviour packet is received by the Crownstone it will retrieve the behaviour at given `Index`. 
+When a Get Behaviour packet is received by the Crownstone it will retrieve the behaviour at given `Index`.
 If such behaviour exists, it is returned.
 
 <details open>
@@ -237,9 +238,11 @@ uint8 | Index | 1 | Index of the behaviour to obtain.
 Result Codes
 </summary>
 <p>
+
 Value | Explanation
 --- | ---
-NOT_FOUND | The index is out of range or no behaviour was found at given index.
+WRONG_PARAMETER | The index is out of range.
+NOT_FOUND | No behaviour was found at given index.
 BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
