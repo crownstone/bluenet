@@ -59,8 +59,8 @@ TimeOfDay Behaviour::until() const {
     return behaviourAppliesUntil; 
 }
 
-bool Behaviour::isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence) const{
-    return isValid(currenttime) && isValid(currentpresence);
+bool Behaviour::isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence){
+    return isValid(static_cast<uint32_t>(currenttime)) && isValid(currentpresence);
 }
 
 bool Behaviour::isValid(TimeOfDay currenttime) const{
@@ -69,7 +69,7 @@ bool Behaviour::isValid(TimeOfDay currenttime) const{
         : (from() <= currenttime || currenttime < until());
 }
 
-bool Behaviour::isValid(PresenceStateDescription currentpresence) const{
+bool Behaviour::isValid(PresenceStateDescription currentpresence){
     if(_isValid(currentpresence)){
         prevIsValidTimeStamp = SystemTime::up();
         return true;

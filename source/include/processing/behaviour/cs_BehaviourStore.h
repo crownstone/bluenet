@@ -44,7 +44,7 @@ class BehaviourStore : public EventListener {
      */
     ErrorCodesGeneral removeBehaviour(uint8_t index);
 
-    static inline const std::array<std::optional<Behaviour>,MaxBehaviours>& getActiveBehaviours() {
+    static inline std::array<std::optional<Behaviour>,MaxBehaviours>& getActiveBehaviours() {
         return activeBehaviours;
     }
 

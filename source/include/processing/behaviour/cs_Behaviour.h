@@ -65,7 +65,7 @@ class Behaviour {
      * Does the behaviour apply to the current situation?
      * If from() == until() the behaviour isValid all day.
      **/
-    bool isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence) const;
+    bool isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence);
 
     private:
     bool isValid(TimeOfDay currenttime) const;
@@ -75,8 +75,8 @@ class Behaviour {
     // (not there is a timeout in the presencehandler to check if the user hasn't disappeared,
     // but it tries to describe the location as accurately as possible. Thus, when a user is
     // detected in another room, the presence is immediately updated.)
-    bool isValid(PresenceStateDescription currentpresence) const; // cached version
-    bool _isValid(PresenceStateDescription currentpresence) const; // uncached version
+    bool isValid(PresenceStateDescription currentpresence); // cached version
+    bool _isValid(PresenceStateDescription currentpresence) const;  // uncached version
 
 
     // serialized fields (settings)
