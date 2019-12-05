@@ -6,8 +6,10 @@
  */
 
 #include <processing/behaviour/cs_Behaviour.h>
-#include <util/cs_WireFormat.h>
+
 #include <drivers/cs_Serial.h>
+#include <time/cs_SystemTime.h>
+#include <util/cs_WireFormat.h>
 
 #include <algorithm>
 
@@ -68,6 +70,25 @@ bool Behaviour::isValid(TimeOfDay currenttime) const{
 }
 
 bool Behaviour::isValid(PresenceStateDescription currentpresence) const{
+    if(_isValid(currentpresence)){
+        prevIsValidTimeStamp = SystemTime::up();
+        return true;
+    } 
+    
+    if(prevIsValidTimeStamp){
+        if (CsMath::Interval<uint32_t>(SystemTime::up(), -PresenceIsValidTimeOut_s).contains(*prevIsValidTimeStamp)) {
+            // presence invalid but we're in the grace period.
+            return true;
+        } else {
+            // fell out of grace, lets delete prev val.
+            prevIsValidTimeStamp.reset();
+        }
+    } 
+
+    return false;
+}
+
+bool Behaviour::_isValid(PresenceStateDescription currentpresence) const{
     return presenceCondition(currentpresence);
 }
 
