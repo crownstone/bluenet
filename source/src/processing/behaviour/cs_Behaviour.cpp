@@ -6,10 +6,14 @@
  */
 
 #include <processing/behaviour/cs_Behaviour.h>
-#include <util/cs_WireFormat.h>
+
 #include <drivers/cs_Serial.h>
+#include <time/cs_SystemTime.h>
+#include <util/cs_WireFormat.h>
 
 #include <algorithm>
+
+#define LOGBehaviour_V LOGnone
 
 Behaviour::Behaviour(
             uint8_t intensity,
@@ -57,17 +61,38 @@ TimeOfDay Behaviour::until() const {
     return behaviourAppliesUntil; 
 }
 
-bool Behaviour::isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence) const{
+bool Behaviour::isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence){
     return isValid(currenttime) && isValid(currentpresence);
 }
 
-bool Behaviour::isValid(TimeOfDay currenttime) const{
+bool Behaviour::isValid(TimeOfDay currenttime){
     return from() < until() // ensure proper midnight roll-over 
         ? (from() <= currenttime && currenttime < until()) 
         : (from() <= currenttime || currenttime < until());
 }
 
-bool Behaviour::isValid(PresenceStateDescription currentpresence) const{
+bool Behaviour::isValid(PresenceStateDescription currentpresence){
+    if(_isValid(currentpresence)){
+        prevIsValidTimeStamp = SystemTime::up();
+        return true;
+    } 
+    
+    if(prevIsValidTimeStamp){
+        if (CsMath::Interval(SystemTime::up(), PresenceIsValidTimeOut_s, true).contains(*prevIsValidTimeStamp)) {
+            // presence invalid but we're in the grace period.
+            LOGBehaviour_V("grace period for Behaviour::isActive, %d in [%d %d]", *prevIsValidTimeStamp, SystemTime::up() - *prevIsValidTimeStamp, SystemTime::up() );
+            return true;
+        } else {
+            // fell out of grace, lets delete prev val.
+            LOGBehaviour_V("grace period for Behaviour::isActive is over, %d in [%d %d]", *prevIsValidTimeStamp, SystemTime::up() - *prevIsValidTimeStamp, SystemTime::up() );
+            prevIsValidTimeStamp.reset();
+        }
+    } 
+
+    return false;
+}
+
+bool Behaviour::_isValid(PresenceStateDescription currentpresence){
     return presenceCondition(currentpresence);
 }
 
@@ -85,10 +110,4 @@ void Behaviour::print() const {
         presenceCondition.pred.cond,
         rooms[1],rooms[0]
     );
-
-    // auto ser = presenceCondition.pred.serialize();
-    // for(auto b : ser){
-    //     LOGd("%02x",b);
-    // }
-
 }

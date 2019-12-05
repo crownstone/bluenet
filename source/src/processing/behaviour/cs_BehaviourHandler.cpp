@@ -91,7 +91,7 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
        PresenceStateDescription currentPresence){
     std::optional<uint8_t> intendedValue = {};
     
-    for (const auto& b : BehaviourStore::getActiveBehaviours()){
+    for (auto& b : BehaviourStore::getActiveBehaviours()){
         if (b.has_value() && b->isValid(currentTime, currentPresence)){
             if (intendedValue){
                 if (b->value() != intendedValue.value()){

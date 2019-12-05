@@ -73,7 +73,6 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
 			Behaviour b = WireFormat::deserialize<Behaviour>(evt.getData() + 1, evt.size - 1);
 
             LOGd("save behaviour event");
-            b.print();
 
             // find the first empty index.
             size_t empty_index = 0;
@@ -81,11 +80,7 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
                 empty_index++;
             }
             
-            if(saveBehaviour(b, empty_index) ){
-                evt.result.returnCode = ERR_SUCCESS;
-            } else {
-                evt.result.returnCode =  ERR_NO_SPACE;
-            }
+            evt.result.returnCode = saveBehaviour(b, empty_index);
 
             if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
                 evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
@@ -135,16 +130,8 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 			}
 
 			Behaviour b = WireFormat::deserialize<Behaviour>(evt.getData() + 2, evt.size - 2);
-            LOGd("replace behaviour event");
-            b.print();
-        
-            if(saveBehaviour(b, index)){
-                LOGd("replace successful");
-                evt.result.returnCode = ERR_SUCCESS;
-            } else {
-                LOGd("replace failed");
-                evt.result.returnCode = ERR_UNSPECIFIED;
-            }
+            
+            evt.result.returnCode = saveBehaviour(b, index);
 
             if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
                 LOGd("ERR_BUFFER_TOO_SMALL");
@@ -177,14 +164,8 @@ void BehaviourStore::handleRemoveBehaviour(event_t& evt){
     uint8_t index = *reinterpret_cast<TYPIFY(EVT_REMOVE_BEHAVIOUR)*>(evt.data);
     LOGd("remove behaviour event %d", index);
     
-    if(removeBehaviour(index)){
-        LOGd("ERR_SUCCESS");
-        evt.result.returnCode = ERR_SUCCESS;
-    } else {
-        LOGd("ERR_NOT_FOUND");
-        evt.result.returnCode = ERR_NOT_FOUND;
-    }
-
+    evt.result.returnCode = removeBehaviour(index);
+    
     if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
         LOGd("ERR_BUFFER_TOO_SMALL");
         evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
@@ -266,24 +247,27 @@ void BehaviourStore::dispatchBehaviourMutationEvent(){
 
 // ==================== public functions ====================
 
-bool BehaviourStore::removeBehaviour(uint8_t index){
-    if(index >= MaxBehaviours || !activeBehaviours[index].has_value()){
-        return false;
+ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index){
+    if(index >= MaxBehaviours){
+        return ERR_WRONG_PARAMETER;
+    } else if (!activeBehaviours[index].has_value()){
+        LOGw("ERR_NOT_FOUND tried removing empty slot in behaviourstore");
+        return ERR_SUCCESS;
     }
     
     activeBehaviours[index].reset();
-    return true;
+    return ERR_SUCCESS;
 }
 
-bool BehaviourStore::saveBehaviour(Behaviour b, uint8_t index){
+ErrorCodesGeneral BehaviourStore::saveBehaviour(Behaviour b, uint8_t index){
     if(index >= MaxBehaviours){
-        return false;
+        return ERR_WRONG_PARAMETER;
     }
     
     LOGd("save behaviour to index %d",index);
 
     activeBehaviours[index] = b;
-    return true;
+    return ERR_SUCCESS;
 }
 
 uint32_t BehaviourStore::masterHash(){
