@@ -236,16 +236,22 @@ void BehaviourStore::handleGetBehaviourIndices(event_t& evt){
         return;
     }
 
-    uint8_t maxProfiles = 5;
-    if (evt.result.buf.len < MaxBehaviours * maxProfiles) {
+    if ( evt.result.buf.len < MaxBehaviours * (sizeof(uint8_t) + sizeof(uint32_t)) ) {
         LOGd("ERR_BUFFER_TOO_SMALL");
         evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
         return;
     }
+
     size_t listSize = 0;
     for (uint8_t i = 0; i < MaxBehaviours; ++i) {
         if (activeBehaviours[i].has_value()) {
-            evt.result.buf.data[listSize++] = i;
+            evt.result.buf.data[listSize] = i;
+            listSize += sizeof(uint8_t);
+
+            *reinterpret_cast<uint32_t*>(evt.result.buf.data) = 
+                Fletcher(activeBehaviours[i]->serialize().data(),sizeof(Behaviour::SerializedDataFormat) );
+            listSize += sizeof(uint32_t);
+
             LOGd("behaviour found at index %d",i);
         }
     }
@@ -295,10 +301,6 @@ uint32_t BehaviourStore::masterHash(){
             fletch = Fletcher(zeroes.data(), sizeof(Behaviour::SerializedDataFormat), fletch);
         }
     }
-
-    // DEBUG
-    LOGd("masterHash: %x", fletch);
-    // DEBUG
 
     return fletch;
 }
