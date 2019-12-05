@@ -724,6 +724,7 @@ void Crownstone::startUp() {
 
 	// Start ticking main and services.
 	scheduleNextTick();
+	SystemTime::init();
 
 	// The rest we only execute if we are in normal operation.
 	// During other operation modes, most of the crownstone's functionality is disabled.
@@ -734,7 +735,6 @@ void Crownstone::startUp() {
 			_powerSampler->enableZeroCrossingInterrupt(handleZeroCrossing);
 		}
 
-		SystemTime::init();
 		EventDispatcher::getInstance().addListener(&_systemTime);
 		EventDispatcher::getInstance().addListener(&Scheduler::getInstance());
 		BackgroundAdvertisementHandler::getInstance();

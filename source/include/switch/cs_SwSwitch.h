@@ -24,10 +24,19 @@ class SwitchAggregator;
 class SwSwitch : public ISwitch, public EventListener {
     private:
     HwSwitch hwSwitch;
+    switch_state_t actualState = {0};
+
+    // sometimes this may differ from the actualState because of
+    // hardware errors or startup intricacies.
+    // currentState will not change when locked, but may be set to a
+    // dimming value other than 0 or 100 even when dimming is not allowed.
+    // the latter makes it possible to slow-dim to the intended dimming value
+    // when the dimmer takes long to initialize.
     switch_state_t currentState = {0};
 
-    // config
-    bool allowDimming = false;     // user/app setting
+    // user/app setting.
+    // when resolving currentState this will decide if the dimmer may be used or not.
+    bool allowDimming = false;     
 
     // user/app setting "locked" if false. This prevents all public
     // methods except setAllowSwitching and handleEvent from having any effect.
@@ -47,7 +56,6 @@ class SwSwitch : public ISwitch, public EventListener {
 
     // result of checkDimmerPower, true indicates that the dimmer is powered/ready for use.
     bool measuredDimmerPowerUsage = false; 
-
 
     /**
      * Initializes the count down timer and sets the dimmer to given
@@ -83,24 +91,23 @@ class SwSwitch : public ISwitch, public EventListener {
     bool isSafeToTurnRelayOff();
     bool isSafeToDim();
 
-    // persistance features
+    // persistance features: 
     void store(switch_state_t nextState);
-    void storeRelayStateUpdate(bool is_on);
-    void storeIntensityStateUpdate(uint8_t intensity);
 
     // exceptional methods (ignores error state but logs and persists)
     void forceRelayOn();
     void forceSwitchOff();
     void forceDimmerOff();
     
+    // checks for safety issues and then calls the unchecked variant.
+    void setRelay_unlocked(bool is_on);
+    void setIntensity_unlocked(uint8_t value);
+
     // all hwSwitch access is looped through these methods.
-    // they set the respective values and persist that value.
+    // they check if the would actually be a change in value
+    // before executing the action.
     void setIntensity_unchecked(uint8_t dimmer_value);
     void setRelay_unchecked(bool relay_state);
-
-    // checks state and persists (safe to call from constructor: 
-    // doesn't call any virtual methods).
-    void resetToCurrentState();
 
     public:
     /**
@@ -110,12 +117,24 @@ class SwSwitch : public ISwitch, public EventListener {
 
     // SwSwitch
 
+    /**
+     * When the intended state and current state do not match, try to
+     * get these two more in sync.
+     * 
+     * This will ignore the [allowSwitching] bool as intendedState will
+     * not be changed when that value is false.
+     * It will take [allowDimming] and error states into account.
+     * 
+     * intendedState is not modified.
+     */
+    void resolveIntendedState();
+
     // will setRelay(true) if dimmer was active
     void setAllowDimming(bool allowed); 
     
     // if false is passed, no state changes may occur through
     // the ISwitch interface.
-    void setAllowSwitching(bool allowed); // TODO(Arend): this isn't implemented!
+    void setAllowSwitching(bool allowed);
 
     /**
      * This is the smarter version of setDimmer(value).
@@ -174,5 +193,8 @@ class SwSwitch : public ISwitch, public EventListener {
     
     uint8_t getIntensity() { return currentState.state.dimmer; }
     bool isRelayOn() { return currentState.state.relay; }
+
+    uint8_t getCurrentState() { return currentState.asInt; }
+    uint8_t getIntendedState() { return currentState.asInt; }
     bool isOn() { return currentState.asInt != 0; } // even dimming to 1% means 'on'
 };

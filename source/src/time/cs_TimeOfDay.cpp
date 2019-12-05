@@ -29,13 +29,11 @@ int32_t TimeOfDay::baseTimeSinceMidnight(BaseTime b){
             TYPIFY(STATE_SUN_TIME) suntime;
             State::getInstance().get(CS_TYPE::STATE_SUN_TIME, &suntime, sizeof(suntime));
             return suntime.sunrise;
-            //return 60*60*7;
         }
-        case BaseTime::Sundown: {
+        case BaseTime::Sunset: {
             TYPIFY(STATE_SUN_TIME) suntime;
             State::getInstance().get(CS_TYPE::STATE_SUN_TIME, &suntime, sizeof(suntime));
             return suntime.sunset;
-            // return 60*60*21;
         }
     }
 
@@ -62,8 +60,8 @@ TimeOfDay::TimeOfDay(SerializedDataType rawData) : TimeOfDay(
     bool basevalue_isok = false;
     switch(base){
         case BaseTime::Midnight:
-        case BaseTime::Sundown:
         case BaseTime::Sunrise:
+        case BaseTime::Sunset:
             basevalue_isok = true;
             break;
     }
@@ -81,8 +79,8 @@ TimeOfDay TimeOfDay::Sunrise(){
     return TimeOfDay(BaseTime::Sunrise,0); 
 }
 
-TimeOfDay TimeOfDay::Sundown(){ 
-    return TimeOfDay(BaseTime::Sundown,0); 
+TimeOfDay TimeOfDay::Sunset(){ 
+    return TimeOfDay(BaseTime::Sunset,0); 
 }
 
 

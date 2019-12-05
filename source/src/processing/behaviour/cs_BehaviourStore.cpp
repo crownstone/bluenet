@@ -80,23 +80,21 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
             while(activeBehaviours[empty_index].has_value() && empty_index < MaxBehaviours){
                 empty_index++;
             }
-
-            if(saveBehaviour(b,empty_index)){
-                // found an empty spot in the list.
+            
+            if(saveBehaviour(b, empty_index) ){
                 evt.result.returnCode = ERR_SUCCESS;
-                if(evt.result.buf.data != nullptr && evt.result.buf.len >= 5) {
-                    uint8_t index = empty_index;
-                    *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
-                    *reinterpret_cast<uint8_t*>( evt.result.buf.data + 4) = index;
-                    evt.result.dataSize = sizeof(uint32_t) + sizeof(index);
-                }
             } else {
-                // behaviour store is full!
-                evt.result.returnCode = ERR_NO_SPACE;
-                if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
-                    *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
-                    evt.result.dataSize = sizeof(uint32_t);
-                }
+                evt.result.returnCode =  ERR_NO_SPACE;
+            }
+
+            if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
+                evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
+            } else {
+                uint8_t index = evt.result.returnCode == ERR_SUCCESS ? empty_index : 0xff;
+
+                *reinterpret_cast<uint8_t*>( evt.result.buf.data + 0) = index;
+                *reinterpret_cast<uint32_t*>(evt.result.buf.data + 1) = masterHash();
+                evt.result.dataSize = sizeof(uint32_t) + sizeof(index);
             }
 
 			return;
@@ -148,13 +146,15 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
                 evt.result.returnCode = ERR_UNSPECIFIED;
             }
 
-            if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
-                *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = masterHash();
-                evt.result.dataSize = sizeof(uint32_t);
-            } else {
+            if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
                 LOGd("ERR_BUFFER_TOO_SMALL");
                 evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
+                break;
             }
+
+            evt.result.buf.data[0] = index;
+            *reinterpret_cast<uint32_t*>(evt.result.buf.data + sizeof(uint8_t)) = masterHash();
+            evt.result.dataSize = sizeof(uint8_t) + sizeof(uint32_t);
             break;
 		}
 		case Behaviour::Type::Twilight:{
@@ -184,11 +184,16 @@ void BehaviourStore::handleRemoveBehaviour(event_t& evt){
         LOGd("ERR_NOT_FOUND");
         evt.result.returnCode = ERR_NOT_FOUND;
     }
-    if(evt.result.buf.data != nullptr && evt.result.buf.len >= 4) {
-        uint32_t hash = masterHash();
-        *reinterpret_cast<uint32_t*>(evt.result.buf.data + 0) = hash;
-        evt.result.dataSize = sizeof(hash);
+
+    if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
+        LOGd("ERR_BUFFER_TOO_SMALL");
+        evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
+        return;
     }
+    
+    evt.result.buf.data[0] = index;
+    *reinterpret_cast<uint32_t*>(evt.result.buf.data + sizeof(uint8_t)) = masterHash();
+    evt.result.dataSize = sizeof(uint8_t) + sizeof(uint32_t);
 }
 
 void BehaviourStore::handleGetBehaviour(event_t& evt){
@@ -211,15 +216,15 @@ void BehaviourStore::handleGetBehaviour(event_t& evt){
 
     Behaviour::SerializedDataFormat bs = activeBehaviours[index]->serialize();
 
-    if(evt.result.buf.len < bs.size()){
+    if(evt.result.buf.len < bs.size() + sizeof(uint8_t)){
         // cannot communicate the result, so won't do anything.
         LOGd("ERR_BUFFER_TOO_SMALL");
         evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
         return;
     }
 
-    std::copy_n(bs.data(), bs.size(), evt.result.buf.data);
-    evt.result.dataSize = bs.size();
+    std::copy_n(bs.data(), bs.size(), evt.result.buf.data + sizeof(uint8_t));
+    evt.result.dataSize = bs.size() + sizeof(uint8_t);
     evt.result.returnCode = ERR_SUCCESS;
 }
 

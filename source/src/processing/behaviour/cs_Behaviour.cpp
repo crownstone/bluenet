@@ -72,14 +72,18 @@ bool Behaviour::isValid(PresenceStateDescription currentpresence) const{
 }
 
 void Behaviour::print() const {
+    uint32_t rooms[2] = {
+        static_cast<uint32_t>(presenceCondition.pred.RoomsBitMask >> 0 ),
+        static_cast<uint32_t>(presenceCondition.pred.RoomsBitMask >> 32)
+    };
+
     LOGd("Behaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x), presencetype(%d) roommask(%x %x)",
         from().h(),from().m(),from().s(),
         until().h(),until().m(),until().s(),
         activeIntensity,
         activeDays,
         presenceCondition.pred.cond,
-        presenceCondition.pred.RoomsBitMask >> 32 & 0xffffffff,
-        presenceCondition.pred.RoomsBitMask >> 0  & 0xffffffff
+        rooms[1],rooms[0]
     );
 
     // auto ser = presenceCondition.pred.serialize();

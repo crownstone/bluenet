@@ -57,8 +57,11 @@ SwitchAggregator& SwitchAggregator::getInstance(){
 void SwitchAggregator::init(SwSwitch&& s){
     swSwitch.emplace(s);
     
-    EventDispatcher::getInstance().addListener(&swSwitch.value());
     EventDispatcher::getInstance().addListener(this);
+    EventDispatcher::getInstance().addListener(&*swSwitch);
+
+    overrideState = swSwitch->getIntendedState();
+    swSwitch->resolveIntendedState();
 }
 
 void SwitchAggregator::updateState(){
@@ -69,30 +72,35 @@ void SwitchAggregator::updateState(){
 
     // (swSwitch.has_value() is true from here)
 
-    if(overrideState){
-        LOGd("updateState: set to overrideState value");
-        swSwitch->setDimmer(overrideState.value());
+    std::optional<uint8_t> nextAggregatedState = {};
 
-        if(behaviourState){
-            bool behaviourStateIsOn = behaviourState.value() != 0;
-            bool overrideStateIsOn = overrideState.value() != 0;
+    if(overrideState && behaviourState && aggregatedState){
+        bool overrideStateIsOn = *overrideState != 0;
+        bool aggregatedStateIsOn = *aggregatedState != 0;
+        bool behaviourStateIsOn = *behaviourState != 0;
 
-            // note: if this check turns out to be too crude, add a check if 
-            // the absolute difference between the difference in intensity is not
-            // too big.
-            if(behaviourStateIsOn == overrideStateIsOn){
-                // clear override on state match
-                LOGd("State match, resetting override");
+        bool overrideMatchedAggregated = overrideStateIsOn == aggregatedStateIsOn;
+        bool behaviourWantsToChangeState = behaviourStateIsOn != aggregatedStateIsOn;
+
+        if(overrideMatchedAggregated && behaviourWantsToChangeState){
+                nextAggregatedState = behaviourState;
                 overrideState = {};
-            }
+        } else {
+            // if the behaviour doesn't want to change state, keep the user override
+            // because we don't want to unexpectedly change intensity.
+            nextAggregatedState = overrideState;
         }
-
-        return;
+    } else {
+        nextAggregatedState = 
+            overrideState ? overrideState : 
+            behaviourState ? behaviourState : 
+            aggregatedState ? aggregatedState : 
+            std::nullopt;
     }
 
-    if(behaviourState){
-        LOGd("updateState: set to behaviourState value");
-        swSwitch->setDimmer(behaviourState.value());
+    aggregatedState = nextAggregatedState;
+    if(aggregatedState){
+        swSwitch->setDimmer(*aggregatedState);
     }
 
 }

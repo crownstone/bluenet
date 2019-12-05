@@ -52,6 +52,17 @@ namespace CsMath{
     }
 
     /**
+     * Returns:
+     *  - lower if value <= lower
+     *  - upper if value >= upper
+     *  - value else.  
+     */
+    template<class V, class L, class U>
+    auto clamp(V value, L lower, U upper){
+        return min(max(value,lower),upper);
+    }
+
+    /**
      * Represents an interval by two unsigned integers [base, base + diff].
      * (base + diff doesn't have to be representable in the current type,
      * the interval represented will wrap around to 0)
@@ -69,17 +80,40 @@ namespace CsMath{
             if(diff < 0){
                 std::swap(low,high);
             }
-        } 
+        }
+
+        T lowerbound() { return low; }
+        T upperbound() { return high; }
 
         // E.g.
         // Interval<uint8_t> i(200,00)
         // i.contains(0) == true.
+        // considers this interval as half open (lower closed) so that the return value is 
+        // true if [val] is enclosed in the interval or equal to the lower boundary.
         bool contains(T val){
             return
                 low < high // reversed interval?
                 ? (low <= val && val < high)  // nope, both must hold
                 : (low <= val || val < high); // yup, only one can hold
 
+        }
+
+        // considers this interval as open ended so that the return value is 
+        // true if [val] is enclosed in the interval or on the boundary.
+        bool ClosureContains(T val){
+            return
+                low < high // reversed interval?
+                ? (low <= val && val <= high)  // nope, both must hold
+                : (low <= val || val <= high); // yup, only one can hold
+        }
+
+        // considers this interval as open ended so that the return value is 
+        // true if [val] is strictly enclosed in the interval.
+        bool InteriorContains(T val){
+                        return
+                low < high // reversed interval?
+                ? (low < val && val < high)  // nope, both must hold
+                : (low < val || val < high); // yup, only one can hold
         }
     };
 }
