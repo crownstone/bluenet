@@ -414,7 +414,7 @@ cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delay) {
 
 cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, cs_file_id_t fileId, const CS_TYPE & type, uint32_t delayMs) {
 	uint32_t delayTicks = delayMs / TICK_INTERVAL_MS;
-	LOGStateDebug("Add to queue op=%u fileId=%u type=%s delay=%u ticks=%u", operation, fileId, TypeName(type), delay, delayTicks);
+	LOGStateDebug("Add to queue op=%u fileId=%u type=%s delayMs=%u delayTicks=%u", operation, fileId, TypeName(type), delayMs, delayTicks);
 	bool found = false;
 	switch (operation) {
 	case CS_STATE_QUEUE_OP_WRITE:

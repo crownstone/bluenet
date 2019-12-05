@@ -208,10 +208,23 @@ endif()
 set(DEFAULT_CONFIGURATION_FILE ${DEFAULT_CONF_CMAKE_PATH}/CMakeBuild.config.default)
 set(BOARD_TARGET_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
 set(BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+	
+set(FACTORY_IMAGE_CONFIGURATION_FILE ${WORKSPACE_DIR}/factory-images/${FACTORY_IMAGE}/CMakeFactoryImage.config)
 
 load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
 load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
 load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
+
+if(CONFIG_DIR STREQUAL "release")
+	MESSAGE(STATUS "Load configuration file for factory images at ${FACTORY_IMAGE_CONFIGURATION_FILE}")
+	load_configuration("${FACTORY_IMAGE_CONFIGURATION_FILE}" CMAKE_ARGS)
+		
+	IF(EXISTS ${FACTORY_IMAGE_CONFIGURATION_FILE})
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${FACTORY_IMAGE_CONFIGURATION_FILE})
+	ENDIF()
+else()
+	MESSAGE(STATUS "Do not load configuration file for factory images yet (only enabled for release configurations)")
+endif()
 
 # For now only cross-compilation
 list(APPEND CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")

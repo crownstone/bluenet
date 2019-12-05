@@ -624,7 +624,7 @@ void CommandHandler::handleEvent(event_t & event) {
 			auto cmd = reinterpret_cast<TYPIFY(CMD_CONTROL_CMD)*>(event.data);
 			uint8_t result_buffer[300] = {};
 
-			auto result = handleCommand(
+			[[maybe_unused]] auto result = handleCommand(
 				cmd->type, 
 				cs_data_t(cmd->data, cmd->size), 
 				cmd->source, 
