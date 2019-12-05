@@ -106,6 +106,11 @@ void SwitchAggregator::updateState(){
 }
 
 void SwitchAggregator::handleEvent(event_t& evt){
+    if(evt.type == CS_TYPE::EVT_TICK){
+        _ownerTimeoutCountdown == 0 || _ownerTimeoutCountdown--;
+        return;
+    }
+
     if(evt.type == CS_TYPE::CMD_SWITCH_LOCKED){
         LOGd("SwitchAggregator::%s case CMD_SWITCH_LOCKED",__func__);
         auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);

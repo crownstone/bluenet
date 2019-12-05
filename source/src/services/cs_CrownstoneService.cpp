@@ -102,7 +102,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			result = command_result_t(ERR_BUFFER_LOCKED);
 		}
 
-		uint8_t* buf = _resultPacketAccessor->getSerializedBuffer().data;
+		[[maybe_unused]] uint8_t* buf = _resultPacketAccessor->getSerializedBuffer().data;
 		LOGd("addControlCharacteristic result.returnCode %d, data len: %d", result.returnCode, result.data.len);
 		for(auto i = 0; i < 50; i+=10){
 			LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
