@@ -28,6 +28,10 @@ void PresenceHandler::init() {
 }
 
 void PresenceHandler::handleEvent(event_t& evt){
+
+    uint8_t location;
+    uint8_t profile;
+
     switch(evt.type) {
     case CS_TYPE::STATE_TIME: {
         // TODO: 
@@ -41,6 +45,9 @@ void PresenceHandler::handleEvent(event_t& evt){
     }
     case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
         // drop through
+        adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
+        profile = parsed_adv_ptr->profileId;
+        location = parsed_adv_ptr->locationId;
         break;
     }
     case CS_TYPE::EVT_PROFILE_LOCATION: {
@@ -52,12 +59,12 @@ void PresenceHandler::handleEvent(event_t& evt){
         if (profile_location->stone_id == _ownId) {
             return;
         }
+        profile = profile_location->profile;
+        location = profile_location->location;
     }
     default:
         return;
     }
-
-    adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
 
     if(WhenWhoWhere.size() >= max_records){
         WhenWhoWhere.pop_back();
@@ -68,7 +75,7 @@ void PresenceHandler::handleEvent(event_t& evt){
     uint32_t now = SystemTime::up();
     auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
 
-    if(parsed_adv_ptr->profileId == 0xff && parsed_adv_ptr->locationId == 0xff){
+    if(profile == 0xff && location == 0xff){
         LOGw("DEBUG: removing presence record data");
         WhenWhoWhere.clear();
     } else {        
@@ -79,14 +86,14 @@ void PresenceHandler::handleEvent(event_t& evt){
                         www.who,www.when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
                     return true;
                 }
-                if(www.who == parsed_adv_ptr->profileId){
+                if(www.who == profile){
                     LOGPresenceHandler("erasing old presence_record for user id %d because of new entry", www.who);
                     return true;
                 }
                 return false;
             } 
         );
-        WhenWhoWhere.push_front( {now, parsed_adv_ptr->profileId, parsed_adv_ptr->locationId} );
+        WhenWhoWhere.push_front( {now, profile, location} );
     }
 
     // TODO Anne @Arend: should we not bail out when profileId == 0xff, why proceed with presence mutation event?
@@ -97,8 +104,9 @@ void PresenceHandler::handleEvent(event_t& evt){
     presence_event.dispatch();
 
     TYPIFY(EVT_PROFILE_LOCATION) profile_location;
-    profile_location.profile = parsed_adv_ptr->profileId;
-    profile_location.location = parsed_adv_ptr->locationId;
+    profile_location.profile = profile;
+    profile_location.location = location;
+    profile_location.stone_id = _ownId;
 
     event_t profile_location_event(CS_TYPE::EVT_PROFILE_LOCATION, &profile_location, sizeof(profile_location));
     profile_location_event.dispatch();
