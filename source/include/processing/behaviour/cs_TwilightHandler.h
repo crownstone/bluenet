@@ -7,7 +7,7 @@
 #pragma once
 
 #include <events/cs_EventListener.h>
-#include <processing/behaviour/cs_Behaviour.h>
+#include <processing/behaviour/cs_SwitchBehaviour.h>
 
 #include <optional>
 

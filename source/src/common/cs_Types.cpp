@@ -158,7 +158,7 @@ CS_TYPE toCsType(uint16_t type) {
 // 	auto type = data.type;
 // 	switch (type) {
 // 		case CS_TYPE::CONFIG_BEHAVIOUR:{
-// 			return Behaviour::checkSize(data.data, data.size, size);
+// 			return SwitchBehaviour::checkSize(data.data, data.size, size);
 // 		}
 // 	}
 // 	return size == TypeSize(type);

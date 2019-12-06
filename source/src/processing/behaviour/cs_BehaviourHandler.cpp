@@ -8,7 +8,7 @@
 
 #include <processing/behaviour/cs_BehaviourHandler.h>
 #include <processing/behaviour/cs_BehaviourStore.h>
-#include <processing/behaviour/cs_Behaviour.h>
+#include <processing/behaviour/cs_SwitchBehaviour.h>
 
 #include <presence/cs_PresenceDescription.h>
 #include <presence/cs_PresenceHandler.h>

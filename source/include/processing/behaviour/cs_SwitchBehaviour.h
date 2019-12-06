@@ -20,15 +20,15 @@
  * It abstracts predicates such as:
  * "fade to 100% in 10 minutes, starting 30 minutes before sunrise, if anyone is in this room"
  */
-class Behaviour {
+class SwitchBehaviour {
     public:
     typedef std::array<uint8_t, 26> SerializedDataFormat;
 
     enum class Type : uint8_t {Switch = 0, Twilight = 1, Extended = 2};
 
     
-    Behaviour() = default;
-    Behaviour(
+    SwitchBehaviour() = default;
+    SwitchBehaviour(
       uint8_t intensity,
       DayOfWeekBitMask activedaysofweek,
       TimeOfDay from, 
@@ -36,7 +36,7 @@ class Behaviour {
       PresenceCondition presencecondition
       );
 
-    Behaviour(SerializedDataFormat arr);
+    SwitchBehaviour(SerializedDataFormat arr);
     SerializedDataFormat serialize() const;
 
     void print() const;

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <processing/behaviour/cs_Behaviour.h>
+#include <processing/behaviour/cs_SwitchBehaviour.h>
 #include <presence/cs_PresencePredicate.h>
 #include <presence/cs_PresenceCondition.h>
 #include <time/cs_TimeOfDay.h>
@@ -56,7 +56,7 @@ template<>
 PresenceCondition WireFormat::deserialize(uint8_t* data, size_t len);
 
 template<>
-Behaviour WireFormat::deserialize(uint8_t* data, size_t len);
+SwitchBehaviour WireFormat::deserialize(uint8_t* data, size_t len);
 
 // ========== Specializations/overloads for serialize =========
 

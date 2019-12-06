@@ -8,7 +8,7 @@
 #pragma once
 
 #include <events/cs_EventListener.h>
-#include <processing/behaviour/cs_Behaviour.h>
+#include <processing/behaviour/cs_SwitchBehaviour.h>
 #include <protocol/cs_ErrorCodes.h>
 
 #include <array>
@@ -21,7 +21,7 @@
 class BehaviourStore : public EventListener {
     private:
     static constexpr size_t MaxBehaviours = 50;
-    static std::array<std::optional<Behaviour>,MaxBehaviours> activeBehaviours;
+    static std::array<std::optional<SwitchBehaviour>,MaxBehaviours> activeBehaviours;
     
     public:
     /**
@@ -29,7 +29,7 @@ class BehaviourStore : public EventListener {
      */
     virtual void handleEvent(event_t& evt);
 
-    static inline std::array<std::optional<Behaviour>,MaxBehaviours>& getActiveBehaviours() {
+    static inline std::array<std::optional<SwitchBehaviour>,MaxBehaviours>& getActiveBehaviours() {
         return activeBehaviours;
     }
 
@@ -41,7 +41,7 @@ class BehaviourStore : public EventListener {
      * 
      * Returns true on success, false if [index] is out of range.
      */
-    ErrorCodesGeneral saveBehaviour(Behaviour b, uint8_t index);
+    ErrorCodesGeneral saveBehaviour(SwitchBehaviour b, uint8_t index);
 
     /**
      * Remove the behaviour at [index]. If [index] is out of bounds,
