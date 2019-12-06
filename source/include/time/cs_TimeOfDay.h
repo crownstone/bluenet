@@ -19,7 +19,7 @@
  */
 class TimeOfDay {
     public:
-    enum class BaseTime : uint8_t { Midnight = 0, Sundown = 1, Sunrise = 2};
+    enum class BaseTime : uint8_t { Midnight = 0, Sunrise = 1, Sunset = 2};
     typedef std::array<uint8_t,5> SerializedDataType;
     
     private:
@@ -47,10 +47,10 @@ class TimeOfDay {
     TimeOfDay(uint32_t seconds_since_midnight);
 
 
-    // defaults with 0 ofset
+    // TimeOfDay describing the given 'event'
     static TimeOfDay Midnight();
     static TimeOfDay Sunrise();
-    static TimeOfDay Sundown();
+    static TimeOfDay Sunset();
 
     // ===================== Conversions =====================
 

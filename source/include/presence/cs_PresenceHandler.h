@@ -11,6 +11,7 @@
 #include <time/cs_SystemTime.h>
 
 #include <list>
+#include <optional>
 
 /**
  * This handler listens for background advertisements to 
@@ -19,8 +20,12 @@
  */
 class PresenceHandler: public EventListener{
     private:
-    // after this amount of ticks a presence_record becomes invalid.
-    static const constexpr uint32_t presence_time_out = 300; // DEBUG, should be 60*5*10;
+    // after this amount of seconds a presence_record becomes invalid.
+    static const constexpr uint32_t presence_time_out_s = 5*60;
+
+    // after this amount of seconds it is assumed that presencehandler would have received 
+    // a message from all devices in vicinity of this device.
+    static const constexpr uint32_t presence_uncertain_due_reboot_time_out_s = 30;
 
     // using a list because of constant time insertion/deletion of
     // any item in the container
@@ -51,5 +56,5 @@ class PresenceHandler: public EventListener{
      * each bit in the description indicates if a person is in that room
      * or not.
      */
-    static PresenceStateDescription getCurrentPresenceDescription();
+    static std::optional<PresenceStateDescription> getCurrentPresenceDescription();
 };
