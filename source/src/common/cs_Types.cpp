@@ -149,6 +149,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
+	case CS_TYPE::EVT_PROFILE_LOCATION:
 		return csType;
 	}
 	return CS_TYPE::CONFIG_DO_NOT_USE;
@@ -441,6 +442,8 @@ size16_t TypeSize(CS_TYPE const & type){
 		return sizeof(TYPIFY(CMD_SET_RELAY));
 	case CS_TYPE::CMD_SET_DIMMER:
 		return sizeof(TYPIFY(CMD_SET_DIMMER));	
+	case CS_TYPE::EVT_PROFILE_LOCATION:
+		return sizeof(TYPIFY(EVT_PROFILE_LOCATION));	
 	} // end switch
 
 	// should never happen
@@ -587,6 +590,7 @@ const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE: return "EVT_BEHAVIOUR_SWITCH_STATE";
 	case CS_TYPE::CMD_SET_RELAY: return "CMD_SET_RELAY";
 	case CS_TYPE::CMD_SET_DIMMER: return "CMD_SET_DIMMER";
+	case CS_TYPE::EVT_PROFILE_LOCATION: return "EVT_PROFILE_LOCATION";
 	}
 	return "Unknown";
 }
@@ -734,6 +738,7 @@ cs_file_id_t getFileId(CS_TYPE const & type){
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
+	case CS_TYPE::EVT_PROFILE_LOCATION:
 		return FILE_DO_NOT_USE;
 	}
 	// should not reach this
@@ -881,6 +886,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
+	case CS_TYPE::EVT_PROFILE_LOCATION:
 		return NO_ONE;
 	}
 	return NO_ONE;
@@ -1027,6 +1033,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
+	case CS_TYPE::EVT_PROFILE_LOCATION:
 		return NO_ONE;
 	}
 	return NO_ONE;

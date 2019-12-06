@@ -555,6 +555,11 @@ void Mesh::handleEvent(event_t & event) {
 		factoryReset();
 		break;
 	}
+	case CS_TYPE::EVT_PROFILE_LOCATION: {
+		TYPIFY(EVT_PROFILE_LOCATION)* packet = (TYPIFY(EVT_PROFILE_LOCATION)*)event.data;
+		_model.sendProfileLocation(packet);
+		break;
+	}
 	default:
 		break;
 	}

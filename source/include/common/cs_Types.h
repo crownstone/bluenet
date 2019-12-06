@@ -237,6 +237,8 @@ enum class CS_TYPE: uint16_t {
 	CMD_SET_RELAY,								// when a user requests to set the relay to a specific state
 	CMD_SET_DIMMER,								// when a user requests to set the dimmer to a specific state
 	// ------------------------
+	//
+	EVT_PROFILE_LOCATION,                       // profile and location information 
 };
 
 CS_TYPE toCsType(uint16_t type);
@@ -406,6 +408,7 @@ typedef uint8_t TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
 typedef void TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
+typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

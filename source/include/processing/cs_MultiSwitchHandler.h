@@ -10,7 +10,7 @@
 #include "events/cs_EventListener.h"
 #include "common/cs_Types.h"
 
-class MultiSwitchHandler : EventListener {
+class MultiSwitchHandler : public EventListener {
 private:
 	MultiSwitchHandler();
 public:

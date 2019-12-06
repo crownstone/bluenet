@@ -18,8 +18,8 @@
  * find out which users are in which room. It can be queried
  * by other 
  */
-class PresenceHandler: public EventListener{
-    private:
+class PresenceHandler: public EventListener {
+private:
     // after this amount of seconds a presence_record becomes invalid.
     static const constexpr uint32_t presence_time_out_s = 5*60;
 
@@ -44,8 +44,14 @@ class PresenceHandler: public EventListener{
 
     void removeOldRecords();
     void print();
+    
+    stone_id_t _ownId = 0;
 
-    public:
+public:
+
+    // register as event handler
+    void init();
+
     // receive background messages indicating where users are,
     // record the time and place and update the current presence description
     // when necessary

@@ -116,12 +116,20 @@ cs_ret_code_t MeshModel::sendTime(const cs_mesh_model_msg_time_t* item, uint8_t 
 	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
+cs_ret_code_t MeshModel::sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats) {
+	remFromQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0);
+	return addToQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+}
+
 cs_ret_code_t MeshModel::sendReliableMsg(const uint8_t* data, uint16_t len) {
 	return ERR_NOT_IMPLEMENTED;
 }
 
 /**
  * Send a message over the mesh via publish, without reply.
+ *
+ * Note, repeats should be larger than zero. If not, nothing will be send.
+ *
  * TODO: wait for NRF_MESH_EVT_TX_COMPLETE before sending next msg (in case of segmented msg?).
  * TODO: repeat publishing the msg.
  */
@@ -270,6 +278,14 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			event_t event(CS_TYPE::CMD_SET_TIME, payload, payloadSize);
 			EventDispatcher::getInstance().dispatch(event);
 		}
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_PROFILE_LOCATION: {
+		if (ownMsg) {
+			break;
+		}
+		event_t event(CS_TYPE::EVT_PROFILE_LOCATION, payload, payloadSize);
+		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_NOOP: {

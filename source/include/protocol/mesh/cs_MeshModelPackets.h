@@ -50,6 +50,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE = 7,       // Payload: none
 	CS_MESH_MODEL_TYPE_STATE_0 = 8,              // Payload: cs_mesh_model_msg_state_0_t
 	CS_MESH_MODEL_TYPE_STATE_1 = 9,              // Payload: cs_mesh_model_msg_state_1_t
+	CS_MESH_MODEL_TYPE_PROFILE_LOCATION = 10,    // Payload: cs_mesh_model_msg_profile_location_t
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_test_t {
@@ -63,6 +64,11 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_t {
 	uint32_t timestamp;
 };
 
+struct __attribute__((__packed__)) cs_mesh_model_msg_profile_location_t {
+	uint8_t profile;
+	uint8_t location;
+	stone_id_t stone_id;
+};
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_state_0_t {
 	uint8_t switchState;

@@ -583,6 +583,7 @@ void Crownstone::setName() {
 void Crownstone::startOperationMode(const OperationMode & mode) {
 	EventDispatcher::getInstance().addListener(&_behaviourHandler);
 	EventDispatcher::getInstance().addListener(&_behaviourStore);
+	_presenceHandler.init();
 	EventDispatcher::getInstance().addListener(&_presenceHandler);
 	
 	switch(mode) {

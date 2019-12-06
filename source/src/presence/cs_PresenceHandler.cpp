@@ -9,14 +9,27 @@
 #include <time/cs_TimeOfDay.h>
 #include <common/cs_Types.h>
 
+#include <storage/cs_State.h>
+
 #include <drivers/cs_Serial.h>
 
 #define LOGPresenceHandler(...) LOGnone(__VA_ARGS__)
 
 std::list<PresenceHandler::PresenceRecord> PresenceHandler::WhenWhoWhere;
 
+void PresenceHandler::init() {
+    State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
+
+    // TODO Anne @Arend. The listener is now set in cs_Crownstone.cpp, outside of the class. This seems to be an 
+    // implementation detail however that should be part of the class. If you want the user to start and stop
+    // listening to events, I'd add member functions for those.
+
+    // EventDispatcher::getInstance().addListener(this);
+}
+
 void PresenceHandler::handleEvent(event_t& evt){
-    if(evt.type == CS_TYPE::STATE_TIME){
+    switch(evt.type) {
+    case CS_TYPE::STATE_TIME: {
         // TODO: 
         // - when time moves backwards because of daylight saving time, we can adjust the values
         //   in the list in order to keep the data intact.
@@ -26,7 +39,21 @@ void PresenceHandler::handleEvent(event_t& evt){
         removeOldRecords();
         return;
     }
-    if(evt.type != CS_TYPE::EVT_ADV_BACKGROUND_PARSED){
+    case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
+        // drop through
+        break;
+    }
+    case CS_TYPE::EVT_PROFILE_LOCATION: {
+        // filter on own messages
+        // TODO Anne @Bart This is probably a common theme. Why not incorporate it in the EventDispatcher itself? Also
+        // we do not care if this stone "has already an id", we actually want to just ignore messages from this 
+        // particular module. An id per "broadcaster" would be sufficient.
+        TYPIFY(EVT_PROFILE_LOCATION) *profile_location = (TYPIFY(EVT_PROFILE_LOCATION)*)evt.data;
+        if (profile_location->stone_id == _ownId) {
+            return;
+        }
+    }
+    default:
         return;
     }
 
@@ -62,10 +89,19 @@ void PresenceHandler::handleEvent(event_t& evt){
         WhenWhoWhere.push_front( {now, parsed_adv_ptr->profileId, parsed_adv_ptr->locationId} );
     }
 
+    // TODO Anne @Arend: should we not bail out when profileId == 0xff, why proceed with presence mutation event?
+
     print();
 
     event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,nullptr,0);
     presence_event.dispatch();
+
+    TYPIFY(EVT_PROFILE_LOCATION) profile_location;
+    profile_location.profile = parsed_adv_ptr->profileId;
+    profile_location.location = parsed_adv_ptr->locationId;
+
+    event_t profile_location_event(CS_TYPE::EVT_PROFILE_LOCATION, &profile_location, sizeof(profile_location));
+    profile_location_event.dispatch();
 
     // TODO: extract handling into method and clean up.
 }
