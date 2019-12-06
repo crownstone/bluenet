@@ -62,8 +62,6 @@ void PresenceHandler::handleEvent(event_t& evt){
         WhenWhoWhere.push_front( {now, parsed_adv_ptr->profileId, parsed_adv_ptr->locationId} );
     }
 
-    print();
-
     event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,nullptr,0);
     presence_event.dispatch();
 

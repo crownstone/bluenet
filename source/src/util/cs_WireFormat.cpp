@@ -68,22 +68,20 @@ PresenceCondition WireFormat::deserialize(uint8_t* data, size_t len){
 }
 
 template<>
-SwitchBehaviour WireFormat::deserialize(uint8_t* data, size_t len){
+Behaviour WireFormat::deserialize(uint8_t* data, size_t len){
     // TODO(Arend): assert length
-    std::array<uint8_t,26> d;
-    std::copy_n(data, 26, d.begin());
-    return SwitchBehaviour(d);
+    std::array<uint8_t,1+13> d;
+    std::copy_n(data, 1+13, d.begin());
+    return Behaviour(d);
 }
 
-//template<>
-//std::tuple<uint8_t,SwitchBehaviour> WireFormat::deserialize(uint8_t* data, size_t len){
-//    // TODO(Arend): assert length
-//	uint8_t index = WireFormat::deserialize<uint8_t>(data, len);
-//    std::array<uint8_t,26> d;
-//    std::copy_n(data+1, 26, d.begin());
-//
-//    return std::tuple<uint8_t, SwitchBehaviour>(index, SwitchBehaviour(d));
-//}
+template<>
+SwitchBehaviour WireFormat::deserialize(uint8_t* data, size_t len){
+    // TODO(Arend): assert length
+    std::array<uint8_t,1+26> d;
+    std::copy_n(data, 1+26, d.begin());
+    return SwitchBehaviour(d);
+}
 
 // -------------------- specialization for serialize --------------------
 

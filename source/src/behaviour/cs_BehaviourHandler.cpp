@@ -6,9 +6,9 @@
  */
 
 
-#include <processing/behaviour/cs_BehaviourHandler.h>
-#include <processing/behaviour/cs_BehaviourStore.h>
-#include <processing/behaviour/cs_SwitchBehaviour.h>
+#include <behaviour/cs_BehaviourHandler.h>
+#include <behaviour/cs_BehaviourStore.h>
+#include <behaviour/cs_SwitchBehaviour.h>
 
 #include <presence/cs_PresenceDescription.h>
 #include <presence/cs_PresenceHandler.h>
@@ -21,7 +21,7 @@
 #include "drivers/cs_Serial.h"
 
 #define LOGBehaviourHandler_V LOGnone
-#define LOGBehaviourHandler LOGd
+#define LOGBehaviourHandler LOGnone
 
 void BehaviourHandler::handleEvent(event_t& evt){
     switch(evt.type){
@@ -56,12 +56,7 @@ void BehaviourHandler::update(){
     if(!presence){
         LOGBehaviourHandler_V("%02d:%02d:%02d, not updating, because presence data is missing",time.h(),time.m(),time.s());
         return;
-    } 
-
-    uint64_t p = presence.value();
-    uint32_t p0 = p & 0xffffffff;
-    uint32_t p1 = (p>>32) & 0xffffffff;
-    LOGBehaviourHandler("presencedescription: %x %x", p1,p0);
+    }
 
     auto intendedState = computeIntendedState(time, presence.value());
     if(intendedState){

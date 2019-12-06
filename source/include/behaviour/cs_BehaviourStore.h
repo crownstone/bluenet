@@ -7,8 +7,8 @@
 
 #pragma once
 
+#include <behaviour/cs_SwitchBehaviour.h>
 #include <events/cs_EventListener.h>
-#include <processing/behaviour/cs_SwitchBehaviour.h>
 #include <protocol/cs_ErrorCodes.h>
 
 #include <array>

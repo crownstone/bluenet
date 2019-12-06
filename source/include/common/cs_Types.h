@@ -19,7 +19,7 @@
 #include <type_traits>
 #include <tuple>
 
-#include <processing/behaviour/cs_SwitchBehaviour.h>
+#include <behaviour/cs_SwitchBehaviour.h>
 
 enum TypeBases {
 	State_Base   = 0x000,

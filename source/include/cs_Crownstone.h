@@ -10,6 +10,8 @@
  * General includes
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
 
+#include <behaviour/cs_BehaviourHandler.h>
+#include <behaviour/cs_BehaviourStore.h>
 #include <ble/cs_Stack.h>
 #include <ble/cs_Advertiser.h>
 #include <ble/cs_iBeacon.h>
@@ -24,8 +26,6 @@
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Scheduler.h>
 #include <processing/cs_TemperatureGuard.h>
-#include <processing/behaviour/cs_BehaviourHandler.h>
-#include <processing/behaviour/cs_BehaviourStore.h>
 #include <services/cs_CrownstoneService.h>
 #include <services/cs_DeviceInformationService.h>
 #include <services/cs_SetupService.h>

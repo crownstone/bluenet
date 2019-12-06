@@ -5,7 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <processing/behaviour/cs_BehaviourStore.h>
+#include <behaviour/cs_BehaviourStore.h>
 
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
@@ -64,7 +64,7 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
 	switch(typ){
 		case SwitchBehaviour::Type::Switch:{
 			// Its a switch behaviour packet, let's check the size
-			if(evt.size - 1 != sizeof(SwitchBehaviour::SerializedDataFormat)){
+			if(evt.size - 1 != sizeof(SwitchBehaviour::SerializedDataType)){
 				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: size(%d) type (%d)", evt.size,typ);
                 evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 				return;
@@ -123,7 +123,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 	switch(type){
 		case SwitchBehaviour::Type::Switch:{
 			// Its a switch behaviour packet, let's check the size
-			if(evt.size -2 != sizeof(SwitchBehaviour::SerializedDataFormat)){
+			if(evt.size -2 != sizeof(SwitchBehaviour::SerializedDataType)){
 				LOGe(FMT_WRONG_PAYLOAD_LENGTH "(% d)", evt.size);
 				evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
                 return;
@@ -195,7 +195,7 @@ void BehaviourStore::handleGetBehaviour(event_t& evt){
         return;
     }
 
-    SwitchBehaviour::SerializedDataFormat bs = activeBehaviours[index]->serialize();
+    SwitchBehaviour::SerializedDataType bs = activeBehaviours[index]->serialize();
 
     if(evt.result.buf.len < bs.size() + sizeof(uint8_t)){
         // cannot communicate the result, so won't do anything.
@@ -229,8 +229,8 @@ void BehaviourStore::handleGetBehaviourIndices(event_t& evt){
             evt.result.buf.data[listSize] = i;
             listSize += sizeof(uint8_t);
 
-            *reinterpret_cast<uint32_t*>(evt.result.buf.data) = 
-                Fletcher(activeBehaviours[i]->serialize().data(),sizeof(SwitchBehaviour::SerializedDataFormat) );
+            *reinterpret_cast<uint32_t*>(evt.result.buf.data + listSize) = 
+                Fletcher(activeBehaviours[i]->serialize().data(),sizeof(SwitchBehaviour::SerializedDataType) );
             listSize += sizeof(uint32_t);
 
             LOGd("behaviour found at index %d",i);
@@ -279,10 +279,10 @@ uint32_t BehaviourStore::masterHash(){
 
         // append behaviour or empty array to hash data
         if(activeBehaviours[i]){
-            fletch = Fletcher(activeBehaviours[i]->serialize().data(),sizeof(SwitchBehaviour::SerializedDataFormat), fletch);
+            fletch = Fletcher(activeBehaviours[i]->serialize().data(),sizeof(SwitchBehaviour::SerializedDataType), fletch);
         } else {
-            SwitchBehaviour::SerializedDataFormat zeroes = {0};
-            fletch = Fletcher(zeroes.data(), sizeof(SwitchBehaviour::SerializedDataFormat), fletch);
+            SwitchBehaviour::SerializedDataType zeroes = {0};
+            fletch = Fletcher(zeroes.data(), sizeof(SwitchBehaviour::SerializedDataType), fletch);
         }
     }
 

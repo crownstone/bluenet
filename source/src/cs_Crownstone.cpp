@@ -53,8 +53,8 @@
 
 #include <switch/cs_SwitchAggregator.h>
 
-#include <processing/behaviour/cs_BehaviourHandler.h>
-#include <processing/behaviour/cs_BehaviourStore.h>
+#include <behaviour/cs_BehaviourHandler.h>
+#include <behaviour/cs_BehaviourStore.h>
 
 #include <array> // DEBUG 
 #include <util/cs_Hash.h> // DEBUG
