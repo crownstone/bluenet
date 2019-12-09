@@ -160,6 +160,8 @@ static void config_server_evt_cb(const config_server_evt_t * p_evt) {
 static uint8_t start_address[3];
 #endif
 
+#if MESH_SCANNER == 1
+
 /**
  * Variable to copy scanned data to, so that it doesn't get created on the stack all the time.
  * Made static, since the callback isn't part of the class.
@@ -231,10 +233,7 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 	}
 }
 
-
-
-
-
+#endif
 
 void Mesh::modelsInitCallback() {
 	LOGi("Initializing and adding models");
@@ -285,9 +284,14 @@ void Mesh::init(const boards_config_t& board) {
 	LOGi("Scan interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
 	scanner_config_scan_time_set(board.scanIntervalUs, board.scanWindowUs);
 
+#if MESH_SCANNER == 1
 	// Init scanned device variable before registering the callback.
+	LOGi("Scanner in mesh enabled");
 	memset(&_scannedDevice, 0, sizeof(_scannedDevice));
 	nrf_mesh_rx_cb_set(scan_cb);
+#else
+	LOGw("Scanner in mesh not enabled");
+#endif
 
 	ble_gap_addr_t macAddress;
 	retCode = sd_ble_gap_addr_get(&macAddress);
@@ -553,6 +557,11 @@ void Mesh::handleEvent(event_t & event) {
 	}
 	case CS_TYPE::CMD_FACTORY_RESET: {
 		factoryReset();
+		break;
+	}
+	case CS_TYPE::EVT_PROFILE_LOCATION: {
+		TYPIFY(EVT_PROFILE_LOCATION)* packet = (TYPIFY(EVT_PROFILE_LOCATION)*)event.data;
+		_model.sendProfileLocation(packet);
 		break;
 	}
 	default:

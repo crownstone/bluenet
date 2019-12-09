@@ -97,7 +97,7 @@ bool Behaviour::_isValid(PresenceStateDescription currentpresence){
 }
 
 void Behaviour::print() const {
-    uint32_t rooms[2] = {
+    [[maybe_unused]] uint32_t rooms[2] = {
         static_cast<uint32_t>(presenceCondition.pred.RoomsBitMask >> 0 ),
         static_cast<uint32_t>(presenceCondition.pred.RoomsBitMask >> 32)
     };

@@ -43,6 +43,9 @@ CHANGE_NAME_ON_RESET=0
 MESHING=1
 BUILD_MESHING=1
 
+# Use the (active) scanner in the mesh
+MESH_SCANNER=1
+
 # Advertise iBeacon packets.
 IBEACON=1
 

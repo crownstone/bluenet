@@ -9,14 +9,31 @@
 #include <time/cs_TimeOfDay.h>
 #include <common/cs_Types.h>
 
+#include <storage/cs_State.h>
+
 #include <drivers/cs_Serial.h>
 
 #define LOGPresenceHandler(...) LOGnone(__VA_ARGS__)
 
 std::list<PresenceHandler::PresenceRecord> PresenceHandler::WhenWhoWhere;
 
+void PresenceHandler::init() {
+    State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
+
+    // TODO Anne @Arend. The listener is now set in cs_Crownstone.cpp, outside of the class. This seems to be an 
+    // implementation detail however that should be part of the class. If you want the user to start and stop
+    // listening to events, I'd add member functions for those.
+
+    // EventDispatcher::getInstance().addListener(this);
+}
+
 void PresenceHandler::handleEvent(event_t& evt){
-    if(evt.type == CS_TYPE::STATE_TIME){
+
+    uint8_t location;
+    uint8_t profile;
+
+    switch(evt.type) {
+    case CS_TYPE::STATE_TIME: {
         // TODO: 
         // - when time moves backwards because of daylight saving time, we can adjust the values
         //   in the list in order to keep the data intact.
@@ -26,11 +43,29 @@ void PresenceHandler::handleEvent(event_t& evt){
         removeOldRecords();
         return;
     }
-    if(evt.type != CS_TYPE::EVT_ADV_BACKGROUND_PARSED){
+    case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
+        // drop through
+        adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
+        profile = parsed_adv_ptr->profileId;
+        location = parsed_adv_ptr->locationId;
+		//LOGd("Location [phone]: %x %x", profile, location);
+        break;
+    }
+    case CS_TYPE::EVT_PROFILE_LOCATION: {
+        // filter on own messages
+        // TODO Anne @Bart This is probably a common theme. Why not incorporate it in the EventDispatcher itself? Also
+        // we do not care if this stone "has already an id", we actually want to just ignore messages from this 
+        // particular module. An id per "broadcaster" would be sufficient.
+        TYPIFY(EVT_PROFILE_LOCATION) *profile_location = (TYPIFY(EVT_PROFILE_LOCATION)*)evt.data;
+        if (profile_location->stone_id == _ownId) {
+            return;
+        }
+        profile = profile_location->profile;
+        location = profile_location->location;
+    }
+    default:
         return;
     }
-
-    adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
 
     if(WhenWhoWhere.size() >= max_records){
         WhenWhoWhere.pop_back();
@@ -41,7 +76,7 @@ void PresenceHandler::handleEvent(event_t& evt){
     uint32_t now = SystemTime::up();
     auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
 
-    if(parsed_adv_ptr->profileId == 0xff && parsed_adv_ptr->locationId == 0xff){
+    if(profile == 0xff && location == 0xff){
         LOGw("DEBUG: removing presence record data");
         WhenWhoWhere.clear();
     } else {        
@@ -52,20 +87,30 @@ void PresenceHandler::handleEvent(event_t& evt){
                         www.who,www.when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
                     return true;
                 }
-                if(www.who == parsed_adv_ptr->profileId){
+                if(www.who == profile){
                     LOGPresenceHandler("erasing old presence_record for user id %d because of new entry", www.who);
                     return true;
                 }
                 return false;
             } 
         );
-        WhenWhoWhere.push_front( {now, parsed_adv_ptr->profileId, parsed_adv_ptr->locationId} );
+        WhenWhoWhere.push_front( {now, profile, location} );
     }
+
+    // TODO Anne @Arend: should we not bail out when profileId == 0xff, why proceed with presence mutation event?
 
     print();
 
     event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,nullptr,0);
     presence_event.dispatch();
+
+    TYPIFY(EVT_PROFILE_LOCATION) profile_location;
+    profile_location.profile = profile;
+    profile_location.location = location;
+    profile_location.stone_id = _ownId;
+
+    event_t profile_location_event(CS_TYPE::EVT_PROFILE_LOCATION, &profile_location, sizeof(profile_location));
+    profile_location_event.dispatch();
 
     // TODO: extract handling into method and clean up.
 }

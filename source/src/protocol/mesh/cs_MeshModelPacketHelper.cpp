@@ -55,6 +55,8 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		return state0IsValid((cs_mesh_model_msg_state_0_t*)payload, payloadSize);
 	case CS_MESH_MODEL_TYPE_STATE_1:
 		return state1IsValid((cs_mesh_model_msg_state_1_t*)payload, payloadSize);
+	case CS_MESH_MODEL_TYPE_PROFILE_LOCATION:
+		return profileLocationIsValid((cs_mesh_model_msg_profile_location_t*)payload, payloadSize);
 	}
 	return false;
 }
@@ -81,6 +83,10 @@ bool state0IsValid(const cs_mesh_model_msg_state_0_t* packet, size16_t size) {
 
 bool state1IsValid(const cs_mesh_model_msg_state_1_t* packet, size16_t size) {
 	return size == sizeof(cs_mesh_model_msg_state_1_t);
+}
+
+bool profileLocationIsValid(const cs_mesh_model_msg_profile_location_t* packet, size16_t size) {
+	return size == sizeof(cs_mesh_model_msg_profile_location_t);
 }
 
 bool keepAliveStateIsValid(const cs_mesh_model_msg_keep_alive_t* packet, size16_t size) {
