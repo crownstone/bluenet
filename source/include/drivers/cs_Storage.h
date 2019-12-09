@@ -100,13 +100,14 @@ public:
 	/**
 	 * Find next id of stored values of given type.
 	 *
-	 * NOTE: must be called immediately after find(), no other storage operations should be done in between.
+	 * NOTE: must be called immediately after findFirst(), no other storage operations should be done in between.
 	 *
 	 * @param[in] type            Type to search for.
 	 * @param[out] id             ID of the found value.
 	 *
 	 * @retval ERR_SUCCESS                  When successful.
 	 * @retval ERR_NOT_FOUND                When the next id of this type was not found.
+	 * @retval ERR_WRONG_STATE              When not called after findFirst(), or another storage operation was done in between.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
 	cs_ret_code_t findNext(CS_TYPE type, uint16_t & id);
@@ -254,7 +255,8 @@ private:
 
 	bool _collectingGarbage = false;
 
-	fds_find_token_t _ftok;
+	fds_find_token_t _findToken;
+	CS_TYPE _currentSearchType = CS_TYPE::CONFIG_DO_NOT_USE;
 
 	bool _removingFile = false;
 	std::vector<uint16_t> _busy_record_keys;
@@ -279,7 +281,21 @@ private:
 	 */
 	void eraseNextPage();
 
-	// Use before ftok
+	/**
+	 * Find next fileId for given recordKey.
+	 */
+	cs_ret_code_t findNextInternal(uint16_t recordKey, uint16_t & fileId);
+
+	/**
+	 * Start a new search, where the user wants to iterate over a certain type.
+	 */
+	void initSearch(CS_TYPE type);
+
+	/**
+	 * Start a new search.
+	 *
+	 * Call before using _findToken
+	 */
 	void initSearch();
 
 	void setBusy(uint16_t recordKey);
@@ -291,6 +307,17 @@ private:
 
 	// Returns size after padding for flash.
 	size16_t getPaddedSize(size16_t size);
+
+	/**
+	 * Get file id, given state value id.
+	 */
+	uint16_t getFileId(uint16_t valueId);
+
+	/**
+	 * Get state value id, given file id.
+	 */
+	uint16_t getStateId(uint16_t fileId);
+
 
 	/** Write to persistent storage.
 	*/
