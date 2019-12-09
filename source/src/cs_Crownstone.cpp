@@ -980,9 +980,9 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	serial_init(SERIAL_ENABLE_RX_AND_TX);
 	_log(SERIAL_INFO, SERIAL_CRLF);
 
-#ifdef GIT_HASH
+#ifdef GIT_SHA1
 #undef FIRMWARE_VERSION
-#define FIRMWARE_VERSION GIT_HASH
+#define FIRMWARE_VERSION GIT_SHA1
 #endif
 
 	LOGi("Welcome! Bluenet firmware, version %s", g_GIT_SHA1);

@@ -48,6 +48,7 @@ void PresenceHandler::handleEvent(event_t& evt){
         adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
         profile = parsed_adv_ptr->profileId;
         location = parsed_adv_ptr->locationId;
+		//LOGd("Location [phone]: %x %x", profile, location);
         break;
     }
     case CS_TYPE::EVT_PROFILE_LOCATION: {
