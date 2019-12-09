@@ -62,6 +62,8 @@ void PresenceHandler::handleEvent(event_t& evt){
         WhenWhoWhere.push_front( {now, parsed_adv_ptr->profileId, parsed_adv_ptr->locationId} );
     }
 
+    // TODO(9-12-2019, Arend) check if state changed
+
     event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,nullptr,0);
     presence_event.dispatch();
 

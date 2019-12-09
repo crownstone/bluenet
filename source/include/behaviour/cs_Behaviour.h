@@ -15,7 +15,12 @@
  * such as from and until times.
  */
 class Behaviour {
+    public:
+    enum class Type : uint8_t {Switch = 0, Twilight = 1, Extended = 2, Undefined = 0xff};
+    typedef std::array<uint8_t, 1+13> SerializedDataType;
+    
     protected:
+    Type typ;
     uint8_t activeIntensity = 0;
     uint8_t profileId = 0;
     DayOfWeekBitMask activeDays;
@@ -23,10 +28,9 @@ class Behaviour {
     TimeOfDay behaviourAppliesUntil = TimeOfDay::Midnight();
 
     public:
-    enum class Type : uint8_t {Switch = 0, Twilight = 1, Extended = 2, Undefined = 0xff};
-    typedef std::array<uint8_t, 1+13> SerializedDataType;
-
+    
     Behaviour(
+      Type typ,
       uint8_t intensity,
       uint8_t profileid,
       DayOfWeekBitMask activedaysofweek,
@@ -36,6 +40,9 @@ class Behaviour {
 
     Behaviour(SerializedDataType arr);
     SerializedDataType serialize() const;
+
+    void print() const;
+    void print_ser(SerializedDataType& arr) const;
 
     // implementations of behaviours have a class specific identifier
     // which is defined by overriding this method.

@@ -22,7 +22,7 @@ SwitchBehaviour::SwitchBehaviour(
             TimeOfDay from, 
             TimeOfDay until, 
             PresenceCondition presencecondition) :
-        Behaviour(intensity,profileid,activedaysofweek,from,until),
+        Behaviour(Behaviour::Type::Switch,intensity,profileid,activedaysofweek,from,until),
         presenceCondition (presencecondition)
     {
 }
@@ -30,16 +30,15 @@ SwitchBehaviour::SwitchBehaviour(
 SwitchBehaviour::SwitchBehaviour(std::array<uint8_t, 1+26> arr) : 
     Behaviour(          WireFormat::deserialize<Behaviour>(         arr.data() +  0, 14)),
     presenceCondition(  WireFormat::deserialize<PresenceCondition>( arr.data() + 14, 13)){
+    for(uint8_t b : arr){
+        LOGd("switchbehaviour constr: 0x%02x",b);
+    }
 }
 
 SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize() const{
     SerializedDataType result;
-    std::copy_n(
-        std::begin(WireFormat::serialize<Behaviour>(*this)),
-        WireFormat::size<Behaviour>(),
-        std::begin(result) + 0);
-
-    std::copy_n(std::begin(WireFormat::serialize(presenceCondition)),     13, std::begin(result) + 13);
+    std::copy_n(std::begin(Behaviour::serialize()),  WireFormat::size<Behaviour>(),            std::begin(result) + 0);
+    std::copy_n(std::begin(WireFormat::serialize(presenceCondition)), WireFormat::size<PresenceCondition>(),    std::begin(result) + 14);
 
     return result;
 }

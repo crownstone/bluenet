@@ -42,6 +42,7 @@ void BehaviourStore::handleEvent(event_t& evt){
         }
         case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES: {
             handleGetBehaviourIndices(evt);
+            break;
         }
         default:{
             break;

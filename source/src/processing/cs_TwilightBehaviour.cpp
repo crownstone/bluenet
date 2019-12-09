@@ -12,6 +12,6 @@ TwilightBehaviour::TwilightBehaviour(
             DayOfWeekBitMask activedaysofweek,
             TimeOfDay from, 
             TimeOfDay until) :
-        Behaviour(intensity,activedaysofweek,from,until)
+        Behaviour(Behaviour::type::Twilight,intensity,activedaysofweek,from,until)
     {
 }
