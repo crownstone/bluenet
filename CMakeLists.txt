@@ -23,8 +23,12 @@ set(DEFAULT_CONF_CMAKE_PATH                      ${WORKSPACE_DIR}/source/conf/cm
 set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modules)
 
 set(CMAKE_BUILD_TYPE                             Debug   CACHE STRING "Default build type")
+
+# With "make" sudo works more or less. Only when running make in parallel prompting is not always clear.
+# With "ninja" sudo does not work. It might be worth looking into "pkexec" instead, but that requires more study.
 set(SUPERUSER_SWITCH                             sudo    CACHE STRING "Switch to superuser")
 
+# We are using python 3 by default, it's not a hard requirement though
 set(PYTHON_EXECUTABLE                            python3 CACHE STRING "The python executable")
 
 project(${BOARD_TARGET} NONE)
@@ -41,11 +45,18 @@ list(APPEND CMAKE_ARGS "-DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}")
 #######################################################################################################################
 
 message(STATUS "Assumed to be installed:")
-message(STATUS "git  - sudo apt-get install git")
-message(STATUS "python/pip - sudo apt-get install python python-pip")
-message(STATUS "wget - sudo apt-get install wget")
+message(STATUS "  git        - sudo apt-get install git")
+message(STATUS "  python/pip - sudo apt-get install python python-pip")
+message(STATUS "  wget       - sudo apt-get install wget")
 
-message(STATUS "Using python version: ${PYTHON_EXECUTABLE}")
+message(STATUS "Optionally (for firmware):")
+message(STATUS "  pass        - sudo apt-get install pass")
+message(STATUS "  srec_cat    - sudo apt-get install srecord")
+
+message(STATUS "Python set-up")
+message(STATUS "  python executable: \"${PYTHON_EXECUTABLE}\"")
+message(STATUS "  pip will be used as: \"${PYTHON_EXECUTABLE} -m pip install package\"")
+message(STATUS "  if installation fails (of e.g. nrfutil), run \"python3 -m pip install -U pip [--user]\"")
 
 find_package(Git REQUIRED)
 
@@ -208,10 +219,23 @@ endif()
 set(DEFAULT_CONFIGURATION_FILE ${DEFAULT_CONF_CMAKE_PATH}/CMakeBuild.config.default)
 set(BOARD_TARGET_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
 set(BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+	
+set(FACTORY_IMAGE_CONFIGURATION_FILE ${WORKSPACE_DIR}/factory-images/${FACTORY_IMAGE}/CMakeFactoryImage.config)
 
 load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
 load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
 load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
+
+if(CONFIG_DIR STREQUAL "release")
+	MESSAGE(STATUS "Load configuration file for factory images at ${FACTORY_IMAGE_CONFIGURATION_FILE}")
+	load_configuration("${FACTORY_IMAGE_CONFIGURATION_FILE}" CMAKE_ARGS)
+		
+	IF(EXISTS ${FACTORY_IMAGE_CONFIGURATION_FILE})
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${FACTORY_IMAGE_CONFIGURATION_FILE})
+	ENDIF()
+else()
+	MESSAGE(STATUS "Do not load configuration file for factory images yet (only enabled for release configurations)")
+endif()
 
 # For now only cross-compilation
 list(APPEND CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/arm.toolchain.cmake")

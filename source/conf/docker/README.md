@@ -3,7 +3,7 @@
 Creation of a docker image is straightforward
 
 ```
-docker build .
+docker build -t crownstone .
 ```
 
 The docker runs as root. Hence in `Dockerfile` you see that `-DSUPERUSER_SWITCH=""` is used.

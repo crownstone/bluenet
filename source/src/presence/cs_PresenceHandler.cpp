@@ -6,11 +6,12 @@
  */
 #include <presence/cs_PresenceHandler.h>
 
-#include <cs_Crownstone.h>
 #include <time/cs_TimeOfDay.h>
 #include <common/cs_Types.h>
 
-#define LOGPresenceHandler(...) 
+#include <drivers/cs_Serial.h>
+
+#define LOGPresenceHandler(...) LOGnone(__VA_ARGS__)
 
 std::list<PresenceHandler::PresenceRecord> PresenceHandler::WhenWhoWhere;
 
@@ -35,8 +36,10 @@ void PresenceHandler::handleEvent(event_t& evt){
         WhenWhoWhere.pop_back();
     }
 
-    uint32_t now = Crownstone::getTickCount();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out,now);
+    // TODO inputvalidation
+
+    uint32_t now = SystemTime::up();
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
 
     if(parsed_adv_ptr->profileId == 0xff && parsed_adv_ptr->locationId == 0xff){
         LOGw("DEBUG: removing presence record data");
@@ -44,8 +47,9 @@ void PresenceHandler::handleEvent(event_t& evt){
     } else {        
         WhenWhoWhere.remove_if( 
             [&] (PresenceRecord www){ 
-                if(!valid_time_interval.contains(www.when)){
-                    LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated", www.who);
+                if(!valid_time_interval.ClosureContains(www.when)){
+                    LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated: %d not contained in [%d %d]", 
+                        www.who,www.when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
                     return true;
                 }
                 if(www.who == parsed_adv_ptr->profileId){
@@ -58,6 +62,8 @@ void PresenceHandler::handleEvent(event_t& evt){
         WhenWhoWhere.push_front( {now, parsed_adv_ptr->profileId, parsed_adv_ptr->locationId} );
     }
 
+    print();
+
     event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,nullptr,0);
     presence_event.dispatch();
 
@@ -65,13 +71,14 @@ void PresenceHandler::handleEvent(event_t& evt){
 }
 
 void PresenceHandler::removeOldRecords(){
-    uint32_t now = Crownstone::getTickCount();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out,now);
+    uint32_t now = SystemTime::up();
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
 
      WhenWhoWhere.remove_if( 
         [&] (PresenceRecord www){ 
-            if(!valid_time_interval.contains(www.when)){
-                LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated", www.who);
+            if(!valid_time_interval.ClosureContains(www.when)){
+                LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated: %d not contained in [%d %d]", 
+                        www.who,www.when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
                 return true;
             }
            
@@ -80,29 +87,36 @@ void PresenceHandler::removeOldRecords(){
     );
 }
 
-PresenceStateDescription PresenceHandler::getCurrentPresenceDescription(){
+std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription(){
+    if(SystemTime::up() < presence_uncertain_due_reboot_time_out_s){
+        LOGPresenceHandler("presence_uncertain_due_reboot_time_out_s hasn't expired");
+        return {};
+    }
+
     PresenceStateDescription p = 0;
-    uint32_t now = Crownstone::getTickCount();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out,now);
+    uint32_t now = SystemTime::up();
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
 
     for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ){
-        if(!valid_time_interval.contains(iter->when)){
-            LOGPresenceHandler("erasing old presence_record for user id %d because it's already %d ticks old", 
-                iter->who, now - iter->when
-            );
+        if(!valid_time_interval.ClosureContains(iter->when)){
+            LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated: %d not contained in [%d %d]", 
+                        iter->who,iter->when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
+
             iter = WhenWhoWhere.erase(iter); // increments iter and invalidates previous value..
             continue;
         } else {
             // appearently iter is valid, so the .where field describes an occupied room.
             p |= 1 << CsMath::min(64-1,iter->where);
+            LOGPresenceHandler("adding room %d to currentPresenceDescription", iter->where);
             ++iter;
         }
     }
+
     return p;
 }
 
 void PresenceHandler::print(){
     for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); iter++){
-        LOGd("at %d ticks after startup user #%d was found in room %d", iter->when, iter->who, iter->where);
+        LOGd("at %d seconds after startup user #%d was found in room %d", iter->when, iter->who, iter->where);
     }
 }

@@ -20,8 +20,8 @@ class PresencePredicate{
     enum class Condition : uint8_t { 
         VacuouslyTrue  = 0, 
         AnyoneAnyRoom  = 1, 
-        AnyoneInSphere = 2, 
-        NooneAnyRoom   = 3, 
+        NooneAnyRoom   = 2, 
+        AnyoneInSphere = 3, 
         NooneInSphere  = 4
     };
 

@@ -17,18 +17,11 @@ PresencePredicate::PresencePredicate(Condition c, PresenceStateDescription rooms
 PresencePredicate::PresencePredicate(std::array<uint8_t, 9> arr) : 
     PresencePredicate(
         static_cast<Condition>(arr[0]),
-        WireFormat::deserialize<uint64_t>(arr.data(),8)) {
+        WireFormat::deserialize<uint64_t>(arr.data() +1, 8)) {
 }
 
 bool PresencePredicate::operator()(
         PresenceStateDescription currentroomspresencebitmask) const{
-    static uint32_t last_print_stamp = 0;
-    if(SystemTime::posix() - last_print_stamp > 60){
-        last_print_stamp = SystemTime::posix();
-        LOGw("DEBUG: Ignoring ALL PresencePredicates.");
-    }
-    return true;
-
     switch(cond){
         case Condition::VacuouslyTrue: 
             return true;

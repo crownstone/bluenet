@@ -25,10 +25,23 @@
 
 void BehaviourHandler::handleEvent(event_t& evt){
     switch(evt.type){
-        case CS_TYPE::STATE_TIME:
-        case CS_TYPE::EVT_PRESENCE_MUTATION:
-        case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:
+        case CS_TYPE::EVT_PRESENCE_MUTATION: {
+            LOGBehaviourHandler("Presence mutation event in BehaviourHandler");
             update();
+            break;
+        }
+        case CS_TYPE::STATE_TIME:{
+            update();
+            break;
+        }
+        case CS_TYPE::EVT_TIME_SET: {
+            update();
+            break;
+        }
+        case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:{
+            update();
+            break;
+        }
         default:{
             // ignore other events
             break;
@@ -38,9 +51,19 @@ void BehaviourHandler::handleEvent(event_t& evt){
 
 void BehaviourHandler::update(){
     TimeOfDay time = SystemTime::now();
-    PresenceStateDescription presence = PresenceHandler::getCurrentPresenceDescription();
+    std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
 
-    auto intendedState = computeIntendedState(time, presence);
+    if(!presence){
+        LOGBehaviourHandler_V("%02d:%02d:%02d, not updating, because presence data is missing",time.h(),time.m(),time.s());
+        return;
+    } 
+
+    uint64_t p = presence.value();
+    uint32_t p0 = p & 0xffffffff;
+    uint32_t p1 = (p>>32) & 0xffffffff;
+    LOGd("presencedescription: %x %x", p1,p0);
+
+    auto intendedState = computeIntendedState(time, presence.value());
     if(intendedState){
         if(previousIntendedState == intendedState){
             LOGBehaviourHandler_V("%02d:%02d:%02d, no behaviour change",time.h(),time.m(),time.s());
@@ -68,7 +91,7 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
        PresenceStateDescription currentPresence){
     std::optional<uint8_t> intendedValue = {};
     
-    for (const auto& b : BehaviourStore::getActiveBehaviours()){
+    for (auto& b : BehaviourStore::getActiveBehaviours()){
         if (b.has_value() && b->isValid(currentTime, currentPresence)){
             if (intendedValue){
                 if (b->value() != intendedValue.value()){
