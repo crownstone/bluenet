@@ -33,7 +33,8 @@ typename T::SerializedDataType serialize(const T& obj){
     return obj.serialize();
 }
 
-// specialized for some fundamental types
+// returns the bytecount of the array to which a type is serialized by WireFormat.
+// (specialized to return sizeof(..) for some fundamental types to gain a uniform interface)
 template<class T>
 constexpr size_t size(T* = nullptr){ return std::tuple_size<typename T::SerializedDataType>::value; }
 

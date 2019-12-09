@@ -17,18 +17,19 @@
 
 SwitchBehaviour::SwitchBehaviour(
             uint8_t intensity,
+            uint8_t profileid,
             DayOfWeekBitMask activedaysofweek,
             TimeOfDay from, 
             TimeOfDay until, 
             PresenceCondition presencecondition) :
-        Behaviour(intensity,activedaysofweek,from,until),
+        Behaviour(intensity,profileid,activedaysofweek,from,until),
         presenceCondition (presencecondition)
     {
 }
 
 SwitchBehaviour::SwitchBehaviour(std::array<uint8_t, 1+26> arr) : 
-    Behaviour(          WireFormat::deserialize<Behaviour>(         arr.data() +  0, 13)),
-    presenceCondition(  WireFormat::deserialize<PresenceCondition>( arr.data() + 13, 13)){
+    Behaviour(          WireFormat::deserialize<Behaviour>(         arr.data() +  0, 14)),
+    presenceCondition(  WireFormat::deserialize<PresenceCondition>( arr.data() + 14, 13)){
 }
 
 SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize() const{
@@ -37,7 +38,9 @@ SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize() const{
         std::begin(WireFormat::serialize<Behaviour>(*this)),
         WireFormat::size<Behaviour>(),
         std::begin(result) + 0);
+
     std::copy_n(std::begin(WireFormat::serialize(presenceCondition)),     13, std::begin(result) + 13);
+
     return result;
 }
 
@@ -82,12 +85,13 @@ void SwitchBehaviour::print() const {
         static_cast<uint32_t>(presenceCondition.pred.RoomsBitMask >> 32)
     };
 
-    LOGd("SwitchBehaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x), presencetype(%d) roommask(%x %x)",
+    LOGd("SwitchBehaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x), presencetype(%d) roommask(%x %x), timeout(%d)",
         from().h(),from().m(),from().s(),
         until().h(),until().m(),until().s(),
         activeIntensity,
         activeDays,
         presenceCondition.pred.cond,
-        rooms[1],rooms[0]
+        rooms[1],rooms[0], 
+        presenceCondition.timeOut
     );
 }

@@ -28,6 +28,7 @@ class SwitchBehaviour : public Behaviour{
     
     SwitchBehaviour(
       uint8_t intensity,
+      uint8_t profileid,
       DayOfWeekBitMask activedaysofweek,
       TimeOfDay from, 
       TimeOfDay until, 

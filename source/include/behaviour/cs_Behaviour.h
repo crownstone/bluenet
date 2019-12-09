@@ -17,6 +17,7 @@
 class Behaviour {
     protected:
     uint8_t activeIntensity = 0;
+    uint8_t profileId = 0;
     DayOfWeekBitMask activeDays;
     TimeOfDay behaviourAppliesFrom = TimeOfDay::Midnight();
     TimeOfDay behaviourAppliesUntil = TimeOfDay::Midnight();
@@ -27,6 +28,7 @@ class Behaviour {
 
     Behaviour(
       uint8_t intensity,
+      uint8_t profileid,
       DayOfWeekBitMask activedaysofweek,
       TimeOfDay from, 
       TimeOfDay until

@@ -10,10 +10,12 @@
 
 Behaviour::Behaviour(
             uint8_t intensity,
+            uint8_t profileid,
             DayOfWeekBitMask activedaysofweek,
             TimeOfDay from, 
             TimeOfDay until) : 
         activeIntensity (intensity),
+        profileId (profileid),
         activeDays(activedaysofweek),
         behaviourAppliesFrom (from),
         behaviourAppliesUntil (until)
@@ -23,7 +25,7 @@ Behaviour::Behaviour(
 Behaviour::Behaviour(SerializedDataType arr) : 
     Behaviour(
         WireFormat::deserialize<uint8_t>(arr.data() +           0,  WireFormat::size<uint8_t>()),
-        // unused field 'profileID'
+        WireFormat::deserialize<uint8_t>(arr.data() +           1,  WireFormat::size<uint8_t>()),
         WireFormat::deserialize<DayOfWeekBitMask>(arr.data() +  2,  WireFormat::size<DayOfWeekBitMask>()),
         WireFormat::deserialize<TimeOfDay>(arr.data() +         3,  WireFormat::size<TimeOfDay>()),
         WireFormat::deserialize<TimeOfDay>(arr.data() +         8,  WireFormat::size<TimeOfDay>())
@@ -33,10 +35,12 @@ Behaviour::Behaviour(SerializedDataType arr) :
 
 Behaviour::SerializedDataType Behaviour::serialize() const{
     SerializedDataType result;
-    std::copy_n( std::begin(WireFormat::serialize(activeIntensity)),        WireFormat::size(&activeIntensity), std::begin(result) + 0);
-    std::copy_n( std::begin(WireFormat::serialize(activeDays)),             WireFormat::size(&activeDays), std::begin(result) + 2);
-    std::copy_n( std::begin(WireFormat::serialize(behaviourAppliesFrom)),   WireFormat::size(&behaviourAppliesFrom), std::begin(result) + 3);
-    std::copy_n( std::begin(WireFormat::serialize(behaviourAppliesUntil)),  WireFormat::size(&behaviourAppliesUntil), std::begin(result) + 8);
+
+    std::copy_n( std::begin(WireFormat::serialize(activeIntensity)),        WireFormat::size(&activeIntensity),         std::begin(result) + 0);
+    std::copy_n( std::begin(WireFormat::serialize(profileId)),              WireFormat::size(&profileId),               std::begin(result) + 1);
+    std::copy_n( std::begin(WireFormat::serialize(activeDays)),             WireFormat::size(&activeDays),              std::begin(result) + 2);
+    std::copy_n( std::begin(WireFormat::serialize(behaviourAppliesFrom)),   WireFormat::size(&behaviourAppliesFrom),    std::begin(result) + 3);
+    std::copy_n( std::begin(WireFormat::serialize(behaviourAppliesUntil)),  WireFormat::size(&behaviourAppliesUntil),   std::begin(result) + 8);
 
     return result;
 }
