@@ -22,6 +22,7 @@ enum ErrorCodesGeneral {
 	ERR_NOT_FOUND                   = 0x25,
 	ERR_NO_SPACE                    = 0x26,
 	ERR_BUSY                        = 0x27,
+	ERR_WRONG_STATE                 = 0x28,
 
 	ERR_NO_ACCESS                   = 0x30,
 
