@@ -50,9 +50,6 @@ Behaviour::SerializedDataType Behaviour::serialize() const{
     result_iter = std::copy_n( std::begin(WireFormat::serialize(behaviourAppliesFrom)),   WireFormat::size<TimeOfDay>(),   result_iter);
     result_iter = std::copy_n( std::begin(WireFormat::serialize(behaviourAppliesUntil)),  WireFormat::size<TimeOfDay>(),   result_iter);
 
-    // print();
-    // print_ser(result);    
-
     return result;
 }
 
@@ -67,4 +64,22 @@ TimeOfDay Behaviour::from() const {
 
 TimeOfDay Behaviour::until() const {
     return behaviourAppliesUntil; 
+}
+
+void Behaviour::print() const {
+
+    LOGd("Behaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #%d",
+        from().h(),from().m(),from().s(),
+        until().h(),until().m(),until().s(),
+        activeIntensity,
+        activeDays,
+        profileId
+    );
+}
+
+void Behaviour::print_ser(SerializedDataType& arr) const{
+    for(uint8_t b : arr){
+        LOGd("behaviour ser 0x%x (%d)",b,b);
+    }
+    LOGd("behaviour--");
 }

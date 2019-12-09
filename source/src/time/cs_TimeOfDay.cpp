@@ -90,6 +90,10 @@ TimeOfDay::SerializedDataType TimeOfDay::serialize() const {
     SerializedDataType result;
     std::copy_n(std::begin(WireFormat::serialize(static_cast<uint8_t>(base))),  1, std::begin(result) + 0);
     std::copy_n(std::begin(WireFormat::serialize(sec_since_base)),              4, std::begin(result) + 1);
+    LOGd("timeofday ser %d %d",static_cast<uint8_t>(base),sec_since_base);
+    for(uint8_t b : result){
+        LOGd("timeofday ser: 0x%02x (%d)",b,b);
+    }
     return result;
 }
 

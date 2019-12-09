@@ -13,9 +13,12 @@
 #include <presence/cs_PresenceCondition.h>
 #include <time/cs_TimeOfDay.h>
 
+#include <drivers/cs_Serial.h>
+
 #include <algorithm>
 #include <cstdint>
 #include <cstddef>
+#include <typeinfo>
 
 namespace WireFormat {
 
@@ -30,6 +33,8 @@ T deserialize(uint8_t* data, size_t len);
 // that is equal to the return type of this method.
 template<class T>
 typename T::SerializedDataType serialize(const T& obj){
+    auto t_name = typeid(T).name();
+    LOGd("serialize %s", t_name);
     return obj.serialize();
 }
 
