@@ -62,6 +62,8 @@ void PresenceHandler::handleEvent(event_t& evt){
         }
         profile = profile_location->profile;
         location = profile_location->location;
+		//LOGd("Location [mesh]: %x %x", profile, location);
+		break;
     }
     default:
         return;
