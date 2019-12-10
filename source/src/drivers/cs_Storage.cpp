@@ -67,41 +67,189 @@ void Storage::setErrorCallback(cs_storage_error_callback_t callback) {
 	_errorCallback = callback;
 }
 
-void Storage::setBusy(uint16_t recordKey) {
-	_busy_record_keys.push_back(recordKey);
+cs_ret_code_t Storage::findFirst(CS_TYPE type, uint16_t & id) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
+	uint16_t recordKey = to_underlying_type(type);
+	if (isBusy(recordKey)) {
+		return ERR_BUSY;
+	}
+	initSearch(type);
+	uint16_t fileId;
+	cs_ret_code_t retVal = findNextInternal(recordKey, fileId);
+	if (retVal == ERR_SUCCESS) {
+		id = getStateId(fileId);
+	}
+	return retVal;
 }
 
-void Storage::clearBusy(uint16_t recordKey) {
-	for (auto it = _busy_record_keys.begin(); it != _busy_record_keys.end(); it++) {
-		if (*it == recordKey) {
-			_busy_record_keys.erase(it);
-			return;
+cs_ret_code_t Storage::findNext(CS_TYPE type, uint16_t & id) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
+	uint16_t recordKey = to_underlying_type(type);
+	if (isBusy(recordKey)) {
+		return ERR_BUSY;
+	}
+	if (_currentSearchType != type) {
+		return ERR_WRONG_STATE;
+	}
+	uint16_t fileId;
+	cs_ret_code_t retVal = findNextInternal(recordKey, fileId);
+	if (retVal == ERR_SUCCESS) {
+		id = getStateId(fileId);
+	}
+	return retVal;
+}
+
+cs_ret_code_t Storage::findNextInternal(uint16_t recordKey, uint16_t & fileId) {
+	fds_record_t record;
+	fds_record_desc_t recordDesc;
+	fds_flash_record_t flashRecord;
+	ret_code_t fdsRetCode;
+	while (fds_record_find_by_key(recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
+		fdsRetCode = fds_record_open(&recordDesc, &flashRecord);
+		if (fdsRetCode == FDS_SUCCESS) {
+			fileId = flashRecord.p_header->file_id;
+			fds_record_close(&recordDesc);
+			return ERR_SUCCESS;
 		}
 	}
+	return ERR_NOT_FOUND;
 }
 
-bool Storage::isBusy(uint16_t recordKey) {
-	if (_collectingGarbage || _removingFile) {
-		LOGw("Busy: gc=%u rm_file=%u", _collectingGarbage, _removingFile);
-		return true;
+
+
+/**
+ * Iterate over all records, so that in case of duplicates, the last written record will be used to read.
+ */
+cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
 	}
-	for (auto it = _busy_record_keys.begin(); it != _busy_record_keys.end(); it++) {
-		if (*it == recordKey) {
-			LOGw("Busy with record %u", recordKey);
-			return true;
+	uint16_t recordKey = to_underlying_type(stateData.type);
+	if (isBusy(recordKey)) {
+		return ERR_BUSY;
+	}
+	uint16_t fileId = getFileId(stateData.id);
+	fds_record_desc_t recordDesc;
+	cs_ret_code_t csRetCode = ERR_NOT_FOUND;
+	bool done = false;
+	LOGd("Read record %u", recordKey);
+	initSearch();
+	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
+		if (done) {
+			LOGe("Duplicate record key=%u addr=%p", recordKey, _findToken.p_addr);
+		}
+		csRetCode = readRecord(recordDesc, stateData.value, stateData.size, fileId);
+		if (csRetCode == ERR_SUCCESS) {
+			done = true;
+		}
+//		if (done) {
+//			break;
+//		}
+	}
+	if (done) {
+		return ERR_SUCCESS;
+	}
+	if (csRetCode == ERR_NOT_FOUND) {
+		LOGd("Record not found");
+	}
+	return csRetCode;
+}
+
+cs_ret_code_t Storage::readFirst(cs_state_data_t & stateData) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
+	uint16_t recordKey = to_underlying_type(stateData.type);
+	if (isBusy(recordKey)) {
+		return ERR_BUSY;
+	}
+	initSearch(stateData.type);
+	uint16_t fileId;
+	cs_ret_code_t retVal = readNextInternal(recordKey, fileId, stateData.value, stateData.size);
+	if (retVal == ERR_SUCCESS) {
+		stateData.id = getStateId(fileId);
+	}
+	return retVal;
+}
+
+
+cs_ret_code_t Storage::readNext(cs_state_data_t & stateData) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
+	uint16_t recordKey = to_underlying_type(stateData.type);
+	if (isBusy(recordKey)) {
+		return ERR_BUSY;
+	}
+	if (_currentSearchType != stateData.type) {
+		return ERR_WRONG_STATE;
+	}
+	uint16_t fileId;
+	cs_ret_code_t retVal = readNextInternal(recordKey, fileId, stateData.value, stateData.size);
+	if (retVal == ERR_SUCCESS) {
+		stateData.id = getStateId(fileId);
+	}
+	return retVal;
+}
+
+/**
+ * Simply reads the next valid record of given key.
+ */
+cs_ret_code_t Storage::readNextInternal(uint16_t recordKey, uint16_t & fileId, uint8_t* buf, uint16_t size) {
+	fds_record_t record;
+	fds_record_desc_t recordDesc;
+	cs_ret_code_t csRetCode = ERR_NOT_FOUND;
+	while (fds_record_find_by_key(recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
+		csRetCode = readRecord(recordDesc, buf, size, fileId);
+		if (csRetCode == ERR_SUCCESS) {
+			return csRetCode;
 		}
 	}
-	return false;
-	// This costs us 400B or so, not really worth it..
-//	return (std::find(_busy_record_keys.begin(), _busy_record_keys.end(), recordKey) != _busy_record_keys.end());
+	return csRetCode;
 }
 
-bool Storage::isBusy() {
-	if (_collectingGarbage || _removingFile || !_busy_record_keys.empty()) {
-		LOGw("Busy: gc=%u rm_file=%u records=%u", _collectingGarbage, _removingFile, _busy_record_keys.size());
-		return true;
+cs_ret_code_t Storage::readRecord(fds_record_desc_t recordDesc, uint8_t* buf, uint16_t size, uint16_t & fileId) {
+	fds_flash_record_t flashRecord;
+	ret_code_t fdsRetCode = fds_record_open(&recordDesc, &flashRecord);
+	switch (fdsRetCode) {
+	case FDS_SUCCESS: {
+		cs_ret_code_t csRetCode = ERR_SUCCESS;
+		LOGStorageDebug("Opened record id=%u addr=%p", flashRecord.p_header->record_id, recordDesc.p_record);
+		size_t flashSize = flashRecord.p_header->length_words << 2; // Size is in bytes, each word is 4B.
+		if (flashSize != getPaddedSize(size)) {
+			LOGe("stored size = %u ram size = %u", flashSize, size);
+			// TODO: remove this record?
+			csRetCode = ERR_WRONG_PAYLOAD_LENGTH;
+		}
+		else {
+			fileId = flashRecord.p_header->file_id;
+			memcpy(buf, flashRecord.p_data, size);
+		}
+		if (fds_record_close(&recordDesc) != FDS_SUCCESS) {
+			// TODO: How to handle the close error? Maybe reboot?
+			LOGe("Error on closing record err=%u", fdsRetCode);
+		}
+		return csRetCode;
+		break;
 	}
-	return false;
+	case FDS_ERR_CRC_CHECK_FAILED:
+		LOGw("CRC check failed addr=%p", recordDesc.p_record);
+		// TODO: remove record.
+		break;
+	case FDS_ERR_NOT_FOUND:
+	default:
+		LOGw("Unhandled open error: %u", fdsRetCode);
+	}
+	return getErrorCode(fdsRetCode);
 }
 
 cs_ret_code_t Storage::garbageCollect() {
@@ -220,96 +368,45 @@ size16_t Storage::getPaddedSize(size16_t size) {
 	return flashSize;
 }
 
+/*
+ * Default id = 0
+ * Old configs were all at file id FILE_CONFIGURATION.
+ * So for id 0, we want to get FILE_CONFIGURATION.
+ */
+uint16_t Storage::getFileId(uint16_t valueId) {
+	return valueId + FILE_CONFIGURATION;
+}
+uint16_t Storage::getStateId(uint16_t fileId) {
+	return fileId - FILE_CONFIGURATION;
+}
+
 void Storage::print(const std::string & prefix, CS_TYPE type) {
 	LOGd("%s %s (%i)", prefix.c_str(), TypeName(type), type);
 }
 
-/**
- * Iterate over all records, so that in case of duplicates, the last written record will be used to read.
- */
-cs_ret_code_t Storage::read(cs_file_id_t file_id, cs_state_data_t & file_data) {
-	if (!_initialized) {
-		LOGe("Storage not initialized");
-		return ERR_NOT_INITIALIZED;
-	}
-	uint16_t recordKey = to_underlying_type(file_data.type);
-	if (isBusy(recordKey)) {
-		return ERR_BUSY;
-	}
 
-	fds_flash_record_t flash_record;
-	fds_record_desc_t record_desc;
-	ret_code_t fds_ret_code;
 
-	fds_ret_code = FDS_ERR_NOT_FOUND;
-	cs_ret_code_t cs_ret_code = ERR_SUCCESS;
-	bool done = false;
-	LOGd("Read record %u", recordKey);
-	initSearch();
-	while (fds_record_find(file_id, recordKey, &record_desc, &_ftok) == FDS_SUCCESS) {
-		if (done) {
-			LOGe("Duplicate record key=%u addr=%p", recordKey, _ftok.p_addr);
-		}
-		fds_ret_code = fds_record_open(&record_desc, &flash_record);
-		switch (fds_ret_code) {
-		case FDS_SUCCESS: {
-			LOGStorageDebug("Opened record id=%u addr=%p", flash_record.p_header->record_id, record_desc.p_record);
-			size_t flashSize = flash_record.p_header->length_words << 2; // Size is in bytes, each word is 4B.
-			if (flashSize != getPaddedSize(file_data.size)) {
-				LOGe("stored size = %u ram size = %u", flashSize, file_data.size);
-				// TODO: remove this record?
-				cs_ret_code = ERR_WRONG_PAYLOAD_LENGTH;
-			}
-			else {
-				memcpy(file_data.value, flash_record.p_data, file_data.size);
-			}
-			fds_ret_code = fds_record_close(&record_desc);
-			if (fds_ret_code != FDS_SUCCESS) {
-				// TODO: maybe still return success? But how to handle the close error?
-				LOGe("Error on closing record err=%u", fds_ret_code);
-			}
-			done = true;
-			break;
-		}
-		case FDS_ERR_CRC_CHECK_FAILED:
-			LOGw("CRC check failed addr=%p", record_desc.p_record);
-			// TODO: remove record.
-			break;
-		case FDS_ERR_NOT_FOUND:
-		default:
-			LOGw("Unhandled open error: %u", fds_ret_code);
-		}
-//		if (done) {
-//			break;
-//		}
-	}
-	if (fds_ret_code == FDS_ERR_NOT_FOUND) {
-		LOGd("Record not found");
-	}
-	if (cs_ret_code != ERR_SUCCESS) {
-		return cs_ret_code;
-	}
-	return getErrorCode(fds_ret_code);
-}
 
-cs_ret_code_t Storage::remove(cs_file_id_t file_id) {
-	if (!_initialized) {
-		LOGe("Storage not initialized");
-		return ERR_NOT_INITIALIZED;
-	}
-	if (isBusy()) {
-		return ERR_BUSY;
-	}
-	LOGi("Delete file, invalidates all configuration values, but does not remove them yet!");
-	ret_code_t fds_ret_code;
-	fds_ret_code = fds_file_delete(file_id);
-	if (fds_ret_code == FDS_SUCCESS) {
-		_removingFile = true;
-	}
-	return getErrorCode(fds_ret_code);
-}
 
-cs_ret_code_t Storage::remove(cs_file_id_t file_id, CS_TYPE type) {
+
+//cs_ret_code_t Storage::remove(cs_file_id_t file_id) {
+//	if (!_initialized) {
+//		LOGe("Storage not initialized");
+//		return ERR_NOT_INITIALIZED;
+//	}
+//	if (isBusy()) {
+//		return ERR_BUSY;
+//	}
+//	LOGi("Delete file, invalidates all configuration values, but does not remove them yet!");
+//	ret_code_t fds_ret_code;
+//	fds_ret_code = fds_file_delete(file_id);
+//	if (fds_ret_code == FDS_SUCCESS) {
+//		_removingFile = true;
+//	}
+//	return getErrorCode(fds_ret_code);
+//}
+
+cs_ret_code_t Storage::remove(CS_TYPE type, uint16_t id) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -318,6 +415,7 @@ cs_ret_code_t Storage::remove(cs_file_id_t file_id, CS_TYPE type) {
 	if (isBusy(recordKey)) {
 		return ERR_BUSY;
 	}
+	uint16_t file_id = getFileId(id);
 	fds_record_desc_t record_desc;
 	ret_code_t fds_ret_code;
 
@@ -326,7 +424,7 @@ cs_ret_code_t Storage::remove(cs_file_id_t file_id, CS_TYPE type) {
 	// Go through all records with given file_id and key (can be multiple).
 	// Record key can be set busy multiple times.
 	initSearch();
-	while (fds_record_find(file_id, recordKey, &record_desc, &_ftok) == FDS_SUCCESS) {
+	while (fds_record_find(file_id, recordKey, &record_desc, &_findToken) == FDS_SUCCESS) {
 		fds_ret_code = fds_record_delete(&record_desc);
 		if (fds_ret_code == FDS_SUCCESS) {
 			setBusy(recordKey);
@@ -352,9 +450,9 @@ ret_code_t Storage::exists(cs_file_id_t file_id, uint16_t recordKey, bool & resu
 ret_code_t Storage::exists(cs_file_id_t file_id, uint16_t recordKey, fds_record_desc_t & record_desc, bool & result) {
 	initSearch();
 	result = false;
-	while (fds_record_find(file_id, recordKey, &record_desc, &_ftok) == FDS_SUCCESS) {
+	while (fds_record_find(file_id, recordKey, &record_desc, &_findToken) == FDS_SUCCESS) {
 		if (result) {
-			LOGe("Duplicate record key=%u addr=%p", recordKey, _ftok.p_addr);
+			LOGe("Duplicate record key=%u addr=%p", recordKey, _findToken.p_addr);
 //			fds_record_delete(&record_desc);
 		}
 		if (!result) {
@@ -364,9 +462,52 @@ ret_code_t Storage::exists(cs_file_id_t file_id, uint16_t recordKey, fds_record_
 	return ERR_SUCCESS;
 }
 
+void Storage::initSearch(CS_TYPE type) {
+	initSearch();
+	_currentSearchType = type;
+}
+
 void Storage::initSearch() {
 	// clear fds token before every use
-	memset(&_ftok, 0x00, sizeof(fds_find_token_t));
+	memset(&_findToken, 0x00, sizeof(fds_find_token_t));
+	_currentSearchType = CS_TYPE::CONFIG_DO_NOT_USE;
+}
+
+void Storage::setBusy(uint16_t recordKey) {
+	_busy_record_keys.push_back(recordKey);
+}
+
+void Storage::clearBusy(uint16_t recordKey) {
+	for (auto it = _busy_record_keys.begin(); it != _busy_record_keys.end(); it++) {
+		if (*it == recordKey) {
+			_busy_record_keys.erase(it);
+			return;
+		}
+	}
+}
+
+bool Storage::isBusy(uint16_t recordKey) {
+	if (_collectingGarbage || _removingFile) {
+		LOGw("Busy: gc=%u rm_file=%u", _collectingGarbage, _removingFile);
+		return true;
+	}
+	for (auto it = _busy_record_keys.begin(); it != _busy_record_keys.end(); it++) {
+		if (*it == recordKey) {
+			LOGw("Busy with record %u", recordKey);
+			return true;
+		}
+	}
+	return false;
+	// This costs us 400B or so, not really worth it..
+//	return (std::find(_busy_record_keys.begin(), _busy_record_keys.end(), recordKey) != _busy_record_keys.end());
+}
+
+bool Storage::isBusy() {
+	if (_collectingGarbage || _removingFile || !_busy_record_keys.empty()) {
+		LOGw("Busy: gc=%u rm_file=%u records=%u", _collectingGarbage, _removingFile, _busy_record_keys.size());
+		return true;
+	}
+	return false;
 }
 
 /**

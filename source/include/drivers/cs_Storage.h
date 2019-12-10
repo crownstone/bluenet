@@ -115,7 +115,7 @@ public:
 	/**
 	 * Find and read stored value of given type and id.
 	 *
-	 * Checks if given size matches stored size, else it returns ERR_WRONG_PAYLOAD_LENGTH.
+	 * In case of duplicates (values with same type and id), you will get the latest value.
 	 *
 	 * @param[in,out] data        Data struct with type and id to read. Pointer and size will be set afterwards.
 	 *
@@ -131,8 +131,6 @@ public:
 	 *
 	 * NOTE: you should complete or abort this readFirst() / readNext() before starting a new one.
 	 *
-	 * Checks if given size matches stored size, else it returns ERR_WRONG_PAYLOAD_LENGTH.
-	 *
 	 * @param[in,out] data        Data struct with type to read. ID, pointer, and size will be set afterwards.
 	 *
 	 * @retval ERR_SUCCESS                  When successful.
@@ -147,7 +145,7 @@ public:
 	 *
 	 * NOTE: must be called immediately after readFirst(), no other storage operations should be done in between.
 	 *
-	 * Checks if given size matches stored size, else it returns ERR_WRONG_PAYLOAD_LENGTH.
+	 * When iterating: just keep overwriting, so in case of duplicates (same type and id), you end up with the latest value.
 	 *
 	 * @param[in,out] data        Data struct with type to read. ID, pointer, and size will be set afterwards.
 	 *
@@ -172,14 +170,6 @@ public:
 	 * @retval ERR_NO_SPACE                 When there is no space, not even after garbage collection.
 	 */
 	cs_ret_code_t write(const cs_state_data_t & data);
-
-	/**
-	 * Allocate ram that is correctly aligned and padded.
-	 *
-	 * @param[in,out] size        Requested size, afterwards set to the allocated size.
-	 * @return                    Pointer to allocated memory.
-	 */
-	uint8_t* allocate(size16_t& size);
 
 //	/**
 //	 * Remove all values of a type.
@@ -223,6 +213,14 @@ public:
 	 * @retval ERR_NOT_AVAILABLE            When you can't use this function (storage initialized already).
 	 */
 	cs_ret_code_t eraseAllPages();
+
+	/**
+	 * Allocate ram that is correctly aligned and padded.
+	 *
+	 * @param[in,out] size        Requested size, afterwards set to the allocated size.
+	 * @return                    Pointer to allocated memory.
+	 */
+	uint8_t* allocate(size16_t& size);
 
 	/**
 	 * Handle Crownstone events.
@@ -285,6 +283,18 @@ private:
 	 * Find next fileId for given recordKey.
 	 */
 	cs_ret_code_t findNextInternal(uint16_t recordKey, uint16_t & fileId);
+
+	/**
+	 * Read next fileId for given recordKey.
+	 */
+	cs_ret_code_t readNextInternal(uint16_t recordKey, uint16_t & fileId, uint8_t* buf, uint16_t size);
+
+	/**
+	 * Read a record: copy data to buffer, and sets fileId.
+	 *
+	 * Only returns success when data has been copied to buffer.
+	 */
+	cs_ret_code_t readRecord(fds_record_desc_t recordDesc, uint8_t* buf, uint16_t size, uint16_t & fileId);
 
 	/**
 	 * Start a new search, where the user wants to iterate over a certain type.
