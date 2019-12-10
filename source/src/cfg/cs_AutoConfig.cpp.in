@@ -1,0 +1,11 @@
+#include <cfg/cs_AutoConfig.h>
+
+#define CS_FIRMWARE_VERSION "@FIRMWARE_VERSION@"
+const char g_FIRMWARE_VERSION[] = CS_FIRMWARE_VERSION;
+
+#define CS_COMPILATION_DAY "@COMPILATION_DAY@"
+const char g_COMPILATION_DAY[] = CS_COMPILATION_DAY;
+
+#define CS_BUILD_TYPE "@CMAKE_BUILD_TYPE@"
+const char g_BUILD_TYPE[] = CS_BUILD_TYPE;
+

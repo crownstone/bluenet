@@ -25,8 +25,6 @@ MESSAGE(STATUS "bootloader: Search for FindX files in ${CMAKE_MODULE_PATH}")
 
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
 SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
-#SET(GIT_BRANCH                               "unset"       CACHE STRING "Current git branch")
-#SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
 SET(CONFIG_DIR                               "config"      CACHE STRING "The config main directory")
@@ -39,13 +37,16 @@ SET(BOOTLOADER_LENGTH                        "unset"       CACHE STRING "Size of
 #######################################################################################################################
 
 MESSAGE(STATUS "bootloader: Set verbosity to level: ${VERBOSITY}")
-#MESSAGE(STATUS "bootloader: Git branch: ${GIT_BRANCH}")
-#MESSAGE(STATUS "bootloader: Day of compilation: ${COMPILATION_DAY}")
 MESSAGE(STATUS "bootloader: Compiler: ${CMAKE_C_COMPILER}")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
 #######################################################################################################################
+
+string(TIMESTAMP COMPILATION_DAY "%Y-%m-%d")
+
+include(GetGitRevisionDescription)
+get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 #######################################################################################################################
 
@@ -301,8 +302,12 @@ ENDIF()
 ADD_DEFINITIONS("-DUSE_APP_CONFIG")
 
 ADD_DEFINITIONS("-DBOOTLOADER_VERSION=${BOOTLOADER_VERSION}")
+		
+message(STATUS "Configure cs_BootloaderConfig.cpp file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_BootloaderConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c" @ONLY)
+list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
 
-ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES})
+ADD_EXECUTABLE(${PROJECT_NAME} ${MAIN_FILE} ${BOOTLOADER_SOURCE_FILES} ${GENERATED_SOURCES})
 
 # Setting properties like this does not work, perhaps CMake finds it difficult to find the right compiler
 # target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_11)

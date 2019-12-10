@@ -6,6 +6,7 @@
  */
 
 #include <ble/cs_Nordic.h>
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_HardwareVersions.h>
 #include <cfg/cs_UuidConfig.h>
@@ -124,11 +125,13 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 	_firmwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_firmwareRevisionCharacteristic);
 
-#ifdef GIT_HASH
-	std::string firmware_version = STRINGIFY(GIT_HASH);
-#else
-	std::string firmware_version = STRINGIFY(FIRMWARE_VERSION);
-#endif
+	std::string firmware_version;
+	if (strcmp(g_BUILD_TYPE, "Release") == 0) {
+		firmware_version = g_FIRMWARE_VERSION;
+	} else {
+		firmware_version = g_GIT_SHA1;
+	}
+	LOGd("Firmware version: %s", firmware_version.c_str());
 
 	_firmwareRevisionCharacteristic->setUUID(BLE_UUID_FIRMWARE_REVISION_STRING_CHAR);
 	_firmwareRevisionCharacteristic->setName(BLE_CHAR_FIRMWARE_REVISION);

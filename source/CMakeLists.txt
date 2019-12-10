@@ -40,6 +40,8 @@ MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 #load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
 #load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
 
+string(TIMESTAMP COMPILATION_DAY "%Y-%m-%d")
+
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
@@ -68,7 +70,6 @@ endif()
 
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
 SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
-#SET(COMPILATION_DAY                          "unset"       CACHE STRING "Day of compilation")
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
 SET(SOFTDEVICE_HEX_FILE                      ""            CACHE STRING "Softdevice hex file")
@@ -84,8 +85,6 @@ MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
 #######################################################################################################################
 
 MESSAGE(STATUS "Set verbosity to level: ${VERBOSITY}")
-#MESSAGE(STATUS "Git branch: ${GIT_BRANCH}")
-#MESSAGE(STATUS "Day of compilation: ${COMPILATION_DAY}")
 MESSAGE(STATUS "Compiler: ${CMAKE_C_COMPILER}")
 
 IF(SERIAL_NUM STREQUAL "")
@@ -512,6 +511,10 @@ ELSE()
 		message(STATUS "Configure cs_Git.cpp file")
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_Git.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp" @ONLY)
 		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_Git.cpp")
+		
+		message(STATUS "Configure cs_AutoConfig.cpp file")
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp" @ONLY)
+		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 		
 		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
 		

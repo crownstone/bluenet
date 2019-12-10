@@ -32,6 +32,7 @@
 
 #include <cs_Crownstone.h>
 
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_Git.h>
 #include <cfg/cs_DeviceTypes.h>
@@ -980,13 +981,7 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	serial_init(SERIAL_ENABLE_RX_AND_TX);
 	_log(SERIAL_INFO, SERIAL_CRLF);
 
-#ifdef GIT_SHA1
-#undef FIRMWARE_VERSION
-#define FIRMWARE_VERSION GIT_SHA1
-#endif
-
-	LOGi("Welcome! Bluenet firmware, version %s", g_GIT_SHA1);
-//	LOGi("Welcome! Bluenet firmware, version %s", STRINGIFY(FIRMWARE_VERSION));
+	LOGi("Welcome to Bluenet!");
 	LOGi("\033[35;1m");
 	LOGi(" _|_|_|    _|                                            _|     ");
 	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");
@@ -994,9 +989,12 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
 	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
 	LOGi("\033[0m");
-
-	LOGi("Compilation date: %s", STRINGIFY(COMPILATION_DAY));
+	
+	LOGi("Firmware version %s", g_FIRMWARE_VERSION);
+	LOGi("Git hash %s", g_GIT_SHA1);
+	LOGi("Compilation date: %s", g_COMPILATION_DAY);
 	LOGi("Compilation time: %s", __TIME__);
+	LOGi("Build type: %s", g_BUILD_TYPE);
 	LOGi("Hardware version: %s", get_hardware_version());
 	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
 #ifdef DEBUG
