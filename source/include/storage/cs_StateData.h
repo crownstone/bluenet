@@ -23,6 +23,7 @@ struct cs_state_data_t {
 	uint16_t id;
 	uint8_t *value;
 	size16_t size;
+	// TODO 2019-12-10 Bart: add size16_t allocatedSize; to indicate how much is actually allocated, handy for storage, which requires a padded buffer.
 
 	cs_state_data_t():
 		type(CS_TYPE::CONFIG_DO_NOT_USE),
