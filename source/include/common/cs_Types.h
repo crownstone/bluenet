@@ -213,7 +213,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_STORAGE_INITIALIZED,                          // Sent when Storage is initialized, storage is only usable after this event!
 	EVT_STORAGE_WRITE_DONE,                           // Sent when an item has been written to storage. -- Payload is CS_TYPE, the type that was written.
 	EVT_STORAGE_REMOVE_DONE,                          // Sent when an item has been invalidated at storage. -- Payload is CS_TYPE, the type that was invalidated.
-	EVT_STORAGE_REMOVE_FILE_DONE,                     // Sent when a file has been invalidated at storage. -- Payload is cs_file_id_t, the file that was invalidated.
+	EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID,             // Sent when all state values with a certain ID have been invalidated at storage. -- ID as payload.
 	EVT_STORAGE_GC_DONE,                              // Sent when garbage collection is done, invalidated data is actually removed at this point.
 	EVT_STORAGE_FACTORY_RESET,                        // Sent when factory reset of storage is done.
 	EVT_STORAGE_PAGES_ERASED,                         // Sent when all storage pages are completely erased.
@@ -386,7 +386,7 @@ typedef  state_external_stone_t TYPIFY(EVT_STATE_EXTERNAL_STONE);
 typedef  void TYPIFY(EVT_STORAGE_INITIALIZED);
 typedef  CS_TYPE TYPIFY(EVT_STORAGE_WRITE_DONE);
 typedef  CS_TYPE TYPIFY(EVT_STORAGE_REMOVE_DONE);
-typedef  cs_file_id_t TYPIFY(EVT_STORAGE_REMOVE_FILE_DONE);
+typedef  uint16_t TYPIFY(EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID);
 typedef  void TYPIFY(EVT_STORAGE_GC_DONE);
 typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET);
 typedef  void TYPIFY(EVT_STORAGE_PAGES_ERASED);

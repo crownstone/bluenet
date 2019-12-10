@@ -390,6 +390,27 @@ cs_ret_code_t Storage::remove(CS_TYPE type) {
 	return getErrorCode(fdsRetCode);
 }
 
+cs_ret_code_t Storage::remove(uint16_t id) {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
+	uint16_t fileId = getFileId(id);
+	if (!isValidFileId(fileId)) {
+		return ERR_WRONG_PARAMETER;
+	}
+	if (isBusy()) {
+		return ERR_BUSY;
+	}
+	ret_code_t fdsRetCode = fds_file_delete(fileId);
+	if (fdsRetCode == FDS_SUCCESS) {
+		_removingFile = true;
+	}
+	return getErrorCode(fdsRetCode);
+}
+
+
+
 cs_ret_code_t Storage::garbageCollect() {
 	return getErrorCode(garbageCollectInternal());
 }
@@ -639,7 +660,8 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 		LOGw("Write FDSerror=%u record=%u", p_fds_evt->result, p_fds_evt->write.record_key);
 		if (_errorCallback) {
 			CS_TYPE type = toCsType(p_fds_evt->write.record_key);
-			_errorCallback(CS_STORAGE_OP_WRITE, p_fds_evt->write.file_id, type);
+			uint16_t id = getStateId(p_fds_evt->write.file_id);
+			_errorCallback(CS_STORAGE_OP_WRITE, type, id);
 		}
 		else {
 			LOGw("Unhandled write error: %u record=%u", p_fds_evt->result, p_fds_evt->write.record_key);
@@ -662,10 +684,11 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 		LOGw("Remove FDSerror=%u record=%u", p_fds_evt->result, p_fds_evt->del.record_key);
 		if (_errorCallback) {
 			CS_TYPE type = toCsType(p_fds_evt->del.record_key);
-			_errorCallback(CS_STORAGE_OP_REMOVE, p_fds_evt->del.file_id, type);
+			uint16_t id = getStateId(p_fds_evt->write.file_id);
+			_errorCallback(CS_STORAGE_OP_REMOVE, type, id);
 		}
 		else {
-			LOGw("Unhandled rem record error: %u record=%u", p_fds_evt->result, p_fds_evt->del.record_key);
+			LOGw("Unhandled");
 		}
 	}
 }
@@ -675,18 +698,20 @@ void Storage::handleRemoveFileEvent(fds_evt_t const * p_fds_evt) {
 	switch (p_fds_evt->result) {
 	case FDS_SUCCESS: {
 		cs_file_id_t fileId = p_fds_evt->del.file_id;
-		LOGi("Remove file done, file_id=%u", fileId);
-		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE, &fileId, sizeof(fileId));
+		LOGi("Remove file done, fileId=%u", fileId);
+		uint16_t stateId = getStateId(fileId);
+		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID, &stateId, sizeof(stateId));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
 	default:
-		LOGw("Remove FDSerror=%u file=%u", p_fds_evt->result, p_fds_evt->del.file_id);
+		LOGw("Remove FDSerror=%u fileId=%u", p_fds_evt->result, p_fds_evt->del.file_id);
 		if (_errorCallback) {
-			_errorCallback(CS_STORAGE_OP_REMOVE_FILE, p_fds_evt->del.file_id, CS_TYPE::CONFIG_DO_NOT_USE);
+			uint16_t id = getStateId(p_fds_evt->write.file_id);
+			_errorCallback(CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id);
 		}
 		else {
-			LOGw("Unhandled rem file error: %u file_id=%u", p_fds_evt->result, p_fds_evt->del.file_id);
+			LOGw("Unhandled");
 		}
 	}
 }
@@ -704,7 +729,7 @@ void Storage::handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt) {
 		LOGw("Garbage collection timeout");
 	default:
 		if (_errorCallback) {
-			_errorCallback(CS_STORAGE_OP_GC, 0, CS_TYPE::CONFIG_DO_NOT_USE);
+			_errorCallback(CS_STORAGE_OP_GC, CS_TYPE::CONFIG_DO_NOT_USE, 0);
 		}
 		else {
 			LOGw("Unhandled GC error: %u", p_fds_evt->result);

@@ -21,11 +21,11 @@ enum cs_storage_operation_t {
 	CS_STORAGE_OP_READ,
 	CS_STORAGE_OP_WRITE,
 	CS_STORAGE_OP_REMOVE,
-	CS_STORAGE_OP_REMOVE_FILE,
+	CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID,
 	CS_STORAGE_OP_GC,
 };
 
-typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, cs_file_id_t fileId, CS_TYPE type);
+typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, CS_TYPE type, uint16_t id);
 
 /**
  * Class to store items persistently in flash (persistent) memory.
@@ -177,8 +177,8 @@ public:
 	 * @param[in] type            Type to remove.
 	 * @param[in] id              ID of value to remove.
 	 *
-	 * @retval ERR_SUCCESS                  When successfully started removing the type.
-	 * @retval ERR_NOT_FOUND                When no value with given type and id was found, consider this a success, but don't wait for an event.
+	 * @retval ERR_SUCCESS                  When successfully started removing the value.
+	 * @retval ERR_NOT_FOUND                When no match was found, consider this a success, but don't wait for an event.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
@@ -189,12 +189,24 @@ public:
 	 *
 	 * @param[in] type            Type to remove.
 	 *
-	 * @retval ERR_SUCCESS                  When successfully started removing the file.
-	 * @retval ERR_NOT_FOUND                When type was not found, consider this a success, but don't wait for an event.
+	 * @retval ERR_SUCCESS                  When successfully started removing the type.
+	 * @retval ERR_NOT_FOUND                When no match was not found, consider this a success, but don't wait for an event.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
 	cs_ret_code_t remove(CS_TYPE type);
+
+	/**
+	 * Remove all values with given id.
+	 *
+	 * @param[in] id              ID of the values to remove.
+	 *
+	 * @retval ERR_SUCCESS                  When successfully started removing.
+	 * @retval ERR_NOT_FOUND                When no match was not found, consider this a success, but don't wait for an event.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
+	 */
+	cs_ret_code_t remove(uint16_t id);
 
 	/**
 	 * Garbage collection reclaims the flash space that is occupied by records that have been deleted,

@@ -59,8 +59,9 @@ constexpr OperationMode getOperationMode(uint8_t mode) {
 
 enum cs_state_queue_op_t {
 	CS_STATE_QUEUE_OP_WRITE,
-	CS_STATE_QUEUE_OP_REM,
-	CS_STATE_QUEUE_OP_REM_FILE,
+	CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE,
+	CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE,
+	CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID,
 	CS_STATE_QUEUE_OP_GC,
 };
 
@@ -71,8 +72,8 @@ enum cs_state_queue_op_t {
  */
 struct __attribute__((__packed__)) cs_state_store_queue_t {
 	cs_state_queue_op_t operation;
-	cs_file_id_t fileId;
 	CS_TYPE type;
+	uint16_t id;
 	uint16_t counter;
 };
 
@@ -219,7 +220,7 @@ public:
 	 * @param[in] mode            Indicates whether to remove data from RAM, FLASH, or a combination of this.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t remove(const CS_TYPE & type, const PersistenceMode mode = PersistenceMode::STRATEGY1);
+	cs_ret_code_t remove(const CS_TYPE & type, uint16_t id, const PersistenceMode mode = PersistenceMode::STRATEGY1);
 
 	/**
 	 * Erase all used persistent storage.
@@ -260,7 +261,7 @@ public:
 	/**
 	 * Internal usage
 	 */
-	void handleStorageError(cs_storage_operation_t operation, cs_file_id_t fileId, CS_TYPE type);
+	void handleStorageError(cs_storage_operation_t operation, CS_TYPE type, uint16_t id);
 
 	/**
 	 * Handle (crownstone) events.
@@ -281,11 +282,12 @@ protected:
 	 * Find given type in ram.
 	 *
 	 * @param[in]                 Type to search for.
+	 * @param[in]                 Id to search for.
 	 * @param[out]                Index in ram register where the type was found.
 	 * @return                    ERR_SUCCESS when type was found.
 	 * @return                    ERR_NOT_FOUND when type was not found.
 	 */
-	cs_ret_code_t findInRam(const CS_TYPE & type, size16_t & index_in_ram);
+	cs_ret_code_t findInRam(const CS_TYPE & type, uint16_t id, size16_t & index_in_ram);
 
 	cs_ret_code_t storeInRam(const cs_state_data_t & data);
 
@@ -311,7 +313,7 @@ protected:
 	 * @param[in] size            State variable size.
 	 * @return                    Struct with allocated data pointer.
 	 */
-	cs_state_data_t & addToRam(const CS_TYPE & type, size16_t size);
+	cs_state_data_t & addToRam(const CS_TYPE & type, uint16_t id, size16_t size);
 
 	/**
 	 * Removed a state variable from ram.
@@ -321,7 +323,7 @@ protected:
 	 * @param[in] type            State type.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t removeFromRam(const CS_TYPE & type);
+	cs_ret_code_t removeFromRam(const CS_TYPE & type, uint16_t id);
 
 	/**
 	 * Writes state variable in ram to flash.
@@ -334,7 +336,18 @@ protected:
 	cs_ret_code_t storeInFlash(size16_t & index_in_ram);
 
 	/**
-	 * Remove a state variable from flash.
+	 * Remove given id of given type from flash.
+	 *
+	 * Can return ERR_BUSY, in which case you have to retry again later.
+	 *
+	 * @param[in] type            State type.
+	 * @param[in] id              State value id.
+	 * @return                    Return code.
+	 */
+	cs_ret_code_t removeFromFlash(const CS_TYPE & type, const uint16_t id);
+
+	/**
+	 * Remove all values of a certain type from flash.
 	 *
 	 * Can return ERR_BUSY, in which case you have to retry again later.
 	 *
@@ -342,6 +355,16 @@ protected:
 	 * @return                    Return code.
 	 */
 	cs_ret_code_t removeFromFlash(const CS_TYPE & type);
+
+//	/**
+//	 * Remove all values of a certain type from flash.
+//	 *
+//	 * Can return ERR_BUSY, in which case you have to retry again later.
+//	 *
+//	 * @param[in] type            State type.
+//	 * @return                    Return code.
+//	 */
+//	cs_ret_code_t removeFromFlash(const CS_TYPE & type);
 
 	/**
 	 * Add an operation to queue.
@@ -355,7 +378,7 @@ protected:
 	 * @param[in] delayMs         Delay in ms.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t addToQueue(cs_state_queue_op_t operation, cs_file_id_t fileId, const CS_TYPE & type, uint32_t delayMs);
+	cs_ret_code_t addToQueue(cs_state_queue_op_t operation, const CS_TYPE & type, uint16_t id, uint32_t delayMs);
 
 	cs_ret_code_t allocate(cs_state_data_t & data);
 
@@ -388,7 +411,7 @@ private:
 
 	cs_ret_code_t setInternal(const cs_state_data_t & data, PersistenceMode mode);
 
-	cs_ret_code_t removeInternal(const CS_TYPE & type, const PersistenceMode mode);
+	cs_ret_code_t removeInternal(const CS_TYPE & type, uint16_t id, const PersistenceMode mode);
 
 	cs_ret_code_t getDefaultValue(cs_state_data_t & data);
 };

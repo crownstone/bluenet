@@ -24,8 +24,8 @@
 // Define as LOGd to get debug logs.
 #define LOGStateDebug LOGnone
 
-void storageErrorCallback(cs_storage_operation_t operation, cs_file_id_t fileId, CS_TYPE type) {
-	State::getInstance().handleStorageError(operation, fileId, type);
+void storageErrorCallback(cs_storage_operation_t operation, CS_TYPE type, uint16_t id) {
+	State::getInstance().handleStorageError(operation, type, id);
 }
 
 State::State() : _storage(NULL), _boardsConfig(NULL) {
@@ -82,9 +82,9 @@ cs_ret_code_t State::verifySizeForSet(const cs_state_data_t & data) {
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t State::findInRam(const CS_TYPE & type, size16_t & index_in_ram) {
+cs_ret_code_t State::findInRam(const CS_TYPE & type, uint16_t id, size16_t & index_in_ram) {
 	for (size16_t i = 0; i < _ram_data_register.size(); ++i) {
-		if (_ram_data_register[i].type == type) {
+		if (_ram_data_register[i].type == type && _ram_data_register[i].id == id) {
 			index_in_ram = i;
 			return ERR_SUCCESS;
 		}
@@ -102,8 +102,8 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data) {
  */
 cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_in_ram) {
 	// TODO: Check if enough RAM is available
-	LOGStateDebug("storeInRam type=%u size=%u", to_underlying_type(data.type), data.size);
-	cs_ret_code_t ret_code = findInRam(data.type, index_in_ram);
+	LOGStateDebug("storeInRam type=%u id=%u size=%u", to_underlying_type(data.type), data.id, data.size);
+	cs_ret_code_t ret_code = findInRam(data.type, data.id, index_in_ram);
 	if (ret_code == ERR_SUCCESS) {
 		LOGStateDebug("Update RAM");
 		cs_state_data_t & ram_data = _ram_data_register[index_in_ram];
@@ -117,28 +117,29 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 	}
 	else {
 		LOGStateDebug("Store in RAM type=%u", data.type);
-		cs_state_data_t & ram_data = addToRam(data.type, data.size);
+		cs_state_data_t & ram_data = addToRam(data.type, data.id, data.size);
 		memcpy(ram_data.value, data.value, data.size);
 		index_in_ram = _ram_data_register.size() - 1;
 	}
 	return ERR_SUCCESS;
 }
 
-cs_state_data_t & State::addToRam(const CS_TYPE & type, size16_t size) {
+cs_state_data_t & State::addToRam(const CS_TYPE & type, uint16_t id, size16_t size) {
 	cs_state_data_t & data = *(cs_state_data_t*)malloc(sizeof(cs_state_data_t));
 	data.type = type;
+	data.id = id;
 	data.size = size;
 	allocate(data);
 	_ram_data_register.push_back(data);
-	LOGStateDebug("Added type=%u size=%u val=%p", data.type, data.size, data.value);
+	LOGStateDebug("Added type=%u id=%u size=%u val=%p", data.type, data.id, data.size, data.value);
 	LOGStateDebug("RAM index now of size %i", _ram_data_register.size());
 	return data;
 }
 
-cs_ret_code_t State::removeFromRam(const CS_TYPE & type) {
-	LOGStateDebug("removeFromRam type=%u", to_underlying_type(type));
+cs_ret_code_t State::removeFromRam(const CS_TYPE & type, uint16_t id) {
+	LOGStateDebug("removeFromRam type=%u id=%u", to_underlying_type(type), id);
 	size16_t index_in_ram;
-	cs_ret_code_t ret_code = findInRam(type, index_in_ram);
+	cs_ret_code_t ret_code = findInRam(type, id, index_in_ram);
 	if (ret_code == ERR_SUCCESS) {
 		LOGStateDebug("Remove from RAM");
 		cs_state_data_t* ram_data = &(_ram_data_register[index_in_ram]);
@@ -167,7 +168,7 @@ cs_ret_code_t State::allocate(cs_state_data_t & data) {
  */
 cs_ret_code_t State::loadFromRam(cs_state_data_t & data) {
 	size16_t index_in_ram;
-	cs_ret_code_t ret_code = findInRam(data.type, index_in_ram);
+	cs_ret_code_t ret_code = findInRam(data.type, data.id, index_in_ram);
 	if (ret_code != ERR_SUCCESS) {
 		return ret_code;
 	}
@@ -191,7 +192,7 @@ cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
 	}
 	cs_state_data_t ram_data = _ram_data_register[index_in_ram];
 	LOGStateDebug("Storage write type=%u size=%u data=%p [0x%X,...]", ram_data.type, ram_data.size, ram_data.value, ram_data.value[0]);
-	cs_ret_code_t ret_code = _storage->write(getFileId(ram_data.type), ram_data);
+	cs_ret_code_t ret_code = _storage->write(ram_data);
 	switch (ret_code) {
 	case ERR_BUSY: {
 		return ERR_BUSY;
@@ -205,11 +206,25 @@ cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
 	}
 }
 
+cs_ret_code_t State::removeFromFlash(const CS_TYPE & type, const uint16_t id) {
+	if (!_startedWritingToFlash) {
+		return ERR_BUSY;
+	}
+	cs_ret_code_t ret_code = _storage->remove(type, id);
+	switch(ret_code) {
+	case ERR_SUCCESS:
+	case ERR_NOT_FOUND:
+		return ERR_SUCCESS;
+	default:
+		return ret_code;
+	}
+}
+
 cs_ret_code_t State::removeFromFlash(const CS_TYPE & type) {
 	if (!_startedWritingToFlash) {
 		return ERR_BUSY;
 	}
-	cs_ret_code_t ret_code = _storage->remove(getFileId(type), type);
+	cs_ret_code_t ret_code = _storage->remove(type);
 	switch(ret_code) {
 	case ERR_SUCCESS:
 	case ERR_NOT_FOUND:
@@ -222,6 +237,7 @@ cs_ret_code_t State::removeFromFlash(const CS_TYPE & type) {
 cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	ret_code_t ret_code = ERR_NOT_FOUND;
 	CS_TYPE type = data.type;
+	uint16_t id = data.id;
 	size16_t typeSize = TypeSize(type);
 	if (typeSize == 0) {
 		return ERR_UNKNOWN_TYPE;
@@ -236,7 +252,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 		case PersistenceMode::RAM:
 			return loadFromRam(data);
 		case PersistenceMode::FLASH:
-			return _storage->read(getFileId(type), data);
+			return _storage->read(data);
 		case PersistenceMode::STRATEGY1: {
 			// First check if it's already in ram.
 			ret_code = loadFromRam(data);
@@ -245,7 +261,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 				return ERR_SUCCESS;
 			}
 			// Else we're going to add a new type to the ram data.
-			cs_state_data_t & ram_data = addToRam(type, typeSize);
+			cs_state_data_t & ram_data = addToRam(type, id, typeSize);
 
 			// See if we need to check flash.
 			if (DefaultLocation(type) == PersistenceMode::RAM) {
@@ -256,7 +272,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 				}
 			}
 			else {
-				ret_code = _storage->read(getFileId(type), ram_data);
+				ret_code = _storage->read(ram_data);
 				switch(ret_code) {
 					case ERR_SUCCESS: {
 						break;
@@ -297,6 +313,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 	LOGStateDebug("Set value: %s: %u", TypeName(data.type), data.type);
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	CS_TYPE type = data.type;
+	uint16_t id = data.id;
 	size16_t typeSize = TypeSize(type);
 	if (typeSize == 0) {
 		LOGw("Wrong type %u", data.type)
@@ -338,7 +355,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
 			ret_code = storeInFlash(index);
 			if (ret_code == ERR_BUSY) {
-				return addToQueue(CS_STATE_QUEUE_OP_WRITE, getFileId(type), type, STATE_RETRY_STORE_DELAY_MS);
+				return addToQueue(CS_STATE_QUEUE_OP_WRITE, type, id, STATE_RETRY_STORE_DELAY_MS);
 			}
 			break;
 		}
@@ -351,7 +368,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 	return ret_code;
 }
 
-cs_ret_code_t State::removeInternal(const CS_TYPE & type, const PersistenceMode mode) {
+cs_ret_code_t State::removeInternal(const CS_TYPE & type, uint16_t id, const PersistenceMode mode) {
 	LOGStateDebug("Remove value: %s", TypeName(type));
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	switch(mode) {
@@ -365,7 +382,7 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, const PersistenceMode 
 	case PersistenceMode::STRATEGY1: {
 		switch(DefaultLocation(type)) {
 		case PersistenceMode::RAM:
-			return removeFromRam(type);
+			return removeFromRam(type, id);
 		case PersistenceMode::FLASH:
 			// fall-through
 			break;
@@ -374,15 +391,15 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, const PersistenceMode 
 			return ERR_NOT_IMPLEMENTED;
 		}
 		// First remove from ram, this should always succeed.
-		ret_code = removeFromRam(type);
+		ret_code = removeFromRam(type, id);
 		if (ret_code != ERR_SUCCESS) {
 			LOGw("Failed to remove from RAM");
 			return ret_code;
 		}
 		// Then remove from flash asynchronously.
-		ret_code = removeFromFlash(type);
+		ret_code = removeFromFlash(type, id);
 		if (ret_code == ERR_BUSY) {
-			return addToQueue(CS_STATE_QUEUE_OP_REM, getFileId(type), type, STATE_RETRY_STORE_DELAY_MS);
+			return addToQueue(CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE, type, id, STATE_RETRY_STORE_DELAY_MS);
 		}
 		break;
 	}
@@ -409,21 +426,24 @@ cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delay) {
 		return ret_code;
 	}
 	uint32_t delayMs = 1000 * delay;
-	return addToQueue(CS_STATE_QUEUE_OP_WRITE, getFileId(data.type), data.type, delayMs);
+	return addToQueue(CS_STATE_QUEUE_OP_WRITE, data.type, data.id, delayMs);
 }
 
-cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, cs_file_id_t fileId, const CS_TYPE & type, uint32_t delayMs) {
+cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, const CS_TYPE & type, uint16_t id, uint32_t delayMs) {
 	uint32_t delayTicks = delayMs / TICK_INTERVAL_MS;
-	LOGStateDebug("Add to queue op=%u fileId=%u type=%s delayMs=%u delayTicks=%u", operation, fileId, TypeName(type), delayMs, delayTicks);
+	LOGStateDebug("Add to queue op=%u type=%s id=%u delayMs=%u delayTicks=%u", operation, TypeName(type), id, delayMs, delayTicks);
 	bool found = false;
 	switch (operation) {
 	case CS_STATE_QUEUE_OP_WRITE:
-	case CS_STATE_QUEUE_OP_REM:{
+	case CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE:{
 		for (size_t i=0; i<_store_queue.size(); ++i) {
 			// A write operation replaces a remove operation, and vice versa.
-			if ((_store_queue[i].type == type) &&
-					(_store_queue[i].operation == CS_STATE_QUEUE_OP_WRITE || _store_queue[i].operation == CS_STATE_QUEUE_OP_REM)
-					) {
+			if ((_store_queue[i].type == type && _store_queue[i].id == id) &&
+					(
+						(_store_queue[i].operation == CS_STATE_QUEUE_OP_WRITE) ||
+						(_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE)
+					)
+				) {
 				_store_queue[i].counter = delayTicks;
 				found = true;
 				break;
@@ -431,9 +451,25 @@ cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, cs_file_id_t file
 		}
 		break;
 	}
-	case CS_STATE_QUEUE_OP_REM_FILE:{
+	case CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE: {
 		for (size_t i=0; i<_store_queue.size(); ++i) {
-			if ((_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_FILE) && (_store_queue[i].fileId == fileId)) {
+			if ((_store_queue[i].type == type) &&
+					(
+						(_store_queue[i].operation == CS_STATE_QUEUE_OP_WRITE) ||
+						(_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE) ||
+						(_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE)
+					)
+				) {
+				_store_queue[i].counter = delayTicks;
+				found = true;
+				break;
+			}
+		}
+		break;
+	}
+	case CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID:{
+		for (size_t i=0; i<_store_queue.size(); ++i) {
+			if ((_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID) && (_store_queue[i].id == id)) {
 				_store_queue[i].counter = delayTicks;
 				found = true;
 				break;
@@ -447,8 +483,8 @@ cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, cs_file_id_t file
 	if (!found) {
 		cs_state_store_queue_t item;
 		item.operation = operation;
-		item.fileId = fileId;
 		item.type = type;
+		item.id = id;
 		item.counter = delayTicks;
 		_store_queue.push_back(item);
 	}
@@ -472,7 +508,7 @@ void State::delayedStoreTick() {
 			bool removeItem = true;
 			switch (it->operation) {
 			case CS_STATE_QUEUE_OP_WRITE: {
-				ret_code = findInRam(it->type, index_in_ram);
+				ret_code = findInRam(it->type, it->id, index_in_ram);
 				if (ret_code == ERR_SUCCESS) {
 					ret_code = storeInFlash(index_in_ram);
 					if (ret_code == ERR_BUSY) {
@@ -481,15 +517,22 @@ void State::delayedStoreTick() {
 				}
 				break;
 			}
-			case CS_STATE_QUEUE_OP_REM: {
+			case CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE: {
+				ret_code = removeFromFlash(it->type, it->id);
+				if (ret_code == ERR_BUSY) {
+					removeItem = false;
+				}
+				break;
+			}
+			case CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE: {
 				ret_code = removeFromFlash(it->type);
 				if (ret_code == ERR_BUSY) {
 					removeItem = false;
 				}
 				break;
 			}
-			case CS_STATE_QUEUE_OP_REM_FILE: {
-				ret_code = _storage->remove(it->fileId);
+			case CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID: {
+				ret_code = _storage->remove(it->id);
 				if (ret_code == ERR_BUSY) {
 					removeItem = false;
 				}
@@ -541,8 +584,8 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 	return retVal;
 }
 
-cs_ret_code_t State::remove(const CS_TYPE & type, const PersistenceMode mode) {
-	return removeInternal(type, mode);
+cs_ret_code_t State::remove(const CS_TYPE & type, uint16_t id, const PersistenceMode mode) {
+	return removeInternal(type, id, mode);
 	// 31-10-2019 TODO: send event?
 }
 
@@ -573,32 +616,43 @@ void State::startWritesToFlash() {
 
 void State::factoryReset() {
 	LOGw("Perform factory reset!");
-	cs_ret_code_t retCode = _storage->remove(FILE_CONFIGURATION);
+	_performingFactoryReset = true;
+
+	// TODO: remove all IDs of each type.
+	// TODO: clear queue of writes
+
+	for (uint32_t i=0; i<TypeBases::General_Base; ++i) {
+		CS_TYPE type = toCsType(i);
+		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE, type, 0, STATE_RETRY_STORE_DELAY_MS);
+	}
+
+	uint16_t id = 0;
+	cs_ret_code_t retCode = _storage->remove(id);
 	switch (retCode) {
 	case ERR_BUSY:
 		// Retry again later.
-		addToQueue(CS_STATE_QUEUE_OP_REM_FILE, FILE_CONFIGURATION, CS_TYPE::CONFIG_DO_NOT_USE, STATE_RETRY_STORE_DELAY_MS);
+		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id, STATE_RETRY_STORE_DELAY_MS);
 		break;
 	default:
 		break;
 	}
 }
 
-void State::handleStorageError(cs_storage_operation_t operation, cs_file_id_t fileId, CS_TYPE type) {
+void State::handleStorageError(cs_storage_operation_t operation, CS_TYPE type, uint16_t id) {
 	switch (operation) {
 	case CS_STORAGE_OP_WRITE:
-		LOGw("error writing type=%u, retrying later", type);
-		addToQueue(CS_STATE_QUEUE_OP_WRITE, fileId, type, STATE_RETRY_STORE_DELAY_MS);
+		LOGw("error writing type=%u id=%u", type);
+		addToQueue(CS_STATE_QUEUE_OP_WRITE, type, id, STATE_RETRY_STORE_DELAY_MS);
 		break;
 	case CS_STORAGE_OP_READ:
 		break;
 	case CS_STORAGE_OP_REMOVE:
-		LOGw("error removing error type=%u", type);
-		addToQueue(CS_STATE_QUEUE_OP_REM, fileId, type, STATE_RETRY_STORE_DELAY_MS);
+		LOGw("error removing error type=%u id=%u", type, id);
+		addToQueue(CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE, type, id, STATE_RETRY_STORE_DELAY_MS);
 		break;
-	case CS_STORAGE_OP_REMOVE_FILE:
-		LOGw("error removing error file=%u", fileId);
-		addToQueue(CS_STATE_QUEUE_OP_REM_FILE, fileId, CS_TYPE::CONFIG_DO_NOT_USE, STATE_RETRY_STORE_DELAY_MS);
+	case CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID:
+		LOGw("error removing error id=%u", id);
+		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id, STATE_RETRY_STORE_DELAY_MS);
 		break;
 	case CS_STORAGE_OP_GC:
 		LOGw("error collecting garbage");
@@ -611,15 +665,18 @@ void State::handleEvent(event_t & event) {
 	case CS_TYPE::EVT_TICK:
 		delayedStoreTick();
 		break;
-	case CS_TYPE::EVT_STORAGE_REMOVE_FILE_DONE: {
-		TYPIFY(EVT_STORAGE_REMOVE_FILE_DONE) fileId = *(TYPIFY(EVT_STORAGE_REMOVE_FILE_DONE)*)event.data;
-		if (fileId == FILE_CONFIGURATION) {
+	case CS_TYPE::EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID: {
+		TYPIFY(EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID) id = *(TYPIFY(EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID)*)event.data;
+		if (id == 0) {
+
+			//TODO
+
 			_performingFactoryReset = true;
 			cs_ret_code_t retCode = _storage->garbageCollect();
 			switch (retCode) {
 			case ERR_BUSY:
 				// Retry again later.
-				addToQueue(CS_STATE_QUEUE_OP_GC, FILE_DO_NOT_USE, CS_TYPE::CONFIG_DO_NOT_USE, STATE_RETRY_STORE_DELAY_MS);
+				addToQueue(CS_STATE_QUEUE_OP_GC, CS_TYPE::CONFIG_DO_NOT_USE, 0, STATE_RETRY_STORE_DELAY_MS);
 				break;
 			default:
 				break;
