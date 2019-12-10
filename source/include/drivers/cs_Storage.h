@@ -171,17 +171,6 @@ public:
 	 */
 	cs_ret_code_t write(const cs_state_data_t & data);
 
-//	/**
-//	 * Remove all values of a type.
-//	 *
-//	 * @param[in] type            Type to remove.
-//	 *
-//	 * @retval ERR_SUCCESS                  When successfully started removing the file.
-//	 * @retval ERR_BUSY                     When busy, try again later.
-//	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
-//	 */
-//	cs_ret_code_t remove(CS_TYPE type);
-
 	/**
 	 * Remove value of given type and id.
 	 *
@@ -189,11 +178,23 @@ public:
 	 * @param[in] id              ID of value to remove.
 	 *
 	 * @retval ERR_SUCCESS                  When successfully started removing the type.
-	 * @retval ERR_NOT_FOUND                When type was not found on file, consider this a success, but don't wait for an event.
+	 * @retval ERR_NOT_FOUND                When no value with given type and id was found, consider this a success, but don't wait for an event.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
 	cs_ret_code_t remove(CS_TYPE type, uint16_t id);
+
+	/**
+	 * Remove all values of a type.
+	 *
+	 * @param[in] type            Type to remove.
+	 *
+	 * @retval ERR_SUCCESS                  When successfully started removing the file.
+	 * @retval ERR_NOT_FOUND                When type was not found, consider this a success, but don't wait for an event.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
+	 */
+	cs_ret_code_t remove(CS_TYPE type);
 
 	/**
 	 * Garbage collection reclaims the flash space that is occupied by records that have been deleted,
@@ -251,33 +252,22 @@ private:
 	bool _registeredFds = false;
 	cs_storage_error_callback_t _errorCallback = NULL;
 
-	bool _collectingGarbage = false;
-
 	fds_find_token_t _findToken;
 	CS_TYPE _currentSearchType = CS_TYPE::CONFIG_DO_NOT_USE;
 
+	bool _collectingGarbage = false;
 	bool _removingFile = false;
-	std::vector<uint16_t> _busy_record_keys;
+	std::vector<uint16_t> _busyRecordKeys;
 
 	/**
-	 * Next page to erase.
-	 *
-	 * Used by eraseAllPages().
+	 * Next page to erase. Used by eraseAllPages().
 	 */
 	uint32_t _erasePage = 0;
+
 	/**
-	 * Page that should _not_ be erased.
-	 *
-	 * Used by eraseAllPages().
+	 * Page that should _not_ be erased. Used by eraseAllPages().
 	 */
 	uint32_t _eraseEndPage = 0;
-
-	bool isErasingPages();
-
-	/**
-	 * Erase next page, started via eraseAllPages().
-	 */
-	void eraseNextPage();
 
 	/**
 	 * Find next fileId for given recordKey.
@@ -296,24 +286,18 @@ private:
 	 */
 	cs_ret_code_t readRecord(fds_record_desc_t recordDesc, uint8_t* buf, uint16_t size, uint16_t & fileId);
 
-	/**
-	 * Start a new search, where the user wants to iterate over a certain type.
-	 */
-	void initSearch(CS_TYPE type);
+	/** Write to persistent storage.
+	*/
+	ret_code_t writeInternal(const cs_state_data_t & data);
+
+	ret_code_t garbageCollectInternal();
+
+	bool isErasingPages();
 
 	/**
-	 * Start a new search.
-	 *
-	 * Call before using _findToken
+	 * Erase next page, started via eraseAllPages().
 	 */
-	void initSearch();
-
-	void setBusy(uint16_t recordKey);
-	void clearBusy(uint16_t recordKey);
-	bool isBusy(uint16_t recordKey);
-	bool isBusy();
-
-	cs_ret_code_t getErrorCode(ret_code_t code);
+	void eraseNextPage();
 
 	// Returns size after padding for flash.
 	size16_t getPaddedSize(size16_t size);
@@ -328,12 +312,22 @@ private:
 	 */
 	uint16_t getStateId(uint16_t fileId);
 
+	bool isValidRecordKey(uint16_t recordKey);
+	bool isValidFileId(uint16_t fileId);
 
-	/** Write to persistent storage.
-	*/
-	ret_code_t writeInternal(cs_file_id_t file_id, const cs_state_data_t & data);
+	/**
+	 * Start a new search, where the user wants to iterate over a certain type.
+	 */
+	void initSearch(CS_TYPE type);
 
-	ret_code_t exists(cs_file_id_t file_id, uint16_t recordKey, bool & result);
+	/**
+	 * Start a new search.
+	 *
+	 * Call before using _findToken
+	 */
+	void initSearch();
+
+//	ret_code_t exists(cs_file_id_t fileId, uint16_t recordKey, bool & result);
 
 	/**
 	 * Check if a type of record exists and return the record descriptor.
@@ -345,13 +339,18 @@ private:
 	 */
 	ret_code_t exists(cs_file_id_t file_id, uint16_t recordKey, fds_record_desc_t & record_desc, bool & result);
 
-	ret_code_t garbageCollectInternal();
+	void setBusy(uint16_t recordKey);
+	void clearBusy(uint16_t recordKey);
+	bool isBusy(uint16_t recordKey);
+	bool isBusy();
+
+	cs_ret_code_t getErrorCode(ret_code_t code);
 
 	void handleWriteEvent(fds_evt_t const * p_fds_evt);
 	void handleRemoveRecordEvent(fds_evt_t const * p_fds_evt);
 	void handleRemoveFileEvent(fds_evt_t const * p_fds_evt);
 	void handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt);
 
-	inline void print(const std::string & prefix, CS_TYPE type);
+//	inline void print(const std::string & prefix, CS_TYPE type);
 };
 
