@@ -412,6 +412,27 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, uint16_t id, const Per
 	return ret_code;
 }
 
+/*
+ * This function setThrottled will immediately write a value to flash, except when this has happened in the last
+ * period (indicated by a parameter). If this function is called during this period, the value will be updated in
+ * ram. Only after this period this value will then be written to flash. Also after this time, this will lead to a
+ * period in which throttling happens. For example, when the period parameter is set to 60000, all calls to 
+ * setThrottled will result to calls to flash at a maximum rate of once per minute (for given data type). 
+ *
+ * Implementation as detailed on https://github.com/crownstone/bluenet/issues/86.
+ *
+ * @param[in] data           Data to store.
+ * @param[in] period         Period (in msec) that throttling will be in effect.
+ * @return                   Return code (e.g. ERR_SUCCES, ERR_WRONG_PARAMETER).
+ */
+cs_ret_code_t State::setThrottled(const cs_state_data_t & data, uint8_t period) {
+	if (period == 0) {
+		return ERR_WRONG_PARAMETER;
+	}
+
+
+}
+
 /**
  * Always first store to ram, use set() for this so that data struct is already validated.
  * Check if type is already queued. If so, overwrite the counter, so that the write to storage is pushed forward in
@@ -429,7 +450,11 @@ cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delay) {
 	return addToQueue(CS_STATE_QUEUE_OP_WRITE, data.type, data.id, delayMs);
 }
 
-cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, const CS_TYPE & type, uint16_t id, uint32_t delayMs) {
+/**
+ * Add a type to the queue to be written to flash.
+ */
+cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, const CS_TYPE & type, uint16_t id, uint32_t delayMs,
+		const QueueMode mode) {
 	uint32_t delayTicks = delayMs / TICK_INTERVAL_MS;
 	LOGStateDebug("Add to queue op=%u type=%s id=%u delayMs=%u delayTicks=%u", operation, TypeName(type), id, delayMs, delayTicks);
 	bool found = false;

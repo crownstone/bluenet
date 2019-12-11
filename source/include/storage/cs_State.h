@@ -53,6 +53,11 @@ constexpr OperationMode getOperationMode(uint8_t mode) {
 	return OperationMode::OPERATION_MODE_UNINITIALIZED;
 }
 
+enum class QueueMode {
+	DELAY,
+	THROTTLE
+};
+
 #define FACTORY_RESET_STATE_NORMAL 0
 #define FACTORY_RESET_STATE_LOWTX  1
 #define FACTORY_RESET_STATE_RESET  2
@@ -196,6 +201,22 @@ public:
 	 * @return                    Return code.
 	 */
 	cs_ret_code_t setDelayed(const cs_state_data_t & data, uint8_t delay);
+	
+	/**
+	 * Write variable to flash in a throttled mode
+	 *
+	 * This function setThrottled will immediately write a value to flash, except when this has happened in the last
+	 * period (indicated by a parameter). If this function is called during this period, the value will be updated in
+	 * ram. Only after this period this value will then be written to flash. Also after this time, this will lead to a
+	 * period in which throttling happens. For example, when the period parameter is set to 60000, all calls to 
+	 * setThrottled will result to calls to flash at a maximum rate of once per minute (for given data type). 
+	 *
+	 * @param[in] data           Data to store.
+	 * @param[in] period         Period (in msec) that throttling will be in effect.
+	 * @return                   Return code (e.g. ERR_SUCCES, ERR_WRONG_PARAMETER).
+	 */
+	cs_ret_code_t setThrottled(const cs_state_data_t & data, uint8_t period);
+
 
 	/**
 	 * Verify size of user data for getting a state.
@@ -378,7 +399,8 @@ protected:
 	 * @param[in] delayMs         Delay in ms.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t addToQueue(cs_state_queue_op_t operation, const CS_TYPE & type, uint16_t id, uint32_t delayMs);
+	cs_ret_code_t addToQueue(cs_state_queue_op_t operation, const CS_TYPE & type, uint16_t id, uint32_t delayMs,
+			const QueueMode mode);
 
 	cs_ret_code_t allocate(cs_state_data_t & data);
 
