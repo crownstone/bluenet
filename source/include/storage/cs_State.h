@@ -73,8 +73,19 @@ enum cs_state_queue_op_t {
 struct __attribute__((__packed__)) cs_state_store_queue_t {
 	cs_state_queue_op_t operation;
 	CS_TYPE type;
-	uint16_t id;
+	cs_state_id_t id;
 	uint16_t counter;
+};
+
+struct cs_state_search_t {
+	CS_TYPE type;
+	cs_state_id_t id;
+	size_t ramIndex;
+};
+
+struct cs_id_list_t {
+	CS_TYPE type;
+	std::vector<cs_state_id_t> ids;
 };
 
 /**
@@ -146,27 +157,41 @@ public:
 	/**
 	 * Get copy of a state value.
 	 *
-	 * @param[in,out] data        Data struct with state type, data, and size.
+	 * @param[in,out] data        Data struct with state type, id, data, and size.
 	 * @param[in] mode            Indicates whether to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
 	 * @return                    Return code.
 	 */
 	cs_ret_code_t get(cs_state_data_t & data, const PersistenceMode mode = PersistenceMode::STRATEGY1);
 
 	/**
-	 * Convenience function for get().
+	 * Convenience function for get() with id 0.
 	 *
 	 * Avoids having to create a temp every time you want to get a state variable.
 	 */
 	cs_ret_code_t get(const CS_TYPE type, void *value, const size16_t size);
 
 	/**
-	 * Shorthand for get() for boolean data types.
+	 * Shorthand for get() for boolean data types, and id 0.
 	 *
 	 * @param[in] type            State type.
 	 * @param[in] mode            Indicates whether to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
 	 * @return                    True when state type is true.
 	 */
 	bool isTrue(CS_TYPE type, const PersistenceMode mode = PersistenceMode::STRATEGY1);
+
+
+	/**
+	 * Get a value of certain type.
+	 *
+	 * Used to iterate over all ids of a certain type.
+	 * Only PersistenceMode::STRATEGY1 is implemented.
+	 *
+	 * @param[in,out] data        Data struct with state type, data, and size. Id will be set on success.
+	 * @param[in,out] search      Start with 0, then provide this variable again for the next get().
+	 * @return                    Return code.
+	 */
+	cs_ret_code_t get(cs_state_data_t & data, cs_state_search_t & search);
+
 
 	/**
 	 * Set state to new value, via copy.
@@ -220,7 +245,7 @@ public:
 	 * @param[in] mode            Indicates whether to remove data from RAM, FLASH, or a combination of this.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t remove(const CS_TYPE & type, uint16_t id, const PersistenceMode mode = PersistenceMode::STRATEGY1);
+	cs_ret_code_t remove(const CS_TYPE & type, cs_state_id_t id, const PersistenceMode mode = PersistenceMode::STRATEGY1);
 
 	/**
 	 * Erase all used persistent storage.
@@ -261,7 +286,7 @@ public:
 	/**
 	 * Internal usage
 	 */
-	void handleStorageError(cs_storage_operation_t operation, CS_TYPE type, uint16_t id);
+	void handleStorageError(cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id);
 
 	/**
 	 * Handle (crownstone) events.
@@ -287,7 +312,7 @@ protected:
 	 * @return                    ERR_SUCCESS when type was found.
 	 * @return                    ERR_NOT_FOUND when type was not found.
 	 */
-	cs_ret_code_t findInRam(const CS_TYPE & type, uint16_t id, size16_t & index_in_ram);
+	cs_ret_code_t findInRam(const CS_TYPE & type, cs_state_id_t id, size16_t & index_in_ram);
 
 	cs_ret_code_t storeInRam(const cs_state_data_t & data);
 
@@ -313,7 +338,7 @@ protected:
 	 * @param[in] size            State variable size.
 	 * @return                    Struct with allocated data pointer.
 	 */
-	cs_state_data_t & addToRam(const CS_TYPE & type, uint16_t id, size16_t size);
+	cs_state_data_t & addToRam(const CS_TYPE & type, cs_state_id_t id, size16_t size);
 
 	/**
 	 * Removed a state variable from ram.
@@ -323,7 +348,7 @@ protected:
 	 * @param[in] type            State type.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t removeFromRam(const CS_TYPE & type, uint16_t id);
+	cs_ret_code_t removeFromRam(const CS_TYPE & type, cs_state_id_t id);
 
 	/**
 	 * Writes state variable in ram to flash.
@@ -344,7 +369,7 @@ protected:
 	 * @param[in] id              State value id.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t removeFromFlash(const CS_TYPE & type, const uint16_t id);
+	cs_ret_code_t removeFromFlash(const CS_TYPE & type, const cs_state_id_t id);
 
 	/**
 	 * Remove all values of a certain type from flash.
@@ -378,7 +403,7 @@ protected:
 	 * @param[in] delayMs         Delay in ms.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t addToQueue(cs_state_queue_op_t operation, const CS_TYPE & type, uint16_t id, uint32_t delayMs);
+	cs_ret_code_t addToQueue(cs_state_queue_op_t operation, const CS_TYPE & type, cs_state_id_t id, uint32_t delayMs);
 
 	cs_ret_code_t allocate(cs_state_data_t & data);
 
@@ -388,6 +413,11 @@ protected:
 	 * Stores state data structs with pointers to state data.
 	 */
 	std::vector<cs_state_data_t> _ram_data_register;
+
+	/**
+	 * Stores list of existing ids for certain types.
+	 */
+	std::vector<cs_id_list_t> _idsCache;
 
 	/**
 	 * Stores the queue of flash operations.
@@ -411,7 +441,16 @@ private:
 
 	cs_ret_code_t setInternal(const cs_state_data_t & data, PersistenceMode mode);
 
-	cs_ret_code_t removeInternal(const CS_TYPE & type, uint16_t id, const PersistenceMode mode);
+	cs_ret_code_t removeInternal(const CS_TYPE & type, cs_state_id_t id, const PersistenceMode mode);
 
 	cs_ret_code_t getDefaultValue(cs_state_data_t & data);
+
+	cs_ret_code_t getIdsFromFlash(const CS_TYPE & type);
+
+	/**
+	 * Add id to list of cached ids.
+	 *
+	 * Will _NOT_ create a new list if no list for this type exists.
+	 */
+	cs_ret_code_t addId(const CS_TYPE & type, cs_state_id_t id);
 };

@@ -67,7 +67,7 @@ void Storage::setErrorCallback(cs_storage_error_callback_t callback) {
 	_errorCallback = callback;
 }
 
-cs_ret_code_t Storage::findFirst(CS_TYPE type, uint16_t & id) {
+cs_ret_code_t Storage::findFirst(CS_TYPE type, cs_state_id_t & id) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -85,7 +85,7 @@ cs_ret_code_t Storage::findFirst(CS_TYPE type, uint16_t & id) {
 	return retVal;
 }
 
-cs_ret_code_t Storage::findNext(CS_TYPE type, uint16_t & id) {
+cs_ret_code_t Storage::findNext(CS_TYPE type, cs_state_id_t & id) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -329,7 +329,7 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 	return fdsRetCode;
 }
 
-cs_ret_code_t Storage::remove(CS_TYPE type, uint16_t id) {
+cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -390,7 +390,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type) {
 	return getErrorCode(fdsRetCode);
 }
 
-cs_ret_code_t Storage::remove(uint16_t id) {
+cs_ret_code_t Storage::remove(cs_state_id_t id) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -527,11 +527,11 @@ size16_t Storage::getPaddedSize(size16_t size) {
  * Old configs were all at file id FILE_CONFIGURATION.
  * So for id 0, we want to get FILE_CONFIGURATION.
  */
-uint16_t Storage::getFileId(uint16_t valueId) {
+uint16_t Storage::getFileId(cs_state_id_t valueId) {
 	return valueId + FILE_CONFIGURATION;
 }
 
-uint16_t Storage::getStateId(uint16_t fileId) {
+cs_state_id_t Storage::getStateId(uint16_t fileId) {
 	return fileId - FILE_CONFIGURATION;
 }
 
@@ -660,7 +660,7 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 		LOGw("Write FDSerror=%u record=%u", p_fds_evt->result, p_fds_evt->write.record_key);
 		if (_errorCallback) {
 			CS_TYPE type = toCsType(p_fds_evt->write.record_key);
-			uint16_t id = getStateId(p_fds_evt->write.file_id);
+			cs_state_id_t id = getStateId(p_fds_evt->write.file_id);
 			_errorCallback(CS_STORAGE_OP_WRITE, type, id);
 		}
 		else {
@@ -684,7 +684,7 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 		LOGw("Remove FDSerror=%u record=%u", p_fds_evt->result, p_fds_evt->del.record_key);
 		if (_errorCallback) {
 			CS_TYPE type = toCsType(p_fds_evt->del.record_key);
-			uint16_t id = getStateId(p_fds_evt->write.file_id);
+			cs_state_id_t id = getStateId(p_fds_evt->write.file_id);
 			_errorCallback(CS_STORAGE_OP_REMOVE, type, id);
 		}
 		else {
@@ -707,7 +707,7 @@ void Storage::handleRemoveFileEvent(fds_evt_t const * p_fds_evt) {
 	default:
 		LOGw("Remove FDSerror=%u fileId=%u", p_fds_evt->result, p_fds_evt->del.file_id);
 		if (_errorCallback) {
-			uint16_t id = getStateId(p_fds_evt->write.file_id);
+			cs_state_id_t id = getStateId(p_fds_evt->write.file_id);
 			_errorCallback(CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id);
 		}
 		else {

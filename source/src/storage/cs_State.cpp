@@ -13,6 +13,7 @@
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
+#include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
@@ -24,7 +25,7 @@
 // Define as LOGd to get debug logs.
 #define LOGStateDebug LOGnone
 
-void storageErrorCallback(cs_storage_operation_t operation, CS_TYPE type, uint16_t id) {
+void storageErrorCallback(cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id) {
 	State::getInstance().handleStorageError(operation, type, id);
 }
 
@@ -82,7 +83,7 @@ cs_ret_code_t State::verifySizeForSet(const cs_state_data_t & data) {
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t State::findInRam(const CS_TYPE & type, uint16_t id, size16_t & index_in_ram) {
+cs_ret_code_t State::findInRam(const CS_TYPE & type, cs_state_id_t id, size16_t & index_in_ram) {
 	for (size16_t i = 0; i < _ram_data_register.size(); ++i) {
 		if (_ram_data_register[i].type == type && _ram_data_register[i].id == id) {
 			index_in_ram = i;
@@ -124,7 +125,7 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 	return ERR_SUCCESS;
 }
 
-cs_state_data_t & State::addToRam(const CS_TYPE & type, uint16_t id, size16_t size) {
+cs_state_data_t & State::addToRam(const CS_TYPE & type, cs_state_id_t id, size16_t size) {
 	cs_state_data_t & data = *(cs_state_data_t*)malloc(sizeof(cs_state_data_t));
 	data.type = type;
 	data.id = id;
@@ -136,7 +137,7 @@ cs_state_data_t & State::addToRam(const CS_TYPE & type, uint16_t id, size16_t si
 	return data;
 }
 
-cs_ret_code_t State::removeFromRam(const CS_TYPE & type, uint16_t id) {
+cs_ret_code_t State::removeFromRam(const CS_TYPE & type, cs_state_id_t id) {
 	LOGStateDebug("removeFromRam type=%u id=%u", to_underlying_type(type), id);
 	size16_t index_in_ram;
 	cs_ret_code_t ret_code = findInRam(type, id, index_in_ram);
@@ -206,7 +207,7 @@ cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
 	}
 }
 
-cs_ret_code_t State::removeFromFlash(const CS_TYPE & type, const uint16_t id) {
+cs_ret_code_t State::removeFromFlash(const CS_TYPE & type, const cs_state_id_t id) {
 	if (!_startedWritingToFlash) {
 		return ERR_BUSY;
 	}
@@ -237,7 +238,7 @@ cs_ret_code_t State::removeFromFlash(const CS_TYPE & type) {
 cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	ret_code_t ret_code = ERR_NOT_FOUND;
 	CS_TYPE type = data.type;
-	uint16_t id = data.id;
+	cs_state_id_t id = data.id;
 	size16_t typeSize = TypeSize(type);
 	if (typeSize == 0) {
 		return ERR_UNKNOWN_TYPE;
@@ -297,6 +298,29 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	return ret_code;
 }
 
+cs_ret_code_t State::get(cs_state_data_t & data, cs_state_search_t & search) {
+	CS_TYPE type = data.type;
+	size16_t typeSize = TypeSize(type);
+	if (typeSize == 0) {
+		return ERR_UNKNOWN_TYPE;
+	}
+	if (search.ramIndex == 0 && to_underlying_type(search.type) == 0 && search.id == 0) {
+		// Start new search
+
+//		for (size16_t i = 0; i < _ram_data_register.size(); ++i) {
+//			if (_ram_data_register[i].type == type) {
+//				index_in_ram = i;
+//				return ERR_SUCCESS;
+//			}
+//		}
+
+	}
+	else {
+
+	}
+	return ERR_NOT_FOUND;
+}
+
 cs_ret_code_t State::getDefaultValue(cs_state_data_t & data) {
 	return getDefault(data, *_boardsConfig);
 }
@@ -313,7 +337,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 	LOGStateDebug("Set value: %s: %u", TypeName(data.type), data.type);
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	CS_TYPE type = data.type;
-	uint16_t id = data.id;
+	cs_state_id_t id = data.id;
 	size16_t typeSize = TypeSize(type);
 	if (typeSize == 0) {
 		LOGw("Wrong type %u", data.type)
@@ -368,7 +392,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 	return ret_code;
 }
 
-cs_ret_code_t State::removeInternal(const CS_TYPE & type, uint16_t id, const PersistenceMode mode) {
+cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, const PersistenceMode mode) {
 	LOGStateDebug("Remove value: %s", TypeName(type));
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	switch(mode) {
@@ -412,6 +436,38 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, uint16_t id, const Per
 	return ret_code;
 }
 
+cs_ret_code_t State::getIdsFromFlash(const CS_TYPE & type) {
+//	std::vector<cs_state_id_t>* ids = new std::vector<cs_state_id_t>();
+//
+//
+//	std::vector<cs_id_list_t>::iterator typeIter;
+//	for (typeIter = _idsCache.begin(); typeIter < _idsCache.end(); typeIter++) {
+//		if (typeIter->type == type) {
+//			LOGw("Already retrieved ids");
+//			return ERR_SUCCESS;
+//		}
+//	}
+//	_idsCache.push_back()
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t State::addId(const CS_TYPE & type, cs_state_id_t id) {
+	std::vector<cs_id_list_t>::iterator typeIter;
+	for (typeIter = _idsCache.begin(); typeIter < _idsCache.end(); typeIter++) {
+		if (typeIter->type == type) {
+			std::vector<cs_state_id_t>::iterator idIter;
+			for (idIter = typeIter->ids.begin(); idIter < typeIter->ids.end(); idIter++) {
+				if (*idIter == id) {
+					return ERR_SUCCESS;
+				}
+			}
+			typeIter->ids.push_back(id);
+			break;
+		}
+	}
+	return ERR_SUCCESS;
+}
+
 /**
  * Always first store to ram, use set() for this so that data struct is already validated.
  * Check if type is already queued. If so, overwrite the counter, so that the write to storage is pushed forward in
@@ -429,7 +485,7 @@ cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delay) {
 	return addToQueue(CS_STATE_QUEUE_OP_WRITE, data.type, data.id, delayMs);
 }
 
-cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, const CS_TYPE & type, uint16_t id, uint32_t delayMs) {
+cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, const CS_TYPE & type, cs_state_id_t id, uint32_t delayMs) {
 	uint32_t delayTicks = delayMs / TICK_INTERVAL_MS;
 	LOGStateDebug("Add to queue op=%u type=%s id=%u delayMs=%u delayTicks=%u", operation, TypeName(type), id, delayMs, delayTicks);
 	bool found = false;
@@ -584,7 +640,7 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 	return retVal;
 }
 
-cs_ret_code_t State::remove(const CS_TYPE & type, uint16_t id, const PersistenceMode mode) {
+cs_ret_code_t State::remove(const CS_TYPE & type, cs_state_id_t id, const PersistenceMode mode) {
 	return removeInternal(type, id, mode);
 	// 31-10-2019 TODO: send event?
 }
@@ -626,7 +682,7 @@ void State::factoryReset() {
 		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE, type, 0, STATE_RETRY_STORE_DELAY_MS);
 	}
 
-	uint16_t id = 0;
+	cs_state_id_t id = 0;
 	cs_ret_code_t retCode = _storage->remove(id);
 	switch (retCode) {
 	case ERR_BUSY:
@@ -638,7 +694,7 @@ void State::factoryReset() {
 	}
 }
 
-void State::handleStorageError(cs_storage_operation_t operation, CS_TYPE type, uint16_t id) {
+void State::handleStorageError(cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id) {
 	switch (operation) {
 	case CS_STORAGE_OP_WRITE:
 		LOGw("error writing type=%u id=%u", type);

@@ -25,7 +25,7 @@ enum cs_storage_operation_t {
 	CS_STORAGE_OP_GC,
 };
 
-typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, CS_TYPE type, uint16_t id);
+typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id);
 
 /**
  * Class to store items persistently in flash (persistent) memory.
@@ -95,7 +95,7 @@ public:
 	 * @retval ERR_NOT_FOUND                When the first id of this type was not found.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
-	cs_ret_code_t findFirst(CS_TYPE type, uint16_t & id);
+	cs_ret_code_t findFirst(CS_TYPE type, cs_state_id_t & id);
 
 	/**
 	 * Find next id of stored values of given type.
@@ -110,7 +110,7 @@ public:
 	 * @retval ERR_WRONG_STATE              When not called after findFirst(), or another storage operation was done in between.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
-	cs_ret_code_t findNext(CS_TYPE type, uint16_t & id);
+	cs_ret_code_t findNext(CS_TYPE type, cs_state_id_t & id);
 
 	/**
 	 * Find and read stored value of given type and id.
@@ -182,7 +182,7 @@ public:
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
-	cs_ret_code_t remove(CS_TYPE type, uint16_t id);
+	cs_ret_code_t remove(CS_TYPE type, cs_state_id_t id);
 
 	/**
 	 * Remove all values of a type.
@@ -206,7 +206,7 @@ public:
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
-	cs_ret_code_t remove(uint16_t id);
+	cs_ret_code_t remove(cs_state_id_t id);
 
 	/**
 	 * Garbage collection reclaims the flash space that is occupied by records that have been deleted,
@@ -317,12 +317,12 @@ private:
 	/**
 	 * Get file id, given state value id.
 	 */
-	uint16_t getFileId(uint16_t valueId);
+	uint16_t getFileId(cs_state_id_t valueId);
 
 	/**
 	 * Get state value id, given file id.
 	 */
-	uint16_t getStateId(uint16_t fileId);
+	cs_state_id_t getStateId(uint16_t fileId);
 
 	bool isValidRecordKey(uint16_t recordKey);
 	bool isValidFileId(uint16_t fileId);
