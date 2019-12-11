@@ -50,6 +50,16 @@ Behaviour::SerializedDataType Behaviour::serialize() const{
     return result;
 }
 
+uint8_t* Behaviour::serialize(uint8_t* outbuff, size_t max_size){
+    const auto size = serializedSize();
+
+    if(max_size < size){
+        return 0;
+    }
+
+    return std::copy_n(std::begin(serialize()),size,outbuff);
+}
+
 size_t Behaviour::serializedSize() const {
     return WireFormat::size<Behaviour>();
 }
