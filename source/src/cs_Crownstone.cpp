@@ -560,18 +560,17 @@ void Crownstone::setName() {
 #endif
 //	TYPIFY(CONFIG_NAME)
 	char device_name[32];
-	cs_state_data_t stateNameData(CS_TYPE::CONFIG_NAME, (uint8_t*)device_name, sizeof(device_name));
-	_state->get(stateNameData);
+	_state->get(CS_TYPE::CONFIG_NAME, device_name, sizeof(device_name));
 	std::string deviceName;
 	if (addResetCounterToName) {
 		//! clip name to 5 chars and add reset counter at the end
 		TYPIFY(STATE_RESET_COUNTER) resetCounter;
 		_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
 		char devicename_resetCounter[32];
-		sprintf(devicename_resetCounter, "%.*s_%d", MIN(stateNameData.size, 5), device_name, resetCounter);
+		sprintf(devicename_resetCounter, "%.*s_%d", MIN(sizeof(device_name), 5), device_name, resetCounter);
 		deviceName = std::string(devicename_resetCounter);
 	} else {
-		deviceName = std::string(device_name, stateNameData.size);
+		deviceName = std::string(device_name, sizeof(device_name));
 	}
 	_advertiser->updateDeviceName(deviceName);
 }
