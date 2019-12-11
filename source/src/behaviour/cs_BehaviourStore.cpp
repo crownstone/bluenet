@@ -117,11 +117,6 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 	}
 
     uint8_t* dat = static_cast<uint8_t*>(evt.data);
-
-    // OK until here
-    // for(size_t i = 0; i < 28; i++){
-    //     LOGd("replace behaviour input: 0x%x",dat[i]);
-    // }
 	
     uint8_t index = dat[0];
 	SwitchBehaviour::Type type = static_cast<SwitchBehaviour::Type>(dat[1]);
@@ -136,25 +131,8 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 			}
 
 			SwitchBehaviour b = WireFormat::deserialize<SwitchBehaviour>(evt.getData() + 1, evt.size - 1);
-            b.print();
             
             evt.result.returnCode = saveBehaviour(b, index);
-
-            auto from_ser = b.from().serialize();
-            LOGd("ToD from serialized %02d:%02d:%02: %x %x %x %x %x",
-                b.from().h(),b.from().m(),b.from().s(),
-                from_ser[0],
-                from_ser[1],
-                from_ser[2],
-                from_ser[3],
-                from_ser[4]
-            );
-
-            SwitchBehaviour::SerializedDataType bs = b.serialize();
-
-            for(uint8_t b : bs){
-                LOGd("replace behaviour bs: 0x%02x",b);
-            }
 
             if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
                 LOGd("ERR_BUFFER_TOO_SMALL");

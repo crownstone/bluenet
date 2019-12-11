@@ -42,7 +42,6 @@ class Behaviour {
     SerializedDataType serialize() const;
 
     void print() const;
-    void print_ser(SerializedDataType& arr) const;
 
     // implementations of behaviours have a class specific identifier
     // which is defined by overriding this method.

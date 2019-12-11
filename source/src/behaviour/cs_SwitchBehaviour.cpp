@@ -30,9 +30,6 @@ SwitchBehaviour::SwitchBehaviour(
 SwitchBehaviour::SwitchBehaviour(std::array<uint8_t, 1+26> arr) : 
     Behaviour(          WireFormat::deserialize<Behaviour>(         arr.data() +  0, 14)),
     presenceCondition(  WireFormat::deserialize<PresenceCondition>( arr.data() + 14, 13)){
-    for(uint8_t b : arr){
-        LOGd("switchbehaviour constr: 0x%02x",b);
-    }
 }
 
 SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize() const{

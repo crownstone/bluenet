@@ -20,6 +20,9 @@
 #include <cstddef>
 #include <typeinfo>
 
+
+#define LOGWireFormat(...) LOGnone(__VA_ARGS__)
+
 namespace WireFormat {
 
 // data will be copied as few times as possible, but the constructed
@@ -33,8 +36,7 @@ T deserialize(uint8_t* data, size_t len);
 // that is equal to the return type of this method.
 template<class T>
 typename T::SerializedDataType serialize(const T& obj){
-    auto t_name = typeid(T).name();
-    LOGd("serialize %s", t_name);
+    LOGWireFormat("serialize %s", typeid(T).name());
     return obj.serialize();
 }
 
