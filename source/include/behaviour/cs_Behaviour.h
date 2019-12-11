@@ -29,6 +29,8 @@ class Behaviour {
 
     public:
     
+    virtual ~Behaviour() = default; // (to prevent object slicing from leaking memory.)
+
     Behaviour(
       Type typ,
       uint8_t intensity,
@@ -40,6 +42,9 @@ class Behaviour {
 
     Behaviour(SerializedDataType arr);
     SerializedDataType serialize() const;
+    
+    // return value: number of bytes written, or pointer to next empty val in array?
+    // virtual size_t serialize(uint8_t* outbuff, size_t max_size);
 
     void print() const;
 

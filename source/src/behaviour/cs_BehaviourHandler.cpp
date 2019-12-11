@@ -87,16 +87,19 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
     std::optional<uint8_t> intendedValue = {};
     
     for (auto& b : BehaviourStore::getActiveBehaviours()){
-        if (b.has_value() && b->isValid(currentTime, currentPresence)){
-            if (intendedValue){
-                if (b->value() != intendedValue.value()){
-                    // found a conflicting behaviour
-                    // TODO(Arend): add more advance conflict resolution according to document.
-                    return std::nullopt;
+        if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(b)){
+            // cast to switch behaviour succesful.
+            if (switchbehave->isValid(currentTime, currentPresence)){
+                if (intendedValue){
+                    if (switchbehave->value() != intendedValue.value()){
+                        // found a conflicting behaviour
+                        // TODO(Arend): add more advance conflict resolution according to document.
+                        return std::nullopt;
+                    }
+                } else {
+                    // found first valid behaviour
+                    intendedValue = switchbehave->value();
                 }
-            } else {
-                // found first valid behaviour
-                intendedValue = b->value();
             }
         }
     }
