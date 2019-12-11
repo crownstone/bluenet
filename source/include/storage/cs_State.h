@@ -80,6 +80,8 @@ struct __attribute__((__packed__)) cs_state_store_queue_t {
 	CS_TYPE type;
 	cs_state_id_t id;
 	uint16_t counter;
+	uint16_t init_counter;
+	bool execute;
 };
 
 struct cs_state_search_t {
@@ -184,6 +186,15 @@ public:
 	 */
 	bool isTrue(CS_TYPE type, const PersistenceMode mode = PersistenceMode::STRATEGY1);
 
+
+	/**
+	 * Check a particular value with the value currently in ram. T
+	 *
+	 * @param[in]  data           Data with type, id, value, and size.
+	 * @param[out] cmp_result     Value that indicates comparison (equality indicated by 0).
+	 * @return                    Return code (e.g. ERR_SUCCESS, ERR_NOT_FOUND, etc.)
+	 */
+	cs_ret_code_t compare(const cs_state_data_t & data, uint32_t & cmp_result);
 
 	/**
 	 * Get a value of certain type.

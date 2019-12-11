@@ -166,6 +166,13 @@ cs_ret_code_t State::allocate(cs_state_data_t & data) {
  * Copies from ram to target buffer.
  *
  * Does not check if target buffer has a large enough size.
+ *
+ * @param[in]  data.type      Type of data.
+ * @param[in]  data.id        Identifier of the data (to get a particular instance of a type).
+ * @param[out] data.size      The size of the data retrieved.
+ * @param[out] data.value     The data itself.
+ *
+ * @return                    Return value (i.e. ERR_SUCCESS or other).
  */
 cs_ret_code_t State::loadFromRam(cs_state_data_t & data) {
 	size16_t index_in_ram;
@@ -298,6 +305,31 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	return ret_code;
 }
 
+cs_ret_code_t State::compare(const cs_state_data_t & data, uint32_t & cmp_result) {
+	cs_state_data_t local_data;
+	local_data.type = data.type;
+	local_data.id = data.id;
+
+	ret_code_t ret_code = loadFromRam(local_data);
+	if (ret_code == ERR_NOT_FOUND) {
+		cmp_result = 1; // not-found
+	} else if (ret_code == ERR_SUCCESS) {
+		if (data.size == local_data.size) {
+			int n = memcmp(data.value, local_data.value, data.size);
+			if (n == 0) {
+				cmp_result = 0;
+			} else {
+				cmp_result = 3; // data-mismatch
+			}
+		} else {
+			cmp_result = 2; // size-mismatch
+		}
+	} else {
+		cmp_result = 4; // load from ram error
+	}
+	return ret_code;
+}
+
 cs_ret_code_t State::get(cs_state_data_t & data, cs_state_search_t & search) {
 	CS_TYPE type = data.type;
 	size16_t typeSize = TypeSize(type);
@@ -379,7 +411,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
 			ret_code = storeInFlash(index);
 			if (ret_code == ERR_BUSY) {
-				return addToQueue(CS_STATE_QUEUE_OP_WRITE, type, id, STATE_RETRY_STORE_DELAY_MS);
+				return addToQueue(CS_STATE_QUEUE_OP_WRITE, type, id, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
 			}
 			break;
 		}
@@ -423,7 +455,7 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 		// Then remove from flash asynchronously.
 		ret_code = removeFromFlash(type, id);
 		if (ret_code == ERR_BUSY) {
-			return addToQueue(CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE, type, id, STATE_RETRY_STORE_DELAY_MS);
+			return addToQueue(CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE, type, id, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
 		}
 		break;
 	}
@@ -485,7 +517,31 @@ cs_ret_code_t State::setThrottled(const cs_state_data_t & data, uint8_t period) 
 	if (period == 0) {
 		return ERR_WRONG_PARAMETER;
 	}
+	uint32_t cmp_value = 0xFF;
+	cs_ret_code_t ret_code = compare(data, cmp_value);
+	if (ret_code != ERR_SUCCESS) {
+		if (ret_code == ERR_NOT_FOUND) {
+			// explicitly go on, it has never set before, so we want to write first time to flash
+		} else {
+			return ret_code;
+		}
+	} else {
+		// it already exists in RAM exactly like we want it, no need to update
+		if (cmp_value == 0) {
+			return ERR_SUCCESS;
+		}
+		// else go on
+	}
+	
+	// write it to flash
+	ret_code = set(data, PersistenceMode::RAM);
+	if (ret_code != ERR_SUCCESS) {
+		return ret_code;
+	}
 
+	uint32_t periodMs = 1000 * period;
+
+	return addToQueue(CS_STATE_QUEUE_OP_WRITE, data.type, data.id, periodMs, QueueMode::THROTTLE);
 }
 
 /**
@@ -502,7 +558,7 @@ cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delay) {
 		return ret_code;
 	}
 	uint32_t delayMs = 1000 * delay;
-	return addToQueue(CS_STATE_QUEUE_OP_WRITE, data.type, data.id, delayMs);
+	return addToQueue(CS_STATE_QUEUE_OP_WRITE, data.type, data.id, delayMs, QueueMode::DELAY);
 }
 
 /**
@@ -520,11 +576,17 @@ cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, const CS_TYPE & t
 			// A write operation replaces a remove operation, and vice versa.
 			if ((_store_queue[i].type == type && _store_queue[i].id == id) &&
 					(
-						(_store_queue[i].operation == CS_STATE_QUEUE_OP_WRITE) ||
-						(_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE)
+					 (_store_queue[i].operation == CS_STATE_QUEUE_OP_WRITE) ||
+					 (_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE)
 					)
-				) {
-				_store_queue[i].counter = delayTicks;
+			   ) {
+				// n-th time, now execute becomes true and for throttle init_counter will be set as well
+				if (mode == QueueMode::THROTTLE) {
+					_store_queue[i].init_counter = delayTicks;
+				} else {
+					_store_queue[i].counter = delayTicks;
+				}
+				_store_queue[i].execute = true;
 				found = true;
 				break;
 			}
@@ -540,7 +602,13 @@ cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, const CS_TYPE & t
 						(_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE)
 					)
 				) {
-				_store_queue[i].counter = delayTicks;
+				// TODO Anne @Bart. might not make sense to do throttled...
+				if (mode == QueueMode::THROTTLE) {
+					_store_queue[i].init_counter = delayTicks;
+				} else {
+					_store_queue[i].counter = delayTicks;
+				}
+				_store_queue[i].execute = true;
 				found = true;
 				break;
 			}
@@ -550,7 +618,13 @@ cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, const CS_TYPE & t
 	case CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID:{
 		for (size_t i=0; i<_store_queue.size(); ++i) {
 			if ((_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID) && (_store_queue[i].id == id)) {
-				_store_queue[i].counter = delayTicks;
+				// TODO Anne @Bart. might not make sense to do throttled...
+				if (mode == QueueMode::THROTTLE) {
+					_store_queue[i].init_counter = delayTicks;
+				} else {
+					_store_queue[i].counter = delayTicks;
+				}
+				_store_queue[i].execute = true;
 				found = true;
 				break;
 			}
@@ -561,11 +635,30 @@ cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, const CS_TYPE & t
 		break;
 	}
 	if (!found) {
+		if (mode == QueueMode::THROTTLE) {
+			// write to flash (again check if it still exists in ram)
+			size16_t index_in_ram;
+			ret_code_t ret_code = findInRam(type, id, index_in_ram);
+			if (ret_code == ERR_SUCCESS) {
+				ret_code = storeInFlash(index_in_ram);
+			} else {
+				return ret_code;
+			}
+			if (ret_code != ERR_SUCCESS) {
+				return ret_code;
+			} else {
+				// also add to the queue (drop through)
+			}
+		}
+	
+		// add new item to the queue
 		cs_state_store_queue_t item;
 		item.operation = operation;
 		item.type = type;
 		item.id = id;
 		item.counter = delayTicks;
+		item.init_counter = 0;
+		item.execute = (mode == QueueMode::DELAY);
 		_store_queue.push_back(item);
 	}
 	LOGStateDebug("queue is now of size %u", _store_queue.size());
@@ -588,6 +681,10 @@ void State::delayedStoreTick() {
 			bool removeItem = true;
 			switch (it->operation) {
 			case CS_STATE_QUEUE_OP_WRITE: {
+				if (it->execute == false) {
+					// fall through with removeItem is true, don't execute
+					break;
+				}
 				ret_code = findInRam(it->type, it->id, index_in_ram);
 				if (ret_code == ERR_SUCCESS) {
 					ret_code = storeInFlash(index_in_ram);
@@ -626,13 +723,20 @@ void State::delayedStoreTick() {
 				break;
 			}
 			}
+
 			if (removeItem) {
 				it = _store_queue.erase(it);
 			}
 			else {
-				// Add to queue again.
-				it->counter = STATE_RETRY_STORE_DELAY_MS / TICK_INTERVAL_MS;
-				it++;
+				if (it->init_counter == 0) {
+					// Add to queue again with fixed retry delay.
+					it->counter = STATE_RETRY_STORE_DELAY_MS / TICK_INTERVAL_MS;
+					it++;
+				} else {
+					// Add to queue with given initialization value
+					it->counter = it->init_counter;
+					it++;
+				}
 			}
 		}
 		else {
@@ -703,7 +807,7 @@ void State::factoryReset() {
 
 	for (uint32_t i=0; i<TypeBases::General_Base; ++i) {
 		CS_TYPE type = toCsType(i);
-		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE, type, 0, STATE_RETRY_STORE_DELAY_MS);
+		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE, type, 0, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
 	}
 
 	cs_state_id_t id = 0;
@@ -711,7 +815,7 @@ void State::factoryReset() {
 	switch (retCode) {
 	case ERR_BUSY:
 		// Retry again later.
-		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id, STATE_RETRY_STORE_DELAY_MS);
+		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
 		break;
 	default:
 		break;
@@ -722,17 +826,17 @@ void State::handleStorageError(cs_storage_operation_t operation, CS_TYPE type, c
 	switch (operation) {
 	case CS_STORAGE_OP_WRITE:
 		LOGw("error writing type=%u id=%u", type);
-		addToQueue(CS_STATE_QUEUE_OP_WRITE, type, id, STATE_RETRY_STORE_DELAY_MS);
+		addToQueue(CS_STATE_QUEUE_OP_WRITE, type, id, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
 		break;
 	case CS_STORAGE_OP_READ:
 		break;
 	case CS_STORAGE_OP_REMOVE:
 		LOGw("error removing error type=%u id=%u", type, id);
-		addToQueue(CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE, type, id, STATE_RETRY_STORE_DELAY_MS);
+		addToQueue(CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE, type, id, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
 		break;
 	case CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID:
 		LOGw("error removing error id=%u", id);
-		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id, STATE_RETRY_STORE_DELAY_MS);
+		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
 		break;
 	case CS_STORAGE_OP_GC:
 		LOGw("error collecting garbage");
@@ -756,7 +860,7 @@ void State::handleEvent(event_t & event) {
 			switch (retCode) {
 			case ERR_BUSY:
 				// Retry again later.
-				addToQueue(CS_STATE_QUEUE_OP_GC, CS_TYPE::CONFIG_DO_NOT_USE, 0, STATE_RETRY_STORE_DELAY_MS);
+				addToQueue(CS_STATE_QUEUE_OP_GC, CS_TYPE::CONFIG_DO_NOT_USE, 0, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
 				break;
 			default:
 				break;
