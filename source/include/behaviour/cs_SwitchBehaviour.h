@@ -40,6 +40,8 @@ class SwitchBehaviour : public Behaviour{
     SwitchBehaviour(SerializedDataType arr);
     SerializedDataType serialize() const;
 
+    virtual size_t serializedSize() const override;
+
     virtual Type getType() const override { return Type::Switch; }
 
     void print() const;

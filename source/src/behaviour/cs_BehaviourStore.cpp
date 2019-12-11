@@ -259,6 +259,8 @@ void BehaviourStore::handleGetBehaviour(event_t& evt){
     }
 
     LOGe("TODO: reimplement to handle multiple types!");
+    LOGd("serialized size: %d", activeBehaviours[index]->serializedSize());
+
     // SwitchBehaviour::SerializedDataType bs = activeBehaviours[index]->serialize();
 
     // for(uint8_t b : bs){

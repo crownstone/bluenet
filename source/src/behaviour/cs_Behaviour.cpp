@@ -50,6 +50,10 @@ Behaviour::SerializedDataType Behaviour::serialize() const{
     return result;
 }
 
+size_t Behaviour::serializedSize() const {
+    return WireFormat::size<Behaviour>();
+}
+
 
 uint8_t Behaviour::value() const {
     return activeIntensity;

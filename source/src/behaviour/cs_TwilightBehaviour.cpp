@@ -21,3 +21,7 @@ TwilightBehaviour::TwilightBehaviour(SerializedDataType arr)
     : Behaviour(std::move(arr)) {
 
 }
+
+size_t TwilightBehaviour::serializedSize() const {
+    return WireFormat::size<TwilightBehaviour>();
+}

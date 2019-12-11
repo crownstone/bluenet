@@ -40,6 +40,10 @@ SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize() const{
     return result;
 }
 
+size_t SwitchBehaviour::serializedSize() const {
+    return WireFormat::size<SwitchBehaviour>();
+}
+
 bool SwitchBehaviour::isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence){
     return isValid(currenttime) && isValid(currentpresence);
 }

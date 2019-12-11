@@ -45,6 +45,7 @@ class Behaviour {
     
     // return value: number of bytes written, or pointer to next empty val in array?
     // virtual size_t serialize(uint8_t* outbuff, size_t max_size);
+    virtual size_t serializedSize() const;
 
     void print() const;
 
