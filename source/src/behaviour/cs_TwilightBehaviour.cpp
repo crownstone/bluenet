@@ -22,6 +22,20 @@ TwilightBehaviour::TwilightBehaviour(SerializedDataType arr)
 
 }
 
+TwilightBehaviour::SerializedDataType TwilightBehaviour::serialize() const {
+    return Behaviour::serialize();
+}
+
+uint8_t* TwilightBehaviour::serialize(uint8_t* outbuff, size_t max_size){
+    const auto size = serializedSize();
+
+    if(max_size < size){
+        return 0;
+    }
+
+    return std::copy_n(std::begin(serialize()),size,outbuff);
+}
+
 size_t TwilightBehaviour::serializedSize() const {
     return WireFormat::size<TwilightBehaviour>();
 }

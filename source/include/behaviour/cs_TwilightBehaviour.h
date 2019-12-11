@@ -27,7 +27,7 @@
 class TwilightBehaviour : public Behaviour {
     public:
     typedef std::array<uint8_t, WireFormat::size<Behaviour>()> SerializedDataType;
-    
+
     TwilightBehaviour(
       uint8_t intensity,
       uint8_t profileid,
@@ -39,6 +39,7 @@ class TwilightBehaviour : public Behaviour {
     TwilightBehaviour(SerializedDataType arr);
     SerializedDataType serialize() const;
 
+    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) override;
     virtual size_t serializedSize() const override;
 
     virtual Type getType() const override { return Type::Twilight; }
