@@ -11,6 +11,8 @@
 
 #include <presence/cs_PresenceCondition.h>
 
+#include <util/cs_WireFormat.h>
+
 #include <optional>
 #include <stdint.h>
 
@@ -23,8 +25,8 @@
 class SwitchBehaviour : public Behaviour{
     public:
     typedef std::array<uint8_t, 
-      std::tuple_size<Behaviour::SerializedDataType>::value + 
-      std::tuple_size<PresenceCondition::SerializedDataType>::value> SerializedDataType;
+      WireFormat::size<Behaviour>() + 
+      WireFormat::size<PresenceCondition>()> SerializedDataType;
     
     SwitchBehaviour(
       uint8_t intensity,

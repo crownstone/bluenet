@@ -147,6 +147,17 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 		}
 		case SwitchBehaviour::Type::Twilight:{
 			LOGe("Not implemented: save twilight");
+
+            // Its a twilight behaviour packet, let's check the size (ignoring the index)
+			if(evt.size -1 != sizeof(TwilightBehaviour::SerializedDataType)){
+				LOGe("replace twilightbehaviour received wrong size event (%d != %d)", evt.size, 1 + sizeof(SwitchBehaviour::SerializedDataType));
+				evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+                return;
+			}
+
+			TwilightBehaviour b = WireFormat::deserialize<TwilightBehaviour>(evt.getData() + 1, evt.size - 1);
+            b.print();
+
 			break;
 		}
 		case SwitchBehaviour::Type::Extended:{

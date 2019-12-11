@@ -7,10 +7,13 @@
 
 #pragma once
 
-#include <behaviour/cs_Behaviour.h>
-#include <behaviour/cs_SwitchBehaviour.h>
+// #include <behaviour/cs_Behaviour.h>
+// #include <behaviour/cs_SwitchBehaviour.h>
+// #include <behaviour/cs_TwilightBehaviour.h>
+
 #include <presence/cs_PresencePredicate.h>
 #include <presence/cs_PresenceCondition.h>
+
 #include <time/cs_TimeOfDay.h>
 
 #include <drivers/cs_Serial.h>
@@ -20,8 +23,11 @@
 #include <cstddef>
 #include <typeinfo>
 
-
 #define LOGWireFormat(...) LOGnone(__VA_ARGS__)
+
+class Behaviour;
+class SwitchBehaviour;
+class TwilightBehaviour;
 
 namespace WireFormat {
 
@@ -75,6 +81,9 @@ Behaviour WireFormat::deserialize(uint8_t* data, size_t len);
 
 template<>
 SwitchBehaviour WireFormat::deserialize(uint8_t* data, size_t len);
+
+template<>
+TwilightBehaviour WireFormat::deserialize(uint8_t* data, size_t len);
 
 // ========== Specializations/overloads for serialize =========
 

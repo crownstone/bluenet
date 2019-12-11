@@ -7,6 +7,10 @@
 
 #include <util/cs_WireFormat.h>
 
+#include <behaviour/cs_Behaviour.h>
+#include <behaviour/cs_SwitchBehaviour.h>
+#include <behaviour/cs_TwilightBehaviour.h>
+
 namespace WireFormat {
 
 // -------------------- specialization for deserialize --------------------
@@ -81,6 +85,15 @@ SwitchBehaviour WireFormat::deserialize(uint8_t* data, size_t len){
     std::array<uint8_t,1+26> d;
     std::copy_n(data, 1+26, d.begin());
     return SwitchBehaviour(d);
+}
+
+template<>
+TwilightBehaviour WireFormat::deserialize(uint8_t* data, size_t len){
+    // TODO(Arend): assert length
+    constexpr auto serialized_size = size<TwilightBehaviour>();
+    std::array<uint8_t,serialized_size> d;
+    std::copy_n(data, serialized_size, d.begin());
+    return TwilightBehaviour(d);
 }
 
 // -------------------- specialization for serialize --------------------

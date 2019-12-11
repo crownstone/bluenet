@@ -64,7 +64,8 @@ TimeOfDay Behaviour::until() const {
 }
 
 void Behaviour::print() const {
-    LOGd("Behaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #%d",
+    LOGd("Behaviour: type(%d) %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #%d",
+        static_cast<uint8_t>(typ),
         from().h(),from().m(),from().s(),
         until().h(),until().m(),until().s(),
         activeIntensity,

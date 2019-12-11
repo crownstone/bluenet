@@ -8,6 +8,8 @@
 #pragma once
 
 #include <behaviour/cs_SwitchBehaviour.h>
+#include <behaviour/cs_TwilightBehaviour.h>
+
 #include <events/cs_EventListener.h>
 #include <protocol/cs_ErrorCodes.h>
 
