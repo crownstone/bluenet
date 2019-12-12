@@ -50,7 +50,7 @@ Behaviour::SerializedDataType Behaviour::serialize() const{
     return result;
 }
 
-uint8_t* Behaviour::serialize(uint8_t* outbuff, size_t max_size){
+uint8_t* Behaviour::serialize(uint8_t* outbuff, size_t max_size) const {
     const auto size = serializedSize();
 
     if(max_size < size){
@@ -64,6 +64,21 @@ size_t Behaviour::serializedSize() const {
     return WireFormat::size<Behaviour>();
 }
 
+std::vector<uint8_t> Behaviour::serialized() const{
+    // TODO(Arend, 12-12-2019): 
+    // The intermediate std::array object in the underlying Behaviour::serialize() 
+    // can be avoided in this call if we
+    // set up serialization the other way around: make the serialize(outbuff*,size)
+    // variation the primitive one and then serialize to a stack variable or heap 
+    // in the othter variatons.
+    // note however that this method works for all subclasses too because 
+    // serialize(uint8_t*,size_t) and serializedSize are virtual :)
+
+    std::vector<uint8_t> vec (serializedSize()) ; // preallocate correct size vector.
+    serialize(vec.data(),vec.size());
+
+    return vec;
+}
 
 uint8_t Behaviour::value() const {
     return activeIntensity;

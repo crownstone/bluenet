@@ -26,7 +26,7 @@ TwilightBehaviour::SerializedDataType TwilightBehaviour::serialize() const {
     return Behaviour::serialize();
 }
 
-uint8_t* TwilightBehaviour::serialize(uint8_t* outbuff, size_t max_size){
+uint8_t* TwilightBehaviour::serialize(uint8_t* outbuff, size_t max_size) const {
     const auto size = serializedSize();
 
     if(max_size < size){
