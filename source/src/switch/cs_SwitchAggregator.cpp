@@ -59,7 +59,7 @@ void SwitchAggregator::init(SwSwitch&& s){
     
     this->listen();
     swSwitch->listen();
-    
+
     twilightHandler.listen();
     behaviourHandler.listen();
 
@@ -109,26 +109,56 @@ void SwitchAggregator::updateState(){
 }
 
 void SwitchAggregator::handleEvent(event_t& evt){
-    if(evt.type == CS_TYPE::EVT_TICK){
-        _ownerTimeoutCountdown == 0 || _ownerTimeoutCountdown--;
+    if (handleTimingEvents(evt)) {
         return;
     }
 
-    if(evt.type == CS_TYPE::CMD_SWITCH_LOCKED){
+   if(handleAllowedOperations(evt)){
+       return;
+   }
+
+    handleStateIntentionEvents(evt);    
+}
+
+bool SwitchAggregator::handleTimingEvents(event_t& evt){
+     switch(evt.type){
+        case CS_TYPE::EVT_TICK: {
+            // decrement until 0
+            _ownerTimeoutCountdown == 0 || _ownerTimeoutCountdown--;
+            break;
+        }
+        case CS_TYPE::STATE_TIME: {
+            // update();
+            break;
+        }
+        case CS_TYPE::EVT_TIME_SET: {
+            // update();
+            break;
+        }
+        default:{
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+bool SwitchAggregator::handleAllowedOperations(event_t& evt) {
+     if (evt.type ==  CS_TYPE::CMD_SWITCH_LOCKED) {
         LOGd("SwitchAggregator::%s case CMD_SWITCH_LOCKED",__func__);
         auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);
         if(swSwitch) swSwitch->setAllowSwitching(*typd);
 
         evt.result.returnCode = ERR_SUCCESS;
 
-        return;
+        return true;
     }
 
     if(swSwitch && !swSwitch->isSwitchingAllowed()){
 
         evt.result.returnCode = ERR_SUCCESS;
 
-        return;
+        return true;
     }
 
     if(evt.type ==  CS_TYPE::CMD_DIMMING_ALLOWED){
@@ -138,13 +168,14 @@ void SwitchAggregator::handleEvent(event_t& evt){
         
         evt.result.returnCode = ERR_SUCCESS;
 
-        return;
+        return true;
     }
 
-    handleStateIntentionEvents(evt);    
+    return false;
 }
 
-void SwitchAggregator::handleStateIntentionEvents(event_t& evt){
+
+bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
     switch(evt.type){
         // ============== overrideState Events ==============
         case CS_TYPE::CMD_SWITCH_ON:{
@@ -205,11 +236,12 @@ void SwitchAggregator::handleStateIntentionEvents(event_t& evt){
             break;
         }
         default:{
-            return;
+            return false;
         }
     }
 
     evt.result.returnCode = ERR_SUCCESS;
+    return true;
 }
 
 void SwitchAggregator::developerForceOff(){

@@ -75,7 +75,25 @@ class SwitchAggregator : public EventListener {
      * Triggers an updateState() call on all handled events and adjusts
      * at least one of behaviourState or overrideState.
      */
-    void handleStateIntentionEvents(event_t & evt);
+    bool handleStateIntentionEvents(event_t & evt);
+
+    /**
+     * EVT_TICK, STATE_TIME and EVT_TIME_SET events possibly trigger
+     * a new aggregated state. This handling function takes care of that.
+     * 
+     * returns true when the event should be considered 'consumed'. 
+     * (which is when evt is of one of these types.)
+     */
+    bool handleTimingEvents(event_t & evt);
+
+    /**
+     * handles CMD_SWITCH_LOCKED and CMD_DIMMING_ALLOWED operations.
+     * 
+     * returns true when the event should be considered 'consumed'. 
+     * (which is when evt is of one of these types or when switching is not
+     * allowed or possible.)
+     */
+    bool handleAllowedOperations(event_t & evt);
     
     /**
      * Tries to set source as owner of the switch.
