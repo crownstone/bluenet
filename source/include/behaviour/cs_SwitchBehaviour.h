@@ -27,6 +27,8 @@ class SwitchBehaviour : public Behaviour{
     typedef std::array<uint8_t, 
       WireFormat::size<Behaviour>() + 
       WireFormat::size<PresenceCondition>()> SerializedDataType;
+
+    virtual ~SwitchBehaviour() = default;
     
     SwitchBehaviour(
       uint8_t intensity,

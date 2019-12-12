@@ -28,6 +28,7 @@ class TwilightBehaviour : public Behaviour {
     public:
     typedef std::array<uint8_t, WireFormat::size<Behaviour>()> SerializedDataType;
 
+    virtual ~TwilightBehaviour() = default;
     TwilightBehaviour(
       uint8_t intensity,
       uint8_t profileid,
