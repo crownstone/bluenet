@@ -34,22 +34,19 @@ class TwilightHandler : public EventListener {
      * dispatch an event to communicate a state update.
      */
     bool update();
-
-    std::optional<uint8_t> getValue();
+    
+    uint8_t getValue();
 
     private:
     /**
-     * Given current time/presence, query the behaviourstore and check
+     * Given current time, query the behaviourstore and check
      * if there any valid ones. 
      * 
-     * Returns an empty optional when no valid behaviour is found, or 
-     * more than one valid behaviours contradicted eachother.
      * Returns a non-empty optional if a valid behaviour is found or
      * multiple agreeing behaviours have been found.
      * In this case its value contains the desired state value.
      */
-    std::optional<uint8_t> computeIntendedState(
-        TimeOfDay currenttime);
+    uint8_t computeIntendedState(TimeOfDay currenttime);
 
-    std::optional<uint8_t> previousIntendedState = {};
+    uint8_t previousIntendedState = 100;
 };
