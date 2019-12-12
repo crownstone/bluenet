@@ -22,8 +22,14 @@
 #error "TICK_INTERVAL_MS must not be larger than STATE_RETRY_STORE_DELAY_MS"
 #endif
 
-// Define as LOGd to get debug logs.
+// Define to get debug logs.
+//#define CS_STATE_DEBUG_LOGS
+
+#ifdef CS_STATE_DEBUG_LOGS
+#define LOGStateDebug LOGd
+#else
 #define LOGStateDebug LOGnone
+#endif
 
 void storageErrorCallback(cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id) {
 	State::getInstance().handleStorageError(operation, type, id);
@@ -504,6 +510,12 @@ cs_ret_code_t State::getIdsFromFlash(const CS_TYPE & type, std::vector<cs_state_
 	cs_id_list_t idList(type, ids);
 	_idsCache.push_back(idList);
 	retIds = ids;
+	LOGStateDebug("Got ids from flash type=%u", to_underlying_type(type));
+#ifdef CS_STATE_DEBUG_LOGS
+	for (auto idIter = ids->begin(); idIter < ids->end(); idIter++) {
+		LOGStateDebug("id=%u", *idIter);
+	}
+#endif
 	return ERR_SUCCESS;
 }
 
