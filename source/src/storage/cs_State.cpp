@@ -32,6 +32,17 @@ void storageErrorCallback(cs_storage_operation_t operation, CS_TYPE type, cs_sta
 State::State() : _storage(NULL), _boardsConfig(NULL) {
 }
 
+State::~State() {
+	for (auto it = _ram_data_register.begin(); it < _ram_data_register.end(); it++) {
+		cs_state_data_t* ram_data = &(*it);
+		free(ram_data->value);
+		free(ram_data);
+	}
+	for (auto it = _idsCache.begin(); it < _idsCache.end(); it++) {
+		delete it->ids;
+	}
+}
+
 void State::init(boards_config_t* boardsConfig) {
 	LOGi(FMT_INIT, "board config");
 	_storage = &Storage::getInstance();
@@ -134,6 +145,7 @@ cs_state_data_t & State::addToRam(const CS_TYPE & type, cs_state_id_t id, size16
 	_ram_data_register.push_back(data);
 	LOGStateDebug("Added type=%u id=%u size=%u val=%p", data.type, data.id, data.size, data.value);
 	LOGStateDebug("RAM index now of size %i", _ram_data_register.size());
+	addId(type, id);
 	return data;
 }
 
@@ -148,6 +160,7 @@ cs_ret_code_t State::removeFromRam(const CS_TYPE & type, cs_state_id_t id) {
 		_ram_data_register.erase(_ram_data_register.begin() + index_in_ram);
 		free(ram_data);
 	}
+	remId(type, id);
 	return ERR_SUCCESS;
 }
 
@@ -330,27 +343,8 @@ cs_ret_code_t State::compare(const cs_state_data_t & data, uint32_t & cmp_result
 	return ret_code;
 }
 
-cs_ret_code_t State::get(cs_state_data_t & data, cs_state_search_t & search) {
-	CS_TYPE type = data.type;
-	size16_t typeSize = TypeSize(type);
-	if (typeSize == 0) {
-		return ERR_UNKNOWN_TYPE;
-	}
-	if (search.ramIndex == 0 && to_underlying_type(search.type) == 0 && search.id == 0) {
-		// Start new search
-
-//		for (size16_t i = 0; i < _ram_data_register.size(); ++i) {
-//			if (_ram_data_register[i].type == type) {
-//				index_in_ram = i;
-//				return ERR_SUCCESS;
-//			}
-//		}
-
-	}
-	else {
-
-	}
-	return ERR_NOT_FOUND;
+cs_ret_code_t State::getIds(CS_TYPE type, std::vector<cs_state_id_t> & ids) {
+	return getIdsFromFlash(type, &ids);
 }
 
 cs_ret_code_t State::getDefaultValue(cs_state_data_t & data) {
@@ -386,6 +380,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			return ERR_NOT_AVAILABLE;
 			// By the time the data is written to flash, the data pointer might be invalid.
 			// There is also no guarantee that the data pointer is aligned.
+			//addId(type, id)
 			//return _storage->write(getFileId(type), data);
 		}
 		case PersistenceMode::STRATEGY1: {
@@ -440,7 +435,7 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 		case PersistenceMode::RAM:
 			return removeFromRam(type, id);
 		case PersistenceMode::FLASH:
-			// fall-through
+			//remId(type, id)
 			break;
 		default:
 			LOGe("PM not implemented");
@@ -468,32 +463,81 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 	return ret_code;
 }
 
-cs_ret_code_t State::getIdsFromFlash(const CS_TYPE & type) {
-//	std::vector<cs_state_id_t>* ids = new std::vector<cs_state_id_t>();
-//
-//
-//	std::vector<cs_id_list_t>::iterator typeIter;
-//	for (typeIter = _idsCache.begin(); typeIter < _idsCache.end(); typeIter++) {
-//		if (typeIter->type == type) {
-//			LOGw("Already retrieved ids");
-//			return ERR_SUCCESS;
-//		}
-//	}
-//	_idsCache.push_back()
+/**
+ * - Check if we already have the IDs in cache.
+ * - Iterate over flash
+ * - Make sure we don't have double IDs in the list
+ * - In case of error, abort the whole thing.
+ * - Cache the results.
+ */
+cs_ret_code_t State::getIdsFromFlash(const CS_TYPE & type, std::vector<cs_state_id_t>* retIds) {
+	for (auto typeIter = _idsCache.begin(); typeIter < _idsCache.end(); typeIter++) {
+		if (typeIter->type == type) {
+			LOGi("Already retrieved ids");
+			retIds = typeIter->ids;
+			return ERR_SUCCESS;
+		}
+	}
+	std::vector<cs_state_id_t>* ids = new std::vector<cs_state_id_t>();
+
+	cs_state_id_t id;
+	cs_ret_code_t retCode = _storage->findFirst(type, id);
+	while (retCode == ERR_SUCCESS) {
+		// TODO: Bart 2019-12-12 Maybe use an unordered set instead of vector?
+		bool found = false;
+		for (auto idIter = ids->begin(); idIter < ids->end(); idIter++) {
+			if (*idIter == id) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			ids->push_back(id);
+		}
+		retCode = _storage->findNext(type, id);
+	}
+	if (retCode != ERR_NOT_FOUND) {
+		delete ids;
+		retIds = nullptr;
+		return retCode;
+	}
+	cs_id_list_t idList(type, ids);
+	_idsCache.push_back(idList);
+	retIds = ids;
 	return ERR_SUCCESS;
 }
 
+/**
+ * - Check if a list of IDs exists for this type.
+ *   - If so, check if given ID is in that list.
+ *     - If not, add the ID to the list.
+ */
 cs_ret_code_t State::addId(const CS_TYPE & type, cs_state_id_t id) {
-	std::vector<cs_id_list_t>::iterator typeIter;
-	for (typeIter = _idsCache.begin(); typeIter < _idsCache.end(); typeIter++) {
+	for (auto typeIter = _idsCache.begin(); typeIter < _idsCache.end(); typeIter++) {
 		if (typeIter->type == type) {
-			std::vector<cs_state_id_t>::iterator idIter;
-			for (idIter = typeIter->ids.begin(); idIter < typeIter->ids.end(); idIter++) {
+			// TODO: Bart 2019-12-12 Maybe use an unordered set instead of vector?
+			for (auto idIter = typeIter->ids->begin(); idIter < typeIter->ids->end(); idIter++) {
 				if (*idIter == id) {
 					return ERR_SUCCESS;
 				}
 			}
-			typeIter->ids.push_back(id);
+			typeIter->ids->push_back(id);
+			break;
+		}
+	}
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t State::remId(const CS_TYPE & type, cs_state_id_t id) {
+	for (auto typeIter = _idsCache.begin(); typeIter < _idsCache.end(); typeIter++) {
+		if (typeIter->type == type) {
+			auto ids = typeIter->ids;
+			for (auto idIter = ids->begin(); idIter < ids->end(); idIter++) {
+				if (*idIter == id) {
+					ids->erase(idIter);
+					return ERR_SUCCESS;
+				}
+			}
 			break;
 		}
 	}

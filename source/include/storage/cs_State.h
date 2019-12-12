@@ -84,15 +84,13 @@ struct __attribute__((__packed__)) cs_state_store_queue_t {
 	bool execute;
 };
 
-struct cs_state_search_t {
-	CS_TYPE type;
-	cs_state_id_t id;
-	size_t ramIndex;
-};
-
 struct cs_id_list_t {
 	CS_TYPE type;
-	std::vector<cs_state_id_t> ids;
+	std::vector<cs_state_id_t>* ids;
+	cs_id_list_t(CS_TYPE type, std::vector<cs_state_id_t>* ids):
+		type(type),
+		ids(ids)
+	{}
 };
 
 /**
@@ -154,6 +152,8 @@ public:
 		return instance;
 	}
 
+	~State();
+
 	/**
 	 * Initialize the State object with the board configuration.
 	 *
@@ -197,17 +197,13 @@ public:
 	cs_ret_code_t compare(const cs_state_data_t & data, uint32_t & cmp_result);
 
 	/**
-	 * Get a value of certain type.
+	 * Get a list of IDs for given type.
 	 *
-	 * Used to iterate over all ids of a certain type.
-	 * Only PersistenceMode::STRATEGY1 is implemented.
-	 *
-	 * @param[in,out] data        Data struct with state type, data, and size. Id will be set on success.
-	 * @param[in,out] search      Start with 0, then provide this variable again for the next get().
+	 * @param[in] type            State type.
+	 * @param[out] ids            List of ids.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t get(cs_state_data_t & data, cs_state_search_t & search);
-
+	cs_ret_code_t getIds(CS_TYPE type, std::vector<cs_state_id_t> & ids);
 
 	/**
 	 * Set state to new value, via copy.
@@ -478,12 +474,24 @@ private:
 
 	cs_ret_code_t getDefaultValue(cs_state_data_t & data);
 
-	cs_ret_code_t getIdsFromFlash(const CS_TYPE & type);
+	/**
+	 * Get and cache all IDs with given type from flash.
+	 *
+	 * @param[in] type            State type.
+	 * @param[out] ids            List of ids.
+	 * @return                    Return code.
+	 */
+	cs_ret_code_t getIdsFromFlash(const CS_TYPE & type, std::vector<cs_state_id_t>* ids);
 
 	/**
-	 * Add id to list of cached ids.
+	 * Add ID to list of cached IDs.
 	 *
 	 * Will _NOT_ create a new list if no list for this type exists.
 	 */
 	cs_ret_code_t addId(const CS_TYPE & type, cs_state_id_t id);
+
+	/**
+	 * Remove ID from list of cached IDs.
+	 */
+	cs_ret_code_t remId(const CS_TYPE & type, cs_state_id_t id);
 };
