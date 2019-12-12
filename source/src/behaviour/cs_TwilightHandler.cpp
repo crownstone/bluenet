@@ -34,13 +34,8 @@ void TwilightHandler::handleEvent(event_t& evt){
 
 void TwilightHandler::update(){
     TimeOfDay time = SystemTime::now();
-    std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
 
-    if(!presence){
-        return;
-    } 
-
-    auto intendedState = computeIntendedState(time, presence.value());
+    auto intendedState = computeIntendedState(time);
     if(intendedState){
         if(previousIntendedState == intendedState){
             return;
@@ -59,7 +54,7 @@ void TwilightHandler::update(){
     }
 }
 
-std::optional<uint8_t> TwilightHandler::computeIntendedState(TimeOfDay currenttime, PresenceStateDescription currentpresence){
+std::optional<uint8_t> TwilightHandler::computeIntendedState(TimeOfDay currenttime){
     // return minimal value among the valid twilights.
     return {};
 }
