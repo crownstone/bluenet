@@ -509,6 +509,7 @@ void Storage::eraseNextPage() {
  *	}
  */
 uint8_t* Storage::allocate(size16_t& size) {
+	// TODO Bart 2019-12-12 Can also use new with align, according to arend.
 	size16_t flashSize = getPaddedSize(size);
 	size16_t paddingSize = flashSize - size;
 	uint8_t* ptr = (uint8_t*) malloc(sizeof(uint8_t) * flashSize);
