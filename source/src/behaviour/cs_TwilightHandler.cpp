@@ -5,7 +5,8 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <cs_TwilightHandler.h>
+#include <behaviour/cs_TwilightHandler.h>
+#include <time/cs_SystemTime.h>
 
 void TwilightHandler::handleEvent(event_t& evt){
     switch(evt.type){
@@ -50,7 +51,7 @@ void TwilightHandler::update(){
             sizeof(uint8_t)
         );
 
-        behaviourStateChange.dispatch();
+        // behaviourStateChange.dispatch();
     }
 }
 

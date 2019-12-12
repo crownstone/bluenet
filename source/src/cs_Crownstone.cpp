@@ -53,7 +53,6 @@
 
 #include <switch/cs_SwitchAggregator.h>
 
-#include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_BehaviourStore.h>
 
 #include <array> // DEBUG 
@@ -580,7 +579,6 @@ void Crownstone::setName() {
  * the mesh. In setup mode we use the serial module (but only RX).
  */
 void Crownstone::startOperationMode(const OperationMode & mode) {
-	_behaviourHandler.listen();
 	_behaviourStore.listen();
 	_presenceHandler.listen();
 	

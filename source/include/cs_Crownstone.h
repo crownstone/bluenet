@@ -186,7 +186,7 @@ private:
 	MultiSwitchHandler* _multiSwitchHandler = NULL;
 
 	SystemTime _systemTime;
-	BehaviourHandler _behaviourHandler;
+
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
 

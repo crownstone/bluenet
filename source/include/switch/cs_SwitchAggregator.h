@@ -11,6 +11,9 @@
 #include "switch/cs_SwSwitch.h"
 #include "events/cs_EventListener.h"
 
+#include <behaviour/cs_BehaviourHandler.h>
+#include <behaviour/cs_TwilightHandler.h>
+
 #include <optional>
 
 /**
@@ -41,6 +44,9 @@ class SwitchAggregator : public EventListener {
     virtual ~SwitchAggregator() noexcept {};
     SwitchAggregator& operator= (const SwitchAggregator&) = delete;
 
+    TwilightHandler twilightHandler;
+    BehaviourHandler behaviourHandler;
+
     // when the swith aggregator is initialized with a board
     // that can switch, swSwitch contains that value.
     std::optional<SwSwitch> swSwitch;
@@ -51,13 +57,6 @@ class SwitchAggregator : public EventListener {
 
     // the last state that was aggregated and passed on towards the SwSwitch.
     std::optional<uint8_t> aggregatedState = {};
-
-    // // will be set to true when overrideState was set, and behaviourState
-    // // aggreed as far as 'on/off' state is concerned.
-    // // When a match has happend (this var. is true), the overrideState will be
-    // // removed at the moment that overrideState and behaviourState are no longer
-    // // in agreement.
-    // bool overrideStateMatched;
 
     /**
      * Checks the behaviourState and overrideState,
@@ -71,8 +70,6 @@ class SwitchAggregator : public EventListener {
      * the behaviourState, unless the switch is locked.
      */
     void updateState();
-
-
 
     /**
      * Triggers an updateState() call on all handled events and adjusts
