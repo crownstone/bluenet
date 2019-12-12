@@ -267,6 +267,8 @@ void BehaviourStore::handleGetBehaviour(event_t& evt){
         return;
     }
 
+    activeBehaviours[index]->print();
+
     // validate buffer
     if(evt.result.buf.data == nullptr) {
         LOGd("ERR_BUFFER_UNASSIGNED");
