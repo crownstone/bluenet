@@ -244,42 +244,39 @@ void BehaviourStore::handleGetBehaviour(event_t& evt){
     uint8_t index = *reinterpret_cast<TYPIFY(EVT_GET_BEHAVIOUR)*>(evt.data);
     LOGd("Get behaviour event %d ", index);
 
+    // validate behaviour index
     if(index >= MaxBehaviours || activeBehaviours[index] == nullptr){
         LOGd("ERR_NOT_FOUND");
         evt.result.returnCode = ERR_NOT_FOUND;
         return;
     }
 
-    activeBehaviours[index]->print();
-
+    // validate buffer
     if(evt.result.buf.data == nullptr) {
         LOGd("ERR_BUFFER_UNASSIGNED");
         evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
         return;
     }
 
+    // validate size
+    if(evt.result.buf.len < sizeof(uint8_t) + activeBehaviours[index]->serializedSize()){
+        // cannot communicate the result, so won't do anything.
+        LOGd("ERR_BUFFER_TOO_SMALL");
+        evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
+        return;
+    }
+
     LOGe("TODO: reimplement to handle multiple types!");
     LOGd("serialized size: %d", activeBehaviours[index]->serializedSize());
+    activeBehaviours[index]->print();
 
-    // SwitchBehaviour::SerializedDataType bs = activeBehaviours[index]->serialize();
+    // populate response
+    evt.result.dataSize = sizeof(uint8_t) + activeBehaviours[index]->serializedSize();
 
-    // for(uint8_t b : bs){
-    //     LOGd("get behaviour: 0x%x (%d)",b,b);
-    // }
-
-    // if(evt.result.buf.len < WireFormat::size<SwitchBehaviour>() + sizeof(uint8_t)){
-    //     // cannot communicate the result, so won't do anything.
-    //     LOGd("ERR_BUFFER_TOO_SMALL");
-    //     evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
-    //     return;
-    // }
-
-    // // populate response buffer
-    // evt.result.buf.data[0] = index;
-    // std::copy_n(bs.data(), bs.size(), evt.result.buf.data + sizeof(uint8_t));
-
-    // evt.result.dataSize = bs.size() + sizeof(uint8_t);
-    evt.result.returnCode = ERR_NOT_IMPLEMENTED;
+    evt.result.buf.data[0] = index;
+    activeBehaviours[index]->serialize(evt.result.buf.data + 1, evt.result.buf.len -1);
+   
+    evt.result.returnCode = ERR_SUCCESS;
 }
 
 void BehaviourStore::handleGetBehaviourIndices(event_t& evt){
@@ -369,4 +366,13 @@ uint32_t BehaviourStore::masterHash(){
     }
 
     return fletch;
+}
+
+
+BehaviourStore::~BehaviourStore(){
+    for(Behaviour* bptr: activeBehaviours){
+        if(bptr != nullptr){
+            delete bptr;
+        };
+    }
 }

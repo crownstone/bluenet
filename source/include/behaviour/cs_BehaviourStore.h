@@ -45,6 +45,8 @@ class BehaviourStore : public EventListener {
         return activeBehaviours;
     }
 
+    virtual ~BehaviourStore();
+
     private:
     /**
      * Stores the given behaviour [b] at given [index] in the activeBehaviours array.

@@ -47,7 +47,7 @@ class Behaviour {
     virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size);
     virtual size_t serializedSize() const;
 
-    void print() const;
+    virtual void print() const;
 
     // implementations of behaviours have a class specific identifier
     // which is defined by overriding this method.

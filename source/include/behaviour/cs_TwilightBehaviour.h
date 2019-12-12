@@ -42,6 +42,8 @@ class TwilightBehaviour : public Behaviour {
     virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) override;
     virtual size_t serializedSize() const override;
 
+    virtual void print() const override;
+
     virtual Type getType() const override { return Type::Twilight; }
 
     // =========== Semantics ===========
