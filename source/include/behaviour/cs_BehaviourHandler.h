@@ -27,14 +27,17 @@ class BehaviourHandler : public EventListener {
      */
     virtual void handleEvent(event_t& evt);
 
-    private:
     /**
      * Acquires the current time and presence information. 
      * Checks the intended state by looping over the active behaviours
      * and if the intendedState differs from previousIntendedState
      * dispatch an event to communicate a state update.
      */
-    void update();
+    bool update();
+
+    std::optional<uint8_t> getValue();
+
+    private:
 
     /**
      * Given current time/presence, query the behaviourstore and check

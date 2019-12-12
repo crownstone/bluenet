@@ -14,14 +14,6 @@ void TwilightHandler::handleEvent(event_t& evt){
             update();
             break;
         }
-        case CS_TYPE::STATE_TIME:{
-            update();
-            break;
-        }
-        case CS_TYPE::EVT_TIME_SET: {
-            update();
-            break;
-        }
         case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:{
             update();
             break;
@@ -33,29 +25,28 @@ void TwilightHandler::handleEvent(event_t& evt){
     }
 }
 
-void TwilightHandler::update(){
+bool TwilightHandler::update(){
     TimeOfDay time = SystemTime::now();
 
     auto intendedState = computeIntendedState(time);
     if(intendedState){
         if(previousIntendedState == intendedState){
-            return;
+            return false;
         }
 
         previousIntendedState = intendedState;
-        
-        uint8_t intendedValue = intendedState.value();
-        event_t behaviourStateChange(
-            CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE,
-            &intendedValue,
-            sizeof(uint8_t)
-        );
-
-        // behaviourStateChange.dispatch();
+        return true;
     }
+
+    return false;
 }
 
 std::optional<uint8_t> TwilightHandler::computeIntendedState(TimeOfDay currenttime){
     // return minimal value among the valid twilights.
+    // TODO
     return {};
+}
+
+std::optional<uint8_t> TwilightHandler::getValue(){
+    return previousIntendedState;
 }

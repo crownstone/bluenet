@@ -77,16 +77,16 @@ void SwitchAggregator::updateState(){
 
     std::optional<uint8_t> nextAggregatedState = {};
 
-    if(overrideState && behaviourState && aggregatedState){
+    if(overrideState && behaviourHandler.getValue() && aggregatedState){
         bool overrideStateIsOn = *overrideState != 0;
         bool aggregatedStateIsOn = *aggregatedState != 0;
-        bool behaviourStateIsOn = *behaviourState != 0;
+        bool behaviourStateIsOn = *behaviourHandler.getValue() != 0;
 
         bool overrideMatchedAggregated = overrideStateIsOn == aggregatedStateIsOn;
         bool behaviourWantsToChangeState = behaviourStateIsOn != aggregatedStateIsOn;
 
         if(overrideMatchedAggregated && behaviourWantsToChangeState){
-                nextAggregatedState = behaviourState;
+                nextAggregatedState = behaviourHandler.getValue();
                 overrideState = {};
         } else {
             // if the behaviour doesn't want to change state, keep the user override
@@ -96,7 +96,7 @@ void SwitchAggregator::updateState(){
     } else {
         nextAggregatedState = 
             overrideState ? overrideState : 
-            behaviourState ? behaviourState : 
+            behaviourHandler.getValue() ? behaviourHandler.getValue() : 
             aggregatedState ? aggregatedState : 
             std::nullopt;
     }
@@ -128,19 +128,33 @@ bool SwitchAggregator::handleTimingEvents(event_t& evt){
             break;
         }
         case CS_TYPE::STATE_TIME: {
-            // update();
+            if(updateBehaviourHandlers()){ 
+                updateState();
+            }
+            
             break;
         }
         case CS_TYPE::EVT_TIME_SET: {
-            // update();
+            if(updateBehaviourHandlers()){ 
+                updateState();
+            }
+
             break;
         }
         default:{
             return false;
         }
     }
-    
+
     return true;
+}
+
+bool SwitchAggregator::updateBehaviourHandlers(){
+    bool result = false;
+    result |= twilightHandler.update();
+    result |= behaviourHandler.update();
+
+    return result;
 }
 
 bool SwitchAggregator::handleAllowedOperations(event_t& evt) {
@@ -206,15 +220,6 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
             LOGd("CMD_SWITCH_TOGGLE",__func__);
             // TODO(Arend, 08-10-2019): toggle should be upgraded when twilight is implemented
             overrideState = swSwitch->isOn() ? 0 : 100;
-            updateState();
-            break;
-        }
-
-        // ============== behaviourState Events ==============
-        case CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE : {
-            uint8_t* typd = reinterpret_cast<TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE)*>(evt.data);
-            LOGd("EVT_BEHAVIOUR_SWITCH_STATE value: %d", *typd);
-            behaviourState = *typd;
             updateState();
             break;
         }
