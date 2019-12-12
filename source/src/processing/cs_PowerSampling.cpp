@@ -702,7 +702,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		startIgbtFailureDetection();
 	}
 
-	// TODO: this should be kept up in the state?
+	// TODO Bart 2019-12-12 Use event handler to check for switch changes. Don't poll, as this uses processing power for nothing.
 	switch_state_t prevSwitchState = _lastSwitchState;
 	// Get the current switch state before we dispatch any event (as that may change the switch).
 	TYPIFY(STATE_SWITCH_STATE) switchState;
