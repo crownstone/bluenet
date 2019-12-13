@@ -254,7 +254,7 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
         case CS_TYPE::CMD_SWITCH_TOGGLE:{
             LOGd("CMD_SWITCH_TOGGLE",__func__);
             // TODO(Arend, 08-10-2019): toggle should be upgraded when twilight is implemented
-            overrideState = swSwitch->isOn() ? 0 : 100;
+            overrideState = swSwitch->isOn() ? 0 : 255;
             updateState(false);
             break;
         }
