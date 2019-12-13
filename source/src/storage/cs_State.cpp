@@ -181,18 +181,7 @@ cs_ret_code_t State::allocate(cs_state_data_t & data) {
 	return ERR_SUCCESS;
 }
 
-/**
- * Copies from ram to target buffer.
- *
- * Does not check if target buffer has a large enough size.
- *
- * @param[in]  data.type      Type of data.
- * @param[in]  data.id        Identifier of the data (to get a particular instance of a type).
- * @param[out] data.size      The size of the data retrieved.
- * @param[out] data.value     The data itself.
- *
- * @return                    Return value (i.e. ERR_SUCCESS or other).
- */
+
 cs_ret_code_t State::loadFromRam(cs_state_data_t & data) {
 	size16_t index_in_ram;
 	cs_ret_code_t ret_code = findInRam(data.type, data.id, index_in_ram);
@@ -247,25 +236,18 @@ cs_ret_code_t State::removeFromFlash(const CS_TYPE & type, const cs_state_id_t i
 	}
 }
 
-cs_ret_code_t State::removeFromFlash(const CS_TYPE & type) {
-	if (!_startedWritingToFlash) {
-		return ERR_BUSY;
-	}
-	cs_ret_code_t ret_code = _storage->remove(type);
-	switch(ret_code) {
-	case ERR_SUCCESS:
-	case ERR_NOT_FOUND:
-		return ERR_SUCCESS;
-	default:
-		return ret_code;
-	}
-}
-
 cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	ret_code_t ret_code = ERR_NOT_FOUND;
 	CS_TYPE type = data.type;
 	cs_state_id_t id = data.id;
 	size16_t typeSize = TypeSize(type);
+	if (DefaultLocation(type) == PersistenceMode::DO_NOT_STORE) {
+		return ERR_WRONG_PARAMETER;
+	}
+	if (id != 0 && !hasMultipleIds(type)) {
+		LOGw("Type %u can't have multiple IDs", to_underlying_type(type));
+		return ERR_WRONG_PARAMETER;
+	}
 	if (typeSize == 0) {
 		return ERR_UNKNOWN_TYPE;
 	}
@@ -274,6 +256,8 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	}
 
 	switch(mode) {
+		case PersistenceMode::DO_NOT_STORE:
+			return ERR_NOT_AVAILABLE;
 		case PersistenceMode::FIRMWARE_DEFAULT:
 			return getDefaultValue(data);
 		case PersistenceMode::RAM:
@@ -284,7 +268,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 			// First check if it's already in ram.
 			ret_code = loadFromRam(data);
 			if (ret_code == ERR_SUCCESS) {
-				LOGStateDebug("Loaded from RAM: %s", TypeName(data.type));
+//				LOGStateDebug("Loaded from RAM: %s", TypeName(data.type));
 				return ERR_SUCCESS;
 			}
 			// Else we're going to add a new type to the ram data.
@@ -324,7 +308,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	return ret_code;
 }
 
-cs_ret_code_t State::compare(const cs_state_data_t & data, uint32_t & cmp_result) {
+cs_ret_code_t State::compareWithRam(const cs_state_data_t & data, uint32_t & cmp_result) {
 	cs_state_data_t local_data;
 	local_data.type = data.type;
 	local_data.id = data.id;
@@ -371,6 +355,13 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 	CS_TYPE type = data.type;
 	cs_state_id_t id = data.id;
 	size16_t typeSize = TypeSize(type);
+	if (DefaultLocation(type) == PersistenceMode::DO_NOT_STORE) {
+		return ERR_WRONG_PARAMETER;
+	}
+	if (id != 0 && !hasMultipleIds(type)) {
+		LOGw("Type %u can't have multiple IDs", to_underlying_type(type));
+		return ERR_WRONG_PARAMETER;
+	}
 	if (typeSize == 0) {
 		LOGw("Wrong type %u", data.type)
 		return ERR_UNKNOWN_TYPE;
@@ -379,6 +370,8 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 		return ERR_BUFFER_TOO_SMALL;
 	}
 	switch(mode) {
+		case PersistenceMode::DO_NOT_STORE:
+			return ERR_NOT_AVAILABLE;
 		case PersistenceMode::RAM: {
 			return storeInRam(data);
 		}
@@ -429,9 +422,11 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 	LOGStateDebug("Remove value: %s", TypeName(type));
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	switch(mode) {
+	case PersistenceMode::DO_NOT_STORE:
+			return ERR_NOT_AVAILABLE;
 	case PersistenceMode::RAM: {
-
-		break;
+		// Can we remove from ram, while not from flash?
+		return ERR_NOT_IMPLEMENTED;
 	}
 	case PersistenceMode::FLASH: {
 		return ERR_NOT_IMPLEMENTED;
@@ -477,6 +472,10 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
  * - Cache the results.
  */
 cs_ret_code_t State::getIdsFromFlash(const CS_TYPE & type, std::vector<cs_state_id_t>* retIds) {
+	if (!hasMultipleIds(type)) {
+		LOGw("Type %u can't have multiple IDs", to_underlying_type(type));
+		return ERR_WRONG_PARAMETER;
+	}
 	for (auto typeIter = _idsCache.begin(); typeIter < _idsCache.end(); typeIter++) {
 		if (typeIter->type == type) {
 			LOGi("Already retrieved ids");
@@ -557,24 +556,14 @@ cs_ret_code_t State::remId(const CS_TYPE & type, cs_state_id_t id) {
 }
 
 /*
- * This function setThrottled will immediately write a value to flash, except when this has happened in the last
- * period (indicated by a parameter). If this function is called during this period, the value will be updated in
- * ram. Only after this period this value will then be written to flash. Also after this time, this will lead to a
- * period in which throttling happens. For example, when the period parameter is set to 60000, all calls to 
- * setThrottled will result to calls to flash at a maximum rate of once per minute (for given data type). 
- *
  * Implementation as detailed on https://github.com/crownstone/bluenet/issues/86.
- *
- * @param[in] data           Data to store.
- * @param[in] period         Period (in msec) that throttling will be in effect.
- * @return                   Return code (e.g. ERR_SUCCES, ERR_WRONG_PARAMETER).
  */
-cs_ret_code_t State::setThrottled(const cs_state_data_t & data, uint8_t period) {
-	if (period == 0) {
+cs_ret_code_t State::setThrottled(const cs_state_data_t & data, uint8_t periodSeconds) {
+	if (periodSeconds == 0) {
 		return ERR_WRONG_PARAMETER;
 	}
 	uint32_t cmp_value = 0xFF;
-	cs_ret_code_t ret_code = compare(data, cmp_value);
+	cs_ret_code_t ret_code = compareWithRam(data, cmp_value);
 	if (ret_code != ERR_SUCCESS) {
 		if (ret_code == ERR_NOT_FOUND) {
 			// explicitly go on, it has never set before, so we want to write first time to flash
@@ -594,9 +583,7 @@ cs_ret_code_t State::setThrottled(const cs_state_data_t & data, uint8_t period) 
 	if (ret_code != ERR_SUCCESS) {
 		return ret_code;
 	}
-
-	uint32_t periodMs = 1000 * period;
-
+	uint32_t periodMs = 1000 * periodSeconds;
 	return addToQueue(CS_STATE_QUEUE_OP_WRITE, data.type, data.id, periodMs, QueueMode::THROTTLE);
 }
 
@@ -649,42 +636,7 @@ cs_ret_code_t State::addToQueue(cs_state_queue_op_t operation, const CS_TYPE & t
 		}
 		break;
 	}
-	case CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE: {
-		for (size_t i=0; i<_store_queue.size(); ++i) {
-			if ((_store_queue[i].type == type) &&
-					(
-						(_store_queue[i].operation == CS_STATE_QUEUE_OP_WRITE) ||
-						(_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE) ||
-						(_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE)
-					)
-				) {
-				// TODO Anne @Bart. might not make sense to do throttled...
-				if (mode == QueueMode::THROTTLE) {
-					_store_queue[i].init_counter = delayTicks;
-				} else {
-					_store_queue[i].counter = delayTicks;
-				}
-				_store_queue[i].execute = true;
-				found = true;
-				break;
-			}
-		}
-		break;
-	}
-	case CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID:{
-		for (size_t i=0; i<_store_queue.size(); ++i) {
-			if ((_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID) && (_store_queue[i].id == id)) {
-				// TODO Anne @Bart. might not make sense to do throttled...
-				if (mode == QueueMode::THROTTLE) {
-					_store_queue[i].init_counter = delayTicks;
-				} else {
-					_store_queue[i].counter = delayTicks;
-				}
-				_store_queue[i].execute = true;
-				found = true;
-				break;
-			}
-		}
+	case CS_STATE_QUEUE_OP_FACTORY_RESET: {
 		break;
 	}
 	case CS_STATE_QUEUE_OP_GC:
@@ -757,16 +709,9 @@ void State::delayedStoreTick() {
 				}
 				break;
 			}
-			case CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE: {
-				ret_code = removeFromFlash(it->type);
-				if (ret_code == ERR_BUSY) {
-					removeItem = false;
-				}
-				break;
-			}
-			case CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID: {
-				ret_code = _storage->remove(it->id);
-				if (ret_code == ERR_BUSY) {
+			case CS_STATE_QUEUE_OP_FACTORY_RESET: {
+				ret_code = _storage->factoryReset();
+				if (!handleFactoryResetResult(ret_code)) {
 					removeItem = false;
 				}
 				break;
@@ -858,27 +803,41 @@ void State::factoryReset() {
 	LOGw("Perform factory reset!");
 	_performingFactoryReset = true;
 
-	// TODO: remove all IDs of each type.
-	// TODO: clear queue of writes
+	// Clear queue, to remove any pending writes.
+	_store_queue.clear();
 
-	for (uint32_t i=0; i<TypeBases::General_Base; ++i) {
-		CS_TYPE type = toCsType(i);
-		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE, type, 0, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
+	cs_ret_code_t retCode = _storage->factoryReset();
+	if (!handleFactoryResetResult(retCode)) {
+		addToQueue(CS_STATE_QUEUE_OP_FACTORY_RESET, CS_TYPE::CONFIG_DO_NOT_USE, 0, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
 	}
+}
 
-	cs_state_id_t id = 0;
-	cs_ret_code_t retCode = _storage->remove(id);
+bool State::handleFactoryResetResult(cs_ret_code_t retCode) {
 	switch (retCode) {
-	case ERR_BUSY:
-		// Retry again later.
-		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
-		break;
-	default:
-		break;
+		case ERR_SUCCESS: {
+			// Done, don't wait for event.
+			return true;
+		}
+		case ERR_WAIT_FOR_SUCCESS: {
+			// Wait for event.
+			return true;
+		}
+		case ERR_BUSY: {
+			return false;
+		}
+		default: {
+			// Now what?
+			return false;
+		}
 	}
 }
 
 void State::handleStorageError(cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id) {
+	if (_performingFactoryReset) {
+		LOGw("error during factory reset: retry later");
+		addToQueue(CS_STATE_QUEUE_OP_FACTORY_RESET, CS_TYPE::CONFIG_DO_NOT_USE, 0, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
+		return;
+	}
 	switch (operation) {
 	case CS_STORAGE_OP_WRITE:
 		LOGw("error writing type=%u id=%u", type);
@@ -892,7 +851,6 @@ void State::handleStorageError(cs_storage_operation_t operation, CS_TYPE type, c
 		break;
 	case CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID:
 		LOGw("error removing error id=%u", id);
-		addToQueue(CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
 		break;
 	case CS_STORAGE_OP_GC:
 		LOGw("error collecting garbage");
@@ -905,34 +863,14 @@ void State::handleEvent(event_t & event) {
 	case CS_TYPE::EVT_TICK:
 		delayedStoreTick();
 		break;
-	case CS_TYPE::EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID: {
-		TYPIFY(EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID) id = *(TYPIFY(EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID)*)event.data;
-		if (id == 0) {
-
-			//TODO
-
-			_performingFactoryReset = true;
-			cs_ret_code_t retCode = _storage->garbageCollect();
-			switch (retCode) {
-			case ERR_BUSY:
-				// Retry again later.
-				addToQueue(CS_STATE_QUEUE_OP_GC, CS_TYPE::CONFIG_DO_NOT_USE, 0, STATE_RETRY_STORE_DELAY_MS, QueueMode::DELAY);
-				break;
-			default:
-				break;
-			}
-		}
-		break;
-	}
-	case CS_TYPE::EVT_STORAGE_GC_DONE: {
-		if (_performingFactoryReset) {
-			event_t resetEvent(CS_TYPE::EVT_STORAGE_FACTORY_RESET);
-			EventDispatcher::getInstance().dispatch(resetEvent);
-		}
-		break;
-	}
 	case CS_TYPE::CMD_FACTORY_RESET: {
 		factoryReset();
+		break;
+	}
+	case CS_TYPE::EVT_STORAGE_FACTORY_RESET_DONE: {
+		_performingFactoryReset = false;
+		event_t event(CS_TYPE::EVT_STATE_FACTORY_RESET_DONE);
+		event.dispatch();
 		break;
 	}
 	default:

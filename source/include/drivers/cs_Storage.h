@@ -209,6 +209,18 @@ public:
 	cs_ret_code_t remove(cs_state_id_t id);
 
 	/**
+	 * Perform factory reset.
+	 *
+	 * Make sure to restart factory reset on any error callback.
+	 *
+	 * @retval ERR_WAIT_FOR_SUCCESS    Successfully started removing a record.
+	 * @retval ERR_SUCCESS             All records have been removed.
+	 * @retval ERR_BUSY                Busy, try again later.
+	 * @retval other                   Other errors, maybe retry again later?
+	 */
+	cs_ret_code_t factoryReset();
+
+	/**
 	 * Garbage collection reclaims the flash space that is occupied by records that have been deleted,
 	 * or that failed to be completely written due to, for example, a power loss.
 	 *
@@ -269,6 +281,7 @@ private:
 
 	bool _collectingGarbage = false;
 	bool _removingFile = false;
+	bool _performingFactoryReset = false;
 	std::vector<uint16_t> _busyRecordKeys;
 
 	/**
@@ -310,6 +323,15 @@ private:
 	 * Erase next page, started via eraseAllPages().
 	 */
 	void eraseNextPage();
+
+	/**
+	 * Continue the factory reset process.
+	 *
+	 * @retval ERR_SUCCESS             Successfully started factory reset process.
+	 * @retval ERR_BUSY                Busy, restart the whole factory reset from the beginning.
+	 * @retval other                   Other errors.
+	 */
+	cs_ret_code_t continueFactoryReset();
 
 	// Returns size after padding for flash.
 	size16_t getPaddedSize(size16_t size);

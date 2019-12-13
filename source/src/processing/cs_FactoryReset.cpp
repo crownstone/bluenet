@@ -180,7 +180,7 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 
 void FactoryReset::handleEvent(event_t & event) {
 	switch (event.type) {
-	case CS_TYPE::EVT_STORAGE_FACTORY_RESET:{
+	case CS_TYPE::EVT_STATE_FACTORY_RESET_DONE:{
 		LOGi("Factory reset done, rebooting device");
 		TYPIFY(CMD_RESET_DELAYED) resetCmd;
 		resetCmd.resetCode = GPREGRET_SOFT_RESET;

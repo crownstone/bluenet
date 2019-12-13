@@ -409,7 +409,83 @@ cs_ret_code_t Storage::remove(cs_state_id_t id) {
 	return getErrorCode(fdsRetCode);
 }
 
+cs_ret_code_t Storage::factoryReset() {
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
+	if (isBusy()) {
+		return ERR_BUSY;
+	}
+	initSearch();
+	cs_ret_code_t retCode = continueFactoryReset();
+	if (retCode == ERR_WAIT_FOR_SUCCESS) {
+		_performingFactoryReset = true;
+	}
+	return retCode;
+}
 
+cs_ret_code_t Storage::continueFactoryReset() {
+	LOGStorageDebug("continueFactoryReset");
+	fds_record_desc_t recordDesc;
+	fds_flash_record_t flashRecord;
+	ret_code_t fdsRetCode ;
+	while (fds_record_iterate(&recordDesc, &_findToken) == FDS_SUCCESS) {
+		bool remove = false;
+		fdsRetCode = fds_record_open(&recordDesc, &flashRecord);
+		switch (fdsRetCode) {
+			case FDS_SUCCESS: {
+				uint16_t fileId = flashRecord.p_header->file_id;
+				uint16_t recordKey = flashRecord.p_header->record_key;
+				if (fds_record_close(&recordDesc) != FDS_SUCCESS) {
+					// TODO: How to handle the close error? Maybe reboot?
+					LOGe("Error on closing record");
+				}
+				CS_TYPE type = toCsType(recordKey);
+				cs_state_id_t id = getStateId(fileId);
+
+				remove = removeOnFactoryReset(type, id);
+				if (!remove) {
+					LOGStorageDebug("skip record type=%u id=%u fileId=%u recordKey=%u", to_underlying_type(type), id, fileId, recordKey);
+				}
+				else {
+					LOGStorageDebug("remove record type=%u id=%u fileId=%u recordKey=%u", to_underlying_type(type), id, fileId, recordKey);
+				}
+				break;
+			}
+			case FDS_ERR_CRC_CHECK_FAILED:
+				LOGStorageDebug("remove record with crc fail");
+				remove = true;
+				break;
+			case FDS_ERR_NOT_FOUND:
+			default:
+				LOGw("Unhandled open error: %u", fdsRetCode);
+				return getErrorCode(fdsRetCode);
+		}
+		if (remove) {
+			fdsRetCode = fds_record_delete(&recordDesc);
+			switch (fdsRetCode) {
+				case FDS_SUCCESS:
+					return ERR_SUCCESS;
+				case FDS_ERR_NO_SPACE_IN_QUEUES:
+					return ERR_BUSY;
+				default:
+					return getErrorCode(fdsRetCode);
+			}
+		}
+	}
+	LOGi("Done removing all records.");
+	fdsRetCode = fds_gc();
+	if (fdsRetCode != FDS_SUCCESS) {
+		LOGw("Failed to start garbage collection (err=%i)", fdsRetCode);
+		return getErrorCode(fdsRetCode);
+	}
+	else {
+		LOGd("Started garbage collection");
+		_collectingGarbage = true;
+		return ERR_SUCCESS;
+	}
+}
 
 cs_ret_code_t Storage::garbageCollect() {
 	return getErrorCode(garbageCollectInternal());
@@ -595,8 +671,8 @@ void Storage::clearBusy(uint16_t recordKey) {
 }
 
 bool Storage::isBusy(uint16_t recordKey) {
-	if (_collectingGarbage || _removingFile) {
-		LOGw("Busy: gc=%u rm_file=%u", _collectingGarbage, _removingFile);
+	if (_collectingGarbage || _removingFile || _performingFactoryReset) {
+		LOGw("Busy: gc=%u rm_file=%u factoryReset=%u", _collectingGarbage, _removingFile, _performingFactoryReset);
 		return true;
 	}
 	for (auto it = _busyRecordKeys.begin(); it != _busyRecordKeys.end(); it++) {
@@ -611,8 +687,8 @@ bool Storage::isBusy(uint16_t recordKey) {
 }
 
 bool Storage::isBusy() {
-	if (_collectingGarbage || _removingFile || !_busyRecordKeys.empty()) {
-		LOGw("Busy: gc=%u rm_file=%u records=%u", _collectingGarbage, _removingFile, _busyRecordKeys.size());
+	if (_collectingGarbage || _removingFile || _performingFactoryReset || !_busyRecordKeys.empty()) {
+		LOGw("Busy: gc=%u rm_file=%u factoryReset=%u records=%u", _collectingGarbage, _removingFile, _performingFactoryReset, _busyRecordKeys.size());
 		return true;
 	}
 	return false;
@@ -677,8 +753,13 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 	case FDS_SUCCESS: {
 		CS_TYPE type = CS_TYPE(p_fds_evt->del.record_key);
 		LOGi("Remove done, record=%u or type=%u", p_fds_evt->del.record_key, to_underlying_type(type));
-		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_DONE, &type, sizeof(type));
-		EventDispatcher::getInstance().dispatch(event);
+		if (_performingFactoryReset) {
+			continueFactoryReset();
+		}
+		else {
+			event_t event(CS_TYPE::EVT_STORAGE_REMOVE_DONE, &type, sizeof(type));
+			EventDispatcher::getInstance().dispatch(event);
+		}
 		break;
 	}
 	default:
@@ -701,7 +782,7 @@ void Storage::handleRemoveFileEvent(fds_evt_t const * p_fds_evt) {
 		cs_file_id_t fileId = p_fds_evt->del.file_id;
 		LOGi("Remove file done, fileId=%u", fileId);
 		uint16_t stateId = getStateId(fileId);
-		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID, &stateId, sizeof(stateId));
+		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE, &stateId, sizeof(stateId));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
@@ -722,6 +803,12 @@ void Storage::handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt) {
 	switch (p_fds_evt->result) {
 	case FDS_SUCCESS: {
 		LOGi("Garbage collection successful");
+		if (_performingFactoryReset) {
+			_performingFactoryReset = false;
+			event_t resetEvent(CS_TYPE::EVT_STORAGE_FACTORY_RESET_DONE);
+			EventDispatcher::getInstance().dispatch(resetEvent);
+			return;
+		}
 		event_t event(CS_TYPE::EVT_STORAGE_GC_DONE);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
@@ -747,6 +834,10 @@ void Storage::handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt) {
  */
 void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 	LOGStorageDebug("FS: res=%u id=%u", p_fds_evt->result, p_fds_evt->id);
+	if (_performingFactoryReset && p_fds_evt->result != FDS_SUCCESS) {
+		LOGw("Stopped factory reset process");
+		_performingFactoryReset = false;
+	}
 	switch(p_fds_evt->id) {
 	case FDS_EVT_INIT: {
 		if (p_fds_evt->result == FDS_SUCCESS) {

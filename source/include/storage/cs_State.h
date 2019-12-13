@@ -65,15 +65,19 @@ enum class QueueMode {
 enum cs_state_queue_op_t {
 	CS_STATE_QUEUE_OP_WRITE,
 	CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE,
-	CS_STATE_QUEUE_OP_REM_ALL_IDS_OF_TYPE,
-	CS_STATE_QUEUE_OP_REM_ALL_TYPES_WITH_ID,
+	CS_STATE_QUEUE_OP_FACTORY_RESET,
 	CS_STATE_QUEUE_OP_GC,
 };
 
 /**
- * Struct for a type of which storing to flash is queued or delayed.
+ * Struct for queuing operations.
  *
- * The type will be stored once the counter is 0.
+ * operation:      Type of operation to perform.
+ * type:           State type
+ * id:             State id
+ * counter:        Number of ticks until item is executed and removed from queue.
+ * init_counter:   In case this item is added again, set counter to this value.
+ * execute:        Whether or not to execute the operation.
  */
 struct __attribute__((__packed__)) cs_state_store_queue_t {
 	cs_state_queue_op_t operation;
@@ -186,16 +190,6 @@ public:
 	 */
 	bool isTrue(CS_TYPE type, const PersistenceMode mode = PersistenceMode::STRATEGY1);
 
-
-	/**
-	 * Check a particular value with the value currently in ram. T
-	 *
-	 * @param[in]  data           Data with type, id, value, and size.
-	 * @param[out] cmp_result     Value that indicates comparison (equality indicated by 0).
-	 * @return                    Return code (e.g. ERR_SUCCESS, ERR_NOT_FOUND, etc.)
-	 */
-	cs_ret_code_t compare(const cs_state_data_t & data, uint32_t & cmp_result);
-
 	/**
 	 * Get a list of IDs for given type.
 	 *
@@ -235,20 +229,19 @@ public:
 	cs_ret_code_t setDelayed(const cs_state_data_t & data, uint8_t delay);
 	
 	/**
-	 * Write variable to flash in a throttled mode
+	 * Write variable to flash in a throttled mode.
 	 *
 	 * This function setThrottled will immediately write a value to flash, except when this has happened in the last
 	 * period (indicated by a parameter). If this function is called during this period, the value will be updated in
 	 * ram. Only after this period this value will then be written to flash. Also after this time, this will lead to a
-	 * period in which throttling happens. For example, when the period parameter is set to 60000, all calls to 
-	 * setThrottled will result to calls to flash at a maximum rate of once per minute (for given data type). 
+	 * period in which throttling happens. For example, when the period parameter is set to 60000, all calls to
+	 * setThrottled will result to calls to flash at a maximum rate of once per minute (for given data type).
 	 *
 	 * @param[in] data           Data to store.
-	 * @param[in] period         Period (in msec) that throttling will be in effect.
+	 * @param[in] period         Period in seconds that throttling will be in effect.
 	 * @return                   Return code (e.g. ERR_SUCCES, ERR_WRONG_PARAMETER).
 	 */
-	cs_ret_code_t setThrottled(const cs_state_data_t & data, uint8_t period);
-
+	cs_ret_code_t setThrottled(const cs_state_data_t & data, uint8_t periodSeconds);
 
 	/**
 	 * Verify size of user data for getting a state.
@@ -327,10 +320,6 @@ protected:
 
 	boards_config_t* _boardsConfig;
 
-//	cs_ret_code_t verify(CS_TYPE type, uint8_t* payload, uint8_t length);
-
-//	bool readFlag(CS_TYPE type, bool& value);
-
 	/**
 	 * Find given type in ram.
 	 *
@@ -342,10 +331,6 @@ protected:
 	 */
 	cs_ret_code_t findInRam(const CS_TYPE & type, cs_state_id_t id, size16_t & index_in_ram);
 
-	cs_ret_code_t storeInRam(const cs_state_data_t & data);
-
-	cs_ret_code_t loadFromRam(cs_state_data_t & data);
-
 	/**
 	 * Stores state variable in ram.
 	 *
@@ -356,6 +341,25 @@ protected:
 	 * @return                    Return code.
 	 */
 	cs_ret_code_t storeInRam(const cs_state_data_t & data, size16_t & index_in_ram);
+
+	/**
+	 * Convenience function, in case you're not interested in index in ram.
+	 */
+	cs_ret_code_t storeInRam(const cs_state_data_t & data);
+
+	/**
+	 * Copies from ram to target buffer.
+	 *
+	 * Does not check if target buffer has a large enough size.
+	 *
+	 * @param[in]  data.type      Type of data.
+	 * @param[in]  data.id        Identifier of the data (to get a particular instance of a type).
+	 * @param[out] data.size      The size of the data retrieved.
+	 * @param[out] data.value     The data itself.
+	 *
+	 * @return                    Return value (i.e. ERR_SUCCESS or other).
+	 */
+	cs_ret_code_t loadFromRam(cs_state_data_t & data);
 
 	/**
 	 * Adds a new state_data struct to ram.
@@ -379,6 +383,15 @@ protected:
 	cs_ret_code_t removeFromRam(const CS_TYPE & type, cs_state_id_t id);
 
 	/**
+	 * Check a particular value with the value currently in ram.
+	 *
+	 * @param[in]  data           Data with type, id, value, and size.
+	 * @param[out] cmp_result     Value that indicates comparison (equality indicated by 0).
+	 * @return                    Return code (e.g. ERR_SUCCESS, ERR_NOT_FOUND, etc.)
+	 */
+	cs_ret_code_t compareWithRam(const cs_state_data_t & data, uint32_t & cmp_result);
+
+	/**
 	 * Writes state variable in ram to flash.
 	 *
 	 * Can return ERR_BUSY, in which case you have to retry again later.
@@ -398,26 +411,6 @@ protected:
 	 * @return                    Return code.
 	 */
 	cs_ret_code_t removeFromFlash(const CS_TYPE & type, const cs_state_id_t id);
-
-	/**
-	 * Remove all values of a certain type from flash.
-	 *
-	 * Can return ERR_BUSY, in which case you have to retry again later.
-	 *
-	 * @param[in] type            State type.
-	 * @return                    Return code.
-	 */
-	cs_ret_code_t removeFromFlash(const CS_TYPE & type);
-
-//	/**
-//	 * Remove all values of a certain type from flash.
-//	 *
-//	 * Can return ERR_BUSY, in which case you have to retry again later.
-//	 *
-//	 * @param[in] type            State type.
-//	 * @return                    Return code.
-//	 */
-//	cs_ret_code_t removeFromFlash(const CS_TYPE & type);
 
 	/**
 	 * Add an operation to queue.
@@ -471,6 +464,13 @@ private:
 	cs_ret_code_t setInternal(const cs_state_data_t & data, PersistenceMode mode);
 
 	cs_ret_code_t removeInternal(const CS_TYPE & type, cs_state_id_t id, const PersistenceMode mode);
+
+	/**
+	 * Handle factory reset result.
+	 *
+	 * @retrun                    False when factory reset needs to be retried.
+	 */
+	bool handleFactoryResetResult(cs_ret_code_t retCode);
 
 	cs_ret_code_t getDefaultValue(cs_state_data_t & data);
 
