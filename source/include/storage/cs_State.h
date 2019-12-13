@@ -53,7 +53,7 @@ constexpr OperationMode getOperationMode(uint8_t mode) {
 	return OperationMode::OPERATION_MODE_UNINITIALIZED;
 }
 
-enum class QueueMode {
+enum class StateQueueMode {
 	DELAY,
 	THROTTLE
 };
@@ -62,7 +62,7 @@ enum class QueueMode {
 #define FACTORY_RESET_STATE_LOWTX  1
 #define FACTORY_RESET_STATE_RESET  2
 
-enum cs_state_queue_op_t {
+enum StateQueueOp {
 	CS_STATE_QUEUE_OP_WRITE,
 	CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE,
 	CS_STATE_QUEUE_OP_FACTORY_RESET,
@@ -80,7 +80,7 @@ enum cs_state_queue_op_t {
  * execute:        Whether or not to execute the operation.
  */
 struct __attribute__((__packed__)) cs_state_store_queue_t {
-	cs_state_queue_op_t operation;
+	StateQueueOp operation;
 	CS_TYPE type;
 	cs_state_id_t id;
 	uint16_t counter;
@@ -424,8 +424,8 @@ protected:
 	 * @param[in] delayMs         Delay in ms.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t addToQueue(cs_state_queue_op_t operation, const CS_TYPE & type, cs_state_id_t id, uint32_t delayMs,
-			const QueueMode mode);
+	cs_ret_code_t addToQueue(StateQueueOp operation, const CS_TYPE & type, cs_state_id_t id, uint32_t delayMs,
+			const StateQueueMode mode);
 
 	cs_ret_code_t allocate(cs_state_data_t & data);
 
