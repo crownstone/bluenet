@@ -47,6 +47,23 @@ class SwitchAggregator : public EventListener {
     TwilightHandler twilightHandler;
     BehaviourHandler behaviourHandler;
 
+    /********************************
+     * Aggregates the value of twilightHandler and behaviourHandler
+     * into a single intensity value.
+     * 
+     * This will return the minimum of the respective handler values
+     * when both are defined, otherwise return the value of the one
+     * that is defined, otherwise 100.
+     */
+    uint8_t aggregatedBehaviourIntensity();
+
+    /********************************
+     * When override state is the special value 'translucent on'
+     * it should be interpreted according to the values of twilightHandler
+     * and behaviourHandler. This getter centralizes that.
+     */
+    std::optional<uint8_t> resolveOverrideState();
+
     // when the swith aggregator is initialized with a board
     // that can switch, swSwitch contains that value.
     std::optional<SwSwitch> swSwitch;
@@ -67,9 +84,12 @@ class SwitchAggregator : public EventListener {
      * - nothing happens.
      * 
      * This method will clear the overrideState when it matches
-     * the behaviourState, unless the switch is locked.
+     * the behaviourState, unless the switch is locked or allowOverrideReset is false.
+     * 
+     * (Disallowing override state to reset is used for commands that want to change
+     * the value and trigger a reset which are not initated through behaviour handlers)
      */
-    void updateState();
+    void updateState(bool allowOverrideReset = true);
 
     /**
      * Calls update on the behaviour handlers and returns true

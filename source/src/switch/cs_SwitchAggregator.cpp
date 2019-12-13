@@ -12,6 +12,7 @@
 
 #include <optional>
 
+#define LOGSwitchAggregator LOGnone
 
 // =====================================================
 // ================== Old Owner logic ==================
@@ -33,13 +34,13 @@ bool SwitchAggregator::checkAndSetOwner(cmd_source_t source) {
 
 	if (_source.sourceId != source.sourceId) {
 		// Switch is claimed by other source.
-		LOGd("Already claimed by %u", _source.sourceId);
+		LOGSwitchAggregator("Already claimed by %u", _source.sourceId);
 		return false;
 	}
 
 	if (!BLEutil::isNewer(_source.count, source.count)) {
 		// A command with newer counter has been received already.
-		LOGd("Old command: %u, already got: %u", source.count, _source.count);
+		LOGSwitchAggregator("Old command: %u, already got: %u", source.count, _source.count);
 		return false;
 	}
 
@@ -67,15 +68,13 @@ void SwitchAggregator::init(SwSwitch&& s){
     swSwitch->resolveIntendedState();
 }
 
-void SwitchAggregator::updateState(){
+void SwitchAggregator::updateState(bool allowOverrideReset){
     if(!swSwitch || !swSwitch->isSwitchingAllowed()){
         // shouldn't update overrideState when switch is locked.
         return;
     }
 
     // (swSwitch.has_value() is true from here)
-
-    std::optional<uint8_t> nextAggregatedState = {};
 
     if(overrideState && behaviourHandler.getValue() && aggregatedState){
         bool overrideStateIsOn = *overrideState != 0;
@@ -85,27 +84,62 @@ void SwitchAggregator::updateState(){
         bool overrideMatchedAggregated = overrideStateIsOn == aggregatedStateIsOn;
         bool behaviourWantsToChangeState = behaviourStateIsOn != aggregatedStateIsOn;
 
-        if(overrideMatchedAggregated && behaviourWantsToChangeState){
-                nextAggregatedState = behaviourHandler.getValue();
+        if(overrideMatchedAggregated && behaviourWantsToChangeState && allowOverrideReset){
+                // nextAggregatedState = aggregatedBehaviourIntensity();
+                LOGSwitchAggregator("resetting overrideState");
                 overrideState = {};
-        } else {
-            // if the behaviour doesn't want to change state, keep the user override
-            // because we don't want to unexpectedly change intensity.
-            nextAggregatedState = overrideState;
-        }
-    } else {
-        nextAggregatedState = 
-            overrideState ? overrideState : 
-            behaviourHandler.getValue() ? behaviourHandler.getValue() : 
-            aggregatedState ? aggregatedState : 
-            std::nullopt;
-    }
+        } 
+    } 
 
-    aggregatedState = nextAggregatedState;
+    aggregatedState = 
+        overrideState ? resolveOverrideState() : 
+        behaviourHandler.getValue() ? aggregatedBehaviourIntensity() : // only use aggr. if no SwitchBehaviour conflict is found
+        aggregatedState ? aggregatedState :                            // if conflict is found, don't change the value.
+        std::nullopt;
+    
     if(aggregatedState){
         swSwitch->setDimmer(*aggregatedState);
     }
 
+}
+
+std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
+    LOGSwitchAggregator("resolveOverrideState called");
+    if(*overrideState == 0xff){
+        LOGSwitchAggregator("translucent override state");
+
+        if(uint8_t behave_intensity = behaviourHandler.getValue().value_or(0)){
+            // behaviour has positive intensity
+            LOGSwitchAggregator("behaviour value positive, returning minimum of behaviour(%d) and twilight(%d)", behave_intensity,twilightHandler.getValue());
+            return CsMath::min(behave_intensity,twilightHandler.getValue());
+        } else {
+            // behaviour conflicts or indicates 'off' are ignored because although
+            // overrideState is 'translucent', it must be 'on.
+            LOGSwitchAggregator("behaviour value undefined or zero, returning twilight(%d)",twilightHandler.getValue());
+            return twilightHandler.getValue();
+        }
+    }
+        
+    LOGSwitchAggregator("returning unchanged overrideState");
+    return overrideState;  // opaque override is unchanged.
+}
+
+uint8_t SwitchAggregator::aggregatedBehaviourIntensity(){
+    LOGSwitchAggregator("aggregatedBehaviourIntensity called");
+
+    if(behaviourHandler.getValue()){
+        LOGSwitchAggregator("returning min of behaviour(%d) and twilight(%d)",
+            *behaviourHandler.getValue(),
+            twilightHandler.getValue());
+        return CsMath::min(
+            *behaviourHandler.getValue(), 
+            twilightHandler.getValue() 
+        );
+    }
+    LOGSwitchAggregator("returning twilight value(%d), behaviour undefined",twilightHandler.getValue());
+
+    // SwitchBehaviours conflict, so use twilight only
+    return twilightHandler.getValue();
 }
 
 void SwitchAggregator::handleEvent(event_t& evt){
@@ -195,32 +229,33 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
         case CS_TYPE::CMD_SWITCH_ON:{
             LOGd("CMD_SWITCH_ON",__func__);
             overrideState = 100;
-            updateState();
+            updateState(false);
             break;
         }
         case CS_TYPE::CMD_SWITCH_OFF:{
             LOGd("CMD_SWITCH_OFF",__func__);
             overrideState = 0;
-            updateState();
+            updateState(false);
             break;
         }
         case CS_TYPE::CMD_SWITCH: {
             LOGd("CMD_SWITCH",__func__);
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;
-            LOGd("packet intensity: %d", packet->switchCmd);
+            LOGd("packet intensity: %d, source(%d)", packet->switchCmd, packet->source.sourceId);
             if (!checkAndSetOwner(packet->source)) {
+                LOGSwitchAggregator("not executing, checkAndSetOwner returned false");
                 break;
             }
             
             overrideState = packet->switchCmd;
-            updateState();
+            updateState(false);
 			break;
 		}
         case CS_TYPE::CMD_SWITCH_TOGGLE:{
             LOGd("CMD_SWITCH_TOGGLE",__func__);
             // TODO(Arend, 08-10-2019): toggle should be upgraded when twilight is implemented
             overrideState = swSwitch->isOn() ? 0 : 100;
-            updateState();
+            updateState(false);
             break;
         }
 
