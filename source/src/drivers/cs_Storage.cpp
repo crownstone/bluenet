@@ -167,6 +167,46 @@ cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 	return csRetCode;
 }
 
+cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t & stateData) {
+	// Code copied from read() with only fileId changed.
+	if (!_initialized) {
+		LOGe("Storage not initialized");
+		return ERR_NOT_INITIALIZED;
+	}
+	uint16_t recordKey = to_underlying_type(stateData.type);
+	uint16_t fileId = FILE_KEEP_FOREVER;
+	if (stateData.type != CS_TYPE::STATE_RESET_COUNTER || stateData.id != 0 || !isValidRecordKey(recordKey) || !isValidFileId(fileId)) {
+		return ERR_WRONG_PARAMETER;
+	}
+	if (isBusy(recordKey)) {
+		return ERR_BUSY;
+	}
+	fds_record_desc_t recordDesc;
+	cs_ret_code_t csRetCode = ERR_NOT_FOUND;
+	bool done = false;
+	LOGd("Read record %u", recordKey);
+	initSearch();
+	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
+		if (done) {
+			LOGe("Duplicate record key=%u addr=%p", recordKey, _findToken.p_addr);
+		}
+		csRetCode = readRecord(recordDesc, stateData.value, stateData.size, fileId);
+		if (csRetCode == ERR_SUCCESS) {
+			done = true;
+		}
+//		if (done) {
+//			break;
+//		}
+	}
+	if (done) {
+		return ERR_SUCCESS;
+	}
+	if (csRetCode == ERR_NOT_FOUND) {
+		LOGd("Record not found");
+	}
+	return csRetCode;
+}
+
 cs_ret_code_t Storage::readFirst(cs_state_data_t & stateData) {
 	if (!_initialized) {
 		LOGe("Storage not initialized");

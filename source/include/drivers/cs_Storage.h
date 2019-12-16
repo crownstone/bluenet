@@ -127,6 +127,17 @@ public:
 	cs_ret_code_t read(cs_state_data_t & data);
 
 	/**
+	 * Read the old (v3) reset counter.
+	 *
+	 * Made to transfer reset counter from old location to new.
+	 *
+	 * @param[in, out] data       Data struct with type and id to read. Pointer and size will be set afterwards.
+	 *
+	 * @return Error code like read().
+	 */
+	cs_ret_code_t readV3ResetCounter(cs_state_data_t & data);
+
+	/**
 	 * Find and read from first stored value of given type.
 	 *
 	 * NOTE: you should complete or abort this readFirst() / readNext() before starting a new one.

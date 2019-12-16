@@ -158,6 +158,13 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 			}
 			else {
 				ret_code = _storage->read(ram_data);
+
+				// Temp code, to retain old reset counter.
+				if (ram_data.type == CS_TYPE::STATE_RESET_COUNTER && ret_code == ERR_NOT_FOUND) {
+					LOGi("Load old reset counter");
+					ret_code = _storage->readV3ResetCounter(ram_data);
+				}
+
 				switch(ret_code) {
 					case ERR_SUCCESS: {
 						break;
