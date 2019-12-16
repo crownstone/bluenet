@@ -269,6 +269,10 @@ static const cs_file_id_t FILE_DO_NOT_USE     = 0x0000;
 static const cs_file_id_t FILE_KEEP_FOREVER   = 0x0001;
 static const cs_file_id_t FILE_CONFIGURATION  = 0x0003;
 
+struct cs_type_and_id_t {
+	CS_TYPE type;
+	cs_state_id_t id;
+};
 
 
 /*---------------------------------------------------------------------------------------------------------------------
@@ -386,9 +390,9 @@ typedef  session_nonce_t TYPIFY(EVT_SESSION_NONCE_SET);
 typedef  state_external_stone_t TYPIFY(EVT_STATE_EXTERNAL_STONE);
 typedef  void TYPIFY(EVT_STATE_FACTORY_RESET_DONE);
 typedef  void TYPIFY(EVT_STORAGE_INITIALIZED);
-typedef  CS_TYPE TYPIFY(EVT_STORAGE_WRITE_DONE);
-typedef  CS_TYPE TYPIFY(EVT_STORAGE_REMOVE_DONE);
-typedef  uint16_t TYPIFY(EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE);
+typedef  cs_type_and_id_t TYPIFY(EVT_STORAGE_WRITE_DONE);
+typedef  cs_type_and_id_t TYPIFY(EVT_STORAGE_REMOVE_DONE);
+typedef  cs_state_id_t TYPIFY(EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE);
 typedef  void TYPIFY(EVT_STORAGE_GC_DONE);
 typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET_DONE);
 typedef  void TYPIFY(EVT_STORAGE_PAGES_ERASED);

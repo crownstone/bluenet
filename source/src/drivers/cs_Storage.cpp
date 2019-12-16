@@ -765,20 +765,20 @@ cs_ret_code_t Storage::getErrorCode(ret_code_t code) {
 
 void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 	clearBusy(p_fds_evt->write.record_key);
+	TYPIFY(EVT_STORAGE_WRITE_DONE) eventData;
+	eventData.type = CS_TYPE(p_fds_evt->write.record_key);
+	eventData.id = getStateId(p_fds_evt->write.file_id);
 	switch (p_fds_evt->result) {
 	case FDS_SUCCESS: {
-		CS_TYPE type = CS_TYPE(p_fds_evt->write.record_key);
-		LOGd("Write done, key=%u file=%u type=%u", p_fds_evt->write.record_key, p_fds_evt->write.file_id, to_underlying_type(type));
-		event_t event(CS_TYPE::EVT_STORAGE_WRITE_DONE, &type, sizeof(type));
+		LOGd("Write done, key=%u file=%u type=%u id=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(eventData.type), eventData.id);
+		event_t event(CS_TYPE::EVT_STORAGE_WRITE_DONE, &eventData, sizeof(eventData));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
 	default:
 		LOGw("Write FDSerror=%u key=%u file=%u", p_fds_evt->result, p_fds_evt->write.record_key, p_fds_evt->write.file_id);
 		if (_errorCallback) {
-			CS_TYPE type = toCsType(p_fds_evt->write.record_key);
-			cs_state_id_t id = getStateId(p_fds_evt->write.file_id);
-			_errorCallback(CS_STORAGE_OP_WRITE, type, id);
+			_errorCallback(CS_STORAGE_OP_WRITE, eventData.type, eventData.id);
 		}
 		else {
 			LOGw("Unhandled");
@@ -789,15 +789,17 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 
 void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 	clearBusy(p_fds_evt->del.record_key);
+	TYPIFY(EVT_STORAGE_REMOVE_DONE) eventData;
+	eventData.type = toCsType(p_fds_evt->del.record_key);
+	eventData.id = getStateId(p_fds_evt->del.file_id);
 	switch (p_fds_evt->result) {
 	case FDS_SUCCESS: {
-		CS_TYPE type = CS_TYPE(p_fds_evt->del.record_key);
-		LOGi("Remove done, key=%u file=%u type=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(type));
+		LOGi("Remove done, key=%u file=%u type=%u id=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(eventData.type), eventData.id);
 		if (_performingFactoryReset) {
 			continueFactoryReset();
 		}
 		else {
-			event_t event(CS_TYPE::EVT_STORAGE_REMOVE_DONE, &type, sizeof(type));
+			event_t event(CS_TYPE::EVT_STORAGE_REMOVE_DONE, &eventData, sizeof(eventData));
 			EventDispatcher::getInstance().dispatch(event);
 		}
 		break;
@@ -805,9 +807,7 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 	default:
 		LOGw("Remove FDSerror=%u key=%u file=%u", p_fds_evt->result, p_fds_evt->del.record_key, p_fds_evt->del.file_id);
 		if (_errorCallback) {
-			CS_TYPE type = toCsType(p_fds_evt->del.record_key);
-			cs_state_id_t id = getStateId(p_fds_evt->write.file_id);
-			_errorCallback(CS_STORAGE_OP_REMOVE, type, id);
+			_errorCallback(CS_STORAGE_OP_REMOVE, eventData.type, eventData.id);
 		}
 		else {
 			LOGw("Unhandled");
@@ -817,19 +817,17 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 
 void Storage::handleRemoveFileEvent(fds_evt_t const * p_fds_evt) {
 	_removingFile = false;
+	cs_state_id_t id = getStateId(p_fds_evt->write.file_id);
 	switch (p_fds_evt->result) {
 	case FDS_SUCCESS: {
-		cs_file_id_t fileId = p_fds_evt->del.file_id;
-		LOGi("Remove file done, fileId=%u", fileId);
-		uint16_t stateId = getStateId(fileId);
-		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE, &stateId, sizeof(stateId));
+		LOGi("Remove file done, file=%u id=%u", p_fds_evt->del.file_id, id);
+		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE, &id, sizeof(id));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
 	default:
-		LOGw("Remove FDSerror=%u fileId=%u", p_fds_evt->result, p_fds_evt->del.file_id);
+		LOGw("Remove FDSerror=%u file=%u", p_fds_evt->result, p_fds_evt->del.file_id);
 		if (_errorCallback) {
-			cs_state_id_t id = getStateId(p_fds_evt->write.file_id);
 			_errorCallback(CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID, CS_TYPE::CONFIG_DO_NOT_USE, id);
 		}
 		else {
@@ -873,7 +871,7 @@ void Storage::handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt) {
  *   del { record_id, file_id, record_key }
  */
 void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
-	LOGStorageDebug("FS: res=%u id=%u", p_fds_evt->result, p_fds_evt->id);
+	LOGStorageDebug("FS: res=%u evt=%u", p_fds_evt->result, p_fds_evt->id);
 	if (_performingFactoryReset && p_fds_evt->result != FDS_SUCCESS) {
 		LOGw("Stopped factory reset process");
 		_performingFactoryReset = false;
