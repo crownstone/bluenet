@@ -83,10 +83,12 @@ struct __attribute__((__packed__)) cs_state_store_queue_t {
 	StateQueueOp operation;
 	CS_TYPE type;
 	cs_state_id_t id;
-	uint16_t counter;
-	uint16_t init_counter;
+	uint32_t counter; // Uint32, so it can fit 24h.
+	uint32_t init_counter;
 	bool execute;
 };
+
+const uint32_t CS_STATE_QUEUE_DELAY_SECONDS_MAX = 0xFFFFFFFF / 1000;
 
 struct cs_id_list_t {
 	CS_TYPE type;
@@ -238,10 +240,10 @@ public:
 	 * setThrottled will result to calls to flash at a maximum rate of once per minute (for given data type).
 	 *
 	 * @param[in] data           Data to store.
-	 * @param[in] period         Period in seconds that throttling will be in effect.
+	 * @param[in] period         Period in seconds that throttling will be in effect. Must be smaller than CS_STATE_QUEUE_DELAY_SECONDS_MAX.
 	 * @return                   Return code (e.g. ERR_SUCCES, ERR_WRONG_PARAMETER).
 	 */
-	cs_ret_code_t setThrottled(const cs_state_data_t & data, uint8_t periodSeconds);
+	cs_ret_code_t setThrottled(const cs_state_data_t & data, uint32_t period);
 
 	/**
 	 * Verify size of user data for getting a state.

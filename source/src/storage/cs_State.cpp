@@ -612,8 +612,8 @@ cs_ret_code_t State::remId(const CS_TYPE & type, cs_state_id_t id) {
 /*
  * Implementation as details on https://github.com/crownstone/bluenet/issues/86.
  */
-cs_ret_code_t State::setThrottled(const cs_state_data_t & data, uint8_t periodSeconds) {
-	if (periodSeconds == 0) {
+cs_ret_code_t State::setThrottled(const cs_state_data_t & data, uint32_t periodSeconds) {
+	if (periodSeconds == 0 || periodSeconds >= CS_STATE_QUEUE_DELAY_SECONDS_MAX) {
 		return ERR_WRONG_PARAMETER;
 	}
 	uint32_t cmp_value = 0xFF;
@@ -646,15 +646,15 @@ cs_ret_code_t State::setThrottled(const cs_state_data_t & data, uint8_t periodSe
  * Check if type is already queued. If so, overwrite the counter, so that the write to storage is pushed forward in
  * time, thus avoiding multiple writes to storage.
  */
-cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delay) {
-	if (delay == 0) {
+cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delaySeconds) {
+	if (delaySeconds == 0) {
 		return ERR_WRONG_PARAMETER;
 	}
 	cs_ret_code_t ret_code = set(data, PersistenceMode::RAM);
 	if (ret_code != ERR_SUCCESS) {
 		return ret_code;
 	}
-	uint32_t delayMs = 1000 * delay;
+	uint32_t delayMs = 1000 * delaySeconds;
 	return addToQueue(CS_STATE_QUEUE_OP_WRITE, data.type, data.id, delayMs, StateQueueMode::DELAY);
 }
 
