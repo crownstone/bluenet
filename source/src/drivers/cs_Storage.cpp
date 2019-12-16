@@ -144,11 +144,11 @@ cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 	fds_record_desc_t recordDesc;
 	cs_ret_code_t csRetCode = ERR_NOT_FOUND;
 	bool done = false;
-	LOGd("Read record %u", recordKey);
+	LOGd("Read record key=%u file=%u", recordKey, fileId);
 	initSearch();
 	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
 		if (done) {
-			LOGe("Duplicate record key=%u addr=%p", recordKey, _findToken.p_addr);
+			LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
 		}
 		csRetCode = readRecord(recordDesc, stateData.value, stateData.size, fileId);
 		if (csRetCode == ERR_SUCCESS) {
@@ -184,11 +184,11 @@ cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t & stateData) {
 	fds_record_desc_t recordDesc;
 	cs_ret_code_t csRetCode = ERR_NOT_FOUND;
 	bool done = false;
-	LOGd("Read record %u", recordKey);
+	LOGd("Read record %u file=%u", recordKey, fileId);
 	initSearch();
 	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
 		if (done) {
-			LOGe("Duplicate record key=%u addr=%p", recordKey, _findToken.p_addr);
+			LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
 		}
 		csRetCode = readRecord(recordDesc, stateData.value, stateData.size, fileId);
 		if (csRetCode == ERR_SUCCESS) {
@@ -330,17 +330,17 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 	// Assume the allocation was done by storage.
 	// Size is in bytes, each word is 4B.
 	record.data.length_words = getPaddedSize(stateData.size) >> 2;
-	LOGd("Write record=%u or type=%u", record.key, recordKey);
+	LOGd("Write key=% file=%u", recordKey, fileId);
 	LOGStorageDebug("Data=%p word size=%u", record.data.p_data, record.data.length_words);
 
 	bool recordExists = false;
 	fdsRetCode = exists(fileId, recordKey, recordDesc, recordExists);
 	if (recordExists) {
-		LOGStorageDebug("Update file %u record %u", record.file_id, record.key);
+		LOGStorageDebug("Update key=%u file=%u ptr=%p", record.key, record.file_id, record.data.p_data);
 		fdsRetCode = fds_record_update(&recordDesc, &record);
 	}
 	else {
-		LOGStorageDebug("Write file %u, record %u, ptr %p", record.file_id, record.key, record.data.p_data);
+		LOGStorageDebug("Write key=%u file=%u ptr=%p", record.key, record.file_id, record.data.p_data);
 		fdsRetCode = fds_record_write(&recordDesc, &record);
 	}
 	switch(fdsRetCode) {
@@ -486,10 +486,10 @@ cs_ret_code_t Storage::continueFactoryReset() {
 
 				remove = removeOnFactoryReset(type, id);
 				if (!remove) {
-					LOGStorageDebug("skip record type=%u id=%u fileId=%u recordKey=%u", to_underlying_type(type), id, fileId, recordKey);
+					LOGStorageDebug("skip record type=%u id=%u recordKey=%u fileId=%u", to_underlying_type(type), id, recordKey, fileId);
 				}
 				else {
-					LOGStorageDebug("remove record type=%u id=%u fileId=%u recordKey=%u", to_underlying_type(type), id, fileId, recordKey);
+					LOGStorageDebug("remove record type=%u id=%u recordKey=%u fileId=%u", to_underlying_type(type), id, recordKey, fileId);
 				}
 				break;
 			}
@@ -687,7 +687,7 @@ ret_code_t Storage::exists(cs_file_id_t fileId, uint16_t recordKey, fds_record_d
 	result = false;
 	while (fds_record_find(fileId, recordKey, &record_desc, &_findToken) == FDS_SUCCESS) {
 		if (result) {
-			LOGe("Duplicate record key=%u addr=%p", recordKey, _findToken.p_addr);
+			LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
 //			fds_record_delete(&record_desc);
 		}
 		if (!result) {
@@ -768,20 +768,20 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 	switch (p_fds_evt->result) {
 	case FDS_SUCCESS: {
 		CS_TYPE type = CS_TYPE(p_fds_evt->write.record_key);
-		LOGd("Write done, record=%u or type=%u", p_fds_evt->write.record_key, to_underlying_type(type));
+		LOGd("Write done, key=%u file=%u type=%u", p_fds_evt->write.record_key, p_fds_evt->write.file_id, to_underlying_type(type));
 		event_t event(CS_TYPE::EVT_STORAGE_WRITE_DONE, &type, sizeof(type));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
 	default:
-		LOGw("Write FDSerror=%u record=%u", p_fds_evt->result, p_fds_evt->write.record_key);
+		LOGw("Write FDSerror=%u key=%u file=%u", p_fds_evt->result, p_fds_evt->write.record_key, p_fds_evt->write.file_id);
 		if (_errorCallback) {
 			CS_TYPE type = toCsType(p_fds_evt->write.record_key);
 			cs_state_id_t id = getStateId(p_fds_evt->write.file_id);
 			_errorCallback(CS_STORAGE_OP_WRITE, type, id);
 		}
 		else {
-			LOGw("Unhandled write error: %u record=%u", p_fds_evt->result, p_fds_evt->write.record_key);
+			LOGw("Unhandled");
 		}
 		break;
 	}
@@ -792,7 +792,7 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 	switch (p_fds_evt->result) {
 	case FDS_SUCCESS: {
 		CS_TYPE type = CS_TYPE(p_fds_evt->del.record_key);
-		LOGi("Remove done, record=%u or type=%u", p_fds_evt->del.record_key, to_underlying_type(type));
+		LOGi("Remove done, key=%u file=%u type=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(type));
 		if (_performingFactoryReset) {
 			continueFactoryReset();
 		}
@@ -803,7 +803,7 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 		break;
 	}
 	default:
-		LOGw("Remove FDSerror=%u record=%u", p_fds_evt->result, p_fds_evt->del.record_key);
+		LOGw("Remove FDSerror=%u key=%u file=%u", p_fds_evt->result, p_fds_evt->del.record_key, p_fds_evt->del.file_id);
 		if (_errorCallback) {
 			CS_TYPE type = toCsType(p_fds_evt->del.record_key);
 			cs_state_id_t id = getStateId(p_fds_evt->write.file_id);
