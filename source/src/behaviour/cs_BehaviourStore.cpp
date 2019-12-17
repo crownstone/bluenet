@@ -7,14 +7,14 @@
 
 #include <behaviour/cs_BehaviourStore.h>
 
+#include <algorithm>
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_ErrorCodes.h>
+#include <storage/cs_State.h>
 #include <util/cs_Hash.h>
 #include <util/cs_WireFormat.h>
-
-#include <algorithm>
 
 // allocate space for the behaviours.
 std::array<Behaviour*,BehaviourStore::MaxBehaviours> BehaviourStore::activeBehaviours = {};
@@ -91,7 +91,10 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
                 // no need to delete previous entry, already checked for nullptr
                 activeBehaviours[result_index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(evt.getData(), evt.size));
                 activeBehaviours[result_index]->print();
-                
+
+				cs_state_data_t data (CS_TYPE::BEHAVIOUR_RULE, result_index, evt.getData(), evt.size);
+				State::getInstance().set(data);
+
                 evt.result.returnCode = ERR_SUCCESS;
 
                 break;
@@ -111,6 +114,9 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
                 activeBehaviours[result_index] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(evt.getData(), evt.size));
                 activeBehaviours[result_index]->print();
                 
+				cs_state_data_t data (CS_TYPE::TWILIGHT_RULE, result_index, evt.getData(), evt.size);
+				State::getInstance().set(data);
+
                 evt.result.returnCode = ERR_SUCCESS;
 
                 break;
@@ -183,10 +189,14 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
                 activeBehaviours[index] = nullptr;
             }
 
-
+			// TODO @Arend, here is +1 / - 1 used... Are you sure
             LOGd("Allocating new SwitchBehaviour");
 			activeBehaviours[index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(evt.getData() + 1, evt.size - 1));
             activeBehaviours[index]->print();
+				
+			// TODO @Arend, also adjust here...
+			cs_state_data_t data (CS_TYPE::BEHAVIOUR_RULE, index, evt.getData() + 1, evt.size - 1);
+			State::getInstance().set(data);
             
             evt.result.returnCode = ERR_SUCCESS;
             break;
@@ -215,9 +225,15 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
             }
 
             LOGd("Allocating new TwilightBehaviour");
+			// TODO @Arend, also adjust here...
             activeBehaviours[index] = new TwilightBehaviour( WireFormat::deserialize<TwilightBehaviour>(evt.getData() + 1, evt.size - 1));
             activeBehaviours[index]->print();
-            evt.result.returnCode = ERR_SUCCESS;
+			
+			// TODO @Arend, also adjust here...
+			cs_state_data_t data (CS_TYPE::BEHAVIOUR_RULE, index, evt.getData() + 1, evt.size - 1);
+			State::getInstance().set(data);
+            
+			evt.result.returnCode = ERR_SUCCESS;
 
 			break;
 		}
@@ -244,6 +260,8 @@ void BehaviourStore::handleRemoveBehaviour(event_t& evt){
     LOGd("remove behaviour event %d", index);
     
     evt.result.returnCode = removeBehaviour(index);
+			
+	State::getInstance().remove(CS_TYPE::BEHAVIOUR_RULE, index);
     
     if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
         LOGd("ERR_BUFFER_TOO_SMALL");
@@ -322,6 +340,9 @@ void BehaviourStore::handleGetBehaviourIndices(event_t& evt){
             LOGd("behaviour found at index %d",i);
         }
     }
+	if (listSize == 0) {
+		LOGi("No behaviour found");
+	}
     evt.result.dataSize = listSize;
     evt.result.returnCode = ERR_SUCCESS;
     evt.result.returnCode = ERR_NOT_IMPLEMENTED;

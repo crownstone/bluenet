@@ -20,6 +20,7 @@
 #include <tuple>
 
 #include <behaviour/cs_SwitchBehaviour.h>
+#include <behaviour/cs_TwilightBehaviour.h>
 
 enum TypeBases {
 	State_Base   = 0x000,
@@ -240,6 +241,8 @@ enum class CS_TYPE: uint16_t {
 	// ------------------------
 	//
 	EVT_PROFILE_LOCATION,                       // profile and location information 
+	BEHAVIOUR_RULE,                             // behaviour rule
+	TWILIGHT_RULE,                              // twilight rule
 };
 
 CS_TYPE toCsType(uint16_t type);
@@ -415,6 +418,8 @@ typedef void TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
+typedef SwitchBehaviour TYPIFY(BEHAVIOUR_RULE);
+typedef TwilightBehaviour TYPIFY(TWILIGHT_RULE);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

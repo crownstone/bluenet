@@ -209,10 +209,11 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 		return ERR_WRONG_PARAMETER;
 	}
 	if (typeSize == 0) {
-		LOGw("Wrong type %u", data.type)
+		LOGw("Expected type size is zero, wrong type (%u)?", data.type)
 		return ERR_UNKNOWN_TYPE;
 	}
 	if (data.size < typeSize) {
+		LOGw("Type size is different (%u rather than %u).", data.size, typeSize)
 		return ERR_BUFFER_TOO_SMALL;
 	}
 	switch(mode) {
