@@ -169,9 +169,9 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 //	State::getInstance().factoryReset(FACTORY_RESET_CODE);
 
 
-	// Lastly, go into setup mode after next reset
-	TYPIFY(STATE_OPERATION_MODE) mode = to_underlying_type(OperationMode::OPERATION_MODE_SETUP);
-	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+//	// Lastly, go into setup mode after next reset
+//	TYPIFY(STATE_OPERATION_MODE) mode = to_underlying_type(OperationMode::OPERATION_MODE_SETUP);
+//	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
 //	LOGi("Factory reset done, rebooting device in 2s ...");
 //	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
