@@ -213,10 +213,11 @@ enum class CS_TYPE: uint16_t {
 	EVT_STORAGE_INITIALIZED,                          // Sent when Storage is initialized, storage is only usable after this event!
 	EVT_STORAGE_WRITE_DONE,                           // Sent when an item has been written to storage. -- Payload is CS_TYPE, the type that was written.
 	EVT_STORAGE_REMOVE_DONE,                          // Sent when an item has been invalidated at storage. -- Payload is CS_TYPE, the type that was invalidated.
-	EVT_STORAGE_REMOVE_FILE_DONE,                     // Sent when a file has been invalidated at storage. -- Payload is cs_file_id_t, the file that was invalidated.
+	EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE,        // Sent when all state values with a certain ID have been invalidated at storage. -- ID as payload.
 	EVT_STORAGE_GC_DONE,                              // Sent when garbage collection is done, invalidated data is actually removed at this point.
-	EVT_STORAGE_FACTORY_RESET,                        // Sent when factory reset of storage is done.
+	EVT_STORAGE_FACTORY_RESET_DONE,                   // Sent when factory reset of storage is done. Only to be used by State.
 	EVT_STORAGE_PAGES_ERASED,                         // Sent when all storage pages are completely erased.
+	EVT_STATE_FACTORY_RESET_DONE,                     // Sent when factory reset of state is done.
 	EVT_MESH_FACTORY_RESET,                           // Sent when factory reset of mesh storage is done.
 	EVT_SETUP_DONE,                                   // Sent when setup was done (and settings are stored).
 //	EVT_DO_RESET_DELAYED,                             // Sent to perform a reset in a few seconds.
@@ -270,6 +271,10 @@ static const cs_file_id_t FILE_DO_NOT_USE     = 0x0000;
 static const cs_file_id_t FILE_KEEP_FOREVER   = 0x0001;
 static const cs_file_id_t FILE_CONFIGURATION  = 0x0003;
 
+struct cs_type_and_id_t {
+	CS_TYPE type;
+	cs_state_id_t id;
+};
 
 
 /*---------------------------------------------------------------------------------------------------------------------
@@ -385,12 +390,13 @@ typedef  schedule_list_t TYPIFY(EVT_SCHEDULE_ENTRIES_UPDATED);
 typedef  void TYPIFY(EVT_SETUP_DONE);
 typedef  session_nonce_t TYPIFY(EVT_SESSION_NONCE_SET);
 typedef  state_external_stone_t TYPIFY(EVT_STATE_EXTERNAL_STONE);
+typedef  void TYPIFY(EVT_STATE_FACTORY_RESET_DONE);
 typedef  void TYPIFY(EVT_STORAGE_INITIALIZED);
-typedef  CS_TYPE TYPIFY(EVT_STORAGE_WRITE_DONE);
-typedef  CS_TYPE TYPIFY(EVT_STORAGE_REMOVE_DONE);
-typedef  cs_file_id_t TYPIFY(EVT_STORAGE_REMOVE_FILE_DONE);
+typedef  cs_type_and_id_t TYPIFY(EVT_STORAGE_WRITE_DONE);
+typedef  cs_type_and_id_t TYPIFY(EVT_STORAGE_REMOVE_DONE);
+typedef  cs_state_id_t TYPIFY(EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE);
 typedef  void TYPIFY(EVT_STORAGE_GC_DONE);
-typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET);
+typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET_DONE);
 typedef  void TYPIFY(EVT_STORAGE_PAGES_ERASED);
 typedef  void TYPIFY(EVT_MESH_FACTORY_RESET);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
@@ -435,9 +441,14 @@ size16_t TypeSize(CS_TYPE const & type);
 const char* TypeName(CS_TYPE const & type);
 
 /**
- * Get the storage file id of a given a type.
+ * Check if type can have multiple IDs.
  */
-cs_file_id_t getFileId(CS_TYPE const & type);
+bool hasMultipleIds(CS_TYPE const & type);
+
+/**
+ * Check if type should be removed on factory reset.
+ */
+bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id);
 
 
 /*---------------------------------------------------------------------------------------------------------------------

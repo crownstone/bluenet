@@ -18,3 +18,4 @@ typedef uint8_t  stone_id_t;
 typedef uint16_t size16_t;
 //! Boolean with fixed size.
 typedef uint8_t BOOL;
+typedef uint8_t cs_state_id_t;

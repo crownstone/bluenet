@@ -21,11 +21,11 @@ enum cs_storage_operation_t {
 	CS_STORAGE_OP_READ,
 	CS_STORAGE_OP_WRITE,
 	CS_STORAGE_OP_REMOVE,
-	CS_STORAGE_OP_REMOVE_FILE,
+	CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID,
 	CS_STORAGE_OP_GC,
 };
 
-typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, cs_file_id_t fileId, CS_TYPE type);
+typedef void (*cs_storage_error_callback_t) (cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id);
 
 /**
  * Class to store items persistently in flash (persistent) memory.
@@ -84,19 +84,88 @@ public:
 	void setErrorCallback(cs_storage_error_callback_t callback);
 
 	/**
-	 * Read from persistent storage.
+	 * Find first id of stored values of given type.
 	 *
-	 * Checks if given size matches stored size, else it returns ERR_WRONG_PAYLOAD_LENGTH.
+	 * NOTE: you should complete or abort this findFirst() / findNext() before starting a new one.
 	 *
-	 * @param[in] file_id         File id to read from.
-	 * @param[in,out] data        Data struct with type to read. Pointer and size will be set afterwards.
+	 * @param[in] type            Type to search for.
+	 * @param[out] id             ID of the found value.
+	 *
+	 * @retval ERR_SUCCESS                  When successful.
+	 * @retval ERR_NOT_FOUND                When the first id of this type was not found.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 */
+	cs_ret_code_t findFirst(CS_TYPE type, cs_state_id_t & id);
+
+	/**
+	 * Find next id of stored values of given type.
+	 *
+	 * NOTE: must be called immediately after findFirst(), no other storage operations should be done in between.
+	 *
+	 * @param[in] type            Type to search for.
+	 * @param[out] id             ID of the found value.
+	 *
+	 * @retval ERR_SUCCESS                  When successful.
+	 * @retval ERR_NOT_FOUND                When the next id of this type was not found.
+	 * @retval ERR_WRONG_STATE              When not called after findFirst(), or another storage operation was done in between.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 */
+	cs_ret_code_t findNext(CS_TYPE type, cs_state_id_t & id);
+
+	/**
+	 * Find and read stored value of given type and id.
+	 *
+	 * In case of duplicates (values with same type and id), you will get the latest value.
+	 *
+	 * @param[in,out] data        Data struct with type and id to read. Pointer and size will be set afterwards.
 	 *
 	 * @retval ERR_SUCCESS                  When successful.
 	 * @retval ERR_NOT_FOUND                When the type was not found.
 	 * @retval ERR_WRONG_PAYLOAD_LENGTH     When the given size does not match the stored size.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 */
-	cs_ret_code_t read(cs_file_id_t file_id, cs_state_data_t & data);
+	cs_ret_code_t read(cs_state_data_t & data);
+
+	/**
+	 * Read the old (v3) reset counter.
+	 *
+	 * Made to transfer reset counter from old location to new.
+	 *
+	 * @param[in, out] data       Data struct with type and id to read. Pointer and size will be set afterwards.
+	 *
+	 * @return Error code like read().
+	 */
+	cs_ret_code_t readV3ResetCounter(cs_state_data_t & data);
+
+	/**
+	 * Find and read from first stored value of given type.
+	 *
+	 * NOTE: you should complete or abort this readFirst() / readNext() before starting a new one.
+	 *
+	 * @param[in,out] data        Data struct with type to read. ID, pointer, and size will be set afterwards.
+	 *
+	 * @retval ERR_SUCCESS                  When successful.
+	 * @retval ERR_NOT_FOUND                When the type was not found.
+	 * @retval ERR_WRONG_PAYLOAD_LENGTH     When the given size does not match the stored size.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 */
+	cs_ret_code_t readFirst(cs_state_data_t & data);
+
+	/**
+	 * Find and read next stored value of given type.
+	 *
+	 * NOTE: must be called immediately after readFirst(), no other storage operations should be done in between.
+	 *
+	 * When iterating: just keep overwriting, so in case of duplicates (same type and id), you end up with the latest value.
+	 *
+	 * @param[in,out] data        Data struct with type to read. ID, pointer, and size will be set afterwards.
+	 *
+	 * @retval ERR_SUCCESS                  When successful.
+	 * @retval ERR_NOT_FOUND                When the type was not found.
+	 * @retval ERR_WRONG_PAYLOAD_LENGTH     When the given size does not match the stored size.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 */
+	cs_ret_code_t readNext(cs_state_data_t & data);
 
 	/**
 	 * Write to persistent storage.
@@ -105,50 +174,62 @@ public:
 	 *
 	 * Automatically starts garbage collection when needed.
 	 *
-	 * @param[in] file_id         File id to write to.
 	 * @param[in] data            Data struct with type, data pointer, and size.
 	 *
 	 * @retval ERR_SUCCESS                  When successfully started to write.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NO_SPACE                 When there is no space, not even after garbage collection.
 	 */
-	cs_ret_code_t write(cs_file_id_t file_id, const cs_state_data_t & data);
+	cs_ret_code_t write(const cs_state_data_t & data);
 
 	/**
-	 * Allocate ram that is correctly aligned and padded.
+	 * Remove value of given type and id.
 	 *
-	 * @param[in,out] size        Requested size, afterwards set to the allocated size.
-	 * @return                    Pointer to allocated memory.
-	 */
-	uint8_t* allocate(size16_t& size);
-
-	/**
-	 * Removes a whole file.
+	 * @param[in] type            Type to remove.
+	 * @param[in] id              ID of value to remove.
 	 *
-	 * TODO: test this function
-	 *
-	 * @param[in] file_id         File id to remove.
-	 *
-	 * @retval ERR_SUCCESS                  When successfully started removing the file.
+	 * @retval ERR_SUCCESS                  When successfully started removing the value.
+	 * @retval ERR_NOT_FOUND                When no match was found, consider this a success, but don't wait for an event.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
-	cs_ret_code_t remove(cs_file_id_t file_id);
+	cs_ret_code_t remove(CS_TYPE type, cs_state_id_t id);
 
 	/**
-	 * Removes a type from a file.
+	 * Remove all values of a type.
 	 *
-	 * TODO: test this function
-	 *
-	 * @param[in] file_id         File id to remove type from.
-	 * @param[in] type            Type to remove
+	 * @param[in] type            Type to remove.
 	 *
 	 * @retval ERR_SUCCESS                  When successfully started removing the type.
-	 * @retval ERR_NOT_FOUND                When type was not found on file, consider this a success, but don't wait for an event.
+	 * @retval ERR_NOT_FOUND                When no match was not found, consider this a success, but don't wait for an event.
 	 * @retval ERR_BUSY                     When busy, try again later.
 	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
 	 */
-	cs_ret_code_t remove(cs_file_id_t file_id, CS_TYPE type);
+	cs_ret_code_t remove(CS_TYPE type);
+
+	/**
+	 * Remove all values with given id.
+	 *
+	 * @param[in] id              ID of the values to remove.
+	 *
+	 * @retval ERR_SUCCESS                  When successfully started removing.
+	 * @retval ERR_NOT_FOUND                When no match was not found, consider this a success, but don't wait for an event.
+	 * @retval ERR_BUSY                     When busy, try again later.
+	 * @retval ERR_NOT_INITIALIZED          When storage hasn't been initialized yet.
+	 */
+	cs_ret_code_t remove(cs_state_id_t id);
+
+	/**
+	 * Perform factory reset.
+	 *
+	 * Make sure to restart factory reset on any error callback.
+	 *
+	 * @retval ERR_WAIT_FOR_SUCCESS    Successfully started removing a record.
+	 * @retval ERR_SUCCESS             All records have been removed.
+	 * @retval ERR_BUSY                Busy, try again later.
+	 * @retval other                   Other errors, maybe retry again later?
+	 */
+	cs_ret_code_t factoryReset();
 
 	/**
 	 * Garbage collection reclaims the flash space that is occupied by records that have been deleted,
@@ -168,6 +249,14 @@ public:
 	 * @retval ERR_NOT_AVAILABLE            When you can't use this function (storage initialized already).
 	 */
 	cs_ret_code_t eraseAllPages();
+
+	/**
+	 * Allocate ram that is correctly aligned and padded.
+	 *
+	 * @param[in,out] size        Requested size, afterwards set to the allocated size.
+	 * @return                    Pointer to allocated memory.
+	 */
+	uint8_t* allocate(size16_t& size);
 
 	/**
 	 * Handle Crownstone events.
@@ -198,25 +287,46 @@ private:
 	bool _registeredFds = false;
 	cs_storage_error_callback_t _errorCallback = NULL;
 
+	fds_find_token_t _findToken;
+	CS_TYPE _currentSearchType = CS_TYPE::CONFIG_DO_NOT_USE;
+
 	bool _collectingGarbage = false;
-
-	fds_find_token_t _ftok;
-
 	bool _removingFile = false;
-	std::vector<uint16_t> _busy_record_keys;
+	bool _performingFactoryReset = false;
+	std::vector<uint16_t> _busyRecordKeys;
 
 	/**
-	 * Next page to erase.
-	 *
-	 * Used by eraseAllPages().
+	 * Next page to erase. Used by eraseAllPages().
 	 */
 	uint32_t _erasePage = 0;
+
 	/**
-	 * Page that should _not_ be erased.
-	 *
-	 * Used by eraseAllPages().
+	 * Page that should _not_ be erased. Used by eraseAllPages().
 	 */
 	uint32_t _eraseEndPage = 0;
+
+	/**
+	 * Find next fileId for given recordKey.
+	 */
+	cs_ret_code_t findNextInternal(uint16_t recordKey, uint16_t & fileId);
+
+	/**
+	 * Read next fileId for given recordKey.
+	 */
+	cs_ret_code_t readNextInternal(uint16_t recordKey, uint16_t & fileId, uint8_t* buf, uint16_t size);
+
+	/**
+	 * Read a record: copy data to buffer, and sets fileId.
+	 *
+	 * Only returns success when data has been copied to buffer.
+	 */
+	cs_ret_code_t readRecord(fds_record_desc_t recordDesc, uint8_t* buf, uint16_t size, uint16_t & fileId);
+
+	/** Write to persistent storage.
+	*/
+	ret_code_t writeInternal(const cs_state_data_t & data);
+
+	ret_code_t garbageCollectInternal();
 
 	bool isErasingPages();
 
@@ -225,24 +335,44 @@ private:
 	 */
 	void eraseNextPage();
 
-	// Use before ftok
-	void initSearch();
-
-	void setBusy(uint16_t recordKey);
-	void clearBusy(uint16_t recordKey);
-	bool isBusy(uint16_t recordKey);
-	bool isBusy();
-
-	cs_ret_code_t getErrorCode(ret_code_t code);
+	/**
+	 * Continue the factory reset process.
+	 *
+	 * @retval ERR_SUCCESS             Successfully started factory reset process.
+	 * @retval ERR_BUSY                Busy, restart the whole factory reset from the beginning.
+	 * @retval other                   Other errors.
+	 */
+	cs_ret_code_t continueFactoryReset();
 
 	// Returns size after padding for flash.
 	size16_t getPaddedSize(size16_t size);
 
-	/** Write to persistent storage.
-	*/
-	ret_code_t writeInternal(cs_file_id_t file_id, const cs_state_data_t & data);
+	/**
+	 * Get file id, given state value id.
+	 */
+	uint16_t getFileId(cs_state_id_t valueId);
 
-	ret_code_t exists(cs_file_id_t file_id, uint16_t recordKey, bool & result);
+	/**
+	 * Get state value id, given file id.
+	 */
+	cs_state_id_t getStateId(uint16_t fileId);
+
+	bool isValidRecordKey(uint16_t recordKey);
+	bool isValidFileId(uint16_t fileId);
+
+	/**
+	 * Start a new search, where the user wants to iterate over a certain type.
+	 */
+	void initSearch(CS_TYPE type);
+
+	/**
+	 * Start a new search.
+	 *
+	 * Call before using _findToken
+	 */
+	void initSearch();
+
+//	ret_code_t exists(cs_file_id_t fileId, uint16_t recordKey, bool & result);
 
 	/**
 	 * Check if a type of record exists and return the record descriptor.
@@ -254,13 +384,18 @@ private:
 	 */
 	ret_code_t exists(cs_file_id_t file_id, uint16_t recordKey, fds_record_desc_t & record_desc, bool & result);
 
-	ret_code_t garbageCollectInternal();
+	void setBusy(uint16_t recordKey);
+	void clearBusy(uint16_t recordKey);
+	bool isBusy(uint16_t recordKey);
+	bool isBusy();
+
+	cs_ret_code_t getErrorCode(ret_code_t code);
 
 	void handleWriteEvent(fds_evt_t const * p_fds_evt);
 	void handleRemoveRecordEvent(fds_evt_t const * p_fds_evt);
 	void handleRemoveFileEvent(fds_evt_t const * p_fds_evt);
 	void handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt);
 
-	inline void print(const std::string & prefix, CS_TYPE type);
+//	inline void print(const std::string & prefix, CS_TYPE type);
 };
 

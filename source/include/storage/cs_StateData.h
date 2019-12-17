@@ -13,26 +13,30 @@
  * Struct to communicate state variables.
  *
  * type       The state type.
+ * id         Multiple value per state type can exist, they all have a unique id. Default is 0.
  * value      Pointer to the state value.
  * size       Size of the state value. When getting a state, this should be set to available size of value pointer.
  *            Afterwards, it will be set to the size of the state value.
  */
-struct cs_state_data_t {
-	CS_TYPE type;
-	uint8_t *value;
-	size16_t size;
+struct __attribute__((packed)) cs_state_data_t {
+	CS_TYPE type = CS_TYPE::CONFIG_DO_NOT_USE;
+	cs_state_id_t id = 0;
+	uint8_t *value = NULL;
+	size16_t size = 0;
 
-	cs_state_data_t():
-		type(CS_TYPE::CONFIG_DO_NOT_USE),
-		value(NULL),
-		size(0)
-	{}
+	cs_state_data_t() {}
 	cs_state_data_t(CS_TYPE type, uint8_t *value, size16_t size):
 		type(type),
+		id(0),
 		value(value),
 		size(size)
 	{}
-
+	cs_state_data_t(CS_TYPE type, cs_state_id_t id, uint8_t *value, size16_t size):
+		type(type),
+		id(id),
+		value(value),
+		size(size)
+	{}
 };
 
 /** Gets the default.
@@ -76,6 +80,7 @@ enum class PersistenceMode: uint8_t {
 	RAM,
 	FIRMWARE_DEFAULT,
 	STRATEGY1,
+	DO_NOT_STORE
 };
 
 PersistenceMode DefaultLocation(CS_TYPE const & type);

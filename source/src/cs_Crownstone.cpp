@@ -570,7 +570,7 @@ void Crownstone::setName() {
 		sprintf(devicename_resetCounter, "%.*s_%d", MIN(stateNameData.size, 5), device_name, resetCounter);
 		deviceName = std::string(devicename_resetCounter);
 	} else {
-		deviceName = std::string(device_name, stateNameData.size);
+		deviceName = std::string(device_name, MIN(stateNameData.size, 5));
 	}
 	_advertiser->updateDeviceName(deviceName);
 }

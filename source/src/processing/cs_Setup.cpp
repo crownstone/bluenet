@@ -93,8 +93,8 @@ void Setup::handleEvent(event_t & event) {
 	}
 	switch (event.type) {
 	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
-		CS_TYPE storedType = *(CS_TYPE*)event.data;
-		onStorageDone(storedType);
+		TYPIFY(EVT_STORAGE_WRITE_DONE)* eventData = (TYPIFY(EVT_STORAGE_WRITE_DONE)*)event.data;
+		onStorageDone(eventData->type);
 		break;
 	}
 	default: {

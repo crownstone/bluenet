@@ -92,7 +92,7 @@ void Advertiser::updateDeviceName(const std::string& deviceName) {
 	BLE_GAP_CONN_SEC_MODE_SET_OPEN(&nameCharacteristicSecurityMode);
 
 	uint32_t ret_code;
-	LOGAdvertiserDebug("sd_ble_gap_device_name_set");
+	LOGAdvertiserDebug("sd_ble_gap_device_name_set %s %u", name.c_str(), name.length());
 	ret_code = sd_ble_gap_device_name_set(&nameCharacteristicSecurityMode, (uint8_t*) name.c_str(), name.length());
 	APP_ERROR_CHECK(ret_code);
 }

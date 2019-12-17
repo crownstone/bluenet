@@ -1,22 +1,15 @@
 #!/bin/bash
 
-# Optionally target as second argument to the script
-target=${1:-crownstone}
+if [ $# -lt 0 ]; then
+        echo "Usage: $0 [jlink-serial]"
+        exit 1
+fi
 
-path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/_utils.sh
-source ${path}/_check_targets.sh $target
-source $path/_config.sh
+if [ $# -lt 1 ]; then
+        nrfjprog --memrd 0x72000 --n 0x4000
+        nrfjprog --reset
+else
+        nrfjprog --memrd 0x72000 --n 0x4000 -s $1
+        nrfjprog --reset -s $1
+fi
 
-#memAddr=$(echo "obase=16;ibase=16;${BOOTLOADER_START_ADDRESS}-1000")
-
-# With bootloader:
-memAddr=$((${BOOTLOADER_START_ADDRESS}-0x8000))
-# Without bootloader:
-#memAddr=$((0x80000-0x7000))
-
-echo $memAddr
-memAddr=`printf "0x%x\n" $memAddr`
-echo $memAddr
-
-$path/_readbytes.sh $memAddr 0x8000 | grep -Pv "FF( FF){15}"
