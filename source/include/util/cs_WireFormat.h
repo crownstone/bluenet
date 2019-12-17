@@ -7,10 +7,13 @@
 
 #pragma once
 
-#include <behaviour/cs_Behaviour.h>
-#include <behaviour/cs_SwitchBehaviour.h>
+// #include <behaviour/cs_Behaviour.h>
+// #include <behaviour/cs_SwitchBehaviour.h>
+// #include <behaviour/cs_TwilightBehaviour.h>
+
 #include <presence/cs_PresencePredicate.h>
 #include <presence/cs_PresenceCondition.h>
+
 #include <time/cs_TimeOfDay.h>
 
 #include <drivers/cs_Serial.h>
@@ -19,6 +22,12 @@
 #include <cstdint>
 #include <cstddef>
 #include <typeinfo>
+
+#define LOGWireFormat(...) LOGnone(__VA_ARGS__)
+
+class Behaviour;
+class SwitchBehaviour;
+class TwilightBehaviour;
 
 namespace WireFormat {
 
@@ -33,8 +42,7 @@ T deserialize(uint8_t* data, size_t len);
 // that is equal to the return type of this method.
 template<class T>
 typename T::SerializedDataType serialize(const T& obj){
-    auto t_name = typeid(T).name();
-    LOGd("serialize %s", t_name);
+    LOGWireFormat("serialize %s", typeid(T).name());
     return obj.serialize();
 }
 
@@ -73,6 +81,9 @@ Behaviour WireFormat::deserialize(uint8_t* data, size_t len);
 
 template<>
 SwitchBehaviour WireFormat::deserialize(uint8_t* data, size_t len);
+
+template<>
+TwilightBehaviour WireFormat::deserialize(uint8_t* data, size_t len);
 
 // ========== Specializations/overloads for serialize =========
 

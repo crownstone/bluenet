@@ -19,28 +19,31 @@
 #include <time/cs_TimeOfDay.h>
 #include <time/cs_DayOfWeek.h>
 #include <presence/cs_PresenceCondition.h>
+#include <util/cs_WireFormat.h>
 
 #include <optional>
 #include <stdint.h>
 
 class TwilightBehaviour : public Behaviour {
     public:
-    typedef std::array<uint8_t, 1+13> SerializedDataFormat;
+    typedef std::array<uint8_t, WireFormat::size<Behaviour>()> SerializedDataType;
 
-    enum class Type : uint8_t {Switch = 0, Twilight = 1, Extended = 2};
-
-    
+    virtual ~TwilightBehaviour() = default;
     TwilightBehaviour(
       uint8_t intensity,
+      uint8_t profileid,
       DayOfWeekBitMask activedaysofweek,
       TimeOfDay from, 
       TimeOfDay until
       );
 
-    TwilightBehaviour(SerializedDataFormat arr);
-    SerializedDataFormat serialize() const;
+    TwilightBehaviour(SerializedDataType arr);
+    SerializedDataType serialize() const;
 
-    void print() const;
+    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) const override;
+    virtual size_t serializedSize() const override;
+
+    virtual void print() const override;
 
     virtual Type getType() const override { return Type::Twilight; }
 

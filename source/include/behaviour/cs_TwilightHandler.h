@@ -6,15 +6,15 @@
  */
 #pragma once
 
-#include <behaviour/cs_SwitchBehaviour.h>
 #include <events/cs_EventListener.h>
+#include <presence/cs_PresenceDescription.h>
+#include <time/cs_TimeOfDay.h>
 
 #include <optional>
 
 
 class TwilightHandler : public EventListener {
     public:
-
     /**
      * Computes the twilight state of this crownstone based on
      * the stored behaviours, and then dispatches an event.
@@ -25,30 +25,28 @@ class TwilightHandler : public EventListener {
      * - EVT_PRESENCE_MUTATION
      * - EVT_BEHAVIOURSTORE_MUTATION
      */
-    virtual void handleEvent(event_t& evt);
+    virtual void handleEvent(event_t& evt) override;
 
-    private:
     /**
      * Acquires the current time and presence information. 
      * Checks the intended state by looping over the active behaviours
      * and if the intendedState differs from previousIntendedState
      * dispatch an event to communicate a state update.
      */
-    void update();
+    bool update();
+    
+    uint8_t getValue();
 
+    private:
     /**
-     * Given current time/presence, query the behaviourstore and check
+     * Given current time, query the behaviourstore and check
      * if there any valid ones. 
      * 
-     * Returns an empty optional when no valid behaviour is found, or 
-     * more than one valid behaviours contradicted eachother.
      * Returns a non-empty optional if a valid behaviour is found or
      * multiple agreeing behaviours have been found.
      * In this case its value contains the desired state value.
      */
-    std::optional<uint8_t> computeIntendedState(
-        TimeOfDay currenttime, 
-        PresenceStateDescription currentpresence);
+    uint8_t computeIntendedState(TimeOfDay currenttime);
 
-    std::optional<uint8_t> previousIntendedState = {};
+    uint8_t previousIntendedState = 100;
 };

@@ -30,9 +30,6 @@ SwitchBehaviour::SwitchBehaviour(
 SwitchBehaviour::SwitchBehaviour(std::array<uint8_t, 1+26> arr) : 
     Behaviour(          WireFormat::deserialize<Behaviour>(         arr.data() +  0, 14)),
     presenceCondition(  WireFormat::deserialize<PresenceCondition>( arr.data() + 14, 13)){
-    for(uint8_t b : arr){
-        LOGd("switchbehaviour constr: 0x%02x",b);
-    }
 }
 
 SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize() const{
@@ -41,6 +38,21 @@ SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize() const{
     std::copy_n(std::begin(WireFormat::serialize(presenceCondition)), WireFormat::size<PresenceCondition>(),    std::begin(result) + 14);
 
     return result;
+}
+
+uint8_t* SwitchBehaviour::serialize(uint8_t* outbuff, size_t max_size) const{
+    const auto size = serializedSize();
+
+    if(max_size < size){
+        return 0;
+    }
+
+    return std::copy_n(std::begin(serialize()),size,outbuff);
+}
+
+
+size_t SwitchBehaviour::serializedSize() const {
+    return WireFormat::size<SwitchBehaviour>();
 }
 
 bool SwitchBehaviour::isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence){

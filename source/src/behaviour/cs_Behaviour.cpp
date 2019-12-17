@@ -27,32 +27,58 @@ Behaviour::Behaviour(
 
 Behaviour::Behaviour(SerializedDataType arr) : 
     Behaviour(
-        Type(WireFormat::deserialize<uint8_t>(arr.data() +             0,  WireFormat::size<uint8_t>())),
+        Type(WireFormat::deserialize<uint8_t>(arr.data() +        0,  WireFormat::size<uint8_t>())),
         WireFormat::deserialize<uint8_t>(arr.data() +             1,  WireFormat::size<uint8_t>()),
         WireFormat::deserialize<uint8_t>(arr.data() +             2,  WireFormat::size<uint8_t>()),
         WireFormat::deserialize<DayOfWeekBitMask>(arr.data() +    3,  WireFormat::size<DayOfWeekBitMask>()),
         WireFormat::deserialize<TimeOfDay>(arr.data() +           4,  WireFormat::size<TimeOfDay>()),
         WireFormat::deserialize<TimeOfDay>(arr.data() +           9,  WireFormat::size<TimeOfDay>())
     ){
-    for(uint8_t b : arr){
-        LOGd("basebehaviour constr: 0x%02x",b);
-    }
 }
 
 Behaviour::SerializedDataType Behaviour::serialize() const{
     SerializedDataType result;
     auto result_iter = std::begin(result);
 
-    // result_iter = std::copy_n( std::begin(getType()),        WireFormat::size<uint8_t>(),     result_iter);
-    result_iter = std::copy_n( std::begin(WireFormat::serialize(activeIntensity)),        WireFormat::size<uint8_t>(),     result_iter);
-    result_iter = std::copy_n( std::begin(WireFormat::serialize(profileId)),              WireFormat::size<uint8_t>(),     result_iter);
-    result_iter = std::copy_n( std::begin(WireFormat::serialize(activeDays)),             WireFormat::size<uint8_t>(),     result_iter);
-    result_iter = std::copy_n( std::begin(WireFormat::serialize(behaviourAppliesFrom)),   WireFormat::size<TimeOfDay>(),   result_iter);
-    result_iter = std::copy_n( std::begin(WireFormat::serialize(behaviourAppliesUntil)),  WireFormat::size<TimeOfDay>(),   result_iter);
+    result_iter = std::copy_n( std::begin(WireFormat::serialize(static_cast<uint8_t>(typ))),  WireFormat::size<uint8_t>(),     result_iter);
+    result_iter = std::copy_n( std::begin(WireFormat::serialize(activeIntensity)),            WireFormat::size<uint8_t>(),     result_iter);
+    result_iter = std::copy_n( std::begin(WireFormat::serialize(profileId)),                  WireFormat::size<uint8_t>(),     result_iter);
+    result_iter = std::copy_n( std::begin(WireFormat::serialize(activeDays)),                 WireFormat::size<uint8_t>(),     result_iter);
+    result_iter = std::copy_n( std::begin(WireFormat::serialize(behaviourAppliesFrom)),       WireFormat::size<TimeOfDay>(),   result_iter);
+    result_iter = std::copy_n( std::begin(WireFormat::serialize(behaviourAppliesUntil)),      WireFormat::size<TimeOfDay>(),   result_iter);
 
     return result;
 }
 
+uint8_t* Behaviour::serialize(uint8_t* outbuff, size_t max_size) const {
+    const auto size = serializedSize();
+
+    if(max_size < size){
+        return 0;
+    }
+
+    return std::copy_n(std::begin(serialize()),size,outbuff);
+}
+
+size_t Behaviour::serializedSize() const {
+    return WireFormat::size<Behaviour>();
+}
+
+std::vector<uint8_t> Behaviour::serialized() const{
+    // TODO(Arend, 12-12-2019): 
+    // The intermediate std::array object in the underlying Behaviour::serialize() 
+    // can be avoided in this call if we
+    // set up serialization the other way around: make the serialize(outbuff*,size)
+    // variation the primitive one and then serialize to a stack variable or heap 
+    // in the othter variatons.
+    // note however that this method works for all subclasses too because 
+    // serialize(uint8_t*,size_t) and serializedSize are virtual :)
+
+    std::vector<uint8_t> vec (serializedSize()) ; // preallocate correct size vector.
+    serialize(vec.data(),vec.size());
+
+    return vec;
+}
 
 uint8_t Behaviour::value() const {
     return activeIntensity;
@@ -67,19 +93,12 @@ TimeOfDay Behaviour::until() const {
 }
 
 void Behaviour::print() const {
-
-    LOGd("Behaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #%d",
+    LOGd("Behaviour: type(%d) %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #%d",
+        static_cast<uint8_t>(typ),
         from().h(),from().m(),from().s(),
         until().h(),until().m(),until().s(),
         activeIntensity,
         activeDays,
         profileId
     );
-}
-
-void Behaviour::print_ser(SerializedDataType& arr) const{
-    for(uint8_t b : arr){
-        LOGd("behaviour ser 0x%x (%d)",b,b);
-    }
-    LOGd("behaviour--");
 }

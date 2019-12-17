@@ -10,6 +10,8 @@
 #include <time/cs_TimeOfDay.h>
 #include <time/cs_DayOfWeek.h>
 
+#include <vector>
+
 /**
  * Class to derrive behaviours from, centralizing common variables
  * such as from and until times.
@@ -29,6 +31,8 @@ class Behaviour {
 
     public:
     
+    virtual ~Behaviour() = default; // (to prevent object slicing from leaking memory.)
+
     Behaviour(
       Type typ,
       uint8_t intensity,
@@ -40,9 +44,13 @@ class Behaviour {
 
     Behaviour(SerializedDataType arr);
     SerializedDataType serialize() const;
+    
+    // return value: pointer to next empty val in array.
+    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) const;
+    virtual size_t serializedSize() const;
+    std::vector<uint8_t> serialized() const; // calls the above virtual functions.
 
-    void print() const;
-    void print_ser(SerializedDataType& arr) const;
+    virtual void print() const;
 
     // implementations of behaviours have a class specific identifier
     // which is defined by overriding this method.

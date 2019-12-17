@@ -11,6 +11,8 @@
 
 #include <presence/cs_PresenceCondition.h>
 
+#include <util/cs_WireFormat.h>
+
 #include <optional>
 #include <stdint.h>
 
@@ -23,8 +25,10 @@
 class SwitchBehaviour : public Behaviour{
     public:
     typedef std::array<uint8_t, 
-      std::tuple_size<Behaviour::SerializedDataType>::value + 
-      std::tuple_size<PresenceCondition::SerializedDataType>::value> SerializedDataType;
+      WireFormat::size<Behaviour>() + 
+      WireFormat::size<PresenceCondition>()> SerializedDataType;
+
+    virtual ~SwitchBehaviour() = default;
     
     SwitchBehaviour(
       uint8_t intensity,
@@ -37,6 +41,9 @@ class SwitchBehaviour : public Behaviour{
 
     SwitchBehaviour(SerializedDataType arr);
     SerializedDataType serialize() const;
+
+    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) const override;
+    virtual size_t serializedSize() const override;
 
     virtual Type getType() const override { return Type::Switch; }
 

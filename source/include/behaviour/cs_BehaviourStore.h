@@ -8,6 +8,8 @@
 #pragma once
 
 #include <behaviour/cs_SwitchBehaviour.h>
+#include <behaviour/cs_TwilightBehaviour.h>
+
 #include <events/cs_EventListener.h>
 #include <protocol/cs_ErrorCodes.h>
 
@@ -21,7 +23,7 @@
 class BehaviourStore : public EventListener {
     private:
     static constexpr size_t MaxBehaviours = 50;
-    static std::array<std::optional<SwitchBehaviour>,MaxBehaviours> activeBehaviours;
+    static std::array<Behaviour*,MaxBehaviours> activeBehaviours;
     
     public:
     /**
@@ -29,9 +31,21 @@ class BehaviourStore : public EventListener {
      */
     virtual void handleEvent(event_t& evt);
 
-    static inline std::array<std::optional<SwitchBehaviour>,MaxBehaviours>& getActiveBehaviours() {
+    // 
+    /*****************************
+     * NOTE: to loop over a specific type of behaviours simply do:
+     * 
+     * for(auto b : getActiveBehaviours()){
+     *   if(auto switchbehave = dynamic_cast<SwitchBehaviour*>(b)){
+     *     // work with switchbehave
+     *   }
+     * }
+     */
+    static inline std::array<Behaviour*,MaxBehaviours>& getActiveBehaviours() {
         return activeBehaviours;
     }
+
+    virtual ~BehaviourStore();
 
     private:
     /**
@@ -41,7 +55,7 @@ class BehaviourStore : public EventListener {
      * 
      * Returns true on success, false if [index] is out of range.
      */
-    ErrorCodesGeneral saveBehaviour(SwitchBehaviour b, uint8_t index);
+    // ErrorCodesGeneral saveBehaviour(SwitchBehaviour b, uint8_t index);
 
     /**
      * Remove the behaviour at [index]. If [index] is out of bounds,

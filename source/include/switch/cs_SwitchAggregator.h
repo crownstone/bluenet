@@ -11,6 +11,9 @@
 #include "switch/cs_SwSwitch.h"
 #include "events/cs_EventListener.h"
 
+#include <behaviour/cs_BehaviourHandler.h>
+#include <behaviour/cs_TwilightHandler.h>
+
 #include <optional>
 
 /**
@@ -41,23 +44,36 @@ class SwitchAggregator : public EventListener {
     virtual ~SwitchAggregator() noexcept {};
     SwitchAggregator& operator= (const SwitchAggregator&) = delete;
 
+    TwilightHandler twilightHandler;
+    BehaviourHandler behaviourHandler;
+
+    /********************************
+     * Aggregates the value of twilightHandler and behaviourHandler
+     * into a single intensity value.
+     * 
+     * This will return the minimum of the respective handler values
+     * when both are defined, otherwise return the value of the one
+     * that is defined, otherwise 100.
+     */
+    uint8_t aggregatedBehaviourIntensity();
+
+    /********************************
+     * When override state is the special value 'translucent on'
+     * it should be interpreted according to the values of twilightHandler
+     * and behaviourHandler. This getter centralizes that.
+     */
+    std::optional<uint8_t> resolveOverrideState();
+
     // when the swith aggregator is initialized with a board
     // that can switch, swSwitch contains that value.
     std::optional<SwSwitch> swSwitch;
 
     // the latest states requested by other parts of the system.
-    std::optional<uint8_t> behaviourState = {};
+    // std::optional<uint8_t> behaviourState = {}; // already cached in behaviourHandler
     std::optional<uint8_t> overrideState = {};
 
     // the last state that was aggregated and passed on towards the SwSwitch.
     std::optional<uint8_t> aggregatedState = {};
-
-    // // will be set to true when overrideState was set, and behaviourState
-    // // aggreed as far as 'on/off' state is concerned.
-    // // When a match has happend (this var. is true), the overrideState will be
-    // // removed at the moment that overrideState and behaviourState are no longer
-    // // in agreement.
-    // bool overrideStateMatched;
 
     /**
      * Checks the behaviourState and overrideState,
@@ -68,17 +84,42 @@ class SwitchAggregator : public EventListener {
      * - nothing happens.
      * 
      * This method will clear the overrideState when it matches
-     * the behaviourState, unless the switch is locked.
+     * the behaviourState, unless the switch is locked or allowOverrideReset is false.
+     * 
+     * (Disallowing override state to reset is used for commands that want to change
+     * the value and trigger a reset which are not initated through behaviour handlers)
      */
-    void updateState();
+    void updateState(bool allowOverrideReset = true);
 
-
+    /**
+     * Calls update on the behaviour handlers and returns true
+     * if there was any of those that returned true.
+     */
+    bool updateBehaviourHandlers();
 
     /**
      * Triggers an updateState() call on all handled events and adjusts
      * at least one of behaviourState or overrideState.
      */
-    void handleStateIntentionEvents(event_t & evt);
+    bool handleStateIntentionEvents(event_t & evt);
+
+    /**
+     * EVT_TICK, STATE_TIME and EVT_TIME_SET events possibly trigger
+     * a new aggregated state. This handling function takes care of that.
+     * 
+     * returns true when the event should be considered 'consumed'. 
+     * (which is when evt is of one of these types.)
+     */
+    bool handleTimingEvents(event_t & evt);
+
+    /**
+     * handles CMD_SWITCH_LOCKED and CMD_DIMMING_ALLOWED operations.
+     * 
+     * returns true when the event should be considered 'consumed'. 
+     * (which is when evt is of one of these types or when switching is not
+     * allowed or possible.)
+     */
+    bool handleAllowedOperations(event_t & evt);
     
     /**
      * Tries to set source as owner of the switch.

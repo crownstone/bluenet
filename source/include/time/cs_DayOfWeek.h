@@ -4,6 +4,7 @@
  * Date: Sep 24, 2019
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
+#pragma once
 
 #include <cstddef>
 

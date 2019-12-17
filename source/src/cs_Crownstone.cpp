@@ -580,7 +580,6 @@ void Crownstone::setName() {
  * the mesh. In setup mode we use the serial module (but only RX).
  */
 void Crownstone::startOperationMode(const OperationMode & mode) {
-	_behaviourHandler.listen();
 	_behaviourStore.listen();
 	_presenceHandler.listen();
 	

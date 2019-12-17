@@ -5,19 +5,15 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <cs_TwilightHandler.h>
+#include <behaviour/cs_TwilightHandler.h>
+#include <behaviour/cs_TwilightBehaviour.h>
+#include <behaviour/cs_BehaviourStore.h>
+
+#include <time/cs_SystemTime.h>
 
 void TwilightHandler::handleEvent(event_t& evt){
     switch(evt.type){
         case CS_TYPE::EVT_PRESENCE_MUTATION: {
-            update();
-            break;
-        }
-        case CS_TYPE::STATE_TIME:{
-            update();
-            break;
-        }
-        case CS_TYPE::EVT_TIME_SET: {
             update();
             break;
         }
@@ -32,34 +28,41 @@ void TwilightHandler::handleEvent(event_t& evt){
     }
 }
 
-void TwilightHandler::update(){
+bool TwilightHandler::update(){
     TimeOfDay time = SystemTime::now();
-    std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
 
-    if(!presence){
-        return;
-    } 
-
-    auto intendedState = computeIntendedState(time, presence.value());
-    if(intendedState){
-        if(previousIntendedState == intendedState){
-            return;
-        }
-
-        previousIntendedState = intendedState;
-        
-        uint8_t intendedValue = intendedState.value();
-        event_t behaviourStateChange(
-            CS_TYPE::EVT_BEHAVIOUR_SWITCH_STATE,
-            &intendedValue,
-            sizeof(uint8_t)
-        );
-
-        behaviourStateChange.dispatch();
+    uint8_t intendedState = computeIntendedState(time);
+    if(previousIntendedState == intendedState){
+        return false;
     }
+
+    previousIntendedState = intendedState;
+    return true;
 }
 
-std::optional<uint8_t> TwilightHandler::computeIntendedState(TimeOfDay currenttime, PresenceStateDescription currentpresence){
+bool TwilightBehaviour::isValid(TimeOfDay currenttime){
+    return from() < until() // ensure proper midnight roll-over 
+        ? (from() <= currenttime && currenttime < until()) 
+        : (from() <= currenttime || currenttime < until());
+}
+
+uint8_t TwilightHandler::computeIntendedState(TimeOfDay currenttime){
     // return minimal value among the valid twilights.
-    return {};
+    // TODO
+    uint8_t min_twilight = 100;
+
+     for (auto& b : BehaviourStore::getActiveBehaviours()){
+        if(TwilightBehaviour * behave = dynamic_cast<TwilightBehaviour*>(b)){
+            // cast to twilight behaviour succesful.
+            if (behave->isValid(currenttime)){
+                min_twilight = CsMath::min(min_twilight, behave->value());
+            }
+        }
+    }
+
+    return min_twilight;
+}
+
+uint8_t TwilightHandler::getValue(){
+    return previousIntendedState;
 }

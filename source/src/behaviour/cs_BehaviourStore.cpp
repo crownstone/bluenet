@@ -17,7 +17,7 @@
 #include <algorithm>
 
 // allocate space for the behaviours.
-std::array<std::optional<SwitchBehaviour>,BehaviourStore::MaxBehaviours> BehaviourStore::activeBehaviours = {};
+std::array<Behaviour*,BehaviourStore::MaxBehaviours> BehaviourStore::activeBehaviours = {};
 
 void BehaviourStore::handleEvent(event_t& evt){
     switch(evt.type){
@@ -60,53 +60,85 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
         return;
 	}
 
-	SwitchBehaviour::Type typ = static_cast<SwitchBehaviour::Type>(evt.getData()[0]);
+	Behaviour::Type typ = static_cast<Behaviour::Type>(evt.getData()[0]);
+    uint8_t result_index = 0xff;
 
-	switch(typ){
-		case SwitchBehaviour::Type::Switch:{
-			// Its a switch behaviour packet, let's check the size
-			if(evt.size != sizeof(SwitchBehaviour::SerializedDataType)){
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: size(%d) type (%d)", evt.size, sizeof(SwitchBehaviour::SerializedDataType), typ);
-                evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-				return;
-			}
+    // find the first empty index.
+    uint8_t empty_index = 0;
+    while(activeBehaviours[empty_index] != nullptr && empty_index < MaxBehaviours){
+        empty_index++;
+    }
 
-			SwitchBehaviour b = WireFormat::deserialize<SwitchBehaviour>(evt.getData(), evt.size);
+    if(empty_index >= MaxBehaviours){
+        evt.result.returnCode = ERR_NO_SPACE;
+    } else {
+        result_index = empty_index;
 
-            LOGd("save behaviour event");
+        LOGd("resolving save Behaviour event to index %d",result_index);
+        switch(typ){
+            case SwitchBehaviour::Type::Switch:{
+                // check size
+                if(evt.size != WireFormat::size<SwitchBehaviour>()){
+                    LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d), expected size(%d)", 
+                        evt.size, typ, WireFormat::size<SwitchBehaviour>());
+                    evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+                    return;
+                }
 
-            // find the first empty index.
-            size_t empty_index = 0;
-            while(activeBehaviours[empty_index].has_value() && empty_index < MaxBehaviours){
-                empty_index++;
+                LOGd("save behaviour event");
+                LOGd("Allocating new SwitchBehaviour");
+                // save the new behaviour
+                // no need to delete previous entry, already checked for nullptr
+                activeBehaviours[result_index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(evt.getData(), evt.size));
+                activeBehaviours[result_index]->print();
+                
+                evt.result.returnCode = ERR_SUCCESS;
+
+                break;
             }
-            
-            evt.result.returnCode = saveBehaviour(b, empty_index);
+            case SwitchBehaviour::Type::Twilight:{// check size
+                if(evt.size != WireFormat::size<TwilightBehaviour>()){
+                    LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d), expected size(%d)", 
+                        evt.size, typ, WireFormat::size<TwilightBehaviour>());
+                    evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+                    return;
+                }
 
-            if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
-                evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
-            } else {
-                uint8_t index = evt.result.returnCode == ERR_SUCCESS ? empty_index : 0xff;
+                LOGd("save behaviour event");
+                LOGd("Allocating new TwilightBehaviour");
+                // save the new behaviour
+                // no need to delete previous entry, already checked for nullptr
+                activeBehaviours[result_index] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(evt.getData(), evt.size));
+                activeBehaviours[result_index]->print();
+                
+                evt.result.returnCode = ERR_SUCCESS;
 
-                *reinterpret_cast<uint8_t*>( evt.result.buf.data + 0) = index;
-                *reinterpret_cast<uint32_t*>(evt.result.buf.data + 1) = masterHash();
-                evt.result.dataSize = sizeof(uint32_t) + sizeof(index);
+                break;
             }
+            case SwitchBehaviour::Type::Extended:{
+                LOGe("Note implemented: save extended behaviour");
+                evt.result.returnCode = ERR_WRONG_PARAMETER;
+                break;
+            }
+            default:{
+                LOGe("Invalid behaviour type: %d", typ);
+                evt.result.returnCode = ERR_WRONG_PARAMETER;
+                break;
+            }
+        }
+    }
 
-			return;
-		}
-		case SwitchBehaviour::Type::Twilight:{
-			LOGe("Not implemented: save twilight");
-			break;
-		}
-		case SwitchBehaviour::Type::Extended:{
-			LOGe("Note implemented: save extended behaviour");
-		}
-		default:{
-			LOGe("Invalid behaviour type: %d", typ);
-		}
-	}
+    // check return buffer
+    if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
+        LOGd("ERR_BUFFER_TOO_SMALL");
+        evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
+        return;
+    }
 
+    // return value can always be used.
+    *reinterpret_cast<uint8_t*>( evt.result.buf.data + 0) = result_index;
+    *reinterpret_cast<uint32_t*>(evt.result.buf.data + 1) = masterHash();
+    evt.result.dataSize = sizeof(uint8_t) + sizeof(uint32_t);
 }
 
 void BehaviourStore::handleReplaceBehaviour(event_t& evt){
@@ -117,70 +149,94 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 	}
 
     uint8_t* dat = static_cast<uint8_t*>(evt.data);
-
-    // OK until here
-    // for(size_t i = 0; i < 28; i++){
-    //     LOGd("replace behaviour input: 0x%x",dat[i]);
-    // }
 	
     uint8_t index = dat[0];
 	SwitchBehaviour::Type type = static_cast<SwitchBehaviour::Type>(dat[1]);
 
 	switch(type){
 		case SwitchBehaviour::Type::Switch:{
-			// Its a switch behaviour packet, let's check the size (ignoring the index)
-			if(evt.size -1 != sizeof(SwitchBehaviour::SerializedDataType)){
-				LOGe("replace switchbehaviour received wrong size event (%d != %d)", evt.size, 1 + sizeof(SwitchBehaviour::SerializedDataType));
+			// check size
+			if(evt.size -1 != WireFormat::size<SwitchBehaviour>()){
+				LOGe("replace switchbehaviour received wrong size event (%d != %d)",
+                    evt.size, 1 + WireFormat::size<SwitchBehaviour>());
 				evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-                return;
+                break;
 			}
 
-			SwitchBehaviour b = WireFormat::deserialize<SwitchBehaviour>(evt.getData() + 1, evt.size - 1);
-            b.print();
-            
-            evt.result.returnCode = saveBehaviour(b, index);
-
-            auto from_ser = b.from().serialize();
-            LOGd("ToD from serialized %02d:%02d:%02: %x %x %x %x %x",
-                b.from().h(),b.from().m(),b.from().s(),
-                from_ser[0],
-                from_ser[1],
-                from_ser[2],
-                from_ser[3],
-                from_ser[4]
-            );
-
-            SwitchBehaviour::SerializedDataType bs = b.serialize();
-
-            for(uint8_t b : bs){
-                LOGd("replace behaviour bs: 0x%02x",b);
+            // check parameter
+            if(index >= MaxBehaviours){
+                evt.result.returnCode = ERR_WRONG_PARAMETER;
+                break;
             }
 
+            // check return buffer
             if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
                 LOGd("ERR_BUFFER_TOO_SMALL");
                 evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
                 break;
             }
 
-            evt.result.buf.data[0] = index;
-            *reinterpret_cast<uint32_t*>(evt.result.buf.data + sizeof(uint8_t)) = masterHash();
-            evt.result.dataSize = sizeof(uint8_t) + sizeof(uint32_t);
+            // check previous data
+            if(activeBehaviours[index] != nullptr){
+                LOGd("deleting previous occupant of index %d", index);
+                delete activeBehaviours[index];
+                activeBehaviours[index] = nullptr;
+            }
+
+
+            LOGd("Allocating new SwitchBehaviour");
+			activeBehaviours[index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(evt.getData() + 1, evt.size - 1));
+            activeBehaviours[index]->print();
+            
+            evt.result.returnCode = ERR_SUCCESS;
             break;
 		}
 		case SwitchBehaviour::Type::Twilight:{
-			LOGe("Not implemented: save twilight");
+            // check size
+			if(evt.size -1 != WireFormat::size<TwilightBehaviour>()){
+				LOGe("replace twilightbehaviour received wrong size event (%d != %d)", 
+                    evt.size, 1 + WireFormat::size<TwilightBehaviour>());
+				evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+                break;
+			}
+
+            // check parameter
+            if(index >= MaxBehaviours){
+                evt.result.returnCode = ERR_WRONG_PARAMETER;
+                break;
+            } 
+            
+            // check previous data
+            if(activeBehaviours[index] != nullptr){
+                LOGd("deleting previous occupant of index %d", index);
+                delete activeBehaviours[index];
+                activeBehaviours[index] = nullptr;
+
+            }
+
+            LOGd("Allocating new TwilightBehaviour");
+            activeBehaviours[index] = new TwilightBehaviour( WireFormat::deserialize<TwilightBehaviour>(evt.getData() + 1, evt.size - 1));
+            activeBehaviours[index]->print();
+            evt.result.returnCode = ERR_SUCCESS;
+
 			break;
 		}
 		case SwitchBehaviour::Type::Extended:{
 			LOGe("Note implemented: save extended behaviour");
-			break;
+			evt.result.returnCode = ERR_WRONG_PARAMETER;
+            break;
 		}
 		default:{
 			LOGe("Invalid behaviour type");
+            evt.result.returnCode = ERR_WRONG_PARAMETER;
 			break;
 		}
 	}
 
+    // can always add a return value
+    evt.result.buf.data[0] = index;
+    *reinterpret_cast<uint32_t*>(evt.result.buf.data + sizeof(uint8_t)) = masterHash();
+    evt.result.dataSize = sizeof(uint8_t) + sizeof(uint32_t);
 }
 
 void BehaviourStore::handleRemoveBehaviour(event_t& evt){
@@ -204,7 +260,8 @@ void BehaviourStore::handleGetBehaviour(event_t& evt){
     uint8_t index = *reinterpret_cast<TYPIFY(EVT_GET_BEHAVIOUR)*>(evt.data);
     LOGd("Get behaviour event %d ", index);
 
-    if(index >= MaxBehaviours || !activeBehaviours[index].has_value()){
+    // validate behaviour index
+    if(index >= MaxBehaviours || activeBehaviours[index] == nullptr){
         LOGd("ERR_NOT_FOUND");
         evt.result.returnCode = ERR_NOT_FOUND;
         return;
@@ -212,30 +269,27 @@ void BehaviourStore::handleGetBehaviour(event_t& evt){
 
     activeBehaviours[index]->print();
 
+    // validate buffer
     if(evt.result.buf.data == nullptr) {
         LOGd("ERR_BUFFER_UNASSIGNED");
         evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
         return;
     }
 
-    SwitchBehaviour::SerializedDataType bs = activeBehaviours[index]->serialize();
-
-    for(uint8_t b : bs){
-        LOGd("get behaviour: 0x%x (%d)",b,b);
-    }
-
-    if(evt.result.buf.len < WireFormat::size<SwitchBehaviour>() + sizeof(uint8_t)){
+    // validate size
+    if(evt.result.buf.len < sizeof(uint8_t) + activeBehaviours[index]->serializedSize()){
         // cannot communicate the result, so won't do anything.
         LOGd("ERR_BUFFER_TOO_SMALL");
         evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
         return;
     }
 
-    // populate response buffer
-    evt.result.buf.data[0] = index;
-    std::copy_n(bs.data(), bs.size(), evt.result.buf.data + sizeof(uint8_t));
+    // populate response
+    evt.result.dataSize = sizeof(uint8_t) + activeBehaviours[index]->serializedSize();
 
-    evt.result.dataSize = bs.size() + sizeof(uint8_t);
+    evt.result.buf.data[0] = index;
+    activeBehaviours[index]->serialize(evt.result.buf.data + 1, evt.result.buf.len -1);
+   
     evt.result.returnCode = ERR_SUCCESS;
 }
 
@@ -255,12 +309,14 @@ void BehaviourStore::handleGetBehaviourIndices(event_t& evt){
 
     size_t listSize = 0;
     for (uint8_t i = 0; i < MaxBehaviours; ++i) {
-        if (activeBehaviours[i].has_value()) {
+        if (activeBehaviours[i] != nullptr) {
             evt.result.buf.data[listSize] = i;
             listSize += sizeof(uint8_t);
 
             *reinterpret_cast<uint32_t*>(evt.result.buf.data + listSize) = 
-                Fletcher(activeBehaviours[i]->serialize().data(),sizeof(SwitchBehaviour::SerializedDataType) );
+                Fletcher(
+                    activeBehaviours[i]->serialized().data(),
+                    activeBehaviours[i]->serializedSize());
             listSize += sizeof(uint32_t);
 
             LOGd("behaviour found at index %d",i);
@@ -268,6 +324,7 @@ void BehaviourStore::handleGetBehaviourIndices(event_t& evt){
     }
     evt.result.dataSize = listSize;
     evt.result.returnCode = ERR_SUCCESS;
+    evt.result.returnCode = ERR_NOT_IMPLEMENTED;
 }
 
 void BehaviourStore::dispatchBehaviourMutationEvent(){
@@ -280,25 +337,32 @@ void BehaviourStore::dispatchBehaviourMutationEvent(){
 ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index){
     if(index >= MaxBehaviours){
         return ERR_WRONG_PARAMETER;
-    } else if (!activeBehaviours[index].has_value()){
+    } 
+    
+    if (activeBehaviours[index] == nullptr){
         LOGw("ERR_NOT_FOUND tried removing empty slot in behaviourstore");
         return ERR_SUCCESS;
     }
     
-    activeBehaviours[index].reset();
-    return ERR_SUCCESS;
-}
-
-ErrorCodesGeneral BehaviourStore::saveBehaviour(SwitchBehaviour b, uint8_t index){
-    if(index >= MaxBehaviours){
-        return ERR_WRONG_PARAMETER;
+    if(activeBehaviours[index] != nullptr){
+        LOGd("deleting behaviour");
+        delete activeBehaviours[index];
+        activeBehaviours[index] = nullptr;
     }
-    
-    LOGd("save behaviour to index %d",index);
 
-    activeBehaviours[index] = b;
     return ERR_SUCCESS;
 }
+
+// ErrorCodesGeneral BehaviourStore::saveBehaviour(SwitchBehaviour b, uint8_t index){
+//     if(index >= MaxBehaviours){
+//         return ERR_WRONG_PARAMETER;
+//     }
+    
+//     LOGd("save behaviour to index %d",index);
+
+//     activeBehaviours[index] = b;
+//     return ERR_SUCCESS;
+// }
 
 uint32_t BehaviourStore::masterHash(){
     uint32_t fletch = 0;
@@ -317,4 +381,13 @@ uint32_t BehaviourStore::masterHash(){
     }
 
     return fletch;
+}
+
+
+BehaviourStore::~BehaviourStore(){
+    for(Behaviour* bptr: activeBehaviours){
+        if(bptr != nullptr){
+            delete bptr;
+        };
+    }
 }
