@@ -100,7 +100,7 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 		EventDispatcher::getInstance().dispatch(event);
 	}
 	else {
-		LOGe("failed to set %u", data.type);
+		LOGe("failed to set type=%u id=%u err=%u", data.type, data.id, retVal);
 	}
 	return retVal;
 }
