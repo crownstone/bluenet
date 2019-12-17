@@ -416,6 +416,9 @@ cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
 	if (!_startedWritingToFlash) {
 		return ERR_BUSY;
 	}
+	if (_performingFactoryReset) {
+		return ERR_WRONG_STATE;
+	}
 	if (index_in_ram >= _ram_data_register.size()) {
 		LOGe("Invalid index");
 		return ERR_WRITE_NOT_ALLOWED;
@@ -439,6 +442,9 @@ cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
 cs_ret_code_t State::removeFromFlash(const CS_TYPE & type, const cs_state_id_t id) {
 	if (!_startedWritingToFlash) {
 		return ERR_BUSY;
+	}
+	if (_performingFactoryReset) {
+		return ERR_WRONG_STATE;
 	}
 	cs_ret_code_t ret_code = _storage->remove(type, id);
 	switch(ret_code) {
@@ -815,7 +821,10 @@ void State::factoryReset() {
 	// Clear queue, to remove any pending writes.
 	_store_queue.clear();
 
-	cs_ret_code_t retCode = _storage->factoryReset();
+	cs_ret_code_t retCode = ERR_BUSY;
+	if (_startedWritingToFlash) {
+		retCode = _storage->factoryReset();
+	}
 	if (!handleFactoryResetResult(retCode)) {
 		addToQueue(CS_STATE_QUEUE_OP_FACTORY_RESET, CS_TYPE::CONFIG_DO_NOT_USE, 0, STATE_RETRY_STORE_DELAY_MS, StateQueueMode::DELAY);
 	}
