@@ -82,6 +82,7 @@ struct __attribute__((__packed__)) result_packet_t {
  */
 struct __attribute__((__packed__)) state_packet_header_t {
 	uint16_t stateType;
+	uint16_t stateId;
 };
 
 /**

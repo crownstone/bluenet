@@ -358,8 +358,8 @@ uint 16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16  | [State type](#state_types) | 2 | Type of state to get.
-
+uint 16 | [State type](#state_types) | 2 | Type of state to get.
+uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
 
 <a name="state_set_packet"></a>
 #### State set packet
@@ -368,19 +368,29 @@ Most configuration changes will only be applied after a reboot.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16  | [State type](#state_types) | 2 | Type of state to set.
+uint 16 | [State type](#state_types) | 2 | Type of state to set.
+uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
 uint 8 | Payload | N | Payload data, depends on state type.
 
 Most configuration changes will only be applied after a reboot.
 Available configurations types:
 
-<a name="state_result_packet"></a>
-#### State result packet
+<a name="state_get_result_packet"></a>
+#### State get result packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16  | [State type](#state_types) | 2 | Type of state.
+uint 16 | [State type](#state_types) | 2 | Type of state.
+uint 16 | id | 2 | ID of state.
 uint 8 | Payload | N | Payload data, depends on state type.
+
+<a name="state_set_result_packet"></a>
+#### State set result packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | [State type](#state_types) | 2 | Type of state.
+uint 16 | id | 2 | ID of state that was set.
 
 
 <a name="set_sun_time_packet"></a>

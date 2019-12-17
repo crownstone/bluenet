@@ -220,6 +220,7 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 	}
 	state_packet_header_t* stateHeader = (state_packet_header_t*) commandData.data;
 	CS_TYPE stateType = toCsType(stateHeader->stateType);
+	cs_state_id_t stateId = stateHeader->stateId;
 	if (!EncryptionHandler::getInstance().allowAccess(getUserAccessLevelGet(stateType), accessLevel)) {
 		return command_result_t(ERR_NO_ACCESS);
 	}
@@ -230,14 +231,16 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 	cs_data_t stateDataBuf(resultData.data + sizeof(state_packet_header_t) , resultData.len - sizeof(state_packet_header_t));
 	state_packet_header_t* resultHeader = (state_packet_header_t*) resultData.data;
 	resultHeader->stateType = stateHeader->stateType;
-	cs_state_data_t stateData(stateType, stateDataBuf.data, stateDataBuf.len);
+	resultHeader->stateId = stateHeader->stateId;
+	cs_state_data_t stateData(stateType, stateId, stateDataBuf.data, stateDataBuf.len);
 	command_result_t result;
 	result.returnCode = State::getInstance().verifySizeForGet(stateData);
+	result.data.data = resultData.data;
+	result.data.len = sizeof(state_packet_header_t);
 	if (FAILURE(result.returnCode)) {
 		return result;
 	}
 	result.returnCode = State::getInstance().get(stateData);
-	result.data.data = resultData.data;
 	result.data.len = sizeof(state_packet_header_t) + stateData.size;
 	return result;
 }
@@ -250,14 +253,23 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 	}
 	state_packet_header_t* stateHeader = (state_packet_header_t*) commandData.data;
 	CS_TYPE stateType = toCsType(stateHeader->stateType);
+	cs_state_id_t stateId = stateHeader->stateId;
 	if (!EncryptionHandler::getInstance().allowAccess(getUserAccessLevelSet(stateType), accessLevel)) {
 		return command_result_t(ERR_NO_ACCESS);
 	}
+	if (resultData.len < sizeof(state_packet_header_t)) {
+		return command_result_t(ERR_BUFFER_TOO_SMALL);
+	}
+	state_packet_header_t* resultHeader = (state_packet_header_t*) resultData.data;
+	resultHeader->stateType = stateHeader->stateType;
+	resultHeader->stateId = stateHeader->stateId;
 	uint16_t payloadSize = commandData.len - sizeof(state_packet_header_t);
 	buffer_ptr_t payload = commandData.data + sizeof(state_packet_header_t);
-	cs_state_data_t stateData(stateType, payload, payloadSize);
+	cs_state_data_t stateData(stateType, stateId, payload, payloadSize);
 	command_result_t result;
 	result.returnCode = State::getInstance().verifySizeForSet(stateData);
+	result.data.data = resultData.data;
+	result.data.len = sizeof(state_packet_header_t);
 	if (FAILURE(result.returnCode)) {
 		return result;
 	}
