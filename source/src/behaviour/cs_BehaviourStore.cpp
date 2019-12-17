@@ -65,13 +65,13 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
 	switch(typ){
 		case SwitchBehaviour::Type::Switch:{
 			// Its a switch behaviour packet, let's check the size
-			if(evt.size - 1 != sizeof(SwitchBehaviour::SerializedDataType)){
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: size(%d) type (%d)", evt.size,typ);
+			if(evt.size != sizeof(SwitchBehaviour::SerializedDataType)){
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: size(%d) type (%d)", evt.size, sizeof(SwitchBehaviour::SerializedDataType), typ);
                 evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 				return;
 			}
 
-			SwitchBehaviour b = WireFormat::deserialize<SwitchBehaviour>(evt.getData() + 1, evt.size - 1);
+			SwitchBehaviour b = WireFormat::deserialize<SwitchBehaviour>(evt.getData(), evt.size);
 
             LOGd("save behaviour event");
 
