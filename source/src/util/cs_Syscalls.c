@@ -73,8 +73,8 @@ int _write(int file, char *ptr, int len)
 
 void fsync() {}
 
-#define LET_HEAP_BE_FIXED
-//#define LET_HEAP_GROW_TO_STACKPOINTER
+//#define LET_HEAP_BE_FIXED
+#define LET_HEAP_GROW_TO_STACKPOINTER
 
 /**
  * The allocation of memory by malloc etc. uses this function internally. The end of the heap is set to _ebss in the
@@ -82,22 +82,23 @@ void fsync() {}
  * Check also: https://devzone.nordicsemi.com/question/14581/nrf51822-with-gcc-stacksize-and-heapsize/
  */
 #ifdef LET_HEAP_GROW_TO_STACKPOINTER
-extern unsigned long _ebss;
+
+extern unsigned long __bss_end__;
+
 void * _sbrk(int incr)
 {
-    static char *heap_end = (char *)&_ebss;
+    static char *heap_end = (char *)&__bss_end__;
 
     //! get stack pointer
     void* sp;
     asm("mov %0, sp" : "=r"(sp) : : );
     //! return (void*)-1 if stackpointer gets below (stack grows downwards) the end of the heap (goes upwards)
     if ((char*)sp <= heap_end+incr) {
-	    __asm("BKPT"); //! for now stop by force!
+		// TODO: Write something to indicate the problem eventually
         return (void*)-1;
     }
 
     char *prev = heap_end;
-    //! heap grows upwards
     heap_end += incr;
     return prev;
 }
