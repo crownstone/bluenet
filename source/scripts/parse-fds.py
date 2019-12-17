@@ -18,15 +18,28 @@ if (len(sys.argv) < 2):
 	exit(1)
 fileName = sys.argv[1]
 
-# Output from JLinkExe, for example: 0006E000 = DE C0 AD DE FE 01 1E F1 00 00 01 00 03 00 C6 60
-patternData = re.compile("([0-9A-F]{8}) = (([0-9A-F]{2} ?)+)")
+nrfjprog = True
+
+patternData = None
+if nrfjprog:
+	# Output from nrfjprog: 0x0007DF70: FFFFFFFF FFFFFFFF FFFFFFFF FFFFFFFF   |................|
+	patternData = re.compile("0x([0-9A-F]{8}): (([0-9A-F]{2} ?)+)")
+else:
+	# Output from JLinkExe, for example: 0006E000 = DE C0 AD DE FE 01 1E F1 00 00 01 00 03 00 C6 60
+	patternData = re.compile("([0-9A-F]{8}) = (([0-9A-F]{2} ?)+)")
+
+
 
 pageHeaderSize = 8
 itemHeaderSize = 12
 
 def getUint16(data, index):
 	#print("getUint16 index=", index, "b1=", int(data[index]), "b2=", int(data[index+1]))
-	return data[index] + (data[index + 1] << 8)
+	if nrfjprog:
+		return (data[index] << 8) + data[index + 1]
+	else:
+		return data[index] + (data[index + 1] << 8)
+
 
 def printTypeData(type, data, sizeLeft):
 	for i in range(0, sizeLeft):
@@ -83,6 +96,7 @@ def parseFile(textFilename):
 					sizeLeft = 0
 
 			for i in range(0, 16):
+				#print("skip:", skip, " sizeLeft:", sizeLeft)
 				if (skip > 0):
 					skip -= 1
 					# go to next byte
@@ -93,11 +107,17 @@ def parseFile(textFilename):
 				else:
 					printTypeData(type, typedata, sizeLeft)
 					# New item
-					type = getUint16(data, i)
+					type = 0
+					typeLen = 0
+					if (nrfjprog):
+						typeLen = 4 * getUint16(data, i)
+						type = getUint16(data, i + 2)
+					else:
+						type = getUint16(data, i)
+						typeLen = 4 * getUint16(data, i + 2)
 					if (type == 0xFFFF):
 						type = -1
 						break
-					typeLen = 4 * getUint16(data, i + 2)
 					typedata = []
 					sizeLeft = typeLen
 					skip = itemHeaderSize - 1
