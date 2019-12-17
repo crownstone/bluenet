@@ -45,7 +45,12 @@ class BehaviourStore : public EventListener {
         return activeBehaviours;
     }
 
-    virtual ~BehaviourStore();
+	/**
+	 * Initialize store from flash.
+	 */
+	void init();
+	
+	virtual ~BehaviourStore();
 
     private:
     /**

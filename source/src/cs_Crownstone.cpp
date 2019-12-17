@@ -717,6 +717,8 @@ void Crownstone::startUp() {
 	Switch::getInstance().turnOn();
 #endif
 #endif
+
+	_behaviourStore.init();
 }
 
 /**

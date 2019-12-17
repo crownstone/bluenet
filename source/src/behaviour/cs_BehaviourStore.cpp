@@ -404,6 +404,38 @@ uint32_t BehaviourStore::masterHash(){
     return fletch;
 }
 
+void BehaviourStore::init() {
+	// load rules from flash
+	std::vector<cs_state_id_t> *ids;
+	State::getInstance().getIds(CS_TYPE::BEHAVIOUR_RULE, ids);
+
+	if (ids != NULL) {
+		for (auto iter: *ids) {
+			size16_t data_size = WireFormat::size<SwitchBehaviour>();
+			uint8_t data_array[data_size];
+			cs_state_data_t data (CS_TYPE::BEHAVIOUR_RULE, iter, data_array, data_size);
+			State::getInstance().get(data);
+
+			activeBehaviours[iter] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(data_array, data_size));
+			activeBehaviours[iter]->print();
+		}
+	}
+	ids = NULL;
+
+	State::getInstance().getIds(CS_TYPE::TWILIGHT_RULE, ids);
+	if (ids != NULL) {
+
+		for (auto iter: *ids) {
+			size16_t data_size = WireFormat::size<TwilightBehaviour>();
+			uint8_t data_array[data_size];
+			cs_state_data_t data (CS_TYPE::BEHAVIOUR_RULE, iter, data_array, data_size);
+			State::getInstance().get(data);
+
+			activeBehaviours[iter] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(data_array, data_size));
+			activeBehaviours[iter]->print();
+		}
+	}
+}
 
 BehaviourStore::~BehaviourStore(){
     for(Behaviour* bptr: activeBehaviours){
