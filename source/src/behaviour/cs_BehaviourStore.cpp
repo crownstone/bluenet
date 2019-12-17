@@ -122,7 +122,7 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
                 break;
             }
             case SwitchBehaviour::Type::Extended:{
-                LOGe("Note implemented: save extended behaviour");
+                LOGe("Not implemented! Save extended behaviour");
                 evt.result.returnCode = ERR_WRONG_PARAMETER;
                 break;
             }
