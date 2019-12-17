@@ -599,9 +599,6 @@ const char* TypeName(CS_TYPE const & type) {
 
 bool hasMultipleIds(CS_TYPE const & type){
 	switch(type) {
-	case CS_TYPE::STATE_RESET_COUNTER:{
-		return true;
-	}
 	case CS_TYPE::CONFIG_NAME:
 	case CS_TYPE::CONFIG_PWM_PERIOD:
 	case CS_TYPE::CONFIG_IBEACON_MAJOR:
@@ -653,7 +650,7 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::STATE_OPERATION_MODE:
 	case CS_TYPE::STATE_SWITCH_STATE:
 	case CS_TYPE::STATE_SCHEDULE:
-//	case CS_TYPE::STATE_RESET_COUNTER:
+	case CS_TYPE::STATE_RESET_COUNTER:
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
