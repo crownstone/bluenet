@@ -330,7 +330,7 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 	// Assume the allocation was done by storage.
 	// Size is in bytes, each word is 4B.
 	record.data.length_words = getPaddedSize(stateData.size) >> 2;
-	LOGd("Write key=% file=%u", recordKey, fileId);
+	LOGd("Write key=%u file=%u", recordKey, fileId);
 	LOGStorageDebug("Data=%p word size=%u", record.data.p_data, record.data.length_words);
 
 	bool recordExists = false;
@@ -450,6 +450,7 @@ cs_ret_code_t Storage::remove(cs_state_id_t id) {
 }
 
 cs_ret_code_t Storage::factoryReset() {
+	LOGi("factoryReset");
 	if (!_initialized) {
 		LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
@@ -459,7 +460,7 @@ cs_ret_code_t Storage::factoryReset() {
 	}
 	initSearch();
 	cs_ret_code_t retCode = continueFactoryReset();
-	if (retCode == ERR_WAIT_FOR_SUCCESS) {
+	if (retCode == ERR_SUCCESS) {
 		_performingFactoryReset = true;
 	}
 	return retCode;
