@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <time/cs_TimeOfDay.h>
-#include <time/cs_DayOfWeek.h>
+#include <behaviour/cs_Behaviour.h>
+
 #include <presence/cs_PresenceCondition.h>
 
 #include <optional>
@@ -20,44 +20,27 @@
  * It abstracts predicates such as:
  * "fade to 100% in 10 minutes, starting 30 minutes before sunrise, if anyone is in this room"
  */
-class Behaviour {
+class SwitchBehaviour : public Behaviour{
     public:
-    typedef std::array<uint8_t, 26> SerializedDataFormat;
-
-    enum class Type : uint8_t {Switch = 0, Twilight = 1, Extended = 2};
-
+    typedef std::array<uint8_t, 
+      std::tuple_size<Behaviour::SerializedDataType>::value + 
+      std::tuple_size<PresenceCondition::SerializedDataType>::value> SerializedDataType;
     
-    Behaviour() = default;
-    Behaviour(
+    SwitchBehaviour(
       uint8_t intensity,
+      uint8_t profileid,
       DayOfWeekBitMask activedaysofweek,
       TimeOfDay from, 
       TimeOfDay until, 
       PresenceCondition presencecondition
       );
 
-    Behaviour(SerializedDataFormat arr);
-    SerializedDataFormat serialize() const;
+    SwitchBehaviour(SerializedDataType arr);
+    SerializedDataType serialize() const;
+
+    virtual Type getType() const override { return Type::Switch; }
 
     void print() const;
-
-    // =========== Getters ===========
-
-    /**
-     * Returns the intended state when this behaviour is valid.
-     */
-    uint8_t value() const;
-
-    /**
-     * Returns from (incl.) which time on this behaviour applies.
-     */
-    TimeOfDay from() const;
-
-    /**
-     * Returns until (excl.) which time on this behaviour applies.
-     */
-    TimeOfDay until() const;
-
 
     // =========== Semantics ===========
 
@@ -80,10 +63,6 @@ class Behaviour {
 
 
     // serialized fields (settings)
-    uint8_t activeIntensity = 0;
-    DayOfWeekBitMask activeDays;
-    TimeOfDay behaviourAppliesFrom = TimeOfDay::Midnight();
-    TimeOfDay behaviourAppliesUntil = TimeOfDay::Midnight();
     PresenceCondition presenceCondition;
 
     // unserialized fields (runtime values)

@@ -25,4 +25,9 @@ public:
 	 * and act upon it. These events are dispatched by the EventDispatcher.
 	 */
 	virtual void handleEvent(event_t & event) = 0;
+
+	/**
+	 * Registers this with the EventDispatcher.
+	 */
+	void listen();
 };

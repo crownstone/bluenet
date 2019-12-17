@@ -19,7 +19,7 @@
 #include <type_traits>
 #include <tuple>
 
-#include <processing/behaviour/cs_Behaviour.h>
+#include <behaviour/cs_SwitchBehaviour.h>
 
 enum TypeBases {
 	State_Base   = 0x000,
@@ -398,8 +398,8 @@ typedef  BOOL TYPIFY(CMD_SWITCH_LOCKED);
 typedef  uint32_t TYPIFY(EVT_TICK);
 typedef  uint32_t TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
-typedef Behaviour TYPIFY(EVT_SAVE_BEHAVIOUR);
-typedef std::tuple<uint8_t,Behaviour> TYPIFY(EVT_REPLACE_BEHAVIOUR);
+typedef SwitchBehaviour TYPIFY(EVT_SAVE_BEHAVIOUR);
+typedef std::tuple<uint8_t,SwitchBehaviour> TYPIFY(EVT_REPLACE_BEHAVIOUR);
 typedef uint8_t TYPIFY(EVT_REMOVE_BEHAVIOUR); // index
 typedef uint8_t TYPIFY(EVT_GET_BEHAVIOUR); // index
 typedef void TYPIFY(EVT_GET_BEHAVIOUR_INDICES);

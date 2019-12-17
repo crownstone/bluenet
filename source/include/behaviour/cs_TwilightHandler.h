@@ -1,28 +1,29 @@
 /*
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: Dec 20, 2019
+ * Date: Dec 5, 2019
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 #pragma once
 
+#include <behaviour/cs_SwitchBehaviour.h>
 #include <events/cs_EventListener.h>
-#include <processing/behaviour/cs_Behaviour.h>
 
 #include <optional>
 
 
-class BehaviourHandler : public EventListener {
+class TwilightHandler : public EventListener {
     public:
 
     /**
-     * Computes the intended state of this crownstone based on
-     * the stored behaviours, and then dispatches a switch event
-     * for that state.
+     * Computes the twilight state of this crownstone based on
+     * the stored behaviours, and then dispatches an event.
      * 
      * Events:
      * - STATE_TIME
+     * - EVT_TIME_SET
      * - EVT_PRESENCE_MUTATION
+     * - EVT_BEHAVIOURSTORE_MUTATION
      */
     virtual void handleEvent(event_t& evt);
 

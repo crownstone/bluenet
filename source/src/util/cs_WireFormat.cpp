@@ -70,29 +70,29 @@ PresenceCondition WireFormat::deserialize(uint8_t* data, size_t len){
 template<>
 Behaviour WireFormat::deserialize(uint8_t* data, size_t len){
     // TODO(Arend): assert length
-    std::array<uint8_t,26> d;
-    std::copy_n(data, 26, d.begin());
+    std::array<uint8_t,1+13> d;
+    std::copy_n(data, 1+13, d.begin());
     return Behaviour(d);
 }
 
-//template<>
-//std::tuple<uint8_t,Behaviour> WireFormat::deserialize(uint8_t* data, size_t len){
-//    // TODO(Arend): assert length
-//	uint8_t index = WireFormat::deserialize<uint8_t>(data, len);
-//    std::array<uint8_t,26> d;
-//    std::copy_n(data+1, 26, d.begin());
-//
-//    return std::tuple<uint8_t, Behaviour>(index, Behaviour(d));
-//}
+template<>
+SwitchBehaviour WireFormat::deserialize(uint8_t* data, size_t len){
+    // TODO(Arend): assert length
+    std::array<uint8_t,1+26> d;
+    std::copy_n(data, 1+26, d.begin());
+    return SwitchBehaviour(d);
+}
 
 // -------------------- specialization for serialize --------------------
 
 
 std::array<uint8_t,1> serialize(const uint8_t& obj){
+    LOGd("serialize uint8_t");
     return {obj};
 }
 
 std::array<uint8_t,4> serialize(const uint32_t& obj){
+    LOGd("serialize uint32_t");
     return {
         static_cast<uint8_t>(obj >> 0), 
         static_cast<uint8_t>(obj >> 1), 
@@ -101,6 +101,7 @@ std::array<uint8_t,4> serialize(const uint32_t& obj){
 }
 
 std::array<uint8_t,4> serialize(const int32_t& obj){
+    LOGd("serialize int32_t");
     return {
         static_cast<uint8_t>(obj >> 0), 
         static_cast<uint8_t>(obj >> 1), 
@@ -109,6 +110,7 @@ std::array<uint8_t,4> serialize(const int32_t& obj){
 }
 
 std::array<uint8_t,8> serialize(const uint64_t& obj){
+    LOGd("serialize uint64_t");
     return {
         static_cast<uint8_t>(obj >> 0), 
         static_cast<uint8_t>(obj >> 1), 

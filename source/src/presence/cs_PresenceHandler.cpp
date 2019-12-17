@@ -100,7 +100,7 @@ void PresenceHandler::handleEvent(event_t& evt){
     }
 
     // TODO Anne @Arend: should we not bail out when profileId == 0xff, why proceed with presence mutation event?
-
+    // TODO(9-12-2019, Arend) check if state changed
     print();
 
     event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,nullptr,0);

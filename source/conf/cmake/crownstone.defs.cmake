@@ -127,6 +127,7 @@ ADD_DEFINITIONS("-DENCRYPTION=${ENCRYPTION}")
 
 ADD_DEFINITIONS("-DMESHING=${MESHING}")
 ADD_DEFINITIONS("-DBUILD_MESHING=${BUILD_MESHING}")
+ADD_DEFINITIONS("-DMESH_SCANNER=${MESH_SCANNER}")
 
 # Add iBeacon default values
 ADD_DEFINITIONS("-DIBEACON=${IBEACON}")
@@ -144,10 +145,7 @@ ADD_DEFINITIONS("-DCHAR_CONTROL=${CHAR_CONTROL}")
 ADD_DEFINITIONS("-DCHAR_CONFIGURATION=${CHAR_CONFIGURATION}")
 ADD_DEFINITIONS("-DCHAR_STATE=${CHAR_STATE}")
 
-
 # Publish all options as CMake options as well
-
-ADD_DEFINITIONS("-DMESH_SCANNER=${MESH_SCANNER}")
 
 # Obtain variables to be used for the compiler
 SET(NRF5_DIR                                    "${NRF5_DIR}"                   CACHE STRING "Nordic SDK Directory" FORCE)
@@ -197,6 +195,7 @@ SET(ENCRYPTION                                  "${ENCRYPTION}"                 
 
 SET(MESHING                                     "${MESHING}"                        CACHE STRING "MESHING" FORCE)
 SET(BUILD_MESHING                               "${BUILD_MESHING}"                  CACHE STRING "BUILD_MESHING" FORCE)
+SET(MESH_SCANNER                                "${MESH_SCANNER}"                   CACHE STRING "MESH_SCANNER" FORCE)
 
 # Add iBeacon default values
 SET(IBEACON                                     "${IBEACON}"                        CACHE STRING "IBEACON" FORCE)
@@ -209,4 +208,3 @@ SET(BEACON_RSSI                                 "${BEACON_RSSI}"                
 SET(CHAR_CONTROL                                "${CHAR_CONTROL}"                   CACHE STRING "CHAR_CONTROL" FORCE)
 SET(CHAR_CONFIGURATION                          "${CHAR_CONFIGURATION}"             CACHE STRING "CHAR_CONFIGURATION" FORCE)
 SET(CHAR_STATE                                  "${CHAR_STATE}"                     CACHE STRING "CHAR_STATE" FORCE)
-

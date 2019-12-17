@@ -23,6 +23,10 @@ PresenceCondition::SerializedDataType PresenceCondition::serialize() const{
     SerializedDataType result;
     std::copy_n(std::begin(WireFormat::serialize(pred)),    9, std::begin(result) + 0);
     std::copy_n(std::begin(WireFormat::serialize(timeOut)), 4, std::begin(result) + 9);
+
+    // for(uint8_t b : result){
+    //     LOGd("presence cond ser 0x%x (%d)",b,b);
+    // }
     return result;
 }
 
