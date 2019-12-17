@@ -428,7 +428,7 @@ void BehaviourStore::init() {
 		for (auto iter: *ids) {
 			size16_t data_size = WireFormat::size<TwilightBehaviour>();
 			uint8_t data_array[data_size];
-			cs_state_data_t data (CS_TYPE::BEHAVIOUR_RULE, iter, data_array, data_size);
+			cs_state_data_t data (CS_TYPE::TWILIGHT_RULE, iter, data_array, data_size);
 			State::getInstance().get(data);
 
 			activeBehaviours[iter] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(data_array, data_size));
