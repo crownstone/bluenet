@@ -514,8 +514,8 @@ cs_ret_code_t State::verifySizeForSet(const cs_state_data_t & data) {
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t State::getIds(CS_TYPE type, std::vector<cs_state_id_t> & ids) {
-	return getIdsFromFlash(type, &ids);
+cs_ret_code_t State::getIds(CS_TYPE type, std::vector<cs_state_id_t>* & ids) {
+	return getIdsFromFlash(type, ids);
 }
 
 /**
@@ -525,7 +525,8 @@ cs_ret_code_t State::getIds(CS_TYPE type, std::vector<cs_state_id_t> & ids) {
  * - In case of error, abort the whole thing.
  * - Cache the results.
  */
-cs_ret_code_t State::getIdsFromFlash(const CS_TYPE & type, std::vector<cs_state_id_t>* retIds) {
+cs_ret_code_t State::getIdsFromFlash(const CS_TYPE & type, std::vector<cs_state_id_t>* & retIds) {
+	LOGd("getIdsFromFlash type=%u", to_underlying_type(type));
 	if (!hasMultipleIds(type)) {
 		LOGw("Type %u can't have multiple IDs", to_underlying_type(type));
 		return ERR_WRONG_PARAMETER;

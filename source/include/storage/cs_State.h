@@ -196,10 +196,10 @@ public:
 	 * Get a list of IDs for given type.
 	 *
 	 * @param[in] type            State type.
-	 * @param[out] ids            List of ids.
+	 * @param[out] ids            Pointer to list of ids. This is not a copy, so make sure not to modify this list.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t getIds(CS_TYPE type, std::vector<cs_state_id_t> & ids);
+	cs_ret_code_t getIds(CS_TYPE type, std::vector<cs_state_id_t>* & ids);
 
 	/**
 	 * Set state to new value, via copy.
@@ -483,7 +483,7 @@ private:
 	 * @param[out] ids            List of ids.
 	 * @return                    Return code.
 	 */
-	cs_ret_code_t getIdsFromFlash(const CS_TYPE & type, std::vector<cs_state_id_t>* ids);
+	cs_ret_code_t getIdsFromFlash(const CS_TYPE & type, std::vector<cs_state_id_t>* & ids);
 
 	/**
 	 * Add ID to list of cached IDs.
