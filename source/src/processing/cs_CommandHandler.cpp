@@ -24,6 +24,8 @@
 
 #include <sstream>
 
+#define CommandHandlerLOG LOGnone
+
 void reset(void* p_context) {
 
 	uint32_t cmd = *(int32_t*) p_context;
@@ -282,7 +284,7 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 
 
 command_result_t CommandHandler::handleCmdSetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
-	LOGi(STR_HANDLE_COMMAND, "set time:");
+	CommandHandlerLOG(STR_HANDLE_COMMAND, "set time:");
 
 	if (commandData.len != sizeof(uint32_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
@@ -297,7 +299,7 @@ command_result_t CommandHandler::handleCmdSetTime(cs_data_t commandData, const E
 }
 
 command_result_t CommandHandler::handleCmdSetTimeAdvertisement(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
-	LOGi(STR_HANDLE_COMMAND, "set time adv:");
+	CommandHandlerLOG(STR_HANDLE_COMMAND, "set time adv:");
 
 	if (commandData.len != 11*sizeof(uint8_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
@@ -321,18 +323,11 @@ command_result_t CommandHandler::handleCmdSetTimeAdvertisement(cs_data_t command
 	cs_state_data_t statedat (CS_TYPE::STATE_SUN_TIME, reinterpret_cast<uint8_t*>(&sst), sizeof(sst));
 	State::getInstance().setThrottled(statedat, SunTimeThrottlePeriod_s);
 
-	if(true /* debug */ ){
-		TimeOfDay sr(sst.sunrise);
-		TimeOfDay ss(sst.sunset);
-		
-		LOGd("Sunrise %02d:%02d:%02d, sunset %02d:%02d:%02d", sr.h(),sr.m(),sr.s(), ss.h(),ss.m(),ss.s());
-	}
-
 	return command_result_t(ERR_SUCCESS);
 }
 
 command_result_t CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGi(STR_HANDLE_COMMAND, "set sun time:");
+	CommandHandlerLOG(STR_HANDLE_COMMAND, "set sun time:");
 
 	if (commandData.len != 2 * sizeof(uint32_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
@@ -346,16 +341,11 @@ command_result_t CommandHandler::handleCmdSetSunTime(cs_data_t commandData, cons
 
 	State::getInstance().set(CS_TYPE::STATE_SUN_TIME, &sst, sizeof(sst));
 
-	TimeOfDay sr(sst.sunrise);
-	TimeOfDay ss(sst.sunset);
-	
-	LOGd("Sunrise %02d:%02d:%02d, sunset %02d:%02d:%02d", sr.h(),sr.m(),sr.s(), ss.h(),ss.m(),ss.s());
-
 	return command_result_t(ERR_SUCCESS);
 }
 
 command_result_t CommandHandler::handleCmdSetSunTimeAdvertisement(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGi(STR_HANDLE_COMMAND, "set sun time adv:");
+	CommandHandlerLOG(STR_HANDLE_COMMAND, "set sun time adv:");
 
 	if (commandData.len != 11 * sizeof(uint8_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
@@ -376,13 +366,6 @@ command_result_t CommandHandler::handleCmdSetSunTimeAdvertisement(cs_data_t comm
 
 	cs_state_data_t statedat (CS_TYPE::STATE_SUN_TIME, reinterpret_cast<uint8_t*>(&sst), sizeof(sst));
 	State::getInstance().setThrottled(statedat, SunTimeThrottlePeriod_s);
-
-	if(true /* debug */ ){
-		TimeOfDay sr(sst.sunrise);
-		TimeOfDay ss(sst.sunset);
-		
-		LOGd("Sunrise %02d:%02d:%02d, sunset %02d:%02d:%02d", sr.h(),sr.m(),sr.s(), ss.h(),ss.m(),ss.s());
-	}
 
 	return command_result_t(ERR_SUCCESS);
 }
@@ -717,9 +700,9 @@ void CommandHandler::handleEvent(event_t & event) {
 				cs_data_t(result_buffer,sizeof(result_buffer))
 			);
 
-			LOGd("control command result.returnCode %d, len: %d", result.returnCode,result.data.len);
+			CommandHandlerLOG("control command result.returnCode %d, len: %d", result.returnCode,result.data.len);
 			for(auto i = 0; i < 50; i+=10){
-				LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+				CommandHandlerLOG("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
 				result_buffer[i+0],result_buffer[i+1],result_buffer[i+2],result_buffer[i+3],result_buffer[i+4],
 				result_buffer[i+5],result_buffer[i+6],result_buffer[i+7],result_buffer[i+8],result_buffer[i+9]);
 			}
