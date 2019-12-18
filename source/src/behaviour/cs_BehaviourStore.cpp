@@ -391,7 +391,7 @@ uint32_t BehaviourStore::masterHash() {
         	// append index as uint16_t to hash data
         	fletch = Fletcher(&i,sizeof(i), fletch); // Fletcher() will padd i to the correct width for us.
         	// append behaviour to hash data
-            fletch = Fletcher(activeBehaviours[i]->serialize().data(), activeBehaviours[i]->serializedSize(), fletch);
+            fletch = Fletcher(activeBehaviours[i]->serialized().data(), activeBehaviours[i]->serializedSize(), fletch);
         }
     }
     return fletch;
