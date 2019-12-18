@@ -9,7 +9,6 @@
 #include <cstdint>
 #include "cfg/cs_Config.h"
 #include "protocol/cs_CommandTypes.h"
-#include "protocol/cs_ScheduleEntries.h"
 #include "protocol/cs_Typedefs.h"
 #include "protocol/mesh/cs_MeshModelPackets.h"
 #include "protocol/cs_ServiceDataPackets.h"
@@ -185,11 +184,6 @@ struct __attribute__((__packed__)) factory_reset_message_payload_t {
 struct __attribute__((__packed__)) led_message_payload_t {
 	uint8_t led;
 	bool enable;
-};
-
-struct __attribute__((__packed__)) schedule_command_t {
-	uint8_t id;
-	schedule_entry_t entry;
 };
 
 struct __attribute__((packed)) session_nonce_t {

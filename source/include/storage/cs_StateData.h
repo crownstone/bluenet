@@ -80,7 +80,7 @@ enum class PersistenceMode: uint8_t {
 	RAM,
 	FIRMWARE_DEFAULT,
 	STRATEGY1,
-	DO_NOT_STORE
+	NEITHER_RAM_NOR_FLASH
 };
 
 PersistenceMode DefaultLocation(CS_TYPE const & type);

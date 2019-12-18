@@ -92,7 +92,7 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
                 activeBehaviours[result_index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(evt.getData(), evt.size));
                 activeBehaviours[result_index]->print();
 
-				cs_state_data_t data (CS_TYPE::BEHAVIOUR_RULE, result_index, evt.getData(), evt.size);
+				cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, result_index, evt.getData(), evt.size);
 				State::getInstance().set(data);
 
                 evt.result.returnCode = ERR_SUCCESS;
@@ -114,7 +114,7 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
                 activeBehaviours[result_index] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(evt.getData(), evt.size));
                 activeBehaviours[result_index]->print();
                 
-				cs_state_data_t data (CS_TYPE::TWILIGHT_RULE, result_index, evt.getData(), evt.size);
+				cs_state_data_t data (CS_TYPE::STATE_TWILIGHT_RULE, result_index, evt.getData(), evt.size);
 				State::getInstance().set(data);
 
                 evt.result.returnCode = ERR_SUCCESS;
@@ -195,7 +195,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
             activeBehaviours[index]->print();
 				
 			// TODO @Arend, also adjust here...
-			cs_state_data_t data (CS_TYPE::BEHAVIOUR_RULE, index, evt.getData() + 1, evt.size - 1);
+			cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, index, evt.getData() + 1, evt.size - 1);
 			State::getInstance().set(data);
             
             evt.result.returnCode = ERR_SUCCESS;
@@ -230,7 +230,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
             activeBehaviours[index]->print();
 			
 			// TODO @Arend, also adjust here...
-			cs_state_data_t data (CS_TYPE::BEHAVIOUR_RULE, index, evt.getData() + 1, evt.size - 1);
+			cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, index, evt.getData() + 1, evt.size - 1);
 			State::getInstance().set(data);
             
 			evt.result.returnCode = ERR_SUCCESS;
@@ -261,7 +261,7 @@ void BehaviourStore::handleRemoveBehaviour(event_t& evt){
     
     evt.result.returnCode = removeBehaviour(index);
 			
-	State::getInstance().remove(CS_TYPE::BEHAVIOUR_RULE, index);
+	State::getInstance().remove(CS_TYPE::STATE_BEHAVIOUR_RULE, index);
     
     if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
         LOGd("ERR_BUFFER_TOO_SMALL");
@@ -407,13 +407,13 @@ uint32_t BehaviourStore::masterHash(){
 void BehaviourStore::init() {
 	// load rules from flash
 	std::vector<cs_state_id_t> *ids;
-	State::getInstance().getIds(CS_TYPE::BEHAVIOUR_RULE, ids);
+	State::getInstance().getIds(CS_TYPE::STATE_BEHAVIOUR_RULE, ids);
 
 	if (ids != NULL) {
 		for (auto iter: *ids) {
 			size16_t data_size = WireFormat::size<SwitchBehaviour>();
 			uint8_t data_array[data_size];
-			cs_state_data_t data (CS_TYPE::BEHAVIOUR_RULE, iter, data_array, data_size);
+			cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, iter, data_array, data_size);
 			State::getInstance().get(data);
 
 			activeBehaviours[iter] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(data_array, data_size));
@@ -422,13 +422,13 @@ void BehaviourStore::init() {
 	}
 	ids = NULL;
 
-	State::getInstance().getIds(CS_TYPE::TWILIGHT_RULE, ids);
+	State::getInstance().getIds(CS_TYPE::STATE_TWILIGHT_RULE, ids);
 	if (ids != NULL) {
 
 		for (auto iter: *ids) {
 			size16_t data_size = WireFormat::size<TwilightBehaviour>();
 			uint8_t data_array[data_size];
-			cs_state_data_t data (CS_TYPE::TWILIGHT_RULE, iter, data_array, data_size);
+			cs_state_data_t data (CS_TYPE::STATE_TWILIGHT_RULE, iter, data_array, data_size);
 			State::getInstance().get(data);
 
 			activeBehaviours[iter] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(data_array, data_size));

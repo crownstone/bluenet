@@ -116,13 +116,15 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_START_DIMMER_ON_ZERO_CROSSING    = 66,     //  0x42
 	CONFIG_TAP_TO_TOGGLE_ENABLED            = 67,
 	CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET = 68,
+	STATE_BEHAVIOUR_RULE                    = 69,     //
+	STATE_TWILIGHT_RULE                     = 70,     //
 
 	STATE_RESET_COUNTER                     = 128,    //  0x80 - 128
 	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
 	STATE_ACCUMULATED_ENERGY                = 130,    //  0x82 - 130   Energy used in μJ.
 	STATE_POWER_USAGE                       = 131,    //  0x83 - 131   Power usage in mW.
 //	STATE_TRACKED_DEVICES,                            //  0x84 - 132
-	STATE_SCHEDULE                          = 133,    //  0x85 - 133
+//	STATE_SCHEDULE                          = 133,    //  0x85 - 133
 	STATE_OPERATION_MODE                    = 134,    //  0x86 - 134
 	STATE_TEMPERATURE                       = 135,    //  0x87 - 135
 	STATE_TIME                              = 136,    //  0x88 - 136
@@ -184,7 +186,6 @@ enum class CS_TYPE: uint16_t {
 //	EVT_POWER_SAMPLES_END,                            // Sent when the power samples buffer (for characteristic) has been filled with new data.
 
 	EVT_MESH_TIME,                                    // Sent when the mesh received the current time. -- Payload is uint32_t timestamp.
-	EVT_SCHEDULE_ENTRIES_UPDATED,      // TODO: deprecate and use STATE event for this.                // Sent when schedule entries were changed. Payload is schedule_list_t.
 //	EVT_BLE_EVENT,
 	EVT_BLE_CONNECT,                                  // Sent when device connected.
 	EVT_BLE_DISCONNECT,                               // Sent when device disconnected.
@@ -241,8 +242,6 @@ enum class CS_TYPE: uint16_t {
 	// ------------------------
 	//
 	EVT_PROFILE_LOCATION,                       // profile and location information 
-	BEHAVIOUR_RULE,                             // behaviour rule
-	TWILIGHT_RULE,                              // twilight rule
 };
 
 CS_TYPE toCsType(uint16_t type);
@@ -333,7 +332,6 @@ typedef  uint8_t TYPIFY(STATE_FACTORY_RESET);
 typedef  uint8_t TYPIFY(STATE_OPERATION_MODE);
 typedef  int32_t TYPIFY(STATE_POWER_USAGE);
 typedef uint16_t TYPIFY(STATE_RESET_COUNTER);
-typedef schedule_list_t TYPIFY(STATE_SCHEDULE);
 typedef switch_state_t TYPIFY(STATE_SWITCH_STATE);
 typedef   int8_t TYPIFY(STATE_TEMPERATURE);
 typedef uint32_t TYPIFY(STATE_TIME);
@@ -389,7 +387,6 @@ typedef  void TYPIFY(EVT_RELAY_FORCED_ON);
 typedef  control_command_packet_t TYPIFY(CMD_CONTROL_CMD);
 typedef  void TYPIFY(EVT_SCAN_STARTED);
 typedef  void TYPIFY(EVT_SCAN_STOPPED);
-typedef  schedule_list_t TYPIFY(EVT_SCHEDULE_ENTRIES_UPDATED);
 typedef  void TYPIFY(EVT_SETUP_DONE);
 typedef  session_nonce_t TYPIFY(EVT_SESSION_NONCE_SET);
 typedef  state_external_stone_t TYPIFY(EVT_STATE_EXTERNAL_STONE);
@@ -418,8 +415,8 @@ typedef void TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
-typedef SwitchBehaviour TYPIFY(BEHAVIOUR_RULE);
-typedef TwilightBehaviour TYPIFY(TWILIGHT_RULE);
+typedef SwitchBehaviour TYPIFY(STATE_BEHAVIOUR_RULE);
+typedef TwilightBehaviour TYPIFY(STATE_TWILIGHT_RULE);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

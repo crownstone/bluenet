@@ -115,7 +115,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	CS_TYPE type = data.type;
 	cs_state_id_t id = data.id;
 	size16_t typeSize = TypeSize(type);
-	if (DefaultLocation(type) == PersistenceMode::DO_NOT_STORE) {
+	if (DefaultLocation(type) == PersistenceMode::NEITHER_RAM_NOR_FLASH) {
 		return ERR_WRONG_PARAMETER;
 	}
 	if (id != 0 && !hasMultipleIds(type)) {
@@ -130,7 +130,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 	}
 
 	switch(mode) {
-		case PersistenceMode::DO_NOT_STORE:
+		case PersistenceMode::NEITHER_RAM_NOR_FLASH:
 			return ERR_NOT_AVAILABLE;
 		case PersistenceMode::FIRMWARE_DEFAULT:
 			return getDefaultValue(data);
@@ -201,7 +201,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 	CS_TYPE type = data.type;
 	cs_state_id_t id = data.id;
 	size16_t typeSize = TypeSize(type);
-	if (DefaultLocation(type) == PersistenceMode::DO_NOT_STORE) {
+	if (DefaultLocation(type) == PersistenceMode::NEITHER_RAM_NOR_FLASH) {
 		return ERR_WRONG_PARAMETER;
 	}
 	if (id != 0 && !hasMultipleIds(type)) {
@@ -217,7 +217,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 		return ERR_BUFFER_TOO_SMALL;
 	}
 	switch(mode) {
-		case PersistenceMode::DO_NOT_STORE:
+		case PersistenceMode::NEITHER_RAM_NOR_FLASH:
 			return ERR_NOT_AVAILABLE;
 		case PersistenceMode::RAM: {
 			return storeInRam(data);
@@ -269,7 +269,7 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 	LOGStateDebug("Remove value: %s", TypeName(type));
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	switch(mode) {
-	case PersistenceMode::DO_NOT_STORE:
+	case PersistenceMode::NEITHER_RAM_NOR_FLASH:
 			return ERR_NOT_AVAILABLE;
 	case PersistenceMode::RAM: {
 		// Can we remove from ram, while not from flash?

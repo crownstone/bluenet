@@ -180,11 +180,6 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_POWER_USAGE:
 		*(TYPIFY(STATE_POWER_USAGE)*)data.value = STATE_POWER_USAGE_DEFAULT;
 		return ERR_SUCCESS;
-	case CS_TYPE::STATE_SCHEDULE: {
-		schedule_list_t *schedule = (TYPIFY(STATE_SCHEDULE)*)data.value;
-		cs_schedule_list_set_default(schedule);
-		return ERR_SUCCESS;
-	}
 	case CS_TYPE::STATE_OPERATION_MODE:
 		*(TYPIFY(STATE_OPERATION_MODE)*)data.value = STATE_OPERATION_MODE_DEFAULT;
 		return ERR_SUCCESS;
@@ -208,9 +203,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_NOT_IMPLEMENTED;
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 		return ERR_NOT_AVAILABLE;
-	case CS_TYPE::BEHAVIOUR_RULE:
+	case CS_TYPE::STATE_BEHAVIOUR_RULE:
 		return ERR_SUCCESS;
-	case CS_TYPE::TWILIGHT_RULE:
+	case CS_TYPE::STATE_TWILIGHT_RULE:
 		return ERR_SUCCESS;
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
@@ -263,7 +258,6 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
 	case CS_TYPE::EVT_SCAN_STARTED:
 	case CS_TYPE::EVT_SCAN_STOPPED:
-	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
@@ -349,11 +343,9 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_RESET_COUNTER:
 	case CS_TYPE::STATE_OPERATION_MODE:
 	case CS_TYPE::STATE_SWITCH_STATE:
-	case CS_TYPE::STATE_SCHEDULE:
-	case CS_TYPE::BEHAVIOUR_RULE:
-	case CS_TYPE::TWILIGHT_RULE:
+	case CS_TYPE::STATE_BEHAVIOUR_RULE:
+	case CS_TYPE::STATE_TWILIGHT_RULE:
 		return PersistenceMode::FLASH;
-	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
 	case CS_TYPE::STATE_TEMPERATURE:
@@ -361,6 +353,8 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_SUN_TIME:
 	case CS_TYPE::STATE_FACTORY_RESET:
 	case CS_TYPE::STATE_ERRORS:
+		return PersistenceMode::RAM;
+	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
@@ -377,7 +371,6 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED:
 	case CS_TYPE::EVT_DIMMER_OFF_FAILURE_DETECTED:
 	case CS_TYPE::EVT_MESH_TIME:
-	case CS_TYPE::EVT_SCHEDULE_ENTRIES_UPDATED:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
@@ -440,8 +433,8 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
-		return PersistenceMode::RAM;
+		return PersistenceMode::NEITHER_RAM_NOR_FLASH;
 	}
 	// should not reach this
-	return PersistenceMode::RAM;
+	return PersistenceMode::NEITHER_RAM_NOR_FLASH;
 }

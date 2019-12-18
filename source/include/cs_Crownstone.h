@@ -24,7 +24,6 @@
 #include <processing/cs_MultiSwitchHandler.h>
 #include <processing/cs_PowerSampling.h>
 #include <processing/cs_Scanner.h>
-#include <processing/cs_Scheduler.h>
 #include <processing/cs_TemperatureGuard.h>
 #include <services/cs_CrownstoneService.h>
 #include <services/cs_DeviceInformationService.h>

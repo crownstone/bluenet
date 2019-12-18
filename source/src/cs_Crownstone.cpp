@@ -673,7 +673,6 @@ void Crownstone::startUp() {
 		}
 
 		_systemTime.listen();
-		Scheduler::getInstance().listen();
 		
 		TapToToggle::getInstance().init(_boardsConfig.tapToToggleDefaultRssiThreshold);
 

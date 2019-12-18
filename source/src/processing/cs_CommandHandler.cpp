@@ -12,7 +12,6 @@
 #include "drivers/cs_Serial.h"
 #include "processing/cs_CommandHandler.h"
 #include "processing/cs_Scanner.h"
-#include "processing/cs_Scheduler.h"
 #include "processing/cs_FactoryReset.h"
 #include "processing/cs_Setup.h"
 #include "processing/cs_TemperatureGuard.h"
