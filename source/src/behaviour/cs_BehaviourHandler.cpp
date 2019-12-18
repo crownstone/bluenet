@@ -34,6 +34,10 @@ void BehaviourHandler::handleEvent(event_t& evt){
             update();
             break;
         }
+        case CS_TYPE::CMD_BEHAVIOURHANDLER_SETTINGS:{
+            isActive =  evt.data[0] != 0;
+            update();
+        }
         default:{
             // ignore other events
             break;
@@ -42,16 +46,21 @@ void BehaviourHandler::handleEvent(event_t& evt){
 }
 
 bool BehaviourHandler::update(){
+    if (!isActive) {
+        previousIntendedState = std::nullopt;
+        return;
+    }
+
     TimeOfDay time = SystemTime::now();
     std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
 
-    if(!presence){
+    if (!presence) {
         LOGBehaviourHandler_V("%02d:%02d:%02d, not updating, because presence data is missing",time.h(),time.m(),time.s());
         return false;
     }
 
     auto intendedState = computeIntendedState(time, presence.value());
-    if(intendedState){
+    if (intendedState) {
         if(previousIntendedState == intendedState){
             LOGBehaviourHandler_V("%02d:%02d:%02d, no behaviour change",time.h(),time.m(),time.s());
             return false;

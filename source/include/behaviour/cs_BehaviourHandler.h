@@ -54,4 +54,10 @@ class BehaviourHandler : public EventListener {
         PresenceStateDescription currentpresence);
 
     std::optional<uint8_t> previousIntendedState = {};
+
+    /******
+     * setting this to false will result in a BehaviourHandler that will
+     * not have an opinion about the state anymore (getValue returns std::nullopt).
+     */
+    bool isActive = true;
 };
