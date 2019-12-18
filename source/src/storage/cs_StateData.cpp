@@ -345,12 +345,12 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_SWITCH_STATE:
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
 	case CS_TYPE::STATE_TWILIGHT_RULE:
+	case CS_TYPE::STATE_SUN_TIME:
 		return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
 	case CS_TYPE::STATE_TEMPERATURE:
 	case CS_TYPE::STATE_TIME:
-	case CS_TYPE::STATE_SUN_TIME:
 	case CS_TYPE::STATE_FACTORY_RESET:
 	case CS_TYPE::STATE_ERRORS:
 		return PersistenceMode::RAM;

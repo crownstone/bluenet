@@ -69,30 +69,34 @@ private:
 
 	const boards_config_t* _boardConfig;
 
+	static const constexpr uint32_t SunTimeThrottlePeriod_s = 5;//60*60*24;
+
 	EncryptionAccessLevel getRequiredAccessLevel(const CommandHandlerTypes type);
 	bool allowedAsMeshCommand(const CommandHandlerTypes type);
 
-	command_result_t handleCmdNop                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdGotoDfu               (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdReset                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdFactoryReset          (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdSetTime               (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdSetSunTime            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdIncreaseTx            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdValidateSetup         (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdDisconnect            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdResetErrors           (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdPwm                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdSwitch                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdRelay                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdMultiSwitch           (cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdMeshCommand           (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdAllowDimming          (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdLockSwitch            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdSetup                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdUartMsg               (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdStateGet              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdStateSet              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdNop                     (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdGotoDfu                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdReset                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdFactoryReset            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdSetTime                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdSetTimeAdvertisement    (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdSetSunTime              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdSetSunTimeAdvertisement (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdIncreaseTx              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdValidateSetup           (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdDisconnect              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdResetErrors             (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdPwm                     (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdSwitch                  (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdRelay                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdMultiSwitch             (cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdMeshCommand             (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdAllowDimming            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdLockSwitch              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdSetup                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdUartMsg                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdStateGet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdStateSet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	
 	// delegate a command in the form of an event of given [typ], passing the commandData and using the allocated [resultData]
 	command_result_t dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_data_t resultData);

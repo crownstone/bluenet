@@ -24,6 +24,8 @@
 
 #include <sstream>
 
+#define CommandHandlerLOG LOGnone
+
 void reset(void* p_context) {
 
 	uint32_t cmd = *(int32_t*) p_context;
@@ -96,8 +98,12 @@ command_result_t CommandHandler::handleCommand(
 		return handleCmdFactoryReset(commandData, accessLevel, resultData);
 	case CTRL_CMD_SET_TIME:
 		return handleCmdSetTime(commandData, accessLevel, resultData);
+	case CTRL_CMD_SET_TIME_ADVERTISEMENT:
+		return handleCmdSetTimeAdvertisement(commandData, accessLevel, resultData);		
 	case CTRL_CMD_SET_SUN_TIME:
 		return handleCmdSetSunTime(commandData, accessLevel, resultData);
+	case CTRL_CMD_SET_SUN_TIME_ADVERTISEMENT:
+		return handleCmdSetSunTimeAdvertisement(commandData, accessLevel, resultData);
 	case CTRL_CMD_INCREASE_TX:
 		return handleCmdIncreaseTx(commandData, accessLevel, resultData);
 	case CTRL_CMD_DISCONNECT:
@@ -278,7 +284,7 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 
 
 command_result_t CommandHandler::handleCmdSetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
-	LOGi(STR_HANDLE_COMMAND, "set time:");
+	CommandHandlerLOG(STR_HANDLE_COMMAND, "set time:");
 
 	if (commandData.len != sizeof(uint32_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
@@ -292,25 +298,74 @@ command_result_t CommandHandler::handleCmdSetTime(cs_data_t commandData, const E
 	return command_result_t(ERR_SUCCESS);
 }
 
+command_result_t CommandHandler::handleCmdSetTimeAdvertisement(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
+	CommandHandlerLOG(STR_HANDLE_COMMAND, "set time adv:");
+
+	if (commandData.len != 11*sizeof(uint8_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+	}
+
+	uint32_t value = reinterpret_cast<uint32_t*>(commandData.data)[0];
+	SystemTime::setTime(value);
+
+	// unwrap packet: uint24 -> uint32 
+	uint32_t rise =  
+		static_cast<uint32_t> (commandData.data [4] << 0*8) | 
+		static_cast<uint32_t> (commandData.data [5] << 1*8) |
+		static_cast<uint32_t> (commandData.data [6] << 2*8) ;
+	uint32_t set =  
+		static_cast<uint32_t> (commandData.data [7] << 0*8) | 
+		static_cast<uint32_t> (commandData.data [8] << 1*8) |
+		static_cast<uint32_t> (commandData.data [9] << 2*8) ;
+	set_sun_time_t sst = { rise, set };
+
+	cs_state_data_t statedat (CS_TYPE::STATE_SUN_TIME, reinterpret_cast<uint8_t*>(&sst), sizeof(sst));
+	State::getInstance().setThrottled(statedat, SunTimeThrottlePeriod_s);
+
+	return command_result_t(ERR_SUCCESS);
+}
+
 command_result_t CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	LOGi(STR_HANDLE_COMMAND, "set time:");
+	CommandHandlerLOG(STR_HANDLE_COMMAND, "set sun time:");
 
 	if (commandData.len != 2 * sizeof(uint32_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 	
-	set_sun_time_t t = {
+	set_sun_time_t sst = {
 		reinterpret_cast<uint32_t*>(commandData.data)[0],
 		reinterpret_cast<uint32_t*>(commandData.data)[1]
 	};
 
-	State::getInstance().set(CS_TYPE::STATE_SUN_TIME, &t, sizeof(t));
+	State::getInstance().set(CS_TYPE::STATE_SUN_TIME, &sst, sizeof(sst));
 
-	TimeOfDay sr(t.sunrise);
-	TimeOfDay ss(t.sunset);
+	return command_result_t(ERR_SUCCESS);
+}
+
+command_result_t CommandHandler::handleCmdSetSunTimeAdvertisement(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
+	CommandHandlerLOG(STR_HANDLE_COMMAND, "set sun time adv:");
+
+	if (commandData.len != 11 * sizeof(uint8_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+	}
 	
-	LOGd("Sunrise %02d:%02d:%02d, sunset %02d:%02d:%02d", sr.h(),sr.m(),sr.s(), ss.h(),ss.m(),ss.s());
+	// unwrap packet: uint24 -> uint32 
+	// unwrap packet: uint24 -> uint32 
+	uint32_t rise =  
+		static_cast<uint32_t> (commandData.data [0] << 0*8) | 
+		static_cast<uint32_t> (commandData.data [1] << 1*8) |
+		static_cast<uint32_t> (commandData.data [2] << 2*8) ;
+	uint32_t set =  
+		static_cast<uint32_t> (commandData.data [3] << 0*8) | 
+		static_cast<uint32_t> (commandData.data [4] << 1*8) |
+		static_cast<uint32_t> (commandData.data [5] << 2*8) ;
+	set_sun_time_t sst = { rise, set };
+
+	cs_state_data_t statedat (CS_TYPE::STATE_SUN_TIME, reinterpret_cast<uint8_t*>(&sst), sizeof(sst));
+	State::getInstance().setThrottled(statedat, SunTimeThrottlePeriod_s);
 
 	return command_result_t(ERR_SUCCESS);
 }
@@ -585,7 +640,9 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		return BASIC;
 
 	case CTRL_CMD_SET_TIME:
+	case CTRL_CMD_SET_TIME_ADVERTISEMENT:
 	case CTRL_CMD_SET_SUN_TIME:
+	case CTRL_CMD_SET_SUN_TIME_ADVERTISEMENT:
 	case CTRL_CMD_SAVE_BEHAVIOUR:
 	case CTRL_CMD_REPLACE_BEHAVIOUR:
 	case CTRL_CMD_REMOVE_BEHAVIOUR:
@@ -643,9 +700,9 @@ void CommandHandler::handleEvent(event_t & event) {
 				cs_data_t(result_buffer,sizeof(result_buffer))
 			);
 
-			LOGd("control command result.returnCode %d, len: %d", result.returnCode,result.data.len);
+			CommandHandlerLOG("control command result.returnCode %d, len: %d", result.returnCode,result.data.len);
 			for(auto i = 0; i < 50; i+=10){
-				LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+				CommandHandlerLOG("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
 				result_buffer[i+0],result_buffer[i+1],result_buffer[i+2],result_buffer[i+3],result_buffer[i+4],
 				result_buffer[i+5],result_buffer[i+6],result_buffer[i+7],result_buffer[i+8],result_buffer[i+9]);
 			}
