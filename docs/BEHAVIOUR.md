@@ -384,6 +384,8 @@ Type | Name | Length | Description
 
 The `BehaviourStore` can generate a hash that can be used to verify if an application is up to date. The data that is hashed is as in the following table. The hashing algorithm used is [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum). As this algorithm is based on 16-bit integer array as input each entry in the table below is padded with 0x00 at the end if its length is uneven.
 
+Only indices with non empty behaviours are used to calculate the master hash.
+
 Type | Name | Length
 --- | --- | ---
 uint8 | Index0 | 1 (padded with 0x00)
@@ -391,8 +393,8 @@ uint8 | Index0 | 1 (padded with 0x00)
 uint8 | Index1 | 1 (padded with 0x00)
 [Behaviour](#behaviour_payload) | Behaviour1 | size depends on the type of payload
 ... | ... | ...
-uint8 | IndexMax | 1 (padded with 0x00)
-[Behaviour](#behaviour_payload) | BehaviourMax | size depends on the type of payload
+uint8 | IndexLast | 1 (padded with 0x00)
+[Behaviour](#behaviour_payload) | BehaviourLast | size depends on the type of payload
 
 <a name="index_and_behaviour_hash"></a>
 #### Index and behaviour hash

@@ -345,7 +345,6 @@ void BehaviourStore::handleGetBehaviourIndices(event_t& evt){
 	}
     evt.result.dataSize = listSize;
     evt.result.returnCode = ERR_SUCCESS;
-    evt.result.returnCode = ERR_NOT_IMPLEMENTED;
 }
 
 void BehaviourStore::dispatchBehaviourMutationEvent(){
@@ -385,22 +384,16 @@ ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index){
 //     return ERR_SUCCESS;
 // }
 
-uint32_t BehaviourStore::masterHash(){
+uint32_t BehaviourStore::masterHash() {
     uint32_t fletch = 0;
-
-    for(uint8_t i = 0; i < MaxBehaviours; i++){
-        // append index as uint16_t to hash data
-        fletch = Fletcher(&i,sizeof(i), fletch); // Fletcher() will padd i to the correct width for us.
-
-        // append behaviour or empty array to hash data
-        if(activeBehaviours[i]){
-            fletch = Fletcher(activeBehaviours[i]->serialize().data(),sizeof(SwitchBehaviour::SerializedDataType), fletch);
-        } else {
-            SwitchBehaviour::SerializedDataType zeroes = {0};
-            fletch = Fletcher(zeroes.data(), sizeof(SwitchBehaviour::SerializedDataType), fletch);
+    for (uint8_t i = 0; i < MaxBehaviours; i++) {
+        if (activeBehaviours[i]) {
+        	// append index as uint16_t to hash data
+        	fletch = Fletcher(&i,sizeof(i), fletch); // Fletcher() will padd i to the correct width for us.
+        	// append behaviour to hash data
+            fletch = Fletcher(activeBehaviours[i]->serialize().data(), activeBehaviours[i]->serializedSize(), fletch);
         }
     }
-
     return fletch;
 }
 
