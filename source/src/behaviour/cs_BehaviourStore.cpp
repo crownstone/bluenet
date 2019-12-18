@@ -92,7 +92,7 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
                 activeBehaviours[result_index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(evt.getData(), evt.size));
                 activeBehaviours[result_index]->print();
 
-				cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, result_index, evt.getData(), evt.size);
+				cs_state_data_t data(CS_TYPE::STATE_BEHAVIOUR_RULE, result_index, evt.getData(), evt.size);
 				State::getInstance().set(data);
 
                 evt.result.returnCode = ERR_SUCCESS;
@@ -345,7 +345,6 @@ void BehaviourStore::handleGetBehaviourIndices(event_t& evt){
 	}
     evt.result.dataSize = listSize;
     evt.result.returnCode = ERR_SUCCESS;
-    evt.result.returnCode = ERR_NOT_IMPLEMENTED;
 }
 
 void BehaviourStore::dispatchBehaviourMutationEvent(){
@@ -385,22 +384,16 @@ ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index){
 //     return ERR_SUCCESS;
 // }
 
-uint32_t BehaviourStore::masterHash(){
+uint32_t BehaviourStore::masterHash() {
     uint32_t fletch = 0;
-
-    for(uint8_t i = 0; i < MaxBehaviours; i++){
-        // append index as uint16_t to hash data
-        fletch = Fletcher(&i,sizeof(i), fletch); // Fletcher() will padd i to the correct width for us.
-
-        // append behaviour or empty array to hash data
-        if(activeBehaviours[i]){
-            fletch = Fletcher(activeBehaviours[i]->serialize().data(),sizeof(SwitchBehaviour::SerializedDataType), fletch);
-        } else {
-            SwitchBehaviour::SerializedDataType zeroes = {0};
-            fletch = Fletcher(zeroes.data(), sizeof(SwitchBehaviour::SerializedDataType), fletch);
+    for (uint8_t i = 0; i < MaxBehaviours; i++) {
+        if (activeBehaviours[i]) {
+        	// append index as uint16_t to hash data
+        	fletch = Fletcher(&i,sizeof(i), fletch); // Fletcher() will padd i to the correct width for us.
+        	// append behaviour to hash data
+            fletch = Fletcher(activeBehaviours[i]->serialize().data(), activeBehaviours[i]->serializedSize(), fletch);
         }
     }
-
     return fletch;
 }
 
@@ -408,31 +401,33 @@ void BehaviourStore::init() {
 	// load rules from flash
 	std::vector<cs_state_id_t> *ids;
 	State::getInstance().getIds(CS_TYPE::STATE_BEHAVIOUR_RULE, ids);
-
+	cs_ret_code_t retCode;
 	if (ids != NULL) {
+		size16_t data_size = WireFormat::size<SwitchBehaviour>();
+		uint8_t data_array[data_size];
 		for (auto iter: *ids) {
-			size16_t data_size = WireFormat::size<SwitchBehaviour>();
-			uint8_t data_array[data_size];
 			cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, iter, data_array, data_size);
-			State::getInstance().get(data);
-
-			activeBehaviours[iter] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(data_array, data_size));
-			activeBehaviours[iter]->print();
+			retCode = State::getInstance().get(data);
+			if (retCode == ERR_SUCCESS) {
+				activeBehaviours[iter] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(data_array, data_size));
+				LOGi("Loaded behaviour at ind=%u:", iter);
+				activeBehaviours[iter]->print();
+			}
 		}
 	}
 	ids = NULL;
-
 	State::getInstance().getIds(CS_TYPE::STATE_TWILIGHT_RULE, ids);
 	if (ids != NULL) {
-
+		size16_t data_size = WireFormat::size<TwilightBehaviour>();
+		uint8_t data_array[data_size];
 		for (auto iter: *ids) {
-			size16_t data_size = WireFormat::size<TwilightBehaviour>();
-			uint8_t data_array[data_size];
 			cs_state_data_t data (CS_TYPE::STATE_TWILIGHT_RULE, iter, data_array, data_size);
-			State::getInstance().get(data);
-
-			activeBehaviours[iter] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(data_array, data_size));
-			activeBehaviours[iter]->print();
+			retCode = State::getInstance().get(data);
+			if (retCode == ERR_SUCCESS) {
+				activeBehaviours[iter] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(data_array, data_size));
+				LOGi("Loaded behaviour at ind=%u:", iter);
+				activeBehaviours[iter]->print();
+			}
 		}
 	}
 }

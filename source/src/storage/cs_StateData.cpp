@@ -204,9 +204,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 		return ERR_NOT_AVAILABLE;
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
-		return ERR_SUCCESS;
+		return ERR_NOT_AVAILABLE;
 	case CS_TYPE::STATE_TWILIGHT_RULE:
-		return ERR_SUCCESS;
+		return ERR_NOT_AVAILABLE;
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
