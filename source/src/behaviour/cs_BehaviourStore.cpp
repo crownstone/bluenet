@@ -92,7 +92,7 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
                 activeBehaviours[result_index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(evt.getData(), evt.size));
                 activeBehaviours[result_index]->print();
 
-				cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, result_index, evt.getData(), evt.size);
+				cs_state_data_t data(CS_TYPE::STATE_BEHAVIOUR_RULE, result_index, evt.getData(), evt.size);
 				State::getInstance().set(data);
 
                 evt.result.returnCode = ERR_SUCCESS;
@@ -401,31 +401,33 @@ void BehaviourStore::init() {
 	// load rules from flash
 	std::vector<cs_state_id_t> *ids;
 	State::getInstance().getIds(CS_TYPE::STATE_BEHAVIOUR_RULE, ids);
-
+	cs_ret_code_t retCode;
 	if (ids != NULL) {
+		size16_t data_size = WireFormat::size<SwitchBehaviour>();
+		uint8_t data_array[data_size];
 		for (auto iter: *ids) {
-			size16_t data_size = WireFormat::size<SwitchBehaviour>();
-			uint8_t data_array[data_size];
 			cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, iter, data_array, data_size);
-			State::getInstance().get(data);
-
-			activeBehaviours[iter] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(data_array, data_size));
-			activeBehaviours[iter]->print();
+			retCode = State::getInstance().get(data);
+			if (retCode == ERR_SUCCESS) {
+				activeBehaviours[iter] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(data_array, data_size));
+				LOGi("Loaded behaviour at ind=%u:", iter);
+				activeBehaviours[iter]->print();
+			}
 		}
 	}
 	ids = NULL;
-
 	State::getInstance().getIds(CS_TYPE::STATE_TWILIGHT_RULE, ids);
 	if (ids != NULL) {
-
+		size16_t data_size = WireFormat::size<TwilightBehaviour>();
+		uint8_t data_array[data_size];
 		for (auto iter: *ids) {
-			size16_t data_size = WireFormat::size<TwilightBehaviour>();
-			uint8_t data_array[data_size];
 			cs_state_data_t data (CS_TYPE::STATE_TWILIGHT_RULE, iter, data_array, data_size);
-			State::getInstance().get(data);
-
-			activeBehaviours[iter] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(data_array, data_size));
-			activeBehaviours[iter]->print();
+			retCode = State::getInstance().get(data);
+			if (retCode == ERR_SUCCESS) {
+				activeBehaviours[iter] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(data_array, data_size));
+				LOGi("Loaded behaviour at ind=%u:", iter);
+				activeBehaviours[iter]->print();
+			}
 		}
 	}
 }

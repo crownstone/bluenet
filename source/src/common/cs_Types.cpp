@@ -268,9 +268,9 @@ size16_t TypeSize(CS_TYPE const & type){
 	case CS_TYPE::CONFIG_UART_ENABLED:
 		return sizeof(TYPIFY(CONFIG_UART_ENABLED));
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
-    	return WireFormat::size<Behaviour>();
+    	return WireFormat::size<SwitchBehaviour>();
 	case CS_TYPE::STATE_TWILIGHT_RULE:
-    	return WireFormat::size<Behaviour>();
+    	return WireFormat::size<TwilightBehaviour>();
 	case CS_TYPE::STATE_RESET_COUNTER:
 		return sizeof(TYPIFY(STATE_RESET_COUNTER));
 	case CS_TYPE::STATE_SWITCH_STATE:

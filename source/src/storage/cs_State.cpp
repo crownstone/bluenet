@@ -150,7 +150,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 
 			// See if we need to check flash.
 			if (DefaultLocation(type) == PersistenceMode::RAM) {
-				LOGStateDebug("Load default: %s", TypeName(ram_data.type));
+				LOGd("Load default: %s", TypeName(ram_data.type));
 				ret_code = getDefaultValue(ram_data);
 				if (ret_code != ERR_SUCCESS) {
 					return ret_code;
@@ -171,7 +171,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 					}
 					case ERR_NOT_FOUND:
 					default: {
-						LOGStateDebug("Load default: %s", TypeName(ram_data.type));
+						LOGd("Load default: %s", TypeName(ram_data.type));
 						ret_code = getDefaultValue(ram_data);
 						if (ret_code != ERR_SUCCESS) {
 							return ret_code;
@@ -283,7 +283,7 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 		case PersistenceMode::RAM:
 			return removeFromRam(type, id);
 		case PersistenceMode::FLASH:
-			//remId(type, id)
+			// continue after this switch
 			break;
 		default:
 			LOGe("PM not implemented");

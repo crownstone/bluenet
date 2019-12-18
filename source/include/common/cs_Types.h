@@ -415,8 +415,8 @@ typedef void TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
-typedef SwitchBehaviour TYPIFY(STATE_BEHAVIOUR_RULE);
-typedef TwilightBehaviour TYPIFY(STATE_TWILIGHT_RULE);
+typedef void TYPIFY(STATE_BEHAVIOUR_RULE);
+typedef void TYPIFY(STATE_TWILIGHT_RULE);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
