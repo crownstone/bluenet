@@ -92,6 +92,12 @@ TimeOfDay Behaviour::until() const {
     return behaviourAppliesUntil; 
 }
 
+bool Behaviour::isValid(TimeOfDay currenttime){
+    return from() < until() // ensure proper midnight roll-over 
+        ? (from() <= currenttime && currenttime < until()) 
+        : (from() <= currenttime || currenttime < until());
+}
+
 void Behaviour::print() const {
     LOGd("Behaviour: type(%d) %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #%d",
         static_cast<uint8_t>(typ),

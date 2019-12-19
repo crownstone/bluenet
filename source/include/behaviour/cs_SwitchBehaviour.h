@@ -60,8 +60,6 @@ class SwitchBehaviour : public Behaviour{
      **/
     bool isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence);
 
-    bool isValid(TimeOfDay currenttime);
-
     // Presence description is cached in order to prevent
     // that the behaviour flickers when a user is on the border of two rooms.
     // (not there is a timeout in the presencehandler to check if the user hasn't disappeared,

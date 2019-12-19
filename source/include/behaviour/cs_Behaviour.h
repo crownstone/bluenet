@@ -56,6 +56,12 @@ class Behaviour {
     // which is defined by overriding this method.
     virtual Type getType() const { return Type::Undefined; }
 
+    /**
+     * Does the behaviour apply to the current situation?
+     * If from() == until() the behaviour isValid all day.
+     **/
+    bool isValid(TimeOfDay currenttime);
+    
     virtual bool requiresPresence() { return false; }
     virtual bool requiresAbsence() { return false; }
 

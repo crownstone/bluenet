@@ -66,12 +66,6 @@ bool SwitchBehaviour::isValid(TimeOfDay currenttime, PresenceStateDescription cu
     return isValid(currenttime) && isValid(currentpresence);
 }
 
-bool SwitchBehaviour::isValid(TimeOfDay currenttime){
-    return from() < until() // ensure proper midnight roll-over 
-        ? (from() <= currenttime && currenttime < until()) 
-        : (from() <= currenttime || currenttime < until());
-}
-
 bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence){
     if(_isValid(currentpresence)){
         prevIsValidTimeStamp = SystemTime::up();

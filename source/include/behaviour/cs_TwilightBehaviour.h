@@ -47,11 +47,4 @@ class TwilightBehaviour : public Behaviour {
 
     virtual Type getType() const override { return Type::Twilight; }
 
-    // =========== Semantics ===========
-
-    /**
-     * Does the behaviour apply to the current situation?
-     * If from() == until() the behaviour isValid all day.
-     **/
-    bool isValid(TimeOfDay currenttime);
 };
