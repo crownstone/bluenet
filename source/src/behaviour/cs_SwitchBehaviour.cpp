@@ -55,11 +55,11 @@ size_t SwitchBehaviour::serializedSize() const {
     return WireFormat::size<SwitchBehaviour>();
 }
 
-bool SwitchBehaviour::requiresPresence(TimeOfDay t) { 
-    return isValid(t) && presenceCondition.pred.requiresPresence();
+bool SwitchBehaviour::requiresPresence() { 
+    return presenceCondition.pred.requiresPresence();
 }
-bool SwitchBehaviour::requiresAbsence(TimeOfDay t) {
-    return isValid(t) && presenceCondition.pred.requiresAbsence();
+bool SwitchBehaviour::requiresAbsence() {
+    return presenceCondition.pred.requiresAbsence();
 }
 
 bool SwitchBehaviour::isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence){

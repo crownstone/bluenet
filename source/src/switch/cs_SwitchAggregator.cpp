@@ -89,7 +89,7 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
                 LOGSwitchAggregator("resetting overrideState");
                 overrideState = {};
         } 
-    } 
+    }
 
     aggregatedState = 
         overrideState ? resolveOverrideState() : 
@@ -100,7 +100,6 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
     if(aggregatedState){
         swSwitch->setDimmer(*aggregatedState);
     }
-
 }
 
 std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){

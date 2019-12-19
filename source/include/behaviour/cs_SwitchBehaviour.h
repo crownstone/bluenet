@@ -51,8 +51,8 @@ class SwitchBehaviour : public Behaviour{
 
     // =========== Semantics ===========
 
-    virtual bool requiresPresence(TimeOfDay t) override;
-    virtual bool requiresAbsence(TimeOfDay t) override;
+    virtual bool requiresPresence() override;
+    virtual bool requiresAbsence() override;
 
     /**
      * Does the behaviour apply to the current situation?
@@ -60,8 +60,6 @@ class SwitchBehaviour : public Behaviour{
      **/
     bool isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence);
 
-
-    private:
     bool isValid(TimeOfDay currenttime);
 
     // Presence description is cached in order to prevent
@@ -70,6 +68,9 @@ class SwitchBehaviour : public Behaviour{
     // but it tries to describe the location as accurately as possible. Thus, when a user is
     // detected in another room, the presence is immediately updated.)
     bool isValid(PresenceStateDescription currentpresence); // cached version
+    
+    private:
+
     bool _isValid(PresenceStateDescription currentpresence);  // uncached version
 
 

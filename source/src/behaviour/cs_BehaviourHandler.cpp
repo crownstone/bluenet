@@ -111,3 +111,23 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 std::optional<uint8_t> BehaviourHandler::getValue(){
     return previousIntendedState;
 }
+
+bool BehaviourHandler::requiresPresence(TimeOfDay t){
+    for (auto& b : BehaviourStore::getActiveBehaviours()){
+        if(b->isValid(t) && b->requiresPresence()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool BehaviourHandler::requiresAbsence(TimeOfDay t){
+    for (auto& b : BehaviourStore::getActiveBehaviours()){
+        if(b->isValid(t) && b->requiresAbsence()) {
+            return true;
+        }
+    }
+
+    return false;
+}

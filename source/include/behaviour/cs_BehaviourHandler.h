@@ -37,6 +37,9 @@ class BehaviourHandler : public EventListener {
 
     std::optional<uint8_t> getValue();
 
+    bool requiresPresence(TimeOfDay t);
+    bool requiresAbsence(TimeOfDay t);
+
     private:
 
     /**
