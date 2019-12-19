@@ -382,6 +382,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
 	if (isBusy(recordKey)) {
 		return ERR_BUSY;
 	}
+	LOGd("Remove key=%u file=%u", recordKey, fileId);
 	fds_record_desc_t recordDesc;
 	ret_code_t fdsRetCode = FDS_ERR_NOT_FOUND;
 
@@ -390,6 +391,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
 	initSearch();
 	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
 		fdsRetCode = fds_record_delete(&recordDesc);
+		LOGStorageDebug("fds_record_delete %u", fdsRetCode);
 		if (fdsRetCode == FDS_SUCCESS) {
 			setBusy(recordKey);
 		}
@@ -412,6 +414,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type) {
 	if (isBusy(recordKey)) {
 		return ERR_BUSY;
 	}
+	LOGd("Remove key=%u", recordKey);
 	fds_record_desc_t recordDesc;
 	ret_code_t fdsRetCode = FDS_ERR_NOT_FOUND;
 
@@ -420,6 +423,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type) {
 	initSearch();
 	while (fds_record_find_by_key(recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
 		fdsRetCode = fds_record_delete(&recordDesc);
+		LOGStorageDebug("fds_record_delete %u", fdsRetCode);
 		if (fdsRetCode == FDS_SUCCESS) {
 			setBusy(recordKey);
 		}
