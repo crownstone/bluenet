@@ -35,7 +35,8 @@ void BehaviourHandler::handleEvent(event_t& evt){
             break;
         }
         case CS_TYPE::CMD_BEHAVIOURHANDLER_SETTINGS:{
-            isActive =  evt.data[0] != 0;
+            isActive =  evt.getData()[0] != 0;
+            LOGBehaviourHandler("behaviourhandler settings isActive:%s", (isActive ? "true" : "false"));
             update();
         }
         default:{
@@ -47,8 +48,9 @@ void BehaviourHandler::handleEvent(event_t& evt){
 
 bool BehaviourHandler::update(){
     if (!isActive) {
+        bool result = previousIntendedState.has_value();
         previousIntendedState = std::nullopt;
-        return;
+        return result;
     }
 
     TimeOfDay time = SystemTime::now();
@@ -78,6 +80,10 @@ bool BehaviourHandler::update(){
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
        TimeOfDay currentTime, 
        PresenceStateDescription currentPresence){
+    if (!isActive) {
+        return {};
+    }
+
     std::optional<uint8_t> intendedValue = {};
     
     for (auto& b : BehaviourStore::getActiveBehaviours()){

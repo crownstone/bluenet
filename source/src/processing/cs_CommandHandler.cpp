@@ -142,6 +142,8 @@ command_result_t CommandHandler::handleCommand(
 		return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR,commandData,resultData);
 	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
 		return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR_INDICES,commandData,resultData);
+	case CTRL_CMD_BEHAVIOURHANDLER_SETTINGS:
+		return dispatchEventForCommand(CS_TYPE::CMD_BEHAVIOURHANDLER_SETTINGS,commandData,resultData);
 
 	case CTRL_CMD_UNKNOWN:
 		return command_result_t(ERR_UNKNOWN_TYPE);
@@ -648,6 +650,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CTRL_CMD_REMOVE_BEHAVIOUR:
 	case CTRL_CMD_GET_BEHAVIOUR:
 	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
+	case CTRL_CMD_BEHAVIOURHANDLER_SETTINGS:
 		return MEMBER;
 
 	case CTRL_CMD_GOTO_DFU:

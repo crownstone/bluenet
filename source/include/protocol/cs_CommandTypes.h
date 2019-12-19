@@ -42,6 +42,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_REMOVE_BEHAVIOUR            = 62,
 	CTRL_CMD_GET_BEHAVIOUR               = 63,
 	CTRL_CMD_GET_BEHAVIOUR_INDICES       = 64,
+	CTRL_CMD_BEHAVIOURHANDLER_SETTINGS   = 65,
 
 	CTRL_CMD_UNKNOWN                     = 0xFFFF
 };

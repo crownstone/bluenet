@@ -43,11 +43,13 @@ class BehaviourHandler : public EventListener {
      * Given current time/presence, query the behaviourstore and check
      * if there any valid ones. 
      * 
-     * Returns an empty optional when no valid behaviour is found, or 
+     * Returns an empty optional when this BehaviourHandler is inactive, or 
      * more than one valid behaviours contradicted eachother.
      * Returns a non-empty optional if a valid behaviour is found or
      * multiple agreeing behaviours have been found.
      * In this case its value contains the desired state value.
+     * When no behaviours are valid at given time/presence the intended
+     * value is 0. (house is 'off' by default)
      */
     std::optional<uint8_t> computeIntendedState(
         TimeOfDay currenttime, 
