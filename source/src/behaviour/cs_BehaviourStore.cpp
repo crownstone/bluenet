@@ -406,9 +406,17 @@ void BehaviourStore::init() {
 		size16_t data_size = WireFormat::size<SwitchBehaviour>();
 		uint8_t data_array[data_size];
 		for (auto iter: *ids) {
+			if (iter >= MaxBehaviours) {
+				LOGw("Invalid ind: %u", iter);
+				continue;
+			}
 			cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, iter, data_array, data_size);
 			retCode = State::getInstance().get(data);
 			if (retCode == ERR_SUCCESS) {
+				if (activeBehaviours[iter] != nullptr) {
+					LOGw("Overwrite ind=%u", iter);
+					delete activeBehaviours[iter];
+				}
 				activeBehaviours[iter] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(data_array, data_size));
 				LOGi("Loaded behaviour at ind=%u:", iter);
 				activeBehaviours[iter]->print();
@@ -421,9 +429,17 @@ void BehaviourStore::init() {
 		size16_t data_size = WireFormat::size<TwilightBehaviour>();
 		uint8_t data_array[data_size];
 		for (auto iter: *ids) {
+			if (iter >= MaxBehaviours) {
+				LOGw("Invalid ind: %u", iter);
+				continue;
+			}
 			cs_state_data_t data (CS_TYPE::STATE_TWILIGHT_RULE, iter, data_array, data_size);
 			retCode = State::getInstance().get(data);
 			if (retCode == ERR_SUCCESS) {
+				if (activeBehaviours[iter] != nullptr) {
+					LOGw("Overwrite ind=%u", iter);
+					delete activeBehaviours[iter];
+				}
 				activeBehaviours[iter] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(data_array, data_size));
 				LOGi("Loaded behaviour at ind=%u:", iter);
 				activeBehaviours[iter]->print();
