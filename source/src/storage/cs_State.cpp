@@ -42,7 +42,6 @@ State::~State() {
 	for (auto it = _ram_data_register.begin(); it < _ram_data_register.end(); it++) {
 		cs_state_data_t* ram_data = &(*it);
 		free(ram_data->value);
-		free(ram_data);
 	}
 	for (auto it = _idsCache.begin(); it < _idsCache.end(); it++) {
 		delete it->ids;
@@ -358,16 +357,13 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 }
 
 cs_state_data_t & State::addToRam(const CS_TYPE & type, cs_state_id_t id, size16_t size) {
-	cs_state_data_t & data = *(cs_state_data_t*)malloc(sizeof(cs_state_data_t));
-	data.type = type;
-	data.id = id;
-	data.size = size;
+	cs_state_data_t data(type, id, nullptr, size);
 	allocate(data);
 	_ram_data_register.push_back(data);
 	LOGStateDebug("Added type=%u id=%u size=%u val=%p", data.type, data.id, data.size, data.value);
 	LOGStateDebug("RAM index now of size %i", _ram_data_register.size());
 	addId(type, id);
-	return data;
+	return _ram_data_register.back();
 }
 
 cs_ret_code_t State::removeFromRam(const CS_TYPE & type, cs_state_id_t id) {
@@ -375,11 +371,9 @@ cs_ret_code_t State::removeFromRam(const CS_TYPE & type, cs_state_id_t id) {
 	size16_t index_in_ram;
 	cs_ret_code_t ret_code = findInRam(type, id, index_in_ram);
 	if (ret_code == ERR_SUCCESS) {
-		LOGStateDebug("Remove from RAM");
 		cs_state_data_t* ram_data = &(_ram_data_register[index_in_ram]);
 		free(ram_data->value);
 		_ram_data_register.erase(_ram_data_register.begin() + index_in_ram);
-		free(ram_data);
 	}
 	remId(type, id);
 	return ERR_SUCCESS;
@@ -447,6 +441,7 @@ cs_ret_code_t State::removeFromFlash(const CS_TYPE & type, const cs_state_id_t i
 	if (_performingFactoryReset) {
 		return ERR_WRONG_STATE;
 	}
+	LOGd("removeFromFlash type=%u id=%u", to_underlying_type(type), id);
 	cs_ret_code_t ret_code = _storage->remove(type, id);
 	switch(ret_code) {
 	case ERR_SUCCESS:
