@@ -285,6 +285,10 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			commandType = CTRL_CMD_SET_SUN_TIME_ADVERTISEMENT;
 			break;
 		}
+		case 4: {
+			commandType = CTRL_CMD_BEHAVIOURHANDLER_SETTINGS;
+			break;
+		}
 	}
 
 	if (commandType == CTRL_CMD_UNKNOWN) {

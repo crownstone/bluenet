@@ -207,6 +207,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_NOT_AVAILABLE;
 	case CS_TYPE::STATE_TWILIGHT_RULE:
 		return ERR_NOT_AVAILABLE;
+	case CS_TYPE::CMD_BEHAVIOURHANDLER_SETTINGS:
+		static_cast<TYPIFY(CMD_BEHAVIOURHANDLER_SETTINGS)*>(data.value)[0] = 0x01; // 'isActive' by default 
+		return ERR_SUCCESS;
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
@@ -422,6 +425,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH:
 	case CS_TYPE::CMD_SET_TIME:
 	case CS_TYPE::CMD_FACTORY_RESET:
+	case CS_TYPE::CMD_BEHAVIOURHANDLER_SETTINGS:
 	case CS_TYPE::EVT_SAVE_BEHAVIOUR:
 	case CS_TYPE::EVT_REPLACE_BEHAVIOUR:
 	case CS_TYPE::EVT_REMOVE_BEHAVIOUR:
