@@ -248,12 +248,14 @@ void fds_evt_handler_sched(void * p_event_data, uint16_t event_size) {
  */
 void fds_evt_handler(fds_evt_t const * const p_fds_evt) {
 	LOGInterruptLevel("fds evt int=%u", BLEutil::getInterruptLevel());
-#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
+	// For some reason, we already got fds event init, before app_sched_execute() was called.
+	// So for now, just always put fds events on the app scheduler.
+//#if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
 	uint32_t retVal = app_sched_event_put(p_fds_evt, sizeof(*p_fds_evt), fds_evt_handler_sched);
 	APP_ERROR_CHECK(retVal);
-#else
-	fds_evt_handler_decoupled(p_fds_evt, sizeof(*p_fds_evt));
-#endif
+//#else
+//	fds_evt_handler_decoupled(p_fds_evt, sizeof(*p_fds_evt));
+//#endif
 }
 
 #ifdef __cplusplus

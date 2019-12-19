@@ -183,7 +183,7 @@ void Crownstone::init(uint16_t step) {
 /**
  * This must be called after the SoftDevice has started. The order in which things should be initialized is as follows:
  *   1. Stack.               Starts up the softdevice. It controls a lot of devices, so need to set it early.
- *   2. Timer.
+ *   2. Timer.               Also initializes the app scheduler.
  *   3. Storage.             Definitely after the stack has been initialized.
  *   4. State.               Storage should be initialized here.
  */
