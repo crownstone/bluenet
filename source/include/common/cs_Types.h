@@ -237,6 +237,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_BEHAVIOURSTORE_MUTATION,				// Sent by BehaviourStore for other components to react _after_ a change to the behaviourstore occured.
 	EVT_PRESENCE_MUTATION,						// when a change in presence occurs this event fires.
 	EVT_BEHAVIOUR_SWITCH_STATE,					// when behaviour desires a stateswitch this event is fired.
+	CMD_BEHAVIOURHANDLER_SETTINGS,				// a user may change settings of behaviourhandler (for example to make the home dumb again).
 	CMD_SET_RELAY,								// when a user requests to set the relay to a specific state
 	CMD_SET_DIMMER,								// when a user requests to set the dimmer to a specific state
 	// ------------------------
@@ -411,6 +412,7 @@ typedef uint8_t TYPIFY(EVT_GET_BEHAVIOUR); // index
 typedef void TYPIFY(EVT_GET_BEHAVIOUR_INDICES);
 typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef uint8_t TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
+typedef uint8_t TYPIFY(CMD_BEHAVIOURHANDLER_SETTINGS);
 typedef void TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.

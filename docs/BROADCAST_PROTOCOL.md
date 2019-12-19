@@ -145,6 +145,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | B | S
 1 | Multi switch | [Multi switch short list packet](#multi_switch_short_list_packet) | List of switch commands | x | x | x |
 2 | Set time | [Set time packet](#set_time_packet) | Current time. | x | x | |
 3 | Sun time | [Sun time packet](#sun_time_packet) | Sun rise and set times. | x | x | |
+4 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Currently only supports turning smart behaviour on/off | x | x | | 
 
 
 <a name="multi_switch_short_list_packet"></a>
@@ -190,3 +191,13 @@ Type | Name | Length | Description
 uint 24 | Sunrise | 3 | Seconds after midnight that the sun rises.
 uint 24 | Sunset | 3 | Seconds after midnight that the sun sets.
 uint 8[] | Reserved | 5 | Reserved for future use, should be 0 for now.
+
+<a name="behaviour_settings_packet"></a>
+##### Behaviour settings
+
+![Sun time packet](../docs/diagrams/behaviour_settings_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Mode | 1 | <ol start="0"><li>Dumb Home</li><li>Smart Home</li></ol>
+uint 8[] | Reserved | 10 | Reserved for future use, should be 0 for now.
