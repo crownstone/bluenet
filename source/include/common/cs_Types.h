@@ -273,7 +273,7 @@ static const cs_file_id_t FILE_DO_NOT_USE     = 0x0000;
 static const cs_file_id_t FILE_KEEP_FOREVER   = 0x0001;
 static const cs_file_id_t FILE_CONFIGURATION  = 0x0003;
 
-struct cs_type_and_id_t {
+struct __attribute__((packed)) cs_type_and_id_t {
 	CS_TYPE type;
 	cs_state_id_t id;
 };
