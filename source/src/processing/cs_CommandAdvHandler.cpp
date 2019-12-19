@@ -14,8 +14,8 @@
 #include "storage/cs_State.h"
 
 // Defines to enable extra debug logs.
-//#define COMMAND_ADV_DEBUG
-//#define COMMAND_ADV_VERBOSE
+// #define COMMAND_ADV_DEBUG
+// #define COMMAND_ADV_VERBOSE
 
 #ifdef COMMAND_ADV_DEBUG
 #define LOGCommandAdvDebug LOGd
@@ -32,6 +32,8 @@
 #if CMD_ADV_CLAIM_TIME_MS / TICK_INTERVAL_MS > 250
 #error "Timeout counter will overflow."
 #endif
+
+constexpr int8_t RSSI_LOG_THRESHOLD = -40;
 
 CommandAdvHandler::CommandAdvHandler() {
 }
@@ -74,15 +76,17 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 		return;
 	}
 
+	if(scannedDevice->rssi > RSSI_LOG_THRESHOLD) {
 #ifdef COMMAND_ADV_VERBOSE
-	LOGCommandAdvVerbose("rssi=%i", scannedDevice->rssi);
-	_log(SERIAL_DEBUG, "16bit services: ");
-	BLEutil::printArray(services16bit.data, services16bit.len);
+		LOGCommandAdvVerbose("rssi=%i", scannedDevice->rssi);
+		_log(SERIAL_DEBUG, "16bit services: ");
+		BLEutil::printArray(services16bit.data, services16bit.len);
 #endif
 #ifdef COMMAND_ADV_VERBOSE
-	_log(SERIAL_DEBUG, "128bit services: ");
-	BLEutil::printArray(services128bit.data, services128bit.len); // Received as uint128, so bytes are reversed.
+		_log(SERIAL_DEBUG, "128bit services: ");
+		BLEutil::printArray(services128bit.data, services128bit.len); // Received as uint128, so bytes are reversed.
 #endif
+	}
 
 	if (services16bit.len < (CMD_ADV_NUM_SERVICES_16BIT * sizeof(uint16_t))) {
 		return;
@@ -130,13 +134,13 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	}
 	for (int i=0; i < CMD_ADV_NUM_SERVICES_16BIT; ++i) {
 		if (!foundSequences[i]) {
-			LOGCommandAdvVerbose("Missing UUID with sequence %i", i)
+			if(scannedDevice->rssi > RSSI_LOG_THRESHOLD) { LOGCommandAdvVerbose("Missing UUID with sequence %i", i);}
 			return;
 		}
 	}
 
 	if (header.sphereId != _sphereId) {
-		LOGCommandAdvVerbose("Wrong sphereId got=%u stored=%u", header.sphereId, _sphereId);
+		if(scannedDevice->rssi > RSSI_LOG_THRESHOLD) {LOGCommandAdvVerbose("Wrong sphereId got=%u stored=%u", header.sphereId, _sphereId);}
 		return;
 	}
 
@@ -256,20 +260,31 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		return false;
 	}
 
-	LOGCommandAdvVerbose("RC5: locationId=%u profileId=%u rssiOffset=%u flags=%u count=%u (not %u)",
-			(decryptedPayloadRC5[1] >> (16-6)) & 0x3F,
-			(decryptedPayloadRC5[1] >> (16-6-3)) & 0x07,
-			(decryptedPayloadRC5[1] >> (16-6-3-4)) & 0x0F,
-			(decryptedPayloadRC5[1] >> (16-6-3-4-3)) & 0x07,
-			(decryptedPayloadRC5[0] >> 8) & 0xFF,
-			(decryptedPayloadRC5[0] >> 0) & 0xFF
-			);
+	if( ((decryptedPayloadRC5[1] >> (16-6-3-4)) & 0x0F) > RSSI_LOG_THRESHOLD){ 
+		LOGCommandAdvVerbose("RC5: locationId=%u profileId=%u rssiOffset=%u flags=%u count=%u (not %u)",
+				(decryptedPayloadRC5[1] >> (16-6)) & 0x3F,
+				(decryptedPayloadRC5[1] >> (16-6-3)) & 0x07,
+				(decryptedPayloadRC5[1] >> (16-6-3-4)) & 0x0F,
+				(decryptedPayloadRC5[1] >> (16-6-3-4-3)) & 0x07,
+				(decryptedPayloadRC5[0] >> 8) & 0xFF,
+				(decryptedPayloadRC5[0] >> 0) & 0xFF
+				);
+	}
 
 	CommandHandlerTypes commandType = CTRL_CMD_UNKNOWN;
 	switch (type) {
-	case 1:
-		commandType = CTRL_CMD_MULTI_SWITCH;
-		break;
+		case 1: {
+			commandType = CTRL_CMD_MULTI_SWITCH;
+			break;
+		}
+		case 2: {
+			commandType = CTRL_CMD_SET_TIME_ADVERTISEMENT;
+			break;
+		}
+		case 3: {
+			commandType = CTRL_CMD_SET_SUN_TIME_ADVERTISEMENT;
+			break;
+		}
 	}
 
 	if (commandType == CTRL_CMD_UNKNOWN) {
