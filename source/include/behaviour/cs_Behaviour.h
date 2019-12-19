@@ -56,6 +56,9 @@ class Behaviour {
     // which is defined by overriding this method.
     virtual Type getType() const { return Type::Undefined; }
 
+    virtual bool requiresPresence(TimeOfDay t) { return false; }
+    virtual bool requiresAbsence(TimeOfDay t) { return false; }
+
     // =========== Getters ===========
 
     /**

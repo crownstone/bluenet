@@ -35,6 +35,10 @@ class PresencePredicate{
 
     PresencePredicate(SerializedDataType arr);
 
+    bool requiresPresence() const;
+    bool requiresAbsence() const;
+    
+
     SerializedDataType serialize() const;
     
     // parameter bit i is 1 whenever there is presence detected in the

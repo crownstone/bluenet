@@ -38,6 +38,14 @@ bool PresencePredicate::operator()(
     return false;
 }
 
+bool PresencePredicate::requiresPresence() const { 
+    return cond == Condition::AnyoneAnyRoom || cond == Condition::AnyoneInSphere; 
+}
+
+bool PresencePredicate::requiresAbsence() const { 
+    return cond == Condition::NooneAnyRoom || cond ==Condition::NooneInSphere; 
+}
+
 PresencePredicate::SerializedDataType PresencePredicate::serialize() const {
     SerializedDataType result;
     std::copy_n(std::begin(WireFormat::serialize(static_cast<uint8_t>(cond))),  1, std::begin(result) + 0);

@@ -51,11 +51,15 @@ class SwitchBehaviour : public Behaviour{
 
     // =========== Semantics ===========
 
+    virtual bool requiresPresence(TimeOfDay t) override;
+    virtual bool requiresAbsence(TimeOfDay t) override;
+
     /**
      * Does the behaviour apply to the current situation?
      * If from() == until() the behaviour isValid all day.
      **/
     bool isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence);
+
 
     private:
     bool isValid(TimeOfDay currenttime);
