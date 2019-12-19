@@ -69,7 +69,7 @@ private:
 
 	const boards_config_t* _boardConfig;
 
-	static const constexpr uint32_t SunTimeThrottlePeriod_s = 5;//60*60*24;
+	static const constexpr uint32_t SunTimeThrottlePeriod_s = 60*60*24;
 
 	EncryptionAccessLevel getRequiredAccessLevel(const CommandHandlerTypes type);
 	bool allowedAsMeshCommand(const CommandHandlerTypes type);
