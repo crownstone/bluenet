@@ -148,7 +148,8 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt){
 }
 
 void BehaviourStore::handleReplaceBehaviour(event_t& evt){
-	if(evt.size < 2){
+	uint8_t indexSize = sizeof(uint8_t);
+	if (evt.size < indexSize) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH " %d", evt.size);
 		evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
         return;
@@ -157,14 +158,14 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
     uint8_t* dat = static_cast<uint8_t*>(evt.data);
 	
     uint8_t index = dat[0];
-	SwitchBehaviour::Type type = static_cast<SwitchBehaviour::Type>(dat[1]);
+	SwitchBehaviour::Type type = static_cast<SwitchBehaviour::Type>(dat[indexSize]);
 
 	switch(type){
 		case SwitchBehaviour::Type::Switch:{
 			// check size
-			if(evt.size -1 != WireFormat::size<SwitchBehaviour>()){
+			if(evt.size - indexSize != WireFormat::size<SwitchBehaviour>()){
 				LOGe("replace switchbehaviour received wrong size event (%d != %d)",
-                    evt.size, 1 + WireFormat::size<SwitchBehaviour>());
+                    evt.size, indexSize + WireFormat::size<SwitchBehaviour>());
 				evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
                 break;
 			}
@@ -183,19 +184,13 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
             }
 
             // check previous data
-            if(activeBehaviours[index] != nullptr){
-                LOGd("deleting previous occupant of index %d", index);
-                delete activeBehaviours[index];
-                activeBehaviours[index] = nullptr;
-            }
+            removeBehaviour(index);
 
-			// TODO @Arend, here is +1 / - 1 used... Are you sure
             LOGd("Allocating new SwitchBehaviour");
-			activeBehaviours[index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(evt.getData() + 1, evt.size - 1));
+			activeBehaviours[index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
             activeBehaviours[index]->print();
 				
-			// TODO @Arend, also adjust here...
-			cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, index, evt.getData() + 1, evt.size - 1);
+			cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, index, evt.getData() + indexSize, evt.size - indexSize);
 			State::getInstance().set(data);
             
             evt.result.returnCode = ERR_SUCCESS;
@@ -203,9 +198,9 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 		}
 		case SwitchBehaviour::Type::Twilight:{
             // check size
-			if(evt.size -1 != WireFormat::size<TwilightBehaviour>()){
+			if(evt.size - indexSize != WireFormat::size<TwilightBehaviour>()){
 				LOGe("replace twilightbehaviour received wrong size event (%d != %d)", 
-                    evt.size, 1 + WireFormat::size<TwilightBehaviour>());
+                    evt.size, indexSize + WireFormat::size<TwilightBehaviour>());
 				evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
                 break;
 			}
@@ -217,20 +212,13 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
             } 
             
             // check previous data
-            if(activeBehaviours[index] != nullptr){
-                LOGd("deleting previous occupant of index %d", index);
-                delete activeBehaviours[index];
-                activeBehaviours[index] = nullptr;
-
-            }
+            removeBehaviour(index);
 
             LOGd("Allocating new TwilightBehaviour");
-			// TODO @Arend, also adjust here...
-            activeBehaviours[index] = new TwilightBehaviour( WireFormat::deserialize<TwilightBehaviour>(evt.getData() + 1, evt.size - 1));
+            activeBehaviours[index] = new TwilightBehaviour( WireFormat::deserialize<TwilightBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
             activeBehaviours[index]->print();
 			
-			// TODO @Arend, also adjust here...
-			cs_state_data_t data (CS_TYPE::STATE_BEHAVIOUR_RULE, index, evt.getData() + 1, evt.size - 1);
+			cs_state_data_t data (CS_TYPE::STATE_TWILIGHT_RULE, index, evt.getData() + indexSize, evt.size - indexSize);
 			State::getInstance().set(data);
             
 			evt.result.returnCode = ERR_SUCCESS;
@@ -260,8 +248,6 @@ void BehaviourStore::handleRemoveBehaviour(event_t& evt){
     LOGd("remove behaviour event %d", index);
     
     evt.result.returnCode = removeBehaviour(index);
-			
-	State::getInstance().remove(CS_TYPE::STATE_BEHAVIOUR_RULE, index);
     
     if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
         LOGd("ERR_BUFFER_TOO_SMALL");
@@ -355,21 +341,29 @@ void BehaviourStore::dispatchBehaviourMutationEvent(){
 // ==================== public functions ====================
 
 ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index){
-    if(index >= MaxBehaviours){
+    if (index >= MaxBehaviours) {
         return ERR_WRONG_PARAMETER;
     } 
-    
-    if (activeBehaviours[index] == nullptr){
-        LOGw("ERR_NOT_FOUND tried removing empty slot in behaviourstore");
+    if (activeBehaviours[index] == nullptr) {
+        LOGi("Already removed");
         return ERR_SUCCESS;
     }
-    
-    if(activeBehaviours[index] != nullptr){
-        LOGd("deleting behaviour");
-        delete activeBehaviours[index];
-        activeBehaviours[index] = nullptr;
-    }
+    auto type = activeBehaviours[index]->getType();
 
+	LOGd("deleting behaviour");
+	delete activeBehaviours[index];
+	activeBehaviours[index] = nullptr;
+
+	switch (type) {
+	case Behaviour::Type::Switch:
+		State::getInstance().remove(CS_TYPE::STATE_BEHAVIOUR_RULE, index);
+		break;
+	case Behaviour::Type::Twilight:
+		State::getInstance().remove(CS_TYPE::STATE_TWILIGHT_RULE, index);
+		break;
+	default:
+		LOGw("Unknown type: %u", type);
+	}
     return ERR_SUCCESS;
 }
 
