@@ -589,6 +589,7 @@ cs_ret_code_t State::addId(const CS_TYPE & type, cs_state_id_t id) {
 					return ERR_SUCCESS;
 				}
 			}
+			LOGd("Added id=%u to type=%u", id, to_underlying_type(type));
 			typeIter->ids->push_back(id);
 			break;
 		}
@@ -602,6 +603,7 @@ cs_ret_code_t State::remId(const CS_TYPE & type, cs_state_id_t id) {
 			auto ids = typeIter->ids;
 			for (auto idIter = ids->begin(); idIter < ids->end(); idIter++) {
 				if (*idIter == id) {
+					LOGd("Removed id=%u to type=%u", id, to_underlying_type(type));
 					ids->erase(idIter);
 					return ERR_SUCCESS;
 				}
