@@ -62,11 +62,24 @@ class BehaviourStore : public EventListener {
      */
     // ErrorCodesGeneral saveBehaviour(SwitchBehaviour b, uint8_t index);
 
+	/**
+	 * Add behaviour to a new index.
+	 *
+	 * Does not check if similar behaviour already exists.
+	 *
+	 * @param[in] buf        Buffer with the behaviour.
+	 * @param[in] bufSize    Size of the buffer.
+	 * @param[out] index     Index at which the behaviour was added, only set on success.
+	 * @return error code.
+	 */
+    ErrorCodesGeneral addBehaviour(uint8_t* buf, cs_buffer_size_t bufSize, uint8_t & index);
+
     /**
      * Remove the behaviour at [index]. If [index] is out of bounds,
      * or no behaviour exists at [index], false is returned. Else, true.
      */
     ErrorCodesGeneral removeBehaviour(uint8_t index);
+
 
 
     static uint32_t masterHash();

@@ -51,10 +51,10 @@ std::vector<uint8_t> get();
 
 ### Behaviour Commands
 
-<a name="save_behaviour_packet"></a>
-#### Save Behaviour
+<a name="add_behaviour_packet"></a>
+#### Add Behaviour
 
-When a Save Behaviour packet is received by the Crownstone, it will try to store the Behaviour represented by `Data` 
+When a Add Behaviour packet is received by the Crownstone, it will try to store the Behaviour represented by `Data` 
 to its persistent memory. Upon success, it returns the `Index` (uint8) that can be used to refer to this behaviour. 
 
 <details open>
