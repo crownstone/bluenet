@@ -8,6 +8,7 @@
 #include <switch/cs_SwitchAggregator.h>
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
+#include <presence/cs_PresenceHandler.h>
 #include <util/cs_Utils.h>
 
 #include <optional>
@@ -180,6 +181,34 @@ bool SwitchAggregator::handleTimingEvents(event_t& evt){
     }
 
     return true;
+}
+
+bool SwitchAggregator::handlePresenceEvents(event_t& evt){
+    if(evt.type == CS_TYPE::EVT_PRESENCE_MUTATION){
+        PresenceHandler::MutationType mutationtype = *reinterpret_cast<PresenceHandler::MutationType*>(evt.data);
+
+        switch(mutationtype){
+            case PresenceHandler::MutationType::LastUserExitSphere : {
+                if(overrideState){
+                    if (behaviourHandler.requiresPresence(SystemTime::now())) {
+                        // if there exists a behaviour which is active at given time and 
+                        //      	and it has a non-negated presence clause (that may not be satisfied)
+                        //      		clear override
+                        LOGSwitchAggregator("clearing override state because last user exited sphere");
+                        overrideState = {};
+                    }
+                }
+  
+                break;
+            }
+            default: 
+                break;
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 bool SwitchAggregator::updateBehaviourHandlers(){

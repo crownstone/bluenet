@@ -13,7 +13,7 @@
 
 #include <drivers/cs_Serial.h>
 
-#define LOGPresenceHandler(...) LOGnone(__VA_ARGS__)
+#define LOGPresenceHandler LOGd
 
 std::list<PresenceHandler::PresenceRecord> PresenceHandler::WhenWhoWhere;
 
@@ -69,52 +69,88 @@ void PresenceHandler::handleEvent(event_t& evt){
         return;
     }
 
+    MutationType mt = handleProfileLocationAdministration(profile,location);
+
+    LOGd("MutationEvent: %d",static_cast<uint8_t>(mt));
+    if(mt != MutationType::NothingChanged){
+        triggerPresenseMutation(mt);
+    }
+
+    propagateMeshMessage(profile,location);
+}
+
+PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministration(uint8_t profile, uint8_t location){
+
+    // TODO inputvalidation
+    auto prevdescription = getCurrentPresenceDescription();
+    LOGd("prev description:");
+    print();
+
+    if(profile == 0xff && location == 0xff){
+        LOGw("DEBUG: clear presence record data");
+        
+        if(prevdescription.value_or(0) != 0){
+            // sphere exit
+            WhenWhoWhere.clear();
+            return MutationType::LastUserExitSphere;
+        }
+
+        return MutationType::NothingChanged;
+    }
+
+    uint32_t now = SystemTime::up();
+    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
+    
+    // purge whowhenwhere of old entries and add a new entry
     if(WhenWhoWhere.size() >= max_records){
         WhenWhoWhere.pop_back();
     }
 
-    // TODO inputvalidation
+    WhenWhoWhere.remove_if( 
+        [&] (PresenceRecord www){ 
+            if(!valid_time_interval.ClosureContains(www.when)){
+                LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated: %d not contained in [%d %d]", 
+                    www.who,www.when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
+                return true;
+            }
+            if(www.who == profile){
+                LOGPresenceHandler("erasing old presence_record for user id %d because of new entry", www.who);
+                return true;
+            }
+            return false;
+        } 
+    );
 
-    uint32_t now = SystemTime::up();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
+    WhenWhoWhere.push_front( {now, profile, location} );
 
-    if(profile == 0xff && location == 0xff){
-        LOGw("DEBUG: removing presence record data");
-        WhenWhoWhere.clear();
-    } else {        
-        WhenWhoWhere.remove_if( 
-            [&] (PresenceRecord www){ 
-                if(!valid_time_interval.ClosureContains(www.when)){
-                    LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated: %d not contained in [%d %d]", 
-                        www.who,www.when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
-                    return true;
-                }
-                if(www.who == profile){
-                    LOGPresenceHandler("erasing old presence_record for user id %d because of new entry", www.who);
-                    return true;
-                }
-                return false;
-            } 
-        );
-        WhenWhoWhere.push_front( {now, profile, location} );
-    }
-
-    // TODO Anne @Arend: should we not bail out when profileId == 0xff, why proceed with presence mutation event?
-    // TODO(9-12-2019, Arend) check if state changed
+    auto nextdescription = getCurrentPresenceDescription();
+    LOGd("next description:");
     print();
 
-    event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,nullptr,0);
-    presence_event.dispatch();
+    if(prevdescription == nextdescription){
+        return MutationType::NothingChanged; // neither has_value or value()'s eq.
+    }
+    if(prevdescription.has_value() && nextdescription.has_value()){
+        // values unequal so can distinguish on == 0 of a single value here
+        if(*prevdescription == 0){
+            return MutationType::FirstUserEnterSphere;
+        }
+        if(*nextdescription == 0){
+            return MutationType::LastUserExitSphere;
+        }
+        // both non-zero, non-trivial change happened.
+        return MutationType::OccupiedRoomsMaskChanged;
+    }
+    if(nextdescription.has_value()){
+        return MutationType::Online;
+    }
+    if(prevdescription.has_value()){
+        return MutationType::Offline;
+    }
 
-    TYPIFY(EVT_PROFILE_LOCATION) profile_location;
-    profile_location.profile = profile;
-    profile_location.location = location;
-    profile_location.stone_id = _ownId;
-
-    event_t profile_location_event(CS_TYPE::EVT_PROFILE_LOCATION, &profile_location, sizeof(profile_location));
-    profile_location_event.dispatch();
-
-    // TODO: extract handling into method and clean up.
+    // can't reach here but that's too difficult for the compiler to conclude.
+    LOGw("unhandled presence handler description");
+    return MutationType::NothingChanged;
 }
 
 void PresenceHandler::removeOldRecords(){
@@ -132,6 +168,21 @@ void PresenceHandler::removeOldRecords(){
             return false;
         }
     );
+}
+
+void PresenceHandler::triggerPresenseMutation(MutationType mutationtype){
+    event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,&mutationtype,sizeof(mutationtype));
+    presence_event.dispatch();
+}
+
+void PresenceHandler::propagateMeshMessage(uint8_t profile, uint8_t location){
+    TYPIFY(EVT_PROFILE_LOCATION) profile_location;
+    profile_location.profile = profile;
+    profile_location.location = location;
+    profile_location.stone_id = _ownId;
+
+    event_t profile_location_event(CS_TYPE::EVT_PROFILE_LOCATION, &profile_location, sizeof(profile_location));
+    profile_location_event.dispatch();
 }
 
 std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription(){

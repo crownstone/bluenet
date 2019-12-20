@@ -113,6 +113,14 @@ class SwitchAggregator : public EventListener {
     bool handleTimingEvents(event_t & evt);
 
     /**
+     * EVT_PRESENCE_MUTATION
+     * 
+     * returns true when the event should be considered 'consumed'. 
+     * (which is when evt is of one of these types.)
+     */
+    bool handlePresenceEvents(event_t& evt);
+
+    /**
      * handles CMD_SWITCH_LOCKED and CMD_DIMMING_ALLOWED operations.
      * 
      * returns true when the event should be considered 'consumed'. 

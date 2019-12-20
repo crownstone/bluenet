@@ -22,6 +22,8 @@
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
 
+// #include <presence/cs_PresenceHandler.h>
+
 enum TypeBases {
 	State_Base   = 0x000,
 	General_Base = 0x100, // Configuration and state types are assumed to fit in a uint8_t, so lower than 256.
@@ -413,7 +415,7 @@ typedef void TYPIFY(EVT_GET_BEHAVIOUR_INDICES);
 typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef uint8_t TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
 typedef uint8_t TYPIFY(CMD_BEHAVIOURHANDLER_SETTINGS);
-typedef void TYPIFY(EVT_PRESENCE_MUTATION);
+typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
