@@ -86,5 +86,5 @@ class SwitchBehaviour : public Behaviour{
     // constants
     // after this amount of seconds an invalid presence condition will result in
     // the behaviour being invalidated.
-    static constexpr uint32_t PresenceIsValidTimeOut_s = 5;// DEBUG! should be 5*60;
+    static constexpr uint32_t PresenceIsValidTimeOut_s = 5*60;
 };
