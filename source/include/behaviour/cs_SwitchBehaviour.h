@@ -40,16 +40,19 @@ class SwitchBehaviour : public Behaviour{
       );
 
     SwitchBehaviour(SerializedDataType arr);
-    SerializedDataType serialize() const;
+    SerializedDataType serialize();
 
-    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) const override;
+    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) override;
     virtual size_t serializedSize() const override;
 
     virtual Type getType() const override { return Type::Switch; }
 
-    void print() const;
+    void print();
 
     // =========== Semantics ===========
+
+    virtual bool requiresPresence() override;
+    virtual bool requiresAbsence() override;
 
     /**
      * Does the behaviour apply to the current situation?
@@ -57,15 +60,20 @@ class SwitchBehaviour : public Behaviour{
      **/
     bool isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence);
 
-    private:
-    bool isValid(TimeOfDay currenttime);
-
     // Presence description is cached in order to prevent
     // that the behaviour flickers when a user is on the border of two rooms.
     // (not there is a timeout in the presencehandler to check if the user hasn't disappeared,
     // but it tries to describe the location as accurately as possible. Thus, when a user is
     // detected in another room, the presence is immediately updated.)
     bool isValid(PresenceStateDescription currentpresence); // cached version
+
+    // Because of the definition of isValid(PresenceStateDescription) in this class
+    // the base class function with the same name is shadowed. This using statement
+    // reintroduces the function name in this class's scope.
+    using Behaviour::isValid;
+    
+    private:
+
     bool _isValid(PresenceStateDescription currentpresence);  // uncached version
 
 
@@ -78,5 +86,5 @@ class SwitchBehaviour : public Behaviour{
     // constants
     // after this amount of seconds an invalid presence condition will result in
     // the behaviour being invalidated.
-    static constexpr uint32_t PresenceIsValidTimeOut_s = 5*60;
+    static constexpr uint32_t PresenceIsValidTimeOut_s = 5;// DEBUG! should be 5*60;
 };

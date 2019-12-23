@@ -8,11 +8,13 @@
 #include <switch/cs_SwitchAggregator.h>
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
+#include <presence/cs_PresenceHandler.h>
 #include <util/cs_Utils.h>
 
 #include <optional>
 
 #define LOGSwitchAggregator LOGnone
+#define LOGSwitchAggregator_Evt LOGnone
 
 // =====================================================
 // ================== Old Owner logic ==================
@@ -76,10 +78,10 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
 
     // (swSwitch.has_value() is true from here)
 
-    if(overrideState && behaviourHandler.getValue() && aggregatedState){
+    if(overrideState && behaviourState && aggregatedState){
         bool overrideStateIsOn = *overrideState != 0;
         bool aggregatedStateIsOn = *aggregatedState != 0;
-        bool behaviourStateIsOn = *behaviourHandler.getValue() != 0;
+        bool behaviourStateIsOn = *behaviourState != 0;
 
         bool overrideMatchedAggregated = overrideStateIsOn == aggregatedStateIsOn;
         bool behaviourWantsToChangeState = behaviourStateIsOn != aggregatedStateIsOn;
@@ -89,18 +91,36 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
                 LOGSwitchAggregator("resetting overrideState");
                 overrideState = {};
         } 
-    } 
+    }
 
     aggregatedState = 
         overrideState ? resolveOverrideState() : 
-        behaviourHandler.getValue() ? aggregatedBehaviourIntensity() : // only use aggr. if no SwitchBehaviour conflict is found
+        behaviourState ? aggregatedBehaviourIntensity() : // only use aggr. if no SwitchBehaviour conflict is found
         aggregatedState ? aggregatedState :                            // if conflict is found, don't change the value.
         std::nullopt;
+
+    LOGSwitchAggregator("updateState");
+    static uint8_t callcount = 0;
+    if(++callcount > 10){
+        callcount = 0;
+        printStatus();
+    }
     
     if(aggregatedState){
         swSwitch->setDimmer(*aggregatedState);
     }
+}
 
+void SwitchAggregator::printStatus(){
+    if(overrideState){
+        LOGd(" ^ overrideState: %02d",overrideState.value());
+    }
+    if(behaviourState){
+        LOGd(" | behaviourState: %02d",behaviourState.value());
+    }
+    if(aggregatedState){
+        LOGd(" v aggregatedState: %02d",aggregatedState.value());
+    }
 }
 
 std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
@@ -108,7 +128,7 @@ std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
     if(*overrideState == 0xff){
         LOGSwitchAggregator("translucent override state");
 
-        if(uint8_t behave_intensity = behaviourHandler.getValue().value_or(0)){
+        if(uint8_t behave_intensity = behaviourState.value_or(0)){
             // behaviour has positive intensity
             LOGSwitchAggregator("behaviour value positive, returning minimum of behaviour(%d) and twilight(%d)", behave_intensity,twilightHandler.getValue());
             return CsMath::min(behave_intensity,twilightHandler.getValue());
@@ -127,12 +147,12 @@ std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
 uint8_t SwitchAggregator::aggregatedBehaviourIntensity(){
     LOGSwitchAggregator("aggregatedBehaviourIntensity called");
 
-    if(behaviourHandler.getValue()){
+    if(behaviourState){
         LOGSwitchAggregator("returning min of behaviour(%d) and twilight(%d)",
-            *behaviourHandler.getValue(),
+            *behaviourState,
             twilightHandler.getValue());
         return CsMath::min(
-            *behaviourHandler.getValue(), 
+            *behaviourState, 
             twilightHandler.getValue() 
         );
     }
@@ -144,6 +164,10 @@ uint8_t SwitchAggregator::aggregatedBehaviourIntensity(){
 
 void SwitchAggregator::handleEvent(event_t& evt){
     if (handleTimingEvents(evt)) {
+        return;
+    }
+
+    if(handlePresenceEvents(evt)){
         return;
     }
 
@@ -162,16 +186,14 @@ bool SwitchAggregator::handleTimingEvents(event_t& evt){
             break;
         }
         case CS_TYPE::STATE_TIME: {
-            if(updateBehaviourHandlers()){ 
-                updateState();
-            }
+            bool allowOverrideReset = updateBehaviourHandlers();
+            updateState(allowOverrideReset);
             
             break;
         }
         case CS_TYPE::EVT_TIME_SET: {
-            if(updateBehaviourHandlers()){ 
-                updateState();
-            }
+            bool allowOverrideReset = updateBehaviourHandlers();
+            updateState(allowOverrideReset);
 
             break;
         }
@@ -183,17 +205,56 @@ bool SwitchAggregator::handleTimingEvents(event_t& evt){
     return true;
 }
 
+bool SwitchAggregator::handlePresenceEvents(event_t& evt){
+    if(evt.type == CS_TYPE::EVT_PRESENCE_MUTATION){
+        PresenceHandler::MutationType mutationtype = *reinterpret_cast<PresenceHandler::MutationType*>(evt.data);
+
+        switch(mutationtype){
+            case PresenceHandler::MutationType::LastUserExitSphere : {
+                LOGSwitchAggregator("SwitchAggregator LastUserExit");
+                if(overrideState){
+                    TimeOfDay now = SystemTime::now();
+                    LOGSwitchAggregator("SwitchAggregator LastUserExit override state true (%02d:%02d:%02d)",now.h(),now.m(),now.s());
+
+                    if (behaviourHandler.requiresPresence(now)) {
+                        // if there exists a behaviour which is active at given time and 
+                        //      	and it has a non-negated presence clause (that may not be satisfied)
+                        //      		clear override
+                        LOGSwitchAggregator("clearing override state because last user exited sphere");
+                        overrideState = {};
+                        updateBehaviourHandlers();
+                        updateState();
+                    }
+                }
+  
+                break;
+            }
+            default: 
+                break;
+        }
+
+        LOGSwitchAggregator_Evt("SwitchAggregator::handlePresence");
+        return true;
+    }
+
+    return false;
+}
+
 bool SwitchAggregator::updateBehaviourHandlers(){
     bool result = false;
     result |= twilightHandler.update();
-    result |= behaviourHandler.update();
+
+    std::optional<uint8_t> prevBehaviourState = behaviourState;
+    behaviourHandler.update();
+    behaviourState = behaviourHandler.getValue();
+    result |= (prevBehaviourState != behaviourState);
 
     return result;
 }
 
 bool SwitchAggregator::handleAllowedOperations(event_t& evt) {
      if (evt.type ==  CS_TYPE::CMD_SWITCH_LOCKED) {
-        LOGd("SwitchAggregator::%s case CMD_SWITCH_LOCKED",__func__);
+        LOGSwitchAggregator_Evt("SwitchAggregator::%s case CMD_SWITCH_LOCKED",__func__);
         auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);
         if(swSwitch) swSwitch->setAllowSwitching(*typd);
 
@@ -210,7 +271,7 @@ bool SwitchAggregator::handleAllowedOperations(event_t& evt) {
     }
 
     if(evt.type ==  CS_TYPE::CMD_DIMMING_ALLOWED){
-        LOGd("SwitchAggregator::%s case CMD_DIMMING_ALLOWED",__func__);
+        LOGSwitchAggregator_Evt("SwitchAggregator::%s case CMD_DIMMING_ALLOWED",__func__);
         auto typd = reinterpret_cast<TYPIFY(CMD_DIMMING_ALLOWED)*>(evt.data);
         if(swSwitch) swSwitch->setAllowDimming(*typd);
         
@@ -227,21 +288,21 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
     switch(evt.type){
         // ============== overrideState Events ==============
         case CS_TYPE::CMD_SWITCH_ON:{
-            LOGd("CMD_SWITCH_ON",__func__);
+            LOGSwitchAggregator_Evt("CMD_SWITCH_ON",__func__);
             overrideState = 100;
             updateState(false);
             break;
         }
         case CS_TYPE::CMD_SWITCH_OFF:{
-            LOGd("CMD_SWITCH_OFF",__func__);
+            LOGSwitchAggregator_Evt("CMD_SWITCH_OFF",__func__);
             overrideState = 0;
             updateState(false);
             break;
         }
         case CS_TYPE::CMD_SWITCH: {
-            LOGd("CMD_SWITCH",__func__);
+            LOGSwitchAggregator_Evt("CMD_SWITCH",__func__);
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;
-            LOGd("packet intensity: %d, source(%d)", packet->switchCmd, packet->source.sourceId);
+            LOGSwitchAggregator("packet intensity: %d, source(%d)", packet->switchCmd, packet->source.sourceId);
             if (!checkAndSetOwner(packet->source)) {
                 LOGSwitchAggregator("not executing, checkAndSetOwner returned false");
                 break;
@@ -252,8 +313,7 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
 			break;
 		}
         case CS_TYPE::CMD_SWITCH_TOGGLE:{
-            LOGd("CMD_SWITCH_TOGGLE",__func__);
-            // TODO(Arend, 08-10-2019): toggle should be upgraded when twilight is implemented
+            LOGSwitchAggregator_Evt("CMD_SWITCH_TOGGLE",__func__);
             overrideState = swSwitch->isOn() ? 0 : 255;
             updateState(false);
             break;
@@ -264,13 +324,13 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
         // behaviourState or overrideState decided that they needed to be.
         // as soon as any of the above handled events are triggered this will have been forgotten.
         case CS_TYPE::CMD_SET_RELAY:{
-            LOGd("CMD_SET_RELAY");
+            LOGSwitchAggregator_Evt("CMD_SET_RELAY");
             auto typd = reinterpret_cast<TYPIFY(CMD_SET_RELAY)*>(evt.data);
             if(swSwitch) swSwitch->setRelay(*typd);
             break;
         }
         case CS_TYPE::CMD_SET_DIMMER:{
-            LOGd("CMD_SET_DIMMER");
+            LOGSwitchAggregator_Evt("CMD_SET_DIMMER");
             auto typd = reinterpret_cast<TYPIFY(CMD_SET_DIMMER)*>(evt.data);
             if(swSwitch) swSwitch->setIntensity(*typd);
             break;

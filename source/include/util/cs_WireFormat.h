@@ -41,7 +41,7 @@ T deserialize(uint8_t* data, size_t len);
 // serialize that takes no arguments, and create an in class typedef 
 // that is equal to the return type of this method.
 template<class T>
-typename T::SerializedDataType serialize(const T& obj){
+typename T::SerializedDataType serialize(T& obj){
     LOGWireFormat("serialize %s", typeid(T).name());
     return obj.serialize();
 }

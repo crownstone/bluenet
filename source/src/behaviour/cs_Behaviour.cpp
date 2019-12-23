@@ -8,6 +8,7 @@
 #include <behaviour/cs_Behaviour.h>
 #include <util/cs_WireFormat.h>
 #include <drivers/cs_Serial.h>
+#include <time/cs_SystemTime.h>
 
 Behaviour::Behaviour(
             Type typ,
@@ -36,7 +37,7 @@ Behaviour::Behaviour(SerializedDataType arr) :
     ){
 }
 
-Behaviour::SerializedDataType Behaviour::serialize() const{
+Behaviour::SerializedDataType Behaviour::serialize() {
     SerializedDataType result;
     auto result_iter = std::begin(result);
 
@@ -50,7 +51,7 @@ Behaviour::SerializedDataType Behaviour::serialize() const{
     return result;
 }
 
-uint8_t* Behaviour::serialize(uint8_t* outbuff, size_t max_size) const {
+uint8_t* Behaviour::serialize(uint8_t* outbuff, size_t max_size) {
     const auto size = serializedSize();
 
     if(max_size < size){
@@ -64,7 +65,7 @@ size_t Behaviour::serializedSize() const {
     return WireFormat::size<Behaviour>();
 }
 
-std::vector<uint8_t> Behaviour::serialized() const{
+std::vector<uint8_t> Behaviour::serialized(){
     // TODO(Arend, 12-12-2019): 
     // The intermediate std::array object in the underlying Behaviour::serialize() 
     // can be avoided in this call if we
@@ -92,13 +93,25 @@ TimeOfDay Behaviour::until() const {
     return behaviourAppliesUntil; 
 }
 
-void Behaviour::print() const {
-    LOGd("Behaviour: type(%d) %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #%d",
+bool Behaviour::isValid(TimeOfDay currenttime){
+    // LOGd("Behaviour::isValid ToD: [%02d:%02d:%02d - %02d:%02d:%02d] contains %02d:%02d:%02d?", 
+    //     from().h(),from().m(),from().s(),
+    //     until().h(),until().m(),until().s(),
+    //     currenttime.h(),currenttime.m(),currenttime.s()
+    // );
+    return from() < until() // ensure proper midnight roll-over 
+        ? (from() <= currenttime && currenttime < until()) 
+        : (from() <= currenttime || currenttime < until());
+}
+
+void Behaviour::print() {
+    LOGd("Behaviour: type(%d) %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #% (%s)",
         static_cast<uint8_t>(typ),
         from().h(),from().m(),from().s(),
         until().h(),until().m(),until().s(),
         activeIntensity,
         activeDays,
-        profileId
+        profileId,
+        (isValid(SystemTime::now()) ? "valid" : "invalid")
     );
 }

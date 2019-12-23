@@ -38,20 +38,13 @@ class TwilightBehaviour : public Behaviour {
       );
 
     TwilightBehaviour(SerializedDataType arr);
-    SerializedDataType serialize() const;
+    SerializedDataType serialize();
 
-    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) const override;
+    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) override;
     virtual size_t serializedSize() const override;
 
-    virtual void print() const override;
+    virtual void print() override;
 
     virtual Type getType() const override { return Type::Twilight; }
 
-    // =========== Semantics ===========
-
-    /**
-     * Does the behaviour apply to the current situation?
-     * If from() == until() the behaviour isValid all day.
-     **/
-    bool isValid(TimeOfDay currenttime);
 };

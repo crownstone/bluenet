@@ -22,11 +22,11 @@ TwilightBehaviour::TwilightBehaviour(SerializedDataType arr)
 
 }
 
-TwilightBehaviour::SerializedDataType TwilightBehaviour::serialize() const {
+TwilightBehaviour::SerializedDataType TwilightBehaviour::serialize() {
     return Behaviour::serialize();
 }
 
-uint8_t* TwilightBehaviour::serialize(uint8_t* outbuff, size_t max_size) const {
+uint8_t* TwilightBehaviour::serialize(uint8_t* outbuff, size_t max_size) {
     const auto size = serializedSize();
 
     if(max_size < size){
@@ -40,7 +40,7 @@ size_t TwilightBehaviour::serializedSize() const {
     return WireFormat::size<TwilightBehaviour>();
 }
 
-void TwilightBehaviour::print() const {
+void TwilightBehaviour::print() {
     LOGd("TwilightBehaviour: type(%d) %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #%d",
         static_cast<uint8_t>(typ),
         from().h(),from().m(),from().s(),

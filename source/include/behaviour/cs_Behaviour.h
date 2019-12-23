@@ -43,18 +43,27 @@ class Behaviour {
       );
 
     Behaviour(SerializedDataType arr);
-    SerializedDataType serialize() const;
+    SerializedDataType serialize();
     
     // return value: pointer to next empty val in array.
-    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) const;
+    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size);
     virtual size_t serializedSize() const;
-    std::vector<uint8_t> serialized() const; // calls the above virtual functions.
+    std::vector<uint8_t> serialized(); // calls the above virtual functions.
 
-    virtual void print() const;
+    virtual void print();
 
     // implementations of behaviours have a class specific identifier
     // which is defined by overriding this method.
     virtual Type getType() const { return Type::Undefined; }
+
+    /**
+     * Does the behaviour apply to the current situation?
+     * If from() == until() the behaviour isValid all day.
+     **/
+    bool isValid(TimeOfDay currenttime);
+    
+    virtual bool requiresPresence() { return false; }
+    virtual bool requiresAbsence() { return false; }
 
     // =========== Getters ===========
 

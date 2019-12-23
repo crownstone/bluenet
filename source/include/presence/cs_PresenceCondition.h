@@ -20,7 +20,7 @@ class PresenceCondition{
     PresenceCondition(PresencePredicate p, uint32_t t);
     PresenceCondition(SerializedDataType arr);
 
-    SerializedDataType serialize() const;
+    SerializedDataType serialize();
 
     /**
      * Does this condition hold given the [currentPresence]?
@@ -28,5 +28,5 @@ class PresenceCondition{
      * TODO: cache result of previous call with timestamp and
      * use those to implement the time out feature
      */
-    bool operator()(PresenceStateDescription currentPresence) const;
+    bool operator()(PresenceStateDescription currentPresence);
 };

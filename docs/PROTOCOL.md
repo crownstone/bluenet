@@ -457,7 +457,7 @@ uint 8 | Command payload | N | The command payload data, which depends on the ty
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
-0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet. **Currently, only control commands `No operation` and `Set time` are implemented.**
+0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet. See [Broadcast command types](BROADCAST_PROTOCOL.md#command-broadcast-types) for implemented commands.
 
 
 

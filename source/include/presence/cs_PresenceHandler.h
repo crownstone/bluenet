@@ -19,6 +19,16 @@
  * by other 
  */
 class PresenceHandler: public EventListener {
+public: 
+    enum class MutationType : uint8_t {
+        NothingChanged              ,
+        Online                      , // when no previous PresenceStateDescription was available but now it is
+        Offline                     , // when a previous PresenceStateDescription was available but now it isn't
+        LastUserExitSphere          , 
+        FirstUserEnterSphere        , 
+        OccupiedRoomsMaskChanged    ,
+    };
+
 private:
     // after this amount of seconds a presence_record becomes invalid.
     static const constexpr uint32_t presence_time_out_s = 5*60;
@@ -43,12 +53,14 @@ private:
     static std::list<PresenceRecord> WhenWhoWhere;
 
     void removeOldRecords();
+    MutationType handleProfileLocationAdministration(uint8_t profile, uint8_t location);
+    void propagateMeshMessage(uint8_t profile, uint8_t location);
+    void triggerPresenseMutation(MutationType mutationtype);
     void print();
     
     stone_id_t _ownId = 0;
 
 public:
-
     // register as event handler
     void init();
 
