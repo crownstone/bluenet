@@ -13,7 +13,7 @@
 
 #include <optional>
 
-#define LOGSwitchAggregator LOGnone
+#define LOGSwitchAggregator LOGd
 
 // =====================================================
 // ================== Old Owner logic ==================
@@ -232,6 +232,8 @@ bool SwitchAggregator::handlePresenceEvents(event_t& evt){
                 break;
         }
 
+        LOGd("SwitchAggregator::handlePresence");
+        printStatus();
         return true;
     }
 
@@ -242,6 +244,9 @@ bool SwitchAggregator::updateBehaviourHandlers(){
     bool result = false;
     result |= twilightHandler.update();
     result |= behaviourHandler.update();
+
+    LOGd("SwitchAggregator::updateBehaviourHandlers (%s)", (result ? "true" : "false"));
+    printStatus();
 
     return result;
 }

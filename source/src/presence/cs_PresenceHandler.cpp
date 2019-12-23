@@ -72,6 +72,8 @@ void PresenceHandler::handleEvent(event_t& evt){
     MutationType mt = handleProfileLocationAdministration(profile,location);
 
     LOGd("MutationEvent: %d",static_cast<uint8_t>(mt));
+    print();
+    
     if(mt != MutationType::NothingChanged){
         triggerPresenseMutation(mt);
     }

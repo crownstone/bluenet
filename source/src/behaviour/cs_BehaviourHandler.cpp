@@ -20,8 +20,8 @@
 
 #include "drivers/cs_Serial.h"
 
-#define LOGBehaviourHandler_V LOGnone
-#define LOGBehaviourHandler LOGnone
+#define LOGBehaviourHandler_V LOGd
+#define LOGBehaviourHandler LOGd
 
 void BehaviourHandler::handleEvent(event_t& evt){
     switch(evt.type){
@@ -99,6 +99,9 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
                 } else {
                     // found first valid behaviour
                     intendedValue = switchbehave->value();
+                    // LOGd("behaviourhandler getvalue found valid behaviour: %02d:%02d:%02d",currentTime.h(),currentTime.m(),currentTime.s());
+                    // switchbehave->print();
+                    // LOGd("-- end compute intended state print -- ");
                 }
             }
         }
