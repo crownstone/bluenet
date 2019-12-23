@@ -48,33 +48,26 @@ void BehaviourHandler::handleEvent(event_t& evt){
 
 bool BehaviourHandler::update(){
     if (!isActive) {
-        bool result = previousIntendedState.has_value();
-        previousIntendedState = std::nullopt;
-        return result;
-    }
+        currentIntendedState = std::nullopt;
+    } else {
+        TimeOfDay time = SystemTime::now();
+        std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
 
-    TimeOfDay time = SystemTime::now();
-    std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
-
-    if (!presence) {
-        LOGBehaviourHandler_V("%02d:%02d:%02d, not updating, because presence data is missing",time.h(),time.m(),time.s());
-        return false;
-    }
-
-    auto intendedState = computeIntendedState(time, presence.value());
-    if (intendedState) {
-        if(previousIntendedState == intendedState){
-            LOGBehaviourHandler_V("%02d:%02d:%02d, no behaviour change",time.h(),time.m(),time.s());
-            return false;
+        // -----
+        if(presence){
+            presence->print();
         }
 
-        LOGBehaviourHandler("%02d:%02d:%02d, new behaviour value",time.h(),time.m(),time.s());
-        previousIntendedState = intendedState;
-        return true;
-    } else {
-        LOGBehaviourHandler_V("%02d:%02d:%02d, conflicting behaviours",time.h(),time.m(),time.s());
-        return false;
+        // -----
+
+        if (!presence) {
+            LOGBehaviourHandler_V("%02d:%02d:%02d, not updating, because presence data is missing",time.h(),time.m(),time.s());
+        } else {
+            currentIntendedState = computeIntendedState(time, presence.value());
+        }
     }
+
+    return true;//currentIntendedState != previousIntendedState;
 }
 
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
@@ -84,12 +77,18 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
         return {};
     }
 
+    LOGd("BehaviourHandler compute intended state");
     std::optional<uint8_t> intendedValue = {};
     
     for (auto& b : BehaviourStore::getActiveBehaviours()){
         if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(b)){
             // cast to switch behaviour succesful.
+            if(switchbehave->isValid(currentTime)){
+                LOGd("valid time on behaviour: ");
+                switchbehave->print();
+            }
             if (switchbehave->isValid(currentTime, currentPresence)){
+                LOGd("presence also valid");
                 if (intendedValue){
                     if (switchbehave->value() != intendedValue.value()){
                         // found a conflicting behaviour
@@ -99,9 +98,6 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
                 } else {
                     // found first valid behaviour
                     intendedValue = switchbehave->value();
-                    // LOGd("behaviourhandler getvalue found valid behaviour: %02d:%02d:%02d",currentTime.h(),currentTime.m(),currentTime.s());
-                    // switchbehave->print();
-                    // LOGd("-- end compute intended state print -- ");
                 }
             }
         }
@@ -112,7 +108,8 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 }
 
 std::optional<uint8_t> BehaviourHandler::getValue(){
-    return previousIntendedState;
+    previousIntendedState = currentIntendedState;
+    return currentIntendedState;
 }
 
 bool BehaviourHandler::requiresPresence(TimeOfDay t){

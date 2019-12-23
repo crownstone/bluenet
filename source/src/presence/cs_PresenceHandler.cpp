@@ -73,7 +73,7 @@ void PresenceHandler::handleEvent(event_t& evt){
 
     LOGd("MutationEvent: %d",static_cast<uint8_t>(mt));
     print();
-    
+
     if(mt != MutationType::NothingChanged){
         triggerPresenseMutation(mt);
     }
@@ -193,7 +193,8 @@ std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescr
         return {};
     }
 
-    PresenceStateDescription p = 0;
+    PresenceStateDescription p;
+
     uint32_t now = SystemTime::up();
     auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
 
@@ -206,7 +207,7 @@ std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescr
             continue;
         } else {
             // appearently iter is valid, so the .where field describes an occupied room.
-            p |= 1 << CsMath::min(64-1,iter->where);
+            p.setRoom(CsMath::min(64-1,iter->where));
             // LOGPresenceHandler("adding room %d to currentPresenceDescription", iter->where);
             ++iter;
         }
@@ -222,11 +223,7 @@ void PresenceHandler::print(){
     
     std::optional<PresenceStateDescription> desc = getCurrentPresenceDescription();
     if( desc){
-        uint32_t rooms[2] = {
-            static_cast<uint32_t>(*desc >> 0 ),
-            static_cast<uint32_t>(*desc >> 32)
-        };
-        LOGd("presenchandler status: %x %x" , rooms[1], rooms[0]);
+        desc->print();
     } else {
         LOGd("presenchandler status: unavailable");
     }

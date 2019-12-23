@@ -29,12 +29,16 @@ class BehaviourHandler : public EventListener {
 
     /**
      * Acquires the current time and presence information. 
-     * Checks the intended state by looping over the active behaviours
-     * and if the intendedState differs from previousIntendedState
-     * dispatch an event to communicate a state update.
+     * Checks and updates the currentIntendedState by looping over the active behaviours
+     * 
+     * Returns true if the currentIntendedState differs from the previousIntendedState.
      */
     bool update();
 
+    /**
+     * Returns currentIntendedState variable and updates the previousIntendedState
+     * to currentIntendedState to match previousIntendedState.
+     */
     std::optional<uint8_t> getValue();
 
     bool requiresPresence(TimeOfDay t);
@@ -58,7 +62,15 @@ class BehaviourHandler : public EventListener {
         TimeOfDay currenttime, 
         PresenceStateDescription currentpresence);
 
+    /**
+     * The last value returned by getValue.
+     */
     std::optional<uint8_t> previousIntendedState = {};
+
+    /**
+     *  The last value that was updated by the update method.
+     */ 
+    std::optional<uint8_t> currentIntendedState = {};
 
     /******
      * setting this to false will result in a BehaviourHandler that will

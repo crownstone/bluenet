@@ -28,7 +28,7 @@ class PresencePredicate{
     
     // private: DEBUG
     Condition cond;
-    uint64_t RoomsBitMask;
+    PresenceStateDescription RoomsBitMask;
 
     public:
     PresencePredicate(Condition c, PresenceStateDescription roomsMask);
@@ -39,10 +39,10 @@ class PresencePredicate{
     bool requiresAbsence() const;
     
 
-    SerializedDataType serialize() const;
+    SerializedDataType serialize();
     
     // parameter bit i is 1 whenever there is presence detected in the
     // room with index i.
-    bool operator()(PresenceStateDescription currentroomspresencebitmask) const;
+    bool operator()(PresenceStateDescription currentroomspresencebitmask);
 
 };

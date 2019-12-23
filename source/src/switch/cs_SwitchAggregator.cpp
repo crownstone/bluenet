@@ -77,10 +77,10 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
 
     // (swSwitch.has_value() is true from here)
 
-    if(overrideState && behaviourHandler.getValue() && aggregatedState){
+    if(overrideState && behaviourState && aggregatedState){
         bool overrideStateIsOn = *overrideState != 0;
         bool aggregatedStateIsOn = *aggregatedState != 0;
-        bool behaviourStateIsOn = *behaviourHandler.getValue() != 0;
+        bool behaviourStateIsOn = *behaviourState != 0;
 
         bool overrideMatchedAggregated = overrideStateIsOn == aggregatedStateIsOn;
         bool behaviourWantsToChangeState = behaviourStateIsOn != aggregatedStateIsOn;
@@ -94,7 +94,7 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
 
     aggregatedState = 
         overrideState ? resolveOverrideState() : 
-        behaviourHandler.getValue() ? aggregatedBehaviourIntensity() : // only use aggr. if no SwitchBehaviour conflict is found
+        behaviourState ? aggregatedBehaviourIntensity() : // only use aggr. if no SwitchBehaviour conflict is found
         aggregatedState ? aggregatedState :                            // if conflict is found, don't change the value.
         std::nullopt;
 
@@ -112,8 +112,8 @@ void SwitchAggregator::printStatus(){
     if(overrideState){
         LOGSwitchAggregator(" ^ overrideState: %02d",overrideState.value());
     }
-    if(behaviourHandler.getValue()){
-        LOGSwitchAggregator(" | behaviourHandler: %02d",behaviourHandler.getValue().value());
+    if(behaviourState){
+        LOGSwitchAggregator(" | behaviourState: %02d",behaviourState.value());
     }
     if(aggregatedState){
         LOGSwitchAggregator(" v aggregatedState: %02d",aggregatedState.value());
@@ -125,7 +125,7 @@ std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
     if(*overrideState == 0xff){
         LOGSwitchAggregator("translucent override state");
 
-        if(uint8_t behave_intensity = behaviourHandler.getValue().value_or(0)){
+        if(uint8_t behave_intensity = behaviourState.value_or(0)){
             // behaviour has positive intensity
             LOGSwitchAggregator("behaviour value positive, returning minimum of behaviour(%d) and twilight(%d)", behave_intensity,twilightHandler.getValue());
             return CsMath::min(behave_intensity,twilightHandler.getValue());
@@ -144,12 +144,12 @@ std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
 uint8_t SwitchAggregator::aggregatedBehaviourIntensity(){
     LOGSwitchAggregator("aggregatedBehaviourIntensity called");
 
-    if(behaviourHandler.getValue()){
+    if(behaviourState){
         LOGSwitchAggregator("returning min of behaviour(%d) and twilight(%d)",
-            *behaviourHandler.getValue(),
+            *behaviourState,
             twilightHandler.getValue());
         return CsMath::min(
-            *behaviourHandler.getValue(), 
+            *behaviourState, 
             twilightHandler.getValue() 
         );
     }
@@ -183,14 +183,18 @@ bool SwitchAggregator::handleTimingEvents(event_t& evt){
             break;
         }
         case CS_TYPE::STATE_TIME: {
-            if(updateBehaviourHandlers()){ 
+            if(
+                updateBehaviourHandlers()
+            ){ 
                 updateState();
             }
             
             break;
         }
         case CS_TYPE::EVT_TIME_SET: {
-            if(updateBehaviourHandlers()){ 
+            if(
+                updateBehaviourHandlers()
+            ){
                 updateState();
             }
 
@@ -221,8 +225,8 @@ bool SwitchAggregator::handlePresenceEvents(event_t& evt){
                         //      		clear override
                         LOGSwitchAggregator("clearing override state because last user exited sphere");
                         overrideState = {};
-                        // updateBehaviourHandlers();
-                        // updateState();
+                        updateBehaviourHandlers();
+                        updateState();
                     }
                 }
   
@@ -243,7 +247,12 @@ bool SwitchAggregator::handlePresenceEvents(event_t& evt){
 bool SwitchAggregator::updateBehaviourHandlers(){
     bool result = false;
     result |= twilightHandler.update();
-    result |= behaviourHandler.update();
+
+    LOGd("before behaviourhandler.update");
+    std::optional<uint8_t> prevBehaviourState = behaviourState;
+    behaviourHandler.update();
+    behaviourState = behaviourHandler.getValue();
+    result |= (prevBehaviourState != behaviourState);
 
     LOGd("SwitchAggregator::updateBehaviourHandlers (%s)", (result ? "true" : "false"));
     printStatus();

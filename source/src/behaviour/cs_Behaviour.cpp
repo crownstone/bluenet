@@ -37,7 +37,7 @@ Behaviour::Behaviour(SerializedDataType arr) :
     ){
 }
 
-Behaviour::SerializedDataType Behaviour::serialize() const{
+Behaviour::SerializedDataType Behaviour::serialize() {
     SerializedDataType result;
     auto result_iter = std::begin(result);
 
@@ -51,7 +51,7 @@ Behaviour::SerializedDataType Behaviour::serialize() const{
     return result;
 }
 
-uint8_t* Behaviour::serialize(uint8_t* outbuff, size_t max_size) const {
+uint8_t* Behaviour::serialize(uint8_t* outbuff, size_t max_size) {
     const auto size = serializedSize();
 
     if(max_size < size){
@@ -65,7 +65,7 @@ size_t Behaviour::serializedSize() const {
     return WireFormat::size<Behaviour>();
 }
 
-std::vector<uint8_t> Behaviour::serialized() const{
+std::vector<uint8_t> Behaviour::serialized(){
     // TODO(Arend, 12-12-2019): 
     // The intermediate std::array object in the underlying Behaviour::serialize() 
     // can be avoided in this call if we

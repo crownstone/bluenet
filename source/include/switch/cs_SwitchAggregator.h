@@ -71,8 +71,8 @@ class SwitchAggregator : public EventListener {
     std::optional<SwSwitch> swSwitch;
 
     // the latest states requested by other parts of the system.
-    // std::optional<uint8_t> behaviourState = {}; // already cached in behaviourHandler
     std::optional<uint8_t> overrideState = {};
+    std::optional<uint8_t> behaviourState = {};
 
     // the last state that was aggregated and passed on towards the SwSwitch.
     std::optional<uint8_t> aggregatedState = {};

@@ -40,9 +40,9 @@ class SwitchBehaviour : public Behaviour{
       );
 
     SwitchBehaviour(SerializedDataType arr);
-    SerializedDataType serialize() const;
+    SerializedDataType serialize();
 
-    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) const override;
+    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size) override;
     virtual size_t serializedSize() const override;
 
     virtual Type getType() const override { return Type::Switch; }
@@ -86,5 +86,5 @@ class SwitchBehaviour : public Behaviour{
     // constants
     // after this amount of seconds an invalid presence condition will result in
     // the behaviour being invalidated.
-    static constexpr uint32_t PresenceIsValidTimeOut_s = 5*60;
+    static constexpr uint32_t PresenceIsValidTimeOut_s = 5;// DEBUG! should be 5*60;
 };
