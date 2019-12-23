@@ -20,8 +20,10 @@
 
 #include "drivers/cs_Serial.h"
 
-#define LOGBehaviourHandler_V LOGd
-#define LOGBehaviourHandler LOGd
+#define LOGBehaviourHandler_V LOGnone
+#define LOGBehaviourHandler LOGnone
+
+
 
 void BehaviourHandler::handleEvent(event_t& evt){
     switch(evt.type){
@@ -53,13 +55,6 @@ bool BehaviourHandler::update(){
         TimeOfDay time = SystemTime::now();
         std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
 
-        // -----
-        if(presence){
-            presence->print();
-        }
-
-        // -----
-
         if (!presence) {
             LOGBehaviourHandler_V("%02d:%02d:%02d, not updating, because presence data is missing",time.h(),time.m(),time.s());
         } else {
@@ -77,18 +72,17 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
         return {};
     }
 
-    LOGd("BehaviourHandler compute intended state");
+    LOGBehaviourHandler("BehaviourHandler compute intended state");
     std::optional<uint8_t> intendedValue = {};
     
     for (auto& b : BehaviourStore::getActiveBehaviours()){
         if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(b)){
             // cast to switch behaviour succesful.
             if(switchbehave->isValid(currentTime)){
-                LOGd("valid time on behaviour: ");
-                switchbehave->print();
+                LOGBehaviourHandler_V("valid time on behaviour: ");
             }
             if (switchbehave->isValid(currentTime, currentPresence)){
-                LOGd("presence also valid");
+                LOGBehaviourHandler_V("presence also valid");
                 if (intendedValue){
                     if (switchbehave->value() != intendedValue.value()){
                         // found a conflicting behaviour
@@ -118,9 +112,9 @@ bool BehaviourHandler::requiresPresence(TimeOfDay t){
         i += 1;
         if(behaviour_ptr != nullptr){
             if(behaviour_ptr->requiresPresence()){
-                LOGd("presence requiring behaviour found %d", i);
+                LOGBehaviourHandler_V("presence requiring behaviour found %d", i);
                 if(behaviour_ptr->isValid(t)) {
-                    LOGd("presence requiring behaviour is currently valid %d", i);
+                    LOGBehaviourHandler_V("presence requiring behaviour is currently valid %d", i);
                     return true;
                 }
             }

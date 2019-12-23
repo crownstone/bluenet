@@ -71,9 +71,6 @@ void PresenceHandler::handleEvent(event_t& evt){
 
     MutationType mt = handleProfileLocationAdministration(profile,location);
 
-    LOGd("MutationEvent: %d",static_cast<uint8_t>(mt));
-    print();
-
     if(mt != MutationType::NothingChanged){
         triggerPresenseMutation(mt);
     }
@@ -85,8 +82,6 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 
     // TODO inputvalidation
     auto prevdescription = getCurrentPresenceDescription();
-    LOGd("prev description:");
-    print();
 
     if(profile == 0xff && location == 0xff){
         LOGw("DEBUG: clear presence record data");
@@ -126,8 +121,6 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
     WhenWhoWhere.push_front( {now, profile, location} );
 
     auto nextdescription = getCurrentPresenceDescription();
-    LOGd("next description:");
-    print();
 
     if(prevdescription == nextdescription){
         return MutationType::NothingChanged; // neither has_value or value()'s eq.
@@ -222,9 +215,9 @@ void PresenceHandler::print(){
     // }
     
     std::optional<PresenceStateDescription> desc = getCurrentPresenceDescription();
-    if( desc){
-        desc->print();
+    if(desc){
+        // desc->print();
     } else {
-        LOGd("presenchandler status: unavailable");
+        LOGPresenceHandler("presenchandler status: unavailable");
     }
 }
