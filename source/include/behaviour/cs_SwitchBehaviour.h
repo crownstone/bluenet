@@ -47,7 +47,7 @@ class SwitchBehaviour : public Behaviour{
 
     virtual Type getType() const override { return Type::Switch; }
 
-    void print() const;
+    void print();
 
     // =========== Semantics ===========
 
@@ -66,6 +66,11 @@ class SwitchBehaviour : public Behaviour{
     // but it tries to describe the location as accurately as possible. Thus, when a user is
     // detected in another room, the presence is immediately updated.)
     bool isValid(PresenceStateDescription currentpresence); // cached version
+
+    // Because of the definition of isValid(PresenceStateDescription) in this class
+    // the base class function with the same name is shadowed. This using statement
+    // reintroduces the function name in this class's scope.
+    using Behaviour::isValid;
     
     private:
 
