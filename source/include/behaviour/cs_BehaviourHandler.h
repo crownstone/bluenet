@@ -41,8 +41,8 @@ class BehaviourHandler : public EventListener {
      */
     std::optional<uint8_t> getValue();
 
-    bool requiresPresence(TimeOfDay t);
-    bool requiresAbsence(TimeOfDay t);
+    bool requiresPresence(Time t);
+    bool requiresAbsence(Time t);
 
     private:
 
@@ -59,7 +59,7 @@ class BehaviourHandler : public EventListener {
      * value is 0. (house is 'off' by default)
      */
     std::optional<uint8_t> computeIntendedState(
-        TimeOfDay currenttime, 
+        Time currenttime, 
         PresenceStateDescription currentpresence);
 
     /**

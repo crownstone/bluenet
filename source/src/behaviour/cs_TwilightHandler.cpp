@@ -29,7 +29,7 @@ void TwilightHandler::handleEvent(event_t& evt){
 }
 
 bool TwilightHandler::update(){
-    TimeOfDay time = SystemTime::now();
+    Time time = SystemTime::now();
 
     uint8_t intendedState = computeIntendedState(time);
     if(previousIntendedState == intendedState){
@@ -40,7 +40,7 @@ bool TwilightHandler::update(){
     return true;
 }
 
-uint8_t TwilightHandler::computeIntendedState(TimeOfDay currenttime){
+uint8_t TwilightHandler::computeIntendedState(Time currenttime){
     // return minimal value among the valid twilights.
     // TODO
     uint8_t min_twilight = 100;

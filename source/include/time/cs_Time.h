@@ -17,7 +17,7 @@ class Time {
     uint32_t posixTimeStamp;
     
     public:
-    Time(uint32_t posixTime)  : posixTimeStamp(posixTime){}
+    Time(uint32_t posixTime) : posixTimeStamp(posixTime){}
 
     // --- Implicit cast operators ---
 
@@ -28,6 +28,10 @@ class Time {
      * See: http://stackoverflow.com/questions/36357013/day-of-week-from-seconds-since-epoch
 	 * With timestamp=0 = Thursday 1-January-1970 00:00:00
      */
-    operator DayOfWeek(){ return DayOfWeek(posixTimeStamp / 60*60*24 + 4 % 7);}
+    operator DayOfWeek(){ return DayOfWeek((posixTimeStamp / (60*60*24) + 4) % 7);}
+
+    // --- named cast functions ---
+    DayOfWeek dayOfWeek() { return *this; }
+    TimeOfDay timeOfDay() { return *this; }
 
 };

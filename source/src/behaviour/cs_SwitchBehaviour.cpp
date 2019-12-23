@@ -62,7 +62,7 @@ bool SwitchBehaviour::requiresAbsence() {
     return presenceCondition.pred.requiresAbsence();
 }
 
-bool SwitchBehaviour::isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence){
+bool SwitchBehaviour::isValid(Time currenttime, PresenceStateDescription currentpresence){
     return isValid(currenttime) && isValid(currentpresence);
 }
 

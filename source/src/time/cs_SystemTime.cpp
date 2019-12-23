@@ -125,7 +125,7 @@ DayOfWeek SystemTime::day(){
     return posix();
 }
 
-TimeOfDay SystemTime::now(){
+Time SystemTime::now(){
      return posix();
 }
 
