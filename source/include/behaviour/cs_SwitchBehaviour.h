@@ -58,7 +58,7 @@ class SwitchBehaviour : public Behaviour{
      * Does the behaviour apply to the current situation?
      * If from() == until() the behaviour isValid all day.
      **/
-    bool isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence);
+    bool isValid(Time currenttime, PresenceStateDescription currentpresence);
 
     // Presence description is cached in order to prevent
     // that the behaviour flickers when a user is on the border of two rooms.

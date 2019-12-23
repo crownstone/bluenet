@@ -52,7 +52,7 @@ bool BehaviourHandler::update(){
     if (!isActive) {
         currentIntendedState = std::nullopt;
     } else {
-        TimeOfDay time = SystemTime::now();
+        Time time = SystemTime::now();
         std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
 
         if (!presence) {
@@ -66,7 +66,7 @@ bool BehaviourHandler::update(){
 }
 
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
-       TimeOfDay currentTime, 
+       Time currentTime, 
        PresenceStateDescription currentPresence){
     if (!isActive) {
         return {};
@@ -106,7 +106,7 @@ std::optional<uint8_t> BehaviourHandler::getValue(){
     return currentIntendedState;
 }
 
-bool BehaviourHandler::requiresPresence(TimeOfDay t){
+bool BehaviourHandler::requiresPresence(Time t){
     uint8_t i = 0;
     for (auto& behaviour_ptr : BehaviourStore::getActiveBehaviours()){
         i += 1;
@@ -124,7 +124,7 @@ bool BehaviourHandler::requiresPresence(TimeOfDay t){
     return false;
 }
 
-bool BehaviourHandler::requiresAbsence(TimeOfDay t){
+bool BehaviourHandler::requiresAbsence(Time t){
     for (auto& behaviour_ptr : BehaviourStore::getActiveBehaviours()){
         if(behaviour_ptr != nullptr){
             if(behaviour_ptr->isValid(t) && behaviour_ptr->requiresAbsence()) {

@@ -213,7 +213,7 @@ bool SwitchAggregator::handlePresenceEvents(event_t& evt){
             case PresenceHandler::MutationType::LastUserExitSphere : {
                 LOGSwitchAggregator("SwitchAggregator LastUserExit");
                 if(overrideState){
-                    TimeOfDay now = SystemTime::now();
+                    Time now = SystemTime::now();
                     LOGSwitchAggregator("SwitchAggregator LastUserExit override state true (%02d:%02d:%02d)",now.h(),now.m(),now.s());
 
                     if (behaviourHandler.requiresPresence(now)) {
