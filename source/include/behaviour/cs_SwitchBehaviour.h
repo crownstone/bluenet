@@ -82,9 +82,4 @@ class SwitchBehaviour : public Behaviour{
 
     // unserialized fields (runtime values)
     std::optional<uint32_t> prevIsValidTimeStamp = {}; // when was the last call to _isValid that returned true?
-
-    // constants
-    // after this amount of seconds an invalid presence condition will result in
-    // the behaviour being invalidated.
-    static constexpr uint32_t PresenceIsValidTimeOut_s = 5*60;
 };

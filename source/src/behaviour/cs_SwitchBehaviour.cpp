@@ -74,7 +74,7 @@ bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence){
     } 
     
     if(prevIsValidTimeStamp){
-        if (CsMath::Interval(SystemTime::up(), PresenceIsValidTimeOut_s, true).contains(*prevIsValidTimeStamp)) {
+        if (CsMath::Interval(SystemTime::up(), presenceCondition.timeOut, true).contains(*prevIsValidTimeStamp)) {
             // presence invalid but we're in the grace period.
             LOGBehaviour_V("grace period for SwitchBehaviour::isActive, %d in [%d %d]", *prevIsValidTimeStamp, SystemTime::up() - *prevIsValidTimeStamp, SystemTime::up() );
             return true;
