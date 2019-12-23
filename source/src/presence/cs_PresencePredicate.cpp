@@ -17,30 +17,38 @@ PresencePredicate::PresencePredicate(Condition c, PresenceStateDescription rooms
 PresencePredicate::PresencePredicate(std::array<uint8_t, 9> arr) : 
     PresencePredicate(
         static_cast<Condition>(arr[0]),
-        WireFormat::deserialize<uint64_t>(arr.data() +1, 8)) {
+        PresenceStateDescription(WireFormat::deserialize<uint64_t>(arr.data() +1, 8))) {
 }
 
 bool PresencePredicate::operator()(
-        PresenceStateDescription currentroomspresencebitmask) const{
+        PresenceStateDescription currentroomspresencebitmask){
     switch(cond){
         case Condition::VacuouslyTrue: 
             return true;
-        case Condition::AnyoneAnyRoom:
-            return (currentroomspresencebitmask & RoomsBitMask) != 0;
-        case Condition::NooneAnyRoom:
-            return (currentroomspresencebitmask & RoomsBitMask) == 0;
+        case Condition::AnyoneInSelectedRooms:
+            return (static_cast<uint64_t>(currentroomspresencebitmask) & static_cast<uint64_t>(RoomsBitMask)) != 0;
+        case Condition::NooneInSelectedRooms:
+            return (static_cast<uint64_t>(currentroomspresencebitmask) & static_cast<uint64_t>(RoomsBitMask)) == 0;
         case Condition::AnyoneInSphere:
-            return currentroomspresencebitmask != 0;
+            return static_cast<uint64_t>(currentroomspresencebitmask) != 0;
         case Condition::NooneInSphere:
-            return currentroomspresencebitmask == 0;
+            return static_cast<uint64_t>(currentroomspresencebitmask) == 0;
     }
     
     return false;
 }
 
-PresencePredicate::SerializedDataType PresencePredicate::serialize() const {
+bool PresencePredicate::requiresPresence() const { 
+    return cond == Condition::AnyoneInSelectedRooms || cond == Condition::AnyoneInSphere; 
+}
+
+bool PresencePredicate::requiresAbsence() const { 
+    return cond == Condition::NooneInSelectedRooms || cond ==Condition::NooneInSphere; 
+}
+
+PresencePredicate::SerializedDataType PresencePredicate::serialize() {
     SerializedDataType result;
-    std::copy_n(std::begin(WireFormat::serialize(static_cast<uint8_t>(cond))),  1, std::begin(result) + 0);
-    std::copy_n(std::begin(WireFormat::serialize(RoomsBitMask)),                8, std::begin(result) + 1);
+    std::copy_n(std::begin(WireFormat::serialize(static_cast<uint8_t>(cond))),              1, std::begin(result) + 0);
+    std::copy_n(std::begin(WireFormat::serialize(static_cast<uint64_t>(RoomsBitMask))),     8, std::begin(result) + 1);
     return result;
 }

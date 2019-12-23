@@ -40,12 +40,6 @@ bool TwilightHandler::update(){
     return true;
 }
 
-bool TwilightBehaviour::isValid(TimeOfDay currenttime){
-    return from() < until() // ensure proper midnight roll-over 
-        ? (from() <= currenttime && currenttime < until()) 
-        : (from() <= currenttime || currenttime < until());
-}
-
 uint8_t TwilightHandler::computeIntendedState(TimeOfDay currenttime){
     // return minimal value among the valid twilights.
     // TODO

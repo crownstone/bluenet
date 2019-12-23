@@ -32,7 +32,7 @@ SwitchBehaviour::SwitchBehaviour(std::array<uint8_t, 1+26> arr) :
     presenceCondition(  WireFormat::deserialize<PresenceCondition>( arr.data() + 14, 13)){
 }
 
-SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize() const{
+SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize(){
     SerializedDataType result;
     std::copy_n(std::begin(Behaviour::serialize()),  WireFormat::size<Behaviour>(),            std::begin(result) + 0);
     std::copy_n(std::begin(WireFormat::serialize(presenceCondition)), WireFormat::size<PresenceCondition>(),    std::begin(result) + 14);
@@ -40,7 +40,7 @@ SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize() const{
     return result;
 }
 
-uint8_t* SwitchBehaviour::serialize(uint8_t* outbuff, size_t max_size) const{
+uint8_t* SwitchBehaviour::serialize(uint8_t* outbuff, size_t max_size){
     const auto size = serializedSize();
 
     if(max_size < size){
@@ -55,17 +55,19 @@ size_t SwitchBehaviour::serializedSize() const {
     return WireFormat::size<SwitchBehaviour>();
 }
 
+bool SwitchBehaviour::requiresPresence() { 
+    return presenceCondition.pred.requiresPresence();
+}
+bool SwitchBehaviour::requiresAbsence() {
+    return presenceCondition.pred.requiresAbsence();
+}
+
 bool SwitchBehaviour::isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence){
     return isValid(currenttime) && isValid(currentpresence);
 }
 
-bool SwitchBehaviour::isValid(TimeOfDay currenttime){
-    return from() < until() // ensure proper midnight roll-over 
-        ? (from() <= currenttime && currenttime < until()) 
-        : (from() <= currenttime || currenttime < until());
-}
-
 bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence){
+    LOGBehaviour_V("isValid(presence) called");
     if(_isValid(currentpresence)){
         prevIsValidTimeStamp = SystemTime::up();
         return true;
@@ -90,19 +92,15 @@ bool SwitchBehaviour::_isValid(PresenceStateDescription currentpresence){
     return presenceCondition(currentpresence);
 }
 
-void SwitchBehaviour::print() const {
-    uint32_t rooms[2] = {
-        static_cast<uint32_t>(presenceCondition.pred.RoomsBitMask >> 0 ),
-        static_cast<uint32_t>(presenceCondition.pred.RoomsBitMask >> 32)
-    };
-
-    LOGd("SwitchBehaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x), presencetype(%d) roommask(%x %x), timeout(%d)",
+void SwitchBehaviour::print(){
+    LOGd("SwitchBehaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x), presencetype(%d), timeout(%d) (%s)",
         from().h(),from().m(),from().s(),
         until().h(),until().m(),until().s(),
         activeIntensity,
         activeDays,
         presenceCondition.pred.cond,
-        rooms[1],rooms[0], 
-        presenceCondition.timeOut
+        presenceCondition.timeOut,
+        (isValid(SystemTime::now()) ? "valid" : "invalid")
     );
+    presenceCondition.pred.RoomsBitMask.print();
 }

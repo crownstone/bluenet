@@ -19,8 +19,8 @@ class PresencePredicate{
     // user id restrictions?
     enum class Condition : uint8_t { 
         VacuouslyTrue  = 0, 
-        AnyoneAnyRoom  = 1, 
-        NooneAnyRoom   = 2, 
+        AnyoneInSelectedRooms  = 1, 
+        NooneInSelectedRooms   = 2, 
         AnyoneInSphere = 3, 
         NooneInSphere  = 4
     };
@@ -28,17 +28,21 @@ class PresencePredicate{
     
     // private: DEBUG
     Condition cond;
-    uint64_t RoomsBitMask;
+    PresenceStateDescription RoomsBitMask;
 
     public:
     PresencePredicate(Condition c, PresenceStateDescription roomsMask);
 
     PresencePredicate(SerializedDataType arr);
 
-    SerializedDataType serialize() const;
+    bool requiresPresence() const;
+    bool requiresAbsence() const;
+    
+
+    SerializedDataType serialize();
     
     // parameter bit i is 1 whenever there is presence detected in the
     // room with index i.
-    bool operator()(PresenceStateDescription currentroomspresencebitmask) const;
+    bool operator()(PresenceStateDescription currentroomspresencebitmask);
 
 };

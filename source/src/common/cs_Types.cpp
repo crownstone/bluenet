@@ -443,7 +443,7 @@ size16_t TypeSize(CS_TYPE const & type){
 	case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:
 		return 0;
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
-		return 0;
+		return sizeof(TYPIFY(EVT_PRESENCE_MUTATION));
 	case CS_TYPE::CMD_SET_RELAY:
 		return sizeof(TYPIFY(CMD_SET_RELAY));
 	case CS_TYPE::CMD_SET_DIMMER:
