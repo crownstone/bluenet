@@ -278,6 +278,8 @@
 
 #define SWITCH_ON_AT_SETUP_BOOT_DELAY            3600  // Seconds until the switch turns on when in setup mode (Crownstone built-in only)
 
+#define SUN_TIME_THROTTLE_PERIOD_SECONDS         (60*60*24) // Seconds to throttle writing the sun time to flash.
+
 /**
  * Interval in milliseconds at which tick events are dispatched.
  */

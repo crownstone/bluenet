@@ -100,11 +100,6 @@ inline bool cs_multi_switch_item_is_valid(internal_multi_switch_item_t* item, si
 	return (size == sizeof(internal_multi_switch_item_t) && item->id != 0);
 }
 
-struct __attribute__((packed)) set_sun_time_t {
-	uint32_t sunrise = 8*60*60;
-	uint32_t sunset = 19*60*60;
-};
-
 /**
  * A single keep alive packet, with target id.
  */

@@ -336,7 +336,7 @@ typedef uint16_t TYPIFY(STATE_RESET_COUNTER);
 typedef switch_state_t TYPIFY(STATE_SWITCH_STATE);
 typedef   int8_t TYPIFY(STATE_TEMPERATURE);
 typedef uint32_t TYPIFY(STATE_TIME);
-typedef set_sun_time_t TYPIFY(STATE_SUN_TIME);
+typedef sun_time_t TYPIFY(STATE_SUN_TIME);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);

@@ -181,6 +181,11 @@ struct __attribute__((__packed__)) factory_reset_message_payload_t {
 	uint32_t resetCode;
 };
 
+struct __attribute__((packed)) sun_time_t {
+	uint32_t sunrise = 8*60*60;
+	uint32_t sunset = 19*60*60;
+};
+
 struct __attribute__((__packed__)) led_message_payload_t {
 	uint8_t led;
 	bool enable;
