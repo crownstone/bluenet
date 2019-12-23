@@ -50,7 +50,7 @@ class Behaviour {
     virtual size_t serializedSize() const;
     std::vector<uint8_t> serialized() const; // calls the above virtual functions.
 
-    virtual void print() const;
+    virtual void print();
 
     // implementations of behaviours have a class specific identifier
     // which is defined by overriding this method.

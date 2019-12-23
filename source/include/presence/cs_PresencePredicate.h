@@ -19,8 +19,8 @@ class PresencePredicate{
     // user id restrictions?
     enum class Condition : uint8_t { 
         VacuouslyTrue  = 0, 
-        AnyoneAnyRoom  = 1, 
-        NooneAnyRoom   = 2, 
+        AnyoneInSelectedRooms  = 1, 
+        NooneInSelectedRooms   = 2, 
         AnyoneInSphere = 3, 
         NooneInSphere  = 4
     };

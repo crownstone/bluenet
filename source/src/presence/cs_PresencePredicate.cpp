@@ -25,9 +25,9 @@ bool PresencePredicate::operator()(
     switch(cond){
         case Condition::VacuouslyTrue: 
             return true;
-        case Condition::AnyoneAnyRoom:
+        case Condition::AnyoneInSelectedRooms:
             return (currentroomspresencebitmask & RoomsBitMask) != 0;
-        case Condition::NooneAnyRoom:
+        case Condition::NooneInSelectedRooms:
             return (currentroomspresencebitmask & RoomsBitMask) == 0;
         case Condition::AnyoneInSphere:
             return currentroomspresencebitmask != 0;
@@ -39,11 +39,11 @@ bool PresencePredicate::operator()(
 }
 
 bool PresencePredicate::requiresPresence() const { 
-    return cond == Condition::AnyoneAnyRoom || cond == Condition::AnyoneInSphere; 
+    return cond == Condition::AnyoneInSelectedRooms || cond == Condition::AnyoneInSphere; 
 }
 
 bool PresencePredicate::requiresAbsence() const { 
-    return cond == Condition::NooneAnyRoom || cond ==Condition::NooneInSphere; 
+    return cond == Condition::NooneInSelectedRooms || cond ==Condition::NooneInSphere; 
 }
 
 PresencePredicate::SerializedDataType PresencePredicate::serialize() const {

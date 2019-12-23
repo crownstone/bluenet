@@ -113,9 +113,17 @@ std::optional<uint8_t> BehaviourHandler::getValue(){
 }
 
 bool BehaviourHandler::requiresPresence(TimeOfDay t){
-    for (auto& b : BehaviourStore::getActiveBehaviours()){
-        if(b->isValid(t) && b->requiresPresence()) {
-            return true;
+    uint8_t i = 0;
+    for (auto& behaviour_ptr : BehaviourStore::getActiveBehaviours()){
+        i += 1;
+        if(behaviour_ptr != nullptr){
+            if(behaviour_ptr->requiresPresence()){
+                LOGd("presence requiring behaviour found %d", i);
+                if(behaviour_ptr->isValid(t)) {
+                    LOGd("presence requiring behaviour is currently valid %d", i);
+                    return true;
+                }
+            }
         }
     }
 
@@ -123,9 +131,11 @@ bool BehaviourHandler::requiresPresence(TimeOfDay t){
 }
 
 bool BehaviourHandler::requiresAbsence(TimeOfDay t){
-    for (auto& b : BehaviourStore::getActiveBehaviours()){
-        if(b->isValid(t) && b->requiresAbsence()) {
-            return true;
+    for (auto& behaviour_ptr : BehaviourStore::getActiveBehaviours()){
+        if(behaviour_ptr != nullptr){
+            if(behaviour_ptr->isValid(t) && behaviour_ptr->requiresAbsence()) {
+                return true;
+            }
         }
     }
 

@@ -40,7 +40,7 @@ size_t TwilightBehaviour::serializedSize() const {
     return WireFormat::size<TwilightBehaviour>();
 }
 
-void TwilightBehaviour::print() const {
+void TwilightBehaviour::print() {
     LOGd("TwilightBehaviour: type(%d) %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #%d",
         static_cast<uint8_t>(typ),
         from().h(),from().m(),from().s(),

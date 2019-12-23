@@ -205,7 +205,7 @@ std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescr
         } else {
             // appearently iter is valid, so the .where field describes an occupied room.
             p |= 1 << CsMath::min(64-1,iter->where);
-            LOGPresenceHandler("adding room %d to currentPresenceDescription", iter->where);
+            // LOGPresenceHandler("adding room %d to currentPresenceDescription", iter->where);
             ++iter;
         }
     }
@@ -214,7 +214,18 @@ std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescr
 }
 
 void PresenceHandler::print(){
-    for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); iter++){
-        LOGd("at %d seconds after startup user #%d was found in room %d", iter->when, iter->who, iter->where);
+    // for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); iter++){
+    //     LOGd("at %d seconds after startup user #%d was found in room %d", iter->when, iter->who, iter->where);
+    // }
+    
+    std::optional<PresenceStateDescription> desc = getCurrentPresenceDescription();
+    if( desc){
+        uint32_t rooms[2] = {
+            static_cast<uint32_t>(*desc >> 0 ),
+            static_cast<uint32_t>(*desc >> 32)
+        };
+        LOGd("presenchandler status: %x %x" , rooms[1], rooms[0]);
+    } else {
+        LOGd("presenchandler status: unavailable");
     }
 }

@@ -91,19 +91,20 @@ bool SwitchBehaviour::_isValid(PresenceStateDescription currentpresence){
     return presenceCondition(currentpresence);
 }
 
-void SwitchBehaviour::print() const {
+void SwitchBehaviour::print(){
     uint32_t rooms[2] = {
         static_cast<uint32_t>(presenceCondition.pred.RoomsBitMask >> 0 ),
         static_cast<uint32_t>(presenceCondition.pred.RoomsBitMask >> 32)
     };
 
-    LOGd("SwitchBehaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x), presencetype(%d) roommask(%x %x), timeout(%d)",
+    LOGd("SwitchBehaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x), presencetype(%d) roommask(%08x %08x), timeout(%d) (%s)",
         from().h(),from().m(),from().s(),
         until().h(),until().m(),until().s(),
         activeIntensity,
         activeDays,
         presenceCondition.pred.cond,
         rooms[1],rooms[0], 
-        presenceCondition.timeOut
+        presenceCondition.timeOut,
+        (isValid(SystemTime::now()) ? "valid" : "invalid")
     );
 }

@@ -44,6 +44,8 @@ class SwitchAggregator : public EventListener {
     virtual ~SwitchAggregator() noexcept {};
     SwitchAggregator& operator= (const SwitchAggregator&) = delete;
 
+    void printStatus();
+
     TwilightHandler twilightHandler;
     BehaviourHandler behaviourHandler;
 

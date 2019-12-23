@@ -97,9 +97,26 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
         behaviourHandler.getValue() ? aggregatedBehaviourIntensity() : // only use aggr. if no SwitchBehaviour conflict is found
         aggregatedState ? aggregatedState :                            // if conflict is found, don't change the value.
         std::nullopt;
+
+    // DEBUG LOG
+    LOGSwitchAggregator("updateState");
+    printStatus();
+    // END DEBUG LOG
     
     if(aggregatedState){
         swSwitch->setDimmer(*aggregatedState);
+    }
+}
+
+void SwitchAggregator::printStatus(){
+    if(overrideState){
+        LOGSwitchAggregator(" ^ overrideState: %02d",overrideState.value());
+    }
+    if(behaviourHandler.getValue()){
+        LOGSwitchAggregator(" | behaviourHandler: %02d",behaviourHandler.getValue().value());
+    }
+    if(aggregatedState){
+        LOGSwitchAggregator(" v aggregatedState: %02d",aggregatedState.value());
     }
 }
 
@@ -147,6 +164,10 @@ void SwitchAggregator::handleEvent(event_t& evt){
         return;
     }
 
+    if(handlePresenceEvents(evt)){
+        return;
+    }
+
    if(handleAllowedOperations(evt)){
        return;
    }
@@ -189,13 +210,19 @@ bool SwitchAggregator::handlePresenceEvents(event_t& evt){
 
         switch(mutationtype){
             case PresenceHandler::MutationType::LastUserExitSphere : {
+                LOGd("SwitchAggregator LastUserExit");
                 if(overrideState){
-                    if (behaviourHandler.requiresPresence(SystemTime::now())) {
+                    TimeOfDay now = SystemTime::now();
+                    LOGd("SwitchAggregator LastUserExit override state true (%02d:%02d:%02d)",now.h(),now.m(),now.s());
+
+                    if (behaviourHandler.requiresPresence(now)) {
                         // if there exists a behaviour which is active at given time and 
                         //      	and it has a non-negated presence clause (that may not be satisfied)
                         //      		clear override
                         LOGSwitchAggregator("clearing override state because last user exited sphere");
                         overrideState = {};
+                        // updateBehaviourHandlers();
+                        // updateState();
                     }
                 }
   
