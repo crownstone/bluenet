@@ -76,8 +76,8 @@ enum StateQueueOp {
  * type:           State type
  * id:             State id
  * counter:        Number of ticks until item is executed and removed from queue.
- * init_counter:   In case this item is added again, set counter to this value.
- * execute:        Whether or not to execute the operation.
+ * init_counter:   When set, and execute is true, this item is added again with counter set to this value.
+ * execute:        Whether or not to execute the operation when the counter reaches 0.
  */
 struct __attribute__((__packed__)) cs_state_store_queue_t {
 	StateQueueOp operation;
