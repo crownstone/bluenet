@@ -142,8 +142,6 @@ ADD_DEFINITIONS("-DCHANGE_NAME_ON_RESET=${CHANGE_NAME_ON_RESET}")
 
 # Add characteristics
 ADD_DEFINITIONS("-DCHAR_CONTROL=${CHAR_CONTROL}")
-ADD_DEFINITIONS("-DCHAR_CONFIGURATION=${CHAR_CONFIGURATION}")
-ADD_DEFINITIONS("-DCHAR_STATE=${CHAR_STATE}")
 
 # Publish all options as CMake options as well
 
@@ -206,5 +204,4 @@ SET(BEACON_RSSI                                 "${BEACON_RSSI}"                
 
 # Add characteristics
 SET(CHAR_CONTROL                                "${CHAR_CONTROL}"                   CACHE STRING "CHAR_CONTROL" FORCE)
-SET(CHAR_CONFIGURATION                          "${CHAR_CONFIGURATION}"             CACHE STRING "CHAR_CONFIGURATION" FORCE)
-SET(CHAR_STATE                                  "${CHAR_STATE}"                     CACHE STRING "CHAR_STATE" FORCE)
+

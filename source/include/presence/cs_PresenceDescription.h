@@ -55,7 +55,7 @@ class PresenceStateDescription{
     }
 
     void print(){
-        uint32_t rooms[2] = {
+        [[maybe_unused]] uint32_t rooms[2] = {
             static_cast<uint32_t>(val >> 0 ),
             static_cast<uint32_t>(val >> 32)
         };
