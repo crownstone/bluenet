@@ -1,11 +1,49 @@
 # Configuration options, used by build systems and scripts.
 
-# The name that is advertised.
-# Should be 4 characters or less
-BLUETOOTH_NAME=Test
+#######################################################
+# The values set here will also be used for releases! #
+#######################################################
 
+# The name that is advertised.
+# Should be 4 characters or less.
+BLUETOOTH_NAME=CRWN
+
+# Firmware and bootloader version will be overwritten.
+# At release, from the files: source/VERSION and source/bootloader/VERSION
+# Else, by git hash.
 FIRMWARE_VERSION=undefined
 BOOTLOADER_VERSION=undefined
+
+# Verbosity of the UART
+# SERIAL_NONE                 0
+# SERIAL_READ_ONLY            1
+# SERIAL_BYTE_PROTOCOL_ONLY   2
+# SERIAL_FATAL                3
+# SERIAL_ERROR                4
+# SERIAL_WARN                 5
+# SERIAL_INFO                 6
+# SERIAL_DEBUG                7
+# SERIAL_VERBOSE              8
+SERIAL_VERBOSITY=SERIAL_BYTE_PROTOCOL_ONLY
+
+# Default uart mode.
+# This can be changed via a bluetooth command.
+# SERIAL_ENABLE_NONE         0
+# SERIAL_ENABLE_RX_ONLY      1
+# SERIAL_ENABLE_RX_AND_TX    3
+CS_SERIAL_ENABLED=0
+
+# If you have serial debug, you probably want to disable the binary protocol, so that you only get debug text.
+CS_UART_BINARY_PROTOCOL_ENABLED=1
+
+# Use the NRF logger module, handy when debugging NRF modules.
+# 0 to disable.
+# 1 to use RTT for logging, so it can coexist with bluenet serial.
+#   Only works when connected via JLink.
+# 2 to use UART, this replaces bluenet serial, and thus breaks the binary protocol.
+#   Also, the UART pin is then defined at compile time.
+CS_SERIAL_NRF_LOG_ENABLED=0
+CS_SERIAL_NRF_LOG_PIN_TX=6
 
 # The different boards that can be used (from cs_Boards.h):
 # ## Nordic boards
@@ -33,108 +71,74 @@ BOOTLOADER_VERSION=undefined
 #HARDWARE_BOARD=ACR01B2C
 
 # The default hardware board, in case no board is written in UICR.
-# This value will also be written to UICR.
+# This value will then also be written to UICR.
 DEFAULT_HARDWARE_BOARD=ACR01B2C
 
 # Add reset counter at end of name
 CHANGE_NAME_ON_RESET=0
 
-# Enable or disable meshing (1 or 0)
-MESHING=1
+# Compile the mesh code.
 BUILD_MESHING=1
 
-# Use the (active) scanner in the mesh
+# Enable the mesh code.
+MESHING=1
+
+# Use the (active) scanner of the mesh.
 MESH_SCANNER=1
 
 # Advertise iBeacon packets.
 IBEACON=1
 
-# Set if crownstone should set power on by default when turning on
-# TODO: remove this
+# Set if crownstone should set switch on by default, on boot.
+# TODO: This macro is deprecated. It will be removed in the future.
 DEFAULT_ON=0
 
 # Enable or disable interval scanner, will scann every
 # SCAN_DURATION + SCAN_BREAK_DURATION ms, for SCAN_DURATION ms
 INTERVAL_SCANNER_ENABLED=0
 
+# Durations for the interval scanner in ms.
+SCAN_DURATION=2000
+SCAN_BREAK_DURATION=7000
+
 # Enables the dimmer.
 PWM_ENABLE=1
 
-# Define the iBeacon advertisement package parameters
-# only applies if IBEACON==1
-# the proximity UUID.
+# The iBeacon advertisement packet parameters contains the proximity UUID, MAJOR, MINOR, AND RSSI value.
 BEACON_UUID="a643423e-e175-4af0-a2e4-31e32f729a8a"
-# the major number
 BEACON_MAJOR=0
-# the minor number
 BEACON_MINOR=0
-# the rssi
 BEACON_RSSI=0xC4
 
-# Set to 1 to enable encryption of BLE (characteristics and advertisements)
+# Set to 1 to enable encryption of BLE (characteristics and advertisements).
 ENCRYPTION=1
 
 # Maximum number of vendor specific services
 # NOTE: increasing this will also need to increase the RAM_R1_BASE
 MAX_NUM_VS_SERVICES=2
 
-# Enable or disable characteristics
+# Enable or disable characteristics.
 CHAR_CONTROL=1
-CHAR_CONFIGURATION=1
-CHAR_STATE=1
 
-# Size of the master buffer
-# Currently this should not be larger than BLE_GATTS_VAR_ATTR_LEN_MAX (512)
+# Size of master buffers.
+# It should not be larger than BLE_GATTS_VAR_ATTR_LEN_MAX (512)
 MASTER_BUFFER_SIZE=300
-
-# Verbosity of the UART
-# SERIAL_NONE                 0
-# SERIAL_READ_ONLY            1
-# SERIAL_BYTE_PROTOCOL_ONLY   2
-# SERIAL_FATAL                3
-# SERIAL_ERROR                4
-# SERIAL_WARN                 5
-# SERIAL_INFO                 6
-# SERIAL_DEBUG                7
-# SERIAL_VERBOSE              8
-SERIAL_VERBOSITY=SERIAL_DEBUG
-
-# Uart mode
-# SERIAL_ENABLE_NONE         0
-# SERIAL_ENABLE_RX_ONLY      1
-# SERIAL_ENABLE_RX_AND_TX    3
-CS_SERIAL_ENABLED=0
-
-CS_UART_BINARY_PROTOCOL_ENABLED=1
-
-# Use the NRF logger module, handy when debugging NRF modules.
-# 0 to disable.
-# 1 to use RTT for logging, so it can coexist with bluenet serial.
-#   Only works when connected via JLink.
-# 2 to use UART, this replaces bluenet serial, and thus breaks the binary protocol.
-#   Also, the UART pin is then defined at compile time.
-CS_SERIAL_NRF_LOG_ENABLED=0
-CS_SERIAL_NRF_LOG_PIN_TX=6
-
-NRF_SERIES=NRF52
 
 # Default transmission power
 # Can be: -40, -20, -16, -12, -8, -4, 0, or 4
 TX_POWER=4
 
+NRF_SERIES=NRF52
+
 # Default advertisement interval, in units of 0.625 ms
 # Must be between 32 and 16384
 ADVERTISEMENT_INTERVAL=160
 
-# Maximal chip temperature in degrees celsius
+# Maximum chip temperature in degrees celsius. Above this, thermal protection kicks in.
 MAX_CHIP_TEMP=75
 
 # Time (ms) to wait with during booting
 BOOT_DELAY=400
-
-# Durations for the scanner in ms
-SCAN_DURATION=2000
-SCAN_BREAK_DURATION=7000
 
 # Enable RSSI measurements when connected.
 ENABLE_RSSI_FOR_CONNECTION=1
@@ -167,10 +171,11 @@ NRF51_USE_SOFTDEVICE=1
 
 # the directory with /Source and /Include subdirectories from the Nordic SDK
 NRF5_DIR=
-# the nordic sdk version
+
+# The nordic sdk version
 NORDIC_SDK_VERSION=15
 
-# starting with SoftDevice S110 v7 there is no separate UICR section
+# Starting with SoftDevice S110 v7 there is no separate UICR section
 SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
 
 # Bootloader without debug:
@@ -191,7 +196,8 @@ BOOTLOADER_LENGTH=0x8000
 
 # DFU is using the first 4 bytes in the UICR (0x10001080) for DFU INIT checks.
 UICR_DFU_INDEX=0
-# We use the second 4 bytes in the UICR (0x10001084) to store the hardware board type.
+
+# The second 4 bytes in the UICR (0x10001084) store the hardware board type.
 UICR_BOARD_INDEX=1
 
 # The address (in UICR) where the hardware board type is written and read
@@ -220,7 +226,7 @@ HARDWARE_BOARD_ADDRESS=0x10001084
 # RAM_APPLICATION_AMOUNT               - size of softdevice in RAM
 
 #######################################################################################################################
-# S132 6.0 (comes with SDK 15)
+# S132 6.1 (comes with SDK 15)
 #######################################################################################################################
 SOFTDEVICE_MAJOR=6
 SOFTDEVICE_MINOR=1
@@ -232,24 +238,22 @@ SOFTDEVICE=s132_nrf52_6.1.1
 # TODO: Copy the relevant files to the local repository again...
 APPLICATION_START_ADDRESS=0x00026000
 
-# This should be a chip with 512kB, so 0x80000 - 0x26000 = 0x5A000
-APPLICATION_LENGTH=0x5A000
+# Bootloader address - application address, so: 0x76000 - 0x26000 - 0x8000 = 0x50000
+APPLICATION_LENGTH=0x50000
+
+# Start of RAM for the application
+RAM_R1_BASE=0x20002380
+
+# Amount of RAM for the application: 0x20010000 - RAM_R1_BASE
+RAM_APPLICATION_AMOUNT=0xDC80
 
 ## To enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
 ## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x580, so if you
 ## increase the ATTR_TABLE_SIZE, the RAM_R1_BASE has to be increased by the same value and the RAM_APPLICATION_AMOUNT
 ## has to be decreased by the same value (and most likely the HEAP_SIZE as well), e.g.
-
 # TODO: Calculate new attr table size, and adjust RAM_R1_BASE accordingly
-
 # WARNING, WARNING
 # The following values are not used...
 # Adjust them in $BLUENET_DIR/include/third/nrf/generic_gcc_nrf52.ld for now! (adjusted version of $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld)
-
 ATTR_TABLE_SIZE=0x500
-
-RAM_R1_BASE=0x20002380
-# This is 0x20010000 - RAM_R1_BASE
-RAM_APPLICATION_AMOUNT=0xDC80
-
 HEAP_SIZE=20000

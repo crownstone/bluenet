@@ -20,11 +20,8 @@ endif()
 message(STATUS "Create release directory: ${CROWNSTONE_RELEASE_DIR}")
 file(MAKE_DIRECTORY "${CROWNSTONE_RELEASE_DIR}")
 
-message(STATUS "Copy conf/cmake/CMakeBuild.config.release.default file")
-CONFIGURE_FILE(${WORKSPACE_DIR}/source/conf/cmake/CMakeBuild.config.release.default ${CROWNSTONE_RELEASE_DIR}/CMakeBuild.config COPYONLY)
-
-# Now check if all fields are defined compared to the debug defaults
-message(STATUS "Now compare with conf/cmake/CMakeBuild.config.default file. This is not done yet!")
+message(STATUS "Copy conf/cmake/CMakeBuild.config.default file")
+CONFIGURE_FILE(${WORKSPACE_DIR}/source/conf/cmake/CMakeBuild.config.default ${CROWNSTONE_RELEASE_DIR}/CMakeBuild.config COPYONLY)
 
 git_info("${WORKSPACE_DIR}/source" GIT_BRANCH GIT_HASH)
 
