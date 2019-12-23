@@ -23,6 +23,7 @@
 class SystemTime : public EventListener {
     public:
     static Time posix();
+    static DayOfWeek day();
     static TimeOfDay now();
 
     /**

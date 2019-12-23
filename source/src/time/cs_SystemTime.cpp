@@ -117,13 +117,18 @@ void SystemTime::handleEvent(event_t & event) {
 	}
 }
 
-TimeOfDay SystemTime::now(){
-     return TimeOfDay(posixTimeStamp);
-}
-
 Time SystemTime::posix(){
     return posixTimeStamp;
 }
+
+DayOfWeek SystemTime::day(){
+    return posix();
+}
+
+TimeOfDay SystemTime::now(){
+     return posix();
+}
+
 
 uint32_t SystemTime::up(){
 	return uptime_sec;
