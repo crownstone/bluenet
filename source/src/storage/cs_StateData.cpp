@@ -190,7 +190,8 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		*(TYPIFY(STATE_TIME)*)data.value = STATE_TIME_DEFAULT;
 		return ERR_SUCCESS;
 	case CS_TYPE::STATE_SUN_TIME:
-		*reinterpret_cast<TYPIFY(STATE_SUN_TIME)*>(data.value) = set_sun_time_t();
+		*reinterpret_cast<TYPIFY(STATE_SUN_TIME)*>(data.value) = sun_time_t();
+		return ERR_SUCCESS;
 	case CS_TYPE::STATE_FACTORY_RESET:
 		*(TYPIFY(STATE_FACTORY_RESET)*)data.value = STATE_FACTORY_RESET_DEFAULT;
 		return ERR_SUCCESS;

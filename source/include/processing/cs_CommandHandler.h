@@ -69,8 +69,6 @@ private:
 
 	const boards_config_t* _boardConfig;
 
-	static const constexpr uint32_t SunTimeThrottlePeriod_s = 60*60*24;
-
 	EncryptionAccessLevel getRequiredAccessLevel(const CommandHandlerTypes type);
 	bool allowedAsMeshCommand(const CommandHandlerTypes type);
 
@@ -79,9 +77,7 @@ private:
 	command_result_t handleCmdReset                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdFactoryReset            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdSetTime                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdSetTimeAdvertisement    (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdSetSunTime              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
-	command_result_t handleCmdSetSunTimeAdvertisement (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdIncreaseTx              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdValidateSetup           (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdDisconnect              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);

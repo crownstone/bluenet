@@ -271,49 +271,71 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 				);
 	}
 
-	CommandHandlerTypes commandType = CTRL_CMD_UNKNOWN;
-	switch (type) {
-		case 1: {
-			commandType = CTRL_CMD_MULTI_SWITCH;
-			break;
-		}
-		case 2: {
-			commandType = CTRL_CMD_SET_TIME_ADVERTISEMENT;
-			break;
-		}
-		case 3: {
-			commandType = CTRL_CMD_SET_SUN_TIME_ADVERTISEMENT;
-			break;
-		}
-		case 4: {
-			commandType = CTRL_CMD_BEHAVIOURHANDLER_SETTINGS;
-			break;
-		}
-	}
-
-	if (commandType == CTRL_CMD_UNKNOWN) {
-		return true;
-	}
-
-	// Claim only after validation
-	if (!claim(header.deviceToken, getPartOfEncryptedData(encryptedPayload), claimIndex)) {
-		// Can't claim, but command is validated.
-		return true;
-	}
-
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
-	controlCmd.type = commandType;
+	controlCmd.type = CTRL_CMD_UNKNOWN;
 	controlCmd.accessLevel = accessLevel;
 	controlCmd.data = commandData;
 	controlCmd.size = length;
 	controlCmd.source.flagExternal = false;
 	controlCmd.source.sourceId = CS_CMD_SOURCE_DEVICE_TOKEN + header.deviceToken;
 	controlCmd.source.count = (decryptedPayloadRC5[0] >> 8) & 0xFF;
+	LOGd("adv cmd type=%u", type);
+	switch (type) {
+		case 1: {
+			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
+			break;
+		}
+		case 2: {
+			size16_t setTimeSize = sizeof(uint32_t);
+			size16_t setSunTimeSize = 6; // 2 uint24
+			if (length < setTimeSize + setSunTimeSize) {
+				return false;
+			}
+			// First, set time
+			controlCmd.type = CTRL_CMD_SET_TIME;
+			controlCmd.size = setTimeSize;
+			LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
+			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+			event.dispatch();
+
+			// Then, set sun time.
+			sun_time_t sunTime;
+			sunTime.sunrise = (commandData[setTimeSize + 0] << 0) + (commandData[setTimeSize + 1] << 8) + (commandData[setTimeSize + 2] << 16);
+			sunTime.sunset  = (commandData[setTimeSize + 3] << 0) + (commandData[setTimeSize + 4] << 8) + (commandData[setTimeSize + 5] << 16);
+			controlCmd.type = CTRL_CMD_SET_SUN_TIME;
+			controlCmd.data = (buffer_ptr_t)&sunTime;
+			controlCmd.size = sizeof(sunTime);
+			break;
+		}
+		case 3: {
+			size16_t setSunTimeSize = 6; // 2 uint24
+			if (length < setSunTimeSize) {
+				return false;
+			}
+			sun_time_t sunTime;
+			sunTime.sunrise = (commandData[0] << 0) + (commandData[1] << 8) + (commandData[2] << 16);
+			sunTime.sunset  = (commandData[3] << 0) + (commandData[4] << 8) + (commandData[5] << 16);
+			controlCmd.type = CTRL_CMD_SET_SUN_TIME;
+			controlCmd.data = (buffer_ptr_t)&sunTime;
+			controlCmd.size = sizeof(sunTime);
+			break;
+		}
+		case 4: {
+			controlCmd.type = CTRL_CMD_BEHAVIOURHANDLER_SETTINGS;
+			break;
+		}
+	}
+	if (controlCmd.type == CTRL_CMD_UNKNOWN) {
+		return true;
+	}
+	// Claim only after validation
+	if (!claim(header.deviceToken, getPartOfEncryptedData(encryptedPayload), claimIndex)) {
+		// Can't claim, but command is validated.
+		return true;
+	}
 	LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
-	
 	event.dispatch();
-	
 	return true;
 }
 

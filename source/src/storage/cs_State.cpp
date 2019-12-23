@@ -637,7 +637,7 @@ cs_ret_code_t State::setThrottled(const cs_state_data_t & data, uint32_t periodS
 		// else go on
 	}
 	
-	// write it to flash
+	// write it to ram
 	ret_code = set(data, PersistenceMode::RAM);
 	if (ret_code != ERR_SUCCESS) {
 		return ret_code;
@@ -745,7 +745,7 @@ void State::delayedStoreTick() {
 	size16_t index_in_ram;
 	for (auto it = _store_queue.begin(); it != _store_queue.end(); /*it++*/) {
 		if (it->counter == 0) {
-			bool removeItem = true;
+			bool keepItem = false;
 			if (it->execute) {
 				switch (it->operation) {
 				case CS_STATE_QUEUE_OP_WRITE: {
@@ -757,7 +757,7 @@ void State::delayedStoreTick() {
 					if (ret_code == ERR_SUCCESS) {
 						ret_code = storeInFlash(index_in_ram);
 						if (ret_code == ERR_BUSY) {
-							removeItem = false;
+							keepItem = true;
 						}
 					}
 					break;
@@ -765,39 +765,42 @@ void State::delayedStoreTick() {
 				case CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE: {
 					ret_code = removeFromFlash(it->type, it->id);
 					if (ret_code == ERR_BUSY) {
-						removeItem = false;
+						keepItem = true;
 					}
 					break;
 				}
 				case CS_STATE_QUEUE_OP_FACTORY_RESET: {
 					ret_code = _storage->factoryReset();
 					if (!handleFactoryResetResult(ret_code)) {
-						removeItem = false;
+						keepItem = true;
 					}
 					break;
 				}
 				case CS_STATE_QUEUE_OP_GC: {
 					ret_code = _storage->garbageCollect();
 					if (ret_code == ERR_BUSY) {
-						removeItem = false;
+						keepItem = true;
 					}
 					break;
 				}
 				}
 			}
-			if (removeItem) {
+			if (it->execute && it->init_counter != 0) {
+				// When init_counter is set, add the item again, but don't execute.
+				keepItem = true;
+				it->execute = false;
+				it->counter = it->init_counter;
+			}
+			else {
+				// Add to queue again with fixed retry delay.
+				it->counter = STATE_RETRY_STORE_DELAY_MS / TICK_INTERVAL_MS;
+			}
+
+			if (!keepItem) {
 				it = _store_queue.erase(it);
 			}
 			else {
-				if (it->init_counter == 0) {
-					// Add to queue again with fixed retry delay.
-					it->counter = STATE_RETRY_STORE_DELAY_MS / TICK_INTERVAL_MS;
-					it++;
-				} else {
-					// Add to queue with given initialization value
-					it->counter = it->init_counter;
-					it++;
-				}
+				it++;
 			}
 		}
 		else {
