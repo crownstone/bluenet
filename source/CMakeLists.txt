@@ -798,7 +798,7 @@ ELSE()
 			COMMAND echo nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip
 			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip
 			COMMAND ${CMAKE_COMMAND} -E make_directory firmwares
-			COMMAND ${CMAKE_COMMAND} -E copy application_dfu.zip firmwares/crownstone_${BOOTLOADER_VERSION}.zip
+			COMMAND ${CMAKE_COMMAND} -E copy application_dfu.zip firmwares/crownstone_${FIRMWARE_VERSION}.zip
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with application only"
@@ -817,7 +817,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
 			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip
 			COMMAND ${CMAKE_COMMAND} -E make_directory bootloaders
-			COMMAND ${CMAKE_COMMAND} -E copy bootloader_dfu.zip bootloaders/crownstone_${FIRMWARE_VERSION}.zip
+			COMMAND ${CMAKE_COMMAND} -E copy bootloader_dfu.zip bootloaders/bootloader_${BOOTLOADER_VERSION}.zip
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with bootloader only"
@@ -912,6 +912,9 @@ ELSE()
 		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.bin" DESTINATION .)
 		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.elf" DESTINATION .)
 		INSTALL(FILES "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" DESTINATION .)
+		INSTALL(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.elf" DESTINATION .)
+		INSTALL(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader.hex" DESTINATION .)
+		INSTALL(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" DESTINATION .)
 		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/firmwares"       DESTINATION . FILES_MATCHING PATTERN "*.zip")
 		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/bootloaders"     DESTINATION . FILES_MATCHING PATTERN "*.zip")
 		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/factory-images"  DESTINATION . FILES_MATCHING PATTERN "*")

@@ -68,7 +68,7 @@ CS_SERIAL_NRF_LOG_PIN_TX=6
 # ACR01B2C             1502
 # ACR01B2E             1503
 # ACR01B2G             1504
-#HARDWARE_BOARD=ACR01B2C
+HARDWARE_BOARD=ACR01B2C
 
 # The default hardware board, in case no board is written in UICR.
 # This value will then also be written to UICR.
