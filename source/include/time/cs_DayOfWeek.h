@@ -8,12 +8,14 @@
 
 #include <cstddef>
 
-typedef uint8_t DayOfWeekBitMask;
+enum class DayOfWeek : uint8_t { 
+    Sunday      = 1 << 0,
+    Monday      = 1 << 1,
+    Tuesday     = 1 << 2,
+    Wednesday   = 1 << 3,
+    Thursday    = 1 << 4,
+    Friday      = 1 << 5,
+    Saturday    = 1 << 6,
+};
 
-const constexpr DayOfWeekBitMask Monday     = 1 << 0;
-const constexpr DayOfWeekBitMask Tuesday    = 1 << 1;
-const constexpr DayOfWeekBitMask Wednesday  = 1 << 2;
-const constexpr DayOfWeekBitMask Thursday   = 1 << 3;
-const constexpr DayOfWeekBitMask Friday     = 1 << 4;
-const constexpr DayOfWeekBitMask Saturday   = 1 << 5;
-const constexpr DayOfWeekBitMask Sunday     = 1 << 6;
+typedef uint8_t DayOfWeekBitMask;

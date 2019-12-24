@@ -23,16 +23,13 @@
 class SystemTime : public EventListener {
     public:
     static Time posix();
-    static TimeOfDay now();
+    static Time now();
+    static DayOfWeek day();
 
     /**
      * Uptime in seconds.
      */
     static uint32_t up();
-
-    // static Day day();
-    // static Month month();
-    // static Date date();
 
     virtual void handleEvent(event_t& event);
 

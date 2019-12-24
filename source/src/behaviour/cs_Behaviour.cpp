@@ -93,15 +93,14 @@ TimeOfDay Behaviour::until() const {
     return behaviourAppliesUntil; 
 }
 
-bool Behaviour::isValid(TimeOfDay currenttime){
-    // LOGd("Behaviour::isValid ToD: [%02d:%02d:%02d - %02d:%02d:%02d] contains %02d:%02d:%02d?", 
-    //     from().h(),from().m(),from().s(),
-    //     until().h(),until().m(),until().s(),
-    //     currenttime.h(),currenttime.m(),currenttime.s()
-    // );
-    return from() < until() // ensure proper midnight roll-over 
-        ? (from() <= currenttime && currenttime < until()) 
-        : (from() <= currenttime || currenttime < until());
+bool Behaviour::isValid(Time currenttime){
+    if(activeDays & static_cast<uint8_t>(currenttime.dayOfWeek())){
+        return from() < until() // ensure proper midnight roll-over 
+            ? (from() <= currenttime && currenttime < until()) 
+            : (from() <= currenttime || currenttime < until());
+    }
+
+    return false;
 }
 
 void Behaviour::print() {

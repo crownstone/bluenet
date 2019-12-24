@@ -8,7 +8,7 @@
 
 #include <events/cs_EventListener.h>
 #include <presence/cs_PresenceDescription.h>
-#include <time/cs_TimeOfDay.h>
+#include <time/cs_Time.h>
 
 #include <optional>
 
@@ -46,7 +46,7 @@ class TwilightHandler : public EventListener {
      * multiple agreeing behaviours have been found.
      * In this case its value contains the desired state value.
      */
-    uint8_t computeIntendedState(TimeOfDay currenttime);
+    uint8_t computeIntendedState(Time currenttime);
 
     uint8_t previousIntendedState = 100;
 };

@@ -58,7 +58,7 @@ class SwitchBehaviour : public Behaviour{
      * Does the behaviour apply to the current situation?
      * If from() == until() the behaviour isValid all day.
      **/
-    bool isValid(TimeOfDay currenttime, PresenceStateDescription currentpresence);
+    bool isValid(Time currenttime, PresenceStateDescription currentpresence);
 
     // Presence description is cached in order to prevent
     // that the behaviour flickers when a user is on the border of two rooms.
@@ -82,9 +82,4 @@ class SwitchBehaviour : public Behaviour{
 
     // unserialized fields (runtime values)
     std::optional<uint32_t> prevIsValidTimeStamp = {}; // when was the last call to _isValid that returned true?
-
-    // constants
-    // after this amount of seconds an invalid presence condition will result in
-    // the behaviour being invalidated.
-    static constexpr uint32_t PresenceIsValidTimeOut_s = 5*60;
 };

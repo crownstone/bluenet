@@ -7,6 +7,7 @@
 #pragma once
 
 
+#include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
 #include <time/cs_DayOfWeek.h>
 
@@ -59,8 +60,10 @@ class Behaviour {
     /**
      * Does the behaviour apply to the current situation?
      * If from() == until() the behaviour isValid all day.
+     * 
+     * Also checks the day of week bitmask.
      **/
-    bool isValid(TimeOfDay currenttime);
+    bool isValid(Time currenttime);
     
     virtual bool requiresPresence() { return false; }
     virtual bool requiresAbsence() { return false; }
