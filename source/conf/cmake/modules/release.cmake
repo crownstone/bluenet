@@ -6,11 +6,12 @@ get_version_info("${WORKSPACE_DIR}/source" FIRMWARE_VERSION FIRMWARE_DFU_VERSION
 message(STATUS "Firmware version: ${FIRMWARE_VERSION}")
 message(STATUS "Firmware version: ${FIRMWARE_RC_VERSION}")
 
-if(FIRMWARE_RC_VERSION AND NOT FIRMWARE_RC_VERSION STREQUAL "") 
-  set(CROWNSTONE_RELEASE_DIR "${WORKSPACE_DIR}/release/crownstone_${FIRMWARE_VERSION}-${FIRMWARE_RC_VERSION}")
-else()
+#if(FIRMWARE_RC_VERSION AND NOT FIRMWARE_RC_VERSION STREQUAL "") 
+#  set(CROWNSTONE_RELEASE_DIR "${WORKSPACE_DIR}/release/crownstone_${FIRMWARE_VERSION}-${FIRMWARE_RC_VERSION}")
+#else()
+  # Hacked in: FIRMWARE_VERSION also has the "-RCx" added to it.
   set(CROWNSTONE_RELEASE_DIR "${WORKSPACE_DIR}/release/crownstone_${FIRMWARE_VERSION}")
-endif()
+#endif()
 
 # Drop out if the directory already exists
 if(EXISTS "${CROWNSTONE_RELEASE_DIR}") 

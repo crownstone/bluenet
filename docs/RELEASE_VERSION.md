@@ -37,6 +37,13 @@ make install
 
 After make install you will find the `.zip` files in (subdirectories of) `bin/crownstone_3.0.1-RC0`.
 
+Don't forget to commit the release config, and create a git tag:
+
+```
+git tag -a -m "Tagging version 3.0.1-RC0" "v3.0.1-RC0"
+git push --tags
+```
+
 
 
 # Factory images
