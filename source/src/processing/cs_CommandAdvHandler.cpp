@@ -279,7 +279,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	controlCmd.source.flagExternal = false;
 	controlCmd.source.sourceId = CS_CMD_SOURCE_DEVICE_TOKEN + header.deviceToken;
 	controlCmd.source.count = (decryptedPayloadRC5[0] >> 8) & 0xFF;
-	LOGd("adv cmd type=%u", type);
+	LOGCommandAdvDebug("adv cmd type=%u", type);
 	switch (type) {
 		case 1: {
 			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
