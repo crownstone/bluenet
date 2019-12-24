@@ -147,21 +147,20 @@ bool SwSwitch::isSafeToDim(){
 // storage functionality
 
 void SwSwitch::store(switch_state_t nextState) {
-
+	// this seems to be redundant as the only call to this function
+	// passes currentState as parameter.
+	currentState = nextState;
+	if (nextState.asInt == storedState.asInt) {
+		return;
+	}
     bool persistNow = false;
-
-	cs_state_data_t stateData (CS_TYPE::STATE_SWITCH_STATE, 
-        reinterpret_cast<uint8_t*>(&nextState), sizeof(nextState));
-
+	cs_state_data_t stateData(CS_TYPE::STATE_SWITCH_STATE, reinterpret_cast<uint8_t*>(&nextState), sizeof(nextState));
+	storedState = nextState;
 	if (persistNow) {
 		State::getInstance().set(stateData);
 	} else {
 		State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
 	}
-
-    // this seems to be redundant as the only call to this function
-    // passes currentState as parameter.
-    currentState = nextState;
 
     SWSWITCH_LOG_CALLFLOW("store(%s, %d%%)",
         currentState.state.relay != 0? "on" : "off", 
@@ -175,6 +174,8 @@ void SwSwitch::forceRelayOn() {
 
     hwSwitch.setRelay(true);
     actualState.state.relay = 1;
+
+    // 24-12-2019 TODO @Arend no store() ?
 	
 	event_t event(CS_TYPE::EVT_RELAY_FORCED_ON);
 	EventDispatcher::getInstance().dispatch(event);
@@ -211,6 +212,8 @@ void SwSwitch::forceDimmerOff() {
 
     setIntensity_unchecked(0);
 
+    // 24-12-2019 TODO @Arend no store() ?
+
     // as there is no mechanism to turn it back on this isn't done yet, 
     // but it would be safer to cut power to the dimmer if in error I suppose.
     // hwSwitch.setDimmerPower(false);
@@ -224,6 +227,8 @@ void SwSwitch::setIntensity_unchecked(uint8_t intensity_value){
         return; 
     }
 
+    // 24-12-2019 TODO @Arend no store() ?
+
     hwSwitch.setIntensity(intensity_value);
     actualState.state.dimmer = intensity_value;
 }
@@ -232,6 +237,8 @@ void SwSwitch::setRelay_unchecked(bool relay_state){
     if(actualState.state.relay == relay_state){ 
         return; 
     }
+
+    // 24-12-2019 TODO @Arend no store() ?
 
     hwSwitch.setRelay(relay_state);
     actualState.state.relay = relay_state;
@@ -252,6 +259,7 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
 
     // load intendedState currentState from State.
     State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &currentState, sizeof(currentState));
+    storedState = currentState;
 
     // load locked state
     bool switch_locked = false;

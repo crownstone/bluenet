@@ -34,6 +34,8 @@ class SwSwitch : public ISwitch, public EventListener {
     // when the dimmer takes long to initialize.
     switch_state_t currentState = {0};
 
+    switch_state_t storedState;
+
     // user/app setting.
     // when resolving currentState this will decide if the dimmer may be used or not.
     bool allowDimming = false;     
