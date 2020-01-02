@@ -325,7 +325,7 @@ void PowerSampling::initAverages() {
 /**
  * This just returns the given currentIndex.
  */
-uint16_t PowerSampling::determineCurrentIndex(power_t power) {
+uint16_t PowerSampling::determineCurrentIndex(power_t & power) {
 	return power.currentIndex;
 }
 
@@ -344,7 +344,7 @@ uint16_t PowerSampling::determineCurrentIndex(power_t power) {
  * We iterate over the buffer. The number of samples within a single buffer (either voltage or current) depends on the
  * period in microseconds and the sample interval also in microseconds.
  */
-void PowerSampling::calculateVoltageZero(power_t power) {
+void PowerSampling::calculateVoltageZero(power_t & power) {
 	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
 
 	int64_t sum = 0;
@@ -373,7 +373,7 @@ void PowerSampling::calculateVoltageZero(power_t power) {
 /**
  * The same as for the voltage curve, but for the current.
  */
-void PowerSampling::calculateCurrentZero(power_t power) {
+void PowerSampling::calculateCurrentZero(power_t & power) {
 	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
 
 	int64_t sum = 0;
@@ -468,7 +468,7 @@ void PowerSampling::filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id
  *
  * The int64_t sum is large enough: 2^63 / (2^12 * 1000 * 2^12 * 1000) = 5*10^5. Many more samples than the 100 we use.
  */
-void PowerSampling::calculatePower(power_t power) {
+void PowerSampling::calculatePower(power_t & power) {
 
 	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
 
@@ -529,7 +529,7 @@ void PowerSampling::calculatePower(power_t power) {
 	// Now that Irms is known: first check the soft fuse.
 //	if (_zeroCurrentInitialized && _zeroVoltageInitialized) {
 	if (_zeroVoltageCount > 200 && _zeroCurrentCount > 200) { // Wait some time, for the measurement to converge.. why does this have to take so long?
-		checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA);
+		checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA, power);
 	}
 
 
@@ -691,7 +691,7 @@ void PowerSampling::calculateEnergy() {
 /**
  * TODO: What does this do?
  */
-void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA) {
+void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA, power_t & power) {
 
 	// Get the current state errors
 	TYPIFY(STATE_ERRORS) stateErrors;
@@ -732,7 +732,12 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 
 	// Check if the filtered Irms is above threshold.
 	if ((currentRmsFilteredMA > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {
-		LOGw("current above threshold");
+		LOGw("Overcurrent: %i V=[%i %i ..] C=[%i %i ..]",
+				currentRmsFilteredMA,
+				power.buf[power.voltageIndex],
+				power.buf[power.voltageIndex + power.numChannels],
+				power.buf[power.currentIndex],
+				power.buf[power.currentIndex + power.numChannels]);
 		event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 		EventDispatcher::getInstance().dispatch(event);
 		stateErrors.errors.overCurrent = true;

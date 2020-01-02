@@ -160,15 +160,15 @@ private:
 
 	/** Determine which index is actually the current index, this should not be necessary!
 	 */
-	uint16_t determineCurrentIndex(power_t power);
+	uint16_t determineCurrentIndex(power_t & power);
 
 	/** Calculate the value of the zero line of the voltage samples
 	 */
-	void calculateVoltageZero(power_t power);
+	void calculateVoltageZero(power_t & power);
 
 	/** Calculate the value of the zero line of the current samples
 	 */
-	void calculateCurrentZero(power_t power);
+	void calculateCurrentZero(power_t & power);
 
 	/** Filter the samples
 	 */
@@ -176,7 +176,7 @@ private:
 
 	/** Calculate the average power usage
 	 */
-	void calculatePower(power_t power);
+	void calculatePower(power_t & power);
 
 	/**
 	 * Determines measured power usage with no load.
@@ -193,7 +193,7 @@ private:
 
 	/** If current goes beyond predefined threshold levels, take action!
 	 */
-	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered);
+	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, power_t & power);
 
 	/** Start IGBT failure detection
 	 */
