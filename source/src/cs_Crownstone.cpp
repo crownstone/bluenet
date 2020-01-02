@@ -267,7 +267,7 @@ void Crownstone::initDrivers(uint16_t step) {
 				&relayHighDuration, sizeof(relayHighDuration));
 
 			HwSwitch h(_boardsConfig, pwmPeriod, relayHighDuration);
-						
+
 			SwitchAggregator::getInstance().init(SwSwitch(h));
 			// End init switchaggregator
 
@@ -596,6 +596,8 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::LOCALIZATION);
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
+
+			BackgroundAdvertisementHandler::getInstance();
 
 			_multiSwitchHandler = &MultiSwitchHandler::getInstance();
 			_multiSwitchHandler->init();
