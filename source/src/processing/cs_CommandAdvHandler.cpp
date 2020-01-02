@@ -260,17 +260,6 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		return false;
 	}
 
-	if( ((decryptedPayloadRC5[1] >> (16-6-3-4)) & 0x0F) > RSSI_LOG_THRESHOLD){ 
-		LOGCommandAdvVerbose("RC5: locationId=%u profileId=%u rssiOffset=%u flags=%u count=%u (not %u)",
-				(decryptedPayloadRC5[1] >> (16-6)) & 0x3F,
-				(decryptedPayloadRC5[1] >> (16-6-3)) & 0x07,
-				(decryptedPayloadRC5[1] >> (16-6-3-4)) & 0x0F,
-				(decryptedPayloadRC5[1] >> (16-6-3-4-3)) & 0x07,
-				(decryptedPayloadRC5[0] >> 8) & 0xFF,
-				(decryptedPayloadRC5[0] >> 0) & 0xFF
-				);
-	}
-
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
 	controlCmd.type = CTRL_CMD_UNKNOWN;
 	controlCmd.accessLevel = accessLevel;

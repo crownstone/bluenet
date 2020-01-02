@@ -16,8 +16,8 @@
 #include "processing/cs_CommandHandler.h"
 #include "storage/cs_State.h"
 
-//#define BACKGROUND_ADV_VERBOSE
 #define LOGBackgroundAdvDebug LOGnone
+//#define BACKGROUND_ADV_VERBOSE
 
 
 #ifdef BACKGROUND_ADV_VERBOSE
