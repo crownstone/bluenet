@@ -652,6 +652,8 @@ void Crownstone::startUp() {
 	nrf_delay_ms(50);
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
+		SwitchAggregator::getInstance().switchPowered();
+
 		//! Start temperature guard regardless of operation mode
 		LOGi(FMT_START, "temp guard");
 		_temperatureGuard->start();

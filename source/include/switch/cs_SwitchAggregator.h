@@ -27,6 +27,11 @@ class SwitchAggregator : public EventListener {
     
     void init(SwSwitch&& s); // claims ownership over s.
 
+	/**
+	 * To be called when there is enough power to use the switch.
+	 */
+	void switchPowered();
+
     /**
      * When swSwitch is locked, only CMD_SWITCH_LOCKED events will be handled.
      * Else events may alter the intended states and subsequently trigger an 

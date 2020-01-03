@@ -22,7 +22,7 @@ class SwitchAggregator;
  * Provides a simple interface to operate the switch.
  */
 class SwSwitch : public ISwitch, public EventListener {
-    private:
+private:
     HwSwitch hwSwitch;
     switch_state_t actualState = {0};
 
@@ -46,47 +46,49 @@ class SwSwitch : public ISwitch, public EventListener {
 
     // hardware validation
 
+    // after this time, assume dimmer is powered  no matter what
+	uint32_t dimmerPowerUpCountDown = PWM_BOOT_DELAY_MS / TICK_INTERVAL_MS;
+
     // time it takes for a dimmer power check to finish
     const uint32_t dimmerCheckCountDown_initvalue = DIMMER_BOOT_CHECK_DELAY_MS / TICK_INTERVAL_MS;
     uint32_t dimmerCheckCountDown = 0;
 
-    // after this time, assume dimmer is powered  no matter what
-    uint32_t dimmerPowerUpCountDown = PWM_BOOT_DELAY_MS / TICK_INTERVAL_MS; 
-  
-    // flag to prevent multiple power checks, will be set by EVT_TICK handler after calling checkDimmerPower
-    bool checkedDimmerPowerUsage = false; 
+	// Flag to remember whether the dimmer power check has been performed yet.
+    bool checkedDimmerPowerUsage = false;
 
     // result of checkDimmerPower, true indicates that the dimmer is powered/ready for use.
-    bool measuredDimmerPowerUsage = false; 
+    bool measuredDimmerPowerUsage = false;
 
     /**
-     * Initializes the count down timer and sets the dimmer to given
-     * value.
+     * Starts timer to check dimmer power check and sets the dimmer to given value.
+     *
+     * Can be called multiple times, as long as dimmer power check has not been performed.
+     *
+     * @return true when the dimmer value is set, and the timer has been started.
      */
     bool startDimmerPowerCheck(uint8_t value);
+
     /**
-     * Returns true if the dimmerCheckCountDown has expired or
+     * Returns true if the dimmerPowerUpCountDown has expired or
      * if a dimmer power check has successfully measured a correct state.
      */
     bool isDimmerCircuitPowered();
 
     /**
-     * try to check if the dimmer is powered and save the value into
-     * isDimmerCircuitPowered.
+     * Check if the dimmer is powered and save the value into measuredDimmerPowerUsage.
      * 
      * If dimming isn't allowed or currentState has a dimmer intensity of
      * zero, this method will have no effect.
      * 
-     * Will fire a EVT_DIMMER_POWERED event when it detects power while 
-     * previous know state was unpowered.
+     * Will fire a EVT_DIMMER_POWERED event when.
      */
     void checkDimmerPower();
 
     // error state semantics
-    TYPIFY(STATE_ERRORS) getErrorState();
-    bool hasDimmingFailed(); 
-    bool isSwitchFried();
-    bool errorStateOK();
+    state_errors_t getErrorState();
+    bool hasDimmingFailed(state_errors_t stateErrors);
+    bool isSwitchOverLoaded(state_errors_t stateErrors);
+    bool errorStateOK(state_errors_t stateErrors);
 
     // functional semantics (derrived from error state)
     bool isSafeToTurnRelayOn();
@@ -111,7 +113,7 @@ class SwSwitch : public ISwitch, public EventListener {
     void setIntensity_unchecked(uint8_t dimmer_value);
     void setRelay_unchecked(bool relay_state);
 
-    public:
+public:
     /**
      * Restores state from persistent memory and tries to recover to that state.
      */
@@ -181,6 +183,14 @@ class SwSwitch : public ISwitch, public EventListener {
      * Updates switchState and calls saveSwitchState.
      */
     void setDimmerPower(bool is_on) override;
+
+	/**
+	 * To be called when there is enough power to set the relay and (try to) power the dimmer.
+	 *
+	 * 03-01-2020 TODO: Let this class decide when this is the case?
+	 * Will need to fire an event that it's ready, as other classes need to start after that.
+	 */
+	void switchPowered();
 
     // EventListener
 

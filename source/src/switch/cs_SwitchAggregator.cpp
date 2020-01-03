@@ -67,7 +67,11 @@ void SwitchAggregator::init(SwSwitch&& s){
     behaviourHandler.listen();
 
     overrideState = swSwitch->getIntendedState();
-    swSwitch->resolveIntendedState();
+}
+
+void SwitchAggregator::switchPowered() {
+	swSwitch->switchPowered();
+	swSwitch->resolveIntendedState();
 }
 
 void SwitchAggregator::updateState(bool allowOverrideReset){
