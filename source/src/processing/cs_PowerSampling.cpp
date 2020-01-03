@@ -762,7 +762,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		if (switchState.state.dimmer != 0) {
 			// If the pwm was on:
 			LOGw("Dimmer overcurrent: %i V=[%i %i ..] C=[%i %i ..]",
-				currentRmsFilteredMA,
+				currentRmsMA,
 				power.buf[power.voltageIndex],
 				power.buf[power.voltageIndex + power.numChannels],
 				power.buf[power.currentIndex],
@@ -776,7 +776,12 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		}
 		else if (switchState.state.relay == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
-			LOGe("IGBT failure detected");
+			LOGe("Dimmer failure detected: %i V=[%i %i ..] C=[%i %i ..]",
+				currentRmsMA,
+				power.buf[power.voltageIndex],
+				power.buf[power.voltageIndex + power.numChannels],
+				power.buf[power.currentIndex],
+				power.buf[power.currentIndex + power.numChannels]);
 			event_t event(CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED);
 			EventDispatcher::getInstance().dispatch(event);
 
