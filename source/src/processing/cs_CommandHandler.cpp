@@ -83,7 +83,12 @@ command_result_t CommandHandler::handleCommand(
 		const EncryptionAccessLevel accessLevel,
 		cs_data_t resultData
 		) {
-	LOGd("cmd=%u lvl=%u", type, accessLevel);
+	switch (type) {
+		case CTRL_CMD_SET_SUN_TIME:
+			break;
+		default:
+			LOGd("cmd=%u lvl=%u", type, accessLevel);
+	}
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		return command_result_t(ERR_NO_ACCESS);
 	}
@@ -266,6 +271,7 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 	state_packet_header_t* resultHeader = (state_packet_header_t*) resultData.data;
 	resultHeader->stateType = stateHeader->stateType;
 	resultHeader->stateId = stateHeader->stateId;
+	LOGi("State type=%u id=%u", stateHeader->stateType, stateHeader->stateId);
 	uint16_t payloadSize = commandData.len - sizeof(state_packet_header_t);
 	buffer_ptr_t payload = commandData.data + sizeof(state_packet_header_t);
 	cs_state_data_t stateData(stateType, stateId, payload, payloadSize);
