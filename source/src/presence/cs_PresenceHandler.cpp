@@ -13,7 +13,7 @@
 
 #include <drivers/cs_Serial.h>
 
-#define LOGPresenceHandler LOGd
+#define LOGPresenceHandler LOGnone
 
 std::list<PresenceHandler::PresenceRecord> PresenceHandler::WhenWhoWhere;
 
