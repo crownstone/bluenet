@@ -92,15 +92,15 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
 
         if(overrideMatchedAggregated && behaviourWantsToChangeState && allowOverrideReset){
                 // nextAggregatedState = aggregatedBehaviourIntensity();
-                LOGSwitchAggregator("resetting overrideState");
+                LOGSwitchAggregator("resetting overrideState overrideStateIsOn=%u aggregatedStateIsOn=%u behaviourStateIsOn=%u", overrideStateIsOn, aggregatedStateIsOn, behaviourStateIsOn);
                 overrideState = {};
-        } 
+        }
     }
 
-    aggregatedState = 
-        overrideState ? resolveOverrideState() : 
+    aggregatedState =
+        overrideState ? resolveOverrideState() :
         behaviourState ? aggregatedBehaviourIntensity() : // only use aggr. if no SwitchBehaviour conflict is found
-        aggregatedState ? aggregatedState :                            // if conflict is found, don't change the value.
+        aggregatedState ? aggregatedState :               // if conflict is found, don't change the value.
         std::nullopt;
 
     LOGSwitchAggregator("updateState");
@@ -110,7 +110,7 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
         printStatus();
     }
     
-    if(aggregatedState){
+    if (aggregatedState) {
         swSwitch->setDimmer(*aggregatedState);
     }
 }
@@ -192,13 +192,11 @@ bool SwitchAggregator::handleTimingEvents(event_t& evt){
         case CS_TYPE::STATE_TIME: {
             bool allowOverrideReset = updateBehaviourHandlers();
             updateState(allowOverrideReset);
-            
             break;
         }
         case CS_TYPE::EVT_TIME_SET: {
             bool allowOverrideReset = updateBehaviourHandlers();
             updateState(allowOverrideReset);
-
             break;
         }
         default:{
@@ -218,7 +216,7 @@ bool SwitchAggregator::handlePresenceEvents(event_t& evt){
                 LOGSwitchAggregator("SwitchAggregator LastUserExit");
                 if(overrideState){
                     Time now = SystemTime::now();
-                    LOGSwitchAggregator("SwitchAggregator LastUserExit override state true (%02d:%02d:%02d)",now.h(),now.m(),now.s());
+                    LOGSwitchAggregator("SwitchAggregator LastUserExit override state true");
 
                     if (behaviourHandler.requiresPresence(now)) {
                         // if there exists a behaviour which is active at given time and 
