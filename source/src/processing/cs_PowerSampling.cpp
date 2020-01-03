@@ -761,7 +761,12 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 //		State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState);
 		if (switchState.state.dimmer != 0) {
 			// If the pwm was on:
-			LOGw("current above pwm threshold");
+			LOGw("Dimmer overcurrent: %i V=[%i %i ..] C=[%i %i ..]",
+				currentRmsFilteredMA,
+				power.buf[power.voltageIndex],
+				power.buf[power.voltageIndex + power.numChannels],
+				power.buf[power.currentIndex],
+				power.buf[power.currentIndex + power.numChannels]);
 			// Dispatch the event that will turn off the pwm
 			event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER);
 			EventDispatcher::getInstance().dispatch(event);
