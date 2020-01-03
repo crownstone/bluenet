@@ -160,10 +160,7 @@ void SwSwitch::store(switch_state_t nextState) {
 	} else {
 		State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
 	}
-
-    SWSWITCH_LOG_CALLFLOW("store(%s, %d%%)",
-        currentState.state.relay != 0? "on" : "off", 
-        currentState.state.dimmer);
+    LOGd("store(%u, %u%%)", currentState.state.relay, currentState.state.dimmer);
 }
 
 // forcing hardwareSwitch
@@ -338,17 +335,17 @@ void SwSwitch::resolveIntendedState(){
     				|| !isSafeToDim()
 					|| (!isDimmerCircuitPowered() && checkedDimmerPowerUsage))) {
     	LOGi("resolve: use relay instead of dimmer. allow=%d safe=%d powered=%d checked=%d", allowDimming, isSafeToDim(), isDimmerCircuitPowered(), checkedDimmerPowerUsage);
-    	currentState.state.dimmer = 0;
+//    	currentState.state.dimmer = 0;
     	if (value > 0) {
-    		currentState.state.relay = 1;
+//    		currentState.state.relay = 1;
     		setRelay_unlocked(true);
     		setIntensity_unlocked(0);
     	} else {
-    		currentState.state.relay = 0;
+//    		currentState.state.relay = 0;
     		setIntensity_unlocked(0);
     		setRelay_unlocked(false);
     	}
-    	store(currentState);
+//    	store(currentState);
     	return;
     }
 
@@ -380,39 +377,34 @@ void SwSwitch::resolveIntendedState(){
     setRelay_unlocked(false);
 }
 
-void SwSwitch::setDimmer(uint8_t value){
-    if(!allowSwitching){
+void SwSwitch::setDimmer(uint8_t value) {
+    if (!allowSwitching) {
         SWSWITCH_LOCKED_LOG();
         return;
     }
-
-    SWSWITCH_LOG_CALLFLOW("SwSwitch::setDimmer(%d) called",value);
-
-    currentState.state.dimmer = CsMath::clamp(value,0,100);
+    LOGi("setDimmer(%d)", value);
+    currentState.state.dimmer = CsMath::clamp(value, 0, 100);
     currentState.state.relay = 0;
-
     store(currentState);
-
+    // 03-01-2020 TODO: call store() in resolveIntendedState() ? Right now, the STATE_SWITCH_STATE event is sent too often on boot.
     resolveIntendedState();
 }
 
 // ================== ISwitch ==============
 
-void SwSwitch::setRelay(bool is_on){
-    if(!allowSwitching){
+void SwSwitch::setRelay(bool is_on) {
+    if (!allowSwitching) {
         SWSWITCH_LOCKED_LOG();
         return;
     }
-
     setRelay_unlocked(is_on);
 }
 
 void SwSwitch::setIntensity(uint8_t value){
-    if(!allowSwitching){
+    if (!allowSwitching) {
         SWSWITCH_LOCKED_LOG()
         return;
     }
-
     setIntensity_unlocked(value);
 }
 
