@@ -28,7 +28,7 @@ class Time {
      * See: http://stackoverflow.com/questions/36357013/day-of-week-from-seconds-since-epoch
 	 * With timestamp=0 = Thursday 1-January-1970 00:00:00
      */
-    operator DayOfWeek(){ return DayOfWeek((posixTimeStamp / (60*60*24) + 4) % 7);}
+    operator DayOfWeek(){ return DayOfWeek(1 << ((posixTimeStamp / (60*60*24) + 4) % 7));}
 
     // --- named cast functions ---
     DayOfWeek dayOfWeek() { return *this; }

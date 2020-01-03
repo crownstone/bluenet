@@ -56,7 +56,7 @@ bool BehaviourHandler::update(){
         std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
 
         if (!presence) {
-            LOGBehaviourHandler_V("%02d:%02d:%02d, not updating, because presence data is missing",time.h(),time.m(),time.s());
+            LOGBehaviourHandler_V("Not updating, because presence data is missing");
         } else {
             currentIntendedState = computeIntendedState(time, presence.value());
         }
@@ -78,13 +78,13 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
     for (auto& b : BehaviourStore::getActiveBehaviours()){
         if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(b)){
             // cast to switch behaviour succesful.
-            if(switchbehave->isValid(currentTime)){
+            if (switchbehave->isValid(currentTime)) {
                 LOGBehaviourHandler_V("valid time on behaviour: ");
             }
-            if (switchbehave->isValid(currentTime, currentPresence)){
+            if (switchbehave->isValid(currentTime, currentPresence)) {
                 LOGBehaviourHandler_V("presence also valid");
                 if (intendedValue){
-                    if (switchbehave->value() != intendedValue.value()){
+                    if (switchbehave->value() != intendedValue.value()) {
                         // found a conflicting behaviour
                         // TODO(Arend): add more advance conflict resolution according to document.
                         return std::nullopt;
