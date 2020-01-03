@@ -15,7 +15,7 @@
  * Provides the most low level interaction with the switch hardware.
  */
 class HwSwitch : public ISwitch {
-    public:
+public:
     
     virtual void setRelay(bool is_on) override;
     virtual void setDimmerPower(bool is_on) override;
@@ -26,8 +26,10 @@ class HwSwitch : public ISwitch {
      */
     HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration);
 
-    private:
-    
+    bool canTryDimmerOnBoot();
+
+private:
+    uint32_t _hardwareBoard = 0;
     bool _hasRelay = false;
     uint8_t _pinRelayOn = 0;
     uint8_t _pinRelayOff = 0;

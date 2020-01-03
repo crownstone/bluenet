@@ -61,6 +61,27 @@ void HwSwitch::setIntensity(uint8_t value) {
 	PWM::getInstance().setValue(0, value);
 }
 
+bool HwSwitch::canTryDimmerOnBoot() {
+	switch (_hardwareBoard) {
+		// Builtins don't have an accurate enough power measurement.
+		case ACR01B1A:
+		case ACR01B1B:
+		case ACR01B1C:
+		case ACR01B1D:
+		case ACR01B1E:
+		// Plugs don't have an accurate enough power measurement.
+		case ACR01B2A:
+		case ACR01B2B:
+		case ACR01B2C:
+		case ACR01B2E:
+		case ACR01B2G:
+			return false;
+		// Newer ones have an accurate power measurement, also have a lower startup time of the dimmer circuit.
+		default:
+			return true;
+	}
+}
+
 /**
  * Initialize the "switch". The switch class encapsulates both the relay for switching high-power loads and the
  * IGBTs for very fast switching of low-power loads. The latter enables all types of dimming. The following types
@@ -87,7 +108,7 @@ HwSwitch::HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t re
 			PWM::getInstance().start(true);
 			break;
 	}
-
+	_hardwareBoard = board.hardwareBoard;
 	_pinEnableDimmer = board.pinGpioEnablePwm;
 	_hasRelay = board.flags.hasRelay;
     _relayHighDuration = relayHighDuration;
