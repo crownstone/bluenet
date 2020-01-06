@@ -199,5 +199,5 @@ uint 8[] | Reserved | 5 | Reserved for future use, should be 0 for now.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Mode | 1 | <ol start="0"><li>Dumb Home</li><li>Smart Home</li></ol>
-uint 8[] | Reserved | 10 | Reserved for future use, should be 0 for now.
+uint 32 | Flags | 4 | <ol start="0"><li>Dumb Home</li><li>Smart Home</li></ol>
+uint 8[] | Reserved | 7 | Reserved for future use, should be 0 for now.

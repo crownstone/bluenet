@@ -100,6 +100,16 @@ union __attribute__((__packed__)) state_errors_t {
 };
 
 /**
+ * Behaviour settings.
+ */
+struct __attribute__((packed)) behaviour_settings_t {
+	struct __attribute__((packed)) {
+		bool enabled;
+	} flags;
+	uint32_t asInt;
+};
+
+/**
  * Switch state: combination of relay and dimmer state.
  * Relay:  0 = off, 1 = on
  * Dimmer: 0 = off, 100 = fully on
@@ -196,20 +206,6 @@ struct __attribute__((packed)) session_nonce_t {
 };
 
 // ========================= functions =========================
-
-/**
- * Sets the switch state to the default.
- */
-constexpr void cs_switch_state_set_default(switch_state_t *state) {
-	state->asInt = STATE_SWITCH_STATE_DEFAULT;
-}
-
-/**
- * Sets the state errors to the default.
- */
-constexpr void cs_state_errors_set_default(state_errors_t *state) {
-	state->asInt = STATE_ERRORS_DEFAULT;
-}
 
 /**
  * Returns true when a multi switch item is valid.

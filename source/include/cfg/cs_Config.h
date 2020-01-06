@@ -469,3 +469,7 @@
 #ifndef STATE_ERRORS_DEFAULT
 #define STATE_ERRORS_DEFAULT 0
 #endif
+
+#ifndef STATE_BEHAVIOUR_SETTINGS_DEFAULT
+#define STATE_BEHAVIOUR_SETTINGS_DEFAULT 1 // Enabled (bit 0) is true by default.
+#endif

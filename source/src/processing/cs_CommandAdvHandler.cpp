@@ -248,16 +248,22 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	TYPIFY(STATE_TIME) timestamp;
 	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
 	uint8_t type = decryptedData[4];
-	uint16_t length = 16 - 5;
-	uint8_t* commandData = decryptedData + 5;
+	uint16_t headerSize = sizeof(validationTimestamp) + sizeof(type);
+	uint16_t length = SOC_ECB_CIPHERTEXT_LENGTH - headerSize;
+	uint8_t* commandData = decryptedData + headerSize;
 
 	// TODO: validate with time.
 	if (validationTimestamp != 0xCAFEBABE) {
 		return false;
 	}
-
 	if (!decryptRC5Payload(encryptedPayloadRC5, decryptedPayloadRC5)) {
 		return false;
+	}
+	// Validated, so from here on, return true.
+
+	// Claim only after validation
+	if (!claim(header.deviceToken, getPartOfEncryptedData(encryptedPayload), claimIndex)) {
+		return true;
 	}
 
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
@@ -270,15 +276,15 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	controlCmd.source.count = (decryptedPayloadRC5[0] >> 8) & 0xFF;
 	LOGCommandAdvDebug("adv cmd type=%u", type);
 	switch (type) {
-		case 1: {
+		case ADV_CMD_MULTI_SWITCH: {
 			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
 			break;
 		}
-		case 2: {
+		case ADV_CMD_SET_TIME: {
 			size16_t setTimeSize = sizeof(uint32_t);
 			size16_t setSunTimeSize = 6; // 2 uint24
 			if (length < setTimeSize + setSunTimeSize) {
-				return false;
+				return true;
 			}
 			// First, set time
 			controlCmd.type = CTRL_CMD_SET_TIME;
@@ -296,10 +302,10 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			controlCmd.size = sizeof(sunTime);
 			break;
 		}
-		case 3: {
+		case ADV_CMD_SET_SUN_TIMES: {
 			size16_t setSunTimeSize = 6; // 2 uint24
 			if (length < setSunTimeSize) {
-				return false;
+				return true;
 			}
 			sun_time_t sunTime;
 			sunTime.sunrise = (commandData[0] << 0) + (commandData[1] << 8) + (commandData[2] << 16);
@@ -309,17 +315,28 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			controlCmd.size = sizeof(sunTime);
 			break;
 		}
-		case 4: {
-			controlCmd.type = CTRL_CMD_BEHAVIOURHANDLER_SETTINGS;
-			break;
+		case ADV_CMD_SET_BEHAVIOUR_SETTINGS: {
+			// Set state.
+			if (length < sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS))) {
+				return true;
+			}
+			length = sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS));
+			CS_TYPE stateType = CS_TYPE::STATE_BEHAVIOUR_SETTINGS;
+			if (!EncryptionHandler::getInstance().allowAccess(getUserAccessLevelSet(stateType), accessLevel)) {
+				return true;
+			}
+			cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, commandData, length);
+			if (State::getInstance().verifySizeForSet(stateData) != ERR_SUCCESS) {
+				return true;
+			}
+			State::getInstance().set(stateData);
+			return true;
 		}
+		default:
+			LOGd("Unkown adv cmd: %u", type);
+			return true;
 	}
 	if (controlCmd.type == CTRL_CMD_UNKNOWN) {
-		return true;
-	}
-	// Claim only after validation
-	if (!claim(header.deviceToken, getPartOfEncryptedData(encryptedPayload), claimIndex)) {
-		// Can't claim, but command is validated.
 		return true;
 	}
 	if (type != 3) {

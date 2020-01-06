@@ -36,10 +36,12 @@ void BehaviourHandler::handleEvent(event_t& evt){
             update();
             break;
         }
-        case CS_TYPE::CMD_BEHAVIOURHANDLER_SETTINGS:{
-            isActive =  evt.getData()[0] != 0;
-            LOGBehaviourHandler("behaviourhandler settings isActive:%s", (isActive ? "true" : "false"));
+        case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
+        	behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
+        	isActive = settings->flags.enabled;
+            LOGBehaviourHandler("settings isActive=%u", isActive);
             update();
+            break;
         }
         default:{
             // ignore other events

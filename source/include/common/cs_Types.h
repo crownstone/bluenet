@@ -143,6 +143,7 @@ enum class CS_TYPE: uint16_t {
 //	STATE_ERROR_DIMMER_ON_FAILURE,                    //  0x93 - 147
 //	STATE_ERROR_DIMMER_OFF_FAILURE,                   //  0x94 - 148
 	STATE_SUN_TIME                          = 149,
+	STATE_BEHAVIOUR_SETTINGS                = 150,
 
 	/*
 	 * Internal commands and events.
@@ -239,7 +240,6 @@ enum class CS_TYPE: uint16_t {
 	EVT_BEHAVIOURSTORE_MUTATION,				// Sent by BehaviourStore for other components to react _after_ a change to the behaviourstore occured.
 	EVT_PRESENCE_MUTATION,						// when a change in presence occurs this event fires.
 	EVT_BEHAVIOUR_SWITCH_STATE,					// when behaviour desires a stateswitch this event is fired.
-	CMD_BEHAVIOURHANDLER_SETTINGS,				// a user may change settings of behaviourhandler (for example to make the home dumb again).
 	CMD_SET_RELAY,								// when a user requests to set the relay to a specific state
 	CMD_SET_DIMMER,								// when a user requests to set the dimmer to a specific state
 	// ------------------------
@@ -339,6 +339,9 @@ typedef switch_state_t TYPIFY(STATE_SWITCH_STATE);
 typedef   int8_t TYPIFY(STATE_TEMPERATURE);
 typedef uint32_t TYPIFY(STATE_TIME);
 typedef sun_time_t TYPIFY(STATE_SUN_TIME);
+typedef void TYPIFY(STATE_BEHAVIOUR_RULE);
+typedef void TYPIFY(STATE_TWILIGHT_RULE);
+typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
@@ -414,13 +417,10 @@ typedef uint8_t TYPIFY(EVT_GET_BEHAVIOUR); // index
 typedef void TYPIFY(EVT_GET_BEHAVIOUR_INDICES);
 typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef uint8_t TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
-typedef uint8_t TYPIFY(CMD_BEHAVIOURHANDLER_SETTINGS);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
-typedef void TYPIFY(STATE_BEHAVIOUR_RULE);
-typedef void TYPIFY(STATE_TWILIGHT_RULE);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
