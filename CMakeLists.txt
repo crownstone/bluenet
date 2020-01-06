@@ -22,6 +22,9 @@ set(WORKSPACE_DIR                                ${CMAKE_CURRENT_LIST_DIR})
 set(DEFAULT_CONF_CMAKE_PATH                      ${WORKSPACE_DIR}/source/conf/cmake)
 set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modules)
 
+set(RELEASE_REPOSITORY                           ${WORKSPACE_DIR}/../bluenet-release CACHE STRING "Release repository")
+set(RELEASE_CANDIDATE_REPOSITORY                 ${WORKSPACE_DIR}/../bluenet-release-candidate CACHE STRING "Release candidate repository")
+
 set(CMAKE_BUILD_TYPE                             Debug   CACHE STRING "Default build type")
 
 # With "make" sudo works more or less. Only when running make in parallel prompting is not always clear.
@@ -34,6 +37,8 @@ set(PYTHON_EXECUTABLE                            python3 CACHE STRING "The pytho
 project(${BOARD_TARGET} NONE)
 
 list(APPEND CMAKE_ARGS "-DWORKSPACE_DIR:STRING=${WORKSPACE_DIR}")
+list(APPEND CMAKE_ARGS "-DRELEASE_REPOSITORY:STRING=${RELEASE_REPOSITORY}")
+list(APPEND CMAKE_ARGS "-DRELEASE_CANDIDATE_REPOSITORY:STRING=${RELEASE_CANDIDATE_REPOSITORY}")
 list(APPEND CMAKE_ARGS "-DCONFIG_DIR:STRING=${CONFIG_DIR}")
 list(APPEND CMAKE_ARGS "-DBOARD_TARGET:STRING=${BOARD_TARGET}")
 list(APPEND CMAKE_ARGS "-DDEFAULT_CONF_CMAKE_PATH:STRING=${DEFAULT_CONF_CMAKE_PATH}")
@@ -402,6 +407,24 @@ ADD_CUSTOM_TARGET(write_bootloader
     bluenet
   COMMENT "Write bootloader"
   )
+
+#######################################################################################################################
+# Create a new release
+#######################################################################################################################
+		
+# Create a new version, create new release directory
+# Copy CMakeBuild.config.release.default.release to this directory
+# Check fields (e.g. compare with CMakeBuild.config.default and see if fields are missing)
+# Check if we are on the master branch
+# Check if we are on the latest public commit
+# Check if we have non-committed changes
+# Check if git version does not exist
+# Create git commit with this release version
+ADD_CUSTOM_TARGET(create_git_release
+  COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release.cmake
+  COMMENT "Create git release"
+  )
+
 
 #######################################################################################################################
 # Some more utility functions
