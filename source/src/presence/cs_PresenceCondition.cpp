@@ -27,6 +27,21 @@ PresenceCondition::SerializedDataType PresenceCondition::serialize(){
     return result;
 }
 
+uint8_t* PresenceCondition::serialize(uint8_t* outbuff, size_t max_size){
+    if(max_size != 0){
+        if(outbuff == nullptr || max_size < serializedSize()) { 
+            return outbuff;
+        }
+    }
+
+    auto serialized_repr = serialize();
+
+    return predstd::copy_n (
+        std::begin (serialized_repr), 
+        WireFormat::size<Presencecondition>(),
+        std::begin (outbuff) );
+}
+
 bool PresenceCondition::operator()(PresenceStateDescription currentPresence){
     return pred(currentPresence);
 }
