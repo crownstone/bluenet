@@ -72,7 +72,7 @@ void PresenceHandler::handleEvent(event_t& evt){
     MutationType mt = handleProfileLocationAdministration(profile,location);
 
     if(mt != MutationType::NothingChanged){
-        triggerPresenseMutation(mt);
+        triggerPresenceMutation(mt);
     }
 
     propagateMeshMessage(profile,location);
@@ -110,8 +110,8 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
                     www.who,www.when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
                 return true;
             }
-            if(www.who == profile){
-                LOGPresenceHandler("erasing old presence_record for user id %d because of new entry", www.who);
+            if(www.who == profile && www.where == location){
+                LOGPresenceHandler("erasing old presence_record profile(%d) location(%d) because of new entry", profile,location);
                 return true;
             }
             return false;
@@ -122,9 +122,17 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 
     auto nextdescription = getCurrentPresenceDescription();
 
+    return getMutationType(prevdescription,nextdescription);
+}
+
+PresenceHandler::MutationType PresenceHandler::getMutationType(
+        std::optional<PresenceStateDescription> prevdescription, 
+        std::optional<PresenceStateDescription> nextdescription) {
+
     if(prevdescription == nextdescription){
         return MutationType::NothingChanged; // neither has_value or value()'s eq.
     }
+
     if(prevdescription.has_value() && nextdescription.has_value()){
         // values unequal so can distinguish on == 0 of a single value here
         if(*prevdescription == 0){
@@ -136,9 +144,11 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
         // both non-zero, non-trivial change happened.
         return MutationType::OccupiedRoomsMaskChanged;
     }
+    
     if(nextdescription.has_value()){
         return MutationType::Online;
     }
+    
     if(prevdescription.has_value()){
         return MutationType::Offline;
     }
@@ -165,7 +175,7 @@ void PresenceHandler::removeOldRecords(){
     );
 }
 
-void PresenceHandler::triggerPresenseMutation(MutationType mutationtype){
+void PresenceHandler::triggerPresenceMutation(MutationType mutationtype){
     event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,&mutationtype,sizeof(mutationtype));
     presence_event.dispatch();
 }

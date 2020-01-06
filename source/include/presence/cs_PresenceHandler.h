@@ -31,10 +31,12 @@ public:
 
 private:
     // after this amount of seconds a presence_record becomes invalid.
-    static const constexpr uint32_t presence_time_out_s = 5*60;
+    static const constexpr uint32_t presence_time_out_s = 10;
 
-    // after this amount of seconds it is assumed that presencehandler would have received 
-    // a message from all devices in vicinity of this device.
+    /**
+     * after this amount of seconds it is assumed that presencehandler would have received 
+     * message from all devices in vicinity of this device.
+     */
     static const constexpr uint32_t presence_uncertain_due_reboot_time_out_s = 30;
 
     // using a list because of constant time insertion/deletion of
@@ -46,16 +48,46 @@ private:
         uint8_t where;  // room id
     };
 
-    // keeps track of a short history of presence events.
-    // will be lazily updated to remove old entries: 
-    //  - when new presence is detected
-    //  - when getCurrentPresenceDescription() is called
+    /**
+     * keeps track of a short history of presence events.
+     * will be lazily updated to remove old entries: 
+     *  - when new presence is detected
+     *  - when getCurrentPresenceDescription() is called
+     */
     static std::list<PresenceRecord> WhenWhoWhere;
 
+    /**
+     * Clears the WhenWhoWhere list from entries that have a time stamp older than
+     * presence_time_out_s.
+     */
     void removeOldRecords();
+
+    /**
+     * Processes a new profile-location combination:
+     * - a new entry is placed in the WhenWhoWhere list, 
+     * - previous entries with the same p-l combo are deleted
+     * - the WhenWhoWhere list is purged of old entries
+     */
     MutationType handleProfileLocationAdministration(uint8_t profile, uint8_t location);
+
+    /**
+     * Resolves the type of mutation from previous and next descriptions.
+     */
+    static MutationType getMutationType(
+        std::optional<PresenceStateDescription> prevdescription, 
+        std::optional<PresenceStateDescription> nextdescription);
+
+    /**
+     * Triggers a EVT_PROFILE_LOCATION event matching the given parameters.
+     */
     void propagateMeshMessage(uint8_t profile, uint8_t location);
-    void triggerPresenseMutation(MutationType mutationtype);
+
+    /**
+     * Triggers a EVT_PRESENCE_MUTATION event of the given type.
+     */
+    void triggerPresenceMutation(MutationType mutationtype);
+
+    // out of order
     void print();
     
     stone_id_t _ownId = 0;
@@ -64,9 +96,11 @@ public:
     // register as event handler
     void init();
 
-    // receive background messages indicating where users are,
-    // record the time and place and update the current presence description
-    // when necessary
+    /**
+     * receive background messages indicating where users are,
+     * record the time and place and update the current presence description
+     * when necessary
+     */
     virtual void handleEvent(event_t& evt) override;
 
     /**
@@ -75,4 +109,5 @@ public:
      * or not.
      */
     static std::optional<PresenceStateDescription> getCurrentPresenceDescription();
+
 };
