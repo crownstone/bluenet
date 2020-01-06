@@ -29,7 +29,7 @@ void RecognizeSwitch::deinit() {
 void RecognizeSwitch::configure(float threshold) {
 	_thresholdDifferent = threshold;
 	_thresholdSimilar = threshold;
-	LOGd("config: diff=%f similar=%f ratio=%f", _thresholdDifferent, _thresholdSimilar, _thresholdRatio);
+	LOGd("config: diff=%i similar=%i ratio=%i", (int)_thresholdDifferent, (int)_thresholdSimilar, (int)_thresholdRatio);
 }
 
 void RecognizeSwitch::start() {
@@ -98,7 +98,7 @@ bool RecognizeSwitch::detect(buffer_id_t bufIndex, channel_id_t voltageChannelId
 			if (diffSum02 < _thresholdSimilar || minDiffSum / diffSum02 > _thresholdRatio) {
 				result = true;
 #ifdef PRINT_DEBUG
-				LOGd("Found switch: %f %f %f %f", diffSum01, diffSum12, diffSum02, minDiffSum / diffSum02);
+				LOGd("Found switch: %i %i %i %i", (int)diffSum01, (int)diffSum12, (int)diffSum02, (int)(minDiffSum / diffSum02));
 #endif
 				break;
 			}
