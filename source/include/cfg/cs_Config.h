@@ -226,12 +226,12 @@
 
 #define PWM_PERIOD                               10000L // Interval in us: 1/10000e-6 = 100 Hz
 
-#define SWITCH_DELAYED_STORE_MS                  10000 // Timeout before storing the pwm switch value is stored.
+#define SWITCH_DELAYED_STORE_MS                  (10 * 1000) // Timeout before storing the pwm switch value is stored.
 #define STATE_RETRY_STORE_DELAY_MS               1000 // Time before retrying to store a varable to flash.
-#define MESH_SEND_TIME_INTERVAL_MS               60000 // Interval at which the time is sent via the mesh.
-#define MESH_SEND_TIME_INTERVAL_MS_VARIATION     10000 // Max amount that gets added to interval.
-#define MESH_SEND_STATE_INTERVAL_MS              60000 // Interval at which the stone state is sent via the mesh.
-#define MESH_SEND_STATE_INTERVAL_MS_VARIATION    10000 // Max amount that gets added to interval.
+#define MESH_SEND_TIME_INTERVAL_MS               (60 * 1000) // Interval at which the time is sent via the mesh.
+#define MESH_SEND_TIME_INTERVAL_MS_VARIATION     (10 * 1000) // Max amount that gets added to interval.
+#define MESH_SEND_STATE_INTERVAL_MS              (60 * 1000) // Interval at which the stone state is sent via the mesh.
+#define MESH_SEND_STATE_INTERVAL_MS_VARIATION    (10 * 1000) // Max amount that gets added to interval.
 
 #define PWM_BOOT_DELAY_MS                        60000 // Delay after boot until pwm can be used. Has to be smaller than overflow time of RTC.
 #define DIMMER_BOOT_CHECK_DELAY_MS               5000  // Delay after boot until power measurement is checked to see if dimmer works.
