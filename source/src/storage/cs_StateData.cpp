@@ -223,7 +223,6 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
 	case CS_TYPE::CMD_RESET_DELAYED:
 	case CS_TYPE::CMD_SEND_MESH_MSG:
-	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE:
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
 	case CS_TYPE::CMD_SET_TIME:
@@ -252,8 +251,6 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
 	case CS_TYPE::CMD_DIMMING_ALLOWED:
-	case CS_TYPE::EVT_KEEP_ALIVE:
-	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_MESH_TIME:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
 	case CS_TYPE::EVT_SCAN_STARTED:
@@ -375,8 +372,6 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_BLE_DISCONNECT:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
-	case CS_TYPE::EVT_KEEP_ALIVE:
-	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
@@ -418,7 +413,6 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
 	case CS_TYPE::CMD_SEND_MESH_MSG:
-	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE:
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH:
 	case CS_TYPE::CMD_SET_TIME:
 	case CS_TYPE::CMD_FACTORY_RESET:

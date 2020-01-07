@@ -106,11 +106,6 @@ cs_ret_code_t MeshModel::sendMultiSwitchItem(const internal_multi_switch_item_t*
 	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id, (uint8_t*)(&meshItem), sizeof(meshItem), repeats, true);
 }
 
-cs_ret_code_t MeshModel::sendKeepAliveItem(const keep_alive_state_item_t* item, uint8_t repeats) {
-	remFromQueue(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE, item->id);
-	return addToQueue(CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE, item->id, (uint8_t*)item, sizeof(*item), repeats, false);
-}
-
 cs_ret_code_t MeshModel::sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats) {
 	remFromQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, (uint8_t*)item, sizeof(*item), repeats, false);
@@ -315,28 +310,6 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			event_t event(CS_TYPE::CMD_MULTI_SWITCH, &internalItem, sizeof(internalItem));
 			EventDispatcher::getInstance().dispatch(event);
 		}
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE: {
-		keep_alive_state_item_t* item = (keep_alive_state_item_t*) payload;
-		if (item->id == _ownId) {
-//			LOGi("recieved keep alive for me");
-			TYPIFY(EVT_KEEP_ALIVE_STATE)* cmd = &(item->cmd);
-			if (memcmp(&_lastReceivedKeepAlive, cmd, sizeof(*cmd)) != 0) {
-				memcpy(&_lastReceivedKeepAlive, cmd, sizeof(*cmd));
-				LOGi("dispatch keep alive");
-				event_t event(CS_TYPE::EVT_KEEP_ALIVE_STATE, cmd, sizeof(*cmd));
-				EventDispatcher::getInstance().dispatch(event);
-			}
-			else {
-//				LOGd("ignore keep alive");
-			}
-		}
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE: {
-		event_t event(CS_TYPE::EVT_KEEP_ALIVE);
-		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_STATE_0: {

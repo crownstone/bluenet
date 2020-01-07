@@ -226,8 +226,6 @@
 
 #define PWM_PERIOD                               10000L // Interval in us: 1/10000e-6 = 100 Hz
 
-#define KEEP_ALIVE_INTERVAL                      (2 * 60) // 2 minutes, in seconds
-
 #define SWITCH_DELAYED_STORE_MS                  10000 // Timeout before storing the pwm switch value is stored.
 #define STATE_RETRY_STORE_DELAY_MS               1000 // Time before retrying to store a varable to flash.
 #define MESH_SEND_TIME_INTERVAL_MS               60000 // Interval at which the time is sent via the mesh.

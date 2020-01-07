@@ -152,24 +152,6 @@ struct __attribute__((__packed__)) cs_legacy_multi_switch_t {
 	cs_legacy_multi_switch_item_t items[LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT];
 };
 
-enum KeepAliveActionTypes {
-	NO_CHANGE = 0,
-	CHANGE    = 1
-};
-
-/**
- * A single keep alive command.
- * action: see KeepAliveActionTypes.
- * switchCmd: 0 = off, 100 = fully on.
- * timeout: delay in seconds.
- */
-struct __attribute__((__packed__)) keep_alive_state_item_cmd_t {
-	uint8_t action;
-	uint8_t switchCmd;
-	uint16_t timeout;
-};
-
-
 struct __attribute__((__packed__)) switch_message_payload_t {
 	uint8_t switchState;
 };

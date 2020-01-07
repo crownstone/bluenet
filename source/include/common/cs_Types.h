@@ -173,7 +173,6 @@ enum class CS_TYPE: uint16_t {
 	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is control_command_packet_t.
 	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
 	CMD_SEND_MESH_MSG,                                // Sent to send a mesh message. -- Payload is cs_mesh_msg_t.
-	CMD_SEND_MESH_MSG_KEEP_ALIVE,                     // Sent to send a switch mesh message. -- Payload is keep_alive_state_item_t.
 	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Sent to send a switch mesh message. -- Payload is multi_switch_item_t.
 	CMD_SET_TIME,                                     // Sent to set the time. -- Payload is uint32_t timestamp.
 	CMD_FACTORY_RESET,                                // Sent when a factory reset should be performed: clear all data.
@@ -195,8 +194,6 @@ enum class CS_TYPE: uint16_t {
 //	EVT_STATE_NOTIFICATION,            // Deprecated  // Sent when a state was updated.
 	EVT_BROWNOUT_IMPENDING,                           // Sent when brownout is impending (low chip supply voltage)
 	EVT_SESSION_NONCE_SET,                            // Sent when a session nonce is generated. -- Payload is the session nonce.
-	EVT_KEEP_ALIVE,                                   // Sent when a keep alive witout action has been received.
-	EVT_KEEP_ALIVE_STATE,                             // Sent when a keep alive with action has been received. -- Payload is keep_alive_state_item_cmd_t.
 	EVT_CURRENT_USAGE_ABOVE_THRESHOLD,        // TODO: deprecate, use STATE_ERRORS        // Sent when current usage goes over the threshold.
 	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER, // TODO: deprecate, use STATE_ERRORS        // Sent when current usage goes over the dimmer threshold, while dimmer is on.
 	EVT_DIMMER_ON_FAILURE_DETECTED,           // TODO: deprecate, use STATE_ERRORS        // Sent when dimmer leaks current, while it's supposed to be off.
@@ -371,8 +368,6 @@ typedef  BOOL TYPIFY(CMD_ENABLE_LOG_VOLTAGE);
 typedef  BOOL TYPIFY(CMD_ENABLE_MESH);
 typedef  void TYPIFY(CMD_INC_VOLTAGE_RANGE);
 typedef  void TYPIFY(CMD_INC_CURRENT_RANGE);
-typedef  void TYPIFY(EVT_KEEP_ALIVE);
-typedef  keep_alive_state_item_cmd_t TYPIFY(EVT_KEEP_ALIVE_STATE);
 typedef  uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
@@ -380,7 +375,6 @@ typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
 typedef  internal_multi_switch_item_cmd_t TYPIFY(CMD_SWITCH);
 typedef  internal_multi_switch_item_t TYPIFY(CMD_MULTI_SWITCH);
 typedef  cs_mesh_msg_t TYPIFY(CMD_SEND_MESH_MSG);
-typedef  keep_alive_state_item_t TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE);
 typedef  internal_multi_switch_item_t TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH);
 typedef  uint32_t TYPIFY(CMD_SET_TIME);
 typedef  void TYPIFY(CMD_FACTORY_RESET);
