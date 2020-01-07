@@ -61,12 +61,19 @@ public:
 	 */
 	void updateFlagsBitmask(uint8_t bitmask);
 
-	/** Set or unset a bit of the event bitmask.
+	/** Set or unset a bit of the flags bitmask.
 	 *
 	 * @param[in] bit             The bit position.
 	 * @param[in] set             True when setting the bit, false when unsetting it.
 	 */
 	void updateFlagsBitmask(uint8_t bit, bool set);
+
+	/** Set or unset a bit of the extra flags bitmask.
+	 *
+	 * @param[in] bit             The bit position.
+	 * @param[in] set             True when setting the bit, false when unsetting it.
+	 */
+	void updateExtraFlagsBitmask(uint8_t bit, bool set);
 
 	/** Set the temperature field of the service data.
 	 *
@@ -107,34 +114,37 @@ public:
 private:
 	//! Timer used to periodically update the advertisement.
 	app_timer_t    _updateTimerData;
-	app_timer_id_t _updateTimerId;
+	app_timer_id_t _updateTimerId = NULL;
 
 	//! Stores the last (current) advertised service data
 	service_data_t _serviceData;
 
 	//! Store own ID
-	stone_id_t _crownstoneId; // TODO: use State for this?
+	stone_id_t _crownstoneId = 0; // TODO: use State for this?
 
 	//! Store switch state
-	uint8_t _switchState; // TODO: use State for this?
+	uint8_t _switchState = 0; // TODO: use State for this?
 
 	//! Store flags
-	uint8_t _flags; // TODO: use State for this?
+	uint8_t _flags = 0; // TODO: use State for this?
+
+	//! Store extra flags
+	uint8_t _extraFlags = 0;
 
 	//! Store the temperature
-	int8_t  _temperature; // TODO: use State for this?
+	int8_t  _temperature = 0; // TODO: use State for this?
 
 	//! Store the power factor
-	int8_t  _powerFactor; // TODO: use State for this?
+	int8_t  _powerFactor = 0; // TODO: use State for this?
 
 	//! Store the power usage in mW
-	int32_t _powerUsageReal; // TODO: use State for this?
+	int32_t _powerUsageReal = 0; // TODO: use State for this?
 
 	//! Store the energy used, in units of 64 J
-	int32_t _energyUsed; // TODO: use State for this?
+	int32_t _energyUsed = 0; // TODO: use State for this?
 
 	//! Store timestamp of first error
-	uint32_t _firstErrorTimestamp; // TODO: use State for this?
+	uint32_t _firstErrorTimestamp = 0; // TODO: use State for this?
 
 	uint32_t _sendStateCountdown = MESH_SEND_STATE_INTERVAL_MS / TICK_INTERVAL_MS;
 
@@ -142,13 +152,13 @@ private:
 //	state_errors_t _stateErrors;
 
 	//! Store the operation mode.
-	OperationMode _operationMode;
+	OperationMode _operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
 	//! Store whether a device is connected or not.
-	bool _connected;
+	bool _connected = false;
 
 	//! Counter that keeps up the number of times that the advertisement has been updated.
-	uint32_t _updateCount;
+	uint32_t _updateCount = 0;
 
 	ExternalStates _externalStates;
 

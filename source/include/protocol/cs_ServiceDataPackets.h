@@ -23,6 +23,10 @@ enum ServiceDataFlagBits {
 	SERVICE_DATA_FLAGS_BEHAVIOUR_OVERRIDDEN    = 7
 };
 
+enum ServiceDataExtraFlagBits {
+	SERVICE_DATA_EXTRA_FLAGS_BEHAVIOUR_ENABLED = 0,
+};
+
 enum ServiceDataUnencryptedType {
 	SERVICE_DATA_TYPE_ENCRYPTED = 7,
 	SERVICE_DATA_TYPE_SETUP = 6,
@@ -44,7 +48,7 @@ struct __attribute__((packed)) service_data_encrypted_state_t {
 	int16_t  powerUsageReal;
 	int32_t  energyUsed;
 	uint16_t partialTimestamp;
-	uint8_t  reserved;
+	uint8_t  extraFlags;
 	uint8_t  validation;
 };
 
