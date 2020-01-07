@@ -92,22 +92,20 @@ void SystemTime::handleEvent(event_t & event) {
 		case CS_TYPE::STATE_TIME: {
 			// Time was set via State.set().
 			// This may have been set by us! So only use it when no time is set yet?
-			if (posixTimeStamp == 0 && event.size == sizeof(TYPIFY(STATE_TIME))) {
+			if (posixTimeStamp == 0) {
 				setTime(*((TYPIFY(STATE_TIME)*)event.data));
 			}
 			break;
 		}
 		case CS_TYPE::EVT_MESH_TIME: {
 			// Only set the time if there is currently no time set, as these timestamps may be old
-			if (posixTimeStamp == 0 && event.size == sizeof(TYPIFY(EVT_MESH_TIME))) {
+			if (posixTimeStamp == 0) {
 				setTime(*((TYPIFY(EVT_MESH_TIME)*)event.data));
 			}
 			break;
 		}
 		case CS_TYPE::CMD_SET_TIME: {
-			if (event.size == sizeof(TYPIFY(CMD_SET_TIME))) {
-				setTime(*((TYPIFY(CMD_SET_TIME)*)event.data));
-			}
+			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data));
 			break;
 		}
 		case CS_TYPE::STATE_SUN_TIME: {
