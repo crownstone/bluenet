@@ -1,9 +1,11 @@
 # Release process
 
-The release process is as follows:
+## Bluenet
+
+The release process starts with updating version information.
 
 * Update the `VERSION` file in `source/VERSION` and `source/bootloader/VERSION`.
-* Commit all the changes to github.
+* Commit all changes to github.
 
 Then to create a release:
 
@@ -23,10 +25,17 @@ cmake -DCONFIG_DIR=release -DBOARD_TARGET=crownstone_3.0.1-RC0 -DCMAKE_BUILD_TYP
 make
 ```
 
-Now we can start generating the DFU packages that will be released:
+The application version has to be bumped. This is an integer that is checked by the bootloader to make sure that the
+application is actually newer.
 
 ```
 cd crownstone_3.0.1-RC0
+make increment_application_version
+```
+
+Now we can start generating the DFU packages that will be released:
+
+```
 make build_bootloader_settings
 make generate_dfu_package_application
 make generate_dfu_package_bootloader
@@ -43,7 +52,25 @@ git tag -a -m "Tagging version 3.0.1-RC0" "v3.0.1-RC0"
 git push --tags
 ```
 
+## Release repository
 
+After the above, the release `.zip` files are generated, however, they are not yet made available to the public.
+
+There are two repositories that maintain releases. 
+
+* https://github.com/crownstone/bluenet-release
+* https://github.com/crownstone/bluenet-release-candidate
+
+The parent directory of the repositories is assumed to be the same as the parent directory of the bluenet repository. 
+This can be adjusted by the CMake variables `RELEASE_REPOSITORY` and `RELEASE_CANDIDATE_REPOSITORY` in the bluenet 
+project. Depending on the existence of RC (release candidate) version information in the `VERSION` file, the proper 
+repository will be used. To create a release directory and fill it, call:
+
+```
+make create_release_in_repository
+```
+
+This will copy all `.zip`, `.elf`, `.bin`, files, as well as configuration files. 
 
 # Factory images
 

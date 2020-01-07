@@ -720,7 +720,12 @@ ELSE()
 			COMMAND nrfjprog -f nrf52 --memwr ${HARDWARE_BOARD_ADDRESS} --val ${LOAD_BOARD_HARDWARE_VERSION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} 
 			COMMENT "Flashes board version to remote target board"
 			)
-		
+	
+		ADD_CUSTOM_TARGET(increment_application_version
+			COMMAND bash -c "perl -i -pe '$. == 2 && s/(\\d+)/$1+1/eg' ${CMAKE_SOURCE_DIR}/VERSION" VERBATIM
+			COMMENT "Increment application version (in VERSION file)"
+			)
+
 		ADD_CUSTOM_TARGET(build_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
@@ -838,7 +843,7 @@ ELSE()
 			MESSAGE(STATUS "Already released... No copy_to_release_repository target available")
 		ELSE()
 
-			ADD_CUSTOM_TARGET(copy_to_release_repository
+			ADD_CUSTOM_TARGET(create_release_in_repository
 					COMMAND ${CMAKE_COMMAND} -E echo
 					COMMAND ${CMAKE_COMMAND} -E echo "** Copy to release repository \"${RELEASE_REPOSITORY_DIRECTORY}\""
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY}/bin
