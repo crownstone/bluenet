@@ -64,7 +64,7 @@ public:
 
 	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats=10);
 	cs_ret_code_t sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats=1);
-	
+	cs_ret_code_t sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats=1);
 	cs_ret_code_t sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats=1);
 
 	access_model_handle_t getAccessModelHandle();

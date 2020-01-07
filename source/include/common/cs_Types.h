@@ -174,6 +174,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
 	CMD_SEND_MESH_MSG,                                // Sent to send a mesh message. -- Payload is cs_mesh_msg_t.
 	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Sent to send a switch mesh message. -- Payload is multi_switch_item_t.
+	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS,         // Sent to send a set behaviour settings mesh message.
 	CMD_SET_TIME,                                     // Sent to set the time. -- Payload is uint32_t timestamp.
 	CMD_FACTORY_RESET,                                // Sent when a factory reset should be performed: clear all data.
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms. -- Payload is uint32_t counter.
@@ -376,6 +377,7 @@ typedef  internal_multi_switch_item_cmd_t TYPIFY(CMD_SWITCH);
 typedef  internal_multi_switch_item_t TYPIFY(CMD_MULTI_SWITCH);
 typedef  cs_mesh_msg_t TYPIFY(CMD_SEND_MESH_MSG);
 typedef  internal_multi_switch_item_t TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH);
+typedef  behaviour_settings_t TYPIFY(CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS);
 typedef  uint32_t TYPIFY(CMD_SET_TIME);
 typedef  void TYPIFY(CMD_FACTORY_RESET);
 typedef  BOOL TYPIFY(CMD_DIMMING_ALLOWED);

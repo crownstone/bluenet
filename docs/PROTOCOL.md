@@ -319,7 +319,7 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 31 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
 32 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
 33 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. Required access depends on the command. | x | x | x
-34 | Set sun times | [Set sun time packet](#set_sun_time_packet) | Update the reference times for sunrise and sunset | x | x | 
+34 | Set sun times | [Sun time packet](#sun_time_packet) | Update the reference times for sunrise and sunset | x | x | 
 40 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 50 | UART message | payload | Print the payload to UART. | x
@@ -393,10 +393,10 @@ uint 16 | [State type](#state_types) | 2 | Type of state.
 uint 16 | id | 2 | ID of state that was set.
 
 
-<a name="set_sun_time_packet"></a>
-##### Set sun time packet
+<a name="sun_time_packet"></a>
+##### Sun time packet
 
-![Set Sun Time Packet](../docs/diagrams/set_sun_time_packet.png)
+![Sun time packet](../docs/diagrams/set_sun_time_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -572,14 +572,36 @@ Type nr | Type name | Payload type | Description | A | M | B
 135 | Temperature | int 8 | Chip temperature in °C. | r | r | 
 136 | Time | uint 32 | The current time as unix timestamp. | r | r | 
 139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors. | r | r | 
+149 | Sun time | [Sun time packet](#sun_time_packet) | r | r | 
+150 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | rw | rw | r
 
 <a name="switch_state_packet"></a>
 #### Switch state
 To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
 
-![Switch State Packet](../docs/diagrams/switch_state_packet.png)
+![Switch state packet](../docs/diagrams/switch_state_packet.png)
 
 Bit | Name |  Description
 --- | --- | ---
 0 | Relay | Value of the relay, where 0 = OFF, 1 = ON.
 1-7 | Dimmer | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
+
+<a name="behaviour_settings_packet"></a>
+##### Behaviour settings
+
+![Behaviour settings packet](../docs/diagrams/behaviour_settings_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 32 | [Flags](#behaviour_settings_flags) | 4 | Flags.
+
+
+<a name="behaviour_settings_flags"></a>
+##### Behaviour settings flags
+
+![Behaviour settings flags](../docs/diagrams/behaviour_settings_flags.png)
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Enabled | Whether behaviours are enabled.
+1-31 | Reserved | Reserved for future use, should be 0 for now.

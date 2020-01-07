@@ -94,8 +94,6 @@ cs_ret_code_t MeshModel::sendMsg(cs_mesh_msg_t *meshMsg) {
 	return addToQueue(meshMsg->type, 0, meshMsg->payload, meshMsg->size, repeats, priority);
 }
 
-
-
 cs_ret_code_t MeshModel::sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats) {
 	cs_mesh_model_msg_multi_switch_item_t meshItem;
 	meshItem.id = item->id;
@@ -109,6 +107,11 @@ cs_ret_code_t MeshModel::sendMultiSwitchItem(const internal_multi_switch_item_t*
 cs_ret_code_t MeshModel::sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats) {
 	remFromQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+}
+
+cs_ret_code_t MeshModel::sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats) {
+	remFromQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0);
+	return addToQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats) {
@@ -208,8 +211,10 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	bool ownMsg = accessMsg->meta_data.p_core_metadata->source == NRF_MESH_RX_SOURCE_LOOPBACK;
 	uint8_t* msg = (uint8_t*)(accessMsg->p_data);
 	uint16_t size = accessMsg->length;
-
-	if (!ownMsg && accessMsg->opcode.opcode == CS_MESH_MODEL_OPCODE_RELIABLE_MSG) {
+	if (ownMsg) {
+		return;
+	}
+	if (accessMsg->opcode.opcode == CS_MESH_MODEL_OPCODE_RELIABLE_MSG) {
 		LOGi("sendReply");
 		sendReply(accessMsg);
 	}
@@ -226,9 +231,6 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	switch (msgType) {
 	case CS_MESH_MODEL_TYPE_TEST: {
 #ifdef MESH_MODEL_TEST_MSG_DROP_ENABLED
-		if (ownMsg) {
-			break;
-		}
 		cs_mesh_model_msg_test_t* test = (cs_mesh_model_msg_test_t*)payload;
 		if (_lastReceivedCounter == 0) {
 			_lastReceivedCounter = test->counter;
@@ -260,9 +262,6 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_STATE_TIME: {
-		if (ownMsg) {
-			break;
-		}
 		event_t event(CS_TYPE::EVT_MESH_TIME, payload, payloadSize);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
@@ -275,10 +274,12 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		}
 		break;
 	}
+	case CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS: {
+		cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, payload, payloadSize);
+		State::getInstance().set(stateData);
+		break;
+	}
 	case CS_MESH_MODEL_TYPE_PROFILE_LOCATION: {
-		if (ownMsg) {
-			break;
-		}
 		event_t event(CS_TYPE::EVT_PROFILE_LOCATION, payload, payloadSize);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
@@ -287,9 +288,6 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
-		if (ownMsg) {
-			break;
-		}
 		cs_mesh_model_msg_multi_switch_item_t* item = (cs_mesh_model_msg_multi_switch_item_t*) payload;
 		if (item->id == _ownId) {
 //			LOGi("recieved multi switch for me");
@@ -313,9 +311,6 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_STATE_0: {
-		if (ownMsg) {
-			break;
-		}
 		cs_mesh_model_msg_state_0_t* packet = (cs_mesh_model_msg_state_0_t*) payload;
 		uint8_t srcId = accessMsg->meta_data.src.value;
 		LOGMeshModelDebug("id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
@@ -330,9 +325,6 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_STATE_1: {
-		if (ownMsg) {
-			break;
-		}
 		cs_mesh_model_msg_state_1_t* packet = (cs_mesh_model_msg_state_1_t*) payload;
 		uint8_t srcId = accessMsg->meta_data.src.value;
 		LOGMeshModelDebug("id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);

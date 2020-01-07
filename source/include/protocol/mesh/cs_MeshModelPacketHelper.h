@@ -23,6 +23,7 @@ bool noopIsValid(const uint8_t* packet, size16_t size);
 bool state0IsValid(const cs_mesh_model_msg_state_0_t* packet, size16_t size);
 bool state1IsValid(const cs_mesh_model_msg_state_1_t* packet, size16_t size);
 bool profileLocationIsValid(const cs_mesh_model_msg_profile_location_t* packet, size16_t size);
+bool setBehaviourSettingsIsValid(const behaviour_settings_t* packet, size16_t size);
 
 cs_mesh_model_msg_type_t getType(const uint8_t* meshMsg);
 

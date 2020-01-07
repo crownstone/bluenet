@@ -195,9 +195,20 @@ uint 8[] | Reserved | 5 | Reserved for future use, should be 0 for now.
 <a name="behaviour_settings_packet"></a>
 ##### Behaviour settings
 
-![Sun time packet](../docs/diagrams/behaviour_settings_packet.png)
+![Behaviour settings packet](../docs/diagrams/broadcast_behaviour_settings_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 32 | Flags | 4 | <ol start="0"><li>Dumb Home</li><li>Smart Home</li></ol>
+uint 32 | [Flags](#behaviour_settings_flags) | 4 | Flags.
 uint 8[] | Reserved | 7 | Reserved for future use, should be 0 for now.
+
+<a name="behaviour_settings_flags"></a>
+##### Behaviour settings flags
+
+![Behaviour settings packet](../docs/diagrams/behaviour_settings_flags.png)
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Enabled | Whether behaviours are enabled.
+1-31 | Reserved | Reserved for future use, should be 0 for now.
+

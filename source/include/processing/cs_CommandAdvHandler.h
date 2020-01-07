@@ -75,6 +75,8 @@ private:
 
 	void handleDecryptedRC5Payload(scanned_device_t* scannedDevice, const command_adv_header_t& header, uint16_t decryptedPayload[2]);
 
+	EncryptionAccessLevel getRequiredAccessLevel(const AdvCommandTypes type);
+
 	/**
 	 * Return index of claim with this device token.
 	 * Returns -1 when the device token was not found.

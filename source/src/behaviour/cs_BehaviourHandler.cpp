@@ -39,7 +39,7 @@ void BehaviourHandler::handleEvent(event_t& evt){
         case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
         	behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
         	isActive = settings->flags.enabled;
-            LOGBehaviourHandler("settings isActive=%u", isActive);
+            LOGi("settings isActive=%u", isActive);
             update();
             break;
         }

@@ -550,6 +550,11 @@ void Mesh::handleEvent(event_t & event) {
 		_model.sendMultiSwitchItem(packet);
 		break;
 	}
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS: {
+		TYPIFY(CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS)* packet = (TYPIFY(CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS)*)event.data;
+		_model.sendBehaviourSettings(packet);
+		break;
+	}
 	case CS_TYPE::CMD_FACTORY_RESET: {
 		factoryReset();
 		break;

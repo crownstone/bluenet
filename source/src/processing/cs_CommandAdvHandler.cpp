@@ -247,8 +247,9 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	uint32_t validationTimestamp = (decryptedData[0] << 0) | (decryptedData[1] << 8) | (decryptedData[2] << 16) | (decryptedData[3] << 24);
 	TYPIFY(STATE_TIME) timestamp;
 	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
-	uint8_t type = decryptedData[4];
-	uint16_t headerSize = sizeof(validationTimestamp) + sizeof(type);
+	uint8_t typeInt = decryptedData[4];
+	AdvCommandTypes type = (AdvCommandTypes)typeInt;
+	uint16_t headerSize = sizeof(validationTimestamp) + sizeof(typeInt);
 	uint16_t length = SOC_ECB_CIPHERTEXT_LENGTH - headerSize;
 	uint8_t* commandData = decryptedData + headerSize;
 
@@ -275,6 +276,10 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	controlCmd.source.sourceId = CS_CMD_SOURCE_DEVICE_TOKEN + header.deviceToken;
 	controlCmd.source.count = (decryptedPayloadRC5[0] >> 8) & 0xFF;
 	LOGCommandAdvDebug("adv cmd type=%u", type);
+	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
+		LOGCommandAdvDebug("no access");
+		return true;
+	}
 	switch (type) {
 		case ADV_CMD_MULTI_SWITCH: {
 			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
@@ -316,20 +321,16 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			break;
 		}
 		case ADV_CMD_SET_BEHAVIOUR_SETTINGS: {
+			size16_t requiredSize = sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS));
+			if (length < requiredSize) {
+				return true;
+			}
 			// Set state.
-			if (length < sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS))) {
-				return true;
-			}
-			length = sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS));
-			CS_TYPE stateType = CS_TYPE::STATE_BEHAVIOUR_SETTINGS;
-			if (!EncryptionHandler::getInstance().allowAccess(getUserAccessLevelSet(stateType), accessLevel)) {
-				return true;
-			}
-			cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, commandData, length);
-			if (State::getInstance().verifySizeForSet(stateData) != ERR_SUCCESS) {
-				return true;
-			}
+			cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, commandData, requiredSize);
 			State::getInstance().set(stateData);
+			// Send over mesh.
+			event_t meshCmd(CS_TYPE::CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS, commandData, requiredSize);
+			meshCmd.dispatch();
 			return true;
 		}
 		default:
@@ -339,7 +340,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	if (controlCmd.type == CTRL_CMD_UNKNOWN) {
 		return true;
 	}
-	if (type != 3) {
+	if (type != ADV_CMD_SET_SUN_TIMES) {
 		LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
 	}
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
@@ -371,6 +372,20 @@ void CommandAdvHandler::handleDecryptedRC5Payload(scanned_device_t* scannedDevic
 
 	event_t event(CS_TYPE::EVT_ADV_BACKGROUND, &backgroundAdv, sizeof(backgroundAdv));
 	EventDispatcher::getInstance().dispatch(event);
+}
+
+EncryptionAccessLevel CommandAdvHandler::getRequiredAccessLevel(const AdvCommandTypes type) {
+	switch (type) {
+		case ADV_CMD_MULTI_SWITCH:
+			return BASIC;
+		case ADV_CMD_SET_TIME:
+		case ADV_CMD_SET_SUN_TIMES:
+		case ADV_CMD_SET_BEHAVIOUR_SETTINGS:
+			return MEMBER;
+		case ADV_CMD_UNKNOWN:
+			return NOT_SET;
+	}
+	return NOT_SET;
 }
 
 void CommandAdvHandler::handleEvent(event_t & event) {
