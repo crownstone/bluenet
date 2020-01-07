@@ -5,18 +5,16 @@ The release process is as follows:
 * Update the `VERSION` file in `source/VERSION` and `source/bootloader/VERSION`.
 * Commit all the changes to github.
 
-Then to release the particular `target` you have worked on, say `default`:
+Then to create a release:
 
 ```
 cd build
-cmake -DCONFIG_DIR=config -DBOARD_TARGET=default -DCMAKE_BUILD_TYPE=Debug ..
-make
-cd default
 make create_git_release
 ```
 
 This will create a `release/` directory with the version information in a subdirectory, e.g. `release/crownstone_3.0.1-RC0`.
-Double check if the CMakeBuild.config is correct.
+Double check if the CMakeBuild.config is correct. Eventually add a CMakeBuild.config.overwrite file for your own
+passkey file.
 Now using this information, we will build everything for this release.
 
 ```
@@ -32,6 +30,7 @@ cd crownstone_3.0.1-RC0
 make build_bootloader_settings
 make generate_dfu_package_application
 make generate_dfu_package_bootloader
+make generate_dfu_package_all
 make install
 ```
 
