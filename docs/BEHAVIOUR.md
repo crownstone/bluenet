@@ -313,74 +313,74 @@ Type | Name | Length | Description
 </details>
 
 
-### Behaviour related Data Types
+### Behaviour related data types
 
 <a name="behaviour_payload"></a>
-#### Behaviour Payload
+#### Behaviour payload
 
-![Behaviour Payload](../docs/diagrams/behaviour-payload.png)
+![Behaviour payload](../docs/diagrams/behaviour-payload.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | Type | 1 | <ol start="0"><li>[Switch Behaviour](#switch_behaviour)</li><li>[Twilight Behaviour](#twilight_behaviour)</li><li>[Smart Timer](#smart_timer)</li></ol>
+uint8_t | Type | 1 | <ol start="0"><li>[Switch behaviour](#switch_behaviour)</li><li>[Twilight behaviour](#twilight_behaviour)</li><li>[Smart timer](#smart_timer)</li></ol>
 uint8_t[] | Data | ... | Type dependent
 
 <a name="switch_behaviour"></a>
-#### Switch Behaviour
+#### Switch behaviour
 
-![Switch Behaviour](../docs/diagrams/switch-behaviour.png)
+![Switch behaviour](../docs/diagrams/switch-behaviour.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
 uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Currently unused)
-[Day Of Week Bitmask](#day_of_week_bitmask) | Active Days | 1 | Selects which days of the week this behaviour is active
-[Time Of Day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
-[Time Of Day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
-[Presence Description](#presence_description) | Presence | 13 | Description of the presence conditions that need to hold for this behaviour to be active.
+[Day of week bitmask](#day_of_week_bitmask) | Active days | 1 | Selects which days of the week this behaviour is active
+[Time of day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
+[Time of day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
+[Presence description](#presence_description) | Presence | 13 | Description of the presence conditions that need to hold for this behaviour to be active.
 
 <a name="twilight_behaviour"></a>
-#### Twilight Behaviour
+#### Twilight behaviour
 
-![Twilight Behaviour](../docs/diagrams/twilight-behaviour.png)
+![Twilight behaviour](../docs/diagrams/twilight-behaviour.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
 uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Currently unused)
-[Day Of Week Bitmask](#day_of_week_bitmask) | Active Days | 1 | Selects which days of the week this behaviour is active
-[Time Of Day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
-[Time Of Day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
+[Day of week bitmask](#day_of_week_bitmask) | Active days | 1 | Selects which days of the week this behaviour is active
+[Time of day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
+[Time of day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
 
 <a name="smart_timer"></a>
-#### Smart Timer
+#### Smart timer
 
-A Smart Timer consists of a Switch Behaviour and an exit condition. This can be used to ensure that for example,
+A Smart timer consists of a switch behaviour and an exit condition. This can be used to ensure that for example,
 when a timer expires it will wait until the room is empty before switching off the device. (Essentially extending the original behaviour.)
 
 At the 'Until'-time of the 'Core' behaviour, it is checked wether the behaviour is still active (i.e. its presence condition is still fullfilled).
 If that is the case, a temporary extension for the behaviour is created which is identical to the Core behaviour with the Presence condition replaced
-by the Extension Presence and the Until time replaced by the Extension Until time. This temporary rule will be destroyed after the Extension Until time
+by the Extension presence and the Until time replaced by the Extension until time. This temporary rule will be destroyed after the Extension Until time
 expires.
 
-![Smart Timer](../docs/diagrams/smart-timer.png)
+![Smart timer](../docs/diagrams/smart-timer.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Switch Behaviour](#switch_behaviour) | Core Behaviour | 26 | The core behaviour is interpreted identical to Switch Behaviour.
-[End Condition](#behaviour_end_condition) | Extension End Condition | 17 | Describes the conditions that determine when this extension will be removed.
+[Switch behaviour](#switch_behaviour) | Core behaviour | 26 | The core behaviour is interpreted identical to switch behaviour.
+[End condition](#behaviour_end_condition) | Extension end condition | 17 | Describes the conditions that determine when this extension will be removed.
 
 <a name="behaviour_end_condition"></a>
-#### Behaviour End Condition
+#### Behaviour end condition
 
 ![End Condition](../docs/diagrams/behaviour-end-condition.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Presence Description](#presence_description) | Extension Presence | 13 | Description of the presence conditions that the Extension behaviour will use.
+[Presence description](#presence_description) | Extension presence | 13 | Description of the presence conditions that the Extension behaviour will use.
 
 <a name="behaviour_master_hash"></a>
-#### Behaviour Master Hash
+#### Behaviour master hash
 
 The `BehaviourStore` can generate a hash that can be used to verify if an application is up to date. The data that is hashed is as in the following table. The hashing algorithm used is [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum). As this algorithm is based on 16-bit integer array as input each entry in the table below is padded with 0x00 at the end if its length is uneven.
 
@@ -410,49 +410,49 @@ uint32 | Behaviour hash | 4 | The hash of the behaviour at this index. Generated
 
 
 <a name="time_difference"></a>
-#### Time Difference
+#### Time difference
 
-![Time Difference](../docs/diagrams/time-difference.png)
+![Time difference](../docs/diagrams/time-difference.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-int32 | Time Payload | 4 | Signed difference in seconds since a known-from-context moment in time (future - past >= 0).
+int32 | Time payload | 4 | Signed difference in seconds since a known-from-context moment in time (future - past >= 0).
 
 <a name="time_of_day"></a>
-#### Time of Day
+#### Time of day
 
-![Time Of Day](../docs/diagrams/time-of-day.png)
+![Time of day](../docs/diagrams/time-of-day.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Base Time |  1 | <ol start="0"><li>Midnight </li><li>Sunrise </li><li>Sunset</li></ol>
-[Time Difference](#time_difference) | Offset | 4 | 
+uint8 | Base time |  1 | <ol start="0"><li>Midnight </li><li>Sunrise </li><li>Sunset</li></ol>
+[Time difference](#time_difference) | Offset | 4 | 
 
 <a name="day_of_week_bitmask"></a>
-#### Day of Week Bitmask
+#### Day of week bitmask
 
-![Day Of Week](../docs/diagrams/day-of-week-bitmask.png)
+![Day of week](../docs/diagrams/day-of-week-bitmask.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Bitmask | 1 | 0: sunday - 6: saturday. 7: must be 0.
 
 <a name="presence_description"></a>
-#### Presence Description
+#### Presence description
 
 Given that for each room it is known if there are users present in that room or not, a Presence Description
 evaluates to 'true' or 'false'. It can be used to implement behaviours that take current presence into account.
 
-![Presence Description](../docs/diagrams/presence-description.png)
+![Presence description](../docs/diagrams/presence-description.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Type | 1 | <ol start="0"><li>Vacuously true condition</li><li>Anyone in any of the rooms</li><li>Noone in any of the rooms</li><li>Anyone anywhere in sphere</li><li>Noone anywhere in sphere</li></ol>
-uint64 | Active Rooms Mask | 8 | Room with id `i` corresponds to bit `i` in this mask.
+uint64 | Active rooms mask | 8 | Room with id `i` corresponds to bit `i` in this mask.
 uint32_t | Timeout | 4 | Whenever a presence description is satisfied (evaluates to true), it shall evaluate to true until this time out expires. Use 0 to ignore. Units: seconds.
 
 <a name="firmware_design"></a>
-# Firmware Design Internals
+# Firmware design internals
 
 In the diagram below the event flow concerning Behaviours and Twilights is depicted. Double arrows (annotated) indicate which `event`'s are received and handled by the node pointed to, red/dashed objects indicate not-yet implemented features, aggregation arrows indicate object ownership as in the sense of UML and lines indicate connection to physical domain.
 
@@ -460,4 +460,4 @@ Main essence of the design is that there are multiple ways that a use can operat
 
 Storing behaviours and Twilights will require additional logic in order to ensure synchronisation accross different devices/phones. All communication from and to host devices regarding Behaviours and Twilights is extracted into a Store object, that takes care of this matter. The corresponding handler object can access the store to query the active Behaviours/Twilights whenever necessary through a static reference.
 
-![Behaviour Handler Overview](../docs/diagrams/behaviourhandler-overview.svg)
+![Behaviour handler overview](../docs/diagrams/behaviourhandler-overview.svg)

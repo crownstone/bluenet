@@ -323,11 +323,11 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 40 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 50 | UART message | payload | Print the payload to UART. | x
-60 | Save Behaviour | [Save Behaviour packet](BEHAVIOUR.md#save_behaviour_packet) | Save a Behaviour to an unoccupied index | x | x
-61 | Replace Behaviour | [Replace Behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | Replace the Behaviour at given index | x | x
-62 | Remove Behaviour | [Remove Behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the Behaviour at given index | x | x
-63 | Get Behaviour | [Get Behaviour packet](BEHAVIOUR.md#get_behaviour_packet) | Obtain the Behaviour stored at given index | x | x
-64 | Get Behaviour Indices | [Get Behaviour Indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the behaviour store | x | x 
+60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add_behaviour_packet) | Add a behaviour to an unoccupied index | x | x
+61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | Replace the behaviour at given index | x | x
+62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the behaviour at given index | x | x
+63 | Get behaviour | [Get behaviour packet](BEHAVIOUR.md#get_behaviour_packet) | Obtain the behaviour stored at given index | x | x
+64 | Get behaviour indices | [Get behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours | x | x 
 
 
 
