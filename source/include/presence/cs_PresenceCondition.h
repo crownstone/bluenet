@@ -8,6 +8,7 @@
 #pragma once
 
 #include <presence/cs_PresencePredicate.h>
+
 #include <array>
 
 class PresenceCondition {
@@ -27,13 +28,11 @@ class PresenceCondition {
     // and no size check is performed. otherwise, both are validated.
     virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size = 0);
 
-    virtual size_t serializedSize() { return WireFormat::size<PresenceCondition>(); }
+    virtual size_t serializedSize() const;
 
     /**
-     * Does this condition hold given the [currentPresence]?
-     * 
-     * TODO: cache result of previous call with timestamp and
-     * use those to implement the time out feature
+     * Returns true if this condition 'holds' given the [currentPresence],
+     * else returns false.
      */
     bool operator()(PresenceStateDescription currentPresence);
 };

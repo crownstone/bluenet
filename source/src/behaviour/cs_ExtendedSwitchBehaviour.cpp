@@ -7,6 +7,8 @@
 
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
+#include <util/cs_WireFormat.h>
+
 ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SwitchBehaviour corebehaviour, PresenceCondition extensioncondition) :
     SwitchBehaviour(corebehaviour), extensionCondition(extensioncondition) {
 }
@@ -27,7 +29,7 @@ ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SerializedDataType arr) :
 ExtendedSwitchBehaviour::SerializedDataType ExtendedSwitchBehaviour::serialize(){
     SerializedDataType result;
 
-    serialize(result.data(),WireFormat::serialize<ExtendedSwitchBehaviour>());
+    serialize(result.data(),WireFormat::size<ExtendedSwitchBehaviour>());
 
     return result;
 }
@@ -35,7 +37,7 @@ ExtendedSwitchBehaviour::SerializedDataType ExtendedSwitchBehaviour::serialize()
 
 uint8_t* ExtendedSwitchBehaviour::serialize(uint8_t* outbuff, size_t max_size){
     if(max_size != 0){
-        if( outbuff == nullptr || max_size < serializedSize()) {
+        if (outbuff == nullptr || max_size < serializedSize()) {
             // all or nothing..
             return outbuff;
         }

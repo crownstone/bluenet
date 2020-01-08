@@ -19,6 +19,10 @@ PresenceCondition::PresenceCondition(SerializedDataType arr):
         WireFormat::deserialize<uint32_t>(         arr.data() + 9, 4)){
 }
 
+size_t PresenceCondition::serializedSize() const {
+    return WireFormat::size<PresenceCondition>();
+}
+
 PresenceCondition::SerializedDataType PresenceCondition::serialize(){
     SerializedDataType result;
     std::copy_n(std::begin(WireFormat::serialize(pred)),    9, std::begin(result) + 0);
