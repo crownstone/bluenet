@@ -31,7 +31,10 @@ public:
 
 private:
     // after this amount of seconds a presence_record becomes invalid.
-    static const constexpr uint32_t presence_time_out_s = 10;
+    static const constexpr uint8_t presence_time_out_s = 10;
+
+    // For each presence entry, send it max every x seconds over the mesh.
+    static const constexpr uint8_t presence_mesh_send_throttle_seconds = 30;
 
     /**
      * after this amount of seconds it is assumed that presencehandler would have received 
@@ -39,13 +42,37 @@ private:
      */
     static const constexpr uint32_t presence_uncertain_due_reboot_time_out_s = 30;
 
+    static const constexpr uint8_t max_location_id = 63;
+    static const constexpr uint8_t max_profile_id = 7;
+
     // using a list because of constant time insertion/deletion of
     // any item in the container
     static const constexpr uint8_t max_records = 20;
     struct PresenceRecord {
-        uint32_t when;  // ticks since startup
         uint8_t who;    // profile id
         uint8_t where;  // room id
+        /**
+         * Used to determine when a record is timed out.
+         * Decreases every seconds.
+         * Starts at presence_time_out_s, when 0, it is timed out.
+         */
+    	uint8_t timeoutCountdownSeconds;
+    	/**
+    	 * Used to determine whether to send a mesh message.
+    	 * Decreases every seconds.
+    	 * Starts at presence_mesh_send_throttle_seconds, when 0, a mesh message can be sent.
+    	 */
+    	uint8_t meshSendCountdownSeconds;
+        PresenceRecord(
+        		uint8_t profileId,
+				uint8_t roomId,
+				uint8_t timeoutSeconds = presence_time_out_s,
+				uint8_t meshThrottleSeconds = presence_mesh_send_throttle_seconds):
+        	who(profileId),
+			where(roomId),
+			timeoutCountdownSeconds(timeoutSeconds),
+			meshSendCountdownSeconds(meshThrottleSeconds)
+        {}
     };
 
     /**
@@ -86,6 +113,11 @@ private:
      * Triggers a EVT_PRESENCE_MUTATION event of the given type.
      */
     void triggerPresenceMutation(MutationType mutationtype);
+
+    /**
+     * To be called every second.
+     */
+    void tickSecond();
 
     // out of order
     void print();

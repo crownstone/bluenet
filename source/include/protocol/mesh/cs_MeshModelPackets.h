@@ -68,7 +68,6 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_t {
 struct __attribute__((__packed__)) cs_mesh_model_msg_profile_location_t {
 	uint8_t profile;
 	uint8_t location;
-	stone_id_t stone_id;
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_state_0_t {

@@ -555,13 +555,14 @@ void Mesh::handleEvent(event_t & event) {
 		_model.sendBehaviourSettings(packet);
 		break;
 	}
-	case CS_TYPE::CMD_FACTORY_RESET: {
-		factoryReset();
+	case CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION: {
+		TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION)* packet = (TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION)*)event.data;
+		LOGd("send profile=%u location=%u", packet->profile, packet->location);
+		_model.sendProfileLocation(packet);
 		break;
 	}
-	case CS_TYPE::EVT_PROFILE_LOCATION: {
-		TYPIFY(EVT_PROFILE_LOCATION)* packet = (TYPIFY(EVT_PROFILE_LOCATION)*)event.data;
-		_model.sendProfileLocation(packet);
+	case CS_TYPE::CMD_FACTORY_RESET: {
+		factoryReset();
 		break;
 	}
 	default:
