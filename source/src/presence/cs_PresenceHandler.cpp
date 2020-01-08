@@ -33,14 +33,13 @@ void PresenceHandler::handleEvent(event_t& evt){
 
     uint8_t location;
     uint8_t profile;
-
+    bool fromMesh = false;
     switch(evt.type) {
     case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
         // drop through
         adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
         profile = parsed_adv_ptr->profileId;
         location = parsed_adv_ptr->locationId;
-		//LOGd("Location [phone]: %x %x", profile, location);
         break;
     }
     case CS_TYPE::EVT_PROFILE_LOCATION: {
@@ -50,6 +49,7 @@ void PresenceHandler::handleEvent(event_t& evt){
         TYPIFY(EVT_PROFILE_LOCATION) *profile_location = (TYPIFY(EVT_PROFILE_LOCATION)*)evt.data;
         profile = profile_location->profile;
         location = profile_location->location;
+        fromMesh = true;
         LOGPresenceHandler("From mesh: location=%u profile=%u", profile, location);
 		break;
     }
@@ -68,13 +68,13 @@ void PresenceHandler::handleEvent(event_t& evt){
     	LOGw("Invalid profile(%u) or location(%u)", profile, location);
     	return;
     }
-    MutationType mutation = handleProfileLocationAdministration(profile, location);
+    MutationType mutation = handleProfileLocationAdministration(profile, location, fromMesh);
     if (mutation != MutationType::NothingChanged) {
     	triggerPresenceMutation(mutation);
     }
 }
 
-PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministration(uint8_t profile, uint8_t location){
+PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministration(uint8_t profile, uint8_t location, bool fromMesh) {
     auto prevdescription = getCurrentPresenceDescription();
 
 #ifdef PRESENCE_HANDLER_TESTING_CODE
@@ -112,7 +112,9 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
     }
     // When record is new, or the old record mesh send countdown was 0: send profile location over the mesh.
     if (meshCountdown == 0) {
-    	propagateMeshMessage(profile, location);
+    	if (!fromMesh) {
+    		propagateMeshMessage(profile, location);
+    	}
     	meshCountdown = presence_mesh_send_throttle_seconds;
     }
     LOGPresenceHandler("add record profile(%u) location(%u)", profile, location);
