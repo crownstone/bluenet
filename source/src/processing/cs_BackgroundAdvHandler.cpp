@@ -112,7 +112,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	backgroundAdvertisement.macAddress = scannedDevice->address;
 	backgroundAdvertisement.rssi = scannedDevice->rssi;
 
-	if (backgroundAdvertisement.protocol != 1 || backgroundAdvertisement.sphereId != _sphereId) {
+	if (backgroundAdvertisement.protocol != 0 || backgroundAdvertisement.sphereId != _sphereId) {
 		LOGBackgroundAdvVerbose("wrong protocol (%u) or sphereId (%u)", backgroundAdvertisement.protocol, backgroundAdvertisement.sphereId);
 		return;
 	}
