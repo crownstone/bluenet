@@ -36,9 +36,11 @@ class ExtendedSwitchBehaviour: public SwitchBehaviour {
     virtual Type getType() const override { return Type::Extended; }
 
     // requiresPresence depends on corebehaviour, extensionIsActive and extensionCondition.
+    // it assumes that extensionIsActive is up to date.
     virtual bool requiresPresence() override;
 
     // requiresAbsence depends on corebehaviour, extensionIsActive and extensionCondition.
+    // it assumes that extensionIsActive is up to date.
     virtual bool requiresAbsence() override;
 
     using SwitchBehaviour::isValid;
@@ -66,5 +68,6 @@ class ExtendedSwitchBehaviour: public SwitchBehaviour {
      * be reset to false as soon as the PresenceCondition evaluates to false.
      */
     bool extensionIsActive;
+    std::optional<Time> prevExtensionIsValidTimeStamp = {};
 
 };

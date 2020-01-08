@@ -87,7 +87,7 @@ namespace CsMath{
         T upperbound() { return high; }
 
         // E.g.
-        // Interval<uint8_t> i(200,00)
+        // Interval<uint8_t> i(200,100)
         // i.contains(0) == true.
         // considers this interval as half open (lower closed) so that the return value is 
         // true if [val] is enclosed in the interval or equal to the lower boundary.

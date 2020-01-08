@@ -72,14 +72,15 @@ class SwitchBehaviour : public Behaviour{
     // reintroduces the function name in this class's scope.
     using Behaviour::isValid;
     
-    private:
-
-    bool _isValid(PresenceStateDescription currentpresence);  // uncached version
-
-
-    // serialized fields (settings)
+    protected:
+    // (serialized field)
     PresenceCondition presenceCondition;
 
-    // unserialized fields (runtime values)
-    std::optional<uint32_t> prevIsValidTimeStamp = {}; // when was the last call to _isValid that returned true?
+    private:
+    // records when was the last call to _isValid returned true
+    // (runtime value, not serialized)
+    std::optional<uint32_t> prevIsValidTimeStamp = {};
+
+    // uncached version of ::isValid
+    bool _isValid(PresenceStateDescription currentpresence);
 };

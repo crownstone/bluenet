@@ -40,10 +40,10 @@ uint8_t* PresenceCondition::serialize(uint8_t* outbuff, size_t max_size){
 
     auto serialized_repr = serialize();
 
-    return predstd::copy_n (
+    return std::copy_n (
         std::begin (serialized_repr), 
-        WireFormat::size<Presencecondition>(),
-        std::begin (outbuff) );
+        WireFormat::size<PresenceCondition>(),
+        outbuff );
 }
 
 bool PresenceCondition::operator()(PresenceStateDescription currentPresence){

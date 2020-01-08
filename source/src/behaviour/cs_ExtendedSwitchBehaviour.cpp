@@ -7,6 +7,7 @@
 
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
+#include <time/cs_SystemTime.h>
 #include <util/cs_WireFormat.h>
 
 ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SwitchBehaviour corebehaviour, PresenceCondition extensioncondition) :
@@ -55,8 +56,51 @@ size_t ExtendedSwitchBehaviour::serializedSize() const {
     return WireFormat::size<ExtendedSwitchBehaviour>();
 }
 
-bool ExtendedSwitchBehaviour::requiresPresence();
+bool ExtendedSwitchBehaviour::requiresPresence(){
+    return extensionIsActive 
+        ? presenceCondition.pred.requiresPresence()
+        : extensionCondition.pred.requiresPresence();
+}
 
-bool ExtendedSwitchBehaviour::requiresAbsence();
+bool ExtendedSwitchBehaviour::requiresAbsence(){
+    return extensionIsActive 
+        ? presenceCondition.pred.requiresAbsence()
+        : extensionCondition.pred.requiresAbsence();
+}
 
-bool ExtendedSwitchBehaviour::isValid(Time currenttime, PresenceStateDescription currentpresence);
+bool ExtendedSwitchBehaviour::isValid(Time currenttime, PresenceStateDescription currentpresence){
+    // implementation detail: 
+    // SwitchBehaviour::isValid(PresenceStateDescription) caches the last valid presence timestamp.
+    // However, this must be recomputed in the extension anyway because the conditions may differ.
+
+    if (SwitchBehaviour::isValid(currenttime)) {
+        // currenttime between from() and until()
+        extensionIsActive = SwitchBehaviour::isValid(currentpresence);
+        return extensionIsActive;
+    }
+
+    if (!extensionIsActive) {
+        // not extended, nor in active time slot
+        return false;
+    }
+
+    if (extensionCondition(currentpresence)) {
+        // in extension and presence match
+        prevExtensionIsValidTimeStamp = SystemTime::posix();
+        return true;
+    }
+
+    if(prevExtensionIsValidTimeStamp){
+        if(CsMath::Interval<uint32_t>(SystemTime::posix(), extensionCondition.timeOut, true).contains(*prevExtensionIsValidTimeStamp)){
+            // in extension and presence is invalid,
+            // but we're in the extension's grace period.
+            return true;
+        } 
+    }
+    
+    // deactivate
+    extensionIsActive = false;
+    prevExtensionIsValidTimeStamp.reset();
+
+    return false;
+}
