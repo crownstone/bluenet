@@ -280,6 +280,10 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		LOGCommandAdvDebug("no access");
 		return true;
 	}
+
+	// TODO: refactr.. just checking if moving this out of switch case scope solves the problem
+	sun_time_t sunTime;
+
 	switch (type) {
 		case ADV_CMD_MULTI_SWITCH: {
 			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
@@ -299,7 +303,8 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			event.dispatch();
 
 			// Then, set sun time.
-			sun_time_t sunTime;
+			
+			// sun_time_t sunTime;
 			sunTime.sunrise = (commandData[setTimeSize + 0] << 0) + (commandData[setTimeSize + 1] << 8) + (commandData[setTimeSize + 2] << 16);
 			sunTime.sunset  = (commandData[setTimeSize + 3] << 0) + (commandData[setTimeSize + 4] << 8) + (commandData[setTimeSize + 5] << 16);
 			controlCmd.type = CTRL_CMD_SET_SUN_TIME;
@@ -312,12 +317,14 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			if (length < setSunTimeSize) {
 				return true;
 			}
-			sun_time_t sunTime;
+
+			
 			sunTime.sunrise = (commandData[0] << 0) + (commandData[1] << 8) + (commandData[2] << 16);
 			sunTime.sunset  = (commandData[3] << 0) + (commandData[4] << 8) + (commandData[5] << 16);
 			controlCmd.type = CTRL_CMD_SET_SUN_TIME;
 			controlCmd.data = (buffer_ptr_t)&sunTime;
 			controlCmd.size = sizeof(sunTime);
+
 			break;
 		}
 		case ADV_CMD_SET_BEHAVIOUR_SETTINGS: {
