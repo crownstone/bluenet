@@ -308,8 +308,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			controlCmd.type = CTRL_CMD_SET_SUN_TIME;
 			controlCmd.data = (buffer_ptr_t)&sunTime;
 			controlCmd.size = sizeof(sunTime);
-
-			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+			
 			event.dispatch();
 
 			return true;
