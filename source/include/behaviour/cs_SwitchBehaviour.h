@@ -23,7 +23,7 @@
  * "fade to 100% in 10 minutes, starting 30 minutes before sunrise, if anyone is in this room"
  */
 class SwitchBehaviour : public Behaviour{
-    public:
+public:
     typedef std::array<uint8_t, 
       WireFormat::size<Behaviour>() + 
       WireFormat::size<PresenceCondition>()> SerializedDataType;
@@ -72,7 +72,7 @@ class SwitchBehaviour : public Behaviour{
     // reintroduces the function name in this class's scope.
     using Behaviour::isValid;
     
-    private:
+private:
 
     bool _isValid(PresenceStateDescription currentpresence);  // uncached version
 

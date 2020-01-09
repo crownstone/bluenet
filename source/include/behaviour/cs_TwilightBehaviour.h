@@ -25,7 +25,7 @@
 #include <stdint.h>
 
 class TwilightBehaviour : public Behaviour {
-    public:
+public:
     typedef std::array<uint8_t, WireFormat::size<Behaviour>()> SerializedDataType;
 
     virtual ~TwilightBehaviour() = default;
@@ -47,4 +47,8 @@ class TwilightBehaviour : public Behaviour {
 
     virtual Type getType() const override { return Type::Twilight; }
 
+    // Because of the definition of isValid(PresenceStateDescription) in this class
+    // the base class function with the same name is shadowed. This using statement
+    // reintroduces the function name in this class's scope.
+    using Behaviour::isValid;
 };
