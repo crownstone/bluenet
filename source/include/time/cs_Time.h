@@ -13,25 +13,19 @@
 #include <stdint.h>
 
 class Time {
-    private:
+private:
     uint32_t posixTimeStamp;
     
-    public:
+public:
     Time(uint32_t posixTime) : posixTimeStamp(posixTime){}
 
-    // --- Implicit cast operators ---
-
-    operator uint32_t(){ return posixTimeStamp; }
-    operator TimeOfDay(){ return TimeOfDay(TimeOfDay::BaseTime::Midnight,posixTimeStamp); }
+    uint32_t timestamp() { return posixTimeStamp; }
 
     /**
-     * See: http://stackoverflow.com/questions/36357013/day-of-week-from-seconds-since-epoch
+	 * See: http://stackoverflow.com/questions/36357013/day-of-week-from-seconds-since-epoch
 	 * With timestamp=0 = Thursday 1-January-1970 00:00:00
-     */
-    operator DayOfWeek(){ return DayOfWeek(1 << ((posixTimeStamp / (60*60*24) + 4) % 7));}
+	 */
+    DayOfWeek dayOfWeek() { return DayOfWeek(1 << ((posixTimeStamp / (60*60*24) + 4) % 7)); }
 
-    // --- named cast functions ---
-    DayOfWeek dayOfWeek() { return *this; }
-    TimeOfDay timeOfDay() { return *this; }
-
+    TimeOfDay timeOfDay() { return TimeOfDay(TimeOfDay::BaseTime::Midnight, posixTimeStamp); }
 };

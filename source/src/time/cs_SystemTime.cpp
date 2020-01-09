@@ -120,7 +120,7 @@ Time SystemTime::posix(){
 }
 
 DayOfWeek SystemTime::day(){
-    return posix();
+    return posix().dayOfWeek();
 }
 
 Time SystemTime::now(){

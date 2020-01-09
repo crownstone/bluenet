@@ -32,7 +32,7 @@ bool TwilightHandler::update(){
     Time time = SystemTime::now();
 
     uint8_t intendedState = computeIntendedState(time);
-    if(previousIntendedState == intendedState){
+    if (previousIntendedState == intendedState) {
         return false;
     }
 
@@ -45,10 +45,11 @@ uint8_t TwilightHandler::computeIntendedState(Time currenttime){
     // TODO
     uint8_t min_twilight = 100;
 
-     for (auto& b : BehaviourStore::getActiveBehaviours()){
-        if(TwilightBehaviour * behave = dynamic_cast<TwilightBehaviour*>(b)){
+    for (auto& b : BehaviourStore::getActiveBehaviours()) {
+
+        if (TwilightBehaviour * behave = dynamic_cast<TwilightBehaviour*>(b)) {
             // cast to twilight behaviour succesful.
-            if (behave->isValid(currenttime)){
+            if (behave->isValid(currenttime)) {
                 min_twilight = CsMath::min(min_twilight, behave->value());
             }
         }
