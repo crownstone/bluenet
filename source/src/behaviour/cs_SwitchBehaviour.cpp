@@ -66,14 +66,16 @@ bool SwitchBehaviour::isValid(Time currenttime, PresenceStateDescription current
     return isValid(currenttime) && isValid(currentpresence);
 }
 
-bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence){
+bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence) {
     LOGBehaviour_V("isValid(presence) called");
-    if(_isValid(currentpresence)){
+    // Presence stays valid when profile left a room, not when entering.
+    if ((_isValid(currentpresence) && requiresPresence()) || (!_isValid(currentpresence) && requiresAbsence())) {
+    	// 9-1-2020 TODO Bart @ Arend: this relies on isValid(presence) to be called often.
         prevIsValidTimeStamp = SystemTime::up();
         return true;
-    } 
+    }
     
-    if(prevIsValidTimeStamp){
+    if (prevIsValidTimeStamp) {
         if (CsMath::Interval(SystemTime::up(), presenceCondition.timeOut, true).contains(*prevIsValidTimeStamp)) {
             // presence invalid but we're in the grace period.
             LOGBehaviour_V("grace period for SwitchBehaviour::isActive, %d in [%d %d]", *prevIsValidTimeStamp, SystemTime::up() - *prevIsValidTimeStamp, SystemTime::up() );
@@ -84,7 +86,6 @@ bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence){
             prevIsValidTimeStamp.reset();
         }
     } 
-
     return false;
 }
 
