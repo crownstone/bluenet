@@ -281,8 +281,6 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		return true;
 	}
 
-	// TODO: refactr.. just checking if moving this out of switch case scope solves the problem
-	sun_time_t sunTime;
 
 	switch (type) {
 		case ADV_CMD_MULTI_SWITCH: {
@@ -304,13 +302,17 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 
 			// Then, set sun time.
 			
-			// sun_time_t sunTime;
-			sunTime.sunrise = (commandData[setTimeSize + 0] << 0) + (commandData[setTimeSize + 1] << 8) + (commandData[setTimeSize + 2] << 16);
-			sunTime.sunset  = (commandData[setTimeSize + 3] << 0) + (commandData[setTimeSize + 4] << 8) + (commandData[setTimeSize + 5] << 16);
+			sun_time_t sunTime;
+			sunTime.sunrise = (commandData[setTimeSize + 4 + 0] << 0) + (commandData[setTimeSize + 4 + 1] << 8) + (commandData[setTimeSize + 4 + 2] << 16);
+			sunTime.sunset  = (commandData[setTimeSize + 4 + 3] << 0) + (commandData[setTimeSize + 4 + 4] << 8) + (commandData[setTimeSize + 4 + 5] << 16);
 			controlCmd.type = CTRL_CMD_SET_SUN_TIME;
 			controlCmd.data = (buffer_ptr_t)&sunTime;
 			controlCmd.size = sizeof(sunTime);
-			break;
+
+			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+			event.dispatch();
+
+			return true;
 		}
 		case ADV_CMD_SET_SUN_TIMES: {
 			size16_t setSunTimeSize = 6; // 2 uint24
@@ -318,14 +320,18 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 				return true;
 			}
 
-			
+			sun_time_t sunTime;
 			sunTime.sunrise = (commandData[0] << 0) + (commandData[1] << 8) + (commandData[2] << 16);
 			sunTime.sunset  = (commandData[3] << 0) + (commandData[4] << 8) + (commandData[5] << 16);
 			controlCmd.type = CTRL_CMD_SET_SUN_TIME;
 			controlCmd.data = (buffer_ptr_t)&sunTime;
 			controlCmd.size = sizeof(sunTime);
 
-			break;
+
+			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+			event.dispatch();
+
+			return true;
 		}
 		case ADV_CMD_SET_BEHAVIOUR_SETTINGS: {
 			size16_t requiredSize = sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS));
@@ -344,14 +350,18 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			LOGd("Unkown adv cmd: %u", type);
 			return true;
 	}
+
 	if (controlCmd.type == CTRL_CMD_UNKNOWN) {
 		return true;
 	}
+
 	if (type != ADV_CMD_SET_SUN_TIMES) {
 		LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
 	}
+
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 	event.dispatch();
+
 	return true;
 }
 
