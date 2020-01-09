@@ -8,8 +8,9 @@
 #pragma once
 
 #include <presence/cs_PresenceDescription.h>
-#include <array>
+#include <drivers/cs_Serial.h>
 
+#include <array>
 
 
 class PresencePredicate{
@@ -44,5 +45,15 @@ class PresencePredicate{
     // parameter bit i is 1 whenever there is presence detected in the
     // room with index i.
     bool operator()(PresenceStateDescription currentroomspresencebitmask);
+
+    void print(){
+        uint64_t roommask = RoomsBitMask;
+
+        [[maybe_unused]] uint32_t rooms[2] = {
+            static_cast<uint32_t>(roommask >> 0 ),
+            static_cast<uint32_t>(roommask >> 32)
+        };
+        LOGd("PresencePredicate(condition: %d roommask: 0x%04x 0x%04x)", static_cast<uint8_t>(cond) , rooms[1], rooms[0]);
+    }
 
 };
