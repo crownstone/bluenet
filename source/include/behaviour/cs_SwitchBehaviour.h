@@ -47,7 +47,7 @@ public:
 
     virtual Type getType() const override { return Type::Switch; }
 
-    void print();
+    virtual void print();
 
     // =========== Semantics ===========
 

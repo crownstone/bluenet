@@ -51,6 +51,8 @@ class ExtendedSwitchBehaviour: public SwitchBehaviour {
      **/
     virtual bool isValid(Time currenttime, PresenceStateDescription currentpresence);
 
+    virtual void print();
+
     private:
 
     PresenceCondition extensionCondition;

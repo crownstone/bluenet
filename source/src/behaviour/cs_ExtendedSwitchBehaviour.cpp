@@ -10,6 +10,8 @@
 #include <time/cs_SystemTime.h>
 #include <util/cs_WireFormat.h>
 
+#include <drivers/cs_Serial.h>
+
 ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SwitchBehaviour corebehaviour, PresenceCondition extensioncondition) :
     SwitchBehaviour(corebehaviour), extensionCondition(extensioncondition) {
 }
@@ -104,4 +106,11 @@ bool ExtendedSwitchBehaviour::isValid(Time currenttime, PresenceStateDescription
     prevExtensionIsValidTimeStamp.reset();
 
     return false;
+}
+
+void ExtendedSwitchBehaviour::print(){
+    LOGd("## ExtendedSwitchBehaviour:")
+    SwitchBehaviour::print();
+    LOGd("##");
+
 }
