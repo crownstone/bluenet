@@ -64,21 +64,26 @@ bool BehaviourHandler::update(){
         }
     }
 
-    return true;//currentIntendedState != previousIntendedState;
+    return true;
 }
 
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
        Time currentTime, 
-       PresenceStateDescription currentPresence){
+       PresenceStateDescription currentPresence) {
     if (!isActive) {
+        return {};
+    }
+
+    if (!currentTime.isValid()) {
+        LOGBehaviourHandler("Current time invalid, computed intended state: empty");
         return {};
     }
 
     LOGBehaviourHandler("BehaviourHandler compute intended state");
     std::optional<uint8_t> intendedValue = {};
     
-    for (auto& b : BehaviourStore::getActiveBehaviours()){
-        if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(b)){
+    for (auto& b : BehaviourStore::getActiveBehaviours()) {
+        if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(b)) {
             // cast to switch behaviour succesful.
             if (switchbehave->isValid(currentTime)) {
                 LOGBehaviourHandler_V("valid time on behaviour: ");
