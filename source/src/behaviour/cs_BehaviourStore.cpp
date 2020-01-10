@@ -142,9 +142,37 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	}
 }
 
+bool BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, const size_t& behaviourSize){
+    const uint8_t indexSize = sizeof(uint8_t);
+
+    // check size
+    if(evt.size != indexSize + behaviourSize){
+        LOGe("replace switchbehaviour received wrong size event (%d != %d)",
+            evt.size, indexSize + behaviourSize);
+        evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+        return false;
+    }
+
+    // check parameter
+    if(index >= MaxBehaviours){
+        evt.result.returnCode = ERR_WRONG_PARAMETER;
+        return false;
+    }
+
+    // check return buffer
+    if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
+        LOGd("ERR_BUFFER_TOO_SMALL");
+        evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
+        return false;
+    }
+
+        return true;
+}
+
 void BehaviourStore::handleReplaceBehaviour(event_t& evt){
-	uint8_t indexSize = sizeof(uint8_t);
-	uint8_t typeSize = sizeof(uint8_t);
+	const uint8_t indexSize = sizeof(uint8_t);
+	const uint8_t typeSize = sizeof(uint8_t);
+
 	if (evt.size < indexSize + typeSize) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH " %d", evt.size);
 		evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
@@ -152,35 +180,17 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 	}
 
     uint8_t* dat = static_cast<uint8_t*>(evt.data);
-	
     uint8_t index = dat[0];
-	SwitchBehaviour::Type type = static_cast<SwitchBehaviour::Type>(dat[indexSize]);
+	Behaviour::Type type = static_cast<Behaviour::Type>(dat[indexSize]);
+
 	LOGi("Replace behaviour at ind=%u", index);
 
 	switch(type){
-		case SwitchBehaviour::Type::Switch:{
-			// check size
-			if(evt.size - indexSize != WireFormat::size<SwitchBehaviour>()){
-				LOGe("replace switchbehaviour received wrong size event (%d != %d)",
-                    evt.size, indexSize + WireFormat::size<SwitchBehaviour>());
-				evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-                break;
-			}
-
-            // check parameter
-            if(index >= MaxBehaviours){
-                evt.result.returnCode = ERR_WRONG_PARAMETER;
+		case Behaviour::Type::Switch:{
+			if(!ReplaceParameterValidation(evt, index, WireFormat::size<SwitchBehaviour>())){
                 break;
             }
 
-            // check return buffer
-            if(evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
-                LOGd("ERR_BUFFER_TOO_SMALL");
-                evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
-                break;
-            }
-
-            // check previous data
             removeBehaviour(index);
 
             LOGd("Allocating new SwitchBehaviour");
@@ -193,22 +203,11 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
             evt.result.returnCode = ERR_SUCCESS;
             break;
 		}
-		case SwitchBehaviour::Type::Twilight:{
-            // check size
-			if(evt.size - indexSize != WireFormat::size<TwilightBehaviour>()){
-				LOGe("replace twilightbehaviour received wrong size event (%d != %d)", 
-                    evt.size, indexSize + WireFormat::size<TwilightBehaviour>());
-				evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+		case Behaviour::Type::Twilight:{
+            if(!ReplaceParameterValidation(evt, index, WireFormat::size<TwilightBehaviour>())){
                 break;
-			}
-
-            // check parameter
-            if(index >= MaxBehaviours){
-                evt.result.returnCode = ERR_WRONG_PARAMETER;
-                break;
-            } 
+            }
             
-            // check previous data
             removeBehaviour(index);
 
             LOGd("Allocating new TwilightBehaviour");
@@ -222,9 +221,25 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 
 			break;
 		}
-		case SwitchBehaviour::Type::Extended:{
-			LOGe("Note implemented: save extended behaviour");
-			evt.result.returnCode = ERR_WRONG_PARAMETER;
+		case Behaviour::Type::Extended:{
+			// LOGe("Note implemented: save extended behaviour");
+			// evt.result.returnCode = ERR_WRONG_PARAMETER;
+            // break;
+
+            if(!ReplaceParameterValidation(evt, index, WireFormat::size<ExtendedSwitchBehaviour>())){
+                break;
+            }
+            
+            removeBehaviour(index);
+
+            LOGd("Allocating new SwitchBehaviour");
+			activeBehaviours[index] = new ExtendedSwitchBehaviour(WireFormat::deserialize<ExtendedSwitchBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
+            activeBehaviours[index]->print();
+				
+			cs_state_data_t data (CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE, index, evt.getData() + indexSize, evt.size - indexSize);
+			State::getInstance().set(data);
+            
+            evt.result.returnCode = ERR_SUCCESS;
             break;
 		}
 		default:{

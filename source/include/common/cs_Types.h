@@ -120,6 +120,7 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET = 68,
 	STATE_BEHAVIOUR_RULE                    = 69,     //
 	STATE_TWILIGHT_RULE                     = 70,     //
+	STATE_EXTENDED_BEHAVIOUR_RULE			= 71,
 
 	STATE_RESET_COUNTER                     = 128,    //  0x80 - 128
 	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
