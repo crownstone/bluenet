@@ -698,8 +698,10 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, sizeof(stateErrors));
 
 	// TODO: implement this differently
-	if (RTC::getCount() > RTC::msToTicks(5000)) {
+	if (!_igbtFailureDetectionStarted && (RTC::getCount() > RTC::msToTicks(5000))) {
 		startIgbtFailureDetection();
+		LOGi("startIgbtFailureDetection");
+		printBuf(power);
 	}
 
 	// TODO Bart 2019-12-12 Use event handler to check for switch changes. Don't poll, as this uses processing power for nothing.
@@ -738,6 +740,8 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 				power.buf[power.voltageIndex + power.numChannels],
 				power.buf[power.currentIndex],
 				power.buf[power.currentIndex + power.numChannels]);
+		printBuf(power);
+
 		event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 		EventDispatcher::getInstance().dispatch(event);
 		stateErrors.errors.overCurrent = true;
@@ -767,6 +771,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 				power.buf[power.voltageIndex + power.numChannels],
 				power.buf[power.currentIndex],
 				power.buf[power.currentIndex + power.numChannels]);
+			printBuf(power);
 			// Dispatch the event that will turn off the pwm
 			event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER);
 			EventDispatcher::getInstance().dispatch(event);
@@ -776,12 +781,13 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		}
 		else if (switchState.state.relay == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
-			LOGe("Dimmer failure detected: %i V=[%i %i ..] C=[%i %i ..]",
+			LOGw("Dimmer failure detected: %i V=[%i %i ..] C=[%i %i ..]",
 				currentRmsMA,
 				power.buf[power.voltageIndex],
 				power.buf[power.voltageIndex + power.numChannels],
 				power.buf[power.currentIndex],
 				power.buf[power.currentIndex + power.numChannels]);
+			printBuf(power);
 			event_t event(CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED);
 			EventDispatcher::getInstance().dispatch(event);
 
@@ -911,4 +917,15 @@ void PowerSampling::enableSwitchcraft(bool enable) {
 	else {
 		RecognizeSwitch::getInstance().stop();
 	}
+}
+
+void PowerSampling::printBuf(power_t & power) {
+	LOGd("PowerBuf:");
+	for (uint16_t i = 0; i < power.bufSize; ++i) {
+		_log(SERIAL_DEBUG, " %i", power.buf[i]);
+		if ((i+1) % 10 == 0) {
+			_log(SERIAL_DEBUG, SERIAL_CRLF);
+		}
+	}
+	_log(SERIAL_DEBUG, SERIAL_CRLF);
 }
