@@ -35,7 +35,6 @@ ExtendedSwitchBehaviour::SerializedDataType ExtendedSwitchBehaviour::serialize()
     return result;
 }
 
-
 uint8_t* ExtendedSwitchBehaviour::serialize(uint8_t* outbuff, size_t max_size){
     if(max_size != 0){
         if (outbuff == nullptr || max_size < serializedSize()) {
@@ -91,7 +90,9 @@ bool ExtendedSwitchBehaviour::isValid(Time currenttime, PresenceStateDescription
     }
 
     if(prevExtensionIsValidTimeStamp){
-        if(CsMath::Interval<uint32_t>(SystemTime::posix(), extensionCondition.timeOut, true).contains(*prevExtensionIsValidTimeStamp)){
+        if ( CsMath::Interval<uint32_t>(
+                SystemTime::posix().timestamp(), extensionCondition.timeOut, true )
+            .contains(prevExtensionIsValidTimeStamp->timestamp()) ) {
             // in extension and presence is invalid,
             // but we're in the extension's grace period.
             return true;
