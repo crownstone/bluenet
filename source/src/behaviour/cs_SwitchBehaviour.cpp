@@ -68,24 +68,42 @@ bool SwitchBehaviour::isValid(Time currenttime, PresenceStateDescription current
 
 bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence) {
     LOGBehaviour_V("isValid(presence) called");
+    if (!requiresPresence() && !requiresAbsence()) {
+    	return true;
+    }
+
     // Presence stays valid when profile left a room, not when entering.
-    if ((_isValid(currentpresence) && requiresPresence()) || (!_isValid(currentpresence) && requiresAbsence())) {
+    if (_isValid(currentpresence) && requiresPresence()) {
     	// 9-1-2020 TODO Bart @ Arend: this relies on isValid(presence) to be called often.
-        prevIsValidTimeStamp = SystemTime::up();
+        prevInRoomTimeStamp = SystemTime::up();
         return true;
     }
+    if (!_isValid(currentpresence) && requiresAbsence()) {
+    	// 9-1-2020 TODO Bart @ Arend: this relies on isValid(presence) to be called often.
+    	prevInRoomTimeStamp = SystemTime::up();
+    	return false;
+    }
     
-    if (prevIsValidTimeStamp) {
-        if (CsMath::Interval(SystemTime::up(), presenceCondition.timeOut, true).contains(*prevIsValidTimeStamp)) {
+    if (prevInRoomTimeStamp) {
+    	bool gracePeriod;
+        if (CsMath::Interval(SystemTime::up(), presenceCondition.timeOut, true).contains(*prevInRoomTimeStamp)) {
             // presence invalid but we're in the grace period.
-            LOGBehaviour_V("grace period for SwitchBehaviour::isActive, %d in [%d %d]", *prevIsValidTimeStamp, SystemTime::up() - *prevIsValidTimeStamp, SystemTime::up() );
-            return true;
+            LOGBehaviour_V("grace period for SwitchBehaviour::isActive, %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
+            gracePeriod = true;
         } else {
             // fell out of grace, lets delete prev val.
-            LOGBehaviour_V("grace period for SwitchBehaviour::isActive is over, %d in [%d %d]", *prevIsValidTimeStamp, SystemTime::up() - *prevIsValidTimeStamp, SystemTime::up() );
-            prevIsValidTimeStamp.reset();
+            LOGBehaviour_V("grace period for SwitchBehaviour::isActive is over, %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
+            prevInRoomTimeStamp.reset();
+            gracePeriod = false;
         }
-    } 
+        if (requiresPresence()) {
+        	return gracePeriod;
+        }
+        if (requiresAbsence()) {
+        	return !gracePeriod;
+        }
+    }
+    // Not valid, and not in grace period.
     return false;
 }
 

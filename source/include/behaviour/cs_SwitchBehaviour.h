@@ -81,5 +81,5 @@ private:
     PresenceCondition presenceCondition;
 
     // unserialized fields (runtime values)
-    std::optional<uint32_t> prevIsValidTimeStamp = {}; // when was the last call to _isValid that returned true?
+    std::optional<uint32_t> prevInRoomTimeStamp = {}; // when was the last call to _isValid that returned true?
 };
