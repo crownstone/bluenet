@@ -77,9 +77,8 @@ public:
     PresenceCondition presenceCondition;
 
     private:
-    // records when was the last call to _isValid returned true
-    // (runtime value, not serialized)
-    std::optional<uint32_t> prevIsValidTimeStamp = {};
+    // unserialized fields (runtime values)
+    std::optional<uint32_t> prevInRoomTimeStamp = {}; // when was the last call to _isValid that returned true?
 
     // uncached version of ::isValid
     bool _isValid(PresenceStateDescription currentpresence);

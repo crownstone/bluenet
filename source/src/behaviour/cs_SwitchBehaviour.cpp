@@ -68,25 +68,63 @@ bool SwitchBehaviour::isValid(Time currenttime, PresenceStateDescription current
 
 bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence) {
     LOGBehaviour_V("isValid(presence) called");
-    // Presence stays valid when profile left a room, not when entering.
-    if ((_isValid(currentpresence) && requiresPresence()) || (!_isValid(currentpresence) && requiresAbsence())) {
-    	// 9-1-2020 TODO Bart @ Arend: this relies on isValid(presence) to be called often.
-        prevIsValidTimeStamp = SystemTime::up();
-        return true;
+    if (!requiresPresence() && !requiresAbsence()) {
+    	LOGBehaviour_V("vacuously true");
+    	return true;
     }
-    
-    if (prevIsValidTimeStamp) {
-        if (CsMath::Interval(SystemTime::up(), presenceCondition.timeOut, true).contains(*prevIsValidTimeStamp)) {
-            // presence invalid but we're in the grace period.
-            LOGBehaviour_V("grace period for SwitchBehaviour::isActive, %d in [%d %d]", *prevIsValidTimeStamp, SystemTime::up() - *prevIsValidTimeStamp, SystemTime::up() );
-            return true;
-        } else {
-            // fell out of grace, lets delete prev val.
-            LOGBehaviour_V("grace period for SwitchBehaviour::isActive is over, %d in [%d %d]", *prevIsValidTimeStamp, SystemTime::up() - *prevIsValidTimeStamp, SystemTime::up() );
-            prevIsValidTimeStamp.reset();
-        }
-    } 
-    return false;
+    if (requiresPresence()) {
+    	if (_isValid(currentpresence)) {
+    		// 9-1-2020 TODO Bart @ Arend: this relies on isValid(presence) to be called often.
+    		prevInRoomTimeStamp = SystemTime::up();
+    		LOGBehaviour_V("return true");
+			return true;
+    	}
+    	if (prevInRoomTimeStamp) {
+//    		presenceCondition.timeOut = 20;
+    		if (CsMath::Interval(SystemTime::up(), presenceCondition.timeOut, true).ClosureContains(*prevInRoomTimeStamp)) {
+    			// presence invalid but we're in the grace period.
+    			LOGBehaviour_V("left room(s) within time out: %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
+    			return true;
+    		} else {
+    			// fell out of grace, lets delete prev val.
+    			LOGBehaviour_V("left room(s) timed out: %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
+    			prevInRoomTimeStamp.reset();
+    			return false;
+    		}
+    	}
+    	// Not valid, and not in timeout period.
+    	LOGBehaviour_V("return false");
+    	return false;
+    }
+    if (requiresAbsence()) {
+    	bool notInRoom = _isValid(currentpresence);
+    	if (!notInRoom) {
+    		// 9-1-2020 TODO Bart @ Arend: this relies on isValid(presence) to be called often.
+    		prevInRoomTimeStamp = SystemTime::up();
+    	}
+    	if (prevInRoomTimeStamp) {
+//    		presenceCondition.timeOut = 20;
+    		if (CsMath::Interval(SystemTime::up(), presenceCondition.timeOut, true).ClosureContains(*prevInRoomTimeStamp)) {
+    			LOGBehaviour_V("left room(s) within time out: %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
+    			return false;
+    		} else {
+    			LOGBehaviour_V("left room(s) timed out: %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
+    			prevInRoomTimeStamp.reset();
+    			return true;
+    		}
+    	}
+
+    	// When not in room, and not recently left the room.
+    	if (notInRoom) {
+    		LOGBehaviour_V("return true");
+    		return true;
+    	}
+
+    	// Not valid, and not in grace period.
+    	LOGBehaviour_V("return false");
+    	return false;
+    }
+    return true;
 }
 
 bool SwitchBehaviour::_isValid(PresenceStateDescription currentpresence){

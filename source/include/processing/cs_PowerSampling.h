@@ -208,5 +208,7 @@ private:
 	void changeRange(uint8_t channel, int32_t amount);
 
 	void enableSwitchcraft(bool enable);
+
+	void printBuf(power_t & power);
 };
 

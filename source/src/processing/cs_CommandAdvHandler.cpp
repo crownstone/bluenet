@@ -291,46 +291,37 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			break;
 		}
 		case ADV_CMD_SET_TIME: {
+			uint8_t flags;
+			size16_t flagsSize = sizeof(flags);
 			size16_t setTimeSize = sizeof(uint32_t);
 			size16_t setSunTimeSize = 6; // 2 uint24
-			if (length < setTimeSize + setSunTimeSize) {
+			if (length < flagsSize + setTimeSize + setSunTimeSize) {
 				return true;
 			}
-			// First, set time
-			controlCmd.type = CTRL_CMD_SET_TIME;
-			controlCmd.size = setTimeSize;
-			LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
-			event_t eventSetTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
-			eventSetTime.dispatch();
+			// First get flags
+			flags = commandData[0];
 
-			// Then, set sun time.
-			sun_time_t sunTime;
-			sunTime.sunrise = (commandData[setTimeSize + 0] << 0) + (commandData[setTimeSize + 1] << 8) + (commandData[setTimeSize + 2] << 16);
-			sunTime.sunset  = (commandData[setTimeSize + 3] << 0) + (commandData[setTimeSize + 4] << 8) + (commandData[setTimeSize + 5] << 16);
-			controlCmd.type = CTRL_CMD_SET_SUN_TIME;
-			controlCmd.data = (buffer_ptr_t)&sunTime;
-			controlCmd.size = sizeof(sunTime);
-			event_t eventSetSunTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
-			eventSetSunTime.dispatch();
-
-			break;
-		}
-		case ADV_CMD_SET_SUN_TIMES: {
-			size16_t setSunTimeSize = 6; // 2 uint24
-			if (length < setSunTimeSize) {
-				return true;
+			// First, set time, if valid.
+			if (BLEutil::isBitSet(flags, 0)) {
+				controlCmd.type = CTRL_CMD_SET_TIME;
+				controlCmd.data = commandData + flagsSize;
+				controlCmd.size = setTimeSize;
+				LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
+				event_t eventSetTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+				eventSetTime.dispatch();
 			}
 
-			sun_time_t sunTime;
-			sunTime.sunrise = (commandData[0] << 0) + (commandData[1] << 8) + (commandData[2] << 16);
-			sunTime.sunset  = (commandData[3] << 0) + (commandData[4] << 8) + (commandData[5] << 16);
-			controlCmd.type = CTRL_CMD_SET_SUN_TIME;
-			controlCmd.data = (buffer_ptr_t)&sunTime;
-			controlCmd.size = sizeof(sunTime);
-
-			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
-			event.dispatch();
-
+			// Then, set sun time, if valid.
+			if (BLEutil::isBitSet(flags, 1)) {
+				sun_time_t sunTime;
+				sunTime.sunrise = (commandData[setTimeSize + 0] << 0) + (commandData[setTimeSize + 1] << 8) + (commandData[setTimeSize + 2] << 16);
+				sunTime.sunset  = (commandData[setTimeSize + 3] << 0) + (commandData[setTimeSize + 4] << 8) + (commandData[setTimeSize + 5] << 16);
+				controlCmd.type = CTRL_CMD_SET_SUN_TIME;
+				controlCmd.data = (buffer_ptr_t)&sunTime;
+				controlCmd.size = sizeof(sunTime);
+				event_t eventSetSunTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+				eventSetSunTime.dispatch();
+			}
 			break;
 		}
 		case ADV_CMD_SET_BEHAVIOUR_SETTINGS: {
@@ -384,7 +375,6 @@ EncryptionAccessLevel CommandAdvHandler::getRequiredAccessLevel(const AdvCommand
 		case ADV_CMD_MULTI_SWITCH:
 			return BASIC;
 		case ADV_CMD_SET_TIME:
-		case ADV_CMD_SET_SUN_TIMES:
 		case ADV_CMD_SET_BEHAVIOUR_SETTINGS:
 			return MEMBER;
 		case ADV_CMD_UNKNOWN:
