@@ -69,6 +69,7 @@ bool SwitchBehaviour::isValid(Time currenttime, PresenceStateDescription current
 bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence) {
     LOGBehaviour_V("isValid(presence) called");
     if (!requiresPresence() && !requiresAbsence()) {
+    	LOGBehaviour_V("vacuously true");
     	return true;
     }
     if (requiresPresence()) {
