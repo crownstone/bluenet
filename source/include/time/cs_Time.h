@@ -21,6 +21,8 @@ public:
 
     uint32_t timestamp() { return posixTimeStamp; }
 
+    bool isValid() { return posixTimeStamp != 0; }
+
     /**
 	 * See: http://stackoverflow.com/questions/36357013/day-of-week-from-seconds-since-epoch
 	 * With timestamp=0 = Thursday 1-January-1970 00:00:00
