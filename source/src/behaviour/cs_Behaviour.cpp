@@ -96,9 +96,10 @@ TimeOfDay Behaviour::until() const {
 bool Behaviour::isValid(Time currenttime){
 //	LOGd("activeDays=%u dayOfWeek=%u timeofday=%02d:%02d:%02d", activeDays, static_cast<uint8_t>(currenttime.dayOfWeek()), currenttime.timeOfDay().h(), currenttime.timeOfDay().m(), currenttime.timeOfDay().s());
     if (activeDays & static_cast<uint8_t>(currenttime.dayOfWeek())) {
-        return from() < until() // ensure proper midnight roll-over 
-            ? (from() <= currenttime && currenttime < until()) 
-            : (from() <= currenttime || currenttime < until());
+//    	LOGd("from() < until()=%u   from() <= currenttime=%u   currenttime < until()=%u", from() < until(), from() <= currenttime.timeOfDay(), currenttime.timeOfDay() < until());
+        return from() < until() // ensure proper midnight roll-over
+            ? (from() <= currenttime.timeOfDay() && currenttime.timeOfDay() < until())
+            : (from() <= currenttime.timeOfDay() || currenttime.timeOfDay() < until());
     }
     return false;
 }

@@ -169,11 +169,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_RESET_COUNTER:
 		*(TYPIFY(STATE_RESET_COUNTER)*)data.value = STATE_RESET_COUNTER_DEFAULT;
 		return ERR_SUCCESS;
-	case CS_TYPE::STATE_SWITCH_STATE: {
-		switch_state_t *state = (TYPIFY(STATE_SWITCH_STATE)*)data.value;
-		cs_switch_state_set_default(state);
+	case CS_TYPE::STATE_SWITCH_STATE:
+		reinterpret_cast<TYPIFY(STATE_SWITCH_STATE)*>(data.value)->asInt = STATE_SWITCH_STATE_DEFAULT;
 		return ERR_SUCCESS;
-	}
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 		*(TYPIFY(STATE_ACCUMULATED_ENERGY)*)data.value = STATE_ACCUMULATED_ENERGY_DEFAULT;
 		return ERR_SUCCESS;
@@ -195,11 +193,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_FACTORY_RESET:
 		*(TYPIFY(STATE_FACTORY_RESET)*)data.value = STATE_FACTORY_RESET_DEFAULT;
 		return ERR_SUCCESS;
-	case CS_TYPE::STATE_ERRORS: {
-		state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*)data.value;
-		cs_state_errors_set_default(stateErrors);
+	case CS_TYPE::STATE_ERRORS:
+		reinterpret_cast<TYPIFY(STATE_ERRORS)*>(data.value)->asInt = STATE_ERRORS_DEFAULT;
 		return ERR_SUCCESS;
-	}
 	case CS_TYPE::CONFIG_CURRENT_LIMIT:
 		return ERR_NOT_IMPLEMENTED;
 	case CS_TYPE::CONFIG_DO_NOT_USE:
@@ -208,8 +204,8 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_NOT_AVAILABLE;
 	case CS_TYPE::STATE_TWILIGHT_RULE:
 		return ERR_NOT_AVAILABLE;
-	case CS_TYPE::CMD_BEHAVIOURHANDLER_SETTINGS:
-		static_cast<TYPIFY(CMD_BEHAVIOURHANDLER_SETTINGS)*>(data.value)[0] = 0x01; // 'isActive' by default 
+	case CS_TYPE::STATE_BEHAVIOUR_SETTINGS:
+		reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(data.value)->asInt = STATE_BEHAVIOUR_SETTINGS_DEFAULT;
 		return ERR_SUCCESS;
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
@@ -227,8 +223,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
 	case CS_TYPE::CMD_RESET_DELAYED:
 	case CS_TYPE::CMD_SEND_MESH_MSG:
-	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE:
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH:
+	case CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION:
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
 	case CS_TYPE::CMD_SET_TIME:
 	case CS_TYPE::CMD_SWITCH_OFF:
@@ -256,8 +253,6 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
 	case CS_TYPE::CMD_DIMMING_ALLOWED:
-	case CS_TYPE::EVT_KEEP_ALIVE:
-	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_MESH_TIME:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
 	case CS_TYPE::EVT_SCAN_STARTED:
@@ -348,6 +343,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_OPERATION_MODE:
 	case CS_TYPE::STATE_SWITCH_STATE:
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
+	case CS_TYPE::STATE_BEHAVIOUR_SETTINGS:
 	case CS_TYPE::STATE_TWILIGHT_RULE:
 	case CS_TYPE::STATE_SUN_TIME:
 		return PersistenceMode::FLASH;
@@ -379,8 +375,6 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_BLE_DISCONNECT:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
 	case CS_TYPE::EVT_SESSION_NONCE_SET:
-	case CS_TYPE::EVT_KEEP_ALIVE:
-	case CS_TYPE::EVT_KEEP_ALIVE_STATE:
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
@@ -422,11 +416,11 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_SET_OPERATION_MODE:
 	case CS_TYPE::CMD_SEND_MESH_MSG:
-	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE:
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH:
+	case CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION:
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS:
 	case CS_TYPE::CMD_SET_TIME:
 	case CS_TYPE::CMD_FACTORY_RESET:
-	case CS_TYPE::CMD_BEHAVIOURHANDLER_SETTINGS:
 	case CS_TYPE::EVT_SAVE_BEHAVIOUR:
 	case CS_TYPE::EVT_REPLACE_BEHAVIOUR:
 	case CS_TYPE::EVT_REMOVE_BEHAVIOUR:

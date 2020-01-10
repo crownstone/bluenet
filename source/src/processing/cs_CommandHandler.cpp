@@ -143,8 +143,6 @@ command_result_t CommandHandler::handleCommand(
 		return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR,commandData,resultData);
 	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
 		return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR_INDICES,commandData,resultData);
-	case CTRL_CMD_BEHAVIOURHANDLER_SETTINGS:
-		return dispatchEventForCommand(CS_TYPE::CMD_BEHAVIOURHANDLER_SETTINGS,commandData,resultData);
 
 	case CTRL_CMD_UNKNOWN:
 		return command_result_t(ERR_UNKNOWN_TYPE);
@@ -489,25 +487,34 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 
 	cs_mesh_msg_t meshMsg;
 	switch (cmdType) {
-	case CTRL_CMD_NOP:
-		meshMsg.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
-		meshMsg.payload = payload;
-		meshMsg.size = payloadSize;
-		meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
-		meshMsg.urgency = CS_MESH_URGENCY_LOW;
-		break;
-	case CTRL_CMD_SET_TIME:
-		meshMsg.type = CS_MESH_MODEL_TYPE_CMD_TIME;
-		meshMsg.payload = payload;
-		meshMsg.size = payloadSize;
-		meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
-		meshMsg.urgency = CS_MESH_URGENCY_LOW; // Timestamp in message gets updated before actually sending.
-		break;
-	default:
-		return command_result_t(ERR_NOT_IMPLEMENTED);
+		case CTRL_CMD_NOP: {
+			meshMsg.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
+			meshMsg.payload = payload;
+			meshMsg.size = payloadSize;
+			meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
+			meshMsg.urgency = CS_MESH_URGENCY_LOW;
+			break;
+		}
+		case CTRL_CMD_SET_TIME: {
+			meshMsg.type = CS_MESH_MODEL_TYPE_CMD_TIME;
+			meshMsg.payload = payload;
+			meshMsg.size = payloadSize;
+			meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
+			meshMsg.urgency = CS_MESH_URGENCY_LOW; // Timestamp in message gets updated before actually sending.
+			break;
+		}
+		default:
+			return command_result_t(ERR_NOT_IMPLEMENTED);
 	}
 	event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 	EventDispatcher::getInstance().dispatch(cmd);
+
+	// Also handle command on this crownstone.
+	if (cmdType == CTRL_CMD_SET_TIME) {
+		event_t event(CS_TYPE::CMD_SET_TIME, payload, payloadSize);
+		EventDispatcher::getInstance().dispatch(event);
+	}
+
 //#endif
 	return command_result_t(ERR_SUCCESS);
 }
@@ -586,7 +593,6 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CTRL_CMD_REMOVE_BEHAVIOUR:
 	case CTRL_CMD_GET_BEHAVIOUR:
 	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
-	case CTRL_CMD_BEHAVIOURHANDLER_SETTINGS:
 		return MEMBER;
 
 	case CTRL_CMD_GOTO_DFU:

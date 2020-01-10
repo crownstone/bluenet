@@ -20,11 +20,10 @@ bool testIsValid(const cs_mesh_model_msg_test_t* packet, size16_t size);
 bool ackIsValid(const uint8_t* packet, size16_t size);
 bool timeIsValid(const cs_mesh_model_msg_time_t* packet, size16_t size);
 bool noopIsValid(const uint8_t* packet, size16_t size);
-bool keepAliveStateIsValid(const cs_mesh_model_msg_keep_alive_t* packet, size16_t size);
-bool keepAliveIsValid(const uint8_t* packet, size16_t size);
 bool state0IsValid(const cs_mesh_model_msg_state_0_t* packet, size16_t size);
 bool state1IsValid(const cs_mesh_model_msg_state_1_t* packet, size16_t size);
 bool profileLocationIsValid(const cs_mesh_model_msg_profile_location_t* packet, size16_t size);
+bool setBehaviourSettingsIsValid(const behaviour_settings_t* packet, size16_t size);
 
 cs_mesh_model_msg_type_t getType(const uint8_t* meshMsg);
 
@@ -67,16 +66,5 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
  * @retval                        True on success.
  */
 bool setMeshPayload(uint8_t* meshMsg, size16_t meshMsgSize, const uint8_t* payload, size16_t payloadSize);
-
-/**
- * Search for item with given stone id.
- *
- * Assumes packet is valid.
- * @param[in]  packet   The packet to search in.
- * @param[in]  stoneId  Stone id to search for.
- * @param[out] item     Set to item with given stoneId.
- * @retval              true when stone id was found.
- */
-bool keepAliveHasItem(cs_mesh_model_msg_keep_alive_t* packet, stone_id_t stoneId, cs_mesh_model_msg_keep_alive_item_t*& item);
 
 }

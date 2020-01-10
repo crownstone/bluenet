@@ -219,7 +219,16 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 		case PersistenceMode::NEITHER_RAM_NOR_FLASH:
 			return ERR_NOT_AVAILABLE;
 		case PersistenceMode::RAM: {
-			return storeInRam(data);
+			ret_code = storeInRam(data);
+			switch (ret_code) {
+				case ERR_SUCCESS:
+				case ERR_SUCCESS_NO_CHANGE:
+					return ERR_SUCCESS;
+				default:
+					LOGw("Failed to store in RAM");
+					return ret_code;
+			}
+			break;
 		}
 		case PersistenceMode::FLASH: {
 			return ERR_NOT_AVAILABLE;
@@ -232,7 +241,16 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			// first get if default location is RAM or FLASH
 			switch(DefaultLocation(data.type)) {
 				case PersistenceMode::RAM:
-					return storeInRam(data);
+					ret_code = storeInRam(data);
+					switch (ret_code) {
+						case ERR_SUCCESS:
+						case ERR_SUCCESS_NO_CHANGE:
+							return ERR_SUCCESS;
+						default:
+							LOGw("Failed to store in RAM");
+							return ret_code;
+					}
+					break;
 				case PersistenceMode::FLASH:
 					// fall-through
 					break;
@@ -244,9 +262,16 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			size16_t index = 0;
 			ret_code = storeInRam(data, index);
 			LOGStateDebug("Item stored in RAM: %i", index);
-			if (ret_code != ERR_SUCCESS) {
-				LOGw("Failed to store in RAM");
-				return ret_code;
+			switch (ret_code) {
+				case ERR_SUCCESS:
+					// Fall through.
+					break;
+				case ERR_SUCCESS_NO_CHANGE:
+					// No need to store in flash.
+					return ERR_SUCCESS;
+				default:
+					LOGw("Failed to store in RAM");
+					return ret_code;
 			}
 			// now we have a duplicate of our data we can safely store it to FLASH asynchronously
 			ret_code = storeInFlash(index);
@@ -337,13 +362,17 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 	LOGStateDebug("storeInRam type=%u id=%u size=%u", to_underlying_type(data.type), data.id, data.size);
 	cs_ret_code_t ret_code = findInRam(data.type, data.id, index_in_ram);
 	if (ret_code == ERR_SUCCESS) {
-		LOGStateDebug("Update RAM");
+		LOGStateDebug("Update in RAM");
 		cs_state_data_t & ram_data = _ram_data_register[index_in_ram];
 		if (ram_data.size != data.size) {
 			LOGe("Should not happen: ram_data.size=%u data.size=%u", ram_data.size, data.size);
 			free(ram_data.value);
 			ram_data.size = data.size;
 			allocate(ram_data);
+		}
+		if (memcmp(ram_data.value, data.value, data.size) == 0) {
+			LOGStateDebug("No change");
+			return ERR_SUCCESS_NO_CHANGE;
 		}
 		memcpy(ram_data.value, data.value, data.size);
 	}
@@ -621,24 +650,7 @@ cs_ret_code_t State::setThrottled(const cs_state_data_t & data, uint32_t periodS
 	if (periodSeconds == 0 || periodSeconds >= CS_STATE_QUEUE_DELAY_SECONDS_MAX) {
 		return ERR_WRONG_PARAMETER;
 	}
-	uint32_t cmp_value = 0xFF;
-	cs_ret_code_t ret_code = compareWithRam(data, cmp_value);
-	if (ret_code != ERR_SUCCESS) {
-		if (ret_code == ERR_NOT_FOUND) {
-			// explicitly go on, it has never set before, so we want to write first time to flash
-		} else {
-			return ret_code;
-		}
-	} else {
-		// it already exists in RAM exactly like we want it, no need to update
-		if (cmp_value == 0) {
-			return ERR_SUCCESS;
-		}
-		// else go on
-	}
-	
-	// write it to ram
-	ret_code = set(data, PersistenceMode::RAM);
+	cs_ret_code_t ret_code = set(data, PersistenceMode::RAM);
 	if (ret_code != ERR_SUCCESS) {
 		return ret_code;
 	}

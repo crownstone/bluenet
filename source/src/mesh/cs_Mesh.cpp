@@ -545,23 +545,24 @@ void Mesh::handleEvent(event_t & event) {
 		_model.sendMsg(msg);
 		break;
 	}
-	case CS_TYPE::CMD_SEND_MESH_MSG_KEEP_ALIVE: {
-		TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE)* packet = (TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE)*)event.data;
-		_model.sendKeepAliveItem(packet);
-		break;
-	}
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH: {
 		TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)* packet = (TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)*)event.data;
 		_model.sendMultiSwitchItem(packet);
 		break;
 	}
-	case CS_TYPE::CMD_FACTORY_RESET: {
-		factoryReset();
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS: {
+		TYPIFY(CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS)* packet = (TYPIFY(CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS)*)event.data;
+		_model.sendBehaviourSettings(packet);
 		break;
 	}
-	case CS_TYPE::EVT_PROFILE_LOCATION: {
-		TYPIFY(EVT_PROFILE_LOCATION)* packet = (TYPIFY(EVT_PROFILE_LOCATION)*)event.data;
+	case CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION: {
+		TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION)* packet = (TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION)*)event.data;
+		LOGd("send profile=%u location=%u", packet->profile, packet->location);
 		_model.sendProfileLocation(packet);
+		break;
+	}
+	case CS_TYPE::CMD_FACTORY_RESET: {
+		factoryReset();
 		break;
 	}
 	default:

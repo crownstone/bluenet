@@ -63,9 +63,8 @@ public:
 	cs_ret_code_t sendReliableMsg(const uint8_t* data, uint16_t len);
 
 	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats=10);
-	cs_ret_code_t sendKeepAliveItem(const keep_alive_state_item_t* item, uint8_t repeats=5);
 	cs_ret_code_t sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats=1);
-	
+	cs_ret_code_t sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats=1);
 	cs_ret_code_t sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats=1);
 
 	access_model_handle_t getAccessModelHandle();
@@ -95,7 +94,6 @@ private:
 	TYPIFY(CONFIG_CROWNSTONE_ID) _ownId = 0;
 
 	cs_mesh_model_msg_multi_switch_item_t _lastReceivedMultiSwitch = {0xFF};
-	TYPIFY(EVT_KEEP_ALIVE_STATE) _lastReceivedKeepAlive = {0xFF};
 	TYPIFY(CMD_SET_TIME) _lastReveivedSetTime = 0;
 	cs_mesh_model_ext_state_t _lastReceivedState;
 

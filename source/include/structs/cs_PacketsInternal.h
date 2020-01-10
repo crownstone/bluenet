@@ -100,18 +100,6 @@ inline bool cs_multi_switch_item_is_valid(internal_multi_switch_item_t* item, si
 	return (size == sizeof(internal_multi_switch_item_t) && item->id != 0);
 }
 
-/**
- * A single keep alive packet, with target id.
- */
-struct __attribute__((packed)) keep_alive_state_item_t {
-	stone_id_t id;
-	keep_alive_state_item_cmd_t cmd;
-};
-
-inline bool cs_keep_alive_state_item_is_valid(keep_alive_state_item_t* item, size16_t size) {
-	return (size == sizeof(keep_alive_state_item_t) && item->id != 0 && item->cmd.timeout != 0);
-}
-
 struct __attribute__((packed)) control_command_packet_t {
 	CommandHandlerTypes type;
 	buffer_ptr_t data;

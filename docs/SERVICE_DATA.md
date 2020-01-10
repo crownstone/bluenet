@@ -78,7 +78,7 @@ int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
-uint 8 | Reserved | 1 | Reserved for future use.
+uint 8 | [Extra flags bitmask](#extra_flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
 
 <a name="service_data_encrypted_error_2"></a>
@@ -168,7 +168,7 @@ int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 uint 32 | [Error bitmask](#state_error_bitmask) | 4 | Error bitmask of the Crownstone.
 uint 8 | Counter | 1 | Simply counts up and overflows.
-uint 8 | Reserved | 4 | Reserved for future use.
+uint 8 | Reserved | 4 | Reserved for future use, will be 0 for now.
 
 
 
@@ -198,6 +198,14 @@ Bit | Name |  Description
 5 | Switchcraft | If this is 1, switchcraft is enabled on this Crownstone.
 6 | Tap to toggle | If this is 1, tap to toggle is enabled on this Crownstone.
 7 | Behaviour overridden | If this is 1, behaviour is overridden.
+
+<a name="extra_flags_bitmask"></a>
+#### Extra flags bitmask
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Behaviour enabled | Whether behaviours are enabled.
+1-7 | Reserved for future use, will be 0 for now.
 
 <a name="state_error_bitmask"></a>
 #### Error Bitmask

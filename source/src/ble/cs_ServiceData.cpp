@@ -19,20 +19,7 @@
 //#define PRINT_DEBUG_EXTERNAL_DATA
 //#define PRINT_VERBOSE_EXTERNAL_DATA
 
-ServiceData::ServiceData() :
-	_updateTimerId(NULL)
-	,_crownstoneId(0)
-	,_switchState(0)
-	,_flags(0)
-	,_temperature(0)
-	,_powerFactor(0)
-	,_powerUsageReal(0)
-	,_energyUsed(0)
-	,_firstErrorTimestamp(0)
-	,_operationMode(OperationMode::OPERATION_MODE_UNINITIALIZED)
-	,_connected(false)
-	,_updateCount(0)
-{
+ServiceData::ServiceData() {
 //	_stateErrors.asInt = 0;
 	// Initialize the service data
 	memset(_serviceData.array, 0, sizeof(_serviceData.array));
@@ -93,12 +80,20 @@ void ServiceData::updateFlagsBitmask(uint8_t bitmask) {
 }
 
 void ServiceData::updateFlagsBitmask(uint8_t bit, bool set) {
-
 	if (set) {
 		BLEutil::setBit(_flags, bit);
 	}
 	else {
 		BLEutil::clearBit(_flags, bit);
+	}
+}
+
+void ServiceData::updateExtraFlagsBitmask(uint8_t bit, bool set) {
+	if (set) {
+		BLEutil::setBit(_extraFlags, bit);
+	}
+	else {
+		BLEutil::clearBit(_extraFlags, bit);
 	}
 }
 
@@ -186,7 +181,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 		_serviceData.params.encrypted.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
 		_serviceData.params.encrypted.state.energyUsed = _energyUsed;
 		_serviceData.params.encrypted.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-		_serviceData.params.encrypted.state.reserved = 0;
+		_serviceData.params.encrypted.state.extraFlags = _extraFlags;
 		_serviceData.params.encrypted.state.validation = SERVICE_DATA_VALIDATION;
 	}
 
@@ -285,6 +280,11 @@ void ServiceData::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::STATE_TEMPERATURE: {
 			updateTemperature(*(TYPIFY(STATE_TEMPERATURE)*)event.data);
+			break;
+		}
+		case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
+			TYPIFY(STATE_BEHAVIOUR_SETTINGS)* behaviourSettings = (TYPIFY(STATE_BEHAVIOUR_SETTINGS)*)event.data;
+			updateExtraFlagsBitmask(SERVICE_DATA_EXTRA_FLAGS_BEHAVIOUR_ENABLED, behaviourSettings->flags.enabled);
 			break;
 		}
 		case CS_TYPE::EVT_TIME_SET: {

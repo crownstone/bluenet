@@ -77,8 +77,6 @@ IF (BUILD_MESHING)
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_Mesh.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_MeshModel.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/mesh/cs_MeshAdvertiser.cpp")
-#	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshMessageState.cpp")
-#	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/protocol/mesh/cs_MeshMessageCounter.cpp")
 
 	IF (NOT DEFINED MESH_SDK_DIR)
 		MESSAGE(FATAL_ERROR "MESH_SDK_DIR is not defined!")

@@ -11,6 +11,10 @@
 
 #include <time/cs_SystemTime.h>
 
+#include <drivers/cs_Serial.h>
+
+#define LOGTwilightHandler LOGnone
+
 void TwilightHandler::handleEvent(event_t& evt){
     switch(evt.type){
         case CS_TYPE::EVT_PRESENCE_MUTATION: {
@@ -31,8 +35,13 @@ void TwilightHandler::handleEvent(event_t& evt){
 bool TwilightHandler::update(){
     Time time = SystemTime::now();
 
+    if (! time.isValid()) {
+        LOGTwilightHandler("Current time invalid, twilight update returns false");
+        return false;
+    }
+
     uint8_t intendedState = computeIntendedState(time);
-    if(previousIntendedState == intendedState){
+    if (previousIntendedState == intendedState) {
         return false;
     }
 
@@ -42,13 +51,12 @@ bool TwilightHandler::update(){
 
 uint8_t TwilightHandler::computeIntendedState(Time currenttime){
     // return minimal value among the valid twilights.
-    // TODO
     uint8_t min_twilight = 100;
 
-     for (auto& b : BehaviourStore::getActiveBehaviours()){
-        if(TwilightBehaviour * behave = dynamic_cast<TwilightBehaviour*>(b)){
+    for (auto& b : BehaviourStore::getActiveBehaviours()) {
+        if (TwilightBehaviour * behave = dynamic_cast<TwilightBehaviour*>(b)) {
             // cast to twilight behaviour succesful.
-            if (behave->isValid(currenttime)){
+            if (behave->isValid(currenttime)) {
                 min_twilight = CsMath::min(min_twilight, behave->value());
             }
         }

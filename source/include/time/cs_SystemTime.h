@@ -23,7 +23,8 @@
 class SystemTime : public EventListener {
     public:
     static Time posix();
-    static Time now();
+    static Time now(); // alias for posix()
+    
     static DayOfWeek day();
 
     /**
@@ -52,8 +53,8 @@ class SystemTime : public EventListener {
     static uint32_t uptime_sec;
 
     // timing features
-    static app_timer_t              appTimerData;// = {{0}};
-	static app_timer_id_t           appTimerId;// = &_appTimerData;
+    static app_timer_t              appTimerData;
+	static app_timer_id_t           appTimerId;
 
     static void scheduleNextTick();
     static void tick(void* unused);

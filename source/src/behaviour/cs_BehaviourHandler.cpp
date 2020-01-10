@@ -36,10 +36,12 @@ void BehaviourHandler::handleEvent(event_t& evt){
             update();
             break;
         }
-        case CS_TYPE::CMD_BEHAVIOURHANDLER_SETTINGS:{
-            isActive =  evt.getData()[0] != 0;
-            LOGBehaviourHandler("behaviourhandler settings isActive:%s", (isActive ? "true" : "false"));
+        case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
+        	behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
+        	isActive = settings->flags.enabled;
+            LOGi("settings isActive=%u", isActive);
             update();
+            break;
         }
         default:{
             // ignore other events
@@ -62,21 +64,26 @@ bool BehaviourHandler::update(){
         }
     }
 
-    return true;//currentIntendedState != previousIntendedState;
+    return true;
 }
 
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
        Time currentTime, 
-       PresenceStateDescription currentPresence){
+       PresenceStateDescription currentPresence) {
     if (!isActive) {
+        return {};
+    }
+
+    if (!currentTime.isValid()) {
+        LOGBehaviourHandler("Current time invalid, computed intended state: empty");
         return {};
     }
 
     LOGBehaviourHandler("BehaviourHandler compute intended state");
     std::optional<uint8_t> intendedValue = {};
     
-    for (auto& b : BehaviourStore::getActiveBehaviours()){
-        if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(b)){
+    for (auto& b : BehaviourStore::getActiveBehaviours()) {
+        if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(b)) {
             // cast to switch behaviour succesful.
             if (switchbehave->isValid(currentTime)) {
                 LOGBehaviourHandler_V("valid time on behaviour: ");

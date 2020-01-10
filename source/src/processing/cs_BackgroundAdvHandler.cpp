@@ -33,6 +33,7 @@
 #define BACKGROUND_SERVICES_MASK_LEN 16
 
 BackgroundAdvertisementHandler::BackgroundAdvertisementHandler() {
+	State::getInstance().get(CS_TYPE::CONFIG_SPHERE_ID, &_sphereId, sizeof(_sphereId));
 	EventDispatcher::getInstance().addListener(this);
 }
 
@@ -68,34 +69,40 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 //	uint64_t left = *((uint64_t*)servicesMask);
 //	uint64_t right = *((uint64_t*)(servicesMask + 8));
 	uint64_t left =
-			((uint64_t)servicesMask[0] << 56) +
-			((uint64_t)servicesMask[1] << 48) +
-			((uint64_t)servicesMask[2] << 40) +
-			((uint64_t)servicesMask[3] << 32) +
-			((uint64_t)servicesMask[4] << 24) +
-			((uint64_t)servicesMask[5] << 16) +
-			((uint64_t)servicesMask[6] << 8 ) +
-			((uint64_t)servicesMask[7] << 0 );
+			((uint64_t)servicesMask[0] << (7*8)) +
+			((uint64_t)servicesMask[1] << (6*8)) +
+			((uint64_t)servicesMask[2] << (5*8)) +
+			((uint64_t)servicesMask[3] << (4*8)) +
+			((uint64_t)servicesMask[4] << (3*8)) +
+			((uint64_t)servicesMask[5] << (2*8)) +
+			((uint64_t)servicesMask[6] << (1*8)) +
+			((uint64_t)servicesMask[7] << (0*8));
 	uint64_t right =
-				((uint64_t)servicesMask[0+8] << 56) +
-				((uint64_t)servicesMask[1+8] << 48) +
-				((uint64_t)servicesMask[2+8] << 40) +
-				((uint64_t)servicesMask[3+8] << 32) +
-				((uint64_t)servicesMask[4+8] << 24) +
-				((uint64_t)servicesMask[5+8] << 16) +
-				((uint64_t)servicesMask[6+8] << 8 ) +
-				((uint64_t)servicesMask[7+8] << 0 );
+				((uint64_t)servicesMask[0+8] << (7*8)) +
+				((uint64_t)servicesMask[1+8] << (6*8)) +
+				((uint64_t)servicesMask[2+8] << (5*8)) +
+				((uint64_t)servicesMask[3+8] << (4*8)) +
+				((uint64_t)servicesMask[4+8] << (3*8)) +
+				((uint64_t)servicesMask[5+8] << (2*8)) +
+				((uint64_t)servicesMask[6+8] << (1*8)) +
+				((uint64_t)servicesMask[7+8] << (0*8));
 	LOGBackgroundAdvVerbose("left=%llx right=%llx", left, right);
 
 
 	// Divide the data into 3 parts, and do a bitwise majority vote, to correct for errors.
-	uint64_t part1 = (left >> (64-42))  & 0x03FFFFFFFFFF; // First 42 bits from left.
+	// Each part is 42 bits.
+	uint64_t part1 = (left >> (64-42)) & 0x03FFFFFFFFFF; // First 42 bits from left.
 	uint64_t part2 = ((left & 0x3FFFFF) << 20) | ((right >> (64-20)) & 0x0FFFFF); // Last 64-42=22 bits from left, and first 42−(64−42)=20 bits from right.
 	uint64_t part3 = (right >> 2) & 0x03FFFFFFFFFF; // Bits 21-62 from right.
 	uint64_t result = ((part1 & part2) | (part2 & part3) | (part1 & part3)); // The majority vote
 	LOGBackgroundAdvVerbose("part1=%llx part2=%llx part3=%llx result=%llx", part1, part2, part3, result);
 
 	// Parse the resulting data.
+	//struct __attribute__((__packed__)) BackgroundAdvertisement {
+	//	uint8_t protocol : 2;
+	//	uint8_t sphereId : 8;
+	//	uint16_t encryptedData[2];
+	//};
 	adv_background_t backgroundAdvertisement;
 	uint16_t encryptedPayload[2];
 	backgroundAdvertisement.protocol = (result >> (42-2)) & 0x03;
@@ -104,6 +111,11 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	encryptedPayload[1] = (result >> (42-2-8-32)) & 0xFFFF;
 	backgroundAdvertisement.macAddress = scannedDevice->address;
 	backgroundAdvertisement.rssi = scannedDevice->rssi;
+
+	if (backgroundAdvertisement.protocol != 0 || backgroundAdvertisement.sphereId != _sphereId) {
+		LOGBackgroundAdvVerbose("wrong protocol (%u) or sphereId (%u)", backgroundAdvertisement.protocol, backgroundAdvertisement.sphereId);
+		return;
+	}
 
 	LOGBackgroundAdvVerbose("encrypted=[%u %u]", encryptedPayload[0], encryptedPayload[1]);
 	// TODO: can decrypt to same buffer?
@@ -144,27 +156,17 @@ void BackgroundAdvertisementHandler::handleBackgroundAdvertisement(adv_backgroun
 #endif
 
 
-// 2019-11-12 TODO: where to put this bit struct definition?
-//// 42 bits, so it fits 3 times in 128 bits.
-//struct __attribute__((__packed__)) BackgroundAdvertisement {
-//	uint8_t protocol : 2;
-//	uint8_t sphereId : 8;
-//	uint16_t encryptedData[2];
-//};
-
-//struct __attribute__((__packed__)) BackgroundAdvertisementPayload {
-//	uint8_t locationId : 6;
-//	uint8_t profileId : 3;
-//	int8_t rssiOffset : 4;
-//	uint8_t flags : 3;
-//};
-
 	adv_background_parsed_t parsed;
 	parsed.protocol = backgroundAdvertisement->protocol;
 	parsed.sphereId = backgroundAdvertisement->sphereId;
 	parsed.macAddress = backgroundAdvertisement->macAddress;
 
-
+	//struct __attribute__((__packed__)) BackgroundAdvertisementPayload {
+	//	uint8_t locationId : 6;
+	//	uint8_t profileId : 3;
+	//	int8_t rssiOffset : 4;
+	//	uint8_t flags : 3;
+	//};
 	parsed.locationId =  (decryptedPayload[1] >> (16-6)) & 0x3F;
 	parsed.profileId =   (decryptedPayload[1] >> (16-6-3)) & 0x07;
 	uint8_t rssiOffset = (decryptedPayload[1] >> (16-6-3-4)) & 0x0F;

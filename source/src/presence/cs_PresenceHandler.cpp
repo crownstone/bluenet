@@ -15,6 +15,8 @@
 
 #define LOGPresenceHandler LOGnone
 
+//#define PRESENCE_HANDLER_TESTING_CODE
+
 std::list<PresenceHandler::PresenceRecord> PresenceHandler::WhenWhoWhere;
 
 void PresenceHandler::init() {
@@ -31,58 +33,51 @@ void PresenceHandler::handleEvent(event_t& evt){
 
     uint8_t location;
     uint8_t profile;
-
+    bool fromMesh = false;
     switch(evt.type) {
-    case CS_TYPE::STATE_TIME: {
-        // TODO: 
-        // - when time moves backwards because of daylight saving time, we can adjust the values
-        //   in the list in order to keep the data intact.
-        // - when time moves forwards by an hour, the same should be done.
-        // - when prevtime (which is part of the event data) is invalid, or a strange difference has
-        //   occured the records should be completely purged.
-        removeOldRecords();
-        return;
-    }
     case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
         // drop through
         adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
         profile = parsed_adv_ptr->profileId;
         location = parsed_adv_ptr->locationId;
-		//LOGd("Location [phone]: %x %x", profile, location);
         break;
     }
     case CS_TYPE::EVT_PROFILE_LOCATION: {
-        // filter on own messages
         // TODO Anne @Bart This is probably a common theme. Why not incorporate it in the EventDispatcher itself? Also
         // we do not care if this stone "has already an id", we actually want to just ignore messages from this 
         // particular module. An id per "broadcaster" would be sufficient.
         TYPIFY(EVT_PROFILE_LOCATION) *profile_location = (TYPIFY(EVT_PROFILE_LOCATION)*)evt.data;
-        if (profile_location->stone_id == _ownId) {
-            return;
-        }
         profile = profile_location->profile;
         location = profile_location->location;
-		//LOGd("Location [mesh]: %x %x", profile, location);
+        fromMesh = true;
+        LOGPresenceHandler("From mesh: location=%u profile=%u", profile, location);
 		break;
+    }
+    case CS_TYPE::EVT_TICK: {
+    	TYPIFY(EVT_TICK)* tickCount = reinterpret_cast<TYPIFY(EVT_TICK)*>(evt.data);
+    	if (*tickCount % (1000 / TICK_INTERVAL_MS) == 0) {
+    		tickSecond();
+    	}
+    	return;
     }
     default:
         return;
     }
-
-    MutationType mt = handleProfileLocationAdministration(profile,location);
-
-    if(mt != MutationType::NothingChanged){
-        triggerPresenceMutation(mt);
+    // Validate data.
+    if (profile > max_profile_id || location > max_location_id) {
+    	LOGw("Invalid profile(%u) or location(%u)", profile, location);
+    	return;
     }
-
-    propagateMeshMessage(profile,location);
+    MutationType mutation = handleProfileLocationAdministration(profile, location, fromMesh);
+    if (mutation != MutationType::NothingChanged) {
+    	triggerPresenceMutation(mutation);
+    }
 }
 
-PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministration(uint8_t profile, uint8_t location){
-
-    // TODO inputvalidation
+PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministration(uint8_t profile, uint8_t location, bool fromMesh) {
     auto prevdescription = getCurrentPresenceDescription();
 
+#ifdef PRESENCE_HANDLER_TESTING_CODE
     if(profile == 0xff && location == 0xff){
         LOGw("DEBUG: clear presence record data");
         
@@ -94,34 +89,38 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 
         return MutationType::NothingChanged;
     }
+#endif
 
-    uint32_t now = SystemTime::up();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
-    
     // purge whowhenwhere of old entries and add a new entry
-    if(WhenWhoWhere.size() >= max_records){
+    if (WhenWhoWhere.size() >= max_records) {
+    	LOGw("Reached max number of records");
         WhenWhoWhere.pop_back();
     }
-
-    WhenWhoWhere.remove_if( 
-        [&] (PresenceRecord www){ 
-            if(!valid_time_interval.ClosureContains(www.when)){
-                LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated: %d not contained in [%d %d]", 
-                    www.who,www.when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
-                return true;
-            }
-            if(www.who == profile && www.where == location){
-                LOGPresenceHandler("erasing old presence_record profile(%d) location(%d) because of new entry", profile,location);
-                return true;
-            }
-            return false;
-        } 
-    );
-
-    WhenWhoWhere.push_front( {now, profile, location} );
+    uint8_t meshCountdown = 0;
+    for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end();) {
+		if (iter->timeoutCountdownSeconds == 0) {
+			// Should not happen, record should've been removed.
+			LOGw("timed out record");
+		}
+    	if (iter->who == profile && iter->where == location) {
+    		LOGPresenceHandler("erasing old record profile(%u) location(%u)", profile, location);
+    		meshCountdown = iter->meshSendCountdownSeconds;
+    		WhenWhoWhere.erase(iter);
+    		break;
+    	}
+    	++iter;
+    }
+    // When record is new, or the old record mesh send countdown was 0: send profile location over the mesh.
+    if (meshCountdown == 0) {
+    	if (!fromMesh) {
+    		propagateMeshMessage(profile, location);
+    	}
+    	meshCountdown = presence_mesh_send_throttle_seconds;
+    }
+    LOGPresenceHandler("add record profile(%u) location(%u)", profile, location);
+    WhenWhoWhere.push_front(PresenceRecord(profile, location, presence_time_out_s, meshCountdown));
 
     auto nextdescription = getCurrentPresenceDescription();
-
     return getMutationType(prevdescription,nextdescription);
 }
 
@@ -158,19 +157,14 @@ PresenceHandler::MutationType PresenceHandler::getMutationType(
     return MutationType::NothingChanged;
 }
 
-void PresenceHandler::removeOldRecords(){
-    uint32_t now = SystemTime::up();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
-
+void PresenceHandler::removeOldRecords() {
      WhenWhoWhere.remove_if( 
-        [&] (PresenceRecord www){ 
-            if(!valid_time_interval.ClosureContains(www.when)){
-                LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated: %d not contained in [%d %d]", 
-                        www.who,www.when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
-                return true;
-            }
-           
-            return false;
+        [&] (PresenceRecord www) {
+			if (www.timeoutCountdownSeconds == 0) {
+				LOGPresenceHandler("erasing timed out record profile=%u location=%u", www.who, www.where);
+				return true;
+			}
+			return false;
         }
     );
 }
@@ -181,42 +175,49 @@ void PresenceHandler::triggerPresenceMutation(MutationType mutationtype){
 }
 
 void PresenceHandler::propagateMeshMessage(uint8_t profile, uint8_t location){
-    TYPIFY(EVT_PROFILE_LOCATION) profile_location;
-    profile_location.profile = profile;
-    profile_location.location = location;
-    profile_location.stone_id = _ownId;
-
-    event_t profile_location_event(CS_TYPE::EVT_PROFILE_LOCATION, &profile_location, sizeof(profile_location));
-    profile_location_event.dispatch();
+    TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION) eventData;
+    eventData.profile = profile;
+    eventData.location = location;
+    event_t event(CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION, &eventData, sizeof(eventData));
+    event.dispatch();
 }
 
-std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription(){
-    if(SystemTime::up() < presence_uncertain_due_reboot_time_out_s){
+std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription() {
+    if (SystemTime::up() < presence_uncertain_due_reboot_time_out_s) {
         LOGPresenceHandler("presence_uncertain_due_reboot_time_out_s hasn't expired");
         return {};
     }
-
     PresenceStateDescription p;
-
-    uint32_t now = SystemTime::up();
-    auto valid_time_interval = CsMath::Interval(now-presence_time_out_s,presence_time_out_s);
-
-    for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ){
-        if(!valid_time_interval.ClosureContains(iter->when)){
-            LOGPresenceHandler("erasing old presence_record for user id %d because it's outdated: %d not contained in [%d %d]", 
-                        iter->who,iter->when,valid_time_interval.lowerbound(),valid_time_interval.upperbound());
-
-            iter = WhenWhoWhere.erase(iter); // increments iter and invalidates previous value..
-            continue;
-        } else {
-            // appearently iter is valid, so the .where field describes an occupied room.
-            p.setRoom(CsMath::min(64-1,iter->where));
-            // LOGPresenceHandler("adding room %d to currentPresenceDescription", iter->where);
-            ++iter;
-        }
+    for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); ++iter) {
+    	if (iter->timeoutCountdownSeconds == 0) {
+    		// Should not happen, record should've been removed.
+    		LOGw("timed out record");
+    	}
+    	else {
+    		// appearently iter is valid, so the .where field describes an occupied room.
+			p.setRoom(iter->where);
+			// LOGPresenceHandler("adding room %d to currentPresenceDescription", iter->where);
+    	}
     }
-
     return p;
+}
+
+void PresenceHandler::tickSecond() {
+	for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end();) {
+		if (iter->timeoutCountdownSeconds) {
+			iter->timeoutCountdownSeconds--;
+		}
+		if (iter->timeoutCountdownSeconds == 0) {
+			iter = WhenWhoWhere.erase(iter);
+			// 8-1-2020 TODO Bart: send event?
+		}
+		else {
+			if (iter->meshSendCountdownSeconds) {
+				iter->meshSendCountdownSeconds--;
+			}
+			++iter;
+		}
+	}
 }
 
 void PresenceHandler::print(){

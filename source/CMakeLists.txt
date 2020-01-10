@@ -680,19 +680,6 @@ ELSE()
 			COMMENT "Reset target board"
 			)
 			
-		# Create a new version, create new release directory
-		# Copy CMakeBuild.config.relesae.default.release to this directory
-		# Check fields (e.g. compare with CMakeBuild.config.default and see if fields are missing)
-		# Check if we are on the master branch
-		# Check if we are on the latest public commit
-		# Check if we have non-committed changes
-		# Check if git version does not exist
-		# Create git commit with this release version
-		ADD_CUSTOM_TARGET(create_git_release
-			COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release.cmake
-			COMMENT "Create git release"
-			)
-
 		MESSAGE(STATUS "Persistent flags disabled: ${PERSISTENT_FLAGS_DISABLED}")
 		
 		ADD_CUSTOM_TARGET(read_bootloader_address
@@ -715,6 +702,7 @@ ELSE()
 
 		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
 		#IF(NOT CONFIG_DIR STREQUAL "release")
+
 			set(JLINK_LINUX_DOWNLOAD_URL_BOARD_HARDWARE_VERSION "")
 			include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
 			message(STATUS "Get version for hardware \"${HARDWARE_BOARD}\"")
@@ -723,7 +711,7 @@ ELSE()
 			include(${DEFAULT_MODULES_PATH}/hex.cmake)
 			to_hex_raw(${LOAD_BOARD_HARDWARE_VERSION} HARDWARE_BOARD_HEX 8 "0x")
 			message(STATUS "Hexadecimal ${HARDWARE_BOARD_HEX}")
-			#ENDIF()
+		#ENDIF()
 
 		ADD_CUSTOM_TARGET(write_board_version
 			COMMAND ${CMAKE_COMMAND} -E echo
@@ -732,7 +720,12 @@ ELSE()
 			COMMAND nrfjprog -f nrf52 --memwr ${HARDWARE_BOARD_ADDRESS} --val ${LOAD_BOARD_HARDWARE_VERSION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} 
 			COMMENT "Flashes board version to remote target board"
 			)
-		
+	
+		ADD_CUSTOM_TARGET(increment_application_version
+			COMMAND bash -c "perl -i -pe '$. == 2 && s/(\\d+)/$1+1/eg' ${CMAKE_SOURCE_DIR}/VERSION" VERBATIM
+			COMMENT "Increment application version (in VERSION file)"
+			)
+
 		ADD_CUSTOM_TARGET(build_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
@@ -762,7 +755,17 @@ ELSE()
 
 		SET(FIRMWARE_DFU_ZIP     crownstone_all_${FIRMWARE_VERSION}.zip)
 		SET(APPLICATION_DFU_ZIP  crownstone_${FIRMWARE_VERSION}.zip)
-		SET(BOOTLOADER_DFU_ZIP   bootloader_${FIRMWARE_VERSION}.zip)
+		SET(BOOTLOADER_DFU_ZIP   bootloader_${BOOTLOADER_VERSION}.zip)
+
+		ADD_CUSTOM_TARGET(extract_sd_id
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Extract id from softdevice file: ${SOFTDEVICE_HEX_FILE}"
+			COMMAND ${CMAKE_OBJCOPY} -I ihex ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} -O binary check.bin
+			COMMAND bash -c "xxd -s 0x300C -l 2 -e -u check.bin | awk '{print \"0x\"$2}' > softdevice_id" VERBATIM
+			COMMAND bash -c "echo \"   Softdevice id: $(cat softdevice_id)\"" VERBATIM
+			COMMAND ${CMAKE_COMMAND} -E echo
+		)
+
 
 		ADD_CUSTOM_TARGET(generate_dfu_package_all
 			COMMAND ${CMAKE_COMMAND} -E echo
@@ -771,17 +774,20 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo "     Softdevice:  ${SOFTDEVICE_HEX_FILE}"
 			COMMAND ${CMAKE_COMMAND} -E echo "     Bootloader:  bootloader.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "TODO: softdevice req/id needs to be extracted rather than hardcoded"
+			COMMAND bash -c "echo \"Softdevice id: $(cat softdevice_id)\"" VERBATIM
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use pass to get encrypted key file, using entry: ${PASS_FILE}"
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
-			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
+			COMMAND pass ${PASS_FILE} > ${KEY_FILE} USES_TERMINAL
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --sd-id 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip
-			COMMAND ${CMAKE_COMMAND} -E make_directory firmwares
+			COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --sd-id $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip" VERBATIM USES_TERMINAL
+			COMMAND ${CMAKE_COMMAND} -E make_directory dfu
+			COMMAND ${CMAKE_COMMAND} -E copy all_dfu.zip dfu/${FIRMWARE_DFU_ZIP}
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
+			COMMAND bash -c "sha1sum dfu/${FIRMWARE_DFU_ZIP} | cut -f1 -d' ' > dfu/${FIRMWARE_DFU_ZIP}.sha1" VERBATIM
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with Softdevice, bootloader, and application"
+			DEPENDS extract_sd_id
 			)
 		
 		ADD_CUSTOM_TARGET(generate_dfu_package_application
@@ -789,17 +795,17 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
 			COMMAND ${CMAKE_COMMAND} -E echo "     Application: ${PROJECT_NAME}.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "TODO: softdevice req needs to be extracted rather than hardcoded"
+			COMMAND bash -c "echo \"Softdevice id: $(cat softdevice_id)\"" VERBATIM
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use pass to get encrypted key file, using entry: ${PASS_FILE}"
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-			COMMAND echo nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip
-			COMMAND ${CMAKE_COMMAND} -E make_directory firmwares
-			COMMAND ${CMAKE_COMMAND} -E copy application_dfu.zip firmwares/crownstone_${FIRMWARE_VERSION}.zip
+			COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip" VERBATIM USES_TERMINAL
+			COMMAND ${CMAKE_COMMAND} -E make_directory dfu
+			COMMAND ${CMAKE_COMMAND} -E copy application_dfu.zip dfu/${APPLICATION_DFU_ZIP}
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
+			COMMAND bash -c "sha1sum dfu/${APPLICATION_DFU_ZIP} | cut -f1 -d' ' > dfu/${APPLICATION_DFU_ZIP}.sha1" VERBATIM
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with application only"
 			)
@@ -809,20 +815,53 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfutil to generate DFU package"
 			COMMAND ${CMAKE_COMMAND} -E echo "     Bootloader:  bootloader.hex"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "TODO: softdevice req needs to be extracted rather than hardcoded"
+			COMMAND bash -c "echo \"Softdevice id: $(cat softdevice_id)\"" VERBATIM
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use pass to get encrypted key file, using entry: ${PASS_FILE}"
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
-			COMMAND nrfutil pkg generate --hw-version 52 --sd-req 0x00B7 --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip
-			COMMAND ${CMAKE_COMMAND} -E make_directory bootloaders
-			COMMAND ${CMAKE_COMMAND} -E copy bootloader_dfu.zip bootloaders/bootloader_${BOOTLOADER_VERSION}.zip
+			COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip" VERBATIM USES_TERMINAL
+			COMMAND ${CMAKE_COMMAND} -E make_directory dfu
+			COMMAND ${CMAKE_COMMAND} -E copy bootloader_dfu.zip dfu/${BOOTLOADER_DFU_ZIP}
 			COMMAND ${CMAKE_COMMAND} -E remove ${KEY_FILE}
+			COMMAND bash -c "sha1sum dfu/${BOOTLOADER_DFU_ZIP} | cut -f1 -d' ' > dfu/${BOOTLOADER_DFU_ZIP}.sha1" VERBATIM
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMENT "Generate DFU package with bootloader only"
 			)
-		
+	
+
+
+		IF(NOT DEFINED FIRMWARE_RC_VERSION OR "${FIRMWARE_RC_VERSION}" STREQUAL "") 
+			SET(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")
+		ELSE()
+			SET(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_CANDIDATE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")
+		ENDIF()
+
+
+		IF(EXISTS ${RELEASE_REPOSITORY_DIRECTORY} )
+			MESSAGE(STATUS "Already released... No copy_to_release_repository target available")
+		ELSE()
+
+			ADD_CUSTOM_TARGET(create_release_in_repository
+					COMMAND ${CMAKE_COMMAND} -E echo
+					COMMAND ${CMAKE_COMMAND} -E echo "** Copy to release repository \"${RELEASE_REPOSITORY_DIRECTORY}\""
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY}/bin
+					COMMAND ${CMAKE_COMMAND} -E echo "   Copy from ${CMAKE_BINARY_DIR}"
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/crownstone*.zip ${RELEASE_REPOSITORY_DIRECTORY}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/crownstone*.zip.sha1 ${RELEASE_REPOSITORY_DIRECTORY}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex ${RELEASE_REPOSITORY_DIRECTORY}/bin/bootloader-settings.hex
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/crownstone.elf ${RELEASE_REPOSITORY_DIRECTORY}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/crownstone.hex ${RELEASE_REPOSITORY_DIRECTORY}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/crownstone.bin ${RELEASE_REPOSITORY_DIRECTORY}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} ${RELEASE_REPOSITORY_DIRECTORY}/bin/softdevice.hex
+					COMMAND ${CMAKE_COMMAND} -E echo "   Copy release config file from ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}"
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY}/config
+					COMMAND ${CMAKE_COMMAND} -E copy ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config ${RELEASE_REPOSITORY_DIRECTORY}/config
+					COMMENT "Copy all generated files to release repository"
+					)
+		ENDIF()
+
 	    # We can not use math(EXPR ...) because it does not have support for unsigned integers and older cmake versions 
 		# do not support hexadecimal values either
 		if(NOT ${PRODUCT_FAMILY} STREQUAL "" AND NOT ${PRODUCT_MARKET} STREQUAL "" AND NOT ${PRODUCT_TYPE} STREQUAL "")
@@ -917,8 +956,8 @@ ELSE()
 		IF(EXISTS "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
 			INSTALL(FILES "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" DESTINATION .)
 		ENDIF()
-		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/firmwares"       DESTINATION . FILES_MATCHING PATTERN "*.zip")
-		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/bootloaders"     DESTINATION . FILES_MATCHING PATTERN "*.zip")
+		INSTALL(FILES "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" DESTINATION .)
+		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/dfu"       DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
 		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/factory-images"  DESTINATION . FILES_MATCHING PATTERN "*")
 	ENDIF()
 

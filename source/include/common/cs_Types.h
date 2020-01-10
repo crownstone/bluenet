@@ -143,6 +143,7 @@ enum class CS_TYPE: uint16_t {
 //	STATE_ERROR_DIMMER_ON_FAILURE,                    //  0x93 - 147
 //	STATE_ERROR_DIMMER_OFF_FAILURE,                   //  0x94 - 148
 	STATE_SUN_TIME                          = 149,
+	STATE_BEHAVIOUR_SETTINGS                = 150,
 
 	/*
 	 * Internal commands and events.
@@ -172,8 +173,9 @@ enum class CS_TYPE: uint16_t {
 	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is control_command_packet_t.
 	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
 	CMD_SEND_MESH_MSG,                                // Sent to send a mesh message. -- Payload is cs_mesh_msg_t.
-	CMD_SEND_MESH_MSG_KEEP_ALIVE,                     // Sent to send a switch mesh message. -- Payload is keep_alive_state_item_t.
 	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Sent to send a switch mesh message. -- Payload is multi_switch_item_t.
+	CMD_SEND_MESH_MSG_PROFILE_LOCATION,               // Sent to send a profile location mesh message.
+	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS,         // Sent to send a set behaviour settings mesh message.
 	CMD_SET_TIME,                                     // Sent to set the time. -- Payload is uint32_t timestamp.
 	CMD_FACTORY_RESET,                                // Sent when a factory reset should be performed: clear all data.
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms. -- Payload is uint32_t counter.
@@ -194,8 +196,6 @@ enum class CS_TYPE: uint16_t {
 //	EVT_STATE_NOTIFICATION,            // Deprecated  // Sent when a state was updated.
 	EVT_BROWNOUT_IMPENDING,                           // Sent when brownout is impending (low chip supply voltage)
 	EVT_SESSION_NONCE_SET,                            // Sent when a session nonce is generated. -- Payload is the session nonce.
-	EVT_KEEP_ALIVE,                                   // Sent when a keep alive witout action has been received.
-	EVT_KEEP_ALIVE_STATE,                             // Sent when a keep alive with action has been received. -- Payload is keep_alive_state_item_cmd_t.
 	EVT_CURRENT_USAGE_ABOVE_THRESHOLD,        // TODO: deprecate, use STATE_ERRORS        // Sent when current usage goes over the threshold.
 	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER, // TODO: deprecate, use STATE_ERRORS        // Sent when current usage goes over the dimmer threshold, while dimmer is on.
 	EVT_DIMMER_ON_FAILURE_DETECTED,           // TODO: deprecate, use STATE_ERRORS        // Sent when dimmer leaks current, while it's supposed to be off.
@@ -239,7 +239,6 @@ enum class CS_TYPE: uint16_t {
 	EVT_BEHAVIOURSTORE_MUTATION,				// Sent by BehaviourStore for other components to react _after_ a change to the behaviourstore occured.
 	EVT_PRESENCE_MUTATION,						// when a change in presence occurs this event fires.
 	EVT_BEHAVIOUR_SWITCH_STATE,					// when behaviour desires a stateswitch this event is fired.
-	CMD_BEHAVIOURHANDLER_SETTINGS,				// a user may change settings of behaviourhandler (for example to make the home dumb again).
 	CMD_SET_RELAY,								// when a user requests to set the relay to a specific state
 	CMD_SET_DIMMER,								// when a user requests to set the dimmer to a specific state
 	// ------------------------
@@ -339,6 +338,9 @@ typedef switch_state_t TYPIFY(STATE_SWITCH_STATE);
 typedef   int8_t TYPIFY(STATE_TEMPERATURE);
 typedef uint32_t TYPIFY(STATE_TIME);
 typedef sun_time_t TYPIFY(STATE_SUN_TIME);
+typedef void TYPIFY(STATE_BEHAVIOUR_RULE);
+typedef void TYPIFY(STATE_TWILIGHT_RULE);
+typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
@@ -368,8 +370,6 @@ typedef  BOOL TYPIFY(CMD_ENABLE_LOG_VOLTAGE);
 typedef  BOOL TYPIFY(CMD_ENABLE_MESH);
 typedef  void TYPIFY(CMD_INC_VOLTAGE_RANGE);
 typedef  void TYPIFY(CMD_INC_CURRENT_RANGE);
-typedef  void TYPIFY(EVT_KEEP_ALIVE);
-typedef  keep_alive_state_item_cmd_t TYPIFY(EVT_KEEP_ALIVE_STATE);
 typedef  uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
@@ -377,8 +377,9 @@ typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
 typedef  internal_multi_switch_item_cmd_t TYPIFY(CMD_SWITCH);
 typedef  internal_multi_switch_item_t TYPIFY(CMD_MULTI_SWITCH);
 typedef  cs_mesh_msg_t TYPIFY(CMD_SEND_MESH_MSG);
-typedef  keep_alive_state_item_t TYPIFY(CMD_SEND_MESH_MSG_KEEP_ALIVE);
 typedef  internal_multi_switch_item_t TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH);
+typedef  cs_mesh_model_msg_profile_location_t TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION);
+typedef  behaviour_settings_t TYPIFY(CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS);
 typedef  uint32_t TYPIFY(CMD_SET_TIME);
 typedef  void TYPIFY(CMD_FACTORY_RESET);
 typedef  BOOL TYPIFY(CMD_DIMMING_ALLOWED);
@@ -414,13 +415,10 @@ typedef uint8_t TYPIFY(EVT_GET_BEHAVIOUR); // index
 typedef void TYPIFY(EVT_GET_BEHAVIOUR_INDICES);
 typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef uint8_t TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
-typedef uint8_t TYPIFY(CMD_BEHAVIOURHANDLER_SETTINGS);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
-typedef void TYPIFY(STATE_BEHAVIOUR_RULE);
-typedef void TYPIFY(STATE_TWILIGHT_RULE);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

@@ -32,6 +32,9 @@ class TwilightHandler : public EventListener {
      * Checks the intended state by looping over the active behaviours
      * and if the intendedState differs from previousIntendedState
      * dispatch an event to communicate a state update.
+     * 
+     * if time is not valid, aborts method execution and returns false.
+     * returns true when value was updated, false else.
      */
     bool update();
     

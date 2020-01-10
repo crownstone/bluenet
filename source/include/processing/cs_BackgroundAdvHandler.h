@@ -27,6 +27,11 @@ public:
 
 
 private:
+	/**
+	 * Own sphere id.
+	 */
+	TYPIFY(CONFIG_SPHERE_ID) _sphereId = 0;
+
 	BackgroundAdvertisementHandler();
 
 	/**
