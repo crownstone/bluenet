@@ -285,6 +285,9 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	switch (type) {
 		case ADV_CMD_MULTI_SWITCH: {
 			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
+			LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
+			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+			event.dispatch();
 			break;
 		}
 		case ADV_CMD_SET_TIME: {
@@ -297,21 +300,20 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			controlCmd.type = CTRL_CMD_SET_TIME;
 			controlCmd.size = setTimeSize;
 			LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
-			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
-			event.dispatch();
+			event_t eventSetTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+			eventSetTime.dispatch();
 
 			// Then, set sun time.
-			
 			sun_time_t sunTime;
-			sunTime.sunrise = (commandData[setTimeSize + 4 + 0] << 0) + (commandData[setTimeSize + 4 + 1] << 8) + (commandData[setTimeSize + 4 + 2] << 16);
-			sunTime.sunset  = (commandData[setTimeSize + 4 + 3] << 0) + (commandData[setTimeSize + 4 + 4] << 8) + (commandData[setTimeSize + 4 + 5] << 16);
+			sunTime.sunrise = (commandData[setTimeSize + 0] << 0) + (commandData[setTimeSize + 1] << 8) + (commandData[setTimeSize + 2] << 16);
+			sunTime.sunset  = (commandData[setTimeSize + 3] << 0) + (commandData[setTimeSize + 4] << 8) + (commandData[setTimeSize + 5] << 16);
 			controlCmd.type = CTRL_CMD_SET_SUN_TIME;
 			controlCmd.data = (buffer_ptr_t)&sunTime;
 			controlCmd.size = sizeof(sunTime);
-			
-			event.dispatch();
+			event_t eventSetSunTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+			eventSetSunTime.dispatch();
 
-			return true;
+			break;
 		}
 		case ADV_CMD_SET_SUN_TIMES: {
 			size16_t setSunTimeSize = 6; // 2 uint24
@@ -326,11 +328,10 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			controlCmd.data = (buffer_ptr_t)&sunTime;
 			controlCmd.size = sizeof(sunTime);
 
-
 			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 			event.dispatch();
 
-			return true;
+			break;
 		}
 		case ADV_CMD_SET_BEHAVIOUR_SETTINGS: {
 			size16_t requiredSize = sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS));
@@ -343,24 +344,12 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			// Send over mesh.
 			event_t meshCmd(CS_TYPE::CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS, commandData, requiredSize);
 			meshCmd.dispatch();
-			return true;
+			break;
 		}
 		default:
 			LOGd("Unkown adv cmd: %u", type);
 			return true;
 	}
-
-	if (controlCmd.type == CTRL_CMD_UNKNOWN) {
-		return true;
-	}
-
-	if (type != ADV_CMD_SET_SUN_TIMES) {
-		LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
-	}
-
-	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
-	event.dispatch();
-
 	return true;
 }
 
