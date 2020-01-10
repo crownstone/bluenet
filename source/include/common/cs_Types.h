@@ -21,6 +21,7 @@
 
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
+#include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
 // #include <presence/cs_PresenceHandler.h>
 
@@ -341,6 +342,7 @@ typedef uint32_t TYPIFY(STATE_TIME);
 typedef sun_time_t TYPIFY(STATE_SUN_TIME);
 typedef void TYPIFY(STATE_BEHAVIOUR_RULE);
 typedef void TYPIFY(STATE_TWILIGHT_RULE);
+typedef void TYPIFY(STATE_EXTENDED_BEHAVIOUR_RULE);
 typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
