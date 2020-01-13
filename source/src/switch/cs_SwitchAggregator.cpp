@@ -54,17 +54,20 @@ void SwitchAggregator::switchPowered() {
 bool SwitchAggregator::updateBehaviourHandlers(){
     twilightHandler.update();
 
-    bool result = false;
     std::optional<uint8_t> prevBehaviourState = behaviourState;
     behaviourHandler.update();
     behaviourState = behaviourHandler.getValue();
-    result |= (prevBehaviourState != behaviourState);
+    
+    if( !prevBehaviourState || !behaviourState ){
+        // don't allow override resets when no values are changed.
+        return false;
+    }
 
-    return result;
+    return (prevBehaviourState != behaviourState);
 }
 
 void SwitchAggregator::updateState(bool allowOverrideReset){
-    if(!swSwitch || !swSwitch->isSwitchingAllowed()){
+    if( !swSwitch || !swSwitch->isSwitchingAllowed() ){
         // shouldn't update overrideState when switch is locked.
         return;
     }
