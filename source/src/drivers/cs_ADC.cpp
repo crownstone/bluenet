@@ -142,8 +142,7 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	// -------------------
 	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CLEAR);
 	nrf_timer_bit_width_set(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_BIT_WIDTH_32);
-//	nrf_timer_frequency_set(CS_ADC_TIMER, CS_ADC_TIMEOUT_TIMER_FREQ);
-	uint32_t timeoutCount = CS_ADC_BUF_SIZE / _config.channelCount - 5; // Timeout 4 samples before END event
+	uint32_t timeoutCount = CS_ADC_BUF_SIZE / _config.channelCount - 1 - CS_ADC_TIMEOUT_SAMPLES; // Timeout N samples before END event.
 	LOGv("timeoutCount=%u", timeoutCount);
 	nrf_timer_cc_write(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_CC_CHANNEL0, timeoutCount);
 	nrf_timer_mode_set(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_MODE_COUNTER);
@@ -615,9 +614,9 @@ void ADC::_restart() {
 }
 
 void ADC::_handleTimeout() {
-#ifdef PRINT_DEBUG
+//#ifdef PRINT_DEBUG
 	LOGw("timeout");
-#endif
+//#endif
 	stop();
 	start();
 }
