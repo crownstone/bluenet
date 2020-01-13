@@ -22,15 +22,10 @@
  * this object decides what state to set the SwSwitch to.
  */
 class SwitchAggregator : public EventListener {
-    public:
+public:
     static SwitchAggregator& getInstance();
     
     void init(SwSwitch&& s); // claims ownership over s.
-
-	/**
-	 * To be called when there is enough power to use the switch.
-	 */
-	void switchPowered();
 
     /**
      * When swSwitch is locked, only CMD_SWITCH_LOCKED events will be handled.
@@ -43,33 +38,19 @@ class SwitchAggregator : public EventListener {
      * sets dimmer and relay to 0, disregarding all other state/intentions.
      */
     void developerForceOff();
-    
-    private:
+
+	/**
+	 * To be called when there is enough power to use the switch.
+	 */
+	void switchPowered();
+
+private:
     SwitchAggregator() = default;
     virtual ~SwitchAggregator() noexcept {};
     SwitchAggregator& operator= (const SwitchAggregator&) = delete;
 
-    void printStatus();
-
     TwilightHandler twilightHandler;
     BehaviourHandler behaviourHandler;
-
-    /********************************
-     * Aggregates the value of twilightHandler and behaviourHandler
-     * into a single intensity value.
-     * 
-     * This will return the minimum of the respective handler values
-     * when both are defined, otherwise return the value of the one
-     * that is defined, otherwise 100.
-     */
-    uint8_t aggregatedBehaviourIntensity();
-
-    /********************************
-     * When override state is the special value 'translucent on'
-     * it should be interpreted according to the values of twilightHandler
-     * and behaviourHandler. This getter centralizes that.
-     */
-    std::optional<uint8_t> resolveOverrideState();
 
     // when the swith aggregator is initialized with a board
     // that can switch, swSwitch contains that value.
@@ -81,6 +62,17 @@ class SwitchAggregator : public EventListener {
 
     // the last state that was aggregated and passed on towards the SwSwitch.
     std::optional<uint8_t> aggregatedState = {};
+
+    /**
+     * Which source claimed the switch.
+     *
+     * Until timeout, nothing with a different source can set the switch.
+     * Unless that source overrules the current source.
+     */
+    cmd_source_t _source = cmd_source_t(CS_CMD_SOURCE_NONE);
+    uint32_t _ownerTimeoutCountdown = 0;
+
+    // ================================== State updaters ==================================
 
     /**
      * Checks the behaviourState and overrideState,
@@ -103,6 +95,8 @@ class SwitchAggregator : public EventListener {
      * if there was any of those that returned true.
      */
     bool updateBehaviourHandlers();
+
+    // ================================== Event handling ==================================
 
     /**
      * Triggers an updateState() call on all handled events and adjusts
@@ -135,19 +129,31 @@ class SwitchAggregator : public EventListener {
      * allowed or possible.)
      */
     bool handleAllowedOperations(event_t & evt);
-    
+
+    // ================================== Misc ==================================
+
+    /**
+     * Aggregates the value of twilightHandler and behaviourHandler
+     * into a single intensity value.
+     * 
+     * This will return the minimum of the respective handler values
+     * when both are defined, otherwise return the value of the one
+     * that is defined, otherwise 100.
+     */
+    uint8_t aggregatedBehaviourIntensity();
+
+    /**
+     * When override state is the special value 'translucent on'
+     * it should be interpreted according to the values of twilightHandler
+     * and behaviourHandler. This getter centralizes that.
+     */
+    std::optional<uint8_t> resolveOverrideState();
+
     /**
      * Tries to set source as owner of the switch.
      * Returns true on success, false if switch is already owned by a different source, and given source does not overrule it.
      */
     bool checkAndSetOwner(cmd_source_t source);
 
-    /**
-     * Which source claimed the switch.
-     *
-     * Until timeout, nothing with a different source can set the switch.
-     * Unless that source overrules the current source.
-     */
-    cmd_source_t _source = cmd_source_t(CS_CMD_SOURCE_NONE);
-    uint32_t _ownerTimeoutCountdown = 0;
+    void printStatus();
 };
