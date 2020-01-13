@@ -97,4 +97,9 @@ class BehaviourStore : public EventListener {
     // checks intermediate state of handleReplaceBehaviour for consistency.
     // returns true if ok, false if nok.
     bool ReplaceParameterValidation(event_t& evt, uint8_t index, const size_t& behaviourSize);
+
+    // loads the behaviours from state into the 'activeBehaviours' array.
+    // BehaviourType must match BehaviourCsType.
+    template<class BehaviourType>
+    void LoadBehavioursFromMemory(CS_TYPE BehaviourCsType);
 };

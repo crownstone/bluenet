@@ -111,6 +111,14 @@ bool ExtendedSwitchBehaviour::isValid(Time currenttime, PresenceStateDescription
 void ExtendedSwitchBehaviour::print(){
     LOGd("## ExtendedSwitchBehaviour:")
     SwitchBehaviour::print();
+    extensionCondition.pred.print();
+    
+    LOGd("extension is active: %d", extensionIsActive);
+
+    if(prevExtensionIsValidTimeStamp){
+        TimeOfDay t = prevExtensionIsValidTimeStamp->timeOfDay();
+        LOGd("extension timestamp : %02d:%02d:%02d", t.h(),t.m(),t.s());
+    }
     LOGd("##");
 
 }
