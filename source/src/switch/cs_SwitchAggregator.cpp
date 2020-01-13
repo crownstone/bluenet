@@ -52,9 +52,9 @@ void SwitchAggregator::switchPowered() {
 // ================================== State updaters ==================================
 
 bool SwitchAggregator::updateBehaviourHandlers(){
-    bool result = false;
-    result |= twilightHandler.update();
+    twilightHandler.update();
 
+    bool result = false;
     std::optional<uint8_t> prevBehaviourState = behaviourState;
     behaviourHandler.update();
     behaviourState = behaviourHandler.getValue();
