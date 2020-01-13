@@ -360,8 +360,8 @@ when a timer expires it will wait until the room is empty before switching off t
 
 At the 'Until'-time of the 'Core' behaviour, it is checked wether the behaviour is still active (i.e. its presence condition is still fullfilled).
 If that is the case, a temporary extension for the behaviour is created which is identical to the Core behaviour with the Presence condition replaced
-by the Extension presence and the Until time replaced by the Extension until time. This temporary rule will be destroyed after the Extension Until time
-expires.
+by the Extension Presence and the Until time replaced by the Extension Until time. This temporary rule will be destroyed after the Extension Until time
+expires. If the extension end condition timeout is set to 0, the temporary behaviour will be destroyed as soon as the presencecondition is no longer met.
 
 ![Smart timer](../docs/diagrams/smart-timer.png)
 

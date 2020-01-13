@@ -46,8 +46,9 @@ class Behaviour {
     Behaviour(SerializedDataType arr);
     SerializedDataType serialize();
     
-    // return value: pointer to next empty val in array.
+    // return value: pointer to next empty val in outbuff.
     virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size);
+
     virtual size_t serializedSize() const;
     std::vector<uint8_t> serialized(); // calls the above virtual functions.
 

@@ -31,10 +31,6 @@ class TwilightBehaviour;
 
 namespace WireFormat {
 
-// data will be copied as few times as possible, but the constructed
-// object is not emplaced over the [data] pointer passed as parameter.
-template <class T>
-T deserialize(uint8_t* data, size_t len);
 
 // a uniform serialization mechanism for both object and fundamental 
 // types. For each serializable class simply implement a member method called
@@ -51,6 +47,23 @@ typename T::SerializedDataType serialize(T& obj){
 template<class T>
 constexpr size_t size(T* = nullptr){ return std::tuple_size<typename T::SerializedDataType>::value; }
 
+/**
+ *  data will be copied as few times as possible, but the constructed
+ * object is not emplaced over the [data] pointer passed as parameter.
+ * 
+ * - T must have a subtype called SerializedDataType iterable as uint8_t array
+ * - T must have a constructor taking T::SerializedDataType as singular parameter
+ * - the len >= WireFormat::size<T>() must hold, else return value will 
+ *   be default constructed.
+ */
+template <class T>
+T deserialize(uint8_t* data, size_t len){
+    typename T::SerializedDataType d;
+    if (len >= size<T>()) {
+        std::copy_n(data, size<T>(), d.begin());
+    }
+    return T(d);
+}
 
 
 // ========== Specializations for deserialize =========
@@ -67,23 +80,23 @@ int32_t WireFormat::deserialize(uint8_t* data, size_t len);
 template<> 
 uint64_t WireFormat::deserialize(uint8_t* data, size_t len);
 
-template<>
-TimeOfDay WireFormat::deserialize(uint8_t* data, size_t len);
+// template<>
+// TimeOfDay WireFormat::deserialize(uint8_t* data, size_t len);
 
-template<>
-PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len);
+// template<>
+// PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len);
 
-template<>
-PresenceCondition WireFormat::deserialize(uint8_t* data, size_t len);
+// template<>
+// PresenceCondition WireFormat::deserialize(uint8_t* data, size_t len);
 
-template<>
-Behaviour WireFormat::deserialize(uint8_t* data, size_t len);
+// template<>
+// Behaviour WireFormat::deserialize(uint8_t* data, size_t len);
 
-template<>
-SwitchBehaviour WireFormat::deserialize(uint8_t* data, size_t len);
+// template<>
+// SwitchBehaviour WireFormat::deserialize(uint8_t* data, size_t len);
 
-template<>
-TwilightBehaviour WireFormat::deserialize(uint8_t* data, size_t len);
+// template<>
+// TwilightBehaviour WireFormat::deserialize(uint8_t* data, size_t len);
 
 // ========== Specializations/overloads for serialize =========
 

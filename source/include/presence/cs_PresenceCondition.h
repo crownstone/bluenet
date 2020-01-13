@@ -8,9 +8,10 @@
 #pragma once
 
 #include <presence/cs_PresencePredicate.h>
+
 #include <array>
 
-class PresenceCondition{
+class PresenceCondition {
     public:
     typedef std::array<uint8_t,9+4> SerializedDataType;
 
@@ -22,11 +23,16 @@ class PresenceCondition{
 
     SerializedDataType serialize();
 
+    // return value: pointer to next empty val in outbuff.
+    // if max_size is 0, outbuff is not checked for nullptr,
+    // and no size check is performed. otherwise, both are validated.
+    virtual uint8_t* serialize(uint8_t* outbuff, size_t max_size = 0);
+
+    virtual size_t serializedSize() const;
+
     /**
-     * Does this condition hold given the [currentPresence]?
-     * 
-     * TODO: cache result of previous call with timestamp and
-     * use those to implement the time out feature
+     * Returns true if this condition 'holds' given the [currentPresence],
+     * else returns false.
      */
     bool operator()(PresenceStateDescription currentPresence);
 };

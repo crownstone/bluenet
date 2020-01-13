@@ -47,7 +47,7 @@ public:
 
     virtual Type getType() const override { return Type::Switch; }
 
-    void print();
+    virtual void print();
 
     // =========== Semantics ===========
 
@@ -58,7 +58,7 @@ public:
      * Does the behaviour apply to the current situation?
      * If from() == until() the behaviour isValid all day.
      **/
-    bool isValid(Time currenttime, PresenceStateDescription currentpresence);
+    virtual bool isValid(Time currenttime, PresenceStateDescription currentpresence);
 
     // Presence description is cached in order to prevent
     // that the behaviour flickers when a user is on the border of two rooms.
@@ -72,14 +72,14 @@ public:
     // reintroduces the function name in this class's scope.
     using Behaviour::isValid;
     
-private:
-
-    bool _isValid(PresenceStateDescription currentpresence);  // uncached version
-
-
-    // serialized fields (settings)
+    protected:
+    // (serialized field)
     PresenceCondition presenceCondition;
 
+    private:
     // unserialized fields (runtime values)
     std::optional<uint32_t> prevInRoomTimeStamp = {}; // when was the last call to _isValid that returned true?
+
+    // uncached version of ::isValid
+    bool _isValid(PresenceStateDescription currentpresence);
 };
