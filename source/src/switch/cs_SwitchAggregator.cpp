@@ -16,46 +16,8 @@
 #define LOGSwitchAggregator LOGnone
 #define LOGSwitchAggregator_Evt LOGnone
 
-// =====================================================
-// ================== Old Owner logic ==================
-// =====================================================
 
-
-bool SwitchAggregator::checkAndSetOwner(cmd_source_t source) {
-	if (source.sourceId < CS_CMD_SOURCE_DEVICE_TOKEN) {
-		// Non device token command can always set the switch.
-		return true;
-	}
-
-	if (_ownerTimeoutCountdown == 0) {
-		// Switch isn't claimed yet.
-		_source = source;
-		_ownerTimeoutCountdown = SWITCH_CLAIM_TIME_MS / TICK_INTERVAL_MS;
-		return true;
-	}
-
-	if (_source.sourceId != source.sourceId) {
-		// Switch is claimed by other source.
-		LOGSwitchAggregator("Already claimed by %u", _source.sourceId);
-		return false;
-	}
-
-	if (!BLEutil::isNewer(_source.count, source.count)) {
-		// A command with newer counter has been received already.
-		LOGSwitchAggregator("Old command: %u, already got: %u", source.count, _source.count);
-		return false;
-	}
-
-	_source = source;
-	_ownerTimeoutCountdown = SWITCH_CLAIM_TIME_MS / TICK_INTERVAL_MS;
-	return true;
-}
-
-SwitchAggregator& SwitchAggregator::getInstance(){
-    static SwitchAggregator instance;
-
-    return instance;
-}
+// ========================= Public ========================
 
 void SwitchAggregator::init(SwSwitch&& s){
     swSwitch.emplace(s);
@@ -69,13 +31,43 @@ void SwitchAggregator::init(SwSwitch&& s){
     overrideState = swSwitch->getIntendedState();
 }
 
+SwitchAggregator& SwitchAggregator::getInstance(){
+    static SwitchAggregator instance;
+
+    return instance;
+}
+
+void SwitchAggregator::developerForceOff(){
+    if(swSwitch){
+        swSwitch->setDimmer(0);
+        swSwitch->setRelay(false);
+    }
+}
+
 void SwitchAggregator::switchPowered() {
 	swSwitch->switchPowered();
 	swSwitch->resolveIntendedState();
 }
 
+// ================================== State updaters ==================================
+
+bool SwitchAggregator::updateBehaviourHandlers(){
+    twilightHandler.update();
+
+    std::optional<uint8_t> prevBehaviourState = behaviourState;
+    behaviourHandler.update();
+    behaviourState = behaviourHandler.getValue();
+    
+    if( !prevBehaviourState || !behaviourState ){
+        // don't allow override resets when no values are changed.
+        return false;
+    }
+
+    return (prevBehaviourState != behaviourState);
+}
+
 void SwitchAggregator::updateState(bool allowOverrideReset){
-    if(!swSwitch || !swSwitch->isSwitchingAllowed()){
+    if( !swSwitch || !swSwitch->isSwitchingAllowed() ){
         // shouldn't update overrideState when switch is locked.
         return;
     }
@@ -115,56 +107,7 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
     }
 }
 
-void SwitchAggregator::printStatus(){
-    if(overrideState){
-        LOGd(" ^ overrideState: %02d",overrideState.value());
-    }
-    if(behaviourState){
-        LOGd(" | behaviourState: %02d",behaviourState.value());
-    }
-    if(aggregatedState){
-        LOGd(" v aggregatedState: %02d",aggregatedState.value());
-    }
-}
-
-std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
-    LOGSwitchAggregator("resolveOverrideState called");
-    if(*overrideState == 0xff){
-        LOGSwitchAggregator("translucent override state");
-
-        if(uint8_t behave_intensity = behaviourState.value_or(0)){
-            // behaviour has positive intensity
-            LOGSwitchAggregator("behaviour value positive, returning minimum of behaviour(%d) and twilight(%d)", behave_intensity,twilightHandler.getValue());
-            return CsMath::min(behave_intensity,twilightHandler.getValue());
-        } else {
-            // behaviour conflicts or indicates 'off' are ignored because although
-            // overrideState is 'translucent', it must be 'on.
-            LOGSwitchAggregator("behaviour value undefined or zero, returning twilight(%d)",twilightHandler.getValue());
-            return twilightHandler.getValue();
-        }
-    }
-        
-    LOGSwitchAggregator("returning unchanged overrideState");
-    return overrideState;  // opaque override is unchanged.
-}
-
-uint8_t SwitchAggregator::aggregatedBehaviourIntensity(){
-    LOGSwitchAggregator("aggregatedBehaviourIntensity called");
-
-    if(behaviourState){
-        LOGSwitchAggregator("returning min of behaviour(%d) and twilight(%d)",
-            *behaviourState,
-            twilightHandler.getValue());
-        return CsMath::min(
-            *behaviourState, 
-            twilightHandler.getValue() 
-        );
-    }
-    LOGSwitchAggregator("returning twilight value(%d), behaviour undefined",twilightHandler.getValue());
-
-    // SwitchBehaviours conflict, so use twilight only
-    return twilightHandler.getValue();
-}
+// ========================= Event handling =========================
 
 void SwitchAggregator::handleEvent(event_t& evt){
     if (handleTimingEvents(evt)) {
@@ -242,18 +185,6 @@ bool SwitchAggregator::handlePresenceEvents(event_t& evt){
     return false;
 }
 
-bool SwitchAggregator::updateBehaviourHandlers(){
-    bool result = false;
-    result |= twilightHandler.update();
-
-    std::optional<uint8_t> prevBehaviourState = behaviourState;
-    behaviourHandler.update();
-    behaviourState = behaviourHandler.getValue();
-    result |= (prevBehaviourState != behaviourState);
-
-    return result;
-}
-
 bool SwitchAggregator::handleAllowedOperations(event_t& evt) {
      if (evt.type ==  CS_TYPE::CMD_SWITCH_LOCKED) {
         LOGSwitchAggregator_Evt("SwitchAggregator::%s case CMD_SWITCH_LOCKED",__func__);
@@ -284,7 +215,6 @@ bool SwitchAggregator::handleAllowedOperations(event_t& evt) {
 
     return false;
 }
-
 
 bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
     switch(evt.type){
@@ -346,9 +276,85 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
     return true;
 }
 
-void SwitchAggregator::developerForceOff(){
-    if(swSwitch){
-        swSwitch->setDimmer(0);
-        swSwitch->setRelay(false);
+// ========================= Misc =========================
+
+uint8_t SwitchAggregator::aggregatedBehaviourIntensity(){
+    LOGSwitchAggregator("aggregatedBehaviourIntensity called");
+
+    if(behaviourState){
+        LOGSwitchAggregator("returning min of behaviour(%d) and twilight(%d)",
+            *behaviourState,
+            twilightHandler.getValue());
+        return CsMath::min(
+            *behaviourState, 
+            twilightHandler.getValue() 
+        );
+    }
+    LOGSwitchAggregator("returning twilight value(%d), behaviour undefined",twilightHandler.getValue());
+
+    // SwitchBehaviours conflict, so use twilight only
+    return twilightHandler.getValue();
+}
+
+std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
+    LOGSwitchAggregator("resolveOverrideState called");
+    if(*overrideState == 0xff){
+        LOGSwitchAggregator("translucent override state");
+
+        if(uint8_t behave_intensity = behaviourState.value_or(0)){
+            // behaviour has positive intensity
+            LOGSwitchAggregator("behaviour value positive, returning minimum of behaviour(%d) and twilight(%d)", behave_intensity,twilightHandler.getValue());
+            return CsMath::min(behave_intensity,twilightHandler.getValue());
+        } else {
+            // behaviour conflicts or indicates 'off' are ignored because although
+            // overrideState is 'translucent', it must be 'on.
+            LOGSwitchAggregator("behaviour value undefined or zero, returning twilight(%d)",twilightHandler.getValue());
+            return twilightHandler.getValue();
+        }
+    }
+        
+    LOGSwitchAggregator("returning unchanged overrideState");
+    return overrideState;  // opaque override is unchanged.
+}
+
+bool SwitchAggregator::checkAndSetOwner(cmd_source_t source) {
+	if (source.sourceId < CS_CMD_SOURCE_DEVICE_TOKEN) {
+		// Non device token command can always set the switch.
+		return true;
+	}
+
+	if (_ownerTimeoutCountdown == 0) {
+		// Switch isn't claimed yet.
+		_source = source;
+		_ownerTimeoutCountdown = SWITCH_CLAIM_TIME_MS / TICK_INTERVAL_MS;
+		return true;
+	}
+
+	if (_source.sourceId != source.sourceId) {
+		// Switch is claimed by other source.
+		LOGSwitchAggregator("Already claimed by %u", _source.sourceId);
+		return false;
+	}
+
+	if (!BLEutil::isNewer(_source.count, source.count)) {
+		// A command with newer counter has been received already.
+		LOGSwitchAggregator("Old command: %u, already got: %u", source.count, _source.count);
+		return false;
+	}
+
+	_source = source;
+	_ownerTimeoutCountdown = SWITCH_CLAIM_TIME_MS / TICK_INTERVAL_MS;
+	return true;
+}
+
+void SwitchAggregator::printStatus(){
+    if(overrideState){
+        LOGd(" ^ overrideState: %02d",overrideState.value());
+    }
+    if(behaviourState){
+        LOGd(" | behaviourState: %02d",behaviourState.value());
+    }
+    if(aggregatedState){
+        LOGd(" v aggregatedState: %02d",aggregatedState.value());
     }
 }

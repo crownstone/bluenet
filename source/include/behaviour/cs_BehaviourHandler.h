@@ -20,10 +20,9 @@ class BehaviourHandler : public EventListener {
      * the stored behaviours, and then dispatches an event for that.
      * 
      * Events:
-     * - STATE_TIME
-     * - EVT_TIME_SET
      * - EVT_PRESENCE_MUTATION
      * - EVT_BEHAVIOURSTORE_MUTATION
+     * - STATE_BEHAVIOUR_SETTINGS
      */
     virtual void handleEvent(event_t& evt);
 
