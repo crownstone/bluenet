@@ -301,7 +301,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			// First get flags
 			flags = commandData[0];
 
-			// First, set time, if valid.
+			// Set time, if valid.
 			if (BLEutil::isBitSet(flags, 0)) {
 				controlCmd.type = CTRL_CMD_SET_TIME;
 				controlCmd.data = commandData + flagsSize;
@@ -311,11 +311,12 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 				eventSetTime.dispatch();
 			}
 
-			// Then, set sun time, if valid.
+			// Set sun time, if valid.
 			if (BLEutil::isBitSet(flags, 1)) {
 				sun_time_t sunTime;
-				sunTime.sunrise = (commandData[setTimeSize + 0] << 0) + (commandData[setTimeSize + 1] << 8) + (commandData[setTimeSize + 2] << 16);
-				sunTime.sunset  = (commandData[setTimeSize + 3] << 0) + (commandData[setTimeSize + 4] << 8) + (commandData[setTimeSize + 5] << 16);
+				sunTime.sunrise = (commandData[flagsSize + setTimeSize + 0] << 0) + (commandData[flagsSize + setTimeSize + 1] << 8) + (commandData[flagsSize + setTimeSize + 2] << 16);
+				sunTime.sunset  = (commandData[flagsSize + setTimeSize + 3] << 0) + (commandData[flagsSize + setTimeSize + 4] << 8) + (commandData[flagsSize + setTimeSize + 5] << 16);
+				LOGd("sunTime: %u %u", sunTime.sunrise, sunTime.sunset);
 				controlCmd.type = CTRL_CMD_SET_SUN_TIME;
 				controlCmd.data = (buffer_ptr_t)&sunTime;
 				controlCmd.size = sizeof(sunTime);

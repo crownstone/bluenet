@@ -760,7 +760,7 @@ ELSE()
 		ADD_CUSTOM_TARGET(extract_sd_id
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Extract id from softdevice file: ${SOFTDEVICE_HEX_FILE}"
-			COMMAND ${CMAKE_OBJCOPY} -I ihex ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} -O binary check.bin
+			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -I ihex ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} -O binary check.bin
 			COMMAND bash -c "xxd -s 0x300C -l 2 -e -u check.bin | awk '{print \"0x\"$2}' > softdevice_id" VERBATIM
 			COMMAND bash -c "echo \"   Softdevice id: $(cat softdevice_id)\"" VERBATIM
 			COMMAND ${CMAKE_COMMAND} -E echo
