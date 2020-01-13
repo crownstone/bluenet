@@ -69,7 +69,7 @@ class ExtendedSwitchBehaviour: public SwitchBehaviour {
      * until() value of the core behaviour, unless this timeOut is zero: in that case it will
      * be reset to false as soon as the PresenceCondition evaluates to false.
      */
-    bool extensionIsActive;
+    bool extensionIsActive = false;
     std::optional<Time> prevExtensionIsValidTimeStamp = {};
 
 };
