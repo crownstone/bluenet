@@ -92,7 +92,7 @@ private:
 
     /**
      * Calls update on the behaviour handlers and returns true
-     * if there was any of those that returned true.
+     * if after the update is allowed to reset the overrideState.
      */
     bool updateBehaviourHandlers();
 

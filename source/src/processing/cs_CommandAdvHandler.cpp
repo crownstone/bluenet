@@ -285,7 +285,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	switch (type) {
 		case ADV_CMD_MULTI_SWITCH: {
 			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
-			LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
+			LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
 			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 			event.dispatch();
 			break;
@@ -306,7 +306,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 				controlCmd.type = CTRL_CMD_SET_TIME;
 				controlCmd.data = commandData + flagsSize;
 				controlCmd.size = setTimeSize;
-				LOGd("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
+				LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
 				event_t eventSetTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 				eventSetTime.dispatch();
 			}
@@ -316,7 +316,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 				sun_time_t sunTime;
 				sunTime.sunrise = (commandData[flagsSize + setTimeSize + 0] << 0) + (commandData[flagsSize + setTimeSize + 1] << 8) + (commandData[flagsSize + setTimeSize + 2] << 16);
 				sunTime.sunset  = (commandData[flagsSize + setTimeSize + 3] << 0) + (commandData[flagsSize + setTimeSize + 4] << 8) + (commandData[flagsSize + setTimeSize + 5] << 16);
-				LOGd("sunTime: %u %u", sunTime.sunrise, sunTime.sunset);
+				LOGCommandAdvDebug("sunTime: %u %u", sunTime.sunrise, sunTime.sunset);
 				controlCmd.type = CTRL_CMD_SET_SUN_TIME;
 				controlCmd.data = (buffer_ptr_t)&sunTime;
 				controlCmd.size = sizeof(sunTime);
