@@ -20,8 +20,16 @@
 
 #include "drivers/cs_Serial.h"
 
-#define LOGBehaviourHandler_V LOGnone
+
+#define BehaviourHandlerDebug false
+
+#if BehaviourHandlerDebug == true
+#define LOGBehaviourHandler LOGd
+#define LOGBehaviourHandler_V LOGi
+#else 
 #define LOGBehaviourHandler LOGnone
+#define LOGBehaviourHandler_V LOGnone
+#endif
 
 
 
@@ -85,11 +93,16 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
     for (auto& b : BehaviourStore::getActiveBehaviours()) {
         if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(b)) {
             // cast to switch behaviour succesful.
+            // note: this may also be an extendedswitchbehaviour - which is intended!
             if (switchbehave->isValid(currentTime)) {
                 LOGBehaviourHandler_V("valid time on behaviour: ");
             }
             if (switchbehave->isValid(currentTime, currentPresence)) {
                 LOGBehaviourHandler_V("presence also valid");
+                if constexpr (BehaviourHandlerDebug) {
+                    switchbehave->print();
+                }
+
                 if (intendedValue){
                     if (switchbehave->value() != intendedValue.value()) {
                         // found a conflicting behaviour

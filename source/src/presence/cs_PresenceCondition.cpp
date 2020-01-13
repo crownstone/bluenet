@@ -19,12 +19,31 @@ PresenceCondition::PresenceCondition(SerializedDataType arr):
         WireFormat::deserialize<uint32_t>(         arr.data() + 9, 4)){
 }
 
+size_t PresenceCondition::serializedSize() const {
+    return WireFormat::size<PresenceCondition>();
+}
+
 PresenceCondition::SerializedDataType PresenceCondition::serialize(){
     SerializedDataType result;
     std::copy_n(std::begin(WireFormat::serialize(pred)),    9, std::begin(result) + 0);
     std::copy_n(std::begin(WireFormat::serialize(timeOut)), 4, std::begin(result) + 9);
 
     return result;
+}
+
+uint8_t* PresenceCondition::serialize(uint8_t* outbuff, size_t max_size){
+    if(max_size != 0){
+        if(outbuff == nullptr || max_size < serializedSize()) { 
+            return outbuff;
+        }
+    }
+
+    auto serialized_repr = serialize();
+
+    return std::copy_n (
+        std::begin (serialized_repr), 
+        WireFormat::size<PresenceCondition>(),
+        outbuff );
 }
 
 bool PresenceCondition::operator()(PresenceStateDescription currentPresence){

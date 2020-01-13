@@ -10,6 +10,7 @@
 #include <behaviour/cs_Behaviour.h>
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
+#include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
 namespace WireFormat {
 
@@ -45,55 +46,6 @@ uint64_t WireFormat::deserialize(uint8_t* data, size_t len){
         static_cast<uint64_t>(data[2]) << (8*2) |
         static_cast<uint64_t>(data[1]) << (8*1) |
         static_cast<uint64_t>(data[0]) << (8*0);
-}
-
-template<>
-TimeOfDay WireFormat::deserialize(uint8_t* data, size_t len){
-    // TODO(Arend): assert length
-    std::array<uint8_t,5> d;
-    std::copy_n(data, 5, d.begin());
-    return TimeOfDay(d);
-}
-
-template<>
-PresencePredicate WireFormat::deserialize(uint8_t* data, size_t len){
-    // TODO(Arend): assert length
-    std::array<uint8_t,9> d;
-    std::copy_n(data, 9, d.begin());
-    return PresencePredicate(d);
-}
-
-template<>
-PresenceCondition WireFormat::deserialize(uint8_t* data, size_t len){
-    // TODO(Arend): assert length
-    std::array<uint8_t,13> d;
-    std::copy_n(data, 13, d.begin());
-    return PresenceCondition(d);
-}
-
-template<>
-Behaviour WireFormat::deserialize(uint8_t* data, size_t len){
-    // TODO(Arend): assert length
-    std::array<uint8_t,1+13> d;
-    std::copy_n(data, 1+13, d.begin());
-    return Behaviour(d);
-}
-
-template<>
-SwitchBehaviour WireFormat::deserialize(uint8_t* data, size_t len){
-    // TODO(Arend): assert length
-    std::array<uint8_t,1+26> d;
-    std::copy_n(data, 1+26, d.begin());
-    return SwitchBehaviour(d);
-}
-
-template<>
-TwilightBehaviour WireFormat::deserialize(uint8_t* data, size_t len){
-    // TODO(Arend): assert length
-    constexpr auto serialized_size = size<TwilightBehaviour>();
-    std::array<uint8_t,serialized_size> d;
-    std::copy_n(data, serialized_size, d.begin());
-    return TwilightBehaviour(d);
 }
 
 // -------------------- specialization for serialize --------------------
