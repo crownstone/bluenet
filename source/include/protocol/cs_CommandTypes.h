@@ -47,6 +47,6 @@ enum CommandHandlerTypes {
 enum AdvCommandTypes {
 	ADV_CMD_MULTI_SWITCH               = 1,
 	ADV_CMD_SET_TIME                   = 2,
-	ADV_CMD_SET_BEHAVIOUR_SETTINGS     = 4,
+	ADV_CMD_SET_BEHAVIOUR_SETTINGS     = 3,
 	ADV_CMD_UNKNOWN                    = 0xFF
 };

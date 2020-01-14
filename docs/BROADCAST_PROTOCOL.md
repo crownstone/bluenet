@@ -144,7 +144,7 @@ Type nr | Type name | Payload type | Payload Description | A | M | B | S
 0 | No operation | - | None | x | x | x |
 1 | Multi switch | [Multi switch short list packet](#multi_switch_short_list_packet) | List of switch commands | x | x | x |
 2 | Set time | [Set time packet](#set_time_packet) | Current time. | x | x | |
-4 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Currently only supports turning smart behaviour on/off | x | x | | 
+3 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Currently only supports turning smart behaviour on/off | x | x | | 
 
 
 <a name="multi_switch_short_list_packet"></a>
