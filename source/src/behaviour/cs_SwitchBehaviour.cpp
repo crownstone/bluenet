@@ -41,13 +41,13 @@ SwitchBehaviour::SerializedDataType SwitchBehaviour::serialize(){
 }
 
 uint8_t* SwitchBehaviour::serialize(uint8_t* outbuff, size_t max_size){
-    const auto size = serializedSize();
+    const auto size = SwitchBehaviour::serializedSize();
 
     if(max_size < size){
         return 0;
     }
 
-    return std::copy_n(std::begin(serialize()),size,outbuff);
+    return std::copy_n(std::begin(SwitchBehaviour::serialize()), size, outbuff);
 }
 
 

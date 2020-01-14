@@ -27,6 +27,7 @@
 
 class Behaviour;
 class SwitchBehaviour;
+class ExtendedSwitchBehaviour;
 class TwilightBehaviour;
 
 namespace WireFormat {
