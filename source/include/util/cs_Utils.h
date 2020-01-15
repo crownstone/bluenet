@@ -114,12 +114,12 @@ inline void print_stack(const std::string & msg) {
 
 template<typename T>
 inline bool isBitSet(const T value, uint8_t bit) {
-	return value & 1 << bit;
+	return value & (1 << bit);
 }
 
 template<typename T>
 inline bool setBit(T& value, uint8_t bit) {
-	return value |= 1 << bit;
+	return value |= (1 << bit);
 }
 
 template<typename T>
