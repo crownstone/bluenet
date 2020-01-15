@@ -76,7 +76,7 @@ uint8 | flags | 3 | [Flags](#background_adv_flags).
 Bit | Name |  Description
 --- | --- | ---
 0 | Reserved | Reserved for future use.
-1 | Ignore for behaviour | Set to 1 when this broadcast should be ignored for behaviour rules.
+1 | Ignore for presence | Set to 1 when this broadcast should be ignored for presence.
 2 | Tap to toggle | Set to 1 when this phone has tap to toggle enabled.
 
 
