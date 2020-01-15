@@ -13,6 +13,8 @@
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
 
+#include <test/cs_Test.h>
+
 #define SWSWITCH_LOG_CALLFLOW LOGnone
 
 #define SWSWITCH_LOG_FUNC() SWSWITCH_LOG_CALLFLOW("SwSwitch::%s",__func__)
@@ -382,10 +384,17 @@ void SwSwitch::setDimmer(uint8_t value) {
         SWSWITCH_LOCKED_LOG();
         return;
     }
+    
     LOGi("setDimmer(%d)", value);
+    
     currentState.state.dimmer = CsMath::clamp(value, 0, 100);
     currentState.state.relay = 0;
+
+    TEST(this, currentState.state.dimmer);
+    TEST(this, currentState.state.relay);
+
     store(currentState);
+    
     // 03-01-2020 TODO: call store() in resolveIntendedState() ? Right now, the STATE_SWITCH_STATE event is sent too often on boot.
     resolveIntendedState();
 }

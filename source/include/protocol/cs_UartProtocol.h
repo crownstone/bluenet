@@ -78,6 +78,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_EVT =                              10300, // Send internal events, this protocol may change
 
 	UART_OPCODE_TX_TEXT =                             20000, // Payload is ascii text.
+	UART_OPCODE_TX_FIRMWARESTATE =                    20001,
 };
 
 struct __attribute__((__packed__)) uart_msg_header_t {
