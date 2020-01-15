@@ -41,6 +41,12 @@ enum EncryptionAccessLevel {
 	NO_ONE              = 255
 };
 
+enum BackgroundAdvFlagBitPos {
+	BG_ADV_FLAG_RESERVED = 0,
+	BG_ADV_FLAG_IGNORE_FOR_PRESENCE = 1,
+	BG_ADV_FLAG_TAP_TO_TOGGLE_ENABLED = 2
+};
+
 /**
  * Header of a control packet.
  */
