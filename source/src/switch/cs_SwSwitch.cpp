@@ -390,8 +390,8 @@ void SwSwitch::setDimmer(uint8_t value) {
     currentState.state.dimmer = CsMath::clamp(value, 0, 100);
     currentState.state.relay = 0;
 
-    TEST(this, currentState.state.dimmer);
-    TEST(this, currentState.state.relay);
+    TEST_PUSH_D(this, currentState.state.dimmer);
+    TEST_PUSH_D(this, currentState.state.relay);
 
     store(currentState);
     

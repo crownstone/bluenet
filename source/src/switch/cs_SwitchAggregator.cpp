@@ -11,6 +11,8 @@
 #include <presence/cs_PresenceHandler.h>
 #include <util/cs_Utils.h>
 
+#include <test/cs_Test.h>
+
 #include <optional>
 
 #define LOGSwitchAggregator LOGnone
@@ -67,6 +69,10 @@ bool SwitchAggregator::updateBehaviourHandlers(){
 }
 
 void SwitchAggregator::updateState(bool allowOverrideReset){
+    TEST_PUSH_EXPR_D(this,"overrideState", (overrideState? (int) overrideState.value() : -1));
+    TEST_PUSH_EXPR_D(this,"behaviourState", (behaviourState? (int) behaviourState.value() : -1));
+    TEST_PUSH_EXPR_D(this,"aggregatedState", (aggregatedState? (int) aggregatedState.value() : -1));
+
     if( !swSwitch || !swSwitch->isSwitchingAllowed() ){
         // shouldn't update overrideState when switch is locked.
         return;
