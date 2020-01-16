@@ -63,7 +63,7 @@ void HwSwitch::setIntensity(uint8_t value) {
 
 bool HwSwitch::canTryDimmerOnBoot() {
 	switch (_hardwareBoard) {
-		// Builtins don't have an accurate enough power measurement.
+		// Builtin zero don't have an accurate enough power measurement.
 		case ACR01B1A:
 		case ACR01B1B:
 		case ACR01B1C:
@@ -79,6 +79,37 @@ bool HwSwitch::canTryDimmerOnBoot() {
 		// Newer ones have an accurate power measurement, also have a lower startup time of the dimmer circuit.
 		default:
 			return true;
+	}
+}
+
+bool HwSwitch::dimmerFlashOnDfu() {
+	switch (_hardwareBoard) {
+		// Dev boards
+		case PCA10036:
+		case PCA10040:
+		// Builtin zero
+		case ACR01B1A:
+		case ACR01B1B:
+		case ACR01B1C:
+		case ACR01B1D:
+		case ACR01B1E:
+		// First builtin one
+		case ACR01B10B:
+		// Plugs
+		case ACR01B2A:
+		case ACR01B2B:
+		case ACR01B2C:
+		case ACR01B2E:
+		case ACR01B2G: {
+			return true;
+		}
+		// These don't have a dimmer.
+		case GUIDESTONE:
+		case CS_USB_DONGLE:
+		// Newer ones won't turn on the dimmer when GPIO pins are floating.
+		case ACR01B10C:
+		default:
+			return false;
 	}
 }
 

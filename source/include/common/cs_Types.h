@@ -27,7 +27,7 @@
 
 enum TypeBases {
 	State_Base   = 0x000,
-	General_Base = 0x100, // Configuration and state types are assumed to fit in a uint8_t, so lower than 256.
+	Internal_Base = 0x100,
 };
 
 /** Cast to underlying type.
@@ -45,207 +45,230 @@ constexpr auto to_underlying_type(T e) noexcept
 	return static_cast<std::underlying_type_t<T>>(e);
 }
 
-/** State variable types
- * Also used as event types
- * Use in the characteristic to read and write state variables in <CommonService>.
+/**
+ * Types:
+ * - State types:
+ *   - Prefixed with STATE (or old style: CONFIG)
+ *   - These types can be stored in the State class.
+ *   - Should have a fixed number, smaller than General_Base.
+ * - Event types:
+ *   - Prefixed with EVT.
+ *   - Types that are sent to inform when something happened, or is going to happen.
+ *   - If a fixed number is required, put it right after Internal_Base.
+ * - Command types:
+ *   - Prefixed with CMD.
+ *   - Types that are sent to request something to be done.
+ *   - If a fixed number is required, put it right after Internal_Base.
  */
 enum class CS_TYPE: uint16_t {
 	CONFIG_DO_NOT_USE                       = State_Base,   // Record keys should be in the range 0x0001 - 0xBFFF. The value 0x0000 is reserved by the system. The values from 0xC000 to 0xFFFF are reserved for use by the Peer Manager module and can only be used in applications that do not include Peer Manager.
-//	CONFIG_DEVICE_TYPE                      = 1,      //  0x01
-//	CONFIG_ROOM                             = 2,      //  0x02
-//	CONFIG_FLOOR                            = 3,      //  0x03
-//	CONFIG_NEARBY_TIMEOUT                   = 4,      //  0x04
-	CONFIG_PWM_PERIOD                       = 5,      //  0x05
-	CONFIG_IBEACON_MAJOR                    = 6,      //  0x06
-	CONFIG_IBEACON_MINOR                    = 7,      //  0x07
-	CONFIG_IBEACON_UUID                     = 8,      //  0x08
-	CONFIG_IBEACON_TXPOWER                  = 9,      //  0x09
-//	CONFIG_WIFI_SETTINGS                    = 10,     //  0x0A
-	CONFIG_TX_POWER                         = 11,     //  0x0B
-	CONFIG_ADV_INTERVAL                     = 12,     //  0x0C   // Advertising interval in units of 0.625ms.
-//	CONFIG_PASSKEY                          = 13,     //  0x0D
-//	CONFIG_MIN_ENV_TEMP                     = 14,     //  0x0E
-//	CONFIG_MAX_ENV_TEMP                     = 15,     //  0x0F
-	CONFIG_SCAN_DURATION                    = 16,     //  0x10   // Deprecate
-//	CONFIG_SCAN_SEND_DELAY                  = 17,     //  0x11
-	CONFIG_SCAN_BREAK_DURATION              = 18,     //  0x12   // Deprecate
-	CONFIG_BOOT_DELAY                       = 19,     //  0x13
-	CONFIG_MAX_CHIP_TEMP                    = 20,     //  0x14
-//	CONFIG_SCAN_FILTER                      = 21,     //  0x15
-//	CONFIG_SCAN_FILTER_SEND_FRACTION        = 22,     //  0x16
-	CONFIG_CURRENT_LIMIT                    = 23,     //  0x17   // Not implemented yet, but something we want in the future.
-	CONFIG_MESH_ENABLED                     = 24,     //  0x18
-	CONFIG_ENCRYPTION_ENABLED               = 25,     //  0x19
-	CONFIG_IBEACON_ENABLED                  = 26,     //  0x1A
-	CONFIG_SCANNER_ENABLED                  = 27,     //  0x1B
-//	CONFIG_CONT_POWER_SAMPLER_ENABLED       = 28,     //  0x1C
-//	CONFIG_TRACKER_ENABLED                  = 29,     //  0x1D
-//	CONFIG_ADC_BURST_SAMPLE_RATE            = 30,     //  0x1E
-//	CONFIG_POWER_SAMPLE_BURST_INTERVAL      = 31,     //  0x1F
-//	CONFIG_POWER_SAMPLE_CONT_INTERVAL       = 32,     //  0x20
-	CONFIG_SPHERE_ID                        = 33,     //  0x21
-	CONFIG_CROWNSTONE_ID                    = 34,     //  0x22
-	CONFIG_KEY_ADMIN                        = 35,     //  0x23
-	CONFIG_KEY_MEMBER                       = 36,     //  0x24
-	CONFIG_KEY_BASIC                        = 37,     //  0x25
-//	CONFIG_DEFAULT_ON                       = 38,     //  0x26
-	CONFIG_SCAN_INTERVAL                    = 39,     //  0x27
-	CONFIG_SCAN_WINDOW                      = 40,     //  0x28
-	CONFIG_RELAY_HIGH_DURATION              = 41,     //  0x29
-	CONFIG_LOW_TX_POWER                     = 42,     //  0x2A
-	CONFIG_VOLTAGE_MULTIPLIER               = 43,     //  0x2B
-	CONFIG_CURRENT_MULTIPLIER               = 44,     //  0x2C
-	CONFIG_VOLTAGE_ADC_ZERO                 = 45,     //  0x2D
-	CONFIG_CURRENT_ADC_ZERO                 = 46,     //  0x2E
-	CONFIG_POWER_ZERO                       = 47,     //  0x2F
-//	CONFIG_POWER_ZERO_AVG_WINDOW            = 48,     //  0x30
-//	CONFIG_MESH_ACCESS_ADDRESS              = 49,     //  0x31
-	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD      = 50,     //  0x32
-	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM  = 51,     //  0x33
-	CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP    = 52,     //  0x34
-	CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN  = 53,     //  0x35
-	CONFIG_PWM_ALLOWED                      = 54,     //  0x36
-	CONFIG_SWITCH_LOCKED                    = 55,     //  0x37
-	CONFIG_SWITCHCRAFT_ENABLED              = 56,     //  0x38
-	CONFIG_SWITCHCRAFT_THRESHOLD            = 57,     //  0x39
-//	CONFIG_MESH_CHANNEL                     = 58,     //  0x3A
-	CONFIG_UART_ENABLED                     = 59,     //  0x3B
-	CONFIG_NAME                             = 60,     //  0x3C
-	CONFIG_KEY_SERVICE_DATA                 = 61,     //  0x3D
-	CONFIG_MESH_DEVICE_KEY                  = 62,     //  0x3E
-	CONFIG_MESH_APP_KEY                     = 63,     //  0x3F
-	CONFIG_MESH_NET_KEY                     = 64,     //  0x40
-	CONFIG_KEY_LOCALIZATION                 = 65,     //  0x41
-	CONFIG_START_DIMMER_ON_ZERO_CROSSING    = 66,     //  0x42
+//	CONFIG_DEVICE_TYPE                      = 1,
+//	CONFIG_ROOM                             = 2,
+//	CONFIG_FLOOR                            = 3,
+//	CONFIG_NEARBY_TIMEOUT                   = 4,
+	CONFIG_PWM_PERIOD                       = 5,
+	CONFIG_IBEACON_MAJOR                    = 6,
+	CONFIG_IBEACON_MINOR                    = 7,
+	CONFIG_IBEACON_UUID                     = 8,
+	CONFIG_IBEACON_TXPOWER                  = 9,
+//	CONFIG_WIFI_SETTINGS                    = 10,
+	CONFIG_TX_POWER                         = 11,
+	CONFIG_ADV_INTERVAL                     = 12,  // Advertising interval in units of 0.625ms.
+//	CONFIG_PASSKEY                          = 13,
+//	CONFIG_MIN_ENV_TEMP                     = 14,
+//	CONFIG_MAX_ENV_TEMP                     = 15,
+	CONFIG_SCAN_DURATION                    = 16,  // Deprecate
+//	CONFIG_SCAN_SEND_DELAY                  = 17,
+	CONFIG_SCAN_BREAK_DURATION              = 18,  // Deprecate
+	CONFIG_BOOT_DELAY                       = 19,
+	CONFIG_MAX_CHIP_TEMP                    = 20,
+//	CONFIG_SCAN_FILTER                      = 21,
+//	CONFIG_SCAN_FILTER_SEND_FRACTION        = 22,
+	CONFIG_CURRENT_LIMIT                    = 23,  // Not implemented yet, but something we want in the future.
+	CONFIG_MESH_ENABLED                     = 24,
+	CONFIG_ENCRYPTION_ENABLED               = 25,
+	CONFIG_IBEACON_ENABLED                  = 26,
+	CONFIG_SCANNER_ENABLED                  = 27,
+//	CONFIG_CONT_POWER_SAMPLER_ENABLED       = 28,
+//	CONFIG_TRACKER_ENABLED                  = 29,
+//	CONFIG_ADC_BURST_SAMPLE_RATE            = 30,
+//	CONFIG_POWER_SAMPLE_BURST_INTERVAL      = 31,
+//	CONFIG_POWER_SAMPLE_CONT_INTERVAL       = 32,
+	CONFIG_SPHERE_ID                        = 33,
+	CONFIG_CROWNSTONE_ID                    = 34,
+	CONFIG_KEY_ADMIN                        = 35,
+	CONFIG_KEY_MEMBER                       = 36,
+	CONFIG_KEY_BASIC                        = 37,
+//	CONFIG_DEFAULT_ON                       = 38,
+	CONFIG_SCAN_INTERVAL                    = 39,
+	CONFIG_SCAN_WINDOW                      = 40,
+	CONFIG_RELAY_HIGH_DURATION              = 41,
+	CONFIG_LOW_TX_POWER                     = 42,
+	CONFIG_VOLTAGE_MULTIPLIER               = 43,
+	CONFIG_CURRENT_MULTIPLIER               = 44,
+	CONFIG_VOLTAGE_ADC_ZERO                 = 45,
+	CONFIG_CURRENT_ADC_ZERO                 = 46,
+	CONFIG_POWER_ZERO                       = 47,
+//	CONFIG_POWER_ZERO_AVG_WINDOW            = 48,
+//	CONFIG_MESH_ACCESS_ADDRESS              = 49,
+	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD      = 50,
+	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM  = 51,
+	CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP    = 52,
+	CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN  = 53,
+	CONFIG_PWM_ALLOWED                      = 54,
+	CONFIG_SWITCH_LOCKED                    = 55,
+	CONFIG_SWITCHCRAFT_ENABLED              = 56,
+	CONFIG_SWITCHCRAFT_THRESHOLD            = 57,
+//	CONFIG_MESH_CHANNEL                     = 58,
+	CONFIG_UART_ENABLED                     = 59,
+	CONFIG_NAME                             = 60,
+	CONFIG_KEY_SERVICE_DATA                 = 61,
+	CONFIG_MESH_DEVICE_KEY                  = 62,
+	CONFIG_MESH_APP_KEY                     = 63,
+	CONFIG_MESH_NET_KEY                     = 64,
+	CONFIG_KEY_LOCALIZATION                 = 65,
+	CONFIG_START_DIMMER_ON_ZERO_CROSSING    = 66,
 	CONFIG_TAP_TO_TOGGLE_ENABLED            = 67,
 	CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET = 68,
-	STATE_BEHAVIOUR_RULE                    = 69,     //
-	STATE_TWILIGHT_RULE                     = 70,     //
+	STATE_BEHAVIOUR_RULE                    = 69,
+	STATE_TWILIGHT_RULE                     = 70,
 	STATE_EXTENDED_BEHAVIOUR_RULE			= 71,
 
-	STATE_RESET_COUNTER                     = 128,    //  0x80 - 128
-	STATE_SWITCH_STATE                      = 129,    //  0x81 - 129
-	STATE_ACCUMULATED_ENERGY                = 130,    //  0x82 - 130   Energy used in μJ.
-	STATE_POWER_USAGE                       = 131,    //  0x83 - 131   Power usage in mW.
-//	STATE_TRACKED_DEVICES,                            //  0x84 - 132
-//	STATE_SCHEDULE                          = 133,    //  0x85 - 133
-	STATE_OPERATION_MODE                    = 134,    //  0x86 - 134
-	STATE_TEMPERATURE                       = 135,    //  0x87 - 135
-	STATE_TIME                              = 136,    //  0x88 - 136
-	STATE_FACTORY_RESET                     = 137,    //  0x89 - 137
-//	STATE_LEARNED_SWITCHES,                           //  0x8A - 138
-	STATE_ERRORS                            = 139,    //  0x8B - 139
-//	STATE_ERROR_OVER_CURRENT,                         //  0x8C - 140
-//	STATE_ERROR_OVER_CURRENT_DIMMER,                  //  0x8D - 141
-//	STATE_ERROR_CHIP_TEMP,                            //  0x8E - 142
-//	STATE_ERROR_DIMMER_TEMP,                          //  0x8F - 143
-//	STATE_IGNORE_BITMASK,                             //  0x90 - 144
-//	STATE_IGNORE_ALL,                                 //  0x91 - 145
-//	STATE_IGNORE_LOCATION,                            //  0x92 - 146
-//	STATE_ERROR_DIMMER_ON_FAILURE,                    //  0x93 - 147
-//	STATE_ERROR_DIMMER_OFF_FAILURE,                   //  0x94 - 148
+	STATE_RESET_COUNTER                     = 128,
+	STATE_SWITCH_STATE                      = 129,
+	STATE_ACCUMULATED_ENERGY                = 130,    // Energy used in μJ.
+	STATE_POWER_USAGE                       = 131,    // Power usage in mW.
+//	STATE_TRACKED_DEVICES,
+//	STATE_SCHEDULE                          = 133,
+	STATE_OPERATION_MODE                    = 134,
+	STATE_TEMPERATURE                       = 135,
+	STATE_TIME                              = 136,
+	STATE_FACTORY_RESET                     = 137,
+//	STATE_LEARNED_SWITCHES,
+	STATE_ERRORS                            = 139,
+//	STATE_ERROR_OVER_CURRENT,
+//	STATE_ERROR_OVER_CURRENT_DIMMER,
+//	STATE_ERROR_CHIP_TEMP,
+//	STATE_ERROR_DIMMER_TEMP,
+//	STATE_IGNORE_BITMASK,
+//	STATE_IGNORE_ALL,
+//	STATE_IGNORE_LOCATION,
+//	STATE_ERROR_DIMMER_ON_FAILURE,
+//	STATE_ERROR_DIMMER_OFF_FAILURE,
 	STATE_SUN_TIME                          = 149,
 	STATE_BEHAVIOUR_SETTINGS                = 150,
 
 	/*
 	 * Internal commands and events.
-	 * These don't need a specific order, as they're not exposed.
-	 * Start at General_Base
+	 * Start at Internal_Base.
 	 */
-	CMD_SWITCH_OFF = General_Base,                    // Sent to turn switch off.
-	CMD_SWITCH_ON,                                    // Sent to turn switch on.
-	CMD_SWITCH_TOGGLE,                                // Sent to toggle switch.
-	CMD_SWITCH,                                       // Sent to set switch.
-	CMD_MULTI_SWITCH,                                 // Sent to handle a multi switch. -- Payload is internal_multi_switch_item_cmd_t.
-//	CMD_SET_LOG_LEVEL,
-	CMD_ENABLE_LOG_POWER,                             // Sent to enable/disable power calculations logging. -- Payload is BOOL.
-	CMD_ENABLE_LOG_CURRENT,                           // Sent to enable/disable current samples logging. -- Payload is BOOL.
-	CMD_ENABLE_LOG_VOLTAGE,                           // Sent to enable/disable voltage samples logging. -- Payload is BOOL.
-	CMD_ENABLE_LOG_FILTERED_CURRENT,                  // Sent to enable/disable filtered current samples logging. -- Payload is BOOL.
-	CMD_RESET_DELAYED,                                // Sent to reboot. -- Payload is reset_delayed_t.
-	CMD_ENABLE_ADVERTISEMENT,                         // Sent to enable/disable advertising. -- Payload is BOOL.
-	CMD_ENABLE_MESH,                                  // Sent to enable/disable mesh. -- Payload is BOOL.
-	CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN,         // Sent to toggle ADC voltage pin. TODO: pin as payload?
-	CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT,              // Sent to toggle differential mode on current pin. -- Payload is BOOL.
-	CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,              // Sent to toggle differential mode on voltage pin. -- Payload is BOOL.
-	CMD_INC_VOLTAGE_RANGE,                            // Sent to increase voltage range.
-	CMD_DEC_VOLTAGE_RANGE,                            // Sent to decrease voltage range.
-	CMD_INC_CURRENT_RANGE,                            // Sent to increase current range.
-	CMD_DEC_CURRENT_RANGE,                            // Sent to decrease current range.
-	CMD_CONTROL_CMD,                                  // Sent to handle a control command. -- Payload is control_command_packet_t.
-	CMD_SET_OPERATION_MODE,                           // Sent to switch operation mode. -- Payload is OperationMode.
-	CMD_SEND_MESH_MSG,                                // Sent to send a mesh message. -- Payload is cs_mesh_msg_t.
-	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Sent to send a switch mesh message. -- Payload is multi_switch_item_t.
-	CMD_SEND_MESH_MSG_PROFILE_LOCATION,               // Sent to send a profile location mesh message.
-	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS,         // Sent to send a set behaviour settings mesh message.
-	CMD_SET_TIME,                                     // Sent to set the time. -- Payload is uint32_t timestamp.
-	CMD_FACTORY_RESET,                                // Sent when a factory reset should be performed: clear all data.
-	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms. -- Payload is uint32_t counter.
-	EVT_ADV_BACKGROUND,                               // Sent when a background advertisement has been received. -- Payload: adv_background_t.
-	EVT_ADV_BACKGROUND_PARSED = 256+30,                        // Sent when a background advertisement has been validated and parsed. -- Payload: adv_background_parsed_t.
-	EVT_ADVERTISEMENT_UPDATED,                        // Sent when advertisement was updated. TODO: advertisement data as payload?
-	EVT_SCAN_STARTED,                                 // Sent when scanner started scanning.
-	EVT_SCAN_STOPPED,                                 // Sent when scanner stopped scanning.
-//	EVT_SCANNED_DEVICES,
-	EVT_DEVICE_SCANNED,                               // Sent when a device was scanned. -- Payload is scanned_device_t.
-//	EVT_POWER_SAMPLES_START,                          // Sent when the power samples buffer (for characteristic) is being filled with new data.
-//	EVT_POWER_SAMPLES_END,                            // Sent when the power samples buffer (for characteristic) has been filled with new data.
+	// Types with fixed number.
+	EVT_ADV_BACKGROUND_PARSED = Internal_Base,        // Sent when a background advertisement has been validated and parsed.
 
-	EVT_MESH_TIME,                                    // Sent when the mesh received the current time. -- Payload is uint32_t timestamp.
-//	EVT_BLE_EVENT,
-	EVT_BLE_CONNECT,                                  // Sent when device connected.
-	EVT_BLE_DISCONNECT,                               // Sent when device disconnected.
-//	EVT_STATE_NOTIFICATION,            // Deprecated  // Sent when a state was updated.
-	EVT_BROWNOUT_IMPENDING,                           // Sent when brownout is impending (low chip supply voltage)
-	EVT_SESSION_NONCE_SET,                            // Sent when a session nonce is generated. -- Payload is the session nonce.
-	EVT_CURRENT_USAGE_ABOVE_THRESHOLD,        // TODO: deprecate, use STATE_ERRORS        // Sent when current usage goes over the threshold.
-	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER, // TODO: deprecate, use STATE_ERRORS        // Sent when current usage goes over the dimmer threshold, while dimmer is on.
-	EVT_DIMMER_ON_FAILURE_DETECTED,           // TODO: deprecate, use STATE_ERRORS        // Sent when dimmer leaks current, while it's supposed to be off.
-	EVT_DIMMER_OFF_FAILURE_DETECTED,          // TODO: deprecate, use STATE_ERRORS        // Sent when dimmer blocks current, while it's supposed to be on.
-	EVT_CHIP_TEMP_ABOVE_THRESHOLD,            // TODO: deprecate, use STATE_ERRORS        // Sent when chip temperature is above threshold.
-	EVT_CHIP_TEMP_OK,                         // TODO: deprecate, use STATE_ERRORS        // Sent when chip temperature is ok again.
-	EVT_DIMMER_TEMP_ABOVE_THRESHOLD,          // TODO: deprecate, use STATE_ERRORS        // Sent when dimmer temperature is above threshold.
-	EVT_DIMMER_TEMP_OK,                       // TODO: deprecate, use STATE_ERRORS        // Sent when dimmer temperature is ok again.
-	EVT_DIMMER_FORCED_OFF,                            // Sent when dimmer was forced off.
-	EVT_SWITCH_FORCED_OFF,                            // Sent when switch (relay and dimmer) was forced off.
-	EVT_RELAY_FORCED_ON,                              // Sent when relay was forced on.
+	// Scans
+	EVT_DEVICE_SCANNED,                               // Device was scanned.
+	EVT_ADV_BACKGROUND,                               // Background advertisement has been received.
 
-//	EVT_EXTERNAL_STATE_MSG_CHAN_0,     // Deprecated
-//	EVT_EXTERNAL_STATE_MSG_CHAN_1,     // Deprecated
-	EVT_TIME_SET,                                     // Sent when the time is set or changed. payload: previous posix time
-	EVT_DIMMER_POWERED,                               // Sent when dimmer being powered is changed. -- Payload is BOOL, true when powered, and ready to be used.
-	CMD_DIMMING_ALLOWED,	// Sent when commandhandler receives set request for allow dimming is changed. -- Payload is BOOL.
-	CMD_SWITCH_LOCKED,		// Sent when commandhandler receives set request for lock state. -- Payload is BOOL.
-	EVT_STORAGE_INITIALIZED,                          // Sent when Storage is initialized, storage is only usable after this event!
-	EVT_STORAGE_WRITE_DONE,                           // Sent when an item has been written to storage. -- Payload is CS_TYPE, the type that was written.
-	EVT_STORAGE_REMOVE_DONE,                          // Sent when an item has been invalidated at storage. -- Payload is CS_TYPE, the type that was invalidated.
-	EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE,        // Sent when all state values with a certain ID have been invalidated at storage. -- ID as payload.
-	EVT_STORAGE_GC_DONE,                              // Sent when garbage collection is done, invalidated data is actually removed at this point.
-	EVT_STORAGE_FACTORY_RESET_DONE,                   // Sent when factory reset of storage is done. Only to be used by State.
-	EVT_STORAGE_PAGES_ERASED,                         // Sent when all storage pages are completely erased.
-	EVT_STATE_FACTORY_RESET_DONE,                     // Sent when factory reset of state is done.
-	EVT_MESH_FACTORY_RESET,                           // Sent when factory reset of mesh storage is done.
-	EVT_SETUP_DONE,                                   // Sent when setup was done (and settings are stored).
-//	EVT_DO_RESET_DELAYED,                             // Sent to perform a reset in a few seconds.
-//	EVT_STORAGE_WRITE,                                // Sent when an item is going to be written to storage.
-//	EVT_STORAGE_ERASE,                                // Sent when a flash page is going to be erased.
-	EVT_ADC_RESTARTED,                                // Sent when ADC has been restarted.
-	EVT_STATE_EXTERNAL_STONE,                          // Sent when the state of another stone has been received. -- Payload is state_external_stone_t
+	// Switch
+	CMD_SWITCH_OFF,                                   // Turn switch off.
+	CMD_SWITCH_ON,                                    // Turn switch on.
+	CMD_SWITCH_TOGGLE,                                // Toggle switch.
+	CMD_SWITCH,                                       // Set switch.
+	CMD_SET_RELAY,                                    // Set the relay state.
+	CMD_SET_DIMMER,                                   // Set the dimmer state.
+	CMD_MULTI_SWITCH,                                 // Handle a multi switch.
+	CMD_SWITCH_LOCKED,		                          // Set switch lock.
+	CMD_DIMMING_ALLOWED,	                          // Set allow dimming.
+	EVT_DIMMER_POWERED,                               // Dimmer being powered is changed. Payload: true when powered, and ready to be used.
 
-	// ------------------------
-	EVT_SAVE_BEHAVIOUR, 						// when a user requests to save a behaviour, this event fires.
-	EVT_REPLACE_BEHAVIOUR,						// when a user requests to update a behaviour, this event fires.
-	EVT_REMOVE_BEHAVIOUR,						// when a user requests to remove a behaviour, this event fires.
-	EVT_GET_BEHAVIOUR,							// when a user requests a currently active behaviour, this event fires.
-	EVT_GET_BEHAVIOUR_INDICES,                  // Sent when a user requests a list of indices with active behaviours.
-	EVT_BEHAVIOURSTORE_MUTATION,				// Sent by BehaviourStore for other components to react _after_ a change to the behaviourstore occured.
-	EVT_PRESENCE_MUTATION,						// when a change in presence occurs this event fires.
-	EVT_BEHAVIOUR_SWITCH_STATE,					// when behaviour desires a stateswitch this event is fired.
-	CMD_SET_RELAY,								// when a user requests to set the relay to a specific state
-	CMD_SET_DIMMER,								// when a user requests to set the dimmer to a specific state
-	// ------------------------
-	//
-	EVT_PROFILE_LOCATION,                       // profile and location information 
+	// Errors
+	EVT_CURRENT_USAGE_ABOVE_THRESHOLD,                // Current usage goes over the threshold.
+	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER,         // Current usage goes over the dimmer threshold, while dimmer is on.
+	EVT_DIMMER_ON_FAILURE_DETECTED,                   // Dimmer leaks current, while it's supposed to be off.
+	EVT_DIMMER_OFF_FAILURE_DETECTED,                  // Dimmer blocks current, while it's supposed to be on.
+	EVT_CHIP_TEMP_ABOVE_THRESHOLD,                    // Chip temperature is above threshold.
+	EVT_CHIP_TEMP_OK,                                 // Chip temperature is ok again.
+	EVT_DIMMER_TEMP_ABOVE_THRESHOLD,                  // Dimmer temperature is above threshold.
+	EVT_DIMMER_TEMP_OK,                               // Dimmer temperature is ok again.
+	EVT_DIMMER_FORCED_OFF,                            // Dimmer was forced off.
+	EVT_SWITCH_FORCED_OFF,                            // Switch (relay and dimmer) was forced off.
+	EVT_RELAY_FORCED_ON,                              // Relay was forced on.
+
+	// Storage
+	EVT_STORAGE_INITIALIZED,                          // Storage is initialized, storage is only usable after this event!
+	EVT_STORAGE_WRITE_DONE,                           // An item has been written to storage.
+	EVT_STORAGE_REMOVE_DONE,                          // An item has been invalidated at storage.
+	EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE,        // All state values with a certain ID have been invalidated at storage.
+	EVT_STORAGE_GC_DONE,                              // Garbage collection is done, invalidated data is actually removed at this point.
+	EVT_STORAGE_FACTORY_RESET_DONE,                   // Factory reset of storage is done. /!\ Only to be used by State.
+	EVT_STORAGE_PAGES_ERASED,                         // All storage pages are completely erased.
+	CMD_FACTORY_RESET,                                // Perform a factory reset: clear all data.
+	EVT_STATE_FACTORY_RESET_DONE,                     // Factory reset of state is done.
+	EVT_MESH_FACTORY_RESET,                           // Factory reset of mesh storage is done.
+
+	// Logging
+	CMD_ENABLE_LOG_POWER,                             // Enable/disable power calculations logging.
+	CMD_ENABLE_LOG_CURRENT,                           // Enable/disable current samples logging.
+	CMD_ENABLE_LOG_VOLTAGE,                           // Enable/disable voltage samples logging.
+	CMD_ENABLE_LOG_FILTERED_CURRENT,                  // Enable/disable filtered current samples logging.
+
+	// ADC config
+	CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN,         // Toggle ADC voltage pin. TODO: pin as payload?
+	CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT,              // Toggle differential mode on current pin.
+	CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,              // Toggle differential mode on voltage pin.
+	CMD_INC_VOLTAGE_RANGE,                            // Increase voltage range.
+	CMD_DEC_VOLTAGE_RANGE,                            // Decrease voltage range.
+	CMD_INC_CURRENT_RANGE,                            // Increase current range.
+	CMD_DEC_CURRENT_RANGE,                            // Decrease current range.
+
+	// Mesh
+	CMD_SEND_MESH_MSG,                                // Send a mesh message.
+	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Send a switch mesh message.
+	CMD_SEND_MESH_MSG_PROFILE_LOCATION,               // Send a profile location mesh message.
+	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS,         // Send a set behaviour settings mesh message.
+	EVT_MESH_TIME,                                    // Mesh received the current time.
+	EVT_PROFILE_LOCATION,                             // Location of profile is received (not via scan).
+
+	// Behaviour
+	CMD_ADD_BEHAVIOUR,                                // Add a behaviour.
+	CMD_REPLACE_BEHAVIOUR,                            // Replace a behaviour.
+	CMD_REMOVE_BEHAVIOUR,                             // Remove a behaviour.
+	CMD_GET_BEHAVIOUR,                                // Get a behaviour.
+	CMD_GET_BEHAVIOUR_INDICES,                        // Get a list of indices of active behaviours.
+	EVT_BEHAVIOURSTORE_MUTATION,                      // Sent by BehaviourStore, after a change to the stored behaviours.
+
+	CMD_RESET_DELAYED,                                // Reboot.
+	EVT_GOING_TO_DFU,                                 // The system will reboot to DFU mode soon.
+
+	CMD_ENABLE_ADVERTISEMENT,                         // Enable/disable advertising.
+	CMD_ENABLE_MESH,                                  // Enable/disable mesh.
+
+	CMD_SET_TIME,                                     // Set the time.
+	EVT_TIME_SET,                                     // Time is set or changed. Payload: previous posix time
+
+	CMD_CONTROL_CMD,                                  // Handle a control command.
+
+	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
+
+	EVT_STATE_EXTERNAL_STONE,                         // The state of another stone has been received.
+
+	EVT_ADVERTISEMENT_UPDATED,                        // Advertisement was updated. TODO: advertisement data as payload?
+
+	EVT_SCAN_STARTED,                                 // Scanner started scanning.
+	EVT_SCAN_STOPPED,                                 // Scanner stopped scanning.
+
+	EVT_BLE_CONNECT,                                  // Device connected.
+	EVT_BLE_DISCONNECT,                               // Device disconnected.
+
+	EVT_BROWNOUT_IMPENDING,                           // Brownout is impending (low chip supply voltage).
+
+	EVT_SESSION_NONCE_SET,                            // Session nonce was generated.
+
+	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
+
+	EVT_ADC_RESTARTED,                                // ADC has been restarted.
+
+	EVT_PRESENCE_MUTATION,                            // Presence changed.
 };
 
 CS_TYPE toCsType(uint16_t type);
@@ -355,7 +378,6 @@ typedef  void TYPIFY(EVT_BROWNOUT_IMPENDING);
 typedef  void TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_CHIP_TEMP_OK);
 typedef  reset_delayed_t TYPIFY(CMD_RESET_DELAYED);
-typedef  OperationMode TYPIFY(CMD_SET_OPERATION_MODE);
 typedef  void TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER);
 typedef  void TYPIFY(EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 typedef  void TYPIFY(CMD_DEC_CURRENT_RANGE);
@@ -411,16 +433,16 @@ typedef  BOOL TYPIFY(CMD_SWITCH_LOCKED);
 typedef  uint32_t TYPIFY(EVT_TICK);
 typedef  uint32_t TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
-typedef SwitchBehaviour TYPIFY(EVT_SAVE_BEHAVIOUR);
-typedef std::tuple<uint8_t,SwitchBehaviour> TYPIFY(EVT_REPLACE_BEHAVIOUR);
-typedef uint8_t TYPIFY(EVT_REMOVE_BEHAVIOUR); // index
-typedef uint8_t TYPIFY(EVT_GET_BEHAVIOUR); // index
-typedef void TYPIFY(EVT_GET_BEHAVIOUR_INDICES);
+typedef SwitchBehaviour TYPIFY(CMD_ADD_BEHAVIOUR);
+typedef std::tuple<uint8_t,SwitchBehaviour> TYPIFY(CMD_REPLACE_BEHAVIOUR);
+typedef uint8_t TYPIFY(CMD_REMOVE_BEHAVIOUR); // index
+typedef uint8_t TYPIFY(CMD_GET_BEHAVIOUR); // index
+typedef void TYPIFY(CMD_GET_BEHAVIOUR_INDICES);
 typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
-typedef uint8_t TYPIFY(EVT_BEHAVIOUR_SWITCH_STATE);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
+typedef void TYPIFY(EVT_GOING_TO_DFU);
 typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
 
 /*---------------------------------------------------------------------------------------------------------------------

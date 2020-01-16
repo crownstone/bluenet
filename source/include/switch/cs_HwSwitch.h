@@ -26,7 +26,15 @@ public:
      */
     HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration);
 
+    /**
+     * Returns whether this hardware can try to start the dimmer right on boot.
+     */
     bool canTryDimmerOnBoot();
+
+    /**
+     * Returns whether the dimmer of this hardware flashes when performing DFU.
+     */
+    bool dimmerFlashOnDfu();
 
 private:
     uint32_t _hardwareBoard = 0;

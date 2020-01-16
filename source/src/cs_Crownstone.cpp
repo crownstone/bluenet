@@ -895,11 +895,6 @@ void Crownstone::handleEvent(event_t & event) {
 //			sd_nvic_SystemReset();
 			break;
 		}
-		case CS_TYPE::CMD_SET_OPERATION_MODE: {
-			OperationMode mode = *(OperationMode*)event.data;
-			switchMode(mode);
-			break;
-		}
 		default:
 			return;
 	}

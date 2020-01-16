@@ -113,6 +113,8 @@ private:
     void setIntensity_unchecked(uint8_t dimmer_value);
     void setRelay_unchecked(bool relay_state);
 
+    void goingToDfu();
+
 public:
     /**
      * Restores state from persistent memory and tries to recover to that state.

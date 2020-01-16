@@ -21,26 +21,26 @@ std::array<Behaviour*,BehaviourStore::MaxBehaviours> BehaviourStore::activeBehav
 
 void BehaviourStore::handleEvent(event_t& evt){
     switch(evt.type){
-        case CS_TYPE::EVT_SAVE_BEHAVIOUR:{
+        case CS_TYPE::CMD_ADD_BEHAVIOUR:{
             handleSaveBehaviour(evt);
             dispatchBehaviourMutationEvent();
             break;
         }
-        case CS_TYPE::EVT_REPLACE_BEHAVIOUR:{
+        case CS_TYPE::CMD_REPLACE_BEHAVIOUR:{
             handleReplaceBehaviour(evt);
             dispatchBehaviourMutationEvent();
             break;
         }
-        case CS_TYPE::EVT_REMOVE_BEHAVIOUR:{
+        case CS_TYPE::CMD_REMOVE_BEHAVIOUR:{
             handleRemoveBehaviour(evt);
             dispatchBehaviourMutationEvent();
             break;
         }
-        case CS_TYPE::EVT_GET_BEHAVIOUR:{
+        case CS_TYPE::CMD_GET_BEHAVIOUR:{
             handleGetBehaviour(evt);
             break;
         }
-        case CS_TYPE::EVT_GET_BEHAVIOUR_INDICES: {
+        case CS_TYPE::CMD_GET_BEHAVIOUR_INDICES: {
             handleGetBehaviourIndices(evt);
             break;
         }
@@ -266,7 +266,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt){
 }
 
 void BehaviourStore::handleRemoveBehaviour(event_t& evt){
-    uint8_t index = *reinterpret_cast<TYPIFY(EVT_REMOVE_BEHAVIOUR)*>(evt.data);
+    uint8_t index = *reinterpret_cast<TYPIFY(CMD_REMOVE_BEHAVIOUR)*>(evt.data);
     LOGd("remove behaviour event %d", index);
     
     evt.result.returnCode = removeBehaviour(index);
@@ -283,7 +283,7 @@ void BehaviourStore::handleRemoveBehaviour(event_t& evt){
 }
 
 void BehaviourStore::handleGetBehaviour(event_t& evt){
-    uint8_t index = *reinterpret_cast<TYPIFY(EVT_GET_BEHAVIOUR)*>(evt.data);
+    uint8_t index = *reinterpret_cast<TYPIFY(CMD_GET_BEHAVIOUR)*>(evt.data);
     LOGd("Get behaviour event %d ", index);
 
     // validate behaviour index

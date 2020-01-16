@@ -445,6 +445,16 @@ void SwSwitch::setDimmerPower(bool is_on){
     hwSwitch.setDimmerPower(is_on);
 }
 
+void SwSwitch::goingToDfu() {
+	if (hwSwitch.dimmerFlashOnDfu()) {
+		// Turn relay on, to prevent current going through the dimmer.
+		TYPIFY(CMD_SET_RELAY) relayVal = true;
+		event_t cmd(CS_TYPE::CMD_SET_RELAY, &relayVal, sizeof(relayVal));
+		EventDispatcher::getInstance().dispatch(cmd);
+	}
+	setRelay_unlocked(true);
+}
+
 // ================== EventListener =============
 
 void SwSwitch::handleEvent(event_t& evt){
@@ -466,6 +476,10 @@ void SwSwitch::handleEvent(event_t& evt){
         	__attribute__((unused)) switch_state_t* typd = reinterpret_cast<TYPIFY(STATE_SWITCH_STATE)*>(evt.data);
             SWSWITCH_LOG_CALLFLOW("switch state update: relay(%d) dim(%d)", typd->state.relay, typd->state.dimmer);
             break;
+        }
+        case CS_TYPE::EVT_GOING_TO_DFU: {
+        	goingToDfu();
+        	break;
         }
         case CS_TYPE::EVT_TICK: {
             if (dimmerPowerUpCountDown && --dimmerPowerUpCountDown == 0) {
