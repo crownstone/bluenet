@@ -319,16 +319,16 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 31 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
 32 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
 33 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. Required access depends on the command. | x | x | x
-34 | Set sun times | [Sun time packet](#sun_time_packet) | Update the reference times for sunrise and sunset | x | x | 
+34 | Set sun times | [Sun time packet](#sun_time_packet) | Update the reference times for sunrise and sunset | x | x
 40 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 50 | UART message | payload | Print the payload to UART. | x
-60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add_behaviour_packet) | Add a behaviour to an unoccupied index | x | x
-61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | Replace the behaviour at given index | x | x
-62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the behaviour at given index | x | x
-63 | Get behaviour | [Get behaviour packet](BEHAVIOUR.md#get_behaviour_packet) | Obtain the behaviour stored at given index | x | x
-64 | Get behaviour indices | [Get behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours | x | x 
-
+60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add_behaviour_packet) | Add a behaviour to an unoccupied index. | x | x
+61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | Replace the behaviour at given index. | x | x
+62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the behaviour at given index. | x | x
+63 | Get behaviour | [Get behaviour packet](BEHAVIOUR.md#get_behaviour_packet) | Obtain the behaviour stored at given index. | x | x
+64 | Get behaviour indices | [Get behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
+69 | Get behaviour debug | [Behaviour debug packet](#behaviour_debug_packet) | Obtain debug info of the current behaviour state. | x
 
 
 <a name="setup_packet"></a>
@@ -459,7 +459,23 @@ Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
 0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet. See [Broadcast command types](BROADCAST_PROTOCOL.md#command-broadcast-types) for implemented commands.
 
+<a name="behaviour_debug_packet"></a>
+##### Behaviour debug packet
 
+![Behaviour debug packet](../docs/diagrams/behaviour_debug_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 32 | Time | 4 | Current time. 0 if not set.
+uint 32 | Sunrise | 4 | Sunrise time, seconds after midnight. 0 if not set.
+uint 32 | Sunset | 4 | Sunset time, seconds after midnight. 0 if not set.
+uint 8 | Override state | 1 | Override state. 255 if not set.
+uint 8 | Behaviour state | 1 | Behaviour state. 255 if not set.
+uint 8 | Aggregated state | 1 | Aggregated state. 255 if not set.
+uint 8 | Dimmer powered | 1 | Whether the dimmer is powered.
+uint 64 | Active behaviours | 8 | Bitmask of behaviours that are currently active. Nth bit is Nth behaviour index.
+uint 64 | Active end conections | 8 | Bitmask of behaviours with active end condtiond. Nth bit is Nth behaviour index.
+uint 64[] | Presence | 64 | Bitmask per profile of occupied rooms. Nth bit is Nth room.
 
 <a name="result_packet"></a>
 ## Result packet
