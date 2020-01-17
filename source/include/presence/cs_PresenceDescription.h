@@ -54,6 +54,10 @@ class PresenceStateDescription{
         }
     }
 
+    uint64_t getBitmask() {
+    	return val;
+    }
+
     void print(){
         [[maybe_unused]] uint32_t rooms[2] = {
             static_cast<uint32_t>(val >> 0 ),

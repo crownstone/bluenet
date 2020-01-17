@@ -155,5 +155,7 @@ private:
      */
     bool checkAndSetOwner(cmd_source_t source);
 
+    void handleGetBehaviourDebug(event_t& evt);
+
     void printStatus();
 };

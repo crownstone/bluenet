@@ -110,19 +110,23 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
 // ========================= Event handling =========================
 
 void SwitchAggregator::handleEvent(event_t& evt){
-    if (handleTimingEvents(evt)) {
-        return;
-    }
+	if (handleTimingEvents(evt)) {
+		return;
+	}
 
-    if(handlePresenceEvents(evt)){
-        return;
-    }
+	if (handlePresenceEvents(evt)) {
+		return;
+	}
 
-   if(handleAllowedOperations(evt)){
-       return;
-   }
+	if (handleAllowedOperations(evt)) {
+		return;
+	}
 
-    handleStateIntentionEvents(evt);    
+	handleStateIntentionEvents(evt);
+
+	if (evt.type == CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG) {
+		handleGetBehaviourDebug(evt);
+	}
 }
 
 bool SwitchAggregator::handleTimingEvents(event_t& evt){
@@ -255,6 +259,8 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
         // temporarily change the state of the swSwitch to something else than the
         // behaviourState or overrideState decided that they needed to be.
         // as soon as any of the above handled events are triggered this will have been forgotten.
+
+        // TODO: bart @ arend: consider these to be an override state.
         case CS_TYPE::CMD_SET_RELAY:{
             LOGSwitchAggregator_Evt("CMD_SET_RELAY");
             auto typd = reinterpret_cast<TYPIFY(CMD_SET_RELAY)*>(evt.data);
@@ -345,6 +351,29 @@ bool SwitchAggregator::checkAndSetOwner(cmd_source_t source) {
 	_source = source;
 	_ownerTimeoutCountdown = SWITCH_CLAIM_TIME_MS / TICK_INTERVAL_MS;
 	return true;
+}
+
+void SwitchAggregator::handleGetBehaviourDebug(event_t& evt) {
+	LOGd("handleGetBehaviourDebug");
+	if (evt.result.buf.data == nullptr) {
+		LOGd("ERR_BUFFER_UNASSIGNED");
+		evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
+		return;
+	}
+	if (evt.result.buf.len < sizeof(behaviour_debug_t)) {
+		LOGd("ERR_BUFFER_TOO_SMALL");
+		evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
+		return;
+	}
+	behaviour_debug_t* behaviourDebug = (behaviour_debug_t*)(evt.result.buf.data);
+
+	behaviourDebug->overrideState = overrideState ? overrideState.value() : 254;
+	behaviourDebug->behaviourState = behaviourState ? behaviourState.value() : 254;
+	behaviourDebug->aggregatedState = aggregatedState ? aggregatedState.value() : 254;
+	behaviourDebug->dimmerPowered = (swSwitch && swSwitch->isDimmerCircuitPowered());
+
+	evt.result.dataSize = sizeof(behaviour_debug_t);
+	evt.result.returnCode = ERR_SUCCESS;
 }
 
 void SwitchAggregator::printStatus(){

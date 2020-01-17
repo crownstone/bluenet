@@ -61,6 +61,8 @@ class BehaviourHandler : public EventListener {
         Time currenttime, 
         PresenceStateDescription currentpresence);
 
+    void handleGetBehaviourDebug(event_t& evt);
+
     /**
      * The last value returned by getValue.
      */

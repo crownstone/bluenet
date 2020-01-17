@@ -235,6 +235,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_REMOVE_BEHAVIOUR,                             // Remove a behaviour.
 	CMD_GET_BEHAVIOUR,                                // Get a behaviour.
 	CMD_GET_BEHAVIOUR_INDICES,                        // Get a list of indices of active behaviours.
+	CMD_GET_BEHAVIOUR_DEBUG,                          // Get info to debug behaviour. Multiple classes will handle this command to fill pieces of info.
 	EVT_BEHAVIOURSTORE_MUTATION,                      // Sent by BehaviourStore, after a change to the stored behaviours.
 
 	CMD_RESET_DELAYED,                                // Reboot.
@@ -438,6 +439,7 @@ typedef std::tuple<uint8_t,SwitchBehaviour> TYPIFY(CMD_REPLACE_BEHAVIOUR);
 typedef uint8_t TYPIFY(CMD_REMOVE_BEHAVIOUR); // index
 typedef uint8_t TYPIFY(CMD_GET_BEHAVIOUR); // index
 typedef void TYPIFY(CMD_GET_BEHAVIOUR_INDICES);
+typedef void TYPIFY(CMD_GET_BEHAVIOUR_DEBUG);
 typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);

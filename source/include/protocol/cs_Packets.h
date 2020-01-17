@@ -201,6 +201,7 @@ struct __attribute__((packed)) behaviour_debug_t {
 	uint8_t behaviourState;  // From switch aggregator, 255 when not set.
 	uint8_t aggregatedState; // From switch aggregator, 255 when not set.
 	uint8_t dimmerPowered; // 1 when powered.
+	uint8_t behaviourEnabled; // 1 when enabled.
 	uint64_t activeBehaviours; // Bitmask of behaviour indices that are active.
 	uint64_t extensionActive;  // Bitmask of behaviours with active end condition.
 	uint64_t presence[8]; // Bitmask of presence per profile.

@@ -328,7 +328,7 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the behaviour at given index. | x | x
 63 | Get behaviour | [Get behaviour packet](BEHAVIOUR.md#get_behaviour_packet) | Obtain the behaviour stored at given index. | x | x
 64 | Get behaviour indices | [Get behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
-69 | Get behaviour debug | [Behaviour debug packet](#behaviour_debug_packet) | Obtain debug info of the current behaviour state. | x
+69 | Get behaviour debug | - | Obtain debug info of the current behaviour state. Result data is a [Behaviour debug packet](#behaviour_debug_packet). | x
 
 
 <a name="setup_packet"></a>
@@ -469,10 +469,11 @@ Type | Name | Length | Description
 uint 32 | Time | 4 | Current time. 0 if not set.
 uint 32 | Sunrise | 4 | Sunrise time, seconds after midnight. 0 if not set.
 uint 32 | Sunset | 4 | Sunset time, seconds after midnight. 0 if not set.
-uint 8 | Override state | 1 | Override state. 255 if not set.
-uint 8 | Behaviour state | 1 | Behaviour state. 255 if not set.
-uint 8 | Aggregated state | 1 | Aggregated state. 255 if not set.
+uint 8 | Override state | 1 | Override state. 254 if not set.
+uint 8 | Behaviour state | 1 | Behaviour state. 254 if not set.
+uint 8 | Aggregated state | 1 | Aggregated state. 254 if not set.
 uint 8 | Dimmer powered | 1 | Whether the dimmer is powered.
+uint 8 | Behaviour enabled | 1 | Whether behaviour is enabled.
 uint 64 | Active behaviours | 8 | Bitmask of behaviours that are currently active. Nth bit is Nth behaviour index.
 uint 64 | Active end conections | 8 | Bitmask of behaviours with active end condtiond. Nth bit is Nth behaviour index.
 uint 64[] | Presence | 64 | Bitmask per profile of occupied rooms. Nth bit is Nth room.
