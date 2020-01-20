@@ -165,6 +165,7 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	// Set active behaviours.
 	behaviourDebug->activeBehaviours = 0;
 	behaviourDebug->extensionActive = 0; // TODO: how to calculate this?
+	behaviourDebug->activeGracePeriod = 0; // TODO: how to calculate this?
 	bool checkBehaviours = true;
 
 	// Kept code similar to update() followed by computeIntendedState().
