@@ -204,7 +204,7 @@ struct __attribute__((packed)) behaviour_debug_t {
 	uint8_t behaviourEnabled; // 1 when enabled.
 	uint64_t activeBehaviours; // Bitmask of behaviour indices that are active.
 	uint64_t extensionActive;  // Bitmask of behaviours with active end condition.
-	uint64_t activeGracePeriod; // Bitmask of behaviours with active grace period (presence timeout).
+	uint64_t activeTimeoutPeriod; // Bitmask of behaviours that are in (presence) timeout period.
 	uint64_t presence[8]; // Bitmask of presence per profile.
 };
 
