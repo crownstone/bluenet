@@ -203,6 +203,7 @@ void PowerSampling::handleEvent(event_t & event) {
 		enableSwitchcraft(*(TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)*)event.data);
 		break;
 	case CS_TYPE::EVT_ADC_RESTARTED:
+		_skipSwapDetection = 1;
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
 		RecognizeSwitch::getInstance().skip(2);
 		break;
@@ -261,6 +262,16 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	filter(bufIndex, power.voltageIndex);
 	filter(bufIndex, power.currentIndex);
 #endif
+
+	nrf_saadc_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
+	if (isVoltageAndCurrentSwapped(power, prevBuf)) {
+		LOGw("Swap detected: restart ADC.");
+		_adc->stop();
+		printBuf(power);
+		_adc->start();
+		_adc->releaseBuffer(bufIndex);
+		return;
+	}
 
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
@@ -327,6 +338,62 @@ void PowerSampling::initAverages() {
  */
 uint16_t PowerSampling::determineCurrentIndex(power_t & power) {
 	return power.currentIndex;
+}
+
+/*
+ * Other idea:
+ * - compare Vrms[t-1] with Vrms[t] and Irms[t]. If Vrms[t-1] is more similar to Irms[t] than to Vrms[t], then swapped.
+ * Problems:
+ * - Vzero and Izero can be different and affect Vrm and Irms.
+ */
+bool PowerSampling::isVoltageAndCurrentSwapped(power_t & power, nrf_saadc_value_t* prevBuf) {
+	if (_skipSwapDetection != 0) {
+		_skipSwapDetection--;
+		return false;
+	}
+	int16_t prev, sameIndex, differentIndex;
+
+	uint32_t sumSameIndex = 0;
+	uint32_t sumDifferentIndex = 0;
+
+	int16_t maxPrev =           INT16_MIN;
+	int16_t maxSameIndex =      INT16_MIN;
+	int16_t maxDifferentIndex = INT16_MIN;
+
+	int16_t minPrev =           INT16_MAX;
+	int16_t minSameIndex =      INT16_MAX;
+	int16_t minDifferentIndex = INT16_MAX;
+
+	for (int i = 0; i < power.bufSize / power.numChannels; i += power.numChannels) {
+		prev =             prevBuf[power.voltageIndex + i];
+		sameIndex =      power.buf[power.voltageIndex + i];
+		differentIndex = power.buf[power.currentIndex + i];
+//		_log(SERIAL_DEBUG, "%i %i %i\r\n", prev, sameIndex, differentIndex);
+
+		sumSameIndex +=      std::abs(sameIndex - prev);
+		sumDifferentIndex += std::abs(differentIndex - prev);
+
+		if (prev > maxPrev) { maxPrev = prev; }
+		if (prev < minPrev) { minPrev = prev; }
+		if (sameIndex > maxSameIndex) { maxSameIndex = sameIndex; }
+		if (sameIndex < minSameIndex) { minSameIndex = sameIndex; }
+		if (differentIndex > maxDifferentIndex) { maxDifferentIndex = differentIndex; }
+		if (differentIndex < minDifferentIndex) { minDifferentIndex = differentIndex; }
+	}
+
+	int16_t minMaxSameIndex = std::abs(maxPrev - maxSameIndex) + std::abs(minPrev - minSameIndex);
+	int16_t minMaxDifferentIndex = std::abs(maxPrev - maxDifferentIndex) + std::abs(minPrev - minDifferentIndex);
+	if (minMaxSameIndex > minMaxDifferentIndex) {
+		LOGd("minMaxSameIndex=%i minMaxDifferentIndex=%i", minMaxSameIndex, minMaxDifferentIndex);
+		LOGd("prev=[%i %i] same=[%i %i] different=[%i %i]", minPrev, maxPrev, minSameIndex, maxSameIndex, minDifferentIndex, maxDifferentIndex);
+	}
+
+//	if (sumSameIndex > sumDifferentIndex || sumSameIndex > 1000) {
+	if (sumSameIndex > sumDifferentIndex) {
+		LOGd("sumSameIndex=%u sumDifferentIndex=%u", sumSameIndex, sumDifferentIndex);
+	}
+	return (sumDifferentIndex < sumSameIndex);
+//	return (minMaxSameIndex > minMaxDifferentIndex && sumSameIndex > sumDifferentIndex);
 }
 
 /**
@@ -472,6 +539,7 @@ void PowerSampling::calculatePower(power_t & power) {
 
 	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
 
+	// TODO: Make this an assert.
 	if ((int)power.bufSize < numSamples * power.numChannels) {
 		LOGe("Should have at least a whole period in a buffer!");
 		return;
@@ -503,13 +571,23 @@ void PowerSampling::calculatePower(power_t & power) {
 	// Calculate Irms of median filtered samples, and filter over multiple periods
 	////////////////////////////////////////////////////////////////////////////////
 
-	// Calculate Irms again, but now with the filtered current samples
-	cSquareSum = 0;
-	for (uint16_t i=0; i<numSamples; ++i) {
-		current = (int64_t)_outputSamples->at(i)*1000 - _avgZeroCurrent;
-		cSquareSum += (current * current) / (1000*1000);
-	}
-	int32_t filteredCurrentRmsMA =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
+//	// Calculate Irms again, but now with the filtered current samples
+//	cSquareSum = 0;
+//	for (uint16_t i=0; i<numSamples; ++i) {
+//		current = (int64_t)_outputSamples->at(i)*1000 - _avgZeroCurrent;
+//		cSquareSum += (current * current) / (1000*1000);
+//	}
+//	int32_t filteredCurrentRmsMA =  sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
+
+	// power.buf is already median filtered
+	int32_t filteredCurrentRmsMA = currentRmsMA;
+
+//	if (isVoltageAndCurrentSwapped(filteredCurrentRmsMA, voltageRmsMilliVolt)) {
+//		LOGw("Swap detected: restart ADC.");
+//		_adc->stop();
+//		_adc->start();
+//		return;
+//	}
 
 	// Calculate median when there are enough values in history, else calculate the average.
 	_filteredCurrentRmsHistMA->push(filteredCurrentRmsMA);
@@ -734,7 +812,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 
 	// Check if the filtered Irms is above threshold.
 	if ((currentRmsFilteredMA > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {
-		LOGw("Overcurrent: %i V=[%i %i ..] C=[%i %i ..]",
+		LOGw("Overcurrent: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
 				currentRmsFilteredMA,
 				power.buf[power.voltageIndex],
 				power.buf[power.voltageIndex + power.numChannels],
@@ -765,7 +843,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 //		State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState);
 		if (switchState.state.dimmer != 0) {
 			// If the pwm was on:
-			LOGw("Dimmer overcurrent: %i V=[%i %i ..] C=[%i %i ..]",
+			LOGw("Dimmer overcurrent: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
 				currentRmsMA,
 				power.buf[power.voltageIndex],
 				power.buf[power.voltageIndex + power.numChannels],
@@ -781,7 +859,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		}
 		else if (switchState.state.relay == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
-			LOGw("Dimmer failure detected: %i V=[%i %i ..] C=[%i %i ..]",
+			LOGw("Dimmer failure detected: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
 				currentRmsMA,
 				power.buf[power.voltageIndex],
 				power.buf[power.voltageIndex + power.numChannels],
