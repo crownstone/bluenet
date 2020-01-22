@@ -121,7 +121,7 @@ bool HwSwitch::dimmerFlashOnDfu() {
  *   + leading edge dimming
  *   + trailing edge dimming
  */
-HwSwitch::HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration) {
+HwSwitch::HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration, bool startDimmerOnZeroCrossing) {
 	pwm_config_t pwmConfig;
 	pwmConfig.channelCount = 1;
 	pwmConfig.period_us = pwmPeriod;
@@ -130,13 +130,14 @@ HwSwitch::HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t re
 
 	PWM::getInstance().init(pwmConfig);
 
-	switch(board.hardwareBoard){
+	switch (board.hardwareBoard) {
 		case PCA10036:
 		case PCA10040:
+			// These dev boards don't have power measurement, so no zero crossing.
 			PWM::getInstance().start(false);
 			break;
 		default:
-			PWM::getInstance().start(true);
+			PWM::getInstance().start(startDimmerOnZeroCrossing);
 			break;
 	}
 	_hardwareBoard = board.hardwareBoard;

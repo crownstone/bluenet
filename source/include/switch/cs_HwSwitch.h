@@ -24,7 +24,7 @@ public:
     /**
      * configures the PWM module and the gpio relay on and relay off pins.
      */
-    HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration);
+    HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration, bool startDimmerOnZeroCrossing);
 
     /**
      * Returns whether this hardware can try to start the dimmer right on boot.
