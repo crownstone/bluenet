@@ -49,6 +49,35 @@ void HwSwitch::setRelay(bool is_on){
 }
 
 void HwSwitch::setDimmerPower(bool is_on){
+	switch (_hardwareBoard) {
+		// Dev boards
+		case PCA10036:
+		case PCA10040:
+		// Builtin zero
+		case ACR01B1A:
+		case ACR01B1B:
+		case ACR01B1C:
+		case ACR01B1D:
+		case ACR01B1E:
+		// First builtin one
+		case ACR01B10B:
+		// Plugs
+		case ACR01B2A:
+		case ACR01B2B:
+		case ACR01B2C:
+		case ACR01B2E:
+		case ACR01B2G:
+		// These don't have a dimmer.
+		case GUIDESTONE:
+		case CS_USB_DONGLE: {
+			return;
+		}
+
+		// Newer ones have a dimmer enable pin.
+		case ACR01B10C:
+		default:
+			break;
+	}
 	if(is_on){
 		enableDimmer();
 	} else {
