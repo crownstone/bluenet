@@ -212,6 +212,8 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	for (int i=0; i<_config.channelCount; ++i) {
 		initChannel(i, _config.channels[i]);
 	}
+	// NRF52_PAN_74
+	nrf_saadc_enable();
 
 	// Allocate buffers
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
@@ -229,6 +231,9 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 
 
 cs_adc_error_t ADC::initAdc(const adc_config_t & config) {
+	// NRF52_PAN_74
+	nrf_saadc_disable();
+
 	nrf_saadc_resolution_set(CS_ADC_RESOLUTION);
 	nrf_saadc_oversample_set(NRF_SAADC_OVERSAMPLE_DISABLED); // Oversample can only be used with 1 channel.
 
@@ -241,7 +246,8 @@ cs_adc_error_t ADC::initAdc(const adc_config_t & config) {
 	sd_nvic_EnableIRQ(SAADC_IRQn);
 	nrf_saadc_int_enable(NRF_SAADC_INT_END);
 
-	nrf_saadc_enable();
+	// NRF52_PAN_74: enable after config
+//	nrf_saadc_enable();
 
 	return 0;
 }
@@ -562,10 +568,13 @@ cs_adc_error_t ADC::changeChannel(cs_adc_channel_id_t channel, adc_channel_confi
 }
 
 void ADC::applyConfig() {
+	// NRF52_PAN_74
+	nrf_saadc_disable();
 	// Apply channel configs
 	for (int i=0; i<_config.channelCount; ++i) {
 		initChannel(i, _config.channels[i]);
 	}
+	nrf_saadc_enable();
 
 	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_CONFIG, (uint8_t*)(&_config), sizeof(_config));
 	_changeConfig = false;
