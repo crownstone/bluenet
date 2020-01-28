@@ -163,9 +163,14 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	behaviourDebug->presence[0] = currentPresence ? currentPresence.value().getBitmask() : 0;
 
 	// Set active behaviours.
+	behaviourDebug->storedBehaviours = 0;
 	behaviourDebug->activeBehaviours = 0;
 	behaviourDebug->extensionActive = 0; // TODO: how to calculate this?
 	behaviourDebug->activeTimeoutPeriod = 0; // TODO: how to calculate this?
+	auto behaviours = BehaviourStore::getActiveBehaviours();
+	for (uint8_t index = 0; index < behaviours.size(); ++index) {
+		behaviourDebug->storedBehaviours |= (1 << index);
+	}
 	bool checkBehaviours = true;
 
 	// Kept code similar to update() followed by computeIntendedState().
@@ -179,7 +184,6 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 		checkBehaviours = false;
 	}
 	if (checkBehaviours) {
-		auto behaviours = BehaviourStore::getActiveBehaviours();
 		for (uint8_t index = 0; index < behaviours.size(); ++index) {
 			if (SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(behaviours[index])) {
 				// cast to switch behaviour succesful.

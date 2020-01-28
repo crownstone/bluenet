@@ -474,6 +474,7 @@ uint 8 | Behaviour state | 1 | Behaviour state. 254 if not set.
 uint 8 | Aggregated state | 1 | Aggregated state. 254 if not set.
 uint 8 | Dimmer powered | 1 | Whether the dimmer is powered.
 uint 8 | Behaviour enabled | 1 | Whether behaviour is enabled.
+uint 64 | Stored behaviours | 8 | Bitmask of behaviours that are stored. Nth bit is Nth behaviour index.
 uint 64 | Active behaviours | 8 | Bitmask of behaviours that are currently active. Nth bit is Nth behaviour index.
 uint 64 | Active end conditions | 8 | Bitmask of behaviours with active end conditions. Nth bit is Nth behaviour index.
 uint 64 | Active timeout periods | 8 | Bitmask of behaviours that are in (presence) timeout period. Nth bit is Nth behaviour index.
