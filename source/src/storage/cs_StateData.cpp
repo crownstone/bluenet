@@ -8,6 +8,7 @@
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <storage/cs_StateData.h>
+#include <util/cs_UuidParser.h>
 
 cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsConfig)  {
 

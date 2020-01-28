@@ -6,14 +6,11 @@
  */
 #pragma once
 
-#include "ble/cs_Nordic.h"
 #include "cfg/cs_Config.h"
-#include "cfg/cs_Boards.h"
 #include "drivers/cs_Serial.h"
 #include "protocol/cs_CommandTypes.h"
 #include "protocol/cs_ErrorCodes.h"
 #include "structs/cs_PacketsInternal.h"
-#include "util/cs_UuidParser.h"
 #include <cstddef> // For NULL
 #include <cstdint>
 #include <type_traits>

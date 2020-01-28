@@ -8,6 +8,7 @@
 #pragma once
 
 #include "events/cs_EventListener.h"
+#include "cfg/cs_Boards.h"
 #include "common/cs_Types.h"
 #include "mesh/cs_MeshModel.h"
 #include <mesh/cs_MeshAdvertiser.h>
