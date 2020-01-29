@@ -190,9 +190,9 @@ bool SwitchAggregator::handlePresenceEvents(event_t& evt){
 }
 
 bool SwitchAggregator::handleAllowedOperations(event_t& evt) {
-     if (evt.type ==  CS_TYPE::CMD_SWITCH_LOCKED) {
+     if (evt.type ==  CS_TYPE::CMD_SWITCHING_ALLOWED) {
         LOGSwitchAggregator_Evt("SwitchAggregator::%s case CMD_SWITCH_LOCKED",__func__);
-        auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);
+        auto typd = reinterpret_cast<TYPIFY(CMD_SWITCHING_ALLOWED)*>(evt.data);
         if(swSwitch) swSwitch->setAllowSwitching(*typd);
 
         evt.result.returnCode = ERR_SUCCESS;

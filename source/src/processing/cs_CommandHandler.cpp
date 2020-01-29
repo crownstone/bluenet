@@ -501,11 +501,9 @@ command_result_t CommandHandler::handleCmdAllowDimming(cs_data_t commandData, co
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) commandData.data;
-	TYPIFY(CONFIG_PWM_ALLOWED) enable = payload->enable;
+	TYPIFY(CONFIG_PWM_ALLOWED) allow = payload->enable;
 
-	LOGi("allow dimming: %u", enable);
-
-	event_t evt(CS_TYPE::CMD_DIMMING_ALLOWED,&enable,sizeof(enable));
+	event_t evt(CS_TYPE::CMD_DIMMING_ALLOWED, &allow, sizeof(allow));
 	EventDispatcher::getInstance().dispatch(evt);
 	
 	return command_result_t(ERR_SUCCESS);
@@ -520,11 +518,9 @@ command_result_t CommandHandler::handleCmdLockSwitch(cs_data_t commandData, cons
 	}
 
 	enable_message_payload_t* payload = (enable_message_payload_t*) commandData.data;
-	TYPIFY(CONFIG_SWITCH_LOCKED) allow_switching = !payload->enable;
+	TYPIFY(CMD_SWITCHING_ALLOWED) allow = !payload->enable;
 
-	LOGi("lock switch: %u", !allow_switching);
-
-	event_t evt(CS_TYPE::CMD_SWITCH_LOCKED,&allow_switching,sizeof(allow_switching));
+	event_t evt(CS_TYPE::CMD_SWITCHING_ALLOWED, &allow, sizeof(allow));
 	EventDispatcher::getInstance().dispatch(evt);
 
 	return command_result_t(ERR_SUCCESS);
