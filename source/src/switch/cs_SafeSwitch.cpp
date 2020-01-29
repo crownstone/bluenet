@@ -49,8 +49,8 @@ cs_ret_code_t SafeSwitch::setRelayUnchecked(bool on) {
 
 
 cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity) {
-	auto stateErrors = getErrorState();
 	if (intensity > 0) {
+		auto stateErrors = getErrorState();
 		if (!isSafeToDim(stateErrors)) {
 			return ERR_UNSAFE;
 		}
@@ -285,6 +285,8 @@ void SafeSwitch::handleEvent(event_t & evt) {
 		case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
 		case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
 			forceSwitchOff();
+			break;
+		default:
 			break;
 	}
 }
