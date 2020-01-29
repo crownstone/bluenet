@@ -69,12 +69,6 @@ private:
     bool startDimmerPowerCheck(uint8_t value);
 
     /**
-     * Returns true if the dimmerPowerUpCountDown has expired or
-     * if a dimmer power check has successfully measured a correct state.
-     */
-    bool isDimmerCircuitPowered();
-
-    /**
      * Check if the dimmer is powered and save the value into measuredDimmerPowerUsage.
      * 
      * If dimming isn't allowed or currentState has a dimmer intensity of
@@ -112,6 +106,8 @@ private:
     // before executing the action.
     void setIntensity_unchecked(uint8_t dimmer_value);
     void setRelay_unchecked(bool relay_state);
+
+    void goingToDfu();
 
 public:
     /**
@@ -200,6 +196,13 @@ public:
     virtual void handleEvent(event_t& evt) override;
 
     // Getters
+
+	/**
+	 * Returns true if the dimmerPowerUpCountDown has expired or
+	 * if a dimmer power check has successfully measured a correct state.
+	 */
+	bool isDimmerCircuitPowered();
+
     bool isSwitchingAllowed() { return allowSwitching; }
     bool isDimmingAllowed() { return allowSwitching; }
     

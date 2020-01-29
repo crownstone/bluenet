@@ -136,9 +136,9 @@ void DeviceInformationService::addFirmwareRevisionCharacteristic() {
 	_firmwareRevisionCharacteristic->setUUID(BLE_UUID_FIRMWARE_REVISION_STRING_CHAR);
 	_firmwareRevisionCharacteristic->setName(BLE_CHAR_FIRMWARE_REVISION);
 	_firmwareRevisionCharacteristic->setWritable(false);
+	_firmwareRevisionCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_firmwareRevisionCharacteristic->setDefaultValue(firmware_version);
 	_firmwareRevisionCharacteristic->setMaxStringLength(firmware_version.size());
-	_firmwareRevisionCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_firmwareRevisionCharacteristic->setValueLength(firmware_version.size());
 }
 
@@ -150,9 +150,14 @@ void DeviceInformationService::addSoftwareRevisionCharacteristic() {
 	}
 	_softwareRevisionCharacteristic = new Characteristic<std::string>();
 	addCharacteristic(_softwareRevisionCharacteristic);
+
+	std::string software_version = STRINGIFY(GIT_BRANCH);
+
 	_softwareRevisionCharacteristic->setUUID(BLE_UUID_SOFTWARE_REVISION_STRING_CHAR);
 	_softwareRevisionCharacteristic->setName(BLE_CHAR_SOFTWARE_REVISION);
-	_softwareRevisionCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
-	_softwareRevisionCharacteristic->setDefaultValue(STRINGIFY(GIT_BRANCH));
 	_softwareRevisionCharacteristic->setWritable(false);
+	_softwareRevisionCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
+	_softwareRevisionCharacteristic->setDefaultValue(software_version);
+	_softwareRevisionCharacteristic->setMaxStringLength(software_version.size());
+	_softwareRevisionCharacteristic->setValueLength(software_version.size());
 }

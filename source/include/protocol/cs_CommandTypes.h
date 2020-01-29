@@ -40,6 +40,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_REMOVE_BEHAVIOUR            = 62,
 	CTRL_CMD_GET_BEHAVIOUR               = 63,
 	CTRL_CMD_GET_BEHAVIOUR_INDICES       = 64,
+	CTRL_CMD_GET_BEHAVIOUR_DEBUG         = 69,
 
 	CTRL_CMD_UNKNOWN                     = 0xFFFF
 };
@@ -47,6 +48,6 @@ enum CommandHandlerTypes {
 enum AdvCommandTypes {
 	ADV_CMD_MULTI_SWITCH               = 1,
 	ADV_CMD_SET_TIME                   = 2,
-	ADV_CMD_SET_BEHAVIOUR_SETTINGS     = 4,
+	ADV_CMD_SET_BEHAVIOUR_SETTINGS     = 3,
 	ADV_CMD_UNKNOWN                    = 0xFF
 };

@@ -116,7 +116,7 @@ void ExtendedSwitchBehaviour::print(){
     LOGd("extension is active: %d", extensionIsActive);
 
     if(prevExtensionIsValidTimeStamp){
-        TimeOfDay t = prevExtensionIsValidTimeStamp->timeOfDay();
+    	[[maybe_unused]] TimeOfDay t = prevExtensionIsValidTimeStamp->timeOfDay();
         LOGd("extension timestamp : %02d:%02d:%02d", t.h(),t.m(),t.s());
     }
     LOGd("##");

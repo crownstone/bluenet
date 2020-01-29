@@ -38,6 +38,9 @@ void PresenceHandler::handleEvent(event_t& evt){
     case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
         // drop through
         adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
+        if (BLEutil::isBitSet(parsed_adv_ptr->flags, BG_ADV_FLAG_IGNORE_FOR_PRESENCE)) {
+        	return;
+        }
         profile = parsed_adv_ptr->profileId;
         location = parsed_adv_ptr->locationId;
         break;

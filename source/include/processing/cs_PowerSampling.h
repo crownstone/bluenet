@@ -124,6 +124,8 @@ private:
 	uint32_t _lastEnergyCalculationTicks; //! Ticks of RTC when last energy calculation was performed.
 	int64_t _energyUsedmicroJoule; //! Energy used in micro joule
 
+	uint8_t _skipSwapDetection = 1; //! Number of buffers to skip until we start detecting swaps.
+
 	switch_state_t _lastSwitchState; //! Stores the last seen switch state.
 	uint32_t _lastSwitchOffTicks;    //! RTC ticks when the switch was last turned off.
 	bool _lastSwitchOffTicksValid;   //! Keep up whether the last switch off time is valid.
@@ -173,6 +175,14 @@ private:
 	/** Filter the samples
 	 */
 	void filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id);
+
+	/**
+	 * Checks if voltage and current index are swapped.
+	 *
+	 * Checks if previous voltage samples look more like this buffer voltage samples or current samples.
+	 * Assumes previous buffer is valid, and of same size as this buffer.
+	 */
+	bool isVoltageAndCurrentSwapped(power_t & power, nrf_saadc_value_t* prevBuf);
 
 	/** Calculate the average power usage
 	 */

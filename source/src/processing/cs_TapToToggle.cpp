@@ -39,8 +39,7 @@ void TapToToggle::handleBackgroundAdvertisement(adv_background_parsed_t* adv) {
 		LOGT2Td("rssi too low");
 		return;
 	}
-	// 2019-11-12 TODO: don't use magic number 2.
-	if (!BLEutil::isBitSet(adv->flags, 2)) {
+	if (!BLEutil::isBitSet(adv->flags, BG_ADV_FLAG_TAP_TO_TOGGLE_ENABLED)) {
 		LOGT2Td("t2t flag not set");
 		return;
 	}

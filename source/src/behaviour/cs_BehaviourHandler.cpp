@@ -13,6 +13,8 @@
 #include <presence/cs_PresenceDescription.h>
 #include <presence/cs_PresenceHandler.h>
 
+#include <storage/cs_State.h>
+
 #include <time/cs_SystemTime.h>
 #include <time/cs_TimeOfDay.h>
 
@@ -50,6 +52,10 @@ void BehaviourHandler::handleEvent(event_t& evt){
             LOGi("settings isActive=%u", isActive);
             update();
             break;
+        }
+        case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG: {
+        	handleGetBehaviourDebug(evt);
+        	break;
         }
         default:{
             // ignore other events
@@ -119,6 +125,83 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 
     // reaching here means no conflict. An empty intendedValue should thus be resolved to 'off'
     return intendedValue.value_or(0);
+}
+
+void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
+	LOGd("handleGetBehaviourDebug");
+	if (evt.result.buf.data == nullptr) {
+		LOGd("ERR_BUFFER_UNASSIGNED");
+		evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
+		return;
+	}
+	if (evt.result.buf.len < sizeof(behaviour_debug_t)) {
+		LOGd("ERR_BUFFER_TOO_SMALL");
+		evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
+		return;
+	}
+	behaviour_debug_t* behaviourDebug = (behaviour_debug_t*)(evt.result.buf.data);
+
+	Time currentTime = SystemTime::now();
+	std::optional<PresenceStateDescription> currentPresence = PresenceHandler::getCurrentPresenceDescription();
+
+	// Set time.
+	behaviourDebug->time = currentTime.isValid() ? currentTime.timestamp() : 0;
+
+	// Set sunrise and sunset.
+	TYPIFY(STATE_SUN_TIME) sunTime;
+	State::getInstance().get(CS_TYPE::STATE_SUN_TIME, &sunTime, sizeof(sunTime));
+	behaviourDebug->sunrise = sunTime.sunrise;
+	behaviourDebug->sunset  = sunTime.sunset;
+
+	// Set behaviour enabled.
+	behaviourDebug->behaviourEnabled = isActive;
+
+	// Set presence.
+	for (uint8_t i = 0; i < 8; ++i) {
+		behaviourDebug->presence[i] = 0;
+	}
+	behaviourDebug->presence[0] = currentPresence ? currentPresence.value().getBitmask() : 0;
+
+	// Set active behaviours.
+	behaviourDebug->storedBehaviours = 0;
+	behaviourDebug->activeBehaviours = 0;
+	behaviourDebug->extensionActive = 0; // TODO: how to calculate this?
+	behaviourDebug->activeTimeoutPeriod = 0; // TODO: how to calculate this?
+	auto behaviours = BehaviourStore::getActiveBehaviours();
+	for (uint8_t index = 0; index < behaviours.size(); ++index) {
+		behaviourDebug->storedBehaviours |= (1 << index);
+	}
+	bool checkBehaviours = true;
+
+	// Kept code similar to update() followed by computeIntendedState().
+	if (!currentPresence) {
+		checkBehaviours = false;
+	}
+	if (!isActive) {
+		checkBehaviours = false;
+	}
+	if (!currentTime.isValid()) {
+		checkBehaviours = false;
+	}
+	if (checkBehaviours) {
+		for (uint8_t index = 0; index < behaviours.size(); ++index) {
+			if (SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(behaviours[index])) {
+				// cast to switch behaviour succesful.
+				// note: this may also be an extendedswitchbehaviour - which is intended!
+				if (switchbehave->isValid(currentTime, currentPresence.value())) {
+					behaviourDebug->activeBehaviours |= (1 << index);
+				}
+			}
+			if (TwilightBehaviour * twilight = dynamic_cast<TwilightBehaviour*>(behaviours[index])) {
+				if (twilight->isValid(currentTime)) {
+					behaviourDebug->activeBehaviours |= (1 << index);
+				}
+			}
+		}
+	}
+
+	evt.result.dataSize = sizeof(behaviour_debug_t);
+	evt.result.returnCode = ERR_SUCCESS;
 }
 
 std::optional<uint8_t> BehaviourHandler::getValue(){

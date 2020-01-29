@@ -134,15 +134,17 @@ command_result_t CommandHandler::handleCommand(
 	case CTRL_CMD_STATE_SET:
 		return handleCmdStateSet(commandData, accessLevel, resultData);
 	case CTRL_CMD_SAVE_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::EVT_SAVE_BEHAVIOUR,commandData,resultData);
+		return dispatchEventForCommand(CS_TYPE::CMD_ADD_BEHAVIOUR, commandData, resultData);
 	case CTRL_CMD_REPLACE_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::EVT_REPLACE_BEHAVIOUR,commandData,resultData);
+		return dispatchEventForCommand(CS_TYPE::CMD_REPLACE_BEHAVIOUR, commandData, resultData);
 	case CTRL_CMD_REMOVE_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::EVT_REMOVE_BEHAVIOUR,commandData,resultData);
+		return dispatchEventForCommand(CS_TYPE::CMD_REMOVE_BEHAVIOUR, commandData, resultData);
 	case CTRL_CMD_GET_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR,commandData,resultData);
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR, commandData, resultData);
 	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
-		return dispatchEventForCommand(CS_TYPE::EVT_GET_BEHAVIOUR_INDICES,commandData,resultData);
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_INDICES, commandData, resultData);
+	case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG, commandData, resultData);
 
 	case CTRL_CMD_UNKNOWN:
 		return command_result_t(ERR_UNKNOWN_TYPE);
@@ -159,37 +161,8 @@ command_result_t CommandHandler::handleCmdNop(cs_data_t commandData, const Encry
 
 command_result_t CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "goto dfu");
-	switch (_boardConfig->hardwareBoard) {
-	case PCA10036:
-	case PCA10040:
-	case ACR01B1A:
-	case ACR01B1B:
-	case ACR01B1C:
-	case ACR01B1D:
-	case ACR01B1E:
-	case ACR01B10B:
-	case ACR01B2A:
-	case ACR01B2B:
-	case ACR01B2C:
-	case ACR01B2E:
-	case ACR01B2G: {
-		// Turn relay on, as the bootloader doesn't manage to turn off the dimmer fast enough.
-		TYPIFY(CMD_SWITCH) switchVal;
-		switchVal.switchCmd = 100;
-		switchVal.delay = 0;
-		switchVal.source = cmd_source_t(CS_CMD_SOURCE_CONNECTION);
-		event_t cmd(CS_TYPE::CMD_SWITCH, &switchVal, sizeof(switchVal));
-		EventDispatcher::getInstance().dispatch(cmd);
-		break;
-	}
-	case GUIDESTONE:
-	case CS_USB_DONGLE:
-	case ACR01B10C:
-		break;
-	default:
-		LOGe("Unknown board");
-		break;
-	}
+	event_t event(CS_TYPE::EVT_GOING_TO_DFU);
+	event.dispatch();
 	resetDelayed(GPREGRET_DFU_RESET);
 	return command_result_t(ERR_SUCCESS);
 }
@@ -602,6 +575,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CTRL_CMD_ALLOW_DIMMING:
 	case CTRL_CMD_LOCK_SWITCH:
 	case CTRL_CMD_UART_MSG:
+	case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 		return ADMIN;
 	case CTRL_CMD_UNKNOWN:
 		return NOT_SET;
@@ -661,7 +635,6 @@ void CommandHandler::handleEvent(event_t & event) {
 command_result_t CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_data_t resultData){
 	event_t event(typ, commandData.data, commandData.len);
 	event.result.buf = resultData;
-
 	event.dispatch();
 	
 	command_result_t cmdResult;

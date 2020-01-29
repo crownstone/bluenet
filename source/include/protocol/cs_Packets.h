@@ -41,6 +41,12 @@ enum EncryptionAccessLevel {
 	NO_ONE              = 255
 };
 
+enum BackgroundAdvFlagBitPos {
+	BG_ADV_FLAG_RESERVED = 0,
+	BG_ADV_FLAG_IGNORE_FOR_PRESENCE = 1,
+	BG_ADV_FLAG_TAP_TO_TOGGLE_ENABLED = 2
+};
+
 /**
  * Header of a control packet.
  */
@@ -185,6 +191,22 @@ struct __attribute__((__packed__)) led_message_payload_t {
 
 struct __attribute__((packed)) session_nonce_t {
 	uint8_t data[SESSION_NONCE_LENGTH];
+};
+
+struct __attribute__((packed)) behaviour_debug_t {
+	uint32_t time;    // 0 if unknown.
+	uint32_t sunrise; // 0 if unknown
+	uint32_t sunset;  // 0 if unknown
+	uint8_t overrideState;   // From switch aggregator, 255 when not set.
+	uint8_t behaviourState;  // From switch aggregator, 255 when not set.
+	uint8_t aggregatedState; // From switch aggregator, 255 when not set.
+	uint8_t dimmerPowered; // 1 when powered.
+	uint8_t behaviourEnabled; // 1 when enabled.
+	uint64_t storedBehaviours; // Bitmask of behaviour indices that are stored.
+	uint64_t activeBehaviours; // Bitmask of behaviour indices that are active.
+	uint64_t extensionActive;  // Bitmask of behaviours with active end condition.
+	uint64_t activeTimeoutPeriod; // Bitmask of behaviours that are in (presence) timeout period.
+	uint64_t presence[8]; // Bitmask of presence per profile.
 };
 
 // ========================= functions =========================

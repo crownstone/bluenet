@@ -49,6 +49,35 @@ void HwSwitch::setRelay(bool is_on){
 }
 
 void HwSwitch::setDimmerPower(bool is_on){
+	switch (_hardwareBoard) {
+		// Dev boards
+		case PCA10036:
+		case PCA10040:
+		// Builtin zero
+		case ACR01B1A:
+		case ACR01B1B:
+		case ACR01B1C:
+		case ACR01B1D:
+		case ACR01B1E:
+		// First builtin one
+		case ACR01B10B:
+		// Plugs
+		case ACR01B2A:
+		case ACR01B2B:
+		case ACR01B2C:
+		case ACR01B2E:
+		case ACR01B2G:
+		// These don't have a dimmer.
+		case GUIDESTONE:
+		case CS_USB_DONGLE: {
+			return;
+		}
+
+		// Newer ones have a dimmer enable pin.
+		case ACR01B10C:
+		default:
+			break;
+	}
 	if(is_on){
 		enableDimmer();
 	} else {
@@ -63,7 +92,7 @@ void HwSwitch::setIntensity(uint8_t value) {
 
 bool HwSwitch::canTryDimmerOnBoot() {
 	switch (_hardwareBoard) {
-		// Builtins don't have an accurate enough power measurement.
+		// Builtin zero don't have an accurate enough power measurement.
 		case ACR01B1A:
 		case ACR01B1B:
 		case ACR01B1C:
@@ -82,6 +111,37 @@ bool HwSwitch::canTryDimmerOnBoot() {
 	}
 }
 
+bool HwSwitch::dimmerFlashOnDfu() {
+	switch (_hardwareBoard) {
+		// Dev boards
+		case PCA10036:
+		case PCA10040:
+		// Builtin zero
+		case ACR01B1A:
+		case ACR01B1B:
+		case ACR01B1C:
+		case ACR01B1D:
+		case ACR01B1E:
+		// First builtin one
+		case ACR01B10B:
+		// Plugs
+		case ACR01B2A:
+		case ACR01B2B:
+		case ACR01B2C:
+		case ACR01B2E:
+		case ACR01B2G: {
+			return true;
+		}
+		// These don't have a dimmer.
+		case GUIDESTONE:
+		case CS_USB_DONGLE:
+		// Newer ones won't turn on the dimmer when GPIO pins are floating.
+		case ACR01B10C:
+		default:
+			return false;
+	}
+}
+
 /**
  * Initialize the "switch". The switch class encapsulates both the relay for switching high-power loads and the
  * IGBTs for very fast switching of low-power loads. The latter enables all types of dimming. The following types
@@ -90,7 +150,7 @@ bool HwSwitch::canTryDimmerOnBoot() {
  *   + leading edge dimming
  *   + trailing edge dimming
  */
-HwSwitch::HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration) {
+HwSwitch::HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t relayHighDuration, bool startDimmerOnZeroCrossing) {
 	pwm_config_t pwmConfig;
 	pwmConfig.channelCount = 1;
 	pwmConfig.period_us = pwmPeriod;
@@ -99,13 +159,14 @@ HwSwitch::HwSwitch(const boards_config_t& board, uint32_t pwmPeriod, uint16_t re
 
 	PWM::getInstance().init(pwmConfig);
 
-	switch(board.hardwareBoard){
+	switch (board.hardwareBoard) {
 		case PCA10036:
 		case PCA10040:
+			// These dev boards don't have power measurement, so no zero crossing.
 			PWM::getInstance().start(false);
 			break;
 		default:
-			PWM::getInstance().start(true);
+			PWM::getInstance().start(startDimmerOnZeroCrossing);
 			break;
 	}
 	_hardwareBoard = board.hardwareBoard;

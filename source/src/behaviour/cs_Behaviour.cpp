@@ -52,13 +52,13 @@ Behaviour::SerializedDataType Behaviour::serialize() {
 }
 
 uint8_t* Behaviour::serialize(uint8_t* outbuff, size_t max_size) {
-    const auto size = serializedSize();
+    const auto size = Behaviour::serializedSize();
 
     if(max_size < size){
         return 0;
     }
 
-    return std::copy_n(std::begin(serialize()),size,outbuff);
+    return std::copy_n(std::begin(Behaviour::serialize()), size, outbuff);
 }
 
 size_t Behaviour::serializedSize() const {

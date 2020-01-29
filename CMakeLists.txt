@@ -25,7 +25,10 @@ set(DEFAULT_MODULES_PATH                         ${DEFAULT_CONF_CMAKE_PATH}/modu
 set(RELEASE_REPOSITORY                           ${WORKSPACE_DIR}/../bluenet-release CACHE STRING "Release repository")
 set(RELEASE_CANDIDATE_REPOSITORY                 ${WORKSPACE_DIR}/../bluenet-release-candidate CACHE STRING "Release candidate repository")
 
-set(CMAKE_BUILD_TYPE                             Debug   CACHE STRING "Default build type")
+# Set build type to debug, unless specified otherwise. This prevents accidental release builds.
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE                             Debug)
+endif()
 
 # With "make" sudo works more or less. Only when running make in parallel prompting is not always clear.
 # With "ninja" sudo does not work. It might be worth looking into "pkexec" instead, but that requires more study.

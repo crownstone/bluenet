@@ -21,7 +21,9 @@
 /**
  * Number of devices that can simultaneously advertise commands
  */
-#define CMD_ADV_MAX_CLAIM_COUNT 3
+#define CMD_ADV_MAX_CLAIM_COUNT 10
+
+#define CMD_ADC_ENCRYPTED_DATA_SIZE 16
 
 /**
  * Struct used to prevent double handling of similar command advertisements.
@@ -30,7 +32,9 @@
 struct __attribute__((__packed__)) command_adv_claim_t {
 	uint8_t deviceToken;
 	uint8_t timeoutCounter;
-	uint32_t encryptedData;
+	uint8_t encryptedData[CMD_ADC_ENCRYPTED_DATA_SIZE];
+	uint16_t encryptedRC5;
+	uint16_t decryptedRC5;
 };
 
 struct __attribute__((__packed__)) command_adv_header_t {
@@ -79,16 +83,16 @@ private:
 
 	/**
 	 * Return index of claim with this device token.
+	 *
+	 * @param[out] decryptedRC5   When previous encrypted data is similar: set to previous decrypted RC5 data.
+	 *
 	 * Returns -1 when the device token was not found.
 	 * Returns -2 when the device token was found, but the previous encryptedData is similar.
 	 */
-	int checkSimilarCommand(uint8_t deviceToken, uint32_t encryptedData);
+	int checkSimilarCommand(uint8_t deviceToken, cs_data_t& encryptedData, uint16_t encryptedRC5, uint16_t& decryptedRC5);
 
 	// Return true when device claimed successfully: when there's a claim spot.
-	bool claim(uint8_t deviceToken, uint32_t encryptedData, int indexOfDevice);
+	bool claim(uint8_t deviceToken, cs_data_t& encryptedData, uint16_t encryptedRC5, uint16_t decryptedRC5, int indexOfDevice);
 
 	void tickClaims();
-
-	// Returns a part of the encrypted data, the part that's most likely to change.
-	uint32_t getPartOfEncryptedData(cs_data_t& encryptedPayload);
 };

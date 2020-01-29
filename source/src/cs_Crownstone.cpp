@@ -266,7 +266,10 @@ void Crownstone::initDrivers(uint16_t step) {
 			State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, 
 				&relayHighDuration, sizeof(relayHighDuration));
 
-			HwSwitch h(_boardsConfig, pwmPeriod, relayHighDuration);
+			TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING) startDimmerOnZeroCrossing;
+			State::getInstance().get(CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING, &startDimmerOnZeroCrossing, sizeof(startDimmerOnZeroCrossing));
+
+			HwSwitch h(_boardsConfig, pwmPeriod, relayHighDuration, startDimmerOnZeroCrossing);
 
 			SwitchAggregator::getInstance().init(SwSwitch(h));
 			// End init switchaggregator
@@ -893,11 +896,6 @@ void Crownstone::handleEvent(event_t & event) {
 //			sd_power_gpregret_set(gpregret_id, gpregret_msk);
 //			// Soft reset, because brownout can't be distinguished from hard reset otherwise.
 //			sd_nvic_SystemReset();
-			break;
-		}
-		case CS_TYPE::CMD_SET_OPERATION_MODE: {
-			OperationMode mode = *(OperationMode*)event.data;
-			switchMode(mode);
 			break;
 		}
 		default:

@@ -37,15 +37,23 @@ Now we can start generating the DFU packages that will be released:
 
 ```
 make build_bootloader_settings
+make generate_dfu_package_all
 make generate_dfu_package_application
 make generate_dfu_package_bootloader
-make generate_dfu_package_all
 make install
 ```
 
 After make install you will find the `.zip` files in (subdirectories of) `bin/crownstone_3.0.1-RC0`.
 
-Don't forget to commit the release config, and create a git tag:
+Don't forget to commit the release config:
+
+```
+git add source/VERSION
+git add release/crownstone_3.0.1-RC0/CMakeBuild.config
+git push
+```
+
+And create a git tag:
 
 ```
 git tag -a -m "Tagging version 3.0.1-RC0" "v3.0.1-RC0"

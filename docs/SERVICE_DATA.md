@@ -190,7 +190,7 @@ Bit | Name |  Description
 
 Bit | Name |  Description
 --- | --- | ---
-0 | Dimming available | When dimming is physically available, this will be 1.
+0 | Dimmer ready | When dimmer is ready to be used, this will be 1.
 1 | Marked as dimmable | When dimming is configured to be allowed, this will be 1.
 2 | Error |  If this is 1, the Crownstone has an error, you can check what error it is in the [error service data](#service_data_encrypted_error), or by reading the [error state](PROTOCOL.md#state_packet).
 3 | Switch locked | When the switch state is locked, this will be 1.

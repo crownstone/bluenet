@@ -8,6 +8,7 @@
 #pragma once
 
 #include <common/cs_Types.h>
+#include <cfg/cs_Boards.h>
 
 /**
  * Struct to communicate state variables.

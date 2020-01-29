@@ -12,6 +12,7 @@
 #include "common/cs_Types.h"
 #include "processing/cs_EncryptionHandler.h"
 #include "storage/cs_State.h"
+#include "util/cs_BleError.h"
 
 // Defines to enable extra debug logs.
 // #define COMMAND_ADV_DEBUG
@@ -155,12 +156,16 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	}
 }
 
-int CommandAdvHandler::checkSimilarCommand(uint8_t deviceToken, uint32_t encryptedData) {
+int CommandAdvHandler::checkSimilarCommand(uint8_t deviceToken, cs_data_t& encryptedData, uint16_t encryptedRC5, uint16_t& decryptedRC5) {
+	assert(encryptedData.len == CMD_ADC_ENCRYPTED_DATA_SIZE, "Invalid size");
 	int index = -1;
 	for (int i=0; i<CMD_ADV_MAX_CLAIM_COUNT; ++i) {
 		if (_claims[i].deviceToken == deviceToken) {
-			if (_claims[i].timeoutCounter && _claims[i].encryptedData == encryptedData) {
+			if (_claims[i].timeoutCounter && _claims[i].encryptedRC5 == encryptedRC5 && memcmp(_claims[i].encryptedData, encryptedData.data, CMD_ADC_ENCRYPTED_DATA_SIZE) == 0) {
 				LOGCommandAdvDebug("Ignore similar payload");
+				// Since all encrypted data is similar: set cached decrypted RC5.
+				// The RC5 data does not use access level, so changing access level does not do anything.
+				decryptedRC5 = _claims[i].decryptedRC5;
 				return -2;
 			}
 			index = i;
@@ -170,7 +175,9 @@ int CommandAdvHandler::checkSimilarCommand(uint8_t deviceToken, uint32_t encrypt
 	return index;
 }
 
-bool CommandAdvHandler::claim(uint8_t deviceToken, uint32_t encryptedData, int index) {
+bool CommandAdvHandler::claim(uint8_t deviceToken, cs_data_t& encryptedData, uint16_t encryptedRC5, uint16_t decryptedRC5, int index) {
+	assert(encryptedData.len == CMD_ADC_ENCRYPTED_DATA_SIZE, "Invalid size");
+	assert(index > -2 && index < CMD_ADV_MAX_CLAIM_COUNT, "Invalid index");
 	if (index == -1) {
 		// Check if there's a spot to claim.
 		for (int i=0; i<CMD_ADV_MAX_CLAIM_COUNT; ++i) {
@@ -184,7 +191,9 @@ bool CommandAdvHandler::claim(uint8_t deviceToken, uint32_t encryptedData, int i
 		// Claim the spot
 		_claims[index].deviceToken = deviceToken;
 		_claims[index].timeoutCounter = CMD_ADV_CLAIM_TIME_MS / TICK_INTERVAL_MS;
-		_claims[index].encryptedData = encryptedData;
+		memcpy(_claims[index].encryptedData, encryptedData.data, CMD_ADC_ENCRYPTED_DATA_SIZE);
+		_claims[index].encryptedRC5 = encryptedRC5;
+		_claims[index].decryptedRC5 = decryptedRC5;
 		return true;
 	}
 	LOGCommandAdvDebug("No more claim spots");
@@ -199,15 +208,13 @@ void CommandAdvHandler::tickClaims() {
 	}
 }
 
-uint32_t CommandAdvHandler::getPartOfEncryptedData(cs_data_t& encryptedPayload) {
-	return *(uint32_t*)(encryptedPayload.data);
-}
-
 bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedDevice, const command_adv_header_t& header, const cs_data_t& nonce, cs_data_t& encryptedPayload, uint16_t encryptedPayloadRC5[2], uint16_t decryptedPayloadRC5[2]) {
-	int claimIndex = checkSimilarCommand(header.deviceToken, getPartOfEncryptedData(encryptedPayload));
+	int claimIndex = checkSimilarCommand(header.deviceToken, encryptedPayload, encryptedPayloadRC5[1], decryptedPayloadRC5[1]);
 	if (claimIndex == -2) {
 		LOGCommandAdvVerbose("Ignore already handled command");
-		return false;
+		// Command was already validated previous time.
+		// Since the RC5 data does not use the access level, it can safely be handled.
+		return true;
 	}
 
 	EncryptionAccessLevel accessLevel;
@@ -263,7 +270,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	// Validated, so from here on, return true.
 
 	// Claim only after validation
-	if (!claim(header.deviceToken, getPartOfEncryptedData(encryptedPayload), claimIndex)) {
+	if (!claim(header.deviceToken, encryptedPayload, encryptedPayloadRC5[1], decryptedPayloadRC5[1], claimIndex)) {
 		return true;
 	}
 
