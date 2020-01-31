@@ -9,6 +9,8 @@
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_PWM.h>
 
+#include <test/cs_Test.h>
+
 #define HWSWITCH_LOG LOGd
 
 void HwSwitch::relayOn() {
@@ -41,6 +43,8 @@ void HwSwitch::disableDimmer(){
 }
 
 void HwSwitch::setRelay(bool is_on){
+	TEST_PUSH_EXPR_B(this, "relay", is_on);
+
 	if(is_on){
 		relayOn();
 	} else {
@@ -87,6 +91,8 @@ void HwSwitch::setDimmerPower(bool is_on){
 
 void HwSwitch::setIntensity(uint8_t value) {
 	HWSWITCH_LOG("%s (%d)", __func__, value);
+	TEST_PUSH_EXPR_D(this, "dimmer", value);
+	
 	PWM::getInstance().setValue(0, value);
 }
 

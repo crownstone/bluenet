@@ -45,13 +45,18 @@ inline int cs_write_test(const char *str, ...) {
 	return len;
 }
 
-// format:
-// ptr to this,prettyfunction,valuename,content
-
+/**
+ * format:
+ * ptr to this,prettyfunction,valuename,content
+ */
 #define TEST_PUSH_EXPR_S(self, expressionnamestr, expr) cs_write_test("%x,%s,%s,%s", self, __PRETTY_FUNCTION__, expressionnamestr, expr)
 #define TEST_PUSH_EXPR_D(self, expressionnamestr, expr) cs_write_test("%x,%s,%s,%d", self, __PRETTY_FUNCTION__, expressionnamestr, expr)
 #define TEST_PUSH_EXPR_X(self, expressionnamestr, expr) cs_write_test("%x,%s,%s,%x", self, __PRETTY_FUNCTION__, expressionnamestr, expr)
 
+// booleans are converted to strings for uniform handling on the python side.
+#define TEST_PUSH_EXPR_B(self, expressionnamestr, expr) TEST_PUSH_EXPR_S(self,expressionnamestr,(expr ? "True" : "False"))
+
 #define TEST_PUSH_D(self, variablename) TEST_PUSH_EXPR_D(self, #variablename, self->variablename)
 #define TEST_PUSH_X(self, variablename) TEST_PUSH_EXPR_X(self, #variablename, self->variablename)
 #define TEST_PUSH_S(self, variablename) TEST_PUSH_EXPR_S(self, #variablename, self->variablename)
+#define TEST_PUSH_B(self, variablename) TEST_PUSH_EXPR_B(self, #variablename, self->variablename)

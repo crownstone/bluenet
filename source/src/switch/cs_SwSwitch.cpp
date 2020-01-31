@@ -85,6 +85,9 @@ void SwSwitch::checkDimmerPower() {
 		// Turn relay on instead of dimmer.
 		currentState.state.relay = 1;
 		currentState.state.dimmer = 0;
+        TEST_PUSH_D(this, currentState.state.dimmer);
+        TEST_PUSH_D(this, currentState.state.relay);
+
 		setRelay_unchecked(true);
 		setIntensity_unchecked(0);
 		store(currentState);
@@ -259,6 +262,9 @@ SwSwitch::SwSwitch(HwSwitch hw_switch): hwSwitch(hw_switch){
     State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &currentState, sizeof(currentState));
     storedState = currentState;
 
+    TEST_PUSH_D(this, currentState.state.dimmer);
+    TEST_PUSH_D(this, currentState.state.relay);
+
     // load locked state
     bool switch_locked = false;
     State::getInstance().get(CS_TYPE::CONFIG_SWITCH_LOCKED, &switch_locked, sizeof(switch_locked));
@@ -364,6 +370,9 @@ void SwSwitch::resolveIntendedState(){
 			// Turn relay on instead of dimmer.
 			currentState.state.relay = 1;
 			currentState.state.dimmer = 0;
+            TEST_PUSH_D(this, currentState.state.dimmer);
+            TEST_PUSH_D(this, currentState.state.relay);
+
 			setRelay_unchecked(true);
 			setIntensity_unchecked(0);
 			store(currentState);
