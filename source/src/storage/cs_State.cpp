@@ -31,6 +31,10 @@
 #define LOGStateDebug LOGnone
 #endif
 
+#define State_LOGe LOGe
+#define State_LOGd LOGnone
+#define State_LOGi LOGnone
+
 void storageErrorCallback(cs_storage_operation_t operation, CS_TYPE type, cs_state_id_t id) {
 	State::getInstance().handleStorageError(operation, type, id);
 }
@@ -49,12 +53,12 @@ State::~State() {
 }
 
 void State::init(boards_config_t* boardsConfig) {
-	LOGi(FMT_INIT, "board config");
+	State_LOGi(FMT_INIT, "board config");
 	_storage = &Storage::getInstance();
 	_boardsConfig = boardsConfig;
 
 	if (!_storage->isInitialized()) {
-		LOGe(FMT_NOT_INITIALIZED, "Storage");
+		State_LOGe(FMT_NOT_INITIALIZED, "Storage");
 		return;
 	}
 	_storage->setErrorCallback(storageErrorCallback);
@@ -99,7 +103,7 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 		EventDispatcher::getInstance().dispatch(event);
 	}
 	else {
-		LOGe("failed to set type=%u id=%u err=%u", data.type, data.id, retVal);
+		State_LOGe("failed to set type=%u id=%u err=%u", data.type, data.id, retVal);
 	}
 	return retVal;
 }
@@ -160,7 +164,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 
 				// Temp code, to retain old reset counter.
 				if (ram_data.type == CS_TYPE::STATE_RESET_COUNTER && ret_code == ERR_NOT_FOUND) {
-					LOGi("Load old reset counter");
+					State_LOGi("Load old reset counter");
 					ret_code = _storage->readV3ResetCounter(ram_data);
 				}
 
@@ -170,7 +174,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 					}
 					case ERR_NOT_FOUND:
 					default: {
-						LOGd("Load default: %s", TypeName(ram_data.type));
+						State_LOGd("Load default: %s", TypeName(ram_data.type));
 						ret_code = getDefaultValue(ram_data);
 						if (ret_code != ERR_SUCCESS) {
 							return ret_code;
@@ -255,7 +259,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 					// fall-through
 					break;
 				default:
-					LOGe("PM not implemented");
+					State_LOGe("PM not implemented");
 					return ERR_NOT_IMPLEMENTED;
 			}
 			// we first store the data in RAM
@@ -281,7 +285,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			break;
 		}
 		case PersistenceMode::FIRMWARE_DEFAULT: {
-			LOGe("Default cannot be written");
+			State_LOGe("Default cannot be written");
 			ret_code = ERR_WRITE_NOT_ALLOWED;
 			break;
 		}
@@ -310,7 +314,7 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 			// continue after this switch
 			break;
 		default:
-			LOGe("PM not implemented");
+			State_LOGe("PM not implemented");
 			return ERR_NOT_IMPLEMENTED;
 		}
 		// First remove from ram, this should always succeed.
@@ -327,7 +331,7 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 		break;
 	}
 	case PersistenceMode::FIRMWARE_DEFAULT: {
-		LOGe("Default cannot be removed");
+		State_LOGe("Default cannot be removed");
 		return ERR_NOT_AVAILABLE;
 		break;
 	}
@@ -365,7 +369,7 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 		LOGStateDebug("Update in RAM");
 		cs_state_data_t & ram_data = _ram_data_register[index_in_ram];
 		if (ram_data.size != data.size) {
-			LOGe("Should not happen: ram_data.size=%u data.size=%u", ram_data.size, data.size);
+			State_LOGe("Should not happen: ram_data.size=%u data.size=%u", ram_data.size, data.size);
 			free(ram_data.value);
 			ram_data.size = data.size;
 			allocate(ram_data);
@@ -444,7 +448,7 @@ cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
 		return ERR_WRONG_STATE;
 	}
 	if (index_in_ram >= _ram_data_register.size()) {
-		LOGe("Invalid index");
+		State_LOGe("Invalid index");
 		return ERR_WRITE_NOT_ALLOWED;
 	}
 	cs_state_data_t ram_data = _ram_data_register[index_in_ram];
@@ -470,7 +474,7 @@ cs_ret_code_t State::removeFromFlash(const CS_TYPE & type, const cs_state_id_t i
 	if (_performingFactoryReset) {
 		return ERR_WRONG_STATE;
 	}
-	LOGd("removeFromFlash type=%u id=%u", to_underlying_type(type), id);
+	State_LOGd("removeFromFlash type=%u id=%u", to_underlying_type(type), id);
 	cs_ret_code_t ret_code = _storage->remove(type, id);
 	switch(ret_code) {
 	case ERR_SUCCESS:
@@ -557,14 +561,14 @@ cs_ret_code_t State::getIds(CS_TYPE type, std::vector<cs_state_id_t>* & ids) {
  * - Cache the results.
  */
 cs_ret_code_t State::getIdsFromFlash(const CS_TYPE & type, std::vector<cs_state_id_t>* & retIds) {
-	LOGd("getIdsFromFlash type=%u", to_underlying_type(type));
+	State_LOGd("getIdsFromFlash type=%u", to_underlying_type(type));
 	if (!hasMultipleIds(type)) {
 		LOGw("Type %u can't have multiple IDs", to_underlying_type(type));
 		return ERR_WRONG_PARAMETER;
 	}
 	for (auto typeIter = _idsCache.begin(); typeIter < _idsCache.end(); typeIter++) {
 		if (typeIter->type == type) {
-			LOGi("Already retrieved ids");
+			State_LOGi("Already retrieved ids");
 			retIds = typeIter->ids;
 			return ERR_SUCCESS;
 		}
@@ -618,7 +622,7 @@ cs_ret_code_t State::addId(const CS_TYPE & type, cs_state_id_t id) {
 					return ERR_SUCCESS;
 				}
 			}
-			LOGd("Added id=%u to type=%u", id, to_underlying_type(type));
+			State_LOGd("Added id=%u to type=%u", id, to_underlying_type(type));
 			typeIter->ids->push_back(id);
 			break;
 		}
@@ -632,7 +636,7 @@ cs_ret_code_t State::remId(const CS_TYPE & type, cs_state_id_t id) {
 			auto ids = typeIter->ids;
 			for (auto idIter = ids->begin(); idIter < ids->end(); idIter++) {
 				if (*idIter == id) {
-					LOGd("Removed id=%u to type=%u", id, to_underlying_type(type));
+					State_LOGd("Removed id=%u to type=%u", id, to_underlying_type(type));
 					ids->erase(idIter);
 					return ERR_SUCCESS;
 				}
@@ -823,7 +827,7 @@ void State::delayedStoreTick() {
 }
 
 void State::startWritesToFlash() {
-	LOGd("startWritesToFlash");
+	State_LOGd("startWritesToFlash");
 	_startedWritingToFlash = true;
 }
 
@@ -857,7 +861,7 @@ bool State::handleFactoryResetResult(cs_ret_code_t retCode) {
 			return false;
 		}
 		default: {
-			LOGe("Now what?");
+			State_LOGe("Now what?");
 			return false;
 		}
 	}
