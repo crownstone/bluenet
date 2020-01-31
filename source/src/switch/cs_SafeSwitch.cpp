@@ -285,6 +285,26 @@ void SafeSwitch::goingToDfu() {
 	}
 }
 
+void SafeSwitch::handleGetBehaviourDebug(event_t& evt) {
+	LOGd("handleGetBehaviourDebug");
+	if (evt.result.buf.data == nullptr) {
+		LOGd("ERR_BUFFER_UNASSIGNED");
+		evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
+		return;
+	}
+	if (evt.result.buf.len < sizeof(behaviour_debug_t)) {
+		LOGd("ERR_BUFFER_TOO_SMALL");
+		evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
+		return;
+	}
+	behaviour_debug_t* behaviourDebug = (behaviour_debug_t*)(evt.result.buf.data);
+
+	behaviourDebug->dimmerPowered = dimmerPowered;
+
+	evt.result.dataSize = sizeof(behaviour_debug_t);
+	evt.result.returnCode = ERR_SUCCESS;
+}
+
 void SafeSwitch::handleEvent(event_t & evt) {
 	switch (evt.type) {
 		case CS_TYPE::EVT_GOING_TO_DFU:
@@ -309,6 +329,9 @@ void SafeSwitch::handleEvent(event_t & evt) {
 		case CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD:
 		case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
 			forceSwitchOff();
+			break;
+		case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG:
+			handleGetBehaviourDebug(evt);
 			break;
 		default:
 			break;

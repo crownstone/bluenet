@@ -198,6 +198,8 @@ private:
 	 * To be called when system is going to DFU mode.
 	 */
 	void goingToDfu();
+
+	void handleGetBehaviourDebug(event_t& evt);
 };
 
 
