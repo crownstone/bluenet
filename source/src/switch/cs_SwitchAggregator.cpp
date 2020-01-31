@@ -20,14 +20,14 @@
 // ========================= Public ========================
 
 void SwitchAggregator::init(const boards_config_t& board) {
-	swSwitch.init(board);
+	smartSwitch.init(board);
     
     listen();
 
     twilightHandler.listen();
     behaviourHandler.listen();
 
-    overrideState = swSwitch.getIntendedState();
+    overrideState = smartSwitch.getIntendedState();
 }
 
 SwitchAggregator& SwitchAggregator::getInstance(){
@@ -37,7 +37,7 @@ SwitchAggregator& SwitchAggregator::getInstance(){
 }
 
 void SwitchAggregator::switchPowered() {
-	swSwitch.start();
+	smartSwitch.start();
 }
 
 // ================================== State updaters ==================================
@@ -90,7 +90,7 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
     }
     
     if (aggregatedState) {
-        auto retCode = swSwitch.set(*aggregatedState);
+        auto retCode = smartSwitch.set(*aggregatedState);
         if (shouldResetOverrideState && retCode == ERR_SUCCESS) {
         	overrideState = {};
         }
@@ -108,10 +108,10 @@ void SwitchAggregator::handleEvent(event_t& evt){
 		return;
 	}
 
-	if(swSwitch && !swSwitch.isSwitchingAllowed()){
-		evt.result.returnCode = ERR_SUCCESS;
-		return;
-	}
+//	if(smartSwitch && !smartSwitch.isSwitchingAllowed()){
+//		evt.result.returnCode = ERR_SUCCESS;
+//		return;
+//	}
 
 	handleStateIntentionEvents(evt);
 
@@ -210,7 +210,7 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
 		}
         case CS_TYPE::CMD_SWITCH_TOGGLE:{
             LOGSwitchAggregator_Evt("CMD_SWITCH_TOGGLE",__func__);
-            overrideState = swSwitch.isOn() ? 0 : 255;
+            overrideState = smartSwitch.getIntendedState() == 0 ? 255 : 0;
             updateState(false);
             break;
         }
@@ -311,7 +311,7 @@ void SwitchAggregator::handleGetBehaviourDebug(event_t& evt) {
 	behaviourDebug->overrideState = overrideState ? overrideState.value() : 254;
 	behaviourDebug->behaviourState = behaviourState ? behaviourState.value() : 254;
 	behaviourDebug->aggregatedState = aggregatedState ? aggregatedState.value() : 254;
-	behaviourDebug->dimmerPowered = (swSwitch && swSwitch.isDimmerCircuitPowered());
+//	behaviourDebug->dimmerPowered = (smartSwitch.isDimmerCircuitPowered());
 
 	evt.result.dataSize = sizeof(behaviour_debug_t);
 	evt.result.returnCode = ERR_SUCCESS;

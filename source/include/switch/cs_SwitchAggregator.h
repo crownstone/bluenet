@@ -19,7 +19,7 @@
 /**
  * Handler that aggregates events related to switching such as SwitchCraft,
  * Behaviours, Twilight and App/User side actions. Based on the incoming data
- * this object decides what state to set the SwSwitch to.
+ * this object decides what state to set the SmartSwitch to.
  */
 class SwitchAggregator : public EventListener {
 public:
@@ -47,7 +47,7 @@ private:
     TwilightHandler twilightHandler;
     BehaviourHandler behaviourHandler;
 
-    SmartSwitch swSwitch;
+    SmartSwitch smartSwitch;
 
     // the latest states requested by other parts of the system.
     std::optional<uint8_t> overrideState = {};

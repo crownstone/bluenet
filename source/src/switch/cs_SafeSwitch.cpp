@@ -63,7 +63,7 @@ cs_ret_code_t SafeSwitch::setRelayUnchecked(bool on) {
 
 
 cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity) {
-	LOGSafeSwitch("setDimmer %u dimmerPowered=%u errors=%u", on, dimmerPowered, getErrorState().asInt);
+	LOGSafeSwitch("setDimmer %u dimmerPowered=%u errors=%u", intensity, dimmerPowered, getErrorState().asInt);
 	if (intensity > 0) {
 		auto stateErrors = getErrorState();
 		if (!isSafeToDim(stateErrors)) {
@@ -200,10 +200,10 @@ void SafeSwitch::forceRelayOnAndDimmerOff() {
 	currentState.state.dimmer = 0;
 	sendUnexpectedStateUpdate();
 
-	event_t event(CS_TYPE::EVT_RELAY_FORCED_ON);
-	EventDispatcher::getInstance().dispatch(event);
-	event_t event(CS_TYPE::EVT_DIMMER_FORCED_OFF);
-	EventDispatcher::getInstance().dispatch(event);
+	event_t eventRelay(CS_TYPE::EVT_RELAY_FORCED_ON);
+	EventDispatcher::getInstance().dispatch(eventRelay);
+	event_t eventDimmer(CS_TYPE::EVT_DIMMER_FORCED_OFF);
+	EventDispatcher::getInstance().dispatch(eventDimmer);
 }
 
 

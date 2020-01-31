@@ -156,7 +156,7 @@ cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity, switch_state_t currentSt
 
 cs_ret_code_t SmartSwitch::setDimmerUnchecked(uint8_t intensity) {
 	cs_ret_code_t retCode = safeSwitch.setDimmer(intensity);
-	LOGSmartSwitch("setDimmerUnchecked %u retCode=%u", on, retCode);
+	LOGSmartSwitch("setDimmerUnchecked %u retCode=%u", intensity, retCode);
 	switch_state_t currentState = getActualState();
 	store(currentState);
 	return retCode;
@@ -180,7 +180,7 @@ void SmartSwitch::sendUnexpectedIntensityUpdate(uint8_t newIntensity) {
 
 
 void SmartSwitch::store(switch_state_t newState) {
-	if (newState == storedState) {
+	if (newState.asInt == storedState.asInt) {
 		return;
 	}
 	LOGd("store(%u, %u%%)", newState.state.relay, newState.state.dimmer);
@@ -211,7 +211,7 @@ cs_ret_code_t SmartSwitch::setAllowDimming(bool allowed) {
 	allowDimming = allowed;
 	State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &allowDimming, sizeof(allowDimming));
 	// Update the switch state, as it may need to be changed.
-	cs_ret_code_t retCode = resolveIntendedState();
+	[[maybe_unused]] cs_ret_code_t retCode = resolveIntendedState();
 	uint8_t newIntensity = getCurrentIntensity();
 	if (newIntensity != intendedState) {
 		sendUnexpectedIntensityUpdate(newIntensity);
@@ -221,7 +221,7 @@ cs_ret_code_t SmartSwitch::setAllowDimming(bool allowed) {
 
 cs_ret_code_t SmartSwitch::handleCommandSetRelay(bool on) {
 	LOGi("handleCommandSetRelay %u", on);
-	cs_ret_code_t retCode = setRelay(on, getActualState());
+	[[maybe_unused]] cs_ret_code_t retCode = setRelay(on, getActualState());
 	uint8_t newIntensity = getCurrentIntensity();
 	if (newIntensity != intendedState) {
 		sendUnexpectedIntensityUpdate(newIntensity);
@@ -231,7 +231,7 @@ cs_ret_code_t SmartSwitch::handleCommandSetRelay(bool on) {
 
 cs_ret_code_t SmartSwitch::handleCommandSetDimmer(uint8_t intensity) {
 	LOGi("handleCommandSetDimmer %u", intensity);
-	cs_ret_code_t retCode = setDimmer(intensity, getActualState());
+	[[maybe_unused]] cs_ret_code_t retCode = setDimmer(intensity, getActualState());
 	uint8_t newIntensity = getCurrentIntensity();
 	if (newIntensity != intendedState) {
 		sendUnexpectedIntensityUpdate(newIntensity);
