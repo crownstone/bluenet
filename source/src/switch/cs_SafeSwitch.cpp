@@ -273,6 +273,7 @@ void SafeSwitch::goingToDfu() {
 			// These boards turn on the dimmer when GPIO pins are floating.
 			// Turn relay on, to prevent current going through the dimmer.
 			setRelayUnchecked(true);
+			sendUnexpectedStateUpdate();
 			break;
 		}
 		// These don't have a dimmer.
@@ -283,6 +284,15 @@ void SafeSwitch::goingToDfu() {
 		default:
 			break;
 	}
+}
+
+void SafeSwitch::factoryReset() {
+	LOGi("factoryReset");
+	// Turn relay off (or on?) without storing.
+	// TODO: 31-01-2020 set to default value instead of always off.
+	setRelayUnchecked(false);
+	// Don't store the value, so don't send unexpected state update.
+//	sendUnexpectedStateUpdate();
 }
 
 void SafeSwitch::handleGetBehaviourDebug(event_t& evt) {
@@ -311,7 +321,7 @@ void SafeSwitch::handleEvent(event_t & evt) {
 			goingToDfu();
 			break;
 		case CS_TYPE::CMD_FACTORY_RESET:
-			// TODO: turn relay off (or on?) without storing
+			factoryReset();
 			break;
 		case CS_TYPE::EVT_TICK:
 			if (dimmerPowerUpCountDown && --dimmerPowerUpCountDown == 0) {
