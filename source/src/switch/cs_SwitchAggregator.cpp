@@ -20,6 +20,9 @@
 // ========================= Public ========================
 
 void SwitchAggregator::init(const boards_config_t& board) {
+	smartSwitch.onUnexpextedIntensityChange([&](uint8_t newState) -> void {
+		handleSwitchStateChange(newState);
+	});
 	smartSwitch.init(board);
     
     listen();
@@ -221,6 +224,12 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
 
     evt.result.returnCode = ERR_SUCCESS;
     return true;
+}
+
+void SwitchAggregator::handleSwitchStateChange(uint8_t newIntensity) {
+	LOGi("handleSwitchStateChange %u", newIntensity);
+	// TODO: 21-01-2020 This is not a user intent, so store in a different variable, and then figure out what to do with it.
+	overrideState = newIntensity;
 }
 
 // ========================= Misc =========================

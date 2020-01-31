@@ -114,6 +114,8 @@ private:
      */
     bool handlePresenceEvents(event_t& evt);
 
+    void handleSwitchStateChange(uint8_t newIntensity);
+
     // ================================== Misc ==================================
 
     /**
