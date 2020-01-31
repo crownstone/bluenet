@@ -7,17 +7,31 @@
 #pragma once
 
 #include <cfg/cs_Boards.h>
+#include <common/cs_Types.h>
 
+/**
+ * Class that provides a bi-stable relay.
+ * - Controls GPIO.
+ * - Powers the relay long enough for it to toggle.
+ * - TODO: toggles relay in a non blocking / asynchronous way.
+ */
 class Relay {
 public:
-	Relay(const boards_config_t& board, uint8_t relayHighDurationMs);
+	void init(const boards_config_t& board);
+
+	/**
+	 * Set relay on or off.
+	 *
+	 * @return true on success.
+	 */
 	bool set(bool on);
 
 private:
+	bool _initialized = false;
 	bool _hasRelay;
 	uint8_t _pinRelayOn;
 	uint8_t _pinRelayOff;
-    uint8_t _relayHighDurationMs;
+	TYPIFY(CONFIG_RELAY_HIGH_DURATION) _relayHighDurationMs;
 
     bool turnOn();
     bool turnOff();

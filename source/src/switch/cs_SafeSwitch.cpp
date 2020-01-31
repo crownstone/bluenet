@@ -9,16 +9,29 @@
 #include <storage/cs_State.h>
 #include <events/cs_EventDispatcher.h>
 
-SafeSwitch::SafeSwitch(const boards_config_t& board, Dimmer& dimmer, Relay& relay) :
-	dimmer(&dimmer),
-	relay(&relay),
-	hardwareBoard(board.hardwareBoard)
-{
-	start();
+#define LOGSafeSwitch LOGd
+
+void SafeSwitch::init(const boards_config_t& board) {
+	dimmer.init(board);
+	relay.init(board);
+	hardwareBoard = board.hardwareBoard;
+	// Load switch state.
+	// Only relay state is persistent.
+	TYPIFY(STATE_SWITCH_STATE) storedState;
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &storedState, sizeof(storedState));
+	currentState.state.relay = storedState.state.relay;
+	currentState.state.dimmer = 0;
+
+	LOGd("init storedState=(%u %u%%)", storedState.state.relay, storedState.state.dimmer);
+
+	listen();
 }
 
 void SafeSwitch::start() {
-	dimmer->start();
+	LOGd("start");
+	// Make sure the actual relay state matches the stored state.
+	relay.set(currentState.state.relay);
+	dimmer.start();
 }
 
 switch_state_t SafeSwitch::getState() {
@@ -27,6 +40,7 @@ switch_state_t SafeSwitch::getState() {
 
 cs_ret_code_t SafeSwitch::setRelay(bool on) {
 	auto stateErrors = getErrorState();
+	LOGSafeSwitch("setRelay %u errors=%u", on, stateErrors.asInt);
 	if (on && !isSafeToTurnRelayOn(stateErrors)) {
 		return ERR_UNSAFE;
 	}
@@ -37,18 +51,19 @@ cs_ret_code_t SafeSwitch::setRelay(bool on) {
 }
 
 cs_ret_code_t SafeSwitch::setRelayUnchecked(bool on) {
+	LOGSafeSwitch("setRelayUnchecked %u current=%u", on, currentState.state.relay);
 	if (currentState.state.relay == on) {
 		return ERR_SUCCESS;
 	}
-	// TODO: set relay
+	relay.set(on);
 	currentState.state.relay = on;
-	store(currentState);
 	return ERR_SUCCESS;
 }
 
 
 
 cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity) {
+	LOGSafeSwitch("setDimmer %u dimmerPowered=%u errors=%u", on, dimmerPowered, getErrorState().asInt);
 	if (intensity > 0) {
 		auto stateErrors = getErrorState();
 		if (!isSafeToDim(stateErrors)) {
@@ -62,16 +77,17 @@ cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity) {
 }
 
 cs_ret_code_t SafeSwitch::setDimmerUnchecked(uint8_t intensity) {
+	LOGSafeSwitch("setDimmerUnchecked %u current=%u", intensity, currentState.state.dimmer);
 	if (currentState.state.dimmer == intensity) {
 		return ERR_SUCCESS;
 	}
-	dimmer->set(intensity);
+	dimmer.set(intensity);
 	currentState.state.dimmer = intensity;
-	store(currentState);
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity) {
+	LOGd("startDimmerPowerCheck");
 	if (checkedDimmerPowerUsage || dimmerPowered) {
 		return ERR_NOT_AVAILABLE;
 	}
@@ -95,8 +111,12 @@ cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity) {
 			break;
 	}
 
+	setDimmerPowered(true);
+
+	// Turn dimmer on, then relay off, to prevent flicker.
+	// Use unchecked, as this function is called via setDimmer().
 	setDimmerUnchecked(intensity);
-	setRelayUnchecked(false);
+//	setRelay(false);
 
 	if (dimmerCheckCountDown == 0) {
 		dimmerCheckCountDown = DIMMER_BOOT_CHECK_DELAY_MS / TICK_INTERVAL_MS;
@@ -106,15 +126,19 @@ cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity) {
 
 void SafeSwitch::cancelDimmerPowerCheck() {
 	dimmerCheckCountDown = 0;
+	setDimmerPowered(false);
 }
 
 void SafeSwitch::checkDimmerPower() {
-	checkedDimmerPowerUsage = true;
-	if (currentState.state.dimmer == 0) {
+	LOGd("checkDimmerPower");
+	// If dimmer is off, or relay is on, then the power measurement doesn't say a thing.
+	// It will have to be checked another time.
+	if (currentState.state.dimmer == 0 || currentState.state.relay) {
+		setDimmerPowered(false);
 		return;
 	}
 
-	// TODO: check board type
+	checkedDimmerPowerUsage = true;
 
 	TYPIFY(STATE_POWER_USAGE) powerUsage;
 	State::getInstance().get(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
@@ -125,51 +149,56 @@ void SafeSwitch::checkDimmerPower() {
 
 	if (powerUsage < DIMMER_BOOT_CHECK_POWER_MW
 			|| (powerUsage < DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED && powerZero == CONFIG_POWER_ZERO_INVALID)) {
-		// Dimmer didn't work: turn relay on instead.
+		// Dimmer didn't work: mark dimmer as not powered, and turn relay on instead.
+		setDimmerPowered(false);
 		setRelayUnchecked(true);
 		setDimmerUnchecked(0);
+		sendUnexpectedStateUpdate();
 	}
-	else {
-		dimmerPowered = true;
-	}
-	sendDimmerPoweredEvent();
+//	else {
+//		setDimmerPowered(true);
+//	}
 }
 
 void SafeSwitch::dimmerPoweredUp() {
+	LOGd("dimmerPoweredUp");
 	cancelDimmerPowerCheck();
-	dimmerPowered = true;
-	sendDimmerPoweredEvent();
+	setDimmerPowered(true);
 }
 
-void SafeSwitch::sendDimmerPoweredEvent() {
-	TYPIFY(EVT_DIMMER_POWERED) powered = dimmerPowered;
-	event_t event(CS_TYPE::EVT_DIMMER_POWERED, &powered, sizeof(powered));
+void SafeSwitch::setDimmerPowered(bool powered) {
+	LOGd("setDimmerPowered %u, powered");
+	dimmerPowered = powered;
+	TYPIFY(EVT_DIMMER_POWERED) eventData = dimmerPowered;
+	event_t event(CS_TYPE::EVT_DIMMER_POWERED, &eventData, sizeof(eventData));
 	event.dispatch();
 }
 
 
 
 void SafeSwitch::forceSwitchOff() {
-	dimmer->set(0);
-	relay->set(false);
+	LOGw("forceSwitchOff");
+	dimmer.set(0);
+	relay.set(false);
 
 	currentState.state.relay = 0;
 	currentState.state.dimmer = 0;
-	store(currentState);
+	sendUnexpectedStateUpdate();
 
 	event_t event(CS_TYPE::EVT_SWITCH_FORCED_OFF);
 	EventDispatcher::getInstance().dispatch(event);
 }
 
 void SafeSwitch::forceRelayOnAndDimmerOff() {
+	LOGw("forceRelayOnAndDimmerOff");
 	// First set relay on, so that the switch doesn't first turn off, and later on again.
 	// The relay protects the dimmer, because it opens a parallel circuit for the current to flow through.
-	relay->set(true);
-	dimmer->set(0);
+	relay.set(true);
+	dimmer.set(0);
 
 	currentState.state.relay = 1;
 	currentState.state.dimmer = 0;
-	store(currentState);
+	sendUnexpectedStateUpdate();
 
 	event_t event(CS_TYPE::EVT_RELAY_FORCED_ON);
 	EventDispatcher::getInstance().dispatch(event);
@@ -210,24 +239,19 @@ bool SafeSwitch::isSafeToDim(state_errors_t stateErrors) {
 
 
 
-void SafeSwitch::store(switch_state_t newState) {
-	if (newState == storedState) {
-		return;
-	}
-	storedState = newState;
+void SafeSwitch::onUnexpextedStateChange(const callback_on_state_change_t& closure) {
+	callbackOnStateChange = closure;
+}
 
-	bool persistNow = false;
-	cs_state_data_t stateData(CS_TYPE::STATE_SWITCH_STATE, reinterpret_cast<uint8_t*>(&newState), sizeof(newState));
-	if (persistNow) {
-		State::getInstance().set(stateData);
-	} else {
-		State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
-	}
-	LOGd("store(%u, %u%%)", currentState.state.relay, currentState.state.dimmer);
+void SafeSwitch::sendUnexpectedStateUpdate() {
+	LOGd("sendUnexpectedStateUpdate");
+	callbackOnStateChange(currentState);
 }
 
 
+
 void SafeSwitch::goingToDfu() {
+	LOGi("goingToDfu");
 	switch (hardwareBoard) {
 		// Dev boards
 		case PCA10036:

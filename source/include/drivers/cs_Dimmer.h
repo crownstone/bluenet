@@ -8,15 +8,35 @@
 
 #include <cfg/cs_Boards.h>
 
+/**
+ * Class that provides a dimmer.
+ * - Determines whether to start on zero crossing.
+ * - Controls dimmer enable GPIO.
+ * - TODO: take care of synchronizing with net frequency
+ */
 class Dimmer {
 public:
-	Dimmer(const boards_config_t& board, uint32_t pwmPeriodUs, bool startDimmerOnZeroCrossing);
+	void init(const boards_config_t& board);
+
+	/**
+	 * Start dimmer.
+	 *
+	 * To be called once there is enough power to enable the dimmer.
+	 */
 	void start();
 
+	/**
+	 * Set dimmer intensity.
+	 *
+	 * @return true on success.
+	 */
 	bool set(uint8_t intensity);
 
 private:
 	uint32_t hardwareBoard;
+	uint8_t pinEnableDimmer;
+
+	bool initialized = false;
 	bool started = false;
 	bool enabled = false;
 

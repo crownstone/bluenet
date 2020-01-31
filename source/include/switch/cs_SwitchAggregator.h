@@ -8,13 +8,13 @@
 #pragma once
 
 #include <drivers/cs_Serial.h>
-#include "switch/cs_SwSwitch.h"
 #include "events/cs_EventListener.h"
 
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_TwilightHandler.h>
 
 #include <optional>
+#include <switch/cs_SmartSwitch.h>
 
 /**
  * Handler that aggregates events related to switching such as SwitchCraft,
@@ -25,7 +25,7 @@ class SwitchAggregator : public EventListener {
 public:
     static SwitchAggregator& getInstance();
     
-    void init(SwSwitch&& s); // claims ownership over s.
+    void init(const boards_config_t& board);
 
     /**
      * When swSwitch is locked, only CMD_SWITCH_LOCKED events will be handled.
@@ -33,11 +33,6 @@ public:
      * actual state change.
      */
     virtual void handleEvent(event_t& evt) override;
- 
-    /**
-     * sets dimmer and relay to 0, disregarding all other state/intentions.
-     */
-    void developerForceOff();
 
 	/**
 	 * To be called when there is enough power to use the switch.
@@ -52,15 +47,13 @@ private:
     TwilightHandler twilightHandler;
     BehaviourHandler behaviourHandler;
 
-    // when the swith aggregator is initialized with a board
-    // that can switch, swSwitch contains that value.
-    std::optional<SwSwitch> swSwitch;
+    SmartSwitch swSwitch;
 
     // the latest states requested by other parts of the system.
     std::optional<uint8_t> overrideState = {};
     std::optional<uint8_t> behaviourState = {};
 
-    // the last state that was aggregated and passed on towards the SwSwitch.
+    // the last state that was aggregated and passed on towards the SoftwareSwitch.
     std::optional<uint8_t> aggregatedState = {};
 
     /**
@@ -120,15 +113,6 @@ private:
      * (which is when evt is of one of these types.)
      */
     bool handlePresenceEvents(event_t& evt);
-
-    /**
-     * handles CMD_SWITCH_LOCKED and CMD_DIMMING_ALLOWED operations.
-     * 
-     * returns true when the event should be considered 'consumed'. 
-     * (which is when evt is of one of these types or when switching is not
-     * allowed or possible.)
-     */
-    bool handleAllowedOperations(event_t & evt);
 
     // ================================== Misc ==================================
 

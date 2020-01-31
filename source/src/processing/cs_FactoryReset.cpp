@@ -153,28 +153,8 @@ bool FactoryReset::performFactoryReset() {
  * again.
  */
 bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
-	if (IS_CROWNSTONE(deviceType)) {
-		// Set switch to initial value: off
-		// TODO: Is it? Should be back to default value isn't it?
-		LOGw("Does not use default value");
-//		TYPIFY(STATE_SWITCH_STATE) switchVal;
-//		cs_state_data_t data(CS_TYPE::STATE_SWITCH_STATE, &switchVal, sizeof(switchVal));
-//		getDefault(data);
-		SwitchAggregator::getInstance().developerForceOff();
-	}
-
-	// Clear other data
 	event_t factoryReset(CS_TYPE::CMD_FACTORY_RESET);
 	EventDispatcher::getInstance().dispatch(factoryReset);
-//	State::getInstance().factoryReset(FACTORY_RESET_CODE);
-
-
-//	// Lastly, go into setup mode after next reset
-//	TYPIFY(STATE_OPERATION_MODE) mode = to_underlying_type(OperationMode::OPERATION_MODE_SETUP);
-//	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
-
-//	LOGi("Factory reset done, rebooting device in 2s ...");
-//	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
 	return true;
 }
 

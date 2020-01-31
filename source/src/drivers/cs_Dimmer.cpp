@@ -8,13 +8,21 @@
 #include <ble/cs_Nordic.h>
 #include <drivers/cs_Dimmer.h>
 #include <drivers/cs_PWM.h>
+#include <drivers/cs_Serial.h>
 #include <storage/cs_State.h>
+#include <util/cs_Error.h>
 
-Dimmer::Dimmer(const boards_config_t& board, uint32_t pwmPeriodUs, bool startDimmerOnZeroCrossing) :
-	hardwareBoard(board.hardwareBoard)
-{
-	TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;
-	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriod, sizeof(pwmPeriod));
+void Dimmer::init(const boards_config_t& board) {
+	initialized = true;
+
+	hardwareBoard = board.hardwareBoard;
+	pinEnableDimmer = board.pinGpioEnablePwm;
+
+	nrf_gpio_cfg_output(pinEnableDimmer);
+	nrf_gpio_pin_clear(pinEnableDimmer);
+
+	TYPIFY(CONFIG_PWM_PERIOD) pwmPeriodUs;
+	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriodUs, sizeof(pwmPeriodUs));
 
 	pwm_config_t pwmConfig;
 	pwmConfig.channelCount = 1;
@@ -22,10 +30,14 @@ Dimmer::Dimmer(const boards_config_t& board, uint32_t pwmPeriodUs, bool startDim
 	pwmConfig.channels[0].pin = board.pinGpioPwm;
 	pwmConfig.channels[0].inverted = board.flags.pwmInverted;
 
+	LOGd("init enablePin=%u pwmPin=%u inverted=%u period=%u µs", board.pinGpioEnablePwm, board.pinGpioPwm, board.flags.pwmInverted, pwmPeriodUs);
+
 	PWM::getInstance().init(pwmConfig);
 }
 
 void Dimmer::start() {
+	LOGd("start");
+	assert(initialized == true, "Not initialized");
 	if (started) {
 		return;
 	}
@@ -49,6 +61,8 @@ void Dimmer::start() {
 }
 
 bool Dimmer::set(uint8_t intensity) {
+	LOGd("set %u", intensity);
+	assert(initialized == true, "Not initialized");
 	if (!enabled && intensity > 0) {
 		return false;
 	}
@@ -57,6 +71,7 @@ bool Dimmer::set(uint8_t intensity) {
 }
 
 void Dimmer::enable() {
+	LOGd("enable");
 	switch (hardwareBoard) {
 		// Dev boards
 		case PCA10036:
@@ -83,7 +98,7 @@ void Dimmer::enable() {
 		// Newer ones have a dimmer enable pin.
 		case ACR01B10C:
 		default: {
-			nrf_gpio_pin_set(_pinEnableDimmer);
+			nrf_gpio_pin_set(pinEnableDimmer);
 			break;
 		}
 	}
