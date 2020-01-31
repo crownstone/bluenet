@@ -82,6 +82,7 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 		if (retCodeDimmer != ERR_SUCCESS) {
 			retCode = retCodeDimmer;
 		}
+		currentState = getActualState();
 		cs_ret_code_t retCodeRelay = setRelay(false, currentState);
 		if (retCodeRelay != ERR_SUCCESS) {
 			retCode = retCodeRelay;
@@ -102,6 +103,9 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 			LOGSmartSwitch("Turn on relay instead.");
 			currentState = getActualState();
 			retCode = setRelay(true, currentState);
+			// Don't forget to turn off the dimmer, as it may have been on already.
+			currentState = getActualState();
+			setDimmer(0, currentState);
 		}
 		LOGSmartSwitch("retCode=%u", retCode);
 		return retCode;
@@ -111,17 +115,21 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 		// If that doesn't work, turn on relay instead.
 		cs_ret_code_t retCode = setDimmer(intendedState, currentState);
 		LOGSmartSwitch("allowDimming=%u", allowDimming);
-		currentState = getActualState();
 		if (retCode == ERR_SUCCESS) {
+			currentState = getActualState();
 			retCode = setRelay(false, currentState);
 			if (retCode != ERR_SUCCESS) {
-				LOGSmartSwitch("Relay could not be turned off: turned dimmer off.");
+				LOGSmartSwitch("Relay could not be turned off: turn dimmer off.");
+				currentState = getActualState();
 				setDimmer(0, currentState);
 			}
 		}
 		else {
 			LOGSmartSwitch("Turn on relay instead.");
 			setRelay(true, currentState);
+			// Don't forget to turn off the dimmer, as it may have been on already.
+			currentState = getActualState();
+			setDimmer(0, currentState);
 		}
 		LOGSmartSwitch("retCode=%u", retCode);
 		return retCode;
