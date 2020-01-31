@@ -20,7 +20,7 @@ void SmartSwitch::init(const boards_config_t& board) {
 
 	// Load intended state.
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &storedState, sizeof(storedState));
-	uint8_t intendedState = getIntensityFromSwitchState(storedState);
+	intendedState = getIntensityFromSwitchState(storedState);
 	LOGi("init intensity=%u allowDimming=%u allowSwitching=%u", intendedState, allowDimming, allowSwitching);
 
 
@@ -31,14 +31,14 @@ void SmartSwitch::init(const boards_config_t& board) {
 	safeSwitch.init(board);
 
 	listen();
-
-	// Since the safeSwitch is initialized, it will already have its state loaded.
-	set(intendedState);
 }
 
 void SmartSwitch::start() {
 	LOGd("start");
+	// Start safe switch first, then set stored intended state.
 	safeSwitch.start();
+	LOGd("restore intended state: %u", intendedState);
+	set(intendedState);
 }
 
 switch_state_t SmartSwitch::getActualState() {
@@ -86,37 +86,44 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 		if (retCodeRelay != ERR_SUCCESS) {
 			retCode = retCodeRelay;
 		}
+		LOGSmartSwitch("retCodeDimmer=%u retCodeRelay=%u", retCodeDimmer, retCodeRelay);
 		return retCode;
 	}
 	else if (intendedState == 100) {
 		// Set dimmer to 100 or turn relay on.
 		if (currentState.state.relay || currentState.state.dimmer == 100) {
+			LOGSmartSwitch("already on");
 			return ERR_SUCCESS;
 		}
-		cs_ret_code_t retCode = ERR_UNSPECIFIED;
-		if (allowDimming) {
-			retCode = setDimmer(100, currentState);
-		}
-		else {
+		// Try to set dimmer to 100.
+		// If that doesn't work, turn relay on instead.
+		cs_ret_code_t retCode = setDimmer(100, currentState);
+		if (retCode != ERR_SUCCESS) {
+			LOGSmartSwitch("Turn on relay instead.");
+			currentState = getActualState();
 			retCode = setRelay(true, currentState);
 		}
+		LOGSmartSwitch("retCode=%u", retCode);
 		return retCode;
 	}
 	else {
 		// Try to set dimmed value, and then turn relay off.
 		// If that doesn't work, turn on relay instead.
 		cs_ret_code_t retCode = setDimmer(intendedState, currentState);
+		LOGSmartSwitch("allowDimming=%u", allowDimming);
 		currentState = getActualState();
 		if (retCode == ERR_SUCCESS) {
 			retCode = setRelay(false, currentState);
 			if (retCode != ERR_SUCCESS) {
-				// If relay was not turned off: turn dimmer off.
+				LOGSmartSwitch("Relay could not be turned off: turned dimmer off.");
 				setDimmer(0, currentState);
 			}
 		}
 		else {
+			LOGSmartSwitch("Turn on relay instead.");
 			setRelay(true, currentState);
 		}
+		LOGSmartSwitch("retCode=%u", retCode);
 		return retCode;
 	}
 }
@@ -209,7 +216,7 @@ cs_ret_code_t SmartSwitch::setAllowSwitching(bool allowed) {
 cs_ret_code_t SmartSwitch::setAllowDimming(bool allowed) {
 	LOGi("setAllowDimming %u", allowed);
 	allowDimming = allowed;
-	State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &allowDimming, sizeof(allowDimming));
+	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &allowDimming, sizeof(allowDimming));
 	// Update the switch state, as it may need to be changed.
 	[[maybe_unused]] cs_ret_code_t retCode = resolveIntendedState();
 	uint8_t newIntensity = getCurrentIntensity();

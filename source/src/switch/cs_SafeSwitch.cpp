@@ -145,7 +145,7 @@ void SafeSwitch::checkDimmerPower() {
 	TYPIFY(CONFIG_POWER_ZERO) powerZero;
 	State::getInstance().get(CS_TYPE::CONFIG_POWER_ZERO, &powerZero, sizeof(powerZero));
 
-	LOGd("powerUsage=%i powerZero=%i", powerUsage, powerZero);
+	LOGd("powerUsage=%i mW powerZero=%i mW", powerUsage, powerZero);
 
 	if (powerUsage < DIMMER_BOOT_CHECK_POWER_MW
 			|| (powerUsage < DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED && powerZero == CONFIG_POWER_ZERO_INVALID)) {
@@ -167,7 +167,7 @@ void SafeSwitch::dimmerPoweredUp() {
 }
 
 void SafeSwitch::setDimmerPowered(bool powered) {
-	LOGd("setDimmerPowered %u, powered");
+	LOGd("setDimmerPowered %u", powered);
 	dimmerPowered = powered;
 	TYPIFY(EVT_DIMMER_POWERED) eventData = dimmerPowered;
 	event_t event(CS_TYPE::EVT_DIMMER_POWERED, &eventData, sizeof(eventData));
