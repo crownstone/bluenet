@@ -204,14 +204,9 @@ void SmartSwitch::store(switch_state_t newState) {
 	LOGd("store(%u, %u%%)", newState.state.relay, newState.state.dimmer);
 	storedState = newState;
 
-	bool persistNow = false;
+	// Never persist immediately, as another store() call might follow soon.
 	cs_state_data_t stateData(CS_TYPE::STATE_SWITCH_STATE, reinterpret_cast<uint8_t*>(&newState), sizeof(newState));
-	if (persistNow) {
-		State::getInstance().set(stateData);
-	}
-	else {
-		State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
-	}
+	State::getInstance().setDelayed(stateData, SWITCH_DELAYED_STORE_MS / 1000);
 }
 
 
