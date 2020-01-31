@@ -254,25 +254,8 @@ void Crownstone::initDrivers(uint16_t step) {
 
 
 		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-			// switch / PWM init
-			LOGi(FMT_INIT, "switch / PWM");
-
-			// Init SwitchAggregator
-			TYPIFY(CONFIG_PWM_PERIOD) pwmPeriod;
-			State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, 
-				&pwmPeriod, sizeof(pwmPeriod));
-
-			TYPIFY(CONFIG_RELAY_HIGH_DURATION) relayHighDuration = 0;
-			State::getInstance().get(CS_TYPE::CONFIG_RELAY_HIGH_DURATION, 
-				&relayHighDuration, sizeof(relayHighDuration));
-
-			TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING) startDimmerOnZeroCrossing;
-			State::getInstance().get(CS_TYPE::CONFIG_START_DIMMER_ON_ZERO_CROSSING, &startDimmerOnZeroCrossing, sizeof(startDimmerOnZeroCrossing));
-
-			HwSwitch h(_boardsConfig, pwmPeriod, relayHighDuration, startDimmerOnZeroCrossing);
-
-			SwitchAggregator::getInstance().init(SwSwitch(h));
-			// End init switchaggregator
+			LOGi(FMT_INIT, "switch");
+			SwitchAggregator::getInstance().init(_boardsConfig);
 
 			LOGi(FMT_INIT, "temperature guard");
 			_temperatureGuard->init(_boardsConfig);

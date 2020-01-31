@@ -174,7 +174,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SET_RELAY,                                    // Set the relay state.
 	CMD_SET_DIMMER,                                   // Set the dimmer state.
 	CMD_MULTI_SWITCH,                                 // Handle a multi switch.
-	CMD_SWITCH_LOCKED,		                          // Set switch lock.
+	CMD_SWITCHING_ALLOWED,		                      // Set switch lock.
 	CMD_DIMMING_ALLOWED,	                          // Set allow dimming.
 	EVT_DIMMER_POWERED,                               // Dimmer being powered is changed. Payload: true when powered, and ready to be used.
 
@@ -427,7 +427,7 @@ typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET_DONE);
 typedef  void TYPIFY(EVT_STORAGE_PAGES_ERASED);
 typedef  void TYPIFY(EVT_MESH_FACTORY_RESET);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
-typedef  BOOL TYPIFY(CMD_SWITCH_LOCKED);
+typedef  bool TYPIFY(CMD_SWITCHING_ALLOWED);
 typedef  uint32_t TYPIFY(EVT_TICK);
 typedef  uint32_t TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);

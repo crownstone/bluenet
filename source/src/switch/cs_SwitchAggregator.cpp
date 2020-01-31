@@ -21,16 +21,18 @@
 
 // ========================= Public ========================
 
-void SwitchAggregator::init(SwSwitch&& s){
-    swSwitch.emplace(s);
+void SwitchAggregator::init(const boards_config_t& board) {
+	smartSwitch.onUnexpextedIntensityChange([&](uint8_t newState) -> void {
+		handleSwitchStateChange(newState);
+	});
+	smartSwitch.init(board);
     
-    this->listen();
-    swSwitch->listen();
+    listen();
 
     twilightHandler.listen();
     behaviourHandler.listen();
 
-    overrideState = swSwitch->getIntendedState();
+    overrideState = smartSwitch.getIntendedState();
 }
 
 SwitchAggregator& SwitchAggregator::getInstance(){
@@ -39,16 +41,8 @@ SwitchAggregator& SwitchAggregator::getInstance(){
     return instance;
 }
 
-void SwitchAggregator::developerForceOff(){
-    if(swSwitch){
-        swSwitch->setDimmer(0);
-        swSwitch->setRelay(false);
-    }
-}
-
 void SwitchAggregator::switchPowered() {
-	swSwitch->switchPowered();
-	swSwitch->resolveIntendedState();
+	smartSwitch.start();
 }
 
 // ================================== State updaters ==================================
@@ -69,16 +63,11 @@ bool SwitchAggregator::updateBehaviourHandlers(){
 }
 
 void SwitchAggregator::updateState(bool allowOverrideReset){
-    TEST_PUSH_EXPR_D(this,"overrideState", (overrideState? (int) overrideState.value() : -1));
+TEST_PUSH_EXPR_D(this,"overrideState", (overrideState? (int) overrideState.value() : -1));
     TEST_PUSH_EXPR_D(this,"behaviourState", (behaviourState? (int) behaviourState.value() : -1));
     TEST_PUSH_EXPR_D(this,"aggregatedState", (aggregatedState? (int) aggregatedState.value() : -1));
 
-    if( !swSwitch || !swSwitch->isSwitchingAllowed() ){
-        // shouldn't update overrideState when switch is locked.
-        return;
-    }
-
-    // (swSwitch.has_value() is true from here)
+    bool shouldResetOverrideState = false;
 
     if(overrideState && behaviourState && aggregatedState){
         bool overrideStateIsOn = *overrideState != 0;
@@ -89,14 +78,14 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
         bool behaviourWantsToChangeState = behaviourStateIsOn != aggregatedStateIsOn;
 
         if(overrideMatchedAggregated && behaviourWantsToChangeState && allowOverrideReset){
-                // nextAggregatedState = aggregatedBehaviourIntensity();
-                LOGSwitchAggregator("resetting overrideState overrideStateIsOn=%u aggregatedStateIsOn=%u behaviourStateIsOn=%u", overrideStateIsOn, aggregatedStateIsOn, behaviourStateIsOn);
-                overrideState = {};
+        	LOGSwitchAggregator("resetting overrideState overrideStateIsOn=%u aggregatedStateIsOn=%u behaviourStateIsOn=%u", overrideStateIsOn, aggregatedStateIsOn, behaviourStateIsOn);
+        	shouldResetOverrideState = true;
+			// nextAggregatedState = aggregatedBehaviourIntensity();
         }
     }
 
     aggregatedState =
-        overrideState ? resolveOverrideState() :
+        (overrideState && !shouldResetOverrideState) ? resolveOverrideState() :
         behaviourState ? aggregatedBehaviourIntensity() : // only use aggr. if no SwitchBehaviour conflict is found
         aggregatedState ? aggregatedState :               // if conflict is found, don't change the value.
         std::nullopt;
@@ -109,7 +98,10 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
     }
     
     if (aggregatedState) {
-        swSwitch->setDimmer(*aggregatedState);
+        auto retCode = smartSwitch.set(*aggregatedState);
+        if (shouldResetOverrideState && retCode == ERR_SUCCESS) {
+        	overrideState = {};
+        }
     }
 }
 
@@ -124,9 +116,10 @@ void SwitchAggregator::handleEvent(event_t& evt){
 		return;
 	}
 
-	if (handleAllowedOperations(evt)) {
-		return;
-	}
+//	if(smartSwitch && !smartSwitch.isSwitchingAllowed()){
+//		evt.result.returnCode = ERR_SUCCESS;
+//		return;
+//	}
 
 	handleStateIntentionEvents(evt);
 
@@ -195,37 +188,6 @@ bool SwitchAggregator::handlePresenceEvents(event_t& evt){
     return false;
 }
 
-bool SwitchAggregator::handleAllowedOperations(event_t& evt) {
-     if (evt.type ==  CS_TYPE::CMD_SWITCH_LOCKED) {
-        LOGSwitchAggregator_Evt("SwitchAggregator::%s case CMD_SWITCH_LOCKED",__func__);
-        auto typd = reinterpret_cast<TYPIFY(CMD_SWITCH_LOCKED)*>(evt.data);
-        if(swSwitch) swSwitch->setAllowSwitching(*typd);
-
-        evt.result.returnCode = ERR_SUCCESS;
-
-        return true;
-    }
-
-    if(swSwitch && !swSwitch->isSwitchingAllowed()){
-
-        evt.result.returnCode = ERR_SUCCESS;
-
-        return true;
-    }
-
-    if(evt.type ==  CS_TYPE::CMD_DIMMING_ALLOWED){
-        LOGSwitchAggregator_Evt("SwitchAggregator::%s case CMD_DIMMING_ALLOWED",__func__);
-        auto typd = reinterpret_cast<TYPIFY(CMD_DIMMING_ALLOWED)*>(evt.data);
-        if(swSwitch) swSwitch->setAllowDimming(*typd);
-        
-        evt.result.returnCode = ERR_SUCCESS;
-
-        return true;
-    }
-
-    return false;
-}
-
 bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
     switch(evt.type){
         // ============== overrideState Events ==============
@@ -256,27 +218,8 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
 		}
         case CS_TYPE::CMD_SWITCH_TOGGLE:{
             LOGSwitchAggregator_Evt("CMD_SWITCH_TOGGLE",__func__);
-            overrideState = swSwitch->isOn() ? 0 : 255;
+            overrideState = smartSwitch.getIntendedState() == 0 ? 255 : 0;
             updateState(false);
-            break;
-        }
-
-        // ============== 'Developer' Events ==============
-        // temporarily change the state of the swSwitch to something else than the
-        // behaviourState or overrideState decided that they needed to be.
-        // as soon as any of the above handled events are triggered this will have been forgotten.
-
-        // TODO: bart @ arend: consider these to be an override state.
-        case CS_TYPE::CMD_SET_RELAY:{
-            LOGSwitchAggregator_Evt("CMD_SET_RELAY");
-            auto typd = reinterpret_cast<TYPIFY(CMD_SET_RELAY)*>(evt.data);
-            if(swSwitch) swSwitch->setRelay(*typd);
-            break;
-        }
-        case CS_TYPE::CMD_SET_DIMMER:{
-            LOGSwitchAggregator_Evt("CMD_SET_DIMMER");
-            auto typd = reinterpret_cast<TYPIFY(CMD_SET_DIMMER)*>(evt.data);
-            if(swSwitch) swSwitch->setIntensity(*typd);
             break;
         }
         default:{
@@ -286,6 +229,12 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
 
     evt.result.returnCode = ERR_SUCCESS;
     return true;
+}
+
+void SwitchAggregator::handleSwitchStateChange(uint8_t newIntensity) {
+	LOGi("handleSwitchStateChange %u", newIntensity);
+	// TODO: 21-01-2020 This is not a user intent, so store in a different variable, and then figure out what to do with it.
+	overrideState = newIntensity;
 }
 
 // ========================= Misc =========================
@@ -376,7 +325,7 @@ void SwitchAggregator::handleGetBehaviourDebug(event_t& evt) {
 	behaviourDebug->overrideState = overrideState ? overrideState.value() : 254;
 	behaviourDebug->behaviourState = behaviourState ? behaviourState.value() : 254;
 	behaviourDebug->aggregatedState = aggregatedState ? aggregatedState.value() : 254;
-	behaviourDebug->dimmerPowered = (swSwitch && swSwitch->isDimmerCircuitPowered());
+//	behaviourDebug->dimmerPowered = (smartSwitch.isDimmerCircuitPowered());
 
 	evt.result.dataSize = sizeof(behaviour_debug_t);
 	evt.result.returnCode = ERR_SUCCESS;

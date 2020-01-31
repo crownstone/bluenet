@@ -26,6 +26,7 @@ enum ErrorCodesGeneral {
 	ERR_WRONG_STATE                 = 0x28,
 
 	ERR_NO_ACCESS                   = 0x30,
+	ERR_UNSAFE                      = 0x31,
 
 	ERR_NOT_AVAILABLE               = 0x40,
 	ERR_NOT_IMPLEMENTED             = 0x41,
