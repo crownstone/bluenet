@@ -91,7 +91,7 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 	}
 	else if (intendedState == 100) {
 		// Set dimmer to 100 or turn relay on.
-		if (currentState.state.relay || currentState.state.dimmer == 100) {
+		if (currentState.state.relay) {
 			LOGSmartSwitch("already on");
 			return ERR_SUCCESS;
 		}
@@ -133,6 +133,7 @@ cs_ret_code_t SmartSwitch::setRelay(bool on, switch_state_t currentState) {
 	if (currentState.state.relay == on) {
 		return ERR_SUCCESS;
 	}
+	// Check allow switching AFTER similarity, else error is returned while same value is set.
 	if (!allowSwitching) {
 		return ERR_NO_ACCESS;
 	}
@@ -149,13 +150,15 @@ cs_ret_code_t SmartSwitch::setRelayUnchecked(bool on) {
 
 cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity, switch_state_t currentState) {
 	LOGSmartSwitch("setDimmer %u currenState=%u allowSwitching=%u allowDimming=%u", intensity, currentState.asInt, allowSwitching, allowDimming);
+	if (!allowDimming && intensity > 0) {
+		return ERR_NO_ACCESS;
+	}
+	// Check similarity AFTER allow dimming, else success is returned when dimming allowed is set to false, while already dimming.
 	if (currentState.state.dimmer == intensity) {
 		return ERR_SUCCESS;
 	}
+	// Check allow switching AFTER similarity, else error is returned while same value is set.
 	if (!allowSwitching) {
-		return ERR_NO_ACCESS;
-	}
-	if (!allowDimming && intensity > 0) {
 		return ERR_NO_ACCESS;
 	}
 	return setDimmerUnchecked(intensity);

@@ -199,6 +199,11 @@ private:
 	 */
 	void goingToDfu();
 
+	/**
+	 * To be called when system is performing factory reset.
+	 */
+	void factoryReset();
+
 	void handleGetBehaviourDebug(event_t& evt);
 };
 
