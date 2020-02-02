@@ -607,7 +607,7 @@ void PowerSampling::calculatePower(power_t & power) {
 	// Now that Irms is known: first check the soft fuse.
 //	if (_zeroCurrentInitialized && _zeroVoltageInitialized) {
 	if (_zeroVoltageCount > 200 && _zeroCurrentCount > 200) { // Wait some time, for the measurement to converge.. why does this have to take so long?
-		checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA, power);
+		checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA, voltageRmsMilliVolt, power);
 	}
 
 
@@ -769,7 +769,7 @@ void PowerSampling::calculateEnergy() {
 /**
  * TODO: What does this do?
  */
-void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA, power_t & power) {
+void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA, int32_t voltageRmsMilliVolt, power_t & power) {
 
 	// Get the current state errors
 	TYPIFY(STATE_ERRORS) stateErrors;
@@ -809,6 +809,11 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	}
 	// ---------------------- end of to do --------------------------
 
+	// Check if data makes sense: RMS voltage should be about 230V.
+	if (voltageRmsMilliVolt < 200*1000 || 250*1000 < voltageRmsMilliVolt) {
+		LOGw("voltageRmsMilliVolt=%u", voltageRmsMilliVolt);
+		return;
+	}
 
 	// Check if the filtered Irms is above threshold.
 	if ((currentRmsFilteredMA > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {

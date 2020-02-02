@@ -203,7 +203,7 @@ private:
 
 	/** If current goes beyond predefined threshold levels, take action!
 	 */
-	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, power_t & power);
+	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, int32_t voltageRmsMilliVolt, power_t & power);
 
 	/** Start IGBT failure detection
 	 */
