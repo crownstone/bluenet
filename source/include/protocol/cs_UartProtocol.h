@@ -58,7 +58,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_ACK =                              0,
 	UART_OPCODE_TX_SERVICE_DATA =                     2, // Sent when the service data is updated (payload: service_data_t)
 	UART_OPCODE_TX_BLE_MSG =                          3, // Sent by command (CMD_UART_MSG), payload: buffer.
-	UART_OPCODE_TX_MESH_STATE_0 =                     100, // For 1st handle, next handle has opcode of 1 larger.
+	UART_OPCODE_TX_MESH_STATE =                       102, // Received state of external stone, payload: service_data_encrypted_t
 
 	UART_OPCODE_TX_ADVERTISEMENT_ENABLED =            10000, // Whether advertising is enabled (payload: bool)
 	UART_OPCODE_TX_MESH_ENABLED =                     10001, // Whether mesh is enabled (payload: bool)

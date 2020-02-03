@@ -370,6 +370,11 @@ void UartProtocol::handleEvent(event_t & event) {
 		serial_enable((serial_enable_t)enabled);
 		break;
 	}
+	case CS_TYPE::EVT_STATE_EXTERNAL_STONE: {
+		TYPIFY(EVT_STATE_EXTERNAL_STONE)* state = (TYPIFY(EVT_STATE_EXTERNAL_STONE)*)event.data;
+		writeMsg(UART_OPCODE_TX_MESH_STATE, (uint8_t*)&(state->data), sizeof(state->data));
+		break;
+	}
 	default:
 		break;
 	}
