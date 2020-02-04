@@ -8,14 +8,7 @@
 #include "processing/cs_RecognizeSwitch.h"
 #include "cfg/cs_Config.h"
 
-// Define to print debug
-#define PRINT_DEBUG
-
-RecognizeSwitch::RecognizeSwitch() :
-	_running(false),
-	_thresholdDifferent(SWITCHCRAFT_THRESHOLD),
-	_thresholdSimilar(SWITCHCRAFT_THRESHOLD),
-	_thresholdRatio(100)
+RecognizeSwitch::RecognizeSwitch()
 {
 
 }
@@ -66,6 +59,7 @@ bool RecognizeSwitch::detect(buffer_id_t currentBufIndex, channel_id_t voltageCh
 	// Then repeat that at different parts of the buffer (start, mid, end).
 	// Example: if channel length = 100, then check 0-49, 25-74, and 50-99.
 	ext_value_id_t checkLength = ib.getChannelLength() / 2;
+	ext_value_id_t shift = checkLength / 2;
 	ext_value_id_t startInd;
 	ext_value_id_t endInd;
 
@@ -77,11 +71,10 @@ bool RecognizeSwitch::detect(buffer_id_t currentBufIndex, channel_id_t voltageCh
 	float value0, value1, value2; // Value of buffer0, buffer1, buffer2
 	float diff01, diff12, diff02;
 	float diffSum01, diffSum12, diffSum02; // Difference between buf0 and buf1, between buf1 and buf2, between buf0 and buf2
-	for (int shift = 0; shift < ib.getChannelLength() - checkLength/2; shift += checkLength / 2) {
+	for (startInd = 0; startInd < (ib.getChannelLength() - shift); startInd += shift) {
 		diffSum01 = 0;
 		diffSum12 = 0;
 		diffSum02 = 0;
-		startInd = shift;
 		endInd = startInd + checkLength;
 		LOGnone("start=%i end=%i", startInd, endInd);
 		for (int i = startInd; i < endInd; ++i) {
@@ -100,9 +93,7 @@ bool RecognizeSwitch::detect(buffer_id_t currentBufIndex, channel_id_t voltageCh
 			float minDiffSum = diffSum01 < diffSum12 ? diffSum01 : diffSum12;
 			if (diffSum02 < _thresholdSimilar || minDiffSum / diffSum02 > _thresholdRatio) {
 				result = true;
-#ifdef PRINT_DEBUG
 				LOGd("Found switch: %i %i %i %i", (int)diffSum01, (int)diffSum12, (int)diffSum02, (int)(minDiffSum / diffSum02));
-#endif
 				break;
 			}
 		}
