@@ -9,7 +9,7 @@
 #include <storage/cs_State.h>
 #include <switch/cs_SmartSwitch.h>
 
-#define LOGSmartSwitch LOGd
+#define LOGSmartSwitch LOGnone
 
 void SmartSwitch::init(const boards_config_t& board) {
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_ALLOWED, &allowDimming, sizeof(allowDimming));

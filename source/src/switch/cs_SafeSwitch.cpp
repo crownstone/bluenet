@@ -9,7 +9,7 @@
 #include <storage/cs_State.h>
 #include <events/cs_EventDispatcher.h>
 
-#define LOGSafeSwitch LOGd
+#define LOGSafeSwitch LOGnone
 
 void SafeSwitch::init(const boards_config_t& board) {
 	dimmer.init(board);
@@ -252,6 +252,13 @@ void SafeSwitch::sendUnexpectedStateUpdate() {
 
 void SafeSwitch::goingToDfu() {
 	LOGi("goingToDfu");
+	bool turnOnRelay = false;
+	if (currentState.state.dimmer != 0) {
+		// If dimmer is on, then turn relay on instead, as the bootloader doesn't have a dimmer.
+		// It's a bit weird to have this here, should be in SmartSwitch, but then there's a
+		// dependency on who receives the event first.
+		turnOnRelay = true;
+	}
 	switch (hardwareBoard) {
 		// Dev boards
 		case PCA10036:
@@ -272,8 +279,7 @@ void SafeSwitch::goingToDfu() {
 		case ACR01B2G: {
 			// These boards turn on the dimmer when GPIO pins are floating.
 			// Turn relay on, to prevent current going through the dimmer.
-			setRelayUnchecked(true);
-			sendUnexpectedStateUpdate();
+			turnOnRelay = true;
 			break;
 		}
 		// These don't have a dimmer.
@@ -283,6 +289,11 @@ void SafeSwitch::goingToDfu() {
 		case ACR01B10C:
 		default:
 			break;
+	}
+	if (turnOnRelay) {
+		setRelayUnchecked(true);
+		setDimmerUnchecked(0);
+		sendUnexpectedStateUpdate();
 	}
 }
 
