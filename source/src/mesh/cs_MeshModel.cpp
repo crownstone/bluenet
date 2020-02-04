@@ -105,6 +105,9 @@ cs_ret_code_t MeshModel::sendMultiSwitchItem(const internal_multi_switch_item_t*
 }
 
 cs_ret_code_t MeshModel::sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats) {
+	if (item->timestamp == 0) {
+		return ERR_WRONG_PARAMETER;
+	}
 	remFromQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
