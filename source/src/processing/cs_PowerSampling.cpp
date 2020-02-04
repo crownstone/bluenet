@@ -251,8 +251,6 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	power.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	power.acPeriodUs = 20000;
 
-	cs_adc_buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
-
 #ifdef DELAY_FILTERING_VOLTAGE
 	// Filter the current immediately, filter the voltage in the buffer at time t-1 (so raw values are available)
 	filter(bufIndex, power.currentIndex);
@@ -263,6 +261,7 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	filter(bufIndex, power.currentIndex);
 #endif
 
+	cs_adc_buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
 	nrf_saadc_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
 	if (isVoltageAndCurrentSwapped(power, prevBuf)) {
 		LOGw("Swap detected: restart ADC.");
@@ -300,7 +299,7 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	bool switch_detected = RecognizeSwitch::getInstance().detect(prevIndex, power.voltageIndex);
+	bool switch_detected = RecognizeSwitch::getInstance().detect(bufIndex, power.voltageIndex);
 	if (switch_detected) {
 		LOGd("Switch event detected!");
 		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE);

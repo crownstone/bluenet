@@ -50,7 +50,7 @@ void RecognizeSwitch::skip(uint16_t num) {
  * The recognizeSwitch function goes through a sequence of buffers to detect if a switch event happened in the buffer
  * in the middle. It uses the InterleavedBuffer to get the previous buffers.
  */
-bool RecognizeSwitch::detect(buffer_id_t bufIndex, channel_id_t voltageChannelId) {
+bool RecognizeSwitch::detect(buffer_id_t currentBufIndex, channel_id_t voltageChannelId) {
 	bool result = false;
 	if (!_running) {
 		return result;
@@ -60,31 +60,34 @@ bool RecognizeSwitch::detect(buffer_id_t bufIndex, channel_id_t voltageChannelId
 		return result;
 	}
 
-	// The previous buffer, "current" and next (future) buffer are available.
-	// buffer0 is the previous buffer
-	// buffer1 is the current buffer (bufIndex)
-	// buffer2 is the next buffer
 	InterleavedBuffer & ib = InterleavedBuffer::getInstance();
 
 	// Check only part of the buffer length (half buffer length).
 	// Then repeat that at different parts of the buffer (start, mid, end).
+	// Example: if channel length = 100, then check 0-49, 25-74, and 50-99.
 	ext_value_id_t checkLength = ib.getChannelLength() / 2;
 	ext_value_id_t startInd;
 	ext_value_id_t endInd;
 
+	buffer_id_t bufIndex0 = ib.getPrevious(currentBufIndex, 2);;
+	buffer_id_t bufIndex1 = ib.getPrevious(currentBufIndex, 1);
+	buffer_id_t bufIndex2 = currentBufIndex;
+	LOGnone("buf ind=%u %u %u", bufIndex0, bufIndex1, bufIndex2);
+
 	float value0, value1, value2; // Value of buffer0, buffer1, buffer2
 	float diff01, diff12, diff02;
 	float diffSum01, diffSum12, diffSum02; // Difference between buf0 and buf1, between buf1 and buf2, between buf0 and buf2
-	for (int shift = 0; shift < ib.getChannelLength(); shift += checkLength / 2) {
+	for (int shift = 0; shift < ib.getChannelLength() - checkLength/2; shift += checkLength / 2) {
 		diffSum01 = 0;
 		diffSum12 = 0;
 		diffSum02 = 0;
-		startInd = -ib.getChannelLength() + shift;
+		startInd = shift;
 		endInd = startInd + checkLength;
+		LOGnone("start=%i end=%i", startInd, endInd);
 		for (int i = startInd; i < endInd; ++i) {
-			value0 = ib.getValue(bufIndex, voltageChannelId, i);
-			value1 = ib.getValue(bufIndex, voltageChannelId, i + ib.getChannelLength());
-			value2 = ib.getValue(bufIndex, voltageChannelId, i + 2 * ib.getChannelLength());
+			value0 = ib.getValue(bufIndex0, voltageChannelId, i);
+			value1 = ib.getValue(bufIndex1, voltageChannelId, i);
+			value2 = ib.getValue(bufIndex2, voltageChannelId, i);
 			diff01 = (value0 - value1) * (value0 - value1);
 			diff12 = (value1 - value2) * (value1 - value2);
 			diff02 = (value0 - value2) * (value0 - value2);
@@ -92,7 +95,7 @@ bool RecognizeSwitch::detect(buffer_id_t bufIndex, channel_id_t voltageChannelId
 			diffSum12 += diff12;
 			diffSum02 += diff02;
 		}
-//		LOGd("%f %f %f", diffSum01, diffSum12, diffSum02);
+		LOGnone("%f %f %f", diffSum01, diffSum12, diffSum02);
 		if (diffSum01 > _thresholdDifferent && diffSum12 > _thresholdDifferent) {
 			float minDiffSum = diffSum01 < diffSum12 ? diffSum01 : diffSum12;
 			if (diffSum02 < _thresholdSimilar || minDiffSum / diffSum02 > _thresholdRatio) {

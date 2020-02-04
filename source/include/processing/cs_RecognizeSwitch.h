@@ -67,9 +67,9 @@ public:
 
 	/** Recognize switch state.
 	 *
-	 * @param[in] bufIndex                       Buffer to check for a switch (should be previous buffer).
+	 * @param[in] bufIndex                       The current buffer.
 	 * @parampin] voltageChannelId               Channel in which the voltage values can be found.
 	 *
 	 */
-	bool detect(buffer_id_t bufIndex, channel_id_t voltageChannelId);
+	bool detect(buffer_id_t currentBufIndex, channel_id_t voltageChannelId);
 };
