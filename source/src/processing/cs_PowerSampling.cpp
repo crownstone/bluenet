@@ -346,6 +346,8 @@ uint16_t PowerSampling::determineCurrentIndex(power_t & power) {
  * - Vzero and Izero can be different and affect Vrm and Irms.
  */
 bool PowerSampling::isVoltageAndCurrentSwapped(power_t & power, nrf_saadc_value_t* prevBuf) {
+	// Problem: switchcraft makes this function falsely detect a swap.
+	return false;
 	if (_skipSwapDetection != 0) {
 		_skipSwapDetection--;
 		return false;
