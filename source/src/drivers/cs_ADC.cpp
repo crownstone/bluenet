@@ -640,7 +640,7 @@ void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 		_inProgress[bufIndex] = true;
 
 		if (_firstBuffer) {
-			LOGd("ADC restarted");
+			LOGw("ADC restarted");
 			event_t event(CS_TYPE::EVT_ADC_RESTARTED, NULL, 0);
 			event.dispatch();
 		}
