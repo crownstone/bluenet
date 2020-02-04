@@ -224,7 +224,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_PROFILE_LOCATION,               // Send a profile location mesh message.
 	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS,         // Send a set behaviour settings mesh message.
 	EVT_MESH_TIME,                                    // Mesh received the current time.
-	EVT_PROFILE_LOCATION,                             // Location of profile is received (not via scan).
+	EVT_MESH_PROFILE_LOCATION,                        // Mesh received location of profile (not via scan).
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR,                                // Add a behaviour.
@@ -442,7 +442,7 @@ typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef void TYPIFY(EVT_GOING_TO_DFU);
-typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
+typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_MESH_PROFILE_LOCATION);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

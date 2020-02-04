@@ -283,7 +283,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_PROFILE_LOCATION: {
-		event_t event(CS_TYPE::EVT_PROFILE_LOCATION, payload, payloadSize);
+		event_t event(CS_TYPE::EVT_MESH_PROFILE_LOCATION, payload, payloadSize);
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
@@ -293,9 +293,9 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
 		cs_mesh_model_msg_multi_switch_item_t* item = (cs_mesh_model_msg_multi_switch_item_t*) payload;
 		if (item->id == _ownId) {
-//			LOGi("recieved multi switch for me");
+			LOGMeshModelInfo("recieved multi switch for me");
 			if (memcmp(&_lastReceivedMultiSwitch, item, sizeof(*item)) == 0) {
-//				LOGd("ignore multi switch");
+				LOGMeshModelDebug("ignore similar multi switch");
 				break;
 			}
 			memcpy(&_lastReceivedMultiSwitch, item, sizeof(*item));
