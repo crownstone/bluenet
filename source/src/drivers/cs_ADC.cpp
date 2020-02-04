@@ -623,9 +623,9 @@ void ADC::_restart() {
 }
 
 void ADC::_handleTimeout() {
-//#ifdef PRINT_DEBUG
+#ifdef PRINT_DEBUG
 	LOGw("timeout");
-//#endif
+#endif
 	stop();
 	start();
 }
@@ -640,9 +640,7 @@ void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
 		_inProgress[bufIndex] = true;
 
 		if (_firstBuffer) {
-#ifdef PRINT_DEBUG
-			LOGv("ADC restarted");
-#endif
+			LOGd("ADC restarted");
 			event_t event(CS_TYPE::EVT_ADC_RESTARTED, NULL, 0);
 			event.dispatch();
 		}
