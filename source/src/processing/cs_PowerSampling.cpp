@@ -327,8 +327,8 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 }
 
 void PowerSampling::initAverages() {
-	_avgZeroVoltage = _voltageZero * 1000;
-	_avgZeroCurrent = _currentZero * 1000;
+	_avgZeroVoltage = _voltageZero * 1024;
+	_avgZeroCurrent = _currentZero * 1024;
 	_avgPower = 0.0;
 }
 
@@ -419,7 +419,7 @@ void PowerSampling::calculateVoltageZero(power_t & power) {
 	for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 		sum += power.buf[i];
 	}
-	int32_t zeroVoltage = sum * 1000 / numSamples;
+	int32_t zeroVoltage = sum * 1024 / numSamples;
 
 //	if (!_zeroVoltageInitialized) {
 //		_avgZeroVoltage = zeroVoltage;
@@ -449,7 +449,7 @@ void PowerSampling::calculateCurrentZero(power_t & power) {
 	for (int i = 0; i < numSamples; ++i) {
 		sum += _outputSamples->at(i);
 	}
-	int32_t zeroCurrent = sum * 1000 / numSamples;
+	int32_t zeroCurrent = sum * 1024 / numSamples;
 
 //	if (!_zeroCurrentInitialized) {
 //		_avgZeroCurrent = zeroCurrent;
@@ -556,11 +556,11 @@ void PowerSampling::calculatePower(power_t & power) {
 	int64_t current;
 	int64_t voltage;
 	for (uint16_t i = 0; i < numSamples * power.numChannels; i += power.numChannels) {
-		current = (int64_t)power.buf[i+power.currentIndex]*1000 - _avgZeroCurrent;
-		voltage = (int64_t)power.buf[i+power.voltageIndex]*1000 - _avgZeroVoltage;
-		cSquareSum += (current * current) / (1000*1000);
-		vSquareSum += (voltage * voltage) / (1000*1000);
-		pSum +=       (current * voltage) / (1000*1000);
+		current = (int64_t)power.buf[i+power.currentIndex]*1024 - _avgZeroCurrent;
+		voltage = (int64_t)power.buf[i+power.voltageIndex]*1024 - _avgZeroVoltage;
+		cSquareSum += (current * current) / (1024*1024);
+		vSquareSum += (voltage * voltage) / (1024*1024);
+		pSum +=       (current * voltage) / (1024*1024);
 	}
 	int32_t powerMilliWattReal = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples;
 	int32_t currentRmsMA = sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
