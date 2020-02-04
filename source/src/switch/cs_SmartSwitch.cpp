@@ -183,6 +183,7 @@ cs_ret_code_t SmartSwitch::setDimmerUnchecked(uint8_t intensity) {
 
 
 void SmartSwitch::handleUnexpectedStateChange(switch_state_t newState) {
+	store(newState);
 	uint8_t intensity = getIntensityFromSwitchState(newState);
 	sendUnexpectedIntensityUpdate(intensity);
 }
