@@ -9,7 +9,7 @@
 #include <storage/cs_State.h>
 #include <events/cs_EventDispatcher.h>
 
-#define LOGSafeSwitch LOGnone
+#define LOGSafeSwitch LOGi
 
 void SafeSwitch::init(const boards_config_t& board) {
 	dimmer.init(board);
@@ -31,7 +31,17 @@ void SafeSwitch::start() {
 	LOGd("start");
 	// Make sure the actual relay state matches the stored state.
 	relay.set(currentState.state.relay);
-	dimmer.start();
+
+	// Make sure dimming is not allowed in any mode other than normal operation mode
+	// simply by not starting the dimmer.
+	TYPIFY(STATE_OPERATION_MODE) mode;
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+
+	if (getOperationMode(mode) == OperationMode::OPERATION_MODE_NORMAL){
+		dimmer.start();
+	} else {
+		LOGSafeSwitch("Not starting dimmer because operation mode differs from NORMAL.");
+	}
 }
 
 switch_state_t SafeSwitch::getState() {
