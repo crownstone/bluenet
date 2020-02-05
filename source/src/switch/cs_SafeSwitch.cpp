@@ -29,14 +29,19 @@ void SafeSwitch::init(const boards_config_t& board) {
 
 void SafeSwitch::start() {
 	LOGd("start");
+	TYPIFY(STATE_OPERATION_MODE) mode;
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	auto opmode = getOperationMode(mode);
+
 	// Make sure the actual relay state matches the stored state.
-	relay.set(currentState.state.relay);
+	if( opmode != OperationMode::OPERATION_MODE_FACTORY_RESET){
+		relay.set(currentState.state.relay);
+	} else {
+		LOGSafeSwitch("Not restoring relaystate because we're in factory reset mode");
+	}
 
 	// Make sure dimming is not allowed in any mode other than normal operation mode
 	// simply by not starting the dimmer.
-	TYPIFY(STATE_OPERATION_MODE) mode;
-	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
-
 	if (getOperationMode(mode) == OperationMode::OPERATION_MODE_NORMAL){
 		dimmer.start();
 	} else {
@@ -51,6 +56,11 @@ switch_state_t SafeSwitch::getState() {
 cs_ret_code_t SafeSwitch::setRelay(bool on) {
 	auto stateErrors = getErrorState();
 	LOGSafeSwitch("setRelay %u errors=%u", on, stateErrors.asInt);
+
+	if ( !allowStateChanges) {
+		return ERR_NO_ACCESS;
+	}
+
 	if (on && !isSafeToTurnRelayOn(stateErrors)) {
 		return ERR_UNSAFE;
 	}
@@ -74,6 +84,10 @@ cs_ret_code_t SafeSwitch::setRelayUnchecked(bool on) {
 
 cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity) {
 	LOGSafeSwitch("setDimmer %u dimmerPowered=%u errors=%u", intensity, dimmerPowered, getErrorState().asInt);
+	if ( !allowStateChanges) { 
+		return ERR_NO_ACCESS;
+	}
+
 	if (intensity > 0) {
 		auto stateErrors = getErrorState();
 		if (!isSafeToDim(stateErrors)) {
@@ -91,13 +105,16 @@ cs_ret_code_t SafeSwitch::setDimmerUnchecked(uint8_t intensity) {
 	if (currentState.state.dimmer == intensity) {
 		return ERR_SUCCESS;
 	}
-	dimmer.set(intensity);
-	currentState.state.dimmer = intensity;
-	return ERR_SUCCESS;
+	if (dimmer.set(intensity)) {
+		currentState.state.dimmer = intensity;
+		return ERR_SUCCESS;
+	}
+
+	return ERR_NOT_STARTED;
 }
 
 cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity) {
-	LOGd("startDimmerPowerCheck");
+	LOGSafeSwitch("startDimmerPowerCheck");
 	if (checkedDimmerPowerUsage || dimmerPowered) {
 		return ERR_NOT_AVAILABLE;
 	}
@@ -262,6 +279,10 @@ void SafeSwitch::sendUnexpectedStateUpdate() {
 
 void SafeSwitch::goingToDfu() {
 	LOGi("goingToDfu");
+	// shut off public state change api of this class.
+	allowStateChanges = false;
+
+
 	bool turnOnRelay = false;
 	if (currentState.state.dimmer != 0) {
 		// If dimmer is on, then turn relay on instead, as the bootloader doesn't have a dimmer.

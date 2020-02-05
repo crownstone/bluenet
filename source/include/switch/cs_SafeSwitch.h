@@ -110,6 +110,12 @@ private:
 	bool checkedDimmerPowerUsage = false;
 
 	/**
+	 * Determines wether or not setDimmer and setRelay will have any effect.
+	 * (Will be set to false when GOING_TO_DFU event is set for example.)
+	 */
+	bool allowStateChanges = true;
+
+	/**
 	 * Set relay.
 	 *
 	 * Checks: similar.
