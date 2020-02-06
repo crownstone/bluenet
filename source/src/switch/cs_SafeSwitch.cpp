@@ -39,7 +39,8 @@ void SafeSwitch::start() {
 	if (isDimmerStateChangeAllowed()) {
 		dimmer.start();
 	} else {
-		LOGSafeSwitch("Not starting dimmer because operation mode differs from NORMAL. (%d)",mode);
+		LOGSafeSwitch("Not starting dimmer (probably because operation mode differs from NORMAL (%d))",
+			static_cast<uint8_t>(cached_operation_mode));
 	}
 }
 
