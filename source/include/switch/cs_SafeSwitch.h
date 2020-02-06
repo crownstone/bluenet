@@ -110,6 +110,15 @@ private:
 	bool checkedDimmerPowerUsage = false;
 
 	/**
+	 * Determines wether or not setDimmer and setRelay will have any effect.
+	 * (Will be set to false when GOING_TO_DFU event is set for example.)
+	 */
+	bool allowStateChanges = true;
+
+	bool relayHasBeenSetBefore = false;
+	OperationMode cached_operation_mode = OperationMode::OPERATION_MODE_UNINITIALIZED; // retrieved at init
+
+	/**
 	 * Set relay.
 	 *
 	 * Checks: similar.
@@ -186,6 +195,9 @@ private:
 	bool isSafeToTurnRelayOn(state_errors_t stateErrors);
 
 	bool isSafeToTurnRelayOff(state_errors_t stateErrors);
+
+	bool isDimmerStateChangeAllowed();
+	bool isRelayStateChangeAllowed();
 
 	/**
 	 * Send state update to listeners.
