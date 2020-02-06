@@ -131,7 +131,10 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 				setDimmer(0, currentState);
 			}
 		} else {
-			LOGSmartSwitch("Turn on relay instead.");
+			// This branch will also be reached when trying to change the value of a locked dimmable crownstone
+			// in that case, setRelay will also refuse to change value, so everything is fine.
+
+			LOGSmartSwitch("setDimmer unsuccessful, try to turn on relay instead.");
 			setRelay(true, currentState);
 			// Don't forget to turn off the dimmer, as it may have been on already.
 			currentState = getActualState();
