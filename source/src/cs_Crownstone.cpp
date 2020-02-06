@@ -647,6 +647,9 @@ void Crownstone::startUp() {
 		//! Start power sampler regardless of operation mode (as it is used for the current based soft fuse)
 		LOGi(FMT_START, "power sampling");
 		_powerSampler->startSampling();
+
+		// Let the power sampler call the PWM callback function on zero crossings.
+		_powerSampler->enableZeroCrossingInterrupt(handleZeroCrossing);
 	}
 
 	// Start ticking main and services.
@@ -656,12 +659,6 @@ void Crownstone::startUp() {
 	// The rest we only execute if we are in normal operation.
 	// During other operation modes, most of the crownstone's functionality is disabled.
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
-
-		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-			// Let the power sampler call the PWM callback function on zero crossings.
-			_powerSampler->enableZeroCrossingInterrupt(handleZeroCrossing);
-		}
-
 		_systemTime.listen();
 		
 		TapToToggle::getInstance().init(_boardsConfig.tapToToggleDefaultRssiThreshold);
