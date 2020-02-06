@@ -55,6 +55,16 @@ public:
 	switch_state_t getState();
 
 	/**
+	 * The relay bit of the return value of getState() is retrieved from
+	 * persistent memory at startup. There is a possibility of this getting 
+	 * out of sync with the physical relay state. Until the first relay action
+	 * it isn't certain which physical state the device is in.
+	 * 
+	 * If it is certain this method returns true.
+	 */
+	bool isRelayStateAccurate();
+
+	/**
 	 * Callback function definition.
 	 */
 	typedef function<void(switch_state_t newState)> callback_on_state_change_t;

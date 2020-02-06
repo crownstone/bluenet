@@ -48,6 +48,10 @@ switch_state_t SafeSwitch::getState() {
 	return currentState;
 }
 
+bool SafeSwitch::isRelayStateAccurate(){
+	return relayHasBeenSetBefore;
+}
+
 // ======================== state setters ========================
 
 cs_ret_code_t SafeSwitch::setRelay(bool on) {

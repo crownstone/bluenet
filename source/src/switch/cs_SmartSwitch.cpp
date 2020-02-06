@@ -9,7 +9,7 @@
 #include <storage/cs_State.h>
 #include <switch/cs_SmartSwitch.h>
 
-#define LOGSmartSwitch LOGnone
+#define LOGSmartSwitch LOGd
 
 void SmartSwitch::init(const boards_config_t& board) {
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_ALLOWED, &allowDimming, sizeof(allowDimming));
@@ -92,10 +92,17 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 	}
 	else if (intendedState == 100) {
 		// Set dimmer to 100 or turn relay on.
-		if (currentState.state.relay) {
+		if (currentState.state.relay && safeSwitch.isRelayStateAccurate()) {
 			LOGSmartSwitch("already on");
 			return ERR_SUCCESS;
+		} else if (!safeSwitch.isRelayStateAccurate()) {
+			// TODO(2020-02-06): @Bart if the relay state is still inaccurate at this point, we can
+			// choose to just use the relay or use the dimmer. An inaccuracy is most probable when 
+			// device has just restarted, so dimmer might not be online yet. Meaning that it might
+			// take a while to actually turn on the device. On the other hand using relay incurrs a
+			// possibly unnecessary click. _which one is the best option?
 		}
+
 		// Try to set dimmer to 100.
 		// If that doesn't work, turn relay on instead.
 		cs_ret_code_t retCode = setDimmer(100, currentState);
