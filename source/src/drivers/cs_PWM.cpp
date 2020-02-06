@@ -207,7 +207,7 @@ void PWM::_zeroCrossingStart() {
 			setValue(i, _nextValues[i]);
 		}
 	}
-	LOGi("Started");
+	LOGi("Started on zero crossing");
 }
 
 void PWM::setValue(uint8_t channel, uint16_t newValue) {
