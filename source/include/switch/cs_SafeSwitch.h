@@ -115,6 +115,9 @@ private:
 	 */
 	bool allowStateChanges = true;
 
+	bool relayHasBeenSetBefore = false;
+	OperationMode cached_operation_mode = OperationMode::OPERATION_MODE_UNINITIALIZED; // retrieved at init
+
 	/**
 	 * Set relay.
 	 *
@@ -192,6 +195,9 @@ private:
 	bool isSafeToTurnRelayOn(state_errors_t stateErrors);
 
 	bool isSafeToTurnRelayOff(state_errors_t stateErrors);
+
+	bool isDimmerStateChangeAllowed();
+	bool isRelayStateChangeAllowed();
 
 	/**
 	 * Send state update to listeners.

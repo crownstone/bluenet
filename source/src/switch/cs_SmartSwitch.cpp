@@ -123,8 +123,7 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 				currentState = getActualState();
 				setDimmer(0, currentState);
 			}
-		}
-		else {
+		} else {
 			LOGSmartSwitch("Turn on relay instead.");
 			setRelay(true, currentState);
 			// Don't forget to turn off the dimmer, as it may have been on already.
