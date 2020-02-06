@@ -13,8 +13,8 @@
 
 #include <optional>
 
-#define LOGSwitchAggregator LOGnone
-#define LOGSwitchAggregator_Evt LOGnone
+#define LOGSwitchAggregator LOGd
+#define LOGSwitchAggregator_Evt LOGd
 
 
 // ========================= Public ========================
@@ -60,7 +60,7 @@ bool SwitchAggregator::updateBehaviourHandlers(){
     return (prevBehaviourState != behaviourState);
 }
 
-void SwitchAggregator::updateState(bool allowOverrideReset){
+cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
     // (swSwitch.has_value() is true from here)
     bool shouldResetOverrideState = false;
 
@@ -97,7 +97,10 @@ void SwitchAggregator::updateState(bool allowOverrideReset){
         if (shouldResetOverrideState && retCode == ERR_SUCCESS) {
         	overrideState = {};
         }
+        return retCode;
     }
+
+    return ERR_SUCCESS_NO_CHANGE;
 }
 
 // ========================= Event handling =========================
@@ -188,14 +191,12 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
         // ============== overrideState Events ==============
         case CS_TYPE::CMD_SWITCH_ON:{
             LOGSwitchAggregator_Evt("CMD_SWITCH_ON",__func__);
-            overrideState = 100;
-            updateState(false);
+            executeStateIntentionUpdate(100);
             break;
         }
         case CS_TYPE::CMD_SWITCH_OFF:{
             LOGSwitchAggregator_Evt("CMD_SWITCH_OFF",__func__);
-            overrideState = 0;
-            updateState(false);
+            executeStateIntentionUpdate(0);
             break;
         }
         case CS_TYPE::CMD_SWITCH: {
@@ -206,15 +207,13 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
                 LOGSwitchAggregator("not executing, checkAndSetOwner returned false");
                 break;
             }
+            executeStateIntentionUpdate(packet->switchCmd);
             
-            overrideState = packet->switchCmd;
-            updateState(false);
 			break;
 		}
         case CS_TYPE::CMD_SWITCH_TOGGLE:{
             LOGSwitchAggregator_Evt("CMD_SWITCH_TOGGLE",__func__);
-            overrideState = smartSwitch.getIntendedState() == 0 ? 255 : 0;
-            updateState(false);
+            executeStateIntentionUpdate(smartSwitch.getIntendedState() == 0 ? 255 : 0);
             break;
         }
         default:{
@@ -224,6 +223,15 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
 
     evt.result.returnCode = ERR_SUCCESS;
     return true;
+}
+
+void SwitchAggregator::executeStateIntentionUpdate(uint8_t value){
+    auto prev_overrideState = overrideState;
+    overrideState = value;
+    if( updateState(false) == ERR_NO_ACCESS){
+        // failure to set the smartswitch. It seems to be locked.
+        overrideState = prev_overrideState;
+    }
 }
 
 void SwitchAggregator::handleSwitchStateChange(uint8_t newIntensity) {
