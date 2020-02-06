@@ -15,6 +15,7 @@ void SafeSwitch::init(const boards_config_t& board) {
 	dimmer.init(board);
 	relay.init(board);
 	hardwareBoard = board.hardwareBoard;
+	
 	// Load switch state.
 	// Only relay state is persistent.
 	TYPIFY(STATE_SWITCH_STATE) storedState;
@@ -24,25 +25,18 @@ void SafeSwitch::init(const boards_config_t& board) {
 
 	LOGd("init storedState=(%u %u%%)", storedState.state.relay, storedState.state.dimmer);
 
+	TYPIFY(STATE_OPERATION_MODE) mode;
+	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	cached_operation_mode = getOperationMode(mode);
+
+
 	listen();
 }
 
 void SafeSwitch::start() {
 	LOGd("start");
-	TYPIFY(STATE_OPERATION_MODE) mode;
-	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
-	auto opmode = getOperationMode(mode);
-
-	// Make sure the actual relay state matches the stored state.
-	if( opmode != OperationMode::OPERATION_MODE_FACTORY_RESET){
-		relay.set(currentState.state.relay);
-	} else {
-		LOGSafeSwitch("Not restoring relaystate because we're in factory reset mode");
-	}
-
-	// Make sure dimming is not allowed in any mode other than normal operation mode
-	// simply by not starting the dimmer.
-	if (getOperationMode(mode) == OperationMode::OPERATION_MODE_NORMAL){
+	
+	if (isDimmerStateChangeAllowed()) {
 		dimmer.start();
 	} else {
 		LOGSafeSwitch("Not starting dimmer because operation mode differs from NORMAL.");
@@ -53,11 +47,13 @@ switch_state_t SafeSwitch::getState() {
 	return currentState;
 }
 
+// ======================== state setters ========================
+
 cs_ret_code_t SafeSwitch::setRelay(bool on) {
 	auto stateErrors = getErrorState();
 	LOGSafeSwitch("setRelay %u errors=%u", on, stateErrors.asInt);
 
-	if ( !allowStateChanges) {
+	if ( !isRelayStateChangeAllowed()) {
 		return ERR_NO_ACCESS;
 	}
 
@@ -72,19 +68,22 @@ cs_ret_code_t SafeSwitch::setRelay(bool on) {
 
 cs_ret_code_t SafeSwitch::setRelayUnchecked(bool on) {
 	LOGSafeSwitch("setRelayUnchecked %u current=%u", on, currentState.state.relay);
-	if (currentState.state.relay == on) {
+	if (currentState.state.relay == on && relayHasBeenSetBefore) {
+		// don't short circuit if relay has not been set since last reboot 
+		// that helps ensure we are in sync with the physical device state.
 		return ERR_SUCCESS;
 	}
+
 	relay.set(on);
 	currentState.state.relay = on;
+	relayHasBeenSetBefore = true;
+
 	return ERR_SUCCESS;
 }
 
-
-
 cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity) {
 	LOGSafeSwitch("setDimmer %u dimmerPowered=%u errors=%u", intensity, dimmerPowered, getErrorState().asInt);
-	if ( !allowStateChanges) { 
+	if ( !isDimmerStateChangeAllowed()) { 
 		return ERR_NO_ACCESS;
 	}
 
@@ -112,6 +111,8 @@ cs_ret_code_t SafeSwitch::setDimmerUnchecked(uint8_t intensity) {
 
 	return ERR_NOT_STARTED;
 }
+
+// ======================== Dimmer power check stuff ========================
 
 cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity) {
 	LOGSafeSwitch("startDimmerPowerCheck");
@@ -201,7 +202,7 @@ void SafeSwitch::setDimmerPowered(bool powered) {
 	event.dispatch();
 }
 
-
+// ======================== Panic/forceful state changers ========================
 
 void SafeSwitch::forceSwitchOff() {
 	LOGw("forceSwitchOff");
@@ -233,7 +234,7 @@ void SafeSwitch::forceRelayOnAndDimmerOff() {
 	EventDispatcher::getInstance().dispatch(eventDimmer);
 }
 
-
+// ======================== Error state checks ===========================
 
 state_errors_t SafeSwitch::getErrorState() {
 	TYPIFY(STATE_ERRORS) stateErrors;
@@ -260,6 +261,26 @@ bool SafeSwitch::isSafeToTurnRelayOff(state_errors_t stateErrors) {
 	return !hasDimmerError(stateErrors);
 }
 
+bool SafeSwitch::isRelayStateChangeAllowed(){
+	if (!allowStateChanges) {
+		// early return if general flag disallowes state changes
+		return false;
+	}
+
+	// disallow relay state changes in factory reset mode
+	return cached_operation_mode != OperationMode::OPERATION_MODE_FACTORY_RESET;
+}
+
+bool SafeSwitch::isDimmerStateChangeAllowed(){
+	if (!allowStateChanges) {
+		// early return if general flag disallowes state changes
+		return false;
+	}
+
+	// disallow dimmer state changes in any mode except normal operation mode.
+	return cached_operation_mode == OperationMode::OPERATION_MODE_NORMAL;
+}
+
 bool SafeSwitch::isSafeToDim(state_errors_t stateErrors) {
 	return !hasDimmerError(stateErrors) && !isSwitchOverLoaded(stateErrors);
 }
@@ -275,7 +296,7 @@ void SafeSwitch::sendUnexpectedStateUpdate() {
 	callbackOnStateChange(currentState);
 }
 
-
+// ======================== Event handling ========================
 
 void SafeSwitch::goingToDfu() {
 	LOGi("goingToDfu");
