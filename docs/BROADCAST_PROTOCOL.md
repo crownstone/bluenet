@@ -233,6 +233,8 @@ Type | Name | Length | Description
 uint 16 | Device ID | 2 | Unique ID of the device.
 uint 8 | Location ID | 1 | ID of the location where the device is.
 uint 8 | Profile ID | 1 | Profile ID of the device.
+int 8 | RSSI offset | 1 | Offset from standard signal strength.
+uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background_adv_flags).
 uint 24 | Device token | 3 | Token that will be advertised by the device.
-uint 32 | Device token expiration | 4 | Timestamp at which the device token will expire.
+uint 16 | Time to live | 2 | Time in minutes after which the device token will be invalid.
 
