@@ -123,11 +123,11 @@ void Crownstone::init(uint16_t step) {
 
 void Crownstone::init0(){
 	LOGi(FMT_HEADER, "init");
-	initDrivers(step);
+	initDrivers(0);
 }
 
 void Crownstone::init1(){
-		initDrivers(step);
+		initDrivers(1);
 		LOG_MEMORY;
 		LOG_FLUSH();
 
