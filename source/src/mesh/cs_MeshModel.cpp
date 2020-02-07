@@ -283,7 +283,12 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_PROFILE_LOCATION: {
-		event_t event(CS_TYPE::EVT_MESH_PROFILE_LOCATION, payload, payloadSize);
+		cs_mesh_model_msg_profile_location_t* profileLocation = (cs_mesh_model_msg_profile_location_t*) payload;
+		TYPIFY(EVT_PROFILE_LOCATION) eventData;
+		eventData.profileId = profileLocation->profile;
+		eventData.locationId = profileLocation->location;
+		eventData.fromMesh = true;
+		event_t event(CS_TYPE::EVT_PROFILE_LOCATION, eventData, sizeof(eventData));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
@@ -359,6 +364,14 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			event_t event(CS_TYPE::EVT_STATE_EXTERNAL_STONE, &(_lastReceivedState.state), sizeof(_lastReceivedState.state));
 			EventDispatcher::getInstance().dispatch(event);
 		}
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER: {
+
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN: {
+
 		break;
 	}
 	}

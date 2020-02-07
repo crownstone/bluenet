@@ -209,6 +209,19 @@ struct __attribute__((packed)) behaviour_debug_t {
 	uint64_t presence[8]; // Bitmask of presence per profile.
 };
 
+struct __attribute__((packed)) register_tracked_device_packet_t {
+	uint16_t deviceId;
+	uint8_t locationId;
+	uint8_t profileId;
+	uint8_t rssiOffset;
+	uint8_t flags;
+	uint8_t deviceToken[3];
+	uint16_t timeToLiveMinutes;
+};
+
+typedef register_tracked_device_packet_t update_tracked_device_packet_t;
+
+
 // ========================= functions =========================
 
 /**

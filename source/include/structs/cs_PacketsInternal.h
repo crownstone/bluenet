@@ -181,3 +181,16 @@ struct __attribute__((__packed__)) adv_background_parsed_t {
 	uint8_t profileId;
 	uint8_t flags;
 };
+
+struct profile_location_t {
+	uint8_t profileId;
+	uint8_t locationId;
+	bool fromMesh = false;
+};
+
+struct __attribute__((packed)) internal_register_tracked_device_packet_t {
+	register_tracked_device_packet_t data;
+	uint8_t accessLevel;
+};
+
+typedef internal_register_tracked_device_packet_t internal_update_tracked_device_packet_t;
