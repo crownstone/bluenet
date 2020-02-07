@@ -28,17 +28,27 @@ uint8 | type | 1 | 0x01: Services bitmask.
 uint8 [] | Services bitmask | 16 | Consists of 3x the same [data](#background_adv_data) plus 2 unused bits.
 
 
-<a name="background_adv_data"></a>
-#### Background broadcast data
+<a name="background_adv_data v0"></a>
+#### Background broadcast data v0
 
-![Background broadcast data](../docs/diagrams/background_broadcast_data.png)
+![Background broadcast data v0](../docs/diagrams/background_broadcast_data_v0.png)
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
-uint8 | Protocol | 2 | Protocol version, currently 0.
+uint8 | Protocol | 2 | Protocol version = 0.
 uint8 | Sphere ID | 8 | Hash of the sphere ID, acts as filter, so that not every advertisement has to be decrypted.
 uint16 [] | Payload | 32 | Encrypted [payload](#background_adv_payload), using 32b RC5 with 128b localization key.
 
+<a name="background_adv_data v1"></a>
+#### Background broadcast data v1
+
+![Background broadcast data v1](../docs/diagrams/background_broadcast_data_v1.png)
+
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+uint8 | Protocol | 2 | Protocol version = 1.
+uint16 | deviceId | 16 | ID of this device.
+uint24 | device token | 24 | Token of this device, set via command [Register tracked device](PROTOCOL.md#command_types) or [Update tracked device](#command_adv_types).
 
 <a name="background_adv_payload"></a>
 #### Background broadcast payload
@@ -144,7 +154,8 @@ Type nr | Type name | Payload type | Payload Description | A | M | B | S
 0 | No operation | - | None | x | x | x |
 1 | Multi switch | [Multi switch short list packet](#multi_switch_short_list_packet) | List of switch commands | x | x | x |
 2 | Set time | [Set time packet](#set_time_packet) | Current time. | x | x | |
-3 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Currently only supports turning smart behaviour on/off | x | x | | 
+3 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Currently only supports turning smart behaviour on/off | x | x | |
+4 | Update tracked device | [Update tracked device packet](#update_tracked_device_packet) | Updates the data of a tracked device. Access level should match the original access level. | x | x | x |
 
 
 <a name="multi_switch_short_list_packet"></a>
@@ -211,4 +222,17 @@ Bit | Name |  Description
 --- | --- | ---
 0 | Enabled | Whether behaviours are enabled.
 1-31 | Reserved | Reserved for future use, should be 0 for now.
+
+<a name="update_tracked_device_packet"></a>
+##### Update tracked device packet
+
+![Update tracked device packet](../docs/diagrams/update_tracked_device_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Device ID | 2 | Unique ID of the device.
+uint 8 | Location ID | 1 | ID of the location where the device is.
+uint 8 | Profile ID | 1 | Profile ID of the device.
+uint 24 | Device token | 3 | Token that will be advertised by the device.
+uint 32 | Device token expiration | 4 | Timestamp at which the device token will expire.
 

@@ -329,6 +329,7 @@ Type nr | Type name | Payload type | Description | A | M | B | S
 63 | Get behaviour | [Get behaviour packet](BEHAVIOUR.md#get_behaviour_packet) | Obtain the behaviour stored at given index. | x | x
 64 | Get behaviour indices | [Get behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
 69 | Get behaviour debug | - | Obtain debug info of the current behaviour state. Result data is a [Behaviour debug packet](#behaviour_debug_packet). | x
+70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | Register or update a device to be tracked.
 
 
 <a name="setup_packet"></a>
@@ -479,6 +480,21 @@ uint 64 | Active behaviours | 8 | Bitmask of behaviours that are currently activ
 uint 64 | Active end conditions | 8 | Bitmask of behaviours with active end conditions. Nth bit is Nth behaviour index.
 uint 64 | Active timeout periods | 8 | Bitmask of behaviours that are in (presence) timeout period. Nth bit is Nth behaviour index.
 uint 64[] | Presence | 64 | Bitmask per profile of occupied rooms. Nth bit is Nth room.
+
+<a name="register_tracked_device_packet"></a>
+##### Register tracked device packet
+
+![Register tracked device packet](../docs/diagrams/register_tracked_device_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Device ID | 2 | Unique ID of the device.
+uint 8 | Location ID | 1 | ID of the location where the device is.
+uint 8 | Profile ID | 1 | Profile ID of the device.
+uint 8 | RSSI offset | 1 | Same as in the [RC5 payload](BROADCAST_PROTOCOL.md#rc5_adv_payload).
+uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background_adv_flags).
+uint 24 | Device token | 3 | Token that will be advertised by the device.
+uint 32 | Device token expiration | 4 | Timestamp at which the device token will expire.
 
 <a name="result_packet"></a>
 ## Result packet

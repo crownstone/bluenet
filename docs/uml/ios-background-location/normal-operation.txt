@@ -1,0 +1,70 @@
+@startuml
+
+participant "Phone"                         as phone
+participant "Crownstone"                    as cs
+participant "Other Crownstone"              as ext
+
+== Enter sphere ==
+phone -> cs: Check-in
+
+hnote over cs
+Cache device token,
+expiration timestamp,
+profile, location,
+RSSI calibration,
+flags.
+endhnote
+
+cs -> cs: handle presence
+
+cs -> ext: Check-in
+hnote over ext
+Cache device token,
+profile, location,
+RSSI calibration,
+flags.
+Expiration timestamp = 0
+endhnote
+ext -> ext: handle presence
+
+cs -> ext: Set device token expiration timestamp
+hnote over ext
+Update expiration timestamp
+endhnote
+
+phone --> cs: broadcast device token
+cs -> cs: handle presence
+phone --> cs: broadcast device token
+cs -> cs: handle presence
+......
+phone --> cs: broadcast device token
+cs -> cs: handle presence
+cs -> ext: profile location
+ext -> ext: handle presence
+phone --> cs: broadcast device token
+cs -> cs: handle presence
+
+== Change room ==
+phone -> cs: Check-in
+
+hnote over cs
+Update location,
+expiration timestamp,
+etc.
+endhnote
+cs -> cs: handle presence
+
+cs -> ext: Check-in
+hnote over ext
+Update location,
+etc.
+endhnote
+ext -> ext: handle presence
+
+cs -> ext: Set device token expiration timestamp
+hnote over ext
+Update expiration timestamp
+endhnote
+
+
+@enduml
