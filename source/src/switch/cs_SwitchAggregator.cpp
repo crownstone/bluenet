@@ -230,6 +230,7 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value){
     overrideState = value;
     if( updateState(false) == ERR_NO_ACCESS){
         // failure to set the smartswitch. It seems to be locked.
+        LOGSwitchAggregator_Evt("Reverting to previous value, no access to smartswitch");
         overrideState = prev_overrideState;
     }
 }

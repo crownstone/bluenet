@@ -16,12 +16,12 @@ void SmartSwitch::init(const boards_config_t& board) {
 
 	TYPIFY(CONFIG_SWITCH_LOCKED) switchLocked;
 	State::getInstance().get(CS_TYPE::CONFIG_SWITCH_LOCKED, &switchLocked, sizeof(switchLocked));
-	allowSwitching = !switchLocked;
+	_allowSwitching = !switchLocked;
 
 	// Load intended state.
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &storedState, sizeof(storedState));
 	intendedState = getIntensityFromSwitchState(storedState);
-	LOGi("init intensity=%u allowDimming=%u allowSwitching=%u", intendedState, allowDimming, allowSwitching);
+	LOGi("init intensity=%u allowDimming=%u _allowSwitching=%u", intendedState, allowDimming, _allowSwitching);
 
 
 	safeSwitch.onUnexpextedStateChange([&](switch_state_t newState) -> void {
@@ -38,7 +38,9 @@ void SmartSwitch::start() {
 	// Start safe switch first, then set stored intended state.
 	safeSwitch.start();
 	LOGd("restore intended state: %u", intendedState);
+	allowSwitchingOverride = true;
 	set(intendedState);
+	allowSwitchingOverride = false;
 }
 
 switch_state_t SmartSwitch::getActualState() {
@@ -59,6 +61,10 @@ uint8_t SmartSwitch::getCurrentIntensity() {
 
 uint8_t SmartSwitch::getIntendedState() {
 	return intendedState;
+}
+
+bool SmartSwitch::allowSwitching(){
+	return _allowSwitching || allowSwitchingOverride;
 }
 
 cs_ret_code_t SmartSwitch::set(uint8_t intensity) {
@@ -139,13 +145,13 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 
 cs_ret_code_t SmartSwitch::setRelay(bool on) {
 	switch_state_t currentState = getActualState();
-	LOGSmartSwitch("setRelay %u currenState=%u allowSwitching=%u", on, currentState.asInt, allowSwitching);
+	LOGSmartSwitch("setRelay %u currenState=%u allowSwitching()=%u", on, currentState.asInt, allowSwitching() );
 	
 	if (currentState.state.relay == on && safeSwitch.isRelayStateAccurate()) {
 		return ERR_SUCCESS;
 	}
 	// Check allow switching AFTER similarity, else error is returned while same value is set.
-	if (!allowSwitching) {
+	if (!allowSwitching()) {
 		return ERR_NO_ACCESS;
 	}
 	return setRelayUnchecked(on);
@@ -161,7 +167,7 @@ cs_ret_code_t SmartSwitch::setRelayUnchecked(bool on) {
 
 cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity) {
 	switch_state_t currentState = getActualState();
-	LOGSmartSwitch("setDimmer %u currenState=%u allowSwitching=%u allowDimming=%u", intensity, currentState.asInt, allowSwitching, allowDimming);
+	LOGSmartSwitch("setDimmer %u currenState=%u allowSwitching()=%u allowDimming=%u", intensity, currentState.asInt, allowSwitching(), allowDimming);
 
 	if (!allowDimming && intensity > 0) {
 		return ERR_NO_ACCESS;
@@ -171,7 +177,7 @@ cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity) {
 		return ERR_SUCCESS;
 	}
 	// Check allow switching AFTER similarity, else error is returned while same value is set.
-	if (!allowSwitching) {
+	if (!allowSwitching()) {
 		return ERR_NO_ACCESS;
 	}
 	return setDimmerUnchecked(intensity);
@@ -219,8 +225,10 @@ void SmartSwitch::store(switch_state_t newState) {
 
 cs_ret_code_t SmartSwitch::setAllowSwitching(bool allowed) {
 	LOGi("setAllowSwitching %u", allowed);
-	allowSwitching = allowed;
-	TYPIFY(CONFIG_SWITCH_LOCKED) switchLocked = !allowSwitching;
+	_allowSwitching = allowed;
+
+	// must use the actual persisted value _allowSwitching rather than the returnvalue of allowSwitching here!
+	TYPIFY(CONFIG_SWITCH_LOCKED) switchLocked = !_allowSwitching;
 	State::getInstance().set(CS_TYPE::CONFIG_SWITCH_LOCKED, &switchLocked, sizeof(switchLocked));
 	return ERR_SUCCESS;
 }

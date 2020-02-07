@@ -76,7 +76,11 @@ private:
 	TYPIFY(STATE_SWITCH_STATE) storedState;
 
 	TYPIFY(CONFIG_PWM_ALLOWED) allowDimming = false;
-	bool allowSwitching = true;
+
+	// returns _allowSwitching || allowSwitchingOverride.
+	bool allowSwitching();
+	bool _allowSwitching = true; // value persisted in flash and settable in the app
+	bool allowSwitchingOverride = false; // override is necessary at startup to restore state of a locked dimmed switch.
 
 	/**
 	 * Get actual switch state.
