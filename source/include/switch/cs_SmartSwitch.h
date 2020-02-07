@@ -98,7 +98,7 @@ private:
 	 * Set relay.
 	 * Checks if switching is allowed.
 	 */
-	cs_ret_code_t setRelay(bool on, switch_state_t currentState);
+	cs_ret_code_t setRelay(bool on);
 
 	/**
 	 * Set relay without checks.
@@ -110,7 +110,7 @@ private:
 	 * Set dimmer.
 	 * Checks if dimming and switching is allowed.
 	 */
-	cs_ret_code_t setDimmer(uint8_t intensity, switch_state_t currentState);
+	cs_ret_code_t setDimmer(uint8_t intensity);
 
 	/**
 	 * Set dimmer without checks.

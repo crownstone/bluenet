@@ -78,12 +78,12 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 	if (intendedState == 0) {
 		// Set dimmer to 0 and turn relay off.
 		cs_ret_code_t retCode = ERR_SUCCESS;
-		cs_ret_code_t retCodeDimmer = setDimmer(0, currentState);
+		cs_ret_code_t retCodeDimmer = setDimmer(0);
 		if (retCodeDimmer != ERR_SUCCESS) {
 			retCode = retCodeDimmer;
 		}
-		currentState = getActualState();
-		cs_ret_code_t retCodeRelay = setRelay(false, currentState);
+
+		cs_ret_code_t retCodeRelay = setRelay(false);
 		if (retCodeRelay != ERR_SUCCESS) {
 			retCode = retCodeRelay;
 		}
@@ -96,23 +96,18 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 			LOGSmartSwitch("already on");
 			return ERR_SUCCESS;
 		} else if (!safeSwitch.isRelayStateAccurate()) {
-			// TODO(2020-02-06): @Bart if the relay state is still inaccurate at this point, we can
-			// choose to just use the relay or use the dimmer. An inaccuracy is most probable when 
-			// device has just restarted, so dimmer might not be online yet. Meaning that it might
-			// take a while to actually turn on the device. On the other hand using relay incurrs a
-			// possibly unnecessary click. _which one is the best option?
+			// Try the dimmer first, if that is already online there won't be any audible click.
+			// If it isn't active yet, or the setDimmer call below doesn't succeed we'll try relay.
 		}
 
 		// Try to set dimmer to 100.
-		// If that doesn't work, turn relay on instead.
-		cs_ret_code_t retCode = setDimmer(100, currentState);
+		cs_ret_code_t retCode = setDimmer(100);
 		if (retCode != ERR_SUCCESS) {
+			// If that doesn't work, turn relay on instead.
 			LOGSmartSwitch("Turn on relay instead.");
-			currentState = getActualState();
-			retCode = setRelay(true, currentState);
+			retCode = setRelay(true);
 			// Don't forget to turn off the dimmer, as it may have been on already.
-			currentState = getActualState();
-			setDimmer(0, currentState);
+			setDimmer(0);
 		}
 		LOGSmartSwitch("retCode=%u", retCode);
 		return retCode;
@@ -120,34 +115,33 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 	else {
 		// Try to set dimmed value, and then turn relay off.
 		// If that doesn't work, turn on relay instead.
-		cs_ret_code_t retCode = setDimmer(intendedState, currentState);
+		cs_ret_code_t retCode = setDimmer(intendedState);
 		LOGSmartSwitch("allowDimming=%u", allowDimming);
 		if (retCode == ERR_SUCCESS) {
-			currentState = getActualState();
-			retCode = setRelay(false, currentState);
+			retCode = setRelay(false);
 			if (retCode != ERR_SUCCESS) {
 				LOGSmartSwitch("Relay could not be turned off: turn dimmer off.");
-				currentState = getActualState();
-				setDimmer(0, currentState);
+				setDimmer(0);
 			}
 		} else {
 			// This branch will also be reached when trying to change the value of a locked dimmable crownstone
 			// in that case, setRelay will also refuse to change value, so everything is fine.
 
 			LOGSmartSwitch("setDimmer unsuccessful, try to turn on relay instead.");
-			setRelay(true, currentState);
+			setRelay(true);
 			// Don't forget to turn off the dimmer, as it may have been on already.
-			currentState = getActualState();
-			setDimmer(0, currentState);
+			setDimmer(0);
 		}
 		LOGSmartSwitch("retCode=%u", retCode);
 		return retCode;
 	}
 }
 
-cs_ret_code_t SmartSwitch::setRelay(bool on, switch_state_t currentState) {
+cs_ret_code_t SmartSwitch::setRelay(bool on) {
+	switch_state_t currentState = getActualState();
 	LOGSmartSwitch("setRelay %u currenState=%u allowSwitching=%u", on, currentState.asInt, allowSwitching);
-	if (currentState.state.relay == on) {
+	
+	if (currentState.state.relay == on && safeSwitch.isRelayStateAccurate()) {
 		return ERR_SUCCESS;
 	}
 	// Check allow switching AFTER similarity, else error is returned while same value is set.
@@ -165,8 +159,10 @@ cs_ret_code_t SmartSwitch::setRelayUnchecked(bool on) {
 	return retCode;
 }
 
-cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity, switch_state_t currentState) {
+cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity) {
+	switch_state_t currentState = getActualState();
 	LOGSmartSwitch("setDimmer %u currenState=%u allowSwitching=%u allowDimming=%u", intensity, currentState.asInt, allowSwitching, allowDimming);
+
 	if (!allowDimming && intensity > 0) {
 		return ERR_NO_ACCESS;
 	}
@@ -244,7 +240,7 @@ cs_ret_code_t SmartSwitch::setAllowDimming(bool allowed) {
 
 cs_ret_code_t SmartSwitch::handleCommandSetRelay(bool on) {
 	LOGi("handleCommandSetRelay %u", on);
-	[[maybe_unused]] cs_ret_code_t retCode = setRelay(on, getActualState());
+	[[maybe_unused]] cs_ret_code_t retCode = setRelay(on);
 	uint8_t newIntensity = getCurrentIntensity();
 	if (newIntensity != intendedState) {
 		sendUnexpectedIntensityUpdate(newIntensity);
@@ -254,7 +250,7 @@ cs_ret_code_t SmartSwitch::handleCommandSetRelay(bool on) {
 
 cs_ret_code_t SmartSwitch::handleCommandSetDimmer(uint8_t intensity) {
 	LOGi("handleCommandSetDimmer %u", intensity);
-	[[maybe_unused]] cs_ret_code_t retCode = setDimmer(intensity, getActualState());
+	[[maybe_unused]] cs_ret_code_t retCode = setDimmer(intensity);
 	uint8_t newIntensity = getCurrentIntensity();
 	if (newIntensity != intendedState) {
 		sendUnexpectedIntensityUpdate(newIntensity);
