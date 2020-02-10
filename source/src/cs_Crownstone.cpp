@@ -808,30 +808,30 @@ void Crownstone::handleEvent(event_t & event) {
 			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
 	}
 
-	switch(event.type) {
-		case CS_TYPE::CONFIG_IBEACON_ENABLED: {
-			__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
-			// 12-sep-2019 TODO: implement
-			LOGw("TODO ibeacon enabled=%i", enabled);
-			break;
-		}
-		case CS_TYPE::EVT_BROWNOUT_IMPENDING: {
-			// Don't log anything, immediately write gpregret and reboot.
-			// Do this in interrupt (cs_Handlers.cpp) instead, else we're still too late.
-//			LOGf("brownout impending!! force shutdown ...")
-//			uint32_t gpregret_id = 0;
-//			uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
-//			// now reset with brownout reset mask set.
-//			// NOTE: do not clear the gpregret register, this way
-//			//   we can count the number of brownouts in the bootloader
-//			sd_power_gpregret_set(gpregret_id, gpregret_msk);
-//			// Soft reset, because brownout can't be distinguished from hard reset otherwise.
-//			sd_nvic_SystemReset();
-			break;
-		}
-		default:
-			return;
-	}
+	// switch(event.type) {
+	// 	case CS_TYPE::CONFIG_IBEACON_ENABLED: {
+	// 		__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
+	// 		// 12-sep-2019 TODO: implement
+	// 		LOGw("TODO ibeacon enabled=%i", enabled);
+	// 		break;
+	// 	}
+	// 	case CS_TYPE::EVT_BROWNOUT_IMPENDING: {
+	// 		// Don't log anything, immediately write gpregret and reboot.
+	// 		// Do this in interrupt (cs_Handlers.cpp) instead, else we're still too late.
+	// 		LOGf("brownout impending!! force shutdown ...")
+	// 		uint32_t gpregret_id = 0;
+	// 		uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
+	// 		// now reset with brownout reset mask set.
+	// 		// NOTE: do not clear the gpregret register, this way
+	// 		//   we can count the number of brownouts in the bootloader
+	// 		sd_power_gpregret_set(gpregret_id, gpregret_msk);
+	// 		// Soft reset, because brownout can't be distinguished from hard reset otherwise.
+	// 		sd_nvic_SystemReset();
+	// 		break;
+	// 	}
+	// 	default:
+	// 		return;
+	// }
 }
 
 /**********************************************************************************************************************
