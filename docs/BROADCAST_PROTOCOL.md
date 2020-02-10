@@ -47,8 +47,8 @@ uint16 [] | Payload | 32 | Encrypted [payload](#background_adv_payload), using 3
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint8 | Protocol | 2 | Protocol version = 1.
-uint16 | deviceId | 16 | ID of this device.
 uint24 | device token | 24 | Token of this device, set via command [Register tracked device](PROTOCOL.md#command_types) or [Update tracked device](#command_adv_types).
+uint16 | reserved | 16 | Reserved for future use, should be 0 for now.
 
 <a name="background_adv_payload"></a>
 #### Background broadcast payload
