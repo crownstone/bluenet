@@ -8,14 +8,19 @@
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_EncryptionHandler.h>
 #include <tracking/cs_TrackedDevices.h>
+#include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
+
+TrackedDevices::TrackedDevices() {
+	EventDispatcher::getInstance().addListener(this);
+}
 
 cs_ret_code_t TrackedDevices::handleRegister(internal_register_tracked_device_packet_t& packet) {
 	TrackedDevice* device = findOrAdd(packet.data.deviceId);
 	if (device == nullptr) {
 		return ERR_NO_SPACE;
 	}
-	if (!hasAccess(*device), packet.accessLevel) {
+	if (!hasAccess(*device, packet.accessLevel)) {
 		return ERR_NO_ACCESS;
 	}
 	if (!isTokenOkToSet(*device, packet.data.deviceToken, sizeof(packet.data.deviceToken))) {
@@ -25,8 +30,8 @@ cs_ret_code_t TrackedDevices::handleRegister(internal_register_tracked_device_pa
 	setLocation(   *device, packet.data.locationId);
 	setProfile(    *device, packet.data.profileId);
 	setRssiOffset( *device, packet.data.rssiOffset);
-	setFlags(      *device, packet.data.flags);
-	setDevicetoken(*device, packet.data.deviceToken);
+	setFlags(      *device, packet.data.flags.asInt);
+	setDevicetoken(*device, packet.data.deviceToken, sizeof(packet.data.deviceToken));
 	setTTL(        *device, packet.data.timeToLiveMinutes);
 	sendRegisterToMesh(*device);
 	sendTokenToMesh(*device);
@@ -34,23 +39,7 @@ cs_ret_code_t TrackedDevices::handleRegister(internal_register_tracked_device_pa
 }
 
 cs_ret_code_t TrackedDevices::handleUpdate(internal_update_tracked_device_packet_t& packet) {
-//	TrackedDevice* device = findOrAdd(packet.data.deviceId);
-//	if (device == nullptr) {
-//		return ERR_NO_SPACE;
-//	}
-//	if (!hasAccess(*device), packet.accessLevel) {
-//		return ERR_NO_ACCESS;
-//	}
-//	setAccessLevel(*device, packet.accessLevel);
-//	setLocation(   *device, packet.data.locationId);
-//	setProfile(    *device, packet.data.profileId);
-//	setRssiOffset( *device, packet.data.rssiOffset);
-//	setFlags(      *device, packet.data.flags);
-//	setDevicetoken(*device, packet.data.deviceToken);
-//	setTTL(        *device, packet.data.timeToLiveMinutes);
-//	sendRegisterToMesh(*device);
-//	sendTokenToMesh(*device);
-//	return ERR_SUCCESS;
+	// For now, this packet is exactly the same as the register packet.
 	return handleRegister(packet);
 }
 
@@ -78,7 +67,7 @@ void TrackedDevices::handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& pack
 	if (!isTokenOkToSet(*device, packet.deviceToken, sizeof(packet.deviceToken))) {
 		return;
 	}
-	setDevicetoken(*device, packet.deviceToke, sizeof(packet.deviceToken));
+	setDevicetoken(*device, packet.deviceToken, sizeof(packet.deviceToken));
 	setTTL(*device, packet.ttlMinutes);
 }
 
@@ -114,9 +103,9 @@ TrackedDevices::TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 }
 
 TrackedDevices::TrackedDevice* TrackedDevices::find(device_id_t deviceId) {
-	for (auto iter = devices.begin(); iter != devices.end();) {
+	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
 		if (iter->data.data.deviceId == deviceId) {
-			return iter;
+			return &(*iter);
 		}
 	}
 	return nullptr;
@@ -124,9 +113,9 @@ TrackedDevices::TrackedDevice* TrackedDevices::find(device_id_t deviceId) {
 
 TrackedDevices::TrackedDevice* TrackedDevices::findToken(uint8_t* deviceToken, uint8_t size) {
 	assert(size == TRACKED_DEVICE_TOKEN_SIZE, "Wrong device token size");
-	for (auto iter = devices.begin(); iter != devices.end();) {
+	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
 		if (memcmp(iter->data.data.deviceToken, deviceToken, size) == 0) {
-			return iter;
+			return &(*iter);
 		}
 	}
 	return nullptr;
@@ -134,7 +123,7 @@ TrackedDevices::TrackedDevice* TrackedDevices::findToken(uint8_t* deviceToken, u
 
 TrackedDevices::TrackedDevice* TrackedDevices::add() {
 	// Check number of devices.
-	if (devices.size() >= MAX_TRACKED_DEVICES) {
+	if (deviceListSize >= MAX_TRACKED_DEVICES) {
 		cs_ret_code_t retCode = removeDevice();
 		if (retCode != ERR_SUCCESS) {
 			return nullptr;
@@ -142,40 +131,56 @@ TrackedDevices::TrackedDevice* TrackedDevices::add() {
 	}
 	TrackedDevice device;
 	devices.push_front(device);
+	++deviceListSize;
 	return &(devices.front());
 }
 
 cs_ret_code_t TrackedDevices::removeDevice() {
 	uint16_t lowestTTL = 0xFFFF;
 	auto iterToRemove = devices.end();
-	for (auto iter = devices.begin(); iter != devices.end();) {
+	auto prevIter = devices.before_begin();
+	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
 		if (iter->fieldsSet != ALL_FIELDS_SET) {
-			iterToRemove = iter;
+			iterToRemove = prevIter;
 			break;
 		}
 		if (iter->data.data.timeToLiveMinutes <= lowestTTL) {
 			lowestTTL = iter->data.data.timeToLiveMinutes;
-			iterToRemove = iter;
+			iterToRemove = prevIter;
 		}
+		prevIter = iter;
 	}
+
 //	if (lowestTTL == 0xFFFF) {
 //		return ERR_NOT_AVAILABLE;
 //	}
-	devices.erase(iterToRemove);
+	devices.erase_after(iterToRemove);
+	--deviceListSize;
 	return ERR_SUCCESS;
 }
 
 
 bool TrackedDevices::hasAccess(TrackedDevice& device, uint8_t accessLevel) {
-	return (!BLEutil::isBitSet(device.fieldsSet, BIT_POS_ACCESS_LEVEL)) || (EncryptionHandler::allowAccess(device.data.accessLevel, accessLevel));
+	if (!isValidTTL(device)) {
+		// Device token timed out, so anyone is allowed to set a token for the device.
+		return true;
+	}
+	if (BLEutil::isBitSet(device.fieldsSet, BIT_POS_ACCESS_LEVEL) &&
+			(!EncryptionHandler::getInstance().allowAccess((EncryptionAccessLevel)device.data.accessLevel, (EncryptionAccessLevel)accessLevel))) {
+		return false;
+	}
+	return true;
 }
 
 bool TrackedDevices::isTokenOkToSet(TrackedDevice& device, uint8_t* deviceToken, uint8_t size) {
 	TrackedDevice* otherDevice = findToken(deviceToken, size);
-	if ((otherDevice != nullptr) && (otherDevice->data.data.deviceId != device.data.data.deviceId)) {
-		return false;
+	if (otherDevice == nullptr) {
+		return true;
 	}
-	return true;
+	if (otherDevice->data.data.deviceId == device.data.data.deviceId) {
+		return true;
+	}
+	return false;
 }
 
 
@@ -185,62 +190,50 @@ bool TrackedDevices::allFieldsSet(TrackedDevice& device) {
 
 void TrackedDevices::setAccessLevel(TrackedDevice& device, uint8_t accessLevel) {
 	device.data.accessLevel = accessLevel;
-	device.fieldsSet |= (1 << BIT_POS_ACCESS_LEVEL);
+	BLEutil::setBit(device.fieldsSet, BIT_POS_ACCESS_LEVEL);
 }
 
 void TrackedDevices::setLocation(TrackedDevice& device, uint8_t locationId) {
 	device.data.data.locationId = locationId;
-	device.fieldsSet |= (1 << BIT_POS_LOCATION);
+	BLEutil::setBit(device.fieldsSet, BIT_POS_LOCATION);
 }
 
 void TrackedDevices::setProfile(TrackedDevice& device, uint8_t profileId) {
 	device.data.data.profileId = profileId;
-	device.fieldsSet |= (1 << BIT_POS_PROFILE);
+	BLEutil::setBit(device.fieldsSet, BIT_POS_PROFILE);
 }
 
 void TrackedDevices::setRssiOffset(TrackedDevice& device, int8_t rssiOffset) {
 	device.data.data.rssiOffset = rssiOffset;
-	device.fieldsSet |= (1 << BIT_POS_RSSI_OFFSET);
+	BLEutil::setBit(device.fieldsSet, BIT_POS_RSSI_OFFSET);
 }
 
 void TrackedDevices::setFlags(TrackedDevice& device, uint8_t flags) {
-	device.data.data.flags = flags;
-	device.fieldsSet |= (1 << BIT_POS_FLAGS);
+	device.data.data.flags.asInt = flags;
+	BLEutil::setBit(device.fieldsSet, BIT_POS_FLAGS);
 }
 
 void TrackedDevices::setDevicetoken(TrackedDevice& device, uint8_t* deviceToken, uint8_t size) {
 	assert(size == TRACKED_DEVICE_TOKEN_SIZE, "Wrong device token size");
 	memcpy(device.data.data.deviceToken, deviceToken, sizeof(device.data.data.deviceToken));
-	device.fieldsSet |= (1 << BIT_POS_DEVICE_TOKEN);
+	BLEutil::setBit(device.fieldsSet, BIT_POS_DEVICE_TOKEN);
 }
 
 void TrackedDevices::setTTL(TrackedDevice& device, uint16_t ttlMinutes) {
 	device.data.data.timeToLiveMinutes = ttlMinutes;
-	device.fieldsSet |= (1 << BIT_POS_TTL);
+	BLEutil::setBit(device.fieldsSet, BIT_POS_TTL);
 }
 
 bool TrackedDevices::isValidTTL(TrackedDevice& device) {
-	return (device.fieldsSet & BIT_POS_TTL) && (device.data.data.timeToLiveMinutes != 0);
+	return (BLEutil::isBitSet(device.fieldsSet, BIT_POS_TTL)) && (device.data.data.timeToLiveMinutes != 0);
 }
 
 void TrackedDevices::decreaseTTL() {
-	for (auto iter = devices.begin(); iter != devices.end();) {
+	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
 		if ((iter->fieldsSet & BIT_POS_TTL) && (iter->data.data.timeToLiveMinutes != 0)) {
 			iter->data.data.timeToLiveMinutes--;
 		}
 	}
-}
-
-void TrackedDevices::sendRegisterToMesh(TrackedDevice& device) {
-	TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER) eventData;
-	eventData.accessLevel = device.data.accessLevel;
-	eventData.deviceId    = device.data.data.deviceId;
-	eventData.flags       = device.data.data.flags;
-	eventData.locationId  = device.data.data.locationId;
-	eventData.profileId   = device.data.data.profileId;
-	eventData.rssiOffset  = device.data.data.rssiOffset;
-	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER, eventData, sizeof(eventData));
-	event.dispatch();
 }
 
 void TrackedDevices::sendLocation(TrackedDevice& device) {
@@ -251,7 +244,19 @@ void TrackedDevices::sendLocation(TrackedDevice& device) {
 	eventData.fromMesh = false;
 	eventData.profileId = device.data.data.profileId;
 	eventData.locationId = device.data.data.locationId;
-	event_t event(CS_TYPE::EVT_PROFILE_LOCATION, eventData, sizeof(eventData));
+	event_t event(CS_TYPE::EVT_PROFILE_LOCATION, &eventData, sizeof(eventData));
+	event.dispatch();
+}
+
+void TrackedDevices::sendRegisterToMesh(TrackedDevice& device) {
+	TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER) eventData;
+	eventData.accessLevel = device.data.accessLevel;
+	eventData.deviceId    = device.data.data.deviceId;
+	eventData.flags       = device.data.data.flags.asInt;
+	eventData.locationId  = device.data.data.locationId;
+	eventData.profileId   = device.data.data.profileId;
+	eventData.rssiOffset  = device.data.data.rssiOffset;
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER, &eventData, sizeof(eventData));
 	event.dispatch();
 }
 
@@ -260,50 +265,53 @@ void TrackedDevices::sendTokenToMesh(TrackedDevice& device) {
 	eventData.deviceId   = device.data.data.deviceId;
 	memcpy(eventData.deviceToken, device.data.data.deviceToken, sizeof(device.data.data.deviceToken));
 	eventData.ttlMinutes = device.data.data.timeToLiveMinutes;
-	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN, eventData, sizeof(eventData));
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN, &eventData, sizeof(eventData));
 	event.dispatch();
 }
 
 void TrackedDevices::sendLocationToMesh(TrackedDevice& device) {
-	TYPIFY(EVT_PROFILE_LOCATION) eventData;
-	eventData.profileId = device.data.data.profileId;
-	eventData.locationId = device.data.data.locationId;
-	eventData.fromMesh = false;
-	event_t event(CS_TYPE::EVT_PROFILE_LOCATION, eventData, sizeof(eventData));
+	TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION) eventData;
+	eventData.profile = device.data.data.profileId;
+	eventData.location = device.data.data.locationId;
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION, &eventData, sizeof(eventData));
 	event.dispatch();
 }
 
 void TrackedDevices::handleEvent(event_t& evt) {
-	case CS_TYPE::CMD_REGISTER_TRACKED_DEVICE: {
-		internal_register_tracked_device_packet_t* data = reinterpret_cast<TYPIFY(CMD_REGISTER_TRACKED_DEVICE)*>(evt.data);
-		evt.result.returnCode = handleRegister(*data);
-		break;
-	}
-	case CS_TYPE::CMD_UPDATE_TRACKED_DEVICE: {
-		internal_update_tracked_device_packet_t* data = reinterpret_cast<TYPIFY(CMD_UPDATE_TRACKED_DEVICE)*>(evt.data);
-		evt.result.returnCode = handleUpdate(*data);
-		break;
-	}
-	case CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER: {
-		TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* data = reinterpret_cast<TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)*>(evt.data);
-		handleMeshRegister(*data);
-		break;
-	}
-	case CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN: {
-		TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* data = reinterpret_cast<TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)*>(evt.data);
-		handleMeshToken(*data);
-		break;
-	}
-	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED_V1: {
-		TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1)* data = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1)*>(evt.data);
-		handleScannedDevice(*data);
-		break;
-	}
-	case CS_TYPE::EVT_TICK: {
-		if (--ticksLeft == 0) {
-			ticksLeft = TICKS_PER_MINUTES;
-			decreaseTTL();
+	switch(evt.type) {
+		case CS_TYPE::CMD_REGISTER_TRACKED_DEVICE: {
+			internal_register_tracked_device_packet_t* data = reinterpret_cast<TYPIFY(CMD_REGISTER_TRACKED_DEVICE)*>(evt.data);
+			evt.result.returnCode = handleRegister(*data);
+			break;
 		}
-		break;
+		case CS_TYPE::CMD_UPDATE_TRACKED_DEVICE: {
+			internal_update_tracked_device_packet_t* data = reinterpret_cast<TYPIFY(CMD_UPDATE_TRACKED_DEVICE)*>(evt.data);
+			evt.result.returnCode = handleUpdate(*data);
+			break;
+		}
+		case CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER: {
+			TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* data = reinterpret_cast<TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)*>(evt.data);
+			handleMeshRegister(*data);
+			break;
+		}
+		case CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN: {
+			TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* data = reinterpret_cast<TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)*>(evt.data);
+			handleMeshToken(*data);
+			break;
+		}
+		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED_V1: {
+			TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1)* data = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1)*>(evt.data);
+			handleScannedDevice(*data);
+			break;
+		}
+		case CS_TYPE::EVT_TICK: {
+			if (--ticksLeft == 0) {
+				ticksLeft = TICKS_PER_MINUTES;
+				decreaseTTL();
+			}
+			break;
+		}
+		default:
+			break;
 	}
 }

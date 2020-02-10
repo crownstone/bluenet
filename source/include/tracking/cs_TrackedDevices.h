@@ -11,8 +11,7 @@
 
 class TrackedDevices: public EventListener {
 public:
-
-
+	TrackedDevices();
 
 	/**
 	 * Handle events.
@@ -47,6 +46,8 @@ private:
 	 * Device ID should be unique.
 	 */
 	std::forward_list<TrackedDevice> devices;
+
+	uint8_t deviceListSize = 0;
 
 	/**
 	 * Find device with given ID, else add a new device with given ID.
@@ -83,26 +84,38 @@ private:
 	 */
 	cs_ret_code_t removeDevice();
 
-	/**
-	 *
-	 */
-	bool isValidTTL(TrackedDevice& device);
-
-
 	cs_ret_code_t handleRegister(internal_register_tracked_device_packet_t& packet);
 	cs_ret_code_t handleUpdate(internal_update_tracked_device_packet_t& packet);
 	void handleMeshRegister(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)& packet);
 	void handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& packet);
 	void handleScannedDevice(adv_background_parsed_v1_t& packet);
 
+	/**
+	 * Return true when given access level is equal or higher than device access level.
+	 */
 	bool hasAccess(TrackedDevice& device, uint8_t accessLevel);
 
 	/**
-	 * Returns false if another device already has this token.
+	 * Returns true when device has a valid TTL, that didn't expire yet.
+	 */
+	bool isValidTTL(TrackedDevice& device);
+
+	/**
+	 * Returns true when no other device has this token.
 	 */
 	bool isTokenOkToSet(TrackedDevice& device, uint8_t* deviceToken, uint8_t size);
 
+	/**
+	 * Decrease TTL of all devices by 1.
+	 */
+	void decreaseTTL();
+
+	/**
+	 * Returns true when all fields are set.
+	 */
 	bool allFieldsSet(TrackedDevice& device);
+
+
 	void setAccessLevel(TrackedDevice& device, uint8_t accessLevel);
 	void setLocation(TrackedDevice& device, uint8_t locationId);
 	void setProfile(TrackedDevice& device, uint8_t profileId);
@@ -111,17 +124,21 @@ private:
 	void setDevicetoken(TrackedDevice& device, uint8_t* deviceToken, uint8_t size);
 	void setTTL(TrackedDevice& device, uint16_t ttlMinutes);
 
-	void decreaseTTL();
-
 	/**
-	 * Send profile location.
+	 * Send profile location to event dispatcher.
 	 *
 	 * Checks if all fields are set.
 	 */
 	void sendLocation(TrackedDevice& device);
 
+	/**
+	 * Send tracked device register msg to mesh.
+	 */
 	void sendRegisterToMesh(TrackedDevice& device);
 
+	/**
+	 * Send tracked device token msg to mesh.
+	 */
 	void sendTokenToMesh(TrackedDevice& device);
 
 	/**
