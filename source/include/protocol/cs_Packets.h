@@ -108,9 +108,9 @@ union __attribute__((__packed__)) state_errors_t {
 /**
  * Behaviour settings.
  */
-struct __attribute__((packed)) behaviour_settings_t {
+union __attribute__((packed)) behaviour_settings_t {
 	struct __attribute__((packed)) {
-		bool enabled;
+		bool enabled : 1;
 	} flags;
 	uint32_t asInt;
 };
