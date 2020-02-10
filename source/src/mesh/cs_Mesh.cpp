@@ -33,7 +33,6 @@ extern "C" {
 #include "util/cs_BleError.h"
 #include "util/cs_Utils.h"
 #include "ble/cs_Stack.h"
-#include "events/cs_EventDispatcher.h"
 #include "storage/cs_State.h"
 
 #include <protocol/cs_UartProtocol.h>
@@ -197,7 +196,7 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 		_scannedDevice.dataSize = p_rx_data->length;
 		_scannedDevice.data = (uint8_t*)(p_rx_data->p_payload);
 		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&_scannedDevice, sizeof(_scannedDevice));
-		EventDispatcher::getInstance().dispatch(event);
+		event.dispatch();
 
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
 		const uint8_t* addr = p_rx_data->p_metadata->params.scanner.adv_addr.addr;
@@ -591,6 +590,8 @@ void Mesh::checkIn() {
 	LOGMeshInfo("Mesh::checkIn");
 	// event_t requiredDataEvent;
 	// requiredDataEvent.dispatch();
+	uint32_t flags;
+	event_t event(CS_TYPE::EVT_MESH_CHECK_IN, (void*)&flags, sizeof(flags));
 
 	// query event.
 

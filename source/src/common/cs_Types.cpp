@@ -152,6 +152,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_MESH_PROFILE_LOCATION:
+	case CS_TYPE::EVT_MESH_CHECK_IN:
 		return csType;
 	}
 	return CS_TYPE::CONFIG_DO_NOT_USE;

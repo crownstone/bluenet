@@ -225,6 +225,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS,         // Send a set behaviour settings mesh message.
 	EVT_MESH_TIME,                                    // Mesh received the current time.
 	EVT_MESH_PROFILE_LOCATION,                        // Mesh received location of profile (not via scan).
+	EVT_MESH_CHECK_IN,                                // Dispatched when boot is complete so that event handlers get a chance to obtain data that resides in the mesh.
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR,                                // Add a behaviour.
@@ -267,6 +268,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_ADC_RESTARTED,                                // ADC has been restarted.
 
 	EVT_PRESENCE_MUTATION,                            // Presence changed.
+
 };
 
 CS_TYPE toCsType(uint16_t type);
@@ -443,6 +445,7 @@ typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef void TYPIFY(EVT_GOING_TO_DFU);
 typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_MESH_PROFILE_LOCATION);
+typedef uint8_t TYPIFY(EVT_MESH_CHECK_IN);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
