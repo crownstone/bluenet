@@ -539,7 +539,7 @@ command_result_t CommandHandler::handleCmdUartMsg(cs_data_t commandData, const E
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t handleCmdRegisterTrackedDevice(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
+command_result_t CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "register tracked device");
 	if (commandData.len != sizeof(register_tracked_device_packet_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
@@ -547,9 +547,9 @@ command_result_t handleCmdRegisterTrackedDevice(cs_data_t commandData, const Enc
 	}
 
 	TYPIFY(CMD_REGISTER_TRACKED_DEVICE) evtData;
-	evtData.data = commandData;
+	evtData.data = *((register_tracked_device_packet_t*)commandData.data);
 	evtData.accessLevel = accessLevel;
-	event_t event(CS_TYPE::CMD_REGISTER_TRACKED_DEVICE, evtData.data, sizeof(evtData));
+	event_t event(CS_TYPE::CMD_REGISTER_TRACKED_DEVICE, &evtData, sizeof(evtData));
 	event.result.buf = resultData;
 	event.dispatch();
 
@@ -584,6 +584,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CTRL_CMD_MESH_COMMAND:
 	case CTRL_CMD_STATE_GET:
 	case CTRL_CMD_STATE_SET:
+	case CTRL_CMD_REGISTER_TRACKED_DEVICE:
 		return BASIC;
 
 	case CTRL_CMD_SET_TIME:

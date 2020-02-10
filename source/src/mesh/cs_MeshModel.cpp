@@ -300,7 +300,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		eventData.profileId = profileLocation->profile;
 		eventData.locationId = profileLocation->location;
 		eventData.fromMesh = true;
-		event_t event(CS_TYPE::EVT_PROFILE_LOCATION, eventData, sizeof(eventData));
+		event_t event(CS_TYPE::EVT_PROFILE_LOCATION, &eventData, sizeof(eventData));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
