@@ -17,8 +17,8 @@
 
 // ============== Static members ==============
 
-uint32_t SystemTime::rtcTimeStamp;
-uint32_t SystemTime::posixTimeStamp;
+uint32_t SystemTime::rtcTimeStamp = 0;
+uint32_t SystemTime::posixTimeStamp = 0;
 uint32_t SystemTime::uptime_sec = 0;
 
 app_timer_t SystemTime::appTimerData = {{0}};
