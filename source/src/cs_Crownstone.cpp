@@ -609,15 +609,6 @@ void Crownstone::startUp() {
 
 	_state->startWritesToFlash();
 
-#ifdef RELAY_DEFAULT_ON
-#if RELAY_DEFAULT_ON==0
-	Switch::getInstance().turnOff();
-#endif
-#if RELAY_DEFAULT_ON==1
-	Switch::getInstance().turnOn();
-#endif
-#endif
-
 	_behaviourStore.init();
 }
 
