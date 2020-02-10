@@ -713,6 +713,8 @@ void Crownstone::startUp() {
 	_state->startWritesToFlash();
 
 	_behaviourStore.init();
+
+	_mesh->checkIn();
 }
 
 void Crownstone::increaseResetCounter() {

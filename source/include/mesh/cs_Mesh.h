@@ -70,6 +70,15 @@ public:
 
 	void factoryResetDone();
 
+	/**
+	 * Dispatches an internal event to request what data this crownstone needs to receive 
+	 * from the mesh. Afterwards, broadcasts a BT message in order to obtain the desired information.
+	 * 
+	 * Assumes all event handlers that are interested in obtaining data after a reboot are registered 
+	 * with the event dispatcher.
+	 */
+	void checkIn();
+
 private:
 	//! Constructor, singleton, thus made private
 	Mesh();
