@@ -809,30 +809,7 @@ void Crownstone::handleEvent(event_t & event) {
 	}
 
 	switch(event.type) {
-		case CS_TYPE::CONFIG_NAME: {
-			_advertiser->updateDeviceName(std::string((char*)event.data, event.size));
-			break;
-		}
-		case CS_TYPE::CONFIG_TX_POWER: {
-			_advertiser->updateTxPower(*(TYPIFY(CONFIG_TX_POWER)*)event.data);
-			break;
-		}
-		case CS_TYPE::CONFIG_ADV_INTERVAL: {
-			_advertiser->updateAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data);
-			break;
-		}
-		case CS_TYPE::CMD_ENABLE_ADVERTISEMENT: {
-			TYPIFY(CMD_ENABLE_ADVERTISEMENT) enable = *(TYPIFY(CMD_ENABLE_ADVERTISEMENT)*)event.data;
-			if (enable) {
-				_advertiser->startAdvertising();
-			}
-			else {
-				_advertiser->stopAdvertising();
-			}
-			// TODO: should be done via event.
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, (uint8_t*)&enable, 1);
-			break;
-		}
+		
 		case CS_TYPE::CMD_ENABLE_MESH: {
 #if BUILD_MESHING == 1
 			uint8_t enable = *(uint8_t*)event.data;
@@ -850,10 +827,6 @@ void Crownstone::handleEvent(event_t & event) {
 			__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
 			// 12-sep-2019 TODO: implement
 			LOGw("TODO ibeacon enabled=%i", enabled);
-			break;
-		}
-		case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: {
-			_advertiser->updateAdvertisementData();
 			break;
 		}
 		case CS_TYPE::EVT_BROWNOUT_IMPENDING: {

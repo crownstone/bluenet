@@ -9,6 +9,7 @@
 #include "cfg/cs_DeviceTypes.h"
 #include "cfg/cs_UuidConfig.h"
 #include "events/cs_EventDispatcher.h"
+#include <protocol/cs_UartProtocol.h>
 
 #define LOGAdvertiserDebug LOGnone
 #define LOGAdvertiserVerbose LOGnone
@@ -476,6 +477,35 @@ void Advertiser::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::EVT_BLE_DISCONNECT: {
 			onDisconnect();
+			break;
+		}
+
+		case CS_TYPE::CONFIG_NAME: {
+			updateDeviceName(std::string((char*)event.data, event.size));
+			break;
+		}
+		case CS_TYPE::CONFIG_TX_POWER: {
+			updateTxPower(*(TYPIFY(CONFIG_TX_POWER)*)event.data);
+			break;
+		}
+		case CS_TYPE::CONFIG_ADV_INTERVAL: {
+			updateAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data);
+			break;
+		}
+		case CS_TYPE::CMD_ENABLE_ADVERTISEMENT: {
+			TYPIFY(CMD_ENABLE_ADVERTISEMENT) enable = *(TYPIFY(CMD_ENABLE_ADVERTISEMENT)*)event.data;
+			if (enable) {
+				startAdvertising();
+			}
+			else {
+				stopAdvertising();
+			}
+			// TODO: should be done via event.
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, (uint8_t*)&enable, 1);
+			break;
+		}
+		case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: {
+			updateAdvertisementData();
 			break;
 		}
 		default: {}
