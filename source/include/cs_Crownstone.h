@@ -273,14 +273,6 @@ private:
 	 */
 	void increaseResetCounter();
 
-	/**
-	 * Start the 32 MHz external oscillator.
-	 * This provides very precise timing, which is required for the PWM driver to synchronize with the mains supply.
-	 * An alternative is to use the low frequency crystal oscillator for the PWM driver, but the SoftDevice's radio
-	 * operations periodically turn on the 32 MHz crystal oscillator anyway.
-	 */
-	void startHFClock();
-
 	boards_config_t _boardsConfig;
 
 	// drivers

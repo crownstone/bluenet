@@ -62,18 +62,121 @@ extern "C" {
 #include <nrf_nvmc.h>
 }
 
+
+/****************************************************** Preamble *******************************************************/ 
+
 // Define test pin to enable gpio debug.
 #define TEST_PIN 18
 
 TYPIFY(EVT_TICK) Crownstone::_tickCount = 0;
 
-/**********************************************************************************************************************
- * Main functionality
- *********************************************************************************************************************/
+
+/****************************************** Global functions ******************************************/
+
+/**
+ * Start the 32 MHz external oscillator.
+ * This provides very precise timing, which is required for the PWM driver to synchronize with the mains supply.
+ * An alternative is to use the low frequency crystal oscillator for the PWM driver, but the SoftDevice's radio
+ * operations periodically turn on the 32 MHz crystal oscillator anyway.
+ */
+void startHFClock() {
+	// Reference: https://devzone.nordicsemi.com/f/nordic-q-a/6394/use-external-32mhz-crystal
+
+	// Start the external high frequency crystal
+	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
+	NRF_CLOCK->TASKS_HFCLKSTART = 1;
+
+	// Wait for the external oscillator to start up
+	while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {}
+	LOGd("HF clock started");
+}
+
+/**
+ * If UART is enabled this will be the message printed out over a serial connection. In release mode we will not by
+ * default use the UART, it will need to be turned on.
+ *
+ * For DFU, application should be at (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED). For
+ * example, for (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes).
+ */
+void initUart(uint8_t pinRx, uint8_t pinTx) {
+	serial_config(pinRx, pinTx);
+	serial_init(SERIAL_ENABLE_RX_AND_TX);
+	_log(SERIAL_INFO, SERIAL_CRLF);
+
+	LOGi("Welcome to Bluenet!");
+	LOGi("\033[35;1m");
+	LOGi(" _|_|_|    _|                                            _|     ");
+	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");
+	LOGi(" _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     ");
+	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
+	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
+	LOGi("\033[0m");
+	
+	LOGi("Firmware version %s", g_FIRMWARE_VERSION);
+	LOGi("Git hash %s", g_GIT_SHA1);
+	LOGi("Compilation date: %s", g_COMPILATION_DAY);
+	LOGi("Compilation time: %s", __TIME__);
+	LOGi("Build type: %s", g_BUILD_TYPE);
+	LOGi("Hardware version: %s", get_hardware_version());
+	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
+#ifdef DEBUG
+	LOGi("DEBUG: defined")
+#else
+	LOGi("DEBUG: undefined")
+#endif
+	LOG_MEMORY;
+}
+
+/** Overwrite the hardware version.
+ *
+ * The firmware is compiled with particular defaults. When a particular product comes from the factory line it has
+ * by default FFFF FFFF in this UICR location. If this is the case, there are two options to cope with this:
+ *   1. Create a custom firmware per device type where this field is adjusted at runtime.
+ *   2. Create a custom firmware per device type with the UICR field state in the .hex file. In the latter case,
+ *      if the UICR fields are already set, this might lead to a conflict.
+ * There is chosen for the first option. Even if rare cases where there are devices types with FFFF FFFF in the field,
+ * the runtime always tries to overwrite it with the (let's hope) proper state.
+ */
+void overwrite_hardware_version() {
+	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
+	if (hardwareBoard == 0xFFFFFFFF) {
+		LOGw("Write board type into UICR");
+		nrf_nvmc_write_word(HARDWARE_BOARD_ADDRESS, DEFAULT_HARDWARE_BOARD);
+	}
+	LOGd("Board: %p", hardwareBoard);
+}
+
+/** Enable NFC pins to be used as GPIO.
+ *
+ * Warning: this is stored in UICR, so it's persistent.
+ * Warning: NFC pins leak a bit of current when not at same voltage level.
+ */
+void enableNfcPins() {
+	if (NRF_UICR->NFCPINS != 0) {
+		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
+	}
+}
+
+void printNfcPins() {
+	uint32_t val = NRF_UICR->NFCPINS;
+	if (val == 0) {
+		LOGd("NFC pins enabled (%p)", val);
+	}
+	else {
+		LOGd("NFC pins disabled (%p)", val);
+	}
+}
+
+void on_exit(void) {
+	LOGf("PROGRAM TERMINATED");
+}
+
 
 void handleZeroCrossing() {
 	PWM::getInstance().onZeroCrossing();
 }
+
+/************************************************* cs_Crownstone impl *************************************************/
 
 Crownstone::Crownstone(boards_config_t& board) :
 	_boardsConfig(board),
@@ -770,99 +873,6 @@ void Crownstone::handleEvent(event_t & event) {
 		default:
 			return;
 	}
-}
-
-void Crownstone::startHFClock() {
-	// Reference: https://devzone.nordicsemi.com/f/nordic-q-a/6394/use-external-32mhz-crystal
-
-	// Start the external high frequency crystal
-	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
-	NRF_CLOCK->TASKS_HFCLKSTART = 1;
-
-	// Wait for the external oscillator to start up
-	while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {}
-	LOGd("HF clock started");
-}
-
-/**********************************************************************************************************************/
-/**
- * If UART is enabled this will be the message printed out over a serial connection. In release mode we will not by
- * default use the UART, it will need to be turned on.
- *
- * For DFU, application should be at (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED). For
- * example, for (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes).
- */
-void initUart(uint8_t pinRx, uint8_t pinTx) {
-	serial_config(pinRx, pinTx);
-	serial_init(SERIAL_ENABLE_RX_AND_TX);
-	_log(SERIAL_INFO, SERIAL_CRLF);
-
-	LOGi("Welcome to Bluenet!");
-	LOGi("\033[35;1m");
-	LOGi(" _|_|_|    _|                                            _|     ");
-	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");
-	LOGi(" _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     ");
-	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
-	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
-	LOGi("\033[0m");
-	
-	LOGi("Firmware version %s", g_FIRMWARE_VERSION);
-	LOGi("Git hash %s", g_GIT_SHA1);
-	LOGi("Compilation date: %s", g_COMPILATION_DAY);
-	LOGi("Compilation time: %s", __TIME__);
-	LOGi("Build type: %s", g_BUILD_TYPE);
-	LOGi("Hardware version: %s", get_hardware_version());
-	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
-#ifdef DEBUG
-	LOGi("DEBUG: defined")
-#else
-	LOGi("DEBUG: undefined")
-#endif
-	LOG_MEMORY;
-}
-
-/** Overwrite the hardware version.
- *
- * The firmware is compiled with particular defaults. When a particular product comes from the factory line it has
- * by default FFFF FFFF in this UICR location. If this is the case, there are two options to cope with this:
- *   1. Create a custom firmware per device type where this field is adjusted at runtime.
- *   2. Create a custom firmware per device type with the UICR field state in the .hex file. In the latter case,
- *      if the UICR fields are already set, this might lead to a conflict.
- * There is chosen for the first option. Even if rare cases where there are devices types with FFFF FFFF in the field,
- * the runtime always tries to overwrite it with the (let's hope) proper state.
- */
-void overwrite_hardware_version() {
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		LOGw("Write board type into UICR");
-		nrf_nvmc_write_word(HARDWARE_BOARD_ADDRESS, DEFAULT_HARDWARE_BOARD);
-	}
-	LOGd("Board: %p", hardwareBoard);
-}
-
-/** Enable NFC pins to be used as GPIO.
- *
- * Warning: this is stored in UICR, so it's persistent.
- * Warning: NFC pins leak a bit of current when not at same voltage level.
- */
-void enableNfcPins() {
-	if (NRF_UICR->NFCPINS != 0) {
-		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
-	}
-}
-
-void printNfcPins() {
-	uint32_t val = NRF_UICR->NFCPINS;
-	if (val == 0) {
-		LOGd("NFC pins enabled (%p)", val);
-	}
-	else {
-		LOGd("NFC pins disabled (%p)", val);
-	}
-}
-
-void on_exit(void) {
-	LOGf("PROGRAM TERMINATED");
 }
 
 /**********************************************************************************************************************
