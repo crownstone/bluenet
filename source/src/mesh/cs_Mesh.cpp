@@ -36,6 +36,8 @@ extern "C" {
 #include "events/cs_EventDispatcher.h"
 #include "storage/cs_State.h"
 
+#include <protocol/cs_UartProtocol.h>
+
 #define LOGMeshDebug LOGnone
 
 #if NRF_MESH_KEY_SIZE != ENCRYPTION_KEY_LENGTH
@@ -564,6 +566,19 @@ void Mesh::handleEvent(event_t & event) {
 	case CS_TYPE::CMD_FACTORY_RESET: {
 		factoryReset();
 		break;
+	}
+	case CS_TYPE::CMD_ENABLE_MESH: {
+#if BUILD_MESHING == 1
+			uint8_t enable = *(uint8_t*)event.data;
+			if (enable) {
+				start();
+			}
+			else {
+				stop();
+			}
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &enable, 1);
+#endif
+			break;
 	}
 	default:
 		break;

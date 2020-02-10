@@ -809,20 +809,6 @@ void Crownstone::handleEvent(event_t & event) {
 	}
 
 	switch(event.type) {
-		
-		case CS_TYPE::CMD_ENABLE_MESH: {
-#if BUILD_MESHING == 1
-			uint8_t enable = *(uint8_t*)event.data;
-			if (enable) {
-				_mesh->start();
-			}
-			else {
-				_mesh->stop();
-			}
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &enable, 1);
-#endif
-			break;
-		}
 		case CS_TYPE::CONFIG_IBEACON_ENABLED: {
 			__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
 			// 12-sep-2019 TODO: implement
