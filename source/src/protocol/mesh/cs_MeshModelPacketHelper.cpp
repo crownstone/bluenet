@@ -54,6 +54,10 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		return profileLocationIsValid((cs_mesh_model_msg_profile_location_t*)payload, payloadSize);
 	case CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS:
 		return setBehaviourSettingsIsValid((behaviour_settings_t*)payload, payloadSize);
+	case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER:
+		return payloadSize == sizeof(cs_mesh_model_msg_device_register_t);
+	case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN:
+		return payloadSize == sizeof(cs_mesh_model_msg_device_token_t);
 	}
 	return false;
 }

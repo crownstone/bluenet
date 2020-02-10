@@ -122,6 +122,18 @@ cs_ret_code_t MeshModel::sendProfileLocation(const cs_mesh_model_msg_profile_loc
 	return addToQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
+cs_ret_code_t MeshModel::sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t repeats) {
+//	remFromQueue(, 0);
+//	return addToQueue(, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	return ERR_NOT_IMPLEMENTED;
+}
+
+cs_ret_code_t MeshModel::sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t repeats) {
+//	remFromQueue(, 0);
+//	return addToQueue(, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	return ERR_NOT_IMPLEMENTED;
+}
+
 cs_ret_code_t MeshModel::sendReliableMsg(const uint8_t* data, uint16_t len) {
 	return ERR_NOT_IMPLEMENTED;
 }
@@ -283,7 +295,12 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		break;
 	}
 	case CS_MESH_MODEL_TYPE_PROFILE_LOCATION: {
-		event_t event(CS_TYPE::EVT_MESH_PROFILE_LOCATION, payload, payloadSize);
+		cs_mesh_model_msg_profile_location_t* profileLocation = (cs_mesh_model_msg_profile_location_t*) payload;
+		TYPIFY(EVT_PROFILE_LOCATION) eventData;
+		eventData.profileId = profileLocation->profile;
+		eventData.locationId = profileLocation->location;
+		eventData.fromMesh = true;
+		event_t event(CS_TYPE::EVT_PROFILE_LOCATION, &eventData, sizeof(eventData));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
 	}
@@ -359,6 +376,14 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			event_t event(CS_TYPE::EVT_STATE_EXTERNAL_STONE, &(_lastReceivedState.state), sizeof(_lastReceivedState.state));
 			EventDispatcher::getInstance().dispatch(event);
 		}
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER: {
+
+		break;
+	}
+	case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN: {
+
 		break;
 	}
 	}

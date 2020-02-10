@@ -45,12 +45,12 @@ void PresenceHandler::handleEvent(event_t& evt){
         location = parsed_adv_ptr->locationId;
         break;
     }
-    case CS_TYPE::EVT_MESH_PROFILE_LOCATION: {
-        TYPIFY(EVT_MESH_PROFILE_LOCATION) *profile_location = (TYPIFY(EVT_MESH_PROFILE_LOCATION)*)evt.data;
-        profile = profile_location->profile;
-        location = profile_location->location;
-        fromMesh = true;
-        LOGPresenceHandler("From mesh: location=%u profile=%u", profile, location);
+    case CS_TYPE::EVT_PROFILE_LOCATION: {
+        TYPIFY(EVT_PROFILE_LOCATION) *profile_location = (TYPIFY(EVT_PROFILE_LOCATION)*)evt.data;
+        profile = profile_location->profileId;
+        location = profile_location->locationId;
+        fromMesh = profile_location->fromMesh;
+        LOGPresenceHandler("Received: location=%u profile=%u mesh=%u", profile, location, fromMesh);
 		break;
     }
     case CS_TYPE::EVT_TICK: {

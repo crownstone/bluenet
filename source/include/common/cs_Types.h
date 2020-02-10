@@ -165,6 +165,7 @@ enum class CS_TYPE: uint16_t {
 	// Scans
 	EVT_DEVICE_SCANNED,                               // Device was scanned.
 	EVT_ADV_BACKGROUND,                               // Background advertisement has been received.
+	EVT_ADV_BACKGROUND_PARSED_V1,                     // Sent when a v1 background advertisement has been received.
 
 	// Switch
 	CMD_SWITCH_OFF,                                   // Turn switch off.
@@ -223,8 +224,11 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Send a switch mesh message.
 	CMD_SEND_MESH_MSG_PROFILE_LOCATION,               // Send a profile location mesh message.
 	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS,         // Send a set behaviour settings mesh message.
+	CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER,
+	CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN,
 	EVT_MESH_TIME,                                    // Mesh received the current time.
-	EVT_MESH_PROFILE_LOCATION,                        // Mesh received location of profile (not via scan).
+	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
+	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.
 	EVT_MESH_CHECK_IN,                                // Dispatched when boot is complete so that event handlers get a chance to obtain data that resides in the mesh.
 
 	// Behaviour
@@ -235,6 +239,12 @@ enum class CS_TYPE: uint16_t {
 	CMD_GET_BEHAVIOUR_INDICES,                        // Get a list of indices of active behaviours.
 	CMD_GET_BEHAVIOUR_DEBUG,                          // Get info to debug behaviour. Multiple classes will handle this command to fill pieces of info.
 	EVT_BEHAVIOURSTORE_MUTATION,                      // Sent by BehaviourStore, after a change to the stored behaviours.
+
+	// Tracked devices
+	CMD_REGISTER_TRACKED_DEVICE,
+	CMD_UPDATE_TRACKED_DEVICE,
+
+	EVT_PROFILE_LOCATION,                             // Location of profile.
 
 	CMD_RESET_DELAYED,                                // Reboot.
 	EVT_GOING_TO_DFU,                                 // The system will reboot to DFU mode soon.
@@ -371,6 +381,7 @@ typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
 typedef  adv_background_parsed_t TYPIFY(EVT_ADV_BACKGROUND_PARSED);
+typedef  adv_background_parsed_v1_t TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1);
 typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
 typedef  void TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
@@ -396,6 +407,10 @@ typedef  BOOL TYPIFY(CMD_ENABLE_MESH);
 typedef  void TYPIFY(CMD_INC_VOLTAGE_RANGE);
 typedef  void TYPIFY(CMD_INC_CURRENT_RANGE);
 typedef  uint32_t TYPIFY(EVT_MESH_TIME);
+typedef  cs_mesh_model_msg_device_register_t TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER);
+typedef  cs_mesh_model_msg_device_register_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER);
+typedef  cs_mesh_model_msg_device_token_t TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN);
+typedef  cs_mesh_model_msg_device_token_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
@@ -440,11 +455,13 @@ typedef uint8_t TYPIFY(CMD_GET_BEHAVIOUR); // index
 typedef void TYPIFY(CMD_GET_BEHAVIOUR_INDICES);
 typedef void TYPIFY(CMD_GET_BEHAVIOUR_DEBUG);
 typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
+typedef internal_register_tracked_device_packet_t TYPIFY(CMD_REGISTER_TRACKED_DEVICE);
+typedef internal_update_tracked_device_packet_t TYPIFY(CMD_UPDATE_TRACKED_DEVICE);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef void TYPIFY(EVT_GOING_TO_DFU);
-typedef cs_mesh_model_msg_profile_location_t TYPIFY(EVT_MESH_PROFILE_LOCATION);
+typedef profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
 typedef uint8_t TYPIFY(EVT_MESH_CHECK_IN);
 
 /*---------------------------------------------------------------------------------------------------------------------

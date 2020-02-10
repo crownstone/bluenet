@@ -173,7 +173,6 @@ struct __attribute__((__packed__)) adv_background_t {
  * Parsed background advertisement.
  */
 struct __attribute__((__packed__)) adv_background_parsed_t {
-	uint8_t protocol;
 	uint8_t sphereId;
 	uint8_t* macAddress;
 	int8_t  adjustedRssi;
@@ -181,3 +180,22 @@ struct __attribute__((__packed__)) adv_background_parsed_t {
 	uint8_t profileId;
 	uint8_t flags;
 };
+
+struct __attribute__((__packed__)) adv_background_parsed_v1_t {
+	uint8_t* macAddress;
+	int8_t rssi;
+	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
+};
+
+struct profile_location_t {
+	uint8_t profileId;
+	uint8_t locationId;
+	bool fromMesh = false;
+};
+
+struct __attribute__((packed)) internal_register_tracked_device_packet_t {
+	register_tracked_device_packet_t data;
+	uint8_t accessLevel;
+};
+
+typedef internal_register_tracked_device_packet_t internal_update_tracked_device_packet_t;
