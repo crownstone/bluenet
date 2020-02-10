@@ -214,8 +214,16 @@ struct __attribute__((packed)) register_tracked_device_packet_t {
 	uint8_t locationId;
 	uint8_t profileId;
 	uint8_t rssiOffset;
-	uint8_t flags;
-	uint8_t deviceToken[3];
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			bool reserved : 1;
+			bool ignoreForBehaviour : 1;
+			bool tapToToggle : 1;
+		} flags;
+		uint8_t asInt;
+	} flags;
+//	uint8_t flags;
+	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
 	uint16_t timeToLiveMinutes;
 };
 

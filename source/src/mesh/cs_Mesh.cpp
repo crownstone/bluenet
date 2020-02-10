@@ -561,6 +561,19 @@ void Mesh::handleEvent(event_t & event) {
 		_model.sendProfileLocation(packet);
 		break;
 	}
+	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER: {
+		LOGd("send tracked device register");
+		TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER)*)event.data;
+		_model.sendTrackedDeviceRegister(packet);
+		break;
+	}
+	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN: {
+		LOGd("send tracked device token");
+		TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN)*)event.data;
+		_model.sendTrackedDeviceToken(packet);
+		break;
+	}
+
 	case CS_TYPE::CMD_FACTORY_RESET: {
 		factoryReset();
 		break;

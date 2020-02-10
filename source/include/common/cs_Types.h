@@ -165,6 +165,7 @@ enum class CS_TYPE: uint16_t {
 	// Scans
 	EVT_DEVICE_SCANNED,                               // Device was scanned.
 	EVT_ADV_BACKGROUND,                               // Background advertisement has been received.
+	EVT_ADV_BACKGROUND_PARSED_V1,                     // Sent when a v1 background advertisement has been received.
 
 	// Switch
 	CMD_SWITCH_OFF,                                   // Turn switch off.
@@ -223,6 +224,8 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Send a switch mesh message.
 	CMD_SEND_MESH_MSG_PROFILE_LOCATION,               // Send a profile location mesh message.
 	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS,         // Send a set behaviour settings mesh message.
+	CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER,
+	CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN,
 	EVT_MESH_TIME,                                    // Mesh received the current time.
 	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
 	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.
@@ -376,6 +379,7 @@ typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
 typedef  adv_background_parsed_t TYPIFY(EVT_ADV_BACKGROUND_PARSED);
+typedef  adv_background_parsed_v1_t TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1);
 typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
 typedef  void TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
@@ -402,7 +406,9 @@ typedef  void TYPIFY(CMD_INC_VOLTAGE_RANGE);
 typedef  void TYPIFY(CMD_INC_CURRENT_RANGE);
 typedef  uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  cs_mesh_model_msg_device_register_t TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER);
+typedef  cs_mesh_model_msg_device_register_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER);
 typedef  cs_mesh_model_msg_device_token_t TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN);
+typedef  cs_mesh_model_msg_device_token_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);

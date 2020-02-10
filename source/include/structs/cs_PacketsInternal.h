@@ -182,6 +182,12 @@ struct __attribute__((__packed__)) adv_background_parsed_t {
 	uint8_t flags;
 };
 
+struct __attribute__((__packed__)) adv_background_parsed_v1_t {
+	uint8_t* macAddress;
+	int8_t rssi;
+	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
+};
+
 struct profile_location_t {
 	uint8_t profileId;
 	uint8_t locationId;

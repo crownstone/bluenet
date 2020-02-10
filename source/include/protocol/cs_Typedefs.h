@@ -20,3 +20,6 @@ typedef uint16_t size16_t;
 //! Boolean with fixed size.
 typedef uint8_t BOOL;
 typedef uint8_t cs_state_id_t;
+
+// Actually wanted something like: typedef uint24_t cs_tracked_device_token_t;
+#define TRACKED_DEVICE_TOKEN_SIZE 3

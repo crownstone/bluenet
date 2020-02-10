@@ -104,6 +104,6 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_device_register_t {
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_device_token_t {
 	device_id_t deviceId;
-	uint8_t deviceToken[3];
+	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
 	uint16_t ttlMinutes;
 };
