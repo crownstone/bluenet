@@ -663,6 +663,8 @@ void Crownstone::startUp() {
 		
 		TapToToggle::getInstance().init(_boardsConfig.tapToToggleDefaultRssiThreshold);
 
+		_trackedDevices.init();
+
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
 			uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)

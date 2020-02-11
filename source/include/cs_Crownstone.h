@@ -29,8 +29,8 @@
 #include <services/cs_DeviceInformationService.h>
 #include <services/cs_SetupService.h>
 #include <storage/cs_State.h>
-
 #include <time/cs_SystemTime.h>
+#include <tracking/cs_TrackedDevices.h>
 
 #if BUILD_MESHING == 1
 #include <mesh/cs_Mesh.h>
@@ -183,7 +183,7 @@ private:
 	FactoryReset* _factoryReset = NULL;
 	CommandAdvHandler* _commandAdvHandler = NULL;
 	MultiSwitchHandler* _multiSwitchHandler = NULL;
-
+	TrackedDevices _trackedDevices;
 	SystemTime _systemTime;
 
 	BehaviourStore _behaviourStore;
