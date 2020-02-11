@@ -472,6 +472,8 @@ size16_t TypeSize(CS_TYPE const & type){
 		return 0;
 	case CS_TYPE::EVT_PROFILE_LOCATION:
 		return sizeof(TYPIFY(EVT_PROFILE_LOCATION));
+	case CS_TYPE::EVT_MESH_CHECK_IN:
+		return sizeof(TYPIFY(EVT_MESH_CHECK_IN));
 	} // end switch
 
 	// should never happen
@@ -628,6 +630,7 @@ const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_DIMMER: return "CMD_SET_DIMMER";
 	case CS_TYPE::EVT_GOING_TO_DFU: return "EVT_GOING_TO_DFU";
 	case CS_TYPE::EVT_PROFILE_LOCATION: return "EVT_PROFILE_LOCATION";
+	case CS_TYPE::EVT_MESH_CHECK_IN: return "EVT_MESH_CHECK_IN";
 	}
 	return "Unknown";
 }
@@ -780,6 +783,7 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
+	case CS_TYPE::EVT_MESH_CHECK_IN:
 		return false;
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
 	case CS_TYPE::STATE_TWILIGHT_RULE:
@@ -941,6 +945,7 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
+	case CS_TYPE::EVT_MESH_CHECK_IN:
 		return true;
 	}
 	// should not reach this
@@ -1098,6 +1103,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
+	case CS_TYPE::EVT_MESH_CHECK_IN:
 		return NO_ONE;
 	}
 	return NO_ONE;
@@ -1255,6 +1261,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
+	case CS_TYPE::EVT_MESH_CHECK_IN:
 		return NO_ONE;
 	}
 	return NO_ONE;

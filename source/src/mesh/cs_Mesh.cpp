@@ -365,7 +365,7 @@ void Mesh::start() {
 	retCode = mesh_stack_start();
 	APP_ERROR_CHECK(retCode);
 
-	EventDispatcher::getInstance().addListener(this);
+	this->listen();
 }
 
 void Mesh::stop() {
@@ -409,7 +409,7 @@ void Mesh::factoryResetDone() {
 	LOGMeshInfo("factoryResetDone");
 	_performingFactoryReset = false;
 	event_t event(CS_TYPE::EVT_MESH_FACTORY_RESET);
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 }
 
 void Mesh::provisionSelf(uint16_t id) {
