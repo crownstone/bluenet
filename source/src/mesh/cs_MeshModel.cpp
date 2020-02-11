@@ -118,7 +118,7 @@ cs_ret_code_t MeshModel::sendBehaviourSettings(const behaviour_settings_t* item,
 }
 
 cs_ret_code_t MeshModel::sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats) {
-	remFromQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0);
+//	remFromQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
