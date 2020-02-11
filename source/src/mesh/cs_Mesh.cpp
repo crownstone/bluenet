@@ -539,7 +539,7 @@ void Mesh::handleEvent(event_t & event) {
 			Time time = SystemTime::posix();
 			if(time.isValid()){
 				cs_mesh_model_msg_time_t packet;
-				packet.timestamp = time.timestamp;
+				packet.timestamp = time.timestamp();
 				_model.sendTime(&packet);
 			}
 		}
@@ -604,13 +604,27 @@ void Mesh::handleEvent(event_t & event) {
 }
 
 
-void Mesh::checkIn() {
-	LOGMeshInfo("Mesh::checkIn");
-	// event_t requiredDataEvent;
-	// requiredDataEvent.dispatch();
+void Mesh::requestSync() {
+	LOGMeshInfo("Mesh::requestSync");
 	uint32_t flags;
-	event_t event(CS_TYPE::EVT_MESH_CHECK_IN, (void*)&flags, sizeof(flags));
+	event_t sync_request_event(CS_TYPE::EVT_MESH_REQUEST_SYNC, (void*)&flags, sizeof(flags));
+	sync_request_event.dispatch();
 
-	// query event.
+	// (query [flags] to find out who needs which data.)
 
+	// and broadcast message
+	cs_mesh_model_msg_request_sync_t rs;
+
+	TYPIFY(CONFIG_CROWNSTONE_ID) id;
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
+
+	rs.flags = flags;
+	rs.crownstone_id = id;
+
+	TYPIFY(CMD_SEND_MESH_MSG) msg = {};
+	msg.payload = static_cast<uint8_t*>(static_cast<void*>(&rs));
+	msg.size = sizeof(rs);
+	msg.type = CS_MESH_MODEL_TYPE_REQUEST_SYNC;
+
+	_model.sendMsg(&msg);
 }

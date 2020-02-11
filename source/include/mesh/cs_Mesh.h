@@ -74,20 +74,21 @@ public:
 	 * Dispatches an internal event to request what data this crownstone needs to receive 
 	 * from the mesh. Afterwards, broadcasts a BT message in order to obtain the desired information.
 	 * 
-	 * Assumes all event handlers that are interested in obtaining data after a reboot are registered 
+	 * Assumes all event handlers that are interested in obtaining data are registered 
 	 * with the event dispatcher.
 	 */
-	void checkIn();
+	void requestSync();
+
 
 private:
 	//! Constructor, singleton, thus made private
 	Mesh();
 
 	//! Copy constructor, singleton, thus made private
-	Mesh(Mesh const&);
+	Mesh(Mesh const&) = delete;
 
 	//! Assignment operator, singleton, thus made private
-	void operator=(Mesh const &);
+	Mesh& operator=(Mesh const &) = delete;
 
 	void provisionSelf(uint16_t id);
 	void provisionLoad();

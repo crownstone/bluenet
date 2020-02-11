@@ -386,6 +386,9 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 
 		break;
 	}
+	case CS_MESH_MODEL_TYPE_REQUEST_SYNC: {
+		break;
+	}
 	}
 }
 

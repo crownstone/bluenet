@@ -714,7 +714,7 @@ void Crownstone::startUp() {
 
 	_behaviourStore.init();
 
-	_mesh->checkIn();
+	_mesh->requestSync();
 }
 
 void Crownstone::increaseResetCounter() {
