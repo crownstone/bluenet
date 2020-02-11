@@ -13,7 +13,7 @@
 
 #include <optional>
 
-#define LOGSwitchAggregator LOGd
+#define LOGSwitchAggregator LOGnone
 #define LOGSwitchAggregator_Evt LOGd
 
 
