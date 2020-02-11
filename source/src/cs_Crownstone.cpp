@@ -714,7 +714,7 @@ void Crownstone::startUp() {
 
 	_behaviourStore.init();
 
-	_mesh->requestSync();
+	// _mesh->requestSync();
 }
 
 void Crownstone::increaseResetCounter() {
@@ -756,6 +756,8 @@ void Crownstone::scheduleNextTick() {
 
 void Crownstone::run() {
 
+	// static bool mesh_sync_complete = false;
+
 	LOGi(FMT_HEADER, "running");
 
 	while(1) {
@@ -770,6 +772,10 @@ void Crownstone::run() {
 		sd_app_evt_wait();
 #endif
 		LOG_FLUSH();
+
+		// if(!mesh_sync_complete){
+		// 	mesh_sync_complete = _mesh->requestSync();
+		// }
 	}
 }
 

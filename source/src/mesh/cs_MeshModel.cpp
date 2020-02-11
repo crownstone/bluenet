@@ -29,8 +29,8 @@ extern "C" {
 #error "TICK_INTERVAL_MS must not be larger than MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS"
 #endif
 
-#define LOGMeshModelInfo    LOGnone
-#define LOGMeshModelDebug   LOGnone
+#define LOGMeshModelInfo    LOGd
+#define LOGMeshModelDebug   LOGd
 #define LOGMeshModelVerbose LOGnone
 
 
@@ -438,7 +438,7 @@ void MeshModel::handleTrackedDeviceToken(const access_message_rx_t * accessMsg, 
 
 void MeshModel::handleRequestSync(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	auto pl = reinterpret_cast<cs_mesh_model_msg_request_sync_t*>(payload);
-	LOGd("payload: %d %x", pl->crownstone_id, pl->flags);
+	LOGw("payload: %d %x", pl->crownstone_id, pl->flags);
 }
 
 

@@ -604,7 +604,12 @@ void Mesh::handleEvent(event_t & event) {
 }
 
 
-void Mesh::requestSync() {
+bool Mesh::requestSync() {
+	while (SystemTime::up() < 5) {
+		// LOGMeshInfo("Mesh::requestSync: nope");	
+		return false;
+	}
+
 	LOGMeshInfo("Mesh::requestSync");
 	uint32_t flags;
 	event_t sync_request_event(CS_TYPE::EVT_MESH_REQUEST_SYNC, (void*)&flags, sizeof(flags));
@@ -618,7 +623,7 @@ void Mesh::requestSync() {
 	TYPIFY(CONFIG_CROWNSTONE_ID) id;
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
 
-	rs.flags = flags;
+	rs.flags = 0xabcd; // ; flags;
 	rs.crownstone_id = id;
 
 	TYPIFY(CMD_SEND_MESH_MSG) msg = {};
@@ -627,4 +632,6 @@ void Mesh::requestSync() {
 	msg.type = CS_MESH_MODEL_TYPE_REQUEST_SYNC;
 
 	_model.sendMsg(&msg);
+
+	return true;
 }

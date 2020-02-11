@@ -77,7 +77,7 @@ public:
 	 * Assumes all event handlers that are interested in obtaining data are registered 
 	 * with the event dispatcher.
 	 */
-	void requestSync();
+	bool requestSync();
 
 
 private:
