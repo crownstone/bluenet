@@ -118,20 +118,18 @@ cs_ret_code_t MeshModel::sendBehaviourSettings(const behaviour_settings_t* item,
 }
 
 cs_ret_code_t MeshModel::sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats) {
-	remFromQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0);
+//	remFromQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t repeats) {
-//	remFromQueue(, 0);
-//	return addToQueue(, 0, (uint8_t*)item, sizeof(*item), repeats, false);
-	return ERR_NOT_IMPLEMENTED;
+//	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0);
+	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t repeats) {
-//	remFromQueue(, 0);
-//	return addToQueue(, 0, (uint8_t*)item, sizeof(*item), repeats, false);
-	return ERR_NOT_IMPLEMENTED;
+//	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, 0);
+	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendReliableMsg(const uint8_t* data, uint16_t len) {
@@ -433,8 +431,19 @@ void MeshModel::handleSetBehaviourSettings(const access_message_rx_t * accessMsg
 		State::getInstance().set(stateData);
 }
 
-void MeshModel::handleTrackedDeviceRegister(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {}
-void MeshModel::handleTrackedDeviceToken(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {}
+void MeshModel::handleTrackedDeviceRegister(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	cs_mesh_model_msg_device_register_t* packet = (cs_mesh_model_msg_device_register_t*) payload;
+			TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* eventData = packet;
+			event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER, eventData, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)));
+			EventDispatcher::getInstance().dispatch(event);
+}
+
+void MeshModel::handleTrackedDeviceToken(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	cs_mesh_model_msg_device_token_t* packet = (cs_mesh_model_msg_device_token_t*) payload;
+			TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventData = packet;
+			event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventData, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
+			EventDispatcher::getInstance().dispatch(event);
+}
 
 void MeshModel::handleRequestSync(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	auto pl = reinterpret_cast<cs_mesh_model_msg_request_sync_t*>(payload);

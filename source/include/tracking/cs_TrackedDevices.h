@@ -9,10 +9,24 @@
 #include <events/cs_EventListener.h>
 #include <forward_list>
 
+/**
+ * Class that keeps up devices to be tracked.
+ *
+ * - Register devices: each device has a unique ID, and registers a unique token.
+ * - Make sure device tokens expire.
+ * - Cache the data of the devices (profile, location, flags, etc).
+ * - Handle scans with device token only as data, and dispatch events with added cached data.
+ */
 class TrackedDevices: public EventListener {
 public:
+	TrackedDevices();
 
-
+	/**
+	 * Init class
+	 *
+	 * Register as event listener.
+	 */
+	void init();
 
 	/**
 	 * Handle events.
@@ -21,6 +35,12 @@ public:
 
 private:
 	static const uint8_t MAX_TRACKED_DEVICES = 20;
+
+	/**
+	 * After N minutes not hearing anything from the device, the location ID will be set to 0 (in sphere).
+	 * This prevents sending out old locations.
+	 */
+	static const uint8_t LOCATION_ID_TIMEOUT_MINUTES = 5;
 	static const uint16_t TICKS_PER_MINUTES = 1000 / TICK_INTERVAL_MS * 60;
 
 	enum TrackedDeviceFields {
@@ -34,8 +54,9 @@ private:
 	};
 	static const uint8_t ALL_FIELDS_SET = 0x7F;
 
-	struct TrackedDevice {
+	struct __attribute__((packed)) TrackedDevice {
 		uint8_t fieldsSet = 0;
+		uint8_t locationIdTimeout = LOCATION_ID_TIMEOUT_MINUTES;
 		internal_register_tracked_device_packet_t data;
 	};
 
@@ -47,6 +68,8 @@ private:
 	 * Device ID should be unique.
 	 */
 	std::forward_list<TrackedDevice> devices;
+
+	uint8_t deviceListSize = 0;
 
 	/**
 	 * Find device with given ID, else add a new device with given ID.
@@ -83,26 +106,41 @@ private:
 	 */
 	cs_ret_code_t removeDevice();
 
-	/**
-	 *
-	 */
-	bool isValidTTL(TrackedDevice& device);
-
-
 	cs_ret_code_t handleRegister(internal_register_tracked_device_packet_t& packet);
 	cs_ret_code_t handleUpdate(internal_update_tracked_device_packet_t& packet);
 	void handleMeshRegister(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)& packet);
 	void handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& packet);
 	void handleScannedDevice(adv_background_parsed_v1_t& packet);
 
+	/**
+	 * Return true when given access level is equal or higher than device access level.
+	 */
 	bool hasAccess(TrackedDevice& device, uint8_t accessLevel);
 
 	/**
-	 * Returns false if another device already has this token.
+	 * Returns true when device has a valid TTL, that didn't expire yet.
+	 */
+	bool isValidTTL(TrackedDevice& device);
+
+	/**
+	 * Returns true when no other device has this token.
 	 */
 	bool isTokenOkToSet(TrackedDevice& device, uint8_t* deviceToken, uint8_t size);
 
+	/**
+	 * A minute has passed.
+	 *
+	 * Decrease TTL of all devices by 1.
+	 * Decrease location timeout of all device by 1.
+	 */
+	void tickMinute();
+
+	/**
+	 * Returns true when all fields are set.
+	 */
 	bool allFieldsSet(TrackedDevice& device);
+
+
 	void setAccessLevel(TrackedDevice& device, uint8_t accessLevel);
 	void setLocation(TrackedDevice& device, uint8_t locationId);
 	void setProfile(TrackedDevice& device, uint8_t profileId);
@@ -111,25 +149,29 @@ private:
 	void setDevicetoken(TrackedDevice& device, uint8_t* deviceToken, uint8_t size);
 	void setTTL(TrackedDevice& device, uint16_t ttlMinutes);
 
-	void decreaseTTL();
+	/**
+	 * Send background adv event.
+	 *
+	 * Checks if all fields are set.
+	 */
+	void sendBackgroundAdv(TrackedDevice& device, uint8_t* macAddress, int8_t rssi);
 
 	/**
-	 * Send profile location.
+	 * Send profile location to event dispatcher.
 	 *
 	 * Checks if all fields are set.
 	 */
 	void sendLocation(TrackedDevice& device);
 
+	/**
+	 * Send tracked device register msg to mesh.
+	 */
 	void sendRegisterToMesh(TrackedDevice& device);
 
-	void sendTokenToMesh(TrackedDevice& device);
-
 	/**
-	 * Send the location of given device to mesh.
-	 *
-	 * Does not check if fields are set.
+	 * Send tracked device token msg to mesh.
 	 */
-	void sendLocationToMesh(TrackedDevice& device);
+	void sendTokenToMesh(TrackedDevice& device);
 };
 
 

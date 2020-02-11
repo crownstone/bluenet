@@ -680,6 +680,8 @@ void Crownstone::startUp() {
 		
 		TapToToggle::getInstance().init(_boardsConfig.tapToToggleDefaultRssiThreshold);
 
+		_trackedDevices.init();
+
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
 			RNG rng;
 			uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
@@ -698,6 +700,7 @@ void Crownstone::startUp() {
 			LOGi("Mesh not enabled");
 		}
 
+		_behaviourStore.init();
 	}
 
 	uint32_t err_code;
@@ -711,8 +714,6 @@ void Crownstone::startUp() {
 	_log(SERIAL_INFO, "\r\n");
 
 	_state->startWritesToFlash();
-
-	_behaviourStore.init();
 
 	// _mesh->requestSync();
 }

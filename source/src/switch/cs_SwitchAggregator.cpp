@@ -13,7 +13,7 @@
 
 #include <optional>
 
-#define LOGSwitchAggregator LOGd
+#define LOGSwitchAggregator LOGnone
 #define LOGSwitchAggregator_Evt LOGd
 
 
@@ -92,15 +92,19 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
         printStatus();
     }
     
+    cs_ret_code_t retCode = ERR_SUCCESS_NO_CHANGE;
     if (aggregatedState) {
-        auto retCode = smartSwitch.set(*aggregatedState);
+        retCode = smartSwitch.set(*aggregatedState);
         if (shouldResetOverrideState && retCode == ERR_SUCCESS) {
         	overrideState = {};
         }
-        return retCode;
     }
 
-    return ERR_SUCCESS_NO_CHANGE;
+    TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN) eventData = overrideState.has_value();
+    event_t overrideEvent(CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN, &eventData, sizeof(eventData));
+    overrideEvent.dispatch();
+
+    return retCode;
 }
 
 // ========================= Event handling =========================

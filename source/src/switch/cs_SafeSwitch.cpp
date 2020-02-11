@@ -9,7 +9,7 @@
 #include <storage/cs_State.h>
 #include <events/cs_EventDispatcher.h>
 
-#define LOGSafeSwitch LOGi
+#define LOGSafeSwitch LOGnone
 
 void SafeSwitch::init(const boards_config_t& board) {
 	dimmer.init(board);

@@ -239,6 +239,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_GET_BEHAVIOUR_INDICES,                        // Get a list of indices of active behaviours.
 	CMD_GET_BEHAVIOUR_DEBUG,                          // Get info to debug behaviour. Multiple classes will handle this command to fill pieces of info.
 	EVT_BEHAVIOURSTORE_MUTATION,                      // Sent by BehaviourStore, after a change to the stored behaviours.
+	EVT_BEHAVIOUR_OVERRIDDEN,                         // Informs whether behaviour is overridden by user (in override state).
 
 	// Tracked devices
 	CMD_REGISTER_TRACKED_DEVICE,
@@ -455,6 +456,7 @@ typedef uint8_t TYPIFY(CMD_GET_BEHAVIOUR); // index
 typedef void TYPIFY(CMD_GET_BEHAVIOUR_INDICES);
 typedef void TYPIFY(CMD_GET_BEHAVIOUR_DEBUG);
 typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
+typedef BOOL TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN);
 typedef internal_register_tracked_device_packet_t TYPIFY(CMD_REGISTER_TRACKED_DEVICE);
 typedef internal_update_tracked_device_packet_t TYPIFY(CMD_UPDATE_TRACKED_DEVICE);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);

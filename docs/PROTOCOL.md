@@ -301,35 +301,35 @@ Setup access means the packet is available in setup mode, and encrypted with the
 
 Available command types:
 
-Type nr | Type name | Payload type | Description | A | M | B | S
---- | --- | --- | --- | :---: | :---: | :---: | :--:
-0 | Setup | [Setup packet](#setup_packet) | Perform setup. |  |  |  | x
-1 | Factory reset | uint 32 | Reset device to factory setting, needs Code 0xdeadbeef as payload | x
-2 | Get state | [State get packet](#state_get_packet) | Required access depends on the state type. | x | x | x
-3 | Set state | [State set packet](#state_set_packet) | Required access depends on the state type. | x | x | x
-10 | Reset | - | Reset device | x
-11 | Goto DFU | - | Reset device to DFU mode | x
-12 | No operation | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
-13 | Disconnect | - | Causes the crownstone to disconnect | x | x | x
-20 | Switch | uint 8 | Switch power, 0 = off, 100 = full on | x | x | x | x |
-21 | Multi switch | [Multi switch packet](#multi_switch_packet) | Switch multiple Crownstones (via mesh). | x | x | x
-22 | Dimmer | uint 8 | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
-23 | Relay | uint 8 | Switch relay, 0 = off, 1 = on | x | x | x
-30 | Set time | uint 32 | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
-31 | Increase TX | - | Temporarily increase the TX power when in setup mode |  |  |  | x
-32 | Reset errors | [Error bitmask](#state_error_bitmask) | Reset all errors which are set in the written bitmask. | x
-33 | Mesh command | [Command mesh packet](#command_mesh_packet) | Send a generic command over the mesh. Required access depends on the command. Required access depends on the command. | x | x | x
-34 | Set sun times | [Sun time packet](#sun_time_packet) | Update the reference times for sunrise and sunset | x | x
-40 | Allow dimming | uint 8 | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
-41 | Lock switch | uint 8 | Lock/unlock switch, 0 = unlock, 1 = lock. | x
-50 | UART message | payload | Print the payload to UART. | x
-60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add_behaviour_packet) | Add a behaviour to an unoccupied index. | x | x
-61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | Replace the behaviour at given index. | x | x
-62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | Remove the behaviour at given index. | x | x
-63 | Get behaviour | [Get behaviour packet](BEHAVIOUR.md#get_behaviour_packet) | Obtain the behaviour stored at given index. | x | x
-64 | Get behaviour indices | [Get behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
-69 | Get behaviour debug | - | Obtain debug info of the current behaviour state. Result data is a [Behaviour debug packet](#behaviour_debug_packet). | x
-70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | Register or update a device to be tracked.
+Type nr | Type name | Payload type | Result type | Description | A | M | B | S
+--- | --- | --- | --- | :---: | :---: | :---: | :---: | :--:
+0 | Setup | [Setup packet](#setup_packet) | - | Perform setup. |  |  |  | x
+1 | Factory reset | uint 32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
+2 | Get state | [State get packet](#state_get_packet) | [State result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
+3 | Set state | [State set packet](#state_set_packet) | - | Required access depends on the state type. | x | x | x
+10 | Reset | - | - | Reset device | x
+11 | Goto DFU | - | - | Reset device to DFU mode | x
+12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
+13 | Disconnect | - | - | Causes the crownstone to disconnect | x | x | x
+20 | Switch | uint 8 | - | Switch power, 0 = off, 100 = full on | x | x | x | x |
+21 | Multi switch | [Multi switch packet](#multi_switch_packet) | - | Switch multiple Crownstones (via mesh). | x | x | x
+22 | Dimmer | uint 8 | - | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
+23 | Relay | uint 8 | - | Switch relay, 0 = off, 1 = on | x | x | x
+30 | Set time | uint 32 | - | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
+31 | Increase TX | - | - | Temporarily increase the TX power when in setup mode |  |  |  | x
+32 | Reset errors | [Error bitmask](#state_error_bitmask) | - | Reset all errors which are set in the written bitmask. | x
+33 | Mesh command | [Command mesh packet](#command_mesh_packet) | - | Send a generic command over the mesh. Required access depends on the command. Required access depends on the command. | x | x | x
+34 | Set sun times | [Sun time packet](#sun_time_packet) | - | Update the reference times for sunrise and sunset | x | x
+40 | Allow dimming | uint 8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
+41 | Lock switch | uint 8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
+50 | UART message | payload | - | Print the payload to UART. | x
+60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#add_behaviour_result_packet) | Add a behaviour to an unoccupied index. | x | x
+61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#replace_behaviour_result_packet) | Replace the behaviour at given index. | x | x
+62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#remove_behaviour_result_packet) | Remove the behaviour at given index. | x | x
+63 | Get behaviour | [Index](BEHAVIOUR.md#get_behaviour_packet) | [Index and behaviour packet](BEHAVIOUR.md#get_behaviour_result_packet) | Obtain the behaviour stored at given index. | x | x
+64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
+69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) | Obtain debug info of the current behaviour state. | x
+70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | Register or update a device to be tracked.
 
 
 <a name="setup_packet"></a>
@@ -515,26 +515,32 @@ uint 8 | Payload | Size | Payload data, depends on command type.
 
 Value | Name | Description
 --- | --- | ---
-0 | SUCCESS | Completed successfully.
-1 | WAIT_FOR_SUCCESS | Command is successful so far, but you need to wait for SUCCESS.
-16 | BUFFER_UNASSIGNED | No buffer was assigned for the command.
-17 | BUFFER_LOCKED | Buffer is locked, failed queue command.
-18 | BUFFER_TOO_SMALL | Buffer is too small for operation.
-32 | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
-33 | WRONG_PARAMETER | Wrong parameter provided.
-34 | INVALID_MESSAGE | invalid message provided.
-35 | UNKNOWN_OP_CODE | Unknown operation code provided.
-36 | UNKNOWN_TYPE | Unknown type provided.
-37 | NOT_FOUND | The thing you were looking for was not found.
-38 | NO_SPACE | There is no space for this command.
-39 | BUSY | Wait for something to be done.
-48 | NO_ACCESS | Invalid access for this command.
-64 | NOT_AVAILABLE | Command currently not available.
-65 | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
-67 | NOT_INITIALIZED | Something must first be initialized.
-80 | WRITE_DISABLED | Write is disabled for given type.
-81 | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
-96 | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
+0   | SUCCESS | Completed successfully.
+1   | WAIT_FOR_SUCCESS | Command is successful so far, but you need to wait for SUCCESS.
+2   | ERR_SUCCESS_NO_CHANGE | Command is succesful, but nothing changed.
+16  | BUFFER_UNASSIGNED | No buffer was assigned for the command.
+17  | BUFFER_LOCKED | Buffer is locked, failed queue command.
+18  | BUFFER_TOO_SMALL | Buffer is too small for operation.
+32  | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
+33  | WRONG_PARAMETER | Wrong parameter provided.
+34  | INVALID_MESSAGE | invalid message provided.
+35  | UNKNOWN_OP_CODE | Unknown operation code provided.
+36  | UNKNOWN_TYPE | Unknown type provided.
+37  | NOT_FOUND | The thing you were looking for was not found.
+38  | NO_SPACE | There is no space for this command.
+39  | BUSY | Wait for something to be done.
+40  | ERR_WRONG_STATE | The crownstone is in a wrong state.
+41  | ERR_ALREADY_EXISTS | Item already exists.
+48  | NO_ACCESS | Invalid access for this command.
+49  | ERR_UNSAFE | It's unsafe to execute this command.
+64  | NOT_AVAILABLE | Command currently not available.
+65  | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
+67  | NOT_INITIALIZED | Something must first be initialized.
+68  | ERR_NOT_STARTED | Something must first be started.
+80  | WRITE_DISABLED | Write is disabled for given type.
+81  | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
+96  | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
+112 | ERR_EVENT_UNHANDLED | The event or command was not handled.
 65535 | UNSPECIFIED | Unspecified error.
 
 
@@ -572,15 +578,15 @@ Type nr | Type name | Payload type | Description | A | M | B
 35 | Admin key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions. |  |  | 
 36 | Member key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions. |  |  | 
 37 | Basic key | uint 8 [16] | 16 byte key used to encrypt/decrypt basic access functions. |  |  | 
-39 | Scan interval | uint 16 | Set the scan interval in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default. | rw |  | 
-40 | Scan window | uint 16 | Set the scan window to in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default. | rw |  | 
-41 | Relay high duration | uint 16 | Set the time/duration that the relay is powered for a switch (ms). **Setting this to a wrong value may cause damage.** | rw |  | 
-42 | Low TX power | int 8 | Set the tx power used when in low transmission power for bonding (can be: -40, -20, -16, -12, -8, -4, 0, or 4). | rw |  | 
-43 | Voltage multiplier | float | Set the voltage multiplier (for power measurement). **Setting this to a wrong value may cause damage.** | rw |  | 
-44 | Current multiplier | float | Set the current multiplier (for power measurement). **Setting this to a wrong value may cause damage.** | rw |  | 
-45 | Voltage zero | int 32 | Set the voltage zero level (for power measurement).      **Setting this to a wrong value may cause damage.** | rw |  | 
-46 | Current zero | int 32 | Set the current zero level (for power measurement).      **Setting this to a wrong value may cause damage.** | rw |  | 
-47 | Power zero | int 32 | Set the power zero level in mW (for power measurement).    **Setting this to a wrong value may cause damage.** | rw |  | 
+39 | Scan interval | uint 16 | The scan interval in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default. | rw |  | 
+40 | Scan window | uint 16 | The scan window to in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default. | rw |  | 
+41 | Relay high duration | uint 16 | The time/duration that the relay is powered for a switch (ms). **Setting this to a wrong value may cause damage.** | rw |  | 
+42 | Low TX power | int 8 | The TX power used when in low transmission power for bonding (can be: -40, -20, -16, -12, -8, -4, 0, or 4). | rw |  | 
+43 | Voltage multiplier | float | Voltage multiplier (for power measurement). **Setting this to a wrong value may cause damage.** | rw |  | 
+44 | Current multiplier | float | Current multiplier (for power measurement). **Setting this to a wrong value may cause damage.** | rw |  | 
+45 | Voltage zero | int 32 | Voltage zero level (for power measurement).      **Setting this to a wrong value may cause damage.** | rw |  | 
+46 | Current zero | int 32 | Current zero level (for power measurement).      **Setting this to a wrong value may cause damage.** | rw |  | 
+47 | Power zero | int 32 | Power zero level in mW (for power measurement).    **Setting this to a wrong value may cause damage.** | rw |  | 
 50 | Current consumption threshold | uint 16 | At how much mA the switch will be turned off (soft fuse).            **Setting this to a wrong value may cause damage.** | rw |  | 
 51 | Current consumption threshold dimmer | uint 16 | At how much mA the dimmer will be turned off (soft fuse).     **Setting this to a wrong value may cause damage.** | rw |  | 
 52 | Dimmer temp up voltage | float | Voltage of upper threshold of the dimmer thermometer.                         **Setting this to a wrong value may cause damage.** | rw |  | 
@@ -607,8 +613,8 @@ Type nr | Type name | Payload type | Description | A | M | B
 135 | Temperature | int 8 | Chip temperature in °C. | r | r | 
 136 | Time | uint 32 | The current time as unix timestamp. | r | r | 
 139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors. | r | r | 
-149 | Sun time | [Sun time packet](#sun_time_packet) | r | r | 
-150 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | rw | rw | r
+149 | Sun time | [Sun time packet](#sun_time_packet) | Packet with sun rise and set times. | r | r | 
+150 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Behaviour settings. | rw | rw | r
 
 <a name="switch_state_packet"></a>
 #### Switch state

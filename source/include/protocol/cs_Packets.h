@@ -213,7 +213,7 @@ struct __attribute__((packed)) register_tracked_device_packet_t {
 	uint16_t deviceId;
 	uint8_t locationId;
 	uint8_t profileId;
-	uint8_t rssiOffset;
+	int8_t rssiOffset;
 	union __attribute__((packed)) {
 		struct __attribute__((packed)) {
 			bool reserved : 1;
