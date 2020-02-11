@@ -1,82 +1,37 @@
 # Behaviour
 
-This document describes the Crownstones' Behaviour concept in more technical detail. (Note that some detail sections have been collapsed.)
-
-# Table of Contents
-1. [Communication API for (smartphone) applications](#api_summary)
-2. [Protocol Packet Definitions](#behaviour_protocol)
-3. [Firmware Design Internals](#firmware_design)
-
-<a name="api_summary"></a>
-# Communication API for (smartphone) applications
-
 To store, update and sync Behaviours, the application can communicate over the Crownstone bluetooth protocol
 by sending [Behaviour Packets](PROTOCOL.md#behaviour_packet). The advertized state contains a [Behaviour Hash](#behaviour_master_hash)
 of all stored behaviours, which can be used to identify an out-of-sync condition.
 
+## Table of contents
 
-```C++
-/**
- * Returns an index in range [0,MaxBehaviours) on succes, 
- * or 0xffffffff if it couldn't be saved.
- */
- uint8_t save(Behaviour b);
+- [Commands](#behaviour_commands)
+- [Packets](#behaviour_packets)
 
-/**
- * Replace the behaviour at [index] with [b]
- * postcondition is identical to the
- * postcondition of calling save(b) when it returns [index].
- */
-bool replace(uint8_t index, Behaviour b);
+<a name="behaviour_commands"></a>
+## Behaviour Commands
 
-/**
- * deletes the behaviour at [index] the behaviour is removed from storage.
- */
-bool remove(uint8_t index);
+- [Add](#add_behaviour)
+- [Replace](#replace_behaviour)
+- [Remove](#remove_behaviour)
+- [Get](#get_behaviour)
+- [List](#get_behaviour_indices)
 
-/**
- *  returns the stored behaviour at [index].
- */
-Behaviour get(uint8_t index);
 
-/**
- * returns a map with the currently occupied indices and the 
- * behaviours at those indices.
- */
-std::vector<uint8_t> get();
-```
 
-<a name="behaviour_protocol"></a>
-# Protocol Packet Definitions
-
-### Behaviour Commands
+<a name="add_behaviour"></a>
+### Add behaviour
+Add a new behaviour to an empty index.
 
 <a name="add_behaviour_packet"></a>
-#### Add Behaviour
-
-When a Add Behaviour packet is received by the Crownstone, it will try to store the Behaviour represented by `Data` 
-to its persistent memory. Upon success, it returns the `Index` (uint8) that can be used to refer to this behaviour. 
-
-<details open>
-<summary>
-Request Payload
-</summary>
-<p>
-
-![Add Behaviour](../docs/diagrams/behaviour-add.png)
+##### Add behaviour packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Behaviour](#behaviour_payload) | Data | ... | Behaviour to add.
 
-</p>
-</details>
-
-<details>
-<summary>
-Result Codes
-</summary>
-<p>
+##### Result codes
 
 Value | Explanation
 --- | ---
@@ -85,16 +40,9 @@ BUSY | The memory was too busy to respond.
 SUCCESS | There was a slot free, and memory wasn't busy - request executed. See return payload for details.
 ... | Other cases may happen in case of exception.
 
-</p>
-</details>
-
-<details>
-<summary>
-Return Payload
-</summary>
-<p>
-
-The return payload will always contain the most current master hash.
+<a name="add_behaviour_result_packet"></a>
+##### Add behaviour result packet
+The result will always contain the most current master hash.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -102,36 +50,20 @@ uint8 | Index | 1 | The index at which the behaviour is stored, or 255 when not 
 [Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
 
 
-</p>
-</details>
+
+<a name="replace_behaviour"></a>
+### Replace Behaviour
+Replace a behaviour at given index by the given behaviour.
 
 <a name="replace_behaviour_packet"></a>
-#### Replace Behaviour
-
-When a Replace Behaviour packet is received by the Crownstone, it will try to replace the behaviour at `index` by the
-Behaviour represented by `Data`.
-
-<details open>
-<summary>
-Request Payload
-</summary>
-<p>
-
-![Replace Behaviour](../docs/diagrams/behaviour-replace.png)
+##### Replace behaviour packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to replace.
 [Behaviour](#behaviour_payload) | Data | ... | Behaviour to replace the current one at given index with.
 
-</p>
-</details>
-
-<details>
-<summary>
-Result Codes
-</summary>
-<p>
+##### Result codes
 
 Value | Explanation
 --- | ---
@@ -140,50 +72,30 @@ BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
 
-</p>
-</details>
-
-<details>
-<summary>
-Return Payload
-</summary>
-<p>
-
-The return payload will always contain the most current master hash.
+<a name="replace_behaviour_result_packet"></a>
+##### Replace behaviour result packet
+The result will always contain the most current master hash.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index at which the behaviour was replaced.
 [Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
 
-</p>
-</details>
+
+
+<a name="remove_behaviour"></a>
+### Remove behaviour
+Remove the behaviour at given index.
 
 <a name="remove_behaviour_packet"></a>
-#### Remove Behaviour Payload
-
-When a Remove Behaviour packet is received by the Crownstone, it will try to remove the behaviour at `index`.
-
-<details open>
-<summary>
-Request Payload
-</summary>
-<p>
-
-![Remove Behaviour](../docs/diagrams/behaviour-remove.png)
+##### Remove behaviour packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to remove.
 
-</p>
-</details>
 
-<details>
-<summary>
-Result Codes
-</summary>
-<p>
+##### Result codes
 
 Value | Explanation
 --- | ---
@@ -192,51 +104,29 @@ BUSY | The memory was too busy to respond.
 SUCCESS | Behaviour at given index is removed, or was already empty.
 ... | Other cases may happen in case of exception.
 
-</p>
-</details>
-
-<details>
-<summary>
-Return Payload
-</summary>
-<p>
-
-The return payload will always contain the most current master hash.
+<a name="remove_behaviour_result_packet"></a>
+##### Remove behaviour result packet
+The result will always contain the most current master hash.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index from which the behaviour was removed.
 [Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
 
-</p>
-</details>
+
+
+<a name="get_behaviour"></a>
+### Get behaviour
+Retrieve the behaviour at given index.
 
 <a name="get_behaviour_packet"></a>
-#### Get Behaviour
-
-When a Get Behaviour packet is received by the Crownstone it will retrieve the behaviour at given `Index`.
-If such behaviour exists, it is returned.
-
-<details open>
-<summary>
-Request Payload
-</summary>
-<p>
-
-![Get Behaviour](../docs/diagrams/behaviour-get.png)
+##### Get behaviour packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to obtain.
 
-<p>
-</details>
-
-<details>
-<summary>
-Result Codes
-</summary>
-<p>
+##### Result codes
 
 Value | Explanation
 --- | ---
@@ -245,49 +135,23 @@ NOT_FOUND | No behaviour was found at given index.
 BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
-<p>
-</details>
 
-
-<details>
-<summary>
-Return Payload
-</summary>
-
-<p>
-If the `Index` is unoccupied, the return payload has length 0.
-
-If there exists a behaviour at the `Index` , the following packet will be returned:
+<a name="get_behaviour_result_packet"></a>
+##### Get behaviour result packet
+If the index is unoccupied, the result payload has length 0.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index of the requested behaviour.
-[Behaviour](#behaviour_payload) | Data | ... | The Behaviour that is stored at the given `Index`.
+[Behaviour](#behaviour_payload) | Data | ... | The behaviour that is stored at the given `Index`.
 
-</p>
-</details>
 
-<a name="get_behaviour_indices_packet"></a>
-#### Get Behaviour Indices
 
+<a name="get_behaviour_indices"></a>
+### Get behaviour indices
 Query which indices in the behaviour store are currently occupied.
 
-<details open>
-<summary>
-Request Payload
-</summary>
-<p>
-
-No additional payload necessary.
-
-</p>
-</details>
-
-<details>
-<summary>
-Result Codes
-</summary>
-<p>
+##### Result codes
 
 Value | Explanation
 --- | ---
@@ -295,25 +159,17 @@ BUSY | The memory was too busy to respond.
 SUCCESS | Memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
 
-</p>
-</details>
-
-<details>
-<summary>
-Return Payload
-</summary>
-<p>
+<a name="get_behaviour_indices_packet"></a>
+##### Behaviour indices result packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 [Index with hash](#index_and_behaviour_hash)[] | list | ... | List of all occupied indices, and their hashes.
 
 
-</p>
-</details>
 
-
-### Behaviour related data types
+<a name="behaviour_packets"></a>
+## Behaviour packets
 
 <a name="behaviour_payload"></a>
 #### Behaviour payload
@@ -451,8 +307,10 @@ uint8 | Type | 1 | <ol start="0"><li>Vacuously true condition</li><li>Anyone in 
 uint64 | Active rooms mask | 8 | Room with id `i` corresponds to bit `i` in this mask.
 uint32_t | Timeout | 4 | Whenever a presence description is satisfied (evaluates to true), it shall evaluate to true until this time out expires. Use 0 to ignore. Units: seconds.
 
+
+
 <a name="firmware_design"></a>
-# Firmware design internals
+## Firmware design internals
 
 In the diagram below the event flow concerning Behaviours and Twilights is depicted. Double arrows (annotated) indicate which `event`'s are received and handled by the node pointed to, red/dashed objects indicate not-yet implemented features, aggregation arrows indicate object ownership as in the sense of UML and lines indicate connection to physical domain.
 
