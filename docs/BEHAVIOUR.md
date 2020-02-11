@@ -1,8 +1,6 @@
 # Behaviour
 
-To store, update and sync Behaviours, the application can communicate over the Crownstone bluetooth protocol
-by sending [Behaviour Packets](PROTOCOL.md#behaviour_packet). The advertized state contains a [Behaviour Hash](#behaviour_master_hash)
-of all stored behaviours, which can be used to identify an out-of-sync condition.
+Behaviours can be set and retrieved. The user can check the [master hash](#behaviour_master_hash) to check if all behaviours are synchronized.
 
 ## Table of contents
 
