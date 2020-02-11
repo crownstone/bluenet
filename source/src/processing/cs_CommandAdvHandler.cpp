@@ -345,6 +345,18 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			meshCmd.dispatch();
 			break;
 		}
+		case ADV_CMD_UPDATE_TRACKED_DEVICE: {
+			size16_t requiredSize = sizeof(update_tracked_device_packet_t);
+			if (length < requiredSize) {
+				return true;
+			}
+			TYPIFY(CMD_UPDATE_TRACKED_DEVICE) eventData;
+			eventData.accessLevel = accessLevel;
+			eventData.data = *((update_tracked_device_packet_t*)commandData);
+			event_t event(CS_TYPE::CMD_UPDATE_TRACKED_DEVICE, &eventData, sizeof(eventData));
+			event.dispatch();
+			break;
+		}
 		default:
 			LOGd("Unkown adv cmd: %u", type);
 			return true;
@@ -381,6 +393,7 @@ void CommandAdvHandler::handleDecryptedRC5Payload(scanned_device_t* scannedDevic
 EncryptionAccessLevel CommandAdvHandler::getRequiredAccessLevel(const AdvCommandTypes type) {
 	switch (type) {
 		case ADV_CMD_MULTI_SWITCH:
+		case ADV_CMD_UPDATE_TRACKED_DEVICE:
 			return BASIC;
 		case ADV_CMD_SET_TIME:
 		case ADV_CMD_SET_BEHAVIOUR_SETTINGS:
