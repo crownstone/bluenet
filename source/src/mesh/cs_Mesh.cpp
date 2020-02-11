@@ -35,6 +35,7 @@ extern "C" {
 #include "ble/cs_Stack.h"
 #include "storage/cs_State.h"
 
+#include <time/cs_SystemTime.h>
 #include <protocol/cs_UartProtocol.h>
 
 #define LOGMeshInfo LOGi
@@ -534,9 +535,13 @@ void Mesh::handleEvent(event_t & event) {
 			RNG::fillBuffer(&rand8, 1);
 			uint32_t randMs = MESH_SEND_TIME_INTERVAL_MS + rand8 * MESH_SEND_TIME_INTERVAL_MS_VARIATION / 255;
 			_sendStateTimeCountdown = randMs / TICK_INTERVAL_MS;
-			cs_mesh_model_msg_time_t packet;
-			State::getInstance().get(CS_TYPE::STATE_TIME, &(packet.timestamp), sizeof(packet.timestamp));
-			_model.sendTime(&packet);
+
+			Time time = SystemTime::posix();
+			if(time.isValid()){
+				cs_mesh_model_msg_time_t packet;
+				packet.timestamp = time.timestamp;
+				_model.sendTime(&packet);
+			}
 		}
 
 		_model.tick(tickCount);
