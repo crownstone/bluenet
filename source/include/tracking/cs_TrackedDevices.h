@@ -9,9 +9,24 @@
 #include <events/cs_EventListener.h>
 #include <forward_list>
 
+/**
+ * Class that keeps up devices to be tracked.
+ *
+ * - Register devices: each device has a unique ID, and registers a unique token.
+ * - Make sure device tokens expire.
+ * - Cache the data of the devices (profile, location, flags, etc).
+ * - Handle scans with device token only as data, and dispatch events with added cached data.
+ */
 class TrackedDevices: public EventListener {
 public:
 	TrackedDevices();
+
+	/**
+	 * Init class
+	 *
+	 * Register as event listener.
+	 */
+	void init();
 
 	/**
 	 * Handle events.
@@ -20,6 +35,12 @@ public:
 
 private:
 	static const uint8_t MAX_TRACKED_DEVICES = 20;
+
+	/**
+	 * After N minutes not hearing anything from the device, the location ID will be set to 0 (in sphere).
+	 * This prevents sending out old locations.
+	 */
+	static const uint8_t LOCATION_ID_TIMEOUT_MINUTES = 5;
 	static const uint16_t TICKS_PER_MINUTES = 1000 / TICK_INTERVAL_MS * 60;
 
 	enum TrackedDeviceFields {
@@ -33,8 +54,9 @@ private:
 	};
 	static const uint8_t ALL_FIELDS_SET = 0x7F;
 
-	struct TrackedDevice {
+	struct __attribute__((packed)) TrackedDevice {
 		uint8_t fieldsSet = 0;
+		uint8_t locationIdTimeout = LOCATION_ID_TIMEOUT_MINUTES;
 		internal_register_tracked_device_packet_t data;
 	};
 
@@ -106,9 +128,12 @@ private:
 	bool isTokenOkToSet(TrackedDevice& device, uint8_t* deviceToken, uint8_t size);
 
 	/**
+	 * A minute has passed.
+	 *
 	 * Decrease TTL of all devices by 1.
+	 * Decrease location timeout of all device by 1.
 	 */
-	void decreaseTTL();
+	void tickMinute();
 
 	/**
 	 * Returns true when all fields are set.
@@ -123,6 +148,13 @@ private:
 	void setFlags(TrackedDevice& device, uint8_t flags);
 	void setDevicetoken(TrackedDevice& device, uint8_t* deviceToken, uint8_t size);
 	void setTTL(TrackedDevice& device, uint16_t ttlMinutes);
+
+	/**
+	 * Send background adv event.
+	 *
+	 * Checks if all fields are set.
+	 */
+	void sendBackgroundAdv(TrackedDevice& device, uint8_t* macAddress, int8_t rssi);
 
 	/**
 	 * Send profile location to event dispatcher.
@@ -140,13 +172,6 @@ private:
 	 * Send tracked device token msg to mesh.
 	 */
 	void sendTokenToMesh(TrackedDevice& device);
-
-	/**
-	 * Send the location of given device to mesh.
-	 *
-	 * Does not check if fields are set.
-	 */
-	void sendLocationToMesh(TrackedDevice& device);
 };
 
 

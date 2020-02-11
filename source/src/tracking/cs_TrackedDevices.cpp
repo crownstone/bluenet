@@ -12,6 +12,9 @@
 #include <util/cs_Utils.h>
 
 TrackedDevices::TrackedDevices() {
+}
+
+void TrackedDevices::init() {
 	EventDispatcher::getInstance().addListener(this);
 }
 
@@ -54,7 +57,6 @@ void TrackedDevices::handleMeshRegister(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)
 	setRssiOffset(*device, packet.rssiOffset);
 	setFlags(*device, packet.flags);
 	setAccessLevel(*device, packet.accessLevel);
-	sendLocationToMesh(*device);
 }
 
 
@@ -80,13 +82,14 @@ void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
 	if (!allFieldsSet(*device)) {
 		return;
 	}
-	if (device->data.data.flags.flags.ignoreForBehaviour) {
-		return;
-	}
 	if (!isValidTTL(*device)) {
 		return;
 	}
-	sendLocation(*device);
+	device->locationIdTimeout = LOCATION_ID_TIMEOUT_MINUTES;
+//	if (!device->data.data.flags.flags.ignoreForBehaviour) {
+//		sendLocation(*device);
+//	}
+	sendBackgroundAdv(*device, packet.macAddress, packet.rssi);
 }
 
 
@@ -196,6 +199,7 @@ void TrackedDevices::setAccessLevel(TrackedDevice& device, uint8_t accessLevel) 
 void TrackedDevices::setLocation(TrackedDevice& device, uint8_t locationId) {
 	device.data.data.locationId = locationId;
 	BLEutil::setBit(device.fieldsSet, BIT_POS_LOCATION);
+	device.locationIdTimeout = LOCATION_ID_TIMEOUT_MINUTES;
 }
 
 void TrackedDevices::setProfile(TrackedDevice& device, uint8_t profileId) {
@@ -228,12 +232,34 @@ bool TrackedDevices::isValidTTL(TrackedDevice& device) {
 	return (BLEutil::isBitSet(device.fieldsSet, BIT_POS_TTL)) && (device.data.data.timeToLiveMinutes != 0);
 }
 
-void TrackedDevices::decreaseTTL() {
+void TrackedDevices::tickMinute() {
 	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
+		if (iter->locationIdTimeout != 0) {
+			iter->locationIdTimeout--;
+			if (iter->locationIdTimeout == 0) {
+				iter->data.data.locationId = 0;
+			}
+		}
 		if ((iter->fieldsSet & BIT_POS_TTL) && (iter->data.data.timeToLiveMinutes != 0)) {
 			iter->data.data.timeToLiveMinutes--;
 		}
 	}
+}
+
+
+
+void TrackedDevices::sendBackgroundAdv(TrackedDevice& device, uint8_t* macAddress, int8_t rssi) {
+	if (!allFieldsSet(device)) {
+		return;
+	}
+	TYPIFY(EVT_ADV_BACKGROUND_PARSED) eventData;
+	eventData.macAddress = macAddress;
+	eventData.adjustedRssi = rssi + device.data.data.rssiOffset;
+	eventData.locationId = device.data.data.locationId;
+	eventData.profileId = device.data.data.profileId;
+	eventData.flags = device.data.data.flags.asInt;
+	event_t event(CS_TYPE::EVT_ADV_BACKGROUND_PARSED, &eventData, sizeof(eventData));
+	event.dispatch();
 }
 
 void TrackedDevices::sendLocation(TrackedDevice& device) {
@@ -269,14 +295,6 @@ void TrackedDevices::sendTokenToMesh(TrackedDevice& device) {
 	event.dispatch();
 }
 
-void TrackedDevices::sendLocationToMesh(TrackedDevice& device) {
-	TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION) eventData;
-	eventData.profile = device.data.data.profileId;
-	eventData.location = device.data.data.locationId;
-	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION, &eventData, sizeof(eventData));
-	event.dispatch();
-}
-
 void TrackedDevices::handleEvent(event_t& evt) {
 	switch(evt.type) {
 		case CS_TYPE::CMD_REGISTER_TRACKED_DEVICE: {
@@ -307,7 +325,7 @@ void TrackedDevices::handleEvent(event_t& evt) {
 		case CS_TYPE::EVT_TICK: {
 			if (--ticksLeft == 0) {
 				ticksLeft = TICKS_PER_MINUTES;
-				decreaseTTL();
+				tickMinute();
 			}
 			break;
 		}
