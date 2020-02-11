@@ -515,26 +515,32 @@ uint 8 | Payload | Size | Payload data, depends on command type.
 
 Value | Name | Description
 --- | --- | ---
-0 | SUCCESS | Completed successfully.
-1 | WAIT_FOR_SUCCESS | Command is successful so far, but you need to wait for SUCCESS.
-16 | BUFFER_UNASSIGNED | No buffer was assigned for the command.
-17 | BUFFER_LOCKED | Buffer is locked, failed queue command.
-18 | BUFFER_TOO_SMALL | Buffer is too small for operation.
-32 | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
-33 | WRONG_PARAMETER | Wrong parameter provided.
-34 | INVALID_MESSAGE | invalid message provided.
-35 | UNKNOWN_OP_CODE | Unknown operation code provided.
-36 | UNKNOWN_TYPE | Unknown type provided.
-37 | NOT_FOUND | The thing you were looking for was not found.
-38 | NO_SPACE | There is no space for this command.
-39 | BUSY | Wait for something to be done.
-48 | NO_ACCESS | Invalid access for this command.
-64 | NOT_AVAILABLE | Command currently not available.
-65 | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
-67 | NOT_INITIALIZED | Something must first be initialized.
-80 | WRITE_DISABLED | Write is disabled for given type.
-81 | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
-96 | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
+0   | SUCCESS | Completed successfully.
+1   | WAIT_FOR_SUCCESS | Command is successful so far, but you need to wait for SUCCESS.
+2   | ERR_SUCCESS_NO_CHANGE | Command is succesful, but nothing changed.
+16  | BUFFER_UNASSIGNED | No buffer was assigned for the command.
+17  | BUFFER_LOCKED | Buffer is locked, failed queue command.
+18  | BUFFER_TOO_SMALL | Buffer is too small for operation.
+32  | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
+33  | WRONG_PARAMETER | Wrong parameter provided.
+34  | INVALID_MESSAGE | invalid message provided.
+35  | UNKNOWN_OP_CODE | Unknown operation code provided.
+36  | UNKNOWN_TYPE | Unknown type provided.
+37  | NOT_FOUND | The thing you were looking for was not found.
+38  | NO_SPACE | There is no space for this command.
+39  | BUSY | Wait for something to be done.
+40  | ERR_WRONG_STATE | The crownstone is in a wrong state.
+41  | ERR_ALREADY_EXISTS | Item already exists.
+48  | NO_ACCESS | Invalid access for this command.
+49  | ERR_UNSAFE | It's unsafe to execute this command.
+64  | NOT_AVAILABLE | Command currently not available.
+65  | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
+67  | NOT_INITIALIZED | Something must first be initialized.
+68  | ERR_NOT_STARTED | Something must first be started.
+80  | WRITE_DISABLED | Write is disabled for given type.
+81  | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
+96  | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
+112 | ERR_EVENT_UNHANDLED | The event or command was not handled.
 65535 | UNSPECIFIED | Unspecified error.
 
 
