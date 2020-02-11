@@ -683,6 +683,7 @@ void Crownstone::startUp() {
 			LOGi("Mesh not enabled");
 		}
 
+		_behaviourStore.init();
 	}
 
 	uint32_t err_code;
@@ -705,8 +706,6 @@ void Crownstone::startUp() {
 	Switch::getInstance().turnOn();
 #endif
 #endif
-
-	_behaviourStore.init();
 }
 
 /**
