@@ -11,6 +11,9 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
+#define LOGTrackedDevicesDebug LOGnone
+#define LOGTrackedDevicesVerbose LOGnone
+
 TrackedDevices::TrackedDevices() {
 }
 
@@ -19,14 +22,17 @@ void TrackedDevices::init() {
 }
 
 cs_ret_code_t TrackedDevices::handleRegister(internal_register_tracked_device_packet_t& packet) {
+	LOGTrackedDevicesDebug("handleRegister id=%u", packet.data.deviceId);
 	TrackedDevice* device = findOrAdd(packet.data.deviceId);
 	if (device == nullptr) {
 		return ERR_NO_SPACE;
 	}
 	if (!hasAccess(*device, packet.accessLevel)) {
+		LOGw("No access id=%u oldLevel=%u newLevel=%u", packet.data.deviceId, device->data.accessLevel, packet.accessLevel);
 		return ERR_NO_ACCESS;
 	}
 	if (!isTokenOkToSet(*device, packet.data.deviceToken, sizeof(packet.data.deviceToken))) {
+		LOGw("Token already exists");
 		return ERR_ALREADY_EXISTS;
 	}
 	setAccessLevel(*device, packet.accessLevel);
@@ -47,6 +53,7 @@ cs_ret_code_t TrackedDevices::handleUpdate(internal_update_tracked_device_packet
 }
 
 void TrackedDevices::handleMeshRegister(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)& packet) {
+	LOGTrackedDevicesDebug("handleMeshRegister id=%u", packet.deviceId);
 	TrackedDevice* device = findOrAdd(packet.deviceId);
 	if (device == nullptr) {
 		return;
@@ -61,12 +68,14 @@ void TrackedDevices::handleMeshRegister(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)
 
 
 void TrackedDevices::handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& packet) {
+	LOGTrackedDevicesDebug("handleMeshToken id=%u", packet.deviceId);
 	TrackedDevice* device = findOrAdd(packet.deviceId);
 	if (device == nullptr) {
 		return;
 	}
 	// Access has been checked by sending crownstone.
 	if (!isTokenOkToSet(*device, packet.deviceToken, sizeof(packet.deviceToken))) {
+		LOGw("Token already exists");
 		return;
 	}
 	setDevicetoken(*device, packet.deviceToken, sizeof(packet.deviceToken));
@@ -80,9 +89,11 @@ void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
 	}
 	// Maybe only check some fields to be set?
 	if (!allFieldsSet(*device)) {
+		LOGTrackedDevicesVerbose("not all fields set id=%u", device->data.data.deviceId);
 		return;
 	}
 	if (!isValidTTL(*device)) {
+		LOGTrackedDevicesVerbose("token expired id=%u", device->data.data.deviceId);
 		return;
 	}
 	device->locationIdTimeout = LOCATION_ID_TIMEOUT_MINUTES;
@@ -108,6 +119,7 @@ TrackedDevices::TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 TrackedDevices::TrackedDevice* TrackedDevices::find(device_id_t deviceId) {
 	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
 		if (iter->data.data.deviceId == deviceId) {
+			LOGTrackedDevicesVerbose("found device");
 			return &(*iter);
 		}
 	}
@@ -118,6 +130,7 @@ TrackedDevices::TrackedDevice* TrackedDevices::findToken(uint8_t* deviceToken, u
 	assert(size == TRACKED_DEVICE_TOKEN_SIZE, "Wrong device token size");
 	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
 		if (memcmp(iter->data.data.deviceToken, deviceToken, size) == 0) {
+			LOGTrackedDevicesVerbose("found token id=%u", iter->data.data.deviceId);
 			return &(*iter);
 		}
 	}
@@ -129,9 +142,11 @@ TrackedDevices::TrackedDevice* TrackedDevices::add() {
 	if (deviceListSize >= MAX_TRACKED_DEVICES) {
 		cs_ret_code_t retCode = removeDevice();
 		if (retCode != ERR_SUCCESS) {
+			LOGTrackedDevicesDebug("no space to add");
 			return nullptr;
 		}
 	}
+	LOGTrackedDevicesDebug("add device");
 	TrackedDevice device;
 	devices.push_front(device);
 	++deviceListSize;
@@ -153,7 +168,8 @@ cs_ret_code_t TrackedDevices::removeDevice() {
 		}
 		prevIter = iter;
 	}
-
+	[[maybe_unused]] auto removedIter = iterToRemove;
+	LOGTrackedDevicesDebug("remove device id=%u", (++removedIter)->data.data.deviceId);
 //	if (lowestTTL == 0xFFFF) {
 //		return ERR_NOT_AVAILABLE;
 //	}
@@ -233,6 +249,7 @@ bool TrackedDevices::isValidTTL(TrackedDevice& device) {
 }
 
 void TrackedDevices::tickMinute() {
+	LOGTrackedDevicesDebug("tickMinute");
 	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
 		if (iter->locationIdTimeout != 0) {
 			iter->locationIdTimeout--;
@@ -249,6 +266,7 @@ void TrackedDevices::tickMinute() {
 
 
 void TrackedDevices::sendBackgroundAdv(TrackedDevice& device, uint8_t* macAddress, int8_t rssi) {
+	LOGTrackedDevicesVerbose("sendBackgroundAdv id=%u", device.data.data.deviceId);
 	if (!allFieldsSet(device)) {
 		return;
 	}
@@ -263,6 +281,7 @@ void TrackedDevices::sendBackgroundAdv(TrackedDevice& device, uint8_t* macAddres
 }
 
 void TrackedDevices::sendLocation(TrackedDevice& device) {
+	LOGTrackedDevicesVerbose("sendLocation id=%u", device.data.data.deviceId);
 	if (!allFieldsSet(device)) {
 		return;
 	}
@@ -275,6 +294,7 @@ void TrackedDevices::sendLocation(TrackedDevice& device) {
 }
 
 void TrackedDevices::sendRegisterToMesh(TrackedDevice& device) {
+	LOGTrackedDevicesDebug("sendRegisterToMesh id=%u", device.data.data.deviceId);
 	TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER) eventData;
 	eventData.accessLevel = device.data.accessLevel;
 	eventData.deviceId    = device.data.data.deviceId;
@@ -287,6 +307,7 @@ void TrackedDevices::sendRegisterToMesh(TrackedDevice& device) {
 }
 
 void TrackedDevices::sendTokenToMesh(TrackedDevice& device) {
+	LOGTrackedDevicesDebug("sendTokenToMesh id=%u", device.data.data.deviceId);
 	TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN) eventData;
 	eventData.deviceId   = device.data.data.deviceId;
 	memcpy(eventData.deviceToken, device.data.data.deviceToken, sizeof(device.data.data.deviceToken));
