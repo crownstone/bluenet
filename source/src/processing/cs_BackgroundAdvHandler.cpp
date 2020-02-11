@@ -174,7 +174,6 @@ void BackgroundAdvertisementHandler::handleBackgroundAdvertisement(adv_backgroun
 
 
 	TYPIFY(EVT_ADV_BACKGROUND_PARSED) parsed;
-	parsed.sphereId = backgroundAdvertisement->sphereId;
 	parsed.macAddress = backgroundAdvertisement->macAddress;
 
 	//struct __attribute__((__packed__)) BackgroundAdvertisementPayload {
