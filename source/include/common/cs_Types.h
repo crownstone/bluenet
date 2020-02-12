@@ -229,7 +229,9 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_TIME,                                    // Mesh received the current time.
 	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
 	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.
-	EVT_MESH_REQUEST_SYNC_OUTGOING,                   // Before an outgoing sync request is broadcast, this event is fired internally so that other event handlers can tag on.
+	EVT_MESH_SYNC_REQUEST_OUTGOING,                   // Before an outgoing sync request is broadcast, this event is fired internally so that other event handlers can tag on.
+	EVT_MESH_SYNC_REQUEST_INCOMING,                   // Whan a sync request is received, this event is fired internally so that each event handler can individually respond to it.
+	EVT_MESH_SYNC_RESPONSE_INCOMING,
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR,                                // Add a behaviour.
@@ -466,7 +468,9 @@ typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef void TYPIFY(EVT_GOING_TO_DFU);
 typedef profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
-typedef uint8_t TYPIFY(EVT_MESH_REQUEST_SYNC_OUTGOING);
+typedef uint8_t TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING);
+typedef void TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING);
+typedef uint8_t TYPIFY(EVT_MESH_SYNC_RESPONSE_INCOMING);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
