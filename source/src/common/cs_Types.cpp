@@ -160,7 +160,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
-	case CS_TYPE::EVT_MESH_REQUEST_SYNC:
+	case CS_TYPE::EVT_MESH_REQUEST_SYNC_OUTGOING:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return csType;
 	}
@@ -476,8 +476,8 @@ size16_t TypeSize(CS_TYPE const & type){
 		return 0;
 	case CS_TYPE::EVT_PROFILE_LOCATION:
 		return sizeof(TYPIFY(EVT_PROFILE_LOCATION));
-	case CS_TYPE::EVT_MESH_REQUEST_SYNC:
-		return sizeof(TYPIFY(EVT_MESH_REQUEST_SYNC));
+	case CS_TYPE::EVT_MESH_REQUEST_SYNC_OUTGOING:
+		return sizeof(TYPIFY(EVT_MESH_REQUEST_SYNC_OUTGOING));
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return 0;
 	} // end switch
@@ -637,7 +637,7 @@ const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_DIMMER: return "CMD_SET_DIMMER";
 	case CS_TYPE::EVT_GOING_TO_DFU: return "EVT_GOING_TO_DFU";
 	case CS_TYPE::EVT_PROFILE_LOCATION: return "EVT_PROFILE_LOCATION";
-	case CS_TYPE::EVT_MESH_REQUEST_SYNC: return "EVT_MESH_REQUEST_SYNC";
+	case CS_TYPE::EVT_MESH_REQUEST_SYNC_OUTGOING: return "EVT_MESH_REQUEST_SYNC_OUTGOING";
 	case CS_TYPE::EVT_GENERIC_TEST: return "EVT_GENERIC_TEST";
 	}
 	return "Unknown";
@@ -792,7 +792,7 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
-	case CS_TYPE::EVT_MESH_REQUEST_SYNC:
+	case CS_TYPE::EVT_MESH_REQUEST_SYNC_OUTGOING:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return false;
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
@@ -956,7 +956,7 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
-	case CS_TYPE::EVT_MESH_REQUEST_SYNC:
+	case CS_TYPE::EVT_MESH_REQUEST_SYNC_OUTGOING:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return true;
 	}
@@ -1116,7 +1116,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
-	case CS_TYPE::EVT_MESH_REQUEST_SYNC:
+	case CS_TYPE::EVT_MESH_REQUEST_SYNC_OUTGOING:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return NO_ONE;
 	}
@@ -1276,7 +1276,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
-	case CS_TYPE::EVT_MESH_REQUEST_SYNC:
+	case CS_TYPE::EVT_MESH_REQUEST_SYNC_OUTGOING:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return NO_ONE;
 	}

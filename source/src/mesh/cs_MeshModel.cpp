@@ -462,7 +462,7 @@ void MeshModel::handleTrackedDeviceToken(const access_message_rx_t * accessMsg, 
 
 void MeshModel::handleRequestSync(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	auto packet = reinterpret_cast<cs_mesh_model_msg_request_sync_t*>(payload);
-	LOGd("payload: %d %x", packet->crownstone_id, packet->flags);
+	LOGw("payload: %d %x", packet->crownstone_id, packet->flags);
 }
 
 
