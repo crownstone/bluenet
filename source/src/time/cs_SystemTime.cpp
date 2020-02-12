@@ -15,6 +15,8 @@
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
 
+#include <protocol/mesh/cs_MeshModelPackets.h>
+
 #define LOGSystemTimeVerbose LOGnone
 
 // ============== Static members ==============
@@ -91,6 +93,8 @@ void SystemTime::setTime(uint32_t time) {
 	event.dispatch();
 }
 
+uint8_t dummy_time = 0xae;
+
 void SystemTime::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::STATE_TIME: {
@@ -118,6 +122,56 @@ void SystemTime::handleEvent(event_t & event) {
 		case CS_TYPE::STATE_SUN_TIME: {
 			// Sunrise/sunset adjusted. No need to do anything as it is already persisted.
 			break;
+		}
+		case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING:{
+			auto req = reinterpret_cast<cs_mesh_model_msg_sync_request_t*>(event.data);
+			// fill the request with a data type that is shared accross the sphere
+
+			// (assume crownstone_id is set by the Mesh::requestSync() method. )
+			// for now just use field 0. Should be the first Unspecified one.
+			req->sphere_data_ids[0] = static_cast<uint8_t>(SphereDataId::Time); 
+		}
+		case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING:{
+			auto request = reinterpret_cast<cs_mesh_model_msg_sync_request_t*>(event.data);
+
+			auto begin = std::begin(request->sphere_data_ids);
+			auto end = std::end(request->sphere_data_ids);
+			auto result = std::find(begin,end, static_cast<uint8_t>(SphereDataId::Time));
+
+			if(result != end){
+				// SphereDataId::Time was requested, SystemTime is responsible for that :)
+				
+				// create response struct
+				cs_mesh_model_msg_sync_response_t response_payload = {{}};
+				response_payload.crownstone_id = request->crownstone_id;
+				response_payload.sphere_data_id = static_cast<uint8_t>(SphereDataId::Time);
+				response_payload.data[0] = dummy_time;
+
+				dummy_time++; // just for test data refreshing
+
+				// build response payload
+				TYPIFY(CMD_SEND_MESH_MSG) response_message = {{}};
+				response_message.type = CS_MESH_MODEL_TYPE_SYNC_RESPONSE;
+				response_message.payload = reinterpret_cast<uint8_t*>(&response_payload);
+				response_message.size = sizeof(response_payload);
+
+				// wrap it in an event to send over internal bus in order to broadcast
+				event_t send_response_event(
+							CS_TYPE::CMD_SEND_MESH_MSG, 
+							&response_message, 
+							sizeof(response_message) );
+
+				send_response_event.dispatch();
+			}
+		}
+		case CS_TYPE::EVT_MESH_SYNC_RESPONSE_INCOMING:{
+			auto response = reinterpret_cast<cs_mesh_model_msg_sync_response_t*>(event.data);
+
+			if(SphereDataId(response->sphere_data_id) == SphereDataId::Time){
+				// SphereDataId::Time was requested, SystemTime is responsible for that :)
+				LOGd("sync response received, %x", response->data[0]);
+				
+			}
 		}
 		default: {}
 	}
