@@ -436,7 +436,6 @@ void MeshModel::handleTrackedDeviceRegister(const access_message_rx_t * accessMs
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* eventData = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER, eventData, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)));
 	EventDispatcher::getInstance().dispatch(event);
-	break;
 }
 
 void MeshModel::handleTrackedDeviceToken(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
@@ -444,7 +443,6 @@ void MeshModel::handleTrackedDeviceToken(const access_message_rx_t * accessMsg, 
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventData = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventData, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
 	EventDispatcher::getInstance().dispatch(event);
-	break;
 }
 
 void MeshModel::handleRequestSync(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
