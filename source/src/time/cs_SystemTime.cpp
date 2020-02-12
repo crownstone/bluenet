@@ -130,6 +130,7 @@ void SystemTime::handleEvent(event_t & event) {
 			// (assume crownstone_id is set by the Mesh::requestSync() method. )
 			// for now just use field 0. Should be the first Unspecified one.
 			req->sphere_data_ids[0] = static_cast<uint8_t>(SphereDataId::Time); 
+			break;
 		}
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING:{
 			auto request = reinterpret_cast<cs_mesh_model_msg_sync_request_t*>(event.data);
@@ -163,6 +164,7 @@ void SystemTime::handleEvent(event_t & event) {
 
 				send_response_event.dispatch();
 			}
+			break;
 		}
 		case CS_TYPE::EVT_MESH_SYNC_RESPONSE_INCOMING:{
 			auto response = reinterpret_cast<cs_mesh_model_msg_sync_response_t*>(event.data);
@@ -172,6 +174,7 @@ void SystemTime::handleEvent(event_t & event) {
 				LOGd("sync response received, %x", response->data[0]);
 				
 			}
+			break;
 		}
 		default: {}
 	}
