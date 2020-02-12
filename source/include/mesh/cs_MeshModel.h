@@ -107,6 +107,20 @@ private:
 	bool sendMsgFromQueue(); // Returns true when message was sent, false when no more messages to be sent.
 	void processQueue();
 
+	// handlers for incoming mesh messages
+	void handleTest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleAck(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);                            // empty impl
+	void handleStateTime(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleCmdTime(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleCmdNoop(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);                        // empty impl
+	void handleCmdMultiSwitch(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleState0(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleState1(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleProfileLocation(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleSetBehaviourSettings(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleTrackedDeviceRegister(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);          // empty impl
+	void handleTrackedDeviceToken(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);             // empty impl
+	void handleRequestSync(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
 
 	cs_ret_code_t _sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats=1);
 	cs_ret_code_t _sendReliableMsg(const uint8_t* data, uint16_t len);

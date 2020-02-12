@@ -241,77 +241,117 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	size16_t payloadSize;
 	MeshModelPacketHelper::getPayload(msg, size, payload, payloadSize);
 
-	switch (msgType) {
-	case CS_MESH_MODEL_TYPE_TEST: {
+	switch(msgType){
+		case CS_MESH_MODEL_TYPE_TEST: {
+			handleTest(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_ACK: {
+			handleAck(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_STATE_TIME: {
+			handleStateTime(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_CMD_TIME: {
+			handleCmdTime(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_CMD_NOOP: {
+			handleCmdNoop(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
+			handleCmdMultiSwitch(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_STATE_0: {
+			handleState0(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_STATE_1: {
+			handleState1(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_PROFILE_LOCATION: {
+			handleProfileLocation(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS: {
+			handleSetBehaviourSettings(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER: {
+			handleTrackedDeviceRegister(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN: {
+			handleTrackedDeviceToken(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_REQUEST_SYNC: {
+			handleRequestSync(accessMsg, payload, payloadSize);
+			break;
+		}
+	}
+}
+	
+void MeshModel::handleTest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 #ifdef MESH_MODEL_TEST_MSG_DROP_ENABLED
-		cs_mesh_model_msg_test_t* test = (cs_mesh_model_msg_test_t*)payload;
-		if (_lastReceivedCounter == 0) {
-			_lastReceivedCounter = test->counter;
-			break;
-		}
-		if (_lastReceivedCounter == test->counter) {
-			// Ignore repeats
-			LOGi("received same counter");
-			break;
-		}
-		uint32_t expectedCounter = _lastReceivedCounter + 1;
+	cs_mesh_model_msg_test_t* test = (cs_mesh_model_msg_test_t*)payload;
+	if (_lastReceivedCounter == 0) {
 		_lastReceivedCounter = test->counter;
-		LOGMeshModelVerbose("receivedCounter=%u expectedCounter=%u", _lastReceivedCounter, expectedCounter);
-		if (expectedCounter == _lastReceivedCounter) {
-			_received++;
-		}
-		else if (_lastReceivedCounter < expectedCounter) {
-			LOGw("receivedCounter=%u < expectedCounter=%u", _lastReceivedCounter, expectedCounter);
-		}
-		else {
-			_dropped += test->counter - expectedCounter;
-			_received++;
-		}
-		LOGi("received=%u dropped=%u (%u%%)", _received, _dropped, (_dropped * 100) / (_received + _dropped));
+		break;
+	}
+	if (_lastReceivedCounter == test->counter) {
+		// Ignore repeats
+		LOGi("received same counter");
+		break;
+	}
+	uint32_t expectedCounter = _lastReceivedCounter + 1;
+	_lastReceivedCounter = test->counter;
+	LOGMeshModelVerbose("receivedCounter=%u expectedCounter=%u", _lastReceivedCounter, expectedCounter);
+	if (expectedCounter == _lastReceivedCounter) {
+		_received++;
+	}
+	else if (_lastReceivedCounter < expectedCounter) {
+		LOGw("receivedCounter=%u < expectedCounter=%u", _lastReceivedCounter, expectedCounter);
+	}
+	else {
+		_dropped += test->counter - expectedCounter;
+		_received++;
+	}
+	LOGi("received=%u dropped=%u (%u%%)", _received, _dropped, (_dropped * 100) / (_received + _dropped));
 #endif
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_ACK: {
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_STATE_TIME: {
-		event_t event(CS_TYPE::EVT_MESH_TIME, payload, payloadSize);
+}
+
+void MeshModel::handleAck(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+}
+
+void MeshModel::handleStateTime(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	event_t event(CS_TYPE::EVT_MESH_TIME, payload, payloadSize);
 		EventDispatcher::getInstance().dispatch(event);
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_CMD_TIME: {
-		if (*(TYPIFY(CMD_SET_TIME)*)payload != _lastReveivedSetTime) {
-			_lastReveivedSetTime = *(TYPIFY(CMD_SET_TIME)*)payload;
-			event_t event(CS_TYPE::CMD_SET_TIME, payload, payloadSize);
-			EventDispatcher::getInstance().dispatch(event);
-		}
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS: {
-		cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, payload, payloadSize);
-		State::getInstance().set(stateData);
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_PROFILE_LOCATION: {
-		cs_mesh_model_msg_profile_location_t* profileLocation = (cs_mesh_model_msg_profile_location_t*) payload;
-		TYPIFY(EVT_PROFILE_LOCATION) eventData;
-		eventData.profileId = profileLocation->profile;
-		eventData.locationId = profileLocation->location;
-		eventData.fromMesh = true;
-		event_t event(CS_TYPE::EVT_PROFILE_LOCATION, &eventData, sizeof(eventData));
+}
+
+void MeshModel::handleCmdTime(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	if (*(TYPIFY(CMD_SET_TIME)*)payload != _lastReveivedSetTime) {
+		_lastReveivedSetTime = *(TYPIFY(CMD_SET_TIME)*)payload;
+		event_t event(CS_TYPE::CMD_SET_TIME, payload, payloadSize);
 		EventDispatcher::getInstance().dispatch(event);
-		break;
 	}
-	case CS_MESH_MODEL_TYPE_CMD_NOOP: {
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
-		cs_mesh_model_msg_multi_switch_item_t* item = (cs_mesh_model_msg_multi_switch_item_t*) payload;
+}
+
+void MeshModel::handleCmdNoop(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+}
+
+void MeshModel::handleCmdMultiSwitch(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	cs_mesh_model_msg_multi_switch_item_t* item = (cs_mesh_model_msg_multi_switch_item_t*) payload;
 		if (item->id == _ownId) {
 			LOGMeshModelInfo("recieved multi switch for me");
 			if (memcmp(&_lastReceivedMultiSwitch, item, sizeof(*item)) == 0) {
 				LOGMeshModelDebug("ignore similar multi switch");
-				break;
+				return;
 			}
 			memcpy(&_lastReceivedMultiSwitch, item, sizeof(*item));
 
@@ -326,72 +366,93 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			event_t event(CS_TYPE::CMD_MULTI_SWITCH, &internalItem, sizeof(internalItem));
 			EventDispatcher::getInstance().dispatch(event);
 		}
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_STATE_0: {
-		cs_mesh_model_msg_state_0_t* packet = (cs_mesh_model_msg_state_0_t*) payload;
-		uint8_t srcId = accessMsg->meta_data.src.value;
-		LOGMeshModelDebug("id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
-		_lastReceivedState.address = srcId;
-		_lastReceivedState.partsReceived = 1;
-		_lastReceivedState.state.data.state.id = srcId;
-		_lastReceivedState.state.data.extState.switchState = packet->switchState;
-		_lastReceivedState.state.data.extState.flags = packet->flags;
-		_lastReceivedState.state.data.extState.powerFactor = packet->powerFactor;
-		_lastReceivedState.state.data.extState.powerUsageReal = packet->powerUsageReal;
-		_lastReceivedState.state.data.extState.partialTimestamp = packet->partialTimestamp;
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_STATE_1: {
-		cs_mesh_model_msg_state_1_t* packet = (cs_mesh_model_msg_state_1_t*) payload;
-		uint8_t srcId = accessMsg->meta_data.src.value;
-		LOGMeshModelDebug("id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
-		if (	_lastReceivedState.address == accessMsg->meta_data.src.value &&
-				_lastReceivedState.partsReceived == 1 &&
-				_lastReceivedState.state.data.extState.id == srcId &&
-				_lastReceivedState.state.data.extState.partialTimestamp == packet->partialTimestamp
-				) {
-			_lastReceivedState.state.data.extState.temperature = packet->temperature;
-			_lastReceivedState.state.data.extState.energyUsed = packet->energyUsed;
-			// We don't actually know the RSSI to the source of this message.
-			// We only get RSSI to a mac address, but we don't know what id a mac address has.
-			// So for now, just assume we don't have direct contact with the source stone.
-			_lastReceivedState.state.data.extState.rssi = 0;
-			_lastReceivedState.state.rssi = 0;
-			_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
-			_lastReceivedState.state.data.type = SERVICE_DATA_TYPE_EXT_STATE;
-			LOGMeshModelInfo("received: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u",
-					_lastReceivedState.state.data.extState.id,
-					_lastReceivedState.state.data.extState.switchState,
-					_lastReceivedState.state.data.extState.flags,
-					_lastReceivedState.state.data.extState.temperature,
-					_lastReceivedState.state.data.extState.powerFactor,
-					_lastReceivedState.state.data.extState.powerUsageReal,
-					_lastReceivedState.state.data.extState.energyUsed,
-					_lastReceivedState.state.data.extState.partialTimestamp
-			);
+}
 
-			event_t event(CS_TYPE::EVT_STATE_EXTERNAL_STONE, &(_lastReceivedState.state), sizeof(_lastReceivedState.state));
-			EventDispatcher::getInstance().dispatch(event);
-		}
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER: {
-		cs_mesh_model_msg_device_register_t* packet = (cs_mesh_model_msg_device_register_t*) payload;
-		TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* eventData = packet;
-		event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER, eventData, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)));
+void MeshModel::handleState0(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	cs_mesh_model_msg_state_0_t* packet = (cs_mesh_model_msg_state_0_t*) payload;
+	uint8_t srcId = accessMsg->meta_data.src.value;
+	LOGMeshModelDebug("id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
+	_lastReceivedState.address = srcId;
+	_lastReceivedState.partsReceived = 1;
+	_lastReceivedState.state.data.state.id = srcId;
+	_lastReceivedState.state.data.extState.switchState = packet->switchState;
+	_lastReceivedState.state.data.extState.flags = packet->flags;
+	_lastReceivedState.state.data.extState.powerFactor = packet->powerFactor;
+	_lastReceivedState.state.data.extState.powerUsageReal = packet->powerUsageReal;
+	_lastReceivedState.state.data.extState.partialTimestamp = packet->partialTimestamp;
+}
+
+void MeshModel::handleState1(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	cs_mesh_model_msg_state_1_t* packet = (cs_mesh_model_msg_state_1_t*) payload;
+	uint8_t srcId = accessMsg->meta_data.src.value;
+	LOGMeshModelDebug("id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
+	if (	_lastReceivedState.address == accessMsg->meta_data.src.value &&
+			_lastReceivedState.partsReceived == 1 &&
+			_lastReceivedState.state.data.extState.id == srcId &&
+			_lastReceivedState.state.data.extState.partialTimestamp == packet->partialTimestamp
+			) {
+		_lastReceivedState.state.data.extState.temperature = packet->temperature;
+		_lastReceivedState.state.data.extState.energyUsed = packet->energyUsed;
+		// We don't actually know the RSSI to the source of this message.
+		// We only get RSSI to a mac address, but we don't know what id a mac address has.
+		// So for now, just assume we don't have direct contact with the source stone.
+		_lastReceivedState.state.data.extState.rssi = 0;
+		_lastReceivedState.state.rssi = 0;
+		_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
+		_lastReceivedState.state.data.type = SERVICE_DATA_TYPE_EXT_STATE;
+		LOGMeshModelInfo("received: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u",
+				_lastReceivedState.state.data.extState.id,
+				_lastReceivedState.state.data.extState.switchState,
+				_lastReceivedState.state.data.extState.flags,
+				_lastReceivedState.state.data.extState.temperature,
+				_lastReceivedState.state.data.extState.powerFactor,
+				_lastReceivedState.state.data.extState.powerUsageReal,
+				_lastReceivedState.state.data.extState.energyUsed,
+				_lastReceivedState.state.data.extState.partialTimestamp
+		);
+
+		event_t event(CS_TYPE::EVT_STATE_EXTERNAL_STONE, &(_lastReceivedState.state), sizeof(_lastReceivedState.state));
 		EventDispatcher::getInstance().dispatch(event);
-		break;
-	}
-	case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN: {
-		cs_mesh_model_msg_device_token_t* packet = (cs_mesh_model_msg_device_token_t*) payload;
-		TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventData = packet;
-		event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventData, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
-		EventDispatcher::getInstance().dispatch(event);
-		break;
-	}
 	}
 }
+
+void MeshModel::handleProfileLocation(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	cs_mesh_model_msg_profile_location_t* profileLocation = (cs_mesh_model_msg_profile_location_t*) payload;
+	TYPIFY(EVT_PROFILE_LOCATION) eventData;
+	eventData.profileId = profileLocation->profile;
+	eventData.locationId = profileLocation->location;
+	eventData.fromMesh = true;
+	event_t event(CS_TYPE::EVT_PROFILE_LOCATION, &eventData, sizeof(eventData));
+	EventDispatcher::getInstance().dispatch(event);
+}
+
+void MeshModel::handleSetBehaviourSettings(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, payload, payloadSize);
+	State::getInstance().set(stateData);
+}
+
+void MeshModel::handleTrackedDeviceRegister(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	cs_mesh_model_msg_device_register_t* packet = (cs_mesh_model_msg_device_register_t*) payload;
+	TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* eventData = packet;
+	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER, eventData, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)));
+	EventDispatcher::getInstance().dispatch(event);
+	break;
+}
+
+void MeshModel::handleTrackedDeviceToken(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	cs_mesh_model_msg_device_token_t* packet = (cs_mesh_model_msg_device_token_t*) payload;
+	TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventData = packet;
+	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventData, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
+	EventDispatcher::getInstance().dispatch(event);
+	break;
+}
+
+void MeshModel::handleRequestSync(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	auto pl = reinterpret_cast<cs_mesh_model_msg_request_sync_t*>(payload);
+	LOGd("payload: %d %x", pl->crownstone_id, pl->flags);
+}
+
+
 
 void MeshModel::handleReliableStatus(access_reliable_status_t status) {
 	switch (status) {

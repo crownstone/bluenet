@@ -33,9 +33,12 @@ extern "C" {
 #include "util/cs_BleError.h"
 #include "util/cs_Utils.h"
 #include "ble/cs_Stack.h"
-#include "events/cs_EventDispatcher.h"
 #include "storage/cs_State.h"
 
+#include <time/cs_SystemTime.h>
+#include <protocol/cs_UartProtocol.h>
+
+#define LOGMeshInfo LOGi
 #define LOGMeshDebug LOGnone
 
 #if NRF_MESH_KEY_SIZE != ENCRYPTION_KEY_LENGTH
@@ -43,12 +46,12 @@ extern "C" {
 #endif
 
 static void cs_mesh_event_handler(const nrf_mesh_evt_t * p_evt) {
-//	LOGi("Mesh event type=%u", p_evt->type);
+//	LOGMeshInfo("Mesh event type=%u", p_evt->type);
 	switch(p_evt->type) {
 	case NRF_MESH_EVT_MESSAGE_RECEIVED:
 		LOGMeshDebug("NRF_MESH_EVT_MESSAGE_RECEIVED");
-//		LOGi("NRF_MESH_EVT_MESSAGE_RECEIVED");
-//		LOGi("src=%u data:", p_evt->params.message.p_metadata->source);
+//		LOGMeshInfo("NRF_MESH_EVT_MESSAGE_RECEIVED");
+//		LOGMeshInfo("src=%u data:", p_evt->params.message.p_metadata->source);
 //		BLEutil::printArray(p_evt->params.message.p_buffer, p_evt->params.message.length);
 		break;
 	case NRF_MESH_EVT_TX_COMPLETE:
@@ -150,7 +153,7 @@ static nrf_mesh_evt_handler_t cs_mesh_event_handler_struct = {
 
 static void config_server_evt_cb(const config_server_evt_t * p_evt) {
 	if (p_evt->type == CONFIG_SERVER_EVT_NODE_RESET) {
-		LOGi("----- Node reset  -----");
+		LOGMeshInfo("----- Node reset  -----");
 		/* This function may return if there are ongoing flash operations. */
 		mesh_stack_device_reset();
 	}
@@ -194,7 +197,7 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 		_scannedDevice.dataSize = p_rx_data->length;
 		_scannedDevice.data = (uint8_t*)(p_rx_data->p_payload);
 		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&_scannedDevice, sizeof(_scannedDevice));
-		EventDispatcher::getInstance().dispatch(event);
+		event.dispatch();
 
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
 		const uint8_t* addr = p_rx_data->p_metadata->params.scanner.adv_addr.addr;
@@ -236,7 +239,7 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 #endif
 
 void Mesh::modelsInitCallback() {
-	LOGi("Initializing and adding models");
+	LOGMeshInfo("Initializing and adding models");
 	_model.init();
 	_model.setOwnAddress(_ownAddress);
 }
@@ -277,16 +280,16 @@ void Mesh::init(const boards_config_t& board) {
 
 	uint32_t retCode = mesh_stack_init(&init_params, &_isProvisioned);
 	APP_ERROR_CHECK(retCode);
-	LOGi("Mesh isProvisioned=%u", _isProvisioned);
+	LOGMeshInfo("Mesh isProvisioned=%u", _isProvisioned);
 
 	nrf_mesh_evt_handler_add(&cs_mesh_event_handler_struct);
 
-	LOGi("Scan interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
+	LOGMeshInfo("Scan interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
 	scanner_config_scan_time_set(board.scanIntervalUs, board.scanWindowUs);
 
 #if MESH_SCANNER == 1
 	// Init scanned device variable before registering the callback.
-	LOGi("Scanner in mesh enabled");
+	LOGMeshInfo("Scanner in mesh enabled");
 	memset(&_scannedDevice, 0, sizeof(_scannedDevice));
 	nrf_mesh_rx_cb_set(scan_cb);
 #else
@@ -358,12 +361,12 @@ void Mesh::start() {
 //	}
 
 	const uint8_t *uuid = nrf_mesh_configure_device_uuid_get();
-	LOGi("Device UUID:");
+	LOGMeshInfo("Device UUID:");
 	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
 	retCode = mesh_stack_start();
 	APP_ERROR_CHECK(retCode);
 
-	EventDispatcher::getInstance().addListener(this);
+	this->listen();
 }
 
 void Mesh::stop() {
@@ -404,14 +407,14 @@ void Mesh::factoryResetDone() {
 	if (!_performingFactoryReset) {
 		return;
 	}
-	LOGi("factoryResetDone");
+	LOGMeshInfo("factoryResetDone");
 	_performingFactoryReset = false;
 	event_t event(CS_TYPE::EVT_MESH_FACTORY_RESET);
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 }
 
 void Mesh::provisionSelf(uint16_t id) {
-	LOGd("provisionSelf");
+	LOGMeshInfo("provisionSelf");
 	uint32_t retCode;
 
 	State::getInstance().get(CS_TYPE::CONFIG_MESH_DEVICE_KEY, _devkey, sizeof(_devkey));
@@ -439,11 +442,11 @@ void Mesh::provisionSelf(uint16_t id) {
 	APP_ERROR_CHECK(retCode);
 
 	uint8_t key[NRF_MESH_KEY_SIZE];
-	LOGi("netKeyHandle=%u netKey=", _netkeyHandle);
+	LOGMeshInfo("netKeyHandle=%u netKey=", _netkeyHandle);
 	dsm_subnet_key_get(_netkeyHandle, key);
 	BLEutil::printArray(key, NRF_MESH_KEY_SIZE);
-	LOGi("appKeyHandle=%u appKey=", _appkeyHandle);
-	LOGi("devKeyHandle=%u devKey=", _devkeyHandle);
+	LOGMeshInfo("appKeyHandle=%u appKey=", _appkeyHandle);
+	LOGMeshInfo("devKeyHandle=%u devKey=", _devkeyHandle);
 
 	retCode = net_state_iv_index_set(0,0);
 	APP_ERROR_CHECK(retCode);
@@ -456,7 +459,7 @@ void Mesh::provisionSelf(uint16_t id) {
 }
 
 void Mesh::provisionLoad() {
-	LOGd("provisionLoad");
+	LOGMeshInfo("provisionLoad");
 	// Used provisioner_helper.c::prov_helper_device_handles_load() as example.
 	uint32_t retCode;
 	dsm_local_unicast_address_t local_addr;
@@ -479,13 +482,13 @@ void Mesh::provisionLoad() {
 	retCode = dsm_devkey_handle_get(local_addr.address_start, &_devkeyHandle);
 	APP_ERROR_CHECK(retCode);
 
-	LOGi("unicast address=%u", local_addr.address_start);
+	LOGMeshInfo("unicast address=%u", local_addr.address_start);
 	uint8_t key[NRF_MESH_KEY_SIZE];
-	LOGi("netKeyHandle=%u netKey=", _netkeyHandle);
+	LOGMeshInfo("netKeyHandle=%u netKey=", _netkeyHandle);
 	dsm_subnet_key_get(_netkeyHandle, key);
 	BLEutil::printArray(key, NRF_MESH_KEY_SIZE);
-	LOGi("appKeyHandle=%u appKey=", _appkeyHandle);
-	LOGi("devKeyHandle=%u devKey=", _devkeyHandle);
+	LOGMeshInfo("appKeyHandle=%u appKey=", _appkeyHandle);
+	LOGMeshInfo("devKeyHandle=%u devKey=", _devkeyHandle);
 }
 
 void Mesh::advertise(IBeacon* ibeacon) {
@@ -532,9 +535,13 @@ void Mesh::handleEvent(event_t & event) {
 			RNG::fillBuffer(&rand8, 1);
 			uint32_t randMs = MESH_SEND_TIME_INTERVAL_MS + rand8 * MESH_SEND_TIME_INTERVAL_MS_VARIATION / 255;
 			_sendStateTimeCountdown = randMs / TICK_INTERVAL_MS;
-			cs_mesh_model_msg_time_t packet;
-			State::getInstance().get(CS_TYPE::STATE_TIME, &(packet.timestamp), sizeof(packet.timestamp));
-			_model.sendTime(&packet);
+
+			Time time = SystemTime::posix();
+			if(time.isValid()){
+				cs_mesh_model_msg_time_t packet;
+				packet.timestamp = time.timestamp();
+				_model.sendTime(&packet);
+			}
 		}
 
 		_model.tick(tickCount);
@@ -578,7 +585,46 @@ void Mesh::handleEvent(event_t & event) {
 		factoryReset();
 		break;
 	}
+	case CS_TYPE::CMD_ENABLE_MESH: {
+#if BUILD_MESHING == 1
+			uint8_t enable = *(uint8_t*)event.data;
+			if (enable) {
+				start();
+			}
+			else {
+				stop();
+			}
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &enable, 1);
+#endif
+			break;
+	}
 	default:
 		break;
 	}
+}
+
+
+void Mesh::requestSync() {
+	LOGMeshInfo("Mesh::requestSync");
+	uint32_t flags;
+	event_t sync_request_event(CS_TYPE::EVT_MESH_REQUEST_SYNC, (void*)&flags, sizeof(flags));
+	sync_request_event.dispatch();
+
+	// (query [flags] to find out who needs which data.)
+
+	// and broadcast message
+	cs_mesh_model_msg_request_sync_t rs;
+
+	TYPIFY(CONFIG_CROWNSTONE_ID) id;
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
+
+	rs.flags = flags;
+	rs.crownstone_id = id;
+
+	TYPIFY(CMD_SEND_MESH_MSG) msg = {};
+	msg.payload = static_cast<uint8_t*>(static_cast<void*>(&rs));
+	msg.size = sizeof(rs);
+	msg.type = CS_MESH_MODEL_TYPE_REQUEST_SYNC;
+
+	_model.sendMsg(&msg);
 }

@@ -62,48 +62,119 @@ extern "C" {
 #include <nrf_nvmc.h>
 }
 
+
+/****************************************************** Preamble *******************************************************/ 
+
 // Define test pin to enable gpio debug.
 #define TEST_PIN 18
 
 TYPIFY(EVT_TICK) Crownstone::_tickCount = 0;
 
-/**********************************************************************************************************************
- * Main functionality
- *********************************************************************************************************************/
+
+/****************************************** Global functions ******************************************/
+
+/**
+ * Start the 32 MHz external oscillator.
+ * This provides very precise timing, which is required for the PWM driver to synchronize with the mains supply.
+ * An alternative is to use the low frequency crystal oscillator for the PWM driver, but the SoftDevice's radio
+ * operations periodically turn on the 32 MHz crystal oscillator anyway.
+ */
+void startHFClock() {
+	// Reference: https://devzone.nordicsemi.com/f/nordic-q-a/6394/use-external-32mhz-crystal
+
+	// Start the external high frequency crystal
+	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
+	NRF_CLOCK->TASKS_HFCLKSTART = 1;
+
+	// Wait for the external oscillator to start up
+	while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {}
+	LOGd("HF clock started");
+}
+
+/**
+ * If UART is enabled this will be the message printed out over a serial connection. In release mode we will not by
+ * default use the UART, it will need to be turned on.
+ */
+void initUart(uint8_t pinRx, uint8_t pinTx) {
+	serial_config(pinRx, pinTx);
+	serial_init(SERIAL_ENABLE_RX_AND_TX);
+	_log(SERIAL_INFO, SERIAL_CRLF);
+
+	LOGi("Welcome to Bluenet!");
+	LOGi("\033[35;1m");
+	LOGi(" _|_|_|    _|                                            _|     ");
+	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");
+	LOGi(" _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     ");
+	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
+	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
+	LOGi("\033[0m");
+	
+	LOGi("Firmware version %s", g_FIRMWARE_VERSION);
+	LOGi("Git hash %s", g_GIT_SHA1);
+	LOGi("Compilation date: %s", g_COMPILATION_DAY);
+	LOGi("Compilation time: %s", __TIME__);
+	LOGi("Build type: %s", g_BUILD_TYPE);
+	LOGi("Hardware version: %s", get_hardware_version());
+	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
+#ifdef DEBUG
+	LOGi("DEBUG: defined")
+#else
+	LOGi("DEBUG: undefined")
+#endif
+	LOG_MEMORY;
+}
+
+/** Overwrite the hardware version.
+ *
+ * The firmware is compiled with particular defaults. When a particular product comes from the factory line it has
+ * by default FFFF FFFF in this UICR location. If this is the case, there are two options to cope with this:
+ *   1. Create a custom firmware per device type where this field is adjusted at runtime.
+ *   2. Create a custom firmware per device type with the UICR field state in the .hex file. In the latter case,
+ *      if the UICR fields are already set, this might lead to a conflict.
+ * There is chosen for the first option. Even if rare cases where there are devices types with FFFF FFFF in the field,
+ * the runtime always tries to overwrite it with the (let's hope) proper state.
+ */
+void overwrite_hardware_version() {
+	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
+	if (hardwareBoard == 0xFFFFFFFF) {
+		LOGw("Write board type into UICR");
+		nrf_nvmc_write_word(HARDWARE_BOARD_ADDRESS, DEFAULT_HARDWARE_BOARD);
+	}
+	LOGd("Board: %p", hardwareBoard);
+}
+
+/** Enable NFC pins to be used as GPIO.
+ *
+ * Warning: this is stored in UICR, so it's persistent.
+ * Warning: NFC pins leak a bit of current when not at same voltage level.
+ */
+void enableNfcPins() {
+	if (NRF_UICR->NFCPINS != 0) {
+		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
+	}
+}
+
+void printNfcPins() {
+	uint32_t val = NRF_UICR->NFCPINS;
+	if (val == 0) {
+		LOGd("NFC pins enabled (%p)", val);
+	}
+	else {
+		LOGd("NFC pins disabled (%p)", val);
+	}
+}
+
+void on_exit(void) {
+	LOGf("PROGRAM TERMINATED");
+}
+
 
 void handleZeroCrossing() {
 	PWM::getInstance().onZeroCrossing();
 }
 
-/** Allocate Crownstone class and internal references.
- *
- * Create buffers, timers, storage, state, etc. We are running on an embedded device. Only allocate something in a
- * constructor. For dynamic information use the stack. Do not allocate/deallocate anything during runtime. It is
- * too risky. It might not be freed and memory might overflow. This type of hardware should run months without
- * interruption.
- *
- * There is a function IS_CROWNSTONE. What this actually is contrasted with are other BLE type devices, in particular
- * the Guidestone. The latter devices do not have the ability to switch, dim, or measure power consumption.
- *
- * The order with which items are created.
- *
- *  + buffers
- *  + event distpatcher
- *  + BLE stack
- *  + timer
- *  + persistent storage
- *  + state
- *  + command handler
- *  + factory reset
- *  + scanner
- *  + tracker
- *  + mesh
- *  + switch
- *  + temperature guard
- *  + power sampling
- *
- * The initialization is done in separate function.
- */
+/************************************************* cs_Crownstone impl *************************************************/
+
 Crownstone::Crownstone(boards_config_t& board) :
 	_boardsConfig(board),
 	_mainTimerId(NULL),
@@ -137,21 +208,26 @@ Crownstone::Crownstone(boards_config_t& board) :
 
 };
 
-/**
- * Initialize Crownstone firmware. First drivers are initialized (log modules, storage modules, ADC conversion,
- * timers). Then everything is configured independent of the mode (everything that is common to whatever mode the
- * Crownstone runs on). A callback to the local staticTick function for a timer is set up. Then the mode of
- * operation is switched and the BLE services are initialized.
- */
 void Crownstone::init(uint16_t step) {
 	switch (step) {
 	case 0: {
-		LOGi(FMT_HEADER, "init");
-		initDrivers(step);
+		init0();
 		break;
 	}
 	case 1: {
-		initDrivers(step);
+		init1();
+		break;
+	}
+	}
+}
+
+void Crownstone::init0(){
+	LOGi(FMT_HEADER, "init");
+	initDrivers(0);
+}
+
+void Crownstone::init1(){
+		initDrivers(1);
 		LOG_MEMORY;
 		LOG_FLUSH();
 
@@ -175,22 +251,23 @@ void Crownstone::init(uint16_t step) {
 		LOGi(FMT_HEADER, "init services");
 		_stack->initServices();
 		LOG_FLUSH();
+}
+
+void Crownstone::initDrivers(uint16_t step) {
+	switch (step) {
+	case 0: {
+		initDrivers0();
+		break;
+	}
+	case 1: {
+		initDrivers1();
 		break;
 	}
 	}
 }
 
-/**
- * This must be called after the SoftDevice has started. The order in which things should be initialized is as follows:
- *   1. Stack.               Starts up the softdevice. It controls a lot of devices, so need to set it early.
- *   2. Timer.               Also initializes the app scheduler.
- *   3. Storage.             Definitely after the stack has been initialized.
- *   4. State.               Storage should be initialized here.
- */
-void Crownstone::initDrivers(uint16_t step) {
-	switch (step) {
-	case 0: {
-		LOGi("Init drivers");
+void Crownstone::initDrivers0(){
+	LOGi("Init drivers");
 		startHFClock();
 		_stack->init();
 		_timer->init();
@@ -208,10 +285,10 @@ void Crownstone::initDrivers(uint16_t step) {
 			// Wait for pages erased event.
 		}
 		// Wait for storage initialized event.
-		break;
-	}
-	case 1: {
-		_state->init(&_boardsConfig);
+}
+
+void Crownstone::initDrivers1(){
+	_state->init(&_boardsConfig);
 
 		// If not done already, init UART
 		// TODO: make into a class with proper init() function
@@ -280,18 +357,8 @@ void Crownstone::initDrivers(uint16_t step) {
 				nrf_gpio_pin_clear(_boardsConfig.pinLedGreen);
 			}
 		}
-		break;
-	}
-	}
 }
 
-/**
- * Configure the Bluetooth stack. This also increments the reset counter.
- *
- * The order within this function is important. For example setName() sets the BLE device name and
- * configureAdvertisements() defines advertisement parameters on appearance. These have to be called after
- * the storage has been initialized.
- */
 void Crownstone::configure() {
 	assert(_stack != NULL, "Stack");
 	assert(_storage != NULL, "Storage");
@@ -312,26 +379,6 @@ void Crownstone::configure() {
 	configureAdvertisement();
 }
 
-/** Sets default parameters of the Bluetooth connection.
- *
- * Data is transmitted with TX_POWER dBm.
- *
- * On transmission of data within a connection (higher interval -> lower power consumption, slow communication)
- *   - minimum connection interval (in steps of 1.25 ms, 16*1.25 = 20 ms)
- *   - maximum connection interval (in steps of 1.25 ms, 32*1.25 = 40 ms)
- * The supervision timeout multiplier is 400
- * The slave latency is 10
- * On advertising:
- *   - advertising interval (in steps of 0.625 ms, 1600*0.625 = 1 sec) (can be between 0x0020 and 0x4000)
- *   - advertising timeout (disabled, can be between 0x0001 and 0x3FFF, and is in steps of seconds)
- *
- * There is no whitelist defined, nor peer addresses.
- *
- * Process:
- *   [31.05.16] we used to stop / start scanning after a disconnect, now starting advertising is enough
- *   [23.06.16] restart the mesh on disconnect, otherwise we have ~10s delay until the device starts advertising.
- *   [29.06.16] restart the mesh disabled, this was limited to pca10000, it does crash dobeacon v0.7
- */
 void Crownstone::configureStack() {
 	// Set callback handler for a connection event
 	_stack->setOnConnectCallback([&](uint16_t conn_handle) {
@@ -358,10 +405,6 @@ void Crownstone::configureStack() {
 	});
 }
 
-/**
- * Populate advertisement (including service data) with information. The persistence mode is obtained from storage
- * (the _operationMode var is not used).
- */
 void Crownstone::configureAdvertisement() {
 	// Set the stored advertisement interval
 	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;
@@ -422,12 +465,6 @@ void Crownstone::configureAdvertisement() {
 	}
 }
 
-/**
- * Create a particular service. Depending on the mode we can choose to create a set of services that we would need.
- * After creation of a service it cannot be deleted. This is a restriction of the Nordic Softdevice. If you need a
- * new set of services, you will need to change the mode of operation (in a persisted field). Then you can restart
- * the device and use the mode to enable another set of services.
- */
 void Crownstone::createService(const ServiceEvent event) {
 	switch(event) {
 		case CREATE_DEVICE_INFO_SERVICE:
@@ -448,11 +485,6 @@ void Crownstone::createService(const ServiceEvent event) {
 	}
 }
 
-/** Switch from one operation mode to another.
- *
- * Depending on the operation mode we have a different set of services / characteristics enabled. Subsequently,
- * also different entities are started (for example a scanner, or the BLE mesh).
- */
 void Crownstone::switchMode(const OperationMode & newMode) {
 
 	LOGd("Current mode: %s", TypeName(_oldOperationMode));
@@ -534,10 +566,6 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 //	_operationMode = newMode;
 }
 
-/**
- * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
- * It is loaded from memory or from the default and written to the Stack.
- */
 void Crownstone::setName() {
 	static bool addResetCounterToName = false;
 #if CHANGE_NAME_ON_RESET==1
@@ -561,10 +589,6 @@ void Crownstone::setName() {
 	_advertiser->updateDeviceName(deviceName);
 }
 
-/**
- * Start the different modules depending on the operational mode. For example, in normal mode we use a scanner and
- * the mesh. In setup mode we use the serial module (but only RX).
- */
 void Crownstone::startOperationMode(const OperationMode & mode) {
 	_behaviourStore.listen();
 	_presenceHandler.listen();
@@ -603,16 +627,6 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	}
 }
 
-/**
- * After allocation of all modules, after initialization of each module, and after configuration of each module, we
- * are ready to "start". This means:
- *
- *   - advertise
- *   - turn on/off switch at boot (depending on default)
- *   - watch temperature excess
- *   - power sampling
- *   - schedule tasks
- */
 void Crownstone::startUp() {
 
 	LOGi(FMT_HEADER, "startup");
@@ -698,20 +712,9 @@ void Crownstone::startUp() {
 
 	_state->startWritesToFlash();
 
-#ifdef RELAY_DEFAULT_ON
-#if RELAY_DEFAULT_ON==0
-	Switch::getInstance().turnOff();
-#endif
-#if RELAY_DEFAULT_ON==1
-	Switch::getInstance().turnOn();
-#endif
-#endif
+	_mesh->requestSync();
 }
 
-/**
- * Increase the reset counter. This can be used for debugging purposes. The reset counter is written to FLASH and
- * persists over reboots.
- */
 void Crownstone::increaseResetCounter() {
 	TYPIFY(STATE_RESET_COUNTER) resetCounter = 0;
 	_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
@@ -720,10 +723,6 @@ void Crownstone::increaseResetCounter() {
 	_state->set(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));
 }
 
-/**
- * Operations that are not sensitive with respect to time and only need to be called at regular intervals.
- * TODO: describe function calls and why they are required.
- */
 void Crownstone::tick() {
 	if (_tickCount % (60*1000/TICK_INTERVAL_MS) == 0) {
 		LOG_MEMORY; // To check for memory leaks
@@ -753,10 +752,6 @@ void Crownstone::scheduleNextTick() {
 	Timer::getInstance().start(_mainTimerId, MS_TO_TICKS(TICK_INTERVAL_MS), this);
 }
 
-/**
- * An infinite loop in which the application ceases control to the SoftDevice at regular times. It runs the scheduler,
- * waits for events, and handles them. Also the printed statements in the log module are flushed.
- */
 void Crownstone::run() {
 
 	LOGi(FMT_HEADER, "running");
@@ -776,10 +771,6 @@ void Crownstone::run() {
 	}
 }
 
-/**
- * Handle events that can come from other parts of the Crownstone firmware and even originate from outside of the
- * firmware via the BLE interface (an application, or the mesh).
- */
 void Crownstone::handleEvent(event_t & event) {
 
 	switch(event.type) {
@@ -817,165 +808,30 @@ void Crownstone::handleEvent(event_t & event) {
 			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
 	}
 
-	switch(event.type) {
-		case CS_TYPE::CONFIG_NAME: {
-			_advertiser->updateDeviceName(std::string((char*)event.data, event.size));
-			break;
-		}
-		case CS_TYPE::CONFIG_TX_POWER: {
-			_advertiser->updateTxPower(*(TYPIFY(CONFIG_TX_POWER)*)event.data);
-			break;
-		}
-		case CS_TYPE::CONFIG_ADV_INTERVAL: {
-			_advertiser->updateAdvertisingInterval(*(TYPIFY(CONFIG_ADV_INTERVAL)*)event.data);
-			break;
-		}
-		case CS_TYPE::CMD_ENABLE_ADVERTISEMENT: {
-			TYPIFY(CMD_ENABLE_ADVERTISEMENT) enable = *(TYPIFY(CMD_ENABLE_ADVERTISEMENT)*)event.data;
-			if (enable) {
-				_advertiser->startAdvertising();
-			}
-			else {
-				_advertiser->stopAdvertising();
-			}
-			// TODO: should be done via event.
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, (uint8_t*)&enable, 1);
-			break;
-		}
-		case CS_TYPE::CMD_ENABLE_MESH: {
-#if BUILD_MESHING == 1
-			uint8_t enable = *(uint8_t*)event.data;
-			if (enable) {
-				_mesh->start();
-			}
-			else {
-				_mesh->stop();
-			}
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &enable, 1);
-#endif
-			break;
-		}
-		case CS_TYPE::CONFIG_IBEACON_ENABLED: {
-			__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
-			// 12-sep-2019 TODO: implement
-			LOGw("TODO ibeacon enabled=%i", enabled);
-			break;
-		}
-		case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: {
-			_advertiser->updateAdvertisementData();
-			break;
-		}
-		case CS_TYPE::EVT_BROWNOUT_IMPENDING: {
-			// Don't log anything, immediately write gpregret and reboot.
-			// Do this in interrupt (cs_Handlers.cpp) instead, else we're still too late.
-//			LOGf("brownout impending!! force shutdown ...")
-//			uint32_t gpregret_id = 0;
-//			uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
-//			// now reset with brownout reset mask set.
-//			// NOTE: do not clear the gpregret register, this way
-//			//   we can count the number of brownouts in the bootloader
-//			sd_power_gpregret_set(gpregret_id, gpregret_msk);
-//			// Soft reset, because brownout can't be distinguished from hard reset otherwise.
-//			sd_nvic_SystemReset();
-			break;
-		}
-		default:
-			return;
-	}
-}
-
-void on_exit(void) {
-	LOGf("PROGRAM TERMINATED");
-}
-
-/**
- * If UART is enabled this will be the message printed out over a serial connection. In release mode we will not by
- * default use the UART, it will need to be turned on.
- *
- * For DFU, application should be at (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED). For
- * example, for (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes).
- */
-void initUart(uint8_t pinRx, uint8_t pinTx) {
-	serial_config(pinRx, pinTx);
-	serial_init(SERIAL_ENABLE_RX_AND_TX);
-	_log(SERIAL_INFO, SERIAL_CRLF);
-
-	LOGi("Welcome to Bluenet!");
-	LOGi("\033[35;1m");
-	LOGi(" _|_|_|    _|                                            _|     ");
-	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");
-	LOGi(" _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     ");
-	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
-	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
-	LOGi("\033[0m");
-	
-	LOGi("Firmware version %s", g_FIRMWARE_VERSION);
-	LOGi("Git hash %s", g_GIT_SHA1);
-	LOGi("Compilation date: %s", g_COMPILATION_DAY);
-	LOGi("Compilation time: %s", __TIME__);
-	LOGi("Build type: %s", g_BUILD_TYPE);
-	LOGi("Hardware version: %s", get_hardware_version());
-	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
-#ifdef DEBUG
-	LOGi("DEBUG: defined")
-#else
-	LOGi("DEBUG: undefined")
-#endif
-	LOG_MEMORY;
-}
-
-/**********************************************************************************************************************/
-
-/** Overwrite the hardware version.
- *
- * The firmware is compiled with particular defaults. When a particular product comes from the factory line it has
- * by default FFFF FFFF in this UICR location. If this is the case, there are two options to cope with this:
- *   1. Create a custom firmware per device type where this field is adjusted at runtime.
- *   2. Create a custom firmware per device type with the UICR field state in the .hex file. In the latter case,
- *      if the UICR fields are already set, this might lead to a conflict.
- * There is chosen for the first option. Even if rare cases where there are devices types with FFFF FFFF in the field,
- * the runtime always tries to overwrite it with the (let's hope) proper state.
- */
-void overwrite_hardware_version() {
-	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
-	if (hardwareBoard == 0xFFFFFFFF) {
-		LOGw("Write board type into UICR");
-		nrf_nvmc_write_word(HARDWARE_BOARD_ADDRESS, DEFAULT_HARDWARE_BOARD);
-	}
-	LOGd("Board: %p", hardwareBoard);
-}
-
-/** Enable NFC pins to be used as GPIO.
- *
- * Warning: this is stored in UICR, so it's persistent.
- * Warning: NFC pins leak a bit of current when not at same voltage level.
- */
-void enableNfcPins() {
-	if (NRF_UICR->NFCPINS != 0) {
-		nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
-	}
-}
-
-void printNfcPins() {
-	uint32_t val = NRF_UICR->NFCPINS;
-	if (val == 0) {
-		LOGd("NFC pins enabled (%p)", val);
-	}
-	else {
-		LOGd("NFC pins disabled (%p)", val);
-	}
-}
-
-void Crownstone::startHFClock() {
-	// Reference: https://devzone.nordicsemi.com/f/nordic-q-a/6394/use-external-32mhz-crystal
-
-	// Start the external high frequency crystal
-	NRF_CLOCK->EVENTS_HFCLKSTARTED = 0;
-	NRF_CLOCK->TASKS_HFCLKSTART = 1;
-
-	// Wait for the external oscillator to start up
-	while (NRF_CLOCK->EVENTS_HFCLKSTARTED == 0) {}
-	LOGd("HF clock started");
+	// switch(event.type) {
+	// 	case CS_TYPE::CONFIG_IBEACON_ENABLED: {
+	// 		__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
+	// 		// 12-sep-2019 TODO: implement
+	// 		LOGw("TODO ibeacon enabled=%i", enabled);
+	// 		break;
+	// 	}
+	// 	case CS_TYPE::EVT_BROWNOUT_IMPENDING: {
+	// 		// Don't log anything, immediately write gpregret and reboot.
+	// 		// Do this in interrupt (cs_Handlers.cpp) instead, else we're still too late.
+	// 		LOGf("brownout impending!! force shutdown ...")
+	// 		uint32_t gpregret_id = 0;
+	// 		uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
+	// 		// now reset with brownout reset mask set.
+	// 		// NOTE: do not clear the gpregret register, this way
+	// 		//   we can count the number of brownouts in the bootloader
+	// 		sd_power_gpregret_set(gpregret_id, gpregret_msk);
+	// 		// Soft reset, because brownout can't be distinguished from hard reset otherwise.
+	// 		sd_nvic_SystemReset();
+	// 		break;
+	// 	}
+	// 	default:
+	// 		return;
+	// }
 }
 
 /**********************************************************************************************************************

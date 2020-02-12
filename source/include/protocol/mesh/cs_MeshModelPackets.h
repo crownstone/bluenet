@@ -54,6 +54,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS  = 11, // Payload: behaviour_settings_t
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER = 12, // Payload: cs_mesh_model_msg_device_register_t
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN    = 13, // Payload: cs_mesh_model_msg_device_token_t
+	CS_MESH_MODEL_TYPE_REQUEST_SYNC            = 14, // Payload: cs_mesh_model_msg_request_sync_t
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_test_t {
@@ -106,4 +107,9 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_device_token_t {
 	device_id_t deviceId;
 	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
 	uint16_t ttlMinutes;
+};
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_request_sync_t { 
+	uint16_t crownstone_id;
+	uint32_t flags;
 };

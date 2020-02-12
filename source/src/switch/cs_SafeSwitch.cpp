@@ -59,6 +59,7 @@ cs_ret_code_t SafeSwitch::setRelay(bool on) {
 	LOGSafeSwitch("setRelay %u errors=%u", on, stateErrors.asInt);
 
 	if ( !isRelayStateChangeAllowed()) {
+		LOGSafeSwitch("isRelayStateChangeAllowed returned false");
 		return ERR_NO_ACCESS;
 	}
 
@@ -88,7 +89,8 @@ cs_ret_code_t SafeSwitch::setRelayUnchecked(bool on) {
 
 cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity) {
 	LOGSafeSwitch("setDimmer %u dimmerPowered=%u errors=%u", intensity, dimmerPowered, getErrorState().asInt);
-	if ( !isDimmerStateChangeAllowed()) { 
+	if ( !isDimmerStateChangeAllowed()) {
+		LOGSafeSwitch("isDimmerStateChangeAllowed returned false");
 		return ERR_NO_ACCESS;
 	}
 

@@ -229,6 +229,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_TIME,                                    // Mesh received the current time.
 	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
 	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.
+	EVT_MESH_REQUEST_SYNC,                                // Dispatched when boot is complete so that event handlers get a chance to obtain data that resides in the mesh.
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR,                                // Add a behaviour.
@@ -278,6 +279,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_ADC_RESTARTED,                                // ADC has been restarted.
 
 	EVT_PRESENCE_MUTATION,                            // Presence changed.
+
 };
 
 CS_TYPE toCsType(uint16_t type);
@@ -462,6 +464,7 @@ typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef void TYPIFY(EVT_GOING_TO_DFU);
 typedef profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
+typedef uint8_t TYPIFY(EVT_MESH_REQUEST_SYNC);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
