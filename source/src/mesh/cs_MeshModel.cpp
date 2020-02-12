@@ -465,17 +465,31 @@ void MeshModel::handleTrackedDeviceToken(const access_message_rx_t * accessMsg, 
 }
 
 void MeshModel::handleSyncRequest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
-	auto packet = reinterpret_cast<cs_mesh_model_msg_sync_request_t*>(payload);
-	LOGw("payload: %d %x", packet->crownstone_id, packet->sphere_data_ids[0]);
-	// push event CS_TYPE::MESH_SYNC_REQUEST_INCOMING
+	auto incoming_sync_request = reinterpret_cast<cs_mesh_model_msg_sync_request_t*>(payload);
+	LOGw("incoming_sync_request: %d %x", incoming_sync_request->crownstone_id, incoming_sync_request->sphere_data_ids[0]);
+
+	event_t incoming_sync_request_event(
+				CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING, 
+				incoming_sync_request, 
+				sizeof(cs_mesh_model_msg_sync_request_t) );
+
+	// handling functions are expected to push events on the bus to respond to incoming sync events. 
+	incoming_sync_request_event.dispatch();
 }
 
 void MeshModel::handleSyncResponse(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	LOGw("HanleSyncResponse stub");
-	// push event CS_TYPE::MESH_SYNC_RESPONSE_INCOMING
+
+	auto incoming_sync_response = reinterpret_cast<cs_mesh_model_msg_sync_response_t*>(payload);
+
+	event_t incoming_sync_response_event(
+				CS_TYPE::EVT_MESH_SYNC_RESPONSE_INCOMING, 
+				incoming_sync_response, 
+				sizeof(cs_mesh_model_msg_sync_response_t) );
+
+	// handling functions are expected to push events on the bus to respond to incoming sync events. 
+	incoming_sync_response_event.dispatch();
 }
-
-
 
 void MeshModel::handleReliableStatus(access_reliable_status_t status) {
 	switch (status) {
