@@ -291,8 +291,12 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			handleTrackedDeviceToken(accessMsg, payload, payloadSize);
 			break;
 		}
-		case CS_MESH_MODEL_TYPE_REQUEST_SYNC: {
-			handleRequestSync(accessMsg, payload, payloadSize);
+		case CS_MESH_MODEL_TYPE_SYNC_REQUEST: {
+			handleSyncResponse(accessMsg, payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_SYNC_RESPONSE: {
+			handleSyncResponse(accessMsg, payload, payloadSize);
 			break;
 		}
 	}
@@ -460,9 +464,15 @@ void MeshModel::handleTrackedDeviceToken(const access_message_rx_t * accessMsg, 
 	EventDispatcher::getInstance().dispatch(event);
 }
 
-void MeshModel::handleRequestSync(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
-	auto packet = reinterpret_cast<cs_mesh_model_msg_request_sync_t*>(payload);
-	LOGw("payload: %d %x", packet->crownstone_id, packet->flags);
+void MeshModel::handleSyncRequest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	auto packet = reinterpret_cast<cs_mesh_model_msg_sync_request_t*>(payload);
+	LOGw("payload: %d %x", packet->crownstone_id, packet->sphere_data_ids[0]);
+	// push event CS_TYPE::MESH_SYNC_REQUEST_INCOMING
+}
+
+void MeshModel::handleSyncResponse(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	LOGw("HanleSyncResponse stub");
+	// push event CS_TYPE::MESH_SYNC_RESPONSE_INCOMING
 }
 
 

@@ -120,7 +120,8 @@ private:
 	void handleSetBehaviourSettings(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
 	void handleTrackedDeviceRegister(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);          // empty impl
 	void handleTrackedDeviceToken(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);             // empty impl
-	void handleRequestSync(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleSyncRequest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleSyncResponse(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
 
 	cs_ret_code_t _sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats=1);
 	cs_ret_code_t _sendReliableMsg(const uint8_t* data, uint16_t len);
