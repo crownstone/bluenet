@@ -280,6 +280,8 @@ enum class CS_TYPE: uint16_t {
 
 	EVT_PRESENCE_MUTATION,                            // Presence changed.
 
+	EVT_GENERIC_TEST= 0xFFFF,                         // Can be used by the python test python lib for ad hoc tests during development.
+
 };
 
 CS_TYPE toCsType(uint16_t type);
