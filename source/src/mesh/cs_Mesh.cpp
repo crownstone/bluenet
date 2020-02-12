@@ -617,25 +617,22 @@ bool Mesh::requestSync() {
 	}
 
 	LOGMeshInfo("Mesh::requestSync");
-	uint32_t flags;
-	event_t sync_request_event(CS_TYPE::EVT_MESH_REQUEST_SYNC_OUTGOING, (void*)&flags, sizeof(flags));
+
+	// retrieve which data should be requested from event handlers
+	cs_mesh_model_msg_sync_request_t sync_request;
+	event_t sync_request_event(CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING, (void*)&sync_request, sizeof(sync_request));
 	sync_request_event.dispatch();
 
-	// (query [flags] to find out who needs which data.)
-
-	// and broadcast message
-	cs_mesh_model_msg_request_sync_t rs;
-
+	// and broadcast message to the network
 	TYPIFY(CONFIG_CROWNSTONE_ID) id;
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
 
-	rs.flags = 0xabcd; // ; flags;
-	rs.crownstone_id = id;
+	sync_request.crownstone_id = id;
 
 	TYPIFY(CMD_SEND_MESH_MSG) msg = {};
-	msg.payload = static_cast<uint8_t*>(static_cast<void*>(&rs));
-	msg.size = sizeof(rs);
-	msg.type = CS_MESH_MODEL_TYPE_REQUEST_SYNC;
+	msg.payload = reinterpret_cast<uint8_t*>(&sync_request);
+	msg.size = sizeof(sync_request);
+	msg.type = CS_MESH_MODEL_TYPE_SYNC_REQUEST;
 
 	_model.sendMsg(&msg);
 
