@@ -14,6 +14,7 @@
 #include "drivers/cs_Serial.h"
 #include "events/cs_EventDispatcher.h"
 #include "storage/cs_State.h"
+#include "time/cs_SystemTime.h"
 #include "util/cs_Utils.h"
 #include "util/cs_BleError.h"
 #include <cstddef> // For NULL
@@ -241,7 +242,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	size16_t payloadSize;
 	MeshModelPacketHelper::getPayload(msg, size, payload, payloadSize);
 
-	switch(msgType){
+	switch (msgType){
 		case CS_MESH_MODEL_TYPE_TEST: {
 			handleTest(accessMsg, payload, payloadSize);
 			break;
@@ -330,25 +331,32 @@ void MeshModel::handleAck(const access_message_rx_t * accessMsg, uint8_t* payloa
 }
 
 void MeshModel::handleStateTime(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
-	event_t event(CS_TYPE::EVT_MESH_TIME, payload, payloadSize);
-		EventDispatcher::getInstance().dispatch(event);
+	cs_mesh_model_msg_time_t* packet = (cs_mesh_model_msg_time_t*)payload;
+	TYPIFY(EVT_MESH_TIME) timestamp = packet->timestamp;
+	LOGMeshModelDebug("received state time %u", timestamp);
+	event_t event(CS_TYPE::EVT_MESH_TIME, &timestamp, sizeof(timestamp));
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 void MeshModel::handleCmdTime(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
-	if (*(TYPIFY(CMD_SET_TIME)*)payload != _lastReveivedSetTime) {
-		_lastReveivedSetTime = *(TYPIFY(CMD_SET_TIME)*)payload;
-		event_t event(CS_TYPE::CMD_SET_TIME, payload, payloadSize);
+	cs_mesh_model_msg_time_t* packet = (cs_mesh_model_msg_time_t*)payload;
+	TYPIFY(CMD_SET_TIME) timestamp = packet->timestamp;
+	LOGMeshModelInfo("received set time %u", timestamp);
+	if (timestamp != _lastReveivedSetTime) {
+		_lastReveivedSetTime = timestamp;
+		event_t event(CS_TYPE::CMD_SET_TIME, &timestamp, sizeof(timestamp));
 		EventDispatcher::getInstance().dispatch(event);
 	}
 }
 
 void MeshModel::handleCmdNoop(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
+	LOGMeshModelDebug("received noop");
 }
 
 void MeshModel::handleCmdMultiSwitch(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_multi_switch_item_t* item = (cs_mesh_model_msg_multi_switch_item_t*) payload;
 		if (item->id == _ownId) {
-			LOGMeshModelInfo("recieved multi switch for me");
+			LOGMeshModelInfo("received multi switch for me");
 			if (memcmp(&_lastReceivedMultiSwitch, item, sizeof(*item)) == 0) {
 				LOGMeshModelDebug("ignore similar multi switch");
 				return;
@@ -418,6 +426,7 @@ void MeshModel::handleState1(const access_message_rx_t * accessMsg, uint8_t* pay
 
 void MeshModel::handleProfileLocation(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_profile_location_t* profileLocation = (cs_mesh_model_msg_profile_location_t*) payload;
+	LOGMeshModelDebug("received profile=%u location=%u", profileLocation->profile, profileLocation->location);
 	TYPIFY(EVT_PROFILE_LOCATION) eventData;
 	eventData.profileId = profileLocation->profile;
 	eventData.locationId = profileLocation->location;
@@ -427,27 +436,33 @@ void MeshModel::handleProfileLocation(const access_message_rx_t * accessMsg, uin
 }
 
 void MeshModel::handleSetBehaviourSettings(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
-	cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, payload, payloadSize);
-		State::getInstance().set(stateData);
+	behaviour_settings_t* packet = (behaviour_settings_t*) payload;
+	LOGMeshModelInfo("received behaviour settings %u", packet->asInt);
+	TYPIFY(STATE_BEHAVIOUR_SETTINGS)* eventDataPtr = packet;
+//	cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, (uint8_t*)eventDataPtr, sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS)));
+//	State::getInstance().set(stateData);
+	State::getInstance().set(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, eventDataPtr, sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS)));
 }
 
 void MeshModel::handleTrackedDeviceRegister(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_device_register_t* packet = (cs_mesh_model_msg_device_register_t*) payload;
-			TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* eventData = packet;
-			event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER, eventData, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)));
-			EventDispatcher::getInstance().dispatch(event);
+	LOGMeshModelDebug("received tracked device register id=%u", packet->deviceId);
+	TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* eventDataPtr = packet;
+	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)));
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 void MeshModel::handleTrackedDeviceToken(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_device_token_t* packet = (cs_mesh_model_msg_device_token_t*) payload;
-			TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventData = packet;
-			event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventData, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
-			EventDispatcher::getInstance().dispatch(event);
+	LOGMeshModelDebug("received tracked device token id=%u", packet->deviceId);
+	TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventDataPtr = packet;
+	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 void MeshModel::handleRequestSync(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
-	auto pl = reinterpret_cast<cs_mesh_model_msg_request_sync_t*>(payload);
-	LOGw("payload: %d %x", pl->crownstone_id, pl->flags);
+	auto packet = reinterpret_cast<cs_mesh_model_msg_request_sync_t*>(payload);
+	LOGd("payload: %d %x", packet->crownstone_id, packet->flags);
 }
 
 
@@ -569,9 +584,12 @@ bool MeshModel::sendMsgFromQueue() {
 	size16_t msgSize = MeshModelPacketHelper::getMeshMessageSize(item->payloadSize);
 	uint8_t* msg = (uint8_t*)malloc(msgSize);
 	if (item->type == CS_MESH_MODEL_TYPE_CMD_TIME) {
-		// Update time in set time command.
-		cs_mesh_model_msg_time_t* timePayload = (cs_mesh_model_msg_time_t*) item->payload;
-		State::getInstance().get(CS_TYPE::STATE_TIME, &(timePayload->timestamp), sizeof(timePayload->timestamp));
+		Time time = SystemTime::posix();
+		if (time.isValid()) {
+			// Update time in set time command.
+			cs_mesh_model_msg_time_t* timePayload = (cs_mesh_model_msg_time_t*) item->payload;
+			timePayload->timestamp = time.timestamp();
+		}
 	}
 	bool success = MeshModelPacketHelper::setMeshMessage((cs_mesh_model_msg_type_t)item->type, item->payload, item->payloadSize, msg, msgSize);
 	if (success) {

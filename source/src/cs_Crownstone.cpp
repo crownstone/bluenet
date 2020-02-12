@@ -94,9 +94,6 @@ void startHFClock() {
 /**
  * If UART is enabled this will be the message printed out over a serial connection. In release mode we will not by
  * default use the UART, it will need to be turned on.
- *
- * For DFU, application should be at (BOOTLOADER_REGION_START - APPLICATION_START_CODE - DFU_APP_DATA_RESERVED). For
- * example, for (0x38000 - 0x1C000 - 0x400) this is 0x1BC00 (113664 bytes).
  */
 void initUart(uint8_t pinRx, uint8_t pinTx) {
 	serial_config(pinRx, pinTx);

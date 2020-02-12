@@ -127,6 +127,8 @@ private:
 	 */
 	bool isTokenOkToSet(TrackedDevice& device, uint8_t* deviceToken, uint8_t size);
 
+	void print(TrackedDevice& device);
+
 	/**
 	 * A minute has passed.
 	 *

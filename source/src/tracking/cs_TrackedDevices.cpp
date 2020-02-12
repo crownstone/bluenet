@@ -44,6 +44,7 @@ cs_ret_code_t TrackedDevices::handleRegister(internal_register_tracked_device_pa
 	setTTL(        *device, packet.data.timeToLiveMinutes);
 	sendRegisterToMesh(*device);
 	sendTokenToMesh(*device);
+	print(*device);
 	return ERR_SUCCESS;
 }
 
@@ -64,6 +65,7 @@ void TrackedDevices::handleMeshRegister(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)
 	setRssiOffset(*device, packet.rssiOffset);
 	setFlags(*device, packet.flags);
 	setAccessLevel(*device, packet.accessLevel);
+	print(*device);
 }
 
 
@@ -80,6 +82,7 @@ void TrackedDevices::handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& pack
 	}
 	setDevicetoken(*device, packet.deviceToken, sizeof(packet.deviceToken));
 	setTTL(*device, packet.ttlMinutes);
+	print(*device);
 }
 
 void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
@@ -247,6 +250,24 @@ void TrackedDevices::setTTL(TrackedDevice& device, uint16_t ttlMinutes) {
 bool TrackedDevices::isValidTTL(TrackedDevice& device) {
 	return (BLEutil::isBitSet(device.fieldsSet, BIT_POS_TTL)) && (device.data.data.timeToLiveMinutes != 0);
 }
+
+void TrackedDevices::print(TrackedDevice& device) {
+	LOGTrackedDevicesDebug("id=%u fieldsSet=%u accessLvl=%u profile=%u location=%u rssiOffset=%i flags=%u TTL=%u token=[%u %u %u]",
+			device.data.data.deviceId,
+			device.fieldsSet,
+			device.data.accessLevel,
+			device.data.data.profileId,
+			device.data.data.locationId,
+			device.data.data.rssiOffset,
+			device.data.data.flags.asInt,
+			device.data.data.timeToLiveMinutes,
+			device.data.data.deviceToken[0],
+			device.data.data.deviceToken[1],
+			device.data.data.deviceToken[2]
+	);
+}
+
+
 
 void TrackedDevices::tickMinute() {
 	LOGTrackedDevicesDebug("tickMinute");

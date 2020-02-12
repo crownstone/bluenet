@@ -15,6 +15,8 @@
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
 
+#define LOGSystemTimeVerbose LOGnone
+
 // ============== Static members ==============
 
 uint32_t SystemTime::rtcTimeStamp = 0;
@@ -48,12 +50,14 @@ void SystemTime::tick(void*) {
 
 	// If more than 1s elapsed since last set rtc timestamp:
 	if (tickDiff > RTC::msToTicks(1000)) {
-		if(posixTimeStamp != 0){
+		if (posixTimeStamp != 0) {
 			// add 1s to posix time
 			posixTimeStamp++;
 			
 			// and store the new time
 			State::getInstance().set(CS_TYPE::STATE_TIME, &posixTimeStamp, sizeof(posixTimeStamp));
+
+			LOGSystemTimeVerbose("posix=%u", posixTimeStamp);
 		}
 
 		// update rtc timestamp subtract 1s from tickDiff by
@@ -73,7 +77,7 @@ void SystemTime::setTime(uint32_t time) {
 	}
 	TimeOfDay t(time);
 
-    LOGi("Set time to %02d:%02d:%02d", t.h(), t.m(), t.s());
+    LOGi("Set time to %u %02d:%02d:%02d", time, t.h(), t.m(), t.s());
     
     uint32_t prevtime = posixTimeStamp;
 	posixTimeStamp = time;
@@ -113,6 +117,7 @@ void SystemTime::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::STATE_SUN_TIME: {
 			// Sunrise/sunset adjusted. No need to do anything as it is already persisted.
+			break;
 		}
 		default: {}
 	}
