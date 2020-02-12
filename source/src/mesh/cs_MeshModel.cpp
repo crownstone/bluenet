@@ -14,6 +14,7 @@
 #include "drivers/cs_Serial.h"
 #include "events/cs_EventDispatcher.h"
 #include "storage/cs_State.h"
+#include "time/cs_SystemTime.h"
 #include "util/cs_Utils.h"
 #include "util/cs_BleError.h"
 #include <cstddef> // For NULL
@@ -583,9 +584,12 @@ bool MeshModel::sendMsgFromQueue() {
 	size16_t msgSize = MeshModelPacketHelper::getMeshMessageSize(item->payloadSize);
 	uint8_t* msg = (uint8_t*)malloc(msgSize);
 	if (item->type == CS_MESH_MODEL_TYPE_CMD_TIME) {
-		// Update time in set time command.
-		cs_mesh_model_msg_time_t* timePayload = (cs_mesh_model_msg_time_t*) item->payload;
-		State::getInstance().get(CS_TYPE::STATE_TIME, &(timePayload->timestamp), sizeof(timePayload->timestamp));
+		Time time = SystemTime::posix();
+		if (time.isValid()) {
+			// Update time in set time command.
+			cs_mesh_model_msg_time_t* timePayload = (cs_mesh_model_msg_time_t*) item->payload;
+			timePayload->timestamp = time.timestamp();
+		}
 	}
 	bool success = MeshModelPacketHelper::setMeshMessage((cs_mesh_model_msg_type_t)item->type, item->payload, item->payloadSize, msg, msgSize);
 	if (success) {
