@@ -106,6 +106,12 @@ void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
 	sendBackgroundAdv(*device, packet.macAddress, packet.rssi);
 }
 
+void TrackedDevices::sendDeviceList() {
+	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
+		sendRegisterToMesh(*iter);
+		sendTokenToMesh(*iter);
+	}
+}
 
 
 
@@ -370,6 +376,27 @@ void TrackedDevices::handleEvent(event_t& evt) {
 			if (--ticksLeft == 0) {
 				ticksLeft = TICKS_PER_MINUTES;
 				tickMinute();
+			}
+			break;
+		}
+		case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING: {
+			if (!deviceListIsSynced) {
+				auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING)*>(evt.data);
+				req->bits.trackedDevices = true;
+			}
+			break;
+		}
+		case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING: {
+			auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)*>(evt.data);
+			if (req->bits.time && deviceListIsSynced) {
+				// Device list is requested by a crownstone in the mesh.
+				// If we are synced, send it.
+				// But only with a 1/10 chance, to prevent flooding the mesh.
+				uint8_t rand8;
+				RNG::fillBuffer(&rand8, 1);
+				if (rand8 < (255 / 10 + 1)) {
+					sendDeviceList();
+				}
 			}
 			break;
 		}
