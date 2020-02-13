@@ -6,7 +6,7 @@ This only documents the latest protocol, older versions can be found in the git 
 ## Payload descriptor
 
 id | name | Payload
----|---|---|
+---|---|---
 0 | CS_MESH_MODEL_TYPE_TEST | [cs_mesh_model_msg_test_t](#cs_mesh_model_msg_test_t)
 1 | CS_MESH_MODEL_TYPE_ACK | none
 2 | CS_MESH_MODEL_TYPE_STATE_TIME | [cs_mesh_model_msg_time_t](#cs_mesh_model_msg_time_t)
