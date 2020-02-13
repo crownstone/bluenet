@@ -163,6 +163,7 @@ cs_ret_code_t MeshModel::_sendMsg(const uint8_t* data, uint16_t len, uint8_t rep
 		accessMsg.access_token = nrf_mesh_unique_token_get();
 		status = access_model_publish(_accessHandle, &accessMsg);
 		if (status != NRF_SUCCESS) {
+			LOGMeshModelInfo("sendMsg failed: %u", status);
 			break;
 		}
 	}
@@ -301,11 +302,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_SYNC_REQUEST: {
-			handleSyncResponse(accessMsg, payload, payloadSize);
-			break;
-		}
-		case CS_MESH_MODEL_TYPE_SYNC_RESPONSE: {
-			handleSyncResponse(accessMsg, payload, payloadSize);
+			handleSyncRequest(accessMsg, payload, payloadSize);
 			break;
 		}
 	}
@@ -483,24 +480,10 @@ void MeshModel::handleTrackedDeviceListSize(const access_message_rx_t * accessMs
 
 void MeshModel::handleSyncRequest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	auto packet = reinterpret_cast<cs_mesh_model_msg_sync_request_t*>(payload);
-	LOGw("handleSyncRequest: %d %x", packet->id, packet->bitmask);
+	LOGw("handleSyncRequest: %u %x", packet->id, packet->bitmask);
 	TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING, eventDataPtr, sizeof(TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)));
 	event.dispatch();
-}
-
-void MeshModel::handleSyncResponse(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
-	LOGw("HanleSyncResponse stub");
-
-	auto incoming_sync_response = reinterpret_cast<cs_mesh_model_msg_sync_response_t*>(payload);
-
-	event_t incoming_sync_response_event(
-				CS_TYPE::EVT_MESH_SYNC_RESPONSE_INCOMING, 
-				incoming_sync_response, 
-				sizeof(cs_mesh_model_msg_sync_response_t) );
-
-	// handling functions are expected to push events on the bus to respond to incoming sync events. 
-	incoming_sync_response_event.dispatch();
 }
 
 void MeshModel::handleReliableStatus(access_reliable_status_t status) {
@@ -632,6 +615,9 @@ bool MeshModel::sendMsgFromQueue() {
 	bool success = MeshModelPacketHelper::setMeshMessage((cs_mesh_model_msg_type_t)item->type, item->payload, item->payloadSize, msg, msgSize);
 	if (success) {
 		_sendMsg(msg, msgSize, 1);
+	}
+	else {
+		LOGMeshModelInfo("Failed to set mesh msg");
 	}
 	free(msg);
 	--(item->repeats);

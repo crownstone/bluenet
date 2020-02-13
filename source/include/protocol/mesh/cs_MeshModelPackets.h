@@ -55,7 +55,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER   = 12, // Payload: cs_mesh_model_msg_device_register_t
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN      = 13, // Payload: cs_mesh_model_msg_device_token_t
 	CS_MESH_MODEL_TYPE_SYNC_REQUEST              = 14, // Payload: cs_mesh_model_msg_sync_request_t
-	CS_MESH_MODEL_TYPE_SYNC_RESPONSE             = 15, // Payload: cs_mesh_model_msg_sync_response_t
+//	CS_MESH_MODEL_TYPE_SYNC_RESPONSE             = 15, // Payload: cs_mesh_model_msg_sync_response_t
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE  = 16, // Payload: cs_mesh_model_msg_device_list_size_t
 };
 
@@ -129,8 +129,4 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_sync_request_t {
 		} bits;
 		uint32_t bitmask;
 	};
-};
-
-struct __attribute__((__packed__)) cs_mesh_model_msg_sync_response_t {
-	stone_id_t id; // ?
 };

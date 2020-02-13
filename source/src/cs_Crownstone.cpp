@@ -712,7 +712,9 @@ void Crownstone::startUp() {
 
 	_state->startWritesToFlash();
 
-	// _mesh->requestSync();
+#if BUILD_MESHING == 1
+	_mesh->startSync();
+#endif
 }
 
 void Crownstone::increaseResetCounter() {

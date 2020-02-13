@@ -543,7 +543,23 @@ void Mesh::handleEvent(event_t & event) {
 				_model.sendTime(&packet);
 			}
 		}
-
+		if (!_synced) {
+			if (_syncCountdown) {
+				--_syncCountdown;
+			}
+			else {
+				_synced = !requestSync();
+				_syncCountdown = MESH_SYNC_RETRY_INTERVAL_MS / TICK_INTERVAL_MS;
+			}
+			if (_syncFailedCountdown) {
+				if (--_syncFailedCountdown == 0) {
+					LOGw("Sync failed");
+					_synced = true;
+					event_t syncFailEvent(CS_TYPE::EVT_MESH_SYNC_FAILED);
+					syncFailEvent.dispatch();
+				}
+			}
+		}
 		_model.tick(tickCount);
 		break;
 	}
@@ -614,18 +630,27 @@ void Mesh::handleEvent(event_t & event) {
 	}
 }
 
+void Mesh::startSync() {
+	_synced = !requestSync();
+	_syncCountdown = MESH_SYNC_RETRY_INTERVAL_MS / TICK_INTERVAL_MS;
+	_syncFailedCountdown = MESH_SYNC_GIVE_UP_MS / TICK_INTERVAL_MS;
+}
 
 bool Mesh::requestSync() {
-	while (SystemTime::up() < 5) {
-		// LOGMeshInfo("Mesh::requestSync: nope");
-		return false;
-	}
-	LOGMeshInfo("Mesh::requestSync");
+//	while (SystemTime::up() < 5) {
+//		// LOGMeshInfo("Mesh::requestSync: nope");
+//		return false;
+//	}
+	LOGMeshInfo("requestSync");
 
 	// Retrieve which data should be requested from event handlers.
 	TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING) syncRequest;
+	syncRequest.bitmask = 0;
 	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING, &syncRequest, sizeof(syncRequest));
 	event.dispatch();
+	if (syncRequest.bitmask == 0) {
+		return false;
+	}
 
 	// Make sure that event data type is equal to mesh msg type.
 	cs_mesh_model_msg_sync_request_t* requestMsg = &syncRequest;
@@ -640,6 +665,7 @@ bool Mesh::requestSync() {
 	msg.payload = reinterpret_cast<uint8_t*>(requestMsg);
 	msg.size = sizeof(*requestMsg);
 	msg.type = CS_MESH_MODEL_TYPE_SYNC_REQUEST;
+	msg.reliability = CS_MESH_RELIABILITY_MEDIUM;
 	_model.sendMsg(&msg);
 
 	return true;
