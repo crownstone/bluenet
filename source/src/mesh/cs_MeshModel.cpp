@@ -465,16 +465,11 @@ void MeshModel::handleTrackedDeviceToken(const access_message_rx_t * accessMsg, 
 }
 
 void MeshModel::handleSyncRequest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
-	auto incoming_sync_request = reinterpret_cast<cs_mesh_model_msg_sync_request_t*>(payload);
-	LOGw("incoming_sync_request: %d %x", incoming_sync_request->crownstone_id, incoming_sync_request->sphere_data_ids[0]);
-
-	event_t incoming_sync_request_event(
-				CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING, 
-				incoming_sync_request, 
-				sizeof(cs_mesh_model_msg_sync_request_t) );
-
-	// handling functions are expected to push events on the bus to respond to incoming sync events. 
-	incoming_sync_request_event.dispatch();
+	auto packet = reinterpret_cast<cs_mesh_model_msg_sync_request_t*>(payload);
+	LOGw("handleSyncRequest: %d %x", packet->id, packet->bitmask);
+	TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)* eventDataPtr = packet;
+	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING, eventDataPtr, sizeof(TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)));
+	event.dispatch();
 }
 
 void MeshModel::handleSyncResponse(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {

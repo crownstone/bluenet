@@ -537,7 +537,7 @@ void Mesh::handleEvent(event_t & event) {
 			_sendStateTimeCountdown = randMs / TICK_INTERVAL_MS;
 
 			Time time = SystemTime::posix();
-			if(time.isValid()){
+			if (time.isValid()) {
 				cs_mesh_model_msg_time_t packet;
 				packet.timestamp = time.timestamp();
 				_model.sendTime(&packet);
@@ -612,28 +612,29 @@ void Mesh::handleEvent(event_t & event) {
 
 bool Mesh::requestSync() {
 	while (SystemTime::up() < 5) {
-		// LOGMeshInfo("Mesh::requestSync: nope");	
+		// LOGMeshInfo("Mesh::requestSync: nope");
 		return false;
 	}
-
 	LOGMeshInfo("Mesh::requestSync");
 
-	// retrieve which data should be requested from event handlers
-	cs_mesh_model_msg_sync_request_t sync_request;
-	event_t sync_request_event(CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING, (void*)&sync_request, sizeof(sync_request));
-	sync_request_event.dispatch();
+	// Retrieve which data should be requested from event handlers.
+	TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING) syncRequest;
+	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING, &syncRequest, sizeof(syncRequest));
+	event.dispatch();
 
-	// and broadcast message to the network
+	// Make sure that event data type is equal to mesh msg type.
+	cs_mesh_model_msg_sync_request_t* requestMsg = &syncRequest;
+
+	// Set crownstone id.
 	TYPIFY(CONFIG_CROWNSTONE_ID) id;
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
+	requestMsg->id = id;
 
-	sync_request.crownstone_id = id;
-
-	TYPIFY(CMD_SEND_MESH_MSG) msg = {};
-	msg.payload = reinterpret_cast<uint8_t*>(&sync_request);
-	msg.size = sizeof(sync_request);
+	// Send the message over the mesh.
+	cs_mesh_msg_t msg = {};
+	msg.payload = reinterpret_cast<uint8_t*>(requestMsg);
+	msg.size = sizeof(*requestMsg);
 	msg.type = CS_MESH_MODEL_TYPE_SYNC_REQUEST;
-
 	_model.sendMsg(&msg);
 
 	return true;
