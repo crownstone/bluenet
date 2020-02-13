@@ -468,9 +468,9 @@ typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef void TYPIFY(EVT_GOING_TO_DFU);
 typedef profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
-typedef uint8_t TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING);
-typedef void TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING);
-typedef uint8_t TYPIFY(EVT_MESH_SYNC_RESPONSE_INCOMING);
+typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING);
+typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING);
+typedef void TYPIFY(EVT_MESH_SYNC_RESPONSE_INCOMING);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

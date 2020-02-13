@@ -481,9 +481,9 @@ size16_t TypeSize(CS_TYPE const & type){
 	case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING:
 		return sizeof(TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING));
 	case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING:
-		return 0;
+		return sizeof(TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING));
 	case CS_TYPE::EVT_MESH_SYNC_RESPONSE_INCOMING:
-		return sizeof(TYPIFY(EVT_MESH_SYNC_RESPONSE_INCOMING));
+		return 0;
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return 0;
 	} // end switch
