@@ -111,6 +111,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 		parsed.deviceToken[0] = (result >> (42-2-8)) & 0xFF;
 		parsed.deviceToken[1] = (result >> (42-2-8-8)) & 0xFF;
 		parsed.deviceToken[2] = (result >> (42-2-8-8-8)) & 0xFF;
+		LOGBackgroundAdvDebug("v1 token=[%u %u %u]", parsed.deviceToken[0], parsed.deviceToken[1], parsed.deviceToken[2]);
 		event_t event(CS_TYPE::EVT_ADV_BACKGROUND_PARSED_V1, &parsed, sizeof(parsed));
 		EventDispatcher::getInstance().dispatch(event);
 		return;

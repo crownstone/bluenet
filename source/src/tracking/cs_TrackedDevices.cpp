@@ -281,6 +281,7 @@ void TrackedDevices::tickMinute() {
 		if ((iter->fieldsSet & BIT_POS_TTL) && (iter->data.data.timeToLiveMinutes != 0)) {
 			iter->data.data.timeToLiveMinutes--;
 		}
+		print(*iter);
 	}
 }
 
@@ -297,6 +298,7 @@ void TrackedDevices::sendBackgroundAdv(TrackedDevice& device, uint8_t* macAddres
 	eventData.locationId = device.data.data.locationId;
 	eventData.profileId = device.data.data.profileId;
 	eventData.flags = device.data.data.flags.asInt;
+	LOGTrackedDevicesVerbose("sendBackgroundAdv adjustedRssi=%i locationId=%u profileId=%u flags=%u", eventData.adjustedRssi, eventData.locationId, eventData.profileId, eventData.flags);
 	event_t event(CS_TYPE::EVT_ADV_BACKGROUND_PARSED, &eventData, sizeof(eventData));
 	event.dispatch();
 }

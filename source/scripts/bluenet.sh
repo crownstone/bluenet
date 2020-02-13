@@ -344,7 +344,7 @@ verify_board_version_written() {
 
 reset() {
 	cs_info "reset"
-	cd "$BLUENET_BUILD_DIR"
+	cd "$BLUENET_BUILD_DIR/$target"
 	make reset
 	checkError "Error when resetting"
 }
