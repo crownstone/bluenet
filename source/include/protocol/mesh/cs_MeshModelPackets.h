@@ -110,10 +110,13 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_device_token_t {
 	uint16_t ttlMinutes;
 };
 
-
-
-struct __attribute__((__packed__)) cs_mesh_model_msg_sync_request_t { 
-	stone_id_t id; // ID of crownstone that requests the data
+struct __attribute__((__packed__)) cs_mesh_model_msg_sync_request_t {
+	/**
+	 * ID of crownstone that requests the data
+	 *
+	 * Not really necessary, as the source address is also the crownstone id.
+	 */
+	stone_id_t id;
 	union __attribute__((__packed__)) {
 		struct __attribute__((packed)) {
 			bool time           : 1;
