@@ -82,7 +82,7 @@ private:
 	 * When syncing, the remote crownstone will tell how many devices there are.
 	 * This number is cached in this variable, so we know when we're synced.
 	 */
-	uint8_t expectedDeviceListSize = 0;
+	uint8_t expectedDeviceListSize = 0xFF;
 
 	/**
 	 * Find device with given ID, else add a new device with given ID.
@@ -156,6 +156,9 @@ private:
 	 */
 	bool allFieldsSet(TrackedDevice& device);
 
+	/**
+	 * Check if tracked device list is synced yet.
+	 */
 	void checkSynced();
 
 

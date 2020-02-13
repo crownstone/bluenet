@@ -11,7 +11,7 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
-#define LOGTrackedDevicesDebug LOGnone
+#define LOGTrackedDevicesDebug LOGd
 #define LOGTrackedDevicesVerbose LOGnone
 
 TrackedDevices::TrackedDevices() {
@@ -370,6 +370,7 @@ void TrackedDevices::sendListSizeToMesh() {
 }
 
 void TrackedDevices::sendDeviceList() {
+	LOGd("sendDeviceList %u devices", deviceListSize);
 	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
 		sendRegisterToMesh(*iter);
 		sendTokenToMesh(*iter);
@@ -420,12 +421,13 @@ void TrackedDevices::handleEvent(event_t& evt) {
 			if (!deviceListIsSynced) {
 				auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING)*>(evt.data);
 				req->bits.trackedDevices = true;
+				expectedDeviceListSize = 0xFF;
 			}
 			break;
 		}
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING: {
 			auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)*>(evt.data);
-			if (req->bits.time && deviceListIsSynced) {
+			if (req->bits.trackedDevices && deviceListIsSynced) {
 				// Device list is requested by a crownstone in the mesh.
 				// If we are synced, send it.
 				// But only with a 1/10 chance, to prevent flooding the mesh.
@@ -435,6 +437,11 @@ void TrackedDevices::handleEvent(event_t& evt) {
 					sendDeviceList();
 				}
 			}
+			break;
+		}
+		case CS_TYPE::EVT_MESH_SYNC_FAILED: {
+			LOGTrackedDevicesDebug("Sync failed: consider synced");
+			deviceListIsSynced = true;
 			break;
 		}
 		default:
