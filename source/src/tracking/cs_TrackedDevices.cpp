@@ -66,6 +66,7 @@ void TrackedDevices::handleMeshRegister(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)
 	setFlags(*device, packet.flags);
 	setAccessLevel(*device, packet.accessLevel);
 	print(*device);
+	checkSynced();
 }
 
 
@@ -83,6 +84,12 @@ void TrackedDevices::handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& pack
 	setDevicetoken(*device, packet.deviceToken, sizeof(packet.deviceToken));
 	setTTL(*device, packet.ttlMinutes);
 	print(*device);
+	checkSynced();
+}
+
+void TrackedDevices::handleMeshListSize(TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)& packet) {
+	LOGd("handleMeshListSize size=%u", packet.listSize);
+	expectedDeviceListSize = packet.listSize;
 }
 
 void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
@@ -105,16 +112,6 @@ void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
 //	}
 	sendBackgroundAdv(*device, packet.macAddress, packet.rssi);
 }
-
-void TrackedDevices::sendDeviceList() {
-	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
-		sendRegisterToMesh(*iter);
-		sendTokenToMesh(*iter);
-	}
-}
-
-
-
 
 TrackedDevices::TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 	TrackedDevice* device = find(deviceId);
@@ -211,10 +208,29 @@ bool TrackedDevices::isTokenOkToSet(TrackedDevice& device, uint8_t* deviceToken,
 	return false;
 }
 
-
 bool TrackedDevices::allFieldsSet(TrackedDevice& device) {
 	return device.fieldsSet == ALL_FIELDS_SET;
 }
+
+void TrackedDevices::checkSynced() {
+	if (deviceListIsSynced) {
+		return;
+	}
+	if (deviceListSize < expectedDeviceListSize) {
+		LOGTrackedDevicesDebug("Expecting more devices, current=%u expected=%u", deviceListSize, expectedDeviceListSize);
+		return;
+	}
+	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
+		if (!allFieldsSet(*iter)) {
+			LOGTrackedDevicesDebug("Not all fields set for id=%u", iter->data.data.deviceId);
+			return;
+		}
+	}
+	LOGi("Synced");
+	deviceListIsSynced = true;
+}
+
+
 
 void TrackedDevices::setAccessLevel(TrackedDevice& device, uint8_t accessLevel) {
 	device.data.accessLevel = accessLevel;
@@ -338,11 +354,27 @@ void TrackedDevices::sendRegisterToMesh(TrackedDevice& device) {
 void TrackedDevices::sendTokenToMesh(TrackedDevice& device) {
 	LOGTrackedDevicesDebug("sendTokenToMesh id=%u", device.data.data.deviceId);
 	TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN) eventData;
-	eventData.deviceId   = device.data.data.deviceId;
+	eventData.deviceId = device.data.data.deviceId;
 	memcpy(eventData.deviceToken, device.data.data.deviceToken, sizeof(device.data.data.deviceToken));
 	eventData.ttlMinutes = device.data.data.timeToLiveMinutes;
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN, &eventData, sizeof(eventData));
 	event.dispatch();
+}
+
+void TrackedDevices::sendListSizeToMesh() {
+	LOGTrackedDevicesDebug("sendListSizeToMesh size=%u", deviceListSize);
+	TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE) eventData;
+	eventData.listSize = deviceListSize;
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE, &eventData, sizeof(eventData));
+	event.dispatch();
+}
+
+void TrackedDevices::sendDeviceList() {
+	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
+		sendRegisterToMesh(*iter);
+		sendTokenToMesh(*iter);
+	}
+	sendListSizeToMesh();
 }
 
 void TrackedDevices::handleEvent(event_t& evt) {
@@ -365,6 +397,11 @@ void TrackedDevices::handleEvent(event_t& evt) {
 		case CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN: {
 			TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* data = reinterpret_cast<TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)*>(evt.data);
 			handleMeshToken(*data);
+			break;
+		}
+		case CS_TYPE::EVT_MESH_TRACKED_DEVICE_LIST_SIZE: {
+			TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)* data = reinterpret_cast<TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)*>(evt.data);
+			handleMeshListSize(*data);
 			break;
 		}
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED_V1: {
