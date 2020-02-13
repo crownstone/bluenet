@@ -281,6 +281,7 @@ void TrackedDevices::tickMinute() {
 		if ((iter->fieldsSet & BIT_POS_TTL) && (iter->data.data.timeToLiveMinutes != 0)) {
 			iter->data.data.timeToLiveMinutes--;
 		}
+		print(*iter);
 	}
 }
 
