@@ -55,7 +55,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER = 12, // Payload: cs_mesh_model_msg_device_register_t
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN    = 13, // Payload: cs_mesh_model_msg_device_token_t
 	CS_MESH_MODEL_TYPE_SYNC_REQUEST            = 14, // Payload: cs_mesh_model_msg_sync_request_t
-	CS_MESH_MODEL_TYPE_SYNC_RESPONSE            = 15, // Payload: cs_mesh_model_msg_sync_response_t
+	CS_MESH_MODEL_TYPE_SYNC_RESPONSE           = 15, // Payload: cs_mesh_model_msg_sync_response_t
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_test_t {
@@ -112,23 +112,17 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_device_token_t {
 
 
 
-/// data that is collective among the devices in a sphere 
-enum class SphereDataId : uint8_t {
-	Unspecified = 0,
-	Time = 1,
-	TrackedDevices = 2,
-};
-
-#define MAX_SYNC_REQUEST_DATA_IDS 8
-#define MAX_SYNC_RESPONSE_DATA_SIZE 8
-
 struct __attribute__((__packed__)) cs_mesh_model_msg_sync_request_t { 
-	uint16_t crownstone_id; // who is requesting data
-	uint8_t sphere_data_ids[MAX_SYNC_REQUEST_DATA_IDS]; // array containing which data is requested
+	stone_id_t id; // ID of crownstone that requests the data
+	union __attribute__((__packed__)) {
+		struct __attribute__((packed)) {
+			bool time           : 1;
+			bool trackedDevices : 1;
+		} bits;
+		uint32_t bitmask;
+	};
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_sync_response_t {
-	uint16_t crownstone_id; // ?
-	uint8_t sphere_data_id; // which data is contained in this sync response
-	uint8_t data[MAX_SYNC_RESPONSE_DATA_SIZE];
+	stone_id_t id; // ?
 };
