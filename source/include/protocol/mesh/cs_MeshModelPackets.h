@@ -40,22 +40,23 @@ enum cs_mesh_model_opcode_t {
  */
 #define MESH_HEADER_SIZE 1
 enum cs_mesh_model_msg_type_t {
-	CS_MESH_MODEL_TYPE_TEST                    = 0,  // Payload: cs_mesh_model_msg_test_t
-	CS_MESH_MODEL_TYPE_ACK                     = 1,  // Payload: none
-	CS_MESH_MODEL_TYPE_STATE_TIME              = 2,  // Payload: cs_mesh_model_msg_time_t
-	CS_MESH_MODEL_TYPE_CMD_TIME                = 3,  // Payload: cs_mesh_model_msg_time_t
-	CS_MESH_MODEL_TYPE_CMD_NOOP                = 4,  // Payload: none
-	CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH        = 5,  // Payload: multi_switch_item_t
-//	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE    = 6,  // Payload: keep_alive_state_item_t
-//	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE          = 7,  // Payload: none
-	CS_MESH_MODEL_TYPE_STATE_0                 = 8,  // Payload: cs_mesh_model_msg_state_0_t
-	CS_MESH_MODEL_TYPE_STATE_1                 = 9,  // Payload: cs_mesh_model_msg_state_1_t
-	CS_MESH_MODEL_TYPE_PROFILE_LOCATION        = 10, // Payload: cs_mesh_model_msg_profile_location_t
-	CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS  = 11, // Payload: behaviour_settings_t
-	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER = 12, // Payload: cs_mesh_model_msg_device_register_t
-	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN    = 13, // Payload: cs_mesh_model_msg_device_token_t
-	CS_MESH_MODEL_TYPE_SYNC_REQUEST            = 14, // Payload: cs_mesh_model_msg_sync_request_t
-	CS_MESH_MODEL_TYPE_SYNC_RESPONSE           = 15, // Payload: cs_mesh_model_msg_sync_response_t
+	CS_MESH_MODEL_TYPE_TEST                      = 0,  // Payload: cs_mesh_model_msg_test_t
+	CS_MESH_MODEL_TYPE_ACK                       = 1,  // Payload: none
+	CS_MESH_MODEL_TYPE_STATE_TIME                = 2,  // Payload: cs_mesh_model_msg_time_t
+	CS_MESH_MODEL_TYPE_CMD_TIME                  = 3,  // Payload: cs_mesh_model_msg_time_t
+	CS_MESH_MODEL_TYPE_CMD_NOOP                  = 4,  // Payload: none
+	CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH          = 5,  // Payload: multi_switch_item_t
+//	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE      = 6,  // Payload: keep_alive_state_item_t
+//	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE            = 7,  // Payload: none
+	CS_MESH_MODEL_TYPE_STATE_0                   = 8,  // Payload: cs_mesh_model_msg_state_0_t
+	CS_MESH_MODEL_TYPE_STATE_1                   = 9,  // Payload: cs_mesh_model_msg_state_1_t
+	CS_MESH_MODEL_TYPE_PROFILE_LOCATION          = 10, // Payload: cs_mesh_model_msg_profile_location_t
+	CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS    = 11, // Payload: behaviour_settings_t
+	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER   = 12, // Payload: cs_mesh_model_msg_device_register_t
+	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN      = 13, // Payload: cs_mesh_model_msg_device_token_t
+	CS_MESH_MODEL_TYPE_SYNC_REQUEST              = 14, // Payload: cs_mesh_model_msg_sync_request_t
+	CS_MESH_MODEL_TYPE_SYNC_RESPONSE             = 15, // Payload: cs_mesh_model_msg_sync_response_t
+	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE  = 16, // Payload: cs_mesh_model_msg_device_list_size_t
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_test_t {
@@ -108,6 +109,10 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_device_token_t {
 	device_id_t deviceId;
 	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
 	uint16_t ttlMinutes;
+};
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_device_list_size_t {
+	uint8_t listSize;
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_sync_request_t {

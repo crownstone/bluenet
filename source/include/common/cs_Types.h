@@ -226,9 +226,11 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS,         // Send a set behaviour settings mesh message.
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER,
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN,
+	CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE,
 	EVT_MESH_TIME,                                    // Mesh received the current time.
 	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
 	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.
+	EVT_MESH_TRACKED_DEVICE_LIST_SIZE,                // Mesh received a tracked device list size.
 	EVT_MESH_SYNC_REQUEST_OUTGOING,                   // Before an outgoing sync request is broadcast, this event is fired internally so that other event handlers can tag on.
 	EVT_MESH_SYNC_REQUEST_INCOMING,                   // Whan a sync request is received, this event is fired internally so that each event handler can individually respond to it.
 	EVT_MESH_SYNC_RESPONSE_INCOMING,
@@ -416,6 +418,8 @@ typedef  cs_mesh_model_msg_device_register_t TYPIFY(EVT_MESH_TRACKED_DEVICE_REGI
 typedef  cs_mesh_model_msg_device_register_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER);
 typedef  cs_mesh_model_msg_device_token_t TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN);
 typedef  cs_mesh_model_msg_device_token_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN);
+typedef  cs_mesh_model_msg_device_list_size_t TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE);
+typedef  cs_mesh_model_msg_device_list_size_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);

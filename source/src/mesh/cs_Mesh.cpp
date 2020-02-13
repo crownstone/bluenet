@@ -580,7 +580,12 @@ void Mesh::handleEvent(event_t & event) {
 		_model.sendTrackedDeviceToken(packet);
 		break;
 	}
-
+	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE: {
+		LOGd("send tracked device list size");
+		TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE)*)event.data;
+		_model.sendTrackedDeviceListSize(packet);
+		break;
+	}
 	case CS_TYPE::CMD_FACTORY_RESET: {
 		factoryReset();
 		break;
