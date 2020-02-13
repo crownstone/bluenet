@@ -211,9 +211,9 @@ struct __attribute__((packed)) behaviour_debug_t {
 
 struct __attribute__((packed)) register_tracked_device_packet_t {
 	uint16_t deviceId;
-	uint8_t locationId;
+	uint8_t locationId = 0;
 	uint8_t profileId;
-	int8_t rssiOffset;
+	int8_t rssiOffset = 0;
 	union __attribute__((packed)) {
 		struct __attribute__((packed)) {
 			bool reserved : 1;
@@ -224,7 +224,7 @@ struct __attribute__((packed)) register_tracked_device_packet_t {
 	} flags;
 //	uint8_t flags;
 	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
-	uint16_t timeToLiveMinutes;
+	uint16_t timeToLiveMinutes = 0;
 };
 
 typedef register_tracked_device_packet_t update_tracked_device_packet_t;

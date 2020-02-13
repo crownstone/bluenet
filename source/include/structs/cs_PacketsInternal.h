@@ -194,7 +194,7 @@ struct profile_location_t {
 
 struct __attribute__((packed)) internal_register_tracked_device_packet_t {
 	register_tracked_device_packet_t data;
-	uint8_t accessLevel;
+	uint8_t accessLevel = NOT_SET;
 };
 
 typedef internal_register_tracked_device_packet_t internal_update_tracked_device_packet_t;
