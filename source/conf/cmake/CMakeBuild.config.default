@@ -43,6 +43,7 @@ CS_UART_BINARY_PROTOCOL_ENABLED=1
 # 2 to use UART, this replaces bluenet serial, and thus breaks the binary protocol.
 #   Also, the UART pin is then defined at compile time.
 CS_SERIAL_NRF_LOG_ENABLED=0
+CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED=0
 CS_SERIAL_NRF_LOG_PIN_TX=6
 
 # The different boards that can be used (from cs_Boards.h):
