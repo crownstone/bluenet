@@ -418,6 +418,7 @@ void MeshModel::handleState1(const access_message_rx_t * accessMsg, uint8_t* pay
 		_lastReceivedState.state.rssi = 0;
 		_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
 		_lastReceivedState.state.data.type = SERVICE_DATA_TYPE_EXT_STATE;
+#if CS_SERIAL_NRF_LOG_ENABLED != 2
 		LOGMeshModelInfo("received: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u",
 				_lastReceivedState.state.data.extState.id,
 				_lastReceivedState.state.data.extState.switchState,
@@ -428,7 +429,7 @@ void MeshModel::handleState1(const access_message_rx_t * accessMsg, uint8_t* pay
 				_lastReceivedState.state.data.extState.energyUsed,
 				_lastReceivedState.state.data.extState.partialTimestamp
 		);
-
+#endif
 		event_t event(CS_TYPE::EVT_STATE_EXTERNAL_STONE, &(_lastReceivedState.state), sizeof(_lastReceivedState.state));
 		EventDispatcher::getInstance().dispatch(event);
 	}
