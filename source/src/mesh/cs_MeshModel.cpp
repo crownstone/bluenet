@@ -538,7 +538,7 @@ void MeshModel::sendTestMsg() {
  * We do the reverse iterate, so that the old SendIndex should be handled early (for a large enough queue).
  */
 cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority) {
-	LOGd("type=%u size=%u", type, payloadSize);
+	LOGMeshModelDebug("addToQueue type=%u id=%u size=%u repeats=%u priority=%u", type, id, payloadSize, repeats, priority);
 	assert(payloadSize <= (MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE), "No segmented msgs for now");
 	uint8_t index;
 //	for (int i = _queueSendIndex; i < _queueSendIndex + MESH_MODEL_QUEUE_SIZE; ++i) {
@@ -552,7 +552,7 @@ cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id
 			item->type = type;
 			item->payloadSize = payloadSize;
 			memcpy(item->payload, payload, payloadSize);
-			LOGMeshModelDebug("added to ind=%u type=%u id=%u", index, type, id);
+			LOGMeshModelVerbose("added to ind=%u", index);
 //			BLEutil::printArray(payload, payloadSize);
 			_queueSendIndex = index;
 			return ERR_SUCCESS;
