@@ -320,6 +320,7 @@ void SafeSwitch::goingToDfu() {
 		// Dev boards
 		case PCA10036:
 		case PCA10040:
+		case PCA10100:
 		// Builtin zero
 		case ACR01B1A:
 		case ACR01B1B:

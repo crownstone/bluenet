@@ -79,6 +79,7 @@ static inline const char* get_hardware_version() {
 	// Nordic Boards
 	if (hardwareBoard == PCA10036) return "PCA10036";
 	if (hardwareBoard == PCA10040) return "PCA10040";
+	if (hardwareBoard == PCA10100) return "PCA10100";
 
 	// Can't use LOGe here, as the bootloader also uses this file.
 //	LOGe("Failed to define version for hardware board");

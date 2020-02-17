@@ -36,6 +36,8 @@ extern "C" {
 #define PCA10036             40
 // Nordic dev board in active use.
 #define PCA10040             41
+// Nordic dev board for the nRF52833
+#define PCA10100             42
 
 // Rectangular beacons from China.
 #define GUIDESTONE           100

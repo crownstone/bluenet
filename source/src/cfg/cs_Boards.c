@@ -781,6 +781,7 @@ uint32_t configure_board(boards_config_t* p_config) {
 
 	case PCA10036:
 	case PCA10040:
+	case PCA10100:
 		asPca10040(p_config);
 		break;
 	case CS_USB_DONGLE:

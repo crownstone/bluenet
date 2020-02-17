@@ -45,7 +45,7 @@ cs_ret_code_t Storage::init() {
 	if (!_registeredFds) {
 		LOGStorageDebug("fds_register");
 		fds_ret_code = fds_register(fds_evt_handler);
-		if (fds_ret_code != FDS_SUCCESS) {
+		if (fds_ret_code != NRF_SUCCESS) {
 			LOGe("Registering FDS event handler failed (err=%i)", fds_ret_code);
 			return getErrorCode(fds_ret_code);
 		}
@@ -54,7 +54,7 @@ cs_ret_code_t Storage::init() {
 
 	LOGStorageDebug("fds_init");
 	fds_ret_code = fds_init();
-	if (fds_ret_code != FDS_SUCCESS) {
+	if (fds_ret_code != NRF_SUCCESS) {
 		LOGe("Init FDS failed (err=%i)", fds_ret_code);
 		return getErrorCode(fds_ret_code);
 	}
@@ -112,9 +112,9 @@ cs_ret_code_t Storage::findNextInternal(uint16_t recordKey, uint16_t & fileId) {
 	fds_record_desc_t recordDesc;
 	fds_flash_record_t flashRecord;
 	ret_code_t fdsRetCode;
-	while (fds_record_find_by_key(recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
+	while (fds_record_find_by_key(recordKey, &recordDesc, &_findToken) == NRF_SUCCESS) {
 		fdsRetCode = fds_record_open(&recordDesc, &flashRecord);
-		if (fdsRetCode == FDS_SUCCESS) {
+		if (fdsRetCode == NRF_SUCCESS) {
 			fileId = flashRecord.p_header->file_id;
 			fds_record_close(&recordDesc);
 			return ERR_SUCCESS;
@@ -146,7 +146,7 @@ cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 	bool done = false;
 	LOGd("Read record key=%u file=%u", recordKey, fileId);
 	initSearch();
-	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
+	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == NRF_SUCCESS) {
 		if (done) {
 			LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
 		}
@@ -186,7 +186,7 @@ cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t & stateData) {
 	bool done = false;
 	LOGd("Read record %u file=%u", recordKey, fileId);
 	initSearch();
-	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
+	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == NRF_SUCCESS) {
 		if (done) {
 			LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
 		}
@@ -255,7 +255,7 @@ cs_ret_code_t Storage::readNextInternal(uint16_t recordKey, uint16_t & fileId, u
 	}
 	fds_record_desc_t recordDesc;
 	cs_ret_code_t csRetCode = ERR_NOT_FOUND;
-	while (fds_record_find_by_key(recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
+	while (fds_record_find_by_key(recordKey, &recordDesc, &_findToken) == NRF_SUCCESS) {
 		csRetCode = readRecord(recordDesc, buf, size, fileId);
 		if (csRetCode == ERR_SUCCESS) {
 			return csRetCode;
@@ -268,7 +268,7 @@ cs_ret_code_t Storage::readRecord(fds_record_desc_t recordDesc, uint8_t* buf, ui
 	fds_flash_record_t flashRecord;
 	ret_code_t fdsRetCode = fds_record_open(&recordDesc, &flashRecord);
 	switch (fdsRetCode) {
-	case FDS_SUCCESS: {
+	case NRF_SUCCESS: {
 		cs_ret_code_t csRetCode = ERR_SUCCESS;
 		LOGStorageDebug("Opened record id=%u addr=%p", flashRecord.p_header->record_id, recordDesc.p_record);
 		size_t flashSize = flashRecord.p_header->length_words << 2; // Size is in bytes, each word is 4B.
@@ -281,7 +281,7 @@ cs_ret_code_t Storage::readRecord(fds_record_desc_t recordDesc, uint8_t* buf, ui
 			fileId = flashRecord.p_header->file_id;
 			memcpy(buf, flashRecord.p_data, size);
 		}
-		if (fds_record_close(&recordDesc) != FDS_SUCCESS) {
+		if (fds_record_close(&recordDesc) != NRF_SUCCESS) {
 			// TODO: How to handle the close error? Maybe reboot?
 			LOGe("Error on closing record err=%u", fdsRetCode);
 		}
@@ -344,14 +344,14 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 		fdsRetCode = fds_record_write(&recordDesc, &record);
 	}
 	switch(fdsRetCode) {
-	case FDS_SUCCESS:
+	case NRF_SUCCESS:
 		setBusy(recordKey);
 		LOGStorageDebug("Started writing");
 		break;
 	case FDS_ERR_NO_SPACE_IN_FLASH: {
 		LOGi("Flash is full, start garbage collection");
 		ret_code_t gcRetCode = garbageCollect();
-		if (gcRetCode == FDS_SUCCESS) {
+		if (gcRetCode == NRF_SUCCESS) {
 			fdsRetCode = FDS_ERR_BUSY;
 		}
 		else {
@@ -389,10 +389,10 @@ cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
 	// Go through all records with given fileId and key (can be multiple).
 	// Record key can be set busy multiple times.
 	initSearch();
-	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
+	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == NRF_SUCCESS) {
 		fdsRetCode = fds_record_delete(&recordDesc);
 		LOGStorageDebug("fds_record_delete %u", fdsRetCode);
-		if (fdsRetCode == FDS_SUCCESS) {
+		if (fdsRetCode == NRF_SUCCESS) {
 			setBusy(recordKey);
 		}
 		else {
@@ -421,10 +421,10 @@ cs_ret_code_t Storage::remove(CS_TYPE type) {
 	// Go through all records with given key (can be multiple).
 	// Record key can be set busy multiple times.
 	initSearch();
-	while (fds_record_find_by_key(recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
+	while (fds_record_find_by_key(recordKey, &recordDesc, &_findToken) == NRF_SUCCESS) {
 		fdsRetCode = fds_record_delete(&recordDesc);
 		LOGStorageDebug("fds_record_delete %u", fdsRetCode);
-		if (fdsRetCode == FDS_SUCCESS) {
+		if (fdsRetCode == NRF_SUCCESS) {
 			setBusy(recordKey);
 		}
 		else {
@@ -447,7 +447,7 @@ cs_ret_code_t Storage::remove(cs_state_id_t id) {
 		return ERR_BUSY;
 	}
 	ret_code_t fdsRetCode = fds_file_delete(fileId);
-	if (fdsRetCode == FDS_SUCCESS) {
+	if (fdsRetCode == NRF_SUCCESS) {
 		_removingFile = true;
 	}
 	return getErrorCode(fdsRetCode);
@@ -475,14 +475,14 @@ cs_ret_code_t Storage::continueFactoryReset() {
 	fds_record_desc_t recordDesc;
 	fds_flash_record_t flashRecord;
 	ret_code_t fdsRetCode ;
-	while (fds_record_iterate(&recordDesc, &_findToken) == FDS_SUCCESS) {
+	while (fds_record_iterate(&recordDesc, &_findToken) == NRF_SUCCESS) {
 		bool remove = false;
 		fdsRetCode = fds_record_open(&recordDesc, &flashRecord);
 		switch (fdsRetCode) {
-			case FDS_SUCCESS: {
+			case NRF_SUCCESS: {
 				uint16_t fileId = flashRecord.p_header->file_id;
 				uint16_t recordKey = flashRecord.p_header->record_key;
-				if (fds_record_close(&recordDesc) != FDS_SUCCESS) {
+				if (fds_record_close(&recordDesc) != NRF_SUCCESS) {
 					// TODO: How to handle the close error? Maybe reboot?
 					LOGe("Error on closing record");
 				}
@@ -510,7 +510,7 @@ cs_ret_code_t Storage::continueFactoryReset() {
 		if (remove) {
 			fdsRetCode = fds_record_delete(&recordDesc);
 			switch (fdsRetCode) {
-				case FDS_SUCCESS:
+				case NRF_SUCCESS:
 					return ERR_SUCCESS;
 				case FDS_ERR_NO_SPACE_IN_QUEUES:
 					return ERR_BUSY;
@@ -521,7 +521,7 @@ cs_ret_code_t Storage::continueFactoryReset() {
 	}
 	LOGi("Done removing all records.");
 	fdsRetCode = fds_gc();
-	if (fdsRetCode != FDS_SUCCESS) {
+	if (fdsRetCode != NRF_SUCCESS) {
 		LOGw("Failed to start garbage collection (err=%i)", fdsRetCode);
 		return getErrorCode(fdsRetCode);
 	}
@@ -551,7 +551,7 @@ ret_code_t Storage::garbageCollectInternal() {
 	}
 	LOGStorageDebug("fds_gc");
 	fdsRetCode = fds_gc();
-	if (fdsRetCode != FDS_SUCCESS) {
+	if (fdsRetCode != NRF_SUCCESS) {
 		LOGw("Failed to start garbage collection (err=%i)", fdsRetCode);
 	}
 	else {
@@ -690,7 +690,7 @@ void Storage::initSearch() {
 ret_code_t Storage::exists(cs_file_id_t fileId, uint16_t recordKey, fds_record_desc_t & record_desc, bool & result) {
 	initSearch();
 	result = false;
-	while (fds_record_find(fileId, recordKey, &record_desc, &_findToken) == FDS_SUCCESS) {
+	while (fds_record_find(fileId, recordKey, &record_desc, &_findToken) == NRF_SUCCESS) {
 		if (result) {
 			LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
 //			fds_record_delete(&record_desc);
@@ -744,7 +744,7 @@ bool Storage::isBusy() {
  */
 cs_ret_code_t Storage::getErrorCode(ret_code_t code) {
 	switch (code) {
-	case FDS_SUCCESS:
+	case NRF_SUCCESS:
 		return ERR_SUCCESS;
 	case FDS_ERR_NOT_FOUND:
 		return ERR_NOT_FOUND;
@@ -774,7 +774,7 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 	eventData.type = CS_TYPE(p_fds_evt->write.record_key);
 	eventData.id = getStateId(p_fds_evt->write.file_id);
 	switch (p_fds_evt->result) {
-	case FDS_SUCCESS: {
+	case NRF_SUCCESS: {
 		LOGd("Write done, key=%u file=%u type=%u id=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(eventData.type), eventData.id);
 		event_t event(CS_TYPE::EVT_STORAGE_WRITE_DONE, &eventData, sizeof(eventData));
 		EventDispatcher::getInstance().dispatch(event);
@@ -798,7 +798,7 @@ void Storage::handleRemoveRecordEvent(fds_evt_t const * p_fds_evt) {
 	eventData.type = toCsType(p_fds_evt->del.record_key);
 	eventData.id = getStateId(p_fds_evt->del.file_id);
 	switch (p_fds_evt->result) {
-	case FDS_SUCCESS: {
+	case NRF_SUCCESS: {
 		LOGi("Remove done, key=%u file=%u type=%u id=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(eventData.type), eventData.id);
 		if (_performingFactoryReset) {
 			continueFactoryReset();
@@ -824,7 +824,7 @@ void Storage::handleRemoveFileEvent(fds_evt_t const * p_fds_evt) {
 	_removingFile = false;
 	cs_state_id_t id = getStateId(p_fds_evt->write.file_id);
 	switch (p_fds_evt->result) {
-	case FDS_SUCCESS: {
+	case NRF_SUCCESS: {
 		LOGi("Remove file done, file=%u id=%u", p_fds_evt->del.file_id, id);
 		event_t event(CS_TYPE::EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE, &id, sizeof(id));
 		EventDispatcher::getInstance().dispatch(event);
@@ -844,7 +844,7 @@ void Storage::handleRemoveFileEvent(fds_evt_t const * p_fds_evt) {
 void Storage::handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt) {
 	_collectingGarbage = false;
 	switch (p_fds_evt->result) {
-	case FDS_SUCCESS: {
+	case NRF_SUCCESS: {
 		LOGi("Garbage collection successful");
 		if (_performingFactoryReset) {
 			_performingFactoryReset = false;
@@ -877,13 +877,13 @@ void Storage::handleGarbageCollectionEvent(fds_evt_t const * p_fds_evt) {
  */
 void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 	LOGStorageDebug("FS: res=%u evt=%u", p_fds_evt->result, p_fds_evt->id);
-	if (_performingFactoryReset && p_fds_evt->result != FDS_SUCCESS) {
+	if (_performingFactoryReset && p_fds_evt->result != NRF_SUCCESS) {
 		LOGw("Stopped factory reset process");
 		_performingFactoryReset = false;
 	}
 	switch(p_fds_evt->id) {
 	case FDS_EVT_INIT: {
-		if (p_fds_evt->result == FDS_SUCCESS) {
+		if (p_fds_evt->result == NRF_SUCCESS) {
 			LOGd("Storage initialized");
 			_initialized = true;
 			event_t event(CS_TYPE::EVT_STORAGE_INITIALIZED);
