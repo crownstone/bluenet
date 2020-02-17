@@ -169,7 +169,9 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	behaviourDebug->activeTimeoutPeriod = 0; // TODO: how to calculate this?
 	auto behaviours = BehaviourStore::getActiveBehaviours();
 	for (uint8_t index = 0; index < behaviours.size(); ++index) {
-		behaviourDebug->storedBehaviours |= (1 << index);
+		if (behaviours[index] != nullptr) {
+			behaviourDebug->storedBehaviours |= (1 << index);
+		}
 	}
 	bool checkBehaviours = true;
 

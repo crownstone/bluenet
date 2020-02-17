@@ -98,14 +98,32 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	LOGBackgroundAdvVerbose("part1=%llx part2=%llx part3=%llx result=%llx", part1, part2, part3, result);
 
 	// Parse the resulting data.
-	//struct __attribute__((__packed__)) BackgroundAdvertisement {
+	uint8_t protocol = (result >> (42-2)) & 0x03;
+
+	// For protocol 1:
+	//   uint8_t protocol     : 2;
+	//   uint24_t deviceToken : 24;
+	//   uint16_t reserved    : 16;
+	if (protocol == 1) {
+		TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1) parsed;
+		parsed.rssi = scannedDevice->rssi;
+		parsed.macAddress = scannedDevice->address;
+		parsed.deviceToken[0] = (result >> (42-2-8)) & 0xFF;
+		parsed.deviceToken[1] = (result >> (42-2-8-8)) & 0xFF;
+		parsed.deviceToken[2] = (result >> (42-2-8-8-8)) & 0xFF;
+		LOGBackgroundAdvDebug("v1 token=[%u %u %u]", parsed.deviceToken[0], parsed.deviceToken[1], parsed.deviceToken[2]);
+		event_t event(CS_TYPE::EVT_ADV_BACKGROUND_PARSED_V1, &parsed, sizeof(parsed));
+		EventDispatcher::getInstance().dispatch(event);
+		return;
+	}
+
+	// For protocol 0:
 	//	uint8_t protocol : 2;
 	//	uint8_t sphereId : 8;
 	//	uint16_t encryptedData[2];
-	//};
 	adv_background_t backgroundAdvertisement;
 	uint16_t encryptedPayload[2];
-	backgroundAdvertisement.protocol = (result >> (42-2)) & 0x03;
+	backgroundAdvertisement.protocol = protocol;
 	backgroundAdvertisement.sphereId = (result >> (42-2-8)) & 0xFF;
 	encryptedPayload[0] = (result >> (42-2-8-16)) & 0xFFFF;
 	encryptedPayload[1] = (result >> (42-2-8-32)) & 0xFFFF;
@@ -113,7 +131,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	backgroundAdvertisement.rssi = scannedDevice->rssi;
 
 	if (backgroundAdvertisement.protocol != 0 || backgroundAdvertisement.sphereId != _sphereId) {
-		LOGBackgroundAdvVerbose("wrong protocol (%u) or sphereId (%u)", backgroundAdvertisement.protocol, backgroundAdvertisement.sphereId);
+		LOGBackgroundAdvVerbose("wrong protocol (%u) or sphereId (%u vs %u)", backgroundAdvertisement.protocol, backgroundAdvertisement.sphereId, _sphereId);
 		return;
 	}
 
@@ -156,9 +174,7 @@ void BackgroundAdvertisementHandler::handleBackgroundAdvertisement(adv_backgroun
 #endif
 
 
-	adv_background_parsed_t parsed;
-	parsed.protocol = backgroundAdvertisement->protocol;
-	parsed.sphereId = backgroundAdvertisement->sphereId;
+	TYPIFY(EVT_ADV_BACKGROUND_PARSED) parsed;
 	parsed.macAddress = backgroundAdvertisement->macAddress;
 
 	//struct __attribute__((__packed__)) BackgroundAdvertisementPayload {

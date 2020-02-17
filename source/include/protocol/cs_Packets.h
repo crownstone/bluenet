@@ -108,9 +108,9 @@ union __attribute__((__packed__)) state_errors_t {
 /**
  * Behaviour settings.
  */
-struct __attribute__((packed)) behaviour_settings_t {
+union __attribute__((packed)) behaviour_settings_t {
 	struct __attribute__((packed)) {
-		bool enabled;
+		bool enabled : 1;
 	} flags;
 	uint32_t asInt;
 };
@@ -208,6 +208,27 @@ struct __attribute__((packed)) behaviour_debug_t {
 	uint64_t activeTimeoutPeriod; // Bitmask of behaviours that are in (presence) timeout period.
 	uint64_t presence[8]; // Bitmask of presence per profile.
 };
+
+struct __attribute__((packed)) register_tracked_device_packet_t {
+	uint16_t deviceId;
+	uint8_t locationId = 0;
+	uint8_t profileId;
+	int8_t rssiOffset = 0;
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			bool reserved : 1;
+			bool ignoreForBehaviour : 1;
+			bool tapToToggle : 1;
+		} flags;
+		uint8_t asInt;
+	} flags;
+//	uint8_t flags;
+	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
+	uint16_t timeToLiveMinutes = 0;
+};
+
+typedef register_tracked_device_packet_t update_tracked_device_packet_t;
+
 
 // ========================= functions =========================
 

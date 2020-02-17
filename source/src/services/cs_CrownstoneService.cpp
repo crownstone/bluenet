@@ -102,13 +102,13 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			result = command_result_t(ERR_BUFFER_LOCKED);
 		}
 
-		[[maybe_unused]] uint8_t* buf = _resultPacketAccessor->getSerializedBuffer().data;
 		LOGd("addControlCharacteristic result.returnCode %d, data len: %d", result.returnCode, result.data.len);
-		for(auto i = 0; i < 50; i+=10){
-			LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
-			buf[i+0],buf[i+1],buf[i+2],buf[i+3],buf[i+4],
-			buf[i+5],buf[i+6],buf[i+7],buf[i+8],buf[i+9]);
-		}
+//		[[maybe_unused]] uint8_t* buf = _resultPacketAccessor->getSerializedBuffer().data;
+//		for(auto i = 0; i < 50; i+=10){
+//			LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+//			buf[i+0],buf[i+1],buf[i+2],buf[i+3],buf[i+4],
+//			buf[i+5],buf[i+6],buf[i+7],buf[i+8],buf[i+9]);
+//		}
 
 		writeResult(type, result);
 	});

@@ -146,7 +146,8 @@ command_result_t CommandHandler::handleCommand(
 		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_INDICES, commandData, resultData);
 	case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG, commandData, resultData);
-
+	case CTRL_CMD_REGISTER_TRACKED_DEVICE:
+		return handleCmdRegisterTrackedDevice(commandData, accessLevel, resultData);
 	case CTRL_CMD_UNKNOWN:
 		return command_result_t(ERR_UNKNOWN_TYPE);
 	}
@@ -539,6 +540,36 @@ command_result_t CommandHandler::handleCmdUartMsg(cs_data_t commandData, const E
 	return command_result_t(ERR_SUCCESS);
 }
 
+command_result_t CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
+	LOGi(STR_HANDLE_COMMAND, "register tracked device");
+	if (commandData.len != sizeof(register_tracked_device_packet_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+	}
+
+	TYPIFY(CMD_REGISTER_TRACKED_DEVICE) evtData;
+	evtData.data = *((register_tracked_device_packet_t*)commandData.data);
+	evtData.accessLevel = accessLevel;
+	event_t event(CS_TYPE::CMD_REGISTER_TRACKED_DEVICE, &evtData, sizeof(evtData));
+	event.result.buf = resultData;
+	event.dispatch();
+
+	return command_result_t(event.result.returnCode);
+}
+
+command_result_t CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_data_t resultData){
+	event_t event(typ, commandData.data, commandData.len);
+	event.result.buf = resultData;
+	event.dispatch();
+
+	command_result_t cmdResult;
+	cmdResult.returnCode = event.result.returnCode;
+	cmdResult.data.data = event.result.buf.data;
+	cmdResult.data.len = event.result.dataSize;
+
+	return cmdResult;
+}
+
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
 	switch (type) {
 	case CTRL_CMD_INCREASE_TX:
@@ -554,6 +585,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	case CTRL_CMD_MESH_COMMAND:
 	case CTRL_CMD_STATE_GET:
 	case CTRL_CMD_STATE_SET:
+	case CTRL_CMD_REGISTER_TRACKED_DEVICE:
 		return BASIC;
 
 	case CTRL_CMD_SET_TIME:
@@ -627,17 +659,4 @@ void CommandHandler::handleEvent(event_t & event) {
 		}
 		default: {}
 	}
-}
-
-command_result_t CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_data_t resultData){
-	event_t event(typ, commandData.data, commandData.len);
-	event.result.buf = resultData;
-	event.dispatch();
-	
-	command_result_t cmdResult;
-	cmdResult.returnCode = event.result.returnCode;
-	cmdResult.data.data = event.result.buf.data;
-	cmdResult.data.len = event.result.dataSize;
-
-	return cmdResult;
 }

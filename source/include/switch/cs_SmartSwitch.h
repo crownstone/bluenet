@@ -76,7 +76,11 @@ private:
 	TYPIFY(STATE_SWITCH_STATE) storedState;
 
 	TYPIFY(CONFIG_PWM_ALLOWED) allowDimming = false;
-	bool allowSwitching = true;
+
+	// returns _allowSwitching || allowSwitchingOverride.
+	bool allowSwitching();
+	bool _allowSwitching = true; // value persisted in flash and settable in the app
+	bool allowSwitchingOverride = false; // override is necessary at startup to restore state of a locked dimmed switch.
 
 	/**
 	 * Get actual switch state.
@@ -98,7 +102,7 @@ private:
 	 * Set relay.
 	 * Checks if switching is allowed.
 	 */
-	cs_ret_code_t setRelay(bool on, switch_state_t currentState);
+	cs_ret_code_t setRelay(bool on);
 
 	/**
 	 * Set relay without checks.
@@ -110,7 +114,7 @@ private:
 	 * Set dimmer.
 	 * Checks if dimming and switching is allowed.
 	 */
-	cs_ret_code_t setDimmer(uint8_t intensity, switch_state_t currentState);
+	cs_ret_code_t setDimmer(uint8_t intensity);
 
 	/**
 	 * Set dimmer without checks.

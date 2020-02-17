@@ -70,15 +70,17 @@ public:
 
 	void factoryResetDone();
 
+	void startSync();
+
 private:
 	//! Constructor, singleton, thus made private
 	Mesh();
 
 	//! Copy constructor, singleton, thus made private
-	Mesh(Mesh const&);
+	Mesh(Mesh const&) = delete;
 
 	//! Assignment operator, singleton, thus made private
-	void operator=(Mesh const &);
+	Mesh& operator=(Mesh const &) = delete;
 
 	void provisionSelf(uint16_t id);
 	void provisionLoad();
@@ -99,4 +101,19 @@ private:
 	MeshModel _model;
 	uint32_t _sendStateTimeCountdown = MESH_SEND_TIME_INTERVAL_MS / TICK_INTERVAL_MS;
 	bool _performingFactoryReset = false;
+	bool _synced = false;
+	uint32_t _syncCountdown = -1;
+	uint32_t _syncFailedCountdown = 0;
+
+	/**
+	 * Dispatches an internal event to request what data this crownstone needs to receive
+	 * from the mesh. Afterwards, broadcasts a BT message in order to obtain the desired information.
+	 *
+	 * Assumes all event handlers that are interested in obtaining data are registered
+	 * with the event dispatcher.
+	 *
+	 * @return true  When request was sent.
+	 * @return false When nothing had to be requested, so everything is synced.
+	 */
+	bool requestSync();
 };

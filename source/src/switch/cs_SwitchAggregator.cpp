@@ -16,7 +16,7 @@
 #include <optional>
 
 #define LOGSwitchAggregator LOGnone
-#define LOGSwitchAggregator_Evt LOGnone
+#define LOGSwitchAggregator_Evt LOGd
 
 
 // ========================= Public ========================
@@ -62,7 +62,7 @@ bool SwitchAggregator::updateBehaviourHandlers(){
     return (prevBehaviourState != behaviourState);
 }
 
-void SwitchAggregator::updateState(bool allowOverrideReset){
+cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
 TEST_PUSH_EXPR_D(this,"overrideState", (overrideState? (int) overrideState.value() : -1));
     TEST_PUSH_EXPR_D(this,"behaviourState", (behaviourState? (int) behaviourState.value() : -1));
     TEST_PUSH_EXPR_D(this,"aggregatedState", (aggregatedState? (int) aggregatedState.value() : -1));
@@ -97,12 +97,19 @@ TEST_PUSH_EXPR_D(this,"overrideState", (overrideState? (int) overrideState.value
         printStatus();
     }
     
+    cs_ret_code_t retCode = ERR_SUCCESS_NO_CHANGE;
     if (aggregatedState) {
-        auto retCode = smartSwitch.set(*aggregatedState);
+        retCode = smartSwitch.set(*aggregatedState);
         if (shouldResetOverrideState && retCode == ERR_SUCCESS) {
         	overrideState = {};
         }
     }
+
+    TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN) eventData = overrideState.has_value();
+    event_t overrideEvent(CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN, &eventData, sizeof(eventData));
+    overrideEvent.dispatch();
+
+    return retCode;
 }
 
 // ========================= Event handling =========================
@@ -193,14 +200,12 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
         // ============== overrideState Events ==============
         case CS_TYPE::CMD_SWITCH_ON:{
             LOGSwitchAggregator_Evt("CMD_SWITCH_ON",__func__);
-            overrideState = 100;
-            updateState(false);
+            executeStateIntentionUpdate(100);
             break;
         }
         case CS_TYPE::CMD_SWITCH_OFF:{
             LOGSwitchAggregator_Evt("CMD_SWITCH_OFF",__func__);
-            overrideState = 0;
-            updateState(false);
+            executeStateIntentionUpdate(0);
             break;
         }
         case CS_TYPE::CMD_SWITCH: {
@@ -211,15 +216,13 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
                 LOGSwitchAggregator("not executing, checkAndSetOwner returned false");
                 break;
             }
+            executeStateIntentionUpdate(packet->switchCmd);
             
-            overrideState = packet->switchCmd;
-            updateState(false);
 			break;
 		}
         case CS_TYPE::CMD_SWITCH_TOGGLE:{
             LOGSwitchAggregator_Evt("CMD_SWITCH_TOGGLE",__func__);
-            overrideState = smartSwitch.getIntendedState() == 0 ? 255 : 0;
-            updateState(false);
+            executeStateIntentionUpdate(smartSwitch.getIntendedState() == 0 ? 255 : 0);
             break;
         }
         default:{
@@ -229,6 +232,16 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
 
     evt.result.returnCode = ERR_SUCCESS;
     return true;
+}
+
+void SwitchAggregator::executeStateIntentionUpdate(uint8_t value){
+    auto prev_overrideState = overrideState;
+    overrideState = value;
+    if( updateState(false) == ERR_NO_ACCESS){
+        // failure to set the smartswitch. It seems to be locked.
+        LOGSwitchAggregator_Evt("Reverting to previous value, no access to smartswitch");
+        overrideState = prev_overrideState;
+    }
 }
 
 void SwitchAggregator::handleSwitchStateChange(uint8_t newIntensity) {

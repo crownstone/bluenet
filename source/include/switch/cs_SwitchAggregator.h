@@ -81,7 +81,7 @@ private:
      * (Disallowing override state to reset is used for commands that want to change
      * the value and trigger a reset which are not initated through behaviour handlers)
      */
-    void updateState(bool allowOverrideReset = true);
+    cs_ret_code_t updateState(bool allowOverrideReset = true);
 
     /**
      * Calls update on the behaviour handlers and returns true
@@ -96,6 +96,13 @@ private:
      * at least one of behaviourState or overrideState.
      */
     bool handleStateIntentionEvents(event_t & evt);
+
+    /** 
+     * Tries to update [overrideState] to [value] and then calls updateState(false).
+     * If smartswitch disallows this operation at the end of updateState, revert back
+     * [overrideState] to the value it had before this function call.
+     */
+    void executeStateIntentionUpdate(uint8_t value);
 
     /**
      * EVT_TICK, STATE_TIME and EVT_TIME_SET events possibly trigger

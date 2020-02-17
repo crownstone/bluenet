@@ -42,6 +42,8 @@ enum CommandHandlerTypes {
 	CTRL_CMD_GET_BEHAVIOUR_INDICES       = 64,
 	CTRL_CMD_GET_BEHAVIOUR_DEBUG         = 69,
 
+	CTRL_CMD_REGISTER_TRACKED_DEVICE     = 70,
+
 	CTRL_CMD_UNKNOWN                     = 0xFFFF
 };
 
@@ -49,5 +51,6 @@ enum AdvCommandTypes {
 	ADV_CMD_MULTI_SWITCH               = 1,
 	ADV_CMD_SET_TIME                   = 2,
 	ADV_CMD_SET_BEHAVIOUR_SETTINGS     = 3,
+	ADV_CMD_UPDATE_TRACKED_DEVICE      = 4,
 	ADV_CMD_UNKNOWN                    = 0xFF
 };

@@ -66,6 +66,7 @@ bool Dimmer::set(uint8_t intensity) {
 	LOGd("set %u", intensity);
 	assert(initialized == true, "Not initialized");
 	if (!enabled && intensity > 0) {
+		LOGd("Dimmer not enabled");
 		return false;
 	}
 

@@ -46,14 +46,11 @@ void PresenceHandler::handleEvent(event_t& evt){
         break;
     }
     case CS_TYPE::EVT_PROFILE_LOCATION: {
-        // TODO Anne @Bart This is probably a common theme. Why not incorporate it in the EventDispatcher itself? Also
-        // we do not care if this stone "has already an id", we actually want to just ignore messages from this 
-        // particular module. An id per "broadcaster" would be sufficient.
         TYPIFY(EVT_PROFILE_LOCATION) *profile_location = (TYPIFY(EVT_PROFILE_LOCATION)*)evt.data;
-        profile = profile_location->profile;
-        location = profile_location->location;
-        fromMesh = true;
-        LOGPresenceHandler("From mesh: location=%u profile=%u", profile, location);
+        profile = profile_location->profileId;
+        location = profile_location->locationId;
+        fromMesh = profile_location->fromMesh;
+        LOGPresenceHandler("Received: location=%u profile=%u mesh=%u", profile, location, fromMesh);
 		break;
     }
     case CS_TYPE::EVT_TICK: {

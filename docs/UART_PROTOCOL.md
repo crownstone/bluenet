@@ -51,11 +51,9 @@ Opcodes for messages sent by the Crownstone.
 Type  | Packet | Description
 ----- | ------ | ----
 0     | ?      | Ack. (Not implemented yet)
-2     | [Service data](../docs/SERVICE_DATA.md) | Service data of this Crownstone (unencrypted).
+2     | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Service data of this Crownstone (unencrypted).
 3     | string | As requested via control command `UART message`.
-100   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 0). **Deprecated**
-101   | [Mesh state](../docs/PROTOCOL.md#mesh-state-packet) | State of other Crownstones in the mesh (channel 1). **Deprecated**
-102   | [Service data](../docs/SERVICE_DATA.md#service_data_encrypted) | State of other Crownstones in the mesh (unencrypted). **Not implemented yet**
+102   | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | State of other Crownstones in the mesh (unencrypted).
 10000 | uint8  | Whether advertising is enabled.
 10001 | uint8  | Whether mesh is enabled.
 10002 | uint8  | Own Crownstone ID.

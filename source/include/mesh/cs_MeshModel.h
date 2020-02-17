@@ -62,10 +62,13 @@ public:
 	cs_ret_code_t sendMsg(cs_mesh_msg_t *meshMsg);
 	cs_ret_code_t sendReliableMsg(const uint8_t* data, uint16_t len);
 
-	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats=10);
-	cs_ret_code_t sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats=1);
-	cs_ret_code_t sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats=1);
-	cs_ret_code_t sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats=1);
+	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats=CS_MESH_RELIABILITY_HIGH);
+	cs_ret_code_t sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOWEST);
+	cs_ret_code_t sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOWEST);
+	cs_ret_code_t sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOWEST);
+	cs_ret_code_t sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOW);
+	cs_ret_code_t sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOW);
+	cs_ret_code_t sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* item, uint8_t repeats=CS_MESH_RELIABILITY_MEDIUM);
 
 	access_model_handle_t getAccessModelHandle();
 
@@ -105,6 +108,21 @@ private:
 	bool sendMsgFromQueue(); // Returns true when message was sent, false when no more messages to be sent.
 	void processQueue();
 
+	// handlers for incoming mesh messages
+	void handleTest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleAck(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleStateTime(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleCmdTime(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleCmdNoop(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleCmdMultiSwitch(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleState0(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleState1(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleProfileLocation(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleSetBehaviourSettings(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleTrackedDeviceRegister(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleTrackedDeviceToken(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleTrackedDeviceListSize(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+	void handleSyncRequest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
 
 	cs_ret_code_t _sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats=1);
 	cs_ret_code_t _sendReliableMsg(const uint8_t* data, uint16_t len);

@@ -55,6 +55,16 @@ public:
 	switch_state_t getState();
 
 	/**
+	 * The relay bit of the return value of getState() is retrieved from
+	 * persistent memory at startup. There is a possibility of this getting 
+	 * out of sync with the physical relay state. Until the first relay action
+	 * it isn't certain which physical state the device is in.
+	 * 
+	 * If it is certain this method returns true.
+	 */
+	bool isRelayStateAccurate();
+
+	/**
 	 * Callback function definition.
 	 */
 	typedef function<void(switch_state_t newState)> callback_on_state_change_t;
@@ -108,6 +118,15 @@ private:
 	 * Whether power usage via dimmer has been checked already.
 	 */
 	bool checkedDimmerPowerUsage = false;
+
+	/**
+	 * Determines wether or not setDimmer and setRelay will have any effect.
+	 * (Will be set to false when GOING_TO_DFU event is set for example.)
+	 */
+	bool allowStateChanges = true;
+
+	bool relayHasBeenSetBefore = false;
+	OperationMode cached_operation_mode = OperationMode::OPERATION_MODE_UNINITIALIZED; // retrieved at init
 
 	/**
 	 * Set relay.
@@ -186,6 +205,9 @@ private:
 	bool isSafeToTurnRelayOn(state_errors_t stateErrors);
 
 	bool isSafeToTurnRelayOff(state_errors_t stateErrors);
+
+	bool isDimmerStateChangeAllowed();
+	bool isRelayStateChangeAllowed();
 
 	/**
 	 * Send state update to listeners.

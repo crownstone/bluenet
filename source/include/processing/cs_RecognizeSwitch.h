@@ -13,20 +13,20 @@
 class RecognizeSwitch {
 private:
 	// Keep up whether this class is running (started).
-	bool _running;
+	bool _running = false;
 
 	// Keep up number of detect() calls to skip.
 	// This is used to prevent multiple switch detections in a row, and to prevent switch detections on init.
-	uint8_t _skipSwitchDetectionTriggers;
+	uint8_t _skipSwitchDetectionTriggers = 200;
 
 	// Threshold above which buffers are considered to be different.
-	float _thresholdDifferent;
+	float _thresholdDifferent = SWITCHCRAFT_THRESHOLD;
 
 	// Threshold below which buffers are considered to be similar.
-	float _thresholdSimilar;
+	float _thresholdSimilar = SWITCHCRAFT_THRESHOLD;
 
 	// Alternative to thresholdSimilar.
-	float _thresholdRatio;
+	float _thresholdRatio = 100.0;
 
 public:
 	// Gets a static singleton (no dynamic memory allocation)
@@ -67,9 +67,9 @@ public:
 
 	/** Recognize switch state.
 	 *
-	 * @param[in] bufIndex                       Buffer to check for a switch (should be previous buffer).
+	 * @param[in] bufIndex                       The current buffer.
 	 * @parampin] voltageChannelId               Channel in which the voltage values can be found.
 	 *
 	 */
-	bool detect(buffer_id_t bufIndex, channel_id_t voltageChannelId);
+	bool detect(buffer_id_t currentBufIndex, channel_id_t voltageChannelId);
 };

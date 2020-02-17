@@ -251,8 +251,6 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	power.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	power.acPeriodUs = 20000;
 
-	cs_adc_buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
-
 #ifdef DELAY_FILTERING_VOLTAGE
 	// Filter the current immediately, filter the voltage in the buffer at time t-1 (so raw values are available)
 	filter(bufIndex, power.currentIndex);
@@ -263,6 +261,7 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	filter(bufIndex, power.currentIndex);
 #endif
 
+	cs_adc_buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
 	nrf_saadc_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
 	if (isVoltageAndCurrentSwapped(power, prevBuf)) {
 		LOGw("Swap detected: restart ADC.");
@@ -300,7 +299,7 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	bool switch_detected = RecognizeSwitch::getInstance().detect(prevIndex, power.voltageIndex);
+	bool switch_detected = RecognizeSwitch::getInstance().detect(bufIndex, power.voltageIndex);
 	if (switch_detected) {
 		LOGd("Switch event detected!");
 		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE);
@@ -328,8 +327,8 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 }
 
 void PowerSampling::initAverages() {
-	_avgZeroVoltage = _voltageZero * 1000;
-	_avgZeroCurrent = _currentZero * 1000;
+	_avgZeroVoltage = _voltageZero * 1024;
+	_avgZeroCurrent = _currentZero * 1024;
 	_avgPower = 0.0;
 }
 
@@ -347,6 +346,8 @@ uint16_t PowerSampling::determineCurrentIndex(power_t & power) {
  * - Vzero and Izero can be different and affect Vrm and Irms.
  */
 bool PowerSampling::isVoltageAndCurrentSwapped(power_t & power, nrf_saadc_value_t* prevBuf) {
+	// Problem: switchcraft makes this function falsely detect a swap.
+	return false;
 	if (_skipSwapDetection != 0) {
 		_skipSwapDetection--;
 		return false;
@@ -418,7 +419,7 @@ void PowerSampling::calculateVoltageZero(power_t & power) {
 	for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 		sum += power.buf[i];
 	}
-	int32_t zeroVoltage = sum * 1000 / numSamples;
+	int32_t zeroVoltage = sum * 1024 / numSamples;
 
 //	if (!_zeroVoltageInitialized) {
 //		_avgZeroVoltage = zeroVoltage;
@@ -448,7 +449,7 @@ void PowerSampling::calculateCurrentZero(power_t & power) {
 	for (int i = 0; i < numSamples; ++i) {
 		sum += _outputSamples->at(i);
 	}
-	int32_t zeroCurrent = sum * 1000 / numSamples;
+	int32_t zeroCurrent = sum * 1024 / numSamples;
 
 //	if (!_zeroCurrentInitialized) {
 //		_avgZeroCurrent = zeroCurrent;
@@ -555,11 +556,11 @@ void PowerSampling::calculatePower(power_t & power) {
 	int64_t current;
 	int64_t voltage;
 	for (uint16_t i = 0; i < numSamples * power.numChannels; i += power.numChannels) {
-		current = (int64_t)power.buf[i+power.currentIndex]*1000 - _avgZeroCurrent;
-		voltage = (int64_t)power.buf[i+power.voltageIndex]*1000 - _avgZeroVoltage;
-		cSquareSum += (current * current) / (1000*1000);
-		vSquareSum += (voltage * voltage) / (1000*1000);
-		pSum +=       (current * voltage) / (1000*1000);
+		current = (int64_t)power.buf[i+power.currentIndex]*1024 - _avgZeroCurrent;
+		voltage = (int64_t)power.buf[i+power.voltageIndex]*1024 - _avgZeroVoltage;
+		cSquareSum += (current * current) / (1024*1024);
+		vSquareSum += (voltage * voltage) / (1024*1024);
+		pSum +=       (current * voltage) / (1024*1024);
 	}
 	int32_t powerMilliWattReal = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples;
 	int32_t currentRmsMA = sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
@@ -607,7 +608,7 @@ void PowerSampling::calculatePower(power_t & power) {
 	// Now that Irms is known: first check the soft fuse.
 //	if (_zeroCurrentInitialized && _zeroVoltageInitialized) {
 	if (_zeroVoltageCount > 200 && _zeroCurrentCount > 200) { // Wait some time, for the measurement to converge.. why does this have to take so long?
-		checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA, power);
+		checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA, voltageRmsMilliVolt, power);
 	}
 
 
@@ -769,7 +770,7 @@ void PowerSampling::calculateEnergy() {
 /**
  * TODO: What does this do?
  */
-void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA, power_t & power) {
+void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA, int32_t voltageRmsMilliVolt, power_t & power) {
 
 	// Get the current state errors
 	TYPIFY(STATE_ERRORS) stateErrors;
@@ -809,6 +810,11 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	}
 	// ---------------------- end of to do --------------------------
 
+	// Check if data makes sense: RMS voltage should be about 230V.
+	if (voltageRmsMilliVolt != 0 && (voltageRmsMilliVolt < 200*1000 || 250*1000 < voltageRmsMilliVolt)) {
+		LOGw("voltageRmsMilliVolt=%u", voltageRmsMilliVolt);
+		return;
+	}
 
 	// Check if the filtered Irms is above threshold.
 	if ((currentRmsFilteredMA > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {

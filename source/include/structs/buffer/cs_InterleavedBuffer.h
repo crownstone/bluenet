@@ -161,9 +161,7 @@ public:
 	}
 
 	/**
-	 * Get a particular value from a buffer. We allow some "magic" behavior here. The value_id is a signed value. If it
-	 * is negative it retrieves a value from the previous buffer. If it is larger than getBufferLength() - 1 it
-	 * retrieves a value from the next buffer.
+	 * Get a particular value from a buffer.
 	 *
 	 * The value_id is a reference to the index of a value within a channel (half of the buffer length).
 	 *
@@ -173,51 +171,13 @@ public:
 	 * @return                                   Particular value
 	 */
 	value_t getValue(buffer_id_t buffer_id, channel_id_t channel_id, ext_value_id_t value_id) {
+		assert(value_id >= 0 && value_id < getChannelLength(), "Invalid value id");
 		value_t value;
 		value_t* buf;
 
-		if (value_id < 0) {
-			// use previous buffer, e.g. for padding
-			uint8_t shift = ((-value_id - 1) / getChannelLength()) + 1;
-			buffer_id_t prev_buffer_id = getPrevious(buffer_id, shift);
-			bool buffer_exists = exists(prev_buffer_id);
-			assert (buffer_exists, "Previous buffer does not exist!");
-
-			value_id_t value_id_in_channel = getChannelLength() * shift + value_id;
-			value_id_in_channel = value_id_in_channel * getChannelCount() + channel_id;
-			assert(value_id_in_channel >= 0, "Index should be positive");
-
-			// a value such as -1 will be multiplied by 2, hence -2 and then used to count from the back of the
-			// previous buffer, say of length 100, value_id = -1 will hence retrieve the last item from the
-			// previous buffer, prev_buffer[98] or prev_buffer[99] depending on channel_id
-			buf = getBuffer(prev_buffer_id);
-			value = buf[value_id_in_channel];
-
-		} else if (value_id >= getChannelLength()) {
-			// use next buffer, e.g. for padding
-
-			uint8_t shift = (value_id / getChannelLength());
-
-			buffer_id_t next_buffer_id = getNext(buffer_id, shift);
-			bool buffer_exists = exists(next_buffer_id);
-			assert (buffer_exists, "Next buffer does not exist!");
-
-			value_id_t value_id_in_channel = (value_id - getChannelLength() * shift);
-			value_id_in_channel = value_id_in_channel * getChannelCount() + channel_id;
-			assert(value_id_in_channel >= 0, "Index should be positive");
-
-			// a value such as 101 will be subtracted by the buffer length, say 100, hence result is 1, then
-			// the next buffer will be queried at next_buffer[2] or next_buffer[3] dependin on channel_id
-			buf = getBuffer(next_buffer_id);
-			value = buf[value_id_in_channel];
-
-		} else {
-			// return value in given buffer
-			value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
-			assert(value_id_in_channel >= 0, "Index should be positive");
-			buf = getBuffer(buffer_id);
-			value = buf[value_id_in_channel];
-		}
+		value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
+		buf = getBuffer(buffer_id);
+		value = buf[value_id_in_channel];
 
 		return value;
 	}

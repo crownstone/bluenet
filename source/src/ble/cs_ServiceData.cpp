@@ -311,6 +311,10 @@ void ServiceData::handleEvent(event_t & event) {
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_TAP_TO_TOGGLE_ENABLED, *(TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED)*)event.data);
 			break;
 		}
+		case CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN: {
+			updateFlagsBitmask(SERVICE_DATA_FLAGS_BEHAVIOUR_OVERRIDDEN, *(TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN)*)event.data);
+			break;
+		}
 		case CS_TYPE::EVT_TICK: {
 			TYPIFY(EVT_TICK) tickCount = *(TYPIFY(EVT_TICK)*)event.data;
 			_externalStates.tick(tickCount);
