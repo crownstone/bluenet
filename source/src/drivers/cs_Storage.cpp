@@ -19,11 +19,14 @@
 
 #define NR_CONFIG_ELEMENTS SIZEOF_ARRAY(config)
 
-// Define as LOGd to get debug logs.
+// Define as Storage_LOGd to get debug logs.
 #define LOGStorageDebug LOGnone
 
+#define Storage_LOGd LOGnone
+#define Storage_LOGe LOGe
+
 Storage::Storage() : EventListener() {
-	LOGd(FMT_CREATE, "storage");
+	Storage_LOGd(FMT_CREATE, "storage");
 
 	EventDispatcher::getInstance().addListener(this);
 }
@@ -34,7 +37,7 @@ cs_ret_code_t Storage::init() {
 
 	uint8_t enabled = nrf_sdh_is_enabled();
 	if (!enabled) {
-		LOGe("Softdevice is not enabled yet!");
+		Storage_LOGe("Softdevice is not enabled yet!");
 	}
 
 	if (_initialized) {
@@ -46,7 +49,7 @@ cs_ret_code_t Storage::init() {
 		LOGStorageDebug("fds_register");
 		fds_ret_code = fds_register(fds_evt_handler);
 		if (fds_ret_code != FDS_SUCCESS) {
-			LOGe("Registering FDS event handler failed (err=%i)", fds_ret_code);
+			Storage_LOGe("Registering FDS event handler failed (err=%i)", fds_ret_code);
 			return getErrorCode(fds_ret_code);
 		}
 		_registeredFds = true;
@@ -55,7 +58,7 @@ cs_ret_code_t Storage::init() {
 	LOGStorageDebug("fds_init");
 	fds_ret_code = fds_init();
 	if (fds_ret_code != FDS_SUCCESS) {
-		LOGe("Init FDS failed (err=%i)", fds_ret_code);
+		Storage_LOGe("Init FDS failed (err=%i)", fds_ret_code);
 		return getErrorCode(fds_ret_code);
 	}
 
@@ -69,7 +72,7 @@ void Storage::setErrorCallback(cs_storage_error_callback_t callback) {
 
 cs_ret_code_t Storage::findFirst(CS_TYPE type, cs_state_id_t & id) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(type);
@@ -87,7 +90,7 @@ cs_ret_code_t Storage::findFirst(CS_TYPE type, cs_state_id_t & id) {
 
 cs_ret_code_t Storage::findNext(CS_TYPE type, cs_state_id_t & id) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(type);
@@ -130,7 +133,7 @@ cs_ret_code_t Storage::findNextInternal(uint16_t recordKey, uint16_t & fileId) {
  */
 cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
@@ -144,11 +147,11 @@ cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 	fds_record_desc_t recordDesc;
 	cs_ret_code_t csRetCode = ERR_NOT_FOUND;
 	bool done = false;
-	LOGd("Read record key=%u file=%u", recordKey, fileId);
+	Storage_LOGd("Read record key=%u file=%u", recordKey, fileId);
 	initSearch();
 	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
 		if (done) {
-			LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
+			Storage_LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
 		}
 		csRetCode = readRecord(recordDesc, stateData.value, stateData.size, fileId);
 		if (csRetCode == ERR_SUCCESS) {
@@ -162,7 +165,7 @@ cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 		return ERR_SUCCESS;
 	}
 	if (csRetCode == ERR_NOT_FOUND) {
-		LOGd("Record not found");
+		Storage_LOGd("Record not found");
 	}
 	return csRetCode;
 }
@@ -170,7 +173,7 @@ cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t & stateData) {
 	// Code copied from read() with only fileId changed.
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
@@ -184,11 +187,11 @@ cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t & stateData) {
 	fds_record_desc_t recordDesc;
 	cs_ret_code_t csRetCode = ERR_NOT_FOUND;
 	bool done = false;
-	LOGd("Read record %u file=%u", recordKey, fileId);
+	Storage_LOGd("Read record %u file=%u", recordKey, fileId);
 	initSearch();
 	while (fds_record_find(fileId, recordKey, &recordDesc, &_findToken) == FDS_SUCCESS) {
 		if (done) {
-			LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
+			Storage_LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
 		}
 		csRetCode = readRecord(recordDesc, stateData.value, stateData.size, fileId);
 		if (csRetCode == ERR_SUCCESS) {
@@ -202,14 +205,14 @@ cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t & stateData) {
 		return ERR_SUCCESS;
 	}
 	if (csRetCode == ERR_NOT_FOUND) {
-		LOGd("Record not found");
+		Storage_LOGd("Record not found");
 	}
 	return csRetCode;
 }
 
 cs_ret_code_t Storage::readFirst(cs_state_data_t & stateData) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
@@ -228,7 +231,7 @@ cs_ret_code_t Storage::readFirst(cs_state_data_t & stateData) {
 
 cs_ret_code_t Storage::readNext(cs_state_data_t & stateData) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
@@ -273,7 +276,7 @@ cs_ret_code_t Storage::readRecord(fds_record_desc_t recordDesc, uint8_t* buf, ui
 		LOGStorageDebug("Opened record id=%u addr=%p", flashRecord.p_header->record_id, recordDesc.p_record);
 		size_t flashSize = flashRecord.p_header->length_words << 2; // Size is in bytes, each word is 4B.
 		if (flashSize != getPaddedSize(size)) {
-			LOGe("stored size = %u ram size = %u", flashSize, size);
+			Storage_LOGe("stored size = %u ram size = %u", flashSize, size);
 			// TODO: remove this record?
 			csRetCode = ERR_WRONG_PAYLOAD_LENGTH;
 		}
@@ -283,7 +286,7 @@ cs_ret_code_t Storage::readRecord(fds_record_desc_t recordDesc, uint8_t* buf, ui
 		}
 		if (fds_record_close(&recordDesc) != FDS_SUCCESS) {
 			// TODO: How to handle the close error? Maybe reboot?
-			LOGe("Error on closing record err=%u", fdsRetCode);
+			Storage_LOGe("Error on closing record err=%u", fdsRetCode);
 		}
 		return csRetCode;
 		break;
@@ -309,7 +312,7 @@ cs_ret_code_t Storage::write(const cs_state_data_t & stateData) {
  */
 ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
@@ -330,7 +333,7 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 	// Assume the allocation was done by storage.
 	// Size is in bytes, each word is 4B.
 	record.data.length_words = getPaddedSize(stateData.size) >> 2;
-	LOGd("Write key=%u file=%u", recordKey, fileId);
+	Storage_LOGd("Write key=%u file=%u", recordKey, fileId);
 	LOGStorageDebug("Data=%p word size=%u", record.data.p_data, record.data.length_words);
 
 	bool recordExists = false;
@@ -355,7 +358,7 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 			fdsRetCode = FDS_ERR_BUSY;
 		}
 		else {
-			LOGe("Failed to start GC: %u", gcRetCode);
+			Storage_LOGe("Failed to start GC: %u", gcRetCode);
 			fdsRetCode = gcRetCode;
 		}
 		break;
@@ -371,7 +374,7 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 
 cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(type);
@@ -382,7 +385,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
 	if (isBusy(recordKey)) {
 		return ERR_BUSY;
 	}
-	LOGd("Remove key=%u file=%u", recordKey, fileId);
+	Storage_LOGd("Remove key=%u file=%u", recordKey, fileId);
 	fds_record_desc_t recordDesc;
 	ret_code_t fdsRetCode = FDS_ERR_NOT_FOUND;
 
@@ -404,7 +407,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
 
 cs_ret_code_t Storage::remove(CS_TYPE type) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(type);
@@ -414,7 +417,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type) {
 	if (isBusy(recordKey)) {
 		return ERR_BUSY;
 	}
-	LOGd("Remove key=%u", recordKey);
+	Storage_LOGd("Remove key=%u", recordKey);
 	fds_record_desc_t recordDesc;
 	ret_code_t fdsRetCode = FDS_ERR_NOT_FOUND;
 
@@ -436,7 +439,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type) {
 
 cs_ret_code_t Storage::remove(cs_state_id_t id) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t fileId = getFileId(id);
@@ -456,7 +459,7 @@ cs_ret_code_t Storage::remove(cs_state_id_t id) {
 cs_ret_code_t Storage::factoryReset() {
 	LOGi("factoryReset");
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	if (isBusy()) {
@@ -484,7 +487,7 @@ cs_ret_code_t Storage::continueFactoryReset() {
 				uint16_t recordKey = flashRecord.p_header->record_key;
 				if (fds_record_close(&recordDesc) != FDS_SUCCESS) {
 					// TODO: How to handle the close error? Maybe reboot?
-					LOGe("Error on closing record");
+					Storage_LOGe("Error on closing record");
 				}
 				CS_TYPE type = toCsType(recordKey);
 				cs_state_id_t id = getStateId(fileId);
@@ -526,7 +529,7 @@ cs_ret_code_t Storage::continueFactoryReset() {
 		return getErrorCode(fdsRetCode);
 	}
 	else {
-		LOGd("Started garbage collection");
+		Storage_LOGd("Started garbage collection");
 		_collectingGarbage = true;
 		return ERR_SUCCESS;
 	}
@@ -538,13 +541,13 @@ cs_ret_code_t Storage::garbageCollect() {
 
 ret_code_t Storage::garbageCollectInternal() {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		Storage_LOGe("Storage not initialized");
 		return ERR_NOT_INITIALIZED;
 	}
 	ret_code_t fdsRetCode;
 	uint8_t enabled = nrf_sdh_is_enabled();
 	if (!enabled) {
-		LOGe("Softdevice is not enabled yet!");
+		Storage_LOGe("Softdevice is not enabled yet!");
 	}
 	if (isBusy()) {
 		return FDS_ERR_BUSY;
@@ -555,7 +558,7 @@ ret_code_t Storage::garbageCollectInternal() {
 		LOGw("Failed to start garbage collection (err=%i)", fdsRetCode);
 	}
 	else {
-		LOGd("Started garbage collection");
+		Storage_LOGd("Started garbage collection");
 		_collectingGarbage = true;
 	}
 	return fdsRetCode;
@@ -626,7 +629,7 @@ void Storage::eraseNextPage() {
  * Maybe we should check if data is stored at right boundary.
  *
  * if ((uint32_t)data.value % 4u != 0) {
- *		LOGe("Unaligned type: %s: %p", TypeName(type), data.value);
+ *		Storage_LOGe("Unaligned type: %s: %p", TypeName(type), data.value);
  *	}
  */
 uint8_t* Storage::allocate(size16_t& size) {
@@ -692,7 +695,7 @@ ret_code_t Storage::exists(cs_file_id_t fileId, uint16_t recordKey, fds_record_d
 	result = false;
 	while (fds_record_find(fileId, recordKey, &record_desc, &_findToken) == FDS_SUCCESS) {
 		if (result) {
-			LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
+			Storage_LOGe("Duplicate record key=%u file=%u addr=%p", recordKey, fileId, _findToken.p_addr);
 //			fds_record_delete(&record_desc);
 		}
 		if (!result) {
@@ -765,7 +768,7 @@ cs_ret_code_t Storage::getErrorCode(ret_code_t code) {
 }
 
 //void Storage::print(const std::string & prefix, CS_TYPE type) {
-//	LOGd("%s %s (%i)", prefix.c_str(), TypeName(type), type);
+//	Storage_LOGd("%s %s (%i)", prefix.c_str(), TypeName(type), type);
 //}
 
 void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
@@ -775,7 +778,7 @@ void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 	eventData.id = getStateId(p_fds_evt->write.file_id);
 	switch (p_fds_evt->result) {
 	case FDS_SUCCESS: {
-		LOGd("Write done, key=%u file=%u type=%u id=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(eventData.type), eventData.id);
+		Storage_LOGd("Write done, key=%u file=%u type=%u id=%u", p_fds_evt->del.record_key, p_fds_evt->del.file_id, to_underlying_type(eventData.type), eventData.id);
 		event_t event(CS_TYPE::EVT_STORAGE_WRITE_DONE, &eventData, sizeof(eventData));
 		EventDispatcher::getInstance().dispatch(event);
 		break;
@@ -884,13 +887,13 @@ void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 	switch(p_fds_evt->id) {
 	case FDS_EVT_INIT: {
 		if (p_fds_evt->result == FDS_SUCCESS) {
-			LOGd("Storage initialized");
+			Storage_LOGd("Storage initialized");
 			_initialized = true;
 			event_t event(CS_TYPE::EVT_STORAGE_INITIALIZED);
 			EventDispatcher::getInstance().dispatch(event);
 		}
 		else {
-			LOGe("Failed to init storage: %u", p_fds_evt->result);
+			Storage_LOGe("Failed to init storage: %u", p_fds_evt->result);
 			// Only option left is to reboot and see if things work out next time.
 			APP_ERROR_CHECK(p_fds_evt->result);
 		}
