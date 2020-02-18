@@ -254,7 +254,15 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 	if (FAILURE(result.returnCode)) {
 		return result;
 	}
-	result.returnCode = State::getInstance().set(stateData);
+	cs_ret_code_t retCode = State::getInstance().set(stateData);
+	switch (retCode) {
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE:
+			result.returnCode = ERR_SUCCESS;
+			break;
+		default:
+			result.returnCode = retCode;
+	}
 	return result;
 }
 
