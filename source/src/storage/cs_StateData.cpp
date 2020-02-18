@@ -5,6 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <storage/cs_StateData.h>
@@ -58,8 +59,11 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		*(TYPIFY(CONFIG_IBEACON_MINOR)*)data.value = BEACON_MINOR;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_IBEACON_UUID: {
-		BLEutil::parseUuid(STRINGIFY(BEACON_UUID), sizeof(STRINGIFY(BEACON_UUID)), data.value);
-		return ERR_SUCCESS;
+		std::string uuidString = g_BEACON_UUID;
+		if (BLEutil::parseUuid(uuidString.c_str(), uuidString.size(), data.value)) {
+			return ERR_SUCCESS;
+		}
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	case CS_TYPE::CONFIG_IBEACON_TXPOWER:
 		*(TYPIFY(CONFIG_IBEACON_TXPOWER)*)data.value = BEACON_RSSI;
