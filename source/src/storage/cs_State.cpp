@@ -94,12 +94,15 @@ cs_ret_code_t State::set(const CS_TYPE type, void *value, const size16_t size) {
 
 cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mode) {
 	cs_ret_code_t retVal = setInternal(data, mode);
-	if (retVal == ERR_SUCCESS) {
-		event_t event(data.type, data.value, data.size);
-		EventDispatcher::getInstance().dispatch(event);
-	}
-	else {
-		LOGe("failed to set type=%u id=%u err=%u", data.type, data.id, retVal);
+	switch (retVal) {
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE: {
+			event_t event(data.type, data.value, data.size);
+			EventDispatcher::getInstance().dispatch(event);
+			break;
+		}
+		default:
+			LOGe("failed to set type=%u id=%u err=%u", data.type, data.id, retVal);
 	}
 	return retVal;
 }
@@ -223,11 +226,11 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			switch (ret_code) {
 				case ERR_SUCCESS:
 				case ERR_SUCCESS_NO_CHANGE:
-					return ERR_SUCCESS;
+					break;
 				default:
 					LOGw("Failed to store in RAM");
-					return ret_code;
 			}
+			return ret_code;
 			break;
 		}
 		case PersistenceMode::FLASH: {
@@ -245,11 +248,11 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 					switch (ret_code) {
 						case ERR_SUCCESS:
 						case ERR_SUCCESS_NO_CHANGE:
-							return ERR_SUCCESS;
+							break;
 						default:
 							LOGw("Failed to store in RAM");
-							return ret_code;
 					}
+					return ret_code;
 					break;
 				case PersistenceMode::FLASH:
 					// fall-through
@@ -268,7 +271,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 					break;
 				case ERR_SUCCESS_NO_CHANGE:
 					// No need to store in flash.
-					return ERR_SUCCESS;
+					return ret_code;
 				default:
 					LOGw("Failed to store in RAM");
 					return ret_code;
@@ -336,7 +339,11 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 }
 
 cs_ret_code_t State::getDefaultValue(cs_state_data_t & data) {
-	return getDefault(data, *_boardsConfig);
+	cs_ret_code_t retCode = getDefault(data, *_boardsConfig);
+	if (retCode != ERR_SUCCESS) {
+		LOGe("Failed to get default type=%u", data.type);
+	}
+	return retCode;
 }
 
 cs_ret_code_t State::findInRam(const CS_TYPE & type, cs_state_id_t id, size16_t & index_in_ram) {
