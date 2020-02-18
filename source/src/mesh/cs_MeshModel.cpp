@@ -24,6 +24,7 @@ extern "C" {
 #include "access_config.h"
 #include "access_reliable.h"
 #include "nrf_mesh.h"
+#include "log.h"
 }
 
 #if TICK_INTERVAL_MS > MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS
@@ -226,6 +227,12 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		printMeshAddress("  Dst: ", &(accessMsg->meta_data.dst));
 		LOGMeshModelVerbose("ownAddress=%u  Data:", _ownAddress);
 //		BLEutil::printArray(msg, size);
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i\n", accessMsg->opcode.opcode, accessMsg->meta_data.appkey_handle, accessMsg->meta_data.subnet_handle, accessMsg->meta_data.ttl, getRssi(accessMsg->meta_data.p_core_metadata));
+	}
+	else {
+		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg loopback\n");
+#endif
 	}
 //	bool ownMsg = (_ownAddress == accessMsg->meta_data.src.value) && (accessMsg->meta_data.src.type == NRF_MESH_ADDRESS_TYPE_UNICAST);
 	bool ownMsg = accessMsg->meta_data.p_core_metadata->source == NRF_MESH_RX_SOURCE_LOOPBACK;
@@ -248,6 +255,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	size16_t payloadSize;
 	MeshModelPacketHelper::getPayload(msg, size, payload, payloadSize);
 
+	__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "type=%u\n", msgType);
 	switch (msgType){
 		case CS_MESH_MODEL_TYPE_TEST: {
 			handleTest(accessMsg, payload, payloadSize);
@@ -481,7 +489,7 @@ void MeshModel::handleTrackedDeviceListSize(const access_message_rx_t * accessMs
 
 void MeshModel::handleSyncRequest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	auto packet = reinterpret_cast<cs_mesh_model_msg_sync_request_t*>(payload);
-	LOGw("handleSyncRequest: %u %x", packet->id, packet->bitmask);
+	LOGi("handleSyncRequest: id=%u bitmask=%x", packet->id, packet->bitmask);
 	TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING, eventDataPtr, sizeof(TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)));
 	event.dispatch();
