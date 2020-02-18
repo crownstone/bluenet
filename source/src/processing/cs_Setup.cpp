@@ -8,6 +8,8 @@
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
 #include <processing/cs_Setup.h>
+#include <storage/cs_State.h>
+#include <util/cs_Utils.h>
 
 Setup::Setup() {
 	EventDispatcher::getInstance().addListener(this);
@@ -40,31 +42,23 @@ cs_ret_code_t Setup::handleCommand(cs_data_t data) {
 		return ERR_WRONG_PARAMETER;
 	}
 
+	// Reset which types were successfully stored.
+	_successfullyStoredBitmask = 0;
+
 	LOGd("Store keys, mesh address, and other config data");
-	State &state = State::getInstance();
-	state.set(CS_TYPE::CONFIG_CROWNSTONE_ID,    &(setupData->stoneId), sizeof(setupData->stoneId));
-	state.set(CS_TYPE::CONFIG_SPHERE_ID,        &(setupData->sphereId), sizeof(setupData->sphereId));
-	state.set(CS_TYPE::CONFIG_KEY_ADMIN,        &(setupData->adminKey), sizeof(setupData->adminKey));
-	state.set(CS_TYPE::CONFIG_KEY_MEMBER,       &(setupData->memberKey), sizeof(setupData->memberKey));
-	state.set(CS_TYPE::CONFIG_KEY_BASIC,        &(setupData->basicKey), sizeof(setupData->basicKey));
-	state.set(CS_TYPE::CONFIG_KEY_SERVICE_DATA, &(setupData->serviceDataKey), sizeof(setupData->serviceDataKey));
-	state.set(CS_TYPE::CONFIG_KEY_LOCALIZATION, &(setupData->localizationKey), sizeof(setupData->localizationKey));
-	state.set(CS_TYPE::CONFIG_MESH_DEVICE_KEY,  &(setupData->meshDeviceKey), sizeof(setupData->meshDeviceKey));
-	state.set(CS_TYPE::CONFIG_MESH_APP_KEY,     &(setupData->meshAppKey), sizeof(setupData->meshAppKey));
-	state.set(CS_TYPE::CONFIG_MESH_NET_KEY,     &(setupData->meshNetKey), sizeof(setupData->meshNetKey));
-	state.set(CS_TYPE::CONFIG_IBEACON_UUID,     &(setupData->ibeaconUuid.uuid128), sizeof(setupData->ibeaconUuid.uuid128));
-	state.set(CS_TYPE::CONFIG_IBEACON_MAJOR,    &(setupData->ibeaconMajor), sizeof(setupData->ibeaconMajor));
-	state.set(CS_TYPE::CONFIG_IBEACON_MINOR,    &(setupData->ibeaconMinor), sizeof(setupData->ibeaconMinor));
-
-	// Set operation mode to normal mode
-	operationMode = OperationMode::OPERATION_MODE_NORMAL;
-	mode = to_underlying_type(operationMode);
-	LOGi("Set mode NORMAL: 0x%X", mode);
-	state.set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
-
-	// Switch relay on
-	event_t event(CS_TYPE::CMD_SWITCH_ON);
-	EventDispatcher::getInstance().dispatch(event);
+	setWithCheck(CS_TYPE::CONFIG_CROWNSTONE_ID,    &(setupData->stoneId), sizeof(setupData->stoneId));
+	setWithCheck(CS_TYPE::CONFIG_SPHERE_ID,        &(setupData->sphereId), sizeof(setupData->sphereId));
+	setWithCheck(CS_TYPE::CONFIG_KEY_ADMIN,        &(setupData->adminKey), sizeof(setupData->adminKey));
+	setWithCheck(CS_TYPE::CONFIG_KEY_MEMBER,       &(setupData->memberKey), sizeof(setupData->memberKey));
+	setWithCheck(CS_TYPE::CONFIG_KEY_BASIC,        &(setupData->basicKey), sizeof(setupData->basicKey));
+	setWithCheck(CS_TYPE::CONFIG_KEY_SERVICE_DATA, &(setupData->serviceDataKey), sizeof(setupData->serviceDataKey));
+	setWithCheck(CS_TYPE::CONFIG_KEY_LOCALIZATION, &(setupData->localizationKey), sizeof(setupData->localizationKey));
+	setWithCheck(CS_TYPE::CONFIG_MESH_DEVICE_KEY,  &(setupData->meshDeviceKey), sizeof(setupData->meshDeviceKey));
+	setWithCheck(CS_TYPE::CONFIG_MESH_APP_KEY,     &(setupData->meshAppKey), sizeof(setupData->meshAppKey));
+	setWithCheck(CS_TYPE::CONFIG_MESH_NET_KEY,     &(setupData->meshNetKey), sizeof(setupData->meshNetKey));
+	setWithCheck(CS_TYPE::CONFIG_IBEACON_UUID,     &(setupData->ibeaconUuid.uuid128), sizeof(setupData->ibeaconUuid.uuid128));
+	setWithCheck(CS_TYPE::CONFIG_IBEACON_MAJOR,    &(setupData->ibeaconMajor), sizeof(setupData->ibeaconMajor));
+	setWithCheck(CS_TYPE::CONFIG_IBEACON_MINOR,    &(setupData->ibeaconMinor), sizeof(setupData->ibeaconMinor));
 
 	// Make sure the stored switch state is correct, as the switch command might not be executed
 	// (for example if the device has no switch, or when the switch is already on).
@@ -72,34 +66,22 @@ cs_ret_code_t Setup::handleCommand(cs_data_t data) {
 	TYPIFY(STATE_SWITCH_STATE) switchState;
 	switchState.state.dimmer = 0;
 	switchState.state.relay = 1;
-	state.set(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
+	setWithCheck(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
 
-	_successfullyStoredBitmask = 0;
-
-	LOGi("Setup completed");
+	LOGi("Setup success, wait for storage");
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
-/**
- * This event handler only listens to one event, namely EVT_STORAGE_WRITE_DONE. In that case it will continue with
- * a reset procedure. However, how does it know that the right item has been written? What should be done instead is
- * just calling a reset procedure that - in a loop - queries if there are peripherals still busy. As soon as for
- * example the entire storage queue has been handled, it should perform the reset.
- */
-void Setup::handleEvent(event_t & event) {
-	// we want to react to the last write request (OPERATION_MODE_NORMAL)
-	if (event.type != CS_TYPE::EVT_ADVERTISEMENT_UPDATED) {
-		LOGnone("Setup received %s [%i]", TypeName(event.type), to_underlying_type(event.type));
-	}
-	switch (event.type) {
-	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
-		TYPIFY(EVT_STORAGE_WRITE_DONE)* eventData = (TYPIFY(EVT_STORAGE_WRITE_DONE)*)event.data;
-		onStorageDone(eventData->type);
-		break;
-	}
-	default: {
-		break;
-	}
+void Setup::setWithCheck(const CS_TYPE& type, void *value, const size16_t size) {
+	cs_ret_code_t retCode = State::getInstance().set(type, value, size);
+	switch (retCode) {
+		case ERR_SUCCESS:
+			break;
+		case ERR_SUCCESS_NO_CHANGE:
+			onStorageDone(type);
+			break;
+		default:
+			break;
 	}
 }
 
@@ -149,15 +131,30 @@ void Setup::onStorageDone(const CS_TYPE& type) {
 		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SWITCH);
 		break;
 	case CS_TYPE::STATE_OPERATION_MODE:
-		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_OPERATION_MODE);
-		break;
+		finalize();
+		return;
 	default:
 		break;
 	}
 	if ((_successfullyStoredBitmask & SETUP_CONFIG_MASK_ALL) == SETUP_CONFIG_MASK_ALL) {
 		LOGi("All state variables stored");
-		finalize();
+		setNormalMode();
 	}
+	else {
+		LOGd("Stored: %u all=%u", _successfullyStoredBitmask, SETUP_CONFIG_MASK_ALL);
+	}
+}
+
+void Setup::setNormalMode() {
+	// Set operation mode to normal mode
+	OperationMode operationMode = OperationMode::OPERATION_MODE_NORMAL;
+	TYPIFY(STATE_OPERATION_MODE) mode = to_underlying_type(operationMode);
+	LOGi("Set mode NORMAL: 0x%X", mode);
+	setWithCheck(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+
+	// Switch relay on
+	event_t event(CS_TYPE::CMD_SWITCH_ON);
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 void Setup::finalize() {
@@ -182,5 +179,24 @@ void Setup::finalize() {
 	resetDelayed.delayMs = 1000;
 	event_t event2(CS_TYPE::CMD_RESET_DELAYED, &resetDelayed, sizeof(resetDelayed));
 	EventDispatcher::getInstance().dispatch(event2);
+}
+
+/**
+ * This event handler only listens to one event, namely EVT_STORAGE_WRITE_DONE. In that case it will continue with
+ * a reset procedure. However, how does it know that the right item has been written? What should be done instead is
+ * just calling a reset procedure that - in a loop - queries if there are peripherals still busy. As soon as for
+ * example the entire storage queue has been handled, it should perform the reset.
+ */
+void Setup::handleEvent(event_t & event) {
+	switch (event.type) {
+		case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
+			TYPIFY(EVT_STORAGE_WRITE_DONE)* eventData = (TYPIFY(EVT_STORAGE_WRITE_DONE)*)event.data;
+			onStorageDone(eventData->type);
+			break;
+		}
+		default: {
+			break;
+		}
+	}
 }
 

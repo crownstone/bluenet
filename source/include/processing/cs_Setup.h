@@ -13,7 +13,6 @@
 #include <cstdint>
 #include <events/cs_EventDispatcher.h>
 #include <events/cs_EventListener.h>
-#include <storage/cs_State.h>
 
 struct __attribute__((__packed__)) setup_data_t {
 	stone_id_t     stoneId;
@@ -47,12 +46,22 @@ enum SetupConfigBit {
 	SETUP_CONFIG_BIT_IBEACON_MAJOR,
 	SETUP_CONFIG_BIT_IBEACON_MINOR,
 	SETUP_CONFIG_BIT_SWITCH,
-	SETUP_CONFIG_BIT_OPERATION_MODE,
 	SETUP_CONFIG_NUM_BITS
 };
 #define SETUP_CONFIG_MASK_ALL ((1 << SETUP_CONFIG_NUM_BITS) - 1)
 
-
+/**
+ * Setup class.
+ *
+ * Handles the setup command:
+ *
+ * Sets all state variables.
+ * Waits for all state variables to be written to flash.
+ * Then sets the operation mode.
+ * Waits for operation mode to be written to flash.
+ * EVT_SETUP_DONE is sent.
+ * Then, the device will reboot after some time.
+ */
 class Setup : EventListener {
 public:
 	// Gets a static singleton (no dynamic memory allocation)
@@ -72,6 +81,8 @@ private:
 	// Used to check if all state variables are written to flash.
 	uint32_t _successfullyStoredBitmask = 0;
 
+	void setWithCheck(const CS_TYPE& type, void *value, const size16_t size);
 	void onStorageDone(const CS_TYPE& type);
+	void setNormalMode();
 	void finalize();
 };
