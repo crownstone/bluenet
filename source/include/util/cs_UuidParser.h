@@ -18,16 +18,16 @@ constexpr int parseHexChar(const char chr) {
 		return chr - '0';
 	}
 	else if ('a' <= chr && chr <= 'f') {
-		return chr - 'a';
+		return chr - 'a' + 10;
 	}
 	else if ('A' <= chr && chr <= 'F') {
-		return chr - 'A';
+		return chr - 'A' + 10;
 	}
 	return 0;
 }
 
 constexpr int parseHex(const char *str) {
-	return parseHexChar(str[0]) | (parseHexChar(str[1]) << 8);
+	return (parseHexChar(str[0]) << 4) | (parseHexChar(str[1]) << 0);
 }
 
 /**
