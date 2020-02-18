@@ -159,9 +159,6 @@ static void config_server_evt_cb(const config_server_evt_t * p_evt) {
 	}
 }
 
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
-static uint8_t start_address[3];
-#endif
 
 #if MESH_SCANNER == 1
 
@@ -201,20 +198,7 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
 		const uint8_t* addr = p_rx_data->p_metadata->params.scanner.adv_addr.addr;
-		bool same_address = false;
-		if ( addr[5] == start_address[0] && addr[4] == start_address[1] && addr[3] == start_address[2] ) {
-		    same_address = true;
-		}
-		if (p_rx_data->p_metadata->params.scanner.adv_type == 0x06 || same_address)  { 
-		    __LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "  %02X:%02X:%02X:%02X:%02X:%02X type=%u chan=%u\n", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], p_rx_data->p_metadata->params.scanner.adv_type, p_rx_data->p_metadata->params.scanner.channel);
-		    __LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "[%02X,%02X,...] %02X\n", p_rx_data->p_payload[0], p_rx_data->p_payload[1], p_rx_data->length);
-		    if (!same_address) {
-			start_address[0] = addr[5];
-			start_address[1] = addr[4];
-			start_address[2] = addr[3];
-		    }
-		}
-//		BLEutil::printArray(p_rx_data->p_payload, p_rx_data->length);
+		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "scanned: %02X:%02X:%02X:%02X:%02X:%02X type=%u chan=%u\n", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], p_rx_data->p_metadata->params.scanner.adv_type, p_rx_data->p_metadata->params.scanner.channel);
 #endif
 
 		break;
@@ -526,6 +510,8 @@ void Mesh::handleEvent(event_t & event) {
 			else {
 //				Stack::getInstance().startScanning();
 			}
+			[[maybe_unused]] const scanner_stats_t * stats = scanner_stats_get();
+			LOGMeshDebug("success=%u crcFail=%u lenFail=%u memFail=%u", stats->successful_receives, stats->crc_failures, stats->length_out_of_bounds, stats->out_of_memory);
 		}
 //		if (tickCount % (5000/TICK_INTERVAL_MS) == 0) {
 //			_model.sendTestMsg();
