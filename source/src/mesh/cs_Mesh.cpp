@@ -39,7 +39,7 @@ extern "C" {
 #include <protocol/cs_UartProtocol.h>
 
 #define LOGMeshInfo LOGi
-#define LOGMeshDebug LOGd
+#define LOGMeshDebug LOGnone
 
 #if NRF_MESH_KEY_SIZE != ENCRYPTION_KEY_LENGTH
 #error "Mesh key size doesn't match encryption key size"
@@ -627,13 +627,15 @@ bool Mesh::requestSync() {
 //		// LOGMeshInfo("Mesh::requestSync: nope");
 //		return false;
 //	}
-	LOGMeshInfo("requestSync");
 
 	// Retrieve which data should be requested from event handlers.
 	TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING) syncRequest;
 	syncRequest.bitmask = 0;
 	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING, &syncRequest, sizeof(syncRequest));
 	event.dispatch();
+
+	LOGMeshInfo("requestSync bitmask=%u", syncRequest.bitmask);
+
 	if (syncRequest.bitmask == 0) {
 		return false;
 	}
