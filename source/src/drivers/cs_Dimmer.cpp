@@ -12,6 +12,8 @@
 #include <storage/cs_State.h>
 #include <util/cs_Error.h>
 
+#include <test/cs_Test.h>
+
 void Dimmer::init(const boards_config_t& board) {
 	initialized = true;
 
@@ -67,7 +69,10 @@ bool Dimmer::set(uint8_t intensity) {
 		LOGd("Dimmer not enabled");
 		return false;
 	}
+
+	TEST_PUSH_EXPR_D(this,"intensity", intensity);
 	PWM::getInstance().setValue(0, intensity);
+	
 	return true;
 }
 

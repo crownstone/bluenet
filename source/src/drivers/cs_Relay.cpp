@@ -11,6 +11,8 @@
 #include <storage/cs_State.h>
 #include <util/cs_Error.h>
 
+#include <test/cs_Test.h>
+
 void Relay::init(const boards_config_t& board) {
 	_initialized = true;
 
@@ -30,6 +32,9 @@ void Relay::init(const boards_config_t& board) {
 
 bool Relay::set(bool on) {
 	assert(_initialized == true, "Not initialized");
+
+	TEST_PUSH_EXPR_B(this,"on",on);
+
 	if (on) {
 		return turnOn();
 	}

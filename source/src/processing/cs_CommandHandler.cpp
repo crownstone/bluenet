@@ -92,6 +92,7 @@ command_result_t CommandHandler::handleCommand(
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		return command_result_t(ERR_NO_ACCESS);
 	}
+
 	switch (type) {
 	case CTRL_CMD_NOP:
 		return handleCmdNop(commandData, accessLevel, resultData);
