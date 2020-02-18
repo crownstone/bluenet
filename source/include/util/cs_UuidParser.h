@@ -33,8 +33,8 @@ constexpr int parseHex(const char *str) {
 /**
  * Parse UUID string (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX) to a byte array.
  */
-constexpr bool parseUuid(const char *str, int size, uint8_t* array) {
-	if (size != CS_UUID_STR_LEN) {
+constexpr bool parseUuid(const char *str, int stringSize, uint8_t* array, int arraySize) {
+	if (stringSize != CS_UUID_STR_LEN || arraySize < 16) {
 		return false;
 	}
 	//   0        8+1  12+2 16+3 20+4

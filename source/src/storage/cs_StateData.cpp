@@ -60,7 +60,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_IBEACON_UUID: {
 		std::string uuidString = g_BEACON_UUID;
-		if (BLEutil::parseUuid(uuidString.c_str(), uuidString.size(), data.value)) {
+		if (BLEutil::parseUuid(uuidString.c_str(), uuidString.size(), data.value, data.size)) {
 			return ERR_SUCCESS;
 		}
 		return ERR_WRONG_PAYLOAD_LENGTH;
