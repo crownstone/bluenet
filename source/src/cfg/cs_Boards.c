@@ -560,7 +560,7 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->pinAinVoltageGainHigh              = 29;
 	
 	p_config->pinAinZeroRef	                     = 5;
-	p_config->pinAinPwmTemp                      = 2;
+	p_config->pinAinPwmTemp                      = 4;
 	p_config->pinGpioRx                          = 22; 
 	p_config->pinGpioTx                          = 20;
 	
