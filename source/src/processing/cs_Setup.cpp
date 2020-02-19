@@ -131,7 +131,10 @@ void Setup::onStorageDone(const CS_TYPE& type) {
 		BLEutil::setBit(_successfullyStoredBitmask, SETUP_CONFIG_BIT_SWITCH);
 		break;
 	case CS_TYPE::STATE_OPERATION_MODE:
-		finalize();
+		// Check, so that we don't finalize if operation mode was set for some other reason than setup.
+		if ((_successfullyStoredBitmask & SETUP_CONFIG_MASK_ALL) == SETUP_CONFIG_MASK_ALL) {
+			finalize();
+		}
 		return;
 	default:
 		break;
