@@ -224,9 +224,10 @@ static void loop_forever(void)
  */
 static void dfu_enter_button_init(void)
 {
-    nrf_gpio_cfg_sense_input(NRF_BL_DFU_ENTER_METHOD_BUTTON_PIN,
-                             BUTTON_PULL,
-                             NRF_GPIO_PIN_SENSE_LOW);
+// not used
+//    nrf_gpio_cfg_sense_input(NRF_BL_DFU_ENTER_METHOD_BUTTON_PIN,
+//                             BUTTON_PULL,
+//                             NRF_GPIO_PIN_SENSE_LOW);
 }
 
 

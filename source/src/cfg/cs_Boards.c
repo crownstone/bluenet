@@ -1,14 +1,32 @@
-/**
+/*
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Aug 20, 2018
  * Triple-license: LGPLv3+, Apache License, and/or MIT
  */
 
+/* Hardware board configuration.
+ *
+ * This file stores information that is different per type of hardware. Not every type of hardware is available to 
+ * customers. It contains the following information:
+ *   - pin assignment
+ *   - existence of e.g. dimming/switch hardware (a Guidestone or dongle does not have relays or IGBTs)
+ *   - circuit parameters (e.g. the measurement circuit might have different values)
+ *   - calibration values (e.g. the threshold for triggering a high temperature warning depends on board layout, or
+ *     the value with which we want to trigger a tap-to-toggle action depends on the antenna)
+ *
+ * For information on how to add a new board see:
+ *    - https://github.com/crownstone/bluenet/blob/master/docs/ADD_BOARD.md
+ */
+
 #include "cfg/cs_Boards.h"
 #include "cfg/cs_DeviceTypes.h"
 #include "nrf_error.h"
 #include "nrf52.h"
+
+/* ********************************************************************************************************************
+ * Crownstone Built-in Zero
+ * *******************************************************************************************************************/
 
 void asACR01B1D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
@@ -52,89 +70,6 @@ void asACR01B1D(boards_config_t* p_config) {
 	p_config->scanWindowUs                       = 150 * 1000;
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
-
-
-//void asACR01B6C(boards_config_t* p_config) {
-//	p_config->pinGpioPwm                         = 8;
-//	p_config->pinGpioRelayOn                     = 6;
-//	p_config->pinGpioRelayOff                    = 7;
-//	p_config->pinAinCurrentGainLow               = 2;
-//	p_config->pinAinVoltage                      = 1;
-//	p_config->pinAinZeroRef                      = 0;
-//	p_config->pinAinPwmTemp                      = 3;
-//	p_config->pinGpioRx                          = 20;
-//	p_config->pinGpioTx                          = 19;
-//	p_config->pinLedRed                          = 10;
-//	p_config->pinLedGreen                        = 9;
-//
-//	p_config->flags.hasRelay                     = true;
-//	p_config->flags.pwmInverted                  = false;
-//	p_config->flags.hasSerial                    = false;
-//	p_config->flags.hasLed                       = true;
-//	p_config->flags.ledInverted                  = false;
-//	p_config->flags.hasAdcZeroRef                = true;
-////	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
-//	p_config->flags.pwmTempInverted              = true;
-//
-//	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
-//
-//	p_config->voltageMultiplier                  = 0.171f; // TODO: calibrate
-//	p_config->currentMultiplier                  = 0.0042f; // TODO: calibrate
-//	p_config->voltageZero                        = -99; // TODO: calibrate
-//	p_config->currentZero                        = -270; // TODO: calibrate
-//	p_config->powerZero                          = 8000; // TODO: calibrate
-//	p_config->voltageRange                       = 1200; // TODO: calibrate
-//	p_config->currentRange                       = 600; // TODO: calibrate
-////	p_config->currentRange                       = 1800; // Range used when not doing differential measurements.
-//
-//	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
-//	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
-//
-//	p_config->minTxPower                         = -20; // higher tx power for builtins
-//}
-//
-//
-//void asACR01B6D(boards_config_t* p_config) {
-//	p_config->pinGpioPwm                         = 8;
-//	p_config->pinGpioRelayOn                     = 6;
-//	p_config->pinGpioRelayOff                    = 7;
-//	p_config->pinAinCurrentGainHigh              = 4; // highest gain
-//	p_config->pinAinCurrentGainMed               = 5;
-//	p_config->pinAinCurrentGainLow               = 6; // lowest gain
-//	p_config->pinAinVoltage                      = 2;
-//	p_config->pinAinZeroRef                      = 0;
-//	p_config->pinAinPwmTemp                      = 3;
-//	p_config->pinGpioRx                          = 20;
-//	p_config->pinGpioTx                          = 19;
-//	p_config->pinLedRed                          = 10;
-//	p_config->pinLedGreen                        = 9;
-//
-//	p_config->flags.hasRelay                     = true;
-//	p_config->flags.pwmInverted                  = false;
-//	p_config->flags.hasSerial                    = false;
-//	p_config->flags.hasLed                       = true;
-//	p_config->flags.ledInverted                  = false;
-//	p_config->flags.hasAdcZeroRef                = true;
-////	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
-//	p_config->flags.pwmTempInverted              = true;
-//
-//	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN;
-//
-//	p_config->voltageMultiplier                  = 0.171f; // TODO: calibrate
-//	p_config->currentMultiplier                  = 0.0042f; // TODO: calibrate
-//	p_config->voltageZero                        = -99; // TODO: calibrate
-//	p_config->currentZero                        = -270; // TODO: calibrate
-//	p_config->powerZero                          = 8000; // TODO: calibrate
-//	p_config->voltageRange                       = 1200; // TODO: calibrate
-//	p_config->currentRange                       = 600; // TODO: calibrate
-////	p_config->currentRange                       = 1800; // Range used when not doing differential measurements.
-//
-//	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
-//	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
-//
-//	p_config->minTxPower                         = -20; // higher tx power for builtins
-//}
-
 
 void asACR01B7B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
@@ -444,65 +379,9 @@ void asACR01B9E(boards_config_t* p_config) {
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
-/*
-void asACR01B10B(boards_config_t* p_config) {
-	p_config->pinGpioPwm                         = 8;
-//	p_config->pinGpioPwm                         = 15;
-	p_config->pinGpioPwmEnabled                  = 11; // Something unused
-	p_config->pinGpioRelayOn                     = 14;
-	p_config->pinGpioRelayOff                    = 13;
-	p_config->pinAinCurrentGainHigh              = 4; // highest gain
-	p_config->pinAinCurrentGainMed               = 5;
-	p_config->pinAinCurrentGainLow               = 6; // lowest gain
-	p_config->pinAinVoltage                      = 1;
-//	p_config->pinAinVoltage                      = 3; // actually the 14V pin
-	p_config->pinAinZeroRef                      = 0;
-	p_config->pinAinPwmTemp                      = 2;
-	p_config->pinGpioRx                          = 20;
-	p_config->pinGpioTx                          = 19;
-	p_config->pinLedRed                          = 6; // Not there
-	p_config->pinLedGreen                        = 7; // Not there
-
-	p_config->flags.hasRelay                     = true;
-	p_config->flags.pwmInverted                  = false;
-	p_config->flags.hasSerial                    = false;
-	p_config->flags.hasSerial                    = true;
-	p_config->flags.hasLed                       = false;
-	p_config->flags.ledInverted                  = false;
-	p_config->flags.hasAdcZeroRef                = true;
-//	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
-	p_config->flags.pwmTempInverted              = true;
-
-	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
-
-	p_config->voltageMultiplier                  = -0.253f; // for range -1800 - 1800 mV
-	p_config->currentMultiplier                  = 0.0071f; // for range -600 - 600 mV on pin 6
-//	p_config->voltageMultiplier                  = 0.0f;
-//	p_config->currentMultiplier                  = 0.0f;
-	p_config->voltageZero                        = 500; // for range -1800 - 1800 mV
-	p_config->currentZero                        = -125; // for range -600 - 600 mV on pin 6
-	p_config->powerZero                          = 0;
-	p_config->voltageRange                       = 1800;
-	p_config->currentRange                       = 600;
-
-	// See https://en.wikipedia.org/wiki/Thermistor#B_or_%CE%B2_parameter_equation B=3380, T0=25, R0=10000
-	// Python: temp=82; r=10000*math.exp(3380*(1/(temp+273.15)-1/(25+273.15))); 3.3/(16000+r)*r
-//	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
-//	p_config->pwmTempVoltageThreshold            = 0.4;  // About 70 degrees C
-	p_config->pwmTempVoltageThreshold            = 0.35; // About 76 degrees C
-//	p_config->pwmTempVoltageThresholdDown        = 0.5;  // About 60 degrees C
-//	p_config->pwmTempVoltageThresholdDown        = 0.25; // About 90 degrees C
-	p_config->pwmTempVoltageThresholdDown        = 0.3; // About 82 degrees C
-
-	p_config->minTxPower                         = -20; // higher tx power for builtins
-
-//	// For NTC voltage advertising.
-//	p_config->pinAinCurrentGainLow               = 2; // actually the IGBT NTC pin, make sure to disable differential measurements.
-//	p_config->pinAinPwmTemp                      = 0; // actually zero ref: 1.2V, so always above the threshold voltage, so always below temperature threshold.
-//	p_config->flags.hasAdcZeroRef                = false; // Non-differential measurements
-//	p_config->currentRange                       = 3000; // 0-3V
-}
-*/
+/* ********************************************************************************************************************
+ * Crownstone Built-in One
+ * *******************************************************************************************************************/
 
 void asACR01B10C(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8; // 18 for v3
@@ -566,6 +445,9 @@ void asACR01B10C(boards_config_t* p_config) {
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
+/* ********************************************************************************************************************
+ * Crownstone Plug Zero
+ * *******************************************************************************************************************/
 
 void asACR01B2C(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
@@ -658,6 +540,70 @@ void asACR01B2G(boards_config_t* p_config) {
 	p_config->scanWindowUs                       = 150 * 1000; // This board cannot provide enough power for 100% scanning.
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
+
+/* ********************************************************************************************************************
+ * Crownstone Plug One
+ * *******************************************************************************************************************/
+
+/*
+ * Very important for first prototype, make sure 19 is floating (not listed here). It is a short to another pin.
+ */
+void asACR01B11A(boards_config_t* p_config) {
+	p_config->pinGpioPwm                         = 8;
+	p_config->pinGpioEnablePwm                   = 11; // something unused
+	p_config->pinGpioRelayOn                     = 15;
+	p_config->pinGpioRelayOff                    = 13;
+
+	p_config->pinAinCurrentGainLow               = 2;
+	p_config->pinAinCurrentGainHigh              = 3;
+	p_config->pinAinVoltageGainLow               = 31;
+	p_config->pinAinVoltageGainHigh              = 29;
+	
+	p_config->pinAinZeroRef	                     = 5;
+	p_config->pinAinPwmTemp                      = 2;
+	p_config->pinGpioRx                          = 22; 
+	p_config->pinGpioTx                          = 20;
+	
+	p_config->pinGpio1                           = 24;
+	p_config->pinGpio2                           = 32;
+	p_config->pinGpio3                           = 34;
+	p_config->pinGpio4                           = 36;
+
+	p_config->pinLedRed                          = 8;   // not placed, now for patch to PWM
+	p_config->pinLedGreen                        = 41;  // not placed
+
+	p_config->flags.hasRelay                     = true;
+	p_config->flags.pwmInverted                  = true;
+	p_config->flags.hasSerial                    = true;
+	p_config->flags.hasLed                       = false; // not placed
+	p_config->flags.ledInverted                  = false; // not placed
+	p_config->flags.hasAdcZeroRef                = true;
+	p_config->flags.pwmTempInverted              = true;
+
+	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG_ONE;
+
+	p_config->voltageMultiplier                  = 0.171f;       // unknown
+	p_config->currentMultiplier                  = 0.00385f;     // unknown
+	p_config->voltageZero                        = -99;          // unknown
+	p_config->currentZero                        = -270;         // unknown
+	p_config->powerZero                          = 9000;         // unknown
+
+	p_config->voltageRange                       = 1200;         // unknown
+	p_config->currentRange                       = 600;          // unknown
+
+	p_config->pwmTempVoltageThreshold            = 0.7;          // unknown
+	p_config->pwmTempVoltageThresholdDown        = 0.25;         // unknown
+
+	p_config->minTxPower                         = -20;          // unknown
+
+	p_config->scanIntervalUs                     = 200 * 1000;   // unknown 
+	p_config->scanWindowUs                       = 150 * 1000;   // unknown
+	p_config->tapToToggleDefaultRssiThreshold    = -35;          // unknown
+}
+
+/* ********************************************************************************************************************
+ * Dev Boards
+ * *******************************************************************************************************************/
 
 void asPca10040(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 17;
@@ -774,7 +720,9 @@ uint32_t configure_board(boards_config_t* p_config) {
 	case ACR01B2G:
 		asACR01B2G(p_config);
 		break;
-
+	case ACR01B11A:
+		asACR01B11A(p_config);
+		break;
 	case GUIDESTONE:
 		asGuidestone(p_config);
 		break;

@@ -68,7 +68,12 @@ CS_SERIAL_NRF_LOG_PIN_TX=6
 # ACR01B2C             1502
 # ACR01B2E             1503
 # ACR01B2G             1504
-HARDWARE_BOARD=ACR01B2C
+# ## Crownstone Plug on
+# ACR01B11A            1505
+HARDWARE_BOARD=ACR01B11A
+
+# The default pin layout as defined by Nordic and used by the bootloader
+NORDIC_HARDWARE_BOARD=PCA10100
 
 # The default hardware board, in case no board is written in UICR.
 # This value will then also be written to UICR.
