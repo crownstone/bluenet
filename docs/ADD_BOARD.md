@@ -6,7 +6,7 @@ The pin layout can be found online for e.g. the [nRF52833](https://infocenter.no
 It has mappings like:
 
 | Pin   | Name          | Crownstone Description | Pin nr |
-| --------------------- | ---------------------- | ------ |
+| ----- | ------------- | ---------------------- | ------ |
 | A8    | P0.31 (AIN7)  | V1                     | 31     |
 | A10   | P0.29 (AIN5)  | V2                     | 29     |
 | A12   | P0.02 (AIN0)  | I1                     |  2     |
@@ -37,7 +37,7 @@ For example on the ACR01B11A board there is an [UCC5310](http://www.ti.com/lit/d
 IN-.
 
 | IN-   | IN+     | OUT  |
-| --------------- | ---- |
+| ----- | ------- | ---- |
 | high  | X       | low  |
 | low   | high    | high |
 
