@@ -180,7 +180,9 @@ void FactoryReset::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_MESH_FACTORY_RESET_DONE: {
+#if BUILD_MESHING == 1
 			onClassFactoryResetDone(FACTORY_RESET_BIT_MESH);
+#endif
 			break;
 		}
 		default:
