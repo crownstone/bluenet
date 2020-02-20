@@ -68,7 +68,7 @@ public:
 	cs_ret_code_t sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOWEST);
 	cs_ret_code_t sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOW);
 	cs_ret_code_t sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOW);
-	cs_ret_code_t sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* item, uint8_t repeats=CS_MESH_RELIABILITY_MEDIUM);
+	cs_ret_code_t sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOW);
 
 	access_model_handle_t getAccessModelHandle();
 

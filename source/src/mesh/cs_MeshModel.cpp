@@ -102,6 +102,7 @@ cs_ret_code_t MeshModel::sendMultiSwitchItem(const internal_multi_switch_item_t*
 	meshItem.switchCmd = item->cmd.switchCmd;
 	meshItem.delay = item->cmd.delay;
 	meshItem.source = item->cmd.source;
+	// Remove old messages of same type and with same target id.
 	remFromQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id);
 	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id, (uint8_t*)(&meshItem), sizeof(meshItem), repeats, true);
 }
@@ -110,32 +111,38 @@ cs_ret_code_t MeshModel::sendTime(const cs_mesh_model_msg_time_t* item, uint8_t 
 	if (item->timestamp == 0) {
 		return ERR_WRONG_PARAMETER;
 	}
+	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats) {
+	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats) {
+	// Don't remove old messages of same type, as they may have the location of a another profile.
 //	remFromQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t repeats) {
+	// Don't remove old messages of same type, as they may have the data of a another device.
 //	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t repeats) {
+	// Don't remove old messages of same type, as they may have the data of a another device.
 //	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* item, uint8_t repeats) {
-//	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0);
+	// Remove old messages of same type, as only the latest is of interest.
+	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
