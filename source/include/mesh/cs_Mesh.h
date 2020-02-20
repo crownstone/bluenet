@@ -19,7 +19,7 @@ extern "C" {
 #include <device_state_manager.h>
 }
 
-class Mesh : EventListener {
+class Mesh : public EventListener {
 public:
 	/**
 	 * Get a reference to the Mesh object.

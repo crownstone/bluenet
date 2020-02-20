@@ -544,6 +544,11 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			break;
 		case OperationMode::OPERATION_MODE_FACTORY_RESET:
 			LOGd("Configure factory reset mode");
+#if BUILD_MESHING == 1
+			// Seems like mesh has to be started in order to run the factory reset.
+			_mesh->init(_boardsConfig);
+			_mesh->start();
+#endif
 			FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
 			_advertiser->changeToNormalTxPower();
 			break;

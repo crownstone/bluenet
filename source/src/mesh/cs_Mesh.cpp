@@ -361,24 +361,24 @@ void Mesh::factoryReset() {
 	LOGw("factoryReset");
 
 
-	nrf_clock_lf_cfg_t lfclksrc;
-	lfclksrc.source = NRF_SDH_CLOCK_LF_SRC;
-	lfclksrc.rc_ctiv = NRF_SDH_CLOCK_LF_RC_CTIV;
-	lfclksrc.rc_temp_ctiv = NRF_SDH_CLOCK_LF_RC_TEMP_CTIV;
-	lfclksrc.accuracy = NRF_CLOCK_LF_ACCURACY_20_PPM;
-
-	mesh_stack_init_params_t init_params;
-	init_params.core.irq_priority       = NRF_MESH_IRQ_PRIORITY_THREAD; // See mesh_interrupt_priorities.md
-	init_params.core.lfclksrc           = lfclksrc;
-	init_params.core.p_uuid             = NULL;
-	init_params.core.relay_cb           = NULL;
-	init_params.models.models_init_cb   = NULL;
-	init_params.models.config_server_cb = NULL;
-
-	uint32_t retCode = mesh_stack_init(&init_params, &_isProvisioned);
-	APP_ERROR_CHECK(retCode);
-
-	nrf_mesh_evt_handler_add(&cs_mesh_event_handler_struct);
+//	nrf_clock_lf_cfg_t lfclksrc;
+//	lfclksrc.source = NRF_SDH_CLOCK_LF_SRC;
+//	lfclksrc.rc_ctiv = NRF_SDH_CLOCK_LF_RC_CTIV;
+//	lfclksrc.rc_temp_ctiv = NRF_SDH_CLOCK_LF_RC_TEMP_CTIV;
+//	lfclksrc.accuracy = NRF_CLOCK_LF_ACCURACY_20_PPM;
+//
+//	mesh_stack_init_params_t init_params;
+//	init_params.core.irq_priority       = NRF_MESH_IRQ_PRIORITY_THREAD; // See mesh_interrupt_priorities.md
+//	init_params.core.lfclksrc           = lfclksrc;
+//	init_params.core.p_uuid             = NULL;
+//	init_params.core.relay_cb           = NULL;
+//	init_params.models.models_init_cb   = NULL;
+//	init_params.models.config_server_cb = NULL;
+//
+//	uint32_t retCode = mesh_stack_init(&init_params, &_isProvisioned);
+//	APP_ERROR_CHECK(retCode);
+//
+//	nrf_mesh_evt_handler_add(&cs_mesh_event_handler_struct);
 
 	mesh_stack_config_clear(); // Check if flash_is_stable, or wait for NRF_MESH_EVT_FLASH_STABLE
 	_performingFactoryReset = true;
@@ -393,7 +393,7 @@ void Mesh::factoryResetDone() {
 	}
 	LOGMeshInfo("factoryResetDone");
 	_performingFactoryReset = false;
-	event_t event(CS_TYPE::EVT_MESH_FACTORY_RESET);
+	event_t event(CS_TYPE::EVT_MESH_FACTORY_RESET_DONE);
 	event.dispatch();
 }
 
