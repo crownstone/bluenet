@@ -1,4 +1,9 @@
+# Hardware version
 
+See also the [naming](https://github.com/crownstone/bluenet/blob/master/docs/NAMING.md) document.
+
+
+```
 ---------------------------------------------------------------
 | GENERAL | PCB      | PRODU | HOUS  | RESERVED    | NORDIC   |
 | PRODUCT | VERSION  | CTION | ING   |             | CHIP     |
@@ -19,9 +24,9 @@
   |  |  |-------------------------------------------------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 USB dongle, 6 Builtin One
   |  |----------------------------------------------------------  Market: 1 EU, 2 US
   |-------------------------------------------------------------  Family: 1 Crownstone
+```
 
-
-
+```
 ----------------------------------------------
 | GENERAL | ASSEMBLY        | PRODU | PIECE  |
 | PRODUCT |                 | CTION | NUMBER |
@@ -43,4 +48,4 @@
   |  |  |--------------------------------------  Product Type: 1 Dev, 2 Plug, 3 Builtin, 4 Guidestone, 5 USB dongle, 6 Builtin One
   |  |-----------------------------------------  Market: 1 EU, 2 US
   |--------------------------------------------  Family: 1 Crownstone
-
+```
