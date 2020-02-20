@@ -395,6 +395,7 @@ void CommandAdvHandler::handleDecryptedRC5Payload(scanned_device_t* scannedDevic
 
 EncryptionAccessLevel CommandAdvHandler::getRequiredAccessLevel(const AdvCommandTypes type) {
 	switch (type) {
+		case ADV_CMD_NOOP:
 		case ADV_CMD_MULTI_SWITCH:
 		case ADV_CMD_UPDATE_TRACKED_DEVICE:
 			return BASIC;
