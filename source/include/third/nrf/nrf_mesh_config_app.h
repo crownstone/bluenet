@@ -165,10 +165,9 @@
 /** Number of flash pages to be reserved between the flash manager recovery page and the bootloader.
  *  @note This value will be ignored if FLASH_MANAGER_RECOVERY_PAGE is set.
  */
-#define FLASH_MANAGER_RECOVERY_PAGE_OFFSET_PAGES        (FDS_PHY_PAGES)
-
-/** Maximum number of pages that can be owned by a single flash manager */
-#define FLASH_MANAGER_PAGE_COUNT_MAX                    (2 + ACCESS_FLASH_PAGE_COUNT + DSM_FLASH_PAGE_COUNT)
+//#define FLASH_MANAGER_RECOVERY_PAGE_OFFSET_PAGES        (FDS_PHY_PAGES)
+// We reserve a few pages for future expansion of FDS pages.
+#define FLASH_MANAGER_RECOVERY_PAGE_OFFSET_PAGES        (2 + FDS_PHY_PAGES)
 
 
 
