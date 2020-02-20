@@ -290,6 +290,9 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 
 
 	switch (type) {
+		case ADV_CMD_NOOP: {
+			break;
+		}
 		case ADV_CMD_MULTI_SWITCH: {
 			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
 			LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
