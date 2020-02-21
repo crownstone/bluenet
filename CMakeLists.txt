@@ -246,7 +246,14 @@ if(CONFIG_DIR STREQUAL "release")
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${FACTORY_IMAGE_CONFIGURATION_FILE})
 	ENDIF()
 else()
-	MESSAGE(STATUS "Do not load configuration file for factory images yet (only enabled for release configurations)")
+	MESSAGE(STATUS "Load configuration file for factory images at ${FACTORY_IMAGE_CONFIGURATION_FILE}")
+	#	MESSAGE(STATUS "Do not load configuration file for factory images yet (only enabled for release configurations)")
+	#MESSAGE(WARNING "Load configuration file for non-release image at ${FACTORY_IMAGE_CONFIGURATION_FILE}")
+	load_configuration("${FACTORY_IMAGE_CONFIGURATION_FILE}" CMAKE_ARGS)
+		
+	IF(EXISTS ${FACTORY_IMAGE_CONFIGURATION_FILE})
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${FACTORY_IMAGE_CONFIGURATION_FILE})
+	ENDIF()
 endif()
 
 # For now only cross-compilation
