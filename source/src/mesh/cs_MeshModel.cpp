@@ -102,6 +102,9 @@ cs_ret_code_t MeshModel::sendMultiSwitchItem(const internal_multi_switch_item_t*
 	meshItem.switchCmd = item->cmd.switchCmd;
 	meshItem.delay = item->cmd.delay;
 	meshItem.source = item->cmd.source;
+	if (item->cmd.source.sourceId == CS_CMD_SOURCE_CONNECTION) {
+		repeats = CS_MESH_RELIABILITY_HIGH;
+	}
 	// Remove old messages of same type and with same target id.
 	remFromQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id);
 	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id, (uint8_t*)(&meshItem), sizeof(meshItem), repeats, true);
