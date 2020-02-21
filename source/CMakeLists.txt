@@ -954,9 +954,12 @@ ELSE()
 			COMMAND test -z "${PRODUCT_FAMILY_TYPE}" && echo "No PRODUCT_FAMILY_TYPE set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
 			COMMAND test -z "${MAJOR_MINOR_PATCH}" && echo "No MAJOR_MINOR_PATCH set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
 			COMMAND test -z "${PRODUCTION_RUN_HOUSING}" && echo "No PRODUCTION_RUN_HOUSING set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
+			COMMAND test -f "${CMAKE_BINARY_DIR}/bootloader/bootloader.hex" && exit 0 || echo "No bootloader.hex found. Did you compile it and run 'make install'?" && echo && exit 1 
+			COMMAND test -f "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" && exit 0 || echo "No bootloader_settings.hex found. Did you generate it with: make build_bootloader_settings?" && echo && exit 1 
+			COMMAND test -f "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" && exit 0 || echo "No ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} found." && echo && exit 1 
 			COMMAND ${CMAKE_COMMAND} -E echo "Use srec_cat to create a factory image"
 			COMMAND ${CMAKE_COMMAND} -E make_directory factory-images
-			COMMAND srec_cat ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD_HEX} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} -o factory-images/${PROJECT_NAME}${IMAGE_FILENAME_POSTFIX}.hex -intel
+			COMMAND srec_cat ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD_HEX} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex -intel ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex -intel ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} -intel -o factory-images/${PROJECT_NAME}${IMAGE_FILENAME_POSTFIX}.hex -intel
 			COMMENT "Generate a factory image"
 			)
 
