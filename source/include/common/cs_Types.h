@@ -234,6 +234,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_SYNC_REQUEST_OUTGOING,                   // Before an outgoing sync request is broadcast, this event is fired internally so that other event handlers can tag on.
 	EVT_MESH_SYNC_REQUEST_INCOMING,                   // Whan a sync request is received, this event is fired internally so that each event handler can individually respond to it.
 	EVT_MESH_SYNC_FAILED,                             // When syncing is considered to have failed, no more retries.
+	EVT_MESH_PAGES_ERASED,                            // All mesh storage pages are completely erased.
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR,                                // Add a behaviour.
@@ -475,6 +476,7 @@ typedef profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
 typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING);
 typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING);
 typedef void TYPIFY(EVT_MESH_SYNC_FAILED);
+typedef void TYPIFY(EVT_MESH_PAGES_ERASED);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

@@ -274,6 +274,20 @@ void Crownstone::initDrivers0(){
 
 		_stack->initSoftdevice();
 
+#if BUILD_MESHING == 1
+		// Check if flash pages of mesh are valid, else erase them.
+		// This has to be done before Storage is initialized.
+		if (!_mesh->isFlashValid()) {
+			// We can try to erase all pages.
+			if (_mesh->eraseAllPages() != ERR_SUCCESS) {
+				// Only option left is to reboot and see if things work out next time.
+				APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
+			}
+			// Wait for pages erased event.
+			return;
+		}
+#endif
+
 		cs_ret_code_t retCode = _storage->init();
 		if (retCode != ERR_SUCCESS) {
 			// We can try to erase all pages.
@@ -283,6 +297,7 @@ void Crownstone::initDrivers0(){
 				APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
 			}
 			// Wait for pages erased event.
+			return;
 		}
 		// Wait for storage initialized event.
 }
@@ -793,7 +808,7 @@ void Crownstone::handleEvent(event_t & event) {
 			LOG_FLUSH();
 			break;
 		case CS_TYPE::EVT_STORAGE_PAGES_ERASED: {
-			LOGi("Storage pages erased, init storage");
+			LOGi("Storage pages erased, reboot");
 			/*
 			 * FDS init can't be called a second time, because it remembers that it's initializing, though
 			 * doesn't continue doing so.
@@ -814,6 +829,11 @@ void Crownstone::handleEvent(event_t & event) {
 			sd_power_gpregret_get(1, &gpregret);
 			gpregret |= GPREGRET2_STORAGE_RECOVERED;
 			sd_power_gpregret_set(1, gpregret);
+			sd_nvic_SystemReset();
+			break;
+		}
+		case CS_TYPE::EVT_MESH_PAGES_ERASED: {
+			LOGi("Mesh pages erased, reboot");
 			sd_nvic_SystemReset();
 			break;
 		}

@@ -565,22 +565,17 @@ ret_code_t Storage::garbageCollectInternal() {
 }
 
 cs_ret_code_t Storage::eraseAllPages() {
+	LOGw("eraseAllPages");
 	if (_initialized || isErasingPages()) {
 		return ERR_NOT_AVAILABLE;
 	}
-	uint32_t const pageSize = NRF_FICR->CODEPAGESIZE;
 	uint32_t endAddr = fds_flash_end_addr();
 	uint32_t flashSizeWords = FDS_VIRTUAL_PAGES * FDS_VIRTUAL_PAGE_SIZE;
 	uint32_t flashSizeBytes = flashSizeWords * sizeof(uint32_t);
 	uint32_t startAddr = endAddr - flashSizeBytes;
-	uint32_t startPage = startAddr / pageSize;
-	uint32_t endPage = endAddr / pageSize;
-	if (startPage > endPage) {
-		APP_ERROR_CHECK(NRF_ERROR_INVALID_ADDR);
-	}
 
 	// Check if pages are already erased.
-	uint32_t* startAddrPointer = (uint32_t*)startAddr;
+	unsigned int* startAddrPointer = (unsigned int*)startAddr;
 	bool isErased = true;
 	for (uint32_t i = 0; i < flashSizeWords; ++i) {
 		if (startAddrPointer[i] != 0xFFFFFFFF) {
@@ -593,9 +588,27 @@ cs_ret_code_t Storage::eraseAllPages() {
 		// No use to erase pages again.
 		return ERR_NOT_AVAILABLE;
 	}
-	LOGw("Erase flash pages used for FDS: 0x%x - 0x%x", startAddr, endAddr);
+
+	return erasePages(CS_TYPE::EVT_STORAGE_PAGES_ERASED, (void *)startAddr, (void *)endAddr);
+}
+
+cs_ret_code_t Storage::erasePages(const CS_TYPE doneEvent, void * startAddressPtr, void * endAddressPtr) {
+	if (_initialized || isErasingPages()) {
+		return ERR_NOT_AVAILABLE;
+	}
+	unsigned int startAddr = (unsigned int)startAddressPtr;
+	unsigned int endAddr = (unsigned int)endAddressPtr;
+	unsigned int const pageSize = NRF_FICR->CODEPAGESIZE;
+	unsigned int startPage = startAddr / pageSize;
+	unsigned int endPage = endAddr / pageSize;
+	if (startPage > endPage) {
+		APP_ERROR_CHECK(NRF_ERROR_INVALID_ADDR);
+	}
+
+	LOGw("Erase flash pages: [0x%p - 0x%p) or [%u - %u)", startAddr, endAddr, startPage, endPage);
 	_erasePage = startPage;
 	_eraseEndPage = endPage;
+	_eraseDoneEvent = doneEvent;
 	eraseNextPage();
 	return ERR_SUCCESS;
 }
@@ -608,7 +621,7 @@ void Storage::eraseNextPage() {
 	if (_erasePage != 0 && _eraseEndPage != 0 && _erasePage <= _eraseEndPage) {
 		if (_eraseEndPage == _erasePage) {
 			LOGi("Done erasing pages");
-			event_t event(CS_TYPE::EVT_STORAGE_PAGES_ERASED);
+			event_t event(_eraseDoneEvent);
 			EventDispatcher::getInstance().dispatch(event);
 		}
 		else {

@@ -24,7 +24,10 @@ extern "C" {
 #include "scanner.h"
 #include "uri.h"
 #include "utils.h"
+
 #include "log.h"
+#include "access_internal.h"
+#include "flash_manager_defrag.h"
 }
 
 #include "cfg/cs_Boards.h"
@@ -239,11 +242,16 @@ Mesh& Mesh::getInstance() {
 	return instance;
 }
 
-void Mesh::init(const boards_config_t& board) {
+cs_ret_code_t Mesh::init(const boards_config_t& board) {
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
 	__LOG_INIT(LOG_SRC_APP | LOG_SRC_PROV | LOG_SRC_ACCESS | LOG_SRC_BEARER | LOG_SRC_TRANSPORT | LOG_SRC_NETWORK, LOG_LEVEL_DBG3, LOG_CALLBACK_DEFAULT);
 	__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "----- Mesh init -----\n");
 #endif
+
+	if (!isFlashValid()) {
+		return ERR_WRONG_STATE;
+	}
+
 	nrf_clock_lf_cfg_t lfclksrc;
 	lfclksrc.source = NRF_SDH_CLOCK_LF_SRC;
 	lfclksrc.rc_ctiv = NRF_SDH_CLOCK_LF_RC_CTIV;
@@ -295,7 +303,8 @@ void Mesh::init(const boards_config_t& board) {
 		radioTxPower = (radio_tx_power_t)txPower;
 		break;
 	default:
-		return;
+		radioTxPower = RADIO_POWER_NRF_POS4DBM;
+		break;
 	}
 	for (uint8_t i=0; i<CORE_TX_ROLE_COUNT; ++i) {
 		mesh_opt_core_adv_addr_set((core_tx_role_t)i, &macAddress);
@@ -326,6 +335,8 @@ void Mesh::init(const boards_config_t& board) {
 	APP_ERROR_CHECK(retCode);
 	retCode = access_model_subscription_add(handle, _groupAddressHandle);
 	APP_ERROR_CHECK(retCode);
+
+	return ERR_SUCCESS;
 }
 
 void Mesh::start() {
@@ -343,6 +354,7 @@ void Mesh::start() {
 //		retCode = mesh_provisionee_prov_start(&prov_start_params);
 //		APP_ERROR_CHECK(retCode);
 //	}
+	LOGMeshInfo("ACCESS_FLASH_ENTRY_SIZE=%u", ACCESS_FLASH_ENTRY_SIZE);
 
 	const uint8_t *uuid = nrf_mesh_configure_device_uuid_get();
 	LOGMeshInfo("Device UUID:");
@@ -657,4 +669,48 @@ bool Mesh::requestSync() {
 	_model.sendMsg(&msg);
 
 	return true;
+}
+
+bool Mesh::isFlashValid() {
+	void* startAddress = NULL;
+	void* endAddress = NULL;
+	getFlashPages(startAddress, endAddress);
+	unsigned int const pageSize = NRF_FICR->CODEPAGESIZE;
+	for (unsigned int* ptr = (unsigned int*)startAddress; ptr < (unsigned int*)endAddress; ptr += pageSize / sizeof(uint32_t)) {
+		LOGd("0x%p: 0x%x 0x%x", ptr, ptr[0], ptr[1]);
+		// Check only if header is correct.
+		// See https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.meshsdk.v4.0.0/md_doc_libraries_flash_manager.html#flash_manager_areas.
+		// Since each "area" only has 1 page, we can check of page count == 01, and index == 00.
+		// Also accept empty page, all FF.
+		if ((ptr[0] == 0x10100408 && ptr[1] == 0xFFFF0001) || (ptr[0] == 0xFFFFFFFF && ptr[1] == 0xFFFFFFFF)) {
+			// Valid
+		}
+		else {
+			LOGw("Flash page with invalid data");
+			return false;
+		}
+	}
+	return true;
+}
+
+void Mesh::getFlashPages(void* & startAddress, void* & endAddress) {
+	// By default, all pages are below the recovery page.
+	// Unless one of these is defined:  ACCESS_FLASH_AREA_LOCATION, DSM_FLASH_AREA_LOCATION, NET_FLASH_AREA_LOCATION.
+	void * recoveryPage = flash_manager_defrag_calc_recovery_page();
+	const unsigned int numPages = (2 + ACCESS_FLASH_PAGE_COUNT + DSM_FLASH_PAGE_COUNT);
+	LOGd("flash manager recovery page = 0x%p numPages=%u", recoveryPage, numPages);
+
+	unsigned int const pageSize = NRF_FICR->CODEPAGESIZE;
+	unsigned int endAddr = (unsigned int)recoveryPage;
+	unsigned int startAddr = endAddr - (numPages * pageSize);
+	startAddress = (void*)startAddr;
+	endAddress = (void*)endAddr;
+}
+
+cs_ret_code_t Mesh::eraseAllPages() {
+	void* startAddress = NULL;
+	void* endAddress = NULL;
+	getFlashPages(startAddress, endAddress);
+	LOGw("eraseAllPages start=0x%p end=0x%p", startAddress, endAddress);
+	return Storage::getInstance().erasePages(CS_TYPE::EVT_MESH_PAGES_ERASED, startAddress, endAddress);
 }

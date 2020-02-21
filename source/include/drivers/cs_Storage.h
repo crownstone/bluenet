@@ -251,6 +251,20 @@ public:
 	cs_ret_code_t eraseAllPages();
 
 	/**
+	 * Erase flash pages.
+	 *
+	 * Must be called before storage is initialized.
+	 *
+	 * @param[in] doneEvent                 Type of event that should be sent when pages have been erased.
+	 * @param[in] startAddress              Address of first page to erase.
+	 * @param[in] endAddress                Address of first page __not__ to erase.
+	 *
+	 * @retval ERR_SUCCESS                  When successfully started erasing all pages.
+	 * @retval ERR_NOT_AVAILABLE            When you can't use this function (storage initialized already).
+	 */
+	cs_ret_code_t erasePages(const CS_TYPE doneEvent, void * startAddress, void * endAddress);
+
+	/**
 	 * Allocate ram that is correctly aligned and padded.
 	 *
 	 * @param[in,out] size        Requested size, afterwards set to the allocated size.
@@ -304,6 +318,8 @@ private:
 	 * Page that should _not_ be erased. Used by eraseAllPages().
 	 */
 	uint32_t _eraseEndPage = 0;
+
+	CS_TYPE _eraseDoneEvent = CS_TYPE::CONFIG_DO_NOT_USE;
 
 	/**
 	 * Find next fileId for given recordKey.

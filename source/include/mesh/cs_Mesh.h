@@ -28,8 +28,23 @@ public:
 
 	/**
 	 * Init the mesh.
+	 *
+	 * @return ERR_SUCCESS             Initialized successfully.
+	 * @return ERR_WRONG_STATE         Flash pages should be erased.
 	 */
-	void init(const boards_config_t& board);
+	cs_ret_code_t init(const boards_config_t& board);
+
+	/**
+	 * Whether flash pages have valid data.
+	 *
+	 * If not, the pages should be erased.
+	 */
+	bool isFlashValid();
+
+	/**
+	 * Erase all flash pages used by the mesh for storage.
+	 */
+	cs_ret_code_t eraseAllPages();
 
 	/**
 	 * Start the mesh.
@@ -58,6 +73,8 @@ public:
 	 */
 	void advertise(IBeacon* ibeacon);
 
+	void startSync();
+
 	/**
 	 * Internal usage
 	 */
@@ -66,11 +83,15 @@ public:
 	}
 	void modelsInitCallback();
 
-	void handleEvent(event_t & event);
-
+	/**
+	 * Internal usage
+	 */
 	void factoryResetDone();
 
-	void startSync();
+	/**
+	 * Internal usage
+	 */
+	void handleEvent(event_t & event);
 
 private:
 	//! Constructor, singleton, thus made private
@@ -116,4 +137,7 @@ private:
 	 * @return false When nothing had to be requested, so everything is synced.
 	 */
 	bool requestSync();
+
+
+	void getFlashPages(void* & startAddress, void* & endAddress);
 };
