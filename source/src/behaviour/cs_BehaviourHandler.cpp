@@ -27,8 +27,8 @@
 
 #if BehaviourHandlerDebug == true
 #define LOGBehaviourHandler LOGd
-#define LOGBehaviourHandler_V LOGi
-#else 
+#define LOGBehaviourHandler_V LOGd
+#else
 #define LOGBehaviourHandler LOGnone
 #define LOGBehaviourHandler_V LOGnone
 #endif

@@ -10,6 +10,7 @@
 #include <common/cs_Types.h>
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
+#include <drivers/cs_Serial.h>
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
 #include <time/cs_Time.h>
