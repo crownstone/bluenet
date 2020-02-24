@@ -780,6 +780,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE} USES_TERMINAL
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
+			COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --sd-id $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip'" VERBATIM USES_TERMINAL
 			COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --sd-id $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip" VERBATIM USES_TERMINAL
 			COMMAND ${CMAKE_COMMAND} -E make_directory dfu
 			COMMAND ${CMAKE_COMMAND} -E copy all_dfu.zip dfu/${FIRMWARE_DFU_ZIP}
@@ -801,6 +802,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
+			COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip'" VERBATIM USES_TERMINAL
 			COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip" VERBATIM USES_TERMINAL
 			COMMAND ${CMAKE_COMMAND} -E make_directory dfu
 			COMMAND ${CMAKE_COMMAND} -E copy application_dfu.zip dfu/${APPLICATION_DFU_ZIP}
@@ -821,6 +823,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
+			COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip'" VERBATIM USES_TERMINAL
 			COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip" VERBATIM USES_TERMINAL
 			COMMAND ${CMAKE_COMMAND} -E make_directory dfu
 			COMMAND ${CMAKE_COMMAND} -E copy bootloader_dfu.zip dfu/${BOOTLOADER_DFU_ZIP}
