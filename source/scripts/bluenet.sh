@@ -271,6 +271,7 @@ upload_softdevice() {
 	cs_info "upload softdevice"
 	cd "$BLUENET_BUILD_DIR"
 	make write_softdevice
+	make write_mbr_param_address
 	checkError "Error uploading softdevice"
 }
 

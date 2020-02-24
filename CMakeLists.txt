@@ -242,7 +242,14 @@ if(CONFIG_DIR STREQUAL "release")
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${FACTORY_IMAGE_CONFIGURATION_FILE})
 	ENDIF()
 else()
-	MESSAGE(STATUS "Do not load configuration file for factory images yet (only enabled for release configurations)")
+	MESSAGE(STATUS "Load configuration file for factory images at ${FACTORY_IMAGE_CONFIGURATION_FILE}")
+	#	MESSAGE(STATUS "Do not load configuration file for factory images yet (only enabled for release configurations)")
+	#MESSAGE(WARNING "Load configuration file for non-release image at ${FACTORY_IMAGE_CONFIGURATION_FILE}")
+	load_configuration("${FACTORY_IMAGE_CONFIGURATION_FILE}" CMAKE_ARGS)
+		
+	IF(EXISTS ${FACTORY_IMAGE_CONFIGURATION_FILE})
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${FACTORY_IMAGE_CONFIGURATION_FILE})
+	ENDIF()
 endif()
 
 # For now only cross-compilation
@@ -339,6 +346,14 @@ ADD_CUSTOM_TARGET(write_softdevice
   DEPENDS bluenet
   COMMENT "Flashes softdevice to remote target board"
   )
+
+ADD_CUSTOM_TARGET(write_mbr_param_address
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write MBR param page address 0x0007E000 to UICR"
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND nrfjprog -f nrf52 --memwr 0x10001018 --val 0x0007E000 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+  COMMENT "Writes MBR param page address to UICR"
+  )
 		
 SET(DEFAULT_NRFJPROG_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
 SET(DEFAULT_NRFJPROG_READ_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH};-DINSTRUCTION:STRING=READ")
@@ -426,6 +441,11 @@ ADD_CUSTOM_TARGET(write_bootloader
 ADD_CUSTOM_TARGET(create_git_release
   COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release.cmake
   COMMENT "Create git release"
+  )
+
+ADD_CUSTOM_TARGET(create_git_release_bootloader
+  COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release_bootloader.cmake
+  COMMENT "Create git release for bootloader"
   )
 
 

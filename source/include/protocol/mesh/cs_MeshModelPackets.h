@@ -45,7 +45,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_STATE_TIME                = 2,  // Payload: cs_mesh_model_msg_time_t
 	CS_MESH_MODEL_TYPE_CMD_TIME                  = 3,  // Payload: cs_mesh_model_msg_time_t
 	CS_MESH_MODEL_TYPE_CMD_NOOP                  = 4,  // Payload: none
-	CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH          = 5,  // Payload: multi_switch_item_t
+	CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH          = 5,  // Payload: cs_mesh_model_msg_multi_switch_item_t
 //	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE_STATE      = 6,  // Payload: keep_alive_state_item_t
 //	CS_MESH_MODEL_TYPE_CMD_KEEP_ALIVE            = 7,  // Payload: none
 	CS_MESH_MODEL_TYPE_STATE_0                   = 8,  // Payload: cs_mesh_model_msg_state_0_t

@@ -2,10 +2,10 @@
 
 ## Bluenet
 
-The release process starts with updating version information.
+The release process starts with updating version information. The application version has to be bumped. This is an integer that is checked by the bootloader to make sure that the
+application is actually newer than the previous release.
 
-* Update the `VERSION` file in `source/VERSION` and `source/bootloader/VERSION`.
-* Commit all changes to github.
+* Update the `VERSION` file in `source/VERSION`.
 
 Then to create a release:
 
@@ -25,17 +25,10 @@ cmake -DCONFIG_DIR=release -DBOARD_TARGET=crownstone_3.0.1-RC0 -DCMAKE_BUILD_TYP
 make
 ```
 
-The application version has to be bumped. This is an integer that is checked by the bootloader to make sure that the
-application is actually newer.
-
-```
-cd crownstone_3.0.1-RC0
-make increment_application_version
-```
-
 Now we can start generating the DFU packages that will be released:
 
 ```
+cd crownstone_3.0.1-RC0
 make build_bootloader_settings
 make generate_dfu_package_all
 make generate_dfu_package_application
@@ -50,6 +43,7 @@ Don't forget to commit the release config:
 ```
 git add source/VERSION
 git add release/crownstone_3.0.1-RC0/CMakeBuild.config
+git commit -m "Added 3.0.1-RC0"
 git push
 ```
 
