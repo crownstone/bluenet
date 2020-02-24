@@ -31,6 +31,7 @@ Now we can start generating the DFU packages that will be released:
 
 ```
 cd bootloader_2.0.1-RC0
+make generate_dfu_package_all
 make generate_dfu_package_bootloader
 make install
 ```
