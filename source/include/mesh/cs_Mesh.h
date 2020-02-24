@@ -133,10 +133,12 @@ private:
 	 * Assumes all event handlers that are interested in obtaining data are registered
 	 * with the event dispatcher.
 	 *
-	 * @return true  When request was sent.
+	 * @param [propagateSyncMessageOverMesh] if set to false no mesh messages will be sent. (Use this internally to check if device is synced.)
+	 * 
+	 * @return true  When request was necessary. If propagateSyncMessageOverMesh is true, a mesh message will be sent to resolve the sync.
 	 * @return false When nothing had to be requested, so everything is synced.
 	 */
-	bool requestSync();
+	bool requestSync(bool propagateSyncMessageOverMesh = true);
 
 
 	void getFlashPages(void* & startAddress, void* & endAddress);
