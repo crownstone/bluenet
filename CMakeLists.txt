@@ -428,6 +428,11 @@ ADD_CUSTOM_TARGET(create_git_release
   COMMENT "Create git release"
   )
 
+ADD_CUSTOM_TARGET(create_git_release_bootloader
+  COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release_bootloader.cmake
+  COMMENT "Create git release for bootloader"
+  )
+
 
 #######################################################################################################################
 # Some more utility functions

@@ -840,7 +840,7 @@ ELSE()
 
 
 		IF(EXISTS ${RELEASE_REPOSITORY_DIRECTORY} )
-			MESSAGE(STATUS "Already released... No copy_to_release_repository target available")
+			MESSAGE(STATUS "Already released... No create_release_in_repository target available")
 		ELSE()
 
 			ADD_CUSTOM_TARGET(create_release_in_repository
@@ -858,6 +858,35 @@ ELSE()
 					COMMAND ${CMAKE_COMMAND} -E echo "   Copy release config file from ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}"
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY}/config
 					COMMAND ${CMAKE_COMMAND} -E copy ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config ${RELEASE_REPOSITORY_DIRECTORY}/config
+					COMMENT "Copy all generated files to release repository"
+					)
+		ENDIF()
+
+		IF(NOT DEFINED BOOTLOADER_RC_VERSION OR "${BOOTLOADER_RC_VERSION}" STREQUAL "") 
+			SET(RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER "${RELEASE_REPOSITORY}/bootloaders/crownstone_${BOOTLOADER_VERSION}")
+		ELSE()
+			SET(RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER "${RELEASE_CANDIDATE_REPOSITORY}/bootloaders/crownstone_${BOOTLOADER_VERSION}")
+		ENDIF()
+
+
+		IF(EXISTS ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER} )
+			MESSAGE(STATUS "Already released... No create_bootloader_release_in_repository target available")
+		ELSE()
+
+			ADD_CUSTOM_TARGET(create_bootloader_release_in_repository
+					COMMAND ${CMAKE_COMMAND} -E echo
+					COMMAND ${CMAKE_COMMAND} -E echo "** Copy to release repository \"${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}\""
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY}/bin
+					COMMAND ${CMAKE_COMMAND} -E echo "   Copy from ${CMAKE_BINARY_DIR}"
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/bootloader*.zip ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/bootloader*.zip.sha1 ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin/bootloader-settings.hex
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader.elf ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader.hex ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin/softdevice.hex
+					COMMAND ${CMAKE_COMMAND} -E echo "   Copy release config file from ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}"
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/config
+					COMMAND ${CMAKE_COMMAND} -E copy ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/config
 					COMMENT "Copy all generated files to release repository"
 					)
 		ENDIF()
