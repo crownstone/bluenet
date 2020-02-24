@@ -339,6 +339,14 @@ ADD_CUSTOM_TARGET(write_softdevice
   DEPENDS bluenet
   COMMENT "Flashes softdevice to remote target board"
   )
+
+ADD_CUSTOM_TARGET(write_mbr_param_address
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write MBR param page address 0x0007E000 to UICR"
+  COMMAND ${CMAKE_COMMAND} -E echo
+  COMMAND nrfjprog -f nrf52 --memwr 0x10001018 --val 0x0007E000 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+  COMMENT "Writes MBR param page address to UICR"
+  )
 		
 SET(DEFAULT_NRFJPROG_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
 SET(DEFAULT_NRFJPROG_READ_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH};-DINSTRUCTION:STRING=READ")
