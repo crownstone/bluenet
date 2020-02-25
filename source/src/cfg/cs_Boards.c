@@ -425,6 +425,9 @@ void asACR01B10C(boards_config_t* p_config) {
 
 	// See https://en.wikipedia.org/wiki/Thermistor#B_or_%CE%B2_parameter_equation B=3380, T0=25, R0=10000
 	// Python: temp=82; r=10000*math.exp(3380*(1/(temp+273.15)-1/(25+273.15))); 3.3/(16000+r)*r
+	//
+	// Here R_temp is not 16k, but 18k. Hence, 76 degrees = 0.31645 and 82 degrees = 0.27265 V.
+	//
 //	p_config->pwmTempVoltageThreshold            = 0.7;  // About 50 degrees C
 //	p_config->pwmTempVoltageThreshold            = 0.4;  // About 70 degrees C
 	p_config->pwmTempVoltageThreshold            = 0.35; // About 76 degrees C
@@ -546,7 +549,17 @@ void asACR01B2G(boards_config_t* p_config) {
  * *******************************************************************************************************************/
 
 /*
- * Very important for first prototype, make sure 19 is floating (not listed here). It is a short to another pin.
+ * Make sure that pin 19 is floating (not listed here). It is a short to another pin. The pin for the dimmer is
+ * accidentally connected to a non-connected pin (A18). It has been patched to pin LED red on pin 8.
+ *
+ * Temperature is set according to:
+ *   R_temp = 15000
+ *   R_ntc  = 0.119286 * exp(3380/(T + 273.15))
+ *   V_temp = 3.3/(R_temp/R_ntc+1)
+ *  
+ * We want to trigger between 76 < T < 82 degrees Celcius.
+ *
+ * Hence, 0.32186 < V_temp < 0.37259 in an inverted fashion (higher voltage means cooler).
  */
 void asACR01B11A(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
@@ -591,8 +604,8 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->voltageRange                       = 1200;         // unknown
 	p_config->currentRange                       = 600;          // unknown
 
-	p_config->pwmTempVoltageThreshold            = 0.7;          // unknown
-	p_config->pwmTempVoltageThresholdDown        = 0.25;         // unknown
+	p_config->pwmTempVoltageThreshold            = 0.37259;
+	p_config->pwmTempVoltageThresholdDown        = 0.32186;
 
 	p_config->minTxPower                         = -20;          // unknown
 
