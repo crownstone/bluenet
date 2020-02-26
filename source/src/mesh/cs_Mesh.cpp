@@ -620,10 +620,19 @@ void Mesh::handleEvent(event_t & event) {
 			}
 			if (_syncFailedCountdown) {
 				if (--_syncFailedCountdown == 0) {
-					LOGw("Sync failed");
-					_synced = true;
-					event_t syncFailEvent(CS_TYPE::EVT_MESH_SYNC_FAILED);
-					syncFailEvent.dispatch();
+					// Do one last check, internally to see if the previous requestSync succeeded.
+					// but don't send anything over the mesh. Our chance has passed.
+					_synced = !requestSync(false);
+
+					if(!_synced){
+						LOGw("Sync failed");
+						event_t syncFailEvent(CS_TYPE::EVT_MESH_SYNC_FAILED);
+						syncFailEvent.dispatch();
+
+						// yes, we know that sync failed, we're just misusing the _synced variable.
+						// (setting it to true will prevent any further sync requests.)
+						_synced = true;
+					}
 				}
 			}
 		}
@@ -722,7 +731,7 @@ void Mesh::startSync() {
 	_syncFailedCountdown = MESH_SYNC_GIVE_UP_MS / TICK_INTERVAL_MS;
 }
 
-bool Mesh::requestSync() {
+bool Mesh::requestSync(bool propagateSyncMessageOverMesh) {
 //	while (SystemTime::up() < 5) {
 //		// LOGMeshInfo("Mesh::requestSync: nope");
 //		return false;
@@ -736,8 +745,10 @@ bool Mesh::requestSync() {
 
 	LOGMeshInfo("requestSync bitmask=%u", syncRequest.bitmask);
 
-	if (syncRequest.bitmask == 0) {
-		return false;
+	if (syncRequest.bitmask == 0 || !propagateSyncMessageOverMesh){
+		// bitmask == 0 implies sync is unnecessary 
+		// propagateSyncMessageOverMesh==false implies we return here, before contacting the mesh.
+		return syncRequest.bitmask != 0;
 	}
 
 	// Make sure that event data type is equal to mesh msg type.
