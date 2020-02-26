@@ -5,23 +5,23 @@
  */
 #pragma once
 
-extern "C" {
-#include <util/cs_Syscalls.h>
-}
 
 #ifdef	NDEBUG
-
 //! for release version ignore asserts
-#define assert(expr, ...) \
+#define assert(expr, message) \
 	if (!(expr)) { \
-		LOGe("%s", __VA_ARGS__); \
+		LOGe("%s", message); \
 	}
 
 #else
 
-#define assert(expr, ...) \
+extern "C" {
+#include <util/cs_Syscalls.h>
+}
+
+#define assert(expr, message) \
 	if (!(expr)) { \
-		LOGe("%s", __VA_ARGS__); \
+		LOGe("%s", message); \
 		_exit(1); \
 	}
 

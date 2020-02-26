@@ -373,7 +373,8 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 		LOGStateDebug("Update in RAM");
 		cs_state_data_t & ram_data = _ram_data_register[index_in_ram];
 		if (ram_data.size != data.size) {
-			assert(false,"Should not happen: ram_data.size=%u data.size=%u", ram_data.size, data.size);
+			LOGe("Should not happen: ram_data.size=%u data.size=%u", ram_data.size, data.size);
+			assert(false,"See last error message");
 			
 			free(ram_data.value);
 			ram_data.size = data.size;
