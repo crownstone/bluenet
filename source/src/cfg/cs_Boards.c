@@ -552,14 +552,29 @@ void asACR01B2G(boards_config_t* p_config) {
  * Make sure that pin 19 is floating (not listed here). It is a short to another pin. The pin for the dimmer is
  * accidentally connected to a non-connected pin (A18). It has been patched to pin LED red on pin 8.
  *
+ * Warning!! The pinAin values are NOT the PX.X numbers! Those are the AINX pins.
+ *
  * Temperature is set according to:
- *   R_temp = 15000
- *   R_ntc  = 0.119286 * exp(3380/(T + 273.15))
- *   V_temp = 3.3/(R_temp/R_ntc+1)
+ *   T_0    = 25 (room temperature)
+ *   R_0    = 10000 (from datasheet, 10k at 25 degrees Celcius)
+ *   B_ntc  = 3434 K (from datasheet of NCP15XH103J03RC at 25/85 degrees Celcius)
+ *   R_22   = 15000
+ *   R_ntc  = R_0 * exp(B_ntc * (1/(T+273.15) + 1/(T_0+273.15)))
+ *   V_temp = 3.3 * R_ntc/(R_22+R_ntc)
  *  
  * We want to trigger between 76 < T < 82 degrees Celcius.
  *
- * Hence, 0.32186 < V_temp < 0.37259 in an inverted fashion (higher voltage means cooler).
+ * |  T | R_ntc | V_temp |
+ * | -- | ----  | ------ |
+ * | 25 | 10000 | 1.32   | 
+ * | 76 |  1859 | 0.3639 |
+ * | 82 |  1575 | 0.3135 | 
+ *
+ * Hence, 0.3135 < V_temp < 0.3639 in an inverted fashion (higher voltage means cooler).
+ *
+ * The voltage range with R10 = 36.5k and R6 = 10M (C9 neglectable) is 0.0365/(0.0365+10)*680 = 2.47V. Thus it is 
+ * 1.24V each way. A range of 1300 would be fine. Then 1240 would correspond to 240V RMS. Hence, the voltage 
+ * multiplier (from ADC values to volts RMS) is 0.19355.
  */
 void asACR01B11A(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
@@ -567,13 +582,16 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->pinGpioRelayOn                     = 15;
 	p_config->pinGpioRelayOff                    = 13;
 
-	p_config->pinAinCurrentGainLow               = 2;
-	p_config->pinAinCurrentGainHigh              = 3;
-	p_config->pinAinVoltageGainLow               = 31;
-	p_config->pinAinVoltageGainHigh              = 29;
+	p_config->pinAinCurrentGainLow               = 0; // GPIO 0.02
+	p_config->pinAinCurrentGainHigh              = 1; // GPIO 0.03
+	p_config->pinAinVoltageGainLow               = 7; // GPIO 0.31
+	p_config->pinAinVoltageGainHigh              = 5; // GPIO 0.29
 	
-	p_config->pinAinZeroRef	                     = 5;
-	p_config->pinAinPwmTemp                      = 4;
+	p_config->pinAinVoltage                      = 7; // default
+	
+	p_config->pinAinZeroRef	                     = 3; // GPIO 0.05
+	p_config->pinAinPwmTemp                      = 2; // GPIO 0.04
+
 	p_config->pinGpioRx                          = 22; 
 	p_config->pinGpioTx                          = 20;
 	
@@ -591,21 +609,21 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->flags.hasLed                       = false; // not placed
 	p_config->flags.ledInverted                  = false; // not placed
 	p_config->flags.hasAdcZeroRef                = true;
-	p_config->flags.pwmTempInverted              = true;
+	p_config->flags.pwmTempInverted              = true; 
 
 	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG_ONE;
 
-	p_config->voltageMultiplier                  = 0.171f;       // unknown
+	p_config->voltageMultiplier                  = 0.19355f;     // unknown
 	p_config->currentMultiplier                  = 0.00385f;     // unknown
-	p_config->voltageZero                        = -99;          // unknown
+	p_config->voltageZero                        = 0;            // unknown
 	p_config->currentZero                        = -270;         // unknown
 	p_config->powerZero                          = 9000;         // unknown
 
-	p_config->voltageRange                       = 1200;         // unknown
+	p_config->voltageRange                       = 1300;
 	p_config->currentRange                       = 600;          // unknown
 
-	p_config->pwmTempVoltageThreshold            = 0.37259;
-	p_config->pwmTempVoltageThresholdDown        = 0.32186;
+	p_config->pwmTempVoltageThreshold            = 0.3639;
+	p_config->pwmTempVoltageThresholdDown        = 0.3135;
 
 	p_config->minTxPower                         = -20;          // unknown
 
