@@ -894,80 +894,7 @@ ELSE()
 					)
 		ENDIF()
 
-	    # We can not use math(EXPR ...) because it does not have support for unsigned integers and older cmake versions 
-		# do not support hexadecimal values either
-		if(NOT ${PRODUCT_FAMILY} STREQUAL "" AND NOT ${PRODUCT_MARKET} STREQUAL "" AND NOT ${PRODUCT_TYPE} STREQUAL "")
-			from_hex(${PRODUCT_FAMILY} PRODUCT_FAMILY_DEC)
-			from_hex(${PRODUCT_MARKET} PRODUCT_MARKET_DEC)
-			from_hex(${PRODUCT_TYPE} PRODUCT_TYPE_DEC)
-			to_hex_raw(${PRODUCT_FAMILY_DEC} PRODUCT_FAMILY_HEX 2 "")
-			to_hex_raw(${PRODUCT_MARKET_DEC} PRODUCT_MARKET_HEX 2 "")
-			to_hex_raw(${PRODUCT_TYPE_DEC} PRODUCT_TYPE_HEX 2 "")
-			set(PRODUCT_FAMILY_TYPE "${PRODUCT_FAMILY_HEX}${PRODUCT_MARKET_HEX}${PRODUCT_TYPE_HEX}")
-			fill(${PRODUCT_FAMILY_TYPE} PRODUCT_FAMILY_TYPE 8 "F" "0x")
-		endif()
-		
-		if(NOT ${PRODUCT_MAJOR} STREQUAL "" AND NOT ${PRODUCT_MINOR} STREQUAL "" AND NOT ${PRODUCT_PATCH} STREQUAL "")
-			from_hex(${PRODUCT_MAJOR} PRODUCT_MAJOR_DEC)
-			from_hex(${PRODUCT_MINOR} PRODUCT_MINOR_DEC)
-			from_hex(${PRODUCT_PATCH} PRODUCT_PATCH_DEC)
-			to_hex_raw(${PRODUCT_MAJOR_DEC} PRODUCT_MAJOR_HEX 2 "")
-			to_hex_raw(${PRODUCT_MINOR_DEC} PRODUCT_MINOR_HEX 2 "")
-			to_hex_raw(${PRODUCT_PATCH_DEC} PRODUCT_PATCH_HEX 2 "")
-			set(MAJOR_MINOR_PATCH "${PRODUCT_MAJOR_HEX}${PRODUCT_MINOR_HEX}${PRODUCT_PATCH_HEX}")
-			fill(${MAJOR_MINOR_PATCH} MAJOR_MINOR_PATCH 8 "F" "0x")
-		endif()
-		
-		if(NOT ${PRODUCTION_YEAR} STREQUAL "" AND NOT ${PRODUCTION_WEEK} STREQUAL "" AND NOT ${PRODUCT_HOUSING} STREQUAL "")
-			from_hex(${PRODUCT_HOUSING} PRODUCT_HOUSING_DEC)
-			to_hex_raw(${PRODUCT_HOUSING_DEC} PRODUCT_HOUSING_HEX 2 "")
 
-			fill(${PRODUCTION_YEAR} PRODUCTION_YEAR_DEC 2 "0" "")
-			fill(${PRODUCTION_WEEK} PRODUCTION_WEEK_DEC 2 "0" "")
-
-			set(PRODUCTION_RUN_HOUSING "${PRODUCTION_YEAR_DEC}${PRODUCTION_WEEK_DEC}${PRODUCT_HOUSING_HEX}")
-			fill(${PRODUCTION_RUN_HOUSING} PRODUCTION_RUN_HOUSING 8 "F" "0x")
-		endif()
-	
-		set(SREC_CAT_UICR_BOOTLOADER        "-exclude;0x10001014;0x10001018;-generate;0x10001014;0x10001018;-l-e-constant;${UICR_BOOTLOADER_ADDRESS};4")
-		set(SREC_CAT_MBR_SETTINGS           "-exclude;0x10001018;0x1000101C;-generate;0x10001018;0x1000101C;-l-e-constant;${MBR_SETTINGS};4")
-		set(SREC_CAT_HARDWARE_BOARD         "-exclude;0x10001084;0x10001088;-generate;0x10001084;0x10001088;-l-e-constant;${HARDWARE_BOARD_HEX};4")
-		set(SREC_CAT_PRODUCT_FAMILY_TYPE    "-exclude;0x10001088;0x1000108C;-generate;0x10001088;0x1000108C;-l-e-constant;${PRODUCT_FAMILY_TYPE};4")
-		set(SREC_CAT_MAJOR_MINOR_PATCH      "-exclude;0x1000108C;0x10001090;-generate;0x1000108C;0x10001090;-l-e-constant;${MAJOR_MINOR_PATCH};4")
-		set(SREC_CAT_PRODUCTION_RUN_HOUSING "-exclude;0x10001090;0x10001094;-generate;0x10001090;0x10001094;-l-e-constant;${PRODUCTION_RUN_HOUSING};4")
-
-		ADD_CUSTOM_TARGET(generate_factory_image
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Create factory images"
-			COMMAND ${CMAKE_COMMAND} -E echo "     MBR_SETTINGS: ${MBR_SETTINGS}"
-			COMMAND ${CMAKE_COMMAND} -E echo "     UICR_BOOTLOADER_ADDRESS: ${UICR_BOOTLOADER_ADDRESS}"
-			COMMAND ${CMAKE_COMMAND} -E echo "     BOARD_HARDWARE_VERSION: ${HARDWARE_BOARD_HEX}"
-			COMMAND ${CMAKE_COMMAND} -E echo "     PRODUCT_FAMILY_TYPE: ${PRODUCT_FAMILY_TYPE}"
-			COMMAND ${CMAKE_COMMAND} -E echo "     MAJOR_MINOR_PATCH: ${MAJOR_MINOR_PATCH}"
-			COMMAND ${CMAKE_COMMAND} -E echo "     PRODUCTION_RUN_HOUSING: ${PRODUCTION_RUN_HOUSING}"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Image to be created: ${PROJECT_NAME}${IMAGE_FILENAME_POSTFIX}.hex"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND test -z "${MBR_SETTINGS}" && echo "No MBR_SETTINGS set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -z "${UICR_BOOTLOADER_ADDRESS}" && echo "No UICR_BOOTLOADER_ADDRESS set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -z "${HARDWARE_BOARD_HEX}" && echo "No HARDWARE_BOARD_HEX set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -z "${PRODUCT_FAMILY_TYPE}" && echo "No PRODUCT_FAMILY_TYPE set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -z "${MAJOR_MINOR_PATCH}" && echo "No MAJOR_MINOR_PATCH set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -z "${PRODUCTION_RUN_HOUSING}" && echo "No PRODUCTION_RUN_HOUSING set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -f "${CMAKE_BINARY_DIR}/bootloader/bootloader.hex" && exit 0 || echo "No bootloader.hex found. Did you compile it and run 'make install'?" && echo && exit 1 
-			COMMAND test -f "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" && exit 0 || echo "No bootloader_settings.hex found. Did you generate it with: make build_bootloader_settings?" && echo && exit 1 
-			COMMAND test -f "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" && exit 0 || echo "No ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} found." && echo && exit 1 
-			COMMAND ${CMAKE_COMMAND} -E echo "Use srec_cat to create a factory image"
-			COMMAND ${CMAKE_COMMAND} -E make_directory factory-images
-			COMMAND srec_cat ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD_HEX} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex -intel ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex -intel ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} -intel -o factory-images/${PROJECT_NAME}${IMAGE_FILENAME_POSTFIX}.hex -intel
-			COMMENT "Generate a factory image"
-			)
-
-
-		if(NOT EXISTS ${CMAKE_BINARY_DIR}/factory-images)
-			message(STATUS "Create directory \"factory-images\"")
-			file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/factory-images)
-		endif()
 
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.elf)
@@ -993,7 +920,7 @@ ELSE()
 		ENDIF()
 		INSTALL(FILES "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" DESTINATION .)
 		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/dfu"       DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
-		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/factory-images"  DESTINATION . FILES_MATCHING PATTERN "*")
+		#INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/factory-images"  DESTINATION . FILES_MATCHING PATTERN "*")
 	ENDIF()
 
 ENDIF()
