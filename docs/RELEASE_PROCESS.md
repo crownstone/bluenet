@@ -116,12 +116,11 @@ HARDWARE_PATCH=
 Now we can build for this particular target, where we use one additional flag, namely `FACTORY_IMAGE`:
 
 ```
-cmake -DCONFIG_DIR=release -DBOARD_TARGET=crownstone_3.0.2-RC0 -DFACTORY_IMAGE=builtin-one -DCMAKE_BUILD_TYPE=Release ..
+cd build
+cmake -DFACTORY_IMAGE=1 -DFACTORY_IMAGE_SOFTWARE_CONFIG=firmware-4.0.0_bootloader-2.0.0 -DFACTORY_IMAGE_HARDWARE_CONFIG=plug-zero-1B2G-patch-3 ..
 ```
 
-We build in the usual way with `make` if we haven't done this before.
-
-Now, to create the factory image, we run:
+Then, to create the factory image, we run:
 
 ```
 make generate_factory_image
