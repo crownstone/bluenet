@@ -234,13 +234,20 @@ load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
 
 if(FACTORY_IMAGE)
 	MESSAGE(WARNING "Making factory image, this will overwrite your config.")
-	set(FACTORY_IMAGE_CONFIGURATION_FILE ${WORKSPACE_DIR}/factory-images/${FACTORY_IMAGE}/CMakeFactoryImage.config)
+	set(FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE ${WORKSPACE_DIR}/factory-images/hardware/${FACTORY_IMAGE_HARDWARE_CONFIG}/CMakeFactoryImage.config)
+	set(FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE ${WORKSPACE_DIR}/factory-images/software/${FACTORY_IMAGE_SOFTWARE_CONFIG}/CMakeFactoryImage.config)
 
-	MESSAGE(STATUS "Load configuration file for factory images at ${FACTORY_IMAGE_CONFIGURATION_FILE}")
-	load_configuration("${FACTORY_IMAGE_CONFIGURATION_FILE}" CMAKE_ARGS)
+	MESSAGE(STATUS "Load hardware configuration file for factory image at ${FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE}")
+	load_configuration("${FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE}" CMAKE_ARGS)
+
+	MESSAGE(STATUS "Load software configuration file for factory image at ${FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE}")
+	load_configuration("${FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE}" CMAKE_ARGS)
 		
-	IF(EXISTS ${FACTORY_IMAGE_CONFIGURATION_FILE})
-		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${FACTORY_IMAGE_CONFIGURATION_FILE})
+	IF(EXISTS ${FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE})
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE})
+	ENDIF()
+	IF(EXISTS ${FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE})
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE})
 	ENDIF()
 endif()
 
@@ -486,6 +493,14 @@ ADD_CUSTOM_TARGET(nrfconnect_programmer
 # do not support hexadecimal values either
 if(FACTORY_IMAGE)
 	include(${DEFAULT_MODULES_PATH}/hex.cmake)
+	include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
+
+	message(STATUS "Get version for hardware \"${HARDWARE_BOARD}\"")
+	load_hardware_version(${CMAKE_SOURCE_DIR}/source/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
+	message(STATUS "Got ${LOAD_BOARD_HARDWARE_VERSION}")
+	to_hex_raw(${LOAD_BOARD_HARDWARE_VERSION} HARDWARE_BOARD_HEX 8 "0x")
+	message(STATUS "Hexadecimal ${HARDWARE_BOARD_HEX}")
+
 	if(NOT ${PRODUCT_FAMILY} STREQUAL "" AND NOT ${PRODUCT_MARKET} STREQUAL "" AND NOT ${PRODUCT_TYPE} STREQUAL "")
 		from_hex(${PRODUCT_FAMILY} PRODUCT_FAMILY_DEC)
 		from_hex(${PRODUCT_MARKET} PRODUCT_MARKET_DEC)
@@ -528,6 +543,8 @@ if(FACTORY_IMAGE)
 
 	string(TIMESTAMP FACTORY_IMAGE_TIMESTAMP "%Y-%U")
 
+	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "${FACTORY_IMAGE_SOFTWARE_NAME}_${FACTORY_IMAGE_HARDWARE_NAME}_${FACTORY_IMAGE_TIMESTAMP}.hex")
+
 	ADD_CUSTOM_TARGET(generate_factory_image
 		COMMAND ${CMAKE_COMMAND} -E echo
 		COMMAND ${CMAKE_COMMAND} -E echo "** Create factory images"
@@ -538,7 +555,7 @@ if(FACTORY_IMAGE)
 		COMMAND ${CMAKE_COMMAND} -E echo "     MAJOR_MINOR_PATCH: ${MAJOR_MINOR_PATCH}"
 		COMMAND ${CMAKE_COMMAND} -E echo "     PRODUCTION_RUN_HOUSING: ${PRODUCTION_RUN_HOUSING}"
 		COMMAND ${CMAKE_COMMAND} -E echo
-		COMMAND ${CMAKE_COMMAND} -E echo "** Image to be created: ${PROJECT_NAME}${IMAGE_FILENAME_POSTFIX}.hex"
+		COMMAND ${CMAKE_COMMAND} -E echo "** Image to be created: ${FACTORY_IMAGE_OUTPUT_FILE_NAME}"
 		COMMAND ${CMAKE_COMMAND} -E echo
 		COMMAND test -z "${MBR_SETTINGS}" && echo "No MBR_SETTINGS set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
 		COMMAND test -z "${UICR_BOOTLOADER_ADDRESS}" && echo "No UICR_BOOTLOADER_ADDRESS set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
@@ -546,12 +563,14 @@ if(FACTORY_IMAGE)
 		COMMAND test -z "${PRODUCT_FAMILY_TYPE}" && echo "No PRODUCT_FAMILY_TYPE set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
 		COMMAND test -z "${MAJOR_MINOR_PATCH}" && echo "No MAJOR_MINOR_PATCH set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
 		COMMAND test -z "${PRODUCTION_RUN_HOUSING}" && echo "No PRODUCTION_RUN_HOUSING set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-		COMMAND test -f "${CMAKE_BINARY_DIR}/bootloader/bootloader.hex" && exit 0 || echo "No bootloader.hex found. Did you compile it and run 'make install'?" && echo && exit 1 
-		COMMAND test -f "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" && exit 0 || echo "No bootloader_settings.hex found. Did you generate it with: make build_bootloader_settings?" && echo && exit 1 
-		COMMAND test -f "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" && exit 0 || echo "No ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} found." && echo && exit 1 
+		COMMAND test -f "${FACTORY_IMAGE_APPLICATION_HEX_FILE}" && exit 0 || echo "Application missing. No such file: ${FACTORY_IMAGE_APPLICATION_HEX_FILE}" && echo && exit 1
+		COMMAND test -f "${FACTORY_IMAGE_BOOTLOADER_HEX_FILE}" && exit 0 || echo "Bootloader missing. No such file: ${FACTORY_IMAGE_BOOTLOADER_HEX_FILE}" && echo && exit 1
+		COMMAND test -f "${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" && exit 0 || echo "Bootloader settings missing. No such file: ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" && echo && exit 1
+		COMMAND test -f "${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE}" && exit 0 || echo "Softdevice missing. No such file: ${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE}" && echo && exit 1
 		COMMAND ${CMAKE_COMMAND} -E echo "Use srec_cat to create a factory image"
 		COMMAND ${CMAKE_COMMAND} -E make_directory factory-images
-		COMMAND srec_cat ${FACTORY_IMAGE_APPLICATION_HEX_FILE} -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD_HEX} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${FACTORY_IMAGE_BOOTLOADER_HEX_FILE} -intel ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE} -intel ${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE} -intel -o factory-images/${FACTORY_IMAGE_APPLICATION_NAME}_${FACTORY_IMAGE_BOOTLOADER_NAME}_${FACTORY_IMAGE_TIMESTAMP}_${IMAGE_FILENAME_POSTFIX}.hex -intel
+		COMMAND echo 'srec_cat ${FACTORY_IMAGE_APPLICATION_HEX_FILE} -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${FACTORY_IMAGE_BOOTLOADER_HEX_FILE} -intel ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE} -intel ${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE} -intel -o factory-images/${FACTORY_IMAGE_OUTPUT_FILE_NAME} -intel'
+		COMMAND srec_cat ${FACTORY_IMAGE_APPLICATION_HEX_FILE} -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${FACTORY_IMAGE_BOOTLOADER_HEX_FILE} -intel ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE} -intel ${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE} -intel -o factory-images/${FACTORY_IMAGE_OUTPUT_FILE_NAME} -intel
 		COMMENT "Generate a factory image"
 		)
 
@@ -559,6 +578,8 @@ if(FACTORY_IMAGE)
 		message(STATUS "Create directory \"factory-images\"")
 		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/factory-images)
 	endif()
+
+	#INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/factory-images" DESTINATION . FILES_MATCHING PATTERN "*")
 endif()
 
 
