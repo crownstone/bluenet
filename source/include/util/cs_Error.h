@@ -12,16 +12,16 @@ extern "C" {
 #ifdef	NDEBUG
 
 //! for release version ignore asserts
-#define assert(expr, message) \
+#define assert(expr, ...) \
 	if (!(expr)) { \
-		LOGe("%s", message); \
+		LOGe("%s", __VA_ARGS__); \
 	}
 
 #else
 
-#define assert(expr, message) \
+#define assert(expr, ...) \
 	if (!(expr)) { \
-		LOGe("%s", message); \
+		LOGe("%s", __VA_ARGS__); \
 		_exit(1); \
 	}
 
