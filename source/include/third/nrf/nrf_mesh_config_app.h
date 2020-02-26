@@ -77,9 +77,17 @@
 /**
  * Enable persistent storage.
  */
+#if MESH_PERSISTENT_STORAGE == 1
 #define PERSISTENT_STORAGE 1
+#else
+#define PERSISTENT_STORAGE 0
+#endif
 
-
+#if MESH_PERSISTENT_STORAGE == 2
+#define MESH_EXTERNAL_PERSISTENT_STORAGE 1
+#else
+#define MESH_EXTERNAL_PERSISTENT_STORAGE 0
+#endif
 
 /** Device company identifier. */
 #define DEVICE_COMPANY_ID (CROWNSTONE_COMPANY_ID)

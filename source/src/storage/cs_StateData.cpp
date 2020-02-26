@@ -214,6 +214,13 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_BEHAVIOUR_SETTINGS:
 		reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(data.value)->asInt = STATE_BEHAVIOUR_SETTINGS_DEFAULT;
 		return ERR_SUCCESS;
+	case CS_TYPE::STATE_MESH_IV_INDEX:
+		reinterpret_cast<TYPIFY(STATE_MESH_IV_INDEX)*>(data.value)->iv_index = STATE_MESH_IV_INDEX_DEFAULT;
+		reinterpret_cast<TYPIFY(STATE_MESH_IV_INDEX)*>(data.value)->iv_update_in_progress = STATE_MESH_IV_STATUS_DEFAULT;
+		return ERR_SUCCESS;
+	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
+		*reinterpret_cast<TYPIFY(STATE_MESH_SEQ_NUMBER)*>(data.value) = STATE_MESH_SEQ_NUMBER_DEFAULT;
+		return ERR_SUCCESS;
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
@@ -369,6 +376,8 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE:
 	case CS_TYPE::STATE_BEHAVIOUR_SETTINGS:
 	case CS_TYPE::STATE_SUN_TIME:
+	case CS_TYPE::STATE_MESH_IV_INDEX:
+	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
 		return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:

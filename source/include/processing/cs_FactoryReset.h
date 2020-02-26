@@ -14,7 +14,7 @@
 // All the classes that are expected to factory reset.
 enum FactoryResetClassBit {
 	FACTORY_RESET_BIT_STATE = 0,
-#if BUILD_MESHING == 1
+#if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 	FACTORY_RESET_BIT_MESH,
 #endif
 	FACTORY_RESET_NUM_BITS

@@ -229,6 +229,14 @@ struct __attribute__((packed)) register_tracked_device_packet_t {
 
 typedef register_tracked_device_packet_t update_tracked_device_packet_t;
 
+struct cs_mesh_iv_index_t {
+	// Same as net_flash_data_iv_index_t
+    uint32_t iv_index;
+    uint8_t iv_update_in_progress;
+};
+
+typedef uint32_t cs_mesh_seq_number_t;
+
 
 // ========================= functions =========================
 

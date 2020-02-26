@@ -139,9 +139,11 @@ ADD_DEFINITIONS("-DATTR_TABLE_SIZE=${ATTR_TABLE_SIZE}")
 # Add encryption
 ADD_DEFINITIONS("-DENCRYPTION=${ENCRYPTION}")
 
+# Add mesh settings
 ADD_DEFINITIONS("-DMESHING=${MESHING}")
 ADD_DEFINITIONS("-DBUILD_MESHING=${BUILD_MESHING}")
 ADD_DEFINITIONS("-DMESH_SCANNER=${MESH_SCANNER}")
+ADD_DEFINITIONS("-DMESH_PERSISTENT_STORAGE=${MESH_PERSISTENT_STORAGE}")
 
 # Add iBeacon default values
 ADD_DEFINITIONS("-DIBEACON=${IBEACON}")
@@ -209,6 +211,7 @@ SET(ENCRYPTION                                  "${ENCRYPTION}"                 
 SET(MESHING                                     "${MESHING}"                        CACHE STRING "MESHING" FORCE)
 SET(BUILD_MESHING                               "${BUILD_MESHING}"                  CACHE STRING "BUILD_MESHING" FORCE)
 SET(MESH_SCANNER                                "${MESH_SCANNER}"                   CACHE STRING "MESH_SCANNER" FORCE)
+SET(MESH_PERSISTENT_STORAGE                     "${MESH_PERSISTENT_STORAGE}"        CACHE STRING "MESH_PERSISTENT_STORAGE" FORCE)
 
 # Add iBeacon default values
 SET(IBEACON                                     "${IBEACON}"                        CACHE STRING "IBEACON" FORCE)

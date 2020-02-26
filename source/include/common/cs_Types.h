@@ -154,6 +154,8 @@ enum class CS_TYPE: uint16_t {
 //	STATE_ERROR_DIMMER_OFF_FAILURE,
 	STATE_SUN_TIME                          = 149,
 	STATE_BEHAVIOUR_SETTINGS                = 150,
+	STATE_MESH_IV_INDEX                     = 151,
+	STATE_MESH_SEQ_NUMBER                   = 152,
 
 	/*
 	 * Internal commands and events.
@@ -385,6 +387,8 @@ typedef void TYPIFY(STATE_BEHAVIOUR_RULE);
 typedef void TYPIFY(STATE_TWILIGHT_RULE);
 typedef void TYPIFY(STATE_EXTENDED_BEHAVIOUR_RULE);
 typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
+typedef cs_mesh_iv_index_t TYPIFY(STATE_MESH_IV_INDEX);
+typedef cs_mesh_seq_number_t TYPIFY(STATE_MESH_SEQ_NUMBER);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);

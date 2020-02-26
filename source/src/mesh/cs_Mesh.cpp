@@ -48,6 +48,68 @@ extern "C" {
 #error "Mesh key size doesn't match encryption key size"
 #endif
 
+#if MESH_EXTERNAL_PERSISTENT_STORAGE
+static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_size) {
+	LOGi("cs_mesh_write_cb handle=%u", handle);
+	assert(BLEutil::getInterruptLevel() == 0, "Invalid interrupt level");
+	CS_TYPE type = CS_TYPE::CONFIG_DO_NOT_USE;
+	switch (handle) {
+		case 1:
+			//FLASH_HANDLE_SEQNUM
+			type = CS_TYPE::STATE_MESH_SEQ_NUMBER;
+			break;
+		case 2:
+			// FLASH_HANDLE_IV_INDEX
+			type = CS_TYPE::STATE_MESH_IV_INDEX;
+			break;
+	}
+	cs_ret_code_t retCode = State::getInstance().set(type, data_ptr, data_size);
+	switch (retCode) {
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE:
+			return NRF_SUCCESS;
+		default:
+			return retCode;
+	}
+}
+
+static uint32_t cs_mesh_read_cb(uint16_t handle, void* data_ptr, uint16_t data_size) {
+	LOGi("cs_mesh_read_cb handle=%u", handle);
+	assert(BLEutil::getInterruptLevel() == 0, "Invalid interrupt level");
+	CS_TYPE type = CS_TYPE::CONFIG_DO_NOT_USE;
+	switch (handle) {
+		case 1:
+			//FLASH_HANDLE_SEQNUM
+			type = CS_TYPE::STATE_MESH_SEQ_NUMBER;
+			break;
+		case 2:
+			// FLASH_HANDLE_IV_INDEX
+			type = CS_TYPE::STATE_MESH_IV_INDEX;
+			break;
+	}
+	State::getInstance().get(type, data_ptr, data_size);
+	return NRF_SUCCESS;
+}
+
+static uint32_t cs_mesh_erase_cb(uint16_t handle) {
+	LOGi("cs_mesh_erase_cb handle=%u", handle);
+	assert(BLEutil::getInterruptLevel() == 0, "Invalid interrupt level");
+	CS_TYPE type = CS_TYPE::CONFIG_DO_NOT_USE;
+	switch (handle) {
+		case 1:
+			//FLASH_HANDLE_SEQNUM
+			type = CS_TYPE::STATE_MESH_SEQ_NUMBER;
+			break;
+		case 2:
+			// FLASH_HANDLE_IV_INDEX
+			type = CS_TYPE::STATE_MESH_IV_INDEX;
+			break;
+	}
+	State::getInstance().remove(type, 0);
+	return NRF_SUCCESS;
+}
+#endif
+
 static void cs_mesh_event_handler(const nrf_mesh_evt_t * p_evt) {
 //	LOGMeshInfo("Mesh event type=%u", p_evt->type);
 	switch(p_evt->type) {
@@ -265,6 +327,13 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	init_params.core.relay_cb           = NULL;
 	init_params.models.models_init_cb   = staticModelsInitCallback;
 	init_params.models.config_server_cb = config_server_evt_cb;
+
+#if MESH_EXTERNAL_PERSISTENT_STORAGE == 1
+#pragma message("MESH_EXTERNAL_PERSISTENT_STORAGE enabled")
+	net_state_register_ext_storage_write_cb(cs_mesh_write_cb);
+	net_state_register_ext_storage_read_cb(cs_mesh_read_cb);
+	net_state_register_ext_storage_erase_cb(cs_mesh_erase_cb);
+#endif
 
 	TYPIFY(CONFIG_CROWNSTONE_ID) id;
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &id, sizeof(id));
@@ -622,7 +691,26 @@ void Mesh::handleEvent(event_t & event) {
 		requestSync();
 		break;
 	}
-
+#if MESH_EXTERNAL_PERSISTENT_STORAGE
+	case CS_TYPE::EVT_STORAGE_WRITE_DONE: {
+		TYPIFY(EVT_STORAGE_WRITE_DONE)* evtData = (TYPIFY(EVT_STORAGE_WRITE_DONE)*)event.data;
+		switch (evtData->type) {
+//			case CS_TYPE::STATE_MESH_IV_INDEX: {
+//				break;
+//			}
+			case CS_TYPE::STATE_MESH_SEQ_NUMBER: {
+				TYPIFY(STATE_MESH_SEQ_NUMBER) seqNumber;
+				State::getInstance().get(CS_TYPE::STATE_MESH_SEQ_NUMBER, &seqNumber, sizeof(seqNumber));
+				LOGi("net_state_ext_write_done");
+				net_state_ext_write_done(1, &seqNumber, sizeof(seqNumber));
+				break;
+			}
+			default:
+				break;
+		}
+		break;
+	}
+#endif
 	default:
 		break;
 	}

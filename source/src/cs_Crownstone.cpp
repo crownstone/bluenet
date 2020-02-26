@@ -274,7 +274,7 @@ void Crownstone::initDrivers0(){
 
 		_stack->initSoftdevice();
 
-#if BUILD_MESHING == 1
+#if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 		// Check if flash pages of mesh are valid, else erase them.
 		// This has to be done before Storage is initialized.
 		if (!_mesh->isFlashValid()) {
@@ -559,7 +559,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			break;
 		case OperationMode::OPERATION_MODE_FACTORY_RESET:
 			LOGd("Configure factory reset mode");
-#if BUILD_MESHING == 1
+#if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 			// Seems like mesh has to be started in order to run the factory reset.
 			_mesh->init(_boardsConfig);
 			_mesh->start();

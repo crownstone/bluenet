@@ -90,6 +90,12 @@ MESHING=1
 # Use the (active) scanner of the mesh.
 MESH_SCANNER=1
 
+# Build and use the mesh persistent storage
+# 0 to disable.
+# 1 to use the default: flash manager.
+# 2 to use own implementation.
+MESH_PERSISTENT_STORAGE=2
+
 # Advertise iBeacon packets.
 IBEACON=1
 
