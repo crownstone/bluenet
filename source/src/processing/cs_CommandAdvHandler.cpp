@@ -15,8 +15,8 @@
 #include "util/cs_BleError.h"
 
 // Defines to enable extra debug logs.
-// #define COMMAND_ADV_DEBUG
-// #define COMMAND_ADV_VERBOSE
+//#define COMMAND_ADV_DEBUG
+//#define COMMAND_ADV_VERBOSE
 
 #ifdef COMMAND_ADV_DEBUG
 #define LOGCommandAdvDebug LOGd
@@ -162,7 +162,7 @@ int CommandAdvHandler::checkSimilarCommand(uint8_t deviceToken, cs_data_t& encry
 	for (int i=0; i<CMD_ADV_MAX_CLAIM_COUNT; ++i) {
 		if (_claims[i].deviceToken == deviceToken) {
 			if (_claims[i].timeoutCounter && _claims[i].encryptedRC5 == encryptedRC5 && memcmp(_claims[i].encryptedData, encryptedData.data, CMD_ADC_ENCRYPTED_DATA_SIZE) == 0) {
-				LOGCommandAdvDebug("Ignore similar payload");
+				LOGCommandAdvVerbose("Ignore similar payload");
 				// Since all encrypted data is similar: set cached decrypted RC5.
 				// The RC5 data does not use access level, so changing access level does not do anything.
 				decryptedRC5 = _claims[i].decryptedRC5;
