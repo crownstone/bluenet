@@ -285,6 +285,10 @@ command_result_t CommandHandler::handleCmdSetSunTime(cs_data_t commandData, cons
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 	sun_time_t* payload = reinterpret_cast<sun_time_t*>(commandData.data);
+	if (payload->sunrise > 24*60*60 || payload->sunset > 24*60*60) {
+		LOGw("Invalid suntimes: rise=%u set=%u", payload->sunrise, payload->sunset);
+		return command_result_t(ERR_WRONG_PARAMETER);
+	}
 	TYPIFY(STATE_SUN_TIME) sunTime = *payload;
 	cs_state_data_t stateData = cs_state_data_t(CS_TYPE::STATE_SUN_TIME, reinterpret_cast<uint8_t*>(&sunTime), sizeof(sunTime));
 	State::getInstance().setThrottled(stateData, SUN_TIME_THROTTLE_PERIOD_SECONDS);
