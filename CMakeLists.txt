@@ -557,12 +557,12 @@ if(FACTORY_IMAGE)
 		COMMAND ${CMAKE_COMMAND} -E echo
 		COMMAND ${CMAKE_COMMAND} -E echo "** Image to be created: ${FACTORY_IMAGE_OUTPUT_FILE_NAME}"
 		COMMAND ${CMAKE_COMMAND} -E echo
-		COMMAND test -z "${MBR_SETTINGS}" && echo "No MBR_SETTINGS set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-		COMMAND test -z "${UICR_BOOTLOADER_ADDRESS}" && echo "No UICR_BOOTLOADER_ADDRESS set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-		COMMAND test -z "${HARDWARE_BOARD_HEX}" && echo "No HARDWARE_BOARD_HEX set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-		COMMAND test -z "${PRODUCT_FAMILY_TYPE}" && echo "No PRODUCT_FAMILY_TYPE set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-		COMMAND test -z "${MAJOR_MINOR_PATCH}" && echo "No MAJOR_MINOR_PATCH set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-		COMMAND test -z "${PRODUCTION_RUN_HOUSING}" && echo "No PRODUCTION_RUN_HOUSING set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
+		COMMAND test -z "${MBR_SETTINGS}" && echo "No MBR_SETTINGS set. Did you set all fields in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
+		COMMAND test -z "${UICR_BOOTLOADER_ADDRESS}" && echo "No UICR_BOOTLOADER_ADDRESS set. Did you set all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
+		COMMAND test -z "${HARDWARE_BOARD_HEX}" && echo "No HARDWARE_BOARD_HEX set. Did you set all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
+		COMMAND test -z "${PRODUCT_FAMILY_TYPE}" && echo "No PRODUCT_FAMILY_TYPE set. Did you set all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
+		COMMAND test -z "${MAJOR_MINOR_PATCH}" && echo "No MAJOR_MINOR_PATCH set. Did you set all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
+		COMMAND test -z "${PRODUCTION_RUN_HOUSING}" && echo "No PRODUCTION_RUN_HOUSING set. Did you set all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
 		COMMAND test -f "${FACTORY_IMAGE_APPLICATION_HEX_FILE}" && exit 0 || echo "Application missing. No such file: ${FACTORY_IMAGE_APPLICATION_HEX_FILE}" && echo && exit 1
 		COMMAND test -f "${FACTORY_IMAGE_BOOTLOADER_HEX_FILE}" && exit 0 || echo "Bootloader missing. No such file: ${FACTORY_IMAGE_BOOTLOADER_HEX_FILE}" && echo && exit 1
 		COMMAND test -f "${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" && exit 0 || echo "Bootloader settings missing. No such file: ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" && echo && exit 1
