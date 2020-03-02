@@ -675,7 +675,9 @@ void PowerSampling::calculatePower(power_t & power) {
 //			APP_ERROR_CHECK(1);
 //		}
 //	}
-//	LOGd("I=%u %u %u %u P=%i %i %i", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA, _avgPowerMilliWatt, powerMilliWattReal, powerMilliWattApparent);
+//	if (printPower % 10 == 0) {
+//		LOGd("I=%u %u %u %u P=%i %i %i", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA, _avgPowerMilliWatt, powerMilliWattReal, powerMilliWattApparent);
+//	}
 
 #ifdef PRINT_POWER_SAMPLES
 	if (printPower % 1 == 0) {
@@ -742,9 +744,10 @@ void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
 	if (_calibratePowerZeroCountDown != 0 || switchState.asInt != 0) {
 		return;
 	}
-	if (powerMilliWatt < -10000 || powerMilliWatt > 10000) {
-		// Measured power without load shouldn't be more than 10W.
+	if (powerMilliWatt < -15000 || powerMilliWatt > 15000) {
+		// Measured power without load shouldn't be more than 15W.
 		// It might be a dimmer on failure instead.
+		// We could make this board dependent, as the max had to be increased to 15W for old plugs.
 		return;
 	}
 	LOGi("Power zero calibrated: %i", powerMilliWatt);
