@@ -9,8 +9,8 @@
 #include <behaviour/cs_TwilightBehaviour.h>
 #include <behaviour/cs_BehaviourStore.h>
 
+#include <test/cs_Test.h>
 #include <time/cs_SystemTime.h>
-
 #include <drivers/cs_Serial.h>
 
 #define LOGTwilightHandler LOGnone
@@ -46,6 +46,8 @@ bool TwilightHandler::update(){
     }
 
     previousIntendedState = intendedState;
+
+    TEST_PUSH_EXPR_D(this,"previousIntendedState",previousIntendedState);
     return true;
 }
 
