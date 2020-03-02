@@ -53,7 +53,7 @@ uint8_t TwilightHandler::computeIntendedState(Time currenttime){
     constexpr uint32_t seconds_per_day = 24*60*60;
 
 	// return the value of the last started valid twilight
-    uint32_t now = currenttime;
+    uint32_t now = currenttime.timestamp();
     uint32_t winning_from_tod;
     uint8_t winning_value = 0xff;
 
@@ -69,8 +69,8 @@ uint8_t TwilightHandler::computeIntendedState(Time currenttime){
             		// previous value found, conflict resolution
             		uint32_t candidate_from_tod = behave->from();
 
-            		if ( CsMath::mod(candidate_from_tod - currenttime), seconds_per_day) <
-            			 CsMath::mod(winning_from_tod   - currenttime), seconds_per_day) ) {
+            		if ( CsMath::mod(candidate_from_tod - now, seconds_per_day) <
+            			 CsMath::mod(winning_from_tod   - now, seconds_per_day) ) {
             				 // we want candidate.from() > winning.from() when overwriting.
             				 // This equation only holds when both from() values are on the
             				 // same day. This is enforced by subtracting currenttime and modding
@@ -92,6 +92,7 @@ uint8_t TwilightHandler::computeIntendedState(Time currenttime){
         }
     }
 
+    // if no winning_value is found at all, return 100.
     return winning_value == 0xff ? 100 : winning_value;
 }
 
