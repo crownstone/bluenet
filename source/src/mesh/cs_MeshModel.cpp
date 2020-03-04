@@ -32,7 +32,7 @@ extern "C" {
 #endif
 
 #define LOGMeshModelInfo    LOGd
-#define LOGMeshModelDebug   LOGd
+#define LOGMeshModelDebug   LOGnone
 #define LOGMeshModelVerbose LOGnone
 
 
@@ -407,50 +407,81 @@ void MeshModel::handleCmdMultiSwitch(const access_message_rx_t * accessMsg, uint
 void MeshModel::handleState0(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_state_0_t* packet = (cs_mesh_model_msg_state_0_t*) payload;
 	uint8_t srcId = accessMsg->meta_data.src.value;
-	LOGMeshModelDebug("id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
+	LOGMeshModelDebug("received: id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
+	if (!isFromSameState(srcId, srcId, packet->partialTimestamp)) {
+		_lastReceivedState.partsReceivedBitmask = 0;
+	}
 	_lastReceivedState.address = srcId;
-	_lastReceivedState.partsReceived = 1;
 	_lastReceivedState.state.data.state.id = srcId;
 	_lastReceivedState.state.data.extState.switchState = packet->switchState;
 	_lastReceivedState.state.data.extState.flags = packet->flags;
 	_lastReceivedState.state.data.extState.powerFactor = packet->powerFactor;
 	_lastReceivedState.state.data.extState.powerUsageReal = packet->powerUsageReal;
 	_lastReceivedState.state.data.extState.partialTimestamp = packet->partialTimestamp;
+	BLEutil::setBit(_lastReceivedState.partsReceivedBitmask, 0);
+	checkStateReceived(getRssi(accessMsg->meta_data.p_core_metadata), accessMsg->meta_data.ttl);
 }
 
 void MeshModel::handleState1(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_state_1_t* packet = (cs_mesh_model_msg_state_1_t*) payload;
 	uint8_t srcId = accessMsg->meta_data.src.value;
-	LOGMeshModelDebug("id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
-	if (	_lastReceivedState.address == accessMsg->meta_data.src.value &&
-			_lastReceivedState.partsReceived == 1 &&
-			_lastReceivedState.state.data.extState.id == srcId &&
-			_lastReceivedState.state.data.extState.partialTimestamp == packet->partialTimestamp
-			) {
-		_lastReceivedState.state.data.extState.temperature = packet->temperature;
-		_lastReceivedState.state.data.extState.energyUsed = packet->energyUsed;
+	LOGMeshModelDebug("received: id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
+	if (!isFromSameState(srcId, srcId, packet->partialTimestamp)) {
+		_lastReceivedState.partsReceivedBitmask = 0;
+	}
+	_lastReceivedState.address = srcId;
+	_lastReceivedState.state.data.state.id = srcId;
+	_lastReceivedState.state.data.extState.temperature = packet->temperature;
+	_lastReceivedState.state.data.extState.energyUsed = packet->energyUsed;
+	_lastReceivedState.state.data.extState.partialTimestamp = packet->partialTimestamp;
+	BLEutil::setBit(_lastReceivedState.partsReceivedBitmask, 1);
+	checkStateReceived(getRssi(accessMsg->meta_data.p_core_metadata), accessMsg->meta_data.ttl);
+}
+
+bool MeshModel::isFromSameState(uint16_t srcAddress, stone_id_t id, uint16_t partialTimestamp) {
+	return (_lastReceivedState.address == srcAddress
+			&& _lastReceivedState.state.data.extState.id == id
+			&& _lastReceivedState.state.data.extState.partialTimestamp == partialTimestamp);
+}
+
+void MeshModel::checkStateReceived(int8_t rssi, uint8_t ttl) {
+	if (_lastReceivedState.partsReceivedBitmask != 0x03) {
+		return;
+	}
+	if (ttl == ACCESS_DEFAULT_TTL) {
+		// Maximum ttl, so we received it without hops: RSSI is valid.
+		_lastReceivedState.state.rssi = rssi;
+		_lastReceivedState.state.data.extState.rssi = 0;
+	}
+	else {
 		// We don't actually know the RSSI to the source of this message.
 		// We only get RSSI to a mac address, but we don't know what id a mac address has.
 		// So for now, just assume we don't have direct contact with the source stone.
-		_lastReceivedState.state.data.extState.rssi = 0;
 		_lastReceivedState.state.rssi = 0;
-		_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
-		_lastReceivedState.state.data.type = SERVICE_DATA_TYPE_EXT_STATE;
-#if CS_SERIAL_NRF_LOG_ENABLED != 2
-		LOGMeshModelInfo("received: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u",
-				_lastReceivedState.state.data.extState.id,
-				_lastReceivedState.state.data.extState.switchState,
-				_lastReceivedState.state.data.extState.flags,
-				_lastReceivedState.state.data.extState.temperature,
-				_lastReceivedState.state.data.extState.powerFactor,
-				_lastReceivedState.state.data.extState.powerUsageReal,
-				_lastReceivedState.state.data.extState.energyUsed,
-				_lastReceivedState.state.data.extState.partialTimestamp
-		);
-#endif
-		event_t event(CS_TYPE::EVT_STATE_EXTERNAL_STONE, &(_lastReceivedState.state), sizeof(_lastReceivedState.state));
-		EventDispatcher::getInstance().dispatch(event);
+		_lastReceivedState.state.data.extState.rssi = 0;
 	}
+	_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
+	_lastReceivedState.state.data.type = SERVICE_DATA_TYPE_EXT_STATE;
+#if CS_SERIAL_NRF_LOG_ENABLED != 2
+	LOGMeshModelInfo("combined: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u rssi=%i",
+			_lastReceivedState.state.data.extState.id,
+			_lastReceivedState.state.data.extState.switchState,
+			_lastReceivedState.state.data.extState.flags,
+			_lastReceivedState.state.data.extState.temperature,
+			_lastReceivedState.state.data.extState.powerFactor,
+			_lastReceivedState.state.data.extState.powerUsageReal,
+			_lastReceivedState.state.data.extState.energyUsed,
+			_lastReceivedState.state.data.extState.partialTimestamp,
+			_lastReceivedState.state.data.extState.rssi
+	);
+#endif
+	// Reset parts received
+	_lastReceivedState.partsReceivedBitmask = 0;
+
+	// Send event
+	TYPIFY(EVT_STATE_EXTERNAL_STONE)* stateExtStone = &(_lastReceivedState.state);
+	event_t event(CS_TYPE::EVT_STATE_EXTERNAL_STONE, stateExtStone, sizeof(*stateExtStone));
+	EventDispatcher::getInstance().dispatch(event);
 }
 
 void MeshModel::handleProfileLocation(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {

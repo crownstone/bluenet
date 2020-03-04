@@ -49,7 +49,7 @@ struct __attribute__((__packed__)) cs_mesh_model_queued_item_t {
 
 struct cs_mesh_model_ext_state_t {
 	uint16_t address = 0;
-	uint8_t partsReceived = 0;
+	uint8_t partsReceivedBitmask = 0;
 	TYPIFY(EVT_STATE_EXTERNAL_STONE) state;
 };
 
@@ -123,6 +123,9 @@ private:
 	void handleTrackedDeviceToken(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
 	void handleTrackedDeviceListSize(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
 	void handleSyncRequest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+
+	bool isFromSameState(uint16_t srcAddress, stone_id_t id, uint16_t partialTimestamp);
+	void checkStateReceived(int8_t rssi, uint8_t ttl);
 
 	cs_ret_code_t _sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats=1);
 	cs_ret_code_t _sendReliableMsg(const uint8_t* data, uint16_t len);
