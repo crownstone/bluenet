@@ -28,23 +28,15 @@ extern "C" {
  */
 #define MESH_MODEL_QUEUE_BURST_COUNT 3
 
-/**
- * Mesh message of max size.
- */
-struct __attribute__((__packed__)) cs_mesh_model_queued_msg_t {
-	bool reliable : 1;
-	uint8_t repeats : 7;
-	size16_t msgSize;
-	uint8_t msg[MAX_MESH_MSG_SIZE];
-};
 
 struct __attribute__((__packed__)) cs_mesh_model_queued_item_t {
 	bool priority : 1;
 	uint8_t repeats : 7;
-	stone_id_t id;   // 0 for broadcast
+//	stone_id_t targetId;   // 0 for broadcast
 	uint8_t type;
-	uint8_t payloadSize;
-	uint8_t payload[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
+	uint16_t id;
+	uint8_t msgSize;
+	uint8_t msg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
 };
 
 struct cs_mesh_model_ext_state_t {
@@ -102,8 +94,8 @@ private:
 
 	cs_mesh_model_queued_item_t _queue[MESH_MODEL_QUEUE_SIZE] = {0};
 	uint8_t _queueSendIndex = 0;
-	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
-	cs_ret_code_t remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t id);
+	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, uint16_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
+	cs_ret_code_t remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id);
 	int getNextItemInQueue(bool priority); // Returns -1 if none found.
 	bool sendMsgFromQueue(); // Returns true when message was sent, false when no more messages to be sent.
 	void processQueue();

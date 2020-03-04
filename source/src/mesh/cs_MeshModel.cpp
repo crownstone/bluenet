@@ -586,10 +586,10 @@ void MeshModel::sendTestMsg() {
  * Then set the new SendIndex at the newly added item, so that it will be send first.
  * We do the reverse iterate, so that the old SendIndex should be handled early (for a large enough queue).
  */
-cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority) {
+cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, uint16_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority) {
 	LOGMeshModelDebug("addToQueue type=%u id=%u size=%u repeats=%u priority=%u", type, id, payloadSize, repeats, priority);
-	assert(payloadSize <= (MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE), "No segmented msgs for now");
-	assert(payloadSize <= sizeof(_queue[0].payload), "Payload too large");
+	assert(payloadSize <= (MAX_MESH_MSG_NON_SEGMENTED_SIZE), "No segmented msgs for now");
+	assert(payloadSize <= sizeof(_queue[0].msg), "Payload too large");
 	uint8_t index;
 //	for (int i = _queueSendIndex; i < _queueSendIndex + MESH_MODEL_QUEUE_SIZE; ++i) {
 	for (int i = _queueSendIndex + MESH_MODEL_QUEUE_SIZE; i > _queueSendIndex; --i) {
@@ -600,10 +600,12 @@ cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id
 			item->repeats = repeats;
 			item->id = id;
 			item->type = type;
-			item->payloadSize = payloadSize;
-			memcpy(item->payload, payload, payloadSize);
+			size16_t msgSize = sizeof(item->msg);
+			if (!MeshModelPacketHelper::setMeshMessage(type, payload, payloadSize, item->msg, msgSize)) {
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			item->msgSize = msgSize;
 			LOGMeshModelVerbose("added to ind=%u", index);
-//			BLEutil::printArray(payload, payloadSize);
 			_queueSendIndex = index;
 			return ERR_SUCCESS;
 		}
@@ -612,7 +614,7 @@ cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id
 	return ERR_BUSY;
 }
 
-cs_ret_code_t MeshModel::remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t id) {
+cs_ret_code_t MeshModel::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
 	for (int i = 0; i < MESH_MODEL_QUEUE_SIZE; ++i) {
 		if (_queue[i].id == id && _queue[i].type == type && _queue[i].repeats != 0) {
 			_queue[i].repeats = 0;
@@ -653,24 +655,20 @@ bool MeshModel::sendMsgFromQueue() {
 		return false;
 	}
 	cs_mesh_model_queued_item_t* item = &(_queue[index]);
-	size16_t msgSize = MeshModelPacketHelper::getMeshMessageSize(item->payloadSize);
-	uint8_t* msg = (uint8_t*)malloc(msgSize);
 	if (item->type == CS_MESH_MODEL_TYPE_CMD_TIME) {
 		Time time = SystemTime::posix();
 		if (time.isValid()) {
 			// Update time in set time command.
-			cs_mesh_model_msg_time_t* timePayload = (cs_mesh_model_msg_time_t*) item->payload;
-			timePayload->timestamp = time.timestamp();
+			uint8_t* payload = NULL;
+			size16_t payloadSize = 0;
+			MeshModelPacketHelper::getPayload(item->msg, item->msgSize, payload, payloadSize);
+			if (payloadSize == sizeof(cs_mesh_model_msg_time_t)) {
+				cs_mesh_model_msg_time_t* timePayload = (cs_mesh_model_msg_time_t*) payload;
+				timePayload->timestamp = time.timestamp();
+			}
 		}
 	}
-	bool success = MeshModelPacketHelper::setMeshMessage((cs_mesh_model_msg_type_t)item->type, item->payload, item->payloadSize, msg, msgSize);
-	if (success) {
-		_sendMsg(msg, msgSize, 1);
-	}
-	else {
-		LOGMeshModelInfo("Failed to set mesh msg");
-	}
-	free(msg);
+	_sendMsg(item->msg, item->msgSize, 1);
 	--(item->repeats);
 	LOGMeshModelInfo("sent ind=%u repeats_left=%u type=%u id=%u", index, item->repeats, item->type, item->id);
 //	BLEutil::printArray(meshMsg.msg, meshMsg.size);
