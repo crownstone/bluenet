@@ -42,14 +42,22 @@ public:
 	void setTxPower(int8_t power);
 
 	/**
-	 * Set iBeacon as advertised data.
-	 */
-	void setIbeaconData(IBeacon* ibeacon);
-
-	/**
 	 * Start advertising.
 	 */
 	void start();
+
+	/**
+	 * Stop advertising.
+	 */
+	void stop();
+
+	/**
+	 * Advertise iBeacon data.
+	 *
+	 * Updates previous advertisement.
+	 */
+	void advertise(IBeacon* ibeacon);
+
 private:
 	advertiser_t* _advertiser = NULL;
 	uint8_t* _buffer = NULL;

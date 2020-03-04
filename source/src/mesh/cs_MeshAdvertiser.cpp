@@ -53,12 +53,29 @@ void MeshAdvertiser::setTxPower(int8_t power) {
 	advertiser_tx_power_set(_advertiser, txPower);
 }
 
+void MeshAdvertiser::start() {
+	advertiser_enable(_advertiser);
+}
+
+void MeshAdvertiser::stop() {
+	advertiser_disable(_advertiser);
+}
+
 /**
- * Fill advertising packet with iBeacon data.
+ * Advertise iBeacon data.
  *
  * See https://github.com/crownstone/bluenet/blob/master/docs/PROTOCOL.md#ibeacon-advertisement-packet
  */
-void MeshAdvertiser::setIbeaconData(IBeacon* ibeacon) {
+void MeshAdvertiser::advertise(IBeacon* ibeacon) {
+	if (_advPacket != NULL) {
+		// See https://devzone.nordicsemi.com/f/nordic-q-a/58658/mesh-advertiser-crash-when-calling-advertiser_packet_discard
+//		advertiser_packet_discard(_advertiser, _advPacket);
+//		_advPacket = NULL;
+		stop();
+		memcpy(&(_advPacket->packet.payload[7]), ibeacon->getArray(), ibeacon->size());
+		start();
+		return;
+	}
 	_advPacket = advertiser_packet_alloc(_advertiser, 7 + ibeacon->size());
 	_advPacket->packet.payload[0] = 0x02; // Length of next AD
 	_advPacket->packet.payload[1] = 0x01; // Type: flags
@@ -71,15 +88,7 @@ void MeshAdvertiser::setIbeaconData(IBeacon* ibeacon) {
 //	_advPacket[8] = 0x15; // iBeacon payload length
 //	memcpy(&(_advPacket[9]), ) // iBeacon UUID
 	memcpy(&(_advPacket->packet.payload[7]), ibeacon->getArray(), ibeacon->size());
-	_advPacket->config.repeats = ADVERTISER_REPEAT_INFINITE;
-}
 
-void MeshAdvertiser::start() {
-	advertiser_enable(_advertiser);
-	if (_advPacket != NULL) {
-		advertiser_packet_send(_advertiser, _advPacket);
-	}
-	else {
-		LOGe("No advPacket");
-	}
+	_advPacket->config.repeats = ADVERTISER_REPEAT_INFINITE;
+	advertiser_packet_send(_advertiser, _advPacket);
 }

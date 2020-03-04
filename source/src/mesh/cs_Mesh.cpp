@@ -544,8 +544,7 @@ void Mesh::provisionLoad() {
 	LOGMeshInfo("devKeyHandle=%u devKey=", _devkeyHandle);
 }
 
-void Mesh::advertise(IBeacon* ibeacon) {
-	LOGd("advertise ibeacon major=%u minor=%u", ibeacon->getMajor(), ibeacon->getMinor());
+void Mesh::initAdvertiser() {
 	_advertiser.init();
 
 	ble_gap_addr_t address;
@@ -564,8 +563,12 @@ void Mesh::advertise(IBeacon* ibeacon) {
 	State::getInstance().get(CS_TYPE::CONFIG_TX_POWER, &txPower, sizeof(txPower));
 	_advertiser.setTxPower(txPower);
 
-	_advertiser.setIbeaconData(ibeacon);
 	_advertiser.start();
+}
+
+void Mesh::advertise(IBeacon* ibeacon) {
+	LOGd("advertise ibeacon major=%u minor=%u", ibeacon->getMajor(), ibeacon->getMinor());
+	_advertiser.advertise(ibeacon);
 }
 
 void Mesh::handleEvent(event_t & event) {
