@@ -34,6 +34,7 @@
 
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_BehaviourStore.h>
+#include <boot/cs_BootRamData.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_Git.h>
@@ -1043,6 +1044,14 @@ int main() {
 	printNfcPins();
 	LOG_FLUSH();
 
+	int length = 12;
+	char data[length];
+	int success = getRamData(data, length);
+	if (success) {
+		LOGi("Got data: %s", data);
+	} else {
+		LOGi("No bootloader data found");
+	}
 //	// Make a "clicker"
 //	nrf_delay_ms(1000);
 //	nrf_gpio_pin_set(board.pinGpioRelayOn);
