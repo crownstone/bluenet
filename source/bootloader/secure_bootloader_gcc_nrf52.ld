@@ -14,11 +14,12 @@ MEMORY
   /* FLASH (rx) : ORIGIN = 0x71000, LENGTH = 0xd000 */
   /* Without gc-sections: FLASH (rx) : ORIGIN = 0x68000, LENGTH = 0x10000 */
   FLASH (rx) : ORIGIN = BOOTLOADER_START_ADDRESS, LENGTH = BOOTLOADER_LENGTH
-  /*
   RAM_BOOTLOADER (rwx): ORIGIN = RAM_R1_BASE, LENGTH = RAM_BOOTLOADER_LENGTH
   RAM (rwx) :  ORIGIN = (RAM_R1_BASE + RAM_BOOTLOADER_LENGTH), LENGTH = (RAM_APPLICATION_AMOUNT - RAM_BOOTLOADER_LENGTH)
-  */
+  /*
+  RAM (rwx) :  ORIGIN = (RAM_R1_BASE), LENGTH = (RAM_APPLICATION_AMOUNT)
   RAM (rwx) :  ORIGIN = 0x200057b8, LENGTH = 0xa848 
+  */
   mbr_params_page (r) : ORIGIN = 0x0007E000, LENGTH = 0x1000
   bootloader_settings_page (r) : ORIGIN = 0x0007F000, LENGTH = 0x1000
   uicr_mbr_params_page (r) : ORIGIN = 0x10001018, LENGTH = 0x4
@@ -53,7 +54,6 @@ SECTIONS
   } > uicr_bootloader_start_address
 }
 
-/*
 SECTIONS
 {
   . = ALIGN(4);
@@ -63,7 +63,7 @@ SECTIONS
     KEEP(*(SORT(.bootloader_ram.*)))
     PROVIDE(__stop_bootloader_ram = .);
   } > RAM_BOOTLOADER
-}*/
+}
 
 SECTIONS
 {

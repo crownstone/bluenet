@@ -1048,10 +1048,11 @@ int main() {
 	char data[length];
 	int success = getRamData(data, length);
 	if (success) {
-		LOGi("Got data: %s", data);
+		LOGi("Bootloader version: %s", data);
 	} else {
 		LOGi("No bootloader data found");
 	}
+
 //	// Make a "clicker"
 //	nrf_delay_ms(1000);
 //	nrf_gpio_pin_set(board.pinGpioRelayOn);
