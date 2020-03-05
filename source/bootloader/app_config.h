@@ -29,14 +29,16 @@
 
 /**
  * Reserved number of flash pages used for app data.
- * 8 for FDS (4 + FDS_PHY_PAGES).
+ * 8 for FDS.
+ * 1 for IPC.
+ * 4 For mesh:
  * See how_to_nordicSDK.md and https://devzone.nordicsemi.com/f/nordic-q-a/42632/mesh-sdk---nrf52840-flash-page-issue
  * 1 for mesh access (ACCESS_FLASH_PAGE_COUNT).
  * 1 for mesh dsm (DSM_FLASH_PAGE_COUNT).
+ * 1 for mesh net state (NET_FLASH_PAGE_COUNT).
  * 1 for mesh defrag/garbage collection.
- * 1 for mesh recovery?.
  */
-#define NRF_DFU_APP_DATA_AREA_SIZE ((8+4)*4096)
+#define NRF_DFU_APP_DATA_AREA_SIZE ((8+1+4)*4096)
 
 //! Device information service.
 #define BLE_DIS_ENABLED 1
