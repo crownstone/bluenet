@@ -6,8 +6,10 @@
  */
 
 #include <switch/cs_SafeSwitch.h>
-#include <storage/cs_State.h>
+
 #include <events/cs_EventDispatcher.h>
+#include <storage/cs_State.h>
+#include <test/cs_Test.h>
 
 #define LOGSafeSwitch LOGnone
 
@@ -24,6 +26,10 @@ void SafeSwitch::init(const boards_config_t& board) {
 	currentState.state.dimmer = 0;
 
 	LOGd("init storedState=(%u %u%%)", storedState.state.relay, storedState.state.dimmer);
+
+	// relay only pushes test value on ::set(bool) because it doesn't keep track of its own state.
+	// we'll push the stored value upon init so that the test suite knows it's state.
+	TEST_PUSH_EXPR_B(&relay,"on",storedState.state.relay);
 
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));

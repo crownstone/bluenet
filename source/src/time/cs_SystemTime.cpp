@@ -16,6 +16,8 @@
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
 
+#include <test/cs_Test.h>
+
 #define LOGSystemTimeVerbose LOGnone
 
 // ============== Static members ==============
@@ -102,6 +104,7 @@ void SystemTime::handleEvent(event_t & event) {
 			if (posixTimeStamp == 0) {
 				LOGd("set time from state");
 				setTime(*((TYPIFY(STATE_TIME)*)event.data));
+				TEST_PUSH_D(this, posixTimeStamp);
 			}
 			break;
 		}
@@ -110,12 +113,14 @@ void SystemTime::handleEvent(event_t & event) {
 			if (posixTimeStamp == 0) {
 				LOGd("set time from mesh");
 				setTime(*((TYPIFY(EVT_MESH_TIME)*)event.data));
+				TEST_PUSH_D(this, posixTimeStamp);
 			}
 			break;
 		}
 		case CS_TYPE::CMD_SET_TIME: {
 			LOGd("set time from command");
 			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data));
+			TEST_PUSH_D(this, posixTimeStamp);
 			break;
 		}
 		case CS_TYPE::STATE_SUN_TIME: {
