@@ -34,4 +34,7 @@ inline DayOfWeek operator+(DayOfWeek day, int offset){
 	}
 }
 
+inline DayOfWeek operator-(DayOfWeek day, int offset){
+	return day + -offset;
+}
 
