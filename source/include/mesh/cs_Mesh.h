@@ -69,6 +69,11 @@ public:
 	void factoryReset();
 
 	/**
+	 * Init the advertiser.
+	 */
+	void initAdvertiser();
+
+	/**
 	 * Advertise as iBeacon.
 	 */
 	void advertise(IBeacon* ibeacon);

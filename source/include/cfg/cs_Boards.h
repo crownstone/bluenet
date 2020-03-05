@@ -36,6 +36,8 @@ extern "C" {
 #define PCA10036             40
 // Nordic dev board in active use.
 #define PCA10040             41
+// Nordic dev board for the nRF52833
+#define PCA10100             42
 
 // Rectangular beacons from China.
 #define GUIDESTONE           100
@@ -73,6 +75,9 @@ extern "C" {
 #define ACR01B2E             1503
 // Schematic change. Change power measurement resistor values.
 #define ACR01B2G             1504
+	
+// Crownstone Plug One (first prototype of second edition of the plug)
+#define ACR01B11A            1505
 
 /** Board configuration
  *
@@ -106,6 +111,12 @@ typedef struct  {
 	//! Analog input pin to read the voltage.
 	uint8_t pinAinVoltage;
 
+	//! Analog input pin to read the voltage.
+	uint8_t pinAinVoltageGainHigh;
+
+	//! Analog input pin to read the voltage.
+	uint8_t pinAinVoltageGainLow;
+
 	//! Analog input pin to read 'zero' line for current and voltage measurement (optional).
 	uint8_t pinAinZeroRef;
 
@@ -117,6 +128,18 @@ typedef struct  {
 
 	//! GPIO pin to send uart.
 	uint8_t pinGpioTx;
+	
+	//! GPIO custom pin 
+	uint8_t pinGpio1;
+	
+	//! GPIO custom pin 
+	uint8_t pinGpio2;
+	
+	//! GPIO custom pin 
+	uint8_t pinGpio3;
+	
+	//! GPIO custom pin 
+	uint8_t pinGpio4;
 
 	//! GPIO pin to control the "red" led.
 	uint8_t pinLedRed;

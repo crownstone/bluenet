@@ -163,6 +163,9 @@ ELSE()
 	# We add the source files explicitly. This is recommended in the cmake system and will also force us all the time to
 	# consider the size of the final binary. Do not include things, if not necessary!
 
+	#LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S")
+	#set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S" PROPERTY LANGUAGE C)
+
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
 	set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
 
@@ -516,6 +519,16 @@ ELSE()
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp" @ONLY)
 		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 		
+		message(STATUS "Configure nrf_symbols.ld file")
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)
+		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld")
+	
+		message(STATUS "Application start address: ${APPLICATION_START_ADDRESS}")
+		message(STATUS "Application length: ${APPLICATION_LENGTH}")
+		message(STATUS "RAM base: ${RAM_R1_BASE}")
+		message(STATUS "RAM amount: ${RAM_APPLICATION_AMOUNT}")
+
 		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
 		
 		# Be more strict about our own files (then about Nordic's files)

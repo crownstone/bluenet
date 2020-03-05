@@ -265,7 +265,7 @@ void ADC::initQueue() {
  *   - set either differential mode (pin - ref_pin), or single ended mode (pin - 0)
  */
 cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config) {
-	LOGi("init channel %u on ain%u, range=%umV, ref=ain%u", channel, config.pin, config.rangeMilliVolt, config.referencePin);
+	LOGi("Init channel %u on AIN%u, range=%umV, ref=ain%u", channel, config.pin, config.rangeMilliVolt, config.referencePin);
 	assert(config.pin < 8 || config.pin == CS_ADC_PIN_VDD, "Invalid pin");
 	assert(config.referencePin < 8 || config.referencePin == CS_ADC_REF_PIN_NOT_AVAILABLE, "Invalid ref pin");
 //	assert(config.pin != config.referencePin, "Pin and ref pin should be different");

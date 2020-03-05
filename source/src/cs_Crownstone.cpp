@@ -709,6 +709,7 @@ void Crownstone::startUp() {
 #if BUILD_MESHING == 1
 			_mesh->start();
 			if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
+				_mesh->initAdvertiser();
 				_mesh->advertise(_beacon);
 			}
 #endif

@@ -28,28 +28,20 @@ extern "C" {
  */
 #define MESH_MODEL_QUEUE_BURST_COUNT 3
 
-/**
- * Mesh message of max size.
- */
-struct __attribute__((__packed__)) cs_mesh_model_queued_msg_t {
-	bool reliable : 1;
-	uint8_t repeats : 7;
-	size16_t msgSize;
-	uint8_t msg[MAX_MESH_MSG_SIZE];
-};
 
 struct __attribute__((__packed__)) cs_mesh_model_queued_item_t {
 	bool priority : 1;
 	uint8_t repeats : 7;
-	stone_id_t id;   // 0 for broadcast
+//	stone_id_t targetId;   // 0 for broadcast
 	uint8_t type;
-	uint8_t payloadSize;
-	uint8_t payload[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
+	uint16_t id;
+	uint8_t msgSize;
+	uint8_t msg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
 };
 
 struct cs_mesh_model_ext_state_t {
 	uint16_t address = 0;
-	uint8_t partsReceived = 0;
+	uint8_t partsReceivedBitmask = 0;
 	TYPIFY(EVT_STATE_EXTERNAL_STONE) state;
 };
 
@@ -102,8 +94,8 @@ private:
 
 	cs_mesh_model_queued_item_t _queue[MESH_MODEL_QUEUE_SIZE] = {0};
 	uint8_t _queueSendIndex = 0;
-	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, stone_id_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
-	cs_ret_code_t remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t id);
+	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, uint16_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
+	cs_ret_code_t remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id);
 	int getNextItemInQueue(bool priority); // Returns -1 if none found.
 	bool sendMsgFromQueue(); // Returns true when message was sent, false when no more messages to be sent.
 	void processQueue();
@@ -123,6 +115,9 @@ private:
 	void handleTrackedDeviceToken(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
 	void handleTrackedDeviceListSize(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
 	void handleSyncRequest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);
+
+	bool isFromSameState(uint16_t srcAddress, stone_id_t id, uint16_t partialTimestamp);
+	void checkStateReceived(int8_t rssi, uint8_t ttl);
 
 	cs_ret_code_t _sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats=1);
 	cs_ret_code_t _sendReliableMsg(const uint8_t* data, uint16_t len);

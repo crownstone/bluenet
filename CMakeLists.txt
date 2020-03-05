@@ -66,6 +66,9 @@ message(STATUS "  python executable: \"${PYTHON_EXECUTABLE}\"")
 message(STATUS "  pip will be used as: \"${PYTHON_EXECUTABLE} -m pip install package\"")
 message(STATUS "  if installation fails (of e.g. nrfutil), run \"python3 -m pip install -U pip [--user]\"")
 
+message(STATUS "bin dir: ${CMAKE_BINARY_DIR}")
+message(STATUS "install dir: ${CMAKE_INSTALL_PREFIX}")
+
 find_package(Git REQUIRED)
 
 include(ExternalProject)
@@ -85,6 +88,9 @@ set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-do
 # The Nordic SDK
 set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5/Binaries/nRF5SDK153059ac345.zip)
 set(NORDIC_NRF5_SDK_MD5 46a8c9cd4b5d7ee4c5142e8fae3444c4)
+
+#set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5/Binaries/nRF5SDK160098a08e2.zip)
+#set(NORDIC_NRF5_SDK_MD5 cc2ccb57d2c7159fd37f9e04fca6cc64)
 
 # The mesh
 set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/sDKS/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip)
@@ -110,6 +116,7 @@ set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
 #######################################################################################################################
 
 set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex)
+#set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/s132_nrf52_7.0.1_softdevice.hex)
 list(APPEND CMAKE_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FILE}")
 
 #######################################################################################################################
@@ -527,10 +534,10 @@ if(FACTORY_IMAGE)
 		from_hex(${PRODUCT_HOUSING} PRODUCT_HOUSING_DEC)
 		to_hex_raw(${PRODUCT_HOUSING_DEC} PRODUCT_HOUSING_HEX 2 "")
 
-		fill(${PRODUCTION_YEAR} PRODUCTION_YEAR_DEC 2 "0" "")
-		fill(${PRODUCTION_WEEK} PRODUCTION_WEEK_DEC 2 "0" "")
+		to_hex_raw(${PRODUCTION_YEAR} PRODUCTION_YEAR_HEX 2 "")
+		to_hex_raw(${PRODUCTION_WEEK} PRODUCTION_WEEK_HEX 2 "")
 
-		set(PRODUCTION_RUN_HOUSING "${PRODUCTION_YEAR_DEC}${PRODUCTION_WEEK_DEC}${PRODUCT_HOUSING_HEX}")
+		set(PRODUCTION_RUN_HOUSING "${PRODUCTION_YEAR_HEX}${PRODUCTION_WEEK_HEX}${PRODUCT_HOUSING_HEX}")
 		fill(${PRODUCTION_RUN_HOUSING} PRODUCTION_RUN_HOUSING 8 "F" "0x")
 	endif()
 
@@ -543,7 +550,11 @@ if(FACTORY_IMAGE)
 
 	string(TIMESTAMP FACTORY_IMAGE_TIMESTAMP "%Y-%U")
 
-	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "${FACTORY_IMAGE_SOFTWARE_NAME}_${FACTORY_IMAGE_HARDWARE_NAME}_${FACTORY_IMAGE_TIMESTAMP}.hex")
+	fill(${FACTORY_IMAGE_SOFTWARE_VERSION} FACTORY_IMAGE_SOFTWARE_VERSION 4 "0" "")
+
+#	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "${FACTORY_IMAGE_SOFTWARE_NAME}_${FACTORY_IMAGE_HARDWARE_NAME}_${FACTORY_IMAGE_TIMESTAMP}.hex")
+	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION}/factory-image.hex")
+#	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "factory-image.hex")
 
 	ADD_CUSTOM_TARGET(generate_factory_image
 		COMMAND ${CMAKE_COMMAND} -E echo
@@ -574,12 +585,12 @@ if(FACTORY_IMAGE)
 		COMMENT "Generate a factory image"
 		)
 
-	if(NOT EXISTS ${CMAKE_BINARY_DIR}/factory-images)
-		message(STATUS "Create directory \"factory-images\"")
-		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/factory-images)
+	if(NOT EXISTS ${CMAKE_BINARY_DIR}/factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION})
+		message(STATUS "Create directory \"factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION}\"")
+		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION})
 	endif()
 
-	#INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/factory-images" DESTINATION . FILES_MATCHING PATTERN "*")
+	#INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION}" DESTINATION . FILES_MATCHING PATTERN "*")
 endif()
 
 
