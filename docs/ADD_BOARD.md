@@ -1,4 +1,49 @@
-## Adding a new board
+# Adding a new board
+
+## Information required
+
+The pin layout can be found online for e.g. the [nRF52833](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fps_nrf52833%2Fpin.html).
+It has mappings like:
+
+| Pin   | Name          | Crownstone Description | Pin nr |
+| ----- | ------------- | ---------------------- | ------ |
+| A8    | P0.31 (AIN7)  | V1                     | 31     |
+| A10   | P0.29 (AIN5)  | V2                     | 29     |
+| A12   | P0.02 (AIN0)  | I1                     |  2     |
+| B13   | P0.03 (AIN1)  | I2                     |  3     |
+| AD8   | P0.13         | reset (relais)         | 13     |
+| AD10  | P0.15         | set (relais)           | 15     |
+| J1    | P0.04 (AIN2)  | NTC <needs patch>      |  4     |
+| A14   | P0.19         | floating               | 19     |
+| N1    | P0.08         | PWM                    |  8     |
+| K2    | P0.05 (AIN3)  | Reference voltage      |  5     |
+| AD18  | P0.22         | RX                     | 22     |
+| AD16  | P0.20         | TX                     | 20     |
+| AD20  | P0.24         | GPIO1                  | 24     |
+| AD22  | P1.00         | GPIO2                  | 32     |
+| W24   | P1.02         | GPIO3                  | 34     |
+| U24   | P1.04         | GPIO4                  | 36     |
+| AC24  | SWDIO         | SWDIO                  |  X     |
+| AA24  | SWCLK         | SWDCLK                 |  X     |
+
+Here the pin and name can be found at Nordic. To understand the functionality of each pin, you will have to look at
+the PCB itself, read the schematics files (if you have them), or contact Crownstone. There can also be additional
+pins, e.g. to enable the dimming functionality, or there might be some LEDs.
+
+The mapping for pins at port 1 is ` (((port) << 5) | ((pin) & 0x1F))`. For example, pin P1.00 will map to 32.
+
+For example on the ACR01B11A board there is an [UCC5310](http://www.ti.com/lit/ds/symlink/ucc5310.pdf) gate driver. In
+10.4 Device Functional Modes there is a table. Here the first two columns are reverted given that we can only control
+IN-.
+
+| IN-   | IN+     | OUT  |
+| ----- | ------- | ---- |
+| high  | X       | low  |
+| low   | high    | high |
+
+Hence, it is inverting (OUT is almost directly coupled to the gates of the IGBTs).
+
+## Files to be adjusted
 
 in order to add a new board you need to alter multiple files. These are:
 * [cs_Boards.h](../include/cfg/cs_Boards.h)

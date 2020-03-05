@@ -545,7 +545,7 @@ TestResult TestState::testDuplicateRecords(uint16_t resetCount, uint32_t step) {
 			record.data.p_data       = data;
 			record.data.length_words = 1;
 			uint32_t fdsRet = fds_record_write(NULL, &record);
-			assert(fdsRet == FDS_SUCCESS, "Expected FDS_SUCCESS");
+			assert(fdsRet == NRF_SUCCESS, "Expected NRF_SUCCESS");
 			waitForStore(CS_TYPE::CONFIG_PWM_PERIOD);
 			return NOT_DONE_WAIT_FOR_WRITE;
 		}
@@ -606,7 +606,7 @@ TestResult TestState::testCorruptedRecords(uint16_t resetCount, uint32_t step) {
 			for (uint32_t i=0; i<100000; ++i) {
 				*data = i;
 			}
-			assert(fdsRet == FDS_SUCCESS, "Expected FDS_SUCCESS");
+			assert(fdsRet == NRF_SUCCESS, "Expected NRF_SUCCESS");
 			waitForStore(CS_TYPE::CONFIG_POWER_ZERO);
 			return NOT_DONE_WAIT_FOR_WRITE;
 		}
@@ -617,7 +617,7 @@ TestResult TestState::testCorruptedRecords(uint16_t resetCount, uint32_t step) {
 			fds_find_token_t ftok;
 			memset(&ftok, 0x00, sizeof(fds_find_token_t));
 			uint32_t fdsRet = fds_record_find(FILE_CONFIGURATION, recordKey, &record_desc, &ftok);
-			assert(fdsRet == FDS_SUCCESS, "Expected FDS_SUCCESS");
+			assert(fdsRet == NRF_SUCCESS, "Expected NRF_SUCCESS");
 			fdsRet = fds_record_open(&record_desc, &flash_record);
 			assert(fdsRet == FDS_ERR_CRC_CHECK_FAILED, "Expected FDS_ERR_CRC_CHECK_FAILED");
 

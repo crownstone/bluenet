@@ -120,8 +120,8 @@ constexpr const char* NordicTypeName(uint32_t nordic_type) {
 
 constexpr const char* NordicFDSTypeName(uint32_t nordic_type) {
 	switch(nordic_type) {
-		case FDS_SUCCESS:
-			return "FDS_SUCCESS";
+//		case FDS_SUCCESS:
+//			return "FDS_SUCCESS";
 		case FDS_ERR_OPERATION_TIMEOUT:
 			return "FDS_ERR_OPERATION_TIMEOUT";
 		case FDS_ERR_NOT_INITIALIZED:

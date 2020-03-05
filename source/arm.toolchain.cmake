@@ -185,6 +185,9 @@ SET(CMAKE_C_FLAGS_RELEASE   "${RELEASE_FLAGS}")
 # However this is different from the firmware versus the bootloader. 
 # That's why it has been moved to the CMakeLists.txt file.
 
+# Write a .map file, can be used to inspect code size
+SET(FLAG_WRITE_MAP_FILE "-Wl,-Map=crownstone.map")
+
 #SET(FLAG_REMOVE_UNWINDING_CODE "-Wl,--wrap,__aeabi_unwind_cpp_pr0")
 
 SET(FLAG_REMOVE_UNWINDING_CODE "")
