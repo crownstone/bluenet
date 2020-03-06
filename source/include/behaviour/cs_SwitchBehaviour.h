@@ -82,4 +82,16 @@ public:
 
     // uncached version of ::isValid
     bool _isValid(PresenceStateDescription currentpresence);
+
+#ifndef DEBUG
+    // Returns true if time passed since between prevInRoomTimeStamp and current up time
+    // is less than presenceCondition.timeout. Else, returns false.
+    bool gracePeriodForPresenceIsActive();
+#else
+    // a debug version of this is made public to propagate this
+    // state to host when requested.
+    public:
+    virtual bool gracePeriodForPresenceIsActive();
+    private:
+#endif
 };

@@ -120,5 +120,4 @@ void ExtendedSwitchBehaviour::print(){
         LOGd("extension timestamp : %02d:%02d:%02d", t.h(),t.m(),t.s());
     }
     LOGd("##");
-
 }

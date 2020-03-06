@@ -165,12 +165,18 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	// Set active behaviours.
 	behaviourDebug->storedBehaviours = 0;
 	behaviourDebug->activeBehaviours = 0;
-	behaviourDebug->extensionActive = 0; // TODO: how to calculate this?
-	behaviourDebug->activeTimeoutPeriod = 0; // TODO: how to calculate this?
+	behaviourDebug->extensionActive = 0;
+	behaviourDebug->activeTimeoutPeriod = 0;
 	auto behaviours = BehaviourStore::getActiveBehaviours();
 	for (uint8_t index = 0; index < behaviours.size(); ++index) {
-		if (behaviours[index] != nullptr) {
+		if (Behaviour* currbehaviour = behaviours[index]) {
 			behaviourDebug->storedBehaviours |= (1 << index);
+
+			behaviourDebug->activeTimeoutPeriod |=
+					currbehaviour->gracePeriodForPresenceIsActive() ? (1 << index) : 0;
+
+			behaviourDebug->extensionActive |=
+					currbehaviour->extensionPeriodIsActive() ? (1 << index) : 0;
 		}
 	}
 	bool checkBehaviours = true;
