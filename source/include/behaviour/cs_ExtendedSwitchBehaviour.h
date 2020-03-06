@@ -54,6 +54,8 @@ class ExtendedSwitchBehaviour: public SwitchBehaviour {
 
     virtual void print();
 
+    bool extensionPeriodIsActive() { return extensionIsActive; }
+
     private:
 
     PresenceCondition extensionCondition;
@@ -72,10 +74,4 @@ class ExtendedSwitchBehaviour: public SwitchBehaviour {
      */
     bool extensionIsActive = false;
     std::optional<Time> prevExtensionIsValidTimeStamp = {};
-
-#ifdef DEBUG
-    public:
-    virtual bool extensionPeriodIsActive() { return extensionIsActive; }
-    private:
-#endif
 };

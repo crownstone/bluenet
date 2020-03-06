@@ -167,16 +167,12 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	behaviourDebug->activeBehaviours = 0;
 	behaviourDebug->extensionActive = 0;
 	behaviourDebug->activeTimeoutPeriod = 0;
+
 	auto behaviours = BehaviourStore::getActiveBehaviours();
+
 	for (uint8_t index = 0; index < behaviours.size(); ++index) {
-		if (Behaviour* currbehaviour = behaviours[index]) {
+		if (behaviours[index] != nullptr) {
 			behaviourDebug->storedBehaviours |= (1 << index);
-
-			behaviourDebug->activeTimeoutPeriod |=
-					currbehaviour->gracePeriodForPresenceIsActive() ? (1 << index) : 0;
-
-			behaviourDebug->extensionActive |=
-					currbehaviour->extensionPeriodIsActive() ? (1 << index) : 0;
 		}
 	}
 	bool checkBehaviours = true;
@@ -191,6 +187,7 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	if (!currentTime.isValid()) {
 		checkBehaviours = false;
 	}
+
 	if (checkBehaviours) {
 		for (uint8_t index = 0; index < behaviours.size(); ++index) {
 			if (SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(behaviours[index])) {
@@ -198,8 +195,17 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 				// note: this may also be an extendedswitchbehaviour - which is intended!
 				if (switchbehave->isValid(currentTime, currentPresence.value())) {
 					behaviourDebug->activeBehaviours |= (1 << index);
+
+					behaviourDebug->activeTimeoutPeriod |=
+							switchbehave->gracePeriodForPresenceIsActive() ? (1 << index) : 0;
 				}
 			}
+
+			if(ExtendedSwitchBehaviour* extendedswitchbehave = dynamic_cast<ExtendedSwitchBehaviour*>(behaviours[index])) {
+				behaviourDebug->extensionActive |=
+						extendedswitchbehave->extensionPeriodIsActive() ? (1 << index) : 0;
+			}
+
 			if (TwilightBehaviour * twilight = dynamic_cast<TwilightBehaviour*>(behaviours[index])) {
 				if (twilight->isValid(currentTime)) {
 					behaviourDebug->activeBehaviours |= (1 << index);

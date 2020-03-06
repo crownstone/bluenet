@@ -85,16 +85,4 @@ class Behaviour {
      * Returns until (excl.) which time on this behaviour applies.
      */
     TimeOfDay until() const;
-
-#ifdef DEBUG
-    /**
-     * Subclasses can implement these method to allow for debug information
-     * that can be sent to host.
-     *
-     * (not the prettiest design, as it ties knowledge of subclasses
-     * to the base class but hey - its debug only.)
-     */
-    virtual bool extensionPeriodIsActive() { return false; }
-    virtual bool gracePeriodForPresenceIsActive() { return false; }
-#endif
 };
