@@ -94,14 +94,36 @@ TimeOfDay Behaviour::until() const {
 }
 
 bool Behaviour::isValid(Time currenttime){
-//	LOGd("activeDays=%u dayOfWeek=%u timeofday=%02d:%02d:%02d", activeDays, static_cast<uint8_t>(currenttime.dayOfWeek()), currenttime.timeOfDay().h(), currenttime.timeOfDay().m(), currenttime.timeOfDay().s());
-    if (activeDays & static_cast<uint8_t>(currenttime.dayOfWeek())) {
-//    	LOGd("from() < until()=%u   from() <= currenttime=%u   currenttime < until()=%u", from() < until(), from() <= currenttime.timeOfDay(), currenttime.timeOfDay() < until());
-        return from() < until() // ensure proper midnight roll-over
-            ? (from() <= currenttime.timeOfDay() && currenttime.timeOfDay() < until())
-            : (from() <= currenttime.timeOfDay() || currenttime.timeOfDay() < until());
-    }
-    return false;
+	bool is_valid_interval_overlaps_midnight = from() >= until();
+
+	DayOfWeek today = currenttime.dayOfWeek();
+	DayOfWeek yesterday = today - 1;
+	uint32_t now = currenttime.timeOfDay();
+
+	if(is_valid_interval_overlaps_midnight){
+		// When a behaviour overlaps midnight, the part of [00:00,from())
+		// should use yesterday as active day comparison and the part
+		// [until(),00:00) should use today. This is to so that all isValid
+		// intervals have the same duration.
+		//
+		// Note: this even works for from() == until() == 00:00, in that
+		// case [today] is used. as active day as now<until() is always false
+		// and from()<=now is always true.
+		if( now < until() ){
+			return activeDays & static_cast<uint8_t>(yesterday);
+		}
+		if (from () <= now){
+			return activeDays & static_cast<uint8_t>(today);
+		}
+		return false;
+	} else {
+		// behaviour doesn't overlap midnight, just use expected logic here.
+		if (activeDays & static_cast<uint8_t>(today)) {
+			return from() <= now && now < until();
+		} else {
+			return false;
+		}
+	}
 }
 
 void Behaviour::print() {

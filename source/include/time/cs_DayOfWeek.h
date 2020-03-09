@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cstddef>
+#include <util/cs_Math.h>
 
 enum class DayOfWeek : uint8_t { 
     Sunday      = 1 << 0,
@@ -19,3 +20,21 @@ enum class DayOfWeek : uint8_t {
 };
 
 typedef uint8_t DayOfWeekBitMask;
+
+inline DayOfWeek operator+(DayOfWeek day, int offset){
+	offset = CsMath::mod(offset, 7);
+	uint16_t shifted_day = static_cast<uint8_t>(day) << offset;
+
+	if(shifted_day & 0b01111111){
+		// no overflow occured, simply return it.
+		return DayOfWeek(static_cast<uint8_t>(shifted_day & 0b01111111));
+	} else {
+		// passed week boundary by shifting so shift it back by 7.
+		return DayOfWeek(static_cast<uint8_t>((shifted_day >> 7) & 0b01111111));
+	}
+}
+
+inline DayOfWeek operator-(DayOfWeek day, int offset){
+	return day + -offset;
+}
+

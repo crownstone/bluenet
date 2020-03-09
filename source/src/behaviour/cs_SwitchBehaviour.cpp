@@ -66,6 +66,17 @@ bool SwitchBehaviour::isValid(Time currenttime, PresenceStateDescription current
     return isValid(currenttime) && isValid(currentpresence);
 }
 
+bool SwitchBehaviour::gracePeriodForPresenceIsActive(){
+	if(prevInRoomTimeStamp){
+		return CsMath::Interval(
+					SystemTime::up(),
+					presenceCondition.timeOut,
+					true)
+			.ClosureContains(*prevInRoomTimeStamp);
+	}
+	return false;
+}
+
 bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence) {
     LOGBehaviour_V("isValid(presence) called");
     if (!requiresPresence() && !requiresAbsence()) {
@@ -81,7 +92,7 @@ bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence) {
     	}
     	if (prevInRoomTimeStamp) {
 //    		presenceCondition.timeOut = 20;
-    		if (CsMath::Interval(SystemTime::up(), presenceCondition.timeOut, true).ClosureContains(*prevInRoomTimeStamp)) {
+    		if (gracePeriodForPresenceIsActive()) {
     			// presence invalid but we're in the grace period.
     			LOGBehaviour_V("left room(s) within time out: %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
     			return true;
@@ -104,7 +115,7 @@ bool SwitchBehaviour::isValid(PresenceStateDescription currentpresence) {
     	}
     	if (prevInRoomTimeStamp) {
 //    		presenceCondition.timeOut = 20;
-    		if (CsMath::Interval(SystemTime::up(), presenceCondition.timeOut, true).ClosureContains(*prevInRoomTimeStamp)) {
+    		if (gracePeriodForPresenceIsActive()) {
     			LOGBehaviour_V("left room(s) within time out: %d in [%d %d]", *prevInRoomTimeStamp, SystemTime::up() - presenceCondition.timeOut, SystemTime::up() );
     			return false;
     		} else {
