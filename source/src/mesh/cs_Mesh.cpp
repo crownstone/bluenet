@@ -521,8 +521,10 @@ void Mesh::provisionSelf(uint16_t id) {
 	LOGMeshInfo("appKeyHandle=%u appKey=", _appkeyHandle);
 	LOGMeshInfo("devKeyHandle=%u devKey=", _devkeyHandle);
 
+#if MESH_PERSISTENT_STORAGE == 0
 	retCode = net_state_iv_index_set(0,0);
 	APP_ERROR_CHECK(retCode);
+#endif
 
     // Bind config server to the device key
 	retCode = config_server_bind(_devkeyHandle);
