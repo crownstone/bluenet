@@ -89,6 +89,11 @@
 #define MESH_EXTERNAL_PERSISTENT_STORAGE 0
 #endif
 
+/**
+ * Enable active scanning.
+ */
+#define SCANNER_ACTIVE_SCANNING 1
+
 /** Device company identifier. */
 #define DEVICE_COMPANY_ID (CROWNSTONE_COMPANY_ID)
 
