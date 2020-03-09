@@ -79,6 +79,7 @@ SET(SUPERUSER_SWITCH                         "sudo"        CACHE STRING "Switch 
 
 MATH(EXPR SWO_PORT       "${GDB_PORT}+1")
 MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
+MATH(EXPR RTT_PORT       "${GDB_PORT}+16690")
 
 #######################################################################################################################
 # Show variables
@@ -619,7 +620,7 @@ ELSE()
 		# The gdb server can be started with configuration specific information
 		ADD_CUSTOM_TARGET(debug_server
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
-			COMMAND JLinkGDBServer -Device nRF52832_xxAA ${SERIAL_NUM_GDB_SELECT} ${SERIAL_NUM_GDB_PARAM} -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT}
+			COMMAND JLinkGDBServer -Device nRF52832_xxAA ${SERIAL_NUM_GDB_SELECT} ${SERIAL_NUM_GDB_PARAM} -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT} -RTTTelnetPort ${RTT_PORT}
 			COMMENT "Debug server, runs in background"
 			)
 		
@@ -631,7 +632,7 @@ ELSE()
 		
 		ADD_CUSTOM_TARGET(rtt_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** RTT client, keep running in separate shell"
-			COMMAND JLinkRTTClient
+			COMMAND JLinkRTTClient -RTTTelnetPort ${RTT_PORT}
 			COMMENT "RTT client, runs in background"
 			)
 		
