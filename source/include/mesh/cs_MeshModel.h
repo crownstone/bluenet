@@ -14,7 +14,14 @@ extern "C" {
 #include "access_reliable.h"
 }
 
-//#define MESH_MODEL_TEST_MSG_DROP_ENABLED
+/*
+ * 0 to disable test.
+ * 1 for unacked, unsegmented drop test.
+ *   This assumes you have a node with id 2 (sending node).
+ * 2 for targeted, segmented acked test.
+ *   This assumes you have 2 nodes: one with id 1 (receiving node), and one with id 2 (sending node).
+ */
+#define MESH_MODEL_TEST_MSG 0
 
 #define MESH_MODEL_QUEUE_SIZE 20
 
@@ -31,12 +38,14 @@ extern "C" {
 
 struct __attribute__((__packed__)) cs_mesh_model_queued_item_t {
 	bool priority : 1;
-	uint8_t repeats : 7;
-//	stone_id_t targetId;   // 0 for broadcast
+	bool reliable : 1;
+	uint8_t repeats : 6;
+	stone_id_t targetId = 0;   // 0 for broadcast
 	uint8_t type;
-	uint16_t id;
+	uint16_t id; // ID that can freely be used to find similar items.
 	uint8_t msgSize;
-	uint8_t msg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
+//	uint8_t msg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
+	uint8_t* msgPtr = NULL;
 };
 
 struct cs_mesh_model_ext_state_t {
@@ -70,12 +79,16 @@ public:
 	/** Internal usage */
 	void handleReliableStatus(access_reliable_status_t status);
 
-#ifdef MESH_MODEL_TEST_MSG_DROP_ENABLED
-	void sendTestMsg();
+#if MESH_MODEL_TEST_MSG == 1
 	uint32_t _nextSendCounter = 1;
 	uint32_t _lastReceivedCounter = 0;
 	uint32_t _received = 0;
 	uint32_t _dropped = 0;
+#elif MESH_MODEL_TEST_MSG == 2
+	uint32_t _nextSendCounter = 1;
+	uint32_t _acked = 0;
+	uint32_t _timedout = 0;
+	uint32_t _canceled = 0;
 #endif
 
 private:
@@ -94,11 +107,13 @@ private:
 
 	cs_mesh_model_queued_item_t _queue[MESH_MODEL_QUEUE_SIZE] = {0};
 	uint8_t _queueSendIndex = 0;
-	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, uint16_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
+	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
 	cs_ret_code_t remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id);
 	int getNextItemInQueue(bool priority); // Returns -1 if none found.
 	bool sendMsgFromQueue(); // Returns true when message was sent, false when no more messages to be sent.
 	void processQueue();
+
+	cs_ret_code_t sendTestMsg();
 
 	// handlers for incoming mesh messages
 	void handleTest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize);

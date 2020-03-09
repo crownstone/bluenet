@@ -122,6 +122,7 @@ private:
 	uint8_t _devkey[NRF_MESH_KEY_SIZE];
 	dsm_handle_t _devkeyHandle = DSM_HANDLE_INVALID;
 	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
+	dsm_handle_t _targetAddressHandle = DSM_HANDLE_INVALID;
 
 	MeshAdvertiser _advertiser;
 	MeshModel _model;

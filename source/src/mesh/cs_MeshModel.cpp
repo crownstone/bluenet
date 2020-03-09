@@ -31,8 +31,8 @@ extern "C" {
 #error "TICK_INTERVAL_MS must not be larger than MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS"
 #endif
 
-#define LOGMeshModelInfo    LOGd
-#define LOGMeshModelDebug   LOGnone
+#define LOGMeshModelInfo    LOGi
+#define LOGMeshModelDebug   LOGd
 #define LOGMeshModelVerbose LOGnone
 
 
@@ -93,7 +93,22 @@ cs_ret_code_t MeshModel::sendMsg(cs_mesh_msg_t *meshMsg) {
 //	size16_t payloadSize;
 //	MeshModelPacketHelper::getPayload(meshMsg->msg, meshMsg->size, payload, payloadSize);
 	remFromQueue(meshMsg->type, 0);
-	return addToQueue(meshMsg->type, 0, meshMsg->payload, meshMsg->size, repeats, priority);
+	return addToQueue(meshMsg->type, 0, 0, meshMsg->payload, meshMsg->size, repeats, priority);
+}
+
+cs_ret_code_t MeshModel::sendTestMsg() {
+	cs_mesh_model_msg_test_t test;
+#if MESH_MODEL_TEST_MSG != 0
+	test.counter = _nextSendCounter++;
+#else
+	test.counter = 0;
+#endif
+	for (uint8_t i=0; i<sizeof(test.dummy); ++i) {
+		test.dummy[i] = i;
+	}
+	uint8_t repeats = 1;
+	LOGd("sendTestMsg counter=%u", test.counter);
+	return addToQueue(CS_MESH_MODEL_TYPE_TEST, 0, 0, (uint8_t*)&test, sizeof(test), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats) {
@@ -115,7 +130,7 @@ cs_ret_code_t MeshModel::sendMultiSwitchItem(const internal_multi_switch_item_t*
 	}
 	// Remove old messages of same type and with same target id.
 	remFromQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id);
-	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id, (uint8_t*)(&meshItem), sizeof(meshItem), repeats, true);
+	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, 0, item->id, (uint8_t*)(&meshItem), sizeof(meshItem), repeats, true);
 }
 
 cs_ret_code_t MeshModel::sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats) {
@@ -124,119 +139,46 @@ cs_ret_code_t MeshModel::sendTime(const cs_mesh_model_msg_time_t* item, uint8_t 
 	}
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats) {
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	return addToQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats) {
-	// Don't remove old messages of same type, as they may have the location of a another profile.
-//	remFromQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	// Don't remove old messages of same type, as they may have other profile location combinations.
+	// Remove old messages of same type, location, and profile.
+	uint16_t id = (item->location << 8) + item->profile;
+//	remFromQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, id);
+	return addToQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0, id, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t repeats) {
-	// Don't remove old messages of same type, as they may have the data of a another device.
-//	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	// Remove old messages of same type, and device id, as only the latest register is of interest.
+	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, item->deviceId);
+	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0, item->deviceId, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t repeats) {
-	// Don't remove old messages of same type, as they may have the data of a another device.
-//	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	// Remove old messages of same type, and device id, as only the latest token is of interest.
+	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, item->deviceId);
+	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, item->deviceId, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* item, uint8_t repeats) {
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshModel::sendReliableMsg(const uint8_t* data, uint16_t len) {
 	return ERR_NOT_IMPLEMENTED;
 }
 
-/**
- * Send a message over the mesh via publish, without reply.
- *
- * Note, repeats should be larger than zero. If not, nothing will be send.
- *
- * TODO: wait for NRF_MESH_EVT_TX_COMPLETE before sending next msg (in case of segmented msg?).
- * TODO: repeat publishing the msg.
- */
-cs_ret_code_t MeshModel::_sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats) {
-	access_message_tx_t accessMsg;
-	accessMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_MSG;
-	accessMsg.p_buffer = data;
-	accessMsg.length = len;
-	accessMsg.force_segmented = false;
-	accessMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
-	uint32_t status = NRF_SUCCESS;
-	for (int i=0; i<repeats; ++i) {
-		accessMsg.access_token = nrf_mesh_unique_token_get();
-		status = access_model_publish(_accessHandle, &accessMsg);
-		if (status != NRF_SUCCESS) {
-			LOGMeshModelInfo("sendMsg failed: %u", status);
-			break;
-		}
-	}
-	return status;
-}
 
-cs_ret_code_t MeshModel::sendReply(const access_message_rx_t * accessMsg) {
-//	size16_t msgSize = MESH_HEADER_SIZE;
-//	uint8_t msg[msgSize];
-	size16_t msgSize = sizeof(_replyMsg);
-	uint8_t* msg = _replyMsg;
-	MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_ACK, NULL, 0, msg, msgSize);
-
-//	access_message_tx_t replyMsg;
-	_accessReplyMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
-	_accessReplyMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_REPLY;
-	_accessReplyMsg.p_buffer = msg;
-	_accessReplyMsg.length = msgSize;
-	_accessReplyMsg.force_segmented = false;
-	_accessReplyMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
-	_accessReplyMsg.access_token = nrf_mesh_unique_token_get();
-
-	uint32_t retVal = access_model_reply(_accessHandle, accessMsg, &_accessReplyMsg);
-	LOGMeshModelVerbose("send reply %u", retVal);
-	return retVal;
-}
-
-// If you send segmented packets to a unicast address, the receiver have to ACK all the packets and if they aren't received they have to be sent again.
-// If you send the packets to a group address, there will be no ACK so the packets have to be sent multiple times to compensate.
-// Number of retries are set in  TRANSPORT_SAR_TX_RETRIES_DEFAULT (4) and can be adjusted with NRF_MESH_OPT_TRS_SAR_TX_RETRIES in nrf_mesh_opt.h.
-// You can also adjust the timing in nrf_mesh_opt.h.
-cs_ret_code_t MeshModel::_sendReliableMsg(const uint8_t* data, uint16_t len) {
-	if (!access_reliable_model_is_free(_accessHandle)) {
-		return ERR_BUSY;
-	}
-//	access_reliable_t accessReliableMsg;
-	memcpy(_reliableMsg, data, len); // Data has to be valid until reply is received.
-	access_message_tx_t* accessMsg = &(_accessReliableMsg.message);
-	accessMsg->opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessMsg->opcode.opcode = CS_MESH_MODEL_OPCODE_RELIABLE_MSG;
-	accessMsg->p_buffer = _reliableMsg;
-	accessMsg->length = len;
-	accessMsg->force_segmented = false;
-	accessMsg->transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
-	accessMsg->access_token = nrf_mesh_unique_token_get();
-
-	_accessReliableMsg.model_handle = _accessHandle;
-	_accessReliableMsg.reply_opcode.company_id = CROWNSTONE_COMPANY_ID;
-	_accessReliableMsg.reply_opcode.opcode = CS_MESH_MODEL_OPCODE_REPLY;
-	_accessReliableMsg.status_cb = cs_mesh_model_reply_status_handler;
-	// Reliable message timeout in microseconds.
-	_accessReliableMsg.timeout = 5000000; // MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT
-	return access_model_reliable_publish(&_accessReliableMsg);
-}
 
 void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	if (accessMsg->meta_data.p_core_metadata->source != NRF_MESH_RX_SOURCE_LOOPBACK) {
@@ -244,7 +186,6 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 		printMeshAddress("  Src: ", &(accessMsg->meta_data.src));
 		printMeshAddress("  Dst: ", &(accessMsg->meta_data.dst));
 		LOGMeshModelVerbose("ownAddress=%u  Data:", _ownAddress);
-//		BLEutil::printArray(msg, size);
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
 		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i\n", accessMsg->opcode.opcode, accessMsg->meta_data.appkey_handle, accessMsg->meta_data.subnet_handle, accessMsg->meta_data.ttl, getRssi(accessMsg->meta_data.p_core_metadata));
 	}
@@ -259,6 +200,7 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 	if (ownMsg) {
 		return;
 	}
+	BLEutil::printArray(msg, size);
 	if (accessMsg->opcode.opcode == CS_MESH_MODEL_OPCODE_RELIABLE_MSG) {
 		LOGi("sendReply");
 		sendReply(accessMsg);
@@ -335,16 +277,16 @@ void MeshModel::handleMsg(const access_message_rx_t * accessMsg) {
 }
 	
 void MeshModel::handleTest(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
-#ifdef MESH_MODEL_TEST_MSG_DROP_ENABLED
 	cs_mesh_model_msg_test_t* test = (cs_mesh_model_msg_test_t*)payload;
+	LOGi("received test counter=%u", test->counter);
+#if MESH_MODEL_TEST_MSG == 1
 	if (_lastReceivedCounter == 0) {
 		_lastReceivedCounter = test->counter;
-		break;
+		return;
 	}
 	if (_lastReceivedCounter == test->counter) {
-		// Ignore repeats
 		LOGi("received same counter");
-		break;
+		return;
 	}
 	uint32_t expectedCounter = _lastReceivedCounter + 1;
 	_lastReceivedCounter = test->counter;
@@ -359,7 +301,7 @@ void MeshModel::handleTest(const access_message_rx_t * accessMsg, uint8_t* paylo
 		_dropped += test->counter - expectedCounter;
 		_received++;
 	}
-	LOGi("received=%u dropped=%u (%u%%)", _received, _dropped, (_dropped * 100) / (_received + _dropped));
+	LOGi("received=%u dropped=%u received=%u%%", _received, _dropped, (_received * 100) / (_received + _dropped));
 #endif
 }
 
@@ -391,25 +333,25 @@ void MeshModel::handleCmdNoop(const access_message_rx_t * accessMsg, uint8_t* pa
 
 void MeshModel::handleCmdMultiSwitch(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_multi_switch_item_t* item = (cs_mesh_model_msg_multi_switch_item_t*) payload;
-		if (item->id == _ownId) {
-			LOGMeshModelInfo("received multi switch for me");
-			if (memcmp(&_lastReceivedMultiSwitch, item, sizeof(*item)) == 0) {
-				LOGMeshModelDebug("ignore similar multi switch");
-				return;
-			}
-			memcpy(&_lastReceivedMultiSwitch, item, sizeof(*item));
-
-			TYPIFY(CMD_MULTI_SWITCH) internalItem;
-			internalItem.id = item->id;
-			internalItem.cmd.switchCmd = item->switchCmd;
-			internalItem.cmd.delay = item->delay;
-			internalItem.cmd.source = item->source;
-			internalItem.cmd.source.flagExternal = true;
-
-			LOGi("dispatch multi switch");
-			event_t event(CS_TYPE::CMD_MULTI_SWITCH, &internalItem, sizeof(internalItem));
-			EventDispatcher::getInstance().dispatch(event);
+	if (item->id == _ownId) {
+		LOGMeshModelInfo("received multi switch for me");
+		if (memcmp(&_lastReceivedMultiSwitch, item, sizeof(*item)) == 0) {
+			LOGMeshModelDebug("ignore similar multi switch");
+			return;
 		}
+		memcpy(&_lastReceivedMultiSwitch, item, sizeof(*item));
+
+		TYPIFY(CMD_MULTI_SWITCH) internalItem;
+		internalItem.id = item->id;
+		internalItem.cmd.switchCmd = item->switchCmd;
+		internalItem.cmd.delay = item->delay;
+		internalItem.cmd.source = item->source;
+		internalItem.cmd.source.flagExternal = true;
+
+		LOGi("dispatch multi switch");
+		event_t event(CS_TYPE::CMD_MULTI_SWITCH, &internalItem, sizeof(internalItem));
+		EventDispatcher::getInstance().dispatch(event);
+	}
 }
 
 void MeshModel::handleState0(const access_message_rx_t * accessMsg, uint8_t* payload, size16_t payloadSize) {
@@ -544,49 +486,115 @@ void MeshModel::handleSyncRequest(const access_message_rx_t * accessMsg, uint8_t
 	event.dispatch();
 }
 
+
+
+/**
+ * Send a message over the mesh via publish, without reply.
+ *
+ * Note, repeats should be larger than zero. If not, nothing will be send.
+ *
+ * TODO: wait for NRF_MESH_EVT_TX_COMPLETE before sending next msg (especially in case of segmented msg).
+ */
+cs_ret_code_t MeshModel::_sendMsg(const uint8_t* data, uint16_t len, uint8_t repeats) {
+	access_message_tx_t accessMsg;
+	accessMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
+	accessMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_MSG;
+	accessMsg.p_buffer = data;
+	accessMsg.length = len;
+	accessMsg.force_segmented = false;
+	accessMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
+	uint32_t status = NRF_SUCCESS;
+	for (int i=0; i<repeats; ++i) {
+		accessMsg.access_token = nrf_mesh_unique_token_get();
+		status = access_model_publish(_accessHandle, &accessMsg);
+		if (status != NRF_SUCCESS) {
+			LOGMeshModelInfo("sendMsg failed: %u", status);
+			break;
+		}
+	}
+	return status;
+}
+
+cs_ret_code_t MeshModel::sendReply(const access_message_rx_t * accessMsg) {
+//	size16_t msgSize = MESH_HEADER_SIZE;
+//	uint8_t msg[msgSize];
+	size16_t msgSize = sizeof(_replyMsg);
+	uint8_t* msg = _replyMsg;
+	MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_ACK, NULL, 0, msg, msgSize);
+
+//	access_message_tx_t replyMsg;
+	_accessReplyMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
+	_accessReplyMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_REPLY;
+	_accessReplyMsg.p_buffer = msg;
+	_accessReplyMsg.length = msgSize;
+	_accessReplyMsg.force_segmented = false;
+	_accessReplyMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
+	_accessReplyMsg.access_token = nrf_mesh_unique_token_get();
+
+	uint32_t retVal = access_model_reply(_accessHandle, accessMsg, &_accessReplyMsg);
+	LOGMeshModelVerbose("send reply %u", retVal);
+	return retVal;
+}
+
+// If you send segmented packets to a unicast address, the receiver have to ACK all the packets and if they aren't received they have to be sent again.
+// If you send the packets to a group address, there will be no ACK so the packets have to be sent multiple times to compensate.
+// Number of retries are set in  TRANSPORT_SAR_TX_RETRIES_DEFAULT (4) and can be adjusted with NRF_MESH_OPT_TRS_SAR_TX_RETRIES in nrf_mesh_opt.h.
+// You can also adjust the timing in nrf_mesh_opt.h.
+cs_ret_code_t MeshModel::_sendReliableMsg(const uint8_t* data, uint16_t len) {
+	if (!access_reliable_model_is_free(_accessHandle)) {
+		LOGw("Busy");
+		return ERR_BUSY;
+	}
+//	access_reliable_t accessReliableMsg;
+	assert(len <= sizeof(_reliableMsg), "reliable msg too large");
+	memcpy(_reliableMsg, data, len); // Data has to be valid until reply is received.
+	access_message_tx_t* accessMsg = &(_accessReliableMsg.message);
+	accessMsg->opcode.company_id = CROWNSTONE_COMPANY_ID;
+	accessMsg->opcode.opcode = CS_MESH_MODEL_OPCODE_RELIABLE_MSG;
+	accessMsg->p_buffer = _reliableMsg;
+	accessMsg->length = len;
+	accessMsg->force_segmented = false;
+	accessMsg->transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
+	accessMsg->access_token = nrf_mesh_unique_token_get();
+
+	_accessReliableMsg.model_handle = _accessHandle;
+	_accessReliableMsg.reply_opcode.company_id = CROWNSTONE_COMPANY_ID;
+	_accessReliableMsg.reply_opcode.opcode = CS_MESH_MODEL_OPCODE_REPLY;
+	_accessReliableMsg.status_cb = cs_mesh_model_reply_status_handler;
+	// Reliable message timeout in microseconds. Usually MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT
+	_accessReliableMsg.timeout = 10 * 1000 * 1000;
+	uint32_t retVal = access_model_reliable_publish(&_accessReliableMsg);
+	LOGd("reliable send ret=%u", retVal);
+	return retVal;
+}
+
 void MeshModel::handleReliableStatus(access_reliable_status_t status) {
 	switch (status) {
-	case ACCESS_RELIABLE_TRANSFER_SUCCESS:
-//		LOGMeshModelVerbose("reliable msg success");
-		LOGi("reliable msg success");
-//		_received++;
-//		LOGi("received=%u dropped=%u (%u%%)", _received, _dropped, (_dropped * 100) / (_received + _dropped));
-		break;
-	case ACCESS_RELIABLE_TRANSFER_TIMEOUT:
-		LOGw("reliable msg timeout");
-//		_dropped++;
-//		LOGi("received=%u dropped=%u (%u%%)", _received, _dropped, (_dropped * 100) / (_received + _dropped));
-		break;
-	case ACCESS_RELIABLE_TRANSFER_CANCELLED:
-		LOGi("reliable msg cancelled");
-		break;
-	}
-}
-
-
-#ifdef MESH_MODEL_TEST_MSG_DROP_ENABLED
-void MeshModel::sendTestMsg() {
-//	if (_ownAddress != 17) {
-//		return;
-//	}
-	size16_t msgSize = MESH_HEADER_SIZE + sizeof(cs_mesh_model_msg_test_t);
-	uint8_t msg[msgSize];
-	cs_mesh_model_msg_test_t test;
-	test.counter = _nextSendCounter;
-	MeshModelPacketHelper::setMeshMessage(CS_MESH_MODEL_TYPE_TEST, (uint8_t*)&test, sizeof(test), msg, msgSize);
-	uint32_t retVal = sendMsg(msg, msgSize, 8);
-//	uint32_t retVal = sendReliableMsg(msg, msgSize);
-	if (retVal != NRF_SUCCESS) {
-		LOGw("sendTestMsg retVal=%u", retVal);
-	}
-	else {
-		LOGMeshModelVerbose("sendTestMsg retVal=%u", retVal);
-	}
-	if (retVal == NRF_SUCCESS) {
-		++_nextSendCounter;
-	}
-}
+		case ACCESS_RELIABLE_TRANSFER_SUCCESS:
+			LOGi("reliable msg success");
+#if MESH_MODEL_TEST_MSG == 2
+			_acked++;
+			LOGi("acked=%u timedout=%u canceled=%u (acked=%u%%)", _acked, _timedout, _canceled, (_acked * 100) / (_acked + _timedout + _canceled));
 #endif
+			break;
+	case ACCESS_RELIABLE_TRANSFER_TIMEOUT:
+			LOGw("reliable msg timeout");
+#if MESH_MODEL_TEST_MSG == 2
+			_timedout++;
+			LOGi("acked=%u timedout=%u canceled=%u (acked=%u%%)", _acked, _timedout, _canceled, (_acked * 100) / (_acked + _timedout + _canceled));
+#endif
+			break;
+	case ACCESS_RELIABLE_TRANSFER_CANCELLED:
+			LOGw("reliable msg cancelled");
+#if MESH_MODEL_TEST_MSG == 2
+			_canceled++;
+			LOGi("acked=%u timedout=%u canceled=%u (acked=%u%%)", _acked, _timedout, _canceled, (_acked * 100) / (_acked + _timedout + _canceled));
+#endif
+			break;
+	}
+}
+
+
 
 /**
  * Add a msg to an empty spot in the queue (repeats == 0).
@@ -594,27 +602,48 @@ void MeshModel::sendTestMsg() {
  * Then set the new SendIndex at the newly added item, so that it will be send first.
  * We do the reverse iterate, so that the old SendIndex should be handled early (for a large enough queue).
  */
-cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, uint16_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority) {
+cs_ret_code_t MeshModel::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority) {
 	LOGMeshModelDebug("addToQueue type=%u id=%u size=%u repeats=%u priority=%u", type, id, payloadSize, repeats, priority);
-	assert(payloadSize <= (MAX_MESH_MSG_NON_SEGMENTED_SIZE), "No segmented msgs for now");
-	assert(payloadSize <= sizeof(_queue[0].msg), "Payload too large");
+#if MESH_MODEL_TEST_MSG != 0
+	if (type != CS_MESH_MODEL_TYPE_TEST) {
+		return ERR_SUCCESS;
+	}
+#endif
+	size16_t msgSize = MeshModelPacketHelper::getMeshMessageSize(payloadSize);
+//	assert(payloadSize <= (MAX_MESH_MSG_NON_SEGMENTED_SIZE), "No segmented msgs for now");
+//	assert(payloadSize <= sizeof(_queue[0].msg), "Payload too large");
+	assert(msgSize <= MAX_MESH_MSG_SIZE, "Message too large");
 	uint8_t index;
 //	for (int i = _queueSendIndex; i < _queueSendIndex + MESH_MODEL_QUEUE_SIZE; ++i) {
 	for (int i = _queueSendIndex + MESH_MODEL_QUEUE_SIZE; i > _queueSendIndex; --i) {
 		index = i % MESH_MODEL_QUEUE_SIZE;
 		cs_mesh_model_queued_item_t* item = &(_queue[index]);
 		if (item->repeats == 0) {
-			item->priority = priority;
-			item->repeats = repeats;
-			item->id = id;
-			item->type = type;
-			size16_t msgSize = sizeof(item->msg);
-			if (!MeshModelPacketHelper::setMeshMessage(type, payload, payloadSize, item->msg, msgSize)) {
+			item->msgPtr = (uint8_t*)malloc(msgSize);
+			LOGMeshModelVerbose("alloc %p size=%u", item->msgPtr, msgSize);
+			if (item->msgPtr == NULL) {
+				return ERR_NO_SPACE;
+			}
+			if (!MeshModelPacketHelper::setMeshMessage(type, payload, payloadSize, item->msgPtr, msgSize)) {
+				LOGMeshModelVerbose("free %p", item->msgPtr);
+				free(item->msgPtr);
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
+
+			item->priority = priority;
+			item->reliable = (msgSize > MAX_MESH_MSG_NON_SEGMENTED_SIZE); // Targeted segmented msgs are acked anyway, but now we actually get the result.
+//			item->reliable = false;
+			// return before setting repeats
+			item->repeats = repeats;
+			item->targetId = targetId;
+			item->type = type;
+			item->id = id;
 			item->msgSize = msgSize;
 			LOGMeshModelVerbose("added to ind=%u", index);
 			_queueSendIndex = index;
+
+			// TODO: start sending from queue.
+			// sendMsgFromQueue can keep up how many msgs have been sent this tick, so it knows how many can still be sent.
 			return ERR_SUCCESS;
 		}
 	}
@@ -626,6 +655,8 @@ cs_ret_code_t MeshModel::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id
 	for (int i = 0; i < MESH_MODEL_QUEUE_SIZE; ++i) {
 		if (_queue[i].id == id && _queue[i].type == type && _queue[i].repeats != 0) {
 			_queue[i].repeats = 0;
+			LOGMeshModelVerbose("free %p", _queue[i].msgPtr);
+			free(_queue[i].msgPtr);
 			LOGMeshModelDebug("removed from queue: ind=%u", i);
 			return ERR_SUCCESS;
 		}
@@ -650,7 +681,6 @@ int MeshModel::getNextItemInQueue(bool priority) {
 }
 
 /** Generate and send a message.
- * TODO: for now it's just 1 item per message, later we could add multiple items to a message.
  * TODO: item->id can be used for unicast address.
  * TODO: use opcode for type.
  */
@@ -669,15 +699,24 @@ bool MeshModel::sendMsgFromQueue() {
 			// Update time in set time command.
 			uint8_t* payload = NULL;
 			size16_t payloadSize = 0;
-			MeshModelPacketHelper::getPayload(item->msg, item->msgSize, payload, payloadSize);
+			MeshModelPacketHelper::getPayload(item->msgPtr, item->msgSize, payload, payloadSize);
 			if (payloadSize == sizeof(cs_mesh_model_msg_time_t)) {
 				cs_mesh_model_msg_time_t* timePayload = (cs_mesh_model_msg_time_t*) payload;
 				timePayload->timestamp = time.timestamp();
 			}
 		}
 	}
-	_sendMsg(item->msg, item->msgSize, 1);
-	--(item->repeats);
+	if (item->reliable) {
+		_sendReliableMsg(item->msgPtr, item->msgSize);
+	}
+	else {
+		_sendMsg(item->msgPtr, item->msgSize, 1);
+		// TOOD: check return code, maybe retry again later.
+	}
+	if (--(item->repeats) == 0) {
+		LOGMeshModelVerbose("free %p", item->msgPtr);
+		free(item->msgPtr);
+	}
 	LOGMeshModelInfo("sent ind=%u repeats_left=%u type=%u id=%u", index, item->repeats, item->type, item->id);
 //	BLEutil::printArray(meshMsg.msg, meshMsg.size);
 
@@ -688,6 +727,11 @@ bool MeshModel::sendMsgFromQueue() {
 
 
 void MeshModel::processQueue() {
+#if MESH_MODEL_TEST_MSG == 1
+	if (_ownAddress == 2) {
+		sendTestMsg();
+	}
+#endif
 	for (int i=0; i<MESH_MODEL_QUEUE_BURST_COUNT; ++i) {
 		if (!sendMsgFromQueue()) {
 			break;
@@ -700,6 +744,11 @@ void MeshModel::tick(TYPIFY(EVT_TICK) tickCount) {
 	if (tickCount % (MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS / TICK_INTERVAL_MS) == 0) {
 		processQueue();
 	}
+#if MESH_MODEL_TEST_MSG == 2
+	if (_ownAddress == 2 && tickCount % (1000 / TICK_INTERVAL_MS) == 0) {
+		sendTestMsg();
+	}
+#endif
 }
 
 int8_t MeshModel::getRssi(const nrf_mesh_rx_metadata_t* metaData) {

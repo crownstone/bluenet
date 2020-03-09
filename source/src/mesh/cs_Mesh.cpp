@@ -28,6 +28,7 @@ extern "C" {
 #include "log.h"
 #include "access_internal.h"
 #include "flash_manager_defrag.h"
+#include "transport.h"
 }
 
 #include "cfg/cs_Boards.h"
@@ -85,6 +86,7 @@ static uint32_t cs_mesh_read_cb(uint16_t handle, void* data_ptr, uint16_t data_s
 	assert(BLEutil::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	State::getInstance().get(type, data_ptr, data_size);
+	BLEutil::printArray(data_ptr, data_size);
 	return NRF_SUCCESS;
 }
 
@@ -248,10 +250,10 @@ static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
 		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&_scannedDevice, sizeof(_scannedDevice));
 		event.dispatch();
 
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
-		const uint8_t* addr = p_rx_data->p_metadata->params.scanner.adv_addr.addr;
-		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "scanned: %02X:%02X:%02X:%02X:%02X:%02X type=%u chan=%u\n", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], p_rx_data->p_metadata->params.scanner.adv_type, p_rx_data->p_metadata->params.scanner.channel);
-#endif
+//#if CS_SERIAL_NRF_LOG_ENABLED == 1
+//		const uint8_t* addr = p_rx_data->p_metadata->params.scanner.adv_addr.addr;
+//		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "scanned: %02X:%02X:%02X:%02X:%02X:%02X type=%u chan=%u\n", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], p_rx_data->p_metadata->params.scanner.adv_type, p_rx_data->p_metadata->params.scanner.channel);
+//#endif
 
 		break;
 	}
@@ -390,8 +392,26 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	APP_ERROR_CHECK(retCode);
 	retCode = access_model_publish_address_set(handle, _groupAddressHandle);
 	APP_ERROR_CHECK(retCode);
+#if MESH_MODEL_TEST_MSG == 2
+	if (_ownAddress == 2) {
+		// Publish to unicast address (of crownstone with id 1).
+		retCode = dsm_address_publish_add(1, &_targetAddressHandle);
+		APP_ERROR_CHECK(retCode);
+		retCode = access_model_publish_address_set(handle, _targetAddressHandle);
+		APP_ERROR_CHECK(retCode);
+	}
+#endif
 	retCode = access_model_subscription_add(handle, _groupAddressHandle);
 	APP_ERROR_CHECK(retCode);
+
+	// Settings for single target segmented messages.
+	nrf_mesh_opt_t opt;
+	opt.len = sizeof(opt.opt.val);
+	opt.opt.val = 4;
+	transport_opt_set(NRF_MESH_OPT_TRS_SAR_TX_RETRIES, &opt);
+
+	opt.opt.val = 250 * 1000; // μs
+	transport_opt_set(NRF_MESH_OPT_TRS_SAR_TX_RETRY_TIMEOUT_BASE, &opt);
 
 	return ERR_SUCCESS;
 }
@@ -585,9 +605,6 @@ void Mesh::handleEvent(event_t & event) {
 			[[maybe_unused]] const scanner_stats_t * stats = scanner_stats_get();
 			LOGMeshDebug("success=%u crcFail=%u lenFail=%u memFail=%u", stats->successful_receives, stats->crc_failures, stats->length_out_of_bounds, stats->out_of_memory);
 		}
-//		if (tickCount % (5000/TICK_INTERVAL_MS) == 0) {
-//			_model.sendTestMsg();
-//		}
 		if (_sendStateTimeCountdown-- == 0) {
 			uint8_t rand8;
 			RNG::fillBuffer(&rand8, 1);
