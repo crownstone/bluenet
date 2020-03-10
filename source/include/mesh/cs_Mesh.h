@@ -7,18 +7,29 @@
 
 #pragma once
 
-#include "events/cs_EventListener.h"
-#include "cfg/cs_Boards.h"
-#include "common/cs_Types.h"
-#include "mesh/cs_MeshModel.h"
+#include <cfg/cs_Boards.h>
+#include <common/cs_Types.h>
+#include <events/cs_EventListener.h>
 #include <mesh/cs_MeshAdvertiser.h>
+#include <mesh/cs_MeshCore.h>
+#include <mesh/cs_MeshModelMulticast.h>
+#include <mesh/cs_MeshModelUnicast.h>
+#include <mesh/cs_MeshMsgHandler.h>
+#include <mesh/cs_MeshMsgSender.h>
+#include <mesh/cs_MeshScanner.h>
 
-extern "C" {
-#include <nrf_mesh_config_app.h>
-#include <nrf_mesh_defines.h>
-#include <device_state_manager.h>
-}
-
+/**
+ * Class that manages all mesh classes:
+ * - Core
+ * - Models
+ * - Message handler
+ * - Message sender
+ * - Scanner
+ * - Advertiser
+ * Also:
+ * - Starts and retries sync requests.
+ * - Sends crownstone state at a regular interval.
+ */
 class Mesh : public EventListener {
 public:
 	/**
@@ -35,16 +46,13 @@ public:
 	cs_ret_code_t init(const boards_config_t& board);
 
 	/**
-	 * Whether flash pages have valid data.
+	 * Checks if flash pages have valid data.
 	 *
-	 * If not, the pages should be erased.
+	 * If not, the pages will be erased, wait for event EVT_MESH_PAGES_ERASED.
+	 *
+	 * @return true when valid.
 	 */
-	bool isFlashValid();
-
-	/**
-	 * Erase all flash pages used by the mesh for storage.
-	 */
-	cs_ret_code_t eraseAllPages();
+	bool checkFlashValid();
 
 	/**
 	 * Start the mesh.
@@ -61,14 +69,6 @@ public:
 	void stop();
 
 	/**
-	 * Factory reset.
-	 *
-	 * Clear all stored data.
-	 * Will send event EVT_MESH_FACTORY_RESET when done.
-	 */
-	void factoryReset();
-
-	/**
 	 * Init the advertiser.
 	 */
 	void initAdvertiser();
@@ -78,20 +78,10 @@ public:
 	 */
 	void advertise(IBeacon* ibeacon);
 
+	/**
+	 * Start synchronization of data with other nodes in mesh.
+	 */
 	void startSync();
-
-	/**
-	 * Internal usage
-	 */
-	static void staticModelsInitCallback() {
-		Mesh::getInstance().modelsInitCallback();
-	}
-	void modelsInitCallback();
-
-	/**
-	 * Internal usage
-	 */
-	void factoryResetDone();
 
 	/**
 	 * Internal usage
@@ -108,26 +98,16 @@ private:
 	//! Assignment operator, singleton, thus made private
 	Mesh& operator=(Mesh const &) = delete;
 
-	void provisionSelf(uint16_t id);
-	void provisionLoad();
+	MeshCore*          _core;
+	MeshModelMulticast _modelMulticast;
+	MeshModelUnicast   _modelUnicast;
+	MeshMsgHandler     _msgHandler;
+	MeshMsgSender      _msgSender;
+	MeshAdvertiser     _advertiser;
+	MeshScanner        _scanner;
 
-	bool _isProvisioned = false;
-	/** Address of this node */
-	uint16_t _ownAddress;
-
-	uint8_t _netkey[NRF_MESH_KEY_SIZE];
-	dsm_handle_t _netkeyHandle = DSM_HANDLE_INVALID;
-	uint8_t _appkey[NRF_MESH_KEY_SIZE];
-	dsm_handle_t _appkeyHandle = DSM_HANDLE_INVALID;
-	uint8_t _devkey[NRF_MESH_KEY_SIZE];
-	dsm_handle_t _devkeyHandle = DSM_HANDLE_INVALID;
-	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
-	dsm_handle_t _targetAddressHandle = DSM_HANDLE_INVALID;
-
-	MeshAdvertiser _advertiser;
-	MeshModel _model;
+	// Sync request
 	uint32_t _sendStateTimeCountdown = MESH_SEND_TIME_INTERVAL_MS / TICK_INTERVAL_MS;
-	bool _performingFactoryReset = false;
 	bool _synced = false;
 	uint32_t _syncCountdown = -1;
 	uint32_t _syncFailedCountdown = 0;
@@ -145,7 +125,4 @@ private:
 	 * @return false When nothing had to be requested, so everything is synced.
 	 */
 	bool requestSync(bool propagateSyncMessageOverMesh = true);
-
-
-	void getFlashPages(void* & startAddress, void* & endAddress);
 };
