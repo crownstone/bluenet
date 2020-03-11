@@ -42,8 +42,22 @@ void MeshModelMulticast::init(uint16_t modelId) {
 	APP_ERROR_CHECK(retVal);
 }
 
-access_model_handle_t MeshModelMulticast::getHandle() {
-	return _accessModelHandle;
+void MeshModelMulticast::configureSelf(dsm_handle_t appkeyHandle) {
+	uint32_t retCode;
+	retCode = dsm_address_publish_add(0xC51E, &_groupAddressHandle);
+	APP_ERROR_CHECK(retCode);
+	retCode = dsm_address_subscription_add_handle(_groupAddressHandle);
+	APP_ERROR_CHECK(retCode);
+
+	retCode = access_model_application_bind(_accessModelHandle, appkeyHandle);
+	APP_ERROR_CHECK(retCode);
+	retCode = access_model_publish_application_set(_accessModelHandle, appkeyHandle);
+	APP_ERROR_CHECK(retCode);
+
+	retCode = access_model_publish_address_set(_accessModelHandle, _groupAddressHandle);
+	APP_ERROR_CHECK(retCode);
+	retCode = access_model_subscription_add(_accessModelHandle, _groupAddressHandle);
+	APP_ERROR_CHECK(retCode);
 }
 
 void MeshModelMulticast::handleMsg(const access_message_rx_t * accessMsg) {
@@ -83,7 +97,7 @@ cs_ret_code_t MeshModelMulticast::sendMsg(const uint8_t* data, uint16_t len) {
 		status = access_model_publish(_accessModelHandle, &accessMsg);
 		if (status != NRF_SUCCESS) {
 			LOGMeshModelInfo("sendMsg failed: %u", status);
-			break;
+//			break;
 		}
 //	}
 	return status;

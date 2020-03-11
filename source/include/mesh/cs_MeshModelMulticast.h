@@ -25,7 +25,7 @@ class MeshModelMulticast {
 public:
 	void init(uint16_t modelId);
 
-	access_model_handle_t getHandle();
+	void configureSelf(dsm_handle_t appkeyHandle);
 
 	/**
 	 * Add a msg to an empty spot in the queue (repeats == 0).
@@ -57,6 +57,8 @@ private:
 	};
 
 	access_model_handle_t _accessModelHandle = ACCESS_HANDLE_INVALID;
+
+	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
 
 	cs_multicast_queue_item_t _queue[_queueSize] = {0};
 

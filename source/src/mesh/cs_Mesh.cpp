@@ -11,7 +11,7 @@
 #include <drivers/cs_RNG.h>
 #include <mesh/cs_Mesh.h>
 #include <mesh/cs_MeshCommon.h>
-//#include <protocol/cs_UartProtocol.h>
+#include <protocol/cs_UartProtocol.h>
 //#include <storage/cs_State.h>
 #include <third/std/function.h>
 #include <time/cs_SystemTime.h>
@@ -41,8 +41,8 @@ bool Mesh::checkFlashValid() {
 
 cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	_msgHandler.init();
-	_core->registerModelInitCallback([&]() -> void {
-		modelsInitCallback();
+	_core->registerModelInitCallback([&](dsm_handle_t appkeyHandle) -> void {
+		modelsInitCallback(appkeyHandle);
 	});
 	_core->registerScanCallback([&](const nrf_mesh_adv_packet_rx_data_t *scanData) -> void {
 		_scanner.onScan(scanData);
@@ -50,10 +50,12 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	return _core->init(board);
 }
 
-void Mesh::modelsInitCallback() {
+void Mesh::modelsInitCallback(dsm_handle_t appkeyHandle) {
 	LOGMeshInfo("Initializing and adding models");
 	_modelMulticast.init(0);
+	_modelMulticast.configureSelf(appkeyHandle);
 	_modelUnicast.init(1);
+	_modelUnicast.configureSelf(appkeyHandle);
 }
 
 void Mesh::start() {

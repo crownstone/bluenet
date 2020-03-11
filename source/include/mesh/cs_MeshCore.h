@@ -33,20 +33,24 @@ public:
 	static MeshCore& getInstance();
 
 	/** Callback function definition. */
-	typedef function<void()> callback_model_init_t;
+	typedef function<void(dsm_handle_t appkeyHandle)> callback_model_init_t;
 
 	/** Callback function definition. */
 	typedef function<void(const nrf_mesh_adv_packet_rx_data_t *scanData)> callback_scan_t;
 
 	/**
 	 * Register a callback function that's called when the models should be initialized.
+	 *
+	 * Must be done before init.
 	 */
-	void registerModelInitCallback(callback_model_init_t& closure);
+	void registerModelInitCallback(const callback_model_init_t& closure);
 
 	/**
 	 * Register a callback function that's called when a device was scanned.
+	 *
+	 * Must be done before init.
 	 */
-	void registerScanCallback(callback_scan_t& closure);
+	void registerScanCallback(const callback_scan_t& closure);
 
 	/**
 	 * Whether flash pages have valid data.
@@ -57,6 +61,8 @@ public:
 
 	/**
 	 * Init the mesh.
+	 *
+	 * Register callbacks first.
 	 *
 	 * @return ERR_SUCCESS             Initialized successfully.
 	 * @return ERR_WRONG_STATE         Flash pages should be erased.
@@ -77,14 +83,6 @@ public:
 	 * Erase all flash pages used by the mesh for storage.
 	 */
 	cs_ret_code_t eraseAllPages();
-
-//	/**
-//	 * Internal usage
-//	 */
-//	static void staticModelsInitCallback() {
-//		MeshCore::getInstance().modelsInitCallback();
-//	}
-//	void modelsInitCallback();
 
 	/**
 	 * Internal usage
@@ -128,8 +126,6 @@ private:
 	dsm_handle_t _appkeyHandle = DSM_HANDLE_INVALID;
 	uint8_t _devkey[NRF_MESH_KEY_SIZE];
 	dsm_handle_t _devkeyHandle = DSM_HANDLE_INVALID;
-	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
-	dsm_handle_t _targetAddressHandle = DSM_HANDLE_INVALID;
 
 	// Flash
 	bool _performingFactoryReset = false;

@@ -51,8 +51,41 @@ void MeshModelUnicast::init(uint16_t modelId) {
 	APP_ERROR_CHECK(retVal);
 }
 
-access_model_handle_t MeshModelUnicast::getHandle() {
-	return _accessModelHandle;
+void MeshModelUnicast::configureSelf(dsm_handle_t appkeyHandle) {
+	uint32_t retCode;
+//	retCode = dsm_address_publish_add(0xC51E, &_publishAddressHandle);
+//	APP_ERROR_CHECK(retCode);
+	// No need to call dsm_address_subscription_add_handle(), as we're only subscribed to unicast address.
+
+	retCode = access_model_application_bind(_accessModelHandle, appkeyHandle);
+	APP_ERROR_CHECK(retCode);
+	retCode = access_model_publish_application_set(_accessModelHandle, appkeyHandle);
+	APP_ERROR_CHECK(retCode);
+
+//	retCode = access_model_publish_address_set(_accessModelHandle, _publishAddressHandle);
+//	APP_ERROR_CHECK(retCode);
+	// No need to call access_model_subscription_add(), as we're only subscribed to unicast address.
+}
+
+cs_ret_code_t MeshModelUnicast::setPublishAddress(stone_id_t id) {
+	uint32_t retCode;
+
+	// First clean up the previous one.
+	dsm_address_publish_remove(_publishAddressHandle);
+
+	// All addresses with first 2 bits 0, are unicast addresses.
+	uint16_t address = id;
+	retCode = dsm_address_publish_add(address, &_publishAddressHandle);
+	assert(retCode == NRF_SUCCESS, "failed to add publish address");
+	if (retCode != NRF_SUCCESS) {
+		return ERR_UNSPECIFIED;
+	}
+	retCode = access_model_publish_address_set(_accessModelHandle, _publishAddressHandle);
+	assert(retCode == NRF_SUCCESS, "failed to set publish address");
+	if (retCode != NRF_SUCCESS) {
+		return ERR_UNSPECIFIED;
+	}
+	return ERR_SUCCESS;
 }
 
 void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
@@ -222,6 +255,7 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 		return false;
 	}
 	cs_unicast_queue_item_t* item = &(_queue[index]);
+	setPublishAddress(item->metaData.targetId);
 	cs_ret_code_t retCode = sendMsg(item->msgPtr, item->metaData.msgSize);
 	if (retCode != ERR_SUCCESS) {
 		return false;

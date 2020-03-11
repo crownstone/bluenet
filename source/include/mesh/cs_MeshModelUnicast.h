@@ -23,7 +23,7 @@ class MeshModelUnicast {
 public:
 	void init(uint16_t modelId);
 
-	access_model_handle_t getHandle();
+	void configureSelf(dsm_handle_t appkeyHandle);
 
 	/**
 	 * Add a msg to an empty spot in the queue (repeats == 0).
@@ -58,6 +58,8 @@ private:
 	};
 
 	access_model_handle_t _accessModelHandle = ACCESS_HANDLE_INVALID;
+
+	dsm_handle_t _publishAddressHandle = DSM_HANDLE_INVALID;
 
 	access_reliable_t _accessReliableMsg;
 
@@ -109,4 +111,6 @@ private:
 	 * Message data has to stay in ram until acked or timedout!
 	 */
 	cs_ret_code_t sendMsg(const uint8_t* msg, uint16_t msgSize);
+
+	cs_ret_code_t setPublishAddress(stone_id_t id);
 };

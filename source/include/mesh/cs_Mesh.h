@@ -127,5 +127,5 @@ private:
 	 */
 	bool requestSync(bool propagateSyncMessageOverMesh = true);
 
-	void modelsInitCallback();
+	void modelsInitCallback(dsm_handle_t appkeyHandle);
 };

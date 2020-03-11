@@ -219,7 +219,7 @@ static void staticModelsInitCallback() {
 }
 
 void MeshCore::modelsInitCallback() {
-	_modelInitCallback();
+	_modelInitCallback(_appkeyHandle);
 }
 
 
@@ -278,12 +278,11 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 
 	nrf_mesh_evt_handler_add(&meshEventHandlerStruct);
 
-	LOGMeshInfo("Scan interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
-	scanner_config_scan_time_set(board.scanIntervalUs, board.scanWindowUs);
-
 #if MESH_SCANNER == 1
 	// Init scanned device variable before registering the callback.
 	LOGMeshInfo("Scanner in mesh enabled");
+	LOGMeshInfo("Scan interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
+	scanner_config_scan_time_set(board.scanIntervalUs, board.scanWindowUs);
 	nrf_mesh_rx_cb_set(scan_cb);
 #else
 	LOGw("Scanner in mesh not enabled");
@@ -319,34 +318,6 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 	else {
 		provisionLoad();
 	}
-
-	retCode = dsm_address_publish_add(0xC51E, &_groupAddressHandle);
-	APP_ERROR_CHECK(retCode);
-
-//    retCode = dsm_address_subscription_add(0xC51E, &subscriptionAddressHandle);
-    retCode = dsm_address_subscription_add_handle(_groupAddressHandle);
-    APP_ERROR_CHECK(retCode);
-
-	access_model_handle_t handle = _model.getAccessModelHandle();
-	retCode = access_model_application_bind(handle, _appkeyHandle);
-	APP_ERROR_CHECK(retCode);
-	retCode = access_model_publish_application_set(handle, _appkeyHandle);
-	APP_ERROR_CHECK(retCode);
-	retCode = access_model_publish_address_set(handle, _groupAddressHandle);
-	APP_ERROR_CHECK(retCode);
-#if MESH_MODEL_TEST_MSG == 2
-	if (_ownAddress == 2) {
-		// Publish to unicast address (of crownstone with id 1).
-		retCode = dsm_address_publish_add(1, &_targetAddressHandle);
-		APP_ERROR_CHECK(retCode);
-		retCode = access_model_publish_address_set(handle, _targetAddressHandle);
-		APP_ERROR_CHECK(retCode);
-	}
-#endif
-	retCode = access_model_subscription_add(handle, _groupAddressHandle);
-	APP_ERROR_CHECK(retCode);
-
-
 
 	// Settings for single target segmented messages.
 	nrf_mesh_opt_t opt;
