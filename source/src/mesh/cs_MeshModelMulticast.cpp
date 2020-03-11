@@ -5,8 +5,9 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <mesh/cs_MeshModelMulticast.h>
 #include <mesh/cs_MeshCommon.h>
+#include <mesh/cs_MeshModelMulticast.h>
+#include <mesh/cs_MeshUtil.h>
 #include <util/cs_BleError.h>
 
 extern "C" {
@@ -47,12 +48,12 @@ access_model_handle_t MeshModelMulticast::getHandle() {
 
 void MeshModelMulticast::handleMsg(const access_message_rx_t * accessMsg) {
 	if (accessMsg->meta_data.p_core_metadata->source != NRF_MESH_RX_SOURCE_LOOPBACK) {
-		LOGMeshModelVerbose("Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i", accessMsg->opcode.opcode, accessMsg->meta_data.appkey_handle, accessMsg->meta_data.subnet_handle, accessMsg->meta_data.ttl, getRssi(accessMsg->meta_data.p_core_metadata));
+		LOGMeshModelVerbose("Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i", accessMsg->opcode.opcode, accessMsg->meta_data.appkey_handle, accessMsg->meta_data.subnet_handle, accessMsg->meta_data.ttl, MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata));
 		MeshUtil::printMeshAddress("  Src: ", &(accessMsg->meta_data.src));
 		MeshUtil::printMeshAddress("  Dst: ", &(accessMsg->meta_data.dst));
 //		LOGMeshModelVerbose("ownAddress=%u  Data:", _ownAddress);
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
-		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i\n", accessMsg->opcode.opcode, accessMsg->meta_data.appkey_handle, accessMsg->meta_data.subnet_handle, accessMsg->meta_data.ttl, getRssi(accessMsg->meta_data.p_core_metadata));
+		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i\n", accessMsg->opcode.opcode, accessMsg->meta_data.appkey_handle, accessMsg->meta_data.subnet_handle, accessMsg->meta_data.ttl, MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata));
 	}
 	else {
 		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg loopback\n");

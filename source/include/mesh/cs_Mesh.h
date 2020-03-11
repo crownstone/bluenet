@@ -49,6 +49,7 @@ public:
 	 * Checks if flash pages have valid data.
 	 *
 	 * If not, the pages will be erased, wait for event EVT_MESH_PAGES_ERASED.
+	 * Has to be done before storage is initialized.
 	 *
 	 * @return true when valid.
 	 */
@@ -125,4 +126,6 @@ private:
 	 * @return false When nothing had to be requested, so everything is synced.
 	 */
 	bool requestSync(bool propagateSyncMessageOverMesh = true);
+
+	void modelsInitCallback();
 };

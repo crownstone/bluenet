@@ -8,8 +8,9 @@
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
 #include <events/cs_Event.h>
-#include <events/cs_EventDispatcher.h>
+#include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshMsgHandler.h>
+#include <mesh/cs_MeshUtil.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <storage/cs_State.h>
@@ -140,7 +141,7 @@ void MeshMsgHandler::handleStateTime(uint8_t* payload, size16_t payloadSize) {
 	TYPIFY(EVT_MESH_TIME) timestamp = packet->timestamp;
 	LOGMeshModelDebug("received state time %u", timestamp);
 	event_t event(CS_TYPE::EVT_MESH_TIME, &timestamp, sizeof(timestamp));
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 }
 
 void MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSize) {
@@ -150,7 +151,7 @@ void MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSize) {
 	if (timestamp != _lastReveivedSetTime) {
 		_lastReveivedSetTime = timestamp;
 		event_t event(CS_TYPE::CMD_SET_TIME, &timestamp, sizeof(timestamp));
-		EventDispatcher::getInstance().dispatch(event);
+		event.dispatch();
 	}
 }
 
@@ -177,7 +178,7 @@ void MeshMsgHandler::handleCmdMultiSwitch(uint8_t* payload, size16_t payloadSize
 
 		LOGi("dispatch multi switch");
 		event_t event(CS_TYPE::CMD_MULTI_SWITCH, &internalItem, sizeof(internalItem));
-		EventDispatcher::getInstance().dispatch(event);
+		event.dispatch();
 	}
 }
 
@@ -260,7 +261,7 @@ void MeshMsgHandler::checkStateReceived(int8_t rssi, uint8_t hops) {
 	// Send event
 	TYPIFY(EVT_STATE_EXTERNAL_STONE)* stateExtStone = &(_lastReceivedState.state);
 	event_t event(CS_TYPE::EVT_STATE_EXTERNAL_STONE, stateExtStone, sizeof(*stateExtStone));
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 }
 
 void MeshMsgHandler::handleProfileLocation(uint8_t* payload, size16_t payloadSize) {
@@ -271,7 +272,7 @@ void MeshMsgHandler::handleProfileLocation(uint8_t* payload, size16_t payloadSiz
 	eventData.locationId = profileLocation->location;
 	eventData.fromMesh = true;
 	event_t event(CS_TYPE::EVT_PROFILE_LOCATION, &eventData, sizeof(eventData));
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 }
 
 void MeshMsgHandler::handleSetBehaviourSettings(uint8_t* payload, size16_t payloadSize) {
@@ -288,7 +289,7 @@ void MeshMsgHandler::handleTrackedDeviceRegister(uint8_t* payload, size16_t payl
 	LOGMeshModelDebug("received tracked device register id=%u", packet->deviceId);
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)));
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 }
 
 void MeshMsgHandler::handleTrackedDeviceToken(uint8_t* payload, size16_t payloadSize) {
@@ -296,7 +297,7 @@ void MeshMsgHandler::handleTrackedDeviceToken(uint8_t* payload, size16_t payload
 	LOGMeshModelDebug("received tracked device token id=%u", packet->deviceId);
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 }
 
 void MeshMsgHandler::handleTrackedDeviceListSize(uint8_t* payload, size16_t payloadSize) {
@@ -304,7 +305,7 @@ void MeshMsgHandler::handleTrackedDeviceListSize(uint8_t* payload, size16_t payl
 	LOGMeshModelDebug("received tracked device list size=%u", packet->listSize);
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_LIST_SIZE, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)));
-	EventDispatcher::getInstance().dispatch(event);
+	event.dispatch();
 }
 
 void MeshMsgHandler::handleSyncRequest(uint8_t* payload, size16_t payloadSize) {

@@ -9,7 +9,7 @@
 
 #include <common/cs_Types.h>
 #include <mesh/cs_MeshCommon.h>
-#include <mesh/cs_MeshModelPackets.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 
 extern "C" {
 #include <access.h>

@@ -5,60 +5,21 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "mesh/cs_Mesh.h"
-#include "mesh/cs_MeshCommon.h"
-
-extern "C" {
-#include "nrf_mesh.h"
-#include "mesh_config.h"
-#include "mesh_opt_core.h"
-#include "mesh_stack.h"
-#include "access.h"
-#include "access_config.h"
-#include "config_server.h"
-#include "config_server_events.h"
-#include "device_state_manager.h"
-#include "mesh_provisionee.h"
-#include "nrf_mesh_configure.h"
-#include "nrf_mesh_events.h"
-#include "net_state.h"
-#include "scanner.h"
-#include "uri.h"
-#include "utils.h"
-
-#include "log.h"
-#include "access_internal.h"
-#include "flash_manager_defrag.h"
-#include "transport.h"
-}
-
-#include "cfg/cs_Boards.h"
-#include "drivers/cs_Serial.h"
-#include "drivers/cs_RNG.h"
-#include "util/cs_BleError.h"
-#include "util/cs_Utils.h"
-#include "ble/cs_Stack.h"
-#include "storage/cs_State.h"
-
+#include <ble/cs_Stack.h>
+#include <cfg/cs_Boards.h>
+#include <drivers/cs_Serial.h>
+#include <drivers/cs_RNG.h>
+#include <mesh/cs_Mesh.h>
+#include <mesh/cs_MeshCommon.h>
+//#include <protocol/cs_UartProtocol.h>
+//#include <storage/cs_State.h>
+#include <third/std/function.h>
 #include <time/cs_SystemTime.h>
-#include <protocol/cs_UartProtocol.h>
-
-
-
-void Mesh::modelsInitCallback() {
-	LOGMeshInfo("Initializing and adding models");
-	_model.init();
-	_model.setOwnAddress(_ownAddress);
-}
-
+//#include <util/cs_BleError.h>
+//#include <util/cs_Utils.h>
 
 Mesh::Mesh() {
-
-}
-
-cs_ret_code_t Mesh::init(const boards_config_t& board) {
-	_msgHandler.init();
-	return _core->init(board);
+	_core = &(MeshCore::getInstance());
 }
 
 Mesh& Mesh::getInstance() {
@@ -67,7 +28,33 @@ Mesh& Mesh::getInstance() {
 	return instance;
 }
 
+bool Mesh::checkFlashValid() {
+	bool valid = _core->isFlashValid();
+	if (!valid) {
+		if (_core->eraseAllPages() != ERR_SUCCESS) {
+			// Only option left is to reboot and see if things work out next time.
+			APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
+		}
+	}
+	return valid;
+}
 
+cs_ret_code_t Mesh::init(const boards_config_t& board) {
+	_msgHandler.init();
+	_core->registerModelInitCallback([&]() -> void {
+		modelsInitCallback();
+	});
+	_core->registerScanCallback([&](const nrf_mesh_adv_packet_rx_data_t *scanData) -> void {
+		_scanner.onScan(scanData);
+	});
+	return _core->init(board);
+}
+
+void Mesh::modelsInitCallback() {
+	LOGMeshInfo("Initializing and adding models");
+	_modelMulticast.init(0);
+	_modelUnicast.init(1);
+}
 
 void Mesh::start() {
 	_core->start();
@@ -116,8 +103,6 @@ void Mesh::handleEvent(event_t & event) {
 			else {
 //				Stack::getInstance().startScanning();
 			}
-			[[maybe_unused]] const scanner_stats_t * stats = scanner_stats_get();
-			LOGMeshDebug("success=%u crcFail=%u lenFail=%u memFail=%u", stats->successful_receives, stats->crc_failures, stats->length_out_of_bounds, stats->out_of_memory);
 		}
 		if (_sendStateTimeCountdown-- == 0) {
 			uint8_t rand8;
@@ -129,7 +114,7 @@ void Mesh::handleEvent(event_t & event) {
 			if (time.isValid()) {
 				cs_mesh_model_msg_time_t packet;
 				packet.timestamp = time.timestamp();
-				_model.sendTime(&packet);
+				_msgSender.sendTime(&packet);
 			}
 		}
 		if (!_synced) {
@@ -163,7 +148,8 @@ void Mesh::handleEvent(event_t & event) {
 			sendTestMsg();
 		}
 #endif
-		_model.tick(tickCount);
+		_modelMulticast.tick(tickCount);
+		_modelUnicast.tick(tickCount);
 		break;
 	}
 	case CS_TYPE::CMD_ENABLE_MESH: {
@@ -229,7 +215,7 @@ bool Mesh::requestSync(bool propagateSyncMessageOverMesh) {
 	msg.size = sizeof(*requestMsg);
 	msg.type = CS_MESH_MODEL_TYPE_SYNC_REQUEST;
 	msg.reliability = CS_MESH_RELIABILITY_MEDIUM;
-	_model.sendMsg(&msg);
+	_msgSender.sendMsg(&msg);
 
 	return true;
 }

@@ -17,4 +17,9 @@ extern "C" {
 class MeshScanner {
 public:
 	void onScan(const nrf_mesh_adv_packet_rx_data_t *scanData);
+private:
+	/**
+	 * Variable to copy scanned data to, so that it doesn't get created on the stack all the time.
+	 */
+	scanned_device_t _scannedDevice = {0};
 };

@@ -7,7 +7,9 @@
 
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
+#include <events/cs_Event.h>
 #include <mesh/cs_MeshMsgSender.h>
+#include <mesh/cs_MeshCommon.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 
@@ -101,6 +103,16 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(const cs_mesh_model_msg_d
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+}
+
+cs_ret_code_t MeshMsgSender::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority) {
+	LOGe("TODO");
+	return ERR_NOT_IMPLEMENTED;
+}
+
+cs_ret_code_t MeshMsgSender::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
+	LOGe("TODO");
+	return ERR_NOT_IMPLEMENTED;
 }
 
 void MeshMsgSender::handleEvent(event_t & event) {

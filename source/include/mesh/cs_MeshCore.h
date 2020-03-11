@@ -91,12 +91,14 @@ public:
 	 */
 	void factoryResetDone();
 
-	/**
-	 * Internal usage
-	 */
+	/** Internal usage */
 	void handleEvent(event_t & event);
 
+	/** Internal usage */
 	void modelsInitCallback();
+
+	/** Internal usage */
+	void scanCallback(const nrf_mesh_adv_packet_rx_data_t *scanData);
 
 private:
 	//! Constructor, singleton, thus made private
@@ -116,8 +118,9 @@ private:
 	/** Address of this node */
 	uint16_t _ownAddress = 0;
 
-	callback_model_init_t _modelInitCallback;
-//	callback_scan_t       _scanCallback;
+	callback_scan_t _scanCallback = nullptr;
+
+	callback_model_init_t _modelInitCallback = nullptr;
 
 	uint8_t _netkey[NRF_MESH_KEY_SIZE];
 	dsm_handle_t _netkeyHandle = DSM_HANDLE_INVALID;

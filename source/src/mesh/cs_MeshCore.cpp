@@ -7,6 +7,9 @@
 
 #include <mesh/cs_MeshCore.h>
 #include <mesh/cs_MeshCommon.h>
+#include <storage/cs_State.h>
+#include <util/cs_BleError.h>
+#include <util/cs_Utils.h>
 
 extern "C" {
 #include "nrf_mesh.h"
@@ -25,7 +28,6 @@ extern "C" {
 #include "scanner.h"
 #include "uri.h"
 #include "utils.h"
-
 #include "log.h"
 #include "access_internal.h"
 #include "flash_manager_defrag.h"
@@ -203,15 +205,13 @@ static void configServerEventCallback(const config_server_evt_t * p_evt) {
 }
 
 
-
-#if MESH_SCANNER == 1
-static callback_scan_t _scanCallback = NULL;
-
 static void scan_cb(const nrf_mesh_adv_packet_rx_data_t *p_rx_data) {
-	_scanCallback(p_rx_data);
+	MeshCore::getInstance().scanCallback(p_rx_data);
 }
-#endif
 
+void MeshCore::scanCallback(const nrf_mesh_adv_packet_rx_data_t *scanData) {
+	_scanCallback(scanData);
+}
 
 
 static void staticModelsInitCallback() {
@@ -284,7 +284,6 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 #if MESH_SCANNER == 1
 	// Init scanned device variable before registering the callback.
 	LOGMeshInfo("Scanner in mesh enabled");
-	memset(&_scannedDevice, 0, sizeof(_scannedDevice));
 	nrf_mesh_rx_cb_set(scan_cb);
 #else
 	LOGw("Scanner in mesh not enabled");
@@ -542,6 +541,14 @@ void MeshCore::handleEvent(event_t & event) {
 	switch (event.type) {
 		case CS_TYPE::CMD_FACTORY_RESET: {
 			factoryReset();
+			break;
+		}
+		case CS_TYPE::EVT_TICK: {
+			TYPIFY(EVT_TICK) tickCount = *((TYPIFY(EVT_TICK)*)event.data);
+			if (tickCount % (500 / TICK_INTERVAL_MS) == 0) {
+				[[maybe_unused]] const scanner_stats_t * stats = scanner_stats_get();
+				LOGMeshDebug("success=%u crcFail=%u lenFail=%u memFail=%u", stats->successful_receives, stats->crc_failures, stats->length_out_of_bounds, stats->out_of_memory);
+			}
 			break;
 		}
 #if MESH_PERSISTENT_STORAGE == 2
