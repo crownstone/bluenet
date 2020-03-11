@@ -11,7 +11,7 @@
 
 #define LOGMeshModelPacketHelperDebug LOGnone
 
-namespace MeshModelPacketHelper {
+namespace MeshUtil {
 
 bool isValidMeshMessage(cs_mesh_msg_t* meshMsg) {
 	if (meshMsg->reliability == CS_MESH_RELIABILITY_INVALID || meshMsg->size > MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE) {
@@ -124,4 +124,4 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
 	return true;
 }
 
-} // namespace CSMeshModel
+}

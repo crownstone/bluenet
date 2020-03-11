@@ -11,7 +11,7 @@
 #include "structs/cs_PacketsInternal.h"
 #include "protocol/cs_Typedefs.h"
 
-namespace MeshModelPacketHelper {
+namespace MeshUtil {
 
 bool isValidMeshMessage(cs_mesh_msg_t* meshMsg);
 bool isValidMeshMessage(uint8_t* meshMsg, size16_t msgSize);

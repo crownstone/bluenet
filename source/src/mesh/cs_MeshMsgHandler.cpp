@@ -23,10 +23,6 @@ extern "C" {
 //#include "log.h"
 }
 
-#define LOGMeshModelInfo    LOGi
-#define LOGMeshModelDebug   LOGd
-#define LOGMeshModelVerbose LOGnone
-
 void MeshMsgHandler::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
 }
@@ -37,15 +33,15 @@ void MeshMsgHandler::handleMsg(uint16_t opCode, uint8_t* msg, size16_t msgSize, 
 		LOGe("sendReply");
 //		sendReply(accessMsg);
 	}
-	if (!MeshModelPacketHelper::isValidMeshMessage(msg, msgSize)) {
+	if (!MeshUtil::isValidMeshMessage(msg, msgSize)) {
 		LOGw("Invalid mesh message");
 		BLEutil::printArray(msg, msgSize);
 		return;
 	}
-	cs_mesh_model_msg_type_t msgType = MeshModelPacketHelper::getType(msg);
+	cs_mesh_model_msg_type_t msgType = MeshUtil::getType(msg);
 	uint8_t* payload;
 	size16_t payloadSize;
-	MeshModelPacketHelper::getPayload(msg, msgSize, payload, payloadSize);
+	MeshUtil::getPayload(msg, msgSize, payload, payloadSize);
 
 	switch (msgType){
 		case CS_MESH_MODEL_TYPE_TEST: {

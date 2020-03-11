@@ -6,6 +6,7 @@
  */
 
 #include <mesh/cs_MeshCore.h>
+#include <mesh/cs_MeshCommon.h>
 
 extern "C" {
 #include "nrf_mesh.h"
@@ -31,8 +32,6 @@ extern "C" {
 #include "transport.h"
 }
 
-#define LOGMeshInfo LOGi
-#define LOGMeshDebug LOGnone
 
 #define MESH_FLASH_HANDLE_SEQNUM   (0x0001)
 #define MESH_FLASH_HANDLE_IV_INDEX (0x0002)

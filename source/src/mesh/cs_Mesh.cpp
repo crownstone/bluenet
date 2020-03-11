@@ -6,6 +6,7 @@
  */
 
 #include "mesh/cs_Mesh.h"
+#include "mesh/cs_MeshCommon.h"
 
 extern "C" {
 #include "nrf_mesh.h"
@@ -157,6 +158,11 @@ void Mesh::handleEvent(event_t & event) {
 				}
 			}
 		}
+#if MESH_MODEL_TEST_MSG == 2
+		if (_ownAddress == 2 && tickCount % (1000 / TICK_INTERVAL_MS) == 0) {
+			sendTestMsg();
+		}
+#endif
 		_model.tick(tickCount);
 		break;
 	}

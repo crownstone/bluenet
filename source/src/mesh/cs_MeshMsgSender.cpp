@@ -12,7 +12,7 @@
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 
 cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t *meshMsg) {
-	if (!MeshModelPacketHelper::isValidMeshMessage(meshMsg)) {
+	if (!MeshUtil::isValidMeshMessage(meshMsg)) {
 		return ERR_INVALID_MESSAGE;
 	}
 	uint8_t repeats = meshMsg->reliability;

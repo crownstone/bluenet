@@ -7,7 +7,14 @@
 
 #pragma once
 
-#include "common/cs_Types.h"
+#include <common/cs_Types.h>
+
+#define LOGMeshInfo LOGi
+#define LOGMeshDebug LOGnone
+
+#define LOGMeshModelInfo    LOGi
+#define LOGMeshModelDebug   LOGd
+#define LOGMeshModelVerbose LOGnone
 
 /*
  * 0 to disable test.
@@ -18,16 +25,36 @@
  */
 #define MESH_MODEL_TEST_MSG 0
 
-struct __attribute__((__packed__)) cs_mesh_model_queued_item_t {
+/**
+ * Interval at which processQueue() gets called.
+ */
+#define MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS 100
+
+/**
+ * Number of messages sent each time processQueue() gets called.
+ */
+#define MESH_MODEL_QUEUE_BURST_COUNT 3
+
+/**
+ * Mesh utils without dependencies on mesh SDK.
+ */
+namespace MeshUtil {
+
+struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
+	uint16_t id; // ID that can freely be used to find similar items.
+	uint8_t type;
+	stone_id_t targetId = 0;   // 0 for broadcast
 	bool priority : 1;
 	bool reliable : 1;
 	uint8_t repeats : 6;
-	stone_id_t targetId = 0;   // 0 for broadcast
-	uint8_t type;
-	uint16_t id; // ID that can freely be used to find similar items.
-	uint8_t msgSize;
-//	uint8_t msg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
-	uint8_t* msgPtr = NULL;
+	uint8_t msgSize = 0;
 };
 
+struct __attribute__((__packed__)) cs_mesh_queue_item_t {
+	cs_mesh_queue_item_meta_data_t metaData;
+	uint8_t* msgPtr = nullptr;
+};
 
+void printQueueItem(const char* prefix, const cs_mesh_queue_item_meta_data_t& metaData);
+
+}
