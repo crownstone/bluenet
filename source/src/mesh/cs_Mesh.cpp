@@ -47,13 +47,20 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	_core->registerScanCallback([&](const nrf_mesh_adv_packet_rx_data_t *scanData) -> void {
 		_scanner.onScan(scanData);
 	});
+	_modelSelector.init(&_modelMulticast, &_modelUnicast);
 	return _core->init(board);
 }
 
 void Mesh::modelsInitCallback(dsm_handle_t appkeyHandle) {
 	LOGMeshInfo("Initializing and adding models");
+	_modelMulticast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg) -> void {
+		_msgHandler.handleMsg(msg);
+	});
 	_modelMulticast.init(0);
 	_modelMulticast.configureSelf(appkeyHandle);
+	_modelMulticast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg) -> void {
+		_msgHandler.handleMsg(msg);
+	});
 	_modelUnicast.init(1);
 	_modelUnicast.configureSelf(appkeyHandle);
 }

@@ -14,6 +14,7 @@
 #include <mesh/cs_MeshCore.h>
 #include <mesh/cs_MeshModelMulticast.h>
 #include <mesh/cs_MeshModelUnicast.h>
+#include <mesh/cs_MeshModelSelector.h>
 #include <mesh/cs_MeshMsgHandler.h>
 #include <mesh/cs_MeshMsgSender.h>
 #include <mesh/cs_MeshScanner.h>
@@ -102,6 +103,7 @@ private:
 	MeshCore*          _core;
 	MeshModelMulticast _modelMulticast;
 	MeshModelUnicast   _modelUnicast;
+	MeshModelSelector  _modelSelector;
 	MeshMsgHandler     _msgHandler;
 	MeshMsgSender      _msgSender;
 	MeshAdvertiser     _advertiser;

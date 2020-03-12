@@ -40,6 +40,15 @@
  */
 namespace MeshUtil {
 
+struct __attribute__((__packed__)) cs_mesh_received_msg_t {
+	uint16_t opCode;
+	uint16_t srcAddress;
+	uint8_t* msg;
+	uint8_t msgSize;
+	int8_t rssi;
+	uint8_t hops;
+};
+
 struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
 	uint16_t id; // ID that can freely be used to find similar items.
 	uint8_t type;

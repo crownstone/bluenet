@@ -16,7 +16,7 @@
 class MeshMsgHandler {
 public:
 	void init();
-	void handleMsg(uint16_t opCode, uint8_t* msg, size16_t msgSize, uint16_t srcAddress, int8_t rssi, uint8_t hops);
+	void handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg);
 
 protected:
 	void handleTest(                 uint8_t* payload, size16_t payloadSize);

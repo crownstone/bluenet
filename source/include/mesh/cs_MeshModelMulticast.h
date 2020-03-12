@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include <common/cs_Types.h>
 #include <mesh/cs_MeshCommon.h>
-#include <protocol/mesh/cs_MeshModelPackets.h>
+#include <third/std/function.h>
 
 extern "C" {
 #include <access.h>
@@ -23,6 +22,16 @@ extern "C" {
  */
 class MeshModelMulticast {
 public:
+	/** Callback function definition. */
+	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg)> callback_msg_t;
+
+	/**
+	 * Register a callback function that's called when a message from the mesh is received.
+	 *
+	 * Must be done before init.
+	 */
+	void registerMsgHandler(const callback_msg_t& closure);
+
 	void init(uint16_t modelId);
 
 	void configureSelf(dsm_handle_t appkeyHandle);
@@ -59,6 +68,8 @@ private:
 	access_model_handle_t _accessModelHandle = ACCESS_HANDLE_INVALID;
 
 	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
+
+	callback_msg_t _msgCallback = nullptr;
 
 	cs_multicast_queue_item_t _queue[_queueSize] = {0};
 

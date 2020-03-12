@@ -8,9 +8,9 @@
 #pragma once
 
 #include <mesh/cs_MeshCommon.h>
+#include <third/std/function.h>
 
 extern "C" {
-//#include <access.h>
 #include <access_reliable.h>
 }
 
@@ -21,6 +21,16 @@ extern "C" {
  */
 class MeshModelUnicast {
 public:
+	/** Callback function definition. */
+	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg)> callback_msg_t;
+
+	/**
+	 * Register a callback function that's called when a message from the mesh is received.
+	 *
+	 * Must be done before init.
+	 */
+	void registerMsgHandler(const callback_msg_t& closure);
+
 	void init(uint16_t modelId);
 
 	void configureSelf(dsm_handle_t appkeyHandle);
@@ -60,6 +70,8 @@ private:
 	access_model_handle_t _accessModelHandle = ACCESS_HANDLE_INVALID;
 
 	dsm_handle_t _publishAddressHandle = DSM_HANDLE_INVALID;
+
+	callback_msg_t _msgCallback = nullptr;
 
 	access_reliable_t _accessReliableMsg;
 

@@ -10,39 +10,30 @@
 #include <events/cs_Event.h>
 #include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshMsgHandler.h>
-#include <mesh/cs_MeshUtil.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
 
-extern "C" {
-//#include "access.h"
-#include "access_config.h"
-//#include "access_reliable.h"
-//#include "nrf_mesh.h"
-//#include "log.h"
-}
-
 void MeshMsgHandler::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
 }
 
-void MeshMsgHandler::handleMsg(uint16_t opCode, uint8_t* msg, size16_t msgSize, uint16_t srcAddress, int8_t rssi, uint8_t hops) {
-	BLEutil::printArray(msg, msgSize);
-	if (opCode == CS_MESH_MODEL_OPCODE_RELIABLE_MSG) {
+void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg) {
+	BLEutil::printArray(msg.msg, msg.msgSize);
+	if (msg.opCode == CS_MESH_MODEL_OPCODE_RELIABLE_MSG) {
 		LOGe("sendReply");
 //		sendReply(accessMsg);
 	}
-	if (!MeshUtil::isValidMeshMessage(msg, msgSize)) {
+	if (!MeshUtil::isValidMeshMessage(msg.msg, msg.msgSize)) {
 		LOGw("Invalid mesh message");
-		BLEutil::printArray(msg, msgSize);
+		BLEutil::printArray(msg.msg, msg.msgSize);
 		return;
 	}
-	cs_mesh_model_msg_type_t msgType = MeshUtil::getType(msg);
+	cs_mesh_model_msg_type_t msgType = MeshUtil::getType(msg.msg);
 	uint8_t* payload;
 	size16_t payloadSize;
-	MeshUtil::getPayload(msg, msgSize, payload, payloadSize);
+	MeshUtil::getPayload(msg.msg, msg.msgSize, payload, payloadSize);
 
 	switch (msgType){
 		case CS_MESH_MODEL_TYPE_TEST: {
@@ -70,11 +61,11 @@ void MeshMsgHandler::handleMsg(uint16_t opCode, uint8_t* msg, size16_t msgSize, 
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_STATE_0: {
-			handleState0(payload, payloadSize, srcAddress, rssi, hops);
+			handleState0(payload, payloadSize, msg.srcAddress, msg.rssi, msg.hops);
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_STATE_1: {
-			handleState1(payload, payloadSize, srcAddress, rssi, hops);
+			handleState1(payload, payloadSize, msg.srcAddress, msg.rssi, msg.hops);
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_PROFILE_LOCATION: {
@@ -227,7 +218,6 @@ void MeshMsgHandler::checkStateReceived(int8_t rssi, uint8_t hops) {
 	if (_lastReceivedState.partsReceivedBitmask != 0x03) {
 		return;
 	}
-//	if (ttl == ACCESS_DEFAULT_TTL) {
 	if (hops == 0) {
 		// Maximum ttl, so we received it without hops: RSSI is valid.
 		_lastReceivedState.state.rssi = rssi;

@@ -75,12 +75,17 @@ void MeshModelMulticast::handleMsg(const access_message_rx_t * accessMsg) {
 	}
 //	bool ownMsg = (_ownAddress == accessMsg->meta_data.src.value) && (accessMsg->meta_data.src.type == NRF_MESH_ADDRESS_TYPE_UNICAST);
 	bool ownMsg = accessMsg->meta_data.p_core_metadata->source == NRF_MESH_RX_SOURCE_LOOPBACK;
-	uint8_t* msg = (uint8_t*)(accessMsg->p_data);
-	uint16_t size = accessMsg->length;
 	if (ownMsg) {
 		return;
 	}
-	// TODO: send to MeshMsgHandler
+	MeshUtil::cs_mesh_received_msg_t msg;
+	msg.opCode = accessMsg->opcode.opcode;
+	msg.srcAddress = accessMsg->meta_data.src.value;
+	msg.msg = (uint8_t*)(accessMsg->p_data);
+	msg.msgSize = accessMsg->length;
+	msg.rssi = MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata);
+	msg.hops = ACCESS_DEFAULT_TTL - accessMsg->meta_data.ttl;
+	_msgCallback(msg);
 }
 
 cs_ret_code_t MeshModelMulticast::sendMsg(const uint8_t* data, uint16_t len) {
