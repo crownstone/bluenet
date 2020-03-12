@@ -112,7 +112,7 @@ size16_t getMeshMessageSize(size16_t payloadSize) {
 	return MESH_HEADER_SIZE + payloadSize;
 }
 
-bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size16_t payloadSize, uint8_t* meshMsg, size16_t& meshMsgSize) {
+bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size16_t payloadSize, uint8_t* meshMsg, size16_t meshMsgSize) {
 	if (meshMsgSize < getMeshMessageSize(payloadSize)) {
 		return false;
 	}
@@ -120,7 +120,6 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
 	if (payloadSize) {
 		memcpy(meshMsg + MESH_HEADER_SIZE, payload, payloadSize);
 	}
-	meshMsgSize = getMeshMessageSize(payloadSize);
 	return true;
 }
 

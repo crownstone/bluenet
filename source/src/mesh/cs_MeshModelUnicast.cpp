@@ -9,6 +9,7 @@
 #include <mesh/cs_MeshModelUnicast.h>
 #include <mesh/cs_MeshUtil.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
+#include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <util/cs_BleError.h>
 
 extern "C" {
@@ -195,22 +196,29 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 		return ERR_SUCCESS;
 	}
 #endif
-	assert(item.msgPtr != nullptr, "Null pointer");
-	assert(item.metaData.msgSize != 0, "Empty message");
-	assert(item.metaData.msgSize <= MAX_MESH_MSG_SIZE, "Message too large");
+	size16_t msgSize = MeshUtil::getMeshMessageSize(item.payloadSize);
+	assert(item.payloadPtr != nullptr, "Null pointer");
+	assert(msgSize != 0, "Empty message");
+	assert(msgSize <= MAX_MESH_MSG_SIZE, "Message too large");
 	assert(item.metaData.targetId != 0, "Unicast only");
 	uint8_t index;
 	for (int i = _queueIndexNext + _queueSize; i > _queueIndexNext; --i) {
 		index = i % _queueSize;
 		cs_unicast_queue_item_t* it = &(_queue[index]);
 		if (it->metaData.repeats == 0) {
-			it->msgPtr = (uint8_t*)malloc(item.metaData.msgSize);
-			LOGMeshModelVerbose("alloc %p size=%u", it->msgPtr, item.metaData.msgSize);
+			it->msgPtr = (uint8_t*)malloc(msgSize);
+			LOGMeshModelVerbose("alloc %p size=%u", it->msgPtr, msgSize);
 			if (it->msgPtr == NULL) {
 				return ERR_NO_SPACE;
 			}
-			memcpy(it->msgPtr, item.msgPtr, item.metaData.msgSize);
+			if (!MeshUtil::setMeshMessage((cs_mesh_model_msg_type_t)item.metaData.type, item.payloadPtr, item.payloadSize, it->msgPtr, msgSize)) {
+				LOGMeshModelVerbose("free %p", it->msgPtr);
+				free(it->msgPtr);
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+//			memcpy(it->msgPtr, item.msgPtr, item.metaData.msgSize);
 			memcpy(&(it->metaData), &(item.metaData), sizeof(item.metaData));
+			it->msgSize = msgSize;
 			LOGMeshModelVerbose("added to ind=%u", index);
 			_queueIndexNext = index;
 
@@ -265,7 +273,7 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 	}
 	cs_unicast_queue_item_t* item = &(_queue[index]);
 	setPublishAddress(item->metaData.targetId);
-	cs_ret_code_t retCode = sendMsg(item->msgPtr, item->metaData.msgSize);
+	cs_ret_code_t retCode = sendMsg(item->msgPtr, item->msgSize);
 	if (retCode != ERR_SUCCESS) {
 		return false;
 	}

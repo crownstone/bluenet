@@ -8,6 +8,7 @@
 #include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshModelMulticast.h>
 #include <mesh/cs_MeshUtil.h>
+#include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <util/cs_BleError.h>
 
 extern "C" {
@@ -119,17 +120,22 @@ cs_ret_code_t MeshModelMulticast::addToQueue(MeshUtil::cs_mesh_queue_item_t& ite
 		return ERR_SUCCESS;
 	}
 #endif
-	assert(item.msgPtr != nullptr, "Null pointer");
-	assert(item.metaData.msgSize != 0, "Empty message");
-	assert(item.metaData.msgSize <= MAX_MESH_MSG_NON_SEGMENTED_SIZE, "Message too large");
+	size16_t msgSize = MeshUtil::getMeshMessageSize(item.payloadSize);
+	assert(item.payloadPtr != nullptr, "Null pointer");
+	assert(msgSize != 0, "Empty message");
+	assert(msgSize <= MAX_MESH_MSG_NON_SEGMENTED_SIZE, "Message too large");
 	assert(item.metaData.targetId == 0, "Multicast only");
 	uint8_t index;
 	for (int i = _queueIndexNext + _queueSize; i > _queueIndexNext; --i) {
 		index = i % _queueSize;
 		cs_multicast_queue_item_t* it = &(_queue[index]);
 		if (it->metaData.repeats == 0) {
-			memcpy(it->msg, item.msgPtr, item.metaData.msgSize);
+			if (!MeshUtil::setMeshMessage((cs_mesh_model_msg_type_t)item.metaData.type, item.payloadPtr, item.payloadSize, it->msg, sizeof(it->msg))) {
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+//			memcpy(it->msg, item.msgPtr, item.metaData.msgSize);
 			memcpy(&(it->metaData), &(item.metaData), sizeof(item.metaData));
+			it->msgSize = msgSize;
 			LOGMeshModelVerbose("added to ind=%u", index);
 			_queueIndexNext = index;
 
@@ -187,7 +193,7 @@ bool MeshModelMulticast::sendMsgFromQueue() {
 //			}
 //		}
 //	}
-	sendMsg(item->msg, item->metaData.msgSize);
+	sendMsg(item->msg, item->msgSize);
 	// TOOD: check return code, maybe retry again later.
 	--(item->metaData.repeats);
 	LOGMeshModelInfo("sent ind=%u repeats_left=%u type=%u id=%u", index, item->metaData.repeats, item->metaData.type, item->metaData.id);

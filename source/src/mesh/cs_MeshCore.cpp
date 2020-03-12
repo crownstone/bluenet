@@ -219,7 +219,7 @@ static void staticModelsInitCallback() {
 }
 
 void MeshCore::modelsInitCallback() {
-	_modelInitCallback(_appkeyHandle);
+	_modelInitCallback();
 }
 
 
@@ -235,6 +235,10 @@ MeshCore& MeshCore::getInstance() {
 
 void MeshCore::registerModelInitCallback(const callback_model_init_t& closure) {
 	_modelInitCallback = closure;
+}
+
+void MeshCore::registerModelInitCallback(const callback_model_configure_t& closure) {
+	_modelConfigureCallback = closure;
 }
 
 void MeshCore::registerScanCallback(const callback_scan_t& closure) {
@@ -323,6 +327,8 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 	else {
 		provisionLoad();
 	}
+
+	_modelConfigureCallback(_appkeyHandle);
 
 	// Settings for single target segmented messages.
 	nrf_mesh_opt_t opt;

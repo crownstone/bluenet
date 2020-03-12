@@ -118,7 +118,8 @@
  */
 #define ACCESS_MODEL_COUNT (1 + /* Configuration server */  \
                             1 + /* Health server */  \
-							1 /* Crownstone model */)
+							1 + /* Crownstone multicast model */  \
+							1   /* Crownstone unicast model */)
 
 /**
  * The number of elements in the application.

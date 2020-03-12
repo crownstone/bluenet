@@ -62,6 +62,7 @@ private:
 
 	struct __attribute__((__packed__)) cs_multicast_queue_item_t {
 		MeshUtil::cs_mesh_queue_item_meta_data_t metaData;
+		uint8_t msgSize;
 		uint8_t msg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
 	};
 

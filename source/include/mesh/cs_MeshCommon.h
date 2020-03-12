@@ -56,12 +56,12 @@ struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
 	bool priority : 1;
 	bool reliable : 1;
 	uint8_t repeats : 6;
-	uint8_t msgSize = 0;
 };
 
 struct __attribute__((__packed__)) cs_mesh_queue_item_t {
 	cs_mesh_queue_item_meta_data_t metaData;
-	uint8_t* msgPtr = nullptr;
+	uint8_t payloadSize = 0;
+	uint8_t* payloadPtr = nullptr;
 };
 
 void printQueueItem(const char* prefix, const cs_mesh_queue_item_meta_data_t& metaData);

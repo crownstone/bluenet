@@ -49,10 +49,10 @@ size16_t getMeshMessageSize(size16_t payloadSize);
  * @param[in]      payload        Payload packet.
  * @param[in]      payloadSize    Size of the payload.
  * @param[in,out]  meshMsg        Mesh message, must already be allocated.
- * @param[in,out]  meshMsgSize    Size of allocated the mesh message, set to size of the message on success.
+ * @param[in]      meshMsgSize    Size of allocated the mesh message.
  * @retval                        True on success.
  */
-bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size16_t payloadSize, uint8_t* meshMsg, size16_t& meshMsgSize);
+bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size16_t payloadSize, uint8_t* meshMsg, size16_t meshMsgSize);
 
 /**
  * Set payload of a mesh message.

@@ -33,7 +33,10 @@ public:
 	static MeshCore& getInstance();
 
 	/** Callback function definition. */
-	typedef function<void(dsm_handle_t appkeyHandle)> callback_model_init_t;
+	typedef function<void()> callback_model_init_t;
+
+	/** Callback function definition. */
+	typedef function<void(dsm_handle_t appkeyHandle)> callback_model_configure_t;
 
 	/** Callback function definition. */
 	typedef function<void(const nrf_mesh_adv_packet_rx_data_t *scanData)> callback_scan_t;
@@ -44,6 +47,13 @@ public:
 	 * Must be done before init.
 	 */
 	void registerModelInitCallback(const callback_model_init_t& closure);
+
+	/**
+	 * Register a callback function that's called when the models should be configured.
+	 *
+	 * Must be done before init.
+	 */
+	void registerModelInitCallback(const callback_model_configure_t& closure);
 
 	/**
 	 * Register a callback function that's called when a device was scanned.
@@ -119,6 +129,7 @@ private:
 	callback_scan_t _scanCallback = nullptr;
 
 	callback_model_init_t _modelInitCallback = nullptr;
+	callback_model_configure_t _modelConfigureCallback = nullptr;
 
 	uint8_t _netkey[NRF_MESH_KEY_SIZE];
 	dsm_handle_t _netkeyHandle = DSM_HANDLE_INVALID;

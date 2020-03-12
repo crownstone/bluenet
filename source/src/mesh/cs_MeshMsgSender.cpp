@@ -12,6 +12,11 @@
 #include <mesh/cs_MeshCommon.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
+#include <util/cs_BleError.h>
+
+void MeshMsgSender::init(MeshModelSelector* selector) {
+	_selector = selector;
+}
 
 cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t *meshMsg) {
 	if (!MeshUtil::isValidMeshMessage(meshMsg)) {
@@ -105,14 +110,32 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(const cs_mesh_model_msg_d
 	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
-cs_ret_code_t MeshMsgSender::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority) {
-	LOGe("TODO");
-	return ERR_NOT_IMPLEMENTED;
+cs_ret_code_t MeshMsgSender::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority) {
+	LOGd("addToQueue");
+	assert(_selector != nullptr, "No model selector set.");
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = id;
+	item.metaData.type = type;
+	item.metaData.targetId = targetId;
+	item.metaData.priority = priority;
+	item.metaData.reliable = false;
+	item.metaData.repeats = repeats;
+	item.payloadSize = payloadSize;
+	item.payloadPtr = payload;
+	return _selector->addToQueue(item);
 }
 
 cs_ret_code_t MeshMsgSender::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
-	LOGe("TODO");
-	return ERR_NOT_IMPLEMENTED;
+	LOGd("remFromQueue");
+	assert(_selector != nullptr, "No model selector set.");
+	MeshUtil::cs_mesh_queue_item_meta_data_t item;
+	item.id = id;
+	item.type = type;
+//	item.targetId =
+//	item.priority =
+//	item.reliable =
+//	item.repeats =
+	return _selector->remFromQueue(item);
 }
 
 void MeshMsgSender::handleEvent(event_t & event) {

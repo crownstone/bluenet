@@ -9,6 +9,7 @@
 
 #include <common/cs_Types.h>
 #include <events/cs_EventListener.h>
+#include <mesh/cs_MeshModelSelector.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 
 /**
@@ -17,6 +18,16 @@
  */
 class MeshMsgSender: EventListener {
 public:
+//	/** Callback function definition. */
+//	typedef function<void(const MeshUtil::cs_mesh_queue_item_t& item)> callback_add_t;
+//
+//	/** Callback function definition. */
+//	typedef function<void(const MeshUtil::cs_mesh_queue_item_meta_data_t& item)> callback_rem_t;
+//
+//	void registerAddCallback(const callback_add_t& closure);
+//	void registerRemCallback(const callback_rem_t& closure);
+	void init(MeshModelSelector* selector);
+
 	cs_ret_code_t sendMsg(cs_mesh_msg_t *meshMsg);
 	cs_ret_code_t sendTestMsg();
 	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOW);
@@ -30,6 +41,10 @@ public:
 	/** Internal usage */
 	void handleEvent(event_t & event);
 private:
-	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, const uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
+//	callback_add_t _addCallback;
+//	callback_rem_t _remCallback;
+	MeshModelSelector* _selector;
+
+	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
 	cs_ret_code_t remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id);
 };
