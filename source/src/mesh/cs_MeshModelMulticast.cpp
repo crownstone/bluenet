@@ -26,6 +26,10 @@ static const access_opcode_handler_t opcodeHandlers[] = {
 		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_MSG, CROWNSTONE_COMPANY_ID), staticMshHandler},
 };
 
+void MeshModelMulticast::registerMsgHandler(const callback_msg_t& closure) {
+	_msgCallback = closure;
+}
+
 void MeshModelMulticast::init(uint16_t modelId) {
 	uint32_t retVal;
 	access_model_add_params_t accessParams;

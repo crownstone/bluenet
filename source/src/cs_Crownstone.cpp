@@ -277,12 +277,7 @@ void Crownstone::initDrivers0(){
 #if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 		// Check if flash pages of mesh are valid, else erase them.
 		// This has to be done before Storage is initialized.
-		if (!_mesh->isFlashValid()) {
-			// We can try to erase all pages.
-			if (_mesh->eraseAllPages() != ERR_SUCCESS) {
-				// Only option left is to reboot and see if things work out next time.
-				APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
-			}
+		if (!_mesh->checkFlashValid()) {
 			// Wait for pages erased event.
 			return;
 		}

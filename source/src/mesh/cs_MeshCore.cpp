@@ -233,8 +233,13 @@ MeshCore& MeshCore::getInstance() {
 	return instance;
 }
 
+void MeshCore::registerModelInitCallback(const callback_model_init_t& closure) {
+	_modelInitCallback = closure;
+}
 
-
+void MeshCore::registerScanCallback(const callback_scan_t& closure) {
+	_scanCallback = closure;
+}
 
 cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
