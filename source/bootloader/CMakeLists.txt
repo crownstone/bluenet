@@ -131,6 +131,7 @@ ELSE()
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/dfu_public_key.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/src/cfg/cs_Boards.c")
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/dev_info_service.c")
+	LIST(APPEND BOOTLOADER_SOURCE_FILES "${CMAKE_SOURCE_DIR}/bootloader/cs_BootRamData.c")
 
 	LIST(APPEND BOOTLOADER_SOURCE_FILES "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
 	set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
@@ -303,8 +304,12 @@ ENDIF()
 ADD_DEFINITIONS("-DUSE_APP_CONFIG")
 
 ADD_DEFINITIONS("-DBOOTLOADER_VERSION=${BOOTLOADER_VERSION}")
-		
-message(STATUS "Configure cs_BootloaderConfig.cpp file")
+
+message(STATUS "bootloader: Configure nrf_symbols.ld file")
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/nrf_symbols.ld" @ONLY)
+list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/nrf_symbols.ld")
+
+message(STATUS "bootloader: Configure cs_BootloaderConfig.cpp file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/cs_BootloaderConfig.c.in" "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c" @ONLY)
 list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/cs_BootloaderConfig.c")
 

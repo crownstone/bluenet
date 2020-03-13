@@ -47,6 +47,8 @@
  */
 
 #include <stdint.h>
+#include <string.h>
+
 //#include "boards.h"
 #include "nrf_mbr.h"
 #include "nrf_bootloader.h"
@@ -64,6 +66,8 @@
 #include "cfg/cs_Boards.h"
 #include "cfg/cs_DeviceTypes.h"
 #include "nrf_nvmc.h"
+#include "cs_BootRamData.h"
+#include "cs_BootloaderConfig.h"
 
 /**
  * GPRegRet value when device was reset due to a soft reset.
@@ -255,6 +259,10 @@ int main(void)
 	
 	NRF_LOG_INFO("Init");
 	NRF_LOG_FLUSH();
+
+	char version[12];
+    memcpy(version, (char*)g_BOOTLOADER_VERSION, 12);
+	setRamData(version, 12);
 
 	// Need to adjust dfu_enter_check().
 	// Or we can simply use NRF_BL_DFU_ENTER_METHOD_GPREGRET

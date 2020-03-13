@@ -744,7 +744,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
+			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" --no-backup
 			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
 			COMMENT "Create bootloader settings"
 			)

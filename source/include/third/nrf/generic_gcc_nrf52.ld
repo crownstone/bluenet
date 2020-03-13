@@ -9,6 +9,8 @@ GROUP(-lgcc -lc -lnosys)
 
 INCLUDE "nrf_symbols.ld"
 
+RAM_BOOTLOADER_LENGTH = 0x40;
+
 /**
  * See S132_nrf52_6.0.0_release_notes.pdf.
  *
@@ -36,7 +38,8 @@ INCLUDE "nrf_symbols.ld"
 MEMORY
 {
   FLASH (rx) : ORIGIN = APPLICATION_START_ADDRESS, LENGTH = APPLICATION_LENGTH
-  RAM (rwx) :  ORIGIN = RAM_R1_BASE, LENGTH = RAM_APPLICATION_AMOUNT
+  RAM_BOOTLOADER (rwx): ORIGIN = RAM_R1_BASE, LENGTH = RAM_BOOTLOADER_LENGTH
+  RAM (rwx) :  ORIGIN = (RAM_R1_BASE + RAM_BOOTLOADER_LENGTH), LENGTH = (RAM_APPLICATION_AMOUNT - RAM_BOOTLOADER_LENGTH)
   CORE_BL_RAM (rw) :     ORIGIN = 0x2000fd00, LENGTH = 0x300
   UICR_BOOTADDR (r) :    ORIGIN = 0x10001014, LENGTH = 0x04
   UICR_MBRPARAMADDR (r): ORIGIN = 0x10001018, LENGTH = 0x04
@@ -44,6 +47,17 @@ MEMORY
 
 SECTIONS
 {
+}
+
+SECTIONS
+{
+  . = ALIGN(4);
+  .bootloader_ram (NOLOAD):
+  {
+    PROVIDE(__start_bootloader_ram = .);
+    KEEP(*(SORT(.bootloader_ram.*)))
+    PROVIDE(__stop_bootloader_ram = .);
+  } > RAM_BOOTLOADER
 }
 
 SECTIONS
