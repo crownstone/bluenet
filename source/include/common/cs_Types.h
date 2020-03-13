@@ -233,9 +233,11 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
 	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.
 	EVT_MESH_TRACKED_DEVICE_LIST_SIZE,                // Mesh received a tracked device list size.
-	EVT_MESH_SYNC_REQUEST_OUTGOING,                   // Before an outgoing sync request is broadcast, this event is fired internally so that other event handlers can tag on.
-	EVT_MESH_SYNC_REQUEST_INCOMING,                   // Whan a sync request is received, this event is fired internally so that each event handler can individually respond to it.
+	EVT_MESH_SYNC_REQUEST_OUTGOING,                   // Before an outgoing sync request is broadcasted, this event is fired internally so that other event handlers can tag on.
+	EVT_MESH_SYNC_REQUEST_INCOMING,                   // When a sync request is received, this event is fired internally so that each event handler can individually respond to it.
 	EVT_MESH_SYNC_FAILED,                             // When syncing is considered to have failed, no more retries.
+	EVT_MESH_EXT_STATE_0,                             // Mesh received part 0 of the state of a Crownstone.
+	EVT_MESH_EXT_STATE_1,                             // Mesh received part 1 of the state of a Crownstone.
 	EVT_MESH_PAGES_ERASED,                            // All mesh storage pages are completely erased.
 
 	// Behaviour
@@ -481,6 +483,8 @@ typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING);
 typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING);
 typedef void TYPIFY(EVT_MESH_SYNC_FAILED);
 typedef void TYPIFY(EVT_MESH_PAGES_ERASED);
+typedef cs_mesh_model_msg_state_0_t TYPIFY(EVT_MESH_EXT_STATE_0);
+typedef cs_mesh_model_msg_state_1_t TYPIFY(EVT_MESH_EXT_STATE_1);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
