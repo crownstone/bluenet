@@ -9,8 +9,6 @@ GROUP(-lgcc -lc -lnosys)
 
 INCLUDE "nrf_symbols.ld"
 
-RAM_BOOTLOADER_LENGTH = 0x40;
-
 /**
  * See S132_nrf52_6.0.0_release_notes.pdf.
  *

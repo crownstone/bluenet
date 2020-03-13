@@ -305,3 +305,5 @@ RAM_APPLICATION_AMOUNT=0xDC80
 # Adjust them in $BLUENET_DIR/include/third/nrf/generic_gcc_nrf52.ld for now! (adjusted version of $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld)
 ATTR_TABLE_SIZE=0x500
 HEAP_SIZE=20000
+
+RAM_BOOTLOADER_LENGTH=0x100

@@ -5,8 +5,6 @@ GROUP(-lgcc -lc -lnosys)
 
 INCLUDE "nrf_symbols.ld"
 
-RAM_BOOTLOADER_LENGTH = 0x40;
-
 MEMORY
 {
   /* Without debug: FLASH (rx) : ORIGIN = 0x76000, LENGTH = 0x8000 */
