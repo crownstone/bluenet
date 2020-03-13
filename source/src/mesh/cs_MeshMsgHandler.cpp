@@ -20,7 +20,7 @@ void MeshMsgHandler::init() {
 }
 
 void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg) {
-	BLEutil::printArray(msg.msg, msg.msgSize);
+//	BLEutil::printArray(msg.msg, msg.msgSize);
 	if (msg.opCode == CS_MESH_MODEL_OPCODE_RELIABLE_MSG) {
 		LOGe("sendReply");
 //		sendReply(accessMsg);
