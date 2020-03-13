@@ -597,7 +597,6 @@ if(FACTORY_IMAGE)
 		COMMENT "Generate a factory image"
 		)
 
-	# We will not use "install" because - different from the bluenet source folder - it is here still set to /usr/local/...
 	INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/${FACTORY_IMAGE_PATH_NAME}/" DESTINATION "${FACTORY_IMAGE_PATH_NAME}" FILES_MATCHING PATTERN "*")
 endif()
 
