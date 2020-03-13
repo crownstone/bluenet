@@ -170,6 +170,8 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_MESH_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_EXT_STATE_0:
 	case CS_TYPE::EVT_MESH_EXT_STATE_1:
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
+	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return csType;
 	}
@@ -505,6 +507,10 @@ size16_t TypeSize(CS_TYPE const & type){
 		return sizeof(TYPIFY(EVT_MESH_EXT_STATE_0));
 	case CS_TYPE::EVT_MESH_EXT_STATE_1:
 		return sizeof(TYPIFY(EVT_MESH_EXT_STATE_1));
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
+		return sizeof(TYPIFY(CMD_SEND_MESH_MSG_SET_TIME));
+	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
+		return 0;
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return 0;
 	} // end switch
@@ -674,6 +680,8 @@ const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_MESH_PAGES_ERASED: return "EVT_MESH_PAGES_ERASED";
 	case CS_TYPE::EVT_MESH_EXT_STATE_0: return "EVT_MESH_EXT_STATE_0";
 	case CS_TYPE::EVT_MESH_EXT_STATE_1: return "EVT_MESH_EXT_STATE_1";
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME: return "CMD_SEND_MESH_MSG_SET_TIME";
+	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP: return "CMD_SEND_MESH_MSG_NOOP";
 	case CS_TYPE::EVT_GENERIC_TEST: return "EVT_GENERIC_TEST";
 	}
 	return "Unknown";
@@ -838,6 +846,8 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::EVT_MESH_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_EXT_STATE_0:
 	case CS_TYPE::EVT_MESH_EXT_STATE_1:
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
+	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return false;
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
@@ -1011,6 +1021,8 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::EVT_MESH_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_EXT_STATE_0:
 	case CS_TYPE::EVT_MESH_EXT_STATE_1:
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
+	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return true;
 	}
@@ -1180,6 +1192,8 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::EVT_MESH_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_EXT_STATE_0:
 	case CS_TYPE::EVT_MESH_EXT_STATE_1:
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
+	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return NO_ONE;
 	}
@@ -1349,6 +1363,8 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_MESH_PAGES_ERASED:
 	case CS_TYPE::EVT_MESH_EXT_STATE_0:
 	case CS_TYPE::EVT_MESH_EXT_STATE_1:
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
+	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return NO_ONE;
 	}

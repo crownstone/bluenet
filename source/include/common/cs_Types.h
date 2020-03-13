@@ -223,6 +223,8 @@ enum class CS_TYPE: uint16_t {
 
 	// Mesh
 	CMD_SEND_MESH_MSG,                                // Send a mesh message.
+	CMD_SEND_MESH_MSG_SET_TIME,                       // Send a set time mesh message.
+	CMD_SEND_MESH_MSG_NOOP,                           // Send a noop mesh message.
 	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Send a switch mesh message.
 	CMD_SEND_MESH_MSG_PROFILE_LOCATION,               // Send a profile location mesh message.
 	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS,         // Send a set behaviour settings mesh message.
@@ -485,6 +487,8 @@ typedef void TYPIFY(EVT_MESH_SYNC_FAILED);
 typedef void TYPIFY(EVT_MESH_PAGES_ERASED);
 typedef cs_mesh_model_msg_state_0_t TYPIFY(EVT_MESH_EXT_STATE_0);
 typedef cs_mesh_model_msg_state_1_t TYPIFY(EVT_MESH_EXT_STATE_1);
+typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
+typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
