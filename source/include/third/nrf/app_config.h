@@ -63,7 +63,7 @@
 // <2=> Warning
 // <3=> Info
 // <4=> Debug
-#define NRF_LOG_DEFAULT_LEVEL 3
+#define NRF_LOG_DEFAULT_LEVEL 4
 #define NRF_SDH_SOC_LOG_LEVEL 3
 #define NRF_SDH_BLE_LOG_LEVEL 3
 #define NRF_SDH_LOG_LEVEL 3
