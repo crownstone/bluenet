@@ -7,8 +7,9 @@
 
 #pragma once
 
-#include "protocol/cs_Typedefs.h"
-#include "protocol/cs_CmdSource.h"
+#include <mesh/cs_MeshDefines.h>
+#include <protocol/cs_Typedefs.h>
+#include <protocol/cs_CmdSource.h>
 
 /**
  * Message opcodes.
@@ -61,9 +62,13 @@ enum cs_mesh_model_msg_type_t {
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_test_t {
 	uint32_t counter;
+#if MESH_MODEL_TEST_MSG == 2
 //	uint8_t dummy[3]; // non segmented
 //	uint8_t dummy[12]; // 2 segments
 	uint8_t dummy[24]; // 3 segments
+#else
+	uint8_t dummy[3]; // non segmented
+#endif
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_time_t {

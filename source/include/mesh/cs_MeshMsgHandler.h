@@ -47,6 +47,12 @@ private:
 	cs_mesh_model_msg_multi_switch_item_t _lastReceivedMultiSwitch = {0xFF};
 	TYPIFY(CMD_SET_TIME) _lastReveivedSetTime = 0;
 
+#if MESH_MODEL_TEST_MSG == 1
+	uint32_t _lastReceivedCounter = 0;
+	uint32_t _received = 0;
+	uint32_t _dropped = 0;
+#endif
+
 	bool isFromSameState(uint16_t srcAddress, stone_id_t id, uint16_t partialTimestamp);
 	void checkStateReceived(int8_t rssi, uint8_t ttl);
 };

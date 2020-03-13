@@ -136,7 +136,7 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 
 cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize) {
 	if (!access_reliable_model_is_free(_accessModelHandle)) {
-		LOGw("Busy");
+		LOGMeshModelVerbose("Busy");
 		return ERR_BUSY;
 	}
 	access_message_tx_t* accessMsg = &(_accessReliableMsg.message);
@@ -191,9 +191,9 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 }
 
 cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
-	MeshUtil::printQueueItem("addToQueue", item.metaData);
+	MeshUtil::printQueueItem("Unicast addToQueue", item.metaData);
 #if MESH_MODEL_TEST_MSG != 0
-	if (type != CS_MESH_MODEL_TYPE_TEST) {
+	if (item.metaData.type != CS_MESH_MODEL_TYPE_TEST) {
 		return ERR_SUCCESS;
 	}
 #endif

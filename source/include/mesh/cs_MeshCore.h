@@ -79,6 +79,11 @@ public:
 	 */
 	cs_ret_code_t init(const boards_config_t& board);
 
+	/**
+	 * Get the unicast address of this crownstone.
+	 */
+	uint16_t getUnicastAddress();
+
 	void start();
 
 	/**

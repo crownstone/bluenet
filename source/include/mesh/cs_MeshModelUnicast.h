@@ -77,6 +77,12 @@ private:
 
 	access_reliable_t _accessReliableMsg;
 
+#if MESH_MODEL_TEST_MSG == 2
+	uint32_t _acked = 0;
+	uint32_t _timedout = 0;
+	uint32_t _canceled = 0;
+#endif
+
 	/**
 	 * Queue index of message currently being sent.
 	 * -1 for none.

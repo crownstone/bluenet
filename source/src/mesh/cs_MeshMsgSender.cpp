@@ -39,12 +39,17 @@ cs_ret_code_t MeshMsgSender::sendTestMsg() {
 #else
 	test.counter = 0;
 #endif
+#if MESH_MODEL_TEST_MSG == 2
+	stone_id_t targetId = 1;
+#else
+	stone_id_t targetId = 0;
+#endif
 	for (uint8_t i=0; i<sizeof(test.dummy); ++i) {
 		test.dummy[i] = i;
 	}
 	uint8_t repeats = 1;
 	LOGd("sendTestMsg counter=%u", test.counter);
-	return addToQueue(CS_MESH_MODEL_TYPE_TEST, 0, 0, (uint8_t*)&test, sizeof(test), repeats, false);
+	return addToQueue(CS_MESH_MODEL_TYPE_TEST, targetId, 0, (uint8_t*)&test, sizeof(test), repeats, false);
 }
 
 cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats) {
@@ -111,7 +116,6 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(const cs_mesh_model_msg_d
 }
 
 cs_ret_code_t MeshMsgSender::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority) {
-	LOGd("addToQueue");
 	assert(_selector != nullptr, "No model selector set.");
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = id;
@@ -126,7 +130,6 @@ cs_ret_code_t MeshMsgSender::addToQueue(cs_mesh_model_msg_type_t type, stone_id_
 }
 
 cs_ret_code_t MeshMsgSender::remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id) {
-	LOGd("remFromQueue");
 	assert(_selector != nullptr, "No model selector set.");
 	MeshUtil::cs_mesh_queue_item_meta_data_t item;
 	item.id = id;

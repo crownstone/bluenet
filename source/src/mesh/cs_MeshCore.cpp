@@ -427,6 +427,9 @@ void MeshCore::provisionLoad() {
 	LOGMeshInfo("devKeyHandle=%u devKey=", _devkeyHandle);
 }
 
+uint16_t MeshCore::getUnicastAddress() {
+	return _ownAddress;
+}
 
 void MeshCore::start() {
 	uint32_t retCode;

@@ -127,9 +127,9 @@ cs_ret_code_t MeshModelMulticast::sendMsg(const uint8_t* data, uint16_t len) {
 }
 
 cs_ret_code_t MeshModelMulticast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
-	MeshUtil::printQueueItem("addToQueue", item.metaData);
+	MeshUtil::printQueueItem("Multicast addToQueue", item.metaData);
 #if MESH_MODEL_TEST_MSG != 0
-	if (type != CS_MESH_MODEL_TYPE_TEST) {
+	if (item.metaData.type != CS_MESH_MODEL_TYPE_TEST) {
 		return ERR_SUCCESS;
 	}
 #endif

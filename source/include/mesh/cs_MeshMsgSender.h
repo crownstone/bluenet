@@ -45,6 +45,10 @@ private:
 //	callback_rem_t _remCallback;
 	MeshModelSelector* _selector;
 
+#if MESH_MODEL_TEST_MSG != 0
+	uint32_t _nextSendCounter = 1;
+#endif
+
 	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
 	cs_ret_code_t remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id);
 };
