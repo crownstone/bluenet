@@ -28,7 +28,7 @@ cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t *meshMsg) {
 //	uint8_t* payload = NULL;
 //	size16_t payloadSize;
 //	MeshModelPacketHelper::getPayload(meshMsg->msg, meshMsg->size, payload, payloadSize);
-	remFromQueue(meshMsg->type, 0);
+	remFromQueue(meshMsg->type, 0, 0);
 	return addToQueue(meshMsg->type, 0, 0, meshMsg->payload, meshMsg->size, repeats, priority);
 }
 
@@ -65,7 +65,7 @@ cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_ite
 			break;
 	}
 	// Remove old messages of same type and with same target id.
-	remFromQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, item->id);
+	remFromQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, 0, item->id);
 	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, 0, item->id, (uint8_t*)(&meshItem), sizeof(meshItem), repeats, true);
 }
 
@@ -74,13 +74,13 @@ cs_ret_code_t MeshMsgSender::sendTime(const cs_mesh_model_msg_time_t* item, uint
 		return ERR_WRONG_PARAMETER;
 	}
 	// Remove old messages of same type, as only the latest is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0);
+	remFromQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshMsgSender::sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats) {
 	// Remove old messages of same type, as only the latest is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0);
+	remFromQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
@@ -94,19 +94,19 @@ cs_ret_code_t MeshMsgSender::sendProfileLocation(const cs_mesh_model_msg_profile
 
 cs_ret_code_t MeshMsgSender::sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t repeats) {
 	// Remove old messages of same type, and device id, as only the latest register is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, item->deviceId);
+	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0, item->deviceId);
 	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0, item->deviceId, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshMsgSender::sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t repeats) {
 	// Remove old messages of same type, and device id, as only the latest token is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, item->deviceId);
+	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, 0, item->deviceId);
 	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, item->deviceId, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* item, uint8_t repeats) {
 	// Remove old messages of same type, as only the latest is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0);
+	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
@@ -125,13 +125,13 @@ cs_ret_code_t MeshMsgSender::addToQueue(cs_mesh_model_msg_type_t type, stone_id_
 	return _selector->addToQueue(item);
 }
 
-cs_ret_code_t MeshMsgSender::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
+cs_ret_code_t MeshMsgSender::remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id) {
 	LOGd("remFromQueue");
 	assert(_selector != nullptr, "No model selector set.");
 	MeshUtil::cs_mesh_queue_item_meta_data_t item;
 	item.id = id;
 	item.type = type;
-//	item.targetId =
+	item.targetId = targetId;
 //	item.priority =
 //	item.reliable =
 //	item.repeats =

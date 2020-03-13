@@ -16,7 +16,7 @@
  * Class that:
  * - Sends messages to the mesh.
  */
-class MeshMsgSender: EventListener {
+class MeshMsgSender: public EventListener {
 public:
 //	/** Callback function definition. */
 //	typedef function<void(const MeshUtil::cs_mesh_queue_item_t& item)> callback_add_t;
@@ -46,5 +46,5 @@ private:
 	MeshModelSelector* _selector;
 
 	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
-	cs_ret_code_t remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id);
+	cs_ret_code_t remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id);
 };

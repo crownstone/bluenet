@@ -32,6 +32,7 @@ void MeshModelMulticast::registerMsgHandler(const callback_msg_t& closure) {
 }
 
 void MeshModelMulticast::init(uint16_t modelId) {
+	assert(_msgCallback != nullptr, "Callback not set");
 	uint32_t retVal;
 	access_model_add_params_t accessParams;
 	accessParams.model_id.company_id = CROWNSTONE_COMPANY_ID;
@@ -67,12 +68,24 @@ void MeshModelMulticast::configureSelf(dsm_handle_t appkeyHandle) {
 
 void MeshModelMulticast::handleMsg(const access_message_rx_t * accessMsg) {
 	if (accessMsg->meta_data.p_core_metadata->source != NRF_MESH_RX_SOURCE_LOOPBACK) {
-		LOGMeshModelVerbose("Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i", accessMsg->opcode.opcode, accessMsg->meta_data.appkey_handle, accessMsg->meta_data.subnet_handle, accessMsg->meta_data.ttl, MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata));
+		LOGMeshModelVerbose("Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i",
+				accessMsg->opcode.opcode,
+				accessMsg->meta_data.appkey_handle,
+				accessMsg->meta_data.subnet_handle,
+				accessMsg->meta_data.ttl,
+				MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata)
+		);
 		MeshUtil::printMeshAddress("  Src: ", &(accessMsg->meta_data.src));
 		MeshUtil::printMeshAddress("  Dst: ", &(accessMsg->meta_data.dst));
 //		LOGMeshModelVerbose("ownAddress=%u  Data:", _ownAddress);
 #if CS_SERIAL_NRF_LOG_ENABLED == 1
-		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i\n", accessMsg->opcode.opcode, accessMsg->meta_data.appkey_handle, accessMsg->meta_data.subnet_handle, accessMsg->meta_data.ttl, MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata));
+		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i\n",
+				accessMsg->opcode.opcode,
+				accessMsg->meta_data.appkey_handle,
+				accessMsg->meta_data.subnet_handle,
+				accessMsg->meta_data.ttl,
+				MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata)
+		);
 	}
 	else {
 		__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "Handle mesh msg loopback\n");

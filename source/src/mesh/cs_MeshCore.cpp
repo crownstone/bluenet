@@ -58,10 +58,10 @@ static CS_TYPE cs_mesh_get_type_from_handle(uint16_t handle) {
 }
 
 static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_size) {
-	LOGi("cs_mesh_write_cb handle=%u", handle);
 	assert(BLEutil::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	cs_ret_code_t retCode = State::getInstance().set(type, data_ptr, data_size);
+	LOGi("cs_mesh_write_cb handle=%u retCode=%u", handle, retCode);
 	switch (retCode) {
 		case ERR_SUCCESS:
 		case ERR_SUCCESS_NO_CHANGE:
@@ -72,11 +72,11 @@ static uint32_t cs_mesh_write_cb(uint16_t handle, void* data_ptr, uint16_t data_
 }
 
 static uint32_t cs_mesh_read_cb(uint16_t handle, void* data_ptr, uint16_t data_size) {
-	LOGi("cs_mesh_read_cb handle=%u", handle);
 	assert(BLEutil::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	State::getInstance().get(type, data_ptr, data_size);
 	BLEutil::printArray(data_ptr, data_size);
+	LOGi("cs_mesh_read_cb handle=%u size=%u", handle, data_size);
 	return NRF_SUCCESS;
 }
 
@@ -237,7 +237,7 @@ void MeshCore::registerModelInitCallback(const callback_model_init_t& closure) {
 	_modelInitCallback = closure;
 }
 
-void MeshCore::registerModelInitCallback(const callback_model_configure_t& closure) {
+void MeshCore::registerModelConfigureCallback(const callback_model_configure_t& closure) {
 	_modelConfigureCallback = closure;
 }
 
@@ -250,12 +250,16 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 	__LOG_INIT(LOG_SRC_APP | LOG_SRC_PROV | LOG_SRC_ACCESS | LOG_SRC_BEARER | LOG_SRC_TRANSPORT | LOG_SRC_NETWORK, LOG_LEVEL_DBG3, LOG_CALLBACK_DEFAULT);
 	__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "----- Mesh init -----\n");
 #endif
+	assert(_modelInitCallback != nullptr && _modelConfigureCallback != nullptr && _scanCallback != nullptr, "Callback not set");
 
 #if MESH_PERSISTENT_STORAGE == 1
 	if (!isFlashValid()) {
 		return ERR_WRONG_STATE;
 	}
 #endif
+
+	// Listen for bluenet events.
+	listen();
 
 	nrf_clock_lf_cfg_t lfclksrc;
 	lfclksrc.source = NRF_SDH_CLOCK_LF_SRC;
@@ -527,9 +531,9 @@ void MeshCore::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::EVT_TICK: {
 			TYPIFY(EVT_TICK) tickCount = *((TYPIFY(EVT_TICK)*)event.data);
-			if (tickCount % (500 / TICK_INTERVAL_MS) == 0) {
+			if (tickCount % (10 * 1000 / TICK_INTERVAL_MS) == 0) {
 				[[maybe_unused]] const scanner_stats_t * stats = scanner_stats_get();
-				LOGMeshDebug("success=%u crcFail=%u lenFail=%u memFail=%u", stats->successful_receives, stats->crc_failures, stats->length_out_of_bounds, stats->out_of_memory);
+				LOGMeshDebug("Scanner stats: success=%u crcFail=%u lenFail=%u memFail=%u", stats->successful_receives, stats->crc_failures, stats->length_out_of_bounds, stats->out_of_memory);
 			}
 			break;
 		}

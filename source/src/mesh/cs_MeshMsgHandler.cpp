@@ -96,7 +96,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg) {
 }
 
 void MeshMsgHandler::handleTest(uint8_t* payload, size16_t payloadSize) {
-	cs_mesh_model_msg_test_t* test = (cs_mesh_model_msg_test_t*)payload;
+	[[maybe_unused]] cs_mesh_model_msg_test_t* test = (cs_mesh_model_msg_test_t*)payload;
 	LOGi("received test counter=%u", test->counter);
 #if MESH_MODEL_TEST_MSG == 1
 	if (_lastReceivedCounter == 0) {

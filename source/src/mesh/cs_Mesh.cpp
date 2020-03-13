@@ -44,7 +44,7 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	_core->registerModelInitCallback([&]() -> void {
 		initModels();
 	});
-	_core->registerModelInitCallback([&](dsm_handle_t appkeyHandle) -> void {
+	_core->registerModelConfigureCallback([&](dsm_handle_t appkeyHandle) -> void {
 		configureModels(appkeyHandle);
 	});
 	_core->registerScanCallback([&](const nrf_mesh_adv_packet_rx_data_t *scanData) -> void {
@@ -62,7 +62,7 @@ void Mesh::initModels() {
 	});
 	_modelMulticast.init(0);
 
-	_modelMulticast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg) -> void {
+	_modelUnicast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg) -> void {
 		_msgHandler.handleMsg(msg);
 	});
 	_modelUnicast.init(1);
@@ -75,6 +75,7 @@ void Mesh::configureModels(dsm_handle_t appkeyHandle) {
 
 void Mesh::start() {
 	_core->start();
+	_msgSender.listen();
 	this->listen();
 }
 

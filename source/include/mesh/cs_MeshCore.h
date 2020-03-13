@@ -53,7 +53,7 @@ public:
 	 *
 	 * Must be done before init.
 	 */
-	void registerModelInitCallback(const callback_model_configure_t& closure);
+	void registerModelConfigureCallback(const callback_model_configure_t& closure);
 
 	/**
 	 * Register a callback function that's called when a device was scanned.

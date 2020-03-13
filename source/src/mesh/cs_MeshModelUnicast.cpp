@@ -41,6 +41,7 @@ void MeshModelUnicast::registerMsgHandler(const callback_msg_t& closure) {
 }
 
 void MeshModelUnicast::init(uint16_t modelId) {
+	assert(_msgCallback != nullptr, "Callback not set");
 	uint32_t retVal;
 	access_model_add_params_t accessParams;
 	accessParams.model_id.company_id = CROWNSTONE_COMPANY_ID;
