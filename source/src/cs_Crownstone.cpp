@@ -186,8 +186,8 @@ Crownstone::Crownstone(boards_config_t& board) :
 
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
 
-        // TODO (Anne @Arend). Yes, you can call this in constructor. All non-virtual member functions can be called as well.
-	this->listen(); 
+	// TODO (Anne @Arend). Yes, you can call this in constructor. All non-virtual member functions can be called as well.
+	this->listen();
 	_stack = &Stack::getInstance();
 	_advertiser = &Advertiser::getInstance();
 	_timer = &Timer::getInstance();
@@ -416,29 +416,12 @@ void Crownstone::configureStack() {
 }
 
 void Crownstone::configureAdvertisement() {
+
 	// Set the stored advertisement interval
 	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;
 	_state->get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, sizeof(advInterval));
 	_advertiser->setAdvertisingInterval(advInterval);
 	_advertiser->init();
-
-	// Create the iBeacon parameter object which will be used to configure the advertisement as an iBeacon.
-	TYPIFY(CONFIG_IBEACON_MAJOR) major;
-	TYPIFY(CONFIG_IBEACON_MINOR) minor;
-	TYPIFY(CONFIG_IBEACON_TXPOWER) rssi;
-	ble_uuid128_t uuid;
-//	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
-		_state->get(CS_TYPE::CONFIG_IBEACON_MAJOR, &major, sizeof(major));
-		_state->get(CS_TYPE::CONFIG_IBEACON_MINOR, &minor, sizeof(minor));
-		_state->get(CS_TYPE::CONFIG_IBEACON_UUID, uuid.uuid128, sizeof(uuid.uuid128));
-		_state->get(CS_TYPE::CONFIG_IBEACON_TXPOWER, &rssi, sizeof(rssi));
-//	}
-//	else {
-//		// TODO: Get default!
-//	}
-	LOGd("iBeacon: major=%u, minor=%u, rssi_on_1m=%i", major, minor, rssi);
-
-	_beacon = new IBeacon(uuid, major, minor, rssi);
 
 	// Create the ServiceData object which will be (mis)used to advertise select state variables from the Crownstone.
 	_serviceData = new ServiceData();
@@ -466,13 +449,7 @@ void Crownstone::configureAdvertisement() {
 
 	// assign service data to stack
 	_advertiser->setServiceData(_serviceData);
-
-	if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
-		_advertiser->configureAdvertisement(_beacon, _boardsConfig.deviceType);
-	}
-	else {
-		_advertiser->configureAdvertisement(NULL, _boardsConfig.deviceType);
-	}
+	_advertiser->configureAdvertisement(_boardsConfig.deviceType);
 }
 
 void Crownstone::createService(const ServiceEvent event) {
@@ -705,7 +682,7 @@ void Crownstone::startUp() {
 			_mesh->start();
 			if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
 				_mesh->initAdvertiser();
-				_mesh->advertise(_beacon);
+				_mesh->advertiseIbeacon();
 			}
 #endif
 		}

@@ -105,9 +105,8 @@ void Mesh::initAdvertiser() {
 	_advertiser.start();
 }
 
-void Mesh::advertise(IBeacon* ibeacon) {
-	LOGd("advertise ibeacon major=%u minor=%u", ibeacon->getMajor(), ibeacon->getMinor());
-	_advertiser.advertise(ibeacon);
+void Mesh::advertiseIbeacon() {
+	_advertiser.advertiseIbeacon();
 }
 
 void Mesh::handleEvent(event_t & event) {

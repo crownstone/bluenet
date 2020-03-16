@@ -76,18 +76,16 @@ public:
 	void initAdvertiser();
 
 	/**
-	 * Advertise as iBeacon.
+	 * Start advertising as iBeacon.
 	 */
-	void advertise(IBeacon* ibeacon);
+	void advertiseIbeacon();
 
 	/**
 	 * Start synchronization of data with other nodes in mesh.
 	 */
 	void startSync();
 
-	/**
-	 * Internal usage
-	 */
+	/** Internal usage */
 	void handleEvent(event_t & event);
 
 private:

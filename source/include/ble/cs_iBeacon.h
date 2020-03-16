@@ -10,7 +10,7 @@
 #pragma once
 
 #include <ble/cs_UUID.h>
-
+#include <protocol/cs_Typedefs.h>
 #include <drivers/cs_Serial.h>
 #include <util/cs_Utils.h>
 
@@ -52,7 +52,7 @@ private:
 
 			/** Proximity UUID, shared for all iBeacons for a given application
 			 */
-			ble_uuid128_t uuid;
+			cs_uuid128_t uuid;
 
 			/** Major number (group level identifier)
 			 */
@@ -87,7 +87,7 @@ public:
 	 *
 	 * @rssi the calibrated rssi value at 1m distance
 	 */
-	IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor, int8_t rssi);
+	IBeacon(cs_uuid128_t uuid, uint16_t major, uint16_t minor, int8_t rssi);
 
 	/** The size of the iBeacon advertisement data
 	 *
@@ -121,9 +121,9 @@ public:
 	uint16_t getMinor();
 
 	/** Set UUID */
-	void setUUID(ble_uuid128_t uuid);
+	void setUUID(cs_uuid128_t& uuid);
 	/** Get UUID */
-	ble_uuid128_t getUUID();
+	cs_uuid128_t getUUID();
 
 	/** Set RSSI value */
 	void setTxPower(int8_t txPower);

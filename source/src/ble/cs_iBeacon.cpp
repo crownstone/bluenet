@@ -10,7 +10,7 @@
 
 //#define PRINT_IBEACON_VERBOSE
 
-IBeacon::IBeacon(ble_uuid128_t uuid, uint16_t major, uint16_t minor,
+IBeacon::IBeacon(cs_uuid128_t uuid, uint16_t major, uint16_t minor,
 		int8_t rssi) {
 	// advertisement indicator for an iBeacon is defined as 0x0215
 	_params.adv_indicator = BLEutil::convertEndian16(0x0215);
@@ -44,7 +44,7 @@ uint16_t IBeacon::getMinor() {
 	return BLEutil::convertEndian16(_params.minor);
 }
 
-void IBeacon::setUUID(ble_uuid128_t uuid) {
+void IBeacon::setUUID(cs_uuid128_t& uuid) {
 	for (int i = 0; i < 16; ++i) {
 		_params.uuid.uuid128[i] = uuid.uuid128[16-1-i];
 	}
@@ -56,8 +56,8 @@ void IBeacon::setUUID(ble_uuid128_t uuid) {
 #endif
 }
 
-ble_uuid128_t IBeacon::getUUID() {
-	ble_uuid128_t uuid;
+cs_uuid128_t IBeacon::getUUID() {
+	cs_uuid128_t uuid;
 	for (int i = 0; i < 16; ++i) {
 		uuid.uuid128[i] = _params.uuid.uuid128[16-1-i];
 	}
