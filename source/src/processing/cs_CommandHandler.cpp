@@ -487,7 +487,7 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 			meshMsg.payload = payload;
 			meshMsg.size = payloadSize;
 			meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
-			meshMsg.urgency = CS_MESH_URGENCY_LOW; // Timestamp in message gets updated before actually sending.
+			meshMsg.urgency = CS_MESH_URGENCY_HIGH;
 			break;
 		}
 		default:

@@ -42,9 +42,20 @@ private:
 		uint8_t partsReceivedBitmask = 0;
 		TYPIFY(EVT_STATE_EXTERNAL_STONE) state;
 	};
+
+	/**
+	 * Cache part(s) of the last received state, so it can be combined.
+	 */
 	cs_mesh_model_ext_state_t _lastReceivedState;
 
+	/**
+	 * Cache last received switch command, so it can be ignored.
+	 */
 	cs_mesh_model_msg_multi_switch_item_t _lastReceivedMultiSwitch = {0xFF};
+
+	/**
+	 * Cache last received set time command, so it can be ignored.
+	 */
 	TYPIFY(CMD_SET_TIME) _lastReveivedSetTime = 0;
 
 #if MESH_MODEL_TEST_MSG == 1
@@ -53,6 +64,14 @@ private:
 	uint32_t _dropped = 0;
 #endif
 
+	/**
+	 * Whether a state message is from the same state as last received part.
+	 */
 	bool isFromSameState(uint16_t srcAddress, stone_id_t id, uint16_t partialTimestamp);
+
+	/**
+	 * Check if all parts of a state are received.
+	 * Send an event if that's the case.
+	 */
 	void checkStateReceived(int8_t rssi, uint8_t ttl);
 };

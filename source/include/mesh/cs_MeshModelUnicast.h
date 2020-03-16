@@ -27,13 +27,19 @@ public:
 
 	/**
 	 * Register a callback function that's called when a message from the mesh is received.
-	 *
-	 * Must be done before init.
 	 */
 	void registerMsgHandler(const callback_msg_t& closure);
 
+	/**
+	 * Init the model.
+	 */
 	void init(uint16_t modelId);
 
+	/**
+	 * Configure the model.
+	 *
+	 * Subscribes, and sets publish address.
+	 */
 	void configureSelf(dsm_handle_t appkeyHandle);
 
 	/**
@@ -132,5 +138,10 @@ private:
 	 */
 	cs_ret_code_t sendMsg(const uint8_t* msg, uint16_t msgSize);
 
+	/**
+	 * Sets the publish address.
+	 *
+	 * Do this while no message is in progress.
+	 */
 	cs_ret_code_t setPublishAddress(stone_id_t id);
 };

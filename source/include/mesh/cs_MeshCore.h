@@ -43,22 +43,16 @@ public:
 
 	/**
 	 * Register a callback function that's called when the models should be initialized.
-	 *
-	 * Must be done before init.
 	 */
 	void registerModelInitCallback(const callback_model_init_t& closure);
 
 	/**
 	 * Register a callback function that's called when the models should be configured.
-	 *
-	 * Must be done before init.
 	 */
 	void registerModelConfigureCallback(const callback_model_configure_t& closure);
 
 	/**
 	 * Register a callback function that's called when a device was scanned.
-	 *
-	 * Must be done before init.
 	 */
 	void registerScanCallback(const callback_scan_t& closure);
 
@@ -84,6 +78,9 @@ public:
 	 */
 	uint16_t getUnicastAddress();
 
+	/**
+	 * Start using the radio.
+	 */
 	void start();
 
 	/**
@@ -123,19 +120,12 @@ private:
 	//! Assignment operator, singleton, thus made private
 	MeshCore& operator=(MeshCore const &) = delete;
 
-	void provisionSelf(uint16_t id);
-	void provisionLoad();
-
-	bool _isProvisioned = false;
-
-	/** Address of this node */
-	uint16_t _ownAddress = 0;
-
+	// Callbacks
 	callback_scan_t _scanCallback = nullptr;
-
 	callback_model_init_t _modelInitCallback = nullptr;
 	callback_model_configure_t _modelConfigureCallback = nullptr;
 
+	// Keys
 	uint8_t _netkey[NRF_MESH_KEY_SIZE];
 	dsm_handle_t _netkeyHandle = DSM_HANDLE_INVALID;
 	uint8_t _appkey[NRF_MESH_KEY_SIZE];
@@ -143,8 +133,16 @@ private:
 	uint8_t _devkey[NRF_MESH_KEY_SIZE];
 	dsm_handle_t _devkeyHandle = DSM_HANDLE_INVALID;
 
-	// Flash
+	/** Address of this node */
+	uint16_t _ownAddress = 0;
+
+	bool _isProvisioned = false;
+
 	bool _performingFactoryReset = false;
+
+	void provisionSelf(uint16_t id);
+
+	void provisionLoad();
 
 	void getFlashPages(void* & startAddress, void* & endAddress);
 };

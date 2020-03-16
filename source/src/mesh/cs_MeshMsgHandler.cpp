@@ -20,7 +20,7 @@ void MeshMsgHandler::init() {
 }
 
 void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg) {
-	BLEutil::printArray(msg.msg, msg.msgSize);
+//	BLEutil::printArray(msg.msg, msg.msgSize);
 	if (msg.opCode == CS_MESH_MODEL_OPCODE_RELIABLE_MSG) {
 		LOGe("sendReply");
 //		sendReply(accessMsg);
@@ -177,6 +177,12 @@ void MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSize, uint16
 	cs_mesh_model_msg_state_0_t* packet = (cs_mesh_model_msg_state_0_t*) payload;
 	stone_id_t srcId = srcAddress;
 	LOGMeshModelDebug("received: id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
+
+	// Send event
+	TYPIFY(EVT_MESH_EXT_STATE_0)* state = packet;
+	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_0, state, sizeof(*state));
+	event.dispatch();
+
 	if (!isFromSameState(srcAddress, srcAddress, packet->partialTimestamp)) {
 		_lastReceivedState.partsReceivedBitmask = 0;
 	}
@@ -195,6 +201,12 @@ void MeshMsgHandler::handleState1(uint8_t* payload, size16_t payloadSize, uint16
 	cs_mesh_model_msg_state_1_t* packet = (cs_mesh_model_msg_state_1_t*) payload;
 	stone_id_t srcId = srcAddress;
 	LOGMeshModelDebug("received: id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
+
+	// Send event
+	TYPIFY(EVT_MESH_EXT_STATE_1)* state = packet;
+	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_1, state, sizeof(*state));
+	event.dispatch();
+
 	if (!isFromSameState(srcAddress, srcAddress, packet->partialTimestamp)) {
 		_lastReceivedState.partsReceivedBitmask = 0;
 	}
@@ -204,7 +216,6 @@ void MeshMsgHandler::handleState1(uint8_t* payload, size16_t payloadSize, uint16
 	_lastReceivedState.state.data.extState.energyUsed = packet->energyUsed;
 	_lastReceivedState.state.data.extState.partialTimestamp = packet->partialTimestamp;
 	BLEutil::setBit(_lastReceivedState.partsReceivedBitmask, 1);
-//	checkStateReceived(getRssi(accessMsg->meta_data.p_core_metadata), accessMsg->meta_data.ttl);
 	checkStateReceived(rssi, hops);
 }
 

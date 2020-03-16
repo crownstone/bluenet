@@ -198,7 +198,7 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 	}
 #endif
 	size16_t msgSize = MeshUtil::getMeshMessageSize(item.payloadSize);
-	assert(item.payloadPtr != nullptr, "Null pointer");
+	assert(item.payloadPtr != nullptr || item.payloadSize == 0, "Null pointer");
 	assert(msgSize != 0, "Empty message");
 	assert(msgSize <= MAX_MESH_MSG_SIZE, "Message too large");
 	assert(item.metaData.targetId != 0, "Unicast only");

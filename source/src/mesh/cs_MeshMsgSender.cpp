@@ -24,10 +24,6 @@ cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t *meshMsg) {
 	}
 	uint8_t repeats = meshMsg->reliability;
 	bool priority = meshMsg->urgency == CS_MESH_URGENCY_HIGH;
-//	cs_mesh_model_msg_type_t type = MeshModelPacketHelper::getType(meshMsg->msg);
-//	uint8_t* payload = NULL;
-//	size16_t payloadSize;
-//	MeshModelPacketHelper::getPayload(meshMsg->msg, meshMsg->size, payload, payloadSize);
 	remFromQueue(meshMsg->type, 0, 0);
 	return addToQueue(meshMsg->type, 0, 0, meshMsg->payload, meshMsg->size, repeats, priority);
 }
@@ -50,6 +46,21 @@ cs_ret_code_t MeshMsgSender::sendTestMsg() {
 	uint8_t repeats = 1;
 	LOGd("sendTestMsg counter=%u", test.counter);
 	return addToQueue(CS_MESH_MODEL_TYPE_TEST, targetId, 0, (uint8_t*)&test, sizeof(test), repeats, false);
+}
+
+cs_ret_code_t MeshMsgSender::sendSetTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats) {
+	if (item->timestamp == 0) {
+		return ERR_WRONG_PARAMETER;
+	}
+	// Remove old messages of same type, as only the latest is of interest.
+	remFromQueue(CS_MESH_MODEL_TYPE_CMD_TIME, 0, 0);
+	return addToQueue(CS_MESH_MODEL_TYPE_CMD_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+}
+
+cs_ret_code_t MeshMsgSender::sendNoop(uint8_t repeats) {
+	// Remove old messages of same type, as only the latest is of interest.
+	remFromQueue(CS_MESH_MODEL_TYPE_CMD_NOOP, 0, 0);
+	return addToQueue(CS_MESH_MODEL_TYPE_CMD_NOOP, 0, 0, nullptr, 0, repeats, false);
 }
 
 cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats) {
@@ -146,6 +157,17 @@ void MeshMsgSender::handleEvent(event_t & event) {
 		case CS_TYPE::CMD_SEND_MESH_MSG: {
 			TYPIFY(CMD_SEND_MESH_MSG)* msg = (TYPIFY(CMD_SEND_MESH_MSG)*)event.data;
 			sendMsg(msg);
+			break;
+		}
+		case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME: {
+			TYPIFY(CMD_SEND_MESH_MSG_SET_TIME)* packet = (TYPIFY(CMD_SEND_MESH_MSG_SET_TIME)*)event.data;
+			cs_mesh_model_msg_time_t item;
+			item.timestamp = *packet;
+			sendSetTime(&item);
+			break;
+		}
+		case CS_TYPE::CMD_SEND_MESH_MSG_NOOP: {
+			sendNoop();
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH: {

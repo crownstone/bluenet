@@ -27,13 +27,19 @@ public:
 
 	/**
 	 * Register a callback function that's called when a message from the mesh is received.
-	 *
-	 * Must be done before init.
 	 */
 	void registerMsgHandler(const callback_msg_t& closure);
 
+	/**
+	 * Init the model.
+	 */
 	void init(uint16_t modelId);
 
+	/**
+	 * Configure the model.
+	 *
+	 * Subscribes, and sets publish address.
+	 */
 	void configureSelf(dsm_handle_t appkeyHandle);
 
 	/**
@@ -100,8 +106,6 @@ private:
 
 	/**
 	 * Send a message over the mesh via publish, without reply.
-	 *
-	 * TODO: wait for NRF_MESH_EVT_TX_COMPLETE before sending next msg.
 	 */
 	cs_ret_code_t sendMsg(const uint8_t* data, uint16_t len);
 };
