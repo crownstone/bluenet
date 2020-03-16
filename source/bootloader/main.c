@@ -260,9 +260,15 @@ int main(void)
 	NRF_LOG_INFO("Init");
 	NRF_LOG_FLUSH();
 
-	char version[12];
-    memcpy(version, (char*)g_BOOTLOADER_VERSION, 12);
-	setRamData(version, 12);
+	uint8_t bootloader_version_index = 1;
+	uint8_t bootloader_version_length = strlen(g_BOOTLOADER_VERSION);
+	if (bootloader_version_length > BOOT_RAM_DATA_ITEM_SIZE) {
+		bootloader_version_length = BOOT_RAM_DATA_ITEM_SIZE;
+	}
+	uint8_t version[bootloader_version_length];
+    memcpy(version, (uint8_t*)g_BOOTLOADER_VERSION, bootloader_version_length);
+	version[bootloader_version_length] = 0;
+	setRamData(bootloader_version_index, version, bootloader_version_length);
 
 	// Need to adjust dfu_enter_check().
 	// Or we can simply use NRF_BL_DFU_ENTER_METHOD_GPREGRET

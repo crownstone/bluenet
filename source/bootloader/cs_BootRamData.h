@@ -9,9 +9,9 @@
  * Store an index, data array, and checksum
  */
 typedef struct {
-	char index;
-	char data[BOOT_RAM_DATA_ITEM_SIZE];
-	unsigned int checksum;
+	uint8_t index;
+	uint8_t data[BOOT_RAM_DATA_ITEM_SIZE];
+	uint16_t checksum;
 } __attribute__((packed, aligned(4))) boot_ram_data_item_t;
 
 /**
@@ -21,6 +21,6 @@ typedef struct {
 	boot_ram_data_item_t item[BOOT_RAM_DATA_ITEMS];
 } __attribute__((packed, aligned(4))) boot_ram_data_t;
 
-void setChecksum(boot_ram_data_item_t * item);
+uint16_t calculateChecksum(boot_ram_data_item_t * item);
 
-void setRamData(char* data, unsigned char length);
+void setRamData(uint8_t index, uint8_t* data, uint8_t length);

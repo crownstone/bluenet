@@ -5,8 +5,7 @@ boot_ram_data_t m_boot_ram
     __attribute__((section(".bootloader_ram")))
     __attribute__((used));
 
-
-void setChecksum(boot_ram_data_item_t * item) {
+uint16_t calculateChecksum(boot_ram_data_item_t * item) {
 	uint16_t sum = 0;
 
 	sum += item->index;
@@ -17,11 +16,19 @@ void setChecksum(boot_ram_data_item_t * item) {
 	sum = (sum >> 8) + (sum & 0xFF);
 	sum += sum >> 8;
 
-	item->checksum = ~sum;
+	return ~sum;
 }  
 
-void setRamData(char* data, unsigned char length) {
-	m_boot_ram.item[1].index = 1;
-	memcpy(m_boot_ram.item[1].data, data, (length < BOOT_RAM_DATA_ITEM_SIZE ? length : BOOT_RAM_DATA_ITEM_SIZE) );
-	setChecksum(&m_boot_ram.item[1]);
+void setRamData(uint8_t index, uint8_t* data, uint8_t length) {
+	// make sure to the index before calculating the checksum (in it includes the index)
+	m_boot_ram.item[index].index = index;
+	if (length < BOOT_RAM_DATA_ITEM_SIZE) {
+		// make null-terminated, just for convenience sake
+		memcpy(m_boot_ram.item[index].data, data, length);
+		m_boot_ram.item[index].data[length] = 0;
+	} else {
+		// take care of null-termination yourself
+		memcpy(m_boot_ram.item[index].data, data, BOOT_RAM_DATA_ITEM_SIZE);
+	}
+	m_boot_ram.item[index].checksum = calculateChecksum(&m_boot_ram.item[index]);
 }

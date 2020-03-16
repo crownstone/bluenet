@@ -929,13 +929,17 @@ int main() {
 	printNfcPins();
 	LOG_FLUSH();
 
-	int length = 12;
-	char data[length];
-	int success = getRamData(data, length);
-	if (success) {
-		LOGi("Bootloader version: %s", data);
+	uint8_t bootloader_version_index = 1;
+	uint8_t length = BOOT_RAM_DATA_ITEM_SIZE;
+	uint8_t data[length];
+	int err_code = getRamData(bootloader_version_index, data, length);
+	if (err_code == 0) {
+		LOGi("Bootloader version: %s", (char*)data);
+		for (int i = 0; i < 10; ++i) {
+			LOGi("Char: %i", data[i]);
+		}
 	} else {
-		LOGi("No bootloader data found");
+		LOGi("No bootloader data found, error = %i", err_code);
 	}
 
 //	// Make a "clicker"
