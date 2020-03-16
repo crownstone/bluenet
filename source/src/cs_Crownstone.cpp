@@ -912,9 +912,6 @@ int main() {
 	int err_code = getRamData(bootloader_version_index, data, length);
 	if (err_code == 0) {
 		LOGi("Bootloader version: %s", (char*)data);
-		for (int i = 0; i < 10; ++i) {
-			LOGi("Char: %i", data[i]);
-		}
 	} else {
 		LOGi("No bootloader data found, error = %i", err_code);
 	}
