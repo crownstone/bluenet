@@ -34,7 +34,6 @@
 
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_BehaviourStore.h>
-#include <boot/cs_BootRamData.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_Git.h>
@@ -46,6 +45,7 @@
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
+#include <ipc/cs_IpcRamData.h>
 #include <processing/cs_EncryptionHandler.h>
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_TapToToggle.h>
@@ -907,13 +907,13 @@ int main() {
 	LOG_FLUSH();
 
 	uint8_t bootloader_version_index = 1;
-	uint8_t length = BOOT_RAM_DATA_ITEM_SIZE;
+	uint8_t length = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
 	uint8_t data[length];
 	int err_code = getRamData(bootloader_version_index, data, length);
 	if (err_code == 0) {
 		LOGi("Bootloader version: %s", (char*)data);
 	} else {
-		LOGi("No bootloader data found, error = %i", err_code);
+		LOGw("No IPC data found, error = %i", err_code);
 	}
 
 //	// Make a "clicker"

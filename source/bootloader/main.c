@@ -66,7 +66,7 @@
 #include "cfg/cs_Boards.h"
 #include "cfg/cs_DeviceTypes.h"
 #include "nrf_nvmc.h"
-#include "cs_BootRamData.h"
+#include "cs_IpcRamData.h"
 #include "cs_BootloaderConfig.h"
 
 /**
@@ -273,8 +273,8 @@ int main(void)
 	
 	uint8_t bootloader_version_index = 1;
 	uint8_t bootloader_version_length = strlen(g_BOOTLOADER_VERSION);
-	if (bootloader_version_length > BOOT_RAM_DATA_ITEM_SIZE) {
-		bootloader_version_length = BOOT_RAM_DATA_ITEM_SIZE;
+	if (bootloader_version_length > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
+		bootloader_version_length = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
 	}
 	uint8_t version[bootloader_version_length];
     memcpy(version, (uint8_t*)g_BOOTLOADER_VERSION, bootloader_version_length);
