@@ -63,7 +63,7 @@
 #endif
 
 //! Log data is buffered and can be processed in idle
-#define NRF_LOG_DEFERRED 1
+#define NRF_LOG_DEFERRED 0
 // <0=> Off
 // <1=> Error
 // <2=> Warning
