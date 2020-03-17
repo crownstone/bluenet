@@ -234,6 +234,13 @@ void cs_check_gpregret() {
 	NRF_LOG_INFO("GPREGRET=%u", gpregret);
 }
 
+
+
+/**
+ * Round up val to the next page boundary (from nrf_dfu_utils.h)
+ */
+#define ALIGN_TO_PAGE(val) ALIGN_NUM((CODE_PAGE_SIZE), (val))
+
 /**@brief Function for application main entry. */
 int main(void)
 {
@@ -252,14 +259,18 @@ int main(void)
 	NRF_LOG_FLUSH();
 
 	// Protect MBR and bootloader code from being overwritten.
+	/*
 	ret_val = nrf_bootloader_flash_protect(0, MBR_SIZE, false);
 	APP_ERROR_CHECK(ret_val);
 	ret_val = nrf_bootloader_flash_protect(BOOTLOADER_START_ADDR, BOOTLOADER_SIZE, false);
 	APP_ERROR_CHECK(ret_val);
+	*/
+	ret_val = nrf_bootloader_flash_protect(0, ALIGN_TO_PAGE(BOOTLOADER_START_ADDR + BOOTLOADER_SIZE), false);
+	APP_ERROR_CHECK(ret_val);
 	
-	NRF_LOG_INFO("Init");
+	NRF_LOG_INFO("Set version");
 	NRF_LOG_FLUSH();
-
+	
 	uint8_t bootloader_version_index = 1;
 	uint8_t bootloader_version_length = strlen(g_BOOTLOADER_VERSION);
 	if (bootloader_version_length > BOOT_RAM_DATA_ITEM_SIZE) {
@@ -269,6 +280,9 @@ int main(void)
     memcpy(version, (uint8_t*)g_BOOTLOADER_VERSION, bootloader_version_length);
 	version[bootloader_version_length] = 0;
 	setRamData(bootloader_version_index, version, bootloader_version_length);
+	
+	NRF_LOG_INFO("Init");
+	NRF_LOG_FLUSH();
 
 	// Need to adjust dfu_enter_check().
 	// Or we can simply use NRF_BL_DFU_ENTER_METHOD_GPREGRET
