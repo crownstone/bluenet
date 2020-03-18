@@ -269,14 +269,13 @@ int main(void)
 	NRF_LOG_INFO("Set version");
 	NRF_LOG_FLUSH();
 	
-	uint8_t bootloader_version_index = 1;
 	uint8_t bootloader_version_length = strlen(g_BOOTLOADER_VERSION);
 	if (bootloader_version_length > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
 		bootloader_version_length = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
 	}
 //	uint8_t version[bootloader_version_length];
 //    memcpy(version, (uint8_t*)g_BOOTLOADER_VERSION, bootloader_version_length);
-	setRamData(bootloader_version_index, (uint8_t*)g_BOOTLOADER_VERSION, bootloader_version_length);
+	setRamData(IPC_INDEX_BOOTLOADER_VERSION, (uint8_t*)g_BOOTLOADER_VERSION, bootloader_version_length);
 	
 	NRF_LOG_INFO("Init");
 	NRF_LOG_FLUSH();
