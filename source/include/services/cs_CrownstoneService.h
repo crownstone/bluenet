@@ -54,13 +54,13 @@ protected:
 	/** Enable the control characteristic.
  	 */
 	void addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid,
-			EncryptionAccessLevel minimumAccessLevel = BASIC);
+			EncryptionAccessLevel minimumAccessLevel);
 
 	/**
 	 * Enable the result characteristic.
 	 */
 	void addResultCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size, uint16_t charUuid,
-			EncryptionAccessLevel minimumAccessLevel = BASIC);
+			EncryptionAccessLevel minimumAccessLevel);
 
 	void addFactoryResetCharacteristic();
 

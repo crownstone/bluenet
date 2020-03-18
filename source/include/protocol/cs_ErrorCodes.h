@@ -8,7 +8,7 @@
 
 enum ErrorCodesGeneral {
 	ERR_SUCCESS                     = 0x00,
-	ERR_WAIT_FOR_SUCCESS            = 0x01,
+	ERR_WAIT_FOR_SUCCESS            = 0x01, // So far so good, but wait for actual success.
 	ERR_SUCCESS_NO_CHANGE           = 0x02, // Success: nothing changed.
 
 	ERR_BUFFER_UNASSIGNED           = 0x10,
