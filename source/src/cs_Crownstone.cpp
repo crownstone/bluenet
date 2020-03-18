@@ -905,13 +905,13 @@ int main() {
 	LOG_FLUSH();
 
 //	LOGi("sizeof(bluenet_ipc_ram_data_item_t)=%u", sizeof(bluenet_ipc_ram_data_item_t));
-	uint8_t bootloader_version_index = 1;
+
 	// Make sure there is space for an extra 0 after the data.
 	uint8_t length = BLUENET_IPC_RAM_DATA_ITEM_SIZE + 1;
 	uint8_t data[length];
 	uint8_t dataSize;
-	int retCode = getRamData(bootloader_version_index, data, length, &dataSize);
-	if (retCode == IPC_SUCCESS) {
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, data, length, &dataSize);
+	if (retCode == IPC_RET_SUCCESS) {
 		// Zero terminate the string.
 		data[dataSize] = 0;
 		LOGi("Bootloader version: %s", (char*)data);

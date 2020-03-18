@@ -10,6 +10,7 @@
 #include "cfg/cs_DeviceTypes.h"
 #include "cfg/cs_Strings.h"
 #include "drivers/cs_Serial.h"
+#include <ipc/cs_IpcRamData.h>
 #include "processing/cs_CommandHandler.h"
 #include "processing/cs_Scanner.h"
 #include "processing/cs_FactoryReset.h"
@@ -98,6 +99,8 @@ command_result_t CommandHandler::handleCommand(
 		return handleCmdNop(commandData, accessLevel, resultData);
 	case CTRL_CMD_GOTO_DFU:
 		return handleCmdGotoDfu(commandData, accessLevel, resultData);
+	case CTRL_CMD_GET_BOOTLOADER_VERSION:
+		return handleCmdGetBootloaderVersion(commandData, accessLevel, resultData);
 	case CTRL_CMD_RESET:
 		return handleCmdReset(commandData, accessLevel, resultData);
 	case CTRL_CMD_FACTORY_RESET:
@@ -167,6 +170,22 @@ command_result_t CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const E
 	event.dispatch();
 	resetDelayed(GPREGRET_DFU_RESET);
 	return command_result_t(ERR_SUCCESS);
+}
+
+command_result_t CommandHandler::handleCmdGetBootloaderVersion(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
+	LOGi(STR_HANDLE_COMMAND, "get bootloader version");
+
+	uint8_t dataSize;
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, resultData.data, resultData.len, &dataSize);
+	if (retCode != IPC_RET_SUCCESS) {
+		LOGw("No IPC data found, error = %i", retCode);
+		return command_result_t(ERR_NOT_FOUND);
+	}
+	command_result_t result;
+	result.returnCode = ERR_SUCCESS;
+	result.data.data = resultData.data;
+	result.data.len = dataSize;
+	return result;
 }
 
 command_result_t CommandHandler::handleCmdReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
@@ -584,42 +603,44 @@ command_result_t CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t 
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
 	switch (type) {
-	case CTRL_CMD_INCREASE_TX:
-	case CTRL_CMD_SETUP:
-		return BASIC; // These commands are only available in setup mode.
+		case CTRL_CMD_GET_BOOTLOADER_VERSION:
+			return ENCRYPTION_DISABLED;
+		case CTRL_CMD_INCREASE_TX:
+		case CTRL_CMD_SETUP:
+			return BASIC; // These commands are only available in setup mode.
 
-	case CTRL_CMD_SWITCH:
-	case CTRL_CMD_PWM:
-	case CTRL_CMD_RELAY:
-	case CTRL_CMD_DISCONNECT:
-	case CTRL_CMD_NOP:
-	case CTRL_CMD_MULTI_SWITCH:
-	case CTRL_CMD_MESH_COMMAND:
-	case CTRL_CMD_STATE_GET:
-	case CTRL_CMD_STATE_SET:
-	case CTRL_CMD_REGISTER_TRACKED_DEVICE:
-		return BASIC;
+		case CTRL_CMD_SWITCH:
+		case CTRL_CMD_PWM:
+		case CTRL_CMD_RELAY:
+		case CTRL_CMD_DISCONNECT:
+		case CTRL_CMD_NOP:
+		case CTRL_CMD_MULTI_SWITCH:
+		case CTRL_CMD_MESH_COMMAND:
+		case CTRL_CMD_STATE_GET:
+		case CTRL_CMD_STATE_SET:
+		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
+			return BASIC;
 
-	case CTRL_CMD_SET_TIME:
-	case CTRL_CMD_SET_SUN_TIME:
-	case CTRL_CMD_SAVE_BEHAVIOUR:
-	case CTRL_CMD_REPLACE_BEHAVIOUR:
-	case CTRL_CMD_REMOVE_BEHAVIOUR:
-	case CTRL_CMD_GET_BEHAVIOUR:
-	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
-		return MEMBER;
+		case CTRL_CMD_SET_TIME:
+		case CTRL_CMD_SET_SUN_TIME:
+		case CTRL_CMD_SAVE_BEHAVIOUR:
+		case CTRL_CMD_REPLACE_BEHAVIOUR:
+		case CTRL_CMD_REMOVE_BEHAVIOUR:
+		case CTRL_CMD_GET_BEHAVIOUR:
+		case CTRL_CMD_GET_BEHAVIOUR_INDICES:
+			return MEMBER;
 
-	case CTRL_CMD_GOTO_DFU:
-	case CTRL_CMD_RESET:
-	case CTRL_CMD_FACTORY_RESET:
-	case CTRL_CMD_RESET_ERRORS:
-	case CTRL_CMD_ALLOW_DIMMING:
-	case CTRL_CMD_LOCK_SWITCH:
-	case CTRL_CMD_UART_MSG:
-	case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
-		return ADMIN;
-	case CTRL_CMD_UNKNOWN:
-		return NOT_SET;
+		case CTRL_CMD_GOTO_DFU:
+		case CTRL_CMD_RESET:
+		case CTRL_CMD_FACTORY_RESET:
+		case CTRL_CMD_RESET_ERRORS:
+		case CTRL_CMD_ALLOW_DIMMING:
+		case CTRL_CMD_LOCK_SWITCH:
+		case CTRL_CMD_UART_MSG:
+		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
+			return ADMIN;
+		case CTRL_CMD_UNKNOWN:
+			return NOT_SET;
 	}
 	return NOT_SET;
 }

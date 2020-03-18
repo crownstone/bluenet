@@ -38,12 +38,12 @@ void CrownstoneService::createCharacteristics() {
 	cs_data_t writeBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
 	_controlPacketAccessor = new ControlPacketAccessor<>();
 	_controlPacketAccessor->assign(writeBuf.data, writeBuf.len);
-	addControlCharacteristic(writeBuf.data, writeBuf.len, CONTROL_UUID);
+	addControlCharacteristic(writeBuf.data, writeBuf.len, CONTROL_UUID, BASIC);
 
 	cs_data_t readBuf = CharacteristicReadBuffer::getInstance().getBuffer();
 	_resultPacketAccessor = new ResultPacketAccessor<>();
 	_resultPacketAccessor->assign(readBuf.data, readBuf.len);
-	addResultCharacteristic(readBuf.data, readBuf.len, RESULT_UUID);
+	addResultCharacteristic(readBuf.data, readBuf.len, RESULT_UUID, BASIC);
 #else
 	LOGi(FMT_CHAR_SKIP, STR_CHAR_CONTROL);
 #endif
