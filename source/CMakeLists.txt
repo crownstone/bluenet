@@ -741,13 +741,17 @@ ELSE()
 			COMMAND bash -c "perl -i -pe '$. == 2 && s/(\\d+)/$1+1/eg' ${CMAKE_SOURCE_DIR}/VERSION" VERBATIM
 			COMMENT "Increment application version (in VERSION file)"
 			)
+			
+		SET(BOOTLOADER_HEX_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
+		SET(BOOTLOADER_BIN_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.bin")
 
 		ADD_CUSTOM_TARGET(build_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" --no-backup
-			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
+			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}" 
+			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -I ihex ${BOOTLOADER_HEX_FILE} -O binary ${BOOTLOADER_BIN_FILE}
+			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${BOOTLOADER_HEX_FILE}"
 			COMMENT "Create bootloader settings"
 			)
 		
@@ -755,9 +759,26 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --program ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMAND echo "nrfjprog -f nrf52 --program ${BOOTLOADER_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
+			COMMAND nrfjprog -f nrf52 --program ${BOOTLOADER_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 			COMMENT "Flashes bootloader settings to remote target board"
 			DEPENDS build_bootloader_settings
+			)
+		
+		ADD_CUSTOM_TARGET(read_bootloader_settings
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to read bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND nrfjprog -f nrf52 --memrd 0x7F000 --n 128 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMENT "Read bootloader settings from remote target board"
+			)
+		
+		ADD_CUSTOM_TARGET(read_bootloader_settings_backup
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to read bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND nrfjprog -f nrf52 --memrd 0x7E000 --n 128 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMENT "Read bootloader settings from remote target board"
 			)
 	
 		ADD_CUSTOM_TARGET(merge_bootloader_settings
