@@ -56,8 +56,6 @@
 #include <util/cs_Utils.h>
 #include <time/cs_SystemTime.h>
 
-#include <array> // DEBUG 
-#include <util/cs_Hash.h> // DEBUG
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -906,14 +904,20 @@ int main() {
 	printNfcPins();
 	LOG_FLUSH();
 
+//	LOGi("sizeof(bluenet_ipc_ram_data_item_t)=%u", sizeof(bluenet_ipc_ram_data_item_t));
 	uint8_t bootloader_version_index = 1;
-	uint8_t length = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
+	// Make sure there is space for an extra 0 after the data.
+	uint8_t length = BLUENET_IPC_RAM_DATA_ITEM_SIZE + 1;
 	uint8_t data[length];
-	int err_code = getRamData(bootloader_version_index, data, length);
-	if (err_code == 0) {
+	uint8_t dataSize;
+	int retCode = getRamData(bootloader_version_index, data, length, &dataSize);
+	if (retCode == IPC_SUCCESS) {
+		// Zero terminate the string.
+		data[dataSize] = 0;
 		LOGi("Bootloader version: %s", (char*)data);
-	} else {
-		LOGw("No IPC data found, error = %i", err_code);
+	}
+	else {
+		LOGw("No IPC data found, error = %i", retCode);
 	}
 
 //	// Make a "clicker"

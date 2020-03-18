@@ -1,3 +1,10 @@
+/*
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Mar 18, 2020
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ */
+
 #include <ipc/cs_IpcRamData.h>
 
 #include <string.h>
@@ -10,6 +17,7 @@ uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t * item) {
 	uint16_t sum = 0;
 
 	sum += item->index;
+	sum += item->dataSize;
 
 	for (uint8_t i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
 		sum += item->data[i];
@@ -18,36 +26,55 @@ uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t * item) {
 	sum += sum >> 8;
 
 	return ~sum;
-}  
-
-void setRamData(uint8_t index, uint8_t* data, uint8_t length) {
-	// make sure to the index before calculating the checksum (in it includes the index)
-	m_bluenet_ipc_ram.item[index].index = index;
-	if (length < BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
-		// make null-terminated, just for convenience sake
-		memcpy(m_bluenet_ipc_ram.item[index].data, data, length);
-		m_bluenet_ipc_ram.item[index].data[length] = 0;
-	} else {
-		// take care of null-termination yourself
-		memcpy(m_bluenet_ipc_ram.item[index].data, data, BLUENET_IPC_RAM_DATA_ITEM_SIZE);
-	}
-	m_bluenet_ipc_ram.item[index].checksum = calculateChecksum(&m_bluenet_ipc_ram.item[index]);
 }
 
-uint8_t getRamData(uint8_t index, uint8_t* data, uint8_t length) {
-	//LOGi("Search at address %p", m_boot_ram);
+enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize) {
+	if (data == NULL) {
+		return IPC_NULL_POINTER;
+	}
+	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
+		return IPC_INDEX_OUT_OF_BOUND;
+	}
+	if (dataSize > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
+		return IPC_DATA_TOO_LARGE;
+	}
+	m_bluenet_ipc_ram.item[index].index = index;
+	m_bluenet_ipc_ram.item[index].dataSize = dataSize;
+
+	memcpy(m_bluenet_ipc_ram.item[index].data, data, dataSize);
+
+	// Zero padding
+	memset(m_bluenet_ipc_ram.item[index].data + dataSize, 0, BLUENET_IPC_RAM_DATA_ITEM_SIZE - dataSize);
+
+	m_bluenet_ipc_ram.item[index].checksum = calculateChecksum(&m_bluenet_ipc_ram.item[index]);
+	return IPC_SUCCESS;
+}
+
+enum IpcRetCode getRamData(uint8_t index, uint8_t* buf, uint8_t length, uint8_t* dataSize) {
+	if (buf == NULL) {
+		return IPC_NULL_POINTER;
+	}
+	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
+		return IPC_INDEX_OUT_OF_BOUND;
+	}
 	if (m_bluenet_ipc_ram.item[index].index != index) {
-		return 1;
+		return IPC_NOT_FOUND;
+	}
+	if (m_bluenet_ipc_ram.item[index].dataSize > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
+		return IPC_DATA_TOO_LARGE;
+	}
+	if (length < m_bluenet_ipc_ram.item[index].dataSize) {
+		return IPC_BUFFER_TOO_SMALL;
 	}
 
 	uint16_t checksum = calculateChecksum(&m_bluenet_ipc_ram.item[index]);
 	if (checksum != m_bluenet_ipc_ram.item[index].checksum) {
-		return 2;
+		return IPC_NOT_FOUND;
 	}
 	
-	memcpy(data, m_bluenet_ipc_ram.item[index].data, (length < BLUENET_IPC_RAM_DATA_ITEM_SIZE) ? length : BLUENET_IPC_RAM_DATA_ITEM_SIZE);
-
-	return 0;
+	memcpy(buf, m_bluenet_ipc_ram.item[index].data, m_bluenet_ipc_ram.item[index].dataSize);
+	*dataSize = m_bluenet_ipc_ram.item[index].dataSize;
+	return IPC_SUCCESS;
 }
 
 bluenet_ipc_ram_data_item_t *getRamStruct(uint8_t index) {
