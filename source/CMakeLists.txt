@@ -133,6 +133,7 @@ SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 INCLUDE_DIRECTORIES("include")
 INCLUDE_DIRECTORIES("include/ble")
 INCLUDE_DIRECTORIES("include/third")
+INCLUDE_DIRECTORIES("shared")
 
 # TODO: Just only include th NRF5 directory and refer to the header files using that relative path in the source files
 # Then we do not need to update the CMakeLists.txt file all the time

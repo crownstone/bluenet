@@ -66,7 +66,7 @@
 #include "cfg/cs_Boards.h"
 #include "cfg/cs_DeviceTypes.h"
 #include "nrf_nvmc.h"
-#include "cs_IpcRamData.h"
+#include "ipc/cs_IpcRamData.h"
 #include "cs_BootloaderConfig.h"
 
 /**
