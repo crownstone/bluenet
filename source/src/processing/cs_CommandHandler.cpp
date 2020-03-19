@@ -87,9 +87,41 @@ command_result_t CommandHandler::handleCommand(
 	switch (type) {
 		case CTRL_CMD_SET_SUN_TIME:
 			break;
-		default:
+		case CTRL_CMD_NOP:
+		case CTRL_CMD_GOTO_DFU:
+		case CTRL_CMD_GET_BOOTLOADER_VERSION:
+		case CTRL_CMD_RESET:
+		case CTRL_CMD_FACTORY_RESET:
+		case CTRL_CMD_SET_TIME:
+		case CTRL_CMD_INCREASE_TX:
+		case CTRL_CMD_DISCONNECT:
+		case CTRL_CMD_RESET_ERRORS:
+		case CTRL_CMD_PWM:
+		case CTRL_CMD_SWITCH:
+		case CTRL_CMD_RELAY:
+		case CTRL_CMD_MULTI_SWITCH:
+		case CTRL_CMD_MESH_COMMAND:
+		case CTRL_CMD_ALLOW_DIMMING:
+		case CTRL_CMD_LOCK_SWITCH:
+		case CTRL_CMD_SETUP:
+		case CTRL_CMD_UART_MSG:
+		case CTRL_CMD_STATE_GET:
+		case CTRL_CMD_STATE_SET:
+		case CTRL_CMD_SAVE_BEHAVIOUR:
+		case CTRL_CMD_REPLACE_BEHAVIOUR:
+		case CTRL_CMD_REMOVE_BEHAVIOUR:
+		case CTRL_CMD_GET_BEHAVIOUR:
+		case CTRL_CMD_GET_BEHAVIOUR_INDICES:
+		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
+		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
 			LOGd("cmd=%u lvl=%u", type, accessLevel);
+			break;
+		case CTRL_CMD_UNKNOWN:
+		default:
+			LOGe("Unknown type: %u", type);
+			return command_result_t(ERR_UNKNOWN_TYPE);
 	}
+
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		return command_result_t(ERR_NO_ACCESS);
 	}
@@ -605,6 +637,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	switch (type) {
 		case CTRL_CMD_GET_BOOTLOADER_VERSION:
 			return ENCRYPTION_DISABLED;
+
 		case CTRL_CMD_INCREASE_TX:
 		case CTRL_CMD_SETUP:
 			return BASIC; // These commands are only available in setup mode.
