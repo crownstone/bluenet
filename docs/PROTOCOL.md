@@ -307,6 +307,7 @@ Type nr | Type name | Payload type | Result type | Description | A | M | B | S
 1 | Factory reset | uint 32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
 2 | Get state | [State get packet](#state_get_packet) | [State result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
 3 | Set state | [State set packet](#state_set_packet) | - | Required access depends on the state type. | x | x | x
+4 | Get bootloader version | - | Char array | Get the bootloader version string. | x | x | x | x
 10 | Reset | - | - | Reset device | x
 11 | Goto DFU | - | - | Reset device to DFU mode | x
 12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
