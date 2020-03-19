@@ -16,7 +16,7 @@ bluenet_ipc_ram_data_t m_bluenet_ipc_ram
 uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t * item) {
 	uint16_t sum = 0;
 
-	sum += item->index;
+	sum += item->indexHash;
 	sum += item->dataSize;
 
 	for (uint8_t i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
@@ -26,6 +26,11 @@ uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t * item) {
 	sum += sum >> 8;
 
 	return ~sum;
+}
+
+uint8_t calculateIndexHash(uint8_t index) {
+	// We just don't want it to be 0, as that's the default ram value.
+	return index + 1;
 }
 
 enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize) {
@@ -38,7 +43,7 @@ enum IpcRetCode setRamData(uint8_t index, uint8_t* data, uint8_t dataSize) {
 	if (dataSize > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
 		return IPC_RET_DATA_TOO_LARGE;
 	}
-	m_bluenet_ipc_ram.item[index].index = index;
+	m_bluenet_ipc_ram.item[index].indexHash = calculateIndexHash(index);
 	m_bluenet_ipc_ram.item[index].dataSize = dataSize;
 
 	memcpy(m_bluenet_ipc_ram.item[index].data, data, dataSize);
@@ -57,7 +62,7 @@ enum IpcRetCode getRamData(uint8_t index, uint8_t* buf, uint8_t length, uint8_t*
 	if (index > BLUENET_IPC_RAM_DATA_ITEMS) {
 		return IPC_RET_INDEX_OUT_OF_BOUND;
 	}
-	if (m_bluenet_ipc_ram.item[index].index != index) {
+	if (m_bluenet_ipc_ram.item[index].indexHash != calculateIndexHash(index)) {
 		return IPC_RET_NOT_FOUND;
 	}
 	if (m_bluenet_ipc_ram.item[index].dataSize > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
@@ -69,7 +74,7 @@ enum IpcRetCode getRamData(uint8_t index, uint8_t* buf, uint8_t length, uint8_t*
 
 	uint16_t checksum = calculateChecksum(&m_bluenet_ipc_ram.item[index]);
 	if (checksum != m_bluenet_ipc_ram.item[index].checksum) {
-		return IPC_RET_NOT_FOUND;
+		return IPC_RET_DATA_INVALID;
 	}
 	
 	memcpy(buf, m_bluenet_ipc_ram.item[index].data, m_bluenet_ipc_ram.item[index].dataSize);
