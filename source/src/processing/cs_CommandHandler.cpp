@@ -272,7 +272,8 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 	if (FAILURE(result.returnCode)) {
 		return result;
 	}
-	result.returnCode = State::getInstance().get(stateData);
+	PersistenceMode persistenceMode = toPersistenceMode(stateHeader->persistenceMode);
+	result.returnCode = State::getInstance().get(stateData, persistenceMode);
 	result.data.len = sizeof(state_packet_header_t) + stateData.size;
 	return result;
 }
@@ -306,7 +307,8 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 	if (FAILURE(result.returnCode)) {
 		return result;
 	}
-	cs_ret_code_t retCode = State::getInstance().set(stateData);
+	PersistenceMode persistenceMode = toPersistenceMode(stateHeader->persistenceMode);
+	cs_ret_code_t retCode = State::getInstance().set(stateData, persistenceMode);
 	switch (retCode) {
 		case ERR_SUCCESS:
 		case ERR_SUCCESS_NO_CHANGE:

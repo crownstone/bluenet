@@ -492,3 +492,16 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	// should not reach this
 	return PersistenceMode::NEITHER_RAM_NOR_FLASH;
 }
+
+PersistenceMode toPersistenceMode(uint8_t mode) {
+	PersistenceMode persistenceMode = static_cast<PersistenceMode>(mode);
+	switch (persistenceMode) {
+		case PersistenceMode::STRATEGY1:
+		case PersistenceMode::FIRMWARE_DEFAULT:
+		case PersistenceMode::RAM:
+		case PersistenceMode::FLASH:
+		case PersistenceMode::NEITHER_RAM_NOR_FLASH:
+			return persistenceMode;
+	}
+	return PersistenceMode::NEITHER_RAM_NOR_FLASH;
+}
