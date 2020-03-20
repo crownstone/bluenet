@@ -251,6 +251,7 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 	state_packet_header_t* stateHeader = (state_packet_header_t*) commandData.data;
+	LOGi("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
 	CS_TYPE stateType = toCsType(stateHeader->stateType);
 	cs_state_id_t stateId = stateHeader->stateId;
 	if (!EncryptionHandler::getInstance().allowAccess(getUserAccessLevelGet(stateType), accessLevel)) {
@@ -264,6 +265,7 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 	state_packet_header_t* resultHeader = (state_packet_header_t*) resultData.data;
 	resultHeader->stateType = stateHeader->stateType;
 	resultHeader->stateId = stateHeader->stateId;
+	resultHeader->persistenceMode = stateHeader->persistenceMode;
 	cs_state_data_t stateData(stateType, stateId, stateDataBuf.data, stateDataBuf.len);
 	command_result_t result;
 	result.returnCode = State::getInstance().verifySizeForGet(stateData);
@@ -285,6 +287,7 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 	state_packet_header_t* stateHeader = (state_packet_header_t*) commandData.data;
+	LOGi("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
 	CS_TYPE stateType = toCsType(stateHeader->stateType);
 	cs_state_id_t stateId = stateHeader->stateId;
 	if (!EncryptionHandler::getInstance().allowAccess(getUserAccessLevelSet(stateType), accessLevel)) {
@@ -296,7 +299,7 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 	state_packet_header_t* resultHeader = (state_packet_header_t*) resultData.data;
 	resultHeader->stateType = stateHeader->stateType;
 	resultHeader->stateId = stateHeader->stateId;
-	LOGi("State type=%u id=%u", stateHeader->stateType, stateHeader->stateId);
+	resultHeader->persistenceMode = stateHeader->persistenceMode;
 	uint16_t payloadSize = commandData.len - sizeof(state_packet_header_t);
 	buffer_ptr_t payload = commandData.data + sizeof(state_packet_header_t);
 	cs_state_data_t stateData(stateType, stateId, payload, payloadSize);
