@@ -363,7 +363,7 @@ Type | Name | Length | Description
 uint 16 | [State type](#state_types) | 2 | Type of state to get.
 uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
 uint 8 | [Persistence mode](#state_persistence_mode) | 1 | Type of persistence mode.
-uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
+uint 8 | stone id | 1 | Stone ID of the stone to get the state from. For now, it can only be the ID of the connected stone.
 
 <a name="state_set_packet"></a>
 #### State set packet
@@ -375,7 +375,7 @@ Type | Name | Length | Description
 uint 16 | [State type](#state_types) | 2 | Type of state to set.
 uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
 uint 8 | [Persistence mode](#state_persistence_mode) | 1 | Type of persistence mode.
-uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
+uint 8 | stone id | 1 | Stone ID of the stone to set the state at. For now, it can only be the ID of the connected stone.
 uint 8 | Payload | N | Payload data, depends on state type.
 
 Most configuration changes will only be applied after a reboot.
@@ -389,7 +389,7 @@ Type | Name | Length | Description
 uint 16 | [State type](#state_types) | 2 | Type of state.
 uint 16 | id | 2 | ID of state.
 uint 8 | [Persistence mode](#state_persistence_mode) | 1 | Type of persistence mode.
-uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
+uint 8 | stone id | 1 | Stone ID of the stone where this state is from.
 uint 8 | Payload | N | Payload data, depends on state type.
 
 <a name="state_set_result_packet"></a>
@@ -400,7 +400,7 @@ Type | Name | Length | Description
 uint 16 | [State type](#state_types) | 2 | Type of state.
 uint 16 | id | 2 | ID of state that was set.
 uint 8 | [Persistence mode](#state_persistence_mode) | 1 | Type of persistence mode.
-uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
+uint 8 | stone id | 1 | Stone ID of the stone where this state was set.
 
 <a name="state_persistence_mode"></a>
 #### State persistence mode
