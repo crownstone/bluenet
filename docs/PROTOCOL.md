@@ -1,4 +1,4 @@
-# Bluenet protocol v4.1.0
+# Bluenet protocol v5.0.0
 -------------------------
 
 This only documents the latest protocol, older versions can be found in the git history.
