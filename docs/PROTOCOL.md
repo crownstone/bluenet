@@ -362,7 +362,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state to get.
 uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
-uint 8 | [Persistence mode](#state_persistence_mode) | 1 | Type of persistence mode.
+uint 8 | [Persistence mode](#state_get_persistence_mode) | 1 | Type of persistence mode.
 uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 
 <a name="state_set_packet"></a>
@@ -374,7 +374,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state to set.
 uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
-uint 8 | [Persistence mode](#state_persistence_mode) | 1 | Type of persistence mode.
+uint 8 | [Persistence mode](#state_set_persistence_mode_set) | 1 | Type of persistence mode.
 uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 uint 8 | Payload | N | Payload data, depends on state type.
 
@@ -388,7 +388,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state.
 uint 16 | id | 2 | ID of state.
-uint 8 | [Persistence mode](#state_persistence_mode) | 1 | Type of persistence mode.
+uint 8 | [Persistence mode](#state_get_persistence_mode) | 1 | Type of persistence mode.
 uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 uint 8 | Payload | N | Payload data, depends on state type.
 
@@ -399,17 +399,24 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state.
 uint 16 | id | 2 | ID of state that was set.
-uint 8 | [Persistence mode](#state_persistence_mode) | 1 | Type of persistence mode.
+uint 8 | [Persistence mode](#state_set_persistence_mode_set) | 1 | Type of persistence mode.
 uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 
-<a name="state_persistence_mode"></a>
-#### State persistence mode
+<a name="state_get_persistence_mode"></a>
+#### State get persistence mode
 Value | Name | Description
 --- | --- | ---
-0   | STRATEGY1 | Get value from flash if exists, else get default. Set to flash.
-1   | FIRMWARE_DEFAULT | Get default value. Not possible for set.
-2   | RAM | Get value from ram, set value to ram.
-3   | FLASH | Get value from flash. Not possible for set.
+0   | CURRENT | Get value from ram if exists, else from flash if exists, else get default. This is the value used by the firmware.
+1   | STORED | Get value from flash, else get default. This value will be used after a reboot.
+2   | FIRMWARE_DEFAULT | Get default value.
+
+<a name="state_set_persistence_mode_set"></a>
+#### State set persistence mode
+Value | Name | Description
+--- | --- | ---
+0   | TEMP | Set value to ram. This value will be used by the firmware, but lost after a reboot.
+1   | STORE | Set value to ram and flash. This value will be used by the firmware, also after a reboot.
+
 
 
 <a name="sun_time_packet"></a>
