@@ -292,7 +292,6 @@ private:
 
 	// advertise
 	ServiceData* _serviceData = NULL;
-	IBeacon* _beacon = NULL;
 
 	// processing
 #if BUILD_MESHING == 1

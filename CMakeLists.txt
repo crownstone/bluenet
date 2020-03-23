@@ -11,11 +11,11 @@ option(DOWNLOAD_NRFCONNECT                       "Download nrfconnect"          
 option(DOWNLOAD_NRFCONNECT_PROGRAMMER            "Download nrfconnect programmer"        OFF)
 
 if(NOT CONFIG_DIR)
-  set(CONFIG_DIR "config")
+	set(CONFIG_DIR "config")
 endif()
 
 if(NOT BOARD_TARGET)
-  set(BOARD_TARGET "default")
+	set(BOARD_TARGET "default")
 endif()
 
 set(WORKSPACE_DIR                                ${CMAKE_CURRENT_LIST_DIR})
@@ -27,8 +27,11 @@ set(RELEASE_CANDIDATE_REPOSITORY                 ${WORKSPACE_DIR}/../bluenet-rel
 
 # Set build type to debug, unless specified otherwise. This prevents accidental release builds.
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE                             Debug)
+	set(CMAKE_BUILD_TYPE                         Debug)
 endif()
+
+# Overwrite the typical install prefix
+set(CMAKE_INSTALL_PREFIX                         ${CMAKE_SOURCE_DIR}/bin)
 
 # With "make" sudo works more or less. Only when running make in parallel prompting is not always clear.
 # With "ninja" sudo does not work. It might be worth looking into "pkexec" instead, but that requires more study.
@@ -66,6 +69,8 @@ message(STATUS "  python executable: \"${PYTHON_EXECUTABLE}\"")
 message(STATUS "  pip will be used as: \"${PYTHON_EXECUTABLE} -m pip install package\"")
 message(STATUS "  if installation fails (of e.g. nrfutil), run \"python3 -m pip install -U pip [--user]\"")
 
+# The source dir is the parent directory, the binary directory is the build/ directory (out of build)
+message(STATUS "source dir: ${CMAKE_SOURCE_DIR}")
 message(STATUS "bin dir: ${CMAKE_BINARY_DIR}")
 message(STATUS "install dir: ${CMAKE_INSTALL_PREFIX}")
 
@@ -107,9 +112,9 @@ set(GCC_ARM_NONE_EABI_MD5 6341f11972dac8de185646d0fbd73bfc)
 
 # The JLink tool
 set(JLINK_DOWNLOAD_URL https://www.segger.com/downloads/jlink)
-set(JLINK_DEB_FILE JLink_Linux_V650_x86_64.deb)
+set(JLINK_DEB_FILE JLink_Linux_V662d_x86_64.deb)
 set(JLINK_LINUX_DOWNLOAD_URL ${JLINK_DOWNLOAD_URL}/${JLINK_DEB_FILE})
-set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
+set(JLINK_MD5 9da2ff634edbe0c8adf68bdb3c850b90)
 
 #######################################################################################################################
 # Local names
@@ -124,107 +129,107 @@ list(APPEND CMAKE_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FILE}")
 #######################################################################################################################
 
 ExternalProject_Add(nordic_sdk
-  DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-  SOURCE_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk
-  URL ${NORDIC_NRF5_SDK_DOWNLOAD_URL}
-  URL_MD5 ${NORDIC_NRF5_SDK_MD5}
-  CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-  BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-  INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-  PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/01nrf5.patch
-        COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/02nrf5.patch
-  )
+	DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+	SOURCE_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk
+	URL ${NORDIC_NRF5_SDK_DOWNLOAD_URL}
+	URL_MD5 ${NORDIC_NRF5_SDK_MD5}
+	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/01nrf5.patch
+	COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/02nrf5.patch
+	)
 
 set(NRF5_DIR ${WORKSPACE_DIR}/tools/nrf5_sdk)
 list(APPEND CMAKE_ARGS "-DNRF5_DIR:STRING=${NRF5_DIR}")
 
 ExternalProject_Add(nordic_mesh_sdk
-  #DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-  GIT_REPOSITORY https://github.com/crownstone/nRF5-SDK-for-Mesh
-  SOURCE_DIR ${WORKSPACE_DIR}/tools/mesh_sdk
-  #URL ${NORDIC_MESH_SDK_DOWNLOAD_URL}
-  #URL_MD5 ${NORDIC_MESH_SDK_MD5}
-  CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-  BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-  INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-  #PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/00mesh.patch
-  )
+	#DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+	GIT_REPOSITORY https://github.com/crownstone/nRF5-SDK-for-Mesh
+	SOURCE_DIR ${WORKSPACE_DIR}/tools/mesh_sdk
+	#URL ${NORDIC_MESH_SDK_DOWNLOAD_URL}
+	#URL_MD5 ${NORDIC_MESH_SDK_MD5}
+	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	#PATCH_COMMAND cd ${WORKSPACE_DIR} && patch -p0 < patch/00mesh.patch
+	)
 
 set(MESH_SDK_DIR ${WORKSPACE_DIR}/tools/mesh_sdk)
 list(APPEND CMAKE_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
 if(DOWNLOAD_JLINK) 
-  ExternalProject_Add(jlink
-    DOWNLOAD_COMMAND wget --timestamping --post-data "accept_license_agreement=accepted&non_emb_ctr=confirmed" ${JLINK_LINUX_DOWNLOAD_URL}
-    DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-    URL ${JLINK_LINUX_DOWNLOAD_URL}
-    URL_MD5 ${JLINK_MD5}
-    DOWNLOAD_NO_EXTRACT 1
-    SOURCE_DIR ${WORKSPACE_DIR}/tools/jlink
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-    BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-    INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
-    # USES_TERMINAL_INSTALL 1 # Does not actually work
-    )
+	ExternalProject_Add(jlink
+		DOWNLOAD_COMMAND wget --timestamping --post-data "accept_license_agreement=accepted&non_emb_ctr=confirmed" ${JLINK_LINUX_DOWNLOAD_URL}
+		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+		URL ${JLINK_LINUX_DOWNLOAD_URL}
+		URL_MD5 ${JLINK_MD5}
+		DOWNLOAD_NO_EXTRACT 1
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/jlink
+		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+		INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
+		# USES_TERMINAL_INSTALL 1 # Does not actually work
+		)
 endif()
 
 ExternalProject_Add(gcc_arm_none_eabi
-  DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-  URL ${GCC_ARM_NONE_EABI_DOWNLOAD_URL}
-  URL_MD5 ${GCC_ARM_NONE_EABI_MD5}
-  SOURCE_DIR ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi
-  CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-  BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-  INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-  )
+	DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+	URL ${GCC_ARM_NONE_EABI_DOWNLOAD_URL}
+	URL_MD5 ${GCC_ARM_NONE_EABI_MD5}
+	SOURCE_DIR ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi
+	CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+	BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+	INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+	)
 
 set(COMPILER_PATH ${WORKSPACE_DIR}/tools/gcc_arm_none_eabi)
 list(APPEND CMAKE_ARGS "-DCOMPILER_PATH:STRING=${COMPILER_PATH}")
 
 if(DOWNLOAD_NRFJPROG)
-  ExternalProject_Add(nrfjprog
-    DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-    URL ${NRFJPROG_DOWNLOAD_URL}
-    URL_MD5 ${NRFJPROG_MD5}
-    SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfjprog
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-    BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-    INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/tools/nrfjprog/${NRFJPROG_DEB_FILE} 
-    )
+	ExternalProject_Add(nrfjprog
+		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+		URL ${NRFJPROG_DOWNLOAD_URL}
+		URL_MD5 ${NRFJPROG_MD5}
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfjprog
+		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+		INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/tools/nrfjprog/${NRFJPROG_DEB_FILE} 
+		)
 endif()
 
 if(DOWNLOAD_NRFUTIL)
-  ExternalProject_Add(nrfutil
-    DOWNLOAD_COMMAND ${PYTHON_EXECUTABLE} -m pip install nrfutil
-    DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-    SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfutil
-    CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
-    BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-    INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-    )
+	ExternalProject_Add(nrfutil
+		DOWNLOAD_COMMAND ${PYTHON_EXECUTABLE} -m pip install nrfutil
+		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfutil
+		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		)
 endif()
 
 if(DOWNLOAD_NRFCONNECT) 
-  ExternalProject_Add(git_nrfconnect_core
-    GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-core
-    SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-    BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-    CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
-    BUILD_COMMAND npm install
-    INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${WORKSPACE_DIR}/tools/nrfconnect_apps 
-            COMMAND ${CMAKE_COMMAND} -E create_symlink ${WORKSPACE_DIR}/tools/nrfconnect_apps $ENV{HOME}/.nrfconnect-apps/local
-    )
+	ExternalProject_Add(git_nrfconnect_core
+		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-core
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
+		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
+		CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
+		BUILD_COMMAND npm install
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${WORKSPACE_DIR}/tools/nrfconnect_apps 
+		COMMAND ${CMAKE_COMMAND} -E create_symlink ${WORKSPACE_DIR}/tools/nrfconnect_apps $ENV{HOME}/.nrfconnect-apps/local
+		)
 endif()
 
 if(DOWNLOAD_NRFCONNECT_PROGRAMMER) 
-  ExternalProject_Add(git_nrfconnect_apps
-    GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-programmer
-    SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
-    BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
-    CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
-    BUILD_COMMAND npm install
-    INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
-    )
+	ExternalProject_Add(git_nrfconnect_apps
+		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-programmer
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
+		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
+		CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
+		BUILD_COMMAND npm install
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		)
 endif()
 
 #######################################################################################################################
@@ -234,13 +239,15 @@ endif()
 set(DEFAULT_CONFIGURATION_FILE ${DEFAULT_CONF_CMAKE_PATH}/CMakeBuild.config.default)
 set(BOARD_TARGET_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
 set(BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
-	
+
 load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
 load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
 load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
 
 if(FACTORY_IMAGE)
-	MESSAGE(WARNING "Making factory image, this will overwrite your config.")
+	MESSAGE(WARNING "Make a factory image. The usual CMakeBuild.config files will not be used. "
+		"They will be overwritten by the CMakeFactoryImage.config files. "
+		"Make sure that you set -DFACTORY_IMAGE=0 when you continue normal development. ")
 	set(FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE ${WORKSPACE_DIR}/factory-images/hardware/${FACTORY_IMAGE_HARDWARE_CONFIG}/CMakeFactoryImage.config)
 	set(FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE ${WORKSPACE_DIR}/factory-images/software/${FACTORY_IMAGE_SOFTWARE_CONFIG}/CMakeFactoryImage.config)
 
@@ -249,7 +256,7 @@ if(FACTORY_IMAGE)
 
 	MESSAGE(STATUS "Load software configuration file for factory image at ${FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE}")
 	load_configuration("${FACTORY_IMAGE_SOFTWARE_CONFIGURATION_FILE}" CMAKE_ARGS)
-		
+
 	IF(EXISTS ${FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE})
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${FACTORY_IMAGE_HARDWARE_CONFIGURATION_FILE})
 	ENDIF()
@@ -265,7 +272,7 @@ list(APPEND CMAKE_ARGS "-DCMAKE_TOOLCHAIN_FILE:FILEPATH=${WORKSPACE_DIR}/source/
 list(APPEND CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:FILEPATH=${WORKSPACE_DIR}/bin/${BOARD_TARGET}")
 
 if(VERBOSITY GREATER 5)
-  message(STATUS "list: ${CMAKE_ARGS}")
+	message(STATUS "list: ${CMAKE_ARGS}")
 endif()
 
 #git_info("${WORKSPACE_DIR}/source" GIT_BRANCH GIT_HASH)
@@ -295,34 +302,35 @@ set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}
 #######################################################################################################################
 
 ADD_CUSTOM_TARGET(micro_eec
-  COMMAND chmod u+x build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
-  COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${WORKSPACE_DIR}/tools/gcc_arm_none_eabi/bin/" "MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
-  COMMENT "Build micro-eec"
-  DEPENDS 
-    nordic_sdk
-    gcc_arm_none_eabi
-  )
+	COMMAND chmod u+x build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
+	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${WORKSPACE_DIR}/tools/gcc_arm_none_eabi/bin/" "MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
+	COMMENT "Build micro-eec"
+	DEPENDS 
+	nordic_sdk
+	gcc_arm_none_eabi
+	)
 
 #######################################################################################################################
 # Build mluenet as external project
 #######################################################################################################################
 
-ExternalProject_Add(bluenet
-  SOURCE_DIR ${WORKSPACE_DIR}/source
-  BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}
-  INSTALL_DIR ${WORKSPACE_DIR}/bin/${BOARD_TARGET}
-  STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/stamp
-  TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/tmp
-  CMAKE_CACHE_ARGS "${CMAKE_ARGS}"
-  CMAKE_ARGS "${CMAKE_ARGS}"
-  BUILD_ALWAYS 1
-  DEPENDS micro_eec
-  )
+if(NOT FACTORY_IMAGE)
+	ExternalProject_Add(bluenet
+		SOURCE_DIR ${WORKSPACE_DIR}/source
+		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}
+		INSTALL_DIR ${WORKSPACE_DIR}/bin/${BOARD_TARGET}
+		STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/stamp
+		TMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/tmp
+		CMAKE_CACHE_ARGS "${CMAKE_ARGS}"
+		CMAKE_ARGS "${CMAKE_ARGS}"
+		BUILD_ALWAYS 1
+		DEPENDS micro_eec
+		)
+endif()
 
-		
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
 if(EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
-  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+	set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
 endif()
 
 # Regretfully, this "trick" will make it impossible to pull after a change in CMakeBuild.config . 
@@ -331,111 +339,113 @@ endif()
 #  COMMAND git update-index --skip-worktree ${WORKSPACE_DIR}/config/default/CMakeBuild.config
 #  )
 
-add_dependencies(bluenet gcc_arm_none_eabi)
-add_dependencies(bluenet nordic_sdk)
-add_dependencies(bluenet nordic_mesh_sdk)
+if(NOT FACTORY_IMAGE)
+	add_dependencies(bluenet gcc_arm_none_eabi)
+	add_dependencies(bluenet nordic_sdk)
+	add_dependencies(bluenet nordic_mesh_sdk)
+endif()
 
 #######################################################################################################################
 # Write softdevice and read version of softdevice
 #######################################################################################################################
-		
+
 IF(SERIAL_NUM) 
-  set(SERIAL_NUM_SWITCH "--snr")
-  set(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
+	set(SERIAL_NUM_SWITCH "--snr")
+	set(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 ENDIF()
-		
+
 ADD_CUSTOM_TARGET(write_softdevice
-  COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write softdevice"
-  COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND nrfjprog -f nrf52 --program ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
-  DEPENDS bluenet
-  COMMENT "Flashes softdevice to remote target board"
-  )
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write softdevice"
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND nrfjprog -f nrf52 --program ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+	#DEPENDS bluenet
+	COMMENT "Flashes softdevice to remote target board"
+	)
 
 ADD_CUSTOM_TARGET(write_mbr_param_address
-  COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write MBR param page address 0x0007E000 to UICR"
-  COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND nrfjprog -f nrf52 --memwr 0x10001018 --val 0x0007E000 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
-  COMMENT "Writes MBR param page address to UICR"
-  )
-		
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write MBR param page address 0x0007E000 to UICR"
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND nrfjprog -f nrf52 --memwr 0x10001018 --val 0x0007E000 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+	COMMENT "Writes MBR param page address to UICR"
+	)
+
 SET(DEFAULT_NRFJPROG_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
 SET(DEFAULT_NRFJPROG_READ_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH};-DINSTRUCTION:STRING=READ")
 
 ADD_CUSTOM_TARGET(read_softdevice_version
-  COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFJPROG_READ_DPARAM} -DADDRESS:STRING=0x000300C ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
-  COMMENT "Reads version of softdevice"
-  )
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFJPROG_READ_DPARAM} -DADDRESS:STRING=0x000300C ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+	COMMENT "Reads version of softdevice"
+	)
 
 ADD_CUSTOM_TARGET(erase
-  COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to erase target board"
-  COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND nrfjprog -f nrf52 --eraseall ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
-  COMMENT "Erase everything on target board"
-  )
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to erase target board"
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND nrfjprog -f nrf52 --eraseall ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+	COMMENT "Erase everything on target board"
+	)
 
 ADD_CUSTOM_TARGET(reset
-  COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to reset target board"
-  COMMAND ${CMAKE_COMMAND} -E echo
-  COMMAND nrfjprog -f nrf52 --reset ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
-  COMMENT "Reset target board"
-  )
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to reset target board"
+	COMMAND ${CMAKE_COMMAND} -E echo
+	COMMAND nrfjprog -f nrf52 --reset ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+	COMMENT "Reset target board"
+	)
 
 #######################################################################################################################
 # Forward commands for a particular board towards its build directory 
 #######################################################################################################################
 
+# Will not be called automatically (this is done through the external project bluenet)
 ADD_CUSTOM_TARGET(${BOARD_TARGET}
-  COMMAND make
-  WORKING_DIRECTORY ${BOARD_TARGET}
-  DEPENDS 
-    bluenet
-  COMMENT "Build application"
-  )
+	COMMAND make
+	WORKING_DIRECTORY ${BOARD_TARGET}
+	DEPENDS 
+	bluenet
+	COMMENT "Build application"
+	)
 
 ADD_CUSTOM_TARGET(debug_application
-  COMMAND cmake ..
-  COMMAND make debug_application
-  WORKING_DIRECTORY ${BOARD_TARGET}
-  DEPENDS 
-    bluenet
-  COMMENT "Debug application"
-  )
+	COMMAND make debug_application
+	WORKING_DIRECTORY ${BOARD_TARGET}
+	DEPENDS 
+	bluenet
+	COMMENT "Debug application"
+	)
 
 ADD_CUSTOM_TARGET(write_board_version
-  COMMAND make write_board_version
-  WORKING_DIRECTORY ${BOARD_TARGET}
-  DEPENDS 
-    nrfjprog
-    bluenet
-  COMMENT "Write board version"
-  )
+	COMMAND make write_board_version
+	WORKING_DIRECTORY ${BOARD_TARGET}
+	DEPENDS 
+	nrfjprog
+	bluenet
+	COMMENT "Write board version"
+	)
 
 ADD_CUSTOM_TARGET(write_application
-  COMMAND make write_application
-  WORKING_DIRECTORY ${BOARD_TARGET}
-  DEPENDS
-    nrfjprog
-    bluenet
-  COMMENT "Write application"
-  )
+	COMMAND make write_application
+	WORKING_DIRECTORY ${BOARD_TARGET}
+	DEPENDS
+	nrfjprog
+	bluenet
+	COMMENT "Write application"
+	)
 
 ADD_CUSTOM_TARGET(write_bootloader
-  COMMAND make write_bootloader
-  WORKING_DIRECTORY ${BOARD_TARGET}
-  DEPENDS
-    bluenet
-  COMMENT "Write bootloader"
-  )
+	COMMAND make write_bootloader
+	WORKING_DIRECTORY ${BOARD_TARGET}
+	DEPENDS
+	bluenet
+	COMMENT "Write bootloader"
+	)
 
 #######################################################################################################################
 # Create a new release
 #######################################################################################################################
-		
+
 # Create a new version, create new release directory
 # Copy CMakeBuild.config.release.default.release to this directory
 # Check fields (e.g. compare with CMakeBuild.config.default and see if fields are missing)
@@ -445,14 +455,14 @@ ADD_CUSTOM_TARGET(write_bootloader
 # Check if git version does not exist
 # Create git commit with this release version
 ADD_CUSTOM_TARGET(create_git_release
-  COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release.cmake
-  COMMENT "Create git release"
-  )
+	COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release.cmake
+	COMMENT "Create git release"
+	)
 
 ADD_CUSTOM_TARGET(create_git_release_bootloader
-  COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release_bootloader.cmake
-  COMMENT "Create git release for bootloader"
-  )
+	COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DWORKSPACE_DIR=${WORKSPACE_DIR} -P ${DEFAULT_MODULES_PATH}/release_bootloader.cmake
+	COMMENT "Create git release for bootloader"
+	)
 
 
 #######################################################################################################################
@@ -460,35 +470,35 @@ ADD_CUSTOM_TARGET(create_git_release_bootloader
 #######################################################################################################################
 
 ADD_CUSTOM_TARGET(list_jlinks
-  COMMAND JLinkExe -commanderscript list.jlink
-  WORKING_DIRECTORY ${WORKSPACE_DIR}/source/conf/jlink
-  DEPENDS 
-    jlink
-  COMMENT "List JLink devices"
-  )
+	COMMAND JLinkExe -commanderscript list.jlink
+	WORKING_DIRECTORY ${WORKSPACE_DIR}/source/conf/jlink
+	DEPENDS 
+	jlink
+	COMMENT "List JLink devices"
+	)
 
 ADD_CUSTOM_TARGET(nrfconnect_core_setup
-  COMMAND ${CMAKE_COMMAND} -E echo "Run in separate shell. This is an electron app, debug with Ctrl+Shift+I"
-  COMMAND npm run dev
-  WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-  #DEPENDS git_nrfconnect_core
-  COMMENT "Run nrf connect core"
-  )
+	COMMAND ${CMAKE_COMMAND} -E echo "Run in separate shell. This is an electron app, debug with Ctrl+Shift+I"
+	COMMAND npm run dev
+	WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
+	#DEPENDS git_nrfconnect_core
+	COMMENT "Run nrf connect core"
+	)
 
 ADD_CUSTOM_TARGET(nrfconnect_core
-  COMMAND ${CMAKE_COMMAND} -E echo "Run in separate shell. This is an electron app, debug with Ctrl+Shift+I"
-  COMMAND npm run app
-  WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
-  #DEPENDS git_nrfconnect_core
-  COMMENT "Run nrf connect core"
-  )
+	COMMAND ${CMAKE_COMMAND} -E echo "Run in separate shell. This is an electron app, debug with Ctrl+Shift+I"
+	COMMAND npm run app
+	WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
+	#DEPENDS git_nrfconnect_core
+	COMMENT "Run nrf connect core"
+	)
 
 ADD_CUSTOM_TARGET(nrfconnect_programmer
-  COMMAND npm run app
-  WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-programmer
-  #DEPENDS git_nrfconnect_programmer
-  COMMENT "Run nrf connect core"
-  )
+	COMMAND npm run app
+	WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-programmer
+	#DEPENDS git_nrfconnect_programmer
+	COMMENT "Run nrf connect core"
+	)
 
 
 
@@ -552,11 +562,13 @@ if(FACTORY_IMAGE)
 
 	fill(${FACTORY_IMAGE_SOFTWARE_VERSION} FACTORY_IMAGE_SOFTWARE_VERSION 4 "0" "")
 
-#	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "${FACTORY_IMAGE_SOFTWARE_NAME}_${FACTORY_IMAGE_HARDWARE_NAME}_${FACTORY_IMAGE_TIMESTAMP}.hex")
+	#	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "${FACTORY_IMAGE_SOFTWARE_NAME}_${FACTORY_IMAGE_HARDWARE_NAME}_${FACTORY_IMAGE_TIMESTAMP}.hex")
 	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION}/factory-image.hex")
-#	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "factory-image.hex")
+	#	set(FACTORY_IMAGE_OUTPUT_FILE_NAME "factory-image.hex")
+	set(FACTORY_IMAGE_PATH_NAME factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION})
 
-	ADD_CUSTOM_TARGET(generate_factory_image
+	# Add this target by default to make all when in factory image creation mode
+	ADD_CUSTOM_TARGET(generate_factory_image ALL
 		COMMAND ${CMAKE_COMMAND} -E echo
 		COMMAND ${CMAKE_COMMAND} -E echo "** Create factory images"
 		COMMAND ${CMAKE_COMMAND} -E echo "     MBR_SETTINGS: ${MBR_SETTINGS}"
@@ -579,18 +591,13 @@ if(FACTORY_IMAGE)
 		COMMAND test -f "${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" && exit 0 || echo "Bootloader settings missing. No such file: ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE}" && echo && exit 1
 		COMMAND test -f "${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE}" && exit 0 || echo "Softdevice missing. No such file: ${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE}" && echo && exit 1
 		COMMAND ${CMAKE_COMMAND} -E echo "Use srec_cat to create a factory image"
-		COMMAND ${CMAKE_COMMAND} -E make_directory factory-images
+		COMMAND ${CMAKE_COMMAND} -E make_directory ${FACTORY_IMAGE_PATH_NAME}
 		COMMAND echo 'srec_cat ${FACTORY_IMAGE_APPLICATION_HEX_FILE} -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${FACTORY_IMAGE_BOOTLOADER_HEX_FILE} -intel ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE} -intel ${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE} -intel -o factory-images/${FACTORY_IMAGE_OUTPUT_FILE_NAME} -intel'
 		COMMAND srec_cat ${FACTORY_IMAGE_APPLICATION_HEX_FILE} -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${FACTORY_IMAGE_BOOTLOADER_HEX_FILE} -intel ${FACTORY_IMAGE_BOOTLOADER_SETTINGS_HEX_FILE} -intel ${FACTORY_IMAGE_SOFTDEVICE_HEX_FILE} -intel -o factory-images/${FACTORY_IMAGE_OUTPUT_FILE_NAME} -intel
 		COMMENT "Generate a factory image"
 		)
 
-	if(NOT EXISTS ${CMAKE_BINARY_DIR}/factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION})
-		message(STATUS "Create directory \"factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION}\"")
-		file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION})
-	endif()
-
-	#INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/factory-images/${FACTORY_IMAGE_HARDWARE_CONFIG}/software_${FACTORY_IMAGE_SOFTWARE_VERSION}" DESTINATION . FILES_MATCHING PATTERN "*")
+	INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/${FACTORY_IMAGE_PATH_NAME}/" DESTINATION "${FACTORY_IMAGE_PATH_NAME}" FILES_MATCHING PATTERN "*")
 endif()
 
 

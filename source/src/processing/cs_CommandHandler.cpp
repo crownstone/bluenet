@@ -10,6 +10,7 @@
 #include "cfg/cs_DeviceTypes.h"
 #include "cfg/cs_Strings.h"
 #include "drivers/cs_Serial.h"
+#include <ipc/cs_IpcRamData.h>
 #include "processing/cs_CommandHandler.h"
 #include "processing/cs_Scanner.h"
 #include "processing/cs_FactoryReset.h"
@@ -86,9 +87,41 @@ command_result_t CommandHandler::handleCommand(
 	switch (type) {
 		case CTRL_CMD_SET_SUN_TIME:
 			break;
-		default:
+		case CTRL_CMD_NOP:
+		case CTRL_CMD_GOTO_DFU:
+		case CTRL_CMD_GET_BOOTLOADER_VERSION:
+		case CTRL_CMD_RESET:
+		case CTRL_CMD_FACTORY_RESET:
+		case CTRL_CMD_SET_TIME:
+		case CTRL_CMD_INCREASE_TX:
+		case CTRL_CMD_DISCONNECT:
+		case CTRL_CMD_RESET_ERRORS:
+		case CTRL_CMD_PWM:
+		case CTRL_CMD_SWITCH:
+		case CTRL_CMD_RELAY:
+		case CTRL_CMD_MULTI_SWITCH:
+		case CTRL_CMD_MESH_COMMAND:
+		case CTRL_CMD_ALLOW_DIMMING:
+		case CTRL_CMD_LOCK_SWITCH:
+		case CTRL_CMD_SETUP:
+		case CTRL_CMD_UART_MSG:
+		case CTRL_CMD_STATE_GET:
+		case CTRL_CMD_STATE_SET:
+		case CTRL_CMD_SAVE_BEHAVIOUR:
+		case CTRL_CMD_REPLACE_BEHAVIOUR:
+		case CTRL_CMD_REMOVE_BEHAVIOUR:
+		case CTRL_CMD_GET_BEHAVIOUR:
+		case CTRL_CMD_GET_BEHAVIOUR_INDICES:
+		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
+		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
 			LOGd("cmd=%u lvl=%u", type, accessLevel);
+			break;
+		case CTRL_CMD_UNKNOWN:
+		default:
+			LOGe("Unknown type: %u", type);
+			return command_result_t(ERR_UNKNOWN_TYPE);
 	}
+
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		return command_result_t(ERR_NO_ACCESS);
 	}
@@ -98,6 +131,8 @@ command_result_t CommandHandler::handleCommand(
 		return handleCmdNop(commandData, accessLevel, resultData);
 	case CTRL_CMD_GOTO_DFU:
 		return handleCmdGotoDfu(commandData, accessLevel, resultData);
+	case CTRL_CMD_GET_BOOTLOADER_VERSION:
+		return handleCmdGetBootloaderVersion(commandData, accessLevel, resultData);
 	case CTRL_CMD_RESET:
 		return handleCmdReset(commandData, accessLevel, resultData);
 	case CTRL_CMD_FACTORY_RESET:
@@ -169,6 +204,22 @@ command_result_t CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const E
 	return command_result_t(ERR_SUCCESS);
 }
 
+command_result_t CommandHandler::handleCmdGetBootloaderVersion(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
+	LOGi(STR_HANDLE_COMMAND, "get bootloader version");
+
+	uint8_t dataSize;
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, resultData.data, resultData.len, &dataSize);
+	if (retCode != IPC_RET_SUCCESS) {
+		LOGw("No IPC data found, error = %i", retCode);
+		return command_result_t(ERR_NOT_FOUND);
+	}
+	command_result_t result;
+	result.returnCode = ERR_SUCCESS;
+	result.data.data = resultData.data;
+	result.data.len = dataSize;
+	return result;
+}
+
 command_result_t CommandHandler::handleCmdReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "reset");
 	resetDelayed(GPREGRET_SOFT_RESET);
@@ -200,6 +251,7 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 	state_packet_header_t* stateHeader = (state_packet_header_t*) commandData.data;
+	LOGi("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
 	CS_TYPE stateType = toCsType(stateHeader->stateType);
 	cs_state_id_t stateId = stateHeader->stateId;
 	if (!EncryptionHandler::getInstance().allowAccess(getUserAccessLevelGet(stateType), accessLevel)) {
@@ -213,6 +265,7 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 	state_packet_header_t* resultHeader = (state_packet_header_t*) resultData.data;
 	resultHeader->stateType = stateHeader->stateType;
 	resultHeader->stateId = stateHeader->stateId;
+	resultHeader->persistenceMode = stateHeader->persistenceMode;
 	cs_state_data_t stateData(stateType, stateId, stateDataBuf.data, stateDataBuf.len);
 	command_result_t result;
 	result.returnCode = State::getInstance().verifySizeForGet(stateData);
@@ -221,7 +274,28 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 	if (FAILURE(result.returnCode)) {
 		return result;
 	}
-	result.returnCode = State::getInstance().get(stateData);
+	PersistenceMode persistenceMode = PersistenceMode::NEITHER_RAM_NOR_FLASH;
+	PersistenceModeGet persistenceModeGet = toPersistenceModeGet(stateHeader->persistenceMode);
+	switch (persistenceModeGet) {
+		case PersistenceModeGet::CURRENT:
+			persistenceMode = PersistenceMode::STRATEGY1;
+			break;
+		case PersistenceModeGet::STORED:
+			persistenceMode = PersistenceMode::FLASH;
+			break;
+		case PersistenceModeGet::FIRMWARE_DEFAULT:
+			persistenceMode = PersistenceMode::FIRMWARE_DEFAULT;
+			break;
+		case PersistenceModeGet::UNKNOWN:
+			break;
+	}
+	result.returnCode = State::getInstance().get(stateData, persistenceMode);
+
+	if (persistenceModeGet == PersistenceModeGet::STORED && result.returnCode == ERR_NOT_FOUND) {
+		// Try default instead.
+		result.returnCode = State::getInstance().get(stateData, PersistenceMode::FIRMWARE_DEFAULT);
+	}
+
 	result.data.len = sizeof(state_packet_header_t) + stateData.size;
 	return result;
 }
@@ -233,6 +307,7 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
 	state_packet_header_t* stateHeader = (state_packet_header_t*) commandData.data;
+	LOGi("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
 	CS_TYPE stateType = toCsType(stateHeader->stateType);
 	cs_state_id_t stateId = stateHeader->stateId;
 	if (!EncryptionHandler::getInstance().allowAccess(getUserAccessLevelSet(stateType), accessLevel)) {
@@ -244,7 +319,7 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 	state_packet_header_t* resultHeader = (state_packet_header_t*) resultData.data;
 	resultHeader->stateType = stateHeader->stateType;
 	resultHeader->stateId = stateHeader->stateId;
-	LOGi("State type=%u id=%u", stateHeader->stateType, stateHeader->stateId);
+	resultHeader->persistenceMode = stateHeader->persistenceMode;
 	uint16_t payloadSize = commandData.len - sizeof(state_packet_header_t);
 	buffer_ptr_t payload = commandData.data + sizeof(state_packet_header_t);
 	cs_state_data_t stateData(stateType, stateId, payload, payloadSize);
@@ -255,7 +330,19 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 	if (FAILURE(result.returnCode)) {
 		return result;
 	}
-	cs_ret_code_t retCode = State::getInstance().set(stateData);
+	PersistenceMode persistenceMode = PersistenceMode::NEITHER_RAM_NOR_FLASH;
+	PersistenceModeSet persistenceModeSet = toPersistenceModeSet(stateHeader->persistenceMode);
+	switch (persistenceModeSet) {
+		case PersistenceModeSet::TEMPORARY:
+			persistenceMode = PersistenceMode::RAM;
+			break;
+		case PersistenceModeSet::STORED:
+			persistenceMode = PersistenceMode::FLASH;
+			break;
+		case PersistenceModeSet::UNKNOWN:
+			break;
+	}
+	cs_ret_code_t retCode = State::getInstance().set(stateData, persistenceMode);
 	switch (retCode) {
 		case ERR_SUCCESS:
 		case ERR_SUCCESS_NO_CHANGE:
@@ -487,7 +574,7 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 			meshMsg.payload = payload;
 			meshMsg.size = payloadSize;
 			meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
-			meshMsg.urgency = CS_MESH_URGENCY_LOW; // Timestamp in message gets updated before actually sending.
+			meshMsg.urgency = CS_MESH_URGENCY_HIGH;
 			break;
 		}
 		default:
@@ -584,42 +671,45 @@ command_result_t CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t 
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
 	switch (type) {
-	case CTRL_CMD_INCREASE_TX:
-	case CTRL_CMD_SETUP:
-		return BASIC; // These commands are only available in setup mode.
+		case CTRL_CMD_GET_BOOTLOADER_VERSION:
+			return ENCRYPTION_DISABLED;
 
-	case CTRL_CMD_SWITCH:
-	case CTRL_CMD_PWM:
-	case CTRL_CMD_RELAY:
-	case CTRL_CMD_DISCONNECT:
-	case CTRL_CMD_NOP:
-	case CTRL_CMD_MULTI_SWITCH:
-	case CTRL_CMD_MESH_COMMAND:
-	case CTRL_CMD_STATE_GET:
-	case CTRL_CMD_STATE_SET:
-	case CTRL_CMD_REGISTER_TRACKED_DEVICE:
-		return BASIC;
+		case CTRL_CMD_INCREASE_TX:
+		case CTRL_CMD_SETUP:
+			return BASIC; // These commands are only available in setup mode.
 
-	case CTRL_CMD_SET_TIME:
-	case CTRL_CMD_SET_SUN_TIME:
-	case CTRL_CMD_SAVE_BEHAVIOUR:
-	case CTRL_CMD_REPLACE_BEHAVIOUR:
-	case CTRL_CMD_REMOVE_BEHAVIOUR:
-	case CTRL_CMD_GET_BEHAVIOUR:
-	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
-		return MEMBER;
+		case CTRL_CMD_SWITCH:
+		case CTRL_CMD_PWM:
+		case CTRL_CMD_RELAY:
+		case CTRL_CMD_DISCONNECT:
+		case CTRL_CMD_NOP:
+		case CTRL_CMD_MULTI_SWITCH:
+		case CTRL_CMD_MESH_COMMAND:
+		case CTRL_CMD_STATE_GET:
+		case CTRL_CMD_STATE_SET:
+		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
+			return BASIC;
 
-	case CTRL_CMD_GOTO_DFU:
-	case CTRL_CMD_RESET:
-	case CTRL_CMD_FACTORY_RESET:
-	case CTRL_CMD_RESET_ERRORS:
-	case CTRL_CMD_ALLOW_DIMMING:
-	case CTRL_CMD_LOCK_SWITCH:
-	case CTRL_CMD_UART_MSG:
-	case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
-		return ADMIN;
-	case CTRL_CMD_UNKNOWN:
-		return NOT_SET;
+		case CTRL_CMD_SET_TIME:
+		case CTRL_CMD_SET_SUN_TIME:
+		case CTRL_CMD_SAVE_BEHAVIOUR:
+		case CTRL_CMD_REPLACE_BEHAVIOUR:
+		case CTRL_CMD_REMOVE_BEHAVIOUR:
+		case CTRL_CMD_GET_BEHAVIOUR:
+		case CTRL_CMD_GET_BEHAVIOUR_INDICES:
+			return MEMBER;
+
+		case CTRL_CMD_GOTO_DFU:
+		case CTRL_CMD_RESET:
+		case CTRL_CMD_FACTORY_RESET:
+		case CTRL_CMD_RESET_ERRORS:
+		case CTRL_CMD_ALLOW_DIMMING:
+		case CTRL_CMD_LOCK_SWITCH:
+		case CTRL_CMD_UART_MSG:
+		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
+			return ADMIN;
+		case CTRL_CMD_UNKNOWN:
+			return NOT_SET;
 	}
 	return NOT_SET;
 }

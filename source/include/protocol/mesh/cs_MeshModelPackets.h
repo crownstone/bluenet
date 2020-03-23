@@ -7,8 +7,9 @@
 
 #pragma once
 
-#include "protocol/cs_Typedefs.h"
-#include "protocol/cs_CmdSource.h"
+#include <mesh/cs_MeshDefines.h>
+#include <protocol/cs_Typedefs.h>
+#include <protocol/cs_CmdSource.h>
 
 /**
  * Message opcodes.
@@ -31,7 +32,7 @@ enum cs_mesh_model_opcode_t {
  * Multi switch message with 5 items is 28 + 3 (opCode) + 4 (MIC) = 35, so 3 segments.
  * The minimum advertising interval that mesh are using now is 20ms, so each advertisement / segment, takes 20ms.
  */
-#define MAX_MESH_MSG_SIZE (3 * 12 - 3 - 4)
+#define MAX_MESH_MSG_SIZE (3 * 12 - 4 - 3)
 #define MAX_MESH_MSG_NON_SEGMENTED_SIZE (15 - 4 - 3)
 
 /**
@@ -61,9 +62,13 @@ enum cs_mesh_model_msg_type_t {
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_test_t {
 	uint32_t counter;
+#if MESH_MODEL_TEST_MSG == 2
+//	uint8_t dummy[3]; // non segmented
+//	uint8_t dummy[12]; // 2 segments
+	uint8_t dummy[24]; // 3 segments
+#else
 	uint8_t dummy[3]; // non segmented
-//	uint8_t dummy[11]; // 2 segments
-//	uint8_t dummy[23]; // 3 segments
+#endif
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_time_t {

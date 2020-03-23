@@ -140,6 +140,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 		case PersistenceMode::RAM:
 			return loadFromRam(data);
 		case PersistenceMode::FLASH:
+			data.size = typeSize;
 			return _storage->read(data);
 		case PersistenceMode::STRATEGY1: {
 			// First check if it's already in ram.

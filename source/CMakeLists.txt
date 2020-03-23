@@ -79,6 +79,7 @@ SET(SUPERUSER_SWITCH                         "sudo"        CACHE STRING "Switch 
 
 MATH(EXPR SWO_PORT       "${GDB_PORT}+1")
 MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
+MATH(EXPR RTT_PORT       "${GDB_PORT}+16690")
 
 #######################################################################################################################
 # Show variables
@@ -132,6 +133,7 @@ SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 INCLUDE_DIRECTORIES("include")
 INCLUDE_DIRECTORIES("include/ble")
 INCLUDE_DIRECTORIES("include/third")
+INCLUDE_DIRECTORIES("shared")
 
 # TODO: Just only include th NRF5 directory and refer to the header files using that relative path in the source files
 # Then we do not need to update the CMakeLists.txt file all the time
@@ -528,6 +530,7 @@ ELSE()
 		message(STATUS "Application length: ${APPLICATION_LENGTH}")
 		message(STATUS "RAM base: ${RAM_R1_BASE}")
 		message(STATUS "RAM amount: ${RAM_APPLICATION_AMOUNT}")
+		message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
 
 		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
 		
@@ -619,7 +622,7 @@ ELSE()
 		# The gdb server can be started with configuration specific information
 		ADD_CUSTOM_TARGET(debug_server
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
-			COMMAND JLinkGDBServer -Device nRF52832_xxAA ${SERIAL_NUM_GDB_SELECT} ${SERIAL_NUM_GDB_PARAM} -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT}
+			COMMAND JLinkGDBServer -Device nRF52832_xxAA ${SERIAL_NUM_GDB_SELECT} ${SERIAL_NUM_GDB_PARAM} -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT} -RTTTelnetPort ${RTT_PORT}
 			COMMENT "Debug server, runs in background"
 			)
 		
@@ -631,7 +634,7 @@ ELSE()
 		
 		ADD_CUSTOM_TARGET(rtt_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** RTT client, keep running in separate shell"
-			COMMAND JLinkRTTClient
+			COMMAND JLinkRTTClient -RTTTelnetPort ${RTT_PORT}
 			COMMENT "RTT client, runs in background"
 			)
 		
@@ -738,13 +741,17 @@ ELSE()
 			COMMAND bash -c "perl -i -pe '$. == 2 && s/(\\d+)/$1+1/eg' ${CMAKE_SOURCE_DIR}/VERSION" VERBATIM
 			COMMENT "Increment application version (in VERSION file)"
 			)
+			
+		SET(BOOTLOADER_HEX_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
+		SET(BOOTLOADER_BIN_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.bin")
 
 		ADD_CUSTOM_TARGET(build_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
-			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
+			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}" 
+			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -I ihex ${BOOTLOADER_HEX_FILE} -O binary ${BOOTLOADER_BIN_FILE}
+			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${BOOTLOADER_HEX_FILE}"
 			COMMENT "Create bootloader settings"
 			)
 		
@@ -752,9 +759,26 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --program ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMAND echo "nrfjprog -f nrf52 --program ${BOOTLOADER_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
+			COMMAND nrfjprog -f nrf52 --program ${BOOTLOADER_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 			COMMENT "Flashes bootloader settings to remote target board"
 			DEPENDS build_bootloader_settings
+			)
+		
+		ADD_CUSTOM_TARGET(read_bootloader_settings
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to read bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND nrfjprog -f nrf52 --memrd 0x7F000 --n 128 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMENT "Read bootloader settings from remote target board"
+			)
+		
+		ADD_CUSTOM_TARGET(read_bootloader_settings_backup
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to read bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND nrfjprog -f nrf52 --memrd 0x7E000 --n 128 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMENT "Read bootloader settings from remote target board"
 			)
 	
 		ADD_CUSTOM_TARGET(merge_bootloader_settings

@@ -82,12 +82,27 @@ struct __attribute__((__packed__)) result_packet_t {
 	uint8_t payload[N];
 };
 
+enum class PersistenceModeGet {
+	CURRENT = 0,
+	STORED = 1,
+	FIRMWARE_DEFAULT = 2,
+	UNKNOWN = 255
+};
+
+enum class PersistenceModeSet {
+	TEMPORARY = 0,
+	STORED = 1,
+	UNKNOWN = 255
+};
+
 /**
  * State get/set header packet.
  */
 struct __attribute__((__packed__)) state_packet_header_t {
 	uint16_t stateType;
 	uint16_t stateId;
+	uint8_t persistenceMode; // PersistenceModeSet or PersistenceModeGet
+	uint8_t reserved;
 };
 
 /**

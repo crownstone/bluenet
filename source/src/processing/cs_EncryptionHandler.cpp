@@ -656,21 +656,27 @@ bool EncryptionHandler::allowAccess(EncryptionAccessLevel minimum, EncryptionAcc
 		return true;
 	}
 
-	if (minimum != ENCRYPTION_DISABLED) {
-		if (_operationMode == OperationMode::OPERATION_MODE_SETUP && provided == SETUP && _setupKeyValid) {
-			return true;
-		}
+	if (minimum == NOT_SET || minimum == NO_ONE) {
+		return false;
+	}
 
-		if (minimum == SETUP && (provided != SETUP || _operationMode != OperationMode::OPERATION_MODE_SETUP || !_setupKeyValid)) {
-			LOGw("Setup mode required");
-			return false;
-		}
+	if (minimum == ENCRYPTION_DISABLED) {
+		return true;
+	}
 
-		// 0 is the highest possible value: ADMIN. If the provided is larger than the minimum, it is not allowed.
-		if (provided > minimum) {
-			LOGw("Insufficient access");
-			return false;
-		}
+	if (_operationMode == OperationMode::OPERATION_MODE_SETUP && provided == SETUP && _setupKeyValid) {
+		return true;
+	}
+
+	if (minimum == SETUP && (provided != SETUP || _operationMode != OperationMode::OPERATION_MODE_SETUP || !_setupKeyValid)) {
+		LOGw("Setup mode required");
+		return false;
+	}
+
+	// 0 is the highest possible value: ADMIN. If the provided is larger than the minimum, it is not allowed.
+	if (provided > minimum) {
+		LOGw("Insufficient access");
+		return false;
 	}
 
 	return true;

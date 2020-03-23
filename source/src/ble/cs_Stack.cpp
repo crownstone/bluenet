@@ -9,6 +9,7 @@
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Config.h>
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_UuidConfig.h>
 #include <common/cs_Handlers.h>
 #include <drivers/cs_Storage.h>
@@ -149,7 +150,7 @@ void Stack::initRadio() {
 
 	LOGi(FMT_INIT, "radio");
 	// Enable BLE stack
-	uint32_t ram_start = RAM_R1_BASE;
+	uint32_t ram_start = g_RAM_R1_BASE;
 //	uint32_t ram_start = 0;
 	LOGd("nrf_sdh_ble_default_cfg_set at %p", ram_start);
 	// TODO: make a separate function, that tells you what to set RAM_R1_BASE to.
@@ -164,7 +165,7 @@ void Stack::initRadio() {
 			break;
 	}
 	APP_ERROR_CHECK(ret_code);
-	if (ram_start != RAM_R1_BASE) {
+	if (ram_start != g_RAM_R1_BASE) {
 		LOGw("Application address is too high, memory is unused: %p", ram_start);
 	}
 

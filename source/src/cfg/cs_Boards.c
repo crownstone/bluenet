@@ -23,6 +23,7 @@
 #include "cfg/cs_DeviceTypes.h"
 #include "nrf_error.h"
 #include "nrf52.h"
+#include "cfg/cs_AutoConfig.h"
 
 /* ********************************************************************************************************************
  * Crownstone Built-in Zero
@@ -724,7 +725,7 @@ uint32_t configure_board(boards_config_t* p_config) {
 
 	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (hardwareBoard == 0xFFFFFFFF) {
-		hardwareBoard = DEFAULT_HARDWARE_BOARD;
+		hardwareBoard = g_DEFAULT_HARDWARE_BOARD;
 	}
 
 	switch(hardwareBoard) {

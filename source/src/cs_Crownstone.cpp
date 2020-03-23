@@ -45,6 +45,7 @@
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
+#include <ipc/cs_IpcRamData.h>
 #include <processing/cs_EncryptionHandler.h>
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_TapToToggle.h>
@@ -55,8 +56,6 @@
 #include <util/cs_Utils.h>
 #include <time/cs_SystemTime.h>
 
-#include <array> // DEBUG 
-#include <util/cs_Hash.h> // DEBUG
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -138,7 +137,7 @@ void overwrite_hardware_version() {
 	uint32_t hardwareBoard = NRF_UICR->CUSTOMER[UICR_BOARD_INDEX];
 	if (hardwareBoard == 0xFFFFFFFF) {
 		LOGw("Write board type into UICR");
-		nrf_nvmc_write_word(HARDWARE_BOARD_ADDRESS, DEFAULT_HARDWARE_BOARD);
+		nrf_nvmc_write_word(g_HARDWARE_BOARD_ADDRESS, g_DEFAULT_HARDWARE_BOARD);
 	}
 	LOGd("Board: %p", hardwareBoard);
 }
@@ -186,8 +185,8 @@ Crownstone::Crownstone(boards_config_t& board) :
 
 	EncryptionBuffer::getInstance().alloc(BLE_GATTS_VAR_ATTR_LEN_MAX);
 
-        // TODO (Anne @Arend). Yes, you can call this in constructor. All non-virtual member functions can be called as well.
-	this->listen(); 
+	// TODO (Anne @Arend). Yes, you can call this in constructor. All non-virtual member functions can be called as well.
+	this->listen();
 	_stack = &Stack::getInstance();
 	_advertiser = &Advertiser::getInstance();
 	_timer = &Timer::getInstance();
@@ -277,12 +276,7 @@ void Crownstone::initDrivers0(){
 #if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 		// Check if flash pages of mesh are valid, else erase them.
 		// This has to be done before Storage is initialized.
-		if (!_mesh->isFlashValid()) {
-			// We can try to erase all pages.
-			if (_mesh->eraseAllPages() != ERR_SUCCESS) {
-				// Only option left is to reboot and see if things work out next time.
-				APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
-			}
+		if (!_mesh->checkFlashValid()) {
 			// Wait for pages erased event.
 			return;
 		}
@@ -421,29 +415,12 @@ void Crownstone::configureStack() {
 }
 
 void Crownstone::configureAdvertisement() {
+
 	// Set the stored advertisement interval
 	TYPIFY(CONFIG_ADV_INTERVAL) advInterval;
 	_state->get(CS_TYPE::CONFIG_ADV_INTERVAL, &advInterval, sizeof(advInterval));
 	_advertiser->setAdvertisingInterval(advInterval);
 	_advertiser->init();
-
-	// Create the iBeacon parameter object which will be used to configure the advertisement as an iBeacon.
-	TYPIFY(CONFIG_IBEACON_MAJOR) major;
-	TYPIFY(CONFIG_IBEACON_MINOR) minor;
-	TYPIFY(CONFIG_IBEACON_TXPOWER) rssi;
-	ble_uuid128_t uuid;
-//	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
-		_state->get(CS_TYPE::CONFIG_IBEACON_MAJOR, &major, sizeof(major));
-		_state->get(CS_TYPE::CONFIG_IBEACON_MINOR, &minor, sizeof(minor));
-		_state->get(CS_TYPE::CONFIG_IBEACON_UUID, uuid.uuid128, sizeof(uuid.uuid128));
-		_state->get(CS_TYPE::CONFIG_IBEACON_TXPOWER, &rssi, sizeof(rssi));
-//	}
-//	else {
-//		// TODO: Get default!
-//	}
-	LOGd("iBeacon: major=%u, minor=%u, rssi_on_1m=%i", major, minor, rssi);
-
-	_beacon = new IBeacon(uuid, major, minor, rssi);
 
 	// Create the ServiceData object which will be (mis)used to advertise select state variables from the Crownstone.
 	_serviceData = new ServiceData();
@@ -471,13 +448,7 @@ void Crownstone::configureAdvertisement() {
 
 	// assign service data to stack
 	_advertiser->setServiceData(_serviceData);
-
-	if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
-		_advertiser->configureAdvertisement(_beacon, _boardsConfig.deviceType);
-	}
-	else {
-		_advertiser->configureAdvertisement(NULL, _boardsConfig.deviceType);
-	}
+	_advertiser->configureAdvertisement(_boardsConfig.deviceType);
 }
 
 void Crownstone::createService(const ServiceEvent event) {
@@ -710,7 +681,7 @@ void Crownstone::startUp() {
 			_mesh->start();
 			if (_state->isTrue(CS_TYPE::CONFIG_IBEACON_ENABLED)) {
 				_mesh->initAdvertiser();
-				_mesh->advertise(_beacon);
+				_mesh->advertiseIbeacon();
 			}
 #endif
 		}
@@ -932,6 +903,22 @@ int main() {
 
 	printNfcPins();
 	LOG_FLUSH();
+
+//	LOGi("sizeof(bluenet_ipc_ram_data_item_t)=%u", sizeof(bluenet_ipc_ram_data_item_t));
+
+	// Make sure there is space for an extra 0 after the data.
+	uint8_t length = BLUENET_IPC_RAM_DATA_ITEM_SIZE + 1;
+	uint8_t data[length];
+	uint8_t dataSize;
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, data, length, &dataSize);
+	if (retCode == IPC_RET_SUCCESS) {
+		// Zero terminate the string.
+		data[dataSize] = 0;
+		LOGi("Bootloader version: %s", (char*)data);
+	}
+	else {
+		LOGw("No IPC data found, error = %i", retCode);
+	}
 
 //	// Make a "clicker"
 //	nrf_delay_ms(1000);

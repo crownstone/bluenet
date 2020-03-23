@@ -119,32 +119,32 @@ typedef enum {
 	LOGd("Memory %s() heap=%p, stack=%p", __func__, p, (uint8_t*)sp); \
 	free(p);
 
-#if SERIAL_VERBOSITY<SERIAL_VERBOSE
+#if SERIAL_VERBOSITY < SERIAL_VERBOSE
 #undef LOGv
 #define LOGv(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY<SERIAL_DEBUG
+#if SERIAL_VERBOSITY < SERIAL_DEBUG
 #undef LOGd
 #define LOGd(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY<SERIAL_INFO
+#if SERIAL_VERBOSITY < SERIAL_INFO
 #undef LOGi
 #define LOGi(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY<SERIAL_WARN
+#if SERIAL_VERBOSITY < SERIAL_WARN
 #undef LOGw
 #define LOGw(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY<SERIAL_ERROR
+#if SERIAL_VERBOSITY < SERIAL_ERROR
 #undef LOGe
 #define LOGe(fmt, ...)
 #endif
 
-#if SERIAL_VERBOSITY<SERIAL_FATAL
+#if SERIAL_VERBOSITY < SERIAL_FATAL
 #undef LOGf
 #define LOGf(fmt, ...)
 #endif
