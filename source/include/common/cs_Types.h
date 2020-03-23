@@ -222,21 +222,26 @@ enum class CS_TYPE: uint16_t {
 	CMD_DEC_CURRENT_RANGE= Internal_Base + 45,                            // Decrease current range.
 
 	// Mesh
-	CMD_SEND_MESH_MSG= Internal_Base + 46,                                // Send a mesh message.
-	CMD_SEND_MESH_MSG_MULTI_SWITCH= Internal_Base + 47,                   // Send a switch mesh message.
-	CMD_SEND_MESH_MSG_PROFILE_LOCATION= Internal_Base + 48,               // Send a profile location mesh message.
-	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS= Internal_Base + 49,         // Send a set behaviour settings mesh message.
-	CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER= Internal_Base + 50,
-	CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN= Internal_Base + 51,
-	CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE= Internal_Base + 52,
-	EVT_MESH_TIME= Internal_Base + 53,                                    // Mesh received the current time.
-	EVT_MESH_TRACKED_DEVICE_REGISTER= Internal_Base + 54,                 // Mesh received a tracked device to register.
-	EVT_MESH_TRACKED_DEVICE_TOKEN= Internal_Base + 55,                    // Mesh received a tracked device token.
-	EVT_MESH_TRACKED_DEVICE_LIST_SIZE= Internal_Base + 56,                // Mesh received a tracked device list size.
-	EVT_MESH_SYNC_REQUEST_OUTGOING= Internal_Base + 57,                   // Before an outgoing sync request is broadcast, this event is fired internally so that other event handlers can tag on.
-	EVT_MESH_SYNC_REQUEST_INCOMING= Internal_Base + 58,                   // Whan a sync request is received, this event is fired internally so that each event handler can individually respond to it.
-	EVT_MESH_SYNC_FAILED= Internal_Base + 59,                             // When syncing is considered to have failed, no more retries.
-	EVT_MESH_PAGES_ERASED= Internal_Base + 60,                            // All mesh storage pages are completely erased.
+
+	CMD_SEND_MESH_MSG,                                // Send a mesh message.
+	CMD_SEND_MESH_MSG_SET_TIME,                       // Send a set time mesh message.
+	CMD_SEND_MESH_MSG_NOOP,                           // Send a noop mesh message.
+	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Send a switch mesh message.
+	CMD_SEND_MESH_MSG_PROFILE_LOCATION,               // Send a profile location mesh message.
+	CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS,         // Send a set behaviour settings mesh message.
+	CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER,
+	CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN,
+	CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE,
+	EVT_MESH_TIME,                                    // Mesh received the current time.
+	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
+	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.
+	EVT_MESH_TRACKED_DEVICE_LIST_SIZE,                // Mesh received a tracked device list size.
+	EVT_MESH_SYNC_REQUEST_OUTGOING,                   // Before an outgoing sync request is broadcasted, this event is fired internally so that other event handlers can tag on.
+	EVT_MESH_SYNC_REQUEST_INCOMING,                   // When a sync request is received, this event is fired internally so that each event handler can individually respond to it.
+	EVT_MESH_SYNC_FAILED,                             // When syncing is considered to have failed, no more retries.
+	EVT_MESH_EXT_STATE_0,                             // Mesh received part 0 of the state of a Crownstone.
+	EVT_MESH_EXT_STATE_1,                             // Mesh received part 1 of the state of a Crownstone.
+	EVT_MESH_PAGES_ERASED,                            // All mesh storage pages are completely erased.
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR= Internal_Base + 61,                                // Add a behaviour.
@@ -344,8 +349,9 @@ typedef    float TYPIFY(CONFIG_CURRENT_MULTIPLIER);
 typedef  int32_t TYPIFY(CONFIG_CURRENT_ADC_ZERO);
 typedef     BOOL TYPIFY(CONFIG_ENCRYPTION_ENABLED);
 typedef     BOOL TYPIFY(CONFIG_IBEACON_ENABLED);
-typedef uint16_t TYPIFY(CONFIG_IBEACON_MINOR);
 typedef uint16_t TYPIFY(CONFIG_IBEACON_MAJOR);
+typedef uint16_t TYPIFY(CONFIG_IBEACON_MINOR);
+typedef cs_uuid128_t TYPIFY(CONFIG_IBEACON_UUID);
 typedef   int8_t TYPIFY(CONFIG_IBEACON_TXPOWER);
 typedef   int8_t TYPIFY(CONFIG_LOW_TX_POWER);
 typedef   int8_t TYPIFY(CONFIG_MAX_CHIP_TEMP);
@@ -482,6 +488,10 @@ typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING);
 typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING);
 typedef void TYPIFY(EVT_MESH_SYNC_FAILED);
 typedef void TYPIFY(EVT_MESH_PAGES_ERASED);
+typedef cs_mesh_model_msg_state_0_t TYPIFY(EVT_MESH_EXT_STATE_0);
+typedef cs_mesh_model_msg_state_1_t TYPIFY(EVT_MESH_EXT_STATE_1);
+typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
+typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

@@ -25,6 +25,7 @@ void MeshAdvertiser::init() {
 	}
 	advertiser_instance_init(_advertiser, NULL, _buffer, MESH_ADVERTISER_BUF_SIZE);
 //	advertiser_instance_init(_advertiser, txComplete, _buffer, MESH_ADVERTISER_BUF_SIZE);
+	listen();
 }
 
 void MeshAdvertiser::setMacAddress(uint8_t* macAddress) {
@@ -61,12 +62,17 @@ void MeshAdvertiser::stop() {
 	advertiser_disable(_advertiser);
 }
 
+void MeshAdvertiser::advertiseIbeacon() {
+	updateIbeacon();
+}
+
 /**
  * Advertise iBeacon data.
  *
  * See https://github.com/crownstone/bluenet/blob/master/docs/PROTOCOL.md#ibeacon-advertisement-packet
  */
 void MeshAdvertiser::advertise(IBeacon* ibeacon) {
+	LOGd("Advertise ibeacon: major=%u, minor=%u, rssi_at_1m=%i", ibeacon->getMajor(), ibeacon->getMinor(), ibeacon->getTxPower());
 	if (_advPacket != NULL) {
 		// See https://devzone.nordicsemi.com/f/nordic-q-a/58658/mesh-advertiser-crash-when-calling-advertiser_packet_discard
 //		advertiser_packet_discard(_advertiser, _advPacket);
@@ -91,4 +97,45 @@ void MeshAdvertiser::advertise(IBeacon* ibeacon) {
 
 	_advPacket->config.repeats = ADVERTISER_REPEAT_INFINITE;
 	advertiser_packet_send(_advertiser, _advPacket);
+}
+
+void MeshAdvertiser::updateIbeacon() {
+	TYPIFY(CONFIG_IBEACON_MAJOR) major;
+	TYPIFY(CONFIG_IBEACON_MINOR) minor;
+	TYPIFY(CONFIG_IBEACON_UUID) uuid;
+	TYPIFY(CONFIG_IBEACON_TXPOWER) rssi;
+	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_MAJOR, &major, sizeof(major));
+	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_MINOR, &minor, sizeof(minor));
+	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_UUID, uuid.uuid128, sizeof(uuid.uuid128));
+	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_TXPOWER, &rssi, sizeof(rssi));
+	IBeacon beacon(uuid, major, minor, rssi);
+	LOGd("Advertise ibeacon: major=%u, minor=%u, rssi_on_1m=%i", major, minor, rssi);
+	advertise(&beacon);
+}
+
+void MeshAdvertiser::handleEvent(event_t & event) {
+	switch(event.type) {
+		case CS_TYPE::CONFIG_IBEACON_MAJOR: {
+//			uint16_t* major = reinterpret_cast<TYPIFY(CONFIG_IBEACON_MAJOR)*>(event.data);
+			updateIbeacon();
+			break;
+		}
+		case CS_TYPE::CONFIG_IBEACON_MINOR: {
+//			uint16_t* minor = reinterpret_cast<TYPIFY(CONFIG_IBEACON_MINOR)*>(event.data);
+			updateIbeacon();
+			break;
+		}
+		case CS_TYPE::CONFIG_IBEACON_UUID: {
+//			cs_uuid128_t* uuid = reinterpret_cast<TYPIFY(CONFIG_IBEACON_UUID)*>(event.data);
+			updateIbeacon();
+			break;
+		}
+		case CS_TYPE::CONFIG_IBEACON_TXPOWER: {
+//			int8_t* txPower = reinterpret_cast<TYPIFY(CONFIG_IBEACON_TXPOWER)*>(event.data);
+			updateIbeacon();
+			break;
+		}
+		default:
+			break;
+	}
 }

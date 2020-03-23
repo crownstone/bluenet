@@ -36,6 +36,10 @@ static bool _initializedRx = false;
 static bool _initializedTx = false;
 static serial_enable_t _state = SERIAL_ENABLE_NONE;
 
+#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
+static char _serialBuffer[128];
+#endif
+
 void serial_config(uint8_t pinRx, uint8_t pinTx) {
 	_pinRx = pinRx;
 	_pinTx = pinTx;
@@ -202,7 +206,7 @@ void serial_init(serial_enable_t enabled) {
 #if CS_SERIAL_NRF_LOG_ENABLED == 2
 	return;
 #endif
-#if SERIAL_VERBOSITY>SERIAL_NONE
+#if SERIAL_VERBOSITY > SERIAL_NONE
 	_state = enabled;
 	init();
 	switch (enabled) {
@@ -239,7 +243,7 @@ serial_enable_t serial_get_state() {
 }
 
 inline void _writeByte(uint8_t val) {
-#if SERIAL_VERBOSITY>SERIAL_READ_ONLY
+#if SERIAL_VERBOSITY > SERIAL_READ_ONLY
 //	if (_initializedTx) { // Check this in functions that call this function.
 		NRF_UART0->EVENTS_TXDRDY = 0;
 		NRF_UART0->TXD = val;
@@ -252,11 +256,10 @@ inline void _writeByte(uint8_t val) {
  * A write function with a format specifier.
  */
 int cs_write(const char *str, ...) {
-#if SERIAL_VERBOSITY>SERIAL_BYTE_PROTOCOL_ONLY
+#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
 	if (!_initializedTx) {
 		return 0;
 	}
-	char buffer[128];
 	va_list ap;
 	va_start(ap, str);
 	int16_t len = vsnprintf(NULL, 0, str, ap);
@@ -265,11 +268,11 @@ int cs_write(const char *str, ...) {
 	if (len < 0) return len;
 
 	// if strings are small we do not need to allocate by malloc
-	if (sizeof buffer >= len + 1UL) {
+	if (sizeof(_serialBuffer) >= len + 1UL) {
 		va_start(ap, str);
-		len = vsprintf(buffer, str, ap);
+		len = vsprintf(_serialBuffer, str, ap);
 		va_end(ap);
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)buffer, len);
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)_serialBuffer, len);
 	} else {
 		char *p_buf = (char*)malloc(len + 1);
 		if (!p_buf) return -1;
@@ -286,7 +289,7 @@ int cs_write(const char *str, ...) {
 
 // TODO: use uart class for this.
 void writeBytes(uint8_t* data, const uint16_t size) {
-#if SERIAL_VERBOSITY>SERIAL_READ_ONLY
+#if SERIAL_VERBOSITY > SERIAL_READ_ONLY
 	if (!_initializedTx) {
 		return;
 	}
@@ -307,7 +310,7 @@ void writeBytes(uint8_t* data, const uint16_t size) {
 
 // TODO: use uart class for this.
 void writeStartByte() {
-#if SERIAL_VERBOSITY>SERIAL_READ_ONLY
+#if SERIAL_VERBOSITY > SERIAL_READ_ONLY
 	if (_initializedTx) {
 		_writeByte(UART_START_BYTE);
 	}

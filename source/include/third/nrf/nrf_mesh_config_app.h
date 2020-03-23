@@ -89,6 +89,11 @@
 #define MESH_EXTERNAL_PERSISTENT_STORAGE 0
 #endif
 
+/**
+ * Enable active scanning.
+ */
+#define SCANNER_ACTIVE_SCANNING 1
+
 /** Device company identifier. */
 #define DEVICE_COMPANY_ID (CROWNSTONE_COMPANY_ID)
 
@@ -113,7 +118,8 @@
  */
 #define ACCESS_MODEL_COUNT (1 + /* Configuration server */  \
                             1 + /* Health server */  \
-							1 /* Crownstone model */)
+							1 + /* Crownstone multicast model */  \
+							1   /* Crownstone unicast model */)
 
 /**
  * The number of elements in the application.

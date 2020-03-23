@@ -240,6 +240,12 @@ void Advertiser::configureAdvertisement(__attribute__((unused))IBeacon* beacon, 
 	updateAdvertisementData();
 }
 
+void Advertiser::configureAdvertisement(uint8_t deviceType) {
+	configureServiceData(deviceType, false);
+//	configureAdvertisementParameters();
+	updateAdvertisementData();
+}
+
 /**
  * It is only possible to include TX power if the advertisement is an "extended" type.
  */

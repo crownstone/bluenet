@@ -1,4 +1,4 @@
-# Bluenet protocol v4.0.0
+# Bluenet protocol v5.0.0
 -------------------------
 
 This only documents the latest protocol, older versions can be found in the git history.
@@ -223,8 +223,8 @@ The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provide
 
 Characteristic | UUID | Date type | Description | A | M | B
 --- | --- | --- | --- | :---: | :---: | :---:
-Control        | 24f0000a-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone. | x | x | x
-Result         | 24f0000b-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone. | x | x | x
+Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone. | x | x | x
+Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone. | x | x | x
 Session nonce  | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the [session nonce](#session_nonce). First 4 bytes are also used as validation key. |  |  | ECB
 Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |
 
@@ -252,8 +252,8 @@ MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MA
 Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the session key that will be for encryption.
 GoTo DFU       | 24f10006-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 66 to go to DFU.
 Session nonce  | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the session nonce. First 4 bytes are also used as validation key.
-Control        | 24f1000a-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
-Result         | 24f1000b-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone.
+Control        | 24f1000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
+Result         | 24f1000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone.
 
 Every command written to the control characteristic returns a [result packet](#result_packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
@@ -307,6 +307,7 @@ Type nr | Type name | Payload type | Result type | Description | A | M | B | S
 1 | Factory reset | uint 32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
 2 | Get state | [State get packet](#state_get_packet) | [State result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
 3 | Set state | [State set packet](#state_set_packet) | - | Required access depends on the state type. | x | x | x
+4 | Get bootloader version | - | Char array | Get the bootloader version string. | x | x | x | x
 10 | Reset | - | - | Reset device | x
 11 | Goto DFU | - | - | Reset device to DFU mode | x
 12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
@@ -361,6 +362,8 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state to get.
 uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
+uint 8 | [Persistence mode](#state_get_persistence_mode) | 1 | Type of persistence mode.
+uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 
 <a name="state_set_packet"></a>
 #### State set packet
@@ -371,6 +374,8 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state to set.
 uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
+uint 8 | [Persistence mode](#state_set_persistence_mode_set) | 1 | Type of persistence mode.
+uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 uint 8 | Payload | N | Payload data, depends on state type.
 
 Most configuration changes will only be applied after a reboot.
@@ -383,6 +388,8 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state.
 uint 16 | id | 2 | ID of state.
+uint 8 | [Persistence mode](#state_get_persistence_mode) | 1 | Type of persistence mode.
+uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 uint 8 | Payload | N | Payload data, depends on state type.
 
 <a name="state_set_result_packet"></a>
@@ -392,6 +399,24 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state.
 uint 16 | id | 2 | ID of state that was set.
+uint 8 | [Persistence mode](#state_set_persistence_mode_set) | 1 | Type of persistence mode.
+uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
+
+<a name="state_get_persistence_mode"></a>
+#### State get persistence mode
+Value | Name | Description
+--- | --- | ---
+0   | CURRENT | Get value from ram if exists, else from flash if exists, else get default. This is the value used by the firmware.
+1   | STORED | Get value from flash, else get default. This value will be used after a reboot.
+2   | FIRMWARE_DEFAULT | Get default value.
+
+<a name="state_set_persistence_mode_set"></a>
+#### State set persistence mode
+Value | Name | Description
+--- | --- | ---
+0   | TEMPORARY | Set value to ram. This value will be used by the firmware, but lost after a reboot.
+1   | STORED | Set value to ram and flash. This value will be used by the firmware, also after a reboot. Overwrites the temporary value.
+
 
 
 <a name="sun_time_packet"></a>

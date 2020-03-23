@@ -25,6 +25,7 @@ void MultiSwitchHandler::handleMultiSwitch(internal_multi_switch_item_t* item) {
 		return;
 	}
 	else {
+		LOGd("send multi switch");
 		TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)* eventData = item;
 		event_t event(CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH, eventData, sizeof(TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)));
 		EventDispatcher::getInstance().dispatch(event);

@@ -94,6 +94,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	_avgZeroVoltageDiscount = VOLTAGE_ZERO_EXP_AVG_DISCOUNT;
 	_avgZeroCurrentDiscount = CURRENT_ZERO_EXP_AVG_DISCOUNT;
 	_avgPowerDiscount = POWER_EXP_AVG_DISCOUNT;
+	_boardPowerZero = boardConfig.powerZero;
 
 	LOGi(FMT_INIT, "buffers");
 	_powerMilliWattHist->init(); // Allocates buffer
@@ -744,10 +745,9 @@ void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
 	if (_calibratePowerZeroCountDown != 0 || switchState.asInt != 0) {
 		return;
 	}
-	if (powerMilliWatt < -15000 || powerMilliWatt > 15000) {
-		// Measured power without load shouldn't be more than 15W.
+	if (powerMilliWatt < (_boardPowerZero - 10000) || powerMilliWatt > (_boardPowerZero + 10000)) {
+		// Measured power without load shouldn't be more than 10W different from the board default.
 		// It might be a dimmer on failure instead.
-		// We could make this board dependent, as the max had to be increased to 15W for old plugs.
 		return;
 	}
 	LOGi("Power zero calibrated: %i", powerMilliWatt);

@@ -3,8 +3,12 @@
 SEARCH_DIR(.)
 GROUP(-lgcc -lc -lnosys)
 
-BOOTLOADER_START_ADDRESS = DEFINED(BOOTLOADER_START_ADDRESS) ? BOOTLOADER_START_ADDRESS : 0x76000;
-BOOTLOADER_LENGTH = DEFINED(BOOTLOADER_LENGTH) ? BOOTLOADER_LENGTH : 0x8000;
+INCLUDE "nrf_symbols.ld"
+
+RAM_START = RAM_R1_BASE + RAM_BOOTLOADER_START_OFFSET;
+RAM_LENGTH = (RAM_APPLICATION_AMOUNT - RAM_BOOTLOADER_START_OFFSET) - RAM_BLUENET_IPC_LENGTH;
+
+RAM_BLUENET_IPC_START = (RAM_START + RAM_LENGTH);
 
 MEMORY
 {
@@ -13,7 +17,8 @@ MEMORY
   /* FLASH (rx) : ORIGIN = 0x71000, LENGTH = 0xd000 */
   /* Without gc-sections: FLASH (rx) : ORIGIN = 0x68000, LENGTH = 0x10000 */
   FLASH (rx) : ORIGIN = BOOTLOADER_START_ADDRESS, LENGTH = BOOTLOADER_LENGTH
-  RAM (rwx) :  ORIGIN = 0x200057b8, LENGTH = 0xa848
+  RAM (rwx) :  ORIGIN = RAM_START, LENGTH = RAM_LENGTH
+  RAM_BLUENET_IPC (rwx): ORIGIN = RAM_BLUENET_IPC_START, LENGTH = RAM_BLUENET_IPC_LENGTH
   mbr_params_page (r) : ORIGIN = 0x0007E000, LENGTH = 0x1000
   bootloader_settings_page (r) : ORIGIN = 0x0007F000, LENGTH = 0x1000
   uicr_mbr_params_page (r) : ORIGIN = 0x10001018, LENGTH = 0x4
@@ -46,6 +51,17 @@ SECTIONS
     KEEP(*(SORT(.uicr_bootloader_start_address*)))
     PROVIDE(__stop_uicr_bootloader_start_address = .);
   } > uicr_bootloader_start_address
+}
+
+SECTIONS
+{
+  . = ALIGN(4);
+  .bluenet_ipc_ram (NOLOAD):
+  {
+    PROVIDE(__start_bluenet_ipc_ram = .);
+    KEEP(*(SORT(.bluenet_ipc_ram.*)))
+    PROVIDE(__stop_bluenet_ipc_ram = .);
+  } > RAM_BLUENET_IPC
 }
 
 SECTIONS

@@ -1,5 +1,7 @@
 #include <cs_BootloaderConfig.h>
 
+#include <cfg/cs_Boards.h>
+
 #define CS_BOOTLOADER_VERSION "@BOOTLOADER_VERSION@"
 const char g_BOOTLOADER_VERSION[] = CS_BOOTLOADER_VERSION;
 
@@ -9,3 +11,4 @@ const char g_COMPILATION_DAY[] = CS_COMPILATION_DAY;
 #define CS_BUILD_TYPE "@CMAKE_BUILD_TYPE@"
 const char g_BUILD_TYPE[] = CS_BUILD_TYPE;
 
+uint32_t g_DEFAULT_HARDWARE_BOARD = @DEFAULT_HARDWARE_BOARD@;

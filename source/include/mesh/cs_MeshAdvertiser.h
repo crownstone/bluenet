@@ -7,11 +7,12 @@
 
 #pragma once
 
-#include "common/cs_Types.h"
-#include "ble/cs_iBeacon.h"
+#include <common/cs_Types.h>
+#include <ble/cs_iBeacon.h>
+#include <events/cs_EventListener.h>
 
 extern "C" {
-#include "advertiser.h"
+#include <advertiser.h>
 }
 
 /**
@@ -22,7 +23,7 @@ extern "C" {
  */
 #define MESH_ADVERTISER_BUF_SIZE (ADVERTISER_PACKET_BUFFER_PACKET_MAXLEN + 4)
 
-class MeshAdvertiser {
+class MeshAdvertiser: public EventListener {
 public:
 	void init();
 
@@ -52,14 +53,24 @@ public:
 	void stop();
 
 	/**
-	 * Advertise iBeacon data.
-	 *
-	 * Updates previous advertisement.
+	 * Start advertising ibeacon.
 	 */
-	void advertise(IBeacon* ibeacon);
+	void advertiseIbeacon();
+
+	/** Internal usage */
+	void handleEvent(event_t & event);
 
 private:
 	advertiser_t* _advertiser = NULL;
 	uint8_t* _buffer = NULL;
 	adv_packet_t* _advPacket = NULL;
+
+	void updateIbeacon();
+
+	/**
+	 * Advertise iBeacon data.
+	 *
+	 * Updates previous advertisement.
+	 */
+	void advertise(IBeacon* ibeacon);
 };

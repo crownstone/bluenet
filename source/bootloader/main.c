@@ -47,6 +47,8 @@
  */
 
 #include <stdint.h>
+#include <string.h>
+
 //#include "boards.h"
 #include "nrf_mbr.h"
 #include "nrf_bootloader.h"
@@ -64,6 +66,8 @@
 #include "cfg/cs_Boards.h"
 #include "cfg/cs_DeviceTypes.h"
 #include "nrf_nvmc.h"
+#include "ipc/cs_IpcRamData.h"
+#include "cs_BootloaderConfig.h"
 
 /**
  * GPRegRet value when device was reset due to a soft reset.
@@ -230,6 +234,13 @@ void cs_check_gpregret() {
 	NRF_LOG_INFO("GPREGRET=%u", gpregret);
 }
 
+
+
+/**
+ * Round up val to the next page boundary (from nrf_dfu_utils.h)
+ */
+#define ALIGN_TO_PAGE(val) ALIGN_NUM((CODE_PAGE_SIZE), (val))
+
 /**@brief Function for application main entry. */
 int main(void)
 {
@@ -252,6 +263,19 @@ int main(void)
 	APP_ERROR_CHECK(ret_val);
 	ret_val = nrf_bootloader_flash_protect(BOOTLOADER_START_ADDR, BOOTLOADER_SIZE, false);
 	APP_ERROR_CHECK(ret_val);
+//	ret_val = nrf_bootloader_flash_protect(0, ALIGN_TO_PAGE(BOOTLOADER_START_ADDR + BOOTLOADER_SIZE), false);
+//	APP_ERROR_CHECK(ret_val);
+	
+	NRF_LOG_INFO("Set version");
+	NRF_LOG_FLUSH();
+	
+	uint8_t bootloader_version_length = strlen(g_BOOTLOADER_VERSION);
+	if (bootloader_version_length > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
+		bootloader_version_length = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
+	}
+//	uint8_t version[bootloader_version_length];
+//    memcpy(version, (uint8_t*)g_BOOTLOADER_VERSION, bootloader_version_length);
+	setRamData(IPC_INDEX_BOOTLOADER_VERSION, (uint8_t*)g_BOOTLOADER_VERSION, bootloader_version_length);
 	
 	NRF_LOG_INFO("Init");
 	NRF_LOG_FLUSH();

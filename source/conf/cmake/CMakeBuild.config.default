@@ -264,6 +264,15 @@ RAM_R1_BASE=0x20002380
 # Amount of RAM for the application: 0x20010000 - RAM_R1_BASE
 RAM_APPLICATION_AMOUNT=0xDC80
 
+# Amount of RAM required by the bootloader (figure this setting out by enabling debug in the bootloader)
+#   CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED=2
+# Then restart with DFU and look for information like this:
+#   <warning> nrf_sdh_ble: Insufficient RAM allocated for the SoftDevice.
+#   <warning> nrf_sdh_ble: Change the RAM start location from 0x20002380 to 0x20002A98.
+#   <warning> nrf_sdh_ble: Maximum RAM size for application is 0x1D568.
+# The difference in RAM is 0x718 so we offset the start of RAM for the bootloader with this.
+RAM_BOOTLOADER_START_OFFSET=0x718
+
 #######################################################################################################################
 # S132 7.0.1 (comes with SDK 16)
 #######################################################################################################################
@@ -305,3 +314,5 @@ RAM_APPLICATION_AMOUNT=0xDC80
 # Adjust them in $BLUENET_DIR/include/third/nrf/generic_gcc_nrf52.ld for now! (adjusted version of $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld)
 ATTR_TABLE_SIZE=0x500
 HEAP_SIZE=20000
+
+RAM_BLUENET_IPC_LENGTH=0x100

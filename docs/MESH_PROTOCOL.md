@@ -30,7 +30,7 @@ id | name | Payload
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint32 | counter | 4 | 
-uint8[3] | dummy | 3 |  
+uint8[3] | dummy | 3 | 
 
 <a name="cs_mesh_model_msg_time_t"></a>
 #### cs_mesh_model_msg_time_t
