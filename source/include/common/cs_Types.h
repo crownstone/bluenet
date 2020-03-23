@@ -24,21 +24,21 @@
 
 enum TypeBases {
 	State_Base   = 0x000,
-	Internal_Base = 0x100,
+	InternalBase = 0x100,
 
 	// we keep internal events categorized so that the test suite
 	// can easily send those while keeping flexibility in ordering this file.
 	InternalBaseBluetooth = InternalBase + 0,
-	InternalBaseSwitch = InternalBase + 10,
-	InternalBasePower = InternalBase + 20,
-	InternalBaseErrors = InternalBase + 30,
-	InternalBaseStorage = InternalBase + 40,
-	InternalBaseLogging = InternalBase + 50,
-	InternalBaseADC = InternalBase + 60,
-	InternalBaseMesh = InternalBase + 70,
-	InternalBaseBehaviour = InternalBase + 80,
-	InternalBaseLocalisation = InternalBase + 90,
-	InternalBaseSystem = InternalBase + 100,
+	InternalBaseSwitch = InternalBase + 20,
+	InternalBasePower = InternalBase + 40,
+	InternalBaseErrors = InternalBase + 60,
+	InternalBaseStorage = InternalBase + 80,
+	InternalBaseLogging = InternalBase + 100,
+	InternalBaseADC = InternalBase + 120,
+	InternalBaseMesh = InternalBase + 140,
+	InternalBaseBehaviour = InternalBase + 170,
+	InternalBaseLocalisation = InternalBase + 190,
+	InternalBaseSystem = InternalBase + 210,
 
 };
 
@@ -177,14 +177,17 @@ enum class CS_TYPE: uint16_t {
 	 * Start at Internal_Base.
 	 */
 
-//		InternalBasePower = InternalBase + 20,
-
-
 	// InternalBaseBluetooth
 	EVT_ADV_BACKGROUND_PARSED = InternalBaseBluetooth,        // Sent when a background advertisement has been validated and parsed.
 	EVT_DEVICE_SCANNED,     	            	              // Device was scanned.
 	EVT_ADV_BACKGROUND,         	    	                  // Background advertisement has been received.
 	EVT_ADV_BACKGROUND_PARSED_V1,   	        	          // Sent when a v1 background advertisement has been received.
+	EVT_ADVERTISEMENT_UPDATED,                        // Advertisement was updated. TODO: advertisement data as payload?
+	EVT_SCAN_STARTED,                                 // Scanner started scanning.
+	EVT_SCAN_STOPPED,                                 // Scanner stopped scanning.
+	EVT_BLE_CONNECT,                                  // Device connected.
+	EVT_BLE_DISCONNECT,                               // Device disconnected.
+	CMD_ENABLE_ADVERTISEMENT,                         // Enable/disable advertising.
 
 	// Switch
 	CMD_SWITCH_OFF = InternalBaseSwitch,              // Turn switch off.
@@ -197,8 +200,9 @@ enum class CS_TYPE: uint16_t {
 	CMD_SWITCHING_ALLOWED,		                      // Set switch lock.
 	CMD_DIMMING_ALLOWED,	                          // Set allow dimming.
 
-
-	EVT_DIMMER_POWERED,                               // Dimmer being powered is changed. Payload: true when powered, and ready to be used.
+	// Power
+	EVT_DIMMER_POWERED = InternalBasePower,			// Dimmer being powered is changed. Payload: true when powered, and ready to be used.
+	EVT_BROWNOUT_IMPENDING,                           // Brownout is impending (low chip supply voltage).
 
 	// Errors
 	EVT_CURRENT_USAGE_ABOVE_THRESHOLD = InternalBaseErrors,		// Current usage goes over the threshold.
@@ -239,9 +243,9 @@ enum class CS_TYPE: uint16_t {
 	CMD_DEC_VOLTAGE_RANGE,                        				    // Decrease voltage range.
 	CMD_INC_CURRENT_RANGE,                         				  	// Increase current range.
 	CMD_DEC_CURRENT_RANGE,                            				// Decrease current range.
+	EVT_ADC_RESTARTED,                              				// ADC has been restarted.
 
 	// Mesh
-
 	CMD_SEND_MESH_MSG = InternalBaseMesh,             // Send a mesh message.
 	CMD_SEND_MESH_MSG_SET_TIME,                       // Send a set time mesh message.
 	CMD_SEND_MESH_MSG_NOOP,                           // Send a noop mesh message.
@@ -251,6 +255,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER,
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN,
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE,
+	CMD_ENABLE_MESH,                                  // Enable/disable mesh.
 	EVT_MESH_TIME,                                    // Mesh received the current time.
 	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
 	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.
@@ -276,41 +281,20 @@ enum class CS_TYPE: uint16_t {
 	CMD_REGISTER_TRACKED_DEVICE = InternalBaseLocalisation,
 	CMD_UPDATE_TRACKED_DEVICE,
 	EVT_PROFILE_LOCATION,                             // Location of profile.
+	EVT_PRESENCE_MUTATION,                            // Presence changed.
+	EVT_STATE_EXTERNAL_STONE,                         // The state of another stone has been received.
 
 	// System
 	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
 	EVT_GOING_TO_DFU,                                 // The system will reboot to DFU mode soon.
 
-	CMD_ENABLE_ADVERTISEMENT,                         // Enable/disable advertising.
-	CMD_ENABLE_MESH,                                  // Enable/disable mesh.
-
 	CMD_SET_TIME,                                     // Set the time.
 	EVT_TIME_SET,                                     // Time is set or changed. Payload: previous posix time
-
-	CMD_CONTROL_CMD,                                  // Handle a control command.
-
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 
-	EVT_STATE_EXTERNAL_STONE,                         // The state of another stone has been received.
-
-	EVT_ADVERTISEMENT_UPDATED,                        // Advertisement was updated. TODO: advertisement data as payload?
-
-	EVT_SCAN_STARTED,                                 // Scanner started scanning.
-	EVT_SCAN_STOPPED,                                 // Scanner stopped scanning.
-
-	EVT_BLE_CONNECT,                                  // Device connected.
-	EVT_BLE_DISCONNECT,                               // Device disconnected.
-
-	EVT_BROWNOUT_IMPENDING,                           // Brownout is impending (low chip supply voltage).
-
+	CMD_CONTROL_CMD,                                  // Handle a control command.
 	EVT_SESSION_NONCE_SET,                            // Session nonce was generated.
-
 	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
-
-	EVT_ADC_RESTARTED,                                // ADC has been restarted.
-
-	EVT_PRESENCE_MUTATION,                            // Presence changed.
-
 
 	EVT_GENERIC_TEST= 0xFFFF,                         // Can be used by the python test python lib for ad hoc tests during development.
 
