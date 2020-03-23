@@ -290,6 +290,12 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 			break;
 	}
 	result.returnCode = State::getInstance().get(stateData, persistenceMode);
+
+	if (persistenceModeGet == PersistenceModeGet::STORED && result.returnCode == ERR_NOT_FOUND) {
+		// Try default instead.
+		result.returnCode = State::getInstance().get(stateData, PersistenceMode::FIRMWARE_DEFAULT);
+	}
+
 	result.data.len = sizeof(state_packet_header_t) + stateData.size;
 	return result;
 }
