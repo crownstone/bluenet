@@ -278,7 +278,7 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 	PersistenceModeGet persistenceModeGet = toPersistenceModeGet(stateHeader->persistenceMode);
 	switch (persistenceModeGet) {
 		case PersistenceModeGet::CURRENT:
-			persistenceMode = PersistenceMode::FIRMWARE_DEFAULT;
+			persistenceMode = PersistenceMode::STRATEGY1;
 			break;
 		case PersistenceModeGet::STORED:
 			persistenceMode = PersistenceMode::FLASH;
