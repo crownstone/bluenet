@@ -25,6 +25,21 @@
 enum TypeBases {
 	State_Base   = 0x000,
 	Internal_Base = 0x100,
+
+	// we keep internal events categorized so that the test suite
+	// can easily send those while keeping flexibility in ordering this file.
+	InternalBaseBluetooth = InternalBase + 0,
+	InternalBaseSwitch = InternalBase + 10,
+	InternalBasePower = InternalBase + 20,
+	InternalBaseErrors = InternalBase + 30,
+	InternalBaseStorage = InternalBase + 40,
+	InternalBaseLogging = InternalBase + 50,
+	InternalBaseADC = InternalBase + 60,
+	InternalBaseMesh = InternalBase + 70,
+	InternalBaseBehaviour = InternalBase + 80,
+	InternalBaseLocalisation = InternalBase + 90,
+	InternalBaseSystem = InternalBase + 100,
+
 };
 
 /** Cast to underlying type.
@@ -161,69 +176,73 @@ enum class CS_TYPE: uint16_t {
 	 * Internal commands and events.
 	 * Start at Internal_Base.
 	 */
-	// Types with fixed number.
-	EVT_ADV_BACKGROUND_PARSED = Internal_Base + 0,        // Sent when a background advertisement has been validated and parsed.
 
-	// Scans
-	EVT_DEVICE_SCANNED= Internal_Base + 1,                               // Device was scanned.
-	EVT_ADV_BACKGROUND= Internal_Base + 2,                               // Background advertisement has been received.
-	EVT_ADV_BACKGROUND_PARSED_V1= Internal_Base + 3,                     // Sent when a v1 background advertisement has been received.
+//		InternalBasePower = InternalBase + 20,
+
+
+	// InternalBaseBluetooth
+	EVT_ADV_BACKGROUND_PARSED = InternalBaseBluetooth,        // Sent when a background advertisement has been validated and parsed.
+	EVT_DEVICE_SCANNED,     	            	              // Device was scanned.
+	EVT_ADV_BACKGROUND,         	    	                  // Background advertisement has been received.
+	EVT_ADV_BACKGROUND_PARSED_V1,   	        	          // Sent when a v1 background advertisement has been received.
 
 	// Switch
-	CMD_SWITCH_OFF= Internal_Base + 4,                                   // Turn switch off.
-	CMD_SWITCH_ON= Internal_Base + 5,                                    // Turn switch on.
-	CMD_SWITCH_TOGGLE= Internal_Base + 6,                                // Toggle switch.
-	CMD_SWITCH= Internal_Base + 7,                                       // Set switch.
-	CMD_SET_RELAY= Internal_Base + 8,                                    // Set the relay state.
-	CMD_SET_DIMMER= Internal_Base + 9,                                   // Set the dimmer state.
-	CMD_MULTI_SWITCH= Internal_Base + 10,                                 // Handle a multi switch.
-	CMD_SWITCHING_ALLOWED= Internal_Base + 11,		                      // Set switch lock.
-	CMD_DIMMING_ALLOWED= Internal_Base + 12,	                          // Set allow dimming.
-	EVT_DIMMER_POWERED= Internal_Base + 13,                               // Dimmer being powered is changed. Payload: true when powered, and ready to be used.
+	CMD_SWITCH_OFF = InternalBaseSwitch,              // Turn switch off.
+	CMD_SWITCH_ON,                                    // Turn switch on.
+	CMD_SWITCH_TOGGLE,                                // Toggle switch.
+	CMD_SWITCH,                                       // Set switch.
+	CMD_SET_RELAY,                                    // Set the relay state.
+	CMD_SET_DIMMER,                                   // Set the dimmer state.
+	CMD_MULTI_SWITCH,                                 // Handle a multi switch.
+	CMD_SWITCHING_ALLOWED,		                      // Set switch lock.
+	CMD_DIMMING_ALLOWED,	                          // Set allow dimming.
+
+
+	EVT_DIMMER_POWERED,                               // Dimmer being powered is changed. Payload: true when powered, and ready to be used.
 
 	// Errors
-	EVT_CURRENT_USAGE_ABOVE_THRESHOLD= Internal_Base + 14,                // Current usage goes over the threshold.
-	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER= Internal_Base + 15,         // Current usage goes over the dimmer threshold, while dimmer is on.
-	EVT_DIMMER_ON_FAILURE_DETECTED= Internal_Base + 16,                   // Dimmer leaks current, while it's supposed to be off.
-	EVT_DIMMER_OFF_FAILURE_DETECTED= Internal_Base + 17,                  // Dimmer blocks current, while it's supposed to be on.
-	EVT_CHIP_TEMP_ABOVE_THRESHOLD= Internal_Base + 18,                    // Chip temperature is above threshold.
-	EVT_CHIP_TEMP_OK= Internal_Base + 19,                                 // Chip temperature is ok again.
-	EVT_DIMMER_TEMP_ABOVE_THRESHOLD= Internal_Base + 20,                  // Dimmer temperature is above threshold.
-	EVT_DIMMER_TEMP_OK= Internal_Base + 21,                               // Dimmer temperature is ok again.
-	EVT_DIMMER_FORCED_OFF= Internal_Base + 22,                            // Dimmer was forced off.
-	EVT_SWITCH_FORCED_OFF= Internal_Base + 23,                            // Switch (relay and dimmer) was forced off.
-	EVT_RELAY_FORCED_ON= Internal_Base + 24,                              // Relay was forced on.
+	EVT_CURRENT_USAGE_ABOVE_THRESHOLD = InternalBaseErrors,		// Current usage goes over the threshold.
+	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER,         			// Current usage goes over the dimmer threshold, while dimmer is on.
+	EVT_DIMMER_ON_FAILURE_DETECTED,                   			// Dimmer leaks current, while it's supposed to be off.
+	EVT_DIMMER_OFF_FAILURE_DETECTED,                			// Dimmer blocks current, while it's supposed to be on.
+	EVT_CHIP_TEMP_ABOVE_THRESHOLD, 		                  		// Chip temperature is above threshold.
+	EVT_CHIP_TEMP_OK,											// Chip temperature is ok again.
+	EVT_DIMMER_TEMP_ABOVE_THRESHOLD,    		            	// Dimmer temperature is above threshold.
+	EVT_DIMMER_TEMP_OK,         								// Dimmer temperature is ok again.
+	EVT_DIMMER_FORCED_OFF,                      		  		// Dimmer was forced off.
+	EVT_SWITCH_FORCED_OFF,                      		  		// Switch (relay and dimmer) was forced off.
+	EVT_RELAY_FORCED_ON,                           				// Relay was forced on.
 
 	// Storage
-	EVT_STORAGE_INITIALIZED= Internal_Base + 25,                          // Storage is initialized, storage is only usable after this event!
-	EVT_STORAGE_WRITE_DONE= Internal_Base + 26,                           // An item has been written to storage.
-	EVT_STORAGE_REMOVE_DONE= Internal_Base + 27,                          // An item has been invalidated at storage.
-	EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE= Internal_Base + 28,        // All state values with a certain ID have been invalidated at storage.
-	EVT_STORAGE_GC_DONE= Internal_Base + 29,                              // Garbage collection is done, invalidated data is actually removed at this point.
-	EVT_STORAGE_FACTORY_RESET_DONE= Internal_Base + 30,                   // Factory reset of storage is done. /!\ Only to be used by State.
-	EVT_STORAGE_PAGES_ERASED= Internal_Base + 31,                         // All storage pages are completely erased.
-	CMD_FACTORY_RESET= Internal_Base + 32,                                // Perform a factory reset: clear all data.
-	EVT_STATE_FACTORY_RESET_DONE= Internal_Base + 33,                     // Factory reset of state is done.
-	EVT_MESH_FACTORY_RESET_DONE= Internal_Base + 34,                           // Factory reset of mesh storage is done.
+	EVT_STORAGE_INITIALIZED = InternalBaseStorage,    // Storage is initialized, storage is only usable after this event!
+	EVT_STORAGE_WRITE_DONE,                           // An item has been written to storage.
+	EVT_STORAGE_REMOVE_DONE,                          // An item has been invalidated at storage.
+	EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE,        // All state values with a certain ID have been invalidated at storage.
+	EVT_STORAGE_GC_DONE,                              // Garbage collection is done, invalidated data is actually removed at this point.
+	EVT_STORAGE_FACTORY_RESET_DONE,                   // Factory reset of storage is done. /!\ Only to be used by State.
+	EVT_STORAGE_PAGES_ERASED,                         // All storage pages are completely erased.
+	CMD_FACTORY_RESET,                                // Perform a factory reset: clear all data.
+	EVT_STATE_FACTORY_RESET_DONE,                     // Factory reset of state is done.
+	EVT_MESH_FACTORY_RESET_DONE,                           // Factory reset of mesh storage is done.
 
 	// Logging
-	CMD_ENABLE_LOG_POWER= Internal_Base + 35,                             // Enable/disable power calculations logging.
-	CMD_ENABLE_LOG_CURRENT= Internal_Base + 36,                           // Enable/disable current samples logging.
-	CMD_ENABLE_LOG_VOLTAGE= Internal_Base + 37,                           // Enable/disable voltage samples logging.
-	CMD_ENABLE_LOG_FILTERED_CURRENT= Internal_Base + 38,                  // Enable/disable filtered current samples logging.
+	CMD_ENABLE_LOG_POWER = InternalBaseLogging, 	  // Enable/disable power calculations logging.
+	CMD_ENABLE_LOG_CURRENT,                           // Enable/disable current samples logging.
+	CMD_ENABLE_LOG_VOLTAGE,                           // Enable/disable voltage samples logging.
+	CMD_ENABLE_LOG_FILTERED_CURRENT,                  // Enable/disable filtered current samples logging.
 
 	// ADC config
-	CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN= Internal_Base + 39,         // Toggle ADC voltage pin. TODO: pin as payload?
-	CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT= Internal_Base + 40,              // Toggle differential mode on current pin.
-	CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE= Internal_Base + 41,              // Toggle differential mode on voltage pin.
-	CMD_INC_VOLTAGE_RANGE= Internal_Base + 42,                            // Increase voltage range.
-	CMD_DEC_VOLTAGE_RANGE= Internal_Base + 43,                            // Decrease voltage range.
-	CMD_INC_CURRENT_RANGE= Internal_Base + 44,                            // Increase current range.
-	CMD_DEC_CURRENT_RANGE= Internal_Base + 45,                            // Decrease current range.
+	CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN = InternalBaseADC,     // Toggle ADC voltage pin. TODO: pin as payload?
+	CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT,              				// Toggle differential mode on current pin.
+	CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,        				    // Toggle differential mode on voltage pin.
+	CMD_INC_VOLTAGE_RANGE,                      				    // Increase voltage range.
+	CMD_DEC_VOLTAGE_RANGE,                        				    // Decrease voltage range.
+	CMD_INC_CURRENT_RANGE,                         				  	// Increase current range.
+	CMD_DEC_CURRENT_RANGE,                            				// Decrease current range.
 
 	// Mesh
 
-	CMD_SEND_MESH_MSG,                                // Send a mesh message.
+	CMD_SEND_MESH_MSG = InternalBaseMesh,             // Send a mesh message.
 	CMD_SEND_MESH_MSG_SET_TIME,                       // Send a set time mesh message.
 	CMD_SEND_MESH_MSG_NOOP,                           // Send a noop mesh message.
 	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Send a switch mesh message.
@@ -244,53 +263,53 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_PAGES_ERASED,                            // All mesh storage pages are completely erased.
 
 	// Behaviour
-	CMD_ADD_BEHAVIOUR= Internal_Base + 61,                                // Add a behaviour.
-	CMD_REPLACE_BEHAVIOUR= Internal_Base + 62,                            // Replace a behaviour.
-	CMD_REMOVE_BEHAVIOUR= Internal_Base + 63,                             // Remove a behaviour.
-	CMD_GET_BEHAVIOUR= Internal_Base + 64,                                // Get a behaviour.
-	CMD_GET_BEHAVIOUR_INDICES= Internal_Base + 65,                        // Get a list of indices of active behaviours.
-	CMD_GET_BEHAVIOUR_DEBUG= Internal_Base + 66,                          // Get info to debug behaviour. Multiple classes will handle this command to fill pieces of info.
-	EVT_BEHAVIOURSTORE_MUTATION= Internal_Base + 67,                      // Sent by BehaviourStore, after a change to the stored behaviours.
-	EVT_BEHAVIOUR_OVERRIDDEN= Internal_Base + 68,                         // Informs whether behaviour is overridden by user (in override state).
+	CMD_ADD_BEHAVIOUR = InternalBaseBehaviour,        // Add a behaviour.
+	CMD_REPLACE_BEHAVIOUR,                            // Replace a behaviour.
+	CMD_REMOVE_BEHAVIOUR,                             // Remove a behaviour.
+	CMD_GET_BEHAVIOUR,                                // Get a behaviour.
+	CMD_GET_BEHAVIOUR_INDICES,                        // Get a list of indices of active behaviours.
+	CMD_GET_BEHAVIOUR_DEBUG,                          // Get info to debug behaviour. Multiple classes will handle this command to fill pieces of info.
+	EVT_BEHAVIOURSTORE_MUTATION,                      // Sent by BehaviourStore, after a change to the stored behaviours.
+	EVT_BEHAVIOUR_OVERRIDDEN,                         // Informs whether behaviour is overridden by user (in override state).
 
-	// Tracked devices
-	CMD_REGISTER_TRACKED_DEVICE= Internal_Base + 69,
-	CMD_UPDATE_TRACKED_DEVICE= Internal_Base + 70,
+	// Localisation of devices
+	CMD_REGISTER_TRACKED_DEVICE = InternalBaseLocalisation,
+	CMD_UPDATE_TRACKED_DEVICE,
+	EVT_PROFILE_LOCATION,                             // Location of profile.
 
-	EVT_PROFILE_LOCATION= Internal_Base + 71,                             // Location of profile.
+	// System
+	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
+	EVT_GOING_TO_DFU,                                 // The system will reboot to DFU mode soon.
 
-	CMD_RESET_DELAYED= Internal_Base + 72,                                // Reboot.
-	EVT_GOING_TO_DFU= Internal_Base + 73,                                 // The system will reboot to DFU mode soon.
+	CMD_ENABLE_ADVERTISEMENT,                         // Enable/disable advertising.
+	CMD_ENABLE_MESH,                                  // Enable/disable mesh.
 
-	CMD_ENABLE_ADVERTISEMENT= Internal_Base + 74,                         // Enable/disable advertising.
-	CMD_ENABLE_MESH= Internal_Base + 75,                                  // Enable/disable mesh.
+	CMD_SET_TIME,                                     // Set the time.
+	EVT_TIME_SET,                                     // Time is set or changed. Payload: previous posix time
 
-	CMD_SET_TIME= Internal_Base + 76,                                     // Set the time.
-	EVT_TIME_SET= Internal_Base + 77,                                     // Time is set or changed. Payload: previous posix time
+	CMD_CONTROL_CMD,                                  // Handle a control command.
 
-	CMD_CONTROL_CMD= Internal_Base + 78,                                  // Handle a control command.
+	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 
-	EVT_TICK= Internal_Base + 79,                                         // Sent about every TICK_INTERVAL_MS ms.
+	EVT_STATE_EXTERNAL_STONE,                         // The state of another stone has been received.
 
-	EVT_STATE_EXTERNAL_STONE= Internal_Base + 80,                         // The state of another stone has been received.
+	EVT_ADVERTISEMENT_UPDATED,                        // Advertisement was updated. TODO: advertisement data as payload?
 
-	EVT_ADVERTISEMENT_UPDATED= Internal_Base + 81,                        // Advertisement was updated. TODO: advertisement data as payload?
+	EVT_SCAN_STARTED,                                 // Scanner started scanning.
+	EVT_SCAN_STOPPED,                                 // Scanner stopped scanning.
 
-	EVT_SCAN_STARTED= Internal_Base + 82,                                 // Scanner started scanning.
-	EVT_SCAN_STOPPED= Internal_Base + 83,                                 // Scanner stopped scanning.
+	EVT_BLE_CONNECT,                                  // Device connected.
+	EVT_BLE_DISCONNECT,                               // Device disconnected.
 
-	EVT_BLE_CONNECT= Internal_Base + 84,                                  // Device connected.
-	EVT_BLE_DISCONNECT= Internal_Base + 85,                               // Device disconnected.
+	EVT_BROWNOUT_IMPENDING,                           // Brownout is impending (low chip supply voltage).
 
-	EVT_BROWNOUT_IMPENDING= Internal_Base + 86,                           // Brownout is impending (low chip supply voltage).
+	EVT_SESSION_NONCE_SET,                            // Session nonce was generated.
 
-	EVT_SESSION_NONCE_SET= Internal_Base + 87,                            // Session nonce was generated.
+	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
 
-	EVT_SETUP_DONE= Internal_Base + 88,                                   // Setup is done (and settings are stored).
+	EVT_ADC_RESTARTED,                                // ADC has been restarted.
 
-	EVT_ADC_RESTARTED= Internal_Base + 89,                                // ADC has been restarted.
-
-	EVT_PRESENCE_MUTATION= Internal_Base + 90,                            // Presence changed.
+	EVT_PRESENCE_MUTATION,                            // Presence changed.
 
 
 	EVT_GENERIC_TEST= 0xFFFF,                         // Can be used by the python test python lib for ad hoc tests during development.
