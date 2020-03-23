@@ -256,10 +256,9 @@
  * This timeout determines the timeout from the last data exchange till a link is considered lost. A Central will not
  * start trying to reconnect before the timeout has passed, so if you have a device which goes in and out of range
  * often, and you need to notice when that happens, it might make sense to have a short timeout.
+ * - https://devzone.nordicsemi.com/f/nordic-q-a/10636/what-are-latency-and-supervision-timeout-limits
  */
-#define CONNECTION_SUPERVISION_TIMEOUT           400 // In units of 10ms.
-
-#define SWITCHCRAFT_DEBUG_BUFFERS                false // Set to true to store the last voltage samples that were recognized as switch (short power interrupt).
+#define CONNECTION_SUPERVISION_TIMEOUT           100 // In units of 10ms.
 
 /*
  * By setting a non-zero slave latency, the Peripheral can choose to not answer when the Central asks for data up to
@@ -268,8 +267,14 @@
  * data fast if needed. The text book example of such device is for example keyboard and mice, which want to be
  * sleeping for as long as possible when there is no data to send, but still have low latency (and for the mouse:
  * low connection interval) when needed.
+ *
+ * Slave latency increases delay of data from central to peripheral, but not from peripheral to central.
+ * - https://devzone.nordicsemi.com/f/nordic-q-a/53230/what-is-the-impact-of-slave-latencyin-ble
+ *
+ * Timeout will be CONNECTION_SUPERVISION_TIMEOUT * SLAVE_LATENCY.
+ * - https://devzone.nordicsemi.com/question/14029/slave-latency-for-s110s120-connection/
  */
-#define SLAVE_LATENCY                            10  // See: https://devzone.nordicsemi.com/question/14029/slave-latency-for-s110s120-connection/
+#define SLAVE_LATENCY                            0
 
 #define ADVERTISING_TIMEOUT                      0
 #define ADVERTISING_REFRESH_PERIOD               1000 // Push the changes in the advertisement packet to the stack every x milliseconds
@@ -281,6 +286,8 @@
 #define SWITCH_ON_AT_SETUP_BOOT_DELAY            3600  // Seconds until the switch turns on when in setup mode (Crownstone built-in only)
 
 #define SUN_TIME_THROTTLE_PERIOD_SECONDS         (60*60*24) // Seconds to throttle writing the sun time to flash.
+
+#define SWITCHCRAFT_DEBUG_BUFFERS                false // Set to true to store the last voltage samples that were recognized as switch (short power interrupt).
 
 /**
  * Interval in milliseconds at which tick events are dispatched.
