@@ -72,7 +72,6 @@ void MeshAdvertiser::advertiseIbeacon() {
  * See https://github.com/crownstone/bluenet/blob/master/docs/PROTOCOL.md#ibeacon-advertisement-packet
  */
 void MeshAdvertiser::advertise(IBeacon* ibeacon) {
-	LOGd("Advertise ibeacon: major=%u, minor=%u, rssi_at_1m=%i", ibeacon->getMajor(), ibeacon->getMinor(), ibeacon->getTxPower());
 	if (_advPacket != NULL) {
 		// See https://devzone.nordicsemi.com/f/nordic-q-a/58658/mesh-advertiser-crash-when-calling-advertiser_packet_discard
 //		advertiser_packet_discard(_advertiser, _advPacket);
@@ -109,7 +108,7 @@ void MeshAdvertiser::updateIbeacon() {
 	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_UUID, uuid.uuid128, sizeof(uuid.uuid128));
 	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_TXPOWER, &rssi, sizeof(rssi));
 	IBeacon beacon(uuid, major, minor, rssi);
-	LOGd("Advertise ibeacon: major=%u, minor=%u, rssi_on_1m=%i", major, minor, rssi);
+	LOGd("Advertise ibeacon: uuid=[%x %x .. %x] major=%u, minor=%u, rssi_on_1m=%i", uuid.uuid128[0], uuid.uuid128[1], uuid.uuid128[15], major, minor, rssi);
 	advertise(&beacon);
 }
 
