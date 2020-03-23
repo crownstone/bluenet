@@ -414,8 +414,8 @@ Value | Name | Description
 #### State set persistence mode
 Value | Name | Description
 --- | --- | ---
-0   | TEMP | Set value to ram. This value will be used by the firmware, but lost after a reboot.
-1   | STORE | Set value to ram and flash. This value will be used by the firmware, also after a reboot.
+0   | TEMPORARY | Set value to ram. This value will be used by the firmware, but lost after a reboot.
+1   | STORED | Set value to ram and flash. This value will be used by the firmware, also after a reboot. Overwrites the temporary value.
 
 
 

@@ -274,7 +274,21 @@ command_result_t CommandHandler::handleCmdStateGet(cs_data_t commandData, const 
 	if (FAILURE(result.returnCode)) {
 		return result;
 	}
-	PersistenceMode persistenceMode = toPersistenceMode(stateHeader->persistenceMode);
+	PersistenceMode persistenceMode = PersistenceMode::NEITHER_RAM_NOR_FLASH;
+	PersistenceModeGet persistenceModeGet = toPersistenceModeGet(stateHeader->persistenceMode);
+	switch (persistenceModeGet) {
+		case PersistenceModeGet::CURRENT:
+			persistenceMode = PersistenceMode::FIRMWARE_DEFAULT;
+			break;
+		case PersistenceModeGet::STORED:
+			persistenceMode = PersistenceMode::FLASH;
+			break;
+		case PersistenceModeGet::FIRMWARE_DEFAULT:
+			persistenceMode = PersistenceMode::FIRMWARE_DEFAULT;
+			break;
+		case PersistenceModeGet::UNKNOWN:
+			break;
+	}
 	result.returnCode = State::getInstance().get(stateData, persistenceMode);
 	result.data.len = sizeof(state_packet_header_t) + stateData.size;
 	return result;
@@ -310,7 +324,18 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 	if (FAILURE(result.returnCode)) {
 		return result;
 	}
-	PersistenceMode persistenceMode = toPersistenceMode(stateHeader->persistenceMode);
+	PersistenceMode persistenceMode = PersistenceMode::NEITHER_RAM_NOR_FLASH;
+	PersistenceModeSet persistenceModeSet = toPersistenceModeSet(stateHeader->persistenceMode);
+	switch (persistenceModeSet) {
+		case PersistenceModeSet::TEMPORARY:
+			persistenceMode = PersistenceMode::RAM;
+			break;
+		case PersistenceModeSet::STORED:
+			persistenceMode = PersistenceMode::FLASH;
+			break;
+		case PersistenceModeSet::UNKNOWN:
+			break;
+	}
 	cs_ret_code_t retCode = State::getInstance().set(stateData, persistenceMode);
 	switch (retCode) {
 		case ERR_SUCCESS:

@@ -76,13 +76,15 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
  * Only after we have deleted the FLASH record we can upload the new firmware. Then the new FIRMWARE_DEFAULT is used
  * automatically.
  */
-//enum class PersistenceMode: uint8_t {
-//	FLASH,
-//	RAM,
-//	FIRMWARE_DEFAULT,
-//	STRATEGY1,
-//	NEITHER_RAM_NOR_FLASH
-//};
-PersistenceMode toPersistenceMode(uint8_t mode);
+enum class PersistenceMode: uint8_t {
+	FLASH,
+	RAM,
+	FIRMWARE_DEFAULT,
+	STRATEGY1,
+	NEITHER_RAM_NOR_FLASH
+};
+
+PersistenceModeGet toPersistenceModeGet(uint8_t mode);
+PersistenceModeSet toPersistenceModeSet(uint8_t mode);
 
 PersistenceMode DefaultLocation(CS_TYPE const & type);

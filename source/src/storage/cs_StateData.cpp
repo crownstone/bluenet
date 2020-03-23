@@ -493,15 +493,25 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	return PersistenceMode::NEITHER_RAM_NOR_FLASH;
 }
 
-PersistenceMode toPersistenceMode(uint8_t mode) {
-	PersistenceMode persistenceMode = static_cast<PersistenceMode>(mode);
+PersistenceModeGet toPersistenceModeGet(uint8_t mode) {
+	PersistenceModeGet persistenceMode = static_cast<PersistenceModeGet>(mode);
 	switch (persistenceMode) {
-		case PersistenceMode::STRATEGY1:
-		case PersistenceMode::FIRMWARE_DEFAULT:
-		case PersistenceMode::RAM:
-		case PersistenceMode::FLASH:
-		case PersistenceMode::NEITHER_RAM_NOR_FLASH:
+		case PersistenceModeGet::CURRENT:
+		case PersistenceModeGet::STORED:
+		case PersistenceModeGet::FIRMWARE_DEFAULT:
+		case PersistenceModeGet::UNKNOWN:
 			return persistenceMode;
 	}
-	return PersistenceMode::NEITHER_RAM_NOR_FLASH;
+	return PersistenceModeGet::UNKNOWN;
+}
+
+PersistenceModeSet toPersistenceModeSet(uint8_t mode) {
+	PersistenceModeSet persistenceMode = static_cast<PersistenceModeSet>(mode);
+	switch (persistenceMode) {
+		case PersistenceModeSet::TEMPORARY:
+		case PersistenceModeSet::STORED:
+		case PersistenceModeSet::UNKNOWN:
+			return persistenceMode;
+	}
+	return PersistenceModeSet::UNKNOWN;
 }
