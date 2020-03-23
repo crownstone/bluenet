@@ -106,6 +106,17 @@ struct __attribute__((__packed__)) state_packet_header_t {
 };
 
 /**
+ * Mesh control command header packet.
+ */
+struct __attribute__((__packed__)) mesh_control_command_packet_header_t {
+	uint8_t type;
+	uint8_t reserved;
+	uint8_t idCount; // 0 for broadcast.
+	// List of ids.
+	// Control packet.
+};
+
+/**
  * State errors: collection of errors that influence the switch behaviour.
  */
 union __attribute__((__packed__)) state_errors_t {

@@ -92,6 +92,9 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg) {
 			handleSyncRequest(payload, payloadSize);
 			break;
 		}
+		case CS_MESH_MODEL_TYPE_STATE_SET: {
+			break;
+		}
 	}
 }
 

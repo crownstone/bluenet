@@ -514,83 +514,141 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 	uint16_t size = commandData.len;
 	buffer_ptr_t buffer = commandData.data;
 	BLEutil::printArray(buffer, size);
-//#if BUILD_MESHING == 1
-	// Only support control command NOOP and SET_TIME for now, with idCount of 0. These are the only ones used by the app.
-	// Command packet: type, flags, count, {control packet: type, type, length, length, payload...}
-	//                 0     1      2                       3     4     5      6       7
-	//                 00    00     00                      12    00    00     00
-	//                 00    00     00                      30    00    04     00      56 34 12 00
-	if (size < 3) {
-		return command_result_t(ERR_BUFFER_TOO_SMALL);
+
+	// Keep up the required size, and where in the buffer we are.
+	uint16_t bufIndex = 0;
+	size16_t requiredSize = 0;
+	TYPIFY(CMD_SEND_MESH_CONTROL_COMMAND) meshCtrlCmd;
+
+	// Mesh command header.
+	requiredSize += sizeof(meshCtrlCmd.header);
+	LOGd("requiredSize = %u", requiredSize);
+	if (size < requiredSize) {
+		LOGd("too small for header size=%u required=%u", size, requiredSize);
+		return command_result_t(ERR_INVALID_MESSAGE);
 	}
-	// Check command type, flags, id count.
-	if (buffer[0] != 0 || buffer[1] != 0 || buffer[2] != 0) {
-		return command_result_t(ERR_NOT_IMPLEMENTED);
+	memcpy(&(meshCtrlCmd.header), &(buffer[bufIndex]), sizeof(meshCtrlCmd.header));
+	bufIndex += sizeof(meshCtrlCmd.header);
+
+	if (meshCtrlCmd.header.type != 0) {
+		return command_result_t(ERR_WRONG_PARAMETER);
 	}
-	if (size < 3+4) {
-		return command_result_t(ERR_BUFFER_TOO_SMALL);
+
+	// List of IDs.
+	requiredSize += meshCtrlCmd.header.idCount * sizeof(stone_id_t);
+	LOGd("requiredSize = %u", requiredSize);
+	if (size < requiredSize) {
+		LOGd("too small for ids size=%u required=%u", size, requiredSize);
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
-	uint16_t payloadSize = *((uint16_t*)&(buffer[5]));
-	uint8_t* payload = &(buffer[7]);
-	if (size < 3+4+payloadSize) {
-		return command_result_t(ERR_BUFFER_TOO_SMALL);
+	meshCtrlCmd.targetIds = &(buffer[bufIndex]);
+	bufIndex += meshCtrlCmd.header.idCount;
+
+	// Control command header
+	requiredSize += sizeof(meshCtrlCmd.controlCommandHeader);
+	LOGd("requiredSize = %u", requiredSize);
+	if (size < requiredSize) {
+		LOGd("too small for control header size=%u required=%u", size, requiredSize);
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
-	// Check control type and payload size
-	uint8_t cmdType = buffer[3];
-	switch (cmdType) {
-	case CTRL_CMD_NOP:{
-		if (payloadSize != 0) {
-			return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-		}
-		break;
+	memcpy(&(meshCtrlCmd.controlCommandHeader), &(buffer[bufIndex]), sizeof(meshCtrlCmd.controlCommandHeader));
+	bufIndex += sizeof(meshCtrlCmd.controlCommandHeader);
+
+	// Control command payload
+	requiredSize += meshCtrlCmd.controlCommandHeader.payloadSize;
+	LOGd("requiredSize = %u", requiredSize);
+	if (size < requiredSize) {
+		LOGd("too small for control payload size=%u required=%u", size, requiredSize);
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
-	case CTRL_CMD_SET_TIME:{
-		if (payloadSize != sizeof(uint32_t)) {
-			return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
-		}
-		break;
+	meshCtrlCmd.controlCommandData = &(buffer[bufIndex]);
+
+	// Check permissions
+	CommandHandlerTypes controlCmdType = (CommandHandlerTypes)meshCtrlCmd.controlCommandHeader.commandType;
+	if (!allowedAsMeshCommand(controlCmdType)) {
+		return command_result_t(ERR_NOT_AVAILABLE);
 	}
-	default:
-		return command_result_t(ERR_NOT_IMPLEMENTED);
-	}
-	// Check access
-	EncryptionAccessLevel requiredAccessLevel = getRequiredAccessLevel((CommandHandlerTypes)cmdType);
-	if (!EncryptionHandler::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
+	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(controlCmdType), accessLevel)) {
 		return command_result_t(ERR_NO_ACCESS);
 	}
 
-	cs_mesh_msg_t meshMsg;
-	switch (cmdType) {
-		case CTRL_CMD_NOP: {
-			meshMsg.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
-			meshMsg.payload = payload;
-			meshMsg.size = payloadSize;
-			meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
-			meshMsg.urgency = CS_MESH_URGENCY_LOW;
-			break;
-		}
-		case CTRL_CMD_SET_TIME: {
-			meshMsg.type = CS_MESH_MODEL_TYPE_CMD_TIME;
-			meshMsg.payload = payload;
-			meshMsg.size = payloadSize;
-			meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
-			meshMsg.urgency = CS_MESH_URGENCY_HIGH;
-			break;
-		}
-		default:
-			return command_result_t(ERR_NOT_IMPLEMENTED);
-	}
-	event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
-	EventDispatcher::getInstance().dispatch(cmd);
+	cs_data_t eventData((buffer_ptr_t)&meshCtrlCmd, sizeof(meshCtrlCmd));
+	return dispatchEventForCommand(CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND, eventData, resultData);
 
-	// Also handle command on this crownstone.
-	if (cmdType == CTRL_CMD_SET_TIME) {
-		event_t event(CS_TYPE::CMD_SET_TIME, payload, payloadSize);
-		EventDispatcher::getInstance().dispatch(event);
-	}
 
-//#endif
-	return command_result_t(ERR_SUCCESS);
+
+
+//	// Only support control command NOOP and SET_TIME for now, with idCount of 0. These are the only ones used by the app.
+//	// Command packet: type, flags, count, {control packet: type, type, length, length, payload...}
+//	//                 0     1      2                       3     4     5      6       7
+//	//                 00    00     00                      12    00    00     00
+//	//                 00    00     00                      30    00    04     00      56 34 12 00
+//	// Check command type, flags, id count.
+//	if (buffer[0] != 0 || buffer[1] != 0 || buffer[2] != 0) {
+//		return command_result_t(ERR_NOT_IMPLEMENTED);
+//	}
+//	if (size < 3+4) {
+//		return command_result_t(ERR_BUFFER_TOO_SMALL);
+//	}
+//	uint16_t payloadSize = *((uint16_t*)&(buffer[5]));
+//	uint8_t* payload = &(buffer[7]);
+//	if (size < 3+4+payloadSize) {
+//		return command_result_t(ERR_BUFFER_TOO_SMALL);
+//	}
+//	// Check control type and payload size
+//	uint8_t cmdType = buffer[3];
+//	switch (cmdType) {
+//	case CTRL_CMD_NOP:{
+//		if (payloadSize != 0) {
+//			return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+//		}
+//		break;
+//	}
+//	case CTRL_CMD_SET_TIME:{
+//		if (payloadSize != sizeof(uint32_t)) {
+//			return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+//		}
+//		break;
+//	}
+//	default:
+//		return command_result_t(ERR_NOT_IMPLEMENTED);
+//	}
+//	// Check access
+//	EncryptionAccessLevel requiredAccessLevel = getRequiredAccessLevel((CommandHandlerTypes)cmdType);
+//	if (!EncryptionHandler::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
+//		return command_result_t(ERR_NO_ACCESS);
+//	}
+//
+//	cs_mesh_msg_t meshMsg;
+//	switch (cmdType) {
+//		case CTRL_CMD_NOP: {
+//			meshMsg.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
+//			meshMsg.payload = payload;
+//			meshMsg.size = payloadSize;
+//			meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
+//			meshMsg.urgency = CS_MESH_URGENCY_LOW;
+//			break;
+//		}
+//		case CTRL_CMD_SET_TIME: {
+//			meshMsg.type = CS_MESH_MODEL_TYPE_CMD_TIME;
+//			meshMsg.payload = payload;
+//			meshMsg.size = payloadSize;
+//			meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
+//			meshMsg.urgency = CS_MESH_URGENCY_HIGH;
+//			break;
+//		}
+//		default:
+//			return command_result_t(ERR_NOT_IMPLEMENTED);
+//	}
+//	event_t cmd(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
+//	EventDispatcher::getInstance().dispatch(cmd);
+//
+//	// Also handle command on this crownstone.
+//	if (cmdType == CTRL_CMD_SET_TIME) {
+//		event_t event(CS_TYPE::CMD_SET_TIME, payload, payloadSize);
+//		EventDispatcher::getInstance().dispatch(event);
+//	}
+//	return command_result_t(ERR_SUCCESS);
 }
 
 command_result_t CommandHandler::handleCmdAllowDimming(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
@@ -656,7 +714,7 @@ command_result_t CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t comman
 	return command_result_t(event.result.returnCode);
 }
 
-command_result_t CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_data_t resultData){
+command_result_t CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_data_t resultData) {
 	event_t event(typ, commandData.data, commandData.len);
 	event.result.buf = resultData;
 	event.dispatch();

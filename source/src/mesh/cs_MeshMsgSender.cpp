@@ -204,6 +204,10 @@ void MeshMsgSender::handleEvent(event_t & event) {
 			sendTrackedDeviceListSize(packet);
 			break;
 		}
+		case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND: {
+
+			break;
+		}
 		default:
 			break;
 	}
