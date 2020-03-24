@@ -136,7 +136,9 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_sync_request_t {
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_state_header_t {
-	uint8_t type; // Shortened version of CS_TYPE
-	uint8_t id : 6; // Shortened version of state id.
-	uint8_t persistenceMode : 2;
+	uint8_t type;                 // Shortened version of CS_TYPE
+	uint8_t id : 6;               // Shortened version of state id.
+	uint8_t persistenceMode : 2;  // Shortened version of peristenceMode.
+	uint8_t accessLevel : 3;      // Shortened version of access level.
+	uint8_t sourceId : 5;         // Shortened version of source.
 };

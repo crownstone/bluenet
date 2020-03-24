@@ -25,7 +25,7 @@
 
 #include <sstream>
 
-#define CommandHandlerLOG LOGnone
+#define LOGCommandHandlerDebug LOGnone
 
 void reset(void* p_context) {
 
@@ -156,7 +156,7 @@ command_result_t CommandHandler::handleCommand(
 	case CTRL_CMD_MULTI_SWITCH:
 		return handleCmdMultiSwitch(commandData, source, accessLevel, resultData);
 	case CTRL_CMD_MESH_COMMAND:
-		return handleCmdMeshCommand(commandData, accessLevel, resultData);
+		return handleCmdMeshCommand(commandData, source, accessLevel, resultData);
 	case CTRL_CMD_ALLOW_DIMMING:
 		return handleCmdAllowDimming(commandData, accessLevel, resultData);
 	case CTRL_CMD_LOCK_SWITCH:
@@ -355,7 +355,7 @@ command_result_t CommandHandler::handleCmdStateSet(cs_data_t commandData, const 
 }
 
 command_result_t CommandHandler::handleCmdSetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
-	CommandHandlerLOG(STR_HANDLE_COMMAND, "set time:");
+	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set time:");
 	if (commandData.len != sizeof(uint32_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
@@ -366,7 +366,7 @@ command_result_t CommandHandler::handleCmdSetTime(cs_data_t commandData, const E
 }
 
 command_result_t CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData){
-	CommandHandlerLOG(STR_HANDLE_COMMAND, "set sun time:");
+	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set sun time:");
 	if (commandData.len != sizeof(sun_time_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
@@ -431,10 +431,10 @@ command_result_t CommandHandler::handleCmdPwm(cs_data_t commandData, const Encry
 
 	switch_message_payload_t* payload = (switch_message_payload_t*) commandData.data;
 	
-	TYPIFY(CMD_SET_DIMMER) switch_cmd;
-	switch_cmd = payload->switchState & ~0b10000000; // peels of the relay state TODO: why is this required?
+	TYPIFY(CMD_SET_DIMMER) switchCmd;
+	switchCmd = payload->switchState;
 
-	event_t evt(CS_TYPE::CMD_SET_DIMMER, &switch_cmd, sizeof(switch_cmd));
+	event_t evt(CS_TYPE::CMD_SET_DIMMER, &switchCmd, sizeof(switchCmd));
 	EventDispatcher::getInstance().dispatch(evt);
 
 	return command_result_t(ERR_SUCCESS);
@@ -509,7 +509,7 @@ command_result_t CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, con
 	return command_result_t(ERR_SUCCESS);
 }
 
-command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
+command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
 	LOGi(STR_HANDLE_COMMAND, "mesh command");
 	uint16_t size = commandData.len;
 	buffer_ptr_t buffer = commandData.data;
@@ -522,7 +522,7 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 
 	// Mesh command header.
 	requiredSize += sizeof(meshCtrlCmd.header);
-	LOGd("requiredSize = %u", requiredSize);
+	LOGCommandHandlerDebug("requiredSize = %u", requiredSize);
 	if (size < requiredSize) {
 		LOGd("too small for header size=%u required=%u", size, requiredSize);
 		return command_result_t(ERR_INVALID_MESSAGE);
@@ -536,7 +536,7 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 
 	// List of IDs.
 	requiredSize += meshCtrlCmd.header.idCount * sizeof(stone_id_t);
-	LOGd("requiredSize = %u", requiredSize);
+	LOGCommandHandlerDebug("requiredSize = %u", requiredSize);
 	if (size < requiredSize) {
 		LOGd("too small for ids size=%u required=%u", size, requiredSize);
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
@@ -545,33 +545,64 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 	bufIndex += meshCtrlCmd.header.idCount;
 
 	// Control command header
-	requiredSize += sizeof(meshCtrlCmd.controlCommandHeader);
-	LOGd("requiredSize = %u", requiredSize);
+	control_packet_header_t controlPacketHeader;
+	requiredSize += sizeof(controlPacketHeader);
+	LOGCommandHandlerDebug("requiredSize = %u", requiredSize);
 	if (size < requiredSize) {
 		LOGd("too small for control header size=%u required=%u", size, requiredSize);
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
-	memcpy(&(meshCtrlCmd.controlCommandHeader), &(buffer[bufIndex]), sizeof(meshCtrlCmd.controlCommandHeader));
-	bufIndex += sizeof(meshCtrlCmd.controlCommandHeader);
+	memcpy(&controlPacketHeader, &(buffer[bufIndex]), sizeof(controlPacketHeader));
+	bufIndex += sizeof(controlPacketHeader);
 
 	// Control command payload
-	requiredSize += meshCtrlCmd.controlCommandHeader.payloadSize;
-	LOGd("requiredSize = %u", requiredSize);
+	requiredSize += controlPacketHeader.payloadSize;
+	LOGCommandHandlerDebug("requiredSize = %u", requiredSize);
 	if (size < requiredSize) {
 		LOGd("too small for control payload size=%u required=%u", size, requiredSize);
 		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
 	}
-	meshCtrlCmd.controlCommandData = &(buffer[bufIndex]);
+	meshCtrlCmd.controlCommand.type = (CommandHandlerTypes) controlPacketHeader.commandType;
+	meshCtrlCmd.controlCommand.data = &(buffer[bufIndex]);
+	meshCtrlCmd.controlCommand.size = controlPacketHeader.payloadSize;
+	meshCtrlCmd.controlCommand.accessLevel = accessLevel;
+	meshCtrlCmd.controlCommand.source = source;
 
 	// Check permissions
-	CommandHandlerTypes controlCmdType = (CommandHandlerTypes)meshCtrlCmd.controlCommandHeader.commandType;
+	CommandHandlerTypes controlCmdType = meshCtrlCmd.controlCommand.type;
 	if (!allowedAsMeshCommand(controlCmdType)) {
+		LOGw("Command %u is not allowed via mesh", controlCmdType);
 		return command_result_t(ERR_NOT_AVAILABLE);
 	}
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(controlCmdType), accessLevel)) {
+		LOGw("No access for command %u", controlCmdType);
+		return command_result_t(ERR_NO_ACCESS);
+	}
+	// Check nested permissions
+	EncryptionAccessLevel requiredAccessLevel = ENCRYPTION_DISABLED;
+	switch (controlCmdType) {
+		case CTRL_CMD_STATE_SET:
+		case CTRL_CMD_STATE_GET: {
+			if (meshCtrlCmd.controlCommand.size < sizeof(state_packet_header_t)) {
+				LOGd("too small for state packet header");
+				return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+			}
+			state_packet_header_t* stateHeader = (state_packet_header_t*) meshCtrlCmd.controlCommand.data;
+			LOGd("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
+			CS_TYPE stateType = toCsType(stateHeader->stateType);
+			requiredAccessLevel = (controlCmdType == CTRL_CMD_STATE_SET) ? getUserAccessLevelSet(stateType) : getUserAccessLevelGet(stateType);
+			break;
+		}
+		default:
+			break;
+	}
+	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(controlCmdType), accessLevel)) {
+		LOGw("No access for command payload. Required=%u", requiredAccessLevel);
 		return command_result_t(ERR_NO_ACCESS);
 	}
 
+	// All permission checks must have been done already!
+	// Also the nested ones!
 	cs_data_t eventData((buffer_ptr_t)&meshCtrlCmd, sizeof(meshCtrlCmd));
 	return dispatchEventForCommand(CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND, eventData, resultData);
 
@@ -774,17 +805,16 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 
 bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 	switch (type) {
-	case CTRL_CMD_SWITCH:
-	case CTRL_CMD_PWM:
-	case CTRL_CMD_RELAY:
-	case CTRL_CMD_SET_TIME:
-	case CTRL_CMD_RESET:
-	case CTRL_CMD_FACTORY_RESET:
-	case CTRL_CMD_RESET_ERRORS:
-	case CTRL_CMD_UART_MSG:
-		return true;
-	default:
-		return false;
+		case CTRL_CMD_FACTORY_RESET:
+		case CTRL_CMD_NOP:
+		case CTRL_CMD_RESET_ERRORS:
+		case CTRL_CMD_RESET:
+		case CTRL_CMD_SET_TIME:
+		case CTRL_CMD_STATE_SET:
+		case CTRL_CMD_UART_MSG:
+			return true;
+		default:
+			return false;
 	}
 	return false;
 }
@@ -808,9 +838,9 @@ void CommandHandler::handleEvent(event_t & event) {
 				cs_data_t(result_buffer,sizeof(result_buffer))
 			);
 
-			CommandHandlerLOG("control command result.returnCode %d, len: %d", result.returnCode,result.data.len);
+			LOGCommandHandlerDebug("control command result.returnCode %d, len: %d", result.returnCode,result.data.len);
 			for(auto i = 0; i < 50; i+=10){
-				CommandHandlerLOG("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+				LOGCommandHandlerDebug("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
 				result_buffer[i+0],result_buffer[i+1],result_buffer[i+2],result_buffer[i+3],result_buffer[i+4],
 				result_buffer[i+5],result_buffer[i+6],result_buffer[i+7],result_buffer[i+8],result_buffer[i+9]);
 			}

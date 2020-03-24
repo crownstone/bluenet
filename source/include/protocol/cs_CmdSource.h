@@ -26,6 +26,7 @@ enum cs_cmd_source {
 /**
  * flagExternal: true when received via mesh
  * sourceId: see cs_cmd_source
+ * count: counter of the device
  */
 struct __attribute__((packed)) cmd_source_t {
 	bool flagExternal : 1;

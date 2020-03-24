@@ -67,4 +67,16 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
  */
 bool setMeshPayload(uint8_t* meshMsg, size16_t meshMsgSize, const uint8_t* payload, size16_t payloadSize);
 
+bool canShortenStateType(uint16_t type);
+bool canShortenStateId(uint16_t id);
+bool canShortenPersistenceMode(uint8_t id);
+bool canShortenAccessLevel(EncryptionAccessLevel accessLevel);
+bool canShortenSource(cmd_source_t source);
+
+uint8_t getShortenedAccessLevel(EncryptionAccessLevel accessLevel);
+EncryptionAccessLevel getInflatedAccessLevel(uint8_t accessLevel);
+
+uint8_t getShortenedSource(cmd_source_t source);
+cmd_source_t getInflatedSource(uint8_t sourceId);
+
 }

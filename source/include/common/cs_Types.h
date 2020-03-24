@@ -231,7 +231,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER,
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN,
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE,
-	CMD_SEND_MESH_CONTROL_COMMAND,
+	CMD_SEND_MESH_CONTROL_COMMAND,                    // Send a control command via the mesh. All permission checks must have been done already!
 	EVT_MESH_TIME,                                    // Mesh received the current time.
 	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
 	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.

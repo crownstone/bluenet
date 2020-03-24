@@ -114,8 +114,7 @@ struct __attribute__((packed)) control_command_packet_t {
 struct __attribute__((__packed__)) mesh_control_command_packet_t {
 	mesh_control_command_packet_header_t header;
 	stone_id_t* targetIds;
-	control_packet_header_t controlCommandHeader;
-	buffer_ptr_t            controlCommandData;
+	control_command_packet_t controlCommand;
 };
 
 /**
