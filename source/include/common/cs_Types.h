@@ -276,6 +276,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_GET_BEHAVIOUR,                                // Get a behaviour.
 	CMD_GET_BEHAVIOUR_INDICES,                        // Get a list of indices of active behaviours.
 	CMD_GET_BEHAVIOUR_DEBUG,                          // Get info to debug behaviour. Multiple classes will handle this command to fill pieces of info.
+	CMD_CLEAR_ALL_BEHAVIOUR,                          // Clear all behaviours in the store, including persisted flash entries.
 	EVT_BEHAVIOURSTORE_MUTATION,                      // Sent by BehaviourStore, after a change to the stored behaviours.
 	EVT_BEHAVIOUR_OVERRIDDEN,                         // Informs whether behaviour is overridden by user (in override state).
 

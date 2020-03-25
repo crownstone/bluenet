@@ -46,6 +46,10 @@ void BehaviourStore::handleEvent(event_t& evt) {
 			handleGetBehaviourIndices(evt);
 			break;
 		}
+		case CS_TYPE::CMD_CLEAR_ALL_BEHAVIOUR: {
+			clearActiveBehavioursArray();
+			break;
+		}
 		default:{
 			break;
 		}
@@ -376,9 +380,6 @@ ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index) {
 	if (activeBehaviours[index] == nullptr) {
 		LOGi("Already removed");
 		return ERR_SUCCESS;
-		TYPIFY(STATE_BEHAVIOUR_MASTER_HASH) hash = calculateMasterHash();
-		State::getInstance().set(CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH, &hash, sizeof(hash));
-
 	}
 	auto type = activeBehaviours[index]->getType();
 
@@ -462,10 +463,13 @@ void BehaviourStore::init() {
 	LoadBehavioursFromMemory<ExtendedSwitchBehaviour>(CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE);
 }
 
-BehaviourStore::~BehaviourStore() {
-	for (Behaviour* bptr: activeBehaviours) {
-		if (bptr != nullptr) {
-			delete bptr;
-		};
+void BehaviourStore::clearActiveBehavioursArray() {
+	LOGd("clearing all behaviours");
+	for (size_t i = 0; i < MaxBehaviours; i++) {
+		removeBehaviour(i);
 	}
+}
+
+BehaviourStore::~BehaviourStore() {
+	clearActiveBehavioursArray();
 }
