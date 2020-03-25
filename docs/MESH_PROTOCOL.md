@@ -19,7 +19,9 @@ id | name | Payload
 11 | CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS | [behaviour_settings_t](#behaviour_settings_t)
 12 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER | [cs_mesh_model_msg_device_register_t](#cs_mesh_model_msg_device_register_t)
 13 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN | [cs_mesh_model_msg_device_token_t](#cs_mesh_model_msg_device_token_t)
-
+14 | CS_MESH_MODEL_TYPE_SYNC_REQUEST | [cs_mesh_model_msg_sync_request_t](#cs_mesh_model_msg_sync_request_t)
+16 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE | [cs_mesh_model_msg_device_list_size_t](#cs_mesh_model_msg_device_list_size_t)
+17 | CS_MESH_MODEL_TYPE_STATE_SET | [cs_mesh_model_msg_state_set](#cs_mesh_model_msg_state_set)
 
 ## Packet descriptors
 
@@ -32,6 +34,7 @@ Type | Name | Length | Description
 uint32 | counter | 4 | 
 uint8[3] | dummy | 3 | 
 
+
 <a name="cs_mesh_model_msg_time_t"></a>
 #### cs_mesh_model_msg_time_t
 ![Time](../docs/diagrams/mesh_message_time.png)
@@ -39,6 +42,7 @@ uint8[3] | dummy | 3 |
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint32 | timestamp | 4 | posix time stamp
+
 
 <a name="cs_mesh_model_msg_profile_location_t"></a>
 #### cs_mesh_model_msg_profile_location_t
@@ -64,6 +68,7 @@ int8 | powerFactor | 1 |
 int16 | powerUsageReal | 2 |
 uint16 | partialTimestamp | 2 |
 
+
 <a name="cs_mesh_model_msg_state_1_t"></a>
 #### cs_mesh_model_msg_state_1_t
 
@@ -74,6 +79,7 @@ Type | Name | Length | Description
 int8 | temperature | 1 | 
 int32 | energyUsed | 4 | 
 uint16 | partialTimestamp | 2 | 
+
 
 <a name="cs_mesh_model_msg_multi_switch_item_t"></a>
 #### cs_mesh_model_msg_multi_switch_item_t
@@ -97,6 +103,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint32 | flags | 4 | only bit 0 is currently in use, as 'behaviour enabled'. Other bits must remain 0. 
 
+
 <a name="cs_mesh_model_msg_device_register_t"></a>
 #### cs_mesh_model_msg_device_register_t
 
@@ -111,6 +118,7 @@ int8 | rssiOffset | 1 |
 uint8 | flags | 1 |
 uint8 | accessLevel | 1 |
 
+
 <a name="cs_mesh_model_msg_device_token_t"></a>
 #### cs_mesh_model_msg_device_token_t
 
@@ -121,3 +129,59 @@ Type | Name | Length | Description
 device_id_t | deviceId | 2 |
 uint8[3] | deviceToken | 3 |
 uint16 | ttlMinutes | 2 |
+
+
+<a name="cs_mesh_model_msg_device_list_size_t"></a>
+#### cs_mesh_model_msg_device_list_size_t
+
+![device list](../docs/diagrams/mesh_device_list_size.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8_t | listSize | 1 | Size of tracked devices list.
+
+
+<a name="cs_mesh_model_msg_sync_request_t"></a>
+#### cs_mesh_model_msg_sync_request_t
+
+![sync request](../docs/diagrams/mesh_sync_request.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8_t | stoneId | 1 | ID of stone that requests for a sync.
+uint32_t | [requestBitmask](#cs_mesh_model_sync_bitmask) | 4 | Bitmask of all things that are requested to be synced.
+
+
+<a name="cs_mesh_model_sync_bitmask"></a>
+#### Sync bitmask
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Time |
+1 | Registered devices |
+2-31 | Reserved | Reserved for future use, must be 0 for now.
+
+
+<a name="cs_mesh_model_msg_state_set"></a>
+#### cs_mesh_model_msg_state_set
+
+![state set](../docs/diagrams/mesh_state_set.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[state header](#cs_mesh_model_msg_state_header_t) | State header | 3 |
+uint8_t[] | Payload | N | Payload data, depends on state type.
+
+
+<a name="cs_mesh_model_msg_state_header_t"></a>
+#### cs_mesh_model_msg_state_header_t
+
+![state header](../docs/diagrams/mesh_state_header.png)
+
+Type | Name | Length (bits) | Description
+--- | --- | --- | ---
+uint8_t | Type | 8 | [State type](PROTOCOL.md#state_types).
+uint8_t | State ID | 6 | ID of state to get. Most state types will only have ID 0.
+uint8_t | [Persistence mode](PROTOCOL.md#state_set_persistence_mode_set) | 2 | Type of persistence mode.
+uint8_t | Access level | 3 | Shortened version of access level: 0=ADMIN, 1=MEMBER, 2=BASIC, 6=SETUP, 7=NOT_SET.
+uint8_t | Source ID | 5 | Shortened version of source ID: 0=NONE, 1=DEFAULT, 2=INTERNAL, 3=UART, 4=CONNECTION, 5=SWITCHCRAFT, 30=DEVICE_TOKEN, 31=NOT_SET
