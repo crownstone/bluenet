@@ -434,7 +434,7 @@ def parseFile(textFilename):
 	# End of file
 	if (foundTableLines):
 		# Draw last table
-		drawVarList(varList, filename)
+		drawVarList(varList, filename, lengthInBits)
 
 if not os.path.exists(GEN_DIR):
 	print "Make dir " + GEN_DIR
