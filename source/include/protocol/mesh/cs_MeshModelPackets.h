@@ -25,11 +25,9 @@ enum cs_mesh_model_opcode_t {
 
 /**
  * Max message size.
- * TODO: define a max per type, since the mesh supports variable length messages.
  * When you send packets that are longer than 15 bytes (including opCode of 1-3B, and MIC of 4 or 8B), they will be sent
- * as segmented packets of 12? byte each.
+ * as segmented packets of 12 byte each.
  * See https://devzone.nordicsemi.com/f/nordic-q-a/32854/max-size-of-data-to-send-from-one-node-to-other-ble-mesh
- * Multi switch message with 5 items is 28 + 3 (opCode) + 4 (MIC) = 35, so 3 segments.
  * The minimum advertising interval that mesh are using now is 20ms, so each advertisement / segment, takes 20ms.
  */
 #define MAX_MESH_MSG_SIZE (3 * 12 - 4 - 3)
@@ -58,6 +56,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_SYNC_REQUEST              = 14, // Payload: cs_mesh_model_msg_sync_request_t
 //	CS_MESH_MODEL_TYPE_SYNC_RESPONSE             = 15, // Payload: cs_mesh_model_msg_sync_response_t
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE  = 16, // Payload: cs_mesh_model_msg_device_list_size_t
+	CS_MESH_MODEL_TYPE_STATE_SET                 = 17, // Payload: cs_mesh_model_msg_state_header_t + payload
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_test_t {
@@ -134,4 +133,12 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_sync_request_t {
 		} bits;
 		uint32_t bitmask;
 	};
+};
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_state_header_t {
+	uint8_t type;                 // Shortened version of CS_TYPE
+	uint8_t id : 6;               // Shortened version of state id.
+	uint8_t persistenceMode : 2;  // Shortened version of peristenceMode.
+	uint8_t accessLevel : 3;      // Shortened version of access level.
+	uint8_t sourceId : 5;         // Shortened version of source.
 };

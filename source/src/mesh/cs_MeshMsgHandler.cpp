@@ -21,10 +21,10 @@ void MeshMsgHandler::init() {
 
 void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg) {
 //	BLEutil::printArray(msg.msg, msg.msgSize);
-	if (msg.opCode == CS_MESH_MODEL_OPCODE_RELIABLE_MSG) {
-		LOGe("sendReply");
-//		sendReply(accessMsg);
-	}
+//	if (msg.opCode == CS_MESH_MODEL_OPCODE_RELIABLE_MSG) {
+//		LOGe("sendReply");
+////		sendReply(accessMsg);
+//	}
 	if (!MeshUtil::isValidMeshMessage(msg.msg, msg.msgSize)) {
 		LOGw("Invalid mesh message");
 		BLEutil::printArray(msg.msg, msg.msgSize);
@@ -90,6 +90,10 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg) {
 		}
 		case CS_MESH_MODEL_TYPE_SYNC_REQUEST: {
 			handleSyncRequest(payload, payloadSize);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_STATE_SET: {
+			handleStateSet(payload, payloadSize);
 			break;
 		}
 	}
@@ -316,3 +320,44 @@ void MeshMsgHandler::handleSyncRequest(uint8_t* payload, size16_t payloadSize) {
 	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING, eventDataPtr, sizeof(TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)));
 	event.dispatch();
 }
+
+void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize) {
+	auto meshStateHeader = reinterpret_cast<cs_mesh_model_msg_state_header_t*>(payload);
+	uint8_t stateDataSize = payloadSize - sizeof(*meshStateHeader);
+	uint8_t* stateData = payload + sizeof(*meshStateHeader);
+
+	LOGi("handleStateSet: type=%u id=%u persistenceMode=%u accessLevel=%u sourceId=%u data:",
+			meshStateHeader->type,
+			meshStateHeader->id,
+			meshStateHeader->persistenceMode,
+			meshStateHeader->accessLevel,
+			meshStateHeader->sourceId
+			);
+	BLEutil::printArray(stateData, stateDataSize);
+
+	TYPIFY(CMD_CONTROL_CMD) controlCmd;
+
+	// The control command data starts with a state packet header,
+	// followed by state data.
+	uint8_t controlCmdDataSize = sizeof(state_packet_header_t) + stateDataSize;
+	uint8_t controlCmdData[controlCmdDataSize];
+
+	state_packet_header_t* stateHeader = (state_packet_header_t*)controlCmdData;
+	memcpy(controlCmdData + sizeof(state_packet_header_t), stateData, stateDataSize);
+
+	// Inflate state header.
+	stateHeader->stateType =           meshStateHeader->type;
+	stateHeader->stateId =             meshStateHeader->id;
+	stateHeader->persistenceMode =     meshStateHeader->persistenceMode;
+
+	// Inflate control command meta data.
+	controlCmd.type =        CTRL_CMD_STATE_SET;
+	controlCmd.data =        controlCmdData;
+	controlCmd.size =        controlCmdDataSize;
+	controlCmd.accessLevel = MeshUtil::getInflatedAccessLevel(meshStateHeader->accessLevel);
+	controlCmd.source =      MeshUtil::getInflatedSource(meshStateHeader->sourceId);
+
+	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+	event.dispatch();
+}
+

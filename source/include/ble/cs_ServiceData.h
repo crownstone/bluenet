@@ -244,6 +244,11 @@ private:
 	 */
 	uint16_t getPartialTimestampOrCounter(uint32_t timestamp, uint32_t counter);
 
+	/**
+	 * Get a part of the behaviour hash.
+	 */
+	uint16_t getPartialBehaviourHash(uint32_t behaviourHash);
+
 	/** Send the state over the mesh.
 	 *
 	 * @param[in] event           True when sending state because of an event.

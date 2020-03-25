@@ -33,6 +33,7 @@ protected:
 	void handleTrackedDeviceToken(   uint8_t* payload, size16_t payloadSize);
 	void handleTrackedDeviceListSize(uint8_t* payload, size16_t payloadSize);
 	void handleSyncRequest(          uint8_t* payload, size16_t payloadSize);
+	void handleStateSet(             uint8_t* payload, size16_t payloadSize);
 
 private:
 	TYPIFY(CONFIG_CROWNSTONE_ID) _ownId = 0;

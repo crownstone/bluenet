@@ -319,7 +319,7 @@ Type nr | Type name | Payload type | Result type | Description | A | M | B | S
 30 | Set time | uint 32 | - | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
 31 | Increase TX | - | - | Temporarily increase the TX power when in setup mode |  |  |  | x
 32 | Reset errors | [Error bitmask](#state_error_bitmask) | - | Reset all errors which are set in the written bitmask. | x
-33 | Mesh command | [Command mesh packet](#command_mesh_packet) | - | Send a generic command over the mesh. Required access depends on the command. Required access depends on the command. | x | x | x
+33 | Mesh command | [Command mesh packet](#command_mesh_packet) | - | Send a generic command over the mesh. Required access depends on the command. | x | x | x
 34 | Set sun times | [Sun time packet](#sun_time_packet) | - | Update the reference times for sunrise and sunset | x | x
 40 | Allow dimming | uint 8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
@@ -467,6 +467,11 @@ Bit | Name |  Description
 
 <a name="command_mesh_packet"></a>
 #### Mesh command packet
+Only a couple of commands are implemented:
+
+- Set time, only broadcast.
+- Noop, only broadcast.
+- State set, only 1 target ID.
 
 ![Command packet](../docs/diagrams/command-mesh-packet.png)
 
@@ -474,16 +479,16 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
 uint 8 | Reserved | 1 | Reserved for future use, should be 0 for now.
-uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast. **Currently, only 0 is implemented.**
-uint8 [] | List of target IDs | Count | Crownstone identifiers of the devices at which this message is aimed. For broadcast, no IDs are provided and the command follows directly after the count field.
-uint 8 | Command payload | N | The command payload data, which depends on the type.
+uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast.
+uint8 [] | List of target IDs | Count | Crownstone identifiers of the devices at which this message is aimed. For broadcast, no IDs are provided and the command payload follows directly after the count field.
+uint 8 | Command payload | N | The command payload data, which depends on the [type](#mesh_command_types).
 
 <a name="mesh_command_types"></a>
 ##### Mesh command types
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
-0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet. See [Broadcast command types](BROADCAST_PROTOCOL.md#command-broadcast-types) for implemented commands.
+0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet.
 
 <a name="behaviour_debug_packet"></a>
 ##### Behaviour debug packet

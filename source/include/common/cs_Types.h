@@ -156,6 +156,7 @@ enum class CS_TYPE: uint16_t {
 	STATE_BEHAVIOUR_SETTINGS                = 150,
 	STATE_MESH_IV_INDEX                     = 151,
 	STATE_MESH_SEQ_NUMBER                   = 152,
+	STATE_BEHAVIOUR_MASTER_HASH             = 153,
 
 	/*
 	 * Internal commands and events.
@@ -232,6 +233,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER,
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN,
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE,
+	CMD_SEND_MESH_CONTROL_COMMAND,                    // Send a control command via the mesh. All permission checks must have been done already!
 	EVT_MESH_TIME,                                    // Mesh received the current time.
 	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
 	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.
@@ -394,6 +396,7 @@ typedef void TYPIFY(STATE_BEHAVIOUR_RULE);
 typedef void TYPIFY(STATE_TWILIGHT_RULE);
 typedef void TYPIFY(STATE_EXTENDED_BEHAVIOUR_RULE);
 typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
+typedef uint32_t TYPIFY(STATE_BEHAVIOUR_MASTER_HASH);
 typedef cs_mesh_iv_index_t TYPIFY(STATE_MESH_IV_INDEX);
 typedef cs_mesh_seq_number_t TYPIFY(STATE_MESH_SEQ_NUMBER);
 
@@ -432,6 +435,7 @@ typedef  cs_mesh_model_msg_device_token_t TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN);
 typedef  cs_mesh_model_msg_device_token_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN);
 typedef  cs_mesh_model_msg_device_list_size_t TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE);
 typedef  cs_mesh_model_msg_device_list_size_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE);
+typedef  mesh_control_command_packet_t TYPIFY(CMD_SEND_MESH_CONTROL_COMMAND);
 typedef  void TYPIFY(CMD_SWITCH_OFF);
 typedef  void TYPIFY(CMD_SWITCH_ON);
 typedef  void TYPIFY(CMD_SWITCH_TOGGLE);
