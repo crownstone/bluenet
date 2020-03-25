@@ -55,7 +55,7 @@ cs_ret_code_t MeshMsgSender::sendSetTime(const cs_mesh_model_msg_time_t* item, u
 	}
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_CMD_TIME, 0, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_CMD_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	return addToQueue(CS_MESH_MODEL_TYPE_CMD_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, true);
 }
 
 cs_ret_code_t MeshMsgSender::sendNoop(uint8_t repeats) {
@@ -95,7 +95,7 @@ cs_ret_code_t MeshMsgSender::sendTime(const cs_mesh_model_msg_time_t* item, uint
 	}
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, true);
 }
 
 cs_ret_code_t MeshMsgSender::sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats) {
@@ -176,6 +176,30 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 	}
 
 	switch (command->controlCommand.type) {
+		case CTRL_CMD_SET_TIME: {
+			if (command->controlCommand.size != sizeof(uint32_t)) {
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			if (command->header.idCount != 0) {
+				return ERR_WRONG_PARAMETER;
+			}
+			uint32_t* time = (uint32_t*) command->controlCommand.data;
+			cs_mesh_model_msg_time_t packet;
+			packet.timestamp = *time;
+			return sendSetTime(&packet, CS_MESH_RELIABILITY_MEDIUM);
+			break;
+		}
+		case CTRL_CMD_NOP: {
+			if (command->controlCommand.size != 0) {
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			if (command->header.idCount != 0) {
+				return ERR_WRONG_PARAMETER;
+			}
+			return sendNoop();
+			break;
+		}
+
 		case CTRL_CMD_STATE_SET: {
 			// Size has already been checked in command handler.
 			state_packet_header_t* stateHeader = (state_packet_header_t*) command->controlCommand.data;

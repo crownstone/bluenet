@@ -578,6 +578,27 @@ command_result_t CommandHandler::handleCmdMeshCommand(cs_data_t commandData, con
 		LOGw("No access for command %u", controlCmdType);
 		return command_result_t(ERR_NO_ACCESS);
 	}
+
+	// Handle command if the command is for this stone.
+	bool forSelf = (meshCtrlCmd.header.idCount == 0);
+	bool forOthers = (meshCtrlCmd.header.idCount == 0);
+	TYPIFY(CONFIG_CROWNSTONE_ID) ownId = 0;
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &ownId, sizeof(ownId));
+	for (uint8_t i = 0; i < meshCtrlCmd.header.idCount; ++i) {
+		forSelf = forSelf || (meshCtrlCmd.targetIds[i] == ownId);
+		forOthers = forOthers || (meshCtrlCmd.targetIds[i] != ownId);
+	}
+	if (forSelf) {
+		cs_data_t meshCommandCtrlCmdData(meshCtrlCmd.controlCommand.data, meshCtrlCmd.controlCommand.size);
+		command_result_t cmdResult = handleCommand(meshCtrlCmd.controlCommand.type, meshCommandCtrlCmdData, source, accessLevel, resultData);
+		if (!forOthers) {
+			return cmdResult;
+		}
+	}
+	if (!forOthers) {
+		return command_result_t(ERR_NOT_FOUND);
+	}
+
 	// Check nested permissions
 	EncryptionAccessLevel requiredAccessLevel = ENCRYPTION_DISABLED;
 	switch (controlCmdType) {
