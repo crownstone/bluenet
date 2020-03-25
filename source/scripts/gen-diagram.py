@@ -269,7 +269,7 @@ def drawVar(startX, y, varName, varLen, color):
 	return startX + width
 
 
-def drawVarList(varList, filename):
+def drawVarList(varList, filename, lengthInBits):
 	if not filename:
 		print "no filename for:"
 		for var in varList:
@@ -287,8 +287,9 @@ def drawVarList(varList, filename):
 
 	size = [totalLen * STEP_X, STEP_Y]
 
-	# Add text "byte" to screen size
-	byteLabel = fontBytes.render("Byte", True, BLACK)
+	# Add text "byte" or "bit" to screen size
+	byteTxt = "Bit" if lengthInBits else "Byte"
+	byteLabel = fontBytes.render(byteTxt, True, BLACK)
 	size[0] += byteLabel.get_width()
 	size[1] += byteLabel.get_height()
 
@@ -380,6 +381,7 @@ def parseFile(textFilename):
 
 	filename = None
 	foundTableHeader=False
+	lengthInBits=False
 	foundTableLines=False
 	varList = []
 
@@ -406,7 +408,7 @@ def parseFile(textFilename):
 
 			else:
 				# End of table, draw and reset
-				drawVarList(varList, filename)
+				drawVarList(varList, filename, lengthInBits)
 				filename = None
 				foundTableHeader=False
 				foundTableLines = False
@@ -422,6 +424,7 @@ def parseFile(textFilename):
 		matches = patternTableHeader.findall(line)
 		if len(matches):
 			#print "foundTableHeader: " + matches[0]
+			lengthInBits = (matches[0] == "in bits")
 			foundTableHeader = True
 
 		matches = patternFileName.findall(line)
