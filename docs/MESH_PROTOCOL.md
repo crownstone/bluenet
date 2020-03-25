@@ -178,7 +178,7 @@ uint8_t[] | Payload | N | Payload data, depends on state type.
 
 ![state header](../docs/diagrams/mesh_state_header.png)
 
-Type | Name | Length (bits) | Description
+Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint8_t | Type | 8 | [State type](PROTOCOL.md#state_types).
 uint8_t | State ID | 6 | ID of state to get. Most state types will only have ID 0.
