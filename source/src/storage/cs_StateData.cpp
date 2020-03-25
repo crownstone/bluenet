@@ -214,6 +214,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_BEHAVIOUR_SETTINGS:
 		reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(data.value)->asInt = STATE_BEHAVIOUR_SETTINGS_DEFAULT;
 		return ERR_SUCCESS;
+	case CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH:
+		*(TYPIFY(STATE_BEHAVIOUR_MASTER_HASH)*)data.value = STATE_BEHAVIOUR_MASTER_HASH_DEFAULT;
+		return ERR_SUCCESS;
 	case CS_TYPE::STATE_MESH_IV_INDEX:
 		reinterpret_cast<TYPIFY(STATE_MESH_IV_INDEX)*>(data.value)->iv_index = STATE_MESH_IV_INDEX_DEFAULT;
 		reinterpret_cast<TYPIFY(STATE_MESH_IV_INDEX)*>(data.value)->iv_update_in_progress = STATE_MESH_IV_STATUS_DEFAULT;
@@ -390,6 +393,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_TIME:
 	case CS_TYPE::STATE_FACTORY_RESET:
 	case CS_TYPE::STATE_ERRORS:
+	case CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH:
 		return PersistenceMode::RAM;
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::CMD_SWITCH_OFF:
