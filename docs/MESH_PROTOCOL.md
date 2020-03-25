@@ -165,11 +165,11 @@ Bit | Name |  Description
 <a name="cs_mesh_model_msg_state_set"></a>
 #### cs_mesh_model_msg_state_set
 
-![device list](../docs/diagrams/mesh_state_set.png)
+![state set](../docs/diagrams/mesh_state_set.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[state header](#cs_mesh_model_msg_state_header_t) | 3 |
+[state header](#cs_mesh_model_msg_state_header_t) | State header | 3 |
 uint8_t[] | Payload | N | Payload data, depends on state type.
 
 
