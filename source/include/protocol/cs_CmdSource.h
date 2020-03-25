@@ -13,19 +13,20 @@
  * Command originates from ..
  */
 enum cs_cmd_source {
-	CS_CMD_SOURCE_NONE = 0,
-	CS_CMD_SOURCE_DEFAULT,             // No good source description, should not be used.
-	CS_CMD_SOURCE_INTERNAL,            // Internal control command, should not be used.
-	CS_CMD_SOURCE_UART,                // UART.
-	CS_CMD_SOURCE_CONNECTION,          // BLE connection.
-	CS_CMD_SOURCE_SWITCHCRAFT,         // Switchcraft trigger.
-	CS_CMD_SOURCE_DEVICE_TOKEN = 0x300 // A specific device. Add device token to this value.
+	CS_CMD_SOURCE_NONE          = 0,
+	CS_CMD_SOURCE_DEFAULT       = 1,        // No good source description, should not be used.
+	CS_CMD_SOURCE_INTERNAL      = 2,        // Internal control command, should not be used.
+	CS_CMD_SOURCE_UART          = 3,        // UART.
+	CS_CMD_SOURCE_CONNECTION    = 4,        // BLE connection.
+	CS_CMD_SOURCE_SWITCHCRAFT   = 5,        // Switchcraft trigger.
+	CS_CMD_SOURCE_DEVICE_TOKEN  = 0x300     // A specific device. Add device token to this value.
 };
 
 
 /**
  * flagExternal: true when received via mesh
  * sourceId: see cs_cmd_source
+ * count: counter of the device
  */
 struct __attribute__((packed)) cmd_source_t {
 	bool flagExternal : 1;

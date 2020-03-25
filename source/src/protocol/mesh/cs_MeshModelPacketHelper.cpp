@@ -62,6 +62,8 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return payloadSize == sizeof(cs_mesh_model_msg_device_list_size_t);
 		case CS_MESH_MODEL_TYPE_SYNC_REQUEST:
 			return payloadSize == sizeof(cs_mesh_model_msg_sync_request_t);
+		case CS_MESH_MODEL_TYPE_STATE_SET:
+			return payloadSize >= sizeof(cs_mesh_model_msg_state_header_t);
 	}
 
 	return false;
@@ -121,6 +123,131 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
 		memcpy(meshMsg + MESH_HEADER_SIZE, payload, payloadSize);
 	}
 	return true;
+}
+
+bool canShortenStateType(uint16_t type) {
+	return type < 0xFF;
+}
+
+bool canShortenStateId(uint16_t id) {
+	return id < ((1 << 6) - 1);
+}
+
+bool canShortenPersistenceMode(uint8_t id) {
+	return id < ((1 << 2) - 1);
+}
+
+bool canShortenAccessLevel(EncryptionAccessLevel accessLevel) {
+	// 3 bits --> max 7
+	switch (accessLevel) {
+		case ADMIN:
+		case MEMBER:
+		case BASIC:
+		case SETUP:
+			return true;
+		case SERVICE_DATA:
+		case LOCALIZATION:
+		case NOT_SET:
+		case ENCRYPTION_DISABLED:
+		case NO_ONE:
+			return false;
+	}
+	return false;
+}
+
+uint8_t getShortenedAccessLevel(EncryptionAccessLevel accessLevel) {
+	// 3 bits --> max 7
+	switch (accessLevel) {
+		case ADMIN:
+		case MEMBER:
+		case BASIC:
+			return (uint8_t) accessLevel;
+		case SETUP:
+			return 6;
+		case SERVICE_DATA:
+		case LOCALIZATION:
+		case NOT_SET:
+		case ENCRYPTION_DISABLED:
+		case NO_ONE:
+			break;
+	}
+	return 7;
+}
+
+EncryptionAccessLevel getInflatedAccessLevel(uint8_t accessLevel) {
+	switch (accessLevel) {
+		case 0:
+		case 1:
+		case 2:
+			return (EncryptionAccessLevel) accessLevel;
+		case 6:
+			return SETUP;
+		default:
+			return NOT_SET;
+	}
+}
+
+bool canShortenSource(cmd_source_t source) {
+	// 5 bits -- max 31
+	if (source.sourceId >= CS_CMD_SOURCE_DEVICE_TOKEN) {
+		return true;
+	}
+	switch (source.sourceId) {
+		case CS_CMD_SOURCE_NONE:
+		case CS_CMD_SOURCE_DEFAULT:
+		case CS_CMD_SOURCE_INTERNAL:
+		case CS_CMD_SOURCE_UART:
+		case CS_CMD_SOURCE_CONNECTION:
+		case CS_CMD_SOURCE_SWITCHCRAFT:
+		case CS_CMD_SOURCE_DEVICE_TOKEN:
+			return true;
+		default:
+			return false;
+	}
+}
+
+uint8_t getShortenedSource(cmd_source_t source) {
+	// 5 bits --> max 31
+	if (source.sourceId >= CS_CMD_SOURCE_DEVICE_TOKEN) {
+		return 30;
+	}
+	switch (source.sourceId) {
+		case CS_CMD_SOURCE_NONE:
+		case CS_CMD_SOURCE_DEFAULT:
+		case CS_CMD_SOURCE_INTERNAL:
+		case CS_CMD_SOURCE_UART:
+		case CS_CMD_SOURCE_CONNECTION:
+		case CS_CMD_SOURCE_SWITCHCRAFT:
+			return (uint8_t) source.sourceId;
+		case CS_CMD_SOURCE_DEVICE_TOKEN:
+			return 30;
+		default:
+			return 31;
+	}
+}
+
+cmd_source_t getInflatedSource(uint8_t sourceId) {
+	cmd_source_t source;
+	source.flagExternal = true;
+	switch (sourceId) {
+		case CS_CMD_SOURCE_NONE:
+		case CS_CMD_SOURCE_DEFAULT:
+		case CS_CMD_SOURCE_INTERNAL:
+		case CS_CMD_SOURCE_UART:
+		case CS_CMD_SOURCE_CONNECTION:
+		case CS_CMD_SOURCE_SWITCHCRAFT:
+			source.sourceId = (cs_cmd_source) sourceId;
+			break;
+		case 30:
+			// We can't reconstruct the device id, nor the counter.
+			// So let's just set the default.
+			source.sourceId = CS_CMD_SOURCE_DEFAULT;
+			break;
+		default:
+			source.sourceId = CS_CMD_SOURCE_DEFAULT;
+			break;
+	}
+	return source;
 }
 
 }

@@ -11,6 +11,7 @@
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <util/cs_BleError.h>
+#include <util/cs_Utils.h>
 
 extern "C" {
 //#include <access.h>
@@ -132,6 +133,26 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 	msg.rssi = MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata);
 	msg.hops = ACCESS_DEFAULT_TTL - accessMsg->meta_data.ttl;
 	_msgCallback(msg);
+
+	// TODO: we could add some payload (returned from msgCallback) in the reply msg.
+	uint8_t replyMsg[MESH_HEADER_SIZE];
+	MeshUtil::setMeshMessage(CS_MESH_MODEL_TYPE_ACK, NULL, 0, replyMsg, sizeof(replyMsg));
+	sendReply(accessMsg, replyMsg, sizeof(replyMsg));
+}
+
+cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, const uint8_t* msg, uint16_t msgSize) {
+	access_message_tx_t accessReplyMsg;
+	accessReplyMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
+	accessReplyMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_REPLY;
+	accessReplyMsg.p_buffer = msg;
+	accessReplyMsg.length = msgSize;
+	accessReplyMsg.force_segmented = false;
+	accessReplyMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
+	accessReplyMsg.access_token = nrf_mesh_unique_token_get();
+
+	uint32_t retVal = access_model_reply(_accessModelHandle, accessMsg, &accessReplyMsg);
+	LOGMeshModelVerbose("send reply %u", retVal);
+	return retVal;
 }
 
 cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize) {
@@ -183,11 +204,15 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 #endif
 			break;
 	}
-	if (_queueIndexInProgress == -1) {
+	if (_queueIndexInProgress == 255) {
 		LOGe("No index in progress");
 		return;
 	}
-	remQueueItem(_queueIndexInProgress);
+
+	// Set index in progress to none, before removing from queue.
+	uint8_t ind = _queueIndexInProgress;
+	_queueIndexInProgress = 255;
+	remQueueItem(ind);
 }
 
 cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
@@ -221,6 +246,7 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 			memcpy(&(it->metaData), &(item.metaData), sizeof(item.metaData));
 			it->msgSize = msgSize;
 			LOGMeshModelVerbose("added to ind=%u", index);
+			BLEutil::printArray(it->msgPtr, it->msgSize);
 			_queueIndexNext = index;
 
 			// TODO: immediately start sending from queue.
@@ -247,6 +273,10 @@ void MeshModelUnicast::remQueueItem(uint8_t index) {
 	_queue[index].metaData.repeats = 0;
 	LOGMeshModelVerbose("free %p", _queue[index].msgPtr);
 	free(_queue[index].msgPtr);
+//	if (_queueIndexInProgress == index) {
+//		// Cancel progress..
+//		_queueIndexInProgress = 255;
+//	}
 	LOGMeshModelVerbose("removed from queue: ind=%u", index);
 }
 
@@ -262,7 +292,7 @@ int MeshModelUnicast::getNextItemInQueue(bool priority) {
 }
 
 bool MeshModelUnicast::sendMsgFromQueue() {
-	if (_queueIndexInProgress == -1) {
+	if (_queueIndexInProgress != 255) {
 		return false;
 	}
 	int index = getNextItemInQueue(true);

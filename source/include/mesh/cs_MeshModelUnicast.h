@@ -91,9 +91,9 @@ private:
 
 	/**
 	 * Queue index of message currently being sent.
-	 * -1 for none.
+	 * 255 for none.
 	 */
-	uint8_t _queueIndexInProgress = -1;
+	uint8_t _queueIndexInProgress = 255;
 
 	cs_unicast_queue_item_t _queue[_queueSize] = {0};
 
@@ -137,6 +137,11 @@ private:
 	 * Message data has to stay in ram until acked or timedout!
 	 */
 	cs_ret_code_t sendMsg(const uint8_t* msg, uint16_t msgSize);
+
+	/**
+	 * Send a reply when receiving a reliable message.
+	 */
+	cs_ret_code_t sendReply(const access_message_rx_t* accessMsg, const uint8_t* msg, uint16_t msgSize);
 
 	/**
 	 * Sets the publish address.

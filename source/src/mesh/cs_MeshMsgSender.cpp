@@ -49,21 +49,24 @@ cs_ret_code_t MeshMsgSender::sendTestMsg() {
 }
 
 cs_ret_code_t MeshMsgSender::sendSetTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats) {
+	LOGd("sendSetTime");
 	if (item->timestamp == 0) {
 		return ERR_WRONG_PARAMETER;
 	}
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_CMD_TIME, 0, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_CMD_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	return addToQueue(CS_MESH_MODEL_TYPE_CMD_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, true);
 }
 
 cs_ret_code_t MeshMsgSender::sendNoop(uint8_t repeats) {
+	LOGd("sendNoop");
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_CMD_NOOP, 0, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_CMD_NOOP, 0, 0, nullptr, 0, repeats, false);
 }
 
 cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats) {
+	LOGMeshModelDebug("sendMultiSwitchItem");
 	cs_mesh_model_msg_multi_switch_item_t meshItem;
 	meshItem.id = item->id;
 	meshItem.switchCmd = item->cmd.switchCmd;
@@ -86,21 +89,24 @@ cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_ite
 }
 
 cs_ret_code_t MeshMsgSender::sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats) {
+	LOGMeshModelDebug("sendTime");
 	if (item->timestamp == 0) {
 		return ERR_WRONG_PARAMETER;
 	}
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, true);
 }
 
 cs_ret_code_t MeshMsgSender::sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats) {
+	LOGMeshModelDebug("sendBehaviourSettings");
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshMsgSender::sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats) {
+	LOGd("sendProfileLocation profile=%u location=%u", item->profile, item->location);
 	// Don't remove old messages of same type, as they may have other profile location combinations.
 	// Remove old messages of same type, location, and profile.
 	uint16_t id = (item->location << 8) + item->profile;
@@ -109,18 +115,21 @@ cs_ret_code_t MeshMsgSender::sendProfileLocation(const cs_mesh_model_msg_profile
 }
 
 cs_ret_code_t MeshMsgSender::sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t repeats) {
+	LOGd("sendTrackedDeviceRegister");
 	// Remove old messages of same type, and device id, as only the latest register is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0, item->deviceId);
 	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0, item->deviceId, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshMsgSender::sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t repeats) {
+	LOGd("sendTrackedDeviceToken");
 	// Remove old messages of same type, and device id, as only the latest token is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, 0, item->deviceId);
 	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, item->deviceId, 0, (uint8_t*)item, sizeof(*item), repeats, false);
 }
 
 cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* item, uint8_t repeats) {
+	LOGd("sendTrackedDeviceListSize");
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0, 0);
 	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
@@ -150,6 +159,95 @@ cs_ret_code_t MeshMsgSender::remFromQueue(cs_mesh_model_msg_type_t type, stone_i
 //	item.reliable =
 //	item.repeats =
 	return _selector->remFromQueue(item);
+}
+
+
+cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t* command) {
+	LOGi("handleSendMeshCommand type=%u idCount=%u ctrlType=%u ctrlSize=%u accessLevel=%u sourceId=%u",
+			command->header.type,
+			command->header.idCount,
+			command->controlCommand.type,
+			command->controlCommand.size,
+			command->controlCommand.accessLevel,
+			command->controlCommand.source.sourceId
+			);
+	for (uint8_t i=0; i<command->header.idCount; ++i) {
+		LOGd("id: %u", command->targetIds[i]);
+	}
+
+	switch (command->controlCommand.type) {
+		case CTRL_CMD_SET_TIME: {
+			if (command->controlCommand.size != sizeof(uint32_t)) {
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			if (command->header.idCount != 0) {
+				return ERR_WRONG_PARAMETER;
+			}
+			uint32_t* time = (uint32_t*) command->controlCommand.data;
+			cs_mesh_model_msg_time_t packet;
+			packet.timestamp = *time;
+			return sendSetTime(&packet, CS_MESH_RELIABILITY_MEDIUM);
+			break;
+		}
+		case CTRL_CMD_NOP: {
+			if (command->controlCommand.size != 0) {
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			if (command->header.idCount != 0) {
+				return ERR_WRONG_PARAMETER;
+			}
+			return sendNoop();
+			break;
+		}
+
+		case CTRL_CMD_STATE_SET: {
+			// Size has already been checked in command handler.
+			state_packet_header_t* stateHeader = (state_packet_header_t*) command->controlCommand.data;
+			LOGd("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
+			if (command->header.idCount != 1) {
+				LOGw("Need 1 target id");
+				return ERR_WRONG_PARAMETER;
+			}
+			uint8_t stateHeaderSize = sizeof(state_packet_header_t);
+			uint8_t statePayloadSize = command->controlCommand.size - stateHeaderSize;
+			uint8_t msg[sizeof(cs_mesh_model_msg_state_header_t) + statePayloadSize];
+			cs_mesh_model_msg_state_header_t* meshStateHeader = (cs_mesh_model_msg_state_header_t*) msg;
+
+			if (!MeshUtil::canShortenStateType(stateHeader->stateType)) {
+				LOGw("Can't shorten state type %u", stateHeader->stateType);
+				return ERR_WRONG_PARAMETER;
+			}
+			if (!MeshUtil::canShortenStateId(stateHeader->stateId)) {
+				LOGw("Can't shorten state id %u", stateHeader->stateId);
+				return ERR_WRONG_PARAMETER;
+			}
+			if (!MeshUtil::canShortenPersistenceMode(stateHeader->persistenceMode)) {
+				LOGw("Can't shorten persistenceMode %u", stateHeader->persistenceMode);
+				return ERR_WRONG_PARAMETER;
+			}
+			if (!MeshUtil::canShortenAccessLevel(command->controlCommand.accessLevel)) {
+				LOGw("Can't shorten accessLevel %u", command->controlCommand.accessLevel);
+				return ERR_WRONG_PARAMETER;
+			}
+			if (!MeshUtil::canShortenSource(command->controlCommand.source)) {
+				LOGw("Can't shorten source id %u", command->controlCommand.source.sourceId);
+				return ERR_WRONG_PARAMETER;
+			}
+
+			meshStateHeader->type = stateHeader->stateType;
+			meshStateHeader->id = stateHeader->stateId;
+			meshStateHeader->persistenceMode = stateHeader->persistenceMode;
+			meshStateHeader->accessLevel = MeshUtil::getShortenedAccessLevel(command->controlCommand.accessLevel);
+			meshStateHeader->sourceId = MeshUtil::getShortenedSource(command->controlCommand.source);
+
+			memcpy(msg + sizeof(cs_mesh_model_msg_state_header_t), command->controlCommand.data + stateHeaderSize, statePayloadSize);
+			return addToQueue(CS_MESH_MODEL_TYPE_STATE_SET, command->targetIds[0], 0, msg, sizeof(msg), 1, false);
+			break;
+		}
+		default:
+			break;
+	}
+	return ERR_NOT_IMPLEMENTED;
 }
 
 void MeshMsgSender::handleEvent(event_t & event) {
@@ -182,26 +280,27 @@ void MeshMsgSender::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION: {
 			TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION)* packet = (TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION)*)event.data;
-			LOGd("send profile=%u location=%u", packet->profile, packet->location);
 			sendProfileLocation(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER: {
-			LOGd("send tracked device register");
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER)*)event.data;
 			sendTrackedDeviceRegister(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN: {
-			LOGd("send tracked device token");
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN)*)event.data;
 			sendTrackedDeviceToken(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE: {
-			LOGd("send tracked device list size");
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE)*)event.data;
 			sendTrackedDeviceListSize(packet);
+			break;
+		}
+		case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND: {
+			TYPIFY(CMD_SEND_MESH_CONTROL_COMMAND)* packet = (TYPIFY(CMD_SEND_MESH_CONTROL_COMMAND)*)event.data;
+			event.result.returnCode = handleSendMeshCommand(packet);
 			break;
 		}
 		default:

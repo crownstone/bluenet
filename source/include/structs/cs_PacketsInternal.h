@@ -109,6 +109,15 @@ struct __attribute__((packed)) control_command_packet_t {
 };
 
 /**
+ * Mesh control command packet.
+ */
+struct __attribute__((__packed__)) mesh_control_command_packet_t {
+	mesh_control_command_packet_header_t header;
+	stone_id_t* targetIds;
+	control_command_packet_t controlCommand;
+};
+
+/**
  * How reliable a mesh message should be.
  *
  * For now, the associated number is the number of times the message gets sent.
