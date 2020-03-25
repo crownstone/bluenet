@@ -45,7 +45,7 @@ uint 8[] | [Encrypted data](#service_data_encrypted) | 16 | Encrypted data, see 
 <a name="service_data_encrypted"></a>
 Encrypted data:
 
-![Encrypted service data](../docs/diagrams/service-data-encrypted.png)
+![Encrypted service data](../docs/diagrams/service-data-encrypted-2.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -95,7 +95,7 @@ Type | Name | Length | Description
 uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
 uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
 uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
-uint 16 | Behaviour master hash | 2 | Part of behaviour master hash.
+uint 16 | Behaviour master hash | 2 | Part of behaviour master hash: divide hash by 65536.
 uint 8[] | Reserved | 6 | Reserved for future use, 0 for now.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
 uint 8 | Reserved | 1 | Reserved for future use, 0 for now.
