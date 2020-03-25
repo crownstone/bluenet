@@ -60,6 +60,7 @@ Type | Packet
 1 | [Error](#service_data_encrypted_error_2).
 2 | [External state](#service_data_encrypted_ext_state_2).
 3 | [External error](#service_data_encrypted_ext_error_2).
+4 | [Alternative state](#service_data_encrypted_alternative_state).
 
 <a name="service_data_encrypted_state_2"></a>
 ## State packet
@@ -79,6 +80,25 @@ int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to g
 int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
 uint 8 | [Extra flags bitmask](#extra_flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
+
+<a name="service_data_encrypted_alternative_state"></a>
+## Alternative state packet
+
+The following type gives the latest state of the Crownstone.
+It's similar to the normal state, but replaces some less essential fields with other data.
+
+![Encrypted service data state](../docs/diagrams/service-data-encrypted-alternative-state.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+uint 16 | Behaviour master hash | 2 | Part of behaviour master hash.
+uint 8[] | Reserved | 6 | Reserved for future use, 0 for now.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
+uint 8 | Reserved | 1 | Reserved for future use, 0 for now.
 uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
 
 <a name="service_data_encrypted_error_2"></a>
