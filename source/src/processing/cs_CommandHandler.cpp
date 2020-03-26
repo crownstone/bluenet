@@ -890,15 +890,21 @@ void CommandHandler::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CMD_CONTROL_CMD: {
 			auto cmd = reinterpret_cast<TYPIFY(CMD_CONTROL_CMD)*>(event.data);
-			uint8_t result_buffer[300] = {};
 
+			// Allocate buffer instead of using event.result.buf, as that's often not set or too small.
+			// TODO: let non-get commands just return error code when buffer is too small.
+			uint8_t result_buffer[300];
 			[[maybe_unused]] auto result = handleCommand(
-				cmd->type, 
-				cs_data_t(cmd->data, cmd->size), 
-				cmd->source, 
+				cmd->type,
+				cs_data_t(cmd->data, cmd->size),
+				cmd->source,
 				cmd->accessLevel,
-				cs_data_t(result_buffer,sizeof(result_buffer))
+				cs_data_t(result_buffer, sizeof(result_buffer))
+//				event.result.buf
 			);
+			event.result.returnCode = result.returnCode;
+//			event.result.dataSize = result.data.len;
+			event.result.dataSize = 0; // Can't be set, until we're actually using the event result buffer.
 
 			LOGCommandHandlerDebug("control command result.returnCode %d, len: %d", result.returnCode,result.data.len);
 			for(auto i = 0; i < 50; i+=10){

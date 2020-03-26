@@ -19,7 +19,7 @@ void MeshMsgHandler::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
 }
 
-void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg) {
+void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) {
 //	BLEutil::printArray(msg.msg, msg.msgSize);
 //	if (msg.opCode == CS_MESH_MODEL_OPCODE_RELIABLE_MSG) {
 //		LOGe("sendReply");
@@ -93,7 +93,11 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg) {
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_STATE_SET: {
-			handleStateSet(payload, payloadSize);
+			handleStateSet(payload, payloadSize, result);
+			break;
+		}
+		case CS_MESH_MODEL_TYPE_RESULT: {
+			handleResult(payload, payloadSize);
 			break;
 		}
 	}
@@ -321,7 +325,7 @@ void MeshMsgHandler::handleSyncRequest(uint8_t* payload, size16_t payloadSize) {
 	event.dispatch();
 }
 
-void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize) {
+void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_result_t& result) {
 	auto meshStateHeader = reinterpret_cast<cs_mesh_model_msg_state_header_t*>(payload);
 	uint8_t stateDataSize = payloadSize - sizeof(*meshStateHeader);
 	uint8_t* stateData = payload + sizeof(*meshStateHeader);
@@ -358,6 +362,18 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize) {
 	controlCmd.source =      MeshUtil::getInflatedSource(meshStateHeader->sourceId);
 
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+	event.result.buf = result.buf;
 	event.dispatch();
+	LOGi("retCode=%u", event.result.returnCode);
+	result.dataSize = event.result.dataSize;
+	result.returnCode = event.result.returnCode;
+}
+
+void MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSize) {
+	auto header = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(payload);
+	LOGi("handleResult: retCode=%u data:", header->retCode);
+	uint8_t resultDataSize = payloadSize - sizeof(*header);
+	uint8_t* resultData = payload + sizeof(*header);
+	BLEutil::printArray(resultData, resultDataSize);
 }
 

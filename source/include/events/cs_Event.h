@@ -11,29 +11,6 @@
 
 #include <cstdint>
 
-struct event_result_t {
-	/**
-	 * Return code.
-	 *
-	 * Should be set by the class that handles the event.
-	 */
-	cs_ret_code_t returnCode = ERR_EVENT_UNHANDLED;
-
-	/**
-	 * Buffer to put the result data in.
-	 *
-	 * Can be NULL.
-	 */
-	cs_data_t buf;
-
-	/**
-	 * Length of the data in the buffer.
-	 *
-	 * Should be set by the class that handles the event.
-	 */
-	cs_buffer_size_t dataSize = 0;
-};
-
 class event_t {
     public:
 	event_t(CS_TYPE type, void * data, size16_t size) :
@@ -54,7 +31,7 @@ class event_t {
 
 	size16_t size;
 
-	event_result_t result;
+	cs_result_t result;
 
     /**
      * Utility function so that not every file needs to include the eventdispatcher.

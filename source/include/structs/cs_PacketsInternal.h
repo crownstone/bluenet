@@ -46,6 +46,36 @@ struct cs_data_t {
 	{}
 };
 
+struct cs_result_t {
+	/**
+	 * Return code.
+	 *
+	 * Should be set by the handler.
+	 */
+	cs_ret_code_t returnCode = ERR_EVENT_UNHANDLED;
+
+	/**
+	 * Buffer to put the result data in.
+	 *
+	 * Can be NULL.
+	 */
+	cs_data_t buf;
+
+	/**
+	 * Length of the data in the buffer.
+	 *
+	 * Should be set by the handler.
+	 */
+	cs_buffer_size_t dataSize = 0;
+
+	cs_result_t():
+		buf()
+	{}
+	cs_result_t(cs_data_t buf):
+		buf(buf)
+	{}
+};
+
 /**
  * Scanned device.
  */

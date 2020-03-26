@@ -57,13 +57,13 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 
 void Mesh::initModels() {
 	LOGMeshInfo("Initializing and adding models");
-	_modelMulticast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg) -> void {
-		_msgHandler.handleMsg(msg);
+	_modelMulticast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) -> void {
+		_msgHandler.handleMsg(msg, result);
 	});
 	_modelMulticast.init(0);
 
-	_modelUnicast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg) -> void {
-		_msgHandler.handleMsg(msg);
+	_modelUnicast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) -> void {
+		_msgHandler.handleMsg(msg, result);
 	});
 	_modelUnicast.init(1);
 }

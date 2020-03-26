@@ -103,7 +103,8 @@ void MeshModelMulticast::handleMsg(const access_message_rx_t * accessMsg) {
 	msg.msgSize = accessMsg->length;
 	msg.rssi = MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata);
 	msg.hops = ACCESS_DEFAULT_TTL - accessMsg->meta_data.ttl;
-	_msgCallback(msg);
+	cs_result_t result;
+	_msgCallback(msg, result);
 }
 
 cs_ret_code_t MeshModelMulticast::sendMsg(const uint8_t* data, uint16_t len) {

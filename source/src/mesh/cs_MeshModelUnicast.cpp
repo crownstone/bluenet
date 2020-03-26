@@ -132,12 +132,30 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 	msg.msgSize = accessMsg->length;
 	msg.rssi = MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata);
 	msg.hops = ACCESS_DEFAULT_TTL - accessMsg->meta_data.ttl;
-	_msgCallback(msg);
 
-	// TODO: we could add some payload (returned from msgCallback) in the reply msg.
-	uint8_t replyMsg[MESH_HEADER_SIZE];
-	MeshUtil::setMeshMessage(CS_MESH_MODEL_TYPE_ACK, NULL, 0, replyMsg, sizeof(replyMsg));
-	sendReply(accessMsg, replyMsg, sizeof(replyMsg));
+	if (msg.opCode == CS_MESH_MODEL_OPCODE_REPLY) {
+		// Handle the message, don't send a reply.
+		cs_result_t result;
+		_msgCallback(msg, result);
+		return;
+	}
+
+	// Prepare a reply message, to send the result back.
+	uint8_t replyMsg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
+	replyMsg[0] = CS_MESH_MODEL_TYPE_RESULT;
+
+	cs_mesh_model_msg_result_header_t* resultHeader = (cs_mesh_model_msg_result_header_t*) (replyMsg + MESH_HEADER_SIZE);
+
+	uint8_t headerSize = MESH_HEADER_SIZE + sizeof(cs_mesh_model_msg_result_header_t);
+	cs_data_t resultData(replyMsg + headerSize, sizeof(replyMsg) - headerSize);
+	cs_result_t result(resultData);
+
+	// Handle the message, get the result.
+	_msgCallback(msg, result);
+
+	// Send the result as reply.
+	resultHeader->retCode = result.returnCode;
+	sendReply(accessMsg, replyMsg, headerSize + result.dataSize);
 }
 
 cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, const uint8_t* msg, uint16_t msgSize) {

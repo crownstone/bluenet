@@ -64,6 +64,8 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return payloadSize == sizeof(cs_mesh_model_msg_sync_request_t);
 		case CS_MESH_MODEL_TYPE_STATE_SET:
 			return payloadSize >= sizeof(cs_mesh_model_msg_state_header_t);
+		case CS_MESH_MODEL_TYPE_RESULT:
+			return payloadSize >= sizeof(cs_mesh_model_msg_result_header_t);
 	}
 
 	return false;
