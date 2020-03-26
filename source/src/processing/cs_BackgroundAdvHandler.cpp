@@ -15,6 +15,7 @@
 #include "processing/cs_EncryptionHandler.h"
 #include "processing/cs_CommandHandler.h"
 #include "storage/cs_State.h"
+#include "time/cs_SystemTime.h"
 
 #define LOGBackgroundAdvDebug LOGnone
 //#define BACKGROUND_ADV_VERBOSE
@@ -145,13 +146,23 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	LOGBackgroundAdvVerbose("decrypted=[%u %u]", decryptedPayload[0], decryptedPayload[1]);
 
 	// Validate
-	uint32_t timestamp;
-	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
-	__attribute__((unused)) uint16_t timestampRounded = (timestamp >> 7) & 0x0000FFFF;
-	LOGBackgroundAdvVerbose("validation=%u time=%u %u", decryptedPayload[0], timestamp, timestampRounded);
+	Time time = SystemTime::posix();
+	uint32_t timestamp = time.timestamp();
+//	TYPIFY(STATE_TIME) timestamp;
+//	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
+	uint16_t timestampRounded = (timestamp >> 7) & 0x0000FFFF;
+	LOGBackgroundAdvVerbose("validation=%u time=%u rounded=%u", decryptedPayload[0], timestamp, timestampRounded);
+	LOGd("validation=%u time=%u rounded=%u", decryptedPayload[0], timestamp, timestampRounded);
 
-	// TODO: validate with time
-	if (decryptedPayload[0] != 0xCAFE){
+	// For now, we also allow CAFE as validation.
+	bool validated = false;
+	if (decryptedPayload[0] == 0xCAFE) {
+		validated = true;
+	}
+	if (timestampRounded - 1 < decryptedPayload[0] && decryptedPayload[0] < timestampRounded + 1) {
+		validated = true;
+	}
+	if (!validated) {
 		return;
 	}
 
