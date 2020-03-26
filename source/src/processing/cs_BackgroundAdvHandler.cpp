@@ -152,7 +152,6 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 //	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
 	uint16_t timestampRounded = (timestamp >> 7) & 0x0000FFFF;
 	LOGBackgroundAdvVerbose("validation=%u time=%u rounded=%u", decryptedPayload[0], timestamp, timestampRounded);
-	LOGd("validation=%u time=%u rounded=%u", decryptedPayload[0], timestamp, timestampRounded);
 
 	// For now, we also allow CAFE as validation.
 	bool validated = false;

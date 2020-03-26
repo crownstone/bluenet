@@ -264,7 +264,6 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 //	TYPIFY(STATE_TIME) timestamp;
 //	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
 	LOGCommandAdvVerbose("validation=%u time=%u", validationTimestamp, timestamp);
-	LOGd("validation=%u time=%u", validationTimestamp, timestamp);
 
 	// For now, we also allow CAFEBABE as validation.
 	bool validated = false;
