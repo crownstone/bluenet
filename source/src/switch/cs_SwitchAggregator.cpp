@@ -63,9 +63,6 @@ bool SwitchAggregator::updateBehaviourHandlers(){
 }
 
 cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
-TEST_PUSH_EXPR_D(this,"overrideState", (overrideState? (int) overrideState.value() : -1));
-    TEST_PUSH_EXPR_D(this,"behaviourState", (behaviourState? (int) behaviourState.value() : -1));
-    TEST_PUSH_EXPR_D(this,"aggregatedState", (aggregatedState? (int) aggregatedState.value() : -1));
 
     bool shouldResetOverrideState = false;
 
@@ -108,6 +105,11 @@ TEST_PUSH_EXPR_D(this,"overrideState", (overrideState? (int) overrideState.value
     TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN) eventData = overrideState.has_value();
     event_t overrideEvent(CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN, &eventData, sizeof(eventData));
     overrideEvent.dispatch();
+
+    // using -1 as value for the hasvalues works because they are unsigned, hence non-negative
+    TEST_PUSH_EXPR_D(this,"overrideState", (overrideState? (int) overrideState.value() : -1));
+    TEST_PUSH_EXPR_D(this,"behaviourState", (behaviourState? (int) behaviourState.value() : -1));
+    TEST_PUSH_EXPR_D(this,"aggregatedState", (aggregatedState? (int) aggregatedState.value() : -1));
 
     return retCode;
 }
