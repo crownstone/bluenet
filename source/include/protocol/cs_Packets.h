@@ -263,6 +263,37 @@ struct cs_mesh_iv_index_t {
 
 typedef uint32_t cs_mesh_seq_number_t;
 
+struct __attribute__((packed)) cs_uicr_data_t {
+	uint32_t board;
+
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			uint8_t productType;
+			uint8_t region;
+			uint8_t productFamily;
+		} fields;
+		uint32_t asInt;
+	} productRegionFamily;
+
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			uint8_t patch;
+			uint8_t minor;
+			uint8_t major;
+		} fields;
+		uint32_t asInt;
+	} majorMinorPatch;
+
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			uint8_t housing;
+			uint8_t week; // week number
+			uint8_t year; // last 2 digits of the year
+		} fields;
+		uint32_t asInt;
+	} productionDateHousing;
+};
+
 
 // ========================= functions =========================
 

@@ -75,6 +75,7 @@ private:
 	command_result_t handleCmdNop                     (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdGotoDfu                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdGetBootloaderVersion    (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleCmdGetUicrData             (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdReset                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdFactoryReset            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdSetTime                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);

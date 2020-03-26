@@ -308,6 +308,7 @@ Type nr | Type name | Payload type | Result type | Description | A | M | B | S
 2 | Get state | [State get packet](#state_get_packet) | [State result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
 3 | Set state | [State set packet](#state_set_packet) | - | Required access depends on the state type. | x | x | x
 4 | Get bootloader version | - | Char array | Get the bootloader version string. | x | x | x | x
+5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) | Get the UICR data. | x | x | x | x
 10 | Reset | - | - | Reset device | x
 11 | Goto DFU | - | - | Reset device to DFU mode | x
 12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
@@ -417,6 +418,29 @@ Value | Name | Description
 0   | TEMPORARY | Set value to ram. This value will be used by the firmware, but lost after a reboot.
 1   | STORED | Set value to ram and flash. This value will be used by the firmware, also after a reboot. Overwrites the temporary value.
 
+
+<a name="uicr_data_packet"></a>
+##### UICR data packet
+
+This packet is meant for developers. For more information, see [UICR](UICR.md) and [Naming](NAMING.md).
+
+![UICR data packet](../docs/diagrams/uicr_data_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 32 | Board | 4 | The board version.
+uint 8 | Product type | 1 | Type of product.
+uint 8 | Region | 1 | Which region the product is for.
+uint 8 | Product family | 1 | Product family.
+uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
+uint 8 | Hardware patch | 1 | Hardware version patch.
+uint 8 | Hardware minor | 1 | Hardware version minor.
+uint 8 | Hardware major | 1 | Hardware version major.
+uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
+uint 8 | Product housing | 1 |
+uint 8 | Production week | 1 | Week number.
+uint 8 | Production year | 1 | Last 2 digits of the year.
+uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
 
 
 <a name="sun_time_packet"></a>

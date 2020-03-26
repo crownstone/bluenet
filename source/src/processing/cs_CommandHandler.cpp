@@ -90,6 +90,7 @@ command_result_t CommandHandler::handleCommand(
 		case CTRL_CMD_NOP:
 		case CTRL_CMD_GOTO_DFU:
 		case CTRL_CMD_GET_BOOTLOADER_VERSION:
+		case CTRL_CMD_GET_UICR_DATA:
 		case CTRL_CMD_RESET:
 		case CTRL_CMD_FACTORY_RESET:
 		case CTRL_CMD_SET_TIME:
@@ -133,6 +134,8 @@ command_result_t CommandHandler::handleCommand(
 		return handleCmdGotoDfu(commandData, accessLevel, resultData);
 	case CTRL_CMD_GET_BOOTLOADER_VERSION:
 		return handleCmdGetBootloaderVersion(commandData, accessLevel, resultData);
+	case CTRL_CMD_GET_UICR_DATA:
+		return handleCmdGetUicrData(commandData, accessLevel, resultData);
 	case CTRL_CMD_RESET:
 		return handleCmdReset(commandData, accessLevel, resultData);
 	case CTRL_CMD_FACTORY_RESET:
@@ -217,6 +220,43 @@ command_result_t CommandHandler::handleCmdGetBootloaderVersion(cs_data_t command
 	result.returnCode = ERR_SUCCESS;
 	result.data.data = resultData.data;
 	result.data.len = dataSize;
+	return result;
+}
+
+command_result_t CommandHandler::handleCmdGetUicrData(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
+	LOGi(STR_HANDLE_COMMAND, "get UICR data");
+
+	if (resultData.len < sizeof(cs_uicr_data_t)) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
+
+	cs_uicr_data_t* uicrData = (cs_uicr_data_t*)resultData.data;
+	uint8_t uicrIndex = UICR_BOARD_INDEX;
+	uicrData->board = NRF_UICR->CUSTOMER[uicrIndex++];
+	uicrData->productRegionFamily.asInt = NRF_UICR->CUSTOMER[uicrIndex++];
+	uicrData->majorMinorPatch.asInt = NRF_UICR->CUSTOMER[uicrIndex++];
+	uicrData->productionDateHousing.asInt = NRF_UICR->CUSTOMER[uicrIndex++];
+	LOGd("board=%u", uicrData->board);
+	LOGd("productType=%u region=%u productFamily=%u int=0x%X",
+			uicrData->productRegionFamily.fields.productType,
+			uicrData->productRegionFamily.fields.region,
+			uicrData->productRegionFamily.fields.productFamily,
+			uicrData->productRegionFamily.asInt);
+	LOGd("major=%u minor=%u patch=%u int=0x%X",
+			uicrData->majorMinorPatch.fields.major,
+			uicrData->majorMinorPatch.fields.minor,
+			uicrData->majorMinorPatch.fields.patch,
+			uicrData->majorMinorPatch.asInt);
+	LOGd("year=%u week=%u housing=%u int=0x%X",
+			uicrData->productionDateHousing.fields.year,
+			uicrData->productionDateHousing.fields.week,
+			uicrData->productionDateHousing.fields.housing,
+			uicrData->productionDateHousing.asInt);
+
+	command_result_t result;
+	result.returnCode = ERR_SUCCESS;
+	result.data.data = resultData.data;
+	result.data.len = sizeof(*uicrData);
 	return result;
 }
 
@@ -782,6 +822,7 @@ command_result_t CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
 	switch (type) {
 		case CTRL_CMD_GET_BOOTLOADER_VERSION:
+		case CTRL_CMD_GET_UICR_DATA:
 			return ENCRYPTION_DISABLED;
 
 		case CTRL_CMD_INCREASE_TX:
