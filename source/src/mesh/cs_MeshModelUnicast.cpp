@@ -10,6 +10,7 @@
 #include <mesh/cs_MeshUtil.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
+#include <protocol/cs_UartProtocol.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
@@ -201,32 +202,48 @@ cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize) {
 }
 
 void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
+	if (_queueIndexInProgress == 255) {
+		LOGe("No index in progress");
+		return;
+	}
+
 	switch (status) {
-		case ACCESS_RELIABLE_TRANSFER_SUCCESS:
+		case ACCESS_RELIABLE_TRANSFER_SUCCESS: {
 			LOGi("reliable msg success");
+			MeshUtil::printQueueItem("", _queue[_queueIndexInProgress].metaData);
 #if MESH_MODEL_TEST_MSG == 2
 			_acked++;
 			LOGi("acked=%u timedout=%u canceled=%u (acked=%u%%)", _acked, _timedout, _canceled, (_acked * 100) / (_acked + _timedout + _canceled));
 #endif
 			break;
-	case ACCESS_RELIABLE_TRANSFER_TIMEOUT:
+		}
+		case ACCESS_RELIABLE_TRANSFER_TIMEOUT: {
 			LOGw("reliable msg timeout");
+			MeshUtil::printQueueItem("", _queue[_queueIndexInProgress].metaData);
+
+			cs_mesh_model_msg_type_t type = (cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type;
+			result_packet_header_t resultHeader(MeshUtil::getCtrlCmdType(type), ERR_TIMEOUT);
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+
 #if MESH_MODEL_TEST_MSG == 2
 			_timedout++;
 			LOGi("acked=%u timedout=%u canceled=%u (acked=%u%%)", _acked, _timedout, _canceled, (_acked * 100) / (_acked + _timedout + _canceled));
 #endif
 			break;
-	case ACCESS_RELIABLE_TRANSFER_CANCELLED:
+		}
+		case ACCESS_RELIABLE_TRANSFER_CANCELLED: {
 			LOGw("reliable msg cancelled");
+
+			cs_mesh_model_msg_type_t type = (cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type;
+			result_packet_header_t resultHeader(MeshUtil::getCtrlCmdType(type), ERR_CANCELED);
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+
 #if MESH_MODEL_TEST_MSG == 2
 			_canceled++;
 			LOGi("acked=%u timedout=%u canceled=%u (acked=%u%%)", _acked, _timedout, _canceled, (_acked * 100) / (_acked + _timedout + _canceled));
 #endif
 			break;
-	}
-	if (_queueIndexInProgress == 255) {
-		LOGe("No index in progress");
-		return;
+		}
 	}
 
 	// Set index in progress to none, before removing from queue.

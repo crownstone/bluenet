@@ -8,11 +8,12 @@
 
 #include <cstdint>
 #include "cfg/cs_Config.h"
+#include "protocol/cs_CmdSource.h"
 #include "protocol/cs_CommandTypes.h"
+#include "protocol/cs_ErrorCodes.h"
+#include "protocol/cs_ServiceDataPackets.h"
 #include "protocol/cs_Typedefs.h"
 #include "protocol/mesh/cs_MeshModelPackets.h"
-#include "protocol/cs_ServiceDataPackets.h"
-#include "protocol/cs_CmdSource.h"
 
 
 #define LEGACY_MULTI_SWITCH_HEADER_SIZE (1+1)
@@ -68,9 +69,20 @@ struct __attribute__((__packed__)) control_packet_t {
  * Header of a result packet.
  */
 struct __attribute__((__packed__)) result_packet_header_t {
-	cs_control_cmd_t commandType;
-	cs_ret_code_t returnCode;
-	cs_buffer_size_t payloadSize;
+	cs_control_cmd_t commandType = CTRL_CMD_UNKNOWN;
+	cs_ret_code_t returnCode = ERR_UNSPECIFIED;
+	cs_buffer_size_t payloadSize = 0;
+	result_packet_header_t() {}
+	result_packet_header_t(cs_control_cmd_t commandType, cs_ret_code_t returnCode):
+		commandType(commandType),
+		returnCode(returnCode),
+		payloadSize(0)
+	{}
+	result_packet_header_t(cs_control_cmd_t commandType, cs_ret_code_t returnCode, cs_buffer_size_t payloadSize):
+		commandType(commandType),
+		returnCode(returnCode),
+		payloadSize(payloadSize)
+	{}
 };
 
 /**
