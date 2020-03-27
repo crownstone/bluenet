@@ -76,4 +76,6 @@ private:
 	 * Send an event if that's the case.
 	 */
 	void checkStateReceived(int8_t rssi, uint8_t ttl);
+
+	void sendResult(result_packet_header_t& resultHeader, const cs_data_t& resultData);
 };

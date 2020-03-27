@@ -12,6 +12,7 @@
 #include <mesh/cs_MeshMsgHandler.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
+#include <protocol/cs_UartProtocol.h>
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
 
@@ -381,10 +382,52 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_r
 
 void MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSize) {
 	auto header = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(payload);
-	cs_ret_code_t retCode = MeshUtil::getInflatedRetCode(header->retCode);
-	LOGi("handleResult: meshType=%u retCode=%u data:", header->msgType, retCode);
-	uint8_t resultDataSize = payloadSize - sizeof(*header);
-	uint8_t* resultData = payload + sizeof(*header);
-	BLEutil::printArray(resultData, resultDataSize);
+	cs_data_t resultData(payload + sizeof(*header), payloadSize - sizeof(*header));
+//	uint8_t resultDataSize = payloadSize - sizeof(*header);
+//	uint8_t* resultData = payload + sizeof(*header);
+
+	// Convert to result packet header.
+	result_packet_header_t resultHeader;
+	resultHeader.commandType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)header->msgType);
+	resultHeader.returnCode = MeshUtil::getInflatedRetCode(header->retCode);
+	resultHeader.payloadSize = resultData.len;
+
+	LOGi("handleResult: meshType=%u retCode=%u data:", header->msgType, header->retCode);
+	BLEutil::printArray(resultData.data, resultData.len);
+
+	// Convert result data if needed.
+	switch (header->msgType) {
+		case CS_MESH_MODEL_TYPE_STATE_SET: {
+			if (resultData.len == sizeof(cs_mesh_model_msg_state_header_t)) {
+				// Inflate state header.
+				cs_mesh_model_msg_state_header_t* meshStateHeader = (cs_mesh_model_msg_state_header_t*)resultData.data;
+				state_packet_header_t stateHeader;
+				stateHeader.stateType =           meshStateHeader->type;
+				stateHeader.stateId =             meshStateHeader->id;
+				stateHeader.persistenceMode =     meshStateHeader->persistenceMode;
+				sendResult(resultHeader, cs_data_t((uint8_t*)&stateHeader, sizeof(stateHeader)));
+				return;
+			}
+			LOGw("Wrong result data size: %u", resultData.len);
+			resultData.len = 0;
+			break;
+		}
+		default:
+			sendResult(resultHeader, resultData);
+			break;
+	}
+}
+
+void MeshMsgHandler::sendResult(result_packet_header_t& resultHeader, const cs_data_t& resultData) {
+	resultHeader.payloadSize = resultData.len;
+
+	LOGi("Result: cmdType=%u retCode=%u data:", resultHeader.commandType, resultHeader.returnCode);
+	BLEutil::printArray(resultData.data, resultData.len);
+
+	// Send out result.
+	UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + resultData.len);
+	UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+	UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, resultData.data, resultData.len);
+	UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_MESH_RESULT);
 }
 

@@ -102,7 +102,7 @@ struct __attribute__((__packed__)) state_packet_header_t {
 	uint16_t stateType;
 	uint16_t stateId;
 	uint8_t persistenceMode; // PersistenceModeSet or PersistenceModeGet
-	uint8_t reserved;
+	uint8_t reserved = 0;
 };
 
 /**

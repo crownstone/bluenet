@@ -129,6 +129,36 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
 	return true;
 }
 
+
+
+CommandHandlerTypes getCtrlCmdType(cs_mesh_model_msg_type_t meshType) {
+	switch (meshType) {
+		case CS_MESH_MODEL_TYPE_CMD_TIME:
+			return CTRL_CMD_SET_TIME;
+		case CS_MESH_MODEL_TYPE_CMD_NOOP:
+			return CTRL_CMD_NOP;
+		case CS_MESH_MODEL_TYPE_STATE_SET:
+			return CTRL_CMD_STATE_SET;
+		default:
+			return CTRL_CMD_UNKNOWN;
+	}
+}
+
+cs_mesh_model_msg_type_t getMeshType(CommandHandlerTypes ctrlCmdType) {
+	switch (ctrlCmdType) {
+		case CTRL_CMD_SET_TIME:
+			return CS_MESH_MODEL_TYPE_CMD_TIME;
+		case CTRL_CMD_NOP:
+			return CS_MESH_MODEL_TYPE_CMD_NOOP;
+		case CTRL_CMD_STATE_SET:
+			return CS_MESH_MODEL_TYPE_STATE_SET;
+		default:
+			return CS_MESH_MODEL_TYPE_UNKNOWN;
+	}
+}
+
+
+
 bool canShortenStateType(uint16_t type) {
 	return type < 0xFF;
 }
