@@ -72,16 +72,13 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt) {
 	if (evt.result.returnCode != ERR_SUCCESS) {
 		evt.result.returnCode = addBehaviour(evt.getData(), evt.size, result_index);
 	}
-	// check return buffer
-	if (evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
-		LOGd("ERR_BUFFER_TOO_SMALL");
-		evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
-		return;
+
+	// Fill return buffer if it's large enough.
+	if (evt.result.buf.data != nullptr && evt.result.buf.len >= sizeof(uint8_t) + sizeof(uint32_t)) {
+		*reinterpret_cast<uint8_t*>( evt.result.buf.data + 0) = result_index;
+		*reinterpret_cast<uint32_t*>(evt.result.buf.data + 1) = calculateMasterHash();
+		evt.result.dataSize = sizeof(uint8_t) + sizeof(uint32_t);
 	}
-	// return value can always be used.
-	*reinterpret_cast<uint8_t*>( evt.result.buf.data + 0) = result_index;
-	*reinterpret_cast<uint32_t*>(evt.result.buf.data + 1) = calculateMasterHash();
-	evt.result.dataSize = sizeof(uint8_t) + sizeof(uint32_t);
 }
 
 ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bufSize, uint8_t & index) {
@@ -180,13 +177,6 @@ bool BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, con
 		return false;
 	}
 
-	// check return buffer
-	if (evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
-		LOGd("ERR_BUFFER_TOO_SMALL");
-		evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
-		return false;
-	}
-
 	return true;
 }
 
@@ -266,10 +256,12 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 		}
 	}
 
-	// can always add a return value
-	evt.result.buf.data[0] = index;
-	*reinterpret_cast<uint32_t*>(evt.result.buf.data + sizeof(uint8_t)) = calculateMasterHash();
-	evt.result.dataSize = sizeof(uint8_t) + sizeof(uint32_t);
+	// Fill return buffer if it's large enough.
+	if (evt.result.buf.data != nullptr && evt.result.buf.len >= sizeof(uint8_t) + sizeof(uint32_t)) {
+		evt.result.buf.data[0] = index;
+		*reinterpret_cast<uint32_t*>(evt.result.buf.data + sizeof(uint8_t)) = calculateMasterHash();
+		evt.result.dataSize = sizeof(uint8_t) + sizeof(uint32_t);
+	}
 }
 
 void BehaviourStore::handleRemoveBehaviour(event_t& evt) {
@@ -278,15 +270,12 @@ void BehaviourStore::handleRemoveBehaviour(event_t& evt) {
 
 	evt.result.returnCode = removeBehaviour(index);
 
-	if (evt.result.buf.data == nullptr || evt.result.buf.len < sizeof(uint8_t) + sizeof(uint32_t)) {
-		LOGd("ERR_BUFFER_TOO_SMALL");
-		evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
-		return;
+	// Fill return buffer if it's large enough.
+	if (evt.result.buf.data != nullptr && evt.result.buf.len >= sizeof(uint8_t) + sizeof(uint32_t)) {
+		evt.result.buf.data[0] = index;
+		*reinterpret_cast<uint32_t*>(evt.result.buf.data + sizeof(uint8_t)) = calculateMasterHash();
+		evt.result.dataSize = sizeof(uint8_t) + sizeof(uint32_t);
 	}
-
-	evt.result.buf.data[0] = index;
-	*reinterpret_cast<uint32_t*>(evt.result.buf.data + sizeof(uint8_t)) = calculateMasterHash();
-	evt.result.dataSize = sizeof(uint8_t) + sizeof(uint32_t);
 }
 
 void BehaviourStore::handleGetBehaviour(event_t& evt) {
