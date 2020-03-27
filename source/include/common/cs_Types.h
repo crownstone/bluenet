@@ -24,7 +24,7 @@
 
 enum TypeBases {
 	State_Base   = 0x000,
-	Internal_Base = 0x100,
+	Internal_Base = 0x100, // Mesh state set relies on state types being below 0x100.
 };
 
 /** Cast to underlying type.

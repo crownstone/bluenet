@@ -63,9 +63,11 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		case CS_MESH_MODEL_TYPE_SYNC_REQUEST:
 			return payloadSize == sizeof(cs_mesh_model_msg_sync_request_t);
 		case CS_MESH_MODEL_TYPE_STATE_SET:
-			return payloadSize >= sizeof(cs_mesh_model_msg_state_header_t);
+			return payloadSize >= sizeof(cs_mesh_model_msg_state_header_ext_t);
 		case CS_MESH_MODEL_TYPE_RESULT:
 			return payloadSize >= sizeof(cs_mesh_model_msg_result_header_t);
+		case CS_MESH_MODEL_TYPE_UNKNOWN:
+			return false;
 	}
 
 	return false;
@@ -137,6 +139,24 @@ bool canShortenStateId(uint16_t id) {
 
 bool canShortenPersistenceMode(uint8_t id) {
 	return id < ((1 << 2) - 1);
+}
+
+bool canShortenRetCode(cs_ret_code_t retCode) {
+	return retCode < 0xFF;
+}
+
+uint8_t getShortenedRetCode(cs_ret_code_t retCode) {
+	if (retCode > 0xFF) {
+		return 0xFF;
+	}
+	return retCode;
+}
+
+cs_ret_code_t getInflatedRetCode(uint8_t retCode) {
+	if (retCode == 0xFF) {
+		return ERR_UNSPECIFIED;
+	}
+	return retCode;
 }
 
 bool canShortenAccessLevel(EncryptionAccessLevel accessLevel) {

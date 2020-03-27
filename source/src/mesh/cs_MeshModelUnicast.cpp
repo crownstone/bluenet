@@ -154,7 +154,9 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 	_msgCallback(msg, result);
 
 	// Send the result as reply.
-	resultHeader->retCode = result.returnCode;
+	resultHeader->msgType = (msg.msgSize >= MESH_HEADER_SIZE) ? MeshUtil::getType(msg.msg) : CS_MESH_MODEL_TYPE_UNKNOWN;
+
+	resultHeader->retCode = MeshUtil::getShortenedRetCode(result.returnCode);
 	sendReply(accessMsg, replyMsg, headerSize + result.dataSize);
 }
 

@@ -100,6 +100,9 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 			handleResult(payload, payloadSize);
 			break;
 		}
+		case CS_MESH_MODEL_TYPE_UNKNOWN: {
+			break;
+		}
 	}
 }
 
@@ -326,14 +329,14 @@ void MeshMsgHandler::handleSyncRequest(uint8_t* payload, size16_t payloadSize) {
 }
 
 void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_result_t& result) {
-	auto meshStateHeader = reinterpret_cast<cs_mesh_model_msg_state_header_t*>(payload);
+	auto meshStateHeader = reinterpret_cast<cs_mesh_model_msg_state_header_ext_t*>(payload);
 	uint8_t stateDataSize = payloadSize - sizeof(*meshStateHeader);
 	uint8_t* stateData = payload + sizeof(*meshStateHeader);
 
 	LOGi("handleStateSet: type=%u id=%u persistenceMode=%u accessLevel=%u sourceId=%u data:",
-			meshStateHeader->type,
-			meshStateHeader->id,
-			meshStateHeader->persistenceMode,
+			meshStateHeader->header.type,
+			meshStateHeader->header.id,
+			meshStateHeader->header.persistenceMode,
 			meshStateHeader->accessLevel,
 			meshStateHeader->sourceId
 			);
@@ -350,9 +353,9 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_r
 	memcpy(controlCmdData + sizeof(state_packet_header_t), stateData, stateDataSize);
 
 	// Inflate state header.
-	stateHeader->stateType =           meshStateHeader->type;
-	stateHeader->stateId =             meshStateHeader->id;
-	stateHeader->persistenceMode =     meshStateHeader->persistenceMode;
+	stateHeader->stateType =           meshStateHeader->header.type;
+	stateHeader->stateId =             meshStateHeader->header.id;
+	stateHeader->persistenceMode =     meshStateHeader->header.persistenceMode;
 
 	// Inflate control command meta data.
 	controlCmd.type =        CTRL_CMD_STATE_SET;
@@ -364,14 +367,22 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_r
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 	event.result.buf = result.buf;
 	event.dispatch();
-	LOGi("retCode=%u", event.result.returnCode);
-	result.dataSize = event.result.dataSize;
+
+	// Since the result data buffer is not large enough for a state_packet_header_t,
+	// we use a cs_mesh_model_msg_state_header_t instead.
+	if (result.buf.len >= sizeof(meshStateHeader->header)) {
+		memcpy(result.buf.data, &(meshStateHeader->header), sizeof(meshStateHeader->header));
+		result.dataSize = sizeof(meshStateHeader->header);
+	}
+//	result.dataSize = event.result.dataSize;
 	result.returnCode = event.result.returnCode;
+	LOGi("retCode=%u dataSize=%u", result.returnCode, result.dataSize);
 }
 
 void MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSize) {
 	auto header = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(payload);
-	LOGi("handleResult: retCode=%u data:", header->retCode);
+	cs_ret_code_t retCode = MeshUtil::getInflatedRetCode(header->retCode);
+	LOGi("handleResult: meshType=%u retCode=%u data:", header->msgType, retCode);
 	uint8_t resultDataSize = payloadSize - sizeof(*header);
 	uint8_t* resultData = payload + sizeof(*header);
 	BLEutil::printArray(resultData, resultDataSize);

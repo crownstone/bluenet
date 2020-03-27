@@ -210,8 +210,8 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			}
 			uint8_t stateHeaderSize = sizeof(state_packet_header_t);
 			uint8_t statePayloadSize = command->controlCommand.size - stateHeaderSize;
-			uint8_t msg[sizeof(cs_mesh_model_msg_state_header_t) + statePayloadSize];
-			cs_mesh_model_msg_state_header_t* meshStateHeader = (cs_mesh_model_msg_state_header_t*) msg;
+			uint8_t msg[sizeof(cs_mesh_model_msg_state_header_ext_t) + statePayloadSize];
+			cs_mesh_model_msg_state_header_ext_t* meshStateHeader = (cs_mesh_model_msg_state_header_ext_t*) msg;
 
 			if (!MeshUtil::canShortenStateType(stateHeader->stateType)) {
 				LOGw("Can't shorten state type %u", stateHeader->stateType);
@@ -234,13 +234,13 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 				return ERR_WRONG_PARAMETER;
 			}
 
-			meshStateHeader->type = stateHeader->stateType;
-			meshStateHeader->id = stateHeader->stateId;
-			meshStateHeader->persistenceMode = stateHeader->persistenceMode;
+			meshStateHeader->header.type = stateHeader->stateType;
+			meshStateHeader->header.id = stateHeader->stateId;
+			meshStateHeader->header.persistenceMode = stateHeader->persistenceMode;
 			meshStateHeader->accessLevel = MeshUtil::getShortenedAccessLevel(command->controlCommand.accessLevel);
 			meshStateHeader->sourceId = MeshUtil::getShortenedSource(command->controlCommand.source);
 
-			memcpy(msg + sizeof(cs_mesh_model_msg_state_header_t), command->controlCommand.data + stateHeaderSize, statePayloadSize);
+			memcpy(msg + sizeof(*meshStateHeader), command->controlCommand.data + stateHeaderSize, statePayloadSize);
 			return addToQueue(CS_MESH_MODEL_TYPE_STATE_SET, command->targetIds[0], 0, msg, sizeof(msg), 1, false);
 			break;
 		}
