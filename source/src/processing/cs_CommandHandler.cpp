@@ -216,6 +216,7 @@ void CommandHandler::handleCmdGetBootloaderVersion(cs_data_t commandData, const 
 		result.returnCode = ERR_NOT_FOUND;
 		return;
 	}
+	result.dataSize = dataSize;
 	result.returnCode = ERR_SUCCESS;
 	return;
 }
@@ -251,8 +252,8 @@ void CommandHandler::handleCmdGetUicrData(cs_data_t commandData, const Encryptio
 			uicrData->productionDateHousing.fields.housing,
 			uicrData->productionDateHousing.asInt);
 
-	result.returnCode = ERR_SUCCESS;
 	result.dataSize = sizeof(*uicrData);
+	result.returnCode = ERR_SUCCESS;
 }
 
 void CommandHandler::handleCmdReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
