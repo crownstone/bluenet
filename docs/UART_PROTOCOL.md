@@ -71,6 +71,15 @@ Type  | Packet | Description
 
 ## Packets
 
+<a name="mesh_result_packet"></a>
+### Mesh result packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Stone ID | 1 | ID of the stone. 0 for all remaining stones.
+[Result packet](../docs/PROTOCOL.md#result_packet) | Result | N | The result.
+
+
 <a name="adc_config_packet"></a>
 ### ADC config
 
