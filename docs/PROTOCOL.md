@@ -502,9 +502,9 @@ Only a couple of commands are implemented:
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
-uint 8 | Reserved | 1 | Reserved for future use, should be 0 for now.
-uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast.
-uint8 [] | List of target IDs | Count | Crownstone identifiers of the devices at which this message is aimed. For broadcast, no IDs are provided and the command payload follows directly after the count field.
+uint 8 | [Flags](#mesh_command_flags) | 1 | Options.
+uint 8 | Count | 1 | The number of stone IDs provided.
+uint8 [] | List of stone IDs | Count | IDs of the stones at which this message is aimed. Can be empty, then the command payload follows directly after the count field.
 uint 8 | Command payload | N | The command payload data, which depends on the [type](#mesh_command_types).
 
 <a name="mesh_command_types"></a>
@@ -513,6 +513,15 @@ uint 8 | Command payload | N | The command payload data, which depends on the [t
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
 0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet.
+
+<a name="mesh_command_flags"></a>
+##### Mesh command flags
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Broadcast | Send command to all stones. Else, its send to all stones in the list of stone IDs.
+1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout.
+
 
 <a name="behaviour_debug_packet"></a>
 ##### Behaviour debug packet
