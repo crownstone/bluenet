@@ -503,6 +503,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
 uint 8 | [Flags](#mesh_command_flags) | 1 | Options.
+uint 8 | Timeout / repeats | 1 | When acked: timeout time in seconds. Else: number of times to repeat the command. 0 to use the default.
 uint 8 | Count | 1 | The number of stone IDs provided.
 uint8 [] | List of stone IDs | Count | IDs of the stones at which this message is aimed. Can be empty, then the command payload follows directly after the count field.
 uint 8 | Command payload | N | The command payload data, which depends on the [type](#mesh_command_types).
@@ -519,8 +520,9 @@ Type nr | Type name | Payload type | Payload description
 
 Bit | Name |  Description
 --- | --- | ---
-0 | Broadcast | Send command to all stones. Else, its send to all stones in the list of stone IDs.
+0 | Broadcast | Send command to all stones. Else, its only sent to all stones in the list of stone IDs, which will take more time.
 1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout.
+2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen.
 
 
 <a name="behaviour_debug_packet"></a>
