@@ -703,7 +703,7 @@ void CommandHandler::handleCmdMeshCommand(cs_data_t commandData, const cmd_sourc
 		default:
 			break;
 	}
-	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(controlCmdType), accessLevel)) {
+	if (!EncryptionHandler::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
 		LOGw("No access for command payload. Required=%u", requiredAccessLevel);
 		result.returnCode = ERR_NO_ACCESS;
 		return;
