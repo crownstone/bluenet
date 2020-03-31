@@ -491,11 +491,11 @@ Bit | Name |  Description
 
 <a name="command_mesh_packet"></a>
 #### Mesh command packet
-Only a couple of commands are implemented:
+For now, only a few of commands are implemented:
 
-- Set time, only broadcast.
-- Noop, only broadcast.
-- State set, only 1 target ID.
+- Set time, only broadcast, without acks.
+- Noop, only broadcast, without acks.
+- State set, only 1 target ID, with ack.
 
 ![Command packet](../docs/diagrams/command-mesh-packet.png)
 
