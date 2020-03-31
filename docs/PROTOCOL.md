@@ -503,8 +503,8 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
 uint 8 | [Flags](#mesh_command_flags) | 1 | Options.
-uint 8 | Timeout / repeats | 1 | When acked: timeout time in seconds. Else: number of times to repeat the command. 0 to use the default.
-uint 8 | Count | 1 | The number of stone IDs provided.
+uint 8 | Timeout / transmissions | 1 | When acked: timeout time in seconds. Else: number of times to send the command. 0 to use the default.
+uint 8 | ID count | 1 | The number of stone IDs provided.
 uint8 [] | List of stone IDs | Count | IDs of the stones at which this message is aimed. Can be empty, then the command payload follows directly after the count field.
 uint 8 | Command payload | N | The command payload data, which depends on the [type](#mesh_command_types).
 
