@@ -116,7 +116,7 @@ cs_ret_code_t MeshModelMulticast::sendMsg(const uint8_t* data, uint16_t len) {
 	accessMsg.force_segmented = false;
 	accessMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
 	uint32_t status = NRF_SUCCESS;
-//	for (int i=0; i<repeats; ++i) {
+//	for (int i=0; i<transmissionsOrTimeout; ++i) {
 		accessMsg.access_token = nrf_mesh_unique_token_get();
 		status = access_model_publish(_accessModelHandle, &accessMsg);
 		if (status != NRF_SUCCESS) {
@@ -143,7 +143,7 @@ cs_ret_code_t MeshModelMulticast::addToQueue(MeshUtil::cs_mesh_queue_item_t& ite
 	for (int i = _queueIndexNext + _queueSize; i > _queueIndexNext; --i) {
 		index = i % _queueSize;
 		cs_multicast_queue_item_t* it = &(_queue[index]);
-		if (it->metaData.repeats == 0) {
+		if (it->metaData.transmissionsOrTimeout == 0) {
 			if (!MeshUtil::setMeshMessage((cs_mesh_model_msg_type_t)item.metaData.type, item.payloadPtr, item.payloadSize, it->msg, sizeof(it->msg))) {
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
@@ -165,8 +165,8 @@ cs_ret_code_t MeshModelMulticast::addToQueue(MeshUtil::cs_mesh_queue_item_t& ite
 cs_ret_code_t MeshModelMulticast::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
 	cs_ret_code_t retCode = ERR_NOT_FOUND;
 	for (int i = 0; i < _queueSize; ++i) {
-		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type && _queue[i].metaData.repeats != 0) {
-			_queue[i].metaData.repeats = 0;
+		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type && _queue[i].metaData.transmissionsOrTimeout != 0) {
+			_queue[i].metaData.transmissionsOrTimeout = 0;
 			LOGMeshModelVerbose("removed from queue: ind=%u", i);
 			retCode = ERR_SUCCESS;
 		}
@@ -178,7 +178,7 @@ int MeshModelMulticast::getNextItemInQueue(bool priority) {
 	int index;
 	for (int i = _queueIndexNext; i < _queueIndexNext + _queueSize; i++) {
 		index = i % _queueSize;
-		if ((!priority || _queue[index].metaData.priority) && _queue[index].metaData.repeats > 0) {
+		if ((!priority || _queue[index].metaData.priority) && _queue[index].metaData.transmissionsOrTimeout > 0) {
 			return index;
 		}
 	}
@@ -209,8 +209,8 @@ bool MeshModelMulticast::sendMsgFromQueue() {
 //	}
 	sendMsg(item->msg, item->msgSize);
 	// TOOD: check return code, maybe retry again later.
-	--(item->metaData.repeats);
-	LOGMeshModelInfo("sent ind=%u repeats_left=%u type=%u id=%u", index, item->metaData.repeats, item->metaData.type, item->metaData.id);
+	--(item->metaData.transmissionsOrTimeout);
+	LOGMeshModelInfo("sent ind=%u transmissions_left=%u type=%u id=%u", index, item->metaData.transmissionsOrTimeout, item->metaData.type, item->metaData.id);
 
 	// Next item will be sent next, so that items are sent interleaved.
 	_queueIndexNext = (index + 1) % _queueSize;

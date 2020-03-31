@@ -222,7 +222,10 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 			MeshUtil::printQueueItem("", _queue[_queueIndexInProgress].metaData);
 
 			cs_mesh_model_msg_type_t type = (cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type;
-			result_packet_header_t resultHeader(MeshUtil::getCtrlCmdType(type), ERR_TIMEOUT);
+			uart_msg_mesh_result_packet_header_t resultHeader;
+			resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType(type);
+			resultHeader.resultHeader.returnCode = ERR_TIMEOUT;
+			resultHeader.stoneId = _queue[_queueIndexInProgress].metaData.targetId;
 			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
 
 #if MESH_MODEL_TEST_MSG == 2
@@ -235,7 +238,10 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 			LOGw("reliable msg cancelled");
 
 			cs_mesh_model_msg_type_t type = (cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type;
-			result_packet_header_t resultHeader(MeshUtil::getCtrlCmdType(type), ERR_CANCELED);
+			uart_msg_mesh_result_packet_header_t resultHeader;
+			resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType(type);
+			resultHeader.resultHeader.returnCode = ERR_CANCELED;
+			resultHeader.stoneId = _queue[_queueIndexInProgress].metaData.targetId;
 			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
 
 #if MESH_MODEL_TEST_MSG == 2
@@ -268,7 +274,7 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 	for (int i = _queueIndexNext + _queueSize; i > _queueIndexNext; --i) {
 		index = i % _queueSize;
 		cs_unicast_queue_item_t* it = &(_queue[index]);
-		if (it->metaData.repeats == 0) {
+		if (it->metaData.transmissionsOrTimeout == 0) {
 			it->msgPtr = (uint8_t*)malloc(msgSize);
 			LOGMeshModelVerbose("alloc %p size=%u", it->msgPtr, msgSize);
 			if (it->msgPtr == NULL) {
@@ -298,7 +304,7 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 cs_ret_code_t MeshModelUnicast::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
 	cs_ret_code_t retCode = ERR_NOT_FOUND;
 	for (int i = 0; i < _queueSize; ++i) {
-		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type && _queue[i].metaData.repeats != 0) {
+		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type && _queue[i].metaData.transmissionsOrTimeout != 0) {
 			remQueueItem(i);
 			retCode = ERR_SUCCESS;
 		}
@@ -307,7 +313,7 @@ cs_ret_code_t MeshModelUnicast::remFromQueue(cs_mesh_model_msg_type_t type, uint
 }
 
 void MeshModelUnicast::remQueueItem(uint8_t index) {
-	_queue[index].metaData.repeats = 0;
+	_queue[index].metaData.transmissionsOrTimeout = 0;
 	LOGMeshModelVerbose("free %p", _queue[index].msgPtr);
 	free(_queue[index].msgPtr);
 //	if (_queueIndexInProgress == index) {
@@ -321,7 +327,7 @@ int MeshModelUnicast::getNextItemInQueue(bool priority) {
 	int index;
 	for (int i = _queueIndexNext; i < _queueIndexNext + _queueSize; i++) {
 		index = i % _queueSize;
-		if ((!priority || _queue[index].metaData.priority) && _queue[index].metaData.repeats > 0) {
+		if ((!priority || _queue[index].metaData.priority) && _queue[index].metaData.transmissionsOrTimeout > 0) {
 			return index;
 		}
 	}
@@ -346,7 +352,7 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 		return false;
 	}
 	_queueIndexInProgress = index;
-	LOGMeshModelInfo("send ind=%u repeats_left=%u type=%u id=%u", index, item->metaData.repeats, item->metaData.type, item->metaData.id);
+	LOGMeshModelInfo("send ind=%u timeout=%u type=%u id=%u", index, item->metaData.transmissionsOrTimeout, item->metaData.type, item->metaData.id);
 
 	// Next item will be sent next, so that items are sent interleaved.
 	_queueIndexNext = (index + 1) % _queueSize;

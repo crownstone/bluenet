@@ -31,6 +31,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 		BLEutil::printArray(msg.msg, msg.msgSize);
 		return;
 	}
+	stone_id_t srcId = msg.srcAddress;
 	cs_mesh_model_msg_type_t msgType = MeshUtil::getType(msg.msg);
 	uint8_t* payload;
 	size16_t payloadSize;
@@ -62,11 +63,11 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_STATE_0: {
-			handleState0(payload, payloadSize, msg.srcAddress, msg.rssi, msg.hops);
+			handleState0(payload, payloadSize, srcId, msg.rssi, msg.hops);
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_STATE_1: {
-			handleState1(payload, payloadSize, msg.srcAddress, msg.rssi, msg.hops);
+			handleState1(payload, payloadSize, srcId, msg.rssi, msg.hops);
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_PROFILE_LOCATION: {
@@ -98,7 +99,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_RESULT: {
-			handleResult(payload, payloadSize);
+			handleResult(payload, payloadSize, srcId);
 			break;
 		}
 		case CS_MESH_MODEL_TYPE_UNKNOWN: {
@@ -185,9 +186,8 @@ void MeshMsgHandler::handleCmdMultiSwitch(uint8_t* payload, size16_t payloadSize
 	}
 }
 
-void MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSize, uint16_t srcAddress, int8_t rssi, uint8_t hops) {
+void MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops) {
 	cs_mesh_model_msg_state_0_t* packet = (cs_mesh_model_msg_state_0_t*) payload;
-	stone_id_t srcId = srcAddress;
 	LOGMeshModelDebug("received: id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
 
 	// Send event
@@ -195,10 +195,10 @@ void MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSize, uint16
 	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_0, state, sizeof(*state));
 	event.dispatch();
 
-	if (!isFromSameState(srcAddress, srcAddress, packet->partialTimestamp)) {
+	if (!isFromSameState(srcId, srcId, packet->partialTimestamp)) {
 		_lastReceivedState.partsReceivedBitmask = 0;
 	}
-	_lastReceivedState.address = srcAddress;
+	_lastReceivedState.srcId = srcId;
 	_lastReceivedState.state.data.state.id = srcId;
 	_lastReceivedState.state.data.extState.switchState = packet->switchState;
 	_lastReceivedState.state.data.extState.flags = packet->flags;
@@ -209,9 +209,8 @@ void MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSize, uint16
 	checkStateReceived(rssi, hops);
 }
 
-void MeshMsgHandler::handleState1(uint8_t* payload, size16_t payloadSize, uint16_t srcAddress, int8_t rssi, uint8_t hops) {
+void MeshMsgHandler::handleState1(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops) {
 	cs_mesh_model_msg_state_1_t* packet = (cs_mesh_model_msg_state_1_t*) payload;
-	stone_id_t srcId = srcAddress;
 	LOGMeshModelDebug("received: id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
 
 	// Send event
@@ -219,10 +218,10 @@ void MeshMsgHandler::handleState1(uint8_t* payload, size16_t payloadSize, uint16
 	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_1, state, sizeof(*state));
 	event.dispatch();
 
-	if (!isFromSameState(srcAddress, srcAddress, packet->partialTimestamp)) {
+	if (!isFromSameState(srcId, srcId, packet->partialTimestamp)) {
 		_lastReceivedState.partsReceivedBitmask = 0;
 	}
-	_lastReceivedState.address = srcAddress;
+	_lastReceivedState.srcId = srcId;
 	_lastReceivedState.state.data.state.id = srcId;
 	_lastReceivedState.state.data.extState.temperature = packet->temperature;
 	_lastReceivedState.state.data.extState.energyUsed = packet->energyUsed;
@@ -231,8 +230,8 @@ void MeshMsgHandler::handleState1(uint8_t* payload, size16_t payloadSize, uint16
 	checkStateReceived(rssi, hops);
 }
 
-bool MeshMsgHandler::isFromSameState(uint16_t srcAddress, stone_id_t id, uint16_t partialTimestamp) {
-	return (_lastReceivedState.address == srcAddress
+bool MeshMsgHandler::isFromSameState(stone_id_t srcId, stone_id_t id, uint16_t partialTimestamp) {
+	return (_lastReceivedState.srcId == srcId
 			&& _lastReceivedState.state.data.extState.id == id
 			&& _lastReceivedState.state.data.extState.partialTimestamp == partialTimestamp);
 }
@@ -380,19 +379,20 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_r
 	LOGi("retCode=%u dataSize=%u", result.returnCode, result.dataSize);
 }
 
-void MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSize) {
+void MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSize, stone_id_t srcId) {
 	auto header = reinterpret_cast<cs_mesh_model_msg_result_header_t*>(payload);
 	cs_data_t resultData(payload + sizeof(*header), payloadSize - sizeof(*header));
 //	uint8_t resultDataSize = payloadSize - sizeof(*header);
 //	uint8_t* resultData = payload + sizeof(*header);
 
 	// Convert to result packet header.
-	result_packet_header_t resultHeader;
-	resultHeader.commandType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)header->msgType);
-	resultHeader.returnCode = MeshUtil::getInflatedRetCode(header->retCode);
-	resultHeader.payloadSize = resultData.len;
+	uart_msg_mesh_result_packet_header_t resultHeader;
+	resultHeader.stoneId = srcId;
+	resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)header->msgType);
+	resultHeader.resultHeader.returnCode = MeshUtil::getInflatedRetCode(header->retCode);
+	resultHeader.resultHeader.payloadSize = resultData.len;
 
-	LOGi("handleResult: meshType=%u retCode=%u data:", header->msgType, header->retCode);
+	LOGi("handleResult: id=%u meshType=%u retCode=%u data:", srcId, header->msgType, header->retCode);
 	BLEutil::printArray(resultData.data, resultData.len);
 
 	// Convert result data if needed.
@@ -418,10 +418,10 @@ void MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSize) {
 	}
 }
 
-void MeshMsgHandler::sendResult(result_packet_header_t& resultHeader, const cs_data_t& resultData) {
-	resultHeader.payloadSize = resultData.len;
+void MeshMsgHandler::sendResult(uart_msg_mesh_result_packet_header_t& resultHeader, const cs_data_t& resultData) {
+	resultHeader.resultHeader.payloadSize = resultData.len;
 
-	LOGi("Result: cmdType=%u retCode=%u data:", resultHeader.commandType, resultHeader.returnCode);
+	LOGi("Result: id=%u cmdType=%u retCode=%u data:", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
 	BLEutil::printArray(resultData.data, resultData.len);
 
 	// Send out result.

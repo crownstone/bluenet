@@ -32,3 +32,18 @@
  * Number of messages sent each time processQueue() gets called.
  */
 #define MESH_MODEL_QUEUE_BURST_COUNT 3
+
+/**
+ * Timeout in seconds for reliable msgs.
+ */
+#define MESH_MODEL_RELIABLE_TIMEOUT_DEFAULT 10
+
+/**
+ * Default number of transmissions for unreliable msgs.
+ */
+#define MESH_MODEL_TRANSMISSIONS_DEFAULT 3
+
+/**
+ * Max number of transmissions for unreliable msgs.
+ */
+#define MESH_MODEL_TRANSMISSIONS_MAX 32

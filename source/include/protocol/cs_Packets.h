@@ -117,16 +117,27 @@ struct __attribute__((__packed__)) state_packet_header_t {
 	uint8_t reserved = 0;
 };
 
+union __attribute__((__packed__)) mesh_control_command_packet_flags_t {
+	struct __attribute__((packed)) {
+		bool broadcast: 1;
+		bool reliable: 1;
+		bool useKnownIds: 1;
+	} flags;
+	uint8_t asInt;
+};
+
 /**
  * Mesh control command header packet.
  */
 struct __attribute__((__packed__)) mesh_control_command_packet_header_t {
 	uint8_t type;
-	uint8_t reserved;
+	mesh_control_command_packet_flags_t flags;
+	uint8_t timeoutOrTransmissions; // 0 for default.
 	uint8_t idCount; // 0 for broadcast.
 	// List of ids.
 	// Control packet.
 };
+
 
 /**
  * State errors: collection of errors that influence the switch behaviour.

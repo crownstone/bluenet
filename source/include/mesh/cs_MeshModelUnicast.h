@@ -43,7 +43,7 @@ public:
 	void configureSelf(dsm_handle_t appkeyHandle);
 
 	/**
-	 * Add a msg to an empty spot in the queue (repeats == 0).
+	 * Add a msg to an empty spot in the queue (transmissions == 0).
 	 * Start looking at SendIndex, then reverse iterate over the queue.
 	 * Then set the new SendIndex at the newly added item, so that it will be send first.
 	 * We do the reverse iterate, so that the old SendIndex should be handled early (for a large enough queue).
@@ -95,7 +95,7 @@ private:
 	 */
 	uint8_t _queueIndexInProgress = 255;
 
-	cs_unicast_queue_item_t _queue[_queueSize] = {0};
+	cs_unicast_queue_item_t _queue[_queueSize];
 
 	uint32_t _ackTimeoutUs = 10 * 1000 * 1000; // MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT
 
@@ -115,7 +115,7 @@ private:
 	void processQueue();
 
 	/**
-	 * Check if there is a msg in queue with more than 0 repeats.
+	 * Check if there is a msg in queue with more than 0 transmissions.
 	 * If so, return that index.
 	 * Start looking at index SendIndex as that item should be sent first.
 	 * Returns -1 if none found.

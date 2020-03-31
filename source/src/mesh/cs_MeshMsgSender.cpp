@@ -22,10 +22,19 @@ cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t *meshMsg) {
 	if (!MeshUtil::isValidMeshMessage(meshMsg)) {
 		return ERR_INVALID_MESSAGE;
 	}
-	uint8_t repeats = meshMsg->reliability;
-	bool priority = meshMsg->urgency == CS_MESH_URGENCY_HIGH;
-	remFromQueue(meshMsg->type, 0, 0);
-	return addToQueue(meshMsg->type, 0, 0, meshMsg->payload, meshMsg->size, repeats, priority);
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = 0;
+	item.metaData.type = meshMsg->type;
+	item.metaData.targetId = 0;
+	item.metaData.priority = meshMsg->urgency == CS_MESH_URGENCY_HIGH;
+	item.metaData.reliable = false;
+	item.metaData.transmissionsOrTimeout = meshMsg->reliability;
+	item.payloadSize = meshMsg->size;
+	item.payloadPtr = meshMsg->payload;
+
+	remFromQueue(item);
+	return addToQueue(item);
 }
 
 cs_ret_code_t MeshMsgSender::sendTestMsg() {
@@ -43,136 +52,256 @@ cs_ret_code_t MeshMsgSender::sendTestMsg() {
 	for (uint8_t i=0; i<sizeof(test.dummy); ++i) {
 		test.dummy[i] = i;
 	}
-	uint8_t repeats = 1;
+	bool reliable = targetId != 0;
+	uint8_t transmissions = 1;
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = 0;
+	item.metaData.type = CS_MESH_MODEL_TYPE_TEST;
+	item.metaData.targetId = targetId;
+	item.metaData.priority = false;
+	item.metaData.reliable = reliable;
+	item.metaData.transmissionsOrTimeout = reliable ? 0 : transmissions;
+	item.payloadSize = sizeof(test);
+	item.payloadPtr = (uint8_t*)&test;
+
 	LOGd("sendTestMsg counter=%u", test.counter);
-	return addToQueue(CS_MESH_MODEL_TYPE_TEST, targetId, 0, (uint8_t*)&test, sizeof(test), repeats, false);
+	return addToQueue(item);
 }
 
-cs_ret_code_t MeshMsgSender::sendSetTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats) {
+cs_ret_code_t MeshMsgSender::sendSetTime(const cs_mesh_model_msg_time_t* packet, uint8_t transmissions) {
 	LOGd("sendSetTime");
-	if (item->timestamp == 0) {
+	if (packet->timestamp == 0) {
 		return ERR_WRONG_PARAMETER;
 	}
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = 0;
+	item.metaData.type = CS_MESH_MODEL_TYPE_CMD_TIME;
+	item.metaData.targetId = 0;
+	item.metaData.priority = true;
+	item.metaData.reliable = false;
+	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
+	item.payloadSize = sizeof(*packet);
+	item.payloadPtr = (uint8_t*)packet;
+
 	// Remove old messages of same type, as only the latest is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_CMD_TIME, 0, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_CMD_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, true);
+	remFromQueue(item);
+	return addToQueue(item);
 }
 
-cs_ret_code_t MeshMsgSender::sendNoop(uint8_t repeats) {
+cs_ret_code_t MeshMsgSender::sendNoop(uint8_t transmissions) {
 	LOGd("sendNoop");
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = 0;
+	item.metaData.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
+	item.metaData.targetId = 0;
+	item.metaData.priority = false;
+	item.metaData.reliable = false;
+	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
+	item.payloadSize = 0;
+	item.payloadPtr = nullptr;
+
 	// Remove old messages of same type, as only the latest is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_CMD_NOOP, 0, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_CMD_NOOP, 0, 0, nullptr, 0, repeats, false);
+	remFromQueue(item);
+	return addToQueue(item);
 }
 
-cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats) {
+cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_item_t* switchItem, uint8_t transmissions) {
 	LOGMeshModelDebug("sendMultiSwitchItem");
 	cs_mesh_model_msg_multi_switch_item_t meshItem;
-	meshItem.id = item->id;
-	meshItem.switchCmd = item->cmd.switchCmd;
-	meshItem.delay = item->cmd.delay;
-	meshItem.source = item->cmd.source;
+	meshItem.id = switchItem->id;
+	meshItem.switchCmd = switchItem->cmd.switchCmd;
+	meshItem.delay = switchItem->cmd.delay;
+	meshItem.source = switchItem->cmd.source;
 
-	switch (item->cmd.source.sourceId) {
+	switch (switchItem->cmd.source.sourceId) {
 		case CS_CMD_SOURCE_CONNECTION:
 		case CS_CMD_SOURCE_UART: {
-			LOGMeshModelInfo("Source connection: set high repeat count");
-			repeats = CS_MESH_RELIABILITY_HIGH;
+			LOGMeshModelInfo("Source connection: set high transmission count");
+			transmissions = CS_MESH_RELIABILITY_HIGH;
 			break;
 		}
 		default:
 			break;
 	}
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = switchItem->id;
+	item.metaData.type = CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH;
+	item.metaData.targetId = 0;
+	item.metaData.priority = true;
+	item.metaData.reliable = false;
+	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
+	item.payloadSize = sizeof(meshItem);
+	item.payloadPtr = (uint8_t*)(&meshItem);
+
 	// Remove old messages of same type and with same target id.
-	remFromQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, 0, item->id);
-	return addToQueue(CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH, 0, item->id, (uint8_t*)(&meshItem), sizeof(meshItem), repeats, true);
+	remFromQueue(item);
+	return addToQueue(item);
 }
 
-cs_ret_code_t MeshMsgSender::sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats) {
+cs_ret_code_t MeshMsgSender::sendTime(const cs_mesh_model_msg_time_t* packet, uint8_t transmissions) {
 	LOGMeshModelDebug("sendTime");
-	if (item->timestamp == 0) {
+	if (packet->timestamp == 0) {
 		return ERR_WRONG_PARAMETER;
 	}
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = 0;
+	item.metaData.type = CS_MESH_MODEL_TYPE_STATE_TIME;
+	item.metaData.targetId = 0;
+	item.metaData.priority = true;
+	item.metaData.reliable = false;
+	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOWEST : transmissions;
+	item.payloadSize = sizeof(*packet);
+	item.payloadPtr = (uint8_t*)packet;
+
 	// Remove old messages of same type, as only the latest is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_STATE_TIME, 0, 0, (uint8_t*)item, sizeof(*item), repeats, true);
+	remFromQueue(item);
+	return addToQueue(item);
 }
 
-cs_ret_code_t MeshMsgSender::sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats) {
+cs_ret_code_t MeshMsgSender::sendBehaviourSettings(const behaviour_settings_t* packet, uint8_t transmissions) {
 	LOGMeshModelDebug("sendBehaviourSettings");
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = 0;
+	item.metaData.type = CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS;
+	item.metaData.targetId = 0;
+	item.metaData.priority = false;
+	item.metaData.reliable = false;
+	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOWEST : transmissions;
+	item.payloadSize = sizeof(*packet);
+	item.payloadPtr = (uint8_t*)packet;
+
 	// Remove old messages of same type, as only the latest is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
+	remFromQueue(item);
+	return addToQueue(item);
 }
 
-cs_ret_code_t MeshMsgSender::sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats) {
-	LOGd("sendProfileLocation profile=%u location=%u", item->profile, item->location);
-	// Don't remove old messages of same type, as they may have other profile location combinations.
-	// Remove old messages of same type, location, and profile.
-	uint16_t id = (item->location << 8) + item->profile;
-//	remFromQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, id);
-	return addToQueue(CS_MESH_MODEL_TYPE_PROFILE_LOCATION, 0, id, (uint8_t*)item, sizeof(*item), repeats, false);
-}
+cs_ret_code_t MeshMsgSender::sendProfileLocation(const cs_mesh_model_msg_profile_location_t* packet, uint8_t transmissions) {
+	LOGd("sendProfileLocation profile=%u location=%u", packet->profile, packet->location);
 
-cs_ret_code_t MeshMsgSender::sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t repeats) {
-	LOGd("sendTrackedDeviceRegister");
-	// Remove old messages of same type, and device id, as only the latest register is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0, item->deviceId);
-	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER, 0, item->deviceId, (uint8_t*)item, sizeof(*item), repeats, false);
-}
+	uint16_t id = (packet->location << 8) + packet->profile;
 
-cs_ret_code_t MeshMsgSender::sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t repeats) {
-	LOGd("sendTrackedDeviceToken");
-	// Remove old messages of same type, and device id, as only the latest token is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, 0, item->deviceId);
-	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN, item->deviceId, 0, (uint8_t*)item, sizeof(*item), repeats, false);
-}
-
-cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* item, uint8_t repeats) {
-	LOGd("sendTrackedDeviceListSize");
-	// Remove old messages of same type, as only the latest is of interest.
-	remFromQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0, 0);
-	return addToQueue(CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE, 0, 0, (uint8_t*)item, sizeof(*item), repeats, false);
-}
-
-cs_ret_code_t MeshMsgSender::addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority) {
-	assert(_selector != nullptr, "No model selector set.");
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = id;
-	item.metaData.type = type;
-	item.metaData.targetId = targetId;
-	item.metaData.priority = priority;
+	item.metaData.type = CS_MESH_MODEL_TYPE_PROFILE_LOCATION;
+	item.metaData.targetId = 0;
+	item.metaData.priority = false;
 	item.metaData.reliable = false;
-	item.metaData.repeats = repeats;
-	item.payloadSize = payloadSize;
-	item.payloadPtr = payload;
+	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOWEST : transmissions;
+	item.payloadSize = sizeof(*packet);
+	item.payloadPtr = (uint8_t*)packet;
+
+	// Remove old messages of same type, location, and profile.
+	remFromQueue(item);
+	return addToQueue(item);
+}
+
+cs_ret_code_t MeshMsgSender::sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* packet, uint8_t transmissions) {
+	LOGd("sendTrackedDeviceRegister");
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = packet->deviceId;
+	item.metaData.type = CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER;
+	item.metaData.targetId = 0;
+	item.metaData.priority = false;
+	item.metaData.reliable = false;
+	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
+	item.payloadSize = sizeof(*packet);
+	item.payloadPtr = (uint8_t*)packet;
+
+	// Remove old messages of same type, and device id, as only the latest register is of interest.
+	remFromQueue(item);
+	return addToQueue(item);
+}
+
+cs_ret_code_t MeshMsgSender::sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* packet, uint8_t transmissions) {
+	LOGd("sendTrackedDeviceToken");
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = packet->deviceId;
+	item.metaData.type = CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN;
+	item.metaData.targetId = 0;
+	item.metaData.priority = false;
+	item.metaData.reliable = false;
+	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
+	item.payloadSize = sizeof(*packet);
+	item.payloadPtr = (uint8_t*)packet;
+
+	// Remove old messages of same type, and device id, as only the latest token is of interest.
+	remFromQueue(item);
+	return addToQueue(item);
+}
+
+cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* packet, uint8_t transmissions) {
+	LOGd("sendTrackedDeviceListSize");
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = 0;
+	item.metaData.type = CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE;
+	item.metaData.targetId = 0;
+	item.metaData.priority = false;
+	item.metaData.reliable = false;
+	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
+	item.payloadSize = sizeof(*packet);
+	item.payloadPtr = (uint8_t*)packet;
+
+	// Remove old messages of same type, as only the latest is of interest.
+	remFromQueue(item);
+	return addToQueue(item);
+}
+
+cs_ret_code_t MeshMsgSender::addToQueue(MeshUtil::cs_mesh_queue_item_t & item) {
+	assert(_selector != nullptr, "No model selector set.");
+
+	if (item.metaData.reliable) {
+		if (item.metaData.transmissionsOrTimeout == 0) {
+			item.metaData.transmissionsOrTimeout = MESH_MODEL_RELIABLE_TIMEOUT_DEFAULT;
+		}
+		else if (item.metaData.transmissionsOrTimeout < (ACCESS_RELIABLE_TIMEOUT_MIN / 1000000)) {
+			item.metaData.transmissionsOrTimeout = (ACCESS_RELIABLE_TIMEOUT_MIN / 1000000);
+		}
+		else if (item.metaData.transmissionsOrTimeout > (ACCESS_RELIABLE_TIMEOUT_MAX / 1000000)) {
+			item.metaData.transmissionsOrTimeout = (ACCESS_RELIABLE_TIMEOUT_MAX / 1000000);
+		}
+	}
+	else {
+		if (item.metaData.transmissionsOrTimeout == 0) {
+			item.metaData.transmissionsOrTimeout = MESH_MODEL_TRANSMISSIONS_DEFAULT;
+		}
+		else if (item.metaData.transmissionsOrTimeout > MESH_MODEL_TRANSMISSIONS_MAX) {
+			item.metaData.transmissionsOrTimeout = MESH_MODEL_TRANSMISSIONS_MAX;
+		}
+	}
 	return _selector->addToQueue(item);
 }
 
-cs_ret_code_t MeshMsgSender::remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id) {
+cs_ret_code_t MeshMsgSender::remFromQueue(MeshUtil::cs_mesh_queue_item_t & item) {
 	assert(_selector != nullptr, "No model selector set.");
-	MeshUtil::cs_mesh_queue_item_meta_data_t item;
-	item.id = id;
-	item.type = type;
-	item.targetId = targetId;
-//	item.priority =
-//	item.reliable =
-//	item.repeats =
-	return _selector->remFromQueue(item);
+	return _selector->remFromQueue(item.metaData);
 }
 
 
+
 cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t* command) {
-	LOGi("handleSendMeshCommand type=%u idCount=%u ctrlType=%u ctrlSize=%u accessLevel=%u sourceId=%u",
+	LOGi("handleSendMeshCommand type=%u idCount=%u flags=%u timeoutOrTransmissions=%u",
 			command->header.type,
 			command->header.idCount,
+			command->header.flags.asInt,
+			command->header.timeoutOrTransmissions
+			);
+	LOGi("  ctrlType=%u ctrlSize=%u accessLevel=%u sourceId=%u",
 			command->controlCommand.type,
 			command->controlCommand.size,
 			command->controlCommand.accessLevel,
 			command->controlCommand.source.sourceId
 			);
 	for (uint8_t i=0; i<command->header.idCount; ++i) {
-		LOGd("id: %u", command->targetIds[i]);
+		LOGd("  id: %u", command->targetIds[i]);
 	}
 
 	switch (command->controlCommand.type) {
@@ -180,33 +309,48 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			if (command->controlCommand.size != sizeof(uint32_t)) {
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
-			if (command->header.idCount != 0) {
-				return ERR_WRONG_PARAMETER;
+			if (command->header.idCount != 0
+					|| command->header.flags.flags.broadcast != true
+					|| command->header.flags.flags.reliable != false
+					|| command->header.flags.flags.useKnownIds != false) {
+				break;
+//				return ERR_WRONG_PARAMETER;
 			}
 			uint32_t* time = (uint32_t*) command->controlCommand.data;
 			cs_mesh_model_msg_time_t packet;
 			packet.timestamp = *time;
-			return sendSetTime(&packet, CS_MESH_RELIABILITY_MEDIUM);
-			break;
+
+			uint8_t transmissions = command->header.timeoutOrTransmissions;
+			if (transmissions == 0) {
+				transmissions = CS_MESH_RELIABILITY_MEDIUM;
+			}
+			return sendSetTime(&packet, transmissions);
 		}
 		case CTRL_CMD_NOP: {
 			if (command->controlCommand.size != 0) {
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
-			if (command->header.idCount != 0) {
-				return ERR_WRONG_PARAMETER;
+			if (command->header.idCount != 0
+					|| command->header.flags.flags.broadcast != true
+					|| command->header.flags.flags.reliable != false
+					|| command->header.flags.flags.useKnownIds != false) {
+				break;
+//				return ERR_WRONG_PARAMETER;
 			}
-			return sendNoop();
-			break;
+			return sendNoop(command->header.timeoutOrTransmissions);
 		}
 
 		case CTRL_CMD_STATE_SET: {
 			// Size has already been checked in command handler.
 			state_packet_header_t* stateHeader = (state_packet_header_t*) command->controlCommand.data;
 			LOGd("State type=%u id=%u persistenceMode=%u", stateHeader->stateType, stateHeader->stateId, stateHeader->persistenceMode);
-			if (command->header.idCount != 1) {
-				LOGw("Need 1 target id");
-				return ERR_WRONG_PARAMETER;
+			if (command->header.idCount != 1
+					|| command->header.flags.flags.broadcast != false
+					|| command->header.flags.flags.reliable != true
+					|| command->header.flags.flags.useKnownIds != false) {
+				break;
+//				LOGw("Need 1 target id");
+//				return ERR_WRONG_PARAMETER;
 			}
 			uint8_t stateHeaderSize = sizeof(state_packet_header_t);
 			uint8_t statePayloadSize = command->controlCommand.size - stateHeaderSize;
@@ -241,8 +385,18 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			meshStateHeader->sourceId = MeshUtil::getShortenedSource(command->controlCommand.source);
 
 			memcpy(msg + sizeof(*meshStateHeader), command->controlCommand.data + stateHeaderSize, statePayloadSize);
-			return addToQueue(CS_MESH_MODEL_TYPE_STATE_SET, command->targetIds[0], 0, msg, sizeof(msg), 1, false);
-			break;
+
+			MeshUtil::cs_mesh_queue_item_t item;
+			item.metaData.id = 0;
+			item.metaData.type = CS_MESH_MODEL_TYPE_STATE_SET;
+			item.metaData.targetId = command->targetIds[0];
+			item.metaData.priority = false;
+			item.metaData.reliable = command->header.flags.flags.reliable;
+			item.metaData.transmissionsOrTimeout = command->header.timeoutOrTransmissions;
+			item.payloadSize = sizeof(msg);
+			item.payloadPtr = msg;
+
+			return addToQueue(item);
 		}
 		default:
 			break;

@@ -28,7 +28,7 @@ cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item
 	}
 }
 
-cs_ret_code_t MeshModelSelector::remFromQueue(MeshUtil::cs_mesh_queue_item_meta_data_t item) {
+cs_ret_code_t MeshModelSelector::remFromQueue(MeshUtil::cs_mesh_queue_item_meta_data_t & item) {
 	assert(_multicastModel != nullptr && _unicastModel != nullptr, "Model not set");
 	if (item.targetId == 0) {
 		return _multicastModel->remFromQueue((cs_mesh_model_msg_type_t)item.type, item.id);

@@ -21,7 +21,8 @@
 
 #pragma once
 
-#include "events/cs_EventListener.h"
+#include <events/cs_EventListener.h>
+#include <protocol/cs_UartMsgTypes.h>
 #include <cstdint>
 
                                            // bit:7654 3210

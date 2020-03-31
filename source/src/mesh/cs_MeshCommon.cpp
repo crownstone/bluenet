@@ -15,14 +15,14 @@
 namespace MeshUtil {
 
 void printQueueItem(const char* prefix, const cs_mesh_queue_item_meta_data_t& metaData) {
-	LOGMeshModelDebug("%s id=%u type=%u targetId=%u priority=%u reliable=%u repeats=%u",
+	LOGMeshModelDebug("%s id=%u type=%u targetId=%u priority=%u reliable=%u transmissionsOrTimeout=%u",
 			prefix,
 			metaData.id,
 			metaData.type,
 			metaData.targetId,
 			metaData.priority,
 			metaData.reliable,
-			metaData.repeats
+			metaData.transmissionsOrTimeout
 	);
 }
 
