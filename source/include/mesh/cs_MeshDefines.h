@@ -35,6 +35,11 @@
 #define MESH_MODEL_ACKED_RETRY_INTERVAL_MS 250
 
 /**
+ * Number of times an ack will be sent.
+ */
+#define MESH_MODEL_ACK_TRANSMISSIONS 1
+
+/**
  * Number of messages sent each time processQueue() gets called.
  */
 #define MESH_MODEL_QUEUE_BURST_COUNT 3

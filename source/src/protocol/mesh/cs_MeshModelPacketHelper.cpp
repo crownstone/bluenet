@@ -114,6 +114,10 @@ void getPayload(uint8_t* meshMsg, size16_t meshMsgSize, uint8_t*& payload, size1
 	payloadSize = meshMsgSize - MESH_HEADER_SIZE;
 }
 
+cs_data_t getPayload(uint8_t* meshMsg, size16_t meshMsgSize) {
+	return cs_data_t(meshMsg + MESH_HEADER_SIZE, meshMsgSize - MESH_HEADER_SIZE);
+}
+
 size16_t getMeshMessageSize(size16_t payloadSize) {
 	return MESH_HEADER_SIZE + payloadSize;
 }

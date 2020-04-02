@@ -118,17 +118,6 @@ cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_ite
 	meshItem.delay = switchItem->cmd.delay;
 	meshItem.source = switchItem->cmd.source;
 
-	switch (switchItem->cmd.source.sourceId) {
-		case CS_CMD_SOURCE_CONNECTION:
-		case CS_CMD_SOURCE_UART: {
-			LOGMeshModelInfo("Source connection: set high transmission count");
-			transmissions = CS_MESH_RELIABILITY_HIGH;
-			break;
-		}
-		default:
-			break;
-	}
-
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = switchItem->id;
 	item.metaData.type = CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH;
@@ -138,6 +127,22 @@ cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_ite
 	item.broadcast = true;
 	item.msgPayload.len = sizeof(meshItem);
 	item.msgPayload.data = (uint8_t*)(&meshItem);
+
+	switch (switchItem->cmd.source.sourceId) {
+		case CS_CMD_SOURCE_CONNECTION:
+		case CS_CMD_SOURCE_UART: {
+//			LOGMeshModelInfo("Source connection: set high transmission count");
+//			transmissions = CS_MESH_RELIABILITY_HIGH;
+			LOGMeshModelInfo("Source connection or uart: use acked msg");
+			item.reliable = true;
+			item.numIds = 1;
+			item.metaData.transmissionsOrTimeout = 0;
+			item.stoneIdsPtr = (stone_id_t*) &(switchItem->id);
+			break;
+		}
+		default:
+			break;
+	}
 
 	// Remove old messages of same type and with same target id.
 	remFromQueue(item);

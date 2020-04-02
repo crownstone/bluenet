@@ -39,6 +39,15 @@ cs_mesh_model_msg_type_t getType(const uint8_t* meshMsg);
  */
 void getPayload(uint8_t* meshMsg, size16_t meshMsgSize, uint8_t*& payload, size16_t& payloadSize);
 
+/**
+ * Get payload of a mesh message.
+ *
+ * Assumes message is valid.
+ * @param[in]      meshMsg        Mesh message..
+ * @param[in]      meshMsgSize    Size of the mesh message.
+ */
+cs_data_t getPayload(uint8_t* meshMsg, size16_t meshMsgSize);
+
 size16_t getMeshMessageSize(size16_t payloadSize);
 
 /**

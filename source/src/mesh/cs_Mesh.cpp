@@ -50,7 +50,7 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	_core->registerScanCallback([&](const nrf_mesh_adv_packet_rx_data_t *scanData) -> void {
 		_scanner.onScan(scanData);
 	});
-	_modelSelector.init(&_modelMulticast, &_modelUnicast);
+	_modelSelector.init(&_modelMulticast, &_modelMulticastAcked, &_modelUnicast);
 	_msgSender.init(&_modelSelector);
 	return _core->init(board);
 }
@@ -62,14 +62,20 @@ void Mesh::initModels() {
 	});
 	_modelMulticast.init(0);
 
+	_modelMulticastAcked.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) -> void {
+		_msgHandler.handleMsg(msg, result);
+	});
+	_modelMulticastAcked.init(1);
+
 	_modelUnicast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) -> void {
 		_msgHandler.handleMsg(msg, result);
 	});
-	_modelUnicast.init(1);
+	_modelUnicast.init(2);
 }
 
 void Mesh::configureModels(dsm_handle_t appkeyHandle) {
 	_modelMulticast.configureSelf(appkeyHandle);
+	_modelMulticastAcked.configureSelf(appkeyHandle);
 	_modelUnicast.configureSelf(appkeyHandle);
 }
 
@@ -170,6 +176,7 @@ void Mesh::handleEvent(event_t & event) {
 		}
 #endif
 		_modelMulticast.tick(tickCount);
+		_modelMulticastAcked.tick(tickCount);
 		_modelUnicast.tick(tickCount);
 		break;
 	}

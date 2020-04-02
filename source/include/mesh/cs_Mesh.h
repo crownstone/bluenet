@@ -13,6 +13,7 @@
 #include <mesh/cs_MeshAdvertiser.h>
 #include <mesh/cs_MeshCore.h>
 #include <mesh/cs_MeshModelMulticast.h>
+#include <mesh/cs_MeshModelMulticastAcked.h>
 #include <mesh/cs_MeshModelUnicast.h>
 #include <mesh/cs_MeshModelSelector.h>
 #include <mesh/cs_MeshMsgHandler.h>
@@ -98,14 +99,15 @@ private:
 	//! Assignment operator, singleton, thus made private
 	Mesh& operator=(Mesh const &) = delete;
 
-	MeshCore*          _core;
-	MeshModelMulticast _modelMulticast;
-	MeshModelUnicast   _modelUnicast;
-	MeshModelSelector  _modelSelector;
-	MeshMsgHandler     _msgHandler;
-	MeshMsgSender      _msgSender;
-	MeshAdvertiser     _advertiser;
-	MeshScanner        _scanner;
+	MeshCore*                _core;
+	MeshModelMulticast       _modelMulticast;
+	MeshModelMulticastAcked  _modelMulticastAcked;
+	MeshModelUnicast         _modelUnicast;
+	MeshModelSelector        _modelSelector;
+	MeshMsgHandler           _msgHandler;
+	MeshMsgSender            _msgSender;
+	MeshAdvertiser           _advertiser;
+	MeshScanner              _scanner;
 
 	// Sync request
 	uint32_t _sendStateTimeCountdown = MESH_SEND_TIME_INTERVAL_MS / TICK_INTERVAL_MS;

@@ -34,8 +34,7 @@ static void staticReliableStatusHandler(access_model_handle_t model_handle, void
 
 static const access_opcode_handler_t opcodeHandlers[] = {
 		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_MSG, CROWNSTONE_COMPANY_ID), staticMsgHandler},
-		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_RELIABLE_MSG, CROWNSTONE_COMPANY_ID), staticMsgHandler},
-		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_REPLY, CROWNSTONE_COMPANY_ID), staticMsgHandler},
+		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_UNICAST_REPLY, CROWNSTONE_COMPANY_ID), staticMsgHandler},
 };
 
 void MeshModelUnicast::registerMsgHandler(const callback_msg_t& closure) {
@@ -130,7 +129,7 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 	msg.rssi = MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata);
 	msg.hops = ACCESS_DEFAULT_TTL - accessMsg->meta_data.ttl;
 
-	if (msg.opCode == CS_MESH_MODEL_OPCODE_REPLY) {
+	if (msg.opCode == CS_MESH_MODEL_OPCODE_UNICAST_REPLY) {
 		// Handle the message, don't send a reply.
 		cs_result_t result;
 		_msgCallback(msg, result);
@@ -152,7 +151,6 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 
 	// Send the result as reply.
 	resultHeader->msgType = (msg.msgSize >= MESH_HEADER_SIZE) ? MeshUtil::getType(msg.msg) : CS_MESH_MODEL_TYPE_UNKNOWN;
-
 	resultHeader->retCode = MeshUtil::getShortenedRetCode(result.returnCode);
 	sendReply(accessMsg, replyMsg, headerSize + result.dataSize);
 }
@@ -160,7 +158,7 @@ void MeshModelUnicast::handleMsg(const access_message_rx_t * accessMsg) {
 cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, const uint8_t* msg, uint16_t msgSize) {
 	access_message_tx_t accessReplyMsg;
 	accessReplyMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessReplyMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_REPLY;
+	accessReplyMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_REPLY;
 	accessReplyMsg.p_buffer = msg;
 	accessReplyMsg.length = msgSize;
 	accessReplyMsg.force_segmented = false;
@@ -179,7 +177,7 @@ cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize) {
 	}
 	access_message_tx_t* accessMsg = &(_accessReliableMsg.message);
 	accessMsg->opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessMsg->opcode.opcode = CS_MESH_MODEL_OPCODE_RELIABLE_MSG;
+	accessMsg->opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG;
 	accessMsg->p_buffer = msg;
 	accessMsg->length = msgSize;
 	accessMsg->force_segmented = false;
@@ -188,7 +186,7 @@ cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize) {
 
 	_accessReliableMsg.model_handle = _accessModelHandle;
 	_accessReliableMsg.reply_opcode.company_id = CROWNSTONE_COMPANY_ID;
-	_accessReliableMsg.reply_opcode.opcode = CS_MESH_MODEL_OPCODE_REPLY;
+	_accessReliableMsg.reply_opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_REPLY;
 	_accessReliableMsg.status_cb = staticReliableStatusHandler;
 	_accessReliableMsg.timeout = _ackTimeoutUs;
 

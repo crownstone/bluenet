@@ -19,8 +19,10 @@
  */
 enum cs_mesh_model_opcode_t {
 	CS_MESH_MODEL_OPCODE_MSG = 0xC0,
-	CS_MESH_MODEL_OPCODE_RELIABLE_MSG = 0xC1,
-	CS_MESH_MODEL_OPCODE_REPLY = 0xC2,
+	CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG = 0xC1,
+	CS_MESH_MODEL_OPCODE_UNICAST_REPLY = 0xC2,
+	CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG = 0xC3,
+	CS_MESH_MODEL_OPCODE_MULTICAST_REPLY = 0xC4,
 };
 
 /**
@@ -152,6 +154,6 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_state_header_ext_t {
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_result_header_t {
-	uint8_t msgType;
+	uint8_t msgType; // Mesh msg type of which this is the result.
 	uint8_t retCode;
 };

@@ -9,6 +9,7 @@
 
 #include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshModelMulticast.h>
+#include <mesh/cs_MeshModelMulticastAcked.h>
 #include <mesh/cs_MeshModelUnicast.h>
 #include <protocol/cs_Typedefs.h>
 
@@ -21,7 +22,7 @@ public:
 	 * Init with pointer to all models.
 	 * Could maybe be implemented neater if we have a base class for models.
 	 */
-	void init(MeshModelMulticast* multicastModel, MeshModelUnicast* unicastModel);
+	void init(MeshModelMulticast* multicastModel, MeshModelMulticastAcked* multicastAckedModel, MeshModelUnicast* unicastModel);
 
 	/**
 	 * Add item to the send queue of a suitable model.
@@ -35,5 +36,6 @@ public:
 
 private:
 	MeshModelMulticast* _multicastModel = nullptr;
+	MeshModelMulticastAcked* _multicastAckedModel = nullptr;
 	MeshModelUnicast* _unicastModel = nullptr;
 };

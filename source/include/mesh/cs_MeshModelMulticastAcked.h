@@ -82,6 +82,8 @@ private:
 
 	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
 
+	dsm_handle_t _unicastAddressHandle = DSM_HANDLE_INVALID;
+
 	callback_msg_t _msgCallback = nullptr;
 
 	cs_multicast_acked_queue_item_t _queue[queue_size];
@@ -98,9 +100,14 @@ private:
 
 	/**
 	 * Bitmask of acked stones.
-	 * If the Nth bit is set, the ack of stone ID N has been received.
+	 * If the Nth bit is set, the ack of Nth stone ID in the list has been received.
 	 */
 	BitmaskVarSize _ackedStonesBitmask;
+
+	/**
+	 * Number of processQueue() calls left until timeout.
+	 */
+	uint16_t _processCallsLeft;
 
 	/**
 	 * If item at index is in progress, cancel it.
@@ -137,13 +144,29 @@ private:
 	bool prepareForMsg(cs_multicast_acked_queue_item_t* item);
 
 	/**
+	 * Set the publish address.
+	 * 0 For broadcast.
+	 */
+	cs_ret_code_t setPublishAddress(stone_id_t id);
+
+	/**
 	 * Send a message over the mesh via publish, without reply.
 	 */
 	cs_ret_code_t sendMsg(const uint8_t* data, uint16_t len);
 
 	/**
+	 * Send an ack message.
+	 */
+	void sendReply(stone_id_t targetId, const uint8_t* data, uint16_t len);
+
+	/**
+	 * Handle an ack message.
+	 */
+	void handleReply(MeshUtil::cs_mesh_received_msg_t & msg);
+
+	/**
 	 * Check if ack from every stone ID in the list has been received.
-	 *
+	 * Also check if timed out.
 	 */
 	void checkDone();
 
