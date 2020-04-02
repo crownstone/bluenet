@@ -24,6 +24,10 @@ bool BitmaskVarSize::setNumBits(uint8_t numBits) {
 	if (_bitmask != nullptr) {
 		free(_bitmask);
 	}
+	if (numBits == 0) {
+		_bitmask = nullptr;
+		return true;
+	}
 	_bitmask = (uint8_t*)malloc(getNumBytes(numBits));
 	if (_bitmask == nullptr) {
 		_numBits = 0;
@@ -58,7 +62,9 @@ bool BitmaskVarSize::isSet(uint8_t bit) {
 }
 
 void BitmaskVarSize::clearAllBits() {
-	memset(_bitmask, 0, getNumBytes(_numBits));
+	if (_numBits) {
+		memset(_bitmask, 0, getNumBytes(_numBits));
+	}
 }
 
 bool BitmaskVarSize::isAllBitsSet() {
