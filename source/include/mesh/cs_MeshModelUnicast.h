@@ -17,8 +17,10 @@ extern "C" {
 
 /**
  * Class that:
- * - Sends and receives targeted segmented messages.
+ * - Sends and receives targeted acked messages.
+ * - Uses reliable segmented messages for this.
  * - Queues messages to be sent.
+ * - Handles queue 1 by 1.
  */
 class MeshModelUnicast {
 public:
@@ -43,10 +45,7 @@ public:
 	void configureSelf(dsm_handle_t appkeyHandle);
 
 	/**
-	 * Add a msg to an empty spot in the queue (transmissions == 0).
-	 * Start looking at SendIndex, then reverse iterate over the queue.
-	 * Then set the new SendIndex at the newly added item, so that it will be send first.
-	 * We do the reverse iterate, so that the old SendIndex should be handled early (for a large enough queue).
+	 * Add a msg the queue.
 	 */
 	cs_ret_code_t addToQueue(MeshUtil::cs_mesh_queue_item_t& item);
 
@@ -71,6 +70,7 @@ private:
 
 	struct __attribute__((__packed__)) cs_unicast_queue_item_t {
 		MeshUtil::cs_mesh_queue_item_meta_data_t metaData;
+		stone_id_t targetId;
 		uint8_t msgSize;
 		uint8_t* msgPtr = nullptr;
 	};
@@ -89,15 +89,15 @@ private:
 	uint32_t _canceled = 0;
 #endif
 
+	cs_unicast_queue_item_t _queue[_queueSize];
+
+	uint32_t _ackTimeoutUs = 10 * 1000 * 1000; // MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT
+
 	/**
 	 * Queue index of message currently being sent.
 	 * 255 for none.
 	 */
 	uint8_t _queueIndexInProgress = 255;
-
-	cs_unicast_queue_item_t _queue[_queueSize];
-
-	uint32_t _ackTimeoutUs = 10 * 1000 * 1000; // MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT
 
 	/**
 	 * Next index in queue to send.

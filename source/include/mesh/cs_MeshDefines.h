@@ -29,6 +29,12 @@
 #define MESH_MODEL_QUEUE_PROCESS_INTERVAL_MS 100
 
 /**
+ * Interval at which acked messages are retried.
+ * When using reliable messages, some more gets added for each hop.
+ */
+#define MESH_MODEL_ACKED_RETRY_INTERVAL_MS 250
+
+/**
  * Number of messages sent each time processQueue() gets called.
  */
 #define MESH_MODEL_QUEUE_BURST_COUNT 3
@@ -46,4 +52,15 @@
 /**
  * Max number of transmissions for unreliable msgs.
  */
-#define MESH_MODEL_TRANSMISSIONS_MAX 32
+#define MESH_MODEL_TRANSMISSIONS_MAX 31
+
+/**
+ * Group address used for multicast.
+ */
+#define MESH_MODEL_GROUP_ADDRESS 0xC51E
+
+/**
+ * Group address used for acked multicast.
+ */
+#define MESH_MODEL_GROUP_ADDRESS_ACKED 0xC51F
+

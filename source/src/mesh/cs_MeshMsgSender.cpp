@@ -26,12 +26,12 @@ cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t *meshMsg) {
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = 0;
 	item.metaData.type = meshMsg->type;
-	item.metaData.targetId = 0;
-	item.metaData.priority = meshMsg->urgency == CS_MESH_URGENCY_HIGH;
-	item.metaData.reliable = false;
 	item.metaData.transmissionsOrTimeout = meshMsg->reliability;
-	item.payloadSize = meshMsg->size;
-	item.payloadPtr = meshMsg->payload;
+	item.metaData.priority = meshMsg->urgency == CS_MESH_URGENCY_HIGH;
+	item.reliable = false;
+	item.broadcast = true;
+	item.msgPayload.len = meshMsg->size;
+	item.msgPayload.data = meshMsg->payload;
 
 	remFromQueue(item);
 	return addToQueue(item);
@@ -44,26 +44,30 @@ cs_ret_code_t MeshMsgSender::sendTestMsg() {
 #else
 	test.counter = 0;
 #endif
-#if MESH_MODEL_TEST_MSG == 2
-	stone_id_t targetId = 1;
-#else
-	stone_id_t targetId = 0;
-#endif
-	for (uint8_t i=0; i<sizeof(test.dummy); ++i) {
-		test.dummy[i] = i;
-	}
-	bool reliable = targetId != 0;
-	uint8_t transmissions = 1;
 
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = 0;
 	item.metaData.type = CS_MESH_MODEL_TYPE_TEST;
-	item.metaData.targetId = targetId;
 	item.metaData.priority = false;
-	item.metaData.reliable = reliable;
-	item.metaData.transmissionsOrTimeout = reliable ? 0 : transmissions;
-	item.payloadSize = sizeof(test);
-	item.payloadPtr = (uint8_t*)&test;
+
+#if MESH_MODEL_TEST_MSG == 2
+	item.metaData.transmissionsOrTimeout = 0;
+	item.reliable = true;
+	item.broadcast = false;
+	stone_id_t targetId = 1;
+	item.numIds = 1;
+	item.stoneIdsPtr = &targetId;
+#else
+	item.metaData.transmissionsOrTimeout = 1;
+	item.reliable = false;
+	item.broadcast = true;
+#endif
+
+	for (uint8_t i=0; i<sizeof(test.dummy); ++i) {
+		test.dummy[i] = i;
+	}
+	item.msgPayload.len = sizeof(test);
+	item.msgPayload.data = (uint8_t*)&test;
 
 	LOGd("sendTestMsg counter=%u", test.counter);
 	return addToQueue(item);
@@ -78,12 +82,12 @@ cs_ret_code_t MeshMsgSender::sendSetTime(const cs_mesh_model_msg_time_t* packet,
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = 0;
 	item.metaData.type = CS_MESH_MODEL_TYPE_CMD_TIME;
-	item.metaData.targetId = 0;
-	item.metaData.priority = true;
-	item.metaData.reliable = false;
 	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
-	item.payloadSize = sizeof(*packet);
-	item.payloadPtr = (uint8_t*)packet;
+	item.metaData.priority = true;
+	item.reliable = false;
+	item.broadcast = true;
+	item.msgPayload.len = sizeof(*packet);
+	item.msgPayload.data = (uint8_t*)packet;
 
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(item);
@@ -96,12 +100,10 @@ cs_ret_code_t MeshMsgSender::sendNoop(uint8_t transmissions) {
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = 0;
 	item.metaData.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
-	item.metaData.targetId = 0;
-	item.metaData.priority = false;
-	item.metaData.reliable = false;
 	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
-	item.payloadSize = 0;
-	item.payloadPtr = nullptr;
+	item.metaData.priority = false;
+	item.reliable = false;
+	item.broadcast = true;
 
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(item);
@@ -130,12 +132,12 @@ cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_ite
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = switchItem->id;
 	item.metaData.type = CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH;
-	item.metaData.targetId = 0;
-	item.metaData.priority = true;
-	item.metaData.reliable = false;
 	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
-	item.payloadSize = sizeof(meshItem);
-	item.payloadPtr = (uint8_t*)(&meshItem);
+	item.metaData.priority = true;
+	item.reliable = false;
+	item.broadcast = true;
+	item.msgPayload.len = sizeof(meshItem);
+	item.msgPayload.data = (uint8_t*)(&meshItem);
 
 	// Remove old messages of same type and with same target id.
 	remFromQueue(item);
@@ -151,12 +153,12 @@ cs_ret_code_t MeshMsgSender::sendTime(const cs_mesh_model_msg_time_t* packet, ui
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = 0;
 	item.metaData.type = CS_MESH_MODEL_TYPE_STATE_TIME;
-	item.metaData.targetId = 0;
-	item.metaData.priority = true;
-	item.metaData.reliable = false;
 	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOWEST : transmissions;
-	item.payloadSize = sizeof(*packet);
-	item.payloadPtr = (uint8_t*)packet;
+	item.metaData.priority = true;
+	item.reliable = false;
+	item.broadcast = true;
+	item.msgPayload.len = sizeof(*packet);
+	item.msgPayload.data = (uint8_t*)packet;
 
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(item);
@@ -169,12 +171,12 @@ cs_ret_code_t MeshMsgSender::sendBehaviourSettings(const behaviour_settings_t* p
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = 0;
 	item.metaData.type = CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS;
-	item.metaData.targetId = 0;
-	item.metaData.priority = false;
-	item.metaData.reliable = false;
 	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOWEST : transmissions;
-	item.payloadSize = sizeof(*packet);
-	item.payloadPtr = (uint8_t*)packet;
+	item.metaData.priority = false;
+	item.reliable = false;
+	item.broadcast = true;
+	item.msgPayload.len = sizeof(*packet);
+	item.msgPayload.data = (uint8_t*)packet;
 
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(item);
@@ -189,12 +191,12 @@ cs_ret_code_t MeshMsgSender::sendProfileLocation(const cs_mesh_model_msg_profile
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = id;
 	item.metaData.type = CS_MESH_MODEL_TYPE_PROFILE_LOCATION;
-	item.metaData.targetId = 0;
-	item.metaData.priority = false;
-	item.metaData.reliable = false;
 	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOWEST : transmissions;
-	item.payloadSize = sizeof(*packet);
-	item.payloadPtr = (uint8_t*)packet;
+	item.metaData.priority = false;
+	item.reliable = false;
+	item.broadcast = true;
+	item.msgPayload.len = sizeof(*packet);
+	item.msgPayload.data = (uint8_t*)packet;
 
 	// Remove old messages of same type, location, and profile.
 	remFromQueue(item);
@@ -207,12 +209,12 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceRegister(const cs_mesh_model_msg_d
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = packet->deviceId;
 	item.metaData.type = CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER;
-	item.metaData.targetId = 0;
-	item.metaData.priority = false;
-	item.metaData.reliable = false;
 	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
-	item.payloadSize = sizeof(*packet);
-	item.payloadPtr = (uint8_t*)packet;
+	item.metaData.priority = false;
+	item.reliable = false;
+	item.broadcast = true;
+	item.msgPayload.len = sizeof(*packet);
+	item.msgPayload.data = (uint8_t*)packet;
 
 	// Remove old messages of same type, and device id, as only the latest register is of interest.
 	remFromQueue(item);
@@ -225,12 +227,12 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceToken(const cs_mesh_model_msg_devi
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = packet->deviceId;
 	item.metaData.type = CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN;
-	item.metaData.targetId = 0;
-	item.metaData.priority = false;
-	item.metaData.reliable = false;
 	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
-	item.payloadSize = sizeof(*packet);
-	item.payloadPtr = (uint8_t*)packet;
+	item.metaData.priority = false;
+	item.reliable = false;
+	item.broadcast = true;
+	item.msgPayload.len = sizeof(*packet);
+	item.msgPayload.data = (uint8_t*)packet;
 
 	// Remove old messages of same type, and device id, as only the latest token is of interest.
 	remFromQueue(item);
@@ -243,12 +245,12 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(const cs_mesh_model_msg_d
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = 0;
 	item.metaData.type = CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE;
-	item.metaData.targetId = 0;
-	item.metaData.priority = false;
-	item.metaData.reliable = false;
 	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
-	item.payloadSize = sizeof(*packet);
-	item.payloadPtr = (uint8_t*)packet;
+	item.metaData.priority = false;
+	item.reliable = false;
+	item.broadcast = true;
+	item.msgPayload.len = sizeof(*packet);
+	item.msgPayload.data = (uint8_t*)packet;
 
 	// Remove old messages of same type, as only the latest is of interest.
 	remFromQueue(item);
@@ -258,7 +260,7 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(const cs_mesh_model_msg_d
 cs_ret_code_t MeshMsgSender::addToQueue(MeshUtil::cs_mesh_queue_item_t & item) {
 	assert(_selector != nullptr, "No model selector set.");
 
-	if (item.metaData.reliable) {
+	if (item.reliable) {
 		if (item.metaData.transmissionsOrTimeout == 0) {
 			item.metaData.transmissionsOrTimeout = MESH_MODEL_RELIABLE_TIMEOUT_DEFAULT;
 		}
@@ -282,7 +284,7 @@ cs_ret_code_t MeshMsgSender::addToQueue(MeshUtil::cs_mesh_queue_item_t & item) {
 
 cs_ret_code_t MeshMsgSender::remFromQueue(MeshUtil::cs_mesh_queue_item_t & item) {
 	assert(_selector != nullptr, "No model selector set.");
-	return _selector->remFromQueue(item.metaData);
+	return _selector->remFromQueue(item);
 }
 
 
@@ -389,12 +391,14 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			MeshUtil::cs_mesh_queue_item_t item;
 			item.metaData.id = 0;
 			item.metaData.type = CS_MESH_MODEL_TYPE_STATE_SET;
-			item.metaData.targetId = command->targetIds[0];
-			item.metaData.priority = false;
-			item.metaData.reliable = command->header.flags.flags.reliable;
 			item.metaData.transmissionsOrTimeout = command->header.timeoutOrTransmissions;
-			item.payloadSize = sizeof(msg);
-			item.payloadPtr = msg;
+			item.metaData.priority = false;
+			item.reliable = command->header.flags.flags.reliable;
+			item.broadcast = command->header.flags.flags.broadcast;
+			item.numIds = command->header.idCount;
+			item.stoneIdsPtr = command->targetIds;
+			item.msgPayload.len = sizeof(msg);
+			item.msgPayload.data = msg;
 
 			return addToQueue(item);
 		}

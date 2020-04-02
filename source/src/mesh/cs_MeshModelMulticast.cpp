@@ -50,7 +50,7 @@ void MeshModelMulticast::init(uint16_t modelId) {
 
 void MeshModelMulticast::configureSelf(dsm_handle_t appkeyHandle) {
 	uint32_t retCode;
-	retCode = dsm_address_publish_add(0xC51E, &_groupAddressHandle);
+	retCode = dsm_address_publish_add(MESH_MODEL_GROUP_ADDRESS, &_groupAddressHandle);
 	APP_ERROR_CHECK(retCode);
 	retCode = dsm_address_subscription_add_handle(_groupAddressHandle);
 	APP_ERROR_CHECK(retCode);
@@ -134,20 +134,26 @@ cs_ret_code_t MeshModelMulticast::addToQueue(MeshUtil::cs_mesh_queue_item_t& ite
 		return ERR_SUCCESS;
 	}
 #endif
-	size16_t msgSize = MeshUtil::getMeshMessageSize(item.payloadSize);
-	assert(item.payloadPtr != nullptr || item.payloadSize == 0, "Null pointer");
+	size16_t msgSize = MeshUtil::getMeshMessageSize(item.msgPayload.len);
+	assert(item.msgPayload.data != nullptr || item.msgPayload.len == 0, "Null pointer");
 	assert(msgSize != 0, "Empty message");
 	assert(msgSize <= MAX_MESH_MSG_NON_SEGMENTED_SIZE, "Message too large");
-	assert(item.metaData.targetId == 0, "Multicast only");
+	assert(item.broadcast == true, "Multicast only");
+	assert(item.reliable == false, "Unreliable only");
+
+	// Find an empty spot in the queue (transmissions == 0).
+	// Start looking at _queueIndexNext, then reverse iterate over the queue.
+	// Then set the new _queueIndexNext at the newly added item, so that it will be sent next.
+	// We do the reverse iterate, so that the chance is higher that
+	// the old _queueIndexNext will be sent quickly after this newly added item.
 	uint8_t index;
 	for (int i = _queueIndexNext + _queueSize; i > _queueIndexNext; --i) {
 		index = i % _queueSize;
 		cs_multicast_queue_item_t* it = &(_queue[index]);
 		if (it->metaData.transmissionsOrTimeout == 0) {
-			if (!MeshUtil::setMeshMessage((cs_mesh_model_msg_type_t)item.metaData.type, item.payloadPtr, item.payloadSize, it->msg, sizeof(it->msg))) {
+			if (!MeshUtil::setMeshMessage((cs_mesh_model_msg_type_t)item.metaData.type, item.msgPayload.data, item.msgPayload.len, it->msg, sizeof(it->msg))) {
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
-//			memcpy(it->msg, item.msgPtr, item.metaData.msgSize);
 			memcpy(&(it->metaData), &(item.metaData), sizeof(item.metaData));
 			it->msgSize = msgSize;
 			LOGMeshModelVerbose("added to ind=%u", index);

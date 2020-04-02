@@ -61,8 +61,6 @@ void MeshModelUnicast::init(uint16_t modelId) {
 
 void MeshModelUnicast::configureSelf(dsm_handle_t appkeyHandle) {
 	uint32_t retCode;
-//	retCode = dsm_address_publish_add(0xC51E, &_publishAddressHandle);
-//	APP_ERROR_CHECK(retCode);
 	// No need to call dsm_address_subscription_add_handle(), as we're only subscribed to unicast address.
 
 	retCode = access_model_application_bind(_accessModelHandle, appkeyHandle);
@@ -70,8 +68,6 @@ void MeshModelUnicast::configureSelf(dsm_handle_t appkeyHandle) {
 	retCode = access_model_publish_application_set(_accessModelHandle, appkeyHandle);
 	APP_ERROR_CHECK(retCode);
 
-//	retCode = access_model_publish_address_set(_accessModelHandle, _publishAddressHandle);
-//	APP_ERROR_CHECK(retCode);
 	// No need to call access_model_subscription_add(), as we're only subscribed to unicast address.
 }
 
@@ -225,7 +221,7 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 			uart_msg_mesh_result_packet_header_t resultHeader;
 			resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType(type);
 			resultHeader.resultHeader.returnCode = ERR_TIMEOUT;
-			resultHeader.stoneId = _queue[_queueIndexInProgress].metaData.targetId;
+			resultHeader.stoneId = _queue[_queueIndexInProgress].targetId;
 			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
 
 #if MESH_MODEL_TEST_MSG == 2
@@ -241,7 +237,7 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 			uart_msg_mesh_result_packet_header_t resultHeader;
 			resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType(type);
 			resultHeader.resultHeader.returnCode = ERR_CANCELED;
-			resultHeader.stoneId = _queue[_queueIndexInProgress].metaData.targetId;
+			resultHeader.stoneId = _queue[_queueIndexInProgress].targetId;
 			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
 
 #if MESH_MODEL_TEST_MSG == 2
@@ -265,13 +261,18 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 		return ERR_SUCCESS;
 	}
 #endif
-	size16_t msgSize = MeshUtil::getMeshMessageSize(item.payloadSize);
-	assert(item.payloadPtr != nullptr || item.payloadSize == 0, "Null pointer");
+	size16_t msgSize = MeshUtil::getMeshMessageSize(item.msgPayload.len);
+	assert(item.msgPayload.data != nullptr || item.msgPayload.len == 0, "Null pointer");
 	assert(msgSize != 0, "Empty message");
 	assert(msgSize <= MAX_MESH_MSG_SIZE, "Message too large");
-	assert(item.metaData.targetId != 0, "Unicast only");
+	assert(item.numIds == 1, "Single ID only");
+	assert(item.broadcast == false, "Unicast only");
+	assert(item.reliable == true, "Reliable only");
+
+	// Find an empty spot in the queue (transmissions == 0).
+	// Start looking at _queueIndexNext, then iterate over the queue.
 	uint8_t index;
-	for (int i = _queueIndexNext + _queueSize; i > _queueIndexNext; --i) {
+	for (int i = _queueIndexNext; i < _queueIndexNext + _queueSize; ++i) {
 		index = i % _queueSize;
 		cs_unicast_queue_item_t* it = &(_queue[index]);
 		if (it->metaData.transmissionsOrTimeout == 0) {
@@ -280,20 +281,19 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 			if (it->msgPtr == NULL) {
 				return ERR_NO_SPACE;
 			}
-			if (!MeshUtil::setMeshMessage((cs_mesh_model_msg_type_t)item.metaData.type, item.payloadPtr, item.payloadSize, it->msgPtr, msgSize)) {
+			if (!MeshUtil::setMeshMessage((cs_mesh_model_msg_type_t)item.metaData.type, item.msgPayload.data, item.msgPayload.len, it->msgPtr, msgSize)) {
 				LOGMeshModelVerbose("free %p", it->msgPtr);
 				free(it->msgPtr);
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
-//			memcpy(it->msgPtr, item.msgPtr, item.metaData.msgSize);
 			memcpy(&(it->metaData), &(item.metaData), sizeof(item.metaData));
+			it->targetId = item.stoneIdsPtr[0];
 			it->msgSize = msgSize;
 			LOGMeshModelVerbose("added to ind=%u", index);
 			BLEutil::printArray(it->msgPtr, it->msgSize);
-			_queueIndexNext = index;
 
-			// TODO: immediately start sending from queue.
-			// sendMsgFromQueue can keep up how many msgs have been sent this tick, so it knows how many can still be sent.
+			// If queue was empty, we can start sending this item.
+			sendMsgFromQueue();
 			return ERR_SUCCESS;
 		}
 	}
@@ -325,7 +325,7 @@ void MeshModelUnicast::remQueueItem(uint8_t index) {
 
 int MeshModelUnicast::getNextItemInQueue(bool priority) {
 	int index;
-	for (int i = _queueIndexNext; i < _queueIndexNext + _queueSize; i++) {
+	for (int i = _queueIndexNext; i < _queueIndexNext + _queueSize; ++i) {
 		index = i % _queueSize;
 		if ((!priority || _queue[index].metaData.priority) && _queue[index].metaData.transmissionsOrTimeout > 0) {
 			return index;
@@ -346,7 +346,7 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 		return false;
 	}
 	cs_unicast_queue_item_t* item = &(_queue[index]);
-	setPublishAddress(item->metaData.targetId);
+	setPublishAddress(item->targetId);
 	cs_ret_code_t retCode = sendMsg(item->msgPtr, item->msgSize);
 	if (retCode != ERR_SUCCESS) {
 		return false;
@@ -354,7 +354,8 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 	_queueIndexInProgress = index;
 	LOGMeshModelInfo("send ind=%u timeout=%u type=%u id=%u", index, item->metaData.transmissionsOrTimeout, item->metaData.type, item->metaData.id);
 
-	// Next item will be sent next, so that items are sent interleaved.
+	// Next item will be sent next.
+	// Order might be messed up when some items are prioritized.
 	_queueIndexNext = (index + 1) % _queueSize;
 	return true;
 }
