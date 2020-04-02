@@ -5,7 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <mesh/cs_BitmaskVarSize.h>
+#include <util/cs_BitmaskVarSize.h>
 #include <cstdlib>
 #include <cstring>
 
@@ -30,6 +30,7 @@ bool BitmaskVarSize::setNumBits(uint8_t numBits) {
 		return false;
 	}
 	_numBits = numBits;
+	clearAllBits();
 	return true;
 }
 
