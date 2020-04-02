@@ -198,7 +198,7 @@ cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize) {
 }
 
 void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
-	if (_queueIndexInProgress == 255) {
+	if (_queueIndexInProgress == queue_index_none) {
 		LOGe("No index in progress");
 		return;
 	}
@@ -248,10 +248,8 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 		}
 	}
 
-	// Set index in progress to none, before removing from queue.
-	uint8_t ind = _queueIndexInProgress;
-	_queueIndexInProgress = 255;
-	remQueueItem(ind);
+	remQueueItem(_queueIndexInProgress);
+	_queueIndexInProgress = queue_index_none;
 }
 
 cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
@@ -272,8 +270,8 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 	// Find an empty spot in the queue (transmissions == 0).
 	// Start looking at _queueIndexNext, then iterate over the queue.
 	uint8_t index;
-	for (int i = _queueIndexNext; i < _queueIndexNext + _queueSize; ++i) {
-		index = i % _queueSize;
+	for (int i = _queueIndexNext; i < _queueIndexNext + queue_size; ++i) {
+		index = i % queue_size;
 		cs_unicast_queue_item_t* it = &(_queue[index]);
 		if (it->metaData.transmissionsOrTimeout == 0) {
 			it->msgPtr = (uint8_t*)malloc(msgSize);
@@ -303,8 +301,9 @@ cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item)
 
 cs_ret_code_t MeshModelUnicast::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
 	cs_ret_code_t retCode = ERR_NOT_FOUND;
-	for (int i = 0; i < _queueSize; ++i) {
+	for (int i = 0; i < queue_size; ++i) {
 		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type && _queue[i].metaData.transmissionsOrTimeout != 0) {
+			cancelQueueItem(i);
 			remQueueItem(i);
 			retCode = ERR_SUCCESS;
 		}
@@ -312,21 +311,24 @@ cs_ret_code_t MeshModelUnicast::remFromQueue(cs_mesh_model_msg_type_t type, uint
 	return retCode;
 }
 
+void MeshModelUnicast::cancelQueueItem(uint8_t index) {
+	if (_queueIndexInProgress == index) {
+		LOGe("TODO: Cancel progress");
+		_queueIndexInProgress = queue_index_none;
+	}
+}
+
 void MeshModelUnicast::remQueueItem(uint8_t index) {
 	_queue[index].metaData.transmissionsOrTimeout = 0;
 	LOGMeshModelVerbose("free %p", _queue[index].msgPtr);
 	free(_queue[index].msgPtr);
-//	if (_queueIndexInProgress == index) {
-//		// Cancel progress..
-//		_queueIndexInProgress = 255;
-//	}
 	LOGMeshModelVerbose("removed from queue: ind=%u", index);
 }
 
 int MeshModelUnicast::getNextItemInQueue(bool priority) {
 	int index;
-	for (int i = _queueIndexNext; i < _queueIndexNext + _queueSize; ++i) {
-		index = i % _queueSize;
+	for (int i = _queueIndexNext; i < _queueIndexNext + queue_size; ++i) {
+		index = i % queue_size;
 		if ((!priority || _queue[index].metaData.priority) && _queue[index].metaData.transmissionsOrTimeout > 0) {
 			return index;
 		}
@@ -335,7 +337,7 @@ int MeshModelUnicast::getNextItemInQueue(bool priority) {
 }
 
 bool MeshModelUnicast::sendMsgFromQueue() {
-	if (_queueIndexInProgress != 255) {
+	if (_queueIndexInProgress != queue_index_none) {
 		return false;
 	}
 	int index = getNextItemInQueue(true);
@@ -356,7 +358,7 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 
 	// Next item will be sent next.
 	// Order might be messed up when some items are prioritized.
-	_queueIndexNext = (index + 1) % _queueSize;
+	_queueIndexNext = (index + 1) % queue_size;
 	return true;
 }
 
