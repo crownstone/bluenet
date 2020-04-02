@@ -129,8 +129,7 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 			// Send the result as reply.
 			resultHeader->msgType = (msg.msgSize >= MESH_HEADER_SIZE) ? MeshUtil::getType(msg.msg) : CS_MESH_MODEL_TYPE_UNKNOWN;
 			resultHeader->retCode = MeshUtil::getShortenedRetCode(result.returnCode);
-			stone_id_t srcId = msg.srcAddress;
-			sendReply(srcId, replyMsg, headerSize + result.dataSize);
+			sendReply(accessMsg, replyMsg, headerSize + result.dataSize);
 			break;
 		}
 		default:
@@ -139,8 +138,6 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 }
 
 cs_ret_code_t MeshModelMulticastAcked::sendMsg(const uint8_t* data, uint16_t len) {
-	setPublishAddress(0);
-
 	access_message_tx_t accessMsg;
 	accessMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
 	accessMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG;
@@ -158,29 +155,25 @@ cs_ret_code_t MeshModelMulticastAcked::sendMsg(const uint8_t* data, uint16_t len
 	return status;
 }
 
-void MeshModelMulticastAcked::sendReply(stone_id_t targetId, const uint8_t* data, uint16_t len) {
-	if (setPublishAddress(targetId) != NRF_SUCCESS) {
-		return;
-	}
-
-	access_message_tx_t accessMsg;
-	accessMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
-	accessMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_MULTICAST_REPLY;
-	accessMsg.p_buffer = data;
-	accessMsg.length = len;
-	accessMsg.force_segmented = false;
-	accessMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
+void MeshModelMulticastAcked::sendReply(const access_message_rx_t* accessMsg, const uint8_t* data, uint16_t len) {
+	access_message_tx_t accessReplyMsg;
+	accessReplyMsg.opcode.company_id = CROWNSTONE_COMPANY_ID;
+	accessReplyMsg.opcode.opcode = CS_MESH_MODEL_OPCODE_MULTICAST_REPLY;
+	accessReplyMsg.p_buffer = data;
+	accessReplyMsg.length = len;
+	accessReplyMsg.force_segmented = false;
+	accessReplyMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
 
 	uint32_t status = NRF_SUCCESS;
 	for (int i = 0; i < MESH_MODEL_ACK_TRANSMISSIONS; ++i) {
-		accessMsg.access_token = nrf_mesh_unique_token_get();
-		status = access_model_publish(_accessModelHandle, &accessMsg);
+		accessReplyMsg.access_token = nrf_mesh_unique_token_get();
+		status = access_model_reply(_accessModelHandle, accessMsg, &accessReplyMsg);
 		if (status != NRF_SUCCESS) {
 			LOGMeshModelInfo("sendReply failed: %u", status);
 			break;
 		}
 	}
-	LOGMeshModelDebug("Sent reply to id=%u", targetId);
+	LOGMeshModelDebug("Sent reply to id=%u", accessMsg->meta_data.src.value);
 }
 
 void MeshModelMulticastAcked::handleReply(MeshUtil::cs_mesh_received_msg_t & msg) {
@@ -210,39 +203,6 @@ void MeshModelMulticastAcked::handleReply(MeshUtil::cs_mesh_received_msg_t & msg
 			break;
 		}
 	}
-}
-
-cs_ret_code_t MeshModelMulticastAcked::setPublishAddress(stone_id_t id) {
-	uint32_t retCode;
-
-	// First clean up the previous unicast address.
-	dsm_address_publish_remove(_unicastAddressHandle);
-	_unicastAddressHandle = DSM_HANDLE_INVALID;
-
-	if (id == 0) {
-		// Set group address.
-		retCode = access_model_publish_address_set(_accessModelHandle, _groupAddressHandle);
-		assert(retCode == NRF_SUCCESS, "failed to set publish address");
-		if (retCode != NRF_SUCCESS) {
-			return ERR_UNSPECIFIED;
-		}
-	}
-	else {
-		// Add and set unicast address.
-		// All addresses with first 2 bits 0, are unicast addresses.
-		uint16_t address = id;
-		retCode = dsm_address_publish_add(address, &_unicastAddressHandle);
-		assert(retCode == NRF_SUCCESS, "failed to add publish address");
-		if (retCode != NRF_SUCCESS) {
-			return ERR_UNSPECIFIED;
-		}
-		retCode = access_model_publish_address_set(_accessModelHandle, _unicastAddressHandle);
-		assert(retCode == NRF_SUCCESS, "failed to set publish address");
-		if (retCode != NRF_SUCCESS) {
-			return ERR_UNSPECIFIED;
-		}
-	}
-	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {

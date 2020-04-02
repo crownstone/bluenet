@@ -82,8 +82,6 @@ private:
 
 	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
 
-	dsm_handle_t _unicastAddressHandle = DSM_HANDLE_INVALID;
-
 	callback_msg_t _msgCallback = nullptr;
 
 	cs_multicast_acked_queue_item_t _queue[queue_size];
@@ -144,12 +142,6 @@ private:
 	bool prepareForMsg(cs_multicast_acked_queue_item_t* item);
 
 	/**
-	 * Set the publish address.
-	 * 0 For broadcast.
-	 */
-	cs_ret_code_t setPublishAddress(stone_id_t id);
-
-	/**
 	 * Send a message over the mesh via publish, without reply.
 	 */
 	cs_ret_code_t sendMsg(const uint8_t* data, uint16_t len);
@@ -157,7 +149,7 @@ private:
 	/**
 	 * Send an ack message.
 	 */
-	void sendReply(stone_id_t targetId, const uint8_t* data, uint16_t len);
+	void sendReply(const access_message_rx_t* accessMsg, const uint8_t* data, uint16_t len);
 
 	/**
 	 * Handle an ack message.
