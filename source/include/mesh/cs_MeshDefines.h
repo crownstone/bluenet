@@ -31,8 +31,9 @@
 /**
  * Interval at which acked messages are retried.
  * When using reliable messages, some more gets added for each hop.
+ * Should be a multiple of TICK_INTERVAL_MS.
  */
-#define MESH_MODEL_ACKED_RETRY_INTERVAL_MS 250
+#define MESH_MODEL_ACKED_RETRY_INTERVAL_MS 200
 
 /**
  * Number of times an ack will be sent.
