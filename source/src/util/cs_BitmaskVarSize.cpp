@@ -25,6 +25,7 @@ bool BitmaskVarSize::setNumBits(uint8_t numBits) {
 		free(_bitmask);
 	}
 	if (numBits == 0) {
+		_numBits = 0;
 		_bitmask = nullptr;
 		return true;
 	}
@@ -62,25 +63,42 @@ bool BitmaskVarSize::isSet(uint8_t bit) {
 }
 
 void BitmaskVarSize::clearAllBits() {
-	if (_numBits) {
-		memset(_bitmask, 0, getNumBytes(_numBits));
+	if (_numBits == 0) {
+		return;
+	}
+	uint8_t numBytes = getNumBytes(_numBits);
+	memset(_bitmask, 0, numBytes);
+
+	// Set bits that are not used.
+	uint8_t numRemainingBits = _numBits % 8;
+	uint8_t remainingBitmask = (1 << numRemainingBits) - 1;
+	if (numRemainingBits) {
+		_bitmask[numBytes-1] = ~remainingBitmask;
 	}
 }
 
 bool BitmaskVarSize::isAllBitsSet() {
-	// First check all bytes that should have all 8 bits set.
-	uint8_t numFullBytes = _numBits / 8;
-	for (uint8_t i=0; i < numFullBytes; ++i) {
+//	// First check all bytes that should have all 8 bits set.
+//	uint8_t numFullBytes = _numBits / 8;
+//	for (uint8_t i=0; i < numFullBytes; ++i) {
+//		if (_bitmask[i] != 0xFF) {
+//			return false;
+//		}
+//	}
+//
+//	// If any bits are remaining, the last byte should match a bitmask with all those bits set.
+//	uint8_t numRemainingBits = _numBits % 8;
+//	uint8_t remainingBitmask = (1 << numRemainingBits) - 1;
+//	if (numRemainingBits && (_bitmask[numFullBytes] & remainingBitmask) != remainingBitmask) {
+//		return false;
+//	}
+//	return true;
+
+	// Since clearAllBits() sets unused bits, we can simply check if all allocated bits are set.
+	for (uint8_t i=0; i < getNumBytes(_numBits); ++i) {
 		if (_bitmask[i] != 0xFF) {
 			return false;
 		}
-	}
-
-	// If any bits are remaining, the last byte should match a bitmask with all those bits set.
-	uint8_t numRemainingBits = _numBits % 8;
-	uint8_t remainingBitmask = (1 << numRemainingBits) - 1;
-	if (numRemainingBits && (_bitmask[numFullBytes] & remainingBitmask) != remainingBitmask) {
-		return false;
 	}
 	return true;
 }

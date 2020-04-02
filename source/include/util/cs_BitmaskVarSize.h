@@ -11,6 +11,8 @@
 
 /**
  * Class that holds a bitmask of variable size.
+ *
+ * Optimized for calling isAllBitsSet() more often than clearAllBits().
  */
 class BitmaskVarSize {
 public:
@@ -19,6 +21,8 @@ public:
 
 	/**
 	 * Set new number of bits.
+	 *
+	 * All bits will be cleared.
 	 *
 	 * Returns true on success.
 	 * Returns false when failed, new number of bits will then be 0.
@@ -50,7 +54,7 @@ public:
 	 */
 	bool isAllBitsSet();
 
-private:
+protected:
 	uint8_t _numBits = 0;
 
 	/**

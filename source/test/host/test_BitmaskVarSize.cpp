@@ -7,7 +7,21 @@
 
 using namespace std;
 
-BitmaskVarSize bitmask;
+// Derived class that exposes some more functions.
+class TestBitmask : public BitmaskVarSize {
+public:
+	uint8_t getBitmaskSizeBytes() {
+		return getNumBytes(_numBits);
+	}
+
+	uint8_t* getBitmask() {
+		return _bitmask;
+	}
+};
+
+const uint8_t num_bytes[]= {0, 1,1,1,1,1,1,1,1, 2,2,2,2,2,2,2,2, 3,3,3,3,3,3,3,3};
+
+TestBitmask bitmask;
 
 void testClearAndSetBit(int bit, int numBits) {
 	cout << "Test clearing and setting bit " << bit << "." << endl;
@@ -44,6 +58,11 @@ void testNumberOfBits(int numBits) {
 	cout << "Set number of bits." << endl;
 	assert(bitmask.setNumBits(numBits) == true);
 
+	cout << "Check if all bits are cleared." << endl;
+	for (int i=0; i<numBits; ++i) {
+		assert(bitmask.isSet(i) == false);
+	}
+
 	cout << "Set each bit." << endl;
 	for (int i=0; i<numBits; ++i) {
 		bitmask.setBit(i);
@@ -66,6 +85,19 @@ int main() {
 		cout << endl << endl << endl;
 	}
 
+	for (int i=0; i<sizeof(num_bytes); ++i) {
+		cout << "Check number of allocated bytes for " << i << " bits." << endl;
+		bitmask.setNumBits(i);
+		cout << "  expected: " << (int)num_bytes[i] << ", got: " << (int)bitmask.getBitmaskSizeBytes() << endl;
+		assert(bitmask.getBitmaskSizeBytes() == num_bytes[i]);
+		cout << "Bitmask:";
+		for (int j=0; j<num_bytes[i]; ++j) {
+			cout << " " << (int)bitmask.getBitmask()[j];
+		}
+		cout << endl;
+	}
+	cout << endl << endl << endl;
+
 	cout << "BitmaskVarSize SUCCESS" << endl;
-	return EXIT_SUCCESS; 
+	return EXIT_SUCCESS;
 }
