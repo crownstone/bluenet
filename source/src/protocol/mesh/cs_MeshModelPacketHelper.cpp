@@ -63,7 +63,11 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		case CS_MESH_MODEL_TYPE_SYNC_REQUEST:
 			return payloadSize == sizeof(cs_mesh_model_msg_sync_request_t);
 		case CS_MESH_MODEL_TYPE_STATE_SET:
-			return payloadSize >= sizeof(cs_mesh_model_msg_state_header_t);
+			return payloadSize >= sizeof(cs_mesh_model_msg_state_header_ext_t);
+		case CS_MESH_MODEL_TYPE_RESULT:
+			return payloadSize >= sizeof(cs_mesh_model_msg_result_header_t);
+		case CS_MESH_MODEL_TYPE_UNKNOWN:
+			return false;
 	}
 
 	return false;
@@ -110,6 +114,10 @@ void getPayload(uint8_t* meshMsg, size16_t meshMsgSize, uint8_t*& payload, size1
 	payloadSize = meshMsgSize - MESH_HEADER_SIZE;
 }
 
+cs_data_t getPayload(uint8_t* meshMsg, size16_t meshMsgSize) {
+	return cs_data_t(meshMsg + MESH_HEADER_SIZE, meshMsgSize - MESH_HEADER_SIZE);
+}
+
 size16_t getMeshMessageSize(size16_t payloadSize) {
 	return MESH_HEADER_SIZE + payloadSize;
 }
@@ -125,6 +133,36 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
 	return true;
 }
 
+
+
+CommandHandlerTypes getCtrlCmdType(cs_mesh_model_msg_type_t meshType) {
+	switch (meshType) {
+		case CS_MESH_MODEL_TYPE_CMD_TIME:
+			return CTRL_CMD_SET_TIME;
+		case CS_MESH_MODEL_TYPE_CMD_NOOP:
+			return CTRL_CMD_NOP;
+		case CS_MESH_MODEL_TYPE_STATE_SET:
+			return CTRL_CMD_STATE_SET;
+		default:
+			return CTRL_CMD_UNKNOWN;
+	}
+}
+
+cs_mesh_model_msg_type_t getMeshType(CommandHandlerTypes ctrlCmdType) {
+	switch (ctrlCmdType) {
+		case CTRL_CMD_SET_TIME:
+			return CS_MESH_MODEL_TYPE_CMD_TIME;
+		case CTRL_CMD_NOP:
+			return CS_MESH_MODEL_TYPE_CMD_NOOP;
+		case CTRL_CMD_STATE_SET:
+			return CS_MESH_MODEL_TYPE_STATE_SET;
+		default:
+			return CS_MESH_MODEL_TYPE_UNKNOWN;
+	}
+}
+
+
+
 bool canShortenStateType(uint16_t type) {
 	return type < 0xFF;
 }
@@ -135,6 +173,24 @@ bool canShortenStateId(uint16_t id) {
 
 bool canShortenPersistenceMode(uint8_t id) {
 	return id < ((1 << 2) - 1);
+}
+
+bool canShortenRetCode(cs_ret_code_t retCode) {
+	return retCode < 0xFF;
+}
+
+uint8_t getShortenedRetCode(cs_ret_code_t retCode) {
+	if (retCode > 0xFF) {
+		return 0xFF;
+	}
+	return retCode;
+}
+
+cs_ret_code_t getInflatedRetCode(uint8_t retCode) {
+	if (retCode == 0xFF) {
+		return ERR_UNSPECIFIED;
+	}
+	return retCode;
 }
 
 bool canShortenAccessLevel(EncryptionAccessLevel accessLevel) {

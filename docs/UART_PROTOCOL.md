@@ -56,6 +56,7 @@ Type  | Packet | Description
 102   | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | State of other Crownstones in the mesh (unencrypted).
 103   | [External state part 0](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_0_t) | Part of the state of other Crownstones in the mesh.
 104   | [External state part 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | Part of the state of other Crownstones in the mesh.
+105   | [Result](../docs/PROTOCOL.md#result_packet) | Result of a mesh command.
 10000 | uint8  | Whether advertising is enabled.
 10001 | uint8  | Whether mesh is enabled.
 10002 | uint8  | Own Crownstone ID.
@@ -69,6 +70,15 @@ Type  | Packet | Description
 20000 | string | Debug strings.
 
 ## Packets
+
+<a name="mesh_result_packet"></a>
+### Mesh result packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Stone ID | 1 | ID of the stone. 0 for all remaining stones.
+[Result packet](../docs/PROTOCOL.md#result_packet) | Result | N | The result.
+
 
 <a name="adc_config_packet"></a>
 ### ADC config

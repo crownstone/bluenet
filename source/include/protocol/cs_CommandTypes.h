@@ -14,6 +14,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_STATE_GET                   = 2,
 	CTRL_CMD_STATE_SET                   = 3,
 	CTRL_CMD_GET_BOOTLOADER_VERSION      = 4,
+	CTRL_CMD_GET_UICR_DATA               = 5,
 
 	CTRL_CMD_RESET                       = 10,
 	CTRL_CMD_GOTO_DFU                    = 11,

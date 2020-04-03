@@ -19,8 +19,10 @@
  */
 enum cs_mesh_model_opcode_t {
 	CS_MESH_MODEL_OPCODE_MSG = 0xC0,
-	CS_MESH_MODEL_OPCODE_RELIABLE_MSG = 0xC1,
-	CS_MESH_MODEL_OPCODE_REPLY = 0xC2,
+	CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG = 0xC1,
+	CS_MESH_MODEL_OPCODE_UNICAST_REPLY = 0xC2,
+	CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG = 0xC3,
+	CS_MESH_MODEL_OPCODE_MULTICAST_REPLY = 0xC4,
 };
 
 /**
@@ -38,6 +40,7 @@ enum cs_mesh_model_opcode_t {
  * 1B for the message type.
  */
 #define MESH_HEADER_SIZE 1
+
 enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_TEST                      = 0,  // Payload: cs_mesh_model_msg_test_t
 	CS_MESH_MODEL_TYPE_ACK                       = 1,  // Payload: none
@@ -56,7 +59,10 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_SYNC_REQUEST              = 14, // Payload: cs_mesh_model_msg_sync_request_t
 //	CS_MESH_MODEL_TYPE_SYNC_RESPONSE             = 15, // Payload: cs_mesh_model_msg_sync_response_t
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE  = 16, // Payload: cs_mesh_model_msg_device_list_size_t
-	CS_MESH_MODEL_TYPE_STATE_SET                 = 17, // Payload: cs_mesh_model_msg_state_header_t + payload
+	CS_MESH_MODEL_TYPE_STATE_SET                 = 17, // Payload: cs_mesh_model_msg_state_header_ext_t + payload
+	CS_MESH_MODEL_TYPE_RESULT                    = 18, // Payload: cs_mesh_model_msg_result_header_t + payload
+
+	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_test_t {
@@ -139,6 +145,15 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_state_header_t {
 	uint8_t type;                 // Shortened version of CS_TYPE
 	uint8_t id : 6;               // Shortened version of state id.
 	uint8_t persistenceMode : 2;  // Shortened version of peristenceMode.
+};
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_state_header_ext_t {
+	cs_mesh_model_msg_state_header_t header;
 	uint8_t accessLevel : 3;      // Shortened version of access level.
 	uint8_t sourceId : 5;         // Shortened version of source.
+};
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_result_header_t {
+	uint8_t msgType; // Mesh msg type of which this is the result.
+	uint8_t retCode;
 };

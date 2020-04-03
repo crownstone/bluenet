@@ -1,7 +1,7 @@
 /*
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: Mar 10, 2020
+ * Date: Apr 1, 2020
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
@@ -9,6 +9,7 @@
 
 #include <mesh/cs_MeshCommon.h>
 #include <third/std/function.h>
+#include <util/cs_BitmaskVarSize.h>
 
 extern "C" {
 #include <access.h>
@@ -16,11 +17,11 @@ extern "C" {
 
 /**
  * Class that:
- * - Sends and receives multicast non-segmented messages.
+ * - Sends and receives multicast acked messages.
  * - Queues messages to be sent.
- * - Interleaves sending queued messages.
+ * - Handles queue 1 by 1.
  */
-class MeshModelMulticast {
+class MeshModelMulticastAcked {
 public:
 	/** Callback function definition. */
 	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result)> callback_msg_t;
@@ -64,12 +65,17 @@ public:
 	void handleMsg(const access_message_rx_t * accessMsg);
 
 private:
-	const static uint8_t _queueSize = 20;
+	const static uint8_t queue_size = 5;
 
-	struct __attribute__((__packed__)) cs_multicast_queue_item_t {
+	const static uint8_t queue_index_none = 255;
+
+	struct __attribute__((__packed__)) cs_multicast_acked_queue_item_t {
 		MeshUtil::cs_mesh_queue_item_meta_data_t metaData;
+		uint8_t numIds;
+		stone_id_t* stoneIdsPtr;
+
 		uint8_t msgSize;
-		uint8_t msg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
+		uint8_t* msgPtr = nullptr;
 	};
 
 	access_model_handle_t _accessModelHandle = ACCESS_HANDLE_INVALID;
@@ -78,12 +84,38 @@ private:
 
 	callback_msg_t _msgCallback = nullptr;
 
-	cs_multicast_queue_item_t _queue[_queueSize];
+	cs_multicast_acked_queue_item_t _queue[queue_size];
+
+	/**
+	 * Queue index of message currently being sent.
+	 */
+	uint8_t _queueIndexInProgress = queue_index_none;
 
 	/**
 	 * Next index in queue to send.
 	 */
 	uint8_t _queueIndexNext = 0;
+
+	/**
+	 * Bitmask of acked stones.
+	 * If the Nth bit is set, the ack of Nth stone ID in the list has been received.
+	 */
+	BitmaskVarSize _ackedStonesBitmask;
+
+	/**
+	 * Number of processQueue() calls left until timeout.
+	 */
+	uint16_t _processCallsLeft;
+
+	/**
+	 * If item at index is in progress, cancel it.
+	 */
+	void cancelQueueItem(uint8_t index);
+
+	/**
+	 * Remove an item from the queue
+	 */
+	void remQueueItem(uint8_t index);
 
 	/**
 	 * Send messages from queue.
@@ -105,7 +137,33 @@ private:
 	bool sendMsgFromQueue();
 
 	/**
+	 * Prepare for sending a new message.
+	 */
+	bool prepareForMsg(cs_multicast_acked_queue_item_t* item);
+
+	/**
 	 * Send a message over the mesh via publish, without reply.
 	 */
 	cs_ret_code_t sendMsg(const uint8_t* data, uint16_t len);
+
+	/**
+	 * Send an ack message.
+	 */
+	void sendReply(const access_message_rx_t* accessMsg, const uint8_t* data, uint16_t len);
+
+	/**
+	 * Handle an ack message.
+	 */
+	void handleReply(MeshUtil::cs_mesh_received_msg_t & msg);
+
+	/**
+	 * Check if ack from every stone ID in the list has been received.
+	 * Also check if timed out.
+	 */
+	void checkDone();
+
+	/**
+	 * Retry sending (parts of) the message.
+	 */
+	void retryMsg();
 };

@@ -17,13 +17,15 @@ extern "C" {
 
 /**
  * Class that:
- * - Sends and receives targeted segmented messages.
+ * - Sends and receives targeted acked messages.
+ * - Uses reliable segmented messages for this.
  * - Queues messages to be sent.
+ * - Handles queue 1 by 1.
  */
 class MeshModelUnicast {
 public:
 	/** Callback function definition. */
-	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg)> callback_msg_t;
+	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result)> callback_msg_t;
 
 	/**
 	 * Register a callback function that's called when a message from the mesh is received.
@@ -43,10 +45,7 @@ public:
 	void configureSelf(dsm_handle_t appkeyHandle);
 
 	/**
-	 * Add a msg to an empty spot in the queue (repeats == 0).
-	 * Start looking at SendIndex, then reverse iterate over the queue.
-	 * Then set the new SendIndex at the newly added item, so that it will be send first.
-	 * We do the reverse iterate, so that the old SendIndex should be handled early (for a large enough queue).
+	 * Add a msg the queue.
 	 */
 	cs_ret_code_t addToQueue(MeshUtil::cs_mesh_queue_item_t& item);
 
@@ -67,10 +66,13 @@ public:
 	void handleReliableStatus(access_reliable_status_t status);
 
 private:
-	const static uint8_t _queueSize = 5;
+	const static uint8_t queue_size = 5;
+
+	const static uint8_t queue_index_none = 255;
 
 	struct __attribute__((__packed__)) cs_unicast_queue_item_t {
 		MeshUtil::cs_mesh_queue_item_meta_data_t metaData;
+		stone_id_t targetId;
 		uint8_t msgSize;
 		uint8_t* msgPtr = nullptr;
 	};
@@ -89,20 +91,24 @@ private:
 	uint32_t _canceled = 0;
 #endif
 
-	/**
-	 * Queue index of message currently being sent.
-	 * 255 for none.
-	 */
-	uint8_t _queueIndexInProgress = 255;
-
-	cs_unicast_queue_item_t _queue[_queueSize] = {0};
+	cs_unicast_queue_item_t _queue[queue_size];
 
 	uint32_t _ackTimeoutUs = 10 * 1000 * 1000; // MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT
+
+	/**
+	 * Queue index of message currently being sent.
+	 */
+	uint8_t _queueIndexInProgress = queue_index_none;
 
 	/**
 	 * Next index in queue to send.
 	 */
 	uint8_t _queueIndexNext = 0;
+
+	/**
+	 * If item at index is in progress, cancel it.
+	 */
+	void cancelQueueItem(uint8_t index);
 
 	/**
 	 * Remove an item from the queue
@@ -115,7 +121,7 @@ private:
 	void processQueue();
 
 	/**
-	 * Check if there is a msg in queue with more than 0 repeats.
+	 * Check if there is a msg in queue with more than 0 transmissions.
 	 * If so, return that index.
 	 * Start looking at index SendIndex as that item should be sent first.
 	 * Returns -1 if none found.

@@ -523,12 +523,13 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	_stack->resume();
 
 	switch(newMode) {
-		case OperationMode::OPERATION_MODE_SETUP:
+		case OperationMode::OPERATION_MODE_SETUP: {
 			LOGd("Configure setup mode");
 //			_advertiser->changeToLowTxPower();
 			_advertiser->changeToNormalTxPower();
 			break;
-		case OperationMode::OPERATION_MODE_FACTORY_RESET:
+		}
+		case OperationMode::OPERATION_MODE_FACTORY_RESET: {
 			LOGd("Configure factory reset mode");
 #if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
 			// Seems like mesh has to be started in order to run the factory reset.
@@ -538,12 +539,15 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			FactoryReset::getInstance().finishFactoryReset(_boardsConfig.deviceType);
 			_advertiser->changeToNormalTxPower();
 			break;
-		case OperationMode::OPERATION_MODE_DFU:
+		}
+		case OperationMode::OPERATION_MODE_DFU: {
 			LOGd("Configure DFU mode");
 			// TODO: have this function somewhere else.
-			CommandHandler::getInstance().handleCommand(CTRL_CMD_GOTO_DFU, cmd_source_t(CS_CMD_SOURCE_INTERNAL));
+			cs_result_t result;
+			CommandHandler::getInstance().handleCommand(CTRL_CMD_GOTO_DFU, cs_data_t(), cmd_source_t(CS_CMD_SOURCE_INTERNAL), ADMIN, result);
 			_advertiser->changeToNormalTxPower();
 			break;
+		}
 		default:
 			_advertiser->changeToNormalTxPower();
 	}

@@ -30,15 +30,15 @@ public:
 
 	cs_ret_code_t sendMsg(cs_mesh_msg_t *meshMsg);
 	cs_ret_code_t sendTestMsg();
-	cs_ret_code_t sendSetTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOW);
-	cs_ret_code_t sendNoop(uint8_t repeats=CS_MESH_RELIABILITY_LOW);
-	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOW);
-	cs_ret_code_t sendTime(const cs_mesh_model_msg_time_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOWEST);
-	cs_ret_code_t sendBehaviourSettings(const behaviour_settings_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOWEST);
-	cs_ret_code_t sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOWEST);
-	cs_ret_code_t sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOW);
-	cs_ret_code_t sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOW);
-	cs_ret_code_t sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* item, uint8_t repeats=CS_MESH_RELIABILITY_LOW);
+	cs_ret_code_t sendSetTime(const cs_mesh_model_msg_time_t* item, uint8_t transmissions=0);
+	cs_ret_code_t sendNoop(uint8_t transmissions=0);
+	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t transmissions=0);
+	cs_ret_code_t sendTime(const cs_mesh_model_msg_time_t* item, uint8_t transmissions=0);
+	cs_ret_code_t sendBehaviourSettings(const behaviour_settings_t* item, uint8_t transmissions=0);
+	cs_ret_code_t sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t transmissions=0);
+	cs_ret_code_t sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t transmissions=0);
+	cs_ret_code_t sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t transmissions=0);
+	cs_ret_code_t sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* item, uint8_t transmissions=0);
 
 	/** Internal usage */
 	void handleEvent(event_t & event);
@@ -54,6 +54,6 @@ private:
 
 	cs_ret_code_t handleSendMeshCommand(mesh_control_command_packet_t* command);
 
-	cs_ret_code_t addToQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id, uint8_t* payload, uint8_t payloadSize, uint8_t repeats, bool priority);
-	cs_ret_code_t remFromQueue(cs_mesh_model_msg_type_t type, stone_id_t targetId, uint16_t id);
+	cs_ret_code_t addToQueue(MeshUtil::cs_mesh_queue_item_t & item);
+	cs_ret_code_t remFromQueue(MeshUtil::cs_mesh_queue_item_t & item);
 };

@@ -24,19 +24,31 @@ struct __attribute__((__packed__)) cs_mesh_received_msg_t {
 	uint8_t hops;
 };
 
+// Data needed in each model queue.
 struct __attribute__((__packed__)) cs_mesh_queue_item_meta_data_t {
-	uint16_t id; // ID that can freely be used to find similar items.
-	uint8_t type;
-	stone_id_t targetId = 0;   // 0 for broadcast
+	uint16_t id = 0; // ID that can freely be used to find similar items.
+	uint8_t type = CS_MESH_MODEL_TYPE_UNKNOWN; // Mesh msg type.
+//	stone_id_t targetId = 0;   // 0 for broadcast
+	uint8_t transmissionsOrTimeout : 6; // Timeout in seconds when reliable, else number of transmissions.
 	bool priority : 1;
-	bool reliable : 1;
-	uint8_t repeats : 6;
+
+	cs_mesh_queue_item_meta_data_t():
+		transmissionsOrTimeout(0),
+		priority(false)
+	{}
 };
 
-struct __attribute__((__packed__)) cs_mesh_queue_item_t {
+/**
+ * Struct to queue an item.
+ * Data is temporary, so has to be copied.
+ */
+struct cs_mesh_queue_item_t {
 	cs_mesh_queue_item_meta_data_t metaData;
-	uint8_t payloadSize = 0;
-	uint8_t* payloadPtr = nullptr;
+	bool reliable = false;
+	bool broadcast = true;
+	uint8_t numIds = 0;
+	stone_id_t* stoneIdsPtr = nullptr;
+	cs_data_t msgPayload;
 };
 
 void printQueueItem(const char* prefix, const cs_mesh_queue_item_meta_data_t& metaData);

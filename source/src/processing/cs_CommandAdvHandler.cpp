@@ -12,6 +12,7 @@
 #include "common/cs_Types.h"
 #include "processing/cs_EncryptionHandler.h"
 #include "storage/cs_State.h"
+#include "time/cs_SystemTime.h"
 #include "util/cs_BleError.h"
 
 // Defines to enable extra debug logs.
@@ -252,16 +253,27 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 #endif
 
 	uint32_t validationTimestamp = (decryptedData[0] << 0) | (decryptedData[1] << 8) | (decryptedData[2] << 16) | (decryptedData[3] << 24);
-	TYPIFY(STATE_TIME) timestamp;
-	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
 	uint8_t typeInt = decryptedData[4];
 	AdvCommandTypes type = (AdvCommandTypes)typeInt;
 	uint16_t headerSize = sizeof(validationTimestamp) + sizeof(typeInt);
 	uint16_t length = SOC_ECB_CIPHERTEXT_LENGTH - headerSize;
 	uint8_t* commandData = decryptedData + headerSize;
 
-	// TODO: validate with time.
-	if (validationTimestamp != 0xCAFEBABE) {
+	Time time = SystemTime::posix();
+	uint32_t timestamp = time.timestamp();
+//	TYPIFY(STATE_TIME) timestamp;
+//	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
+	LOGCommandAdvVerbose("validation=%u time=%u", validationTimestamp, timestamp);
+
+	// For now, we also allow CAFEBABE as validation.
+	bool validated = false;
+	if (validationTimestamp == 0xCAFEBABE) {
+		validated = true;
+	}
+	if (timestamp - 2*60 < validationTimestamp && validationTimestamp < timestamp + 2*60) {
+		validated = true;
+	}
+	if (!validated) {
 		return false;
 	}
 	if (!decryptRC5Payload(encryptedPayloadRC5, decryptedPayloadRC5)) {

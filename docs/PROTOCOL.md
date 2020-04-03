@@ -305,9 +305,10 @@ Type nr | Type name | Payload type | Result type | Description | A | M | B | S
 --- | --- | --- | --- | :---: | :---: | :---: | :---: | :--:
 0 | Setup | [Setup packet](#setup_packet) | - | Perform setup. |  |  |  | x
 1 | Factory reset | uint 32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
-2 | Get state | [State get packet](#state_get_packet) | [State result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
-3 | Set state | [State set packet](#state_set_packet) | - | Required access depends on the state type. | x | x | x
+2 | Get state | [State get packet](#state_get_packet) | [State get result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
+3 | Set state | [State set packet](#state_set_packet) | [State set result packet](#state_set_result_packet) | Required access depends on the state type. | x | x | x
 4 | Get bootloader version | - | Char array | Get the bootloader version string. | x | x | x | x
+5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) | Get the UICR data. | x | x | x | x
 10 | Reset | - | - | Reset device | x
 11 | Goto DFU | - | - | Reset device to DFU mode | x
 12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
@@ -418,6 +419,29 @@ Value | Name | Description
 1   | STORED | Set value to ram and flash. This value will be used by the firmware, also after a reboot. Overwrites the temporary value.
 
 
+<a name="uicr_data_packet"></a>
+##### UICR data packet
+
+This packet is meant for developers. For more information, see [UICR](UICR.md) and [Naming](NAMING.md).
+
+![UICR data packet](../docs/diagrams/uicr_data_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 32 | Board | 4 | The board version.
+uint 8 | Product type | 1 | Type of product.
+uint 8 | Region | 1 | Which region the product is for.
+uint 8 | Product family | 1 | Product family.
+uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
+uint 8 | Hardware patch | 1 | Hardware version patch.
+uint 8 | Hardware minor | 1 | Hardware version minor.
+uint 8 | Hardware major | 1 | Hardware version major.
+uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
+uint 8 | Product housing | 1 |
+uint 8 | Production week | 1 | Week number.
+uint 8 | Production year | 1 | Last 2 digits of the year.
+uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
+
 
 <a name="sun_time_packet"></a>
 ##### Sun time packet
@@ -467,20 +491,21 @@ Bit | Name |  Description
 
 <a name="command_mesh_packet"></a>
 #### Mesh command packet
-Only a couple of commands are implemented:
+For now, only a few of commands are implemented:
 
-- Set time, only broadcast.
-- Noop, only broadcast.
-- State set, only 1 target ID.
+- Set time, only broadcast, without acks.
+- Noop, only broadcast, without acks.
+- State set, only 1 target ID, with ack.
 
 ![Command packet](../docs/diagrams/command-mesh-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
-uint 8 | Reserved | 1 | Reserved for future use, should be 0 for now.
-uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast.
-uint8 [] | List of target IDs | Count | Crownstone identifiers of the devices at which this message is aimed. For broadcast, no IDs are provided and the command payload follows directly after the count field.
+uint 8 | [Flags](#mesh_command_flags) | 1 | Options.
+uint 8 | Timeout / transmissions | 1 | When acked: timeout time in seconds. Else: number of times to send the command. 0 to use the default.
+uint 8 | ID count | 1 | The number of stone IDs provided.
+uint8 [] | List of stone IDs | Count | IDs of the stones at which this message is aimed. Can be empty, then the command payload follows directly after the count field.
 uint 8 | Command payload | N | The command payload data, which depends on the [type](#mesh_command_types).
 
 <a name="mesh_command_types"></a>
@@ -489,6 +514,16 @@ uint 8 | Command payload | N | The command payload data, which depends on the [t
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
 0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet.
+
+<a name="mesh_command_flags"></a>
+##### Mesh command flags
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Broadcast | Send command to all stones. Else, its only sent to all stones in the list of stone IDs, which will take more time.
+1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout.
+2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen.
+
 
 <a name="behaviour_debug_packet"></a>
 ##### Behaviour debug packet
@@ -561,6 +596,8 @@ Value | Name | Description
 39  | BUSY | Wait for something to be done.
 40  | ERR_WRONG_STATE | The crownstone is in a wrong state.
 41  | ERR_ALREADY_EXISTS | Item already exists.
+42  | ERR_TIMEOUT | Operation timed out.
+43  | ERR_CANCELED | Operation was canceled.
 48  | NO_ACCESS | Invalid access for this command.
 49  | ERR_UNSAFE | It's unsafe to execute this command.
 64  | NOT_AVAILABLE | Command currently not available.

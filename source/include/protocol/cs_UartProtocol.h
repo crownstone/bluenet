@@ -21,7 +21,8 @@
 
 #pragma once
 
-#include "events/cs_EventListener.h"
+#include <events/cs_EventListener.h>
+#include <protocol/cs_UartMsgTypes.h>
 #include <cstdint>
 
                                            // bit:7654 3210
@@ -61,7 +62,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_MESH_STATE =                       102, // Received state of external stone, payload: service_data_encrypted_t
 	UART_OPCODE_TX_MESH_STATE_PART_0 =                103, // Received part of state of external stone, payload: cs_mesh_model_msg_state_0_t
 	UART_OPCODE_TX_MESH_STATE_PART_1 =                104, // Received part of state of external stone, payload: cs_mesh_model_msg_state_1_t
-
+	UART_OPCODE_TX_MESH_RESULT =                      105, // Received the result of a mesh command, payload: result_packet_header_t + data.
 
 	UART_OPCODE_TX_ADVERTISEMENT_ENABLED =            10000, // Whether advertising is enabled (payload: bool)
 	UART_OPCODE_TX_MESH_ENABLED =                     10001, // Whether mesh is enabled (payload: bool)
