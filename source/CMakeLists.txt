@@ -522,7 +522,7 @@ ELSE()
 		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 		
 		message(STATUS "Configure nrf_symbols.ld file")
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/nrf_symbols.ld" @ONLY)
 		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld")
 	
 		message(STATUS "Application start address: ${APPLICATION_START_ADDRESS}")
