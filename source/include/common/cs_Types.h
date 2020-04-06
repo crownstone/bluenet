@@ -292,7 +292,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_GOING_TO_DFU,                                 // The system will reboot to DFU mode soon.
 
 	CMD_SET_TIME,                                     // Set the time.
-	CMD_SET_IBEACON_CONFIG_INDEX,                     // Set which ibeacon config index to use for advertising.
+	CMD_SET_IBEACON_CONFIG_ID,                        // Set which ibeacon config id to use for advertising.
 	EVT_TIME_SET,                                     // Time is set or changed. Payload: previous posix time
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 
@@ -500,7 +500,7 @@ typedef void TYPIFY(EVT_MESH_PAGES_ERASED);
 typedef cs_mesh_model_msg_state_0_t TYPIFY(EVT_MESH_EXT_STATE_0);
 typedef cs_mesh_model_msg_state_1_t TYPIFY(EVT_MESH_EXT_STATE_1);
 typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
-typedef ibeacon_config_index_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_INDEX);
+typedef ibeacon_config_id_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_ID);
 typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
 
 /*---------------------------------------------------------------------------------------------------------------------

@@ -61,12 +61,12 @@ public:
 	void handleEvent(event_t & event);
 
 private:
-	static const uint8_t num_ibeacon_config_indices = 2;
+	static const uint8_t num_ibeacon_config_ids = 2;
 	advertiser_t* _advertiser = NULL;
 	uint8_t* _buffer = NULL;
 	adv_packet_t* _advPacket = NULL;
-	uint8_t _ibeaconConfigIndex = 0;
-	ibeacon_config_index_packet_t _ibeaconInterval[num_ibeacon_config_indices]; // Timestamp and interval = 0 for invalid entry.
+	uint8_t _ibeaconConfigId = 0;
+	ibeacon_config_id_packet_t _ibeaconInterval[num_ibeacon_config_ids]; // Timestamp and interval = 0 for invalid entry.
 
 	void updateIbeacon();
 
@@ -77,7 +77,7 @@ private:
 	 */
 	void advertise(IBeacon* ibeacon);
 
-	cs_ret_code_t handleSetIbeaconConfig(ibeacon_config_index_packet_t* packet);
+	cs_ret_code_t handleSetIbeaconConfig(ibeacon_config_id_packet_t* packet);
 
 	void handleTime(uint32_t now);
 };

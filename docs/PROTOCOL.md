@@ -309,6 +309,7 @@ Type nr | Type name | Payload type | Result type | Description | A | M | B | S
 3 | Set state | [State set packet](#state_set_packet) | [State set result packet](#state_set_result_packet) | Required access depends on the state type. | x | x | x
 4 | Get bootloader version | - | Char array | Get the bootloader version string. | x | x | x | x
 5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) | Get the UICR data. | x | x | x | x
+6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon_config_id_packet) | - | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x
 10 | Reset | - | - | Reset device | x
 11 | Goto DFU | - | - | Reset device to DFU mode | x
 12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
@@ -442,6 +443,23 @@ uint 8 | Production week | 1 | Week number.
 uint 8 | Production year | 1 | Last 2 digits of the year.
 uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
 
+
+<a name="ibeacon_config_id_packet"></a>
+##### Ibeacon config ID packet
+
+![Ibeacon config ID packet](../docs/diagrams/ibeacon_config_id_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | ID | 1 | The ibeacon config ID to set.
+uint 32 | Timestamp | 4 | Timestamp when the config ID should be set.
+uint 16 | Interval | 2 | Interval in seconds when the ID should be set again.
+
+- ID can only be 0 or 1 for now.
+- Set the interval to 0 if you to set the ID only once.
+- Set the interval to 0, and the timestamp to 0 if you want to set the ID only once, and now.
+
+To interleave between two config IDs, you can for example set ID=0 at timestamp=0 with interval=600, and ID=1 at timestamp=300 with interval=600.
 
 <a name="sun_time_packet"></a>
 ##### Sun time packet

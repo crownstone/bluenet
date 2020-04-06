@@ -234,15 +234,15 @@ struct __attribute__((packed)) sun_time_t {
 };
 
 /**
- * Packet to change ibeacon config index.
+ * Packet to change ibeacon config ID.
  *
  * Timestamp: when to start executing the change.
  * Interval: change every N seconds after timestamp.
  * Set interval = 0 to execute only once.
  * Set timestamp = 0, and interval = 0 to execute now.
  */
-struct __attribute__((__packed__)) ibeacon_config_index_packet_t {
-	uint8_t ibeaconConfigIndex = 0;
+struct __attribute__((__packed__)) ibeacon_config_id_packet_t {
+	uint8_t ibeaconConfigId = 0;
 	uint32_t timestamp = 0;
 	uint16_t interval = 0;
 };

@@ -66,7 +66,7 @@ void MeshAdvertiser::stop() {
 }
 
 void MeshAdvertiser::advertiseIbeacon(uint8_t ibeaconIndex) {
-	_ibeaconConfigIndex = ibeaconIndex;
+	_ibeaconConfigId = ibeaconIndex;
 	updateIbeacon();
 }
 
@@ -77,25 +77,25 @@ void MeshAdvertiser::updateIbeacon() {
 	TYPIFY(CONFIG_IBEACON_TXPOWER) rssi;
 
 	{
-		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_MAJOR,   _ibeaconConfigIndex, (uint8_t*)&major, sizeof(major));
+		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_MAJOR,   _ibeaconConfigId, (uint8_t*)&major, sizeof(major));
 		if (State::getInstance().get(data) != ERR_SUCCESS) {
 			return;
 		}
 	}
 	{
-		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_MINOR,   _ibeaconConfigIndex, (uint8_t*)&minor, sizeof(minor));
+		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_MINOR,   _ibeaconConfigId, (uint8_t*)&minor, sizeof(minor));
 		if (State::getInstance().get(data) != ERR_SUCCESS) {
 			return;
 		}
 	}
 	{
-		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_UUID,    _ibeaconConfigIndex, (uint8_t*)(uuid.uuid128), sizeof(uuid.uuid128));
+		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_UUID,    _ibeaconConfigId, (uint8_t*)(uuid.uuid128), sizeof(uuid.uuid128));
 		if (State::getInstance().get(data) != ERR_SUCCESS) {
 			return;
 		}
 	}
 	{
-		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_TXPOWER, _ibeaconConfigIndex, (uint8_t*)&rssi, sizeof(rssi));
+		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_TXPOWER, _ibeaconConfigId, (uint8_t*)&rssi, sizeof(rssi));
 		if (State::getInstance().get(data) != ERR_SUCCESS) {
 			return;
 		}
@@ -148,35 +148,35 @@ void MeshAdvertiser::advertise(IBeacon* ibeacon) {
 	advertiser_packet_send(_advertiser, _advPacket);
 }
 
-cs_ret_code_t MeshAdvertiser::handleSetIbeaconConfig(ibeacon_config_index_packet_t* packet) {
-	if (packet->ibeaconConfigIndex >= num_ibeacon_config_indices) {
+cs_ret_code_t MeshAdvertiser::handleSetIbeaconConfig(ibeacon_config_id_packet_t* packet) {
+	if (packet->ibeaconConfigId >= num_ibeacon_config_ids) {
 		return ERR_WRONG_PARAMETER;
 	}
 	if (packet->interval == 0 && packet->timestamp == 0) {
-		// Set config index now, and clear entry.
-		_ibeaconConfigIndex = packet->ibeaconConfigIndex;
-		_ibeaconInterval[packet->ibeaconConfigIndex].interval = 0;
-		_ibeaconInterval[packet->ibeaconConfigIndex].timestamp = 0;
+		// Set config id now, and clear entry.
+		_ibeaconConfigId = packet->ibeaconConfigId;
+		_ibeaconInterval[packet->ibeaconConfigId].interval = 0;
+		_ibeaconInterval[packet->ibeaconConfigId].timestamp = 0;
 		updateIbeacon();
 	}
 	else {
-		_ibeaconInterval[packet->ibeaconConfigIndex] = *packet;
+		_ibeaconInterval[packet->ibeaconConfigId] = *packet;
 	}
 	return ERR_SUCCESS;
 }
 
 void MeshAdvertiser::handleTime(uint32_t now) {
-	for (uint8_t i = 0; i < num_ibeacon_config_indices; ++i) {
+	for (uint8_t i = 0; i < num_ibeacon_config_ids; ++i) {
 		if (now >= _ibeaconInterval[i].timestamp) {
 			if (_ibeaconInterval[i].interval == 0) {
-				// Set config index, and clear entry.
-				_ibeaconConfigIndex = i;
+				// Set config id, and clear entry.
+				_ibeaconConfigId = i;
 				_ibeaconInterval[i].interval = 0;
 				_ibeaconInterval[i].timestamp = 0;
 				updateIbeacon();
 			}
 			else if (CsMath::mod((_ibeaconInterval[i].timestamp - now), _ibeaconInterval[i].interval) == 0)	{
-				_ibeaconConfigIndex = i;
+				_ibeaconConfigId = i;
 				updateIbeacon();
 				return;
 			}
@@ -211,8 +211,8 @@ void MeshAdvertiser::handleEvent(event_t & event) {
 			handleTime(*timestamp);
 			break;
 		}
-		case CS_TYPE::CMD_SET_IBEACON_CONFIG_INDEX: {
-			auto packet = (TYPIFY(CMD_SET_IBEACON_CONFIG_INDEX)*) event.data;
+		case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID: {
+			auto packet = (TYPIFY(CMD_SET_IBEACON_CONFIG_ID)*) event.data;
 			event.result.returnCode = handleSetIbeaconConfig(packet);
 			break;
 		}
