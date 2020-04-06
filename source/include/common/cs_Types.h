@@ -24,7 +24,22 @@
 
 enum TypeBases {
 	State_Base   = 0x000,
-	Internal_Base = 0x100, // Mesh state set relies on state types being below 0x100.
+	InternalBase = 0x100,
+
+	// we keep internal events categorized so that the test suite
+	// can easily send those while keeping flexibility in ordering this file.
+	InternalBaseBluetooth = InternalBase + 0,
+	InternalBaseSwitch = InternalBase + 20,
+	InternalBasePower = InternalBase + 40,
+	InternalBaseErrors = InternalBase + 60,
+	InternalBaseStorage = InternalBase + 80,
+	InternalBaseLogging = InternalBase + 100,
+	InternalBaseADC = InternalBase + 120,
+	InternalBaseMesh = InternalBase + 140,
+	InternalBaseBehaviour = InternalBase + 170,
+	InternalBaseLocalisation = InternalBase + 190,
+	InternalBaseSystem = InternalBase + 210,
+
 };
 
 /** Cast to underlying type.
@@ -162,16 +177,21 @@ enum class CS_TYPE: uint16_t {
 	 * Internal commands and events.
 	 * Start at Internal_Base.
 	 */
-	// Types with fixed number.
-	EVT_ADV_BACKGROUND_PARSED = Internal_Base,        // Sent when a background advertisement has been validated and parsed.
 
-	// Scans
-	EVT_DEVICE_SCANNED,                               // Device was scanned.
-	EVT_ADV_BACKGROUND,                               // Background advertisement has been received.
-	EVT_ADV_BACKGROUND_PARSED_V1,                     // Sent when a v1 background advertisement has been received.
+	// InternalBaseBluetooth
+	EVT_ADV_BACKGROUND_PARSED = InternalBaseBluetooth,     // Sent when a background advertisement has been validated and parsed.
+	EVT_DEVICE_SCANNED,                                    // Device was scanned.
+	EVT_ADV_BACKGROUND,                                    // Background advertisement has been received.
+	EVT_ADV_BACKGROUND_PARSED_V1,                          // Sent when a v1 background advertisement has been received.
+	EVT_ADVERTISEMENT_UPDATED,                             // Advertisement was updated. TODO: advertisement data as payload?
+	EVT_SCAN_STARTED,                                      // Scanner started scanning.
+	EVT_SCAN_STOPPED,                                      // Scanner stopped scanning.
+	EVT_BLE_CONNECT,                                       // Device connected.
+	EVT_BLE_DISCONNECT,                                    // Device disconnected.
+	CMD_ENABLE_ADVERTISEMENT,                              // Enable/disable advertising.
 
 	// Switch
-	CMD_SWITCH_OFF,                                   // Turn switch off.
+	CMD_SWITCH_OFF = InternalBaseSwitch,              // Turn switch off.
 	CMD_SWITCH_ON,                                    // Turn switch on.
 	CMD_SWITCH_TOGGLE,                                // Toggle switch.
 	CMD_SWITCH,                                       // Set switch.
@@ -180,23 +200,26 @@ enum class CS_TYPE: uint16_t {
 	CMD_MULTI_SWITCH,                                 // Handle a multi switch.
 	CMD_SWITCHING_ALLOWED,		                      // Set switch lock.
 	CMD_DIMMING_ALLOWED,	                          // Set allow dimming.
-	EVT_DIMMER_POWERED,                               // Dimmer being powered is changed. Payload: true when powered, and ready to be used.
+
+	// Power
+	EVT_DIMMER_POWERED = InternalBasePower,           // Dimmer being powered is changed. Payload: true when powered, and ready to be used.
+	EVT_BROWNOUT_IMPENDING,                           // Brownout is impending (low chip supply voltage).
 
 	// Errors
-	EVT_CURRENT_USAGE_ABOVE_THRESHOLD,                // Current usage goes over the threshold.
-	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER,         // Current usage goes over the dimmer threshold, while dimmer is on.
-	EVT_DIMMER_ON_FAILURE_DETECTED,                   // Dimmer leaks current, while it's supposed to be off.
-	EVT_DIMMER_OFF_FAILURE_DETECTED,                  // Dimmer blocks current, while it's supposed to be on.
-	EVT_CHIP_TEMP_ABOVE_THRESHOLD,                    // Chip temperature is above threshold.
-	EVT_CHIP_TEMP_OK,                                 // Chip temperature is ok again.
-	EVT_DIMMER_TEMP_ABOVE_THRESHOLD,                  // Dimmer temperature is above threshold.
-	EVT_DIMMER_TEMP_OK,                               // Dimmer temperature is ok again.
-	EVT_DIMMER_FORCED_OFF,                            // Dimmer was forced off.
-	EVT_SWITCH_FORCED_OFF,                            // Switch (relay and dimmer) was forced off.
-	EVT_RELAY_FORCED_ON,                              // Relay was forced on.
+	EVT_CURRENT_USAGE_ABOVE_THRESHOLD = InternalBaseErrors,     // Current usage goes over the threshold.
+	EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER,                   // Current usage goes over the dimmer threshold, while dimmer is on.
+	EVT_DIMMER_ON_FAILURE_DETECTED,                             // Dimmer leaks current, while it's supposed to be off.
+	EVT_DIMMER_OFF_FAILURE_DETECTED,                            // Dimmer blocks current, while it's supposed to be on.
+	EVT_CHIP_TEMP_ABOVE_THRESHOLD,                              // Chip temperature is above threshold.
+	EVT_CHIP_TEMP_OK,                                           // Chip temperature is ok again.
+	EVT_DIMMER_TEMP_ABOVE_THRESHOLD,                            // Dimmer temperature is above threshold.
+	EVT_DIMMER_TEMP_OK,                                         // Dimmer temperature is ok again.
+	EVT_DIMMER_FORCED_OFF,                                      // Dimmer was forced off.
+	EVT_SWITCH_FORCED_OFF,                                      // Switch (relay and dimmer) was forced off.
+	EVT_RELAY_FORCED_ON,                                        // Relay was forced on.
 
 	// Storage
-	EVT_STORAGE_INITIALIZED,                          // Storage is initialized, storage is only usable after this event!
+	EVT_STORAGE_INITIALIZED = InternalBaseStorage,    // Storage is initialized, storage is only usable after this event!
 	EVT_STORAGE_WRITE_DONE,                           // An item has been written to storage.
 	EVT_STORAGE_REMOVE_DONE,                          // An item has been invalidated at storage.
 	EVT_STORAGE_REMOVE_ALL_TYPES_WITH_ID_DONE,        // All state values with a certain ID have been invalidated at storage.
@@ -208,22 +231,23 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_FACTORY_RESET_DONE,                           // Factory reset of mesh storage is done.
 
 	// Logging
-	CMD_ENABLE_LOG_POWER,                             // Enable/disable power calculations logging.
+	CMD_ENABLE_LOG_POWER = InternalBaseLogging,       // Enable/disable power calculations logging.
 	CMD_ENABLE_LOG_CURRENT,                           // Enable/disable current samples logging.
 	CMD_ENABLE_LOG_VOLTAGE,                           // Enable/disable voltage samples logging.
 	CMD_ENABLE_LOG_FILTERED_CURRENT,                  // Enable/disable filtered current samples logging.
 
 	// ADC config
-	CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN,         // Toggle ADC voltage pin. TODO: pin as payload?
-	CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT,              // Toggle differential mode on current pin.
-	CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,              // Toggle differential mode on voltage pin.
-	CMD_INC_VOLTAGE_RANGE,                            // Increase voltage range.
-	CMD_DEC_VOLTAGE_RANGE,                            // Decrease voltage range.
-	CMD_INC_CURRENT_RANGE,                            // Increase current range.
-	CMD_DEC_CURRENT_RANGE,                            // Decrease current range.
+	CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN = InternalBaseADC,     // Toggle ADC voltage pin. TODO: pin as payload?
+	CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT,                            // Toggle differential mode on current pin.
+	CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE,                            // Toggle differential mode on voltage pin.
+	CMD_INC_VOLTAGE_RANGE,                                          // Increase voltage range.
+	CMD_DEC_VOLTAGE_RANGE,                                          // Decrease voltage range.
+	CMD_INC_CURRENT_RANGE,                                          // Increase current range.
+	CMD_DEC_CURRENT_RANGE,                                          // Decrease current range.
+	EVT_ADC_RESTARTED,                                              // ADC has been restarted.
 
 	// Mesh
-	CMD_SEND_MESH_MSG,                                // Send a mesh message.
+	CMD_SEND_MESH_MSG = InternalBaseMesh,             // Send a mesh message.
 	CMD_SEND_MESH_MSG_SET_TIME,                       // Send a set time mesh message.
 	CMD_SEND_MESH_MSG_NOOP,                           // Send a noop mesh message.
 	CMD_SEND_MESH_MSG_MULTI_SWITCH,                   // Send a switch mesh message.
@@ -233,6 +257,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN,
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE,
 	CMD_SEND_MESH_CONTROL_COMMAND,                    // Send a control command via the mesh. All permission checks must have been done already!
+	CMD_ENABLE_MESH,                                  // Enable/disable mesh.
 	EVT_MESH_TIME,                                    // Mesh received the current time.
 	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
 	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.
@@ -245,55 +270,35 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_PAGES_ERASED,                            // All mesh storage pages are completely erased.
 
 	// Behaviour
-	CMD_ADD_BEHAVIOUR,                                // Add a behaviour.
+	CMD_ADD_BEHAVIOUR = InternalBaseBehaviour,        // Add a behaviour.
 	CMD_REPLACE_BEHAVIOUR,                            // Replace a behaviour.
 	CMD_REMOVE_BEHAVIOUR,                             // Remove a behaviour.
 	CMD_GET_BEHAVIOUR,                                // Get a behaviour.
 	CMD_GET_BEHAVIOUR_INDICES,                        // Get a list of indices of active behaviours.
 	CMD_GET_BEHAVIOUR_DEBUG,                          // Get info to debug behaviour. Multiple classes will handle this command to fill pieces of info.
+	CMD_CLEAR_ALL_BEHAVIOUR,                          // Clear all behaviours in the store, including persisted flash entries.
 	EVT_BEHAVIOURSTORE_MUTATION,                      // Sent by BehaviourStore, after a change to the stored behaviours.
 	EVT_BEHAVIOUR_OVERRIDDEN,                         // Informs whether behaviour is overridden by user (in override state).
 
-	// Tracked devices
-	CMD_REGISTER_TRACKED_DEVICE,
+	// Localisation of devices
+	CMD_REGISTER_TRACKED_DEVICE = InternalBaseLocalisation,
 	CMD_UPDATE_TRACKED_DEVICE,
-
 	EVT_PROFILE_LOCATION,                             // Location of profile.
-
-	CMD_RESET_DELAYED,                                // Reboot.
-	EVT_GOING_TO_DFU,                                 // The system will reboot to DFU mode soon.
-
-	CMD_ENABLE_ADVERTISEMENT,                         // Enable/disable advertising.
-	CMD_ENABLE_MESH,                                  // Enable/disable mesh.
-
-	CMD_SET_IBEACON_CONFIG_INDEX,                     // Set which ibeacon config index to use for advertising.
-
-	CMD_SET_TIME,                                     // Set the time.
-	EVT_TIME_SET,                                     // Time is set or changed. Payload: previous posix time
-
-	CMD_CONTROL_CMD,                                  // Handle a control command.
-
-	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
-
+	EVT_PRESENCE_MUTATION,                            // Presence changed.
 	EVT_STATE_EXTERNAL_STONE,                         // The state of another stone has been received.
 
-	EVT_ADVERTISEMENT_UPDATED,                        // Advertisement was updated. TODO: advertisement data as payload?
+	// System
+	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
+	EVT_GOING_TO_DFU,                                 // The system will reboot to DFU mode soon.
 
-	EVT_SCAN_STARTED,                                 // Scanner started scanning.
-	EVT_SCAN_STOPPED,                                 // Scanner stopped scanning.
+	CMD_SET_TIME,                                     // Set the time.
+	CMD_SET_IBEACON_CONFIG_INDEX,                     // Set which ibeacon config index to use for advertising.
+	EVT_TIME_SET,                                     // Time is set or changed. Payload: previous posix time
+	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 
-	EVT_BLE_CONNECT,                                  // Device connected.
-	EVT_BLE_DISCONNECT,                               // Device disconnected.
-
-	EVT_BROWNOUT_IMPENDING,                           // Brownout is impending (low chip supply voltage).
-
+	CMD_CONTROL_CMD,                                  // Handle a control command.
 	EVT_SESSION_NONCE_SET,                            // Session nonce was generated.
-
 	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
-
-	EVT_ADC_RESTARTED,                                // ADC has been restarted.
-
-	EVT_PRESENCE_MUTATION,                            // Presence changed.
 
 	EVT_GENERIC_TEST= 0xFFFF,                         // Can be used by the python test python lib for ad hoc tests during development.
 
