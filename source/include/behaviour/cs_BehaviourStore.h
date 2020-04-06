@@ -73,6 +73,13 @@ private:
 	ErrorCodesGeneral removeBehaviour(uint8_t index);
 
 	/**
+	 * Clear all behaviours - usefull for a clean start of the test suite.
+	 * Does not edit the persisted values, so expect discrepancies with
+	 * flash until all behaviours in flash are overwritten.
+	 */
+	void clearActiveBehavioursArray();
+
+	/**
 	 * Calculate the hash over all behaviours.
 	 */
 	static uint32_t calculateMasterHash();
