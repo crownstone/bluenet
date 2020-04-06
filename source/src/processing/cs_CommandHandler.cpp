@@ -183,6 +183,8 @@ return;
 		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG, commandData, result);
 	case CTRL_CMD_REGISTER_TRACKED_DEVICE:
 		return handleCmdRegisterTrackedDevice(commandData, accessLevel, result);
+	case CTRL_CMD_SET_IBEACON_CONFIG_INDEX:
+		return dispatchEventForCommand(CS_TYPE::CMD_SET_IBEACON_CONFIG_INDEX, commandData, result);
 	case CTRL_CMD_UNKNOWN:
 		result.returnCode = ERR_UNKNOWN_TYPE;
 		return;
@@ -826,6 +828,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_LOCK_SWITCH:
 		case CTRL_CMD_UART_MSG:
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
+		case CTRL_CMD_SET_IBEACON_CONFIG_INDEX:
 			return ADMIN;
 		case CTRL_CMD_UNKNOWN:
 			return NOT_SET;
@@ -842,6 +845,7 @@ bool CommandHandler::allowedAsMeshCommand(const CommandHandlerTypes type) {
 		case CTRL_CMD_SET_TIME:
 		case CTRL_CMD_STATE_SET:
 		case CTRL_CMD_UART_MSG:
+		case CTRL_CMD_SET_IBEACON_CONFIG_INDEX:
 			return true;
 		default:
 			return false;
