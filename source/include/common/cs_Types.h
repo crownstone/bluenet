@@ -266,6 +266,8 @@ enum class CS_TYPE: uint16_t {
 	CMD_ENABLE_ADVERTISEMENT,                         // Enable/disable advertising.
 	CMD_ENABLE_MESH,                                  // Enable/disable mesh.
 
+	CMD_SET_IBEACON_CONFIG_INDEX,                     // Set which ibeacon config index to use for advertising.
+
 	CMD_SET_TIME,                                     // Set the time.
 	EVT_TIME_SET,                                     // Time is set or changed. Payload: previous posix time
 
@@ -493,6 +495,7 @@ typedef void TYPIFY(EVT_MESH_PAGES_ERASED);
 typedef cs_mesh_model_msg_state_0_t TYPIFY(EVT_MESH_EXT_STATE_0);
 typedef cs_mesh_model_msg_state_1_t TYPIFY(EVT_MESH_EXT_STATE_1);
 typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
+typedef ibeacon_config_index_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_INDEX);
 typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
 
 /*---------------------------------------------------------------------------------------------------------------------
