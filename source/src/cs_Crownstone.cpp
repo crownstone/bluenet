@@ -839,6 +839,97 @@ void Crownstone::handleEvent(event_t & event) {
 	// }
 }
 
+void printBootloaderInfo() {
+	// Make sure there is space for an extra 0 after the data.
+	uint8_t length = BLUENET_IPC_RAM_DATA_ITEM_SIZE + 1;
+	uint8_t data[length];
+	uint8_t dataSize;
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, data, length, &dataSize);
+	if (retCode == IPC_RET_SUCCESS) {
+		// Zero terminate the string.
+		data[dataSize] = 0;
+		LOGi("Bootloader version: %s", (char*)data);
+	}
+	else {
+		LOGw("No IPC data found, error = %i", retCode);
+	}
+}
+
+extern "C" {
+
+uintptr_t setup;
+uintptr_t loop;
+
+void getAddresses() {
+	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE+1];
+	uint8_t rd_size = 0;
+	uint8_t ret_code = getRamData(IPC_INDEX_MICROAPP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &rd_size);
+
+	if (ret_code == IPC_RET_SUCCESS) {
+		LOGi("Found RAM for MicroApp");
+		LOGi("  protocol: %02x", buf[0]);
+		LOGi("  setup():  %02x %02x %02x %02x", buf[1], buf[2], buf[3], buf[4]);
+		LOGi("  loop():   %02x %02x %02x %02x", buf[5], buf[6], buf[7], buf[8]);
+
+		uint8_t protocol = buf[0];
+		if (protocol == 0) {
+			setup = 0;
+			uint8_t offset = 1;
+			for (int i = 0; i < 4; ++i) {
+				setup = setup | ( (uintptr_t)(buf[i+offset]) << (i*8));
+			}
+			loop = 0;
+			offset = 5;
+			for (int i = 0; i < 4; ++i) {
+				loop = loop | ( (uintptr_t)(buf[i+offset]) << (i*8));
+			}
+		}
+	} else {
+		LOGi("Nothing found in RAM");
+	}
+}
+
+void invokeAddress(uintptr_t address, bool thumb_mode = false) {
+	if (thumb_mode) address += 1;
+	LOGi("Check main code at %p", address);
+	char *arr = (char*)address;
+	if (arr[0] != 0xFF) {
+		void (*microapp_main)() = (void (*)()) address;
+		LOGi("Call function in module: %p", microapp_main);
+		(*microapp_main)();
+		LOGi("Module run.");
+	}
+}
+
+void printMicroAppInfo() {
+	uintptr_t address;
+	
+	// Run microapp code
+	address = 0x680b4;
+	invokeAddress(address, true);
+	
+	setup = 0;
+	loop = 0;
+
+	getAddresses();
+
+	LOGi("Found setup at %p", setup);
+	LOGi("Found loop at %p", loop);
+
+	if (setup) {
+		LOGi("Call setup");
+		void (*setup_func)() = (void (*)()) setup;
+		setup_func();
+	}
+	if (loop) {
+		LOGi("Call loop");
+		void (*loop_func)() = (void (*)()) loop;
+		loop_func();
+	}
+}
+
+}
+
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
  * the code within the bootloader has been processed before. But also after the bootloader, the code in
@@ -904,21 +995,9 @@ int main() {
 	printNfcPins();
 	LOG_FLUSH();
 
-//	LOGi("sizeof(bluenet_ipc_ram_data_item_t)=%u", sizeof(bluenet_ipc_ram_data_item_t));
+	printBootloaderInfo();
 
-	// Make sure there is space for an extra 0 after the data.
-	uint8_t length = BLUENET_IPC_RAM_DATA_ITEM_SIZE + 1;
-	uint8_t data[length];
-	uint8_t dataSize;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, data, length, &dataSize);
-	if (retCode == IPC_RET_SUCCESS) {
-		// Zero terminate the string.
-		data[dataSize] = 0;
-		LOGi("Bootloader version: %s", (char*)data);
-	}
-	else {
-		LOGw("No IPC data found, error = %i", retCode);
-	}
+	printMicroAppInfo();
 
 //	// Make a "clicker"
 //	nrf_delay_ms(1000);

@@ -221,6 +221,8 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
 		*reinterpret_cast<TYPIFY(STATE_MESH_SEQ_NUMBER)*>(data.value) = STATE_MESH_SEQ_NUMBER_DEFAULT;
 		return ERR_SUCCESS;
+	case CS_TYPE::STATE_MICROAPP:
+		return ERR_NOT_AVAILABLE;
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
@@ -317,6 +319,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 		return ERR_NOT_FOUND;
 	}
 	return ERR_NOT_FOUND;
@@ -382,6 +385,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_SUN_TIME:
 	case CS_TYPE::STATE_MESH_IV_INDEX:
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
+	case CS_TYPE::STATE_MICROAPP:
 		return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
@@ -487,6 +491,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 		return PersistenceMode::NEITHER_RAM_NOR_FLASH;
 	}
 	// should not reach this

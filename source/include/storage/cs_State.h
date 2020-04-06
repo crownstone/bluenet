@@ -204,7 +204,7 @@ public:
 	/**
 	 * Set state to new value, via copy.
 	 *
-	 * @param[in] data            Data struct with state type, data, and size.
+	 * @param[in] data            Data struct with state type, optional id, data, and size.
 	 * @param[in] mode            Indicates whether to set data in RAM, FLASH, or a combination of this.
 	 * @return                    Return code.
 	 */

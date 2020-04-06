@@ -30,6 +30,16 @@
 #define ADVERTISEMENT_DATA_MAX_SIZE 31
 
 /**
+ * Size of MicroApp packet.
+ */
+#define MICROAPP_PACKET_SIZE 300
+
+/**
+ * Size of MicroApp chunk.
+ */
+#define MICROAPP_CHUNK_SIZE MICROAPP_PACKET_SIZE - 10
+
+/**
  * Variable length data encapsulation in terms of length and pointer to data.
  */
 struct cs_data_t {
@@ -198,3 +208,25 @@ struct __attribute__((packed)) internal_register_tracked_device_packet_t {
 };
 
 typedef internal_register_tracked_device_packet_t internal_update_tracked_device_packet_t;
+
+/*
+ * Struct for MicroApp code. 
+ *
+ *  - The protocol byte is reserved for future changes. 
+ *  - The app_id is an identifier for the app (in theory we can support multiple apps).
+ *  - The index refers to the chunk index.
+ *  - The count refers to the total number of chunks.
+ *  - The size to the data size (even if data is larger, only the data up to size will be considered). 
+ *  - The checksum is a checksum for this chunk.
+ *  - The app_checksum is over the complete app (only need to be set in the last chunk).
+ */
+struct __attribute__((packed)) microapp_upload_packet_t {
+	uint8_t protocol;
+	uint8_t app_id;
+	uint8_t index;
+	uint8_t count;
+	uint16_t size;
+	uint16_t checksum;
+	uint16_t app_checksum;
+	uint8_t data[MICROAPP_CHUNK_SIZE];
+};

@@ -13,7 +13,21 @@
 
 
 /**
- * Every command goes through the CommandHandler.
+ * Every command from an external device such as a smartphone goes through the CommandHandler.
+ *
+ * # Handlers
+ *
+ * To implement a new command:
+ *   - Add a new type to <cs_Types.h>
+ *   - Define a custom handler for this type in this class.
+ *   - Implement a function to handle this type. 
+ *     - The commandData contains a pointer to a data buffer.
+ *     - This data will be gone after function returns. It has to copied.
+ *     - In most functions there is no explicit memcpy, but a struct assignment (including member arrays).
+ *     - When sending the data through as event, a pointer to the struct can be used.
+ *     - This means that the attached struct has to be freed later.
+ *
+ * # Access Level
  *
  * TODO: In handleCommand is every function by default executed at ADMIN level. This should be at the lowest privilege
  * level.
@@ -95,6 +109,7 @@ private:
 	command_result_t handleCmdStateGet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdStateSet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	command_result_t handleCmdRegisterTrackedDevice   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
+	command_result_t handleMicroAppUpload              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData);
 	
 	// delegate a command in the form of an event of given [typ], passing the commandData and using the allocated [resultData]
 	command_result_t dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_data_t resultData);

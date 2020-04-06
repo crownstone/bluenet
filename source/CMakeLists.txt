@@ -224,6 +224,13 @@ ELSE()
 		MESSAGE(STATUS "SERIAL from NORDIC disabled")
 	ENDIF()
 
+	IF (BUILD_MICROAPP_SUPPORT) 
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
+	ELSE()
+		MESSAGE(STATUS "MicroApp support disabled, no fstorage module required")
+	ENDIF()
+
 	IF (BUILD_MESHING)
 		# All C files in mesh/core/src
 		LIST(APPEND NORDIC_SOURCE "${MESH_SDK_DIR}/mesh/core/src/nrf_mesh_utils.c")

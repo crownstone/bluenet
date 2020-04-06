@@ -238,6 +238,13 @@ struct cs_mesh_iv_index_t {
 typedef uint32_t cs_mesh_seq_number_t;
 
 
+struct __attribute__((packed)) cs_microapp_t {
+	uint32_t start_addr;
+	uint16_t size;
+	uint16_t checksum;
+	uint8_t validation;
+};
+
 // ========================= functions =========================
 
 /**

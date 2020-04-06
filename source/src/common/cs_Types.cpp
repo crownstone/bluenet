@@ -77,6 +77,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::STATE_ERRORS:
 	case CS_TYPE::STATE_MESH_IV_INDEX:
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
+	case CS_TYPE::STATE_MICROAPP:
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
@@ -173,6 +174,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 		return csType;
 	}
 	return CS_TYPE::CONFIG_DO_NOT_USE;
@@ -321,6 +323,8 @@ size16_t TypeSize(CS_TYPE const & type){
 		return sizeof(TYPIFY(STATE_MESH_IV_INDEX));
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
 		return sizeof(TYPIFY(STATE_MESH_SEQ_NUMBER));
+	case CS_TYPE::STATE_MICROAPP:
+		return sizeof(TYPIFY(STATE_MICROAPP));
 	case CS_TYPE::CMD_SWITCH_OFF:
 		return 0;
 	case CS_TYPE::CMD_SWITCH_ON:
@@ -513,6 +517,8 @@ size16_t TypeSize(CS_TYPE const & type){
 		return 0;
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return 0;
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
+		return sizeof(TYPIFY(CMD_MICROAPP_UPLOAD));
 	} // end switch
 
 	// should never happen
@@ -653,6 +659,7 @@ const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: return "STATE_BEHAVIOUR_SETTINGS";
 	case CS_TYPE::STATE_MESH_IV_INDEX: return "STATE_MESH_IV_INDEX";
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER: return "STATE_MESH_SEQ_NUMBER";
+	case CS_TYPE::STATE_MICROAPP: return "STATE_MICROAPP";
 	case CS_TYPE::CMD_SEND_MESH_MSG: return "CMD_SEND_MESH_MSG";
 	case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH: return "CMD_SEND_MESH_MSG_MULTI_SWITCH";
 	case CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION: return "CMD_SEND_MESH_MSG_PROFILE_LOCATION";
@@ -683,6 +690,7 @@ const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME: return "CMD_SEND_MESH_MSG_SET_TIME";
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP: return "CMD_SEND_MESH_MSG_NOOP";
 	case CS_TYPE::EVT_GENERIC_TEST: return "EVT_GENERIC_TEST";
+	case CS_TYPE::CMD_MICROAPP_UPLOAD: return "CMD_MICROAPP_UPLOAD";
 	}
 	return "Unknown";
 }
@@ -753,6 +761,7 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::STATE_MESH_IV_INDEX:
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
 	case CS_TYPE::STATE_ERRORS:
+	case CS_TYPE::STATE_MICROAPP:
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
@@ -849,6 +858,7 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 		return false;
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
 	case CS_TYPE::STATE_TWILIGHT_RULE:
@@ -928,6 +938,7 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::STATE_ERRORS:
 	case CS_TYPE::STATE_MESH_IV_INDEX:
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
+	case CS_TYPE::STATE_MICROAPP:
 	case CS_TYPE::CMD_SWITCH_OFF:
 	case CS_TYPE::CMD_SWITCH_ON:
 	case CS_TYPE::CMD_SWITCH_TOGGLE:
@@ -1024,6 +1035,7 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 		return true;
 	}
 	// should not reach this
@@ -1099,6 +1111,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::STATE_SUN_TIME:
 	case CS_TYPE::STATE_MESH_IV_INDEX:
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
+	case CS_TYPE::STATE_MICROAPP:
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
@@ -1195,6 +1208,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 		return NO_ONE;
 	}
 	return NO_ONE;
@@ -1243,6 +1257,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER:
 	case CS_TYPE::STATE_MESH_IV_INDEX:
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
+	case CS_TYPE::STATE_MICROAPP:
 		return ADMIN;
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_ERRORS:
@@ -1366,6 +1381,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 		return NO_ONE;
 	}
 	return NO_ONE;

@@ -17,7 +17,9 @@ extern "C" {
 #define BLUENET_IPC_RAM_DATA_ITEMS                      5
 
 enum IpcIndex {
-	IPC_INDEX_BOOTLOADER_VERSION = 0,
+	IPC_INDEX_CROWNSTONE_APP = 1,
+	IPC_INDEX_BOOTLOADER_VERSION = 2,
+	IPC_INDEX_MICROAPP = 3,
 };
 
 enum IpcRetCode {

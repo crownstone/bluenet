@@ -156,6 +156,8 @@ enum class CS_TYPE: uint16_t {
 	STATE_BEHAVIOUR_SETTINGS                = 150,
 	STATE_MESH_IV_INDEX                     = 151,
 	STATE_MESH_SEQ_NUMBER                   = 152,
+	
+	STATE_MICROAPP                          = 153,
 
 	/*
 	 * Internal commands and events.
@@ -291,6 +293,8 @@ enum class CS_TYPE: uint16_t {
 
 	EVT_PRESENCE_MUTATION,                            // Presence changed.
 
+	CMD_MICROAPP_UPLOAD,                              // MicroApp upload (e.g. Arduino code).
+
 	EVT_GENERIC_TEST= 0xFFFF,                         // Can be used by the python test python lib for ad hoc tests during development.
 
 };
@@ -394,6 +398,7 @@ typedef void TYPIFY(STATE_EXTENDED_BEHAVIOUR_RULE);
 typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
 typedef cs_mesh_iv_index_t TYPIFY(STATE_MESH_IV_INDEX);
 typedef cs_mesh_seq_number_t TYPIFY(STATE_MESH_SEQ_NUMBER);
+typedef cs_microapp_t TYPIFY(STATE_MICROAPP);
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
@@ -490,6 +495,7 @@ typedef cs_mesh_model_msg_state_0_t TYPIFY(EVT_MESH_EXT_STATE_0);
 typedef cs_mesh_model_msg_state_1_t TYPIFY(EVT_MESH_EXT_STATE_1);
 typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
 typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
+typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP_UPLOAD);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

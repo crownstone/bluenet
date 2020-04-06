@@ -151,6 +151,8 @@ command_result_t CommandHandler::handleCommand(
 		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG, commandData, resultData);
 	case CTRL_CMD_REGISTER_TRACKED_DEVICE:
 		return handleCmdRegisterTrackedDevice(commandData, accessLevel, resultData);
+	case CTRL_CMD_MICROAPP_UPLOAD:
+		return handleMicroAppUpload(commandData, accessLevel, resultData);
 	case CTRL_CMD_UNKNOWN:
 		return command_result_t(ERR_UNKNOWN_TYPE);
 	}
@@ -588,6 +590,22 @@ command_result_t CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t comman
 	return command_result_t(event.result.returnCode);
 }
 
+command_result_t CommandHandler::handleMicroAppUpload(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_data_t resultData) {
+	LOGi(STR_HANDLE_COMMAND, "microapp upload");
+	if (commandData.len != sizeof(microapp_upload_packet_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		return command_result_t(ERR_WRONG_PAYLOAD_LENGTH);
+	}
+	
+	TYPIFY(CMD_MICROAPP_UPLOAD) evtData;
+	evtData = *((microapp_upload_packet_t*)commandData.data);
+	event_t event(CS_TYPE::CMD_MICROAPP_UPLOAD, &evtData, sizeof(evtData));
+	event.result.buf = resultData;
+	event.dispatch();
+
+	return command_result_t(event.result.returnCode);
+}
+
 command_result_t CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_data_t resultData){
 	event_t event(typ, commandData.data, commandData.len);
 	event.result.buf = resultData;
@@ -638,6 +656,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_LOCK_SWITCH:
 		case CTRL_CMD_UART_MSG:
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
+		case CTRL_CMD_MICROAPP_UPLOAD:
 			return ADMIN;
 		case CTRL_CMD_UNKNOWN:
 			return NOT_SET;

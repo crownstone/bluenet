@@ -45,6 +45,8 @@ enum CommandHandlerTypes {
 
 	CTRL_CMD_REGISTER_TRACKED_DEVICE     = 70,
 
+	CTRL_CMD_MICROAPP_UPLOAD              = 71,
+
 	CTRL_CMD_UNKNOWN                     = 0xFFFF
 };
 
