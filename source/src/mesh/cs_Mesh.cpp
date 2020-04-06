@@ -112,7 +112,7 @@ void Mesh::initAdvertiser() {
 }
 
 void Mesh::advertiseIbeacon() {
-	_advertiser.advertiseIbeacon();
+	_advertiser.advertiseIbeacon(0);
 }
 
 void Mesh::handleEvent(event_t & event) {

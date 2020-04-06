@@ -5,9 +5,11 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "mesh/cs_MeshAdvertiser.h"
-#include "storage/cs_State.h"
-#include "util/cs_BleError.h"
+#include <mesh/cs_MeshAdvertiser.h>
+#include <storage/cs_State.h>
+#include <util/cs_BleError.h>
+#include <time/cs_SystemTime.h>
+#include <util/cs_Math.h>
 
 //void txComplete(advertiser_t * p_adv, nrf_mesh_tx_token_t token, timestamp_t timestamp) {
 //	LOGd("tx complete int=%u", BLEutil::getInterruptLevel());
@@ -25,6 +27,7 @@ void MeshAdvertiser::init() {
 	}
 	advertiser_instance_init(_advertiser, NULL, _buffer, MESH_ADVERTISER_BUF_SIZE);
 //	advertiser_instance_init(_advertiser, txComplete, _buffer, MESH_ADVERTISER_BUF_SIZE);
+
 	listen();
 }
 
@@ -62,8 +65,55 @@ void MeshAdvertiser::stop() {
 	advertiser_disable(_advertiser);
 }
 
-void MeshAdvertiser::advertiseIbeacon() {
+void MeshAdvertiser::advertiseIbeacon(uint8_t ibeaconIndex) {
+	_ibeaconConfigIndex = ibeaconIndex;
 	updateIbeacon();
+}
+
+void MeshAdvertiser::updateIbeacon() {
+	TYPIFY(CONFIG_IBEACON_MAJOR) major;
+	TYPIFY(CONFIG_IBEACON_MINOR) minor;
+	TYPIFY(CONFIG_IBEACON_UUID) uuid;
+	TYPIFY(CONFIG_IBEACON_TXPOWER) rssi;
+
+	{
+		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_MAJOR,   _ibeaconConfigIndex, (uint8_t*)&major, sizeof(major));
+		if (State::getInstance().get(data) != ERR_SUCCESS) {
+			return;
+		}
+	}
+	{
+		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_MINOR,   _ibeaconConfigIndex, (uint8_t*)&minor, sizeof(minor));
+		if (State::getInstance().get(data) != ERR_SUCCESS) {
+			return;
+		}
+	}
+	{
+		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_UUID,    _ibeaconConfigIndex, (uint8_t*)(uuid.uuid128), sizeof(uuid.uuid128));
+		if (State::getInstance().get(data) != ERR_SUCCESS) {
+			return;
+		}
+	}
+	{
+		cs_state_data_t data(CS_TYPE::CONFIG_IBEACON_TXPOWER, _ibeaconConfigIndex, (uint8_t*)&rssi, sizeof(rssi));
+		if (State::getInstance().get(data) != ERR_SUCCESS) {
+			return;
+		}
+	}
+
+//	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_MAJOR, &major, sizeof(major));
+//	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_MINOR, &minor, sizeof(minor));
+//	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_UUID, uuid.uuid128, sizeof(uuid.uuid128));
+//	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_TXPOWER, &rssi, sizeof(rssi));
+
+//	State::getInstance().get(cs_state_data_t(CS_TYPE::CONFIG_IBEACON_MAJOR,   ibeaconIndex, (uint8_t*)&major, sizeof(major)));
+//	State::getInstance().get(cs_state_data_t(CS_TYPE::CONFIG_IBEACON_MINOR,   ibeaconIndex, (uint8_t*)&minor, sizeof(minor)));
+//	State::getInstance().get(cs_state_data_t(CS_TYPE::CONFIG_IBEACON_UUID,    ibeaconIndex, (uint8_t*)uuid.uuid128, sizeof(uuid.uuid128)));
+//	State::getInstance().get(cs_state_data_t(CS_TYPE::CONFIG_IBEACON_TXPOWER, ibeaconIndex, (uint8_t*)&rssi, sizeof(rssi)));
+
+	IBeacon beacon(uuid, major, minor, rssi);
+	LOGd("Advertise ibeacon uuid=[%x %x .. %x] major=%u, minor=%u, rssi_on_1m=%i", uuid.uuid128[0], uuid.uuid128[1], uuid.uuid128[15], major, minor, rssi);
+	advertise(&beacon);
 }
 
 /**
@@ -98,18 +148,40 @@ void MeshAdvertiser::advertise(IBeacon* ibeacon) {
 	advertiser_packet_send(_advertiser, _advPacket);
 }
 
-void MeshAdvertiser::updateIbeacon() {
-	TYPIFY(CONFIG_IBEACON_MAJOR) major;
-	TYPIFY(CONFIG_IBEACON_MINOR) minor;
-	TYPIFY(CONFIG_IBEACON_UUID) uuid;
-	TYPIFY(CONFIG_IBEACON_TXPOWER) rssi;
-	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_MAJOR, &major, sizeof(major));
-	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_MINOR, &minor, sizeof(minor));
-	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_UUID, uuid.uuid128, sizeof(uuid.uuid128));
-	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_TXPOWER, &rssi, sizeof(rssi));
-	IBeacon beacon(uuid, major, minor, rssi);
-	LOGd("Advertise ibeacon: uuid=[%x %x .. %x] major=%u, minor=%u, rssi_on_1m=%i", uuid.uuid128[0], uuid.uuid128[1], uuid.uuid128[15], major, minor, rssi);
-	advertise(&beacon);
+cs_ret_code_t MeshAdvertiser::handleSetIbeaconConfig(ibeacon_config_index_packet_t* packet) {
+	if (packet->ibeaconConfigIndex >= num_ibeacon_config_indices) {
+		return ERR_WRONG_PARAMETER;
+	}
+	if (packet->interval == 0 && packet->timestamp == 0) {
+		// Set config index now, and clear entry.
+		_ibeaconConfigIndex = packet->ibeaconConfigIndex;
+		_ibeaconInterval[packet->ibeaconConfigIndex].interval = 0;
+		_ibeaconInterval[packet->ibeaconConfigIndex].timestamp = 0;
+		updateIbeacon();
+	}
+	else {
+		_ibeaconInterval[packet->ibeaconConfigIndex] = *packet;
+	}
+	return ERR_SUCCESS;
+}
+
+void MeshAdvertiser::handleTime(uint32_t now) {
+	for (uint8_t i = 0; i < num_ibeacon_config_indices; ++i) {
+		if (now >= _ibeaconInterval[i].timestamp) {
+			if (_ibeaconInterval[i].interval == 0) {
+				// Set config index, and clear entry.
+				_ibeaconConfigIndex = i;
+				_ibeaconInterval[i].interval = 0;
+				_ibeaconInterval[i].timestamp = 0;
+				updateIbeacon();
+			}
+			else if (CsMath::mod((_ibeaconInterval[i].timestamp - now), _ibeaconInterval[i].interval) == 0)	{
+				_ibeaconConfigIndex = i;
+				updateIbeacon();
+				return;
+			}
+		}
+	}
 }
 
 void MeshAdvertiser::handleEvent(event_t & event) {
@@ -132,6 +204,16 @@ void MeshAdvertiser::handleEvent(event_t & event) {
 		case CS_TYPE::CONFIG_IBEACON_TXPOWER: {
 //			int8_t* txPower = reinterpret_cast<TYPIFY(CONFIG_IBEACON_TXPOWER)*>(event.data);
 			updateIbeacon();
+			break;
+		}
+		case CS_TYPE::STATE_TIME: {
+			uint32_t* timestamp = (TYPIFY(STATE_TIME)*) event.data;
+			handleTime(*timestamp);
+			break;
+		}
+		case CS_TYPE::CMD_SET_IBEACON_CONFIG_INDEX: {
+			auto packet = (TYPIFY(CMD_SET_IBEACON_CONFIG_INDEX)*) event.data;
+			event.result.returnCode = handleSetIbeaconConfig(packet);
 			break;
 		}
 		default:

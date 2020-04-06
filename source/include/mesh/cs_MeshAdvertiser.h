@@ -55,15 +55,18 @@ public:
 	/**
 	 * Start advertising ibeacon.
 	 */
-	void advertiseIbeacon();
+	void advertiseIbeacon(uint8_t ibeaconIndex);
 
 	/** Internal usage */
 	void handleEvent(event_t & event);
 
 private:
+	static const uint8_t num_ibeacon_config_indices = 2;
 	advertiser_t* _advertiser = NULL;
 	uint8_t* _buffer = NULL;
 	adv_packet_t* _advPacket = NULL;
+	uint8_t _ibeaconConfigIndex = 0;
+	ibeacon_config_index_packet_t _ibeaconInterval[num_ibeacon_config_indices]; // Timestamp and interval = 0 for invalid entry.
 
 	void updateIbeacon();
 
@@ -73,4 +76,8 @@ private:
 	 * Updates previous advertisement.
 	 */
 	void advertise(IBeacon* ibeacon);
+
+	cs_ret_code_t handleSetIbeaconConfig(ibeacon_config_index_packet_t* packet);
+
+	void handleTime(uint32_t now);
 };
