@@ -128,12 +128,12 @@ uint8 | Access level | 3 | Shortened access level: 0=admin, 1=member, 2=basic, 4
 uint8 | Sequence | 2 | 1: Sequence of this service UUID.
 uint8 | Reserved | 2 | Reserved for future use.
 uint8 | Device token | 8 | Token of this device, should be unique per device (phone) in the sphere.
-uint16 | Background payload | 4 | First 4 bits of first block of [encrypted background payload](#background_adv_payload).
+uint16 | RC5 payload | 4 | First 4 bits of first block of [encrypted RC5 payload](#rc5_adv_payload).
 uint8 | Sequence | 2 | 2: Sequence of this service UUID.
-uint16 | Background payload | 12 | Last 12 bits of first block of [encrypted background payload](#background_adv_payload).
-uint16 | Background payload | 2 | First 2 bits of second block of [encrypted background payload](#background_adv_payload).
+uint16 | RC5 payload | 12 | Last 12 bits of first block of [encrypted RC5 payload](#rc5_adv_payload).
+uint16 | RC5 payload | 2 | First 2 bits of second block of [encrypted RC5 payload](#rc5_adv_payload).
 uint8 | Sequence | 2 | 3: Sequence of this service UUID.
-uint16 | Background payload | 14 | Last 14 bits of second block of [encrypted background payload](#background_adv_payload).
+uint16 | RC5 payload | 14 | Last 14 bits of second block of [encrypted RC5 payload](#rc5_adv_payload).
 
 <a name="command_adv_payload"></a>
 #### Command broadcast payload
