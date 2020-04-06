@@ -181,6 +181,28 @@ void MeshModelMulticastAcked::handleReply(MeshUtil::cs_mesh_received_msg_t & msg
 		return;
 	}
 
+	stone_id_t srcId = msg.srcAddress;
+
+	// Find stone ID in list of stone IDs.
+	auto item = _queue[_queueIndexInProgress];
+	uint16_t stoneIndex = 0xFFFF;
+	for (uint8_t i = 0; i < item.numIds; ++i) {
+		if (item.stoneIdsPtr[i] == srcId) {
+			stoneIndex = i;
+			break;
+		}
+	}
+	if (stoneIndex == 0xFFFF) {
+		LOGMeshModelInfo("Stone id %u not in list", srcId);
+		return;
+	}
+
+	// Check if stone ID has already been marked as acked, and thus already been handled.
+	if (_ackedStonesBitmask.isSet(stoneIndex)) {
+		LOGMeshModelVerbose("Already received ack from id %u", srcId);
+		return;
+	}
+
 	// Handle reply message.
 	cs_result_t result;
 	_msgCallback(msg, result);
@@ -190,19 +212,9 @@ void MeshModelMulticastAcked::handleReply(MeshUtil::cs_mesh_received_msg_t & msg
 		return;
 	}
 
-	stone_id_t srcId = msg.srcAddress;
-//	cs_mesh_model_msg_result_header_t* resultHeader = (cs_mesh_model_msg_result_header_t*) (msg + MESH_HEADER_SIZE);
-//	LOGMeshModelDebug("Received ack from id=%u type=%u retCode=%u", srcId, resultHeader->msgType, resultHeader->retCode);
-
 	// Mark id as acked.
-	auto item = _queue[_queueIndexInProgress];
-	for (uint8_t i = 0; i < item.numIds; ++i) {
-		if (item.stoneIdsPtr[i] == srcId) {
-			LOGMeshModelVerbose("Set acked bit %u", i);
-			_ackedStonesBitmask.setBit(i);
-			break;
-		}
-	}
+	LOGMeshModelDebug("Set acked bit %u", stoneIndex);
+	_ackedStonesBitmask.setBit(stoneIndex);
 }
 
 cs_ret_code_t MeshModelMulticastAcked::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {
