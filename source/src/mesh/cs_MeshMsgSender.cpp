@@ -312,6 +312,22 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 		LOGd("  id: %u", command->targetIds[i]);
 	}
 
+	MeshUtil::cs_mesh_queue_item_t item;
+
+	// These fields can should be decided per type.
+	item.metaData.id = 0;
+	item.metaData.type = CS_MESH_MODEL_TYPE_UNKNOWN;
+	item.metaData.priority = false;
+
+	// All these fields can be set from the mesh command.
+	item.metaData.transmissionsOrTimeout = command->header.timeoutOrTransmissions;
+	item.reliable = command->header.flags.flags.reliable;
+	item.broadcast = command->header.flags.flags.broadcast;
+	item.numIds = command->header.idCount;
+	item.stoneIdsPtr = command->targetIds;
+	item.msgPayload.len = command->controlCommand.size;
+	item.msgPayload.data = command->controlCommand.data;
+
 	switch (command->controlCommand.type) {
 		case CTRL_CMD_SET_TIME: {
 			if (command->controlCommand.size != sizeof(uint32_t)) {
@@ -321,8 +337,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 					|| command->header.flags.flags.broadcast != true
 					|| command->header.flags.flags.reliable != false
 					|| command->header.flags.flags.useKnownIds != false) {
-				break;
-//				return ERR_WRONG_PARAMETER;
+				return ERR_NOT_IMPLEMENTED;
 			}
 			uint32_t* time = (uint32_t*) command->controlCommand.data;
 			cs_mesh_model_msg_time_t packet;
@@ -342,12 +357,19 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 					|| command->header.flags.flags.broadcast != true
 					|| command->header.flags.flags.reliable != false
 					|| command->header.flags.flags.useKnownIds != false) {
-				break;
-//				return ERR_WRONG_PARAMETER;
+				return ERR_NOT_IMPLEMENTED;
 			}
 			return sendNoop(command->header.timeoutOrTransmissions);
 		}
-
+		case CTRL_CMD_SET_IBEACON_CONFIG_ID: {
+			if (command->controlCommand.size != sizeof(ibeacon_config_id_packet_t)) {
+				return ERR_WRONG_PAYLOAD_LENGTH;
+			}
+			item.metaData.id = 0;
+			item.metaData.type = CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID;
+			item.metaData.priority = false;
+			break;
+		}
 		case CTRL_CMD_STATE_SET: {
 			// Size has already been checked in command handler.
 			state_packet_header_t* stateHeader = (state_packet_header_t*) command->controlCommand.data;
@@ -356,9 +378,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 					|| command->header.flags.flags.broadcast != false
 					|| command->header.flags.flags.reliable != true
 					|| command->header.flags.flags.useKnownIds != false) {
-				break;
-//				LOGw("Need 1 target id");
-//				return ERR_WRONG_PARAMETER;
+				return ERR_NOT_IMPLEMENTED;
 			}
 			uint8_t stateHeaderSize = sizeof(state_packet_header_t);
 			uint8_t statePayloadSize = command->controlCommand.size - stateHeaderSize;
@@ -394,7 +414,6 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 
 			memcpy(msg + sizeof(*meshStateHeader), command->controlCommand.data + stateHeaderSize, statePayloadSize);
 
-			MeshUtil::cs_mesh_queue_item_t item;
 			item.metaData.id = 0;
 			item.metaData.type = CS_MESH_MODEL_TYPE_STATE_SET;
 			item.metaData.transmissionsOrTimeout = command->header.timeoutOrTransmissions;
@@ -409,9 +428,10 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			return addToQueue(item);
 		}
 		default:
-			break;
+			return ERR_NOT_IMPLEMENTED;
 	}
-	return ERR_NOT_IMPLEMENTED;
+
+	return addToQueue(item);
 }
 
 void MeshMsgSender::handleEvent(event_t & event) {
