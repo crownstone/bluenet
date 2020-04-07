@@ -37,6 +37,7 @@ enum ServiceDataEncryptedType {
 	SERVICE_DATA_TYPE_ERROR = 1,
 	SERVICE_DATA_TYPE_EXT_STATE = 2,
 	SERVICE_DATA_TYPE_EXT_ERROR = 3,
+	SERVICE_DATA_TYPE_ALTERNATIVE_STATE = 4,
 };
 
 struct __attribute__((packed)) service_data_encrypted_state_t {
@@ -49,6 +50,17 @@ struct __attribute__((packed)) service_data_encrypted_state_t {
 	int32_t  energyUsed;
 	uint16_t partialTimestamp;
 	uint8_t  extraFlags;
+	uint8_t  validation;
+};
+
+struct __attribute__((packed)) service_data_encrypted_alternative_state_t {
+	uint8_t  id;
+	uint8_t  switchState;
+	uint8_t  flags;
+	uint16_t behaviourMasterHash;
+	uint8_t  reserved[6];
+	uint16_t partialTimestamp;
+	uint8_t  reserved2;
 	uint8_t  validation;
 };
 
@@ -93,6 +105,7 @@ struct __attribute__((packed)) service_data_encrypted_t {
 		service_data_encrypted_error_t error;
 		service_data_encrypted_ext_state_t extState;
 		service_data_encrypted_ext_error_t extError;
+		service_data_encrypted_alternative_state_t altState;
 	};
 };
 

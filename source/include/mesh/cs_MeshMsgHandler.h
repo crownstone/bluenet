@@ -8,6 +8,7 @@
 #pragma once
 
 #include <common/cs_Types.h>
+#include <protocol/cs_UartMsgTypes.h>
 
 /**
  * Class that:
@@ -16,29 +17,31 @@
 class MeshMsgHandler {
 public:
 	void init();
-	void handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg);
+	void handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result);
 
 protected:
-	void handleTest(                 uint8_t* payload, size16_t payloadSize);
-	void handleAck(                  uint8_t* payload, size16_t payloadSize);
-	void handleStateTime(            uint8_t* payload, size16_t payloadSize);
-	void handleCmdTime(              uint8_t* payload, size16_t payloadSize);
-	void handleCmdNoop(              uint8_t* payload, size16_t payloadSize);
-	void handleCmdMultiSwitch(       uint8_t* payload, size16_t payloadSize);
-	void handleState0(               uint8_t* payload, size16_t payloadSize, uint16_t srcAddress, int8_t rssi, uint8_t hops);
-	void handleState1(               uint8_t* payload, size16_t payloadSize, uint16_t srcAddress, int8_t rssi, uint8_t hops);
-	void handleProfileLocation(      uint8_t* payload, size16_t payloadSize);
-	void handleSetBehaviourSettings( uint8_t* payload, size16_t payloadSize);
-	void handleTrackedDeviceRegister(uint8_t* payload, size16_t payloadSize);
-	void handleTrackedDeviceToken(   uint8_t* payload, size16_t payloadSize);
-	void handleTrackedDeviceListSize(uint8_t* payload, size16_t payloadSize);
-	void handleSyncRequest(          uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleTest(                 uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleAck(                  uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleStateTime(            uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleCmdTime(              uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleCmdNoop(              uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleCmdMultiSwitch(       uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleState0(               uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
+	cs_ret_code_t handleState1(               uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
+	cs_ret_code_t handleProfileLocation(      uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleSetBehaviourSettings( uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleTrackedDeviceRegister(uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleTrackedDeviceToken(   uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleTrackedDeviceListSize(uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleSyncRequest(          uint8_t* payload, size16_t payloadSize);
+	void handleStateSet(                      uint8_t* payload, size16_t payloadSize, cs_result_t& result);
+	cs_ret_code_t handleResult(               uint8_t* payload, size16_t payloadSize, stone_id_t srcId);
 
 private:
 	TYPIFY(CONFIG_CROWNSTONE_ID) _ownId = 0;
 
 	struct cs_mesh_model_ext_state_t {
-		uint16_t address = 0;
+		stone_id_t srcId = 0;
 		uint8_t partsReceivedBitmask = 0;
 		TYPIFY(EVT_STATE_EXTERNAL_STONE) state;
 	};
@@ -67,11 +70,13 @@ private:
 	/**
 	 * Whether a state message is from the same state as last received part.
 	 */
-	bool isFromSameState(uint16_t srcAddress, stone_id_t id, uint16_t partialTimestamp);
+	bool isFromSameState(stone_id_t srcId, stone_id_t id, uint16_t partialTimestamp);
 
 	/**
 	 * Check if all parts of a state are received.
 	 * Send an event if that's the case.
 	 */
 	void checkStateReceived(int8_t rssi, uint8_t ttl);
+
+	void sendResult(uart_msg_mesh_result_packet_header_t& resultHeader, const cs_data_t& resultData);
 };

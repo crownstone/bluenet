@@ -118,8 +118,9 @@
  */
 #define ACCESS_MODEL_COUNT (1 + /* Configuration server */  \
                             1 + /* Health server */  \
-							1 + /* Crownstone multicast model */  \
-							1   /* Crownstone unicast model */)
+                            1 + /* Crownstone multicast model */  \
+                            1 + /* Crownstone multicast acked model */  \
+                            1   /* Crownstone unicast model */)
 
 /**
  * The number of elements in the application.
@@ -155,14 +156,14 @@
 #define DSM_SUBNET_MAX                                  (4)
 
 /** Maximum number of applications. */
-//#define DSM_APP_MAX                                     (1)
-#define DSM_APP_MAX                                     (8)
+#define DSM_APP_MAX                                     (1)
+//#define DSM_APP_MAX                                     (8)
 
 /** Maximum number of device keys. */
 #define DSM_DEVICE_MAX                                  (1)
 
 /** Maximum number of virtual addresses. */
-#define DSM_VIRTUAL_ADDR_MAX                            (1)
+#define DSM_VIRTUAL_ADDR_MAX                            (2)
 
 /** Maximum number of non-virtual addresses. One for each of the servers and a group address.
  * - Generic OnOff publication

@@ -214,6 +214,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_BEHAVIOUR_SETTINGS:
 		reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(data.value)->asInt = STATE_BEHAVIOUR_SETTINGS_DEFAULT;
 		return ERR_SUCCESS;
+	case CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH:
+		*(TYPIFY(STATE_BEHAVIOUR_MASTER_HASH)*)data.value = STATE_BEHAVIOUR_MASTER_HASH_DEFAULT;
+		return ERR_SUCCESS;
 	case CS_TYPE::STATE_MESH_IV_INDEX:
 		reinterpret_cast<TYPIFY(STATE_MESH_IV_INDEX)*>(data.value)->iv_index = STATE_MESH_IV_INDEX_DEFAULT;
 		reinterpret_cast<TYPIFY(STATE_MESH_IV_INDEX)*>(data.value)->iv_update_in_progress = STATE_MESH_IV_STATUS_DEFAULT;
@@ -276,6 +279,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN:
 	case CS_TYPE::EVT_MESH_TRACKED_DEVICE_LIST_SIZE:
 	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE:
+	case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
 	case CS_TYPE::EVT_SCAN_STARTED:
 	case CS_TYPE::EVT_SCAN_STOPPED:
@@ -301,6 +305,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_GET_BEHAVIOUR:
 	case CS_TYPE::CMD_GET_BEHAVIOUR_INDICES:
 	case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG:
+	case CS_TYPE::CMD_CLEAR_ALL_BEHAVIOUR:
 	case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN:
 	case CS_TYPE::CMD_REGISTER_TRACKED_DEVICE:
@@ -317,6 +322,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_MESH_EXT_STATE_0:
 	case CS_TYPE::EVT_MESH_EXT_STATE_1:
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
+	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:
@@ -393,6 +399,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_TIME:
 	case CS_TYPE::STATE_FACTORY_RESET:
 	case CS_TYPE::STATE_ERRORS:
+	case CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH:
 		return PersistenceMode::RAM;
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::CMD_SWITCH_OFF:
@@ -418,6 +425,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN:
 	case CS_TYPE::EVT_MESH_TRACKED_DEVICE_LIST_SIZE:
 	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE:
+	case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
@@ -473,6 +481,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_GET_BEHAVIOUR:
 	case CS_TYPE::CMD_GET_BEHAVIOUR_INDICES:
 	case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG:
+	case CS_TYPE::CMD_CLEAR_ALL_BEHAVIOUR:
 	case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN:
 	case CS_TYPE::CMD_REGISTER_TRACKED_DEVICE:
@@ -489,6 +498,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_MESH_EXT_STATE_0:
 	case CS_TYPE::EVT_MESH_EXT_STATE_1:
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
+	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_GENERIC_TEST:
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:
@@ -496,4 +506,27 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	}
 	// should not reach this
 	return PersistenceMode::NEITHER_RAM_NOR_FLASH;
+}
+
+PersistenceModeGet toPersistenceModeGet(uint8_t mode) {
+	PersistenceModeGet persistenceMode = static_cast<PersistenceModeGet>(mode);
+	switch (persistenceMode) {
+		case PersistenceModeGet::CURRENT:
+		case PersistenceModeGet::STORED:
+		case PersistenceModeGet::FIRMWARE_DEFAULT:
+		case PersistenceModeGet::UNKNOWN:
+			return persistenceMode;
+	}
+	return PersistenceModeGet::UNKNOWN;
+}
+
+PersistenceModeSet toPersistenceModeSet(uint8_t mode) {
+	PersistenceModeSet persistenceMode = static_cast<PersistenceModeSet>(mode);
+	switch (persistenceMode) {
+		case PersistenceModeSet::TEMPORARY:
+		case PersistenceModeSet::STORED:
+		case PersistenceModeSet::UNKNOWN:
+			return persistenceMode;
+	}
+	return PersistenceModeSet::UNKNOWN;
 }

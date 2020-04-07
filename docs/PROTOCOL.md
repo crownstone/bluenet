@@ -1,4 +1,4 @@
-# Bluenet protocol v4.0.0
+# Bluenet protocol v5.0.0
 -------------------------
 
 This only documents the latest protocol, older versions can be found in the git history.
@@ -223,8 +223,8 @@ The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provide
 
 Characteristic | UUID | Date type | Description | A | M | B
 --- | --- | --- | --- | :---: | :---: | :---:
-Control        | 24f0000a-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone. | x | x | x
-Result         | 24f0000b-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone. | x | x | x
+Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone. | x | x | x
+Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone. | x | x | x
 Session nonce  | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the [session nonce](#session_nonce). First 4 bytes are also used as validation key. |  |  | ECB
 Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |
 
@@ -252,8 +252,8 @@ MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MA
 Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the session key that will be for encryption.
 GoTo DFU       | 24f10006-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 66 to go to DFU.
 Session nonce  | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the session nonce. First 4 bytes are also used as validation key.
-Control        | 24f1000a-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
-Result         | 24f1000b-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone.
+Control        | 24f1000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
+Result         | 24f1000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone.
 
 Every command written to the control characteristic returns a [result packet](#result_packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
@@ -305,8 +305,11 @@ Type nr | Type name | Payload type | Result type | Description | A | M | B | S
 --- | --- | --- | --- | :---: | :---: | :---: | :---: | :--:
 0 | Setup | [Setup packet](#setup_packet) | - | Perform setup. |  |  |  | x
 1 | Factory reset | uint 32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
-2 | Get state | [State get packet](#state_get_packet) | [State result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
-3 | Set state | [State set packet](#state_set_packet) | - | Required access depends on the state type. | x | x | x
+2 | Get state | [State get packet](#state_get_packet) | [State get result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
+3 | Set state | [State set packet](#state_set_packet) | [State set result packet](#state_set_result_packet) | Required access depends on the state type. | x | x | x
+4 | Get bootloader version | - | Char array | Get the bootloader version string. | x | x | x | x
+5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) | Get the UICR data. | x | x | x | x
+6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon_config_id_packet) | - | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x
 10 | Reset | - | - | Reset device | x
 11 | Goto DFU | - | - | Reset device to DFU mode | x
 12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
@@ -318,7 +321,7 @@ Type nr | Type name | Payload type | Result type | Description | A | M | B | S
 30 | Set time | uint 32 | - | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
 31 | Increase TX | - | - | Temporarily increase the TX power when in setup mode |  |  |  | x
 32 | Reset errors | [Error bitmask](#state_error_bitmask) | - | Reset all errors which are set in the written bitmask. | x
-33 | Mesh command | [Command mesh packet](#command_mesh_packet) | - | Send a generic command over the mesh. Required access depends on the command. Required access depends on the command. | x | x | x
+33 | Mesh command | [Command mesh packet](#command_mesh_packet) | - | Send a generic command over the mesh. Required access depends on the command. | x | x | x
 34 | Set sun times | [Sun time packet](#sun_time_packet) | - | Update the reference times for sunrise and sunset | x | x
 40 | Allow dimming | uint 8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
@@ -361,6 +364,8 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state to get.
 uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
+uint 8 | [Persistence mode](#state_get_persistence_mode) | 1 | Type of persistence mode.
+uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 
 <a name="state_set_packet"></a>
 #### State set packet
@@ -371,6 +376,8 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state to set.
 uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
+uint 8 | [Persistence mode](#state_set_persistence_mode_set) | 1 | Type of persistence mode.
+uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 uint 8 | Payload | N | Payload data, depends on state type.
 
 Most configuration changes will only be applied after a reboot.
@@ -383,6 +390,8 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state.
 uint 16 | id | 2 | ID of state.
+uint 8 | [Persistence mode](#state_get_persistence_mode) | 1 | Type of persistence mode.
+uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 uint 8 | Payload | N | Payload data, depends on state type.
 
 <a name="state_set_result_packet"></a>
@@ -392,7 +401,65 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [State type](#state_types) | 2 | Type of state.
 uint 16 | id | 2 | ID of state that was set.
+uint 8 | [Persistence mode](#state_set_persistence_mode_set) | 1 | Type of persistence mode.
+uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 
+<a name="state_get_persistence_mode"></a>
+#### State get persistence mode
+Value | Name | Description
+--- | --- | ---
+0   | CURRENT | Get value from ram if exists, else from flash if exists, else get default. This is the value used by the firmware.
+1   | STORED | Get value from flash, else get default. This value will be used after a reboot.
+2   | FIRMWARE_DEFAULT | Get default value.
+
+<a name="state_set_persistence_mode_set"></a>
+#### State set persistence mode
+Value | Name | Description
+--- | --- | ---
+0   | TEMPORARY | Set value to ram. This value will be used by the firmware, but lost after a reboot.
+1   | STORED | Set value to ram and flash. This value will be used by the firmware, also after a reboot. Overwrites the temporary value.
+
+
+<a name="uicr_data_packet"></a>
+##### UICR data packet
+
+This packet is meant for developers. For more information, see [UICR](UICR.md) and [Naming](NAMING.md).
+
+![UICR data packet](../docs/diagrams/uicr_data_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 32 | Board | 4 | The board version.
+uint 8 | Product type | 1 | Type of product.
+uint 8 | Region | 1 | Which region the product is for.
+uint 8 | Product family | 1 | Product family.
+uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
+uint 8 | Hardware patch | 1 | Hardware version patch.
+uint 8 | Hardware minor | 1 | Hardware version minor.
+uint 8 | Hardware major | 1 | Hardware version major.
+uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
+uint 8 | Product housing | 1 |
+uint 8 | Production week | 1 | Week number.
+uint 8 | Production year | 1 | Last 2 digits of the year.
+uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
+
+
+<a name="ibeacon_config_id_packet"></a>
+##### Ibeacon config ID packet
+
+![Ibeacon config ID packet](../docs/diagrams/ibeacon_config_id_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | ID | 1 | The ibeacon config ID to set.
+uint 32 | Timestamp | 4 | Timestamp when the config ID should be set.
+uint 16 | Interval | 2 | Interval in seconds when the ID should be set again.
+
+- ID can only be 0 or 1 for now.
+- Set the interval to 0 if you to set the ID only once.
+- Set the interval to 0, and the timestamp to 0 if you want to set the ID only once, and now.
+
+To interleave between two config IDs, you can for example set ID=0 at timestamp=0 with interval=600, and ID=1 at timestamp=300 with interval=600.
 
 <a name="sun_time_packet"></a>
 ##### Sun time packet
@@ -442,23 +509,39 @@ Bit | Name |  Description
 
 <a name="command_mesh_packet"></a>
 #### Mesh command packet
+For now, only a few of commands are implemented:
+
+- Set time, only broadcast, without acks.
+- Noop, only broadcast, without acks.
+- State set, only 1 target ID, with ack.
 
 ![Command packet](../docs/diagrams/command-mesh-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
-uint 8 | Reserved | 1 | Reserved for future use, should be 0 for now.
-uint 8 | Count | 1 | The number of IDs provided as targets, 0 for broadcast. **Currently, only 0 is implemented.**
-uint8 [] | List of target IDs | Count | Crownstone identifiers of the devices at which this message is aimed. For broadcast, no IDs are provided and the command follows directly after the count field.
-uint 8 | Command payload | N | The command payload data, which depends on the type.
+uint 8 | [Flags](#mesh_command_flags) | 1 | Options.
+uint 8 | Timeout / transmissions | 1 | When acked: timeout time in seconds. Else: number of times to send the command. 0 to use the default.
+uint 8 | ID count | 1 | The number of stone IDs provided.
+uint8 [] | List of stone IDs | Count | IDs of the stones at which this message is aimed. Can be empty, then the command payload follows directly after the count field.
+uint 8 | Command payload | N | The command payload data, which depends on the [type](#mesh_command_types).
 
 <a name="mesh_command_types"></a>
 ##### Mesh command types
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
-0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet. See [Broadcast command types](BROADCAST_PROTOCOL.md#command-broadcast-types) for implemented commands.
+0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet.
+
+<a name="mesh_command_flags"></a>
+##### Mesh command flags
+
+Bit | Name |  Description
+--- | --- | ---
+0 | Broadcast | Send command to all stones. Else, its only sent to all stones in the list of stone IDs, which will take more time.
+1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout.
+2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen.
+
 
 <a name="behaviour_debug_packet"></a>
 ##### Behaviour debug packet
@@ -531,6 +614,8 @@ Value | Name | Description
 39  | BUSY | Wait for something to be done.
 40  | ERR_WRONG_STATE | The crownstone is in a wrong state.
 41  | ERR_ALREADY_EXISTS | Item already exists.
+42  | ERR_TIMEOUT | Operation timed out.
+43  | ERR_CANCELED | Operation was canceled.
 48  | NO_ACCESS | Invalid access for this command.
 49  | ERR_UNSAFE | It's unsafe to execute this command.
 64  | NOT_AVAILABLE | Command currently not available.

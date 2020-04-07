@@ -57,8 +57,10 @@ enum CrownstoneCharacteristicsIDs {
 //	STATE_READ_UUID                         = 0x7, // Removed.
 	SESSION_NONCE_UUID                      = 0x8,
 	FACTORY_RESET_UUID                      = 0x9,
-	CONTROL_UUID                            = 0xA,
-	RESULT_UUID                             = 0xB,
+//	CONTROL_UUID                            = 0xA, // Changed to C, as State get and set changed.
+//	RESULT_UUID                             = 0xB, // Changed to D, as State get and set changed.
+	CONTROL_UUID                            = 0xC,
+	RESULT_UUID                             = 0xD,
 };
 
 enum SetupCharacteristicsIDs {
@@ -71,8 +73,10 @@ enum SetupCharacteristicsIDs {
 //	SETUP_CONTROL_UUID                      = 0x7, // Changed to 9, because we added more keys to setup.
 //	SESSION_NONCE_UUID                      = 0x8, // is taken from CrownstonecharacteristicIDs, mentioned here only for completeness' sake
 //	SETUP_CONTROL_UUID                      = 0x9, // Changed to A, because we the header is different, and we added the result characteristic.
-	SETUP_CONTROL_UUID                      = 0xA,
-	SETUP_RESULT_UUID                       = 0xB,
+//	SETUP_CONTROL_UUID                      = 0xA, // Changed to C, as State get and set changed.
+//	SETUP_RESULT_UUID                       = 0xB, // Changed to D, as State get and set changed.
+	SETUP_CONTROL_UUID                      = 0xC,
+	SETUP_RESULT_UUID                       = 0xD,
 };
 
 enum GeneralCharacteristicsIDs {

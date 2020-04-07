@@ -25,6 +25,11 @@
 #include "drivers/cs_ADC.h"
 #include <cstdint>
 
+struct __attribute__((__packed__)) uart_msg_mesh_result_packet_header_t {
+	stone_id_t stoneId;
+	result_packet_header_t resultHeader;
+};
+
 struct __attribute__((__packed__)) uart_msg_power_t {
 	uint32_t timestamp;
 	int32_t  currentRmsMA;

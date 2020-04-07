@@ -29,18 +29,19 @@ enum IpcRetCode {
 	IPC_RET_BUFFER_TOO_SMALL = 3,
 	IPC_RET_NOT_FOUND = 4,
 	IPC_RET_NULL_POINTER = 5,
+	IPC_RET_DATA_INVALID = 6,
 };
 
 /**
  * One item of data in the IPC ram.
  * The data array is word aligned.
  *
- * index      Has to matches the index of this item in the ram data.
+ * indexHash  Hash of the index of this item, to see if this item has been set.
  * dataSize   How many bytes of useful data is in the data array.
  * checksum   Checksum calculated over the index, data size, and _complete_ data array.
  */
 typedef struct {
-	uint8_t index;
+	uint8_t indexHash;
 	uint8_t dataSize;
 	uint16_t checksum;
 	uint8_t data[BLUENET_IPC_RAM_DATA_ITEM_SIZE];

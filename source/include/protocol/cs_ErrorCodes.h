@@ -25,6 +25,8 @@ enum ErrorCodesGeneral {
 	ERR_BUSY                        = 0x27,
 	ERR_WRONG_STATE                 = 0x28,
 	ERR_ALREADY_EXISTS              = 0x29,
+	ERR_TIMEOUT                     = 0x2A,
+	ERR_CANCELED                    = 0x2B,
 
 	ERR_NO_ACCESS                   = 0x30,
 	ERR_UNSAFE                      = 0x31,
@@ -42,6 +44,7 @@ enum ErrorCodesGeneral {
 
 	ERR_EVENT_UNHANDLED	            = 0x70,
 
+	// Mesh uses 0xFF as max.
 	ERR_UNSPECIFIED                 = 0xFFFF
 };
 

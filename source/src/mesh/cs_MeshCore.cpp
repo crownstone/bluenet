@@ -340,7 +340,7 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 	opt.opt.val = 4;
 	transport_opt_set(NRF_MESH_OPT_TRS_SAR_TX_RETRIES, &opt);
 
-	opt.opt.val = 250 * 1000; // μs
+	opt.opt.val = MESH_MODEL_ACKED_RETRY_INTERVAL_MS * 1000; // μs
 	transport_opt_set(NRF_MESH_OPT_TRS_SAR_TX_RETRY_TIMEOUT_BASE, &opt);
 
 	return ERR_SUCCESS;

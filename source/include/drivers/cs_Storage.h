@@ -360,7 +360,9 @@ private:
 	 */
 	cs_ret_code_t continueFactoryReset();
 
-	// Returns size after padding for flash.
+	/**
+	 * Returns size after padding for flash.
+	 */
 	size16_t getPaddedSize(size16_t size);
 
 	/**

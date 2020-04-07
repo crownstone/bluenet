@@ -10,6 +10,7 @@
 #include "protocol/mesh/cs_MeshModelPackets.h"
 #include "structs/cs_PacketsInternal.h"
 #include "protocol/cs_Typedefs.h"
+#include "protocol/cs_CommandTypes.h"
 
 namespace MeshUtil {
 
@@ -37,6 +38,15 @@ cs_mesh_model_msg_type_t getType(const uint8_t* meshMsg);
  * @param[out]     payloadSize    Set to size of the payload.
  */
 void getPayload(uint8_t* meshMsg, size16_t meshMsgSize, uint8_t*& payload, size16_t& payloadSize);
+
+/**
+ * Get payload of a mesh message.
+ *
+ * Assumes message is valid.
+ * @param[in]      meshMsg        Mesh message..
+ * @param[in]      meshMsgSize    Size of the mesh message.
+ */
+cs_data_t getPayload(uint8_t* meshMsg, size16_t meshMsgSize);
 
 size16_t getMeshMessageSize(size16_t payloadSize);
 
@@ -66,5 +76,24 @@ bool setMeshMessage(cs_mesh_model_msg_type_t type, const uint8_t* payload, size1
  * @retval                        True on success.
  */
 bool setMeshPayload(uint8_t* meshMsg, size16_t meshMsgSize, const uint8_t* payload, size16_t payloadSize);
+
+CommandHandlerTypes getCtrlCmdType(cs_mesh_model_msg_type_t meshType);
+cs_mesh_model_msg_type_t getMeshType(CommandHandlerTypes ctrlCmdType);
+
+bool canShortenStateType(uint16_t type);
+bool canShortenStateId(uint16_t id);
+bool canShortenPersistenceMode(uint8_t id);
+bool canShortenAccessLevel(EncryptionAccessLevel accessLevel);
+bool canShortenSource(cmd_source_t source);
+bool canShortenRetCode(cs_ret_code_t retCode);
+
+uint8_t getShortenedRetCode(cs_ret_code_t retCode);
+cs_ret_code_t getInflatedRetCode(uint8_t retCode);
+
+uint8_t getShortenedAccessLevel(EncryptionAccessLevel accessLevel);
+EncryptionAccessLevel getInflatedAccessLevel(uint8_t accessLevel);
+
+uint8_t getShortenedSource(cmd_source_t source);
+cmd_source_t getInflatedSource(uint8_t sourceId);
 
 }

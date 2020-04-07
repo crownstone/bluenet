@@ -23,7 +23,7 @@ extern "C" {
 class MeshModelMulticast {
 public:
 	/** Callback function definition. */
-	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg)> callback_msg_t;
+	typedef function<void(const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result)> callback_msg_t;
 
 	/**
 	 * Register a callback function that's called when a message from the mesh is received.
@@ -43,7 +43,7 @@ public:
 	void configureSelf(dsm_handle_t appkeyHandle);
 
 	/**
-	 * Add a msg to an empty spot in the queue (repeats == 0).
+	 * Add a msg to an empty spot in the queue (transmissions == 0).
 	 * Start looking at SendIndex, then reverse iterate over the queue.
 	 * Then set the new SendIndex at the newly added item, so that it will be send first.
 	 * We do the reverse iterate, so that the old SendIndex should be handled early (for a large enough queue).
@@ -78,7 +78,7 @@ private:
 
 	callback_msg_t _msgCallback = nullptr;
 
-	cs_multicast_queue_item_t _queue[_queueSize] = {0};
+	cs_multicast_queue_item_t _queue[_queueSize];
 
 	/**
 	 * Next index in queue to send.
@@ -91,7 +91,7 @@ private:
 	void processQueue();
 
 	/**
-	 * Check if there is a msg in queue with more than 0 repeats.
+	 * Check if there is a msg in queue with more than 0 transmissions.
 	 * If so, return that index.
 	 * Start looking at index SendIndex as that item should be sent first.
 	 * Returns -1 if none found.

@@ -84,7 +84,7 @@ protected:
 	 * @param[in] type            The command type that was handled.
 	 * @param[in] result          The result of handling the command.
 	 */
-	void writeResult(CommandHandlerTypes type, command_result_t result);
+	void writeResult(CommandHandlerTypes type, cs_result_t & result);
 
 
 private:

@@ -50,7 +50,7 @@ void MeshModelMulticast::init(uint16_t modelId) {
 
 void MeshModelMulticast::configureSelf(dsm_handle_t appkeyHandle) {
 	uint32_t retCode;
-	retCode = dsm_address_publish_add(0xC51E, &_groupAddressHandle);
+	retCode = dsm_address_publish_add(MESH_MODEL_GROUP_ADDRESS, &_groupAddressHandle);
 	APP_ERROR_CHECK(retCode);
 	retCode = dsm_address_subscription_add_handle(_groupAddressHandle);
 	APP_ERROR_CHECK(retCode);
@@ -103,7 +103,8 @@ void MeshModelMulticast::handleMsg(const access_message_rx_t * accessMsg) {
 	msg.msgSize = accessMsg->length;
 	msg.rssi = MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata);
 	msg.hops = ACCESS_DEFAULT_TTL - accessMsg->meta_data.ttl;
-	_msgCallback(msg);
+	cs_result_t result;
+	_msgCallback(msg, result);
 }
 
 cs_ret_code_t MeshModelMulticast::sendMsg(const uint8_t* data, uint16_t len) {
@@ -115,7 +116,7 @@ cs_ret_code_t MeshModelMulticast::sendMsg(const uint8_t* data, uint16_t len) {
 	accessMsg.force_segmented = false;
 	accessMsg.transmic_size = NRF_MESH_TRANSMIC_SIZE_SMALL;
 	uint32_t status = NRF_SUCCESS;
-//	for (int i=0; i<repeats; ++i) {
+//	for (int i=0; i<transmissionsOrTimeout; ++i) {
 		accessMsg.access_token = nrf_mesh_unique_token_get();
 		status = access_model_publish(_accessModelHandle, &accessMsg);
 		if (status != NRF_SUCCESS) {
@@ -133,20 +134,26 @@ cs_ret_code_t MeshModelMulticast::addToQueue(MeshUtil::cs_mesh_queue_item_t& ite
 		return ERR_SUCCESS;
 	}
 #endif
-	size16_t msgSize = MeshUtil::getMeshMessageSize(item.payloadSize);
-	assert(item.payloadPtr != nullptr || item.payloadSize == 0, "Null pointer");
+	size16_t msgSize = MeshUtil::getMeshMessageSize(item.msgPayload.len);
+	assert(item.msgPayload.data != nullptr || item.msgPayload.len == 0, "Null pointer");
 	assert(msgSize != 0, "Empty message");
 	assert(msgSize <= MAX_MESH_MSG_NON_SEGMENTED_SIZE, "Message too large");
-	assert(item.metaData.targetId == 0, "Multicast only");
+	assert(item.broadcast == true, "Multicast only");
+	assert(item.reliable == false, "Unreliable only");
+
+	// Find an empty spot in the queue (transmissions == 0).
+	// Start looking at _queueIndexNext, then reverse iterate over the queue.
+	// Then set the new _queueIndexNext at the newly added item, so that it will be sent next.
+	// We do the reverse iterate, so that the chance is higher that
+	// the old _queueIndexNext will be sent quickly after this newly added item.
 	uint8_t index;
 	for (int i = _queueIndexNext + _queueSize; i > _queueIndexNext; --i) {
 		index = i % _queueSize;
 		cs_multicast_queue_item_t* it = &(_queue[index]);
-		if (it->metaData.repeats == 0) {
-			if (!MeshUtil::setMeshMessage((cs_mesh_model_msg_type_t)item.metaData.type, item.payloadPtr, item.payloadSize, it->msg, sizeof(it->msg))) {
+		if (it->metaData.transmissionsOrTimeout == 0) {
+			if (!MeshUtil::setMeshMessage((cs_mesh_model_msg_type_t)item.metaData.type, item.msgPayload.data, item.msgPayload.len, it->msg, sizeof(it->msg))) {
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
-//			memcpy(it->msg, item.msgPtr, item.metaData.msgSize);
 			memcpy(&(it->metaData), &(item.metaData), sizeof(item.metaData));
 			it->msgSize = msgSize;
 			LOGMeshModelVerbose("added to ind=%u", index);
@@ -164,8 +171,8 @@ cs_ret_code_t MeshModelMulticast::addToQueue(MeshUtil::cs_mesh_queue_item_t& ite
 cs_ret_code_t MeshModelMulticast::remFromQueue(cs_mesh_model_msg_type_t type, uint16_t id) {
 	cs_ret_code_t retCode = ERR_NOT_FOUND;
 	for (int i = 0; i < _queueSize; ++i) {
-		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type && _queue[i].metaData.repeats != 0) {
-			_queue[i].metaData.repeats = 0;
+		if (_queue[i].metaData.id == id && _queue[i].metaData.type == type && _queue[i].metaData.transmissionsOrTimeout != 0) {
+			_queue[i].metaData.transmissionsOrTimeout = 0;
 			LOGMeshModelVerbose("removed from queue: ind=%u", i);
 			retCode = ERR_SUCCESS;
 		}
@@ -177,7 +184,7 @@ int MeshModelMulticast::getNextItemInQueue(bool priority) {
 	int index;
 	for (int i = _queueIndexNext; i < _queueIndexNext + _queueSize; i++) {
 		index = i % _queueSize;
-		if ((!priority || _queue[index].metaData.priority) && _queue[index].metaData.repeats > 0) {
+		if ((!priority || _queue[index].metaData.priority) && _queue[index].metaData.transmissionsOrTimeout > 0) {
 			return index;
 		}
 	}
@@ -208,8 +215,8 @@ bool MeshModelMulticast::sendMsgFromQueue() {
 //	}
 	sendMsg(item->msg, item->msgSize);
 	// TOOD: check return code, maybe retry again later.
-	--(item->metaData.repeats);
-	LOGMeshModelInfo("sent ind=%u repeats_left=%u type=%u id=%u", index, item->metaData.repeats, item->metaData.type, item->metaData.id);
+	--(item->metaData.transmissionsOrTimeout);
+	LOGMeshModelInfo("sent ind=%u transmissions_left=%u type=%u id=%u", index, item->metaData.transmissionsOrTimeout, item->metaData.type, item->metaData.id);
 
 	// Next item will be sent next, so that items are sent interleaved.
 	_queueIndexNext = (index + 1) % _queueSize;

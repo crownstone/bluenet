@@ -543,6 +543,7 @@ ELSE()
 		SET(CROWNSTONE_ONLY_FLAGS "")
 		SET_PROPERTY(SOURCE ${FOLDER_SOURCE} APPEND PROPERTY COMPILE_FLAGS ${CROWNSTONE_ONLY_FLAGS})
 
+		# Add path with files like sdk_config.h to include directories
 		target_include_directories(${PROJECT_NAME} PRIVATE "include/third/nrf")
 
 		# This does lead to a cmake reconfigure when the file changes... However, nothing else gets rebuild after

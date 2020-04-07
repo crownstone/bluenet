@@ -171,18 +171,35 @@ void ServiceData::updateAdvertisement(bool initial) {
 	}
 
 	if (!serviceDataSet) {
-		_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
-		_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_STATE;
-		_serviceData.params.encrypted.state.id = _crownstoneId;
-		_serviceData.params.encrypted.state.switchState = _switchState;
-		_serviceData.params.encrypted.state.flags = _flags;
-		_serviceData.params.encrypted.state.temperature = _temperature;
-		_serviceData.params.encrypted.state.powerFactor = _powerFactor;
-		_serviceData.params.encrypted.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
-		_serviceData.params.encrypted.state.energyUsed = _energyUsed;
-		_serviceData.params.encrypted.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-		_serviceData.params.encrypted.state.extraFlags = _extraFlags;
-		_serviceData.params.encrypted.state.validation = SERVICE_DATA_VALIDATION;
+		if (_updateCount % 16 == 0) {
+			TYPIFY(STATE_BEHAVIOUR_MASTER_HASH) behaviourHash;
+			State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH, &behaviourHash, sizeof(behaviourHash));
+			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
+			_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_ALTERNATIVE_STATE;
+			_serviceData.params.encrypted.altState.id = _crownstoneId;
+			_serviceData.params.encrypted.altState.switchState = _switchState;
+			_serviceData.params.encrypted.altState.flags = _flags;
+			_serviceData.params.encrypted.altState.behaviourMasterHash = getPartialBehaviourHash(behaviourHash);
+			memset(_serviceData.params.encrypted.altState.reserved, 0, sizeof(_serviceData.params.encrypted.altState.reserved));
+//			_serviceData.params.encrypted.altState.reserved = {0};
+			_serviceData.params.encrypted.altState.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+			_serviceData.params.encrypted.altState.reserved2 = 0;
+			_serviceData.params.encrypted.altState.validation = SERVICE_DATA_VALIDATION;
+		}
+		else {
+			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
+			_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_STATE;
+			_serviceData.params.encrypted.state.id = _crownstoneId;
+			_serviceData.params.encrypted.state.switchState = _switchState;
+			_serviceData.params.encrypted.state.flags = _flags;
+			_serviceData.params.encrypted.state.temperature = _temperature;
+			_serviceData.params.encrypted.state.powerFactor = _powerFactor;
+			_serviceData.params.encrypted.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
+			_serviceData.params.encrypted.state.energyUsed = _energyUsed;
+			_serviceData.params.encrypted.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+			_serviceData.params.encrypted.state.extraFlags = _extraFlags;
+			_serviceData.params.encrypted.state.validation = SERVICE_DATA_VALIDATION;
+		}
 	}
 
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
@@ -381,6 +398,11 @@ uint16_t ServiceData::getPartialTimestampOrCounter(uint32_t timestamp, uint32_t 
 		return counter;
 	}
 	return timestampToPartialTimestamp(timestamp);
+}
+
+uint16_t ServiceData::getPartialBehaviourHash(uint32_t behaviourHash) {
+	// The most significant bytes are order dependent.
+	return behaviourHash >> 16;
 }
 
 void ServiceData::sendMeshState(bool event) {

@@ -8,11 +8,12 @@
 
 #include <cstdint>
 #include "cfg/cs_Config.h"
+#include "protocol/cs_CmdSource.h"
 #include "protocol/cs_CommandTypes.h"
+#include "protocol/cs_ErrorCodes.h"
+#include "protocol/cs_ServiceDataPackets.h"
 #include "protocol/cs_Typedefs.h"
 #include "protocol/mesh/cs_MeshModelPackets.h"
-#include "protocol/cs_ServiceDataPackets.h"
-#include "protocol/cs_CmdSource.h"
 
 
 #define LEGACY_MULTI_SWITCH_HEADER_SIZE (1+1)
@@ -68,9 +69,20 @@ struct __attribute__((__packed__)) control_packet_t {
  * Header of a result packet.
  */
 struct __attribute__((__packed__)) result_packet_header_t {
-	cs_control_cmd_t commandType;
-	cs_ret_code_t returnCode;
-	cs_buffer_size_t payloadSize;
+	cs_control_cmd_t commandType = CTRL_CMD_UNKNOWN;
+	cs_ret_code_t returnCode = ERR_UNSPECIFIED;
+	cs_buffer_size_t payloadSize = 0;
+	result_packet_header_t() {}
+	result_packet_header_t(cs_control_cmd_t commandType, cs_ret_code_t returnCode):
+		commandType(commandType),
+		returnCode(returnCode),
+		payloadSize(0)
+	{}
+	result_packet_header_t(cs_control_cmd_t commandType, cs_ret_code_t returnCode, cs_buffer_size_t payloadSize):
+		commandType(commandType),
+		returnCode(returnCode),
+		payloadSize(payloadSize)
+	{}
 };
 
 /**
@@ -82,13 +94,50 @@ struct __attribute__((__packed__)) result_packet_t {
 	uint8_t payload[N];
 };
 
+enum class PersistenceModeGet {
+	CURRENT = 0,
+	STORED = 1,
+	FIRMWARE_DEFAULT = 2,
+	UNKNOWN = 255
+};
+
+enum class PersistenceModeSet {
+	TEMPORARY = 0,
+	STORED = 1,
+	UNKNOWN = 255
+};
+
 /**
  * State get/set header packet.
  */
 struct __attribute__((__packed__)) state_packet_header_t {
 	uint16_t stateType;
 	uint16_t stateId;
+	uint8_t persistenceMode; // PersistenceModeSet or PersistenceModeGet
+	uint8_t reserved = 0;
 };
+
+union __attribute__((__packed__)) mesh_control_command_packet_flags_t {
+	struct __attribute__((packed)) {
+		bool broadcast: 1;
+		bool reliable: 1;
+		bool useKnownIds: 1;
+	} flags;
+	uint8_t asInt;
+};
+
+/**
+ * Mesh control command header packet.
+ */
+struct __attribute__((__packed__)) mesh_control_command_packet_header_t {
+	uint8_t type;
+	mesh_control_command_packet_flags_t flags;
+	uint8_t timeoutOrTransmissions; // 0 for default.
+	uint8_t idCount; // 0 for broadcast.
+	// List of ids.
+	// Control packet.
+};
+
 
 /**
  * State errors: collection of errors that influence the switch behaviour.
@@ -184,6 +233,20 @@ struct __attribute__((packed)) sun_time_t {
 	uint32_t sunset = 19*60*60;
 };
 
+/**
+ * Packet to change ibeacon config ID.
+ *
+ * Timestamp: when to start executing the change.
+ * Interval: change every N seconds after timestamp.
+ * Set interval = 0 to execute only once.
+ * Set timestamp = 0, and interval = 0 to execute now.
+ */
+struct __attribute__((__packed__)) ibeacon_config_id_packet_t {
+	uint8_t ibeaconConfigId = 0;
+	uint32_t timestamp = 0;
+	uint16_t interval = 0;
+};
+
 struct __attribute__((__packed__)) led_message_payload_t {
 	uint8_t led;
 	bool enable;
@@ -236,6 +299,37 @@ struct cs_mesh_iv_index_t {
 };
 
 typedef uint32_t cs_mesh_seq_number_t;
+
+struct __attribute__((packed)) cs_uicr_data_t {
+	uint32_t board;
+
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			uint8_t productType;
+			uint8_t region;
+			uint8_t productFamily;
+		} fields;
+		uint32_t asInt;
+	} productRegionFamily;
+
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			uint8_t patch;
+			uint8_t minor;
+			uint8_t major;
+		} fields;
+		uint32_t asInt;
+	} majorMinorPatch;
+
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			uint8_t housing;
+			uint8_t week; // week number
+			uint8_t year; // last 2 digits of the year
+		} fields;
+		uint32_t asInt;
+	} productionDateHousing;
+};
 
 
 struct __attribute__((packed)) cs_microapp_t {

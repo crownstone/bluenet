@@ -43,6 +43,10 @@ public:
 	 */
 	virtual cs_buffer_size_t getSerializedSize() const = 0;
 
+	virtual cs_buffer_size_t getRemainingCapacity() const {
+		return getBufferSize() - getSerializedSize();
+	}
+
 	/**
 	 * Get the pointer to the buffer.
 	 *
