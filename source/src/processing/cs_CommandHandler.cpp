@@ -122,7 +122,7 @@ void CommandHandler::handleCommand(
 
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		result.returnCode = ERR_NO_ACCESS;
-return;
+		return;
 	}
 
 	switch (type) {
@@ -795,14 +795,16 @@ void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const
 	evtData.accessLevel = accessLevel;
 	event_t event(CS_TYPE::CMD_REGISTER_TRACKED_DEVICE, &evtData, sizeof(evtData), result);
 	event.dispatch();
-
 	result.returnCode = event.result.returnCode;
+	result.dataSize = event.result.dataSize;
 	return;
 }
 
-void CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_result_t & result) {
-	event_t event(typ, commandData.data, commandData.len, result);
+void CommandHandler::dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, cs_result_t & result) {
+	event_t event(type, commandData.data, commandData.len, result);
 	event.dispatch();
+	result.returnCode = event.result.returnCode;
+	result.dataSize = event.result.dataSize;
 }
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {
