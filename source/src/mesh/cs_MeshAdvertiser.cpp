@@ -149,6 +149,7 @@ void MeshAdvertiser::advertise(IBeacon* ibeacon) {
 }
 
 cs_ret_code_t MeshAdvertiser::handleSetIbeaconConfig(ibeacon_config_id_packet_t* packet) {
+	LOGi("handleSetIbeaconConfig id=%u timestamp=%u interval=%u", packet->ibeaconConfigId, packet->timestamp, packet->interval);
 	if (packet->ibeaconConfigId >= num_ibeacon_config_ids) {
 		return ERR_WRONG_PARAMETER;
 	}
@@ -169,6 +170,10 @@ void MeshAdvertiser::handleTime(uint32_t now) {
 	for (uint8_t i = 0; i < num_ibeacon_config_ids; ++i) {
 		if (now >= _ibeaconInterval[i].timestamp) {
 			if (_ibeaconInterval[i].interval == 0) {
+				if (_ibeaconInterval[i].timestamp == 0) {
+					// Empty entry.
+					break;
+				}
 				// Set config id, and clear entry.
 				_ibeaconConfigId = i;
 				_ibeaconInterval[i].interval = 0;
