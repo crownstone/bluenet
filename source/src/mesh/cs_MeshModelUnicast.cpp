@@ -33,7 +33,7 @@ static void staticReliableStatusHandler(access_model_handle_t model_handle, void
 }
 
 static const access_opcode_handler_t opcodeHandlers[] = {
-		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_MSG, CROWNSTONE_COMPANY_ID), staticMsgHandler},
+		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_UNICAST_RELIABLE_MSG, CROWNSTONE_COMPANY_ID), staticMsgHandler},
 		{ACCESS_OPCODE_VENDOR(CS_MESH_MODEL_OPCODE_UNICAST_REPLY, CROWNSTONE_COMPANY_ID), staticMsgHandler},
 };
 
@@ -352,7 +352,7 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 		return false;
 	}
 	_queueIndexInProgress = index;
-	LOGMeshModelInfo("send ind=%u timeout=%u type=%u id=%u", index, item->metaData.transmissionsOrTimeout, item->metaData.type, item->metaData.id);
+	LOGMeshModelInfo("sent ind=%u timeout=%u type=%u id=%u targetId=%u", index, item->metaData.transmissionsOrTimeout, item->metaData.type, item->metaData.id, item->targetId);
 
 	// Next item will be sent next.
 	// Order might be messed up when some items are prioritized.
