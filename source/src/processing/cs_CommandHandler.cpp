@@ -678,6 +678,21 @@ void CommandHandler::handleCmdMeshCommand(cs_data_t commandData, const cmd_sourc
 	if (forSelf) {
 		cs_data_t meshCommandCtrlCmdData(meshCtrlCmd.controlCommand.data, meshCtrlCmd.controlCommand.size);
 		handleCommand(meshCtrlCmd.controlCommand.type, meshCommandCtrlCmdData, source, accessLevel, result);
+
+		// Send out result to UART.
+		uart_msg_mesh_result_packet_header_t resultHeader;
+		resultHeader.stoneId = ownId;
+		resultHeader.resultHeader.commandType = meshCtrlCmd.controlCommand.type;
+		resultHeader.resultHeader.returnCode = result.returnCode;
+		resultHeader.resultHeader.payloadSize = result.dataSize;
+		LOGi("Result: id=%u cmdType=%u retCode=%u data:", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
+		BLEutil::printArray(result.buf.data, result.dataSize);
+
+		UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + result.dataSize);
+		UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+		UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, result.buf.data, result.dataSize);
+		UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_MESH_RESULT);
+
 		if (!forOthers) {
 			return;
 		}

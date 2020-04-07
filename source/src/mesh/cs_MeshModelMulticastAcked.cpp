@@ -9,6 +9,7 @@
 #include <mesh/cs_MeshModelMulticastAcked.h>
 #include <mesh/cs_MeshUtil.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
+#include <storage/cs_State.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
@@ -48,6 +49,8 @@ void MeshModelMulticastAcked::init(uint16_t modelId) {
 	APP_ERROR_CHECK(retVal);
 	retVal = access_model_subscription_list_alloc(_accessModelHandle);
 	APP_ERROR_CHECK(retVal);
+
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownStoneId, sizeof(_ownStoneId));
 }
 
 void MeshModelMulticastAcked::configureSelf(dsm_handle_t appkeyHandle) {
@@ -70,12 +73,14 @@ void MeshModelMulticastAcked::configureSelf(dsm_handle_t appkeyHandle) {
 
 void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 	if (accessMsg->meta_data.p_core_metadata->source != NRF_MESH_RX_SOURCE_LOOPBACK) {
-		LOGMeshModelVerbose("Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i",
+//	if (true) {
+		LOGMeshModelVerbose("Handle mesh msg. opcode=%u appkey=%u subnet=%u ttl=%u rssi=%i loopback=%u",
 				accessMsg->opcode.opcode,
 				accessMsg->meta_data.appkey_handle,
 				accessMsg->meta_data.subnet_handle,
 				accessMsg->meta_data.ttl,
-				MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata)
+				MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata),
+				accessMsg->meta_data.p_core_metadata->source == NRF_MESH_RX_SOURCE_LOOPBACK
 		);
 		MeshUtil::printMeshAddress("  Src: ", &(accessMsg->meta_data.src));
 		MeshUtil::printMeshAddress("  Dst: ", &(accessMsg->meta_data.dst));
@@ -109,10 +114,16 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 
 	switch (msg.opCode) {
 		case CS_MESH_MODEL_OPCODE_MULTICAST_REPLY: {
-			handleReply(msg);
+//			if (!ownMsg) {
+				handleReply(msg);
+//			}
 			return;
 		}
 		case CS_MESH_MODEL_OPCODE_MULTICAST_RELIABLE_MSG: {
+//			if (ownMsg && _handledSelf) {
+//				return;
+//			}
+
 			// Prepare a reply message, to send the result back.
 			uint8_t replyMsg[MAX_MESH_MSG_NON_SEGMENTED_SIZE];
 			replyMsg[0] = CS_MESH_MODEL_TYPE_RESULT;
@@ -126,10 +137,27 @@ void MeshModelMulticastAcked::handleMsg(const access_message_rx_t * accessMsg) {
 			// Handle the message, get the result.
 			_msgCallback(msg, result);
 
-			// Send the result as reply.
+			// Set the result header.
 			resultHeader->msgType = (msg.msgSize >= MESH_HEADER_SIZE) ? MeshUtil::getType(msg.msg) : CS_MESH_MODEL_TYPE_UNKNOWN;
 			resultHeader->retCode = MeshUtil::getShortenedRetCode(result.returnCode);
-			sendReply(accessMsg, replyMsg, headerSize + result.dataSize);
+
+//			if (ownMsg) {
+//				// Handle the reply msg immediately.
+//				_handledSelf = true;
+//				MeshUtil::cs_mesh_received_msg_t selfReplyMsg;
+//				selfReplyMsg.opCode = CS_MESH_MODEL_OPCODE_MULTICAST_REPLY;
+////				selfReplyMsg.srcAddress = _ownStoneId;
+//				selfReplyMsg.srcAddress = accessMsg->meta_data.src.value;
+//				selfReplyMsg.msg = replyMsg;
+//				selfReplyMsg.msgSize = sizeof(replyMsg);
+//				selfReplyMsg.rssi = MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata);
+//				selfReplyMsg.hops = ACCESS_DEFAULT_TTL - accessMsg->meta_data.ttl;
+//				handleReply(selfReplyMsg);
+//			}
+//			else {
+				// Send the result as reply.
+				sendReply(accessMsg, replyMsg, headerSize + result.dataSize);
+//			}
 			break;
 		}
 		default:
@@ -352,7 +380,19 @@ bool MeshModelMulticastAcked::sendMsgFromQueue() {
 
 bool MeshModelMulticastAcked::prepareForMsg(cs_multicast_acked_queue_item_t* item) {
 	_processCallsLeft = item->metaData.transmissionsOrTimeout * 1000 / MESH_MODEL_ACKED_RETRY_INTERVAL_MS;
-	return _ackedStonesBitmask.setNumBits(item->numIds);
+	if (!_ackedStonesBitmask.setNumBits(item->numIds)) {
+		return false;
+	}
+//	_handledSelf = false;
+
+	// Mark own stone ID as acked.
+	for (uint8_t i=0; i < item->numIds; ++i) {
+		if (item->stoneIdsPtr[i] == _ownStoneId) {
+			_ackedStonesBitmask.setBit(i);
+			break;
+		}
+	}
+	return true;
 }
 
 void MeshModelMulticastAcked::checkDone() {
