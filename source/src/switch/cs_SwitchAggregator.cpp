@@ -53,6 +53,7 @@ bool SwitchAggregator::updateBehaviourHandlers(){
     std::optional<uint8_t> prevBehaviourState = behaviourState;
     behaviourHandler.update();
     behaviourState = behaviourHandler.getValue();
+    twilightState = twilightHandler.getValue();
     
     if( !prevBehaviourState || !behaviourState ){
         // don't allow override resets when no values are changed.
@@ -77,7 +78,6 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
         if(overrideMatchedAggregated && behaviourWantsToChangeState && allowOverrideReset){
         	LOGSwitchAggregator("resetting overrideState overrideStateIsOn=%u aggregatedStateIsOn=%u behaviourStateIsOn=%u", overrideStateIsOn, aggregatedStateIsOn, behaviourStateIsOn);
         	shouldResetOverrideState = true;
-			// nextAggregatedState = aggregatedBehaviourIntensity();
         }
     }
 
@@ -268,40 +268,47 @@ void SwitchAggregator::handleSwitchStateChange(uint8_t newIntensity) {
 uint8_t SwitchAggregator::aggregatedBehaviourIntensity(){
     LOGSwitchAggregator("aggregatedBehaviourIntensity called");
 
-    if(behaviourState){
-        LOGSwitchAggregator("returning min of behaviour(%d) and twilight(%d)",
-            *behaviourState,
-            twilightHandler.getValue());
-        return CsMath::min(
-            *behaviourState, 
-            twilightHandler.getValue() 
-        );
+    if(behaviourState && twilightState){
+        LOGSwitchAggregator("returning min of behaviour(%d) and twilight(%d)", *behaviourState, *twilightState);
+        return CsMath::min(*behaviourState, *twilightState);
     }
-    LOGSwitchAggregator("returning twilight value(%d), behaviour undefined",twilightHandler.getValue());
 
-    // SwitchBehaviours conflict, so use twilight only
-    return twilightHandler.getValue();
+    if(behaviourState) {
+    	return *behaviourState;
+    }
+
+    if(twilightState) {
+    	return *twilightState;
+    }
+
+    return 100;
 }
 
 std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
     LOGSwitchAggregator("resolveOverrideState called");
-    if(*overrideState == 0xff){
-        LOGSwitchAggregator("translucent override state");
 
-        if(uint8_t behave_intensity = behaviourState.value_or(0)){
-            // behaviour has positive intensity
-            LOGSwitchAggregator("behaviour value positive, returning minimum of behaviour(%d) and twilight(%d)", behave_intensity,twilightHandler.getValue());
-            return CsMath::min(behave_intensity,twilightHandler.getValue());
-        } else {
-            // behaviour conflicts or indicates 'off' are ignored because although
-            // overrideState is 'translucent', it must be 'on.
-            LOGSwitchAggregator("behaviour value undefined or zero, returning twilight(%d)",twilightHandler.getValue());
-            return twilightHandler.getValue();
-        }
+    if(!overrideState || *overrideState != 0xff){
+		return overrideState;  // opaque or empty override is returned unchanged.
+	}
+
+    LOGSwitchAggregator("translucent override state");
+
+    std::optional<uint8_t> opt0 = {0}; // to simplify following expressions.
+
+    if(behaviourState > opt0 && twilightState > opt0){
+    	// both exists and are positive
+    	return CsMath::min(*behaviourState, *twilightState);
     }
-        
-    LOGSwitchAggregator("returning unchanged overrideState");
-    return overrideState;  // opaque override is unchanged.
+
+    if(behaviourState > opt0){
+    	return behaviourState;
+    }
+
+    if(twilightState > opt0){
+    	return twilightState;
+    }
+
+    return 100;
 }
 
 bool SwitchAggregator::checkAndSetOwner(cmd_source_t source) {
