@@ -23,6 +23,7 @@ class BehaviourHandler : public EventListener {
      * - EVT_PRESENCE_MUTATION
      * - EVT_BEHAVIOURSTORE_MUTATION
      * - STATE_BEHAVIOUR_SETTINGS
+     * - CMD_GET_BEHAVIOUR_DEBUG
      */
     virtual void handleEvent(event_t& evt);
 

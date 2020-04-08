@@ -25,6 +25,13 @@ void TwilightHandler::handleEvent(event_t& evt){
             update();
             break;
         }
+        case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
+			behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
+			isActive = settings->flags.enabled;
+			LOGi("TwilightHandler.isActive=%u", isActive);
+			update();
+			break;
+		}
         default:{
             // ignore other events
             break;
@@ -34,24 +41,28 @@ void TwilightHandler::handleEvent(event_t& evt){
 
 bool TwilightHandler::update(){
     Time time = SystemTime::now();
+    auto nextIntendedState = computeIntendedState(time);
 
-    if (! time.isValid()) {
-        LOGTwilightHandler("Current time invalid, twilight update returns false");
+    if (currentIntendedState == nextIntendedState) {
+    	// no need to assign currentIntendedState.
         return false;
     }
 
-    uint8_t intendedState = computeIntendedState(time);
-    if (previousIntendedState == intendedState) {
-        return false;
-    }
+    currentIntendedState = nextIntendedState;
 
-    previousIntendedState = intendedState;
-
-    TEST_PUSH_EXPR_D(this,"previousIntendedState",previousIntendedState);
+    TEST_PUSH_EXPR_D(this,"currentIntendedState",currentIntendedState);
     return true;
 }
 
-uint8_t TwilightHandler::computeIntendedState(Time currenttime){
+std::optional<uint8_t> TwilightHandler::computeIntendedState(Time currenttime){
+	if(!isActive){
+		return {};
+	}
+
+	if(!currenttime.isValid()){
+		return {};
+	}
+
     constexpr uint32_t seconds_per_day = 24*60*60;
 
     uint32_t now = currenttime.timestamp();
@@ -125,6 +136,6 @@ uint8_t TwilightHandler::computeIntendedState(Time currenttime){
     return winning_value == 0xff ? 100 : winning_value;
 }
 
-uint8_t TwilightHandler::getValue(){
-    return previousIntendedState;
+std::optional<uint8_t> TwilightHandler::getValue(){
+    return currentIntendedState;
 }
