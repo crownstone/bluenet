@@ -26,13 +26,25 @@
 #include <storage/cs_State.h>
 #include <storage/cs_StateData.h>
 #include <util/cs_Error.h>
+#include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
 static void fs_event_handler(nrf_fstorage_evt_t * p_evt) {
 	if (p_evt->result != NRF_SUCCESS) {	
 		LOGe("Flash error");
+		return;
 	} else {
 		LOGi("Flash event successful");
+	}
+	switch (p_evt->id) {
+	case NRF_FSTORAGE_EVT_WRITE_RESULT:
+		LOGi("Flash written");
+		break;
+	case NRF_FSTORAGE_EVT_ERASE_RESULT:
+		LOGi("Flash erased");
+		break;
+	default:
+		break;
 	}
 }
 
@@ -88,6 +100,7 @@ void MicroApp::storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t size) {
 	state_microapp.start_addr = micro_app_storage.start_addr;
 	state_microapp.size = size;
 	state_microapp.checksum = checksum;
+	state_microapp.id = id;
 	state_microapp.validation = static_cast<uint8_t>(MICROAPP_VALIDATION::NONE);
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, id, (uint8_t*)&state_microapp, sizeof(state_microapp));
 	State::getInstance().set(data);
@@ -99,12 +112,36 @@ uint8_t MicroApp::validateApp() {
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, id, (uint8_t*)&state_microapp, sizeof(state_microapp));
 	State::getInstance().get(data);
 	
-	// read from flash with fstorage
+	// temporary buffer (large one!)
+	uint8_t buf[MICROAPP_CHUNK_SIZE];
+
+	// read from flash with fstorage, calculate checksum
+	uint8_t count = (state_microapp.size - 1) / MICROAPP_CHUNK_SIZE;
+	uint16_t remain = state_microapp.size - (count * MICROAPP_CHUNK_SIZE);
+	uint16_t checksum = 0;
+	uint32_t addr = micro_app_storage.start_addr;
+	for (int i = 0; i < count; ++i) { 
+		nrf_fstorage_read(&micro_app_storage, addr, &buf, MICROAPP_CHUNK_SIZE);
+		checksum = Fletcher(buf, MICROAPP_CHUNK_SIZE, checksum);
+		addr += MICROAPP_CHUNK_SIZE;
+	}
+	if (remain) {
+		nrf_fstorage_read(&micro_app_storage, addr, &buf, remain);
+		checksum = Fletcher(buf, remain, checksum);
+	}
 	
-	// calculate and compare checksum
+	// compare checksum
+	if (state_microapp.checksum == checksum) {
+		LOGi("Yes, micro app %i has the same checksum", state_microapp.id);
+	} else {
+		LOGw("Yes, micro app %i has checksum %x, but calculation shows %x", state_microapp.id, 
+				state_microapp.checksum, checksum);
+		return ERR_INVALID_MESSAGE; // better to have ERR_INVALID or ERR_CHECKSUM_INCORRECT
+	}
 	
 	// write validation = VALIDATION_CHECKSUM to fds record
-	
+	state_microapp.validation = static_cast<uint8_t>(MICROAPP_VALIDATION::CHECKSUM);
+	State::getInstance().set(data);
 	return EXIT_SUCCESS;
 }
 

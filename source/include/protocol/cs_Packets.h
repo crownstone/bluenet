@@ -337,6 +337,7 @@ struct __attribute__((packed)) cs_microapp_t {
 	uint16_t size;
 	uint16_t checksum;
 	uint8_t validation;
+	uint8_t id;
 };
 
 // ========================= functions =========================
