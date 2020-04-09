@@ -19,29 +19,26 @@ SET(PROJECT_NAME ${APPLICATION_SHORTHAND})
 # Set the main file to use for this application
 SET(MAIN_FILE "cs_Crownstone.cpp")
 
+# The directory with additional CMake files
+set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
+
+SET(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${DEFAULT_CONF_CMAKE_PATH}/override_cxx.cmake)
+SET(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${DEFAULT_CONF_CMAKE_PATH}/override_c.cmake)
+
 # Start a project
 PROJECT(${PROJECT_NAME}) 
 
-#enable_language(CXX)
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED on)
-#set(CMAKE_CXX_EXTENSIONS OFF)
-
-# The directory with some of the FindXXX modules
-set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
+# Other search directories for cmake
 set(DEFAULT_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules)
 set(THIRD_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules/third)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH};${DEFAULT_MODULES_PATH};${THIRD_MODULES_PATH}")
 
-MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
+message(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
-#include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
-#load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
-#load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
-#load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
-
+# Get compilation day, this will be used in the binary itself
 string(TIMESTAMP COMPILATION_DAY "%Y-%m-%d")
 
+# Get git info, this will be used in the binary in Debug build system
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 

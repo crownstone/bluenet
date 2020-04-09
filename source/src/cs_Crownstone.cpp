@@ -843,6 +843,22 @@ void Crownstone::handleEvent(event_t & event) {
 	// }
 }
 
+void printBootloaderInfo() {
+	// Make sure there is space for an extra 0 after the data.
+	uint8_t length = BLUENET_IPC_RAM_DATA_ITEM_SIZE + 1;
+	uint8_t data[length];
+	uint8_t dataSize;
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, data, length, &dataSize);
+	if (retCode == IPC_RET_SUCCESS) {
+		// Zero terminate the string.
+		data[dataSize] = 0;
+		LOGi("Bootloader version: %s", (char*)data);
+	}
+	else {
+		LOGw("No IPC data found, error = %i", retCode);
+	}
+}
+
 /**********************************************************************************************************************
  * The main function. Note that this is not the first function called! For starters, if there is a bootloader present,
  * the code within the bootloader has been processed before. But also after the bootloader, the code in
@@ -908,21 +924,8 @@ int main() {
 	printNfcPins();
 	LOG_FLUSH();
 
-//	LOGi("sizeof(bluenet_ipc_ram_data_item_t)=%u", sizeof(bluenet_ipc_ram_data_item_t));
+	printBootloaderInfo();
 
-	// Make sure there is space for an extra 0 after the data.
-	uint8_t length = BLUENET_IPC_RAM_DATA_ITEM_SIZE + 1;
-	uint8_t data[length];
-	uint8_t dataSize;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, data, length, &dataSize);
-	if (retCode == IPC_RET_SUCCESS) {
-		// Zero terminate the string.
-		data[dataSize] = 0;
-		LOGi("Bootloader version: %s", (char*)data);
-	}
-	else {
-		LOGw("No IPC data found, error = %i", retCode);
-	}
 
 //	// Make a "clicker"
 //	nrf_delay_ms(1000);
