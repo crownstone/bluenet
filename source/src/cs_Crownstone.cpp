@@ -844,15 +844,28 @@ void Crownstone::handleEvent(event_t & event) {
 }
 
 void printBootloaderInfo() {
-	// Make sure there is space for an extra 0 after the data.
-	uint8_t length = BLUENET_IPC_RAM_DATA_ITEM_SIZE + 1;
-	uint8_t data[length];
+	bluenet_ipc_bootloader_data_t bootloader_data;
+	uint8_t size = sizeof(bootloader_data);
 	uint8_t dataSize;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, data, length, &dataSize);
+	uint8_t *buf = (uint8_t*)&bootloader_data;
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, buf, size, &dataSize);
 	if (retCode == IPC_RET_SUCCESS) {
-		// Zero terminate the string.
-		data[dataSize] = 0;
-		LOGi("Bootloader version: %s", (char*)data);
+		if(size != dataSize) {
+			LOGw("IPC data struct incorrect size");
+			return;
+		}
+		if (bootloader_data.prerelease) {
+			LOGi("Bootloader version: %i.%i.%i-rc%i",
+					bootloader_data.major,
+					bootloader_data.minor,
+					bootloader_data.patch,
+					bootloader_data.prerelease)
+		} else {
+			LOGi("Bootloader version (no rc): %i.%i.%i",
+					bootloader_data.major,
+					bootloader_data.minor,
+					bootloader_data.patch)
+		}
 	}
 	else {
 		LOGw("No IPC data found, error = %i", retCode);

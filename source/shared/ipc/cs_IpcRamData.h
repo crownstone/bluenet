@@ -17,6 +17,7 @@ extern "C" {
 #define BLUENET_IPC_RAM_DATA_ITEMS                      5
 
 enum IpcIndex {
+	IPC_INDEX_RESERVED = 0,
 	IPC_INDEX_CROWNSTONE_APP = 1,
 	IPC_INDEX_BOOTLOADER_VERSION = 2,
 	IPC_INDEX_MICROAPP = 3,
@@ -31,6 +32,33 @@ enum IpcRetCode {
 	IPC_RET_NULL_POINTER = 5,
 	IPC_RET_DATA_INVALID = 6,
 };
+
+enum BuildType {
+	BUILD_TYPE_RESERVED = 0,
+	BUILD_TYPE_DEBUG = 1,
+	BUILD_TYPE_RELEASE = 2,
+	BUILD_TYPE_RELWITHDEBINFO = 3,
+	BUILD_TYPE_MINSIZEREL = 4,
+};
+
+/**
+ * The protocol struct with which the bootloader communicates with the bluenet binary through RAM. The protocol can
+ * be bumped when there are changes. The dfu_version is an always increasing number that gets incremented for each
+ * new bootloader change. It is the Bootloader Version number that is written in the bootloader settings file through 
+ * `make build_bootloader_settings`. The major, minor, and patch is e.g. 2.1.0 and is communicated over BLE and 
+ * used externally to check for compatibility and firmware update processes. There is another prerelease number which
+ * can be used as alpha, beta, or rc. Convention for now is something like 2.1.0-rc2. The build type is an integer
+ * that represented the CMAKE_BUILD_TYPE, such as Release or Debug.
+ */
+typedef struct {
+	uint8_t protocol;
+	uint16_t dfu_version;
+	uint8_t major;
+	uint8_t minor;
+	uint8_t patch;
+	uint8_t prerelease;
+	uint8_t build_type;
+} __attribute__((packed, aligned(4))) bluenet_ipc_bootloader_data_t;
 
 /**
  * One item of data in the IPC ram.

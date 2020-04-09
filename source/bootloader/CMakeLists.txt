@@ -302,10 +302,27 @@ ELSE()
 	
 ENDIF()
 
+
 # Overwrite sdk config options
 ADD_DEFINITIONS("-DUSE_APP_CONFIG")
 
 ADD_DEFINITIONS("-DBOOTLOADER_VERSION=${BOOTLOADER_VERSION}")
+
+# Translate build type to integer to use in the code
+IF(CMAKE_BUILD_TYPE MATCHES "Debug")
+	SET(BOOTLOADER_BUILD_TYPE 1)
+ELSEIF(CMAKE_BUILD_TYPE MATCHES "Release")
+	SET(BOOTLOADER_BUILD_TYPE 2)
+ELSEIF(CMAKE_BUILD_TYPE MATCHES "RelWithDebInfo")
+	SET(BOOTLOADER_BUILD_TYPE 3)
+ELSEIF(CMAKE_BUILD_TYPE MATCHES "MinSizeRel")
+	SET(BOOTLOADER_BUILD_TYPE 4)
+ELSE()
+	MESSAGE(FATAL_ERROR "There should be a CMAKE_BUILD_TYPE defined (and known)")
+ENDIF()
+MESSAGE(STATUS "Set bootloader build type: ${BOOTLOADER_BUILD_TYPE}")
+
+message(STATUS "Bootloader version: ${BOOTLOADER_VERSION_MAJOR}")
 
 message(STATUS "bootloader: Configure nrf_symbols.ld file")
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/nrf_symbols.ld" @ONLY)
