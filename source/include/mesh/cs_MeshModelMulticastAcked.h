@@ -102,6 +102,16 @@ private:
 	 */
 	BitmaskVarSize _ackedStonesBitmask;
 
+//	/**
+//	 * Whether the current message has been handled by this stone yet.
+//	 */
+//	bool _handledSelf = false;
+
+	/**
+	 *
+	 */
+	TYPIFY(CONFIG_CROWNSTONE_ID) _ownStoneId = 0;
+
 	/**
 	 * Number of processQueue() calls left until timeout.
 	 */

@@ -122,7 +122,7 @@ void CommandHandler::handleCommand(
 
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		result.returnCode = ERR_NO_ACCESS;
-return;
+		return;
 	}
 
 	switch (type) {
@@ -678,6 +678,21 @@ void CommandHandler::handleCmdMeshCommand(cs_data_t commandData, const cmd_sourc
 	if (forSelf) {
 		cs_data_t meshCommandCtrlCmdData(meshCtrlCmd.controlCommand.data, meshCtrlCmd.controlCommand.size);
 		handleCommand(meshCtrlCmd.controlCommand.type, meshCommandCtrlCmdData, source, accessLevel, result);
+
+		// Send out result to UART.
+		uart_msg_mesh_result_packet_header_t resultHeader;
+		resultHeader.stoneId = ownId;
+		resultHeader.resultHeader.commandType = meshCtrlCmd.controlCommand.type;
+		resultHeader.resultHeader.returnCode = result.returnCode;
+		resultHeader.resultHeader.payloadSize = result.dataSize;
+		LOGi("Result: id=%u cmdType=%u retCode=%u data:", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
+		BLEutil::printArray(result.buf.data, result.dataSize);
+
+		UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + result.dataSize);
+		UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+		UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, result.buf.data, result.dataSize);
+		UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_MESH_RESULT);
+
 		if (!forOthers) {
 			return;
 		}
@@ -780,14 +795,16 @@ void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const
 	evtData.accessLevel = accessLevel;
 	event_t event(CS_TYPE::CMD_REGISTER_TRACKED_DEVICE, &evtData, sizeof(evtData), result);
 	event.dispatch();
-
 	result.returnCode = event.result.returnCode;
+	result.dataSize = event.result.dataSize;
 	return;
 }
 
-void CommandHandler::dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_result_t & result) {
-	event_t event(typ, commandData.data, commandData.len, result);
+void CommandHandler::dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, cs_result_t & result) {
+	event_t event(type, commandData.data, commandData.len, result);
 	event.dispatch();
+	result.returnCode = event.result.returnCode;
+	result.dataSize = event.result.dataSize;
 }
 
 EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandlerTypes type) {

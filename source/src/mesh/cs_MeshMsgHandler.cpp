@@ -103,6 +103,10 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 			result.returnCode = handleResult(payload, payloadSize, srcId);
 			return;
 		}
+		case CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID: {
+			result.returnCode = handleSetIbeaconConfigId(payload, payloadSize);
+			return;
+		}
 		case CS_MESH_MODEL_TYPE_UNKNOWN: {
 			result.returnCode = ERR_INVALID_MESSAGE;
 			return;
@@ -348,8 +352,17 @@ cs_ret_code_t MeshMsgHandler::handleSyncRequest(uint8_t* payload, size16_t paylo
 	LOGi("handleSyncRequest: id=%u bitmask=%x", packet->id, packet->bitmask);
 	TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING, eventDataPtr, sizeof(TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)));
+	event.dispatch();
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
+}
+
+cs_ret_code_t MeshMsgHandler::handleSetIbeaconConfigId(uint8_t* payload, size16_t payloadSize) {
+	LOGi("handleSetIbeaconConfigId");
+	// Event and mesh msg use the same type.
+	event_t event(CS_TYPE::CMD_SET_IBEACON_CONFIG_ID, payload, payloadSize);
+	event.dispatch();
+	return event.result.returnCode;
 }
 
 void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_result_t& result) {
@@ -415,6 +428,9 @@ cs_ret_code_t MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSiz
 	resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)header->msgType);
 	resultHeader.resultHeader.returnCode = MeshUtil::getInflatedRetCode(header->retCode);
 	resultHeader.resultHeader.payloadSize = resultData.len;
+	if (resultHeader.resultHeader.commandType == CTRL_CMD_UNKNOWN) {
+		LOGw("Unknown command type %u, did you add it to getCtrlCmdType() and getMeshType()?", header->msgType);
+	}
 
 	LOGi("handleResult: id=%u meshType=%u retCode=%u data:", srcId, header->msgType, header->retCode);
 	BLEutil::printArray(resultData.data, resultData.len);

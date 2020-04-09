@@ -117,6 +117,18 @@ struct __attribute__((__packed__)) state_packet_header_t {
 	uint8_t reserved = 0;
 };
 
+/**
+ * Flags to determine how to send the mesh message.
+ *
+ * All possibilities:
+ *   1,0,0 Broadcast
+ *   1,1,0 Broadcast, ack all provided IDs
+ *   1,1,1 Broadcast, ack all known IDs
+ *   0,0,0 Send command only to provided IDs
+ *   0,1,0 Send command only to provided IDs, with ack
+ *   0,0,1 Send command only to known IDs
+ *   0,1,1 Send command only to known IDs, with ack
+ */
 union __attribute__((__packed__)) mesh_control_command_packet_flags_t {
 	struct __attribute__((packed)) {
 		bool broadcast: 1;

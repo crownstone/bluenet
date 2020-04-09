@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include "protocol/mesh/cs_MeshModelPackets.h"
-#include "structs/cs_PacketsInternal.h"
-#include "protocol/cs_Typedefs.h"
-#include "protocol/cs_CommandTypes.h"
+#include <protocol/mesh/cs_MeshModelPackets.h>
+#include <structs/cs_PacketsInternal.h>
+#include <protocol/cs_Typedefs.h>
+#include <protocol/cs_CommandTypes.h>
 
 namespace MeshUtil {
 
