@@ -64,12 +64,12 @@ typedef struct {
  * One item of data in the IPC ram.
  * The data array is word aligned.
  *
- * indexHash  Hash of the index of this item, to see if this item has been set.
+ * index      The index of this item, to see if this item has been set.
  * dataSize   How many bytes of useful data is in the data array.
  * checksum   Checksum calculated over the index, data size, and _complete_ data array.
  */
 typedef struct {
-	uint8_t indexHash;
+	uint8_t index;
 	uint8_t dataSize;
 	uint16_t checksum;
 	uint8_t data[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
