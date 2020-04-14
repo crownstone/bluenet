@@ -17,9 +17,9 @@ Type | Name | Length | Description
 uint8 | [Index](#index_types) | 1 | Index of this item. Each index has a specific use.
 uint8 | Size | 1 | Size of the payload.
 uint16 | Checksum | 2 | Checksum of index, size, and payload.
-uint8[] | Payload | N | Depends on [index](#index_types).
+uint8[] | Payload | N | Depends on [index](#index_types). Max 24 bytes.
 
-The checksum is a sum of: index, size, and all 12 payload bytes.
+The checksum is a sum of: index, size, and all 24 payload bytes.
 Then ...
 
 
@@ -34,7 +34,7 @@ Index | Type | Set by | Value
 3     | Micro app | Arduino programs |
 
 ## Packets
-Each packet will be 12 bytes or smaller.
+Each packet will be 24 bytes or smaller.
 
 <a name="bootloader_info_packet"></a>
 ### Bootloader info packet
