@@ -48,11 +48,12 @@ void SwitchAggregator::switchPowered() {
 // ================================== State updaters ==================================
 
 bool SwitchAggregator::updateBehaviourHandlers(){
-    twilightHandler.update();
 
     std::optional<uint8_t> prevBehaviourState = behaviourState;
     behaviourHandler.update();
     behaviourState = behaviourHandler.getValue();
+
+    twilightHandler.update();
     twilightState = twilightHandler.getValue();
     
     if( !prevBehaviourState || !behaviourState ){
@@ -109,6 +110,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
     // using -1 as value for the hasvalues works because they are unsigned, hence non-negative
     TEST_PUSH_EXPR_D(this,"overrideState", (overrideState? (int) overrideState.value() : -1));
     TEST_PUSH_EXPR_D(this,"behaviourState", (behaviourState? (int) behaviourState.value() : -1));
+    TEST_PUSH_EXPR_D(this,"twilightState", (twilightState? (int) twilightState.value() : -1));
     TEST_PUSH_EXPR_D(this,"aggregatedState", (aggregatedState? (int) aggregatedState.value() : -1));
 
     return retCode;
