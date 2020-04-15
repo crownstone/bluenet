@@ -731,22 +731,3 @@ Bit | Name |  Description
 --- | --- | ---
 0 | Enabled | Whether behaviours are enabled.
 1-31 | Reserved | Reserved for future use, should be 0 for now.
-
-<a name="bootloader info"></a>
-### Bootloader info
-
-The bootloader can communicate with the bluenet firmware through a struct at a fixed location in RAM that sets e.g. 
-version information. This can be read over the air as well.
-
-![Bootloader info](../docs/diagrams/bootloader_info.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Protocol | 1 | Protocol version (will be incremented on change of struct/packet format).
-uint 16 | DFU version | 2 | DFU Version (the value in the DFU settings page).
-uint 8 | Major | 1 | Major version.
-uint 8 | Minor | 1 | Minor version.
-uint 8 | Patch | 1 | Patch version.
-uint 8 | Prerelease | 1 | Prerelease version.
-uint 8 | Build type | 1 | Build type (Debug = 1, Release = 2, etc.).
-
