@@ -45,20 +45,20 @@ get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 #######################################################################################################################
 
 if(NOT CONFIG_DIR)
-  set(CONFIG_DIR "config")
+	set(CONFIG_DIR "config")
 endif()
 
 if(NOT GDB_PORT)
-  set(GDB_PORT "2331")
+	set(GDB_PORT "2331")
 endif()
 
 if(NOT BOARD_TARGET)
-  set(BOARD_TARGET "2331")
+	set(BOARD_TARGET "2331")
 endif()
 
 # Get the following information via JlinkExe and then ShowEmuList
 if(NOT SERIAL_NUM)
-  set(SERIAL_NUM "")
+	set(SERIAL_NUM "")
 endif()
 
 #if(NOT GIT_BRANCH)
@@ -468,8 +468,6 @@ IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "\"nrf5\"")
 
 	ENABLE_TESTING()
 
-	#	ADD_SUBDIRECTORY(test/nrf5)
-
 	INCLUDE(test/nrf5/CMakeLists.txt)
 ELSE()
 
@@ -508,7 +506,7 @@ ELSE()
 			SET(SERIAL_NUM_SWITCH "--snr")
 			SET(SERIAL_NUM_GDB_SELECT "-select")
 			SET(SERIAL_NUM_GDB_PARAM "usb=${SERIAL_NUM}")
-  			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
+			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 		ENDIF()
 
 		MESSAGE(STATUS "Descend into bootloader directory and compile if needed")
@@ -891,7 +889,7 @@ ELSE()
 	
 
 
-		IF(NOT DEFINED FIRMWARE_RC_VERSION OR "${FIRMWARE_RC_VERSION}" STREQUAL "") 
+		IF(NOT DEFINED FIRMWARE_RC_VERSION OR "${FIRMWARE_RC_VERSION}" STREQUAL "")
 			SET(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")
 		ELSE()
 			SET(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_CANDIDATE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")

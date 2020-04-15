@@ -495,7 +495,7 @@ ADD_CUSTOM_TARGET(nrfconnect_core
 
 ADD_CUSTOM_TARGET(nrfconnect_programmer
 	COMMAND npm run app
-	WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-programmer
+	WORKING_DIRECTORY ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
 	#DEPENDS git_nrfconnect_programmer
 	COMMENT "Run nrf connect core"
 	)
