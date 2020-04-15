@@ -12,6 +12,23 @@ enum CommandHandlerTypes {
 }
 ```
 
+You will likely want to **use** this command for something. You can define for this a data type. There are very few
+exceptions for this, for example:
+
+* `CTRL_CMD_GOTO_DFU` generates an `CS_TYPE::EVT_GOING_TO_DFU` event.
+* `CTRL_CMD_SET_SUN_TIME` writes an `CS_TYPE::STATE_SUN_TIME` type.
+* `CTRL_CMD_PWM` generates an `CS_TYPE::CMD_SET_DIMMER` event.
+* `CTRL_CMD_RELAY` generates an `CS_TYPE::CMD_SET_RELAY` event.
+* `CTRL_CMD_MULTI_SWITCH` generates an `CS_TYPE::CMD_MULTI_SWITCH` event.
+
+There are of course exceptions as well, `CTRL_CMD_NOP` does nothing, it can be used as `keep-alive` command. There are
+also a bunch of commands that handle the request directly. For example on `CTRL_CMD_GET_BOOTLOADER_VERSION` 
+the data is obtained directly from RAM, on `CTRL_CMD_GET_UICR_DATA` it is obtained directly from UICR, on 
+`CTRL_CMD_RESET` a `resetDelayed` function is called which calls `Timer::getInstance().start`, on
+`CTRL_CMD_SET_TIME` the `SystemTime::setTime()` is directly called. Note that such a hard coupling is strongly 
+**discouraged**. Use the event bus instead! If you are including header files to the 
+[cs_CommandHandler.cpp](/source/src/processing/cs_CommandHandler.cpp) you're likely doing something wrong.
+
 ## Data types
 
 There is a large list of types in [cs_Types.h](/source/include/common/cs_Types.h). There are three classes:
