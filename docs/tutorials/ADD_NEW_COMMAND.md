@@ -6,13 +6,13 @@ command, expand the list in the documentation itself with a new type.
 The list of commands can be found in [cs_CommandTypes.h](/source/include/protocol/cs_CommandTypes.h). They are numbered
 
 ```
-	enum CommandHandlerTypes {
-		...
-		CTRL_CMD_YOUR_COMMAND
-	}
+enum CommandHandlerTypes {
+	...
+	CTRL_CMD_YOUR_COMMAND = N,
+}
 ```
 
-# Persistence of data
+## Data types
 
 There is a large list of types in [cs_Types.h](/source/include/common/cs_Types.h). There are three classes:
 
@@ -32,7 +32,7 @@ custom command, you have to add it to `CS_TYPE`.
 enum class CS_TYPE: uint16_t {
 	...
 	CMD_YOUR_COMMAND = N,
-	}
+}
 ```
 
 This is a different index then in `CommandHandlerTypes` which is only used to represent the control opcodes for the 
@@ -71,3 +71,41 @@ struct __attribute__((packed)) session_nonce_t {
 
 You see that the struct is `packed`, important! Moreover, it is of fixed size. Always specify a maximum size!
 
+## Communication
+
+To add the new command to the part of the code where the BLE messages arrive, or more specific, where the command
+messages arrive, navigate to [cs_CommandHandler.cpp](/source/src/processing/cs_CommandHandler.cpp). There is the
+`handleCommand` function that can be expanded.
+
+You will have to do several things:
+
+* Add `CTRL_CMD_YOUR_COMMAND` as valid option in the start.
+* Add in the function `getRequiredAccessLevel` the access level, `ENCRYPTION_DISABLED`, `BASIC`, `MEMBER`, or `ADMIN`.
+* Then handle the command itself, see next.
+
+You can handle the command by adding a case statement:
+
+```
+void CommandHandler::handleCommand(...)
+	...
+	case CTRL_CMD_YOUR_COMMAND:
+		return handleYourCommand(commandData, accessLevel, result);
+```
+
+Or you can immediately dispatch an event by:
+
+```
+void CommandHandler::handleCommand(...)
+	...
+	case CTRL_CMD_YOUR_COMMAND:
+		return dispatchEventForCommand(CS_TYPE::CMD_YOUR_COMMAND, commandData, result);
+```
+
+Note the subtle change from the opcode `CTRL_CMD_YOUR_COMMAND` to the type `CS_TYPE::CMD_YOUR_COMMAND`.
+
+When the command is send through as an event, the `dispatch()` function will synchronously update all event listeners.
+However, those event listeners can have asynchronous calls. For example, writing something to flash and receiving a
+"done" request after this operation has finished. The `result.returnCode`, `.data`, and `.dataSize` fields can 
+therefore not always be written.
+
+For this you will need to use notifications.
