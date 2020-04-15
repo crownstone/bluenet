@@ -75,4 +75,7 @@ public:
 	 * Returns true when flag is set.
 	 */
 	static bool isFlagSet(GpRegRetFlag flag);
+
+private:
+	static void printRegRet();
 };
