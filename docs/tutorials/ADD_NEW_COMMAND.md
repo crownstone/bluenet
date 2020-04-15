@@ -113,7 +113,7 @@ For this you will need to use notifications.
 ## Notifications
 
 The [CrownstoneService](/source/src/services/cs_CrownstoneService.cpp) is where the characteristics are defined. See
-also the protocol [doc](/docs/PROTOCOL.md#crownstone-service) The "control characteristic" is the characteristic that 
+also the protocol [document](/docs/PROTOCOL.md#crownstone-service). The `_controlCharacteristic` is the characteristic that 
 is used to send the new command. If you inspect the code you see that it sets `setNotifies(false)`. It has a different
 characteristic to communicate results back, the `_resultCharacteristic`. This has `setNotifies(true)`.
 
