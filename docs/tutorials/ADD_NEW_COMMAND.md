@@ -106,6 +106,36 @@ Note the subtle change from the opcode `CTRL_CMD_YOUR_COMMAND` to the type `CS_T
 When the command is send through as an event, the `dispatch()` function will synchronously update all event listeners.
 However, those event listeners can have asynchronous calls. For example, writing something to flash and receiving a
 "done" request after this operation has finished. The `result.returnCode`, `.data`, and `.dataSize` fields can 
-therefore not always be written.
+therefore not always be written immediately.
 
 For this you will need to use notifications.
+
+## Notifications
+
+The [CrownstoneService](/source/src/services/cs_CrownstoneService.cpp) is where the characteristics are defined. See
+also the protocol [doc](/docs/PROTOCOL.md#crownstone-service) The "control characteristic" is the characteristic that 
+is used to send the new command. If you inspect the code you see that it sets `setNotifies(false)`. It has a different
+characteristic to communicate results back, the `_resultCharacteristic`. This has `setNotifies(true)`.
+
+The results can be written to this characteristic through `writeResult(CommandHandlerTypes, cs_result_t)`. It will
+write:
+
+```
+_resultPacketAccessor->setPayloadSize(result.dataSize);
+_resultPacketAccessor->setType(type);
+_resultPacketAccessor->setResult(result.returnCode);
+_resultCharacteristic->setValueLength(_resultPacketAccessor->getSerializedSize());
+_resultCharacteristic->updateValue();
+```
+
+If you pay close attention you see that the same `_resultPacketAccessor` is used in the function
+`_controlCharacteristic->onWrite`. That's why there is no actual data in the notification. The only fields that
+are set in `writeResults` are `type`, `result.dataSize`, and `result.returnCode`. If you actually want to write
+the data you will have to access through `_resultPacketAccessor` or `readBuf.data`. The latter you can reach through
+`CharacteristicReadBuffer::getInstance().getBuffer()`. 
+
+Note that on a write, for a while the `result.buf.data` buffer in `_resultPacketAccessor` will be available for the 
+`handleCommand()` function. If there is an incoming write while we are waiting for an asynchronous `writeResults`
+call, this can overwrite what's in that buffer through a second call to `handleCommand()`.
+
+
