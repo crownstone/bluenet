@@ -235,6 +235,8 @@ bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encrypted
 			levelOfPackage = BASIC; break;
 		case 100:
 			levelOfPackage = SETUP; break;
+		default:
+			levelOfPackage = NOT_SET; break;
 	}
 
 	// the actual encrypted part is after the overhead

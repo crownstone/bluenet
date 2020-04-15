@@ -103,8 +103,10 @@ private:
 	void handleCmdRegisterTrackedDevice   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleMicroAppUpload             (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	
-	// delegate a command in the form of an event of given [typ], passing the commandData and using the allocated [resultData]
-	void dispatchEventForCommand(CS_TYPE typ, cs_data_t commandData, cs_result_t & result);
+	/**
+	 * Delegate a command via an event.
+	 */
+	void dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, cs_result_t & result);
 
 	/**
 	 * Reset, after a delay.

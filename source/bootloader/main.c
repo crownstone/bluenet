@@ -234,6 +234,27 @@ void cs_check_gpregret() {
 	NRF_LOG_INFO("GPREGRET=%u", gpregret);
 }
 
+void set_bootloader_info() {
+	NRF_LOG_INFO("Set bootloader info");
+	NRF_LOG_FLUSH();
+
+	bluenet_ipc_bootloader_data_t bootloader_data;
+	bootloader_data.protocol = g_BOOTLOADER_IPC_RAM_PROTOCOL;
+	bootloader_data.dfu_version = g_BOOTLOADER_DFU_VERSION;
+	bootloader_data.major = g_BOOTLOADER_VERSION_MAJOR;
+	bootloader_data.minor = g_BOOTLOADER_VERSION_MINOR;
+	bootloader_data.patch = g_BOOTLOADER_VERSION_PATCH;
+	bootloader_data.prerelease = g_BOOTLOADER_VERSION_PRERELEASE;
+	bootloader_data.build_type = g_BOOTLOADER_BUILD_TYPE;
+
+	uint8_t size = sizeof(bootloader_data);
+
+	// should not happen but we don't want asserts in the bootloader, so we just truncate the struct
+	if (size > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
+		size = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
+	}
+	setRamData(IPC_INDEX_BOOTLOADER_VERSION, (uint8_t*)&bootloader_data, size);
+}
 
 
 /**
@@ -265,18 +286,9 @@ int main(void)
 	APP_ERROR_CHECK(ret_val);
 //	ret_val = nrf_bootloader_flash_protect(0, ALIGN_TO_PAGE(BOOTLOADER_START_ADDR + BOOTLOADER_SIZE), false);
 //	APP_ERROR_CHECK(ret_val);
-	
-	NRF_LOG_INFO("Set version");
-	NRF_LOG_FLUSH();
-	
-	uint8_t bootloader_version_length = strlen(g_BOOTLOADER_VERSION);
-	if (bootloader_version_length > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
-		bootloader_version_length = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
-	}
-//	uint8_t version[bootloader_version_length];
-//    memcpy(version, (uint8_t*)g_BOOTLOADER_VERSION, bootloader_version_length);
-	setRamData(IPC_INDEX_BOOTLOADER_VERSION, (uint8_t*)g_BOOTLOADER_VERSION, bootloader_version_length);
-	
+
+	set_bootloader_info();
+
 	NRF_LOG_INFO("Init");
 	NRF_LOG_FLUSH();
 

@@ -10,7 +10,7 @@ DOCS_DIR_PREFIX = "../"
 DOCS_DIR = "../docs/"
 DIR = "diagrams/"
 GEN_DIR = DOCS_DIR_PREFIX + DOCS_DIR + DIR
-FILENAMES = [DOCS_DIR_PREFIX + DOCS_DIR + F for F in ["PROTOCOL.md", "BEHAVIOUR.md", "SERVICE_DATA.md", "SERVICE_DATA_DEPRECATED.md", "BROADCAST_PROTOCOL.md", "MESH_PROTOCOL.md"]]
+FILENAMES = [DOCS_DIR_PREFIX + DOCS_DIR + F for F in ["PROTOCOL.md", "BEHAVIOUR.md", "SERVICE_DATA.md", "SERVICE_DATA_DEPRECATED.md", "BROADCAST_PROTOCOL.md", "MESH_PROTOCOL.md", "IPC.md"]]
 
 fontPath = DOCS_DIR_PREFIX + DOCS_DIR + "diagrams/fonts/LiberationSans-Regular.ttf"
 fontSizeBlocks = 24
@@ -271,11 +271,11 @@ def drawVar(startX, y, varName, varLen, color):
 
 def drawVarList(varList, filename, lengthInBits):
 	if not filename:
-		print "no filename for:"
+		print("no filename for:")
 		for var in varList:
-			print "  " + var[0]
+			print("  " + var[0])
 		return
-	print "Generating " + filename
+	print("Generating " + filename)
 
 	totalLen = 0
 	for var in varList:
@@ -437,7 +437,7 @@ def parseFile(textFilename):
 		drawVarList(varList, filename, lengthInBits)
 
 if not os.path.exists(GEN_DIR):
-	print "Make dir " + GEN_DIR
+	print("Make dir " + GEN_DIR)
 	os.makedirs(GEN_DIR)
 
 pygame.init()
@@ -455,7 +455,7 @@ patternTableRow = re.compile("[^|]\\|([^|]+)\\|([^|]+)\\|.*")
 patternLink = re.compile("\\[([^]]+)\\]\\([^\\)]+\\)")
 
 for filename in FILENAMES:
-	print filename
+	print(filename)
 	parseFile(filename)
 	
 
