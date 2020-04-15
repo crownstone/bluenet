@@ -302,6 +302,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
 
 	CMD_MICROAPP_UPLOAD,                              // MicroApp upload (e.g. Arduino code).
+	EVT_MICROAPP,                                     // MicroApp event (e.g. write done)
 
 	EVT_GENERIC_TEST= 0xFFFF,                         // Can be used by the python test python lib for ad hoc tests during development.
 
@@ -507,6 +508,7 @@ typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
 typedef ibeacon_config_id_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_ID);
 typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
 typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP_UPLOAD);
+typedef uint32_t TYPIFY(EVT_MICROAPP);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

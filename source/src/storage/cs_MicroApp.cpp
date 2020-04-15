@@ -25,27 +25,19 @@
 #include <storage/cs_MicroApp.h>
 #include <storage/cs_State.h>
 #include <storage/cs_StateData.h>
+#include <util/cs_BleError.h>
 #include <util/cs_Error.h>
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
-static void fs_event_handler(nrf_fstorage_evt_t * p_evt) {
-	if (p_evt->result != NRF_SUCCESS) {	
-		LOGe("Flash error");
-		return;
-	} else {
-		LOGi("Flash event successful");
-	}
-	switch (p_evt->id) {
-	case NRF_FSTORAGE_EVT_WRITE_RESULT:
-		LOGi("Flash written");
-		break;
-	case NRF_FSTORAGE_EVT_ERASE_RESULT:
-		LOGi("Flash erased");
-		break;
-	default:
-		break;
-	}
+void fs_evt_handler_sched(void *data, uint16_t size) {
+	nrf_fstorage_evt_t * evt = (nrf_fstorage_evt_t*) data;
+	MicroApp::getInstance().handleFileStorageEvent(evt);
+}
+
+static void fs_evt_handler(nrf_fstorage_evt_t * p_evt) {
+	uint32_t retVal = app_sched_event_put(p_evt, sizeof(*p_evt), fs_evt_handler_sched);
+	APP_ERROR_CHECK(retVal);
 }
 
 #define MICRO_APP_PAGES      4
@@ -55,9 +47,9 @@ static void fs_event_handler(nrf_fstorage_evt_t * p_evt) {
  */
 NRF_FSTORAGE_DEF(nrf_fstorage_t micro_app_storage) =
 {
-    .evt_handler    = fs_event_handler,
-    .start_addr     = 0x68000,
-    .end_addr       = 0x68000 + (0x1000*MICRO_APP_PAGES) - 1,
+	.evt_handler    = fs_evt_handler,
+	.start_addr     = 0x68000,
+	.end_addr       = 0x68000 + (0x1000*MICRO_APP_PAGES) - 1,
 };
 
 MicroApp::MicroApp(): EventListener() {
@@ -87,7 +79,7 @@ int MicroApp::writeChunk(uint8_t index, uint8_t *data, uint8_t size) {
 	if ((start + size) > micro_app_storage.end_addr) {
 		LOGw("Microapp binary too large. Chunk not written");
 		return ERR_NO_SPACE;
-	} 
+	}
 	err_code = nrf_fstorage_write(&micro_app_storage, start, data, size, NULL);
 	return err_code;
 }
@@ -134,7 +126,7 @@ uint8_t MicroApp::validateApp() {
 	if (state_microapp.checksum == checksum) {
 		LOGi("Yes, micro app %i has the same checksum", state_microapp.id);
 	} else {
-		LOGw("Yes, micro app %i has checksum %x, but calculation shows %x", state_microapp.id, 
+		LOGw("Yes, micro app %i has checksum %x, but calculation shows %x", state_microapp.id,
 				state_microapp.checksum, checksum);
 		return ERR_INVALID_MESSAGE; // better to have ERR_INVALID or ERR_CHECKSUM_INCORRECT
 	}
@@ -159,7 +151,7 @@ void MicroApp::handleEvent(event_t & evt) {
 				// write app meta info to fds
 				uint16_t size = packet->index * MICROAPP_CHUNK_SIZE + packet->size;
 				storeAppMetadata(packet->app_id, packet->app_checksum, size);
-				
+
 				// validate app
 				validateApp();
 			}
@@ -169,5 +161,31 @@ void MicroApp::handleEvent(event_t & evt) {
 	default: {
 		// ignore other events
 	}
+	}
+}
+
+void MicroApp::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
+	if (evt->result != NRF_SUCCESS) {
+		LOGe("Flash error");
+		return;
+	} else {
+		LOGi("Flash event successful");
+	}
+
+	switch (evt->id) {
+	case NRF_FSTORAGE_EVT_WRITE_RESULT: {
+		LOGi("Flash written");
+		TYPIFY(EVT_MICROAPP) data;
+		data = NRF_FSTORAGE_EVT_WRITE_RESULT;
+		event_t event(CS_TYPE::EVT_MICROAPP, &data, sizeof(data));
+		event.dispatch();
+		break;
+	}
+	case NRF_FSTORAGE_EVT_ERASE_RESULT: {
+		LOGi("Flash erased");
+		break;
+	}
+	default:
+		break;
 	}
 }

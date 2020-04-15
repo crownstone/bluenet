@@ -225,6 +225,11 @@ void CrownstoneService::handleEvent(event_t & event) {
 //		writeResult(CTRL_CMD_SETUP, cs_result_t(ERR_SUCCESS));
 		break;
 	}
+	case CS_TYPE::EVT_MICROAPP: {
+		cs_result_t result(ERR_SUCCESS);
+		writeResult(CTRL_CMD_MICROAPP_UPLOAD, result);
+		break;
+	}
 	default: {}
 	}
 }

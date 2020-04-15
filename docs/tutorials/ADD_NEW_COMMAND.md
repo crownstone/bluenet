@@ -149,10 +149,12 @@ If you pay close attention you see that the same `_resultPacketAccessor` is used
 `_controlCharacteristic->onWrite`. That's why there is no actual data in the notification. The only fields that
 are set in `writeResults` are `type`, `result.dataSize`, and `result.returnCode`. If you actually want to write
 the data you will have to access through `_resultPacketAccessor` or `readBuf.data`. The latter you can reach through
-`CharacteristicReadBuffer::getInstance().getBuffer()`. 
+`CharacteristicReadBuffer::getInstance().getBuffer()`.
 
 Note that on a write, for a while the `result.buf.data` buffer in `_resultPacketAccessor` will be available for the 
 `handleCommand()` function. If there is an incoming write while we are waiting for an asynchronous `writeResults`
 call, this can overwrite what's in that buffer through a second call to `handleCommand()`.
 
-
+Currently, for asynchronous communication it is only used when `CS_TYPE::EVT_SETUP_DONE` is received in 
+[CrownstoneService](/source/src/services/cs_CrownstoneService.cpp). Then it writes
+`writeResult(CTRL_CMD_SETUP, result)` with `cs_result_t result(ERR_SUCCESS)`.
