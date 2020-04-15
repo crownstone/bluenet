@@ -5,47 +5,45 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "ble/cs_Advertiser.h"
-#include "cfg/cs_Boards.h"
-#include "cfg/cs_DeviceTypes.h"
-#include "cfg/cs_Strings.h"
-#include "drivers/cs_Serial.h"
+#include <ble/cs_Advertiser.h>
+#include <cfg/cs_Boards.h>
+#include <cfg/cs_DeviceTypes.h>
+#include <cfg/cs_Strings.h>
+#include <drivers/cs_GpRegRet.h>
+#include <drivers/cs_Serial.h>
 #include <ipc/cs_IpcRamData.h>
-#include "processing/cs_CommandHandler.h"
-#include "processing/cs_Scanner.h"
-#include "processing/cs_FactoryReset.h"
-#include "processing/cs_Setup.h"
-#include "processing/cs_TemperatureGuard.h"
-#include "protocol/cs_UartProtocol.h"
-#include "protocol/mesh/cs_MeshModelPacketHelper.h"
-#include "storage/cs_State.h"
-#include "time/cs_SystemTime.h"
-
+#include <processing/cs_CommandHandler.h>
+#include <processing/cs_FactoryReset.h>
+#include <processing/cs_Scanner.h>
+#include <processing/cs_Setup.h>
+#include <processing/cs_TemperatureGuard.h>
+#include <protocol/cs_UartProtocol.h>
+#include <protocol/mesh/cs_MeshModelPacketHelper.h>
+#include <storage/cs_State.h>
+#include <time/cs_SystemTime.h>
 #include <util/cs_WireFormat.h>
-
-#include <sstream>
 
 #define LOGCommandHandlerDebug LOGnone
 
 void reset(void* p_context) {
 
-	uint32_t cmd = *(int32_t*) p_context;
+	uint8_t cmd = *(uint8_t*) p_context;
 
-	if (cmd == GPREGRET_DFU_RESET) {
-		LOGi(MSG_FIRMWARE_UPDATE);
-	} else {
-		LOGi(MSG_RESET);
+	switch (cmd) {
+		case CS_RESET_CODE_SOFT_RESET: {
+			LOGi(MSG_RESET);
+			GpRegRet::setCounter(CS_GPREGRET_COUNTER_SOFT_RESET);
+			break;
+		}
+		case CS_RESET_CODE_GO_TO_DFU_MODE: {
+			LOGi(MSG_FIRMWARE_UPDATE);
+			GpRegRet::setFlag(GpRegRet::FLAG_DFU);
+			break;
+		}
+		default:
+			LOGw("Unknown reset code: %u", cmd);
+			return;
 	}
-
-	LOGi("Executing reset: %d", cmd);
-	// copy to make sure this is nothing more than one value
-	uint8_t err_code;
-	uint32_t gpregret_id = 0;
-	uint32_t gpregret_msk = 0xFF;
-	err_code = sd_power_gpregret_clr(gpregret_id, gpregret_msk);
-	APP_ERROR_CHECK(err_code);
-	err_code = sd_power_gpregret_set(gpregret_id, cmd);
-	APP_ERROR_CHECK(err_code);
 	sd_nvic_SystemReset();
 }
 
@@ -205,7 +203,7 @@ void CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const EncryptionAcc
 	LOGi(STR_HANDLE_COMMAND, "goto dfu");
 	event_t event(CS_TYPE::EVT_GOING_TO_DFU);
 	event.dispatch();
-	resetDelayed(GPREGRET_DFU_RESET);
+	resetDelayed(CS_RESET_CODE_GO_TO_DFU_MODE);
 	result.returnCode = ERR_SUCCESS;
 }
 
@@ -261,7 +259,7 @@ void CommandHandler::handleCmdGetUicrData(cs_data_t commandData, const Encryptio
 
 void CommandHandler::handleCmdReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "reset");
-	resetDelayed(GPREGRET_SOFT_RESET);
+	resetDelayed(CS_RESET_CODE_SOFT_RESET);
 	result.returnCode = ERR_SUCCESS;
 }
 

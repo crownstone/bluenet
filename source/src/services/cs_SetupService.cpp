@@ -7,14 +7,16 @@
 
 #include <cfg/cs_Strings.h>
 #include <cfg/cs_UuidConfig.h>
+#include <cs_GpRegRetConfig.h>
 #include <events/cs_EventDispatcher.h>
-#include <nrf_soc.h>
 #include <processing/cs_CommandHandler.h>
 #include <services/cs_SetupService.h>
 #include <storage/cs_State.h>
+#include <structs/buffer/cs_CharacteristicReadBuffer.h>
+#include <structs/buffer/cs_CharacteristicWriteBuffer.h>
 #include <util/cs_BleError.h>
-#include "structs/buffer/cs_CharacteristicReadBuffer.h"
-#include "structs/buffer/cs_CharacteristicWriteBuffer.h"
+
+#include <nrf_soc.h>
 
 SetupService::SetupService() :
     _macAddressCharacteristic(NULL),
@@ -105,11 +107,10 @@ void SetupService::addGoToDfuCharacteristic() {
 	_gotoDfuCharacteristic->setDefaultValue(0);
 	_gotoDfuCharacteristic->setMinAccessLevel(ENCRYPTION_DISABLED);
 	_gotoDfuCharacteristic->onWrite([&](const uint8_t accessLevel, const uint8_t& value, uint16_t length) -> void {
-		if (value == GPREGRET_DFU_RESET) {
+		if (value == CS_GPREGRET_LEGACY_DFU_RESET) {
 			LOGi("goto dfu");
-//			CommandHandler::getInstance().resetDelayed(value);
 			TYPIFY(CMD_RESET_DELAYED) resetCmd;
-			resetCmd.resetCode = value;
+			resetCmd.resetCode = CS_RESET_CODE_SOFT_RESET;
 			resetCmd.delayMs = 2000;
 			event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
 			EventDispatcher::getInstance().dispatch(eventReset);

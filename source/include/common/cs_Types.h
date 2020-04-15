@@ -322,8 +322,13 @@ enum class OperationMode {
 	OPERATION_MODE_UNINITIALIZED               = 0xFF,
 };
 
+enum ResetCode {
+	CS_RESET_CODE_SOFT_RESET = 0,
+	CS_RESET_CODE_GO_TO_DFU_MODE = 1,
+};
+
 struct __attribute__((packed)) reset_delayed_t {
-	uint8_t resetCode;
+	uint8_t resetCode; // ResetCode
 	uint16_t delayMs;
 };
 

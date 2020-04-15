@@ -18,23 +18,6 @@
  */
 #define MAX_STRING_STORAGE_SIZE                  31
 
-/** Command to enter the bootloader and stay there.
- *
- * This should be the same value as defined in the bootloader.
- */
-#define GPREGRET_DFU_RESET                       66 // 07-11-2019 TODO: why 66? It makes more sense to use 63 or 31.
-#define GPREGRET_BROWNOUT_RESET                  96 // 07-11-2019 TODO: why 96? It makes more sense to use 64 or 32.
-#define GPREGRET_SOFT_RESET                      1
-
-/**
- * Values used to remember flags after a reboot.
- *
- * Make sure this doesn't interfere with the nrf bootloader values that are used. Like:
- * - BOOTLOADER_DFU_GPREGRET2_MASK
- * - BOOTLOADER_DFU_GPREGRET2
- * - BOOTLOADER_DFU_SKIP_CRC_BIT_MASK
- */
-#define GPREGRET2_STORAGE_RECOVERED              4
 
 /** Priorities of the different peripherals
  */

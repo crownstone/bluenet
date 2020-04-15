@@ -30,32 +30,31 @@
  *
  *********************************************************************************************************************/
 
-#include <cs_Crownstone.h>
-
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_BehaviourStore.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
-#include <cfg/cs_Git.h>
 #include <cfg/cs_DeviceTypes.h>
+#include <cfg/cs_Git.h>
 #include <cfg/cs_HardwareVersions.h>
 #include <common/cs_Types.h>
+#include <cs_Crownstone.h>
+#include <drivers/cs_GpRegRet.h>
 #include <drivers/cs_PWM.h>
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
 #include <ipc/cs_IpcRamData.h>
-#include <processing/cs_EncryptionHandler.h>
 #include <processing/cs_BackgroundAdvHandler.h>
+#include <processing/cs_EncryptionHandler.h>
 #include <processing/cs_TapToToggle.h>
 #include <protocol/cs_UartProtocol.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
 #include <switch/cs_SwitchAggregator.h>
-#include <util/cs_Utils.h>
 #include <time/cs_SystemTime.h>
-
+#include <util/cs_Utils.h>
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -308,17 +307,11 @@ void Crownstone::initDrivers1(){
 			serial_enable((serial_enable_t)uartEnabled);
 		}
 
-		uint32_t gpregret;
-		sd_power_gpregret_get(0, &gpregret);
-		uint32_t gpregret2;
-		sd_power_gpregret_get(1, &gpregret2);
-		LOGi("GPRegRet: %u %u", gpregret, gpregret2);
+		LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
 
-		// For now, use GPREGRET2 instead.
-		sd_power_gpregret_get(1, &gpregret2);
-		if (gpregret2 & GPREGRET2_STORAGE_RECOVERED) {
+		if (GpRegRet::isFlagSet(GpRegRet::FLAG_STORAGE_RECOVERED)) {
 			_setStateValuesAfterStorageRecover = true;
-			sd_power_gpregret_clr(1, GPREGRET2_STORAGE_RECOVERED);
+			GpRegRet::clearFlag(GpRegRet::FLAG_STORAGE_RECOVERED);
 		}
 		if (_setStateValuesAfterStorageRecover) {
 			LOGw("Set state values after storage recover.");
@@ -398,9 +391,6 @@ void Crownstone::configureStack() {
 		sd_ble_gap_rssi_stop(conn_handle);
 		sd_ble_gap_rssi_start(conn_handle, 0, 0);
 #endif
-		uint32_t gpregret_id = 0;
-		uint32_t gpregret_msk = 0xFF;
-		sd_power_gpregret_clr(gpregret_id, gpregret_msk);
 	});
 
 	// Set callback handler for a disconnection event
@@ -801,10 +791,7 @@ void Crownstone::handleEvent(event_t & event) {
 //
 //			_setStateValuesAfterStorageRecover = true;
 //			// Wait for storage initialized event.
-			uint32_t gpregret;
-			sd_power_gpregret_get(1, &gpregret);
-			gpregret |= GPREGRET2_STORAGE_RECOVERED;
-			sd_power_gpregret_set(1, gpregret);
+			GpRegRet::setFlag(GpRegRet::FLAG_STORAGE_RECOVERED);
 			sd_nvic_SystemReset();
 			break;
 		}
@@ -829,7 +816,7 @@ void Crownstone::handleEvent(event_t & event) {
 	// 		// Do this in interrupt (cs_Handlers.cpp) instead, else we're still too late.
 	// 		LOGf("brownout impending!! force shutdown ...")
 	// 		uint32_t gpregret_id = 0;
-	// 		uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
+	// 		uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
 	// 		// now reset with brownout reset mask set.
 	// 		// NOTE: do not clear the gpregret register, this way
 	// 		//   we can count the number of brownouts in the bootloader
