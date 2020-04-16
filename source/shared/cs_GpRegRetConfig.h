@@ -33,7 +33,7 @@
 #define CS_GPREGRET_LEGACY_DFU_RESET        66   // Value that used to be the value of the counter to enter dfu mode.
 #define CS_GPREGRET_FLAG_BROWNOUT           32   // Bit used to indicate a brownout happened.
 #define CS_GPREGRET_FLAG_DFU_RESET          64   // Bit used to indicate we want to go to dfu mode.
-#define CS_GPREGRET_FLAG_WATCHDOG_TIMEOUT   128  // Bit used to indicate a watchdog timeout happened.
+#define CS_GPREGRET_FLAG_STORAGE_RECOVERED  128  // Bit used to indicate storage recovered.
 
 /**
  * Values in GPREGRET2 used to remember things after a reboot.
@@ -48,6 +48,5 @@
  * - bit 0 is used for "skip crc"
  *
  * We use:
- * - bit 2 to indicate storage recovered
+ * -
  */
-#define CS_GPREGRET2_FLAG_STORAGE_RECOVERED              4

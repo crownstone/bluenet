@@ -13,6 +13,7 @@
 // Set true to enable debug logs.
 #define CS_GPREGRET_DEBUG false
 
+
 #if CS_GPREGRET_DEBUG == true
 #define LOGGpRegRetDebug LOGd
 #else
@@ -31,9 +32,6 @@ void GpRegRet::clearAll() {
 	uint32_t mask = 0xFFFFFFFF;
 	retCode = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
 	APP_ERROR_CHECK(retCode);
-
-	// This flag is stored in GPREGRET2.
-	clearFlag(GpRegRetFlag::FLAG_STORAGE_RECOVERED);
 	printRegRet();
 }
 
@@ -66,21 +64,13 @@ void GpRegRet::clearFlags() {
 	mask = ~mask;
 	retCode = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
 	APP_ERROR_CHECK(retCode);
-
-	// This flag is stored in GPREGRET2.
-	clearFlag(GpRegRetFlag::FLAG_STORAGE_RECOVERED);
 	printRegRet();
 }
 
 void GpRegRet::setFlag(GpRegRetFlag flag) {
 	LOGGpRegRetDebug("setFlag %u", flag);
 	uint32_t retCode;
-	if (flag == FLAG_STORAGE_RECOVERED) {
-		retCode = sd_power_gpregret_set(GpRegRetId::GPREGRET2, flag);
-	}
-	else {
-		retCode = sd_power_gpregret_set(GpRegRetId::GPREGRET, flag);
-	}
+	retCode = sd_power_gpregret_set(GpRegRetId::GPREGRET, flag);
 	APP_ERROR_CHECK(retCode);
 	printRegRet();
 }
@@ -89,26 +79,15 @@ void GpRegRet::clearFlag(GpRegRetFlag flag) {
 	LOGGpRegRetDebug("clearFlag %u", flag);
 	uint32_t retCode;
 	uint32_t mask = flag;
-	if (flag == FLAG_STORAGE_RECOVERED) {
-		retCode = sd_power_gpregret_clr(GpRegRetId::GPREGRET2, mask);
-	}
-	else {
-		retCode = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
-	}
+	retCode = sd_power_gpregret_clr(GpRegRetId::GPREGRET, mask);
 	APP_ERROR_CHECK(retCode);
 	printRegRet();
 }
 
 bool GpRegRet::isFlagSet(GpRegRetFlag flag) {
 	LOGGpRegRetDebug("isFlagSet %u", flag);
-	if (flag == FLAG_STORAGE_RECOVERED) {
-		uint32_t gpregret = getValue(GpRegRetId::GPREGRET2);
-		return (gpregret & flag);
-	}
-	else {
-		uint32_t gpregret = getValue(GpRegRetId::GPREGRET);
-		return (gpregret & flag);
-	}
+	uint32_t gpregret = getValue(GpRegRetId::GPREGRET);
+	return (gpregret & flag);
 }
 
 void GpRegRet::printRegRet() {

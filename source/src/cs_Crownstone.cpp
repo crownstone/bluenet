@@ -730,7 +730,7 @@ void Crownstone::tick() {
 	}
 
 	if (!_clearedGpRegRetCount && _tickCount == (CS_CLEAR_GPREGRET_COUNTER_TIMEOUT_S * 1000 / TICK_INTERVAL_MS)) {
-		GpRegRet::clearCounter();
+		GpRegRet::clearAll();
 		_clearedGpRegRetCount = true;
 	}
 
