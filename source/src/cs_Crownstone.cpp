@@ -220,36 +220,36 @@ void Crownstone::init(uint16_t step) {
 	}
 }
 
-void Crownstone::init0(){
+void Crownstone::init0() {
 	LOGi(FMT_HEADER, "init");
 	initDrivers(0);
 }
 
-void Crownstone::init1(){
-		initDrivers(1);
-		LOG_MEMORY;
-		LOG_FLUSH();
+void Crownstone::init1() {
+	initDrivers(1);
+	LOG_MEMORY;
+	LOG_FLUSH();
 
-		TYPIFY(STATE_OPERATION_MODE) mode;
-		_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
-		_operationMode = getOperationMode(mode);
+	TYPIFY(STATE_OPERATION_MODE) mode;
+	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	_operationMode = getOperationMode(mode);
 
-		//! configure the crownstone
-		LOGi(FMT_HEADER, "configure");
-		configure();
-		LOG_FLUSH();
+	//! configure the crownstone
+	LOGi(FMT_HEADER, "configure");
+	configure();
+	LOG_FLUSH();
 
-		LOGi(FMT_CREATE, "timer");
-		_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
-		LOG_FLUSH();
+	LOGi(FMT_CREATE, "timer");
+	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
+	LOG_FLUSH();
 
-		LOGi(FMT_HEADER, "mode");
-		switchMode(_operationMode);
-		LOG_FLUSH();
+	LOGi(FMT_HEADER, "mode");
+	switchMode(_operationMode);
+	LOG_FLUSH();
 
-		LOGi(FMT_HEADER, "init services");
-		_stack->initServices();
-		LOG_FLUSH();
+	LOGi(FMT_HEADER, "init services");
+	_stack->initServices();
+	LOG_FLUSH();
 }
 
 void Crownstone::initDrivers(uint16_t step) {
@@ -265,38 +265,37 @@ void Crownstone::initDrivers(uint16_t step) {
 	}
 }
 
-void Crownstone::initDrivers0(){
+void Crownstone::initDrivers0() {
 	LOGi("Init drivers");
-		startHFClock();
-		_stack->init();
-		_timer->init();
-
-		_stack->initSoftdevice();
+	startHFClock();
+	_stack->init();
+	_timer->init();
+	_stack->initSoftdevice();
 
 #if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
-		// Check if flash pages of mesh are valid, else erase them.
-		// This has to be done before Storage is initialized.
-		if (!_mesh->checkFlashValid()) {
-			// Wait for pages erased event.
-			return;
-		}
+	// Check if flash pages of mesh are valid, else erase them.
+	// This has to be done before Storage is initialized.
+	if (!_mesh->checkFlashValid()) {
+		// Wait for pages erased event.
+		return;
+	}
 #endif
 
-		cs_ret_code_t retCode = _storage->init();
+	cs_ret_code_t retCode = _storage->init();
+	if (retCode != ERR_SUCCESS) {
+		// We can try to erase all pages.
+		retCode = _storage->eraseAllPages();
 		if (retCode != ERR_SUCCESS) {
-			// We can try to erase all pages.
-			retCode = _storage->eraseAllPages();
-			if (retCode != ERR_SUCCESS) {
-				// Only option left is to reboot and see if things work out next time.
-				APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
-			}
-			// Wait for pages erased event.
-			return;
+			// Only option left is to reboot and see if things work out next time.
+			APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
 		}
-		// Wait for storage initialized event.
+		// Wait for pages erased event.
+		return;
+	}
+	// Wait for storage initialized event.
 }
 
-void Crownstone::initDrivers1(){
+void Crownstone::initDrivers1() {
 	_state->init(&_boardsConfig);
 
 		// If not done already, init UART
@@ -800,7 +799,7 @@ void Crownstone::handleEvent(event_t & event) {
 			 * doesn't continue doing so.
 			 *
 			 * The following commented out code could be used once FDS has been fixed.
-			 * For now, we use GPREGRET2 to remember and do it next boot.
+			 * For now, we use GPREGRET to remember and do it next boot.
 			 */
 //			cs_ret_code_t retCode = _storage->init();
 //			if (retCode != ERR_SUCCESS) {
