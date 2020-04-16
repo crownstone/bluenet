@@ -245,6 +245,8 @@ int main(void)
 	(void) NRF_LOG_INIT(nrf_bootloader_dfu_timer_counter_get);
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
 
+	NRF_LOG_INFO("Reset reason: %u", NRF_POWER->RESETREAS);
+
 	cs_check_gpregret();
 
 	NRF_LOG_INFO("Protect");

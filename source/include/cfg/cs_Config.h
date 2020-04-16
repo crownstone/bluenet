@@ -161,6 +161,10 @@
 #define CS_ADC_IRQ_PRIORITY                      APP_IRQ_PRIORITY_HIGH
 #define CS_ADC_IRQ                               SAADC_IRQHandler
 
+// ----- WDT -----
+#define CS_WATCHDOG_PRIORITY                     APP_IRQ_PRIORITY_HIGH
+#define CS_WATCHDOG_TIMEOUT_MS                   60000
+
 
 #define CS_ADC_SAMPLE_INTERVAL_US                200 // 100 samples per period of 50Hz wave
 #define CS_ADC_MAX_PINS                          2

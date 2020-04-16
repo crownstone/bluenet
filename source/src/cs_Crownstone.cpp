@@ -45,6 +45,7 @@
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
+#include <drivers/cs_Watchdog.h>
 #include <ipc/cs_IpcRamData.h>
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_EncryptionHandler.h>
@@ -308,6 +309,14 @@ void Crownstone::initDrivers1(){
 		}
 
 		LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
+
+		uint32_t resetReason;
+		sd_power_reset_reason_get(&resetReason);
+		LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u", resetReason,
+				(resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
+				(resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
+				(resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
+				(resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
 
 		if (GpRegRet::isFlagSet(GpRegRet::FLAG_STORAGE_RECOVERED)) {
 			_setStateValuesAfterStorageRecover = true;
@@ -701,6 +710,10 @@ void Crownstone::startUp() {
 #if BUILD_MESHING == 1
 	_mesh->startSync();
 #endif
+
+	// Clear all reset reasons after initializing and starting all modules.
+	// So the modules had the opportunity to read it out.
+	sd_power_reset_reason_clr(0xFFFFFFFF);
 }
 
 void Crownstone::increaseResetCounter() {
@@ -733,6 +746,8 @@ void Crownstone::tick() {
 		GpRegRet::clearAll();
 		_clearedGpRegRetCount = true;
 	}
+
+	Watchdog::kick();
 
 	event_t event(CS_TYPE::EVT_TICK, &_tickCount, sizeof(_tickCount));
 	event.dispatch();
@@ -925,6 +940,10 @@ int main() {
 		initUart(board.pinGpioRx, board.pinGpioTx);
 		LOG_FLUSH();
 	}
+
+	// Start the watchdog early (after uart, so we can see the logs).
+	Watchdog::init();
+	Watchdog::start();
 
 	printNfcPins();
 	LOG_FLUSH();
