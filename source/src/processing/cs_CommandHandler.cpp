@@ -111,6 +111,7 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_GET_BEHAVIOUR_INDICES:
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
+		case CTRL_CMD_MICROAPP_UPLOAD:
 			LOGd("cmd=%u lvl=%u", type, accessLevel);
 			break;
 		case CTRL_CMD_UNKNOWN:
@@ -812,6 +813,9 @@ void CommandHandler::handleMicroAppUpload(cs_data_t commandData, const Encryptio
 	
 	TYPIFY(CMD_MICROAPP_UPLOAD) evtData;
 	evtData = *((microapp_upload_packet_t*)commandData.data);
+	for (int i = 0; i < 50; ++i) {
+		LOGi("Event data [%02i]: %02x", i, commandData.data[i]);
+	}
 	event_t event(CS_TYPE::CMD_MICROAPP_UPLOAD, &evtData, sizeof(evtData), result);
 	event.dispatch();
 
@@ -901,6 +905,7 @@ void CommandHandler::handleEvent(event_t & event) {
 
 			// Allocate buffer instead of using event.result.buf, as that's often not set or too small.
 			// TODO: let non-get commands just return error code when buffer is too small.
+			// TODO: @vliedel. We should set this buffer depending on macro MAX PACKET SIZE
 			uint8_t result_buffer[300];
 
 			cs_result_t result(cs_data_t(result_buffer, sizeof(result_buffer)));

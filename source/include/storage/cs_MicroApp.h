@@ -4,6 +4,8 @@
 
 enum class MICROAPP_VALIDATION { NONE, CHECKSUM, BOOTS, FAILS };
 
+static const int number_of_notifications = 3;
+
 /**
  * The class MicroApp has functionality to store a second app (and perhaps in the future even more apps) on another
  * part of the flash memory.
@@ -17,11 +19,17 @@ class MicroApp: public EventListener {
 		MicroApp(MicroApp const&);
 		void operator=(MicroApp const &);
 
+		/**
+		 * The last message we have sent. It has a repeat value that will start at "number_of_notifications". If it
+		 * is at zero, it will not be repeated anymore.
+		 */
+		TYPIFY(EVT_MICROAPP) _lastMessage;
+
 	protected:
 		/**
 		 * Write a chunk to flash memory. Writes to buffer at index start + index * CHUNK_SIZE up to size of the data.
 		 */
-		int writeChunk(uint8_t index, uint8_t *data, uint8_t size);
+		int writeChunk(uint8_t index, const uint8_t *data, uint8_t size);
 
 		/**
 		 * Erases all pages of the MicroApp binary.
@@ -44,6 +52,11 @@ class MicroApp: public EventListener {
 			return instance;
 		}
 		int init();
+
+		/**
+		 * The tick function is used to send more notifications than one.
+		 */
+		void tick();
 
 		/**
 		 * Handle incoming events.

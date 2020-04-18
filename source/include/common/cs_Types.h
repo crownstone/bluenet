@@ -508,7 +508,7 @@ typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
 typedef ibeacon_config_id_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_ID);
 typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
 typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP_UPLOAD);
-typedef uint32_t TYPIFY(EVT_MICROAPP);
+typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

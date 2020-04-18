@@ -8,6 +8,7 @@
 
 #include "protocol/cs_Packets.h"
 #include "protocol/cs_ErrorCodes.h"
+#include <third/nrf/app_config.h>
 
 /**
  * Packets (structs) that are used internally.
@@ -30,14 +31,19 @@
 #define ADVERTISEMENT_DATA_MAX_SIZE 31
 
 /**
- * Size of MicroApp packet.
+ * Overhead through encryption
  */
-#define MICROAPP_PACKET_SIZE 300
+#define ENCRYPTION_OVERHEAD 20
 
 /**
- * Size of MicroApp chunk.
+ * Size of MicroApp packet.
  */
-#define MICROAPP_CHUNK_SIZE MICROAPP_PACKET_SIZE - 10
+#define MICROAPP_PACKET_SIZE (NRF_SDH_BLE_GATT_MAX_MTU_SIZE - ENCRYPTION_OVERHEAD)
+
+/**
+ * Size of MicroApp chunk (without header)
+ */
+#define MICROAPP_CHUNK_SIZE (MICROAPP_PACKET_SIZE - 8)
 
 /**
  * Variable length data encapsulation in terms of length and pointer to data.
@@ -239,13 +245,13 @@ struct __attribute__((packed)) internal_register_tracked_device_packet_t {
 typedef internal_register_tracked_device_packet_t internal_update_tracked_device_packet_t;
 
 /*
- * Struct for MicroApp code. 
+ * Struct for MicroApp code.
  *
- *  - The protocol byte is reserved for future changes. 
+ *  - The protocol byte is reserved for future changes.
  *  - The app_id is an identifier for the app (in theory we can support multiple apps).
  *  - The index refers to the chunk index.
  *  - The count refers to the total number of chunks.
- *  - The size to the data size (even if data is larger, only the data up to size will be considered). 
+ *  - The data size of total program
  *  - The checksum is a checksum for this chunk.
  *  - The app_checksum is over the complete app (only need to be set in the last chunk).
  */
@@ -256,6 +262,24 @@ struct __attribute__((packed)) microapp_upload_packet_t {
 	uint8_t count;
 	uint16_t size;
 	uint16_t checksum;
-	uint16_t app_checksum;
 	uint8_t data[MICROAPP_CHUNK_SIZE];
 };
+
+/**
+ * Notification from the MicroApp module.
+ *
+ *   - The protocol byte is reserved for future struct changes.
+ *   - The app_id identifies the app (for now we use only one app).
+ *   - The index refers to the chunk index being written.
+ *   - The repeat value is an index that goes down (notifications will be written with decreasing repeat value).
+ *
+ * After getting the first notification it is already fine to start sending a new packet. Do check the index in
+ * the notification though (to not accidentally treat it as an ACK for the current chunk).
+ */
+struct __attribute__((packed)) microapp_notification_packet_t {
+	uint8_t protocol;
+	uint8_t app_id;
+	uint8_t index;
+	uint8_t repeat;
+};
+

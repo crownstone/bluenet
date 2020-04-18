@@ -28,6 +28,7 @@
 #include <services/cs_CrownstoneService.h>
 #include <services/cs_DeviceInformationService.h>
 #include <services/cs_SetupService.h>
+#include <storage/cs_MicroApp.h>
 #include <storage/cs_State.h>
 #include <time/cs_SystemTime.h>
 #include <tracking/cs_TrackedDevices.h>
@@ -307,6 +308,8 @@ private:
 
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
+
+	MicroApp* _microApp;
 
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;
