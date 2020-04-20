@@ -855,7 +855,7 @@ void printBootloaderInfo() {
 	uint8_t dataSize;
 	uint8_t *buf = (uint8_t*)&bootloaderData;
 	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, buf, size, &dataSize);
-	if (retCode == IPC_RET_SUCCESS) {
+	if (retCode != IPC_RET_SUCCESS) {
 		LOGw("No IPC data found, error = %i", retCode);
 		return;
 	}
@@ -863,14 +863,15 @@ void printBootloaderInfo() {
 		LOGw("IPC data struct incorrect size");
 		return;
 	}
-	LOGi("Bootloader version: %u.%u.%u-RC%u  protocol=%u dfu_version=%u build_type=%u",
-			bootloaderData.major,
-			bootloaderData.minor,
-			bootloaderData.patch,
-			bootloaderData.prerelease,
+	LOGd("Bootloader version protocol=%u dfu_version=%u build_type=%u",
 			bootloaderData.protocol,
 			bootloaderData.dfu_version,
 			bootloaderData.build_type);
+	LOGi("Bootloader version: %u.%u.%u-RC%u",
+			bootloaderData.major,
+			bootloaderData.minor,
+			bootloaderData.patch,
+			bootloaderData.prerelease);
 }
 
 /**********************************************************************************************************************
