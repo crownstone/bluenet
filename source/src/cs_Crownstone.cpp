@@ -850,32 +850,27 @@ void Crownstone::handleEvent(event_t & event) {
 }
 
 void printBootloaderInfo() {
-	bluenet_ipc_bootloader_data_t bootloader_data;
-	uint8_t size = sizeof(bootloader_data);
+	bluenet_ipc_bootloader_data_t bootloaderData;
+	uint8_t size = sizeof(bootloaderData);
 	uint8_t dataSize;
-	uint8_t *buf = (uint8_t*)&bootloader_data;
+	uint8_t *buf = (uint8_t*)&bootloaderData;
 	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, buf, size, &dataSize);
 	if (retCode == IPC_RET_SUCCESS) {
-		if(size != dataSize) {
-			LOGw("IPC data struct incorrect size");
-			return;
-		}
-		if (bootloader_data.prerelease) {
-			LOGi("Bootloader version: %i.%i.%i-rc%i",
-					bootloader_data.major,
-					bootloader_data.minor,
-					bootloader_data.patch,
-					bootloader_data.prerelease)
-		} else {
-			LOGi("Bootloader version (no rc): %i.%i.%i",
-					bootloader_data.major,
-					bootloader_data.minor,
-					bootloader_data.patch)
-		}
-	}
-	else {
 		LOGw("No IPC data found, error = %i", retCode);
+		return;
 	}
+	if (size != dataSize) {
+		LOGw("IPC data struct incorrect size");
+		return;
+	}
+	LOGi("Bootloader version: %u.%u.%u-RC%u  protocol=%u dfu_version=%u build_type=%u",
+			bootloaderData.major,
+			bootloaderData.minor,
+			bootloaderData.patch,
+			bootloaderData.prerelease,
+			bootloaderData.protocol,
+			bootloaderData.dfu_version,
+			bootloaderData.build_type);
 }
 
 /**********************************************************************************************************************
