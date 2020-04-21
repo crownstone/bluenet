@@ -562,7 +562,7 @@ uint 64 | Stored behaviours | 8 | Bitmask of behaviours that are stored. Nth bit
 uint 64 | Active behaviours | 8 | Bitmask of behaviours that are currently active. Nth bit is Nth behaviour index.
 uint 64 | Active end conditions | 8 | Bitmask of behaviours with active end conditions. Nth bit is Nth behaviour index.
 uint 64 | Active timeout periods | 8 | Bitmask of behaviours that are in (presence) timeout period. Nth bit is Nth behaviour index.
-uint 64[] | Presence | 64 | Bitmask per profile of occupied rooms. Nth bit is Nth room.
+uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
 
 <a name="register_tracked_device_packet"></a>
 ##### Register tracked device packet
