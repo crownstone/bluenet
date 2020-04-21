@@ -263,7 +263,8 @@ APPLICATION_LENGTH=0x50000
 RAM_R1_BASE=0x200023a0
 
 # Amount of RAM for the application: 0x20010000 - RAM_R1_BASE
-RAM_APPLICATION_AMOUNT=0xDC80
+#RAM_APPLICATION_AMOUNT=0xDC80
+RAM_APPLICATION_AMOUNT=0xDC60
 
 # Amount of RAM required by the bootloader (figure this setting out by enabling debug in the bootloader)
 #   CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED=2

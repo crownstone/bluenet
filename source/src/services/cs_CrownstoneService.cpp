@@ -226,14 +226,12 @@ void CrownstoneService::handleEvent(event_t & event) {
 		break;
 	}
 	case CS_TYPE::EVT_MICROAPP: {
-		cs_data_t resultData((uint8_t*)event.data, TypeSize(event.type));
+		memcpy(_resultPacketAccessor->getPayloadBuffer(), event.data, TypeSize(event.type));
+		cs_data_t resultData(_resultPacketAccessor->getPayloadBuffer(), TypeSize(event.type));
 		cs_result_t result(resultData);
 		TYPIFY(EVT_MICROAPP) data = *((TYPIFY(EVT_MICROAPP)*)event.data);
-		LOGi("Write microapp result for %i [#%i]", data.index, data.repeat);
-		//for (int i = 0; i < result.buf.len; ++i) {
-		//	LOGi("Data 0x%02X", result.buf.data[i]);
-		//}
-		result.returnCode = ERR_SUCCESS;
+		result.returnCode = data.error;
+		result.dataSize = TypeSize(event.type);
 		writeResult(CTRL_CMD_MICROAPP_UPLOAD, result);
 		break;
 	}

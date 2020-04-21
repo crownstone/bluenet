@@ -343,13 +343,24 @@ struct __attribute__((packed)) cs_uicr_data_t {
 	} productionDateHousing;
 };
 
-
+/**
+ * Struct stored in fds to be able to run an app using only this info.
+ * 
+ * Fields:
+ *   - start_addr    The address the binary starts at.
+ *   - size          The size of the binary.
+ *   - checksum      The checksum calculated over the size of the binary (only padded by single zero for an odd size).
+ *   - validation    Validation step by step, from checksum correct, enabled, to being able to boot.
+ *   - id            The app id.
+ *   - offset        The entry into the binary (will assume thumb mode, offset will be incremented with one).
+ */
 struct __attribute__((packed)) cs_microapp_t {
 	uint32_t start_addr;
 	uint16_t size;
 	uint16_t checksum;
 	uint8_t validation;
 	uint8_t id;
+	uint16_t offset;
 };
 
 // ========================= functions =========================

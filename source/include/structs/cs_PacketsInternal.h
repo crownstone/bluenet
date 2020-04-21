@@ -253,7 +253,12 @@ typedef internal_register_tracked_device_packet_t internal_update_tracked_device
  *  - The count refers to the total number of chunks.
  *  - The data size of total program
  *  - The checksum is a checksum for this chunk.
- *  - The app_checksum is over the complete app (only need to be set in the last chunk).
+ *
+ * Two remarks:
+ *  - The checksum of the last packet is the size for the COMPLETE application.
+ *  - The data of the last packet has to be filled with 0xFF. It will be written like that to flash. Moreover, its
+ *    checksum will be over the entire buffer, including the 0xFF values.
+ *  - When the index field is 0xFF, the information in the package is on enabling/disabling the microapp.
  */
 struct __attribute__((packed)) microapp_upload_packet_t {
 	uint8_t protocol;
@@ -265,6 +270,23 @@ struct __attribute__((packed)) microapp_upload_packet_t {
 	uint8_t data[MICROAPP_CHUNK_SIZE];
 };
 
+/*
+ * Struct for MicroApp meta packet (index equal to 0xFF)
+ *
+ *   - The opcode indicates enabling/disabling the app (or other future actions).
+ *   - The param0 parameter contains e.g. an offset when opcode is "enable app".
+ *   - The param1 parameter contains e.g. a checksum.
+ */
+struct __attribute__((packed)) microapp_upload_meta_packet_t {
+	uint8_t protocol;
+	uint8_t app_id;
+	uint8_t index;
+	uint8_t opcode;
+	uint16_t param0;
+	uint16_t param1;
+	uint8_t data[MICROAPP_CHUNK_SIZE];
+};
+
 /**
  * Notification from the MicroApp module.
  *
@@ -272,6 +294,7 @@ struct __attribute__((packed)) microapp_upload_packet_t {
  *   - The app_id identifies the app (for now we use only one app).
  *   - The index refers to the chunk index being written.
  *   - The repeat value is an index that goes down (notifications will be written with decreasing repeat value).
+ *   - The error value.
  *
  * After getting the first notification it is already fine to start sending a new packet. Do check the index in
  * the notification though (to not accidentally treat it as an ACK for the current chunk).
@@ -281,5 +304,6 @@ struct __attribute__((packed)) microapp_notification_packet_t {
 	uint8_t app_id;
 	uint8_t index;
 	uint8_t repeat;
+	uint16_t error;
 };
 

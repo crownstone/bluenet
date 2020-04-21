@@ -11,8 +11,8 @@
 
 // based on source(30-10-2019): https://en.wikipedia.org/wiki/Fletcher%27s_checksum
 // adjusted to handle uint8_t arrays by padding with 0x00
-uint32_t Fletcher(uint8_t *data_8, const size_t len, uint32_t previousFletcherHash) {
-        uint16_t* data_16 = reinterpret_cast<uint16_t*>(data_8);
+uint32_t Fletcher(const uint8_t * const data_8, const size_t len, uint32_t previousFletcherHash) {
+        const uint16_t* data_16 = reinterpret_cast<const uint16_t*>(data_8);
 
         // optimization of amount of operator% calls below still holds given a previous
         // fletcher hash because the last operation always is a modulo operation.

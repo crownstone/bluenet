@@ -813,9 +813,6 @@ void CommandHandler::handleMicroAppUpload(cs_data_t commandData, const Encryptio
 	
 	TYPIFY(CMD_MICROAPP_UPLOAD) evtData;
 	evtData = *((microapp_upload_packet_t*)commandData.data);
-	for (int i = 0; i < 50; ++i) {
-		LOGi("Event data [%02i]: %02x", i, commandData.data[i]);
-	}
 	event_t event(CS_TYPE::CMD_MICROAPP_UPLOAD, &evtData, sizeof(evtData), result);
 	event.dispatch();
 
