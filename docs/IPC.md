@@ -52,7 +52,7 @@ uint 8 | Major | 1 | Major version. Set in VERSION file.
 uint 8 | Minor | 1 | Minor version. Set in VERSION file.
 uint 8 | Patch | 1 | Patch version. Set in VERSION file.
 uint 8 | Prerelease | 1 | Prerelease version, will be 255 if not a pre-release. Set in VERSION file.
-uint 8 | Build type | 1 | Build type (Debug = 1, Release = 2, etc.). Set by CMakeLists.txt file.
+uint 8 | Build type | 1 | Build type (Debug = 1, Release = 2, RelWithDebInfo = 3, MinSizeRel = 4). Set by CMakeLists.txt file.
 
 
 
