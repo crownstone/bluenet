@@ -15,7 +15,7 @@
 
 #include <optional>
 
-#define LOGSwitchAggregator LOGnone
+#define LOGSwitchAggregator LOGd
 #define LOGSwitchAggregator_Evt LOGd
 
 
@@ -85,7 +85,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
     aggregatedState =
         (overrideState && !shouldResetOverrideState) ? resolveOverrideState() :
         behaviourState ? aggregatedBehaviourIntensity() : // only use aggr. if no SwitchBehaviour conflict is found
-        aggregatedState ? aggregatedState :               // if conflict is found, don't change the value.
+        aggregatedState ? aggregatedState :               // if override and behaviour don't have an opinion, use previous value.
         std::nullopt;
 
     LOGSwitchAggregator("updateState");
@@ -95,6 +95,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
         printStatus();
     }
     
+    // attempt to update smartSwitch value
     cs_ret_code_t retCode = ERR_SUCCESS_NO_CHANGE;
     if (aggregatedState) {
         retCode = smartSwitch.set(*aggregatedState);
@@ -245,6 +246,13 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value){
 	if(value == 0xFE){
 		overrideState.reset();
 		LOGd("Resetting overrideState");
+	} else if (value == 0xFD) {
+		aggregatedState.reset();
+		LOGd("Resetting aggregatedState");
+	} else if (value == 0xFC) {
+		overrideState.reset();
+		aggregatedState.reset();
+		LOGd("Resetting overrideState and aggregatedState");
 	} else {
 		overrideState = value;
 	}
@@ -252,6 +260,8 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value){
 	overrideState = value;
 #endif
 
+	// don't allow override reset in updateState, it has just been requested to be
+	// set to `value`
     if( updateState(false) == ERR_NO_ACCESS){
         // failure to set the smartswitch. It seems to be locked.
         LOGSwitchAggregator_Evt("Reverting to previous value, no access to smartswitch");

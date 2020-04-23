@@ -10,7 +10,7 @@
 #define LOGMeshInfo LOGi
 #define LOGMeshDebug LOGnone
 
-#define LOGMeshModelInfo    LOGi
+#define LOGMeshModelInfo    LOGnone
 #define LOGMeshModelDebug   LOGnone
 #define LOGMeshModelVerbose LOGnone
 
