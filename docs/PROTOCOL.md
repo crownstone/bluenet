@@ -24,13 +24,28 @@ The setup process goes as follows:
 
 - Crownstone is in setup mode ([Setup service](#setup_service) active).
 - Phone connects to the Crownstone.
-- Phone reads the **session key** and **session nonce** from the [setup service](#setup_service). These characteristics are not encrypted.
-The values are only valid for this connection session. The session key and the session nonce will be used to encrypt the rest of the setup phase using AES 128 CTR as explained [here](#encrypted_write_read).
+- Phone reads the **session key** from the [setup service](#setup_service).
+- Phone reads the [session data](#session_data) from the [setup service](#setup_service).
+- From here on, all writes and read are encrypted using the session key and data, as explained [here](#encrypted_write_read).
 - Phone subscribes to [result](#setup_service) characteristic.
 - Phone commands Crownstone to [setup](#control_packet) via the control characteristic.
 - Phone waits for result to become SUCCESS (See [result packet](#result_packet)).
 - Crownstone will reboot to normal mode.
 
+<a name="normal"></a>
+# Normal mode
+When a Crownstone has been set up, it will run in "normal mode".
+
+To write a command via connection, the process goes as follows:
+
+- Crownstone is in normal mode ([Crownstone service](#crownstone_service) active).
+- Phone connects to the Crownstone.
+- Phone reads the [session data](#session_data) from the [Crownstone service](#crownstone_service).
+- From here on, all writes and read are encrypted using the session key and data, as explained [here](#encrypted_write_read).
+- Phone subscribes to [result](#crownstone_service) characteristic.
+- Phone writes a [control command](#control_packet) to the [control characteristic](#crownstone_service).
+- Phone waits for result, see [result packet](#result_packet).
+- Next command can be written.
 
 
 <a name="encryption"></a>
@@ -65,31 +80,26 @@ The nonce is a combination of 2 pieces: the session nonce and the packet nonce
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 [] | Packet nonce | 3 | Packet nonce, sent with every packet (see [encrypted packet](#encrypted_packet)).
-uint8 [] | Session nonce | 5 | Session nonce, can be [read](#session_nonce) once after connect (only changes on connect).
+uint8 [] | Packet nonce | 3 | Packet nonce, sent with every packet (see [encrypted packet](#encrypted_packet)). Should be different for each encrypted packet.
+uint8 [] | Session nonce | 5 | Session nonce, should be [read](#session_data) when connected, each time you connect.
 
-<a name="session_nonce"></a>
-### Session nonce
+<a name="session_data"></a>
+#### Session data
 
-After connecting, you first have to read the session nonce from the [Crownstone service](#crownstone_service). The session nonce is [ECB encrypted](#ecb_encryption) with the basic key. After decryption, you should verify whether you have read and decrypted succesfully by checking if the validation in the [data](#encrypted_session_nonce) is equal to **0xCAFEBABE**. If so, you now have the correct session nonce.
+After connecting, you should first read the session data from the [Crownstone service](#crownstone_service).
+The session data is [ECB encrypted](#ecb_encryption) with the basic key, or when in setup mode: the session key.
+After decryption, you should verify whether you have read and decrypted succesfully by checking if the validation is equal to **0xCAFEBABE**.
+The session nonce and validation key will be different each time you connect.
 
-The session nonce has two purposes:
-
-- Validation: the first 4 bytes of the session nonce is what we call the **validation key**, it is used in every [encrypted packet](#encrypted_packet), to verify that the correct key was used for decryption/encryption.
-- Encryption: the whole 5 bytes are used for the nonce, which is used for CTR encryption.
-
-The session nonce and validation key are only valid during the connection.
-
-<a name="encrypted_session_nonce"></a>
-#### Session nonce after ECB decryption
-
-![Encrypted session nonce](../docs/diagrams/encrypted-session-nonce.png)
+![Session data](../docs/diagrams/session-data.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 32 | Validation | 4 | 0xCAFEBABE as validation.
-uint8 [] | Session nonce | 5 | The session nonce for this session.
-uint8 [] | Padding | 7 | Zero-padding so that the whole packet is 16 bytes.
+uint8 | Protocol | 1 | The protocol version to use for communication.
+uint8 [] | Session nonce | 5 | The session nonce for this session. Used to encrypt or decrypt packets.
+uint8 [] | Validation key | 4 | The validation key for this session. Used to verify decryption/encryption.
+uint8 [] | Padding | 2 | Zero-padding so that the whole packet is 16 bytes.
 
 
 <a name="encrypted_write_read"></a>
@@ -114,14 +124,16 @@ uint8 [] | Data part |  | Part of the data.
 Once you received the last packet, you should concatenate all data parts to get the payload (which is usually an [encrypted packet](#encrypted_packet)).
 
 <a name="encrypted_packet"></a>
-### Encrypted Packet
+### Encrypted packet
+
+Unlike the name suggests, only the payload of this packet is encrypted. The header is used to determine how to decrypt the payload.
 
 ![Encrypted packet](../docs/diagrams/encrypted-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 [] | Packet nonce | 3 | First 3 bytes of nonce used in the encryption of this message (see [CTR encryption](#ctr_encryption)).
-uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup
+uint8 [] | Packet nonce | 3 | First 3 bytes of nonce used for encrypting the payload, see [CTR encryption](#ctr_encryption).
+uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup. This determines which key has been used for encryption.
 [Encrypted payload](#encrypted_payload) | Encrypted payload | N*16 | The encrypted payload of N blocks.
 
 <a name="encrypted_payload"></a>
@@ -131,7 +143,7 @@ uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint32 | Validation key | 4 | Should be equal to the read [validation key](#session_nonce).
+uint32 | Validation key | 4 | Should be equal to the read [validation key](#session_info).
 uint8 | Payload |  | Whatever data would have been sent if encryption was disabled.
 uint8 | Padding |  | Zero-padding so that the whole packet is of size N*16 bytes.
 
@@ -225,7 +237,7 @@ Characteristic | UUID | Date type | Description | A | M | B
 --- | --- | --- | --- | :---: | :---: | :---:
 Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone. | x | x | x
 Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone. | x | x | x
-Session nonce  | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the [session nonce](#session_nonce). First 4 bytes are also used as validation key. |  |  | ECB
+Session nonce  | 24f00008-7d10-4805-bfc1-7663a01c3bff | [Session data](#session_data) | Read the session data. |  |  | ECB
 Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |
 
 Every command written to the control characteristic returns a [result packet](#result_packet) on the result characteristic.
@@ -251,7 +263,7 @@ Characteristic | UUID | Date type | Description
 MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MAC address of the crownstone.
 Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the session key that will be for encryption.
 GoTo DFU       | 24f10006-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 66 to go to DFU.
-Session nonce  | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the session nonce. First 4 bytes are also used as validation key.
+Session data   | 24f10008-7d10-4805-bfc1-7663a01c3bff | [Session data](#session_data) | Read the session data.
 Control        | 24f1000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
 Result         | 24f1000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone.
 
@@ -281,12 +293,10 @@ __If encryption is enabled, this packet must be encrypted using any of the keys 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [Command type](#command_types) | 2 | Type of the command.
+uint 8 | Protocol | 1 | Which protocol the payload is. Should be similar to the protocol as received in the [session data](#session_data). Older protocols might be supported, but there's no guarantee.
 uint 16 | Size | 2 | Size of the payload in bytes.
 uint 8 | Payload | Size | Payload data, depends on command type.
 
-
-<a name="result_code_packet"></a>
-### Result code packet
 
 <a name="command_types"></a>
 ## Command types
@@ -590,6 +600,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | [Command type](#command_types) | 2 | Type of the command of which this packet is the result.
 uint 16 | [Result code](#result_codes) | 2 | The result code.
+uint 8 | Protocol | 1 | Which protocol the payload is. Should be similar to the protocol in the [control packet](#control_packet).
 uint 16 | Size | 2 | Size of the payload in bytes.
 uint 8 | Payload | Size | Payload data, depends on command type.
 
