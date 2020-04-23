@@ -627,6 +627,7 @@ Value | Name | Description
 41  | ERR_ALREADY_EXISTS | Item already exists.
 42  | ERR_TIMEOUT | Operation timed out.
 43  | ERR_CANCELED | Operation was canceled.
+44  | ERR_PROTOCOL_UNSUPPORTED | The protocol is not supported.
 48  | NO_ACCESS | Invalid access for this command.
 49  | ERR_UNSAFE | It's unsafe to execute this command.
 64  | NOT_AVAILABLE | Command currently not available.
