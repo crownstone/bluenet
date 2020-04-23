@@ -292,8 +292,8 @@ __If encryption is enabled, this packet must be encrypted using any of the keys 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint 8 | Protocol | 1 | Which protocol the command is. Should be similar to the protocol as received in the [session data](#session_data). Older protocols might be supported, but there's no guarantee.
 uint 16 | [Command type](#command_types) | 2 | Type of the command.
-uint 8 | Protocol | 1 | Which protocol the payload is. Should be similar to the protocol as received in the [session data](#session_data). Older protocols might be supported, but there's no guarantee.
 uint 16 | Size | 2 | Size of the payload in bytes.
 uint 8 | Payload | Size | Payload data, depends on command type.
 
@@ -598,9 +598,9 @@ __If encryption is enabled, this packet will be encrypted using any of the keys 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint 8 | Protocol | 1 | Which protocol the result is. Should be similar to the protocol in the [control packet](#control_packet).
 uint 16 | [Command type](#command_types) | 2 | Type of the command of which this packet is the result.
 uint 16 | [Result code](#result_codes) | 2 | The result code.
-uint 8 | Protocol | 1 | Which protocol the payload is. Should be similar to the protocol in the [control packet](#control_packet).
 uint 16 | Size | 2 | Size of the payload in bytes.
 uint 8 | Payload | Size | Payload data, depends on command type.
 
