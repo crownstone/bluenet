@@ -43,15 +43,11 @@ bool TwilightHandler::update(){
     Time time = SystemTime::now();
     auto nextIntendedState = computeIntendedState(time);
 
-    if (currentIntendedState == nextIntendedState) {
-    	// no need to assign currentIntendedState.
-        return false;
-    }
-
+    bool valuechanged = currentIntendedState != nextIntendedState;
     currentIntendedState = nextIntendedState;
 
-    TEST_PUSH_EXPR_D(this,"currentIntendedState",currentIntendedState);
-    return true;
+    TEST_PUSH_EXPR_D(this,"currentIntendedState",(currentIntendedState? (int)currentIntendedState.value() : -1));
+    return valuechanged;
 }
 
 std::optional<uint8_t> TwilightHandler::computeIntendedState(Time currenttime){
