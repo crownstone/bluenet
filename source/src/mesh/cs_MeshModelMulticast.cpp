@@ -120,7 +120,7 @@ cs_ret_code_t MeshModelMulticast::sendMsg(const uint8_t* data, uint16_t len) {
 		accessMsg.access_token = nrf_mesh_unique_token_get();
 		status = access_model_publish(_accessModelHandle, &accessMsg);
 		if (status != NRF_SUCCESS) {
-			LOGMeshModelInfo("sendMsg failed: %u", status);
+			LOGw("sendMsg failed: %u", status);
 //			break;
 		}
 //	}
