@@ -47,14 +47,16 @@ public:
 	/**
 	 * Handle a a command.
 	 *
-	 * @param[in]  type           Type of command.
-	 * @param[in]  commandData    Data of the command.
-	 * @param[in]  source         Source of the entity that issuce this command.
-	 * @param[in]  accessLevel    Access level of the entity that issued this command. Default is ADMIN.
-	 * @param[out] resultData     Buffer (that can be NULL) to put the result data in. Default is NULL.
-	 * @return                    Result of the command.
+	 * @param[in]  protocolVersion     Protocol version of the command.
+	 * @param[in]  type                Type of command.
+	 * @param[in]  commandData         Data of the command.
+	 * @param[in]  source              Source of the entity that issuce this command.
+	 * @param[in]  accessLevel         Access level of the entity that issued this command. Default is ADMIN.
+	 * @param[out] resultData          Buffer (that can be NULL) to put the result data in. Default is NULL.
+	 * @return                         Result of the command.
 	 */
 	void handleCommand(
+			uint8_t protocolVersion,
 			const CommandHandlerTypes type,
 			cs_data_t commandData,
 			const cmd_source_t source,
@@ -93,7 +95,7 @@ private:
 	void handleCmdSwitch                  (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdRelay                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdMultiSwitch             (cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accesss_resulLevel, cs_result_t & result);
-	void handleCmdMeshCommand             (cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accesss_resulLevel, cs_result_t & result);
+	void handleCmdMeshCommand             (uint8_t protocol, cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accesss_resulLevel, cs_result_t & result);
 	void handleCmdAllowDimming            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdLockSwitch              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdSetup                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);

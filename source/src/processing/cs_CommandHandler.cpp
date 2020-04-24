@@ -71,12 +71,19 @@ void CommandHandler::resetDelayed(uint8_t opCode, uint16_t delayMs) {
 }
 
 void CommandHandler::handleCommand(
+		uint8_t protocolVersion,
 		const CommandHandlerTypes type,
 		cs_data_t commandData,
 		const cmd_source_t source,
 		const EncryptionAccessLevel accessLevel,
 		cs_result_t & result
 		) {
+	if (protocolVersion != CS_CONNECTION_PROTOCOL_VERSION) {
+		LOGw("Wrong protocol: %u", protocolVersion);
+		result.returnCode = ERR_PROTOCOL_UNSUPPORTED;
+		return;
+	}
+
 	switch (type) {
 		case CTRL_CMD_SET_SUN_TIME:
 			break;
@@ -155,7 +162,7 @@ void CommandHandler::handleCommand(
 	case CTRL_CMD_MULTI_SWITCH:
 		return handleCmdMultiSwitch(commandData, source, accessLevel, result);
 	case CTRL_CMD_MESH_COMMAND:
-		return handleCmdMeshCommand(commandData, source, accessLevel, result);
+		return handleCmdMeshCommand(protocolVersion, commandData, source, accessLevel, result);
 	case CTRL_CMD_ALLOW_DIMMING:
 		return handleCmdAllowDimming(commandData, accessLevel, result);
 	case CTRL_CMD_LOCK_SWITCH:
@@ -587,7 +594,7 @@ void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_sourc
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdMeshCommand(cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "mesh command");
 	uint16_t size = commandData.len;
 	buffer_ptr_t buffer = commandData.data;
@@ -675,7 +682,7 @@ void CommandHandler::handleCmdMeshCommand(cs_data_t commandData, const cmd_sourc
 	}
 	if (forSelf) {
 		cs_data_t meshCommandCtrlCmdData(meshCtrlCmd.controlCommand.data, meshCtrlCmd.controlCommand.size);
-		handleCommand(meshCtrlCmd.controlCommand.type, meshCommandCtrlCmdData, source, accessLevel, result);
+		handleCommand(protocol, meshCtrlCmd.controlCommand.type, meshCommandCtrlCmdData, source, accessLevel, result);
 
 		// Send out result to UART.
 		uart_msg_mesh_result_packet_header_t resultHeader;
@@ -886,6 +893,7 @@ void CommandHandler::handleEvent(event_t & event) {
 			cs_result_t result(cs_data_t(result_buffer, sizeof(result_buffer)));
 
 			handleCommand(
+				cmd->protocolVersion,
 				cmd->type,
 				cs_data_t(cmd->data, cmd->size),
 				cmd->source,

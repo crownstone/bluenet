@@ -64,7 +64,7 @@ protected:
 
 	void addFactoryResetCharacteristic();
 
-	void addSessionNonceCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size,
+	void addSessionDataCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size,
 			EncryptionAccessLevel minimumAccessLevel = BASIC);
 
 	void getReadBuffer(buffer_ptr_t& buffer, cs_buffer_size_t& maxLength);
@@ -81,13 +81,14 @@ protected:
 
 	/** Write a result to the result characteristic.
 	 *
+	 * @param[in] protocol        The protocol version.
 	 * @param[in] type            The command type that was handled.
 	 * @param[in] result          The result of handling the command.
 	 */
-	void writeResult(CommandHandlerTypes type, cs_result_t & result);
+	void writeResult(uint8_t protocol, CommandHandlerTypes type, cs_result_t & result);
 
 
 private:
-	Characteristic<buffer_ptr_t>* _sessionNonceCharacteristic = NULL;
+	Characteristic<buffer_ptr_t>* _sessionDataCharacteristic = NULL;
 	Characteristic<uint32_t>*     _factoryResetCharacteristic = NULL;
 };

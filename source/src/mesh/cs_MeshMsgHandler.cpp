@@ -395,11 +395,12 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_r
 	stateHeader->persistenceMode =     meshStateHeader->header.persistenceMode;
 
 	// Inflate control command meta data.
-	controlCmd.type =        CTRL_CMD_STATE_SET;
-	controlCmd.data =        controlCmdData;
-	controlCmd.size =        controlCmdDataSize;
-	controlCmd.accessLevel = MeshUtil::getInflatedAccessLevel(meshStateHeader->accessLevel);
-	controlCmd.source =      MeshUtil::getInflatedSource(meshStateHeader->sourceId);
+	controlCmd.protocolVersion =  CS_CONNECTION_PROTOCOL_VERSION;
+	controlCmd.type =             CTRL_CMD_STATE_SET;
+	controlCmd.data =             controlCmdData;
+	controlCmd.size =             controlCmdDataSize;
+	controlCmd.accessLevel =      MeshUtil::getInflatedAccessLevel(meshStateHeader->accessLevel);
+	controlCmd.source =           MeshUtil::getInflatedSource(meshStateHeader->sourceId);
 
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 	event.result.buf = result.buf;

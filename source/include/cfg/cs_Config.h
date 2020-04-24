@@ -8,6 +8,8 @@
 
 #define CROWNSTONE_COMPANY_ID                    0x038E
 
+#define CS_CONNECTION_PROTOCOL_VERSION           5
+
 // size of the buffer used for characteristics
 //#define GENERAL_BUFFER_SIZE                      300
 

@@ -19,7 +19,8 @@
 #define LEGACY_MULTI_SWITCH_HEADER_SIZE (1+1)
 #define LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT 18
 
-#define SESSION_NONCE_LENGTH 5
+#define VALIDATION_KEY_LENGTH   4
+#define SESSION_NONCE_LENGTH 	5
 
 /**
  * Packets (structs) that are used over the air.
@@ -52,6 +53,7 @@ enum BackgroundAdvFlagBitPos {
  * Header of a control packet.
  */
 struct __attribute__((__packed__)) control_packet_header_t {
+	uint8_t protocolVersion;
 	cs_control_cmd_t commandType;
 	cs_buffer_size_t payloadSize;
 };
@@ -69,6 +71,7 @@ struct __attribute__((__packed__)) control_packet_t {
  * Header of a result packet.
  */
 struct __attribute__((__packed__)) result_packet_header_t {
+	uint8_t protocolVersion = CS_CONNECTION_PROTOCOL_VERSION;
 	cs_control_cmd_t commandType = CTRL_CMD_UNKNOWN;
 	cs_ret_code_t returnCode = ERR_UNSPECIFIED;
 	cs_buffer_size_t payloadSize = 0;
@@ -264,8 +267,10 @@ struct __attribute__((__packed__)) led_message_payload_t {
 	bool enable;
 };
 
-struct __attribute__((packed)) session_nonce_t {
-	uint8_t data[SESSION_NONCE_LENGTH];
+struct __attribute__((packed)) session_data_t {
+	uint8_t protocol;
+	uint8_t sessionNonce[SESSION_NONCE_LENGTH];
+	uint8_t validationKey[VALIDATION_KEY_LENGTH];
 };
 
 struct __attribute__((packed)) behaviour_debug_t {

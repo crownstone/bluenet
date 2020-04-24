@@ -15,8 +15,6 @@
 
 #define PACKET_NONCE_LENGTH  	3
 #define USER_LEVEL_LENGTH 		1
-#define VALIDATION_NONCE_LENGTH 4
-#define SESSION_NONCE_LENGTH 	5
 #define DEFAULT_SESSION_KEY 	0xCAFEBABE
 #define DEFAULT_SESSION_KEY_LENGTH 4
 
@@ -39,7 +37,7 @@ private:
 	~EncryptionHandler() {}
 
 	OperationMode _operationMode;
-	uint8_t _sessionNonce[SESSION_NONCE_LENGTH];
+	session_data_t _sessionData;
 	nrf_ecb_hal_data_t _block __attribute__ ((aligned (4)));
 	uint8_t _setupKey[SOC_ECB_KEY_LENGTH];
 	bool _setupKeyValid = false;
@@ -95,11 +93,6 @@ public:
 	void handleEvent(event_t & event);
 
 	/**
-	 * Allow characteristics to get the sessionNonce. Length of the sessionNonce is 5 bytes.
-	 */
-	uint8_t* getSessionNonce();
-
-	/**
 	 * Break the connection if there is an error in the encryption or decryption
 	 */
 	void closeConnectionAuthenticationFailure();
@@ -121,9 +114,9 @@ public:
 	static uint16_t calculateDecryptionBufferLength(uint16_t encryptedPacketLength);
 
 	/**
-	 * Generate a 16 byte key to be used during the setup phase.
+	 * Get a 16 byte key to be used during the setup phase.
 	 */
-	uint8_t* generateNewSetupKey();
+	uint8_t* getSetupKey();
 
 	/**
 	 * After the setup phase, invalidate the key. Is usually called on disconnect.
@@ -136,12 +129,13 @@ private:
 
 	inline bool _encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* target, uint8_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType);
 	inline bool _prepareEncryptCTR(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength, EncryptionAccessLevel userLevel, EncryptionType encryptionType);
-	inline bool _encryptCTR(uint8_t* validationNonce, uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength);
-	inline bool _decryptCTR(uint8_t* validationNonce, uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength);
+	inline bool _encryptCTR(uint8_t* validationKey, uint8_t* input, uint16_t inputLength, uint8_t* output, uint16_t outputLength);
+	inline bool _decryptCTR(uint8_t* validationKey, uint8_t* input, uint16_t inputLength, uint8_t* target, uint16_t targetLength);
 	bool _checkAndSetKey(uint8_t userLevel);
 	bool _validateBlockLength(uint16_t length);
-	bool _validateDecryption(uint8_t* buffer, uint8_t* validationNonce);
-	void _generateSessionNonce();
+	bool _validateDecryption(uint8_t* buffer, uint8_t* validationKey);
+	void _generateSessionData();
+	void _generateNewSetupKey();
 	void _generateNonceInTarget(uint8_t* target);
 	void _createIV(uint8_t* target, uint8_t* nonce, EncryptionType encryptionType);
 	bool _RC5PrepareKey(uint8_t* key, uint8_t keyLength);

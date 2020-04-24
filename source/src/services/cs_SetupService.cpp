@@ -51,8 +51,8 @@ void SetupService::createCharacteristics() {
 	LOGi(FMT_CHAR_ADD, BLE_CHAR_GOTO_DFU);
 	addGoToDfuCharacteristic();
 
-	LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_NONCE);
-	addSessionNonceCharacteristic(readBuf.data, readBuf.len, ENCRYPTION_DISABLED);
+	LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_DATA);
+	addSessionDataCharacteristic(readBuf.data, readBuf.len, SETUP);
 
 	updatedCharacteristics();
 }
@@ -122,14 +122,16 @@ void SetupService::addGoToDfuCharacteristic() {
 }
 
 void SetupService::handleEvent(event_t & event) {
-	// make sure the session nonce is populated.
+	// make sure the session key is populated.
 	CrownstoneService::handleEvent(event);
 	switch(event.type) {
 	case CS_TYPE::EVT_BLE_CONNECT: {
-		uint8_t* key = EncryptionHandler::getInstance().generateNewSetupKey();
-		_setupKeyCharacteristic->setValueLength(SOC_ECB_KEY_LENGTH);
-		_setupKeyCharacteristic->setValue(key);
-		_setupKeyCharacteristic->updateValue();
+		uint8_t* key = EncryptionHandler::getInstance().getSetupKey();
+		if (key != nullptr) {
+			_setupKeyCharacteristic->setValueLength(SOC_ECB_KEY_LENGTH);
+			_setupKeyCharacteristic->setValue(key);
+			_setupKeyCharacteristic->updateValue();
+		}
 		break;
 	}
 	case CS_TYPE::EVT_BLE_DISCONNECT: {
