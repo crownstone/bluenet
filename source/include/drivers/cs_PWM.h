@@ -122,14 +122,21 @@ private:
 	//! Duty cycle values of the channels in ticks.
 	uint32_t _tickValues[CS_PWM_MAX_CHANNELS];
 
-	//! PPI channels to be used to communicate from Timer to GPIOTE.
-	nrf_ppi_channel_t _ppiChannels[2*CS_PWM_MAX_CHANNELS];
 
-	//! PPI channels to be used for duty cycle transitions.
-	nrf_ppi_channel_t _ppiTransitionChannels[2];
+//	//! Whether or not a transition of a duty cycle is in progress.
+//	bool _transitionInProgress = false;
+//
+//	//! Target value of the channel that's changing its duty cycle.
+//	uint8_t _transitionTargetTicks;
 
-	//! PPI group, used to enable/disable ppi channels.
-	nrf_ppi_channel_group_t _ppiGroup;
+	//! PPI channels to be used to trigger GPIOTE tasks from timer compare events. Turning the switch on.
+	nrf_ppi_channel_t _ppiChannelsOn[CS_PWM_MAX_CHANNELS];
+
+	//! PPI channels to be used to trigger GPIOTE tasks from timer compare events. Turning the switch off.
+	nrf_ppi_channel_t _ppiChannelsOff[CS_PWM_MAX_CHANNELS];
+
+	//! PPI channel to be used for duty cycle transitions.
+	nrf_ppi_channel_t _ppiTransitionChannel;
 
 	//! GPIOTE init states cache
 	nrf_gpiote_outinit_t _gpioteInitStatesOn[CS_PWM_MAX_CHANNELS];
@@ -165,6 +172,13 @@ private:
 	//! Disables pwm for given channel and turns it on or off.
 	void disablePwm(uint8_t channel, bool on);
 
+	/**
+	 * Checks and caches if duty cycle is in transition.
+	 *
+	 * @return true when a duty cycle is in transition.
+	 */
+	bool checkInTransition();
+
 	//! Config gpiote
 	void gpioteConfig(uint8_t channel, bool initOn);
 	//! Unconfig gpiote
@@ -192,6 +206,10 @@ private:
 	nrf_timer_cc_channel_t getTimerChannel(uint8_t index);
 	//! Helper function to get the gpiote task out, given the index.
 	nrf_gpiote_tasks_t getGpioteTaskOut(uint8_t index);
+	//! Helper function to get the gpiote task out, given the index.
+	nrf_gpiote_tasks_t getGpioteTaskSet(uint8_t index);
+	//! Helper function to get the gpiote task out, given the index.
+	nrf_gpiote_tasks_t getGpioteTaskClear(uint8_t index);
 	//! Helper function to get the ppi channel, given the index.
 	nrf_ppi_channel_t getPpiChannel(uint8_t index);
 	//! Helper function to get the ppi group, given the index.
