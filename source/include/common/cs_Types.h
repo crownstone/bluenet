@@ -39,7 +39,6 @@ enum TypeBases {
 	InternalBaseBehaviour = InternalBase + 170,
 	InternalBaseLocalisation = InternalBase + 190,
 	InternalBaseSystem = InternalBase + 210,
-
 };
 
 /** Cast to underlying type.
@@ -190,7 +189,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_DISCONNECT,                                    // Device disconnected.
 	CMD_ENABLE_ADVERTISEMENT,                              // Enable/disable advertising.
 
-	// Switch
+	// Switch (aggregator)
 	CMD_SWITCH_OFF = InternalBaseSwitch,              // Turn switch off.
 	CMD_SWITCH_ON,                                    // Turn switch on.
 	CMD_SWITCH_TOGGLE,                                // Toggle switch.
@@ -200,6 +199,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_MULTI_SWITCH,                                 // Handle a multi switch.
 	CMD_SWITCHING_ALLOWED,		                      // Set switch lock.
 	CMD_DIMMING_ALLOWED,	                          // Set allow dimming.
+	CMD_SWITCH_AGGREGATOR_RESET,                      // Reset the internal state of the switch aggregator.
 
 	// Power
 	EVT_DIMMER_POWERED = InternalBasePower,           // Dimmer being powered is changed. Payload: true when powered, and ready to be used.

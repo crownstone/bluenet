@@ -13,11 +13,6 @@
 #include <cstdarg>
 
 
-//     UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
-//     UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT,(uint8_t*)&(rtcCount), sizeof(rtcCount));
-//     UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_CURRENT);
-// }
-
 inline int cs_write_test(const char *str, ...) {
 	char buffer[128];
 	va_list ap;
@@ -46,20 +41,35 @@ inline int cs_write_test(const char *str, ...) {
 }
 
 /**
+ * Cast optional into integer for easy printing.
+ */
+template<class U>
+inline long int OptionalUnsignedToInt(std::optional<U> opt){
+	return (opt? static_cast<long int>(opt.value()) : -1);
+}
+
+/**
  * format:
  * ptr_to_this,prettyfunction,valuename,content
  */
+
 // folds in pretty_function name
 #define TEST_PUSH_DATA(form, self, expressionnamestr, expr) cs_write_test(form, self, __PRETTY_FUNCTION__, expressionnamestr, expr)
 
 /**
  * Expression wrappers for generic expressions in non-static context
  */
-#define TEST_PUSH_EXPR_S(self, expressionnamestr, expr) TEST_PUSH_DATA("%x,%s,%s,%s", self, expressionnamestr, expr)
-#define TEST_PUSH_EXPR_D(self, expressionnamestr, expr) TEST_PUSH_DATA("%x,%s,%s,%d", self, expressionnamestr, expr)
-#define TEST_PUSH_EXPR_X(self, expressionnamestr, expr) TEST_PUSH_DATA("%x,%s,%s,%x", self, expressionnamestr, expr)
-#define TEST_PUSH_EXPR_B(self, expressionnamestr, expr) TEST_PUSH_EXPR_S(self,expressionnamestr, \
+#define TEST_PUSH_EXPR_S(self, expressionnamestr, expr) TEST_PUSH_DATA("%x,%s,%s,%s", self, expressionnamestr, expr)  // string
+#define TEST_PUSH_EXPR_D(self, expressionnamestr, expr) TEST_PUSH_DATA("%x,%s,%s,%d", self, expressionnamestr, expr)  // decimal
+#define TEST_PUSH_EXPR_X(self, expressionnamestr, expr) TEST_PUSH_DATA("%x,%s,%s,%x", self, expressionnamestr, expr)  // hexadecimal
+
+// boolean remap to string
+#define TEST_PUSH_EXPR_B(self, expressionnamestr, expr) TEST_PUSH_EXPR_S(self, expressionnamestr, \
 		(expr ? "True" : "False"))
+
+// std::optional<uint*_t> remap to Decimal
+#define TEST_PUSH_EXPR_O(self, expressionnamestr, expr) TEST_PUSH_EXPR_D(self, expressionnamestr, \
+		OptionalUnsignedToInt(expr))
 
 /**
  * Utiltiy wrappers for member variables.
@@ -68,6 +78,8 @@ inline int cs_write_test(const char *str, ...) {
 #define TEST_PUSH_D(self, variablename) TEST_PUSH_EXPR_D(self, #variablename, self->variablename)
 #define TEST_PUSH_X(self, variablename) TEST_PUSH_EXPR_X(self, #variablename, self->variablename)
 #define TEST_PUSH_B(self, variablename) TEST_PUSH_EXPR_B(self, #variablename, self->variablename)
+#define TEST_PUSH_O(self, variablename) TEST_PUSH_EXPR_O(self, #variablename, self->variablename)
+
 
 /**
  * Utility wrappers for static stuff.

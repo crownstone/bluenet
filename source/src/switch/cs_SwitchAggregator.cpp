@@ -108,11 +108,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
     event_t overrideEvent(CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN, &eventData, sizeof(eventData));
     overrideEvent.dispatch();
 
-    // using -1 as value for the hasvalues works because they are unsigned, hence non-negative
-    TEST_PUSH_EXPR_D(this,"overrideState", (overrideState? (int) overrideState.value() : -1));
-    TEST_PUSH_EXPR_D(this,"behaviourState", (behaviourState? (int) behaviourState.value() : -1));
-    TEST_PUSH_EXPR_D(this,"twilightState", (twilightState? (int) twilightState.value() : -1));
-    TEST_PUSH_EXPR_D(this,"aggregatedState", (aggregatedState? (int) aggregatedState.value() : -1));
+    pushTestDataToHost();
 
     return retCode;
 }
@@ -120,6 +116,10 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
 // ========================= Event handling =========================
 
 void SwitchAggregator::handleEvent(event_t& evt){
+	if(handleSwitchAggregatorCommand(evt)){
+
+	}
+
 	if (handleTimingEvents(evt)) {
 		return;
 	}
@@ -138,6 +138,23 @@ void SwitchAggregator::handleEvent(event_t& evt){
 	if (evt.type == CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG) {
 		handleGetBehaviourDebug(evt);
 	}
+}
+
+bool SwitchAggregator::handleSwitchAggregatorCommand(event_t& evt){
+	switch(evt.type){
+		case CS_TYPE::CMD_SWITCH_AGGREGATOR_RESET: {
+			overrideState.reset();
+			behaviourState.reset();
+			twilightState.reset();
+			aggregatedState.reset();
+			break;
+		}
+		default: {
+			return false;
+		}
+
+	}
+	return true;
 }
 
 bool SwitchAggregator::handleTimingEvents(event_t& evt){
@@ -376,14 +393,16 @@ void SwitchAggregator::handleGetBehaviourDebug(event_t& evt) {
 	evt.result.returnCode = ERR_SUCCESS;
 }
 
-void SwitchAggregator::printStatus(){
-    if(overrideState){
-        LOGd(" ^ overrideState: %02d",overrideState.value());
-    }
-    if(behaviourState){
-        LOGd(" | behaviourState: %02d",behaviourState.value());
-    }
-    if(aggregatedState){
-        LOGd(" v aggregatedState: %02d",aggregatedState.value());
-    }
+void SwitchAggregator::printStatus() {
+    LOGd("^ overrideState: %02d",   OptionalUnsignedToInt(overrideState));
+	LOGd("| behaviourState: %02d",  OptionalUnsignedToInt(behaviourState));
+    LOGd("| twilightState: %02d",   OptionalUnsignedToInt(behaviourState));
+    LOGd("v aggregatedState: %02d", OptionalUnsignedToInt(aggregatedState));
+}
+
+void SwitchAggregator::pushTestDataToHost() {
+	TEST_PUSH_O(this, overrideState);
+	TEST_PUSH_O(this, behaviourState);
+	TEST_PUSH_O(this, twilightState);
+	TEST_PUSH_O(this, aggregatedState);
 }

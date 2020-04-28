@@ -122,6 +122,12 @@ private:
      */
     bool handlePresenceEvents(event_t& evt);
 
+    /**
+     * Clearing private variables, setting them to specific values, etc.
+     * Debug or power user features.
+     */
+    bool handleSwitchAggregatorCommand(event_t& evt);
+
     void handleSwitchStateChange(uint8_t newIntensity);
 
     // ================================== Misc ==================================
@@ -157,4 +163,5 @@ private:
     void handleGetBehaviourDebug(event_t& evt);
 
     void printStatus();
+    void pushTestDataToHost();
 };
