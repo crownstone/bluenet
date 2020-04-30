@@ -58,7 +58,7 @@ void asACR01B1D(boards_config_t* p_config) {
 	p_config->currentMultiplier                  = 0.0044f;
 	p_config->voltageZero                        = 1993;
 	p_config->currentZero                        = 1980;
-	p_config->powerZero                          = 3504;
+	p_config->powerZero                          = 3500;
 	p_config->voltageRange                       = 1200; // 0V - 1.2V
 	p_config->currentRange                       = 1200; // 0V - 1.2V
 
