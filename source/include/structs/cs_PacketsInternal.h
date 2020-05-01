@@ -121,6 +121,7 @@ inline bool cs_multi_switch_item_is_valid(internal_multi_switch_item_t* item, si
 }
 
 struct __attribute__((packed)) control_command_packet_t {
+	uint8_t protocolVersion = CS_CONNECTION_PROTOCOL_VERSION;
 	CommandHandlerTypes type;
 	buffer_ptr_t data;
 	size16_t size;

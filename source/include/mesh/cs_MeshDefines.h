@@ -7,9 +7,11 @@
 
 #pragma once
 
-#define LOGMeshInfo LOGi
+// Debug logs
+#define LOGMeshInfo LOGnone
 #define LOGMeshDebug LOGnone
 
+// Debug logs
 #define LOGMeshModelInfo    LOGnone
 #define LOGMeshModelDebug   LOGnone
 #define LOGMeshModelVerbose LOGnone

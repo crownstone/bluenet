@@ -69,6 +69,7 @@ project. Depending on the existence of RC (release candidate) version informatio
 repository will be used. To create a release directory and fill it, call:
 
 ```
+cd build/cd bootloader_2.0.1-RC0
 make create_bootloader_release_in_repository
 ```
 

@@ -21,7 +21,7 @@
  * to keep up to date using on board timing functionality.
  */
 class SystemTime : public EventListener {
-    public:
+public:
     static Time posix();
     static Time now(); // alias for posix()
     
@@ -46,7 +46,7 @@ class SystemTime : public EventListener {
      */
     static void init();
 
-    private:
+private:
     // state data
 	static uint32_t rtcTimeStamp;
 	static uint32_t posixTimeStamp;

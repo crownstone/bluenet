@@ -297,7 +297,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 
 	CMD_CONTROL_CMD,                                  // Handle a control command.
-	EVT_SESSION_NONCE_SET,                            // Session nonce was generated.
+	EVT_SESSION_DATA_SET,                             // Session data was generated.
 	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
 
 	EVT_GENERIC_TEST= 0xFFFF,                         // Can be used by the python test python lib for ad hoc tests during development.
@@ -322,8 +322,13 @@ enum class OperationMode {
 	OPERATION_MODE_UNINITIALIZED               = 0xFF,
 };
 
+enum ResetCode {
+	CS_RESET_CODE_SOFT_RESET = 0,
+	CS_RESET_CODE_GO_TO_DFU_MODE = 1,
+};
+
 struct __attribute__((packed)) reset_delayed_t {
-	uint8_t resetCode;
+	uint8_t resetCode; // ResetCode
 	uint16_t delayMs;
 };
 
@@ -462,7 +467,7 @@ typedef  control_command_packet_t TYPIFY(CMD_CONTROL_CMD);
 typedef  void TYPIFY(EVT_SCAN_STARTED);
 typedef  void TYPIFY(EVT_SCAN_STOPPED);
 typedef  void TYPIFY(EVT_SETUP_DONE);
-typedef  session_nonce_t TYPIFY(EVT_SESSION_NONCE_SET);
+typedef  session_data_t TYPIFY(EVT_SESSION_DATA_SET);
 typedef  state_external_stone_t TYPIFY(EVT_STATE_EXTERNAL_STONE);
 typedef  void TYPIFY(EVT_STATE_FACTORY_RESET_DONE);
 typedef  void TYPIFY(EVT_STORAGE_INITIALIZED);

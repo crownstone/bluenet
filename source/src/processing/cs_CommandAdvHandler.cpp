@@ -287,6 +287,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	}
 
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
+	controlCmd.protocolVersion = CS_CONNECTION_PROTOCOL_VERSION;
 	controlCmd.type = CTRL_CMD_UNKNOWN;
 	controlCmd.accessLevel = accessLevel;
 	controlCmd.data = commandData;

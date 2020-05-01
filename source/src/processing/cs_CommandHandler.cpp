@@ -5,47 +5,45 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "ble/cs_Advertiser.h"
-#include "cfg/cs_Boards.h"
-#include "cfg/cs_DeviceTypes.h"
-#include "cfg/cs_Strings.h"
-#include "drivers/cs_Serial.h"
+#include <ble/cs_Advertiser.h>
+#include <cfg/cs_Boards.h>
+#include <cfg/cs_DeviceTypes.h>
+#include <cfg/cs_Strings.h>
+#include <drivers/cs_GpRegRet.h>
+#include <drivers/cs_Serial.h>
 #include <ipc/cs_IpcRamData.h>
-#include "processing/cs_CommandHandler.h"
-#include "processing/cs_Scanner.h"
-#include "processing/cs_FactoryReset.h"
-#include "processing/cs_Setup.h"
-#include "processing/cs_TemperatureGuard.h"
-#include "protocol/cs_UartProtocol.h"
-#include "protocol/mesh/cs_MeshModelPacketHelper.h"
-#include "storage/cs_State.h"
-#include "time/cs_SystemTime.h"
-
+#include <processing/cs_CommandHandler.h>
+#include <processing/cs_FactoryReset.h>
+#include <processing/cs_Scanner.h>
+#include <processing/cs_Setup.h>
+#include <processing/cs_TemperatureGuard.h>
+#include <protocol/cs_UartProtocol.h>
+#include <protocol/mesh/cs_MeshModelPacketHelper.h>
+#include <storage/cs_State.h>
+#include <time/cs_SystemTime.h>
 #include <util/cs_WireFormat.h>
-
-#include <sstream>
 
 #define LOGCommandHandlerDebug LOGnone
 
 void reset(void* p_context) {
 
-	uint32_t cmd = *(int32_t*) p_context;
+	uint8_t cmd = *(uint8_t*) p_context;
 
-	if (cmd == GPREGRET_DFU_RESET) {
-		LOGi(MSG_FIRMWARE_UPDATE);
-	} else {
-		LOGi(MSG_RESET);
+	switch (cmd) {
+		case CS_RESET_CODE_SOFT_RESET: {
+			LOGi(MSG_RESET);
+			GpRegRet::setCounter(CS_GPREGRET_COUNTER_SOFT_RESET);
+			break;
+		}
+		case CS_RESET_CODE_GO_TO_DFU_MODE: {
+			LOGi(MSG_FIRMWARE_UPDATE);
+			GpRegRet::setFlag(GpRegRet::FLAG_DFU);
+			break;
+		}
+		default:
+			LOGw("Unknown reset code: %u", cmd);
+			return;
 	}
-
-	LOGi("Executing reset: %d", cmd);
-	// copy to make sure this is nothing more than one value
-	uint8_t err_code;
-	uint32_t gpregret_id = 0;
-	uint32_t gpregret_msk = 0xFF;
-	err_code = sd_power_gpregret_clr(gpregret_id, gpregret_msk);
-	APP_ERROR_CHECK(err_code);
-	err_code = sd_power_gpregret_set(gpregret_id, cmd);
-	APP_ERROR_CHECK(err_code);
 	sd_nvic_SystemReset();
 }
 
@@ -73,12 +71,19 @@ void CommandHandler::resetDelayed(uint8_t opCode, uint16_t delayMs) {
 }
 
 void CommandHandler::handleCommand(
+		uint8_t protocolVersion,
 		const CommandHandlerTypes type,
 		cs_data_t commandData,
 		const cmd_source_t source,
 		const EncryptionAccessLevel accessLevel,
 		cs_result_t & result
 		) {
+	if (protocolVersion != CS_CONNECTION_PROTOCOL_VERSION) {
+		LOGw("Wrong protocol: %u", protocolVersion);
+		result.returnCode = ERR_PROTOCOL_UNSUPPORTED;
+		return;
+	}
+
 	switch (type) {
 		case CTRL_CMD_SET_SUN_TIME:
 			break;
@@ -157,7 +162,7 @@ void CommandHandler::handleCommand(
 	case CTRL_CMD_MULTI_SWITCH:
 		return handleCmdMultiSwitch(commandData, source, accessLevel, result);
 	case CTRL_CMD_MESH_COMMAND:
-		return handleCmdMeshCommand(commandData, source, accessLevel, result);
+		return handleCmdMeshCommand(protocolVersion, commandData, source, accessLevel, result);
 	case CTRL_CMD_ALLOW_DIMMING:
 		return handleCmdAllowDimming(commandData, accessLevel, result);
 	case CTRL_CMD_LOCK_SWITCH:
@@ -205,7 +210,7 @@ void CommandHandler::handleCmdGotoDfu(cs_data_t commandData, const EncryptionAcc
 	LOGi(STR_HANDLE_COMMAND, "goto dfu");
 	event_t event(CS_TYPE::EVT_GOING_TO_DFU);
 	event.dispatch();
-	resetDelayed(GPREGRET_DFU_RESET);
+	resetDelayed(CS_RESET_CODE_GO_TO_DFU_MODE);
 	result.returnCode = ERR_SUCCESS;
 }
 
@@ -261,7 +266,7 @@ void CommandHandler::handleCmdGetUicrData(cs_data_t commandData, const Encryptio
 
 void CommandHandler::handleCmdReset(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "reset");
-	resetDelayed(GPREGRET_SOFT_RESET);
+	resetDelayed(CS_RESET_CODE_SOFT_RESET);
 	result.returnCode = ERR_SUCCESS;
 }
 
@@ -589,7 +594,7 @@ void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_sourc
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdMeshCommand(cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "mesh command");
 	uint16_t size = commandData.len;
 	buffer_ptr_t buffer = commandData.data;
@@ -677,7 +682,7 @@ void CommandHandler::handleCmdMeshCommand(cs_data_t commandData, const cmd_sourc
 	}
 	if (forSelf) {
 		cs_data_t meshCommandCtrlCmdData(meshCtrlCmd.controlCommand.data, meshCtrlCmd.controlCommand.size);
-		handleCommand(meshCtrlCmd.controlCommand.type, meshCommandCtrlCmdData, source, accessLevel, result);
+		handleCommand(protocol, meshCtrlCmd.controlCommand.type, meshCommandCtrlCmdData, source, accessLevel, result);
 
 		// Send out result to UART.
 		uart_msg_mesh_result_packet_header_t resultHeader;
@@ -888,6 +893,7 @@ void CommandHandler::handleEvent(event_t & event) {
 			cs_result_t result(cs_data_t(result_buffer, sizeof(result_buffer)));
 
 			handleCommand(
+				cmd->protocolVersion,
 				cmd->type,
 				cs_data_t(cmd->data, cmd->size),
 				cmd->source,

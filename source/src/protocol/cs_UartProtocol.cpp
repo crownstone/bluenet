@@ -240,6 +240,7 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 			break;
 		}
 		TYPIFY(CMD_CONTROL_CMD) controlCmd;
+		controlCmd.protocolVersion = controlHeader->protocolVersion;
 		controlCmd.type = (CommandHandlerTypes)controlHeader->commandType;
 		controlCmd.accessLevel = ADMIN;
 		controlCmd.data = payload + sizeof(*controlHeader);

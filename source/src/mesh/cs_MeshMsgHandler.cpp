@@ -151,7 +151,7 @@ cs_ret_code_t MeshMsgHandler::handleAck(uint8_t* payload, size16_t payloadSize) 
 cs_ret_code_t MeshMsgHandler::handleStateTime(uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_time_t* packet = (cs_mesh_model_msg_time_t*)payload;
 	TYPIFY(EVT_MESH_TIME) timestamp = packet->timestamp;
-	LOGMeshModelDebug("received state time %u", timestamp);
+	LOGMeshModelInfo("received state time %u", timestamp);
 	event_t event(CS_TYPE::EVT_MESH_TIME, &timestamp, sizeof(timestamp));
 	event.dispatch();
 //	return event.result.returnCode;
@@ -161,7 +161,7 @@ cs_ret_code_t MeshMsgHandler::handleStateTime(uint8_t* payload, size16_t payload
 cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_time_t* packet = (cs_mesh_model_msg_time_t*)payload;
 	TYPIFY(CMD_SET_TIME) timestamp = packet->timestamp;
-	LOGMeshModelInfo("received set time %u", timestamp);
+	LOGi("received set time %u", timestamp);
 	if (timestamp != _lastReveivedSetTime) {
 		_lastReveivedSetTime = timestamp;
 		event_t event(CS_TYPE::CMD_SET_TIME, &timestamp, sizeof(timestamp));
@@ -173,7 +173,7 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSi
 }
 
 cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSize) {
-	LOGMeshModelDebug("received noop");
+	LOGMeshModelInfo("received noop");
 	return ERR_SUCCESS;
 }
 
@@ -194,7 +194,7 @@ cs_ret_code_t MeshMsgHandler::handleCmdMultiSwitch(uint8_t* payload, size16_t pa
 		internalItem.cmd.source = item->source;
 		internalItem.cmd.source.flagExternal = true;
 
-		LOGi("dispatch multi switch");
+		LOGi("execute multi switch");
 		event_t event(CS_TYPE::CMD_MULTI_SWITCH, &internalItem, sizeof(internalItem));
 		event.dispatch();
 //		return event.result.returnCode;
@@ -205,7 +205,7 @@ cs_ret_code_t MeshMsgHandler::handleCmdMultiSwitch(uint8_t* payload, size16_t pa
 
 cs_ret_code_t MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops) {
 	cs_mesh_model_msg_state_0_t* packet = (cs_mesh_model_msg_state_0_t*) payload;
-	LOGMeshModelDebug("received: id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
+	LOGMeshModelInfo("received: id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
 
 	// Send event
 	TYPIFY(EVT_MESH_EXT_STATE_0)* state = packet;
@@ -229,7 +229,7 @@ cs_ret_code_t MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSiz
 
 cs_ret_code_t MeshMsgHandler::handleState1(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops) {
 	cs_mesh_model_msg_state_1_t* packet = (cs_mesh_model_msg_state_1_t*) payload;
-	LOGMeshModelDebug("received: id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
+	LOGMeshModelInfo("received: id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
 
 	// Send event
 	TYPIFY(EVT_MESH_EXT_STATE_1)* state = packet;
@@ -274,7 +274,7 @@ void MeshMsgHandler::checkStateReceived(int8_t rssi, uint8_t hops) {
 	_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
 	_lastReceivedState.state.data.type = SERVICE_DATA_TYPE_EXT_STATE;
 #if CS_SERIAL_NRF_LOG_ENABLED != 2
-	LOGMeshModelInfo("combined: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u rssi=%i",
+	LOGi("Received state: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u rssi=%i",
 			_lastReceivedState.state.data.extState.id,
 			_lastReceivedState.state.data.extState.switchState,
 			_lastReceivedState.state.data.extState.flags,
@@ -310,7 +310,7 @@ cs_ret_code_t MeshMsgHandler::handleProfileLocation(uint8_t* payload, size16_t p
 
 cs_ret_code_t MeshMsgHandler::handleSetBehaviourSettings(uint8_t* payload, size16_t payloadSize) {
 	behaviour_settings_t* packet = (behaviour_settings_t*) payload;
-	LOGMeshModelInfo("received behaviour settings %u", packet->asInt);
+	LOGi("received behaviour settings %u", packet->asInt);
 	TYPIFY(STATE_BEHAVIOUR_SETTINGS)* eventDataPtr = packet;
 //	cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, (uint8_t*)eventDataPtr, sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS)));
 //	State::getInstance().set(stateData);
@@ -319,7 +319,7 @@ cs_ret_code_t MeshMsgHandler::handleSetBehaviourSettings(uint8_t* payload, size1
 
 cs_ret_code_t MeshMsgHandler::handleTrackedDeviceRegister(uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_device_register_t* packet = (cs_mesh_model_msg_device_register_t*) payload;
-	LOGMeshModelDebug("received tracked device register id=%u", packet->deviceId);
+	LOGMeshModelInfo("received tracked device register id=%u", packet->deviceId);
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)));
 	event.dispatch();
@@ -329,7 +329,7 @@ cs_ret_code_t MeshMsgHandler::handleTrackedDeviceRegister(uint8_t* payload, size
 
 cs_ret_code_t MeshMsgHandler::handleTrackedDeviceToken(uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_device_token_t* packet = (cs_mesh_model_msg_device_token_t*) payload;
-	LOGMeshModelDebug("received tracked device token id=%u", packet->deviceId);
+	LOGMeshModelInfo("received tracked device token id=%u", packet->deviceId);
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
 	event.dispatch();
@@ -339,7 +339,7 @@ cs_ret_code_t MeshMsgHandler::handleTrackedDeviceToken(uint8_t* payload, size16_
 
 cs_ret_code_t MeshMsgHandler::handleTrackedDeviceListSize(uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_device_list_size_t* packet = (cs_mesh_model_msg_device_list_size_t*) payload;
-	LOGMeshModelDebug("received tracked device list size=%u", packet->listSize);
+	LOGMeshModelInfo("received tracked device list size=%u", packet->listSize);
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_LIST_SIZE, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)));
 	event.dispatch();
@@ -395,11 +395,12 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_r
 	stateHeader->persistenceMode =     meshStateHeader->header.persistenceMode;
 
 	// Inflate control command meta data.
-	controlCmd.type =        CTRL_CMD_STATE_SET;
-	controlCmd.data =        controlCmdData;
-	controlCmd.size =        controlCmdDataSize;
-	controlCmd.accessLevel = MeshUtil::getInflatedAccessLevel(meshStateHeader->accessLevel);
-	controlCmd.source =      MeshUtil::getInflatedSource(meshStateHeader->sourceId);
+	controlCmd.protocolVersion =  CS_CONNECTION_PROTOCOL_VERSION;
+	controlCmd.type =             CTRL_CMD_STATE_SET;
+	controlCmd.data =             controlCmdData;
+	controlCmd.size =             controlCmdDataSize;
+	controlCmd.accessLevel =      MeshUtil::getInflatedAccessLevel(meshStateHeader->accessLevel);
+	controlCmd.source =           MeshUtil::getInflatedSource(meshStateHeader->sourceId);
 
 	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
 	event.result.buf = result.buf;

@@ -8,6 +8,8 @@
 
 #define CROWNSTONE_COMPANY_ID                    0x038E
 
+#define CS_CONNECTION_PROTOCOL_VERSION           5
+
 // size of the buffer used for characteristics
 //#define GENERAL_BUFFER_SIZE                      300
 
@@ -18,23 +20,6 @@
  */
 #define MAX_STRING_STORAGE_SIZE                  31
 
-/** Command to enter the bootloader and stay there.
- *
- * This should be the same value as defined in the bootloader.
- */
-#define GPREGRET_DFU_RESET                       66 // 07-11-2019 TODO: why 66? It makes more sense to use 63 or 31.
-#define GPREGRET_BROWNOUT_RESET                  96 // 07-11-2019 TODO: why 96? It makes more sense to use 64 or 32.
-#define GPREGRET_SOFT_RESET                      1
-
-/**
- * Values used to remember flags after a reboot.
- *
- * Make sure this doesn't interfere with the nrf bootloader values that are used. Like:
- * - BOOTLOADER_DFU_GPREGRET2_MASK
- * - BOOTLOADER_DFU_GPREGRET2
- * - BOOTLOADER_DFU_SKIP_CRC_BIT_MASK
- */
-#define GPREGRET2_STORAGE_RECOVERED              4
 
 /** Priorities of the different peripherals
  */
@@ -157,7 +142,7 @@
 // Soft device uses 17-31
 // Mesh SDK uses 8-11
 #define CS_PWM_PPI_CHANNEL_START                 0
-#define CS_PWM_PPI_CHANNEL_COUNT                 (2 + 2 * CS_PWM_MAX_CHANNELS)
+#define CS_PWM_PPI_CHANNEL_COUNT                 (1 + 2 * CS_PWM_MAX_CHANNELS)
 //#define CS_ADC_PPI_CHANNEL_START                 (CS_PWM_PPI_CHANNEL_START + CS_PWM_PPI_CHANNEL_COUNT)
 #define CS_ADC_PPI_CHANNEL_START                 12
 #define CS_ADC_PPI_CHANNEL_COUNT                 4
@@ -165,7 +150,7 @@
 // ----- PPI groups -----
 // Soft device uses 4-5
 #define CS_PWM_PPI_GROUP_START                   0
-#define CS_PWM_PPI_GROUP_COUNT                   1
+#define CS_PWM_PPI_GROUP_COUNT                   0
 
 // ----- GPIOTE -----
 #define CS_ADC_GPIOTE_CHANNEL_START              0
@@ -177,6 +162,10 @@
 #define CS_ADC_RESOLUTION                        NRF_SAADC_RESOLUTION_12BIT
 #define CS_ADC_IRQ_PRIORITY                      APP_IRQ_PRIORITY_HIGH
 #define CS_ADC_IRQ                               SAADC_IRQHandler
+
+// ----- WDT -----
+#define CS_WATCHDOG_PRIORITY                     APP_IRQ_PRIORITY_HIGH
+#define CS_WATCHDOG_TIMEOUT_MS                   60000
 
 
 #define CS_ADC_SAMPLE_INTERVAL_US                200 // 100 samples per period of 50Hz wave
@@ -228,7 +217,7 @@
 #define PWM_PERIOD                               10000L // Interval in us: 1/10000e-6 = 100 Hz
 
 #define SWITCH_DELAYED_STORE_MS                  (10 * 1000) // Timeout before storing the pwm switch value is stored.
-#define STATE_RETRY_STORE_DELAY_MS               1000 // Time before retrying to store a varable to flash.
+#define STATE_RETRY_STORE_DELAY_MS               200 // Time before retrying to store a varable to flash.
 #define MESH_SEND_TIME_INTERVAL_MS               (60 * 1000) // Interval at which the time is sent via the mesh.
 #define MESH_SEND_TIME_INTERVAL_MS_VARIATION     (10 * 1000) // Max amount that gets added to interval.
 #define MESH_SEND_STATE_INTERVAL_MS              (60 * 1000) // Interval at which the stone state is sent via the mesh.
@@ -288,6 +277,8 @@
 #define SUN_TIME_THROTTLE_PERIOD_SECONDS         (60*60*24) // Seconds to throttle writing the sun time to flash.
 
 #define SWITCHCRAFT_DEBUG_BUFFERS                false // Set to true to store the last voltage samples that were recognized as switch (short power interrupt).
+
+#define CS_CLEAR_GPREGRET_COUNTER_TIMEOUT_S      60 // Seconds after boot to clear the GPREGRET reset counter.
 
 /**
  * Interval in milliseconds at which tick events are dispatched.

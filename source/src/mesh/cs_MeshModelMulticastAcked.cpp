@@ -178,7 +178,7 @@ cs_ret_code_t MeshModelMulticastAcked::sendMsg(const uint8_t* data, uint16_t len
 	uint32_t status = NRF_SUCCESS;
 	status = access_model_publish(_accessModelHandle, &accessMsg);
 	if (status != NRF_SUCCESS) {
-		LOGMeshModelInfo("sendMsg failed: %u", status);
+		LOGw("sendMsg failed: %u", status);
 	}
 	return status;
 }
@@ -197,7 +197,7 @@ void MeshModelMulticastAcked::sendReply(const access_message_rx_t* accessMsg, co
 		accessReplyMsg.access_token = nrf_mesh_unique_token_get();
 		status = access_model_reply(_accessModelHandle, accessMsg, &accessReplyMsg);
 		if (status != NRF_SUCCESS) {
-			LOGMeshModelInfo("sendReply failed: %u", status);
+			LOGw("sendReply failed: %u", status);
 			break;
 		}
 	}

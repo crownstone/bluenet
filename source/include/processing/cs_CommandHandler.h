@@ -13,7 +13,21 @@
 
 
 /**
- * Every command goes through the CommandHandler.
+ * Every command from an external device such as a smartphone goes through the CommandHandler.
+ *
+ * # Handlers
+ *
+ * To implement a new command:
+ *   - Add a new type to <cs_Types.h>
+ *   - Define a custom handler for this type in this class.
+ *   - Implement a function to handle this type. 
+ *     - The commandData contains a pointer to a data buffer.
+ *     - This data will be gone after function returns. It has to copied.
+ *     - In most functions there is no explicit memcpy, but a struct assignment (including member arrays).
+ *     - When sending the data through as event, a pointer to the struct can be used.
+ *     - This means that the attached struct has to be freed later.
+ *
+ * # Access Level
  *
  * TODO: In handleCommand is every function by default executed at ADMIN level. This should be at the lowest privilege
  * level.
@@ -33,14 +47,16 @@ public:
 	/**
 	 * Handle a a command.
 	 *
-	 * @param[in]  type           Type of command.
-	 * @param[in]  commandData    Data of the command.
-	 * @param[in]  source         Source of the entity that issuce this command.
-	 * @param[in]  accessLevel    Access level of the entity that issued this command. Default is ADMIN.
-	 * @param[out] resultData     Buffer (that can be NULL) to put the result data in. Default is NULL.
-	 * @return                    Result of the command.
+	 * @param[in]  protocolVersion     Protocol version of the command.
+	 * @param[in]  type                Type of command.
+	 * @param[in]  commandData         Data of the command.
+	 * @param[in]  source              Source of the entity that issuce this command.
+	 * @param[in]  accessLevel         Access level of the entity that issued this command. Default is ADMIN.
+	 * @param[out] resultData          Buffer (that can be NULL) to put the result data in. Default is NULL.
+	 * @return                         Result of the command.
 	 */
 	void handleCommand(
+			uint8_t protocolVersion,
 			const CommandHandlerTypes type,
 			cs_data_t commandData,
 			const cmd_source_t source,
@@ -79,7 +95,7 @@ private:
 	void handleCmdSwitch                  (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdRelay                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdMultiSwitch             (cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accesss_resulLevel, cs_result_t & result);
-	void handleCmdMeshCommand             (cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accesss_resulLevel, cs_result_t & result);
+	void handleCmdMeshCommand             (uint8_t protocol, cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accesss_resulLevel, cs_result_t & result);
 	void handleCmdAllowDimming            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdLockSwitch              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdSetup                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);

@@ -392,6 +392,7 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 		// Currently only option is: BLE_USER_MEM_TYPE_GATTS_QUEUED_WRITES
 		// See https://devzone.nordicsemi.com/f/nordic-q-a/33366/is-it-necessary-handle-ble_evt_user_mem_request-respectivly-is-it-required-to-support-prepared-writes
 		// And https://devzone.nordicsemi.com/f/nordic-q-a/53074/ble_evt_user_mem_request-if-data_length-is-180-bytes-on-ios-but-not-for-android
+		// And https://devzone.nordicsemi.com/f/nordic-q-a/50043/ble_evt_user_mem_request-patterns
 		// Also see https://interrupt.memfault.com/blog/ble-throughput-primer
 //		BLE_CALL(sd_ble_user_mem_reply, (p_ble_evt->evt.gap_evt.conn_handle, NULL));
 

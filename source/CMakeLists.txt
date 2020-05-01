@@ -19,49 +19,46 @@ SET(PROJECT_NAME ${APPLICATION_SHORTHAND})
 # Set the main file to use for this application
 SET(MAIN_FILE "cs_Crownstone.cpp")
 
+# The directory with additional CMake files
+set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
+
+SET(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${DEFAULT_CONF_CMAKE_PATH}/override_cxx.cmake)
+SET(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${DEFAULT_CONF_CMAKE_PATH}/override_c.cmake)
+
 # Start a project
 PROJECT(${PROJECT_NAME}) 
 
-#enable_language(CXX)
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED on)
-#set(CMAKE_CXX_EXTENSIONS OFF)
-
-# The directory with some of the FindXXX modules
-set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
+# Other search directories for cmake
 set(DEFAULT_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules)
 set(THIRD_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules/third)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH};${DEFAULT_MODULES_PATH};${THIRD_MODULES_PATH}")
 
-MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
+message(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
-#include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
-#load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
-#load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
-#load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
-
+# Get compilation day, this will be used in the binary itself
 string(TIMESTAMP COMPILATION_DAY "%Y-%m-%d")
 
+# Get git info, this will be used in the binary in Debug build system
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 #######################################################################################################################
 
 if(NOT CONFIG_DIR)
-  set(CONFIG_DIR "config")
+	set(CONFIG_DIR "config")
 endif()
 
 if(NOT GDB_PORT)
-  set(GDB_PORT "2331")
+	set(GDB_PORT "2331")
 endif()
 
 if(NOT BOARD_TARGET)
-  set(BOARD_TARGET "2331")
+	set(BOARD_TARGET "2331")
 endif()
 
 # Get the following information via JlinkExe and then ShowEmuList
 if(NOT SERIAL_NUM)
-  set(SERIAL_NUM "")
+	set(SERIAL_NUM "")
 endif()
 
 #if(NOT GIT_BRANCH)
@@ -197,6 +194,7 @@ ELSE()
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh_ble.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh_soc.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_comp.c")
+	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_wdt.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/prs/nrfx_prs.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/hal/nrf_nvmc.c")
 	# should be our own code, but SystemInit here contains a lot of PANs we don't have to solve subsequently...
@@ -471,8 +469,6 @@ IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "\"nrf5\"")
 
 	ENABLE_TESTING()
 
-	#	ADD_SUBDIRECTORY(test/nrf5)
-
 	INCLUDE(test/nrf5/CMakeLists.txt)
 ELSE()
 
@@ -485,12 +481,33 @@ ELSE()
 		include(${DEFAULT_MODULES_PATH}/get_versions.cmake)
 		get_version_info("${WORKSPACE_DIR}/source" FIRMWARE_VERSION FIRMWARE_DFU_VERSION FIRMWARE_RC_VERSION)
 		get_version_info("${WORKSPACE_DIR}/source/bootloader" BOOTLOADER_VERSION BOOTLOADER_DFU_VERSION BOOTLOADER_RC_VERSION)
-		
+
+		# Create bootloader version as integers (DFU is already an integer, RC is treated separately, it's a string)
+		string(REPLACE "-" ";" BOOTLOADER_WITHOUT_RC_LIST "${BOOTLOADER_VERSION}")
+		list(GET BOOTLOADER_WITHOUT_RC_LIST 0 BOOTLOADER_VERSION_WITHOUT_RC)
+		string(REPLACE "." ";" BOOTLOADER_VERSION_LIST "${BOOTLOADER_VERSION_WITHOUT_RC}")
+		list(GET BOOTLOADER_VERSION_LIST 0 BOOTLOADER_VERSION_MAJOR)
+		list(GET BOOTLOADER_VERSION_LIST 1 BOOTLOADER_VERSION_MINOR)
+		list(GET BOOTLOADER_VERSION_LIST 2 BOOTLOADER_VERSION_PATCH)
+
+		# Print so we can check correctness
+		string(CONCAT PRINT_BOOTLOADER_VERSION "${BOOTLOADER_VERSION_MAJOR}."
+			"${BOOTLOADER_VERSION_MINOR}."
+			"${BOOTLOADER_VERSION_PATCH}"
+			)
+		if (BOOTLOADER_RC_VERSION)
+			string(REGEX MATCHALL "[0-9]+" BOOTLOADER_VERSION_PRERELEASE "${BOOTLOADER_RC_VERSION}")
+			string(CONCAT PRINT_BOOTLOADER_VERSION "${BOOTLOADER_RC_VERSION}-" "${BOOTLOADER_VERSION_PRERELEASE}")
+		else()
+			set(BOOTLOADER_VERSION_PRERELEASE 255)
+		endif()
+		message(STATUS "Bootloader version: ${PRINT_BOOTLOADER_VERSION}")
+	
 		IF(SERIAL_NUM) 
 			SET(SERIAL_NUM_SWITCH "--snr")
 			SET(SERIAL_NUM_GDB_SELECT "-select")
 			SET(SERIAL_NUM_GDB_PARAM "usb=${SERIAL_NUM}")
-  			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
+			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 		ENDIF()
 
 		MESSAGE(STATUS "Descend into bootloader directory and compile if needed")
@@ -873,7 +890,7 @@ ELSE()
 	
 
 
-		IF(NOT DEFINED FIRMWARE_RC_VERSION OR "${FIRMWARE_RC_VERSION}" STREQUAL "") 
+		IF(NOT DEFINED FIRMWARE_RC_VERSION OR "${FIRMWARE_RC_VERSION}" STREQUAL "")
 			SET(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")
 		ELSE()
 			SET(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_CANDIDATE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")
@@ -917,13 +934,12 @@ ELSE()
 			ADD_CUSTOM_TARGET(create_bootloader_release_in_repository
 					COMMAND ${CMAKE_COMMAND} -E echo
 					COMMAND ${CMAKE_COMMAND} -E echo "** Copy to release repository \"${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}\""
-					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY}/bin
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
 					COMMAND ${CMAKE_COMMAND} -E echo "   Copy from ${CMAKE_BINARY_DIR}"
 					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/bootloader*.zip ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
 					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/bootloader*.zip.sha1 ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
-					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin/bootloader-settings.hex
-					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader.elf ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
-					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader.hex ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader/bootloader.elf ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
 					COMMAND ${CMAKE_COMMAND} -E copy ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin/softdevice.hex
 					COMMAND ${CMAKE_COMMAND} -E echo "   Copy release config file from ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}"
 					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/config

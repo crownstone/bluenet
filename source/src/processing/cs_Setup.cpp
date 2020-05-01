@@ -178,7 +178,7 @@ void Setup::finalize() {
 
 	// reset after 1000 ms
 	reset_delayed_t resetDelayed;
-	resetDelayed.resetCode = GPREGRET_SOFT_RESET;
+	resetDelayed.resetCode = CS_RESET_CODE_SOFT_RESET;
 	resetDelayed.delayMs = 1000;
 	event_t event2(CS_TYPE::CMD_RESET_DELAYED, &resetDelayed, sizeof(resetDelayed));
 	EventDispatcher::getInstance().dispatch(event2);

@@ -12,6 +12,10 @@
  * The sdk_config.h is a copy of SDK_15-3/config/nrf52832/config/sdk_config.h
  */
 
+// Set to 1 to define legacy driver configs, instead of the new NRFX ones.
+// This will overwrite some NRFX defines, via apply_old_config.h.
+#define CS_DEFINE_LEGACY_NRF_DRIVERS_CONFIGS 0
+
 
 #define APP_SCHEDULER_ENABLED 1
 #define APP_TIMER_ENABLED 1
@@ -144,6 +148,32 @@
 
 // Used by cs_Comp
 #define COMP_ENABLED 1
+
+
+
+#if CS_DEFINE_LEGACY_NRF_DRIVERS_CONFIGS == 0
+// NRFX_WDT_ENABLED is overwritten by apply_old_config.h
+#define WDT_ENABLED 1
+#endif
+
+#define NRFX_WDT_ENABLED 1
+
+// <1=> Run in SLEEP, Pause in HALT
+// <8=> Pause in SLEEP, Run in HALT
+// <9=> Run in SLEEP and HALT
+// <0=> Pause in SLEEP and HALT
+#ifdef DEBUG
+#define NRFX_WDT_CONFIG_BEHAVIOUR 1
+#else
+#define NRFX_WDT_CONFIG_BEHAVIOUR 9
+#endif
+
+// <0=> Include WDT IRQ handling
+// <1=> Remove WDT IRQ handling
+#define NRFX_WDT_CONFIG_NO_IRQ 1
+
+
+
 
 //#define NRFX_SAADC_ENABLED 1
 

@@ -30,32 +30,32 @@
  *
  *********************************************************************************************************************/
 
-#include <cs_Crownstone.h>
-
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_BehaviourStore.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
-#include <cfg/cs_Git.h>
 #include <cfg/cs_DeviceTypes.h>
+#include <cfg/cs_Git.h>
 #include <cfg/cs_HardwareVersions.h>
 #include <common/cs_Types.h>
+#include <cs_Crownstone.h>
+#include <drivers/cs_GpRegRet.h>
 #include <drivers/cs_PWM.h>
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
+#include <drivers/cs_Watchdog.h>
 #include <ipc/cs_IpcRamData.h>
-#include <processing/cs_EncryptionHandler.h>
 #include <processing/cs_BackgroundAdvHandler.h>
+#include <processing/cs_EncryptionHandler.h>
 #include <processing/cs_TapToToggle.h>
 #include <protocol/cs_UartProtocol.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
 #include <switch/cs_SwitchAggregator.h>
-#include <util/cs_Utils.h>
 #include <time/cs_SystemTime.h>
-
+#include <util/cs_Utils.h>
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -221,36 +221,36 @@ void Crownstone::init(uint16_t step) {
 	}
 }
 
-void Crownstone::init0(){
+void Crownstone::init0() {
 	LOGi(FMT_HEADER, "init");
 	initDrivers(0);
 }
 
-void Crownstone::init1(){
-		initDrivers(1);
-		LOG_MEMORY;
-		LOG_FLUSH();
+void Crownstone::init1() {
+	initDrivers(1);
+	LOG_MEMORY;
+	LOG_FLUSH();
 
-		TYPIFY(STATE_OPERATION_MODE) mode;
-		_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
-		_operationMode = getOperationMode(mode);
+	TYPIFY(STATE_OPERATION_MODE) mode;
+	_state->get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
+	_operationMode = getOperationMode(mode);
 
-		//! configure the crownstone
-		LOGi(FMT_HEADER, "configure");
-		configure();
-		LOG_FLUSH();
+	//! configure the crownstone
+	LOGi(FMT_HEADER, "configure");
+	configure();
+	LOG_FLUSH();
 
-		LOGi(FMT_CREATE, "timer");
-		_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
-		LOG_FLUSH();
+	LOGi(FMT_CREATE, "timer");
+	_timer->createSingleShot(_mainTimerId, (app_timer_timeout_handler_t)Crownstone::staticTick);
+	LOG_FLUSH();
 
-		LOGi(FMT_HEADER, "mode");
-		switchMode(_operationMode);
-		LOG_FLUSH();
+	LOGi(FMT_HEADER, "mode");
+	switchMode(_operationMode);
+	LOG_FLUSH();
 
-		LOGi(FMT_HEADER, "init services");
-		_stack->initServices();
-		LOG_FLUSH();
+	LOGi(FMT_HEADER, "init services");
+	_stack->initServices();
+	LOG_FLUSH();
 }
 
 void Crownstone::initDrivers(uint16_t step) {
@@ -266,38 +266,37 @@ void Crownstone::initDrivers(uint16_t step) {
 	}
 }
 
-void Crownstone::initDrivers0(){
+void Crownstone::initDrivers0() {
 	LOGi("Init drivers");
-		startHFClock();
-		_stack->init();
-		_timer->init();
-
-		_stack->initSoftdevice();
+	startHFClock();
+	_stack->init();
+	_timer->init();
+	_stack->initSoftdevice();
 
 #if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
-		// Check if flash pages of mesh are valid, else erase them.
-		// This has to be done before Storage is initialized.
-		if (!_mesh->checkFlashValid()) {
-			// Wait for pages erased event.
-			return;
-		}
+	// Check if flash pages of mesh are valid, else erase them.
+	// This has to be done before Storage is initialized.
+	if (!_mesh->checkFlashValid()) {
+		// Wait for pages erased event.
+		return;
+	}
 #endif
 
-		cs_ret_code_t retCode = _storage->init();
+	cs_ret_code_t retCode = _storage->init();
+	if (retCode != ERR_SUCCESS) {
+		// We can try to erase all pages.
+		retCode = _storage->eraseAllPages();
 		if (retCode != ERR_SUCCESS) {
-			// We can try to erase all pages.
-			retCode = _storage->eraseAllPages();
-			if (retCode != ERR_SUCCESS) {
-				// Only option left is to reboot and see if things work out next time.
-				APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
-			}
-			// Wait for pages erased event.
-			return;
+			// Only option left is to reboot and see if things work out next time.
+			APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
 		}
-		// Wait for storage initialized event.
+		// Wait for pages erased event.
+		return;
+	}
+	// Wait for storage initialized event.
 }
 
-void Crownstone::initDrivers1(){
+void Crownstone::initDrivers1() {
 	_state->init(&_boardsConfig);
 
 		// If not done already, init UART
@@ -309,17 +308,19 @@ void Crownstone::initDrivers1(){
 			serial_enable((serial_enable_t)uartEnabled);
 		}
 
-		uint32_t gpregret;
-		sd_power_gpregret_get(0, &gpregret);
-		uint32_t gpregret2;
-		sd_power_gpregret_get(1, &gpregret2);
-		LOGi("GPRegRet: %u %u", gpregret, gpregret2);
+		LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
 
-		// For now, use GPREGRET2 instead.
-		sd_power_gpregret_get(1, &gpregret2);
-		if (gpregret2 & GPREGRET2_STORAGE_RECOVERED) {
+		uint32_t resetReason;
+		sd_power_reset_reason_get(&resetReason);
+		LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u", resetReason,
+				(resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
+				(resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
+				(resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
+				(resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
+
+		if (GpRegRet::isFlagSet(GpRegRet::FLAG_STORAGE_RECOVERED)) {
 			_setStateValuesAfterStorageRecover = true;
-			sd_power_gpregret_clr(1, GPREGRET2_STORAGE_RECOVERED);
+			GpRegRet::clearFlag(GpRegRet::FLAG_STORAGE_RECOVERED);
 		}
 		if (_setStateValuesAfterStorageRecover) {
 			LOGw("Set state values after storage recover.");
@@ -399,9 +400,6 @@ void Crownstone::configureStack() {
 		sd_ble_gap_rssi_stop(conn_handle);
 		sd_ble_gap_rssi_start(conn_handle, 0, 0);
 #endif
-		uint32_t gpregret_id = 0;
-		uint32_t gpregret_msk = 0xFF;
-		sd_power_gpregret_clr(gpregret_id, gpregret_msk);
 	});
 
 	// Set callback handler for a disconnection event
@@ -545,7 +543,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			LOGd("Configure DFU mode");
 			// TODO: have this function somewhere else.
 			cs_result_t result;
-			CommandHandler::getInstance().handleCommand(CTRL_CMD_GOTO_DFU, cs_data_t(), cmd_source_t(CS_CMD_SOURCE_INTERNAL), ADMIN, result);
+			CommandHandler::getInstance().handleCommand(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_GOTO_DFU, cs_data_t(), cmd_source_t(CS_CMD_SOURCE_INTERNAL), ADMIN, result);
 			_advertiser->changeToNormalTxPower();
 			break;
 		}
@@ -712,6 +710,10 @@ void Crownstone::startUp() {
 #if BUILD_MESHING == 1
 	_mesh->startSync();
 #endif
+
+	// Clear all reset reasons after initializing and starting all modules.
+	// So the modules had the opportunity to read it out.
+	sd_power_reset_reason_clr(0xFFFFFFFF);
 }
 
 void Crownstone::increaseResetCounter() {
@@ -739,6 +741,13 @@ void Crownstone::tick() {
 	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
 //		_stack->updateAdvertisement();
 	}
+
+	if (!_clearedGpRegRetCount && _tickCount == (CS_CLEAR_GPREGRET_COUNTER_TIMEOUT_S * 1000 / TICK_INTERVAL_MS)) {
+		GpRegRet::clearAll();
+		_clearedGpRegRetCount = true;
+	}
+
+	Watchdog::kick();
 
 	event_t event(CS_TYPE::EVT_TICK, &_tickCount, sizeof(_tickCount));
 	event.dispatch();
@@ -791,7 +800,7 @@ void Crownstone::handleEvent(event_t & event) {
 			 * doesn't continue doing so.
 			 *
 			 * The following commented out code could be used once FDS has been fixed.
-			 * For now, we use GPREGRET2 to remember and do it next boot.
+			 * For now, we use GPREGRET to remember and do it next boot.
 			 */
 //			cs_ret_code_t retCode = _storage->init();
 //			if (retCode != ERR_SUCCESS) {
@@ -802,10 +811,7 @@ void Crownstone::handleEvent(event_t & event) {
 //
 //			_setStateValuesAfterStorageRecover = true;
 //			// Wait for storage initialized event.
-			uint32_t gpregret;
-			sd_power_gpregret_get(1, &gpregret);
-			gpregret |= GPREGRET2_STORAGE_RECOVERED;
-			sd_power_gpregret_set(1, gpregret);
+			GpRegRet::setFlag(GpRegRet::FLAG_STORAGE_RECOVERED);
 			sd_nvic_SystemReset();
 			break;
 		}
@@ -830,7 +836,7 @@ void Crownstone::handleEvent(event_t & event) {
 	// 		// Do this in interrupt (cs_Handlers.cpp) instead, else we're still too late.
 	// 		LOGf("brownout impending!! force shutdown ...")
 	// 		uint32_t gpregret_id = 0;
-	// 		uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
+	// 		uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
 	// 		// now reset with brownout reset mask set.
 	// 		// NOTE: do not clear the gpregret register, this way
 	// 		//   we can count the number of brownouts in the bootloader
@@ -842,6 +848,31 @@ void Crownstone::handleEvent(event_t & event) {
 	// 	default:
 	// 		return;
 	// }
+}
+
+void printBootloaderInfo() {
+	bluenet_ipc_bootloader_data_t bootloaderData;
+	uint8_t size = sizeof(bootloaderData);
+	uint8_t dataSize;
+	uint8_t *buf = (uint8_t*)&bootloaderData;
+	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, buf, size, &dataSize);
+	if (retCode != IPC_RET_SUCCESS) {
+		LOGw("No IPC data found, error = %i", retCode);
+		return;
+	}
+	if (size != dataSize) {
+		LOGw("IPC data struct incorrect size");
+		return;
+	}
+	LOGd("Bootloader version protocol=%u dfu_version=%u build_type=%u",
+			bootloaderData.protocol,
+			bootloaderData.dfu_version,
+			bootloaderData.build_type);
+	LOGi("Bootloader version: %u.%u.%u-RC%u",
+			bootloaderData.major,
+			bootloaderData.minor,
+			bootloaderData.patch,
+			bootloaderData.prerelease);
 }
 
 /**********************************************************************************************************************
@@ -906,24 +937,15 @@ int main() {
 		LOG_FLUSH();
 	}
 
+	// Start the watchdog early (after uart, so we can see the logs).
+	Watchdog::init();
+	Watchdog::start();
+
 	printNfcPins();
 	LOG_FLUSH();
 
-//	LOGi("sizeof(bluenet_ipc_ram_data_item_t)=%u", sizeof(bluenet_ipc_ram_data_item_t));
+	printBootloaderInfo();
 
-	// Make sure there is space for an extra 0 after the data.
-	uint8_t length = BLUENET_IPC_RAM_DATA_ITEM_SIZE + 1;
-	uint8_t data[length];
-	uint8_t dataSize;
-	int retCode = getRamData(IPC_INDEX_BOOTLOADER_VERSION, data, length, &dataSize);
-	if (retCode == IPC_RET_SUCCESS) {
-		// Zero terminate the string.
-		data[dataSize] = 0;
-		LOGi("Bootloader version: %s", (char*)data);
-	}
-	else {
-		LOGw("No IPC data found, error = %i", retCode);
-	}
 
 //	// Make a "clicker"
 //	nrf_delay_ms(1000);
