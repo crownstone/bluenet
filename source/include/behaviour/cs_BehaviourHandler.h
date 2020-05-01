@@ -65,6 +65,14 @@ class BehaviourHandler : public EventListener {
     void handleGetBehaviourDebug(event_t& evt);
 
     /**
+     * Returns b, casted as switch behaviour if that cast is valid and
+     * isValid(*) returns true.
+     * Else, returns nullptr.
+     */
+    SwitchBehaviour* ValidateSwitchBehaviour(Behaviour* behave, Time currentTime,
+       PresenceStateDescription currentPresence);
+
+    /**
      * The last value returned by getValue.
      */
     std::optional<uint8_t> previousIntendedState = {};

@@ -2,6 +2,7 @@
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_Behaviour.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_BehaviourHandler.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_BehaviourStore.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_BehaviourConflictResolution.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_ExtendedSwitchBehaviour.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_SwitchBehaviour.cpp")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/behaviour/cs_TwilightBehaviour.cpp")

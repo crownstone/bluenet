@@ -117,7 +117,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
 
 void SwitchAggregator::handleEvent(event_t& evt){
 	if(handleSwitchAggregatorCommand(evt)){
-
+		return;
 	}
 
 	if (handleTimingEvents(evt)) {
@@ -127,11 +127,6 @@ void SwitchAggregator::handleEvent(event_t& evt){
 	if (handlePresenceEvents(evt)) {
 		return;
 	}
-
-//	if(smartSwitch && !smartSwitch.isSwitchingAllowed()){
-//		evt.result.returnCode = ERR_SUCCESS;
-//		return;
-//	}
 
 	handleStateIntentionEvents(evt);
 
@@ -147,6 +142,8 @@ bool SwitchAggregator::handleSwitchAggregatorCommand(event_t& evt){
 			behaviourState.reset();
 			twilightState.reset();
 			aggregatedState.reset();
+			pushTestDataToHost();
+			LOGd("handled switch aggregator reset command");
 			break;
 		}
 		default: {
