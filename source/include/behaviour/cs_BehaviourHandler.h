@@ -23,6 +23,7 @@ class BehaviourHandler : public EventListener {
      * - EVT_PRESENCE_MUTATION
      * - EVT_BEHAVIOURSTORE_MUTATION
      * - STATE_BEHAVIOUR_SETTINGS
+     * - CMD_GET_BEHAVIOUR_DEBUG
      */
     virtual void handleEvent(event_t& evt);
 
@@ -62,6 +63,14 @@ class BehaviourHandler : public EventListener {
         PresenceStateDescription currentpresence);
 
     void handleGetBehaviourDebug(event_t& evt);
+
+    /**
+     * Returns b, casted as switch behaviour if that cast is valid and
+     * isValid(*) returns true.
+     * Else, returns nullptr.
+     */
+    SwitchBehaviour* ValidateSwitchBehaviour(Behaviour* behave, Time currentTime,
+       PresenceStateDescription currentPresence);
 
     /**
      * The last value returned by getValue.

@@ -63,6 +63,11 @@ void SystemTime::tick(void*) {
 			LOGSystemTimeVerbose("posix=%u", posixTimeStamp);
 		}
 
+		TEST_PUSH_STATIC_D("SystemTime","posixTime",posixTimeStamp);
+		TEST_PUSH_STATIC_D("SystemTime","timeOfday_h",posix().timeOfDay().h());
+		TEST_PUSH_STATIC_D("SystemTime","timeOfday_m",posix().timeOfDay().m());
+		TEST_PUSH_STATIC_D("SystemTime","timeOfday_s",posix().timeOfDay().s());
+
 		// update rtc timestamp subtract 1s from tickDiff by
 		// increasing the rtc timestamp 1s.
 		rtcTimeStamp += RTC::msToTicks(1000);

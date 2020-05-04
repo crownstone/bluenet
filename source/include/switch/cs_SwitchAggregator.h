@@ -52,6 +52,7 @@ private:
     // the latest states requested by other parts of the system.
     std::optional<uint8_t> overrideState = {};
     std::optional<uint8_t> behaviourState = {};
+    std::optional<uint8_t> twilightState = {};
 
     // the last state that was aggregated and passed on towards the SoftwareSwitch.
     std::optional<uint8_t> aggregatedState = {};
@@ -121,6 +122,12 @@ private:
      */
     bool handlePresenceEvents(event_t& evt);
 
+    /**
+     * Clearing private variables, setting them to specific values, etc.
+     * Debug or power user features.
+     */
+    bool handleSwitchAggregatorCommand(event_t& evt);
+
     void handleSwitchStateChange(uint8_t newIntensity);
 
     // ================================== Misc ==================================
@@ -139,6 +146,11 @@ private:
      * When override state is the special value 'translucent on'
      * it should be interpreted according to the values of twilightHandler
      * and behaviourHandler. This getter centralizes that.
+     *
+     * When override is 0xff:
+     * This method will return the minimum of respective handlers when both of them
+     * have a non-zero value, otherwise return the non-zero value of the
+     * handler that has a non-zero value (if there is such), otherwise 100.
      */
     std::optional<uint8_t> resolveOverrideState();
 
@@ -151,4 +163,5 @@ private:
     void handleGetBehaviourDebug(event_t& evt);
 
     void printStatus();
+    void pushTestDataToHost();
 };

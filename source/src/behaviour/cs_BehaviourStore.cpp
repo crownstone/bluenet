@@ -198,7 +198,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 	uint8_t index = dat[0];
 	Behaviour::Type type = static_cast<Behaviour::Type>(dat[indexSize]);
 
-	LOGi("Replace behaviour at ind=%u", index);
+	LOGi("Replace behaviour at ind=%u, type=%u", index, static_cast<uint8_t>(type));
 
 	switch(type) {
 		case Behaviour::Type::Switch:{

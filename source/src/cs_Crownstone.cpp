@@ -115,6 +115,7 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	LOGi("Build type: %s", g_BUILD_TYPE);
 	LOGi("Hardware version: %s", get_hardware_version());
 	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
+	LOGi("UART binary protocol set: %d",CS_UART_BINARY_PROTOCOL_ENABLED);
 #ifdef DEBUG
 	LOGi("DEBUG: defined")
 #else
