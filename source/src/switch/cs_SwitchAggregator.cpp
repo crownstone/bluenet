@@ -15,7 +15,7 @@
 
 #include <optional>
 
-#define LOGSwitchAggregator LOGnone
+#define LOGSwitchAggregator LOGd
 #define LOGSwitchAggregator_Evt LOGd
 
 
@@ -48,11 +48,13 @@ void SwitchAggregator::switchPowered() {
 // ================================== State updaters ==================================
 
 bool SwitchAggregator::updateBehaviourHandlers(){
-    twilightHandler.update();
 
     std::optional<uint8_t> prevBehaviourState = behaviourState;
     behaviourHandler.update();
     behaviourState = behaviourHandler.getValue();
+
+    twilightHandler.update();
+    twilightState = twilightHandler.getValue();
     
     if( !prevBehaviourState || !behaviourState ){
         // don't allow override resets when no values are changed.
@@ -77,14 +79,13 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
         if(overrideMatchedAggregated && behaviourWantsToChangeState && allowOverrideReset){
         	LOGSwitchAggregator("resetting overrideState overrideStateIsOn=%u aggregatedStateIsOn=%u behaviourStateIsOn=%u", overrideStateIsOn, aggregatedStateIsOn, behaviourStateIsOn);
         	shouldResetOverrideState = true;
-			// nextAggregatedState = aggregatedBehaviourIntensity();
         }
     }
 
     aggregatedState =
         (overrideState && !shouldResetOverrideState) ? resolveOverrideState() :
         behaviourState ? aggregatedBehaviourIntensity() : // only use aggr. if no SwitchBehaviour conflict is found
-        aggregatedState ? aggregatedState :               // if conflict is found, don't change the value.
+        aggregatedState ? aggregatedState :               // if override and behaviour don't have an opinion, use previous value.
         std::nullopt;
 
     LOGSwitchAggregator("updateState");
@@ -94,6 +95,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
         printStatus();
     }
     
+    // attempt to update smartSwitch value
     cs_ret_code_t retCode = ERR_SUCCESS_NO_CHANGE;
     if (aggregatedState) {
         retCode = smartSwitch.set(*aggregatedState);
@@ -106,10 +108,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
     event_t overrideEvent(CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN, &eventData, sizeof(eventData));
     overrideEvent.dispatch();
 
-    // using -1 as value for the hasvalues works because they are unsigned, hence non-negative
-    TEST_PUSH_EXPR_D(this,"overrideState", (overrideState? (int) overrideState.value() : -1));
-    TEST_PUSH_EXPR_D(this,"behaviourState", (behaviourState? (int) behaviourState.value() : -1));
-    TEST_PUSH_EXPR_D(this,"aggregatedState", (aggregatedState? (int) aggregatedState.value() : -1));
+    pushTestDataToHost();
 
     return retCode;
 }
@@ -117,6 +116,10 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
 // ========================= Event handling =========================
 
 void SwitchAggregator::handleEvent(event_t& evt){
+	if(handleSwitchAggregatorCommand(evt)){
+		return;
+	}
+
 	if (handleTimingEvents(evt)) {
 		return;
 	}
@@ -125,16 +128,30 @@ void SwitchAggregator::handleEvent(event_t& evt){
 		return;
 	}
 
-//	if(smartSwitch && !smartSwitch.isSwitchingAllowed()){
-//		evt.result.returnCode = ERR_SUCCESS;
-//		return;
-//	}
-
 	handleStateIntentionEvents(evt);
 
 	if (evt.type == CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG) {
 		handleGetBehaviourDebug(evt);
 	}
+}
+
+bool SwitchAggregator::handleSwitchAggregatorCommand(event_t& evt){
+	switch(evt.type){
+		case CS_TYPE::CMD_SWITCH_AGGREGATOR_RESET: {
+			overrideState.reset();
+			behaviourState.reset();
+			twilightState.reset();
+			aggregatedState.reset();
+			pushTestDataToHost();
+			LOGd("handled switch aggregator reset command");
+			break;
+		}
+		default: {
+			return false;
+		}
+
+	}
+	return true;
 }
 
 bool SwitchAggregator::handleTimingEvents(event_t& evt){
@@ -243,6 +260,13 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value){
 	if(value == 0xFE){
 		overrideState.reset();
 		LOGd("Resetting overrideState");
+	} else if (value == 0xFD) {
+		aggregatedState.reset();
+		LOGd("Resetting aggregatedState");
+	} else if (value == 0xFC) {
+		overrideState.reset();
+		aggregatedState.reset();
+		LOGd("Resetting overrideState and aggregatedState");
 	} else {
 		overrideState = value;
 	}
@@ -250,6 +274,8 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value){
 	overrideState = value;
 #endif
 
+	// don't allow override reset in updateState, it has just been requested to be
+	// set to `value`
     if( updateState(false) == ERR_NO_ACCESS){
         // failure to set the smartswitch. It seems to be locked.
         LOGSwitchAggregator_Evt("Reverting to previous value, no access to smartswitch");
@@ -268,40 +294,47 @@ void SwitchAggregator::handleSwitchStateChange(uint8_t newIntensity) {
 uint8_t SwitchAggregator::aggregatedBehaviourIntensity(){
     LOGSwitchAggregator("aggregatedBehaviourIntensity called");
 
-    if(behaviourState){
-        LOGSwitchAggregator("returning min of behaviour(%d) and twilight(%d)",
-            *behaviourState,
-            twilightHandler.getValue());
-        return CsMath::min(
-            *behaviourState, 
-            twilightHandler.getValue() 
-        );
+    if(behaviourState && twilightState){
+        LOGSwitchAggregator("returning min of behaviour(%d) and twilight(%d)", *behaviourState, *twilightState);
+        return CsMath::min(*behaviourState, *twilightState);
     }
-    LOGSwitchAggregator("returning twilight value(%d), behaviour undefined",twilightHandler.getValue());
 
-    // SwitchBehaviours conflict, so use twilight only
-    return twilightHandler.getValue();
+    if(behaviourState) {
+    	return *behaviourState;
+    }
+
+    if(twilightState) {
+    	return *twilightState;
+    }
+
+    return 100;
 }
 
 std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
     LOGSwitchAggregator("resolveOverrideState called");
-    if(*overrideState == 0xff){
-        LOGSwitchAggregator("translucent override state");
 
-        if(uint8_t behave_intensity = behaviourState.value_or(0)){
-            // behaviour has positive intensity
-            LOGSwitchAggregator("behaviour value positive, returning minimum of behaviour(%d) and twilight(%d)", behave_intensity,twilightHandler.getValue());
-            return CsMath::min(behave_intensity,twilightHandler.getValue());
-        } else {
-            // behaviour conflicts or indicates 'off' are ignored because although
-            // overrideState is 'translucent', it must be 'on.
-            LOGSwitchAggregator("behaviour value undefined or zero, returning twilight(%d)",twilightHandler.getValue());
-            return twilightHandler.getValue();
-        }
+    if(!overrideState || *overrideState != 0xff){
+		return overrideState;  // opaque or empty override is returned unchanged.
+	}
+
+    LOGSwitchAggregator("translucent override state");
+
+    std::optional<uint8_t> opt0 = {0}; // to simplify following expressions.
+
+    if(behaviourState > opt0 && twilightState > opt0){
+    	// both exists and are positive
+    	return CsMath::min(*behaviourState, *twilightState);
     }
-        
-    LOGSwitchAggregator("returning unchanged overrideState");
-    return overrideState;  // opaque override is unchanged.
+
+    if(behaviourState > opt0){
+    	return behaviourState;
+    }
+
+    if(twilightState > opt0){
+    	return twilightState;
+    }
+
+    return 100;
 }
 
 bool SwitchAggregator::checkAndSetOwner(cmd_source_t source) {
@@ -357,14 +390,16 @@ void SwitchAggregator::handleGetBehaviourDebug(event_t& evt) {
 	evt.result.returnCode = ERR_SUCCESS;
 }
 
-void SwitchAggregator::printStatus(){
-    if(overrideState){
-        LOGd(" ^ overrideState: %02d",overrideState.value());
-    }
-    if(behaviourState){
-        LOGd(" | behaviourState: %02d",behaviourState.value());
-    }
-    if(aggregatedState){
-        LOGd(" v aggregatedState: %02d",aggregatedState.value());
-    }
+void SwitchAggregator::printStatus() {
+    LOGd("^ overrideState: %02d",   OptionalUnsignedToInt(overrideState));
+	LOGd("| behaviourState: %02d",  OptionalUnsignedToInt(behaviourState));
+    LOGd("| twilightState: %02d",   OptionalUnsignedToInt(behaviourState));
+    LOGd("v aggregatedState: %02d", OptionalUnsignedToInt(aggregatedState));
+}
+
+void SwitchAggregator::pushTestDataToHost() {
+	TEST_PUSH_O(this, overrideState);
+	TEST_PUSH_O(this, behaviourState);
+	TEST_PUSH_O(this, twilightState);
+	TEST_PUSH_O(this, aggregatedState);
 }
