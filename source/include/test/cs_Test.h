@@ -13,6 +13,7 @@
 #include <cstdarg>
 
 
+#ifdef DEBUG
 inline int cs_write_test(const char *str, ...) {
 	char buffer[128];
 	va_list ap;
@@ -39,6 +40,11 @@ inline int cs_write_test(const char *str, ...) {
 	}
 	return len;
 }
+#else
+// when debug is not defined, define the centralized method
+// as empty symbol so that all calls to it result in no generated code.
+#define cs_write_test(...)
+#endif
 
 /**
  * Cast optional into integer for easy printing.
