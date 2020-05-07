@@ -17,6 +17,7 @@
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
+#include <localisation/cs_RssiDataTracker.h>
 #include <presence/cs_PresenceHandler.h>
 #include <processing/cs_CommandAdvHandler.h>
 #include <processing/cs_CommandHandler.h>
@@ -304,6 +305,8 @@ private:
 	MultiSwitchHandler* _multiSwitchHandler = NULL;
 	TrackedDevices _trackedDevices;
 	SystemTime _systemTime;
+
+	RssiDataTracker _rssiDataTracker;
 
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;

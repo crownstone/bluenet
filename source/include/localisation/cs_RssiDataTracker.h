@@ -5,12 +5,17 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+
+#include <cstdint>
+#include <events/cs_EventListener.h>
+
+
 /**
  * Launches ping messages into the mesh and receives them.
  * Exposes a static API for other firmware components to
  * query the data.
  */
-class RssiDataTracker : public EventHandler {
+class RssiDataTracker : public EventListener {
 public:
 	/**
 	 * When receiving a ping msg from another crownstone,
@@ -21,7 +26,7 @@ public:
 	 * filled in, push data to test host.
 	 *
 	 */
-	void handleEvent();
+	void handleEvent(event_t& evt);
 
 	// State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
 

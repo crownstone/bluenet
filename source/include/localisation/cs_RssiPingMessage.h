@@ -5,6 +5,10 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+
+#include <cstdint>
+
+
 /**
  * Sent between crownstones in a mesh with TTL 0 in order to find out
  * what the rssi between each pair of nodes is.
