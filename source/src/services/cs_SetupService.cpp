@@ -110,7 +110,7 @@ void SetupService::addGoToDfuCharacteristic() {
 		if (value == CS_GPREGRET_LEGACY_DFU_RESET) {
 			LOGi("goto dfu");
 			TYPIFY(CMD_RESET_DELAYED) resetCmd;
-			resetCmd.resetCode = CS_RESET_CODE_SOFT_RESET;
+			resetCmd.resetCode = CS_RESET_CODE_GO_TO_DFU_MODE;
 			resetCmd.delayMs = 2000;
 			event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
 			EventDispatcher::getInstance().dispatch(eventReset);
