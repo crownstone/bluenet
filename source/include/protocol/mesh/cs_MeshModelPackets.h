@@ -62,6 +62,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_STATE_SET                 = 17, // Payload: cs_mesh_model_msg_state_header_ext_t + payload
 	CS_MESH_MODEL_TYPE_RESULT                    = 18, // Payload: cs_mesh_model_msg_result_header_t + payload
 	CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID     = 19, // Payload: ibeacon_config_id_packet_t
+	CS_MESH_MODEL_TYPE_RSSI_PING                 = 20, // Payload: rssi_ping_message_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };

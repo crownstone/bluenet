@@ -23,6 +23,8 @@ public:
 	 */
 	void handleEvent();
 
+	// State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
+
 	uint32_t max_ping_msgs_per_s = 5;
 
 };

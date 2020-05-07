@@ -26,12 +26,15 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 //		LOGe("sendReply");
 ////		sendReply(accessMsg);
 //	}
+
+	// (checks payload size)
 	if (!MeshUtil::isValidMeshMessage(msg.msg, msg.msgSize)) {
 		LOGw("Invalid mesh message");
 		BLEutil::printArray(msg.msg, msg.msgSize);
 		result.returnCode = ERR_INVALID_MESSAGE;
 		return;
 	}
+
 	stone_id_t srcId = msg.srcAddress;
 	cs_mesh_model_msg_type_t msgType = MeshUtil::getType(msg.msg);
 	uint8_t* payload;
@@ -57,6 +60,10 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 		}
 		case CS_MESH_MODEL_TYPE_CMD_NOOP: {
 			result.returnCode = handleCmdNoop(payload, payloadSize);
+			return;
+		}
+		case CS_MESH_MODEL_TYPE_RSSI_PING: {
+			result.returnCode = handleRssiPing(payload, payloadSize, srcId, msg.rssi, msg.hops);
 			return;
 		}
 		case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
@@ -174,6 +181,23 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSi
 
 cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSize) {
 	LOGMeshModelInfo("received noop");
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops){
+	rssi_ping_message_t* packet = (rssi_ping_message_t*) payload;
+	LOGMeshModelInfo("received rssi ping message id=%u", packet->deviceId);
+
+	// copy metadata into event data if it is an original ping message.
+	// (i.e. if sender and rssi hasn't been filled in yet.)
+	if(packet->sender_id == 0xff){ // && hops == 0?
+		packet->rssi = rssi;
+		packet->sender_id = srcId;
+	}
+
+	event_t event(CS_TYPE::EVT_MESH_RSSI_PING, packet, sizeof(rssi_ping_message_t));
+	event.dispatch();
+
 	return ERR_SUCCESS;
 }
 

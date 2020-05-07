@@ -13,11 +13,11 @@
  * so that all rssi-pairs can be recorded using a single crownstone for
  * debugging purpose.
  */
-struct rssi_ping_message_t {
+struct __attribute__((__packed__)) rssi_ping_message_t {
 //	uint32_t sender_local_uptime;
 //	uint32_t sender_local_systime;
-	uint16_t sender_id;
-	uint16_t recipient_id;
+	stone_id_t sender_id;
+	stone_id_t recipient_id;
 	uint8_t sample_id;
-	uint8_t rssi;
+	int8_t rssi;
 };

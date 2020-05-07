@@ -7,6 +7,9 @@
 
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <drivers/cs_Serial.h>
+
+#include <localisation/cs_RssiPingMessage.h>
+
 #include <cstring> // For memcpy
 
 #define LOGMeshModelPacketHelperDebug LOGnone
@@ -68,6 +71,8 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return payloadSize >= sizeof(cs_mesh_model_msg_result_header_t);
 		case CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID:
 			return payloadSize >= sizeof(ibeacon_config_id_packet_t);
+		case CS_MESH_MODEL_TYPE_RSSI_PING:
+			return payloadSize >= sizeof(rssi_ping_message_t);
 		case CS_MESH_MODEL_TYPE_UNKNOWN:
 			return false;
 	}
