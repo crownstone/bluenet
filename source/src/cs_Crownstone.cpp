@@ -586,6 +586,8 @@ void Crownstone::setName() {
 void Crownstone::startOperationMode(const OperationMode & mode) {
 	_behaviourStore.listen();
 	_presenceHandler.listen();
+
+	_rssiDataTracker.init();
 	_rssiDataTracker.listen();
 	
 	switch(mode) {

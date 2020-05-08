@@ -4,10 +4,11 @@
  * Date: May 6, 2020
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
-
+#pragma once
 
 #include <cstdint>
 #include <events/cs_EventListener.h>
+#include <localisation/cs_RssiPingMessage.h>
 
 
 /**
@@ -28,8 +29,18 @@ public:
 	 */
 	void handleEvent(event_t& evt);
 
-	// State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
+	/**
+	 * Obtains the stone_id_t of this crownstone to use for forwarded ping messages.
+	 */
+	void init();
 
+
+	void forwardPingMsgOverMesh(rssi_ping_message_t* primary_ping_msg);
+
+	void forwardPingMsgToTestSuite(rssi_ping_message_t* secondary_ping_msg);
+
+
+	stone_id_t my_id = 0xff;
 	uint32_t max_ping_msgs_per_s = 5;
 
 };
