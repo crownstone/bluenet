@@ -271,15 +271,23 @@ void PWM::setValue(uint8_t channel, uint16_t newValue) {
 	nrf_ppi_channel_disable(_ppiTransitionChannel);
 
 	switch (newValue) {
+//		case 0:
+//			// Simply disable the PPI that turns on the switch.
+//			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
+//			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
+//
+//			break;
+//		case 100:
+//			// Simply disable the PPI that turns off the switch.
+//			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
+//			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
+//			break;
 		case 0:
-			// Simply disable the PPI that turns on the switch.
-			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
-			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
-			break;
 		case 100:
-			// Simply disable the PPI that turns off the switch.
+			// Disable both PPI channels, and force gpio values.
+			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
 			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
-			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
+			gpioteForce(channel, newValue == 100);
 			break;
 		default: {
 			if (oldValue != 0 && oldValue != 100 && newValue < oldValue) {
