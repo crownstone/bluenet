@@ -35,6 +35,8 @@
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 20
 
+#define LOGPwmDebug LOGnone
+
 PWM::PWM() :
 		_initialized(false),
 		_started(false),
@@ -229,6 +231,17 @@ void PWM::setValue(uint8_t channel, uint16_t newValue) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
 	}
+
+	if (newValue > 100) {
+		newValue = 100;
+	}
+
+	// Something weird happens for low values: the resulting intensity is way too large.
+	// Either a software bug, peripheral issue, or hardware issue.
+	if (0 < newValue && newValue < 5) {
+		newValue = 5;
+	}
+
 	if (!_started) {
 		LOGw("Not started yet");
 		// Remember what value was set, set it on start.
@@ -247,28 +260,34 @@ void PWM::setValue(uint8_t channel, uint16_t newValue) {
 		return;
 	}
 
-	if (newValue > 100) {
-		newValue = 100;
-	}
 	LOGd("Set PWM channel %d to %d", channel, newValue);
 	uint32_t oldValue = _values[channel];
 	_values[channel] = newValue;
 	uint32_t oldTickValue = _tickValues[channel];
 	_tickValues[channel] = _maxTickVal * newValue / 100;
+	LOGPwmDebug("ticks=%u", _tickValues[channel]);
 
 	// Always disable the temporary PPI.
 	nrf_ppi_channel_disable(_ppiTransitionChannel);
 
 	switch (newValue) {
+//		case 0:
+//			// Simply disable the PPI that turns on the switch.
+//			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
+//			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
+//
+//			break;
+//		case 100:
+//			// Simply disable the PPI that turns off the switch.
+//			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
+//			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
+//			break;
 		case 0:
-			// Simply disable the PPI that turns on the switch.
-			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
-			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
-			break;
 		case 100:
-			// Simply disable the PPI that turns off the switch.
+			// Disable both PPI channels, and force gpio values.
+			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
 			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
-			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
+			gpioteForce(channel, newValue == 100);
 			break;
 		default: {
 			if (oldValue != 0 && oldValue != 100 && newValue < oldValue) {
@@ -277,6 +296,7 @@ void PWM::setValue(uint8_t channel, uint16_t newValue) {
 				// Turn switch off at end of the old tick value.
 				// This is required to turn off the switch in case the current timer value is higher than the new tick value, but lower than the old tick value.
 				// So this PPI is only temporarily needed, until the timer reached the start of the period again.
+				LOGPwmDebug("transition");
 				writeCC(TRANSITION_CHANNEL_IDX, oldTickValue);
 				nrf_ppi_channel_endpoint_setup(
 						_ppiTransitionChannel,
@@ -289,6 +309,7 @@ void PWM::setValue(uint8_t channel, uint16_t newValue) {
 //				_transitionInProgress = true;
 //				_transitionTargetTicks = _tickValues[channel];
 			}
+			LOGPwmDebug("writeCC %u", _tickValues[channel]);
 			writeCC(channel, _tickValues[channel]);
 			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
 			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);

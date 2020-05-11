@@ -15,7 +15,7 @@
 
 #include <optional>
 
-#define LOGSwitchAggregator LOGd
+#define LOGSwitchAggregatorDebug LOGnone
 #define LOGSwitchAggregator_Evt LOGd
 
 
@@ -77,7 +77,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
         bool behaviourWantsToChangeState = behaviourStateIsOn != aggregatedStateIsOn;
 
         if(overrideMatchedAggregated && behaviourWantsToChangeState && allowOverrideReset){
-        	LOGSwitchAggregator("resetting overrideState overrideStateIsOn=%u aggregatedStateIsOn=%u behaviourStateIsOn=%u", overrideStateIsOn, aggregatedStateIsOn, behaviourStateIsOn);
+        	LOGd("resetting overrideState overrideStateIsOn=%u aggregatedStateIsOn=%u behaviourStateIsOn=%u", overrideStateIsOn, aggregatedStateIsOn, behaviourStateIsOn);
         	shouldResetOverrideState = true;
         }
     }
@@ -88,7 +88,7 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset){
         aggregatedState ? aggregatedState :               // if override and behaviour don't have an opinion, use previous value.
         std::nullopt;
 
-    LOGSwitchAggregator("updateState");
+    LOGSwitchAggregatorDebug("updateState");
     static uint8_t callcount = 0;
     if(++callcount > 10){
         callcount = 0;
@@ -185,16 +185,16 @@ bool SwitchAggregator::handlePresenceEvents(event_t& evt){
 
         switch(mutationtype){
             case PresenceHandler::MutationType::LastUserExitSphere : {
-                LOGSwitchAggregator("SwitchAggregator LastUserExit");
+                LOGd("SwitchAggregator LastUserExit");
                 if(overrideState){
                     Time now = SystemTime::now();
-                    LOGSwitchAggregator("SwitchAggregator LastUserExit override state true");
+                    LOGd("SwitchAggregator LastUserExit override state true");
 
                     if (behaviourHandler.requiresPresence(now)) {
                         // if there exists a behaviour which is active at given time and 
                         //      	and it has a non-negated presence clause (that may not be satisfied)
                         //      		clear override
-                        LOGSwitchAggregator("clearing override state because last user exited sphere");
+                        LOGd("clearing override state because last user exited sphere");
                         overrideState = {};
                         updateBehaviourHandlers();
                         updateState();
@@ -230,9 +230,9 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
         case CS_TYPE::CMD_SWITCH: {
             LOGSwitchAggregator_Evt("CMD_SWITCH",__func__);
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;
-            LOGSwitchAggregator("packet intensity: %d, source(%d)", packet->switchCmd, packet->source.sourceId);
+            LOGd("packet intensity: %d, source(%d)", packet->switchCmd, packet->source.sourceId);
             if (!checkAndSetOwner(packet->source)) {
-                LOGSwitchAggregator("not executing, checkAndSetOwner returned false");
+            	LOGSwitchAggregatorDebug("not executing, checkAndSetOwner returned false");
                 break;
             }
             executeStateIntentionUpdate(packet->switchCmd);
@@ -292,10 +292,10 @@ void SwitchAggregator::handleSwitchStateChange(uint8_t newIntensity) {
 // ========================= Misc =========================
 
 uint8_t SwitchAggregator::aggregatedBehaviourIntensity(){
-    LOGSwitchAggregator("aggregatedBehaviourIntensity called");
+    LOGSwitchAggregatorDebug("aggregatedBehaviourIntensity called");
 
     if(behaviourState && twilightState){
-        LOGSwitchAggregator("returning min of behaviour(%d) and twilight(%d)", *behaviourState, *twilightState);
+    	LOGSwitchAggregatorDebug("returning min of behaviour(%d) and twilight(%d)", *behaviourState, *twilightState);
         return CsMath::min(*behaviourState, *twilightState);
     }
 
@@ -311,13 +311,13 @@ uint8_t SwitchAggregator::aggregatedBehaviourIntensity(){
 }
 
 std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
-    LOGSwitchAggregator("resolveOverrideState called");
+	LOGSwitchAggregatorDebug("resolveOverrideState called");
 
     if(!overrideState || *overrideState != 0xff){
 		return overrideState;  // opaque or empty override is returned unchanged.
 	}
 
-    LOGSwitchAggregator("translucent override state");
+    LOGSwitchAggregatorDebug("translucent override state");
 
     std::optional<uint8_t> opt0 = {0}; // to simplify following expressions.
 
@@ -352,13 +352,13 @@ bool SwitchAggregator::checkAndSetOwner(cmd_source_t source) {
 
 	if (_source.sourceId != source.sourceId) {
 		// Switch is claimed by other source.
-		LOGSwitchAggregator("Already claimed by %u", _source.sourceId);
+		LOGd("Already claimed by %u", _source.sourceId);
 		return false;
 	}
 
 	if (!BLEutil::isNewer(_source.count, source.count)) {
 		// A command with newer counter has been received already.
-		LOGSwitchAggregator("Old command: %u, already got: %u", source.count, _source.count);
+		LOGd("Old command: %u, already got: %u", source.count, _source.count);
 		return false;
 	}
 
@@ -393,7 +393,7 @@ void SwitchAggregator::handleGetBehaviourDebug(event_t& evt) {
 void SwitchAggregator::printStatus() {
     LOGd("^ overrideState: %02d",   OptionalUnsignedToInt(overrideState));
 	LOGd("| behaviourState: %02d",  OptionalUnsignedToInt(behaviourState));
-    LOGd("| twilightState: %02d",   OptionalUnsignedToInt(behaviourState));
+    LOGd("| twilightState: %02d",   OptionalUnsignedToInt(twilightState));
     LOGd("v aggregatedState: %02d", OptionalUnsignedToInt(aggregatedState));
 }
 

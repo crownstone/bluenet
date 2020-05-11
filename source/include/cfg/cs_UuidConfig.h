@@ -70,7 +70,7 @@ enum SetupCharacteristicsIDs {
 	SETUP_KEY_UUID                          = 0x3,
 //	CONFIG_CONTROL_UUID                     = 0x4, // Removed.
 //	CONFIG_READ_UUID                        = 0x5, // Removed.
-	GOTO_DFU_UUID                           = 0x6,
+//	GOTO_DFU_UUID                           = 0x6, // Removed, use control command instead.
 //	SETUP_CONTROL_UUID                      = 0x7, // Changed to 9, because we added more keys to setup.
 //	SESSION_NONCE_UUID                      = 0x8, // Changed to E, as we added protocol version.
 //	SETUP_CONTROL_UUID                      = 0x9, // Changed to A, because we the header is different, and we added the result characteristic.

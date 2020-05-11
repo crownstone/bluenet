@@ -235,9 +235,9 @@ The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provide
 
 Characteristic | UUID | Date type | Description | A | M | B
 --- | --- | --- | --- | :---: | :---: | :---:
+Session nonce  | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session_data) | Read the session data. |  |  | ECB
 Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone. | x | x | x
 Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone. | x | x | x
-Session nonce  | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session_data) | Read the session data. |  |  | ECB
 Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |
 
 Every command written to the control characteristic returns a [result packet](#result_packet) on the result characteristic.
@@ -262,7 +262,6 @@ Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
 MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MAC address of the crownstone.
 Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the session key that will be for encryption.
-GoTo DFU       | 24f10006-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 66 to go to DFU.
 Session data   | 24f1000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session_data) | Read the session data.
 Control        | 24f1000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
 Result         | 24f1000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone.
