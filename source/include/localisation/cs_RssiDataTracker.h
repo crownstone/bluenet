@@ -54,7 +54,6 @@ private:
 	uint32_t max_ping_msgs_per_s = 5;
 	uint8_t ping_sample_index = 0;
 
-	Coroutine loggingRoutine;
 	Coroutine pingRoutine;
 
 };

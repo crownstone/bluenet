@@ -5,8 +5,9 @@
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_Timer.h>
 #include <events/cs_Event.h>
-#include <time/cs_SystemTime.h>
 #include <storage/cs_State.h>
+#include <time/cs_SystemTime.h>
+#include <test/cs_Test.h>
 
 // some temporary/debug globals
 uint32_t next_log_msg_tickcount = 0;
@@ -39,21 +40,9 @@ void sendPingMsg(rssi_ping_message_t* pingmsg){
 	pingmsgevt.dispatch();
 }
 
-
-
-
-uint32_t loggingAction(){
-	LOGd("RssiDataTracker tick happened");
-
-	return 20;
-}
-
-
-
 // ------------ RssiDataTracker methods ------------
 
 RssiDataTracker::RssiDataTracker() :
-		loggingRoutine ([this](){ return loggingAction(); }),
 		pingRoutine ([this](){ return sendPrimaryPingMessage(); }) {
 }
 
@@ -65,7 +54,7 @@ void RssiDataTracker::init(){
 // ------------ Ping stuff ------------
 
 uint32_t RssiDataTracker::sendPrimaryPingMessage(){
-	LOGd("RssiDataTracker sending ping");
+	LOGd("RssiDataTracker sending ping for my_id(%d)", my_id);
 
 	// details with (0) need to be filled in by primary sender RssiDataTracker.
 	// details with (1) will be filled in by primary recipient MeshMsgHandler.
@@ -82,14 +71,21 @@ uint32_t RssiDataTracker::sendPrimaryPingMessage(){
 }
 
 void RssiDataTracker::forwardPingMsgOverMesh(rssi_ping_message_t* primary_ping_msg){
-	LOGd("lets forward this ping msg over mesh");
 	primary_ping_msg->recipient_id = my_id;
 	sendPingMsg(primary_ping_msg);
 }
 
 void RssiDataTracker::forwardPingMsgToTestSuite(rssi_ping_message_t* secondary_ping_msg){
-	LOGd("lets forward this ping msg over mesh");
+	LOGd("lets forward this ping msg to host");
 	printPingMsg(secondary_ping_msg);
+	char expressionstring[50];
+
+	sprintf(expressionstring, "rssi: %d->%d",
+			secondary_ping_msg->sender_id,
+			secondary_ping_msg->recipient_id);
+
+	TEST_PUSH_EXPR_D(this, expressionstring, secondary_ping_msg->rssi);
+
 }
 
 
@@ -99,7 +95,6 @@ void RssiDataTracker::handleEvent(event_t& evt){
 	case CS_TYPE::EVT_TICK: {
 		auto current_tick_count = *reinterpret_cast<uint32_t*>(evt.data);
 
-		loggingRoutine(current_tick_count);
 		pingRoutine(current_tick_count);
 
 		break;
@@ -107,7 +102,7 @@ void RssiDataTracker::handleEvent(event_t& evt){
 
 	case CS_TYPE::EVT_MESH_RSSI_PING: {
 		auto pingmsg_ptr = reinterpret_cast<rssi_ping_message_t*>(evt.data);
-		LOGd("pingcounter: %d ", received_pingcounter++);
+		LOGd("incoming pingcounter: %d ", received_pingcounter++);
 		if(pingmsg_ptr->recipient_id == 0xff){
 			forwardPingMsgOverMesh(pingmsg_ptr);
 		} else {
