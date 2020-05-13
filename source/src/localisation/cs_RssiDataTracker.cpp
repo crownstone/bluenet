@@ -58,7 +58,8 @@ void RssiDataTracker::init(){
 // ------------ Ping stuff ------------
 
 uint32_t RssiDataTracker::sendPrimaryPingMessage(){
-	RSSIDATATRACKER_LOGv("RssiDataTracker sending ping for my_id(%d)", my_id);
+	RSSIDATATRACKER_LOGd("RssiDataTracker sending ping for my_id(%d), sample#%d",
+			my_id, ping_sample_index);
 
 	// details with (0) need to be filled in by primary sender RssiDataTracker.
 	// details with (1) will be filled in by primary recipient MeshMsgHandler.
@@ -74,24 +75,62 @@ uint32_t RssiDataTracker::sendPrimaryPingMessage(){
 	return 50;
 }
 
-void RssiDataTracker::forwardPingMsgOverMesh(rssi_ping_message_t* primary_ping_msg){
-	primary_ping_msg->recipient_id = my_id;
-	sendPingMsg(primary_ping_msg);
+void RssiDataTracker::handlePrimaryPingMessage(rssi_ping_message_t* ping_msg){
+	ping_msg->recipient_id = my_id; // needs to be filled in before filtering
+
+	if(filterSampleIndex(ping_msg) == nullptr){
+		return; // (also catches ping_msg == nullptr)
+	}
+
+	sendPingMsg(ping_msg);
+	recordPingMsg(ping_msg);
 }
 
-void RssiDataTracker::forwardPingMsgToTestSuite(rssi_ping_message_t* secondary_ping_msg){
+void RssiDataTracker::handeleSecondaryPingMessage(rssi_ping_message_t* ping_msg){
+	if(filterSampleIndex(ping_msg) == nullptr){
+		return; // (also catches ping_msg == nullptr)
+	}
+
 	RSSIDATATRACKER_LOGv("lets forward this ping msg to host");
-	printPingMsg(secondary_ping_msg);
+	printPingMsg(ping_msg);
+	recordPingMsg(ping_msg);
+
 	char expressionstring[50];
 
 	sprintf(expressionstring, "rssi_%d_%d",
-			secondary_ping_msg->sender_id,
-			secondary_ping_msg->recipient_id);
+			ping_msg->sender_id,
+			ping_msg->recipient_id);
 
-	TEST_PUSH_EXPR_D(this, expressionstring, secondary_ping_msg->rssi);
+	TEST_PUSH_EXPR_D(this, expressionstring, ping_msg->rssi);
 
 }
 
+rssi_ping_message_t* RssiDataTracker::filterSampleIndex(rssi_ping_message_t* p){
+	if (p == nullptr){
+		return nullptr;
+	}
+
+	auto p_key = getKey(p);
+
+	if(last_received_sample_indices[p_key] == p->sample_id){
+		LOGd("filtered out stale ping message (%d -> %d) %d", p->sender_id, p->recipient_id, p->sample_id);
+		return nullptr;
+	}
+
+	return p;
+}
+
+void RssiDataTracker::recordPingMsg(rssi_ping_message_t* ping_msg){
+	// TODO: size constraint... map may keep up to 256**2 items. when
+	// 256 crownstones are on the same mesh.
+
+	auto stone_pair = getKey(ping_msg);
+
+	LOGd("record new sampleid (%d -> %d) %d", ping_msg->sender_id, ping_msg->recipient_id, ping_msg->sample_id);
+
+	last_received_sample_indices[stone_pair] = ping_msg->sample_id;
+	last_received_rssi[stone_pair] = ping_msg->rssi;
+}
 
 uint32_t received_pingcounter = 0;
 void RssiDataTracker::handleEvent(event_t& evt){
@@ -108,9 +147,9 @@ void RssiDataTracker::handleEvent(event_t& evt){
 		auto pingmsg_ptr = reinterpret_cast<rssi_ping_message_t*>(evt.data);
 		RSSIDATATRACKER_LOGv("incoming pingcounter: %d ", received_pingcounter++);
 		if(pingmsg_ptr->recipient_id == 0xff){
-			forwardPingMsgOverMesh(pingmsg_ptr);
+			handlePrimaryPingMessage(pingmsg_ptr);
 		} else {
-			forwardPingMsgToTestSuite(pingmsg_ptr);
+			handeleSecondaryPingMessage(pingmsg_ptr);
 		}
 
 		break;

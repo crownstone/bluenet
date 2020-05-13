@@ -12,6 +12,8 @@
 
 #include <util/cs_Coroutine.h>
 
+#include <map>
+#include <utility>  // for pair
 
 /**
  * Launches ping messages into the mesh and receives them.
@@ -45,15 +47,42 @@ public:
 	 * Returns the number of ticks to wait before sending the next.
 	 */
 	uint32_t sendPrimaryPingMessage();
-	void forwardPingMsgOverMesh(rssi_ping_message_t* primary_ping_msg);
-	void forwardPingMsgToTestSuite(rssi_ping_message_t* secondary_ping_msg);
+
+	/**
+	 * Forwards message over mesh
+	 * Records ping message
+	 */
+	void handlePrimaryPingMessage(rssi_ping_message_t* primary_ping_msg);
+
+	/**
+	 * Forwards message to test suite
+	 * Records ping message
+	 */
+	void handeleSecondaryPingMessage(rssi_ping_message_t* secondary_ping_msg);
 
 
 private:
+	void recordPingMsg(rssi_ping_message_t* ping_msg);
+
 	stone_id_t my_id = 0xff;
 	uint32_t max_ping_msgs_per_s = 5;
 	uint8_t ping_sample_index = 0;
 
 	Coroutine pingRoutine;
+
+	// if p has a sample index that was received recently, return nullptr
+	// else return p.
+	rssi_ping_message_t* filterSampleIndex(rssi_ping_message_t* p);
+
+	// mapping utilites.
+	inline std::pair<stone_id_t,stone_id_t> getKey(stone_id_t i, stone_id_t j){
+		return {i,j};
+	}
+	inline std::pair<stone_id_t,stone_id_t> getKey(rssi_ping_message_t* p){
+		return getKey(p->sender_id, p->recipient_id);
+	}
+
+	std::map<std::pair<stone_id_t,stone_id_t>, uint8_t> last_received_sample_indices = {};
+	std::map<std::pair<stone_id_t,stone_id_t>, int8_t> last_received_rssi = {};
 
 };
