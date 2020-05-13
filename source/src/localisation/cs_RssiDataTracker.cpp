@@ -72,7 +72,7 @@ uint32_t RssiDataTracker::sendPrimaryPingMessage(){
 
 	sendPingMsg(&pingmsg);
 
-	return 50;
+	return 5;
 }
 
 void RssiDataTracker::handlePrimaryPingMessage(rssi_ping_message_t* ping_msg){
