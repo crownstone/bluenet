@@ -52,13 +52,13 @@ public:
 	 * Forwards message over mesh
 	 * Records ping message
 	 */
-	void handlePrimaryPingMessage(rssi_ping_message_t* primary_ping_msg);
+	void handlePrimaryPingMessage(rssi_ping_message_t* ping_msg);
 
 	/**
 	 * Forwards message to test suite
 	 * Records ping message
 	 */
-	void handeleSecondaryPingMessage(rssi_ping_message_t* secondary_ping_msg);
+	void handeleSecondaryPingMessage(rssi_ping_message_t* ping_msg);
 
 
 private:
