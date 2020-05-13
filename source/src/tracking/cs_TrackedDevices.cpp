@@ -11,7 +11,7 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
-#define LOGTrackedDevicesDebug LOGd
+#define LOGTrackedDevicesDebug LOGnone
 #define LOGTrackedDevicesVerbose LOGnone
 
 TrackedDevices::TrackedDevices() {
@@ -88,7 +88,7 @@ void TrackedDevices::handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& pack
 }
 
 void TrackedDevices::handleMeshListSize(TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)& packet) {
-	LOGd("handleMeshListSize size=%u", packet.listSize);
+	LOGTrackedDevicesDebug("handleMeshListSize size=%u", packet.listSize);
 	expectedDeviceListSize = packet.listSize;
 }
 
@@ -372,7 +372,7 @@ void TrackedDevices::sendListSizeToMesh() {
 }
 
 void TrackedDevices::sendDeviceList() {
-	LOGd("sendDeviceList %u devices", deviceListSize);
+	LOGTrackedDevicesDebug("sendDeviceList %u devices", deviceListSize);
 	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
 		sendRegisterToMesh(*iter);
 		sendTokenToMesh(*iter);
