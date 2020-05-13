@@ -113,7 +113,7 @@ rssi_ping_message_t* RssiDataTracker::filterSampleIndex(rssi_ping_message_t* p){
 	auto p_key = getKey(p);
 
 	if(last_received_sample_indices[p_key] == p->sample_id){
-		LOGd("filtered out stale ping message (%d -> %d) %d", p->sender_id, p->recipient_id, p->sample_id);
+		RSSIDATATRACKER_LOGv("filtered out stale ping message (%d -> %d) %d", p->sender_id, p->recipient_id, p->sample_id);
 		return nullptr;
 	}
 
@@ -126,7 +126,7 @@ void RssiDataTracker::recordPingMsg(rssi_ping_message_t* ping_msg){
 
 	auto stone_pair = getKey(ping_msg);
 
-	LOGd("record new sampleid (%d -> %d) %d", ping_msg->sender_id, ping_msg->recipient_id, ping_msg->sample_id);
+	RSSIDATATRACKER_LOGv("record new sampleid (%d -> %d) %d", ping_msg->sender_id, ping_msg->recipient_id, ping_msg->sample_id);
 
 	last_received_sample_indices[stone_pair] = ping_msg->sample_id;
 	last_received_rssi[stone_pair] = ping_msg->rssi;
