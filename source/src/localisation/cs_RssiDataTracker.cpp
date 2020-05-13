@@ -9,6 +9,10 @@
 #include <time/cs_SystemTime.h>
 #include <test/cs_Test.h>
 
+
+#define RSSIDATATRACKER_LOGd LOGd
+#define RSSIDATATRACKER_LOGv LOGnone
+
 // some temporary/debug globals
 uint32_t next_log_msg_tickcount = 0;
 uint32_t prev_uptime_sec = 0;
@@ -21,7 +25,7 @@ void printPingMsg(rssi_ping_message_t* p){
 		return;
 	}
 
-	LOGd("ping: %d -> %d @ %d dB sample(#%d)",
+	RSSIDATATRACKER_LOGv("ping: %d -> %d @ %d dB sample(#%d)",
 			p->sender_id,
 			p->recipient_id,
 			p->rssi,
@@ -54,7 +58,7 @@ void RssiDataTracker::init(){
 // ------------ Ping stuff ------------
 
 uint32_t RssiDataTracker::sendPrimaryPingMessage(){
-	LOGd("RssiDataTracker sending ping for my_id(%d)", my_id);
+	RSSIDATATRACKER_LOGv("RssiDataTracker sending ping for my_id(%d)", my_id);
 
 	// details with (0) need to be filled in by primary sender RssiDataTracker.
 	// details with (1) will be filled in by primary recipient MeshMsgHandler.
@@ -76,11 +80,11 @@ void RssiDataTracker::forwardPingMsgOverMesh(rssi_ping_message_t* primary_ping_m
 }
 
 void RssiDataTracker::forwardPingMsgToTestSuite(rssi_ping_message_t* secondary_ping_msg){
-	LOGd("lets forward this ping msg to host");
+	RSSIDATATRACKER_LOGv("lets forward this ping msg to host");
 	printPingMsg(secondary_ping_msg);
 	char expressionstring[50];
 
-	sprintf(expressionstring, "rssi: %d->%d",
+	sprintf(expressionstring, "rssi_%d_%d",
 			secondary_ping_msg->sender_id,
 			secondary_ping_msg->recipient_id);
 
@@ -102,7 +106,7 @@ void RssiDataTracker::handleEvent(event_t& evt){
 
 	case CS_TYPE::EVT_MESH_RSSI_PING: {
 		auto pingmsg_ptr = reinterpret_cast<rssi_ping_message_t*>(evt.data);
-		LOGd("incoming pingcounter: %d ", received_pingcounter++);
+		RSSIDATATRACKER_LOGv("incoming pingcounter: %d ", received_pingcounter++);
 		if(pingmsg_ptr->recipient_id == 0xff){
 			forwardPingMsgOverMesh(pingmsg_ptr);
 		} else {
