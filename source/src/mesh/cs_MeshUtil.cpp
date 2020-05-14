@@ -53,7 +53,7 @@ uint8_t getChannel(const nrf_mesh_rx_metadata_t* metaData) {
 	return 0xff;
 }
 
-cs_mesh_received_msg_t fromAccessMessageRX(access_message_rx_t&  accessMsg){
+cs_mesh_received_msg_t fromAccessMessageRX(const access_message_rx_t&  accessMsg){
 	cs_mesh_received_msg_t msg;
 	msg.opCode = accessMsg.opcode.opcode;
 	msg.srcAddress = accessMsg.meta_data.src.value;
