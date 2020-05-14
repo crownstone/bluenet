@@ -461,14 +461,13 @@ uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | ID | 1 | The ibeacon config ID to set.
-uint 32 | Timestamp | 4 | Timestamp when the config ID should be set.
-uint 16 | Interval | 2 | Interval in seconds when the ID should be set again.
+uint 32 | Timestamp | 4 | Unix timestamp when the config ID should be set (the first time).
+uint 16 | Interval | 2 | Interval in seconds when the ID should be set again, after the given timestamp.
 
 - ID can only be 0 or 1 for now.
-- Set the interval to 0 if you to set the ID only once.
+- Set the interval to 0 if you want to set the ID only once.
 - Set the interval to 0, and the timestamp to 0 if you want to set the ID only once, and now.
-
-To interleave between two config IDs, you can for example set ID=0 at timestamp=0 with interval=600, and ID=1 at timestamp=300 with interval=600.
+- To interleave between two config IDs every N seconds, set ID=0, at timestamp=0 with interval=N, ID=1 at timestamp=N/2 with interval=N.
 
 <a name="sun_time_packet"></a>
 ##### Sun time packet
@@ -523,6 +522,7 @@ For now, only a few of commands are implemented:
 - Set time, only broadcast, without acks.
 - Noop, only broadcast, without acks.
 - State set, only 1 target ID, with ack.
+- Set ibeacon config ID, all mesh command flags are possible.
 
 ![Command packet](../docs/diagrams/command-mesh-packet.png)
 
@@ -549,7 +549,7 @@ Bit | Name |  Description
 --- | --- | ---
 0 | Broadcast | Send command to all stones. Else, its only sent to all stones in the list of stone IDs, which will take more time.
 1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout.
-2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen.
+2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen. **Not implemented yet.**
 
 
 <a name="behaviour_debug_packet"></a>
