@@ -75,6 +75,7 @@ project. Depending on the existence of RC (release candidate) version informatio
 repository will be used. To create a release directory and fill it, call:
 
 ```
+cd build/crownstone_${CS_FW_VERSION}
 make create_release_in_repository
 ```
 
