@@ -36,6 +36,37 @@ int8_t getRssi(const nrf_mesh_rx_metadata_t* metaData) {
 	return 0;
 }
 
+uint8_t getChannel(const nrf_mesh_rx_metadata_t* metaData) {
+	switch (metaData->source) {
+	case NRF_MESH_RX_SOURCE_SCANNER:
+		return metaData->params.scanner.channel;
+	case NRF_MESH_RX_SOURCE_INSTABURST:
+		 return metaData->params.instaburst.channel;
+	case NRF_MESH_RX_SOURCE_GATT:
+		// a semi decent solution: connection index is uint16_t.
+		// return metaData->params.gatt.connection_index & 0xff;
+		return 0xff;
+	case NRF_MESH_RX_SOURCE_LOOPBACK:
+		return 0xff;
+	}
+
+	return 0xff;
+}
+
+cs_mesh_received_msg_t fromAccessMessageRX(access_message_rx_t&  accessMsg){
+	cs_mesh_received_msg_t msg;
+	msg.opCode = accessMsg.opcode.opcode;
+	msg.srcAddress = accessMsg.meta_data.src.value;
+	msg.msg = (uint8_t*)(accessMsg.p_data);
+	msg.msgSize = accessMsg.length;
+	msg.rssi = getRssi(accessMsg.meta_data.p_core_metadata);
+	msg.hops = ACCESS_DEFAULT_TTL - accessMsg.meta_data.ttl;
+	msg.channel = getChannel(accessMsg.meta_data.p_core_metadata);
+
+	return msg;
+}
+
+
 void printMeshAddress(const char* prefix, const nrf_mesh_address_t* addr) {
 	switch (addr->type) {
 	case NRF_MESH_ADDRESS_TYPE_INVALID:
