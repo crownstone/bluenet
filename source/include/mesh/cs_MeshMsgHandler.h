@@ -25,7 +25,7 @@ protected:
 	cs_ret_code_t handleStateTime(            uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleCmdTime(              uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleCmdNoop(              uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleRssiPing(             uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
+	cs_ret_code_t handleRssiPing(             uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops, uint8_t channel);
 	cs_ret_code_t handleCmdMultiSwitch(       uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleState0(               uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
 	cs_ret_code_t handleState1(               uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);

@@ -63,7 +63,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 			return;
 		}
 		case CS_MESH_MODEL_TYPE_RSSI_PING: {
-			result.returnCode = handleRssiPing(payload, payloadSize, srcId, msg.rssi, msg.hops);
+			result.returnCode = handleRssiPing(payload, payloadSize, srcId, msg.rssi, msg.hops, msg.channel);
 			return;
 		}
 		case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
@@ -184,7 +184,7 @@ cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSi
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops){
+cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops, uint8_t channel){
 	rssi_ping_message_t* packet = (rssi_ping_message_t*) payload;
 	LOGMeshModelInfo("received rssi ping message id=%u", packet->deviceId);
 
@@ -193,6 +193,7 @@ cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadS
 	if(packet->sender_id == 0xff){ // && hops == 0?
 		packet->rssi = rssi;
 		packet->sender_id = srcId;
+		packet->channel = channel;
 	}
 
 	event_t event(CS_TYPE::EVT_MESH_RSSI_PING, packet, sizeof(rssi_ping_message_t));
