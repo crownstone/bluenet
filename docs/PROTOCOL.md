@@ -461,13 +461,12 @@ uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | ID | 1 | The ibeacon config ID to set.
-uint 32 | Timestamp | 4 | Unix timestamp when the config ID should be set (the first time).
-uint 16 | Interval | 2 | Interval in seconds when the ID should be set again, after the given timestamp.
+uint 32 | Timestamp | 4 | Unix timestamp when the ibeacon config ID should be set (the first time).
+uint 16 | Interval | 2 | Interval in seconds when the ibeacon config ID should be set again, after the given timestamp.
 
-- ID can only be 0 or 1 for now.
-- Set the interval to 0 if you want to set the ID only once.
-- Set the interval to 0, and the timestamp to 0 if you want to set the ID only once, and now.
-- To interleave between two config IDs every N seconds, set ID=0, at timestamp=0 with interval=N, ID=1 at timestamp=N/2 with interval=N.
+- ID can only be 0 or 1.
+- Set the interval to 0 if you want to set the ibeacon config ID only once, at the given timestamp. Use timestamp 0 if you want it to be set immediately.
+- To interleave between two config IDs every 60 seconds, you will need two commands. First set ID=0, at timestamp=0 with interval=60, then set ID=1 at timestamp=30 with interval=60.
 
 <a name="sun_time_packet"></a>
 ##### Sun time packet
