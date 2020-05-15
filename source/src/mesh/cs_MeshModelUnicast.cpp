@@ -209,18 +209,21 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 			_acked++;
 			LOGi("acked=%u timedout=%u canceled=%u (acked=%u%%)", _acked, _timedout, _canceled, (_acked * 100) / (_acked + _timedout + _canceled));
 #endif
+			CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type);
+			result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
+
 			break;
 		}
 		case ACCESS_RELIABLE_TRANSFER_TIMEOUT: {
 			LOGw("reliable msg timeout");
 			MeshUtil::printQueueItem("", _queue[_queueIndexInProgress].metaData);
 
-			cs_mesh_model_msg_type_t type = (cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type;
-			uart_msg_mesh_result_packet_header_t resultHeader;
-			resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType(type);
-			resultHeader.resultHeader.returnCode = ERR_TIMEOUT;
-			resultHeader.stoneId = _queue[_queueIndexInProgress].targetId;
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+			sendFailedResultToUart(
+					_queue[_queueIndexInProgress].targetId,
+					(cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type,
+					ERR_TIMEOUT
+			);
 
 #if MESH_MODEL_TEST_MSG == 2
 			_timedout++;
@@ -231,12 +234,11 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 		case ACCESS_RELIABLE_TRANSFER_CANCELLED: {
 			LOGw("reliable msg cancelled");
 
-			cs_mesh_model_msg_type_t type = (cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type;
-			uart_msg_mesh_result_packet_header_t resultHeader;
-			resultHeader.resultHeader.commandType = MeshUtil::getCtrlCmdType(type);
-			resultHeader.resultHeader.returnCode = ERR_CANCELED;
-			resultHeader.stoneId = _queue[_queueIndexInProgress].targetId;
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+			sendFailedResultToUart(
+					_queue[_queueIndexInProgress].targetId,
+					(cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type,
+					ERR_CANCELED
+			);
 
 #if MESH_MODEL_TEST_MSG == 2
 			_canceled++;
@@ -248,6 +250,19 @@ void MeshModelUnicast::handleReliableStatus(access_reliable_status_t status) {
 
 	remQueueItem(_queueIndexInProgress);
 	_queueIndexInProgress = queue_index_none;
+}
+
+void MeshModelUnicast::sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_type_t msgType, cs_ret_code_t retCode) {
+	CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType(msgType);
+
+	uart_msg_mesh_result_packet_header_t resultHeader;
+	resultHeader.resultHeader.commandType = cmdType;
+	resultHeader.resultHeader.returnCode = retCode;
+	resultHeader.stoneId = id;
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+
+	result_packet_header_t ackResult(cmdType, ERR_TIMEOUT);
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
 }
 
 cs_ret_code_t MeshModelUnicast::addToQueue(MeshUtil::cs_mesh_queue_item_t& item) {

@@ -155,4 +155,6 @@ private:
 	 * Do this while no message is in progress.
 	 */
 	cs_ret_code_t setPublishAddress(stone_id_t id);
+
+	void sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_type_t msgType, cs_ret_code_t retCode);
 };
