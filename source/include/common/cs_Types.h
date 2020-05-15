@@ -171,6 +171,7 @@ enum class CS_TYPE: uint16_t {
 	STATE_MESH_IV_INDEX                     = 151,
 	STATE_MESH_SEQ_NUMBER                   = 152,
 	STATE_BEHAVIOUR_MASTER_HASH             = 153,
+	STATE_IBEACON_CONFIG_ID                 = 154,
 
 	/*
 	 * Internal commands and events.
@@ -409,6 +410,9 @@ typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
 typedef uint32_t TYPIFY(STATE_BEHAVIOUR_MASTER_HASH);
 typedef cs_mesh_iv_index_t TYPIFY(STATE_MESH_IV_INDEX);
 typedef cs_mesh_seq_number_t TYPIFY(STATE_MESH_SEQ_NUMBER);
+typedef ibeacon_config_id_packet_t TYPIFY(STATE_IBEACON_CONFIG_ID);
+
+
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
@@ -505,7 +509,7 @@ typedef void TYPIFY(EVT_MESH_PAGES_ERASED);
 typedef cs_mesh_model_msg_state_0_t TYPIFY(EVT_MESH_EXT_STATE_0);
 typedef cs_mesh_model_msg_state_1_t TYPIFY(EVT_MESH_EXT_STATE_1);
 typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
-typedef ibeacon_config_id_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_ID);
+typedef set_ibeacon_config_id_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_ID);
 typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
 
 /*---------------------------------------------------------------------------------------------------------------------
