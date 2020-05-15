@@ -27,7 +27,12 @@ cs_ret_code_t MeshModelSelector::addToQueue(MeshUtil::cs_mesh_queue_item_t& item
 	}
 	else {
 		if (item.reliable) {
-			return _unicastModel->addToQueue(item);
+			if (item.numIds == 1) {
+				return _unicastModel->addToQueue(item);
+			}
+			else {
+				return ERR_NOT_IMPLEMENTED;
+			}
 		}
 		else {
 			return ERR_NOT_IMPLEMENTED;
