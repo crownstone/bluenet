@@ -73,7 +73,11 @@ void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) 
 		// Now only the special chars get escaped, no header and tail.
 		writeBytes(data, size);
 		return;
+	case UART_OPCODE_TX_SERVICE_DATA:
+	case UART_OPCODE_TX_FIRMWARESTATE:
+		return;
 	default:
+//		LOGd("writeMsg opCode=%u", opCode);
 		return;
 	}
 #endif
@@ -88,6 +92,7 @@ void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 	// when debugging we would like to drop out of certain binary data coming over the console...
 	switch(opCode) {
 	default:
+//		LOGd("writeMsg opCode=%u", opCode);
 		return;
 	}
 #endif
