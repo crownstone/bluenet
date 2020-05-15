@@ -141,9 +141,15 @@ bool SwitchAggregator::handleSwitchAggregatorCommand(event_t& evt){
 			overrideState.reset();
 			behaviourState.reset();
 			twilightState.reset();
-			aggregatedState.reset();
+			aggregatedState = 0;
 			pushTestDataToHost();
 			LOGd("handled switch aggregator reset command");
+			break;
+		}
+		case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
+//			behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
+//			smartHomeIsActive = settings->flags.enabled;
+			LOGi("aggregator smartHomeIsActive=%u", smartHomeIsActive);
 			break;
 		}
 		default: {
@@ -219,32 +225,52 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
         // ============== overrideState Events ==============
         case CS_TYPE::CMD_SWITCH_ON:{
             LOGSwitchAggregator_Evt("CMD_SWITCH_ON",__func__);
+            if(!smartHomeIsActive){
+            	evt.result.returnCode = ERR_NOT_AVAILABLE;
+            	return false;
+            }
+
             executeStateIntentionUpdate(100);
             break;
         }
         case CS_TYPE::CMD_SWITCH_OFF:{
             LOGSwitchAggregator_Evt("CMD_SWITCH_OFF",__func__);
+            if(!smartHomeIsActive){
+				evt.result.returnCode = ERR_NOT_AVAILABLE;
+				return false;
+			}
+
             executeStateIntentionUpdate(0);
             break;
         }
         case CS_TYPE::CMD_SWITCH: {
             LOGSwitchAggregator_Evt("CMD_SWITCH",__func__);
+            if(!smartHomeIsActive){
+				evt.result.returnCode = ERR_NOT_AVAILABLE;
+				return false;
+			}
+
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;
             LOGd("packet intensity: %d, source(%d)", packet->switchCmd, packet->source.sourceId);
             if (!checkAndSetOwner(packet->source)) {
             	LOGSwitchAggregatorDebug("not executing, checkAndSetOwner returned false");
-                break;
+            	evt.result.returnCode = ERR_NO_ACCESS;
+                return false;
             }
+
             executeStateIntentionUpdate(packet->switchCmd);
             
 			break;
 		}
         case CS_TYPE::CMD_SWITCH_TOGGLE:{
             LOGSwitchAggregator_Evt("CMD_SWITCH_TOGGLE",__func__);
+            // toggle is allowed even if smartHomeIsActive==false
+
             executeStateIntentionUpdate(smartSwitch.getIntendedState() == 0 ? 255 : 0);
             break;
         }
         default:{
+        	// event not handled.
             return false;
         }
     }
