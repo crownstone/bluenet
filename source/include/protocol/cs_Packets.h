@@ -251,15 +251,21 @@ struct __attribute__((packed)) sun_time_t {
 /**
  * Packet to change ibeacon config ID.
  *
- * Timestamp: when to start executing the change.
- * Interval: change every N seconds after timestamp.
+ * Timestamp: when to set the ID for the first time.
+ * Interval: set ID every N seconds after timestamp.
  * Set interval = 0 to execute only once.
  * Set timestamp = 0, and interval = 0 to execute now.
+ * A stored entry with timestamp = 0 and interval = 0, will be considered empty.
  */
 struct __attribute__((__packed__)) ibeacon_config_id_packet_t {
-	uint8_t ibeaconConfigId = 0;
 	uint32_t timestamp = 0;
 	uint16_t interval = 0;
+};
+
+// See ibeacon_config_id_packet_t
+struct __attribute__((__packed__)) set_ibeacon_config_id_packet_t {
+	uint8_t ibeaconConfigId = 0;
+	ibeacon_config_id_packet_t config;
 };
 
 struct __attribute__((__packed__)) led_message_payload_t {

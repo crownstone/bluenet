@@ -66,7 +66,9 @@ private:
 	uint8_t* _buffer = NULL;
 	adv_packet_t* _advPacket = NULL;
 	uint8_t _ibeaconConfigId = 0;
-	ibeacon_config_id_packet_t _ibeaconInterval[num_ibeacon_config_ids]; // Timestamp and interval = 0 for invalid entry.
+
+	// Cache of what's in flash.
+	ibeacon_config_id_packet_t _ibeaconInterval[num_ibeacon_config_ids];
 
 	void updateIbeacon();
 
@@ -77,7 +79,10 @@ private:
 	 */
 	void advertise(IBeacon* ibeacon);
 
-	cs_ret_code_t handleSetIbeaconConfig(ibeacon_config_id_packet_t* packet);
+	cs_ret_code_t handleSetIbeaconConfig(set_ibeacon_config_id_packet_t* packet);
 
 	void handleTime(uint32_t now);
+
+	void setConfigEntry(uint8_t id, ibeacon_config_id_packet_t& config);
+	void clearConfigEntry(uint8_t id);
 };

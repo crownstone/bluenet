@@ -67,7 +67,7 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		case CS_MESH_MODEL_TYPE_RESULT:
 			return payloadSize >= sizeof(cs_mesh_model_msg_result_header_t);
 		case CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID:
-			return payloadSize >= sizeof(ibeacon_config_id_packet_t);
+			return payloadSize >= sizeof(set_ibeacon_config_id_packet_t);
 		case CS_MESH_MODEL_TYPE_UNKNOWN:
 			return false;
 	}

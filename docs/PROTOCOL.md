@@ -521,7 +521,7 @@ For now, only a few of commands are implemented:
 - Set time, only broadcast, without acks.
 - Noop, only broadcast, without acks.
 - State set, only 1 target ID, with ack.
-- Set ibeacon config ID, all mesh command flags are possible.
+- Set ibeacon config ID.
 
 ![Command packet](../docs/diagrams/command-mesh-packet.png)
 
@@ -544,10 +544,16 @@ Type nr | Type name | Payload type | Payload description
 <a name="mesh_command_flags"></a>
 ##### Mesh command flags
 
+For now there are only a couple of combinations possible:
+
+- If you want to send a command to all stones in the mesh, without acks and retries, set: `Broadcast=true`, `AckIDs=false`, `KnownIDs=false`.
+- If you want to send a command to all stones in the mesh, with acks and retries, set: `Broadcast=true`, `AckIDs=true`, `KnownIDs=false`. You will have to provide the list of IDs yourself.
+- If you want to send a command to 1 stone, with acks and retries, set: `Broadcast=false`, `AckIDs=true`, `KnownIDs=false`.
+
 Bit | Name |  Description
 --- | --- | ---
 0 | Broadcast | Send command to all stones. Else, its only sent to all stones in the list of stone IDs, which will take more time.
-1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout.
+1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout. **More than 1 IDs without broadcast is not implemented yet.**
 2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen. **Not implemented yet.**
 
 

@@ -7,6 +7,7 @@
 
 #include <mesh/cs_MeshAdvertiser.h>
 #include <storage/cs_State.h>
+#include <storage/cs_StateData.h>
 #include <util/cs_BleError.h>
 #include <time/cs_SystemTime.h>
 #include <util/cs_Math.h>
@@ -27,6 +28,19 @@ void MeshAdvertiser::init() {
 	}
 	advertiser_instance_init(_advertiser, NULL, _buffer, MESH_ADVERTISER_BUF_SIZE);
 //	advertiser_instance_init(_advertiser, txComplete, _buffer, MESH_ADVERTISER_BUF_SIZE);
+
+	// Load ibeacon config intervals from storage.
+	std::vector<cs_state_id_t>* ids = nullptr;
+	State::getInstance().getIds(CS_TYPE::STATE_IBEACON_CONFIG_ID, ids);
+	if (ids != nullptr) {
+		for (auto iter: *ids) {
+			if (iter < num_ibeacon_config_ids) {
+				cs_state_data_t stateData(CS_TYPE::STATE_IBEACON_CONFIG_ID, iter, (uint8_t*)&(_ibeaconInterval[iter]), sizeof(_ibeaconInterval[iter]));
+				State::getInstance().get(stateData);
+				LOGi("Loaded ibeacon config interval: ID=%u t=%u interval=%u", iter, _ibeaconInterval[iter].timestamp, _ibeaconInterval[iter].interval);
+			}
+		}
+	}
 
 	listen();
 }
@@ -148,22 +162,35 @@ void MeshAdvertiser::advertise(IBeacon* ibeacon) {
 	advertiser_packet_send(_advertiser, _advPacket);
 }
 
-cs_ret_code_t MeshAdvertiser::handleSetIbeaconConfig(ibeacon_config_id_packet_t* packet) {
-	LOGi("handleSetIbeaconConfig id=%u timestamp=%u interval=%u", packet->ibeaconConfigId, packet->timestamp, packet->interval);
+cs_ret_code_t MeshAdvertiser::handleSetIbeaconConfig(set_ibeacon_config_id_packet_t* packet) {
+	LOGi("handleSetIbeaconConfig id=%u timestamp=%u interval=%u", packet->ibeaconConfigId, packet->config.timestamp, packet->config.interval);
 	if (packet->ibeaconConfigId >= num_ibeacon_config_ids) {
 		return ERR_WRONG_PARAMETER;
 	}
-	if (packet->interval == 0 && packet->timestamp == 0) {
+	if (packet->config.interval == 0 && packet->config.timestamp == 0) {
 		// Set config id now, and clear entry.
 		_ibeaconConfigId = packet->ibeaconConfigId;
-		_ibeaconInterval[packet->ibeaconConfigId].interval = 0;
-		_ibeaconInterval[packet->ibeaconConfigId].timestamp = 0;
+		clearConfigEntry(packet->ibeaconConfigId);
 		updateIbeacon();
 	}
 	else {
-		_ibeaconInterval[packet->ibeaconConfigId] = *packet;
+		setConfigEntry(packet->ibeaconConfigId, packet->config);
 	}
 	return ERR_SUCCESS;
+}
+
+void MeshAdvertiser::setConfigEntry(uint8_t id, ibeacon_config_id_packet_t& config) {
+	LOGi("Set ID=%u t=%u interval=%u", id, config.timestamp, config.interval);
+	_ibeaconInterval[id] = config;
+	cs_state_data_t stateData(CS_TYPE::STATE_IBEACON_CONFIG_ID, id, (uint8_t*)&config, sizeof(config));
+	State::getInstance().set(stateData);
+}
+
+void MeshAdvertiser::clearConfigEntry(uint8_t id) {
+	LOGi("Clear ID=%u", id);
+	_ibeaconInterval[id].interval = 0;
+	_ibeaconInterval[id].timestamp = 0;
+	State::getInstance().remove(CS_TYPE::STATE_IBEACON_CONFIG_ID, id);
 }
 
 void MeshAdvertiser::handleTime(uint32_t now) {
@@ -176,8 +203,7 @@ void MeshAdvertiser::handleTime(uint32_t now) {
 				}
 				// Set config id, and clear entry.
 				_ibeaconConfigId = i;
-				_ibeaconInterval[i].interval = 0;
-				_ibeaconInterval[i].timestamp = 0;
+				clearConfigEntry(i);
 				updateIbeacon();
 			}
 			else if (CsMath::mod((_ibeaconInterval[i].timestamp - now), _ibeaconInterval[i].interval) == 0)	{

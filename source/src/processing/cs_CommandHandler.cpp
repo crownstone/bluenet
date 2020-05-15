@@ -410,7 +410,7 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 			persistenceMode = PersistenceMode::RAM;
 			break;
 		case PersistenceModeSet::STORED:
-			persistenceMode = PersistenceMode::FLASH;
+			persistenceMode = PersistenceMode::STRATEGY1;
 			break;
 		case PersistenceModeSet::UNKNOWN:
 			break;

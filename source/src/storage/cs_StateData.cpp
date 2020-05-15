@@ -143,12 +143,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = CONFIG_POWER_ZERO_INVALID;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_PWM_PERIOD: {
-		LOGd("Got PWM period: %u", PWM_PERIOD);
-		LOGd("Data value ptr: %p", data.value);
-		*((uint32_t*)data.value) = 1;
-		LOGd("data.value: %u", *((uint32_t*)data.value));
 		*(TYPIFY(CONFIG_PWM_PERIOD)*)data.value = (TYPIFY(CONFIG_PWM_PERIOD))PWM_PERIOD;
-		LOGd("data.value: %u", *((uint32_t*)data.value));
 		return ERR_SUCCESS;
 	}
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
@@ -224,6 +219,14 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
 		*reinterpret_cast<TYPIFY(STATE_MESH_SEQ_NUMBER)*>(data.value) = STATE_MESH_SEQ_NUMBER_DEFAULT;
 		return ERR_SUCCESS;
+	case CS_TYPE::STATE_IBEACON_CONFIG_ID: {
+//		*reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value) = TYPIFY(STATE_IBEACON_CONFIG_ID)();
+		*reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value) = ibeacon_config_id_packet_t();
+//		TYPIFY(STATE_IBEACON_CONFIG_ID)* config = reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value);
+//		config->timestamp = 0;
+//		config->interval = 0;
+		return ERR_SUCCESS;
+	}
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
@@ -389,6 +392,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_SUN_TIME:
 	case CS_TYPE::STATE_MESH_IV_INDEX:
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
+	case CS_TYPE::STATE_IBEACON_CONFIG_ID:
 		return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:

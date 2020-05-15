@@ -362,7 +362,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			return sendNoop(command->header.timeoutOrTransmissions);
 		}
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID: {
-			if (command->controlCommand.size != sizeof(ibeacon_config_id_packet_t)) {
+			if (command->controlCommand.size != sizeof(set_ibeacon_config_id_packet_t)) {
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 			item.metaData.id = 0;
