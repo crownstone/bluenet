@@ -58,7 +58,7 @@ void RssiDataTracker::init(){
 // ------------ Ping stuff ------------
 
 uint32_t RssiDataTracker::sendPrimaryPingMessage(){
-	RSSIDATATRACKER_LOGd("RssiDataTracker sending ping for my_id(%d), sample#%d",
+	RSSIDATATRACKER_LOGv("RssiDataTracker sending ping for my_id(%d), sample#%d",
 			my_id, ping_sample_index);
 
 	// details with (0) need to be filled in by primary sender RssiDataTracker.
@@ -97,9 +97,10 @@ void RssiDataTracker::handeleSecondaryPingMessage(rssi_ping_message_t* ping_msg)
 
 	char expressionstring[50];
 
-	sprintf(expressionstring, "rssi_%d_%d",
+	sprintf(expressionstring, "rssi_%d_%d_%d",
 			ping_msg->sender_id,
-			ping_msg->recipient_id);
+			ping_msg->recipient_id,
+			ping_msg->channel);
 
 	TEST_PUSH_EXPR_D(this, expressionstring, ping_msg->rssi);
 
