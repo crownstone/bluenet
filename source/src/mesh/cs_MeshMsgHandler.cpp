@@ -16,8 +16,6 @@
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
 
-#define MESGMSGHANDLER_LOGw LOGnone
-
 void MeshMsgHandler::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_ownId, sizeof(_ownId));
 }
@@ -29,8 +27,8 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 ////		sendReply(accessMsg);
 //	}
 	if (!MeshUtil::isValidMeshMessage(msg.msg, msg.msgSize)) {
-		MESGMSGHANDLER_LOGw("Invalid mesh message");
-//		BLEutil::printArray(msg.msg, msg.msgSize);
+		LOGw("Invalid mesh message");
+		BLEutil::printArray(msg.msg, msg.msgSize);
 		result.returnCode = ERR_INVALID_MESSAGE;
 		return;
 	}

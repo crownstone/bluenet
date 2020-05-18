@@ -73,7 +73,11 @@ void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) 
 		// Now only the special chars get escaped, no header and tail.
 		writeBytes(data, size);
 		return;
+	case UART_OPCODE_TX_SERVICE_DATA:
+	case UART_OPCODE_TX_FIRMWARESTATE:
+		return;
 	default:
+//		LOGd("writeMsg opCode=%u", opCode);
 		return;
 	}
 #endif
@@ -88,6 +92,7 @@ void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 	// when debugging we would like to drop out of certain binary data coming over the console...
 	switch(opCode) {
 	default:
+//		LOGd("writeMsg opCode=%u", opCode);
 		return;
 	}
 #endif
@@ -246,9 +251,19 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 		controlCmd.data = payload + sizeof(*controlHeader);
 		controlCmd.size = controlHeader->payloadSize;
 		controlCmd.source = cmd_source_t(CS_CMD_SOURCE_UART);
-		event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+
+		// Allocate buffer for result.
+		uint8_t resultBuffer[300];
+		cs_result_t result(cs_data_t(resultBuffer, sizeof(resultBuffer)));
+
+		event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), result);
 		EventDispatcher::getInstance().dispatch(event);
-		// TODO: return result.
+
+		result_packet_header_t resultHeader(controlCmd.type, event.result.returnCode, event.result.dataSize);
+		writeMsgStart(UART_OPCODE_TX_CONTROL_RESULT, sizeof(resultHeader) + resultHeader.payloadSize);
+		writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+		writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, event.result.buf.data, event.result.dataSize);
+		writeMsgEnd(UART_OPCODE_TX_CONTROL_RESULT);
 		break;
 	}
 	case UART_OPCODE_RX_ENABLE_ADVERTISEMENT: {

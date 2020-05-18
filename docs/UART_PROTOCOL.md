@@ -27,7 +27,7 @@ Opcodes for messages received by the Crownstone.
 
 Type  | Packet | Description
 ----- | ------ | ----
-1     | [Control msg](../docs/PROTOCOL.md#control_packet).
+1     | [Control msg](../docs/PROTOCOL.md#control_packet). | The result will be returned.
 10000 | uint8  | Enable/disable advertising.
 10001 | uint8  | Enable/disable mesh.
 10002 | -      | Get ID of this Crownstone.
@@ -51,12 +51,14 @@ Opcodes for messages sent by the Crownstone.
 Type  | Packet | Description
 ----- | ------ | ----
 0     | ?      | Ack. (Not implemented yet)
+1     | [Result packet](../docs/PROTOCOL.md#result_packet) | Result of a control command.
 2     | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Service data of this Crownstone (unencrypted).
 3     | string | As requested via control command `UART message`.
 102   | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | State of other Crownstones in the mesh (unencrypted).
 103   | [External state part 0](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_0_t) | Part of the state of other Crownstones in the mesh.
 104   | [External state part 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | Part of the state of other Crownstones in the mesh.
-105   | [Mesh result](#mesh_result_packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone.
+105   | [Mesh result](#mesh_result_packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out.
+106   | [Mesh ack all result](../docs/PROTOCOL.md#result_packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out. Note: for single IDs, this message might be sent before the `Mesh result` of that ID.
 10000 | uint8  | Whether advertising is enabled.
 10001 | uint8  | Whether mesh is enabled.
 10002 | uint8  | Own Crownstone ID.
@@ -76,7 +78,7 @@ Type  | Packet | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Stone ID | 1 | ID of the stone. 0 for all remaining stones.
+uint8 | Stone ID | 1 | ID of the stone.
 [Result packet](../docs/PROTOCOL.md#result_packet) | Result | N | The result.
 
 
