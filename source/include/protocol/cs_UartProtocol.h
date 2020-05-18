@@ -57,6 +57,7 @@ enum UartOpcodeRx {
 
 enum UartOpcodeTx {
 	UART_OPCODE_TX_ACK =                              0,
+	UART_OPCODE_TX_CONTROL_RESULT =                   1, // The result of the control command, payload: result_packet_header_t + data.
 	UART_OPCODE_TX_SERVICE_DATA =                     2, // Sent when the service data is updated (payload: service_data_t)
 	UART_OPCODE_TX_BLE_MSG =                          3, // Sent by command (CMD_UART_MSG), payload: buffer.
 	UART_OPCODE_TX_MESH_STATE =                       102, // Received state of external stone, payload: service_data_encrypted_t
