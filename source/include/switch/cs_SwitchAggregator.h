@@ -66,12 +66,6 @@ private:
     cmd_source_t _source = cmd_source_t(CS_CMD_SOURCE_NONE);
     uint32_t _ownerTimeoutCountdown = 0;
 
-    /**
-     * When this is false, all switch commands except toggle need to be
-     * ignored. The value will cache STATE_BEHAVIOUR_SETTINGS
-     */
-    bool smartHomeIsActive = true;
-
     // ================================== State updaters ==================================
 
     /**
