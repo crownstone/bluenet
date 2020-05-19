@@ -104,6 +104,17 @@ private:
 	uint8_t _queueIndexNext = 0;
 
 	/**
+	 * Status of the reliable msg.
+	 * 255 for no status.
+	 */
+	uint8_t _reliableStatus = 255;
+
+	/**
+	 * Whether the reply message has been received.
+	 */
+	bool _replyReceived = false;
+
+	/**
 	 * If item at index is in progress, cancel it.
 	 */
 	void cancelQueueItem(uint8_t index);
@@ -131,6 +142,11 @@ private:
 	 * Returns true when message was sent, false when no more messages to be sent.
 	 */
 	bool sendMsgFromQueue();
+
+	/**
+	 * Check if a message is done (success or timed out).
+	 */
+	void checkDone();
 
 	/**
 	 * Send a unicast message over the mesh.

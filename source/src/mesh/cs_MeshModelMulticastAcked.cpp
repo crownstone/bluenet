@@ -411,6 +411,7 @@ void MeshModelMulticastAcked::checkDone() {
 
 		result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
+		LOGMeshModelDebug("all success");
 
 		remQueueItem(_queueIndexInProgress);
 		_queueIndexInProgress = queue_index_none;
@@ -431,11 +432,13 @@ void MeshModelMulticastAcked::checkDone() {
 			if (!_ackedStonesBitmask.isSet(i)) {
 				resultHeader.stoneId = item.stoneIdsPtr[i];
 				UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+				LOGMeshModelDebug("timeout id=%u", resultHeader.stoneId);
 			}
 		}
 
 		result_packet_header_t ackResult(cmdType, ERR_TIMEOUT);
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
+		LOGMeshModelDebug("all timeout");
 
 		remQueueItem(_queueIndexInProgress);
 		_queueIndexInProgress = queue_index_none;

@@ -471,5 +471,6 @@ void MeshMsgHandler::sendResult(uart_msg_mesh_result_packet_header_t& resultHead
 	UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
 	UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, resultData.data, resultData.len);
 	UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_MESH_RESULT);
+	LOGMeshModelDebug("success id=%u", resultHeader.stoneId);
 }
 

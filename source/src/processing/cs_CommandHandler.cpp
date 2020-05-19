@@ -697,6 +697,7 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 		UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
 		UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, result.buf.data, result.dataSize);
 		UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_MESH_RESULT);
+//		LOGd("success id=%u", resultHeader.stoneId);
 
 		if (!forOthers) {
 			return;
