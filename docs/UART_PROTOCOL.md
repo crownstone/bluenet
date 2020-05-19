@@ -57,8 +57,8 @@ Type  | Packet | Description
 102   | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | State of other Crownstones in the mesh (unencrypted).
 103   | [External state part 0](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_0_t) | Part of the state of other Crownstones in the mesh.
 104   | [External state part 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | Part of the state of other Crownstones in the mesh.
-105   | [Mesh result](#mesh_result_packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out.
-106   | [Mesh ack all result](../docs/PROTOCOL.md#result_packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out. Note: for single IDs, this message might be sent before the `Mesh result` of that ID.
+105   | [Mesh result](#mesh_result_packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
+106   | [Mesh ack all result](../docs/PROTOCOL.md#result_packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
 10000 | uint8  | Whether advertising is enabled.
 10001 | uint8  | Whether mesh is enabled.
 10002 | uint8  | Own Crownstone ID.
