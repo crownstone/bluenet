@@ -93,8 +93,6 @@ private:
 
 	cs_unicast_queue_item_t _queue[queue_size];
 
-	uint32_t _ackTimeoutUs = 10 * 1000 * 1000; // MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT
-
 	/**
 	 * Queue index of message currently being sent.
 	 */
@@ -142,7 +140,7 @@ private:
 	 *
 	 * Message data has to stay in ram until acked or timedout!
 	 */
-	cs_ret_code_t sendMsg(const uint8_t* msg, uint16_t msgSize);
+	cs_ret_code_t sendMsg(const uint8_t* msg, uint16_t msgSize, uint32_t timeoutUs);
 
 	/**
 	 * Send a reply when receiving a reliable message.

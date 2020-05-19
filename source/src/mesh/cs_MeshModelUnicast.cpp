@@ -170,7 +170,7 @@ cs_ret_code_t MeshModelUnicast::sendReply(const access_message_rx_t* accessMsg, 
 	return retVal;
 }
 
-cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize) {
+cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize, uint32_t timeoutUs) {
 	if (!access_reliable_model_is_free(_accessModelHandle)) {
 		LOGMeshModelVerbose("Busy");
 		return ERR_BUSY;
@@ -188,7 +188,7 @@ cs_ret_code_t MeshModelUnicast::sendMsg(const uint8_t* msg, uint16_t msgSize) {
 	_accessReliableMsg.reply_opcode.company_id = CROWNSTONE_COMPANY_ID;
 	_accessReliableMsg.reply_opcode.opcode = CS_MESH_MODEL_OPCODE_UNICAST_REPLY;
 	_accessReliableMsg.status_cb = staticReliableStatusHandler;
-	_accessReliableMsg.timeout = _ackTimeoutUs;
+	_accessReliableMsg.timeout = timeoutUs;
 
 	uint32_t retVal = access_model_reliable_publish(&_accessReliableMsg);
 	LOGd("reliable send ret=%u", retVal);
@@ -362,7 +362,7 @@ bool MeshModelUnicast::sendMsgFromQueue() {
 	}
 	cs_unicast_queue_item_t* item = &(_queue[index]);
 	setPublishAddress(item->targetId);
-	cs_ret_code_t retCode = sendMsg(item->msgPtr, item->msgSize);
+	cs_ret_code_t retCode = sendMsg(item->msgPtr, item->msgSize, item->metaData.transmissionsOrTimeout * 1000 * 1000);
 	if (retCode != ERR_SUCCESS) {
 		return false;
 	}
