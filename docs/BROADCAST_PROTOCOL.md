@@ -58,7 +58,7 @@ uint16 | reserved | 16 | Reserved for future use, should be 0 for now.
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint16 | Validation | 16 | Validation: current local time as unix timestamp, right shifted by 7.
-uint8 | Location ID | 6 | ID of the location where the user is.
+uint8 | Location ID | 6 | ID of the location where the user is. 0 for in sphere, but no specific location.
 uint8 | Profile ID | 3 | ID of the profile the user is using.
 uint8 | RSSI offset | 4 | Offset from standard signal strength. Divide by 2, then add 8.
 uint8 | flags | 3 | [Flags](#background_adv_flags).
@@ -73,7 +73,7 @@ Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint8 | Counter | 8 | Count of the broadcast command. This value should be increased for each newly broadcasted command.
 uint8 | Reserved | 8 | Reserved for future use.
-uint8 | Location ID | 6 | ID of the location where the user is.
+uint8 | Location ID | 6 | ID of the location where the user is. 0 for in sphere, but no specific location.
 uint8 | Profile ID | 3 | ID of the profile the user is using.
 uint8 | RSSI offset | 4 | Offset from standard signal strength. Divide by 2, then add 8.
 uint8 | flags | 3 | [Flags](#background_adv_flags).
@@ -231,7 +231,7 @@ Bit | Name |  Description
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | Device ID | 2 | Unique ID of the device.
-uint 8 | Location ID | 1 | ID of the location where the device is.
+uint 8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
 uint 8 | Profile ID | 1 | Profile ID of the device.
 int 8 | RSSI offset | 1 | Offset from standard signal strength.
 uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background_adv_flags).

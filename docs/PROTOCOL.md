@@ -310,38 +310,38 @@ Setup access means the packet is available in setup mode, and encrypted with the
 
 Available command types:
 
-Type nr | Type name | Payload type | Result type | Description | A | M | B | S
---- | --- | --- | --- | :---: | :---: | :---: | :---: | :--:
-0 | Setup | [Setup packet](#setup_packet) | - | Perform setup. |  |  |  | x
-1 | Factory reset | uint 32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
-2 | Get state | [State get packet](#state_get_packet) | [State get result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
-3 | Set state | [State set packet](#state_set_packet) | [State set result packet](#state_set_result_packet) | Required access depends on the state type. | x | x | x
-4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) | Get bootloader version info. | x | x | x | x
-5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) | Get the UICR data. | x | x | x | x
-6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon_config_id_packet) | - | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x
-10 | Reset | - | - | Reset device | x
-11 | Goto DFU | - | - | Reset device to DFU mode | x
-12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
-13 | Disconnect | - | - | Causes the crownstone to disconnect | x | x | x
-20 | Switch | uint 8 | - | Switch power, 0 = off, 100 = full on | x | x | x | x |
-21 | Multi switch | [Multi switch packet](#multi_switch_packet) | - | Switch multiple Crownstones (via mesh). | x | x | x
-22 | Dimmer | uint 8 | - | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
-23 | Relay | uint 8 | - | Switch relay, 0 = off, 1 = on | x | x | x
-30 | Set time | uint 32 | - | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
-31 | Increase TX | - | - | Temporarily increase the TX power when in setup mode |  |  |  | x
-32 | Reset errors | [Error bitmask](#state_error_bitmask) | - | Reset all errors which are set in the written bitmask. | x
-33 | Mesh command | [Command mesh packet](#command_mesh_packet) | - | Send a generic command over the mesh. Required access depends on the command. | x | x | x
-34 | Set sun times | [Sun time packet](#sun_time_packet) | - | Update the reference times for sunrise and sunset | x | x
-40 | Allow dimming | uint 8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
-41 | Lock switch | uint 8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
-50 | UART message | payload | - | Print the payload to UART. | x
-60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#add_behaviour_result_packet) | Add a behaviour to an unoccupied index. | x | x
-61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#replace_behaviour_result_packet) | Replace the behaviour at given index. | x | x
-62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#remove_behaviour_result_packet) | Remove the behaviour at given index. | x | x
-63 | Get behaviour | [Index](BEHAVIOUR.md#get_behaviour_packet) | [Index and behaviour packet](BEHAVIOUR.md#get_behaviour_result_packet) | Obtain the behaviour stored at given index. | x | x
-64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
-69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) | Obtain debug info of the current behaviour state. | x
-70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | Register or update a device to be tracked.
+Type nr | Type name | Payload type | Result payload | Error descriptions | Description | A | M | B | S
+--- | --- | --- | --- | --- | :---: | :---: | :---: | :---: | :--:
+0 | Setup | [Setup packet](#setup_packet) | - |  | Perform setup. |  |  |  | x
+1 | Factory reset | uint 32 | - |  | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
+2 | Get state | [State get packet](#state_get_packet) | [State get result packet](#state_get_result_packet) |  | Required access depends on the state type. | x | x | x
+3 | Set state | [State set packet](#state_set_packet) | [State set result packet](#state_set_result_packet) |  | Required access depends on the state type. | x | x | x
+4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) |  | Get bootloader version info. | x | x | x | x
+5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) |  | Get the UICR data. | x | x | x | x
+6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon_config_id_packet) | - |  | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x
+10 | Reset | - | - |  | Reset device | x
+11 | Goto DFU | - | - |  | Reset device to DFU mode | x
+12 | No operation | - | - |  | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
+13 | Disconnect | - | - |  | Causes the crownstone to disconnect | x | x | x
+20 | Switch | uint 8 | - |  | Switch power, 0 = off, 100 = full on | x | x | x | x |
+21 | Multi switch | [Multi switch packet](#multi_switch_packet) | - |  | Switch multiple Crownstones (via mesh). | x | x | x
+22 | Dimmer | uint 8 | - |  | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
+23 | Relay | uint 8 | - |  | Switch relay, 0 = off, 1 = on | x | x | x
+30 | Set time | uint 32 | - |  | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
+31 | Increase TX | - | - |  | Temporarily increase the TX power when in setup mode |  |  |  | x
+32 | Reset errors | [Error bitmask](#state_error_bitmask) | - |  | Reset all errors which are set in the written bitmask. | x
+33 | Mesh command | [Command mesh packet](#command_mesh_packet) | - |  | Send a generic command over the mesh. Required access depends on the command. | x | x | x
+34 | Set sun times | [Sun time packet](#sun_time_packet) | - |  | Update the reference times for sunrise and sunset | x | x
+40 | Allow dimming | uint 8 | - |  | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
+41 | Lock switch | uint 8 | - |  | Lock/unlock switch, 0 = unlock, 1 = lock. | x
+50 | UART message | payload | - |  | Print the payload to UART. | x
+60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#add_behaviour_result_packet) |  | Add a behaviour to an unoccupied index. | x | x
+61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#replace_behaviour_result_packet) |  | Replace the behaviour at given index. | x | x
+62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#remove_behaviour_result_packet) |  | Remove the behaviour at given index. | x | x
+63 | Get behaviour | [Index](BEHAVIOUR.md#get_behaviour_packet) | [Index and behaviour packet](BEHAVIOUR.md#get_behaviour_result_packet) |  | Obtain the behaviour stored at given index. | x | x
+64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) |  | Obtain a list of occupied indices in the list of behaviours. | x | x
+69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) |  | Obtain debug info of the current behaviour state. | x
+70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | Register or update a device to be tracked.
 
 
 <a name="setup_packet"></a>
@@ -586,7 +586,7 @@ uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupi
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | Device ID | 2 | Unique ID of the device.
-uint 8 | Location ID | 1 | ID of the location where the device is.
+uint 8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
 uint 8 | Profile ID | 1 | Profile ID of the device.
 int 8 | RSSI offset | 1 | Offset from standard signal strength.
 uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background_adv_flags).
@@ -626,7 +626,7 @@ Value | Name | Description
 36  | UNKNOWN_TYPE | Unknown type provided.
 37  | NOT_FOUND | The thing you were looking for was not found.
 38  | NO_SPACE | There is no space for this command.
-39  | BUSY | Wait for something to be done.
+39  | BUSY | Wait for something to be done. You can usually retry later.
 40  | ERR_WRONG_STATE | The crownstone is in a wrong state.
 41  | ERR_ALREADY_EXISTS | Item already exists.
 42  | ERR_TIMEOUT | Operation timed out.
