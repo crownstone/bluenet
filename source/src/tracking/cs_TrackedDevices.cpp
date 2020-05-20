@@ -11,7 +11,7 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
-#define LOGTrackedDevicesDebug LOGd
+#define LOGTrackedDevicesDebug LOGnone
 #define LOGTrackedDevicesVerbose LOGnone
 
 TrackedDevices::TrackedDevices() {
@@ -32,7 +32,6 @@ cs_ret_code_t TrackedDevices::handleRegister(internal_register_tracked_device_pa
 		return ERR_NO_ACCESS;
 	}
 	if (!isTokenOkToSet(*device, packet.data.deviceToken, sizeof(packet.data.deviceToken))) {
-		LOGw("Token already exists");
 		return ERR_ALREADY_EXISTS;
 	}
 	setAccessLevel(*device, packet.accessLevel);
@@ -78,7 +77,6 @@ void TrackedDevices::handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& pack
 	}
 	// Access has been checked by sending crownstone.
 	if (!isTokenOkToSet(*device, packet.deviceToken, sizeof(packet.deviceToken))) {
-		LOGw("Token already exists");
 		return;
 	}
 	setDevicetoken(*device, packet.deviceToken, sizeof(packet.deviceToken));
@@ -205,6 +203,7 @@ bool TrackedDevices::isTokenOkToSet(TrackedDevice& device, uint8_t* deviceToken,
 	if (otherDevice->data.data.deviceId == device.data.data.deviceId) {
 		return true;
 	}
+	LOGw("Token already exists (id=%u)", otherDevice->data.data.deviceId);
 	return false;
 }
 
@@ -302,7 +301,7 @@ void TrackedDevices::tickMinute() {
 				iter->data.data.locationId = 0;
 			}
 		}
-		if ((iter->fieldsSet & BIT_POS_TTL) && (iter->data.data.timeToLiveMinutes != 0)) {
+		if (iter->data.data.timeToLiveMinutes != 0) {
 			iter->data.data.timeToLiveMinutes--;
 		}
 		print(*iter);

@@ -210,7 +210,7 @@ cs_ret_code_t MeshMsgSender::sendProfileLocation(const cs_mesh_model_msg_profile
 }
 
 cs_ret_code_t MeshMsgSender::sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* packet, uint8_t transmissions) {
-	LOGd("sendTrackedDeviceRegister");
+	LOGd("sendTrackedDeviceRegister id=%u profile=%u location=%u", packet->deviceId, packet->profileId, packet->locationId);
 
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = packet->deviceId;
@@ -228,7 +228,7 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceRegister(const cs_mesh_model_msg_d
 }
 
 cs_ret_code_t MeshMsgSender::sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* packet, uint8_t transmissions) {
-	LOGd("sendTrackedDeviceToken");
+	LOGd("sendTrackedDeviceToken id=%u TTL=%u token=%u %u %u", packet->deviceId, packet->ttlMinutes, packet->deviceToken[0], packet->deviceToken[1], packet->deviceToken[2]);
 
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = packet->deviceId;

@@ -319,7 +319,7 @@ cs_ret_code_t MeshMsgHandler::handleSetBehaviourSettings(uint8_t* payload, size1
 
 cs_ret_code_t MeshMsgHandler::handleTrackedDeviceRegister(uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_device_register_t* packet = (cs_mesh_model_msg_device_register_t*) payload;
-	LOGMeshModelInfo("received tracked device register id=%u", packet->deviceId);
+	LOGMeshModelInfo("received tracked device register id=%u profile=%u location=%u", packet->deviceId, packet->profileId, packet->locationId);
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)));
 	event.dispatch();
@@ -329,7 +329,7 @@ cs_ret_code_t MeshMsgHandler::handleTrackedDeviceRegister(uint8_t* payload, size
 
 cs_ret_code_t MeshMsgHandler::handleTrackedDeviceToken(uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_device_token_t* packet = (cs_mesh_model_msg_device_token_t*) payload;
-	LOGMeshModelInfo("received tracked device token id=%u", packet->deviceId);
+	LOGMeshModelInfo("received tracked device token id=%u TTL=%u token=%u %u %u", packet->deviceId, packet->ttlMinutes, packet->deviceToken[0], packet->deviceToken[1], packet->deviceToken[2]);
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
 	event.dispatch();
