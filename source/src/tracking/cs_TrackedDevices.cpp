@@ -306,6 +306,8 @@ void TrackedDevices::tickMinute() {
 		}
 		print(*iter);
 	}
+	// Removed timed out devices.
+	devices.remove_if([](const TrackedDevice& device) { return device.data.data.timeToLiveMinutes == 0; });
 }
 
 
