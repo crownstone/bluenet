@@ -310,42 +310,42 @@ Setup access means the packet is available in setup mode, and encrypted with the
 
 Available command types:
 
-Type nr | Type name | Payload type | Result payload | Error descriptions | Description | A | M | B | S
---- | --- | --- | --- | --- | --- | :---: | :---: | :---: | :--:
-0 | Setup | [Setup packet](#setup_packet) | - |  | Perform setup. |  |  |  | x
-1 | Factory reset | uint 32 | - |  | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
-2 | Get state | [State get packet](#state_get_packet) | [State get result packet](#state_get_result_packet) |  | Required access depends on the state type. | x | x | x
-3 | Set state | [State set packet](#state_set_packet) | [State set result packet](#state_set_result_packet) |  | Required access depends on the state type. | x | x | x
-4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) |  | Get bootloader version info. | x | x | x | x
-5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) |  | Get the UICR data. | x | x | x | x
-6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon_config_id_packet) | - |  | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x
-10 | Reset | - | - |  | Reset device | x
-11 | Goto DFU | - | - |  | Reset device to DFU mode | x
-12 | No operation | - | - |  | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
-13 | Disconnect | - | - |  | Causes the crownstone to disconnect | x | x | x
-20 | Switch | [Switch value](#switch_command_value) | - |  | Switch power. | x | x | x | x |
-21 | Multi switch | [Multi switch packet](#multi_switch_packet) | - |  | Switch multiple Crownstones (via mesh). | x | x | x
-22 | Dimmer | uint 8 | - |  | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
-23 | Relay | uint 8 | - |  | Switch relay, 0 = off, 1 = on | x | x | x
-30 | Set time | uint 32 | - |  | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
-31 | Increase TX | - | - |  | Temporarily increase the TX power when in setup mode |  |  |  | x
-32 | Reset errors | [Error bitmask](#state_error_bitmask) | - |  | Reset all errors which are set in the written bitmask. | x
-33 | Mesh command | [Command mesh packet](#command_mesh_packet) | - |  | Send a generic command over the mesh. Required access depends on the command. | x | x | x
-34 | Set sun times | [Sun time packet](#sun_time_packet) | - |  | Update the reference times for sunrise and sunset | x | x
-40 | Allow dimming | uint 8 | - |  | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
-41 | Lock switch | uint 8 | - |  | Lock/unlock switch, 0 = unlock, 1 = lock. | x
-50 | UART message | payload | - |  | Print the payload to UART. | x
-60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#add_behaviour_result_packet) |  | Add a behaviour to an unoccupied index. | x | x
-61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#replace_behaviour_result_packet) |  | Replace the behaviour at given index. | x | x
-62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#remove_behaviour_result_packet) |  | Remove the behaviour at given index. | x | x
-63 | Get behaviour | [Index](BEHAVIOUR.md#get_behaviour_packet) | [Index and behaviour packet](BEHAVIOUR.md#get_behaviour_result_packet) |  | Obtain the behaviour stored at given index. | x | x
-64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) |  | Obtain a list of occupied indices in the list of behaviours. | x | x
-69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) |  | Obtain debug info of the current behaviour state. | x
-70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | Register or update a device to be tracked.
-80 | Get uptime | - | uint 32 | Time in seconds since boot.
-81 | Get ADC restarts | - | uint 32 | Number of ADC restarts since boot.
-82 | Get switch history | - | [Switch history packet](#switch_history_packet)
-83 | Get power samples | [Request power samples](#power_samples_request_packet) | [Power samples](#power_samples_result_packet) |
+Type nr | Type name | Payload type | Result payload | Description | A | M | B | S
+--- | --- | --- | --- | --- | :---: | :---: | :---: | :--:
+0 | Setup | [Setup packet](#setup_packet) | - | Perform setup. |  |  |  | x
+1 | Factory reset | uint 32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
+2 | Get state | [State get packet](#state_get_packet) | [State get result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
+3 | Set state | [State set packet](#state_set_packet) | [State set result packet](#state_set_result_packet) | Required access depends on the state type. | x | x | x
+4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) | Get bootloader version info. | x | x | x | x
+5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) | Get the UICR data. | x | x | x | x
+6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon_config_id_packet) | - | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x
+10 | Reset | - | - | Reset device | x
+11 | Goto DFU | - | - | Reset device to DFU mode | x
+12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
+13 | Disconnect | - | - | Causes the crownstone to disconnect | x | x | x
+20 | Switch | [Switch value](#switch_command_value) | - | Switch power. | x | x | x | x |
+21 | Multi switch | [Multi switch packet](#multi_switch_packet) | - | Switch multiple Crownstones (via mesh). | x | x | x
+22 | Dimmer | uint 8 | - | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
+23 | Relay | uint 8 | - | Switch relay, 0 = off, 1 = on | x | x | x
+30 | Set time | uint 32 | - | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
+31 | Increase TX | - | - | Temporarily increase the TX power when in setup mode |  |  |  | x
+32 | Reset errors | [Error bitmask](#state_error_bitmask) | - | Reset all errors which are set in the written bitmask. | x
+33 | Mesh command | [Command mesh packet](#command_mesh_packet) | - | Send a generic command over the mesh. Required access depends on the command. | x | x | x
+34 | Set sun times | [Sun time packet](#sun_time_packet) | - | Update the reference times for sunrise and sunset | x | x
+40 | Allow dimming | uint 8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
+41 | Lock switch | uint 8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
+50 | UART message | payload | - | Print the payload to UART. | x
+60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#add_behaviour_result_packet) | Add a behaviour to an unoccupied index. | x | x
+61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#replace_behaviour_result_packet) | Replace the behaviour at given index. | x | x
+62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#remove_behaviour_result_packet) | Remove the behaviour at given index. | x | x
+63 | Get behaviour | [Index](BEHAVIOUR.md#get_behaviour_packet) | [Index and behaviour packet](BEHAVIOUR.md#get_behaviour_result_packet) | Obtain the behaviour stored at given index. | x | x
+64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
+69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) | Obtain debug info of the current behaviour state. | x
+70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | Register or update a device to be tracked. Error codes: ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | x | x | x
+80 | Get uptime | - | uint 32 | Time in seconds since boot. | x
+81 | Get ADC restarts | - | uint 32 | Number of ADC restarts since boot. | x
+82 | Get switch history | - | [Switch history packet](#switch_history_packet) | A history of why the switch state has changed. | x
+83 | Get power samples | [Request power samples](#power_samples_request_packet) | [Power samples](#power_samples_result_packet) | Get the current or voltage samples of certain events. | x
 84 | Get CPU usage statistics | - |
 
 
@@ -596,6 +596,7 @@ uint 64 | Active timeout periods | 8 | Bitmask of behaviours that are in (presen
 uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
 
 
+
 <a name="switch_history_packet"></a>
 #### Switch history packet
 
@@ -609,9 +610,10 @@ uint8 | Count | 1 | Number of items in the list.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint32 | Timestamp | 4 | Unique ID of the device.
+uint32 | Timestamp | 4 | Unix timestamp of the switch command.
 [Switch state](#switch_state_packet) | Switch state | 1 | The switch state.
 [Command source](#command_source_packet) | Source | 2 | The source of the switch command.
+
 
 
 <a name="command_source_packet"></a>
@@ -621,7 +623,7 @@ Type | Name | Length in bits | Description
 --- | --- | --- | ---
 bool | External | 1 | Whether receive from the mesh.
 uint 8 | Reserved | 5 | Reserved for future use, must be 0 for now.
-uint 16 | [Source ID](#command_source_type) | 10 | The ID of the source.
+uint 16 | [Source ID](#command_source_ID) | 10 | The ID of the source.
 
 <a name="command_source_ID"></a>
 ##### Command source ID
@@ -637,6 +639,7 @@ Value | Name | Description
 768 + N | Device ID | Device with ID = N, as given by [broadcast command](BROADCAST_PROTOCOL.md#command_adv_header).
 
 
+
 <a name="power_samples_request_packet"></a>
 #### Power samples request packet
 
@@ -648,12 +651,19 @@ uint 8 | Index | 1 | Some types have multiple lists of samples.
 <a name="power_samples_result_packet"></a>
 #### Power samples result packet
 
+![Power samples result packet](../docs/diagrams/power_samples_result_packet.png)
+
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Type](#power_samples_type) | 1 | Type of samples, also determines whether the samples are voltage or current samples.
 uint 8 | Index | 1 | Some types have multiple lists of samples.
 uint 16 | Count | 2 | Number of samples in the list.
-uint 32 | Timestamp | 4 | Timestamp of the last update.
+uint 32 | Timestamp | 4 | Unix timestamp of time the samples have been set.
+uint 16 | Delay | 2 | Measurement delay in μs.
+uint 16 | Sample interval | 2 | Sample interval in μs.
+uint 16 | Reserved | 2 | Reserved for future use, should be 0 for now.
+int 16 | Offset | 2 | Calculated offset of the samples.
+float | Multiplier | 4 | Multiply the sample value with this value to get a value in ampere, or volt.
 int 16 [] | Samples | 2 | List of samples.
 
 <a name="power_samples_type"></a>
@@ -680,6 +690,8 @@ int 8 | RSSI offset | 1 | Offset from standard signal strength.
 uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background_adv_flags).
 uint 24 | Device token | 3 | Token that will be advertised by the device.
 uint 16 | Time to live | 2 | Time in minutes after which the device token will be invalid.
+
+
 
 <a name="result_packet"></a>
 ## Result packet
