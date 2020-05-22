@@ -311,7 +311,7 @@ Setup access means the packet is available in setup mode, and encrypted with the
 Available command types:
 
 Type nr | Type name | Payload type | Result payload | Error descriptions | Description | A | M | B | S
---- | --- | --- | --- | --- | :---: | :---: | :---: | :---: | :--:
+--- | --- | --- | --- | --- | --- | :---: | :---: | :---: | :--:
 0 | Setup | [Setup packet](#setup_packet) | - |  | Perform setup. |  |  |  | x
 1 | Factory reset | uint 32 | - |  | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
 2 | Get state | [State get packet](#state_get_packet) | [State get result packet](#state_get_result_packet) |  | Required access depends on the state type. | x | x | x
@@ -319,8 +319,6 @@ Type nr | Type name | Payload type | Result payload | Error descriptions | Descr
 4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) |  | Get bootloader version info. | x | x | x | x
 5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) |  | Get the UICR data. | x | x | x | x
 6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon_config_id_packet) | - |  | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x
-
-
 10 | Reset | - | - |  | Reset device | x
 11 | Goto DFU | - | - |  | Reset device to DFU mode | x
 12 | No operation | - | - |  | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
@@ -342,13 +340,12 @@ Type nr | Type name | Payload type | Result payload | Error descriptions | Descr
 62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#remove_behaviour_result_packet) |  | Remove the behaviour at given index. | x | x
 63 | Get behaviour | [Index](BEHAVIOUR.md#get_behaviour_packet) | [Index and behaviour packet](BEHAVIOUR.md#get_behaviour_result_packet) |  | Obtain the behaviour stored at given index. | x | x
 64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) |  | Obtain a list of occupied indices in the list of behaviours. | x | x
-65 | Activate behaviour | - | - |  | Removes manual override.
 69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) |  | Obtain debug info of the current behaviour state. | x
 70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | Register or update a device to be tracked.
-80 | Get uptime | - |
-81 | Get ADC restarts | - |
-82 | Get switch history | - |
-83 | Get power buffer | type of event
+80 | Get uptime | - | uint 32 | Time in seconds since boot.
+81 | Get ADC restarts | - | uint 32 | Number of ADC restarts since boot.
+82 | Get switch history | - | [Switch history packet](#switch_history_packet)
+83 | Get power samples | [Request power samples](#power_samples_request_packet) | [Power samples](#power_samples_result_packet) |
 84 | Get CPU usage statistics | - |
 
 
@@ -578,7 +575,7 @@ Bit | Name |  Description
 
 
 <a name="behaviour_debug_packet"></a>
-##### Behaviour debug packet
+#### Behaviour debug packet
 
 ![Behaviour debug packet](../docs/diagrams/behaviour_debug_packet.png)
 
@@ -598,8 +595,79 @@ uint 64 | Active end conditions | 8 | Bitmask of behaviours with active end cond
 uint 64 | Active timeout periods | 8 | Bitmask of behaviours that are in (presence) timeout period. Nth bit is Nth behaviour index.
 uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
 
+
+<a name="switch_history_packet"></a>
+#### Switch history packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Count | 1 | Number of items in the list.
+[Switch history item](#switch_history_item_packet) [] | List |
+
+<a name="switch_history_item_packet"></a>
+##### Switch history item packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Timestamp | 4 | Unique ID of the device.
+[Switch state](#switch_state_packet) | Switch state | 1 | The switch state.
+[Command source](#command_source_packet) | Source | 2 | The source of the switch command.
+
+
+<a name="command_source_packet"></a>
+#### Command source packet
+
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+bool | External | 1 | Whether receive from the mesh.
+uint 8 | Reserved | 5 | Reserved for future use, must be 0 for now.
+uint 16 | [Source ID](#command_source_type) | 10 | The ID of the source.
+
+<a name="command_source_ID"></a>
+##### Command source ID
+
+Value | Name | Description
+--- | --- | ---
+0 | None
+1 | Default
+2 | Internal
+3 | UART
+4 | Connection
+5 | Switchcraft
+768 + N | Device ID | Device with ID = N, as given by [broadcast command](BROADCAST_PROTOCOL.md#command_adv_header).
+
+
+<a name="power_samples_request_packet"></a>
+#### Power samples request packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | [Type](#power_samples_type) | 1 | Type of samples.
+uint 8 | Index | 1 | Some types have multiple lists of samples.
+
+<a name="power_samples_result_packet"></a>
+#### Power samples result packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | [Type](#power_samples_type) | 1 | Type of samples, also determines whether the samples are voltage or current samples.
+uint 8 | Index | 1 | Some types have multiple lists of samples.
+uint 16 | Count | 2 | Number of samples in the list.
+uint 32 | Timestamp | 4 | Timestamp of the last update.
+int 16 [] | Samples | 2 | List of samples.
+
+<a name="power_samples_type"></a>
+#### Power samples type
+
+Value | Name | Description | Voltage | Current
+--- | --- | --- | :---: | :---:
+0 | Triggered switchcraft | Last samples that triggered switchcraft. Has 3 lists of samples. | x
+1 | Non-triggered switchcraft | Last samples that almost triggered switchcraft. Has 3 lists of samples. | x
+
+
+
 <a name="register_tracked_device_packet"></a>
-##### Register tracked device packet
+#### Register tracked device packet
 
 ![Register tracked device packet](../docs/diagrams/register_tracked_device_packet.png)
 

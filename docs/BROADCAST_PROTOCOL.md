@@ -127,7 +127,7 @@ uint8 | Sphere ID | 8 | Sphere ID that must be the same as given during setup. U
 uint8 | Access level | 3 | Shortened access level: 0=admin, 1=member, 2=basic, 4=setup.
 uint8 | Sequence | 2 | 1: Sequence of this service UUID.
 uint8 | Reserved | 2 | Reserved for future use.
-uint8 | Device token | 8 | Token of this device, should be unique per device (phone) in the sphere.
+uint8 | Device ID | 8 | ID of this device, should be unique per device (phone) in the sphere.
 uint16 | RC5 payload | 4 | First 4 bits of first block of [encrypted RC5 payload](#rc5_adv_payload).
 uint8 | Sequence | 2 | 2: Sequence of this service UUID.
 uint16 | RC5 payload | 12 | Last 12 bits of first block of [encrypted RC5 payload](#rc5_adv_payload).
