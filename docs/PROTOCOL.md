@@ -1,4 +1,4 @@
-# Bluenet protocol v5.0.0
+# Bluenet protocol v5.1
 -------------------------
 
 This only documents the latest protocol, older versions can be found in the git history.
@@ -319,6 +319,8 @@ Type nr | Type name | Payload type | Result payload | Error descriptions | Descr
 4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) |  | Get bootloader version info. | x | x | x | x
 5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) |  | Get the UICR data. | x | x | x | x
 6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon_config_id_packet) | - |  | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x
+
+
 10 | Reset | - | - |  | Reset device | x
 11 | Goto DFU | - | - |  | Reset device to DFU mode | x
 12 | No operation | - | - |  | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
@@ -340,8 +342,14 @@ Type nr | Type name | Payload type | Result payload | Error descriptions | Descr
 62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#remove_behaviour_result_packet) |  | Remove the behaviour at given index. | x | x
 63 | Get behaviour | [Index](BEHAVIOUR.md#get_behaviour_packet) | [Index and behaviour packet](BEHAVIOUR.md#get_behaviour_result_packet) |  | Obtain the behaviour stored at given index. | x | x
 64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) |  | Obtain a list of occupied indices in the list of behaviours. | x | x
+65 | Activate behaviour | - | - |  | Removes manual override.
 69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) |  | Obtain debug info of the current behaviour state. | x
 70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | Register or update a device to be tracked.
+80 | Get uptime | - |
+81 | Get ADC restarts | - |
+82 | Get switch history | - |
+83 | Get power buffer | type of event
+84 | Get CPU usage statistics | - |
 
 
 <a name="setup_packet"></a>
@@ -374,6 +382,7 @@ Value | Name | Description
 0 | Off | Switch off.
 1-99 | Dimmed | Set a dimmed value.
 100 | Full on | Switch fully on.
+254 | Behaviour | Set the default value determined by _behaviour_ rules.
 255 | Default on | Set the default on value, determined by _twilight_ rules.
 
 
