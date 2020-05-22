@@ -323,7 +323,7 @@ Type nr | Type name | Payload type | Result payload | Error descriptions | Descr
 11 | Goto DFU | - | - |  | Reset device to DFU mode | x
 12 | No operation | - | - |  | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
 13 | Disconnect | - | - |  | Causes the crownstone to disconnect | x | x | x
-20 | Switch | uint 8 | - |  | Switch power, 0 = off, 100 = full on | x | x | x | x |
+20 | Switch | [Switch value](#switch_command_value) | - |  | Switch power. | x | x | x | x |
 21 | Multi switch | [Multi switch packet](#multi_switch_packet) | - |  | Switch multiple Crownstones (via mesh). | x | x | x
 22 | Dimmer | uint 8 | - |  | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
 23 | Relay | uint 8 | - |  | Switch relay, 0 = off, 1 = on | x | x | x
@@ -364,6 +364,17 @@ uint 8[] | Mesh net key  | 16 | 16 byte key used to encrypt/decrypt relays of me
 uint 8[] | iBeacon UUID | 16 | The iBeacon UUID. Should be the same for each Crownstone in the sphere.
 uint 16 | iBeacon major | 2 | The iBeacon major. Together with the minor, should be unique per sphere.
 uint 16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should be unique per sphere.
+
+
+<a name="switch_command_value"></a>
+#### Switch command value
+
+Value | Name | Description
+--- | --- | ---
+0 | Off | Switch off.
+1-99 | Dimmed | Set a dimmed value.
+100 | Full on | Switch fully on.
+255 | Default on | Set the default on value, determined by _twilight_ rules.
 
 
 <a name="state_get_packet"></a>
@@ -497,7 +508,7 @@ uint 8 | Count | 1 | Number of valid entries.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
-uint 8 | Switch value | 1 | The switch value to be set by the targeted crownstone. 0 = off, 100 = fully on.
+uint 8 | [Switch value](#switch_command_value) | 1 | The switch value to be set by the targeted crownstone.
 
 
 <a name="state_error_bitmask"></a>

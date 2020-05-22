@@ -1,4 +1,4 @@
-# Bluenet broadcast protocol v4.0.0
+# Bluenet broadcast protocol v4.0
 -----------------------------------
 
 This only documents the latest protocol, older versions can be found in the git history.
@@ -177,7 +177,7 @@ uint 8 | Count | 1 | Number of valid entries.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
-uint 8 | Switch state | 1 | The switch state to be set by the targeted crownstone. 0 = off, 100 = fully on.
+uint 8 | [Switch value](PROTOCOL.md#switch_command_value) | 1 | The switch value to be set by the targeted crownstone.
 
 <a name="set_time_packet"></a>
 ##### Set time packet
