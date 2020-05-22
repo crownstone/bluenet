@@ -367,7 +367,7 @@ uint 16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should
 
 
 <a name="switch_command_value"></a>
-#### Switch command value
+#### Switch command value (uint 8)
 
 Value | Name | Description
 --- | --- | ---
