@@ -103,6 +103,7 @@ private:
 	void handleCmdStateGet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdStateSet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdRegisterTrackedDevice   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdGetUptime               (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	
 	/**
 	 * Delegate a command via an event.

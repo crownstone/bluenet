@@ -354,6 +354,29 @@ struct __attribute__((packed)) cs_uicr_data_t {
 	} productionDateHousing;
 };
 
+enum PowerSamplesType {
+	POWER_SAMPLES_TYPE_SWITCHCRAFT = 0,
+	POWER_SAMPLES_TYPE_SWITCHCRAFT_NON_TRIGGERED = 1,
+};
+
+struct __attribute__((packed)) cs_power_samples_header_t {
+	uint8_t type;                 // PowerSamplesType.
+	uint8_t index = 0;            // Some types have multiple lists of samples.
+	uint16_t count = 0;           // Number of samples.
+	uint32_t unixTimestamp;       // Unix timestamp of time the samples have been set.
+	uint16_t delayUs;             // Delay of the measurement.
+	uint16_t sampleIntervalUs;    // Time between samples.
+	uint16_t reserved = 0;
+	int16_t offset;               // Calculated offset (mean) of the samples.
+	float multiplier;             // Multiply the sample value with this value to get a value in ampere, or volt.
+	// Followed by: int16_t samples[count]
+};
+
+struct __attribute__((packed)) cs_power_samples_request_t {
+	uint8_t type;                 // PowerSamplesType.
+	uint8_t index = 0;            // Some types have multiple lists of samples.
+};
+
 
 // ========================= functions =========================
 

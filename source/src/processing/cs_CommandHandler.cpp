@@ -116,6 +116,9 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_GET_BEHAVIOUR_INDICES:
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
+		case CTRL_CMD_GET_UPTIME:
+		case CTLR_CMD_GET_ADC_RESTARTS:
+		case CTLR_CMD_GET_POWER_SAMPLES:
 			LOGd("cmd=%u lvl=%u", type, accessLevel);
 			break;
 		case CTRL_CMD_UNKNOWN:
@@ -191,6 +194,12 @@ void CommandHandler::handleCommand(
 		return handleCmdRegisterTrackedDevice(commandData, accessLevel, result);
 	case CTRL_CMD_SET_IBEACON_CONFIG_ID:
 		return dispatchEventForCommand(CS_TYPE::CMD_SET_IBEACON_CONFIG_ID, commandData, result);
+	case CTRL_CMD_GET_UPTIME:
+		return handleCmdGetUptime(commandData, accessLevel, result);
+	case CTLR_CMD_GET_ADC_RESTARTS:
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_RESTARTS, commandData, result);
+	case CTLR_CMD_GET_POWER_SAMPLES:
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_POWER_SAMPLES, commandData, result);
 	case CTRL_CMD_UNKNOWN:
 		result.returnCode = ERR_UNKNOWN_TYPE;
 		return;
@@ -806,6 +815,19 @@ void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const
 	return;
 }
 
+void CommandHandler::handleCmdGetUptime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+	LOGi(STR_HANDLE_COMMAND, "get uptime");
+	if (result.buf.len < sizeof(uint32_t)) {
+		result.returnCode = ERR_BUFFER_TOO_SMALL;
+		return;
+	}
+	uint32_t* uptime = (uint32_t*) result.buf.data;
+	*uptime = SystemTime::up();
+	result.dataSize = sizeof(uint32_t);
+	result.returnCode = ERR_SUCCESS;
+	return;
+}
+
 void CommandHandler::dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, cs_result_t & result) {
 	event_t event(type, commandData.data, commandData.len, result);
 	event.dispatch();
@@ -853,6 +875,9 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_UART_MSG:
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
+		case CTRL_CMD_GET_UPTIME:
+		case CTLR_CMD_GET_ADC_RESTARTS:
+		case CTLR_CMD_GET_POWER_SAMPLES:
 			return ADMIN;
 		case CTRL_CMD_UNKNOWN:
 			return NOT_SET;
