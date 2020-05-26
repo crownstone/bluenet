@@ -63,8 +63,10 @@ private:
      * Until timeout, nothing with a different source can set the switch.
      * Unless that source overrules the current source.
      */
-    cmd_source_t _source = cmd_source_t(CS_CMD_SOURCE_NONE);
+    cmd_source_with_counter_t _source = cmd_source_with_counter_t(CS_CMD_SOURCE_NONE);
     uint32_t _ownerTimeoutCountdown = 0;
+
+
 
     // ================================== State updaters ==================================
 
@@ -158,7 +160,7 @@ private:
      * Tries to set source as owner of the switch.
      * Returns true on success, false if switch is already owned by a different source, and given source does not overrule it.
      */
-    bool checkAndSetOwner(cmd_source_t source);
+    bool checkAndSetOwner(cmd_source_with_counter_t source);
 
     void handleGetBehaviourDebug(event_t& evt);
 

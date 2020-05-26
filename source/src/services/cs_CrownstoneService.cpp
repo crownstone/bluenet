@@ -95,7 +95,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			result.buf.len = _resultPacketAccessor->getMaxPayloadSize();
 //			}
 
-			CommandHandler::getInstance().handleCommand(protocol, type, payload, cmd_source_t(CS_CMD_SOURCE_CONNECTION), accessLevel, result);
+			CommandHandler::getInstance().handleCommand(protocol, type, payload, cmd_source_with_counter_t(CS_CMD_SOURCE_CONNECTION), accessLevel, result);
 			writeBuffer.unlock();
 		}
 		else {

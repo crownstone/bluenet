@@ -250,7 +250,7 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 		controlCmd.accessLevel = ADMIN;
 		controlCmd.data = payload + sizeof(*controlHeader);
 		controlCmd.size = controlHeader->payloadSize;
-		controlCmd.source = cmd_source_t(CS_CMD_SOURCE_UART);
+		controlCmd.source = cmd_source_with_counter_t(CS_CMD_SOURCE_UART);
 
 		// Allocate buffer for result.
 		uint8_t resultBuffer[300];

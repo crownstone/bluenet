@@ -74,7 +74,7 @@ void CommandHandler::handleCommand(
 		uint8_t protocolVersion,
 		const CommandHandlerTypes type,
 		cs_data_t commandData,
-		const cmd_source_t source,
+		const cmd_source_with_counter_t source,
 		const EncryptionAccessLevel accessLevel,
 		cs_result_t & result
 		) {
@@ -578,7 +578,7 @@ void CommandHandler::handleCmdRelay(cs_data_t commandData, const EncryptionAcces
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "multi switch");
 	multi_switch_t* multiSwitchPacket = (multi_switch_t*)commandData.data;
 	if (!cs_multi_switch_packet_is_valid(multiSwitchPacket, commandData.len)) {
@@ -603,7 +603,7 @@ void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_sourc
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "mesh command");
 	uint16_t size = commandData.len;
 	buffer_ptr_t buffer = commandData.data;

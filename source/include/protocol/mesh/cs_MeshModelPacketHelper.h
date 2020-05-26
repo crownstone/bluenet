@@ -84,7 +84,7 @@ bool canShortenStateType(uint16_t type);
 bool canShortenStateId(uint16_t id);
 bool canShortenPersistenceMode(uint8_t id);
 bool canShortenAccessLevel(EncryptionAccessLevel accessLevel);
-bool canShortenSource(cmd_source_t source);
+bool canShortenSource(cmd_source_with_counter_t source);
 bool canShortenRetCode(cs_ret_code_t retCode);
 
 uint8_t getShortenedRetCode(cs_ret_code_t retCode);
@@ -93,7 +93,7 @@ cs_ret_code_t getInflatedRetCode(uint8_t retCode);
 uint8_t getShortenedAccessLevel(EncryptionAccessLevel accessLevel);
 EncryptionAccessLevel getInflatedAccessLevel(uint8_t accessLevel);
 
-uint8_t getShortenedSource(cmd_source_t source);
-cmd_source_t getInflatedSource(uint8_t sourceId);
+uint8_t getShortenedSource(cmd_source_with_counter_t source);
+cmd_source_with_counter_t getInflatedSource(uint8_t sourceId);
 
 }

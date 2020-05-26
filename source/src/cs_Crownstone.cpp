@@ -543,7 +543,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			LOGd("Configure DFU mode");
 			// TODO: have this function somewhere else.
 			cs_result_t result;
-			CommandHandler::getInstance().handleCommand(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_GOTO_DFU, cs_data_t(), cmd_source_t(CS_CMD_SOURCE_INTERNAL), ADMIN, result);
+			CommandHandler::getInstance().handleCommand(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_GOTO_DFU, cs_data_t(), cmd_source_with_counter_t(CS_CMD_SOURCE_INTERNAL), ADMIN, result);
 			_advertiser->changeToNormalTxPower();
 			break;
 		}

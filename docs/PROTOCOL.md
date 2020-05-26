@@ -611,7 +611,8 @@ uint8 | Count | 1 | Number of items in the list.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint32 | Timestamp | 4 | Unix timestamp of the switch command.
-[Switch state](#switch_state_packet) | Switch state | 1 | The switch state.
+[Switch command]() | Switch command | 1 | The switch command.
+[Switch state](#switch_state_packet) | Switch state | 1 | The switch state after the command was executed.
 [Command source](#command_source_packet) | Source | 2 | The source of the switch command.
 
 
@@ -621,9 +622,18 @@ uint32 | Timestamp | 4 | Unix timestamp of the switch command.
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
-bool | External | 1 | Whether receive from the mesh.
-uint 8 | Reserved | 5 | Reserved for future use, must be 0 for now.
-uint 16 | [Source ID](#command_source_ID) | 10 | The ID of the source.
+bool | External | 1 | Whether the command was received via the mesh.
+uint 8 | Reserved | 4 | Reserved for future use, must be 0 for now.
+uint 8 | [Source type](#command_source_type) | 3 | What type of source ID.
+uint 8 | [Source ID](#command_source_ID) | 8 | The ID of the source.
+
+<a name="command_source_type"></a>
+##### Command source type
+
+Value | Name | Description
+--- | --- | ---
+0 | Enum | ID is one of the [list](#command_source_ID).
+3 | Broadcast | ID is the [device ID](BROADCAST_PROTOCOL.md#command_adv_header)
 
 <a name="command_source_ID"></a>
 ##### Command source ID
@@ -631,12 +641,11 @@ uint 16 | [Source ID](#command_source_ID) | 10 | The ID of the source.
 Value | Name | Description
 --- | --- | ---
 0 | None
-1 | Default
 2 | Internal
 3 | UART
 4 | Connection
 5 | Switchcraft
-768 + N | Device ID | Device with ID = N, as given by [broadcast command](BROADCAST_PROTOCOL.md#command_adv_header).
+
 
 
 

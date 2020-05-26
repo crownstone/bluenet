@@ -292,8 +292,9 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	controlCmd.accessLevel = accessLevel;
 	controlCmd.data = commandData;
 	controlCmd.size = length;
-	controlCmd.source.flagExternal = false;
-	controlCmd.source.sourceId = CS_CMD_SOURCE_DEVICE_TOKEN + header.deviceToken;
+	controlCmd.source.source.flagExternal = false;
+	controlCmd.source.source.type = CS_CMD_SOURCE_TYPE_BROADCAST;
+	controlCmd.source.source.id = header.deviceToken;
 	controlCmd.source.count = (decryptedPayloadRC5[0] >> 8) & 0xFF;
 	LOGCommandAdvDebug("adv cmd type=%u", type);
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {

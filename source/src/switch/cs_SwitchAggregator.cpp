@@ -233,7 +233,7 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& evt){
             LOGSwitchAggregator_Evt("CMD_SWITCH",__func__);
 
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) evt.data;
-            LOGd("packet intensity: %d, source(%d)", packet->switchCmd, packet->source.sourceId);
+            LOGd("packet intensity: %d, source(%d)", packet->switchCmd, packet->source.source.id);
             if (!checkAndSetOwner(packet->source)) {
             	LOGSwitchAggregatorDebug("not executing, checkAndSetOwner returned false");
             	evt.result.returnCode = ERR_NO_ACCESS;
@@ -345,9 +345,9 @@ std::optional<uint8_t> SwitchAggregator::resolveOverrideState(){
     return 100;
 }
 
-bool SwitchAggregator::checkAndSetOwner(cmd_source_t source) {
-	if (source.sourceId < CS_CMD_SOURCE_DEVICE_TOKEN) {
-		// Non device token command can always set the switch.
+bool SwitchAggregator::checkAndSetOwner(cmd_source_with_counter_t source) {
+	if (source.source.type != CS_CMD_SOURCE_TYPE_BROADCAST) {
+		// Non broadcast command can always set the switch.
 		return true;
 	}
 
@@ -358,9 +358,9 @@ bool SwitchAggregator::checkAndSetOwner(cmd_source_t source) {
 		return true;
 	}
 
-	if (_source.sourceId != source.sourceId) {
+	if (_source.source.id != source.source.id) {
 		// Switch is claimed by other source.
-		LOGd("Already claimed by %u", _source.sourceId);
+		LOGd("Already claimed by %u", _source.source.id);
 		return false;
 	}
 

@@ -105,7 +105,7 @@ struct __attribute__((packed)) scanned_device_t {
 struct __attribute__((packed)) internal_multi_switch_item_cmd_t {
 	uint8_t switchCmd;
 	uint16_t delay;
-	cmd_source_t source;
+	cmd_source_with_counter_t source;
 };
 
 /**
@@ -126,7 +126,7 @@ struct __attribute__((packed)) control_command_packet_t {
 	buffer_ptr_t data;
 	size16_t size;
 	EncryptionAccessLevel accessLevel;
-	cmd_source_t source;
+	cmd_source_with_counter_t source;
 };
 
 /**

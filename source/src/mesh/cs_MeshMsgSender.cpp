@@ -128,21 +128,23 @@ cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_ite
 	item.msgPayload.len = sizeof(meshItem);
 	item.msgPayload.data = (uint8_t*)(&meshItem);
 
-	switch (switchItem->cmd.source.sourceId) {
-		case CS_CMD_SOURCE_CONNECTION:
-		case CS_CMD_SOURCE_UART: {
-			LOGMeshModelInfo("Source connection: set high transmission count");
-			transmissions = CS_MESH_RELIABILITY_HIGH;
-			// Keep using unreliable for now, as reliable will be handled 1 by 1 instead of interleaved.
-//			LOGMeshModelInfo("Source connection or uart: use acked msg");
-//			item.reliable = true;
-//			item.numIds = 1;
-//			item.metaData.transmissionsOrTimeout = 0;
-//			item.stoneIdsPtr = (stone_id_t*) &(switchItem->id);
-			break;
+	if (switchItem->cmd.source.source.type == CS_CMD_SOURCE_TYPE_ENUM) {
+		switch (switchItem->cmd.source.source.id) {
+			case CS_CMD_SOURCE_CONNECTION:
+			case CS_CMD_SOURCE_UART: {
+				LOGMeshModelInfo("Source connection: set high transmission count");
+				transmissions = CS_MESH_RELIABILITY_HIGH;
+				// Keep using unreliable for now, as reliable will be handled 1 by 1 instead of interleaved.
+//				LOGMeshModelInfo("Source connection or uart: use acked msg");
+//				item.reliable = true;
+//				item.numIds = 1;
+//				item.metaData.transmissionsOrTimeout = 0;
+//				item.stoneIdsPtr = (stone_id_t*) &(switchItem->id);
+				break;
+			}
+			default:
+				break;
 		}
-		default:
-			break;
 	}
 
 	// Remove old messages of same type and with same target id.
@@ -302,11 +304,12 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			command->header.flags.asInt,
 			command->header.timeoutOrTransmissions
 			);
-	LOGi("  ctrlType=%u ctrlSize=%u accessLevel=%u sourceId=%u",
+	LOGi("  ctrlType=%u ctrlSize=%u accessLevel=%u sourceType=%u sourceId=%u",
 			command->controlCommand.type,
 			command->controlCommand.size,
 			command->controlCommand.accessLevel,
-			command->controlCommand.source.sourceId
+			command->controlCommand.source.source.type,
+			command->controlCommand.source.source.id
 			);
 	for (uint8_t i=0; i<command->header.idCount; ++i) {
 		LOGd("  id: %u", command->targetIds[i]);
@@ -402,7 +405,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 				return ERR_WRONG_PARAMETER;
 			}
 			if (!MeshUtil::canShortenSource(command->controlCommand.source)) {
-				LOGw("Can't shorten source id %u", command->controlCommand.source.sourceId);
+				LOGw("Can't shorten source type=%u id=%u", command->controlCommand.source.source.type, command->controlCommand.source.source.id);
 				return ERR_WRONG_PARAMETER;
 			}
 
