@@ -25,7 +25,8 @@ enum cs_cmd_source_id {
 	CS_CMD_SOURCE_UART            = 3,        // UART.
 	CS_CMD_SOURCE_CONNECTION      = 4,        // BLE connection.
 	CS_CMD_SOURCE_SWITCHCRAFT     = 5,        // Switchcraft trigger.
-//  CS_CMD_SOURCE_CONFIG_APPLY    = 6,        // A configuration was changed, resulting in an immediate change. For example, dimming is no longer allowed.
+	CS_CMD_SOURCE_TAP_TO_TOGLE    = 6,        // Tap to toggle trigger.
+//  CS_CMD_SOURCE_CONFIG_APPLY    = 7,        // A configuration was changed, resulting in an immediate change. For example, dimming is no longer allowed.
 };
 
 /**
@@ -36,10 +37,18 @@ struct __attribute__((packed)) cmd_source_t {
 	uint8_t reserved   : 4; // Reserved for flags.
 	uint8_t type       : 3; // See cs_cmd_source_type.
 	uint8_t id         : 8; // Source ID, depends on type.
+
 	cmd_source_t(cs_cmd_source_id sourceId = CS_CMD_SOURCE_NONE):
 		flagExternal(false),
 		reserved(0),
 		type(CS_CMD_SOURCE_TYPE_ENUM),
+		id(sourceId)
+	{}
+
+	cmd_source_t(cs_cmd_source_type type = CS_CMD_SOURCE_TYPE_ENUM, uint8_t sourceId = CS_CMD_SOURCE_NONE, bool viaMesh = false):
+		flagExternal(viaMesh),
+		reserved(0),
+		type(type),
 		id(sourceId)
 	{}
 };
@@ -51,8 +60,12 @@ struct __attribute__((packed)) cmd_source_t {
 struct __attribute__((packed)) cmd_source_with_counter_t {
 	cmd_source_t source;
 	uint8_t count; // Command counter, increases each command.
-	cmd_source_with_counter_t(cs_cmd_source_id source = CS_CMD_SOURCE_NONE):
+	cmd_source_with_counter_t(cmd_source_t source = CS_CMD_SOURCE_NONE):
 		source(source),
 		count(0)
+	{}
+	cmd_source_with_counter_t(cmd_source_t source, uint8_t count):
+		source(source),
+		count(count)
 	{}
 };

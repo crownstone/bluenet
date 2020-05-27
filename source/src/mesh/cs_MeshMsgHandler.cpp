@@ -190,12 +190,10 @@ cs_ret_code_t MeshMsgHandler::handleCmdMultiSwitch(uint8_t* payload, size16_t pa
 		TYPIFY(CMD_MULTI_SWITCH) internalItem;
 		internalItem.id = item->id;
 		internalItem.cmd.switchCmd = item->switchCmd;
-		internalItem.cmd.delay = item->delay;
-		internalItem.cmd.source = item->source;
-		internalItem.cmd.source.source.flagExternal = true;
 
 		LOGi("execute multi switch");
-		event_t event(CS_TYPE::CMD_MULTI_SWITCH, &internalItem, sizeof(internalItem));
+		event_t event(CS_TYPE::CMD_MULTI_SWITCH, &internalItem, sizeof(internalItem), item->source);
+		event.source.source.flagExternal = true;
 		event.dispatch();
 //		return event.result.returnCode;
 		return ERR_SUCCESS;
@@ -394,16 +392,17 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_r
 	stateHeader->stateId =             meshStateHeader->header.id;
 	stateHeader->persistenceMode =     meshStateHeader->header.persistenceMode;
 
+	// Inflate source.
+	cmd_source_with_counter_t source = MeshUtil::getInflatedSource(meshStateHeader->sourceId);
+
 	// Inflate control command meta data.
 	controlCmd.protocolVersion =  CS_CONNECTION_PROTOCOL_VERSION;
 	controlCmd.type =             CTRL_CMD_STATE_SET;
 	controlCmd.data =             controlCmdData;
 	controlCmd.size =             controlCmdDataSize;
 	controlCmd.accessLevel =      MeshUtil::getInflatedAccessLevel(meshStateHeader->accessLevel);
-	controlCmd.source =           MeshUtil::getInflatedSource(meshStateHeader->sourceId);
 
-	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
-	event.result.buf = result.buf;
+	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source, cs_result_t(result.buf));
 	event.dispatch();
 
 	// Since the result data buffer is not large enough for a state_packet_header_t,

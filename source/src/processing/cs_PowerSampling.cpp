@@ -320,7 +320,7 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	bool switch_detected = RecognizeSwitch::getInstance().detect(bufIndex, power.voltageIndex);
 	if (switch_detected) {
 		LOGd("Switch event detected!");
-		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE);
+		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
 		EventDispatcher::getInstance().dispatch(event);
 	}
 

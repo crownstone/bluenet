@@ -249,7 +249,7 @@ EncryptionAccessLevel getInflatedAccessLevel(uint8_t accessLevel) {
 	}
 }
 
-bool canShortenSource(cmd_source_with_counter_t source) {
+bool canShortenSource(const cmd_source_with_counter_t& source) {
 	// 5 bits -- max 31
 	switch (source.source.type) {
 		case CS_CMD_SOURCE_TYPE_ENUM: {
@@ -272,7 +272,7 @@ bool canShortenSource(cmd_source_with_counter_t source) {
 	}
 }
 
-uint8_t getShortenedSource(cmd_source_with_counter_t source) {
+uint8_t getShortenedSource(const cmd_source_with_counter_t& source) {
 	// 5 bits --> max 31
 	switch (source.source.type) {
 		case CS_CMD_SOURCE_TYPE_ENUM: {

@@ -110,13 +110,12 @@ cs_ret_code_t MeshMsgSender::sendNoop(uint8_t transmissions) {
 	return addToQueue(item);
 }
 
-cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_item_t* switchItem, uint8_t transmissions) {
+cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_item_t* switchItem, const cmd_source_with_counter_t& source, uint8_t transmissions) {
 	LOGMeshModelDebug("sendMultiSwitchItem");
 	cs_mesh_model_msg_multi_switch_item_t meshItem;
 	meshItem.id = switchItem->id;
 	meshItem.switchCmd = switchItem->cmd.switchCmd;
-	meshItem.delay = switchItem->cmd.delay;
-	meshItem.source = switchItem->cmd.source;
+	meshItem.source = source;
 
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = switchItem->id;
@@ -128,8 +127,8 @@ cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_ite
 	item.msgPayload.len = sizeof(meshItem);
 	item.msgPayload.data = (uint8_t*)(&meshItem);
 
-	if (switchItem->cmd.source.source.type == CS_CMD_SOURCE_TYPE_ENUM) {
-		switch (switchItem->cmd.source.source.id) {
+	if (source.source.type == CS_CMD_SOURCE_TYPE_ENUM) {
+		switch (source.source.id) {
 			case CS_CMD_SOURCE_CONNECTION:
 			case CS_CMD_SOURCE_UART: {
 				LOGMeshModelInfo("Source connection: set high transmission count");
@@ -297,7 +296,7 @@ cs_ret_code_t MeshMsgSender::remFromQueue(MeshUtil::cs_mesh_queue_item_t & item)
 
 
 
-cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t* command) {
+cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t* command, const cmd_source_with_counter_t& source) {
 	LOGi("handleSendMeshCommand type=%u idCount=%u flags=%u timeoutOrTransmissions=%u",
 			command->header.type,
 			command->header.idCount,
@@ -308,8 +307,8 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			command->controlCommand.type,
 			command->controlCommand.size,
 			command->controlCommand.accessLevel,
-			command->controlCommand.source.source.type,
-			command->controlCommand.source.source.id
+			source.source.type,
+			source.source.id
 			);
 	for (uint8_t i=0; i<command->header.idCount; ++i) {
 		LOGd("  id: %u", command->targetIds[i]);
@@ -404,8 +403,8 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 				LOGw("Can't shorten accessLevel %u", command->controlCommand.accessLevel);
 				return ERR_WRONG_PARAMETER;
 			}
-			if (!MeshUtil::canShortenSource(command->controlCommand.source)) {
-				LOGw("Can't shorten source type=%u id=%u", command->controlCommand.source.source.type, command->controlCommand.source.source.id);
+			if (!MeshUtil::canShortenSource(source)) {
+				LOGw("Can't shorten source type=%u id=%u", source.source.type, source.source.id);
 				return ERR_WRONG_PARAMETER;
 			}
 
@@ -413,7 +412,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			meshStateHeader->header.id = stateHeader->stateId;
 			meshStateHeader->header.persistenceMode = stateHeader->persistenceMode;
 			meshStateHeader->accessLevel = MeshUtil::getShortenedAccessLevel(command->controlCommand.accessLevel);
-			meshStateHeader->sourceId = MeshUtil::getShortenedSource(command->controlCommand.source);
+			meshStateHeader->sourceId = MeshUtil::getShortenedSource(source);
 
 			memcpy(msg + sizeof(*meshStateHeader), command->controlCommand.data + stateHeaderSize, statePayloadSize);
 
@@ -457,7 +456,7 @@ void MeshMsgSender::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH: {
 			TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)* packet = (TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)*)event.data;
-			sendMultiSwitchItem(packet);
+			sendMultiSwitchItem(packet, event.source);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS: {
@@ -487,7 +486,7 @@ void MeshMsgSender::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND: {
 			TYPIFY(CMD_SEND_MESH_CONTROL_COMMAND)* packet = (TYPIFY(CMD_SEND_MESH_CONTROL_COMMAND)*)event.data;
-			event.result.returnCode = handleSendMeshCommand(packet);
+			event.result.returnCode = handleSendMeshCommand(packet, event.source);
 			break;
 		}
 		default:

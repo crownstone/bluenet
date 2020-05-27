@@ -108,7 +108,7 @@ private:
 	/**
 	 * Delegate a command via an event.
 	 */
-	void dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, cs_result_t & result);
+	void dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, const cmd_source_with_counter_t& source, cs_result_t & result);
 
 	/**
 	 * Reset, after a delay.

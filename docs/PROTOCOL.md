@@ -611,7 +611,7 @@ uint8 | Count | 1 | Number of items in the list.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint32 | Timestamp | 4 | Unix timestamp of the switch command.
-[Switch command]() | Switch command | 1 | The switch command.
+[Switch command](#switch_command_value) | Switch command | 1 | The switch command value.
 [Switch state](#switch_state_packet) | Switch state | 1 | The switch state after the command was executed.
 [Command source](#command_source_packet) | Source | 2 | The source of the switch command.
 

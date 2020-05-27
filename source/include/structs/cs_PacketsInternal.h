@@ -99,13 +99,9 @@ struct __attribute__((packed)) scanned_device_t {
 /**
  * A single multi switch command.
  * switchCmd: 0 = off, 100 = fully on.
- * delay: Delay in seconds.
- * source: The source that issued the command.
  */
 struct __attribute__((packed)) internal_multi_switch_item_cmd_t {
 	uint8_t switchCmd;
-	uint16_t delay;
-	cmd_source_with_counter_t source;
 };
 
 /**
@@ -126,7 +122,6 @@ struct __attribute__((packed)) control_command_packet_t {
 	buffer_ptr_t data;
 	size16_t size;
 	EncryptionAccessLevel accessLevel;
-	cmd_source_with_counter_t source;
 };
 
 /**

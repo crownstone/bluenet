@@ -179,27 +179,27 @@ void CommandHandler::handleCommand(
 	case CTRL_CMD_STATE_SET:
 		return handleCmdStateSet(commandData, accessLevel, result);
 	case CTRL_CMD_SAVE_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::CMD_ADD_BEHAVIOUR, commandData, result);
+		return dispatchEventForCommand(CS_TYPE::CMD_ADD_BEHAVIOUR, commandData, source, result);
 	case CTRL_CMD_REPLACE_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::CMD_REPLACE_BEHAVIOUR, commandData, result);
+		return dispatchEventForCommand(CS_TYPE::CMD_REPLACE_BEHAVIOUR, commandData, source, result);
 	case CTRL_CMD_REMOVE_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::CMD_REMOVE_BEHAVIOUR, commandData, result);
+		return dispatchEventForCommand(CS_TYPE::CMD_REMOVE_BEHAVIOUR, commandData, source, result);
 	case CTRL_CMD_GET_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR, commandData, result);
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR, commandData, source, result);
 	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_INDICES, commandData, result);
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_INDICES, commandData, source, result);
 	case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG, commandData, result);
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG, commandData, source, result);
 	case CTRL_CMD_REGISTER_TRACKED_DEVICE:
 		return handleCmdRegisterTrackedDevice(commandData, accessLevel, result);
 	case CTRL_CMD_SET_IBEACON_CONFIG_ID:
-		return dispatchEventForCommand(CS_TYPE::CMD_SET_IBEACON_CONFIG_ID, commandData, result);
+		return dispatchEventForCommand(CS_TYPE::CMD_SET_IBEACON_CONFIG_ID, commandData, source, result);
 	case CTRL_CMD_GET_UPTIME:
 		return handleCmdGetUptime(commandData, accessLevel, result);
 	case CTLR_CMD_GET_ADC_RESTARTS:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_RESTARTS, commandData, result);
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_RESTARTS, commandData, source, result);
 	case CTLR_CMD_GET_POWER_SAMPLES:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_POWER_SAMPLES, commandData, result);
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_POWER_SAMPLES, commandData, source, result);
 	case CTRL_CMD_UNKNOWN:
 		result.returnCode = ERR_UNKNOWN_TYPE;
 		return;
@@ -590,10 +590,9 @@ void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_sourc
 		TYPIFY(CMD_MULTI_SWITCH) item;
 		item.id = multiSwitchPacket->items[i].id;
 		item.cmd.switchCmd = multiSwitchPacket->items[i].switchCmd;
-		item.cmd.delay = 0;
-		item.cmd.source = source;
+
 		if (cs_multi_switch_item_is_valid(&item, sizeof(item))) {
-			event_t cmd(CS_TYPE::CMD_MULTI_SWITCH, &item, sizeof(item));
+			event_t cmd(CS_TYPE::CMD_MULTI_SWITCH, &item, sizeof(item), source);
 			EventDispatcher::getInstance().dispatch(cmd);
 		}
 		else {
@@ -665,7 +664,6 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 	meshCtrlCmd.controlCommand.data = &(buffer[bufIndex]);
 	meshCtrlCmd.controlCommand.size = controlPacketHeader.payloadSize;
 	meshCtrlCmd.controlCommand.accessLevel = accessLevel;
-	meshCtrlCmd.controlCommand.source = source;
 
 	// Check permissions
 	CommandHandlerTypes controlCmdType = meshCtrlCmd.controlCommand.type;
@@ -745,7 +743,7 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 	// All permission checks must have been done already!
 	// Also the nested ones!
 	cs_data_t eventData((buffer_ptr_t)&meshCtrlCmd, sizeof(meshCtrlCmd));
-	dispatchEventForCommand(CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND, eventData, result);
+	dispatchEventForCommand(CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND, eventData, source, result);
 }
 
 void CommandHandler::handleCmdAllowDimming(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
@@ -828,8 +826,8 @@ void CommandHandler::handleCmdGetUptime(cs_data_t commandData, const EncryptionA
 	return;
 }
 
-void CommandHandler::dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, cs_result_t & result) {
-	event_t event(type, commandData.data, commandData.len, result);
+void CommandHandler::dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, const cmd_source_with_counter_t& source, cs_result_t & result) {
+	event_t event(type, commandData.data, commandData.len, source, result);
 	event.dispatch();
 	result.returnCode = event.result.returnCode;
 	result.dataSize = event.result.dataSize;
@@ -915,7 +913,7 @@ void CommandHandler::handleEvent(event_t & event) {
 				cmd->protocolVersion,
 				cmd->type,
 				cs_data_t(cmd->data, cmd->size),
-				cmd->source,
+				event.source,
 				cmd->accessLevel,
 				event.result
 			);

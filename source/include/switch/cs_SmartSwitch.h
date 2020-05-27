@@ -51,6 +51,11 @@ public:
 	uint8_t getIntendedState();
 
 	/**
+	 * Get actual switch state.
+	 */
+	switch_state_t getActualState();
+
+	/**
 	 * Callback function definition.
 	 */
 	typedef function<void(uint8_t newIntensity)> callback_on_intensity_change_t;
@@ -81,11 +86,6 @@ private:
 	bool allowSwitching();
 	bool _allowSwitching = true; // value persisted in flash and settable in the app
 	bool allowSwitchingOverride = false; // override is necessary at startup to restore state of a locked dimmed switch.
-
-	/**
-	 * Get actual switch state.
-	 */
-	switch_state_t getActualState();
 
 	/**
 	 * Get intensity from a switch state.

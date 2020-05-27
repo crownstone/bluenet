@@ -377,6 +377,24 @@ struct __attribute__((packed)) cs_power_samples_request_t {
 	uint8_t index = 0;            // Some types have multiple lists of samples.
 };
 
+struct __attribute__((packed)) cs_switch_history_header_t {
+	uint8_t count;                // Number of items.
+};
+
+struct __attribute__((packed)) cs_switch_history_item_t {
+	uint32_t timestamp;           // Timestamp of the switch command.
+	uint8_t value;                // Switch command value.
+	switch_state_t state;         // Switch state after executing the command.
+	cmd_source_t source;          // Source of the command.
+
+	cs_switch_history_item_t(uint32_t timestamp, uint8_t switchValue, switch_state_t switchState, const cmd_source_t& source):
+		timestamp(timestamp),
+		value(switchValue),
+		state(switchState),
+		source(source)
+	{}
+};
+
 
 // ========================= functions =========================
 

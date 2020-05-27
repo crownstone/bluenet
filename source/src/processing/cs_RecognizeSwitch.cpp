@@ -123,7 +123,7 @@ void RecognizeSwitch::setLastDetection(bool aboveThreshold, buffer_id_t currentB
 //	header->type // type can be set once.
 //	header->index // index is set on get.
 //	header->count
-	header->unixTimestamp = SystemTime::posix().timestamp();
+	header->unixTimestamp = SystemTime::posix();
 //	header->delayUs =
 	header->sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 //	header->offset =

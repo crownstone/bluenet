@@ -103,7 +103,7 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_state_1_t {
 struct __attribute__((__packed__)) cs_mesh_model_msg_multi_switch_item_t {
 	stone_id_t id;
 	uint8_t switchCmd;
-	uint16_t delay;
+	uint16_t delay = 0; // Deprecated, set to 0 or backwards compatibility.
 	cmd_source_with_counter_t source;
 };
 

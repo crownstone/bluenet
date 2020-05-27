@@ -146,10 +146,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	LOGBackgroundAdvVerbose("decrypted=[%u %u]", decryptedPayload[0], decryptedPayload[1]);
 
 	// Validate
-	Time time = SystemTime::posix();
-	uint32_t timestamp = time.timestamp();
-//	TYPIFY(STATE_TIME) timestamp;
-//	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
+	uint32_t timestamp = SystemTime::posix();
 	uint16_t timestampRounded = (timestamp >> 7) & 0x0000FFFF;
 	LOGBackgroundAdvVerbose("validation=%u time=%u rounded=%u", decryptedPayload[0], timestamp, timestampRounded);
 

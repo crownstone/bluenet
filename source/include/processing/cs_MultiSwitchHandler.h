@@ -23,7 +23,7 @@ public:
 	void operator=(MultiSwitchHandler const&) = delete;
 
 	void init();
-	void handleMultiSwitch(internal_multi_switch_item_t* cmd);
+	void handleMultiSwitch(internal_multi_switch_item_t* cmd, cmd_source_with_counter_t& source);
 	// Handle events as EventListener
 	void handleEvent(event_t & event);
 private:
