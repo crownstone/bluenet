@@ -35,7 +35,7 @@ void SwitchAggregator::init(const boards_config_t& board) {
 	overrideState = smartSwitch.getIntendedState();
 }
 
-SwitchAggregator& SwitchAggregator::getInstance(){
+SwitchAggregator& SwitchAggregator::getInstance() {
 	static SwitchAggregator instance;
 
 	return instance;
@@ -47,7 +47,7 @@ void SwitchAggregator::switchPowered() {
 
 // ================================== State updaters ==================================
 
-bool SwitchAggregator::updateBehaviourHandlers(){
+bool SwitchAggregator::updateBehaviourHandlers() {
 
 	std::optional<uint8_t> prevBehaviourState = behaviourState;
 	behaviourHandler.update();
@@ -68,13 +68,13 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 
 	bool shouldResetOverrideState = false;
 
-	if(overrideState && behaviourState && aggregatedState) {
-		bool overrideStateIsOn = *overrideState != 0;
-		bool aggregatedStateIsOn = *aggregatedState != 0;
-		bool behaviourStateIsOn = *behaviourState != 0;
+	if (overrideState && behaviourState && aggregatedState) {
+		bool overrideStateIsOn =   (*overrideState   != 0);
+		bool aggregatedStateIsOn = (*aggregatedState != 0);
+		bool behaviourStateIsOn =  (*behaviourState  != 0);
 
-		bool overrideMatchedAggregated = overrideStateIsOn == aggregatedStateIsOn;
-		bool behaviourWantsToChangeState = behaviourStateIsOn != aggregatedStateIsOn;
+		bool overrideMatchedAggregated =   (overrideStateIsOn  == aggregatedStateIsOn);
+		bool behaviourWantsToChangeState = (behaviourStateIsOn != aggregatedStateIsOn);
 
 		if (overrideMatchedAggregated && behaviourWantsToChangeState && allowOverrideReset) {
 			LOGd("resetting overrideState overrideStateIsOn=%u aggregatedStateIsOn=%u behaviourStateIsOn=%u", overrideStateIsOn, aggregatedStateIsOn, behaviourStateIsOn);
@@ -82,12 +82,16 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 		}
 	}
 
-	// TODO: Set source here
-	aggregatedState =
-			(overrideState && !shouldResetOverrideState) ? resolveOverrideState() :
-					behaviourState ? aggregatedBehaviourIntensity() : // only use aggr. if no SwitchBehaviour conflict is found
-							aggregatedState ? aggregatedState :               // if override and behaviour don't have an opinion, use previous value.
-									std::nullopt;
+	if (overrideState && !shouldResetOverrideState) {
+		aggregatedState = resolveOverrideState();
+	}
+	else if (behaviourState) {
+		// only use aggr. if no SwitchBehaviour conflict is found
+		aggregatedState = aggregatedBehaviourIntensity();
+	}
+	// If override and behaviour don't have an opinion, keep previous value.
+
+
 
 	LOGSwitchAggregatorDebug("updateState");
 	static uint8_t callcount = 0;
@@ -101,13 +105,11 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 	if (aggregatedState) {
 		retCode = smartSwitch.set(*aggregatedState);
 		if (shouldResetOverrideState && retCode == ERR_SUCCESS) {
+			LOGSwitchAggregatorDebug("Reset override state");
 			overrideState = {};
 		}
 	}
 
-	if (retCode == ERR_SUCCESS) {
-		addToSwitchHistory(cs_switch_history_item_t(SystemTime::posix(), *aggregatedState, smartSwitch.getActualState(), source.source));
-	}
 
 	TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN) eventData = overrideState.has_value();
 	event_t overrideEvent(CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN, &eventData, sizeof(eventData));
@@ -169,13 +171,21 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 		case CS_TYPE::STATE_TIME: {
 			bool behaviourValueChanged = updateBehaviourHandlers();
 			uint8_t behaviourRuleIndex = 255; // TODO: set correct value.
-			updateState(behaviourValueChanged, cmd_source_t(CS_CMD_SOURCE_TYPE_BEHAVIOUR, behaviourRuleIndex));
+			cmd_source_with_counter_t source(cmd_source_t(CS_CMD_SOURCE_TYPE_BEHAVIOUR, behaviourRuleIndex));
+			updateState(behaviourValueChanged, source);
+			if (behaviourValueChanged) {
+				addToSwitchHistory(cs_switch_history_item_t(SystemTime::posix(), *aggregatedState, smartSwitch.getActualState(), source.source));
+			}
 			break;
 		}
 		case CS_TYPE::EVT_TIME_SET: {
 			bool behaviourValueChanged = updateBehaviourHandlers();
 			uint8_t behaviourRuleIndex = 255; // TODO: set correct value.
-			updateState(behaviourValueChanged, cmd_source_t(CS_CMD_SOURCE_TYPE_BEHAVIOUR, behaviourRuleIndex));
+			cmd_source_with_counter_t source(cmd_source_t(CS_CMD_SOURCE_TYPE_BEHAVIOUR, behaviourRuleIndex));
+			updateState(behaviourValueChanged, source);
+			if (behaviourValueChanged) {
+				addToSwitchHistory(cs_switch_history_item_t(SystemTime::posix(), *aggregatedState, smartSwitch.getActualState(), source.source));
+			}
 			break;
 		}
 		default:{
@@ -192,7 +202,7 @@ bool SwitchAggregator::handlePresenceEvents(event_t& event) {
 		switch (mutationtype) {
 			case PresenceHandler::MutationType::LastUserExitSphere: {
 				LOGd("SwitchAggregator LastUserExit");
-				if(overrideState){
+				if (overrideState) {
 					Time now = SystemTime::now();
 					LOGd("SwitchAggregator LastUserExit override state true");
 
@@ -290,9 +300,10 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 	// set to `value`
 	if (updateState(false, source) == ERR_NO_ACCESS) {
 		// failure to set the smartswitch. It seems to be locked.
-		LOGSwitchAggregator_Evt("Reverting to previous value, no access to smartswitch");
+		LOGSwitchAggregatorDebug("Reverting to previous value, no access to smartswitch");
 		overrideState = prev_overrideState;
 	}
+	addToSwitchHistory(cs_switch_history_item_t(SystemTime::posix(), value, smartSwitch.getActualState(), source.source));
 }
 
 void SwitchAggregator::handleSwitchStateChange(uint8_t newIntensity) {
@@ -403,11 +414,23 @@ void SwitchAggregator::handleGetBehaviourDebug(event_t& evt) {
 }
 
 void SwitchAggregator::addToSwitchHistory(const cs_switch_history_item_t& cmd) {
-	LOGd("addToSwitchHistory val=%u state=%u srcType=%u, srcId=%u", cmd.value, cmd.state, cmd.source.type, cmd.source.id);
+	LOGd("addToSwitchHistory val=%u state=%u srcType=%u, srcId=%u", cmd.value, cmd.state.asInt, cmd.source.type, cmd.source.id);
 	if (_switchHistory.size() == _maxSwitchHistoryItems) {
 		_switchHistory.pop();
 	}
 	_switchHistory.push(cmd);
+	printSwitchHistory();
+}
+
+void SwitchAggregator::printSwitchHistory() {
+	LOGd("Switch history:");
+	// Queue doesn't have an iterator..
+	for (size_t i = 0; i < _switchHistory.size(); ++i) {
+		auto item = _switchHistory.front();
+		LOGd("  t=%u val=%u state=%u srcType=%u, srcId=%u", item.timestamp, item.value, item.state.asInt, item.source.type, item.source.id);
+		_switchHistory.pop();
+		_switchHistory.push(item);
+	}
 }
 
 void SwitchAggregator::printStatus() {

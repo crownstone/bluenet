@@ -175,6 +175,7 @@ private:
 	void handleGetBehaviourDebug(event_t& evt);
 
 	void addToSwitchHistory(const cs_switch_history_item_t& cmd);
+	void printSwitchHistory();
 
 	void printStatus();
 	void pushTestDataToHost();

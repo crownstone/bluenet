@@ -91,10 +91,10 @@ private:
 	void handleCmdValidateSetup           (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdDisconnect              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdResetErrors             (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
-	void handleCmdPwm                     (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
-	void handleCmdSwitch                  (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
-	void handleCmdRelay                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
-	void handleCmdMultiSwitch             (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accesss_resulLevel, cs_result_t & result);
+	void handleCmdPwm                     (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdSwitch                  (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdRelay                   (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdMultiSwitch             (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdMeshCommand             (uint8_t protocol, cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accesss_resulLevel, cs_result_t & result);
 	void handleCmdAllowDimming            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdLockSwitch              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);

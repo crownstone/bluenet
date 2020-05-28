@@ -157,11 +157,11 @@ void CommandHandler::handleCommand(
 	case CTRL_CMD_RESET_ERRORS:
 		return handleCmdResetErrors(commandData, accessLevel, result);
 	case CTRL_CMD_PWM:
-		return handleCmdPwm(commandData, accessLevel, result);
+		return handleCmdPwm(commandData, source, accessLevel, result);
 	case CTRL_CMD_SWITCH:
-		return handleCmdSwitch(commandData, accessLevel, result);
+		return handleCmdSwitch(commandData, source, accessLevel, result);
 	case CTRL_CMD_RELAY:
-		return handleCmdRelay(commandData, accessLevel, result);
+		return handleCmdRelay(commandData, source, accessLevel, result);
 	case CTRL_CMD_MULTI_SWITCH:
 		return handleCmdMultiSwitch(commandData, source, accessLevel, result);
 	case CTRL_CMD_MESH_COMMAND:
@@ -503,7 +503,7 @@ void CommandHandler::handleCmdResetErrors(cs_data_t commandData, const Encryptio
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdPwm(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdPwm(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
 		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
 		result.returnCode = ERR_NOT_AVAILABLE;
@@ -523,13 +523,13 @@ void CommandHandler::handleCmdPwm(cs_data_t commandData, const EncryptionAccessL
 	TYPIFY(CMD_SET_DIMMER) switchCmd;
 	switchCmd = payload->switchState;
 
-	event_t evt(CS_TYPE::CMD_SET_DIMMER, &switchCmd, sizeof(switchCmd));
+	event_t evt(CS_TYPE::CMD_SET_DIMMER, &switchCmd, sizeof(switchCmd), source);
 	EventDispatcher::getInstance().dispatch(evt);
 
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdSwitch(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdSwitch(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
 		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
 		result.returnCode = ERR_NOT_AVAILABLE;
@@ -548,13 +548,13 @@ void CommandHandler::handleCmdSwitch(cs_data_t commandData, const EncryptionAcce
 
 	TYPIFY(CMD_SWITCH) switch_cmd;
 	switch_cmd.switchCmd = payload->switchState;
-	event_t evt(CS_TYPE::CMD_SWITCH, &switch_cmd, sizeof(switch_cmd));
+	event_t evt(CS_TYPE::CMD_SWITCH, &switch_cmd, sizeof(switch_cmd), source);
 	EventDispatcher::getInstance().dispatch(evt);
 
 	result.returnCode = ERR_SUCCESS;
 }
 
-void CommandHandler::handleCmdRelay(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+void CommandHandler::handleCmdRelay(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	if (!IS_CROWNSTONE(_boardConfig->deviceType)) {
 		LOGe("Commands not available for device type %d", _boardConfig->deviceType);
 		result.returnCode = ERR_NOT_AVAILABLE;
@@ -572,7 +572,7 @@ void CommandHandler::handleCmdRelay(cs_data_t commandData, const EncryptionAcces
 	switch_message_payload_t* payload = (switch_message_payload_t*) commandData.data;
 	TYPIFY(CMD_SET_RELAY) relay_switch_state;
 	relay_switch_state = payload->switchState != 0;
-	event_t evt(CS_TYPE::CMD_SET_RELAY, &relay_switch_state, sizeof(relay_switch_state));
+	event_t evt(CS_TYPE::CMD_SET_RELAY, &relay_switch_state, sizeof(relay_switch_state), source);
 	EventDispatcher::getInstance().dispatch(evt);
 	
 	result.returnCode = ERR_SUCCESS;
