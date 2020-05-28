@@ -21,6 +21,7 @@ bool testIsValid(const cs_mesh_model_msg_test_t* packet, size16_t size);
 bool ackIsValid(const uint8_t* packet, size16_t size);
 bool timeIsValid(const cs_mesh_model_msg_time_t* packet, size16_t size);
 bool noopIsValid(const uint8_t* packet, size16_t size);
+bool multiSwitchIsValid(const uint8_t* packet, size16_t size);
 bool state0IsValid(const cs_mesh_model_msg_state_0_t* packet, size16_t size);
 bool state1IsValid(const cs_mesh_model_msg_state_1_t* packet, size16_t size);
 bool profileLocationIsValid(const cs_mesh_model_msg_profile_location_t* packet, size16_t size);
