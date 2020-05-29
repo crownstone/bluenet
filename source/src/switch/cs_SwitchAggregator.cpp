@@ -153,6 +153,24 @@ bool SwitchAggregator::handleSwitchAggregatorCommand(event_t& event) {
 			LOGd("handled switch aggregator reset command");
 			break;
 		}
+		case CS_TYPE::CMD_GET_SWITCH_HISTORY: {
+			cs_switch_history_header_t header;
+			header.count = _switchHistory.size();
+			cs_buffer_size_t requiredSize = sizeof(header) + header.count * sizeof(cs_switch_history_item_t);
+			if (event.result.buf.len < requiredSize) {
+				event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+				break;
+			}
+			memcpy(event.result.buf.data, &header, sizeof(header));
+			int offset = sizeof(header);
+			for (const auto& item : _switchHistory) {
+				memcpy(event.result.buf.data + offset, &item, sizeof(item));
+				offset += sizeof(item);
+			}
+			event.result.dataSize = requiredSize;
+			event.result.returnCode = ERR_SUCCESS;
+			break;
+		}
 		default: {
 			return false;
 		}
@@ -418,20 +436,23 @@ void SwitchAggregator::handleGetBehaviourDebug(event_t& evt) {
 void SwitchAggregator::addToSwitchHistory(const cs_switch_history_item_t& cmd) {
 	LOGd("addToSwitchHistory val=%u state=%u srcType=%u, srcId=%u", cmd.value, cmd.state.asInt, cmd.source.type, cmd.source.id);
 	if (_switchHistory.size() == _maxSwitchHistoryItems) {
-		_switchHistory.pop();
+		_switchHistory.erase(_switchHistory.begin());
 	}
-	_switchHistory.push(cmd);
+	_switchHistory.push_back(cmd);
 	printSwitchHistory();
 }
 
 void SwitchAggregator::printSwitchHistory() {
 	LOGd("Switch history:");
 	// Queue doesn't have an iterator..
-	for (size_t i = 0; i < _switchHistory.size(); ++i) {
-		auto item = _switchHistory.front();
-		LOGd("  t=%u val=%u state=%u srcType=%u, srcId=%u", item.timestamp, item.value, item.state.asInt, item.source.type, item.source.id);
-		_switchHistory.pop();
-		_switchHistory.push(item);
+//	for (size_t i = 0; i < _switchHistory.size(); ++i) {
+//		auto item = _switchHistory.front();
+//		LOGd("  t=%u val=%u state=%u srcType=%u, srcId=%u", item.timestamp, item.value, item.state.asInt, item.source.type, item.source.id);
+//		_switchHistory.pop();
+//		_switchHistory.push(item);
+//	}
+	for (const auto& iter : _switchHistory) {
+		LOGd("  t=%u val=%u state=%u srcType=%u, srcId=%u", iter.timestamp, iter.value, iter.state.asInt, iter.source.type, iter.source.id);
 	}
 }
 

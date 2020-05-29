@@ -14,7 +14,7 @@
 #include <behaviour/cs_TwilightHandler.h>
 
 #include <optional>
-#include <queue>
+#include <vector>
 #include <switch/cs_SmartSwitch.h>
 
 /**
@@ -74,7 +74,7 @@ private:
 	 * Keep up a history of switch commands.
 	 * This can be commands from any source, user or automated.
 	 */
-	std::queue<cs_switch_history_item_t> _switchHistory;
+	std::vector<cs_switch_history_item_t> _switchHistory;
 
 	// ================================== State updaters ==================================
 

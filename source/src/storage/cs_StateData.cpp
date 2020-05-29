@@ -327,6 +327,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::CMD_GET_ADC_RESTARTS:
+	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
 	case CS_TYPE::CMD_GET_POWER_SAMPLES:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return ERR_NOT_FOUND;
@@ -505,6 +506,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::CMD_GET_ADC_RESTARTS:
+	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
 	case CS_TYPE::CMD_GET_POWER_SAMPLES:
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return PersistenceMode::NEITHER_RAM_NOR_FLASH;

@@ -117,8 +117,9 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
 		case CTRL_CMD_GET_UPTIME:
-		case CTLR_CMD_GET_ADC_RESTARTS:
-		case CTLR_CMD_GET_POWER_SAMPLES:
+		case CTRL_CMD_GET_ADC_RESTARTS:
+		case CTRL_CMD_GET_SWITCH_HISTORY:
+		case CTRL_CMD_GET_POWER_SAMPLES:
 			LOGd("cmd=%u lvl=%u", type, accessLevel);
 			break;
 		case CTRL_CMD_UNKNOWN:
@@ -196,9 +197,11 @@ void CommandHandler::handleCommand(
 		return dispatchEventForCommand(CS_TYPE::CMD_SET_IBEACON_CONFIG_ID, commandData, source, result);
 	case CTRL_CMD_GET_UPTIME:
 		return handleCmdGetUptime(commandData, accessLevel, result);
-	case CTLR_CMD_GET_ADC_RESTARTS:
+	case CTRL_CMD_GET_ADC_RESTARTS:
 		return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_RESTARTS, commandData, source, result);
-	case CTLR_CMD_GET_POWER_SAMPLES:
+	case CTRL_CMD_GET_SWITCH_HISTORY:
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_SWITCH_HISTORY, commandData, source, result);
+	case CTRL_CMD_GET_POWER_SAMPLES:
 		return dispatchEventForCommand(CS_TYPE::CMD_GET_POWER_SAMPLES, commandData, source, result);
 	case CTRL_CMD_UNKNOWN:
 		result.returnCode = ERR_UNKNOWN_TYPE;
@@ -874,8 +877,9 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
 		case CTRL_CMD_GET_UPTIME:
-		case CTLR_CMD_GET_ADC_RESTARTS:
-		case CTLR_CMD_GET_POWER_SAMPLES:
+		case CTRL_CMD_GET_ADC_RESTARTS:
+		case CTRL_CMD_GET_SWITCH_HISTORY:
+		case CTRL_CMD_GET_POWER_SAMPLES:
 			return ADMIN;
 		case CTRL_CMD_UNKNOWN:
 			return NOT_SET;

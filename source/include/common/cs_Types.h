@@ -302,6 +302,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
 
 	CMD_GET_ADC_RESTARTS,                             // Get number of ADC restarts.
+	CMD_GET_SWITCH_HISTORY,                           // Get the switch command history.
 	CMD_GET_POWER_SAMPLES,                            // Get power samples of interesting events.
 
 	EVT_GENERIC_TEST= 0xFFFF,                         // Can be used by the python test python lib for ad hoc tests during development.
@@ -515,6 +516,7 @@ typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
 typedef set_ibeacon_config_id_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_ID);
 typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
 typedef void TYPIFY(CMD_GET_ADC_RESTARTS);
+typedef void TYPIFY(CMD_GET_SWITCH_HISTORY);
 typedef cs_power_samples_request_t TYPIFY(CMD_GET_POWER_SAMPLES);
 
 /*---------------------------------------------------------------------------------------------------------------------
