@@ -137,7 +137,7 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
  */
 void cs_gpio_init(boards_config_t* board) {
 	switch (board->hardwareBoard) {
-	case ACR01B10C:
+	case ACR01B10D:
 		// Enable NFC pins
 		if (NRF_UICR->NFCPINS != 0) {
 			nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
