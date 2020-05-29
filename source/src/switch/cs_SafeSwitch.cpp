@@ -351,7 +351,7 @@ void SafeSwitch::goingToDfu() {
 		case GUIDESTONE:
 		case CS_USB_DONGLE:
 		// Newer ones have dimmer enable pin.
-		case ACR01B10C:
+		case ACR01B10D:
 		default:
 			break;
 	}

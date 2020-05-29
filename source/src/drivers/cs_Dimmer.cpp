@@ -104,7 +104,7 @@ void Dimmer::enable() {
 			break;
 		}
 		// Newer ones have a dimmer enable pin.
-		case ACR01B10C:
+		case ACR01B10D:
 		default: {
 			nrf_gpio_pin_set(pinEnableDimmer);
 			break;
