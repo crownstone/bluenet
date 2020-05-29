@@ -147,7 +147,7 @@ void asACR01B10D(boards_config_t* p_config) {
  * Crownstone Plug Zero
  * *******************************************************************************************************************/
 
-void asACR01B2C(boards_config_t* p_config) {
+void asACR01B2D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 6;
