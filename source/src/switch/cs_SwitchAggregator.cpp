@@ -310,6 +310,8 @@ void SwitchAggregator::handleSwitchStateChange(uint8_t newIntensity) {
 	LOGi("handleSwitchStateChange %u", newIntensity);
 	// TODO: 21-01-2020 This is not a user intent, so store in a different variable, and then figure out what to do with it.
 	overrideState = newIntensity;
+	// TODO: get the correct source.
+	addToSwitchHistory(cs_switch_history_item_t(SystemTime::posix(), newIntensity, smartSwitch.getActualState(), cmd_source_t(CS_CMD_SOURCE_INTERNAL)));
 }
 
 // ========================= Misc =========================
