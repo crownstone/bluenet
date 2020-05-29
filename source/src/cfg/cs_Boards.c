@@ -78,10 +78,10 @@ void asACR01B1D(boards_config_t* p_config) {
  * Crownstone Built-in One
  * *******************************************************************************************************************/
 
-void asACR01B10C(boards_config_t* p_config) {
+void asACR01B10D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8; // 18 for v3
 //	p_config->pinGpioPwm                         = 15;
-	p_config->pinGpioEnablePwm                   = 10; // Only for v21, but on v20 this pin is not connected.
+	p_config->pinGpioEnablePwm                   = 10; // Only for v25, but on v20 this pin is not connected.
 	p_config->pinGpioRelayOn                     = 14; // 15 for v3
 	p_config->pinGpioRelayOff                    = 13; // 16 for v3
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain   6 for v3
@@ -147,7 +147,7 @@ void asACR01B10C(boards_config_t* p_config) {
  * Crownstone Plug Zero
  * *******************************************************************************************************************/
 
-void asACR01B2C(boards_config_t* p_config) {
+void asACR01B2D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8;
 	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 6;
@@ -432,8 +432,8 @@ uint32_t configure_board(boards_config_t* p_config) {
 		break;
 
 	case ACR01B10B:
-	case ACR01B10C:
-		asACR01B10C(p_config);
+	case ACR01B10D:
+		asACR01B10D(p_config);
 		break;
 
 	case ACR01B2A:

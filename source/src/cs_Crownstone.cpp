@@ -907,11 +907,13 @@ int main() {
 
 	// Init GPIO pins early in the process!
 	switch (board.hardwareBoard) {
-	case ACR01B10C:
-		enableNfcPins();
-		break;
-	default:
-		break;
+		// These boards use the NFC pins (p0.09 and p0.10).
+		// They have to be configured as GPIO before they can be used as GPIO.
+		case ACR01B10D:
+			enableNfcPins();
+			break;
+		default:
+			break;
 	}
 	if (IS_CROWNSTONE(board.deviceType)) {
 		nrf_gpio_cfg_output(board.pinGpioPwm);
