@@ -191,7 +191,7 @@ cs_ret_code_t MeshMsgHandler::handleCmdMultiSwitch(uint8_t* payload, size16_t pa
 		internalItem.id = item->id;
 		internalItem.cmd.switchCmd = item->switchCmd;
 
-		LOGi("execute multi switch");
+		LOGi("execute multi switch cmd=%u source: type=%u id=%u", item->switchCmd, item->source.source.type, item->source.source.id);
 		event_t event(CS_TYPE::CMD_MULTI_SWITCH, &internalItem, sizeof(internalItem), item->source);
 		event.source.source.flagExternal = true;
 		event.dispatch();
