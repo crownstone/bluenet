@@ -20,12 +20,11 @@
  * To implement a new command:
  *   - Add a new type to <cs_Types.h>
  *   - Define a custom handler for this type in this class.
- *   - Implement a function to handle this type. 
+ *   - Implement a function to handle this type.
  *     - The commandData contains a pointer to a data buffer.
- *     - This data will be gone after function returns. It has to copied.
+ *     - This data will be gone after function returns.
  *     - In most functions there is no explicit memcpy, but a struct assignment (including member arrays).
  *     - When sending the data through as event, a pointer to the struct can be used.
- *     - This means that the attached struct has to be freed later.
  *
  * # Access Level
  *
