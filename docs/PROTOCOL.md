@@ -622,9 +622,9 @@ uint32 | Timestamp | 4 | Unix timestamp of the switch command.
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
-bool | External | 1 | Whether the command was received via the mesh.
-uint 8 | Reserved | 4 | Reserved for future use, must be 0 for now.
-uint 8 | [Source type](#command_source_type) | 3 | What type of source ID.
+uint 8 | [Source type](#command_source_type) | 3 | What type of source ID. Bits 5-7.
+uint 8 | Reserved | 4 | Reserved for future use, must be 0 for now. Bits 1-4.
+bool | External | 1 | Whether the command was received via the mesh. Bit 0.
 uint 8 | [Source ID](#command_source_ID) | 8 | The ID of the source.
 
 <a name="command_source_type"></a>

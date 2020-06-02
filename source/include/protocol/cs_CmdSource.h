@@ -33,9 +33,9 @@ enum cs_cmd_source_id {
  * Struct that tells where a command originated from.
  */
 struct __attribute__((packed)) cmd_source_t {
-	bool flagExternal  : 1; // True when the command was received via mesh.
-	uint8_t reserved   : 4; // Reserved for flags.
-	uint8_t type       : 3; // See cs_cmd_source_type.
+	bool flagExternal  : 1; // True when the command was received via mesh. Bit 0.
+	uint8_t reserved   : 4; // Reserved for flags. Bits 1-4.
+	uint8_t type       : 3; // See cs_cmd_source_type. Bits 5-7.
 	uint8_t id         : 8; // Source ID, depends on type.
 
 	cmd_source_t(cs_cmd_source_id sourceId = CS_CMD_SOURCE_NONE):
