@@ -143,12 +143,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = CONFIG_POWER_ZERO_INVALID;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_PWM_PERIOD: {
-		LOGd("Got PWM period: %u", PWM_PERIOD);
-		LOGd("Data value ptr: %p", data.value);
-		*((uint32_t*)data.value) = 1;
-		LOGd("data.value: %u", *((uint32_t*)data.value));
 		*(TYPIFY(CONFIG_PWM_PERIOD)*)data.value = (TYPIFY(CONFIG_PWM_PERIOD))PWM_PERIOD;
-		LOGd("data.value: %u", *((uint32_t*)data.value));
 		return ERR_SUCCESS;
 	}
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
@@ -224,6 +219,14 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
 		*reinterpret_cast<TYPIFY(STATE_MESH_SEQ_NUMBER)*>(data.value) = STATE_MESH_SEQ_NUMBER_DEFAULT;
 		return ERR_SUCCESS;
+	case CS_TYPE::STATE_IBEACON_CONFIG_ID: {
+//		*reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value) = TYPIFY(STATE_IBEACON_CONFIG_ID)();
+		*reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value) = ibeacon_config_id_packet_t();
+//		TYPIFY(STATE_IBEACON_CONFIG_ID)* config = reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value);
+//		config->timestamp = 0;
+//		config->interval = 0;
+		return ERR_SUCCESS;
+	}
 	case CS_TYPE::STATE_MICROAPP:
 		return ERR_NOT_AVAILABLE;
 	case CS_TYPE::CMD_CONTROL_CMD:
@@ -272,6 +275,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
 	case CS_TYPE::CMD_DIMMING_ALLOWED:
+	case CS_TYPE::CMD_SWITCH_AGGREGATOR_RESET:
 	case CS_TYPE::EVT_MESH_TIME:
 	case CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER:
 	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER:
@@ -283,7 +287,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
 	case CS_TYPE::EVT_SCAN_STARTED:
 	case CS_TYPE::EVT_SCAN_STOPPED:
-	case CS_TYPE::EVT_SESSION_NONCE_SET:
+	case CS_TYPE::EVT_SESSION_DATA_SET:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STATE_FACTORY_RESET_DONE:
@@ -324,6 +328,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
 	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
+	case CS_TYPE::CMD_GET_ADC_RESTARTS:
+	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
+	case CS_TYPE::CMD_GET_POWER_SAMPLES:
 	case CS_TYPE::EVT_GENERIC_TEST:
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 	case CS_TYPE::EVT_MICROAPP:
@@ -392,6 +399,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_SUN_TIME:
 	case CS_TYPE::STATE_MESH_IV_INDEX:
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
+	case CS_TYPE::STATE_IBEACON_CONFIG_ID:
 	case CS_TYPE::STATE_MICROAPP:
 		return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
@@ -430,7 +438,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
-	case CS_TYPE::EVT_SESSION_NONCE_SET:
+	case CS_TYPE::EVT_SESSION_DATA_SET:
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
@@ -442,6 +450,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_DIMMER_POWERED:
 	case CS_TYPE::CMD_DIMMING_ALLOWED:
+	case CS_TYPE::CMD_SWITCH_AGGREGATOR_RESET:
 	case CS_TYPE::CMD_SWITCHING_ALLOWED:
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STATE_FACTORY_RESET_DONE:
@@ -501,6 +510,9 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
 	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
+	case CS_TYPE::CMD_GET_ADC_RESTARTS:
+	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
+	case CS_TYPE::CMD_GET_POWER_SAMPLES:
 	case CS_TYPE::EVT_GENERIC_TEST:
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 	case CS_TYPE::EVT_MICROAPP:

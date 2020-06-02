@@ -157,6 +157,8 @@ private:
 		uint32_t asInt;
 	} _logsEnabled;
 
+	uint32_t _numAdcRestarts = 0;
+
 	/** Initialize the moving averages
 	 */
 	void initAverages();

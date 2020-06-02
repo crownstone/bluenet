@@ -24,8 +24,8 @@
 #define PERIOD_SHORT_STOP_MASK      NRF_TIMER_SHORT_COMPARE5_STOP_MASK
 
 // Timer channel that is used when duty cycle is changed.
-#define SECONDARY_CHANNEL_IDX       4
-#define SECONDARY_CAPTURE_TASK      NRF_TIMER_TASK_CAPTURE4
+#define TRANSITION_CHANNEL_IDX      4
+#define TRANSITION_CAPTURE_TASK     NRF_TIMER_TASK_CAPTURE4
 
 
 // Timer channel to capture the timer counter at the zero crossing.
@@ -34,6 +34,8 @@
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN 20
+
+#define LOGPwmDebug LOGnone
 
 PWM::PWM() :
 		_initialized(false),
@@ -77,9 +79,7 @@ uint32_t PWM::init(const pwm_config_t& config) {
 		initChannel(i, _config.channels[i]);
 	}
 
-	_ppiTransitionChannels[0] = getPpiChannel(CS_PWM_PPI_CHANNEL_START + _config.channelCount*2);
-	_ppiTransitionChannels[1] = getPpiChannel(CS_PWM_PPI_CHANNEL_START + _config.channelCount*2 + 1);
-	_ppiGroup = getPpiGroup(CS_PWM_PPI_GROUP_START);
+	_ppiTransitionChannel = getPpiChannel(CS_PWM_PPI_CHANNEL_START + _config.channelCount * 2);
 
 	// Enable timer interrupt
 	err_code = sd_nvic_SetPriority(CS_PWM_IRQn, CS_PWM_TIMER_IRQ_PRIORITY);
@@ -113,26 +113,29 @@ uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
 	_values[channel] = 0;
 	_nextValues[channel] = 0;
 
-	// Configure gpiote
+	// Configure GPIOTE
 	_gpioteInitStatesOn[channel] = config.inverted ? NRF_GPIOTE_INITIAL_VALUE_LOW : NRF_GPIOTE_INITIAL_VALUE_HIGH;
 	_gpioteInitStatesOff[channel] = config.inverted ? NRF_GPIOTE_INITIAL_VALUE_HIGH : NRF_GPIOTE_INITIAL_VALUE_LOW;
-
 	nrf_gpiote_task_configure(CS_PWM_GPIOTE_CHANNEL_START + channel, config.pin, NRF_GPIOTE_POLARITY_TOGGLE, _gpioteInitStatesOn[channel]);
 
-	// Cache ppi channels and gpiote tasks
-	_ppiChannels[channel*2] = getPpiChannel(CS_PWM_PPI_CHANNEL_START + channel*2);
-	_ppiChannels[channel*2 + 1] = getPpiChannel(CS_PWM_PPI_CHANNEL_START + channel*2 + 1);
+	// Cache PPI channels
+	_ppiChannelsOn[channel] = getPpiChannel(CS_PWM_PPI_CHANNEL_START + channel * 2);
+	_ppiChannelsOff[channel] = getPpiChannel(CS_PWM_PPI_CHANNEL_START + channel * 2 + 1);
 
-	// Make the timer compare event trigger the gpiote task
+	// Make the timer compare event trigger the GPIOTE set and clear task:
+
+	// At the end of the duty cycle, turn switch off.
 	nrf_ppi_channel_endpoint_setup(
-			_ppiChannels[channel*2],
+			_ppiChannelsOff[channel],
 			(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(channel)),
-			nrf_gpiote_task_addr_get(getGpioteTaskOut(CS_PWM_GPIOTE_CHANNEL_START + channel))
+			nrf_gpiote_task_addr_get(config.inverted ? getGpioteTaskSet(CS_PWM_GPIOTE_CHANNEL_START + channel) : getGpioteTaskClear(CS_PWM_GPIOTE_CHANNEL_START + channel))
 	);
+
+	// At the start/end of the period, turn switch on.
 	nrf_ppi_channel_endpoint_setup(
-			_ppiChannels[channel*2 + 1],
+			_ppiChannelsOn[channel],
 			(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX)),
-			nrf_gpiote_task_addr_get(getGpioteTaskOut(CS_PWM_GPIOTE_CHANNEL_START + channel))
+			nrf_gpiote_task_addr_get(config.inverted ? getGpioteTaskClear(CS_PWM_GPIOTE_CHANNEL_START + channel) : getGpioteTaskSet(CS_PWM_GPIOTE_CHANNEL_START + channel))
 	);
 
 //	// Enable ppi
@@ -210,11 +213,35 @@ void PWM::_zeroCrossingStart() {
 	LOGi("Started on zero crossing");
 }
 
+bool PWM::checkInTransition() {
+//	if (!_transitionInProgress) {
+//		return false;
+//	}
+//	if (readCC(TRANSITION_CHANNEL_IDX) == _transitionTargetTicks) {
+//		// Transition is done.
+//		_transitionInProgress = false;
+//		return false;
+//	}
+//	return true;
+	return false;
+}
+
 void PWM::setValue(uint8_t channel, uint16_t newValue) {
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
 	}
+
+	if (newValue > 100) {
+		newValue = 100;
+	}
+
+	// Something weird happens for low values: the resulting intensity is way too large.
+	// Either a software bug, peripheral issue, or hardware issue.
+	if (0 < newValue && newValue < 5) {
+		newValue = 5;
+	}
+
 	if (!_started) {
 		LOGw("Not started yet");
 		// Remember what value was set, set it on start.
@@ -222,99 +249,72 @@ void PWM::setValue(uint8_t channel, uint16_t newValue) {
 		return;
 	}
 
-	if (newValue > 100) {
-		newValue = 100;
+	if (_values[channel] == newValue) {
+		LOGd("Channel %u is already set to %u", channel, newValue);
+		return;
 	}
+
+	if (checkInTransition()) {
+		LOGd("Transition in progress, set value later");
+		_nextValues[channel] = newValue;
+		return;
+	}
+
 	LOGd("Set PWM channel %d to %d", channel, newValue);
 	uint32_t oldValue = _values[channel];
-
-	switch (_values[channel]) {
-	case 100:
-	case 0: {
-		if (newValue == 0 || newValue == 100) {
-			// 0/100 --> 0/100
-			gpioteForce(channel, newValue == 100);
-		}
-		else {
-			// 0/100 --> N
-			_tickValues[channel] = _maxTickVal * newValue / 100;
-
-			nrf_ppi_channel_disable(_ppiTransitionChannels[0]);
-			nrf_ppi_channel_disable(_ppiTransitionChannels[1]);
-			writeCC(channel, _tickValues[channel]);
-
-			// Turn on PPI channels at end of period (when currently on) or at trailing edge (when currently off).
-			// This makes a difference, because of the initial state of the pin.
-			nrf_ppi_channel_group_clear(_ppiGroup);
-			nrf_ppi_channel_include_in_group(_ppiChannels[channel*2],     _ppiGroup);
-			nrf_ppi_channel_include_in_group(_ppiChannels[channel*2 + 1], _ppiGroup);
-
-			nrf_ppi_channel_endpoint_setup(
-					_ppiTransitionChannels[0],
-					(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(oldValue == 0 ? channel : PERIOD_CHANNEL_IDX)),
-					(uint32_t)nrf_ppi_task_address_get(getPpiTaskEnable(CS_PWM_PPI_GROUP_START))
-			);
-
-			nrf_ppi_channel_enable(_ppiTransitionChannels[0]);
-		}
-		break;
-	}
-	default: {
-		if (newValue == 0 || newValue == 100) {
-			// N --> 0/100
-
-			nrf_ppi_channel_disable(_ppiTransitionChannels[0]);
-			nrf_ppi_channel_disable(_ppiTransitionChannels[1]);
-			writeCC(channel, _tickValues[channel]);
-
-			// Turn off PPI channels at end of period (when turning on) or at trailing edge (when turning off).
-			// This makes a difference, because of the initial state of the pin.
-			nrf_ppi_channel_group_clear(_ppiGroup);
-			nrf_ppi_channel_include_in_group(_ppiChannels[channel*2],     _ppiGroup);
-			nrf_ppi_channel_include_in_group(_ppiChannels[channel*2 + 1], _ppiGroup);
-
-			nrf_ppi_channel_endpoint_setup(
-					_ppiTransitionChannels[0],
-					(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(newValue == 0 ? channel : PERIOD_CHANNEL_IDX)),
-					(uint32_t)nrf_ppi_task_address_get(getPpiTaskDisable(CS_PWM_PPI_GROUP_START))
-			);
-
-			nrf_ppi_channel_enable(_ppiTransitionChannels[0]);
-		}
-		else {
-			// N --> M
-			_tickValues[channel] = _maxTickVal * newValue / 100;
-
-			nrf_ppi_channel_disable(_ppiTransitionChannels[0]);
-			nrf_ppi_channel_disable(_ppiTransitionChannels[1]);
-			nrf_ppi_channel_group_clear(_ppiGroup);
-			nrf_ppi_channel_include_in_group(_ppiTransitionChannels[0], _ppiGroup);
-
-			// Next time the secondary channel triggers (at the new tick value), it will write this tick value to the channel CC.
-			nrf_ppi_channel_endpoint_setup(
-					_ppiTransitionChannels[0],
-					(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(SECONDARY_CHANNEL_IDX)),
-					(uint32_t)nrf_timer_task_address_get(CS_PWM_TIMER, nrf_timer_capture_task_get(channel))
-			);
-
-			if (newValue < oldValue) {
-				// If the new value is lower, an extra gpio task has to be setup, as the old one will be skipped.
-				nrf_ppi_channel_endpoint_setup(
-						_ppiTransitionChannels[1],
-						(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(SECONDARY_CHANNEL_IDX)),
-						nrf_gpiote_task_addr_get(getGpioteTaskOut(CS_PWM_GPIOTE_CHANNEL_START + channel))
-				);
-				nrf_ppi_channel_include_in_group(_ppiTransitionChannels[1], _ppiGroup);
-			}
-
-			writeCC(SECONDARY_CHANNEL_IDX, _tickValues[channel]);
-			nrf_ppi_group_enable(_ppiGroup);
-
-			// TODO: the secondary channel and the ppi transition channels are never stopped/cleared (if pwm value isn't changed)?
-		}
-	}
-	}
 	_values[channel] = newValue;
+	uint32_t oldTickValue = _tickValues[channel];
+	_tickValues[channel] = _maxTickVal * newValue / 100;
+	LOGPwmDebug("ticks=%u", _tickValues[channel]);
+
+	// Always disable the temporary PPI.
+	nrf_ppi_channel_disable(_ppiTransitionChannel);
+
+	switch (newValue) {
+//		case 0:
+//			// Simply disable the PPI that turns on the switch.
+//			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
+//			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
+//
+//			break;
+//		case 100:
+//			// Simply disable the PPI that turns off the switch.
+//			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
+//			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
+//			break;
+		case 0:
+		case 100:
+			// Disable both PPI channels, and force gpio values.
+			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
+			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
+			gpioteForce(channel, newValue == 100);
+			break;
+		default: {
+			if (oldValue != 0 && oldValue != 100 && newValue < oldValue) {
+				// From dimmed value to lower dimmed value.
+
+				// Turn switch off at end of the old tick value.
+				// This is required to turn off the switch in case the current timer value is higher than the new tick value, but lower than the old tick value.
+				// So this PPI is only temporarily needed, until the timer reached the start of the period again.
+				LOGPwmDebug("transition");
+				writeCC(TRANSITION_CHANNEL_IDX, oldTickValue);
+				nrf_ppi_channel_endpoint_setup(
+						_ppiTransitionChannel,
+						(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(TRANSITION_CHANNEL_IDX)),
+						nrf_gpiote_task_addr_get(_config.channels[channel].inverted ? getGpioteTaskSet(CS_PWM_GPIOTE_CHANNEL_START + channel) : getGpioteTaskClear(CS_PWM_GPIOTE_CHANNEL_START + channel))
+				);
+				nrf_ppi_channel_enable(_ppiTransitionChannel);
+
+//				// Wait for transition to be done.
+//				_transitionInProgress = true;
+//				_transitionTargetTicks = _tickValues[channel];
+			}
+			LOGPwmDebug("writeCC %u", _tickValues[channel]);
+			writeCC(channel, _tickValues[channel]);
+			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
+			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
+		}
+	}
 }
 
 uint16_t PWM::getValue(uint8_t channel) {
@@ -518,18 +518,12 @@ uint32_t PWM::readCC(uint8_t channelIdx) {
 nrf_timer_cc_channel_t PWM::getTimerChannel(uint8_t index) {
 	assert(index < 6, "invalid timer channel index");
 	switch(index) {
-	case 0:
-		return NRF_TIMER_CC_CHANNEL0;
-	case 1:
-		return NRF_TIMER_CC_CHANNEL1;
-	case 2:
-		return NRF_TIMER_CC_CHANNEL2;
-	case 3:
-		return NRF_TIMER_CC_CHANNEL3;
-	case 4:
-		return NRF_TIMER_CC_CHANNEL4;
-	case 5:
-		return NRF_TIMER_CC_CHANNEL5;
+		case 0: return NRF_TIMER_CC_CHANNEL0;
+		case 1: return NRF_TIMER_CC_CHANNEL1;
+		case 2: return NRF_TIMER_CC_CHANNEL2;
+		case 3: return NRF_TIMER_CC_CHANNEL3;
+		case 4: return NRF_TIMER_CC_CHANNEL4;
+		case 5: return NRF_TIMER_CC_CHANNEL5;
 	}
 	APP_ERROR_CHECK(NRF_ERROR_INVALID_PARAM);
 	return NRF_TIMER_CC_CHANNEL0;
@@ -538,62 +532,70 @@ nrf_timer_cc_channel_t PWM::getTimerChannel(uint8_t index) {
 nrf_gpiote_tasks_t PWM::getGpioteTaskOut(uint8_t index) {
 	assert(index < 8, "invalid gpiote task index");
 	switch(index) {
-	case 0:
-		return NRF_GPIOTE_TASKS_OUT_0;
-	case 1:
-		return NRF_GPIOTE_TASKS_OUT_1;
-	case 2:
-		return NRF_GPIOTE_TASKS_OUT_2;
-	case 3:
-		return NRF_GPIOTE_TASKS_OUT_3;
-	case 4:
-		return NRF_GPIOTE_TASKS_OUT_4;
-	case 5:
-		return NRF_GPIOTE_TASKS_OUT_5;
-	case 6:
-		return NRF_GPIOTE_TASKS_OUT_6;
-	case 7:
-		return NRF_GPIOTE_TASKS_OUT_7;
+		case 0: return NRF_GPIOTE_TASKS_OUT_0;
+		case 1: return NRF_GPIOTE_TASKS_OUT_1;
+		case 2: return NRF_GPIOTE_TASKS_OUT_2;
+		case 3: return NRF_GPIOTE_TASKS_OUT_3;
+		case 4: return NRF_GPIOTE_TASKS_OUT_4;
+		case 5: return NRF_GPIOTE_TASKS_OUT_5;
+		case 6: return NRF_GPIOTE_TASKS_OUT_6;
+		case 7: return NRF_GPIOTE_TASKS_OUT_7;
 	}
 	APP_ERROR_CHECK(NRF_ERROR_INVALID_PARAM);
 	return NRF_GPIOTE_TASKS_OUT_0;
 }
 
+nrf_gpiote_tasks_t PWM::getGpioteTaskSet(uint8_t index) {
+	assert(index < 8, "invalid gpiote task index");
+	switch(index) {
+		case 0: return NRF_GPIOTE_TASKS_SET_0;
+		case 1: return NRF_GPIOTE_TASKS_SET_1;
+		case 2: return NRF_GPIOTE_TASKS_SET_2;
+		case 3: return NRF_GPIOTE_TASKS_SET_3;
+		case 4: return NRF_GPIOTE_TASKS_SET_4;
+		case 5: return NRF_GPIOTE_TASKS_SET_5;
+		case 6: return NRF_GPIOTE_TASKS_SET_6;
+		case 7: return NRF_GPIOTE_TASKS_SET_7;
+	}
+	APP_ERROR_CHECK(NRF_ERROR_INVALID_PARAM);
+	return NRF_GPIOTE_TASKS_SET_0;
+}
+
+nrf_gpiote_tasks_t PWM::getGpioteTaskClear(uint8_t index) {
+	assert(index < 8, "invalid gpiote task index");
+	switch(index) {
+		case 0: return NRF_GPIOTE_TASKS_CLR_0;
+		case 1: return NRF_GPIOTE_TASKS_CLR_1;
+		case 2: return NRF_GPIOTE_TASKS_CLR_2;
+		case 3: return NRF_GPIOTE_TASKS_CLR_3;
+		case 4: return NRF_GPIOTE_TASKS_CLR_4;
+		case 5: return NRF_GPIOTE_TASKS_CLR_5;
+		case 6: return NRF_GPIOTE_TASKS_CLR_6;
+		case 7: return NRF_GPIOTE_TASKS_CLR_7;
+	}
+	APP_ERROR_CHECK(NRF_ERROR_INVALID_PARAM);
+	return NRF_GPIOTE_TASKS_CLR_0;
+}
+
 nrf_ppi_channel_t PWM::getPpiChannel(uint8_t index) {
 	assert(index < 16, "invalid ppi channel index");
 	switch(index) {
-	case 0:
-		return NRF_PPI_CHANNEL0;
-	case 1:
-		return NRF_PPI_CHANNEL1;
-	case 2:
-		return NRF_PPI_CHANNEL2;
-	case 3:
-		return NRF_PPI_CHANNEL3;
-	case 4:
-		return NRF_PPI_CHANNEL4;
-	case 5:
-		return NRF_PPI_CHANNEL5;
-	case 6:
-		return NRF_PPI_CHANNEL6;
-	case 7:
-		return NRF_PPI_CHANNEL7;
-	case 8:
-		return NRF_PPI_CHANNEL8;
-	case 9:
-		return NRF_PPI_CHANNEL9;
-	case 10:
-		return NRF_PPI_CHANNEL10;
-	case 11:
-		return NRF_PPI_CHANNEL11;
-	case 12:
-		return NRF_PPI_CHANNEL12;
-	case 13:
-		return NRF_PPI_CHANNEL13;
-	case 14:
-		return NRF_PPI_CHANNEL14;
-	case 15:
-		return NRF_PPI_CHANNEL15;
+		case 0: return NRF_PPI_CHANNEL0;
+		case 1: return NRF_PPI_CHANNEL1;
+		case 2: return NRF_PPI_CHANNEL2;
+		case 3: return NRF_PPI_CHANNEL3;
+		case 4: return NRF_PPI_CHANNEL4;
+		case 5: return NRF_PPI_CHANNEL5;
+		case 6: return NRF_PPI_CHANNEL6;
+		case 7: return NRF_PPI_CHANNEL7;
+		case 8: return NRF_PPI_CHANNEL8;
+		case 9: return NRF_PPI_CHANNEL9;
+		case 10: return NRF_PPI_CHANNEL10;
+		case 11: return NRF_PPI_CHANNEL11;
+		case 12: return NRF_PPI_CHANNEL12;
+		case 13: return NRF_PPI_CHANNEL13;
+		case 14: return NRF_PPI_CHANNEL14;
+		case 15: return NRF_PPI_CHANNEL15;
 	}
 	return NRF_PPI_CHANNEL0;
 }
@@ -601,18 +603,12 @@ nrf_ppi_channel_t PWM::getPpiChannel(uint8_t index) {
 nrf_ppi_channel_group_t PWM::getPpiGroup(uint8_t index) {
 	assert(index < 6, "invalid ppi group index");
 	switch(index) {
-	case 0:
-		return NRF_PPI_CHANNEL_GROUP0;
-	case 1:
-		return NRF_PPI_CHANNEL_GROUP1;
-	case 2:
-		return NRF_PPI_CHANNEL_GROUP2;
-	case 3:
-		return NRF_PPI_CHANNEL_GROUP3;
-	case 4:
-		return NRF_PPI_CHANNEL_GROUP4;
-	case 5:
-		return NRF_PPI_CHANNEL_GROUP5;
+	case 0: return NRF_PPI_CHANNEL_GROUP0;
+	case 1: return NRF_PPI_CHANNEL_GROUP1;
+	case 2: return NRF_PPI_CHANNEL_GROUP2;
+	case 3: return NRF_PPI_CHANNEL_GROUP3;
+	case 4: return NRF_PPI_CHANNEL_GROUP4;
+	case 5: return NRF_PPI_CHANNEL_GROUP5;
 	}
 	return NRF_PPI_CHANNEL_GROUP0;
 }
@@ -620,18 +616,12 @@ nrf_ppi_channel_group_t PWM::getPpiGroup(uint8_t index) {
 nrf_ppi_task_t PWM::getPpiTaskEnable(uint8_t index) {
 	assert(index < 6, "invalid ppi group index");
 	switch(index) {
-	case 0:
-		return NRF_PPI_TASK_CHG0_EN;
-	case 1:
-		return NRF_PPI_TASK_CHG1_EN;
-	case 2:
-		return NRF_PPI_TASK_CHG2_EN;
-	case 3:
-		return NRF_PPI_TASK_CHG3_EN;
-	case 4:
-		return NRF_PPI_TASK_CHG4_EN;
-	case 5:
-		return NRF_PPI_TASK_CHG5_EN;
+	case 0: return NRF_PPI_TASK_CHG0_EN;
+	case 1: return NRF_PPI_TASK_CHG1_EN;
+	case 2: return NRF_PPI_TASK_CHG2_EN;
+	case 3: return NRF_PPI_TASK_CHG3_EN;
+	case 4: return NRF_PPI_TASK_CHG4_EN;
+	case 5: return NRF_PPI_TASK_CHG5_EN;
 	}
 	return NRF_PPI_TASK_CHG0_EN;
 }
@@ -639,18 +629,12 @@ nrf_ppi_task_t PWM::getPpiTaskEnable(uint8_t index) {
 nrf_ppi_task_t PWM::getPpiTaskDisable(uint8_t index) {
 	assert(index < 6, "invalid ppi group index");
 	switch(index) {
-	case 0:
-		return NRF_PPI_TASK_CHG0_DIS;
-	case 1:
-		return NRF_PPI_TASK_CHG1_DIS;
-	case 2:
-		return NRF_PPI_TASK_CHG2_DIS;
-	case 3:
-		return NRF_PPI_TASK_CHG3_DIS;
-	case 4:
-		return NRF_PPI_TASK_CHG4_DIS;
-	case 5:
-		return NRF_PPI_TASK_CHG5_DIS;
+	case 0: return NRF_PPI_TASK_CHG0_DIS;
+	case 1: return NRF_PPI_TASK_CHG1_DIS;
+	case 2: return NRF_PPI_TASK_CHG2_DIS;
+	case 3: return NRF_PPI_TASK_CHG3_DIS;
+	case 4: return NRF_PPI_TASK_CHG4_DIS;
+	case 5: return NRF_PPI_TASK_CHG5_DIS;
 	}
 	return NRF_PPI_TASK_CHG0_DIS;
 }

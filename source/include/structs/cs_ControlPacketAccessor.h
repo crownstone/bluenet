@@ -23,6 +23,22 @@ template <cs_buffer_size_t PAYLOAD_SIZE = CS_CONTROL_PACKET_DEFAULT_PAYLOAD_SIZE
 class ControlPacketAccessor: BufferAccessor {
 public:
 	/**
+	 * Get the protocol version.
+	 */
+	uint8_t getProtocolVersion() const {
+		checkInitialized();
+		return _buffer->header.protocolVersion;
+	}
+
+	/**
+	 * Set the protocol version.
+	 */
+	void setProtocolVersion(uint8_t protocol) {
+		checkInitialized();
+		_buffer->header.protocolVersion = protocol;
+	}
+
+	/**
 	 * Get the command type.
 	 */
 	cs_control_cmd_t getType() const {

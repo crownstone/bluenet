@@ -1,4 +1,4 @@
-# Bluenet broadcast protocol v4.0.0
+# Bluenet broadcast protocol v4.0
 -----------------------------------
 
 This only documents the latest protocol, older versions can be found in the git history.
@@ -58,7 +58,7 @@ uint16 | reserved | 16 | Reserved for future use, should be 0 for now.
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint16 | Validation | 16 | Validation: current local time as unix timestamp, right shifted by 7.
-uint8 | Location ID | 6 | ID of the location where the user is.
+uint8 | Location ID | 6 | ID of the location where the user is. 0 for in sphere, but no specific location.
 uint8 | Profile ID | 3 | ID of the profile the user is using.
 uint8 | RSSI offset | 4 | Offset from standard signal strength. Divide by 2, then add 8.
 uint8 | flags | 3 | [Flags](#background_adv_flags).
@@ -73,7 +73,7 @@ Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint8 | Counter | 8 | Count of the broadcast command. This value should be increased for each newly broadcasted command.
 uint8 | Reserved | 8 | Reserved for future use.
-uint8 | Location ID | 6 | ID of the location where the user is.
+uint8 | Location ID | 6 | ID of the location where the user is. 0 for in sphere, but no specific location.
 uint8 | Profile ID | 3 | ID of the profile the user is using.
 uint8 | RSSI offset | 4 | Offset from standard signal strength. Divide by 2, then add 8.
 uint8 | flags | 3 | [Flags](#background_adv_flags).
@@ -127,7 +127,7 @@ uint8 | Sphere ID | 8 | Sphere ID that must be the same as given during setup. U
 uint8 | Access level | 3 | Shortened access level: 0=admin, 1=member, 2=basic, 4=setup.
 uint8 | Sequence | 2 | 1: Sequence of this service UUID.
 uint8 | Reserved | 2 | Reserved for future use.
-uint8 | Device token | 8 | Token of this device, should be unique per device (phone) in the sphere.
+uint8 | Device ID | 8 | ID of this device, should be unique per device (phone) in the sphere.
 uint16 | RC5 payload | 4 | First 4 bits of first block of [encrypted RC5 payload](#rc5_adv_payload).
 uint8 | Sequence | 2 | 2: Sequence of this service UUID.
 uint16 | RC5 payload | 12 | Last 12 bits of first block of [encrypted RC5 payload](#rc5_adv_payload).
@@ -177,7 +177,7 @@ uint 8 | Count | 1 | Number of valid entries.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
-uint 8 | Switch state | 1 | The switch state to be set by the targeted crownstone. 0 = off, 100 = fully on.
+uint 8 | [Switch value](PROTOCOL.md#switch_command_value) | 1 | The switch value to be set by the targeted crownstone.
 
 <a name="set_time_packet"></a>
 ##### Set time packet
@@ -231,7 +231,7 @@ Bit | Name |  Description
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | Device ID | 2 | Unique ID of the device.
-uint 8 | Location ID | 1 | ID of the location where the device is.
+uint 8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
 uint 8 | Profile ID | 1 | Profile ID of the device.
 int 8 | RSSI offset | 1 | Offset from standard signal strength.
 uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background_adv_flags).

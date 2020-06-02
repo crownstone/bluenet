@@ -19,7 +19,8 @@
 #define LEGACY_MULTI_SWITCH_HEADER_SIZE (1+1)
 #define LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT 18
 
-#define SESSION_NONCE_LENGTH 5
+#define VALIDATION_KEY_LENGTH   4
+#define SESSION_NONCE_LENGTH 	5
 
 /**
  * Packets (structs) that are used over the air.
@@ -52,6 +53,7 @@ enum BackgroundAdvFlagBitPos {
  * Header of a control packet.
  */
 struct __attribute__((__packed__)) control_packet_header_t {
+	uint8_t protocolVersion;
 	cs_control_cmd_t commandType;
 	cs_buffer_size_t payloadSize;
 };
@@ -69,6 +71,7 @@ struct __attribute__((__packed__)) control_packet_t {
  * Header of a result packet.
  */
 struct __attribute__((__packed__)) result_packet_header_t {
+	uint8_t protocolVersion = CS_CONNECTION_PROTOCOL_VERSION;
 	cs_control_cmd_t commandType = CTRL_CMD_UNKNOWN;
 	cs_ret_code_t returnCode = ERR_UNSPECIFIED;
 	cs_buffer_size_t payloadSize = 0;
@@ -248,15 +251,21 @@ struct __attribute__((packed)) sun_time_t {
 /**
  * Packet to change ibeacon config ID.
  *
- * Timestamp: when to start executing the change.
- * Interval: change every N seconds after timestamp.
+ * Timestamp: when to set the ID for the first time.
+ * Interval: set ID every N seconds after timestamp.
  * Set interval = 0 to execute only once.
  * Set timestamp = 0, and interval = 0 to execute now.
+ * A stored entry with timestamp = 0 and interval = 0, will be considered empty.
  */
 struct __attribute__((__packed__)) ibeacon_config_id_packet_t {
-	uint8_t ibeaconConfigId = 0;
 	uint32_t timestamp = 0;
 	uint16_t interval = 0;
+};
+
+// See ibeacon_config_id_packet_t
+struct __attribute__((__packed__)) set_ibeacon_config_id_packet_t {
+	uint8_t ibeaconConfigId = 0;
+	ibeacon_config_id_packet_t config;
 };
 
 struct __attribute__((__packed__)) led_message_payload_t {
@@ -264,8 +273,10 @@ struct __attribute__((__packed__)) led_message_payload_t {
 	bool enable;
 };
 
-struct __attribute__((packed)) session_nonce_t {
-	uint8_t data[SESSION_NONCE_LENGTH];
+struct __attribute__((packed)) session_data_t {
+	uint8_t protocol;
+	uint8_t sessionNonce[SESSION_NONCE_LENGTH];
+	uint8_t validationKey[VALIDATION_KEY_LENGTH];
 };
 
 struct __attribute__((packed)) behaviour_debug_t {
@@ -341,6 +352,47 @@ struct __attribute__((packed)) cs_uicr_data_t {
 		} fields;
 		uint32_t asInt;
 	} productionDateHousing;
+};
+
+enum PowerSamplesType {
+	POWER_SAMPLES_TYPE_SWITCHCRAFT = 0,
+	POWER_SAMPLES_TYPE_SWITCHCRAFT_NON_TRIGGERED = 1,
+};
+
+struct __attribute__((packed)) cs_power_samples_header_t {
+	uint8_t type;                 // PowerSamplesType.
+	uint8_t index = 0;            // Some types have multiple lists of samples.
+	uint16_t count = 0;           // Number of samples.
+	uint32_t unixTimestamp;       // Unix timestamp of time the samples have been set.
+	uint16_t delayUs;             // Delay of the measurement.
+	uint16_t sampleIntervalUs;    // Time between samples.
+	uint16_t reserved = 0;
+	int16_t offset;               // Calculated offset (mean) of the samples.
+	float multiplier;             // Multiply the sample value with this value to get a value in ampere, or volt.
+	// Followed by: int16_t samples[count]
+};
+
+struct __attribute__((packed)) cs_power_samples_request_t {
+	uint8_t type;                 // PowerSamplesType.
+	uint8_t index = 0;            // Some types have multiple lists of samples.
+};
+
+struct __attribute__((packed)) cs_switch_history_header_t {
+	uint8_t count;                // Number of items.
+};
+
+struct __attribute__((packed)) cs_switch_history_item_t {
+	uint32_t timestamp;           // Timestamp of the switch command.
+	uint8_t value;                // Switch command value.
+	switch_state_t state;         // Switch state after executing the command.
+	cmd_source_t source;          // Source of the command.
+
+	cs_switch_history_item_t(uint32_t timestamp, uint8_t switchValue, switch_state_t switchState, const cmd_source_t& source):
+		timestamp(timestamp),
+		value(switchValue),
+		state(switchState),
+		source(source)
+	{}
 };
 
 /**

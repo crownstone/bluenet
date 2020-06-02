@@ -28,6 +28,18 @@ private:
 	// Alternative to thresholdSimilar.
 	float _thresholdRatio = 100.0;
 
+
+
+	const static uint8_t _numStoredBuffers = 3;
+
+	// Store the samples and meta data of the last detection.
+	cs_power_samples_header_t _lastDetection;
+	cs_power_samples_header_t _lastAlmostDetection;
+	int16_t _lastDetectionSamples[_numStoredBuffers * InterleavedBuffer::getChannelLength()] = {0};
+	int16_t _lastAlmostDetectionSamples[_numStoredBuffers * InterleavedBuffer::getChannelLength()] = {0};
+
+	void setLastDetection(bool aboveThreshold, buffer_id_t currentBufIndex, channel_id_t voltageChannelId);
+
 public:
 	// Gets a static singleton (no dynamic memory allocation)
 	static RecognizeSwitch& getInstance() {
@@ -65,11 +77,20 @@ public:
 	 */
 	void skip(uint16_t num);
 
-	/** Recognize switch state.
+	/**
+	 * Recognize switch event.
 	 *
 	 * @param[in] bufIndex                       The current buffer.
-	 * @parampin] voltageChannelId               Channel in which the voltage values can be found.
-	 *
+	 * @param[in] voltageChannelId               Channel in which the voltage values can be found.
+	 * @return                                   True when switch event was detected.
 	 */
 	bool detect(buffer_id_t currentBufIndex, channel_id_t voltageChannelId);
+
+	/**
+	 * Get the samples of the last (almost) detected switch event.
+	 *
+	 * @param[in] type                           Either SWITCHCRAFT or SWITCHCRAFT_NON_TRIGGERED.
+	 * @param[in/out]                            Result with buffer to fill with data (header + samples), and result code to set.
+	 */
+	void getLastDetection(PowerSamplesType type, uint8_t index, cs_result_t& result);
 };

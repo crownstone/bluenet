@@ -11,7 +11,6 @@
  *
  * The sdk_config.h is a copy of SDK_15-3/examples/dfu/secure_bootloader/pca10040_ble_debug/config/sdk_config.h
  */
-
 #define NRF_BL_DFU_ENTER_METHOD_BUTTON 0
 #define NRF_BL_DFU_ENTER_METHOD_PINRESET 0
 #define NRF_BL_DFU_ENTER_METHOD_GPREGRET 1

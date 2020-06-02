@@ -14,6 +14,7 @@
 #include "processing/cs_RecognizeSwitch.h"
 #include "protocol/cs_UartMsgTypes.h"
 #include "protocol/cs_UartProtocol.h"
+#include "protocol/cs_Packets.h"
 #include "storage/cs_State.h"
 #include "structs/buffer/cs_InterleavedBuffer.h"
 #include "third/SortMedian.h"
@@ -203,7 +204,23 @@ void PowerSampling::handleEvent(event_t & event) {
 	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
 		enableSwitchcraft(*(TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)*)event.data);
 		break;
+	case CS_TYPE::CMD_GET_POWER_SAMPLES: {
+		cs_power_samples_request_t* cmd = (TYPIFY(CMD_GET_POWER_SAMPLES)*)event.data;
+		RecognizeSwitch::getInstance().getLastDetection((PowerSamplesType)cmd->type, cmd->index, event.result);
+		break;
+	}
+	case CS_TYPE::CMD_GET_ADC_RESTARTS: {
+		if (event.result.buf.len < sizeof(_numAdcRestarts)) {
+			event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+			return;
+		}
+		memcpy(event.result.buf.data, &_numAdcRestarts, sizeof(_numAdcRestarts));
+		event.result.dataSize = sizeof(_numAdcRestarts);
+		event.result.returnCode = ERR_SUCCESS;
+		break;
+	}
 	case CS_TYPE::EVT_ADC_RESTARTED:
+		++_numAdcRestarts;
 		_skipSwapDetection = 1;
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
 		RecognizeSwitch::getInstance().skip(2);
@@ -303,7 +320,7 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	bool switch_detected = RecognizeSwitch::getInstance().detect(bufIndex, power.voltageIndex);
 	if (switch_detected) {
 		LOGd("Switch event detected!");
-		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE);
+		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
@@ -506,7 +523,7 @@ void PowerSampling::filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id
 
 	// Pad the start of the input vector with the first sample in the buffer
 	uint16_t j = 0;
-	value_t padded_value = InterleavedBuffer::getInstance().getValue(buffer_id, channel_id, 0);
+	sample_value_t padded_value = InterleavedBuffer::getInstance().getValue(buffer_id, channel_id, 0);
 	for (uint16_t i = 0; i < _filterParams->half; ++i, ++j) {
 		_inputSamples->at(j) = padded_value;
 	}

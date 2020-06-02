@@ -33,6 +33,7 @@ typedef uint32_t ret_code_t;
 #include <nrf_gpio.h>
 #include <nrf_gpiote.h>
 #include <nrf_nvic.h>
+#include <nrf_power.h>
 #include <nrf_sdh.h>
 #include <nrf_sdh_ble.h>
 #include <nrf_sdh_soc.h>
@@ -43,6 +44,7 @@ typedef uint32_t ret_code_t;
 //#include <nrf_serial.h>
 #include <nrfx_comp.h>
 //#include <nrf_drv_comp.h>
+#include <nrfx_wdt.h>
 
 #if CS_SERIAL_NRF_LOG_ENABLED > 0
 #include <nrfx_log.h>

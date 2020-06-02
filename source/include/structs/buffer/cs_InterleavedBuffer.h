@@ -18,30 +18,27 @@ typedef uint8_t buffer_id_t;
 // The index type for a channel (a buffer within one of the buffers), organized like [A B A B A B]
 typedef uint8_t channel_id_t;
 
-// The index type for a value is positive and at maximum 255
-typedef uint8_t value_id_t;
+// The index type for a value is positive
+typedef uint16_t sample_value_id_t;
 
-// The index type for a value can be extended to negative values and is then a signed int16_t
-typedef int16_t ext_value_id_t;
-
-// The value type, this should be the same as value_t, but we do not want to create a dependency from here.
-typedef int16_t value_t;
+// The sample value type.
+typedef int16_t sample_value_t;
 
 // The number of buffers is to be defined statically
 static const uint8_t INTERLEAVED_BUFFER_COUNT = CS_ADC_NUM_BUFFERS;
 
 // The length of the complete buffer (including both channels) is also defined statically
-static const value_t INTERLEAVED_BUFFER_LENGTH = CS_ADC_BUF_SIZE;
+static const sample_value_id_t INTERLEAVED_BUFFER_LENGTH = CS_ADC_BUF_SIZE;
 
 #if CS_ADC_BUF_SIZE % 2 == 1
 #error "Buffer size needs to be even with current channel count"
 #endif
 
 // The number of channels
-static const uint8_t INTERLEAVED_CHANNEL_COUNT = 2;
+static const channel_id_t INTERLEAVED_CHANNEL_COUNT = 2;
 
 // The length of an individual channel within a buffer
-static const value_t INTERLEAVED_CHANNEL_LENGTH = INTERLEAVED_BUFFER_LENGTH / INTERLEAVED_CHANNEL_COUNT;
+static const sample_value_id_t INTERLEAVED_CHANNEL_LENGTH = INTERLEAVED_BUFFER_LENGTH / INTERLEAVED_CHANNEL_COUNT;
 
 /** Interleaved Buffer implementation
  *
@@ -49,7 +46,7 @@ static const value_t INTERLEAVED_CHANNEL_LENGTH = INTERLEAVED_BUFFER_LENGTH / IN
 class InterleavedBuffer {
 private:
 
-	value_t* _buf[INTERLEAVED_BUFFER_COUNT];
+	sample_value_t* _buf[INTERLEAVED_BUFFER_COUNT];
 
 public:
 	/**
@@ -64,7 +61,7 @@ public:
 	/**
 	 * From the _buf array pick the one with the given buffer_id.
 	 */
-	value_t* getBuffer(buffer_id_t buffer_id) {
+	sample_value_t* getBuffer(buffer_id_t buffer_id) {
 //		assert(buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
 		return _buf[buffer_id];
 	}
@@ -73,7 +70,7 @@ public:
 	 * Set the buffer at the particular buffer_id by just writing a pointer to it. The code calling this function is
 	 * responsible for setting the right pointer. No checks w.r.t. this pointer are performed.
 	 */
-	void setBuffer(buffer_id_t buffer_id, value_t* ptr) {
+	void setBuffer(buffer_id_t buffer_id, sample_value_t* ptr) {
 //		assert(buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
 		_buf[buffer_id] = ptr;
 	}
@@ -81,35 +78,35 @@ public:
 	/**
 	 * Expose buffer lengths to accessors.
 	 */
-	inline const value_t getBufferLength() {
+	static inline constexpr sample_value_id_t getBufferLength() {
 		return INTERLEAVED_BUFFER_LENGTH;
 	}
 
 	/**
 	 * Get number of buffers.
 	 */
-	inline const value_t getBufferCount() {
+	static inline constexpr buffer_id_t getBufferCount() {
 		return INTERLEAVED_BUFFER_COUNT;
 	}
 
 	/**
 	 * Expose channel lengths to accessors.
 	 */
-	inline const ext_value_id_t getChannelLength() {
+	static inline constexpr sample_value_id_t getChannelLength() {
 		return INTERLEAVED_CHANNEL_LENGTH;
 	}
 
 	/**
 	 * Get number of channels.
 	 */
-	inline const value_t getChannelCount() {
+	static inline constexpr channel_id_t getChannelCount() {
 		return INTERLEAVED_CHANNEL_COUNT;
 	}
 
 	/**
 	 * Given a pointer to a buffer return the buffer_id.
 	 */
-	buffer_id_t getIndex(value_t *buffer) {
+	buffer_id_t getIndex(sample_value_t *buffer) {
 		for (buffer_id_t i = 0; i < getBufferCount(); ++i) {
 			if (buffer == _buf[i])
 				return i;
@@ -127,7 +124,7 @@ public:
 	/**
 	 * Uses getIndex to find out if this pointer exists.
 	 */
-	bool exists(value_t *buffer) {
+	bool exists(sample_value_t *buffer) {
 		return (getIndex(buffer) != getBufferCount());
 	}
 
@@ -170,12 +167,12 @@ public:
 	 * @param[in] value_id                       Index to the value in the buffer (0 up to getChannelLength() - 1)
 	 * @return                                   Particular value
 	 */
-	value_t getValue(buffer_id_t buffer_id, channel_id_t channel_id, ext_value_id_t value_id) {
+	sample_value_t getValue(buffer_id_t buffer_id, channel_id_t channel_id, sample_value_id_t value_id) {
 		assert(value_id >= 0 && value_id < getChannelLength(), "Invalid value id");
-		value_t value;
-		value_t* buf;
+		sample_value_t value;
+		sample_value_t* buf;
 
-		value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
+		sample_value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
 		buf = getBuffer(buffer_id);
 		value = buf[value_id_in_channel];
 
@@ -190,11 +187,11 @@ public:
 	 * @param[in] value_id                       Index to the value in the buffer
 	 * @param[in] value                          Value to be written to the buffer
 	 */
-	void setValue(buffer_id_t buffer_id, channel_id_t channel_id, value_id_t value_id, value_t value) {
+	void setValue(buffer_id_t buffer_id, channel_id_t channel_id, sample_value_id_t value_id, sample_value_t value) {
 		assert(value_id >= 0, "value id should be positive");
 		assert(value_id < getChannelLength(), "value id should be smaller than channel size");
-		value_t* buf;
-		value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
+		sample_value_t* buf;
+		sample_value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
 		buf = getBuffer(buffer_id);
 		buf[value_id_in_channel] = value;
 	}

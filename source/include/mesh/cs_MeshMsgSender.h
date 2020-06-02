@@ -32,7 +32,7 @@ public:
 	cs_ret_code_t sendTestMsg();
 	cs_ret_code_t sendSetTime(const cs_mesh_model_msg_time_t* item, uint8_t transmissions=0);
 	cs_ret_code_t sendNoop(uint8_t transmissions=0);
-	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, uint8_t transmissions=0);
+	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, const cmd_source_with_counter_t& source, uint8_t transmissions=0);
 	cs_ret_code_t sendTime(const cs_mesh_model_msg_time_t* item, uint8_t transmissions=0);
 	cs_ret_code_t sendBehaviourSettings(const behaviour_settings_t* item, uint8_t transmissions=0);
 	cs_ret_code_t sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t transmissions=0);
@@ -52,7 +52,7 @@ private:
 	uint32_t _nextSendCounter = 1;
 #endif
 
-	cs_ret_code_t handleSendMeshCommand(mesh_control_command_packet_t* command);
+	cs_ret_code_t handleSendMeshCommand(mesh_control_command_packet_t* command, const cmd_source_with_counter_t& source);
 
 	cs_ret_code_t addToQueue(MeshUtil::cs_mesh_queue_item_t & item);
 	cs_ret_code_t remFromQueue(MeshUtil::cs_mesh_queue_item_t & item);

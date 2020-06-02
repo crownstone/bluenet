@@ -76,7 +76,7 @@ void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
 	case NRF_EVT_FLASH_OPERATION_ERROR:
 	case NRF_EVT_POWER_FAILURE_WARNING: {
 //		uint32_t gpregret_id = 0;
-//		uint32_t gpregret_msk = GPREGRET_BROWNOUT_RESET;
+//		uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
 //		// NOTE: do not clear the gpregret register, this way
 //		//   we can count the number of brownouts in the bootloader.
 //		sd_power_gpregret_set(gpregret_id, gpregret_msk);

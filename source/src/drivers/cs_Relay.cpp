@@ -30,12 +30,12 @@ void Relay::init(const boards_config_t& board) {
 	LOGd("init duration=%u ms", _relayHighDurationMs);
 }
 
-bool Relay::set(bool on) {
+bool Relay::set(bool value) {
 	assert(_initialized == true, "Not initialized");
 
-	TEST_PUSH_EXPR_B(this,"on",on);
+	TEST_PUSH_EXPR_B(this, "on", value);
 
-	if (on) {
+	if (value) {
 		return turnOn();
 	}
 	else {

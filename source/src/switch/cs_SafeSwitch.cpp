@@ -33,8 +33,7 @@ void SafeSwitch::init(const boards_config_t& board) {
 
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
-	cached_operation_mode = getOperationMode(mode);
-
+	operationMode = getOperationMode(mode);
 
 	listen();
 }
@@ -45,8 +44,7 @@ void SafeSwitch::start() {
 	if (isDimmerStateChangeAllowed()) {
 		dimmer.start();
 	} else {
-		LOGSafeSwitch("Not starting dimmer (probably because operation mode differs from NORMAL (%d))",
-			static_cast<uint8_t>(cached_operation_mode));
+		LOGSafeSwitch("Not starting dimmer, operationMode = %u", static_cast<uint8_t>(operationMode));
 	}
 }
 
@@ -54,40 +52,41 @@ switch_state_t SafeSwitch::getState() {
 	return currentState;
 }
 
-bool SafeSwitch::isRelayStateAccurate(){
+bool SafeSwitch::isRelayStateAccurate() {
 	return relayHasBeenSetBefore;
 }
 
 // ======================== state setters ========================
 
-cs_ret_code_t SafeSwitch::setRelay(bool on) {
+cs_ret_code_t SafeSwitch::setRelay(bool value) {
 	auto stateErrors = getErrorState();
-	LOGSafeSwitch("setRelay %u errors=%u", on, stateErrors.asInt);
+	LOGSafeSwitch("setRelay %u errors=%u", value, stateErrors.asInt);
 
 	if ( !isRelayStateChangeAllowed()) {
 		LOGSafeSwitch("isRelayStateChangeAllowed returned false");
 		return ERR_NO_ACCESS;
 	}
 
-	if (on && !isSafeToTurnRelayOn(stateErrors)) {
+	if (value && !isSafeToTurnRelayOn(stateErrors)) {
 		return ERR_UNSAFE;
 	}
-	if (!on && !isSafeToTurnRelayOff(stateErrors)) {
+	if (!value && !isSafeToTurnRelayOff(stateErrors)) {
 		return ERR_UNSAFE;
 	}
-	return setRelayUnchecked(on);
+	return setRelayUnchecked(value);
 }
 
-cs_ret_code_t SafeSwitch::setRelayUnchecked(bool on) {
-	LOGSafeSwitch("setRelayUnchecked %u current=%u", on, currentState.state.relay);
-	if (currentState.state.relay == on && relayHasBeenSetBefore) {
-		// don't short circuit if relay has not been set since last reboot 
-		// that helps ensure we are in sync with the physical device state.
+cs_ret_code_t SafeSwitch::setRelayUnchecked(bool value) {
+	LOGSafeSwitch("setRelayUnchecked %u current=%u", value, currentState.state.relay);
+
+	// If the relay has not been set since boot, the physical relay state might not match the stored state.
+	// In that case, don't return, but set relay.
+	if (currentState.state.relay == value && relayHasBeenSetBefore) {
 		return ERR_SUCCESS;
 	}
 
-	relay.set(on);
-	currentState.state.relay = on;
+	relay.set(value);
+	currentState.state.relay = value;
 	relayHasBeenSetBefore = true;
 
 	return ERR_SUCCESS;
@@ -281,7 +280,7 @@ bool SafeSwitch::isRelayStateChangeAllowed(){
 	}
 
 	// disallow relay state changes in factory reset mode
-	return cached_operation_mode != OperationMode::OPERATION_MODE_FACTORY_RESET;
+	return operationMode != OperationMode::OPERATION_MODE_FACTORY_RESET;
 }
 
 bool SafeSwitch::isDimmerStateChangeAllowed(){
@@ -291,7 +290,7 @@ bool SafeSwitch::isDimmerStateChangeAllowed(){
 	}
 
 	// disallow dimmer state changes in any mode except normal operation mode.
-	return cached_operation_mode == OperationMode::OPERATION_MODE_NORMAL;
+	return operationMode == OperationMode::OPERATION_MODE_NORMAL;
 }
 
 bool SafeSwitch::isSafeToDim(state_errors_t stateErrors) {
@@ -352,7 +351,7 @@ void SafeSwitch::goingToDfu() {
 		case GUIDESTONE:
 		case CS_USB_DONGLE:
 		// Newer ones have dimmer enable pin.
-		case ACR01B10C:
+		case ACR01B10D:
 		default:
 			break;
 	}

@@ -1,4 +1,4 @@
-# Bluenet protocol v5.0.0
+# Bluenet protocol v5.1
 -------------------------
 
 This only documents the latest protocol, older versions can be found in the git history.
@@ -24,13 +24,28 @@ The setup process goes as follows:
 
 - Crownstone is in setup mode ([Setup service](#setup_service) active).
 - Phone connects to the Crownstone.
-- Phone reads the **session key** and **session nonce** from the [setup service](#setup_service). These characteristics are not encrypted.
-The values are only valid for this connection session. The session key and the session nonce will be used to encrypt the rest of the setup phase using AES 128 CTR as explained [here](#encrypted_write_read).
+- Phone reads the **session key** from the [setup service](#setup_service).
+- Phone reads the [session data](#session_data) from the [setup service](#setup_service).
+- From here on, all writes and read are encrypted using the session key and data, as explained [here](#encrypted_write_read).
 - Phone subscribes to [result](#setup_service) characteristic.
 - Phone commands Crownstone to [setup](#control_packet) via the control characteristic.
 - Phone waits for result to become SUCCESS (See [result packet](#result_packet)).
 - Crownstone will reboot to normal mode.
 
+<a name="normal"></a>
+# Normal mode
+When a Crownstone has been set up, it will run in "normal mode".
+
+To write a command via connection, the process goes as follows:
+
+- Crownstone is in normal mode ([Crownstone service](#crownstone_service) active).
+- Phone connects to the Crownstone.
+- Phone reads the [session data](#session_data) from the [Crownstone service](#crownstone_service).
+- From here on, all writes and read are encrypted using the session key and data, as explained [here](#encrypted_write_read).
+- Phone subscribes to [result](#crownstone_service) characteristic.
+- Phone writes a [control command](#control_packet) to the [control characteristic](#crownstone_service).
+- Phone waits for result, see [result packet](#result_packet).
+- Next command can be written.
 
 
 <a name="encryption"></a>
@@ -65,31 +80,26 @@ The nonce is a combination of 2 pieces: the session nonce and the packet nonce
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 [] | Packet nonce | 3 | Packet nonce, sent with every packet (see [encrypted packet](#encrypted_packet)).
-uint8 [] | Session nonce | 5 | Session nonce, can be [read](#session_nonce) once after connect (only changes on connect).
+uint8 [] | Packet nonce | 3 | Packet nonce, sent with every packet (see [encrypted packet](#encrypted_packet)). Should be different for each encrypted packet.
+uint8 [] | Session nonce | 5 | Session nonce, should be [read](#session_data) when connected, each time you connect.
 
-<a name="session_nonce"></a>
-### Session nonce
+<a name="session_data"></a>
+#### Session data
 
-After connecting, you first have to read the session nonce from the [Crownstone service](#crownstone_service). The session nonce is [ECB encrypted](#ecb_encryption) with the basic key. After decryption, you should verify whether you have read and decrypted succesfully by checking if the validation in the [data](#encrypted_session_nonce) is equal to **0xCAFEBABE**. If so, you now have the correct session nonce.
+After connecting, you should first read the session data from the [Crownstone service](#crownstone_service).
+The session data is [ECB encrypted](#ecb_encryption) with the basic key, or when in setup mode: the session key.
+After decryption, you should verify whether you have read and decrypted succesfully by checking if the validation is equal to **0xCAFEBABE**.
+The session nonce and validation key will be different each time you connect.
 
-The session nonce has two purposes:
-
-- Validation: the first 4 bytes of the session nonce is what we call the **validation key**, it is used in every [encrypted packet](#encrypted_packet), to verify that the correct key was used for decryption/encryption.
-- Encryption: the whole 5 bytes are used for the nonce, which is used for CTR encryption.
-
-The session nonce and validation key are only valid during the connection.
-
-<a name="encrypted_session_nonce"></a>
-#### Session nonce after ECB decryption
-
-![Encrypted session nonce](../docs/diagrams/encrypted-session-nonce.png)
+![Session data](../docs/diagrams/session-data.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 32 | Validation | 4 | 0xCAFEBABE as validation.
-uint8 [] | Session nonce | 5 | The session nonce for this session.
-uint8 [] | Padding | 7 | Zero-padding so that the whole packet is 16 bytes.
+uint8 | Protocol | 1 | The protocol version to use for communication.
+uint8 [] | Session nonce | 5 | The session nonce for this session. Used to encrypt or decrypt packets.
+uint8 [] | Validation key | 4 | The validation key for this session. Used to verify decryption/encryption.
+uint8 [] | Padding | 2 | Zero-padding so that the whole packet is 16 bytes.
 
 
 <a name="encrypted_write_read"></a>
@@ -114,14 +124,16 @@ uint8 [] | Data part |  | Part of the data.
 Once you received the last packet, you should concatenate all data parts to get the payload (which is usually an [encrypted packet](#encrypted_packet)).
 
 <a name="encrypted_packet"></a>
-### Encrypted Packet
+### Encrypted packet
+
+Unlike the name suggests, only the payload of this packet is encrypted. The header is used to determine how to decrypt the payload.
 
 ![Encrypted packet](../docs/diagrams/encrypted-packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 [] | Packet nonce | 3 | First 3 bytes of nonce used in the encryption of this message (see [CTR encryption](#ctr_encryption)).
-uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup
+uint8 [] | Packet nonce | 3 | First 3 bytes of nonce used for encrypting the payload, see [CTR encryption](#ctr_encryption).
+uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup. This determines which key has been used for encryption.
 [Encrypted payload](#encrypted_payload) | Encrypted payload | N*16 | The encrypted payload of N blocks.
 
 <a name="encrypted_payload"></a>
@@ -131,7 +143,7 @@ uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint32 | Validation key | 4 | Should be equal to the read [validation key](#session_nonce).
+uint32 | Validation key | 4 | Should be equal to the read [validation key](#session_info).
 uint8 | Payload |  | Whatever data would have been sent if encryption was disabled.
 uint8 | Padding |  | Zero-padding so that the whole packet is of size N*16 bytes.
 
@@ -223,9 +235,9 @@ The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provide
 
 Characteristic | UUID | Date type | Description | A | M | B
 --- | --- | --- | --- | :---: | :---: | :---:
+Session nonce  | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session_data) | Read the session data. |  |  | ECB
 Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone. | x | x | x
 Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone. | x | x | x
-Session nonce  | 24f00008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the [session nonce](#session_nonce). First 4 bytes are also used as validation key. |  |  | ECB
 Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |
 
 Every command written to the control characteristic returns a [result packet](#result_packet) on the result characteristic.
@@ -250,8 +262,7 @@ Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
 MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MAC address of the crownstone.
 Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the session key that will be for encryption.
-GoTo DFU       | 24f10006-7d10-4805-bfc1-7663a01c3bff | uint 8 | Write 66 to go to DFU.
-Session nonce  | 24f10008-7d10-4805-bfc1-7663a01c3bff | uint 8 [5] | Read the session nonce. First 4 bytes are also used as validation key.
+Session data   | 24f1000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session_data) | Read the session data.
 Control        | 24f1000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control_packet) | Write a command to the crownstone.
 Result         | 24f1000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result_packet) | Read the result of a command from the crownstone.
 
@@ -280,13 +291,11 @@ __If encryption is enabled, this packet must be encrypted using any of the keys 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint 8 | Protocol | 1 | Which protocol the command is. Should be similar to the protocol as received in the [session data](#session_data). Older protocols might be supported, but there's no guarantee.
 uint 16 | [Command type](#command_types) | 2 | Type of the command.
 uint 16 | Size | 2 | Size of the payload in bytes.
 uint 8 | Payload | Size | Payload data, depends on command type.
 
-
-<a name="result_code_packet"></a>
-### Result code packet
 
 <a name="command_types"></a>
 ## Command types
@@ -301,20 +310,20 @@ Setup access means the packet is available in setup mode, and encrypted with the
 
 Available command types:
 
-Type nr | Type name | Payload type | Result type | Description | A | M | B | S
---- | --- | --- | --- | :---: | :---: | :---: | :---: | :--:
+Type nr | Type name | Payload type | Result payload | Description | A | M | B | S
+--- | --- | --- | --- | --- | :---: | :---: | :---: | :--:
 0 | Setup | [Setup packet](#setup_packet) | - | Perform setup. |  |  |  | x
 1 | Factory reset | uint 32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
 2 | Get state | [State get packet](#state_get_packet) | [State get result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
 3 | Set state | [State set packet](#state_set_packet) | [State set result packet](#state_set_result_packet) | Required access depends on the state type. | x | x | x
-4 | Get bootloader version | - | Char array | Get the bootloader version string. | x | x | x | x
+4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) | Get bootloader version info. | x | x | x | x
 5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) | Get the UICR data. | x | x | x | x
 6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon_config_id_packet) | - | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x
 10 | Reset | - | - | Reset device | x
 11 | Goto DFU | - | - | Reset device to DFU mode | x
 12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
 13 | Disconnect | - | - | Causes the crownstone to disconnect | x | x | x
-20 | Switch | uint 8 | - | Switch power, 0 = off, 100 = full on | x | x | x | x |
+20 | Switch | [Switch value](#switch_command_value) | - | Switch power. | x | x | x | x |
 21 | Multi switch | [Multi switch packet](#multi_switch_packet) | - | Switch multiple Crownstones (via mesh). | x | x | x
 22 | Dimmer | uint 8 | - | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
 23 | Relay | uint 8 | - | Switch relay, 0 = off, 1 = on | x | x | x
@@ -332,7 +341,12 @@ Type nr | Type name | Payload type | Result type | Description | A | M | B | S
 63 | Get behaviour | [Index](BEHAVIOUR.md#get_behaviour_packet) | [Index and behaviour packet](BEHAVIOUR.md#get_behaviour_result_packet) | Obtain the behaviour stored at given index. | x | x
 64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
 69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) | Obtain debug info of the current behaviour state. | x
-70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | Register or update a device to be tracked.
+70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | Register or update a device to be tracked. Error codes: ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | x | x | x
+80 | Get uptime | - | uint 32 | Time in seconds since boot. | x
+81 | Get ADC restarts | - | uint 32 | Number of ADC restarts since boot. | x
+82 | Get switch history | - | [Switch history packet](#switch_history_packet) | A history of why the switch state has changed. | x
+83 | Get power samples | [Request power samples](#power_samples_request_packet) | [Power samples](#power_samples_result_packet) | Get the current or voltage samples of certain events. | x
+84 | Get CPU usage statistics | - |
 
 
 <a name="setup_packet"></a>
@@ -355,6 +369,18 @@ uint 8[] | Mesh net key  | 16 | 16 byte key used to encrypt/decrypt relays of me
 uint 8[] | iBeacon UUID | 16 | The iBeacon UUID. Should be the same for each Crownstone in the sphere.
 uint 16 | iBeacon major | 2 | The iBeacon major. Together with the minor, should be unique per sphere.
 uint 16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should be unique per sphere.
+
+
+<a name="switch_command_value"></a>
+#### Switch command value (uint 8)
+
+Value | Name | Description
+--- | --- | ---
+0 | Off | Switch off.
+1-99 | Dimmed | Set a dimmed value.
+100 | Full on | Switch fully on.
+254 | Behaviour | Set the default value determined by _behaviour_ rules.
+255 | Default on | Set the default on value, determined by _twilight_ rules.
 
 
 <a name="state_get_packet"></a>
@@ -452,14 +478,12 @@ uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | ID | 1 | The ibeacon config ID to set.
-uint 32 | Timestamp | 4 | Timestamp when the config ID should be set.
-uint 16 | Interval | 2 | Interval in seconds when the ID should be set again.
+uint 32 | Timestamp | 4 | Unix timestamp when the ibeacon config ID should be set (the first time).
+uint 16 | Interval | 2 | Interval in seconds when the ibeacon config ID should be set again, after the given timestamp.
 
-- ID can only be 0 or 1 for now.
-- Set the interval to 0 if you to set the ID only once.
-- Set the interval to 0, and the timestamp to 0 if you want to set the ID only once, and now.
-
-To interleave between two config IDs, you can for example set ID=0 at timestamp=0 with interval=600, and ID=1 at timestamp=300 with interval=600.
+- ID can only be 0 or 1.
+- Set the interval to 0 if you want to set the ibeacon config ID only once, at the given timestamp. Use timestamp 0 if you want it to be set immediately.
+- To interleave between two config IDs every 60 seconds, you will need two commands. First set ID=0, at timestamp=0 with interval=60, then set ID=1 at timestamp=30 with interval=60.
 
 <a name="sun_time_packet"></a>
 ##### Sun time packet
@@ -490,7 +514,7 @@ uint 8 | Count | 1 | Number of valid entries.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
-uint 8 | Switch value | 1 | The switch value to be set by the targeted crownstone. 0 = off, 100 = fully on.
+uint 8 | [Switch value](#switch_command_value) | 1 | The switch value to be set by the targeted crownstone.
 
 
 <a name="state_error_bitmask"></a>
@@ -514,6 +538,7 @@ For now, only a few of commands are implemented:
 - Set time, only broadcast, without acks.
 - Noop, only broadcast, without acks.
 - State set, only 1 target ID, with ack.
+- Set ibeacon config ID.
 
 ![Command packet](../docs/diagrams/command-mesh-packet.png)
 
@@ -521,7 +546,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
 uint 8 | [Flags](#mesh_command_flags) | 1 | Options.
-uint 8 | Timeout / transmissions | 1 | When acked: timeout time in seconds. Else: number of times to send the command. 0 to use the default.
+uint 8 | Timeout / transmissions | 1 | When acked: timeout time in seconds. Else: number of times to send the command. 0 to use the default (10s timeout or 3 transmissions).
 uint 8 | ID count | 1 | The number of stone IDs provided.
 uint8 [] | List of stone IDs | Count | IDs of the stones at which this message is aimed. Can be empty, then the command payload follows directly after the count field.
 uint 8 | Command payload | N | The command payload data, which depends on the [type](#mesh_command_types).
@@ -536,15 +561,21 @@ Type nr | Type name | Payload type | Payload description
 <a name="mesh_command_flags"></a>
 ##### Mesh command flags
 
+For now there are only a couple of combinations possible:
+
+- If you want to send a command to all stones in the mesh, without acks and retries, set: `Broadcast=true`, `AckIDs=false`, `KnownIDs=false`.
+- If you want to send a command to all stones in the mesh, with acks and retries, set: `Broadcast=true`, `AckIDs=true`, `KnownIDs=false`. You will have to provide the list of IDs yourself.
+- If you want to send a command to 1 stone, with acks and retries, set: `Broadcast=false`, `AckIDs=true`, `KnownIDs=false`.
+
 Bit | Name |  Description
 --- | --- | ---
 0 | Broadcast | Send command to all stones. Else, its only sent to all stones in the list of stone IDs, which will take more time.
-1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout.
-2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen.
+1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout. **More than 1 IDs without broadcast is not implemented yet.**
+2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen. **Not implemented yet.**
 
 
 <a name="behaviour_debug_packet"></a>
-##### Behaviour debug packet
+#### Behaviour debug packet
 
 ![Behaviour debug packet](../docs/diagrams/behaviour_debug_packet.png)
 
@@ -562,22 +593,114 @@ uint 64 | Stored behaviours | 8 | Bitmask of behaviours that are stored. Nth bit
 uint 64 | Active behaviours | 8 | Bitmask of behaviours that are currently active. Nth bit is Nth behaviour index.
 uint 64 | Active end conditions | 8 | Bitmask of behaviours with active end conditions. Nth bit is Nth behaviour index.
 uint 64 | Active timeout periods | 8 | Bitmask of behaviours that are in (presence) timeout period. Nth bit is Nth behaviour index.
-uint 64[] | Presence | 64 | Bitmask per profile of occupied rooms. Nth bit is Nth room.
+uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
+
+
+
+<a name="switch_history_packet"></a>
+#### Switch history packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Count | 1 | Number of items in the list.
+[Switch history item](#switch_history_item_packet) [] | List |
+
+<a name="switch_history_item_packet"></a>
+##### Switch history item packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Timestamp | 4 | Unix timestamp of the switch command.
+[Switch command](#switch_command_value) | Switch command | 1 | The switch command value.
+[Switch state](#switch_state_packet) | Switch state | 1 | The switch state after the command was executed.
+[Command source](#command_source_packet) | Source | 2 | The source of the switch command.
+
+
+
+<a name="command_source_packet"></a>
+#### Command source packet
+
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+uint 8 | [Source type](#command_source_type) | 3 | What type of source ID. Bits 5-7.
+uint 8 | Reserved | 4 | Reserved for future use, must be 0 for now. Bits 1-4.
+bool | External | 1 | Whether the command was received via the mesh. Bit 0.
+uint 8 | [Source ID](#command_source_ID) | 8 | The ID of the source.
+
+<a name="command_source_type"></a>
+##### Command source type
+
+Value | Name | Description
+--- | --- | ---
+0 | Enum | ID is one of the [list](#command_source_ID).
+3 | Broadcast | ID is the [device ID](BROADCAST_PROTOCOL.md#command_adv_header)
+
+<a name="command_source_ID"></a>
+##### Command source ID
+
+Value | Name | Description
+--- | --- | ---
+0 | None
+2 | Internal
+3 | UART
+4 | Connection
+5 | Switchcraft
+
+
+
+
+<a name="power_samples_request_packet"></a>
+#### Power samples request packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | [Type](#power_samples_type) | 1 | Type of samples.
+uint 8 | Index | 1 | Some types have multiple lists of samples.
+
+<a name="power_samples_result_packet"></a>
+#### Power samples result packet
+
+![Power samples result packet](../docs/diagrams/power_samples_result_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | [Type](#power_samples_type) | 1 | Type of samples, also determines whether the samples are voltage or current samples.
+uint 8 | Index | 1 | Some types have multiple lists of samples.
+uint 16 | Count | 2 | Number of samples in the list.
+uint 32 | Timestamp | 4 | Unix timestamp of time the samples have been set.
+uint 16 | Delay | 2 | Measurement delay in μs.
+uint 16 | Sample interval | 2 | Sample interval in μs.
+uint 16 | Reserved | 2 | Reserved for future use, should be 0 for now.
+int 16 | Offset | 2 | Calculated offset of the samples.
+float | Multiplier | 4 | Multiply the sample value with this value to get a value in ampere, or volt.
+int 16 [] | Samples | 2 | List of samples.
+
+<a name="power_samples_type"></a>
+#### Power samples type
+
+Value | Name | Description | Voltage | Current
+--- | --- | --- | :---: | :---:
+0 | Triggered switchcraft | Last samples that triggered switchcraft. Has 3 lists of samples. | x
+1 | Non-triggered switchcraft | Last samples that almost triggered switchcraft. Has 3 lists of samples. | x
+
+
 
 <a name="register_tracked_device_packet"></a>
-##### Register tracked device packet
+#### Register tracked device packet
 
 ![Register tracked device packet](../docs/diagrams/register_tracked_device_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | Device ID | 2 | Unique ID of the device.
-uint 8 | Location ID | 1 | ID of the location where the device is.
+uint 8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
 uint 8 | Profile ID | 1 | Profile ID of the device.
 int 8 | RSSI offset | 1 | Offset from standard signal strength.
 uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background_adv_flags).
 uint 24 | Device token | 3 | Token that will be advertised by the device.
 uint 16 | Time to live | 2 | Time in minutes after which the device token will be invalid.
+
+
 
 <a name="result_packet"></a>
 ## Result packet
@@ -588,6 +711,7 @@ __If encryption is enabled, this packet will be encrypted using any of the keys 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint 8 | Protocol | 1 | Which protocol the result is. Should be similar to the protocol in the [control packet](#control_packet).
 uint 16 | [Command type](#command_types) | 2 | Type of the command of which this packet is the result.
 uint 16 | [Result code](#result_codes) | 2 | The result code.
 uint 16 | Size | 2 | Size of the payload in bytes.
@@ -611,11 +735,12 @@ Value | Name | Description
 36  | UNKNOWN_TYPE | Unknown type provided.
 37  | NOT_FOUND | The thing you were looking for was not found.
 38  | NO_SPACE | There is no space for this command.
-39  | BUSY | Wait for something to be done.
+39  | BUSY | Wait for something to be done. You can usually retry later.
 40  | ERR_WRONG_STATE | The crownstone is in a wrong state.
 41  | ERR_ALREADY_EXISTS | Item already exists.
 42  | ERR_TIMEOUT | Operation timed out.
 43  | ERR_CANCELED | Operation was canceled.
+44  | ERR_PROTOCOL_UNSUPPORTED | The protocol is not supported.
 48  | NO_ACCESS | Invalid access for this command.
 49  | ERR_UNSAFE | It's unsafe to execute this command.
 64  | NOT_AVAILABLE | Command currently not available.

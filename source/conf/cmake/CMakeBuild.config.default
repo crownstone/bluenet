@@ -62,7 +62,7 @@ CS_SERIAL_NRF_LOG_PIN_TX=6
 # ACR01B1E             1004
 # ## Crownstone Builtin One
 # ACR01B10B            1007
-# ACR01B10C            1008
+# ACR01B10D            1008
 # ## Crownstone Plug
 # ACR01B2A             1500
 # ACR01B2B             1501
@@ -85,6 +85,9 @@ DEFAULT_HARDWARE_BOARD=ACR01B2C
 
 # Add reset counter at end of name
 CHANGE_NAME_ON_RESET=0
+
+# Enable Arduino like apps
+BUILD_MICROAPP_SUPPORT=1
 
 # Compile the mesh code.
 BUILD_MESHING=1

@@ -259,10 +259,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	uint16_t length = SOC_ECB_CIPHERTEXT_LENGTH - headerSize;
 	uint8_t* commandData = decryptedData + headerSize;
 
-	Time time = SystemTime::posix();
-	uint32_t timestamp = time.timestamp();
-//	TYPIFY(STATE_TIME) timestamp;
-//	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
+	uint32_t timestamp = SystemTime::posix();
 	LOGCommandAdvVerbose("validation=%u time=%u", validationTimestamp, timestamp);
 
 	// For now, we also allow CAFEBABE as validation.
@@ -286,14 +283,14 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		return true;
 	}
 
+	cmd_source_with_counter_t source(cmd_source_t(CS_CMD_SOURCE_TYPE_BROADCAST, header.deviceToken), (decryptedPayloadRC5[0] >> 8) & 0xFF);
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
+	controlCmd.protocolVersion = CS_CONNECTION_PROTOCOL_VERSION;
 	controlCmd.type = CTRL_CMD_UNKNOWN;
 	controlCmd.accessLevel = accessLevel;
 	controlCmd.data = commandData;
 	controlCmd.size = length;
-	controlCmd.source.flagExternal = false;
-	controlCmd.source.sourceId = CS_CMD_SOURCE_DEVICE_TOKEN + header.deviceToken;
-	controlCmd.source.count = (decryptedPayloadRC5[0] >> 8) & 0xFF;
+
 	LOGCommandAdvDebug("adv cmd type=%u", type);
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		LOGCommandAdvDebug("no access");
@@ -307,8 +304,8 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		}
 		case ADV_CMD_MULTI_SWITCH: {
 			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
-			LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
-			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+			LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, source.sourceId, source.count);
+			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 			event.dispatch();
 			break;
 		}
@@ -328,8 +325,8 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 				controlCmd.type = CTRL_CMD_SET_TIME;
 				controlCmd.data = commandData + flagsSize;
 				controlCmd.size = setTimeSize;
-				LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
-				event_t eventSetTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+				LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, source.sourceId, source.count);
+				event_t eventSetTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 				eventSetTime.dispatch();
 			}
 
@@ -342,7 +339,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 				controlCmd.type = CTRL_CMD_SET_SUN_TIME;
 				controlCmd.data = (buffer_ptr_t)&sunTime;
 				controlCmd.size = sizeof(sunTime);
-				event_t eventSetSunTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+				event_t eventSetSunTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 				eventSetSunTime.dispatch();
 			}
 			break;

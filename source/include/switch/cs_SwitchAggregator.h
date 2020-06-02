@@ -8,12 +8,13 @@
 #pragma once
 
 #include <drivers/cs_Serial.h>
-#include "events/cs_EventListener.h"
+#include <events/cs_EventListener.h>
 
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_TwilightHandler.h>
 
 #include <optional>
+#include <vector>
 #include <switch/cs_SmartSwitch.h>
 
 /**
@@ -23,16 +24,16 @@
  */
 class SwitchAggregator : public EventListener {
 public:
-    static SwitchAggregator& getInstance();
-    
-    void init(const boards_config_t& board);
+	static SwitchAggregator& getInstance();
 
-    /**
-     * When swSwitch is locked, only CMD_SWITCH_LOCKED events will be handled.
-     * Else events may alter the intended states and subsequently trigger an 
-     * actual state change.
-     */
-    virtual void handleEvent(event_t& evt) override;
+	void init(const boards_config_t& board);
+
+	/**
+	 * When swSwitch is locked, only CMD_SWITCH_LOCKED events will be handled.
+	 * Else events may alter the intended states and subsequently trigger an
+	 * actual state change.
+	 */
+	virtual void handleEvent(event_t& evt) override;
 
 	/**
 	 * To be called when there is enough power to use the switch.
@@ -40,115 +41,142 @@ public:
 	void switchPowered();
 
 private:
-    SwitchAggregator() = default;
-    virtual ~SwitchAggregator() noexcept {};
-    SwitchAggregator& operator= (const SwitchAggregator&) = delete;
+	SwitchAggregator() = default;
+	virtual ~SwitchAggregator() noexcept {};
+	SwitchAggregator& operator= (const SwitchAggregator&) = delete;
 
-    TwilightHandler twilightHandler;
-    BehaviourHandler behaviourHandler;
+	TwilightHandler twilightHandler;
+	BehaviourHandler behaviourHandler;
 
-    SmartSwitch smartSwitch;
+	SmartSwitch smartSwitch;
 
-    // the latest states requested by other parts of the system.
-    std::optional<uint8_t> overrideState = {};
-    std::optional<uint8_t> behaviourState = {};
+	// the latest states requested by other parts of the system.
+	std::optional<uint8_t> overrideState = {};
+	std::optional<uint8_t> behaviourState = {};
+	std::optional<uint8_t> twilightState = {};
 
-    // the last state that was aggregated and passed on towards the SoftwareSwitch.
-    std::optional<uint8_t> aggregatedState = {};
+	// the last state that was aggregated and passed on towards the SoftwareSwitch.
+	std::optional<uint8_t> aggregatedState = {};
 
-    /**
-     * Which source claimed the switch.
-     *
-     * Until timeout, nothing with a different source can set the switch.
-     * Unless that source overrules the current source.
-     */
-    cmd_source_t _source = cmd_source_t(CS_CMD_SOURCE_NONE);
-    uint32_t _ownerTimeoutCountdown = 0;
+	/**
+	 * Which source claimed the switch.
+	 *
+	 * Until timeout, nothing with a different source can set the switch.
+	 * Unless that source overrules the current source.
+	 */
+	cmd_source_with_counter_t _source = cmd_source_with_counter_t(CS_CMD_SOURCE_NONE);
+	uint32_t _ownerTimeoutCountdown = 0;
 
-    // ================================== State updaters ==================================
+	// Max number of switch commands to store in history.
+	const static uint8_t _maxSwitchHistoryItems = 10;
 
-    /**
-     * Checks the behaviourState and overrideState,
-     * to set the swSwitch to the desired value:
-     * - if swSwitch doesn't allow switching, nothing happens, else,
-     * - when overrideState has a value, swSwitch is set to that value, else,
-     * - when behaviourState has a value, swSwitch is set to that value, else,
-     * - nothing happens.
-     * 
-     * This method will clear the overrideState when it matches
-     * the behaviourState, unless the switch is locked or allowOverrideReset is false.
-     * 
-     * (Disallowing override state to reset is used for commands that want to change
-     * the value and trigger a reset which are not initated through behaviour handlers)
-     */
-    cs_ret_code_t updateState(bool allowOverrideReset = true);
+	/**
+	 * Keep up a history of switch commands.
+	 * This can be commands from any source, user or automated.
+	 */
+	std::vector<cs_switch_history_item_t> _switchHistory;
 
-    /**
-     * Calls update on the behaviour handlers and returns true
-     * if after the update is allowed to reset the overrideState.
-     */
-    bool updateBehaviourHandlers();
+	// ================================== State updaters ==================================
 
-    // ================================== Event handling ==================================
+	/**
+	 * Checks the behaviourState and overrideState,
+	 * to set the swSwitch to the desired value:
+	 * - if swSwitch doesn't allow switching, nothing happens, else,
+	 * - when overrideState has a value, swSwitch is set to that value, else,
+	 * - when behaviourState has a value, swSwitch is set to that value, else,
+	 * - nothing happens.
+	 *
+	 * This method will clear the overrideState when it matches
+	 * the behaviourState, unless the switch is locked or allowOverrideReset is false.
+	 *
+	 * (Disallowing override state to reset is used for commands that want to change
+	 * the value and trigger a reset which are not initated through behaviour handlers)
+	 */
+	cs_ret_code_t updateState(bool allowOverrideReset, const cmd_source_with_counter_t& source);
 
-    /**
-     * Triggers an updateState() call on all handled events and adjusts
-     * at least one of behaviourState or overrideState.
-     */
-    bool handleStateIntentionEvents(event_t & evt);
+	/**
+	 * Calls update on the behaviour handlers and returns true
+	 * if after the update is allowed to reset the overrideState.
+	 *
+	 * Returns true when behaviour value changed since last time it was called.
+	 */
+	bool updateBehaviourHandlers();
 
-    /** 
-     * Tries to update [overrideState] to [value] and then calls updateState(false).
-     * If smartswitch disallows this operation at the end of updateState, revert back
-     * [overrideState] to the value it had before this function call.
-     */
-    void executeStateIntentionUpdate(uint8_t value);
+	// ================================== Event handling ==================================
 
-    /**
-     * EVT_TICK, STATE_TIME and EVT_TIME_SET events possibly trigger
-     * a new aggregated state. This handling function takes care of that.
-     * 
-     * returns true when the event should be considered 'consumed'. 
-     * (which is when evt is of one of these types.)
-     */
-    bool handleTimingEvents(event_t & evt);
+	/**
+	 * Triggers an updateState() call on all handled events and adjusts
+	 * at least one of behaviourState or overrideState.
+	 */
+	bool handleStateIntentionEvents(event_t & evt);
 
-    /**
-     * EVT_PRESENCE_MUTATION
-     * 
-     * returns true when the event should be considered 'consumed'. 
-     * (which is when evt is of one of these types.)
-     */
-    bool handlePresenceEvents(event_t& evt);
+	/**
+	 * Tries to update [overrideState] to [value] and then calls updateState(false).
+	 * If smartswitch disallows this operation at the end of updateState, revert back
+	 * [overrideState] to the value it had before this function call.
+	 */
+	void executeStateIntentionUpdate(uint8_t value, cmd_source_with_counter_t& source);
 
-    void handleSwitchStateChange(uint8_t newIntensity);
+	/**
+	 * EVT_TICK, STATE_TIME and EVT_TIME_SET events possibly trigger
+	 * a new aggregated state. This handling function takes care of that.
+	 *
+	 * returns true when the event should be considered 'consumed'.
+	 * (which is when evt is of one of these types.)
+	 */
+	bool handleTimingEvents(event_t & evt);
 
-    // ================================== Misc ==================================
+	/**
+	 * EVT_PRESENCE_MUTATION
+	 *
+	 * returns true when the event should be considered 'consumed'.
+	 * (which is when evt is of one of these types.)
+	 */
+	bool handlePresenceEvents(event_t& evt);
 
-    /**
-     * Aggregates the value of twilightHandler and behaviourHandler
-     * into a single intensity value.
-     * 
-     * This will return the minimum of the respective handler values
-     * when both are defined, otherwise return the value of the one
-     * that is defined, otherwise 100.
-     */
-    uint8_t aggregatedBehaviourIntensity();
+	/**
+	 * Clearing private variables, setting them to specific values, etc.
+	 * Debug or power user features.
+	 */
+	bool handleSwitchAggregatorCommand(event_t& evt);
 
-    /**
-     * When override state is the special value 'translucent on'
-     * it should be interpreted according to the values of twilightHandler
-     * and behaviourHandler. This getter centralizes that.
-     */
-    std::optional<uint8_t> resolveOverrideState();
+	void handleSwitchStateChange(uint8_t newIntensity);
 
-    /**
-     * Tries to set source as owner of the switch.
-     * Returns true on success, false if switch is already owned by a different source, and given source does not overrule it.
-     */
-    bool checkAndSetOwner(cmd_source_t source);
+	// ================================== Misc ==================================
 
-    void handleGetBehaviourDebug(event_t& evt);
+	/**
+	 * Aggregates the value of twilightHandler and behaviourHandler
+	 * into a single intensity value.
+	 *
+	 * This will return the minimum of the respective handler values
+	 * when both are defined, otherwise return the value of the one
+	 * that is defined, otherwise 100.
+	 */
+	uint8_t aggregatedBehaviourIntensity();
 
-    void printStatus();
+	/**
+	 * When override state is the special value 'translucent on'
+	 * it should be interpreted according to the values of twilightHandler
+	 * and behaviourHandler. This getter centralizes that.
+	 *
+	 * When override is 0xff:
+	 * This method will return the minimum of respective handlers when both of them
+	 * have a non-zero value, otherwise return the non-zero value of the
+	 * handler that has a non-zero value (if there is such), otherwise 100.
+	 */
+	std::optional<uint8_t> resolveOverrideState();
+
+	/**
+	 * Tries to set source as owner of the switch.
+	 * Returns true on success, false if switch is already owned by a different source, and given source does not overrule it.
+	 */
+	bool checkAndSetOwner(const cmd_source_with_counter_t& source);
+
+	void handleGetBehaviourDebug(event_t& evt);
+
+	void addToSwitchHistory(const cs_switch_history_item_t& cmd);
+	void printSwitchHistory();
+
+	void printStatus();
+	void pushTestDataToHost();
 };

@@ -39,7 +39,7 @@
 #define BLE_CHAR_CONFIG_READ                     "Config Read"
 #define BLE_CHAR_STATE_CONTROL                   "State Control"
 #define BLE_CHAR_STATE_READ                      "State Read"
-#define BLE_CHAR_SESSION_NONCE                   "Session Nonce"
+#define BLE_CHAR_SESSION_DATA                    "Session data"
 #define BLE_CHAR_FACTORY_RESET                   "Recovery"
 #define BLE_CHAR_RSSI                            "RSSI"
 #define BLE_CHAR_SCAN_CONTROL                    "Scan Control"
@@ -73,7 +73,7 @@
 #define STR_CHAR_MESH                            "Mesh"
 #define STR_CHAR_CONFIGURATION                   "Configuration"
 #define STR_CHAR_STATE                           "State"
-#define STR_CHAR_SESSION_NONCE                   "Nonce"
+#define STR_CHAR_SESSION_DATA                    "Session data"
 #define STR_CHAR_FACTORY_RESET                   "Recovery"
 
 #define STR_CHAR_NEW_ALERT                       "New Alert"

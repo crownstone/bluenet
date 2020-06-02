@@ -38,8 +38,6 @@ class SetupService: public CrownstoneService {
 
 	inline void addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size);
 
-	inline void addGoToDfuCharacteristic();
-
     private:
 
 	// stores the MAC address of the devices to be used for mesh message handling
@@ -49,6 +47,4 @@ class SetupService: public CrownstoneService {
 
 	Characteristic<buffer_ptr_t>* _macAddressCharacteristic;
 	Characteristic<buffer_ptr_t>* _setupKeyCharacteristic;
-	Characteristic<uint8_t>* _gotoDfuCharacteristic;
-
 };

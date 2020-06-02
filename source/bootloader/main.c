@@ -49,6 +49,7 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "cs_GpRegRetConfig.h"
 //#include "boards.h"
 #include "nrf_mbr.h"
 #include "nrf_bootloader.h"
@@ -69,34 +70,6 @@
 #include "ipc/cs_IpcRamData.h"
 #include "cs_BootloaderConfig.h"
 
-/**
- * GPRegRet value when device was reset due to a soft reset.
- */
-#define CS_GPREGRET_SOFT_RESET 0
-
-/**
- * GPRegRet value to start counting from.
- */
-#define GPREGRET_START_COUNT 1
-
-/**
- * GPRegRet value when device was reset to start DFU.
- * Should be lower than BOOTLOADER_DFU_GPREGRET, in order not to interfere with the SDK bootloader GPRegRet usage.
- * 07-11-2019 TODO: why 66? It makes more sense to use 63 or 31.
- */
-#define CS_GPREGRET_DFU 66
-
-/**
- * GPRegRet value when device was reset due to a brownout.
- * 07-11-2019 TODO: why 96? It makes more sense to use 64 or 32.
- */
-#define CS_GPREGRET_BROWNOUT_RESET 96
-
-/**
- * GPRegRet value when device has browned out too often.
- * 07-11-2019 TODO: why 106? It makes more sense to use 127 or 63.
- */
-#define CS_GPREGRET_BROWNOUT_DFU (CS_GPREGRET_BROWNOUT_RESET + 10)
 
 static void on_error(void)
 {
@@ -164,7 +137,7 @@ static void dfu_observer(nrf_dfu_evt_type_t evt_type)
  */
 void cs_gpio_init(boards_config_t* board) {
 	switch (board->hardwareBoard) {
-	case ACR01B10C:
+	case ACR01B10D:
 		// Enable NFC pins
 		if (NRF_UICR->NFCPINS != 0) {
 			nrf_nvmc_write_word((uint32_t)&(NRF_UICR->NFCPINS), 0);
@@ -194,38 +167,36 @@ void cs_gpio_init(boards_config_t* board) {
 	}
 }
 
-/**
- * The GPRegRet value is used in two ways:
- * - To communicate from app to bootloader.
- * In case the app wants to perform DFU, it sets the GPRegRet to a special value and then reboots.
- *
- * - To detect a crashing app.
- * Every time the bootloader starts, the GPRegRet value will be increased.
- * After many reboots, it will be high enough to start DFU.
- */
+/** See cs_GpRegRet.h */
 void cs_check_gpregret() {
 	uint32_t gpregret = NRF_POWER->GPREGRET;
-	NRF_LOG_INFO("GPREGRET=%u", gpregret);
 	bool start_dfu = false;
+	uint32_t counter = gpregret & CS_GPREGRET_COUNTER_MASK;
+//	uint32_t flags = gpregret & (~CS_GPREGRET_RESET_COUNTER_MASK);
+	NRF_LOG_INFO("GPREGRET=%u counter=%u", gpregret, counter);
 
-	switch (gpregret) {
-	case CS_GPREGRET_DFU:
+	if (gpregret == CS_GPREGRET_LEGACY_DFU_RESET) {
+		// Legacy value, set new dfu flag.
+		NRF_LOG_WARNING("Legacy value");
+		gpregret |= CS_GPREGRET_FLAG_DFU_RESET;
+	}
+
+	if (gpregret & CS_GPREGRET_FLAG_DFU_RESET) {
+		// App wants to go to DFU mode.
 		start_dfu = true;
-		break;
-	case CS_GPREGRET_SOFT_RESET:
-		NRF_POWER->GPREGRET = GPREGRET_START_COUNT;
-		break;
-	case CS_GPREGRET_BROWNOUT_DFU:
+	}
+
+	if (counter == CS_GPREGRET_COUNTER_MAX) {
 		start_dfu = true;
-		break;
-	default:
+	}
+	else {
+		// Increase counter, but maintain flags.
+//		counter += 1;
+//		gpregret = flags | counter;
+//		NRF_POWER->GPREGRET = gpregret;
 		NRF_POWER->GPREGRET = gpregret + 1;
 	}
-	if (gpregret > CS_GPREGRET_DFU) {
-//	if (gpregret > CS_GPREGRET_BROWNOUT_DFU) {
-		NRF_LOG_ERROR("Should not happen");
-		start_dfu = true;
-	}
+
 	if (start_dfu) {
 		NRF_LOG_INFO("Start DFU");
 		NRF_POWER->GPREGRET = BOOTLOADER_DFU_START;
@@ -273,6 +244,8 @@ int main(void)
 
 	(void) NRF_LOG_INIT(nrf_bootloader_dfu_timer_counter_get);
 	NRF_LOG_DEFAULT_BACKENDS_INIT();
+
+	NRF_LOG_INFO("Reset reason: %u", NRF_POWER->RESETREAS);
 
 	cs_check_gpregret();
 

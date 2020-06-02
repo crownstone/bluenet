@@ -39,7 +39,6 @@ enum TypeBases {
 	InternalBaseBehaviour = InternalBase + 170,
 	InternalBaseLocalisation = InternalBase + 190,
 	InternalBaseSystem = InternalBase + 210,
-
 };
 
 /** Cast to underlying type.
@@ -172,7 +171,8 @@ enum class CS_TYPE: uint16_t {
 	STATE_MESH_IV_INDEX                     = 151,
 	STATE_MESH_SEQ_NUMBER                   = 152,
 	STATE_BEHAVIOUR_MASTER_HASH             = 153,
-	STATE_MICROAPP                          = 154,
+	STATE_IBEACON_CONFIG_ID                 = 154,
+	STATE_MICROAPP                          = 155,
 
 	/*
 	 * Internal commands and events.
@@ -191,7 +191,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_DISCONNECT,                                    // Device disconnected.
 	CMD_ENABLE_ADVERTISEMENT,                              // Enable/disable advertising.
 
-	// Switch
+	// Switch (aggregator)
 	CMD_SWITCH_OFF = InternalBaseSwitch,              // Turn switch off.
 	CMD_SWITCH_ON,                                    // Turn switch on.
 	CMD_SWITCH_TOGGLE,                                // Toggle switch.
@@ -201,6 +201,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_MULTI_SWITCH,                                 // Handle a multi switch.
 	CMD_SWITCHING_ALLOWED,		                      // Set switch lock.
 	CMD_DIMMING_ALLOWED,	                          // Set allow dimming.
+	CMD_SWITCH_AGGREGATOR_RESET,                      // Reset the internal state of the switch aggregator.
 
 	// Power
 	EVT_DIMMER_POWERED = InternalBasePower,           // Dimmer being powered is changed. Payload: true when powered, and ready to be used.
@@ -298,8 +299,12 @@ enum class CS_TYPE: uint16_t {
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 
 	CMD_CONTROL_CMD,                                  // Handle a control command.
-	EVT_SESSION_NONCE_SET,                            // Session nonce was generated.
+	EVT_SESSION_DATA_SET,                             // Session data was generated.
 	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
+
+	CMD_GET_ADC_RESTARTS,                             // Get number of ADC restarts.
+	CMD_GET_SWITCH_HISTORY,                           // Get the switch command history.
+	CMD_GET_POWER_SAMPLES,                            // Get power samples of interesting events.
 
 	CMD_MICROAPP_UPLOAD,                              // MicroApp upload (e.g. Arduino code).
 	EVT_MICROAPP,                                     // MicroApp event (e.g. write done)
@@ -326,8 +331,13 @@ enum class OperationMode {
 	OPERATION_MODE_UNINITIALIZED               = 0xFF,
 };
 
+enum ResetCode {
+	CS_RESET_CODE_SOFT_RESET = 0,
+	CS_RESET_CODE_GO_TO_DFU_MODE = 1,
+};
+
 struct __attribute__((packed)) reset_delayed_t {
-	uint8_t resetCode;
+	uint8_t resetCode; // ResetCode
 	uint16_t delayMs;
 };
 
@@ -408,7 +418,9 @@ typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
 typedef uint32_t TYPIFY(STATE_BEHAVIOUR_MASTER_HASH);
 typedef cs_mesh_iv_index_t TYPIFY(STATE_MESH_IV_INDEX);
 typedef cs_mesh_seq_number_t TYPIFY(STATE_MESH_SEQ_NUMBER);
+typedef ibeacon_config_id_packet_t TYPIFY(STATE_IBEACON_CONFIG_ID);
 typedef cs_microapp_t TYPIFY(STATE_MICROAPP);
+
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
@@ -467,7 +479,7 @@ typedef  control_command_packet_t TYPIFY(CMD_CONTROL_CMD);
 typedef  void TYPIFY(EVT_SCAN_STARTED);
 typedef  void TYPIFY(EVT_SCAN_STOPPED);
 typedef  void TYPIFY(EVT_SETUP_DONE);
-typedef  session_nonce_t TYPIFY(EVT_SESSION_NONCE_SET);
+typedef  session_data_t TYPIFY(EVT_SESSION_DATA_SET);
 typedef  state_external_stone_t TYPIFY(EVT_STATE_EXTERNAL_STONE);
 typedef  void TYPIFY(EVT_STATE_FACTORY_RESET_DONE);
 typedef  void TYPIFY(EVT_STORAGE_INITIALIZED);
@@ -505,8 +517,11 @@ typedef void TYPIFY(EVT_MESH_PAGES_ERASED);
 typedef cs_mesh_model_msg_state_0_t TYPIFY(EVT_MESH_EXT_STATE_0);
 typedef cs_mesh_model_msg_state_1_t TYPIFY(EVT_MESH_EXT_STATE_1);
 typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
-typedef ibeacon_config_id_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_ID);
+typedef set_ibeacon_config_id_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_ID);
 typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
+typedef void TYPIFY(CMD_GET_ADC_RESTARTS);
+typedef void TYPIFY(CMD_GET_SWITCH_HISTORY);
+typedef cs_power_samples_request_t TYPIFY(CMD_GET_POWER_SAMPLES);
 typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP_UPLOAD);
 typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
 

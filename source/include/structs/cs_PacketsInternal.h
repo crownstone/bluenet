@@ -115,13 +115,9 @@ struct __attribute__((packed)) scanned_device_t {
 /**
  * A single multi switch command.
  * switchCmd: 0 = off, 100 = fully on.
- * delay: Delay in seconds.
- * source: The source that issued the command.
  */
 struct __attribute__((packed)) internal_multi_switch_item_cmd_t {
 	uint8_t switchCmd;
-	uint16_t delay;
-	cmd_source_t source;
 };
 
 /**
@@ -137,11 +133,11 @@ inline bool cs_multi_switch_item_is_valid(internal_multi_switch_item_t* item, si
 }
 
 struct __attribute__((packed)) control_command_packet_t {
+	uint8_t protocolVersion = CS_CONNECTION_PROTOCOL_VERSION;
 	CommandHandlerTypes type;
 	buffer_ptr_t data;
 	size16_t size;
 	EncryptionAccessLevel accessLevel;
-	cmd_source_t source;
 };
 
 /**

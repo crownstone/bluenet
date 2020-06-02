@@ -22,9 +22,10 @@ public:
 	/**
 	 * Set relay on or off.
 	 *
-	 * @return true on success.
+	 * @param[in] value      True to set the relay on.
+	 * @return               True on success.
 	 */
-	bool set(bool on);
+	bool set(bool value);
 
 private:
 	bool _initialized = false;

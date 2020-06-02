@@ -293,8 +293,7 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 
 #if MESH_SCANNER == 1
 	// Init scanned device variable before registering the callback.
-	LOGMeshInfo("Scanner in mesh enabled");
-	LOGMeshInfo("Scan interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
+	LOGi("Mesh scanner: interval=%ums window=%ums", board.scanIntervalUs/1000, board.scanWindowUs/1000);
 	scanner_config_scan_time_set(board.scanIntervalUs, board.scanWindowUs);
 	nrf_mesh_rx_cb_set(scan_cb);
 #else
@@ -348,7 +347,7 @@ cs_ret_code_t MeshCore::init(const boards_config_t& board) {
 
 
 void MeshCore::provisionSelf(uint16_t id) {
-	LOGMeshInfo("provisionSelf");
+	LOGi("provisionSelf");
 	uint32_t retCode;
 
 	State::getInstance().get(CS_TYPE::CONFIG_MESH_DEVICE_KEY, _devkey, sizeof(_devkey));
@@ -360,11 +359,12 @@ void MeshCore::provisionSelf(uint16_t id) {
 	// And https://devzone.nordicsemi.com/f/nordic-q-a/44515/mesh-node-self-provisioning
 
 	// Store provisioning data in DSM.
-	dsm_local_unicast_address_t local_address;
-	local_address.address_start = id;
-	local_address.count = 1;
-	retCode = dsm_local_unicast_addresses_set(&local_address);
+	dsm_local_unicast_address_t localAddress;
+	localAddress.address_start = id;
+	localAddress.count = 1;
+	retCode = dsm_local_unicast_addresses_set(&localAddress);
 	APP_ERROR_CHECK(retCode);
+	LOGi("unicast address=%u", localAddress.address_start);
 
 	retCode = dsm_subnet_add(0, _netkey, &_netkeyHandle);
 	APP_ERROR_CHECK(retCode);
@@ -395,10 +395,10 @@ void MeshCore::provisionSelf(uint16_t id) {
 }
 
 void MeshCore::provisionLoad() {
-	LOGMeshInfo("provisionLoad");
+	LOGi("provisionLoad");
 	// Used provisioner_helper.c::prov_helper_device_handles_load() as example.
 	uint32_t retCode;
-	dsm_local_unicast_address_t local_addr;
+	dsm_local_unicast_address_t localAddress;
 	uint32_t netKeyCount = 1;
 	mesh_key_index_t keyIndices[netKeyCount] = {0};
 
@@ -414,11 +414,11 @@ void MeshCore::provisionLoad() {
 	retCode = dsm_appkey_get_all(_netkeyHandle, &_appkeyHandle, &netKeyCount);
 	APP_ERROR_CHECK(retCode);
 
-	dsm_local_unicast_addresses_get(&local_addr);
-	retCode = dsm_devkey_handle_get(local_addr.address_start, &_devkeyHandle);
+	dsm_local_unicast_addresses_get(&localAddress);
+	retCode = dsm_devkey_handle_get(localAddress.address_start, &_devkeyHandle);
 	APP_ERROR_CHECK(retCode);
 
-	LOGMeshInfo("unicast address=%u", local_addr.address_start);
+	LOGi("unicast address=%u", localAddress.address_start);
 	uint8_t key[NRF_MESH_KEY_SIZE];
 	LOGMeshInfo("netKeyHandle=%u netKey=", _netkeyHandle);
 	dsm_subnet_key_get(_netkeyHandle, key);
@@ -449,7 +449,7 @@ void MeshCore::start() {
 	LOGMeshInfo("ACCESS_FLASH_ENTRY_SIZE=%u", ACCESS_FLASH_ENTRY_SIZE);
 
 	const uint8_t *uuid = nrf_mesh_configure_device_uuid_get();
-	LOGMeshInfo("Device UUID:");
+	LOGd("Device UUID:");
 	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
 	retCode = mesh_stack_start();
 	APP_ERROR_CHECK(retCode);
@@ -471,7 +471,7 @@ void MeshCore::factoryResetDone() {
 	if (!_performingFactoryReset) {
 		return;
 	}
-	LOGMeshInfo("factoryResetDone");
+	LOGi("factoryResetDone");
 	_performingFactoryReset = false;
 	event_t event(CS_TYPE::EVT_MESH_FACTORY_RESET_DONE);
 	event.dispatch();

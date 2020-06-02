@@ -79,7 +79,7 @@ void TapToToggle::handleBackgroundAdvertisement(adv_background_parsed_t* adv) {
 	if (prevScore <= scoreThreshold && list[index].score > scoreThreshold) {
 		LOGi("Tap to toggle triggered");
 		timeoutCounter = timeoutTicks;
-		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE);
+		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_TAP_TO_TOGLE));
 		EventDispatcher::getInstance().dispatch(event);
 	}
 }

@@ -27,6 +27,7 @@ enum ErrorCodesGeneral {
 	ERR_ALREADY_EXISTS              = 0x29,
 	ERR_TIMEOUT                     = 0x2A,
 	ERR_CANCELED                    = 0x2B,
+	ERR_PROTOCOL_UNSUPPORTED        = 0x2C,
 
 	ERR_NO_ACCESS                   = 0x30,
 	ERR_UNSAFE                      = 0x31,

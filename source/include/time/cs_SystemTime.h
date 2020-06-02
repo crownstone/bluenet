@@ -21,10 +21,20 @@
  * to keep up to date using on board timing functionality.
  */
 class SystemTime : public EventListener {
-    public:
-    static Time posix();
-    static Time now(); // alias for posix()
+public:
+	/**
+	 * Get the current time as posix timestamp.
+	 */
+    static uint32_t posix();
+
+    /**
+     * Get the current time as Time object.
+     */
+    static Time now();
     
+    /**
+     * Get the current weekday.
+     */
     static DayOfWeek day();
 
     /**
@@ -35,9 +45,8 @@ class SystemTime : public EventListener {
     virtual void handleEvent(event_t& event);
 
     /**
-     * Changes the system wide time (i.e. SystemTime::posixTimeStamp) 
-     * to the given value. Dispatches a EVT_TIME_SET event to signal 
-     * any interested Listeners.
+     * Set the system wide time to given posix timestamp.
+     * Dispatches EVT_TIME_SET.
      */
 	static void setTime(uint32_t time);
     
@@ -46,7 +55,7 @@ class SystemTime : public EventListener {
      */
     static void init();
 
-    private:
+private:
     // state data
 	static uint32_t rtcTimeStamp;
 	static uint32_t posixTimeStamp;

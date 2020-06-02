@@ -94,7 +94,7 @@ Type | Name | Length | Description
 stone_id_t | Stone ID | 1 |
 uint8 | Switch value | 1 |
 uint16 | Delay | 2 |
-cmd_source_t  | Source | 3 |
+cmd_source_with_counter_t | Source | 3 |
 
 
 <a name="behaviour_settings_t"></a>
@@ -186,7 +186,7 @@ Type | Name | Length in bits | Description
 --- | --- | --- | ---
 [cs_mesh_model_msg_state_header_t](#cs_mesh_model_msg_state_header_t) | Header | 16 | State header.
 uint8_t | Access level | 3 | Shortened version of access level: 0=ADMIN, 1=MEMBER, 2=BASIC, 6=SETUP, 7=NOT_SET.
-uint8_t | Source ID | 5 | Shortened version of source ID: 0=NONE, 1=DEFAULT, 2=INTERNAL, 3=UART, 4=CONNECTION, 5=SWITCHCRAFT, 30=DEVICE_TOKEN, 31=NOT_SET
+uint8_t | Source ID | 5 | Shortened version of source ID: 0=NONE, 2=INTERNAL, 3=UART, 4=CONNECTION, 5=SWITCHCRAFT, 30=BROADCAST
 
 
 <a name="cs_mesh_model_msg_state_header_t"></a>

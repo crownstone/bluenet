@@ -7,18 +7,16 @@
 
 
 #include <behaviour/cs_BehaviourHandler.h>
+
+#include <behaviour/cs_BehaviourConflictResolution.h>
 #include <behaviour/cs_BehaviourStore.h>
 #include <behaviour/cs_SwitchBehaviour.h>
-
+#include <common/cs_Types.h>
 #include <presence/cs_PresenceDescription.h>
 #include <presence/cs_PresenceHandler.h>
-
 #include <storage/cs_State.h>
-
 #include <time/cs_SystemTime.h>
 #include <time/cs_TimeOfDay.h>
-
-#include <common/cs_Types.h>
 
 #include "drivers/cs_Serial.h"
 
@@ -81,50 +79,72 @@ bool BehaviourHandler::update(){
     return true;
 }
 
+SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(Behaviour* behave, Time currentTime,
+   PresenceStateDescription currentPresence){
+	 if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(behave)){
+		if (switchbehave->isValid(currentTime) &&
+			switchbehave->isValid(currentTime, currentPresence)) {
+				return switchbehave;
+			}
+		}
+
+	return nullptr;
+}
+
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
        Time currentTime, 
        PresenceStateDescription currentPresence) {
     if (!isActive) {
+    	LOGBehaviourHandler("Behaviour handler is inactive, computed intended state: empty");
         return {};
     }
-
     if (!currentTime.isValid()) {
         LOGBehaviourHandler("Current time invalid, computed intended state: empty");
         return {};
     }
 
-    LOGBehaviourHandler("BehaviourHandler compute intended state");
-    std::optional<uint8_t> intendedValue = {};
-    
-    for (auto& b : BehaviourStore::getActiveBehaviours()) {
-        if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(b)) {
-            // cast to switch behaviour succesful.
-            // note: this may also be an extendedswitchbehaviour - which is intended!
-            if (switchbehave->isValid(currentTime)) {
-                LOGBehaviourHandler_V("valid time on behaviour: ");
-            }
-            if (switchbehave->isValid(currentTime, currentPresence)) {
-                LOGBehaviourHandler_V("presence also valid");
-                if constexpr (BehaviourHandlerDebug) {
-                    switchbehave->print();
-                }
+    LOGBehaviourHandler("BehaviourHandler computeIntendedState resolves");
 
-                if (intendedValue){
-                    if (switchbehave->value() != intendedValue.value()) {
-                        // found a conflicting behaviour
-                        // TODO(Arend): add more advance conflict resolution according to document.
-                        return std::nullopt;
-                    }
-                } else {
-                    // found first valid behaviour
-                    intendedValue = switchbehave->value();
-                }
-            }
-        }
-    }
+	// 'best' meaning most relevant considering from/until time window.
+	SwitchBehaviour* current_best_switchbehaviour = nullptr;
+	for(auto candidate_behaviour : BehaviourStore::getActiveBehaviours()){
+    	SwitchBehaviour* candidate_switchbehaviour = ValidateSwitchBehaviour(
+    			candidate_behaviour,currentTime, currentPresence);
 
-    // reaching here means no conflict. An empty intendedValue should thus be resolved to 'off'
-    return intendedValue.value_or(0);
+    	// check for failed transformation from right to left. If either
+    	// current or candidate is nullptr, we can continue to the next candidate.
+    	if(current_best_switchbehaviour == nullptr){
+    		// candidate always wins when there is no current best.
+    		current_best_switchbehaviour = candidate_switchbehaviour;
+    		continue;
+    	}
+    	if(candidate_switchbehaviour == nullptr){
+    		continue;
+    	}
+
+    	// conflict resolve:
+    	if(FromUntilIntervalIsEqual(
+    			current_best_switchbehaviour,
+				candidate_switchbehaviour)){
+			// when interval coincides, lowest intensity behaviour wins:
+    		if(candidate_switchbehaviour->value() < current_best_switchbehaviour->value()){
+    			current_best_switchbehaviour = candidate_switchbehaviour;
+    		}
+    	} else if(FromUntilIntervalIsMoreRelevantOrEqual(
+				candidate_switchbehaviour,
+    			current_best_switchbehaviour,
+				currentTime)){
+    		// when interval is more relevant, that behaviour wins
+    		current_best_switchbehaviour = candidate_switchbehaviour;
+    	}
+	}
+
+
+	if(current_best_switchbehaviour){
+		return current_best_switchbehaviour->value();
+	}
+
+    return 0;
 }
 
 void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {

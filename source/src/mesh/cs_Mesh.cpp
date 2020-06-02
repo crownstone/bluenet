@@ -40,6 +40,7 @@ bool Mesh::checkFlashValid() {
 }
 
 cs_ret_code_t Mesh::init(const boards_config_t& board) {
+	LOGi("init");
 	_msgHandler.init();
 	_core->registerModelInitCallback([&]() -> void {
 		initModels();
@@ -56,7 +57,7 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 }
 
 void Mesh::initModels() {
-	LOGMeshInfo("Initializing and adding models");
+	LOGi("Initializing and adding models");
 	_modelMulticast.registerMsgHandler([&](const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result) -> void {
 		_msgHandler.handleMsg(msg, result);
 	});
@@ -80,6 +81,7 @@ void Mesh::configureModels(dsm_handle_t appkeyHandle) {
 }
 
 void Mesh::start() {
+	LOGi("start");
 	_core->start();
 	_msgSender.listen();
 	this->listen();
@@ -133,7 +135,7 @@ void Mesh::handleEvent(event_t & event) {
 			uint32_t randMs = MESH_SEND_TIME_INTERVAL_MS + rand8 * MESH_SEND_TIME_INTERVAL_MS_VARIATION / 255;
 			_sendStateTimeCountdown = randMs / TICK_INTERVAL_MS;
 
-			Time time = SystemTime::posix();
+			Time time = SystemTime::now();
 			if (time.isValid()) {
 				cs_mesh_model_msg_time_t packet;
 				packet.timestamp = time.timestamp();
@@ -210,18 +212,13 @@ void Mesh::startSync() {
 }
 
 bool Mesh::requestSync(bool propagateSyncMessageOverMesh) {
-//	while (SystemTime::up() < 5) {
-//		// LOGMeshInfo("Mesh::requestSync: nope");
-//		return false;
-//	}
-
 	// Retrieve which data should be requested from event handlers.
 	TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING) syncRequest;
 	syncRequest.bitmask = 0;
 	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING, &syncRequest, sizeof(syncRequest));
 	event.dispatch();
 
-	LOGMeshInfo("requestSync bitmask=%u", syncRequest.bitmask);
+	LOGd("requestSync bitmask=%u", syncRequest.bitmask);
 
 	if (syncRequest.bitmask == 0 || !propagateSyncMessageOverMesh){
 		// bitmask == 0 implies sync is unnecessary 

@@ -57,7 +57,7 @@ extern "C" {
 #define ACR01B1D             1003 // released
 #define ACR01B1E             1004 // same as ACR01B1D, but with patch
 #define ACR01B10B            1007 // Builtin One v20
-#define ACR01B10C            1008 // Builtin One v21
+#define ACR01B10D            1008 // Builtin One v25
 
 // CROWNSTONE PLUGS
 

@@ -51,8 +51,8 @@ uint 16 | DFU version | 2 | DFU Version, the value in the DFU settings page. Set
 uint 8 | Major | 1 | Major version. Set in VERSION file.
 uint 8 | Minor | 1 | Minor version. Set in VERSION file.
 uint 8 | Patch | 1 | Patch version. Set in VERSION file.
-uint 8 | Prerelease | 1 | Prerelease version. Set in VERSION file.
-uint 8 | Build type | 1 | Build type (Debug = 1, Release = 2, etc.). Set by CMakeLists.txt file.
+uint 8 | Prerelease | 1 | Prerelease version, will be 255 if not a pre-release. Set in VERSION file.
+uint 8 | Build type | 1 | Build type (Debug = 1, Release = 2, RelWithDebInfo = 3, MinSizeRel = 4). Set by CMakeLists.txt file.
 
 
 
@@ -69,3 +69,7 @@ uint 8 | Build type | 1 | Build type (Debug = 1, Release = 2, etc.). Set by CMak
 - Linker file `secure_bootloader_gcc_nrf52.ld` reserves the RAM, and creates a section.
 
 
+## General purpose retention register
+The general purpose retention register (GPREGRET) is used for communication between bootloader and application, as well as to store data that survives a reboot.
+
+How this is done can be read in `cs_GpRegRetConfig.h`.

@@ -324,8 +324,10 @@ private:
 	 */
 	bool _setStateValuesAfterStorageRecover = false;
 
+	bool _clearedGpRegRetCount = false;
 
-	public:
+
+public:
 	static TYPIFY(EVT_TICK) getTickCount(){ return _tickCount; }
 };
 
