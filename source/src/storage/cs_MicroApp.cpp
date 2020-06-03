@@ -31,9 +31,9 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
-enum MICROAPP_OPCODE { 
-	ENABLE = 0x01,
-	DISABLE = 0x02,
+enum MICROAPP_OPCODE {
+	CS_MICROAPP_OPCODE_ENABLE = 0x01,
+	CS_MICROAPP_OPCODE_DISABLE = 0x02,
 };
 
 void fs_evt_handler_sched(void *data, uint16_t size) {
@@ -172,7 +172,7 @@ void MicroApp::storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t size) {
 	state_microapp.size = size;
 	state_microapp.checksum = checksum;
 	state_microapp.id = id;
-	state_microapp.validation = static_cast<uint8_t>(MICROAPP_VALIDATION::NONE);
+	state_microapp.validation = static_cast<uint8_t>(CS_MICROAPP_VALIDATION_NONE);
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, id, (uint8_t*)&state_microapp, sizeof(state_microapp));
 	State::getInstance().set(data);
 }
@@ -292,7 +292,7 @@ void MicroApp::setAppValid() {
 	State::getInstance().get(data);
 	
 	// write validation = VALIDATION_CHECKSUM to fds record
-	state_microapp.validation = static_cast<uint8_t>(MICROAPP_VALIDATION::CHECKSUM);
+	state_microapp.validation = static_cast<uint8_t>(CS_MICROAPP_VALIDATION_CHECKSUM);
 	State::getInstance().set(data);
 }
 
@@ -301,7 +301,7 @@ bool MicroApp::isAppValid() {
 	cs_state_id_t app_id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
 	State::getInstance().get(data);
-	return (state_microapp.validation == static_cast<uint8_t>(MICROAPP_VALIDATION::CHECKSUM));
+	return (state_microapp.validation == static_cast<uint8_t>(CS_MICROAPP_VALIDATION_CHECKSUM));
 }
 
 uint16_t MicroApp::enableApp(bool flag) {
@@ -310,12 +310,12 @@ uint16_t MicroApp::enableApp(bool flag) {
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
 	State::getInstance().get(data);
 
-	if (state_microapp.validation >= static_cast<uint8_t>(MICROAPP_VALIDATION::CHECKSUM)) {
+	if (state_microapp.validation >= static_cast<uint8_t>(CS_MICROAPP_VALIDATION_CHECKSUM)) {
 		if (flag) {
-			state_microapp.validation = static_cast<uint8_t>(MICROAPP_VALIDATION::ENABLED);
+			state_microapp.validation = static_cast<uint8_t>(CS_MICROAPP_VALIDATION_ENABLED);
 			_enabled = true;
 		} else {
-			state_microapp.validation = static_cast<uint8_t>(MICROAPP_VALIDATION::DISABLED);
+			state_microapp.validation = static_cast<uint8_t>(CS_MICROAPP_VALIDATION_DISABLED);
 			_enabled = false;
 		}
 	} else {
@@ -331,7 +331,7 @@ bool MicroApp::isEnabled() {
 	cs_state_id_t app_id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
 	State::getInstance().get(data);
-	return (state_microapp.validation == static_cast<uint8_t>(MICROAPP_VALIDATION::ENABLED));
+	return (state_microapp.validation == static_cast<uint8_t>(CS_MICROAPP_VALIDATION_ENABLED));
 }
 
 /**
@@ -483,7 +483,7 @@ void MicroApp::handleEvent(event_t & evt) {
 		// Different type of package! Enable or disable this app.
 		if (packet->index == 0xFF) {
 			microapp_upload_meta_packet_t* meta_packet = reinterpret_cast<microapp_upload_meta_packet_t*>(packet);
-			if (meta_packet->opcode == MICROAPP_OPCODE::ENABLE) {
+			if (meta_packet->opcode == CS_MICROAPP_OPCODE_ENABLE) {
 
 				// write the offset (param0)
 				TYPIFY(STATE_MICROAPP) state_microapp;
@@ -494,7 +494,7 @@ void MicroApp::handleEvent(event_t & evt) {
 
 				err_code = enableApp(true);
 				break;
-			} else if (meta_packet->opcode == MICROAPP_OPCODE::DISABLE) {
+			} else if (meta_packet->opcode == CS_MICROAPP_OPCODE_DISABLE) {
 				err_code = enableApp(false);
 				break;
 			}

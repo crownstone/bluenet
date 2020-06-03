@@ -6,14 +6,15 @@
  */
 #pragma once
 
+#include <cfg/cs_Config.h>
 #include <cstdint>
-#include "cfg/cs_Config.h"
-#include "protocol/cs_CmdSource.h"
-#include "protocol/cs_CommandTypes.h"
-#include "protocol/cs_ErrorCodes.h"
-#include "protocol/cs_ServiceDataPackets.h"
-#include "protocol/cs_Typedefs.h"
-#include "protocol/mesh/cs_MeshModelPackets.h"
+#include <protocol/cs_CmdSource.h>
+#include <protocol/cs_CommandTypes.h>
+#include <protocol/cs_ErrorCodes.h>
+#include <protocol/cs_MicroAppPackets.h>
+#include <protocol/cs_ServiceDataPackets.h>
+#include <protocol/cs_Typedefs.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 
 
 #define LEGACY_MULTI_SWITCH_HEADER_SIZE (1+1)
@@ -23,10 +24,9 @@
 #define SESSION_NONCE_LENGTH 	5
 
 /**
- * Packets (structs) that are used over the air.
+ * Packets (structs) that are used over the air, over uart, or stored in flash.
  *
- * These should be plain structs, without constructors, or member functions.
- * Instead of a constructor, you can add a function that fills a struct.
+ * Constructors can be added, as they do not impact the size of the struct.
  *
  * If the definition becomes large, move it to its own file and include it in this file.
  */
