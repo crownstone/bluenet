@@ -200,7 +200,9 @@ Crownstone::Crownstone(boards_config_t& board) :
 #if BUILD_MESHING == 1
 	_mesh = &Mesh::getInstance();
 #endif
+#if BUILD_MICROAPP_SUPPORT == 1
 	_microApp = &MicroApp::getInstance();
+#endif
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		_temperatureGuard = &TemperatureGuard::getInstance();
@@ -253,8 +255,10 @@ void Crownstone::init1() {
 	_stack->initServices();
 	LOG_FLUSH();
 
+#if BUILD_MICROAPP_SUPPORT == 1
 	LOGi(FMT_HEADER, "init microapp");
 	_microApp->init();
+#endif
 }
 
 void Crownstone::initDrivers(uint16_t step) {
