@@ -262,11 +262,9 @@ APPLICATION_LENGTH=0x50000
 
 # Start of RAM for the application
 # Find out what the minimal value is by calling nrf_sdh_ble_default_cfg_set() with p_ram_start = 0.
-#RAM_R1_BASE=0x20002380
-RAM_R1_BASE=0x200023a0
+RAM_R1_BASE=0x200023A0
 
 # Amount of RAM for the application: 0x20010000 - RAM_R1_BASE
-#RAM_APPLICATION_AMOUNT=0xDC80
 RAM_APPLICATION_AMOUNT=0xDC60
 
 # Amount of RAM required by the bootloader (figure this setting out by enabling debug in the bootloader)
