@@ -64,7 +64,7 @@ static int printPower = 0;
 /*
  * At this moment in time is the function adc_done_callback already decoupled from the ADC interrupt.
  */
-void adc_done_callback(cs_adc_buffer_id_t bufIndex) {
+void adc_done_callback(buffer_id_t bufIndex) {
 	PowerSampling::getInstance().powerSampleAdcDone(bufIndex);
 }
 
@@ -256,7 +256,7 @@ void PowerSampling::handleEvent(event_t & event) {
  * @param[in] size                               Size of the buffer.
  * @param[in] bufIndex                           The buffer index, can be used in InterleavedBuffer.
  */
-void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
+void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
@@ -279,7 +279,7 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	filter(bufIndex, power.currentIndex);
 #endif
 
-	cs_adc_buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
+	buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
 	nrf_saadc_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
 	if (isVoltageAndCurrentSwapped(power, prevBuf)) {
 		LOGw("Swap detected: restart ADC.");
@@ -519,7 +519,7 @@ void PowerSampling::calculateCurrentZero(power_t & power) {
 /**
  * This function performs a median filter with respect to the given channel.
  */
-void PowerSampling::filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id) {
+void PowerSampling::filter(buffer_id_t buffer_id, channel_id_t channel_id) {
 
 	// Pad the start of the input vector with the first sample in the buffer
 	uint16_t j = 0;

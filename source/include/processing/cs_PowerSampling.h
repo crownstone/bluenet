@@ -40,7 +40,7 @@ public:
 	 *  Calculates the power usage, updates the state.
 	 *  Sends the samples if the central is subscribed for that.
 	 */
-	void powerSampleAdcDone(cs_adc_buffer_id_t bufIndex);
+	void powerSampleAdcDone(buffer_id_t bufIndex);
 
 	/** Fill up the current curve and send it out over bluetooth
 	 * @type specifies over which characteristic the current curve should be sent.
@@ -177,7 +177,7 @@ private:
 
 	/** Filter the samples
 	 */
-	void filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id);
+	void filter(buffer_id_t buffer_id, channel_id_t channel_id);
 
 	/**
 	 * Checks if voltage and current index are swapped.

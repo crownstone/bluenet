@@ -41,7 +41,7 @@
 
 // Called by app scheduler, from saadc interrupt.
 void adc_done(void * p_event_data, uint16_t event_size) {
-	cs_adc_buffer_id_t* bufIndex = (cs_adc_buffer_id_t*)p_event_data;
+	buffer_id_t* bufIndex = (buffer_id_t*)p_event_data;
 	ADC::getInstance()._handleAdcDone(*bufIndex);
 }
 
@@ -57,6 +57,7 @@ void adc_timeout(void* pEventData, uint16_t dataSize) {
 
 ADC::ADC() :
 		_changeConfig(false),
+		_bufferQueue(CS_ADC_NUM_BUFFERS),
 		_bufferIndex(BUFFER_INDEX_NONE),
 		_queuedBufferIndex(BUFFER_INDEX_NONE),
 		_numBuffersQueued(0),
@@ -71,7 +72,6 @@ ADC::ADC() :
 	_doneCallback = NULL;
 	_zeroCrossingCallback = NULL;
 	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
-		InterleavedBuffer::getInstance().setBuffer(0, NULL);
 		_inProgress[i] = false;
 	}
 }
@@ -84,7 +84,7 @@ ADC::ADC() :
  *
  * @caller src/processing/cs_PowerSampling.cpp
  */
-cs_adc_error_t ADC::init(const adc_config_t & config) {
+cs_ret_code_t ADC::init(const adc_config_t & config) {
 	ret_code_t err_code;
 	_config = config;
 //	memcpy(&_config, &config, sizeof(adc_config_t));
@@ -206,7 +206,7 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	);
 
 	// Config adc
-	err_code = initAdc(config);
+	err_code = initSaadc(config);
 	APP_ERROR_CHECK(err_code);
 
 	for (int i=0; i<_config.channelCount; ++i) {
@@ -215,22 +215,15 @@ cs_adc_error_t ADC::init(const adc_config_t & config) {
 	// NRF52_PAN_74
 	nrf_saadc_enable();
 
-	// Allocate buffers
-	for (int i=0; i<CS_ADC_NUM_BUFFERS; i++) {
-		nrf_saadc_value_t* buf = new nrf_saadc_value_t[CS_ADC_BUF_SIZE];
-		LOGv("Allocate buffer %i = %p", i, buf);
-		InterleavedBuffer::getInstance().setBuffer(i, buf);
-		_inProgress[i] = false;
-	}
 	initQueue();
 
 	this->listen();
 
-	return 0;
+	return ERR_SUCCESS;
 }
 
 
-cs_adc_error_t ADC::initAdc(const adc_config_t & config) {
+cs_ret_code_t ADC::initSaadc(const adc_config_t & config) {
 	// NRF52_PAN_74
 	nrf_saadc_disable();
 
@@ -249,12 +242,25 @@ cs_adc_error_t ADC::initAdc(const adc_config_t & config) {
 	// NRF52_PAN_74: enable after config
 //	nrf_saadc_enable();
 
-	return 0;
+	return ERR_SUCCESS;
 }
 
-void ADC::initQueue() {
-	_bufferIndex = 0;
-	_queuedBufferIndex = 1;
+cs_ret_code_t ADC::initQueue() {
+//	_bufferIndex = 0;
+//	_queuedBufferIndex = 1;
+
+	if (!_bufferQueue.init()) {
+		return ERR_NO_SPACE;
+	}
+	cs_ret_code_t retCode = InterleavedBuffer::getInstance().init();
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+	buffer_id_t bufCount = InterleavedBuffer::getInstance().getBufferCount();
+	for (buffer_id_t id = 0; id < bufCount; ++id) {
+		_bufferQueue.push(id);
+	}
+	return ERR_SUCCESS;
 }
 
 /** Configure an ADC channel.
@@ -264,7 +270,7 @@ void ADC::initQueue() {
  *   - set the prescaler for the input voltage (the input, not the input supply)
  *   - set either differential mode (pin - ref_pin), or single ended mode (pin - 0)
  */
-cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config) {
+cs_ret_code_t ADC::initChannel(channel_id_t channel, adc_channel_config_t& config) {
 	LOGi("Init channel %u on AIN%u, range=%umV, ref=ain%u", channel, config.pin, config.rangeMilliVolt, config.referencePin);
 	assert(config.pin < 8 || config.pin == CS_ADC_PIN_VDD, "Invalid pin");
 	assert(config.referencePin < 8 || config.referencePin == CS_ADC_REF_PIN_NOT_AVAILABLE, "Invalid ref pin");
@@ -340,7 +346,7 @@ cs_adc_error_t ADC::initChannel(cs_adc_channel_id_t channel, adc_channel_config_
 	nrf_saadc_channel_init(channel, &channelConfig);
 //	nrf_saadc_channel_input_set(channel, channelConfig.pin_p, channelConfig.pin_n); // Already done by channel_init()
 
-	return 0;
+	return ERR_SUCCESS;
 }
 
 void ADC::setDoneCallback(adc_done_cb_t callback) {
@@ -429,15 +435,15 @@ void ADC::start() {
 	if (_bufferIndex != BUFFER_INDEX_NONE) {
 		// Resume from previous index.
 		if (_queuedBufferIndex != BUFFER_INDEX_NONE) {
-			// Store queued buffer index, as it will be overwritten by addBufferToSampleQueue()
-			cs_adc_buffer_id_t queuedBufferIndex = _queuedBufferIndex;
-			addBufferToSampleQueue(_bufferIndex);
-			addBufferToSampleQueue(queuedBufferIndex);
+			// Store queued buffer index, as it will be overwritten by addBufferToSaadcQueue()
+			buffer_id_t queuedBufferIndex = _queuedBufferIndex;
+			addBufferToSaadcQueue(_bufferIndex);
+			addBufferToSaadcQueue(queuedBufferIndex);
 		}
 		else {
 			LOGw("no queued buffer?");
-			addBufferToSampleQueue(_bufferIndex);
-			addBufferToSampleQueue((_bufferIndex + 1) % CS_ADC_NUM_BUFFERS);
+			addBufferToSaadcQueue(_bufferIndex);
+			addBufferToSaadcQueue((_bufferIndex + 1) % CS_ADC_NUM_BUFFERS);
 		}
 	}
 	else {
@@ -455,7 +461,7 @@ void ADC::start() {
 #endif
 }
 
-void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
+void ADC::addBufferToSaadcQueue(buffer_id_t bufIndex) {
 	if (_inProgress[bufIndex]) {
 		LOGe("Buffer %u in progress", bufIndex);
 		APP_ERROR_CHECK(NRF_ERROR_BUSY);
@@ -477,45 +483,45 @@ void ADC::addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex) {
 	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
 
 	switch (_saadcState) {
-	case ADC_SAADC_STATE_BUSY: {
-		if (_queuedBufferIndex != BUFFER_INDEX_NONE) {
+		case ADC_SAADC_STATE_BUSY: {
+			if (_queuedBufferIndex != BUFFER_INDEX_NONE) {
+				nrf_saadc_int_enable(NRF_SAADC_INT_END);
+				LOGe("Second buffer already queued");
+				APP_ERROR_CHECK(NRF_ERROR_BUSY);
+				return;
+			}
+			_queuedBufferIndex = bufIndex;
+			_numBuffersQueued++;
+			{
+				// Make sure to queue the next buffer only after the STARTED event
+				// which should follow quickly after the START task.
+				while (nrf_saadc_event_check(NRF_SAADC_EVENT_STARTED) == 0);
+				nrf_saadc_event_clear(NRF_SAADC_EVENT_STARTED);
+				nrf_saadc_buffer_init(buf, CS_ADC_BUF_SIZE);
+			}
 			nrf_saadc_int_enable(NRF_SAADC_INT_END);
-			LOGe("Second buffer already queued");
-			APP_ERROR_CHECK(NRF_ERROR_BUSY);
-			return;
+			break;
 		}
-		_queuedBufferIndex = bufIndex;
-		_numBuffersQueued++;
-		{
-			// Make sure to queue the next buffer only after the STARTED event
-			// which should follow quickly after the START task.
-			while (nrf_saadc_event_check(NRF_SAADC_EVENT_STARTED) == 0);
-			nrf_saadc_event_clear(NRF_SAADC_EVENT_STARTED);
+		case ADC_SAADC_STATE_IDLE: {
+			_saadcState = ADC_SAADC_STATE_BUSY;
+			_bufferIndex = bufIndex;
+			_queuedBufferIndex = BUFFER_INDEX_NONE;
+			_numBuffersQueued++;
+			nrf_saadc_int_enable(NRF_SAADC_INT_END);
 			nrf_saadc_buffer_init(buf, CS_ADC_BUF_SIZE);
+			nrf_saadc_event_clear(NRF_SAADC_EVENT_STARTED);
+			nrf_saadc_task_trigger(NRF_SAADC_TASK_START);
+			break;
 		}
-		nrf_saadc_int_enable(NRF_SAADC_INT_END);
-		break;
-	}
-	case ADC_SAADC_STATE_IDLE: {
-		_saadcState = ADC_SAADC_STATE_BUSY;
-		_bufferIndex = bufIndex;
-		_queuedBufferIndex = BUFFER_INDEX_NONE;
-		_numBuffersQueued++;
-		nrf_saadc_int_enable(NRF_SAADC_INT_END);
-		nrf_saadc_buffer_init(buf, CS_ADC_BUF_SIZE);
-		nrf_saadc_event_clear(NRF_SAADC_EVENT_STARTED);
-		nrf_saadc_task_trigger(NRF_SAADC_TASK_START);
-		break;
-	}
-	default: {
+		default: {
 #ifdef PRINT_DEBUG_VERBOSE
-		LOGw("don't queue");
+			LOGw("don't queue");
 #endif
-	}
+		}
 	}
 }
 
-bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
+void ADC::releaseBuffer(buffer_id_t bufIndex) {
 #ifdef TEST_PIN_PROCESS
 	nrf_gpio_pin_toggle(TEST_PIN_PROCESS);
 #endif
@@ -527,25 +533,25 @@ bool ADC::releaseBuffer(cs_adc_buffer_id_t bufIndex) {
 	if (_state == ADC_STATE_WAITING_TO_START) {
 		_state = ADC_STATE_READY_TO_START;
 		start();
-		return true;
+		return;
 	}
 
 	if (_state != ADC_STATE_BUSY) {
 		LOGv("not running, don't queue buf");
-		return true;
+		return;
 	}
 
-	cs_adc_buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS; // TODO: 2 should be (CS_ADC_NUM_BUFFERS - saadc queue size)?
-	addBufferToSampleQueue(nextIndex);
+	buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS; // TODO: 2 should be (CS_ADC_NUM_BUFFERS - saadc queue size)?
+	addBufferToSaadcQueue(nextIndex);
 	stopTimeout();
-	return true;
+	return;
 }
 
 void ADC::setZeroCrossingCallback(adc_zero_crossing_cb_t callback) {
 	_zeroCrossingCallback = callback;
 }
 
-void ADC::enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroVal) {
+void ADC::enableZeroCrossingInterrupt(channel_id_t channel, int32_t zeroVal) {
 	LOGv("enable zero chan=%u zero=%i", channel, zeroVal);
 	_zeroValue = zeroVal;
 	_zeroCrossingChannel = channel;
@@ -555,7 +561,7 @@ void ADC::enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroV
 	setLimitUp();
 }
 
-cs_adc_error_t ADC::changeChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config) {
+cs_ret_code_t ADC::changeChannel(channel_id_t channel, adc_channel_config_t& config) {
 	if (channel >= _config.channelCount) {
 		return ERR_ADC_INVALID_CHANNEL;
 	}
@@ -630,7 +636,7 @@ void ADC::_handleTimeout() {
 	start();
 }
 
-void ADC::_handleAdcDone(cs_adc_buffer_id_t bufIndex) {
+void ADC::_handleAdcDone(buffer_id_t bufIndex) {
 #ifdef TEST_PIN_PROCESS
 	nrf_gpio_pin_toggle(TEST_PIN_PROCESS);
 #endif
@@ -705,7 +711,7 @@ void ADC::_handleAdcInterrupt() {
 		nrf_gpio_pin_toggle(TEST_PIN_INT_END);
 #endif
 
-		cs_adc_buffer_id_t bufIndex = _bufferIndex;
+		buffer_id_t bufIndex = _bufferIndex;
 		__attribute__((unused)) uint16_t bufSize = nrf_saadc_amount_get();
 
 
@@ -845,7 +851,7 @@ nrf_saadc_input_t ADC::getAdcPin(const cs_adc_pin_id_t pinNum) {
 	}
 }
 
-nrf_saadc_event_t ADC::getLimitLowEvent(cs_adc_channel_id_t channel) {
+nrf_saadc_event_t ADC::getLimitLowEvent(channel_id_t channel) {
 	switch (channel) {
 	case 0:
 		return NRF_SAADC_EVENT_CH0_LIMITL;
@@ -867,7 +873,7 @@ nrf_saadc_event_t ADC::getLimitLowEvent(cs_adc_channel_id_t channel) {
 	return NRF_SAADC_EVENT_CH7_LIMITL;
 }
 
-nrf_saadc_event_t ADC::getLimitHighEvent(cs_adc_channel_id_t channel) {
+nrf_saadc_event_t ADC::getLimitHighEvent(channel_id_t channel) {
 	switch (channel) {
 	case 0:
 		return NRF_SAADC_EVENT_CH0_LIMITH;
