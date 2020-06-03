@@ -227,8 +227,10 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 //		config->interval = 0;
 		return ERR_SUCCESS;
 	}
-	case CS_TYPE::STATE_MICROAPP:
-		return ERR_NOT_AVAILABLE;
+	case CS_TYPE::STATE_MICROAPP: {
+		*reinterpret_cast<TYPIFY(STATE_MICROAPP)*>(data.value) = cs_microapp_t();
+		return ERR_SUCCESS;
+	}
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:

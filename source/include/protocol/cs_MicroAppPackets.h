@@ -19,6 +19,8 @@
 
 /**
  * Size of MicroApp packet.
+ *
+ * TODO: encryption isn't the only overhead, is this really the optimal size?
  */
 #define MICROAPP_PACKET_SIZE (NRF_SDH_BLE_GATT_MAX_MTU_SIZE - ENCRYPTION_OVERHEAD)
 
@@ -29,6 +31,34 @@
  */
 #define MICROAPP_CHUNK_SIZE (MICROAPP_PACKET_SIZE - 8)
 
+enum MICROAPP_VALIDATION {
+	CS_MICROAPP_VALIDATION_NONE = 0,
+	CS_MICROAPP_VALIDATION_CHECKSUM = 1,
+	CS_MICROAPP_VALIDATION_ENABLED = 2,
+	CS_MICROAPP_VALIDATION_DISABLED = 3,
+	CS_MICROAPP_VALIDATION_BOOTS = 4,
+	CS_MICROAPP_VALIDATION_FAILS = 5
+};
+
+/**
+ * Struct stored in FDS to be able to run an app using only this info.
+ *
+ * Fields:
+ *   - start_addr    The address the binary starts at.
+ *   - size          The size of the binary.
+ *   - checksum      The checksum calculated over the size of the binary (only padded by single zero for an odd size).
+ *   - validation    Validation step by step, from checksum correct, enabled, to being able to boot. See MICROAPP_VALIDATION.
+ *   - id            The app id.
+ *   - offset        The entry into the binary (will assume thumb mode, offset will be incremented with one).
+ */
+struct __attribute__((packed)) cs_microapp_t {
+	uint32_t start_addr = 0;
+	uint16_t size = 0;
+	uint16_t checksum = 0;
+	uint8_t validation = CS_MICROAPP_VALIDATION_NONE;
+	uint8_t id = 0;
+	uint16_t offset = 0;
+};
 
 /**
  * Struct for MicroApp code.
@@ -58,6 +88,8 @@ struct __attribute__((packed)) microapp_upload_packet_t {
 
 /**
  * Struct for MicroApp meta packet (index equal to 0xFF)
+ *
+ * TODO: this struct is assumed to be the same size as microapp_upload_packet_t. Make it a union instead.
  *
  *   - The opcode indicates enabling/disabling the app (or other future actions).
  *   - The param0 parameter contains e.g. an offset when opcode is "enable app".

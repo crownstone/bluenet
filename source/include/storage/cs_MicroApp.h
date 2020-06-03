@@ -2,15 +2,6 @@
 
 #include <events/cs_EventListener.h>
 
-enum MICROAPP_VALIDATION {
-	CS_MICROAPP_VALIDATION_NONE = 0,
-	CS_MICROAPP_VALIDATION_CHECKSUM = 1,
-	CS_MICROAPP_VALIDATION_ENABLED = 2,
-	CS_MICROAPP_VALIDATION_DISABLED = 3,
-	CS_MICROAPP_VALIDATION_BOOTS = 4,
-	CS_MICROAPP_VALIDATION_FAILS = 5
-};
-
 /**
  * The class MicroApp has functionality to store a second app (and perhaps in the future even more apps) on another
  * part of the flash memory.

@@ -840,6 +840,7 @@ void CommandHandler::handleMicroAppUpload(cs_data_t commandData, const Encryptio
 		return;
 	}
 	
+	// TODO: don't copy the data. Maybe just use dispatchEventForCommand().
 	TYPIFY(CMD_MICROAPP_UPLOAD) evtData;
 	evtData = *((microapp_upload_packet_t*)commandData.data);
 	event_t event(CS_TYPE::CMD_MICROAPP_UPLOAD, &evtData, sizeof(evtData), result);
