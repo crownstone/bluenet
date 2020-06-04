@@ -157,7 +157,7 @@ private:
 		uint32_t asInt;
 	} _logsEnabled;
 
-	uint32_t _numAdcRestarts = 0;
+	cs_adc_restarts_t _adcRestarts;
 
 	/** Initialize the moving averages
 	 */

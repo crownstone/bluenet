@@ -343,7 +343,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) | Obtain debug info of the current behaviour state. | x
 70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | Register or update a device to be tracked. Error codes: ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | x | x | x
 80 | Get uptime | - | uint 32 | Time in seconds since boot. | x
-81 | Get ADC restarts | - | uint 32 | Number of ADC restarts since boot. | x
+81 | Get ADC restarts | - | [ADC restarts packet](#adc_restarts_packet) | Number of ADC restarts since boot. | x
 82 | Get switch history | - | [Switch history packet](#switch_history_packet) | A history of why the switch state has changed. | x
 83 | Get power samples | [Request power samples](#power_samples_request_packet) | [Power samples](#power_samples_result_packet) | Get the current or voltage samples of certain events. | x
 84 | Get CPU usage statistics | - |
@@ -597,6 +597,15 @@ uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupi
 
 
 
+<a name="adc_restarts_packet"></a>
+#### ADC restarts packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Restart count | 4 | Number of ADC restarts since boot.
+uint32 | Timestamp | 4 | Unix timestamp of the last ADC restart.
+
+
 <a name="switch_history_packet"></a>
 #### Switch history packet
 
@@ -633,6 +642,7 @@ uint 8 | [Source ID](#command_source_ID) | 8 | The ID of the source.
 Value | Name | Description
 --- | --- | ---
 0 | Enum | ID is one of the [list](#command_source_ID).
+1 | Behaviour | ID is the behaviour index, or 255 when unknown.
 3 | Broadcast | ID is the [device ID](BROADCAST_PROTOCOL.md#command_adv_header)
 
 <a name="command_source_ID"></a>
@@ -640,11 +650,11 @@ Value | Name | Description
 
 Value | Name | Description
 --- | --- | ---
-0 | None
-2 | Internal
-3 | UART
-4 | Connection
-5 | Switchcraft
+0 | None | No source was set.
+2 | Internal | Some internal source, not very specific.
+3 | UART | Command came from UART.
+4 | Connection | Command came from a BLE connection.
+5 | Switchcraft | Switchcraft triggered this command.
 
 
 
@@ -657,6 +667,14 @@ Type | Name | Length | Description
 uint 8 | [Type](#power_samples_type) | 1 | Type of samples.
 uint 8 | Index | 1 | Some types have multiple lists of samples.
 
+<a name="power_samples_type"></a>
+#### Power samples type
+
+Value | Name| Description
+--- | --- | ---
+0 | Triggered switchcraft | Last samples that triggered switchcraft. Has 3 lists of voltage samples: index 0 for first list, index 1 for the list directly following the first, index 2 for the list directly following the list of index 1.
+1 | Non-triggered switchcraft | Last samples that almost triggered switchcraft. Has 3 lists of voltage samples: index 0 for first list, index 1 for the list directly following the first, index 2 for the list directly following the list of index 1.
+
 <a name="power_samples_result_packet"></a>
 #### Power samples result packet
 
@@ -665,23 +683,15 @@ uint 8 | Index | 1 | Some types have multiple lists of samples.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Type](#power_samples_type) | 1 | Type of samples, also determines whether the samples are voltage or current samples.
-uint 8 | Index | 1 | Some types have multiple lists of samples.
+uint 8 | Index | 1 | Some types have multiple lists of samples, see the type description.
 uint 16 | Count | 2 | Number of samples in the list.
 uint 32 | Timestamp | 4 | Unix timestamp of time the samples have been set.
 uint 16 | Delay | 2 | Measurement delay in μs.
 uint 16 | Sample interval | 2 | Sample interval in μs.
 uint 16 | Reserved | 2 | Reserved for future use, should be 0 for now.
 int 16 | Offset | 2 | Calculated offset of the samples.
-float | Multiplier | 4 | Multiply the sample value with this value to get a value in ampere, or volt.
+float | Multiplier | 4 | Multiply the sample value with this value to get a value in ampere (when samples are current), or volt (when samples are voltage).
 int 16 [] | Samples | 2 | List of samples.
-
-<a name="power_samples_type"></a>
-#### Power samples type
-
-Value | Name | Description | Voltage | Current
---- | --- | --- | :---: | :---:
-0 | Triggered switchcraft | Last samples that triggered switchcraft. Has 3 lists of samples. | x
-1 | Non-triggered switchcraft | Last samples that almost triggered switchcraft. Has 3 lists of samples. | x
 
 
 
