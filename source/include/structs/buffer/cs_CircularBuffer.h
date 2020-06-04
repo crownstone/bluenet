@@ -13,6 +13,8 @@
 
 //#define PRINT_CIRCULARBUFFER_VERBOSE
 
+#define CS_CIRCULAR_BUFFER_INDEX_NOT_FOUND 0xFFFF
+
 /** Circular Buffer implementation
  * @param T Element type of elements within the buffer.
  *
@@ -170,12 +172,26 @@ public:
 	 * removed from the beginning. If the buffer is full
 	 * the oldest element will be overwritten.
 	 */
-	void push(T& value) {
+	void push(const T& value) {
 		incTail();
 		if (_contentsSize > _capacity) {
 			incHead();
 		}
 		_array[_tail] = value;
+	}
+
+	/**
+	 * Add an element to the end of the buffer,
+	 * but only when it's not already in the buffer.
+	 *
+	 * @return     True when the element was added.
+	 */
+	bool pushUnique(const T& value) {
+		if (find(value) == CS_CIRCULAR_BUFFER_INDEX_NOT_FOUND) {
+			push(value);
+			return true;
+		}
+		return false;
 	}
 
 	/** Get the oldest element
@@ -185,10 +201,10 @@ public:
 	 *
 	 * @return the value of the oldest element
 	 */
-	T& pop() {
-		T res = peek();
+	const T& pop() {
+		T* res = &(_array[_head]);
 		incHead();
-		return res;
+		return *res;
 	}
 
 	/** Peek at the oldest element without removing it
@@ -209,6 +225,21 @@ public:
 	 */
 	T& operator[](uint16_t idx) const {
 		return _array[(_head+idx)%_capacity];
+	}
+
+	/**
+	 * Find a value in the buffer.
+	 *
+	 * @return The first index at which the value was found,
+	 *         or CS_CIRCULAR_BUFFER_INDEX_NOT_FOUND when not found.
+	 */
+	uint16_t find(const T& value) const {
+		for (uint16_t index = 0; index < size(); ++index) {
+			if (operator[](index) == value) {
+				return index;
+			}
+		}
+		return CS_CIRCULAR_BUFFER_INDEX_NOT_FOUND;
 	}
 
 private:
