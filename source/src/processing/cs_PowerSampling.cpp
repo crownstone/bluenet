@@ -19,6 +19,7 @@
 #include "structs/buffer/cs_InterleavedBuffer.h"
 #include "third/SortMedian.h"
 #include "third/optmed.h"
+#include "time/cs_SystemTime.h"
 
 #include <cmath>
 
@@ -210,17 +211,18 @@ void PowerSampling::handleEvent(event_t & event) {
 		break;
 	}
 	case CS_TYPE::CMD_GET_ADC_RESTARTS: {
-		if (event.result.buf.len < sizeof(_numAdcRestarts)) {
+		if (event.result.buf.len < sizeof(_adcRestarts)) {
 			event.result.returnCode = ERR_BUFFER_TOO_SMALL;
 			return;
 		}
-		memcpy(event.result.buf.data, &_numAdcRestarts, sizeof(_numAdcRestarts));
-		event.result.dataSize = sizeof(_numAdcRestarts);
+		memcpy(event.result.buf.data, &_adcRestarts, sizeof(_adcRestarts));
+		event.result.dataSize = sizeof(_adcRestarts);
 		event.result.returnCode = ERR_SUCCESS;
 		break;
 	}
 	case CS_TYPE::EVT_ADC_RESTARTED:
-		++_numAdcRestarts;
+		_adcRestarts.count++;
+		_adcRestarts.lastTimestamp = SystemTime::posix();
 		_skipSwapDetection = 1;
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
 		RecognizeSwitch::getInstance().skip(2);

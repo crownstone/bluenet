@@ -354,6 +354,11 @@ struct __attribute__((packed)) cs_uicr_data_t {
 	} productionDateHousing;
 };
 
+struct __attribute__((packed)) cs_adc_restarts_t {
+	uint32_t count = 0; // Number or ADC restarts since boot.
+	uint32_t lastTimestamp = 0; // Timestamp of last ADC restart.
+};
+
 enum PowerSamplesType {
 	POWER_SAMPLES_TYPE_SWITCHCRAFT = 0,
 	POWER_SAMPLES_TYPE_SWITCHCRAFT_NON_TRIGGERED = 1,
