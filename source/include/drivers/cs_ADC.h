@@ -79,6 +79,9 @@ enum adc_saadc_state_t {
 	ADC_SAADC_STATE_STOPPING // When saadc is or will be commanded to stop.
 };
 
+// Max number of buffers in the SAADC peripheral.
+#define CS_ADC_NUM_SAADC_BUFFERS 2
+
 
 /** Analog-Digital conversion.
  *
@@ -235,17 +238,26 @@ private:
 	CircularBuffer<buffer_id_t> _bufferQueue;
 
 
-	// Index of buffer that is currently being used to write samples to.
-	// **Used in interrupt!**
-	buffer_id_t _bufferIndex;
+//	// Index of buffer that is currently being used to write samples to.
+//	// **Used in interrupt!**
+//	buffer_id_t _bufferIndex;
+//
+//	// Index of next buffer to be used.
+//	// **Used in interrupt!**
+//	buffer_id_t _queuedBufferIndex;
+//
+//	// Number of buffers that are queued to be populated by SAADC.
+//	// **Used in interrupt!**
+//	buffer_id_t _numBuffersQueued;
 
-	// Index of next buffer to be used.
-	// **Used in interrupt!**
-	buffer_id_t _queuedBufferIndex;
-
-	// Number of buffers that are queued to be populated by SAADC.
-	// **Used in interrupt!**
-	buffer_id_t _numBuffersQueued;
+	/**
+	 * Keeps up which buffers that are queued in the SAADC peripheral.
+	 *
+	 * First buffer in queue is the one currently being (or going to be) filled with samples.
+	 *
+	 * Used in interrupt!
+	 */
+	CircularBuffer<buffer_id_t> _saadcBufferQueue;
 
 	// True when next buffer is the first after start.
 	bool _firstBuffer;
@@ -310,11 +322,28 @@ private:
 	void setLimitDown();
 
 	// Initialize buffer queue
-	cs_ret_code_t initQueue();
+	cs_ret_code_t initBufferQueue();
 
-	// Function that puts a buffer in queue to be populated with adc values.
-	// Also triggers NRF_SAADC_TASK_START
-	void addBufferToSaadcQueue(buffer_id_t bufIndex);
+	/**
+	 * Try to add all queued buffers to the SAADC queue.
+	 * If the SAADC queue is now filled, stop the timeout timer.
+	 *
+	 * @return ERR_SUCCESS when SAADC queue is full, and timeout timer has been stopped.
+	 */
+	cs_ret_code_t fillSaadcQueue();
+
+	/**
+	 * Puts a buffer in the SAADC queue.
+	 *
+	 * Starts the SAADC when it's idle.
+	 * Waits for the SAADC to be started to queue another buffer.
+	 *
+	 * @return
+	 * - ERR_SUCCESS when the buffer is queued in the SAADC.
+	 * - ERR_NO_SPACE when there are already enough buffers queued in the SAADC, so the given buffer is not queued.
+	 * - Other return codes for failures, the given buffer is not queued.
+	 */
+	cs_ret_code_t addBufferToSaadcQueue(buffer_id_t bufIndex);
 
 	// Function to apply a new config. Should be called when no buffers are are queued, nor being processed.
 	void applyConfig();

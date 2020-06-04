@@ -17,12 +17,9 @@
 #include <structs/buffer/cs_InterleavedBuffer.h>
 #include <util/cs_BleError.h>
 
-// Define to print adc restarts
-//#define PRINT_DEBUG
-
-// Define to print buffers being queued etc.
-//#define PRINT_DEBUG_VERBOSE
-
+#define LOGAdcDebug LOGd
+#define LOGAdcVerbose LOGd
+#define LOGAdcInterrupt LOGnone
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN_ZERO_CROSS 20
@@ -58,9 +55,7 @@ void adc_timeout(void* pEventData, uint16_t dataSize) {
 ADC::ADC() :
 		_changeConfig(false),
 		_bufferQueue(CS_ADC_NUM_BUFFERS),
-		_bufferIndex(BUFFER_INDEX_NONE),
-		_queuedBufferIndex(BUFFER_INDEX_NONE),
-		_numBuffersQueued(0),
+		_saadcBufferQueue(CS_ADC_NUM_SAADC_BUFFERS),
 		_firstBuffer(true),
 		_state(ADC_STATE_IDLE),
 		_saadcState(ADC_SAADC_STATE_IDLE),
@@ -215,7 +210,7 @@ cs_ret_code_t ADC::init(const adc_config_t & config) {
 	// NRF52_PAN_74
 	nrf_saadc_enable();
 
-	initQueue();
+	initBufferQueue();
 
 	this->listen();
 
@@ -245,10 +240,10 @@ cs_ret_code_t ADC::initSaadc(const adc_config_t & config) {
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t ADC::initQueue() {
-//	_bufferIndex = 0;
-//	_queuedBufferIndex = 1;
-
+cs_ret_code_t ADC::initBufferQueue() {
+	if (!_saadcBufferQueue.init()) {
+		return ERR_NO_SPACE;
+	}
 	if (!_bufferQueue.init()) {
 		return ERR_NO_SPACE;
 	}
@@ -354,19 +349,20 @@ void ADC::setDoneCallback(adc_done_cb_t callback) {
 }
 
 void ADC::stop() {
-#ifdef PRINT_DEBUG
-	LOGv("stop");
-#endif
+	LOGAdcDebug("stop");
 	switch (_state) {
-	case ADC_STATE_IDLE:
-		LOGw("already stopped");
-		return;
-	default:
-		break;
+		case ADC_STATE_IDLE:
+			LOGw("already stopped");
+			return;
+		default:
+			break;
 	}
-	nrf_saadc_int_disable(NRF_SAADC_INT_END); // Make sure the interrupt doesn't interrupt this piece of code.
+
+	// Make sure the end interrupt doesn't interrupt this piece of code.
+	nrf_saadc_int_disable(NRF_SAADC_INT_END);
 	// TODO: state = stopping ?
 	_state = ADC_STATE_IDLE;
+
 #ifdef TEST_PIN_STOP
 	nrf_gpio_pin_toggle(TEST_PIN_STOP);
 #endif
@@ -381,9 +377,7 @@ void ADC::stop() {
 	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
 
 	if (_saadcState != ADC_SAADC_STATE_IDLE) {
-#ifdef PRINT_DEBUG_VERBOSE
-		LOGv("stop saadc");
-#endif
+		LOGAdcDebug("stop saadc");
 		_saadcState = ADC_SAADC_STATE_STOPPING;
 
 		nrf_saadc_event_clear(NRF_SAADC_EVENT_STOPPED);
@@ -393,29 +387,38 @@ void ADC::stop() {
 		// Wait for ADC being stopped.
 		while (_saadcState != ADC_SAADC_STATE_IDLE);
 	}
-	_numBuffersQueued = 0;
-	nrf_saadc_event_clear(NRF_SAADC_EVENT_END); // Clear any pending saadc END event.
-	nrf_saadc_int_enable(NRF_SAADC_INT_END); // Re-enable end interrupt.
+
+	// The SAADC queue is now cleared, so move the queued buffers to the regular queue.
+	while (!_saadcBufferQueue.empty()) {
+		_bufferQueue.pushUnique(_saadcBufferQueue.pop());
+	}
+
+	// Clear any pending saadc END event.
+	nrf_saadc_event_clear(NRF_SAADC_EVENT_END);
+
+	// Re-enable end interrupt.
+	nrf_saadc_int_enable(NRF_SAADC_INT_END);
+
 #ifdef TEST_PIN_STOP
 	nrf_gpio_pin_toggle(TEST_PIN_STOP);
 #endif
 }
 
 void ADC::start() {
-#ifdef PRINT_DEBUG
-	LOGv("start");
-#endif
+	LOGAdcDebug("start");
 	switch (_state) {
-	case ADC_STATE_WAITING_TO_START:
-	case ADC_STATE_BUSY:
-		LOGw("already started");
-		return;
-	default:
-		break;
+//		case ADC_STATE_WAITING_TO_START:
+		case ADC_STATE_BUSY:
+			LOGw("already started");
+			return;
+		default:
+			break;
 	}
+
 #ifdef TEST_PIN_START
 	nrf_gpio_pin_toggle(TEST_PIN_START);
 #endif
+
 	bool inProgress = false;
 	for (uint8_t i=0; i<CS_ADC_NUM_BUFFERS; ++i) {
 		if (_inProgress[i]) {
@@ -424,74 +427,105 @@ void ADC::start() {
 	}
 	if (inProgress) {
 		// Wait for buffers to be released.
+//		_state = ADC_STATE_WAITING_TO_START;
+		LOGAdcDebug("wait to start");
+//		return;
+	}
+
+	cs_ret_code_t retCode = fillSaadcQueue();
+	if (retCode != ERR_SUCCESS) {
+		LOGAdcDebug("SAADC queue not full yet, wait for more buffers");
 		_state = ADC_STATE_WAITING_TO_START;
-#ifdef PRINT_DEBUG_VERBOSE
-		LOGv("wait to start");
-#endif
 		return;
 	}
-	_state = ADC_STATE_BUSY;
 
-	if (_bufferIndex != BUFFER_INDEX_NONE) {
-		// Resume from previous index.
-		if (_queuedBufferIndex != BUFFER_INDEX_NONE) {
-			// Store queued buffer index, as it will be overwritten by addBufferToSaadcQueue()
-			buffer_id_t queuedBufferIndex = _queuedBufferIndex;
-			addBufferToSaadcQueue(_bufferIndex);
-			addBufferToSaadcQueue(queuedBufferIndex);
-		}
-		else {
-			LOGw("no queued buffer?");
-			addBufferToSaadcQueue(_bufferIndex);
-			addBufferToSaadcQueue((_bufferIndex + 1) % CS_ADC_NUM_BUFFERS);
-		}
-	}
-	else {
-		LOGe("no buffer set");
-		APP_ERROR_CHECK(NRF_ERROR_INVALID_STATE);
-	}
+	// Start sampling.
+	_state = ADC_STATE_BUSY;
 	_firstBuffer = true;
 
-	nrf_ppi_channel_enable(_ppiChannelStart); // Start saadc on end event
-	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CLEAR); // Clear timeout counter
-	nrf_ppi_channel_enable(_ppiTimeoutStart); // Start timeout on saadc end event
-	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_START); // Start sample timer
+	// Start saadc on end event
+	nrf_ppi_channel_enable(_ppiChannelStart);
+
+	// Clear timeout counter
+	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CLEAR);
+
+	// Start timeout on saadc end event
+	nrf_ppi_channel_enable(_ppiTimeoutStart);
+
+	// Start sample timer
+	nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_START);
+
 #ifdef TEST_PIN_START
 	nrf_gpio_pin_toggle(TEST_PIN_START);
 #endif
 }
 
-void ADC::addBufferToSaadcQueue(buffer_id_t bufIndex) {
-	if (_inProgress[bufIndex]) {
-		LOGe("Buffer %u in progress", bufIndex);
-		APP_ERROR_CHECK(NRF_ERROR_BUSY);
-		return;
+cs_ret_code_t ADC::fillSaadcQueue() {
+	LOGAdcVerbose("fillSaadcQueue");
+	cs_ret_code_t retCode = ERR_SUCCESS;
+	while (!_bufferQueue.empty()) {
+		// Try to add a buffer from queue to the SAADC queue.
+		auto bufIndex = _bufferQueue.peek();
+		retCode = addBufferToSaadcQueue(bufIndex);
+		switch (retCode) {
+			case ERR_SUCCESS:
+			case ERR_ALREADY_EXISTS:
+				// Buffer has been added to SAADC queue, so remove it from regular queue.
+				_bufferQueue.pop();
+				break;
+			case ERR_NO_SPACE:
+				// The SAADC queue is full, we can stop.
+				return ERR_SUCCESS;
+			default:
+				// Stop on failure.
+				LOGAdcVerbose("err %u", retCode);
+				return retCode;
+		}
 	}
 
-	nrf_saadc_int_disable(NRF_SAADC_INT_END); // Make sure the interrupt doesn't interrupt this piece of code.
-#ifdef PRINT_DEBUG_VERBOSE
-	LOGv("Queued: %u", _numBuffersQueued);
-	LOGv("Queue buf %u", bufIndex);
-#endif
-	if (_numBuffersQueued > 1) { // TODO: check _queuedBufferIndex instead?
+	nrf_saadc_int_disable(NRF_SAADC_INT_END);
+	bool saadcQueueFull = _saadcBufferQueue.full();
+	nrf_saadc_int_enable(NRF_SAADC_INT_END);
+
+	if (!saadcQueueFull) {
+		LOGAdcDebug("SAADC queue not full");
+		return ERR_NOT_FOUND;
+	}
+
+	stopTimeout();
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t ADC::addBufferToSaadcQueue(buffer_id_t bufIndex) {
+	LOGAdcVerbose("addBufferToSaadcQueue buf=%u", bufIndex);
+	if (_inProgress[bufIndex]) {
+		LOGe("Buffer %u in progress", bufIndex);
+//		APP_ERROR_CHECK(NRF_ERROR_BUSY);
+//		return ERR_WRONG_PARAMETER;
+	}
+
+	// Make sure the interrupt doesn't interrupt this piece of code.
+	// All variables that are used in interrupt should only be used with interrupt disabled.
+	nrf_saadc_int_disable(NRF_SAADC_INT_END);
+
+	if (_saadcBufferQueue.size() >= CS_ADC_NUM_SAADC_BUFFERS) {
+		LOGAdcVerbose("SAADC queue full");
 		nrf_saadc_int_enable(NRF_SAADC_INT_END);
-		LOGe("Too many buffers queued %u", _numBuffersQueued);
-		APP_ERROR_CHECK(NRF_ERROR_RESOURCES);
-		return;
+		return ERR_NO_SPACE;
+	}
+
+	if (_saadcBufferQueue.find(bufIndex) != CS_CIRCULAR_BUFFER_INDEX_NOT_FOUND) {
+		LOGAdcDebug("Buf already in SAADC queue");
+		nrf_saadc_int_enable(NRF_SAADC_INT_END);
+		return ERR_ALREADY_EXISTS;
 	}
 
 	nrf_saadc_value_t* buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
 
 	switch (_saadcState) {
 		case ADC_SAADC_STATE_BUSY: {
-			if (_queuedBufferIndex != BUFFER_INDEX_NONE) {
-				nrf_saadc_int_enable(NRF_SAADC_INT_END);
-				LOGe("Second buffer already queued");
-				APP_ERROR_CHECK(NRF_ERROR_BUSY);
-				return;
-			}
-			_queuedBufferIndex = bufIndex;
-			_numBuffersQueued++;
+			LOGAdcDebug("queue buf");
+			_saadcBufferQueue.push(bufIndex);
 			{
 				// Make sure to queue the next buffer only after the STARTED event
 				// which should follow quickly after the START task.
@@ -503,10 +537,9 @@ void ADC::addBufferToSaadcQueue(buffer_id_t bufIndex) {
 			break;
 		}
 		case ADC_SAADC_STATE_IDLE: {
+			LOGAdcDebug("add buf and start");
 			_saadcState = ADC_SAADC_STATE_BUSY;
-			_bufferIndex = bufIndex;
-			_queuedBufferIndex = BUFFER_INDEX_NONE;
-			_numBuffersQueued++;
+			_saadcBufferQueue.push(bufIndex);
 			nrf_saadc_int_enable(NRF_SAADC_INT_END);
 			nrf_saadc_buffer_init(buf, CS_ADC_BUF_SIZE);
 			nrf_saadc_event_clear(NRF_SAADC_EVENT_STARTED);
@@ -514,37 +547,41 @@ void ADC::addBufferToSaadcQueue(buffer_id_t bufIndex) {
 			break;
 		}
 		default: {
-#ifdef PRINT_DEBUG_VERBOSE
-			LOGw("don't queue");
-#endif
+			LOGAdcDebug("don't queue, wrong state: %u", _saadcState);
+			nrf_saadc_int_enable(NRF_SAADC_INT_END);
+			return ERR_WRONG_STATE;
 		}
 	}
+	return ERR_SUCCESS;
 }
 
 void ADC::releaseBuffer(buffer_id_t bufIndex) {
+	LOGAdcVerbose("Release buf %u", bufIndex);
+
 #ifdef TEST_PIN_PROCESS
 	nrf_gpio_pin_toggle(TEST_PIN_PROCESS);
 #endif
-#ifdef PRINT_DEBUG_VERBOSE
-	LOGv("Release buf %u", bufIndex);
-#endif
+
 	_inProgress[bufIndex] = false;
 
-	if (_state == ADC_STATE_WAITING_TO_START) {
-		_state = ADC_STATE_READY_TO_START;
-		start();
-		return;
-	}
+	_bufferQueue.pushUnique(bufIndex);
 
-	if (_state != ADC_STATE_BUSY) {
-		LOGv("not running, don't queue buf");
-		return;
+	switch (_state) {
+		case ADC_STATE_WAITING_TO_START:
+			// Try to start now.
+			start();
+			return;
+		case ADC_STATE_BUSY:
+			// Continue sampling, fill up the SAADC queue.
+			fillSaadcQueue();
+			return;
+		case ADC_STATE_IDLE:
+		case ADC_STATE_READY_TO_START:
+		default:
+			// We want to stop, so don't add buffers to SAADC queue.
+			LOGAdcDebug("not running, don't fill saadc queue");
+			return;
 	}
-
-	buffer_id_t nextIndex = (bufIndex + 2) % CS_ADC_NUM_BUFFERS; // TODO: 2 should be (CS_ADC_NUM_BUFFERS - saadc queue size)?
-	addBufferToSaadcQueue(nextIndex);
-	stopTimeout();
-	return;
 }
 
 void ADC::setZeroCrossingCallback(adc_zero_crossing_cb_t callback) {
@@ -621,17 +658,13 @@ void ADC::handleEvent(event_t & event) {
 
 
 void ADC::_restart() {
-#ifdef PRINT_DEBUG
-	LOGi("restart");
-#endif
+	LOGAdcDebug("restart");
 	stop();
 	start();
 }
 
 void ADC::_handleTimeout() {
-#ifdef PRINT_DEBUG
-	LOGw("timeout");
-#endif
+	LOGAdcDebug("timeout");
 	stop();
 	start();
 }
@@ -640,7 +673,6 @@ void ADC::_handleAdcDone(buffer_id_t bufIndex) {
 #ifdef TEST_PIN_PROCESS
 	nrf_gpio_pin_toggle(TEST_PIN_PROCESS);
 #endif
-
 
 	if (dataCallbackRegistered()) {
 		_inProgress[bufIndex] = true;
@@ -658,9 +690,7 @@ void ADC::_handleAdcDone(buffer_id_t bufIndex) {
 			start();
 		}
 
-#ifdef PRINT_DEBUG_VERBOSE
-		LOGv("process buf %u", bufIndex);
-#endif
+		LOGAdcVerbose("process buf %u", bufIndex);
 		_doneCallback(bufIndex);
 	}
 	else {
@@ -694,6 +724,8 @@ void ADC::_handleAdcLimitInterrupt(nrf_saadc_limit_t type) {
 	}
 }
 
+
+
 void ADC::_handleTimeoutInterrupt() {
 //#ifdef TEST_PIN_TIMEOUT
 //	nrf_gpio_pin_toggle(TEST_PIN_TIMEOUT);
@@ -703,6 +735,8 @@ void ADC::_handleTimeoutInterrupt() {
 	APP_ERROR_CHECK(errorCode);
 }
 
+
+
 void ADC::_handleAdcInterrupt() {
 	if (nrf_saadc_event_check(NRF_SAADC_EVENT_END)) {
 		nrf_saadc_event_clear(NRF_SAADC_EVENT_END);
@@ -711,48 +745,50 @@ void ADC::_handleAdcInterrupt() {
 		nrf_gpio_pin_toggle(TEST_PIN_INT_END);
 #endif
 
-		buffer_id_t bufIndex = _bufferIndex;
-		__attribute__((unused)) uint16_t bufSize = nrf_saadc_amount_get();
-
-
-#ifdef PRINT_DEBUG_VERBOSE
-		LOGv("Done %u q=%u ind=%u amount=%u", bufIndex, _numBuffersQueued, _bufferIndex, bufSize);
-#endif
+		LOGAdcInterrupt("NRF_SAADC_EVENT_END");
 		if (_saadcState != ADC_SAADC_STATE_BUSY) {
 			// Don't handle end events when state is not busy.
 			// The end event also fires when we stop the saadc.
+			LOGAdcInterrupt("Not busy: saadcState=%u", _saadcState);
 			return;
 		}
 
-		--_numBuffersQueued;
-		if (_queuedBufferIndex == BUFFER_INDEX_NONE) {
+		if (_saadcBufferQueue.empty()) {
+			// This shouldn't happen: a buffer is done, so it should be in the SAADC queue.
+			LOGAdcDebug("No buffer");
+
+			// Let's restart.
 			_saadcState = ADC_SAADC_STATE_STOPPING;
-#ifdef PRINT_DEBUG_VERBOSE
-			LOGw("No buffer queued");
-#endif
-			_bufferIndex = bufIndex;
-//			_queuedBufferIndex = (bufIndex + 1) % CS_ADC_NUM_BUFFERS;
 			uint32_t errorCode = app_sched_event_put(NULL, 0, adc_restart);
 			APP_ERROR_CHECK(errorCode);
+			return;
 		}
-		else {
-			// Start next buffer
-			// - set buffer: this is already done in addBufferToSample()
-			// - call START task: this is already done via PPI
 
-			// TODO: Maybe put outside the else? We can maybe still process this buffer, no? But it does delay the restart?
-			_bufferIndex = _queuedBufferIndex;
-			_queuedBufferIndex = BUFFER_INDEX_NONE;
-			// Decouple handling of buffer from adc interrupt handler, copy buffer index.
-			uint32_t errorCode = app_sched_event_put(&bufIndex, sizeof(bufIndex), adc_done);
+		// Decouple handling of buffer from adc interrupt handler, copy buffer index.
+		buffer_id_t bufIndex = _saadcBufferQueue.pop();
+		uint32_t errorCode = app_sched_event_put(&bufIndex, sizeof(bufIndex), adc_done);
+		APP_ERROR_CHECK(errorCode);
+
+		__attribute__((unused)) uint16_t bufSize = nrf_saadc_amount_get();
+		LOGAdcInterrupt("Done bufIndex=%u queueSize=%u queued=%u", bufIndex, _saadcBufferQueue.size(), _saadcBufferQueue.peek());
+
+		if (_saadcBufferQueue.empty()) {
+			// There is no buffer queued in the SAADC peripheral, so it has no more buffers to fill.
+			LOGAdcInterrupt("No buffer queued");
+
+			// Let's restart.
+			_saadcState = ADC_SAADC_STATE_STOPPING;
+			uint32_t errorCode = app_sched_event_put(NULL, 0, adc_restart);
 			APP_ERROR_CHECK(errorCode);
+			return;
 		}
+
+		// SAADC will continue with sampling to the queued buffer.
+		// The start task is called via PPI.
 	}
 	if (nrf_saadc_event_check(NRF_SAADC_EVENT_STOPPED)) {
 		nrf_saadc_event_clear(NRF_SAADC_EVENT_STOPPED);
-#ifdef PRINT_DEBUG_VERBOSE
-		LOGi("stopped");
-#endif
+		LOGAdcInterrupt("NRF_SAADC_EVENT_STOPPED");
 		_saadcState = ADC_SAADC_STATE_IDLE;
 	}
 	// No zero crossing events if we stop the SAADC.
