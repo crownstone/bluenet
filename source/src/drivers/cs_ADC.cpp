@@ -19,7 +19,7 @@
 
 #define LOGAdcDebug LOGd
 #define LOGAdcVerbose LOGd
-#define LOGAdcInterrupt LOGnone
+#define LOGAdcInterrupt LOGd
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN_ZERO_CROSS 20
@@ -440,6 +440,7 @@ void ADC::start() {
 	}
 
 	// Start sampling.
+	LOGAdcDebug("start sampling");
 	_state = ADC_STATE_BUSY;
 	_firstBuffer = true;
 
@@ -524,7 +525,7 @@ cs_ret_code_t ADC::addBufferToSaadcQueue(buffer_id_t bufIndex) {
 
 	switch (_saadcState) {
 		case ADC_SAADC_STATE_BUSY: {
-			LOGAdcDebug("queue buf");
+			LOGAdcVerbose("queue buf");
 			_saadcBufferQueue.push(bufIndex);
 			{
 				// Make sure to queue the next buffer only after the STARTED event
@@ -730,6 +731,8 @@ void ADC::_handleTimeoutInterrupt() {
 //#ifdef TEST_PIN_TIMEOUT
 //	nrf_gpio_pin_toggle(TEST_PIN_TIMEOUT);
 //#endif
+
+	LOGAdcInterrupt("Timeout interrupt");
 	// Decouple timeout handling from interrupt handler.
 	uint32_t errorCode = app_sched_event_put(NULL, 0, adc_timeout);
 	APP_ERROR_CHECK(errorCode);
