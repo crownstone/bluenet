@@ -131,12 +131,16 @@ void RecognizeSwitch::setLastDetection(bool aboveThreshold, buffer_id_t currentB
 
 	// Copy the samples.
 	InterleavedBuffer & ib = InterleavedBuffer::getInstance();
-	buffer_id_t bufIndices[3];
-	bufIndices[0] = ib.getPrevious(currentBufIndex, 2);;
-	bufIndices[1] = ib.getPrevious(currentBufIndex, 1);
-	bufIndices[2] = currentBufIndex;
+	buffer_id_t bufIndices[_numStoredBuffers];
+	bufIndices[_numStoredBuffers - 1] = currentBufIndex;
+	for (uint8_t i = 0; i < _numStoredBuffers; ++i) {
+		bufIndices[i] = ib.getPrevious(currentBufIndex, _numStoredBuffers - i - 1);
+	}
+//	bufIndices[0] = ib.getPrevious(currentBufIndex, 2);
+//	bufIndices[1] = ib.getPrevious(currentBufIndex, 1);
+//	bufIndices[2] = currentBufIndex;
 	uint16_t numSamples = ib.getChannelLength();
-	for (uint8_t i = 0; i < 3; ++i) {
+	for (uint8_t i = 0; i < _numStoredBuffers; ++i) {
 		for (sample_value_id_t j = 0; j < numSamples; ++j) {
 			buf[i * numSamples + j] = ib.getValue(bufIndices[i], voltageChannelId, j);
 		}
