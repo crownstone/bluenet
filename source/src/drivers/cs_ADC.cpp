@@ -20,6 +20,7 @@
 #define LOGAdcDebug LOGd
 #define LOGAdcVerbose LOGd
 #define LOGAdcInterrupt LOGd
+#define ADC_LOG_QUEUES true
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN_ZERO_CROSS 20
@@ -358,14 +359,14 @@ void ADC::stop() {
 			break;
 	}
 
-	// Make sure the end interrupt doesn't interrupt this piece of code.
-	nrf_saadc_int_disable(NRF_SAADC_INT_END);
 	// TODO: state = stopping ?
 	_state = ADC_STATE_IDLE;
 
 #ifdef TEST_PIN_STOP
 	nrf_gpio_pin_toggle(TEST_PIN_STOP);
 #endif
+
+	enterCriticalRegion();
 
 	nrf_ppi_channel_disable(_ppiChannelStart);
 	nrf_ppi_channel_disable(_ppiTimeoutStart);
@@ -392,12 +393,12 @@ void ADC::stop() {
 	while (!_saadcBufferQueue.empty()) {
 		_bufferQueue.pushUnique(_saadcBufferQueue.pop());
 	}
+	printQueues();
 
 	// Clear any pending saadc END event.
 	nrf_saadc_event_clear(NRF_SAADC_EVENT_END);
 
-	// Re-enable end interrupt.
-	nrf_saadc_int_enable(NRF_SAADC_INT_END);
+	exitCriticalRegion();
 
 #ifdef TEST_PIN_STOP
 	nrf_gpio_pin_toggle(TEST_PIN_STOP);
@@ -420,11 +421,13 @@ void ADC::start() {
 #endif
 
 	bool inProgress = false;
+	enterCriticalRegion();
 	for (uint8_t i=0; i<CS_ADC_NUM_BUFFERS; ++i) {
 		if (_inProgress[i]) {
 			inProgress = true;
 		}
 	}
+	exitCriticalRegion();
 	if (inProgress) {
 		// Wait for buffers to be released.
 //		_state = ADC_STATE_WAITING_TO_START;
@@ -462,12 +465,33 @@ void ADC::start() {
 }
 
 cs_ret_code_t ADC::fillSaadcQueue() {
+	enterCriticalRegion();
+	cs_ret_code_t retCode = _fillSaadcQueue();
+	exitCriticalRegion();
+	return retCode;
+}
+
+cs_ret_code_t ADC::_fillSaadcQueue() {
 	LOGAdcVerbose("fillSaadcQueue");
 	cs_ret_code_t retCode = ERR_SUCCESS;
-	while (!_bufferQueue.empty()) {
+
+	switch (_saadcState) {
+		case ADC_SAADC_STATE_STOPPING:
+			// Don't fill the SAADC queue.
+			// But do cancel the timeout timer, otherwise we will restart again.
+			stopTimeout();
+			return ERR_WRONG_STATE;
+		case ADC_SAADC_STATE_IDLE:
+		case ADC_SAADC_STATE_BUSY:
+			break;
+	}
+
+	bool keepLooping = true;
+	while (keepLooping && !_bufferQueue.empty()) {
 		// Try to add a buffer from queue to the SAADC queue.
 		auto bufIndex = _bufferQueue.peek();
 		retCode = addBufferToSaadcQueue(bufIndex);
+
 		switch (retCode) {
 			case ERR_SUCCESS:
 			case ERR_ALREADY_EXISTS:
@@ -475,20 +499,19 @@ cs_ret_code_t ADC::fillSaadcQueue() {
 				_bufferQueue.pop();
 				break;
 			case ERR_NO_SPACE:
-				// The SAADC queue is full, we can stop.
-				return ERR_SUCCESS;
+				// The SAADC queue is full, we can stop looping.
+				keepLooping = false;
+				break;
 			default:
 				// Stop on failure.
-				LOGAdcVerbose("err %u", retCode);
+				LOGAdcDebug("Error %u", retCode);
 				return retCode;
 		}
 	}
 
-	nrf_saadc_int_disable(NRF_SAADC_INT_END);
-	bool saadcQueueFull = _saadcBufferQueue.full();
-	nrf_saadc_int_enable(NRF_SAADC_INT_END);
+	printQueues();
 
-	if (!saadcQueueFull) {
+	if (!_saadcBufferQueue.full()) {
 		LOGAdcDebug("SAADC queue not full");
 		return ERR_NOT_FOUND;
 	}
@@ -498,6 +521,13 @@ cs_ret_code_t ADC::fillSaadcQueue() {
 }
 
 cs_ret_code_t ADC::addBufferToSaadcQueue(buffer_id_t bufIndex) {
+	enterCriticalRegion();
+	cs_ret_code_t retCode = _addBufferToSaadcQueue(bufIndex);
+	exitCriticalRegion();
+	return retCode;
+}
+
+cs_ret_code_t ADC::_addBufferToSaadcQueue(buffer_id_t bufIndex) {
 	LOGAdcVerbose("addBufferToSaadcQueue buf=%u", bufIndex);
 	if (_inProgress[bufIndex]) {
 		LOGe("Buffer %u in progress", bufIndex);
@@ -505,19 +535,13 @@ cs_ret_code_t ADC::addBufferToSaadcQueue(buffer_id_t bufIndex) {
 //		return ERR_WRONG_PARAMETER;
 	}
 
-	// Make sure the interrupt doesn't interrupt this piece of code.
-	// All variables that are used in interrupt should only be used with interrupt disabled.
-	nrf_saadc_int_disable(NRF_SAADC_INT_END);
-
 	if (_saadcBufferQueue.size() >= CS_ADC_NUM_SAADC_BUFFERS) {
 		LOGAdcVerbose("SAADC queue full");
-		nrf_saadc_int_enable(NRF_SAADC_INT_END);
 		return ERR_NO_SPACE;
 	}
 
 	if (_saadcBufferQueue.find(bufIndex) != CS_CIRCULAR_BUFFER_INDEX_NOT_FOUND) {
 		LOGAdcDebug("Buf already in SAADC queue");
-		nrf_saadc_int_enable(NRF_SAADC_INT_END);
 		return ERR_ALREADY_EXISTS;
 	}
 
@@ -534,14 +558,12 @@ cs_ret_code_t ADC::addBufferToSaadcQueue(buffer_id_t bufIndex) {
 				nrf_saadc_event_clear(NRF_SAADC_EVENT_STARTED);
 				nrf_saadc_buffer_init(buf, CS_ADC_BUF_SIZE);
 			}
-			nrf_saadc_int_enable(NRF_SAADC_INT_END);
 			break;
 		}
 		case ADC_SAADC_STATE_IDLE: {
 			LOGAdcDebug("add buf and start");
 			_saadcState = ADC_SAADC_STATE_BUSY;
 			_saadcBufferQueue.push(bufIndex);
-			nrf_saadc_int_enable(NRF_SAADC_INT_END);
 			nrf_saadc_buffer_init(buf, CS_ADC_BUF_SIZE);
 			nrf_saadc_event_clear(NRF_SAADC_EVENT_STARTED);
 			nrf_saadc_task_trigger(NRF_SAADC_TASK_START);
@@ -549,7 +571,6 @@ cs_ret_code_t ADC::addBufferToSaadcQueue(buffer_id_t bufIndex) {
 		}
 		default: {
 			LOGAdcDebug("don't queue, wrong state: %u", _saadcState);
-			nrf_saadc_int_enable(NRF_SAADC_INT_END);
 			return ERR_WRONG_STATE;
 		}
 	}
@@ -563,9 +584,13 @@ void ADC::releaseBuffer(buffer_id_t bufIndex) {
 	nrf_gpio_pin_toggle(TEST_PIN_PROCESS);
 #endif
 
+	enterCriticalRegion();
 	_inProgress[bufIndex] = false;
 
 	_bufferQueue.pushUnique(bufIndex);
+	exitCriticalRegion();
+
+	printQueues();
 
 	switch (_state) {
 		case ADC_STATE_WAITING_TO_START:
@@ -582,6 +607,32 @@ void ADC::releaseBuffer(buffer_id_t bufIndex) {
 			// We want to stop, so don't add buffers to SAADC queue.
 			LOGAdcDebug("not running, don't fill saadc queue");
 			return;
+	}
+}
+
+void ADC::printQueues() {
+	if (ADC_LOG_QUEUES) {
+		enterCriticalRegion();
+		_log(SERIAL_DEBUG, "processed: ");
+		for (uint8_t i = 0; i < CS_ADC_NUM_BUFFERS; ++i) {
+			if (_inProgress[i]) {
+				_log(SERIAL_DEBUG, "%u, ", i);
+			}
+		}
+		_log(SERIAL_DEBUG, SERIAL_CRLF);
+
+		_log(SERIAL_DEBUG, "queued: ");
+		for (uint8_t i = 0; i < _bufferQueue.size(); ++i) {
+			_log(SERIAL_DEBUG, "%u, ", _bufferQueue[i]);
+		}
+		_log(SERIAL_DEBUG, SERIAL_CRLF);
+
+		_log(SERIAL_DEBUG, "saadc queue: ");
+		for (uint8_t i = 0; i < _saadcBufferQueue.size(); ++i) {
+			_log(SERIAL_DEBUG, "%u, ", _saadcBufferQueue[i]);
+		}
+		_log(SERIAL_DEBUG, SERIAL_CRLF);
+		exitCriticalRegion();
 	}
 }
 
@@ -647,6 +698,7 @@ void ADC::setLimitDown() {
 }
 
 void ADC::stopTimeout() {
+	LOGAdcVerbose("stopTimeout");
 	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_STOP);
 }
 
@@ -676,8 +728,6 @@ void ADC::_handleAdcDone(buffer_id_t bufIndex) {
 #endif
 
 	if (dataCallbackRegistered()) {
-		_inProgress[bufIndex] = true;
-
 		if (_firstBuffer) {
 			LOGw("ADC restarted");
 			event_t event(CS_TYPE::EVT_ADC_RESTARTED, NULL, 0);
@@ -692,11 +742,29 @@ void ADC::_handleAdcDone(buffer_id_t bufIndex) {
 		}
 
 		LOGAdcVerbose("process buf %u", bufIndex);
+		printQueues();
+
 		_doneCallback(bufIndex);
 	}
 	else {
 		// Skip the callback: release immediately.
 		releaseBuffer(bufIndex);
+	}
+}
+
+void ADC::enterCriticalRegion() {
+	if (!_criticalRegionEntered) {
+		LOGAdcVerbose("disable interrupts");
+		nrf_saadc_int_disable(NRF_SAADC_INT_END & NRF_SAADC_EVENT_STOPPED);
+	}
+	_criticalRegionEntered++;
+}
+
+void ADC::exitCriticalRegion() {
+	_criticalRegionEntered--;
+	if (!_criticalRegionEntered) {
+		LOGAdcVerbose("enable interrupts");
+		nrf_saadc_int_enable(NRF_SAADC_INT_END & NRF_SAADC_EVENT_STOPPED);
 	}
 }
 
@@ -773,7 +841,8 @@ void ADC::_handleAdcInterrupt() {
 		APP_ERROR_CHECK(errorCode);
 
 		__attribute__((unused)) uint16_t bufSize = nrf_saadc_amount_get();
-		LOGAdcInterrupt("Done bufIndex=%u queueSize=%u queued=%u", bufIndex, _saadcBufferQueue.size(), _saadcBufferQueue.peek());
+		LOGAdcInterrupt("Done bufIndex=%u queueSize=%u nextBuf=%u", bufIndex, _saadcBufferQueue.size(), _saadcBufferQueue.peek());
+		_inProgress[bufIndex] = true;
 
 		if (_saadcBufferQueue.empty()) {
 			// There is no buffer queued in the SAADC peripheral, so it has no more buffers to fill.
@@ -785,6 +854,9 @@ void ADC::_handleAdcInterrupt() {
 			APP_ERROR_CHECK(errorCode);
 			return;
 		}
+
+		// We may have buffers in queue for the SAADC.
+		fillSaadcQueue();
 
 		// SAADC will continue with sampling to the queued buffer.
 		// The start task is called via PPI.

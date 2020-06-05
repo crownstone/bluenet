@@ -235,20 +235,12 @@ private:
 	// PPI channel used to clear and start the timeout count.
 	nrf_ppi_channel_t _ppiTimeoutStart;
 
+	/**
+	 * Queue of buffers that are free to be added to the SAADC queue.
+	 *
+	 * Used in interrupt!
+	 */
 	CircularBuffer<buffer_id_t> _bufferQueue;
-
-
-//	// Index of buffer that is currently being used to write samples to.
-//	// **Used in interrupt!**
-//	buffer_id_t _bufferIndex;
-//
-//	// Index of next buffer to be used.
-//	// **Used in interrupt!**
-//	buffer_id_t _queuedBufferIndex;
-//
-//	// Number of buffers that are queued to be populated by SAADC.
-//	// **Used in interrupt!**
-//	buffer_id_t _numBuffersQueued;
 
 	/**
 	 * Keeps up which buffers that are queued in the SAADC peripheral.
@@ -265,13 +257,20 @@ private:
 	// State of this class.
 	adc_state_t _state;
 
-	// Keep up the state of the SAADC peripheral.
-	// **Used in interrupt!**
+	/**
+	 * Sate of the SAADC peripheral.
+	 *
+	 * Used in interrupt!
+	 */
 	volatile adc_saadc_state_t _saadcState;
 
-	// Keep up which buffers are being processed by callback.
-	// This only accounts for the time between calling the doneCallback and releaseBuffer.
-	// TODO: mark all buffers in progress that processing could read (so all but bufIndex and queuedBuf).
+	/**
+	 * Keep up which buffers are being processed by callback.
+	 * This only accounts for the time between calling the doneCallback and releaseBuffer.
+	 * Really only used for testing.
+	 *
+	 * Used in interrupt!
+	 */
 	bool _inProgress[CS_ADC_NUM_BUFFERS] = { false };
 
 	// Callback function
@@ -310,6 +309,11 @@ private:
 	// **Used in interrupt!**
 	int32_t _zeroValue;
 
+	/**
+	 * Keep up number of nested critical regions entered.
+	 */
+	int _criticalRegionEntered = 0;
+
 	cs_ret_code_t initSaadc(const adc_config_t & config);
 
 	// Function to initialize the adc channels.
@@ -328,9 +332,17 @@ private:
 	 * Try to add all queued buffers to the SAADC queue.
 	 * If the SAADC queue is now filled, stop the timeout timer.
 	 *
-	 * @return ERR_SUCCESS when SAADC queue is full, and timeout timer has been stopped.
+	 * @return ERR_SUCCESS when SAADC queue is full,           and timeout timer has been stopped.
+	 * @return ERR_WRONG_STATE when SAADC queue is not filled, and timeout timer has been stopped.
+	 * @return ERR_NOT_FOUND when the SAADC queue is not full, and timeout timer has not been stopped.
+	 * @return Other return codes on failure.
 	 */
 	cs_ret_code_t fillSaadcQueue();
+
+	/**
+	 * Same as fillSaadcQueue(), but without critical region enter/exit.
+	 */
+	cs_ret_code_t _fillSaadcQueue();
 
 	/**
 	 * Puts a buffer in the SAADC queue.
@@ -344,6 +356,26 @@ private:
 	 * - Other return codes for failures, the given buffer is not queued.
 	 */
 	cs_ret_code_t addBufferToSaadcQueue(buffer_id_t bufIndex);
+
+	/**
+	 * Same as addBufferToSaadcQueue(), but without critical region enter/exit.
+	 */
+	cs_ret_code_t _addBufferToSaadcQueue(buffer_id_t bufIndex);
+
+	/**
+	 * Enter a region of code where variables are used that are also used in SAADC interrupts.
+	 * Make sure you exit once for each time you call enter.
+	 */
+	void enterCriticalRegion();
+
+	/**
+	 * Exit a region of code where variables are used that are also used in SAADC interrupts.
+	 */
+	void exitCriticalRegion();
+
+	void enableInterrupt();
+
+	void printQueues();
 
 	// Function to apply a new config. Should be called when no buffers are are queued, nor being processed.
 	void applyConfig();
