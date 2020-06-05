@@ -17,10 +17,10 @@
 #include <structs/buffer/cs_InterleavedBuffer.h>
 #include <util/cs_BleError.h>
 
-#define LOGAdcDebug LOGd
-#define LOGAdcVerbose LOGd
-#define LOGAdcInterrupt LOGd
-#define ADC_LOG_QUEUES true
+#define LOGAdcDebug LOGnone
+#define LOGAdcVerbose LOGnone
+#define LOGAdcInterrupt LOGnone
+#define ADC_LOG_QUEUES false
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN_ZERO_CROSS 20
@@ -151,7 +151,7 @@ cs_ret_code_t ADC::init(const adc_config_t & config) {
 	nrf_timer_shorts_enable(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_SHORT_COMPARE0_STOP_MASK);
 
 	// Setup timeout PPI: on compare event (timeout), stop the sample timer.
-	_ppiTimeout = getPpiChannel(CS_ADC_PPI_CHANNEL_START+2);
+	_ppiTimeout = getPpiChannel(CS_ADC_PPI_CHANNEL_START + 2);
 #ifdef TEST_PIN_TIMEOUT
 	nrf_gpiote_task_configure(CS_ADC_GPIOTE_CHANNEL_START, TEST_PIN_TIMEOUT, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
 	nrf_gpiote_task_enable(CS_ADC_GPIOTE_CHANNEL_START);
@@ -170,8 +170,8 @@ cs_ret_code_t ADC::init(const adc_config_t & config) {
 #endif
 	nrf_ppi_channel_enable(_ppiTimeout);
 
-	// Setup PPI: on saadc end event, reset sample count, and start the timer.
-	_ppiTimeoutStart = getPpiChannel(CS_ADC_PPI_CHANNEL_START+3);
+	// Setup PPI: on saadc end event, reset sample count, and start the sample timer.
+	_ppiTimeoutStart = getPpiChannel(CS_ADC_PPI_CHANNEL_START + 3);
 	nrf_ppi_channel_and_fork_endpoint_setup(
 			_ppiTimeoutStart,
 			(uint32_t)nrf_saadc_event_address_get(NRF_SAADC_EVENT_END),
@@ -194,7 +194,7 @@ cs_ret_code_t ADC::init(const adc_config_t & config) {
 	// Setup PPI: call START on END.
 	// This avoids a SAMPLE being called before the START.
 	// See https://devzone.nordicsemi.com/f/nordic-q-a/20291/offset-in-saadc-samples-with-easy-dma-and-ble/79053
-	_ppiChannelStart = getPpiChannel(CS_ADC_PPI_CHANNEL_START+1);
+	_ppiChannelStart = getPpiChannel(CS_ADC_PPI_CHANNEL_START + 1);
 	nrf_ppi_channel_endpoint_setup(
 			_ppiChannelStart,
 			(uint32_t)nrf_saadc_event_address_get(NRF_SAADC_EVENT_END),
@@ -753,18 +753,22 @@ void ADC::_handleAdcDone(buffer_id_t bufIndex) {
 }
 
 void ADC::enterCriticalRegion() {
+	assert(_criticalRegionEntered < 100, "Exit and enter critical region unbalanced.");
 	if (!_criticalRegionEntered) {
-		LOGAdcVerbose("disable interrupts");
+//		LOGAdcVerbose("disable interrupts");
 		nrf_saadc_int_disable(NRF_SAADC_INT_END & NRF_SAADC_EVENT_STOPPED);
+//		nrf_timer_int_disable(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_int_get(0));
 	}
 	_criticalRegionEntered++;
 }
 
 void ADC::exitCriticalRegion() {
 	_criticalRegionEntered--;
+	assert(_criticalRegionEntered >= 0, "Exit and enter critical region unbalanced.");
 	if (!_criticalRegionEntered) {
-		LOGAdcVerbose("enable interrupts");
+//		LOGAdcVerbose("enable interrupts");
 		nrf_saadc_int_enable(NRF_SAADC_INT_END & NRF_SAADC_EVENT_STOPPED);
+//		nrf_timer_int_enable(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_int_get(0));
 	}
 }
 
@@ -801,6 +805,16 @@ void ADC::_handleTimeoutInterrupt() {
 //#endif
 
 	LOGAdcInterrupt("Timeout interrupt");
+
+	// This doesn't work, we'll just have to wait for the scheduled adc_timeout to be called.
+//	enterCriticalRegion();
+//	// Set SAADC state to stopping, else it takes very long before it stops.
+//	// But only change the state if it's BUSY, else we might overwrite the IDLE state.
+//	if (_saadcState == ADC_SAADC_STATE_BUSY) {
+//		_saadcState = ADC_SAADC_STATE_STOPPING;
+//	}
+//	exitCriticalRegion();
+
 	// Decouple timeout handling from interrupt handler.
 	uint32_t errorCode = app_sched_event_put(NULL, 0, adc_timeout);
 	APP_ERROR_CHECK(errorCode);
