@@ -451,7 +451,7 @@ void SwitchAggregator::printSwitchHistory() {
 //		_switchHistory.pop();
 //		_switchHistory.push(item);
 //	}
-	for (const auto& iter : _switchHistory) {
+	for (__attribute__((unused)) const auto& iter : _switchHistory) {
 		LOGd("  t=%u val=%u state=%u srcType=%u, srcId=%u", iter.timestamp, iter.value, iter.state.asInt, iter.source.type, iter.source.id);
 	}
 }
