@@ -28,7 +28,7 @@ Now using this information, we will build everything for this release.
 ```
 cd build
 cmake -DCONFIG_DIR=release -DBOARD_TARGET=crownstone_${CS_FW_VERSION} -DCMAKE_BUILD_TYPE=Release -DFACTORY_IMAGE= ..
-make
+make -j
 ```
 
 Now we can start generating the DFU packages that will be released:
