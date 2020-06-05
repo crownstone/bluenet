@@ -686,11 +686,11 @@ uint 8 | [Type](#power_samples_type) | 1 | Type of samples, also determines whet
 uint 8 | Index | 1 | Some types have multiple lists of samples, see the type description.
 uint 16 | Count | 2 | Number of samples in the list.
 uint 32 | Timestamp | 4 | Unix timestamp of time the samples have been set.
-uint 16 | Delay | 2 | Measurement delay in μs, due to hardware. A sample measured now, will get the value of delay μs ago.
+uint 16 | Delay | 2 | Measurement delay in μs, due to hardware. A sample measured now, will get the value of delay μs ago. Not set yet, will be 0.
 uint 16 | Sample interval | 2 | Sample interval in μs.
 uint 16 | Reserved | 2 | Reserved for future use, should be 0 for now.
-int 16 | Offset | 2 | Calculated offset of the samples. (Sort of the average of the sample values).
-float | Multiplier | 4 | Multiply the sample value minus offset with this value to get a value in ampere (when samples are current), or volt (when samples are voltage).
+int 16 | Offset | 2 | Calculated offset of the samples. (Sort of the average of the sample values). Not set yet, will be 0.
+float | Multiplier | 4 | Multiply the sample value minus offset with this value to get a value in ampere (when samples are current), or volt (when samples are voltage). Not set yet, will be 0.
 int 16 [] | Samples | 2 | List of samples.
 
 
