@@ -11,6 +11,7 @@
 #include <events/cs_EventListener.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_CircularBuffer.h>
+#include <structs/buffer/cs_InterleavedBuffer.h>
 #include <third/Median.h>
 
 typedef void (*ps_zero_crossing_cb_t) ();
@@ -94,8 +95,8 @@ private:
 	uint16_t _avgPowerDiscount;
 
 	int32_t _boardPowerZero; //! Measured power when there is no load for this board (mW).
-	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value (times 1000).
-	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value (times 1000).
+	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value (times 1024).
+	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value (times 1024).
 	bool _recalibrateZeroVoltage; //! Whether or not the zero voltage value should be recalculated.
 	bool _recalibrateZeroCurrent; //! Whether or not the zero current value should be recalculated.
 //	bool _zeroVoltageInitialized; //! True when zero of voltage has been initialized.
@@ -157,6 +158,9 @@ private:
 		uint32_t asInt;
 	} _logsEnabled;
 
+	buffer_id_t _lastBufIndex = 0;
+	buffer_id_t _lastFilteredBufIndex = 0;
+
 	cs_adc_restarts_t _adcRestarts;
 
 	/** Initialize the moving averages
@@ -177,7 +181,7 @@ private:
 
 	/** Filter the samples
 	 */
-	void filter(buffer_id_t buffer_id, channel_id_t channel_id);
+	void filter(buffer_id_t bufIndexIn, buffer_id_t bufIndexOut, channel_id_t channel_id);
 
 	/**
 	 * Checks if voltage and current index are swapped.
@@ -211,6 +215,8 @@ private:
 	/** Start IGBT failure detection
 	 */
 	void startIgbtFailureDetection();
+
+	void handleGetPowerSamples(PowerSamplesType type, uint8_t index, cs_result_t& result);
 
 	void toggleVoltageChannelInput();
 
