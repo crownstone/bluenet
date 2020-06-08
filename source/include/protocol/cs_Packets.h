@@ -362,6 +362,8 @@ struct __attribute__((packed)) cs_adc_restarts_t {
 enum PowerSamplesType {
 	POWER_SAMPLES_TYPE_SWITCHCRAFT = 0,
 	POWER_SAMPLES_TYPE_SWITCHCRAFT_NON_TRIGGERED = 1,
+	POWER_SAMPLES_TYPE_NOW_FILTERED = 2,
+	POWER_SAMPLES_TYPE_NOW_UNFILTERED = 3,
 };
 
 struct __attribute__((packed)) cs_power_samples_header_t {

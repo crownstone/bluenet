@@ -11,6 +11,7 @@
 #include <events/cs_EventListener.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_CircularBuffer.h>
+#include <structs/buffer/cs_InterleavedBuffer.h>
 #include <third/Median.h>
 
 typedef void (*ps_zero_crossing_cb_t) ();
@@ -157,6 +158,9 @@ private:
 		uint32_t asInt;
 	} _logsEnabled;
 
+	buffer_id_t _lastBufIndex = 0;
+	buffer_id_t _lastFilteredBufIndex = 0;
+
 	cs_adc_restarts_t _adcRestarts;
 
 	/** Initialize the moving averages
@@ -177,7 +181,7 @@ private:
 
 	/** Filter the samples
 	 */
-	void filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id);
+	void filter(cs_adc_buffer_id_t bufIndexIn, cs_adc_buffer_id_t bufIndexOut, channel_id_t channel_id);
 
 	/**
 	 * Checks if voltage and current index are swapped.
@@ -211,6 +215,8 @@ private:
 	/** Start IGBT failure detection
 	 */
 	void startIgbtFailureDetection();
+
+	void handleGetPowerSamples(PowerSamplesType type, uint8_t index, cs_result_t& result);
 
 	void toggleVoltageChannelInput();
 

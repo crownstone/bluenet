@@ -207,7 +207,7 @@ void PowerSampling::handleEvent(event_t & event) {
 		break;
 	case CS_TYPE::CMD_GET_POWER_SAMPLES: {
 		cs_power_samples_request_t* cmd = (TYPIFY(CMD_GET_POWER_SAMPLES)*)event.data;
-		RecognizeSwitch::getInstance().getLastDetection((PowerSamplesType)cmd->type, cmd->index, event.result);
+		handleGetPowerSamples((PowerSamplesType)cmd->type, cmd->index, event.result);
 		break;
 	}
 	case CS_TYPE::CMD_GET_ADC_RESTARTS: {
@@ -262,8 +262,14 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
+
+	// Filter current buffer to the previous unfiltered buffer.
+	cs_adc_buffer_id_t filteredBufIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
+	_lastBufIndex = bufIndex;
+	_lastFilteredBufIndex = filteredBufIndex;
+
 	power_t power;
-	power.buf = InterleavedBuffer::getInstance().getBuffer(bufIndex);
+	power.buf = InterleavedBuffer::getInstance().getBuffer(filteredBufIndex);
 	power.bufSize = CS_ADC_BUF_SIZE;
 	power.voltageIndex = VOLTAGE_CHANNEL_IDX;
 	power.currentIndex = CURRENT_CHANNEL_IDX;
@@ -271,17 +277,12 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	power.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	power.acPeriodUs = 20000;
 
-#ifdef DELAY_FILTERING_VOLTAGE
-	// Filter the current immediately, filter the voltage in the buffer at time t-1 (so raw values are available)
-	filter(bufIndex, power.currentIndex);
-	filter(prevIndex, power.voltageIndex);
-#else
-	// Filter both immediately, no raw values available
-	filter(bufIndex, power.voltageIndex);
-	filter(bufIndex, power.currentIndex);
-#endif
+	// Filter current buffer to the previous unfiltered buffer.
+	filter(bufIndex, filteredBufIndex, power.voltageIndex);
+	filter(bufIndex, filteredBufIndex, power.currentIndex);
 
-	cs_adc_buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
+	cs_adc_buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(filteredBufIndex);
+
 	nrf_saadc_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
 	if (isVoltageAndCurrentSwapped(power, prevBuf)) {
 		LOGw("Swap detected: restart ADC.");
@@ -319,7 +320,7 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	bool switch_detected = RecognizeSwitch::getInstance().detect(bufIndex, power.voltageIndex);
+	bool switch_detected = RecognizeSwitch::getInstance().detect(filteredBufIndex, power.voltageIndex);
 	if (switch_detected) {
 		LOGd("Switch event detected!");
 		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
@@ -504,21 +505,21 @@ void PowerSampling::calculateCurrentZero(power_t & power) {
 /**
  * This function performs a median filter with respect to the given channel.
  */
-void PowerSampling::filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id) {
+void PowerSampling::filter(cs_adc_buffer_id_t bufIndexIn, cs_adc_buffer_id_t bufIndexOut, channel_id_t channel_id) {
 
 	// Pad the start of the input vector with the first sample in the buffer
 	uint16_t j = 0;
-	sample_value_t padded_value = InterleavedBuffer::getInstance().getValue(buffer_id, channel_id, 0);
+	sample_value_t padded_value = InterleavedBuffer::getInstance().getValue(bufIndexIn, channel_id, 0);
 	for (uint16_t i = 0; i < _filterParams->half; ++i, ++j) {
 		_inputSamples->at(j) = padded_value;
 	}
 	// Copy samples from buffer to input vector
 	uint8_t channel_length = InterleavedBuffer::getInstance().getChannelLength();
 	for (int i = 0; i < channel_length - 1; ++i, ++j) {
-		_inputSamples->at(j) = InterleavedBuffer::getInstance().getValue(buffer_id, channel_id, i);
+		_inputSamples->at(j) = InterleavedBuffer::getInstance().getValue(bufIndexIn, channel_id, i);
 	}
 	// Pad the end of the buffer with the last sample in the buffer
-	padded_value = InterleavedBuffer::getInstance().getValue(buffer_id, channel_id, channel_length - 1);
+	padded_value = InterleavedBuffer::getInstance().getValue(bufIndexIn, channel_id, channel_length - 1);
 	for (uint16_t i = 0; i < _filterParams->half; ++i, ++j) {
 		_inputSamples->at(j) = padded_value;
 	}
@@ -528,7 +529,7 @@ void PowerSampling::filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id
 
 	// Copy the result back into the buffer
 	for (int i = 0; i < InterleavedBuffer::getInstance().getChannelLength() - 1; ++i) {
-		InterleavedBuffer::getInstance().setValue(buffer_id, channel_id, i, _outputSamples->at(i));
+		InterleavedBuffer::getInstance().setValue(bufIndexOut, channel_id, i, _outputSamples->at(i));
 	}
 }
 
@@ -880,6 +881,65 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 
 void PowerSampling::startIgbtFailureDetection() {
 	_igbtFailureDetectionStarted = true;
+}
+
+void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, cs_result_t& result) {
+	LOGi("handleGetPowerSamples type=%u index=%u", type, index);
+	switch (type) {
+		case POWER_SAMPLES_TYPE_SWITCHCRAFT:
+		case POWER_SAMPLES_TYPE_SWITCHCRAFT_NON_TRIGGERED:
+			RecognizeSwitch::getInstance().getLastDetection(type, index, result);
+			break;
+		case POWER_SAMPLES_TYPE_NOW_FILTERED:
+		case POWER_SAMPLES_TYPE_NOW_UNFILTERED: {
+			// Check index
+			if (index >= 2) {
+				LOGw("index=%u", index);
+				result.returnCode = ERR_WRONG_PARAMETER;
+				return;
+			}
+
+			// Check size
+			cs_power_samples_header_t* header = (cs_power_samples_header_t*)result.buf.data;
+			uint16_t numSamples = InterleavedBuffer::getInstance().getChannelLength();
+			uint16_t samplesSize = numSamples * sizeof(sample_value_t);
+			size16_t requiredSize = sizeof(*header) + samplesSize;
+			if (result.buf.len < requiredSize) {
+				LOGw("size=%u required=%u", result.buf.len, requiredSize);
+				result.returnCode = ERR_BUFFER_TOO_SMALL;
+				return;
+			}
+
+			// Set header fields.
+			header->type = type;
+			header->index = index;
+			header->count = numSamples;
+			header->unixTimestamp = SystemTime::posix();
+			header->delayUs = 0;
+			header->sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
+			if (index == VOLTAGE_CHANNEL_IDX) {
+				header->offset = _avgZeroVoltage / 1024;
+				header->multiplier = _voltageMultiplier;
+			}
+			else {
+				header->offset = _avgZeroCurrent / 1024;
+				header->multiplier = _currentMultiplier;
+			}
+
+			// Copy samples
+			buffer_id_t bufIndex = (type == POWER_SAMPLES_TYPE_NOW_FILTERED) ? _lastFilteredBufIndex : _lastBufIndex;
+			sample_value_t* samples = (sample_value_t*)(result.buf.data + sizeof(*header));
+			for (sample_value_id_t i = 0; i < numSamples; ++i) {
+				samples[i] = InterleavedBuffer::getInstance().getValue(bufIndex, index, i);
+			}
+
+			result.dataSize = requiredSize;
+			result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		default:
+			break;
+	}
 }
 
 void PowerSampling::toggleVoltageChannelInput() {
