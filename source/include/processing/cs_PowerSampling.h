@@ -94,8 +94,8 @@ private:
 	uint16_t _avgPowerDiscount;
 
 	int32_t _boardPowerZero; //! Measured power when there is no load for this board (mW).
-	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value (times 1000).
-	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value (times 1000).
+	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value (times 1024).
+	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value (times 1024).
 	bool _recalibrateZeroVoltage; //! Whether or not the zero voltage value should be recalculated.
 	bool _recalibrateZeroCurrent; //! Whether or not the zero current value should be recalculated.
 //	bool _zeroVoltageInitialized; //! True when zero of voltage has been initialized.

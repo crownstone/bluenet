@@ -326,23 +326,6 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
-#if SWITCHCRAFT_DEBUG_BUFFERS==true
-	// Copy buffers to state, so that switch craft can be debugged.
-	InterleavedBuffer & ib = InterleavedBuffer::getInstance();
-	State::getInstance()._switchcraftBuf1.clear();
-	State::getInstance()._switchcraftBuf2.clear();
-	State::getInstance()._switchcraftBuf3.clear();
-	for (int i=0; i<ib.getChannelLength(); ++i) {
-		State::getInstance()._switchcraftBuf1.push(ib.getValue(prevIndex, power.voltageIndex, i));
-	}
-	for (int i=0; i<ib.getChannelLength(); ++i) {
-		State::getInstance()._switchcraftBuf2.push(ib.getValue(prevIndex, power.voltageIndex, i + ib.getChannelLength()));
-	}
-	for (int i=0; i<ib.getChannelLength(); ++i) {
-		State::getInstance()._switchcraftBuf3.push(ib.getValue(prevIndex, power.voltageIndex, i + 2 * ib.getChannelLength()));
-	}
-#endif
-
 	_adc->releaseBuffer(bufIndex);
 }
 
@@ -542,8 +525,6 @@ void PowerSampling::filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id
 
 	// Filter the data
 	sort_median(*_filterParams, *_inputSamples, *_outputSamples);
-
-	// TODO: Note that this is a lot of copying back and forth. Filtering should actually be done in-place.
 
 	// Copy the result back into the buffer
 	for (int i = 0; i < InterleavedBuffer::getInstance().getChannelLength() - 1; ++i) {
@@ -774,9 +755,6 @@ void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
 	State::getInstance().set(CS_TYPE::CONFIG_POWER_ZERO, &_powerZero, sizeof(_powerZero));
 }
 
-/**
- * TODO: What does this do?
- */
 void PowerSampling::calculateEnergy() {
 	uint32_t rtcCount = RTC::getCount();
 	uint32_t diffTicks = RTC::difference(rtcCount, _lastEnergyCalculationTicks);
@@ -789,9 +767,6 @@ void PowerSampling::calculateEnergy() {
 	_lastEnergyCalculationTicks = rtcCount;
 }
 
-/**
- * TODO: What does this do?
- */
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA, int32_t voltageRmsMilliVolt, power_t & power) {
 
 	// Get the current state errors
@@ -903,16 +878,10 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	}
 }
 
-/**
- * TODO: What does this do?
- */
 void PowerSampling::startIgbtFailureDetection() {
 	_igbtFailureDetectionStarted = true;
 }
 
-/**
- * TODO: What does this do?
- */
 void PowerSampling::toggleVoltageChannelInput() {
 	_adcConfig.voltageChannelUsedAs = (_adcConfig.voltageChannelUsedAs + 1) % 5;
 
@@ -948,9 +917,6 @@ void PowerSampling::toggleVoltageChannelInput() {
 	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
 }
 
-/**
- * TODO: What does this do?
- */
 void PowerSampling::enableDifferentialModeCurrent(bool enable) {
 	_adcConfig.currentDifferential = enable;
 	adc_channel_config_t channelConfig;
@@ -960,9 +926,6 @@ void PowerSampling::enableDifferentialModeCurrent(bool enable) {
 	_adc->changeChannel(CURRENT_CHANNEL_IDX, channelConfig);
 }
 
-/**
- * TODO: What does this do?
- */
 void PowerSampling::enableDifferentialModeVoltage(bool enable) {
 	_adcConfig.voltageDifferential = enable;
 	adc_channel_config_t channelConfig;
@@ -972,9 +935,6 @@ void PowerSampling::enableDifferentialModeVoltage(bool enable) {
 	_adc->changeChannel(VOLTAGE_CHANNEL_IDX, channelConfig);
 }
 
-/**
- * TODO: What does this do?
- */
 void PowerSampling::changeRange(uint8_t channel, int32_t amount) {
 	uint16_t newRange = _adcConfig.rangeMilliVolt[channel] + amount;
 	switch (_adcConfig.rangeMilliVolt[channel]) {

@@ -276,8 +276,6 @@
 
 #define SUN_TIME_THROTTLE_PERIOD_SECONDS         (60*60*24) // Seconds to throttle writing the sun time to flash.
 
-#define SWITCHCRAFT_DEBUG_BUFFERS                false // Set to true to store the last voltage samples that were recognized as switch (short power interrupt).
-
 #define CS_CLEAR_GPREGRET_COUNTER_TIMEOUT_S      60 // Seconds after boot to clear the GPREGRET reset counter.
 
 /**
