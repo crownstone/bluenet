@@ -159,7 +159,7 @@ private:
 	/**
 	 * Current number of periods to wait before next value update.
 	 */
-	uint8_t _updateValuesTimeout = 0;
+	uint8_t _updateValuesCountdown = 0;
 
 //	/**
 //	 * New duty cycle values of the channels in percentage.

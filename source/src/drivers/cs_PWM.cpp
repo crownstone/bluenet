@@ -280,10 +280,10 @@ void PWM::updateValues() {
 	}
 
 	// Only set values every N periods, to avoid setValue() being called too often.
-	if (--_updateValuesTimeout != 0) {
+	if (--_updateValuesCountdown != 0) {
 		return;
 	}
-	_updateValuesTimeout = numPeriodsBeforeValueUpdate;
+	_updateValuesCountdown = numPeriodsBeforeValueUpdate;
 
 	for (uint8_t channel = 0; channel < CS_PWM_MAX_CHANNELS; ++channel) {
 		int16_t diff = _targetValues[channel] - _values[channel];
@@ -311,8 +311,8 @@ void PWM::updateValues() {
 void PWM::setValue(uint8_t channel, uint8_t newValue) {
 	// Something weird happens for low values: the resulting intensity is way too large.
 	// Either a software bug, peripheral issue, or hardware issue.
-	if (0 < newValue && newValue < 5) {
-		newValue = 5;
+	if (0 < newValue && newValue < 7) {
+		newValue = 7;
 	}
 
 	if (_values[channel] == newValue) {
@@ -361,7 +361,7 @@ void PWM::setValue(uint8_t channel, uint8_t newValue) {
 				// Turn switch off at end of the old tick value.
 				// This is required to turn off the switch in case the current timer value is higher than the new tick value, but lower than the old tick value.
 				// So this PPI is only temporarily needed, until the timer reached the start of the period again.
-				LOGPwmDebug("transition");
+				LOGPwmDebug("transition: turn off at %u", oldTickValue);
 				writeCC(TRANSITION_CHANNEL_IDX, oldTickValue);
 				nrf_ppi_channel_endpoint_setup(
 						_ppiTransitionChannel,
@@ -376,8 +376,10 @@ void PWM::setValue(uint8_t channel, uint8_t newValue) {
 			}
 			LOGPwmDebug("writeCC %u", _tickValues[channel]);
 			writeCC(channel, _tickValues[channel]);
-			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
+
+			// Enable turn off first, else turn on might happen before the turn off ppi is enabled.
 			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
+			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
 		}
 	}
 }

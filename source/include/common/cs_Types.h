@@ -173,6 +173,7 @@ enum class CS_TYPE: uint16_t {
 	STATE_BEHAVIOUR_MASTER_HASH             = 153,
 	STATE_IBEACON_CONFIG_ID                 = 154,
 	STATE_MICROAPP                          = 155,
+	STATE_SOFT_ON_SPEED                     = 156,
 
 	/*
 	 * Internal commands and events.
@@ -419,6 +420,7 @@ typedef cs_mesh_iv_index_t TYPIFY(STATE_MESH_IV_INDEX);
 typedef cs_mesh_seq_number_t TYPIFY(STATE_MESH_SEQ_NUMBER);
 typedef ibeacon_config_id_packet_t TYPIFY(STATE_IBEACON_CONFIG_ID);
 typedef cs_microapp_t TYPIFY(STATE_MICROAPP);
+typedef uint8_t TYPIFY(STATE_SOFT_ON_SPEED);
 
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);

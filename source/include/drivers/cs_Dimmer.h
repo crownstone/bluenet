@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cfg/cs_Boards.h>
+#include <common/cs_Types.h>
 
 /**
  * Class that provides a dimmer.
@@ -37,6 +38,8 @@ public:
 private:
 	uint32_t hardwareBoard;
 	uint8_t pinEnableDimmer;
+
+	TYPIFY(STATE_SOFT_ON_SPEED) softOnfSpeed;
 
 	bool initialized = false;
 	bool started = false;
