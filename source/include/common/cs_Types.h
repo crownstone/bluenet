@@ -201,7 +201,6 @@ enum class CS_TYPE: uint16_t {
 	CMD_MULTI_SWITCH,                                 // Handle a multi switch.
 	CMD_SWITCHING_ALLOWED,		                      // Set switch lock.
 	CMD_DIMMING_ALLOWED,	                          // Set allow dimming.
-	CMD_SWITCH_AGGREGATOR_RESET,                      // Reset the internal state of the switch aggregator.
 
 	// Power
 	EVT_DIMMER_POWERED = InternalBasePower,           // Dimmer being powered is changed. Payload: true when powered, and ready to be used.

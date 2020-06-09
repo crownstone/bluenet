@@ -379,8 +379,9 @@ Value | Name | Description
 0 | Off | Switch off.
 1-99 | Dimmed | Set a dimmed value.
 100 | Full on | Switch fully on.
-254 | Behaviour | Set the default value determined by _behaviour_ rules.
-255 | Default on | Set the default on value, determined by _twilight_ rules.
+253 | Toggle | Switch `OFF` when currently on, switch to `SMART_ON` when currently off.
+254 | Behaviour | Switch to the value according to _behaviour_ rules.
+255 | Smart on | Switch on, the value will be determined by _behaviour_ rules.
 
 
 <a name="state_get_packet"></a>
