@@ -170,7 +170,7 @@ void on_exit(void) {
 
 
 void handleZeroCrossing() {
-	PWM::getInstance().onZeroCrossing();
+	PWM::getInstance().onZeroCrossingInterrupt();
 }
 
 /************************************************* cs_Crownstone impl *************************************************/

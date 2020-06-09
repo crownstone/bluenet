@@ -108,15 +108,15 @@ cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity) {
 			return startDimmerPowerCheck(intensity);
 		}
 	}
-	return setDimmerUnchecked(intensity);
+	return setDimmerUnchecked(intensity, false);
 }
 
-cs_ret_code_t SafeSwitch::setDimmerUnchecked(uint8_t intensity) {
+cs_ret_code_t SafeSwitch::setDimmerUnchecked(uint8_t intensity, bool immediately) {
 	LOGSafeSwitch("setDimmerUnchecked %u current=%u", intensity, currentState.state.dimmer);
 	if (currentState.state.dimmer == intensity) {
 		return ERR_SUCCESS;
 	}
-	if (dimmer.set(intensity)) {
+	if (dimmer.set(intensity, immediately)) {
 		currentState.state.dimmer = intensity;
 		return ERR_SUCCESS;
 	}
@@ -155,7 +155,7 @@ cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity) {
 
 	// Turn dimmer on, then relay off, to prevent flicker.
 	// Use unchecked, as this function is called via setDimmer().
-	setDimmerUnchecked(intensity);
+	setDimmerUnchecked(intensity, false);
 //	setRelay(false);
 
 	if (dimmerCheckCountDown == 0) {
@@ -192,7 +192,7 @@ void SafeSwitch::checkDimmerPower() {
 		// Dimmer didn't work: mark dimmer as not powered, and turn relay on instead.
 		setDimmerPowered(false);
 		setRelayUnchecked(true);
-		setDimmerUnchecked(0);
+		setDimmerUnchecked(0, true);
 		sendUnexpectedStateUpdate();
 	}
 //	else {
@@ -218,7 +218,7 @@ void SafeSwitch::setDimmerPowered(bool powered) {
 
 void SafeSwitch::forceSwitchOff() {
 	LOGw("forceSwitchOff");
-	dimmer.set(0);
+	dimmer.set(0, true);
 	relay.set(false);
 
 	currentState.state.relay = 0;
@@ -234,7 +234,7 @@ void SafeSwitch::forceRelayOnAndDimmerOff() {
 	// First set relay on, so that the switch doesn't first turn off, and later on again.
 	// The relay protects the dimmer, because it opens a parallel circuit for the current to flow through.
 	relay.set(true);
-	dimmer.set(0);
+	dimmer.set(0, true);
 
 	currentState.state.relay = 1;
 	currentState.state.dimmer = 0;
@@ -357,7 +357,7 @@ void SafeSwitch::goingToDfu() {
 	}
 	if (turnOnRelay) {
 		setRelayUnchecked(true);
-		setDimmerUnchecked(0);
+		setDimmerUnchecked(0, true);
 		sendUnexpectedStateUpdate();
 	}
 }

@@ -28,9 +28,11 @@ public:
 	/**
 	 * Set dimmer intensity.
 	 *
+	 * @param[in] intensity       Intensity value to set.
+	 * @param[in] immediately     Whether to set the value immediately. False will nicely fade towards the value.
 	 * @return true on success.
 	 */
-	bool set(uint8_t intensity);
+	bool set(uint8_t intensity, bool immediately);
 
 private:
 	uint32_t hardwareBoard;
