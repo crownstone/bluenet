@@ -294,24 +294,27 @@ void PWM::setValue(uint8_t channel, uint8_t newValue) {
 	nrf_ppi_channel_disable(_ppiTransitionChannel);
 
 	switch (newValue) {
-//		case 0:
-//			// Simply disable the PPI that turns on the switch.
-//			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
-//			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
-//
-//			break;
-//		case _maxValue:
-//			// Simply disable the PPI that turns off the switch.
-//			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
-//			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
-//			break;
 		case 0:
-		case _maxValue:
-			// Disable both PPI channels, and force gpio values.
+			// Simply disable the PPI that turns on the switch.
 			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
-			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
-			gpioteForce(channel, newValue == _maxValue);
+			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
+			LOGPwmDebug("ppiEnabled=%u", NRF_PPI->CHEN);
 			break;
+		case _maxValue:
+			// Simply disable the PPI that turns off the switch.
+			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
+			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
+			LOGPwmDebug("ppiEnabled=%u", NRF_PPI->CHEN);
+			break;
+//		case 0:
+//		case _maxValue:
+//			// Disable both PPI channels, and force gpio values.
+//			// We use this because the way above didn't work.
+//			// However, this way doesn't turn on at a zero crossing.
+//			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
+//			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
+//			gpioteForce(channel, newValue == _maxValue);
+//			break;
 		default: {
 			if (oldValue != 0 && oldValue != _maxValue && newValue < oldValue) {
 				// From dimmed value to lower dimmed value.
