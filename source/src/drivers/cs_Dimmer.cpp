@@ -81,6 +81,11 @@ bool Dimmer::set(uint8_t intensity, bool immediately) {
 	return true;
 }
 
+void Dimmer::setSoftOnSpeed(uint8_t speed) {
+	LOGd("setSoftOnSpeed %u", speed);
+	softOnfSpeed = speed;
+}
+
 void Dimmer::enable() {
 	LOGd("enable");
 	switch (hardwareBoard) {

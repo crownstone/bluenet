@@ -35,6 +35,13 @@ public:
 	 */
 	bool set(uint8_t intensity, bool immediately);
 
+	/**
+	 * Change the soft of speed.
+	 *
+	 * TODO: remove this function again once we have a nice default value.
+	 */
+	void setSoftOnSpeed(uint8_t speed);
+
 private:
 	uint32_t hardwareBoard;
 	uint8_t pinEnableDimmer;

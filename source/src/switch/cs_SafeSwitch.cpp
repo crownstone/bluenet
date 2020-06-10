@@ -419,6 +419,11 @@ void SafeSwitch::handleEvent(event_t & evt) {
 		case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG:
 			handleGetBehaviourDebug(evt);
 			break;
+		case CS_TYPE::STATE_SOFT_ON_SPEED: {
+			TYPIFY(STATE_SOFT_ON_SPEED) speed = *reinterpret_cast<TYPIFY(STATE_SOFT_ON_SPEED)*>(evt.data);
+			dimmer.setSoftOnSpeed(speed);
+			break;
+		}
 		default:
 			break;
 	}
