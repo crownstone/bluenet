@@ -154,7 +154,7 @@ private:
 	/**
 	 * Only update values every so many PWM periods.
 	 */
-	static const uint8_t numPeriodsBeforeValueUpdate = 5;
+	static const uint8_t numPeriodsBeforeValueUpdate = 3;
 
 	/**
 	 * Current number of periods to wait before next value update.
