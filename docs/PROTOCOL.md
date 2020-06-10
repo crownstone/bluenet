@@ -379,8 +379,9 @@ Value | Name | Description
 0 | Off | Switch off.
 1-99 | Dimmed | Set a dimmed value.
 100 | Full on | Switch fully on.
-254 | Behaviour | Set the default value determined by _behaviour_ rules.
-255 | Default on | Set the default on value, determined by _twilight_ rules.
+253 | Toggle | Switch `OFF` when currently on, switch to `SMART_ON` when currently off.
+254 | Behaviour | Switch to the value according to _behaviour_ rules.
+255 | Smart on | Switch on, the value will be determined by _behaviour_ rules.
 
 
 <a name="state_get_packet"></a>
@@ -837,6 +838,7 @@ Type nr | Type name | Payload type | Description | A | M | B
 139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors. | r | r | 
 149 | Sun time | [Sun time packet](#sun_time_packet) | Packet with sun rise and set times. | r | r | 
 150 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Behaviour settings. | rw | rw | r
+156 | Soft on speed | uint 8 | Speed at which the dimmer goes towards the target value. Range: 1-100. | rw
 
 <a name="switch_state_packet"></a>
 #### Switch state

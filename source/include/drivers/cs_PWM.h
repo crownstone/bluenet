@@ -39,6 +39,8 @@ public:
 		return instance;
 	}
 
+	static const uint8_t _maxValue = 100;
+
 	/**
 	 * Initialize the PWM settings.
 	 * config can be safely deleted after calling this function.
@@ -56,15 +58,27 @@ public:
 
 	/**
 	 * Set the value of a specific channel.
-	 * TODO: currently calling this twice within 10ms, will lead to errors!
+	 *
+	 * Each tick, the value will go towards target value by increasing or decreasing the actual value with 'speed'.
+	 *
+	 * @param[in] channel    Channel to set.
+	 * @param[in] value      Target value to set the channel to (0-100).
+	 * @param[in] speed      Speed at which to go to target value (1-100).
 	 */
-	void setValue(uint8_t channel, uint16_t value);
+	void setValue(uint8_t channel, uint8_t value, uint8_t speed);
 
 	//! Get current value of a specific channel.
-	uint16_t getValue(uint8_t channel);
+	uint8_t getValue(uint8_t channel);
 
-	//! Function to be called on a zero crossing.
-	void onZeroCrossing();
+	/**
+	 * Function to be called on the end of the PWM period.
+	 *
+	 * Decoupled from interrupt.
+	 */
+	void onPeriodEnd();
+
+	//! Function to be called on a zero crossing interrupt.
+	void onZeroCrossingInterrupt();
 
 	//! Internal use! Called when started from a zero crossing.
 	void _zeroCrossingStart();
@@ -86,7 +100,7 @@ private:
 	pwm_config_t _config;
 
 	//! Duty cycle values of the channels in percentage.
-	uint32_t _values[CS_PWM_MAX_CHANNELS];
+	uint8_t _values[CS_PWM_MAX_CHANNELS] = {0};
 
 	//! Flag to indicate that the init function has been successfully performed
 	bool _initialized;
@@ -100,12 +114,26 @@ private:
 	//! Init a channel
 	uint32_t initChannel(uint8_t index, pwm_channel_config_t& config);
 
-	//! Actually start the PWM
+	/**
+	 * Start the PWM timer, and mark PWM as started.
+	 *
+	 * Can be called from zero crossing interrupt.
+	 */
 	void start();
 
-	// -----------------------------------
-	// ----- Implementation specific -----
-	// -----------------------------------
+	/**
+	 * Check if the current value with the target value.
+	 *
+	 * If not equal, set the value.
+	 */
+	void updateValues();
+
+	/**
+	 * Actually set the value in the peripheral.
+	 */
+	void setValue(uint8_t channel, uint8_t newValue);
+
+
 
 	//! Max value of channel, in ticks. Set at init
 	uint32_t _maxTickVal;
@@ -114,20 +142,27 @@ private:
 	uint32_t _adjustedMaxTickVal;
 
 	/**
-	 * New duty cycle values of the channels in percentage.
-	 * Used in case the value couldn't be adjusted yet at the moment of calling setValue.
+	 * Target duty cycle values of the channels in percentage.
 	 */
-	uint32_t _nextValues[CS_PWM_MAX_CHANNELS];
+	uint8_t _targetValues[CS_PWM_MAX_CHANNELS] = {0};
+
+	/**
+	 * Step size to move actual value towards target value.
+	 */
+	uint8_t _stepSize[CS_PWM_MAX_CHANNELS] = {0};
+
+	/**
+	 * Only update values every so many PWM periods.
+	 */
+	static const uint8_t numPeriodsBeforeValueUpdate = 3;
+
+	/**
+	 * Current number of periods to wait before next value update.
+	 */
+	uint8_t _updateValuesCountdown = 0;
 
 	//! Duty cycle values of the channels in ticks.
-	uint32_t _tickValues[CS_PWM_MAX_CHANNELS];
-
-
-//	//! Whether or not a transition of a duty cycle is in progress.
-//	bool _transitionInProgress = false;
-//
-//	//! Target value of the channel that's changing its duty cycle.
-//	uint8_t _transitionTargetTicks;
+	uint32_t _tickValues[CS_PWM_MAX_CHANNELS] = {0};
 
 	//! PPI channels to be used to trigger GPIOTE tasks from timer compare events. Turning the switch on.
 	nrf_ppi_channel_t _ppiChannelsOn[CS_PWM_MAX_CHANNELS];
@@ -153,31 +188,6 @@ private:
 
 	//! Integral of the tick deviations.
 	int64_t _zeroCrossDeviationIntegral;
-
-	//! Sets pin on
-	void turnOn(uint8_t channel);
-
-	//! Sets pin off
-	void turnOff(uint8_t channel);
-
-	//! Enables pwm for given channel (to be used when value is > 0 and < max).
-	void enablePwm(uint8_t channel);
-
-	//! Disables pwm for given channel (to be used when value is 0 or max).
-	void disablePwm(uint8_t channel);
-
-//	//! Enables pwm for given channel and turns it on or off.
-//	void enablePwm(uint8_t channel, bool on);
-//
-	//! Disables pwm for given channel and turns it on or off.
-	void disablePwm(uint8_t channel, bool on);
-
-	/**
-	 * Checks and caches if duty cycle is in transition.
-	 *
-	 * @return true when a duty cycle is in transition.
-	 */
-	bool checkInTransition();
 
 	//! Config gpiote
 	void gpioteConfig(uint8_t channel, bool initOn);

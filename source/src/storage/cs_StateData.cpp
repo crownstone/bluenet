@@ -231,6 +231,9 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		*reinterpret_cast<TYPIFY(STATE_MICROAPP)*>(data.value) = cs_microapp_t();
 		return ERR_SUCCESS;
 	}
+	case CS_TYPE::STATE_SOFT_ON_SPEED:
+		*(TYPIFY(CONFIG_CROWNSTONE_ID)*)data.value = DIMMER_SOFT_ON_SPEED;
+		return ERR_SUCCESS;
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
@@ -277,7 +280,6 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_DIMMER_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_DIMMER_TEMP_OK:
 	case CS_TYPE::CMD_DIMMING_ALLOWED:
-	case CS_TYPE::CMD_SWITCH_AGGREGATOR_RESET:
 	case CS_TYPE::EVT_MESH_TIME:
 	case CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER:
 	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER:
@@ -403,6 +405,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
 	case CS_TYPE::STATE_IBEACON_CONFIG_ID:
 	case CS_TYPE::STATE_MICROAPP:
+	case CS_TYPE::STATE_SOFT_ON_SPEED:
 		return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
@@ -452,7 +455,6 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TIME_SET:
 	case CS_TYPE::EVT_DIMMER_POWERED:
 	case CS_TYPE::CMD_DIMMING_ALLOWED:
-	case CS_TYPE::CMD_SWITCH_AGGREGATOR_RESET:
 	case CS_TYPE::CMD_SWITCHING_ALLOWED:
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STATE_FACTORY_RESET_DONE:

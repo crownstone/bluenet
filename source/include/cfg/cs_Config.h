@@ -230,6 +230,7 @@
 #define DIMMER_BOOT_CHECK_DELAY_MS               5000  // Delay after boot until power measurement is checked to see if dimmer works.
 #define DIMMER_BOOT_CHECK_POWER_MW               3000  // Threshold in milliWatt above which the dimmer is considered to be working.
 #define DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED  10000 // Threshold in milliWatt above which the dimmer is considered to be working, in case power zero is not calibrated yet.
+#define DIMMER_SOFT_ON_SPEED                     8     // Speed of the soft on feature.
 
 // Stack config values
 // See: https://devzone.nordicsemi.com/question/60/what-is-connection-parameters/

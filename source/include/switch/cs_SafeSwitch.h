@@ -150,7 +150,7 @@ private:
 	 * Checks: similar.
 	 * Does not check: safe, powered.
 	 */
-	cs_ret_code_t setDimmerUnchecked(uint8_t intensity);
+	cs_ret_code_t setDimmerUnchecked(uint8_t intensity, bool immediately);
 
 	/**
 	 * Try to see if dimmer is powered:
