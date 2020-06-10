@@ -838,6 +838,7 @@ Type nr | Type name | Payload type | Description | A | M | B
 139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors. | r | r | 
 149 | Sun time | [Sun time packet](#sun_time_packet) | Packet with sun rise and set times. | r | r | 
 150 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Behaviour settings. | rw | rw | r
+156 | Soft on speed | uint 8 | Speed at which the dimmer goes towards the target value. Range: 1-100. | rw
 
 <a name="switch_state_packet"></a>
 #### Switch state
