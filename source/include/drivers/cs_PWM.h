@@ -161,21 +161,8 @@ private:
 	 */
 	uint8_t _updateValuesCountdown = 0;
 
-//	/**
-//	 * New duty cycle values of the channels in percentage.
-//	 * Used in case the value couldn't be adjusted yet at the moment of calling setValue.
-//	 */
-//	uint8_t _nextValues[CS_PWM_MAX_CHANNELS];
-
 	//! Duty cycle values of the channels in ticks.
 	uint32_t _tickValues[CS_PWM_MAX_CHANNELS] = {0};
-
-
-//	//! Whether or not a transition of a duty cycle is in progress.
-//	bool _transitionInProgress = false;
-//
-//	//! Target value of the channel that's changing its duty cycle.
-//	uint8_t _transitionTargetTicks;
 
 	//! PPI channels to be used to trigger GPIOTE tasks from timer compare events. Turning the switch on.
 	nrf_ppi_channel_t _ppiChannelsOn[CS_PWM_MAX_CHANNELS];
@@ -201,31 +188,6 @@ private:
 
 	//! Integral of the tick deviations.
 	int64_t _zeroCrossDeviationIntegral;
-
-	//! Sets pin on
-	void turnOn(uint8_t channel);
-
-	//! Sets pin off
-	void turnOff(uint8_t channel);
-
-	//! Enables pwm for given channel (to be used when value is > 0 and < max).
-	void enablePwm(uint8_t channel);
-
-	//! Disables pwm for given channel (to be used when value is 0 or max).
-	void disablePwm(uint8_t channel);
-
-//	//! Enables pwm for given channel and turns it on or off.
-//	void enablePwm(uint8_t channel, bool on);
-//
-	//! Disables pwm for given channel and turns it on or off.
-	void disablePwm(uint8_t channel, bool on);
-
-	/**
-	 * Checks and caches if duty cycle is in transition.
-	 *
-	 * @return true when a duty cycle is in transition.
-	 */
-	bool checkInTransition();
 
 	//! Config gpiote
 	void gpioteConfig(uint8_t channel, bool initOn);

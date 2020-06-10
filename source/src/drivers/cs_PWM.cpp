@@ -108,10 +108,7 @@ uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
 	LOGd("Configure channel %u as pin %u", channel, _config.channels[channel].pin);
 
 	// Start off
-//	nrf_gpio_cfg_output(_config.channels[i].pin);
 	nrf_gpio_pin_write(_config.channels[channel].pin, _config.channels[channel].inverted ? 1 : 0);
-//	_values[channel] = 0;
-//	_nextValues[channel] = 0;
 
 	// Configure GPIOTE
 	_gpioteInitStatesOn[channel] = config.inverted ? NRF_GPIOTE_INITIAL_VALUE_LOW : NRF_GPIOTE_INITIAL_VALUE_HIGH;
@@ -137,10 +134,6 @@ uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
 			(uint32_t)nrf_timer_event_address_get(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX)),
 			nrf_gpiote_task_addr_get(config.inverted ? getGpioteTaskClear(CS_PWM_GPIOTE_CHANNEL_START + channel) : getGpioteTaskSet(CS_PWM_GPIOTE_CHANNEL_START + channel))
 	);
-
-//	// Enable ppi
-//	nrf_ppi_channel_enable(_ppiChannels[channel*2]);
-//	nrf_ppi_channel_enable(_ppiChannels[channel*2 + 1]);
 
 	// Enable gpiote
 	nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + channel, _gpioteInitStatesOff[channel]);
@@ -183,9 +176,6 @@ void PWM::onPeriodEnd() {
 	updateValues();
 }
 
-//static void staticZeroCrossingStart(void* p_data, uint16_t len) {
-//	PWM::getInstance()._zeroCrossingStart();
-//}
 
 void PWM::start() {
 #ifdef TEST_PIN
@@ -205,40 +195,6 @@ void PWM::start() {
 	if (!_startOnZeroCrossing) {
 		LOGi("Started");
 	}
-
-//	if (_startOnZeroCrossing) {
-//		// Decouple from zero crossing interrupt
-//		uint32_t errorCode = app_sched_event_put(NULL, 0, staticZeroCrossingStart);
-//		APP_ERROR_CHECK(errorCode);
-//	}
-//	else {
-//		LOGi("Started");
-//	}
-}
-
-//void PWM::_zeroCrossingStart() {
-//	// Set all values
-//	// TODO: currently this only works for 1 channel! (as it calls setValue too often)
-////	for (uint8_t i=0; i<_config.channelCount; ++i) {
-//	for (uint8_t i=0; i<1; ++i) {
-//		if (_values[i] != _nextValues[i]) {
-//			setValue(i, _nextValues[i]);
-//		}
-//	}
-//	LOGi("Started on zero crossing");
-//}
-
-bool PWM::checkInTransition() {
-//	if (!_transitionInProgress) {
-//		return false;
-//	}
-//	if (readCC(TRANSITION_CHANNEL_IDX) == _transitionTargetTicks) {
-//		// Transition is done.
-//		_transitionInProgress = false;
-//		return false;
-//	}
-//	return true;
-	return false;
 }
 
 void PWM::setValue(uint8_t channel, uint8_t newValue, uint8_t stepSize) {
