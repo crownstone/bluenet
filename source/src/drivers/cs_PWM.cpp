@@ -243,14 +243,14 @@ void PWM::updateValues() {
 
 	for (uint8_t channel = 0; channel < CS_PWM_MAX_CHANNELS; ++channel) {
 		int16_t diff = _targetValues[channel] - _values[channel];
-		int16_t inc;
+		int16_t inc = 0;
 		if (diff > 0) {
 			inc = _stepSize[channel];
 			if (inc > diff) {
 				inc = diff;
 			}
 		}
-		else {
+		else if (diff < 0) {
 			inc = -_stepSize[channel];
 			if (inc < diff) {
 				inc = diff;
@@ -265,12 +265,6 @@ void PWM::updateValues() {
 }
 
 void PWM::setValue(uint8_t channel, uint8_t newValue) {
-	// Something weird happens for low values: the resulting intensity is way too large.
-	// Either a software bug, peripheral issue, or hardware issue.
-	if (0 < newValue && newValue < 7) {
-		newValue = 7;
-	}
-
 	if (_values[channel] == newValue) {
 		LOGd("Channel %u is already set to %u", channel, newValue);
 		return;
@@ -284,6 +278,14 @@ void PWM::setValue(uint8_t channel, uint8_t newValue) {
 
 	uint32_t oldValue = _values[channel];
 	_values[channel] = newValue;
+
+	// Something weird happens for low values: the resulting intensity is way too large.
+	// Either a software bug, peripheral issue, or hardware issue.
+	// Cap the value after storing it to _values, else _values will never reach 0.
+	if (0 < newValue && newValue < 7) {
+		newValue = 7;
+	}
+
 	uint32_t oldTickValue = _tickValues[channel];
 	_tickValues[channel] = _maxTickVal * newValue / _maxValue;
 	LOGPwmDebug("Set PWM channel %u to %u ticks=%u", channel, newValue, _tickValues[channel]);
