@@ -725,8 +725,11 @@ void Crownstone::increaseResetCounter() {
  * TODO: describe function calls and why they are required.
  */
 void Crownstone::tick() {
-	if (_tickCount % (60*1000/TICK_INTERVAL_MS) == 0) {
+	if (_tickCount % (5*1000/TICK_INTERVAL_MS) == 0) {
 		LOG_MEMORY; // To check for memory leaks
+		uint16_t maxEver = app_sched_queue_utilization_get();
+		uint16_t currentFree = app_sched_queue_space_get();
+		LOGi("Scheduler current free=%u max ever used=%u", currentFree, maxEver);
 	}
 	// TODO: warning when close to out of memory
 	// TODO: maybe detect memory leaks?

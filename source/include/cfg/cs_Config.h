@@ -64,7 +64,7 @@
  *  The scheduler will require a buffer of size:
  *  (SCHED_MAX_EVENT_DATA_SIZE + APP_SCHED_EVENT_HEADER_SIZE) * (SCHED_QUEUE_SIZE + 1)
  */
-#define SCHED_QUEUE_SIZE                         64
+#define SCHED_QUEUE_SIZE                         512
 
 /**
  * Buffer size that is used for characteristics that the user reads from.
