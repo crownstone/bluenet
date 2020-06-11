@@ -40,6 +40,16 @@ public:
 	 */
 	void init();
 
+private:
+	stone_id_t my_id = 0xff;
+	uint8_t ping_sample_index = 0;
+
+	Coroutine pingRoutine;
+
+	// stores the relevant history
+	std::map<std::pair<stone_id_t,stone_id_t>, uint8_t> last_received_sample_indices = {};
+	std::map<std::pair<stone_id_t,stone_id_t>, int8_t> last_received_rssi = {};
+
 	/**
 	 * Sends a primary ping message over the mesh, containing only the 'ping counter'
 	 * of this RssiDataTracker.
@@ -61,28 +71,25 @@ public:
 	void handeleSecondaryPingMessage(rssi_ping_message_t* ping_msg);
 
 
-private:
+	/**
+	 * Store ping message information in the tracking maps and send
+	 * the ping message to host.
+	 */
 	void recordPingMsg(rssi_ping_message_t* ping_msg);
 
-	stone_id_t my_id = 0xff;
-	uint32_t max_ping_msgs_per_s = 5;
-	uint8_t ping_sample_index = 0;
-
-	Coroutine pingRoutine;
-
-	// if p has a sample index that was received recently, return nullptr
-	// else return p.
+	/**
+	 * Filters out ping messages that have been seen before.
+	 *
+	 * If p has a sample index that was received recently, return nullptr
+	 * else return p.
+	 */
 	rssi_ping_message_t* filterSampleIndex(rssi_ping_message_t* p);
 
-	// mapping utilites.
+	// mapping utils
 	inline std::pair<stone_id_t,stone_id_t> getKey(stone_id_t i, stone_id_t j){
 		return {i,j};
 	}
 	inline std::pair<stone_id_t,stone_id_t> getKey(rssi_ping_message_t* p){
 		return getKey(p->sender_id, p->recipient_id);
 	}
-
-	std::map<std::pair<stone_id_t,stone_id_t>, uint8_t> last_received_sample_indices = {};
-	std::map<std::pair<stone_id_t,stone_id_t>, int8_t> last_received_rssi = {};
-
 };

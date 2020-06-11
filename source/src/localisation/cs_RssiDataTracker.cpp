@@ -13,10 +13,6 @@
 #define RSSIDATATRACKER_LOGd LOGd
 #define RSSIDATATRACKER_LOGv LOGnone
 
-// some temporary/debug globals
-uint32_t next_log_msg_tickcount = 0;
-uint32_t prev_uptime_sec = 0;
-uint32_t pings_received_this_sec = 0;
 
 // utilities
 
@@ -32,17 +28,6 @@ void printPingMsg(rssi_ping_message_t* p){
 			p->sample_id);
 }
 
-void sendPingMsg(rssi_ping_message_t* pingmsg){
-	cs_mesh_msg_t pingmsg_wrapper;
-	pingmsg_wrapper.type = CS_MESH_MODEL_TYPE_RSSI_PING;
-	pingmsg_wrapper.payload = reinterpret_cast<uint8_t*>(pingmsg);
-	pingmsg_wrapper.size  = sizeof(rssi_ping_message_t);
-	pingmsg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
-	pingmsg_wrapper.urgency = CS_MESH_URGENCY_LOW;
-
-	event_t pingmsgevt(CS_TYPE::CMD_SEND_MESH_MSG, &pingmsg_wrapper, sizeof(cs_mesh_msg_t));
-	pingmsgevt.dispatch();
-}
 
 // ------------ RssiDataTracker methods ------------
 
@@ -56,6 +41,17 @@ void RssiDataTracker::init(){
 }
 
 // ------------ Ping stuff ------------
+void sendPingMsg(rssi_ping_message_t* pingmsg){
+	cs_mesh_msg_t pingmsg_wrapper;
+	pingmsg_wrapper.type = CS_MESH_MODEL_TYPE_RSSI_PING;
+	pingmsg_wrapper.payload = reinterpret_cast<uint8_t*>(pingmsg);
+	pingmsg_wrapper.size  = sizeof(rssi_ping_message_t);
+	pingmsg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
+	pingmsg_wrapper.urgency = CS_MESH_URGENCY_LOW;
+
+	event_t pingmsgevt(CS_TYPE::CMD_SEND_MESH_MSG, &pingmsg_wrapper, sizeof(cs_mesh_msg_t));
+	pingmsgevt.dispatch();
+}
 
 uint32_t RssiDataTracker::sendPrimaryPingMessage(){
 	RSSIDATATRACKER_LOGv("RssiDataTracker sending ping for my_id(%d), sample#%d",
@@ -76,13 +72,21 @@ uint32_t RssiDataTracker::sendPrimaryPingMessage(){
 }
 
 void RssiDataTracker::handlePrimaryPingMessage(rssi_ping_message_t* ping_msg){
+	if(ping_msg == nullptr){
+		return;
+	}
+
 	ping_msg->recipient_id = my_id; // needs to be filled in before filtering
 
 	if(filterSampleIndex(ping_msg) == nullptr){
-		return; // (also catches ping_msg == nullptr)
+		// already seen this one before, don't re-propagate.
+		return;
 	}
 
-	sendPingMsg(ping_msg);
+	sendPingMsg(ping_msg); // essentially 'sendSecondaryPingMessage'
+
+	// primary ping messages will never be recorded as secondary messages
+	// since they only get propagated once (TTL=1) and there is no loopback.
 	recordPingMsg(ping_msg);
 }
 
@@ -91,12 +95,18 @@ void RssiDataTracker::handeleSecondaryPingMessage(rssi_ping_message_t* ping_msg)
 		return; // (also catches ping_msg == nullptr)
 	}
 
-	RSSIDATATRACKER_LOGv("lets forward this ping msg to host");
 	printPingMsg(ping_msg);
+
+	// secondary ping messages have not yet been recorded.
 	recordPingMsg(ping_msg);
 
 	char expressionstring[50];
 
+	// crude workaround: we're using '_' as separator since
+	// the strings that are pushed to test suite are separated
+	// on ',' and we're using this expressionstring to push
+	// stuff of several different pairs of crownstones but want
+	// to split that out on the host side.
 	sprintf(expressionstring, "rssi_%d_%d_%d",
 			ping_msg->sender_id,
 			ping_msg->recipient_id,
