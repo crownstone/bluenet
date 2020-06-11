@@ -110,7 +110,6 @@ cs_ret_code_t SwitchAggregator::updateState(bool allowOverrideReset, const cmd_s
 		}
 	}
 
-
 	TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN) eventData = overrideState.has_value();
 	event_t overrideEvent(CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN, &eventData, sizeof(eventData));
 	overrideEvent.dispatch();
@@ -299,15 +298,18 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 			break;
 		case CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG:
 			aggregatedState.reset();
+			pushTestDataToHost();
 			LOGd("Reset aggregatedState");
 			break;
 		case CS_SWITCH_CMD_VAL_DEBUG_RESET_OVERRIDE:
 			overrideState.reset();
+			pushTestDataToHost();
 			LOGd("Reset overrideState");
 			break;
 		case CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG_OVERRIDE:
 			overrideState.reset();
 			aggregatedState.reset();
+			pushTestDataToHost();
 			LOGd("Reset overrideState and aggregatedState");
 			break;
 	}
@@ -320,6 +322,7 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 		}
 		case CS_SWITCH_CMD_VAL_BEHAVIOUR:
 			overrideState.reset();
+			pushTestDataToHost();
 			break;
 		case CS_SWITCH_CMD_VAL_SMART_ON:
 			overrideState = value;
