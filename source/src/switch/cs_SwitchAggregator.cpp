@@ -293,23 +293,19 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 			behaviourState.reset();
 			twilightState.reset();
 			aggregatedState = 0;
-			pushTestDataToHost();
 			LOGd("Reset all");
 			break;
 		case CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG:
 			aggregatedState.reset();
-			pushTestDataToHost();
 			LOGd("Reset aggregatedState");
 			break;
 		case CS_SWITCH_CMD_VAL_DEBUG_RESET_OVERRIDE:
 			overrideState.reset();
-			pushTestDataToHost();
 			LOGd("Reset overrideState");
 			break;
 		case CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG_OVERRIDE:
 			overrideState.reset();
 			aggregatedState.reset();
-			pushTestDataToHost();
 			LOGd("Reset overrideState and aggregatedState");
 			break;
 	}
@@ -322,7 +318,6 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 		}
 		case CS_SWITCH_CMD_VAL_BEHAVIOUR:
 			overrideState.reset();
-			pushTestDataToHost();
 			break;
 		case CS_SWITCH_CMD_VAL_SMART_ON:
 			overrideState = value;
@@ -342,6 +337,7 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 		overrideState = prev_overrideState;
 	}
 	addToSwitchHistory(cs_switch_history_item_t(SystemTime::posix(), value, smartSwitch.getActualState(), source.source));
+	pushTestDataToHost();
 }
 
 void SwitchAggregator::handleSwitchStateChange(uint8_t newIntensity) {
