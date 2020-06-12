@@ -135,6 +135,10 @@ uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
 			nrf_gpiote_task_addr_get(config.inverted ? getGpioteTaskClear(CS_PWM_GPIOTE_CHANNEL_START + channel) : getGpioteTaskSet(CS_PWM_GPIOTE_CHANNEL_START + channel))
 	);
 
+	// Set initial CC value.
+	// 0 doesn't work, that never triggers.
+	writeCC(channel, 1);
+
 	// Enable gpiote
 	nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + channel, _gpioteInitStatesOff[channel]);
 	nrf_gpiote_task_enable(CS_PWM_GPIOTE_CHANNEL_START + channel);
@@ -282,8 +286,8 @@ void PWM::setValue(uint8_t channel, uint8_t newValue) {
 	// Something weird happens for low values: the resulting intensity is way too large.
 	// Either a software bug, peripheral issue, or hardware issue.
 	// Cap the value after storing it to _values, else _values will never reach 0.
-	if (0 < newValue && newValue < 7) {
-		newValue = 7;
+	if (newValue < 10) {
+		newValue = 0;
 	}
 
 	uint32_t oldTickValue = _tickValues[channel];
@@ -296,25 +300,25 @@ void PWM::setValue(uint8_t channel, uint8_t newValue) {
 	switch (newValue) {
 		case 0:
 			// Simply disable the PPI that turns on the switch.
+			// Don't forget that the CC value has to be set.
+//			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
+//			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
+
+			// Disable the PPI that turns on the switch, and force gpio value.
+			// This turns it off immediately instead of waiting for the CC event.
 			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
-			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
-			LOGPwmDebug("ppiEnabled=%u", NRF_PPI->CHEN);
+			gpioteForce(channel, false);
+
+			LOGPwmDebug("ppiEnabled=%u CC=%u", NRF_PPI->CHEN, readCC(channel));
 			break;
 		case _maxValue:
 			// Simply disable the PPI that turns off the switch.
+			// This way, it turns on at the start of the period.
 			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
 			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
-			LOGPwmDebug("ppiEnabled=%u", NRF_PPI->CHEN);
+
+			LOGPwmDebug("ppiEnabled=%u CC=%u", NRF_PPI->CHEN, readCC(channel));
 			break;
-//		case 0:
-//		case _maxValue:
-//			// Disable both PPI channels, and force gpio values.
-//			// We use this because the way above didn't work.
-//			// However, this way doesn't turn on at a zero crossing.
-//			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
-//			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
-//			gpioteForce(channel, newValue == _maxValue);
-//			break;
 		default: {
 			if (oldValue != 0 && oldValue != _maxValue && newValue < oldValue) {
 				// From dimmed value to lower dimmed value.
