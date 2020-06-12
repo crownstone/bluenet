@@ -286,8 +286,8 @@ void PWM::setValue(uint8_t channel, uint8_t newValue) {
 	// Something weird happens for low values: the resulting intensity is way too large.
 	// Either a software bug, peripheral issue, or hardware issue.
 	// Cap the value after storing it to _values, else _values will never reach 0.
-	if (0 < newValue && newValue < 7) {
-		newValue = 7;
+	if (newValue < 10) {
+		newValue = 0;
 	}
 
 	uint32_t oldTickValue = _tickValues[channel];
