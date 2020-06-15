@@ -264,7 +264,7 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 #endif
 
 	// Filter current buffer to the previous unfiltered buffer.
-	cs_adc_buffer_id_t filteredBufIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
+	buffer_id_t filteredBufIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
 	_lastBufIndex = bufIndex;
 	_lastFilteredBufIndex = filteredBufIndex;
 
