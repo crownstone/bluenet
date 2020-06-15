@@ -598,8 +598,10 @@ void ADC::releaseBuffer(buffer_id_t bufIndex) {
 			start();
 			return;
 		case ADC_STATE_BUSY:
-			// Continue sampling, fill up the SAADC queue.
-			fillSaadcQueue();
+			// The SAADC queue has already been filled in the interrupt.
+
+//			// Continue sampling, fill up the SAADC queue.
+//			fillSaadcQueue();
 			return;
 		case ADC_STATE_IDLE:
 		case ADC_STATE_READY_TO_START:
@@ -869,8 +871,19 @@ void ADC::_handleAdcInterrupt() {
 			return;
 		}
 
-		// We may have buffers in queue for the SAADC.
-		fillSaadcQueue();
+//		// We may have buffers in queue for the SAADC.
+//		_fillSaadcQueue();
+
+		// We should have a buffer in queue for the SAADC.
+		if (_fillSaadcQueue() != ERR_SUCCESS) {
+			LOGAdcInterrupt("No buffer to queue");
+
+			// Let's restart.
+			_saadcState = ADC_SAADC_STATE_STOPPING;
+			uint32_t errorCode = app_sched_event_put(NULL, 0, adc_restart);
+			APP_ERROR_CHECK(errorCode);
+			return;
+		}
 
 		// SAADC will continue with sampling to the queued buffer.
 		// The start task is called via PPI.
