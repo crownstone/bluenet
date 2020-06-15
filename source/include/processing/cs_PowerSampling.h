@@ -93,6 +93,9 @@ private:
 	// - buffer[size-2] = previous filtered.
 	CircularBuffer<buffer_id_t> _bufferQueue;
 
+	cs_power_samples_header_t _lastSoftfuse;
+	int16_t _lastSoftfuseSamples[InterleavedBuffer::getChannelLength()] = {0};
+
 	TYPIFY(CONFIG_VOLTAGE_MULTIPLIER) _voltageMultiplier; //! Voltage multiplier from settings.
 	TYPIFY(CONFIG_CURRENT_MULTIPLIER) _currentMultiplier; //! Current multiplier from settings.
 	TYPIFY(CONFIG_VOLTAGE_ADC_ZERO) _voltageZero; //! Voltage zero from settings.

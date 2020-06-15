@@ -677,6 +677,7 @@ Value | Name| Description
 1 | Non-triggered switchcraft | Last samples that almost triggered switchcraft. Has 3 lists of subsequent voltage samples (index 0 is the first list). You can assume the time between the last sample of the first list and the first sample of the second list is equal to sample interval.
 2 | Now filtered | Last sampled values, after smoothing. Has 2 lists: index 0 for voltage, index 1 for current.
 3 | Now unfiltered | Last sampled values, before smoothing. Has 2 lists: index 0 for voltage, index 1 for current.
+4 | Soft fuse | Last samples that triggered a soft fuse. Has 1 list: index 0 for current.
 
 <a name="power_samples_result_packet"></a>
 #### Power samples result packet

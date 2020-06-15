@@ -830,6 +830,24 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 	}
 	// ---------------------- end of to do --------------------------
 
+
+	if ((currentRmsMA > _currentMilliAmpThresholdPwm) && (!stateErrors.errors.overCurrentDimmer)) {
+		// Store last buffer that would trigger the dimmer over current softfuse.
+		if ((switchState.state.dimmer != 0) || (switchState.state.relay == 0 && !justSwitchedOff && _igbtFailureDetectionStarted)) {
+			_lastSoftfuse.type = POWER_SAMPLES_TYPE_SOFTFUSE;
+			_lastSoftfuse.index = 0;
+			_lastSoftfuse.count = power.bufSize / power.numChannels;
+			_lastSoftfuse.unixTimestamp = SystemTime::posix();
+			_lastSoftfuse.delayUs = 0;
+			_lastSoftfuse.sampleIntervalUs = power.sampleIntervalUs;
+			_lastSoftfuse.offset = _avgZeroCurrent / 1024;
+			_lastSoftfuse.multiplier = _currentMultiplier;
+			for (sample_value_id_t i = 0; i < power.bufSize / power.numChannels; i += power.numChannels) {
+				_lastSoftfuseSamples[i] = power.buf[i + power.currentIndex];
+			}
+		}
+	}
+
 	// Check if data makes sense: RMS voltage should be about 230V.
 	if (voltageRmsMilliVolt != 0 && (voltageRmsMilliVolt < 200*1000 || 250*1000 < voltageRmsMilliVolt)) {
 		LOGw("voltageRmsMilliVolt=%u", voltageRmsMilliVolt);
@@ -915,7 +933,7 @@ void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, 
 		case POWER_SAMPLES_TYPE_NOW_FILTERED:
 		case POWER_SAMPLES_TYPE_NOW_UNFILTERED: {
 			// Check index
-			if (index >= 2) {
+			if (index > 1) {
 				LOGw("index=%u", index);
 				result.returnCode = ERR_WRONG_PARAMETER;
 				return;
@@ -954,6 +972,31 @@ void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, 
 			for (sample_value_id_t i = 0; i < numSamples; ++i) {
 				samples[i] = InterleavedBuffer::getInstance().getValue(bufIndex, index, i);
 			}
+
+			result.dataSize = requiredSize;
+			result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case POWER_SAMPLES_TYPE_SOFTFUSE: {
+			// Check index
+			if (index > 0) {
+				LOGw("index=%u", index);
+				result.returnCode = ERR_WRONG_PARAMETER;
+				return;
+			}
+
+			// Check size
+			size16_t samplesSize = _lastSoftfuse.count * sizeof(int16_t);
+			size16_t requiredSize = sizeof(_lastSoftfuse) + samplesSize;
+			if (result.buf.len < requiredSize) {
+				LOGw("size=%u required=%u", result.buf.len, requiredSize);
+				result.returnCode = ERR_BUFFER_TOO_SMALL;
+				return;
+			}
+
+			// Copy data to buffer.
+			memcpy(result.buf.data, &_lastSoftfuse, sizeof(_lastSoftfuse));
+			memcpy(result.buf.data + sizeof(_lastSoftfuse), _lastSoftfuseSamples, samplesSize);
 
 			result.dataSize = requiredSize;
 			result.returnCode = ERR_SUCCESS;
