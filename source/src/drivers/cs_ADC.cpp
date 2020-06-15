@@ -719,7 +719,7 @@ void ADC::_restart() {
 }
 
 void ADC::_handleTimeout() {
-	LOGAdcDebug("timeout");
+	LOGw("timeout");
 	stop();
 	start();
 }
@@ -836,13 +836,13 @@ void ADC::_handleAdcInterrupt() {
 		if (_saadcState != ADC_SAADC_STATE_BUSY) {
 			// Don't handle end events when state is not busy.
 			// The end event also fires when we stop the saadc.
-			LOGAdcInterrupt("Not busy: saadcState=%u", _saadcState);
+			LOGAdcDebug("Not busy: saadcState=%u", _saadcState);
 			return;
 		}
 
 		if (_saadcBufferQueue.empty()) {
 			// This shouldn't happen: a buffer is done, so it should be in the SAADC queue.
-			LOGAdcDebug("No buffer");
+			LOGe("No buffer");
 
 			// Let's restart.
 			_saadcState = ADC_SAADC_STATE_STOPPING;
@@ -862,7 +862,7 @@ void ADC::_handleAdcInterrupt() {
 
 		if (_saadcBufferQueue.empty()) {
 			// There is no buffer queued in the SAADC peripheral, so it has no more buffers to fill.
-			LOGAdcInterrupt("No buffer queued");
+			LOGw("No buffer queued");
 
 			// Let's restart.
 			_saadcState = ADC_SAADC_STATE_STOPPING;
@@ -876,7 +876,7 @@ void ADC::_handleAdcInterrupt() {
 
 		// We should have a buffer in queue for the SAADC.
 		if (_fillSaadcQueue() != ERR_SUCCESS) {
-			LOGAdcInterrupt("No buffer to queue");
+			LOGw("No buffer to queue");
 
 			// Let's restart.
 			_saadcState = ADC_SAADC_STATE_STOPPING;
