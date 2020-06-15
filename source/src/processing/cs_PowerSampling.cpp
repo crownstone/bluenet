@@ -35,6 +35,7 @@
 PowerSampling::PowerSampling() :
 		_isInitialized(false),
 		_adc(NULL),
+		_bufferQueue(CS_ADC_NUM_BUFFERS),
 		_consecutivePwmOvercurrent(0),
 		_lastEnergyCalculationTicks(0),
 		_energyUsedmicroJoule(0),
@@ -85,6 +86,8 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	settings.get(CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD, &switchcraftThreshold, sizeof(switchcraftThreshold));
 	RecognizeSwitch::getInstance().configure(switchcraftThreshold);
 	enableSwitchcraft(switchcraftEnabled);
+
+	_bufferQueue.init();
 
 	initAverages();
 	_recalibrateZeroVoltage = true;
@@ -224,6 +227,9 @@ void PowerSampling::handleEvent(event_t & event) {
 		_adcRestarts.count++;
 		_adcRestarts.lastTimestamp = SystemTime::posix();
 		_skipSwapDetection = 1;
+		while (!_bufferQueue.empty()) {
+			ADC::getInstance().releaseBuffer(_bufferQueue.pop());
+		}
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
 		RecognizeSwitch::getInstance().skip(2);
 		break;
@@ -263,10 +269,20 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	// Filter current buffer to the previous unfiltered buffer.
-	buffer_id_t filteredBufIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
+	buffer_id_t filteredBufIndex;
+	if (_bufferQueue.empty()) {
+		// Filter current buffer to current buffer.
+		filteredBufIndex = bufIndex;
+	}
+	else {
+		// Filter current buffer to last buffer in queue (which is the last unfiltered buffer).
+		filteredBufIndex = _bufferQueue[_bufferQueue.size() - 1];
+	}
+	LOGnone("filter %u to %u", bufIndex, filteredBufIndex);
 	_lastBufIndex = bufIndex;
 	_lastFilteredBufIndex = filteredBufIndex;
+
+	_bufferQueue.push(bufIndex);
 
 	power_t power;
 	power.buf = InterleavedBuffer::getInstance().getBuffer(filteredBufIndex);
@@ -281,16 +297,18 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 	filter(bufIndex, filteredBufIndex, power.voltageIndex);
 	filter(bufIndex, filteredBufIndex, power.currentIndex);
 
-	buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(filteredBufIndex);
 
-	nrf_saadc_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
-	if (isVoltageAndCurrentSwapped(power, prevBuf)) {
-		LOGw("Swap detected: restart ADC.");
-		_adc->stop();
-		printBuf(power);
-		_adc->start();
-		_adc->releaseBuffer(bufIndex);
-		return;
+	if (_bufferQueue.size() >= 3) {
+		buffer_id_t prevIndex = _bufferQueue[_bufferQueue.size() - 3]; // Previous filtered buffer.
+		nrf_saadc_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
+		if (isVoltageAndCurrentSwapped(power, prevBuf)) {
+			LOGw("Swap detected: restart ADC.");
+			_adc->stop();
+			printBuf(power);
+			_adc->releaseBuffer(bufIndex);
+			_adc->start();
+			return;
+		}
 	}
 
 #ifdef TEST_PIN
@@ -320,14 +338,18 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	bool switch_detected = RecognizeSwitch::getInstance().detect(filteredBufIndex, power.voltageIndex);
+	bool switch_detected = RecognizeSwitch::getInstance().detect(_bufferQueue, power.voltageIndex);
 	if (switch_detected) {
 		LOGd("Switch event detected!");
 		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
-	_adc->releaseBuffer(bufIndex);
+	// We want to keep 4 buffers: 1 unfiltered, 3 filtered.
+	if (_bufferQueue.size() > 4) {
+		buffer_id_t bufIndexToRelease = _bufferQueue.pop();
+		_adc->releaseBuffer(bufIndexToRelease);
+	}
 }
 
 void PowerSampling::initAverages() {

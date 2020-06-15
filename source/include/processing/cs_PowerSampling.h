@@ -84,6 +84,15 @@ private:
 	//! Operation mode of this device.
 	OperationMode _operationMode;
 
+	// Queue of buffers we can use for processing.
+	// If queue size == 1:
+	// - buffer[0] = last filtered.
+	// If queue size > 1:
+	// - buffer[size] = last unfiltered.
+	// - buffer[size-1] = last filtered.
+	// - buffer[size-2] = previous filtered.
+	CircularBuffer<buffer_id_t> _bufferQueue;
+
 	TYPIFY(CONFIG_VOLTAGE_MULTIPLIER) _voltageMultiplier; //! Voltage multiplier from settings.
 	TYPIFY(CONFIG_CURRENT_MULTIPLIER) _currentMultiplier; //! Current multiplier from settings.
 	TYPIFY(CONFIG_VOLTAGE_ADC_ZERO) _voltageZero; //! Voltage zero from settings.

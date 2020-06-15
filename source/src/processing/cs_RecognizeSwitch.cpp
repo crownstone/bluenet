@@ -44,9 +44,9 @@ void RecognizeSwitch::skip(uint16_t num) {
 
 /**
  * The recognizeSwitch function goes through a sequence of buffers to detect if a switch event happened in the buffer
- * in the middle. It uses the InterleavedBuffer to get the previous buffers.
+ * in the middle.
  */
-bool RecognizeSwitch::detect(buffer_id_t currentBufIndex, channel_id_t voltageChannelId) {
+bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId) {
 	bool result = false;
 	if (!_running) {
 		return result;
@@ -54,6 +54,9 @@ bool RecognizeSwitch::detect(buffer_id_t currentBufIndex, channel_id_t voltageCh
 	if (_skipSwitchDetectionTriggers > 0) {
 		_skipSwitchDetectionTriggers--;
 		return result;
+	}
+	if (bufQueue.size() < 4) {
+		return false;
 	}
 
 	InterleavedBuffer & ib = InterleavedBuffer::getInstance();
@@ -66,9 +69,9 @@ bool RecognizeSwitch::detect(buffer_id_t currentBufIndex, channel_id_t voltageCh
 	sample_value_id_t startInd;
 	sample_value_id_t endInd;
 
-	buffer_id_t bufIndex0 = ib.getPrevious(currentBufIndex, 2);;
-	buffer_id_t bufIndex1 = ib.getPrevious(currentBufIndex, 1);
-	buffer_id_t bufIndex2 = currentBufIndex;
+	buffer_id_t bufIndex0 = bufQueue[bufQueue.size() - 4];
+	buffer_id_t bufIndex1 = bufQueue[bufQueue.size() - 3];
+	buffer_id_t bufIndex2 = bufQueue[bufQueue.size() - 2]; // Last buffer is the unfiltered version.
 	LOGnone("buf ind=%u %u %u", bufIndex0, bufIndex1, bufIndex2);
 
 	float value0, value1, value2; // Value of buffer0, buffer1, buffer2
@@ -102,14 +105,14 @@ bool RecognizeSwitch::detect(buffer_id_t currentBufIndex, channel_id_t voltageCh
 		}
 	}
 	if (result) {
-		setLastDetection(true, currentBufIndex, voltageChannelId);
+		setLastDetection(true, bufQueue, voltageChannelId);
 		_skipSwitchDetectionTriggers = 5;
 	}
 
 	return result;
 }
 
-void RecognizeSwitch::setLastDetection(bool aboveThreshold, buffer_id_t currentBufIndex, channel_id_t voltageChannelId) {
+void RecognizeSwitch::setLastDetection(bool aboveThreshold, const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId) {
 	cs_power_samples_header_t* header;
 	int16_t* buf;
 	if (aboveThreshold) {
@@ -132,13 +135,10 @@ void RecognizeSwitch::setLastDetection(bool aboveThreshold, buffer_id_t currentB
 	// Copy the samples.
 	InterleavedBuffer & ib = InterleavedBuffer::getInstance();
 	buffer_id_t bufIndices[_numStoredBuffers];
-	bufIndices[_numStoredBuffers - 1] = currentBufIndex;
 	for (uint8_t i = 0; i < _numStoredBuffers; ++i) {
-		bufIndices[i] = ib.getPrevious(currentBufIndex, _numStoredBuffers - i - 1);
+		bufIndices[i] = bufQueue[bufQueue.size() - 4 + i]; // Last buffer is the unfiltered version.
 	}
-//	bufIndices[0] = ib.getPrevious(currentBufIndex, 2);
-//	bufIndices[1] = ib.getPrevious(currentBufIndex, 1);
-//	bufIndices[2] = currentBufIndex;
+
 	uint16_t numSamples = ib.getChannelLength();
 	for (uint8_t i = 0; i < _numStoredBuffers; ++i) {
 		for (sample_value_id_t j = 0; j < numSamples; ++j) {
