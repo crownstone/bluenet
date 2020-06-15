@@ -300,7 +300,7 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 
 	if (_bufferQueue.size() >= 3) {
 		buffer_id_t prevIndex = _bufferQueue[_bufferQueue.size() - 3]; // Previous filtered buffer.
-		nrf_saadc_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
+		sample_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
 		if (isVoltageAndCurrentSwapped(power, prevBuf)) {
 			LOGw("Swap detected: restart ADC.");
 			_adc->stop();
@@ -371,7 +371,7 @@ uint16_t PowerSampling::determineCurrentIndex(power_t & power) {
  * Problems:
  * - Vzero and Izero can be different and affect Vrm and Irms.
  */
-bool PowerSampling::isVoltageAndCurrentSwapped(power_t & power, nrf_saadc_value_t* prevBuf) {
+bool PowerSampling::isVoltageAndCurrentSwapped(power_t & power, sample_value_t* prevBuf) {
 	// Problem: switchcraft makes this function falsely detect a swap.
 	return false;
 	if (_skipSwapDetection != 0) {
@@ -731,7 +731,7 @@ void PowerSampling::calculatePower(power_t & power) {
 			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
 			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT,(uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
+				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
 			}
 			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_CURRENT);
 		}
@@ -753,7 +753,7 @@ void PowerSampling::calculatePower(power_t & power) {
 			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
 			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
+				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
 			}
 			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_VOLTAGE);
 		}

@@ -62,7 +62,7 @@ public:
 	 * Struct that defines the buffer received from the ADC sampler in scanning mode.
 	 */
 	typedef struct {
-		nrf_saadc_value_t* buf;
+		sample_value_t* buf;
 		uint16_t bufSize;
 		uint16_t numChannels;
 		uint16_t voltageIndex;
@@ -198,7 +198,7 @@ private:
 	 * Checks if previous voltage samples look more like this buffer voltage samples or current samples.
 	 * Assumes previous buffer is valid, and of same size as this buffer.
 	 */
-	bool isVoltageAndCurrentSwapped(power_t & power, nrf_saadc_value_t* prevBuf);
+	bool isVoltageAndCurrentSwapped(power_t & power, sample_value_t* prevBuf);
 
 	/** Calculate the average power usage
 	 */
