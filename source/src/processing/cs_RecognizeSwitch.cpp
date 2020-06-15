@@ -11,6 +11,9 @@
 #include <structs/cs_PacketsInternal.h>
 #include <time/cs_SystemTime.h>
 
+#define LOGSwitchcraftDebug LOGnone
+#define LOGSwitchcraftVerbose LOGnone
+
 RecognizeSwitch::RecognizeSwitch()
 {
 
@@ -47,13 +50,13 @@ void RecognizeSwitch::skip(uint16_t num) {
  * in the middle.
  */
 bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId) {
-	bool result = false;
+	bool found = false;
 	if (!_running) {
-		return result;
+		return false;
 	}
 	if (_skipSwitchDetectionTriggers > 0) {
 		_skipSwitchDetectionTriggers--;
-		return result;
+		return false;
 	}
 	if (bufQueue.size() < 4) {
 		return false;
@@ -77,6 +80,7 @@ bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channe
 	float value0, value1, value2; // Value of buffer0, buffer1, buffer2
 	float diff01, diff12, diff02;
 	float diffSum01, diffSum12, diffSum02; // Difference between buf0 and buf1, between buf1 and buf2, between buf0 and buf2
+	bool foundAlmost = false;
 	for (startInd = 0; startInd < (ib.getChannelLength() - shift); startInd += shift) {
 		diffSum01 = 0;
 		diffSum12 = 0;
@@ -94,22 +98,33 @@ bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channe
 			diffSum12 += diff12;
 			diffSum02 += diff02;
 		}
-		LOGnone("%f %f %f", diffSum01, diffSum12, diffSum02);
+		LOGSwitchcraftVerbose("%f %f %f", diffSum01, diffSum12, diffSum02);
 		if (diffSum01 > _thresholdDifferent && diffSum12 > _thresholdDifferent) {
 			float minDiffSum = diffSum01 < diffSum12 ? diffSum01 : diffSum12;
 			if (diffSum02 < _thresholdSimilar || minDiffSum / diffSum02 > _thresholdRatio) {
-				result = true;
-				LOGd("Found switch: %i %i %i %i", (int)diffSum01, (int)diffSum12, (int)diffSum02, (int)(minDiffSum / diffSum02));
+				found = true;
+				LOGSwitchcraftDebug("Found switch: %i %i %i %i", (int)diffSum01, (int)diffSum12, (int)diffSum02, (int)(minDiffSum / diffSum02));
 				break;
 			}
 		}
+
+		// Check if it was almost recognized as switch.
+		float lowerTheshold = 0.1 * _thresholdDifferent;
+		if (diffSum01 > lowerTheshold && diffSum12 > lowerTheshold && diffSum02 < _thresholdSimilar) {
+			LOGSwitchcraftDebug("Almost found switch: %i %i %i", (int)diffSum01, (int)diffSum12, (int)diffSum02);
+			foundAlmost = true;
+		}
 	}
-	if (result) {
+	if (found) {
 		setLastDetection(true, bufQueue, voltageChannelId);
 		_skipSwitchDetectionTriggers = 5;
 	}
+	else if (foundAlmost) {
+		LOGSwitchcraftDebug("Almost found switch");
+		setLastDetection(false, bufQueue, voltageChannelId);
+	}
 
-	return result;
+	return found;
 }
 
 void RecognizeSwitch::setLastDetection(bool aboveThreshold, const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId) {
