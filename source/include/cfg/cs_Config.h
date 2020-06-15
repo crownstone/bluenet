@@ -170,7 +170,7 @@
 
 #define CS_ADC_SAMPLE_INTERVAL_US                200 // 100 samples per period of 50Hz wave
 #define CS_ADC_MAX_PINS                          2
-#define CS_ADC_NUM_BUFFERS                       5
+#define CS_ADC_NUM_BUFFERS                       8 // 4 buffers are held by processing, 2 queued in SAADC, 1 moves between them, 1 extra for CPU usage peaks.
 #define CS_ADC_BUF_SIZE                          (CS_ADC_MAX_PINS * 20000 / CS_ADC_SAMPLE_INTERVAL_US) // Make size so it fills up 20ms of data.
 #define CS_ADC_TIMEOUT_SAMPLES                   2 // Timeout when no buffer has been set at N samples before end of interval.
 
