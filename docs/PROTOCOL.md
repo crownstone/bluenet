@@ -656,7 +656,7 @@ Value | Name | Description
 3 | UART | Command came from UART.
 4 | Connection | Command came from a BLE connection.
 5 | Switchcraft | Switchcraft triggered this command.
-
+6 | Tap to toggle | Tap to toggle triggered this command.
 
 
 
