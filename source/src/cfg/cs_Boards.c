@@ -306,7 +306,8 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->flags.hasAdcZeroRef                = true;
 	p_config->flags.pwmTempInverted              = true; 
 
-	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG_ONE;
+//	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG_ONE;
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
 
 	p_config->voltageMultiplier                  = 0.19355f;     // unknown
 	p_config->currentMultiplier                  = 0.00385f;     // unknown

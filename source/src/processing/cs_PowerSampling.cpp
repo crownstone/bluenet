@@ -850,7 +850,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 
 	// Check if data makes sense: RMS voltage should be about 230V.
 	if (voltageRmsMilliVolt != 0 && (voltageRmsMilliVolt < 200*1000 || 250*1000 < voltageRmsMilliVolt)) {
-		LOGw("voltageRmsMilliVolt=%u", voltageRmsMilliVolt);
+//		LOGw("voltageRmsMilliVolt=%u", voltageRmsMilliVolt);
 		return;
 	}
 

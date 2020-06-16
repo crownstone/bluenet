@@ -290,11 +290,9 @@ RAM_BOOTLOADER_START_OFFSET=0x718
 # We repeat them here, but you will have to adjust that file...
 # TODO: This depends on the target nrf52832 vs nrf52833. That is not nice...
 # TODO: Copy the relevant files to the local repository again...
-#APPLICATION_START_ADDRESS=0x0001C000
 #APPLICATION_START_ADDRESS=0x00026000
 
 # Bootloader address - application address, so: 0x76000 - 0x26000 - 0x8000 = 0x50000
-#APPLICATION_LENGTH=0x64000
 #APPLICATION_LENGTH=0x50000
 
 # Start of RAM for the application (from 0x20000000 and up to RAM_R1_BASE it is reserved for the softdevice)
@@ -304,7 +302,6 @@ RAM_BOOTLOADER_START_OFFSET=0x718
 # On the nRF52833 we have 128kB of RAM, end is at 0x20020000, so the amount of RAM for the application becomes
 # 0x20020000 - RAM_R1_BASE = 0x1DC40
 #RAM_APPLICATION_AMOUNT=0x1DC40
-#RAM_APPLICATION_AMOUNT=0x0DC40
 
 
 ## To enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
