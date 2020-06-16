@@ -83,6 +83,18 @@ include(${DEFAULT_MODULES_PATH}/git_info.cmake)
 include(${DEFAULT_MODULES_PATH}/compilation_info.cmake)
 
 #######################################################################################################################
+# Load configuration values from multiple files
+#######################################################################################################################
+
+set(DEFAULT_CONFIGURATION_FILE ${DEFAULT_CONF_CMAKE_PATH}/CMakeBuild.config.default)
+set(BOARD_TARGET_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
+set(BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+
+load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
+load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
+load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
+
+#######################################################################################################################
 # Download urls and hashes
 #######################################################################################################################
 
@@ -91,11 +103,16 @@ include(${DEFAULT_MODULES_PATH}/compilation_info.cmake)
 set(NORDIC_DOWNLOAD_URL https://www.nordicsemi.com/-/media/Software-and-other-downloads)
 
 # The Nordic SDK
-set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5/Binaries/nRF5SDK153059ac345.zip)
-set(NORDIC_NRF5_SDK_MD5 46a8c9cd4b5d7ee4c5142e8fae3444c4)
+if (NORDIC_SDK_VERSION EQUAL 15)
+	set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5/Binaries/nRF5SDK153059ac345.zip)
+	set(NORDIC_NRF5_SDK_MD5 46a8c9cd4b5d7ee4c5142e8fae3444c4)
+elseif (NORDIC_SDK_VERSION EQUAL 16)
+	set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5/Binaries/nRF5SDK160098a08e2.zip)
+	set(NORDIC_NRF5_SDK_MD5 cc2ccb57d2c7159fd37f9e04fca6cc64)
+else()
+	message(FATAL_ERROR "Unkown SDK version: ${NORDIC_SDK_VERSION}")
+endif()
 
-#set(NORDIC_NRF5_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/SDKs/nRF5/Binaries/nRF5SDK160098a08e2.zip)
-#set(NORDIC_NRF5_SDK_MD5 cc2ccb57d2c7159fd37f9e04fca6cc64)
 
 # The mesh
 set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/sDKS/nRF5-SDK-for-Mesh/nrf5SDKforMeshv320src.zip)
@@ -112,16 +129,21 @@ set(GCC_ARM_NONE_EABI_MD5 6341f11972dac8de185646d0fbd73bfc)
 
 # The JLink tool
 set(JLINK_DOWNLOAD_URL https://www.segger.com/downloads/jlink)
-set(JLINK_DEB_FILE JLink_Linux_V662d_x86_64.deb)
+#set(JLINK_DEB_FILE JLink_Linux_V662d_x86_64.deb)
+set(JLINK_DEB_FILE JLink_Linux_V650_x86_64.deb)
 set(JLINK_LINUX_DOWNLOAD_URL ${JLINK_DOWNLOAD_URL}/${JLINK_DEB_FILE})
-set(JLINK_MD5 9da2ff634edbe0c8adf68bdb3c850b90)
+#set(JLINK_MD5 9da2ff634edbe0c8adf68bdb3c850b90)
+set(JLINK_MD5 bdf926715a45dfd930d4516e6a5027c1)
 
 #######################################################################################################################
 # Local names
 #######################################################################################################################
 
-set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex)
+
+#set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/s132_nrf52_6.1.1_softdevice.hex)
 #set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/s132_nrf52_7.0.1_softdevice.hex)
+set(SOFTDEVICE_HEX_FILE components/softdevice/s132/hex/${SOFTDEVICE}_softdevice.hex)
+
 list(APPEND CMAKE_ARGS "-DSOFTDEVICE_HEX_FILE:STRING=${SOFTDEVICE_HEX_FILE}")
 
 #######################################################################################################################
@@ -232,17 +254,7 @@ if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
 		)
 endif()
 
-#######################################################################################################################
-# Load configuration values from multiple files
-#######################################################################################################################
 
-set(DEFAULT_CONFIGURATION_FILE ${DEFAULT_CONF_CMAKE_PATH}/CMakeBuild.config.default)
-set(BOARD_TARGET_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
-set(BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
-
-load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
-load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
-load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
 
 if(FACTORY_IMAGE)
 	MESSAGE(WARNING "Make a factory image. The usual CMakeBuild.config files will not be used. "
