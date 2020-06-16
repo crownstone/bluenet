@@ -33,7 +33,8 @@ SERIAL_VERBOSITY=SERIAL_BYTE_PROTOCOL_ONLY
 # SERIAL_ENABLE_RX_AND_TX    3
 CS_SERIAL_ENABLED=0
 
-# If you have serial debug, you probably want to disable the binary protocol, so that you only get debug text.
+# Enable the binary protocol if you want to use a UART library.
+# Disable the binary protocol if you want to use a serial communication program, like Minicom.
 CS_UART_BINARY_PROTOCOL_ENABLED=1
 
 # Use the NRF logger module, handy when debugging NRF modules.
@@ -179,8 +180,10 @@ JLINK=/usr/bin/JLinkExe
 # The JLink utilty that can be used with gdb
 JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
 
-# The device can be nRF51822 or nRF52832_xxAA
+# The device can be nRF52832_xxAA or nRF52833
+# Matches the options of JLink
 DEVICE=nRF52832_xxAA
+#DEVICE=nRF52833
 
 # Use SoftDevice (setting to 0 is untested)
 # [18.07.16] do we really want this flag still? Most of our code depends on the
