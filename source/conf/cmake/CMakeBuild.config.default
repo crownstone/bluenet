@@ -74,7 +74,8 @@ CS_SERIAL_NRF_LOG_PIN_TX=6
 # ACR01B11A            1505
 HARDWARE_BOARD=PCA10040
 
-# The default pin layout as defined by Nordic and used by the bootloader
+# The default pin layout as defined by Nordic and used by the bootloader.
+# Use PCA10040 for the nRF52832, and PCA10100 for the nRF52833.
 NORDIC_HARDWARE_BOARD=PCA10040
 
 # The default pin layout as defined by Nordic and used by the bootloader
