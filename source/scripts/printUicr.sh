@@ -1,16 +1,15 @@
 #!/bin/bash
 
-# Optionally target as second argument to the script
-target=${1:-crownstone}
+if [ $# -lt 0 ]; then
+        echo "Usage: $0 [jlink-serial]"
+        exit 1
+fi
 
-path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/_utils.sh
-source ${path}/_check_targets.sh $target
-source $path/_config.sh
+if [ $# -lt 1 ]; then
+        nrfjprog --memrd 0x10001000 --n 0x100
+        nrfjprog --reset
+else
+        nrfjprog --memrd 0x10001000 --n 0x100 -s $1
+        nrfjprog --reset -s $1
+fi
 
-echo "NRF uicr:"
-$path/_readbytes.sh 0x10001000 0x40
-
-
-echo "Hardware version:"
-$path/_readbytes.sh $HARDWARE_BOARD_ADDRESS 0x40

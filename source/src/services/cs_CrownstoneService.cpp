@@ -38,20 +38,20 @@ void CrownstoneService::createCharacteristics() {
 	cs_data_t writeBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
 	_controlPacketAccessor = new ControlPacketAccessor<>();
 	_controlPacketAccessor->assign(writeBuf.data, writeBuf.len);
-	addControlCharacteristic(writeBuf.data, writeBuf.len, CONTROL_UUID);
+	addControlCharacteristic(writeBuf.data, writeBuf.len, CONTROL_UUID, BASIC);
 
 	cs_data_t readBuf = CharacteristicReadBuffer::getInstance().getBuffer();
 	_resultPacketAccessor = new ResultPacketAccessor<>();
 	_resultPacketAccessor->assign(readBuf.data, readBuf.len);
-	addResultCharacteristic(readBuf.data, readBuf.len, RESULT_UUID);
+	addResultCharacteristic(readBuf.data, readBuf.len, RESULT_UUID, BASIC);
 #else
 	LOGi(FMT_CHAR_SKIP, STR_CHAR_CONTROL);
 #endif
 
 	{
-		LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_NONCE);
+		LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_DATA);
 		cs_data_t readBuf = CharacteristicReadBuffer::getInstance().getBuffer();
-		addSessionNonceCharacteristic(readBuf.data, readBuf.len);
+		addSessionDataCharacteristic(readBuf.data, readBuf.len);
 	}
 
 	LOGi(FMT_CHAR_ADD, STR_CHAR_FACTORY_RESET);
@@ -77,40 +77,41 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 	_controlCharacteristic->setValueLength(0);
 	_controlCharacteristic->onWrite([&](const EncryptionAccessLevel accessLevel, const buffer_ptr_t& value, uint16_t length) -> void {
 		// Encryption in the write stage verifies if the key is at the lowest level, command specific permissions are handled in the CommandHandler.
-		command_result_t result;
+		cs_result_t result;
 		CommandHandlerTypes type = CTRL_CMD_UNKNOWN;
+		uint8_t protocol = CS_CONNECTION_PROTOCOL_VERSION;
 		CharacteristicWriteBuffer& writeBuffer = CharacteristicWriteBuffer::getInstance();
-		LOGd("controlCharacteristic onWrite");
+		LOGd("controlCharacteristic onWrite buf=%p size=%u", value, length);
 		// At this point it is too late to check if writeBuffer was locked, because the softdevice doesn't care if the writeBuffer was locked,
 		// it writes to the buffer in any case.
 		if (!writeBuffer.isLocked()) {
 			LOGi(MSG_CHAR_VALUE_WRITE);
+			protocol = _controlPacketAccessor->getProtocolVersion();
 			type = (CommandHandlerTypes) _controlPacketAccessor->getType();
 			cs_data_t payload = _controlPacketAccessor->getPayload();
-			cs_data_t resultData;
 //			if (_resultPacketAccessor != NULL) {
 			assert(_resultPacketAccessor != NULL, "_resultPacketAccessor is null");
-			resultData.data = _resultPacketAccessor->getPayloadBuffer();
-			resultData.len = _resultPacketAccessor->getMaxPayloadSize();
+			result.buf.data = _resultPacketAccessor->getPayloadBuffer();
+			result.buf.len = _resultPacketAccessor->getMaxPayloadSize();
 //			}
 
-			result = CommandHandler::getInstance().handleCommand(type, payload, cmd_source_t(CS_CMD_SOURCE_CONNECTION), accessLevel, resultData);
+			CommandHandler::getInstance().handleCommand(protocol, type, payload, cmd_source_with_counter_t(CS_CMD_SOURCE_CONNECTION), accessLevel, result);
 			writeBuffer.unlock();
 		}
 		else {
 			LOGe(MSG_BUFFER_IS_LOCKED);
-			result = command_result_t(ERR_BUFFER_LOCKED);
+			result.returnCode = ERR_BUFFER_LOCKED;
 		}
 
-		[[maybe_unused]] uint8_t* buf = _resultPacketAccessor->getSerializedBuffer().data;
-		LOGd("addControlCharacteristic result.returnCode %d, data len: %d", result.returnCode, result.data.len);
-		for(auto i = 0; i < 50; i+=10){
-			LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
-			buf[i+0],buf[i+1],buf[i+2],buf[i+3],buf[i+4],
-			buf[i+5],buf[i+6],buf[i+7],buf[i+8],buf[i+9]);
-		}
+		LOGd("addControlCharacteristic returnCode=%u dataSize=%u", result.returnCode, result.dataSize);
+//		[[maybe_unused]] uint8_t* buf = _resultPacketAccessor->getSerializedBuffer().data;
+//		for(auto i = 0; i < 50; i+=10){
+//			LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
+//			buf[i+0],buf[i+1],buf[i+2],buf[i+3],buf[i+4],
+//			buf[i+5],buf[i+6],buf[i+7],buf[i+8],buf[i+9]);
+//		}
 
-		writeResult(type, result);
+		writeResult(protocol, type, result);
 	});
 }
 
@@ -131,22 +132,22 @@ void CrownstoneService::addResultCharacteristic(buffer_ptr_t buffer, cs_buffer_s
 	_resultCharacteristic->setValueLength(0);
 }
 
-void CrownstoneService::addSessionNonceCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size, EncryptionAccessLevel minimumAccessLevel) {
-	if (_sessionNonceCharacteristic != NULL) {
-		LOGe(FMT_CHAR_EXISTS, STR_CHAR_SESSION_NONCE);
+void CrownstoneService::addSessionDataCharacteristic(buffer_ptr_t buffer, cs_buffer_size_t size, EncryptionAccessLevel minimumAccessLevel) {
+	if (_sessionDataCharacteristic != NULL) {
+		LOGe(FMT_CHAR_EXISTS, STR_CHAR_SESSION_DATA);
 		return;
 	}
-	_sessionNonceCharacteristic = new Characteristic<buffer_ptr_t>();
-	addCharacteristic(_sessionNonceCharacteristic);
-	_sessionNonceCharacteristic->setUUID(UUID(getUUID(), SESSION_NONCE_UUID));
-	_sessionNonceCharacteristic->setName(BLE_CHAR_SESSION_NONCE);
-	_sessionNonceCharacteristic->setWritable(false);
-	_sessionNonceCharacteristic->setNotifies(true);
-	_sessionNonceCharacteristic->setValue(buffer);
-	_sessionNonceCharacteristic->setSharedEncryptionBuffer(false);
-	_sessionNonceCharacteristic->setMinAccessLevel(minimumAccessLevel);
-	_sessionNonceCharacteristic->setMaxGattValueLength(size);
-	_sessionNonceCharacteristic->setValueLength(0);
+	_sessionDataCharacteristic = new Characteristic<buffer_ptr_t>();
+	addCharacteristic(_sessionDataCharacteristic);
+	_sessionDataCharacteristic->setUUID(UUID(getUUID(), SESSION_DATA_UUID));
+	_sessionDataCharacteristic->setName(BLE_CHAR_SESSION_DATA);
+	_sessionDataCharacteristic->setWritable(false);
+	_sessionDataCharacteristic->setNotifies(true);
+	_sessionDataCharacteristic->setValue(buffer);
+	_sessionDataCharacteristic->setSharedEncryptionBuffer(false);
+	_sessionDataCharacteristic->setMinAccessLevel(minimumAccessLevel);
+	_sessionDataCharacteristic->setMaxGattValueLength(size);
+	_sessionDataCharacteristic->setValueLength(0);
 }
 
 void CrownstoneService::addFactoryResetCharacteristic() {
@@ -170,7 +171,7 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 	});
 }
 
-void CrownstoneService::writeResult(CommandHandlerTypes type, command_result_t result) {
+void CrownstoneService::writeResult(uint8_t protocol, CommandHandlerTypes type, cs_result_t & result) {
 	if (_resultCharacteristic == NULL) {
 		return;
 	}
@@ -178,14 +179,15 @@ void CrownstoneService::writeResult(CommandHandlerTypes type, command_result_t r
 	// Payload has already been set by command handler.
 	// But the size hasn't been set yet.
 //	cs_ret_code_t retVal = _resultPacketAccessor->setPayload(result.data.data, result.data.len);
-	assert(result.data.len == 0 || result.data.data == _resultPacketAccessor->getPayloadBuffer(), "Wrong buffer");
-	cs_ret_code_t retVal = _resultPacketAccessor->setPayloadSize(result.data.len);
+	assert(result.dataSize == 0 || result.buf.data == _resultPacketAccessor->getPayloadBuffer(), "Wrong buffer");
+	cs_ret_code_t retVal = _resultPacketAccessor->setPayloadSize(result.dataSize);
 	if (!SUCCESS(retVal)) {
 		LOGe("Unable to set result: %u", retVal);
 		result.returnCode = retVal;
 		_resultPacketAccessor->setPayloadSize(0);
 	}
-	LOGd("Result: type=%u code=%u size=%u", type, result.returnCode, result.data.len);
+	LOGd("Result: protocol=%u type=%u code=%u size=%u", protocol, type, result.returnCode, result.dataSize);
+	_resultPacketAccessor->setProtocolVersion(protocol);
 	_resultPacketAccessor->setType(type);
 	_resultPacketAccessor->setResult(result.returnCode);
 	_resultCharacteristic->setValueLength(_resultPacketAccessor->getSerializedSize());
@@ -194,12 +196,12 @@ void CrownstoneService::writeResult(CommandHandlerTypes type, command_result_t r
 
 void CrownstoneService::handleEvent(event_t & event) {
 	switch(event.type) {
-	case CS_TYPE::EVT_SESSION_NONCE_SET: {
+	case CS_TYPE::EVT_SESSION_DATA_SET: {
 		// Check if this characteristic exists first. In case of setup mode it does not for instance.
-		if (_sessionNonceCharacteristic != NULL) {
-			_sessionNonceCharacteristic->setValueLength(event.size);
-			_sessionNonceCharacteristic->setValue((uint8_t*)event.data);
-			_sessionNonceCharacteristic->updateValue(ECB_GUEST_CAFEBABE);
+		if (_sessionDataCharacteristic != NULL) {
+			_sessionDataCharacteristic->setValueLength(event.size);
+			_sessionDataCharacteristic->setValue((uint8_t*)event.data);
+			_sessionDataCharacteristic->updateValue(ECB_GUEST_CAFEBABE);
 		}
 		break;
 	}
@@ -215,13 +217,26 @@ void CrownstoneService::handleEvent(event_t & event) {
 	}
 	case CS_TYPE::EVT_BLE_DISCONNECT: {
 		// Check if this characteristic exists first. In case of setup mode it does not for instance.
-		if (_sessionNonceCharacteristic != NULL) {
-			_sessionNonceCharacteristic->setValueLength(0);
+		if (_sessionDataCharacteristic != NULL) {
+			_sessionDataCharacteristic->setValueLength(0);
 		}
 		break;
 	}
 	case CS_TYPE::EVT_SETUP_DONE: {
-		writeResult(CTRL_CMD_SETUP, command_result_t(ERR_SUCCESS));
+		cs_result_t result(ERR_SUCCESS);
+		writeResult(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_SETUP, result);
+//		writeResult(CTRL_CMD_SETUP, cs_result_t(ERR_SUCCESS));
+		break;
+	}
+	case CS_TYPE::EVT_MICROAPP: {
+		memcpy(_resultPacketAccessor->getPayloadBuffer(), event.data, TypeSize(event.type));
+		cs_data_t resultData(_resultPacketAccessor->getPayloadBuffer(), TypeSize(event.type));
+		cs_result_t result(resultData);
+		TYPIFY(EVT_MICROAPP) data = *((TYPIFY(EVT_MICROAPP)*)event.data);
+		result.returnCode = data.error;
+		result.dataSize = TypeSize(event.type);
+		uint8_t protocolVersion = 5; // TODO: get this from event.
+		writeResult(protocolVersion, CTRL_CMD_MICROAPP_UPLOAD, result);
 		break;
 	}
 	default: {}

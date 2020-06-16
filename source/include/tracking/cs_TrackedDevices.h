@@ -72,6 +72,19 @@ private:
 	uint8_t deviceListSize = 0;
 
 	/**
+	 * Whether there has been a successful sync of tracked devices.
+	 *
+	 * For now, this means just getting a list of devices from another crownstone, after boot.
+	 */
+	bool deviceListIsSynced = false;
+
+	/**
+	 * When syncing, the remote crownstone will tell how many devices there are.
+	 * This number is cached in this variable, so we know when we're synced.
+	 */
+	uint8_t expectedDeviceListSize = 0xFF;
+
+	/**
 	 * Find device with given ID, else add a new device with given ID.
 	 *
 	 * returns null if couldn't be added.
@@ -110,6 +123,7 @@ private:
 	cs_ret_code_t handleUpdate(internal_update_tracked_device_packet_t& packet);
 	void handleMeshRegister(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)& packet);
 	void handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& packet);
+	void handleMeshListSize(TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)& packet);
 	void handleScannedDevice(adv_background_parsed_v1_t& packet);
 
 	/**
@@ -127,6 +141,8 @@ private:
 	 */
 	bool isTokenOkToSet(TrackedDevice& device, uint8_t* deviceToken, uint8_t size);
 
+	void print(TrackedDevice& device);
+
 	/**
 	 * A minute has passed.
 	 *
@@ -139,6 +155,11 @@ private:
 	 * Returns true when all fields are set.
 	 */
 	bool allFieldsSet(TrackedDevice& device);
+
+	/**
+	 * Check if tracked device list is synced yet.
+	 */
+	void checkSynced();
 
 
 	void setAccessLevel(TrackedDevice& device, uint8_t accessLevel);
@@ -172,6 +193,16 @@ private:
 	 * Send tracked device token msg to mesh.
 	 */
 	void sendTokenToMesh(TrackedDevice& device);
+
+	/**
+	 * Send tracked devices list size to mesh.
+	 */
+	void sendListSizeToMesh();
+
+	/**
+	 * Send all tracked devices to mesh.
+	 */
+	void sendDeviceList();
 };
 
 

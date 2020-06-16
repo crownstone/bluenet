@@ -12,11 +12,12 @@
 #include "common/cs_Types.h"
 #include "processing/cs_EncryptionHandler.h"
 #include "storage/cs_State.h"
+#include "time/cs_SystemTime.h"
 #include "util/cs_BleError.h"
 
 // Defines to enable extra debug logs.
-// #define COMMAND_ADV_DEBUG
-// #define COMMAND_ADV_VERBOSE
+//#define COMMAND_ADV_DEBUG
+//#define COMMAND_ADV_VERBOSE
 
 #ifdef COMMAND_ADV_DEBUG
 #define LOGCommandAdvDebug LOGd
@@ -162,7 +163,7 @@ int CommandAdvHandler::checkSimilarCommand(uint8_t deviceToken, cs_data_t& encry
 	for (int i=0; i<CMD_ADV_MAX_CLAIM_COUNT; ++i) {
 		if (_claims[i].deviceToken == deviceToken) {
 			if (_claims[i].timeoutCounter && _claims[i].encryptedRC5 == encryptedRC5 && memcmp(_claims[i].encryptedData, encryptedData.data, CMD_ADC_ENCRYPTED_DATA_SIZE) == 0) {
-				LOGCommandAdvDebug("Ignore similar payload");
+				LOGCommandAdvVerbose("Ignore similar payload");
 				// Since all encrypted data is similar: set cached decrypted RC5.
 				// The RC5 data does not use access level, so changing access level does not do anything.
 				decryptedRC5 = _claims[i].decryptedRC5;
@@ -252,16 +253,24 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 #endif
 
 	uint32_t validationTimestamp = (decryptedData[0] << 0) | (decryptedData[1] << 8) | (decryptedData[2] << 16) | (decryptedData[3] << 24);
-	TYPIFY(STATE_TIME) timestamp;
-	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
 	uint8_t typeInt = decryptedData[4];
 	AdvCommandTypes type = (AdvCommandTypes)typeInt;
 	uint16_t headerSize = sizeof(validationTimestamp) + sizeof(typeInt);
 	uint16_t length = SOC_ECB_CIPHERTEXT_LENGTH - headerSize;
 	uint8_t* commandData = decryptedData + headerSize;
 
-	// TODO: validate with time.
-	if (validationTimestamp != 0xCAFEBABE) {
+	uint32_t timestamp = SystemTime::posix();
+	LOGCommandAdvVerbose("validation=%u time=%u", validationTimestamp, timestamp);
+
+	// For now, we also allow CAFEBABE as validation.
+	bool validated = false;
+	if (validationTimestamp == 0xCAFEBABE) {
+		validated = true;
+	}
+	if (timestamp - 2*60 < validationTimestamp && validationTimestamp < timestamp + 2*60) {
+		validated = true;
+	}
+	if (!validated) {
 		return false;
 	}
 	if (!decryptRC5Payload(encryptedPayloadRC5, decryptedPayloadRC5)) {
@@ -274,14 +283,14 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		return true;
 	}
 
+	cmd_source_with_counter_t source(cmd_source_t(CS_CMD_SOURCE_TYPE_BROADCAST, header.deviceToken), (decryptedPayloadRC5[0] >> 8) & 0xFF);
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
+	controlCmd.protocolVersion = CS_CONNECTION_PROTOCOL_VERSION;
 	controlCmd.type = CTRL_CMD_UNKNOWN;
 	controlCmd.accessLevel = accessLevel;
 	controlCmd.data = commandData;
 	controlCmd.size = length;
-	controlCmd.source.flagExternal = false;
-	controlCmd.source.sourceId = CS_CMD_SOURCE_DEVICE_TOKEN + header.deviceToken;
-	controlCmd.source.count = (decryptedPayloadRC5[0] >> 8) & 0xFF;
+
 	LOGCommandAdvDebug("adv cmd type=%u", type);
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		LOGCommandAdvDebug("no access");
@@ -290,10 +299,13 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 
 
 	switch (type) {
+		case ADV_CMD_NOOP: {
+			break;
+		}
 		case ADV_CMD_MULTI_SWITCH: {
 			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
-			LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
-			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+			LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, source.sourceId, source.count);
+			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 			event.dispatch();
 			break;
 		}
@@ -313,8 +325,8 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 				controlCmd.type = CTRL_CMD_SET_TIME;
 				controlCmd.data = commandData + flagsSize;
 				controlCmd.size = setTimeSize;
-				LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, controlCmd.source.sourceId, controlCmd.source.count);
-				event_t eventSetTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+				LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, source.sourceId, source.count);
+				event_t eventSetTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 				eventSetTime.dispatch();
 			}
 
@@ -327,7 +339,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 				controlCmd.type = CTRL_CMD_SET_SUN_TIME;
 				controlCmd.data = (buffer_ptr_t)&sunTime;
 				controlCmd.size = sizeof(sunTime);
-				event_t eventSetSunTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+				event_t eventSetSunTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 				eventSetSunTime.dispatch();
 			}
 			break;
@@ -343,6 +355,18 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 			// Send over mesh.
 			event_t meshCmd(CS_TYPE::CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS, commandData, requiredSize);
 			meshCmd.dispatch();
+			break;
+		}
+		case ADV_CMD_UPDATE_TRACKED_DEVICE: {
+			size16_t requiredSize = sizeof(update_tracked_device_packet_t);
+			if (length < requiredSize) {
+				return true;
+			}
+			TYPIFY(CMD_UPDATE_TRACKED_DEVICE) eventData;
+			eventData.accessLevel = accessLevel;
+			eventData.data = *((update_tracked_device_packet_t*)commandData);
+			event_t event(CS_TYPE::CMD_UPDATE_TRACKED_DEVICE, &eventData, sizeof(eventData));
+			event.dispatch();
 			break;
 		}
 		default:
@@ -380,7 +404,9 @@ void CommandAdvHandler::handleDecryptedRC5Payload(scanned_device_t* scannedDevic
 
 EncryptionAccessLevel CommandAdvHandler::getRequiredAccessLevel(const AdvCommandTypes type) {
 	switch (type) {
+		case ADV_CMD_NOOP:
 		case ADV_CMD_MULTI_SWITCH:
+		case ADV_CMD_UPDATE_TRACKED_DEVICE:
 			return BASIC;
 		case ADV_CMD_SET_TIME:
 		case ADV_CMD_SET_BEHAVIOUR_SETTINGS:

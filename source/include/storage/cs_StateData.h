@@ -84,4 +84,7 @@ enum class PersistenceMode: uint8_t {
 	NEITHER_RAM_NOR_FLASH
 };
 
+PersistenceModeGet toPersistenceModeGet(uint8_t mode);
+PersistenceModeSet toPersistenceModeSet(uint8_t mode);
+
 PersistenceMode DefaultLocation(CS_TYPE const & type);

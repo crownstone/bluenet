@@ -16,6 +16,7 @@
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
+#include <util/cs_Error.h>
 #include <util/cs_Utils.h>
 
 #if TICK_INTERVAL_MS > STATE_RETRY_STORE_DELAY_MS
@@ -94,12 +95,15 @@ cs_ret_code_t State::set(const CS_TYPE type, void *value, const size16_t size) {
 
 cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mode) {
 	cs_ret_code_t retVal = setInternal(data, mode);
-	if (retVal == ERR_SUCCESS) {
-		event_t event(data.type, data.value, data.size);
-		EventDispatcher::getInstance().dispatch(event);
-	}
-	else {
-		LOGe("failed to set type=%u id=%u err=%u", data.type, data.id, retVal);
+	switch (retVal) {
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE: {
+			event_t event(data.type, data.value, data.size);
+			EventDispatcher::getInstance().dispatch(event);
+			break;
+		}
+		default:
+			LOGe("failed to set type=%u id=%u err=%u", data.type, data.id, retVal);
 	}
 	return retVal;
 }
@@ -136,6 +140,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 		case PersistenceMode::RAM:
 			return loadFromRam(data);
 		case PersistenceMode::FLASH:
+			data.size = typeSize;
 			return _storage->read(data);
 		case PersistenceMode::STRATEGY1: {
 			// First check if it's already in ram.
@@ -223,11 +228,11 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 			switch (ret_code) {
 				case ERR_SUCCESS:
 				case ERR_SUCCESS_NO_CHANGE:
-					return ERR_SUCCESS;
+					break;
 				default:
 					LOGw("Failed to store in RAM");
-					return ret_code;
 			}
+			return ret_code;
 			break;
 		}
 		case PersistenceMode::FLASH: {
@@ -245,11 +250,11 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 					switch (ret_code) {
 						case ERR_SUCCESS:
 						case ERR_SUCCESS_NO_CHANGE:
-							return ERR_SUCCESS;
+							break;
 						default:
 							LOGw("Failed to store in RAM");
-							return ret_code;
 					}
+					return ret_code;
 					break;
 				case PersistenceMode::FLASH:
 					// fall-through
@@ -268,7 +273,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 					break;
 				case ERR_SUCCESS_NO_CHANGE:
 					// No need to store in flash.
-					return ERR_SUCCESS;
+					return ret_code;
 				default:
 					LOGw("Failed to store in RAM");
 					return ret_code;
@@ -336,7 +341,11 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 }
 
 cs_ret_code_t State::getDefaultValue(cs_state_data_t & data) {
-	return getDefault(data, *_boardsConfig);
+	cs_ret_code_t retCode = getDefault(data, *_boardsConfig);
+	if (retCode != ERR_SUCCESS) {
+		LOGe("Failed to get default type=%u", data.type);
+	}
+	return retCode;
 }
 
 cs_ret_code_t State::findInRam(const CS_TYPE & type, cs_state_id_t id, size16_t & index_in_ram) {
@@ -366,6 +375,8 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 		cs_state_data_t & ram_data = _ram_data_register[index_in_ram];
 		if (ram_data.size != data.size) {
 			LOGe("Should not happen: ram_data.size=%u data.size=%u", ram_data.size, data.size);
+			assert(false,"See last error message");
+			
 			free(ram_data.value);
 			ram_data.size = data.size;
 			allocate(ram_data);

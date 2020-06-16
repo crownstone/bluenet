@@ -7,18 +7,16 @@
 
 
 #include <behaviour/cs_BehaviourHandler.h>
+
+#include <behaviour/cs_BehaviourConflictResolution.h>
 #include <behaviour/cs_BehaviourStore.h>
 #include <behaviour/cs_SwitchBehaviour.h>
-
+#include <common/cs_Types.h>
 #include <presence/cs_PresenceDescription.h>
 #include <presence/cs_PresenceHandler.h>
-
 #include <storage/cs_State.h>
-
 #include <time/cs_SystemTime.h>
 #include <time/cs_TimeOfDay.h>
-
-#include <common/cs_Types.h>
 
 #include "drivers/cs_Serial.h"
 
@@ -27,8 +25,8 @@
 
 #if BehaviourHandlerDebug == true
 #define LOGBehaviourHandler LOGd
-#define LOGBehaviourHandler_V LOGi
-#else 
+#define LOGBehaviourHandler_V LOGd
+#else
 #define LOGBehaviourHandler LOGnone
 #define LOGBehaviourHandler_V LOGnone
 #endif
@@ -81,50 +79,72 @@ bool BehaviourHandler::update(){
     return true;
 }
 
+SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(Behaviour* behave, Time currentTime,
+   PresenceStateDescription currentPresence){
+	 if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(behave)){
+		if (switchbehave->isValid(currentTime) &&
+			switchbehave->isValid(currentTime, currentPresence)) {
+				return switchbehave;
+			}
+		}
+
+	return nullptr;
+}
+
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
        Time currentTime, 
        PresenceStateDescription currentPresence) {
     if (!isActive) {
+    	LOGBehaviourHandler("Behaviour handler is inactive, computed intended state: empty");
         return {};
     }
-
     if (!currentTime.isValid()) {
         LOGBehaviourHandler("Current time invalid, computed intended state: empty");
         return {};
     }
 
-    LOGBehaviourHandler("BehaviourHandler compute intended state");
-    std::optional<uint8_t> intendedValue = {};
-    
-    for (auto& b : BehaviourStore::getActiveBehaviours()) {
-        if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(b)) {
-            // cast to switch behaviour succesful.
-            // note: this may also be an extendedswitchbehaviour - which is intended!
-            if (switchbehave->isValid(currentTime)) {
-                LOGBehaviourHandler_V("valid time on behaviour: ");
-            }
-            if (switchbehave->isValid(currentTime, currentPresence)) {
-                LOGBehaviourHandler_V("presence also valid");
-                if constexpr (BehaviourHandlerDebug) {
-                    switchbehave->print();
-                }
+    LOGBehaviourHandler("BehaviourHandler computeIntendedState resolves");
 
-                if (intendedValue){
-                    if (switchbehave->value() != intendedValue.value()) {
-                        // found a conflicting behaviour
-                        // TODO(Arend): add more advance conflict resolution according to document.
-                        return std::nullopt;
-                    }
-                } else {
-                    // found first valid behaviour
-                    intendedValue = switchbehave->value();
-                }
-            }
-        }
-    }
+	// 'best' meaning most relevant considering from/until time window.
+	SwitchBehaviour* current_best_switchbehaviour = nullptr;
+	for(auto candidate_behaviour : BehaviourStore::getActiveBehaviours()){
+    	SwitchBehaviour* candidate_switchbehaviour = ValidateSwitchBehaviour(
+    			candidate_behaviour,currentTime, currentPresence);
 
-    // reaching here means no conflict. An empty intendedValue should thus be resolved to 'off'
-    return intendedValue.value_or(0);
+    	// check for failed transformation from right to left. If either
+    	// current or candidate is nullptr, we can continue to the next candidate.
+    	if(current_best_switchbehaviour == nullptr){
+    		// candidate always wins when there is no current best.
+    		current_best_switchbehaviour = candidate_switchbehaviour;
+    		continue;
+    	}
+    	if(candidate_switchbehaviour == nullptr){
+    		continue;
+    	}
+
+    	// conflict resolve:
+    	if(FromUntilIntervalIsEqual(
+    			current_best_switchbehaviour,
+				candidate_switchbehaviour)){
+			// when interval coincides, lowest intensity behaviour wins:
+    		if(candidate_switchbehaviour->value() < current_best_switchbehaviour->value()){
+    			current_best_switchbehaviour = candidate_switchbehaviour;
+    		}
+    	} else if(FromUntilIntervalIsMoreRelevantOrEqual(
+				candidate_switchbehaviour,
+    			current_best_switchbehaviour,
+				currentTime)){
+    		// when interval is more relevant, that behaviour wins
+    		current_best_switchbehaviour = candidate_switchbehaviour;
+    	}
+	}
+
+
+	if(current_best_switchbehaviour){
+		return current_best_switchbehaviour->value();
+	}
+
+    return 0;
 }
 
 void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
@@ -165,9 +185,11 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	// Set active behaviours.
 	behaviourDebug->storedBehaviours = 0;
 	behaviourDebug->activeBehaviours = 0;
-	behaviourDebug->extensionActive = 0; // TODO: how to calculate this?
-	behaviourDebug->activeTimeoutPeriod = 0; // TODO: how to calculate this?
+	behaviourDebug->extensionActive = 0;
+	behaviourDebug->activeTimeoutPeriod = 0;
+
 	auto behaviours = BehaviourStore::getActiveBehaviours();
+
 	for (uint8_t index = 0; index < behaviours.size(); ++index) {
 		if (behaviours[index] != nullptr) {
 			behaviourDebug->storedBehaviours |= (1 << index);
@@ -185,6 +207,7 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	if (!currentTime.isValid()) {
 		checkBehaviours = false;
 	}
+
 	if (checkBehaviours) {
 		for (uint8_t index = 0; index < behaviours.size(); ++index) {
 			if (SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(behaviours[index])) {
@@ -192,8 +215,17 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 				// note: this may also be an extendedswitchbehaviour - which is intended!
 				if (switchbehave->isValid(currentTime, currentPresence.value())) {
 					behaviourDebug->activeBehaviours |= (1 << index);
+
+					behaviourDebug->activeTimeoutPeriod |=
+							switchbehave->gracePeriodForPresenceIsActive() ? (1 << index) : 0;
 				}
 			}
+
+			if(ExtendedSwitchBehaviour* extendedswitchbehave = dynamic_cast<ExtendedSwitchBehaviour*>(behaviours[index])) {
+				behaviourDebug->extensionActive |=
+						extendedswitchbehave->extensionPeriodIsActive() ? (1 << index) : 0;
+			}
+
 			if (TwilightBehaviour * twilight = dynamic_cast<TwilightBehaviour*>(behaviours[index])) {
 				if (twilight->isValid(currentTime)) {
 					behaviourDebug->activeBehaviours |= (1 << index);

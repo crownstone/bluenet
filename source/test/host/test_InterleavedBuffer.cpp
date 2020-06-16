@@ -17,21 +17,21 @@ int main() {
 
 	InterleavedBuffer & buffer = InterleavedBuffer::getInstance();
 	value_t buf[4][200];
-	
+
 	cout << "Fill buffers with current and voltage data" << endl;
 
 	for (int i = 0; i < NUM_BUFFERS; ++i) {
 		for (int j = 0; j < 100; ++j) {
-			buf[i][j*2] = sin_table[j]; 
-			buf[i][j*2+1] = 400; 
+			buf[i][j*2] = sin_table[j];
+			buf[i][j*2+1] = 400;
 		}
 	}
-	
+
 	cout << "Set buffers" << endl;
 	for (int i = 0; i < NUM_BUFFERS; ++i) {
 		buffer.setBuffer(i, buf[i]);
 	}
-	
+
 	cout << "Retrieve values from buffers" << endl;
 
 	int cb_size = 10;
@@ -64,13 +64,13 @@ int main() {
 		}*/
 		//cout << "Add to circular buffer: " << vdiff << endl;
 //		circBuffer->push(vdiff);
-		
+
 		vdifftot0 += vdiff0;
 		vdifftot1 += vdiff1;
 
 	}
-	cout << "Differences (total sum): " << vdifftot0 << endl;	
-	cout << "Differences (total sum): " << vdifftot1 << endl;	
+	cout << "Differences (total sum): " << vdifftot0 << endl;
+	cout << "Differences (total sum): " << vdifftot1 << endl;
 
 	delete circBuffer;
 

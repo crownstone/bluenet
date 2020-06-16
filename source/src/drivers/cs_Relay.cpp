@@ -11,6 +11,8 @@
 #include <storage/cs_State.h>
 #include <util/cs_Error.h>
 
+#include <test/cs_Test.h>
+
 void Relay::init(const boards_config_t& board) {
 	_initialized = true;
 
@@ -28,9 +30,12 @@ void Relay::init(const boards_config_t& board) {
 	LOGd("init duration=%u ms", _relayHighDurationMs);
 }
 
-bool Relay::set(bool on) {
+bool Relay::set(bool value) {
 	assert(_initialized == true, "Not initialized");
-	if (on) {
+
+	TEST_PUSH_EXPR_B(this, "on", value);
+
+	if (value) {
 		return turnOn();
 	}
 	else {

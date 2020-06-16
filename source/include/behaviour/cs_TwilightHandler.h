@@ -20,10 +20,9 @@ class TwilightHandler : public EventListener {
      * the stored behaviours, and then dispatches an event.
      * 
      * Events:
-     * - STATE_TIME
-     * - EVT_TIME_SET
      * - EVT_PRESENCE_MUTATION
      * - EVT_BEHAVIOURSTORE_MUTATION
+     * - STATE_BEHAVIOUR_SETTINGS
      */
     virtual void handleEvent(event_t& evt) override;
 
@@ -38,18 +37,26 @@ class TwilightHandler : public EventListener {
      */
     bool update();
     
-    uint8_t getValue();
+    /**
+     * Returns currentIntendedState.
+     */
+    std::optional<uint8_t> getValue();
 
     private:
     /**
      * Given current time, query the behaviourstore and check
      * if there any valid ones. 
      * 
-     * Returns a non-empty optional if a valid behaviour is found or
-     * multiple agreeing behaviours have been found.
-     * In this case its value contains the desired state value.
+     * Returns an empty optional if time is invalid, or this isActive==false.
+     * Else returns a non-empty optional containing the conflict resolved value
+     * of all active twilights, defaulting to 100 if none are active.
      */
-    uint8_t computeIntendedState(Time currenttime);
+    std::optional<uint8_t> computeIntendedState(Time currenttime);
 
-    uint8_t previousIntendedState = 100;
+    std::optional<uint8_t> currentIntendedState = 100;
+
+    /**
+     * Is this handler active?
+     */
+    bool isActive = true;
 };

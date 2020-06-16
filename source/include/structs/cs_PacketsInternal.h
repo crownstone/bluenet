@@ -10,10 +10,13 @@
 #include "protocol/cs_ErrorCodes.h"
 
 /**
- * Packets (structs) that are used internally.
+ * Packets (structs) that are used internally in the firmware, and can be changed freely.
+ * This means packets that:
+ * - do not go over the air
+ * - do not go over uart
+ * - are not stored in flash
  *
- * These should be plain structs, without constructors, or member functions.
- * Instead of a constructor, you can add a function that fills a struct.
+ * Constructors can be added, as they do not impact the size of the struct.
  *
  * If the definition becomes large, move it to its own file and include it in this file.
  */
@@ -28,6 +31,7 @@
  * Maximum length advertisement data.
  */
 #define ADVERTISEMENT_DATA_MAX_SIZE 31
+
 
 /**
  * Variable length data encapsulation in terms of length and pointer to data.
@@ -46,6 +50,40 @@ struct cs_data_t {
 	{}
 };
 
+struct cs_result_t {
+	/**
+	 * Return code.
+	 *
+	 * Should be set by the handler.
+	 */
+	cs_ret_code_t returnCode = ERR_EVENT_UNHANDLED;
+
+	/**
+	 * Buffer to put the result data in.
+	 *
+	 * Can be NULL.
+	 */
+	cs_data_t buf;
+
+	/**
+	 * Length of the data in the buffer.
+	 *
+	 * Should be set by the handler.
+	 */
+	cs_buffer_size_t dataSize = 0;
+
+	cs_result_t():
+		buf()
+	{}
+	cs_result_t(cs_data_t buf):
+		buf(buf)
+	{}
+	cs_result_t(cs_ret_code_t returnCode):
+		returnCode(returnCode),
+		buf()
+	{}
+};
+
 /**
  * Scanned device.
  */
@@ -61,31 +99,13 @@ struct __attribute__((packed)) scanned_device_t {
 	// More possibilities: addressType, connectable, isScanResponse, directed, scannable, extended advertisements, etc.
 };
 
-struct command_result_t {
-	cs_ret_code_t returnCode;
-	cs_data_t data;
-
-	command_result_t():
-		returnCode(ERR_NOT_IMPLEMENTED),
-		data()
-	{}
-
-	command_result_t(cs_ret_code_t code):
-		returnCode(code),
-		data()
-	{}
-};
 
 /**
  * A single multi switch command.
  * switchCmd: 0 = off, 100 = fully on.
- * delay: Delay in seconds.
- * source: The source that issued the command.
  */
 struct __attribute__((packed)) internal_multi_switch_item_cmd_t {
 	uint8_t switchCmd;
-	uint16_t delay;
-	cmd_source_t source;
 };
 
 /**
@@ -101,11 +121,20 @@ inline bool cs_multi_switch_item_is_valid(internal_multi_switch_item_t* item, si
 }
 
 struct __attribute__((packed)) control_command_packet_t {
+	uint8_t protocolVersion = CS_CONNECTION_PROTOCOL_VERSION;
 	CommandHandlerTypes type;
 	buffer_ptr_t data;
 	size16_t size;
 	EncryptionAccessLevel accessLevel;
-	cmd_source_t source;
+};
+
+/**
+ * Mesh control command packet.
+ */
+struct __attribute__((__packed__)) mesh_control_command_packet_t {
+	mesh_control_command_packet_header_t header;
+	stone_id_t* targetIds;
+	control_command_packet_t controlCommand;
 };
 
 /**
@@ -194,7 +223,7 @@ struct profile_location_t {
 
 struct __attribute__((packed)) internal_register_tracked_device_packet_t {
 	register_tracked_device_packet_t data;
-	uint8_t accessLevel;
+	uint8_t accessLevel = NOT_SET;
 };
 
 typedef internal_register_tracked_device_packet_t internal_update_tracked_device_packet_t;

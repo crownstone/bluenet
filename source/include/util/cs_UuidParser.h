@@ -18,23 +18,23 @@ constexpr int parseHexChar(const char chr) {
 		return chr - '0';
 	}
 	else if ('a' <= chr && chr <= 'f') {
-		return chr - 'a';
+		return chr - 'a' + 10;
 	}
 	else if ('A' <= chr && chr <= 'F') {
-		return chr - 'A';
+		return chr - 'A' + 10;
 	}
 	return 0;
 }
 
 constexpr int parseHex(const char *str) {
-	return parseHexChar(str[0]) | (parseHexChar(str[1]) << 8);
+	return (parseHexChar(str[0]) << 4) | (parseHexChar(str[1]) << 0);
 }
 
 /**
  * Parse UUID string (XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX) to a byte array.
  */
-constexpr bool parseUuid(const char *str, int size, uint8_t* array) {
-	if (size != CS_UUID_STR_LEN) {
+constexpr bool parseUuid(const char *str, int stringSize, uint8_t* array, int arraySize) {
+	if (stringSize != CS_UUID_STR_LEN || arraySize < 16) {
 		return false;
 	}
 	//   0        8+1  12+2 16+3 20+4

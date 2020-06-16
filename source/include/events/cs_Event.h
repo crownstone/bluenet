@@ -11,35 +11,37 @@
 
 #include <cstdint>
 
-struct event_result_t {
-	/**
-	 * Return code.
-	 *
-	 * Should be set by the class that handles the event.
-	 */
-	cs_ret_code_t returnCode = ERR_EVENT_UNHANDLED;
-
-	/**
-	 * Buffer to put the result data in.
-	 *
-	 * Can be NULL.
-	 */
-	cs_data_t buf;
-
-	/**
-	 * Length of the data in the buffer.
-	 *
-	 * Should be set by the class that handles the event.
-	 */
-	cs_buffer_size_t dataSize = 0;
-};
-
 class event_t {
-    public:
+public:
+	event_t(CS_TYPE type, void * data, size16_t size, const cmd_source_with_counter_t& source, const cs_result_t& result) :
+		type(type),
+		data(data),
+		size(size),
+		source(source),
+		result(result)
+	{}
+
+	event_t(CS_TYPE type, void * data, size16_t size, const cmd_source_with_counter_t& source) :
+		type(type),
+		data(data),
+		size(size),
+		source(source),
+		result()
+	{}
+
+	event_t(CS_TYPE type, void * data, size16_t size, const cs_result_t& result) :
+		type(type),
+		data(data),
+		size(size),
+		source(),
+		result(result)
+	{}
+
 	event_t(CS_TYPE type, void * data, size16_t size) :
 		type(type),
 		data(data),
 		size(size),
+		source(),
 		result()
 	{}
 
@@ -47,17 +49,36 @@ class event_t {
 		event_t(type, nullptr, 0)
 	{}
 
+	// Type of event.
 	CS_TYPE type;
 
+	// Event data.
 	void *data;
-	inline uint8_t* getData(){ return static_cast<uint8_t*>(data); }
 
+	// Size of the event data.
 	size16_t size;
 
-	event_result_t result;
+	/**
+	 * Source of the command (optional).
+	 */
+	cmd_source_with_counter_t source;
 
-    /**
-     * Utility function so that not every file needs to include the eventdispatcher.
-     */
-    void dispatch();
+	/**
+	 * Result of the event (optional).
+	 * The buffer is set by the sender of the event.
+	 * The result code and data size is set by the handler of the event.
+	 */
+	cs_result_t result;
+
+	/**
+	 * Utility function to get the data as uint8_t*.
+	 */
+	inline uint8_t* getData() {
+		return static_cast<uint8_t*>(data);
+	}
+
+	/**
+	 * Utility function so that not every file needs to include the eventdispatcher.
+	 */
+	void dispatch();
 };

@@ -19,49 +19,46 @@ SET(PROJECT_NAME ${APPLICATION_SHORTHAND})
 # Set the main file to use for this application
 SET(MAIN_FILE "cs_Crownstone.cpp")
 
+# The directory with additional CMake files
+set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
+
+SET(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${DEFAULT_CONF_CMAKE_PATH}/override_cxx.cmake)
+SET(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${DEFAULT_CONF_CMAKE_PATH}/override_c.cmake)
+
 # Start a project
 PROJECT(${PROJECT_NAME}) 
 
-#enable_language(CXX)
-#set(CMAKE_CXX_STANDARD 17)
-#set(CMAKE_CXX_STANDARD_REQUIRED on)
-#set(CMAKE_CXX_EXTENSIONS OFF)
-
-# The directory with some of the FindXXX modules
-set(DEFAULT_CONF_CMAKE_PATH ${CMAKE_SOURCE_DIR}/conf/cmake)
+# Other search directories for cmake
 set(DEFAULT_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules)
 set(THIRD_MODULES_PATH ${DEFAULT_CONF_CMAKE_PATH}/modules/third)
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_CONF_CMAKE_PATH};${DEFAULT_MODULES_PATH};${THIRD_MODULES_PATH}")
 
-MESSAGE(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
+message(STATUS "Search for FindX files in ${CMAKE_MODULE_PATH}")
 
-#include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
-#load_configuration("${DEFAULT_CONFIGURATION_FILE}" CMAKE_ARGS)
-#load_configuration("${BOARD_TARGET_CONFIGURATION_FILE}" CMAKE_ARGS)
-#load_configuration("${BOARD_TARGET_OVERWRITE_CONFIGURATION_FILE}" CMAKE_ARGS)
-
+# Get compilation day, this will be used in the binary itself
 string(TIMESTAMP COMPILATION_DAY "%Y-%m-%d")
 
+# Get git info, this will be used in the binary in Debug build system
 include(GetGitRevisionDescription)
 get_git_head_revision(GIT_REFSPEC GIT_SHA1)
 
 #######################################################################################################################
 
 if(NOT CONFIG_DIR)
-  set(CONFIG_DIR "config")
+	set(CONFIG_DIR "config")
 endif()
 
 if(NOT GDB_PORT)
-  set(GDB_PORT "2331")
+	set(GDB_PORT "2331")
 endif()
 
 if(NOT BOARD_TARGET)
-  set(BOARD_TARGET "2331")
+	set(BOARD_TARGET "2331")
 endif()
 
 # Get the following information via JlinkExe and then ShowEmuList
 if(NOT SERIAL_NUM)
-  set(SERIAL_NUM "")
+	set(SERIAL_NUM "")
 endif()
 
 #if(NOT GIT_BRANCH)
@@ -79,6 +76,7 @@ SET(SUPERUSER_SWITCH                         "sudo"        CACHE STRING "Switch 
 
 MATH(EXPR SWO_PORT       "${GDB_PORT}+1")
 MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
+MATH(EXPR RTT_PORT       "${GDB_PORT}+16690")
 
 #######################################################################################################################
 # Show variables
@@ -132,6 +130,7 @@ SET(CMAKE_INCLUDE_SYSTEM_FLAG_CXX "-isystem ")
 INCLUDE_DIRECTORIES("include")
 INCLUDE_DIRECTORIES("include/ble")
 INCLUDE_DIRECTORIES("include/third")
+INCLUDE_DIRECTORIES("shared")
 
 # TODO: Just only include th NRF5 directory and refer to the header files using that relative path in the source files
 # Then we do not need to update the CMakeLists.txt file all the time
@@ -163,11 +162,11 @@ ELSE()
 	# We add the source files explicitly. This is recommended in the cmake system and will also force us all the time to
 	# consider the size of the final binary. Do not include things, if not necessary!
 
-	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S")
-	set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S" PROPERTY LANGUAGE C)
+	#LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S")
+	#set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52833.S" PROPERTY LANGUAGE C)
 
-	#LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
-	#set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
+	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S")
+	set_property(SOURCE "${NRF5_DIR}/modules/nrfx/mdk/gcc_startup_nrf52.S" PROPERTY LANGUAGE C)
 
 	# The following files are only added for the logging module by Nordic. It might be good to remove these files to
 	# save space in production. It should then be enclosed within a macro.
@@ -195,6 +194,7 @@ ELSE()
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh_ble.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/softdevice/common/nrf_sdh_soc.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_comp.c")
+	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_wdt.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/prs/nrfx_prs.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/hal/nrf_nvmc.c")
 	# should be our own code, but SystemInit here contains a lot of PANs we don't have to solve subsequently...
@@ -223,6 +223,13 @@ ELSE()
 		ENDIF()
 	ELSE()
 		MESSAGE(STATUS "SERIAL from NORDIC disabled")
+	ENDIF()
+
+	IF (BUILD_MICROAPP_SUPPORT) 
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
+	ELSE()
+		MESSAGE(STATUS "MicroApp support disabled, no fstorage module required")
 	ENDIF()
 
 	IF (BUILD_MESHING)
@@ -469,8 +476,6 @@ IF((DEFINED TEST_TARGET) AND "${TEST_TARGET}" STREQUAL "\"nrf5\"")
 
 	ENABLE_TESTING()
 
-	#	ADD_SUBDIRECTORY(test/nrf5)
-
 	INCLUDE(test/nrf5/CMakeLists.txt)
 ELSE()
 
@@ -483,12 +488,33 @@ ELSE()
 		include(${DEFAULT_MODULES_PATH}/get_versions.cmake)
 		get_version_info("${WORKSPACE_DIR}/source" FIRMWARE_VERSION FIRMWARE_DFU_VERSION FIRMWARE_RC_VERSION)
 		get_version_info("${WORKSPACE_DIR}/source/bootloader" BOOTLOADER_VERSION BOOTLOADER_DFU_VERSION BOOTLOADER_RC_VERSION)
-		
+
+		# Create bootloader version as integers (DFU is already an integer, RC is treated separately, it's a string)
+		string(REPLACE "-" ";" BOOTLOADER_WITHOUT_RC_LIST "${BOOTLOADER_VERSION}")
+		list(GET BOOTLOADER_WITHOUT_RC_LIST 0 BOOTLOADER_VERSION_WITHOUT_RC)
+		string(REPLACE "." ";" BOOTLOADER_VERSION_LIST "${BOOTLOADER_VERSION_WITHOUT_RC}")
+		list(GET BOOTLOADER_VERSION_LIST 0 BOOTLOADER_VERSION_MAJOR)
+		list(GET BOOTLOADER_VERSION_LIST 1 BOOTLOADER_VERSION_MINOR)
+		list(GET BOOTLOADER_VERSION_LIST 2 BOOTLOADER_VERSION_PATCH)
+
+		# Print so we can check correctness
+		string(CONCAT PRINT_BOOTLOADER_VERSION "${BOOTLOADER_VERSION_MAJOR}."
+			"${BOOTLOADER_VERSION_MINOR}."
+			"${BOOTLOADER_VERSION_PATCH}"
+			)
+		if (BOOTLOADER_RC_VERSION)
+			string(REGEX MATCHALL "[0-9]+" BOOTLOADER_VERSION_PRERELEASE "${BOOTLOADER_RC_VERSION}")
+			string(CONCAT PRINT_BOOTLOADER_VERSION "${BOOTLOADER_RC_VERSION}-" "${BOOTLOADER_VERSION_PRERELEASE}")
+		else()
+			set(BOOTLOADER_VERSION_PRERELEASE 255)
+		endif()
+		message(STATUS "Bootloader version: ${PRINT_BOOTLOADER_VERSION}")
+	
 		IF(SERIAL_NUM) 
 			SET(SERIAL_NUM_SWITCH "--snr")
 			SET(SERIAL_NUM_GDB_SELECT "-select")
 			SET(SERIAL_NUM_GDB_PARAM "usb=${SERIAL_NUM}")
-  			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
+			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 		ENDIF()
 
 		MESSAGE(STATUS "Descend into bootloader directory and compile if needed")
@@ -521,13 +547,14 @@ ELSE()
 		
 		message(STATUS "Configure nrf_symbols.ld file")
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)
-		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)
 		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld")
+		link_directories(${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf)
 	
 		message(STATUS "Application start address: ${APPLICATION_START_ADDRESS}")
 		message(STATUS "Application length: ${APPLICATION_LENGTH}")
 		message(STATUS "RAM base: ${RAM_R1_BASE}")
 		message(STATUS "RAM amount: ${RAM_APPLICATION_AMOUNT}")
+		message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
 
 		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
 		
@@ -536,6 +563,7 @@ ELSE()
 		SET(CROWNSTONE_ONLY_FLAGS "")
 		SET_PROPERTY(SOURCE ${FOLDER_SOURCE} APPEND PROPERTY COMPILE_FLAGS ${CROWNSTONE_ONLY_FLAGS})
 
+		# Add path with files like sdk_config.h to include directories
 		target_include_directories(${PROJECT_NAME} PRIVATE "include/third/nrf")
 
 		# This does lead to a cmake reconfigure when the file changes... However, nothing else gets rebuild after
@@ -619,7 +647,7 @@ ELSE()
 		# The gdb server can be started with configuration specific information
 		ADD_CUSTOM_TARGET(debug_server
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
-			COMMAND JLinkGDBServer -Device nRF52832_xxAA ${SERIAL_NUM_GDB_SELECT} ${SERIAL_NUM_GDB_PARAM} -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT}
+			COMMAND JLinkGDBServer -Device nRF52832_xxAA ${SERIAL_NUM_GDB_SELECT} ${SERIAL_NUM_GDB_PARAM} -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT} -RTTTelnetPort ${RTT_PORT}
 			COMMENT "Debug server, runs in background"
 			)
 		
@@ -631,7 +659,7 @@ ELSE()
 		
 		ADD_CUSTOM_TARGET(rtt_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** RTT client, keep running in separate shell"
-			COMMAND JLinkRTTClient
+			COMMAND JLinkRTTClient -RTTTelnetPort ${RTT_PORT}
 			COMMENT "RTT client, runs in background"
 			)
 		
@@ -738,13 +766,17 @@ ELSE()
 			COMMAND bash -c "perl -i -pe '$. == 2 && s/(\\d+)/$1+1/eg' ${CMAKE_SOURCE_DIR}/VERSION" VERBATIM
 			COMMENT "Increment application version (in VERSION file)"
 			)
+			
+		SET(BOOTLOADER_HEX_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex")
+		SET(BOOTLOADER_BIN_FILE "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.bin")
 
 		ADD_CUSTOM_TARGET(build_bootloader_settings
 			COMMAND ${CMAKE_COMMAND} -E echo "** Firmware version: ${FIRMWARE_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Bootloader version: ${BOOTLOADER_VERSION}"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use files in directory: ${CMAKE_BINARY_DIR}"
-			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 1 "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
-			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex"
+			COMMAND nrfutil settings generate --family NRF52 --application "${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex" --application-version ${FIRMWARE_DFU_VERSION} --bootloader-version ${BOOTLOADER_DFU_VERSION} --bl-settings-version 2 "${BOOTLOADER_HEX_FILE}" 
+			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} -I ihex ${BOOTLOADER_HEX_FILE} -O binary ${BOOTLOADER_BIN_FILE}
+			COMMAND ${CMAKE_COMMAND} -E echo "** Generated file: ${BOOTLOADER_HEX_FILE}"
 			COMMENT "Create bootloader settings"
 			)
 		
@@ -752,9 +784,26 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo
 			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
 			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --program ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMAND echo "nrfjprog -f nrf52 --program ${BOOTLOADER_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
+			COMMAND nrfjprog -f nrf52 --program ${BOOTLOADER_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
 			COMMENT "Flashes bootloader settings to remote target board"
 			DEPENDS build_bootloader_settings
+			)
+		
+		ADD_CUSTOM_TARGET(read_bootloader_settings
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to read bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND nrfjprog -f nrf52 --memrd 0x7F000 --n 128 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMENT "Read bootloader settings from remote target board"
+			)
+		
+		ADD_CUSTOM_TARGET(read_bootloader_settings_backup
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to read bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
+			COMMAND ${CMAKE_COMMAND} -E echo
+			COMMAND nrfjprog -f nrf52 --memrd 0x7E000 --n 128 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMENT "Read bootloader settings from remote target board"
 			)
 	
 		ADD_CUSTOM_TARGET(merge_bootloader_settings
@@ -793,6 +842,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE} USES_TERMINAL
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
+			COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --sd-id $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip'" VERBATIM USES_TERMINAL
 			COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --sd-id $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} --softdevice ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} all_dfu.zip" VERBATIM USES_TERMINAL
 			COMMAND ${CMAKE_COMMAND} -E make_directory dfu
 			COMMAND ${CMAKE_COMMAND} -E copy all_dfu.zip dfu/${FIRMWARE_DFU_ZIP}
@@ -814,6 +864,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
+			COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip'" VERBATIM USES_TERMINAL
 			COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --application ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex --application-version ${FIRMWARE_DFU_VERSION} application_dfu.zip" VERBATIM USES_TERMINAL
 			COMMAND ${CMAKE_COMMAND} -E make_directory dfu
 			COMMAND ${CMAKE_COMMAND} -E copy application_dfu.zip dfu/${APPLICATION_DFU_ZIP}
@@ -834,6 +885,7 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E touch ${KEY_FILE}
 			COMMAND pass ${PASS_FILE} > ${KEY_FILE}
 			COMMAND ${CMAKE_COMMAND} -E echo "     Temp key file: ${KEY_FILE}"
+			COMMAND bash -c "echo 'nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip'" VERBATIM USES_TERMINAL
 			COMMAND bash -c "nrfutil pkg generate --hw-version 52 --sd-req $(cat softdevice_id) --key-file ${KEY_FILE} --bootloader ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex --bootloader-version ${BOOTLOADER_DFU_VERSION} bootloader_dfu.zip" VERBATIM USES_TERMINAL
 			COMMAND ${CMAKE_COMMAND} -E make_directory dfu
 			COMMAND ${CMAKE_COMMAND} -E copy bootloader_dfu.zip dfu/${BOOTLOADER_DFU_ZIP}
@@ -845,7 +897,7 @@ ELSE()
 	
 
 
-		IF(NOT DEFINED FIRMWARE_RC_VERSION OR "${FIRMWARE_RC_VERSION}" STREQUAL "") 
+		IF(NOT DEFINED FIRMWARE_RC_VERSION OR "${FIRMWARE_RC_VERSION}" STREQUAL "")
 			SET(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")
 		ELSE()
 			SET(RELEASE_REPOSITORY_DIRECTORY "${RELEASE_CANDIDATE_REPOSITORY}/firmwares/crownstone_${FIRMWARE_VERSION}")
@@ -853,7 +905,7 @@ ELSE()
 
 
 		IF(EXISTS ${RELEASE_REPOSITORY_DIRECTORY} )
-			MESSAGE(STATUS "Already released... No copy_to_release_repository target available")
+			MESSAGE(STATUS "Already released... No create_release_in_repository target available")
 		ELSE()
 
 			ADD_CUSTOM_TARGET(create_release_in_repository
@@ -875,80 +927,35 @@ ELSE()
 					)
 		ENDIF()
 
-	    # We can not use math(EXPR ...) because it does not have support for unsigned integers and older cmake versions 
-		# do not support hexadecimal values either
-		if(NOT ${PRODUCT_FAMILY} STREQUAL "" AND NOT ${PRODUCT_MARKET} STREQUAL "" AND NOT ${PRODUCT_TYPE} STREQUAL "")
-			from_hex(${PRODUCT_FAMILY} PRODUCT_FAMILY_DEC)
-			from_hex(${PRODUCT_MARKET} PRODUCT_MARKET_DEC)
-			from_hex(${PRODUCT_TYPE} PRODUCT_TYPE_DEC)
-			to_hex_raw(${PRODUCT_FAMILY_DEC} PRODUCT_FAMILY_HEX 2 "")
-			to_hex_raw(${PRODUCT_MARKET_DEC} PRODUCT_MARKET_HEX 2 "")
-			to_hex_raw(${PRODUCT_TYPE_DEC} PRODUCT_TYPE_HEX 2 "")
-			set(PRODUCT_FAMILY_TYPE "${PRODUCT_FAMILY_HEX}${PRODUCT_MARKET_HEX}${PRODUCT_TYPE_HEX}")
-			fill(${PRODUCT_FAMILY_TYPE} PRODUCT_FAMILY_TYPE 8 "F" "0x")
-		endif()
-		
-		if(NOT ${PRODUCT_MAJOR} STREQUAL "" AND NOT ${PRODUCT_MINOR} STREQUAL "" AND NOT ${PRODUCT_PATCH} STREQUAL "")
-			from_hex(${PRODUCT_MAJOR} PRODUCT_MAJOR_DEC)
-			from_hex(${PRODUCT_MINOR} PRODUCT_MINOR_DEC)
-			from_hex(${PRODUCT_PATCH} PRODUCT_PATCH_DEC)
-			to_hex_raw(${PRODUCT_MAJOR_DEC} PRODUCT_MAJOR_HEX 2 "")
-			to_hex_raw(${PRODUCT_MINOR_DEC} PRODUCT_MINOR_HEX 2 "")
-			to_hex_raw(${PRODUCT_PATCH_DEC} PRODUCT_PATCH_HEX 2 "")
-			set(MAJOR_MINOR_PATCH "${PRODUCT_MAJOR_HEX}${PRODUCT_MINOR_HEX}${PRODUCT_PATCH_HEX}")
-			fill(${MAJOR_MINOR_PATCH} MAJOR_MINOR_PATCH 8 "F" "0x")
-		endif()
-		
-		if(NOT ${PRODUCTION_YEAR} STREQUAL "" AND NOT ${PRODUCTION_WEEK} STREQUAL "" AND NOT ${PRODUCT_HOUSING} STREQUAL "")
-			from_hex(${PRODUCT_HOUSING} PRODUCT_HOUSING_DEC)
-			to_hex_raw(${PRODUCT_HOUSING_DEC} PRODUCT_HOUSING_HEX 2 "")
-
-			fill(${PRODUCTION_YEAR} PRODUCTION_YEAR_DEC 2 "0" "")
-			fill(${PRODUCTION_WEEK} PRODUCTION_WEEK_DEC 2 "0" "")
-
-			set(PRODUCTION_RUN_HOUSING "${PRODUCTION_YEAR_DEC}${PRODUCTION_WEEK_DEC}${PRODUCT_HOUSING_HEX}")
-			fill(${PRODUCTION_RUN_HOUSING} PRODUCTION_RUN_HOUSING 8 "F" "0x")
-		endif()
-	
-		set(SREC_CAT_UICR_BOOTLOADER        "-exclude;0x10001014;0x10001018;-generate;0x10001014;0x10001018;-l-e-constant;${UICR_BOOTLOADER_ADDRESS};4")
-		set(SREC_CAT_MBR_SETTINGS           "-exclude;0x10001018;0x1000101C;-generate;0x10001018;0x1000101C;-l-e-constant;${MBR_SETTINGS};4")
-		set(SREC_CAT_HARDWARE_BOARD         "-exclude;0x10001084;0x10001088;-generate;0x10001084;0x10001088;-l-e-constant;${HARDWARE_BOARD_HEX};4")
-		set(SREC_CAT_PRODUCT_FAMILY_TYPE    "-exclude;0x10001088;0x1000108C;-generate;0x10001088;0x1000108C;-l-e-constant;${PRODUCT_FAMILY_TYPE};4")
-		set(SREC_CAT_MAJOR_MINOR_PATCH      "-exclude;0x1000108C;0x10001090;-generate;0x1000108C;0x10001090;-l-e-constant;${MAJOR_MINOR_PATCH};4")
-		set(SREC_CAT_PRODUCTION_RUN_HOUSING "-exclude;0x10001090;0x10001094;-generate;0x10001090;0x10001094;-l-e-constant;${PRODUCTION_RUN_HOUSING};4")
-
-		ADD_CUSTOM_TARGET(generate_factory_image
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Create factory images"
-			COMMAND ${CMAKE_COMMAND} -E echo "     MBR_SETTINGS: ${MBR_SETTINGS}"
-			COMMAND ${CMAKE_COMMAND} -E echo "     UICR_BOOTLOADER_ADDRESS: ${UICR_BOOTLOADER_ADDRESS}"
-			COMMAND ${CMAKE_COMMAND} -E echo "     BOARD_HARDWARE_VERSION: ${HARDWARE_BOARD_HEX}"
-			COMMAND ${CMAKE_COMMAND} -E echo "     PRODUCT_FAMILY_TYPE: ${PRODUCT_FAMILY_TYPE}"
-			COMMAND ${CMAKE_COMMAND} -E echo "     MAJOR_MINOR_PATCH: ${MAJOR_MINOR_PATCH}"
-			COMMAND ${CMAKE_COMMAND} -E echo "     PRODUCTION_RUN_HOUSING: ${PRODUCTION_RUN_HOUSING}"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Image to be created: ${PROJECT_NAME}${IMAGE_FILENAME_POSTFIX}.hex"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND test -z "${MBR_SETTINGS}" && echo "No MBR_SETTINGS set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -z "${UICR_BOOTLOADER_ADDRESS}" && echo "No UICR_BOOTLOADER_ADDRESS set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -z "${HARDWARE_BOARD_HEX}" && echo "No HARDWARE_BOARD_HEX set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -z "${PRODUCT_FAMILY_TYPE}" && echo "No PRODUCT_FAMILY_TYPE set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -z "${MAJOR_MINOR_PATCH}" && echo "No MAJOR_MINOR_PATCH set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -z "${PRODUCTION_RUN_HOUSING}" && echo "No PRODUCTION_RUN_HOUSING set. Did you use the -DFACTORY_IMAGE option and are all fields set in the CMakeFactoryImage.config file?" && echo && exit 1 || exit 0
-			COMMAND test -f "${CMAKE_BINARY_DIR}/bootloader/bootloader.hex" && exit 0 || echo "No bootloader.hex found. Did you compile it and run 'make install'?" && echo && exit 1 
-			COMMAND test -f "${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex" && exit 0 || echo "No bootloader_settings.hex found. Did you generate it with: make build_bootloader_settings?" && echo && exit 1 
-			COMMAND test -f "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" && exit 0 || echo "No ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} found." && echo && exit 1 
-			COMMAND ${CMAKE_COMMAND} -E echo "Use srec_cat to create a factory image"
-			COMMAND ${CMAKE_COMMAND} -E make_directory factory-images
-			COMMAND srec_cat ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.hex -intel ${SREC_CAT_UICR_BOOTLOADER} ${SREC_CAT_MBR_SETTINGS} ${SREC_CAT_HARDWARE_BOARD_HEX} ${SREC_CAT_PRODUCT_FAMILY_TYPE} ${SREC_CAT_MAJOR_MINOR_PATCH} ${SREC_CAT_PRODUCTION_RUN_HOUSING} ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex -intel ${CMAKE_BINARY_DIR}/bootloader/bootloader_settings.hex -intel ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} -intel -o factory-images/${PROJECT_NAME}${IMAGE_FILENAME_POSTFIX}.hex -intel
-			COMMENT "Generate a factory image"
-			)
+		IF(NOT DEFINED BOOTLOADER_RC_VERSION OR "${BOOTLOADER_RC_VERSION}" STREQUAL "")
+			SET(RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER "${RELEASE_REPOSITORY}/bootloaders/bootloader_${BOOTLOADER_VERSION}")
+		ELSE()
+			SET(RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER "${RELEASE_CANDIDATE_REPOSITORY}/bootloaders/bootloader_${BOOTLOADER_VERSION}")
+		ENDIF()
 
 
-		if(NOT EXISTS ${CMAKE_BINARY_DIR}/factory-images)
-			message(STATUS "Create directory \"factory-images\"")
-			file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/factory-images)
-		endif()
+		IF(EXISTS ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER} )
+			MESSAGE(STATUS "Already released... No create_bootloader_release_in_repository target available")
+		ELSE()
+
+			ADD_CUSTOM_TARGET(create_bootloader_release_in_repository
+					COMMAND ${CMAKE_COMMAND} -E echo
+					COMMAND ${CMAKE_COMMAND} -E echo "** Copy to release repository \"${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}\""
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+					COMMAND ${CMAKE_COMMAND} -E echo "   Copy from ${CMAKE_BINARY_DIR}"
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/bootloader*.zip ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/dfu/bootloader*.zip.sha1 ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader/bootloader.elf ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/bootloader/bootloader.hex ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin
+					COMMAND ${CMAKE_COMMAND} -E copy ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/bin/softdevice.hex
+					COMMAND ${CMAKE_COMMAND} -E echo "   Copy release config file from ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}"
+					COMMAND ${CMAKE_COMMAND} -E make_directory ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/config
+					COMMAND ${CMAKE_COMMAND} -E copy ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config ${RELEASE_REPOSITORY_DIRECTORY_BOOTLOADER}/config
+					COMMENT "Copy all generated files to release repository"
+					)
+		ENDIF()
+
+
 
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.elf)
@@ -956,7 +963,6 @@ ELSE()
 		SET(FILE_MEMORY_LAYOUT "-Tgeneric_gcc_nrf52.ld")
 		SET(PATH_FILE_MEMORY "-L${CMAKE_SOURCE_DIR}/include/third/nrf/")
 		SET(PATH_FILE_MEMORY "${PATH_FILE_MEMORY} -L${NRF5_DIR}/modules/nrfx/mdk/")
-
 		SET(CMAKE_EXE_LINKER_FLAGS "${PATH_FILE_MEMORY} ${FILE_MEMORY_LAYOUT} ${CMAKE_EXE_LINKER_FLAGS}")
 	
 		TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${LIBS})
@@ -975,7 +981,6 @@ ELSE()
 		ENDIF()
 		INSTALL(FILES "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" DESTINATION .)
 		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/dfu"       DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
-		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/factory-images"  DESTINATION . FILES_MATCHING PATTERN "*")
 	ENDIF()
 
 ENDIF()

@@ -12,6 +12,10 @@
  * The sdk_config.h is a copy of SDK_15-3/config/nrf52832/config/sdk_config.h
  */
 
+// Set to 1 to define legacy driver configs, instead of the new NRFX ones.
+// This will overwrite some NRFX defines, via apply_old_config.h.
+#define CS_DEFINE_LEGACY_NRF_DRIVERS_CONFIGS 0
+
 
 #define APP_SCHEDULER_ENABLED 1
 #define APP_TIMER_ENABLED 1
@@ -125,7 +129,8 @@
 
 #define NRF_SDH_BLE_ENABLED 1
 #define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 1
-#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69 // Advised by mesh
+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69 // Advised by mesh, see MESH_GATT_MTU_SIZE_MAX.
+//#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 72 // For microapps, we want a multiple of 4. Ok this doesn't make sense, as there's a L2CAP header of 3 bytes?
 #define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE ATTR_TABLE_SIZE
 #define NRF_SDH_BLE_VS_UUID_COUNT MAX_NUM_VS_SERVICES
 /**
@@ -145,6 +150,32 @@
 
 // Used by cs_Comp
 #define COMP_ENABLED 1
+
+
+
+#if CS_DEFINE_LEGACY_NRF_DRIVERS_CONFIGS == 0
+// NRFX_WDT_ENABLED is overwritten by apply_old_config.h
+#define WDT_ENABLED 1
+#endif
+
+#define NRFX_WDT_ENABLED 1
+
+// <1=> Run in SLEEP, Pause in HALT
+// <8=> Pause in SLEEP, Run in HALT
+// <9=> Run in SLEEP and HALT
+// <0=> Pause in SLEEP and HALT
+#ifdef DEBUG
+#define NRFX_WDT_CONFIG_BEHAVIOUR 1
+#else
+#define NRFX_WDT_CONFIG_BEHAVIOUR 9
+#endif
+
+// <0=> Include WDT IRQ handling
+// <1=> Remove WDT IRQ handling
+#define NRFX_WDT_CONFIG_NO_IRQ 1
+
+
+
 
 //#define NRFX_SAADC_ENABLED 1
 

@@ -32,7 +32,6 @@ cs_ret_code_t TrackedDevices::handleRegister(internal_register_tracked_device_pa
 		return ERR_NO_ACCESS;
 	}
 	if (!isTokenOkToSet(*device, packet.data.deviceToken, sizeof(packet.data.deviceToken))) {
-		LOGw("Token already exists");
 		return ERR_ALREADY_EXISTS;
 	}
 	setAccessLevel(*device, packet.accessLevel);
@@ -44,6 +43,7 @@ cs_ret_code_t TrackedDevices::handleRegister(internal_register_tracked_device_pa
 	setTTL(        *device, packet.data.timeToLiveMinutes);
 	sendRegisterToMesh(*device);
 	sendTokenToMesh(*device);
+	print(*device);
 	return ERR_SUCCESS;
 }
 
@@ -64,6 +64,8 @@ void TrackedDevices::handleMeshRegister(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)
 	setRssiOffset(*device, packet.rssiOffset);
 	setFlags(*device, packet.flags);
 	setAccessLevel(*device, packet.accessLevel);
+	print(*device);
+	checkSynced();
 }
 
 
@@ -75,11 +77,17 @@ void TrackedDevices::handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& pack
 	}
 	// Access has been checked by sending crownstone.
 	if (!isTokenOkToSet(*device, packet.deviceToken, sizeof(packet.deviceToken))) {
-		LOGw("Token already exists");
 		return;
 	}
 	setDevicetoken(*device, packet.deviceToken, sizeof(packet.deviceToken));
 	setTTL(*device, packet.ttlMinutes);
+	print(*device);
+	checkSynced();
+}
+
+void TrackedDevices::handleMeshListSize(TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)& packet) {
+	LOGd("handleMeshListSize size=%u", packet.listSize);
+	expectedDeviceListSize = packet.listSize;
 }
 
 void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
@@ -102,10 +110,6 @@ void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
 //	}
 	sendBackgroundAdv(*device, packet.macAddress, packet.rssi);
 }
-
-
-
-
 
 TrackedDevices::TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 	TrackedDevice* device = find(deviceId);
@@ -199,13 +203,33 @@ bool TrackedDevices::isTokenOkToSet(TrackedDevice& device, uint8_t* deviceToken,
 	if (otherDevice->data.data.deviceId == device.data.data.deviceId) {
 		return true;
 	}
+	LOGw("Token already exists (id=%u)", otherDevice->data.data.deviceId);
 	return false;
 }
-
 
 bool TrackedDevices::allFieldsSet(TrackedDevice& device) {
 	return device.fieldsSet == ALL_FIELDS_SET;
 }
+
+void TrackedDevices::checkSynced() {
+	if (deviceListIsSynced) {
+		return;
+	}
+	if (deviceListSize < expectedDeviceListSize) {
+		LOGTrackedDevicesDebug("Expecting more devices, current=%u expected=%u", deviceListSize, expectedDeviceListSize);
+		return;
+	}
+	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
+		if (!allFieldsSet(*iter)) {
+			LOGTrackedDevicesDebug("Not all fields set for id=%u", iter->data.data.deviceId);
+			return;
+		}
+	}
+	LOGi("Synced");
+	deviceListIsSynced = true;
+}
+
+
 
 void TrackedDevices::setAccessLevel(TrackedDevice& device, uint8_t accessLevel) {
 	device.data.accessLevel = accessLevel;
@@ -248,6 +272,26 @@ bool TrackedDevices::isValidTTL(TrackedDevice& device) {
 	return (BLEutil::isBitSet(device.fieldsSet, BIT_POS_TTL)) && (device.data.data.timeToLiveMinutes != 0);
 }
 
+void TrackedDevices::print(TrackedDevice& device) {
+#if CS_SERIAL_NRF_LOG_ENABLED != 2
+	LOGTrackedDevicesDebug("id=%u fieldsSet=%u accessLvl=%u profile=%u location=%u rssiOffset=%i flags=%u TTL=%u token=[%u %u %u]",
+			device.data.data.deviceId,
+			device.fieldsSet,
+			device.data.accessLevel,
+			device.data.data.profileId,
+			device.data.data.locationId,
+			device.data.data.rssiOffset,
+			device.data.data.flags.asInt,
+			device.data.data.timeToLiveMinutes,
+			device.data.data.deviceToken[0],
+			device.data.data.deviceToken[1],
+			device.data.data.deviceToken[2]
+	);
+#endif
+}
+
+
+
 void TrackedDevices::tickMinute() {
 	LOGTrackedDevicesDebug("tickMinute");
 	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
@@ -257,10 +301,13 @@ void TrackedDevices::tickMinute() {
 				iter->data.data.locationId = 0;
 			}
 		}
-		if ((iter->fieldsSet & BIT_POS_TTL) && (iter->data.data.timeToLiveMinutes != 0)) {
+		if (iter->data.data.timeToLiveMinutes != 0) {
 			iter->data.data.timeToLiveMinutes--;
 		}
+		print(*iter);
 	}
+	// Removed timed out devices.
+	devices.remove_if([](const TrackedDevice& device) { return device.data.data.timeToLiveMinutes == 0; });
 }
 
 
@@ -276,6 +323,7 @@ void TrackedDevices::sendBackgroundAdv(TrackedDevice& device, uint8_t* macAddres
 	eventData.locationId = device.data.data.locationId;
 	eventData.profileId = device.data.data.profileId;
 	eventData.flags = device.data.data.flags.asInt;
+	LOGTrackedDevicesVerbose("sendBackgroundAdv adjustedRssi=%i locationId=%u profileId=%u flags=%u", eventData.adjustedRssi, eventData.locationId, eventData.profileId, eventData.flags);
 	event_t event(CS_TYPE::EVT_ADV_BACKGROUND_PARSED, &eventData, sizeof(eventData));
 	event.dispatch();
 }
@@ -309,11 +357,28 @@ void TrackedDevices::sendRegisterToMesh(TrackedDevice& device) {
 void TrackedDevices::sendTokenToMesh(TrackedDevice& device) {
 	LOGTrackedDevicesDebug("sendTokenToMesh id=%u", device.data.data.deviceId);
 	TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN) eventData;
-	eventData.deviceId   = device.data.data.deviceId;
+	eventData.deviceId = device.data.data.deviceId;
 	memcpy(eventData.deviceToken, device.data.data.deviceToken, sizeof(device.data.data.deviceToken));
 	eventData.ttlMinutes = device.data.data.timeToLiveMinutes;
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN, &eventData, sizeof(eventData));
 	event.dispatch();
+}
+
+void TrackedDevices::sendListSizeToMesh() {
+	LOGTrackedDevicesDebug("sendListSizeToMesh size=%u", deviceListSize);
+	TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE) eventData;
+	eventData.listSize = deviceListSize;
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE, &eventData, sizeof(eventData));
+	event.dispatch();
+}
+
+void TrackedDevices::sendDeviceList() {
+	LOGd("sendDeviceList %u devices", deviceListSize);
+	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
+		sendRegisterToMesh(*iter);
+		sendTokenToMesh(*iter);
+	}
+	sendListSizeToMesh();
 }
 
 void TrackedDevices::handleEvent(event_t& evt) {
@@ -338,6 +403,11 @@ void TrackedDevices::handleEvent(event_t& evt) {
 			handleMeshToken(*data);
 			break;
 		}
+		case CS_TYPE::EVT_MESH_TRACKED_DEVICE_LIST_SIZE: {
+			TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)* data = reinterpret_cast<TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)*>(evt.data);
+			handleMeshListSize(*data);
+			break;
+		}
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED_V1: {
 			TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1)* data = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1)*>(evt.data);
 			handleScannedDevice(*data);
@@ -348,6 +418,33 @@ void TrackedDevices::handleEvent(event_t& evt) {
 				ticksLeft = TICKS_PER_MINUTES;
 				tickMinute();
 			}
+			break;
+		}
+		case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING: {
+			if (!deviceListIsSynced) {
+				auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING)*>(evt.data);
+				req->bits.trackedDevices = true;
+				expectedDeviceListSize = 0xFF;
+			}
+			break;
+		}
+		case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING: {
+			auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)*>(evt.data);
+			if (req->bits.trackedDevices && deviceListIsSynced) {
+				// Device list is requested by a crownstone in the mesh.
+				// If we are synced, send it.
+				// But only with a 0.15 chance (0.15 * 255 = 39), to prevent flooding the mesh.
+				uint8_t rand8;
+				RNG::fillBuffer(&rand8, 1);
+				if (rand8 < 39) {
+					sendDeviceList();
+				}
+			}
+			break;
+		}
+		case CS_TYPE::EVT_MESH_SYNC_FAILED: {
+			LOGTrackedDevicesDebug("Sync failed: consider synced");
+			deviceListIsSynced = true;
 			break;
 		}
 		default:

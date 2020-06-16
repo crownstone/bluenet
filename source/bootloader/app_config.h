@@ -11,7 +11,6 @@
  *
  * The sdk_config.h is a copy of SDK_15-3/examples/dfu/secure_bootloader/pca10040_ble_debug/config/sdk_config.h
  */
-
 #define NRF_BL_DFU_ENTER_METHOD_BUTTON 0
 #define NRF_BL_DFU_ENTER_METHOD_PINRESET 0
 #define NRF_BL_DFU_ENTER_METHOD_GPREGRET 1
@@ -29,14 +28,16 @@
 
 /**
  * Reserved number of flash pages used for app data.
- * 4 for FDS (FDS_PHY_PAGES).
+ * 8 for FDS.
+ * 1 for IPC.
+ * 4 For mesh:
  * See how_to_nordicSDK.md and https://devzone.nordicsemi.com/f/nordic-q-a/42632/mesh-sdk---nrf52840-flash-page-issue
  * 1 for mesh access (ACCESS_FLASH_PAGE_COUNT).
  * 1 for mesh dsm (DSM_FLASH_PAGE_COUNT).
+ * 1 for mesh net state (NET_FLASH_PAGE_COUNT).
  * 1 for mesh defrag/garbage collection.
- * 1 for mesh recovery?.
  */
-#define NRF_DFU_APP_DATA_AREA_SIZE ((4+4)*4096)
+#define NRF_DFU_APP_DATA_AREA_SIZE ((8+1+4)*4096)
 
 //! Device information service.
 #define BLE_DIS_ENABLED 1
@@ -54,20 +55,20 @@
  */
 #define NRF_SDH_BLE_SERVICE_CHANGED 1
 
-#if CS_SERIAL_NRF_LOG_ENABLED > 0
+#if CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED > 0
 #define NRF_LOG_ENABLED 1
 #else
 #define NRF_LOG_ENABLED 0
 #endif
 
 //! Log data is buffered and can be processed in idle
-#define NRF_LOG_DEFERRED 1
+#define NRF_LOG_DEFERRED 0
 // <0=> Off
 // <1=> Error
 // <2=> Warning
 // <3=> Info
 // <4=> Debug
-#define NRF_LOG_DEFAULT_LEVEL 3
+#define NRF_LOG_DEFAULT_LEVEL 4
 #define NRF_SDH_SOC_LOG_LEVEL 3
 #define NRF_SDH_BLE_LOG_LEVEL 3
 #define NRF_SDH_LOG_LEVEL 3
@@ -78,14 +79,13 @@
 #define NRF_FPRINTF_ENABLED 1
 #define NRF_FPRINTF_FLAG_AUTOMATIC_CR_ON_LF_ENABLED 1
 
-
-#if CS_SERIAL_NRF_LOG_ENABLED == 1
+#if CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED == 1
 #define NRF_LOG_BACKEND_RTT_ENABLED 1
 #else
 #define NRF_LOG_BACKEND_RTT_ENABLED 0
 #endif
 
-#if CS_SERIAL_NRF_LOG_ENABLED == 2
+#if CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED == 2
 #define NRF_LOG_BACKEND_UART_ENABLED 1
 #else
 #define NRF_LOG_BACKEND_UART_ENABLED 0
@@ -93,7 +93,7 @@
 
 #define NRF_LOG_BACKEND_UART_TX_PIN CS_SERIAL_NRF_LOG_PIN_TX
 
-#if CS_SERIAL_NRF_LOG_ENABLED == 2
+#if CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED == 2
 // UARTE_ENABLED is overwritten by apply_old_config.h
 #define UARTE_ENABLED 1
 #define UART0_ENABLED 1

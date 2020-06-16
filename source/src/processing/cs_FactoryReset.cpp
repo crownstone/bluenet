@@ -5,17 +5,16 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "processing/cs_FactoryReset.h"
-#include "cfg/cs_Config.h"
-#include "cfg/cs_DeviceTypes.h"
-#include "storage/cs_State.h"
-#include "drivers/cs_RTC.h"
-#include "ble/cs_Stack.h"
-#include "ble/cs_Advertiser.h"
-#include "processing/cs_CommandHandler.h"
-#include "events/cs_EventDispatcher.h"
+#include <ble/cs_Advertiser.h>
+#include <ble/cs_Stack.h>
+#include <cfg/cs_Config.h>
+#include <cfg/cs_DeviceTypes.h>
+#include <drivers/cs_RTC.h>
+#include <events/cs_EventDispatcher.h>
+#include <processing/cs_CommandHandler.h>
+#include <processing/cs_FactoryReset.h>
+#include <storage/cs_State.h>
 
-#include <switch/cs_SwitchAggregator.h>
 
 FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
 		_recoveryDisableTimerId(NULL),
@@ -139,13 +138,26 @@ bool FactoryReset::performFactoryReset() {
 	State::getInstance().set(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 
 	LOGi("Going into factory reset mode, rebooting device in 2s ...");
-//	CommandHandler::getInstance().resetDelayed(GPREGRET_SOFT_RESET);
 	TYPIFY(CMD_RESET_DELAYED) resetCmd;
-	resetCmd.resetCode = GPREGRET_SOFT_RESET;
+	resetCmd.resetCode = CS_RESET_CODE_SOFT_RESET;
 	resetCmd.delayMs = 2000;
 	event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
 	EventDispatcher::getInstance().dispatch(eventReset);
 	return true;
+}
+
+void FactoryReset::onClassFactoryResetDone(const FactoryResetClassBit bit) {
+	BLEutil::setBit(_successfullyFactoryResetBitmask, bit);
+	LOGi("onClassFactoryResetDone bit=%u bitmask=%u", bit, _successfullyFactoryResetBitmask);
+
+	if ((_successfullyFactoryResetBitmask & FACTORY_RESET_MASK_ALL) == FACTORY_RESET_MASK_ALL) {
+		LOGi("All classes factory reset, rebooting device");
+		TYPIFY(CMD_RESET_DELAYED) resetCmd;
+		resetCmd.resetCode = CS_RESET_CODE_SOFT_RESET;
+		resetCmd.delayMs = 100;
+		event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
+		EventDispatcher::getInstance().dispatch(eventReset);
+	}
 }
 
 /**
@@ -153,6 +165,7 @@ bool FactoryReset::performFactoryReset() {
  * again.
  */
 bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
+	_successfullyFactoryResetBitmask = 0;
 	event_t factoryReset(CS_TYPE::CMD_FACTORY_RESET);
 	EventDispatcher::getInstance().dispatch(factoryReset);
 	return true;
@@ -160,16 +173,17 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 
 void FactoryReset::handleEvent(event_t & event) {
 	switch (event.type) {
-	case CS_TYPE::EVT_STATE_FACTORY_RESET_DONE:{
-		LOGi("Factory reset done, rebooting device");
-		TYPIFY(CMD_RESET_DELAYED) resetCmd;
-		resetCmd.resetCode = GPREGRET_SOFT_RESET;
-		resetCmd.delayMs = 100;
-		event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
-		EventDispatcher::getInstance().dispatch(eventReset);
-		break;
-	}
-	default:
-		break;
+		case CS_TYPE::EVT_STATE_FACTORY_RESET_DONE:{
+			onClassFactoryResetDone(FACTORY_RESET_BIT_STATE);
+			break;
+		}
+		case CS_TYPE::EVT_MESH_FACTORY_RESET_DONE: {
+#if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
+			onClassFactoryResetDone(FACTORY_RESET_BIT_MESH);
+#endif
+			break;
+		}
+		default:
+			break;
 	}
 }

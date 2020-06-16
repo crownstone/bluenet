@@ -6,25 +6,27 @@
  */
 #pragma once
 
+#include <cfg/cs_Config.h>
 #include <cstdint>
-#include "cfg/cs_Config.h"
-#include "protocol/cs_CommandTypes.h"
-#include "protocol/cs_Typedefs.h"
-#include "protocol/mesh/cs_MeshModelPackets.h"
-#include "protocol/cs_ServiceDataPackets.h"
-#include "protocol/cs_CmdSource.h"
+#include <protocol/cs_CmdSource.h>
+#include <protocol/cs_CommandTypes.h>
+#include <protocol/cs_ErrorCodes.h>
+#include <protocol/cs_MicroAppPackets.h>
+#include <protocol/cs_ServiceDataPackets.h>
+#include <protocol/cs_Typedefs.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 
 
 #define LEGACY_MULTI_SWITCH_HEADER_SIZE (1+1)
 #define LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT 18
 
-#define SESSION_NONCE_LENGTH 5
+#define VALIDATION_KEY_LENGTH   4
+#define SESSION_NONCE_LENGTH 	5
 
 /**
- * Packets (structs) that are used over the air.
+ * Packets (structs) that are used over the air, over uart, or stored in flash.
  *
- * These should be plain structs, without constructors, or member functions.
- * Instead of a constructor, you can add a function that fills a struct.
+ * Constructors can be added, as they do not impact the size of the struct.
  *
  * If the definition becomes large, move it to its own file and include it in this file.
  */
@@ -51,6 +53,7 @@ enum BackgroundAdvFlagBitPos {
  * Header of a control packet.
  */
 struct __attribute__((__packed__)) control_packet_header_t {
+	uint8_t protocolVersion;
 	cs_control_cmd_t commandType;
 	cs_buffer_size_t payloadSize;
 };
@@ -68,9 +71,21 @@ struct __attribute__((__packed__)) control_packet_t {
  * Header of a result packet.
  */
 struct __attribute__((__packed__)) result_packet_header_t {
-	cs_control_cmd_t commandType;
-	cs_ret_code_t returnCode;
-	cs_buffer_size_t payloadSize;
+	uint8_t protocolVersion = CS_CONNECTION_PROTOCOL_VERSION;
+	cs_control_cmd_t commandType = CTRL_CMD_UNKNOWN;
+	cs_ret_code_t returnCode = ERR_UNSPECIFIED;
+	cs_buffer_size_t payloadSize = 0;
+	result_packet_header_t() {}
+	result_packet_header_t(cs_control_cmd_t commandType, cs_ret_code_t returnCode):
+		commandType(commandType),
+		returnCode(returnCode),
+		payloadSize(0)
+	{}
+	result_packet_header_t(cs_control_cmd_t commandType, cs_ret_code_t returnCode, cs_buffer_size_t payloadSize):
+		commandType(commandType),
+		returnCode(returnCode),
+		payloadSize(payloadSize)
+	{}
 };
 
 /**
@@ -82,13 +97,62 @@ struct __attribute__((__packed__)) result_packet_t {
 	uint8_t payload[N];
 };
 
+enum class PersistenceModeGet {
+	CURRENT = 0,
+	STORED = 1,
+	FIRMWARE_DEFAULT = 2,
+	UNKNOWN = 255
+};
+
+enum class PersistenceModeSet {
+	TEMPORARY = 0,
+	STORED = 1,
+	UNKNOWN = 255
+};
+
 /**
  * State get/set header packet.
  */
 struct __attribute__((__packed__)) state_packet_header_t {
 	uint16_t stateType;
 	uint16_t stateId;
+	uint8_t persistenceMode; // PersistenceModeSet or PersistenceModeGet
+	uint8_t reserved = 0;
 };
+
+/**
+ * Flags to determine how to send the mesh message.
+ *
+ * All possibilities:
+ *   1,0,0 Broadcast
+ *   1,1,0 Broadcast, ack all provided IDs
+ *   1,1,1 Broadcast, ack all known IDs
+ *   0,0,0 Send command only to provided IDs
+ *   0,1,0 Send command only to provided IDs, with ack
+ *   0,0,1 Send command only to known IDs
+ *   0,1,1 Send command only to known IDs, with ack
+ */
+union __attribute__((__packed__)) mesh_control_command_packet_flags_t {
+	struct __attribute__((packed)) {
+		bool broadcast: 1;
+		bool reliable: 1;
+		bool useKnownIds: 1;
+	} flags;
+	uint8_t asInt;
+};
+
+/**
+ * Mesh control command header packet.
+ */
+struct __attribute__((__packed__)) mesh_control_command_packet_header_t {
+	uint8_t type;
+	mesh_control_command_packet_flags_t flags;
+	uint8_t timeoutOrTransmissions; // 0 for default.
+	uint8_t idCount; // 0 for broadcast.
+	// List of ids.
+	// Control packet.
+};
+
 
 /**
  * State errors: collection of errors that influence the switch behaviour.
@@ -129,8 +193,31 @@ union __attribute__((__packed__)) switch_state_t {
 };
 
 /**
+ * Switch command values.
+ *
+ * We could also write this as struct with 7 bits value,
+ * and 1 bit that determines whether the value is switch value (0-100), or a special value (enum).
+ */
+enum SwitchCommandValue {
+	CS_SWITCH_CMD_VAL_OFF = 0,
+	// Dimmed from 1 - 99
+	CS_SWITCH_CMD_VAL_FULLY_ON = 100,
+	CS_SWITCH_CMD_VAL_NONE = 128,      // For printing: the value is set to nothing.
+	CS_SWITCH_CMD_VAL_DEBUG_RESET_ALL = 129,
+	CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG = 130,
+	CS_SWITCH_CMD_VAL_DEBUG_RESET_OVERRIDE = 131,
+	CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG_OVERRIDE = 132,
+
+	CS_SWITCH_CMD_VAL_TOGGLE = 253,    // Switch OFF when currently on, switch to SMART_ON when currently off.
+	CS_SWITCH_CMD_VAL_BEHAVIOUR = 254, // Switch to the value according to behaviour rules.
+	CS_SWITCH_CMD_VAL_SMART_ON = 255   // Switch on, the value will be determined by behaviour rules.
+};
+
+/**
  * A single multi switch item.
- * switchCmd: 0 = off, 100 = fully on.
+ *
+ * id:        Command is targeted to stone with this ID.
+ * switchCmd: SwitchCommandValue
  */
 struct __attribute__((packed)) multi_switch_item_t {
 	stone_id_t id;
@@ -184,13 +271,35 @@ struct __attribute__((packed)) sun_time_t {
 	uint32_t sunset = 19*60*60;
 };
 
+/**
+ * Packet to change ibeacon config ID.
+ *
+ * Timestamp: when to set the ID for the first time.
+ * Interval: set ID every N seconds after timestamp.
+ * Set interval = 0 to execute only once.
+ * Set timestamp = 0, and interval = 0 to execute now.
+ * A stored entry with timestamp = 0 and interval = 0, will be considered empty.
+ */
+struct __attribute__((__packed__)) ibeacon_config_id_packet_t {
+	uint32_t timestamp = 0;
+	uint16_t interval = 0;
+};
+
+// See ibeacon_config_id_packet_t
+struct __attribute__((__packed__)) set_ibeacon_config_id_packet_t {
+	uint8_t ibeaconConfigId = 0;
+	ibeacon_config_id_packet_t config;
+};
+
 struct __attribute__((__packed__)) led_message_payload_t {
 	uint8_t led;
 	bool enable;
 };
 
-struct __attribute__((packed)) session_nonce_t {
-	uint8_t data[SESSION_NONCE_LENGTH];
+struct __attribute__((packed)) session_data_t {
+	uint8_t protocol;
+	uint8_t sessionNonce[SESSION_NONCE_LENGTH];
+	uint8_t validationKey[VALIDATION_KEY_LENGTH];
 };
 
 struct __attribute__((packed)) behaviour_debug_t {
@@ -211,9 +320,9 @@ struct __attribute__((packed)) behaviour_debug_t {
 
 struct __attribute__((packed)) register_tracked_device_packet_t {
 	uint16_t deviceId;
-	uint8_t locationId;
+	uint8_t locationId = 0;
 	uint8_t profileId;
-	int8_t rssiOffset;
+	int8_t rssiOffset = 0;
 	union __attribute__((packed)) {
 		struct __attribute__((packed)) {
 			bool reserved : 1;
@@ -224,10 +333,98 @@ struct __attribute__((packed)) register_tracked_device_packet_t {
 	} flags;
 //	uint8_t flags;
 	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
-	uint16_t timeToLiveMinutes;
+	uint16_t timeToLiveMinutes = 0;
 };
 
 typedef register_tracked_device_packet_t update_tracked_device_packet_t;
+
+struct cs_mesh_iv_index_t {
+	// Same as net_flash_data_iv_index_t
+    uint32_t iv_index;
+    uint8_t iv_update_in_progress;
+};
+
+typedef uint32_t cs_mesh_seq_number_t;
+
+struct __attribute__((packed)) cs_uicr_data_t {
+	uint32_t board;
+
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			uint8_t productType;
+			uint8_t region;
+			uint8_t productFamily;
+		} fields;
+		uint32_t asInt;
+	} productRegionFamily;
+
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			uint8_t patch;
+			uint8_t minor;
+			uint8_t major;
+		} fields;
+		uint32_t asInt;
+	} majorMinorPatch;
+
+	union __attribute__((packed)) {
+		struct __attribute__((packed)) {
+			uint8_t housing;
+			uint8_t week; // week number
+			uint8_t year; // last 2 digits of the year
+		} fields;
+		uint32_t asInt;
+	} productionDateHousing;
+};
+
+struct __attribute__((packed)) cs_adc_restarts_t {
+	uint32_t count = 0; // Number or ADC restarts since boot.
+	uint32_t lastTimestamp = 0; // Timestamp of last ADC restart.
+};
+
+enum PowerSamplesType {
+	POWER_SAMPLES_TYPE_SWITCHCRAFT = 0,
+	POWER_SAMPLES_TYPE_SWITCHCRAFT_NON_TRIGGERED = 1,
+	POWER_SAMPLES_TYPE_NOW_FILTERED = 2,
+	POWER_SAMPLES_TYPE_NOW_UNFILTERED = 3,
+	POWER_SAMPLES_TYPE_SOFTFUSE = 4,
+};
+
+struct __attribute__((packed)) cs_power_samples_header_t {
+	uint8_t type;                 // PowerSamplesType.
+	uint8_t index = 0;            // Some types have multiple lists of samples.
+	uint16_t count = 0;           // Number of samples.
+	uint32_t unixTimestamp;       // Unix timestamp of time the samples have been set.
+	uint16_t delayUs;             // Delay of the measurement.
+	uint16_t sampleIntervalUs;    // Time between samples.
+	uint16_t reserved = 0;
+	int16_t offset;               // Calculated offset (mean) of the samples.
+	float multiplier;             // Multiply the sample value with this value to get a value in ampere, or volt.
+	// Followed by: int16_t samples[count]
+};
+
+struct __attribute__((packed)) cs_power_samples_request_t {
+	uint8_t type;                 // PowerSamplesType.
+	uint8_t index = 0;            // Some types have multiple lists of samples.
+};
+
+struct __attribute__((packed)) cs_switch_history_header_t {
+	uint8_t count;                // Number of items.
+};
+
+struct __attribute__((packed)) cs_switch_history_item_t {
+	uint32_t timestamp;           // Timestamp of the switch command.
+	uint8_t value;                // Switch command value.
+	switch_state_t state;         // Switch state after executing the command.
+	cmd_source_t source;          // Source of the command.
+
+	cs_switch_history_item_t(uint32_t timestamp, uint8_t switchValue, switch_state_t switchState, const cmd_source_t& source):
+		timestamp(timestamp),
+		value(switchValue),
+		state(switchState),
+		source(source)
+	{}
+};
 
 
 // ========================= functions =========================

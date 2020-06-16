@@ -43,6 +43,7 @@ class ExtendedSwitchBehaviour: public SwitchBehaviour {
     // it assumes that extensionIsActive is up to date.
     virtual bool requiresAbsence() override;
 
+    // See SwitchBehaviour for more elaborate explanation why this is necessary.
     using SwitchBehaviour::isValid;
 
     /**
@@ -52,6 +53,8 @@ class ExtendedSwitchBehaviour: public SwitchBehaviour {
     virtual bool isValid(Time currenttime, PresenceStateDescription currentpresence);
 
     virtual void print();
+
+    bool extensionPeriodIsActive() { return extensionIsActive; }
 
     private:
 
@@ -71,5 +74,4 @@ class ExtendedSwitchBehaviour: public SwitchBehaviour {
      */
     bool extensionIsActive = false;
     std::optional<Time> prevExtensionIsValidTimeStamp = {};
-
 };

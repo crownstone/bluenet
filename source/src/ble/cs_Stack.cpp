@@ -9,6 +9,7 @@
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Config.h>
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_UuidConfig.h>
 #include <common/cs_Handlers.h>
 #include <drivers/cs_Storage.h>
@@ -149,7 +150,7 @@ void Stack::initRadio() {
 
 	LOGi(FMT_INIT, "radio");
 	// Enable BLE stack
-	uint32_t ram_start = RAM_R1_BASE;
+	uint32_t ram_start = g_RAM_R1_BASE;
 //	uint32_t ram_start = 0;
 	LOGd("nrf_sdh_ble_default_cfg_set at %p", ram_start);
 	// TODO: make a separate function, that tells you what to set RAM_R1_BASE to.
@@ -164,11 +165,11 @@ void Stack::initRadio() {
 			break;
 	}
 	APP_ERROR_CHECK(ret_code);
-	if (ram_start != RAM_R1_BASE) {
+	if (ram_start != g_RAM_R1_BASE) {
 		LOGw("Application address is too high, memory is unused: %p", ram_start);
 	}
 
-	LOGd("nrf_sdh_ble_enable");
+	LOGd("nrf_sdh_ble_enable ram_start=%p", ram_start);
 	ret_code = nrf_sdh_ble_enable(&ram_start);
 	switch(ret_code) {
 		case NRF_ERROR_INVALID_STATE:
@@ -391,6 +392,7 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 		// Currently only option is: BLE_USER_MEM_TYPE_GATTS_QUEUED_WRITES
 		// See https://devzone.nordicsemi.com/f/nordic-q-a/33366/is-it-necessary-handle-ble_evt_user_mem_request-respectivly-is-it-required-to-support-prepared-writes
 		// And https://devzone.nordicsemi.com/f/nordic-q-a/53074/ble_evt_user_mem_request-if-data_length-is-180-bytes-on-ios-but-not-for-android
+		// And https://devzone.nordicsemi.com/f/nordic-q-a/50043/ble_evt_user_mem_request-patterns
 		// Also see https://interrupt.memfault.com/blog/ble-throughput-primer
 //		BLE_CALL(sd_ble_user_mem_reply, (p_ble_evt->evt.gap_evt.conn_handle, NULL));
 

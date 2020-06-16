@@ -85,6 +85,13 @@ public:
 	void configureAdvertisement(IBeacon* beacon, uint8_t deviceType);
 
 	/**
+	 * Sets and updates the advertisement data.
+	 *
+	 * @param[in] deviceType           Device type, for example DEVICE_CROWNSTONE_PLUG.
+	 */
+	void configureAdvertisement(uint8_t deviceType);
+
+	/**
 	 * Start advertising.
 	 *
 	 * @return nrf return code.

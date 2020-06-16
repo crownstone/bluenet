@@ -43,6 +43,7 @@ CS_UART_BINARY_PROTOCOL_ENABLED=1
 # 2 to use UART, this replaces bluenet serial, and thus breaks the binary protocol.
 #   Also, the UART pin is then defined at compile time.
 CS_SERIAL_NRF_LOG_ENABLED=0
+CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED=0
 CS_SERIAL_NRF_LOG_PIN_TX=6
 
 # The different boards that can be used (from cs_Boards.h):
@@ -61,19 +62,22 @@ CS_SERIAL_NRF_LOG_PIN_TX=6
 # ACR01B1E             1004
 # ## Crownstone Builtin One
 # ACR01B10B            1007
-# ACR01B10C            1008
+# ACR01B10D            1008
 # ## Crownstone Plug
 # ACR01B2A             1500
 # ACR01B2B             1501
 # ACR01B2C             1502
 # ACR01B2E             1503
 # ACR01B2G             1504
-# ## Crownstone Plug on
+# ## Crownstone Plug One
 # ACR01B11A            1505
-HARDWARE_BOARD=ACR01B11A
+HARDWARE_BOARD=PCA10040
 
 # The default pin layout as defined by Nordic and used by the bootloader
-NORDIC_HARDWARE_BOARD=PCA10100
+NORDIC_HARDWARE_BOARD=PCA10040
+
+# The default pin layout as defined by Nordic and used by the bootloader
+NORDIC_HARDWARE_BOARD=PCA10040
 
 # The default hardware board, in case no board is written in UICR.
 # This value will then also be written to UICR.
@@ -81,6 +85,9 @@ DEFAULT_HARDWARE_BOARD=ACR01B2C
 
 # Add reset counter at end of name
 CHANGE_NAME_ON_RESET=0
+
+# Enable Arduino like apps
+BUILD_MICROAPP_SUPPORT=0
 
 # Compile the mesh code.
 BUILD_MESHING=1
@@ -90,6 +97,12 @@ MESHING=1
 
 # Use the (active) scanner of the mesh.
 MESH_SCANNER=1
+
+# Build and use the mesh persistent storage
+# 0 to disable.
+# 1 to use the default: flash manager.
+# 2 to use own implementation.
+MESH_PERSISTENT_STORAGE=2
 
 # Advertise iBeacon packets.
 IBEACON=1
@@ -178,7 +191,8 @@ NRF51_USE_SOFTDEVICE=1
 NRF5_DIR=
 
 # The nordic sdk version
-NORDIC_SDK_VERSION=16
+NORDIC_SDK_VERSION=15
+#NORDIC_SDK_VERSION=16
 
 # Starting with SoftDevice S110 v7 there is no separate UICR section
 SOFTDEVICE_NO_SEPARATE_UICR_SECTION=1
@@ -231,12 +245,44 @@ HARDWARE_BOARD_ADDRESS=0x10001084
 # RAM_APPLICATION_AMOUNT               - size of softdevice in RAM
 
 #######################################################################################################################
+# S132 6.1 (comes with SDK 15)
+#######################################################################################################################
+SOFTDEVICE_MAJOR=6
+SOFTDEVICE_MINOR=1
+SOFTDEVICE_SERIES=132
+SOFTDEVICE=s132_nrf52_6.1.1
+
+# We get APPLICATION_START_ADDRESS from $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld
+# We repeat them here, but you will have to adjust that file...
+# TODO: Copy the relevant files to the local repository again...
+APPLICATION_START_ADDRESS=0x00026000
+
+# Bootloader address - application address, so: 0x76000 - 0x26000 - 0x8000 = 0x50000
+APPLICATION_LENGTH=0x50000
+
+# Start of RAM for the application
+# Find out what the minimal value is by calling nrf_sdh_ble_default_cfg_set() with p_ram_start = 0.
+RAM_R1_BASE=0x20002380
+
+# Amount of RAM for the application: 0x20010000 - RAM_R1_BASE
+RAM_APPLICATION_AMOUNT=0xDC80
+
+# Amount of RAM required by the bootloader (figure this setting out by enabling debug in the bootloader)
+#   CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED=2
+# Then restart with DFU and look for information like this:
+#   <warning> nrf_sdh_ble: Insufficient RAM allocated for the SoftDevice.
+#   <warning> nrf_sdh_ble: Change the RAM start location from 0x20002380 to 0x20002A98.
+#   <warning> nrf_sdh_ble: Maximum RAM size for application is 0x1D568.
+# The difference in RAM is 0x718 so we offset the start of RAM for the bootloader with this.
+RAM_BOOTLOADER_START_OFFSET=0x718
+
+#######################################################################################################################
 # S132 7.0.1 (comes with SDK 16)
 #######################################################################################################################
-SOFTDEVICE_MAJOR=7
-SOFTDEVICE_MINOR=0
-SOFTDEVICE_SERIES=132
-SOFTDEVICE=s132_nrf52_7.0.1
+#SOFTDEVICE_MAJOR=7
+#SOFTDEVICE_MINOR=0
+#SOFTDEVICE_SERIES=132
+#SOFTDEVICE=s132_nrf52_7.0.1
 
 # This softdevice (according to release-notes.pdf in SDK files) uses 152 kB (0x26000) flash and 5.6 kB (90x1668) ram 
 
@@ -244,23 +290,19 @@ SOFTDEVICE=s132_nrf52_7.0.1
 # We repeat them here, but you will have to adjust that file...
 # TODO: This depends on the target nrf52832 vs nrf52833. That is not nice...
 # TODO: Copy the relevant files to the local repository again...
-#APPLICATION_START_ADDRESS=0x0001C000
-APPLICATION_START_ADDRESS=0x00026000
+#APPLICATION_START_ADDRESS=0x00026000
 
 # Bootloader address - application address, so: 0x76000 - 0x26000 - 0x8000 = 0x50000
-#APPLICATION_LENGTH=0x64000
-APPLICATION_LENGTH=0x50000
+#APPLICATION_LENGTH=0x50000
 
 # Start of RAM for the application (from 0x20000000 and up to RAM_R1_BASE it is reserved for the softdevice)
-RAM_R1_BASE=0x200023C0
+# Find out what the minimal value is by calling nrf_sdh_ble_default_cfg_set() with p_ram_start = 0.
+#RAM_R1_BASE=0x200023C0
 
 # On the nRF52833 we have 128kB of RAM, end is at 0x20020000, so the amount of RAM for the application becomes
 # 0x20020000 - RAM_R1_BASE = 0x1DC40
-RAM_APPLICATION_AMOUNT=0x1DC40
-#RAM_APPLICATION_AMOUNT=0x0DC40
+#RAM_APPLICATION_AMOUNT=0x1DC40
 
-# Amount of RAM for the application: 0x20010000 - RAM_R1_BASE
-#RAM_APPLICATION_AMOUNT=0xDC80
 
 ## To enable all services the gatt attribute table size has to be increased, and in turn, the RAM_R1_BASE and
 ## RAM_APPLICATION_AMOUNT variables have to be adjusted. Default for the ATTR_TABLE_SIZE is 0x580, so if you
@@ -272,3 +314,7 @@ RAM_APPLICATION_AMOUNT=0x1DC40
 # Adjust them in $BLUENET_DIR/include/third/nrf/generic_gcc_nrf52.ld for now! (adjusted version of $NRF5_DIR/config/nrf52832/armgcc/generic_gcc_nrf52.ld)
 ATTR_TABLE_SIZE=0x500
 HEAP_SIZE=20000
+
+RAM_BLUENET_IPC_LENGTH=0x100
+
+BOOTLOADER_IPC_RAM_PROTOCOL=1

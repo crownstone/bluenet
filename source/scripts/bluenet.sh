@@ -181,7 +181,7 @@ check_target_changed() {
 	# fi
 	cd "$BLUENET_BUILD_DIR"
 	cs_info "Running cmake"
-	cmake .. -DBOARD_TARGET=$target -DDOWNLOAD_JLINK=OFF -DCONFIG_DIR=config -DCMAKE_BUILD_TYPE=Debug
+	cmake .. -DBOARD_TARGET=$target -DDOWNLOAD_JLINK=OFF -DDOWNLOAD_NRFUTIL=OFF -DDOWNLOAD_NRFJPROG=OFF -DCONFIG_DIR=config -DCMAKE_BUILD_TYPE=Debug -DFACTORY_IMAGE=
 	checkError "Error running cmake"
 	make -j${jobs}
 	checkError "Error running first make"
@@ -271,6 +271,7 @@ upload_softdevice() {
 	cs_info "upload softdevice"
 	cd "$BLUENET_BUILD_DIR"
 	make write_softdevice
+	make write_mbr_param_address
 	checkError "Error uploading softdevice"
 }
 
@@ -344,7 +345,7 @@ verify_board_version_written() {
 
 reset() {
 	cs_info "reset"
-	cd "$BLUENET_BUILD_DIR"
+	cd "$BLUENET_BUILD_DIR/$target"
 	make reset
 	checkError "Error when resetting"
 }

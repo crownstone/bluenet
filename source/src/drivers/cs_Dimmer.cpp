@@ -12,6 +12,8 @@
 #include <storage/cs_State.h>
 #include <util/cs_Error.h>
 
+#include <test/cs_Test.h>
+
 void Dimmer::init(const boards_config_t& board) {
 	initialized = true;
 
@@ -24,13 +26,15 @@ void Dimmer::init(const boards_config_t& board) {
 	TYPIFY(CONFIG_PWM_PERIOD) pwmPeriodUs;
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_PERIOD, &pwmPeriodUs, sizeof(pwmPeriodUs));
 
+	State::getInstance().get(CS_TYPE::STATE_SOFT_ON_SPEED, &softOnfSpeed, sizeof(softOnfSpeed));
+
+	LOGd("init enablePin=%u pwmPin=%u inverted=%u period=%u µs softOnSpeed=%u", board.pinGpioEnablePwm, board.pinGpioPwm, board.flags.pwmInverted, pwmPeriodUs, softOnfSpeed);
+
 	pwm_config_t pwmConfig;
 	pwmConfig.channelCount = 1;
 	pwmConfig.period_us = pwmPeriodUs;
 	pwmConfig.channels[0].pin = board.pinGpioPwm;
 	pwmConfig.channels[0].inverted = board.flags.pwmInverted;
-
-	LOGd("init enablePin=%u pwmPin=%u inverted=%u period=%u µs", board.pinGpioEnablePwm, board.pinGpioPwm, board.flags.pwmInverted, pwmPeriodUs);
 
 	PWM::getInstance().init(pwmConfig);
 }
@@ -61,15 +65,25 @@ void Dimmer::start() {
 	}
 }
 
-bool Dimmer::set(uint8_t intensity) {
-	LOGd("set %u", intensity);
+bool Dimmer::set(uint8_t intensity, bool immediately) {
+	LOGd("set val=%u immediately=%u", intensity, immediately);
 	assert(initialized == true, "Not initialized");
 	if (!enabled && intensity > 0) {
 		LOGd("Dimmer not enabled");
 		return false;
 	}
-	PWM::getInstance().setValue(0, intensity);
+
+	uint8_t speed = immediately ? 100 : softOnfSpeed;
+
+	TEST_PUSH_EXPR_D(this,"intensity", intensity);
+	PWM::getInstance().setValue(0, intensity, speed);
+	
 	return true;
+}
+
+void Dimmer::setSoftOnSpeed(uint8_t speed) {
+	LOGd("setSoftOnSpeed %u", speed);
+	softOnfSpeed = speed;
 }
 
 void Dimmer::enable() {
@@ -99,7 +113,7 @@ void Dimmer::enable() {
 			break;
 		}
 		// Newer ones have a dimmer enable pin.
-		case ACR01B10C:
+		case ACR01B10D:
 		default: {
 			nrf_gpio_pin_set(pinEnableDimmer);
 			break;

@@ -5,12 +5,8 @@
  */
 #pragma once
 
-extern "C" {
-#include <util/cs_Syscalls.h>
-}
 
 #ifdef	NDEBUG
-
 //! for release version ignore asserts
 #define assert(expr, message) \
 	if (!(expr)) { \
@@ -18,6 +14,10 @@ extern "C" {
 	}
 
 #else
+
+extern "C" {
+#include <util/cs_Syscalls.h>
+}
 
 #define assert(expr, message) \
 	if (!(expr)) { \

@@ -1,8 +1,20 @@
 # Naming Convention
 
+Naming depends on the purpose, in this document we explain the naming for:
+
+* manufacturing
+* packaging
+* distribution
+* software
+* shops
+
+# Manufacturing
+
 A name is a concatenation of multiple fields:
 
     broad product line | product line | product | part | version i.e. 00 000000 00 X_Name 0.0.0
+
+This naming you can find back in communication to the factories that produce Crownstone products or in inventory documents.
 
 ## Product families
 
@@ -17,10 +29,18 @@ Six digits in binary format. This means that parts can be reused over multiple p
 
 ### Crownstone family
 
+The binary product representation is as follows.
+
     000001 Development Board     01
     000010 Plug                  02
     000100 Built-in              04
     001000 (Own) Guidestone      08
+
+You see that the Crownstone family has multiple products. To indicate that we can use a particular physical part for e.g. both plugs and guidestones we can use entries in our tables, such as:
+
+    001010 
+
+For example the socket part of the plastic can be reused for both products. Or we might have an electronic component - say, a relays - that can be reused for both the plugs as well as the built-in Crownstones.
 
 ### Third-party family
 
@@ -76,10 +96,14 @@ Current part list for the Crownstone Plug and Guidestone:
     01 001010 01 M_Pin
     01 001010 01 M_Ground_clip
 
-# Vendor product number
+You see that there are plastic `P_` and metal `M_` parts. You can also see that the bottom four can be used for both the plugs as well as the guidestones `001010`. If we have 10.000 `P_Ring` parts we can create a total of 10.000 plugs/guidestones.
+
+# Packaging
+
+## Vendor product number
 
 The product lines can also be used directly for a vendor product number (VPN). This number is communicated with
-distributors. It changes for each type of packaging.
+distributors. It changes for each type of commercially available product. 
 
 | Name                         | Description                                        | Certification | Variant   | VPN         |
 | --                           | --                                                 | --            | --        | --          |
@@ -95,11 +119,11 @@ The vendor product number exists of `CRfppMmm/vv` with:
     mm - market
     vv - variant
 
-The market can be updated as soon as we have products that are for example certified for more markets. We definitely
-want to have updated packaging for those markets. However, we do not need to change the product for these markets.
-Hence the product number is slightly more general (see below).
+Again. The product `pp` number is not the same as the binary product presentation used in manufacturing, it is only bumped when a new product enters the market. If the product is in the same category only the `vv` variant is updated (e.g. from the Crownstone Built-in Zero to the Crownstone Built-in One). This VPN contains market information (which means it is certified for that market). This can be found on the packaging. On the product itself this information is not there, it is shortened, see next section.
 
-# Product number (label on product itself)
+# Distribution
+
+## Product number (label on product itself, shortened VPN)
 
 The product number should not specify the market. You will see the following abbreviated VPN on the product itself:
 
@@ -110,7 +134,9 @@ The product number should not specify the market. You will see the following abb
 | Crownstone Plug              | Crownstone Plug European Type F                    | CE            | Type F    | CR102/01 |
 | Crownstone Guidestone        | Guidestone                                         | CE            | 240V      | CR201/01 |
 
-# Registers
+# Software
+
+## Registers
 
 When the hardware is programmed the factory image contains information on the product as well. The following information is stored separately from the main firmware (which is identical for every device). Note that these are stored in registers and use fewer bits than the notations on the packaging, in the code, or in the documentation.
 
@@ -118,7 +144,7 @@ When the hardware is programmed the factory image contains information on the pr
 | --                            | --                          | --                  |
 | MBR_SETTINGS                  | MBR settings page (start)   | 0x0007E000          |
 | UICR_BOOTLOADER_ADDRESS       | Bootloader address (start)  | 0x00076000          |
-| HARDWARE_BOARD                | PCB version                 | ACR01B10C           |
+| HARDWARE_BOARD                | PCB version                 | ACR01B10D           |
 | PRODUCT_FAMILY                | Family                      | 0x01                |
 | PRODUCT_MARKET                | Market (European / US)      | 0x01                |
 | PRODUCT_TYPE                  | Type (different from above) | 0x03                |
@@ -138,11 +164,11 @@ The above settings are not directly stored in separate registers, but concatenat
 | 0x1000108c       | Major/minor/patch       | 0xFF000500          |
 | 0x10001090       | Production date/housing | 0xFF191201          |
 
-The hardware board `0x3EC` corresponds to `1004` in decimal notation. In the [cs_Boards.h](https://github.com/crownstone/bluenet/blob/master/source/include/cfg/cs_Boards.h) file this is board `ACR01B1E`. Likewise `ACR01B10C` has number `1008` is `0x3F0`.
+The hardware board `0x3EC` corresponds to `1004` in decimal notation. In the [cs_Boards.h](https://github.com/crownstone/bluenet/blob/master/source/include/cfg/cs_Boards.h) file this is board `ACR01B1E`. Likewise `ACR01B10D` has number `1008` is `0x3F0`.
 
 The major/minor versions are currently generated from the hardware board id, see the [cs_HardwareVersions.h](https://github.com/crownstone/bluenet/blob/master/source/include/cfg/cs_HardwareVersions.h) file. A patch is a PCB patch which can be taken into account by the firmware to e.g. delay enabling the dimmer at boot. A minor update is done for any PCB alteration that does not change the pin layout. A major update means significant hardware changes, under which pin layout changes.
 
-The family / market / type triplet is different from the notation above. 
+The family / market / type triplet is different from the notation at the top of this document. 
 
     Development Board     01
     Plug                  02
@@ -150,10 +176,15 @@ The family / market / type triplet is different from the notation above.
     Guidestone            04
     Dongle                05
     Built-in One          06
+    Plug One              07
 
 If values are not written they are still `FF`.
 
-# EAN
+Why for example the `PRODUCT_HOUSING` is important to be known to the firmware, is because a different form factor of the product housing might influence the antenna. It might very well be that additional metal requires us to broadcast slightly stronger for example or it might require us to use different parameters for the current measurements or modules that depend on the current measurements. The id for `PRODUCT_HOUSING` starts with `0x01` for each product line and is bumped for each mechanical alteration.
+
+# Shops
+
+## EAN
 
 | Name                                              | VPN         | EAN           |
 | --                                                | --          | --            |

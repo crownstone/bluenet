@@ -5,11 +5,10 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <events/cs_EventDispatcher.h>
-
-#include <util/cs_BleError.h>
-
+#include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
+#include <events/cs_EventDispatcher.h>
+#include <util/cs_BleError.h>
 
 //#define PRINT_EVENTDISPATCHER_VERBOSE
 
@@ -27,6 +26,18 @@ void EventDispatcher::dispatch(event_t & event) {
 		LOGe("data nullptr while size != 0");
     	event.result.returnCode = ERR_BUFFER_UNASSIGNED;
         return;
+    }
+
+    switch (event.type) {
+    	case CS_TYPE::CMD_ADD_BEHAVIOUR:
+    	case CS_TYPE::CMD_REPLACE_BEHAVIOUR:
+    		// These types have variable sized data, and will be size checked in the handler.
+    		break;
+    	default:
+			if (event.size != TypeSize(event.type)) {
+				event.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+				return;
+			}
     }
 
 	for (int i = 0; i < _listenerCount; i++) {

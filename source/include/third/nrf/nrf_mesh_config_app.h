@@ -70,31 +70,29 @@
 #define LOG_ENABLE_RTT NRF_LOG_BACKEND_RTT_ENABLED
 
 
-/**
- * @defgroup NRF_MESH_CONFIG_APP nRF Mesh app config
- *
- * Application side configuration file. Should be copied into every
- * application, and customized to fit its requirements.
- * @{
- */
-
-/**
- * @defgroup DEVICE_CONFIG Device configuration
- *
- * @{
- */
-
 
 /** Relay feature */
 #define MESH_FEATURE_RELAY_ENABLED (1)
 
-#define PERSISTENT_STORAGE 0
-
-
-/** Number of flash pages to be reserved between the flash manager recovery page and the bootloader.
- *  @note This value will be ignored if FLASH_MANAGER_RECOVERY_PAGE is set.
+/**
+ * Enable persistent storage.
  */
-#define FLASH_MANAGER_RECOVERY_PAGE_OFFSET_PAGES FDS_PHY_PAGES
+#if MESH_PERSISTENT_STORAGE == 1
+#define PERSISTENT_STORAGE 1
+#else
+#define PERSISTENT_STORAGE 0
+#endif
+
+#if MESH_PERSISTENT_STORAGE == 2
+#define MESH_EXTERNAL_PERSISTENT_STORAGE 1
+#else
+#define MESH_EXTERNAL_PERSISTENT_STORAGE 0
+#endif
+
+/**
+ * Enable active scanning.
+ */
+#define SCANNER_ACTIVE_SCANNING 1
 
 /** Device company identifier. */
 #define DEVICE_COMPANY_ID (CROWNSTONE_COMPANY_ID)
@@ -105,12 +103,7 @@
 /** Device version identifier. */
 #define DEVICE_VERSION_ID (0x0000)
 
-/** @} end of DEVICE_CONFIG */
 
-/**
- * @defgroup ACCESS_CONFIG Access layer configuration
- * @{
- */
 
 /**
  * The default TTL value for the node.
@@ -125,7 +118,9 @@
  */
 #define ACCESS_MODEL_COUNT (1 + /* Configuration server */  \
                             1 + /* Health server */  \
-							1 /* Crownstone model */)
+                            1 + /* Crownstone multicast model */  \
+                            1 + /* Crownstone multicast acked model */  \
+                            1   /* Crownstone unicast model */)
 
 /**
  * The number of elements in the application.
@@ -148,49 +143,47 @@
  */
 #define ACCESS_FLASH_PAGE_COUNT (1)
 
-/**
- * @defgroup ACCESS_RELIABLE_CONFIG Configuration of access layer reliable transfer
- * @{
- */
-
 /** Number of the allowed parallel transfers (size of the internal context pool). */
 #define ACCESS_RELIABLE_TRANSFER_COUNT (ACCESS_MODEL_COUNT)
 
 /** Define for acknowledging message transaction timeout, in micro seconds. */
 #define MODEL_ACKNOWLEDGED_TRANSACTION_TIMEOUT  (SEC_TO_US(3))
 
-/** @} end of ACCESS_RELIABLE_CONFIG */
 
 
-/** @} end of ACCESS_CONFIG */
-
-
-/**
- * @defgroup DSM_CONFIG Device State Manager configuration
- * Sizes for the internal storage of the Device State Manager.
- * @{
- */
 /** Maximum number of subnetworks. */
 //#define DSM_SUBNET_MAX                                  (1)
 #define DSM_SUBNET_MAX                                  (4)
+
 /** Maximum number of applications. */
-//#define DSM_APP_MAX                                     (1)
-#define DSM_APP_MAX                                     (8)
+#define DSM_APP_MAX                                     (1)
+//#define DSM_APP_MAX                                     (8)
+
 /** Maximum number of device keys. */
 #define DSM_DEVICE_MAX                                  (1)
+
 /** Maximum number of virtual addresses. */
-#define DSM_VIRTUAL_ADDR_MAX                            (1)
+#define DSM_VIRTUAL_ADDR_MAX                            (2)
+
 /** Maximum number of non-virtual addresses. One for each of the servers and a group address.
  * - Generic OnOff publication
  * - Health publication
  * - Subscription address
  */
 #define DSM_NONVIRTUAL_ADDR_MAX                         (ACCESS_MODEL_COUNT + 1)
+
 /** Number of flash pages reserved for the DSM storage. */
 #define DSM_FLASH_PAGE_COUNT                            (1)
-/** @} end of DSM_CONFIG */
 
 
-/** @} */
+
+/** Number of flash pages to be reserved between the flash manager recovery page and the bootloader.
+ *  @note This value will be ignored if FLASH_MANAGER_RECOVERY_PAGE is set.
+ */
+//#define FLASH_MANAGER_RECOVERY_PAGE_OFFSET_PAGES        (FDS_PHY_PAGES)
+// We reserve a few pages for future expansion of FDS pages.
+#define FLASH_MANAGER_RECOVERY_PAGE_OFFSET_PAGES        (2 + FDS_PHY_PAGES)
+
+
 
 #endif /* NRF_MESH_CONFIG_APP_H__ */

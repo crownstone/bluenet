@@ -50,7 +50,7 @@ void PresenceHandler::handleEvent(event_t& evt){
         profile = profile_location->profileId;
         location = profile_location->locationId;
         fromMesh = profile_location->fromMesh;
-        LOGPresenceHandler("Received: location=%u profile=%u mesh=%u", profile, location, fromMesh);
+        LOGPresenceHandler("Received: profile=%u location=%u mesh=%u", profile, location, fromMesh);
 		break;
     }
     case CS_TYPE::EVT_TICK: {

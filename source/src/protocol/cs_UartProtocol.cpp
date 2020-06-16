@@ -73,7 +73,11 @@ void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) 
 		// Now only the special chars get escaped, no header and tail.
 		writeBytes(data, size);
 		return;
+	case UART_OPCODE_TX_SERVICE_DATA:
+	case UART_OPCODE_TX_FIRMWARESTATE:
+		return;
 	default:
+//		LOGd("writeMsg opCode=%u", opCode);
 		return;
 	}
 #endif
@@ -88,6 +92,7 @@ void UartProtocol::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 	// when debugging we would like to drop out of certain binary data coming over the console...
 	switch(opCode) {
 	default:
+//		LOGd("writeMsg opCode=%u", opCode);
 		return;
 	}
 #endif
@@ -240,13 +245,24 @@ void UartProtocol::handleMsg(uart_handle_msg_data_t* msgData) {
 			break;
 		}
 		TYPIFY(CMD_CONTROL_CMD) controlCmd;
+		controlCmd.protocolVersion = controlHeader->protocolVersion;
 		controlCmd.type = (CommandHandlerTypes)controlHeader->commandType;
 		controlCmd.accessLevel = ADMIN;
 		controlCmd.data = payload + sizeof(*controlHeader);
 		controlCmd.size = controlHeader->payloadSize;
-		controlCmd.source = cmd_source_t(CS_CMD_SOURCE_UART);
-		event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd));
+
+		// Allocate buffer for result.
+		uint8_t resultBuffer[300];
+		cs_result_t result(cs_data_t(resultBuffer, sizeof(resultBuffer)));
+
+		event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), cmd_source_with_counter_t(CS_CMD_SOURCE_UART), result);
 		EventDispatcher::getInstance().dispatch(event);
+
+		result_packet_header_t resultHeader(controlCmd.type, event.result.returnCode, event.result.dataSize);
+		writeMsgStart(UART_OPCODE_TX_CONTROL_RESULT, sizeof(resultHeader) + resultHeader.payloadSize);
+		writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+		writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, event.result.buf.data, event.result.dataSize);
+		writeMsgEnd(UART_OPCODE_TX_CONTROL_RESULT);
 		break;
 	}
 	case UART_OPCODE_RX_ENABLE_ADVERTISEMENT: {
@@ -373,6 +389,16 @@ void UartProtocol::handleEvent(event_t & event) {
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE: {
 		TYPIFY(EVT_STATE_EXTERNAL_STONE)* state = (TYPIFY(EVT_STATE_EXTERNAL_STONE)*)event.data;
 		writeMsg(UART_OPCODE_TX_MESH_STATE, (uint8_t*)&(state->data), sizeof(state->data));
+		break;
+	}
+	case CS_TYPE::EVT_MESH_EXT_STATE_0: {
+		TYPIFY(EVT_MESH_EXT_STATE_0)* state = (TYPIFY(EVT_MESH_EXT_STATE_0)*)event.data;
+		writeMsg(UART_OPCODE_TX_MESH_STATE_PART_0, (uint8_t*)&state, sizeof(state));
+		break;
+	}
+	case CS_TYPE::EVT_MESH_EXT_STATE_1: {
+		TYPIFY(EVT_MESH_EXT_STATE_1)* state = (TYPIFY(EVT_MESH_EXT_STATE_1)*)event.data;
+		writeMsg(UART_OPCODE_TX_MESH_STATE_PART_1, (uint8_t*)&state, sizeof(state));
 		break;
 	}
 	default:

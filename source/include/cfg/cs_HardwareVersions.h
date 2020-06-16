@@ -56,7 +56,7 @@ static inline const char* get_hardware_version() {
 
 	// CROWNSTONE BUILTIN ONES
 	if (hardwareBoard == ACR01B10B) return "10106000000";
-	if (hardwareBoard == ACR01B10C) return "10106000100";
+	if (hardwareBoard == ACR01B10D) return "10106000100";
 
 	// CROWNSTONE PLUGS
 	if (hardwareBoard == ACR01B2A) return "10102000100";

@@ -21,7 +21,8 @@
 
 #pragma once
 
-#include "events/cs_EventListener.h"
+#include <events/cs_EventListener.h>
+#include <protocol/cs_UartMsgTypes.h>
 #include <cstdint>
 
                                            // bit:7654 3210
@@ -56,9 +57,14 @@ enum UartOpcodeRx {
 
 enum UartOpcodeTx {
 	UART_OPCODE_TX_ACK =                              0,
+	UART_OPCODE_TX_CONTROL_RESULT =                   1, // The result of the control command, payload: result_packet_header_t + data.
 	UART_OPCODE_TX_SERVICE_DATA =                     2, // Sent when the service data is updated (payload: service_data_t)
 	UART_OPCODE_TX_BLE_MSG =                          3, // Sent by command (CMD_UART_MSG), payload: buffer.
 	UART_OPCODE_TX_MESH_STATE =                       102, // Received state of external stone, payload: service_data_encrypted_t
+	UART_OPCODE_TX_MESH_STATE_PART_0 =                103, // Received part of state of external stone, payload: cs_mesh_model_msg_state_0_t
+	UART_OPCODE_TX_MESH_STATE_PART_1 =                104, // Received part of state of external stone, payload: cs_mesh_model_msg_state_1_t
+	UART_OPCODE_TX_MESH_RESULT =                      105, // Received the result of a mesh command, payload: uart_msg_mesh_result_packet_header_t + data.
+	UART_OPCODE_TX_MESH_ACK_ALL_RESULT =              106, // Whether all stone IDs were acked, payload: result_packet_header_t.
 
 	UART_OPCODE_TX_ADVERTISEMENT_ENABLED =            10000, // Whether advertising is enabled (payload: bool)
 	UART_OPCODE_TX_MESH_ENABLED =                     10001, // Whether mesh is enabled (payload: bool)
@@ -78,6 +84,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_EVT =                              10300, // Send internal events, this protocol may change
 
 	UART_OPCODE_TX_TEXT =                             20000, // Payload is ascii text.
+	UART_OPCODE_TX_FIRMWARESTATE =                    20001,
 };
 
 struct __attribute__((__packed__)) uart_msg_header_t {

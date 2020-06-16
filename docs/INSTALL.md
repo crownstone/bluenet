@@ -69,6 +69,10 @@ To check the version of a softdevice:
 
 If you type `make ` and then TAB there should be tab completion that shows the possible targets.
 
+The softdevice makes use of a so called master boot record (MBR). This provides the softdevice, bootloader, and firmware some functions. It requires a parameter page, which it finds by looking at the UICR. We write the address with:
+
+    make write_mbr_param_address
+
 Before writing the application or bootloader, the board version should be written. It allows Crownstone to run the same binary on all our devices and decide per device what type of hardware is actually present. For example, on a Guidestone there will be no switch functionality available.
 It has to be written before the application runs, else the application will write a default.
 

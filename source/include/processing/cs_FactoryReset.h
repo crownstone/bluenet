@@ -11,6 +11,16 @@
 #include "drivers/cs_Timer.h"
 #include "events/cs_EventListener.h"
 
+// All the classes that are expected to factory reset.
+enum FactoryResetClassBit {
+	FACTORY_RESET_BIT_STATE = 0,
+#if BUILD_MESHING == 1 && MESH_PERSISTENT_STORAGE == 1
+	FACTORY_RESET_BIT_MESH,
+#endif
+	FACTORY_RESET_NUM_BITS
+};
+#define FACTORY_RESET_MASK_ALL ((1 << FACTORY_RESET_NUM_BITS) - 1)
+
 class FactoryReset: public EventListener {
 public:
 	//! Gets a static singleton (no dynamic memory allocation)
@@ -56,9 +66,13 @@ private:
 	void resetTimeout();
 	void timeout();
 	void process();
+	void onClassFactoryResetDone(const FactoryResetClassBit bit);
 
 	bool _recoveryEnabled;
 	uint32_t _rtcStartTime;
+
+	// Used to check if all classes are factory reset.
+	uint32_t _successfullyFactoryResetBitmask = 0;
 
 	app_timer_t              _recoveryDisableTimerData;
 	app_timer_id_t           _recoveryDisableTimerId;

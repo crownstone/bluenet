@@ -10,7 +10,7 @@ DOCS_DIR_PREFIX = "../"
 DOCS_DIR = "../docs/"
 DIR = "diagrams/"
 GEN_DIR = DOCS_DIR_PREFIX + DOCS_DIR + DIR
-FILENAMES = [DOCS_DIR_PREFIX + DOCS_DIR + F for F in ["PROTOCOL.md", "BEHAVIOUR.md", "SERVICE_DATA.md", "SERVICE_DATA_DEPRECATED.md", "BROADCAST_PROTOCOL.md"]]
+FILENAMES = [DOCS_DIR_PREFIX + DOCS_DIR + F for F in ["PROTOCOL.md", "BEHAVIOUR.md", "SERVICE_DATA.md", "SERVICE_DATA_DEPRECATED.md", "BROADCAST_PROTOCOL.md", "MESH_PROTOCOL.md", "IPC.md"]]
 
 fontPath = DOCS_DIR_PREFIX + DOCS_DIR + "diagrams/fonts/LiberationSans-Regular.ttf"
 fontSizeBlocks = 24
@@ -269,13 +269,13 @@ def drawVar(startX, y, varName, varLen, color):
 	return startX + width
 
 
-def drawVarList(varList, filename):
+def drawVarList(varList, filename, lengthInBits):
 	if not filename:
-		print "no filename for:"
+		print("no filename for:")
 		for var in varList:
-			print "  " + var[0]
+			print("  " + var[0])
 		return
-	print "Generating " + filename
+	print("Generating " + filename)
 
 	totalLen = 0
 	for var in varList:
@@ -287,8 +287,9 @@ def drawVarList(varList, filename):
 
 	size = [totalLen * STEP_X, STEP_Y]
 
-	# Add text "byte" to screen size
-	byteLabel = fontBytes.render("Byte", True, BLACK)
+	# Add text "byte" or "bit" to screen size
+	byteTxt = "Bit" if lengthInBits else "Byte"
+	byteLabel = fontBytes.render(byteTxt, True, BLACK)
 	size[0] += byteLabel.get_width()
 	size[1] += byteLabel.get_height()
 
@@ -380,6 +381,7 @@ def parseFile(textFilename):
 
 	filename = None
 	foundTableHeader=False
+	lengthInBits=False
 	foundTableLines=False
 	varList = []
 
@@ -406,7 +408,7 @@ def parseFile(textFilename):
 
 			else:
 				# End of table, draw and reset
-				drawVarList(varList, filename)
+				drawVarList(varList, filename, lengthInBits)
 				filename = None
 				foundTableHeader=False
 				foundTableLines = False
@@ -422,6 +424,7 @@ def parseFile(textFilename):
 		matches = patternTableHeader.findall(line)
 		if len(matches):
 			#print "foundTableHeader: " + matches[0]
+			lengthInBits = (matches[0] == "in bits")
 			foundTableHeader = True
 
 		matches = patternFileName.findall(line)
@@ -431,10 +434,10 @@ def parseFile(textFilename):
 	# End of file
 	if (foundTableLines):
 		# Draw last table
-		drawVarList(varList, filename)
+		drawVarList(varList, filename, lengthInBits)
 
 if not os.path.exists(GEN_DIR):
-	print "Make dir " + GEN_DIR
+	print("Make dir " + GEN_DIR)
 	os.makedirs(GEN_DIR)
 
 pygame.init()
@@ -452,7 +455,7 @@ patternTableRow = re.compile("[^|]\\|([^|]+)\\|([^|]+)\\|.*")
 patternLink = re.compile("\\[([^]]+)\\]\\([^\\)]+\\)")
 
 for filename in FILENAMES:
-	print filename
+	print(filename)
 	parseFile(filename)
 	
 

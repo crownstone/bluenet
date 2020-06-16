@@ -56,17 +56,18 @@ The following data types are available:
 
 Type | Packet
 --- | ---
-0 | [State](#service_data_encrypted_state_2).
-1 | [Error](#service_data_encrypted_error_2).
-2 | [External state](#service_data_encrypted_ext_state_2).
-3 | [External error](#service_data_encrypted_ext_error_2).
+0 | [State](#service_data_encrypted_state_3).
+1 | [Error](#service_data_encrypted_error_3).
+2 | [External state](#service_data_encrypted_ext_state_3).
+3 | [External error](#service_data_encrypted_ext_error_3).
+4 | [Alternative state](#service_data_encrypted_alternative_state).
 
-<a name="service_data_encrypted_state_2"></a>
+<a name="service_data_encrypted_state_3"></a>
 ## State packet
 
 The following type gives the latest state of the Crownstone.
 
-![Encrypted service data state](../docs/diagrams/service-data-encrypted-state-2.png)
+![Encrypted service data state](../docs/diagrams/service-data-encrypted-state-3.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -81,12 +82,31 @@ uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp w
 uint 8 | [Extra flags bitmask](#extra_flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
 
-<a name="service_data_encrypted_error_2"></a>
+<a name="service_data_encrypted_alternative_state"></a>
+## Alternative state packet
+
+The following type gives the latest state of the Crownstone.
+It's similar to the normal state, but replaces some less essential fields with other data.
+
+![Encrypted service data state](../docs/diagrams/service-data-encrypted-alternative-state.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+uint 16 | Behaviour master hash | 2 | Part of behaviour master hash: divide hash by 65536.
+uint 8[] | Reserved | 6 | Reserved for future use, 0 for now.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
+uint 8 | Reserved | 1 | Reserved for future use, 0 for now.
+uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
+
+<a name="service_data_encrypted_error_3"></a>
 ## Error packet
 
 The following type only gets advertised in case there is an error. It will be interleaved with the state type.
 
-![Encrypted service data error](../docs/diagrams/service-data-encrypted-error-2.png)
+![Encrypted service data error](../docs/diagrams/service-data-encrypted-error-3.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -96,14 +116,14 @@ uint 32 | Timestamp | 4 | The timestamp when the first error occured.
 uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
-int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
+int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.servicedata_device_type
 
-<a name="service_data_encrypted_ext_state_2"></a>
+<a name="service_data_encrypted_ext_state_3"></a>
 ## External state packet
 
 The following type sends out the last known state of another Crownstone. It will be interleaved with the state type (unless there's an error).
 
-![Encrypted service data external state](../docs/diagrams/service-data-encrypted-ext-state-2.png)
+![Encrypted service data external state](../docs/diagrams/service-data-encrypted-ext-state-3.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -115,15 +135,15 @@ int 8 | Power factor | 1 | The power factor at this moment. Divide by 127 to get
 int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to get power usage in Watt. Divide real power usage by the power factor to get apparent power usage in VA.
 int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
-int 8 | RSSI | 1 | RSSI to the external crownstone.
+int 8 | RSSI | 1 | RSSI to the external crownstone. 0 when unknown, usually means the external Crownstone is out of direct reach.
 uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
 
-<a name="service_data_encrypted_ext_error_2"></a>
+<a name="service_data_encrypted_ext_error_3"></a>
 ## External error packet
 
 The following type sends out the last known error of another Crownstone. It will be interleaved with the state type (unless there's an error).
 
-![Encrypted service data external error](../docs/diagrams/service-data-encrypted-ext-error-2.png)
+![Encrypted service data external error](../docs/diagrams/service-data-encrypted-ext-error-3.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -133,7 +153,7 @@ uint 32 | Timestamp | 4 | The timestamp when the first error occured.
 uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
-int 8 | RSSI | 1 | RSSI to the external crownstone.
+int 8 | RSSI | 1 | RSSI to the external crownstone. 0 when unknown, usually means the external Crownstone is out of direct reach.
 uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
 
 

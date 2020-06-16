@@ -8,6 +8,8 @@
 
 #define CROWNSTONE_COMPANY_ID                    0x038E
 
+#define CS_CONNECTION_PROTOCOL_VERSION           5
+
 // size of the buffer used for characteristics
 //#define GENERAL_BUFFER_SIZE                      300
 
@@ -18,23 +20,6 @@
  */
 #define MAX_STRING_STORAGE_SIZE                  31
 
-/** Command to enter the bootloader and stay there.
- *
- * This should be the same value as defined in the bootloader.
- */
-#define GPREGRET_DFU_RESET                       66 // 07-11-2019 TODO: why 66? It makes more sense to use 63 or 31.
-#define GPREGRET_BROWNOUT_RESET                  96 // 07-11-2019 TODO: why 96? It makes more sense to use 64 or 32.
-#define GPREGRET_SOFT_RESET                      1
-
-/**
- * Values used to remember flags after a reboot.
- *
- * Make sure this doesn't interfere with the nrf bootloader values that are used. Like:
- * - BOOTLOADER_DFU_GPREGRET2_MASK
- * - BOOTLOADER_DFU_GPREGRET2
- * - BOOTLOADER_DFU_SKIP_CRC_BIT_MASK
- */
-#define GPREGRET2_STORAGE_RECOVERED              4
 
 /** Priorities of the different peripherals
  */
@@ -157,7 +142,7 @@
 // Soft device uses 17-31
 // Mesh SDK uses 8-11
 #define CS_PWM_PPI_CHANNEL_START                 0
-#define CS_PWM_PPI_CHANNEL_COUNT                 (2 + 2 * CS_PWM_MAX_CHANNELS)
+#define CS_PWM_PPI_CHANNEL_COUNT                 (1 + 2 * CS_PWM_MAX_CHANNELS)
 //#define CS_ADC_PPI_CHANNEL_START                 (CS_PWM_PPI_CHANNEL_START + CS_PWM_PPI_CHANNEL_COUNT)
 #define CS_ADC_PPI_CHANNEL_START                 12
 #define CS_ADC_PPI_CHANNEL_COUNT                 4
@@ -165,7 +150,7 @@
 // ----- PPI groups -----
 // Soft device uses 4-5
 #define CS_PWM_PPI_GROUP_START                   0
-#define CS_PWM_PPI_GROUP_COUNT                   1
+#define CS_PWM_PPI_GROUP_COUNT                   0
 
 // ----- GPIOTE -----
 #define CS_ADC_GPIOTE_CHANNEL_START              0
@@ -178,10 +163,14 @@
 #define CS_ADC_IRQ_PRIORITY                      APP_IRQ_PRIORITY_HIGH
 #define CS_ADC_IRQ                               SAADC_IRQHandler
 
+// ----- WDT -----
+#define CS_WATCHDOG_PRIORITY                     APP_IRQ_PRIORITY_HIGH
+#define CS_WATCHDOG_TIMEOUT_MS                   60000
+
 
 #define CS_ADC_SAMPLE_INTERVAL_US                200 // 100 samples per period of 50Hz wave
 #define CS_ADC_MAX_PINS                          2
-#define CS_ADC_NUM_BUFFERS                       4
+#define CS_ADC_NUM_BUFFERS                       8 // 4 buffers are held by processing, 2 queued in SAADC, 1 moves between them, 1 extra for CPU usage peaks.
 #define CS_ADC_BUF_SIZE                          (CS_ADC_MAX_PINS * 20000 / CS_ADC_SAMPLE_INTERVAL_US) // Make size so it fills up 20ms of data.
 #define CS_ADC_TIMEOUT_SAMPLES                   2 // Timeout when no buffer has been set at N samples before end of interval.
 
@@ -228,16 +217,20 @@
 #define PWM_PERIOD                               10000L // Interval in us: 1/10000e-6 = 100 Hz
 
 #define SWITCH_DELAYED_STORE_MS                  (10 * 1000) // Timeout before storing the pwm switch value is stored.
-#define STATE_RETRY_STORE_DELAY_MS               1000 // Time before retrying to store a varable to flash.
+#define STATE_RETRY_STORE_DELAY_MS               200 // Time before retrying to store a varable to flash.
 #define MESH_SEND_TIME_INTERVAL_MS               (60 * 1000) // Interval at which the time is sent via the mesh.
 #define MESH_SEND_TIME_INTERVAL_MS_VARIATION     (10 * 1000) // Max amount that gets added to interval.
 #define MESH_SEND_STATE_INTERVAL_MS              (60 * 1000) // Interval at which the stone state is sent via the mesh.
 #define MESH_SEND_STATE_INTERVAL_MS_VARIATION    (10 * 1000) // Max amount that gets added to interval.
+#define MESH_SYNC_RETRY_INTERVAL_MS              (2500)
+#define MESH_SYNC_GIVE_UP_MS                     (60 * 1000) // After some time, give up syncing.
+
 
 #define PWM_BOOT_DELAY_MS                        60000 // Delay after boot until pwm can be used. Has to be smaller than overflow time of RTC.
 #define DIMMER_BOOT_CHECK_DELAY_MS               5000  // Delay after boot until power measurement is checked to see if dimmer works.
 #define DIMMER_BOOT_CHECK_POWER_MW               3000  // Threshold in milliWatt above which the dimmer is considered to be working.
 #define DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED  10000 // Threshold in milliWatt above which the dimmer is considered to be working, in case power zero is not calibrated yet.
+#define DIMMER_SOFT_ON_SPEED                     8     // Speed of the soft on feature.
 
 // Stack config values
 // See: https://devzone.nordicsemi.com/question/60/what-is-connection-parameters/
@@ -253,10 +246,9 @@
  * This timeout determines the timeout from the last data exchange till a link is considered lost. A Central will not
  * start trying to reconnect before the timeout has passed, so if you have a device which goes in and out of range
  * often, and you need to notice when that happens, it might make sense to have a short timeout.
+ * - https://devzone.nordicsemi.com/f/nordic-q-a/10636/what-are-latency-and-supervision-timeout-limits
  */
-#define CONNECTION_SUPERVISION_TIMEOUT           400 // In units of 10ms.
-
-#define SWITCHCRAFT_DEBUG_BUFFERS                false // Set to true to store the last voltage samples that were recognized as switch (short power interrupt).
+#define CONNECTION_SUPERVISION_TIMEOUT           100 // In units of 10ms.
 
 /*
  * By setting a non-zero slave latency, the Peripheral can choose to not answer when the Central asks for data up to
@@ -265,8 +257,14 @@
  * data fast if needed. The text book example of such device is for example keyboard and mice, which want to be
  * sleeping for as long as possible when there is no data to send, but still have low latency (and for the mouse:
  * low connection interval) when needed.
+ *
+ * Slave latency increases delay of data from central to peripheral, but not from peripheral to central.
+ * - https://devzone.nordicsemi.com/f/nordic-q-a/53230/what-is-the-impact-of-slave-latencyin-ble
+ *
+ * Timeout will be CONNECTION_SUPERVISION_TIMEOUT * SLAVE_LATENCY.
+ * - https://devzone.nordicsemi.com/question/14029/slave-latency-for-s110s120-connection/
  */
-#define SLAVE_LATENCY                            10  // See: https://devzone.nordicsemi.com/question/14029/slave-latency-for-s110s120-connection/
+#define SLAVE_LATENCY                            0
 
 #define ADVERTISING_TIMEOUT                      0
 #define ADVERTISING_REFRESH_PERIOD               1000 // Push the changes in the advertisement packet to the stack every x milliseconds
@@ -278,6 +276,8 @@
 #define SWITCH_ON_AT_SETUP_BOOT_DELAY            3600  // Seconds until the switch turns on when in setup mode (Crownstone built-in only)
 
 #define SUN_TIME_THROTTLE_PERIOD_SECONDS         (60*60*24) // Seconds to throttle writing the sun time to flash.
+
+#define CS_CLEAR_GPREGRET_COUNTER_TIMEOUT_S      60 // Seconds after boot to clear the GPREGRET reset counter.
 
 /**
  * Interval in milliseconds at which tick events are dispatched.
@@ -472,3 +472,23 @@
 #ifndef STATE_BEHAVIOUR_SETTINGS_DEFAULT
 #define STATE_BEHAVIOUR_SETTINGS_DEFAULT 1 // Enabled (bit 0) is true by default.
 #endif
+
+#ifndef STATE_BEHAVIOUR_MASTER_HASH_DEFAULT
+#define STATE_BEHAVIOUR_MASTER_HASH_DEFAULT 0
+#endif
+
+#ifndef STATE_MESH_IV_INDEX_DEFAULT
+#define STATE_MESH_IV_INDEX_DEFAULT 0
+#endif
+
+#ifndef STATE_MESH_IV_STATUS_DEFAULT
+#define STATE_MESH_IV_STATUS_DEFAULT 0 // NET_STATE_IV_UPDATE_NORMAL
+#endif
+
+#ifndef STATE_MESH_SEQ_NUMBER_DEFAULT
+#define STATE_MESH_SEQ_NUMBER_DEFAULT 0
+#endif
+
+
+
+

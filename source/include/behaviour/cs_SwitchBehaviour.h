@@ -51,6 +51,10 @@ public:
 
     // =========== Semantics ===========
 
+    // Returns true if time passed since between prevInRoomTimeStamp and current up time
+    // is less than presenceCondition.timeout. Else, returns false.
+    bool gracePeriodForPresenceIsActive();
+
     virtual bool requiresPresence() override;
     virtual bool requiresAbsence() override;
 

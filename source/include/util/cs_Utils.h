@@ -101,7 +101,7 @@ std::string toBinaryString(T& value) {
 }
 
 inline void print_heap(const std::string & msg) {
-	uint8_t *p = (uint8_t*)malloc(1);
+	uint8_t *p = (uint8_t*)malloc(128);
 	LOGd("%s %p", msg.c_str(), p);
 	free(p);
 }

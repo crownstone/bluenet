@@ -7,19 +7,32 @@
 
 #pragma once
 
-#include "events/cs_EventListener.h"
-#include "cfg/cs_Boards.h"
-#include "common/cs_Types.h"
-#include "mesh/cs_MeshModel.h"
+#include <cfg/cs_Boards.h>
+#include <common/cs_Types.h>
+#include <events/cs_EventListener.h>
 #include <mesh/cs_MeshAdvertiser.h>
+#include <mesh/cs_MeshCore.h>
+#include <mesh/cs_MeshModelMulticast.h>
+#include <mesh/cs_MeshModelMulticastAcked.h>
+#include <mesh/cs_MeshModelUnicast.h>
+#include <mesh/cs_MeshModelSelector.h>
+#include <mesh/cs_MeshMsgHandler.h>
+#include <mesh/cs_MeshMsgSender.h>
+#include <mesh/cs_MeshScanner.h>
 
-extern "C" {
-#include <nrf_mesh_config_app.h>
-#include <nrf_mesh_defines.h>
-#include <device_state_manager.h>
-}
-
-class Mesh : EventListener {
+/**
+ * Class that manages all mesh classes:
+ * - Core
+ * - Models
+ * - Message handler
+ * - Message sender
+ * - Scanner
+ * - Advertiser
+ * Also:
+ * - Starts and retries sync requests.
+ * - Sends crownstone state at a regular interval.
+ */
+class Mesh : public EventListener {
 public:
 	/**
 	 * Get a reference to the Mesh object.
@@ -28,8 +41,21 @@ public:
 
 	/**
 	 * Init the mesh.
+	 *
+	 * @return ERR_SUCCESS             Initialized successfully.
+	 * @return ERR_WRONG_STATE         Flash pages should be erased.
 	 */
-	void init(const boards_config_t& board);
+	cs_ret_code_t init(const boards_config_t& board);
+
+	/**
+	 * Checks if flash pages have valid data.
+	 *
+	 * If not, the pages will be erased, wait for event EVT_MESH_PAGES_ERASED.
+	 * Has to be done before storage is initialized.
+	 *
+	 * @return true when valid.
+	 */
+	bool checkFlashValid();
 
 	/**
 	 * Start the mesh.
@@ -46,57 +72,64 @@ public:
 	void stop();
 
 	/**
-	 * Factory reset.
-	 *
-	 * Clear all stored data.
-	 * Will send event EVT_MESH_FACTORY_RESET when done.
+	 * Init the advertiser.
 	 */
-	void factoryReset();
+	void initAdvertiser();
 
 	/**
-	 * Advertise as iBeacon.
+	 * Start advertising as iBeacon.
 	 */
-	void advertise(IBeacon* ibeacon);
+	void advertiseIbeacon();
 
 	/**
-	 * Internal usage
+	 * Start synchronization of data with other nodes in mesh.
 	 */
-	static void staticModelsInitCallback() {
-		Mesh::getInstance().modelsInitCallback();
-	}
-	void modelsInitCallback();
+	void startSync();
 
+	/** Internal usage */
 	void handleEvent(event_t & event);
-
-	void factoryResetDone();
 
 private:
 	//! Constructor, singleton, thus made private
 	Mesh();
 
 	//! Copy constructor, singleton, thus made private
-	Mesh(Mesh const&);
+	Mesh(Mesh const&) = delete;
 
 	//! Assignment operator, singleton, thus made private
-	void operator=(Mesh const &);
+	Mesh& operator=(Mesh const &) = delete;
 
-	void provisionSelf(uint16_t id);
-	void provisionLoad();
+	MeshCore*                _core;
+	MeshModelMulticast       _modelMulticast;
+	MeshModelMulticastAcked  _modelMulticastAcked;
+	MeshModelUnicast         _modelUnicast;
+	MeshModelSelector        _modelSelector;
+	MeshMsgHandler           _msgHandler;
+	MeshMsgSender            _msgSender;
+	MeshAdvertiser           _advertiser;
+	MeshScanner              _scanner;
 
-	bool _isProvisioned = false;
-	/** Address of this node */
-	uint16_t _ownAddress;
-
-	uint8_t _netkey[NRF_MESH_KEY_SIZE];
-	dsm_handle_t _netkeyHandle = DSM_HANDLE_INVALID;
-	uint8_t _appkey[NRF_MESH_KEY_SIZE];
-	dsm_handle_t _appkeyHandle = DSM_HANDLE_INVALID;
-	uint8_t _devkey[NRF_MESH_KEY_SIZE];
-	dsm_handle_t _devkeyHandle = DSM_HANDLE_INVALID;
-	dsm_handle_t _groupAddressHandle = DSM_HANDLE_INVALID;
-
-	MeshAdvertiser _advertiser;
-	MeshModel _model;
+	// Sync request
 	uint32_t _sendStateTimeCountdown = MESH_SEND_TIME_INTERVAL_MS / TICK_INTERVAL_MS;
-	bool _performingFactoryReset = false;
+	bool _synced = false;
+	uint32_t _syncCountdown = -1;
+	uint32_t _syncFailedCountdown = 0;
+
+	/**
+	 * Dispatches an internal event to request what data this crownstone needs to receive
+	 * from the mesh. Afterwards, broadcasts a BT message in order to obtain the desired information.
+	 *
+	 * Assumes all event handlers that are interested in obtaining data are registered
+	 * with the event dispatcher.
+	 *
+	 * @param [propagateSyncMessageOverMesh] if set to false no mesh messages will be sent. (Use this internally to check if device is synced.)
+	 * 
+	 * @return true  When request was necessary. If propagateSyncMessageOverMesh is true, a mesh message will be sent to resolve the sync.
+	 * @return false When nothing had to be requested, so everything is synced.
+	 */
+	bool requestSync(bool propagateSyncMessageOverMesh = true);
+
+	void initModels();
+
+	void configureModels(dsm_handle_t appkeyHandle);
 };

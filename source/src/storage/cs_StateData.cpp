@@ -5,6 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <storage/cs_StateData.h>
@@ -58,8 +59,11 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		*(TYPIFY(CONFIG_IBEACON_MINOR)*)data.value = BEACON_MINOR;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_IBEACON_UUID: {
-		BLEutil::parseUuid(STRINGIFY(BEACON_UUID), sizeof(STRINGIFY(BEACON_UUID)), data.value);
-		return ERR_SUCCESS;
+		std::string uuidString = g_BEACON_UUID;
+		if (BLEutil::parseUuid(uuidString.c_str(), uuidString.size(), data.value, data.size)) {
+			return ERR_SUCCESS;
+		}
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	case CS_TYPE::CONFIG_IBEACON_TXPOWER:
 		*(TYPIFY(CONFIG_IBEACON_TXPOWER)*)data.value = BEACON_RSSI;
@@ -139,12 +143,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		*(TYPIFY(CONFIG_POWER_ZERO)*)data.value = CONFIG_POWER_ZERO_INVALID;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_PWM_PERIOD: {
-		LOGd("Got PWM period: %u", PWM_PERIOD);
-		LOGd("Data value ptr: %p", data.value);
-		*((uint32_t*)data.value) = 1;
-		LOGd("data.value: %u", *((uint32_t*)data.value));
 		*(TYPIFY(CONFIG_PWM_PERIOD)*)data.value = (TYPIFY(CONFIG_PWM_PERIOD))PWM_PERIOD;
-		LOGd("data.value: %u", *((uint32_t*)data.value));
 		return ERR_SUCCESS;
 	}
 	case CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD:
@@ -210,6 +209,31 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_BEHAVIOUR_SETTINGS:
 		reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(data.value)->asInt = STATE_BEHAVIOUR_SETTINGS_DEFAULT;
 		return ERR_SUCCESS;
+	case CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH:
+		*(TYPIFY(STATE_BEHAVIOUR_MASTER_HASH)*)data.value = STATE_BEHAVIOUR_MASTER_HASH_DEFAULT;
+		return ERR_SUCCESS;
+	case CS_TYPE::STATE_MESH_IV_INDEX:
+		reinterpret_cast<TYPIFY(STATE_MESH_IV_INDEX)*>(data.value)->iv_index = STATE_MESH_IV_INDEX_DEFAULT;
+		reinterpret_cast<TYPIFY(STATE_MESH_IV_INDEX)*>(data.value)->iv_update_in_progress = STATE_MESH_IV_STATUS_DEFAULT;
+		return ERR_SUCCESS;
+	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
+		*reinterpret_cast<TYPIFY(STATE_MESH_SEQ_NUMBER)*>(data.value) = STATE_MESH_SEQ_NUMBER_DEFAULT;
+		return ERR_SUCCESS;
+	case CS_TYPE::STATE_IBEACON_CONFIG_ID: {
+//		*reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value) = TYPIFY(STATE_IBEACON_CONFIG_ID)();
+		*reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value) = ibeacon_config_id_packet_t();
+//		TYPIFY(STATE_IBEACON_CONFIG_ID)* config = reinterpret_cast<TYPIFY(STATE_IBEACON_CONFIG_ID)*>(data.value);
+//		config->timestamp = 0;
+//		config->interval = 0;
+		return ERR_SUCCESS;
+	}
+	case CS_TYPE::STATE_MICROAPP: {
+		*reinterpret_cast<TYPIFY(STATE_MICROAPP)*>(data.value) = cs_microapp_t();
+		return ERR_SUCCESS;
+	}
+	case CS_TYPE::STATE_SOFT_ON_SPEED:
+		*(TYPIFY(CONFIG_CROWNSTONE_ID)*)data.value = DIMMER_SOFT_ON_SPEED;
+		return ERR_SUCCESS;
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
 	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
@@ -261,10 +285,13 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER:
 	case CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN:
 	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN:
+	case CS_TYPE::EVT_MESH_TRACKED_DEVICE_LIST_SIZE:
+	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE:
+	case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
 	case CS_TYPE::EVT_SCAN_STARTED:
 	case CS_TYPE::EVT_SCAN_STOPPED:
-	case CS_TYPE::EVT_SESSION_NONCE_SET:
+	case CS_TYPE::EVT_SESSION_DATA_SET:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_STATE_EXTERNAL_STONE:
 	case CS_TYPE::EVT_STATE_FACTORY_RESET_DONE:
@@ -275,7 +302,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET_DONE:
 	case CS_TYPE::EVT_STORAGE_PAGES_ERASED:
-	case CS_TYPE::EVT_MESH_FACTORY_RESET:
+	case CS_TYPE::EVT_MESH_FACTORY_RESET_DONE:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::CMD_SWITCHING_ALLOWED:
 	case CS_TYPE::EVT_TICK:
@@ -286,6 +313,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_GET_BEHAVIOUR:
 	case CS_TYPE::CMD_GET_BEHAVIOUR_INDICES:
 	case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG:
+	case CS_TYPE::CMD_CLEAR_ALL_BEHAVIOUR:
 	case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN:
 	case CS_TYPE::CMD_REGISTER_TRACKED_DEVICE:
@@ -295,6 +323,21 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
+	case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING:
+	case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING:
+	case CS_TYPE::EVT_MESH_SYNC_FAILED:
+	case CS_TYPE::EVT_MESH_PAGES_ERASED:
+	case CS_TYPE::EVT_MESH_EXT_STATE_0:
+	case CS_TYPE::EVT_MESH_EXT_STATE_1:
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
+	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
+	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
+	case CS_TYPE::CMD_GET_ADC_RESTARTS:
+	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
+	case CS_TYPE::CMD_GET_POWER_SAMPLES:
+	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
+	case CS_TYPE::EVT_MICROAPP:
 		return ERR_NOT_FOUND;
 	}
 	return ERR_NOT_FOUND;
@@ -358,6 +401,11 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE:
 	case CS_TYPE::STATE_BEHAVIOUR_SETTINGS:
 	case CS_TYPE::STATE_SUN_TIME:
+	case CS_TYPE::STATE_MESH_IV_INDEX:
+	case CS_TYPE::STATE_MESH_SEQ_NUMBER:
+	case CS_TYPE::STATE_IBEACON_CONFIG_ID:
+	case CS_TYPE::STATE_MICROAPP:
+	case CS_TYPE::STATE_SOFT_ON_SPEED:
 		return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
@@ -365,6 +413,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_TIME:
 	case CS_TYPE::STATE_FACTORY_RESET:
 	case CS_TYPE::STATE_ERRORS:
+	case CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH:
 		return PersistenceMode::RAM;
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::CMD_SWITCH_OFF:
@@ -388,10 +437,13 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER:
 	case CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN:
 	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN:
+	case CS_TYPE::EVT_MESH_TRACKED_DEVICE_LIST_SIZE:
+	case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE:
+	case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
-	case CS_TYPE::EVT_SESSION_NONCE_SET:
+	case CS_TYPE::EVT_SESSION_DATA_SET:
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
 	case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 	case CS_TYPE::EVT_RELAY_FORCED_ON:
@@ -413,7 +465,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_STORAGE_GC_DONE:
 	case CS_TYPE::EVT_STORAGE_FACTORY_RESET_DONE:
 	case CS_TYPE::EVT_STORAGE_PAGES_ERASED:
-	case CS_TYPE::EVT_MESH_FACTORY_RESET:
+	case CS_TYPE::EVT_MESH_FACTORY_RESET_DONE:
 	case CS_TYPE::EVT_SETUP_DONE:
 	case CS_TYPE::EVT_ADC_RESTARTED:
 	case CS_TYPE::CMD_ENABLE_LOG_POWER:
@@ -443,6 +495,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_GET_BEHAVIOUR:
 	case CS_TYPE::CMD_GET_BEHAVIOUR_INDICES:
 	case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG:
+	case CS_TYPE::CMD_CLEAR_ALL_BEHAVIOUR:
 	case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:
 	case CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN:
 	case CS_TYPE::CMD_REGISTER_TRACKED_DEVICE:
@@ -452,8 +505,46 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
 	case CS_TYPE::EVT_PROFILE_LOCATION:
+	case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING:
+	case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING:
+	case CS_TYPE::EVT_MESH_SYNC_FAILED:
+	case CS_TYPE::EVT_MESH_PAGES_ERASED:
+	case CS_TYPE::EVT_MESH_EXT_STATE_0:
+	case CS_TYPE::EVT_MESH_EXT_STATE_1:
+	case CS_TYPE::CMD_SEND_MESH_MSG_SET_TIME:
+	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
+	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
+	case CS_TYPE::CMD_GET_ADC_RESTARTS:
+	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
+	case CS_TYPE::CMD_GET_POWER_SAMPLES:
+	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
+	case CS_TYPE::EVT_MICROAPP:
 		return PersistenceMode::NEITHER_RAM_NOR_FLASH;
 	}
 	// should not reach this
 	return PersistenceMode::NEITHER_RAM_NOR_FLASH;
+}
+
+PersistenceModeGet toPersistenceModeGet(uint8_t mode) {
+	PersistenceModeGet persistenceMode = static_cast<PersistenceModeGet>(mode);
+	switch (persistenceMode) {
+		case PersistenceModeGet::CURRENT:
+		case PersistenceModeGet::STORED:
+		case PersistenceModeGet::FIRMWARE_DEFAULT:
+		case PersistenceModeGet::UNKNOWN:
+			return persistenceMode;
+	}
+	return PersistenceModeGet::UNKNOWN;
+}
+
+PersistenceModeSet toPersistenceModeSet(uint8_t mode) {
+	PersistenceModeSet persistenceMode = static_cast<PersistenceModeSet>(mode);
+	switch (persistenceMode) {
+		case PersistenceModeSet::TEMPORARY:
+		case PersistenceModeSet::STORED:
+		case PersistenceModeSet::UNKNOWN:
+			return persistenceMode;
+	}
+	return PersistenceModeSet::UNKNOWN;
 }
