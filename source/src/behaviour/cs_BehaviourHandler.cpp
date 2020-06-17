@@ -18,10 +18,12 @@
 #include <time/cs_SystemTime.h>
 #include <time/cs_TimeOfDay.h>
 
+#include <test/cs_Test.h>
+
 #include "drivers/cs_Serial.h"
 
 
-#define BehaviourHandlerDebug false
+#define BehaviourHandlerDebug true
 
 #if BehaviourHandlerDebug == true
 #define LOGBehaviourHandler LOGd
@@ -48,6 +50,7 @@ void BehaviourHandler::handleEvent(event_t& evt){
         	behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
         	isActive = settings->flags.enabled;
             LOGi("settings isActive=%u", isActive);
+            TEST_PUSH_B(this, isActive);
             update();
             break;
         }
