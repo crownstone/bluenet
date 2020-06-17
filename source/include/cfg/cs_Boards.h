@@ -111,11 +111,11 @@ typedef struct  {
 	//! Analog input pin to read the voltage.
 	uint8_t pinAinVoltage;
 
-	//! Analog input pin to read the voltage.
-	uint8_t pinAinVoltageGainHigh;
+//	//! Analog input pin to read the voltage.
+//	uint8_t pinAinVoltageGainHigh;
 
-	//! Analog input pin to read the voltage.
-	uint8_t pinAinVoltageGainLow;
+//	//! Analog input pin to read the voltage.
+//	uint8_t pinAinVoltageGainLow;
 
 	//! Analog input pin to read 'zero' line for current and voltage measurement (optional).
 	uint8_t pinAinZeroRef;

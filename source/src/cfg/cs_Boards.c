@@ -278,11 +278,14 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->pinGpioRelayOff                    = 13;
 
 	p_config->pinAinCurrentGainLow               = 0; // GPIO 0.02
-	p_config->pinAinCurrentGainHigh              = 1; // GPIO 0.03
-	p_config->pinAinVoltageGainLow               = 7; // GPIO 0.31
-	p_config->pinAinVoltageGainHigh              = 5; // GPIO 0.29
+	p_config->pinAinCurrentGainMed               = 1; // GPIO 0.03
+//	p_config->pinAinVoltageGainLow               = 7; // GPIO 0.31
+//	p_config->pinAinVoltageGainHigh              = 5; // GPIO 0.29
+
 	
 	p_config->pinAinVoltage                      = 7; // default
+
+	p_config->pinAinCurrentGainHigh              = 5; // Actually voltage high gain.
 	
 	p_config->pinAinZeroRef	                     = 3; // GPIO 0.05
 	p_config->pinAinPwmTemp                      = 2; // GPIO 0.04
