@@ -318,7 +318,7 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->currentZero                        = -270;         // unknown
 	p_config->powerZero                          = 9000;         // unknown
 
-	p_config->voltageRange                       = 1300;
+	p_config->voltageRange                       = 1800;
 	p_config->currentRange                       = 600;          // unknown
 
 	p_config->pwmTempVoltageThreshold            = 0.3639;
