@@ -37,8 +37,11 @@
 
 #if (PWM_GPIO_DEBUG == true)
 #define PWM_TEST_PIN 20
-#define PWM_TEST_PIN_INIT nrf_gpio_cfg_output(PWM_TEST_PIN);
-#define PWM_TEST_PIN_TOGGLE nrf_gpio_pin_toggle(PWM_TEST_PIN);
+#define PWM_TEST_PIN_INIT nrf_gpio_cfg_output(PWM_TEST_PIN)
+#define PWM_TEST_PIN_TOGGLE nrf_gpio_pin_toggle(PWM_TEST_PIN)
+#else
+#define PWM_TEST_PIN_INIT
+#define PWM_TEST_PIN_TOGGLE
 #endif
 
 
@@ -101,7 +104,7 @@ uint32_t PWM::init(const pwm_config_t& config) {
 	_zeroCrossDeviationIntegral = 0;
 	_zeroCrossTicksDeviationAvg = 0;
 
-	PWM_TEST_PIN_INIT
+	PWM_TEST_PIN_INIT;
 
     _initialized = true;
     return ERR_SUCCESS;
@@ -188,7 +191,7 @@ void PWM::onPeriodEnd() {
 
 
 void PWM::start() {
-	PWM_TEST_PIN_TOGGLE
+	PWM_TEST_PIN_TOGGLE;
 
 	// Start the timer as soon as possible.
 	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
@@ -477,7 +480,7 @@ void PWM::onZeroCrossingInterrupt() {
 
 
 void PWM::enableInterrupt() {
-	PWM_TEST_PIN_TOGGLE
+	PWM_TEST_PIN_TOGGLE;
 
 	// The order of the function calls below are important:
 	// If we enable short stop first, the event might happen right after that,
@@ -684,7 +687,7 @@ nrf_ppi_task_t PWM::getPpiTaskDisable(uint8_t index) {
 
 // Timer interrupt handler
 extern "C" void CS_PWM_TIMER_IRQ(void) {
-	PWM_TEST_PIN_TOGGLE
+	PWM_TEST_PIN_TOGGLE;
 //	if (nrf_timer_event_check(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX))) {
 //	// Clear and disable interrupt until next change.
 //	nrf_timer_int_disable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
