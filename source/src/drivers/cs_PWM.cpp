@@ -301,13 +301,14 @@ void PWM::setValue(uint8_t channel, uint8_t newValue) {
 		case 0:
 			// Simply disable the PPI that turns on the switch.
 			// Don't forget that the CC value has to be set.
-//			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
-//			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
+			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
+			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
 
 			// Disable the PPI that turns on the switch, and force gpio value.
 			// This turns it off immediately instead of waiting for the CC event.
-			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
-			gpioteForce(channel, false);
+			// However, this also results in 1 period with a low duty cycle, resulting in a high power output (see above).
+//			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
+//			gpioteForce(channel, false);
 
 			LOGPwmDebug("ppiEnabled=%u CC=%u", NRF_PPI->CHEN, readCC(channel));
 			break;
