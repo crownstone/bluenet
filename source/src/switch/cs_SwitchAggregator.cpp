@@ -16,16 +16,26 @@
 #include <optional>
 
 #define LOGSwitchAggregatorDebug LOGnone
+#define LOGSwitchHistory false
 #define LOGSwitchAggregator_Evt LOGd
 
 
 // ========================= Public ========================
+
+SwitchAggregator::SwitchAggregator():
+	_switchHistory(_maxSwitchHistoryItems)
+{
+
+}
 
 void SwitchAggregator::init(const boards_config_t& board) {
 	smartSwitch.onUnexpextedIntensityChange([&](uint8_t newState) -> void {
 		handleSwitchStateChange(newState);
 	});
 	smartSwitch.init(board);
+
+	// Allocate buffer.
+	_switchHistory.init();
 
 	listen();
 
@@ -154,7 +164,8 @@ bool SwitchAggregator::handleSwitchAggregatorCommand(event_t& event) {
 			}
 			memcpy(event.result.buf.data, &header, sizeof(header));
 			int offset = sizeof(header);
-			for (const auto& item : _switchHistory) {
+			for (uint16_t i = 0; i < _switchHistory.size(); ++i) {
+				const auto& item = _switchHistory[i];
 				memcpy(event.result.buf.data + offset, &item, sizeof(item));
 				offset += sizeof(item);
 			}
@@ -453,25 +464,18 @@ void SwitchAggregator::handleGetBehaviourDebug(event_t& evt) {
 
 void SwitchAggregator::addToSwitchHistory(const cs_switch_history_item_t& cmd) {
 	LOGd("addToSwitchHistory val=%u state=%u srcType=%u, srcId=%u", cmd.value, cmd.state.asInt, cmd.source.type, cmd.source.id);
-	if (_switchHistory.size() == _maxSwitchHistoryItems) {
-		_switchHistory.erase(_switchHistory.begin());
-	}
-	_switchHistory.push_back(cmd);
+	_switchHistory.push(cmd);
 	printSwitchHistory();
 }
 
 void SwitchAggregator::printSwitchHistory() {
+#if LOGSwitchHistory == true
 	LOGd("Switch history:");
-	// Queue doesn't have an iterator..
-//	for (size_t i = 0; i < _switchHistory.size(); ++i) {
-//		auto item = _switchHistory.front();
-//		LOGd("  t=%u val=%u state=%u srcType=%u, srcId=%u", item.timestamp, item.value, item.state.asInt, item.source.type, item.source.id);
-//		_switchHistory.pop();
-//		_switchHistory.push(item);
-//	}
-	for (__attribute__((unused)) const auto& iter : _switchHistory) {
+	for (uint16_t i = 0; i < _switchHistory.size(); ++i) {
+		__attribute__((unused)) const auto& iter = _switchHistory[i];
 		LOGd("  t=%u val=%u state=%u srcType=%u, srcId=%u", iter.timestamp, iter.value, iter.state.asInt, iter.source.type, iter.source.id);
 	}
+#endif
 }
 
 void SwitchAggregator::printStatus() {

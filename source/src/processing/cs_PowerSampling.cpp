@@ -35,6 +35,7 @@
 PowerSampling::PowerSampling() :
 		_isInitialized(false),
 		_adc(NULL),
+		_bufferQueue(CS_ADC_NUM_BUFFERS),
 		_consecutivePwmOvercurrent(0),
 		_lastEnergyCalculationTicks(0),
 		_energyUsedmicroJoule(0),
@@ -65,7 +66,7 @@ static int printPower = 0;
 /*
  * At this moment in time is the function adc_done_callback already decoupled from the ADC interrupt.
  */
-void adc_done_callback(cs_adc_buffer_id_t bufIndex) {
+void adc_done_callback(buffer_id_t bufIndex) {
 	PowerSampling::getInstance().powerSampleAdcDone(bufIndex);
 }
 
@@ -85,6 +86,8 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	settings.get(CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD, &switchcraftThreshold, sizeof(switchcraftThreshold));
 	RecognizeSwitch::getInstance().configure(switchcraftThreshold);
 	enableSwitchcraft(switchcraftEnabled);
+
+	_bufferQueue.init();
 
 	initAverages();
 	_recalibrateZeroVoltage = true;
@@ -224,6 +227,9 @@ void PowerSampling::handleEvent(event_t & event) {
 		_adcRestarts.count++;
 		_adcRestarts.lastTimestamp = SystemTime::posix();
 		_skipSwapDetection = 1;
+		while (!_bufferQueue.empty()) {
+			ADC::getInstance().releaseBuffer(_bufferQueue.pop());
+		}
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
 		RecognizeSwitch::getInstance().skip(2);
 		break;
@@ -258,15 +264,25 @@ void PowerSampling::handleEvent(event_t & event) {
  * @param[in] size                               Size of the buffer.
  * @param[in] bufIndex                           The buffer index, can be used in InterleavedBuffer.
  */
-void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
+void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 #ifdef TEST_PIN
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	// Filter current buffer to the previous unfiltered buffer.
-	cs_adc_buffer_id_t filteredBufIndex = InterleavedBuffer::getInstance().getPrevious(bufIndex);
+	buffer_id_t filteredBufIndex;
+	if (_bufferQueue.empty()) {
+		// Filter current buffer to current buffer.
+		filteredBufIndex = bufIndex;
+	}
+	else {
+		// Filter current buffer to last buffer in queue (which is the last unfiltered buffer).
+		filteredBufIndex = _bufferQueue[_bufferQueue.size() - 1];
+	}
+	LOGnone("filter %u to %u", bufIndex, filteredBufIndex);
 	_lastBufIndex = bufIndex;
 	_lastFilteredBufIndex = filteredBufIndex;
+
+	_bufferQueue.push(bufIndex);
 
 	power_t power;
 	power.buf = InterleavedBuffer::getInstance().getBuffer(filteredBufIndex);
@@ -281,16 +297,18 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	filter(bufIndex, filteredBufIndex, power.voltageIndex);
 	filter(bufIndex, filteredBufIndex, power.currentIndex);
 
-	cs_adc_buffer_id_t prevIndex = InterleavedBuffer::getInstance().getPrevious(filteredBufIndex);
 
-	nrf_saadc_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
-	if (isVoltageAndCurrentSwapped(power, prevBuf)) {
-		LOGw("Swap detected: restart ADC.");
-		_adc->stop();
-		printBuf(power);
-		_adc->start();
-		_adc->releaseBuffer(bufIndex);
-		return;
+	if (_bufferQueue.size() >= 3) {
+		buffer_id_t prevIndex = _bufferQueue[_bufferQueue.size() - 3]; // Previous filtered buffer.
+		sample_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
+		if (isVoltageAndCurrentSwapped(power, prevBuf)) {
+			LOGw("Swap detected: restart ADC.");
+			_adc->stop();
+			printBuf(power);
+			_adc->releaseBuffer(bufIndex);
+			_adc->start();
+			return;
+		}
 	}
 
 #ifdef TEST_PIN
@@ -320,14 +338,18 @@ void PowerSampling::powerSampleAdcDone(cs_adc_buffer_id_t bufIndex) {
 	nrf_gpio_pin_toggle(TEST_PIN);
 #endif
 
-	bool switch_detected = RecognizeSwitch::getInstance().detect(filteredBufIndex, power.voltageIndex);
+	bool switch_detected = RecognizeSwitch::getInstance().detect(_bufferQueue, power.voltageIndex);
 	if (switch_detected) {
 		LOGd("Switch event detected!");
 		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
-	_adc->releaseBuffer(bufIndex);
+	// We want to keep 4 buffers: 1 unfiltered, 3 filtered.
+	if (_bufferQueue.size() > 4) {
+		buffer_id_t bufIndexToRelease = _bufferQueue.pop();
+		_adc->releaseBuffer(bufIndexToRelease);
+	}
 }
 
 void PowerSampling::initAverages() {
@@ -349,7 +371,7 @@ uint16_t PowerSampling::determineCurrentIndex(power_t & power) {
  * Problems:
  * - Vzero and Izero can be different and affect Vrm and Irms.
  */
-bool PowerSampling::isVoltageAndCurrentSwapped(power_t & power, nrf_saadc_value_t* prevBuf) {
+bool PowerSampling::isVoltageAndCurrentSwapped(power_t & power, sample_value_t* prevBuf) {
 	// Problem: switchcraft makes this function falsely detect a swap.
 	return false;
 	if (_skipSwapDetection != 0) {
@@ -505,7 +527,7 @@ void PowerSampling::calculateCurrentZero(power_t & power) {
 /**
  * This function performs a median filter with respect to the given channel.
  */
-void PowerSampling::filter(cs_adc_buffer_id_t bufIndexIn, cs_adc_buffer_id_t bufIndexOut, channel_id_t channel_id) {
+void PowerSampling::filter(buffer_id_t bufIndexIn, buffer_id_t bufIndexOut, channel_id_t channel_id) {
 
 	// Pad the start of the input vector with the first sample in the buffer
 	uint16_t j = 0;
@@ -709,7 +731,7 @@ void PowerSampling::calculatePower(power_t & power) {
 			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
 			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT,(uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
+				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
 			}
 			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_CURRENT);
 		}
@@ -731,7 +753,7 @@ void PowerSampling::calculatePower(power_t & power) {
 			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
 			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(power.buf[i]), sizeof(nrf_saadc_value_t));
+				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
 			}
 			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_VOLTAGE);
 		}
@@ -807,6 +829,24 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		}
 	}
 	// ---------------------- end of to do --------------------------
+
+
+	if ((currentRmsMA > _currentMilliAmpThresholdPwm) && (!stateErrors.errors.overCurrentDimmer)) {
+		// Store last buffer that would trigger the dimmer over current softfuse.
+		if ((switchState.state.dimmer != 0) || (switchState.state.relay == 0 && !justSwitchedOff && _igbtFailureDetectionStarted)) {
+			_lastSoftfuse.type = POWER_SAMPLES_TYPE_SOFTFUSE;
+			_lastSoftfuse.index = 0;
+			_lastSoftfuse.count = power.bufSize / power.numChannels;
+			_lastSoftfuse.unixTimestamp = SystemTime::posix();
+			_lastSoftfuse.delayUs = 0;
+			_lastSoftfuse.sampleIntervalUs = power.sampleIntervalUs;
+			_lastSoftfuse.offset = _avgZeroCurrent / 1024;
+			_lastSoftfuse.multiplier = _currentMultiplier;
+			for (sample_value_id_t i = 0; i < power.bufSize / power.numChannels; i += power.numChannels) {
+				_lastSoftfuseSamples[i] = power.buf[i + power.currentIndex];
+			}
+		}
+	}
 
 	// Check if data makes sense: RMS voltage should be about 230V.
 	if (voltageRmsMilliVolt != 0 && (voltageRmsMilliVolt < 200*1000 || 250*1000 < voltageRmsMilliVolt)) {
@@ -893,7 +933,7 @@ void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, 
 		case POWER_SAMPLES_TYPE_NOW_FILTERED:
 		case POWER_SAMPLES_TYPE_NOW_UNFILTERED: {
 			// Check index
-			if (index >= 2) {
+			if (index > 1) {
 				LOGw("index=%u", index);
 				result.returnCode = ERR_WRONG_PARAMETER;
 				return;
@@ -932,6 +972,31 @@ void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, 
 			for (sample_value_id_t i = 0; i < numSamples; ++i) {
 				samples[i] = InterleavedBuffer::getInstance().getValue(bufIndex, index, i);
 			}
+
+			result.dataSize = requiredSize;
+			result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case POWER_SAMPLES_TYPE_SOFTFUSE: {
+			// Check index
+			if (index > 0) {
+				LOGw("index=%u", index);
+				result.returnCode = ERR_WRONG_PARAMETER;
+				return;
+			}
+
+			// Check size
+			size16_t samplesSize = _lastSoftfuse.count * sizeof(int16_t);
+			size16_t requiredSize = sizeof(_lastSoftfuse) + samplesSize;
+			if (result.buf.len < requiredSize) {
+				LOGw("size=%u required=%u", result.buf.len, requiredSize);
+				result.returnCode = ERR_BUFFER_TOO_SMALL;
+				return;
+			}
+
+			// Copy data to buffer.
+			memcpy(result.buf.data, &_lastSoftfuse, sizeof(_lastSoftfuse));
+			memcpy(result.buf.data + sizeof(_lastSoftfuse), _lastSoftfuseSamples, samplesSize);
 
 			result.dataSize = requiredSize;
 			result.returnCode = ERR_SUCCESS;

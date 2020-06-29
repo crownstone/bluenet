@@ -735,6 +735,9 @@ void Crownstone::increaseResetCounter() {
 void Crownstone::tick() {
 	if (_tickCount % (60*1000/TICK_INTERVAL_MS) == 0) {
 		LOG_MEMORY; // To check for memory leaks
+		__attribute__((unused)) uint16_t maxUsed = app_sched_queue_utilization_get();
+		__attribute__((unused)) uint16_t currentFree = app_sched_queue_space_get();
+		LOGi("Scheduler current free=%u max used=%u", currentFree, maxUsed);
 	}
 	// TODO: warning when close to out of memory
 	// TODO: maybe detect memory leaks?

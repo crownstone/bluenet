@@ -7,14 +7,12 @@
 
 #pragma once
 
-#include <drivers/cs_Serial.h>
-#include <events/cs_EventListener.h>
-
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_TwilightHandler.h>
-
+#include <drivers/cs_Serial.h>
+#include <events/cs_EventListener.h>
 #include <optional>
-#include <vector>
+#include <structs/buffer/cs_CircularBuffer.h>
 #include <switch/cs_SmartSwitch.h>
 
 /**
@@ -41,7 +39,7 @@ public:
 	void switchPowered();
 
 private:
-	SwitchAggregator() = default;
+	SwitchAggregator();
 	virtual ~SwitchAggregator() noexcept {};
 	SwitchAggregator& operator= (const SwitchAggregator&) = delete;
 
@@ -74,7 +72,7 @@ private:
 	 * Keep up a history of switch commands.
 	 * This can be commands from any source, user or automated.
 	 */
-	std::vector<cs_switch_history_item_t> _switchHistory;
+	CircularBuffer<cs_switch_history_item_t> _switchHistory;
 
 	// ================================== State updaters ==================================
 
