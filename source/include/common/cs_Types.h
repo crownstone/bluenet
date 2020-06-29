@@ -246,7 +246,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_DEC_VOLTAGE_RANGE,                                          // Decrease voltage range.
 	CMD_INC_CURRENT_RANGE,                                          // Increase current range.
 	CMD_DEC_CURRENT_RANGE,                                          // Decrease current range.
-	EVT_ADC_RESTARTED,                                              // ADC has been restarted.
+	EVT_ADC_RESTARTED,                                              // ADC has been restarted. Sent before the first buffer is to be processed.
 
 	// Mesh
 	CMD_SEND_MESH_MSG = InternalBaseMesh,             // Send a mesh message.

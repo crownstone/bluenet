@@ -295,8 +295,13 @@ ELSE()
 	LIST(APPEND BOOTLOADER_LIBS "${NRF5_DIR}/external/micro-ecc/nrf52hf_armgcc/armgcc/micro_ecc_lib_nrf52.a")
 
 	# oberon
-	LIST(APPEND BOOTLOADER_LIBS "${NRF5_DIR}/external/nrf_oberon/lib/cortex-m4/hard-float/liboberon_2.0.7.a")
-	#LIST(APPEND BOOTLOADER_LIBS "${NRF5_DIR}/external/nrf_oberon/lib/cortex-m4/hard-float/liboberon_3.0.1.a")
+	IF (NORDIC_SDK_VERSION EQUAL 15)
+		LIST(APPEND BOOTLOADER_LIBS "${NRF5_DIR}/external/nrf_oberon/lib/cortex-m4/hard-float/liboberon_2.0.7.a")
+	ELSEIF (NORDIC_SDK_VERSION EQUAL 16)
+		LIST(APPEND BOOTLOADER_LIBS "${NRF5_DIR}/external/nrf_oberon/lib/cortex-m4/hard-float/liboberon_3.0.1.a")
+	ELSE()
+		MESSAGE(FATAL_ERROR "Unkown SDK version: ${NORDIC_SDK_VERSION}")
+	ENDIF()
 
 	ADD_DEFINITIONS("-DNRF_DFU_SETTINGS_VERSION=1")
 	

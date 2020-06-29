@@ -46,7 +46,11 @@ static const sample_value_id_t INTERLEAVED_CHANNEL_LENGTH = INTERLEAVED_BUFFER_L
 class InterleavedBuffer {
 private:
 
-	sample_value_t* _buf[INTERLEAVED_BUFFER_COUNT];
+	sample_value_t* _buf[INTERLEAVED_BUFFER_COUNT] = { nullptr };
+	bool _allocated = false;
+
+	InterleavedBuffer() {};
+	InterleavedBuffer(InterleavedBuffer const&) {};
 
 public:
 	/**
@@ -59,6 +63,25 @@ public:
 	}
 
 	/**
+	 * Allocate the buffers.
+	 */
+	cs_ret_code_t init() {
+		if (_allocated) {
+			return ERR_SUCCESS;
+		}
+		for (buffer_id_t i = 0; i < INTERLEAVED_BUFFER_COUNT; ++i) {
+			sample_value_t* buf = (sample_value_t*) malloc(sizeof(sample_value_t) * CS_ADC_BUF_SIZE);
+			if (buf == nullptr) {
+				return ERR_NO_SPACE;
+			}
+			LOGd("Allocate buffer %i = %p", i, buf);
+			_buf[i] = buf;
+		}
+		_allocated = true;
+		return ERR_SUCCESS;
+	}
+
+	/**
 	 * From the _buf array pick the one with the given buffer_id.
 	 */
 	sample_value_t* getBuffer(buffer_id_t buffer_id) {
@@ -66,14 +89,14 @@ public:
 		return _buf[buffer_id];
 	}
 
-	/**
-	 * Set the buffer at the particular buffer_id by just writing a pointer to it. The code calling this function is
-	 * responsible for setting the right pointer. No checks w.r.t. this pointer are performed.
-	 */
-	void setBuffer(buffer_id_t buffer_id, sample_value_t* ptr) {
-//		assert(buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
-		_buf[buffer_id] = ptr;
-	}
+//	/**
+//	 * Set the buffer at the particular buffer_id by just writing a pointer to it. The code calling this function is
+//	 * responsible for setting the right pointer. No checks w.r.t. this pointer are performed.
+//	 */
+//	void setBuffer(buffer_id_t buffer_id, sample_value_t* ptr) {
+////		assert(buffer_id < getBufferCount(), "ADC has fewer buffers allocated");
+//		_buf[buffer_id] = ptr;
+//	}
 
 	/**
 	 * Expose buffer lengths to accessors.
@@ -112,13 +135,6 @@ public:
 				return i;
 		}
 		return getBufferCount();
-	}
-
-	/**
-	 * Clear the pointer to a buffer.
-	 */
-	void clearBuffer(buffer_id_t buffer_id) {
-		setBuffer(buffer_id, NULL);
 	}
 
 	/**
