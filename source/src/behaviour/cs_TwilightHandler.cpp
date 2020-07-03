@@ -14,7 +14,7 @@
 #include <time/cs_SystemTime.h>
 #include <drivers/cs_Serial.h>
 
-#define LOGTwilightHandler LOGnone
+#define LOGTwilightHandler LOGd
 
 
 
@@ -31,7 +31,8 @@ void TwilightHandler::handleEvent(event_t& evt){
         case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
 			behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
 			isActive = settings->flags.enabled;
-			LOGi("TwilightHandler.isActive=%u", isActive);
+			LOGTwilightHandler("TwilightHandler.isActive=%u", isActive);
+			TEST_PUSH_B(this, isActive);
 			update();
 			break;
 		}

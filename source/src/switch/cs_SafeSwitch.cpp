@@ -29,7 +29,9 @@ void SafeSwitch::init(const boards_config_t& board) {
 
 	// relay only pushes test value on ::set(bool) because it doesn't keep track of its own state.
 	// we'll push the stored value upon init so that the test suite knows it's state.
-	TEST_PUSH_EXPR_B(&relay,"on",storedState.state.relay);
+	TEST_PUSH_EXPR_B(this,"storedState.state.relay",storedState.state.relay);
+	TEST_PUSH_EXPR_X(this,"storedState.state", storedState.asInt);
+
 
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));

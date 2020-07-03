@@ -9,7 +9,7 @@
 #include <storage/cs_State.h>
 #include <switch/cs_SmartSwitch.h>
 
-#define LOGSmartSwitch LOGnone
+#define LOGSmartSwitch LOGd
 
 void SmartSwitch::init(const boards_config_t& board) {
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_ALLOWED, &allowDimming, sizeof(allowDimming));
@@ -21,7 +21,7 @@ void SmartSwitch::init(const boards_config_t& board) {
 	// Load intended state.
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &storedState, sizeof(storedState));
 	intendedState = getIntensityFromSwitchState(storedState);
-	LOGi("init intensity=%u allowDimming=%u _allowSwitching=%u", intendedState, allowDimming, _allowSwitching);
+	LOGi("init stored=%u, intended=%u allowDimming=%u _allowSwitching=%u", storedState.asInt, intendedState, allowDimming, _allowSwitching);
 
 
 	safeSwitch.onUnexpextedStateChange([&](switch_state_t newState) -> void {
