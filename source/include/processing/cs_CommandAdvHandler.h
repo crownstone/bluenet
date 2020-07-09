@@ -31,7 +31,7 @@
  */
 struct __attribute__((__packed__)) command_adv_claim_t {
 	uint8_t deviceToken;
-	uint8_t timeoutCounter;
+	uint8_t timeoutCounter = 0;
 	uint8_t encryptedData[CMD_ADC_ENCRYPTED_DATA_SIZE];
 	uint16_t encryptedRC5;
 	uint16_t decryptedRC5;
