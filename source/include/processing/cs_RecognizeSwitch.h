@@ -38,6 +38,8 @@ private:
 	int16_t _lastDetectionSamples[_numStoredBuffers * InterleavedBuffer::getChannelLength()] = {0};
 	int16_t _lastAlmostDetectionSamples[_numStoredBuffers * InterleavedBuffer::getChannelLength()] = {0};
 
+	bool ignoreSample(sample_value_t value0, sample_value_t value1, sample_value_t value2);
+
 	void setLastDetection(bool aboveThreshold, const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId);
 
 public:

@@ -91,14 +91,21 @@ bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channe
 			value0 = ib.getValue(bufIndex0, voltageChannelId, i);
 			value1 = ib.getValue(bufIndex1, voltageChannelId, i);
 			value2 = ib.getValue(bufIndex2, voltageChannelId, i);
-			diff01 = (value0 - value1) * (value0 - value1);
-			diff12 = (value1 - value2) * (value1 - value2);
-			diff02 = (value0 - value2) * (value0 - value2);
+			if (ignoreSample(value0, value1, value2)) {
+				diff01 = 0;
+				diff12 = 0;
+				diff02 = 0;
+			}
+			else {
+				diff01 = (value0 - value1) * (value0 - value1);
+				diff12 = (value1 - value2) * (value1 - value2);
+				diff02 = (value0 - value2) * (value0 - value2);
+			}
 			diffSum01 += diff01;
 			diffSum12 += diff12;
 			diffSum02 += diff02;
 		}
-		LOGSwitchcraftVerbose("%f %f %f", diffSum01, diffSum12, diffSum02);
+		LOGSwitchcraftVerbose("%d %d %d", (int32_t)diffSum01, (int32_t)diffSum12, (int32_t)diffSum02);
 		if (diffSum01 > _thresholdDifferent && diffSum12 > _thresholdDifferent) {
 			float minDiffSum = diffSum01 < diffSum12 ? diffSum01 : diffSum12;
 			if (diffSum02 < _thresholdSimilar || minDiffSum / diffSum02 > _thresholdRatio) {
@@ -125,6 +132,15 @@ bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channe
 	}
 
 	return found;
+}
+
+bool RecognizeSwitch::ignoreSample(sample_value_t value0, sample_value_t value1, sample_value_t value2) {
+	// Observed: sometimes, or often, the builtin one 1B10 measures value 2047 around the top of the curve.
+	// This triggers a false positive when the width of this block changes.
+	if (value0 == 2047 || value1 == 2047 || value2 == 2047) {
+		return true;
+	}
+	return false;
 }
 
 void RecognizeSwitch::setLastDetection(bool aboveThreshold, const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId) {
