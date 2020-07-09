@@ -9,7 +9,7 @@
 #include <storage/cs_State.h>
 #include <switch/cs_SmartSwitch.h>
 
-#define LOGSmartSwitch LOGd
+#define LOGSmartSwitchDebug LOGd
 
 void SmartSwitch::init(const boards_config_t& board) {
 	State::getInstance().get(CS_TYPE::CONFIG_PWM_ALLOWED, &allowDimming, sizeof(allowDimming));
@@ -68,7 +68,7 @@ bool SmartSwitch::allowSwitching(){
 }
 
 cs_ret_code_t SmartSwitch::set(uint8_t intensity) {
-	LOGSmartSwitch("set %u", intensity);
+	LOGSmartSwitchDebug("set %u", intensity);
 	if (intensity > 100) {
 		intensity = 100;
 //		return ERR_WRONG_PARAMETER;
@@ -79,7 +79,7 @@ cs_ret_code_t SmartSwitch::set(uint8_t intensity) {
 
 cs_ret_code_t SmartSwitch::resolveIntendedState() {
 	switch_state_t currentState = getActualState();
-	LOGSmartSwitch("resolveIntendedState intended=%u current=(%u %u%%)", intendedState, currentState.state.relay, currentState.state.dimmer);
+	LOGSmartSwitchDebug("resolveIntendedState intended=%u current=(%u %u%%)", intendedState, currentState.state.relay, currentState.state.dimmer);
 
 	if (intendedState == 0) {
 		// Set dimmer to 0 and turn relay off.
@@ -93,13 +93,13 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 		if (retCodeRelay != ERR_SUCCESS) {
 			retCode = retCodeRelay;
 		}
-		LOGSmartSwitch("retCodeDimmer=%u retCodeRelay=%u", retCodeDimmer, retCodeRelay);
+		LOGSmartSwitchDebug("retCodeDimmer=%u retCodeRelay=%u", retCodeDimmer, retCodeRelay);
 		return retCode;
 	}
 	else if (intendedState == 100) {
 		// Set dimmer to 100 or turn relay on.
 		if (currentState.state.relay && safeSwitch.isRelayStateAccurate()) {
-			LOGSmartSwitch("already on");
+			LOGSmartSwitchDebug("already on");
 			return ERR_SUCCESS;
 		} else if (!safeSwitch.isRelayStateAccurate()) {
 			// Try the dimmer first, if that is already online there won't be any audible click.
@@ -110,42 +110,42 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 		cs_ret_code_t retCode = setDimmer(100);
 		if (retCode != ERR_SUCCESS) {
 			// If that doesn't work, turn relay on instead.
-			LOGSmartSwitch("Turn on relay instead.");
+			LOGSmartSwitchDebug("Turn on relay instead.");
 			retCode = setRelay(true);
 			// Don't forget to turn off the dimmer, as it may have been on already.
 			setDimmer(0);
 		}
-		LOGSmartSwitch("retCode=%u", retCode);
+		LOGSmartSwitchDebug("retCode=%u", retCode);
 		return retCode;
 	}
 	else {
 		// Try to set dimmed value, and then turn relay off.
 		// If that doesn't work, turn on relay instead.
 		cs_ret_code_t retCode = setDimmer(intendedState);
-		LOGSmartSwitch("allowDimming=%u", allowDimming);
+		LOGSmartSwitchDebug("allowDimming=%u", allowDimming);
 		if (retCode == ERR_SUCCESS) {
 			retCode = setRelay(false);
 			if (retCode != ERR_SUCCESS) {
-				LOGSmartSwitch("Relay could not be turned off: turn dimmer off.");
+				LOGSmartSwitchDebug("Relay could not be turned off: turn dimmer off.");
 				setDimmer(0);
 			}
 		} else {
 			// This branch will also be reached when trying to change the value of a locked dimmable crownstone
 			// in that case, setRelay will also refuse to change value, so everything is fine.
 
-			LOGSmartSwitch("setDimmer unsuccessful, try to turn on relay instead.");
+			LOGSmartSwitchDebug("setDimmer unsuccessful, try to turn on relay instead.");
 			setRelay(true);
 			// Don't forget to turn off the dimmer, as it may have been on already.
 			setDimmer(0);
 		}
-		LOGSmartSwitch("retCode=%u", retCode);
+		LOGSmartSwitchDebug("retCode=%u", retCode);
 		return retCode;
 	}
 }
 
 cs_ret_code_t SmartSwitch::setRelay(bool on) {
 	switch_state_t currentState = getActualState();
-	LOGSmartSwitch("setRelay %u currenState=%u allowSwitching()=%u", on, currentState.asInt, allowSwitching() );
+	LOGSmartSwitchDebug("setRelay %u currenState=%u allowSwitching()=%u", on, currentState.asInt, allowSwitching() );
 	
 	if (currentState.state.relay == on && safeSwitch.isRelayStateAccurate()) {
 		return ERR_SUCCESS;
@@ -159,7 +159,7 @@ cs_ret_code_t SmartSwitch::setRelay(bool on) {
 
 cs_ret_code_t SmartSwitch::setRelayUnchecked(bool on) {
 	cs_ret_code_t retCode = safeSwitch.setRelay(on);
-	LOGSmartSwitch("setRelayUnchecked %u retCode=%u", on, retCode);
+	LOGSmartSwitchDebug("setRelayUnchecked %u retCode=%u", on, retCode);
 	switch_state_t currentState = getActualState();
 	store(currentState);
 	return retCode;
@@ -167,7 +167,7 @@ cs_ret_code_t SmartSwitch::setRelayUnchecked(bool on) {
 
 cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity) {
 	switch_state_t currentState = getActualState();
-	LOGSmartSwitch("setDimmer %u currenState=%u allowSwitching()=%u allowDimming=%u", intensity, currentState.asInt, allowSwitching(), allowDimming);
+	LOGSmartSwitchDebug("setDimmer %u currenState=%u allowSwitching()=%u allowDimming=%u", intensity, currentState.asInt, allowSwitching(), allowDimming);
 
 	if (!allowDimming && intensity > 0) {
 		return ERR_NO_ACCESS;
@@ -185,7 +185,7 @@ cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity) {
 
 cs_ret_code_t SmartSwitch::setDimmerUnchecked(uint8_t intensity) {
 	cs_ret_code_t retCode = safeSwitch.setDimmer(intensity);
-	LOGSmartSwitch("setDimmerUnchecked %u retCode=%u", intensity, retCode);
+	LOGSmartSwitchDebug("setDimmerUnchecked %u retCode=%u", intensity, retCode);
 	switch_state_t currentState = getActualState();
 	store(currentState);
 	return retCode;

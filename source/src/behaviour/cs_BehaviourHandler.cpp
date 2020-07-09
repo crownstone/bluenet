@@ -23,131 +23,123 @@
 #include "drivers/cs_Serial.h"
 
 
-#define BehaviourHandlerDebug true
-
-#if BehaviourHandlerDebug == true
-#define LOGBehaviourHandler LOGd
-#define LOGBehaviourHandler_V LOGd
-#else
-#define LOGBehaviourHandler LOGnone
-#define LOGBehaviourHandler_V LOGnone
-#endif
+#define LOGBehaviourHandlerDebug LOGnone
+#define LOGBehaviourHandlerVerbose LOGnone
 
 
 
 void BehaviourHandler::handleEvent(event_t& evt){
-    switch(evt.type){
-        case CS_TYPE::EVT_PRESENCE_MUTATION: {
-            LOGBehaviourHandler("Presence mutation event in BehaviourHandler");
-            update();
-            break;
-        }
-        case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:{
-            update();
-            break;
-        }
-        case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
-        	behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
-        	isActive = settings->flags.enabled;
-            LOGi("settings isActive=%u", isActive);
-            TEST_PUSH_B(this, isActive);
-            update();
-            break;
-        }
-        case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG: {
-        	handleGetBehaviourDebug(evt);
-        	break;
-        }
-        default:{
-            // ignore other events
-            break;
-        }
-    }
+	switch(evt.type){
+		case CS_TYPE::EVT_PRESENCE_MUTATION: {
+			LOGBehaviourHandlerDebug("Presence mutation event in BehaviourHandler");
+			update();
+			break;
+		}
+		case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:{
+			update();
+			break;
+		}
+		case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
+			behaviour_settings_t* settings = reinterpret_cast<TYPIFY(STATE_BEHAVIOUR_SETTINGS)*>(evt.data);
+			isActive = settings->flags.enabled;
+			LOGi("settings isActive=%u", isActive);
+			TEST_PUSH_B(this, isActive);
+			update();
+			break;
+		}
+		case CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG: {
+			handleGetBehaviourDebug(evt);
+			break;
+		}
+		default:{
+			// ignore other events
+			break;
+		}
+	}
 }
 
 bool BehaviourHandler::update(){
-    if (!isActive) {
-        currentIntendedState = std::nullopt;
-    } else {
-        Time time = SystemTime::now();
-        std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
+	if (!isActive) {
+		currentIntendedState = std::nullopt;
+	} else {
+		Time time = SystemTime::now();
+		std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
 
-        if (!presence) {
-            LOGBehaviourHandler_V("Not updating, because presence data is missing");
-        } else {
-            currentIntendedState = computeIntendedState(time, presence.value());
-        }
-    }
+		if (!presence) {
+			LOGBehaviourHandlerVerbose("Not updating, because presence data is missing");
+		} else {
+			currentIntendedState = computeIntendedState(time, presence.value());
+		}
+	}
 
-    return true;
+	return true;
 }
 
-SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(Behaviour* behave, Time currentTime,
-   PresenceStateDescription currentPresence){
-	 if(SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(behave)){
+SwitchBehaviour* BehaviourHandler::ValidateSwitchBehaviour(Behaviour* behave, Time currentTime, PresenceStateDescription currentPresence) {
+	if (SwitchBehaviour * switchbehave = dynamic_cast<SwitchBehaviour*>(behave)) {
 		if (switchbehave->isValid(currentTime) &&
-			switchbehave->isValid(currentTime, currentPresence)) {
-				return switchbehave;
-			}
+				switchbehave->isValid(currentTime, currentPresence)) {
+			return switchbehave;
 		}
+	}
 
 	return nullptr;
 }
 
 std::optional<uint8_t> BehaviourHandler::computeIntendedState(
-       Time currentTime, 
-       PresenceStateDescription currentPresence) {
-    if (!isActive) {
-    	LOGBehaviourHandler("Behaviour handler is inactive, computed intended state: empty");
-        return {};
-    }
-    if (!currentTime.isValid()) {
-        LOGBehaviourHandler("Current time invalid, computed intended state: empty");
-        return {};
-    }
+		Time currentTime,
+		PresenceStateDescription currentPresence) {
+	if (!isActive) {
+		LOGBehaviourHandlerDebug("Behaviour handler is inactive, computed intended state: empty");
+		return {};
+	}
+	if (!currentTime.isValid()) {
+		LOGBehaviourHandlerDebug("Current time invalid, computed intended state: empty");
+		return {};
+	}
 
-    LOGBehaviourHandler("BehaviourHandler computeIntendedState resolves");
+	LOGBehaviourHandlerDebug("BehaviourHandler computeIntendedState resolves");
 
 	// 'best' meaning most relevant considering from/until time window.
 	SwitchBehaviour* current_best_switchbehaviour = nullptr;
 	for(auto candidate_behaviour : BehaviourStore::getActiveBehaviours()){
-    	SwitchBehaviour* candidate_switchbehaviour = ValidateSwitchBehaviour(
-    			candidate_behaviour,currentTime, currentPresence);
+		SwitchBehaviour* candidate_switchbehaviour = ValidateSwitchBehaviour(
+				candidate_behaviour,currentTime, currentPresence);
 
-    	// check for failed transformation from right to left. If either
-    	// current or candidate is nullptr, we can continue to the next candidate.
-    	if(current_best_switchbehaviour == nullptr){
-    		// candidate always wins when there is no current best.
-    		current_best_switchbehaviour = candidate_switchbehaviour;
-    		continue;
-    	}
-    	if(candidate_switchbehaviour == nullptr){
-    		continue;
-    	}
+		// check for failed transformation from right to left. If either
+		// current or candidate is nullptr, we can continue to the next candidate.
+		if (current_best_switchbehaviour == nullptr) {
+			// candidate always wins when there is no current best.
+			current_best_switchbehaviour = candidate_switchbehaviour;
+			continue;
+		}
+		if (candidate_switchbehaviour == nullptr) {
+			continue;
+		}
 
-    	// conflict resolve:
-    	if(FromUntilIntervalIsEqual(
-    			current_best_switchbehaviour,
-				candidate_switchbehaviour)){
+		// conflict resolve:
+		if (FromUntilIntervalIsEqual(
+				current_best_switchbehaviour,
+				candidate_switchbehaviour)) {
 			// when interval coincides, lowest intensity behaviour wins:
-    		if(candidate_switchbehaviour->value() < current_best_switchbehaviour->value()){
-    			current_best_switchbehaviour = candidate_switchbehaviour;
-    		}
-    	} else if(FromUntilIntervalIsMoreRelevantOrEqual(
+			if (candidate_switchbehaviour->value() < current_best_switchbehaviour->value()){
+				current_best_switchbehaviour = candidate_switchbehaviour;
+			}
+		} else if (FromUntilIntervalIsMoreRelevantOrEqual(
 				candidate_switchbehaviour,
-    			current_best_switchbehaviour,
-				currentTime)){
-    		// when interval is more relevant, that behaviour wins
-    		current_best_switchbehaviour = candidate_switchbehaviour;
-    	}
+				current_best_switchbehaviour,
+				currentTime)) {
+			// when interval is more relevant, that behaviour wins
+			current_best_switchbehaviour = candidate_switchbehaviour;
+		}
 	}
 
 
-	if(current_best_switchbehaviour){
+	if (current_best_switchbehaviour) {
 		return current_best_switchbehaviour->value();
 	}
 
-    return 0;
+	return 0;
 }
 
 void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
@@ -241,37 +233,37 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 	evt.result.returnCode = ERR_SUCCESS;
 }
 
-std::optional<uint8_t> BehaviourHandler::getValue(){
-    previousIntendedState = currentIntendedState;
-    return currentIntendedState;
+std::optional<uint8_t> BehaviourHandler::getValue() {
+	previousIntendedState = currentIntendedState;
+	return currentIntendedState;
 }
 
-bool BehaviourHandler::requiresPresence(Time t){
-    uint8_t i = 0;
-    for (auto& behaviour_ptr : BehaviourStore::getActiveBehaviours()){
-        i += 1;
-        if(behaviour_ptr != nullptr){
-            if(behaviour_ptr->requiresPresence()){
-                LOGBehaviourHandler_V("presence requiring behaviour found %d", i);
-                if(behaviour_ptr->isValid(t)) {
-                    LOGBehaviourHandler_V("presence requiring behaviour is currently valid %d", i);
-                    return true;
-                }
-            }
-        }
-    }
+bool BehaviourHandler::requiresPresence(Time t) {
+	uint8_t i = 0;
+	for (auto& behaviour_ptr : BehaviourStore::getActiveBehaviours()) {
+		i += 1;
+		if (behaviour_ptr != nullptr) {
+			if (behaviour_ptr->requiresPresence()) {
+				LOGBehaviourHandlerVerbose("presence requiring behaviour found %d", i);
+				if (behaviour_ptr->isValid(t)) {
+					LOGBehaviourHandlerVerbose("presence requiring behaviour is currently valid %d", i);
+					return true;
+				}
+			}
+		}
+	}
 
-    return false;
+	return false;
 }
 
-bool BehaviourHandler::requiresAbsence(Time t){
-    for (auto& behaviour_ptr : BehaviourStore::getActiveBehaviours()){
-        if(behaviour_ptr != nullptr){
-            if(behaviour_ptr->isValid(t) && behaviour_ptr->requiresAbsence()) {
-                return true;
-            }
-        }
-    }
+bool BehaviourHandler::requiresAbsence(Time t) {
+	for (auto& behaviour_ptr : BehaviourStore::getActiveBehaviours()) {
+		if (behaviour_ptr != nullptr) {
+			if (behaviour_ptr->isValid(t) && behaviour_ptr->requiresAbsence()) {
+				return true;
+			}
+		}
+	}
 
-    return false;
+	return false;
 }

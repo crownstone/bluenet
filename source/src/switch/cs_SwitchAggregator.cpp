@@ -17,7 +17,7 @@
 
 #define LOGSwitchAggregatorDebug LOGnone
 #define LOGSwitchHistory false
-#define LOGSwitchAggregator_Evt LOGd
+#define LOGSwitchAggregatorEvent LOGd
 
 
 // ========================= Public ========================
@@ -243,7 +243,7 @@ bool SwitchAggregator::handlePresenceEvents(event_t& event) {
 				break;
 		}
 
-		LOGSwitchAggregator_Evt("SwitchAggregator::handlePresence");
+		LOGSwitchAggregatorEvent("SwitchAggregator::handlePresence");
 		return true;
 	}
 
@@ -254,19 +254,19 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& event) {
 	switch (event.type) {
 		// ============== overrideState Events ==============
 		case CS_TYPE::CMD_SWITCH_ON: {
-			LOGSwitchAggregator_Evt("CMD_SWITCH_ON",__func__);
+			LOGSwitchAggregatorEvent("CMD_SWITCH_ON",__func__);
 
 			executeStateIntentionUpdate(100, event.source);
 			break;
 		}
 		case CS_TYPE::CMD_SWITCH_OFF: {
-			LOGSwitchAggregator_Evt("CMD_SWITCH_OFF",__func__);
+			LOGSwitchAggregatorEvent("CMD_SWITCH_OFF",__func__);
 
 			executeStateIntentionUpdate(0, event.source);
 			break;
 		}
 		case CS_TYPE::CMD_SWITCH: {
-			LOGSwitchAggregator_Evt("CMD_SWITCH",__func__);
+			LOGSwitchAggregatorEvent("CMD_SWITCH",__func__);
 
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) event.data;
 			LOGd("packet intensity: %d, source: type=%u id=%u", packet->switchCmd, event.source.source.type, event.source.source.id);
@@ -281,7 +281,7 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& event) {
 			break;
 		}
 		case CS_TYPE::CMD_SWITCH_TOGGLE: {
-			LOGSwitchAggregator_Evt("CMD_SWITCH_TOGGLE",__func__);
+			LOGSwitchAggregatorEvent("CMD_SWITCH_TOGGLE",__func__);
 			executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_TOGGLE, event.source);
 			break;
 		}
