@@ -217,6 +217,8 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 
 bool SwitchAggregator::handlePresenceEvents(event_t& event) {
 	if (event.type == CS_TYPE::EVT_PRESENCE_MUTATION) {
+		LOGSwitchAggregatorEvent("handlePresence");
+
 		PresenceHandler::MutationType mutationtype = *reinterpret_cast<PresenceHandler::MutationType*>(event.data);
 
 		switch (mutationtype) {
@@ -242,8 +244,6 @@ bool SwitchAggregator::handlePresenceEvents(event_t& event) {
 			default:
 				break;
 		}
-
-		LOGSwitchAggregatorEvent("SwitchAggregator::handlePresence");
 		return true;
 	}
 
@@ -254,34 +254,33 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& event) {
 	switch (event.type) {
 		// ============== overrideState Events ==============
 		case CS_TYPE::CMD_SWITCH_ON: {
-			LOGSwitchAggregatorEvent("CMD_SWITCH_ON",__func__);
+			LOGSwitchAggregatorEvent("CMD_SWITCH_ON");
 
 			executeStateIntentionUpdate(100, event.source);
 			break;
 		}
 		case CS_TYPE::CMD_SWITCH_OFF: {
-			LOGSwitchAggregatorEvent("CMD_SWITCH_OFF",__func__);
+			LOGSwitchAggregatorEvent("CMD_SWITCH_OFF");
 
 			executeStateIntentionUpdate(0, event.source);
 			break;
 		}
 		case CS_TYPE::CMD_SWITCH: {
-			LOGSwitchAggregatorEvent("CMD_SWITCH",__func__);
+//			LOGSwitchAggregatorEvent("CMD_SWITCH");
 
 			TYPIFY(CMD_SWITCH)* packet = (TYPIFY(CMD_SWITCH)*) event.data;
-			LOGd("packet intensity: %d, source: type=%u id=%u", packet->switchCmd, event.source.source.type, event.source.source.id);
 			if (!checkAndSetOwner(event.source)) {
 				LOGSwitchAggregatorDebug("not executing, checkAndSetOwner returned false");
 				event.result.returnCode = ERR_NO_ACCESS;
 				return false;
 			}
-
+			LOGd("packet intensity: %d, source: type=%u id=%u", packet->switchCmd, event.source.source.type, event.source.source.id);
 			executeStateIntentionUpdate(packet->switchCmd, event.source);
 
 			break;
 		}
 		case CS_TYPE::CMD_SWITCH_TOGGLE: {
-			LOGSwitchAggregatorEvent("CMD_SWITCH_TOGGLE",__func__);
+			LOGSwitchAggregatorEvent("CMD_SWITCH_TOGGLE");
 			executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_TOGGLE, event.source);
 			break;
 		}
@@ -430,7 +429,7 @@ bool SwitchAggregator::checkAndSetOwner(const cmd_source_with_counter_t& source)
 
 	if (!BLEutil::isNewer(_source.count, source.count)) {
 		// A command with newer counter has been received already.
-		LOGd("Old command: %u, already got: %u", source.count, _source.count);
+		LOGSwitchAggregatorDebug("Old command count: %u, already got: %u", source.count, _source.count);
 		return false;
 	}
 

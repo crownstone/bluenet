@@ -180,18 +180,18 @@ cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSi
 cs_ret_code_t MeshMsgHandler::handleCmdMultiSwitch(uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_multi_switch_item_t* item = (cs_mesh_model_msg_multi_switch_item_t*) payload;
 	if (item->id == _ownId) {
-		LOGMeshModelInfo("received multi switch for me");
-		if (memcmp(&_lastReceivedMultiSwitch, item, sizeof(*item)) == 0) {
-			LOGMeshModelDebug("ignore similar multi switch");
-			return ERR_SUCCESS;
-		}
-		memcpy(&_lastReceivedMultiSwitch, item, sizeof(*item));
+//		LOGMeshModelInfo("received multi switch for me");
+//		if (memcmp(&_lastReceivedMultiSwitch, item, sizeof(*item)) == 0) {
+//			LOGMeshModelDebug("ignore similar multi switch");
+//			return ERR_SUCCESS;
+//		}
+//		memcpy(&_lastReceivedMultiSwitch, item, sizeof(*item));
 
 		TYPIFY(CMD_MULTI_SWITCH) internalItem;
 		internalItem.id = item->id;
 		internalItem.cmd.switchCmd = item->switchCmd;
 
-		LOGi("execute multi switch cmd=%u source: type=%u id=%u", item->switchCmd, item->source.source.type, item->source.source.id);
+		LOGMeshModelInfo("execute multi switch cmd=%u source: type=%u id=%u", item->switchCmd, item->source.source.type, item->source.source.id);
 		event_t event(CS_TYPE::CMD_MULTI_SWITCH, &internalItem, sizeof(internalItem), item->source);
 		event.source.source.flagExternal = true;
 		event.dispatch();

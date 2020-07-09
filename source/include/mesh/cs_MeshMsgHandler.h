@@ -52,10 +52,10 @@ private:
 	 */
 	cs_mesh_model_ext_state_t _lastReceivedState;
 
-	/**
-	 * Cache last received switch command, so it can be ignored.
-	 */
-	cs_mesh_model_msg_multi_switch_item_t _lastReceivedMultiSwitch = {0xFF};
+//	/**
+//	 * Cache last received switch command, so it can be ignored.
+//	 */
+//	cs_mesh_model_msg_multi_switch_item_t _lastReceivedMultiSwitch = {0xFF};
 
 	/**
 	 * Cache last received set time command, so it can be ignored.
