@@ -38,6 +38,36 @@ BackgroundAdvertisementHandler::BackgroundAdvertisementHandler() {
 	EventDispatcher::getInstance().addListener(this);
 }
 
+void BackgroundAdvertisementHandler::parseServicesAdvertisement(scanned_device_t* scannedDevice) {
+	uint32_t errCode;
+	cs_data_t serviceUuids;
+	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE, scannedDevice->data, scannedDevice->dataSize, &serviceUuids);
+	if (errCode != ERR_SUCCESS) {
+		return;
+	}
+
+	memcpy(_lastMacAddress, scannedDevice->address, MAC_ADDRESS_LEN);
+
+	_lastBitmask[0] = 0;
+	_lastBitmask[1] = 0;
+//	memset(_lastBitmask, 0, sizeof(_lastBitmask));
+
+	// Loop over 16 bit service UUIDs.
+	for (uint8_t i = 0; i < serviceUuids.len / 2; ++i) {
+		LOGBackgroundAdvVerbose("uuid=%u %u", serviceUuids.data[2 * i + 0], serviceUuids.data[2 * i + 1]);
+		uint8_t index = serviceUuids.data[2 * i + 1];
+		uint8_t bitPos = _uuidMap[index];
+		if (bitPos == 255) {
+			LOGw("invalid bit pos %u for uuid %u", bitPos, index);
+		}
+		else {
+			_lastBitmask[bitPos / 64] |= 1 << (bitPos % 64);
+		}
+	}
+
+	LOGBackgroundAdvVerbose("store bitmask 0x%X 0x%X", _lastBitmask[0], _lastBitmask[1]);
+}
+
 void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	uint32_t errCode;
 	cs_data_t manufacturerData;
@@ -87,7 +117,19 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 				((uint64_t)servicesMask[5+8] << (2*8)) +
 				((uint64_t)servicesMask[6+8] << (1*8)) +
 				((uint64_t)servicesMask[7+8] << (0*8));
-	LOGBackgroundAdvVerbose("left=%llx right=%llx", left, right);
+	LOGBackgroundAdvVerbose("left=0x%X right=0x%X", left, right);
+
+	if (memcmp(_lastMacAddress, scannedDevice->address, MAC_ADDRESS_LEN) == 0) {
+		// TODO: make sure the right bits go to the right place.
+		left |= _lastBitmask[0];
+		right |= _lastBitmask[1];
+		LOGBackgroundAdvVerbose("Use last bitmask left=0x%X right=0x%X", left, right);
+	}
+
+	// Clear any cached bitmask.
+	_lastBitmask[0] = 0;
+	_lastBitmask[1] = 0;
+
 
 
 	// Divide the data into 3 parts, and do a bitwise majority vote, to correct for errors.
@@ -96,7 +138,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	uint64_t part2 = ((left & 0x3FFFFF) << 20) | ((right >> (64-20)) & 0x0FFFFF); // Last 64-42=22 bits from left, and first 42−(64−42)=20 bits from right.
 	uint64_t part3 = (right >> 2) & 0x03FFFFFFFFFF; // Bits 21-62 from right.
 	uint64_t result = ((part1 & part2) | (part2 & part3) | (part1 & part3)); // The majority vote
-	LOGBackgroundAdvVerbose("part1=%llx part2=%llx part3=%llx result=%llx", part1, part2, part3, result);
+	LOGBackgroundAdvVerbose("part1=0x%X part2=0x%X part3=0x%X result=0x%X", part1, part2, part3, result);
 
 	// Parse the resulting data.
 	uint8_t protocol = (result >> (42-2)) & 0x03;
@@ -216,6 +258,7 @@ void BackgroundAdvertisementHandler::handleEvent(event_t & event) {
 	case CS_TYPE::EVT_DEVICE_SCANNED: {
 		TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice = (TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
 		parseAdvertisement(scannedDevice);
+		parseServicesAdvertisement(scannedDevice);
 		break;
 	}
 	case CS_TYPE::EVT_ADV_BACKGROUND: {
