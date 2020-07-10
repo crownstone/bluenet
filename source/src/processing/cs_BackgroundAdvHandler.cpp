@@ -58,7 +58,7 @@ void BackgroundAdvertisementHandler::parseServicesAdvertisement(scanned_device_t
 		uint8_t index = serviceUuids.data[2 * i + 1];
 		uint8_t bitPos = _uuidMap[index];
 		if (bitPos == 255) {
-			LOGw("invalid bit pos %u for uuid %u", bitPos, index);
+			LOGBackgroundAdvVerbose("invalid bit pos %u for uuid %u", bitPos, index);
 		}
 		else {
 			_lastBitmask[bitPos / 64] |= 1 << (bitPos % 64);
