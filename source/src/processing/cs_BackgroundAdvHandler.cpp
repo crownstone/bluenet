@@ -122,8 +122,8 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 
 	if (memcmp(_lastMacAddress, scannedDevice->address, MAC_ADDRESS_LEN) == 0) {
 		// TODO: make sure the right bits go to the right place.
-		left |= _lastBitmask[0];
-		right |= _lastBitmask[1];
+		left |= _lastBitmask[1];
+		right |= _lastBitmask[0];
 		LOGBackgroundAdvVerbose("Use last bitmask left=0x%X%X right=0x%X%X", (uint32_t)(left >> 32), (uint32_t)(left), (uint32_t)(right >> 32), (uint32_t)(right));
 	}
 
