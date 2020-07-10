@@ -347,7 +347,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 82 | Get switch history | - | [Switch history packet](#switch_history_packet) | A history of why the switch state has changed. | x
 83 | Get power samples | [Request power samples](#power_samples_request_packet) | [Power samples](#power_samples_result_packet) | Get the current or voltage samples of certain events. | x
 84 | Get CPU usage statistics | - |
-
+90 | Upload microapp | [Upload microapp packet](#upload_microapp_packet) | [Microapp result packet](#microapp_result_packet) | Upload microapp. | x
 
 <a name="setup_packet"></a>
 #### Setup packet
@@ -698,7 +698,6 @@ float | Multiplier | 4 | Multiply the sample value minus offset with this value 
 int 16 [] | Samples | 2 | List of samples.
 
 
-
 <a name="register_tracked_device_packet"></a>
 #### Register tracked device packet
 
@@ -714,7 +713,56 @@ uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background_adv_flags).
 uint 24 | Device token | 3 | Token that will be advertised by the device.
 uint 16 | Time to live | 2 | Time in minutes after which the device token will be invalid.
 
+<a name="upload_microapp_packet"></a>
+#### Upload microapp
 
+![Upload microapp packet](../docs/diagrams/upload_microapp_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Protocol | 1 | Protocol version of binary uploads (default 0).
+uint 8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
+uint 8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0) if index != 255.
+uint 8 | Count | 1 | The total number of chunks (rounded up).
+uint 16 | Size | 2 | Size in bytes of the complete binary.
+uint 16 | Checksum | 2 | The checksum of this chunk. The checksum of the last packet is of the complete program.
+uint 8 | Data | N | `NRF_SDH_BLE_GATT_MAX_MTU_SIZE` (69)  - `OVERHEAD` (20), should be 49.
+
+The checksum of the last packet contains the checksum of the complete binary. The packets are all of the same size. The data in the last packet has to contain 0xFF for the values beyond the application size.
+
+<a name="send_microapp_meta_packet"></a>
+#### Send microapp meta info
+
+![Send microapp meta packet](../docs/diagrams/send_microapp_meta_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Protocol | 1 | Protocol version of binary sends (default 0).
+uint 8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
+uint 8 | Index  | 1 | If set to `255`.
+uint 8 | Opcode | 1 | There are currently two opcodes.
+uint 16 | Param0 | 2 | Opcode specific parameter.
+uint 16 | Param1 | 2 | Opcode specific parameter.
+uint 8 | Data | N | Opcode specific data.
+
+The opcodes that are defined are `MICROAPP_OPCODE_ENABLE = 0x01` and `MICROAPP_OPCODE_DISABLE = 0x02`. These can be used to enable/disable a (previously) uploaded microapp.
+
+<a name="microapp_result_packet"></a>
+#### Microapp result packet
+
+![Microapp result packet](../docs/diagrams/microapp_result_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Protocol | 1 | Protocol version of binary uploads (default 0).
+uint 8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
+uint 8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0) if index != 255.
+uint 8 | Repeat | 1 | A decrementing counter (down from 3 to improve reception thanks to unique ads).
+uint 16 | Error | 2 | Any error that might have happened (checksum, size, etc.).
+
+The result packet is important to retrieve a notification that a particular write has been successful. Only then you should send the next chunk.
+
+To make the process more graceful for the receiving party to miss a notification, the notification is sent repeatedly with decrementing repeat counter.
 
 <a name="result_packet"></a>
 ## Result packet
@@ -730,6 +778,7 @@ uint 16 | [Command type](#command_types) | 2 | Type of the command of which this
 uint 16 | [Result code](#result_codes) | 2 | The result code.
 uint 16 | Size | 2 | Size of the payload in bytes.
 uint 8 | Payload | Size | Payload data, depends on command type.
+
 
 <a name="result_codes"></a>
 #### Result codes
