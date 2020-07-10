@@ -18,10 +18,10 @@
 #include "time/cs_SystemTime.h"
 
 #define LOGBackgroundAdvDebug LOGnone
-//#define BACKGROUND_ADV_VERBOSE
+#define BACKGROUND_ADV_VERBOSE false
 
 
-#ifdef BACKGROUND_ADV_VERBOSE
+#if BACKGROUND_ADV_VERBOSE == true
 #define LOGBackgroundAdvVerbose LOGd
 #else
 #define LOGBackgroundAdvVerbose LOGnone
@@ -65,7 +65,7 @@ void BackgroundAdvertisementHandler::parseServicesAdvertisement(scanned_device_t
 		}
 	}
 
-	LOGBackgroundAdvVerbose("store bitmask 0x%X 0x%X", _lastBitmask[0], _lastBitmask[1]);
+	LOGBackgroundAdvVerbose("store bitmask 0x%X%X 0x%X%X", (uint32_t)(_lastBitmask[0] >> 32), (uint32_t)(_lastBitmask[0]), (uint32_t)(_lastBitmask[1] >> 32), (uint32_t)(_lastBitmask[1]));
 }
 
 void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
@@ -91,12 +91,13 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	uint8_t* servicesMask; // This is a mask of 128 bits.
 	servicesMask = manufacturerData.data + BACKGROUND_SERVICES_MASK_HEADER_LEN;
 
-#ifdef BACKGROUND_ADV_VERBOSE
+#if BACKGROUND_ADV_VERBOSE == true
 	_log(SERIAL_DEBUG, "rssi=%i servicesMask: ", scannedDevice->rssi);
 	BLEutil::printArray(servicesMask, BACKGROUND_SERVICES_MASK_LEN);
 #endif
 
 	// Put the data into large integers, so we can perform shift operations.
+	// Can't cast, as the data is big endian (MSB).
 //	uint64_t left = *((uint64_t*)servicesMask);
 //	uint64_t right = *((uint64_t*)(servicesMask + 8));
 	uint64_t left =
@@ -117,13 +118,13 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 				((uint64_t)servicesMask[5+8] << (2*8)) +
 				((uint64_t)servicesMask[6+8] << (1*8)) +
 				((uint64_t)servicesMask[7+8] << (0*8));
-	LOGBackgroundAdvVerbose("left=0x%X right=0x%X", left, right);
+	LOGBackgroundAdvVerbose("left=0x%X%X right=0x%X%X", (uint32_t)(left >> 32), (uint32_t)(left), (uint32_t)(right >> 32), (uint32_t)(right));
 
 	if (memcmp(_lastMacAddress, scannedDevice->address, MAC_ADDRESS_LEN) == 0) {
 		// TODO: make sure the right bits go to the right place.
 		left |= _lastBitmask[0];
 		right |= _lastBitmask[1];
-		LOGBackgroundAdvVerbose("Use last bitmask left=0x%X right=0x%X", left, right);
+		LOGBackgroundAdvVerbose("Use last bitmask left=0x%X%X right=0x%X%X", (uint32_t)(left >> 32), (uint32_t)(left), (uint32_t)(right >> 32), (uint32_t)(right));
 	}
 
 	// Clear any cached bitmask.
@@ -138,7 +139,11 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	uint64_t part2 = ((left & 0x3FFFFF) << 20) | ((right >> (64-20)) & 0x0FFFFF); // Last 64-42=22 bits from left, and first 42−(64−42)=20 bits from right.
 	uint64_t part3 = (right >> 2) & 0x03FFFFFFFFFF; // Bits 21-62 from right.
 	uint64_t result = ((part1 & part2) | (part2 & part3) | (part1 & part3)); // The majority vote
-	LOGBackgroundAdvVerbose("part1=0x%X part2=0x%X part3=0x%X result=0x%X", part1, part2, part3, result);
+	LOGBackgroundAdvVerbose("part1=0x%X%X part2=0x%X%X part3=0x%X%X result=0x%X%X",
+			(uint32_t)(part1 >> 32), (uint32_t)(part1),
+			(uint32_t)(part2 >> 32), (uint32_t)(part2),
+			(uint32_t)(part3 >> 32), (uint32_t)(part3),
+			(uint32_t)(result >> 32), (uint32_t)(result));
 
 	// Parse the resulting data.
 	uint8_t protocol = (result >> (42-2)) & 0x03;
@@ -215,7 +220,7 @@ void BackgroundAdvertisementHandler::handleBackgroundAdvertisement(adv_backgroun
 		return;
 	}
 	uint16_t* decryptedPayload = (uint16_t*)(backgroundAdvertisement->data);
-#ifdef BACKGROUND_ADV_VERBOSE
+#if BACKGROUND_ADV_VERBOSE == true
 	_log(SERIAL_DEBUG, "bg adv: ");
 	_log(SERIAL_DEBUG, "protocol=%u sphereId=%u rssi=%i ", backgroundAdvertisement->protocol, backgroundAdvertisement->sphereId, backgroundAdvertisement->rssi);
 	_log(SERIAL_DEBUG, "payload=[%u %u] address=", decryptedPayload[0], decryptedPayload[1]);
