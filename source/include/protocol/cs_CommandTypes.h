@@ -46,6 +46,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_GET_BEHAVIOUR_DEBUG         = 69,
 
 	CTRL_CMD_REGISTER_TRACKED_DEVICE     = 70,
+	CTRL_CMD_TRACKED_DEVICE_HEARTBEAT    = 71,
 
 	CTRL_CMD_GET_UPTIME                  = 80,
 	CTRL_CMD_GET_ADC_RESTARTS            = 81,

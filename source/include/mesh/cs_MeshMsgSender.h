@@ -38,6 +38,7 @@ public:
 	cs_ret_code_t sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t transmissions=0);
 	cs_ret_code_t sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t transmissions=0);
 	cs_ret_code_t sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* item, uint8_t transmissions=0);
+	cs_ret_code_t sendTrackedDeviceHeartbeat(const cs_mesh_model_msg_device_heartbeat_t* item, uint8_t transmissions=0);
 	cs_ret_code_t sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* item, uint8_t transmissions=0);
 
 	/** Internal usage */

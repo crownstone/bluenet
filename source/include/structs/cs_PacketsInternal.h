@@ -227,3 +227,9 @@ struct __attribute__((packed)) internal_register_tracked_device_packet_t {
 };
 
 typedef internal_register_tracked_device_packet_t internal_update_tracked_device_packet_t;
+
+struct __attribute__((packed)) internal_tracked_device_heartbeat_packet_t {
+	tracked_device_heartbeat_packet_t data;
+	uint8_t accessLevel = NOT_SET;
+};
+

@@ -8,6 +8,7 @@
 
 #include <events/cs_EventListener.h>
 #include <forward_list>
+#include <cstdint>
 
 /**
  * Class that keeps up devices to be tracked.
@@ -16,6 +17,7 @@
  * - Make sure device tokens expire.
  * - Cache the data of the devices (profile, location, flags, etc).
  * - Handle scans with device token only as data, and dispatch events with added cached data.
+ * - Handle device heartbeats, which are treated as if the device was scanned.
  */
 class TrackedDevices: public EventListener {
 public:
@@ -40,8 +42,16 @@ private:
 	 * After N minutes not hearing anything from the device, the location ID will be set to 0 (in sphere).
 	 * This prevents sending out old locations.
 	 */
-	static const uint8_t LOCATION_ID_TIMEOUT_MINUTES = 5;
-	static const uint16_t TICKS_PER_MINUTES = 1000 / TICK_INTERVAL_MS * 60;
+	static const uint8_t LOCATION_ID_TTL_MINUTES = 5;
+
+	/**
+	 * Max heartbeat TTL in minutes.
+	 * Make sure that it's not larger than what fits in location id timeout.
+	 */
+	static const uint16_t HEARTBEAT_TTL_MINUTES_MAX = 60;
+
+	static const uint16_t TICKS_PER_SECOND = (1000 / TICK_INTERVAL_MS);
+	static const uint16_t TICKS_PER_MINUTES = (60 * 1000 / TICK_INTERVAL_MS);
 
 	enum TrackedDeviceFields {
 		BIT_POS_ACCESS_LEVEL  = 0,
@@ -56,11 +66,13 @@ private:
 
 	struct __attribute__((packed)) TrackedDevice {
 		uint8_t fieldsSet = 0;
-		uint8_t locationIdTimeout = LOCATION_ID_TIMEOUT_MINUTES;
+		uint8_t locationIdTTLMinutes = LOCATION_ID_TTL_MINUTES;
+		uint8_t heartbeatTTLMinutes = 0;
 		internal_register_tracked_device_packet_t data;
 	};
 
-	uint16_t ticksLeft = TICKS_PER_MINUTES;
+	uint16_t ticksLeftSecond = TICKS_PER_SECOND;
+	uint16_t ticksLeftMinute = TICKS_PER_MINUTES;
 
 	/**
 	 * List of all tracked devices.
@@ -125,6 +137,9 @@ private:
 	void handleMeshToken(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)& packet);
 	void handleMeshListSize(TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)& packet);
 	void handleScannedDevice(adv_background_parsed_v1_t& packet);
+	cs_ret_code_t handleHeartbeat(internal_tracked_device_heartbeat_packet_t& packet);
+	cs_ret_code_t handleHeartbeat(TrackedDevice& device, uint8_t locationId, uint8_t ttlMinutes);
+	void handleMeshHeartbeat(TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)& packet);
 
 	/**
 	 * Return true when given access level is equal or higher than device access level.
@@ -148,8 +163,14 @@ private:
 	 *
 	 * Decrease TTL of all devices by 1.
 	 * Decrease location timeout of all device by 1.
+	 * Decrease heartbeat TTL.
 	 */
 	void tickMinute();
+
+	/**
+	 * Send location of devices with non-timed out heartbeat.
+	 */
+	void tickSecond();
 
 	/**
 	 * Returns true when all fields are set.

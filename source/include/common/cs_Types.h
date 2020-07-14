@@ -270,6 +270,8 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_EXT_STATE_0,                             // Mesh received part 0 of the state of a Crownstone.
 	EVT_MESH_EXT_STATE_1,                             // Mesh received part 1 of the state of a Crownstone.
 	EVT_MESH_PAGES_ERASED,                            // All mesh storage pages are completely erased.
+	CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT,       // Send a tracked device heartbeat mesh message.
+	EVT_MESH_TRACKED_DEVICE_HEARTBEAT,                // Mesh received a tracked device heartbeat.
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR = InternalBaseBehaviour,        // Add a behaviour.
@@ -283,11 +285,12 @@ enum class CS_TYPE: uint16_t {
 	EVT_BEHAVIOUR_OVERRIDDEN,                         // Informs whether behaviour is overridden by user (in override state).
 
 	// Localisation of devices
-	CMD_REGISTER_TRACKED_DEVICE = InternalBaseLocalisation,
-	CMD_UPDATE_TRACKED_DEVICE,
+	CMD_REGISTER_TRACKED_DEVICE = InternalBaseLocalisation, // Register a tracked device.
+	CMD_UPDATE_TRACKED_DEVICE,                        // Update data of a tracked device.
 	EVT_PROFILE_LOCATION,                             // Location of profile.
 	EVT_PRESENCE_MUTATION,                            // Presence changed.
 	EVT_STATE_EXTERNAL_STONE,                         // The state of another stone has been received.
+	CMD_TRACKED_DEVICE_HEARTBEAT,                     // Set location of a tracked device, with a TTL. This command can be sent instead of advertisements.
 
 	// System
 	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
@@ -456,6 +459,8 @@ typedef  cs_mesh_model_msg_device_register_t TYPIFY(EVT_MESH_TRACKED_DEVICE_REGI
 typedef  cs_mesh_model_msg_device_register_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER);
 typedef  cs_mesh_model_msg_device_token_t TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN);
 typedef  cs_mesh_model_msg_device_token_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN);
+typedef  cs_mesh_model_msg_device_heartbeat_t TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT);
+typedef  cs_mesh_model_msg_device_heartbeat_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT);
 typedef  cs_mesh_model_msg_device_list_size_t TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE);
 typedef  cs_mesh_model_msg_device_list_size_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE);
 typedef  mesh_control_command_packet_t TYPIFY(CMD_SEND_MESH_CONTROL_COMMAND);
@@ -506,6 +511,7 @@ typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef BOOL TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN);
 typedef internal_register_tracked_device_packet_t TYPIFY(CMD_REGISTER_TRACKED_DEVICE);
 typedef internal_update_tracked_device_packet_t TYPIFY(CMD_UPDATE_TRACKED_DEVICE);
+typedef internal_tracked_device_heartbeat_packet_t TYPIFY(CMD_TRACKED_DEVICE_HEARTBEAT);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.

@@ -87,6 +87,10 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 			result.returnCode = handleTrackedDeviceToken(payload, payloadSize);
 			return;
 		}
+		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT: {
+			result.returnCode = handleTrackedDeviceHeartbeat(payload, payloadSize);
+			return;
+		}
 		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE: {
 			result.returnCode = handleTrackedDeviceListSize(payload, payloadSize);
 			return;
@@ -330,6 +334,16 @@ cs_ret_code_t MeshMsgHandler::handleTrackedDeviceToken(uint8_t* payload, size16_
 	LOGMeshModelInfo("received tracked device token id=%u TTL=%u token=%u %u %u", packet->deviceId, packet->ttlMinutes, packet->deviceToken[0], packet->deviceToken[1], packet->deviceToken[2]);
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
+	event.dispatch();
+//	return event.result.returnCode;
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t MeshMsgHandler::handleTrackedDeviceHeartbeat(uint8_t* payload, size16_t payloadSize) {
+	cs_mesh_model_msg_device_heartbeat_t* packet = (cs_mesh_model_msg_device_heartbeat_t*) payload;
+	LOGMeshModelInfo("received tracked device heartbeat id=%u location=%u TTL=%u", packet->deviceId, packet->locationId, packet->ttlMinutes);
+	TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)* eventDataPtr = packet;
+	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_HEARTBEAT, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)));
 	event.dispatch();
 //	return event.result.returnCode;
 	return ERR_SUCCESS;

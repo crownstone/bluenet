@@ -194,6 +194,8 @@ void CommandHandler::handleCommand(
 		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG, commandData, source, result);
 	case CTRL_CMD_REGISTER_TRACKED_DEVICE:
 		return handleCmdRegisterTrackedDevice(commandData, accessLevel, result);
+	case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
+		return handleCmdTrackedDeviceHeartbeat(commandData, accessLevel, result);
 	case CTRL_CMD_SET_IBEACON_CONFIG_ID:
 		return dispatchEventForCommand(CS_TYPE::CMD_SET_IBEACON_CONFIG_ID, commandData, source, result);
 	case CTRL_CMD_GET_UPTIME:
@@ -819,6 +821,24 @@ void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const
 	return;
 }
 
+void CommandHandler::handleCmdTrackedDeviceHeartbeat(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+	LOGi(STR_HANDLE_COMMAND, "tracked device heartbeat");
+	if (commandData.len != sizeof(tracked_device_heartbeat_packet_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+		return;
+	}
+
+	TYPIFY(CMD_TRACKED_DEVICE_HEARTBEAT) evtData;
+	evtData.data = *((tracked_device_heartbeat_packet_t*)commandData.data);
+	evtData.accessLevel = accessLevel;
+	event_t event(CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT, &evtData, sizeof(evtData), result);
+	event.dispatch();
+	result.returnCode = event.result.returnCode;
+	result.dataSize = event.result.dataSize;
+	return;
+}
+
 void CommandHandler::handleCmdGetUptime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "get uptime");
 	if (result.buf.len < sizeof(uint32_t)) {
@@ -876,6 +896,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_STATE_GET:
 		case CTRL_CMD_STATE_SET:
 		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
+		case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
 			return BASIC;
 
 		case CTRL_CMD_SET_TIME:

@@ -27,7 +27,9 @@ cs_ret_code_t TrackedDevices::handleRegister(internal_register_tracked_device_pa
 	if (device == nullptr) {
 		return ERR_NO_SPACE;
 	}
-	if (!hasAccess(*device, packet.accessLevel)) {
+
+	// When device token timed out, anyone is allowed to set a token for the device.
+	if (isValidTTL(*device) && !hasAccess(*device, packet.accessLevel)) {
 		LOGw("No access id=%u oldLevel=%u newLevel=%u", packet.data.deviceId, device->data.accessLevel, packet.accessLevel);
 		return ERR_NO_ACCESS;
 	}
@@ -104,11 +106,60 @@ void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
 		LOGTrackedDevicesVerbose("token expired id=%u", device->data.data.deviceId);
 		return;
 	}
-	device->locationIdTimeout = LOCATION_ID_TIMEOUT_MINUTES;
-//	if (!device->data.data.flags.flags.ignoreForBehaviour) {
-//		sendLocation(*device);
-//	}
+	device->locationIdTTLMinutes = LOCATION_ID_TTL_MINUTES;
+
 	sendBackgroundAdv(*device, packet.macAddress, packet.rssi);
+}
+
+cs_ret_code_t TrackedDevices::handleHeartbeat(internal_tracked_device_heartbeat_packet_t& packet) {
+	LOGTrackedDevicesDebug("handleHeartbeat");
+
+	TrackedDevice* device = find(packet.data.deviceId);
+	if (device == nullptr) {
+		return ERR_NOT_FOUND;
+	}
+	if (!allFieldsSet(*device)) {
+		LOGTrackedDevicesVerbose("not all fields set id=%u", device->data.data.deviceId);
+		return ERR_NOT_FOUND;
+	}
+	if (!isValidTTL(*device)) {
+		LOGTrackedDevicesVerbose("device expired id=%u", device->data.data.deviceId);
+		return ERR_TIMEOUT;
+	}
+	if (!hasAccess(*device, packet.accessLevel)) {
+		LOGw("No access id=%u oldLevel=%u newLevel=%u", packet.data.deviceId, device->data.accessLevel, packet.accessLevel);
+		return ERR_NO_ACCESS;
+	}
+	if (memcmp(device->data.data.deviceToken, packet.data.deviceToken, sizeof(packet.data.deviceToken)) != 0) {
+		LOGw("Invalid token for id=%u", device->data.data.deviceId);
+		return ERR_NO_ACCESS;
+	}
+
+	return handleHeartbeat(*device, packet.data.locationId, packet.data.timeToLiveMinutes);
+}
+
+void TrackedDevices::handleMeshHeartbeat(TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)& packet) {
+	LOGTrackedDevicesDebug("handleMeshHeartbeat");
+	TrackedDevice* device = find(packet.deviceId);
+	if (device == nullptr) {
+		return;
+	}
+	handleHeartbeat(*device, packet.locationId, packet.ttlMinutes);
+}
+
+cs_ret_code_t TrackedDevices::handleHeartbeat(TrackedDevice& device, uint8_t locationId, uint8_t ttlMinutes) {
+	if (ttlMinutes > HEARTBEAT_TTL_MINUTES_MAX) {
+		LOGd("Invalid heartbeat TTL %u", ttlMinutes);
+		return ERR_WRONG_PARAMETER;
+	}
+	device.data.data.locationId = locationId;
+	device.heartbeatTTLMinutes = ttlMinutes;
+
+	// Make sure the location ID doesn't timeout before the heartbeat times out.
+	device.locationIdTTLMinutes = std::max(ttlMinutes, LOCATION_ID_TTL_MINUTES);
+
+	sendLocation(device);
+	return ERR_SUCCESS;
 }
 
 TrackedDevices::TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
@@ -184,10 +235,6 @@ cs_ret_code_t TrackedDevices::removeDevice() {
 
 
 bool TrackedDevices::hasAccess(TrackedDevice& device, uint8_t accessLevel) {
-	if (!isValidTTL(device)) {
-		// Device token timed out, so anyone is allowed to set a token for the device.
-		return true;
-	}
 	if (BLEutil::isBitSet(device.fieldsSet, BIT_POS_ACCESS_LEVEL) &&
 			(!EncryptionHandler::getInstance().allowAccess((EncryptionAccessLevel)device.data.accessLevel, (EncryptionAccessLevel)accessLevel))) {
 		return false;
@@ -239,7 +286,7 @@ void TrackedDevices::setAccessLevel(TrackedDevice& device, uint8_t accessLevel) 
 void TrackedDevices::setLocation(TrackedDevice& device, uint8_t locationId) {
 	device.data.data.locationId = locationId;
 	BLEutil::setBit(device.fieldsSet, BIT_POS_LOCATION);
-	device.locationIdTimeout = LOCATION_ID_TIMEOUT_MINUTES;
+	device.locationIdTTLMinutes = LOCATION_ID_TTL_MINUTES;
 }
 
 void TrackedDevices::setProfile(TrackedDevice& device, uint8_t profileId) {
@@ -290,19 +337,20 @@ void TrackedDevices::print(TrackedDevice& device) {
 #endif
 }
 
-
-
 void TrackedDevices::tickMinute() {
 	LOGTrackedDevicesDebug("tickMinute");
 	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
-		if (iter->locationIdTimeout != 0) {
-			iter->locationIdTimeout--;
-			if (iter->locationIdTimeout == 0) {
+		if (iter->locationIdTTLMinutes != 0) {
+			iter->locationIdTTLMinutes--;
+			if (iter->locationIdTTLMinutes == 0) {
 				iter->data.data.locationId = 0;
 			}
 		}
 		if (iter->data.data.timeToLiveMinutes != 0) {
 			iter->data.data.timeToLiveMinutes--;
+		}
+		if (iter->heartbeatTTLMinutes != 0) {
+			iter->heartbeatTTLMinutes--;
 		}
 		print(*iter);
 	}
@@ -310,7 +358,13 @@ void TrackedDevices::tickMinute() {
 	devices.remove_if([](const TrackedDevice& device) { return device.data.data.timeToLiveMinutes == 0; });
 }
 
-
+void TrackedDevices::tickSecond() {
+	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
+		if (isValidTTL(*iter) && iter->heartbeatTTLMinutes != 0) {
+			sendLocation(*iter);
+		}
+	}
+}
 
 void TrackedDevices::sendBackgroundAdv(TrackedDevice& device, uint8_t* macAddress, int8_t rssi) {
 	LOGTrackedDevicesVerbose("sendBackgroundAdv id=%u", device.data.data.deviceId);
@@ -331,6 +385,9 @@ void TrackedDevices::sendBackgroundAdv(TrackedDevice& device, uint8_t* macAddres
 void TrackedDevices::sendLocation(TrackedDevice& device) {
 	LOGTrackedDevicesVerbose("sendLocation id=%u", device.data.data.deviceId);
 	if (!allFieldsSet(device)) {
+		return;
+	}
+	if (device.data.data.flags.flags.ignoreForBehaviour) {
 		return;
 	}
 	TYPIFY(EVT_PROFILE_LOCATION) eventData;
@@ -393,6 +450,11 @@ void TrackedDevices::handleEvent(event_t& evt) {
 			evt.result.returnCode = handleUpdate(*data);
 			break;
 		}
+		case CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT: {
+			internal_tracked_device_heartbeat_packet_t* data = reinterpret_cast<TYPIFY(CMD_TRACKED_DEVICE_HEARTBEAT)*>(evt.data);
+			evt.result.returnCode = handleHeartbeat(*data);
+			break;
+		}
 		case CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER: {
 			TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* data = reinterpret_cast<TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)*>(evt.data);
 			handleMeshRegister(*data);
@@ -401,6 +463,11 @@ void TrackedDevices::handleEvent(event_t& evt) {
 		case CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN: {
 			TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* data = reinterpret_cast<TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)*>(evt.data);
 			handleMeshToken(*data);
+			break;
+		}
+		case CS_TYPE::EVT_MESH_TRACKED_DEVICE_HEARTBEAT: {
+			TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)* data = reinterpret_cast<TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)*>(evt.data);
+			handleMeshHeartbeat(*data);
 			break;
 		}
 		case CS_TYPE::EVT_MESH_TRACKED_DEVICE_LIST_SIZE: {
@@ -414,9 +481,13 @@ void TrackedDevices::handleEvent(event_t& evt) {
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {
-			if (--ticksLeft == 0) {
-				ticksLeft = TICKS_PER_MINUTES;
+			if (--ticksLeftMinute == 0) {
+				ticksLeftMinute = TICKS_PER_MINUTES;
 				tickMinute();
+			}
+			if (--ticksLeftSecond == 0) {
+				ticksLeftSecond = TICKS_PER_SECOND;
+				tickSecond();
 			}
 			break;
 		}

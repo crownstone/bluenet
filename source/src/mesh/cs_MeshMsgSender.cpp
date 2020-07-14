@@ -246,6 +246,24 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceToken(const cs_mesh_model_msg_devi
 	return addToQueue(item);
 }
 
+cs_ret_code_t MeshMsgSender::sendTrackedDeviceHeartbeat(const cs_mesh_model_msg_device_heartbeat_t* packet, uint8_t transmissions) {
+	LOGd("sendTrackedDeviceHeartbeat id=%u location=%u TTL=%u", packet->deviceId, packet->locationId, packet->ttlMinutes);
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = packet->deviceId;
+	item.metaData.type = CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT;
+	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
+	item.metaData.priority = false;
+	item.reliable = false;
+	item.broadcast = true;
+	item.msgPayload.len = sizeof(*packet);
+	item.msgPayload.data = (uint8_t*)packet;
+
+	// Remove old messages of same type, and device id, as only the latest token is of interest.
+	remFromQueue(item);
+	return addToQueue(item);
+}
+
 cs_ret_code_t MeshMsgSender::sendTrackedDeviceListSize(const cs_mesh_model_msg_device_list_size_t* packet, uint8_t transmissions) {
 	LOGd("sendTrackedDeviceListSize");
 
@@ -477,6 +495,11 @@ void MeshMsgSender::handleEvent(event_t & event) {
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN: {
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN)*)event.data;
 			sendTrackedDeviceToken(packet);
+			break;
+		}
+		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT: {
+			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT)*)event.data;
+			sendTrackedDeviceHeartbeat(packet);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE: {

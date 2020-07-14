@@ -102,6 +102,7 @@ private:
 	void handleCmdStateGet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdStateSet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdRegisterTrackedDevice   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdTrackedDeviceHeartbeat  (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdGetUptime               (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleMicroAppUpload             (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	

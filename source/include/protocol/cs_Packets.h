@@ -338,6 +338,13 @@ struct __attribute__((packed)) register_tracked_device_packet_t {
 
 typedef register_tracked_device_packet_t update_tracked_device_packet_t;
 
+struct __attribute__((packed)) tracked_device_heartbeat_packet_t {
+	uint16_t deviceId;
+	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE]; // Should match the token that's registered.
+	uint8_t locationId = 0;
+	uint8_t timeToLiveMinutes = 0; // When set, heartbeats will be simulated until timeout.
+};
+
 struct cs_mesh_iv_index_t {
 	// Same as net_flash_data_iv_index_t
     uint32_t iv_index;
