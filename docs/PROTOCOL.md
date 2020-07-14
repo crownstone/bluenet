@@ -342,6 +342,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
 69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) | Obtain debug info of the current behaviour state. | x
 70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | Register or update a device to be tracked. Error codes: ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | x | x | x
+71 | Tracked device heartbeat | [Tracked device heartbeat packet](#tracked_device_heartbeat_packet) | - | Let the crownstone know where a device is, similar to [background broadcasts](BROADCAST_PROTOCOL.md#background_broadcasts). Error codes: ERR_NOT_FOUND: no device with given device ID was registered. ERR_TIMEOUT: registered device is timed out. ERR_NO_ACCESS: wrong access level, or device token. | x | x | x
 80 | Get uptime | - | uint 32 | Time in seconds since boot. | x
 81 | Get ADC restarts | - | [ADC restarts packet](#adc_restarts_packet) | Number of ADC restarts since boot. | x
 82 | Get switch history | - | [Switch history packet](#switch_history_packet) | A history of why the switch state has changed. | x
@@ -681,7 +682,7 @@ Value | Name| Description
 
 <a name="power_samples_result_packet"></a>
 #### Power samples result packet
-
+background broadcast
 ![Power samples result packet](../docs/diagrams/power_samples_result_packet.png)
 
 Type | Name | Length | Description
@@ -712,6 +713,20 @@ int 8 | RSSI offset | 1 | Offset from standard signal strength.
 uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background_adv_flags).
 uint 24 | Device token | 3 | Token that will be advertised by the device.
 uint 16 | Time to live | 2 | Time in minutes after which the device token will be invalid.
+
+
+<a name="tracked_device_heartbeat_packet"></a>
+#### Tracked device heartbeat packet
+
+![Tracked device heartbeat packet](../docs/diagrams/tracked_device_heartbeat_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Device ID | 2 | Unique ID of the device.
+uint 8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
+uint 24 | Device token | 3 | Token that has been registered.
+uint 8 | Time to live | 1 | How long (in minutes) the crownstone assumes the device is at the given location, so should best be larger than the interval at which the heartbeat is sent. Setting this to 0 is similar to sending a single [background broadcast](BROADCAST_PROTOCOL.md#background_broadcasts).
+
 
 <a name="upload_microapp_packet"></a>
 #### Upload microapp
