@@ -206,7 +206,7 @@ public:
 	 *
 	 * @param[in] data            Data struct with state type, optional id, data, and size.
 	 * @param[in] mode            Indicates whether to set data in RAM, FLASH, or a combination of this.
-	 * @return                    Return code.
+	 * @return                    Return code. Can be ERR_SUCCESS_NO_CHANGE.
 	 */
 	cs_ret_code_t set(const cs_state_data_t & data, PersistenceMode mode = PersistenceMode::STRATEGY1);
 
