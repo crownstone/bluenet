@@ -291,7 +291,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	controlCmd.data = commandData;
 	controlCmd.size = length;
 
-	LOGCommandAdvDebug("adv cmd type=%u", type);
+	LOGCommandAdvDebug("adv cmd type=%u deviceId=%u accessLvl=%u", type, header.deviceToken, accessLevel);
 	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		LOGCommandAdvDebug("no access");
 		return true;
