@@ -465,15 +465,7 @@ void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const Encryption
 		return;
 	}
 	sun_time_t* payload = reinterpret_cast<sun_time_t*>(commandData.data);
-	if (payload->sunrise > 24*60*60 || payload->sunset > 24*60*60) {
-		LOGw("Invalid suntimes: rise=%u set=%u", payload->sunrise, payload->sunset);
-		result.returnCode = ERR_WRONG_PARAMETER;
-		return;
-	}
-	TYPIFY(STATE_SUN_TIME) sunTime = *payload;
-	cs_state_data_t stateData = cs_state_data_t(CS_TYPE::STATE_SUN_TIME, reinterpret_cast<uint8_t*>(&sunTime), sizeof(sunTime));
-	State::getInstance().setThrottled(stateData, SUN_TIME_THROTTLE_PERIOD_SECONDS);
-	result.returnCode = ERR_SUCCESS;
+	result.returnCode = SystemTime::setSunTimes(*payload);
 }
 
 void CommandHandler::handleCmdIncreaseTx(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {

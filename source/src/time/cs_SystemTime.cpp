@@ -18,6 +18,7 @@
 
 #include <test/cs_Test.h>
 
+#define LOGSystemTimeDebug   LOGnone
 #define LOGSystemTimeVerbose LOGnone
 
 // ============== Static members ==============
@@ -25,6 +26,9 @@
 uint32_t SystemTime::rtcTimeStamp = 0;
 uint32_t SystemTime::posixTimeStamp = 0;
 uint32_t SystemTime::uptime_sec = 0;
+
+uint16_t SystemTime::throttleSetTimeCountdownTicks = 0;
+uint16_t SystemTime::throttleSetSunTimesCountdownTicks = 0;
 
 app_timer_t SystemTime::appTimerData = {{0}};
 app_timer_id_t SystemTime::appTimerId = &appTimerData;
@@ -34,17 +38,17 @@ app_timer_id_t SystemTime::appTimerId = &appTimerData;
 // Init and start the timer.
 void SystemTime::init(){
 	Timer::getInstance().createSingleShot(
-        appTimerId, 
-        static_cast<app_timer_timeout_handler_t>(&SystemTime::tick));
+			appTimerId,
+			static_cast<app_timer_timeout_handler_t>(&SystemTime::tick));
 
 	scheduleNextTick();
 }
 
 void SystemTime::scheduleNextTick() {
-		Timer::getInstance().start(
-            appTimerId, 
-            HZ_TO_TICKS(SCHEDULER_UPDATE_FREQUENCY), 
-            nullptr);
+	Timer::getInstance().start(
+			appTimerId,
+			MS_TO_TICKS(TICK_TIME_MS),
+			nullptr);
 }
 
 void SystemTime::tick(void*) {
@@ -56,7 +60,7 @@ void SystemTime::tick(void*) {
 		if (posixTimeStamp != 0) {
 			// add 1s to posix time
 			posixTimeStamp++;
-			
+
 			// and store the new time
 			State::getInstance().set(CS_TYPE::STATE_TIME, &posixTimeStamp, sizeof(posixTimeStamp));
 
@@ -76,27 +80,67 @@ void SystemTime::tick(void*) {
 		++uptime_sec; 
 	}
 
+	if (throttleSetTimeCountdownTicks) {
+		--throttleSetTimeCountdownTicks;
+	}
+	if (throttleSetSunTimesCountdownTicks) {
+		--throttleSetSunTimesCountdownTicks;
+	}
+
 	scheduleNextTick();
 }
 
-void SystemTime::setTime(uint32_t time) {
+void SystemTime::setTime(uint32_t time, bool throttled) {
 	if (time == 0) {
 		return;
 	}
-	TimeOfDay t(time);
 
-    LOGi("Set time to %u %02d:%02d:%02d", time, t.h(), t.m(), t.s());
-    
-    uint32_t prevtime = posixTimeStamp;
+	if (throttled && throttleSetTimeCountdownTicks) {
+		LOGSystemTimeDebug("setTime throttled");
+		return;
+	}
+	throttleSetTimeCountdownTicks = THROTTLE_SET_TIME_TICKS;
+
+	TimeOfDay t(time);
+	LOGi("Set time to %u %02d:%02d:%02d", time, t.h(), t.m(), t.s());
+
+	uint32_t prevtime = posixTimeStamp;
 	posixTimeStamp = time;
 	rtcTimeStamp = RTC::getCount();
 
 	event_t event(
-        CS_TYPE::EVT_TIME_SET,
-        &prevtime,
-        sizeof(prevtime));
+			CS_TYPE::EVT_TIME_SET,
+			&prevtime,
+			sizeof(prevtime));
 
 	event.dispatch();
+}
+
+cs_ret_code_t SystemTime::setSunTimes(const sun_time_t& sunTimes, bool throttled) {
+	if (sunTimes.sunrise > 24*60*60 || sunTimes.sunset > 24*60*60) {
+		LOGw("Invalid suntimes: rise=%u set=%u", sunTimes.sunrise, sunTimes.sunset);
+		return ERR_WRONG_PARAMETER;
+	}
+
+	if (throttled && throttleSetSunTimesCountdownTicks) {
+		LOGSystemTimeDebug("setSunTimes throttled");
+		return ERR_BUSY;
+	}
+	throttleSetSunTimesCountdownTicks = THROTTLE_SET_SUN_TIMES_TICKS;
+
+	LOGSystemTimeDebug("setSunTimes rise=%u set=%u", sunTimes.sunrise, sunTimes.sunset);
+
+	TYPIFY(STATE_SUN_TIME) stateSunTimes = sunTimes;
+	cs_state_data_t stateData = cs_state_data_t(CS_TYPE::STATE_SUN_TIME, reinterpret_cast<uint8_t*>(&stateSunTimes), sizeof(stateSunTimes));
+	cs_ret_code_t retCode = State::getInstance().setThrottled(stateData, SUN_TIME_THROTTLE_PERIOD_SECONDS);
+	switch (retCode) {
+		case ERR_SUCCESS:
+		case ERR_WAIT_FOR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE:
+			return ERR_SUCCESS;
+		default:
+			return retCode;
+	}
 }
 
 uint8_t dummy_time = 0xae;
@@ -169,15 +213,15 @@ void SystemTime::handleEvent(event_t & event) {
 }
 
 uint32_t SystemTime::posix(){
-    return posixTimeStamp;
+	return posixTimeStamp;
 }
 
 DayOfWeek SystemTime::day(){
-    return now().dayOfWeek();
+	return now().dayOfWeek();
 }
 
 Time SystemTime::now(){
-     return posix();
+	return posix();
 }
 
 

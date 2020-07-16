@@ -267,8 +267,8 @@ struct __attribute__((__packed__)) factory_reset_message_payload_t {
 };
 
 struct __attribute__((packed)) sun_time_t {
-	uint32_t sunrise = 8*60*60;
-	uint32_t sunset = 19*60*60;
+	uint32_t sunrise = 8*60*60; // Time in seconds after midnight that the sun rises.
+	uint32_t sunset = 19*60*60; // Time in seconds after midnight that the sun sets.
 };
 
 /**
