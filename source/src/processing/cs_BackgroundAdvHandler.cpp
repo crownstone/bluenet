@@ -54,18 +54,19 @@ void BackgroundAdvertisementHandler::parseServicesAdvertisement(scanned_device_t
 
 	// Loop over 16 bit service UUIDs.
 	for (uint8_t i = 0; i < serviceUuids.len / 2; ++i) {
-		LOGBackgroundAdvVerbose("uuid=%u %u", serviceUuids.data[2 * i + 0], serviceUuids.data[2 * i + 1]);
+		LOGBackgroundAdvVerbose("uuid=%u %u (0x%02X 0x%02X)", serviceUuids.data[2 * i + 0], serviceUuids.data[2 * i + 1], serviceUuids.data[2 * i + 0], serviceUuids.data[2 * i + 1]);
 		uint8_t index = serviceUuids.data[2 * i + 1];
 		uint8_t bitPos = _uuidMap[index];
 		if (bitPos == 255) {
 			LOGBackgroundAdvVerbose("invalid bit pos %u for uuid %u", bitPos, index);
 		}
 		else {
+			LOGBackgroundAdvVerbose("bit pos %u --> ind=%u shift=%u", bitPos, bitPos / 64, bitPos % 64);
 			_lastBitmask[bitPos / 64] |= ((uint64_t)1) << (bitPos % 64);
 		}
 	}
 
-	LOGBackgroundAdvVerbose("store bitmask 0x%X%X 0x%X%X", (uint32_t)(_lastBitmask[0] >> 32), (uint32_t)(_lastBitmask[0]), (uint32_t)(_lastBitmask[1] >> 32), (uint32_t)(_lastBitmask[1]));
+	LOGBackgroundAdvVerbose("store bitmask 0x%08X%08X 0x%08X%08X", (uint32_t)(_lastBitmask[0] >> 32), (uint32_t)(_lastBitmask[0]), (uint32_t)(_lastBitmask[1] >> 32), (uint32_t)(_lastBitmask[1]));
 }
 
 void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
@@ -118,13 +119,13 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 				((uint64_t)servicesMask[5+8] << (2*8)) +
 				((uint64_t)servicesMask[6+8] << (1*8)) +
 				((uint64_t)servicesMask[7+8] << (0*8));
-	LOGBackgroundAdvVerbose("left=0x%X%X right=0x%X%X", (uint32_t)(left >> 32), (uint32_t)(left), (uint32_t)(right >> 32), (uint32_t)(right));
+	LOGBackgroundAdvVerbose("left=0x%08X%08X right=0x%08X%08X", (uint32_t)(left >> 32), (uint32_t)(left), (uint32_t)(right >> 32), (uint32_t)(right));
 
 	if (memcmp(_lastMacAddress, scannedDevice->address, MAC_ADDRESS_LEN) == 0) {
 		// TODO: make sure the right bits go to the right place.
 		left |= _lastBitmask[1];
 		right |= _lastBitmask[0];
-		LOGBackgroundAdvVerbose("Use last bitmask left=0x%X%X right=0x%X%X", (uint32_t)(left >> 32), (uint32_t)(left), (uint32_t)(right >> 32), (uint32_t)(right));
+		LOGBackgroundAdvVerbose("Use last bitmask left=0x%08X%08X right=0x%08X%08X", (uint32_t)(left >> 32), (uint32_t)(left), (uint32_t)(right >> 32), (uint32_t)(right));
 	}
 
 	// Clear any cached bitmask.
@@ -139,7 +140,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	uint64_t part2 = ((left & 0x3FFFFF) << 20) | ((right >> (64-20)) & 0x0FFFFF); // Last 64-42=22 bits from left, and first 42−(64−42)=20 bits from right.
 	uint64_t part3 = (right >> 2) & 0x03FFFFFFFFFF; // Bits 21-62 from right.
 	uint64_t result = ((part1 & part2) | (part2 & part3) | (part1 & part3)); // The majority vote
-	LOGBackgroundAdvVerbose("part1=0x%X%X part2=0x%X%X part3=0x%X%X result=0x%X%X",
+	LOGBackgroundAdvVerbose("part1=0x%08X%08X part2=0x%08X%08X part3=0x%08X%08X result=0x%08X%08X",
 			(uint32_t)(part1 >> 32), (uint32_t)(part1),
 			(uint32_t)(part2 >> 32), (uint32_t)(part2),
 			(uint32_t)(part3 >> 32), (uint32_t)(part3),
