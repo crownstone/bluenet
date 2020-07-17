@@ -61,7 +61,7 @@ void BackgroundAdvertisementHandler::parseServicesAdvertisement(scanned_device_t
 			LOGBackgroundAdvVerbose("invalid bit pos %u for uuid %u", bitPos, index);
 		}
 		else {
-			_lastBitmask[bitPos / 64] |= 1 << (bitPos % 64);
+			_lastBitmask[bitPos / 64] |= ((uint64_t)1) << (bitPos % 64);
 		}
 	}
 
