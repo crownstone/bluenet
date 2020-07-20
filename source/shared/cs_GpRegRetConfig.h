@@ -14,7 +14,7 @@
  *
  * However, we do use NRF_BL_DFU_ENTER_METHOD_GPREGRET in the bootloader once it decided to go into DFU mode,
  * to avoid modifications to nrf_bootloader.c.
- * This means that if GPREGRET == 1011 0001 (counter=11, brownout=true, watchdog_timeout=true), the bootloader will also go into DFU mode.
+ * This means that if GPREGRET == 1011 0001 (counter=17, brownout=true, storage_recovered=true), the bootloader will also go into DFU mode.
  *
  * We use 5 bits of GPREGRET as counter. Each boot, the bootloader increases the count by 1.
  * Once the counter is at its max, the bootloader will go into DFU mode.
