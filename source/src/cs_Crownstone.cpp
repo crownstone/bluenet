@@ -318,13 +318,17 @@ void Crownstone::initDrivers1() {
 
 		LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
 
-		uint32_t resetReason;
-		sd_power_reset_reason_get(&resetReason);
-		LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u", resetReason,
-				(resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
-				(resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
-				(resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
-				(resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
+		// Store reset reason.
+		sd_power_reset_reason_get(&_resetReason);
+		LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u", _resetReason,
+				(_resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
+				(_resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
+				(_resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
+				(_resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
+
+		// Store gpregret.
+		_gpregret[0] = GpRegRet::getValue(GpRegRet::GPREGRET);
+		_gpregret[1] = GpRegRet::getValue(GpRegRet::GPREGRET2);
 
 		if (GpRegRet::isFlagSet(GpRegRet::FLAG_STORAGE_RECOVERED)) {
 			_setStateValuesAfterStorageRecover = true;
@@ -829,6 +833,49 @@ void Crownstone::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_MESH_PAGES_ERASED: {
 			LOGi("Mesh pages erased, reboot");
 			sd_nvic_SystemReset();
+			break;
+		}
+		case CS_TYPE::CMD_GET_SCHEDULER_MIN_FREE: {
+			LOGi("Get scheduler min free");
+			uint16_t minFree;
+			if (event.result.buf.len < sizeof(minFree)) {
+				event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+				break;
+			}
+			minFree = SCHED_QUEUE_SIZE - app_sched_queue_utilization_get();
+			memcpy(event.result.buf.data, &minFree, sizeof(minFree));
+			event.result.dataSize = sizeof(minFree);
+			event.result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case CS_TYPE::CMD_GET_RESET_REASON: {
+			LOGi("Get reset reason");
+			if (event.result.buf.len < sizeof(_resetReason)) {
+				event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+				break;
+			}
+			memcpy(event.result.buf.data, &_resetReason, sizeof(_resetReason));
+			event.result.dataSize = sizeof(_resetReason);
+			event.result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case CS_TYPE::CMD_GET_GPREGRET: {
+			LOGi("Get GPREGRET");
+			cs_gpregret_result_t gpregret;
+			if (event.result.buf.len < sizeof(gpregret)) {
+				event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+				break;
+			}
+			TYPIFY(CMD_GET_GPREGRET) index = *((TYPIFY(CMD_GET_GPREGRET)*)event.data);
+			if (index > sizeof(_gpregret) / sizeof(_gpregret[0])) {
+				event.result.returnCode = ERR_WRONG_PARAMETER;
+				break;
+			}
+			gpregret.index = index;
+			gpregret.value = _gpregret[index];
+			memcpy(event.result.buf.data, &(gpregret), sizeof(gpregret));
+			event.result.dataSize = sizeof(gpregret);
+			event.result.returnCode = ERR_SUCCESS;
 			break;
 		}
 		default:

@@ -385,8 +385,13 @@ struct __attribute__((packed)) cs_uicr_data_t {
 };
 
 struct __attribute__((packed)) cs_adc_restarts_t {
-	uint32_t count = 0; // Number or ADC restarts since boot.
+	uint32_t count = 0; // Number of ADC restarts since boot.
 	uint32_t lastTimestamp = 0; // Timestamp of last ADC restart.
+};
+
+struct __attribute__((packed)) cs_adc_channel_swaps_t {
+	uint32_t count = 0; // Number of detected ADC channel swaps since boot.
+	uint32_t lastTimestamp = 0; // Timestamp of last detected ADC channel swap.
 };
 
 enum PowerSamplesType {
@@ -431,6 +436,11 @@ struct __attribute__((packed)) cs_switch_history_item_t {
 		state(switchState),
 		source(source)
 	{}
+};
+
+struct __attribute__((packed)) cs_gpregret_result_t {
+	uint8_t index;                // Which GPREGRET
+	uint32_t value;               // The value of this GPREGRET
 };
 
 

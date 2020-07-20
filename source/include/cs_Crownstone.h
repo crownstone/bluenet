@@ -323,6 +323,12 @@ private:
 	OperationMode _operationMode;
 	OperationMode _oldOperationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
+	//! Store gpregret as it was on boot.
+	uint32_t _gpregret[2] = {0};
+
+	//! Store reset reason as it was on boot.
+	uint32_t _resetReason = 0;
+
 	/**
 	 * If storage was recovered by erasing all pages, we want to set some state variables
 	 * different than after a factory reset.

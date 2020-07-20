@@ -174,6 +174,8 @@ private:
 	buffer_id_t _lastFilteredBufIndex = 0;
 
 	cs_adc_restarts_t _adcRestarts;
+	cs_adc_channel_swaps_t _adcChannelSwaps;
+
 
 	/** Initialize the moving averages
 	 */

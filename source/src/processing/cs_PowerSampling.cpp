@@ -223,6 +223,16 @@ void PowerSampling::handleEvent(event_t & event) {
 		event.result.returnCode = ERR_SUCCESS;
 		break;
 	}
+	case CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS: {
+		if (event.result.buf.len < sizeof(_adcChannelSwaps)) {
+			event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+			return;
+		}
+		memcpy(event.result.buf.data, &_adcChannelSwaps, sizeof(_adcChannelSwaps));
+		event.result.dataSize = sizeof(_adcChannelSwaps);
+		event.result.returnCode = ERR_SUCCESS;
+		break;
+	}
 	case CS_TYPE::EVT_ADC_RESTARTED:
 		_adcRestarts.count++;
 		_adcRestarts.lastTimestamp = SystemTime::posix();
@@ -850,6 +860,8 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 
 	// Check if data makes sense: RMS voltage should be about 230V.
 	if (voltageRmsMilliVolt != 0 && (voltageRmsMilliVolt < 200*1000 || 250*1000 < voltageRmsMilliVolt)) {
+		_adcChannelSwaps.count++;
+		_adcChannelSwaps.lastTimestamp = SystemTime::posix();
 		LOGw("voltageRmsMilliVolt=%u", voltageRmsMilliVolt);
 		return;
 	}

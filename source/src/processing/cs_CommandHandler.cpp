@@ -120,6 +120,10 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_GET_ADC_RESTARTS:
 		case CTRL_CMD_GET_SWITCH_HISTORY:
 		case CTRL_CMD_GET_POWER_SAMPLES:
+		case CTLR_CMD_GET_SCHEDULER_MIN_FREE:
+		case CTRL_CMD_GET_RESET_REASON:
+		case CTRL_CMD_GET_GPREGRET:
+		case CTRL_CMD_GET_ADC_CHANNEL_SWAPS:
 		case CTRL_CMD_MICROAPP_UPLOAD:
 			LOGd("cmd=%u lvl=%u", type, accessLevel);
 			break;
@@ -206,6 +210,14 @@ void CommandHandler::handleCommand(
 		return dispatchEventForCommand(CS_TYPE::CMD_GET_SWITCH_HISTORY, commandData, source, result);
 	case CTRL_CMD_GET_POWER_SAMPLES:
 		return dispatchEventForCommand(CS_TYPE::CMD_GET_POWER_SAMPLES, commandData, source, result);
+	case CTLR_CMD_GET_SCHEDULER_MIN_FREE:
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_SCHEDULER_MIN_FREE, commandData, source, result);
+	case CTRL_CMD_GET_RESET_REASON:
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_RESET_REASON, commandData, source, result);
+	case CTRL_CMD_GET_GPREGRET:
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_GPREGRET, commandData, source, result);
+	case CTRL_CMD_GET_ADC_CHANNEL_SWAPS:
+		return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS, commandData, source, result);
 	case CTRL_CMD_MICROAPP_UPLOAD:
 		return handleMicroAppUpload(commandData, accessLevel, result);
 	case CTRL_CMD_UNKNOWN:
@@ -913,6 +925,10 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_GET_ADC_RESTARTS:
 		case CTRL_CMD_GET_SWITCH_HISTORY:
 		case CTRL_CMD_GET_POWER_SAMPLES:
+		case CTLR_CMD_GET_SCHEDULER_MIN_FREE:
+		case CTRL_CMD_GET_RESET_REASON:
+		case CTRL_CMD_GET_GPREGRET:
+		case CTRL_CMD_GET_ADC_CHANNEL_SWAPS:
 		case CTRL_CMD_MICROAPP_UPLOAD:
 			return ADMIN;
 		case CTRL_CMD_UNKNOWN:

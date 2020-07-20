@@ -52,7 +52,10 @@ enum CommandHandlerTypes {
 	CTRL_CMD_GET_ADC_RESTARTS            = 81,
 	CTRL_CMD_GET_SWITCH_HISTORY          = 82,
 	CTRL_CMD_GET_POWER_SAMPLES           = 83,
-//	CTLR_CMD_GET_CPU_STATS               = 84,
+	CTLR_CMD_GET_SCHEDULER_MIN_FREE      = 84,
+	CTRL_CMD_GET_RESET_REASON            = 85,
+	CTRL_CMD_GET_GPREGRET                = 86,
+	CTRL_CMD_GET_ADC_CHANNEL_SWAPS       = 87,
 
 	CTRL_CMD_MICROAPP_UPLOAD             = 90,
 
