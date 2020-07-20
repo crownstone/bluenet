@@ -93,7 +93,7 @@ private:
 	// Time shouldn't differ more than 1 minute.
 	static constexpr uint16_t THROTTLE_SET_TIME_TICKS = (60 * 1000 / TICK_TIME_MS);
 
-	// Sun time shouldn't differ more than 5 minutes.
-	static constexpr uint16_t THROTTLE_SET_SUN_TIMES_TICKS = (5 * 60 * 1000 / TICK_TIME_MS);
+	// Sun time shouldn't differ more than 30 minutes.
+	static constexpr uint16_t THROTTLE_SET_SUN_TIMES_TICKS = (30 * 60 * 1000 / TICK_TIME_MS);
 };
 
