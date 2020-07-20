@@ -344,13 +344,13 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | Register or update a device to be tracked. Error codes: ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | x | x | x
 71 | Tracked device heartbeat | [Tracked device heartbeat packet](#tracked_device_heartbeat_packet) | - | Let the crownstone know where a device is, similar to [background broadcasts](BROADCAST_PROTOCOL.md#background_broadcasts). Error codes: ERR_NOT_FOUND: no device with given device ID was registered. ERR_TIMEOUT: registered device is timed out. ERR_NO_ACCESS: wrong access level, or device token. | x | x | x
 80 | Get uptime | - | uint 32 | Time in seconds since boot. | x
-81 | Get ADC restarts | - | [ADC restarts packet](#adc_restarts_packet) | Number of ADC restarts since boot. | x
-82 | Get switch history | - | [Switch history packet](#switch_history_packet) | A history of why the switch state has changed. | x
-83 | Get power samples | [Request power samples](#power_samples_request_packet) | [Power samples](#power_samples_result_packet) | Get the current or voltage samples of certain events. | x
-84 | Get min scheduler free space | - | uint 16 | Get minimum queue space left of app scheduler observed so far. A lower number indicates the CPU has been busy a lot.
-85 | Get last reset reason | - | uint 32 | Contents of POWER->RESETREAS as it was on boot. Bitmask with bit 0=ResetPin, 1=Watchdog, 2=SoftReset, 3=Lockup, 16=GPIO, 17=LPComp, 18=DebugInterface, 19=NFC.
-86 | Get GPREGRET | Index (uint8) | [Gpregret packet](#gpregret_result_packet) | Get the Nth general purpose retention register as it was on boot.
-87 | Get ADC channel swaps | - | [ADC channel swaps packet](#adc_channel_swaps_packet) | Get the number of detected ADC channel swaps.
+81 | Get ADC restarts | - | [ADC restarts packet](#adc_restarts_packet) | **Firmware debug.** Number of ADC restarts since boot. | x
+82 | Get switch history | - | [Switch history packet](#switch_history_packet) | **Firmware debug.** A history of why the switch state has changed. | x
+83 | Get power samples | [Request power samples](#power_samples_request_packet) | [Power samples](#power_samples_result_packet) | **Firmware debug.** Get the current or voltage samples of certain events. | x
+84 | Get min scheduler free space | - | uint 16 | **Firmware debug.** Get minimum queue space left of app scheduler observed so far. A lower number indicates the CPU has been busy a lot. | x
+85 | Get last reset reason | - | uint 32 | **Firmware debug.** Contents of POWER->RESETREAS as it was on boot. Bitmask with bit 0=ResetPin, 1=Watchdog, 2=SoftReset, 3=Lockup, 16=GPIO, 17=LPComp, 18=DebugInterface, 19=NFC. | x
+86 | Get GPREGRET | Index (uint8) | [Gpregret packet](#gpregret_result_packet) | **Firmware debug.** Get the Nth general purpose retention register as it was on boot. | x
+87 | Get ADC channel swaps | - | [ADC channel swaps packet](#adc_channel_swaps_packet) | **Firmware debug.** Get the number of detected ADC channel swaps. | x
 90 | Upload microapp | [Upload microapp packet](#upload_microapp_packet) | [Microapp result packet](#microapp_result_packet) | Upload microapp. | x
 
 <a name="setup_packet"></a>
