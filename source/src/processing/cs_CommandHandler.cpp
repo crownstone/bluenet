@@ -827,6 +827,9 @@ void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const
 
 void CommandHandler::handleCmdTrackedDeviceHeartbeat(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "tracked device heartbeat");
+	result.returnCode = ERR_NOT_IMPLEMENTED;
+	return;
+
 	if (commandData.len != sizeof(tracked_device_heartbeat_packet_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
@@ -858,6 +861,9 @@ void CommandHandler::handleCmdGetUptime(cs_data_t commandData, const EncryptionA
 
 void CommandHandler::handleMicroAppUpload(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "microapp upload");
+	result.returnCode = ERR_NOT_IMPLEMENTED;
+	return;
+
 	if (commandData.len != sizeof(microapp_upload_packet_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
