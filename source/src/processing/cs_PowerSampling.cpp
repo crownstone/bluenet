@@ -145,6 +145,16 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	_adcConfig.currentDifferential = true;
 	_adcConfig.voltageDifferential = true;
 
+	// Set last softfuse header data.
+	_lastSoftfuse.type = POWER_SAMPLES_TYPE_SOFTFUSE;
+	_lastSoftfuse.index = 0;
+	_lastSoftfuse.count = 0;
+	_lastSoftfuse.unixTimestamp = 0;
+//	_lastSoftfuse.delayUs = 0;
+//	_lastSoftfuse.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
+//	_lastSoftfuse.offset = 0;
+//	_lastSoftfuse.multiplier = _currentMultiplier;
+
 	EventDispatcher::getInstance().addListener(this);
 
 #ifdef TEST_PIN
