@@ -4,6 +4,7 @@
  */
 
 #include <common/cs_Handlers.h>
+#include <drivers/cs_GpRegRet.h>
 #include <drivers/cs_RTC.h>
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
@@ -72,9 +73,14 @@ void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
 	LOGInterruptLevel("soc evt int=%u", BLEutil::getInterruptLevel());
 
     switch(evt_id) {
+    case NRF_EVT_POWER_FAILURE_WARNING:
+    	// Set brownout flag, so next boot we know the cause.
+    	// Only works when we reset as well?
+    	// Only works when softdevice handler dispatch model is interrupt?
+    	GpRegRet::setFlag(GpRegRet::FLAG_BROWNOUT);
+    	// Fall through
 	case NRF_EVT_FLASH_OPERATION_SUCCESS:
-	case NRF_EVT_FLASH_OPERATION_ERROR:
-	case NRF_EVT_POWER_FAILURE_WARNING: {
+	case NRF_EVT_FLASH_OPERATION_ERROR: {
 //		uint32_t gpregret_id = 0;
 //		uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
 //		// NOTE: do not clear the gpregret register, this way
