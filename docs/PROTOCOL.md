@@ -349,7 +349,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 83 | Get power samples | [Request power samples](#power_samples_request_packet) | [Power samples](#power_samples_result_packet) | **Firmware debug.** Get the current or voltage samples of certain events. | x
 84 | Get min scheduler free space | - | uint 16 | **Firmware debug.** Get minimum queue space left of app scheduler observed so far. A lower number indicates the CPU has been busy a lot. | x
 85 | Get last reset reason | - | uint 32 | **Firmware debug.** Contents of POWER->RESETREAS as it was on boot. Bitmask with bit 0=ResetPin, 1=Watchdog, 2=SoftReset, 3=Lockup, 16=GPIO, 17=LPComp, 18=DebugInterface, 19=NFC. | x
-86 | Get GPREGRET | Index (uint8) | [Gpregret packet](#gpregret_result_packet) | **Firmware debug.** Get the Nth general purpose retention register as it was on boot. | x
+86 | Get GPREGRET | Index (uint8) | [Gpregret packet](#gpregret_result_packet) | **Firmware debug.** Get the Nth general purpose retention register as it was on boot. There are currently 2 registers. | x
 87 | Get ADC channel swaps | - | [ADC channel swaps packet](#adc_channel_swaps_packet) | **Firmware debug.** Get the number of detected ADC channel swaps. | x
 90 | Upload microapp | [Upload microapp packet](#upload_microapp_packet) | [Microapp result packet](#microapp_result_packet) | Upload microapp. | x
 
