@@ -827,8 +827,8 @@ void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const
 
 void CommandHandler::handleCmdTrackedDeviceHeartbeat(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "tracked device heartbeat");
-	result.returnCode = ERR_NOT_IMPLEMENTED;
-	return;
+//	result.returnCode = ERR_NOT_IMPLEMENTED;
+//	return;
 
 	if (commandData.len != sizeof(tracked_device_heartbeat_packet_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
