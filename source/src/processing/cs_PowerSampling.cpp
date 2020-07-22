@@ -555,11 +555,13 @@ void PowerSampling::filter(buffer_id_t bufIndexIn, buffer_id_t bufIndexOut, chan
 	for (uint16_t i = 0; i < _filterParams->half; ++i, ++j) {
 		_inputSamples->at(j) = padded_value;
 	}
+
 	// Copy samples from buffer to input vector
 	uint8_t channel_length = InterleavedBuffer::getInstance().getChannelLength();
-	for (int i = 0; i < channel_length - 1; ++i, ++j) {
+	for (int i = 0; i < channel_length; ++i, ++j) {
 		_inputSamples->at(j) = InterleavedBuffer::getInstance().getValue(bufIndexIn, channel_id, i);
 	}
+
 	// Pad the end of the buffer with the last sample in the buffer
 	padded_value = InterleavedBuffer::getInstance().getValue(bufIndexIn, channel_id, channel_length - 1);
 	for (uint16_t i = 0; i < _filterParams->half; ++i, ++j) {
@@ -570,7 +572,7 @@ void PowerSampling::filter(buffer_id_t bufIndexIn, buffer_id_t bufIndexOut, chan
 	sort_median(*_filterParams, *_inputSamples, *_outputSamples);
 
 	// Copy the result back into the buffer
-	for (int i = 0; i < InterleavedBuffer::getInstance().getChannelLength() - 1; ++i) {
+	for (int i = 0; i < InterleavedBuffer::getInstance().getChannelLength(); ++i) {
 		InterleavedBuffer::getInstance().setValue(bufIndexOut, channel_id, i, _outputSamples->at(i));
 	}
 }
