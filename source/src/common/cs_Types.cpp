@@ -190,6 +190,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_GET_GPREGRET:
 	case CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 	case CS_TYPE::EVT_MICROAPP:
 		return csType;
@@ -566,6 +567,8 @@ size16_t TypeSize(CS_TYPE const & type){
 		return 0;
 	case CS_TYPE::EVT_GENERIC_TEST:
 		return 0;
+	case CS_TYPE::CMD_TEST_SET_TIME:
+		return sizeof(TYPIFY(CMD_TEST_SET_TIME));
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 		return sizeof(TYPIFY(CMD_MICROAPP_UPLOAD));
 	case CS_TYPE::EVT_MICROAPP:
@@ -757,6 +760,7 @@ const char* TypeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_GET_GPREGRET: return "CMD_GET_GPREGRET";
 	case CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS: return "CMD_GET_ADC_CHANNEL_SWAPS";
 	case CS_TYPE::EVT_GENERIC_TEST: return "EVT_GENERIC_TEST";
+	case CS_TYPE::CMD_TEST_SET_TIME: return "CMD_TEST_SET_TIME";
 	case CS_TYPE::CMD_MICROAPP_UPLOAD: return "CMD_MICROAPP_UPLOAD";
 	case CS_TYPE::EVT_MICROAPP: return "EVT_MICROAPP";
 	}
@@ -937,6 +941,7 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::CMD_GET_GPREGRET:
 	case CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 	case CS_TYPE::EVT_MICROAPP:
 		return false;
@@ -1136,6 +1141,7 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::CMD_GET_GPREGRET:
 	case CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 	case CS_TYPE::EVT_MICROAPP:
 		return true;
@@ -1326,6 +1332,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::CMD_GET_GPREGRET:
 	case CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 	case CS_TYPE::EVT_MICROAPP:
 		return NO_ONE;
@@ -1516,6 +1523,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_GET_GPREGRET:
 	case CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS:
 	case CS_TYPE::EVT_GENERIC_TEST:
+	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:
 	case CS_TYPE::EVT_MICROAPP:
 		return NO_ONE;

@@ -172,6 +172,12 @@ void SystemTime::handleEvent(event_t & event) {
 			TEST_PUSH_D(this, posixTimeStamp);
 			break;
 		}
+		case CS_TYPE::CMD_TEST_SET_TIME: {
+			LOGd("set test time");
+			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data), false);
+			TEST_PUSH_D(this, posixTimeStamp);
+			break;
+		}
 		case CS_TYPE::STATE_SUN_TIME: {
 			// Sunrise/sunset adjusted. No need to do anything as it is already persisted.
 			break;

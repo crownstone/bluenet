@@ -39,6 +39,7 @@ enum TypeBases {
 	InternalBaseBehaviour = InternalBase + 170,
 	InternalBaseLocalisation = InternalBase + 190,
 	InternalBaseSystem = InternalBase + 210,
+	InternalBaseTests = 0xF000,
 };
 
 /** Cast to underlying type.
@@ -316,7 +317,8 @@ enum class CS_TYPE: uint16_t {
 	CMD_MICROAPP_UPLOAD,                              // MicroApp upload (e.g. Arduino code).
 	EVT_MICROAPP,                                     // MicroApp event (e.g. write done)
 
-	EVT_GENERIC_TEST= 0xFFFF,                         // Can be used by the python test python lib for ad hoc tests during development.
+	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
+	EVT_GENERIC_TEST = 0xFFFF,                        // Can be used by the python test python lib for ad hoc tests during development.
 
 };
 
@@ -539,6 +541,7 @@ typedef uint8_t TYPIFY(CMD_GET_GPREGRET);
 typedef void TYPIFY(CMD_GET_ADC_CHANNEL_SWAPS);
 typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP_UPLOAD);
 typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
+typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *
