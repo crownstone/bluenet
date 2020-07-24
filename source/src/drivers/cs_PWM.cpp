@@ -505,8 +505,11 @@ void PWM::_handleInterrupt() {
 	writeCC(PERIOD_CHANNEL_IDX, _adjustedMaxTickVal);
 
 	// Decouple from zero crossing interrupt
-	uint32_t errorCode = app_sched_event_put(NULL, 0, onTimerEnd);
-	APP_ERROR_CHECK(errorCode);
+	uint16_t schedulerSpace = app_sched_queue_space_get();
+	if (schedulerSpace > 10) {
+		uint32_t errorCode = app_sched_event_put(NULL, 0, onTimerEnd);
+		APP_ERROR_CHECK(errorCode);
+	}
 
 //	// Don't stop timer on end of period anymore, and start the timer again
 //	nrf_timer_shorts_disable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
