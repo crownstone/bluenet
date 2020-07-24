@@ -626,7 +626,7 @@ uint32 | Timestamp | 4 | Unix timestamp of the last detected ADC channel swap.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Which GPREGRET.
-uint32 | Value | 4 | Value of this GPREGRET. For index 0: bits 0-4 are used to count resets, bit 5 is set on brownout, bit 6 is set to go to DFU mode, bit 7 is set after storage was recovered.
+uint32 | Value | 4 | Value of this GPREGRET. For index 0: bits 0-4 are used to count resets, bit 5 is set on brownout (doesn't work yet), bit 6 is set to go to DFU mode, bit 7 is set after storage was recovered.
 
 
 <a name="switch_history_packet"></a>
