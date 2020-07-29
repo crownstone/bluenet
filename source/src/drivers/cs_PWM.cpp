@@ -119,10 +119,10 @@ uint32_t PWM::init(const pwm_config_t& config) {
 }
 
 uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
-	LOGd("Configure channel %u as pin %u", channel, _config.channels[channel].pin);
+	LOGd("Configure channel %u as pin %u", channel, config.pin);
 
 	// Start off
-	nrf_gpio_pin_write(_config.channels[channel].pin, _config.channels[channel].inverted ? 1 : 0);
+	nrf_gpio_pin_write(config.pin, config.inverted ? 1 : 0);
 
 	// Configure GPIOTE
 	_gpioteInitStatesOn[channel] = config.inverted ? NRF_GPIOTE_INITIAL_VALUE_LOW : NRF_GPIOTE_INITIAL_VALUE_HIGH;
