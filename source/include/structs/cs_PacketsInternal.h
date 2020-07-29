@@ -41,8 +41,8 @@ struct cs_data_t {
 	cs_buffer_size_t len = 0;      /** < Length of data. */
 
 	cs_data_t():
-		data(),
-		len()
+		data(NULL),
+		len(0)
 	{}
 	cs_data_t(buffer_ptr_t buf, cs_buffer_size_t size):
 		data(buf),
