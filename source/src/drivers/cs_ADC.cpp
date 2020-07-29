@@ -651,7 +651,7 @@ void ADC::setZeroCrossingCallback(adc_zero_crossing_cb_t callback) {
 }
 
 void ADC::enableZeroCrossingInterrupt(channel_id_t channel, int32_t zeroVal) {
-	LOGv("enable zero chan=%u zero=%i", channel, zeroVal);
+	LOGd("enable zero chan=%u zero=%i", channel, zeroVal);
 	_zeroValue = zeroVal;
 	_zeroCrossingChannel = channel;
 	_eventLimitLow = getLimitLowEvent(_zeroCrossingChannel);
