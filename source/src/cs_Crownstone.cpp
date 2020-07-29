@@ -65,7 +65,15 @@ extern "C" {
 /****************************************************** Preamble *******************************************************/ 
 
 // Define test pin to enable gpio debug.
-#define TEST_PIN 18
+//#define CS_TEST_PIN 18
+
+#ifdef CS_TEST_PIN
+	#ifdef DEBUG
+		#pragma message("Crownstone test pin enabled")
+	#else
+		#warning "Crownstone test pin enabled"
+	#endif
+#endif
 
 TYPIFY(EVT_TICK) Crownstone::_tickCount = 0;
 
@@ -924,9 +932,9 @@ void printBootloaderInfo() {
  *********************************************************************************************************************/
 
 int main() {
-#ifdef TEST_PIN
-	nrf_gpio_cfg_output(TEST_PIN);
-	nrf_gpio_pin_clear(TEST_PIN);
+#ifdef CS_TEST_PIN
+	nrf_gpio_cfg_output(CS_TEST_PIN);
+	nrf_gpio_pin_clear(CS_TEST_PIN);
 #endif
 
 	// this enabled the hard float, without it, we get a hardfault

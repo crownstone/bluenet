@@ -31,6 +31,14 @@
 //#define TEST_PIN_INT_END    25
 
 
+#if defined(TEST_PIN_ZERO_CROSS) || defined(TEST_PIN_TIMEOUT) || defined(TEST_PIN_START) || defined(TEST_PIN_STOP) || defined(TEST_PIN_PROCESS) || defined(TEST_PIN_INT_END)
+	#ifdef DEBUG
+		#pragma message("ADC test pin enabled")
+	#else
+		#warning "ADC test pin enabled"
+	#endif
+#endif
+
 // Defines specific for implementation
 #define LIMIT_LOW_DISABLED  (-2048) // min adc value
 #define LIMIT_HIGH_DISABLED (4095)  // max adc value

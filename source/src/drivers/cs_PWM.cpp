@@ -36,12 +36,17 @@
 #define PWM_GPIO_DEBUG false
 
 #if (PWM_GPIO_DEBUG == true)
-#define PWM_TEST_PIN 20
-#define PWM_TEST_PIN_INIT nrf_gpio_cfg_output(PWM_TEST_PIN)
-#define PWM_TEST_PIN_TOGGLE nrf_gpio_pin_toggle(PWM_TEST_PIN)
+	#ifdef DEBUG
+		#pragma message("PWM test pin enabled")
+	#else
+		#warning "PWM test pin enabled"
+	#endif
+	#define PWM_TEST_PIN 20
+	#define PWM_TEST_PIN_INIT nrf_gpio_cfg_output(PWM_TEST_PIN)
+	#define PWM_TEST_PIN_TOGGLE nrf_gpio_pin_toggle(PWM_TEST_PIN)
 #else
-#define PWM_TEST_PIN_INIT
-#define PWM_TEST_PIN_TOGGLE
+	#define PWM_TEST_PIN_INIT
+	#define PWM_TEST_PIN_TOGGLE
 #endif
 
 

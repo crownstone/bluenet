@@ -24,13 +24,26 @@
 #include <cmath>
 
 // Define test pin to enable gpio debug.
-//#define TEST_PIN 20
+//#define PS_TEST_PIN 20
 
 // Define to print power samples
 #define PRINT_POWER_SAMPLES
 
 #define VOLTAGE_CHANNEL_IDX 0
 #define CURRENT_CHANNEL_IDX 1
+
+#ifdef PS_TEST_PIN
+	#ifdef DEBUG
+		#pragma message("Power sampling test pin enabled")
+	#else
+		#warning "Power sampling test pin enabled"
+	#endif
+	#define PS_TEST_PIN_INIT nrf_gpio_cfg_output(PS_TEST_PIN);
+	#define PS_TEST_PIN_TOGGLE nrf_gpio_pin_toggle(PS_TEST_PIN);
+#else
+	#define PS_TEST_PIN_INIT
+	#define PS_TEST_PIN_TOGGLE
+#endif
 
 PowerSampling::PowerSampling() :
 		_isInitialized(false),
@@ -157,9 +170,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 
 	EventDispatcher::getInstance().addListener(this);
 
-#ifdef TEST_PIN
-	nrf_gpio_cfg_output(TEST_PIN);
-#endif
+	PS_TEST_PIN_INIT
 
 	_isInitialized = true;
 }
@@ -285,9 +296,7 @@ void PowerSampling::handleEvent(event_t & event) {
  * @param[in] bufIndex                           The buffer index, can be used in InterleavedBuffer.
  */
 void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
+	PS_TEST_PIN_TOGGLE
 
 	buffer_id_t filteredBufIndex;
 	if (_bufferQueue.empty()) {
@@ -331,9 +340,7 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 		}
 	}
 
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
+	PS_TEST_PIN_TOGGLE
 
 	if (_recalibrateZeroVoltage) {
 		calculateVoltageZero(power);
@@ -342,9 +349,7 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 		calculateCurrentZero(power);
 	}
 
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
+	PS_TEST_PIN_TOGGLE
 
 	calculatePower(power);
 	calculateEnergy();
@@ -354,9 +359,7 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 		State::getInstance().set(CS_TYPE::STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
 	}
 
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
+	PS_TEST_PIN_TOGGLE
 
 	bool switch_detected = RecognizeSwitch::getInstance().detect(_bufferQueue, power.voltageIndex);
 	if (switch_detected) {

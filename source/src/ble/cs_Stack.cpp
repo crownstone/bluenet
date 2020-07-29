@@ -23,8 +23,6 @@
 
 #define LOGStackDebug LOGnone
 
-// Define test pin to enable gpio debug.
-//#define TEST_PIN 19
 
 Stack::Stack() :
 //	_clock_source(defaultClockSource),
