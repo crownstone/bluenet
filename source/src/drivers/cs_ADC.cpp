@@ -24,14 +24,15 @@
 
 // Define test pin to enable gpio debug.
 //#define TEST_PIN_ZERO_CROSS 20
-//#define TEST_PIN_TIMEOUT    20 // Controlled via GPIOTE
+//#define TEST_PIN_TIMEOUT    20 // Controlled via GPIOTE, don't combine with TEST_PIN_SAMPLE
 //#define TEST_PIN_START      22
 //#define TEST_PIN_STOP       23
 //#define TEST_PIN_PROCESS    24
 //#define TEST_PIN_INT_END    25
+//#define TEST_PIN_SAMPLE     20 // Controlled via GPIOTE, don't combine with TEST_PIN_TIMEOUT
 
 
-#if defined(TEST_PIN_ZERO_CROSS) || defined(TEST_PIN_TIMEOUT) || defined(TEST_PIN_START) || defined(TEST_PIN_STOP) || defined(TEST_PIN_PROCESS) || defined(TEST_PIN_INT_END)
+#if defined(TEST_PIN_ZERO_CROSS) || defined(TEST_PIN_TIMEOUT) || defined(TEST_PIN_START) || defined(TEST_PIN_STOP) || defined(TEST_PIN_PROCESS) || defined(TEST_PIN_INT_END) || defined(TEST_PIN_SAMPLE)
 	#ifdef DEBUG
 		#pragma message("ADC test pin enabled")
 	#else
@@ -140,14 +141,28 @@ cs_ret_code_t ADC::init(const adc_config_t & config) {
 	);
 	nrf_ppi_channel_enable(_ppiChannelSample);
 
+#ifdef TEST_PIN_SAMPLE
+	_ppiDebug = getPpiChannel(CS_ADC_PPI_CHANNEL_START + 4);
+	nrf_gpiote_task_configure(CS_ADC_GPIOTE_CHANNEL_START, TEST_PIN_SAMPLE, NRF_GPIOTE_POLARITY_TOGGLE, NRF_GPIOTE_INITIAL_VALUE_LOW);
+	nrf_gpiote_task_enable(CS_ADC_GPIOTE_CHANNEL_START);
+	nrf_ppi_channel_endpoint_setup(
+			_ppiDebug,
+			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMER, nrf_timer_compare_event_get(0)),
+			nrf_gpiote_task_addr_get(getGpioteTaskOut(CS_ADC_GPIOTE_CHANNEL_START))
+	);
+	nrf_ppi_channel_enable(_ppiDebug);
+#endif
+
 
 	// -------------------
 	// Setup timeout timer
 	// -------------------
 	nrf_timer_task_trigger(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_TASK_CLEAR);
 	nrf_timer_bit_width_set(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_BIT_WIDTH_32);
-	uint32_t timeoutCount = CS_ADC_BUF_SIZE / _config.channelCount - 1 - CS_ADC_TIMEOUT_SAMPLES; // Timeout N samples before END event.
-	LOGv("timeoutCount=%u", timeoutCount);
+//	uint32_t timeoutCount = CS_ADC_BUF_SIZE / _config.channelCount - 1 - CS_ADC_TIMEOUT_SAMPLES; // Timeout N samples before END event.
+//	uint32_t timeoutCount = (CS_ADC_BUF_SIZE / _config.channelCount); // Timeout at SAADC END event.
+	uint32_t timeoutCount = (CS_ADC_BUF_SIZE / _config.channelCount) * 5; // Don't timeout.
+	LOGd("timeoutCount=%u", timeoutCount);
 	nrf_timer_cc_write(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_CC_CHANNEL0, timeoutCount);
 	nrf_timer_mode_set(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_MODE_COUNTER);
 	nrf_timer_event_clear(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(0));
@@ -157,6 +172,12 @@ cs_ret_code_t ADC::init(const adc_config_t & config) {
 
 	// Setup short: stop the timeout timer on compare event (timeout).
 	nrf_timer_shorts_enable(CS_ADC_TIMEOUT_TIMER, NRF_TIMER_SHORT_COMPARE0_STOP_MASK);
+
+	_ppiTimeoutGroup = NRF_PPI_CHANNEL_GROUP0;
+	nrf_ppi_channel_group_clear(_ppiTimeoutGroup);
+	nrf_ppi_channels_include_in_group(_ppiChannelSample, _ppiTimeoutGroup);
+	nrf_ppi_channels_include_in_group(_ppiChannelStart, _ppiTimeoutGroup);
+	nrf_ppi_channels_include_in_group(_ppiTimeoutStart, _ppiTimeoutGroup);
 
 	// Setup timeout PPI: on compare event (timeout), stop the sample timer.
 	_ppiTimeout = getPpiChannel(CS_ADC_PPI_CHANNEL_START + 2);
@@ -173,7 +194,8 @@ cs_ret_code_t ADC::init(const adc_config_t & config) {
 	nrf_ppi_channel_endpoint_setup(
 			_ppiTimeout,
 			(uint32_t)nrf_timer_event_address_get(CS_ADC_TIMEOUT_TIMER, nrf_timer_compare_event_get(0)),
-			(uint32_t)nrf_timer_task_address_get(CS_ADC_TIMER, NRF_TIMER_TASK_STOP)
+//			(uint32_t)nrf_timer_task_address_get(CS_ADC_TIMER, NRF_TIMER_TASK_STOP)
+			(uint32_t)nrf_ppi_task_address_get(NRF_PPI_TASK_CHG0_DIS)
 	);
 #endif
 	nrf_ppi_channel_enable(_ppiTimeout);
@@ -233,6 +255,7 @@ cs_ret_code_t ADC::initSaadc(const adc_config_t & config) {
 
 	nrf_saadc_resolution_set(CS_ADC_RESOLUTION);
 	nrf_saadc_oversample_set(NRF_SAADC_OVERSAMPLE_DISABLED); // Oversample can only be used with 1 channel.
+	nrf_saadc_continuous_mode_disable();
 
 	nrf_saadc_int_disable(NRF_SAADC_INT_ALL);
 	nrf_saadc_event_clear(NRF_SAADC_EVENT_END);
@@ -404,6 +427,7 @@ void ADC::stop() {
 	printQueues();
 
 	// Clear any pending saadc END event.
+	// Doesn't prevent one more interrupt though?
 	nrf_saadc_event_clear(NRF_SAADC_EVENT_END);
 
 	exitCriticalRegion();
@@ -441,6 +465,20 @@ void ADC::start() {
 //		_state = ADC_STATE_WAITING_TO_START;
 		LOGAdcDebug("wait to start");
 //		return;
+	}
+
+	if (nrf_saadc_busy_check()) {
+		LOGe("busy");
+	}
+
+	uint16_t numSamplesInBuffer = nrf_saadc_amount_get();
+	if (numSamplesInBuffer != 0 && numSamplesInBuffer != CS_ADC_BUF_SIZE) {
+		LOGw("Buffer not empty or full amount=%u", numSamplesInBuffer);
+//		return;
+	}
+
+	if (_changeConfig) {
+		applyConfig();
 	}
 
 	cs_ret_code_t retCode = fillSaadcQueue();
@@ -651,6 +689,7 @@ void ADC::setZeroCrossingCallback(adc_zero_crossing_cb_t callback) {
 }
 
 void ADC::enableZeroCrossingInterrupt(channel_id_t channel, int32_t zeroVal) {
+//	return;
 	LOGd("enable zero chan=%u zero=%i", channel, zeroVal);
 	_zeroValue = zeroVal;
 	_zeroCrossingChannel = channel;
@@ -673,6 +712,7 @@ cs_ret_code_t ADC::changeChannel(channel_id_t channel, adc_channel_config_t& con
 }
 
 void ADC::applyConfig() {
+	LOGd("apply config");
 	// NRF52_PAN_74
 	nrf_saadc_disable();
 	// Apply channel configs
@@ -680,9 +720,9 @@ void ADC::applyConfig() {
 		initChannel(i, _config.channels[i]);
 	}
 	nrf_saadc_enable();
+	_changeConfig = false;
 
 	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_CONFIG, (uint8_t*)(&_config), sizeof(_config));
-	_changeConfig = false;
 }
 
 // No logs, this function can be called from interrupt
@@ -745,11 +785,11 @@ void ADC::_handleAdcDone(buffer_id_t bufIndex) {
 		}
 		_firstBuffer = false;
 
-		if (_changeConfig) {
-			stop();
-			applyConfig();
-			start();
-		}
+//		if (_changeConfig) {
+//			stop();
+//			applyConfig();
+//			start();
+//		}
 
 		LOGAdcVerbose("process buf %u", bufIndex);
 		printQueues();
@@ -841,6 +881,8 @@ void ADC::_handleAdcInterrupt() {
 #endif
 
 		LOGAdcInterrupt("NRF_SAADC_EVENT_END");
+		LOGAdcVerbose("end: amount=%u", nrf_saadc_amount_get());
+
 		if (_saadcState != ADC_SAADC_STATE_BUSY) {
 			// Don't handle end events when state is not busy.
 			// The end event also fires when we stop the saadc.
@@ -870,6 +912,13 @@ void ADC::_handleAdcInterrupt() {
 
 		if (_saadcBufferQueue.empty()) {
 			// There is no buffer queued in the SAADC peripheral, so it has no more buffers to fill.
+
+			// Stop sampling.
+			nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_STOP);
+			nrf_timer_event_clear(CS_ADC_TIMER, nrf_timer_compare_event_get(0));
+			nrf_timer_task_trigger(CS_ADC_TIMER, NRF_TIMER_TASK_CLEAR);
+//			nrf_ppi_channel_disable(_ppiChannelSample);
+
 			LOGw("No buffer queued");
 
 			// Let's restart.
@@ -879,18 +928,22 @@ void ADC::_handleAdcInterrupt() {
 			return;
 		}
 
-//		// We may have buffers in queue for the SAADC.
-//		_fillSaadcQueue();
+		if (_changeConfig) {
+			// Don't add buffers to SAADC queue, so we can stop gracefully.
+			return;
+		}
 
 		// We should have a buffer in queue for the SAADC.
 		if (_fillSaadcQueue() != ERR_SUCCESS) {
 			LOGw("No buffer to queue");
 
-			// Let's restart.
-			_saadcState = ADC_SAADC_STATE_STOPPING;
-			uint32_t errorCode = app_sched_event_put(NULL, 0, adc_restart);
-			APP_ERROR_CHECK(errorCode);
-			return;
+			// Since we didn't add a buffer to the SAADC, it will be empty next END interrupt, and thus will restart.
+
+//			// Let's restart.
+//			_saadcState = ADC_SAADC_STATE_STOPPING;
+//			uint32_t errorCode = app_sched_event_put(NULL, 0, adc_restart);
+//			APP_ERROR_CHECK(errorCode);
+//			return;
 		}
 
 		// SAADC will continue with sampling to the queued buffer.
@@ -930,7 +983,7 @@ extern "C" void CS_ADC_TIMEOUT_TIMER_IRQ(void) {
 }
 
 nrf_ppi_channel_t ADC::getPpiChannel(uint8_t index) {
-	assert(index < 16, "invalid ppi channel index");
+	assert(index < 17, "invalid ppi channel index");
 	switch(index) {
 	case 0:
 		return NRF_PPI_CHANNEL0;
@@ -964,6 +1017,8 @@ nrf_ppi_channel_t ADC::getPpiChannel(uint8_t index) {
 		return NRF_PPI_CHANNEL14;
 	case 15:
 		return NRF_PPI_CHANNEL15;
+	case 16:
+		return NRF_PPI_CHANNEL16;
 	}
 	return NRF_PPI_CHANNEL0;
 }

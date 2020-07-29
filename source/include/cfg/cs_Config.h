@@ -156,6 +156,8 @@
 // Soft device uses 4-5
 #define CS_PWM_PPI_GROUP_START                   0
 #define CS_PWM_PPI_GROUP_COUNT                   0
+#define CS_ADC_PPI_GROUP_START                   (CS_PWM_PPI_GROUP_START + CS_PWM_PPI_GROUP_COUNT)
+#define CS_ADC_PPI_GROUP_COUNT                   1
 
 // ----- GPIOTE -----
 #define CS_ADC_GPIOTE_CHANNEL_START              0
@@ -178,8 +180,6 @@
 #define CS_ADC_NUM_BUFFERS                       8 // 4 buffers are held by processing, 2 queued in SAADC, 1 moves between them, 1 extra for CPU usage peaks.
 #define CS_ADC_BUF_SIZE                          (CS_ADC_MAX_PINS * 20000 / CS_ADC_SAMPLE_INTERVAL_US) // Make size so it fills up 20ms of data.
 #define CS_ADC_TIMEOUT_SAMPLES                   2 // Timeout when no buffer has been set at N samples before end of interval.
-
-#define POWER_SAMPLE_BURST_NUM_SAMPLES           (20000/CS_ADC_SAMPLE_INTERVAL_US) // Number of voltage and current samples per burst
 
 
 // Buffer size for storage requests. Storage requests get buffered when the device is scanning or meshing.

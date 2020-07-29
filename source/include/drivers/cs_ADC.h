@@ -68,7 +68,7 @@ typedef void (*adc_zero_crossing_cb_t) ();
 enum adc_state_t {
 	ADC_STATE_IDLE,
 	ADC_STATE_BUSY,
-	ADC_STATE_WAITING_TO_START,
+	ADC_STATE_WAITING_TO_START, // Wait for buffers to be released.
 	ADC_STATE_READY_TO_START    // This state is a dummy, to work around the state check in start(). It is set just before calling start() again.
 };
 
@@ -218,22 +218,42 @@ private:
 	bool _changeConfig;
 
 	// Configuration of this class
+	// **Used in interrupt!**
 	adc_config_t _config;
 
-	// PPI channel to be used to communicate from Timer to ADC peripheral.
+	/**
+	 * PPI channel to sample each tick, and count these.
+	 *
+	 * Sample timer event COMPARE -> SAADC task SAMPLE
+	 *                            -> Timeout counter task COUNT
+	 */
 	nrf_ppi_channel_t _ppiChannelSample;
 
-	// PPI channel used to start the SAADC on the END event.
+	/**
+	 * PPI channel used to start the SAADC on end event.
+	 *
+	 * SAADC event END -> SAADC task START
+	 */
 	nrf_ppi_channel_t _ppiChannelStart;
 
-	// PPI channel used to count the number of samples taken.
-	nrf_ppi_channel_t _ppiSampleCount;
+	/**
+	 * PPI channel used to clear and start the timeout counter.
+	 *
+	 * SAADC event END -> Timeout counter task CLEAR.
+	 *                 -> Timeout counter task START.
+	 */
+	nrf_ppi_channel_t _ppiTimeoutStart;
 
-	// PPI channel used to stop the sample timer when no buffer is queued.
+	/**
+	 * PPI channel used to stop on timeout (when no buffer is queued in time).
+	 *
+	 * Timeout counter event COMPARE -> Sample timer task STOP
+	 */
 	nrf_ppi_channel_t _ppiTimeout;
 
-	// PPI channel used to clear and start the timeout count.
-	nrf_ppi_channel_t _ppiTimeoutStart;
+	nrf_ppi_channel_t _ppiDebug;
+
+	nrf_ppi_channel_group_t _ppiTimeoutGroup;
 
 	/**
 	 * Queue of buffers that are free to be added to the SAADC queue.
