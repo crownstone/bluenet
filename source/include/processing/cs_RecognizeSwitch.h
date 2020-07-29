@@ -28,15 +28,23 @@ private:
 	// Alternative to thresholdSimilar.
 	float _thresholdRatio = 100.0;
 
+	const static uint8_t _numBuffersRequired = 4;
 
-
-	const static uint8_t _numStoredBuffers = 3;
+	const static uint8_t _numStoredBuffers = _numBuffersRequired;
 
 	// Store the samples and meta data of the last detection.
 	cs_power_samples_header_t _lastDetection;
 	cs_power_samples_header_t _lastAlmostDetection;
 	int16_t _lastDetectionSamples[_numStoredBuffers * InterleavedBuffer::getChannelLength()] = {0};
 	int16_t _lastAlmostDetectionSamples[_numStoredBuffers * InterleavedBuffer::getChannelLength()] = {0};
+
+	enum FoundSwitch {
+		True,
+		Almost,
+		False
+	};
+
+	FoundSwitch detect(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId, uint8_t iteration);
 
 	bool ignoreSample(sample_value_t value0, sample_value_t value1, sample_value_t value2);
 

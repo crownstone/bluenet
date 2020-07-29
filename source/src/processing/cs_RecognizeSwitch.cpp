@@ -50,7 +50,6 @@ void RecognizeSwitch::skip(uint16_t num) {
  * in the middle.
  */
 bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId) {
-	bool found = false;
 	if (!_running) {
 		return false;
 	}
@@ -58,10 +57,45 @@ bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channe
 		_skipSwitchDetectionTriggers--;
 		return false;
 	}
-	if (bufQueue.size() < 4) {
+
+	// Last buffer is unfiltered.
+	if (bufQueue.size() < _numBuffersRequired + 1) {
+		LOGSwitchcraftDebug("Not enough buffers");
 		return false;
 	}
 
+	FoundSwitch found = FoundSwitch::False;
+	for (uint8_t i = 0; i < (_numBuffersRequired - 2); ++i) {
+		FoundSwitch tempFound = detect(bufQueue, voltageChannelId, i);
+		if (tempFound == FoundSwitch::True) {
+			found = tempFound;
+			break;
+		}
+		if (tempFound == FoundSwitch::Almost) {
+			found = tempFound;
+		}
+	}
+
+	switch (found) {
+		case FoundSwitch::True: {
+			setLastDetection(true, bufQueue, voltageChannelId);
+			_skipSwitchDetectionTriggers = 5;
+			return true;
+		}
+		case FoundSwitch::Almost: {
+			LOGSwitchcraftDebug("Almost found switch");
+			setLastDetection(false, bufQueue, voltageChannelId);
+			return false;
+		}
+		case FoundSwitch::False: {
+
+			return false;
+		}
+	}
+	return false;
+}
+
+RecognizeSwitch::FoundSwitch RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId, uint8_t iteration) {
 	InterleavedBuffer & ib = InterleavedBuffer::getInstance();
 
 	// Check only part of the buffer length (half buffer length).
@@ -72,9 +106,10 @@ bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channe
 	sample_value_id_t startInd;
 	sample_value_id_t endInd;
 
-	buffer_id_t bufIndex0 = bufQueue[bufQueue.size() - 4];
-	buffer_id_t bufIndex1 = bufQueue[bufQueue.size() - 3];
-	buffer_id_t bufIndex2 = bufQueue[bufQueue.size() - 2]; // Last buffer is the unfiltered version.
+	// Buffer index (size - 1) is unfiltered buffer.
+	buffer_id_t bufIndex0 = bufQueue[bufQueue.size() - (1 + _numBuffersRequired)];
+	buffer_id_t bufIndex1 = bufQueue[bufQueue.size() - (1 + _numBuffersRequired - iteration - 1)];
+	buffer_id_t bufIndex2 = bufQueue[bufQueue.size() - (1 + 1)];
 	LOGnone("buf ind=%u %u %u", bufIndex0, bufIndex1, bufIndex2);
 
 	float value0, value1, value2; // Value of buffer0, buffer1, buffer2
@@ -105,13 +140,12 @@ bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channe
 			diffSum12 += diff12;
 			diffSum02 += diff02;
 		}
-		LOGSwitchcraftVerbose("%d %d %d", (int32_t)diffSum01, (int32_t)diffSum12, (int32_t)diffSum02);
+		LOGSwitchcraftVerbose("it=%u start=%u %d %d %d", iteration, startInd, (int32_t)diffSum01, (int32_t)diffSum12, (int32_t)diffSum02);
 		if (diffSum01 > _thresholdDifferent && diffSum12 > _thresholdDifferent) {
 			float minDiffSum = diffSum01 < diffSum12 ? diffSum01 : diffSum12;
 			if (diffSum02 < _thresholdSimilar || minDiffSum / diffSum02 > _thresholdRatio) {
-				found = true;
 				LOGSwitchcraftDebug("Found switch: %i %i %i %i", (int)diffSum01, (int)diffSum12, (int)diffSum02, (int)(minDiffSum / diffSum02));
-				break;
+				return RecognizeSwitch::FoundSwitch::True;
 			}
 		}
 
@@ -122,16 +156,11 @@ bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channe
 			foundAlmost = true;
 		}
 	}
-	if (found) {
-		setLastDetection(true, bufQueue, voltageChannelId);
-		_skipSwitchDetectionTriggers = 5;
-	}
-	else if (foundAlmost) {
-		LOGSwitchcraftDebug("Almost found switch");
-		setLastDetection(false, bufQueue, voltageChannelId);
-	}
 
-	return found;
+	if (foundAlmost) {
+		return RecognizeSwitch::FoundSwitch::Almost;
+	}
+	return RecognizeSwitch::FoundSwitch::False;
 }
 
 bool RecognizeSwitch::ignoreSample(sample_value_t value0, sample_value_t value1, sample_value_t value2) {

@@ -75,6 +75,13 @@ public:
 private:
 	PowerSampling();
 
+	// Number of filtered buffers for processing.
+	// Should be at least as large as number of buffers required for recognize switch.
+	const static uint8_t numFilteredBuffersForProcessing = 4;
+
+	// Currently hard coded at 1.
+	const static uint8_t numUnfilteredBuffers = 1;
+
 	//! Variable to keep up whether power sampling is initialized.
 	bool _isInitialized;
 

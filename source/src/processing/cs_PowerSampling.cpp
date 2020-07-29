@@ -262,7 +262,7 @@ void PowerSampling::handleEvent(event_t & event) {
 			ADC::getInstance().releaseBuffer(_bufferQueue.pop());
 		}
 		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
-		RecognizeSwitch::getInstance().skip(2);
+//		RecognizeSwitch::getInstance().skip(2);
 		break;
 	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
 		RecognizeSwitch::getInstance().configure(*(TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)*)event.data);
@@ -368,8 +368,8 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
-	// We want to keep 4 buffers: 1 unfiltered, 3 filtered.
-	if (_bufferQueue.size() > 4) {
+	// We want to keep N buffers for processing.
+	if (_bufferQueue.size() > numFilteredBuffersForProcessing + numUnfilteredBuffers) {
 		buffer_id_t bufIndexToRelease = _bufferQueue.pop();
 		_adc->releaseBuffer(bufIndexToRelease);
 	}
