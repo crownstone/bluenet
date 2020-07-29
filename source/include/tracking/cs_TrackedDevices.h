@@ -13,11 +13,14 @@
 /**
  * Class that keeps up devices to be tracked.
  *
+ * Alternative to dynamic background broadcasts (no heartbeat required),
+ * or to background broadcasts at all (heartbeats required).
+ *
  * - Register devices: each device has a unique ID, and registers a unique token.
  * - Make sure device tokens expire.
  * - Cache the data of the devices (profile, location, flags, etc).
- * - Handle scans with device token only as data, and dispatch events with added cached data.
- * - Handle device heartbeats, which are treated as if the device was scanned.
+ * - Handle scans with device token only as data, and dispatch background broadcast event, by adding cached data.
+ * - Handle device heartbeats, which are treated as if the device was scanned, by dispatching profile location event.
  */
 class TrackedDevices: public EventListener {
 public:
