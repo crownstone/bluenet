@@ -327,8 +327,8 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 	filter(bufIndex, filteredBufIndex, power.currentIndex);
 
 
-	if (_bufferQueue.size() >= 3) {
-		buffer_id_t prevIndex = _bufferQueue[_bufferQueue.size() - 3]; // Previous filtered buffer.
+	if (_bufferQueue.size() >= 2 + numUnfilteredBuffers) {
+		buffer_id_t prevIndex = _bufferQueue[_bufferQueue.size() - 2 - numUnfilteredBuffers]; // Previous filtered buffer.
 		sample_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
 		if (isVoltageAndCurrentSwapped(power, prevBuf)) {
 			LOGw("Swap detected: restart ADC.");
