@@ -44,9 +44,24 @@ private:
 		False
 	};
 
+	FoundSwitch detectSwitch(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId);
 	FoundSwitch detect(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId, uint8_t iteration);
 
-	bool ignoreSample(sample_value_t value0, sample_value_t value1, sample_value_t value2);
+	/*
+	 * Calculate the difference between 2 buffers.
+	 *
+	 * Start at sample <shift> and iterates over <numSamples> samples.
+	 */
+	inline float calcDiff(
+			const CircularBuffer<buffer_id_t>& bufQueue,
+			const channel_id_t voltageChannelId,
+			const buffer_id_t bufIndex1,
+			const buffer_id_t bufIndex2,
+			const sample_value_id_t startIndex,
+			const sample_value_id_t numSamples);
+
+	bool ignoreSample(const sample_value_t value1, const sample_value_t value2);
+	bool ignoreSample(const sample_value_t value0, const sample_value_t value1, const sample_value_t value2);
 
 	void setLastDetection(bool aboveThreshold, const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId);
 
