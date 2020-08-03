@@ -6,8 +6,8 @@
  */
 #pragma once
 
+#include <cstdint>
 #include <cstdlib>
-//#include <nrf.h>
 #include <cfg/cs_Config.h>
 #include <util/cs_Error.h>
 #include <drivers/cs_Serial.h>
