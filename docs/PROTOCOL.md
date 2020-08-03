@@ -351,6 +351,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 85 | Get last reset reason | - | uint 32 | **Firmware debug.** Contents of POWER->RESETREAS as it was on boot. Bitmask with bit 0=ResetPin, 1=Watchdog, 2=SoftReset, 3=Lockup, 16=GPIO, 17=LPComp, 18=DebugInterface, 19=NFC. | x
 86 | Get GPREGRET | Index (uint8) | [Gpregret packet](#gpregret_result_packet) | **Firmware debug.** Get the Nth general purpose retention register as it was on boot. There are currently 2 registers. | x
 87 | Get ADC channel swaps | - | [ADC channel swaps packet](#adc_channel_swaps_packet) | **Firmware debug.** Get the number of detected ADC channel swaps. | x
+88 | Get RAM statistics | - | [RAM stats packet](#ram_stats_packet) | **Firmware debug.** Get RAM statistics. | x
 90 | Upload microapp | [Upload microapp packet](#upload_microapp_packet) | [Microapp result packet](#microapp_result_packet) | Upload microapp. | x
 
 <a name="setup_packet"></a>
@@ -627,6 +628,17 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Which GPREGRET.
 uint32 | Value | 4 | Value of this GPREGRET. For index 0: bits 0-4 are used to count resets, bit 5 is set on brownout (doesn't work yet), bit 6 is set to go to DFU mode, bit 7 is set after storage was recovered.
+
+
+<a name="ram_stats_packet"></a>
+#### RAM stats packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Min stack end | 4 | Minimal observed stack end pointer since boot. It might take some time before this reflects the actual minimum.
+uint32 | Max heap end | 4 | Maximal observed heap end pointer since boot.
+uint32 | Min free | 4 | Minimal observed free RAM in bytes. It might take some time before this reflects the actual minimum.
+uint32 | Num sbrk fails | 4 | Number of times sbrk failed to hand out space.
 
 
 <a name="switch_history_packet"></a>

@@ -342,6 +342,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_GET_RESET_REASON:
 	case CS_TYPE::CMD_GET_GPREGRET:
 	case CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS:
+	case CS_TYPE::CMD_GET_RAM_STATS:
 	case CS_TYPE::EVT_GENERIC_TEST:
 	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:
@@ -532,6 +533,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_GET_RESET_REASON:
 	case CS_TYPE::CMD_GET_GPREGRET:
 	case CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS:
+	case CS_TYPE::CMD_GET_RAM_STATS:
 	case CS_TYPE::EVT_GENERIC_TEST:
 	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP_UPLOAD:

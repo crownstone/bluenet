@@ -56,6 +56,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_GET_RESET_REASON            = 85,
 	CTRL_CMD_GET_GPREGRET                = 86,
 	CTRL_CMD_GET_ADC_CHANNEL_SWAPS       = 87,
+	CTRL_CMD_GET_RAM_STATS               = 88,
 
 	CTRL_CMD_MICROAPP_UPLOAD             = 90,
 

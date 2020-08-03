@@ -886,6 +886,17 @@ void Crownstone::handleEvent(event_t & event) {
 			event.result.returnCode = ERR_SUCCESS;
 			break;
 		}
+		case CS_TYPE::CMD_GET_RAM_STATS: {
+			LOGi("Get RAM stats");
+			if (event.result.buf.len < sizeof(_ramStats)) {
+				event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+				break;
+			}
+			memcpy(event.result.buf.data, &_ramStats, sizeof(_ramStats));
+			event.result.dataSize = sizeof(_ramStats);
+			event.result.returnCode = ERR_SUCCESS;
+			break;
+		}
 		default:
 			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
 	}
@@ -902,6 +913,7 @@ void Crownstone::handleEvent(event_t & event) {
 void Crownstone::updateHeapStats() {
 	// Don't have to do much, _sbrk() is the best place to keep up the heap end.
 	_ramStats.maxHeapEnd = (uint32_t)getHeapEndMax();
+	_ramStats.minFree = _ramStats.minStackEnd - _ramStats.maxHeapEnd;
 	_ramStats.numSbrkFails = getSbrkNumFails();
 }
 
@@ -916,7 +928,7 @@ void Crownstone::updateMinStackEnd() {
 void Crownstone::printLoadStats() {
 	// Log ram usage.
 	LOG_MEMORY;
-	LOGi("heapEnd=0x%X maxHeapEnd=0x%X minStackEnd=0x%X minFree=%u sbrkFails=%u", (uint32_t)getHeapEnd(), _ramStats.maxHeapEnd, _ramStats.minStackEnd, (_ramStats.minStackEnd - _ramStats.maxHeapEnd), _ramStats.numSbrkFails);
+	LOGi("heapEnd=0x%X maxHeapEnd=0x%X minStackEnd=0x%X minFree=%u sbrkFails=%u", (uint32_t)getHeapEnd(), _ramStats.maxHeapEnd, _ramStats.minStackEnd, _ramStats.minFree, _ramStats.numSbrkFails);
 
 	// Log scheduler usage.
 	__attribute__((unused)) uint16_t maxUsed = app_sched_queue_utilization_get();

@@ -446,6 +446,7 @@ struct __attribute__((packed)) cs_gpregret_result_t {
 struct __attribute__((packed)) cs_ram_stats_t {
 	uint32_t minStackEnd = 0xFFFFFFFF;
 	uint32_t maxHeapEnd = 0;
+	uint32_t minFree = 0;
 	uint32_t numSbrkFails = 0;
 };
 
