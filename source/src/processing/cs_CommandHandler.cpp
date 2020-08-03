@@ -861,8 +861,6 @@ void CommandHandler::handleCmdGetUptime(cs_data_t commandData, const EncryptionA
 
 void CommandHandler::handleMicroAppUpload(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "microapp upload");
-	result.returnCode = ERR_NOT_IMPLEMENTED;
-	return;
 
 	if (commandData.len != sizeof(microapp_upload_packet_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
