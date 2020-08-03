@@ -5,6 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <cs_Crownstone.h>
 #include <ble/cs_Nordic.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_Config.h>
@@ -971,6 +972,7 @@ void ADC::_handleAdcInterrupt() {
 // SAADC interrupt handler
 extern "C" void CS_ADC_IRQ(void) {
 	ADC::getInstance()._handleAdcInterrupt();
+	Crownstone::updateMinStackEnd();
 }
 
 // Timer interrupt handler

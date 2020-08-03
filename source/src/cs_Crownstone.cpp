@@ -59,6 +59,7 @@
 
 extern "C" {
 #include <nrf_nvmc.h>
+#include <util/cs_Syscalls.h>
 }
 
 
@@ -75,7 +76,7 @@ extern "C" {
 	#endif
 #endif
 
-TYPIFY(EVT_TICK) Crownstone::_tickCount = 0;
+cs_ram_stats_t Crownstone::_ramStats;
 
 
 /****************************************** Global functions ******************************************/
@@ -220,6 +221,9 @@ Crownstone::Crownstone(boards_config_t& board) :
 };
 
 void Crownstone::init(uint16_t step) {
+	updateHeapStats();
+	updateMinStackEnd();
+	printLoadStats();
 	switch (step) {
 	case 0: {
 		init0();
@@ -745,14 +749,10 @@ void Crownstone::increaseResetCounter() {
 }
 
 void Crownstone::tick() {
+	updateHeapStats();
 	if (_tickCount % (60*1000/TICK_INTERVAL_MS) == 0) {
-		LOG_MEMORY; // To check for memory leaks
-		__attribute__((unused)) uint16_t maxUsed = app_sched_queue_utilization_get();
-		__attribute__((unused)) uint16_t currentFree = app_sched_queue_space_get();
-		LOGi("Scheduler current free=%u max used=%u", currentFree, maxUsed);
+		printLoadStats();
 	}
-	// TODO: warning when close to out of memory
-	// TODO: maybe detect memory leaks?
 
 	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
 		TYPIFY(STATE_TEMPERATURE) temperature = getTemperature();
@@ -897,6 +897,31 @@ void Crownstone::handleEvent(event_t & event) {
 	// 		break;
 	// 	}
 
+}
+
+void Crownstone::updateHeapStats() {
+	// Don't have to do much, _sbrk() is the best place to keep up the heap end.
+	_ramStats.maxHeapEnd = (uint32_t)getHeapEndMax();
+	_ramStats.numSbrkFails = getSbrkNumFails();
+}
+
+void Crownstone::updateMinStackEnd() {
+	void* stackPointer;
+	asm("mov %0, sp" : "=r"(stackPointer) : : );
+	if ((uint32_t)stackPointer < _ramStats.minStackEnd) {
+		_ramStats.minStackEnd = (uint32_t)stackPointer;
+	}
+}
+
+void Crownstone::printLoadStats() {
+	// Log ram usage.
+	LOG_MEMORY;
+	LOGi("heapEnd=0x%X maxHeapEnd=0x%X minStackEnd=0x%X minFree=%u sbrkFails=%u", (uint32_t)getHeapEnd(), _ramStats.maxHeapEnd, _ramStats.minStackEnd, (_ramStats.minStackEnd - _ramStats.maxHeapEnd), _ramStats.numSbrkFails);
+
+	// Log scheduler usage.
+	__attribute__((unused)) uint16_t maxUsed = app_sched_queue_utilization_get();
+	__attribute__((unused)) uint16_t currentFree = app_sched_queue_space_get();
+	LOGi("Scheduler current free=%u max used=%u", currentFree, maxUsed);
 }
 
 void printBootloaderInfo() {

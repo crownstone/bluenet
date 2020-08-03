@@ -443,6 +443,12 @@ struct __attribute__((packed)) cs_gpregret_result_t {
 	uint32_t value;               // The value of this GPREGRET
 };
 
+struct __attribute__((packed)) cs_ram_stats_t {
+	uint32_t minStackEnd = 0xFFFFFFFF;
+	uint32_t maxHeapEnd = 0;
+	uint32_t numSbrkFails = 0;
+};
+
 
 // ========================= functions =========================
 
