@@ -276,6 +276,15 @@ public:
 	void factoryReset();
 
 	/**
+	 * Clean up persistent storage.
+	 *
+	 * Permanently deletes removed state variables, and defragments the persistent storage.
+	 *
+	 * @return                    Success when cleaning up will be started.
+	 */
+	cs_ret_code_t cleanUp();
+
+	/**
 	 * Get pointer to state value.
 	 *
 	 * TODO: implement

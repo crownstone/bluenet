@@ -353,6 +353,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 87 | Get ADC channel swaps | - | [ADC channel swaps packet](#adc_channel_swaps_packet) | **Firmware debug.** Get the number of detected ADC channel swaps. | x
 88 | Get RAM statistics | - | [RAM stats packet](#ram_stats_packet) | **Firmware debug.** Get RAM statistics. | x
 90 | Upload microapp | [Upload microapp packet](#upload_microapp_packet) | [Microapp result packet](#microapp_result_packet) | Upload microapp. | x
+100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
 
 <a name="setup_packet"></a>
 #### Setup packet

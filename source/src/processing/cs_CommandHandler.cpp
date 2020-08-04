@@ -126,6 +126,7 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_GET_ADC_CHANNEL_SWAPS:
 		case CTRL_CMD_GET_RAM_STATS:
 		case CTRL_CMD_MICROAPP_UPLOAD:
+		case CTRL_CMD_CLEAN_FLASH:
 			LOGd("cmd=%u lvl=%u", type, accessLevel);
 			break;
 		case CTRL_CMD_UNKNOWN:
@@ -223,6 +224,8 @@ void CommandHandler::handleCommand(
 		return dispatchEventForCommand(CS_TYPE::CMD_GET_RAM_STATS, commandData, source, result);
 	case CTRL_CMD_MICROAPP_UPLOAD:
 		return handleMicroAppUpload(commandData, accessLevel, result);
+	case CTRL_CMD_CLEAN_FLASH:
+		return dispatchEventForCommand(CS_TYPE::CMD_STORAGE_GARBAGE_COLLECT, commandData, source, result);
 	case CTRL_CMD_UNKNOWN:
 		result.returnCode = ERR_UNKNOWN_TYPE;
 		return;
@@ -938,6 +941,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_GET_ADC_CHANNEL_SWAPS:
 		case CTRL_CMD_GET_RAM_STATS:
 		case CTRL_CMD_MICROAPP_UPLOAD:
+		case CTRL_CMD_CLEAN_FLASH:
 			return ADMIN;
 		case CTRL_CMD_UNKNOWN:
 			return NOT_SET;

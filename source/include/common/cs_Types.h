@@ -231,7 +231,8 @@ enum class CS_TYPE: uint16_t {
 	EVT_STORAGE_PAGES_ERASED,                         // All storage pages are completely erased.
 	CMD_FACTORY_RESET,                                // Perform a factory reset: clear all data.
 	EVT_STATE_FACTORY_RESET_DONE,                     // Factory reset of state is done.
-	EVT_MESH_FACTORY_RESET_DONE,                           // Factory reset of mesh storage is done.
+	EVT_MESH_FACTORY_RESET_DONE,                      // Factory reset of mesh storage is done.
+	CMD_STORAGE_GARBAGE_COLLECT,                      // Start garbage collection of FDS.
 
 	// Logging
 	CMD_ENABLE_LOG_POWER = InternalBaseLogging,       // Enable/disable power calculations logging.
@@ -503,6 +504,7 @@ typedef  void TYPIFY(EVT_STORAGE_GC_DONE);
 typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET_DONE);
 typedef  void TYPIFY(EVT_STORAGE_PAGES_ERASED);
 typedef  void TYPIFY(EVT_MESH_FACTORY_RESET_DONE);
+typedef  void TYPIFY(CMD_STORAGE_GARBAGE_COLLECT);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
 typedef  bool TYPIFY(CMD_SWITCHING_ALLOWED);
 typedef  uint32_t TYPIFY(EVT_TICK);

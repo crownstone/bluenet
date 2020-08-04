@@ -60,6 +60,8 @@ enum CommandHandlerTypes {
 
 	CTRL_CMD_MICROAPP_UPLOAD             = 90,
 
+	CTRL_CMD_CLEAN_FLASH                 = 100,
+
 	CTRL_CMD_UNKNOWN                     = 0xFFFF
 };
 
