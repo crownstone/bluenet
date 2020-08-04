@@ -708,8 +708,8 @@ uint 8 | Index | 1 | Some types have multiple lists of samples.
 
 Value | Name| Description
 --- | --- | ---
-0 | Triggered switchcraft | Last samples that triggered switchcraft. Has 3 lists of subsequent voltage samples (index 0 is the first list). You can assume the time between the last sample of the first list and the first sample of the second list is equal to sample interval.
-1 | Non-triggered switchcraft | Last samples that almost triggered switchcraft. Has 3 lists of subsequent voltage samples (index 0 is the first list). You can assume the time between the last sample of the first list and the first sample of the second list is equal to sample interval.
+0 | Triggered switchcraft | Last samples that triggered switchcraft. Has N lists of subsequent voltage samples (index 0 is the first list). You can assume the time between the last sample of the first list and the first sample of the second list is equal to sample interval. Keep reading the next index until you get result code WRONG_PARAMETER.
+1 | Non-triggered switchcraft | Last samples that almost triggered switchcraft. Has N lists of subsequent voltage samples (index 0 is the first list). You can assume the time between the last sample of the first list and the first sample of the second list is equal to sample interval. Keep reading the next index until you get result code WRONG_PARAMETER.
 2 | Now filtered | Last sampled values, after smoothing. Has 2 lists: index 0 for voltage, index 1 for current.
 3 | Now unfiltered | Last sampled values, before smoothing. Has 2 lists: index 0 for voltage, index 1 for current.
 4 | Soft fuse | Last samples that triggered a soft fuse. Has 1 list: index 0 for current.
