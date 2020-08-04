@@ -121,7 +121,9 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 	else {
 		// Try to set dimmed value, and then turn relay off.
 		// If that doesn't work, turn on relay instead.
-		cs_ret_code_t retCode = setDimmer(intendedState);
+		// Only fade if relay isn't on right now (else you get the effect that you go from 100% to 0%, then fade to N%).
+		bool fade = !(getActualState().state.relay);
+		cs_ret_code_t retCode = setDimmer(intendedState, fade);
 		LOGSmartSwitchDebug("allowDimming=%u", allowDimming);
 		if (retCode == ERR_SUCCESS) {
 			retCode = setRelay(false);
@@ -165,9 +167,9 @@ cs_ret_code_t SmartSwitch::setRelayUnchecked(bool on) {
 	return retCode;
 }
 
-cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity) {
+cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity, bool fade) {
 	switch_state_t currentState = getActualState();
-	LOGSmartSwitchDebug("setDimmer %u currenState=%u allowSwitching()=%u allowDimming=%u", intensity, currentState.asInt, allowSwitching(), allowDimming);
+	LOGSmartSwitchDebug("setDimmer %u fade=%u currenState=%u allowSwitching()=%u allowDimming=%u", intensity, fade, currentState.asInt, allowSwitching(), allowDimming);
 
 	if (!allowDimming && intensity > 0) {
 		return ERR_NO_ACCESS;
@@ -180,12 +182,12 @@ cs_ret_code_t SmartSwitch::setDimmer(uint8_t intensity) {
 	if (!allowSwitching()) {
 		return ERR_NO_ACCESS;
 	}
-	return setDimmerUnchecked(intensity);
+	return setDimmerUnchecked(intensity, fade);
 }
 
-cs_ret_code_t SmartSwitch::setDimmerUnchecked(uint8_t intensity) {
-	cs_ret_code_t retCode = safeSwitch.setDimmer(intensity);
-	LOGSmartSwitchDebug("setDimmerUnchecked %u retCode=%u", intensity, retCode);
+cs_ret_code_t SmartSwitch::setDimmerUnchecked(uint8_t intensity, bool fade) {
+	cs_ret_code_t retCode = safeSwitch.setDimmer(intensity, fade);
+	LOGSmartSwitchDebug("setDimmerUnchecked %u fade=%u retCode=%u", intensity, fade, retCode);
 	switch_state_t currentState = getActualState();
 	store(currentState);
 	return retCode;

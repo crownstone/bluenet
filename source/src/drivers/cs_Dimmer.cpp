@@ -65,15 +65,15 @@ void Dimmer::start() {
 	}
 }
 
-bool Dimmer::set(uint8_t intensity, bool immediately) {
-	LOGd("set val=%u immediately=%u", intensity, immediately);
+bool Dimmer::set(uint8_t intensity, bool fade) {
+	LOGd("set %u fade=%u", intensity, fade);
 	assert(initialized == true, "Not initialized");
 	if (!enabled && intensity > 0) {
 		LOGd("Dimmer not enabled");
 		return false;
 	}
 
-	uint8_t speed = immediately ? 100 : softOnfSpeed;
+	uint8_t speed = fade ? softOnfSpeed : 100;
 
 	TEST_PUSH_EXPR_D(this,"intensity", intensity);
 	PWM::getInstance().setValue(0, intensity, speed);

@@ -114,13 +114,13 @@ private:
 	 * Set dimmer.
 	 * Checks if dimming and switching is allowed.
 	 */
-	cs_ret_code_t setDimmer(uint8_t intensity);
+	cs_ret_code_t setDimmer(uint8_t intensity, bool fade = true);
 
 	/**
 	 * Set dimmer without checks.
 	 * Also updates State.
 	 */
-	cs_ret_code_t setDimmerUnchecked(uint8_t intensity);
+	cs_ret_code_t setDimmerUnchecked(uint8_t intensity, bool fade);
 
 	/**
 	 * Handle unexpected state change by safeSwitch.

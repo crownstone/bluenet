@@ -29,11 +29,11 @@ public:
 	/**
 	 * Set dimmer intensity.
 	 *
-	 * @param[in] intensity       Intensity value to set.
-	 * @param[in] immediately     Whether to set the value immediately. False will nicely fade towards the value.
+	 * @param[in] intensity       Intensity value to set: 0-100.
+	 * @param[in] fade            Whether to fade towards the new intensity. False will set it immediately.
 	 * @return true on success.
 	 */
-	bool set(uint8_t intensity, bool immediately);
+	bool set(uint8_t intensity, bool fade);
 
 	/**
 	 * Change the soft of speed.

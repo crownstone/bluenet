@@ -44,9 +44,12 @@ public:
 	 *
 	 * It could be that something else is done instead, check the error code.
 	 *
+	 * @param[in] intensity  Intensity of the dimmer: 0-100.
+	 * @param[in] fade       Whether to fade towards the new intensity. False will set it immediately.
+	 *
 	 * @return     Error code: if not successful, check what the current state is.
 	 */
-	cs_ret_code_t setDimmer(uint8_t intensity);
+	cs_ret_code_t setDimmer(uint8_t intensity, bool fade = true);
 
 	/**
 	 * Get current switch state.
@@ -150,7 +153,7 @@ private:
 	 * Checks: similar.
 	 * Does not check: safe, powered.
 	 */
-	cs_ret_code_t setDimmerUnchecked(uint8_t intensity, bool immediately);
+	cs_ret_code_t setDimmerUnchecked(uint8_t intensity, bool fade);
 
 	/**
 	 * Try to see if dimmer is powered:

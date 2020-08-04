@@ -94,8 +94,8 @@ cs_ret_code_t SafeSwitch::setRelayUnchecked(bool value) {
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity) {
-	LOGSafeSwitch("setDimmer %u dimmerPowered=%u errors=%u", intensity, dimmerPowered, getErrorState().asInt);
+cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity, bool fade) {
+	LOGSafeSwitch("setDimmer %u fade=%u dimmerPowered=%u errors=%u", intensity, fade, dimmerPowered, getErrorState().asInt);
 	if ( !isDimmerStateChangeAllowed()) {
 		LOGSafeSwitch("isDimmerStateChangeAllowed returned false");
 		return ERR_NO_ACCESS;
@@ -110,15 +110,15 @@ cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity) {
 			return startDimmerPowerCheck(intensity);
 		}
 	}
-	return setDimmerUnchecked(intensity, false);
+	return setDimmerUnchecked(intensity, fade);
 }
 
-cs_ret_code_t SafeSwitch::setDimmerUnchecked(uint8_t intensity, bool immediately) {
-	LOGSafeSwitch("setDimmerUnchecked %u current=%u", intensity, currentState.state.dimmer);
+cs_ret_code_t SafeSwitch::setDimmerUnchecked(uint8_t intensity, bool fade) {
+	LOGSafeSwitch("setDimmerUnchecked %u fade=%u current=%u", intensity, fade, currentState.state.dimmer);
 	if (currentState.state.dimmer == intensity) {
 		return ERR_SUCCESS;
 	}
-	if (dimmer.set(intensity, immediately)) {
+	if (dimmer.set(intensity, fade)) {
 		currentState.state.dimmer = intensity;
 		return ERR_SUCCESS;
 	}
@@ -157,7 +157,7 @@ cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity) {
 
 	// Turn dimmer on, then relay off, to prevent flicker.
 	// Use unchecked, as this function is called via setDimmer().
-	setDimmerUnchecked(intensity, false);
+	setDimmerUnchecked(intensity, true);
 //	setRelay(false);
 
 	if (dimmerCheckCountDown == 0) {
@@ -194,7 +194,7 @@ void SafeSwitch::checkDimmerPower() {
 		// Dimmer didn't work: mark dimmer as not powered, and turn relay on instead.
 		setDimmerPowered(false);
 		setRelayUnchecked(true);
-		setDimmerUnchecked(0, true);
+		setDimmerUnchecked(0, false);
 		sendUnexpectedStateUpdate();
 	}
 //	else {
@@ -220,7 +220,7 @@ void SafeSwitch::setDimmerPowered(bool powered) {
 
 void SafeSwitch::forceSwitchOff() {
 	LOGw("forceSwitchOff");
-	dimmer.set(0, true);
+	dimmer.set(0, false);
 	relay.set(false);
 
 	currentState.state.relay = 0;
@@ -236,7 +236,7 @@ void SafeSwitch::forceRelayOnAndDimmerOff() {
 	// First set relay on, so that the switch doesn't first turn off, and later on again.
 	// The relay protects the dimmer, because it opens a parallel circuit for the current to flow through.
 	relay.set(true);
-	dimmer.set(0, true);
+	dimmer.set(0, false);
 
 	currentState.state.relay = 1;
 	currentState.state.dimmer = 0;
@@ -359,7 +359,7 @@ void SafeSwitch::goingToDfu() {
 	}
 	if (turnOnRelay) {
 		setRelayUnchecked(true);
-		setDimmerUnchecked(0, true);
+		setDimmerUnchecked(0, false);
 		sendUnexpectedStateUpdate();
 	}
 }
