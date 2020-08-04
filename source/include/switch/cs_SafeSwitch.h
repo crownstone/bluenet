@@ -162,7 +162,7 @@ private:
 	 * Sets dimmer powered.
 	 * Does not check: safe, powered.
 	 */
-	cs_ret_code_t startDimmerPowerCheck(uint8_t intensity);
+	cs_ret_code_t startDimmerPowerCheck(uint8_t intensity, bool fade);
 
 	/**
 	 * Cancel power usage check.
@@ -198,6 +198,7 @@ private:
 
 	/**
 	 * Turn relay on and dimmer off, without any checks.
+	 * Also disables dimming in state.
 	 * Also send an event.
 	 */
 	void forceRelayOnAndDimmerOff();

@@ -107,7 +107,7 @@ cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity, bool fade) {
 			return ERR_UNSAFE;
 		}
 		if (!dimmerPowered) {
-			return startDimmerPowerCheck(intensity);
+			return startDimmerPowerCheck(intensity, fade);
 		}
 	}
 	return setDimmerUnchecked(intensity, fade);
@@ -128,7 +128,7 @@ cs_ret_code_t SafeSwitch::setDimmerUnchecked(uint8_t intensity, bool fade) {
 
 // ======================== Dimmer power check stuff ========================
 
-cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity) {
+cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity, bool fade) {
 	LOGSafeSwitch("startDimmerPowerCheck");
 	if (checkedDimmerPowerUsage || dimmerPowered) {
 		return ERR_NOT_AVAILABLE;
@@ -157,7 +157,7 @@ cs_ret_code_t SafeSwitch::startDimmerPowerCheck(uint8_t intensity) {
 
 	// Turn dimmer on, then relay off, to prevent flicker.
 	// Use unchecked, as this function is called via setDimmer().
-	setDimmerUnchecked(intensity, true);
+	setDimmerUnchecked(intensity, fade);
 //	setRelay(false);
 
 	if (dimmerCheckCountDown == 0) {
@@ -240,7 +240,12 @@ void SafeSwitch::forceRelayOnAndDimmerOff() {
 
 	currentState.state.relay = 1;
 	currentState.state.dimmer = 0;
+
 	sendUnexpectedStateUpdate();
+
+	// Disable dimming, as it's likely that dimming shouldn't be allowed for this device.
+	TYPIFY(CONFIG_PWM_ALLOWED) dimmingEnabled = 0;
+	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &dimmingEnabled, sizeof(dimmingEnabled));
 
 	event_t eventRelay(CS_TYPE::EVT_RELAY_FORCED_ON);
 	EventDispatcher::getInstance().dispatch(eventRelay);

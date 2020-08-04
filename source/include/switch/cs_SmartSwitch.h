@@ -152,6 +152,8 @@ private:
 	 */
 	cs_ret_code_t setAllowDimming(bool allowed);
 
+	void handleAllowDimmingSet();
+
 	cs_ret_code_t handleCommandSetRelay(bool on);
 
 	cs_ret_code_t handleCommandSetDimmer(uint8_t intensity);

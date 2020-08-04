@@ -5,6 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <events/cs_Event.h>
 #include <storage/cs_StateData.h>
 #include <storage/cs_State.h>
 #include <switch/cs_SmartSwitch.h>
@@ -122,7 +123,7 @@ cs_ret_code_t SmartSwitch::resolveIntendedState() {
 		// Try to set dimmed value, and then turn relay off.
 		// If that doesn't work, turn on relay instead.
 		// Only fade if relay isn't on right now (else you get the effect that you go from 100% to 0%, then fade to N%).
-		bool fade = !(getActualState().state.relay);
+		bool fade = !(currentState.state.relay && safeSwitch.isRelayStateAccurate());
 		cs_ret_code_t retCode = setDimmer(intendedState, fade);
 		LOGSmartSwitchDebug("allowDimming=%u", allowDimming);
 		if (retCode == ERR_SUCCESS) {
@@ -239,13 +240,19 @@ cs_ret_code_t SmartSwitch::setAllowDimming(bool allowed) {
 	LOGi("setAllowDimming %u", allowed);
 	allowDimming = allowed;
 	State::getInstance().set(CS_TYPE::CONFIG_PWM_ALLOWED, &allowDimming, sizeof(allowDimming));
+
+	// This will trigger event CONFIG_PWM_ALLOWED, which will call handleAllowDimmingSet().
+//	handleAllowDimmingSet();
+	return ERR_SUCCESS;
+}
+
+void SmartSwitch::handleAllowDimmingSet() {
 	// Update the switch state, as it may need to be changed.
 	[[maybe_unused]] cs_ret_code_t retCode = resolveIntendedState();
 	uint8_t newIntensity = getCurrentIntensity();
 	if (newIntensity != intendedState) {
 		sendUnexpectedIntensityUpdate(newIntensity);
 	}
-	return ERR_SUCCESS;
 }
 
 cs_ret_code_t SmartSwitch::handleCommandSetRelay(bool on) {
@@ -293,6 +300,11 @@ void SmartSwitch::handleEvent(event_t& evt) {
 		}
 		case CS_TYPE::EVT_DIMMER_POWERED: {
 			// Fade to intended intensity?
+			break;
+		}
+		case CS_TYPE::CONFIG_PWM_ALLOWED: {
+			allowDimming = *reinterpret_cast<TYPIFY(CONFIG_PWM_ALLOWED)*>(evt.data);
+			handleAllowDimmingSet();
 			break;
 		}
 		default:
