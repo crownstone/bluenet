@@ -52,6 +52,7 @@
 
 #define HARDFAULT_HANDLER_ENABLED 1
 
+#define APP_SCHEDULER_WITH_PROFILER 1
 
 
 #if CS_SERIAL_NRF_LOG_ENABLED > 0
@@ -68,9 +69,9 @@
 // <3=> Info
 // <4=> Debug
 #define NRF_LOG_DEFAULT_LEVEL 4
-#define NRF_SDH_SOC_LOG_LEVEL 3
-#define NRF_SDH_BLE_LOG_LEVEL 3
-#define NRF_SDH_LOG_LEVEL 3
+#define NRF_SDH_SOC_LOG_LEVEL 4
+#define NRF_SDH_BLE_LOG_LEVEL 4
+#define NRF_SDH_LOG_LEVEL 4
 
 #define NRF_LOG_USES_COLORS 1
 #define NRF_LOG_WARNING_COLOR 4
@@ -128,7 +129,8 @@
 
 #define NRF_SDH_BLE_ENABLED 1
 #define NRF_SDH_BLE_PERIPHERAL_LINK_COUNT 1
-#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69 // Advised by mesh
+#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 69 // Advised by mesh, see MESH_GATT_MTU_SIZE_MAX.
+//#define NRF_SDH_BLE_GATT_MAX_MTU_SIZE 72 // For microapps, we want a multiple of 4. Ok this doesn't make sense, as there's a L2CAP header of 3 bytes?
 #define NRF_SDH_BLE_GATTS_ATTR_TAB_SIZE ATTR_TABLE_SIZE
 #define NRF_SDH_BLE_VS_UUID_COUNT MAX_NUM_VS_SERVICES
 /**

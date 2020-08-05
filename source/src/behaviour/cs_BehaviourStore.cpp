@@ -16,6 +16,7 @@
 #include <util/cs_Hash.h>
 #include <util/cs_WireFormat.h>
 
+#define LOGBehaviourStoreInfo LOGi
 #define LOGBehaviourStoreDebug LOGd
 
 // allocate space for the behaviours.
@@ -100,7 +101,7 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	if (empty_index >= MaxBehaviours) {
 		return ERR_NO_SPACE;
 	}
-	LOGd("Add behaviour to index %u", empty_index);
+	LOGBehaviourStoreInfo("Add behaviour to index %u", empty_index);
 	switch (typ) {
 		case SwitchBehaviour::Type::Switch:{
 			if (bufSize != WireFormat::size<SwitchBehaviour>()) {
@@ -108,7 +109,7 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 						bufSize, typ, WireFormat::size<SwitchBehaviour>());
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
-			LOGd("Allocating new SwitchBehaviour");
+			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
 			// no need to delete previous entry, already checked for nullptr
 			activeBehaviours[empty_index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(buf, bufSize));
 			activeBehaviours[empty_index]->print();
@@ -125,7 +126,7 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 						bufSize, typ, WireFormat::size<TwilightBehaviour>());
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
-			LOGd("Allocating new TwilightBehaviour");
+			LOGBehaviourStoreDebug("Allocating new TwilightBehaviour");
 			// no need to delete previous entry, already checked for nullptr
 			activeBehaviours[empty_index] = new TwilightBehaviour(WireFormat::deserialize<TwilightBehaviour>(buf, bufSize));
 			activeBehaviours[empty_index]->print();
@@ -137,14 +138,12 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 			return ERR_SUCCESS;
 		}
 		case SwitchBehaviour::Type::Extended:{
-			// LOGe("Not implemented! Save extended behaviour");
-			// return ERR_WRONG_PARAMETER;;
 			if (bufSize != WireFormat::size<ExtendedSwitchBehaviour>()) {
 				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d), expected size(%d)",
 						bufSize, typ, WireFormat::size<ExtendedSwitchBehaviour>());
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
-			LOGd("Allocating new ExtendedSwitchBehaviour");
+			LOGBehaviourStoreDebug("Allocating new ExtendedSwitchBehaviour");
 			// no need to delete previous entry, already checked for nullptr
 			activeBehaviours[empty_index] = new ExtendedSwitchBehaviour(WireFormat::deserialize<ExtendedSwitchBehaviour>(buf, bufSize));
 			activeBehaviours[empty_index]->print();
@@ -198,7 +197,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 	uint8_t index = dat[0];
 	Behaviour::Type type = static_cast<Behaviour::Type>(dat[indexSize]);
 
-	LOGi("Replace behaviour at ind=%u, type=%u", index, static_cast<uint8_t>(type));
+	LOGBehaviourStoreInfo("Replace behaviour at ind=%u, type=%u", index, static_cast<uint8_t>(type));
 
 	switch(type) {
 		case Behaviour::Type::Switch:{
@@ -208,7 +207,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 			removeBehaviour(index);
 
-			LOGd("Allocating new SwitchBehaviour");
+			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
 			activeBehaviours[index] = new SwitchBehaviour(WireFormat::deserialize<SwitchBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
 			activeBehaviours[index]->print();
 
@@ -225,7 +224,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 			removeBehaviour(index);
 
-			LOGd("Allocating new TwilightBehaviour");
+			LOGBehaviourStoreDebug("Allocating new TwilightBehaviour");
 			activeBehaviours[index] = new TwilightBehaviour( WireFormat::deserialize<TwilightBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
 			activeBehaviours[index]->print();
 
@@ -243,7 +242,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 			removeBehaviour(index);
 
-			LOGd("Allocating new SwitchBehaviour");
+			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
 			activeBehaviours[index] = new ExtendedSwitchBehaviour(WireFormat::deserialize<ExtendedSwitchBehaviour>(evt.getData() + indexSize, evt.size - indexSize));
 			activeBehaviours[index]->print();
 
@@ -270,7 +269,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 void BehaviourStore::handleRemoveBehaviour(event_t& evt) {
 	uint8_t index = *reinterpret_cast<TYPIFY(CMD_REMOVE_BEHAVIOUR)*>(evt.data);
-	LOGd("remove behaviour event %d", index);
+	LOGBehaviourStoreInfo("Remove behaviour %u", index);
 
 	evt.result.returnCode = removeBehaviour(index);
 
@@ -284,11 +283,11 @@ void BehaviourStore::handleRemoveBehaviour(event_t& evt) {
 
 void BehaviourStore::handleGetBehaviour(event_t& evt) {
 	uint8_t index = *reinterpret_cast<TYPIFY(CMD_GET_BEHAVIOUR)*>(evt.data);
-	LOGd("Get behaviour event %d ", index);
+	LOGBehaviourStoreInfo("Get behaviour %u ", index);
 
 	// validate behaviour index
 	if (index >= MaxBehaviours || activeBehaviours[index] == nullptr) {
-		LOGd("ERR_NOT_FOUND");
+		LOGBehaviourStoreDebug("ERR_NOT_FOUND");
 		evt.result.returnCode = ERR_NOT_FOUND;
 		return;
 	}
@@ -297,7 +296,7 @@ void BehaviourStore::handleGetBehaviour(event_t& evt) {
 
 	// validate buffer
 	if (evt.result.buf.data == nullptr) {
-		LOGd("ERR_BUFFER_UNASSIGNED");
+		LOGw("ERR_BUFFER_UNASSIGNED");
 		evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
 		return;
 	}
@@ -305,7 +304,7 @@ void BehaviourStore::handleGetBehaviour(event_t& evt) {
 	// validate size
 	if (evt.result.buf.len < sizeof(uint8_t) + activeBehaviours[index]->serializedSize()) {
 		// cannot communicate the result, so won't do anything.
-		LOGd("ERR_BUFFER_TOO_SMALL");
+		LOGw("ERR_BUFFER_TOO_SMALL");
 		evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
 		return;
 	}
@@ -320,15 +319,15 @@ void BehaviourStore::handleGetBehaviour(event_t& evt) {
 }
 
 void BehaviourStore::handleGetBehaviourIndices(event_t& evt) {
-	LOGd("handle EVT_GET_BEHAVIOUR_INDICES");
+	LOGBehaviourStoreDebug("handle EVT_GET_BEHAVIOUR_INDICES");
 	if (evt.result.buf.data == nullptr) {
-		LOGd("ERR_BUFFER_UNASSIGNED");
+		LOGw("ERR_BUFFER_UNASSIGNED");
 		evt.result.returnCode = ERR_BUFFER_UNASSIGNED;
 		return;
 	}
 
 	if ( evt.result.buf.len < MaxBehaviours * (sizeof(uint8_t) + sizeof(uint32_t)) ) {
-		LOGd("ERR_BUFFER_TOO_SMALL");
+		LOGw("ERR_BUFFER_TOO_SMALL");
 		evt.result.returnCode = ERR_BUFFER_TOO_SMALL;
 		return;
 	}
@@ -345,11 +344,11 @@ void BehaviourStore::handleGetBehaviourIndices(event_t& evt) {
 							activeBehaviours[i]->serializedSize());
 			listSize += sizeof(uint32_t);
 
-			LOGd("behaviour found at index %d", i);
+			LOGBehaviourStoreDebug("behaviour found at index %d", i);
 		}
 	}
 	if (listSize == 0) {
-		LOGi("No behaviour found");
+		LOGBehaviourStoreInfo("No behaviour found");
 	}
 	evt.result.dataSize = listSize;
 	evt.result.returnCode = ERR_SUCCESS;
@@ -367,12 +366,12 @@ ErrorCodesGeneral BehaviourStore::removeBehaviour(uint8_t index) {
 		return ERR_WRONG_PARAMETER;
 	}
 	if (activeBehaviours[index] == nullptr) {
-		LOGi("Already removed");
+		LOGBehaviourStoreDebug("Already removed");
 		return ERR_SUCCESS;
 	}
 	auto type = activeBehaviours[index]->getType();
 
-	LOGd("deleting behaviour");
+	LOGBehaviourStoreDebug("deleting behaviour");
 	delete activeBehaviours[index];
 	activeBehaviours[index] = nullptr;
 
@@ -437,7 +436,7 @@ void BehaviourStore::LoadBehavioursFromMemory(CS_TYPE BehaviourCsType) {
 					delete activeBehaviours[iter];
 				}
 				activeBehaviours[iter] = new BehaviourType(WireFormat::deserialize<BehaviourType>(data_array, data_size));
-				LOGi("Loaded behaviour at ind=%u:", iter);
+				LOGBehaviourStoreInfo("Loaded behaviour at ind=%u:", iter);
 				activeBehaviours[iter]->print();
 			}
 		}

@@ -6,14 +6,15 @@
  */
 #pragma once
 
+#include <cfg/cs_Config.h>
 #include <cstdint>
-#include "cfg/cs_Config.h"
-#include "protocol/cs_CmdSource.h"
-#include "protocol/cs_CommandTypes.h"
-#include "protocol/cs_ErrorCodes.h"
-#include "protocol/cs_ServiceDataPackets.h"
-#include "protocol/cs_Typedefs.h"
-#include "protocol/mesh/cs_MeshModelPackets.h"
+#include <protocol/cs_CmdSource.h>
+#include <protocol/cs_CommandTypes.h>
+#include <protocol/cs_ErrorCodes.h>
+#include <protocol/cs_MicroAppPackets.h>
+#include <protocol/cs_ServiceDataPackets.h>
+#include <protocol/cs_Typedefs.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 
 
 #define LEGACY_MULTI_SWITCH_HEADER_SIZE (1+1)
@@ -23,10 +24,9 @@
 #define SESSION_NONCE_LENGTH 	5
 
 /**
- * Packets (structs) that are used over the air.
+ * Packets (structs) that are used over the air, over uart, or stored in flash.
  *
- * These should be plain structs, without constructors, or member functions.
- * Instead of a constructor, you can add a function that fills a struct.
+ * Constructors can be added, as they do not impact the size of the struct.
  *
  * If the definition becomes large, move it to its own file and include it in this file.
  */
@@ -193,8 +193,31 @@ union __attribute__((__packed__)) switch_state_t {
 };
 
 /**
+ * Switch command values.
+ *
+ * We could also write this as struct with 7 bits value,
+ * and 1 bit that determines whether the value is switch value (0-100), or a special value (enum).
+ */
+enum SwitchCommandValue {
+	CS_SWITCH_CMD_VAL_OFF = 0,
+	// Dimmed from 1 - 99
+	CS_SWITCH_CMD_VAL_FULLY_ON = 100,
+	CS_SWITCH_CMD_VAL_NONE = 128,      // For printing: the value is set to nothing.
+	CS_SWITCH_CMD_VAL_DEBUG_RESET_ALL = 129,
+	CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG = 130,
+	CS_SWITCH_CMD_VAL_DEBUG_RESET_OVERRIDE = 131,
+	CS_SWITCH_CMD_VAL_DEBUG_RESET_AGG_OVERRIDE = 132,
+
+	CS_SWITCH_CMD_VAL_TOGGLE = 253,    // Switch OFF when currently on, switch to SMART_ON when currently off.
+	CS_SWITCH_CMD_VAL_BEHAVIOUR = 254, // Switch to the value according to behaviour rules.
+	CS_SWITCH_CMD_VAL_SMART_ON = 255   // Switch on, the value will be determined by behaviour rules.
+};
+
+/**
  * A single multi switch item.
- * switchCmd: 0 = off, 100 = fully on.
+ *
+ * id:        Command is targeted to stone with this ID.
+ * switchCmd: SwitchCommandValue
  */
 struct __attribute__((packed)) multi_switch_item_t {
 	stone_id_t id;
@@ -244,22 +267,28 @@ struct __attribute__((__packed__)) factory_reset_message_payload_t {
 };
 
 struct __attribute__((packed)) sun_time_t {
-	uint32_t sunrise = 8*60*60;
-	uint32_t sunset = 19*60*60;
+	uint32_t sunrise = 8*60*60; // Time in seconds after midnight that the sun rises.
+	uint32_t sunset = 19*60*60; // Time in seconds after midnight that the sun sets.
 };
 
 /**
  * Packet to change ibeacon config ID.
  *
- * Timestamp: when to start executing the change.
- * Interval: change every N seconds after timestamp.
+ * Timestamp: when to set the ID for the first time.
+ * Interval: set ID every N seconds after timestamp.
  * Set interval = 0 to execute only once.
  * Set timestamp = 0, and interval = 0 to execute now.
+ * A stored entry with timestamp = 0 and interval = 0, will be considered empty.
  */
 struct __attribute__((__packed__)) ibeacon_config_id_packet_t {
-	uint8_t ibeaconConfigId = 0;
 	uint32_t timestamp = 0;
 	uint16_t interval = 0;
+};
+
+// See ibeacon_config_id_packet_t
+struct __attribute__((__packed__)) set_ibeacon_config_id_packet_t {
+	uint8_t ibeaconConfigId = 0;
+	ibeacon_config_id_packet_t config;
 };
 
 struct __attribute__((__packed__)) led_message_payload_t {
@@ -309,6 +338,13 @@ struct __attribute__((packed)) register_tracked_device_packet_t {
 
 typedef register_tracked_device_packet_t update_tracked_device_packet_t;
 
+struct __attribute__((packed)) tracked_device_heartbeat_packet_t {
+	uint16_t deviceId;
+	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE]; // Should match the token that's registered.
+	uint8_t locationId = 0;
+	uint8_t timeToLiveMinutes = 0; // When set, heartbeats will be simulated until timeout.
+};
+
 struct cs_mesh_iv_index_t {
 	// Same as net_flash_data_iv_index_t
     uint32_t iv_index;
@@ -346,6 +382,72 @@ struct __attribute__((packed)) cs_uicr_data_t {
 		} fields;
 		uint32_t asInt;
 	} productionDateHousing;
+};
+
+struct __attribute__((packed)) cs_adc_restarts_t {
+	uint32_t count = 0; // Number of ADC restarts since boot.
+	uint32_t lastTimestamp = 0; // Timestamp of last ADC restart.
+};
+
+struct __attribute__((packed)) cs_adc_channel_swaps_t {
+	uint32_t count = 0; // Number of detected ADC channel swaps since boot.
+	uint32_t lastTimestamp = 0; // Timestamp of last detected ADC channel swap.
+};
+
+enum PowerSamplesType {
+	POWER_SAMPLES_TYPE_SWITCHCRAFT = 0,
+	POWER_SAMPLES_TYPE_SWITCHCRAFT_NON_TRIGGERED = 1,
+	POWER_SAMPLES_TYPE_NOW_FILTERED = 2,
+	POWER_SAMPLES_TYPE_NOW_UNFILTERED = 3,
+	POWER_SAMPLES_TYPE_SOFTFUSE = 4,
+};
+
+struct __attribute__((packed)) cs_power_samples_header_t {
+	uint8_t type;                 // PowerSamplesType.
+	uint8_t index = 0;            // Some types have multiple lists of samples.
+	uint16_t count = 0;           // Number of samples.
+	uint32_t unixTimestamp;       // Unix timestamp of time the samples have been set.
+	uint16_t delayUs;             // Delay of the measurement.
+	uint16_t sampleIntervalUs;    // Time between samples.
+	uint16_t reserved = 0;
+	int16_t offset;               // Calculated offset (mean) of the samples.
+	float multiplier;             // Multiply the sample value with this value to get a value in ampere, or volt.
+	// Followed by: int16_t samples[count]
+};
+
+struct __attribute__((packed)) cs_power_samples_request_t {
+	uint8_t type;                 // PowerSamplesType.
+	uint8_t index = 0;            // Some types have multiple lists of samples.
+};
+
+struct __attribute__((packed)) cs_switch_history_header_t {
+	uint8_t count;                // Number of items.
+};
+
+struct __attribute__((packed)) cs_switch_history_item_t {
+	uint32_t timestamp;           // Timestamp of the switch command.
+	uint8_t value;                // Switch command value.
+	switch_state_t state;         // Switch state after executing the command.
+	cmd_source_t source;          // Source of the command.
+
+	cs_switch_history_item_t(uint32_t timestamp, uint8_t switchValue, switch_state_t switchState, const cmd_source_t& source):
+		timestamp(timestamp),
+		value(switchValue),
+		state(switchState),
+		source(source)
+	{}
+};
+
+struct __attribute__((packed)) cs_gpregret_result_t {
+	uint8_t index;                // Which GPREGRET
+	uint32_t value;               // The value of this GPREGRET
+};
+
+struct __attribute__((packed)) cs_ram_stats_t {
+	uint32_t minStackEnd = 0xFFFFFFFF;
+	uint32_t maxHeapEnd = 0;
+	uint32_t minFree = 0;
+	uint32_t numSbrkFails = 0;
 };
 
 

@@ -10,10 +10,13 @@
 #include "protocol/cs_ErrorCodes.h"
 
 /**
- * Packets (structs) that are used internally.
+ * Packets (structs) that are used internally in the firmware, and can be changed freely.
+ * This means packets that:
+ * - do not go over the air
+ * - do not go over uart
+ * - are not stored in flash
  *
- * These should be plain structs, without constructors, or member functions.
- * Instead of a constructor, you can add a function that fills a struct.
+ * Constructors can be added, as they do not impact the size of the struct.
  *
  * If the definition becomes large, move it to its own file and include it in this file.
  */
@@ -29,6 +32,7 @@
  */
 #define ADVERTISEMENT_DATA_MAX_SIZE 31
 
+
 /**
  * Variable length data encapsulation in terms of length and pointer to data.
  */
@@ -37,8 +41,8 @@ struct cs_data_t {
 	cs_buffer_size_t len = 0;      /** < Length of data. */
 
 	cs_data_t():
-		data(),
-		len()
+		data(NULL),
+		len(0)
 	{}
 	cs_data_t(buffer_ptr_t buf, cs_buffer_size_t size):
 		data(buf),
@@ -99,13 +103,9 @@ struct __attribute__((packed)) scanned_device_t {
 /**
  * A single multi switch command.
  * switchCmd: 0 = off, 100 = fully on.
- * delay: Delay in seconds.
- * source: The source that issued the command.
  */
 struct __attribute__((packed)) internal_multi_switch_item_cmd_t {
 	uint8_t switchCmd;
-	uint16_t delay;
-	cmd_source_t source;
 };
 
 /**
@@ -126,7 +126,6 @@ struct __attribute__((packed)) control_command_packet_t {
 	buffer_ptr_t data;
 	size16_t size;
 	EncryptionAccessLevel accessLevel;
-	cmd_source_t source;
 };
 
 /**
@@ -228,3 +227,9 @@ struct __attribute__((packed)) internal_register_tracked_device_packet_t {
 };
 
 typedef internal_register_tracked_device_packet_t internal_update_tracked_device_packet_t;
+
+struct __attribute__((packed)) internal_tracked_device_heartbeat_packet_t {
+	tracked_device_heartbeat_packet_t data;
+	uint8_t accessLevel = NOT_SET;
+};
+

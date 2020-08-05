@@ -11,6 +11,7 @@
 #include <events/cs_EventListener.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_CircularBuffer.h>
+#include <structs/buffer/cs_InterleavedBuffer.h>
 #include <third/Median.h>
 
 typedef void (*ps_zero_crossing_cb_t) ();
@@ -40,7 +41,7 @@ public:
 	 *  Calculates the power usage, updates the state.
 	 *  Sends the samples if the central is subscribed for that.
 	 */
-	void powerSampleAdcDone(cs_adc_buffer_id_t bufIndex);
+	void powerSampleAdcDone(buffer_id_t bufIndex);
 
 	/** Fill up the current curve and send it out over bluetooth
 	 * @type specifies over which characteristic the current curve should be sent.
@@ -61,7 +62,7 @@ public:
 	 * Struct that defines the buffer received from the ADC sampler in scanning mode.
 	 */
 	typedef struct {
-		nrf_saadc_value_t* buf;
+		sample_value_t* buf;
 		uint16_t bufSize;
 		uint16_t numChannels;
 		uint16_t voltageIndex;
@@ -74,6 +75,13 @@ public:
 private:
 	PowerSampling();
 
+	// Number of filtered buffers for processing.
+	// Should be at least as large as number of buffers required for recognize switch.
+	const static uint8_t numFilteredBuffersForProcessing = 4;
+
+	// Currently hard coded at 1.
+	const static uint8_t numUnfilteredBuffers = 1;
+
 	//! Variable to keep up whether power sampling is initialized.
 	bool _isInitialized;
 
@@ -82,6 +90,18 @@ private:
 
 	//! Operation mode of this device.
 	OperationMode _operationMode;
+
+	// Queue of buffers we can use for processing.
+	// If queue size == 1:
+	// - buffer[0] = last filtered.
+	// If queue size > 1:
+	// - buffer[size] = last unfiltered.
+	// - buffer[size-1] = last filtered.
+	// - buffer[size-2] = previous filtered.
+	CircularBuffer<buffer_id_t> _bufferQueue;
+
+	cs_power_samples_header_t _lastSoftfuse;
+	int16_t _lastSoftfuseSamples[InterleavedBuffer::getChannelLength()] = {0};
 
 	TYPIFY(CONFIG_VOLTAGE_MULTIPLIER) _voltageMultiplier; //! Voltage multiplier from settings.
 	TYPIFY(CONFIG_CURRENT_MULTIPLIER) _currentMultiplier; //! Current multiplier from settings.
@@ -94,8 +114,8 @@ private:
 	uint16_t _avgPowerDiscount;
 
 	int32_t _boardPowerZero; //! Measured power when there is no load for this board (mW).
-	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value (times 1000).
-	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value (times 1000).
+	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value (times 1024).
+	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value (times 1024).
 	bool _recalibrateZeroVoltage; //! Whether or not the zero voltage value should be recalculated.
 	bool _recalibrateZeroCurrent; //! Whether or not the zero current value should be recalculated.
 //	bool _zeroVoltageInitialized; //! True when zero of voltage has been initialized.
@@ -157,6 +177,13 @@ private:
 		uint32_t asInt;
 	} _logsEnabled;
 
+	buffer_id_t _lastBufIndex = 0;
+	buffer_id_t _lastFilteredBufIndex = 0;
+
+	cs_adc_restarts_t _adcRestarts;
+	cs_adc_channel_swaps_t _adcChannelSwaps;
+
+
 	/** Initialize the moving averages
 	 */
 	void initAverages();
@@ -175,7 +202,7 @@ private:
 
 	/** Filter the samples
 	 */
-	void filter(cs_adc_buffer_id_t buffer_id, channel_id_t channel_id);
+	void filter(buffer_id_t bufIndexIn, buffer_id_t bufIndexOut, channel_id_t channel_id);
 
 	/**
 	 * Checks if voltage and current index are swapped.
@@ -183,7 +210,7 @@ private:
 	 * Checks if previous voltage samples look more like this buffer voltage samples or current samples.
 	 * Assumes previous buffer is valid, and of same size as this buffer.
 	 */
-	bool isVoltageAndCurrentSwapped(power_t & power, nrf_saadc_value_t* prevBuf);
+	bool isVoltageAndCurrentSwapped(power_t & power, sample_value_t* prevBuf);
 
 	/** Calculate the average power usage
 	 */
@@ -209,6 +236,8 @@ private:
 	/** Start IGBT failure detection
 	 */
 	void startIgbtFailureDetection();
+
+	void handleGetPowerSamples(PowerSamplesType type, uint8_t index, cs_result_t& result);
 
 	void toggleVoltageChannelInput();
 

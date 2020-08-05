@@ -110,13 +110,12 @@ cs_ret_code_t MeshMsgSender::sendNoop(uint8_t transmissions) {
 	return addToQueue(item);
 }
 
-cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_item_t* switchItem, uint8_t transmissions) {
+cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_item_t* switchItem, const cmd_source_with_counter_t& source, uint8_t transmissions) {
 	LOGMeshModelDebug("sendMultiSwitchItem");
 	cs_mesh_model_msg_multi_switch_item_t meshItem;
 	meshItem.id = switchItem->id;
 	meshItem.switchCmd = switchItem->cmd.switchCmd;
-	meshItem.delay = switchItem->cmd.delay;
-	meshItem.source = switchItem->cmd.source;
+	meshItem.source = source;
 
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = switchItem->id;
@@ -128,21 +127,23 @@ cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_ite
 	item.msgPayload.len = sizeof(meshItem);
 	item.msgPayload.data = (uint8_t*)(&meshItem);
 
-	switch (switchItem->cmd.source.sourceId) {
-		case CS_CMD_SOURCE_CONNECTION:
-		case CS_CMD_SOURCE_UART: {
-			LOGMeshModelInfo("Source connection: set high transmission count");
-			transmissions = CS_MESH_RELIABILITY_HIGH;
-			// Keep using unreliable for now, as reliable will be handled 1 by 1 instead of interleaved.
-//			LOGMeshModelInfo("Source connection or uart: use acked msg");
-//			item.reliable = true;
-//			item.numIds = 1;
-//			item.metaData.transmissionsOrTimeout = 0;
-//			item.stoneIdsPtr = (stone_id_t*) &(switchItem->id);
-			break;
+	if (source.source.type == CS_CMD_SOURCE_TYPE_ENUM) {
+		switch (source.source.id) {
+			case CS_CMD_SOURCE_CONNECTION:
+			case CS_CMD_SOURCE_UART: {
+				LOGMeshModelInfo("Source connection: set high transmission count");
+				transmissions = CS_MESH_RELIABILITY_HIGH;
+				// Keep using unreliable for now, as reliable will be handled 1 by 1 instead of interleaved.
+//				LOGMeshModelInfo("Source connection or uart: use acked msg");
+//				item.reliable = true;
+//				item.numIds = 1;
+//				item.metaData.transmissionsOrTimeout = 0;
+//				item.stoneIdsPtr = (stone_id_t*) &(switchItem->id);
+				break;
+			}
+			default:
+				break;
 		}
-		default:
-			break;
 	}
 
 	// Remove old messages of same type and with same target id.
@@ -210,7 +211,7 @@ cs_ret_code_t MeshMsgSender::sendProfileLocation(const cs_mesh_model_msg_profile
 }
 
 cs_ret_code_t MeshMsgSender::sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* packet, uint8_t transmissions) {
-	LOGd("sendTrackedDeviceRegister");
+	LOGd("sendTrackedDeviceRegister id=%u profile=%u location=%u", packet->deviceId, packet->profileId, packet->locationId);
 
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = packet->deviceId;
@@ -228,11 +229,29 @@ cs_ret_code_t MeshMsgSender::sendTrackedDeviceRegister(const cs_mesh_model_msg_d
 }
 
 cs_ret_code_t MeshMsgSender::sendTrackedDeviceToken(const cs_mesh_model_msg_device_token_t* packet, uint8_t transmissions) {
-	LOGd("sendTrackedDeviceToken");
+	LOGd("sendTrackedDeviceToken id=%u TTL=%u token=%u %u %u", packet->deviceId, packet->ttlMinutes, packet->deviceToken[0], packet->deviceToken[1], packet->deviceToken[2]);
 
 	MeshUtil::cs_mesh_queue_item_t item;
 	item.metaData.id = packet->deviceId;
 	item.metaData.type = CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN;
+	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
+	item.metaData.priority = false;
+	item.reliable = false;
+	item.broadcast = true;
+	item.msgPayload.len = sizeof(*packet);
+	item.msgPayload.data = (uint8_t*)packet;
+
+	// Remove old messages of same type, and device id, as only the latest token is of interest.
+	remFromQueue(item);
+	return addToQueue(item);
+}
+
+cs_ret_code_t MeshMsgSender::sendTrackedDeviceHeartbeat(const cs_mesh_model_msg_device_heartbeat_t* packet, uint8_t transmissions) {
+	LOGd("sendTrackedDeviceHeartbeat id=%u location=%u TTL=%u", packet->deviceId, packet->locationId, packet->ttlMinutes);
+
+	MeshUtil::cs_mesh_queue_item_t item;
+	item.metaData.id = packet->deviceId;
+	item.metaData.type = CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT;
 	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOW : transmissions;
 	item.metaData.priority = false;
 	item.reliable = false;
@@ -295,18 +314,19 @@ cs_ret_code_t MeshMsgSender::remFromQueue(MeshUtil::cs_mesh_queue_item_t & item)
 
 
 
-cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t* command) {
+cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t* command, const cmd_source_with_counter_t& source) {
 	LOGi("handleSendMeshCommand type=%u idCount=%u flags=%u timeoutOrTransmissions=%u",
 			command->header.type,
 			command->header.idCount,
 			command->header.flags.asInt,
 			command->header.timeoutOrTransmissions
 			);
-	LOGi("  ctrlType=%u ctrlSize=%u accessLevel=%u sourceId=%u",
+	LOGi("  ctrlType=%u ctrlSize=%u accessLevel=%u sourceType=%u sourceId=%u",
 			command->controlCommand.type,
 			command->controlCommand.size,
 			command->controlCommand.accessLevel,
-			command->controlCommand.source.sourceId
+			source.source.type,
+			source.source.id
 			);
 	for (uint8_t i=0; i<command->header.idCount; ++i) {
 		LOGd("  id: %u", command->targetIds[i]);
@@ -362,7 +382,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			return sendNoop(command->header.timeoutOrTransmissions);
 		}
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID: {
-			if (command->controlCommand.size != sizeof(ibeacon_config_id_packet_t)) {
+			if (command->controlCommand.size != sizeof(set_ibeacon_config_id_packet_t)) {
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 			item.metaData.id = 0;
@@ -401,8 +421,8 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 				LOGw("Can't shorten accessLevel %u", command->controlCommand.accessLevel);
 				return ERR_WRONG_PARAMETER;
 			}
-			if (!MeshUtil::canShortenSource(command->controlCommand.source)) {
-				LOGw("Can't shorten source id %u", command->controlCommand.source.sourceId);
+			if (!MeshUtil::canShortenSource(source)) {
+				LOGw("Can't shorten source type=%u id=%u", source.source.type, source.source.id);
 				return ERR_WRONG_PARAMETER;
 			}
 
@@ -410,7 +430,7 @@ cs_ret_code_t MeshMsgSender::handleSendMeshCommand(mesh_control_command_packet_t
 			meshStateHeader->header.id = stateHeader->stateId;
 			meshStateHeader->header.persistenceMode = stateHeader->persistenceMode;
 			meshStateHeader->accessLevel = MeshUtil::getShortenedAccessLevel(command->controlCommand.accessLevel);
-			meshStateHeader->sourceId = MeshUtil::getShortenedSource(command->controlCommand.source);
+			meshStateHeader->sourceId = MeshUtil::getShortenedSource(source);
 
 			memcpy(msg + sizeof(*meshStateHeader), command->controlCommand.data + stateHeaderSize, statePayloadSize);
 
@@ -454,7 +474,7 @@ void MeshMsgSender::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_MULTI_SWITCH: {
 			TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)* packet = (TYPIFY(CMD_SEND_MESH_MSG_MULTI_SWITCH)*)event.data;
-			sendMultiSwitchItem(packet);
+			sendMultiSwitchItem(packet, event.source);
 			break;
 		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_SET_BEHAVIOUR_SETTINGS: {
@@ -477,6 +497,11 @@ void MeshMsgSender::handleEvent(event_t & event) {
 			sendTrackedDeviceToken(packet);
 			break;
 		}
+		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT: {
+			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT)*)event.data;
+			sendTrackedDeviceHeartbeat(packet);
+			break;
+		}
 		case CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE: {
 			TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE)* packet = (TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE)*)event.data;
 			sendTrackedDeviceListSize(packet);
@@ -484,7 +509,7 @@ void MeshMsgSender::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND: {
 			TYPIFY(CMD_SEND_MESH_CONTROL_COMMAND)* packet = (TYPIFY(CMD_SEND_MESH_CONTROL_COMMAND)*)event.data;
-			event.result.returnCode = handleSendMeshCommand(packet);
+			event.result.returnCode = handleSendMeshCommand(packet, event.source);
 			break;
 		}
 		default:

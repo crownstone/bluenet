@@ -84,24 +84,44 @@ void fsync() {}
 #ifdef LET_HEAP_GROW_TO_STACKPOINTER
 
 extern unsigned long __bss_end__;
+static char *heap_end = (char *)&__bss_end__;
+static char *heap_end_max = 0;
+unsigned long sbrk_num_fails = 0;
 
 void * _sbrk(int incr)
 {
-    static char *heap_end = (char *)&__bss_end__;
-
     //! get stack pointer
     void* sp;
     asm("mov %0, sp" : "=r"(sp) : : );
     //! return (void*)-1 if stackpointer gets below (stack grows downwards) the end of the heap (goes upwards)
     if ((char*)sp <= heap_end+incr) {
 		// TODO: Write something to indicate the problem eventually
+    	++sbrk_num_fails;
         return (void*)-1;
     }
 
     char *prev = heap_end;
     heap_end += incr;
+
+    if (heap_end > heap_end_max) {
+    	heap_end_max = heap_end;
+    }
+
     return prev;
 }
+
+const char* getHeapEnd() {
+	return heap_end;
+}
+
+const char* getHeapEndMax() {
+	return heap_end_max;
+}
+
+unsigned long getSbrkNumFails() {
+	return sbrk_num_fails;
+}
+
 #elif defined(LET_HEAP_BE_FIXED)
 
 extern unsigned long _heap_start;

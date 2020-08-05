@@ -53,13 +53,13 @@ A short list for a quick overview:
 | ---                                                                                                   | ---                                                              |
 | [Bluenet firmware](https://github.com/crownstone/bluenet)                                             | This repository, open-source firmware (C++) for smart plugs      |
 | [Bluenet documentation](http://crownstone.github.io/bluenet/)                                         | Documentation of the firmware (doxygen-based)                    |
-| [Android library](https://github.com/crownstone/bluenet-android-lib)                                  | Android library (Kotlin)                                        |
-| [iOS library](https://github.com/crownstone/bluenet-ios-lib)                                          | iOS library (Swift)                                         |
-| [Python library](https://github.com/crownstone/bluenet-python-lib)                                    | Python library                                                      |
+| [Android library](https://github.com/crownstone/bluenet-android-lib)                                  | Android library (Kotlin)                                         |
+| [iOS library](https://github.com/crownstone/bluenet-ios-lib)                                          | iOS library (Swift)                                              |
+| [Python library](https://github.com/crownstone/crownstone-lib-python)                                 | Python library                                                   |
 | [Crownstone website](http://crownstone.rocks)                                                         | Website and shop for the Crownstone products                     |
-| [Crownstone Android app](https://play.google.com/store/apps/details?id=rocks.crownstone.consumerapp)  | Android app on the Play Store                                  |
-| [Crownstone iOS app](https://itunes.apple.com/us/app/crownstone/id1136616106?mt=8)                    | iOS app on the Apple Store                                     |
-| [Crownstone app source](https://github.com/crownstone/crownstone-app)                                 | Source code for the cross-platform app (React Native)           |
+| [Crownstone Android app](https://play.google.com/store/apps/details?id=rocks.crownstone.consumerapp)  | Android app on the Play Store                                    |
+| [Crownstone iOS app](https://itunes.apple.com/us/app/crownstone/id1136616106?mt=8)                    | iOS app on the Apple Store                                       |
+| [Crownstone app source](https://github.com/crownstone/crownstone-app)                                 | Source code for the cross-platform app (React Native)            |
 
 
 # Commercial use

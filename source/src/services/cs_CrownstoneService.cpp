@@ -95,7 +95,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			result.buf.len = _resultPacketAccessor->getMaxPayloadSize();
 //			}
 
-			CommandHandler::getInstance().handleCommand(protocol, type, payload, cmd_source_t(CS_CMD_SOURCE_CONNECTION), accessLevel, result);
+			CommandHandler::getInstance().handleCommand(protocol, type, payload, cmd_source_with_counter_t(CS_CMD_SOURCE_CONNECTION), accessLevel, result);
 			writeBuffer.unlock();
 		}
 		else {
@@ -226,6 +226,17 @@ void CrownstoneService::handleEvent(event_t & event) {
 		cs_result_t result(ERR_SUCCESS);
 		writeResult(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_SETUP, result);
 //		writeResult(CTRL_CMD_SETUP, cs_result_t(ERR_SUCCESS));
+		break;
+	}
+	case CS_TYPE::EVT_MICROAPP: {
+		memcpy(_resultPacketAccessor->getPayloadBuffer(), event.data, TypeSize(event.type));
+		cs_data_t resultData(_resultPacketAccessor->getPayloadBuffer(), TypeSize(event.type));
+		cs_result_t result(resultData);
+		TYPIFY(EVT_MICROAPP) data = *((TYPIFY(EVT_MICROAPP)*)event.data);
+		result.returnCode = data.error;
+		result.dataSize = TypeSize(event.type);
+		uint8_t protocolVersion = 5; // TODO: get this from event.
+		writeResult(protocolVersion, CTRL_CMD_MICROAPP_UPLOAD, result);
 		break;
 	}
 	default: {}

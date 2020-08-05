@@ -126,7 +126,7 @@ the board version given a board name. The other maps the other way around.
 This function requires the header file `source/include/cfg/cs_Boards.h` as first argument. It parses all the 
 macro definitions and will use those as mappings.
 
-    #define ACR01B10C    1008
+    #define ACR01B10D    1008
 
 The regular expression might actually fail if you create fancy commands with `#define` statements in there. The 
 mapping is used to write the board version to UICR.

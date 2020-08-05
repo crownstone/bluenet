@@ -14,6 +14,7 @@
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
 #include <drivers/cs_Storage.h>
+#include <events/cs_Event.h>
 #include <events/cs_EventDispatcher.h>
 #include <storage/cs_State.h>
 #include <util/cs_Error.h>
@@ -298,44 +299,44 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 	LOGStateDebug("Remove value: %s", TypeName(type));
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	switch(mode) {
-	case PersistenceMode::NEITHER_RAM_NOR_FLASH:
+		case PersistenceMode::NEITHER_RAM_NOR_FLASH:
 			return ERR_NOT_AVAILABLE;
-	case PersistenceMode::RAM: {
-		// Can we remove from ram, while not from flash?
-		return ERR_NOT_IMPLEMENTED;
-	}
-	case PersistenceMode::FLASH: {
-		return ERR_NOT_IMPLEMENTED;
-	}
-	case PersistenceMode::STRATEGY1: {
-		switch(DefaultLocation(type)) {
-		case PersistenceMode::RAM:
-			return removeFromRam(type, id);
-		case PersistenceMode::FLASH:
-			// continue after this switch
-			break;
-		default:
-			LOGe("PM not implemented");
+		case PersistenceMode::RAM: {
+			// Can we remove from ram, while not from flash?
 			return ERR_NOT_IMPLEMENTED;
 		}
-		// First remove from ram, this should always succeed.
-		ret_code = removeFromRam(type, id);
-		if (ret_code != ERR_SUCCESS) {
-			LOGw("Failed to remove from RAM");
-			return ret_code;
+		case PersistenceMode::FLASH: {
+			return ERR_NOT_IMPLEMENTED;
 		}
-		// Then remove from flash asynchronously.
-		ret_code = removeFromFlash(type, id);
-		if (ret_code == ERR_BUSY) {
-			return addToQueue(CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE, type, id, STATE_RETRY_STORE_DELAY_MS, StateQueueMode::DELAY);
+		case PersistenceMode::STRATEGY1: {
+			switch(DefaultLocation(type)) {
+				case PersistenceMode::RAM:
+					return removeFromRam(type, id);
+				case PersistenceMode::FLASH:
+					// continue after this switch
+					break;
+				default:
+					LOGe("PM not implemented");
+					return ERR_NOT_IMPLEMENTED;
+			}
+			// First remove from ram, this should always succeed.
+			ret_code = removeFromRam(type, id);
+			if (ret_code != ERR_SUCCESS) {
+				LOGw("Failed to remove from RAM");
+				return ret_code;
+			}
+			// Then remove from flash asynchronously.
+			ret_code = removeFromFlash(type, id);
+			if (ret_code == ERR_BUSY) {
+				return addToQueue(CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE, type, id, STATE_RETRY_STORE_DELAY_MS, StateQueueMode::DELAY);
+			}
+			break;
 		}
-		break;
-	}
-	case PersistenceMode::FIRMWARE_DEFAULT: {
-		LOGe("Default cannot be removed");
-		return ERR_NOT_AVAILABLE;
-		break;
-	}
+		case PersistenceMode::FIRMWARE_DEFAULT: {
+			LOGe("Default cannot be removed");
+			return ERR_NOT_AVAILABLE;
+			break;
+		}
 	}
 	return ret_code;
 }
@@ -462,15 +463,15 @@ cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
 	LOGStateDebug("Storage write type=%u size=%u data=%p [0x%X,...]", ram_data.type, ram_data.size, ram_data.value, ram_data.value[0]);
 	cs_ret_code_t ret_code = _storage->write(ram_data);
 	switch (ret_code) {
-	case ERR_BUSY: {
-		return ERR_BUSY;
-	}
-	case ERR_NO_SPACE: {
-		// TODO: remove things from flash..
-		return ERR_NO_SPACE;
-	}
-	default:
-		return ret_code;
+		case ERR_BUSY: {
+			return ERR_BUSY;
+		}
+		case ERR_NO_SPACE: {
+			// TODO: remove things from flash..
+			return ERR_NO_SPACE;
+		}
+		default:
+			return ret_code;
 	}
 }
 
@@ -484,11 +485,11 @@ cs_ret_code_t State::removeFromFlash(const CS_TYPE & type, const cs_state_id_t i
 	LOGd("removeFromFlash type=%u id=%u", to_underlying_type(type), id);
 	cs_ret_code_t ret_code = _storage->remove(type, id);
 	switch(ret_code) {
-	case ERR_SUCCESS:
-	case ERR_NOT_FOUND:
-		return ERR_SUCCESS;
-	default:
-		return ret_code;
+		case ERR_SUCCESS:
+		case ERR_NOT_FOUND:
+			return ERR_SUCCESS;
+		default:
+			return ret_code;
 	}
 }
 
@@ -695,34 +696,34 @@ cs_ret_code_t State::addToQueue(StateQueueOp operation, const CS_TYPE & type, cs
 	LOGStateDebug("Add to queue op=%u type=%s id=%u delayMs=%u delayTicks=%u", operation, TypeName(type), id, delayMs, delayTicks);
 	bool found = false;
 	switch (operation) {
-	case CS_STATE_QUEUE_OP_WRITE:
-	case CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE:{
-		for (size_t i=0; i<_store_queue.size(); ++i) {
-			// A write operation replaces a remove operation, and vice versa.
-			if ((_store_queue[i].type == type && _store_queue[i].id == id) &&
-					(
-					 (_store_queue[i].operation == CS_STATE_QUEUE_OP_WRITE) ||
-					 (_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE)
-					)
-			   ) {
-				// n-th time, now execute becomes true and for throttle init_counter will be set as well
-				if (mode == StateQueueMode::THROTTLE) {
-					_store_queue[i].init_counter = delayTicks;
-				} else {
-					_store_queue[i].counter = delayTicks;
+		case CS_STATE_QUEUE_OP_WRITE:
+		case CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE:{
+			for (size_t i=0; i<_store_queue.size(); ++i) {
+				// A write operation replaces a remove operation, and vice versa.
+				if ((_store_queue[i].type == type && _store_queue[i].id == id) &&
+						(
+								(_store_queue[i].operation == CS_STATE_QUEUE_OP_WRITE) ||
+								(_store_queue[i].operation == CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE)
+						)
+				) {
+					// n-th time, now execute becomes true and for throttle init_counter will be set as well
+					if (mode == StateQueueMode::THROTTLE) {
+						_store_queue[i].init_counter = delayTicks;
+					} else {
+						_store_queue[i].counter = delayTicks;
+					}
+					_store_queue[i].execute = true;
+					found = true;
+					break;
 				}
-				_store_queue[i].execute = true;
-				found = true;
-				break;
 			}
+			break;
 		}
-		break;
-	}
-	case CS_STATE_QUEUE_OP_FACTORY_RESET: {
-		break;
-	}
-	case CS_STATE_QUEUE_OP_GC:
-		break;
+		case CS_STATE_QUEUE_OP_FACTORY_RESET: {
+			break;
+		}
+		case CS_STATE_QUEUE_OP_GC:
+			break;
 	}
 	if (!found) {
 		if (mode == StateQueueMode::THROTTLE) {
@@ -854,6 +855,15 @@ void State::factoryReset() {
 	}
 }
 
+cs_ret_code_t State::cleanUp() {
+	LOGi("cleanUp");
+	cs_ret_code_t retCode = _storage->garbageCollect();
+	if (retCode == ERR_BUSY) {
+		addToQueue(CS_STATE_QUEUE_OP_GC, CS_TYPE::CONFIG_DO_NOT_USE, 0, STATE_RETRY_STORE_DELAY_MS, StateQueueMode::DELAY);
+	}
+	return ERR_SUCCESS;
+}
+
 bool State::handleFactoryResetResult(cs_ret_code_t retCode) {
 	switch (retCode) {
 		case ERR_SUCCESS: {
@@ -881,41 +891,45 @@ void State::handleStorageError(cs_storage_operation_t operation, CS_TYPE type, c
 		return;
 	}
 	switch (operation) {
-	case CS_STORAGE_OP_WRITE:
-		LOGw("error writing type=%u id=%u", type);
-		addToQueue(CS_STATE_QUEUE_OP_WRITE, type, id, STATE_RETRY_STORE_DELAY_MS, StateQueueMode::DELAY);
-		break;
-	case CS_STORAGE_OP_READ:
-		break;
-	case CS_STORAGE_OP_REMOVE:
-		LOGw("error removing error type=%u id=%u", type, id);
-		addToQueue(CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE, type, id, STATE_RETRY_STORE_DELAY_MS, StateQueueMode::DELAY);
-		break;
-	case CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID:
-		LOGw("error removing error id=%u", id);
-		break;
-	case CS_STORAGE_OP_GC:
-		LOGw("error collecting garbage");
-		break;
+		case CS_STORAGE_OP_WRITE:
+			LOGw("error writing type=%u id=%u", type);
+			addToQueue(CS_STATE_QUEUE_OP_WRITE, type, id, STATE_RETRY_STORE_DELAY_MS, StateQueueMode::DELAY);
+			break;
+		case CS_STORAGE_OP_READ:
+			break;
+		case CS_STORAGE_OP_REMOVE:
+			LOGw("error removing error type=%u id=%u", type, id);
+			addToQueue(CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE, type, id, STATE_RETRY_STORE_DELAY_MS, StateQueueMode::DELAY);
+			break;
+		case CS_STORAGE_OP_REMOVE_ALL_VALUES_WITH_ID:
+			LOGw("error removing error id=%u", id);
+			break;
+		case CS_STORAGE_OP_GC:
+			LOGw("error collecting garbage");
+			break;
 	}
 }
 
 void State::handleEvent(event_t & event) {
 	switch (event.type) {
-	case CS_TYPE::EVT_TICK:
-		delayedStoreTick();
-		break;
-	case CS_TYPE::CMD_FACTORY_RESET: {
-		factoryReset();
-		break;
-	}
-	case CS_TYPE::EVT_STORAGE_FACTORY_RESET_DONE: {
-		_performingFactoryReset = false;
-		event_t event(CS_TYPE::EVT_STATE_FACTORY_RESET_DONE);
-		event.dispatch();
-		break;
-	}
-	default:
-		break;
+		case CS_TYPE::EVT_TICK:
+			delayedStoreTick();
+			break;
+		case CS_TYPE::CMD_FACTORY_RESET: {
+			factoryReset();
+			break;
+		}
+		case CS_TYPE::EVT_STORAGE_FACTORY_RESET_DONE: {
+			_performingFactoryReset = false;
+			event_t event(CS_TYPE::EVT_STATE_FACTORY_RESET_DONE);
+			event.dispatch();
+			break;
+		}
+		case CS_TYPE::CMD_STORAGE_GARBAGE_COLLECT: {
+			event.result.returnCode = cleanUp();
+			break;
+		}
+		default:
+			break;
 	}
 }

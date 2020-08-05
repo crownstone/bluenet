@@ -23,8 +23,6 @@
 
 #define LOGStackDebug LOGnone
 
-// Define test pin to enable gpio debug.
-//#define TEST_PIN 19
 
 Stack::Stack() :
 //	_clock_source(defaultClockSource),
@@ -169,7 +167,7 @@ void Stack::initRadio() {
 		LOGw("Application address is too high, memory is unused: %p", ram_start);
 	}
 
-	LOGd("nrf_sdh_ble_enable");
+	LOGd("nrf_sdh_ble_enable ram_start=%p", ram_start);
 	ret_code = nrf_sdh_ble_enable(&ram_start);
 	switch(ret_code) {
 		case NRF_ERROR_INVALID_STATE:

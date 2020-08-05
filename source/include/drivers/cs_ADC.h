@@ -10,29 +10,10 @@
 #include <cfg/cs_Config.h>
 #include <events/cs_EventListener.h>
 #include <structs/buffer/cs_CircularBuffer.h>
-#include <structs/buffer/cs_DifferentialBuffer.h>
-#include <structs/buffer/cs_StackBuffer.h>
+#include <structs/buffer/cs_InterleavedBuffer.h>
 
 // Numeric reference to a pin
 typedef uint8_t cs_adc_pin_id_t;
-
-// Numeric reference to a channel
-typedef uint8_t cs_adc_channel_id_t;
-
-// Numeric reference to a buffer
-typedef uint8_t cs_adc_buffer_id_t;
-
-// Pin count (number)
-typedef uint8_t cs_adc_pin_count_t;
-
-// Buffer count (number)
-typedef uint8_t cs_adc_buffer_count_t;
-
-// Buffer size (number)
-typedef uint16_t cs_adc_buffer_size_t;
-
-// Error codes (number)
-typedef uint32_t cs_adc_error_t;
 
 
 enum adc_gain_t {
@@ -51,9 +32,9 @@ enum adc_gain_t {
 
 /** Struct to configure an ADC channel.
  *
- * pin:               The AIN pin to sample.
- * rangeMilliVolt:    The range in mV of the pin.
- * referencePin:      The AIN pin to be subtracted from the measured voltage.
+ * pin:                 The AIN pin to sample.
+ * rangeMilliVolt:      The range in mV of the pin.
+ * referencePin:        The AIN pin to be subtracted from the measured voltage.
  */
 struct __attribute__((packed)) adc_channel_config_t {
 	cs_adc_pin_id_t pin;
@@ -63,12 +44,12 @@ struct __attribute__((packed)) adc_channel_config_t {
 
 /** Struct to configure the ADC.
  *
- * channelCount:      The amount of channels to sample.
- * channels:          The channel configs.
- * samplingPeriodUs:  The sampling period in μs (each period, all channels are sampled once).
+ * channelCount:        The amount of channels to sample.
+ * channels:            The channel configs.
+ * samplingPeriodUs:    The sampling period in μs (each period, all channels are sampled once).
  */
 struct __attribute__((packed)) adc_config_t {
-	cs_adc_channel_id_t channelCount;
+	channel_id_t channelCount;
 	adc_channel_config_t channels[CS_ADC_MAX_PINS];
 	uint32_t samplingPeriodUs;
 };
@@ -79,7 +60,7 @@ struct __attribute__((packed)) adc_config_t {
  * This function pointer can be set via ADC::setDoneCallback.
  * Currently, ADC::setDoneCallback is called from cs_PowerSampling.cpp.
  */
-typedef void (*adc_done_cb_t) (cs_adc_buffer_id_t bufIndex);
+typedef void (*adc_done_cb_t) (buffer_id_t bufIndex);
 
 typedef void (*adc_zero_crossing_cb_t) ();
 
@@ -87,7 +68,7 @@ typedef void (*adc_zero_crossing_cb_t) ();
 enum adc_state_t {
 	ADC_STATE_IDLE,
 	ADC_STATE_BUSY,
-	ADC_STATE_WAITING_TO_START,
+	ADC_STATE_WAITING_TO_START, // Wait for buffers to be released.
 	ADC_STATE_READY_TO_START    // This state is a dummy, to work around the state check in start(). It is set just before calling start() again.
 };
 
@@ -97,6 +78,9 @@ enum adc_saadc_state_t {
 	ADC_SAADC_STATE_BUSY,    // When saadc is busy sampling.
 	ADC_SAADC_STATE_STOPPING // When saadc is or will be commanded to stop.
 };
+
+// Max number of buffers in the SAADC peripheral.
+#define CS_ADC_NUM_SAADC_BUFFERS 2
 
 
 /** Analog-Digital conversion.
@@ -141,11 +125,9 @@ public:
 	/** Initialize ADC.
 	 *
 	 * @param[in] config               Config struct.
-	 * @return                         Error code (0 for success).
+	 * @return                         Return code.
 	 */
-	cs_adc_error_t init(const adc_config_t& config);
-
-	cs_adc_error_t initAdc(const adc_config_t & config);
+	cs_ret_code_t init(const adc_config_t& config);
 
 	/** Start the ADC sampling
 	 */
@@ -159,9 +141,8 @@ public:
 	/** Release a buffer, so it can be used again by the ADC.
 	 *
 	 * @param[in] buf                  Pointer to the buffer, as received in the done callback.
-	 * @return                         Boolean indicating success (true) or failure (false).
 	 */
-	bool releaseBuffer(cs_adc_buffer_id_t bufIndex);
+	void releaseBuffer(buffer_id_t bufIndex);
 
 	/** Set the callback which is called when a buffer is filled.
 	 *
@@ -182,7 +163,7 @@ public:
 	 * @param[in] channel              The channel on which to check for zero crossings.
 	 * @param[in] zeroVal              The value of zero.
 	 */
-	void enableZeroCrossingInterrupt(cs_adc_channel_id_t channel, int32_t zeroVal);
+	void enableZeroCrossingInterrupt(channel_id_t channel, int32_t zeroVal);
 
 	/** Change channel config.
 	 *  Currently this config is applied immediately.
@@ -190,9 +171,9 @@ public:
 	 *
 	 * @param[in] channel              Channel number.
 	 * @param[in] config               Config struct.
-	 * @return                         Error code (0 for success).
+	 * @return                         Return code.
 	 */
-	cs_adc_error_t changeChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config);
+	cs_ret_code_t changeChannel(channel_id_t channel, adc_channel_config_t& config);
 
 	// Handle events as EventListener.
 	void handleEvent(event_t & event);
@@ -203,7 +184,7 @@ public:
 
 	/** Handle buffer, called in main thread.
 	 */
-	void _handleAdcDone(cs_adc_buffer_id_t bufIndex);
+	void _handleAdcDone(buffer_id_t bufIndex);
 
 	/** Handles timeout
 	 */
@@ -222,9 +203,6 @@ public:
 	 */
 	void _handleTimeoutInterrupt();
 
-protected:
-
-
 private:
 	/** Constructor
 	 */
@@ -240,36 +218,58 @@ private:
 	bool _changeConfig;
 
 	// Configuration of this class
+	// **Used in interrupt!**
 	adc_config_t _config;
 
-	// PPI channel to be used to communicate from Timer to ADC peripheral.
+	/**
+	 * PPI channel to sample each tick, and count these.
+	 *
+	 * Sample timer event COMPARE -> SAADC task SAMPLE
+	 *                            -> Timeout counter task COUNT
+	 */
 	nrf_ppi_channel_t _ppiChannelSample;
 
-	// PPI channel used to start the SAADC on the END event.
+	/**
+	 * PPI channel used to start the SAADC on end event.
+	 *
+	 * SAADC event END -> SAADC task START
+	 */
 	nrf_ppi_channel_t _ppiChannelStart;
 
-	// PPI channel used to count the number of samples taken.
-	nrf_ppi_channel_t _ppiSampleCount;
-
-	// PPI channel used to stop the sample timer when no buffer is queued.
-	nrf_ppi_channel_t _ppiTimeout;
-
-	// PPI channel used to clear and start the timeout count.
+	/**
+	 * PPI channel used to clear and start the timeout counter.
+	 *
+	 * SAADC event END -> Timeout counter task CLEAR.
+	 *                 -> Timeout counter task START.
+	 */
 	nrf_ppi_channel_t _ppiTimeoutStart;
 
+	/**
+	 * PPI channel used to stop on timeout (when no buffer is queued in time).
+	 *
+	 * Timeout counter event COMPARE -> Sample timer task STOP
+	 */
+	nrf_ppi_channel_t _ppiTimeout;
 
+	nrf_ppi_channel_t _ppiDebug;
 
-	// Index of buffer that is currently being used to write samples to.
-	// **Used in interrupt!**
-	cs_adc_buffer_id_t _bufferIndex;
+	nrf_ppi_channel_group_t _ppiTimeoutGroup;
 
-	// Index of next buffer to be used.
-	// **Used in interrupt!**
-	cs_adc_buffer_id_t _queuedBufferIndex;
+	/**
+	 * Queue of buffers that are free to be added to the SAADC queue.
+	 *
+	 * Used in interrupt!
+	 */
+	CircularBuffer<buffer_id_t> _bufferQueue;
 
-	// Number of buffers that are queued to be populated by SAADC.
-	// **Used in interrupt!**
-	cs_adc_buffer_count_t _numBuffersQueued;
+	/**
+	 * Keeps up which buffers that are queued in the SAADC peripheral.
+	 *
+	 * First buffer in queue is the one currently being (or going to be) filled with samples.
+	 *
+	 * Used in interrupt!
+	 */
+	CircularBuffer<buffer_id_t> _saadcBufferQueue;
 
 	// True when next buffer is the first after start.
 	bool _firstBuffer;
@@ -277,14 +277,21 @@ private:
 	// State of this class.
 	adc_state_t _state;
 
-	// Keep up the state of the SAADC peripheral.
-	// **Used in interrupt!**
+	/**
+	 * Sate of the SAADC peripheral.
+	 *
+	 * Used in interrupt!
+	 */
 	volatile adc_saadc_state_t _saadcState;
 
-	// Keep up which buffers are being processed by callback.
-	// This only accounts for the time between calling the doneCallback and releaseBuffer.
-	// TODO: mark all buffers in progress that processing could read (so all but bufIndex and queuedBuf).
-	bool _inProgress[CS_ADC_NUM_BUFFERS];
+	/**
+	 * Keep up which buffers are being processed by callback.
+	 * This only accounts for the time between calling the doneCallback and releaseBuffer.
+	 * Really only used for testing.
+	 *
+	 * Used in interrupt!
+	 */
+	bool _inProgress[CS_ADC_NUM_BUFFERS] = { false };
 
 	// Callback function
 	adc_done_cb_t _doneCallback;
@@ -300,7 +307,7 @@ private:
 
 	// The channel which is checked for zero crossings.
 	// **Used in interrupt!**
-	cs_adc_channel_id_t _zeroCrossingChannel;
+	channel_id_t _zeroCrossingChannel;
 
 	// Cache limit event.
 	// **Used in interrupt!**
@@ -322,9 +329,15 @@ private:
 	// **Used in interrupt!**
 	int32_t _zeroValue;
 
+	/**
+	 * Keep up number of nested critical regions entered.
+	 */
+	int _criticalRegionEntered = 0;
+
+	cs_ret_code_t initSaadc(const adc_config_t & config);
 
 	// Function to initialize the adc channels.
-	cs_adc_error_t initChannel(cs_adc_channel_id_t channel, adc_channel_config_t& config);
+	cs_ret_code_t initChannel(channel_id_t channel, adc_channel_config_t& config);
 
 	// Set the adc limit such that it triggers when going above zero
 	void setLimitUp();
@@ -333,10 +346,56 @@ private:
 	void setLimitDown();
 
 	// Initialize buffer queue
-	void initQueue();
+	cs_ret_code_t initBufferQueue();
 
-	// Function that puts a buffer in queue to be populated with adc values.
-	void addBufferToSampleQueue(cs_adc_buffer_id_t bufIndex);
+	/**
+	 * Try to add all queued buffers to the SAADC queue.
+	 * If the SAADC queue is now filled, stop the timeout timer.
+	 *
+	 * @return ERR_SUCCESS when SAADC queue is full,           and timeout timer has been stopped.
+	 * @return ERR_WRONG_STATE when SAADC queue is not filled, and timeout timer has been stopped.
+	 * @return ERR_NOT_FOUND when the SAADC queue is not full, and timeout timer has not been stopped.
+	 * @return Other return codes on failure.
+	 */
+	cs_ret_code_t fillSaadcQueue();
+
+	/**
+	 * Same as fillSaadcQueue(), but without critical region enter/exit.
+	 */
+	cs_ret_code_t _fillSaadcQueue();
+
+	/**
+	 * Puts a buffer in the SAADC queue.
+	 *
+	 * Starts the SAADC when it's idle.
+	 * Waits for the SAADC to be started to queue another buffer.
+	 *
+	 * @return
+	 * - ERR_SUCCESS when the buffer is queued in the SAADC.
+	 * - ERR_NO_SPACE when there are already enough buffers queued in the SAADC, so the given buffer is not queued.
+	 * - Other return codes for failures, the given buffer is not queued.
+	 */
+	cs_ret_code_t addBufferToSaadcQueue(buffer_id_t bufIndex);
+
+	/**
+	 * Same as addBufferToSaadcQueue(), but without critical region enter/exit.
+	 */
+	cs_ret_code_t _addBufferToSaadcQueue(buffer_id_t bufIndex);
+
+	/**
+	 * Enter a region of code where variables are used that are also used in SAADC interrupts.
+	 * Make sure you exit once for each time you call enter.
+	 */
+	void enterCriticalRegion();
+
+	/**
+	 * Exit a region of code where variables are used that are also used in SAADC interrupts.
+	 */
+	void exitCriticalRegion();
+
+	void enableInterrupt();
+
+	void printQueues();
 
 	// Function to apply a new config. Should be called when no buffers are are queued, nor being processed.
 	void applyConfig();
@@ -351,10 +410,10 @@ private:
 	nrf_ppi_channel_t getPpiChannel(uint8_t index);
 
 	// Helper function to get the limit event, given the channel.
-	nrf_saadc_event_t getLimitLowEvent(cs_adc_channel_id_t channel);
+	nrf_saadc_event_t getLimitLowEvent(channel_id_t channel);
 
 	// Helper function to get the limit event, given the channel.
-	nrf_saadc_event_t getLimitHighEvent(cs_adc_channel_id_t channel);
+	nrf_saadc_event_t getLimitHighEvent(channel_id_t channel);
 
 	// Helper function to get the gpiote task out, given the index.
 	nrf_gpiote_tasks_t getGpioteTaskOut(uint8_t index);

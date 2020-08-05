@@ -47,8 +47,7 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		case CS_MESH_MODEL_TYPE_CMD_NOOP:
 			return noopIsValid(payload, payloadSize);
 		case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH:
-	//		return multiSwitchIsValid((cs_mesh_model_msg_multi_switch_t*)payload, payloadSize);
-			return cs_multi_switch_item_is_valid((internal_multi_switch_item_t*)payload, payloadSize);
+			return multiSwitchIsValid(payload, payloadSize);
 		case CS_MESH_MODEL_TYPE_STATE_0:
 			return state0IsValid((cs_mesh_model_msg_state_0_t*)payload, payloadSize);
 		case CS_MESH_MODEL_TYPE_STATE_1:
@@ -61,6 +60,8 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return payloadSize == sizeof(cs_mesh_model_msg_device_register_t);
 		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN:
 			return payloadSize == sizeof(cs_mesh_model_msg_device_token_t);
+		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT:
+			return payloadSize == sizeof(cs_mesh_model_msg_device_heartbeat_t);
 		case CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE:
 			return payloadSize == sizeof(cs_mesh_model_msg_device_list_size_t);
 		case CS_MESH_MODEL_TYPE_SYNC_REQUEST:
@@ -70,7 +71,7 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		case CS_MESH_MODEL_TYPE_RESULT:
 			return payloadSize >= sizeof(cs_mesh_model_msg_result_header_t);
 		case CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID:
-			return payloadSize >= sizeof(ibeacon_config_id_packet_t);
+			return payloadSize >= sizeof(set_ibeacon_config_id_packet_t);
 		case CS_MESH_MODEL_TYPE_RSSI_PING:
 			return payloadSize >= sizeof(rssi_ping_message_t);
 		case CS_MESH_MODEL_TYPE_UNKNOWN:
@@ -94,6 +95,10 @@ bool timeIsValid(const cs_mesh_model_msg_time_t* packet, size16_t size) {
 
 bool noopIsValid(const uint8_t* packet, size16_t size) {
 	return size == 0;
+}
+
+bool multiSwitchIsValid(const uint8_t* packet, size16_t size) {
+	return (size == sizeof(cs_mesh_model_msg_multi_switch_item_t)) && (((cs_mesh_model_msg_multi_switch_item_t*)packet)->id != 0);
 }
 
 bool state0IsValid(const cs_mesh_model_msg_state_0_t* packet, size16_t size) {
@@ -254,64 +259,74 @@ EncryptionAccessLevel getInflatedAccessLevel(uint8_t accessLevel) {
 	}
 }
 
-bool canShortenSource(cmd_source_t source) {
+bool canShortenSource(const cmd_source_with_counter_t& source) {
 	// 5 bits -- max 31
-	if (source.sourceId >= CS_CMD_SOURCE_DEVICE_TOKEN) {
-		return true;
-	}
-	switch (source.sourceId) {
-		case CS_CMD_SOURCE_NONE:
-		case CS_CMD_SOURCE_DEFAULT:
-		case CS_CMD_SOURCE_INTERNAL:
-		case CS_CMD_SOURCE_UART:
-		case CS_CMD_SOURCE_CONNECTION:
-		case CS_CMD_SOURCE_SWITCHCRAFT:
-		case CS_CMD_SOURCE_DEVICE_TOKEN:
+	switch (source.source.type) {
+		case CS_CMD_SOURCE_TYPE_ENUM: {
+			switch (source.source.id) {
+				case CS_CMD_SOURCE_NONE:
+				case CS_CMD_SOURCE_INTERNAL:
+				case CS_CMD_SOURCE_UART:
+				case CS_CMD_SOURCE_CONNECTION:
+				case CS_CMD_SOURCE_SWITCHCRAFT:
+					return true;
+				default:
+					return false;
+			}
+			break;
+		}
+		case CS_CMD_SOURCE_TYPE_BROADCAST:
 			return true;
 		default:
 			return false;
 	}
 }
 
-uint8_t getShortenedSource(cmd_source_t source) {
+uint8_t getShortenedSource(const cmd_source_with_counter_t& source) {
 	// 5 bits --> max 31
-	if (source.sourceId >= CS_CMD_SOURCE_DEVICE_TOKEN) {
-		return 30;
-	}
-	switch (source.sourceId) {
-		case CS_CMD_SOURCE_NONE:
-		case CS_CMD_SOURCE_DEFAULT:
-		case CS_CMD_SOURCE_INTERNAL:
-		case CS_CMD_SOURCE_UART:
-		case CS_CMD_SOURCE_CONNECTION:
-		case CS_CMD_SOURCE_SWITCHCRAFT:
-			return (uint8_t) source.sourceId;
-		case CS_CMD_SOURCE_DEVICE_TOKEN:
+	switch (source.source.type) {
+		case CS_CMD_SOURCE_TYPE_ENUM: {
+			switch (source.source.id) {
+				case CS_CMD_SOURCE_NONE:
+				case CS_CMD_SOURCE_INTERNAL:
+				case CS_CMD_SOURCE_UART:
+				case CS_CMD_SOURCE_CONNECTION:
+				case CS_CMD_SOURCE_SWITCHCRAFT:
+					return source.source.id;
+				default:
+					return CS_CMD_SOURCE_NONE;
+			}
+			break;
+		}
+		case CS_CMD_SOURCE_TYPE_BROADCAST: {
 			return 30;
+		}
 		default:
-			return 31;
+			return CS_CMD_SOURCE_NONE;
 	}
 }
 
-cmd_source_t getInflatedSource(uint8_t sourceId) {
-	cmd_source_t source;
-	source.flagExternal = true;
+cmd_source_with_counter_t getInflatedSource(uint8_t sourceId) {
+	cmd_source_with_counter_t source;
+	source.source.flagExternal = true;
 	switch (sourceId) {
 		case CS_CMD_SOURCE_NONE:
-		case CS_CMD_SOURCE_DEFAULT:
 		case CS_CMD_SOURCE_INTERNAL:
 		case CS_CMD_SOURCE_UART:
 		case CS_CMD_SOURCE_CONNECTION:
 		case CS_CMD_SOURCE_SWITCHCRAFT:
-			source.sourceId = (cs_cmd_source) sourceId;
+			source.source.type = CS_CMD_SOURCE_TYPE_ENUM;
+			source.source.id = sourceId;
 			break;
 		case 30:
 			// We can't reconstruct the device id, nor the counter.
 			// So let's just set the default.
-			source.sourceId = CS_CMD_SOURCE_DEFAULT;
+			source.source.type = CS_CMD_SOURCE_TYPE_BROADCAST;
+			source.source.id = 0;
 			break;
 		default:
-			source.sourceId = CS_CMD_SOURCE_DEFAULT;
+			source.source.type = CS_CMD_SOURCE_TYPE_ENUM;
+			source.source.id = CS_CMD_SOURCE_NONE;
 			break;
 	}
 	return source;

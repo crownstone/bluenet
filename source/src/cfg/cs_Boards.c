@@ -78,10 +78,10 @@ void asACR01B1D(boards_config_t* p_config) {
  * Crownstone Built-in One
  * *******************************************************************************************************************/
 
-void asACR01B10C(boards_config_t* p_config) {
+void asACR01B10D(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 8; // 18 for v3
 //	p_config->pinGpioPwm                         = 15;
-	p_config->pinGpioEnablePwm                   = 10; // Only for v21, but on v20 this pin is not connected.
+	p_config->pinGpioEnablePwm                   = 10; // Only for v25, but on v20 this pin is not connected.
 	p_config->pinGpioRelayOn                     = 14; // 15 for v3
 	p_config->pinGpioRelayOff                    = 13; // 16 for v3
 	p_config->pinAinCurrentGainHigh              = 4; // highest gain   6 for v3
@@ -278,11 +278,14 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->pinGpioRelayOff                    = 13;
 
 	p_config->pinAinCurrentGainLow               = 0; // GPIO 0.02
-	p_config->pinAinCurrentGainHigh              = 1; // GPIO 0.03
-	p_config->pinAinVoltageGainLow               = 7; // GPIO 0.31
-	p_config->pinAinVoltageGainHigh              = 5; // GPIO 0.29
+	p_config->pinAinCurrentGainMed               = 1; // GPIO 0.03
+//	p_config->pinAinVoltageGainLow               = 7; // GPIO 0.31
+//	p_config->pinAinVoltageGainHigh              = 5; // GPIO 0.29
+
 	
 	p_config->pinAinVoltage                      = 7; // default
+
+	p_config->pinAinCurrentGainHigh              = 5; // Actually voltage high gain.
 	
 	p_config->pinAinZeroRef	                     = 3; // GPIO 0.05
 	p_config->pinAinPwmTemp                      = 2; // GPIO 0.04
@@ -306,7 +309,8 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->flags.hasAdcZeroRef                = true;
 	p_config->flags.pwmTempInverted              = true; 
 
-	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG_ONE;
+//	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG_ONE;
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
 
 	p_config->voltageMultiplier                  = 0.19355f;     // unknown
 	p_config->currentMultiplier                  = 0.00385f;     // unknown
@@ -314,7 +318,7 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->currentZero                        = -270;         // unknown
 	p_config->powerZero                          = 9000;         // unknown
 
-	p_config->voltageRange                       = 1300;
+	p_config->voltageRange                       = 1800;
 	p_config->currentRange                       = 600;          // unknown
 
 	p_config->pwmTempVoltageThreshold            = 0.3639;
@@ -432,8 +436,8 @@ uint32_t configure_board(boards_config_t* p_config) {
 		break;
 
 	case ACR01B10B:
-	case ACR01B10C:
-		asACR01B10C(p_config);
+	case ACR01B10D:
+		asACR01B10D(p_config);
 		break;
 
 	case ACR01B2A:

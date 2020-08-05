@@ -46,6 +46,21 @@ enum CommandHandlerTypes {
 	CTRL_CMD_GET_BEHAVIOUR_DEBUG         = 69,
 
 	CTRL_CMD_REGISTER_TRACKED_DEVICE     = 70,
+	CTRL_CMD_TRACKED_DEVICE_HEARTBEAT    = 71,
+
+	CTRL_CMD_GET_UPTIME                  = 80,
+	CTRL_CMD_GET_ADC_RESTARTS            = 81,
+	CTRL_CMD_GET_SWITCH_HISTORY          = 82,
+	CTRL_CMD_GET_POWER_SAMPLES           = 83,
+	CTLR_CMD_GET_SCHEDULER_MIN_FREE      = 84,
+	CTRL_CMD_GET_RESET_REASON            = 85,
+	CTRL_CMD_GET_GPREGRET                = 86,
+	CTRL_CMD_GET_ADC_CHANNEL_SWAPS       = 87,
+	CTRL_CMD_GET_RAM_STATS               = 88,
+
+	CTRL_CMD_MICROAPP_UPLOAD             = 90,
+
+	CTRL_CMD_CLEAN_FLASH                 = 100,
 
 	CTRL_CMD_UNKNOWN                     = 0xFFFF
 };

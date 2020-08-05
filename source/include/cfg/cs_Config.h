@@ -49,7 +49,12 @@
  *  The scheduler will require a buffer of size:
  *  (SCHED_MAX_EVENT_DATA_SIZE + APP_SCHED_EVENT_HEADER_SIZE) * (SCHED_QUEUE_SIZE + 1)
  */
+#if (NORDIC_SDK_VERSION == 16)
+// TODO: only this big because something fills up the scheduler during connection.
+#define SCHED_QUEUE_SIZE                         512
+#else
 #define SCHED_QUEUE_SIZE                         32
+#endif
 
 /**
  * Buffer size that is used for characteristics that the user reads from.
@@ -151,6 +156,8 @@
 // Soft device uses 4-5
 #define CS_PWM_PPI_GROUP_START                   0
 #define CS_PWM_PPI_GROUP_COUNT                   0
+#define CS_ADC_PPI_GROUP_START                   (CS_PWM_PPI_GROUP_START + CS_PWM_PPI_GROUP_COUNT)
+#define CS_ADC_PPI_GROUP_COUNT                   1
 
 // ----- GPIOTE -----
 #define CS_ADC_GPIOTE_CHANNEL_START              0
@@ -170,11 +177,9 @@
 
 #define CS_ADC_SAMPLE_INTERVAL_US                200 // 100 samples per period of 50Hz wave
 #define CS_ADC_MAX_PINS                          2
-#define CS_ADC_NUM_BUFFERS                       4
+#define CS_ADC_NUM_BUFFERS                       9 // 5 buffers are held by processing, 2 queued in SAADC, 1 moves between them, 1 extra for CPU usage peaks.
 #define CS_ADC_BUF_SIZE                          (CS_ADC_MAX_PINS * 20000 / CS_ADC_SAMPLE_INTERVAL_US) // Make size so it fills up 20ms of data.
 #define CS_ADC_TIMEOUT_SAMPLES                   2 // Timeout when no buffer has been set at N samples before end of interval.
-
-#define POWER_SAMPLE_BURST_NUM_SAMPLES           (20000/CS_ADC_SAMPLE_INTERVAL_US) // Number of voltage and current samples per burst
 
 
 // Buffer size for storage requests. Storage requests get buffered when the device is scanning or meshing.
@@ -230,6 +235,7 @@
 #define DIMMER_BOOT_CHECK_DELAY_MS               5000  // Delay after boot until power measurement is checked to see if dimmer works.
 #define DIMMER_BOOT_CHECK_POWER_MW               3000  // Threshold in milliWatt above which the dimmer is considered to be working.
 #define DIMMER_BOOT_CHECK_POWER_MW_UNCALIBRATED  10000 // Threshold in milliWatt above which the dimmer is considered to be working, in case power zero is not calibrated yet.
+#define DIMMER_SOFT_ON_SPEED                     8     // Speed of the soft on feature.
 
 // Stack config values
 // See: https://devzone.nordicsemi.com/question/60/what-is-connection-parameters/
@@ -275,8 +281,6 @@
 #define SWITCH_ON_AT_SETUP_BOOT_DELAY            3600  // Seconds until the switch turns on when in setup mode (Crownstone built-in only)
 
 #define SUN_TIME_THROTTLE_PERIOD_SECONDS         (60*60*24) // Seconds to throttle writing the sun time to flash.
-
-#define SWITCHCRAFT_DEBUG_BUFFERS                false // Set to true to store the last voltage samples that were recognized as switch (short power interrupt).
 
 #define CS_CLEAR_GPREGRET_COUNTER_TIMEOUT_S      60 // Seconds after boot to clear the GPREGRET reset counter.
 

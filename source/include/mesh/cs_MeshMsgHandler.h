@@ -33,11 +33,12 @@ protected:
 	cs_ret_code_t handleSetBehaviourSettings( uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleTrackedDeviceRegister(uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleTrackedDeviceToken(   uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleTrackedDeviceListSize(uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleSyncRequest(          uint8_t* payload, size16_t payloadSize);
-	void handleStateSet(                      uint8_t* payload, size16_t payloadSize, cs_result_t& result);
-	cs_ret_code_t handleResult(               uint8_t* payload, size16_t payloadSize, stone_id_t srcId);
-	cs_ret_code_t handleSetIbeaconConfigId(   uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleTrackedDeviceHeartbeat(  uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleTrackedDeviceListSize(   uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleSyncRequest(             uint8_t* payload, size16_t payloadSize);
+	void handleStateSet(                         uint8_t* payload, size16_t payloadSize, cs_result_t& result);
+	cs_ret_code_t handleResult(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId);
+	cs_ret_code_t handleSetIbeaconConfigId(      uint8_t* payload, size16_t payloadSize);
 
 private:
 	TYPIFY(CONFIG_CROWNSTONE_ID) _ownId = 0;
@@ -53,10 +54,10 @@ private:
 	 */
 	cs_mesh_model_ext_state_t _lastReceivedState;
 
-	/**
-	 * Cache last received switch command, so it can be ignored.
-	 */
-	cs_mesh_model_msg_multi_switch_item_t _lastReceivedMultiSwitch = {0xFF};
+//	/**
+//	 * Cache last received switch command, so it can be ignored.
+//	 */
+//	cs_mesh_model_msg_multi_switch_item_t _lastReceivedMultiSwitch = {0xFF};
 
 	/**
 	 * Cache last received set time command, so it can be ignored.

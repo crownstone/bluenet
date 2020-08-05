@@ -54,6 +54,6 @@ struct __attribute__((__packed__)) uart_msg_voltage_t {
 };
 
 struct __attribute__((__packed__)) uart_msg_adc_channel_config_t {
-	cs_adc_channel_id_t channel;
+	channel_id_t channel;
 	adc_channel_config_t config;
 };

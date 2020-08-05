@@ -39,4 +39,4 @@
  * fletch = Fletcher(part2,len2,fletch);
  *  
  */
-uint32_t Fletcher(uint8_t* data, const size_t len, uint32_t previousFletcherHash = 0);
+uint32_t Fletcher(const uint8_t* const data, const size_t len, uint32_t previousFletcherHash = 0);

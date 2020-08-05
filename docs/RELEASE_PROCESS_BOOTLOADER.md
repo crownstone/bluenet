@@ -9,6 +9,12 @@ bootloader version is actually newer than the previous release.
 
 * Update the `VERSION` file in `source/bootloader/VERSION`.
 
+For further instructions, we set the version in a variable:
+
+```
+CS_BL_VERSION="2.0.1-RC0"
+```
+
 Then to create a release:
 
 ```
@@ -23,14 +29,14 @@ Now using this information, we will build everything for this release.
 
 ```
 cd build
-cmake -DCONFIG_DIR=release -DBOARD_TARGET=bootloader_2.0.1-RC0 -DCMAKE_BUILD_TYPE=Release ..
+cmake -DCONFIG_DIR=release -DBOARD_TARGET=bootloader_${CS_BL_VERSION} -DCMAKE_BUILD_TYPE=Release ..
 make
 ```
 
 Now we can start generating the DFU packages that will be released:
 
 ```
-cd bootloader_2.0.1-RC0
+cd bootloader_${CS_BL_VERSION}
 make generate_dfu_package_all
 make generate_dfu_package_bootloader
 make install
@@ -42,15 +48,15 @@ Don't forget to commit the release config:
 
 ```
 git add source/bootloader/VERSION
-git add release/bootloader_2.0.1-RC0/CMakeBuild.config
-git commit -m "Added bootloader 2.0.1-RC0"
+git add release/bootloader_${CS_BL_VERSION}/CMakeBuild.config
+git commit -m "Added bootloader ${CS_BL_VERSION}"
 git push
 ```
 
 And create a git tag:
 
 ```
-git tag -a -m "Tagging bootloader version 2.0.1-RC0" "bootloader-2.0.1-RC0"
+git tag -a -m "Tagging bootloader version ${CS_BL_VERSION}" "bootloader-${CS_BL_VERSION}"
 git push --tags
 ```
 
@@ -69,7 +75,7 @@ project. Depending on the existence of RC (release candidate) version informatio
 repository will be used. To create a release directory and fill it, call:
 
 ```
-cd build/cd bootloader_2.0.1-RC0
+cd build/bootloader_${CS_BL_VERSION}
 make create_bootloader_release_in_repository
 ```
 

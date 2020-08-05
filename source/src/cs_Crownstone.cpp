@@ -59,15 +59,24 @@
 
 extern "C" {
 #include <nrf_nvmc.h>
+#include <util/cs_Syscalls.h>
 }
 
 
 /****************************************************** Preamble *******************************************************/ 
 
 // Define test pin to enable gpio debug.
-#define TEST_PIN 18
+//#define CS_TEST_PIN 18
 
-TYPIFY(EVT_TICK) Crownstone::_tickCount = 0;
+#ifdef CS_TEST_PIN
+	#ifdef DEBUG
+		#pragma message("Crownstone test pin enabled")
+	#else
+		#warning "Crownstone test pin enabled"
+	#endif
+#endif
+
+cs_ram_stats_t Crownstone::_ramStats;
 
 
 /****************************************** Global functions ******************************************/
@@ -115,7 +124,7 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	LOGi("Build type: %s", g_BUILD_TYPE);
 	LOGi("Hardware version: %s", get_hardware_version());
 	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
-	LOGi("UART binary protocol set: %d",CS_UART_BINARY_PROTOCOL_ENABLED);
+	LOGi("UART binary protocol set: %d", CS_UART_BINARY_PROTOCOL_ENABLED);
 #ifdef DEBUG
 	LOGi("DEBUG: defined")
 #else
@@ -170,7 +179,7 @@ void on_exit(void) {
 
 
 void handleZeroCrossing() {
-	PWM::getInstance().onZeroCrossing();
+	PWM::getInstance().onZeroCrossingInterrupt();
 }
 
 /************************************************* cs_Crownstone impl *************************************************/
@@ -200,6 +209,9 @@ Crownstone::Crownstone(boards_config_t& board) :
 #if BUILD_MESHING == 1
 	_mesh = &Mesh::getInstance();
 #endif
+#if BUILD_MICROAPP_SUPPORT == 1
+	_microApp = &MicroApp::getInstance();
+#endif
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
 		_temperatureGuard = &TemperatureGuard::getInstance();
@@ -209,6 +221,9 @@ Crownstone::Crownstone(boards_config_t& board) :
 };
 
 void Crownstone::init(uint16_t step) {
+	updateHeapStats();
+	updateMinStackEnd();
+	printLoadStats();
 	switch (step) {
 	case 0: {
 		init0();
@@ -251,6 +266,11 @@ void Crownstone::init1() {
 	LOGi(FMT_HEADER, "init services");
 	_stack->initServices();
 	LOG_FLUSH();
+
+#if BUILD_MICROAPP_SUPPORT == 1
+	LOGi(FMT_HEADER, "init microapp");
+	_microApp->init();
+#endif
 }
 
 void Crownstone::initDrivers(uint16_t step) {
@@ -310,13 +330,17 @@ void Crownstone::initDrivers1() {
 
 		LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
 
-		uint32_t resetReason;
-		sd_power_reset_reason_get(&resetReason);
-		LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u", resetReason,
-				(resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
-				(resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
-				(resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
-				(resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
+		// Store reset reason.
+		sd_power_reset_reason_get(&_resetReason);
+		LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u", _resetReason,
+				(_resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
+				(_resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
+				(_resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
+				(_resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
+
+		// Store gpregret.
+		_gpregret[0] = GpRegRet::getValue(GpRegRet::GPREGRET);
+		_gpregret[1] = GpRegRet::getValue(GpRegRet::GPREGRET2);
 
 		if (GpRegRet::isFlagSet(GpRegRet::FLAG_STORAGE_RECOVERED)) {
 			_setStateValuesAfterStorageRecover = true;
@@ -543,7 +567,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			LOGd("Configure DFU mode");
 			// TODO: have this function somewhere else.
 			cs_result_t result;
-			CommandHandler::getInstance().handleCommand(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_GOTO_DFU, cs_data_t(), cmd_source_t(CS_CMD_SOURCE_INTERNAL), ADMIN, result);
+			CommandHandler::getInstance().handleCommand(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_GOTO_DFU, cs_data_t(), cmd_source_with_counter_t(CS_CMD_SOURCE_INTERNAL), ADMIN, result);
 			_advertiser->changeToNormalTxPower();
 			break;
 		}
@@ -728,11 +752,10 @@ void Crownstone::increaseResetCounter() {
 }
 
 void Crownstone::tick() {
+	updateHeapStats();
 	if (_tickCount % (60*1000/TICK_INTERVAL_MS) == 0) {
-		LOG_MEMORY; // To check for memory leaks
+		printLoadStats();
 	}
-	// TODO: warning when close to out of memory
-	// TODO: maybe detect memory leaks?
 
 	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
 		TYPIFY(STATE_TEMPERATURE) temperature = getTemperature();
@@ -823,34 +846,97 @@ void Crownstone::handleEvent(event_t & event) {
 			sd_nvic_SystemReset();
 			break;
 		}
+		case CS_TYPE::CMD_GET_SCHEDULER_MIN_FREE: {
+			LOGi("Get scheduler min free");
+			uint16_t minFree;
+			if (event.result.buf.len < sizeof(minFree)) {
+				event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+				break;
+			}
+			minFree = SCHED_QUEUE_SIZE - app_sched_queue_utilization_get();
+			memcpy(event.result.buf.data, &minFree, sizeof(minFree));
+			event.result.dataSize = sizeof(minFree);
+			event.result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case CS_TYPE::CMD_GET_RESET_REASON: {
+			LOGi("Get reset reason");
+			if (event.result.buf.len < sizeof(_resetReason)) {
+				event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+				break;
+			}
+			memcpy(event.result.buf.data, &_resetReason, sizeof(_resetReason));
+			event.result.dataSize = sizeof(_resetReason);
+			event.result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case CS_TYPE::CMD_GET_GPREGRET: {
+			LOGi("Get GPREGRET");
+			cs_gpregret_result_t gpregret;
+			if (event.result.buf.len < sizeof(gpregret)) {
+				event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+				break;
+			}
+			TYPIFY(CMD_GET_GPREGRET) index = *((TYPIFY(CMD_GET_GPREGRET)*)event.data);
+			if (index > sizeof(_gpregret) / sizeof(_gpregret[0])) {
+				event.result.returnCode = ERR_WRONG_PARAMETER;
+				break;
+			}
+			gpregret.index = index;
+			gpregret.value = _gpregret[index];
+			memcpy(event.result.buf.data, &(gpregret), sizeof(gpregret));
+			event.result.dataSize = sizeof(gpregret);
+			event.result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case CS_TYPE::CMD_GET_RAM_STATS: {
+			LOGi("Get RAM stats");
+			if (event.result.buf.len < sizeof(_ramStats)) {
+				event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+				break;
+			}
+			memcpy(event.result.buf.data, &_ramStats, sizeof(_ramStats));
+			event.result.dataSize = sizeof(_ramStats);
+			event.result.returnCode = ERR_SUCCESS;
+			break;
+		}
 		default:
 			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
 	}
 
-	// switch(event.type) {
 	// 	case CS_TYPE::CONFIG_IBEACON_ENABLED: {
 	// 		__attribute__((unused)) TYPIFY(CONFIG_IBEACON_ENABLED) enabled = *(TYPIFY(CONFIG_IBEACON_ENABLED)*)event.data;
 	// 		// 12-sep-2019 TODO: implement
 	// 		LOGw("TODO ibeacon enabled=%i", enabled);
 	// 		break;
 	// 	}
-	// 	case CS_TYPE::EVT_BROWNOUT_IMPENDING: {
-	// 		// Don't log anything, immediately write gpregret and reboot.
-	// 		// Do this in interrupt (cs_Handlers.cpp) instead, else we're still too late.
-	// 		LOGf("brownout impending!! force shutdown ...")
-	// 		uint32_t gpregret_id = 0;
-	// 		uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
-	// 		// now reset with brownout reset mask set.
-	// 		// NOTE: do not clear the gpregret register, this way
-	// 		//   we can count the number of brownouts in the bootloader
-	// 		sd_power_gpregret_set(gpregret_id, gpregret_msk);
-	// 		// Soft reset, because brownout can't be distinguished from hard reset otherwise.
-	// 		sd_nvic_SystemReset();
-	// 		break;
-	// 	}
-	// 	default:
-	// 		return;
-	// }
+
+}
+
+void Crownstone::updateHeapStats() {
+	// Don't have to do much, _sbrk() is the best place to keep up the heap end.
+	_ramStats.maxHeapEnd = (uint32_t)getHeapEndMax();
+	_ramStats.minFree = _ramStats.minStackEnd - _ramStats.maxHeapEnd;
+	_ramStats.numSbrkFails = getSbrkNumFails();
+}
+
+void Crownstone::updateMinStackEnd() {
+	void* stackPointer;
+	asm("mov %0, sp" : "=r"(stackPointer) : : );
+	if ((uint32_t)stackPointer < _ramStats.minStackEnd) {
+		_ramStats.minStackEnd = (uint32_t)stackPointer;
+	}
+}
+
+void Crownstone::printLoadStats() {
+	// Log ram usage.
+	LOG_MEMORY;
+	LOGi("heapEnd=0x%X maxHeapEnd=0x%X minStackEnd=0x%X minFree=%u sbrkFails=%u", (uint32_t)getHeapEnd(), _ramStats.maxHeapEnd, _ramStats.minStackEnd, _ramStats.minFree, _ramStats.numSbrkFails);
+
+	// Log scheduler usage.
+	__attribute__((unused)) uint16_t maxUsed = app_sched_queue_utilization_get();
+	__attribute__((unused)) uint16_t currentFree = app_sched_queue_space_get();
+	LOGi("Scheduler current free=%u max used=%u", currentFree, maxUsed);
 }
 
 void printBootloaderInfo() {
@@ -886,9 +972,9 @@ void printBootloaderInfo() {
  *********************************************************************************************************************/
 
 int main() {
-#ifdef TEST_PIN
-	nrf_gpio_cfg_output(TEST_PIN);
-	nrf_gpio_pin_clear(TEST_PIN);
+#ifdef CS_TEST_PIN
+	nrf_gpio_cfg_output(CS_TEST_PIN);
+	nrf_gpio_pin_clear(CS_TEST_PIN);
 #endif
 
 	// this enabled the hard float, without it, we get a hardfault
@@ -910,11 +996,13 @@ int main() {
 
 	// Init GPIO pins early in the process!
 	switch (board.hardwareBoard) {
-	case ACR01B10C:
-		enableNfcPins();
-		break;
-	default:
-		break;
+		// These boards use the NFC pins (p0.09 and p0.10).
+		// They have to be configured as GPIO before they can be used as GPIO.
+		case ACR01B10D:
+			enableNfcPins();
+			break;
+		default:
+			break;
 	}
 	if (IS_CROWNSTONE(board.deviceType)) {
 		nrf_gpio_cfg_output(board.pinGpioPwm);

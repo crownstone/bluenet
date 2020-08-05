@@ -37,6 +37,10 @@
 #include <mesh/cs_Mesh.h>
 #endif
 
+#if BUILD_MICROAPP_SUPPORT == 1
+#include <storage/cs_MicroApp.h>
+#endif
+
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -136,6 +140,18 @@ public:
 	 * firmware via the BLE interface (an application, or the mesh).
 	 */
 	void handleEvent(event_t & event);
+
+	/**
+	 * Update the heap statistics.
+	 */
+	static void updateHeapStats();
+
+	/**
+	 * Update the minimal stack end location.
+	 *
+	 * Should be called regularly from high level interrupt.
+	 */
+	static void updateMinStackEnd();
 
 	/** tick function called by app timer
 	 */
@@ -274,6 +290,11 @@ private:
 	 */
 	void increaseResetCounter();
 
+	/**
+	 * Print load stats: RAM usage, app scheduler usage, etc.
+	 */
+	void printLoadStats();
+
 	boards_config_t _boardsConfig;
 
 	// drivers
@@ -311,12 +332,24 @@ private:
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
 
+#if BUILD_MICROAPP_SUPPORT == 1
+	MicroApp* _microApp;
+#endif
+
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;
-	static TYPIFY(EVT_TICK) _tickCount;
+	TYPIFY(EVT_TICK) _tickCount = 0;
 
 	OperationMode _operationMode;
 	OperationMode _oldOperationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
+
+	//! Store gpregret as it was on boot.
+	uint32_t _gpregret[2] = {0};
+
+	//! Store reset reason as it was on boot.
+	uint32_t _resetReason = 0;
+
+	static cs_ram_stats_t _ramStats;
 
 	/**
 	 * If storage was recovered by erasing all pages, we want to set some state variables
@@ -325,10 +358,6 @@ private:
 	bool _setStateValuesAfterStorageRecover = false;
 
 	bool _clearedGpRegRetCount = false;
-
-
-public:
-	static TYPIFY(EVT_TICK) getTickCount(){ return _tickCount; }
 };
 
 

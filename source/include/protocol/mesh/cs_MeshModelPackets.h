@@ -61,7 +61,8 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE  = 16, // Payload: cs_mesh_model_msg_device_list_size_t
 	CS_MESH_MODEL_TYPE_STATE_SET                 = 17, // Payload: cs_mesh_model_msg_state_header_ext_t + payload
 	CS_MESH_MODEL_TYPE_RESULT                    = 18, // Payload: cs_mesh_model_msg_result_header_t + payload
-	CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID     = 19, // Payload: ibeacon_config_id_packet_t
+	CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID     = 19, // Payload: set_ibeacon_config_id_packet_t
+	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT  = 20, // Payload: cs_mesh_model_msg_device_heartbeat_t
 	CS_MESH_MODEL_TYPE_RSSI_PING                 = 20, // Payload: rssi_ping_message_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
@@ -104,8 +105,8 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_state_1_t {
 struct __attribute__((__packed__)) cs_mesh_model_msg_multi_switch_item_t {
 	stone_id_t id;
 	uint8_t switchCmd;
-	uint16_t delay;
-	cmd_source_t source;
+	uint16_t delay = 0; // Deprecated, set to 0 or backwards compatibility.
+	cmd_source_with_counter_t source;
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_device_register_t {
@@ -121,6 +122,12 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_device_token_t {
 	device_id_t deviceId;
 	uint8_t deviceToken[TRACKED_DEVICE_TOKEN_SIZE];
 	uint16_t ttlMinutes;
+};
+
+struct __attribute__((__packed__)) cs_mesh_model_msg_device_heartbeat_t {
+	device_id_t deviceId;
+	uint8_t locationId;
+	uint8_t ttlMinutes;
 };
 
 struct __attribute__((__packed__)) cs_mesh_model_msg_device_list_size_t {

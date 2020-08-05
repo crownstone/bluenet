@@ -144,7 +144,7 @@ When the hardware is programmed the factory image contains information on the pr
 | --                            | --                          | --                  |
 | MBR_SETTINGS                  | MBR settings page (start)   | 0x0007E000          |
 | UICR_BOOTLOADER_ADDRESS       | Bootloader address (start)  | 0x00076000          |
-| HARDWARE_BOARD                | PCB version                 | ACR01B10C           |
+| HARDWARE_BOARD                | PCB version                 | ACR01B10D           |
 | PRODUCT_FAMILY                | Family                      | 0x01                |
 | PRODUCT_MARKET                | Market (European / US)      | 0x01                |
 | PRODUCT_TYPE                  | Type (different from above) | 0x03                |
@@ -164,7 +164,7 @@ The above settings are not directly stored in separate registers, but concatenat
 | 0x1000108c       | Major/minor/patch       | 0xFF000500          |
 | 0x10001090       | Production date/housing | 0xFF191201          |
 
-The hardware board `0x3EC` corresponds to `1004` in decimal notation. In the [cs_Boards.h](https://github.com/crownstone/bluenet/blob/master/source/include/cfg/cs_Boards.h) file this is board `ACR01B1E`. Likewise `ACR01B10C` has number `1008` is `0x3F0`.
+The hardware board `0x3EC` corresponds to `1004` in decimal notation. In the [cs_Boards.h](https://github.com/crownstone/bluenet/blob/master/source/include/cfg/cs_Boards.h) file this is board `ACR01B1E`. Likewise `ACR01B10D` has number `1008` is `0x3F0`.
 
 The major/minor versions are currently generated from the hardware board id, see the [cs_HardwareVersions.h](https://github.com/crownstone/bluenet/blob/master/source/include/cfg/cs_HardwareVersions.h) file. A patch is a PCB patch which can be taken into account by the firmware to e.g. delay enabling the dimmer at boot. A minor update is done for any PCB alteration that does not change the pin layout. A major update means significant hardware changes, under which pin layout changes.
 

@@ -34,18 +34,22 @@ public:
 	 *
 	 * It could be that something else is done instead, check the error code.
 	 *
-	 * @return     Error code: if not successful, check what the current state is.
+	 * @param[in] value      True to set the relay on.
+	 * @return               Result code: if not successful, check what the current state is.
 	 */
-	cs_ret_code_t setRelay(bool on);
+	cs_ret_code_t setRelay(bool value);
 
 	/**
 	 * Set dimmer intensity.
 	 *
 	 * It could be that something else is done instead, check the error code.
 	 *
+	 * @param[in] intensity  Intensity of the dimmer: 0-100.
+	 * @param[in] fade       Whether to fade towards the new intensity. False will set it immediately.
+	 *
 	 * @return     Error code: if not successful, check what the current state is.
 	 */
-	cs_ret_code_t setDimmer(uint8_t intensity);
+	cs_ret_code_t setDimmer(uint8_t intensity, bool fade = true);
 
 	/**
 	 * Get current switch state.
@@ -120,13 +124,20 @@ private:
 	bool checkedDimmerPowerUsage = false;
 
 	/**
-	 * Determines wether or not setDimmer and setRelay will have any effect.
+	 * Determines whether or not setDimmer and setRelay will have any effect.
 	 * (Will be set to false when GOING_TO_DFU event is set for example.)
 	 */
 	bool allowStateChanges = true;
 
+	/**
+	 * Whether the relay has been set at least once after boot.
+	 */
 	bool relayHasBeenSetBefore = false;
-	OperationMode cached_operation_mode = OperationMode::OPERATION_MODE_UNINITIALIZED; // retrieved at init
+
+	/**
+	 * Cached operation mode.
+	 */
+	OperationMode operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
 	/**
 	 * Set relay.
@@ -134,7 +145,7 @@ private:
 	 * Checks: similar.
 	 * Does not check: safe, powered.
 	 */
-	cs_ret_code_t setRelayUnchecked(bool on);
+	cs_ret_code_t setRelayUnchecked(bool value);
 
 	/**
 	 * Set dimmer intensity.
@@ -142,7 +153,7 @@ private:
 	 * Checks: similar.
 	 * Does not check: safe, powered.
 	 */
-	cs_ret_code_t setDimmerUnchecked(uint8_t intensity);
+	cs_ret_code_t setDimmerUnchecked(uint8_t intensity, bool fade);
 
 	/**
 	 * Try to see if dimmer is powered:
@@ -151,7 +162,7 @@ private:
 	 * Sets dimmer powered.
 	 * Does not check: safe, powered.
 	 */
-	cs_ret_code_t startDimmerPowerCheck(uint8_t intensity);
+	cs_ret_code_t startDimmerPowerCheck(uint8_t intensity, bool fade);
 
 	/**
 	 * Cancel power usage check.
@@ -187,6 +198,7 @@ private:
 
 	/**
 	 * Turn relay on and dimmer off, without any checks.
+	 * Also disables dimming in state.
 	 * Also send an event.
 	 */
 	void forceRelayOnAndDimmerOff();

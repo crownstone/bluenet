@@ -196,7 +196,7 @@ bool MeshModelMulticast::sendMsgFromQueue() {
 	}
 	cs_multicast_queue_item_t* item = &(_queue[index]);
 //	if (item->type == CS_MESH_MODEL_TYPE_CMD_TIME) {
-//		Time time = SystemTime::posix();
+//		Time time = SystemTime::now();
 //		if (time.isValid()) {
 //			// Update time in set time command.
 //			uint8_t* payload = NULL;

@@ -32,8 +32,24 @@
 #define ZERO_CROSSING_CHANNEL_IDX   3
 #define ZERO_CROSSING_CAPTURE_TASK  NRF_TIMER_TASK_CAPTURE3
 
-// Define test pin to enable gpio debug.
-//#define TEST_PIN 20
+// Set to true to enable gpio debug.
+#define PWM_GPIO_DEBUG false
+
+#if (PWM_GPIO_DEBUG == true)
+	#ifdef DEBUG
+		#pragma message("PWM test pin enabled")
+	#else
+		#warning "PWM test pin enabled"
+	#endif
+	#define PWM_TEST_PIN 20
+	#define PWM_TEST_PIN_INIT nrf_gpio_cfg_output(PWM_TEST_PIN)
+	#define PWM_TEST_PIN_TOGGLE nrf_gpio_pin_toggle(PWM_TEST_PIN)
+#else
+	#define PWM_TEST_PIN_INIT
+	#define PWM_TEST_PIN_TOGGLE
+#endif
+
+
 
 #define LOGPwmDebug LOGnone
 
@@ -93,9 +109,7 @@ uint32_t PWM::init(const pwm_config_t& config) {
 	_zeroCrossDeviationIntegral = 0;
 	_zeroCrossTicksDeviationAvg = 0;
 
-#ifdef TEST_PIN
-    nrf_gpio_cfg_output(TEST_PIN);
-#endif
+	PWM_TEST_PIN_INIT;
 
     _initialized = true;
     return ERR_SUCCESS;
@@ -105,13 +119,10 @@ uint32_t PWM::init(const pwm_config_t& config) {
 }
 
 uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
-	LOGd("Configure channel %u as pin %u", channel, _config.channels[channel].pin);
+	LOGd("Configure channel %u as pin %u", channel, config.pin);
 
 	// Start off
-//	nrf_gpio_cfg_output(_config.channels[i].pin);
-	nrf_gpio_pin_write(_config.channels[channel].pin, _config.channels[channel].inverted ? 1 : 0);
-	_values[channel] = 0;
-	_nextValues[channel] = 0;
+	nrf_gpio_pin_write(config.pin, config.inverted ? 1 : 0);
 
 	// Configure GPIOTE
 	_gpioteInitStatesOn[channel] = config.inverted ? NRF_GPIOTE_INITIAL_VALUE_LOW : NRF_GPIOTE_INITIAL_VALUE_HIGH;
@@ -138,9 +149,9 @@ uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
 			nrf_gpiote_task_addr_get(config.inverted ? getGpioteTaskClear(CS_PWM_GPIOTE_CHANNEL_START + channel) : getGpioteTaskSet(CS_PWM_GPIOTE_CHANNEL_START + channel))
 	);
 
-//	// Enable ppi
-//	nrf_ppi_channel_enable(_ppiChannels[channel*2]);
-//	nrf_ppi_channel_enable(_ppiChannels[channel*2 + 1]);
+	// Set initial CC value.
+	// 0 doesn't work, that never triggers.
+	writeCC(channel, 1);
 
 	// Enable gpiote
 	nrf_gpiote_task_force(CS_PWM_GPIOTE_CHANNEL_START + channel, _gpioteInitStatesOff[channel]);
@@ -175,128 +186,160 @@ uint32_t PWM::start(bool onZeroCrossing) {
 	return ERR_SUCCESS;
 }
 
-static void staticZeroCrossingStart(void* p_data, uint16_t len) {
-	PWM::getInstance()._zeroCrossingStart();
+void onTimerEnd(void* p_data, uint16_t len) {
+	PWM::getInstance().onPeriodEnd();
 }
 
+void PWM::onPeriodEnd() {
+	updateValues();
+}
+
+
 void PWM::start() {
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
+	PWM_TEST_PIN_TOGGLE;
 
 	// Start the timer as soon as possible.
 	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
+
+	// Enabled the timer interrupt on period end.
+	nrf_timer_int_enable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
 
 	// Mark as started, else the next zero crossing calls start() again.
 	// Also have to mark as started before setValue()
 	_started = true;
 
-	if (_startOnZeroCrossing) {
-		// Decouple from zero crossing interrupt
-		uint32_t errorCode = app_sched_event_put(NULL, 0, staticZeroCrossingStart);
-		APP_ERROR_CHECK(errorCode);
-	}
-	else {
+	if (!_startOnZeroCrossing) {
 		LOGi("Started");
 	}
 }
 
-void PWM::_zeroCrossingStart() {
-	// Set all values
-	// TODO: currently this only works for 1 channel! (as it calls setValue too often)
-//	for (uint8_t i=0; i<_config.channelCount; ++i) {
-	for (uint8_t i=0; i<1; ++i) {
-		if (_values[i] != _nextValues[i]) {
-			setValue(i, _nextValues[i]);
-		}
-	}
-	LOGi("Started on zero crossing");
-}
-
-bool PWM::checkInTransition() {
-//	if (!_transitionInProgress) {
-//		return false;
-//	}
-//	if (readCC(TRANSITION_CHANNEL_IDX) == _transitionTargetTicks) {
-//		// Transition is done.
-//		_transitionInProgress = false;
-//		return false;
-//	}
-//	return true;
-	return false;
-}
-
-void PWM::setValue(uint8_t channel, uint16_t newValue) {
+void PWM::setValue(uint8_t channel, uint8_t newValue, uint8_t stepSize) {
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
 	}
 
-	if (newValue > 100) {
-		newValue = 100;
-	}
-
-	// Something weird happens for low values: the resulting intensity is way too large.
-	// Either a software bug, peripheral issue, or hardware issue.
-	if (0 < newValue && newValue < 5) {
-		newValue = 5;
-	}
-
-	if (!_started) {
-		LOGw("Not started yet");
-		// Remember what value was set, set it on start.
-		_nextValues[channel] = newValue;
+	if (channel > CS_PWM_MAX_CHANNELS) {
+		LOGe("Invalid channel %u", channel);
 		return;
 	}
 
+	LOGd("Set PWM channel %d to %d", channel, newValue);
+
+	if (newValue > _maxValue) {
+		newValue = _maxValue;
+	}
+
+	if (stepSize < 1) {
+		stepSize = 1;
+	}
+
+	// Simply store the target value, don't actually set it,
+	// that will be done by updateValues().
+	_targetValues[channel] = newValue;
+	_stepSize[channel] = stepSize;
+
+	// Unless value is 0 or 100 and speed 100
+	// In that case we can and should set the value immediately, as it might be for to safety.
+	if ((newValue == 0 || newValue == _maxValue) && stepSize >= _maxValue) {
+		setValue(channel, newValue);
+	}
+}
+
+void PWM::updateValues() {
+	if (!_started) {
+		return;
+	}
+
+	// Only set values every N periods, to avoid setValue() being called too often.
+	if (--_updateValuesCountdown != 0) {
+		return;
+	}
+	_updateValuesCountdown = numPeriodsBeforeValueUpdate;
+
+	for (uint8_t channel = 0; channel < CS_PWM_MAX_CHANNELS; ++channel) {
+		int16_t diff = _targetValues[channel] - _values[channel];
+		int16_t inc = 0;
+		if (diff > 0) {
+			inc = _stepSize[channel];
+			if (inc > diff) {
+				inc = diff;
+			}
+		}
+		else if (diff < 0) {
+			inc = -_stepSize[channel];
+			if (inc < diff) {
+				inc = diff;
+			}
+		}
+		if (inc != 0) {
+			// Only 1 value can be set at a time.
+			setValue(channel, _values[channel] + inc);
+			return;
+		}
+	}
+}
+
+void PWM::setValue(uint8_t channel, uint8_t newValue) {
 	if (_values[channel] == newValue) {
 		LOGd("Channel %u is already set to %u", channel, newValue);
 		return;
 	}
 
-	if (checkInTransition()) {
-		LOGd("Transition in progress, set value later");
-		_nextValues[channel] = newValue;
-		return;
-	}
+//	if (checkInTransition()) {
+//		LOGd("Transition in progress, set value later");
+//		_nextValues[channel] = newValue;
+//		return;
+//	}
 
-	LOGd("Set PWM channel %d to %d", channel, newValue);
 	uint32_t oldValue = _values[channel];
 	_values[channel] = newValue;
+
+	// Something weird happens for low values: the resulting intensity is way too large.
+	// Either a software bug, peripheral issue, or hardware issue.
+	// Cap the value after storing it to _values, else _values will never reach 0.
+	if (newValue < 10) {
+		newValue = 0;
+	}
+
 	uint32_t oldTickValue = _tickValues[channel];
-	_tickValues[channel] = _maxTickVal * newValue / 100;
-	LOGPwmDebug("ticks=%u", _tickValues[channel]);
+	_tickValues[channel] = _maxTickVal * newValue / _maxValue;
+	LOGPwmDebug("Set PWM channel %u to %u ticks=%u", channel, newValue, _tickValues[channel]);
 
 	// Always disable the temporary PPI.
 	nrf_ppi_channel_disable(_ppiTransitionChannel);
 
 	switch (newValue) {
-//		case 0:
-//			// Simply disable the PPI that turns on the switch.
-//			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
-//			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
-//
-//			break;
-//		case 100:
-//			// Simply disable the PPI that turns off the switch.
-//			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
-//			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
-//			break;
 		case 0:
-		case 100:
-			// Disable both PPI channels, and force gpio values.
+			// Simply disable the PPI that turns on the switch.
+			// Don't forget that the CC value has to be set.
 			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
+			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
+
+			// Disable the PPI that turns on the switch, and force gpio value.
+			// This turns it off immediately instead of waiting for the CC event.
+			// However, this also results in 1 period with a low duty cycle, resulting in a high power output (see above).
+//			nrf_ppi_channel_disable(_ppiChannelsOn[channel]);
+//			gpioteForce(channel, false);
+
+			LOGPwmDebug("ppiEnabled=%u CC=%u", NRF_PPI->CHEN, readCC(channel));
+			break;
+		case _maxValue:
+			// Simply disable the PPI that turns off the switch.
+			// This way, it turns on at the start of the period.
 			nrf_ppi_channel_disable(_ppiChannelsOff[channel]);
-			gpioteForce(channel, newValue == 100);
+			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
+
+			LOGPwmDebug("ppiEnabled=%u CC=%u", NRF_PPI->CHEN, readCC(channel));
 			break;
 		default: {
-			if (oldValue != 0 && oldValue != 100 && newValue < oldValue) {
+			if (oldValue != 0 && oldValue != _maxValue && newValue < oldValue) {
 				// From dimmed value to lower dimmed value.
 
 				// Turn switch off at end of the old tick value.
 				// This is required to turn off the switch in case the current timer value is higher than the new tick value, but lower than the old tick value.
 				// So this PPI is only temporarily needed, until the timer reached the start of the period again.
-				LOGPwmDebug("transition");
+				LOGPwmDebug("transition: turn off at %u", oldTickValue);
 				writeCC(TRANSITION_CHANNEL_IDX, oldTickValue);
 				nrf_ppi_channel_endpoint_setup(
 						_ppiTransitionChannel,
@@ -311,13 +354,15 @@ void PWM::setValue(uint8_t channel, uint16_t newValue) {
 			}
 			LOGPwmDebug("writeCC %u", _tickValues[channel]);
 			writeCC(channel, _tickValues[channel]);
-			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
+
+			// Enable turn off first, else turn on might happen before the turn off ppi is enabled.
 			nrf_ppi_channel_enable(_ppiChannelsOff[channel]);
+			nrf_ppi_channel_enable(_ppiChannelsOn[channel]);
 		}
 	}
 }
 
-uint16_t PWM::getValue(uint8_t channel) {
+uint8_t PWM::getValue(uint8_t channel) {
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return 0;
@@ -329,7 +374,7 @@ uint16_t PWM::getValue(uint8_t channel) {
 	return _values[channel];
 }
 
-void PWM::onZeroCrossing() {
+void PWM::onZeroCrossingInterrupt() {
 	if (!_initialized) {
 		LOGe(FMT_NOT_INITIALIZED, "PWM");
 		return;
@@ -440,22 +485,20 @@ void PWM::onZeroCrossing() {
 
 
 void PWM::enableInterrupt() {
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
+	PWM_TEST_PIN_TOGGLE;
 
 	// The order of the function calls below are important:
 	// If we enable short stop first, the event might happen right after that,
 	//   stopping the timer, and not generating a new event for the interrupt to trigger.
 
-	// First clear the compare event, since it's still set from the last end of period event.
-	nrf_timer_event_clear(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX));
+//	// First clear the compare event, since it's still set from the last end of period event.
+//	nrf_timer_event_clear(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX));
 
 //	// Make the timer stop on end of period (it will be started again in the interrupt handler).
 //	nrf_timer_shorts_enable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
 
-	// Enable interrupt, set the new period value in there (at the end/start of the period).
-	nrf_timer_int_enable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
+//	// Enable interrupt, set the new period value in there (at the end/start of the period).
+//	nrf_timer_int_enable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
 }
 
 void PWM::_handleInterrupt() {
@@ -466,9 +509,19 @@ void PWM::_handleInterrupt() {
 	// Set the new period value.
 	writeCC(PERIOD_CHANNEL_IDX, _adjustedMaxTickVal);
 
+	// Decouple from zero crossing interrupt
+	uint16_t schedulerSpace = app_sched_queue_space_get();
+	if (schedulerSpace > 10) {
+		uint32_t errorCode = app_sched_event_put(NULL, 0, onTimerEnd);
+		APP_ERROR_CHECK(errorCode);
+	}
+
 //	// Don't stop timer on end of period anymore, and start the timer again
 //	nrf_timer_shorts_disable(CS_PWM_TIMER, PERIOD_SHORT_STOP_MASK);
 //	nrf_timer_task_trigger(CS_PWM_TIMER, NRF_TIMER_TASK_START);
+
+	// Clear the compare event.
+	nrf_timer_event_clear(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX));
 }
 
 
@@ -642,12 +695,10 @@ nrf_ppi_task_t PWM::getPpiTaskDisable(uint8_t index) {
 
 // Timer interrupt handler
 extern "C" void CS_PWM_TIMER_IRQ(void) {
-#ifdef TEST_PIN
-	nrf_gpio_pin_toggle(TEST_PIN);
-#endif
+	PWM_TEST_PIN_TOGGLE;
 //	if (nrf_timer_event_check(CS_PWM_TIMER, nrf_timer_compare_event_get(PERIOD_CHANNEL_IDX))) {
-	// Clear and disable interrupt until next change.
-	nrf_timer_int_disable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
+//	// Clear and disable interrupt until next change.
+//	nrf_timer_int_disable(CS_PWM_TIMER, nrf_timer_compare_int_get(PERIOD_CHANNEL_IDX));
 	PWM::getInstance()._handleInterrupt();
 //	}
 }

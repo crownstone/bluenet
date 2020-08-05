@@ -41,6 +41,7 @@ enum TypeBases {
 	InternalBaseBehaviour = InternalBase + 170,
 	InternalBaseLocalisation = InternalBase + 190,
 	InternalBaseSystem = InternalBase + 210,
+	InternalBaseTests = 0xF000,
 };
 
 /** Cast to underlying type.
@@ -173,6 +174,9 @@ enum class CS_TYPE: uint16_t {
 	STATE_MESH_IV_INDEX                     = 151,
 	STATE_MESH_SEQ_NUMBER                   = 152,
 	STATE_BEHAVIOUR_MASTER_HASH             = 153,
+	STATE_IBEACON_CONFIG_ID                 = 154,
+	STATE_MICROAPP                          = 155,
+	STATE_SOFT_ON_SPEED                     = 156,
 
 	/*
 	 * Internal commands and events.
@@ -201,7 +205,6 @@ enum class CS_TYPE: uint16_t {
 	CMD_MULTI_SWITCH,                                 // Handle a multi switch.
 	CMD_SWITCHING_ALLOWED,		                      // Set switch lock.
 	CMD_DIMMING_ALLOWED,	                          // Set allow dimming.
-	CMD_SWITCH_AGGREGATOR_RESET,                      // Reset the internal state of the switch aggregator.
 
 	// Power
 	EVT_DIMMER_POWERED = InternalBasePower,           // Dimmer being powered is changed. Payload: true when powered, and ready to be used.
@@ -230,7 +233,8 @@ enum class CS_TYPE: uint16_t {
 	EVT_STORAGE_PAGES_ERASED,                         // All storage pages are completely erased.
 	CMD_FACTORY_RESET,                                // Perform a factory reset: clear all data.
 	EVT_STATE_FACTORY_RESET_DONE,                     // Factory reset of state is done.
-	EVT_MESH_FACTORY_RESET_DONE,                           // Factory reset of mesh storage is done.
+	EVT_MESH_FACTORY_RESET_DONE,                      // Factory reset of mesh storage is done.
+	CMD_STORAGE_GARBAGE_COLLECT,                      // Start garbage collection of FDS.
 
 	// Logging
 	CMD_ENABLE_LOG_POWER = InternalBaseLogging,       // Enable/disable power calculations logging.
@@ -246,7 +250,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_DEC_VOLTAGE_RANGE,                                          // Decrease voltage range.
 	CMD_INC_CURRENT_RANGE,                                          // Increase current range.
 	CMD_DEC_CURRENT_RANGE,                                          // Decrease current range.
-	EVT_ADC_RESTARTED,                                              // ADC has been restarted.
+	EVT_ADC_RESTARTED,                                              // ADC has been restarted. Sent before the first buffer is to be processed.
 
 	// Mesh
 	CMD_SEND_MESH_MSG = InternalBaseMesh,             // Send a mesh message.
@@ -270,6 +274,8 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_EXT_STATE_0,                             // Mesh received part 0 of the state of a Crownstone.
 	EVT_MESH_EXT_STATE_1,                             // Mesh received part 1 of the state of a Crownstone.
 	EVT_MESH_PAGES_ERASED,                            // All mesh storage pages are completely erased.
+	CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT,       // Send a tracked device heartbeat mesh message.
+	EVT_MESH_TRACKED_DEVICE_HEARTBEAT,                // Mesh received a tracked device heartbeat.
 	EVT_MESH_RSSI_PING,                               // A ping message sent from another crownstone was received.
 
 	// Behaviour
@@ -284,11 +290,12 @@ enum class CS_TYPE: uint16_t {
 	EVT_BEHAVIOUR_OVERRIDDEN,                         // Informs whether behaviour is overridden by user (in override state).
 
 	// Localisation of devices
-	CMD_REGISTER_TRACKED_DEVICE = InternalBaseLocalisation,
-	CMD_UPDATE_TRACKED_DEVICE,
+	CMD_REGISTER_TRACKED_DEVICE = InternalBaseLocalisation, // Register a tracked device.
+	CMD_UPDATE_TRACKED_DEVICE,                        // Update data of a tracked device.
 	EVT_PROFILE_LOCATION,                             // Location of profile.
 	EVT_PRESENCE_MUTATION,                            // Presence changed.
 	EVT_STATE_EXTERNAL_STONE,                         // The state of another stone has been received.
+	CMD_TRACKED_DEVICE_HEARTBEAT,                     // Set location of a tracked device, with a TTL. This command can be sent instead of advertisements.
 
 	// System
 	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
@@ -303,7 +310,20 @@ enum class CS_TYPE: uint16_t {
 	EVT_SESSION_DATA_SET,                             // Session data was generated.
 	EVT_SETUP_DONE,                                   // Setup is done (and settings are stored).
 
-	EVT_GENERIC_TEST= 0xFFFF,                         // Can be used by the python test python lib for ad hoc tests during development.
+	CMD_GET_ADC_RESTARTS,                             // Get number of ADC restarts.
+	CMD_GET_SWITCH_HISTORY,                           // Get the switch command history.
+	CMD_GET_POWER_SAMPLES,                            // Get power samples of interesting events.
+	CMD_GET_SCHEDULER_MIN_FREE,                       // Get minimum queue space left of app scheduler observed so far.
+	CMD_GET_RESET_REASON,                             // Get last reset reason. Contents of POWER->RESETREAS as it was on boot.
+	CMD_GET_GPREGRET,                                 // Get the Nth general purpose retention register as it was on boot.
+	CMD_GET_ADC_CHANNEL_SWAPS,                        // Get number of detected ADC channel swaps.
+	CMD_GET_RAM_STATS,                                // Get RAM statistics.
+
+	CMD_MICROAPP_UPLOAD,                              // MicroApp upload (e.g. Arduino code).
+	EVT_MICROAPP,                                     // MicroApp event (e.g. write done)
+
+	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
+	EVT_GENERIC_TEST = 0xFFFF,                        // Can be used by the python test python lib for ad hoc tests during development.
 
 };
 
@@ -412,6 +432,10 @@ typedef behaviour_settings_t TYPIFY(STATE_BEHAVIOUR_SETTINGS);
 typedef uint32_t TYPIFY(STATE_BEHAVIOUR_MASTER_HASH);
 typedef cs_mesh_iv_index_t TYPIFY(STATE_MESH_IV_INDEX);
 typedef cs_mesh_seq_number_t TYPIFY(STATE_MESH_SEQ_NUMBER);
+typedef ibeacon_config_id_packet_t TYPIFY(STATE_IBEACON_CONFIG_ID);
+typedef cs_microapp_t TYPIFY(STATE_MICROAPP);
+typedef uint8_t TYPIFY(STATE_SOFT_ON_SPEED);
+
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);
 typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
@@ -446,6 +470,8 @@ typedef  cs_mesh_model_msg_device_register_t TYPIFY(EVT_MESH_TRACKED_DEVICE_REGI
 typedef  cs_mesh_model_msg_device_register_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER);
 typedef  cs_mesh_model_msg_device_token_t TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN);
 typedef  cs_mesh_model_msg_device_token_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_TOKEN);
+typedef  cs_mesh_model_msg_device_heartbeat_t TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT);
+typedef  cs_mesh_model_msg_device_heartbeat_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT);
 typedef  cs_mesh_model_msg_device_list_size_t TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE);
 typedef  cs_mesh_model_msg_device_list_size_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE);
 typedef  mesh_control_command_packet_t TYPIFY(CMD_SEND_MESH_CONTROL_COMMAND);
@@ -481,6 +507,7 @@ typedef  void TYPIFY(EVT_STORAGE_GC_DONE);
 typedef  void TYPIFY(EVT_STORAGE_FACTORY_RESET_DONE);
 typedef  void TYPIFY(EVT_STORAGE_PAGES_ERASED);
 typedef  void TYPIFY(EVT_MESH_FACTORY_RESET_DONE);
+typedef  void TYPIFY(CMD_STORAGE_GARBAGE_COLLECT);
 typedef  void TYPIFY(EVT_SWITCH_FORCED_OFF);
 typedef  bool TYPIFY(CMD_SWITCHING_ALLOWED);
 typedef  uint32_t TYPIFY(EVT_TICK);
@@ -500,6 +527,7 @@ typedef BOOL TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN);
 
 typedef internal_register_tracked_device_packet_t TYPIFY(CMD_REGISTER_TRACKED_DEVICE);
 typedef internal_update_tracked_device_packet_t TYPIFY(CMD_UPDATE_TRACKED_DEVICE);
+typedef internal_tracked_device_heartbeat_packet_t TYPIFY(CMD_TRACKED_DEVICE_HEARTBEAT);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
@@ -514,8 +542,19 @@ typedef void TYPIFY(EVT_MESH_PAGES_ERASED);
 typedef cs_mesh_model_msg_state_0_t TYPIFY(EVT_MESH_EXT_STATE_0);
 typedef cs_mesh_model_msg_state_1_t TYPIFY(EVT_MESH_EXT_STATE_1);
 typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
-typedef ibeacon_config_id_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_ID);
+typedef set_ibeacon_config_id_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_ID);
 typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
+typedef void TYPIFY(CMD_GET_ADC_RESTARTS);
+typedef void TYPIFY(CMD_GET_SWITCH_HISTORY);
+typedef cs_power_samples_request_t TYPIFY(CMD_GET_POWER_SAMPLES);
+typedef void TYPIFY(CMD_GET_SCHEDULER_MIN_FREE);
+typedef void TYPIFY(CMD_GET_RESET_REASON);
+typedef uint8_t TYPIFY(CMD_GET_GPREGRET);
+typedef void TYPIFY(CMD_GET_ADC_CHANNEL_SWAPS);
+typedef void TYPIFY(CMD_GET_RAM_STATS);
+typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP_UPLOAD);
+typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
+typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
 
 /*---------------------------------------------------------------------------------------------------------------------

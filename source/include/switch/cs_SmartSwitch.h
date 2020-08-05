@@ -51,6 +51,11 @@ public:
 	uint8_t getIntendedState();
 
 	/**
+	 * Get actual switch state.
+	 */
+	switch_state_t getActualState();
+
+	/**
 	 * Callback function definition.
 	 */
 	typedef function<void(uint8_t newIntensity)> callback_on_intensity_change_t;
@@ -83,11 +88,6 @@ private:
 	bool allowSwitchingOverride = false; // override is necessary at startup to restore state of a locked dimmed switch.
 
 	/**
-	 * Get actual switch state.
-	 */
-	switch_state_t getActualState();
-
-	/**
 	 * Get intensity from a switch state.
 	 */
 	uint8_t getIntensityFromSwitchState(switch_state_t switchState);
@@ -114,13 +114,13 @@ private:
 	 * Set dimmer.
 	 * Checks if dimming and switching is allowed.
 	 */
-	cs_ret_code_t setDimmer(uint8_t intensity);
+	cs_ret_code_t setDimmer(uint8_t intensity, bool fade = true);
 
 	/**
 	 * Set dimmer without checks.
 	 * Also updates State.
 	 */
-	cs_ret_code_t setDimmerUnchecked(uint8_t intensity);
+	cs_ret_code_t setDimmerUnchecked(uint8_t intensity, bool fade);
 
 	/**
 	 * Handle unexpected state change by safeSwitch.
@@ -151,6 +151,8 @@ private:
 	 * Also updates State.
 	 */
 	cs_ret_code_t setAllowDimming(bool allowed);
+
+	void handleAllowDimmingSet();
 
 	cs_ret_code_t handleCommandSetRelay(bool on);
 

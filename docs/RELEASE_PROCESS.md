@@ -27,8 +27,8 @@ Now using this information, we will build everything for this release.
 
 ```
 cd build
-cmake -DCONFIG_DIR=release -DBOARD_TARGET=crownstone_${CS_FW_VERSION} -DCMAKE_BUILD_TYPE=Release ..
-make
+cmake -DCONFIG_DIR=release -DBOARD_TARGET=crownstone_${CS_FW_VERSION} -DCMAKE_BUILD_TYPE=Release -DFACTORY_IMAGE= ..
+make -j
 ```
 
 Now we can start generating the DFU packages that will be released:
@@ -75,6 +75,7 @@ project. Depending on the existence of RC (release candidate) version informatio
 repository will be used. To create a release directory and fill it, call:
 
 ```
+cd build/crownstone_${CS_FW_VERSION}
 make create_release_in_repository
 ```
 

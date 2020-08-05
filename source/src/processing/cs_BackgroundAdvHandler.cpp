@@ -18,10 +18,10 @@
 #include "time/cs_SystemTime.h"
 
 #define LOGBackgroundAdvDebug LOGnone
-//#define BACKGROUND_ADV_VERBOSE
+#define BACKGROUND_ADV_VERBOSE false
 
 
-#ifdef BACKGROUND_ADV_VERBOSE
+#if BACKGROUND_ADV_VERBOSE == true
 #define LOGBackgroundAdvVerbose LOGd
 #else
 #define LOGBackgroundAdvVerbose LOGnone
@@ -36,6 +36,37 @@
 BackgroundAdvertisementHandler::BackgroundAdvertisementHandler() {
 	State::getInstance().get(CS_TYPE::CONFIG_SPHERE_ID, &_sphereId, sizeof(_sphereId));
 	EventDispatcher::getInstance().addListener(this);
+}
+
+void BackgroundAdvertisementHandler::parseServicesAdvertisement(scanned_device_t* scannedDevice) {
+	uint32_t errCode;
+	cs_data_t serviceUuids;
+	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_MORE_AVAILABLE, scannedDevice->data, scannedDevice->dataSize, &serviceUuids);
+	if (errCode != ERR_SUCCESS) {
+		return;
+	}
+
+	memcpy(_lastMacAddress, scannedDevice->address, MAC_ADDRESS_LEN);
+
+	_lastBitmask[0] = 0;
+	_lastBitmask[1] = 0;
+//	memset(_lastBitmask, 0, sizeof(_lastBitmask));
+
+	// Loop over 16 bit service UUIDs.
+	for (uint8_t i = 0; i < serviceUuids.len / 2; ++i) {
+		LOGBackgroundAdvVerbose("uuid=%u %u (0x%02X 0x%02X)", serviceUuids.data[2 * i + 0], serviceUuids.data[2 * i + 1], serviceUuids.data[2 * i + 0], serviceUuids.data[2 * i + 1]);
+		uint8_t index = serviceUuids.data[2 * i + 1];
+		uint8_t bitPos = _uuidMap[index];
+		if (bitPos == 255) {
+			LOGBackgroundAdvVerbose("invalid bit pos %u for uuid %u", bitPos, index);
+		}
+		else {
+			LOGBackgroundAdvVerbose("bit pos %u --> ind=%u shift=%u", bitPos, bitPos / 64, bitPos % 64);
+			_lastBitmask[bitPos / 64] |= ((uint64_t)1) << (bitPos % 64);
+		}
+	}
+
+	LOGBackgroundAdvVerbose("store bitmask 0x%08X%08X 0x%08X%08X", (uint32_t)(_lastBitmask[0] >> 32), (uint32_t)(_lastBitmask[0]), (uint32_t)(_lastBitmask[1] >> 32), (uint32_t)(_lastBitmask[1]));
 }
 
 void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
@@ -61,12 +92,13 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	uint8_t* servicesMask; // This is a mask of 128 bits.
 	servicesMask = manufacturerData.data + BACKGROUND_SERVICES_MASK_HEADER_LEN;
 
-#ifdef BACKGROUND_ADV_VERBOSE
+#if BACKGROUND_ADV_VERBOSE == true
 	_log(SERIAL_DEBUG, "rssi=%i servicesMask: ", scannedDevice->rssi);
 	BLEutil::printArray(servicesMask, BACKGROUND_SERVICES_MASK_LEN);
 #endif
 
 	// Put the data into large integers, so we can perform shift operations.
+	// Can't cast, as the data is big endian (MSB).
 //	uint64_t left = *((uint64_t*)servicesMask);
 //	uint64_t right = *((uint64_t*)(servicesMask + 8));
 	uint64_t left =
@@ -87,7 +119,19 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 				((uint64_t)servicesMask[5+8] << (2*8)) +
 				((uint64_t)servicesMask[6+8] << (1*8)) +
 				((uint64_t)servicesMask[7+8] << (0*8));
-	LOGBackgroundAdvVerbose("left=%llx right=%llx", left, right);
+	LOGBackgroundAdvVerbose("left=0x%08X%08X right=0x%08X%08X", (uint32_t)(left >> 32), (uint32_t)(left), (uint32_t)(right >> 32), (uint32_t)(right));
+
+	if (memcmp(_lastMacAddress, scannedDevice->address, MAC_ADDRESS_LEN) == 0) {
+		// TODO: make sure the right bits go to the right place.
+		left |= _lastBitmask[1];
+		right |= _lastBitmask[0];
+		LOGBackgroundAdvVerbose("Use last bitmask left=0x%08X%08X right=0x%08X%08X", (uint32_t)(left >> 32), (uint32_t)(left), (uint32_t)(right >> 32), (uint32_t)(right));
+	}
+
+	// Clear any cached bitmask.
+	_lastBitmask[0] = 0;
+	_lastBitmask[1] = 0;
+
 
 
 	// Divide the data into 3 parts, and do a bitwise majority vote, to correct for errors.
@@ -96,7 +140,11 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	uint64_t part2 = ((left & 0x3FFFFF) << 20) | ((right >> (64-20)) & 0x0FFFFF); // Last 64-42=22 bits from left, and first 42−(64−42)=20 bits from right.
 	uint64_t part3 = (right >> 2) & 0x03FFFFFFFFFF; // Bits 21-62 from right.
 	uint64_t result = ((part1 & part2) | (part2 & part3) | (part1 & part3)); // The majority vote
-	LOGBackgroundAdvVerbose("part1=%llx part2=%llx part3=%llx result=%llx", part1, part2, part3, result);
+	LOGBackgroundAdvVerbose("part1=0x%08X%08X part2=0x%08X%08X part3=0x%08X%08X result=0x%08X%08X",
+			(uint32_t)(part1 >> 32), (uint32_t)(part1),
+			(uint32_t)(part2 >> 32), (uint32_t)(part2),
+			(uint32_t)(part3 >> 32), (uint32_t)(part3),
+			(uint32_t)(result >> 32), (uint32_t)(result));
 
 	// Parse the resulting data.
 	uint8_t protocol = (result >> (42-2)) & 0x03;
@@ -146,10 +194,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	LOGBackgroundAdvVerbose("decrypted=[%u %u]", decryptedPayload[0], decryptedPayload[1]);
 
 	// Validate
-	Time time = SystemTime::posix();
-	uint32_t timestamp = time.timestamp();
-//	TYPIFY(STATE_TIME) timestamp;
-//	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
+	uint32_t timestamp = SystemTime::posix();
 	uint16_t timestampRounded = (timestamp >> 7) & 0x0000FFFF;
 	LOGBackgroundAdvVerbose("validation=%u time=%u rounded=%u", decryptedPayload[0], timestamp, timestampRounded);
 
@@ -176,7 +221,7 @@ void BackgroundAdvertisementHandler::handleBackgroundAdvertisement(adv_backgroun
 		return;
 	}
 	uint16_t* decryptedPayload = (uint16_t*)(backgroundAdvertisement->data);
-#ifdef BACKGROUND_ADV_VERBOSE
+#if BACKGROUND_ADV_VERBOSE == true
 	_log(SERIAL_DEBUG, "bg adv: ");
 	_log(SERIAL_DEBUG, "protocol=%u sphereId=%u rssi=%i ", backgroundAdvertisement->protocol, backgroundAdvertisement->sphereId, backgroundAdvertisement->rssi);
 	_log(SERIAL_DEBUG, "payload=[%u %u] address=", decryptedPayload[0], decryptedPayload[1]);
@@ -219,6 +264,7 @@ void BackgroundAdvertisementHandler::handleEvent(event_t & event) {
 	case CS_TYPE::EVT_DEVICE_SCANNED: {
 		TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice = (TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
 		parseAdvertisement(scannedDevice);
+		parseServicesAdvertisement(scannedDevice);
 		break;
 	}
 	case CS_TYPE::EVT_ADV_BACKGROUND: {

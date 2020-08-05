@@ -20,12 +20,11 @@
  * To implement a new command:
  *   - Add a new type to <cs_Types.h>
  *   - Define a custom handler for this type in this class.
- *   - Implement a function to handle this type. 
+ *   - Implement a function to handle this type.
  *     - The commandData contains a pointer to a data buffer.
- *     - This data will be gone after function returns. It has to copied.
+ *     - This data will be gone after function returns.
  *     - In most functions there is no explicit memcpy, but a struct assignment (including member arrays).
  *     - When sending the data through as event, a pointer to the struct can be used.
- *     - This means that the attached struct has to be freed later.
  *
  * # Access Level
  *
@@ -59,7 +58,7 @@ public:
 			uint8_t protocolVersion,
 			const CommandHandlerTypes type,
 			cs_data_t commandData,
-			const cmd_source_t source,
+			const cmd_source_with_counter_t source,
 			const EncryptionAccessLevel accessLevel,
 			cs_result_t & result
 			);
@@ -91,11 +90,11 @@ private:
 	void handleCmdValidateSetup           (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdDisconnect              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdResetErrors             (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
-	void handleCmdPwm                     (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
-	void handleCmdSwitch                  (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
-	void handleCmdRelay                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
-	void handleCmdMultiSwitch             (cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accesss_resulLevel, cs_result_t & result);
-	void handleCmdMeshCommand             (uint8_t protocol, cs_data_t commandData, const cmd_source_t source, const EncryptionAccessLevel accesss_resulLevel, cs_result_t & result);
+	void handleCmdPwm                     (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdSwitch                  (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdRelay                   (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdMultiSwitch             (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdMeshCommand             (uint8_t protocol, cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accesss_resulLevel, cs_result_t & result);
 	void handleCmdAllowDimming            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdLockSwitch              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdSetup                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
@@ -103,11 +102,14 @@ private:
 	void handleCmdStateGet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdStateSet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdRegisterTrackedDevice   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdTrackedDeviceHeartbeat  (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdGetUptime               (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleMicroAppUpload             (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	
 	/**
 	 * Delegate a command via an event.
 	 */
-	void dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, cs_result_t & result);
+	void dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, const cmd_source_with_counter_t& source, cs_result_t & result);
 
 	/**
 	 * Reset, after a delay.

@@ -206,7 +206,7 @@ public:
 	 *
 	 * @param[in] data            Data struct with state type, optional id, data, and size.
 	 * @param[in] mode            Indicates whether to set data in RAM, FLASH, or a combination of this.
-	 * @return                    Return code.
+	 * @return                    Return code. Can be ERR_SUCCESS_NO_CHANGE.
 	 */
 	cs_ret_code_t set(const cs_state_data_t & data, PersistenceMode mode = PersistenceMode::STRATEGY1);
 
@@ -274,6 +274,15 @@ public:
 	 * Erase all used persistent storage.
 	 */
 	void factoryReset();
+
+	/**
+	 * Clean up persistent storage.
+	 *
+	 * Permanently deletes removed state variables, and defragments the persistent storage.
+	 *
+	 * @return                    Success when cleaning up will be started.
+	 */
+	cs_ret_code_t cleanUp();
 
 	/**
 	 * Get pointer to state value.

@@ -87,13 +87,13 @@ bool ExtendedSwitchBehaviour::isValid(Time currenttime, PresenceStateDescription
 
     if (extensionCondition(currentpresence)) {
         // in extension and presence match
-        prevExtensionIsValidTimeStamp = SystemTime::posix();
+        prevExtensionIsValidTimeStamp = SystemTime::now();
         return true;
     }
 
     if(prevExtensionIsValidTimeStamp){
         if ( CsMath::Interval<uint32_t>(
-                SystemTime::posix().timestamp(), extensionCondition.timeOut, true )
+                SystemTime::posix(), extensionCondition.timeOut, true )
             .contains(prevExtensionIsValidTimeStamp->timestamp()) ) {
             // in extension and presence is invalid,
             // but we're in the extension's grace period.

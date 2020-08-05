@@ -1,4 +1,4 @@
-# Bluenet protocol v5.0.0
+# Bluenet protocol v5.1
 -------------------------
 
 This only documents the latest protocol, older versions can be found in the git history.
@@ -310,8 +310,8 @@ Setup access means the packet is available in setup mode, and encrypted with the
 
 Available command types:
 
-Type nr | Type name | Payload type | Result type | Description | A | M | B | S
---- | --- | --- | --- | :---: | :---: | :---: | :---: | :--:
+Type nr | Type name | Payload type | Result payload | Description | A | M | B | S
+--- | --- | --- | --- | --- | :---: | :---: | :---: | :--:
 0 | Setup | [Setup packet](#setup_packet) | - | Perform setup. |  |  |  | x
 1 | Factory reset | uint 32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
 2 | Get state | [State get packet](#state_get_packet) | [State get result packet](#state_get_result_packet) | Required access depends on the state type. | x | x | x
@@ -323,7 +323,7 @@ Type nr | Type name | Payload type | Result type | Description | A | M | B | S
 11 | Goto DFU | - | - | Reset device to DFU mode | x
 12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
 13 | Disconnect | - | - | Causes the crownstone to disconnect | x | x | x
-20 | Switch | uint 8 | - | Switch power, 0 = off, 100 = full on | x | x | x | x |
+20 | Switch | [Switch value](#switch_command_value) | - | Switch power. | x | x | x | x |
 21 | Multi switch | [Multi switch packet](#multi_switch_packet) | - | Switch multiple Crownstones (via mesh). | x | x | x
 22 | Dimmer | uint 8 | - | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
 23 | Relay | uint 8 | - | Switch relay, 0 = off, 1 = on | x | x | x
@@ -341,8 +341,19 @@ Type nr | Type name | Payload type | Result type | Description | A | M | B | S
 63 | Get behaviour | [Index](BEHAVIOUR.md#get_behaviour_packet) | [Index and behaviour packet](BEHAVIOUR.md#get_behaviour_result_packet) | Obtain the behaviour stored at given index. | x | x
 64 | Get behaviour indices | - | [Behaviour indices packet](BEHAVIOUR.md#get_behaviour_indices_packet) | Obtain a list of occupied indices in the list of behaviours. | x | x
 69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) | Obtain debug info of the current behaviour state. | x
-70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | Register or update a device to be tracked.
-
+70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | Register or update a device to be tracked. Error codes: ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | x | x | x
+71 | Tracked device heartbeat | [Tracked device heartbeat packet](#tracked_device_heartbeat_packet) | - | Let the crownstone know where a device is, similar to [background broadcasts](BROADCAST_PROTOCOL.md#background_broadcasts). Error codes: ERR_NOT_FOUND: no device with given device ID was registered. ERR_TIMEOUT: registered device is timed out. ERR_NO_ACCESS: wrong access level, or device token. | x | x | x
+80 | Get uptime | - | uint 32 | Time in seconds since boot. | x
+81 | Get ADC restarts | - | [ADC restarts packet](#adc_restarts_packet) | **Firmware debug.** Number of ADC restarts since boot. | x
+82 | Get switch history | - | [Switch history packet](#switch_history_packet) | **Firmware debug.** A history of why the switch state has changed. | x
+83 | Get power samples | [Request power samples](#power_samples_request_packet) | [Power samples](#power_samples_result_packet) | **Firmware debug.** Get the current or voltage samples of certain events. | x
+84 | Get min scheduler free space | - | uint 16 | **Firmware debug.** Get minimum queue space left of app scheduler observed so far. A lower number indicates the CPU has been busy a lot. | x
+85 | Get last reset reason | - | uint 32 | **Firmware debug.** Contents of POWER->RESETREAS as it was on boot. Bitmask with bit 0=ResetPin, 1=Watchdog, 2=SoftReset, 3=Lockup, 16=GPIO, 17=LPComp, 18=DebugInterface, 19=NFC. | x
+86 | Get GPREGRET | Index (uint8) | [Gpregret packet](#gpregret_result_packet) | **Firmware debug.** Get the Nth general purpose retention register as it was on boot. There are currently 2 registers. | x
+87 | Get ADC channel swaps | - | [ADC channel swaps packet](#adc_channel_swaps_packet) | **Firmware debug.** Get the number of detected ADC channel swaps. | x
+88 | Get RAM statistics | - | [RAM stats packet](#ram_stats_packet) | **Firmware debug.** Get RAM statistics. | x
+90 | Upload microapp | [Upload microapp packet](#upload_microapp_packet) | [Microapp result packet](#microapp_result_packet) | Upload microapp. | x
+100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
 
 <a name="setup_packet"></a>
 #### Setup packet
@@ -364,6 +375,19 @@ uint 8[] | Mesh net key  | 16 | 16 byte key used to encrypt/decrypt relays of me
 uint 8[] | iBeacon UUID | 16 | The iBeacon UUID. Should be the same for each Crownstone in the sphere.
 uint 16 | iBeacon major | 2 | The iBeacon major. Together with the minor, should be unique per sphere.
 uint 16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should be unique per sphere.
+
+
+<a name="switch_command_value"></a>
+#### Switch command value (uint 8)
+
+Value | Name | Description
+--- | --- | ---
+0 | Off | Switch off.
+1-99 | Dimmed | Set a dimmed value.
+100 | Full on | Switch fully on.
+253 | Toggle | Switch `OFF` when currently on, switch to `SMART_ON` when currently off.
+254 | Behaviour | Switch to the value according to _behaviour_ rules.
+255 | Smart on | Switch on, the value will be determined by _behaviour_ rules.
 
 
 <a name="state_get_packet"></a>
@@ -461,14 +485,12 @@ uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | ID | 1 | The ibeacon config ID to set.
-uint 32 | Timestamp | 4 | Timestamp when the config ID should be set.
-uint 16 | Interval | 2 | Interval in seconds when the ID should be set again.
+uint 32 | Timestamp | 4 | Unix timestamp when the ibeacon config ID should be set (the first time).
+uint 16 | Interval | 2 | Interval in seconds when the ibeacon config ID should be set again, after the given timestamp.
 
-- ID can only be 0 or 1 for now.
-- Set the interval to 0 if you to set the ID only once.
-- Set the interval to 0, and the timestamp to 0 if you want to set the ID only once, and now.
-
-To interleave between two config IDs, you can for example set ID=0 at timestamp=0 with interval=600, and ID=1 at timestamp=300 with interval=600.
+- ID can only be 0 or 1.
+- Set the interval to 0 if you want to set the ibeacon config ID only once, at the given timestamp. Use timestamp 0 if you want it to be set immediately.
+- To interleave between two config IDs every 60 seconds, you will need two commands. First set ID=0, at timestamp=0 with interval=60, then set ID=1 at timestamp=30 with interval=60.
 
 <a name="sun_time_packet"></a>
 ##### Sun time packet
@@ -499,7 +521,7 @@ uint 8 | Count | 1 | Number of valid entries.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
-uint 8 | Switch value | 1 | The switch value to be set by the targeted crownstone. 0 = off, 100 = fully on.
+uint 8 | [Switch value](#switch_command_value) | 1 | The switch value to be set by the targeted crownstone.
 
 
 <a name="state_error_bitmask"></a>
@@ -523,6 +545,7 @@ For now, only a few of commands are implemented:
 - Set time, only broadcast, without acks.
 - Noop, only broadcast, without acks.
 - State set, only 1 target ID, with ack.
+- Set ibeacon config ID.
 
 ![Command packet](../docs/diagrams/command-mesh-packet.png)
 
@@ -530,7 +553,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | [Type](#mesh_command_types) | 1 | Type of command, see table below.
 uint 8 | [Flags](#mesh_command_flags) | 1 | Options.
-uint 8 | Timeout / transmissions | 1 | When acked: timeout time in seconds. Else: number of times to send the command. 0 to use the default.
+uint 8 | Timeout / transmissions | 1 | When acked: timeout time in seconds. Else: number of times to send the command. 0 to use the default (10s timeout or 3 transmissions).
 uint 8 | ID count | 1 | The number of stone IDs provided.
 uint8 [] | List of stone IDs | Count | IDs of the stones at which this message is aimed. Can be empty, then the command payload follows directly after the count field.
 uint 8 | Command payload | N | The command payload data, which depends on the [type](#mesh_command_types).
@@ -545,15 +568,21 @@ Type nr | Type name | Payload type | Payload description
 <a name="mesh_command_flags"></a>
 ##### Mesh command flags
 
+For now there are only a couple of combinations possible:
+
+- If you want to send a command to all stones in the mesh, without acks and retries, set: `Broadcast=true`, `AckIDs=false`, `KnownIDs=false`.
+- If you want to send a command to all stones in the mesh, with acks and retries, set: `Broadcast=true`, `AckIDs=true`, `KnownIDs=false`. You will have to provide the list of IDs yourself.
+- If you want to send a command to 1 stone, with acks and retries, set: `Broadcast=false`, `AckIDs=true`, `KnownIDs=false`.
+
 Bit | Name |  Description
 --- | --- | ---
 0 | Broadcast | Send command to all stones. Else, its only sent to all stones in the list of stone IDs, which will take more time.
-1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout.
-2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen.
+1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout. **More than 1 IDs without broadcast is not implemented yet.**
+2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen. **Not implemented yet.**
 
 
 <a name="behaviour_debug_packet"></a>
-##### Behaviour debug packet
+#### Behaviour debug packet
 
 ![Behaviour debug packet](../docs/diagrams/behaviour_debug_packet.png)
 
@@ -573,20 +602,216 @@ uint 64 | Active end conditions | 8 | Bitmask of behaviours with active end cond
 uint 64 | Active timeout periods | 8 | Bitmask of behaviours that are in (presence) timeout period. Nth bit is Nth behaviour index.
 uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
 
+
+
+<a name="adc_restarts_packet"></a>
+#### ADC restarts packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Restart count | 4 | Number of ADC restarts since boot.
+uint32 | Timestamp | 4 | Unix timestamp of the last ADC restart.
+
+
+<a name="adc_channel_swaps_packet"></a>
+#### ADC channel swaps packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Swap count | 4 | Number of detected ADC channel swaps since boot.
+uint32 | Timestamp | 4 | Unix timestamp of the last detected ADC channel swap.
+
+
+<a name="gpregret_result_packet"></a>
+#### GPREGRET result packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Index | 1 | Which GPREGRET.
+uint32 | Value | 4 | Value of this GPREGRET. For index 0: bits 0-4 are used to count resets, bit 5 is set on brownout (doesn't work yet), bit 6 is set to go to DFU mode, bit 7 is set after storage was recovered.
+
+
+<a name="ram_stats_packet"></a>
+#### RAM stats packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Min stack end | 4 | Minimal observed stack end pointer since boot. It might take some time before this reflects the actual minimum.
+uint32 | Max heap end | 4 | Maximal observed heap end pointer since boot.
+uint32 | Min free | 4 | Minimal observed free RAM in bytes. It might take some time before this reflects the actual minimum.
+uint32 | Num sbrk fails | 4 | Number of times sbrk failed to hand out space.
+
+
+<a name="switch_history_packet"></a>
+#### Switch history packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Count | 1 | Number of items in the list.
+[Switch history item](#switch_history_item_packet) [] | List |
+
+<a name="switch_history_item_packet"></a>
+##### Switch history item packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Timestamp | 4 | Unix timestamp of the switch command.
+[Switch command](#switch_command_value) | Switch command | 1 | The switch command value.
+[Switch state](#switch_state_packet) | Switch state | 1 | The switch state after the command was executed.
+[Command source](#command_source_packet) | Source | 2 | The source of the switch command.
+
+
+
+<a name="command_source_packet"></a>
+#### Command source packet
+
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+uint 8 | [Source type](#command_source_type) | 3 | What type of source ID. Bits 5-7.
+uint 8 | Reserved | 4 | Reserved for future use, must be 0 for now. Bits 1-4.
+bool | External | 1 | Whether the command was received via the mesh. Bit 0.
+uint 8 | [Source ID](#command_source_ID) | 8 | The ID of the source.
+
+<a name="command_source_type"></a>
+##### Command source type
+
+Value | Name | Description
+--- | --- | ---
+0 | Enum | ID is one of the [list](#command_source_ID).
+1 | Behaviour | ID is the behaviour index, or 255 when unknown.
+3 | Broadcast | ID is the [device ID](BROADCAST_PROTOCOL.md#command_adv_header)
+
+<a name="command_source_ID"></a>
+##### Command source ID
+
+Value | Name | Description
+--- | --- | ---
+0 | None | No source was set.
+2 | Internal | Some internal source, not very specific.
+3 | UART | Command came from UART.
+4 | Connection | Command came from a BLE connection.
+5 | Switchcraft | Switchcraft triggered this command.
+6 | Tap to toggle | Tap to toggle triggered this command.
+
+
+
+<a name="power_samples_request_packet"></a>
+#### Power samples request packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | [Type](#power_samples_type) | 1 | Type of samples.
+uint 8 | Index | 1 | Some types have multiple lists of samples.
+
+<a name="power_samples_type"></a>
+#### Power samples type
+
+Value | Name| Description
+--- | --- | ---
+0 | Triggered switchcraft | Last samples that triggered switchcraft. Has N lists of subsequent voltage samples (index 0 is the first list). You can assume the time between the last sample of the first list and the first sample of the second list is equal to sample interval. Keep reading the next index until you get result code WRONG_PARAMETER.
+1 | Non-triggered switchcraft | Last samples that almost triggered switchcraft. Has N lists of subsequent voltage samples (index 0 is the first list). You can assume the time between the last sample of the first list and the first sample of the second list is equal to sample interval. Keep reading the next index until you get result code WRONG_PARAMETER.
+2 | Now filtered | Last sampled values, after smoothing. Has 2 lists: index 0 for voltage, index 1 for current.
+3 | Now unfiltered | Last sampled values, before smoothing. Has 2 lists: index 0 for voltage, index 1 for current.
+4 | Soft fuse | Last samples that triggered a soft fuse. Has 1 list: index 0 for current.
+
+<a name="power_samples_result_packet"></a>
+#### Power samples result packet
+background broadcast
+![Power samples result packet](../docs/diagrams/power_samples_result_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | [Type](#power_samples_type) | 1 | Type of samples, also determines whether the samples are voltage or current samples.
+uint 8 | Index | 1 | Some types have multiple lists of samples, see the type description.
+uint 16 | Count | 2 | Number of samples in the list.
+uint 32 | Timestamp | 4 | Unix timestamp of time the samples have been set.
+uint 16 | Delay | 2 | Measurement delay in μs, due to hardware. A sample measured now, will get the value of delay μs ago. Not set yet, will be 0.
+uint 16 | Sample interval | 2 | Sample interval in μs.
+uint 16 | Reserved | 2 | Reserved for future use, should be 0 for now.
+int 16 | Offset | 2 | Calculated offset of the samples. (Sort of the average of the sample values). Not set yet, will be 0.
+float | Multiplier | 4 | Multiply the sample value minus offset with this value to get a value in ampere (when samples are current), or volt (when samples are voltage). Not set yet, will be 0.
+int 16 [] | Samples | 2 | List of samples.
+
+
 <a name="register_tracked_device_packet"></a>
-##### Register tracked device packet
+#### Register tracked device packet
 
 ![Register tracked device packet](../docs/diagrams/register_tracked_device_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 16 | Device ID | 2 | Unique ID of the device.
-uint 8 | Location ID | 1 | ID of the location where the device is.
+uint 8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
 uint 8 | Profile ID | 1 | Profile ID of the device.
 int 8 | RSSI offset | 1 | Offset from standard signal strength.
 uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background_adv_flags).
 uint 24 | Device token | 3 | Token that will be advertised by the device.
 uint 16 | Time to live | 2 | Time in minutes after which the device token will be invalid.
+
+
+<a name="tracked_device_heartbeat_packet"></a>
+#### Tracked device heartbeat packet
+
+![Tracked device heartbeat packet](../docs/diagrams/tracked_device_heartbeat_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 16 | Device ID | 2 | Unique ID of the device.
+uint 8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
+uint 24 | Device token | 3 | Token that has been registered.
+uint 8 | Time to live | 1 | How long (in minutes) the crownstone assumes the device is at the given location, so should best be larger than the interval at which the heartbeat is sent. Setting this to 0 is similar to sending a single [background broadcast](BROADCAST_PROTOCOL.md#background_broadcasts).
+
+
+<a name="upload_microapp_packet"></a>
+#### Upload microapp
+
+![Upload microapp packet](../docs/diagrams/upload_microapp_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Protocol | 1 | Protocol version of binary uploads (default 0).
+uint 8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
+uint 8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0) if index != 255.
+uint 8 | Count | 1 | The total number of chunks (rounded up).
+uint 16 | Size | 2 | Size in bytes of the complete binary.
+uint 16 | Checksum | 2 | The checksum of this chunk. The checksum of the last packet is of the complete program.
+uint 8 | Data | N | `NRF_SDH_BLE_GATT_MAX_MTU_SIZE` (69)  - `OVERHEAD` (20), should be 49.
+
+The checksum of the last packet contains the checksum of the complete binary. The packets are all of the same size. The data in the last packet has to contain 0xFF for the values beyond the application size.
+
+<a name="send_microapp_meta_packet"></a>
+#### Send microapp meta info
+
+![Send microapp meta packet](../docs/diagrams/send_microapp_meta_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Protocol | 1 | Protocol version of binary sends (default 0).
+uint 8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
+uint 8 | Index  | 1 | If set to `255`.
+uint 8 | Opcode | 1 | There are currently two opcodes.
+uint 16 | Param0 | 2 | Opcode specific parameter.
+uint 16 | Param1 | 2 | Opcode specific parameter.
+uint 8 | Data | N | Opcode specific data.
+
+The opcodes that are defined are `MICROAPP_OPCODE_ENABLE = 0x01` and `MICROAPP_OPCODE_DISABLE = 0x02`. These can be used to enable/disable a (previously) uploaded microapp.
+
+<a name="microapp_result_packet"></a>
+#### Microapp result packet
+
+![Microapp result packet](../docs/diagrams/microapp_result_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Protocol | 1 | Protocol version of binary uploads (default 0).
+uint 8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
+uint 8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0) if index != 255.
+uint 8 | Repeat | 1 | A decrementing counter (down from 3 to improve reception thanks to unique ads).
+uint 16 | Error | 2 | Any error that might have happened (checksum, size, etc.).
+
+The result packet is important to retrieve a notification that a particular write has been successful. Only then you should send the next chunk.
+
+To make the process more graceful for the receiving party to miss a notification, the notification is sent repeatedly with decrementing repeat counter.
 
 <a name="result_packet"></a>
 ## Result packet
@@ -602,6 +827,7 @@ uint 16 | [Command type](#command_types) | 2 | Type of the command of which this
 uint 16 | [Result code](#result_codes) | 2 | The result code.
 uint 16 | Size | 2 | Size of the payload in bytes.
 uint 8 | Payload | Size | Payload data, depends on command type.
+
 
 <a name="result_codes"></a>
 #### Result codes
@@ -621,7 +847,7 @@ Value | Name | Description
 36  | UNKNOWN_TYPE | Unknown type provided.
 37  | NOT_FOUND | The thing you were looking for was not found.
 38  | NO_SPACE | There is no space for this command.
-39  | BUSY | Wait for something to be done.
+39  | BUSY | Wait for something to be done. You can usually retry later.
 40  | ERR_WRONG_STATE | The crownstone is in a wrong state.
 41  | ERR_ALREADY_EXISTS | Item already exists.
 42  | ERR_TIMEOUT | Operation timed out.
@@ -711,6 +937,7 @@ Type nr | Type name | Payload type | Description | A | M | B
 139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors. | r | r | 
 149 | Sun time | [Sun time packet](#sun_time_packet) | Packet with sun rise and set times. | r | r | 
 150 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Behaviour settings. | rw | rw | r
+156 | Soft on speed | uint 8 | Speed at which the dimmer goes towards the target value. Range: 1-100. | rw
 
 <a name="switch_state_packet"></a>
 #### Switch state
