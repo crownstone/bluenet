@@ -90,7 +90,7 @@ void RssiDataTracker::handlePrimaryPingMessage(rssi_ping_message_t* ping_msg){
 	recordPingMsg(ping_msg);
 }
 
-void RssiDataTracker::handeleSecondaryPingMessage(rssi_ping_message_t* ping_msg){
+void RssiDataTracker::handleSecondaryPingMessage(rssi_ping_message_t* ping_msg){
 	if(filterSampleIndex(ping_msg) == nullptr){
 		return; // (also catches ping_msg == nullptr)
 	}
@@ -124,6 +124,9 @@ rssi_ping_message_t* RssiDataTracker::filterSampleIndex(rssi_ping_message_t* p){
 	auto p_key = getKey(p);
 
 	if(last_received_sample_indices[p_key] == p->sample_id){
+		// sample index should be incremented each ping message,
+		// a second (third...) message from crownstone_id with a previously
+		// recorded sample_id is filtered out.
 		RSSIDATATRACKER_LOGv("filtered out stale ping message (%d -> %d) %d", p->sender_id, p->recipient_id, p->sample_id);
 		return nullptr;
 	}
@@ -139,8 +142,14 @@ void RssiDataTracker::recordPingMsg(rssi_ping_message_t* ping_msg){
 
 	RSSIDATATRACKER_LOGv("record new sampleid (%d -> %d) %d", ping_msg->sender_id, ping_msg->recipient_id, ping_msg->sample_id);
 
+	if(variance_recorders.find(stone_pair) == variance_recorders.end()){
+		OnlineVarianceRecorder ovr;
+		variance_recorders[stone_pair] = ovr;
+	}
+
 	last_received_sample_indices[stone_pair] = ping_msg->sample_id;
 	last_received_rssi[stone_pair] = ping_msg->rssi;
+	variance_recorders[stone_pair].addValue(ping_msg->rssi);
 }
 
 uint32_t received_pingcounter = 0;
@@ -160,7 +169,7 @@ void RssiDataTracker::handleEvent(event_t& evt){
 		if(pingmsg_ptr->recipient_id == 0xff){
 			handlePrimaryPingMessage(pingmsg_ptr);
 		} else {
-			handeleSecondaryPingMessage(pingmsg_ptr);
+			handleSecondaryPingMessage(pingmsg_ptr);
 		}
 
 		break;

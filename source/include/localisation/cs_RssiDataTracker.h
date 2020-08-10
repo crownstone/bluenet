@@ -11,6 +11,7 @@
 #include <localisation/cs_RssiPingMessage.h>
 
 #include <util/cs_Coroutine.h>
+#include <util/cs_Variance.h>
 
 #include <map>
 #include <utility>  // for pair
@@ -46,9 +47,13 @@ private:
 
 	Coroutine pingRoutine;
 
-	// stores the relevant history
-	std::map<std::pair<stone_id_t,stone_id_t>, uint8_t> last_received_sample_indices = {};
-	std::map<std::pair<stone_id_t,stone_id_t>, int8_t> last_received_rssi = {};
+	// stores the relevant history, the stone id pairs are order dependent: (sender, receiver)
+	template <class T>
+	using StonePairMap = std::map<std::pair<stone_id_t,stone_id_t>, T>;
+
+	StonePairMap<uint8_t> last_received_sample_indices = {};
+	StonePairMap<int8_t> last_received_rssi = {};
+	StonePairMap<OnlineVarianceRecorder> variance_recorders = {};
 
 	/**
 	 * Sends a primary ping message over the mesh, containing only the 'ping counter'
@@ -68,7 +73,7 @@ private:
 	 * Forwards message to test suite
 	 * Records ping message
 	 */
-	void handeleSecondaryPingMessage(rssi_ping_message_t* ping_msg);
+	void handleSecondaryPingMessage(rssi_ping_message_t* ping_msg);
 
 
 	/**
@@ -86,6 +91,7 @@ private:
 	rssi_ping_message_t* filterSampleIndex(rssi_ping_message_t* p);
 
 	// mapping utils
+	// Note: the stone id pairs are order dependent: (sender, receiver)
 	inline std::pair<stone_id_t,stone_id_t> getKey(stone_id_t i, stone_id_t j){
 		return {i,j};
 	}
