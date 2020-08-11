@@ -867,8 +867,8 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 			_lastSoftfuse.sampleIntervalUs = power.sampleIntervalUs;
 			_lastSoftfuse.offset = _avgZeroCurrent / 1024;
 			_lastSoftfuse.multiplier = _currentMultiplier;
-			for (sample_value_id_t i = 0; i < power.bufSize / power.numChannels; i += power.numChannels) {
-				_lastSoftfuseSamples[i] = power.buf[i + power.currentIndex];
+			for (sample_value_id_t i = 0; i < power.bufSize / power.numChannels; ++i) {
+				_lastSoftfuseSamples[i] = power.buf[2*i + power.currentIndex];
 			}
 		}
 	}
