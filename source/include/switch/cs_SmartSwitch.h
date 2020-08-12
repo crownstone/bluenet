@@ -31,8 +31,11 @@ public:
 	/**
 	 * Set intended intensity.
 	 *
+	 * Intended state is only changed by this function.
+	 *
 	 * @param[in]  Intensity value: 0-100
-	 * @return     Return code. When it's not success, the intended state might have changed to something else.
+	 * @return     Return code. When it's not success, the current intensity might have changed to something else.
+	 *             ERR_NOT_POWERED when trying to dim while the dimmer is not powered.
 	 */
 	cs_ret_code_t set(uint8_t intensity);
 

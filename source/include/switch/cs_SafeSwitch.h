@@ -48,6 +48,7 @@ public:
 	 * @param[in] fade       Whether to fade towards the new intensity. False will set it immediately.
 	 *
 	 * @return     Error code: if not successful, check what the current state is.
+	 *             ERR_NOT_POWERED when the dimmer is not powered yet.
 	 */
 	cs_ret_code_t setDimmer(uint8_t intensity, bool fade = true);
 

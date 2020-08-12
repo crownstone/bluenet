@@ -859,6 +859,7 @@ Value | Name | Description
 65  | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
 67  | NOT_INITIALIZED | Something must first be initialized.
 68  | ERR_NOT_STARTED | Something must first be started.
+69  | ERR_NOT_POWERED | Something must first be powered.
 80  | WRITE_DISABLED | Write is disabled for given type.
 81  | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
 96  | ADC_INVALID_CHANNEL | Invalid adc input channel selected.

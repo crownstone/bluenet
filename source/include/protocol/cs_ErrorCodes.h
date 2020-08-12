@@ -37,6 +37,7 @@ enum ErrorCodesGeneral {
 //	ERR_WRONG_SETTING               = 0x42,
 	ERR_NOT_INITIALIZED             = 0x43,
 	ERR_NOT_STARTED					= 0x44,
+	ERR_NOT_POWERED                 = 0x45,
 
 	ERR_WRITE_DISABLED              = 0x50,
 	ERR_WRITE_NOT_ALLOWED           = 0x51,

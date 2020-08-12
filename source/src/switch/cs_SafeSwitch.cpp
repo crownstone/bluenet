@@ -107,7 +107,11 @@ cs_ret_code_t SafeSwitch::setDimmer(uint8_t intensity, bool fade) {
 			return ERR_UNSAFE;
 		}
 		if (!dimmerPowered) {
-			return startDimmerPowerCheck(intensity, fade);
+			cs_ret_code_t retCode = startDimmerPowerCheck(intensity, fade);
+			if (retCode == ERR_NOT_AVAILABLE) {
+				return ERR_NOT_POWERED;
+			}
+			return retCode;
 		}
 	}
 	return setDimmerUnchecked(intensity, fade);
