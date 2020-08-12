@@ -21,6 +21,10 @@ private:
 	float M2 = 0.0f;
 	float mean = 0.0f;
 
+	// these values are just guesses...
+	static const constexpr float float_precision_threshold = 10e9f;
+	static const constexpr int count_precision_threshold = 10e6;
+
 public:
 	/**
 	 * update the aggregated data with a new measurement.
@@ -52,9 +56,19 @@ public:
 		return sqrt(getVariance());
 	}
 
+	bool isNumericPrecisionLow(){
+		return M2 > float_precision_threshold || num_recorded_values > count_precision_threshold;
+	}
+
 	void reduceCount(){
 		// suggestion:
 		M2 /= 2;
 		num_recorded_values /= 2;
+	}
+
+	void reset(){
+		num_recorded_values = 0;
+		M2 = 0.0f;
+		mean = 0.0f;
 	}
 };

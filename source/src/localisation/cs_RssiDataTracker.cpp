@@ -142,9 +142,12 @@ void RssiDataTracker::recordPingMsg(rssi_ping_message_t* ping_msg){
 
 	RSSIDATATRACKER_LOGv("record new sampleid (%d -> %d) %d", ping_msg->sender_id, ping_msg->recipient_id, ping_msg->sample_id);
 
-	if(variance_recorders.find(stone_pair) == variance_recorders.end()){
+	auto var_rec_iter = variance_recorders.find(stone_pair);
+	if(var_rec_iter == variance_recorders.end()){
 		OnlineVarianceRecorder ovr;
 		variance_recorders[stone_pair] = ovr;
+	} else if (var_rec_iter->second.isNumericPrecisionLow()){
+		var_rec_iter->second.reduceCount();
 	}
 
 	last_received_sample_indices[stone_pair] = ping_msg->sample_id;
