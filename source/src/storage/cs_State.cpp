@@ -100,6 +100,19 @@ cs_ret_code_t State::set(const cs_state_data_t & data, const PersistenceMode mod
 		case ERR_SUCCESS:
 		case ERR_SUCCESS_NO_CHANGE: {
 			event_t event(data.type, data.value, data.size);
+
+			// Check if value pointer is aligned.
+			// TODO: improve this.
+			if ((uint32_t)data.value % 4 != 0) {
+				// Get the value pointer from State ram, as that's aligned.
+				size16_t index_in_ram;
+				cs_ret_code_t foundInRam = findInRam(data.type, data.id, index_in_ram);
+				if (foundInRam == ERR_SUCCESS) {
+					event.data = _ram_data_register[index_in_ram].value;
+					LOGd("unaligned=%p aligned=%p", data.value, event.data);
+				}
+			}
+
 			EventDispatcher::getInstance().dispatch(event);
 			break;
 		}
