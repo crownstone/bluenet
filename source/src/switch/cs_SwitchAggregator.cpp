@@ -295,7 +295,6 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& event) {
 }
 
 void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_with_counter_t& source) {
-	auto prev_overrideState = overrideState;
 
 #ifdef DEBUG
 	switch (value) {
@@ -321,6 +320,7 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 			break;
 	}
 #endif
+
 	switch (value) {
 		case CS_SWITCH_CMD_VAL_TOGGLE: {
 			uint8_t newValue = smartSwitch.getIntendedState() == 0 ? CS_SWITCH_CMD_VAL_SMART_ON : 0;
@@ -340,13 +340,23 @@ void SwitchAggregator::executeStateIntentionUpdate(uint8_t value, cmd_source_wit
 			break;
 	}
 
-	// don't allow override reset in updateState, it has just been requested to be
-	// set to `value`
-	if (updateState(false, source) == ERR_NO_ACCESS) {
-		// failure to set the smartswitch. It seems to be locked.
-		LOGSwitchAggregatorDebug("Reverting to previous value, no access to smartswitch");
-		overrideState = prev_overrideState;
+	// Don't allow override reset in updateState, it has just been requested to be set to `value`
+	cs_ret_code_t retCode = updateState(false, source);
+
+	switch (retCode) {
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE:
+		case ERR_NOT_POWERED:
+			break;
+		default:
+			// Only when the dimmer isn't powered yet, we want to keep the given overrideState,
+			// because it should be set once the dimmer is powered.
+			// In all other cases, we want to copy the current intensity, so that the intensity
+			// doesn't change when some configuration is changed.
+			LOGSwitchAggregatorDebug("Copy current intensity to overrideState");
+			overrideState = smartSwitch.getCurrentIntensity();
 	}
+
 	addToSwitchHistory(cs_switch_history_item_t(SystemTime::posix(), value, smartSwitch.getActualState(), source.source));
 	pushTestDataToHost();
 }

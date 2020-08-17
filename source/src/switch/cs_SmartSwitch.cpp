@@ -64,7 +64,7 @@ uint8_t SmartSwitch::getIntendedState() {
 	return intendedState;
 }
 
-bool SmartSwitch::allowSwitching(){
+bool SmartSwitch::allowSwitching() {
 	return _allowSwitching || allowSwitchingOverride;
 }
 

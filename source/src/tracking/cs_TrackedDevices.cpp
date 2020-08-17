@@ -131,7 +131,7 @@ cs_ret_code_t TrackedDevices::handleHeartbeat(internal_tracked_device_heartbeat_
 		return ERR_NO_ACCESS;
 	}
 	if (memcmp(device->data.data.deviceToken, packet.data.deviceToken, sizeof(packet.data.deviceToken)) != 0) {
-		LOGw("Invalid token for id=%u", device->data.data.deviceId);
+		LOGw("Invalid token for id=%u stored=%u %u .. given=%u %u .. ", device->data.data.deviceId, device->data.data.deviceToken[0], device->data.data.deviceToken[1], packet.data.deviceToken[0], packet.data.deviceToken[1]);
 		return ERR_NO_ACCESS;
 	}
 

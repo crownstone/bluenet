@@ -759,7 +759,7 @@ Type | Name | Length | Description
 uint 16 | Device ID | 2 | Unique ID of the device.
 uint 8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
 uint 24 | Device token | 3 | Token that has been registered.
-uint 8 | Time to live | 1 | How long (in minutes) the crownstone assumes the device is at the given location, so should best be larger than the interval at which the heartbeat is sent. Setting this to 0 is similar to sending a single [background broadcast](BROADCAST_PROTOCOL.md#background_broadcasts).
+uint 8 | Time to live | 1 | How long (in minutes) the crownstone assumes the device is at the given location, so should best be larger than the interval at which the heartbeat is sent. Setting this to 0 is similar to sending a single [background broadcast](BROADCAST_PROTOCOL.md#background_broadcasts). Currently the max is 60, a longer time will result in an error WRONG_PARAMETER.
 
 
 <a name="upload_microapp_packet"></a>
@@ -859,6 +859,7 @@ Value | Name | Description
 65  | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
 67  | NOT_INITIALIZED | Something must first be initialized.
 68  | ERR_NOT_STARTED | Something must first be started.
+69  | ERR_NOT_POWERED | Something must first be powered.
 80  | WRITE_DISABLED | Write is disabled for given type.
 81  | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
 96  | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
