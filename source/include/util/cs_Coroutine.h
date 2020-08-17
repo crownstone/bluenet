@@ -33,6 +33,7 @@
  *
  */
 class Coroutine{
+private:
 	uint32_t next_call_tickcount = 0;
 public:
 	typedef std::function<uint32_t(void)> Action;
@@ -42,9 +43,19 @@ public:
 
 	void operator()(uint32_t current_tick_count){
 		// not doing roll-over checks here yet..
-		if(current_tick_count > next_call_tickcount){
+		if(current_tick_count > next_call_tickcount && action){
 			auto ticks_to_wait = action();
 			next_call_tickcount = current_tick_count + ticks_to_wait;
+		}
+	}
+
+	/**
+	 * utility wrapper to simply pass an event
+	 */
+	void operator()(event_t& evt){
+		if(evt.type == CS_TYPE::EVT_TICK){
+			// forward call to uint32_t
+			(*this)(*reinterpret_cast<uint32_t*>(evt.data));
 		}
 	}
 };
