@@ -193,86 +193,91 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
 
 void PowerSampling::handleEvent(event_t & event) {
 	switch(event.type) {
-	case CS_TYPE::CMD_ENABLE_LOG_POWER:
-		_logsEnabled.flags.power = *(TYPIFY(CMD_ENABLE_LOG_POWER)*)event.data;
-		break;
-	case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
-		_logsEnabled.flags.current = *(TYPIFY(CMD_ENABLE_LOG_CURRENT)*)event.data;
-		break;
-	case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
-		_logsEnabled.flags.voltage = *(TYPIFY(CMD_ENABLE_LOG_VOLTAGE)*)event.data;
-		break;
-	case CS_TYPE::CMD_ENABLE_LOG_FILTERED_CURRENT:
-		_logsEnabled.flags.filteredCurrent = *(TYPIFY(CMD_ENABLE_LOG_FILTERED_CURRENT)*)event.data;
-		break;
-	case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
-		toggleVoltageChannelInput();
-		break;
-	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT:
-		enableDifferentialModeCurrent(*(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT)*)event.data);
-		break;
-	case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
-		enableDifferentialModeVoltage(*(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE)*)event.data);
-		break;
-	case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
-		changeRange(VOLTAGE_CHANNEL_IDX, 600);
-		break;
-	case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
-		changeRange(VOLTAGE_CHANNEL_IDX, -600);
-		break;
-	case CS_TYPE::CMD_INC_CURRENT_RANGE:
-		changeRange(CURRENT_CHANNEL_IDX, 600);
-		break;
-	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
-		changeRange(CURRENT_CHANNEL_IDX, -600);
-		break;
-	case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
-		enableSwitchcraft(*(TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)*)event.data);
-		break;
-	case CS_TYPE::CMD_GET_POWER_SAMPLES: {
-		cs_power_samples_request_t* cmd = (TYPIFY(CMD_GET_POWER_SAMPLES)*)event.data;
-		handleGetPowerSamples((PowerSamplesType)cmd->type, cmd->index, event.result);
-		break;
-	}
-	case CS_TYPE::CMD_GET_ADC_RESTARTS: {
-		if (event.result.buf.len < sizeof(_adcRestarts)) {
-			event.result.returnCode = ERR_BUFFER_TOO_SMALL;
-			return;
+		case CS_TYPE::CMD_ENABLE_LOG_POWER:
+			_logsEnabled.flags.power = *(TYPIFY(CMD_ENABLE_LOG_POWER)*)event.data;
+			break;
+		case CS_TYPE::CMD_ENABLE_LOG_CURRENT:
+			_logsEnabled.flags.current = *(TYPIFY(CMD_ENABLE_LOG_CURRENT)*)event.data;
+			break;
+		case CS_TYPE::CMD_ENABLE_LOG_VOLTAGE:
+			_logsEnabled.flags.voltage = *(TYPIFY(CMD_ENABLE_LOG_VOLTAGE)*)event.data;
+			break;
+		case CS_TYPE::CMD_ENABLE_LOG_FILTERED_CURRENT:
+			_logsEnabled.flags.filteredCurrent = *(TYPIFY(CMD_ENABLE_LOG_FILTERED_CURRENT)*)event.data;
+			break;
+		case CS_TYPE::CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN:
+			toggleVoltageChannelInput();
+			break;
+		case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT:
+			enableDifferentialModeCurrent(*(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_CURRENT)*)event.data);
+			break;
+		case CS_TYPE::CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE:
+			enableDifferentialModeVoltage(*(TYPIFY(CMD_ENABLE_ADC_DIFFERENTIAL_VOLTAGE)*)event.data);
+			break;
+		case CS_TYPE::CMD_INC_VOLTAGE_RANGE:
+			changeRange(VOLTAGE_CHANNEL_IDX, 600);
+			break;
+		case CS_TYPE::CMD_DEC_VOLTAGE_RANGE:
+			changeRange(VOLTAGE_CHANNEL_IDX, -600);
+			break;
+		case CS_TYPE::CMD_INC_CURRENT_RANGE:
+			changeRange(CURRENT_CHANNEL_IDX, 600);
+			break;
+		case CS_TYPE::CMD_DEC_CURRENT_RANGE:
+			changeRange(CURRENT_CHANNEL_IDX, -600);
+			break;
+		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED:
+			enableSwitchcraft(*(TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)*)event.data);
+			break;
+		case CS_TYPE::CMD_GET_POWER_SAMPLES: {
+			cs_power_samples_request_t* cmd = (TYPIFY(CMD_GET_POWER_SAMPLES)*)event.data;
+			handleGetPowerSamples((PowerSamplesType)cmd->type, cmd->index, event.result);
+			break;
 		}
-		memcpy(event.result.buf.data, &_adcRestarts, sizeof(_adcRestarts));
-		event.result.dataSize = sizeof(_adcRestarts);
-		event.result.returnCode = ERR_SUCCESS;
-		break;
-	}
-	case CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS: {
-		if (event.result.buf.len < sizeof(_adcChannelSwaps)) {
-			event.result.returnCode = ERR_BUFFER_TOO_SMALL;
-			return;
+		case CS_TYPE::CMD_GET_ADC_RESTARTS: {
+			if (event.result.buf.len < sizeof(_adcRestarts)) {
+				event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+				return;
+			}
+			memcpy(event.result.buf.data, &_adcRestarts, sizeof(_adcRestarts));
+			event.result.dataSize = sizeof(_adcRestarts);
+			event.result.returnCode = ERR_SUCCESS;
+			break;
 		}
-		memcpy(event.result.buf.data, &_adcChannelSwaps, sizeof(_adcChannelSwaps));
-		event.result.dataSize = sizeof(_adcChannelSwaps);
-		event.result.returnCode = ERR_SUCCESS;
-		break;
-	}
-	case CS_TYPE::EVT_ADC_RESTARTED:
-		_adcRestarts.count++;
-		_adcRestarts.lastTimestamp = SystemTime::posix();
-		_skipSwapDetection = 1;
-		while (!_bufferQueue.empty()) {
-			ADC::getInstance().releaseBuffer(_bufferQueue.pop());
+		case CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS: {
+			if (event.result.buf.len < sizeof(_adcChannelSwaps)) {
+				event.result.returnCode = ERR_BUFFER_TOO_SMALL;
+				return;
+			}
+			memcpy(event.result.buf.data, &_adcChannelSwaps, sizeof(_adcChannelSwaps));
+			event.result.dataSize = sizeof(_adcChannelSwaps);
+			event.result.returnCode = ERR_SUCCESS;
+			break;
 		}
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
-//		RecognizeSwitch::getInstance().skip(2);
-		break;
-	case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD:
-		RecognizeSwitch::getInstance().configure(*(TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)*)event.data);
-		break;
-	case CS_TYPE::EVT_TICK:
-		if (_calibratePowerZeroCountDown) {
-			--_calibratePowerZeroCountDown;
+		case CS_TYPE::EVT_ADC_RESTARTED: {
+			_adcRestarts.count++;
+			_adcRestarts.lastTimestamp = SystemTime::posix();
+			_skipSwapDetection = 1;
+			while (!_bufferQueue.empty()) {
+				ADC::getInstance().releaseBuffer(_bufferQueue.pop());
+			}
+			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
+			//		RecognizeSwitch::getInstance().skip(2);
+			break;
 		}
-		break;
-	default: {}
+		case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD: {
+			TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD) threshold;
+			memcpy(&threshold, event.data, sizeof(TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)));
+			RecognizeSwitch::getInstance().configure(threshold);
+			break;
+		}
+		case CS_TYPE::EVT_TICK: {
+			if (_calibratePowerZeroCountDown) {
+				--_calibratePowerZeroCountDown;
+			}
+			break;
+		}
+		default: {}
 	}
 }
 
