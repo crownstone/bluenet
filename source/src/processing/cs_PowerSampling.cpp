@@ -266,7 +266,9 @@ void PowerSampling::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD: {
-			RecognizeSwitch::getInstance().configure(*reinterpret_cast<TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)*>(event.data));
+			TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD) threshold;
+			memcpy(&threshold, event.data, sizeof(TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)));
+			RecognizeSwitch::getInstance().configure(threshold);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {
