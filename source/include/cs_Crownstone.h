@@ -327,7 +327,9 @@ private:
 	TrackedDevices _trackedDevices;
 	SystemTime _systemTime;
 
+#if RSSI_DATA_TRACKER_ENABLED==1
 	RssiDataTracker _rssiDataTracker;
+#endif
 
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
