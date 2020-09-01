@@ -393,12 +393,12 @@ void UartProtocol::handleEvent(event_t & event) {
 	}
 	case CS_TYPE::EVT_MESH_EXT_STATE_0: {
 		TYPIFY(EVT_MESH_EXT_STATE_0)* state = (TYPIFY(EVT_MESH_EXT_STATE_0)*)event.data;
-		writeMsg(UART_OPCODE_TX_MESH_STATE_PART_0, (uint8_t*)&state, sizeof(state));
+		writeMsg(UART_OPCODE_TX_MESH_STATE_PART_0, (uint8_t*)state, sizeof(*state));
 		break;
 	}
 	case CS_TYPE::EVT_MESH_EXT_STATE_1: {
 		TYPIFY(EVT_MESH_EXT_STATE_1)* state = (TYPIFY(EVT_MESH_EXT_STATE_1)*)event.data;
-		writeMsg(UART_OPCODE_TX_MESH_STATE_PART_1, (uint8_t*)&state, sizeof(state));
+		writeMsg(UART_OPCODE_TX_MESH_STATE_PART_1, (uint8_t*)state, sizeof(*state));
 		break;
 	}
 	default:
