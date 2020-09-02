@@ -70,7 +70,7 @@ SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile f
 SET(NRF5_DIR                                 "unset"       CACHE STRING "The nRF5 sdk directory")
 SET(WORKSPACE_DIR                            "unset"       CACHE STRING "The workspace directory")
 SET(SOFTDEVICE_HEX_FILE                      ""            CACHE STRING "Softdevice hex file")
-SET(PASS_FILE                                "crownstone/dfu_pkg_signing_key" CACHE STRING "Pass file (containing key")
+SET(PASS_FILE                                "crownstone/firmware/dfu_pkg_signing_key" CACHE STRING "Pass file (containing key")
 SET(KEY_FILE                                 "temp.key"    CACHE STRING "Pass file (containing key")
 SET(SUPERUSER_SWITCH                         "sudo"        CACHE STRING "Switch to superuser")
 
