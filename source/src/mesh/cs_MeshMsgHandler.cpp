@@ -170,6 +170,7 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSi
 		_lastReveivedSetTime = timestamp;
 		event_t event(CS_TYPE::CMD_SET_TIME, &timestamp, sizeof(timestamp));
 		event.dispatch();
+		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_CMD_TIME, payload, payloadSize);
 //		return event.result.returnCode;
 		return ERR_SUCCESS;
 	}
@@ -300,12 +301,13 @@ void MeshMsgHandler::checkStateReceived(int8_t rssi, uint8_t hops) {
 cs_ret_code_t MeshMsgHandler::handleProfileLocation(uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_profile_location_t* profileLocation = (cs_mesh_model_msg_profile_location_t*) payload;
 	LOGMeshModelDebug("received profile=%u location=%u", profileLocation->profile, profileLocation->location);
-	TYPIFY(EVT_PROFILE_LOCATION) eventData;
+	TYPIFY(EVT_RECEIVED_PROFILE_LOCATION) eventData;
 	eventData.profileId = profileLocation->profile;
 	eventData.locationId = profileLocation->location;
 	eventData.fromMesh = true;
-	event_t event(CS_TYPE::EVT_PROFILE_LOCATION, &eventData, sizeof(eventData));
+	event_t event(CS_TYPE::EVT_RECEIVED_PROFILE_LOCATION, &eventData, sizeof(eventData));
 	event.dispatch();
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_PROFILE_LOCATION, payload, payloadSize);
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
 }
@@ -316,6 +318,7 @@ cs_ret_code_t MeshMsgHandler::handleSetBehaviourSettings(uint8_t* payload, size1
 	TYPIFY(STATE_BEHAVIOUR_SETTINGS)* eventDataPtr = packet;
 //	cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, (uint8_t*)eventDataPtr, sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS)));
 //	State::getInstance().set(stateData);
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_SET_BEHAVIOUR_SETTINGS, payload, payloadSize);
 	return State::getInstance().set(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, eventDataPtr, sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS)));
 }
 
@@ -325,6 +328,7 @@ cs_ret_code_t MeshMsgHandler::handleTrackedDeviceRegister(uint8_t* payload, size
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)));
 	event.dispatch();
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_TRACKED_DEVICE_REGISTER, payload, payloadSize);
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
 }
@@ -335,6 +339,7 @@ cs_ret_code_t MeshMsgHandler::handleTrackedDeviceToken(uint8_t* payload, size16_
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
 	event.dispatch();
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_TRACKED_DEVICE_TOKEN, payload, payloadSize);
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
 }
@@ -345,6 +350,7 @@ cs_ret_code_t MeshMsgHandler::handleTrackedDeviceHeartbeat(uint8_t* payload, siz
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_HEARTBEAT, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)));
 	event.dispatch();
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_TRACKED_DEVICE_HEARTBEAT, payload, payloadSize);
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
 }
@@ -365,6 +371,7 @@ cs_ret_code_t MeshMsgHandler::handleSyncRequest(uint8_t* payload, size16_t paylo
 	TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING, eventDataPtr, sizeof(TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)));
 	event.dispatch();
+	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_SYNC_REQUEST, payload, payloadSize);
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
 }

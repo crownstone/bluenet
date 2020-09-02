@@ -111,6 +111,15 @@ private:
     void propagateMeshMessage(uint8_t profile, uint8_t location);
 
     /**
+     * Sends event with profile location change.
+     *
+     * @param[in] type                 Type of change.
+     * @param[in] profileId            The profile ID that entered/left a location.
+     * @param[in] locationId           The location ID that was entered/left.
+     */
+    void sendPresenceChange(PresenceChange type, uint8_t profileId = 0, uint8_t locationId = 0);
+
+    /**
      * Triggers a EVT_PRESENCE_MUTATION event of the given type.
      */
     void triggerPresenceMutation(MutationType mutationtype);

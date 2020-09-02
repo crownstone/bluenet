@@ -38,6 +38,8 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_CONTROL_RESULT =                   1, // The result of the control command, payload: result_packet_header_t + data.
 	UART_OPCODE_TX_SERVICE_DATA =                     2, // Sent when the service data is updated (payload: service_data_t)
 	UART_OPCODE_TX_BLE_MSG =                          3, // Sent by command (CMD_UART_MSG), payload: buffer.
+	UART_OPCODE_TX_PRESENCE_CHANGE =                  4, // Sent when the presence has changed, payload: presence_change_t. When the first user enters, multiple msgs will be sent.
+
 	UART_OPCODE_TX_MESH_STATE =                       102, // Received state of external stone, payload: service_data_encrypted_t
 	UART_OPCODE_TX_MESH_STATE_PART_0 =                103, // Received part of state of external stone, payload: cs_mesh_model_msg_state_0_t
 	UART_OPCODE_TX_MESH_STATE_PART_1 =                104, // Received part of state of external stone, payload: cs_mesh_model_msg_state_1_t
@@ -49,6 +51,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_OWN_ID =                           10002, // Own id (payload: crownstone_id_t)
 	UART_OPCODE_TX_OWN_MAC =                          10003, // Own MAC address (payload: mac address (6B))
 
+	////////// Developer messages. //////////
 	UART_OPCODE_TX_ADC_CONFIG =                       10100, // Current adc config (payload: adc_config_t)
 	UART_OPCODE_TX_ADC_RESTART =                      10101,
 
@@ -60,6 +63,15 @@ enum UartOpcodeTx {
 
 
 	UART_OPCODE_TX_EVT =                              10300, // Send internal events, this protocol may change
+
+//	UART_OPCODE_TX_MESH_STATE_TIME =                  10402, // Received time of other crownstone, payload: cs_mesh_model_msg_time_t
+	UART_OPCODE_TX_MESH_CMD_TIME =                    10403, // Received cmd to set time, payload: cs_mesh_model_msg_time_t
+	UART_OPCODE_TX_MESH_PROFILE_LOCATION =            10410, // Received the location of a profile, payload: cs_mesh_model_msg_profile_location_t.
+	UART_OPCODE_TX_MESH_SET_BEHAVIOUR_SETTINGS =      10411, // Received cmd to set behaviour settings, payload: behaviour_settings_t
+	UART_OPCODE_TX_MESH_TRACKED_DEVICE_REGISTER =     10412, // Received cmd to register a tracked device, payload: cs_mesh_model_msg_device_register_t
+	UART_OPCODE_TX_MESH_TRACKED_DEVICE_TOKEN =        10413, // Received cmd to set the token of a tracked device, payload: cs_mesh_model_msg_device_token_t
+	UART_OPCODE_TX_MESH_SYNC_REQUEST =                10414, // Received a sync request, payload: cs_mesh_model_msg_sync_request_t
+	UART_OPCODE_TX_MESH_TRACKED_DEVICE_HEARTBEAT =    10420, // Received heartbeat cmd of a tracked device, payload: cs_mesh_model_msg_device_heartbeat_t
 
 	UART_OPCODE_TX_TEXT =                             20000, // Payload is ascii text.
 	UART_OPCODE_TX_FIRMWARESTATE =                    20001,

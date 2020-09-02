@@ -45,8 +45,8 @@ void PresenceHandler::handleEvent(event_t& evt){
         location = parsed_adv_ptr->locationId;
         break;
     }
-    case CS_TYPE::EVT_PROFILE_LOCATION: {
-        TYPIFY(EVT_PROFILE_LOCATION) *profile_location = (TYPIFY(EVT_PROFILE_LOCATION)*)evt.data;
+    case CS_TYPE::EVT_RECEIVED_PROFILE_LOCATION: {
+        TYPIFY(EVT_RECEIVED_PROFILE_LOCATION) *profile_location = (TYPIFY(EVT_RECEIVED_PROFILE_LOCATION)*)evt.data;
         profile = profile_location->profileId;
         location = profile_location->locationId;
         fromMesh = profile_location->fromMesh;
@@ -72,6 +72,21 @@ void PresenceHandler::handleEvent(event_t& evt){
     if (mutation != MutationType::NothingChanged) {
     	triggerPresenceMutation(mutation);
     }
+
+    switch (mutation) {
+    	case MutationType::FirstUserEnterSphere: {
+    		sendPresenceChange(PresenceChange::FIRST_SPHERE_ENTER);
+    		sendPresenceChange(PresenceChange::PROFILE_SPHERE_ENTER, profile);
+    		break;
+    	}
+    	case MutationType::LastUserExitSphere: {
+    		sendPresenceChange(PresenceChange::LAST_SPHERE_EXIT);
+    		sendPresenceChange(PresenceChange::PROFILE_SPHERE_EXIT, profile);
+    		break;
+    	}
+    	default:
+    		break;
+    }
 }
 
 PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministration(uint8_t profile, uint8_t location, bool fromMesh) {
@@ -94,9 +109,12 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
     // purge whowhenwhere of old entries and add a new entry
     if (WhenWhoWhere.size() >= max_records) {
     	LOGw("Reached max number of records");
+    	PresenceRecord record = WhenWhoWhere.back();
+    	sendPresenceChange(PresenceChange::PROFILE_LOCATION_EXIT, record.who, record.where);
         WhenWhoWhere.pop_back();
     }
     uint8_t meshCountdown = 0;
+    bool newLocation = true;
     for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end();) {
 		if (iter->timeoutCountdownSeconds == 0) {
 			// Should not happen, record should've been removed.
@@ -106,6 +124,7 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
     		LOGPresenceHandler("erasing old record profile(%u) location(%u)", profile, location);
     		meshCountdown = iter->meshSendCountdownSeconds;
     		WhenWhoWhere.erase(iter);
+    		newLocation = false;
     		break;
     	}
     	++iter;
@@ -119,6 +138,10 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
     }
     LOGPresenceHandler("add record profile(%u) location(%u)", profile, location);
     WhenWhoWhere.push_front(PresenceRecord(profile, location, presence_time_out_s, meshCountdown));
+
+    if (newLocation) {
+    	sendPresenceChange(PresenceChange::PROFILE_LOCATION_ENTER, profile, location);
+    }
 
     auto nextdescription = getCurrentPresenceDescription();
     return getMutationType(prevdescription,nextdescription);
@@ -174,6 +197,15 @@ void PresenceHandler::triggerPresenceMutation(MutationType mutationtype){
     presence_event.dispatch();
 }
 
+void PresenceHandler::sendPresenceChange(PresenceChange type, uint8_t profileId, uint8_t locationId) {
+	TYPIFY(EVT_PRESENCE_CHANGE) eventData;
+	eventData.type = static_cast<uint8_t>(type);
+	eventData.profileId = profileId;
+	eventData.locationId = locationId;
+	event_t event(CS_TYPE::EVT_PRESENCE_CHANGE, &eventData, sizeof(eventData));
+	event.dispatch();
+}
+
 void PresenceHandler::propagateMeshMessage(uint8_t profile, uint8_t location){
     TYPIFY(CMD_SEND_MESH_MSG_PROFILE_LOCATION) eventData;
     eventData.profile = profile;
@@ -181,6 +213,7 @@ void PresenceHandler::propagateMeshMessage(uint8_t profile, uint8_t location){
     event_t event(CS_TYPE::CMD_SEND_MESH_MSG_PROFILE_LOCATION, &eventData, sizeof(eventData));
     event.dispatch();
 }
+
 
 std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescription() {
     if (SystemTime::up() < presence_uncertain_due_reboot_time_out_s) {
@@ -203,13 +236,14 @@ std::optional<PresenceStateDescription> PresenceHandler::getCurrentPresenceDescr
 }
 
 void PresenceHandler::tickSecond() {
+	auto prevdescription = getCurrentPresenceDescription();
 	for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end();) {
 		if (iter->timeoutCountdownSeconds) {
 			iter->timeoutCountdownSeconds--;
 		}
 		if (iter->timeoutCountdownSeconds == 0) {
+			sendPresenceChange(PresenceChange::PROFILE_LOCATION_EXIT, iter->who, iter->where);
 			iter = WhenWhoWhere.erase(iter);
-			// 8-1-2020 TODO Bart: send event?
 		}
 		else {
 			if (iter->meshSendCountdownSeconds) {
@@ -218,6 +252,18 @@ void PresenceHandler::tickSecond() {
 			++iter;
 		}
 	}
+	auto nextdescription = getCurrentPresenceDescription();
+	auto mutation = getMutationType(prevdescription, nextdescription);
+
+    switch (mutation) {
+    	case MutationType::LastUserExitSphere: {
+    		sendPresenceChange(PresenceChange::LAST_SPHERE_EXIT);
+    		sendPresenceChange(PresenceChange::PROFILE_SPHERE_EXIT, 0);
+    		break;
+    	}
+    	default:
+    		break;
+    }
 }
 
 void PresenceHandler::print(){

@@ -14,7 +14,7 @@
  * Class that keeps up devices to be tracked.
  *
  * Alternative to dynamic background broadcasts (no heartbeat required),
- * or to background broadcasts at all (heartbeats required).
+ * or to no background broadcasts at all (heartbeats required).
  *
  * - Register devices: each device has a unique ID, and registers a unique token.
  * - Make sure device tokens expire.
@@ -141,7 +141,7 @@ private:
 	void handleMeshListSize(TYPIFY(EVT_MESH_TRACKED_DEVICE_LIST_SIZE)& packet);
 	void handleScannedDevice(adv_background_parsed_v1_t& packet);
 	cs_ret_code_t handleHeartbeat(internal_tracked_device_heartbeat_packet_t& packet);
-	cs_ret_code_t handleHeartbeat(TrackedDevice& device, uint8_t locationId, uint8_t ttlMinutes);
+	cs_ret_code_t handleHeartbeat(TrackedDevice& device, uint8_t locationId, uint8_t ttlMinutes, bool fromMesh);
 	void handleMeshHeartbeat(TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)& packet);
 
 	/**
@@ -205,8 +205,15 @@ private:
 	 * Send profile location to event dispatcher.
 	 *
 	 * Checks if all fields are set.
+	 * Set fromMesh to true when location is based on a mesh message.
+	 * Set simulated to true when the location is from the heartbeat TTL, not from a command or broadcast.
 	 */
-	void sendLocation(TrackedDevice& device);
+	void sendHeartbeatLocation(TrackedDevice& device, bool fromMesh, bool simulated);
+
+	/**
+	 * Send the heartbeat msg to the mesh.
+	 */
+	void sendHeartbeatToMesh(TrackedDevice& device);
 
 	/**
 	 * Send tracked device register msg to mesh.

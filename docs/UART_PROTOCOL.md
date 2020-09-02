@@ -54,6 +54,7 @@ Type  | Packet | Description
 1     | [Result packet](../docs/PROTOCOL.md#result_packet) | Result of a control command.
 2     | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Service data of this Crownstone (unencrypted).
 3     | string | As requested via control command `UART message`.
+4     | [Presence change packet](#presence_change_packet) | Sent when the presence has changed. Note: a profile ID can be at multiple locations at the same time.
 102   | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | State of other Crownstones in the mesh (unencrypted).
 103   | [External state part 0](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_0_t) | Part of the state of other Crownstones in the mesh.
 104   | [External state part 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | Part of the state of other Crownstones in the mesh.
@@ -69,9 +70,39 @@ Type  | Packet | Description
 10202 | [Filtered current samples](#current_samples_packet) | Filtered ADC samples of the current channel.
 10203 | [Filtered voltage samples](#voltage_samples_packet) | Filtered ADC samples of the voltage channel.
 10204 | [Power calculations](#power_calculation_packet) | Calculated power values.
+10403 | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Received command to set time from the mesh.
+10410 | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Received the location of a profile from the mesh.
+10411 | [Behaviour settings](../docs/MESH_PROTOCOL.md#behaviour_settings_t) | Received command to set behaviour settings from the mesh.
+10412 | [Tracked device register](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_register_t) | Received command to register a tracked device from the mesh.
+10413 | [Tracked device token](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_token_t) | Received command to set the token of a tracked device from the mesh.
+10414 | [Sync request](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_sync_request_t) | Received a sync request from the mesh.
+10420 | [Tracked device heartbeat](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_heartbeat_t) | Received heartbeat command of a tracked device from the mesh.
 20000 | string | Debug strings.
 
 ## Packets
+
+<a name="presence_change_packet"></a>
+### Presence change packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | [Type](#presence_change_type) | 1 | Type of change.
+uint8 | Profile ID | 1 | ID of the profile.
+uint8 | Location ID | 1 | ID of the location.
+
+
+<a name="presence_change_type"></a>
+##### Presence change type
+
+Value | Name | Description
+--- | --- | ---
+0 | First sphere enter     | The first user entered the sphere. Ignore profile and location values.
+1 | Last sphere exit       | The last user left the sphere. Ignore profile and location values.
+2 | Profile sphere enter   | The first user of given profile entered the sphere. Ignore location value.
+3 | Profile sphere exit    | The last user of given profile left the sphere. Ignore location value.
+4 | Profile location enter | The first user of given profile entered the given location.
+5 | Profile location exit  | The first user of given profile left the given location.
+
 
 <a name="mesh_result_packet"></a>
 ### Mesh result packet
