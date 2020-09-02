@@ -33,8 +33,9 @@ private:
     // after this amount of seconds a presence_record becomes invalid.
     static const constexpr uint8_t presence_time_out_s = 10;
 
-    // For each presence entry, send it max every x seconds over the mesh.
-    static const constexpr uint8_t presence_mesh_send_throttle_seconds = 30;
+    // For each presence entry, send it max every (x + variation) seconds over the mesh.
+    static const constexpr uint8_t presence_mesh_send_throttle_seconds = 20;
+    static const constexpr uint8_t presence_mesh_send_throttle_seconds_variation = 10;
 
     /**
      * after this amount of seconds it is assumed that presencehandler would have received 

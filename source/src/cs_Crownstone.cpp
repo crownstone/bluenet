@@ -698,8 +698,7 @@ void Crownstone::startUp() {
 		_trackedDevices.init();
 
 		if (_state->isTrue(CS_TYPE::CONFIG_SCANNER_ENABLED)) {
-			RNG rng;
-			uint16_t delay = rng.getRandom16() / 6; // Delay in ms (about 0-10 seconds)
+			uint16_t delay = RNG::getInstance().getRandom16() / 6; // Delay in ms (about 0-10 seconds)
 			_scanner->delayedStart(delay);
 		}
 

@@ -196,9 +196,7 @@ void SystemTime::handleEvent(event_t & event) {
 				// Posix time is requested by a crownstone in the mesh.
 				// If we know the time, send it.
 				// But only with a 1/10 chance, to prevent flooding the mesh.
-				uint8_t rand8;
-				RNG::fillBuffer(&rand8, 1);
-				if (rand8 < (255 / 10 + 1)) {
+				if (RNG::getInstance().getRandom8() < (255 / 10 + 1)) {
 					cs_mesh_model_msg_time_t packet;
 					packet.timestamp = posixTimeStamp;
 

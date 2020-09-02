@@ -336,9 +336,7 @@ void ServiceData::handleEvent(event_t & event) {
 			TYPIFY(EVT_TICK) tickCount = *(TYPIFY(EVT_TICK)*)event.data;
 			_externalStates.tick(tickCount);
 			if (_sendStateCountdown-- == 0) {
-				uint8_t rand8;
-				RNG::fillBuffer(&rand8, 1);
-				uint32_t randMs = MESH_SEND_STATE_INTERVAL_MS + rand8 * MESH_SEND_STATE_INTERVAL_MS_VARIATION / 255;
+				uint32_t randMs = MESH_SEND_STATE_INTERVAL_MS + RNG::getInstance().getRandom8() * MESH_SEND_STATE_INTERVAL_MS_VARIATION / 255;
 				_sendStateCountdown = randMs / TICK_INTERVAL_MS;
 				sendMeshState(false);
 			}

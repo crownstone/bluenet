@@ -520,9 +520,7 @@ void TrackedDevices::handleEvent(event_t& evt) {
 				// Device list is requested by a crownstone in the mesh.
 				// If we are synced, send it.
 				// But only with a 0.15 chance (0.15 * 255 = 39), to prevent flooding the mesh.
-				uint8_t rand8;
-				RNG::fillBuffer(&rand8, 1);
-				if (rand8 < 39) {
+				if (RNG::getInstance().getRandom8() < 39) {
 					sendDeviceList();
 				}
 			}

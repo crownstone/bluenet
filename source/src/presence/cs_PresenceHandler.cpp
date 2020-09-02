@@ -11,6 +11,7 @@
 
 #include <storage/cs_State.h>
 
+#include <drivers/cs_RNG.h>
 #include <drivers/cs_Serial.h>
 
 #define LOGPresenceHandler LOGnone
@@ -134,7 +135,7 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
     	if (!fromMesh) {
     		propagateMeshMessage(profile, location);
     	}
-    	meshCountdown = presence_mesh_send_throttle_seconds;
+    	meshCountdown = presence_mesh_send_throttle_seconds + (RNG::getInstance().getRandom8() % presence_mesh_send_throttle_seconds_variation);
     }
     LOGPresenceHandler("add record profile(%u) location(%u)", profile, location);
     WhenWhoWhere.push_front(PresenceRecord(profile, location, presence_time_out_s, meshCountdown));

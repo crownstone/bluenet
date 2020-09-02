@@ -23,14 +23,28 @@ typedef union {
 /**
  * Random number generator using softdevice called peripheral.
  */
-class RNG{
+class RNG {
 public:
-	uint8_t _randomBytes[4] = {0,0,0,0};
+	// Use static variant of singleton, no dynamic memory allocation
+	static RNG& getInstance() {
+		static RNG instance;
+		return instance;
+	}
 
-	RNG();
+	uint8_t _randomBytes[4];
+
 	static void fillBuffer(uint8_t* buffer, uint8_t length);
 	uint32_t getRandom32();
 	uint16_t getRandom16();
 	uint8_t  getRandom8();
 
+private:
+	// Constructor
+	RNG();
+
+	// This class is singleton, deny implementation
+	RNG(RNG const&);
+
+	// This class is singleton, deny implementation
+	void operator=(RNG const &);
 };
