@@ -143,6 +143,95 @@ void asACR01B10D(boards_config_t* p_config) {
 	p_config->tapToToggleDefaultRssiThreshold    = -35;
 }
 
+
+
+/* ********************************************************************************************************************
+ * Crownstone Built-in Two
+ * *******************************************************************************************************************/
+
+void asACR01B13B(boards_config_t* p_config) {
+	p_config->pinGpioPwm                         = 15;
+//	p_config->pinGpioEnablePwm                   = 10; // Not needed anymore.
+	p_config->pinGpioRelayOn                     = 17;
+	p_config->pinGpioRelayOff                    = 18;
+	p_config->pinAinCurrentGainHigh              = 0; // highest gain
+	p_config->pinAinCurrentGainMed               = 0; // No longer exists.
+	p_config->pinAinCurrentGainLow               = 1; // lowest gain
+//	p_config->pinAinVoltage                      = 6; // In phase with currentLow,  line after switch!
+//	p_config->pinAinVoltage                      = 5; // In phase with currentHigh, line after switch!
+	p_config->pinAinVoltage                      = 7; // In phase with currentLow,  neutral
+//	p_config->pinAinVoltage                      = 4; // In phase with currentHigh, neutral
+
+	p_config->pinAinZeroRef                      = 2;
+	p_config->pinAinPwmTemp                      = 3;
+	p_config->pinGpioRx                          = 10;
+	p_config->pinGpioTx                          = 9;
+	p_config->pinLedRed                          = 0; // Not there
+	p_config->pinLedGreen                        = 0; // Not there
+
+	p_config->flags.hasRelay                     = true;
+	p_config->flags.pwmInverted                  = true;
+	p_config->flags.hasSerial                    = false;
+	p_config->flags.hasLed                       = false;
+	p_config->flags.ledInverted                  = false;
+	p_config->flags.hasAdcZeroRef                = true;
+	p_config->flags.pwmTempInverted              = true;
+
+	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
+
+	p_config->voltageRange                       = 1800;
+	p_config->currentRange                       = 1800;
+
+	// Based on calculated value: peak voltage of 412V corresponds with +1.5V.
+	// So: 412 / (1.5 / 1.8 * 2047) = 0.2415
+	p_config->voltageMultiplier                  = -0.2415f; // For range -1800 - 1800 mV.
+
+	// Based on calculated value: 1 LSB = 12.2mA, for range -1.5 - 1.5V.
+	// So: (12.2 / 1000) * (3 / 3.6) = 0.01017
+	p_config->currentMultiplier                  = 0.01017f; // For range -1800 - 1800 mV on low gain pin.
+
+
+	//////////////////// High current gain pin ////////////////////////
+	p_config->pinAinCurrentGainLow               = 0; // Actually high gain.
+	p_config->pinAinVoltage                      = 4; // Actually for high current gain.
+	p_config->voltageRange                       = 1800;
+	p_config->currentRange                       = 1800;
+
+	// Based on calculated value: peak voltage of 412V corresponds with +1.5V.
+	// So: 412 / (1.5 / 1.8 * 2047) = 0.2415
+	p_config->voltageMultiplier                  = -0.2415f; // For range -1800 - 1800 mV.
+
+	// Based on calculated value: 1 LSB = 244uA, for range -1.5 - 1.5V.
+	// So: (244 / 1000 / 1000) * (3 / 3.6) = 0.0002033
+	p_config->currentMultiplier                  = 0.0002033f; // For range -1800 - 1800 mV on high gain pin.
+	///////////////////////////////////////////////////////////////////
+
+
+//	p_config->voltageMultiplier                  = 0.0f;
+//	p_config->currentMultiplier                  = 0.0f;
+
+	p_config->voltageZero                        = 0;
+	p_config->currentZero                        = 0;
+	p_config->powerZero                          = 0;
+
+
+	// See https://en.wikipedia.org/wiki/Thermistor#B_or_%CE%B2_parameter_equation B=3380, T0=25, R0=10000
+	// Python: temp=82; r=10000*math.exp(3380*(1/(temp+273.15)-1/(25+273.15))); 3.3/(16000+r)*r
+	//
+	// Here R_temp is not 16k, but 18k. Hence, 76 degrees = 0.31645 and 82 degrees = 0.27265 V.
+	//
+	p_config->pwmTempVoltageThreshold            = 0.35; // About 76 degrees C
+	p_config->pwmTempVoltageThresholdDown        = 0.3;  // About 82 degrees C
+
+	p_config->minTxPower                         = -20;
+
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
+	p_config->tapToToggleDefaultRssiThreshold    = -35;
+}
+
+
+
 /* ********************************************************************************************************************
  * Crownstone Plug Zero
  * *******************************************************************************************************************/
@@ -326,8 +415,8 @@ void asACR01B11A(boards_config_t* p_config) {
 
 	p_config->minTxPower                         = -20;          // unknown
 
-	p_config->scanIntervalUs                     = 200 * 1000;   // unknown 
-	p_config->scanWindowUs                       = 150 * 1000;   // unknown
+	p_config->scanIntervalUs                     = 2000 * 1000;
+	p_config->scanWindowUs                       = 2000 * 1000;
 	p_config->tapToToggleDefaultRssiThreshold    = -35;          // unknown
 }
 
@@ -438,6 +527,10 @@ uint32_t configure_board(boards_config_t* p_config) {
 	case ACR01B10B:
 	case ACR01B10D:
 		asACR01B10D(p_config);
+		break;
+
+	case ACR01B13B:
+		asACR01B13B(p_config);
 		break;
 
 	case ACR01B2A:

@@ -59,6 +59,8 @@ extern "C" {
 #define ACR01B10B            1007 // Builtin One v20
 #define ACR01B10D            1008 // Builtin One v25
 
+#define ACR01B13B            1009 // Builtin Two development version
+
 // CROWNSTONE PLUGS
 
 // Prototype plug.
