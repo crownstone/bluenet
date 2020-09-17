@@ -23,6 +23,7 @@
 
 // ============== Static members ==============
 
+// runtime variables
 uint32_t SystemTime::rtcTimeStamp = 0;
 uint32_t SystemTime::posixTimeStamp = 0;
 uint32_t SystemTime::uptime_sec = 0;
@@ -30,6 +31,7 @@ uint32_t SystemTime::uptime_sec = 0;
 uint16_t SystemTime::throttleSetTimeCountdownTicks = 0;
 uint16_t SystemTime::throttleSetSunTimesCountdownTicks = 0;
 
+// driver details
 app_timer_t SystemTime::appTimerData = {{0}};
 app_timer_id_t SystemTime::appTimerId = &appTimerData;
 
@@ -90,6 +92,8 @@ void SystemTime::tick(void*) {
 	scheduleNextTick();
 }
 
+// ======================== Setters ========================
+
 void SystemTime::setTime(uint32_t time, bool throttled) {
 	if (time == 0) {
 		return;
@@ -143,7 +147,7 @@ cs_ret_code_t SystemTime::setSunTimes(const sun_time_t& sunTimes, bool throttled
 	}
 }
 
-uint8_t dummy_time = 0xae;
+// ======================== Events ========================
 
 void SystemTime::handleEvent(event_t & event) {
 	switch(event.type) {
@@ -215,6 +219,43 @@ void SystemTime::handleEvent(event_t & event) {
 		default: {}
 	}
 }
+
+// ======================== Synchronization ========================
+
+uint32_t SystemTime::syncTimeCoroutine(){
+	if(no_data_known_yet()){
+		// wait until sync time is over
+		return sync_timeout_ms;
+	}
+
+	if(havent_heard_anything_for(sync_timeout_ms)){
+		// the master clock just disappeared and we're in the process
+		// of determining a new one.. lets consider ourselves a candidate
+		currentMasterClockId = myId;
+	}
+
+	if(myId <= currentMasterClockId){
+		// we're the master clock!
+		sendTimeSyncMessage();
+		return master_clock_update_period_ms;
+	}
+
+	return master_clock_reelection_period_ms;
+}
+
+void SystemTime::onTimeSyncMessageReceive(auto syncmessage){
+	if (syncmessage->id <= currentMasterClockId){
+		// lower id wins, sync message wins authority on the clock values.
+		posixTimeStamp = syncmessage->timestamp;
+		currentMasterClockId = syncmessage->id;
+	}
+}
+
+void SystemTime::sendTimeSyncMessage(){
+
+}
+
+// ======================== Utility functions ========================
 
 uint32_t SystemTime::posix(){
 	return posixTimeStamp;

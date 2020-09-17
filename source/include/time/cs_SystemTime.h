@@ -72,9 +72,11 @@ public:
 
 private:
 	// state data
-	static uint32_t rtcTimeStamp;
-	static uint32_t posixTimeStamp;
+	static uint32_t rtcTimeStamp;       // high resolution device local time
+	static uint32_t posixTimeStamp;     // global time
 	static uint32_t uptime_sec;
+
+	static stone_id_t currentMasterClockId;  // which crownstone id is considered clock master by this device.
 
 	// throttling: when not 0, block command
 	static uint16_t throttleSetTimeCountdownTicks;
