@@ -130,9 +130,7 @@ void Mesh::handleEvent(event_t & event) {
 			}
 		}
 		if (_sendStateTimeCountdown-- == 0) {
-			uint8_t rand8;
-			RNG::fillBuffer(&rand8, 1);
-			uint32_t randMs = MESH_SEND_TIME_INTERVAL_MS + rand8 * MESH_SEND_TIME_INTERVAL_MS_VARIATION / 255;
+			uint32_t randMs = MESH_SEND_TIME_INTERVAL_MS + RNG::getInstance().getRandom8() * MESH_SEND_TIME_INTERVAL_MS_VARIATION / 255;
 			_sendStateTimeCountdown = randMs / TICK_INTERVAL_MS;
 
 			Time time = SystemTime::now();

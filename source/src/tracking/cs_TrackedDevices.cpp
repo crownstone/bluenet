@@ -112,7 +112,7 @@ void TrackedDevices::handleScannedDevice(adv_background_parsed_v1_t& packet) {
 }
 
 cs_ret_code_t TrackedDevices::handleHeartbeat(internal_tracked_device_heartbeat_packet_t& packet) {
-	LOGTrackedDevicesDebug("handleHeartbeat");
+	LOGTrackedDevicesVerbose("handleHeartbeat deviceId=%u", packet.data.deviceId);
 
 	TrackedDevice* device = find(packet.data.deviceId);
 	if (device == nullptr) {
@@ -135,19 +135,24 @@ cs_ret_code_t TrackedDevices::handleHeartbeat(internal_tracked_device_heartbeat_
 		return ERR_NO_ACCESS;
 	}
 
-	return handleHeartbeat(*device, packet.data.locationId, packet.data.timeToLiveMinutes);
+	cs_ret_code_t retCode = handleHeartbeat(*device, packet.data.locationId, packet.data.timeToLiveMinutes, false);
+	if (retCode == ERR_SUCCESS) {
+		sendHeartbeatToMesh(*device);
+	}
+	return retCode;
 }
 
 void TrackedDevices::handleMeshHeartbeat(TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)& packet) {
-	LOGTrackedDevicesDebug("handleMeshHeartbeat");
+	LOGTrackedDevicesVerbose("handleMeshHeartbeat deviceId=%u", packet.deviceId);
 	TrackedDevice* device = find(packet.deviceId);
 	if (device == nullptr) {
 		return;
 	}
-	handleHeartbeat(*device, packet.locationId, packet.ttlMinutes);
+	handleHeartbeat(*device, packet.locationId, packet.ttlMinutes, true);
 }
 
-cs_ret_code_t TrackedDevices::handleHeartbeat(TrackedDevice& device, uint8_t locationId, uint8_t ttlMinutes) {
+cs_ret_code_t TrackedDevices::handleHeartbeat(TrackedDevice& device, uint8_t locationId, uint8_t ttlMinutes, bool fromMesh) {
+	LOGTrackedDevicesDebug("handleHeartbeat deviceId=%u locationId=%u ttlMinutes=%u fromMesh=%u", device.data.data.deviceId, locationId, ttlMinutes, fromMesh);
 	if (ttlMinutes > HEARTBEAT_TTL_MINUTES_MAX) {
 		LOGd("Invalid heartbeat TTL %u", ttlMinutes);
 		return ERR_WRONG_PARAMETER;
@@ -158,7 +163,7 @@ cs_ret_code_t TrackedDevices::handleHeartbeat(TrackedDevice& device, uint8_t loc
 	// Make sure the location ID doesn't timeout before the heartbeat times out.
 	device.locationIdTTLMinutes = std::max(ttlMinutes, LOCATION_ID_TTL_MINUTES);
 
-	sendLocation(device);
+	sendHeartbeatLocation(device, fromMesh, false);
 	return ERR_SUCCESS;
 }
 
@@ -361,7 +366,7 @@ void TrackedDevices::tickMinute() {
 void TrackedDevices::tickSecond() {
 	for (auto iter = devices.begin(); iter != devices.end(); ++iter) {
 		if (isValidTTL(*iter) && iter->heartbeatTTLMinutes != 0) {
-			sendLocation(*iter);
+			sendHeartbeatLocation(*iter, false, true);
 		}
 	}
 }
@@ -382,19 +387,29 @@ void TrackedDevices::sendBackgroundAdv(TrackedDevice& device, uint8_t* macAddres
 	event.dispatch();
 }
 
-void TrackedDevices::sendLocation(TrackedDevice& device) {
-	LOGTrackedDevicesVerbose("sendLocation id=%u", device.data.data.deviceId);
+void TrackedDevices::sendHeartbeatLocation(TrackedDevice& device, bool fromMesh, bool simulated) {
+	LOGTrackedDevicesVerbose("sendHeartbeatLocation id=%u", device.data.data.deviceId);
 	if (!allFieldsSet(device)) {
 		return;
 	}
 	if (device.data.data.flags.flags.ignoreForBehaviour) {
 		return;
 	}
-	TYPIFY(EVT_PROFILE_LOCATION) eventData;
-	eventData.fromMesh = false;
+	TYPIFY(EVT_RECEIVED_PROFILE_LOCATION) eventData;
+	eventData.fromMesh = fromMesh;
+	eventData.simulated = simulated;
 	eventData.profileId = device.data.data.profileId;
 	eventData.locationId = device.data.data.locationId;
-	event_t event(CS_TYPE::EVT_PROFILE_LOCATION, &eventData, sizeof(eventData));
+	event_t event(CS_TYPE::EVT_RECEIVED_PROFILE_LOCATION, &eventData, sizeof(eventData));
+	event.dispatch();
+}
+
+void TrackedDevices::sendHeartbeatToMesh(TrackedDevice& device) {
+	TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT) meshMsg;
+	meshMsg.deviceId = device.data.data.deviceId;
+	meshMsg.locationId = device.data.data.locationId;
+	meshMsg.ttlMinutes = device.heartbeatTTLMinutes;
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT, &meshMsg, sizeof(meshMsg));
 	event.dispatch();
 }
 
@@ -505,9 +520,7 @@ void TrackedDevices::handleEvent(event_t& evt) {
 				// Device list is requested by a crownstone in the mesh.
 				// If we are synced, send it.
 				// But only with a 0.15 chance (0.15 * 255 = 39), to prevent flooding the mesh.
-				uint8_t rand8;
-				RNG::fillBuffer(&rand8, 1);
-				if (rand8 < 39) {
+				if (RNG::getInstance().getRandom8() < 39) {
 					sendDeviceList();
 				}
 			}

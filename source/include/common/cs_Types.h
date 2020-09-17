@@ -292,10 +292,12 @@ enum class CS_TYPE: uint16_t {
 	// Localisation of devices
 	CMD_REGISTER_TRACKED_DEVICE = InternalBaseLocalisation, // Register a tracked device.
 	CMD_UPDATE_TRACKED_DEVICE,                        // Update data of a tracked device.
-	EVT_PROFILE_LOCATION,                             // Location of profile.
+	EVT_RECEIVED_PROFILE_LOCATION,                    // Received the location of a profile via mesh or command.
 	EVT_PRESENCE_MUTATION,                            // Presence changed.
 	EVT_STATE_EXTERNAL_STONE,                         // The state of another stone has been received.
 	CMD_TRACKED_DEVICE_HEARTBEAT,                     // Set location of a tracked device, with a TTL. This command can be sent instead of advertisements.
+	EVT_PRESENCE_CHANGE,                              // The presence has changed. When the first user enters, multiple events will be sent.
+
 
 	// System
 	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
@@ -529,10 +531,11 @@ typedef internal_register_tracked_device_packet_t TYPIFY(CMD_REGISTER_TRACKED_DE
 typedef internal_update_tracked_device_packet_t TYPIFY(CMD_UPDATE_TRACKED_DEVICE);
 typedef internal_tracked_device_heartbeat_packet_t TYPIFY(CMD_TRACKED_DEVICE_HEARTBEAT);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
+typedef presence_change_t TYPIFY(EVT_PRESENCE_CHANGE);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef void TYPIFY(EVT_GOING_TO_DFU);
-typedef profile_location_t TYPIFY(EVT_PROFILE_LOCATION);
+typedef profile_location_t TYPIFY(EVT_RECEIVED_PROFILE_LOCATION);
 
 // Mesh
 typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING);

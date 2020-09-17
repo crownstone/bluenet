@@ -25,6 +25,7 @@ id | name | Payload | Result data
 17 | CS_MESH_MODEL_TYPE_STATE_SET | [cs_mesh_model_msg_state_set](#cs_mesh_model_msg_state_set) | [cs_mesh_model_msg_state_header_t](#cs_mesh_model_msg_state_header_t)
 18 | CS_MESH_MODEL_TYPE_RESULT | [cs_mesh_model_msg_result](#cs_mesh_model_msg_result)
 19 | CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID | [Ibeacon config ID packet](PROTOCOL.md#ibeacon_config_id_packet)
+20 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT | [Device heartbeat packet](#cs_mesh_model_msg_device_heartbeat_t)
 
 ## Packet descriptors
 
@@ -132,6 +133,19 @@ Type | Name | Length | Description
 device_id_t | Device ID | 2 |
 uint8[3] | Device token | 3 |
 uint16 | TTL minutes | 2 |
+
+
+<a name="cs_mesh_model_msg_device_heartbeat_t"></a>
+#### cs_mesh_model_msg_device_heartbeat_t
+
+![device heartbeat](../docs/diagrams/mesh_device_heartbeat.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+device_id_t | Device ID | 2 |
+uint8 | Location ID | 1 |
+uint8 | TTL minutes | 1 |
+
 
 
 <a name="cs_mesh_model_msg_device_list_size_t"></a>

@@ -345,6 +345,23 @@ struct __attribute__((packed)) tracked_device_heartbeat_packet_t {
 	uint8_t timeToLiveMinutes = 0; // When set, heartbeats will be simulated until timeout.
 };
 
+enum class PresenceChange : uint8_t {
+	FIRST_SPHERE_ENTER = 0,     // Profile ID and location ID are not set.
+	LAST_SPHERE_EXIT = 1,       // Profile ID and location ID are not set.
+	PROFILE_SPHERE_ENTER = 2,   // Only profile ID is set.
+	PROFILE_SPHERE_EXIT = 3,    // Only profile ID is set.
+	PROFILE_LOCATION_ENTER = 4, // Profile ID and location ID are set.
+	PROFILE_LOCATION_EXIT = 5,  // Profile ID and location ID are set.
+};
+
+struct __attribute((packed)) presence_change_t {
+	uint8_t type;
+	uint8_t profileId;
+	uint8_t locationId;
+};
+
+
+
 struct cs_mesh_iv_index_t {
 	// Same as net_flash_data_iv_index_t
     uint32_t iv_index;

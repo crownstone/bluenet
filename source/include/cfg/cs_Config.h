@@ -223,10 +223,10 @@
 
 #define SWITCH_DELAYED_STORE_MS                  (10 * 1000) // Timeout before storing the pwm switch value is stored.
 #define STATE_RETRY_STORE_DELAY_MS               200 // Time before retrying to store a varable to flash.
-#define MESH_SEND_TIME_INTERVAL_MS               (60 * 1000) // Interval at which the time is sent via the mesh.
-#define MESH_SEND_TIME_INTERVAL_MS_VARIATION     (10 * 1000) // Max amount that gets added to interval.
-#define MESH_SEND_STATE_INTERVAL_MS              (60 * 1000) // Interval at which the stone state is sent via the mesh.
-#define MESH_SEND_STATE_INTERVAL_MS_VARIATION    (10 * 1000) // Max amount that gets added to interval.
+#define MESH_SEND_TIME_INTERVAL_MS               (50 * 1000) // Interval at which the time is sent via the mesh.
+#define MESH_SEND_TIME_INTERVAL_MS_VARIATION     (20 * 1000) // Max amount that gets added to interval.
+#define MESH_SEND_STATE_INTERVAL_MS              (50 * 1000) // Interval at which the stone state is sent via the mesh.
+#define MESH_SEND_STATE_INTERVAL_MS_VARIATION    (20 * 1000) // Max amount that gets added to interval.
 #define MESH_SYNC_RETRY_INTERVAL_MS              (2500)
 #define MESH_SYNC_GIVE_UP_MS                     (60 * 1000) // After some time, give up syncing.
 

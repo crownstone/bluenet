@@ -77,7 +77,8 @@ void UartProtocol::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) 
 	case UART_OPCODE_TX_FIRMWARESTATE:
 		return;
 	default:
-//		LOGd("writeMsg opCode=%u", opCode);
+//		_log(SERIAL_DEBUG, "writeMsg opCode=%u data=", opCode);
+//		BLEutil::printArray(data, size);
 		return;
 	}
 #endif
@@ -393,12 +394,17 @@ void UartProtocol::handleEvent(event_t & event) {
 	}
 	case CS_TYPE::EVT_MESH_EXT_STATE_0: {
 		TYPIFY(EVT_MESH_EXT_STATE_0)* state = (TYPIFY(EVT_MESH_EXT_STATE_0)*)event.data;
-		writeMsg(UART_OPCODE_TX_MESH_STATE_PART_0, (uint8_t*)&state, sizeof(state));
+		writeMsg(UART_OPCODE_TX_MESH_STATE_PART_0, (uint8_t*)state, sizeof(*state));
 		break;
 	}
 	case CS_TYPE::EVT_MESH_EXT_STATE_1: {
 		TYPIFY(EVT_MESH_EXT_STATE_1)* state = (TYPIFY(EVT_MESH_EXT_STATE_1)*)event.data;
-		writeMsg(UART_OPCODE_TX_MESH_STATE_PART_1, (uint8_t*)&state, sizeof(state));
+		writeMsg(UART_OPCODE_TX_MESH_STATE_PART_1, (uint8_t*)state, sizeof(*state));
+		break;
+	}
+	case CS_TYPE::EVT_PRESENCE_CHANGE: {
+		TYPIFY(EVT_PRESENCE_CHANGE)* state = (TYPIFY(EVT_PRESENCE_CHANGE)*)event.data;
+		writeMsg(UART_OPCODE_TX_PRESENCE_CHANGE, (uint8_t*)state, sizeof(*state));
 		break;
 	}
 	default:

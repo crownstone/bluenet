@@ -219,6 +219,7 @@ struct profile_location_t {
 	uint8_t profileId;
 	uint8_t locationId;
 	bool fromMesh = false;
+	bool simulated = false;
 };
 
 struct __attribute__((packed)) internal_register_tracked_device_packet_t {
