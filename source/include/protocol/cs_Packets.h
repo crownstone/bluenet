@@ -21,7 +21,8 @@
 #define LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT 18
 
 #define VALIDATION_KEY_LENGTH   4
-#define SESSION_NONCE_LENGTH 	5
+#define SESSION_NONCE_LENGTH    5
+#define PACKET_NONCE_LENGTH     3
 
 /**
  * Packets (structs) that are used over the air, over uart, or stored in flash.
