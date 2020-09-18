@@ -31,6 +31,12 @@
  * If the definition becomes large, move it to its own file and include it in this file.
  */
 
+/**
+ * Length of a MAC address
+ * TODO: check if this length is similar to BLE_GAP_ADDR_LEN
+ */
+#define MAC_ADDRESS_LEN 6
+
 enum EncryptionAccessLevel {
 	ADMIN               = 0,
 	MEMBER              = 1,

@@ -22,12 +22,6 @@
  */
 
 /**
- * Length of a MAC address
- * TODO: check if this length is similar to BLE_GAP_ADDR_LEN
- */
-#define MAC_ADDRESS_LEN 6
-
-/**
  * Maximum length advertisement data.
  */
 #define ADVERTISEMENT_DATA_MAX_SIZE 31

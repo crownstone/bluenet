@@ -84,6 +84,9 @@ private:
 	void handleCmdGetUicrData             (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdReset                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdFactoryReset            (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdGetMacAddress           (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdGetHardwareVersion      (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdGetFirmwareVersion      (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdSetTime                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdSetSunTime              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdIncreaseTx              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);

@@ -6,6 +6,7 @@
  */
 
 #include <ble/cs_Advertiser.h>
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
 #include <cfg/cs_DeviceTypes.h>
 #include <cfg/cs_Strings.h>
@@ -94,6 +95,9 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_GET_BOOTLOADER_VERSION:
 		case CTRL_CMD_GET_UICR_DATA:
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
+		case CTRL_CMD_GET_MAC_ADDRESS:
+		case CTRL_CMD_GET_HARDWARE_VERSION:
+		case CTRL_CMD_GET_FIRMWARE_VERSION:
 
 		case CTRL_CMD_RESET:
 		case CTRL_CMD_GOTO_DFU:
@@ -153,93 +157,99 @@ void CommandHandler::handleCommand(
 	}
 
 	switch (type) {
-	case CTRL_CMD_NOP:
-		return handleCmdNop(commandData, accessLevel, result);
-	case CTRL_CMD_GOTO_DFU:
-		return handleCmdGotoDfu(commandData, accessLevel, result);
-	case CTRL_CMD_GET_BOOTLOADER_VERSION:
-		return handleCmdGetBootloaderVersion(commandData, accessLevel, result);
-	case CTRL_CMD_GET_UICR_DATA:
-		return handleCmdGetUicrData(commandData, accessLevel, result);
-	case CTRL_CMD_RESET:
-		return handleCmdReset(commandData, accessLevel, result);
-	case CTRL_CMD_FACTORY_RESET:
-		return handleCmdFactoryReset(commandData, accessLevel, result);
-	case CTRL_CMD_SET_TIME:
-		return handleCmdSetTime(commandData, accessLevel, result);
-	case CTRL_CMD_SET_SUN_TIME:
-		return handleCmdSetSunTime(commandData, accessLevel, result);
-	case CTRL_CMD_INCREASE_TX:
-		return handleCmdIncreaseTx(commandData, accessLevel, result);
-	case CTRL_CMD_DISCONNECT:
-		return handleCmdDisconnect(commandData, accessLevel, result);
-	case CTRL_CMD_RESET_ERRORS:
-		return handleCmdResetErrors(commandData, accessLevel, result);
-	case CTRL_CMD_PWM:
-		return handleCmdPwm(commandData, source, accessLevel, result);
-	case CTRL_CMD_SWITCH:
-		return handleCmdSwitch(commandData, source, accessLevel, result);
-	case CTRL_CMD_RELAY:
-		return handleCmdRelay(commandData, source, accessLevel, result);
-	case CTRL_CMD_MULTI_SWITCH:
-		return handleCmdMultiSwitch(commandData, source, accessLevel, result);
-	case CTRL_CMD_MESH_COMMAND:
-		return handleCmdMeshCommand(protocolVersion, commandData, source, accessLevel, result);
-	case CTRL_CMD_ALLOW_DIMMING:
-		return handleCmdAllowDimming(commandData, accessLevel, result);
-	case CTRL_CMD_LOCK_SWITCH:
-		return handleCmdLockSwitch(commandData, accessLevel, result);
-	case CTRL_CMD_SETUP:
-		return handleCmdSetup(commandData, accessLevel, result);
-	case CTRL_CMD_UART_MSG:
-		return handleCmdUartMsg(commandData, accessLevel, result);
-	case CTRL_CMD_STATE_GET:
-		return handleCmdStateGet(commandData, accessLevel, result);
-	case CTRL_CMD_STATE_SET:
-		return handleCmdStateSet(commandData, accessLevel, result);
-	case CTRL_CMD_SAVE_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::CMD_ADD_BEHAVIOUR, commandData, source, result);
-	case CTRL_CMD_REPLACE_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::CMD_REPLACE_BEHAVIOUR, commandData, source, result);
-	case CTRL_CMD_REMOVE_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::CMD_REMOVE_BEHAVIOUR, commandData, source, result);
-	case CTRL_CMD_GET_BEHAVIOUR:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR, commandData, source, result);
-	case CTRL_CMD_GET_BEHAVIOUR_INDICES:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_INDICES, commandData, source, result);
-	case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG, commandData, source, result);
-	case CTRL_CMD_REGISTER_TRACKED_DEVICE:
-		return handleCmdRegisterTrackedDevice(commandData, accessLevel, result);
-	case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
-		return handleCmdTrackedDeviceHeartbeat(commandData, accessLevel, result);
-	case CTRL_CMD_SET_IBEACON_CONFIG_ID:
-		return dispatchEventForCommand(CS_TYPE::CMD_SET_IBEACON_CONFIG_ID, commandData, source, result);
-	case CTRL_CMD_GET_UPTIME:
-		return handleCmdGetUptime(commandData, accessLevel, result);
-	case CTRL_CMD_GET_ADC_RESTARTS:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_RESTARTS, commandData, source, result);
-	case CTRL_CMD_GET_SWITCH_HISTORY:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_SWITCH_HISTORY, commandData, source, result);
-	case CTRL_CMD_GET_POWER_SAMPLES:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_POWER_SAMPLES, commandData, source, result);
-	case CTLR_CMD_GET_SCHEDULER_MIN_FREE:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_SCHEDULER_MIN_FREE, commandData, source, result);
-	case CTRL_CMD_GET_RESET_REASON:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_RESET_REASON, commandData, source, result);
-	case CTRL_CMD_GET_GPREGRET:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_GPREGRET, commandData, source, result);
-	case CTRL_CMD_GET_ADC_CHANNEL_SWAPS:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS, commandData, source, result);
-	case CTRL_CMD_GET_RAM_STATS:
-		return dispatchEventForCommand(CS_TYPE::CMD_GET_RAM_STATS, commandData, source, result);
-	case CTRL_CMD_MICROAPP_UPLOAD:
-		return handleMicroAppUpload(commandData, accessLevel, result);
-	case CTRL_CMD_CLEAN_FLASH:
-		return dispatchEventForCommand(CS_TYPE::CMD_STORAGE_GARBAGE_COLLECT, commandData, source, result);
-	case CTRL_CMD_UNKNOWN:
-		result.returnCode = ERR_UNKNOWN_TYPE;
-		return;
+		case CTRL_CMD_NOP:
+			return handleCmdNop(commandData, accessLevel, result);
+		case CTRL_CMD_GOTO_DFU:
+			return handleCmdGotoDfu(commandData, accessLevel, result);
+		case CTRL_CMD_GET_BOOTLOADER_VERSION:
+			return handleCmdGetBootloaderVersion(commandData, accessLevel, result);
+		case CTRL_CMD_GET_UICR_DATA:
+			return handleCmdGetUicrData(commandData, accessLevel, result);
+		case CTRL_CMD_RESET:
+			return handleCmdReset(commandData, accessLevel, result);
+		case CTRL_CMD_FACTORY_RESET:
+			return handleCmdFactoryReset(commandData, accessLevel, result);
+		case CTRL_CMD_GET_MAC_ADDRESS:
+			return handleCmdGetMacAddress(commandData, accessLevel, result);
+		case CTRL_CMD_GET_HARDWARE_VERSION:
+			return handleCmdGetHardwareVersion(commandData, accessLevel, result);
+		case CTRL_CMD_GET_FIRMWARE_VERSION:
+			return handleCmdGetFirmwareVersion(commandData, accessLevel, result);
+		case CTRL_CMD_SET_TIME:
+			return handleCmdSetTime(commandData, accessLevel, result);
+		case CTRL_CMD_SET_SUN_TIME:
+			return handleCmdSetSunTime(commandData, accessLevel, result);
+		case CTRL_CMD_INCREASE_TX:
+			return handleCmdIncreaseTx(commandData, accessLevel, result);
+		case CTRL_CMD_DISCONNECT:
+			return handleCmdDisconnect(commandData, accessLevel, result);
+		case CTRL_CMD_RESET_ERRORS:
+			return handleCmdResetErrors(commandData, accessLevel, result);
+		case CTRL_CMD_PWM:
+			return handleCmdPwm(commandData, source, accessLevel, result);
+		case CTRL_CMD_SWITCH:
+			return handleCmdSwitch(commandData, source, accessLevel, result);
+		case CTRL_CMD_RELAY:
+			return handleCmdRelay(commandData, source, accessLevel, result);
+		case CTRL_CMD_MULTI_SWITCH:
+			return handleCmdMultiSwitch(commandData, source, accessLevel, result);
+		case CTRL_CMD_MESH_COMMAND:
+			return handleCmdMeshCommand(protocolVersion, commandData, source, accessLevel, result);
+		case CTRL_CMD_ALLOW_DIMMING:
+			return handleCmdAllowDimming(commandData, accessLevel, result);
+		case CTRL_CMD_LOCK_SWITCH:
+			return handleCmdLockSwitch(commandData, accessLevel, result);
+		case CTRL_CMD_SETUP:
+			return handleCmdSetup(commandData, accessLevel, result);
+		case CTRL_CMD_UART_MSG:
+			return handleCmdUartMsg(commandData, accessLevel, result);
+		case CTRL_CMD_STATE_GET:
+			return handleCmdStateGet(commandData, accessLevel, result);
+		case CTRL_CMD_STATE_SET:
+			return handleCmdStateSet(commandData, accessLevel, result);
+		case CTRL_CMD_SAVE_BEHAVIOUR:
+			return dispatchEventForCommand(CS_TYPE::CMD_ADD_BEHAVIOUR, commandData, source, result);
+		case CTRL_CMD_REPLACE_BEHAVIOUR:
+			return dispatchEventForCommand(CS_TYPE::CMD_REPLACE_BEHAVIOUR, commandData, source, result);
+		case CTRL_CMD_REMOVE_BEHAVIOUR:
+			return dispatchEventForCommand(CS_TYPE::CMD_REMOVE_BEHAVIOUR, commandData, source, result);
+		case CTRL_CMD_GET_BEHAVIOUR:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR, commandData, source, result);
+		case CTRL_CMD_GET_BEHAVIOUR_INDICES:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_INDICES, commandData, source, result);
+		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG, commandData, source, result);
+		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
+			return handleCmdRegisterTrackedDevice(commandData, accessLevel, result);
+		case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
+			return handleCmdTrackedDeviceHeartbeat(commandData, accessLevel, result);
+		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
+			return dispatchEventForCommand(CS_TYPE::CMD_SET_IBEACON_CONFIG_ID, commandData, source, result);
+		case CTRL_CMD_GET_UPTIME:
+			return handleCmdGetUptime(commandData, accessLevel, result);
+		case CTRL_CMD_GET_ADC_RESTARTS:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_RESTARTS, commandData, source, result);
+		case CTRL_CMD_GET_SWITCH_HISTORY:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_SWITCH_HISTORY, commandData, source, result);
+		case CTRL_CMD_GET_POWER_SAMPLES:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_POWER_SAMPLES, commandData, source, result);
+		case CTLR_CMD_GET_SCHEDULER_MIN_FREE:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_SCHEDULER_MIN_FREE, commandData, source, result);
+		case CTRL_CMD_GET_RESET_REASON:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_RESET_REASON, commandData, source, result);
+		case CTRL_CMD_GET_GPREGRET:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_GPREGRET, commandData, source, result);
+		case CTRL_CMD_GET_ADC_CHANNEL_SWAPS:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS, commandData, source, result);
+		case CTRL_CMD_GET_RAM_STATS:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_RAM_STATS, commandData, source, result);
+		case CTRL_CMD_MICROAPP_UPLOAD:
+			return handleMicroAppUpload(commandData, accessLevel, result);
+		case CTRL_CMD_CLEAN_FLASH:
+			return dispatchEventForCommand(CS_TYPE::CMD_STORAGE_GARBAGE_COLLECT, commandData, source, result);
+		case CTRL_CMD_UNKNOWN:
+			result.returnCode = ERR_UNKNOWN_TYPE;
+			return;
 	}
 	LOGe("Unknown type: %u", type);
 	result.returnCode = ERR_UNKNOWN_TYPE;
@@ -274,6 +284,45 @@ void CommandHandler::handleCmdGetBootloaderVersion(cs_data_t commandData, const 
 	result.returnCode = ERR_SUCCESS;
 	return;
 }
+
+void CommandHandler::handleCmdGetHardwareVersion(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+	LOGi(STR_HANDLE_COMMAND, "get hardware version");
+
+	// TODO: use UICR to determine hardware version, use struct instead of string.
+	result.returnCode = ERR_NOT_IMPLEMENTED;
+	return;
+}
+
+void CommandHandler::handleCmdGetFirmwareVersion(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+	LOGi(STR_HANDLE_COMMAND, "get firmware version");
+
+//	// Let std string handle the null termination.
+//	std::string firmwareVersion;
+//	if (strcmp(g_BUILD_TYPE, "Release") == 0) {
+//		firmwareVersion = g_FIRMWARE_VERSION;
+//	}
+//	else {
+//		firmwareVersion = g_GIT_SHA1;
+//	}
+//	uint16_t dataSize = firmwareVersion.size();
+//
+//	LOGd("Firmware version: %s", firmwareVersion.c_str());
+//	if (result.buf.len < dataSize) {
+//		result.returnCode = ERR_BUFFER_TOO_SMALL;
+//		return;
+//	}
+//
+//	memcpy(result.buf.data, firmwareVersion.c_str(), dataSize);
+//	result.dataSize = dataSize;
+//	result.returnCode = ERR_SUCCESS;
+
+	// TODO: use struct instead of string?
+	result.returnCode = ERR_NOT_IMPLEMENTED;
+	return;
+}
+
+
+
 
 void CommandHandler::handleCmdGetUicrData(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "get UICR data");
@@ -332,6 +381,24 @@ void CommandHandler::handleCmdFactoryReset(cs_data_t commandData, const Encrypti
 		result.returnCode = ERR_WRONG_PARAMETER;
 		return;
 	}
+	result.returnCode = ERR_SUCCESS;
+}
+
+void CommandHandler::handleCmdGetMacAddress(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+	LOGi(STR_HANDLE_COMMAND, "get MAC");
+
+	if (result.buf.len < MAC_ADDRESS_LEN) {
+		result.returnCode = ERR_BUFFER_TOO_SMALL;
+		return;
+	}
+
+	ble_gap_addr_t address;
+	if (sd_ble_gap_addr_get(&address) != NRF_SUCCESS) {
+		result.returnCode = ERR_NOT_FOUND;
+		return;
+	}
+	memcpy(result.buf.data, address.addr, MAC_ADDRESS_LEN);
+	result.dataSize = MAC_ADDRESS_LEN;
 	result.returnCode = ERR_SUCCESS;
 }
 
@@ -905,6 +972,9 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 	switch (type) {
 		case CTRL_CMD_GET_BOOTLOADER_VERSION:
 		case CTRL_CMD_GET_UICR_DATA:
+		case CTRL_CMD_GET_MAC_ADDRESS:
+		case CTRL_CMD_GET_HARDWARE_VERSION:
+		case CTRL_CMD_GET_FIRMWARE_VERSION:
 			return ENCRYPTION_DISABLED;
 
 		case CTRL_CMD_INCREASE_TX:
