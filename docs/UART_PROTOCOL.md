@@ -179,7 +179,7 @@ uint8 | Flags | 1 | Flags: has_been_set_up, ready_for_encryption, has_error, ...
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Timeout | 1 | How long (minutes) this session nonce is valid.
-uint8[] | Session nonce | 5 | The session nonce to use for encrypted messages sent by the crownstone.
+uint8[] | Session nonce | 5 | The session nonce to use for encrypted messages sent by the user.
 
 
 <a name="ret_session_nonce_packet"></a>
@@ -187,7 +187,7 @@ uint8[] | Session nonce | 5 | The session nonce to use for encrypted messages se
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8[] | Session nonce | 5 | The session nonce to use for encrypted messages sent by the user.
+uint8[] | Session nonce | 5 | The session nonce to use for encrypted messages sent by the crownstone.
 
 
 
