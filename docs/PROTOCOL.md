@@ -319,6 +319,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) | Get bootloader version info. | x | x | x | x
 5 | Get UICR data | - | [UICR data packet](#uicr_data_packet) | Get the UICR data. | x | x | x | x
 6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon_config_id_packet) | - | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x
+7 | Get MAC address | - | uint8[6] | Get the MAC address of this stone. | x | x | x | x
 10 | Reset | - | - | Reset device | x
 11 | Goto DFU | - | - | Reset device to DFU mode | x
 12 | No operation | - | - | Does nothing, merely there to keep the crownstone from disconnecting | x | x | x
@@ -711,6 +712,7 @@ Value | Name| Description
 2 | Now filtered | Last sampled values, after smoothing. Has 2 lists: index 0 for voltage, index 1 for current.
 3 | Now unfiltered | Last sampled values, before smoothing. Has 2 lists: index 0 for voltage, index 1 for current.
 4 | Soft fuse | Last samples that triggered a soft fuse. Has 1 list: index 0 for current.
+5 | Switch event | Last samples around a switch event. Has N lists: even index for voltage samples, uneven index for current samples.
 
 <a name="power_samples_result_packet"></a>
 #### Power samples result packet
