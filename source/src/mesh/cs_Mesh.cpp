@@ -193,11 +193,6 @@ void Mesh::handleEvent(event_t & event) {
 #endif
 			break;
 	}
-	case CS_TYPE::EVT_GENERIC_TEST: {
-		LOGd("generic test event received, calling requestSync()");
-		requestSync();
-		break;
-	}
 	default:
 		break;
 	}

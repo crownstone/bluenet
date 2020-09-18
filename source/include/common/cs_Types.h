@@ -20,6 +20,8 @@
 #include <behaviour/cs_TwilightBehaviour.h>
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
+#include <localisation/cs_RssiPingMessage.h>
+
 // #include <presence/cs_PresenceHandler.h>
 
 enum TypeBases {
@@ -274,6 +276,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_PAGES_ERASED,                            // All mesh storage pages are completely erased.
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT,       // Send a tracked device heartbeat mesh message.
 	EVT_MESH_TRACKED_DEVICE_HEARTBEAT,                // Mesh received a tracked device heartbeat.
+	EVT_MESH_RSSI_PING,                               // A ping message sent from another crownstone was received.
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR = InternalBaseBehaviour,        // Add a behaviour.
@@ -512,6 +515,8 @@ typedef  bool TYPIFY(CMD_SWITCHING_ALLOWED);
 typedef  uint32_t TYPIFY(EVT_TICK);
 typedef  uint32_t TYPIFY(EVT_TIME_SET);
 typedef  void TYPIFY(CMD_TOGGLE_ADC_VOLTAGE_VDD_REFERENCE_PIN);
+
+// Behaviour
 typedef SwitchBehaviour TYPIFY(CMD_ADD_BEHAVIOUR);
 typedef std::tuple<uint8_t,SwitchBehaviour> TYPIFY(CMD_REPLACE_BEHAVIOUR);
 typedef uint8_t TYPIFY(CMD_REMOVE_BEHAVIOUR); // index
@@ -520,6 +525,8 @@ typedef void TYPIFY(CMD_GET_BEHAVIOUR_INDICES);
 typedef void TYPIFY(CMD_GET_BEHAVIOUR_DEBUG);
 typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef BOOL TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN);
+
+
 typedef internal_register_tracked_device_packet_t TYPIFY(CMD_REGISTER_TRACKED_DEVICE);
 typedef internal_update_tracked_device_packet_t TYPIFY(CMD_UPDATE_TRACKED_DEVICE);
 typedef internal_tracked_device_heartbeat_packet_t TYPIFY(CMD_TRACKED_DEVICE_HEARTBEAT);
@@ -529,6 +536,8 @@ typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef void TYPIFY(EVT_GOING_TO_DFU);
 typedef profile_location_t TYPIFY(EVT_RECEIVED_PROFILE_LOCATION);
+
+// Mesh
 typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING);
 typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING);
 typedef void TYPIFY(EVT_MESH_SYNC_FAILED);
@@ -549,6 +558,7 @@ typedef void TYPIFY(CMD_GET_RAM_STATS);
 typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP_UPLOAD);
 typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
+typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

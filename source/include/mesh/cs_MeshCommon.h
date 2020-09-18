@@ -22,6 +22,7 @@ struct __attribute__((__packed__)) cs_mesh_received_msg_t {
 	uint8_t msgSize;
 	int8_t rssi;
 	uint8_t hops;
+	uint8_t channel;
 };
 
 // Data needed in each model queue.

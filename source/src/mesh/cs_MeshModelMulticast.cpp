@@ -14,7 +14,6 @@
 extern "C" {
 #include <access.h>
 #include <access_config.h>
-//#include <nrf_mesh.h>
 #include <log.h>
 }
 
@@ -96,13 +95,9 @@ void MeshModelMulticast::handleMsg(const access_message_rx_t * accessMsg) {
 	if (ownMsg) {
 		return;
 	}
-	MeshUtil::cs_mesh_received_msg_t msg;
-	msg.opCode = accessMsg->opcode.opcode;
-	msg.srcAddress = accessMsg->meta_data.src.value;
-	msg.msg = (uint8_t*)(accessMsg->p_data);
-	msg.msgSize = accessMsg->length;
-	msg.rssi = MeshUtil::getRssi(accessMsg->meta_data.p_core_metadata);
-	msg.hops = ACCESS_DEFAULT_TTL - accessMsg->meta_data.ttl;
+	MeshUtil::cs_mesh_received_msg_t msg =
+				MeshUtil::fromAccessMessageRX(*accessMsg);
+
 	cs_result_t result;
 	_msgCallback(msg, result);
 }
