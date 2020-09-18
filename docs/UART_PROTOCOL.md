@@ -178,7 +178,7 @@ uint8 | Flags | 1 | Flags: has_been_set_up, ready_for_encryption, has_error, ...
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Timeout | 1 | How long (seconds) this session nonce is valid.
+uint8 | Timeout | 1 | How long (minutes) this session nonce is valid.
 uint8[] | Session nonce | 5 | The session nonce to use for encrypted messages sent by the crownstone.
 
 
