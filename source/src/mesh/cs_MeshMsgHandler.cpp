@@ -195,7 +195,7 @@ cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadS
 
 	// copy metadata into event data if it is an original ping message.
 	// (i.e. if sender and rssi hasn't been filled in yet.)
-	if(packet->sender_id == 0xff){ // && hops == 0?
+	if (packet->sender_id == 0) { // && hops == 0?
 		packet->rssi = rssi;
 		packet->sender_id = srcId;
 		packet->channel = channel;
