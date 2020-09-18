@@ -119,6 +119,7 @@
 
 // ----- TIMERS -----
 // Soft device uses timer 0
+// Mesh uses timer 3 (BEARER_ACTION_TIMER_INDEX)
 #define CS_PWM_TIMER                             NRF_TIMER4
 #define CS_PWM_TIMER_IRQ                         TIMER4_IRQHandler
 #define CS_PWM_IRQn                              TIMER4_IRQn
