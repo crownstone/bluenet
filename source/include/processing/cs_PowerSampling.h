@@ -123,6 +123,15 @@ private:
 	uint16_t _avgZeroVoltageDiscount;
 	uint16_t _avgPowerDiscount;
 
+	// Slow averaging of power
+	float _slowAvgPowerDiscount;
+	float _slowAvgPowerMilliWatt = 0.0f;
+	uint16_t _slowAvgPowerCount; // Number of values that have been used for slow averaging.
+	const float powerDiffThresholdPart = 0.1f; // When difference is 10% larger or smaller, consider it a significant change.
+	const float powerDiffThresholdMinMilliWatt = 10.0f; // But the difference must also be at least so many Watts.
+	const float negativePowerThresholdMilliWatt = -10.0f; // Only if power is below threshold, it may be negative.
+
+
 	int32_t _boardPowerZero; //! Measured power when there is no load for this board (mW).
 	int32_t _avgZeroVoltage; //! Used for storing and calculating the average zero voltage value (times 1024).
 	int32_t _avgZeroCurrent; //! Used for storing and calculating the average zero current value (times 1024).
@@ -132,7 +141,7 @@ private:
 //	bool _zeroCurrentInitialized; //! True when zero of current has been initialized.
 	uint16_t _zeroVoltageCount; //! Number of times the zero voltage has been calculated.
 	uint16_t _zeroCurrentCount; //! Number of times the zero current has been calculated.
-	double _avgPower; //! Used for storing and calculating the average power (in mW).
+
 	int32_t _avgPowerMilliWatt; //! Used to send out the average power (in mW).
 	int32_t _avgCurrentRmsMilliAmp; //! Used for storing the average rms current (in mA).
 	int32_t _avgVoltageRmsMilliVolt; //! Used for storing the average rms voltage (in mV).
@@ -225,6 +234,8 @@ private:
 	/** Calculate the average power usage
 	 */
 	void calculatePower(power_t & power);
+
+	void calculateSlowAveragePower(float powerMilliWatt, float fastAvgPowerMilliWatt);
 
 	/**
 	 * Determines measured power usage with no load.

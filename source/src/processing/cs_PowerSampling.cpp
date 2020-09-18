@@ -23,6 +23,8 @@
 
 #include <cmath>
 
+#define LOGPowerSamplingDebug LOGd
+
 // Define test pin to enable gpio debug.
 //#define PS_TEST_PIN 20
 
@@ -366,6 +368,8 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 	calculateEnergy();
 
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+//		int32_t powerUsage = _slowAvgPowerMilliWatt;
+//		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
 		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
 		State::getInstance().set(CS_TYPE::STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
 	}
@@ -419,7 +423,8 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 void PowerSampling::initAverages() {
 	_avgZeroVoltage = _voltageZero * 1024;
 	_avgZeroCurrent = _currentZero * 1024;
-	_avgPower = 0.0;
+	_avgPowerMilliWatt = 0;
+	_slowAvgPowerMilliWatt = 0.0;
 }
 
 /**
@@ -756,6 +761,9 @@ void PowerSampling::calculatePower(power_t & power) {
 	int64_t avgPowerDiscount = _avgPowerDiscount;
 	_avgPowerMilliWatt = ((1000-avgPowerDiscount) * _avgPowerMilliWatt + avgPowerDiscount * powerMilliWattReal) / 1000;
 
+	calculateSlowAveragePower(powerMilliWattReal, _avgPowerMilliWatt);
+
+
 
 	/////////////////////////////////////////////////////////
 	// Debug prints
@@ -828,6 +836,42 @@ void PowerSampling::calculatePower(power_t & power) {
 #endif
 }
 
+void PowerSampling::calculateSlowAveragePower(float powerMilliWatt, float fastAvgPowerMilliWatt) {
+	if (_switchHist.size() >= 2) {
+		if (_switchHist[_switchHist.size() - 2].asInt != _switchHist[_switchHist.size() - 1].asInt) {
+			if (_switchHist[_switchHist.size() - 1].asInt == 0) {
+				// Switch has just been turned off: reset slow average to 0.
+				_slowAvgPowerMilliWatt = 0.0f;
+				LOGPowerSamplingDebug("switched off: reset slow avg to 0");
+			}
+			else {
+				// Switch just turned on, or to a different dim percentage
+				_slowAvgPowerMilliWatt = powerMilliWatt;
+				LOGPowerSamplingDebug("switched on: reset slow avg to %i mW", (int32_t)powerMilliWatt);
+			}
+			_slowAvgPowerCount = 0;
+		}
+	}
+
+	float significantChangeThreshold = std::max(_slowAvgPowerMilliWatt * powerDiffThresholdPart, 1000.0f * powerDiffThresholdMinMilliWatt);
+	if (std::abs(fastAvgPowerMilliWatt - _slowAvgPowerMilliWatt) > significantChangeThreshold) {
+		LOGPowerSamplingDebug("significant change: fast=%i slow=%i diff=%i thresh=%i", (int32_t)fastAvgPowerMilliWatt, (int32_t)_slowAvgPowerMilliWatt, (int32_t)std::abs(fastAvgPowerMilliWatt - _slowAvgPowerMilliWatt), (int32_t)significantChangeThreshold);
+		_slowAvgPowerMilliWatt = fastAvgPowerMilliWatt;
+		_slowAvgPowerCount = 0;
+	}
+
+	if (_slowAvgPowerCount < 1000) {
+		++_slowAvgPowerCount;
+	}
+	if (_slowAvgPowerCount < 50) {
+		// After a reset, slowly go up to 0.01 --> 99% of the average is influenced by the last 458 values, 50% by the last 68.
+		// Because we increase count before this line, we never divide by 0.
+		_slowAvgPowerDiscount = 0.5f / _slowAvgPowerCount;
+	}
+	// Exponential moving average.
+	_slowAvgPowerMilliWatt = (1.0f - _slowAvgPowerDiscount) * _slowAvgPowerMilliWatt + _slowAvgPowerDiscount * (float)powerMilliWatt;
+};
+
 void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
 	TYPIFY(STATE_SWITCH_STATE) switchState;
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
@@ -845,6 +889,7 @@ void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
 }
 
 void PowerSampling::calculateEnergy() {
+/*
 	uint32_t rtcCount = RTC::getCount();
 	uint32_t diffTicks = RTC::difference(rtcCount, _lastEnergyCalculationTicks);
 	// TODO: using ms introduces more error (due to rounding to ms), maybe use ticks directly?
@@ -854,6 +899,11 @@ void PowerSampling::calculateEnergy() {
 	// In order to keep more precision: multiply ticks by some number, then divide the result by the same number.
 	_energyUsedmicroJoule += (int64_t)_avgPowerMilliWatt * RTC::ticksToMs(1024*diffTicks) / 1024;
 	_lastEnergyCalculationTicks = rtcCount;
+*/
+
+	if (_slowAvgPowerMilliWatt > 0.0f || _slowAvgPowerMilliWatt < negativePowerThresholdMilliWatt * 1000.0f) {
+		_energyUsedmicroJoule += _slowAvgPowerMilliWatt * (CS_ADC_SAMPLE_INTERVAL_US / 1000.0f * InterleavedBuffer::getChannelLength());
+	}
 }
 
 void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA, int32_t voltageRmsMilliVolt, power_t & power) {
