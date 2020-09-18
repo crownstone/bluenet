@@ -417,6 +417,7 @@ enum PowerSamplesType {
 	POWER_SAMPLES_TYPE_NOW_FILTERED = 2,
 	POWER_SAMPLES_TYPE_NOW_UNFILTERED = 3,
 	POWER_SAMPLES_TYPE_SOFTFUSE = 4,
+	POWER_SAMPLES_TYPE_SWITCH = 5,
 };
 
 struct __attribute__((packed)) cs_power_samples_header_t {

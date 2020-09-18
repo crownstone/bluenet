@@ -49,6 +49,7 @@ PowerSampling::PowerSampling() :
 		_isInitialized(false),
 		_adc(NULL),
 		_bufferQueue(CS_ADC_NUM_BUFFERS),
+		_switchHist(switchHistSize),
 		_consecutivePwmOvercurrent(0),
 		_lastEnergyCalculationTicks(0),
 		_energyUsedmicroJoule(0),
@@ -119,6 +120,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	_currentRmsMilliAmpHist->init(); // Allocates buffer
 	_voltageRmsMilliVoltHist->init(); // Allocates buffer
 	_filteredCurrentRmsHistMA->init(); // Allocates buffer
+	_switchHist.init(); // Allocates buffer
 
 	// Init moving median filter
 	unsigned halfWindowSize = POWER_SAMPLING_CURVE_HALF_WINDOW_SIZE;
@@ -318,6 +320,10 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 
 	_bufferQueue.push(bufIndex);
 
+	TYPIFY(STATE_SWITCH_STATE) switchState;
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
+	_switchHist.push(switchState);
+
 	power_t power;
 	power.buf = InterleavedBuffer::getInstance().getBuffer(filteredBufIndex);
 	power.bufSize = CS_ADC_BUF_SIZE;
@@ -372,6 +378,36 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
 		EventDispatcher::getInstance().dispatch(event);
 	}
+
+
+	if (_switchHist.size() >= 3) {
+		if (_switchHist[_switchHist.size() - 2].asInt != _switchHist[_switchHist.size() - 1].asInt) {
+			// Switch changed state since previous buffer.
+			// Store the current and previous buffer.
+			buffer_id_t prevFilteredBufferIndex = _bufferQueue[_bufferQueue.size() - 2 - numUnfilteredBuffers]; // Previous filtered buffer.
+			uint16_t count = InterleavedBuffer::getChannelLength();
+			_lastSwitchSamplesHeader.type = POWER_SAMPLES_TYPE_SWITCH;
+			_lastSwitchSamplesHeader.count = count;
+			_lastSwitchSamplesHeader.unixTimestamp = SystemTime::posix();
+			_lastSwitchSamplesHeader.delayUs = 0;
+			_lastSwitchSamplesHeader.sampleIntervalUs = power.sampleIntervalUs;
+			for (sample_value_id_t i = 0; i < count; ++i) {
+				_lastSwitchSamples[i + 0 * count] = InterleavedBuffer::getInstance().getValue(prevFilteredBufferIndex, VOLTAGE_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 1 * count] = InterleavedBuffer::getInstance().getValue(prevFilteredBufferIndex, CURRENT_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 2 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, VOLTAGE_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 3 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, CURRENT_CHANNEL_IDX, i);
+			}
+		}
+		else if (_switchHist[_switchHist.size() - 3].asInt != _switchHist[_switchHist.size() - 1].asInt) {
+			// Switch changed state in previous buffer.
+			uint16_t count = InterleavedBuffer::getChannelLength();
+			for (sample_value_id_t i = 0; i < count; ++i) {
+				_lastSwitchSamples[i + 4 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, VOLTAGE_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 5 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, CURRENT_CHANNEL_IDX, i);
+			}
+		}
+	}
+
 
 	// We want to keep N buffers for processing.
 	if (_bufferQueue.size() > numFilteredBuffersForProcessing + numUnfilteredBuffers) {
@@ -1029,6 +1065,41 @@ void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, 
 			// Copy data to buffer.
 			memcpy(result.buf.data, &_lastSoftfuse, sizeof(_lastSoftfuse));
 			memcpy(result.buf.data + sizeof(_lastSoftfuse), _lastSoftfuseSamples, samplesSize);
+
+			result.dataSize = requiredSize;
+			result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case POWER_SAMPLES_TYPE_SWITCH: {
+			if (index >= numSwitchSamplesBuffers) {
+				LOGw("index=%u", index);
+				result.returnCode = ERR_WRONG_PARAMETER;
+				return;
+			}
+
+			// Check size
+			size16_t samplesSize = _lastSwitchSamplesHeader.count * sizeof(int16_t);
+			size16_t requiredSize = sizeof(_lastSwitchSamplesHeader) + samplesSize;
+			if (result.buf.len < requiredSize) {
+				LOGw("size=%u required=%u", result.buf.len, requiredSize);
+				result.returnCode = ERR_BUFFER_TOO_SMALL;
+				return;
+			}
+
+			// Set header data
+			_lastSwitchSamplesHeader.index = index;
+			if (index % 2 == 0) {
+					_lastSwitchSamplesHeader.offset = _avgZeroVoltage / 1024;;
+					_lastSwitchSamplesHeader.multiplier = _voltageMultiplier;
+			}
+			else {
+					_lastSwitchSamplesHeader.offset = _avgZeroCurrent / 1024;;
+					_lastSwitchSamplesHeader.multiplier = _currentMultiplier;
+			}
+
+			// Copy data to buffer.
+			memcpy(result.buf.data, &_lastSwitchSamplesHeader, sizeof(_lastSwitchSamplesHeader));
+			memcpy(result.buf.data + sizeof(_lastSwitchSamplesHeader), _lastSwitchSamples + index * _lastSwitchSamplesHeader.count, samplesSize);
 
 			result.dataSize = requiredSize;
 			result.returnCode = ERR_SUCCESS;

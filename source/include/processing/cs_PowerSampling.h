@@ -13,6 +13,7 @@
 #include <structs/buffer/cs_CircularBuffer.h>
 #include <structs/buffer/cs_InterleavedBuffer.h>
 #include <third/Median.h>
+#include <cstdint>
 
 typedef void (*ps_zero_crossing_cb_t) ();
 
@@ -82,6 +83,9 @@ private:
 	// Currently hard coded at 1.
 	const static uint8_t numUnfilteredBuffers = 1;
 
+	// Number of switch states to keep up.
+	const static uint8_t switchHistSize = 3;
+
 	//! Variable to keep up whether power sampling is initialized.
 	bool _isInitialized;
 
@@ -101,7 +105,13 @@ private:
 	CircularBuffer<buffer_id_t> _bufferQueue;
 
 	cs_power_samples_header_t _lastSoftfuse;
-	int16_t _lastSoftfuseSamples[InterleavedBuffer::getChannelLength()] = {0};
+	sample_value_t _lastSoftfuseSamples[InterleavedBuffer::getChannelLength()] = {0};
+
+	CircularBuffer<switch_state_t> _switchHist;
+	cs_power_samples_header_t _lastSwitchSamplesHeader;
+
+	const static uint8_t numSwitchSamplesBuffers = 6; // 3 voltage and 3 current buffers.
+	sample_value_t _lastSwitchSamples[numSwitchSamplesBuffers * InterleavedBuffer::getChannelLength()] = {0};
 
 	TYPIFY(CONFIG_VOLTAGE_MULTIPLIER) _voltageMultiplier; //! Voltage multiplier from settings.
 	TYPIFY(CONFIG_CURRENT_MULTIPLIER) _currentMultiplier; //! Current multiplier from settings.

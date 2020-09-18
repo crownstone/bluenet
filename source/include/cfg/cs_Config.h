@@ -204,6 +204,7 @@
 #define POWER_ZERO                               1500
 */
 // Octave: a=0.05; x=[0:1000]; y=(1-a).^x; y2=cumsum(y)*a; figure(1); plot(x,y); figure(2); plot(x,y2); find(y2 > 0.99)(1)
+// Python: d=0.1; x=range(0,1000); y=np.power(1.0 - d, x); y2=np.cumsum(y) * d; indices=np.where(y2 > 0.99); print(indices[0][0])
 #define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            20  // Is divided by 1000, so 20 is a discount of 0.02. // 99% of the average is influenced by the last 228 values
 //#define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            1000 // No averaging
 #define CURRENT_ZERO_EXP_AVG_DISCOUNT            100 // Is divided by 1000, so 100 is a discount of 0.1. // 99% of the average is influenced by the last 44 values
