@@ -18,7 +18,7 @@
 
 #include <test/cs_Test.h>
 
-#define LOGSystemTimeDebug   LOGnone
+#define LOGSystemTimeDebug   LOGd
 #define LOGSystemTimeVerbose LOGnone
 
 // ============== Static members ==============
@@ -39,6 +39,10 @@ app_timer_id_t SystemTime::appTimerId = &appTimerData;
 
 // Init and start the timer.
 void SystemTime::init(){
+	assertTimeSyncParameters();
+
+	syncTimeCoroutine.action = [this](){ syncTimeCoroutineAction(); };
+
 	Timer::getInstance().createSingleShot(
 			appTimerId,
 			static_cast<app_timer_timeout_handler_t>(&SystemTime::tick));
@@ -150,6 +154,10 @@ cs_ret_code_t SystemTime::setSunTimes(const sun_time_t& sunTimes, bool throttled
 // ======================== Events ========================
 
 void SystemTime::handleEvent(event_t & event) {
+	if(syncTimeCoroutine(event)){
+		return;
+	}
+
 	switch(event.type) {
 		case CS_TYPE::STATE_TIME: {
 			// Time was set via State.set().
@@ -223,35 +231,93 @@ void SystemTime::handleEvent(event_t & event) {
 // ======================== Synchronization ========================
 
 uint32_t SystemTime::syncTimeCoroutine(){
-	if(no_data_known_yet()){
-		// wait until sync time is over
-		return sync_timeout_ms;
+	LOGSystemTimeDebug("");
+	static is_first_call = true;
+	if(is_first_call){
+		LOGSystemTimeDebug("is_first_call");
+		// reboot occured, wait until sync time is over
+		is_first_call = false;
+		return RTC::msToTicks(reboot_sync_timeout_ms);
 	}
 
-	if(havent_heard_anything_for(sync_timeout_ms)){
-		// the master clock just disappeared and we're in the process
-		// of determining a new one.. lets consider ourselves a candidate
+	if(reelectionPeriodTimedOut()) {
+		LOGSystemTimeDebug("reelectionPeriodTimedOut");
 		currentMasterClockId = myId;
+
+		// optionally: return random delay to reduce chance
+		// of sync message collision during reelection?
 	}
 
-	if(myId <= currentMasterClockId){
-		// we're the master clock!
+	if(thisDeviceClaimsMasterClock()){
+		LOGSystemTimeDebug("thisDeviceClaimsMasterClock");
 		sendTimeSyncMessage();
-		return master_clock_update_period_ms;
+		return RTC::msToTicks(master_clock_update_period_ms);
 	}
 
-	return master_clock_reelection_period_ms;
+	// we need to check at least once in a while so that if there are
+	// no more sync messages sent, the coroutine will eventually trigger a self promotion.
+	return RTC::msToTicks(master_clock_reelection_period_ms);
 }
 
-void SystemTime::onTimeSyncMessageReceive(auto syncmessage){
-	if (syncmessage->id <= currentMasterClockId){
-		// lower id wins, sync message wins authority on the clock values.
+void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
+	LOGSystemTimeDebug("onTimeSyncMessageReceive");
+	if (isClockAuthority(syncmessage)){
+		// sync message wons authority on the clock values.
+		currentMasterClockId = candidate;
 		posixTimeStamp = syncmessage->timestamp;
-		currentMasterClockId = syncmessage->id;
+		lastReceivedSyncMessagePosix = posixTimeStamp;
+
+		// could postpone reelection if coroutine interface would be improved
+		// sync_routine.reschedule(master_clock_reelection_period_ms);
 	}
+}
+
+/**
+ * Returns true if the candidate is considered a clock authority relative to us.
+ */
+bool SystemTime::isClockAuthority(stone_id_t candidate){
+	return candidate <= currentMasterClockId;
+}
+
+bool SystemTime::thisDeviceClaimsMasterClock(){
+	return isClockAuthority(myId);
+}
+
+void SystemTime::clearMasterClockId(){
+	currentMasterClockId = master_clock_reset_value;
+}
+
+void SystemTime::assertTimeSyncParameters(){
+	if (reboot_sync_timeout_ms < 3 * master_clock_update_period_ms) {
+		LOGW("reboot delay for sync times is very small compared to sync message update period");
+	}
+	if (master_clock_reelection_period_ms < 3 * master_clock_update_period_ms) {
+		LOGW("master clock reelection period is very small compared to sync message update period");
+	}
+}
+
+/**
+ * we didn't receive any new sync messages since in
+ * [ posixTimeStamp - master_clock_reelection_timeout_ms, posixTimeStamp ]
+ */
+bool SystemTime::reelectionPeriodTimedOut(){
+	return CsMath::Interval<uint32_t>(posixTimeStamp, master_clock_reelection_timeout_ms, true)
+			.contains(lastReceivedSyncMessagePosix) == false;
 }
 
 void SystemTime::sendTimeSyncMessage(){
+	// TODO: check if this is correct for the _FIRST TIME_ we pretend to be the master clock.
+
+	auto currenttickcount = RTC::getCount();
+	last_rollover_rtc_value
+
+
+	time_sync_message_t msg = {};
+	msg.senders_stamp.posix_time = lastMasterClockSyncMessage.stamp.posix;
+	msg.senders_stamp.rtc_ticks = currenttickcount - last_rollover_rtc_value;
+	msg.senders_id = my_id;
+
+	lastSyncMessageLocalRtcTickCount = currenttickcount;
 
 }
 

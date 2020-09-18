@@ -37,6 +37,8 @@ private:
 	uint32_t next_call_tickcount = 0;
 public:
 	typedef std::function<uint32_t(void)> Action;
+
+	// void function that returns the amount of ticks before it should be called again.
 	Action action;
 
 	Coroutine(Action a) : action(a) {}
@@ -50,12 +52,15 @@ public:
 	}
 
 	/**
-	 * utility wrapper to simply pass an event
+	 * utility wrapper to simply pass an event.
+	 * Returns true if the event type was tick.
 	 */
-	void operator()(event_t& evt){
+	bool operator()(event_t& evt){
 		if(evt.type == CS_TYPE::EVT_TICK){
 			// forward call to uint32_t
 			(*this)(*reinterpret_cast<uint32_t*>(evt.data));
+			return true;
 		}
+		return false;
 	}
 };
