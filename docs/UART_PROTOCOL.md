@@ -36,6 +36,8 @@ Type | Payload
 <a name="encrypted_uart_msg"></a>
 ### Encrypted UART message
 
+Although the name suggests this is encrypted, only the `encrypted data` is actually encrypted. The other fields are unencrypted, but required for the encryption.
+
 ![Encrypted UART message](../docs/diagrams/encrypted_uart_msg.png)
 
 Type | Name | Length | Description
@@ -51,7 +53,7 @@ uint8[] | Encrypted data | N | Encrypted with [AES CTR](PROTOCOL.md#ctr_encrypti
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8[] | Validation   | 4 | Validation
+uint32  | Validation   | 4 | Validation
 uint16  | Messge size  | 2 | Size of the uart message in bytes.
 uint8[] | [UART message](#uart_msg) | Size | The uart message.
 uint8[] | Padding      | N | Padding to make this whole packet size a multiple of 16.
@@ -64,7 +66,7 @@ uint8[] | Padding      | N | Padding to make this whole packet size a multiple o
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8   | Device ID    | X | ID of the hub/crownstone
+uint8   | Device ID    | 1 | User device ID for messages to the crownstone, or crownstone ID for messages from the crownstone.
 uint16  | Data type    | 2 | Type of UART data.
 uint8[] | Data         | N | The data packet, depends on type.
 
@@ -75,15 +77,16 @@ uint8[] | Data         | N | The data packet, depends on type.
 Data types for messages sent to the Crownstone.
 
 - Each message will be replied to with a message with the same data type.
-- Messages with _encrypted_ set to _yes_, have to be encrypted when the crownstone is ready for encryption.
+- Messages with _encrypted_ set to _yes_, have to be encrypted when the crownstone status has _encryption required_ set to true.
 - Messages with _encrypted_ set to _optional_, may be encrypted.
 - Types >= 30000 are for development, and will be disabled in release.
 
 Type  | Data   | Encrypted | Description
 ----- | ------ | --------- | -----------
-0     | [Heartbeat](#cmd_heartbeat_packet) | Never | Used to know whether the UART connection is alive.
-1     | [Status](#cmd_status_packet) | Optional | Status of the user, this will be advertised by a dongle.
-2     | [Session nonce](#cmd_session_nonce_packet) | Never | Refresh the session nonce.
+0     | -      | Never     | First command that is sent, used to determine whether this is the right crownstone, and whether encryption has to be used.
+1     | [Session nonce](#cmd_session_nonce_packet) | Never | Refresh the session nonce.
+2     | [Heartbeat](#cmd_heartbeat_packet) | Yes | Used to know whether the UART connection is alive.
+3     | [Status](#cmd_status_packet) | Optional | Status of the user, this will be advertised by a dongle.
 10    | [Control msg](../docs/PROTOCOL.md#control_packet) | Yes | 
 30000 | uint8  | Never | Enable/disable advertising.
 30001 | uint8  | Never | Enable/disable mesh.
@@ -107,15 +110,16 @@ Type  | Data   | Encrypted | Description
 
 Data types for messages received from the Crownstone.
 
-- Messages with _encrypted_ set to _yes_, will be encrypted when the crownstone is ready for encryption.
+- Messages with _encrypted_ set to _yes_, will be encrypted when the crownstone status has _encryption required_ set to true.
 - Types in range 10000 - 20000 are events, not a (direct) reply to a UART command.
 - Types >= 30000 are for development, and will be disabled in release.
 
 Type  | Data   | Encrypted | Description
 ----- | ------ | --------- | ----
-0     | -      | Never | Heartbeat reply.
-1     | [Status](#ret_status_packet) | Never | Status reply and event.
-2     | [Session nonce](#ret_session_nonce_packet) | Never | The new session nonce to use for encrypted messages sent by the user.
+0     | [Hello](#ret_hello_packet) | Never | Hello reply.
+1     | [Session nonce](#ret_session_nonce_packet) | Never | The new session nonce to use for encrypted messages sent by the user.
+2     | -      | Yes | Heartbeat reply.
+3     | [Status](#ret_status_packet) | Never | Status reply and event.
 10    | [Result packet](../docs/PROTOCOL.md#result_packet) | Yes | Result of a control command.
 10000 | string | Yes | As requested via control command `UART message`.
 10002 | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Yes | Service data of this Crownstone (unencrypted).
@@ -148,6 +152,15 @@ Type  | Data   | Encrypted | Description
 
 ## Packets
 
+<a name="ret_hello_packet"></a>
+### Hello packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Sphere ID | 1 | Short sphere ID, as given during [setup](PROTOCOL.md#setup).
+[status](#ret_status_packet) | Status | 1 | Status packet.
+
+
 <a name="cmd_heartbeat_packet"></a>
 ### Heartbeat packet
 
@@ -161,9 +174,9 @@ uint16 | Timeout | 2 | If no heartbeat is received for _timeout_ seconds, the co
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Type | 1 | Status type: 0=unknown, 1=crownstone-hub, 2-15=reserved, 16-255=free to use
-uint8 | Flags | 1 | Standard flags: has_been_set_up, ready_for_encryption, has_error, ...
-uint8[] | Data | 8 | Status data to be advertised by dongle.
+uint8 | Type | 1 | Status type: 0=no-data, 1=crownstone-hub, 2-15=reserved, 16-255=free to use
+uint8 | Flags | 1 | Standard flags: has_been_set_up, encryption_required, has_error, ...
+uint8[] | Data | 8 | Status data to be advertised by dongle (will be ignored if status type is _no-data_).
 
 <a name="ret_status_packet"></a>
 ### Crownstone status packet
