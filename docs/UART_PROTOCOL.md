@@ -79,7 +79,7 @@ Data types for messages sent to the Crownstone.
 - Each message will be replied to with a message with the same data type.
 - Messages with _encrypted_ set to _yes_, have to be encrypted when the crownstone status has _encryption required_ set to true.
 - Messages with _encrypted_ set to _optional_, may be encrypted.
-- Types >= 30000 are for development, and will be disabled in release.
+- Types >= 50000 are for development. These may change, and will be disabled in release.
 
 Type  | Data   | Encrypted | Description
 ----- | ------ | --------- | -----------
@@ -88,21 +88,21 @@ Type  | Data   | Encrypted | Description
 2     | [Heartbeat](#cmd_heartbeat_packet) | Yes | Used to know whether the UART connection is alive.
 3     | [Status](#cmd_status_packet) | Optional | Status of the user, this will be advertised by a dongle.
 10    | [Control msg](../docs/PROTOCOL.md#control_packet) | Yes | 
-30000 | uint8  | Never | Enable/disable advertising.
-30001 | uint8  | Never | Enable/disable mesh.
-30002 | -      | Never | Get ID of this Crownstone.
-30003 | -      | Never | Get MAC address of this Crownstone.
-30103 | -      | Never | Increase the range on the current channel.
-30104 | -      | Never | Decrease the range on the current channel.
-30105 | -      | Never | Increase the range on the voltage channel.
-30106 | -      | Never | Decrease the range on the voltage channel.
-30108 | uint8  | Never | Enable/disable differential mode on current channel. (Currently the packet is ignored, and it toggles instead)
-30109 | uint8  | Never | Enable/disable differential mode on voltage channel. (Currently the packet is ignored, and it toggles instead)
-30110 | uint8  | Never | Change the pin used on voltage channel. (Currently the packet is ignored, and it rotates between certain pins instead)
-30200 | uint8  | Never | Enable sending current samples.
-30201 | uint8  | Never | Enable sending voltage samples.
-30202 | uint8  | Never | Enable sending filtered current samples.
-30204 | uint8  | Never | Enable sending calculated power samples.
+50000 | uint8  | Never | Enable/disable advertising.
+50001 | uint8  | Never | Enable/disable mesh.
+50002 | -      | Never | Get ID of this Crownstone.
+50003 | -      | Never | Get MAC address of this Crownstone.
+50103 | -      | Never | Increase the range on the current channel.
+50104 | -      | Never | Decrease the range on the current channel.
+50105 | -      | Never | Increase the range on the voltage channel.
+50106 | -      | Never | Decrease the range on the voltage channel.
+50108 | uint8  | Never | Enable/disable differential mode on current channel. (Currently the packet is ignored, and it toggles instead)
+50109 | uint8  | Never | Enable/disable differential mode on voltage channel. (Currently the packet is ignored, and it toggles instead)
+50110 | uint8  | Never | Change the pin used on voltage channel. (Currently the packet is ignored, and it rotates between certain pins instead)
+50200 | uint8  | Never | Enable sending current samples.
+50201 | uint8  | Never | Enable sending voltage samples.
+50202 | uint8  | Never | Enable sending filtered current samples.
+50204 | uint8  | Never | Enable sending calculated power samples.
 
 
 
@@ -112,7 +112,7 @@ Data types for messages received from the Crownstone.
 
 - Messages with _encrypted_ set to _yes_, will be encrypted when the crownstone status has _encryption required_ set to true.
 - Types in range 10000 - 20000 are events, not a (direct) reply to a UART command.
-- Types >= 30000 are for development, and will be disabled in release.
+- Types >= 50000 are for development. These may change, and will be disabled in release.
 
 Type  | Data   | Encrypted | Description
 ----- | ------ | --------- | ----
@@ -129,24 +129,24 @@ Type  | Data   | Encrypted | Description
 10104 | [External state part 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | Yes | Part of the state of other Crownstones in the mesh.
 10105 | [Mesh result](#mesh_result_packet) | Yes | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
 10106 | [Mesh ack all result](../docs/PROTOCOL.md#result_packet) | Yes | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
-30000 | uint8  | Never | Whether advertising is enabled.
-30001 | uint8  | Never | Whether mesh is enabled.
-30002 | uint8  | Never | Own Crownstone ID.
-30003 | MAC    | Never | Own mac address (6 bytes).
-30100 | [ADC config](#adc_channel_config_packet) | Never | ADC configuration.
-30200 | [Current samples](#current_samples_packet) | Never | Raw ADC samples of the current channel.
-30201 | [Voltage samples](#voltage_samples_packet) | Never | Raw ADC samples of the voltage channel.
-30202 | [Filtered current samples](#current_samples_packet) | Never | Filtered ADC samples of the current channel.
-30203 | [Filtered voltage samples](#voltage_samples_packet) | Never | Filtered ADC samples of the voltage channel.
-30204 | [Power calculations](#power_calculation_packet) | Never | Calculated power values.
-30403 | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Never | Received command to set time from the mesh.
-30410 | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Never | Received the location of a profile from the mesh.
-30411 | [Behaviour settings](../docs/MESH_PROTOCOL.md#behaviour_settings_t) | Never | Received command to set behaviour settings from the mesh.
-30412 | [Tracked device register](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_register_t) | Never | Received command to register a tracked device from the mesh.
-30413 | [Tracked device token](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_token_t) | Never | Received command to set the token of a tracked device from the mesh.
-30414 | [Sync request](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_sync_request_t) | Never | Received a sync request from the mesh.
-30420 | [Tracked device heartbeat](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_heartbeat_t) | Never | Received heartbeat command of a tracked device from the mesh.
-40000 | string | Never | Debug strings.
+50000 | uint8  | Never | Whether advertising is enabled.
+50001 | uint8  | Never | Whether mesh is enabled.
+50002 | uint8  | Never | Own Crownstone ID.
+50003 | MAC    | Never | Own mac address (6 bytes).
+50100 | [ADC config](#adc_channel_config_packet) | Never | ADC configuration.
+50200 | [Current samples](#current_samples_packet) | Never | Raw ADC samples of the current channel.
+50201 | [Voltage samples](#voltage_samples_packet) | Never | Raw ADC samples of the voltage channel.
+50202 | [Filtered current samples](#current_samples_packet) | Never | Filtered ADC samples of the current channel.
+50203 | [Filtered voltage samples](#voltage_samples_packet) | Never | Filtered ADC samples of the voltage channel.
+50204 | [Power calculations](#power_calculation_packet) | Never | Calculated power values.
+50403 | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Never | Received command to set time from the mesh.
+50410 | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Never | Received the location of a profile from the mesh.
+50411 | [Behaviour settings](../docs/MESH_PROTOCOL.md#behaviour_settings_t) | Never | Received command to set behaviour settings from the mesh.
+50412 | [Tracked device register](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_register_t) | Never | Received command to register a tracked device from the mesh.
+50413 | [Tracked device token](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_token_t) | Never | Received command to set the token of a tracked device from the mesh.
+50414 | [Sync request](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_sync_request_t) | Never | Received a sync request from the mesh.
+50420 | [Tracked device heartbeat](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_heartbeat_t) | Never | Received heartbeat command of a tracked device from the mesh.
+60000 | string | Never | Debug strings.
 
 
 
