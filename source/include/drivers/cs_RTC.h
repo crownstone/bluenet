@@ -61,7 +61,7 @@ public:
 	 * ... 3 seconds pass ...
 	 * printf("%d miliseconds passed", RTC::msPassedSince(stamp);
 	 */
-	inline static_ uint32_t msPassedSince(uint32_t tick_count){
+	inline static uint32_t msPassedSince(uint32_t tick_count){
 		return ticksToMs(difference(getCount(),tick_count));
 	}
 

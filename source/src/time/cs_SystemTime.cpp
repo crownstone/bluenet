@@ -8,13 +8,18 @@
 #include <time/cs_SystemTime.h>
 
 #include <common/cs_Types.h>
+
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Serial.h>
+
 #include <events/cs_EventDispatcher.h>
+
 #include <storage/cs_State.h>
+
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
+#include <time/cs_TimeSyncMessage.h>
 
 #include <test/cs_Test.h>
 
@@ -26,10 +31,18 @@
 // runtime variables
 uint32_t SystemTime::rtcTimeStamp = 0;
 uint32_t SystemTime::posixTimeStamp = 0;
-uint32_t SystemTime::uptime_sec = 0;
+uint32_t SystemTime::upTimeSec = 0;
 
 uint16_t SystemTime::throttleSetTimeCountdownTicks = 0;
 uint16_t SystemTime::throttleSetSunTimesCountdownTicks = 0;
+
+// sync
+high_resolution_time_stamp_t SystemTime::last_received_root_stamp = {0};
+uint32_t SystemTime::local_time_of_last_received_root_stamp_rtc_ticks = 0;
+stone_id_t SystemTime::currentMasterClockId = stone_id_unknown_value;
+stone_id_t SystemTime::myId = stone_id_unknown_value;
+Coroutine SystemTime::syncTimeCoroutine;
+
 
 // driver details
 app_timer_t SystemTime::appTimerData = {{0}};
@@ -40,8 +53,9 @@ app_timer_id_t SystemTime::appTimerId = &appTimerData;
 // Init and start the timer.
 void SystemTime::init(){
 	assertTimeSyncParameters();
+	syncTimeCoroutine.action = [](){ return syncTimeCoroutineAction(); };
 
-	syncTimeCoroutine.action = [this](){ syncTimeCoroutineAction(); };
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 
 	Timer::getInstance().createSingleShot(
 			appTimerId,
@@ -83,7 +97,7 @@ void SystemTime::tick(void*) {
 		rtcTimeStamp += RTC::msToTicks(1000);
 
 		// increment uptime.
-		++uptime_sec; 
+		++upTimeSec;
 	}
 
 	if (throttleSetTimeCountdownTicks) {
@@ -246,9 +260,9 @@ high_resolution_time_stamp_t SystemTime::getSynchronizedStamp(){
 	return stamp;
 }
 
-uint32_t SystemTime::syncTimeCoroutine(){
+uint32_t SystemTime::syncTimeCoroutineAction(){
 	LOGSystemTimeDebug("");
-	static is_first_call = true;
+	static bool is_first_call = true;
 	if(is_first_call){
 		LOGSystemTimeDebug("is_first_call");
 		// reboot occured, wait until sync time is over
@@ -272,25 +286,25 @@ uint32_t SystemTime::syncTimeCoroutine(){
 
 	// we need to check at least once in a while so that if there are
 	// no more sync messages sent, the coroutine will eventually trigger a self promotion.
-	return RTC::msToTicks(master_clock_reelection_period_ms);
+	return RTC::msToTicks(master_clock_reelection_timeout_ms);
 }
 
 void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 	LOGSystemTimeDebug("onTimeSyncMessageReceive");
-	if (isClockAuthority(syncmessage)){
+	if (isClockAuthority(syncmessage.root_id)){
 		// sync message wons authority on the clock values.
 		logRootTimeStamp(syncmessage);
 
 		// could postpone reelection if coroutine interface would be improved
-		// sync_routine.reschedule(master_clock_reelection_period_ms);
+		// sync_routine.reschedule(master_clock_reelection_timeout_ms);
 	}
 }
 
 void SystemTime::sendTimeSyncMessage(){
 	// TODO: check if this is correct for the _FIRST TIME_ we pretend to be the master clock.
-	time_sync_message_t syncmsg = {};
-	msg.senders_stamp = getSynchronizedStamp();
-	msg.senders_id = my_id;
+	time_sync_message_t syncmessage = {};
+	syncmessage.stamp = getSynchronizedStamp();
+	syncmessage.root_id = myId;
 
 	// immediate loopback:
 	logRootTimeStamp(syncmessage);
@@ -308,15 +322,15 @@ bool SystemTime::thisDeviceClaimsMasterClock(){
 }
 
 void SystemTime::clearMasterClockId(){
-	currentMasterClockId = master_clock_reset_value;
+	currentMasterClockId = stone_id_unknown_value;
 }
 
 void SystemTime::assertTimeSyncParameters(){
 	if (reboot_sync_timeout_ms < 3 * master_clock_update_period_ms) {
-		LOGW("reboot delay for sync times is very small compared to sync message update period");
+		LOGw("reboot delay for sync times is very small compared to sync message update period");
 	}
-	if (master_clock_reelection_period_ms < 3 * master_clock_update_period_ms) {
-		LOGW("master clock reelection period is very small compared to sync message update period");
+	if (master_clock_reelection_timeout_ms < 3 * master_clock_update_period_ms) {
+		LOGw("master clock reelection period is very small compared to sync message update period");
 	}
 }
 
@@ -342,5 +356,5 @@ Time SystemTime::now(){
 
 
 uint32_t SystemTime::up(){
-	return uptime_sec;
+	return upTimeSec;
 }

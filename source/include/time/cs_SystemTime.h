@@ -11,8 +11,10 @@
 #include <events/cs_EventListener.h>
 
 #include <protocol/cs_Typedefs.h>
+
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
+#include <time/cs_TimeSyncMessage.h>
 
 #include <util/cs_Coroutine.h>
 
@@ -50,7 +52,7 @@ public:
 	 * by adding the difference between the local rtc time upon reception
 	 * and the current local rtc time.
 	 */
-	high_resolution_time_stamp_t getSynchronizedStamp();
+	static high_resolution_time_stamp_t getSynchronizedStamp();
 
 	virtual void handleEvent(event_t& event);
 
@@ -83,7 +85,7 @@ public:
 private:
 	// state data
 	static uint32_t rtcTimeStamp;       // high resolution device local time
-	static uint32_t uptime_sec;
+	static uint32_t upTimeSec;
 
 	// throttling: when not 0, block command
 	static uint16_t throttleSetTimeCountdownTicks;
@@ -111,53 +113,56 @@ private:
 	// during this period the device will not participate for election
 	// even if it has received a valid sync message from another device
 	// and has lower crownstone id.
-	static constexpr uint32_t reboot_sync_timeout_ms = ;
+	static constexpr uint32_t reboot_sync_timeout_ms = 60 * 1000;
 
 	// period of sync messages sent by the master clock
-	static constexpr uint32_t master_clock_update_period_ms = ;
+	static constexpr uint32_t master_clock_update_period_ms = 5* 1000; // TODO: can be much larger probably
 
 	// time out period for master clock invalidation.
 	// not hearing sync messages for this amount of time will invalidate the
 	// current master clock id.
 	// should be larger than master_clock_update_period_ms by a fair margin.
-	static constexpr uint32_t master_clock_reelection_period_ms = 60* 1000;
+	static constexpr uint32_t master_clock_reelection_timeout_ms = 60 * 1000;
 
-	static constexpr uint32_t master_clock_reset_value = 0xffffffff;
+	static constexpr uint32_t stone_id_unknown_value = 0xff;
 
 	static uint32_t posixTimeStamp; // old time stamp implementation.
 
 	// clock synchronization data (updated on sync)
-	high_resolution_time_stamp_t last_received_root_stamp;
-	uint32_t local_time_of_last_received_root_stamp_rtc_ticks;
+	static high_resolution_time_stamp_t last_received_root_stamp;
+	static uint32_t local_time_of_last_received_root_stamp_rtc_ticks;
+	static stone_id_t currentMasterClockId;
+	static stone_id_t myId;
 
-	Coroutine syncTimeCoroutine;
+	static Coroutine syncTimeCoroutine;
 
-	uint32_t syncTimeCoroutineAction();
-	void onTimeSyncMessageReceive(time_sync_message_t syncmessage);
+	static uint32_t syncTimeCoroutineAction();
+	static void onTimeSyncMessageReceive(time_sync_message_t syncmessage);
+	static void logRootTimeStamp(time_sync_message_t syncmessage);
 
 	/**
 	 * Send a sync message as if we are the master clock.
 	 */
-	void sendTimeSyncMessage();
+	static void sendTimeSyncMessage();
 
-	void clearMasterClockId();
-	void assertTimeSyncParameters();
+	static void clearMasterClockId();
+	static void assertTimeSyncParameters();
 
 	/**
 	 * Returns true if the device id of this device is lower than or equal to the currentMasterClockId.
 	 */
-	bool thisDeviceClaimsMasterClock();
+	static bool thisDeviceClaimsMasterClock();
 
 	/**
 	 * Returns true if the candidate is considered a clock authority relative to us.
 	 */
-	bool isClockAuthority(stone_id_t candidate);
+	static bool isClockAuthority(stone_id_t candidate);
 
 	/**
 	 * Returns true if onTimeSyncMessageReceive hasn't received any sync messages from a
 	 * clock authority in the last master_clock_reelection_timeout_ms miliseconds.
 	 */
-	bool reelectionPeriodTimedOut();
+	static bool reelectionPeriodTimedOut();
 
 
 };

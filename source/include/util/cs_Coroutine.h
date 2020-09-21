@@ -4,6 +4,7 @@
  * Date: May 11, 2020
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
+#pragma once
 
 #include <functional>
 
@@ -41,6 +42,7 @@ public:
 	// void function that returns the amount of ticks before it should be called again.
 	Action action;
 
+	Coroutine() = default;
 	Coroutine(Action a) : action(a) {}
 
 	void operator()(uint32_t current_tick_count){
