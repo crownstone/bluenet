@@ -130,14 +130,14 @@ Type  | Data   | Encrypted | Description
 10104 | [External state part 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | Yes | Part of the state of other Crownstones in the mesh.
 10105 | [Mesh result](#mesh_result_packet) | Yes | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
 10106 | [Mesh ack all result](../docs/PROTOCOL.md#result_packet) | Yes | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
-50000 | Eventbus | Yes | Raw data from the event bus.
-50103 | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Yes | Received command to set time from the mesh.
-50110 | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Yes | Received the location of a profile from the mesh.
-50111 | [Behaviour settings](../docs/MESH_PROTOCOL.md#behaviour_settings_t) | Yes | Received command to set behaviour settings from the mesh.
-50112 | [Tracked device register](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_register_t) | Yes | Received command to register a tracked device from the mesh.
-50113 | [Tracked device token](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_token_t) | Yes | Received command to set the token of a tracked device from the mesh.
-50114 | [Sync request](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_sync_request_t) | Yes | Received a sync request from the mesh.
-50120 | [Tracked device heartbeat](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_heartbeat_t) | Yes | Received heartbeat command of a tracked device from the mesh.
+40000 | Eventbus | Yes | Raw data from the event bus.
+40103 | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Yes | Received command to set time from the mesh.
+40110 | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Yes | Received the location of a profile from the mesh.
+40111 | [Behaviour settings](../docs/MESH_PROTOCOL.md#behaviour_settings_t) | Yes | Received command to set behaviour settings from the mesh.
+40112 | [Tracked device register](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_register_t) | Yes | Received command to register a tracked device from the mesh.
+40113 | [Tracked device token](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_token_t) | Yes | Received command to set the token of a tracked device from the mesh.
+40114 | [Sync request](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_sync_request_t) | Yes | Received a sync request from the mesh.
+40120 | [Tracked device heartbeat](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_heartbeat_t) | Yes | Received heartbeat command of a tracked device from the mesh.
 50000 | uint8  | Never | Whether advertising is enabled.
 50001 | uint8  | Never | Whether mesh is enabled.
 50002 | uint8  | Never | Own Crownstone ID.
