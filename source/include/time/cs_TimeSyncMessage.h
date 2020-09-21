@@ -10,16 +10,14 @@
 
 
 struct __attribute__((__packed__)) high_resolution_time_stamp_t {
-	uint32_t posix_time;
-
-	// fractional part is represented in rtc ticks.
-	uint32_t rtc_ticks;
-}
+	uint32_t posix_s;  // seconds since epoch
+	uint16_t posix_ms;  // miliseconds passed since posix_s.
+};
 
 /**
  *
  */
 struct __attribute__((__packed__)) time_sync_message_t {
 	high_resolution_time_stamp_t stamp;
-	stone_id_t id;
+	stone_id_t root_id;
 };

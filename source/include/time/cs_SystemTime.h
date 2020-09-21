@@ -45,6 +45,13 @@ public:
 	 */
 	static uint32_t up();
 
+	/**
+	 * Returns the current time, computed from the last received root stamp
+	 * by adding the difference between the local rtc time upon reception
+	 * and the current local rtc time.
+	 */
+	high_resolution_time_stamp_t getSynchronizedStamp();
+
 	virtual void handleEvent(event_t& event);
 
 	/**
@@ -119,9 +126,9 @@ private:
 
 	static uint32_t posixTimeStamp; // old time stamp implementation.
 
-	time_sync_message_t lastMasterClockSyncMessage;
-	high_resolution_time_stamp_t local_time; // (updated in the tick method, adjusted when sync happens)
-	uint32_t lastSyncMessageLocalRtcTickCount; // when we are the master clock, this contains our tick count at last sync message generation.
+	// clock synchronization data (updated on sync)
+	high_resolution_time_stamp_t last_received_root_stamp;
+	uint32_t local_time_of_last_received_root_stamp_rtc_ticks;
 
 	Coroutine syncTimeCoroutine;
 
@@ -151,5 +158,7 @@ private:
 	 * clock authority in the last master_clock_reelection_timeout_ms miliseconds.
 	 */
 	bool reelectionPeriodTimedOut();
+
+
 };
 
