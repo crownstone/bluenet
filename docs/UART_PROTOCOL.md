@@ -86,7 +86,7 @@ Type  | Data   | Encrypted | Description
 0     | -      | Never     | First command that is sent, used to determine whether this is the right crownstone, and whether encryption has to be used.
 1     | [Session nonce](#cmd_session_nonce_packet) | Never | Refresh the session nonce.
 2     | [Heartbeat](#cmd_heartbeat_packet) | Yes | Used to know whether the UART connection is alive.
-3     | [Status](#cmd_status_packet) | Optional | Status of the user, this will be advertised by a dongle.
+3     | [Status](#cmd_status_packet) | Yes | Status of the user, this will be advertised by a dongle.
 10    | [Control msg](../docs/PROTOCOL.md#control_packet) | Yes | Send a generic control command.
 50000 | uint8  | Never | Enable/disable advertising.
 50001 | uint8  | Never | Enable/disable mesh.
@@ -103,7 +103,7 @@ Type  | Data   | Encrypted | Description
 50201 | uint8  | Never | Enable sending voltage samples.
 50202 | uint8  | Never | Enable sending filtered current samples.
 50204 | uint8  | Never | Enable sending calculated power samples.
-
+60000 |        | Never | Inject an internal event.
 
 
 ## RX data types (events and replies)
@@ -118,11 +118,12 @@ Data types for messages received from the Crownstone.
 Type  | Data   | Encrypted | Description
 ----- | ------ | --------- | ----
 0     | [Hello](#ret_hello_packet) | Never | Hello reply.
-1     | [Session nonce](#ret_session_nonce_packet) | Never | The new session nonce to use for encrypted messages sent by the user.
+1     | [Session nonce](#ret_session_nonce_packet) | Never | The new session nonce.
 2     | -      | Yes | Heartbeat reply.
 3     | [Status](#ret_status_packet) | Never | Status reply and event.
 10    | [Result packet](../docs/PROTOCOL.md#result_packet) | Yes | Result of a control command.
 10000 | string | Yes | As requested via control command `UART message`.
+10001 | - | Never | The Crownstone has no session nonce, please send one.
 10002 | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Yes | Service data of this Crownstone (unencrypted).
 10003 | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | Yes | State of other Crownstones in the mesh (unencrypted).
 10004 | [Presence change packet](#presence_change_packet) | Yes | Sent when the presence has changed. Note: a profile ID can be at multiple locations at the same time.
