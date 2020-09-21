@@ -87,7 +87,7 @@ Type  | Data   | Encrypted | Description
 1     | [Session nonce](#cmd_session_nonce_packet) | Never | Refresh the session nonce.
 2     | [Heartbeat](#cmd_heartbeat_packet) | Yes | Used to know whether the UART connection is alive.
 3     | [Status](#cmd_status_packet) | Optional | Status of the user, this will be advertised by a dongle.
-10    | [Control msg](../docs/PROTOCOL.md#control_packet) | Yes | 
+10    | [Control msg](../docs/PROTOCOL.md#control_packet) | Yes | Send a generic control command.
 50000 | uint8  | Never | Enable/disable advertising.
 50001 | uint8  | Never | Enable/disable mesh.
 50002 | -      | Never | Get ID of this Crownstone.
@@ -112,6 +112,7 @@ Data types for messages received from the Crownstone.
 
 - Messages with _encrypted_ set to _yes_, will be encrypted when the crownstone status has _encryption required_ set to true.
 - Types in range 10000 - 20000 are events, not a (direct) reply to a UART command.
+- Types in range 40000 - 50000 are for development. These may change, and will be enabled in release.
 - Types >= 50000 are for development. These may change, and will be disabled in release.
 
 Type  | Data   | Encrypted | Description
@@ -129,6 +130,14 @@ Type  | Data   | Encrypted | Description
 10104 | [External state part 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | Yes | Part of the state of other Crownstones in the mesh.
 10105 | [Mesh result](#mesh_result_packet) | Yes | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
 10106 | [Mesh ack all result](../docs/PROTOCOL.md#result_packet) | Yes | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
+50000 | Eventbus | Yes | Raw data from the event bus.
+50103 | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Yes | Received command to set time from the mesh.
+50110 | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Yes | Received the location of a profile from the mesh.
+50111 | [Behaviour settings](../docs/MESH_PROTOCOL.md#behaviour_settings_t) | Yes | Received command to set behaviour settings from the mesh.
+50112 | [Tracked device register](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_register_t) | Yes | Received command to register a tracked device from the mesh.
+50113 | [Tracked device token](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_token_t) | Yes | Received command to set the token of a tracked device from the mesh.
+50114 | [Sync request](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_sync_request_t) | Yes | Received a sync request from the mesh.
+50120 | [Tracked device heartbeat](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_heartbeat_t) | Yes | Received heartbeat command of a tracked device from the mesh.
 50000 | uint8  | Never | Whether advertising is enabled.
 50001 | uint8  | Never | Whether mesh is enabled.
 50002 | uint8  | Never | Own Crownstone ID.
@@ -139,13 +148,6 @@ Type  | Data   | Encrypted | Description
 50202 | [Filtered current samples](#current_samples_packet) | Never | Filtered ADC samples of the current channel.
 50203 | [Filtered voltage samples](#voltage_samples_packet) | Never | Filtered ADC samples of the voltage channel.
 50204 | [Power calculations](#power_calculation_packet) | Never | Calculated power values.
-50403 | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Never | Received command to set time from the mesh.
-50410 | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Never | Received the location of a profile from the mesh.
-50411 | [Behaviour settings](../docs/MESH_PROTOCOL.md#behaviour_settings_t) | Never | Received command to set behaviour settings from the mesh.
-50412 | [Tracked device register](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_register_t) | Never | Received command to register a tracked device from the mesh.
-50413 | [Tracked device token](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_token_t) | Never | Received command to set the token of a tracked device from the mesh.
-50414 | [Sync request](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_sync_request_t) | Never | Received a sync request from the mesh.
-50420 | [Tracked device heartbeat](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_heartbeat_t) | Never | Received heartbeat command of a tracked device from the mesh.
 60000 | string | Never | Debug strings.
 
 
@@ -183,7 +185,7 @@ uint8[] | Data | 8 | Status data to be advertised by dongle (will be ignored if 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Flags | 1 | Flags: has_been_set_up, ready_for_encryption, has_error, ...
+uint8 | Flags | 1 | Flags: has_been_set_up, encryption_required, has_error, ...
 
 
 <a name="cmd_session_nonce_packet"></a>
@@ -235,6 +237,9 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Stone ID | 1 | ID of the stone.
 [Result packet](../docs/PROTOCOL.md#result_packet) | Result | N | The result.
+
+
+
 
 
 <a name="adc_config_packet"></a>
