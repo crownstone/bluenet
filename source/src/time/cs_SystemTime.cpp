@@ -308,6 +308,16 @@ void SystemTime::sendTimeSyncMessage(){
 
 	// immediate loopback:
 	logRootTimeStamp(syncmessage);
+
+	cs_mesh_msg_t syncmsg_wrapper;
+	syncmsg_wrapper.type = CS_MESH_MODEL_TYPE_TIME_SYNC;
+	syncmsg_wrapper.payload = reinterpret_cast<uint8_t*>(syncmessage);
+	syncmsg_wrapper.size  = sizeof(time_sync_message_t);
+	syncmsg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
+	syncmsg_wrapper.urgency = CS_MESH_URGENCY_LOW;
+
+	event_t msgevt(CS_TYPE::CMD_SEND_MESH_MSG, &syncmsg_wrapper, sizeof(cs_mesh_msg_t));
+	msgevt.dispatch();
 }
 
 /**

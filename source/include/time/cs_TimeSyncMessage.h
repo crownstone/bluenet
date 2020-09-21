@@ -8,16 +8,20 @@
 
 #include <cstdint>
 
-
+/**
+ * message to be sent over mesh
+ */
 struct __attribute__((__packed__)) high_resolution_time_stamp_t {
 	uint32_t posix_s;  // seconds since epoch
 	uint16_t posix_ms;  // miliseconds passed since posix_s.
 };
 
 /**
- *
+ * event sent over the internal event bus upon reception of new mesh
+ * time stamp msg.
  */
 struct __attribute__((__packed__)) time_sync_message_t {
 	high_resolution_time_stamp_t stamp;
 	stone_id_t root_id;
+	uint8_t hops;
 };
