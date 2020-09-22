@@ -9,70 +9,121 @@
 
 
 enum UartOpcodeRx {
-	UART_OPCODE_RX_CONTROL =                          1,
-	UART_OPCODE_RX_ENABLE_ADVERTISEMENT =             10000, // Enable advertising (payload: bool enable)
-	UART_OPCODE_RX_ENABLE_MESH =                      10001, // Enable mesh (payload: bool enable)
-	UART_OPCODE_RX_GET_ID =                           10002, // Get ID of this Crownstone
-	UART_OPCODE_RX_GET_MAC =                          10003, // Get MAC address of this Crownstone
+	UART_OPCODE_RX_HELLO =                            0,
+	UART_OPCODE_RX_SESSION_NONCE =                    1,
+	UART_OPCODE_RX_HEARTBEAT =                        2,
+	UART_OPCODE_RX_STATUS =                           3,
+	UART_OPCODE_RX_CONTROL =                          10,
 
-//	UART_OPCODE_RX_ADC_CONFIG_GET =                   10100, // Get the adc config
-//	UART_OPCODE_RX_ADC_CONFIG_SET =                   10101, // Set an adc channel config (payload: uart_msg_adc_channel_config_t)
-//	UART_OPCODE_RX_ADC_CONFIG_SET_RANGE =             10102, // Set range of given channel (payload: channel, range)
-	UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_CURRENT =     10103, // Increase the range on the current channel
-	UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_CURRENT =     10104, // Decrease the range on the current channel
-	UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_VOLTAGE =     10105, // Increase the range on the voltage channel
-	UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_VOLTAGE =     10106, // Decrease the range on the voltage channel
-	UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_CURRENT =  10108, // Enable differential mode on current channel (payload: bool enable)
-	UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_VOLTAGE =  10109, // Enable differential mode on voltage channel (payload: bool enable)
-	UART_OPCODE_RX_ADC_CONFIG_VOLTAGE_PIN =           10110, // Change the pin used on voltage channel (payload: enum of pins)
+	////////// Developer messages in debug build. //////////
+	UART_OPCODE_RX_ENABLE_ADVERTISEMENT =             50000, // Enable advertising (payload: bool enable)
+	UART_OPCODE_RX_ENABLE_MESH =                      50001, // Enable mesh (payload: bool enable)
+	UART_OPCODE_RX_GET_ID =                           50002, // Get ID of this Crownstone
+	UART_OPCODE_RX_GET_MAC =                          50003, // Get MAC address of this Crownstone
 
-	UART_OPCODE_RX_POWER_LOG_CURRENT =                10200, // Enable writing current samples (payload: bool enable)
-	UART_OPCODE_RX_POWER_LOG_VOLTAGE =                10201, // Enable writing voltage samples (payload: bool enable)
-	UART_OPCODE_RX_POWER_LOG_FILTERED_CURRENT =       10202, // Enable writing filtered current samples (payload: bool enable)
-//	UART_OPCODE_RX_POWER_LOG_FILTERED_VOLTAGE =       10203, // Enable writing filtered voltage samples (payload: bool enable)
-	UART_OPCODE_RX_POWER_LOG_POWER =                  10204, // Enable writing calculated power (payload: bool enable)
+//	UART_OPCODE_RX_ADC_CONFIG_GET =                   50100, // Get the adc config
+//	UART_OPCODE_RX_ADC_CONFIG_SET =                   50101, // Set an adc channel config (payload: uart_msg_adc_channel_config_t)
+//	UART_OPCODE_RX_ADC_CONFIG_SET_RANGE =             50102, // Set range of given channel (payload: channel, range)
+	UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_CURRENT =     50103, // Increase the range on the current channel
+	UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_CURRENT =     50104, // Decrease the range on the current channel
+	UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_VOLTAGE =     50105, // Increase the range on the voltage channel
+	UART_OPCODE_RX_ADC_CONFIG_DEC_RANGE_VOLTAGE =     50106, // Decrease the range on the voltage channel
+	UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_CURRENT =  50108, // Enable differential mode on current channel (payload: bool enable)
+	UART_OPCODE_RX_ADC_CONFIG_DIFFERENTIAL_VOLTAGE =  50109, // Enable differential mode on voltage channel (payload: bool enable)
+	UART_OPCODE_RX_ADC_CONFIG_VOLTAGE_PIN =           50110, // Change the pin used on voltage channel (payload: enum of pins)
+
+	UART_OPCODE_RX_POWER_LOG_CURRENT =                50200, // Enable writing current samples (payload: bool enable)
+	UART_OPCODE_RX_POWER_LOG_VOLTAGE =                50201, // Enable writing voltage samples (payload: bool enable)
+	UART_OPCODE_RX_POWER_LOG_FILTERED_CURRENT =       50202, // Enable writing filtered current samples (payload: bool enable)
+//	UART_OPCODE_RX_POWER_LOG_FILTERED_VOLTAGE =       50203, // Enable writing filtered voltage samples (payload: bool enable)
+	UART_OPCODE_RX_POWER_LOG_POWER =                  50204, // Enable writing calculated power (payload: bool enable)
+
+	UART_OPCODE_RX_INJECT_EVENT =                     60000, // Dispatch any event. Payload: CS_TYPE + data.
 };
 
 enum UartOpcodeTx {
-	UART_OPCODE_TX_ACK =                              0,
-	UART_OPCODE_TX_CONTROL_RESULT =                   1, // The result of the control command, payload: result_packet_header_t + data.
-	UART_OPCODE_TX_SERVICE_DATA =                     2, // Sent when the service data is updated (payload: service_data_t)
-	UART_OPCODE_TX_BLE_MSG =                          3, // Sent by command (CMD_UART_MSG), payload: buffer.
-	UART_OPCODE_TX_PRESENCE_CHANGE =                  4, // Sent when the presence has changed, payload: presence_change_t. When the first user enters, multiple msgs will be sent.
+	UART_OPCODE_TX_HELLO =                            0,
+	UART_OPCODE_TX_SESSION_NONCE =                    1,
+	UART_OPCODE_TX_HEARTBEAT =                        2,
+	UART_OPCODE_TX_STATUS =                           3,
+	UART_OPCODE_TX_CONTROL_RESULT =                   10, // The result of the control command, payload: result_packet_header_t + data.
 
-	UART_OPCODE_TX_MESH_STATE =                       102, // Received state of external stone, payload: service_data_encrypted_t
-	UART_OPCODE_TX_MESH_STATE_PART_0 =                103, // Received part of state of external stone, payload: cs_mesh_model_msg_state_0_t
-	UART_OPCODE_TX_MESH_STATE_PART_1 =                104, // Received part of state of external stone, payload: cs_mesh_model_msg_state_1_t
-	UART_OPCODE_TX_MESH_RESULT =                      105, // Received the result of a mesh command, payload: uart_msg_mesh_result_packet_header_t + data.
-	UART_OPCODE_TX_MESH_ACK_ALL_RESULT =              106, // Whether all stone IDs were acked, payload: result_packet_header_t.
+	////////// Event messages. //////////
+	UART_OPCODE_TX_BLE_MSG =                          10000, // Sent by command (CMD_UART_MSG), payload: buffer.
+	UART_OPCODE_TX_SESSION_NONCE_MISSING =            10001, // Sent when a session nonce is missing.
+	UART_OPCODE_TX_SERVICE_DATA =                     10002, // Sent when the service data is updated (payload: service_data_t)
+	UART_OPCODE_TX_PRESENCE_CHANGE =                  10004, // Sent when the presence has changed, payload: presence_change_t. When the first user enters, multiple msgs will be sent.
 
-	UART_OPCODE_TX_ADVERTISEMENT_ENABLED =            10000, // Whether advertising is enabled (payload: bool)
-	UART_OPCODE_TX_MESH_ENABLED =                     10001, // Whether mesh is enabled (payload: bool)
-	UART_OPCODE_TX_OWN_ID =                           10002, // Own id (payload: crownstone_id_t)
-	UART_OPCODE_TX_OWN_MAC =                          10003, // Own MAC address (payload: mac address (6B))
+	UART_OPCODE_TX_MESH_STATE =                       10102, // Received state of external stone, payload: service_data_encrypted_t
+	UART_OPCODE_TX_MESH_STATE_PART_0 =                10103, // Received part of state of external stone, payload: cs_mesh_model_msg_state_0_t
+	UART_OPCODE_TX_MESH_STATE_PART_1 =                10104, // Received part of state of external stone, payload: cs_mesh_model_msg_state_1_t
+	UART_OPCODE_TX_MESH_RESULT =                      10105, // Received the result of a mesh command, payload: uart_msg_mesh_result_packet_header_t + data.
+	UART_OPCODE_TX_MESH_ACK_ALL_RESULT =              10106, // Whether all stone IDs were acked, payload: result_packet_header_t.
 
-	////////// Developer messages. //////////
-	UART_OPCODE_TX_ADC_CONFIG =                       10100, // Current adc config (payload: adc_config_t)
-	UART_OPCODE_TX_ADC_RESTART =                      10101,
+	////////// Developer messages in release builds. //////////
+	UART_OPCODE_TX_EVT =                              40000, // Send internal events, this protocol may change
 
-	UART_OPCODE_TX_POWER_LOG_CURRENT =                10200,
-	UART_OPCODE_TX_POWER_LOG_VOLTAGE =                10201,
-	UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT =       10202,
-	UART_OPCODE_TX_POWER_LOG_FILTERED_VOLTAGE =       10203,
-	UART_OPCODE_TX_POWER_LOG_POWER =                  10204,
+//	UART_OPCODE_TX_MESH_STATE_TIME =                  40102, // Received time of other crownstone, payload: cs_mesh_model_msg_time_t
+	UART_OPCODE_TX_MESH_CMD_TIME =                    40103, // Received cmd to set time, payload: cs_mesh_model_msg_time_t
+	UART_OPCODE_TX_MESH_PROFILE_LOCATION =            40110, // Received the location of a profile, payload: cs_mesh_model_msg_profile_location_t.
+	UART_OPCODE_TX_MESH_SET_BEHAVIOUR_SETTINGS =      40111, // Received cmd to set behaviour settings, payload: behaviour_settings_t
+	UART_OPCODE_TX_MESH_TRACKED_DEVICE_REGISTER =     40112, // Received cmd to register a tracked device, payload: cs_mesh_model_msg_device_register_t
+	UART_OPCODE_TX_MESH_TRACKED_DEVICE_TOKEN =        40113, // Received cmd to set the token of a tracked device, payload: cs_mesh_model_msg_device_token_t
+	UART_OPCODE_TX_MESH_SYNC_REQUEST =                40114, // Received a sync request, payload: cs_mesh_model_msg_sync_request_t
+	UART_OPCODE_TX_MESH_TRACKED_DEVICE_HEARTBEAT =    40120, // Received heartbeat cmd of a tracked device, payload: cs_mesh_model_msg_device_heartbeat_t
 
+	////////// Developer messages in debug builds. //////////
+	UART_OPCODE_TX_ADVERTISEMENT_ENABLED =            50000, // Whether advertising is enabled (payload: bool)
+	UART_OPCODE_TX_MESH_ENABLED =                     50001, // Whether mesh is enabled (payload: bool)
+	UART_OPCODE_TX_OWN_ID =                           50002, // Own id (payload: crownstone_id_t)
+	UART_OPCODE_TX_OWN_MAC =                          50003, // Own MAC address (payload: mac address (6B))
 
-	UART_OPCODE_TX_EVT =                              10300, // Send internal events, this protocol may change
+	UART_OPCODE_TX_ADC_CONFIG =                       50100, // Current adc config (payload: adc_config_t)
+	UART_OPCODE_TX_ADC_RESTART =                      50101,
 
-//	UART_OPCODE_TX_MESH_STATE_TIME =                  10402, // Received time of other crownstone, payload: cs_mesh_model_msg_time_t
-	UART_OPCODE_TX_MESH_CMD_TIME =                    10403, // Received cmd to set time, payload: cs_mesh_model_msg_time_t
-	UART_OPCODE_TX_MESH_PROFILE_LOCATION =            10410, // Received the location of a profile, payload: cs_mesh_model_msg_profile_location_t.
-	UART_OPCODE_TX_MESH_SET_BEHAVIOUR_SETTINGS =      10411, // Received cmd to set behaviour settings, payload: behaviour_settings_t
-	UART_OPCODE_TX_MESH_TRACKED_DEVICE_REGISTER =     10412, // Received cmd to register a tracked device, payload: cs_mesh_model_msg_device_register_t
-	UART_OPCODE_TX_MESH_TRACKED_DEVICE_TOKEN =        10413, // Received cmd to set the token of a tracked device, payload: cs_mesh_model_msg_device_token_t
-	UART_OPCODE_TX_MESH_SYNC_REQUEST =                10414, // Received a sync request, payload: cs_mesh_model_msg_sync_request_t
-	UART_OPCODE_TX_MESH_TRACKED_DEVICE_HEARTBEAT =    10420, // Received heartbeat cmd of a tracked device, payload: cs_mesh_model_msg_device_heartbeat_t
+	UART_OPCODE_TX_POWER_LOG_CURRENT =                50200,
+	UART_OPCODE_TX_POWER_LOG_VOLTAGE =                50201,
+	UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT =       50202,
+	UART_OPCODE_TX_POWER_LOG_FILTERED_VOLTAGE =       50203,
+	UART_OPCODE_TX_POWER_LOG_POWER =                  50204,
 
-	UART_OPCODE_TX_TEXT =                             20000, // Payload is ascii text.
-	UART_OPCODE_TX_FIRMWARESTATE =                    20001,
+	UART_OPCODE_TX_TEXT =                             60000, // Payload is ascii text.
+	UART_OPCODE_TX_FIRMWARESTATE =                    60001,
 };
+
+namespace UartProtocol {
+
+/**
+ * Whether a received UART message must be encrypted when a UART key is set.
+ */
+constexpr bool mustBeEncryptedRx(UartOpcodeRx opCode) {
+	switch (opCode) {
+		case UartOpcodeRx::UART_OPCODE_RX_HELLO:
+		case UartOpcodeRx::UART_OPCODE_RX_SESSION_NONCE:
+			return false;
+		default:
+			if (opCode > 50000) {
+				return false;
+			}
+			return true;
+	}
+}
+
+/**
+ * Whether a written UART message must be encrypted when a UART key is set.
+ */
+constexpr bool mustBeEncryptedTx(UartOpcodeTx opCode) {
+	switch (opCode) {
+		case UartOpcodeTx::UART_OPCODE_TX_HELLO:
+		case UartOpcodeTx::UART_OPCODE_TX_SESSION_NONCE:
+		case UartOpcodeTx::UART_OPCODE_TX_STATUS:
+			return false;
+		default:
+			if (opCode > 50000) {
+				return false;
+			}
+			return true;
+	}
+}
+
+}

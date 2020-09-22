@@ -8,7 +8,7 @@
 #include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshModelMulticastAcked.h>
 #include <mesh/cs_MeshUtil.h>
-#include <protocol/cs_UartProtocol.h>
+#include <uart/cs_UartHandler.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <storage/cs_State.h>
 #include <util/cs_BleError.h>
@@ -405,7 +405,7 @@ void MeshModelMulticastAcked::checkDone() {
 		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)item.metaData.type);
 
 		result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
 		LOGMeshModelDebug("all success");
 
 		remQueueItem(_queueIndexInProgress);
@@ -426,13 +426,13 @@ void MeshModelMulticastAcked::checkDone() {
 		for (uint8_t i = 0; i < item.numIds; ++i) {
 			if (!_ackedStonesBitmask.isSet(i)) {
 				resultHeader.stoneId = item.stoneIdsPtr[i];
-				UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+				UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
 				LOGMeshModelDebug("timeout id=%u", resultHeader.stoneId);
 			}
 		}
 
 		result_packet_header_t ackResult(cmdType, ERR_TIMEOUT);
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
 		LOGMeshModelDebug("all timeout");
 
 		remQueueItem(_queueIndexInProgress);

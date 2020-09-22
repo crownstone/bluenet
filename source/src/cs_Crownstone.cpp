@@ -50,7 +50,6 @@
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_EncryptionHandler.h>
 #include <processing/cs_TapToToggle.h>
-#include <protocol/cs_UartProtocol.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
 #include <switch/cs_SwitchAggregator.h>

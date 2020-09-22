@@ -8,7 +8,7 @@
 #pragma once
 
 #include <drivers/cs_Serial.h>
-#include <protocol/cs_UartProtocol.h>
+#include <uart/cs_UartHandler.h>
 
 #include <cstdarg>
 
@@ -28,14 +28,14 @@ inline int cs_write_test(const char *str, ...) {
 		va_start(ap, str);
 		len = vsprintf(buffer, str, ap);
 		va_end(ap);
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_FIRMWARESTATE, (uint8_t*)buffer, len);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_FIRMWARESTATE, (uint8_t*)buffer, len);
 	} else {
 		char *p_buf = (char*)malloc(len + 1);
 		if (!p_buf) return -1;
 		va_start(ap, str);
 		len = vsprintf(p_buf, str, ap);
 		va_end(ap);
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_FIRMWARESTATE, (uint8_t*)p_buf, len);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_FIRMWARESTATE, (uint8_t*)p_buf, len);
 		free(p_buf);
 	}
 	return len;

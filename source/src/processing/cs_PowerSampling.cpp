@@ -13,7 +13,7 @@
 #include "events/cs_EventDispatcher.h"
 #include "processing/cs_RecognizeSwitch.h"
 #include "protocol/cs_UartMsgTypes.h"
-#include "protocol/cs_UartProtocol.h"
+#include "uart/cs_UartHandler.h"
 #include "protocol/cs_Packets.h"
 #include "storage/cs_State.h"
 #include "structs/buffer/cs_InterleavedBuffer.h"
@@ -265,7 +265,7 @@ void PowerSampling::handleEvent(event_t & event) {
 			while (!_bufferQueue.empty()) {
 				ADC::getInstance().releaseBuffer(_bufferQueue.pop());
 			}
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
+			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
 			//		RecognizeSwitch::getInstance().skip(2);
 			break;
 		}
@@ -797,39 +797,39 @@ void PowerSampling::calculatePower(power_t & power) {
 			powerMsg.powerMilliWattReal = powerMilliWattReal;
 			powerMsg.avgPowerMilliWattReal = _avgPowerMilliWatt;
 
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_POWER_LOG_POWER, (uint8_t*)&powerMsg, sizeof(powerMsg));
+			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_POWER_LOG_POWER, (uint8_t*)&powerMsg, sizeof(powerMsg));
 		}
 
 		if (_logsEnabled.flags.current) {
 			// Write uart_msg_current_t without allocating a buffer.
-			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
-			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT,(uint8_t*)&(rtcCount), sizeof(rtcCount));
+			UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT,(uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
+				UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
 			}
-			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_CURRENT);
+			UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_CURRENT);
 		}
 
 		if (_logsEnabled.flags.filteredCurrent) {
 			// Write uart_msg_current_t without allocating a buffer.
-			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, sizeof(uart_msg_current_t));
-			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&(rtcCount), sizeof(rtcCount));
+			UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, sizeof(uart_msg_current_t));
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&(rtcCount), sizeof(rtcCount));
 			int16_t val;
 			for (int i = 0; i < numSamples; ++i) {
 				val = _outputSamples->at(i);
-				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&val, sizeof(val));
+				UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&val, sizeof(val));
 			}
-			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT);
+			UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT);
 		}
 
 		if (_logsEnabled.flags.voltage) {
 			// Write uart_msg_voltage_t without allocating a buffer.
-			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
-			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(rtcCount), sizeof(rtcCount));
+			UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(rtcCount), sizeof(rtcCount));
 			for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
+				UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
 			}
-			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_VOLTAGE);
+			UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_VOLTAGE);
 		}
 	}
 	++printPower;

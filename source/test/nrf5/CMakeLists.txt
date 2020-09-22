@@ -107,6 +107,9 @@ LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/integration/nrfx/legacy/nrf_drv_uart.c")
 
 list(APPEND FOLDER_SOURCE "${NORDIC_SOURCE}")
 
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartCommandHandler.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartConnection.cpp")
+LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/uart/cs_UartHandler.cpp")
 
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
 list(APPEND FOLDER_SOURCE "${SOURCE_DIR}/cfg/cs_Boards.c")

@@ -10,7 +10,7 @@
 #include <mesh/cs_MeshUtil.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
-#include <protocol/cs_UartProtocol.h>
+#include <uart/cs_UartHandler.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
@@ -254,7 +254,7 @@ void MeshModelUnicast::checkDone() {
 			if (_replyReceived) {
 				CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)_queue[_queueIndexInProgress].metaData.type);
 				result_packet_header_t ackResult(cmdType, ERR_SUCCESS);
-				UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
+				UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
 				LOGMeshModelDebug("all success");
 				done = true;
 			}
@@ -277,11 +277,11 @@ void MeshModelUnicast::sendFailedResultToUart(stone_id_t id, cs_mesh_model_msg_t
 	resultHeader.resultHeader.commandType = cmdType;
 	resultHeader.resultHeader.returnCode = retCode;
 	resultHeader.stoneId = id;
-	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
 	LOGMeshModelDebug("failed id=%u", id);
 
 	result_packet_header_t ackResult(cmdType, ERR_TIMEOUT);
-	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ACK_ALL_RESULT, (uint8_t*)&ackResult, sizeof(ackResult));
 	LOGMeshModelDebug("all failed");
 }
 

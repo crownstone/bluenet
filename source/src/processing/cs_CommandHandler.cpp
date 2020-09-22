@@ -18,7 +18,7 @@
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Setup.h>
 #include <processing/cs_TemperatureGuard.h>
-#include <protocol/cs_UartProtocol.h>
+#include <uart/cs_UartHandler.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <storage/cs_State.h>
 #include <time/cs_SystemTime.h>
@@ -796,10 +796,10 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 		LOGi("Result: id=%u cmdType=%u retCode=%u data:", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
 		BLEutil::printArray(result.buf.data, result.dataSize);
 
-		UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + result.dataSize);
-		UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
-		UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, result.buf.data, result.dataSize);
-		UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_MESH_RESULT);
+		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + result.dataSize);
+		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, result.buf.data, result.dataSize);
+		UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_MESH_RESULT);
 //		LOGd("success id=%u", resultHeader.stoneId);
 
 		if (!forOthers) {
@@ -887,7 +887,7 @@ void CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAcc
 		return;
 	}
 
-	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_BLE_MSG, commandData.data, commandData.len);
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_BLE_MSG, commandData.data, commandData.len);
 	result.returnCode = ERR_SUCCESS;
 }
 

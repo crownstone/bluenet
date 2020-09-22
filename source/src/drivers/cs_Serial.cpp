@@ -16,7 +16,7 @@
 #include <drivers/cs_Serial.h>
 #include <events/cs_EventDispatcher.h>
 #include <nrf.h>
-#include <protocol/cs_UartProtocol.h>
+#include <uart/cs_UartHandler.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
@@ -73,9 +73,6 @@ void init() {
 #ifdef INIT_RX_PIN
 	nrf_gpio_cfg_output(INIT_RX_PIN);
 #endif
-
-	// Init parser
-	UartProtocol::getInstance().init();
 
 	// Enable interrupt handling
 	uint32_t err_code;
@@ -210,21 +207,23 @@ void serial_init(serial_enable_t enabled) {
 	_state = enabled;
 	init();
 	switch (enabled) {
-	case SERIAL_ENABLE_NONE:
-		deinit_rx();
-		deinit_tx();
-		deinit_uart();
-		break;
-	case SERIAL_ENABLE_RX_ONLY:
-		init_uart();
-		init_rx();
-		deinit_tx();
-		break;
-	case SERIAL_ENABLE_RX_AND_TX:
-		init_uart();
-		init_rx();
-		init_tx();
-		break;
+		case SERIAL_ENABLE_NONE:
+			deinit_rx();
+			deinit_tx();
+			deinit_uart();
+			break;
+		case SERIAL_ENABLE_RX_ONLY:
+			UartHandler::getInstance().init();
+			init_uart();
+			init_rx();
+			deinit_tx();
+			break;
+		case SERIAL_ENABLE_RX_AND_TX:
+			UartHandler::getInstance().init();
+			init_uart();
+			init_rx();
+			init_tx();
+			break;
 	}
 #else
 	// Disable UART
@@ -272,14 +271,14 @@ int cs_write(const char *str, ...) {
 		va_start(ap, str);
 		len = vsprintf(_serialBuffer, str, ap);
 		va_end(ap);
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)_serialBuffer, len);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)_serialBuffer, len);
 	} else {
 		char *p_buf = (char*)malloc(len + 1);
 		if (!p_buf) return -1;
 		va_start(ap, str);
 		len = vsprintf(p_buf, str, ap);
 		va_end(ap);
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)p_buf, len);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)p_buf, len);
 		free(p_buf);
 	}
 	return len;
@@ -342,7 +341,7 @@ extern "C" void UART0_IRQHandler(void) {
 
 		// Read RXD only once.
 		readByte = nrf_uart_rxd_get(NRF_UART0);
-		UartProtocol::getInstance().onRead(readByte);
+		UartHandler::getInstance().onRead(readByte);
 #ifdef RX_PIN
 		nrf_gpio_pin_toggle(RX_PIN);
 #endif
