@@ -679,6 +679,7 @@ Value | Name | Description
 0 | Enum | ID is one of the [list](#command_source_ID).
 1 | Behaviour | ID is the behaviour index, or 255 when unknown.
 3 | Broadcast | ID is the [device ID](BROADCAST_PROTOCOL.md#command_adv_header)
+4 | Uart | ID is the device ID
 
 <a name="command_source_ID"></a>
 ##### Command source ID
