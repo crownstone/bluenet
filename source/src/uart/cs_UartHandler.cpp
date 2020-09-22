@@ -48,7 +48,9 @@ void UartHandler::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
 			writeBytes(data, size);
 			return;
 		case UART_OPCODE_TX_SERVICE_DATA:
+			return;
 		case UART_OPCODE_TX_FIRMWARESTATE:
+			writeBytes(data, size);
 			return;
 		default:
 //			_log(SERIAL_DEBUG, "writeMsg opCode=%u data=", opCode);

@@ -65,9 +65,15 @@ inline long int OptionalUnsignedToInt(std::optional<U> opt){
 /**
  * Expression wrappers for generic expressions in non-static context
  */
+#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
+#define TEST_PUSH_EXPR_S(self, expressionnamestr, expr) TEST_PUSH_DATA("%x@%s@%s@%s\r\n", self, expressionnamestr, expr)  // string
+#define TEST_PUSH_EXPR_D(self, expressionnamestr, expr) TEST_PUSH_DATA("%x@%s@%s@%d\r\n", self, expressionnamestr, expr)  // decimal
+#define TEST_PUSH_EXPR_X(self, expressionnamestr, expr) TEST_PUSH_DATA("%x@%s@%s@%x\r\n", self, expressionnamestr, expr)  // hexadecimal
+#else
 #define TEST_PUSH_EXPR_S(self, expressionnamestr, expr) TEST_PUSH_DATA("%x@%s@%s@%s", self, expressionnamestr, expr)  // string
 #define TEST_PUSH_EXPR_D(self, expressionnamestr, expr) TEST_PUSH_DATA("%x@%s@%s@%d", self, expressionnamestr, expr)  // decimal
 #define TEST_PUSH_EXPR_X(self, expressionnamestr, expr) TEST_PUSH_DATA("%x@%s@%s@%x", self, expressionnamestr, expr)  // hexadecimal
+#endif
 
 // boolean remap to string
 #define TEST_PUSH_EXPR_B(self, expressionnamestr, expr) TEST_PUSH_EXPR_S(self, expressionnamestr, \
@@ -92,8 +98,16 @@ inline long int OptionalUnsignedToInt(std::optional<U> opt){
  *
  * (Use with care, may result in conflicts when multiple translation units use the same names)
  */
+#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
+#define TEST_PUSH_STATIC_S(context, expressionnamestr, expr) TEST_PUSH_DATA("%s@%s@%s@%s\r\n", context, expressionnamestr, expr)
+#define TEST_PUSH_STATIC_D(context, expressionnamestr, expr) TEST_PUSH_DATA("%s@%s@%s@%d\r\n", context, expressionnamestr, expr)
+#define TEST_PUSH_STATIC_X(context, expressionnamestr, expr) TEST_PUSH_DATA("%s@%s@%s@%x\r\n", context, expressionnamestr, expr)
+#define TEST_PUSH_STATIC_B(context, expressionnamestr, expr) TEST_PUSH_DATA("%s@%s@%s@%s\r\n", context, expressionnamestr, \
+		(expr ? "True" : "False"))
+#else
 #define TEST_PUSH_STATIC_S(context, expressionnamestr, expr) TEST_PUSH_DATA("%s@%s@%s@%s", context, expressionnamestr, expr)
 #define TEST_PUSH_STATIC_D(context, expressionnamestr, expr) TEST_PUSH_DATA("%s@%s@%s@%d", context, expressionnamestr, expr)
 #define TEST_PUSH_STATIC_X(context, expressionnamestr, expr) TEST_PUSH_DATA("%s@%s@%s@%x", context, expressionnamestr, expr)
 #define TEST_PUSH_STATIC_B(context, expressionnamestr, expr) TEST_PUSH_DATA("%s@%s@%s@%s", context, expressionnamestr, \
 		(expr ? "True" : "False"))
+#endif
