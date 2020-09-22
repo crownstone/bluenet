@@ -67,6 +67,7 @@ void UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 //		return;
 //	}
 
+	uart_msg_size_header_t sizeHeader;
 	uart_msg_wrapper_header_t wrapperHeader;
 	if (UartProtocol::mustBeEncryptedTx(opCode)) {
 		wrapperHeader.type = static_cast<uint8_t>(UartMsgType::ENCRYPTED_UART_MSG);
@@ -76,9 +77,14 @@ void UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 	else {
 		writeStartByte();
 
+		// Init CRC
+		_crc = UartProtocol::crc16(nullptr, 0);
+
+		sizeHeader.size = sizeof(wrapperHeader) + sizeof(uart_msg_header_t) + size + sizeof(uart_msg_tail_t);
+		writeBytes((uint8_t*)(&sizeHeader), sizeof(sizeHeader));
+
 		wrapperHeader.type = static_cast<uint8_t>(UartMsgType::UART_MSG);
-		wrapperHeader.size = sizeof(uart_msg_header_t) + size;
-		_crc = UartProtocol::crc16((uint8_t*)(&wrapperHeader), sizeof(wrapperHeader));
+		UartProtocol::crc16((uint8_t*)(&wrapperHeader), sizeof(wrapperHeader), _crc);
 		writeBytes((uint8_t*)(&wrapperHeader), sizeof(wrapperHeader));
 
 		uart_msg_header_t msgHeader;
@@ -179,30 +185,28 @@ void UartHandler::onRead(uint8_t val) {
 
 	_readBuffer[_readBufferIdx++] = val;
 
-	if (_readBufferIdx == sizeof(uart_msg_wrapper_header_t)) {
-		// First check received size, then add header and tail size.
-		// Otherwise an overflow would lead to passing the size check.
-		uart_msg_wrapper_header_t* wrapperHeader = reinterpret_cast<uart_msg_wrapper_header_t*>(_readBuffer);
-		uint16_t wrapperSize = sizeof(uart_msg_wrapper_header_t) + sizeof(uart_msg_tail_t);
-		if (wrapperHeader->size > UART_RX_BUFFER_SIZE - wrapperSize) {
-			resetReadBuf();
-			return;
+	if (_sizeToRead == 0) {
+		if (_readBufferIdx == sizeof(uart_msg_size_header_t)) {
+			// Check received size
+			uart_msg_size_header_t* sizeHeader = reinterpret_cast<uart_msg_size_header_t*>(_readBuffer);
+			if (sizeHeader->size == 0 || sizeHeader->size > UART_RX_BUFFER_SIZE) {
+				resetReadBuf();
+				return;
+			}
+			// Set size to read and reset read buffer index.
+			_sizeToRead = sizeHeader->size;
+			_readBufferIdx = 0;
 		}
-		_sizeToRead = wrapperSize + wrapperHeader->size;
 	}
-
-	if (_readBufferIdx >= sizeof(uart_msg_wrapper_header_t)) {
-		// Header was read, so size to read is set.
-		if (_readBufferIdx >= _sizeToRead) {
-			// Block reading until the buffer has been handled.
-			_readBusy = true;
-			// Decouple callback from interrupt handler, and put it on app scheduler instead
-			cs_data_t msgData;
-			msgData.data = _readBuffer;
-			msgData.len = _readBufferIdx;
-			uint32_t errorCode = app_sched_event_put(&msgData, sizeof(msgData), handle_msg);
-			APP_ERROR_CHECK(errorCode);
-		}
+	else if (_readBufferIdx >= _sizeToRead) {
+		// Block reading until the buffer has been handled.
+		_readBusy = true;
+		// Decouple callback from interrupt handler, and put it on app scheduler instead
+		cs_data_t msgData;
+		msgData.data = _readBuffer;
+		msgData.len = _readBufferIdx;
+		uint32_t errorCode = app_sched_event_put(&msgData, sizeof(msgData), handle_msg);
+		APP_ERROR_CHECK(errorCode);
 	}
 }
 
@@ -219,18 +223,7 @@ void UartHandler::handleMsg(cs_data_t* msgData) {
 }
 
 void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
-//	// Check wrapper fits in msgData.
-//	uint16_t wrapperSize = sizeof(uart_msg_wrapper_header_t) + sizeof(uart_msg_tail_t);
-//	if (size < wrapperSize) {
-//		return;
-//	}
-//
-//	// Check if payload fits in msgData.
-//	uart_msg_wrapper_header_t* wrapperHeader = reinterpret_cast<uart_msg_wrapper_header_t*>(data);
-//	if (size - wrapperSize < wrapperHeader->size) {
-//		return;
-//	}
-
+	// Get wrapper header and payload data.
 	uint16_t wrapperSize = sizeof(uart_msg_wrapper_header_t) + sizeof(uart_msg_tail_t);
 	uart_msg_wrapper_header_t* wrapperHeader = reinterpret_cast<uart_msg_wrapper_header_t*>(data);
 	uint8_t* payload = data + sizeof(uart_msg_wrapper_header_t);
@@ -238,7 +231,7 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 
 	// Check CRC
 	uint16_t calculatedCrc = UartProtocol::crc16(data, size - sizeof(uart_msg_tail_t));
-	uart_msg_tail_t* tail = reinterpret_cast<uart_msg_tail_t*>(data + sizeof(uart_msg_wrapper_header_t) + wrapperHeader->size);
+	uart_msg_tail_t* tail = reinterpret_cast<uart_msg_tail_t*>(data + size - sizeof(uart_msg_tail_t));
 	if (calculatedCrc != tail->crc) {
 		LOGw("CRC mismatch: calculated=%u received=%u", calculatedCrc, tail->crc);
 		return;

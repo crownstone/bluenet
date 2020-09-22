@@ -26,13 +26,19 @@ enum class UartMsgType : uint8_t {
 
 /**
  * Very first header, right after the start byte.
+ * Only used to determine how many bytes have to be read, so only has size as field.
+ */
+struct __attribute__((__packed__)) uart_msg_size_header_t {
+	uint16_t size = 0; // Size of all remaining bytes, including tail.
+};
+
+/**
+ * Wrapper header, after the initial size field.
  */
 struct __attribute__((__packed__)) uart_msg_wrapper_header_t {
-//	uint8_t start;
 	uint8_t protocolMajor = UART_PROTOCOL_MAJOR;
 	uint8_t protocolMinor = UART_PROTOCOL_MINOR;
 	uint8_t type = 0;
-	uint16_t size = 0; // Size of payload, see UartMsgType.
 	// Followed by payload
 };
 
@@ -67,7 +73,7 @@ struct __attribute__((__packed__)) uart_msg_header_t {
  * Final bytes.
  */
 struct __attribute__((__packed__)) uart_msg_tail_t {
-	uint16_t crc;
+	uint16_t crc; // The CRC16 (CRC-16-CCITT) of everything after the size field.
 };
 
 namespace UartProtocol {

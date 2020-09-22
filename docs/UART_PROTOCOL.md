@@ -20,12 +20,12 @@ Every UART message is wrapped.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8   | Start          | 1 | Start of a message.
+uint16  | Size           | 2 | Size of all data after this field, including CRC.
 uint8   | Protocol major | 1 | Major protocol version, increased for breaking changes.
 uint8   | Protocol minor | 1 | Minor protocol version, increased when new types are added.
 uint8   | Message type   | 1 | Type of UART message, see below.
-uint16  | Size           | 2 | Size of payload.
 uint8[] | Payload        | N | Depends on message type.
-uint16  | CRC            | 2 | The CRC16 (CRC-16-CCITT) of everything except the start byte.
+uint16  | CRC            | 2 | The CRC16 (CRC-16-CCITT) of everything after the size field.
 
 Type | Payload
 --- | ---
@@ -54,7 +54,7 @@ uint8[] | Encrypted data | N | Encrypted with [AES CTR](PROTOCOL.md#ctr_encrypti
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint32  | Validation   | 4 | Validation
-uint16  | Messge size  | 2 | Size of the uart message in bytes.
+uint16  | Message size | 2 | Size of the uart message in bytes.
 uint8[] | [UART message](#uart_msg) | Size | The uart message.
 uint8[] | Padding      | N | Padding to make this whole packet size a multiple of 16.
 
