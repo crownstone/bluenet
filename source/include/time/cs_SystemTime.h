@@ -135,6 +135,12 @@ private:
 	static stone_id_t myId;
 
 	static Coroutine syncTimeCoroutine;
+#ifdef DEBUG
+	static Coroutine debugSyncTimeCoroutine;
+	static constexpr uint32_t debugSyncTimeMessagePeriodMs = 5*1000;
+	static void publishSyncMessageForTesting();
+	static void pushSyncMessageToTestSuite(time_sync_message_t& syncmessage);
+#endif
 
 	static uint32_t syncTimeCoroutineAction();
 	static void onTimeSyncMessageReceive(time_sync_message_t syncmessage);

@@ -43,6 +43,10 @@ stone_id_t SystemTime::currentMasterClockId = stone_id_unknown_value;
 stone_id_t SystemTime::myId = stone_id_unknown_value;
 Coroutine SystemTime::syncTimeCoroutine;
 
+#ifdef DEBUG
+Coroutine SystemTime::debugSyncTimeCoroutine;
+#endif
+
 
 // driver details
 app_timer_t SystemTime::appTimerData = {{0}};
@@ -54,6 +58,13 @@ app_timer_id_t SystemTime::appTimerId = &appTimerData;
 void SystemTime::init(){
 	assertTimeSyncParameters();
 	syncTimeCoroutine.action = [](){ return syncTimeCoroutineAction(); };
+
+#ifdef DEBUG
+	debugSyncTimeCoroutine.action = [](){
+		publishSyncMessageForTesting();
+		return debugSyncTimeMessagePeriodMs;
+	};
+#endif
 
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 
@@ -168,7 +179,12 @@ cs_ret_code_t SystemTime::setSunTimes(const sun_time_t& sunTimes, bool throttled
 // ======================== Events ========================
 
 void SystemTime::handleEvent(event_t & event) {
-	if(syncTimeCoroutine(event)){
+	bool handled_by_coroutine = false;
+	handled_by_coroutine |= syncTimeCoroutine(event);
+#ifdef DEBUG
+	handled_by_coroutine |= debugSyncTimeCoroutine(event);
+#endif
+	if (handled_by_coroutine) {
 		return;
 	}
 
@@ -261,7 +277,7 @@ high_resolution_time_stamp_t SystemTime::getSynchronizedStamp(){
 }
 
 uint32_t SystemTime::syncTimeCoroutineAction(){
-	LOGSystemTimeDebug("");
+	LOGSystemTimeDebug("synccoroutine action called");
 	static bool is_first_call = true;
 	if(is_first_call){
 		LOGSystemTimeDebug("is_first_call");
@@ -298,10 +314,12 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 		// could postpone reelection if coroutine interface would be improved
 		// sync_routine.reschedule(master_clock_reelection_timeout_ms);
 	}
+#ifdef DEBUG
+	pushSyncMessageToTestSuite(syncmessage);
+#endif
 }
 
 void SystemTime::sendTimeSyncMessage(){
-	// TODO: check if this is correct for the _FIRST TIME_ we pretend to be the master clock.
 	time_sync_message_t syncmessage = {};
 	syncmessage.stamp = getSynchronizedStamp();
 	syncmessage.root_id = myId;
@@ -348,6 +366,30 @@ bool SystemTime::reelectionPeriodTimedOut(){
 	return master_clock_reelection_timeout_ms <=
 			RTC::msPassedSince(local_time_of_last_received_root_stamp_rtc_ticks);
 }
+
+
+#ifdef DEBUG
+
+void SystemTime::publishSyncMessageForTesting(){
+	// we can just send a normal sync message.
+	// Implementation is robust against false root clock claims by nature.
+	sendTimeSyncMessage();
+}
+
+void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage){
+	char valuestring [50];
+
+	sprintf(valuestring, "%lu,%u,%u,%u",
+			syncmessage.stamp.posix_s,
+			syncmessage.stamp.posix_ms,
+			syncmessage.root_id,
+			syncmessage.hops
+			);
+
+	TEST_PUSH_STATIC_S("SystemTime", "timesyncmsg", valuestring);
+}
+#endif
+
 
 
 // ======================== Utility functions ========================
