@@ -27,6 +27,12 @@ public:
 
 	EncryptionAccessLevel getRequiredAccessLevel(const UartOpcodeRx opCode);
 
+	/**
+	 * Dispatch event.
+	 *
+	 * @param[in] type            Event type.
+	 * @param[in] commandData     Command data, which will be used as event data.
+	 */
 	void dispatchEventForCommand(
 			CS_TYPE type,
 			cs_data_t commandData

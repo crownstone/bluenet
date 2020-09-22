@@ -37,8 +37,9 @@ public:
 	/**
 	 * Initialize the class.
 	 *
-	 * Allocates memory and starts listening for events.
-	 * Reads settings from State.
+	 * - Allocates memory.
+	 * - Reads settings from State.
+	 * - Starts listening for events
 	 */
 	void init();
 
@@ -123,7 +124,10 @@ private:
 	//! Keeps up whether to escape the next read byte
 	bool _escapeNextByte = false;
 
-	//! Size of the msg to read, including header and tail, excluding start byte.
+	/**
+	 * Size of the msg to read, including header and tail, excluding start byte.
+	 * Once set, the read buffer index is set to 0.
+	 */
 	uint16_t _sizeToRead = 0;
 
 	//! Whether reading is busy (if true, can't read anything, until the read buffer was processed)

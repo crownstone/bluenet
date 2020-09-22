@@ -24,16 +24,37 @@ public:
 		return instance;
 	}
 
+	/**
+	 * Initialize the class.
+	 *
+	 * - Reads settings from State.
+	 * - Starts listening for events.
+	 */
 	void init();
 
+	/**
+	 * Returns whether encryption of uart messages is required.
+	 */
 	bool isEncryptionRequired();
 
+	/**
+	 * Returns the UART status reply.
+	 */
 	const uart_msg_status_reply_t& getSelfStatus();
 
+	/**
+	 * Returns the status of the UART user.
+	 */
 	const uart_msg_status_user_t& getUserStatus();
 
+	/**
+	 * To be called on UART heartbeat command.
+	 */
 	void onHeartBeat(uint16_t timeoutSeconds);
 
+	/**
+	 * To be called on UART status command.
+	 */
 	void onUserStatus(const uart_msg_status_user_t& status);
 
 
@@ -47,11 +68,14 @@ private:
 	//! This class is singleton, deny implementation
 	void operator=(UartConnection const &) = delete;
 
+	//! Keep up the UART status reply.
 	uart_msg_status_reply_t _status;
 
-	bool _isConnectionAlive = false;
-
+	//! Keep up the UART user status.
 	uart_msg_status_user_t _userStatus;
+
+	//! Keep up whether the connection is considered to be alive.
+	bool _isConnectionAlive = false;
 
 	/**
 	 * Timeout (in ticks) set by heartbeat.
