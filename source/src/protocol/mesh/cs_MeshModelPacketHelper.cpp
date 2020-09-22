@@ -9,6 +9,7 @@
 #include <drivers/cs_Serial.h>
 
 #include <localisation/cs_RssiPingMessage.h>
+#include <time/cs_TimeSyncMessage.h>
 
 #include <cstring> // For memcpy
 

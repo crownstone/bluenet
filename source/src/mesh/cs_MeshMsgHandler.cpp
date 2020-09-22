@@ -187,19 +187,18 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSi
 	return ERR_SUCCESS;
 }
 
-adfasdf;
-handleTimeSync(payload, payloadSize, msg.hops);
 cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, uint8_t hops){
 	high_resolution_time_stamp_t* packet = (high_resolution_time_stamp_t*) payload;
 
 	//	LOGMeshModelInfo("received time stamp for syncing");
 
+	// fold meta-data into event packet
 	time_sync_message_t time_sync_message;
 	time_sync_message.stamp = *packet;
 	time_sync_message.root_id = srcId;
 	time_sync_message.hops = hops;
 
-	event_t event(CS_TYPE::EVT_MESH_TIME_SYNC, time_sync_message, sizeof(time_sync_message_t));
+	event_t event(CS_TYPE::EVT_MESH_TIME_SYNC, &time_sync_message, sizeof(time_sync_message_t));
 	event.dispatch();
 
 	return ERR_SUCCESS;

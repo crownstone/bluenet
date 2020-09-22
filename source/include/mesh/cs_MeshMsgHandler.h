@@ -20,19 +20,20 @@ public:
 	void handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_result_t& result);
 
 protected:
-	cs_ret_code_t handleTest(                 uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleAck(                  uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleStateTime(            uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleCmdTime(              uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleCmdNoop(              uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleRssiPing(             uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops, uint8_t channel);
-	cs_ret_code_t handleCmdMultiSwitch(       uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleState0(               uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
-	cs_ret_code_t handleState1(               uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
-	cs_ret_code_t handleProfileLocation(      uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleSetBehaviourSettings( uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleTrackedDeviceRegister(uint8_t* payload, size16_t payloadSize);
-	cs_ret_code_t handleTrackedDeviceToken(   uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleTest(                    uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleAck(                     uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleStateTime(               uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleCmdTime(                 uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleCmdNoop(                 uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleRssiPing(                uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops, uint8_t channel);
+	cs_ret_code_t handleTimeSync(                uint8_t* payload, size16_t payloadSize, stone_id_t srcId, uint8_t hops);
+	cs_ret_code_t handleCmdMultiSwitch(          uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleState0(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
+	cs_ret_code_t handleState1(                  uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops);
+	cs_ret_code_t handleProfileLocation(         uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleSetBehaviourSettings(    uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleTrackedDeviceRegister(   uint8_t* payload, size16_t payloadSize);
+	cs_ret_code_t handleTrackedDeviceToken(      uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleTrackedDeviceHeartbeat(  uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleTrackedDeviceListSize(   uint8_t* payload, size16_t payloadSize);
 	cs_ret_code_t handleSyncRequest(             uint8_t* payload, size16_t payloadSize);
