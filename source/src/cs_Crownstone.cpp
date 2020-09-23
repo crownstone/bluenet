@@ -54,6 +54,7 @@
 #include <structs/buffer/cs_EncryptionBuffer.h>
 #include <switch/cs_SwitchAggregator.h>
 #include <time/cs_SystemTime.h>
+#include <uart/cs_UartHandler.h>
 #include <util/cs_Utils.h>
 
 extern "C" {
@@ -325,6 +326,11 @@ void Crownstone::initDrivers1() {
 			TYPIFY(CONFIG_UART_ENABLED) uartEnabled;
 			_state->get(CS_TYPE::CONFIG_UART_ENABLED, &uartEnabled, sizeof(uartEnabled));
 			serial_enable((serial_enable_t)uartEnabled);
+			UartHandler::getInstance().init((serial_enable_t)uartEnabled);
+		}
+		else {
+			// Init UartHandler only now, because it will read State.
+			UartHandler::getInstance().init(SERIAL_ENABLE_RX_AND_TX);
 		}
 
 		LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));

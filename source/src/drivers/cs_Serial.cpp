@@ -213,13 +213,11 @@ void serial_init(serial_enable_t enabled) {
 			deinit_uart();
 			break;
 		case SERIAL_ENABLE_RX_ONLY:
-			UartHandler::getInstance().init();
 			init_uart();
 			init_rx();
 			deinit_tx();
 			break;
 		case SERIAL_ENABLE_RX_AND_TX:
-			UartHandler::getInstance().init();
 			init_uart();
 			init_rx();
 			init_tx();

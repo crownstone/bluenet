@@ -10,6 +10,7 @@
 #include <events/cs_EventListener.h>
 #include <protocol/cs_UartProtocol.h>
 #include <uart/cs_UartCommandHandler.h>
+#include <drivers/cs_Serial.h>
 
 
 #define UART_RX_BUFFER_SIZE            128
@@ -41,7 +42,7 @@ public:
 	 * - Reads settings from State.
 	 * - Starts listening for events
 	 */
-	void init();
+	void init(serial_enable_t serialEnabled);
 
 	/**
 	 * Write a msg over UART.
