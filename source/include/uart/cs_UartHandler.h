@@ -148,10 +148,17 @@ private:
 	/**
 	 * Handles read msgs.
 	 *
-	 * Message data starts after START byte, and includes the tail (CRC).
-	 * Wrapper header size has been checked already.
+	 * Data starts after size header, and includes wrapper header and tail (CRC).
 	 */
 	void handleMsg(uint8_t* data, uint16_t size);
+
+
+	/**
+	 * Handles unencrypted UART msg.
+	 *
+	 * Data includes uart msg header.
+	 */
+	void handleUartMsg(uint8_t* data, uint16_t size);
 
 	/**
 	 * Reset the read buffer and status.

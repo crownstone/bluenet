@@ -13,6 +13,8 @@
 #include <drivers/cs_Serial.h>
 #include <util/cs_BleError.h>
 
+#define LOGUartHandlerDebug LOGnone
+
 void handle_msg(void * data, uint16_t size) {
 	UartHandler::getInstance().handleMsg((cs_data_t*)data);
 }
@@ -225,11 +227,22 @@ void UartHandler::handleMsg(cs_data_t* msgData) {
 }
 
 void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
-	// Get wrapper header and payload data.
+	LOGUartHandlerDebug("Handle msg size=%u", size);
+
+	// Check size
 	uint16_t wrapperSize = sizeof(uart_msg_wrapper_header_t) + sizeof(uart_msg_tail_t);
+	if (size < wrapperSize) {
+		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+//		LOGw("Wrapper won't fit required=%u size=%u", wrapperSize, size);
+		return;
+	}
+
+	// Get wrapper header and payload data.
 	uart_msg_wrapper_header_t* wrapperHeader = reinterpret_cast<uart_msg_wrapper_header_t*>(data);
 	uint8_t* payload = data + sizeof(uart_msg_wrapper_header_t);
 	uint16_t payloadSize = size - wrapperSize;
+
+	LOGd("handleMsg %u %u %u %u %u %u %u %u", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
 
 	// Check CRC
 	uint16_t calculatedCrc = UartProtocol::crc16(data, size - sizeof(uart_msg_tail_t));
@@ -245,23 +258,29 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 			break;
 		}
 		case UartMsgType::UART_MSG: {
-			if (payloadSize < sizeof(uart_msg_header_t)) {
-				return;
-			}
-			uart_msg_header_t* header = reinterpret_cast<uart_msg_header_t*>(payload);
-			uint16_t msgDataSize = payloadSize - sizeof(uart_msg_header_t);
-			uint8_t* msgData = payload + sizeof(uart_msg_header_t);
-
-			_commandHandler.handleCommand(
-					static_cast<UartOpcodeRx>(header->type),
-					cs_data_t(msgData, msgDataSize),
-					cmd_source_with_counter_t(cmd_source_t(CS_CMD_SOURCE_TYPE_UART, header->deviceId)),
-					EncryptionAccessLevel::ADMIN,
-					cs_data_t(_writeBuffer, (_writeBuffer == nullptr) ? 0 : UART_TX_BUFFER_SIZE)
-					);
+			handleUartMsg(payload, payloadSize);
 			break;
 		}
 	}
+}
+
+void UartHandler::handleUartMsg(uint8_t* data, uint16_t size) {
+	if (size < sizeof(uart_msg_header_t)) {
+		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+//		LOGw("Header won't fit required=%u size=%u", sizeof(uart_msg_header_t), payloadSize);
+		return;
+	}
+	uart_msg_header_t* header = reinterpret_cast<uart_msg_header_t*>(data);
+	uint16_t msgDataSize = size - sizeof(uart_msg_header_t);
+	uint8_t* msgData = data + sizeof(uart_msg_header_t);
+
+	_commandHandler.handleCommand(
+			static_cast<UartOpcodeRx>(header->type),
+			cs_data_t(msgData, msgDataSize),
+			cmd_source_with_counter_t(cmd_source_t(CS_CMD_SOURCE_TYPE_UART, header->deviceId)),
+			EncryptionAccessLevel::ADMIN,
+			cs_data_t(_writeBuffer, (_writeBuffer == nullptr) ? 0 : UART_TX_BUFFER_SIZE)
+			);
 }
 
 void UartHandler::handleEvent(event_t & event) {

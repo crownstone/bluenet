@@ -9,6 +9,8 @@
 
 #include <storage/cs_State.h>
 
+#define LOGUartconnectionDebug LOGnone
+
 UartConnection::UartConnection() {
 
 }
@@ -35,10 +37,12 @@ const uart_msg_status_user_t& UartConnection::getUserStatus() {
 }
 
 void UartConnection::onUserStatus(const uart_msg_status_user_t& status) {
+	LOGUartconnectionDebug("Set user status");
 	_userStatus = status;
 }
 
 void UartConnection::onHeartBeat(uint16_t timeoutSeconds) {
+	LOGUartconnectionDebug("Heartbeat timeout=%u", timeoutSeconds);
 	_isConnectionAlive = true;
 	_connectionTimeoutCountdown = timeoutSeconds * (1000 / TICK_INTERVAL_MS);
 }
@@ -47,6 +51,7 @@ void UartConnection::onTick() {
 	if (_connectionTimeoutCountdown) {
 		--_connectionTimeoutCountdown;
 		if (_connectionTimeoutCountdown == 0) {
+			LOGi("Connection timed out");
 			// No heartbeat received within timeout: connection died.
 			_isConnectionAlive = false;
 		}
