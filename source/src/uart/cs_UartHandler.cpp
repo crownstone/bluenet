@@ -83,12 +83,12 @@ void UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 
 	uart_msg_size_header_t sizeHeader;
 	uart_msg_wrapper_header_t wrapperHeader;
-	if (UartProtocol::mustBeEncryptedTx(opCode)) {
-		wrapperHeader.type = static_cast<uint8_t>(UartMsgType::ENCRYPTED_UART_MSG);
+//	if (UartProtocol::mustBeEncryptedTx(opCode)) {
+//		wrapperHeader.type = static_cast<uint8_t>(UartMsgType::ENCRYPTED_UART_MSG);
 //		uint16_t encryptedDataSize = sizeof(uart_encrypted_data_header_t.size) + sizeof(uart_msg_header_t) + size;
 //		EncryptionHandler::calculateEncryptionBufferLength(encryptedDataSize, EncryptionType::CTR);
-	}
-	else {
+//	}
+//	else {
 		writeStartByte();
 
 		// Init CRC
@@ -106,7 +106,7 @@ void UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 		msgHeader.type = opCode;
 		UartProtocol::crc16((uint8_t*)(&msgHeader), sizeof(msgHeader), _crc);
 		writeBytes((uint8_t*)(&msgHeader), sizeof(msgHeader));
-	}
+//	}
 }
 
 void UartHandler::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
