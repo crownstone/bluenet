@@ -52,6 +52,10 @@ State::~State() {
 
 void State::init(boards_config_t* boardsConfig) {
 	LOGi(FMT_INIT, "board config");
+	if (isInitialized()) {
+		return;
+	}
+
 	_storage = &Storage::getInstance();
 	_boardsConfig = boardsConfig;
 
@@ -115,6 +119,10 @@ cs_ret_code_t State::remove(const CS_TYPE & type, cs_state_id_t id, const Persis
 }
 
 cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
+	if (!isInitialized()) {
+		LOGe(STR_ERR_NOT_INITIALIZED);
+		return ERR_NOT_INITIALIZED;
+	}
 	ret_code_t ret_code = ERR_NOT_FOUND;
 	CS_TYPE type = data.type;
 	cs_state_id_t id = data.id;
@@ -201,6 +209,10 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
  *   STRATEGY: store item depending on its default location, keep a copy in RAM.
  */
 cs_ret_code_t State::setInternal(const cs_state_data_t & data, const PersistenceMode mode) {
+	if (!isInitialized()) {
+		LOGe(STR_ERR_NOT_INITIALIZED);
+		return ERR_NOT_INITIALIZED;
+	}
 	LOGStateDebug("Set value: %s: %u", TypeName(data.type), data.type);
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	CS_TYPE type = data.type;
@@ -297,6 +309,10 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 
 cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, const PersistenceMode mode) {
 	LOGStateDebug("Remove value: %s", TypeName(type));
+	if (!isInitialized()) {
+		LOGe(STR_ERR_NOT_INITIALIZED);
+		return ERR_NOT_INITIALIZED;
+	}
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	switch(mode) {
 		case PersistenceMode::NEITHER_RAM_NOR_FLASH:
@@ -570,6 +586,10 @@ cs_ret_code_t State::getIds(CS_TYPE type, std::vector<cs_state_id_t>* & ids) {
  */
 cs_ret_code_t State::getIdsFromFlash(const CS_TYPE & type, std::vector<cs_state_id_t>* & retIds) {
 	LOGd("getIdsFromFlash type=%u", to_underlying_type(type));
+	if (!isInitialized()) {
+		LOGe(STR_ERR_NOT_INITIALIZED);
+		return ERR_NOT_INITIALIZED;
+	}
 	if (!hasMultipleIds(type)) {
 		LOGw("Type %u can't have multiple IDs", to_underlying_type(type));
 		return ERR_WRONG_PARAMETER;

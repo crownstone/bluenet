@@ -104,6 +104,7 @@
 #define STR_ERR_FORGOT_TO_ASSIGN_STACK           "Forgot to assign stack!"
 #define STR_ERR_ALREADY_STOPPED                  "Already stopped!"
 #define STR_ERR_MULTIPLE_OF_16                   "Data must be multiple of 16B"
+#define STR_ERR_NOT_INITIALIZED                  "Not initialized"
 
 /** Error messages
  *

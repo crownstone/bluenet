@@ -70,7 +70,7 @@ void Storage::setErrorCallback(cs_storage_error_callback_t callback) {
 
 cs_ret_code_t Storage::findFirst(CS_TYPE type, cs_state_id_t & id) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(type);
@@ -88,7 +88,7 @@ cs_ret_code_t Storage::findFirst(CS_TYPE type, cs_state_id_t & id) {
 
 cs_ret_code_t Storage::findNext(CS_TYPE type, cs_state_id_t & id) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(type);
@@ -131,7 +131,7 @@ cs_ret_code_t Storage::findNextInternal(uint16_t recordKey, uint16_t & fileId) {
  */
 cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
@@ -171,7 +171,7 @@ cs_ret_code_t Storage::read(cs_state_data_t & stateData) {
 cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t & stateData) {
 	// Code copied from read() with only fileId changed.
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
@@ -210,7 +210,7 @@ cs_ret_code_t Storage::readV3ResetCounter(cs_state_data_t & stateData) {
 
 cs_ret_code_t Storage::readFirst(cs_state_data_t & stateData) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
@@ -229,7 +229,7 @@ cs_ret_code_t Storage::readFirst(cs_state_data_t & stateData) {
 
 cs_ret_code_t Storage::readNext(cs_state_data_t & stateData) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
@@ -310,7 +310,7 @@ cs_ret_code_t Storage::write(const cs_state_data_t & stateData) {
  */
 ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(stateData.type);
@@ -372,7 +372,7 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 
 cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(type);
@@ -405,7 +405,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type, cs_state_id_t id) {
 
 cs_ret_code_t Storage::remove(CS_TYPE type) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t recordKey = to_underlying_type(type);
@@ -437,7 +437,7 @@ cs_ret_code_t Storage::remove(CS_TYPE type) {
 
 cs_ret_code_t Storage::remove(cs_state_id_t id) {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	uint16_t fileId = getFileId(id);
@@ -457,7 +457,7 @@ cs_ret_code_t Storage::remove(cs_state_id_t id) {
 cs_ret_code_t Storage::factoryReset() {
 	LOGStorageInfo("factoryReset");
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	if (isBusy()) {
@@ -539,7 +539,7 @@ cs_ret_code_t Storage::garbageCollect() {
 
 ret_code_t Storage::garbageCollectInternal() {
 	if (!_initialized) {
-		LOGe("Storage not initialized");
+		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
 	ret_code_t fdsRetCode;
