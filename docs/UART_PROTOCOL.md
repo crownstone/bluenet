@@ -125,8 +125,8 @@ Type  | Data   | Encrypted | Description
 10000 | string | Yes | As requested via control command `UART message`.
 10001 | - | Never | The Crownstone has no session nonce, please send one.
 10002 | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Yes | Service data of this Crownstone (unencrypted).
-10003 | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | Yes | State of other Crownstones in the mesh (unencrypted).
 10004 | [Presence change packet](#presence_change_packet) | Yes | Sent when the presence has changed. Note: a profile ID can be at multiple locations at the same time.
+10102 | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | Yes | State of other Crownstones in the mesh (unencrypted).
 10103 | [External state part 0](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_0_t) | Yes | Part of the state of other Crownstones in the mesh.
 10104 | [External state part 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | Yes | Part of the state of other Crownstones in the mesh.
 10105 | [Mesh result](#mesh_result_packet) | Yes | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
@@ -144,12 +144,14 @@ Type  | Data   | Encrypted | Description
 50002 | uint8  | Never | Own Crownstone ID.
 50003 | MAC    | Never | Own mac address (6 bytes).
 50100 | [ADC config](#adc_channel_config_packet) | Never | ADC configuration.
+50101 | - | Never | ADC restarted.
 50200 | [Current samples](#current_samples_packet) | Never | Raw ADC samples of the current channel.
 50201 | [Voltage samples](#voltage_samples_packet) | Never | Raw ADC samples of the voltage channel.
 50202 | [Filtered current samples](#current_samples_packet) | Never | Filtered ADC samples of the current channel.
 50203 | [Filtered voltage samples](#voltage_samples_packet) | Never | Filtered ADC samples of the voltage channel.
 50204 | [Power calculations](#power_calculation_packet) | Never | Calculated power values.
 60000 | string | Never | Debug strings.
+60001 | string | Never | Firmware test strings.
 
 
 
