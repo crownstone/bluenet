@@ -203,7 +203,11 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	if (decryptedPayload[0] == 0xCAFE) {
 		validated = true;
 	}
-	if (timestampRounded - 1 < decryptedPayload[0] && decryptedPayload[0] < timestampRounded + 1) {
+	// Needs to work with overflows too, so can't use "smaller than".
+	if (
+			(decryptedPayload[0] == timestampRounded - 1) ||
+			(decryptedPayload[0] == timestampRounded) ||
+			(decryptedPayload[0] == timestampRounded + 1)) {
 		validated = true;
 	}
 	if (!validated) {
