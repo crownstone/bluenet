@@ -23,9 +23,19 @@ UartHandler::UartHandler() {
 
 }
 
-void UartHandler::init() {
+void UartHandler::init(serial_enable_t serialEnabled) {
 	if (_initialized) {
 		return;
+	}
+	switch (serialEnabled) {
+		case SERIAL_ENABLE_NONE:
+			return;
+		case SERIAL_ENABLE_RX_ONLY:
+		case SERIAL_ENABLE_RX_AND_TX:
+			// We init both at the same time.
+			break;
+		default:
+			return;
 	}
 	_initialized = true;
 	_readBuffer = new uint8_t[UART_RX_BUFFER_SIZE];
