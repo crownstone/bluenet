@@ -379,11 +379,15 @@ void SystemTime::publishSyncMessageForTesting(){
 void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage){
 	char valuestring [50];
 
-	sprintf(valuestring, "%lu,%u,%u,%u",
+	LOGSystemTimeVerbose("push sync message to host: %d %d %d",
+				syncmessage.stamp.posix_s,
+				syncmessage.stamp.posix_ms,
+				syncmessage.root_id);
+
+	sprintf(valuestring, "%lu,%u,%u",
 			syncmessage.stamp.posix_s,
 			syncmessage.stamp.posix_ms,
-			syncmessage.root_id,
-			syncmessage.hops
+			syncmessage.root_id
 			);
 
 	TEST_PUSH_STATIC_S("SystemTime", "timesyncmsg", valuestring);

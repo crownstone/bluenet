@@ -23,5 +23,6 @@ struct __attribute__((__packed__)) high_resolution_time_stamp_t {
 struct __attribute__((__packed__)) time_sync_message_t {
 	high_resolution_time_stamp_t stamp;
 	stone_id_t root_id;
-	uint8_t hops;
+	// (could squeeze max 64 hops into the miliseconds field of .stamp
+	// because that won't need values above 1000.)
 };

@@ -14,12 +14,18 @@
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <util/cs_BleError.h>
 
+
+#include <drivers/cs_Serial.h>
+
+#define MESHMSGSENDER_LOGw LOGw
+
 void MeshMsgSender::init(MeshModelSelector* selector) {
 	_selector = selector;
 }
 
 cs_ret_code_t MeshMsgSender::sendMsg(cs_mesh_msg_t *meshMsg) {
 	if (!MeshUtil::isValidMeshMessage(meshMsg)) {
+		MESHMSGSENDER_LOGw("MeshMsgSender::sendMsg invalid message");
 		return ERR_INVALID_MESSAGE;
 	}
 
