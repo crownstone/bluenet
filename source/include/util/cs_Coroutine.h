@@ -8,8 +8,13 @@
 
 #include <functional>
 
+#include <drivers/cs_Timer.h>
+#include <drivers/cs_RTC.h>
+#include <drivers/cs_Serial.h>
+
 // coroutines
-// note: tickrate currently is 10 ticks/s
+// note: coroutine is currently built upon the event buss tickrate
+// which is set to about 10 ticks/s. (wishlist: use SystemTime instead.)
 
 /**
  * A coroutine essentially is a throttling mechanism: it takes
@@ -59,10 +64,16 @@ public:
 	 */
 	bool operator()(event_t& evt){
 		if(evt.type == CS_TYPE::EVT_TICK){
+
 			// forward call to uint32_t
 			(*this)(*reinterpret_cast<uint32_t*>(evt.data));
 			return true;
 		}
 		return false;
+	}
+
+	static uint32_t delay_ms(uint32_t ms){
+		return ms/100;
+//		return RTC::msToTicks(ms);
 	}
 };

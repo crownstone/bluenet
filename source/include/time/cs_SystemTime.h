@@ -147,9 +147,9 @@ private:
 	static void logRootTimeStamp(time_sync_message_t syncmessage);
 
 	/**
-	 * Send a sync message as if we are the master clock.
+	 * Send a sync message for given stamp/id combo to the mesh.
 	 */
-	static void sendTimeSyncMessage();
+	static void sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id);
 
 	static void clearMasterClockId();
 	static void assertTimeSyncParameters();

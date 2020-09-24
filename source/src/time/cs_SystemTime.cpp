@@ -61,8 +61,9 @@ void SystemTime::init(){
 
 #ifdef DEBUG
 	debugSyncTimeCoroutine.action = [](){
+		LOGd("debug sync time");
 		publishSyncMessageForTesting();
-		return debugSyncTimeMessagePeriodMs;
+		return Coroutine::delay_ms(debugSyncTimeMessagePeriodMs);
 	};
 #endif
 
@@ -140,6 +141,17 @@ void SystemTime::setTime(uint32_t time, bool throttled) {
 	uint32_t prevtime = posixTimeStamp;
 	posixTimeStamp = time;
 	rtcTimeStamp = RTC::getCount();
+
+	// setting root_id 0 is a brutal claim to be root.
+	// it results in no crownstone sending time sync messages
+	// anymore until the master_clock_reelection_timeout_ms expires.
+	// However, it strictly enforces the synchronisation among crownstones
+	// that hear the setTime command and ensure propagation in the mesh
+	// when the true root clock node hears the message.
+	high_resolution_time_stamp_t stamp;
+	stamp.posix_s = time;
+	stamp.posix_ms = 0;
+	sendTimeSyncMessage(stamp, 0); // loopback will cause this device to synchronize.
 
 	event_t event(
 			CS_TYPE::EVT_TIME_SET,
@@ -224,6 +236,11 @@ void SystemTime::handleEvent(event_t & event) {
 			// Sunrise/sunset adjusted. No need to do anything as it is already persisted.
 			break;
 		}
+		case CS_TYPE::EVT_MESH_TIME_SYNC: {
+			time_sync_message_t* syncmsg = reinterpret_cast<TYPIFY(EVT_MESH_TIME_SYNC)*>(event.data);
+			onTimeSyncMessageReceive(*syncmsg);
+			break;
+		}
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING: {
 			if (posixTimeStamp == 0) {
 				// If posix time is unknown, we request for it.
@@ -261,6 +278,10 @@ void SystemTime::handleEvent(event_t & event) {
 // ======================== Synchronization ========================
 
 void SystemTime::logRootTimeStamp(time_sync_message_t syncmessage){
+	if(syncmessage.root_id == 0){
+		LOGSystemTimeDebug("root_id 0 sync message occured");
+	}
+
 	currentMasterClockId = syncmessage.root_id;
 	last_received_root_stamp = syncmessage.stamp;
 	local_time_of_last_received_root_stamp_rtc_ticks = RTC::getCount();
@@ -270,8 +291,9 @@ high_resolution_time_stamp_t SystemTime::getSynchronizedStamp(){
 	uint32_t ms_passed = RTC::msPassedSince(local_time_of_last_received_root_stamp_rtc_ticks);
 
 	high_resolution_time_stamp_t stamp;
+	// be aware of the bracket placement ;)
 	stamp.posix_s = last_received_root_stamp.posix_s + ms_passed / 1000;
-	stamp.posix_ms = last_received_root_stamp.posix_ms + ms_passed % 1000;
+	stamp.posix_ms = (last_received_root_stamp.posix_ms + ms_passed) % 1000;
 
 	return stamp;
 }
@@ -283,7 +305,7 @@ uint32_t SystemTime::syncTimeCoroutineAction(){
 		LOGSystemTimeDebug("is_first_call");
 		// reboot occured, wait until sync time is over
 		is_first_call = false;
-		return RTC::msToTicks(reboot_sync_timeout_ms);
+		return Coroutine::delay_ms(reboot_sync_timeout_ms);
 	}
 
 	if(reelectionPeriodTimedOut()) {
@@ -296,13 +318,13 @@ uint32_t SystemTime::syncTimeCoroutineAction(){
 
 	if(thisDeviceClaimsMasterClock()){
 		LOGSystemTimeDebug("thisDeviceClaimsMasterClock");
-		sendTimeSyncMessage();
-		return RTC::msToTicks(master_clock_update_period_ms);
+		sendTimeSyncMessage(getSynchronizedStamp(), myId);
+		return Coroutine::delay_ms(master_clock_update_period_ms);
 	}
 
 	// we need to check at least once in a while so that if there are
 	// no more sync messages sent, the coroutine will eventually trigger a self promotion.
-	return RTC::msToTicks(master_clock_reelection_timeout_ms);
+	return Coroutine::delay_ms(master_clock_reelection_timeout_ms);
 }
 
 void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
@@ -319,10 +341,17 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 #endif
 }
 
-void SystemTime::sendTimeSyncMessage(){
+void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id){
+	LOGSystemTimeDebug("send time sync message");
+
 	time_sync_message_t syncmessage = {};
-	syncmessage.stamp = getSynchronizedStamp();
-	syncmessage.root_id = myId;
+	syncmessage.stamp = stamp; // getSynchronizedStamp();
+	syncmessage.root_id = id;// myId;
+
+	LOGSystemTimeDebug("send sync message: %d %d %d",
+			syncmessage.stamp.posix_s,
+			syncmessage.stamp.posix_ms,
+			syncmessage.root_id);
 
 	// immediate loopback:
 	logRootTimeStamp(syncmessage);
@@ -373,13 +402,13 @@ bool SystemTime::reelectionPeriodTimedOut(){
 void SystemTime::publishSyncMessageForTesting(){
 	// we can just send a normal sync message.
 	// Implementation is robust against false root clock claims by nature.
-	sendTimeSyncMessage();
+	sendTimeSyncMessage(getSynchronizedStamp(), myId);
 }
 
 void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage){
 	char valuestring [50];
 
-	LOGSystemTimeVerbose("push sync message to host: %d %d %d",
+	LOGSystemTimeDebug("push sync message to host: %d %d %d",
 				syncmessage.stamp.posix_s,
 				syncmessage.stamp.posix_ms,
 				syncmessage.root_id);

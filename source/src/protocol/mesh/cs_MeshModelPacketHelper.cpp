@@ -14,11 +14,19 @@
 #include <cstring> // For memcpy
 
 #define LOGMeshModelPacketHelperDebug LOGnone
+#define LOGMeshModelPacketHelperWarn LOGw
 
 namespace MeshUtil {
 
 bool isValidMeshMessage(cs_mesh_msg_t* meshMsg) {
-	if (meshMsg->reliability == CS_MESH_RELIABILITY_INVALID || meshMsg->size > MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE) {
+	if (meshMsg->reliability == CS_MESH_RELIABILITY_INVALID){
+		LOGMeshModelPacketHelperWarn("Invalid reliability");
+		return false;
+	}
+	if(meshMsg->size > MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE) {
+		LOGMeshModelPacketHelperWarn("message size too big %d > %d",
+				meshMsg->size,
+				MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE);
 		return false;
 	}
 	return isValidMeshPayload(meshMsg->type, meshMsg->payload, meshMsg->size);
