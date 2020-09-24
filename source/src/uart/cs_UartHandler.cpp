@@ -62,7 +62,7 @@ void UartHandler::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
 		case UART_OPCODE_TX_SERVICE_DATA:
 			return;
 		case UART_OPCODE_TX_FIRMWARESTATE:
-			writeBytes(data, size);
+//			writeBytes(data, size);
 			return;
 		default:
 //			_log(SERIAL_DEBUG, "writeMsg opCode=%u data=", opCode);
@@ -251,8 +251,6 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 	uart_msg_wrapper_header_t* wrapperHeader = reinterpret_cast<uart_msg_wrapper_header_t*>(data);
 	uint8_t* payload = data + sizeof(uart_msg_wrapper_header_t);
 	uint16_t payloadSize = size - wrapperSize;
-
-	LOGd("handleMsg %u %u %u %u %u %u %u %u", data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7]);
 
 	// Check CRC
 	uint16_t calculatedCrc = UartProtocol::crc16(data, size - sizeof(uart_msg_tail_t));
