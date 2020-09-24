@@ -127,9 +127,10 @@ private:
 	float _slowAvgPowerDiscount;
 	float _slowAvgPowerMilliWatt = 0.0f;
 	uint16_t _slowAvgPowerCount; // Number of values that have been used for slow averaging.
-	const float powerDiffThresholdPart = 0.1f; // When difference is 10% larger or smaller, consider it a significant change.
-	const float powerDiffThresholdMinMilliWatt = 10.0f; // But the difference must also be at least so many Watts.
-	const float negativePowerThresholdMilliWatt = -10.0f; // Only if power is below threshold, it may be negative.
+	const uint16_t slowAvgPowerConvergedCount = 1000;
+	float _powerDiffThresholdPart;  // When difference is 10% larger or smaller, consider it a significant change.
+	float _powerDiffThresholdMinMilliWatt; // But the difference must also be at least so many Watts.
+	float _negativePowerThresholdMilliWatt; // Only if power is below threshold, it may be negative.
 
 
 	int32_t _boardPowerZero; //! Measured power when there is no load for this board (mW).

@@ -97,6 +97,32 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentMilliAmpThresholdPwm, sizeof(_currentMilliAmpThresholdPwm));
 	bool switchcraftEnabled = settings.isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
 
+	switch (boardConfig.hardwareBoard) {
+		// Builtin zero
+		case ACR01B1A:
+		case ACR01B1B:
+		case ACR01B1C:
+		case ACR01B1D:
+		case ACR01B1E:
+		// Plug zero
+		case ACR01B2A:
+		case ACR01B2B:
+		case ACR01B2C:
+		case ACR01B2E:
+		case ACR01B2G: {
+			_powerDiffThresholdPart =          POWER_DIFF_THRESHOLD_PART_CS_ZERO;
+			_powerDiffThresholdMinMilliWatt =  POWER_DIFF_THRESHOLD_MIN_WATT_CS_ZERO * 1000.0f;
+			_negativePowerThresholdMilliWatt = NEGATIVE_POWER_THRESHOLD_WATT_CS_ZERO * 1000.0f;
+			break;
+		}
+		default: {
+			_powerDiffThresholdPart =          POWER_DIFF_THRESHOLD_PART;
+			_powerDiffThresholdMinMilliWatt =  POWER_DIFF_THRESHOLD_MIN_WATT * 1000.0f;
+			_negativePowerThresholdMilliWatt = NEGATIVE_POWER_THRESHOLD_WATT * 1000.0f;
+			break;
+		}
+	}
+
 	RecognizeSwitch::getInstance().init();
 	TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD) switchcraftThreshold;
 	settings.get(CS_TYPE::CONFIG_SWITCHCRAFT_THRESHOLD, &switchcraftThreshold, sizeof(switchcraftThreshold));
@@ -764,7 +790,6 @@ void PowerSampling::calculatePower(power_t & power) {
 	calculateSlowAveragePower(powerMilliWattReal, _avgPowerMilliWatt);
 
 
-
 	/////////////////////////////////////////////////////////
 	// Debug prints
 	/////////////////////////////////////////////////////////
@@ -853,14 +878,14 @@ void PowerSampling::calculateSlowAveragePower(float powerMilliWatt, float fastAv
 		}
 	}
 
-	float significantChangeThreshold = std::max(_slowAvgPowerMilliWatt * powerDiffThresholdPart, 1000.0f * powerDiffThresholdMinMilliWatt);
+	float significantChangeThreshold = std::max(_slowAvgPowerMilliWatt * _powerDiffThresholdPart, _powerDiffThresholdMinMilliWatt);
 	if (std::abs(fastAvgPowerMilliWatt - _slowAvgPowerMilliWatt) > significantChangeThreshold) {
 		LOGPowerSamplingDebug("significant change: fast=%i slow=%i diff=%i thresh=%i", (int32_t)fastAvgPowerMilliWatt, (int32_t)_slowAvgPowerMilliWatt, (int32_t)std::abs(fastAvgPowerMilliWatt - _slowAvgPowerMilliWatt), (int32_t)significantChangeThreshold);
 		_slowAvgPowerMilliWatt = fastAvgPowerMilliWatt;
 		_slowAvgPowerCount = 0;
 	}
 
-	if (_slowAvgPowerCount < 1000) {
+	if (_slowAvgPowerCount < slowAvgPowerConvergedCount) {
 		++_slowAvgPowerCount;
 	}
 	if (_slowAvgPowerCount < 50) {
@@ -878,6 +903,13 @@ void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
 	if (_calibratePowerZeroCountDown != 0 || switchState.asInt != 0) {
 		return;
 	}
+
+	// Use the slow average instead
+	if (_slowAvgPowerCount < slowAvgPowerConvergedCount) {
+		return;
+	}
+	powerMilliWatt = _slowAvgPowerMilliWatt;
+
 	if (powerMilliWatt < (_boardPowerZero - 10000) || powerMilliWatt > (_boardPowerZero + 10000)) {
 		// Measured power without load shouldn't be more than 10W different from the board default.
 		// It might be a dimmer on failure instead.
@@ -901,7 +933,7 @@ void PowerSampling::calculateEnergy() {
 	_lastEnergyCalculationTicks = rtcCount;
 */
 
-	if (_slowAvgPowerMilliWatt > 0.0f || _slowAvgPowerMilliWatt < negativePowerThresholdMilliWatt * 1000.0f) {
+	if (_slowAvgPowerMilliWatt > 0.0f || _slowAvgPowerMilliWatt < _negativePowerThresholdMilliWatt) {
 		_energyUsedmicroJoule += _slowAvgPowerMilliWatt * (CS_ADC_SAMPLE_INTERVAL_US / 1000.0f * InterleavedBuffer::getChannelLength());
 	}
 }
