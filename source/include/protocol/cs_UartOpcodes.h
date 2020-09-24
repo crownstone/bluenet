@@ -53,6 +53,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_SESSION_NONCE_MISSING =            10001, // Sent when a session nonce is missing.
 	UART_OPCODE_TX_SERVICE_DATA =                     10002, // Sent when the service data is updated (payload: service_data_t)
 	UART_OPCODE_TX_PRESENCE_CHANGE =                  10004, // Sent when the presence has changed, payload: presence_change_t. When the first user enters, multiple msgs will be sent.
+	UART_OPCODE_TX_FACTORY_RESET =                    10005, // Sent when a factory reset is going to be performed.
 
 	UART_OPCODE_TX_MESH_STATE =                       10102, // Received state of external stone, payload: service_data_encrypted_t
 	UART_OPCODE_TX_MESH_STATE_PART_0 =                10103, // Received part of state of external stone, payload: cs_mesh_model_msg_state_0_t

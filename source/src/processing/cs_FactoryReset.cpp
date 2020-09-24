@@ -14,6 +14,7 @@
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
 #include <storage/cs_State.h>
+#include <uart/cs_UartHandler.h>
 
 
 FactoryReset::FactoryReset() : _recoveryEnabled(true), _rtcStartTime(0),
@@ -92,25 +93,23 @@ bool FactoryReset::recover(uint32_t resetCode) {
 	TYPIFY(STATE_FACTORY_RESET) resetState;
 	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
 	switch (resetState) {
-	case FACTORY_RESET_STATE_NORMAL:
-		// just in case, we stop the timer so we cannot flood this mechanism.
-		Timer::getInstance().stop(_recoveryProcessTimerId);
-		Timer::getInstance().start(_recoveryProcessTimerId, MS_TO_TICKS(FACTORY_PROCESS_TIMEOUT), this);
-		return true;
-//		break;
-	case FACTORY_RESET_STATE_LOWTX:
-		resetState = FACTORY_RESET_STATE_NORMAL;
-		State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
-		LOGd("recovery: factory reset");
+		case FACTORY_RESET_STATE_NORMAL:
+			// just in case, we stop the timer so we cannot flood this mechanism.
+			Timer::getInstance().stop(_recoveryProcessTimerId);
+			Timer::getInstance().start(_recoveryProcessTimerId, MS_TO_TICKS(FACTORY_PROCESS_TIMEOUT), this);
+			return true;
+		case FACTORY_RESET_STATE_LOWTX:
+			resetState = FACTORY_RESET_STATE_NORMAL;
+			State::getInstance().set(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
+			LOGd("recovery: factory reset");
 
-		// the reset delayed in here should be sufficient
-		return performFactoryReset();
-//		break;
-	case FACTORY_RESET_STATE_RESET:
-		// What to do here?
-		break;
-	default:
-		break;
+			// the reset delayed in here should be sufficient
+			return performFactoryReset();
+		case FACTORY_RESET_STATE_RESET:
+			// What to do here?
+			break;
+		default:
+			break;
 	}
 	return false;
 }
@@ -143,6 +142,8 @@ bool FactoryReset::performFactoryReset() {
 	resetCmd.delayMs = 2000;
 	event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
 	EventDispatcher::getInstance().dispatch(eventReset);
+
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_FACTORY_RESET, nullptr, 0);
 	return true;
 }
 
