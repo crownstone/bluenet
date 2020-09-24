@@ -143,6 +143,8 @@ bool FactoryReset::performFactoryReset() {
 	event_t eventReset(CS_TYPE::CMD_RESET_DELAYED, &resetCmd, sizeof(resetCmd));
 	EventDispatcher::getInstance().dispatch(eventReset);
 
+	// Could also send an event instead.
+	// Has to be sent before running in factory reset mode, as this message has to be encrypted.
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_FACTORY_RESET, nullptr, 0);
 	return true;
 }
