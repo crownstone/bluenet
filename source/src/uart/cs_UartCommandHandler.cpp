@@ -106,6 +106,9 @@ void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 #else
 	#pragma message("UART dev commands disabled")
 #endif // DEBUG
+		default:
+			LOGw("Unknown opcode: %u", opCode);
+			break;
 	}
 }
 
