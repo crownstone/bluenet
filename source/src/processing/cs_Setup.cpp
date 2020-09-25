@@ -26,7 +26,7 @@ cs_ret_code_t Setup::handleCommand(cs_data_t data) {
 	}
 
 	if (data.len != sizeof(setup_data_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, data.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, data.len, sizeof(setup_data_t));
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
