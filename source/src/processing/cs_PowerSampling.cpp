@@ -122,6 +122,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 			break;
 		}
 	}
+	LOGd("_powerDiffThresholdPart=%i _powerDiffThresholdMinMilliWatt=%i _negativePowerThresholdMilliWatt=%i", (int32_t)_powerDiffThresholdPart, (int32_t)_powerDiffThresholdMinMilliWatt, (int32_t)_negativePowerThresholdMilliWatt);
 
 	RecognizeSwitch::getInstance().init();
 	TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD) switchcraftThreshold;
@@ -396,7 +397,9 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
 //		int32_t powerUsage = _slowAvgPowerMilliWatt;
 //		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
-		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
+//		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
+		int32_t slowAvgPowerMilliWatt = _slowAvgPowerMilliWatt;
+		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &slowAvgPowerMilliWatt, sizeof(slowAvgPowerMilliWatt));
 		State::getInstance().set(CS_TYPE::STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
 	}
 
@@ -880,7 +883,7 @@ void PowerSampling::calculateSlowAveragePower(float powerMilliWatt, float fastAv
 
 	float significantChangeThreshold = std::max(_slowAvgPowerMilliWatt * _powerDiffThresholdPart, _powerDiffThresholdMinMilliWatt);
 	if (std::abs(fastAvgPowerMilliWatt - _slowAvgPowerMilliWatt) > significantChangeThreshold) {
-		LOGPowerSamplingDebug("significant change: fast=%i slow=%i diff=%i thresh=%i", (int32_t)fastAvgPowerMilliWatt, (int32_t)_slowAvgPowerMilliWatt, (int32_t)std::abs(fastAvgPowerMilliWatt - _slowAvgPowerMilliWatt), (int32_t)significantChangeThreshold);
+		LOGPowerSamplingDebug("Significant power change: cur=%i fastAvg=%i slowAvg=%i diff=%i thresh=%i", (int32_t)powerMilliWatt, (int32_t)fastAvgPowerMilliWatt, (int32_t)_slowAvgPowerMilliWatt, (int32_t)std::abs(fastAvgPowerMilliWatt - _slowAvgPowerMilliWatt), (int32_t)significantChangeThreshold);
 		_slowAvgPowerMilliWatt = fastAvgPowerMilliWatt;
 		_slowAvgPowerCount = 0;
 	}
@@ -889,12 +892,17 @@ void PowerSampling::calculateSlowAveragePower(float powerMilliWatt, float fastAv
 		++_slowAvgPowerCount;
 	}
 	if (_slowAvgPowerCount < 50) {
-		// After a reset, slowly go up to 0.01 --> 99% of the average is influenced by the last 458 values, 50% by the last 68.
+		// After a reset, slowly go up from 0.5 to 0.01.
+		// Since, after a reset, we init with fastAvgPowerMilliWatt, this means we end up with the mean of powerMilliWatt and fastAvgPowerMilliWatt.
+		// Discount of 0.01 --> 99% of the average is influenced by the last 458 values, 50% by the last 68.
 		// Because we increase count before this line, we never divide by 0.
 		_slowAvgPowerDiscount = 0.5f / _slowAvgPowerCount;
 	}
 	// Exponential moving average.
 	_slowAvgPowerMilliWatt = (1.0f - _slowAvgPowerDiscount) * _slowAvgPowerMilliWatt + _slowAvgPowerDiscount * (float)powerMilliWatt;
+	if (_slowAvgPowerCount < 4) {
+		LOGPowerSamplingDebug("slowAvg=%i", (int32_t)_slowAvgPowerMilliWatt);
+	}
 };
 
 void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
