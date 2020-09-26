@@ -88,7 +88,7 @@ void BehaviourStore::handleSaveBehaviour(event_t& evt) {
 
 ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bufSize, uint8_t & index) {
 	if (bufSize < 1) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, bufSize);
+		LOGe(FMT_ZERO_PAYLOAD_LENGTH, bufSize);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	Behaviour::Type typ = static_cast<Behaviour::Type>(buf[0]);
@@ -105,8 +105,11 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	switch (typ) {
 		case SwitchBehaviour::Type::Switch:{
 			if (bufSize != WireFormat::size<SwitchBehaviour>()) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d), expected size(%d)",
-						bufSize, typ, WireFormat::size<SwitchBehaviour>());
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d)",
+						bufSize,
+						WireFormat::size<SwitchBehaviour>(),
+						typ
+						);
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 			LOGBehaviourStoreDebug("Allocating new SwitchBehaviour");
@@ -122,8 +125,11 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 		}
 		case SwitchBehaviour::Type::Twilight:{// check size
 			if (bufSize != WireFormat::size<TwilightBehaviour>()) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d), expected size(%d)",
-						bufSize, typ, WireFormat::size<TwilightBehaviour>());
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d)",
+						bufSize,
+						WireFormat::size<TwilightBehaviour>(),
+						typ
+						);
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 			LOGBehaviourStoreDebug("Allocating new TwilightBehaviour");
@@ -139,8 +145,11 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 		}
 		case SwitchBehaviour::Type::Extended:{
 			if (bufSize != WireFormat::size<ExtendedSwitchBehaviour>()) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d), expected size(%d)",
-						bufSize, typ, WireFormat::size<ExtendedSwitchBehaviour>());
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d)",
+						bufSize,
+						WireFormat::size<ExtendedSwitchBehaviour>(),
+						typ
+						);
 				return ERR_WRONG_PAYLOAD_LENGTH;
 			}
 			LOGBehaviourStoreDebug("Allocating new ExtendedSwitchBehaviour");
@@ -168,8 +177,10 @@ bool BehaviourStore::ReplaceParameterValidation(event_t& evt, uint8_t index, con
 
 	// check size
 	if (evt.size != indexSize + behaviourSize) {
-		LOGe("replace switchbehaviour received wrong size event (%d != %d)",
-				evt.size, indexSize + behaviourSize);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH " in replace switchbehaviour",
+				evt.size,
+				(indexSize + behaviourSize)
+			);
 		evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return false;
 	}
@@ -188,7 +199,10 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 	const uint8_t typeSize = sizeof(uint8_t);
 
 	if (evt.size < indexSize + typeSize) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH " %d", evt.size);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH,
+				evt.size,
+				(indexSize + typeSize)
+			);
 		evt.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}

@@ -369,7 +369,7 @@ void CommandHandler::handleCmdFactoryReset(cs_data_t commandData, const Encrypti
 	LOGi(STR_HANDLE_COMMAND, "factory reset");
 
 	if (commandData.len != sizeof(FACTORY_RESET_CODE)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, sizeof(FACTORY_RESET_CODE));
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(FACTORY_RESET_CODE));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -407,7 +407,7 @@ void CommandHandler::handleCmdStateGet(cs_data_t commandData, const EncryptionAc
 
 	// Check if command data is large enough for header.
 	if (commandData.len < sizeof(state_packet_header_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(state_packet_header_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -478,7 +478,7 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 
 	// Check if command data is large enough for header.
 	if (commandData.len < sizeof(state_packet_header_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(state_packet_header_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -544,7 +544,7 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 void CommandHandler::handleCmdSetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set time:");
 	if (commandData.len != sizeof(uint32_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(uint32_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -556,7 +556,7 @@ void CommandHandler::handleCmdSetTime(cs_data_t commandData, const EncryptionAcc
 void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result){
 	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set sun time:");
 	if (commandData.len != sizeof(sun_time_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(sun_time_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -585,7 +585,7 @@ void CommandHandler::handleCmdDisconnect(cs_data_t commandData, const Encryption
 void CommandHandler::handleCmdResetErrors(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "reset errors");
 	if (commandData.len != sizeof(state_errors_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(state_errors_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -609,7 +609,7 @@ void CommandHandler::handleCmdPwm(cs_data_t commandData, const cmd_source_with_c
 	LOGi(STR_HANDLE_COMMAND, "PWM");
 
 	if (commandData.len != sizeof(switch_message_payload_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(switch_message_payload_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -635,7 +635,7 @@ void CommandHandler::handleCmdSwitch(cs_data_t commandData, const cmd_source_wit
 	LOGi(STR_HANDLE_COMMAND, "switch");
 
 	if (commandData.len != sizeof(switch_message_payload_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(switch_message_payload_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -660,7 +660,7 @@ void CommandHandler::handleCmdRelay(cs_data_t commandData, const cmd_source_with
 	LOGi(STR_HANDLE_COMMAND, "relay");
 
 	if (commandData.len != sizeof(switch_message_payload_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(switch_message_payload_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -846,7 +846,7 @@ void CommandHandler::handleCmdAllowDimming(cs_data_t commandData, const Encrypti
 	LOGi(STR_HANDLE_COMMAND, "allow dimming");
 
 	if (commandData.len != sizeof(enable_message_payload_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(enable_message_payload_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -864,7 +864,7 @@ void CommandHandler::handleCmdLockSwitch(cs_data_t commandData, const Encryption
 	LOGi(STR_HANDLE_COMMAND, "lock switch");
 
 	if (commandData.len != sizeof(enable_message_payload_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(enable_message_payload_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -882,7 +882,7 @@ void CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAcc
 	LOGd(STR_HANDLE_COMMAND, "UART msg");
 
 	if (!commandData.len) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_ZERO_PAYLOAD_LENGTH, commandData.len);
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -894,7 +894,7 @@ void CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAcc
 void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "register tracked device");
 	if (commandData.len != sizeof(register_tracked_device_packet_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(register_tracked_device_packet_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -915,7 +915,7 @@ void CommandHandler::handleCmdTrackedDeviceHeartbeat(cs_data_t commandData, cons
 //	return;
 
 	if (commandData.len != sizeof(tracked_device_heartbeat_packet_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(tracked_device_heartbeat_packet_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
@@ -947,7 +947,7 @@ void CommandHandler::handleMicroAppUpload(cs_data_t commandData, const Encryptio
 	LOGi(STR_HANDLE_COMMAND, "microapp upload");
 
 	if (commandData.len != sizeof(microapp_upload_packet_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len);
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_upload_packet_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 		return;
 	}
