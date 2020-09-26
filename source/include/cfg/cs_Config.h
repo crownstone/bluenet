@@ -217,12 +217,12 @@
 //#define POWER_SAMPLING_CURVE_HALF_WINDOW_SIZE    16 // Half window size used for filtering the current curve. Can't just be any value!
 
 
-#define POWER_DIFF_THRESHOLD_PART                0.10f // When difference is 10% larger or smaller, consider it a significant change.
-#define POWER_DIFF_THRESHOLD_MIN_WATT            10.0f // But the difference must also be at least so many Watts.
-#define NEGATIVE_POWER_THRESHOLD_WATT            10.0f // Only if power is below threshold, it may be negative.
-#define POWER_DIFF_THRESHOLD_PART_CS_ZERO        0.10f // Same, but for plug zero or builtin zero (less accurate power measurements).
-#define POWER_DIFF_THRESHOLD_MIN_WATT_CS_ZERO    15.0f // Same, but for plug zero or builtin zero (less accurate power measurements).
-#define NEGATIVE_POWER_THRESHOLD_WATT_CS_ZERO    20.0f // Same, but for plug zero or builtin zero (less accurate power measurements).
+#define POWER_DIFF_THRESHOLD_PART                0.10f  // When difference is 10% larger or smaller, consider it a significant change.
+#define POWER_DIFF_THRESHOLD_MIN_WATT            10.0f  // But the difference must also be at least so many Watts.
+#define NEGATIVE_POWER_THRESHOLD_WATT            -10.0f // Only if power is below threshold, it may be negative.
+#define POWER_DIFF_THRESHOLD_PART_CS_ZERO        0.10f  // Same, but for plug zero or builtin zero (less accurate power measurements).
+#define POWER_DIFF_THRESHOLD_MIN_WATT_CS_ZERO    15.0f  // Same, but for plug zero or builtin zero (less accurate power measurements).
+#define NEGATIVE_POWER_THRESHOLD_WATT_CS_ZERO    -20.0f // Same, but for plug zero or builtin zero (less accurate power measurements).
 
 #define CURRENT_USAGE_THRESHOLD                  (16000) // Power usage threshold in mA at which the switch should be turned off.
 #define CURRENT_USAGE_THRESHOLD_PWM              (1000)  // Power usage threshold in mA at which the PWM should be turned off.

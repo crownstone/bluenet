@@ -77,6 +77,8 @@ uint8[] | Data         | N | The data packet, depends on type.
 Data types for messages sent to the Crownstone.
 
 - Each message will be replied to with a message with the same data type.
+    - You __must__ wait for the reply before sending the next message, else the next message will be ignored.
+    - However, if your message is invalid (no access, wrong payload, unknown type, etc), there will be no reply.
 - Messages with _encrypted_ set to _yes_, have to be encrypted when the crownstone status has _encryption required_ set to true.
 - Messages with _encrypted_ set to _optional_, may be encrypted.
 - Types >= 50000 are for development. These may change, and will be disabled in release.
