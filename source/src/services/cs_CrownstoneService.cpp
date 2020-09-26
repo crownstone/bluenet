@@ -236,7 +236,7 @@ void CrownstoneService::handleEvent(event_t & event) {
 		result.returnCode = data.error;
 		result.dataSize = TypeSize(event.type);
 		uint8_t protocolVersion = 5; // TODO: get this from event.
-		writeResult(protocolVersion, CTRL_CMD_MICROAPP_UPLOAD, result);
+		writeResult(protocolVersion, CTRL_CMD_MICROAPP, result);
 		break;
 	}
 	default: {}

@@ -86,12 +86,6 @@ class MicroApp: public EventListener {
 		uint16_t erasePages();
 
 		/**
-		 * Function that validates the application. The last chunk can still reside in ram. If it is set to NULL
-		 * it is assumed to be in flash.
-		 */
-		uint16_t validateAppInternal(const uint8_t *const last_chunk);
-
-		/**
 		 * Store in flash information about the app (start address, checksum, etc.)
 		 */
 		void storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t size);
@@ -140,6 +134,11 @@ class MicroApp: public EventListener {
 		 * Handle incoming events.
 		 */
 		void handleEvent(event_t & event);
+
+		/**
+		 * Handle incoming packet. Returns err_code.
+		 */
+		uint32_t handlePacket(microapp_packet_header_t *packet_stub);
 
 		/**
 		 * When fstorage is done, this function will be called (indirectly through app_scheduler).

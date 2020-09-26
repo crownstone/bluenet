@@ -772,30 +772,48 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Protocol | 1 | Protocol version of binary uploads (default 0).
 uint 8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
-uint 8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0) if index != 255.
-uint 8 | Count | 1 | The total number of chunks (rounded up).
+uint 8 | Opcode | 1 | `CS_MICROAPP_OPCODE_UPLOAD` (`0x01`)
+uint 8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0)
+uint 8 | Count | 1 | The total number of chunks (rounded up, max 256 packets).
 uint 16 | Size | 2 | Size in bytes of the complete binary.
 uint 16 | Checksum | 2 | The checksum of this chunk. The checksum of the last packet is of the complete program.
 uint 8 | Data | N | `NRF_SDH_BLE_GATT_MAX_MTU_SIZE` (69)  - `OVERHEAD` (20), should be 49.
 
-The checksum of the last packet contains the checksum of the complete binary. The packets are all of the same size. The data in the last packet has to contain 0xFF for the values beyond the application size.
+The packets are all of the same size. Important! The data in the last packet has to contain `0xFF` for the values beyond the application size. This is due to the fact that on flash writing `0xFF` does not change the flash. 
 
-<a name="send_microapp_meta_packet"></a>
-#### Send microapp meta info
+The total maximum size of a binary (256 packets with each 49 bytes) is around 12 kB. This is considered sufficient
+for this first version. Larger binaries would require more stringent containerization as well to make sure its not
+eating too many other resources.
 
-![Send microapp meta packet](../docs/diagrams/send_microapp_meta_packet.png)
+<a name="send_microapp_validate_packet"></a>
+#### Validate microapp
+
+![Send microapp validate packet](../docs/diagrams/send_microapp_validate_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Protocol | 1 | Protocol version of binary sends (default 0).
-uint 8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
-uint 8 | Index  | 1 | If set to `255`.
-uint 8 | Opcode | 1 | There are currently two opcodes.
-uint 16 | Param0 | 2 | Opcode specific parameter.
-uint 16 | Param1 | 2 | Opcode specific parameter.
-uint 8 | Data | N | Opcode specific data.
+uint 8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
+uint 8 | Opcode | 1 | `CS_MICROAPP_OPCODE_VALIDATE` (`0x02`).
+uint 16 | Size | 2 | Size in bytes of the complete binary.
+uint 16 | Checksum | 2 | The checksum of the complete program.
 
-The opcodes that are defined are `MICROAPP_OPCODE_ENABLE = 0x01` and `MICROAPP_OPCODE_DISABLE = 0x02`. These can be used to enable/disable a (previously) uploaded microapp.
+After sending the last packet, the microapp has to be validated.
+
+<a name="send_microapp_enable_packet"></a>
+#### Enable/disable microapp
+
+![Send microapp enable packet](../docs/diagrams/send_microapp_enable_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Protocol | 1 | Protocol version of binary sends (default 0).
+uint 8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
+uint 8 | Opcode | 1 | `CS_MICROAPP_OPCODE_ENABLE` (`0x03`) or `CS_MICROAPP_OPCODE_DISABLE` (`0x04`).
+uint 16 | Offset | 2 | Offset of the `dummy_main` function into the binary.
+
+After uploading a microapp you will first have to validate, the overall app (see above). After that you can
+enable the app.
 
 <a name="microapp_result_packet"></a>
 #### Microapp result packet
@@ -805,7 +823,7 @@ The opcodes that are defined are `MICROAPP_OPCODE_ENABLE = 0x01` and `MICROAPP_O
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Protocol | 1 | Protocol version of binary uploads (default 0).
-uint 8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
+uint 8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
 uint 8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0) if index != 255.
 uint 8 | Repeat | 1 | A decrementing counter (down from 3 to improve reception thanks to unique ads).
 uint 16 | Error | 2 | Any error that might have happened (checksum, size, etc.).
