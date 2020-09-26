@@ -86,6 +86,11 @@ class MicroApp: public EventListener {
 		uint16_t erasePages();
 
 		/**
+		 * Initialize memory for the microapp.
+		 */
+		uint16_t initMemory();
+
+		/**
 		 * Store in flash information about the app (start address, checksum, etc.)
 		 */
 		void storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t size);

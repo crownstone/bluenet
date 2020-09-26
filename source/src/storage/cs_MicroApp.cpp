@@ -114,6 +114,19 @@ uint16_t MicroApp::init() {
 	return err_code;
 }
 
+uint16_t MicroApp::initMemory() {
+	// We allow an area of 0x2000B000 and then two pages for RAM. For now let us clear it to 0
+	// This is actually incorrect (we should skip) and it probably can be done at once as well
+	for (int i = 0; i < 1024 * 2; ++i) {
+		uint32_t *const val = (uint32_t *)(uintptr_t)(0x2000B000 + i);
+		*val = 0;
+	}
+
+	// The above is fine for .bss (which is uninitialized) but not for .data. It needs to be copied
+	// to the right addresses.
+	return ERR_SUCCESS;
+}
+
 uint16_t MicroApp::erasePages() {
 	uint32_t err_code;
 	err_code = nrf_fstorage_erase(&micro_app_storage, micro_app_storage.start_addr, MICRO_APP_PAGES, NULL);
@@ -212,7 +225,7 @@ void MicroApp::tick() {
 		event.dispatch();
 	}
 
-	static int counter = 0;
+	static uint16_t counter = 0;
 	if (_enabled && _booted) {
 		
 		if (!_loaded) {
@@ -235,13 +248,15 @@ void MicroApp::tick() {
 				LOGi("Setup done");
 			}
 			counter++;
+			// Call loop every 10 ticks
 			if (counter % 10 == 0) {
 				LOGi("Call loop");
 				int (*loop_func)() = (int (*)()) _loop;
 				int result = loop_func();
 				LOGi("Loop 0x%x", result);
 			}
-			if (counter == 11) {
+			// Loop around, but do not hit 0 again
+			if (counter == 0) {
 				counter = 1;
 			}
 		}
@@ -361,6 +376,8 @@ void MicroApp::callApp() {
 		return;
 	}
 
+	initMemory();
+
 	uintptr_t address = state_microapp.start_addr + state_microapp.offset;
 	LOGi("Microapp: start at 0x%04x", address)
 
@@ -445,15 +462,6 @@ void MicroApp::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
 	switch (evt->id) {
 	case NRF_FSTORAGE_EVT_WRITE_RESULT: {
 		LOGi("Flash written");
-		if (_lastChunk) {
-			error = validateApp();
-			if (error == ERR_SUCCESS) {
-				LOGi("Set app valid");
-				setAppValid();
-			} else {
-				LOGi("Checksum error");
-			}
-		}
 		_prevMessage.repeat = number_of_notifications;
 		_prevMessage.error = error;
 		event_t event(CS_TYPE::EVT_MICROAPP, &_prevMessage, sizeof(_prevMessage));
@@ -490,6 +498,7 @@ uint32_t MicroApp::handlePacket(microapp_packet_header_t *packet_stub) {
 
 		if (packet->chunk_size != MICROAPP_CHUNK_SIZE) {
 			err_code = ERR_WRONG_STATE;
+			LOGi("Chunk size %i (should be %i)", packet->chunk_size, MICROAPP_CHUNK_SIZE);
 			_prevMessage.payload = MICROAPP_CHUNK_SIZE;
 			break;
 		}
@@ -502,7 +511,7 @@ uint32_t MicroApp::handlePacket(microapp_packet_header_t *packet_stub) {
 
 		// We can add here a method to check if the memory is clear... However, this is quite an intensive
 		// read of flash memory. So, it is probably smart to do this with another opcode.
-
+		break;
 	}
 	case CS_MICROAPP_OPCODE_ENABLE: {
 		microapp_enable_packet_t* packet = reinterpret_cast<microapp_enable_packet_t*>(packet_stub);
@@ -568,6 +577,10 @@ uint32_t MicroApp::handlePacket(microapp_packet_header_t *packet_stub) {
 		if (err_code != ERR_SUCCESS) {
 			break;
 		}
+		
+		// Set app to valid
+		LOGi("Set app valid");
+		setAppValid();
 		
 		break;
 	}

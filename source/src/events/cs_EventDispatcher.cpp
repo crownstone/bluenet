@@ -31,6 +31,7 @@ void EventDispatcher::dispatch(event_t & event) {
     switch (event.type) {
     	case CS_TYPE::CMD_ADD_BEHAVIOUR:
     	case CS_TYPE::CMD_REPLACE_BEHAVIOUR:
+		case CS_TYPE::CMD_MICROAPP:
     		// These types have variable sized data, and will be size checked in the handler.
     		break;
     	default:

@@ -944,7 +944,7 @@ void CommandHandler::handleCmdGetUptime(cs_data_t commandData, const EncryptionA
 }
 
 void CommandHandler::handleMicroappCommand(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "microapp command");
+	//LOGi(STR_HANDLE_COMMAND, "microapp");
 
 	// First cast to header packet, must be large enough for that.
 	if (commandData.len < sizeof(microapp_packet_header_t)) {
@@ -962,7 +962,8 @@ void CommandHandler::handleMicroappCommand(cs_data_t commandData, const Encrypti
 			result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 			return;
 		}
-	
+		LOGi(STR_HANDLE_COMMAND, "microapp upload");
+
 		// TODO: don't copy the data. Maybe just use dispatchEventForCommand().
 		TYPIFY(CMD_MICROAPP) evtData;
 		evtData = *((microapp_upload_packet_t*)commandData.data);
@@ -979,6 +980,7 @@ void CommandHandler::handleMicroappCommand(cs_data_t commandData, const Encrypti
 			result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 			return;
 		}
+		LOGi(STR_HANDLE_COMMAND, "microapp en/disable");
 
 		// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
 		//       also make sure that for sending the data back, another buffer is used
@@ -995,6 +997,7 @@ void CommandHandler::handleMicroappCommand(cs_data_t commandData, const Encrypti
 			result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 			return;
 		}
+		LOGi(STR_HANDLE_COMMAND, "microapp validate");
 
 		// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
 		microapp_validate_packet_t evtData = *((microapp_validate_packet_t*)commandData.data);
@@ -1010,6 +1013,8 @@ void CommandHandler::handleMicroappCommand(cs_data_t commandData, const Encrypti
 			result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 			return;
 		}
+	
+		LOGi(STR_HANDLE_COMMAND, "microapp request");
 
 		// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
 		microapp_request_packet_t evtData = *((microapp_request_packet_t*)commandData.data);
