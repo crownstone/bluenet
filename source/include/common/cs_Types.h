@@ -321,7 +321,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_GET_ADC_CHANNEL_SWAPS,                        // Get number of detected ADC channel swaps.
 	CMD_GET_RAM_STATS,                                // Get RAM statistics.
 
-	CMD_MICROAPP_UPLOAD,                              // MicroApp upload (e.g. Arduino code).
+	CMD_MICROAPP,                                     // MicroApp upload (e.g. Arduino code).
 	EVT_MICROAPP,                                     // MicroApp event (e.g. write done)
 
 	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
@@ -555,7 +555,7 @@ typedef void TYPIFY(CMD_GET_RESET_REASON);
 typedef uint8_t TYPIFY(CMD_GET_GPREGRET);
 typedef void TYPIFY(CMD_GET_ADC_CHANNEL_SWAPS);
 typedef void TYPIFY(CMD_GET_RAM_STATS);
-typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP_UPLOAD);
+typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP);
 typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
