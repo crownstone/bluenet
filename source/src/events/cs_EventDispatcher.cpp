@@ -21,25 +21,25 @@ void EventDispatcher::dispatch(event_t & event) {
 #ifdef PRINT_EVENTDISPATCHER_VERBOSE
 	LOGi("dispatch event: %d", event.type);
 #endif
-	
-    if (event.size != 0 && event.data == nullptr) {
-		LOGe("data nullptr while size != 0");
-    	event.result.returnCode = ERR_BUFFER_UNASSIGNED;
-        return;
-    }
 
-    switch (event.type) {
-    	case CS_TYPE::CMD_ADD_BEHAVIOUR:
-    	case CS_TYPE::CMD_REPLACE_BEHAVIOUR:
-		case CS_TYPE::CMD_MICROAPP:
-    		// These types have variable sized data, and will be size checked in the handler.
-    		break;
-    	default:
-			if (event.size != TypeSize(event.type)) {
-				event.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-				return;
-			}
-    }
+	if (event.size != 0 && event.data == nullptr) {
+		LOGe("data nullptr while size != 0");
+		event.result.returnCode = ERR_BUFFER_UNASSIGNED;
+		return;
+	}
+
+	switch (event.type) {
+	case CS_TYPE::CMD_ADD_BEHAVIOUR:
+	case CS_TYPE::CMD_REPLACE_BEHAVIOUR:
+	case CS_TYPE::CMD_MICROAPP:
+		// These types have variable sized data, and will be size checked in the handler.
+		break;
+	default:
+		if (event.size != TypeSize(event.type)) {
+			event.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+			return;
+		}
+	}
 
 	for (int i = 0; i < _listenerCount; i++) {
 		_listeners[i]->handleEvent(event);
