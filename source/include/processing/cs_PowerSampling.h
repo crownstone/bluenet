@@ -155,12 +155,13 @@ private:
 	CircularBuffer<int32_t>* _currentRmsMilliAmpHist;  //! Used to store a history of the current_rms
 	CircularBuffer<int32_t>* _filteredCurrentRmsHistMA; //! Used to store a history of the filtered current_rms
 	CircularBuffer<int32_t>* _voltageRmsMilliVoltHist; //! Used to store a history of the voltage_rms
-	int32_t _histCopy[POWER_SAMPLING_RMS_WINDOW_SIZE];     //! Used to copy a history to (so it can be used to calculate the median)
-	uint16_t _consecutivePwmOvercurrent;
+	int32_t _histCopy[POWER_SAMPLING_RMS_WINDOW_SIZE]; //! Used to copy a history to (so it can be used to calculate the median)
+	uint16_t _consecutiveDimmerOvercurrent = 0;
+	uint16_t _consecutiveOvercurrent = 0;
 
 
 	TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD) _currentMilliAmpThreshold;    //! Current threshold from settings.
-	TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM) _currentMilliAmpThresholdPwm; //! Current threshold when using dimmer from settings.
+	TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_DIMMER) _currentMilliAmpThresholdDimmer; //! Current threshold when using dimmer from settings.
 
 	uint32_t _lastEnergyCalculationTicks; //! Ticks of RTC when last energy calculation was performed.
 	int64_t _energyUsedmicroJoule; //! Energy used in micro joule
@@ -170,7 +171,7 @@ private:
 	switch_state_t _lastSwitchState; //! Stores the last seen switch state.
 	uint32_t _lastSwitchOffTicks;    //! RTC ticks when the switch was last turned off.
 	bool _lastSwitchOffTicksValid;   //! Keep up whether the last switch off time is valid.
-	bool _igbtFailureDetectionStarted; //! Keep up whether the IGBT failure detection has started yet.
+	bool _dimmerFailureDetectionStarted; //! Keep up whether the IGBT failure detection has started yet.
 	uint32_t _calibratePowerZeroCountDown = 4000 / TICK_INTERVAL_MS;
 
 	//! Store the adc config, so that the actual adc config can be changed.
@@ -253,11 +254,7 @@ private:
 
 	/** If current goes beyond predefined threshold levels, take action!
 	 */
-	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, int32_t voltageRmsMilliVolt, power_t & power);
-
-	/** Start IGBT failure detection
-	 */
-	void startIgbtFailureDetection();
+	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t voltageRmsMilliVolt, power_t & power);
 
 	void handleGetPowerSamples(PowerSamplesType type, uint8_t index, cs_result_t& result);
 

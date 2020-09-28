@@ -225,7 +225,10 @@
 #define NEGATIVE_POWER_THRESHOLD_WATT_CS_ZERO    -20.0f // Same, but for plug zero or builtin zero (less accurate power measurements).
 
 #define CURRENT_USAGE_THRESHOLD                  (16000) // Power usage threshold in mA at which the switch should be turned off.
-#define CURRENT_USAGE_THRESHOLD_PWM              (1000)  // Power usage threshold in mA at which the PWM should be turned off.
+#define CURRENT_USAGE_THRESHOLD_DIMMER           (1000)  // Power usage threshold in mA at which the PWM should be turned off.
+#define CURRENT_THRESHOLD_CONSECUTIVE            50 // Number of consecutive times the current has to be above the threshold before triggering the softfuse.
+#define CURRENT_THRESHOLD_DIMMER_CONSECUTIVE     20 // Number of consecutive times the current has to be above the threshold before triggering the softfuse.
+
 
 #define SWITCHCRAFT_THRESHOLD                    (500000) // Threshold for switch recognition (float).
 
