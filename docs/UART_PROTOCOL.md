@@ -1,5 +1,5 @@
 # UART Protocol 1.0
----------------
+-------------------
 
 ## Special characters
 
@@ -27,10 +27,10 @@ uint8   | Message type   | 1 | Type of UART message, see below.
 uint8[] | Payload        | N | Depends on message type.
 uint16  | CRC            | 2 | The CRC16 (CRC-16-CCITT) of everything after the size field.
 
-Type | Payload
---- | ---
-0 | [UART message](#uart_msg)
-128 | [Encrypted UART message](#encrypted_uart_msg)
+Type | Payload | Description
+---- | ------- | -----------
+0    | [UART message](#uart_msg) | Plain text UART message.
+128  | [Encrypted UART message](#encrypted_uart_msg) | Encrypted UART message. **Not implemented yet.**
 
 
 <a name="encrypted_uart_msg"></a>
