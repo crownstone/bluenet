@@ -130,8 +130,8 @@ Type  | Type name                     | Encrypted | Data   | Description
 10004 | Presence change               | Yes       | [Presence change packet](#presence_change_packet) | Sent when the presence has changed. Note: a profile ID can be at multiple locations at the same time.
 10005 | Factory reset                 | Yes       | -      | Sent when a factory reset will be performed.
 10102 | Mesh state msg                | Yes       | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | State of other Crownstones in the mesh (unencrypted).
-10103 | Mesh state part 0             | Yes       | [External state part 0](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_0_t) | Part of the state of other Crownstones in the mesh.
-10104 | Mesh state part 1             | Yes       | [External state part 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | Part of the state of other Crownstones in the mesh.
+10103 | Mesh state part 0             | Yes       | [External state part 0](#mesh_state_part_0) | Part of the state of other Crownstones in the mesh.
+10104 | Mesh state part 1             | Yes       | [External state part 1](#mesh_state_part_1) | Part of the state of other Crownstones in the mesh.
 10105 | Mesh result                   | Yes       | [Mesh result](#mesh_result_packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
 10106 | Mesh ack all                  | Yes       | [Mesh ack all result](../docs/PROTOCOL.md#result_packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
@@ -245,6 +245,22 @@ uint8 | Stone ID | 1 | ID of the stone.
 [Result packet](../docs/PROTOCOL.md#result_packet) | Result | N | The result.
 
 
+<a name="mesh_state_part_0"></a>
+### Mesh state part 0
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Stone ID | 1 | ID of the stone.
+[Mesh msg state 0](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_0_t) | State | 7 | The state.
+
+
+<a name="mesh_state_part_1"></a>
+### Mesh state part 1
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Stone ID | 1 | ID of the stone.
+[Mesh msg state 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | State | 7 | The state.
 
 
 

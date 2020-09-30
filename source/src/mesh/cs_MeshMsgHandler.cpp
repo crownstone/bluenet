@@ -236,8 +236,10 @@ cs_ret_code_t MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSiz
 	LOGMeshModelInfo("received: id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
 
 	// Send event
-	TYPIFY(EVT_MESH_EXT_STATE_0)* state = packet;
-	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_0, state, sizeof(*state));
+	TYPIFY(EVT_MESH_EXT_STATE_0) state;
+	state.stoneId = srcId;
+	state.meshState = *packet;
+	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_0, &state, sizeof(state));
 	event.dispatch();
 
 	if (!isFromSameState(srcId, srcId, packet->partialTimestamp)) {
@@ -260,8 +262,10 @@ cs_ret_code_t MeshMsgHandler::handleState1(uint8_t* payload, size16_t payloadSiz
 	LOGMeshModelInfo("received: id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
 
 	// Send event
-	TYPIFY(EVT_MESH_EXT_STATE_1)* state = packet;
-	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_1, state, sizeof(*state));
+	TYPIFY(EVT_MESH_EXT_STATE_1) state;
+	state.stoneId = srcId;
+	state.meshState = *packet;
+	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_1, &state, sizeof(state));
 	event.dispatch();
 
 	if (!isFromSameState(srcId, srcId, packet->partialTimestamp)) {
