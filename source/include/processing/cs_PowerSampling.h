@@ -95,13 +95,16 @@ private:
 	//! Operation mode of this device.
 	OperationMode _operationMode;
 
-	// Queue of buffers we can use for processing.
-	// If queue size == 1:
-	// - buffer[0] = last filtered.
-	// If queue size > 1:
-	// - buffer[size] = last unfiltered.
-	// - buffer[size-1] = last filtered.
-	// - buffer[size-2] = previous filtered.
+	/**
+	 * Queue of buffers we can use for processing.
+	 *
+	 * If queue size == 1:
+	 * - buffer[0] = last filtered.
+	 * If queue size > 1:
+	 * - buffer[size] = last unfiltered.
+	 * - buffer[size-1] = last filtered.
+	 * - buffer[size-2] = previous filtered.
+	 */
 	CircularBuffer<buffer_id_t> _bufferQueue;
 
 	cs_power_samples_header_t _lastSoftfuse;
@@ -252,9 +255,18 @@ private:
 	 */
 	void calculateEnergy();
 
-	/** If current goes beyond predefined threshold levels, take action!
+	/**
+	 * Check if the current goes above a threshold (for long enough).
+	 *
+	 * Emits an event when a softfuse triggers.
+	 * Stores the current buffer of the last buffer that's above threshold, before the softfuse triggered.
+	 *
+	 * @param[in] currentRmsMilliAmp             RMS current in mA of the last AC period.
+	 * @param[in] currentRmsMilliAmpFiltered     Filtered (averaged or so) RMS current in mA.
+	 * @param[in] voltageRmsMilliVolt            RMS voltage in mV of the last AC period.
+	 * @param[in] power                          Struct that holds the buffers.
 	 */
-	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t voltageRmsMilliVolt, power_t & power);
+	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, int32_t voltageRmsMilliVolt, power_t & power);
 
 	void handleGetPowerSamples(PowerSamplesType type, uint8_t index, cs_result_t& result);
 

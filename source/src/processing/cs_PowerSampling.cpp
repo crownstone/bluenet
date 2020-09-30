@@ -733,7 +733,7 @@ void PowerSampling::calculatePower(power_t & power) {
 	// Wait some time, for the measurement to converge.. why does this have to take so long?
 //	if (_zeroCurrentInitialized && _zeroVoltageInitialized) {
 	if (_zeroVoltageCount > 200 && _zeroCurrentCount > 200) {
-		checkSoftfuse(filteredCurrentRmsMedianMA, voltageRmsMilliVolt, power);
+		checkSoftfuse(currentRmsMA, filteredCurrentRmsMedianMA, voltageRmsMilliVolt, power);
 	}
 
 
@@ -940,7 +940,7 @@ void PowerSampling::calculateEnergy() {
 	}
 }
 
-void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t voltageRmsMilliVolt, power_t & power) {
+void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, int32_t voltageRmsMilliVolt, power_t & power) {
 
 	// Get the current state errors
 	TYPIFY(STATE_ERRORS) stateErrors;
@@ -982,10 +982,12 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t voltageRmsMilliV
 
 
 	// Store last buffer that could trigger the (dimmer) over current softfuse.
-	if ((currentRmsMA > _currentMilliAmpThresholdDimmer) && (!stateErrors.errors.overCurrentDimmer)) {
+	// Use the unfiltered current RMS for this, so we don't end up with a buffer that is no longer above threshold,
+	// while the filtered current RMS still is.
+	if ((currentRmsMilliAmp > _currentMilliAmpThresholdDimmer) && (!stateErrors.errors.overCurrentDimmer)) {
 		if ((switchState.state.dimmer != 0) ||
 				(switchState.state.relay == 0 && !recentlySwitchedOff && _dimmerFailureDetectionStarted) ||
-				((currentRmsMA > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent))
+				((currentRmsMilliAmp > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent))
 				) {
 			_lastSoftfuse.type = POWER_SAMPLES_TYPE_SOFTFUSE;
 			_lastSoftfuse.index = 0;
@@ -1010,7 +1012,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t voltageRmsMilliV
 	}
 
 	// Count number of consecutive times that the current is over the threshold.
-	if (currentRmsMA > _currentMilliAmpThreshold) {
+	if (currentRmsMilliAmpFiltered > _currentMilliAmpThreshold) {
 		++_consecutiveOvercurrent;
 	}
 	else {
@@ -1018,7 +1020,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t voltageRmsMilliV
 	}
 	if ((_consecutiveOvercurrent > CURRENT_THRESHOLD_CONSECUTIVE) && (!stateErrors.errors.overCurrent)) {
 		LOGw("Overcurrent: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
-				currentRmsMA,
+				currentRmsMilliAmpFiltered,
 				power.buf[power.voltageIndex],
 				power.buf[power.voltageIndex + power.numChannels],
 				power.buf[power.currentIndex],
@@ -1033,7 +1035,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t voltageRmsMilliV
 	}
 
 	// Count number of consecutive times that the current is over the dimmer threshold.
-	if (currentRmsMA > _currentMilliAmpThresholdDimmer) {
+	if (currentRmsMilliAmpFiltered > _currentMilliAmpThresholdDimmer) {
 		++_consecutiveDimmerOvercurrent;
 	}
 	else {
@@ -1043,7 +1045,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t voltageRmsMilliV
 		if (switchState.state.dimmer != 0) {
 			// If the dimmer is on:
 			LOGw("Dimmer overcurrent: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
-				currentRmsMA,
+				currentRmsMilliAmpFiltered,
 				power.buf[power.voltageIndex],
 				power.buf[power.voltageIndex + power.numChannels],
 				power.buf[power.currentIndex],
@@ -1059,7 +1061,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t voltageRmsMilliV
 		else if (switchState.state.relay == 0 && !recentlySwitchedOff && _dimmerFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
 			LOGw("Dimmer failure detected: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
-				currentRmsMA,
+				currentRmsMilliAmpFiltered,
 				power.buf[power.voltageIndex],
 				power.buf[power.voltageIndex + power.numChannels],
 				power.buf[power.currentIndex],
