@@ -91,6 +91,11 @@ class MicroApp: public EventListener {
 		uint16_t initMemory();
 
 		/**
+		 * Set IPC ram data.
+		 */
+		void setIpcRam();
+
+		/**
 		 * Store in flash information about the app (start address, checksum, etc.)
 		 */
 		void storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t size);

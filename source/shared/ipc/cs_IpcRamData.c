@@ -13,6 +13,11 @@ bluenet_ipc_ram_data_t m_bluenet_ipc_ram
     __attribute__((section(".bluenet_ipc_ram")))
     __attribute__((used));
 
+/*
+ * A simple additive checksum with inversion of the result to detect 
+ * all zeros. This is the checksum used in IP headers. The only difference
+ * is that here we run it over 8-bit data items rather than 16-bit words.
+ */
 uint16_t calculateChecksum(bluenet_ipc_ram_data_item_t * item) {
 	uint16_t sum = 0;
 

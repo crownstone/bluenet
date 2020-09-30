@@ -69,6 +69,68 @@ MicroApp::MicroApp(): EventListener() {
 	_debug = true;
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+enum ErrorCodesMicroapp {
+	ERR_NO_PAYLOAD             = 0x01,    // need at least an opcode in the payload
+	ERR_TOO_LARGE              = 0x02,
+};
+
+int microapp_callback(char *payload, uint16_t length) {
+	if (length == 0) return ERR_NO_PAYLOAD;
+	if (length > 255) return ERR_TOO_LARGE;
+
+	uint8_t opcode = payload[0];
+
+	switch(opcode) {
+	case 1: {
+		char *data = &(payload[1]);
+		data[length] = 0;
+		LOGi("%s", data);
+		break;
+	}
+	default:
+		LOGi("Unknown command of length %i", length);
+		int ml = length;
+		if (length > 4) ml = 4;
+		for (int i = 0; i < ml; i++) {
+			LOGi("0x%i", payload[i]);
+		}
+	}
+
+	return ERR_SUCCESS;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+void MicroApp::setIpcRam() {
+	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
+
+	// protocol version
+	const char protocol_version = 0;
+	buf[0] = protocol_version;
+	uint8_t len = 1;
+
+	// address of callback() function (is a C function)
+	uintptr_t address = (uintptr_t)&microapp_callback;
+	for (uint16_t i = 0; i < sizeof(uintptr_t); ++i) {
+		buf[i+len] = (uint8_t)(0xFF & (address >> (i*8)));
+	}
+	len += sizeof(uintptr_t);
+
+	// truncate (rather than assert)
+	if (len > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
+		len = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
+	}
+
+	// set buffer in RAM
+	setRamData(IPC_INDEX_CROWNSTONE_APP, buf, len);
+}
+
 uint16_t MicroApp::init() {
 	_buffer = new uint8_t[MICROAPP_CHUNK_SIZE];
 
@@ -86,6 +148,9 @@ uint16_t MicroApp::init() {
 	if (err_code != NRF_SUCCESS) {
 		return err_code;
 	}
+
+	// Set callback handler in IPC ram
+	setIpcRam();
 
 	// Actually, first check if there's anything there?
 
