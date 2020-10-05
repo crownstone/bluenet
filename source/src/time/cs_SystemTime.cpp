@@ -23,6 +23,8 @@
 
 #include <test/cs_Test.h>
 
+#include <util/cs_Lollipop.h>
+
 #define LOGSystemTimeDebug   LOGd
 #define LOGSystemTimeVerbose LOGnone
 
@@ -124,7 +126,7 @@ void SystemTime::tick(void*) {
 
 // ======================== Setters ========================
 
-void SystemTime::setTime(uint32_t time, bool throttled) {
+void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 	if (time == 0) {
 		return;
 	}
@@ -142,16 +144,24 @@ void SystemTime::setTime(uint32_t time, bool throttled) {
 	posixTimeStamp = time;
 	rtcTimeStamp = RTC::getCount();
 
-	// setting root_id 0 is a brutal claim to be root.
-	// it results in no crownstone sending time sync messages
-	// anymore until the master_clock_reelection_timeout_ms expires.
-	// However, it strictly enforces the synchronisation among crownstones
-	// that hear the setTime command and ensure propagation in the mesh
-	// when the true root clock node hears the message.
 	high_resolution_time_stamp_t stamp;
 	stamp.posix_s = time;
 	stamp.posix_ms = 0;
-	sendTimeSyncMessage(stamp, 0); // loopback will cause this device to synchronize.
+
+	// updates local time stamp.
+	logRootTimeStamp(stamp, 0);
+
+	// propagate stamp with highest priority id to synchronize mesh.
+	if (!unsynchronize) {
+		// Note:
+		// setting root_id 0 is a brutal claim to be root.
+		// It results in no crownstone sending time sync messages
+		// anymore until the master_clock_reelection_timeout_ms expires.
+		// It strictly enforces the synchronisation among crownstones
+		// because all nodes, even the true root clock, will update
+		// their local time.
+		sendTimeSyncMessage(stamp, 0);
+	}
 
 	event_t event(
 			CS_TYPE::EVT_TIME_SET,
@@ -228,7 +238,8 @@ void SystemTime::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::CMD_TEST_SET_TIME: {
 			LOGd("set test time");
-			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data), false);
+			// calls setTime, ignoring throttling and allowing desynchronization
+			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data), false, true);
 			TEST_PUSH_D(this, posixTimeStamp);
 			break;
 		}
@@ -277,13 +288,13 @@ void SystemTime::handleEvent(event_t & event) {
 
 // ======================== Synchronization ========================
 
-void SystemTime::logRootTimeStamp(time_sync_message_t syncmessage){
-	if(syncmessage.root_id == 0){
-		LOGSystemTimeDebug("root_id 0 sync message occured");
+void SystemTime::logRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id){
+	if(id == 0){
+		LOGSystemTimeDebug("clock id 0 sync message occured");
 	}
 
-	currentMasterClockId = syncmessage.root_id;
-	last_received_root_stamp = syncmessage.stamp;
+	currentMasterClockId = id;
+	last_received_root_stamp = stamp;
 	local_time_of_last_received_root_stamp_rtc_ticks = RTC::getCount();
 }
 
@@ -329,9 +340,15 @@ uint32_t SystemTime::syncTimeCoroutineAction(){
 
 void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 	LOGSystemTimeDebug("onTimeSyncMessageReceive");
-	if (isClockAuthority(syncmessage.root_id)){
+	bool version_has_incremented = Lollipop::compare(
+										last_received_root_stamp.version,
+										syncmessage.stamp.version,
+										time_stamp_version_lollipop_max);
+	bool version_is_equal = last_received_root_stamp.version == syncmessage.stamp.version;
+
+	if (version_has_incremented || (version_is_equal && isClockAuthority(syncmessage.root_id))) {
 		// sync message wons authority on the clock values.
-		logRootTimeStamp(syncmessage);
+		logRootTimeStamp(syncmessage.stamp, syncmessage.root_id);
 
 		// could postpone reelection if coroutine interface would be improved
 		// sync_routine.reschedule(master_clock_reelection_timeout_ms);
@@ -345,16 +362,13 @@ void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_i
 	LOGSystemTimeDebug("send time sync message");
 
 	time_sync_message_t syncmessage = {};
-	syncmessage.stamp = stamp; // getSynchronizedStamp();
-	syncmessage.root_id = id;// myId;
+	syncmessage.stamp = stamp;
+	syncmessage.root_id = id;
 
 	LOGSystemTimeDebug("send sync message: %d %d %d",
 			syncmessage.stamp.posix_s,
 			syncmessage.stamp.posix_ms,
 			syncmessage.root_id);
-
-	// immediate loopback:
-	logRootTimeStamp(syncmessage);
 
 	cs_mesh_msg_t syncmsg_wrapper;
 	syncmsg_wrapper.type = CS_MESH_MODEL_TYPE_TIME_SYNC;
@@ -367,9 +381,6 @@ void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_i
 	msgevt.dispatch();
 }
 
-/**
- * Returns true if the candidate is considered a clock authority relative to us.
- */
 bool SystemTime::isClockAuthority(stone_id_t candidate){
 	return candidate <= currentMasterClockId;
 }

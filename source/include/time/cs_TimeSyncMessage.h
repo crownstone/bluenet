@@ -12,8 +12,9 @@
  * message to be sent over mesh
  */
 struct __attribute__((__packed__)) high_resolution_time_stamp_t {
-	uint32_t posix_s;  // seconds since epoch
-	uint16_t posix_ms;  // miliseconds passed since posix_s.
+	uint32_t posix_s;        // seconds since epoch
+	uint16_t posix_ms : 10;  // miliseconds passed since posix_s.
+	uint16_t version : 6;    // synchronisation version
 };
 
 /**

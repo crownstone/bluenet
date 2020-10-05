@@ -61,11 +61,13 @@ public:
 	 * Dispatches EVT_TIME_SET.
 	 * Also sets it to state.
 	 *
-	 * @param[in] time       Posix time in seconds.
-	 * @param[in] throttled  When true, a new suntime won't be allowed to be set for a while.
-	 *                       Unless it's set with throttled false.
+	 * @param[in] time            Posix time in seconds.
+	 * @param[in] throttled       When true, a new suntime won't be allowed to be set for a while.
+	 *                            Unless it's set with throttled false.
+	 * @param[in] unsynchronize   setting this to true will prevent updating other mesh nodes
+	 *                            This enables purposefully unsynchronizing this node for testing.
 	 */
-	static void setTime(uint32_t time, bool throttled = true);
+	static void setTime(uint32_t time, bool throttled = true, bool unsynchronize = false);
 
 	/**
 	 * Set the sunrise and sunset times.
@@ -126,6 +128,8 @@ private:
 
 	static constexpr uint32_t stone_id_unknown_value = 0xff;
 
+	static constexpr uint8_t time_stamp_version_lollipop_max = (2 << 6) - 1;
+
 	static uint32_t posixTimeStamp; // old time stamp implementation.
 
 	// clock synchronization data (updated on sync)
@@ -144,7 +148,7 @@ private:
 
 	static uint32_t syncTimeCoroutineAction();
 	static void onTimeSyncMessageReceive(time_sync_message_t syncmessage);
-	static void logRootTimeStamp(time_sync_message_t syncmessage);
+	static void logRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id);
 
 	/**
 	 * Send a sync message for given stamp/id combo to the mesh.
