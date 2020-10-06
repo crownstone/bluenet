@@ -27,6 +27,11 @@ MESSAGE(STATUS "Bluetooth name ${BLUETOOTH_NAME}")
 
 INCLUDE(CheckIPOSupported)
 
+# Set a particular build type (do not add to cache)
+if(NOT CMAKE_BUILD_TYPE)
+	set(CMAKE_BUILD_TYPE                         Debug)
+endif()
+
 #######################################################################################################################
 
 # type of compiler we want to use, the COMPILER_TYPE can be empty if normal gcc and g++ compilers are intended
