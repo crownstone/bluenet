@@ -147,6 +147,12 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 	high_resolution_time_stamp_t stamp;
 	stamp.posix_s = time;
 	stamp.posix_ms = 0;
+	if(unsynchronize){
+		// incrementing the version would incur mesh syncrhonisation.
+		stamp.version = last_received_root_stamp.version;
+	} else {
+		stamp.version = Lollipop::next(last_received_root_stamp.version, time_stamp_version_lollipop_max);
+	}
 
 	// updates local time stamp.
 	logRootTimeStamp(stamp, 0);
@@ -333,6 +339,9 @@ uint32_t SystemTime::syncTimeCoroutineAction(){
 		return Coroutine::delay_ms(master_clock_update_period_ms);
 	}
 
+	LOGSystemTimeDebug("syncTimeCoroutineAction did nothing, waiting for reelection (myid=%d, masterid= %d, version=%d)",
+			myId, currentMasterClockId, last_received_root_stamp.version);
+
 	// we need to check at least once in a while so that if there are
 	// no more sync messages sent, the coroutine will eventually trigger a self promotion.
 	return Coroutine::delay_ms(master_clock_reelection_timeout_ms);
@@ -352,7 +361,15 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 
 		// could postpone reelection if coroutine interface would be improved
 		// sync_routine.reschedule(master_clock_reelection_timeout_ms);
+	} else {
+		LOGSystemTimeDebug("dropped sync message {id=%d, version=%d}, current data {id=%d, version=%d}",
+				syncmessage.root_id,
+				syncmessage.stamp.version,
+				currentMasterClockId,
+				last_received_root_stamp.version
+				);
 	}
+
 #ifdef DEBUG
 	pushSyncMessageToTestSuite(syncmessage);
 #endif
@@ -365,10 +382,11 @@ void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_i
 	syncmessage.stamp = stamp;
 	syncmessage.root_id = id;
 
-	LOGSystemTimeDebug("send sync message: %d %d %d",
+	LOGSystemTimeDebug("send sync message: %d %d %d %d",
 			syncmessage.stamp.posix_s,
 			syncmessage.stamp.posix_ms,
-			syncmessage.root_id);
+			syncmessage.root_id,
+			syncmessage.stamp.version);
 
 	cs_mesh_msg_t syncmsg_wrapper;
 	syncmsg_wrapper.type = CS_MESH_MODEL_TYPE_TIME_SYNC;
@@ -419,16 +437,17 @@ void SystemTime::publishSyncMessageForTesting(){
 void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage){
 	char valuestring [50];
 
-	LOGSystemTimeDebug("push sync message to host: %d %d %d",
+	LOGSystemTimeDebug("push sync message to host: %d %d %d %d",
 				syncmessage.stamp.posix_s,
 				syncmessage.stamp.posix_ms,
-				syncmessage.root_id);
+				syncmessage.root_id,
+				syncmessage.stamp.version);
 
-	sprintf(valuestring, "%lu,%u,%u",
+	sprintf(valuestring, "%lu,%u,%u,%u",
 			syncmessage.stamp.posix_s,
 			syncmessage.stamp.posix_ms,
-			syncmessage.root_id
-			);
+			syncmessage.root_id,
+			syncmessage.stamp.version);
 
 	TEST_PUSH_STATIC_S("SystemTime", "timesyncmsg", valuestring);
 }
