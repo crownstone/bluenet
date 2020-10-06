@@ -2,16 +2,23 @@
 
 # Get the scripts path: the path where this file is located.
 path="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-source $path/_env.sh
+
 source $path/_utils.sh
+
+BLUENET_WORKSPACE_DIR="$path/../.."
+BLUENET_BUILD_DIR="$BLUENET_WORKSPACE_DIR/build"
 
 bluenet_logo
 
 usage() {
 	echo "Bluenet bash script"
 	echo
-	echo "usage: ./bluenet.sh [args]              run script"
+	echo "Usage: ./bluenet.sh [args]              run script"
 	echo "   or: VERBOSE=1 ./bluenet.sh [args]    run script in verbose mode"
+	echo
+	echo "Common usage examples:"
+	echo "   Build and upload all:                ./bluenet.sh -j8 -ebu -SHFBP -t mytarget"
+	echo "   Build and upload firmware only:      ./bluenet.sh -j8 -bu -FP -t mytarget"
 	echo
 	echo "Commands:"
 	echo "   -b, --build                          cross-compile target"
@@ -163,8 +170,8 @@ target=${target:-default}
 jobs=${jobs:-1}
 
 # Load configuration files.
-cs_info "Load configuration from: ${path}/_config.sh"
-source $path/_config.sh $target
+#cs_info "Load configuration from: ${path}/_config.sh"
+#source $path/_config.sh $target
 
 check_target_changed() {
 	# old_target="$(grep "BOARD_TARGET:STRING=.*" $BLUENET_BUILD_DIR/CMakeCache.txt | sed 's/BOARD_TARGET:STRING=//')"

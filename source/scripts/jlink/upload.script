@@ -1,3 +1,0 @@
-loadbin @BIN@ @START_ADDRESS@
-r
-qc
