@@ -369,6 +369,18 @@ struct __attribute((packed)) presence_change_t {
 
 
 
+struct __attribute__((__packed__)) mesh_state_part_0_t {
+	stone_id_t stoneId;
+	cs_mesh_model_msg_state_0_t meshState;
+};
+
+struct __attribute__((__packed__)) mesh_state_part_1_t {
+	stone_id_t stoneId;
+	cs_mesh_model_msg_state_1_t meshState;
+};
+
+
+
 struct cs_mesh_iv_index_t {
 	// Same as net_flash_data_iv_index_t
     uint32_t iv_index;

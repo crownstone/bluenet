@@ -226,8 +226,8 @@
 
 #define CURRENT_USAGE_THRESHOLD                  (16000) // Power usage threshold in mA at which the switch should be turned off.
 #define CURRENT_USAGE_THRESHOLD_DIMMER           (1000)  // Power usage threshold in mA at which the PWM should be turned off.
-#define CURRENT_THRESHOLD_CONSECUTIVE            50 // Number of consecutive times the current has to be above the threshold before triggering the softfuse.
-#define CURRENT_THRESHOLD_DIMMER_CONSECUTIVE     20 // Number of consecutive times the current has to be above the threshold before triggering the softfuse.
+#define CURRENT_THRESHOLD_CONSECUTIVE            100 // Number of consecutive times the current has to be above the threshold before triggering the softfuse.
+#define CURRENT_THRESHOLD_DIMMER_CONSECUTIVE     20  // Number of consecutive times the current has to be above the threshold before triggering the softfuse.
 
 
 #define SWITCHCRAFT_THRESHOLD                    (500000) // Threshold for switch recognition (float).
