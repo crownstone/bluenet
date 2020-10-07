@@ -154,11 +154,15 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 		stamp.version = Lollipop::next(last_received_root_stamp.version, time_stamp_version_lollipop_max);
 	}
 
-	// updates local time stamp.
-	logRootTimeStamp(stamp, 0);
+	if (unsynchronize) {
+		// just log the stamp locally, with myId as clock id.
+		// Don't mention anything to the mesh.
+		logRootTimeStamp(stamp, myId);
+	} else {
+		// log with root_id 0 and broadcast this over the mesh.
+		logRootTimeStamp(stamp, 0);
+		sendTimeSyncMessage(stamp, 0);
 
-	// propagate stamp with highest priority id to synchronize mesh.
-	if (!unsynchronize) {
 		// Note:
 		// setting root_id 0 is a brutal claim to be root.
 		// It results in no crownstone sending time sync messages
@@ -166,7 +170,6 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 		// It strictly enforces the synchronisation among crownstones
 		// because all nodes, even the true root clock, will update
 		// their local time.
-		sendTimeSyncMessage(stamp, 0);
 	}
 
 	event_t event(
