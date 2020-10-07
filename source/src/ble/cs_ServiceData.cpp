@@ -10,7 +10,7 @@
 #include "drivers/cs_RTC.h"
 #include "drivers/cs_Serial.h"
 #include "processing/cs_EncryptionHandler.h"
-#include "protocol/cs_UartProtocol.h"
+#include "uart/cs_UartHandler.h"
 #include "storage/cs_State.h"
 #include "util/cs_Utils.h"
 #include "protocol/mesh/cs_MeshModelPacketHelper.h"
@@ -207,7 +207,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 	BLEutil::printArray(_serviceData.array, sizeof(service_data_t));
 //		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u", serviceData->params.type, serviceData->params.crownstoneId, serviceData->params.switchState, serviceData->params.flagBitmask, serviceData->params.temperature, serviceData->params.powerUsageReal, serviceData->params.accumulatedEnergy, serviceData->params.partialTimestamp);
 #endif
-	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_SERVICE_DATA, _serviceData.array, sizeof(service_data_t));
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_SERVICE_DATA, _serviceData.array, sizeof(service_data_t));
 
 //		Mesh::getInstance().printRssiList();
 

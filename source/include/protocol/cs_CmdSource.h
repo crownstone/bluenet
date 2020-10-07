@@ -12,7 +12,8 @@
 enum cs_cmd_source_type {
 	CS_CMD_SOURCE_TYPE_ENUM = 0,       // Source ID is one of cs_cmd_source_id.
 	CS_CMD_SOURCE_TYPE_BEHAVIOUR = 1,  // Source ID is the Nth behaviour rule.
-	CS_CMD_SOURCE_TYPE_BROADCAST = 3   // Source ID is the device ID.
+	CS_CMD_SOURCE_TYPE_BROADCAST = 3,  // Source ID is the device ID.
+	CS_CMD_SOURCE_TYPE_UART = 4,       // Source ID is the device ID.
 };
 
 /**

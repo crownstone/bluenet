@@ -127,7 +127,7 @@ enum class CS_TYPE: uint16_t {
 //	CONFIG_POWER_ZERO_AVG_WINDOW            = 48,
 //	CONFIG_MESH_ACCESS_ADDRESS              = 49,
 	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD      = 50,
-	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM  = 51,
+	CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_DIMMER  = 51,
 	CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP    = 52,
 	CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN  = 53,
 	CONFIG_PWM_ALLOWED                      = 54,
@@ -323,7 +323,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_GET_ADC_CHANNEL_SWAPS,                        // Get number of detected ADC channel swaps.
 	CMD_GET_RAM_STATS,                                // Get RAM statistics.
 
-	CMD_MICROAPP_UPLOAD,                              // MicroApp upload (e.g. Arduino code).
+	CMD_MICROAPP,                                     // MicroApp upload (e.g. Arduino code).
 	EVT_MICROAPP,                                     // MicroApp event (e.g. write done)
 
 	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
@@ -407,7 +407,7 @@ typedef uint16_t TYPIFY(CONFIG_SCAN_DURATION);
 typedef uint16_t TYPIFY(CONFIG_SCAN_INTERVAL);
 typedef uint16_t TYPIFY(CONFIG_SCAN_WINDOW);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD);
-typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM);
+typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_DIMMER);
 typedef     BOOL TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING);
 typedef     BOOL TYPIFY(CONFIG_SWITCH_LOCKED);
 typedef     BOOL TYPIFY(CONFIG_SWITCHCRAFT_ENABLED);
@@ -544,8 +544,8 @@ typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING);
 typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING);
 typedef void TYPIFY(EVT_MESH_SYNC_FAILED);
 typedef void TYPIFY(EVT_MESH_PAGES_ERASED);
-typedef cs_mesh_model_msg_state_0_t TYPIFY(EVT_MESH_EXT_STATE_0);
-typedef cs_mesh_model_msg_state_1_t TYPIFY(EVT_MESH_EXT_STATE_1);
+typedef mesh_state_part_0_t TYPIFY(EVT_MESH_EXT_STATE_0);
+typedef mesh_state_part_1_t TYPIFY(EVT_MESH_EXT_STATE_1);
 typedef uint32_t TYPIFY(CMD_SEND_MESH_MSG_SET_TIME);
 typedef set_ibeacon_config_id_packet_t TYPIFY(CMD_SET_IBEACON_CONFIG_ID);
 typedef void TYPIFY(CMD_SEND_MESH_MSG_NOOP);
@@ -557,7 +557,7 @@ typedef void TYPIFY(CMD_GET_RESET_REASON);
 typedef uint8_t TYPIFY(CMD_GET_GPREGRET);
 typedef void TYPIFY(CMD_GET_ADC_CHANNEL_SWAPS);
 typedef void TYPIFY(CMD_GET_RAM_STATS);
-typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP_UPLOAD);
+typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP);
 typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);

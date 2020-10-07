@@ -9,7 +9,7 @@
 #include <events/cs_Event.h>
 #include <events/cs_EventListener.h>
 
-#define MAX_EVENT_LISTENERS 32
+#define MAX_EVENT_LISTENERS 48
 
 /**
  * Event dispatcher.

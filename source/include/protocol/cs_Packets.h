@@ -21,7 +21,8 @@
 #define LEGACY_MULTI_SWITCH_MAX_ITEM_COUNT 18
 
 #define VALIDATION_KEY_LENGTH   4
-#define SESSION_NONCE_LENGTH 	5
+#define SESSION_NONCE_LENGTH    5
+#define PACKET_NONCE_LENGTH     3
 
 /**
  * Packets (structs) that are used over the air, over uart, or stored in flash.
@@ -30,6 +31,12 @@
  *
  * If the definition becomes large, move it to its own file and include it in this file.
  */
+
+/**
+ * Length of a MAC address
+ * TODO: check if this length is similar to BLE_GAP_ADDR_LEN
+ */
+#define MAC_ADDRESS_LEN 6
 
 enum EncryptionAccessLevel {
 	ADMIN               = 0,
@@ -362,6 +369,18 @@ struct __attribute((packed)) presence_change_t {
 
 
 
+struct __attribute__((__packed__)) mesh_state_part_0_t {
+	stone_id_t stoneId;
+	cs_mesh_model_msg_state_0_t meshState;
+};
+
+struct __attribute__((__packed__)) mesh_state_part_1_t {
+	stone_id_t stoneId;
+	cs_mesh_model_msg_state_1_t meshState;
+};
+
+
+
 struct cs_mesh_iv_index_t {
 	// Same as net_flash_data_iv_index_t
     uint32_t iv_index;
@@ -417,6 +436,7 @@ enum PowerSamplesType {
 	POWER_SAMPLES_TYPE_NOW_FILTERED = 2,
 	POWER_SAMPLES_TYPE_NOW_UNFILTERED = 3,
 	POWER_SAMPLES_TYPE_SOFTFUSE = 4,
+	POWER_SAMPLES_TYPE_SWITCH = 5,
 };
 
 struct __attribute__((packed)) cs_power_samples_header_t {

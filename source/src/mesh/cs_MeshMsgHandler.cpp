@@ -12,7 +12,7 @@
 #include <mesh/cs_MeshMsgHandler.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
-#include <protocol/cs_UartProtocol.h>
+#include <uart/cs_UartHandler.h>
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
 
@@ -185,7 +185,7 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSi
 		_lastReveivedSetTime = timestamp;
 		event_t event(CS_TYPE::CMD_SET_TIME, &timestamp, sizeof(timestamp));
 		event.dispatch();
-		UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_CMD_TIME, payload, payloadSize);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_CMD_TIME, payload, payloadSize);
 //		return event.result.returnCode;
 		return ERR_SUCCESS;
 	}
@@ -221,7 +221,7 @@ cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadS
 
 	// copy metadata into event data if it is an original ping message.
 	// (i.e. if sender and rssi hasn't been filled in yet.)
-	if(packet->sender_id == 0xff){ // && hops == 0?
+	if (packet->sender_id == 0) { // && hops == 0?
 		packet->rssi = rssi;
 		packet->sender_id = srcId;
 		packet->channel = channel;
@@ -262,8 +262,10 @@ cs_ret_code_t MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSiz
 	LOGMeshModelInfo("received: id=%u switch=%u flags=%u powerFactor=%i powerUsage=%i ts=%u", srcId, packet->switchState, packet->flags, packet->powerFactor, packet->powerUsageReal, packet->partialTimestamp);
 
 	// Send event
-	TYPIFY(EVT_MESH_EXT_STATE_0)* state = packet;
-	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_0, state, sizeof(*state));
+	TYPIFY(EVT_MESH_EXT_STATE_0) state;
+	state.stoneId = srcId;
+	state.meshState = *packet;
+	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_0, &state, sizeof(state));
 	event.dispatch();
 
 	if (!isFromSameState(srcId, srcId, packet->partialTimestamp)) {
@@ -286,8 +288,10 @@ cs_ret_code_t MeshMsgHandler::handleState1(uint8_t* payload, size16_t payloadSiz
 	LOGMeshModelInfo("received: id=%u temp=%i energy=%i ts=%u", srcId, packet->temperature, packet->energyUsed, packet->partialTimestamp);
 
 	// Send event
-	TYPIFY(EVT_MESH_EXT_STATE_1)* state = packet;
-	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_1, state, sizeof(*state));
+	TYPIFY(EVT_MESH_EXT_STATE_1) state;
+	state.stoneId = srcId;
+	state.meshState = *packet;
+	event_t event(CS_TYPE::EVT_MESH_EXT_STATE_1, &state, sizeof(state));
 	event.dispatch();
 
 	if (!isFromSameState(srcId, srcId, packet->partialTimestamp)) {
@@ -358,7 +362,7 @@ cs_ret_code_t MeshMsgHandler::handleProfileLocation(uint8_t* payload, size16_t p
 	eventData.fromMesh = true;
 	event_t event(CS_TYPE::EVT_RECEIVED_PROFILE_LOCATION, &eventData, sizeof(eventData));
 	event.dispatch();
-	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_PROFILE_LOCATION, payload, payloadSize);
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_PROFILE_LOCATION, payload, payloadSize);
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
 }
@@ -369,7 +373,7 @@ cs_ret_code_t MeshMsgHandler::handleSetBehaviourSettings(uint8_t* payload, size1
 	TYPIFY(STATE_BEHAVIOUR_SETTINGS)* eventDataPtr = packet;
 //	cs_state_data_t stateData(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, (uint8_t*)eventDataPtr, sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS)));
 //	State::getInstance().set(stateData);
-	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_SET_BEHAVIOUR_SETTINGS, payload, payloadSize);
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_SET_BEHAVIOUR_SETTINGS, payload, payloadSize);
 	return State::getInstance().set(CS_TYPE::STATE_BEHAVIOUR_SETTINGS, eventDataPtr, sizeof(TYPIFY(STATE_BEHAVIOUR_SETTINGS)));
 }
 
@@ -379,7 +383,7 @@ cs_ret_code_t MeshMsgHandler::handleTrackedDeviceRegister(uint8_t* payload, size
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_REGISTER, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER)));
 	event.dispatch();
-	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_TRACKED_DEVICE_REGISTER, payload, payloadSize);
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_TRACKED_DEVICE_REGISTER, payload, payloadSize);
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
 }
@@ -390,7 +394,7 @@ cs_ret_code_t MeshMsgHandler::handleTrackedDeviceToken(uint8_t* payload, size16_
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_TOKEN, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN)));
 	event.dispatch();
-	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_TRACKED_DEVICE_TOKEN, payload, payloadSize);
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_TRACKED_DEVICE_TOKEN, payload, payloadSize);
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
 }
@@ -401,7 +405,7 @@ cs_ret_code_t MeshMsgHandler::handleTrackedDeviceHeartbeat(uint8_t* payload, siz
 	TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_TRACKED_DEVICE_HEARTBEAT, eventDataPtr, sizeof(TYPIFY(EVT_MESH_TRACKED_DEVICE_HEARTBEAT)));
 	event.dispatch();
-	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_TRACKED_DEVICE_HEARTBEAT, payload, payloadSize);
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_TRACKED_DEVICE_HEARTBEAT, payload, payloadSize);
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
 }
@@ -422,7 +426,7 @@ cs_ret_code_t MeshMsgHandler::handleSyncRequest(uint8_t* payload, size16_t paylo
 	TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)* eventDataPtr = packet;
 	event_t event(CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING, eventDataPtr, sizeof(TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)));
 	event.dispatch();
-	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_SYNC_REQUEST, payload, payloadSize);
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_SYNC_REQUEST, payload, payloadSize);
 //	return event.result.returnCode;
 	return ERR_SUCCESS;
 }
@@ -538,10 +542,10 @@ void MeshMsgHandler::sendResult(uart_msg_mesh_result_packet_header_t& resultHead
 	BLEutil::printArray(resultData.data, resultData.len);
 
 	// Send out result.
-	UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + resultData.len);
-	UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
-	UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, resultData.data, resultData.len);
-	UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_MESH_RESULT);
+	UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + resultData.len);
+	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
+	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, resultData.data, resultData.len);
+	UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_MESH_RESULT);
 	LOGMeshModelDebug("success id=%u", resultHeader.stoneId);
 }
 

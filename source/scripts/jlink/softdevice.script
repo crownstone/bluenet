@@ -1,5 +1,0 @@
-st
-loadbin @SOFTDEVICE_DIR@/softdevice_uicr.bin 0x10001000
-loadbin @SOFTDEVICE_DIR@/softdevice_mainpart.bin 0
-r
-qc

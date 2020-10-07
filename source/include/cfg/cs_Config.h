@@ -119,6 +119,7 @@
 
 // ----- TIMERS -----
 // Soft device uses timer 0
+// Mesh uses timer 3 (BEARER_ACTION_TIMER_INDEX)
 #define CS_PWM_TIMER                             NRF_TIMER4
 #define CS_PWM_TIMER_IRQ                         TIMER4_IRQHandler
 #define CS_PWM_IRQn                              TIMER4_IRQn
@@ -203,6 +204,7 @@
 #define POWER_ZERO                               1500
 */
 // Octave: a=0.05; x=[0:1000]; y=(1-a).^x; y2=cumsum(y)*a; figure(1); plot(x,y); figure(2); plot(x,y2); find(y2 > 0.99)(1)
+// Python: d=0.1; x=range(0,1000); y=np.power(1.0 - d, x); y2=np.cumsum(y) * d; indices=np.where(y2 > 0.99); print(indices[0][0])
 #define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            20  // Is divided by 1000, so 20 is a discount of 0.02. // 99% of the average is influenced by the last 228 values
 //#define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            1000 // No averaging
 #define CURRENT_ZERO_EXP_AVG_DISCOUNT            100 // Is divided by 1000, so 100 is a discount of 0.1. // 99% of the average is influenced by the last 44 values
@@ -214,8 +216,19 @@
 #define POWER_SAMPLING_CURVE_HALF_WINDOW_SIZE    5 // Half window size used for filtering the current curve. Can't just be any value!
 //#define POWER_SAMPLING_CURVE_HALF_WINDOW_SIZE    16 // Half window size used for filtering the current curve. Can't just be any value!
 
+
+#define POWER_DIFF_THRESHOLD_PART                0.10f  // When difference is 10% larger or smaller, consider it a significant change.
+#define POWER_DIFF_THRESHOLD_MIN_WATT            10.0f  // But the difference must also be at least so many Watts.
+#define NEGATIVE_POWER_THRESHOLD_WATT            -10.0f // Only if power is below threshold, it may be negative.
+#define POWER_DIFF_THRESHOLD_PART_CS_ZERO        0.10f  // Same, but for plug zero or builtin zero (less accurate power measurements).
+#define POWER_DIFF_THRESHOLD_MIN_WATT_CS_ZERO    15.0f  // Same, but for plug zero or builtin zero (less accurate power measurements).
+#define NEGATIVE_POWER_THRESHOLD_WATT_CS_ZERO    -20.0f // Same, but for plug zero or builtin zero (less accurate power measurements).
+
 #define CURRENT_USAGE_THRESHOLD                  (16000) // Power usage threshold in mA at which the switch should be turned off.
-#define CURRENT_USAGE_THRESHOLD_PWM              (1000)  // Power usage threshold in mA at which the PWM should be turned off.
+#define CURRENT_USAGE_THRESHOLD_DIMMER           (1000)  // Power usage threshold in mA at which the PWM should be turned off.
+#define CURRENT_THRESHOLD_CONSECUTIVE            100 // Number of consecutive times the current has to be above the threshold before triggering the softfuse.
+#define CURRENT_THRESHOLD_DIMMER_CONSECUTIVE     20  // Number of consecutive times the current has to be above the threshold before triggering the softfuse.
+
 
 #define SWITCHCRAFT_THRESHOLD                    (500000) // Threshold for switch recognition (float).
 

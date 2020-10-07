@@ -63,8 +63,8 @@ uint32_t RssiDataTracker::sendPrimaryPingMessage(){
 	static rssi_ping_message_t pingmsg = {0};
 	pingmsg.sample_id = ping_sample_index++; // (0)
 	pingmsg.rssi = 0xff;                     // (1)
-	pingmsg.sender_id = 0xff;	             // (1)
-	pingmsg.recipient_id = 0xff;             // (2)
+	pingmsg.sender_id = 0;	                 // (1)
+	pingmsg.recipient_id = 0;                // (2)
 
 	sendPingMsg(&pingmsg);
 
@@ -169,7 +169,7 @@ void RssiDataTracker::handleEvent(event_t& evt){
 	case CS_TYPE::EVT_MESH_RSSI_PING: {
 		auto pingmsg_ptr = reinterpret_cast<rssi_ping_message_t*>(evt.data);
 		RSSIDATATRACKER_LOGv("incoming pingcounter: %d ", received_pingcounter++);
-		if(pingmsg_ptr->recipient_id == 0xff){
+		if(pingmsg_ptr->recipient_id == 0){
 			handlePrimaryPingMessage(pingmsg_ptr);
 		} else {
 			handleSecondaryPingMessage(pingmsg_ptr);

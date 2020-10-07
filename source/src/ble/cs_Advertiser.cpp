@@ -9,7 +9,7 @@
 #include "cfg/cs_DeviceTypes.h"
 #include "cfg/cs_UuidConfig.h"
 #include "events/cs_EventDispatcher.h"
-#include <protocol/cs_UartProtocol.h>
+#include <uart/cs_UartHandler.h>
 
 #define LOGAdvertiserDebug LOGnone
 #define LOGAdvertiserVerbose LOGnone
@@ -507,7 +507,7 @@ void Advertiser::handleEvent(event_t & event) {
 				stopAdvertising();
 			}
 			// TODO: should be done via event.
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, (uint8_t*)&enable, 1);
+			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ADVERTISEMENT_ENABLED, (uint8_t*)&enable, 1);
 			break;
 		}
 		case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: {

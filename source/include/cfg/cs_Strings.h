@@ -104,6 +104,7 @@
 #define STR_ERR_FORGOT_TO_ASSIGN_STACK           "Forgot to assign stack!"
 #define STR_ERR_ALREADY_STOPPED                  "Already stopped!"
 #define STR_ERR_MULTIPLE_OF_16                   "Data must be multiple of 16B"
+#define STR_ERR_NOT_INITIALIZED                  "Not initialized"
 
 /** Error messages
  *
@@ -142,7 +143,8 @@
 #define FMT_CHAR_EXISTS                          "Characteristic %s exists"
 #define FMT_CHAR_DOES_NOT_EXIST                  "Characteristic %s does not exist"
 
-#define FMT_WRONG_PAYLOAD_LENGTH                 "Wrong payload length received: %u"
+#define FMT_WRONG_PAYLOAD_LENGTH                 "Wrong payload length received: %u (should be %u)"
+#define FMT_ZERO_PAYLOAD_LENGTH                  "Wrong payload length received: %u (should not be zero)"
 #define FMT_SELECT_TYPE                          "Select %s type: %d"
 #define FMT_WRITE_TYPE                           "Write %s type: %d"
 

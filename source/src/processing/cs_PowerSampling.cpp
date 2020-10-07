@@ -13,7 +13,7 @@
 #include "events/cs_EventDispatcher.h"
 #include "processing/cs_RecognizeSwitch.h"
 #include "protocol/cs_UartMsgTypes.h"
-#include "protocol/cs_UartProtocol.h"
+#include "uart/cs_UartHandler.h"
 #include "protocol/cs_Packets.h"
 #include "storage/cs_State.h"
 #include "structs/buffer/cs_InterleavedBuffer.h"
@@ -23,11 +23,13 @@
 
 #include <cmath>
 
+#define LOGPowerSamplingDebug LOGd
+
 // Define test pin to enable gpio debug.
 //#define PS_TEST_PIN 20
 
 // Define to print power samples
-#define PRINT_POWER_SAMPLES
+//#define PRINT_POWER_SAMPLES
 
 #define VOLTAGE_CHANNEL_IDX 0
 #define CURRENT_CHANNEL_IDX 1
@@ -49,12 +51,13 @@ PowerSampling::PowerSampling() :
 		_isInitialized(false),
 		_adc(NULL),
 		_bufferQueue(CS_ADC_NUM_BUFFERS),
-		_consecutivePwmOvercurrent(0),
+		_switchHist(switchHistSize),
+		_consecutiveDimmerOvercurrent(0),
 		_lastEnergyCalculationTicks(0),
 		_energyUsedmicroJoule(0),
 		_lastSwitchOffTicks(0),
 		_lastSwitchOffTicksValid(false),
-		_igbtFailureDetectionStarted(false)
+		_dimmerFailureDetectionStarted(false)
 {
 	_adc = &(ADC::getInstance());
 	_powerMilliWattHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
@@ -91,8 +94,35 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	settings.get(CS_TYPE::CONFIG_CURRENT_ADC_ZERO, &_currentZero, sizeof(_currentZero));
 	settings.get(CS_TYPE::CONFIG_POWER_ZERO, &_powerZero, sizeof(_powerZero));
 	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD, &_currentMilliAmpThreshold, sizeof(_currentMilliAmpThreshold));
-	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_PWM, &_currentMilliAmpThresholdPwm, sizeof(_currentMilliAmpThresholdPwm));
+	settings.get(CS_TYPE::CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_DIMMER, &_currentMilliAmpThresholdDimmer, sizeof(_currentMilliAmpThresholdDimmer));
 	bool switchcraftEnabled = settings.isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
+
+	switch (boardConfig.hardwareBoard) {
+		// Builtin zero
+		case ACR01B1A:
+		case ACR01B1B:
+		case ACR01B1C:
+		case ACR01B1D:
+		case ACR01B1E:
+		// Plug zero
+		case ACR01B2A:
+		case ACR01B2B:
+		case ACR01B2C:
+		case ACR01B2E:
+		case ACR01B2G: {
+			_powerDiffThresholdPart =          POWER_DIFF_THRESHOLD_PART_CS_ZERO;
+			_powerDiffThresholdMinMilliWatt =  POWER_DIFF_THRESHOLD_MIN_WATT_CS_ZERO * 1000.0f;
+			_negativePowerThresholdMilliWatt = NEGATIVE_POWER_THRESHOLD_WATT_CS_ZERO * 1000.0f;
+			break;
+		}
+		default: {
+			_powerDiffThresholdPart =          POWER_DIFF_THRESHOLD_PART;
+			_powerDiffThresholdMinMilliWatt =  POWER_DIFF_THRESHOLD_MIN_WATT * 1000.0f;
+			_negativePowerThresholdMilliWatt = NEGATIVE_POWER_THRESHOLD_WATT * 1000.0f;
+			break;
+		}
+	}
+	LOGd("_powerDiffThresholdPart=%i _powerDiffThresholdMinMilliWatt=%i _negativePowerThresholdMilliWatt=%i", (int32_t)_powerDiffThresholdPart, (int32_t)_powerDiffThresholdMinMilliWatt, (int32_t)_negativePowerThresholdMilliWatt);
 
 	RecognizeSwitch::getInstance().init();
 	TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD) switchcraftThreshold;
@@ -119,6 +149,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	_currentRmsMilliAmpHist->init(); // Allocates buffer
 	_voltageRmsMilliVoltHist->init(); // Allocates buffer
 	_filteredCurrentRmsHistMA->init(); // Allocates buffer
+	_switchHist.init(); // Allocates buffer
 
 	// Init moving median filter
 	unsigned halfWindowSize = POWER_SAMPLING_CURVE_HALF_WINDOW_SIZE;
@@ -261,7 +292,7 @@ void PowerSampling::handleEvent(event_t & event) {
 			while (!_bufferQueue.empty()) {
 				ADC::getInstance().releaseBuffer(_bufferQueue.pop());
 			}
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
+			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
 			//		RecognizeSwitch::getInstance().skip(2);
 			break;
 		}
@@ -318,6 +349,10 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 
 	_bufferQueue.push(bufIndex);
 
+	TYPIFY(STATE_SWITCH_STATE) switchState;
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
+	_switchHist.push(switchState);
+
 	power_t power;
 	power.buf = InterleavedBuffer::getInstance().getBuffer(filteredBufIndex);
 	power.bufSize = CS_ADC_BUF_SIZE;
@@ -360,7 +395,11 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 	calculateEnergy();
 
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
-		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
+//		int32_t powerUsage = _slowAvgPowerMilliWatt;
+//		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &powerUsage, sizeof(powerUsage));
+//		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &_avgPowerMilliWatt, sizeof(_avgPowerMilliWatt));
+		int32_t slowAvgPowerMilliWatt = _slowAvgPowerMilliWatt;
+		State::getInstance().set(CS_TYPE::STATE_POWER_USAGE, &slowAvgPowerMilliWatt, sizeof(slowAvgPowerMilliWatt));
 		State::getInstance().set(CS_TYPE::STATE_ACCUMULATED_ENERGY, &_energyUsedmicroJoule, sizeof(_energyUsedmicroJoule));
 	}
 
@@ -373,6 +412,36 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 		EventDispatcher::getInstance().dispatch(event);
 	}
 
+
+	if (_switchHist.size() >= 3) {
+		if (_switchHist[_switchHist.size() - 2].asInt != _switchHist[_switchHist.size() - 1].asInt) {
+			// Switch changed state since previous buffer.
+			// Store the current and previous buffer.
+			buffer_id_t prevFilteredBufferIndex = _bufferQueue[_bufferQueue.size() - 2 - numUnfilteredBuffers]; // Previous filtered buffer.
+			uint16_t count = InterleavedBuffer::getChannelLength();
+			_lastSwitchSamplesHeader.type = POWER_SAMPLES_TYPE_SWITCH;
+			_lastSwitchSamplesHeader.count = count;
+			_lastSwitchSamplesHeader.unixTimestamp = SystemTime::posix();
+			_lastSwitchSamplesHeader.delayUs = 0;
+			_lastSwitchSamplesHeader.sampleIntervalUs = power.sampleIntervalUs;
+			for (sample_value_id_t i = 0; i < count; ++i) {
+				_lastSwitchSamples[i + 0 * count] = InterleavedBuffer::getInstance().getValue(prevFilteredBufferIndex, VOLTAGE_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 1 * count] = InterleavedBuffer::getInstance().getValue(prevFilteredBufferIndex, CURRENT_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 2 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, VOLTAGE_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 3 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, CURRENT_CHANNEL_IDX, i);
+			}
+		}
+		else if (_switchHist[_switchHist.size() - 3].asInt != _switchHist[_switchHist.size() - 1].asInt) {
+			// Switch changed state in previous buffer.
+			uint16_t count = InterleavedBuffer::getChannelLength();
+			for (sample_value_id_t i = 0; i < count; ++i) {
+				_lastSwitchSamples[i + 4 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, VOLTAGE_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 5 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, CURRENT_CHANNEL_IDX, i);
+			}
+		}
+	}
+
+
 	// We want to keep N buffers for processing.
 	if (_bufferQueue.size() > numFilteredBuffersForProcessing + numUnfilteredBuffers) {
 		buffer_id_t bufIndexToRelease = _bufferQueue.pop();
@@ -383,7 +452,8 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 void PowerSampling::initAverages() {
 	_avgZeroVoltage = _voltageZero * 1024;
 	_avgZeroCurrent = _currentZero * 1024;
-	_avgPower = 0.0;
+	_avgPowerMilliWatt = 0;
+	_slowAvgPowerMilliWatt = 0.0;
 }
 
 /**
@@ -660,9 +730,10 @@ void PowerSampling::calculatePower(power_t & power) {
 	}
 
 	// Now that Irms is known: first check the soft fuse.
+	// Wait some time, for the measurement to converge.. why does this have to take so long?
 //	if (_zeroCurrentInitialized && _zeroVoltageInitialized) {
-	if (_zeroVoltageCount > 200 && _zeroCurrentCount > 200) { // Wait some time, for the measurement to converge.. why does this have to take so long?
-		checkSoftfuse(filteredCurrentRmsMedianMA, filteredCurrentRmsMedianMA, voltageRmsMilliVolt, power);
+	if (_zeroVoltageCount > 200 && _zeroCurrentCount > 200) {
+		checkSoftfuse(currentRmsMA, filteredCurrentRmsMedianMA, voltageRmsMilliVolt, power);
 	}
 
 
@@ -720,77 +791,123 @@ void PowerSampling::calculatePower(power_t & power) {
 	int64_t avgPowerDiscount = _avgPowerDiscount;
 	_avgPowerMilliWatt = ((1000-avgPowerDiscount) * _avgPowerMilliWatt + avgPowerDiscount * powerMilliWattReal) / 1000;
 
+	calculateSlowAveragePower(powerMilliWattReal, _avgPowerMilliWatt);
+
 
 	/////////////////////////////////////////////////////////
 	// Debug prints
 	/////////////////////////////////////////////////////////
+
+#ifdef PRINT_POWER_SAMPLES
+
 //	for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
 //		if (power.buf[i] < 100) {
 //			APP_ERROR_CHECK(1);
 //		}
 //	}
-//	if (printPower % 10 == 0) {
-//		LOGd("I=%u %u %u %u P=%i %i %i", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA, _avgPowerMilliWatt, powerMilliWattReal, powerMilliWattApparent);
-//	}
 
-#ifdef PRINT_POWER_SAMPLES
-	if (printPower % 1 == 0) {
-//	if (printPower % 500 == 0) {
-//	if (printPower % 500 == 0 || currentRmsMedianMA > _currentMilliAmpThresholdPwm || currentRmsMA > _currentMilliAmpThresholdPwm) {
-		uint32_t rtcCount = RTC::getCount();
-		if (_logsEnabled.flags.power) {
-			// Calculated values
-			uart_msg_power_t powerMsg;
-			powerMsg.timestamp = rtcCount;
-//			powerMsg.timestamp = RTC::getCount();
-			powerMsg.currentRmsMA = currentRmsMA;
-			powerMsg.currentRmsMedianMA = currentRmsMedianMA;
-			powerMsg.filteredCurrentRmsMA = filteredCurrentRmsMA;
-			powerMsg.filteredCurrentRmsMedianMA = filteredCurrentRmsMedianMA;
-			powerMsg.avgZeroVoltage = _avgZeroVoltage;
-			powerMsg.avgZeroCurrent = _avgZeroCurrent;
-			powerMsg.powerMilliWattApparent = powerMilliWattApparent;
-			powerMsg.powerMilliWattReal = powerMilliWattReal;
-			powerMsg.avgPowerMilliWattReal = _avgPowerMilliWatt;
-
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_POWER_LOG_POWER, (uint8_t*)&powerMsg, sizeof(powerMsg));
-		}
-
-		if (_logsEnabled.flags.current) {
-			// Write uart_msg_current_t without allocating a buffer.
-			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
-			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT,(uint8_t*)&(rtcCount), sizeof(rtcCount));
-			for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
-			}
-			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_CURRENT);
-		}
-
-		if (_logsEnabled.flags.filteredCurrent) {
-			// Write uart_msg_current_t without allocating a buffer.
-			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, sizeof(uart_msg_current_t));
-			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&(rtcCount), sizeof(rtcCount));
-			int16_t val;
-			for (int i = 0; i < numSamples; ++i) {
-				val = _outputSamples->at(i);
-				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&val, sizeof(val));
-			}
-			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT);
-		}
-
-		if (_logsEnabled.flags.voltage) {
-			// Write uart_msg_voltage_t without allocating a buffer.
-			UartProtocol::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
-			UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(rtcCount), sizeof(rtcCount));
-			for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-				UartProtocol::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
-			}
-			UartProtocol::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_VOLTAGE);
-		}
+	if (printPower % 10 == 0) {
+		LOGd("I=%u %u %u %u P=%i %i %i", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA, _avgPowerMilliWatt, powerMilliWattReal, powerMilliWattApparent);
 	}
+
 	++printPower;
 #endif
+
+	uint32_t rtcCount = RTC::getCount();
+	if (_logsEnabled.flags.power) {
+		// Calculated values
+		uart_msg_power_t powerMsg;
+		powerMsg.timestamp = rtcCount;
+		powerMsg.currentRmsMA = currentRmsMA;
+		powerMsg.currentRmsMedianMA = currentRmsMedianMA;
+		powerMsg.filteredCurrentRmsMA = filteredCurrentRmsMA;
+		powerMsg.filteredCurrentRmsMedianMA = filteredCurrentRmsMedianMA;
+		powerMsg.avgZeroVoltage = _avgZeroVoltage;
+		powerMsg.avgZeroCurrent = _avgZeroCurrent;
+		powerMsg.powerMilliWattApparent = powerMilliWattApparent;
+		powerMsg.powerMilliWattReal = powerMilliWattReal;
+		powerMsg.avgPowerMilliWattReal = _avgPowerMilliWatt;
+
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_POWER_LOG_POWER, (uint8_t*)&powerMsg, sizeof(powerMsg));
+	}
+
+	if (_logsEnabled.flags.current) {
+		// Write uart_msg_current_t without allocating a buffer.
+		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
+		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT,(uint8_t*)&(rtcCount), sizeof(rtcCount));
+		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
+		}
+		UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_CURRENT);
+	}
+
+	if (_logsEnabled.flags.filteredCurrent) {
+		// Write uart_msg_current_t without allocating a buffer.
+		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, sizeof(uart_msg_current_t));
+		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&(rtcCount), sizeof(rtcCount));
+		int16_t val;
+		for (int i = 0; i < numSamples; ++i) {
+			val = _outputSamples->at(i);
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&val, sizeof(val));
+		}
+		UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT);
+	}
+
+	if (_logsEnabled.flags.voltage) {
+		// Write uart_msg_voltage_t without allocating a buffer.
+		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
+		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(rtcCount), sizeof(rtcCount));
+		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
+		}
+		UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_VOLTAGE);
+	}
 }
+
+void PowerSampling::calculateSlowAveragePower(float powerMilliWatt, float fastAvgPowerMilliWatt) {
+	if (_switchHist.size() >= 2) {
+		if (_switchHist[_switchHist.size() - 2].asInt != _switchHist[_switchHist.size() - 1].asInt) {
+			if (_switchHist[_switchHist.size() - 1].asInt == 0) {
+				// Switch has just been turned off: reset slow average to 0.
+				_slowAvgPowerMilliWatt = 0.0f;
+				LOGPowerSamplingDebug("switched off: reset slow avg to 0");
+			}
+			else {
+				// Switch just turned on, or to a different dim percentage: reset to fast average.
+				_slowAvgPowerMilliWatt = fastAvgPowerMilliWatt;
+				LOGPowerSamplingDebug("switched on: reset slow avg to %i mW", (int32_t)powerMilliWatt);
+			}
+			_slowAvgPowerCount = 0;
+		}
+	}
+
+	float significantChangeThreshold = std::max(_slowAvgPowerMilliWatt * _powerDiffThresholdPart, _powerDiffThresholdMinMilliWatt);
+	if (std::abs(fastAvgPowerMilliWatt - _slowAvgPowerMilliWatt) > significantChangeThreshold) {
+		LOGPowerSamplingDebug("Significant power change: cur=%i fastAvg=%i slowAvg=%i diff=%i thresh=%i", (int32_t)powerMilliWatt, (int32_t)fastAvgPowerMilliWatt, (int32_t)_slowAvgPowerMilliWatt, (int32_t)std::abs(fastAvgPowerMilliWatt - _slowAvgPowerMilliWatt), (int32_t)significantChangeThreshold);
+		// Reset the slow average to fast average.
+		_slowAvgPowerMilliWatt = fastAvgPowerMilliWatt;
+		_slowAvgPowerCount = 0;
+	}
+
+	if (_slowAvgPowerCount < slowAvgPowerConvergedCount) {
+		++_slowAvgPowerCount;
+	}
+	if (_slowAvgPowerCount < 50) {
+		// After a reset, slowly go up from 0.5 to 0.01.
+		// Since, after a reset, we init with fastAvgPowerMilliWatt, this means we end up with the mean of powerMilliWatt and fastAvgPowerMilliWatt.
+		// We do that, because most devices will have some inrush current, so the powerMilliWatt will overshoot.
+		// Discount of 0.01 --> 99% of the average is influenced by the last 458 values, 50% by the last 68.
+		// Because we increase count before this line, we never divide by 0.
+		_slowAvgPowerDiscount = 0.5f / _slowAvgPowerCount;
+	}
+	// Exponential moving average.
+	_slowAvgPowerMilliWatt = (1.0f - _slowAvgPowerDiscount) * _slowAvgPowerMilliWatt + _slowAvgPowerDiscount * (float)powerMilliWatt;
+
+	// Print slow average shortly after a reset.
+	if (_slowAvgPowerCount < 4) {
+		LOGPowerSamplingDebug("slowAvg=%i", (int32_t)_slowAvgPowerMilliWatt);
+	}
+};
 
 void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
 	TYPIFY(STATE_SWITCH_STATE) switchState;
@@ -798,6 +915,13 @@ void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
 	if (_calibratePowerZeroCountDown != 0 || switchState.asInt != 0) {
 		return;
 	}
+
+	// Use the slow average instead
+	if (_slowAvgPowerCount < slowAvgPowerConvergedCount) {
+		return;
+	}
+	powerMilliWatt = _slowAvgPowerMilliWatt;
+
 	if (powerMilliWatt < (_boardPowerZero - 10000) || powerMilliWatt > (_boardPowerZero + 10000)) {
 		// Measured power without load shouldn't be more than 10W different from the board default.
 		// It might be a dimmer on failure instead.
@@ -809,61 +933,62 @@ void PowerSampling::calibratePowerZero(int32_t powerMilliWatt) {
 }
 
 void PowerSampling::calculateEnergy() {
-	uint32_t rtcCount = RTC::getCount();
-	uint32_t diffTicks = RTC::difference(rtcCount, _lastEnergyCalculationTicks);
-	// TODO: using ms introduces more error (due to rounding to ms), maybe use ticks directly?
-//	_energyUsedmicroJoule += (int64_t)_avgPowerMilliWatt * RTC::ticksToMs(diffTicks);
-//	_energyUsedmicroJoule += (int64_t)_avgPowerMilliWatt * diffTicks * (NRF_RTC0->PRESCALER + 1) * 1000 / RTC_CLOCK_FREQ;
-
-	// In order to keep more precision: multiply ticks by some number, then divide the result by the same number.
-	_energyUsedmicroJoule += (int64_t)_avgPowerMilliWatt * RTC::ticksToMs(1024*diffTicks) / 1024;
-	_lastEnergyCalculationTicks = rtcCount;
+	// Assume we process every buffer, so simply only multiple power with the buffer duration.
+	// Only add negative energy when power is below the threshold.
+	if (_slowAvgPowerMilliWatt > 0.0f || _slowAvgPowerMilliWatt < _negativePowerThresholdMilliWatt) {
+		_energyUsedmicroJoule += _slowAvgPowerMilliWatt * (CS_ADC_SAMPLE_INTERVAL_US / 1000.0f * InterleavedBuffer::getChannelLength());
+	}
 }
 
-void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilteredMA, int32_t voltageRmsMilliVolt, power_t & power) {
+void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, int32_t voltageRmsMilliVolt, power_t & power) {
 
 	// Get the current state errors
 	TYPIFY(STATE_ERRORS) stateErrors;
 	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors.asInt, sizeof(stateErrors));
 
-	// TODO: implement this differently
-	if (!_igbtFailureDetectionStarted && (RTC::getCount() > RTC::msToTicks(5000))) {
-		startIgbtFailureDetection();
-		LOGi("startIgbtFailureDetection");
+	// Maybe use uptime instead.
+	if (!_dimmerFailureDetectionStarted && (RTC::getCount() > RTC::msToTicks(5000))) {
+		LOGi("Start dimmer failure detection");
+		_dimmerFailureDetectionStarted = true;
 		printBuf(power);
 	}
 
-	// TODO Bart 2019-12-12 Use event handler to check for switch changes. Don't poll, as this uses processing power for nothing.
+	// TODO: use _switchHist instead
 	switch_state_t prevSwitchState = _lastSwitchState;
 	// Get the current switch state before we dispatch any event (as that may change the switch).
 	TYPIFY(STATE_SWITCH_STATE) switchState;
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
 	_lastSwitchState = switchState;
 
+	// Check if the switch has been turned off.
 	if (switchState.state.relay == 0 && switchState.state.dimmer == 0 && (prevSwitchState.state.relay || prevSwitchState.state.dimmer)) {
-		// switch has been turned off
 		_lastSwitchOffTicksValid = true;
 		_lastSwitchOffTicks = RTC::getCount();
 	}
 
-	bool justSwitchedOff = false;
+	// Check if switch has recently been turned off.
+	bool recentlySwitchedOff = false;
 	if (_lastSwitchOffTicksValid) {
+		// TODO: use tick counter or uptime instead
 		uint32_t tickDiff = RTC::difference(RTC::getCount(), _lastSwitchOffTicks);
-//		write("%u\r\n", tickDiff);
 		if (tickDiff < RTC::msToTicks(1000)) {
-			justSwitchedOff = true;
+			recentlySwitchedOff = true;
 		}
 		else {
 			// Timed out
 			_lastSwitchOffTicksValid = false;
 		}
 	}
-	// ---------------------- end of to do --------------------------
 
 
-	if ((currentRmsMA > _currentMilliAmpThresholdPwm) && (!stateErrors.errors.overCurrentDimmer)) {
-		// Store last buffer that would trigger the dimmer over current softfuse.
-		if ((switchState.state.dimmer != 0) || (switchState.state.relay == 0 && !justSwitchedOff && _igbtFailureDetectionStarted)) {
+	// Store last buffer that could trigger the (dimmer) over current softfuse.
+	// Use the unfiltered current RMS for this, so we don't end up with a buffer that is no longer above threshold,
+	// while the filtered current RMS still is.
+	if ((currentRmsMilliAmp > _currentMilliAmpThresholdDimmer) && (!stateErrors.errors.overCurrentDimmer)) {
+		if ((switchState.state.dimmer != 0) ||
+				(switchState.state.relay == 0 && !recentlySwitchedOff && _dimmerFailureDetectionStarted) ||
+				((currentRmsMilliAmp > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent))
+				) {
 			_lastSoftfuse.type = POWER_SAMPLES_TYPE_SOFTFUSE;
 			_lastSoftfuse.index = 0;
 			_lastSoftfuse.count = power.bufSize / power.numChannels;
@@ -886,10 +1011,16 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		return;
 	}
 
-	// Check if the filtered Irms is above threshold.
-	if ((currentRmsFilteredMA > _currentMilliAmpThreshold) && (!stateErrors.errors.overCurrent)) {
+	// Count number of consecutive times that the current is over the threshold.
+	if (currentRmsMilliAmpFiltered > _currentMilliAmpThreshold) {
+		++_consecutiveOvercurrent;
+	}
+	else {
+		_consecutiveOvercurrent = 0;
+	}
+	if ((_consecutiveOvercurrent > CURRENT_THRESHOLD_CONSECUTIVE) && (!stateErrors.errors.overCurrent)) {
 		LOGw("Overcurrent: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
-				currentRmsFilteredMA,
+				currentRmsMilliAmpFiltered,
 				power.buf[power.voltageIndex],
 				power.buf[power.voltageIndex + power.numChannels],
 				power.buf[power.currentIndex],
@@ -903,40 +1034,34 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 		return;
 	}
 
-	// When the dimmer is on: check if the filtered Irms is above threshold, or if the unfiltered Irms is way above threshold.
-//	if ((currentRmsFilteredMA > _currentMilliAmpThresholdPwm || currentRmsMA > (int32_t)_currentMilliAmpThresholdPwm*5) && (!stateErrors.errors.overCurrentPwm)) {
-//	if ((currentRmsFilteredMA > _currentMilliAmpThresholdPwm) && (!stateErrors.errors.overCurrentPwm)) {
-	if (currentRmsMA > _currentMilliAmpThresholdPwm) {
-		++_consecutivePwmOvercurrent;
-//		_logSerial(SERIAL_DEBUG, "mA=%u cnt=%u\r\n", currentRmsMA, _consecutivePwmOvercurrent);
+	// Count number of consecutive times that the current is over the dimmer threshold.
+	if (currentRmsMilliAmpFiltered > _currentMilliAmpThresholdDimmer) {
+		++_consecutiveDimmerOvercurrent;
 	}
 	else {
-		_consecutivePwmOvercurrent = 0;
+		_consecutiveDimmerOvercurrent = 0;
 	}
-	if ((_consecutivePwmOvercurrent > 20) && (!stateErrors.errors.overCurrentDimmer)) {
-//		// Get the current pwm state before we dispatch the event (as that may change the pwm).
-//		TYPIFY(STATE_SWITCH_STATE) switchState;
-//		State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState);
+	if ((_consecutiveDimmerOvercurrent > CURRENT_THRESHOLD_DIMMER_CONSECUTIVE) && (!stateErrors.errors.overCurrentDimmer)) {
 		if (switchState.state.dimmer != 0) {
-			// If the pwm was on:
+			// If the dimmer is on:
 			LOGw("Dimmer overcurrent: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
-				currentRmsMA,
+				currentRmsMilliAmpFiltered,
 				power.buf[power.voltageIndex],
 				power.buf[power.voltageIndex + power.numChannels],
 				power.buf[power.currentIndex],
 				power.buf[power.currentIndex + power.numChannels]);
 			printBuf(power);
-			// Dispatch the event that will turn off the pwm
+			// Dispatch the event that will turn off the dimmer
 			event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER);
 			EventDispatcher::getInstance().dispatch(event);
 
 			stateErrors.errors.overCurrentDimmer = true;
 			State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 		}
-		else if (switchState.state.relay == 0 && !justSwitchedOff && _igbtFailureDetectionStarted) {
+		else if (switchState.state.relay == 0 && !recentlySwitchedOff && _dimmerFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
 			LOGw("Dimmer failure detected: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
-				currentRmsMA,
+				currentRmsMilliAmpFiltered,
 				power.buf[power.voltageIndex],
 				power.buf[power.voltageIndex + power.numChannels],
 				power.buf[power.currentIndex],
@@ -949,10 +1074,6 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMA, int32_t currentRmsFilter
 			State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 		}
 	}
-}
-
-void PowerSampling::startIgbtFailureDetection() {
-	_igbtFailureDetectionStarted = true;
 }
 
 void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, cs_result_t& result) {
@@ -1029,6 +1150,41 @@ void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, 
 			// Copy data to buffer.
 			memcpy(result.buf.data, &_lastSoftfuse, sizeof(_lastSoftfuse));
 			memcpy(result.buf.data + sizeof(_lastSoftfuse), _lastSoftfuseSamples, samplesSize);
+
+			result.dataSize = requiredSize;
+			result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case POWER_SAMPLES_TYPE_SWITCH: {
+			if (index >= numSwitchSamplesBuffers) {
+				LOGw("index=%u", index);
+				result.returnCode = ERR_WRONG_PARAMETER;
+				return;
+			}
+
+			// Check size
+			size16_t samplesSize = _lastSwitchSamplesHeader.count * sizeof(int16_t);
+			size16_t requiredSize = sizeof(_lastSwitchSamplesHeader) + samplesSize;
+			if (result.buf.len < requiredSize) {
+				LOGw("size=%u required=%u", result.buf.len, requiredSize);
+				result.returnCode = ERR_BUFFER_TOO_SMALL;
+				return;
+			}
+
+			// Set header data
+			_lastSwitchSamplesHeader.index = index;
+			if (index % 2 == 0) {
+					_lastSwitchSamplesHeader.offset = _avgZeroVoltage / 1024;;
+					_lastSwitchSamplesHeader.multiplier = _voltageMultiplier;
+			}
+			else {
+					_lastSwitchSamplesHeader.offset = _avgZeroCurrent / 1024;;
+					_lastSwitchSamplesHeader.multiplier = _currentMultiplier;
+			}
+
+			// Copy data to buffer.
+			memcpy(result.buf.data, &_lastSwitchSamplesHeader, sizeof(_lastSwitchSamplesHeader));
+			memcpy(result.buf.data + sizeof(_lastSwitchSamplesHeader), _lastSwitchSamples + index * _lastSwitchSamplesHeader.count, samplesSize);
 
 			result.dataSize = requiredSize;
 			result.returnCode = ERR_SUCCESS;

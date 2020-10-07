@@ -11,7 +11,7 @@
 #include <drivers/cs_RNG.h>
 #include <mesh/cs_Mesh.h>
 #include <mesh/cs_MeshCommon.h>
-#include <protocol/cs_UartProtocol.h>
+#include <uart/cs_UartHandler.h>
 //#include <storage/cs_State.h>
 #include <third/std/function.h>
 #include <time/cs_SystemTime.h>
@@ -189,7 +189,7 @@ void Mesh::handleEvent(event_t & event) {
 			else {
 				stop();
 			}
-			UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &enable, 1);
+			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &enable, 1);
 #endif
 			break;
 	}

@@ -85,9 +85,9 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 		// At this point it is too late to check if writeBuffer was locked, because the softdevice doesn't care if the writeBuffer was locked,
 		// it writes to the buffer in any case.
 		if (!writeBuffer.isLocked()) {
-			LOGi(MSG_CHAR_VALUE_WRITE);
 			protocol = _controlPacketAccessor->getProtocolVersion();
 			type = (CommandHandlerTypes) _controlPacketAccessor->getType();
+			LOGi(MSG_CHAR_VALUE_WRITE " (command 0x%x=%i)", type, type);
 			cs_data_t payload = _controlPacketAccessor->getPayload();
 //			if (_resultPacketAccessor != NULL) {
 			assert(_resultPacketAccessor != NULL, "_resultPacketAccessor is null");
@@ -236,7 +236,7 @@ void CrownstoneService::handleEvent(event_t & event) {
 		result.returnCode = data.error;
 		result.dataSize = TypeSize(event.type);
 		uint8_t protocolVersion = 5; // TODO: get this from event.
-		writeResult(protocolVersion, CTRL_CMD_MICROAPP_UPLOAD, result);
+		writeResult(protocolVersion, CTRL_CMD_MICROAPP, result);
 		break;
 	}
 	default: {}

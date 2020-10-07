@@ -31,11 +31,6 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
-enum MICROAPP_OPCODE {
-	CS_MICROAPP_OPCODE_ENABLE = 0x01,
-	CS_MICROAPP_OPCODE_DISABLE = 0x02,
-};
-
 void fs_evt_handler_sched(void *data, uint16_t size) {
 	nrf_fstorage_evt_t * evt = (nrf_fstorage_evt_t*) data;
 	MicroApp::getInstance().handleFileStorageEvent(evt);
@@ -64,7 +59,7 @@ MicroApp::MicroApp(): EventListener() {
 
 	_prevMessage.protocol = 0;
 	_prevMessage.app_id = 0;
-	_prevMessage.index = 0;
+	_prevMessage.payload = 0;
 	_prevMessage.repeat = 0;
 
 	_setup = 0;
@@ -72,6 +67,68 @@ MicroApp::MicroApp(): EventListener() {
 	_enabled = false;
 	_booted = false;
 	_debug = true;
+}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+enum ErrorCodesMicroapp {
+	ERR_NO_PAYLOAD             = 0x01,    // need at least an opcode in the payload
+	ERR_TOO_LARGE              = 0x02,
+};
+
+int microapp_callback(char *payload, uint16_t length) {
+	if (length == 0) return ERR_NO_PAYLOAD;
+	if (length > 255) return ERR_TOO_LARGE;
+
+	uint8_t opcode = payload[0];
+
+	switch(opcode) {
+	case 1: {
+		char *data = &(payload[1]);
+		data[length] = 0;
+		LOGi("%s", data);
+		break;
+	}
+	default:
+		LOGi("Unknown command of length %i", length);
+		int ml = length;
+		if (length > 4) ml = 4;
+		for (int i = 0; i < ml; i++) {
+			LOGi("0x%i", payload[i]);
+		}
+	}
+
+	return ERR_SUCCESS;
+}
+
+#ifdef __cplusplus
+}
+#endif
+
+void MicroApp::setIpcRam() {
+	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
+
+	// protocol version
+	const char protocol_version = 0;
+	buf[0] = protocol_version;
+	uint8_t len = 1;
+
+	// address of callback() function (is a C function)
+	uintptr_t address = (uintptr_t)&microapp_callback;
+	for (uint16_t i = 0; i < sizeof(uintptr_t); ++i) {
+		buf[i+len] = (uint8_t)(0xFF & (address >> (i*8)));
+	}
+	len += sizeof(uintptr_t);
+
+	// truncate (rather than assert)
+	if (len > BLUENET_IPC_RAM_DATA_ITEM_SIZE) {
+		len = BLUENET_IPC_RAM_DATA_ITEM_SIZE;
+	}
+
+	// set buffer in RAM
+	setRamData(IPC_INDEX_CROWNSTONE_APP, buf, len);
 }
 
 uint16_t MicroApp::init() {
@@ -88,17 +145,51 @@ uint16_t MicroApp::init() {
 		break;
 	}
 
-	if (err_code == NRF_SUCCESS) {
-		if (isEnabled()) {
-			LOGi("Enable microapp");
-			_enabled = true;
-			// Actually call app
-			callApp();
-		} else {
-			LOGi("Microapp is not enabled");
-		}
+	if (err_code != NRF_SUCCESS) {
+		return err_code;
+	}
+
+	// Set callback handler in IPC ram
+	setIpcRam();
+
+	// Actually, first check if there's anything there?
+
+	// Check for valid app on boot 
+	err_code = validateApp();
+	if (err_code == ERR_SUCCESS) {
+		LOGi("Set app valid");
+		setAppValid();
+	} else {
+		LOGi("Checksum error");
+	}
+
+	if (err_code != NRF_SUCCESS) {
+		return err_code;
+	}
+
+	// If enabled, call the app
+	if (isEnabled()) {
+		LOGi("Enable microapp");
+		_enabled = true;
+		// Actually call app
+		callApp();
+	} else {
+		LOGi("Microapp is not enabled");
 	}
 	return err_code;
+}
+
+uint16_t MicroApp::initMemory() {
+	// We allow an area of 0x2000B000 and then two pages for RAM. For now let us clear it to 0
+	// This is actually incorrect (we should skip) and it probably can be done at once as well
+	for (int i = 0; i < 1024 * 2; ++i) {
+		uint32_t *const val = (uint32_t *)(uintptr_t)(0x2000B000 + i);
+		*val = 0;
+	}
+
+	// The above is fine for .bss (which is uninitialized) but not for .data. It needs to be copied
+	// to the right addresses.
+	return ERR_SUCCESS;
 }
 
 uint16_t MicroApp::erasePages() {
@@ -180,7 +271,7 @@ void MicroApp::storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t size) {
 uint16_t MicroApp::validateChunk(const uint8_t * const data, uint16_t size, uint16_t compare) {
 	uint32_t checksum = 0;
 	checksum = Fletcher(data, size, checksum);
-	LOGi("Chunk checksum %04X (versus %04X)", checksum, compare);
+	LOGi("Chunk checksum %04X (versus %04X)", (uint16_t)checksum, compare);
 	if ((uint16_t)checksum == compare) {
 		return ERR_SUCCESS;
 	} else {
@@ -199,7 +290,7 @@ void MicroApp::tick() {
 		event.dispatch();
 	}
 
-	static int counter = 0;
+	static uint16_t counter = 0;
 	if (_enabled && _booted) {
 		
 		if (!_loaded) {
@@ -219,14 +310,18 @@ void MicroApp::tick() {
 				LOGi("Call setup");
 				void (*setup_func)() = (void (*)()) _setup;
 				setup_func();
+				LOGi("Setup done");
 			}
 			counter++;
+			// Call loop every 10 ticks
 			if (counter % 10 == 0) {
 				LOGi("Call loop");
-				void (*loop_func)() = (void (*)()) _loop;
-				loop_func();
+				int (*loop_func)() = (int (*)()) _loop;
+				int result = loop_func();
+				LOGi("Loop 0x%x", result);
 			}
-			if (counter == 11) {
+			// Loop around, but do not hit 0 again
+			if (counter == 0) {
 				counter = 1;
 			}
 		}
@@ -234,25 +329,18 @@ void MicroApp::tick() {
 }
 
 /**
- * This funtion validates the app in flash. It can only be used when the state is written and all flash operations 
- * have finished. Do not use this function on receiving the last chunk. Only use it when the last chunk has been 
- * written successfully.
+ * This function validates the app in flash. It can only be used when the state is written and all flash operations
+ * have finished. Only use it when all chunks, also the last chunk has been written successfully.
+ *
+ * The checksum is calculated iteratively, by using the chunk size. For the last chunk we will only use the part 
+ * up to the total size of the binary. By doing it iteratively we can keep the local buffer relatively small.
  */
 uint16_t MicroApp::validateApp() {
-	return validateAppInternal(NULL);
-}
-
-/**
- * Iterates over flash for all chunks. For the last chunk it can be iteration over flash, or a separate chunk that
- * it still on the heap, depending if last_chunk == NULL.
- */
-uint16_t MicroApp::validateAppInternal(const uint8_t *const last_chunk) {
 	TYPIFY(STATE_MICROAPP) state_microapp;
 	cs_state_id_t id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, id, (uint8_t*)&state_microapp, sizeof(state_microapp));
 	State::getInstance().get(data);
 	
-	// temporary buffer (large one!)
 	uint8_t buf[MICROAPP_CHUNK_SIZE];
 
 	// read from flash with fstorage, calculate checksum
@@ -265,13 +353,10 @@ uint16_t MicroApp::validateAppInternal(const uint8_t *const last_chunk) {
 		checksum_iterative = Fletcher(buf, MICROAPP_CHUNK_SIZE, checksum_iterative);
 		addr += MICROAPP_CHUNK_SIZE;
 	}
+	// last chunk of alternative size
 	if (remain) {
-		if (last_chunk == NULL) {
-			nrf_fstorage_read(&micro_app_storage, addr, &buf, remain);
-			checksum_iterative = Fletcher(buf, remain, checksum_iterative);
-		} else {
-			checksum_iterative = Fletcher(last_chunk, remain, checksum_iterative);
-		}
+		nrf_fstorage_read(&micro_app_storage, addr, &buf, remain);
+		checksum_iterative = Fletcher(buf, remain, checksum_iterative);
 	}
 	uint16_t checksum = (uint16_t)checksum_iterative;
 	// compare checksum
@@ -349,7 +434,15 @@ void MicroApp::callApp() {
 	cs_state_id_t app_id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
 	State::getInstance().get(data);
-	
+
+	if (state_microapp.start_addr == 0x00) {
+		LOGi("Module can't be run. Start address 0?");
+		_booted = false;
+		return;
+	}
+
+	initMemory();
+
 	uintptr_t address = state_microapp.start_addr + state_microapp.offset;
 	LOGi("Microapp: start at 0x%04x", address)
 
@@ -418,7 +511,8 @@ uint16_t MicroApp::interpretRamdata() {
 }
 
 /**
- * Return result of fstorage operation to sender.
+ * Return result of fstorage operation to sender. We only send this event after fstorage returns to pace the 
+ * incoming messages. In this way it is also possible to resend a particular chunk.
  */
 void MicroApp::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
 	uint16_t error;
@@ -433,15 +527,6 @@ void MicroApp::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
 	switch (evt->id) {
 	case NRF_FSTORAGE_EVT_WRITE_RESULT: {
 		LOGi("Flash written");
-		if (_lastChunk) {
-			error = validateApp();
-			if (error == ERR_SUCCESS) {
-				LOGi("Set app valid");
-				setAppValid();
-			} else {
-				LOGi("Checksum error");
-			}
-		}
 		_prevMessage.repeat = number_of_notifications;
 		_prevMessage.error = error;
 		event_t event(CS_TYPE::EVT_MICROAPP, &_prevMessage, sizeof(_prevMessage));
@@ -457,6 +542,121 @@ void MicroApp::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
 	}
 }
 
+uint32_t MicroApp::handlePacket(microapp_packet_header_t *packet_stub) {
+	
+	uint32_t err_code = ERR_EVENT_UNHANDLED;
+	
+	// For now accept only apps with id == 0.
+	if (packet_stub->app_id != 0) {
+		err_code = ERR_NOT_IMPLEMENTED;
+		return err_code;
+	}
+
+	switch(packet_stub->opcode) {
+	case CS_MICROAPP_OPCODE_REQUEST: {
+		microapp_request_packet_t* packet = reinterpret_cast<microapp_request_packet_t*>(packet_stub);
+		// Check if app size is not too large.
+		err_code = checkAppSize(packet->size);
+		if (err_code != ERR_SUCCESS) {
+			break;
+		}
+
+		if (packet->chunk_size != MICROAPP_CHUNK_SIZE) {
+			err_code = ERR_WRONG_STATE;
+			LOGi("Chunk size %i (should be %i)", packet->chunk_size, MICROAPP_CHUNK_SIZE);
+			_prevMessage.payload = MICROAPP_CHUNK_SIZE;
+			break;
+		}
+
+		if (packet->size > packet->count * packet->chunk_size) {
+			err_code = ERR_WRONG_PARAMETER;
+			_prevMessage.payload = packet->count * packet->chunk_size;
+			break;
+		}
+
+		// We can add here a method to check if the memory is clear... However, this is quite an intensive
+		// read of flash memory. So, it is probably smart to do this with another opcode.
+		break;
+	}
+	case CS_MICROAPP_OPCODE_ENABLE: {
+		microapp_enable_packet_t* packet = reinterpret_cast<microapp_enable_packet_t*>(packet_stub);
+
+		// write the offset to flash
+		TYPIFY(STATE_MICROAPP) state_microapp;
+		cs_state_data_t data(CS_TYPE::STATE_MICROAPP, packet->app_id,
+			(uint8_t*)&state_microapp, sizeof(state_microapp));
+		LOGi("Set of offset to 0x%x", packet->offset);
+		State::getInstance().get(data);
+		state_microapp.offset = packet->offset;
+		State::getInstance().set(data);
+
+		LOGi("Enable app");
+		err_code = enableApp(true);
+
+		if (err_code == ERR_SUCCESS) {
+			LOGi("Call app");
+			callApp();
+		}
+		break;
+	}
+	case CS_MICROAPP_OPCODE_DISABLE: {
+		LOGi("Disable app");
+		err_code = enableApp(false);
+		break;
+	}
+	case CS_MICROAPP_OPCODE_UPLOAD: {
+		microapp_upload_packet_t* packet = reinterpret_cast<microapp_upload_packet_t*>(packet_stub);
+		
+		// Prepare notification packet.
+		_prevMessage.app_id = packet->app_id;
+
+		// Validate chunk in ram.
+		LOGi("Validate chunk %i", packet->index);
+		err_code = validateChunk(packet->data, MICROAPP_CHUNK_SIZE, packet->checksum);
+		if (err_code != ERR_SUCCESS) {
+			break;
+		}
+		
+		// Write chunk with fstorage to flash.
+		err_code = writeChunk(packet->index, packet->data, MICROAPP_CHUNK_SIZE);
+		if (err_code != ERR_SUCCESS) {
+			break;
+		} 
+		LOGi("Successfully written to chunk");
+		
+		// For now tell the sending party to wait (storing to flash).
+		if (err_code == ERR_SUCCESS) {
+			_prevMessage.payload = packet->index;
+			err_code = ERR_WAIT_FOR_SUCCESS;
+		}
+		break;
+	}
+	case CS_MICROAPP_OPCODE_VALIDATE: {
+		microapp_validate_packet_t* packet = reinterpret_cast<microapp_validate_packet_t*>(packet_stub);
+		LOGi("Store meta data (checksum, etc.)");
+		storeAppMetadata(packet->app_id, packet->checksum, packet->size);
+
+		// Assumes that storage of meta data gets actually through at one point
+		LOGi("Validate app");
+		err_code = validateApp();
+		if (err_code != ERR_SUCCESS) {
+			break;
+		}
+		
+		// Set app to valid
+		LOGi("Set app valid");
+		setAppValid();
+		
+		break;
+	}
+	default: {
+		LOGw("Microapp: Unknown opcode");
+		err_code = ERR_NOT_IMPLEMENTED;
+		break;
+	}
+	}
+	return err_code;
+}
 
 /**
  * Handle incoming events from other modules (mainly the CommandController).
@@ -467,92 +667,16 @@ void MicroApp::handleEvent(event_t & evt) {
 	uint32_t err_code = ERR_EVENT_UNHANDLED;
 
 	switch (evt.type) {
-	case CS_TYPE::CMD_MICROAPP_UPLOAD: {
+	case CS_TYPE::CMD_MICROAPP: {
 		// Immediately stop previous notifications
 		_prevMessage.repeat = 0;
 
 		LOGi("MicroApp receives event");
-		microapp_upload_packet_t* packet = reinterpret_cast<TYPIFY(CMD_MICROAPP_UPLOAD)*>(evt.data);
+		microapp_packet_header_t* packet = reinterpret_cast<microapp_packet_header_t*>(evt.data);
 
-		// For now accept only apps with id == 0.
-		if (packet->app_id != 0) {
-			err_code = ERR_NOT_IMPLEMENTED;
-			break;
-		}
+		// Handle packet
+		err_code = handlePacket(packet);
 
-		// Different type of package! Enable or disable this app.
-		if (packet->index == 0xFF) {
-			microapp_upload_meta_packet_t* meta_packet = reinterpret_cast<microapp_upload_meta_packet_t*>(packet);
-			if (meta_packet->opcode == CS_MICROAPP_OPCODE_ENABLE) {
-
-				// write the offset (param0)
-				TYPIFY(STATE_MICROAPP) state_microapp;
-				cs_state_data_t data(CS_TYPE::STATE_MICROAPP, packet->app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
-				State::getInstance().get(data);
-				state_microapp.offset = meta_packet->param0;
-				State::getInstance().set(data);
-
-				err_code = enableApp(true);
-				break;
-			} else if (meta_packet->opcode == CS_MICROAPP_OPCODE_DISABLE) {
-				err_code = enableApp(false);
-				break;
-			}
-
-			LOGw("Microapp: Unknown opcode");
-			err_code = ERR_NOT_IMPLEMENTED;
-			break;
-		}
-
-		// Prepare notification packet.
-		_prevMessage.app_id = packet->app_id;
-
-		// Warn in case user actually misunderstood size to be chunk size. It can happen though, an app this size.
-		if (packet->size == MICROAPP_CHUNK_SIZE) {
-			LOGw("Size of packet (%i) should be application size", packet->size);
-		}
-
-		// Check if app size is not too large.
-		err_code = checkAppSize(packet->size);
-		if (err_code != ERR_SUCCESS) {
-			break;
-		}
-
-		// Check if we are at the last chunk.
-		if (packet->index == packet->count - 1) {
-			_lastChunk = true;
-			LOGi("Validate app");
-
-			// Write app meta info to fds (validation field is not set yet).
-			storeAppMetadata(packet->app_id, packet->checksum, packet->size);
-
-			// Validate app, last chunk in ram.
-			err_code = validateAppInternal(packet->data);
-			if (err_code != ERR_SUCCESS) {
-				break;
-			}
-
-		} else {
-			// Validate chunk in ram.
-			LOGi("Validate chunk %i", packet->index);
-			err_code = validateChunk(packet->data, MICROAPP_CHUNK_SIZE, packet->checksum);
-			if (err_code != ERR_SUCCESS) {
-				break;
-			}
-		}
-
-		// Write chunk with fstorage to flash.
-		err_code = writeChunk(packet->index, packet->data, MICROAPP_CHUNK_SIZE);
-		if (err_code != ERR_SUCCESS) {
-			break;
-		} 
-		LOGi("Successfully written to chunk");
-
-		// For now tell the sending party to wait (storing to flash).
-		if (err_code == ERR_SUCCESS) {
-			_prevMessage.index = packet->index;
-			err_code = ERR_WAIT_FOR_SUCCESS;
-		}
 		break;
 	}
 	case CS_TYPE::EVT_TICK: {
@@ -564,7 +688,7 @@ void MicroApp::handleEvent(event_t & evt) {
 	}
 	}
 
-	if (evt.type == CS_TYPE::CMD_MICROAPP_UPLOAD) {
+	if (evt.type == CS_TYPE::CMD_MICROAPP) {
 		LOGi("Return code %i", err_code);
 		evt.result.returnCode = err_code;
 	}

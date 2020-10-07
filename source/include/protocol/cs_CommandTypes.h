@@ -16,6 +16,10 @@ enum CommandHandlerTypes {
 	CTRL_CMD_GET_BOOTLOADER_VERSION      = 4,
 	CTRL_CMD_GET_UICR_DATA               = 5,
 	CTRL_CMD_SET_IBEACON_CONFIG_ID       = 6,
+	CTRL_CMD_GET_MAC_ADDRESS             = 7,
+	CTRL_CMD_GET_HARDWARE_VERSION        = 8,
+	CTRL_CMD_GET_FIRMWARE_VERSION        = 9,
+
 
 	CTRL_CMD_RESET                       = 10,
 	CTRL_CMD_GOTO_DFU                    = 11,
@@ -58,7 +62,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_GET_ADC_CHANNEL_SWAPS       = 87,
 	CTRL_CMD_GET_RAM_STATS               = 88,
 
-	CTRL_CMD_MICROAPP_UPLOAD             = 90,
+	CTRL_CMD_MICROAPP                    = 90,
 
 	CTRL_CMD_CLEAN_FLASH                 = 100,
 

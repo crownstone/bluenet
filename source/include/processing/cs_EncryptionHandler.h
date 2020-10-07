@@ -13,10 +13,8 @@
 #include <events/cs_EventListener.h>
 #include <storage/cs_State.h>
 
-#define PACKET_NONCE_LENGTH  	3
-#define USER_LEVEL_LENGTH 		1
-#define DEFAULT_SESSION_KEY 	0xCAFEBABE
-#define DEFAULT_SESSION_KEY_LENGTH 4
+#define USER_LEVEL_LENGTH       1
+#define DEFAULT_VALIDATION_KEY  0xCAFEBABE
 
 #define RC5_ROUNDS 12
 #define RC5_NUM_SUBKEYS (2*(RC5_ROUNDS+1)) // t = 2(r+1) - the number of round subkeys required.

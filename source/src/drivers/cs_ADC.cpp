@@ -14,7 +14,7 @@
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Serial.h>
 #include <protocol/cs_ErrorCodes.h>
-#include <protocol/cs_UartProtocol.h>
+#include <uart/cs_UartHandler.h>
 #include <structs/buffer/cs_InterleavedBuffer.h>
 #include <util/cs_BleError.h>
 
@@ -723,7 +723,7 @@ void ADC::applyConfig() {
 	nrf_saadc_enable();
 	_changeConfig = false;
 
-	UartProtocol::getInstance().writeMsg(UART_OPCODE_TX_ADC_CONFIG, (uint8_t*)(&_config), sizeof(_config));
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ADC_CONFIG, (uint8_t*)(&_config), sizeof(_config));
 }
 
 // No logs, this function can be called from interrupt

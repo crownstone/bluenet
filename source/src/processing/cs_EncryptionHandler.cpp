@@ -23,7 +23,7 @@
 #define RC5_16BIT_Q 0x9E37
 
 void EncryptionHandler::init() {
-	_defaultValidationKey.b = DEFAULT_SESSION_KEY;
+	_defaultValidationKey.b = DEFAULT_VALIDATION_KEY;
 	EventDispatcher::getInstance().addListener(this);
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
@@ -106,7 +106,7 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 		return false;
 	}
 
-	if ((encryptionType == ECB_GUEST_CAFEBABE && dataLength + DEFAULT_SESSION_KEY_LENGTH > SOC_ECB_CLEARTEXT_LENGTH) ||
+	if ((encryptionType == ECB_GUEST_CAFEBABE && dataLength + VALIDATION_KEY_LENGTH > SOC_ECB_CLEARTEXT_LENGTH) ||
 			(encryptionType == ECB_GUEST && dataLength > SOC_ECB_CLEARTEXT_LENGTH)) {
 		LOGe("Invalid input buffer length");
 		return false;
@@ -121,10 +121,10 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 
 	if (encryptionType == ECB_GUEST_CAFEBABE) {
 		// copy the validation key into the cleartext
-		memcpy(_block.cleartext, _defaultValidationKey.a, DEFAULT_SESSION_KEY_LENGTH);
+		memcpy(_block.cleartext, _defaultValidationKey.a, VALIDATION_KEY_LENGTH);
 
 		// after which, copy the data into the cleartext
-		memcpy(_block.cleartext + DEFAULT_SESSION_KEY_LENGTH, data, dataLength);
+		memcpy(_block.cleartext + VALIDATION_KEY_LENGTH, data, dataLength);
 	}
 	else {
 		// copy the data over into the cleartext

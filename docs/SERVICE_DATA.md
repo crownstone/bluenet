@@ -172,7 +172,7 @@ uint 8[] | Data | 15 | Data, see below.
 
 Type | Packet
 --- | ---
-0 | [State](#service_data_encrypted_state_2).
+0 | [State](#service_data_setup_state_2).
 
 <a name="service_data_setup_state_2"></a>
 ## Setup state packet
