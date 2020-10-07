@@ -92,6 +92,7 @@ void SystemTime::tick(void*) {
 	}
 
 	if (RTC::msPassedSince(last_statetimeevent_stamp_rtc) >= 1000){
+		// a second has passed!
 		last_statetimeevent_stamp_rtc += RTC::msToTicks(1000);
 		upTimeSec += 1;
 
@@ -99,6 +100,12 @@ void SystemTime::tick(void*) {
 		if (stamp.version != 0) {
 			uint32_t posix_s = stamp.posix_s;
 			State::getInstance().set(CS_TYPE::STATE_TIME, &posix_s, sizeof(posix_s));
+		}
+
+		if(thisDeviceClaimsMasterClock()){
+			// Master clokc has to update its stamp every now and then
+			// to prevent roll over.
+			logRootTimeStamp(stamp, myId);
 		}
 	}
 
@@ -287,6 +294,8 @@ high_resolution_time_stamp_t SystemTime::getSynchronizedStamp(){
 	stamp.posix_s = last_received_root_stamp.posix_s + ms_passed / 1000;
 	stamp.posix_ms = (last_received_root_stamp.posix_ms + ms_passed) % 1000;
 	stamp.version = last_received_root_stamp.version;
+
+	// TODO: we have to do something special when version == 0. see confluence page.
 
 	return stamp;
 }
