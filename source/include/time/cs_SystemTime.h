@@ -28,7 +28,10 @@
 class SystemTime : public EventListener {
 public:
 	/**
-	 * Get the current time as posix timestamp.
+	 * Get the current time as posix timestamp in seconds.
+	 *
+	 * If the synchronized stamp has version 0, this
+	 * function returns 0.
 	 */
 	static uint32_t posix();
 
@@ -51,6 +54,10 @@ public:
 	 * Returns the current time, computed from the last received root stamp
 	 * by adding the difference between the local rtc time upon reception
 	 * and the current local rtc time.
+	 *
+	 * When version == 0, this stamp contains a synchronized value which is
+	 * not posix based. Nonetheless it's seconds an miliseconds fields are
+	 * the current best synchronized values known accross the mesh.
 	 */
 	static high_resolution_time_stamp_t getSynchronizedStamp();
 
@@ -86,7 +93,6 @@ public:
 
 private:
 	// state data
-	static uint32_t rtcTimeStamp;       // high resolution device local time
 	static uint32_t upTimeSec;
 
 	// throttling: when not 0, block command
@@ -130,7 +136,8 @@ private:
 
 	static constexpr uint8_t time_stamp_version_lollipop_max = (2 << 6) - 1;
 
-	static uint32_t posixTimeStamp; // old time stamp implementation.
+	// kept track off in ::tick(void*), seeded at first call for best accuracy.
+	static uint32_t last_statetimeevent_stamp_rtc;
 
 	// clock synchronization data (updated on sync)
 	static high_resolution_time_stamp_t last_received_root_stamp;
@@ -167,6 +174,8 @@ private:
 	 * Returns true if the candidate is considered a clock authority relative to us.
 	 */
 	static bool isClockAuthority(stone_id_t candidate);
+
+	static inline uint8_t timeStampVersion() { return last_received_root_stamp.version; }
 
 	/**
 	 * Returns true if onTimeSyncMessageReceive hasn't received any sync messages from a
