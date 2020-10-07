@@ -17,7 +17,7 @@ namespace MeshUtil {
 
 struct __attribute__((__packed__)) cs_mesh_received_msg_t {
 	uint16_t opCode;
-	uint16_t srcAddress;
+	uint16_t srcAddress; // of the original sender
 	uint8_t* msg;
 	uint8_t msgSize;
 	int8_t rssi;

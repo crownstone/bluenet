@@ -29,7 +29,12 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 
 	// (checks payload size)
 	if (!MeshUtil::isValidMeshMessage(msg.msg, msg.msgSize)) {
-		LOGw("Invalid mesh message");
+		if (msg.msgSize > 0) {
+			LOGw("Invalid mesh message of type %d", MeshUtil::getType(msg.msg));
+		} else {
+			LOGw("Invalid mesh message of size 0");
+		}
+
 		BLEutil::printArray(msg.msg, msg.msgSize);
 		result.returnCode = ERR_INVALID_MESSAGE;
 		return;
@@ -57,6 +62,9 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 		case CS_MESH_MODEL_TYPE_CMD_TIME: {
 			result.returnCode = handleCmdTime(payload, payloadSize);
 			return;
+		}
+		case CS_MESH_MODEL_TYPE_TIME_SYNC: {
+			result.returnCode = handleTimeSync(payload, payloadSize, srcId, msg.hops);
 		}
 		case CS_MESH_MODEL_TYPE_CMD_NOOP: {
 			result.returnCode = handleCmdNoop(payload, payloadSize);
@@ -184,6 +192,25 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSi
 	return ERR_SUCCESS;
 }
 
+cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, uint8_t hops){
+	LOGd("handleTimeSync");
+	high_resolution_time_stamp_t* packet = (high_resolution_time_stamp_t*) payload;
+
+	//	LOGMeshModelInfo("received time stamp for syncing");
+
+	// fold meta-data into event packet
+	time_sync_message_t time_sync_message;
+	time_sync_message.stamp = *packet;
+	time_sync_message.root_id = srcId;
+
+	event_t event(CS_TYPE::EVT_MESH_TIME_SYNC, &time_sync_message, sizeof(time_sync_message_t));
+	event.dispatch();
+
+	return ERR_SUCCESS;
+}
+
+
+
 cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSize) {
 	LOGMeshModelInfo("received noop");
 	return ERR_SUCCESS;
@@ -191,7 +218,6 @@ cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSi
 
 cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops, uint8_t channel){
 	rssi_ping_message_t* packet = (rssi_ping_message_t*) payload;
-	LOGMeshModelInfo("received rssi ping message id=%u", packet->deviceId);
 
 	// copy metadata into event data if it is an original ping message.
 	// (i.e. if sender and rssi hasn't been filled in yet.)
