@@ -222,12 +222,12 @@ void SystemTime::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::STATE_TIME: {
 			// Time was set via State.set().
-			// This may have been set by us! So only use it when no time is set yet?
 			if (posixTimeStamp == 0) {
-				LOGd("set time from state");
-				setTime(*((TYPIFY(STATE_TIME)*)event.data));
-				TEST_PUSH_D(this, posixTimeStamp);
+				// By design that only happens in SystemTime::tick and only when
+				// posixTimeStamp != 0. Hence the code that was here before was dead.
 			}
+			// any other code to be executed at this event should be written in the
+			// SystemTime::tick directly after the State::set.
 			break;
 		}
 		case CS_TYPE::EVT_MESH_TIME: {
