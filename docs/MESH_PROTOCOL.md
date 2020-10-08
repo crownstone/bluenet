@@ -43,6 +43,9 @@ uint8[3] | Dummy | 3 |
 #### cs_mesh_model_msg_time_t
 ![Time](../docs/diagrams/mesh_message_time.png)
 
+When a Crownstone receives this message over the mesh, it will synchronize the whole mesh
+to the given value. Behaviour is identical to the [set time command](PROTOCOL.md#command_types)
+
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint32 | Timestamp | 4 | posix time stamp

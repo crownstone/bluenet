@@ -141,6 +141,10 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 	TimeOfDay t(time);
 	LOGi("Set time to %u %02d:%02d:%02d", time, t.h(), t.m(), t.s());
 
+#ifdef DEBUG
+	publishSyncMessageForTesting();
+#endif
+
 	uint32_t prevtime = posix();
 
 	high_resolution_time_stamp_t stamp;
@@ -220,11 +224,8 @@ void SystemTime::handleEvent(event_t & event) {
 
 	switch(event.type) {
 		case CS_TYPE::EVT_MESH_TIME: {
-			// Only set the time if there is currently no time set, as these timestamps may be old
-			if (timeStampVersion() == 0) {
-				LOGd("set time from mesh");
-				setTime(*((TYPIFY(EVT_MESH_TIME)*)event.data));
-			}
+			LOGd("set time from mesh");
+			setTime(*((TYPIFY(EVT_MESH_TIME)*)event.data));
 			break;
 		}
 		case CS_TYPE::CMD_SET_TIME: {
