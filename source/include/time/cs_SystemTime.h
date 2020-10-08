@@ -157,6 +157,14 @@ private:
 	static void onTimeSyncMessageReceive(time_sync_message_t syncmessage);
 	static void logRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id);
 
+	// adjusts the local_time_of_last_received_root_stamp_rtc_ticks
+	// and last_received_root_stamp accordingly. Calling this function
+	// every now and then is necessary when this crownstone claims root
+	// clock in order to prevent roll over issues,
+	// but it currently looses some precision which is tricky to avoid,
+	// so don't call it too often.
+	static void updateRootTimeStamp();
+
 	/**
 	 * Send a sync message for given stamp/id combo to the mesh.
 	 */

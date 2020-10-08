@@ -52,6 +52,10 @@ public:
 		return ((ticksTo - ticksFrom) & MAX_RTC_COUNTER_VAL);
 	}
 
+	inline static uint32_t differenceMs(uint32_t ticksTo, uint32_t ticksFrom){
+		return ticksToMs(difference(ticksTo,ticksFrom));
+	}
+
 	/**
 	 * Returns the number of miliseconds passed since the given tick_count.
 	 *

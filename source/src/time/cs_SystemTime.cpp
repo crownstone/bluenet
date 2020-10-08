@@ -89,6 +89,12 @@ void SystemTime::tick(void*) {
 	if(first_call_to_tick){
 		first_call_to_tick = false;
 		last_statetimeevent_stamp_rtc = RTC::getCount();
+
+		high_resolution_time_stamp_t start_stamp;
+		start_stamp.posix_s = 0;
+		start_stamp.posix_ms = 0;
+		start_stamp.version = 0;
+		logRootTimeStamp(start_stamp, myId);
 	}
 
 	if (RTC::msPassedSince(last_statetimeevent_stamp_rtc) >= 1000){
@@ -103,9 +109,9 @@ void SystemTime::tick(void*) {
 		}
 
 		if(thisDeviceClaimsMasterClock()){
-			// Master clokc has to update its stamp every now and then
-			// to prevent roll over.
-			logRootTimeStamp(stamp, myId);
+			// Master clokc has to update its stamp every
+			// now and then to prevent roll over.
+			updateRootTimeStamp();
 		}
 	}
 
@@ -286,6 +292,22 @@ void SystemTime::logRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t
 	local_time_of_last_received_root_stamp_rtc_ticks = RTC::getCount();
 }
 
+void SystemTime::updateRootTimeStamp(){
+	uint32_t now_rtc = RTC::getCount();
+	uint32_t ms_passed = RTC::differenceMs(now_rtc, local_time_of_last_received_root_stamp_rtc_ticks);
+
+	high_resolution_time_stamp_t updated_stamp;
+	updated_stamp.posix_s = last_received_root_stamp.posix_s + ms_passed / 1000;
+	updated_stamp.posix_ms = (last_received_root_stamp.posix_ms + ms_passed) % 1000;
+
+	last_received_root_stamp = updated_stamp;
+
+	// this is where we are currently losing precision
+	// because we are storing ms only, and not exact tick count.
+	local_time_of_last_received_root_stamp_rtc_ticks += RTC::msToTicks(ms_passed);
+}
+
+
 high_resolution_time_stamp_t SystemTime::getSynchronizedStamp(){
 	uint32_t ms_passed = RTC::msPassedSince(local_time_of_last_received_root_stamp_rtc_ticks);
 
@@ -345,8 +367,11 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 		// sync message wons authority on the clock values.
 		logRootTimeStamp(syncmessage.stamp, syncmessage.root_id);
 
-		// could postpone reelection if coroutine interface would be improved
+		// TODO: could postpone reelection if coroutine interface would be improved
 		// sync_routine.reschedule(master_clock_reelection_timeout_ms);
+
+		// TODO: send SYNC_TIME_JUMP event in case of a big difference in time.
+		// That way components can react appropriately.
 	} else {
 		LOGSystemTimeDebug("dropped sync message {id=%d, version=%d}, current data {id=%d, version=%d}",
 				syncmessage.root_id,
