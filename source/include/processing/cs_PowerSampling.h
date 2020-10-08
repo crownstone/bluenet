@@ -11,13 +11,13 @@
 #include <events/cs_EventListener.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_CircularBuffer.h>
-#include <structs/buffer/cs_InterleavedBuffer.h>
+#include <structs/buffer/cs_AdcBuffer.h>
 #include <third/Median.h>
 #include <cstdint>
 
 typedef void (*ps_zero_crossing_cb_t) ();
 
-typedef uint8_t channel_id_t;
+typedef uint8_t adc_channel_id_t;
 
 class PowerSampling : EventListener {
 public:
@@ -42,7 +42,7 @@ public:
 	 *  Calculates the power usage, updates the state.
 	 *  Sends the samples if the central is subscribed for that.
 	 */
-	void powerSampleAdcDone(buffer_id_t bufIndex);
+	void powerSampleAdcDone(adc_buffer_id_t bufIndex);
 
 	/** Fill up the current curve and send it out over bluetooth
 	 * @type specifies over which characteristic the current curve should be sent.
@@ -63,7 +63,7 @@ public:
 	 * Struct that defines the buffer received from the ADC sampler in scanning mode.
 	 */
 	typedef struct {
-		sample_value_t* buf;
+		adc_sample_value_t* buf;
 		uint16_t bufSize;
 		uint16_t numChannels;
 		uint16_t voltageIndex;
@@ -105,16 +105,16 @@ private:
 	 * - buffer[size-1] = last filtered.
 	 * - buffer[size-2] = previous filtered.
 	 */
-	CircularBuffer<buffer_id_t> _bufferQueue;
+	CircularBuffer<adc_buffer_id_t> _bufferQueue;
 
 	cs_power_samples_header_t _lastSoftfuse;
-	sample_value_t _lastSoftfuseSamples[InterleavedBuffer::getChannelLength()] = {0};
+	adc_sample_value_t _lastSoftfuseSamples[AdcBuffer::getChannelLength()] = {0};
 
 	CircularBuffer<switch_state_t> _switchHist;
 	cs_power_samples_header_t _lastSwitchSamplesHeader;
 
 	const static uint8_t numSwitchSamplesBuffers = 6; // 3 voltage and 3 current buffers.
-	sample_value_t _lastSwitchSamples[numSwitchSamplesBuffers * InterleavedBuffer::getChannelLength()] = {0};
+	adc_sample_value_t _lastSwitchSamples[numSwitchSamplesBuffers * AdcBuffer::getChannelLength()] = {0};
 
 	TYPIFY(CONFIG_VOLTAGE_MULTIPLIER) _voltageMultiplier; //! Voltage multiplier from settings.
 	TYPIFY(CONFIG_CURRENT_MULTIPLIER) _currentMultiplier; //! Current multiplier from settings.
@@ -201,8 +201,8 @@ private:
 		uint32_t asInt;
 	} _logsEnabled;
 
-	buffer_id_t _lastBufIndex = 0;
-	buffer_id_t _lastFilteredBufIndex = 0;
+	adc_buffer_id_t _lastBufIndex = 0;
+	adc_buffer_id_t _lastFilteredBufIndex = 0;
 
 	cs_adc_restarts_t _adcRestarts;
 	cs_adc_channel_swaps_t _adcChannelSwaps;
@@ -226,7 +226,7 @@ private:
 
 	/** Filter the samples
 	 */
-	void filter(buffer_id_t bufIndexIn, buffer_id_t bufIndexOut, channel_id_t channel_id);
+	void filter(adc_buffer_id_t bufIndexIn, adc_buffer_id_t bufIndexOut, adc_channel_id_t channel_id);
 
 	/**
 	 * Checks if voltage and current index are swapped.
@@ -234,7 +234,7 @@ private:
 	 * Checks if previous voltage samples look more like this buffer voltage samples or current samples.
 	 * Assumes previous buffer is valid, and of same size as this buffer.
 	 */
-	bool isVoltageAndCurrentSwapped(power_t & power, sample_value_t* prevBuf);
+	bool isVoltageAndCurrentSwapped(power_t & power, adc_sample_value_t* prevBuf);
 
 	/** Calculate the average power usage
 	 */

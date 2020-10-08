@@ -21,6 +21,13 @@ typedef uint16_t size16_t;
 typedef uint8_t BOOL;
 typedef uint8_t cs_state_id_t;
 
+
+typedef uint8_t  adc_buffer_id_t;
+typedef uint8_t  adc_channel_id_t;
+typedef uint8_t  adc_pin_id_t;
+typedef uint16_t adc_sample_value_id_t;
+typedef int16_t  adc_sample_value_t;
+
 // Actually wanted something like: typedef uint24_t cs_tracked_device_token_t;
 #define TRACKED_DEVICE_TOKEN_SIZE 3
 

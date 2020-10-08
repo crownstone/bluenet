@@ -228,3 +228,79 @@ struct __attribute__((packed)) internal_tracked_device_heartbeat_packet_t {
 	uint8_t accessLevel = NOT_SET;
 };
 
+
+#define CS_ADC_REF_PIN_NOT_AVAILABLE 255
+#define CS_ADC_PIN_VDD 100
+
+/**
+ * Struct to configure an ADC channel.
+ *
+ * pin:                 The AIN pin to sample.
+ * rangeMilliVolt:      The range in mV of the pin.
+ * referencePin:        The AIN pin to be subtracted from the measured voltage.
+ */
+struct __attribute__((packed)) adc_channel_config_t {
+	adc_pin_id_t pin;
+	uint32_t rangeMilliVolt;
+	adc_pin_id_t referencePin;
+};
+
+/**
+ * Struct to configure the ADC.
+ *
+ * channelCount:        The amount of channels to sample.
+ * channels:            The channel configs.
+ * samplingPeriodUs:    The sampling period in μs (each period, all channels are sampled once).
+ */
+struct __attribute__((packed)) adc_config_t {
+	adc_channel_id_t channelCount;
+	adc_channel_config_t channels[CS_ADC_NUM_CHANNELS];
+	uint32_t samplingPeriodUs;
+};
+
+/**
+ * Result struct after configuring an ADC channel. Has all the info to put the sample values in context.
+ *
+ * Usage: Vpin = sampleVal / maxSampleValue * maxValueMilliVolt * 1000 + Vpinref
+ *
+ * pin:                 The AIN pin of this channel.
+ * referencePin:        The AIN pin that was subtracted from the measured voltage on <pin>.
+ * samplingPeriodUs:    The sampling period in μs.
+ * minValueMilliVolt:   Minimum of the measured voltage (Vpin - Vpinref) range, in mV.
+ * maxValueMilliVolt:   Maximum of the measured voltage (Vpin - Vpinref) range, in mV.
+ * minSampleValue:      Minimum of the sample value range.
+ * maxSampleValue:      Maximum of the sample value range.
+ */
+struct __attribute__((packed)) adc_channel_config_result_t {
+	adc_pin_id_t pin;
+	adc_pin_id_t referencePin;
+	uint16_t samplingPeriodUs;
+	int16_t minValueMilliVolt;
+	int16_t maxValueMilliVolt;
+	adc_sample_value_t minSampleValue;
+	adc_sample_value_t maxSampleValue;
+};
+
+/**
+ * Struct communicated from the ADC class when it's done sampling a buffer.
+ */
+struct adc_buffer_t {
+	/**
+	 * Whether this buffer has valid data.
+	 *
+	 * This may change at any moment, so make sure to check it after calculations and be ready to revert.
+	 */
+	bool valid = false;
+
+	/**
+	 * The ADC config that was used to sample this buffer.
+	 */
+	adc_channel_config_result_t config[CS_ADC_NUM_CHANNELS];
+
+	/**
+	 * Pointer to the samples.
+	 */
+	adc_sample_value_t* samples = nullptr;
+};
+
+

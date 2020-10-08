@@ -1,6 +1,7 @@
+
 #define SERIAL_VERBOSITY SERIAL_DEBUG
 
-#include <structs/buffer/cs_InterleavedBuffer.h>
+#include <structs/buffer/cs_AdcBuffer.h>
 #include <structs/buffer/cs_CircularBuffer.h>
 
 #include <iostream>
@@ -15,7 +16,7 @@ int main() {
 
 	cout << "Test InterleavedBuffer implementation" << endl;
 
-	InterleavedBuffer & buffer = InterleavedBuffer::getInstance();
+	AdcBuffer & buffer = AdcBuffer::getInstance();
 	value_t buf[4][200];
 
 	cout << "Fill buffers with current and voltage data" << endl;
@@ -41,10 +42,10 @@ int main() {
 	int channel = 100;
 	int32_t vdifftot0 = 0, vdifftot1 = 0;
 	value_t value0, value1, value2, vdiff0, vdiff1, last;
-	buffer_id_t buffer_id = 0;
+	adc_buffer_id_t buffer_id = 0;
 
 	bool full = false;
-	channel_id_t channel_id = 0;
+	adc_channel_id_t channel_id = 0;
 //	value0 = buffer.getValue(buffer_id, channel_id, 200);
 	for (int i = -channel + 1; i < 0; ++i) {
 		value0 = buffer.getValue(buffer_id, channel_id, i);
