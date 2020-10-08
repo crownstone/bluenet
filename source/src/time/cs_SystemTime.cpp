@@ -31,8 +31,7 @@
 // ============== Static members ==============
 
 // runtime variables
-uint32_t SystemTime::rtcTimeStamp = 0;
-uint32_t SystemTime::posixTimeStamp = 0;
+uint32_t SystemTime::last_statetimeevent_stamp_rtc = 0;
 uint32_t SystemTime::upTimeSec = 0;
 
 uint16_t SystemTime::throttleSetTimeCountdownTicks = 0;
@@ -86,32 +85,34 @@ void SystemTime::scheduleNextTick() {
 }
 
 void SystemTime::tick(void*) {
-	// RTC can overflow every 512s
-	uint32_t tickDiff = RTC::difference(RTC::getCount(), rtcTimeStamp);
+	static bool first_call_to_tick = true;
+	if(first_call_to_tick){
+		first_call_to_tick = false;
+		last_statetimeevent_stamp_rtc = RTC::getCount();
 
-	// If more than 1s elapsed since last set rtc timestamp:
-	if (tickDiff > RTC::msToTicks(1000)) {
-		if (posixTimeStamp != 0) {
-			// add 1s to posix time
-			posixTimeStamp++;
+		high_resolution_time_stamp_t start_stamp;
+		start_stamp.posix_s = 0;
+		start_stamp.posix_ms = 0;
+		start_stamp.version = 0;
+		logRootTimeStamp(start_stamp, myId);
+	}
 
-			// and store the new time
-			State::getInstance().set(CS_TYPE::STATE_TIME, &posixTimeStamp, sizeof(posixTimeStamp));
+	if (RTC::msPassedSince(last_statetimeevent_stamp_rtc) >= 1000){
+		// a second has passed!
+		last_statetimeevent_stamp_rtc += RTC::msToTicks(1000);
+		upTimeSec += 1;
 
-			LOGSystemTimeVerbose("posix=%u", posixTimeStamp);
+		auto stamp = getSynchronizedStamp();
+		if (stamp.version != 0) {
+			uint32_t posix_s = stamp.posix_s;
+			State::getInstance().set(CS_TYPE::STATE_TIME, &posix_s, sizeof(posix_s));
 		}
 
-		TEST_PUSH_STATIC_D("SystemTime", "posixTime", posixTimeStamp);
-		TEST_PUSH_STATIC_D("SystemTime", "timeOfday_h", now().timeOfDay().h());
-		TEST_PUSH_STATIC_D("SystemTime", "timeOfday_m", now().timeOfDay().m());
-		TEST_PUSH_STATIC_D("SystemTime", "timeOfday_s", now().timeOfDay().s());
-
-		// update rtc timestamp subtract 1s from tickDiff by
-		// increasing the rtc timestamp 1s.
-		rtcTimeStamp += RTC::msToTicks(1000);
-
-		// increment uptime.
-		++upTimeSec;
+		if(thisDeviceClaimsMasterClock()){
+			// Master clokc has to update its stamp every
+			// now and then to prevent roll over.
+			updateRootTimeStamp();
+		}
 	}
 
 	if (throttleSetTimeCountdownTicks) {
@@ -140,9 +141,7 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 	TimeOfDay t(time);
 	LOGi("Set time to %u %02d:%02d:%02d", time, t.h(), t.m(), t.s());
 
-	uint32_t prevtime = posixTimeStamp;
-	posixTimeStamp = time;
-	rtcTimeStamp = RTC::getCount();
+	uint32_t prevtime = posix();
 
 	high_resolution_time_stamp_t stamp;
 	stamp.posix_s = time;
@@ -220,36 +219,23 @@ void SystemTime::handleEvent(event_t & event) {
 	}
 
 	switch(event.type) {
-		case CS_TYPE::STATE_TIME: {
-			// Time was set via State.set().
-			if (posixTimeStamp == 0) {
-				// By design that only happens in SystemTime::tick and only when
-				// posixTimeStamp != 0. Hence the code that was here before was dead.
-			}
-			// any other code to be executed at this event should be written in the
-			// SystemTime::tick directly after the State::set.
-			break;
-		}
 		case CS_TYPE::EVT_MESH_TIME: {
 			// Only set the time if there is currently no time set, as these timestamps may be old
-			if (posixTimeStamp == 0) {
+			if (timeStampVersion() == 0) {
 				LOGd("set time from mesh");
 				setTime(*((TYPIFY(EVT_MESH_TIME)*)event.data));
-				TEST_PUSH_D(this, posixTimeStamp);
 			}
 			break;
 		}
 		case CS_TYPE::CMD_SET_TIME: {
 			LOGd("set time from command");
 			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data));
-			TEST_PUSH_D(this, posixTimeStamp);
 			break;
 		}
 		case CS_TYPE::CMD_TEST_SET_TIME: {
 			LOGd("set test time");
 			// calls setTime, ignoring throttling and allowing desynchronization
 			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data), false, true);
-			TEST_PUSH_D(this, posixTimeStamp);
 			break;
 		}
 		case CS_TYPE::STATE_SUN_TIME: {
@@ -262,8 +248,7 @@ void SystemTime::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING: {
-			if (posixTimeStamp == 0) {
-				// If posix time is unknown, we request for it.
+			if (timeStampVersion() == 0) {
 				auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING)*>(event.data);
 				req->bits.time = true;
 			}
@@ -271,13 +256,13 @@ void SystemTime::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING: {
 			auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)*>(event.data);
-			if (req->bits.time && posixTimeStamp != 0) {
+			if (req->bits.time && timeStampVersion() != 0) {
 				// Posix time is requested by a crownstone in the mesh.
 				// If we know the time, send it.
 				// But only with a 1/10 chance, to prevent flooding the mesh.
 				if (RNG::getInstance().getRandom8() < (255 / 10 + 1)) {
 					cs_mesh_model_msg_time_t packet;
-					packet.timestamp = posixTimeStamp;
+					packet.timestamp = getSynchronizedStamp().posix_s;
 
 					TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
 					meshMsg.type = CS_MESH_MODEL_TYPE_STATE_TIME;
@@ -307,6 +292,22 @@ void SystemTime::logRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t
 	local_time_of_last_received_root_stamp_rtc_ticks = RTC::getCount();
 }
 
+void SystemTime::updateRootTimeStamp(){
+	uint32_t now_rtc = RTC::getCount();
+	uint32_t ms_passed = RTC::differenceMs(now_rtc, local_time_of_last_received_root_stamp_rtc_ticks);
+
+	high_resolution_time_stamp_t updated_stamp;
+	updated_stamp.posix_s = last_received_root_stamp.posix_s + ms_passed / 1000;
+	updated_stamp.posix_ms = (last_received_root_stamp.posix_ms + ms_passed) % 1000;
+
+	last_received_root_stamp = updated_stamp;
+
+	// this is where we are currently losing precision
+	// because we are storing ms only, and not exact tick count.
+	local_time_of_last_received_root_stamp_rtc_ticks += RTC::msToTicks(ms_passed);
+}
+
+
 high_resolution_time_stamp_t SystemTime::getSynchronizedStamp(){
 	uint32_t ms_passed = RTC::msPassedSince(local_time_of_last_received_root_stamp_rtc_ticks);
 
@@ -314,6 +315,9 @@ high_resolution_time_stamp_t SystemTime::getSynchronizedStamp(){
 	// be aware of the bracket placement ;)
 	stamp.posix_s = last_received_root_stamp.posix_s + ms_passed / 1000;
 	stamp.posix_ms = (last_received_root_stamp.posix_ms + ms_passed) % 1000;
+	stamp.version = last_received_root_stamp.version;
+
+	// TODO: we have to do something special when version == 0. see confluence page.
 
 	return stamp;
 }
@@ -338,7 +342,8 @@ uint32_t SystemTime::syncTimeCoroutineAction(){
 
 	if(thisDeviceClaimsMasterClock()){
 		LOGSystemTimeDebug("thisDeviceClaimsMasterClock");
-		sendTimeSyncMessage(getSynchronizedStamp(), myId);
+		auto stamp = getSynchronizedStamp();
+		sendTimeSyncMessage(stamp, myId);
 		return Coroutine::delay_ms(master_clock_update_period_ms);
 	}
 
@@ -362,8 +367,11 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 		// sync message wons authority on the clock values.
 		logRootTimeStamp(syncmessage.stamp, syncmessage.root_id);
 
-		// could postpone reelection if coroutine interface would be improved
+		// TODO: could postpone reelection if coroutine interface would be improved
 		// sync_routine.reschedule(master_clock_reelection_timeout_ms);
+
+		// TODO: send SYNC_TIME_JUMP event in case of a big difference in time.
+		// That way components can react appropriately.
 	} else {
 		LOGSystemTimeDebug("dropped sync message {id=%d, version=%d}, current data {id=%d, version=%d}",
 				syncmessage.root_id,
@@ -461,7 +469,8 @@ void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage){
 // ======================== Utility functions ========================
 
 uint32_t SystemTime::posix(){
-	return posixTimeStamp;
+	auto stamp = getSynchronizedStamp();
+	return stamp.version != 0 ? stamp.posix_s : 0;
 }
 
 DayOfWeek SystemTime::day(){
@@ -471,7 +480,6 @@ DayOfWeek SystemTime::day(){
 Time SystemTime::now(){
 	return posix();
 }
-
 
 uint32_t SystemTime::up(){
 	return upTimeSec;
