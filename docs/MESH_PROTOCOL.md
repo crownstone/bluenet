@@ -25,6 +25,8 @@ id | name | Payload | Result data
 18 | CS_MESH_MODEL_TYPE_RESULT | [cs_mesh_model_msg_result](#cs_mesh_model_msg_result)
 19 | CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID | [Ibeacon config ID packet](PROTOCOL.md#ibeacon_config_id_packet)
 20 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT | [Device heartbeat packet](#cs_mesh_model_msg_device_heartbeat_t)
+21 | CS_MESH_MODEL_TYPE_RSSI_PING | [rssi_ping_message_t](#rssi_ping_message_t)
+22 | CS_MESH_MODEL_TYPE_TIME_SYNC|  [time_sync_message_t](#time_sync_message_t)
 
 ## Packet descriptors
 
@@ -216,6 +218,39 @@ uint8_t | Type | 8 | [State type](PROTOCOL.md#state_types).
 uint8_t | State ID | 6 | ID of state to get. Most state types will only have ID 0.
 uint8_t | [Persistence mode](PROTOCOL.md#state_set_persistence_mode_set) | 2 | Type of persistence mode.
 
+
+<a name="rssi_ping_message_t"></a>
+#### rssi_ping_message_t
+![Rssi ping message](../docs/diagrams/rssi_ping_msg.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+stone_id_t | sender_id   | 1 |
+stone_id_t |recipient_id | 1 |
+uint8_t    | sample_id;  | 1 | 
+int8_t     |rssi         | 1 |
+uint8_t    | channel     | 1 |
+
+
+<a name="high_resolution_time_stamp_t"></a>
+#### high_resolution_time_stamp_t
+
+![High resolution time stamp](../docs/diagrams/high_resolution_time_stamp.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32_t | posix_s  | 4 | seconds since epoch
+uint16_t | posix_ms, version | 2 | bits 0-9: miliseconds passed since posix_s. bits 10-15: synchronisation version
+
+<a name="time_sync_message_t"></a>
+#### time_sync_message_t
+
+![Time sync message](../docs/diagrams/time_sync_message_t.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+high_resolution_time_stamp_t  | stamp | 6 | current stamp of root clock
+stone_id_t | root_id | 1 | id of root clock (may differ from sender id)
 
 
 <a name="cs_mesh_model_msg_result"></a>
