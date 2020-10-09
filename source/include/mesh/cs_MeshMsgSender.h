@@ -30,10 +30,9 @@ public:
 
 	cs_ret_code_t sendMsg(cs_mesh_msg_t *meshMsg);
 	cs_ret_code_t sendTestMsg();
-	cs_ret_code_t sendSetTime(const cs_mesh_model_msg_time_t* item, uint8_t transmissions=0);
 	cs_ret_code_t sendNoop(uint8_t transmissions=0);
 	cs_ret_code_t sendMultiSwitchItem(const internal_multi_switch_item_t* item, const cmd_source_with_counter_t& source, uint8_t transmissions=0);
-	cs_ret_code_t sendTime(const cs_mesh_model_msg_time_t* item, uint8_t transmissions=0);
+	cs_ret_code_t sendSetTime(const cs_mesh_model_msg_time_t* item, uint8_t transmissions=0);
 	cs_ret_code_t sendBehaviourSettings(const behaviour_settings_t* item, uint8_t transmissions=0);
 	cs_ret_code_t sendProfileLocation(const cs_mesh_model_msg_profile_location_t* item, uint8_t transmissions=0);
 	cs_ret_code_t sendTrackedDeviceRegister(const cs_mesh_model_msg_device_register_t* item, uint8_t transmissions=0);
