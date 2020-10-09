@@ -49,8 +49,6 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return testIsValid((cs_mesh_model_msg_test_t*)payload, payloadSize);
 		case CS_MESH_MODEL_TYPE_ACK:
 			return ackIsValid(payload, payloadSize);
-		case CS_MESH_MODEL_TYPE_STATE_TIME:
-			return timeIsValid((cs_mesh_model_msg_time_t*)payload, payloadSize);
 		case CS_MESH_MODEL_TYPE_CMD_TIME:
 			return timeIsValid((cs_mesh_model_msg_time_t*)payload, payloadSize);
 		case CS_MESH_MODEL_TYPE_CMD_NOOP:

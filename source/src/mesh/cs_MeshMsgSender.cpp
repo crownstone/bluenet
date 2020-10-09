@@ -157,27 +157,6 @@ cs_ret_code_t MeshMsgSender::sendMultiSwitchItem(const internal_multi_switch_ite
 	return addToQueue(item);
 }
 
-cs_ret_code_t MeshMsgSender::sendTime(const cs_mesh_model_msg_time_t* packet, uint8_t transmissions) {
-	LOGMeshModelDebug("sendTime");
-	if (packet->timestamp == 0) {
-		return ERR_WRONG_PARAMETER;
-	}
-
-	MeshUtil::cs_mesh_queue_item_t item;
-	item.metaData.id = 0;
-	item.metaData.type = CS_MESH_MODEL_TYPE_STATE_TIME;
-	item.metaData.transmissionsOrTimeout = (transmissions == 0) ? CS_MESH_RELIABILITY_LOWEST : transmissions;
-	item.metaData.priority = true;
-	item.reliable = false;
-	item.broadcast = true;
-	item.msgPayload.len = sizeof(*packet);
-	item.msgPayload.data = (uint8_t*)packet;
-
-	// Remove old messages of same type, as only the latest is of interest.
-	remFromQueue(item);
-	return addToQueue(item);
-}
-
 cs_ret_code_t MeshMsgSender::sendBehaviourSettings(const behaviour_settings_t* packet, uint8_t transmissions) {
 	LOGMeshModelDebug("sendBehaviourSettings");
 
