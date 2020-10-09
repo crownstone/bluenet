@@ -223,11 +223,6 @@ void SystemTime::handleEvent(event_t & event) {
 	}
 
 	switch(event.type) {
-		case CS_TYPE::EVT_MESH_TIME: {
-			LOGd("set time from mesh");
-			setTime(*((TYPIFY(EVT_MESH_TIME)*)event.data));
-			break;
-		}
 		case CS_TYPE::CMD_SET_TIME: {
 			LOGd("set time from command");
 			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data));
@@ -262,17 +257,10 @@ void SystemTime::handleEvent(event_t & event) {
 				// If we know the time, send it.
 				// But only with a 1/10 chance, to prevent flooding the mesh.
 				if (RNG::getInstance().getRandom8() < (255 / 10 + 1)) {
-					cs_mesh_model_msg_time_t packet;
-					packet.timestamp = getSynchronizedStamp().posix_s;
-
-					TYPIFY(CMD_SEND_MESH_MSG) meshMsg;
-					meshMsg.type = CS_MESH_MODEL_TYPE_STATE_TIME;
-					meshMsg.urgency = CS_MESH_URGENCY_HIGH;
-					meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
-					meshMsg.payload = (uint8_t*)&packet;
-					meshMsg.size = sizeof(packet);
-					event_t timeEvent(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
-					timeEvent.dispatch();
+					// we're sending what we currently think is the time.
+					// don't use currentMasterClockId here, we don't want to
+					// be an impostor as we might have drifted a bit.
+					sendTimeSyncMessage(getSynchronizedStamp(), myId);
 				}
 			}
 			break;
@@ -339,6 +327,9 @@ uint32_t SystemTime::syncTimeCoroutineAction(){
 
 		// optionally: return random delay to reduce chance
 		// of sync message collision during reelection?
+		// E.g.:
+		// uint8_t max_delay_ms = 100;
+		// return Coroutine::delay_ms(RNG::getInstance().getRandom8() % max_delay_ms);
 	}
 
 	if(thisDeviceClaimsMasterClock()){

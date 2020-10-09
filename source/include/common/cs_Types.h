@@ -265,7 +265,6 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_LIST_SIZE,
 	CMD_SEND_MESH_CONTROL_COMMAND,                    // Send a control command via the mesh. All permission checks must have been done already!
 	CMD_ENABLE_MESH,                                  // Enable/disable mesh.
-	EVT_MESH_TIME,                                    // Mesh received the current time.
 	EVT_MESH_TRACKED_DEVICE_REGISTER,                 // Mesh received a tracked device to register.
 	EVT_MESH_TRACKED_DEVICE_TOKEN,                    // Mesh received a tracked device token.
 	EVT_MESH_TRACKED_DEVICE_LIST_SIZE,                // Mesh received a tracked device list size.
@@ -469,7 +468,6 @@ typedef  BOOL TYPIFY(CMD_ENABLE_LOG_VOLTAGE);
 typedef  BOOL TYPIFY(CMD_ENABLE_MESH);
 typedef  void TYPIFY(CMD_INC_VOLTAGE_RANGE);
 typedef  void TYPIFY(CMD_INC_CURRENT_RANGE);
-typedef  uint32_t TYPIFY(EVT_MESH_TIME);
 typedef  cs_mesh_model_msg_device_register_t TYPIFY(EVT_MESH_TRACKED_DEVICE_REGISTER);
 typedef  cs_mesh_model_msg_device_register_t TYPIFY(CMD_SEND_MESH_MSG_TRACKED_DEVICE_REGISTER);
 typedef  cs_mesh_model_msg_device_token_t TYPIFY(EVT_MESH_TRACKED_DEVICE_TOKEN);
