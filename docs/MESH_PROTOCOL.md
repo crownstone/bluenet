@@ -10,7 +10,6 @@ id | name | Payload | Result data
 ---|---|---|---
 0 | CS_MESH_MODEL_TYPE_TEST | [cs_mesh_model_msg_test_t](#cs_mesh_model_msg_test_t)
 1 | CS_MESH_MODEL_TYPE_ACK | none
-2 | CS_MESH_MODEL_TYPE_STATE_TIME | [cs_mesh_model_msg_time_t](#cs_mesh_model_msg_time_t)
 3 | CS_MESH_MODEL_TYPE_CMD_TIME | [cs_mesh_model_msg_time_t](#cs_mesh_model_msg_time_t)
 4 | CS_MESH_MODEL_TYPE_CMD_NOOP | none
 5 | CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH | [cs_mesh_model_msg_multi_switch_item_t](#cs_mesh_model_msg_multi_switch_item_t)
