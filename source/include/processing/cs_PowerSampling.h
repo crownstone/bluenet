@@ -169,8 +169,6 @@ private:
 	uint32_t _lastEnergyCalculationTicks; //! Ticks of RTC when last energy calculation was performed.
 	int64_t _energyUsedmicroJoule; //! Energy used in micro joule
 
-	uint8_t _skipSwapDetection = 1; //! Number of buffers to skip until we start detecting swaps.
-
 	switch_state_t _lastSwitchState; //! Stores the last seen switch state.
 	uint32_t _lastSwitchOffTicks;    //! RTC ticks when the switch was last turned off.
 	bool _lastSwitchOffTicksValid;   //! Keep up whether the last switch off time is valid.
@@ -212,9 +210,19 @@ private:
 	 */
 	void initAverages();
 
-	/** Determine which index is actually the current index, this should not be necessary!
+	/**
+	 * Whether the given buffer is valid.
+	 *
+	 * This can change at any moment (set in interrupt).
 	 */
-	uint16_t determineCurrentIndex(adc_buffer_id_t bufIndex);
+	bool isValidBuf(adc_buffer_id_t bufIndex);
+
+	/**
+	 * Remove all buffers from queue that are older than the newest invalid buffer.
+	 *
+	 * What remains is a queue of consecutive valid buffers.
+	 */
+	void removeInvalidBufs();
 
 	/**
 	 * Calculate the value of the zero line of the voltage samples (the offset).
@@ -237,9 +245,12 @@ private:
 	 */
 	bool isVoltageAndCurrentSwapped(adc_buffer_id_t bufIndex, adc_buffer_id_t prevBufIndex);
 
-	/** Calculate the average power usage
+	/**
+	 * Calculate the average power usage
+	 *
+	 * @return true when calculation was successful.
 	 */
-	void calculatePower(adc_buffer_id_t bufIndex);
+	bool calculatePower(adc_buffer_id_t bufIndex);
 
 	void calculateSlowAveragePower(float powerMilliWatt, float fastAvgPowerMilliWatt);
 

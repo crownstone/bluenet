@@ -44,8 +44,18 @@ private:
 		False
 	};
 
-	FoundSwitch detectSwitch(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId);
+	/**
+	 * Check if a switch is detected in the given buffers.
+	 */
 	FoundSwitch detect(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId, uint8_t iteration);
+
+	/**
+	 * Check if a switch is detected in the given buffers.
+	 *
+	 * Different way of calculating, using calcDiff().
+	 * Seems to go slower though.
+	 */
+	FoundSwitch detectSwitch(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId);
 
 	/*
 	 * Calculate the difference between 2 buffers.

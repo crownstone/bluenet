@@ -45,10 +45,6 @@ void RecognizeSwitch::skip(uint16_t num) {
 }
 
 
-/**
- * The recognizeSwitch function goes through a sequence of buffers to detect if a switch event happened in the buffer
- * in the middle.
- */
 bool RecognizeSwitch::detect(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId) {
 	if (!_running) {
 		return false;
@@ -132,7 +128,10 @@ RecognizeSwitch::FoundSwitch RecognizeSwitch::detectSwitch(const CircularBuffer<
 	float minDiff;
 	float lowerTheshold = 0.1 * _thresholdDifferent;
 
+	AdcBuffer & ib = AdcBuffer::getInstance();
+
 	for (startIndex = 0; startIndex < (bufferLength - shift); startIndex += shift) {
+
 		// Difference between first and last buffer.
 		diffFirstLast = calcDiff(bufQueue, voltageChannelId, bufIndexFirst, bufIndexLast, startIndex, checkLength);
 
@@ -140,9 +139,21 @@ RecognizeSwitch::FoundSwitch RecognizeSwitch::detectSwitch(const CircularBuffer<
 		for (uint8_t i = 0; i < (_numBuffersRequired - 2); ++i) {
 			adc_buffer_id_t bufIndexCenter = bufQueue[bufQueue.size() - (1 + _numBuffersRequired - i - 1)];
 
+			// Check buffer validity before doing the calculations.
+			if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
+				LOGSwitchcraftDebug("Buffer not valid");
+				return RecognizeSwitch::FoundSwitch::False;
+			}
+
 			// Difference between center and first buffer. And between center and last buffer.
 			diffCenterFirst = calcDiff(bufQueue, voltageChannelId, bufIndexFirst, bufIndexCenter, startIndex, checkLength);
 			diffCenterLast  = calcDiff(bufQueue, voltageChannelId, bufIndexLast,  bufIndexCenter, startIndex, checkLength);
+
+			// Check buffer validity after doing the calculations.
+			if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
+				LOGSwitchcraftDebug("Buffer not valid");
+				return RecognizeSwitch::FoundSwitch::False;
+			}
 
 			LOGnone("buffer ind: first=%u center=%u last=%u", bufIndexFirst, bufIndexCenter, bufIndexLast);
 			LOGSwitchcraftVerbose("center iter=%u sample start=%u %d %d %d", i, startIndex, (int32_t)diffCenterFirst, (int32_t)diffCenterLast, (int32_t)diffFirstLast);
@@ -160,77 +171,6 @@ RecognizeSwitch::FoundSwitch RecognizeSwitch::detectSwitch(const CircularBuffer<
 				foundAlmost = true;
 			}
 
-		}
-	}
-
-	if (foundAlmost) {
-		return RecognizeSwitch::FoundSwitch::Almost;
-	}
-	return RecognizeSwitch::FoundSwitch::False;
-}
-
-
-RecognizeSwitch::FoundSwitch RecognizeSwitch::detect(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId, uint8_t iteration) {
-	AdcBuffer & ib = AdcBuffer::getInstance();
-
-	// Check only part of the buffer length (half buffer length).
-	// Then repeat that at different parts of the buffer (start, mid, end).
-	// Example: if channel length = 100, then check 0-49, 25-74, and 50-99.
-	adc_sample_value_id_t checkLength = ib.getChannelLength() / 2;
-	adc_sample_value_id_t shift = checkLength / 2;
-	adc_sample_value_id_t startInd;
-	adc_sample_value_id_t endInd;
-
-	// Buffer index (size - 1) is unfiltered buffer.
-	adc_buffer_id_t bufIndexFirst  = bufQueue[bufQueue.size() - (1 + _numBuffersRequired)];
-	adc_buffer_id_t bufIndexCenter = bufQueue[bufQueue.size() - (1 + _numBuffersRequired - iteration - 1)];
-	adc_buffer_id_t bufIndexLast   = bufQueue[bufQueue.size() - (1 + 1)];
-	LOGnone("buffer ind: first=%u center=%u last=%u", bufIndexFirst, bufIndexCenter, bufIndexLast);
-
-	float valueFirst, valueCenter, valueLast;
-	float diffCenterFirst, diffCenterLast, diffFirstLast; // Diff between 2 values of 2 buffers.
-	float diffSumCenterFirst, diffSumCenterLast, diffSumFirstLast; // Summed diff between all values of 2 buffers.
-	float minDiffSum;
-	float lowerTheshold = 0.1 * _thresholdDifferent;
-	bool foundAlmost = false;
-
-	for (startInd = 0; startInd < (ib.getChannelLength() - shift); startInd += shift) {
-		diffSumCenterFirst = 0;
-		diffSumCenterLast = 0;
-		diffSumFirstLast = 0;
-		endInd = startInd + checkLength;
-		LOGnone("start=%i end=%i", startInd, endInd);
-		for (int i = startInd; i < endInd; ++i) {
-			valueFirst  = ib.getValue(bufIndexFirst,  voltageChannelId, i);
-			valueCenter = ib.getValue(bufIndexCenter, voltageChannelId, i);
-			valueLast   = ib.getValue(bufIndexLast,   voltageChannelId, i);
-			if (ignoreSample(valueFirst, valueCenter, valueLast)) {
-				diffCenterFirst = 0;
-				diffCenterLast = 0;
-				diffFirstLast = 0;
-			}
-			else {
-				diffCenterFirst = (valueFirst - valueCenter) * (valueFirst - valueCenter);
-				diffCenterLast = (valueCenter - valueLast) * (valueCenter - valueLast);
-				diffFirstLast = (valueFirst - valueLast) * (valueFirst - valueLast);
-			}
-			diffSumCenterFirst += diffCenterFirst;
-			diffSumCenterLast += diffCenterLast;
-			diffSumFirstLast += diffFirstLast;
-		}
-		LOGSwitchcraftVerbose("center iter=%u sample start=%u %d %d %d", iteration, startInd, (int32_t)diffSumCenterFirst, (int32_t)diffSumCenterLast, (int32_t)diffSumFirstLast);
-		if (diffSumCenterFirst > _thresholdDifferent && diffSumCenterLast > _thresholdDifferent) {
-			minDiffSum = diffSumCenterFirst < diffSumCenterLast ? diffSumCenterFirst : diffSumCenterLast;
-			if (diffSumFirstLast < _thresholdSimilar || minDiffSum / diffSumFirstLast > _thresholdRatio) {
-				LOGSwitchcraftDebug("Found switch: %i %i %i %i", (int)diffSumCenterFirst, (int)diffSumCenterLast, (int)diffSumFirstLast, (int)(minDiffSum / diffSumFirstLast));
-				return RecognizeSwitch::FoundSwitch::True;
-			}
-		}
-
-		// Check if it was almost recognized as switch.
-		if (diffSumCenterFirst > lowerTheshold && diffSumCenterLast > lowerTheshold && diffSumFirstLast < _thresholdSimilar) {
-			LOGSwitchcraftDebug("Almost found switch: %i %i %i", (int)diffSumCenterFirst, (int)diffSumCenterLast, (int)diffSumFirstLast);
-			foundAlmost = true;
 		}
 	}
 
@@ -264,6 +204,90 @@ float RecognizeSwitch::calcDiff(
 		diffSum += diff;
 	}
 	return diffSum;
+}
+
+
+RecognizeSwitch::FoundSwitch RecognizeSwitch::detect(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId, uint8_t iteration) {
+	AdcBuffer & ib = AdcBuffer::getInstance();
+
+	// Check only part of the buffer length (half buffer length).
+	// Then repeat that at different parts of the buffer (start, mid, end).
+	// Example: if channel length = 100, then check 0-49, 25-74, and 50-99.
+	adc_sample_value_id_t checkLength = ib.getChannelLength() / 2;
+	adc_sample_value_id_t shift = checkLength / 2;
+	adc_sample_value_id_t startInd;
+	adc_sample_value_id_t endInd;
+
+	// Buffer index (size - 1) is unfiltered buffer.
+	adc_buffer_id_t bufIndexFirst  = bufQueue[bufQueue.size() - (1 + _numBuffersRequired)];
+	adc_buffer_id_t bufIndexCenter = bufQueue[bufQueue.size() - (1 + _numBuffersRequired - iteration - 1)];
+	adc_buffer_id_t bufIndexLast   = bufQueue[bufQueue.size() - (1 + 1)];
+	LOGnone("buffer ind: first=%u center=%u last=%u", bufIndexFirst, bufIndexCenter, bufIndexLast);
+
+	// Check buffer validity before doing the calculations.
+	if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
+		LOGSwitchcraftDebug("Buffer not valid");
+		return RecognizeSwitch::FoundSwitch::False;
+	}
+
+	float valueFirst, valueCenter, valueLast;
+	float diffCenterFirst, diffCenterLast, diffFirstLast; // Diff between 2 values of 2 buffers.
+	float diffSumCenterFirst, diffSumCenterLast, diffSumFirstLast; // Summed diff between all values of 2 buffers.
+	float minDiffSum;
+	float lowerTheshold = 0.1 * _thresholdDifferent;
+	bool foundAlmost = false;
+
+	for (startInd = 0; startInd < (ib.getChannelLength() - shift); startInd += shift) {
+		diffSumCenterFirst = 0;
+		diffSumCenterLast = 0;
+		diffSumFirstLast = 0;
+		endInd = startInd + checkLength;
+		LOGnone("start=%i end=%i", startInd, endInd);
+		for (int i = startInd; i < endInd; ++i) {
+			valueFirst  = ib.getValue(bufIndexFirst,  voltageChannelId, i);
+			valueCenter = ib.getValue(bufIndexCenter, voltageChannelId, i);
+			valueLast   = ib.getValue(bufIndexLast,   voltageChannelId, i);
+			if (ignoreSample(valueFirst, valueCenter, valueLast)) {
+				diffCenterFirst = 0;
+				diffCenterLast = 0;
+				diffFirstLast = 0;
+			}
+			else {
+				diffCenterFirst = (valueFirst - valueCenter) * (valueFirst - valueCenter);
+				diffCenterLast = (valueCenter - valueLast) * (valueCenter - valueLast);
+				diffFirstLast = (valueFirst - valueLast) * (valueFirst - valueLast);
+			}
+			diffSumCenterFirst += diffCenterFirst;
+			diffSumCenterLast += diffCenterLast;
+			diffSumFirstLast += diffFirstLast;
+		}
+		LOGSwitchcraftVerbose("center iter=%u sample start=%u %d %d %d", iteration, startInd, (int32_t)diffSumCenterFirst, (int32_t)diffSumCenterLast, (int32_t)diffSumFirstLast);
+
+		// Check buffer validity after doing the calculations.
+		if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
+			LOGSwitchcraftDebug("Buffer not valid");
+			return RecognizeSwitch::FoundSwitch::False;
+		}
+
+		if (diffSumCenterFirst > _thresholdDifferent && diffSumCenterLast > _thresholdDifferent) {
+			minDiffSum = diffSumCenterFirst < diffSumCenterLast ? diffSumCenterFirst : diffSumCenterLast;
+			if (diffSumFirstLast < _thresholdSimilar || minDiffSum / diffSumFirstLast > _thresholdRatio) {
+				LOGSwitchcraftDebug("Found switch: %i %i %i %i", (int)diffSumCenterFirst, (int)diffSumCenterLast, (int)diffSumFirstLast, (int)(minDiffSum / diffSumFirstLast));
+				return RecognizeSwitch::FoundSwitch::True;
+			}
+		}
+
+		// Check if it was almost recognized as switch.
+		if (diffSumCenterFirst > lowerTheshold && diffSumCenterLast > lowerTheshold && diffSumFirstLast < _thresholdSimilar) {
+			LOGSwitchcraftDebug("Almost found switch: %i %i %i", (int)diffSumCenterFirst, (int)diffSumCenterLast, (int)diffSumFirstLast);
+			foundAlmost = true;
+		}
+	}
+
+	if (foundAlmost) {
+		return RecognizeSwitch::FoundSwitch::Almost;
+	}
+	return RecognizeSwitch::FoundSwitch::False;
 }
 
 bool RecognizeSwitch::ignoreSample(const adc_sample_value_t value1, const adc_sample_value_t value2) {

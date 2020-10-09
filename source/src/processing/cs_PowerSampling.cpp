@@ -23,6 +23,7 @@
 
 #include <cmath>
 
+#define LOGPowerSamplingWarn LOGw
 #define LOGPowerSamplingDebug LOGd
 
 // Define test pin to enable gpio debug.
@@ -289,7 +290,7 @@ void PowerSampling::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_ADC_RESTARTED: {
 			_adcRestarts.count++;
 			_adcRestarts.lastTimestamp = SystemTime::posix();
-			_skipSwapDetection = 1;
+			_bufferQueue.clear();
 			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
 			//		RecognizeSwitch::getInstance().skip(2);
 			break;
@@ -333,6 +334,12 @@ void PowerSampling::handleEvent(event_t & event) {
 void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 	PS_TEST_PIN_TOGGLE
 
+	if (!isValidBuf(bufIndex)) {
+		LOGPowerSamplingWarn("buf %u invalid", bufIndex);
+		_bufferQueue.clear();
+		return;
+	}
+
 	adc_buffer_id_t filteredBufIndex;
 	if (_bufferQueue.empty()) {
 		// Filter current buffer to current buffer.
@@ -342,6 +349,12 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 		// Filter current buffer to last buffer in queue (which is the last unfiltered buffer).
 		filteredBufIndex = _bufferQueue[_bufferQueue.size() - 1];
 	}
+	if (!isValidBuf(filteredBufIndex)) {
+		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		_bufferQueue.clear();
+		return;
+	}
+
 	LOGnone("filter %u to %u", bufIndex, filteredBufIndex);
 	_lastBufIndex = bufIndex;
 	_lastFilteredBufIndex = filteredBufIndex;
@@ -356,16 +369,20 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 	filter(bufIndex, filteredBufIndex, VOLTAGE_CHANNEL_IDX);
 	filter(bufIndex, filteredBufIndex, CURRENT_CHANNEL_IDX);
 
+	if (!isValidBuf(filteredBufIndex)) {
+		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		_bufferQueue.clear();
+		return;
+	}
 
+	removeInvalidBufs();
 	if (_bufferQueue.size() >= 2 + numUnfilteredBuffers) {
 		adc_buffer_id_t prevIndex = _bufferQueue[_bufferQueue.size() - 2 - numUnfilteredBuffers]; // Previous filtered buffer.
-//		adc_sample_value_t* prevBuf = AdcBuffer::getInstance().getBuffer(prevIndex)->samples;
 		if (isVoltageAndCurrentSwapped(filteredBufIndex, prevIndex)) {
-			LOGw("Swap detected: restart ADC.");
-			_adc->stop();
-			printBuf(filteredBufIndex);
-			_adc->start();
-			return;
+			if (isValidBuf(filteredBufIndex) && isValidBuf(prevIndex)) {
+				LOGw("Swap detected.");
+				printBuf(filteredBufIndex);
+			}
 		}
 	}
 
@@ -379,9 +396,18 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 		calculateCurrentZero(filteredBufIndex);
 	}
 
+	if (!isValidBuf(filteredBufIndex)) {
+		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		return;
+	}
+
 	PS_TEST_PIN_TOGGLE
 
-	calculatePower(filteredBufIndex);
+	if (!calculatePower(filteredBufIndex)) {
+		LOGw("Failed to calculate power");
+	}
+
+	// TODO: if buffer is invalid, assume power remained similar and increase energy regardless?
 	calculateEnergy();
 
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
@@ -447,11 +473,26 @@ void PowerSampling::initAverages() {
 	_slowAvgPowerMilliWatt = 0.0;
 }
 
-/**
- * This just returns the given currentIndex.
- */
-uint16_t PowerSampling::determineCurrentIndex(adc_buffer_id_t bufIndex) {
-	return CURRENT_CHANNEL_IDX;
+bool PowerSampling::isValidBuf(adc_buffer_id_t bufIndex) {
+	return AdcBuffer::getInstance().getBuffer(bufIndex)->valid;
+}
+
+void PowerSampling::removeInvalidBufs() {
+	// Find the newest invalid queue index
+	int newestInvalidIndex = -1;
+	for (uint16_t i = 0; i < _bufferQueue.size(); ++i) {
+		if (!isValidBuf(_bufferQueue[i])) {
+			newestInvalidIndex = i;
+		}
+	}
+	if (newestInvalidIndex > -1) {
+		LOGPowerSamplingWarn("buf %u invalid (%uth in queue)", _bufferQueue[newestInvalidIndex], newestInvalidIndex);
+		// Remove this and older buffers from queue.
+		for (uint16_t i = 0; i <= newestInvalidIndex; ++i) {
+			LOGPowerSamplingWarn("remove buf %u from queue", _bufferQueue.peek());
+			_bufferQueue.pop();
+		}
+	}
 }
 
 /*
@@ -464,10 +505,6 @@ bool PowerSampling::isVoltageAndCurrentSwapped(adc_buffer_id_t bufIndex, adc_buf
 	// Problem: switchcraft makes this function falsely detect a swap.
 	return false;
 
-	if (_skipSwapDetection != 0) {
-		_skipSwapDetection--;
-		return false;
-	}
 	adc_sample_value_t prevSample, voltageSample, currentSample;
 
 	uint32_t sumVoltageChannel = 0;
@@ -523,6 +560,12 @@ void PowerSampling::calculateVoltageZero(adc_buffer_id_t bufIndex) {
 		sum += AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, i);
 	}
 
+	if (!isValidBuf(bufIndex)) {
+		// Don't use the calculation.
+		LOGPowerSamplingWarn("buf %u invalid", bufIndex);
+		return;
+	}
+
 	int32_t zeroVoltage = sum * 1024 / numSamples;
 
 //	if (!_zeroVoltageInitialized) {
@@ -550,6 +593,12 @@ void PowerSampling::calculateCurrentZero(adc_buffer_id_t bufIndex) {
 	int64_t sum = 0;
 	for (adc_sample_value_id_t i = 0; i < numSamples; ++i) {
 		sum += AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i);
+	}
+
+	if (!isValidBuf(bufIndex)) {
+		// Don't use the calculation.
+		LOGPowerSamplingWarn("buf %u invalid", bufIndex);
+		return;
 	}
 
 	int32_t zeroCurrent = sum * 1024 / numSamples;
@@ -634,7 +683,7 @@ void PowerSampling::filter(adc_buffer_id_t bufIndexIn, adc_buffer_id_t bufIndexO
 	}
 }
 
-void PowerSampling::calculatePower(adc_buffer_id_t bufIndex) {
+bool PowerSampling::calculatePower(adc_buffer_id_t bufIndex) {
 
 	adc_sample_value_id_t numSamples = AC_PERIOD_US / AdcBuffer::getInstance().getBuffer(bufIndex)->config[VOLTAGE_CHANNEL_IDX].samplingIntervalUs;
 	assert(numSamples <= AdcBuffer::getChannelLength(), "Not enough samples");
@@ -656,6 +705,11 @@ void PowerSampling::calculatePower(adc_buffer_id_t bufIndex) {
 		cSquareSum += (current * current) / (1024*1024);
 		pSum +=       (current * voltage) / (1024*1024);
 	}
+	if (!isValidBuf(bufIndex)) {
+		LOGPowerSamplingWarn("buf %u invalid", bufIndex);
+		return false;
+	}
+
 	int32_t powerMilliWattReal = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples;
 	int32_t currentRmsMA = sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
 	int32_t voltageRmsMilliVolt = sqrt((double)vSquareSum * _voltageMultiplier * _voltageMultiplier / numSamples) * 1000;
@@ -840,6 +894,8 @@ void PowerSampling::calculatePower(adc_buffer_id_t bufIndex) {
 		}
 		UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_VOLTAGE);
 	}
+
+	return true;
 }
 
 void PowerSampling::calculateSlowAveragePower(float powerMilliWatt, float fastAvgPowerMilliWatt) {
@@ -1102,6 +1158,13 @@ void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, 
 			adc_sample_value_t* samples = (adc_sample_value_t*)(result.buf.data + sizeof(*header));
 			for (adc_sample_value_id_t i = 0; i < numSamples; ++i) {
 				samples[i] = AdcBuffer::getInstance().getValue(bufIndex, index, i);
+			}
+
+			// After reading the buffer, check if it was valid
+			if (!isValidBuf(bufIndex)) {
+				LOGw("buf %u invalid", bufIndex);
+				result.returnCode = ERR_NOT_AVAILABLE;
+				return;
 			}
 
 			result.dataSize = requiredSize;
