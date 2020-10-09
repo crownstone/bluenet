@@ -116,53 +116,6 @@ public:
 		return ADC_BUFFER_COUNT;
 	}
 
-//	/**
-//	 * Given a pointer to a buffer return the buffer_id.
-//	 */
-//	buffer_id_t getIndex(sample_value_t *buffer) {
-//		for (buffer_id_t i = 0; i < getBufferCount(); ++i) {
-//			if (buffer == _buf[i])
-//				return i;
-//		}
-//		return getBufferCount();
-//	}
-
-//	/**
-//	 * Uses getIndex to find out if this pointer exists.
-//	 */
-//	bool exists(sample_value_t *buffer) {
-//		return (getIndex(buffer) != getBufferCount());
-//	}
-
-//	/**
-//	 * Checks if the pointer is set.
-//	 */
-//	bool exists(buffer_id_t buffer_id) {
-//		return (_buf[buffer_id] != NULL);
-//	}
-
-//	/**
-//	 * Get the previous buffer index. This will just use the total static buffer count and use a modulus operation to
-//	 * wrap around the first buffer.
-//	 *
-//	 * @param[in] buffer_id                      Index to the buffer (0 up to getBufferCount() - 1)
-//	 * @return                                   Index to the previous buffer
-//	 */
-//	inline buffer_id_t getPrevious(buffer_id_t buffer_id, const uint8_t shift = 1) {
-//		return (buffer_id + getBufferCount() - shift) % getBufferCount();
-//	}
-
-//	/**
-//	 * Get the next buffer index. This will just use the total static buffer count and use a modulus operation to
-//	 * wrap around the first buffer.
-//	 *
-//	 * @param[in] buffer_id                      Index to the buffer (0 up to getBufferCount() - 1)
-//	 * @return                                   Index to the next buffer
-//	 */
-//	inline buffer_id_t getNext(buffer_id_t buffer_id, const uint8_t shift = 1) {
-//		return (buffer_id + shift) % getBufferCount();
-//	}
-
 	/**
 	 * Get a particular value from a buffer.
 	 *
@@ -175,13 +128,10 @@ public:
 	 */
 	adc_sample_value_t getValue(adc_buffer_id_t buffer_id, adc_channel_id_t channel_id, adc_sample_value_id_t value_id) {
 		assert(value_id >= 0 && value_id < getChannelLength(), "Invalid value id");
-		adc_sample_value_t value;
-		adc_sample_value_t* buf;
 
 		adc_sample_value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
-		buf = getBuffer(buffer_id)->samples;
-		value = buf[value_id_in_channel];
-
+		adc_sample_value_t* buf = getBuffer(buffer_id)->samples;
+		adc_sample_value_t value = buf[value_id_in_channel];
 		return value;
 	}
 
@@ -196,9 +146,9 @@ public:
 	void setValue(adc_buffer_id_t buffer_id, adc_channel_id_t channel_id, adc_sample_value_id_t value_id, adc_sample_value_t value) {
 		assert(value_id >= 0, "value id should be positive");
 		assert(value_id < getChannelLength(), "value id should be smaller than channel size");
-		adc_sample_value_t* buf;
+
 		adc_sample_value_id_t value_id_in_channel = value_id * getChannelCount() + channel_id;
-		buf = getBuffer(buffer_id)->samples;
+		adc_sample_value_t* buf = getBuffer(buffer_id)->samples;
 		buf[value_id_in_channel] = value;
 	}
 

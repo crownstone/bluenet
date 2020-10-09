@@ -214,15 +214,16 @@ private:
 
 	/** Determine which index is actually the current index, this should not be necessary!
 	 */
-	uint16_t determineCurrentIndex(power_t & power);
+	uint16_t determineCurrentIndex(adc_buffer_id_t bufIndex);
 
-	/** Calculate the value of the zero line of the voltage samples
+	/**
+	 * Calculate the value of the zero line of the voltage samples (the offset).
 	 */
-	void calculateVoltageZero(power_t & power);
+	void calculateVoltageZero(adc_buffer_id_t bufIndex);
 
 	/** Calculate the value of the zero line of the current samples
 	 */
-	void calculateCurrentZero(power_t & power);
+	void calculateCurrentZero(adc_buffer_id_t bufIndex);
 
 	/** Filter the samples
 	 */
@@ -234,11 +235,11 @@ private:
 	 * Checks if previous voltage samples look more like this buffer voltage samples or current samples.
 	 * Assumes previous buffer is valid, and of same size as this buffer.
 	 */
-	bool isVoltageAndCurrentSwapped(power_t & power, adc_sample_value_t* prevBuf);
+	bool isVoltageAndCurrentSwapped(adc_buffer_id_t bufIndex, adc_buffer_id_t prevBufIndex);
 
 	/** Calculate the average power usage
 	 */
-	void calculatePower(power_t & power);
+	void calculatePower(adc_buffer_id_t bufIndex);
 
 	void calculateSlowAveragePower(float powerMilliWatt, float fastAvgPowerMilliWatt);
 
@@ -266,7 +267,7 @@ private:
 	 * @param[in] voltageRmsMilliVolt            RMS voltage in mV of the last AC period.
 	 * @param[in] power                          Struct that holds the buffers.
 	 */
-	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, int32_t voltageRmsMilliVolt, power_t & power);
+	void checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, int32_t voltageRmsMilliVolt, adc_buffer_id_t bufIndex);
 
 	void handleGetPowerSamples(PowerSamplesType type, uint8_t index, cs_result_t& result);
 
@@ -280,6 +281,6 @@ private:
 
 	void enableSwitchcraft(bool enable);
 
-	void printBuf(power_t & power);
+	void printBuf(adc_buffer_id_t bufIndex);
 };
 

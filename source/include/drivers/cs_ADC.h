@@ -178,13 +178,25 @@ private:
 	// This class is singleton, deny implementation
 	void operator=(ADC const &);
 
-	// Whether or not the config should be changed.
+	/**
+	 * Whether or not the config should be changed.
+	 *
+	 * == Used in interrupt! ==
+	 */
 	bool _changeConfig = false;
 
-	// Configuration of this class
-	// **Used in interrupt!**
+	/**
+	 * Configuration of this class.
+	 *
+	 * == Used in interrupt! ==
+	 */
 	adc_config_t _config;
 
+	/**
+	 * Resulting configuration of this class.
+	 *
+	 * == Used in interrupt! ==
+	 */
 	adc_channel_config_result_t _channelResultConfigs[CS_ADC_NUM_CHANNELS];
 
 	/**
@@ -205,7 +217,7 @@ private:
 	/**
 	 * Queue of buffers that are free to be added to the SAADC queue.
 	 *
-	 * Used in interrupt!
+	 * == Used in interrupt! ==
 	 */
 	CircularBuffer<adc_buffer_id_t> _bufferQueue;
 
@@ -214,7 +226,7 @@ private:
 	 *
 	 * First buffer in queue is the one currently being (or going to be) filled with samples.
 	 *
-	 * Used in interrupt!
+	 * == Used in interrupt! ==
 	 */
 	CircularBuffer<adc_buffer_id_t> _saadcBufferQueue;
 
@@ -227,7 +239,7 @@ private:
 	/**
 	 * Sate of the SAADC peripheral.
 	 *
-	 * Used in interrupt!
+	 * == Used in interrupt! ==
 	 */
 	volatile adc_saadc_state_t _saadcState = ADC_SAADC_STATE_IDLE;
 
@@ -238,32 +250,53 @@ private:
 		return (_doneCallback != nullptr);
 	}
 
-	// The zero crossing callback.
-	// **Used in interrupt!**
+	/**
+	 * The zero crossing callback.
+	 *
+	 * == Used in interrupt! ==
+	 */
 	adc_zero_crossing_cb_t _zeroCrossingCallback = nullptr;
 
-	// The channel which is checked for zero crossings.
-	// **Used in interrupt!**
+	/**
+	 * The channel which is checked for zero crossings.
+	 *
+	 * == Used in interrupt! ==
+	 */
 	adc_channel_id_t _zeroCrossingChannel = 0;
 
-	// Cache limit event.
-	// **Used in interrupt!**
+	/**
+	 * Cache limit event.
+	 *
+	 * == Used in interrupt! ==
+	 */
 	nrf_saadc_event_t _eventLimitLow;
 
-	// Cache limit event.
-	// **Used in interrupt!**
+	/**
+	 * Cache limit event.
+	 *
+	 * == Used in interrupt! ==
+	 */
 	nrf_saadc_event_t _eventLimitHigh;
 
-	// Keep up whether zero crossing is enabled.
-	// **Used in interrupt!**
+	/**
+	 * Keep up whether zero crossing is enabled.
+	 *
+	 * == Used in interrupt! ==
+	 */
 	bool _zeroCrossingEnabled = false;
 
-	// Store the RTC timestamp of the last upwards zero crossing.
-	// **Used in interrupt!**
+	/**
+	 * Store the RTC timestamp of the last upwards zero crossing.
+	 *
+	 * == Used in interrupt! ==
+	 */
 	uint32_t _lastZeroCrossUpTime = 0;
 
-	// Store the zero value used to detect zero crossings.
-	// **Used in interrupt!**
+	/**
+	 * Store the zero value used to detect zero crossings.
+	 *
+	 * == Used in interrupt! ==
+	 */
 	int32_t _zeroValue = 0;
 
 	/**
@@ -304,14 +337,18 @@ private:
 
 	/**
 	 * Same as fillSaadcQueue(), but without critical region enter/exit.
+	 *
+	 * @param[in] fromInterrupt        Whether this is called from an interrupt.
+	 *
+	 * == Called from interrupt! ==
 	 */
-	cs_ret_code_t _fillSaadcQueue();
+	cs_ret_code_t _fillSaadcQueue(bool fromInterrupt);
 
 	/**
 	 * Puts a buffer in the SAADC queue.
 	 *
 	 * Starts the SAADC when it's idle.
-	 * Waits for the SAADC to be started to queue another buffer.
+	 * Waits (blocking) for the SAADC to be started to queue another buffer.
 	 *
 	 * @return
 	 * - ERR_SUCCESS when the buffer is queued in the SAADC.
@@ -322,6 +359,8 @@ private:
 
 	/**
 	 * Same as addBufferToSaadcQueue(), but without critical region enter/exit.
+	 *
+	 * == Called from interrupt! ==
 	 */
 	cs_ret_code_t _addBufferToSaadcQueue(adc_buffer_id_t bufIndex);
 
@@ -336,11 +375,9 @@ private:
 	 */
 	void exitCriticalRegion();
 
-	void enableInterrupt();
-
 	void printQueues();
 
-	// Function to apply a new config. Should be called when no buffers are are queued, nor being processed.
+	// Function to apply a new config. Should only be called when SAADC has stopped.
 	void applyConfig();
 
 	// Helper function that returns the adc pin number, given the AIN number.
