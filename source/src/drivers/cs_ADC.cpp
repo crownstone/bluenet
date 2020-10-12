@@ -52,7 +52,6 @@
 // Called by app scheduler, from saadc interrupt.
 void adc_done(void * p_event_data, uint16_t event_size) {
 	adc_buffer_id_t* bufIndex = (adc_buffer_id_t*)p_event_data;
-	AdcBuffer::getInstance().getBuffer(*bufIndex)->valid = true;
 	ADC::getInstance()._handleAdcDone(*bufIndex);
 }
 
@@ -750,9 +749,15 @@ void ADC::_handleAdcInterrupt() {
 		}
 
 		// This buffer is no longer in use by saadc: move it to the buffer queue.
-		// Don't mark valid yet, do that in the scheduled task.
-		// In case processing is really slow, it might be marked valid again while being processed.
 		adc_buffer_id_t bufIndex = _saadcBufferQueue.pop();
+
+		// Mark buffer valid.
+		// TODO: In case processing is really slow, it might be marked valid again while it's being processed.
+		// Idea: Only have 1 call in the app scheduler, without buf index.
+		//       Let processing loop over all valid buffers in _bufferQueue.
+		AdcBuffer::getInstance().getBuffer(bufIndex)->valid = true;
+		AdcBuffer::getInstance().getBuffer(bufIndex)->seqNr = _bufSeqNr++;
+
 		_bufferQueue.pushUnique(bufIndex);
 
 		// Decouple handling of buffer from adc interrupt handler, copy buffer index.

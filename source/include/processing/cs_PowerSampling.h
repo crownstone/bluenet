@@ -198,6 +198,7 @@ private:
 		uint32_t asInt;
 	} _logsEnabled;
 
+	adc_buffer_seq_nr_t _lastBufSeqNr = 0;
 	adc_buffer_id_t _lastBufIndex = 0;
 	adc_buffer_id_t _lastFilteredBufIndex = 0;
 
@@ -215,6 +216,13 @@ private:
 	 * This can change at any moment (set in interrupt).
 	 */
 	bool isValidBuf(adc_buffer_id_t bufIndex);
+
+	/**
+	 * Whether the given sequence nr follows directly after the previous sequence nr.
+	 *
+	 * This can change at any moment (set in interrupt).
+	 */
+	bool isConsecutiveBuf(adc_buffer_seq_nr_t seqNr, adc_buffer_seq_nr_t prevSeqNr);
 
 	/**
 	 * Remove all buffers from queue that are older than the newest invalid buffer.

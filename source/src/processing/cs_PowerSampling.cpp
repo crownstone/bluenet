@@ -23,8 +23,9 @@
 
 #include <cmath>
 
-#define LOGPowerSamplingWarn LOGnone
+#define LOGPowerSamplingWarn LOGw
 #define LOGPowerSamplingDebug LOGnone
+#define LOGPowerSamplingVerbose LOGnone
 
 // Define test pin to enable gpio debug.
 //#define PS_TEST_PIN 20
@@ -324,10 +325,21 @@ void PowerSampling::handleEvent(event_t & event) {
  * @param[in] bufIndex                           The buffer index, can be used in InterleavedBuffer.
  */
 void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
+	adc_buffer_seq_nr_t seqNr = AdcBuffer::getInstance().getBuffer(bufIndex)->seqNr;
+	LOGPowerSamplingVerbose("bufId=%u seqNr=%u", bufIndex, seqNr);
 	PS_TEST_PIN_TOGGLE
+
+
+	if (!isConsecutiveBuf(seqNr, _lastBufSeqNr)) {
+		LOGw("buf skipped (prev=%u cur=%u)", _lastBufSeqNr, seqNr);
+		// Clear buffer queue, as these are no longer consecutive.
+		_bufferQueue.clear();
+	}
+	_lastBufSeqNr = seqNr;
 
 	if (!isValidBuf(bufIndex)) {
 		LOGPowerSamplingWarn("buf %u invalid", bufIndex);
+		// Clear buffer queue, as these are no longer valid.
 		_bufferQueue.clear();
 		return;
 	}
@@ -341,8 +353,10 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 		// Filter current buffer to last buffer in queue (which is the last unfiltered buffer).
 		filteredBufIndex = _bufferQueue[_bufferQueue.size() - 1];
 	}
+
 	if (!isValidBuf(filteredBufIndex)) {
 		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		// Clear buffer queue, as these are no longer valid.
 		_bufferQueue.clear();
 		return;
 	}
@@ -370,6 +384,7 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 	removeInvalidBufs();
 	if (_bufferQueue.size() >= 2 + numUnfilteredBuffers) {
 		adc_buffer_id_t prevIndex = _bufferQueue[_bufferQueue.size() - 2 - numUnfilteredBuffers]; // Previous filtered buffer.
+
 		if (isVoltageAndCurrentSwapped(filteredBufIndex, prevIndex)) {
 			if (isValidBuf(filteredBufIndex) && isValidBuf(prevIndex)) {
 				LOGw("Swap detected.");
@@ -459,6 +474,11 @@ void PowerSampling::initAverages() {
 
 bool PowerSampling::isValidBuf(adc_buffer_id_t bufIndex) {
 	return AdcBuffer::getInstance().getBuffer(bufIndex)->valid;
+}
+
+bool PowerSampling::isConsecutiveBuf(adc_buffer_seq_nr_t seqNr, adc_buffer_seq_nr_t prevSeqNr) {
+	adc_buffer_seq_nr_t diff = seqNr - prevSeqNr;
+	return diff == 1;
 }
 
 void PowerSampling::removeInvalidBufs() {

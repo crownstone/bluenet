@@ -200,6 +200,13 @@ private:
 	adc_channel_config_result_t _channelResultConfigs[CS_ADC_NUM_CHANNELS];
 
 	/**
+	 * Buffer sequence number.
+	 *
+	 * Increased each time a buffer is fully sampled.
+	 */
+	adc_buffer_seq_nr_t _bufSeqNr = 1;
+
+	/**
 	 * PPI channel to sample each tick, and count these.
 	 *
 	 * Sample timer event COMPARE -> SAADC task SAMPLE

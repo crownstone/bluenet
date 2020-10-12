@@ -293,6 +293,13 @@ struct adc_buffer_t {
 	bool valid = false;
 
 	/**
+	 * Sequence number.
+	 *
+	 * Increased by 1 for each consecutive buffer. Can be used to check if you missed a buffer.
+	 */
+	adc_buffer_seq_nr_t seqNr = 0;
+
+	/**
 	 * The ADC config that was used to sample this buffer.
 	 */
 	adc_channel_config_result_t config[CS_ADC_NUM_CHANNELS];
