@@ -23,8 +23,8 @@
 
 #include <cmath>
 
-#define LOGPowerSamplingWarn LOGw
-#define LOGPowerSamplingDebug LOGd
+#define LOGPowerSamplingWarn LOGnone
+#define LOGPowerSamplingDebug LOGnone
 
 // Define test pin to enable gpio debug.
 //#define PS_TEST_PIN 20
@@ -50,16 +50,8 @@
 #endif
 
 PowerSampling::PowerSampling() :
-		_isInitialized(false),
-		_adc(NULL),
 		_bufferQueue(CS_ADC_NUM_BUFFERS),
-		_switchHist(switchHistSize),
-		_consecutiveDimmerOvercurrent(0),
-		_lastEnergyCalculationTicks(0),
-		_energyUsedmicroJoule(0),
-		_lastSwitchOffTicks(0),
-		_lastSwitchOffTicksValid(false),
-		_dimmerFailureDetectionStarted(false)
+		_switchHist(switchHistSize)
 {
 	_adc = &(ADC::getInstance());
 	_powerMilliWattHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
@@ -456,14 +448,6 @@ void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
 			}
 		}
 	}
-
-
-	// We want to keep N buffers for processing.
-	if (_bufferQueue.size() > numFilteredBuffersForProcessing + numUnfilteredBuffers) {
-		_bufferQueue.pop();
-//		adc_buffer_id_t bufIndexToRelease = _bufferQueue.pop();
-//		_adc->releaseBuffer(bufIndexToRelease);
-	}
 }
 
 void PowerSampling::initAverages() {
@@ -486,10 +470,10 @@ void PowerSampling::removeInvalidBufs() {
 		}
 	}
 	if (newestInvalidIndex > -1) {
-		LOGPowerSamplingWarn("buf %u invalid (%uth in queue)", _bufferQueue[newestInvalidIndex], newestInvalidIndex);
+		LOGPowerSamplingDebug("buf %u invalid (%uth in queue of size %u)", _bufferQueue[newestInvalidIndex], newestInvalidIndex, _bufferQueue.size());
 		// Remove this and older buffers from queue.
 		for (uint16_t i = 0; i <= newestInvalidIndex; ++i) {
-			LOGPowerSamplingWarn("remove buf %u from queue", _bufferQueue.peek());
+			LOGPowerSamplingDebug("remove buf %u from queue", _bufferQueue.peek());
 			_bufferQueue.pop();
 		}
 	}

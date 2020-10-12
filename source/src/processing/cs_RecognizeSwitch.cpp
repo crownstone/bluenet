@@ -11,6 +11,7 @@
 #include <structs/cs_PacketsInternal.h>
 #include <time/cs_SystemTime.h>
 
+#define LOGSwitchcraftWarn LOGw
 #define LOGSwitchcraftDebug LOGnone
 #define LOGSwitchcraftVerbose LOGnone
 
@@ -141,7 +142,7 @@ RecognizeSwitch::FoundSwitch RecognizeSwitch::detectSwitch(const CircularBuffer<
 
 			// Check buffer validity before doing the calculations.
 			if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
-				LOGSwitchcraftDebug("Buffer not valid");
+				LOGSwitchcraftWarn("Buffer not valid");
 				return RecognizeSwitch::FoundSwitch::False;
 			}
 
@@ -151,7 +152,7 @@ RecognizeSwitch::FoundSwitch RecognizeSwitch::detectSwitch(const CircularBuffer<
 
 			// Check buffer validity after doing the calculations.
 			if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
-				LOGSwitchcraftDebug("Buffer not valid");
+				LOGSwitchcraftWarn("Buffer not valid");
 				return RecognizeSwitch::FoundSwitch::False;
 			}
 
@@ -226,7 +227,7 @@ RecognizeSwitch::FoundSwitch RecognizeSwitch::detect(const CircularBuffer<adc_bu
 
 	// Check buffer validity before doing the calculations.
 	if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
-		LOGSwitchcraftDebug("Buffer not valid");
+		LOGSwitchcraftWarn("Buffer not valid");
 		return RecognizeSwitch::FoundSwitch::False;
 	}
 
@@ -265,7 +266,7 @@ RecognizeSwitch::FoundSwitch RecognizeSwitch::detect(const CircularBuffer<adc_bu
 
 		// Check buffer validity after doing the calculations.
 		if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
-			LOGSwitchcraftDebug("Buffer not valid");
+			LOGSwitchcraftWarn("Buffer not valid");
 			return RecognizeSwitch::FoundSwitch::False;
 		}
 
