@@ -9,7 +9,6 @@
 #include <drivers/cs_Serial.h>
 
 #include <localisation/cs_RssiPingMessage.h>
-#include <time/cs_TimeSyncMessage.h>
 
 #include <cstring> // For memcpy
 
@@ -82,7 +81,7 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		case CS_MESH_MODEL_TYPE_RSSI_PING:
 			return payloadSize >= sizeof(rssi_ping_message_t);
 		case CS_MESH_MODEL_TYPE_TIME_SYNC:
-			return payloadSize >= sizeof(time_sync_message_t);
+			return payloadSize == sizeof(cs_mesh_model_msg_time_sync_t); // @arend use == when the msg is a fixed size.
 		case CS_MESH_MODEL_TYPE_UNKNOWN:
 			return false;
 	}

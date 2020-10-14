@@ -9,12 +9,12 @@
 #include <cstdint>
 
 /**
- * message to be sent over mesh
+ * Versioned timestamp with milliseconds precision.
  */
 struct __attribute__((__packed__)) high_resolution_time_stamp_t {
 	uint32_t posix_s;        // seconds since epoch
-	uint16_t posix_ms : 10;  // miliseconds passed since posix_s.
-	uint16_t version : 6;    // synchronisation version
+	uint16_t posix_ms;       // milliseconds passed since posix_s.
+	uint8_t  version;        // synchronization version
 };
 
 /**
@@ -23,7 +23,5 @@ struct __attribute__((__packed__)) high_resolution_time_stamp_t {
  */
 struct __attribute__((__packed__)) time_sync_message_t {
 	high_resolution_time_stamp_t stamp;
-	stone_id_t root_id;
-	// (could squeeze max 64 hops into the miliseconds field of .stamp
-	// because that won't need values above 1000.)
+	stone_id_t root_id; // @arend isn't this just the source Id ? I got confused into thinking this was what the sending node believes to be the root id.
 };

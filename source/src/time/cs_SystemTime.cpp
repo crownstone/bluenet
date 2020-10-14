@@ -378,28 +378,30 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 #endif
 }
 
-void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id){
+void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id) {
 	LOGSystemTimeDebug("send time sync message");
 
-	time_sync_message_t syncmessage = {};
-	syncmessage.stamp = stamp;
-	syncmessage.root_id = id;
+	cs_mesh_model_msg_time_sync_t timeSyncMsg;
+	timeSyncMsg.posix_s  = stamp.posix_s;
+	timeSyncMsg.posix_ms = stamp.posix_ms;
+	timeSyncMsg.version  = stamp.version;
+	timeSyncMsg.overrideRoot = (id == 0);
 
 	LOGSystemTimeDebug("send sync message: %d %d %d %d",
-			syncmessage.stamp.posix_s,
-			syncmessage.stamp.posix_ms,
-			syncmessage.root_id,
-			syncmessage.stamp.version);
+			timeSyncMsg.posix_s,
+			timeSyncMsg.posix_ms,
+			timeSyncMsg.overrideRoot,
+			timeSyncMsg.version);
 
-	cs_mesh_msg_t syncmsg_wrapper;
-	syncmsg_wrapper.type = CS_MESH_MODEL_TYPE_TIME_SYNC;
-	syncmsg_wrapper.payload = reinterpret_cast<uint8_t*>(&syncmessage);
-	syncmsg_wrapper.size  = sizeof(time_sync_message_t);
-	syncmsg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
-	syncmsg_wrapper.urgency = CS_MESH_URGENCY_LOW;
+	cs_mesh_msg_t meshMsg;
+	meshMsg.type = CS_MESH_MODEL_TYPE_TIME_SYNC;
+	meshMsg.payload = reinterpret_cast<uint8_t*>(&timeSyncMsg);
+	meshMsg.size  = sizeof(timeSyncMsg); // @arend use size of the variable instead of a type: otherwise, if the type of variable is changed, the size is wrong.
+	meshMsg.reliability = CS_MESH_RELIABILITY_LOW; // @arend should only be low if this command was broadcasted, if it was set via BLE connection, or UART, the reliability should be higher.
+	meshMsg.urgency = CS_MESH_URGENCY_HIGH; // @arend with low urgency this msg will end up last in queue.
 
-	event_t msgevt(CS_TYPE::CMD_SEND_MESH_MSG, &syncmsg_wrapper, sizeof(cs_mesh_msg_t));
-	msgevt.dispatch();
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg)); // @arend use size of the variable instead of a type
+	event.dispatch();
 }
 
 bool SystemTime::isClockAuthority(stone_id_t candidate){

@@ -63,7 +63,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID     = 19, // Payload: set_ibeacon_config_id_packet_t
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT  = 20, // Payload: cs_mesh_model_msg_device_heartbeat_t
 	CS_MESH_MODEL_TYPE_RSSI_PING                 = 21, // Payload: rssi_ping_message_t
-	CS_MESH_MODEL_TYPE_TIME_SYNC                 = 22, // Payload: high_resolution_time_stamp_t
+	CS_MESH_MODEL_TYPE_TIME_SYNC                 = 22, // Payload: cs_mesh_model_msg_time_sync_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };
@@ -165,4 +165,15 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_state_header_ext_t {
 struct __attribute__((__packed__)) cs_mesh_model_msg_result_header_t {
 	uint8_t msgType; // Mesh msg type of which this is the result.
 	uint8_t retCode;
+};
+
+/**
+ * Packed version of time_sync_message_t.
+ */
+struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
+	uint32_t posix_s;        // Seconds since epoch.
+	uint16_t posix_ms : 10;  // Milliseconds passed since posix_s.
+	uint8_t version : 6;     // Synchronization version,
+	bool overrideRoot : 1;   // Whether this time overrides the root time.
+	uint8_t reserved : 7;    // @arend maybe use these bits to increase version size.
 };

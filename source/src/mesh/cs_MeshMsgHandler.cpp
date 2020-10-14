@@ -179,23 +179,27 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSi
 }
 
 cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, uint8_t hops){
-	LOGd("handleTimeSync");
-	high_resolution_time_stamp_t* packet = (high_resolution_time_stamp_t*) payload;
+	LOGMeshModelInfo("handleTimeSync");
+	cs_mesh_model_msg_time_sync_t* packet = (cs_mesh_model_msg_time_sync_t*) payload;
 
-	//	LOGMeshModelInfo("received time stamp for syncing");
+	// @arend use TYPIFY() so that the corrent type is used.
+	TYPIFY(EVT_MESH_TIME_SYNC) eventData;
+	eventData.stamp.posix_s  = packet->posix_s;
+	eventData.stamp.posix_ms = packet->posix_ms;
+	eventData.stamp.version  = packet->version;
+	if (packet->overrideRoot) {
+		eventData.root_id = 0;
+	}
+	else {
+		eventData.root_id = srcId;
+	}
 
-	// fold meta-data into event packet
-	time_sync_message_t time_sync_message;
-	time_sync_message.stamp = *packet;
-	time_sync_message.root_id = srcId;
-
-	event_t event(CS_TYPE::EVT_MESH_TIME_SYNC, &time_sync_message, sizeof(time_sync_message_t));
+	// @arend user sizeof(eventData) so the actual size of the variable is used, also when the type is changed.
+	event_t event(CS_TYPE::EVT_MESH_TIME_SYNC, &eventData, sizeof(eventData));
 	event.dispatch();
 
 	return ERR_SUCCESS;
 }
-
-
 
 cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSize) {
 	LOGMeshModelInfo("received noop");
