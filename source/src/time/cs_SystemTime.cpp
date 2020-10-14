@@ -396,11 +396,11 @@ void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_i
 	cs_mesh_msg_t meshMsg;
 	meshMsg.type = CS_MESH_MODEL_TYPE_TIME_SYNC;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&timeSyncMsg);
-	meshMsg.size  = sizeof(timeSyncMsg); // @arend use size of the variable instead of a type: otherwise, if the type of variable is changed, the size is wrong.
-	meshMsg.reliability = CS_MESH_RELIABILITY_LOW; // @arend should only be low if this command was broadcasted, if it was set via BLE connection, or UART, the reliability should be higher.
-	meshMsg.urgency = CS_MESH_URGENCY_HIGH; // @arend with low urgency this msg will end up last in queue.
+	meshMsg.size  = sizeof(timeSyncMsg);
+	meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
+	meshMsg.urgency = CS_MESH_URGENCY_HIGH;
 
-	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg)); // @arend use size of the variable instead of a type
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 	event.dispatch();
 }
 
