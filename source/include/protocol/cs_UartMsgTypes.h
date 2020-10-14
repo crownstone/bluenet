@@ -73,15 +73,15 @@ struct __attribute__((__packed__)) uart_msg_power_t {
 
 struct __attribute__((__packed__)) uart_msg_current_t {
 	uint32_t timestamp;
-	int16_t  samples[CS_ADC_BUF_SIZE / 2];
+	int16_t  samples[CS_ADC_NUM_SAMPLES_PER_CHANNEL];
 };
 
 struct __attribute__((__packed__)) uart_msg_voltage_t {
 	uint32_t timestamp;
-	int16_t  samples[CS_ADC_BUF_SIZE / 2];
+	int16_t  samples[CS_ADC_NUM_SAMPLES_PER_CHANNEL];
 };
 
 struct __attribute__((__packed__)) uart_msg_adc_channel_config_t {
-	channel_id_t channel;
+	adc_channel_id_t channel;
 	adc_channel_config_t config;
 };

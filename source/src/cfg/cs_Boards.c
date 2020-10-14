@@ -216,12 +216,11 @@ void asACR01B13B(boards_config_t* p_config) {
 
 
 	// See https://en.wikipedia.org/wiki/Thermistor#B_or_%CE%B2_parameter_equation B=3380, T0=25, R0=10000
-	// Python: temp=82; r=10000*math.exp(3380*(1/(temp+273.15)-1/(25+273.15))); 3.3/(16000+r)*r
-	//
-	// Here R_temp is not 16k, but 18k. Hence, 76 degrees = 0.31645 and 82 degrees = 0.27265 V.
-	//
-	p_config->pwmTempVoltageThreshold            = 0.35; // About 76 degrees C
-	p_config->pwmTempVoltageThresholdDown        = 0.3;  // About 82 degrees C
+	// Python: temp=82; r=10000*math.exp(3380*(1/(temp+273.15)-1/(25+273.15))); 3.3/(18000+r)*r
+//	p_config->pwmTempVoltageThreshold            = 0.35; // About 72 degrees C
+//	p_config->pwmTempVoltageThresholdDown        = 0.3;  // About 78 degrees C
+	p_config->pwmTempVoltageThreshold            = 0.2;  // About 95 degrees C
+	p_config->pwmTempVoltageThresholdDown        = 0.18; // About 100 degrees C
 
 	p_config->minTxPower                         = -20;
 

@@ -16,14 +16,16 @@
 #include "uart/cs_UartHandler.h"
 #include "protocol/cs_Packets.h"
 #include "storage/cs_State.h"
-#include "structs/buffer/cs_InterleavedBuffer.h"
+#include "structs/buffer/cs_AdcBuffer.h"
 #include "third/SortMedian.h"
 #include "third/optmed.h"
 #include "time/cs_SystemTime.h"
 
 #include <cmath>
 
-#define LOGPowerSamplingDebug LOGd
+#define LOGPowerSamplingWarn LOGw
+#define LOGPowerSamplingDebug LOGnone
+#define LOGPowerSamplingVerbose LOGnone
 
 // Define test pin to enable gpio debug.
 //#define PS_TEST_PIN 20
@@ -33,6 +35,7 @@
 
 #define VOLTAGE_CHANNEL_IDX 0
 #define CURRENT_CHANNEL_IDX 1
+#define AC_PERIOD_US 20000
 
 #ifdef PS_TEST_PIN
 	#ifdef DEBUG
@@ -48,16 +51,8 @@
 #endif
 
 PowerSampling::PowerSampling() :
-		_isInitialized(false),
-		_adc(NULL),
 		_bufferQueue(CS_ADC_NUM_BUFFERS),
-		_switchHist(switchHistSize),
-		_consecutiveDimmerOvercurrent(0),
-		_lastEnergyCalculationTicks(0),
-		_energyUsedmicroJoule(0),
-		_lastSwitchOffTicks(0),
-		_lastSwitchOffTicksValid(false),
-		_dimmerFailureDetectionStarted(false)
+		_switchHist(switchHistSize)
 {
 	_adc = &(ADC::getInstance());
 	_powerMilliWattHist = new CircularBuffer<int32_t>(POWER_SAMPLING_RMS_WINDOW_SIZE);
@@ -82,7 +77,7 @@ static int printPower = 0;
 /*
  * At this moment in time is the function adc_done_callback already decoupled from the ADC interrupt.
  */
-void adc_done_callback(buffer_id_t bufIndex) {
+void adc_done_callback(adc_buffer_id_t bufIndex) {
 	PowerSampling::getInstance().powerSampleAdcDone(bufIndex);
 }
 
@@ -156,7 +151,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 //	unsigned halfWindowSize = 5;  // Takes 0.74ms
 //	unsigned halfWindowSize = 16; // Takes 0.93ms
 	unsigned windowSize = halfWindowSize * 2 + 1;
-	uint16_t bufSize = CS_ADC_BUF_SIZE / 2;
+	uint16_t bufSize = AdcBuffer::getInstance().getChannelLength();
 	unsigned blockCount = (bufSize + halfWindowSize*2) / windowSize; // Shouldn't have a remainder!
 	_filterParams = new MedianFilter(halfWindowSize, blockCount);
 	_inputSamples = new PowerVector(bufSize + halfWindowSize*2);
@@ -171,7 +166,7 @@ void PowerSampling::init(const boards_config_t& boardConfig) {
 	adcConfig.channels[CURRENT_CHANNEL_IDX].pin = boardConfig.pinAinCurrentGainLow;
 	adcConfig.channels[CURRENT_CHANNEL_IDX].rangeMilliVolt = boardConfig.currentRange;
 	adcConfig.channels[CURRENT_CHANNEL_IDX].referencePin = boardConfig.flags.hasAdcZeroRef ? boardConfig.pinAinZeroRef : CS_ADC_REF_PIN_NOT_AVAILABLE;
-	adcConfig.samplingPeriodUs = CS_ADC_SAMPLE_INTERVAL_US;
+	adcConfig.samplingIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
 	_adc->init(adcConfig);
 
 	_adc->setDoneCallback(adc_done_callback);
@@ -288,10 +283,7 @@ void PowerSampling::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_ADC_RESTARTED: {
 			_adcRestarts.count++;
 			_adcRestarts.lastTimestamp = SystemTime::posix();
-			_skipSwapDetection = 1;
-			while (!_bufferQueue.empty()) {
-				ADC::getInstance().releaseBuffer(_bufferQueue.pop());
-			}
+			_bufferQueue.clear();
 			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ADC_RESTART, NULL, 0);
 			//		RecognizeSwitch::getInstance().skip(2);
 			break;
@@ -306,6 +298,7 @@ void PowerSampling::handleEvent(event_t & event) {
 			if (_calibratePowerZeroCountDown) {
 				--_calibratePowerZeroCountDown;
 			}
+//			toggleVoltageChannelInput();
 			break;
 		}
 		default: {}
@@ -331,10 +324,27 @@ void PowerSampling::handleEvent(event_t & event) {
  * @param[in] size                               Size of the buffer.
  * @param[in] bufIndex                           The buffer index, can be used in InterleavedBuffer.
  */
-void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
+void PowerSampling::powerSampleAdcDone(adc_buffer_id_t bufIndex) {
+	adc_buffer_seq_nr_t seqNr = AdcBuffer::getInstance().getBuffer(bufIndex)->seqNr;
+	LOGPowerSamplingVerbose("bufId=%u seqNr=%u", bufIndex, seqNr);
 	PS_TEST_PIN_TOGGLE
 
-	buffer_id_t filteredBufIndex;
+
+	if (!isConsecutiveBuf(seqNr, _lastBufSeqNr)) {
+		LOGw("buf skipped (prev=%u cur=%u)", _lastBufSeqNr, seqNr);
+		// Clear buffer queue, as these are no longer consecutive.
+		_bufferQueue.clear();
+	}
+	_lastBufSeqNr = seqNr;
+
+	if (!isValidBuf(bufIndex)) {
+		LOGPowerSamplingWarn("buf %u invalid", bufIndex);
+		// Clear buffer queue, as these are no longer valid.
+		_bufferQueue.clear();
+		return;
+	}
+
+	adc_buffer_id_t filteredBufIndex;
 	if (_bufferQueue.empty()) {
 		// Filter current buffer to current buffer.
 		filteredBufIndex = bufIndex;
@@ -343,6 +353,14 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 		// Filter current buffer to last buffer in queue (which is the last unfiltered buffer).
 		filteredBufIndex = _bufferQueue[_bufferQueue.size() - 1];
 	}
+
+	if (!isValidBuf(filteredBufIndex)) {
+		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		// Clear buffer queue, as these are no longer valid.
+		_bufferQueue.clear();
+		return;
+	}
+
 	LOGnone("filter %u to %u", bufIndex, filteredBufIndex);
 	_lastBufIndex = bufIndex;
 	_lastFilteredBufIndex = filteredBufIndex;
@@ -353,45 +371,50 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
 	_switchHist.push(switchState);
 
-	power_t power;
-	power.buf = InterleavedBuffer::getInstance().getBuffer(filteredBufIndex);
-	power.bufSize = CS_ADC_BUF_SIZE;
-	power.voltageIndex = VOLTAGE_CHANNEL_IDX;
-	power.currentIndex = CURRENT_CHANNEL_IDX;
-	power.numChannels = 2;
-	power.sampleIntervalUs = CS_ADC_SAMPLE_INTERVAL_US;
-	power.acPeriodUs = 20000;
-
 	// Filter current buffer to the previous unfiltered buffer.
-	filter(bufIndex, filteredBufIndex, power.voltageIndex);
-	filter(bufIndex, filteredBufIndex, power.currentIndex);
+	filter(bufIndex, filteredBufIndex, VOLTAGE_CHANNEL_IDX);
+	filter(bufIndex, filteredBufIndex, CURRENT_CHANNEL_IDX);
 
+	if (!isValidBuf(filteredBufIndex)) {
+		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		_bufferQueue.clear();
+		return;
+	}
 
+	removeInvalidBufs();
 	if (_bufferQueue.size() >= 2 + numUnfilteredBuffers) {
-		buffer_id_t prevIndex = _bufferQueue[_bufferQueue.size() - 2 - numUnfilteredBuffers]; // Previous filtered buffer.
-		sample_value_t* prevBuf = InterleavedBuffer::getInstance().getBuffer(prevIndex);
-		if (isVoltageAndCurrentSwapped(power, prevBuf)) {
-			LOGw("Swap detected: restart ADC.");
-			_adc->stop();
-			printBuf(power);
-			_adc->releaseBuffer(bufIndex);
-			_adc->start();
-			return;
+		adc_buffer_id_t prevIndex = _bufferQueue[_bufferQueue.size() - 2 - numUnfilteredBuffers]; // Previous filtered buffer.
+
+		if (isVoltageAndCurrentSwapped(filteredBufIndex, prevIndex)) {
+			if (isValidBuf(filteredBufIndex) && isValidBuf(prevIndex)) {
+				LOGw("Swap detected.");
+				printBuf(filteredBufIndex);
+			}
 		}
 	}
 
 	PS_TEST_PIN_TOGGLE
 
+	// Use filtered samples to calculate the zero.
 	if (_recalibrateZeroVoltage) {
-		calculateVoltageZero(power);
+		calculateVoltageZero(filteredBufIndex);
 	}
 	if (_recalibrateZeroCurrent) {
-		calculateCurrentZero(power);
+		calculateCurrentZero(filteredBufIndex);
+	}
+
+	if (!isValidBuf(filteredBufIndex)) {
+		LOGPowerSamplingWarn("buf %u invalid", filteredBufIndex);
+		return;
 	}
 
 	PS_TEST_PIN_TOGGLE
 
-	calculatePower(power);
+	if (!calculatePower(filteredBufIndex)) {
+		LOGw("Failed to calculate power");
+	}
+
+	// TODO: if buffer is invalid, assume power remained similar and increase energy regardless?
 	calculateEnergy();
 
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
@@ -405,7 +428,7 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 
 	PS_TEST_PIN_TOGGLE
 
-	bool switch_detected = RecognizeSwitch::getInstance().detect(_bufferQueue, power.voltageIndex);
+	bool switch_detected = RecognizeSwitch::getInstance().detect(_bufferQueue, VOLTAGE_CHANNEL_IDX);
 	if (switch_detected) {
 		LOGd("Switch event detected!");
 		event_t event(CS_TYPE::CMD_SWITCH_TOGGLE, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
@@ -417,35 +440,28 @@ void PowerSampling::powerSampleAdcDone(buffer_id_t bufIndex) {
 		if (_switchHist[_switchHist.size() - 2].asInt != _switchHist[_switchHist.size() - 1].asInt) {
 			// Switch changed state since previous buffer.
 			// Store the current and previous buffer.
-			buffer_id_t prevFilteredBufferIndex = _bufferQueue[_bufferQueue.size() - 2 - numUnfilteredBuffers]; // Previous filtered buffer.
-			uint16_t count = InterleavedBuffer::getChannelLength();
+			adc_buffer_id_t prevFilteredBufferIndex = _bufferQueue[_bufferQueue.size() - 2 - numUnfilteredBuffers]; // Previous filtered buffer.
+			uint16_t count = AdcBuffer::getChannelLength();
 			_lastSwitchSamplesHeader.type = POWER_SAMPLES_TYPE_SWITCH;
 			_lastSwitchSamplesHeader.count = count;
 			_lastSwitchSamplesHeader.unixTimestamp = SystemTime::posix();
 			_lastSwitchSamplesHeader.delayUs = 0;
-			_lastSwitchSamplesHeader.sampleIntervalUs = power.sampleIntervalUs;
-			for (sample_value_id_t i = 0; i < count; ++i) {
-				_lastSwitchSamples[i + 0 * count] = InterleavedBuffer::getInstance().getValue(prevFilteredBufferIndex, VOLTAGE_CHANNEL_IDX, i);
-				_lastSwitchSamples[i + 1 * count] = InterleavedBuffer::getInstance().getValue(prevFilteredBufferIndex, CURRENT_CHANNEL_IDX, i);
-				_lastSwitchSamples[i + 2 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, VOLTAGE_CHANNEL_IDX, i);
-				_lastSwitchSamples[i + 3 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, CURRENT_CHANNEL_IDX, i);
+			_lastSwitchSamplesHeader.sampleIntervalUs = AdcBuffer::getInstance().getBuffer(prevFilteredBufferIndex)->config[0].samplingIntervalUs;
+			for (adc_sample_value_id_t i = 0; i < count; ++i) {
+				_lastSwitchSamples[i + 0 * count] = AdcBuffer::getInstance().getValue(prevFilteredBufferIndex, VOLTAGE_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 1 * count] = AdcBuffer::getInstance().getValue(prevFilteredBufferIndex, CURRENT_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 2 * count] = AdcBuffer::getInstance().getValue(filteredBufIndex, VOLTAGE_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 3 * count] = AdcBuffer::getInstance().getValue(filteredBufIndex, CURRENT_CHANNEL_IDX, i);
 			}
 		}
 		else if (_switchHist[_switchHist.size() - 3].asInt != _switchHist[_switchHist.size() - 1].asInt) {
 			// Switch changed state in previous buffer.
-			uint16_t count = InterleavedBuffer::getChannelLength();
-			for (sample_value_id_t i = 0; i < count; ++i) {
-				_lastSwitchSamples[i + 4 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, VOLTAGE_CHANNEL_IDX, i);
-				_lastSwitchSamples[i + 5 * count] = InterleavedBuffer::getInstance().getValue(filteredBufIndex, CURRENT_CHANNEL_IDX, i);
+			uint16_t count = AdcBuffer::getChannelLength();
+			for (adc_sample_value_id_t i = 0; i < count; ++i) {
+				_lastSwitchSamples[i + 4 * count] = AdcBuffer::getInstance().getValue(filteredBufIndex, VOLTAGE_CHANNEL_IDX, i);
+				_lastSwitchSamples[i + 5 * count] = AdcBuffer::getInstance().getValue(filteredBufIndex, CURRENT_CHANNEL_IDX, i);
 			}
 		}
-	}
-
-
-	// We want to keep N buffers for processing.
-	if (_bufferQueue.size() > numFilteredBuffersForProcessing + numUnfilteredBuffers) {
-		buffer_id_t bufIndexToRelease = _bufferQueue.pop();
-		_adc->releaseBuffer(bufIndexToRelease);
 	}
 }
 
@@ -456,11 +472,31 @@ void PowerSampling::initAverages() {
 	_slowAvgPowerMilliWatt = 0.0;
 }
 
-/**
- * This just returns the given currentIndex.
- */
-uint16_t PowerSampling::determineCurrentIndex(power_t & power) {
-	return power.currentIndex;
+bool PowerSampling::isValidBuf(adc_buffer_id_t bufIndex) {
+	return AdcBuffer::getInstance().getBuffer(bufIndex)->valid;
+}
+
+bool PowerSampling::isConsecutiveBuf(adc_buffer_seq_nr_t seqNr, adc_buffer_seq_nr_t prevSeqNr) {
+	adc_buffer_seq_nr_t diff = seqNr - prevSeqNr;
+	return diff == 1;
+}
+
+void PowerSampling::removeInvalidBufs() {
+	// Find the newest invalid queue index
+	int newestInvalidIndex = -1;
+	for (uint16_t i = 0; i < _bufferQueue.size(); ++i) {
+		if (!isValidBuf(_bufferQueue[i])) {
+			newestInvalidIndex = i;
+		}
+	}
+	if (newestInvalidIndex > -1) {
+		LOGPowerSamplingDebug("buf %u invalid (%uth in queue of size %u)", _bufferQueue[newestInvalidIndex], newestInvalidIndex, _bufferQueue.size());
+		// Remove this and older buffers from queue.
+		for (uint16_t i = 0; i <= newestInvalidIndex; ++i) {
+			LOGPowerSamplingDebug("remove buf %u from queue", _bufferQueue.peek());
+			_bufferQueue.pop();
+		}
+	}
 }
 
 /*
@@ -469,80 +505,71 @@ uint16_t PowerSampling::determineCurrentIndex(power_t & power) {
  * Problems:
  * - Vzero and Izero can be different and affect Vrm and Irms.
  */
-bool PowerSampling::isVoltageAndCurrentSwapped(power_t & power, sample_value_t* prevBuf) {
+bool PowerSampling::isVoltageAndCurrentSwapped(adc_buffer_id_t bufIndex, adc_buffer_id_t prevBufIndex) {
 	// Problem: switchcraft makes this function falsely detect a swap.
 	return false;
-	if (_skipSwapDetection != 0) {
-		_skipSwapDetection--;
-		return false;
-	}
-	int16_t prev, sameIndex, differentIndex;
 
-	uint32_t sumSameIndex = 0;
-	uint32_t sumDifferentIndex = 0;
+	adc_sample_value_t prevSample, voltageSample, currentSample;
 
-	int16_t maxPrev =           INT16_MIN;
-	int16_t maxSameIndex =      INT16_MIN;
-	int16_t maxDifferentIndex = INT16_MIN;
+	uint32_t sumVoltageChannel = 0;
+	uint32_t sumCurrentChannel = 0;
 
-	int16_t minPrev =           INT16_MAX;
-	int16_t minSameIndex =      INT16_MAX;
-	int16_t minDifferentIndex = INT16_MAX;
+	int16_t maxPrevSample =      INT16_MIN;
+	int16_t maxVoltageSample =   INT16_MIN;
+	int16_t maxCurrentSample =   INT16_MIN;
 
-	for (int i = 0; i < power.bufSize / power.numChannels; i += power.numChannels) {
-		prev =             prevBuf[power.voltageIndex + i];
-		sameIndex =      power.buf[power.voltageIndex + i];
-		differentIndex = power.buf[power.currentIndex + i];
-//		_log(SERIAL_DEBUG, "%i %i %i\r\n", prev, sameIndex, differentIndex);
+	int16_t minPrevSample =      INT16_MAX;
+	int16_t minVoltageSample =   INT16_MAX;
+	int16_t minCurrentSample =   INT16_MAX;
 
-		sumSameIndex +=      std::abs(sameIndex - prev);
-		sumDifferentIndex += std::abs(differentIndex - prev);
+	for (adc_sample_value_id_t i =0; i < AdcBuffer::getChannelLength(); ++i) {
+		prevSample = AdcBuffer::getInstance().getValue(prevBufIndex, VOLTAGE_CHANNEL_IDX, i);
+		voltageSample = AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, i);
+		currentSample = AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i);
+		_log(SERIAL_DEBUG, "%i %i %i\r\n", prevSample, voltageSample, currentSample);
 
-		if (prev > maxPrev) { maxPrev = prev; }
-		if (prev < minPrev) { minPrev = prev; }
-		if (sameIndex > maxSameIndex) { maxSameIndex = sameIndex; }
-		if (sameIndex < minSameIndex) { minSameIndex = sameIndex; }
-		if (differentIndex > maxDifferentIndex) { maxDifferentIndex = differentIndex; }
-		if (differentIndex < minDifferentIndex) { minDifferentIndex = differentIndex; }
+		sumVoltageChannel += std::abs(voltageSample - prevSample);
+		sumCurrentChannel += std::abs(currentSample - prevSample);
+
+		// Keep up min and max sample values.
+		if (prevSample > maxPrevSample) { maxPrevSample = prevSample; }
+		if (prevSample < minPrevSample) { minPrevSample = prevSample; }
+		if (voltageSample > maxVoltageSample) { maxVoltageSample = voltageSample; }
+		if (voltageSample < minVoltageSample) { minVoltageSample = voltageSample; }
+		if (currentSample > maxCurrentSample) { maxCurrentSample = currentSample; }
+		if (currentSample < minCurrentSample) { minCurrentSample = currentSample; }
 	}
 
-	int16_t minMaxSameIndex = std::abs(maxPrev - maxSameIndex) + std::abs(minPrev - minSameIndex);
-	int16_t minMaxDifferentIndex = std::abs(maxPrev - maxDifferentIndex) + std::abs(minPrev - minDifferentIndex);
-	if (minMaxSameIndex > minMaxDifferentIndex) {
-		LOGd("minMaxSameIndex=%i minMaxDifferentIndex=%i", minMaxSameIndex, minMaxDifferentIndex);
-		LOGd("prev=[%i %i] same=[%i %i] different=[%i %i]", minPrev, maxPrev, minSameIndex, maxSameIndex, minDifferentIndex, maxDifferentIndex);
+
+	int16_t minMaxVoltageChannel = std::abs(maxPrevSample - maxVoltageSample) + std::abs(minPrevSample - minVoltageSample);
+	int16_t minMaxCurrentChannel = std::abs(maxPrevSample - maxCurrentSample) + std::abs(minPrevSample - minCurrentSample);
+	if (minMaxVoltageChannel > minMaxCurrentChannel) {
+		LOGd("minMaxVoltageChannel=%i minMaxCurrentChannel=%i", minMaxVoltageChannel, minMaxCurrentChannel);
+		LOGd("prev=[%i %i] voltage=[%i %i] current=[%i %i]", minPrevSample, maxPrevSample, minVoltageSample, maxVoltageSample, minCurrentSample, maxCurrentSample);
 	}
 
-//	if (sumSameIndex > sumDifferentIndex || sumSameIndex > 1000) {
-	if (sumSameIndex > sumDifferentIndex) {
-		LOGd("sumSameIndex=%u sumDifferentIndex=%u", sumSameIndex, sumDifferentIndex);
+	if (sumVoltageChannel > sumCurrentChannel) {
+		LOGd("sumVoltageChannel=%u sumCurrentChannel=%u", sumVoltageChannel, sumCurrentChannel);
 	}
-	return (sumDifferentIndex < sumSameIndex);
-//	return (minMaxSameIndex > minMaxDifferentIndex && sumSameIndex > sumDifferentIndex);
+	return (sumCurrentChannel < sumVoltageChannel);
 }
 
-/**
- * The voltage curve is a distorted sinusoid. We calculate the zero(-crossing) by averaging over the buffer over
- * exactly one cycle (positive and negative) of the sinusoid. The cycle does not start at a particular known phase.
- *
- * @param buf                                    Series of samples for voltage and current (we skip every numChannel).
- * @param bufSize                                Not used.
- * @param numChannels                            By default 2 channels, voltage and current.
- * @param voltageIndex                           Offset into the array.
- * @param currentIndex                           Offset into the array for current (irrelevant).
- * @param sampleIntervalUs                       CS_ADC_SAMPLE_INTERVAL_US (default 200).
- * @param acPeriodUs                             20000 (at 50Hz this is 20.000 microseconds, this means: 100 samples).
- *
- * We iterate over the buffer. The number of samples within a single buffer (either voltage or current) depends on the
- * period in microseconds and the sample interval also in microseconds.
- */
-void PowerSampling::calculateVoltageZero(power_t & power) {
-	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
+void PowerSampling::calculateVoltageZero(adc_buffer_id_t bufIndex) {
+	// Simply use the average of an AC period.
+	adc_sample_value_id_t numSamples = AC_PERIOD_US / AdcBuffer::getInstance().getBuffer(bufIndex)->config[VOLTAGE_CHANNEL_IDX].samplingIntervalUs;
+	assert(numSamples <= AdcBuffer::getChannelLength(), "Not enough samples");
 
 	int64_t sum = 0;
-	for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-		sum += power.buf[i];
+	for (adc_sample_value_id_t i = 0; i < numSamples; ++i) {
+		sum += AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, i);
 	}
+
+	if (!isValidBuf(bufIndex)) {
+		// Don't use the calculation.
+		LOGPowerSamplingWarn("buf %u invalid", bufIndex);
+		return;
+	}
+
 	int32_t zeroVoltage = sum * 1024 / numSamples;
 
 //	if (!_zeroVoltageInitialized) {
@@ -562,17 +589,22 @@ void PowerSampling::calculateVoltageZero(power_t & power) {
 	}
 }
 
-/**
- * The same as for the voltage curve, but for the current.
- */
-void PowerSampling::calculateCurrentZero(power_t & power) {
-	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
+void PowerSampling::calculateCurrentZero(adc_buffer_id_t bufIndex) {
+	// Simply use the average of an AC period.
+	adc_sample_value_id_t numSamples = AC_PERIOD_US / AdcBuffer::getInstance().getBuffer(bufIndex)->config[CURRENT_CHANNEL_IDX].samplingIntervalUs;
+	assert(numSamples <= AdcBuffer::getChannelLength(), "Not enough samples");
 
 	int64_t sum = 0;
-	// Use filtered samples to calculate the zero.
-	for (int i = 0; i < numSamples; ++i) {
-		sum += _outputSamples->at(i);
+	for (adc_sample_value_id_t i = 0; i < numSamples; ++i) {
+		sum += AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i);
 	}
+
+	if (!isValidBuf(bufIndex)) {
+		// Don't use the calculation.
+		LOGPowerSamplingWarn("buf %u invalid", bufIndex);
+		return;
+	}
+
 	int32_t zeroCurrent = sum * 1024 / numSamples;
 
 //	if (!_zeroCurrentInitialized) {
@@ -625,23 +657,23 @@ void PowerSampling::calculateCurrentZero(power_t & power) {
 /**
  * This function performs a median filter with respect to the given channel.
  */
-void PowerSampling::filter(buffer_id_t bufIndexIn, buffer_id_t bufIndexOut, channel_id_t channel_id) {
+void PowerSampling::filter(adc_buffer_id_t bufIndexIn, adc_buffer_id_t bufIndexOut, adc_channel_id_t channel_id) {
 
 	// Pad the start of the input vector with the first sample in the buffer
 	uint16_t j = 0;
-	sample_value_t padded_value = InterleavedBuffer::getInstance().getValue(bufIndexIn, channel_id, 0);
+	adc_sample_value_t padded_value = AdcBuffer::getInstance().getValue(bufIndexIn, channel_id, 0);
 	for (uint16_t i = 0; i < _filterParams->half; ++i, ++j) {
 		_inputSamples->at(j) = padded_value;
 	}
 
 	// Copy samples from buffer to input vector
-	uint8_t channel_length = InterleavedBuffer::getInstance().getChannelLength();
+	uint8_t channel_length = AdcBuffer::getInstance().getChannelLength();
 	for (int i = 0; i < channel_length; ++i, ++j) {
-		_inputSamples->at(j) = InterleavedBuffer::getInstance().getValue(bufIndexIn, channel_id, i);
+		_inputSamples->at(j) = AdcBuffer::getInstance().getValue(bufIndexIn, channel_id, i);
 	}
 
 	// Pad the end of the buffer with the last sample in the buffer
-	padded_value = InterleavedBuffer::getInstance().getValue(bufIndexIn, channel_id, channel_length - 1);
+	padded_value = AdcBuffer::getInstance().getValue(bufIndexIn, channel_id, channel_length - 1);
 	for (uint16_t i = 0; i < _filterParams->half; ++i, ++j) {
 		_inputSamples->at(j) = padded_value;
 	}
@@ -650,42 +682,38 @@ void PowerSampling::filter(buffer_id_t bufIndexIn, buffer_id_t bufIndexOut, chan
 	sort_median(*_filterParams, *_inputSamples, *_outputSamples);
 
 	// Copy the result back into the buffer
-	for (int i = 0; i < InterleavedBuffer::getInstance().getChannelLength(); ++i) {
-		InterleavedBuffer::getInstance().setValue(bufIndexOut, channel_id, i, _outputSamples->at(i));
+	for (int i = 0; i < AdcBuffer::getInstance().getChannelLength(); ++i) {
+		AdcBuffer::getInstance().setValue(bufIndexOut, channel_id, i, _outputSamples->at(i));
 	}
 }
 
-/**
- * Calculate power.
- *
- * The int64_t sum is large enough: 2^63 / (2^12 * 1000 * 2^12 * 1000) = 5*10^5. Many more samples than the 100 we use.
- */
-void PowerSampling::calculatePower(power_t & power) {
+bool PowerSampling::calculatePower(adc_buffer_id_t bufIndex) {
 
-	uint16_t numSamples = power.acPeriodUs / power.sampleIntervalUs;
-
-	// TODO: Make this an assert.
-	if ((int)power.bufSize < numSamples * power.numChannels) {
-		LOGe("Should have at least a whole period in a buffer!");
-		return;
-	}
+	adc_sample_value_id_t numSamples = AC_PERIOD_US / AdcBuffer::getInstance().getBuffer(bufIndex)->config[VOLTAGE_CHANNEL_IDX].samplingIntervalUs;
+	assert(numSamples <= AdcBuffer::getChannelLength(), "Not enough samples");
 
 	//////////////////////////////////////////////////
 	// Calculatate power, Irms, and Vrms
 	//////////////////////////////////////////////////
 
+	// The int64_t sum is large enough: 2^63 / (2^12 * 1000 * 2^12 * 1000) = 5*10^5. Many more samples than the 100 we use.
 	int64_t pSum = 0;
 	int64_t cSquareSum = 0;
 	int64_t vSquareSum = 0;
 	int64_t current;
 	int64_t voltage;
-	for (uint16_t i = 0; i < numSamples * power.numChannels; i += power.numChannels) {
-		current = (int64_t)power.buf[i+power.currentIndex]*1024 - _avgZeroCurrent;
-		voltage = (int64_t)power.buf[i+power.voltageIndex]*1024 - _avgZeroVoltage;
-		cSquareSum += (current * current) / (1024*1024);
+	for (adc_sample_value_id_t i = 0; i < numSamples; ++i) {
+		voltage = (int64_t)AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, i) * 1024 - _avgZeroVoltage;
+		current = (int64_t)AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i) * 1024 - _avgZeroCurrent;
 		vSquareSum += (voltage * voltage) / (1024*1024);
+		cSquareSum += (current * current) / (1024*1024);
 		pSum +=       (current * voltage) / (1024*1024);
 	}
+	if (!isValidBuf(bufIndex)) {
+		LOGPowerSamplingWarn("buf %u invalid", bufIndex);
+		return false;
+	}
+
 	int32_t powerMilliWattReal = pSum * _currentMultiplier * _voltageMultiplier * 1000 / numSamples;
 	int32_t currentRmsMA = sqrt((double)cSquareSum * _currentMultiplier * _currentMultiplier / numSamples) * 1000;
 	int32_t voltageRmsMilliVolt = sqrt((double)vSquareSum * _voltageMultiplier * _voltageMultiplier / numSamples) * 1000;
@@ -733,7 +761,7 @@ void PowerSampling::calculatePower(power_t & power) {
 	// Wait some time, for the measurement to converge.. why does this have to take so long?
 //	if (_zeroCurrentInitialized && _zeroVoltageInitialized) {
 	if (_zeroVoltageCount > 200 && _zeroCurrentCount > 200) {
-		checkSoftfuse(currentRmsMA, filteredCurrentRmsMedianMA, voltageRmsMilliVolt, power);
+		checkSoftfuse(currentRmsMA, filteredCurrentRmsMedianMA, voltageRmsMilliVolt, bufIndex);
 	}
 
 
@@ -807,7 +835,11 @@ void PowerSampling::calculatePower(power_t & power) {
 //	}
 
 	if (printPower % 10 == 0) {
-		LOGd("I=%u %u %u %u P=%i %i %i", currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA, _avgPowerMilliWatt, powerMilliWattReal, powerMilliWattApparent);
+		LOGd("Izero=%i Vzero=%i", _avgZeroCurrent, _avgZeroVoltage);
+		LOGd("I: rms=%umA rmsMedian=%umA rmsFiltered=%umA rmsFilteredMedian=%umA  V: rms=%u  P: avg=%imW real=%imW apparent=%imW",
+				currentRmsMA, currentRmsMedianMA, filteredCurrentRmsMA, filteredCurrentRmsMedianMA,
+				voltageRmsMilliVolt,
+				_avgPowerMilliWatt, powerMilliWattReal, powerMilliWattApparent);
 	}
 
 	++printPower;
@@ -835,8 +867,10 @@ void PowerSampling::calculatePower(power_t & power) {
 		// Write uart_msg_current_t without allocating a buffer.
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
 		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT,(uint8_t*)&(rtcCount), sizeof(rtcCount));
-		for (int i = power.currentIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
+		adc_sample_value_t val;
+		for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
+			val = AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i);
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&val, sizeof(val));
 		}
 		UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_CURRENT);
 	}
@@ -845,9 +879,9 @@ void PowerSampling::calculatePower(power_t & power) {
 		// Write uart_msg_current_t without allocating a buffer.
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, sizeof(uart_msg_current_t));
 		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&(rtcCount), sizeof(rtcCount));
-		int16_t val;
-		for (int i = 0; i < numSamples; ++i) {
-			val = _outputSamples->at(i);
+		adc_sample_value_t val;
+		for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
+			val = AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i);
 			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT, (uint8_t*)&val, sizeof(val));
 		}
 		UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_FILTERED_CURRENT);
@@ -857,11 +891,15 @@ void PowerSampling::calculatePower(power_t & power) {
 		// Write uart_msg_voltage_t without allocating a buffer.
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
 		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(rtcCount), sizeof(rtcCount));
-		for (int i = power.voltageIndex; i < numSamples * power.numChannels; i += power.numChannels) {
-			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(power.buf[i]), sizeof(sample_value_t));
+		adc_sample_value_t val;
+		for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
+			val = AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, i);
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&val, sizeof(val));
 		}
 		UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_VOLTAGE);
 	}
+
+	return true;
 }
 
 void PowerSampling::calculateSlowAveragePower(float powerMilliWatt, float fastAvgPowerMilliWatt) {
@@ -936,11 +974,11 @@ void PowerSampling::calculateEnergy() {
 	// Assume we process every buffer, so simply only multiple power with the buffer duration.
 	// Only add negative energy when power is below the threshold.
 	if (_slowAvgPowerMilliWatt > 0.0f || _slowAvgPowerMilliWatt < _negativePowerThresholdMilliWatt) {
-		_energyUsedmicroJoule += _slowAvgPowerMilliWatt * (CS_ADC_SAMPLE_INTERVAL_US / 1000.0f * InterleavedBuffer::getChannelLength());
+		_energyUsedmicroJoule += _slowAvgPowerMilliWatt * (CS_ADC_SAMPLE_INTERVAL_US / 1000.0f * AdcBuffer::getChannelLength());
 	}
 }
 
-void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, int32_t voltageRmsMilliVolt, power_t & power) {
+void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRmsMilliAmpFiltered, int32_t voltageRmsMilliVolt, adc_buffer_id_t bufIndex) {
 
 	// Get the current state errors
 	TYPIFY(STATE_ERRORS) stateErrors;
@@ -950,7 +988,7 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRms
 	if (!_dimmerFailureDetectionStarted && (RTC::getCount() > RTC::msToTicks(5000))) {
 		LOGi("Start dimmer failure detection");
 		_dimmerFailureDetectionStarted = true;
-		printBuf(power);
+		printBuf(bufIndex);
 	}
 
 	// TODO: use _switchHist instead
@@ -991,14 +1029,14 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRms
 				) {
 			_lastSoftfuse.type = POWER_SAMPLES_TYPE_SOFTFUSE;
 			_lastSoftfuse.index = 0;
-			_lastSoftfuse.count = power.bufSize / power.numChannels;
+			_lastSoftfuse.count = AdcBuffer::getChannelLength();
 			_lastSoftfuse.unixTimestamp = SystemTime::posix();
 			_lastSoftfuse.delayUs = 0;
-			_lastSoftfuse.sampleIntervalUs = power.sampleIntervalUs;
+			_lastSoftfuse.sampleIntervalUs = AdcBuffer::getInstance().getBuffer(bufIndex)->config[CURRENT_CHANNEL_IDX].samplingIntervalUs;
 			_lastSoftfuse.offset = _avgZeroCurrent / 1024;
 			_lastSoftfuse.multiplier = _currentMultiplier;
-			for (sample_value_id_t i = 0; i < power.bufSize / power.numChannels; ++i) {
-				_lastSoftfuseSamples[i] = power.buf[2*i + power.currentIndex];
+			for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
+				_lastSoftfuseSamples[i] = AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i);
 			}
 		}
 	}
@@ -1021,11 +1059,11 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRms
 	if ((_consecutiveOvercurrent > CURRENT_THRESHOLD_CONSECUTIVE) && (!stateErrors.errors.overCurrent)) {
 		LOGw("Overcurrent: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
 				currentRmsMilliAmpFiltered,
-				power.buf[power.voltageIndex],
-				power.buf[power.voltageIndex + power.numChannels],
-				power.buf[power.currentIndex],
-				power.buf[power.currentIndex + power.numChannels]);
-		printBuf(power);
+				AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, 0),
+				AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, 1),
+				AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, 0),
+				AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, 1));
+		printBuf(bufIndex);
 
 		event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
 		EventDispatcher::getInstance().dispatch(event);
@@ -1046,11 +1084,11 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRms
 			// If the dimmer is on:
 			LOGw("Dimmer overcurrent: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
 				currentRmsMilliAmpFiltered,
-				power.buf[power.voltageIndex],
-				power.buf[power.voltageIndex + power.numChannels],
-				power.buf[power.currentIndex],
-				power.buf[power.currentIndex + power.numChannels]);
-			printBuf(power);
+				AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, 0),
+				AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, 1),
+				AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, 0),
+				AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, 1));
+			printBuf(bufIndex);
 			// Dispatch the event that will turn off the dimmer
 			event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER);
 			EventDispatcher::getInstance().dispatch(event);
@@ -1062,11 +1100,11 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRms
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
 			LOGw("Dimmer failure detected: Irms=%i mA V=[%i %i ..] C=[%i %i ..]",
 				currentRmsMilliAmpFiltered,
-				power.buf[power.voltageIndex],
-				power.buf[power.voltageIndex + power.numChannels],
-				power.buf[power.currentIndex],
-				power.buf[power.currentIndex + power.numChannels]);
-			printBuf(power);
+				AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, 0),
+				AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, 1),
+				AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, 0),
+				AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, 1));
+			printBuf(bufIndex);
 			event_t event(CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED);
 			EventDispatcher::getInstance().dispatch(event);
 
@@ -1094,8 +1132,8 @@ void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, 
 
 			// Check size
 			cs_power_samples_header_t* header = (cs_power_samples_header_t*)result.buf.data;
-			uint16_t numSamples = InterleavedBuffer::getInstance().getChannelLength();
-			uint16_t samplesSize = numSamples * sizeof(sample_value_t);
+			uint16_t numSamples = AdcBuffer::getInstance().getChannelLength();
+			uint16_t samplesSize = numSamples * sizeof(adc_sample_value_t);
 			size16_t requiredSize = sizeof(*header) + samplesSize;
 			if (result.buf.len < requiredSize) {
 				LOGw("size=%u required=%u", result.buf.len, requiredSize);
@@ -1120,10 +1158,17 @@ void PowerSampling::handleGetPowerSamples(PowerSamplesType type, uint8_t index, 
 			}
 
 			// Copy samples
-			buffer_id_t bufIndex = (type == POWER_SAMPLES_TYPE_NOW_FILTERED) ? _lastFilteredBufIndex : _lastBufIndex;
-			sample_value_t* samples = (sample_value_t*)(result.buf.data + sizeof(*header));
-			for (sample_value_id_t i = 0; i < numSamples; ++i) {
-				samples[i] = InterleavedBuffer::getInstance().getValue(bufIndex, index, i);
+			adc_buffer_id_t bufIndex = (type == POWER_SAMPLES_TYPE_NOW_FILTERED) ? _lastFilteredBufIndex : _lastBufIndex;
+			adc_sample_value_t* samples = (adc_sample_value_t*)(result.buf.data + sizeof(*header));
+			for (adc_sample_value_id_t i = 0; i < numSamples; ++i) {
+				samples[i] = AdcBuffer::getInstance().getValue(bufIndex, index, i);
+			}
+
+			// After reading the buffer, check if it was valid
+			if (!isValidBuf(bufIndex)) {
+				LOGw("buf %u invalid", bufIndex);
+				result.returnCode = ERR_NOT_AVAILABLE;
+				return;
 			}
 
 			result.dataSize = requiredSize;
@@ -1298,13 +1343,15 @@ void PowerSampling::enableSwitchcraft(bool enable) {
 	}
 }
 
-void PowerSampling::printBuf(power_t & power) {
-	LOGd("PowerBuf:");
-	for (uint16_t i = 0; i < power.bufSize; ++i) {
-		_log(SERIAL_DEBUG, " %i", power.buf[i]);
-		if ((i+1) % 10 == 0) {
-			_log(SERIAL_DEBUG, SERIAL_CRLF);
+void PowerSampling::printBuf(adc_buffer_id_t bufIndex) {
+	LOGd("ADC buf:");
+	for (adc_channel_id_t channel = 0; channel < AdcBuffer::getChannelCount(); ++channel) {
+		for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
+			_log(SERIAL_DEBUG, "%i ", AdcBuffer::getInstance().getValue(bufIndex, channel, i));
+			if ((i+1) % 10 == 0) {
+				_log(SERIAL_DEBUG, SERIAL_CRLF);
+			}
 		}
+		_log(SERIAL_DEBUG, SERIAL_CRLF);
 	}
-	_log(SERIAL_DEBUG, SERIAL_CRLF);
 }

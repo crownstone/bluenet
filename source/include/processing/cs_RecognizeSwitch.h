@@ -8,7 +8,7 @@
 #pragma once
 
 #include <structs/buffer/cs_CircularBuffer.h>
-#include <structs/buffer/cs_InterleavedBuffer.h>
+#include <structs/buffer/cs_AdcBuffer.h>
 
 class RecognizeSwitch {
 private:
@@ -35,8 +35,8 @@ private:
 	// Store the samples and meta data of the last detection.
 	cs_power_samples_header_t _lastDetection;
 	cs_power_samples_header_t _lastAlmostDetection;
-	int16_t _lastDetectionSamples[_numStoredBuffers * InterleavedBuffer::getChannelLength()] = {0};
-	int16_t _lastAlmostDetectionSamples[_numStoredBuffers * InterleavedBuffer::getChannelLength()] = {0};
+	int16_t _lastDetectionSamples[_numStoredBuffers * AdcBuffer::getChannelLength()] = {0};
+	int16_t _lastAlmostDetectionSamples[_numStoredBuffers * AdcBuffer::getChannelLength()] = {0};
 
 	enum FoundSwitch {
 		True,
@@ -44,8 +44,18 @@ private:
 		False
 	};
 
-	FoundSwitch detectSwitch(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId);
-	FoundSwitch detect(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId, uint8_t iteration);
+	/**
+	 * Check if a switch is detected in the given buffers.
+	 */
+	FoundSwitch detect(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId, uint8_t iteration);
+
+	/**
+	 * Check if a switch is detected in the given buffers.
+	 *
+	 * Different way of calculating, using calcDiff().
+	 * Seems to go slower though.
+	 */
+	FoundSwitch detectSwitch(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId);
 
 	/*
 	 * Calculate the difference between 2 buffers.
@@ -53,17 +63,17 @@ private:
 	 * Start at sample <shift> and iterates over <numSamples> samples.
 	 */
 	inline float calcDiff(
-			const CircularBuffer<buffer_id_t>& bufQueue,
-			const channel_id_t voltageChannelId,
-			const buffer_id_t bufIndex1,
-			const buffer_id_t bufIndex2,
-			const sample_value_id_t startIndex,
-			const sample_value_id_t numSamples);
+			const CircularBuffer<adc_buffer_id_t>& bufQueue,
+			const adc_channel_id_t voltageChannelId,
+			const adc_buffer_id_t bufIndex1,
+			const adc_buffer_id_t bufIndex2,
+			const adc_sample_value_id_t startIndex,
+			const adc_sample_value_id_t numSamples);
 
-	bool ignoreSample(const sample_value_t value1, const sample_value_t value2);
-	bool ignoreSample(const sample_value_t value0, const sample_value_t value1, const sample_value_t value2);
+	bool ignoreSample(const adc_sample_value_t value1, const adc_sample_value_t value2);
+	bool ignoreSample(const adc_sample_value_t value0, const adc_sample_value_t value1, const adc_sample_value_t value2);
 
-	void setLastDetection(bool aboveThreshold, const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId);
+	void setLastDetection(bool aboveThreshold, const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId);
 
 public:
 	// Gets a static singleton (no dynamic memory allocation)
@@ -109,7 +119,7 @@ public:
 	 * @param[in] voltageChannelId               Channel in which the voltage values can be found.
 	 * @return                                   True when switch event was detected.
 	 */
-	bool detect(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId);
+	bool detect(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId);
 
 	/**
 	 * Get the samples of the last (almost) detected switch event.
