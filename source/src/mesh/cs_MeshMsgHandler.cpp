@@ -55,10 +55,6 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 			result.returnCode = handleAck(payload, payloadSize);
 			return;
 		}
-		case CS_MESH_MODEL_TYPE_STATE_TIME: {
-			result.returnCode = handleStateTime(payload, payloadSize);
-			return;
-		}
 		case CS_MESH_MODEL_TYPE_CMD_TIME: {
 			result.returnCode = handleCmdTime(payload, payloadSize);
 			return;
@@ -165,16 +161,6 @@ cs_ret_code_t MeshMsgHandler::handleTest(uint8_t* payload, size16_t payloadSize)
 
 cs_ret_code_t MeshMsgHandler::handleAck(uint8_t* payload, size16_t payloadSize) {
 	return ERR_NOT_IMPLEMENTED;
-}
-
-cs_ret_code_t MeshMsgHandler::handleStateTime(uint8_t* payload, size16_t payloadSize) {
-	cs_mesh_model_msg_time_t* packet = (cs_mesh_model_msg_time_t*)payload;
-	TYPIFY(EVT_MESH_TIME) timestamp = packet->timestamp;
-	LOGMeshModelInfo("received state time %u", timestamp);
-	event_t event(CS_TYPE::EVT_MESH_TIME, &timestamp, sizeof(timestamp));
-	event.dispatch();
-//	return event.result.returnCode;
-	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSize) {

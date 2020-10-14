@@ -129,17 +129,6 @@ void Mesh::handleEvent(event_t & event) {
 //				Stack::getInstance().startScanning();
 			}
 		}
-		if (_sendStateTimeCountdown-- == 0) {
-			uint32_t randMs = MESH_SEND_TIME_INTERVAL_MS + RNG::getInstance().getRandom8() * MESH_SEND_TIME_INTERVAL_MS_VARIATION / 255;
-			_sendStateTimeCountdown = randMs / TICK_INTERVAL_MS;
-
-			Time time = SystemTime::now();
-			if (time.isValid()) {
-				cs_mesh_model_msg_time_t packet;
-				packet.timestamp = time.timestamp();
-				_msgSender.sendTime(&packet);
-			}
-		}
 		if (!_synced) {
 			if (_syncCountdown) {
 				--_syncCountdown;

@@ -110,7 +110,6 @@ private:
 	MeshScanner              _scanner;
 
 	// Sync request
-	uint32_t _sendStateTimeCountdown = MESH_SEND_TIME_INTERVAL_MS / TICK_INTERVAL_MS;
 	bool _synced = false;
 	uint32_t _syncCountdown = -1;
 	uint32_t _syncFailedCountdown = 0;

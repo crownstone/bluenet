@@ -18,8 +18,6 @@
  * debugging purpose.
  */
 struct __attribute__((__packed__)) rssi_ping_message_t {
-//	uint32_t sender_local_uptime;
-//	uint32_t sender_local_systime;
 	stone_id_t sender_id;
 	stone_id_t recipient_id;
 	uint8_t sample_id;
