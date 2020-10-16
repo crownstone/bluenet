@@ -5,8 +5,9 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <drivers/cs_RNG.h>
 #include <uart/cs_UartConnection.h>
-
+#include <uart/cs_UartHandler.h>
 #include <storage/cs_State.h>
 
 #define LOGUartconnectionDebug LOGnone
@@ -39,12 +40,30 @@ const uart_msg_status_user_t& UartConnection::getUserStatus() {
 void UartConnection::onUserStatus(const uart_msg_status_user_t& status) {
 	LOGUartconnectionDebug("Set user status");
 	_userStatus = status;
+
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_STATUS, (uint8_t*)&_status, sizeof(_status));
 }
 
 void UartConnection::onHeartBeat(uint16_t timeoutSeconds) {
 	LOGUartconnectionDebug("Heartbeat timeout=%u", timeoutSeconds);
 	_isConnectionAlive = true;
 	_connectionTimeoutCountdown = timeoutSeconds * (1000 / TICK_INTERVAL_MS);
+
+	// Reply with a heartbeat.
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HEARTBEAT, nullptr, 0);
+}
+
+void UartConnection::onSessionNonce(const uart_msg_session_nonce_t& sessionNonce) {
+	LOGUartconnectionDebug("SessionNonce timeout=%u nonce=[%u %u .. %u]", sessionNonce.timeoutMinutes, sessionNonce.sessionNonce[0], sessionNonce.sessionNonce[1], sessionNonce.sessionNonce[SESSION_NONCE_LENGTH - 1]);
+	memcpy(_sessionNonceRx, sessionNonce.sessionNonce, SESSION_NONCE_LENGTH);
+	_sessionNonceValid = true;
+	_sessionNonceTimeoutCountdown = sessionNonce.timeoutMinutes * 60 * (1000 / TICK_INTERVAL_MS);
+
+	// Refresh our own session nonce.
+	RNG::fillBuffer(_sessionNonceTx, sizeof(_sessionNonceTx));
+
+	// Reply with our new session nonce.
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_SESSION_NONCE, _sessionNonceTx, sizeof(_sessionNonceTx));
 }
 
 void UartConnection::onTick() {
@@ -54,6 +73,14 @@ void UartConnection::onTick() {
 			LOGi("Connection timed out");
 			// No heartbeat received within timeout: connection died.
 			_isConnectionAlive = false;
+		}
+	}
+
+	if (_sessionNonceTimeoutCountdown) {
+		--_sessionNonceTimeoutCountdown;
+		if (_sessionNonceTimeoutCountdown == 0) {
+			LOGi("Session nonce timed out");
+			_sessionNonceValid = false;
 		}
 	}
 }

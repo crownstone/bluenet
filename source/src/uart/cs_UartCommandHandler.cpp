@@ -155,7 +155,13 @@ void UartCommandHandler::handleCommandHello(cs_data_t commandData) {
 }
 
 void UartCommandHandler::handleCommandSessionNonce(cs_data_t commandData) {
-	LOGd("TODO");
+	LOGd(STR_HANDLE_COMMAND, "session nonce");
+	if (commandData.len < sizeof(uart_msg_session_nonce_t)) {
+		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		return;
+	}
+	uart_msg_session_nonce_t* sessionNonce = reinterpret_cast<uart_msg_session_nonce_t*>(commandData.data);
+	UartConnection::getInstance().onSessionNonce(*sessionNonce);
 }
 
 void UartCommandHandler::handleCommandHeartBeat(cs_data_t commandData) {
@@ -166,9 +172,6 @@ void UartCommandHandler::handleCommandHeartBeat(cs_data_t commandData) {
 	}
 	uart_msg_heartbeat_t* heartbeat = reinterpret_cast<uart_msg_heartbeat_t*>(commandData.data);
 	UartConnection::getInstance().onHeartBeat(heartbeat->timeoutSeconds);
-
-	// Reply with a heartbeat.
-	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HEARTBEAT, nullptr, 0);
 }
 
 void UartCommandHandler::handleCommandStatus(cs_data_t commandData) {
@@ -179,10 +182,6 @@ void UartCommandHandler::handleCommandStatus(cs_data_t commandData) {
 	}
 	uart_msg_status_user_t* userStatus = reinterpret_cast<uart_msg_status_user_t*>(commandData.data);
 	UartConnection::getInstance().onUserStatus(*userStatus);
-
-	// Send our status as reply.
-	uart_msg_status_reply_t status = UartConnection::getInstance().getSelfStatus();
-	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_STATUS, (uint8_t*)&status, sizeof(status));
 }
 
 void UartCommandHandler::handleCommandControl(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultBuffer) {

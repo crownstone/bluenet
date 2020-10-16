@@ -49,13 +49,24 @@ public:
 
 	/**
 	 * To be called on UART heartbeat command.
+	 *
+	 * Sends reply.
 	 */
 	void onHeartBeat(uint16_t timeoutSeconds);
 
 	/**
 	 * To be called on UART status command.
+	 *
+	 * Sends reply.
 	 */
 	void onUserStatus(const uart_msg_status_user_t& status);
+
+	/**
+	 * To be called on UART session nonce command.
+	 *
+	 * Sends reply.
+	 */
+	void onSessionNonce(const uart_msg_session_nonce_t& sessionNonce);
 
 
 private:
@@ -68,20 +79,50 @@ private:
 	//! This class is singleton, deny implementation
 	void operator=(UartConnection const &) = delete;
 
+
+
 	//! Keep up the UART status reply.
 	uart_msg_status_reply_t _status;
 
 	//! Keep up the UART user status.
 	uart_msg_status_user_t _userStatus;
 
+
+
 	//! Keep up whether the connection is considered to be alive.
 	bool _isConnectionAlive = false;
 
 	/**
-	 * Timeout (in ticks) set by heartbeat.
+	 * Timeout (in tick events) set by heartbeat.
 	 * When this reaches 0, consider the connection te be dead.
 	 */
 	uint32_t _connectionTimeoutCountdown = 0;
+
+
+
+	/**
+	 * Session nonce used to decrypt incoming uart msgs.
+	 */
+	uint8_t _sessionNonceRx[SESSION_NONCE_LENGTH];
+
+	/**
+	 * Session nonce used to encrypt outgoing uart msgs.
+	 */
+	uint8_t _sessionNonceTx[SESSION_NONCE_LENGTH];
+
+	/**
+	 * Whether the RX and TX session nonce are valid.
+	 */
+	bool _sessionNonceValid = false;
+
+	/**
+	 * Timeout (in tick events) set by the received session nonce.
+	 * When this reaches 0, consider the RX and TX session nonce to be invalid.
+	 */
+	uint32_t _sessionNonceTimeoutCountdown = 0;
+
+
+
 
 	void onTick();
 
