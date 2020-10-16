@@ -182,7 +182,7 @@ uint16 | Timeout | 2 | If no heartbeat is received for _timeout_ seconds, the co
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Type | 1 | Status type: 0=no-data, 1=crownstone-hub, 2-15=reserved, 16-255=free to use
+uint8 | Type | 1 | Status type: 0=no-data, 1=crownstone-hub, 2-127=reserved, 128-255=free to use
 uint8 | Flags | 1 | Standard flags: has_been_set_up, encryption_required, has_error, ...
 uint8[] | Data | 8 | Status data to be advertised by dongle (will be ignored if status type is _no-data_).
 
