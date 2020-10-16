@@ -164,7 +164,6 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 	} else {
 		// log with root_id 0 and broadcast this over the mesh.
 		logRootTimeStamp(stamp, 0);
-		sendTimeSyncMessage(stamp, 0);
 
 		// Note:
 		// setting root_id 0 is a brutal claim to be root.
@@ -225,12 +224,15 @@ void SystemTime::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::CMD_SET_TIME: {
 			LOGd("set time from command");
+			// TODO: based on source, decide wether or not to broadcast the update
 			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data));
 			break;
 		}
 		case CS_TYPE::CMD_TEST_SET_TIME: {
 			LOGd("set test time");
 			// calls setTime, ignoring throttling and allowing desynchronization
+
+			// TODO: Don't broadcast!
 			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data), false, true);
 			break;
 		}
