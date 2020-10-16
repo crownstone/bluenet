@@ -23,7 +23,7 @@
 #define RC5_16BIT_Q 0x9E37
 
 void EncryptionHandler::init() {
-	_defaultValidationKey.b = DEFAULT_VALIDATION_KEY;
+	_defaultValidationKey.asInt = DEFAULT_VALIDATION_KEY;
 	EventDispatcher::getInstance().addListener(this);
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
@@ -31,7 +31,7 @@ void EncryptionHandler::init() {
 }
 
 uint16_t EncryptionHandler::calculateEncryptionBufferLength(uint16_t inputLength, EncryptionType encryptionType) {
-	if (encryptionType == CTR || encryptionType == CTR_CAFEBABE) {
+	if (encryptionType == CTR) {
 		// add the validation padding length to the raw data length
 		uint16_t requiredLength = inputLength + VALIDATION_KEY_LENGTH;
 
@@ -121,7 +121,7 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
 
 	if (encryptionType == ECB_GUEST_CAFEBABE) {
 		// copy the validation key into the cleartext
-		memcpy(_block.cleartext, _defaultValidationKey.a, VALIDATION_KEY_LENGTH);
+		memcpy(_block.cleartext, _defaultValidationKey.asBuf, VALIDATION_KEY_LENGTH);
 
 		// after which, copy the data into the cleartext
 		memcpy(_block.cleartext + VALIDATION_KEY_LENGTH, data, dataLength);
@@ -149,7 +149,7 @@ bool EncryptionHandler::_encryptECB(uint8_t* data, uint8_t dataLength, uint8_t* 
  */
 bool EncryptionHandler::encrypt(uint8_t* data, uint16_t dataLength, uint8_t* target, uint16_t targetLength,
 		EncryptionAccessLevel userLevel, EncryptionType encryptionType) {
-	if (encryptionType == CTR || encryptionType == CTR_CAFEBABE) {
+	if (encryptionType == CTR) {
 		return _prepareEncryptCTR(data,dataLength,target,targetLength,userLevel,encryptionType);
 	} else {
 		return _encryptECB(data,dataLength,target,targetLength,userLevel,encryptionType);
@@ -185,14 +185,7 @@ bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, u
 	// create the IV
 	_createIV(_block.cleartext, target, encryptionType);
 
-	uint8_t* validationKey;
-	if (encryptionType == CTR_CAFEBABE) {
-		// in case we need a checksum but not a session, we use 0xcafebabe
-		validationKey = _defaultValidationKey.a;
-	}
-	else {
-		validationKey = _sessionData.validationKey;
-	}
+	uint8_t* validationKey = _sessionData.validationKey;
 
 	if (_encryptCTR(validationKey, data, dataLength, target+_overhead, targetNetLength) == false) {
 		LOGe("Error while encrypting");
@@ -206,8 +199,8 @@ bool EncryptionHandler::_prepareEncryptCTR(uint8_t* data, uint16_t dataLength, u
 
 bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encryptedDataPacketLength, uint8_t* target,
 		uint16_t targetLength, EncryptionAccessLevel& levelOfPackage, EncryptionType encryptionType) {
-	if (!(encryptionType == CTR || encryptionType == CTR_CAFEBABE)) {
-		LOGe("Cannot decrypt ECB");
+	if (encryptionType != CTR) {
+		LOGe("Wrong type: %u", encryptionType);
 		return false;
 	}
 
@@ -242,13 +235,7 @@ bool EncryptionHandler::decrypt(uint8_t* encryptedDataPacket, uint16_t encrypted
 	// setup the IV
 	_createIV(_block.cleartext, encryptedDataPacket, encryptionType);
 
-	uint8_t* validationKey;
-	if (encryptionType == CTR_CAFEBABE) {
-		validationKey = _defaultValidationKey.a;
-	}
-	else {
-		validationKey = _sessionData.validationKey;
-	}
+	uint8_t* validationKey = _sessionData.validationKey;
 
 	if (_decryptCTR(validationKey, encryptedDataPacket + _overhead, sourceNetLength, target, targetLength) == false) {
 		LOGe("Error while decrypting");
@@ -622,21 +609,15 @@ void EncryptionHandler::_generateSessionData() {
  * 	- 5 from the session nonce
  * We use the term IV (initialization vector) for this because we have enough Nonce terms floating around.
  */
-void EncryptionHandler::_createIV(uint8_t* IV, uint8_t* nonce, EncryptionType encryptionType) {
+void EncryptionHandler::_createIV(uint8_t* IV, uint8_t* packetNonce, EncryptionType encryptionType) {
 	// Set the nonce to zero to ensure it is consistent.
 	// Since we only have 1 uint8_t as counter doing this once is enough.
 	memset(IV, 0x00, SOC_ECB_CLEARTEXT_LENGTH);
 	// half the text is nonce, the other half is a counter
-	memcpy(IV, nonce, PACKET_NONCE_LENGTH);
+	memcpy(IV, packetNonce, PACKET_NONCE_LENGTH);
 
-	if (encryptionType == CTR_CAFEBABE) {
-		// in case we do not use the session nonce, we use the cafebabe as a validation
-		memcpy(IV + PACKET_NONCE_LENGTH, _defaultValidationKey.a, SESSION_NONCE_LENGTH);
-	}
-	else {
-		// copy the session nonce over into the target
-		memcpy(IV + PACKET_NONCE_LENGTH, _sessionData.sessionNonce, SESSION_NONCE_LENGTH);
-	}
+	// copy the session nonce over into the target
+	memcpy(IV + PACKET_NONCE_LENGTH, _sessionData.sessionNonce, SESSION_NONCE_LENGTH);
 }
 
 

@@ -36,12 +36,12 @@ uint32_t RNG::getRandom32() {
 	APP_ERROR_CHECK(err_code);
 
 	conv8_32 converter;
-	converter.a[0] = _randomBytes[0];
-	converter.a[1] = _randomBytes[1];
-	converter.a[2] = _randomBytes[2];
-	converter.a[3] = _randomBytes[3];
+	converter.asBuf[0] = _randomBytes[0];
+	converter.asBuf[1] = _randomBytes[1];
+	converter.asBuf[2] = _randomBytes[2];
+	converter.asBuf[3] = _randomBytes[3];
 
-	return converter.b;
+	return converter.asInt;
 };
 
 uint16_t RNG::getRandom16() {
@@ -58,10 +58,10 @@ uint16_t RNG::getRandom16() {
 
 	conv8_16 converter;
 
-	converter.a[0] = _randomBytes[0];
-	converter.a[1] = _randomBytes[1];
+	converter.asBuf[0] = _randomBytes[0];
+	converter.asBuf[1] = _randomBytes[1];
 
-	return converter.b;
+	return converter.asInt;
 };
 
 uint8_t RNG::getRandom8() {

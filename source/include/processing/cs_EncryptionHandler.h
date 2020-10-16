@@ -22,7 +22,6 @@
 
 enum EncryptionType {
 	CTR,
-	CTR_CAFEBABE,
 	ECB_GUEST,
 	ECB_GUEST_CAFEBABE
 };
@@ -135,7 +134,7 @@ private:
 	void _generateSessionData();
 	void _generateNewSetupKey();
 	void _generateNonceInTarget(uint8_t* target);
-	void _createIV(uint8_t* target, uint8_t* nonce, EncryptionType encryptionType);
+	void _createIV(uint8_t* target, uint8_t* packetNonce, EncryptionType encryptionType);
 	bool _RC5PrepareKey(uint8_t* key, uint8_t keyLength);
 };
 
