@@ -64,6 +64,17 @@ struct __attribute__((packed)) service_data_encrypted_alternative_state_t {
 	uint8_t  validation;
 };
 
+struct __attribute__((packed)) service_data_encrypted_hub_state_t {
+	uint8_t  id;
+	uint8_t  flags;
+	uint8_t  hubDataType;
+	uint8_t  hubData[8];
+	uint16_t partialTimestamp;
+	uint8_t  reserved2; // TODO: Only required if we want to send hub state over mesh.
+	uint8_t  validation;
+};
+
+
 struct __attribute__((packed)) service_data_encrypted_error_t {
 	uint8_t  id;
 	uint32_t errors;
