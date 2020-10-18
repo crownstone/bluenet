@@ -11,6 +11,7 @@
 #include <structs/cs_PacketsInternal.h>
 #include <time/cs_SystemTime.h>
 
+#define LOGSwitchcraftWarn LOGw
 #define LOGSwitchcraftDebug LOGnone
 #define LOGSwitchcraftVerbose LOGnone
 
@@ -45,11 +46,7 @@ void RecognizeSwitch::skip(uint16_t num) {
 }
 
 
-/**
- * The recognizeSwitch function goes through a sequence of buffers to detect if a switch event happened in the buffer
- * in the middle.
- */
-bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId) {
+bool RecognizeSwitch::detect(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId) {
 	if (!_running) {
 		return false;
 	}
@@ -113,36 +110,51 @@ bool RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channe
 	return false;
 }
 
-RecognizeSwitch::FoundSwitch RecognizeSwitch::detectSwitch(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId) {
+RecognizeSwitch::FoundSwitch RecognizeSwitch::detectSwitch(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId) {
 	// Buffer index (size - 1) is unfiltered buffer.
-	buffer_id_t bufIndexFirst = bufQueue[bufQueue.size() - (1 + _numBuffersRequired)];
-	buffer_id_t bufIndexLast  = bufQueue[bufQueue.size() - (1 + 1)];
+	adc_buffer_id_t bufIndexFirst = bufQueue[bufQueue.size() - (1 + _numBuffersRequired)];
+	adc_buffer_id_t bufIndexLast  = bufQueue[bufQueue.size() - (1 + 1)];
 
 	bool foundAlmost = false;
 
 	// Check only part of the buffer length (half buffer length).
 	// Then repeat that at different parts of the buffer (start, mid, end).
 	// Example: if channel length = 100, then check 0-49, 25-74, and 50-99.
-	sample_value_id_t bufferLength = InterleavedBuffer::getInstance().getChannelLength();
-	sample_value_id_t checkLength = bufferLength / 2;
-	sample_value_id_t shift = checkLength / 2;
-	sample_value_id_t startIndex;
+	adc_sample_value_id_t bufferLength = AdcBuffer::getInstance().getChannelLength();
+	adc_sample_value_id_t checkLength = bufferLength / 2;
+	adc_sample_value_id_t shift = checkLength / 2;
+	adc_sample_value_id_t startIndex;
 
 	float diffFirstLast, diffCenterFirst, diffCenterLast;
 	float minDiff;
 	float lowerTheshold = 0.1 * _thresholdDifferent;
 
+	AdcBuffer & ib = AdcBuffer::getInstance();
+
 	for (startIndex = 0; startIndex < (bufferLength - shift); startIndex += shift) {
+
 		// Difference between first and last buffer.
 		diffFirstLast = calcDiff(bufQueue, voltageChannelId, bufIndexFirst, bufIndexLast, startIndex, checkLength);
 
 		// Loop over the center buffers.
 		for (uint8_t i = 0; i < (_numBuffersRequired - 2); ++i) {
-			buffer_id_t bufIndexCenter = bufQueue[bufQueue.size() - (1 + _numBuffersRequired - i - 1)];
+			adc_buffer_id_t bufIndexCenter = bufQueue[bufQueue.size() - (1 + _numBuffersRequired - i - 1)];
+
+			// Check buffer validity before doing the calculations.
+			if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
+				LOGSwitchcraftWarn("Buffer not valid");
+				return RecognizeSwitch::FoundSwitch::False;
+			}
 
 			// Difference between center and first buffer. And between center and last buffer.
 			diffCenterFirst = calcDiff(bufQueue, voltageChannelId, bufIndexFirst, bufIndexCenter, startIndex, checkLength);
 			diffCenterLast  = calcDiff(bufQueue, voltageChannelId, bufIndexLast,  bufIndexCenter, startIndex, checkLength);
+
+			// Check buffer validity after doing the calculations.
+			if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
+				LOGSwitchcraftWarn("Buffer not valid");
+				return RecognizeSwitch::FoundSwitch::False;
+			}
 
 			LOGnone("buffer ind: first=%u center=%u last=%u", bufIndexFirst, bufIndexCenter, bufIndexLast);
 			LOGSwitchcraftVerbose("center iter=%u sample start=%u %d %d %d", i, startIndex, (int32_t)diffCenterFirst, (int32_t)diffCenterLast, (int32_t)diffFirstLast);
@@ -169,23 +181,55 @@ RecognizeSwitch::FoundSwitch RecognizeSwitch::detectSwitch(const CircularBuffer<
 	return RecognizeSwitch::FoundSwitch::False;
 }
 
+float RecognizeSwitch::calcDiff(
+		const CircularBuffer<adc_buffer_id_t>& bufQueue,
+		const adc_channel_id_t voltageChannelId,
+		const adc_buffer_id_t bufIndex1,
+		const adc_buffer_id_t bufIndex2,
+		const adc_sample_value_id_t startIndex,
+		const adc_sample_value_id_t numSamples) {
+	AdcBuffer & ib = AdcBuffer::getInstance();
+	adc_sample_value_id_t endIndex = startIndex + numSamples;
+	float diffSum = 0;
+	float value1, value2, diff;
+	LOGnone("start=%i end=%i", startIndex, endIndex);
+	for (int i = startIndex; i < endIndex; ++i) {
+		value1 = ib.getValue(bufIndex1, voltageChannelId, i);
+		value2 = ib.getValue(bufIndex2, voltageChannelId, i);
+		if (ignoreSample(value1, value2)) {
+			diff = 0;
+		}
+		else {
+			diff = (value1 - value2) * (value1 - value2);
+		}
+		diffSum += diff;
+	}
+	return diffSum;
+}
 
-RecognizeSwitch::FoundSwitch RecognizeSwitch::detect(const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId, uint8_t iteration) {
-	InterleavedBuffer & ib = InterleavedBuffer::getInstance();
+
+RecognizeSwitch::FoundSwitch RecognizeSwitch::detect(const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId, uint8_t iteration) {
+	AdcBuffer & ib = AdcBuffer::getInstance();
 
 	// Check only part of the buffer length (half buffer length).
 	// Then repeat that at different parts of the buffer (start, mid, end).
 	// Example: if channel length = 100, then check 0-49, 25-74, and 50-99.
-	sample_value_id_t checkLength = ib.getChannelLength() / 2;
-	sample_value_id_t shift = checkLength / 2;
-	sample_value_id_t startInd;
-	sample_value_id_t endInd;
+	adc_sample_value_id_t checkLength = ib.getChannelLength() / 2;
+	adc_sample_value_id_t shift = checkLength / 2;
+	adc_sample_value_id_t startInd;
+	adc_sample_value_id_t endInd;
 
 	// Buffer index (size - 1) is unfiltered buffer.
-	buffer_id_t bufIndexFirst  = bufQueue[bufQueue.size() - (1 + _numBuffersRequired)];
-	buffer_id_t bufIndexCenter = bufQueue[bufQueue.size() - (1 + _numBuffersRequired - iteration - 1)];
-	buffer_id_t bufIndexLast   = bufQueue[bufQueue.size() - (1 + 1)];
+	adc_buffer_id_t bufIndexFirst  = bufQueue[bufQueue.size() - (1 + _numBuffersRequired)];
+	adc_buffer_id_t bufIndexCenter = bufQueue[bufQueue.size() - (1 + _numBuffersRequired - iteration - 1)];
+	adc_buffer_id_t bufIndexLast   = bufQueue[bufQueue.size() - (1 + 1)];
 	LOGnone("buffer ind: first=%u center=%u last=%u", bufIndexFirst, bufIndexCenter, bufIndexLast);
+
+	// Check buffer validity before doing the calculations.
+	if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
+		LOGSwitchcraftWarn("Buffer not valid");
+		return RecognizeSwitch::FoundSwitch::False;
+	}
 
 	float valueFirst, valueCenter, valueLast;
 	float diffCenterFirst, diffCenterLast, diffFirstLast; // Diff between 2 values of 2 buffers.
@@ -219,6 +263,13 @@ RecognizeSwitch::FoundSwitch RecognizeSwitch::detect(const CircularBuffer<buffer
 			diffSumFirstLast += diffFirstLast;
 		}
 		LOGSwitchcraftVerbose("center iter=%u sample start=%u %d %d %d", iteration, startInd, (int32_t)diffSumCenterFirst, (int32_t)diffSumCenterLast, (int32_t)diffSumFirstLast);
+
+		// Check buffer validity after doing the calculations.
+		if (!ib.getBuffer(bufIndexFirst)->valid || !ib.getBuffer(bufIndexCenter)->valid || !ib.getBuffer(bufIndexLast)->valid) {
+			LOGSwitchcraftWarn("Buffer not valid");
+			return RecognizeSwitch::FoundSwitch::False;
+		}
+
 		if (diffSumCenterFirst > _thresholdDifferent && diffSumCenterLast > _thresholdDifferent) {
 			minDiffSum = diffSumCenterFirst < diffSumCenterLast ? diffSumCenterFirst : diffSumCenterLast;
 			if (diffSumFirstLast < _thresholdSimilar || minDiffSum / diffSumFirstLast > _thresholdRatio) {
@@ -240,37 +291,11 @@ RecognizeSwitch::FoundSwitch RecognizeSwitch::detect(const CircularBuffer<buffer
 	return RecognizeSwitch::FoundSwitch::False;
 }
 
-float RecognizeSwitch::calcDiff(
-		const CircularBuffer<buffer_id_t>& bufQueue,
-		const channel_id_t voltageChannelId,
-		const buffer_id_t bufIndex1,
-		const buffer_id_t bufIndex2,
-		const sample_value_id_t startIndex,
-		const sample_value_id_t numSamples) {
-	InterleavedBuffer & ib = InterleavedBuffer::getInstance();
-	sample_value_id_t endIndex = startIndex + numSamples;
-	float diffSum = 0;
-	float value1, value2, diff;
-	LOGnone("start=%i end=%i", startIndex, endIndex);
-	for (int i = startIndex; i < endIndex; ++i) {
-		value1 = ib.getValue(bufIndex1, voltageChannelId, i);
-		value2 = ib.getValue(bufIndex2, voltageChannelId, i);
-		if (ignoreSample(value1, value2)) {
-			diff = 0;
-		}
-		else {
-			diff = (value1 - value2) * (value1 - value2);
-		}
-		diffSum += diff;
-	}
-	return diffSum;
-}
-
-bool RecognizeSwitch::ignoreSample(const sample_value_t value1, const sample_value_t value2) {
+bool RecognizeSwitch::ignoreSample(const adc_sample_value_t value1, const adc_sample_value_t value2) {
 	return ignoreSample(value1, value2, 0);
 }
 
-bool RecognizeSwitch::ignoreSample(const sample_value_t value0, const sample_value_t value1, const sample_value_t value2) {
+bool RecognizeSwitch::ignoreSample(const adc_sample_value_t value0, const adc_sample_value_t value1, const adc_sample_value_t value2) {
 	// Observed: sometimes, or often, the builtin one 1B10 measures value 2047 around the top of the curve.
 	// This triggers a false positive when the width of this block changes.
 	if (value0 == 2047 || value1 == 2047 || value2 == 2047) {
@@ -279,7 +304,7 @@ bool RecognizeSwitch::ignoreSample(const sample_value_t value0, const sample_val
 	return false;
 }
 
-void RecognizeSwitch::setLastDetection(bool aboveThreshold, const CircularBuffer<buffer_id_t>& bufQueue, channel_id_t voltageChannelId) {
+void RecognizeSwitch::setLastDetection(bool aboveThreshold, const CircularBuffer<adc_buffer_id_t>& bufQueue, adc_channel_id_t voltageChannelId) {
 	cs_power_samples_header_t* header;
 	int16_t* buf;
 	if (aboveThreshold) {
@@ -300,15 +325,15 @@ void RecognizeSwitch::setLastDetection(bool aboveThreshold, const CircularBuffer
 //	header->multiplier =
 
 	// Copy the samples.
-	InterleavedBuffer & ib = InterleavedBuffer::getInstance();
-	buffer_id_t bufIndices[_numStoredBuffers];
+	AdcBuffer & ib = AdcBuffer::getInstance();
+	adc_buffer_id_t bufIndices[_numStoredBuffers];
 	for (uint8_t i = 0; i < _numStoredBuffers; ++i) {
 		bufIndices[i] = bufQueue[bufQueue.size() - 4 + i]; // Last buffer is the unfiltered version.
 	}
 
 	uint16_t numSamples = ib.getChannelLength();
 	for (uint8_t i = 0; i < _numStoredBuffers; ++i) {
-		for (sample_value_id_t j = 0; j < numSamples; ++j) {
+		for (adc_sample_value_id_t j = 0; j < numSamples; ++j) {
 			buf[i * numSamples + j] = ib.getValue(bufIndices[i], voltageChannelId, j);
 		}
 	}
@@ -341,8 +366,8 @@ void RecognizeSwitch::getLastDetection(PowerSamplesType type, uint8_t index, cs_
 	}
 
 	// Check size.
-	uint16_t numSamples = InterleavedBuffer::getInstance().getChannelLength();
-	uint16_t samplesSize = numSamples * sizeof(sample_value_t);
+	uint16_t numSamples = AdcBuffer::getInstance().getChannelLength();
+	uint16_t samplesSize = numSamples * sizeof(adc_sample_value_t);
 	uint16_t requiredSize = sizeof(*header) + samplesSize;
 	if (result.buf.len < requiredSize) {
 		LOGw("size=%u required=%u", result.buf.len, requiredSize);

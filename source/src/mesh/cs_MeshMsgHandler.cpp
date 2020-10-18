@@ -29,7 +29,12 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 
 	// (checks payload size)
 	if (!MeshUtil::isValidMeshMessage(msg.msg, msg.msgSize)) {
-		LOGw("Invalid mesh message");
+		if (msg.msgSize > 0) {
+			LOGw("Invalid mesh message of type %d", MeshUtil::getType(msg.msg));
+		} else {
+			LOGw("Invalid mesh message of size 0");
+		}
+
 		BLEutil::printArray(msg.msg, msg.msgSize);
 		result.returnCode = ERR_INVALID_MESSAGE;
 		return;
@@ -50,13 +55,12 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 			result.returnCode = handleAck(payload, payloadSize);
 			return;
 		}
-		case CS_MESH_MODEL_TYPE_STATE_TIME: {
-			result.returnCode = handleStateTime(payload, payloadSize);
-			return;
-		}
 		case CS_MESH_MODEL_TYPE_CMD_TIME: {
 			result.returnCode = handleCmdTime(payload, payloadSize);
 			return;
+		}
+		case CS_MESH_MODEL_TYPE_TIME_SYNC: {
+			result.returnCode = handleTimeSync(payload, payloadSize, srcId, msg.hops);
 		}
 		case CS_MESH_MODEL_TYPE_CMD_NOOP: {
 			result.returnCode = handleCmdNoop(payload, payloadSize);
@@ -159,16 +163,6 @@ cs_ret_code_t MeshMsgHandler::handleAck(uint8_t* payload, size16_t payloadSize) 
 	return ERR_NOT_IMPLEMENTED;
 }
 
-cs_ret_code_t MeshMsgHandler::handleStateTime(uint8_t* payload, size16_t payloadSize) {
-	cs_mesh_model_msg_time_t* packet = (cs_mesh_model_msg_time_t*)payload;
-	TYPIFY(EVT_MESH_TIME) timestamp = packet->timestamp;
-	LOGMeshModelInfo("received state time %u", timestamp);
-	event_t event(CS_TYPE::EVT_MESH_TIME, &timestamp, sizeof(timestamp));
-	event.dispatch();
-//	return event.result.returnCode;
-	return ERR_SUCCESS;
-}
-
 cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSize) {
 	cs_mesh_model_msg_time_t* packet = (cs_mesh_model_msg_time_t*)payload;
 	TYPIFY(CMD_SET_TIME) timestamp = packet->timestamp;
@@ -184,6 +178,29 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSi
 	return ERR_SUCCESS;
 }
 
+cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, uint8_t hops){
+	LOGMeshModelInfo("handleTimeSync");
+	cs_mesh_model_msg_time_sync_t* packet = (cs_mesh_model_msg_time_sync_t*) payload;
+
+	// @arend use TYPIFY() so that the corrent type is used.
+	TYPIFY(EVT_MESH_TIME_SYNC) eventData;
+	eventData.stamp.posix_s  = packet->posix_s;
+	eventData.stamp.posix_ms = packet->posix_ms;
+	eventData.stamp.version  = packet->version;
+	if (packet->overrideRoot) {
+		eventData.root_id = 0;
+	}
+	else {
+		eventData.root_id = srcId;
+	}
+
+	// @arend user sizeof(eventData) so the actual size of the variable is used, also when the type is changed.
+	event_t event(CS_TYPE::EVT_MESH_TIME_SYNC, &eventData, sizeof(eventData));
+	event.dispatch();
+
+	return ERR_SUCCESS;
+}
+
 cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSize) {
 	LOGMeshModelInfo("received noop");
 	return ERR_SUCCESS;
@@ -191,7 +208,6 @@ cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSi
 
 cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops, uint8_t channel){
 	rssi_ping_message_t* packet = (rssi_ping_message_t*) payload;
-	LOGMeshModelInfo("received rssi ping message id=%u", packet->deviceId);
 
 	// copy metadata into event data if it is an original ping message.
 	// (i.e. if sender and rssi hasn't been filled in yet.)

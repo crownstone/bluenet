@@ -136,12 +136,6 @@
 #define CS_ADC_TIMER_ID                          1
 #define CS_ADC_TIMER_FREQ                        NRF_TIMER_FREQ_16MHz
 
-#define CS_ADC_TIMEOUT_TIMER                     NRF_TIMER2
-#define CS_ADC_TIMEOUT_TIMER_IRQ                 TIMER2_IRQHandler
-#define CS_ADC_TIMEOUT_TIMER_IRQn                TIMER2_IRQn
-#define CS_ADC_TIMEOUT_INSTANCE_INDEX            TIMER2_INSTANCE_INDEX
-#define CS_ADC_TIMEOUT_TIMER_ID                  2
-#define CS_ADC_TIMEOUT_TIMER_IRQ_PRIORITY        APP_IRQ_PRIORITY_MID // MUST be lower than CS_ADC_IRQ_PRIORITY
 
 
 // ----- PPI -----
@@ -151,14 +145,14 @@
 #define CS_PWM_PPI_CHANNEL_COUNT                 (1 + 2 * CS_PWM_MAX_CHANNELS)
 //#define CS_ADC_PPI_CHANNEL_START                 (CS_PWM_PPI_CHANNEL_START + CS_PWM_PPI_CHANNEL_COUNT)
 #define CS_ADC_PPI_CHANNEL_START                 12
-#define CS_ADC_PPI_CHANNEL_COUNT                 4
+#define CS_ADC_PPI_CHANNEL_COUNT                 2
 
 // ----- PPI groups -----
 // Soft device uses 4-5
 #define CS_PWM_PPI_GROUP_START                   0
 #define CS_PWM_PPI_GROUP_COUNT                   0
 #define CS_ADC_PPI_GROUP_START                   (CS_PWM_PPI_GROUP_START + CS_PWM_PPI_GROUP_COUNT)
-#define CS_ADC_PPI_GROUP_COUNT                   1
+#define CS_ADC_PPI_GROUP_COUNT                   0
 
 // ----- GPIOTE -----
 #define CS_ADC_GPIOTE_CHANNEL_START              0
@@ -167,7 +161,7 @@
 #define CS_PWM_GPIOTE_CHANNEL_COUNT              (CS_PWM_MAX_CHANNELS)
 
 // ----- SAADC -----
-#define CS_ADC_RESOLUTION                        NRF_SAADC_RESOLUTION_12BIT
+#define CS_ADC_RESOLUTION                        NRF_SAADC_RESOLUTION_12BIT // Don't change without changing code.
 #define CS_ADC_IRQ_PRIORITY                      APP_IRQ_PRIORITY_HIGH
 #define CS_ADC_IRQ                               SAADC_IRQHandler
 
@@ -177,9 +171,11 @@
 
 
 #define CS_ADC_SAMPLE_INTERVAL_US                200 // 100 samples per period of 50Hz wave
-#define CS_ADC_MAX_PINS                          2
+#define CS_ADC_NUM_CHANNELS                      2 // Number of channels (pins) to sample.
+#define CS_ADC_NUM_SAMPLES_PER_CHANNEL           (20000 / CS_ADC_SAMPLE_INTERVAL_US) // Make size so it fills up 20ms of data.
+//#define CS_ADC_BUF_SIZE                          (CS_ADC_NUM_CHANNELS * CS_ADC_NUM_SAMPLES_PER_CHANNEL)
+
 #define CS_ADC_NUM_BUFFERS                       9 // 5 buffers are held by processing, 2 queued in SAADC, 1 moves between them, 1 extra for CPU usage peaks.
-#define CS_ADC_BUF_SIZE                          (CS_ADC_MAX_PINS * 20000 / CS_ADC_SAMPLE_INTERVAL_US) // Make size so it fills up 20ms of data.
 #define CS_ADC_TIMEOUT_SAMPLES                   2 // Timeout when no buffer has been set at N samples before end of interval.
 
 

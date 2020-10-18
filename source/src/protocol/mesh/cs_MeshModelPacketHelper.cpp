@@ -13,11 +13,19 @@
 #include <cstring> // For memcpy
 
 #define LOGMeshModelPacketHelperDebug LOGnone
+#define LOGMeshModelPacketHelperWarn LOGw
 
 namespace MeshUtil {
 
 bool isValidMeshMessage(cs_mesh_msg_t* meshMsg) {
-	if (meshMsg->reliability == CS_MESH_RELIABILITY_INVALID || meshMsg->size > MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE) {
+	if (meshMsg->reliability == CS_MESH_RELIABILITY_INVALID){
+		LOGMeshModelPacketHelperWarn("Invalid reliability");
+		return false;
+	}
+	if(meshMsg->size > MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE) {
+		LOGMeshModelPacketHelperWarn("message size too big %d > %d",
+				meshMsg->size,
+				MAX_MESH_MSG_NON_SEGMENTED_SIZE - MESH_HEADER_SIZE);
 		return false;
 	}
 	return isValidMeshPayload(meshMsg->type, meshMsg->payload, meshMsg->size);
@@ -40,8 +48,6 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return testIsValid((cs_mesh_model_msg_test_t*)payload, payloadSize);
 		case CS_MESH_MODEL_TYPE_ACK:
 			return ackIsValid(payload, payloadSize);
-		case CS_MESH_MODEL_TYPE_STATE_TIME:
-			return timeIsValid((cs_mesh_model_msg_time_t*)payload, payloadSize);
 		case CS_MESH_MODEL_TYPE_CMD_TIME:
 			return timeIsValid((cs_mesh_model_msg_time_t*)payload, payloadSize);
 		case CS_MESH_MODEL_TYPE_CMD_NOOP:
@@ -74,6 +80,8 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return payloadSize >= sizeof(set_ibeacon_config_id_packet_t);
 		case CS_MESH_MODEL_TYPE_RSSI_PING:
 			return payloadSize >= sizeof(rssi_ping_message_t);
+		case CS_MESH_MODEL_TYPE_TIME_SYNC:
+			return payloadSize == sizeof(cs_mesh_model_msg_time_sync_t); // @arend use == when the msg is a fixed size.
 		case CS_MESH_MODEL_TYPE_UNKNOWN:
 			return false;
 	}
