@@ -25,7 +25,7 @@
 
 #include <util/cs_Lollipop.h>
 
-#define LOGSystemTimeDebug   LOGd
+#define LOGSystemTimeDebug   LOGnone
 #define LOGSystemTimeVerbose LOGnone
 
 // ============== Static members ==============
@@ -357,6 +357,16 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 
 	if (version_has_incremented || (version_is_equal && isClockAuthority(syncmessage.root_id))) {
 		// sync message wons authority on the clock values.
+		LOGSystemTimeVerbose("logging sync message {id=%d, version=%d}, current data {id=%d, version=%d}.",
+						syncmessage.root_id,
+						syncmessage.stamp.version,
+						currentMasterClockId,
+						last_received_root_stamp.version
+						);
+		LOGSystemTimeVerbose("Version increment:%d, Version eq: %d, is authority:%d",
+				version_has_incremented,
+				version_is_equal,
+				isClockAuthority(syncmessage.root_id));
 		logRootTimeStamp(syncmessage.stamp, syncmessage.root_id);
 
 		// TODO: could postpone reelection if coroutine interface would be improved
