@@ -28,6 +28,8 @@
 #define LOGSystemTimeDebug   LOGnone
 #define LOGSystemTimeVerbose LOGnone
 
+#define DEBUG_SYSTEM_TIME 1
+
 // ============== Static members ==============
 
 // runtime variables
@@ -44,7 +46,7 @@ stone_id_t SystemTime::currentMasterClockId = stone_id_unknown_value;
 stone_id_t SystemTime::myId = stone_id_unknown_value;
 Coroutine SystemTime::syncTimeCoroutine;
 
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 Coroutine SystemTime::debugSyncTimeCoroutine;
 #endif
 
@@ -60,7 +62,7 @@ void SystemTime::init(){
 	assertTimeSyncParameters();
 	syncTimeCoroutine.action = [](){ return syncTimeCoroutineAction(); };
 
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 	debugSyncTimeCoroutine.action = [](){
 		LOGd("debug sync time");
 		publishSyncMessageForTesting();
@@ -139,7 +141,7 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 	TimeOfDay t(time);
 	LOGi("Set time to %u %02d:%02d:%02d", time, t.h(), t.m(), t.s());
 
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 	publishSyncMessageForTesting();
 #endif
 
@@ -212,7 +214,7 @@ cs_ret_code_t SystemTime::setSunTimes(const sun_time_t& sunTimes, bool throttled
 void SystemTime::handleEvent(event_t & event) {
 	bool handled_by_coroutine = false;
 	handled_by_coroutine |= syncTimeCoroutine(event);
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 	handled_by_coroutine |= debugSyncTimeCoroutine(event);
 #endif
 	if (handled_by_coroutine) {
@@ -383,7 +385,7 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 				);
 	}
 
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 	pushSyncMessageToTestSuite(syncmessage);
 #endif
 }
@@ -441,7 +443,7 @@ bool SystemTime::reelectionPeriodTimedOut(){
 }
 
 
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 
 void SystemTime::publishSyncMessageForTesting(){
 	// we can just send a normal sync message.
