@@ -226,6 +226,10 @@ void SystemTime::handleEvent(event_t & event) {
 			LOGd("set time from command");
 			// TODO: based on source, decide wether or not to broadcast the update
 			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data));
+			if(event.source.source.id == CS_CMD_SOURCE_UART){
+				// only this device heard the message, so we make sure to propagate it.
+				sendTimeSyncMessage(getSynchronizedStamp(), 0);
+			}
 			break;
 		}
 		case CS_TYPE::CMD_TEST_SET_TIME: {
@@ -274,9 +278,7 @@ void SystemTime::handleEvent(event_t & event) {
 // ======================== Synchronization ========================
 
 void SystemTime::logRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id){
-	if(id == 0){
-		LOGSystemTimeDebug("clock id 0 sync message occured");
-	}
+	LOGSystemTimeDebug("logRootTimeStamp, changing masterClockId of #%d to: #%d", myId, id);
 
 	currentMasterClockId = id;
 	last_received_root_stamp = stamp;
@@ -307,8 +309,6 @@ high_resolution_time_stamp_t SystemTime::getSynchronizedStamp(){
 	stamp.posix_s = last_received_root_stamp.posix_s + ms_passed / 1000;
 	stamp.posix_ms = (last_received_root_stamp.posix_ms + ms_passed) % 1000;
 	stamp.version = last_received_root_stamp.version;
-
-	// TODO: we have to do something special when version == 0. see confluence page.
 
 	return stamp;
 }
