@@ -103,10 +103,8 @@ void SystemTime::tick(void*) {
 		upTimeSec += 1;
 
 		auto stamp = getSynchronizedStamp();
-		if (stamp.version != 0) {
-			uint32_t posix_s = stamp.posix_s;
-			State::getInstance().set(CS_TYPE::STATE_TIME, &posix_s, sizeof(posix_s));
-		}
+		uint32_t posix_s = stamp.posix_s;
+		State::getInstance().set(CS_TYPE::STATE_TIME, &posix_s, sizeof(posix_s));
 
 		if(thisDeviceClaimsMasterClock()){
 			// Master clokc has to update its stamp every
