@@ -735,7 +735,7 @@ void Crownstone::startUp() {
 
 	_log(SERIAL_INFO, "\r\n");
 	_log(SERIAL_INFO, "\t\t\tAddress: ");
-	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN);
+	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN, SERIAL_INFO);
 	_log(SERIAL_INFO, "\r\n");
 
 	_state->startWritesToFlash();
