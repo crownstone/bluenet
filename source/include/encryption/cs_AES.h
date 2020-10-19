@@ -7,7 +7,15 @@
 
 #pragma once
 
+#include <ble/cs_Nordic.h>
 #include <structs/cs_PacketsInternal.h>
+
+/**
+ * AES block size.
+ *
+ * 16 byte size, just like SOC_ECB_CLEARTEXT_LENGTH and SOC_ECB_CIPHERTEXT_LENGTH.
+ */
+#define AES_BLOCK_SIZE 16
 
 class AES {
 public:
@@ -49,7 +57,18 @@ public:
 	 * @param[out] writtenSize         How many bytes are written to output.
 	 * @return                         Return code.
 	 */
-	cs_ret_code_t encryptCtr(cs_data_t key, cs_data_t prefix, cs_data_t input, cs_data_t output, cs_buffer_size_t& writtenSize);
+	cs_ret_code_t encryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t prefix, cs_data_t input, cs_data_t output, cs_buffer_size_t& writtenSize);
+
+	/**
+	 * Decrypt data with given key in CTR mode.
+	 *
+	 * @param[in]  key                 Key to encrypt with.
+	 * @param[in]  nonce               Nonce to use for decryption.
+	 * @param[in]  input               Input data to be encrypted.
+	 * @param[out] output              Buffer to encrypt to. Can be the same as input.
+	 * @return                         Return code.
+	 */
+	cs_ret_code_t decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t output);
 
 
 private:
@@ -62,6 +81,10 @@ private:
 	// This class is singleton, deny implementation
 	void operator=(AES const &);
 
+	/**
+	 * Struct with key, and single block of encrypted and decypted data.
+	 */
+	nrf_ecb_hal_data_t _block __attribute__ ((aligned (4)));
 
 };
 
