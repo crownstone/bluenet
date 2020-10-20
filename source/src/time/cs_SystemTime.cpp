@@ -25,8 +25,16 @@
 
 #include <util/cs_Lollipop.h>
 
-#define LOGSystemTimeDebug   LOGd
+#define LOGSystemTimeDebug   LOGnone
 #define LOGSystemTimeVerbose LOGnone
+
+#if DEBUGSYSTEM_TIME
+#ifndef DEBUG
+#error "SystemTime Debug must be turned off in release"
+#endif
+#else
+#pragma message("SystemTime Debug is turned on.")
+#endif
 
 // ============== Static members ==============
 
@@ -44,7 +52,7 @@ stone_id_t SystemTime::currentMasterClockId = stone_id_unknown_value;
 stone_id_t SystemTime::myId = stone_id_unknown_value;
 Coroutine SystemTime::syncTimeCoroutine;
 
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 Coroutine SystemTime::debugSyncTimeCoroutine;
 #endif
 
@@ -60,7 +68,7 @@ void SystemTime::init(){
 	assertTimeSyncParameters();
 	syncTimeCoroutine.action = [](){ return syncTimeCoroutineAction(); };
 
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 	debugSyncTimeCoroutine.action = [](){
 		LOGd("debug sync time");
 		publishSyncMessageForTesting();
@@ -103,10 +111,8 @@ void SystemTime::tick(void*) {
 		upTimeSec += 1;
 
 		auto stamp = getSynchronizedStamp();
-		if (stamp.version != 0) {
-			uint32_t posix_s = stamp.posix_s;
-			State::getInstance().set(CS_TYPE::STATE_TIME, &posix_s, sizeof(posix_s));
-		}
+		uint32_t posix_s = stamp.posix_s;
+		State::getInstance().set(CS_TYPE::STATE_TIME, &posix_s, sizeof(posix_s));
 
 		if(thisDeviceClaimsMasterClock()){
 			// Master clokc has to update its stamp every
@@ -141,7 +147,7 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 	TimeOfDay t(time);
 	LOGi("Set time to %u %02d:%02d:%02d", time, t.h(), t.m(), t.s());
 
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 	publishSyncMessageForTesting();
 #endif
 
@@ -164,7 +170,6 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 	} else {
 		// log with root_id 0 and broadcast this over the mesh.
 		logRootTimeStamp(stamp, 0);
-		sendTimeSyncMessage(stamp, 0);
 
 		// Note:
 		// setting root_id 0 is a brutal claim to be root.
@@ -215,7 +220,7 @@ cs_ret_code_t SystemTime::setSunTimes(const sun_time_t& sunTimes, bool throttled
 void SystemTime::handleEvent(event_t & event) {
 	bool handled_by_coroutine = false;
 	handled_by_coroutine |= syncTimeCoroutine(event);
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 	handled_by_coroutine |= debugSyncTimeCoroutine(event);
 #endif
 	if (handled_by_coroutine) {
@@ -225,12 +230,19 @@ void SystemTime::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::CMD_SET_TIME: {
 			LOGd("set time from command");
+			// TODO: based on source, decide wether or not to broadcast the update
 			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data));
+			if(isOnlyReceiveByThisDevice(event.source)){
+				// only this device heard the message, so we make sure to propagate it.
+				sendTimeSyncMessage(getSynchronizedStamp(), 0);
+			}
 			break;
 		}
 		case CS_TYPE::CMD_TEST_SET_TIME: {
 			LOGd("set test time");
 			// calls setTime, ignoring throttling and allowing desynchronization
+
+			// TODO: Don't broadcast!
 			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data), false, true);
 			break;
 		}
@@ -269,12 +281,21 @@ void SystemTime::handleEvent(event_t & event) {
 	}
 }
 
+bool SystemTime::isOnlyReceiveByThisDevice(cmd_source_with_counter_t counted_source){
+	auto src = counted_source.source;
+	if (src.flagExternal) {
+		return false;
+	}
+
+	return src.type == CS_CMD_SOURCE_TYPE_UART
+			|| (src.type == CS_CMD_SOURCE_TYPE_ENUM
+					&&  src.id == CS_CMD_SOURCE_CONNECTION);
+}
+
 // ======================== Synchronization ========================
 
 void SystemTime::logRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id){
-	if(id == 0){
-		LOGSystemTimeDebug("clock id 0 sync message occured");
-	}
+	LOGSystemTimeDebug("logRootTimeStamp, changing masterClockId of #%d to: #%d", myId, id);
 
 	currentMasterClockId = id;
 	last_received_root_stamp = stamp;
@@ -305,8 +326,6 @@ high_resolution_time_stamp_t SystemTime::getSynchronizedStamp(){
 	stamp.posix_s = last_received_root_stamp.posix_s + ms_passed / 1000;
 	stamp.posix_ms = (last_received_root_stamp.posix_ms + ms_passed) % 1000;
 	stamp.version = last_received_root_stamp.version;
-
-	// TODO: we have to do something special when version == 0. see confluence page.
 
 	return stamp;
 }
@@ -357,6 +376,16 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 
 	if (version_has_incremented || (version_is_equal && isClockAuthority(syncmessage.root_id))) {
 		// sync message wons authority on the clock values.
+		LOGSystemTimeVerbose("logging sync message {id=%d, version=%d}, current data {id=%d, version=%d}.",
+						syncmessage.root_id,
+						syncmessage.stamp.version,
+						currentMasterClockId,
+						last_received_root_stamp.version
+						);
+		LOGSystemTimeVerbose("Version increment:%d, Version eq: %d, is authority:%d",
+				version_has_incremented,
+				version_is_equal,
+				isClockAuthority(syncmessage.root_id));
 		logRootTimeStamp(syncmessage.stamp, syncmessage.root_id);
 
 		// TODO: could postpone reelection if coroutine interface would be improved
@@ -373,7 +402,7 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 				);
 	}
 
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 	pushSyncMessageToTestSuite(syncmessage);
 #endif
 }
@@ -396,11 +425,11 @@ void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_i
 	cs_mesh_msg_t meshMsg;
 	meshMsg.type = CS_MESH_MODEL_TYPE_TIME_SYNC;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&timeSyncMsg);
-	meshMsg.size  = sizeof(timeSyncMsg); // @arend use size of the variable instead of a type: otherwise, if the type of variable is changed, the size is wrong.
-	meshMsg.reliability = CS_MESH_RELIABILITY_LOW; // @arend should only be low if this command was broadcasted, if it was set via BLE connection, or UART, the reliability should be higher.
-	meshMsg.urgency = CS_MESH_URGENCY_HIGH; // @arend with low urgency this msg will end up last in queue.
+	meshMsg.size  = sizeof(timeSyncMsg);
+	meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
+	meshMsg.urgency = CS_MESH_URGENCY_HIGH;
 
-	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg)); // @arend use size of the variable instead of a type
+	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
 	event.dispatch();
 }
 
@@ -431,7 +460,7 @@ bool SystemTime::reelectionPeriodTimedOut(){
 }
 
 
-#ifdef DEBUG
+#ifdef DEBUG_SYSTEM_TIME
 
 void SystemTime::publishSyncMessageForTesting(){
 	// we can just send a normal sync message.
