@@ -8,6 +8,7 @@
 #include <cfg/cs_Strings.h>
 #include <cfg/cs_UuidConfig.h>
 #include <cs_GpRegRetConfig.h>
+#include <encryption/cs_KeysAndAccess.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_CommandHandler.h>
 #include <services/cs_SetupService.h>
@@ -93,20 +94,22 @@ void SetupService::handleEvent(event_t & event) {
 	// make sure the session key is populated.
 	CrownstoneService::handleEvent(event);
 	switch(event.type) {
-	case CS_TYPE::EVT_BLE_CONNECT: {
-		uint8_t* key = EncryptionHandler::getInstance().getSetupKey();
-		if (key != nullptr) {
-			_setupKeyCharacteristic->setValueLength(SOC_ECB_KEY_LENGTH);
-			_setupKeyCharacteristic->setValue(key);
-			_setupKeyCharacteristic->updateValue();
+		case CS_TYPE::EVT_BLE_CONNECT: {
+			// Make sure a key is generated before trying to set the value in the characteristic.
+			KeysAndAccess::getInstance().generateSetupKey();
+			cs_data_t key = KeysAndAccess::getInstance().getSetupKey();
+			if (key.data != nullptr) {
+				_setupKeyCharacteristic->setValueLength(key.len);
+				_setupKeyCharacteristic->setValue(key.data);
+				_setupKeyCharacteristic->updateValue();
+			}
+			break;
 		}
-		break;
-	}
-	case CS_TYPE::EVT_BLE_DISCONNECT: {
-		EncryptionHandler::getInstance().invalidateSetupKey();
-		break;
-	}
-	default: {}
+		case CS_TYPE::EVT_BLE_DISCONNECT: {
+			KeysAndAccess::getInstance().invalidateSetupKey();
+			break;
+		}
+		default: {}
 	}
 }
 

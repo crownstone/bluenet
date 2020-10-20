@@ -9,6 +9,10 @@
 #include <encryption/cs_KeysAndAccess.h>
 #include <storage/cs_State.h>
 
+KeysAndAccess::KeysAndAccess() {
+
+}
+
 void KeysAndAccess::init() {
 	_encryptionEnabled = State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED);
 
@@ -104,3 +108,8 @@ void KeysAndAccess::generateSetupKey() {
 		_setupKeyValid = true;
 	}
 }
+
+void KeysAndAccess::invalidateSetupKey() {
+	_setupKeyValid = false;
+}
+

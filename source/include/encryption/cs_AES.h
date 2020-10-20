@@ -62,13 +62,16 @@ public:
 	/**
 	 * Decrypt data with given key in CTR mode.
 	 *
+	 * The decrypted data is a concatenation of prefix and output.
+	 *
 	 * @param[in]  key                 Key to encrypt with.
 	 * @param[in]  nonce               Nonce to use for decryption.
 	 * @param[in]  input               Input data to be encrypted.
-	 * @param[out] output              Buffer to encrypt to. Can be the same as input.
+	 * @param[out] prefix              Buffer to encrypt to, before the output buffer. Can be the same as input.
+	 * @param[out] output              Buffer to encrypt to. Can be the same as input, as long as: output pointer >= input pointer + prefix size.
 	 * @return                         Return code.
 	 */
-	cs_ret_code_t decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t output);
+	cs_ret_code_t decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t prefix, cs_data_t output);
 
 
 private:
@@ -80,6 +83,20 @@ private:
 
 	// This class is singleton, deny implementation
 	void operator=(AES const &);
+
+	/**
+	 * Encrypt or decrypt data with given key in CTR mode.
+	 *
+	 * @param[in]  key                 Key to encrypt with.
+	 * @param[in]  nonce               Nonce to use for encryption.
+	 * @param[in]  inputPrefix         Extra data to put before the input data.
+	 * @param[in]  input               Input data to be encrypted.
+	 * @param[in]  outputPrefix        Extra data to be written to before writing to the output buffer.
+	 * @param[out] output              Buffer to encrypt to. Can be the same as input, as long as: output pointer + output prefix size >= input pointer + input prefix size.
+	 * @param[out] writtenSize         How many bytes are written to output.
+	 * @return                         Return code.
+	 */
+	cs_ret_code_t ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs_data_t input, cs_data_t outputPrefix, cs_data_t output, cs_buffer_size_t& writtenSize);
 
 	/**
 	 * Struct with key, and single block of encrypted and decypted data.

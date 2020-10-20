@@ -16,6 +16,10 @@
 #define RC5_16BIT_P 0xB7E1
 #define RC5_16BIT_Q 0x9E37
 
+RC5::RC5() {
+
+}
+
 void RC5::init() {
 	initKey(EncryptionAccessLevel::LOCALIZATION);
 }

@@ -50,6 +50,37 @@ enum EncryptionAccessLevel {
 	NO_ONE              = 255
 };
 
+/**
+ * Nonce used for encryption.
+ */
+struct __attribute__((__packed__)) encryption_nonce_t {
+	uint8_t packetNonce[PACKET_NONCE_LENGTH];
+	uint8_t sessionNonce[SESSION_NONCE_LENGTH];
+};
+
+/**
+ * Encryption header that's not encrypted.
+ */
+struct __attribute__((__packed__)) encryption_header_t {
+	uint8_t packetNonce[PACKET_NONCE_LENGTH];
+	uint8_t accessLevel;
+};
+
+/**
+ * Encryption header that's encrypted.
+ */
+struct __attribute__((__packed__)) encryption_header_encrypted_t {
+	uint8_t validationKey[VALIDATION_KEY_LENGTH];
+};
+
+struct __attribute__((packed)) session_data_t {
+	uint8_t protocol;
+	uint8_t sessionNonce[SESSION_NONCE_LENGTH];
+	uint8_t validationKey[VALIDATION_KEY_LENGTH];
+};
+
+
+
 enum BackgroundAdvFlagBitPos {
 	BG_ADV_FLAG_RESERVED = 0,
 	BG_ADV_FLAG_IGNORE_FOR_PRESENCE = 1,
@@ -301,12 +332,6 @@ struct __attribute__((__packed__)) set_ibeacon_config_id_packet_t {
 struct __attribute__((__packed__)) led_message_payload_t {
 	uint8_t led;
 	bool enable;
-};
-
-struct __attribute__((packed)) session_data_t {
-	uint8_t protocol;
-	uint8_t sessionNonce[SESSION_NONCE_LENGTH];
-	uint8_t validationKey[VALIDATION_KEY_LENGTH];
 };
 
 struct __attribute__((packed)) behaviour_debug_t {
