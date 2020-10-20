@@ -56,6 +56,7 @@
 #include <time/cs_SystemTime.h>
 #include <uart/cs_UartHandler.h>
 #include <util/cs_Utils.h>
+#include <encryption/cs_RC5.h>
 
 extern "C" {
 #include <nrf_nvmc.h>
@@ -631,7 +632,8 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 				_mesh->init(_boardsConfig);
 			}
 #endif
-			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::LOCALIZATION);
+			RC5::getInstance().init();
+
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
 
