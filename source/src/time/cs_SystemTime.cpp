@@ -28,7 +28,7 @@
 #define LOGSystemTimeDebug   LOGnone
 #define LOGSystemTimeVerbose LOGnone
 
-#if DEBUGSYSTEM_TIME
+#if defined(DEBUGSYSTEM_TIME)
 #ifndef DEBUG
 #error "SystemTime Debug must be turned off in release"
 #endif

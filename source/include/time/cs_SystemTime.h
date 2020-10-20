@@ -20,8 +20,11 @@
 
 #include <stdint.h>
 
-// set to 1 will incur more mesh traffic but allow for easier debugging.
-#define DEBUG_SYSTEM_TIME 1
+#ifdef DEBUG
+// Define this symbol for more mesh traffic but allow for easier debugging.
+// Please make sure to keep it out of release builds.
+#undef DEBUG_SYSTEM_TIME
+#endif
 
 /**
  * This class keeps track of the real time in the current time zone.
@@ -129,17 +132,23 @@ private:
 	// and has lower crownstone id.
 	static constexpr uint32_t reboot_sync_timeout_ms = 60 * 1000;
 
+	/**
+	 * timing settings for the algorithm.
+	 * - update period defines the time between two sync messages from the master clock.
+	 * - reelection period defines the time a crownstone will wait before claiming to
+	 *   be a master clock itself and start sending sync messages.
+	 *
+	 * Note: reelection should be larger than master_clock_update_period_ms
+	 * by a fair margin. This will be checked at startup in ::assertTimeSyncParameters.
+	 */
 #ifdef DEBUG_SYSTEM_TIME
-	// period of sync messages sent by the master clock
-	static constexpr uint32_t master_clock_update_period_ms = 5* 1000; // TODO: can be much larger probably
-
-	// time out period for master clock invalidation.
-	// not hearing sync messages for this amount of time will invalidate the
-	// current master clock id.
-	// should be larger than master_clock_update_period_ms by a fair margin.
+	// period of sync messages sent by the master clock in debug builds
+	static constexpr uint32_t master_clock_update_period_ms = 5* 1000;
 	static constexpr uint32_t master_clock_reelection_timeout_ms = 60 * 1000;
 #else
-
+	// period of sync messages sent by the master clock in release builds
+	static constexpr uint32_t master_clock_update_period_ms = 60*60* 1000;
+	static constexpr uint32_t master_clock_reelection_timeout_ms = 5 * master_clock_update_period_ms;
 #endif
 
 	static constexpr uint32_t stone_id_unknown_value = 0xff;
