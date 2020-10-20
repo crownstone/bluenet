@@ -23,7 +23,6 @@
 // set to 1 will incur more mesh traffic but allow for easier debugging.
 #define DEBUG_SYSTEM_TIME 1
 
-
 /**
  * This class keeps track of the real time in the current time zone.
  * It may obtain its data through the mesh, or some other way and try
