@@ -226,7 +226,7 @@ void SystemTime::handleEvent(event_t & event) {
 			LOGd("set time from command");
 			// TODO: based on source, decide wether or not to broadcast the update
 			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data));
-			if(event.source.source.id == CS_CMD_SOURCE_UART){
+			if(isOnlyReceiveByThisDevice(event.source)){
 				// only this device heard the message, so we make sure to propagate it.
 				sendTimeSyncMessage(getSynchronizedStamp(), 0);
 			}
@@ -273,6 +273,17 @@ void SystemTime::handleEvent(event_t & event) {
 		}
 		default: {}
 	}
+}
+
+bool SystemTime::isOnlyReceiveByThisDevice(cmd_source_with_counter_t counted_source){
+	auto src = counted_source.source;
+	if (src.flagExternal) {
+		return false;
+	}
+
+	return src.type == CS_CMD_SOURCE_TYPE_UART
+			|| (src.type == CS_CMD_SOURCE_TYPE_ENUM
+					&&  src.id == CS_CMD_SOURCE_CONNECTION);
 }
 
 // ======================== Synchronization ========================
