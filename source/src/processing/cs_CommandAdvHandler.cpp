@@ -305,7 +305,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		}
 		case ADV_CMD_MULTI_SWITCH: {
 			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
-			LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, source.sourceId, source.count);
+			LOGCommandAdvDebug("send cmd type=%u source: type=%u id=%u count=%u", controlCmd.type, source.source.type, source.source.id, source.count);
 			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 			event.dispatch();
 			break;
@@ -326,7 +326,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 				controlCmd.type = CTRL_CMD_SET_TIME;
 				controlCmd.data = commandData + flagsSize;
 				controlCmd.size = setTimeSize;
-				LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, source.sourceId, source.count);
+				LOGCommandAdvDebug("send cmd type=%u source: type=%u id=%u count=%u", controlCmd.type, source.source.type, source.source.id, source.count);
 				event_t eventSetTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 				eventSetTime.dispatch();
 			}
