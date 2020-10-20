@@ -5,16 +5,17 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "processing/cs_CommandAdvHandler.h"
-#include "drivers/cs_Serial.h"
-#include "util/cs_Utils.h"
-#include "events/cs_EventDispatcher.h"
-#include "common/cs_Types.h"
-#include "processing/cs_EncryptionHandler.h"
-#include "storage/cs_State.h"
-#include "time/cs_SystemTime.h"
-#include "util/cs_BleError.h"
+#include <common/cs_Types.h>
+#include <drivers/cs_Serial.h>
+#include <encryption/cs_AES.h>
+#include <encryption/cs_KeysAndAccess.h>
 #include <encryption/cs_RC5.h>
+#include <events/cs_EventDispatcher.h>
+#include <processing/cs_CommandAdvHandler.h>
+#include <storage/cs_State.h>
+#include <time/cs_SystemTime.h>
+#include <util/cs_BleError.h>
+#include <util/cs_Utils.h>
 
 // Defines to enable extra debug logs.
 //#define COMMAND_ADV_DEBUG
@@ -243,11 +244,23 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	}
 
 	// TODO: can decrypt to same buffer?
-	uint8_t decryptedData[16];
-	if (!EncryptionHandler::getInstance().decryptBlockCTR(encryptedPayload.data, encryptedPayload.len, decryptedData, 16, accessLevel, nonce.data, nonce.len)) {
+	cs_ret_code_t decryptionResult = ERR_NO_ACCESS;
+	uint8_t decryptedData[AES_BLOCK_SIZE];
+	uint8_t key[ENCRYPTION_KEY_LENGTH];
+	if (KeysAndAccess::getInstance().getKey(accessLevel, key, sizeof(key))) {
+		decryptionResult = AES::getInstance().decryptCtr(
+				cs_data_t(key, sizeof(key)),
+				nonce,
+				encryptedPayload,
+				cs_data_t(),
+				cs_data_t(decryptedData, sizeof(decryptedData))
+		);
+	}
+	if (decryptionResult != ERR_SUCCESS) {
 		LOGCommandAdvVerbose("Decrypt failed");
 		return false;
 	}
+
 #ifdef COMMAND_ADV_VERBOSE
 	_log(SERIAL_DEBUG, "decrypted data: ");
 	BLEutil::printArray(decryptedData, 16);
@@ -293,7 +306,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	controlCmd.size = length;
 
 	LOGCommandAdvDebug("adv cmd type=%u deviceId=%u accessLvl=%u", type, header.deviceToken, accessLevel);
-	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
+	if (!KeysAndAccess::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		LOGCommandAdvDebug("no access");
 		return true;
 	}

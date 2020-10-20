@@ -22,6 +22,7 @@
 #include <common/cs_Types.h>
 
 #include <drivers/cs_Serial.h>
+#include <encryption/cs_KeysAndAccess.h>
 #include <util/cs_Utils.h>
 
 #include <structs/buffer/cs_EncryptionBuffer.h>
@@ -536,7 +537,7 @@ protected:
 			);
 
 			// disconnect on failure or if the user is not authenticated
-			if (!success || !EncryptionHandler::getInstance().allowAccess(_minAccessLevel , accessLevel)) {
+			if (!success || !KeysAndAccess::getInstance().allowAccess(_minAccessLevel , accessLevel)) {
 				LOGi("insufficient access")
 				EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
 				return;

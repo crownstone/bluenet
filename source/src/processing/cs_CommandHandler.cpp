@@ -12,6 +12,7 @@
 #include <cfg/cs_Strings.h>
 #include <drivers/cs_GpRegRet.h>
 #include <drivers/cs_Serial.h>
+#include <encryption/cs_KeysAndAccess.h>
 #include <ipc/cs_IpcRamData.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
@@ -151,7 +152,7 @@ void CommandHandler::handleCommand(
 			return;
 	}
 
-	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
+	if (!KeysAndAccess::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		result.returnCode = ERR_NO_ACCESS;
 		return;
 	}
@@ -419,7 +420,7 @@ void CommandHandler::handleCmdStateGet(cs_data_t commandData, const EncryptionAc
 	cs_state_id_t stateId = stateHeader->stateId;
 
 	// Check access.
-	if (!EncryptionHandler::getInstance().allowAccess(getUserAccessLevelGet(stateType), accessLevel)) {
+	if (!KeysAndAccess::getInstance().allowAccess(getUserAccessLevelGet(stateType), accessLevel)) {
 		result.returnCode = ERR_NO_ACCESS;
 		return;
 	}
@@ -490,7 +491,7 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 	cs_state_id_t stateId = stateHeader->stateId;
 
 	// Check access.
-	if (!EncryptionHandler::getInstance().allowAccess(getUserAccessLevelSet(stateType), accessLevel)) {
+	if (!KeysAndAccess::getInstance().allowAccess(getUserAccessLevelSet(stateType), accessLevel)) {
 		result.returnCode = ERR_NO_ACCESS;
 		return;
 	}
@@ -768,7 +769,7 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 		result.returnCode = ERR_NOT_AVAILABLE;
 		return;
 	}
-	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(controlCmdType), accessLevel)) {
+	if (!KeysAndAccess::getInstance().allowAccess(getRequiredAccessLevel(controlCmdType), accessLevel)) {
 		LOGw("No access for command %u", controlCmdType);
 		result.returnCode = ERR_NO_ACCESS;
 		return;
@@ -830,7 +831,7 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 		default:
 			break;
 	}
-	if (!EncryptionHandler::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
+	if (!KeysAndAccess::getInstance().allowAccess(requiredAccessLevel, accessLevel)) {
 		LOGw("No access for command payload. Required=%u", requiredAccessLevel);
 		result.returnCode = ERR_NO_ACCESS;
 		return;

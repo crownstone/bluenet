@@ -6,6 +6,7 @@
  */
 
 #include <drivers/cs_Serial.h>
+#include <encryption/cs_KeysAndAccess.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_EncryptionHandler.h>
 #include <protocol/cs_UartMsgTypes.h>
@@ -24,7 +25,7 @@ void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 	LOGUartCommandHandlerDebug("Handle cmd opCode=%u size=%u", opCode, commandData.len);
 
 	EncryptionAccessLevel requiredAccess = getRequiredAccessLevel(opCode);
-	if (!EncryptionHandler::getInstance().allowAccess(requiredAccess, accessLevel)) {
+	if (!KeysAndAccess::getInstance().allowAccess(requiredAccess, accessLevel)) {
 		LOGi("No access: required=%u given=%u", requiredAccess, accessLevel);
 		return;
 	}
