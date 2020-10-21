@@ -9,6 +9,8 @@
 #include <encryption/cs_KeysAndAccess.h>
 #include <storage/cs_State.h>
 
+#define KeysAndAccessDebug LOGnone
+
 KeysAndAccess::KeysAndAccess() {
 
 }
@@ -54,7 +56,7 @@ bool KeysAndAccess::allowAccess(EncryptionAccessLevel minimum, EncryptionAccessL
 }
 
 bool KeysAndAccess::getKey(EncryptionAccessLevel accessLevel, buffer_ptr_t outBuf, cs_buffer_size_t outBufSize) {
-
+	KeysAndAccessDebug("getKey accessLevel=%u", accessLevel);
 	if (outBufSize < ENCRYPTION_KEY_LENGTH) {
 		LOGe("Buf size too small");
 		return false;
@@ -96,6 +98,7 @@ bool KeysAndAccess::getKey(EncryptionAccessLevel accessLevel, buffer_ptr_t outBu
 }
 
 cs_data_t KeysAndAccess::getSetupKey() {
+	KeysAndAccessDebug("getSetupKey valid=%u", _setupKeyValid);
 	if (!_setupKeyValid) {
 		return cs_data_t();
 	}
@@ -103,6 +106,7 @@ cs_data_t KeysAndAccess::getSetupKey() {
 }
 
 void KeysAndAccess::generateSetupKey() {
+	KeysAndAccessDebug("generateSetupKey opMode=%u", _operationMode);
 	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
 		RNG::fillBuffer(_setupKey, SOC_ECB_KEY_LENGTH);
 		_setupKeyValid = true;

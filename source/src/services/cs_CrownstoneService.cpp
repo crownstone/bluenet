@@ -5,21 +5,19 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <services/cs_CrownstoneService.h>
-
-#include <storage/cs_State.h>
 #include <cfg/cs_UuidConfig.h>
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_CommandHandler.h>
 #include <processing/cs_FactoryReset.h>
-#include <storage/cs_State.h>
 #include <protocol/cs_ErrorCodes.h>
-#include <structs/cs_PacketsInternal.h>
+#include <services/cs_CrownstoneService.h>
+#include <storage/cs_State.h>
+#include <storage/cs_State.h>
 #include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
-
+#include <structs/cs_PacketsInternal.h>
 
 CrownstoneService::CrownstoneService() : EventListener()
 {
@@ -199,9 +197,10 @@ void CrownstoneService::handleEvent(event_t & event) {
 	case CS_TYPE::EVT_SESSION_DATA_SET: {
 		// Check if this characteristic exists first. In case of setup mode it does not for instance.
 		if (_sessionDataCharacteristic != NULL) {
+			// In setup mode, this requires the setup key to be generated.
 			_sessionDataCharacteristic->setValueLength(event.size);
 			_sessionDataCharacteristic->setValue((uint8_t*)event.data);
-			_sessionDataCharacteristic->updateValue(ECB_GUEST_CAFEBABE);
+			_sessionDataCharacteristic->updateValue(ConnectionEncryptionType::ECB);
 		}
 		break;
 	}

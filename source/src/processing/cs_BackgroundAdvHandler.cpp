@@ -7,16 +7,15 @@
 
 
 
-#include "processing/cs_BackgroundAdvHandler.h"
-#include "drivers/cs_Serial.h"
-#include "util/cs_Utils.h"
-#include "events/cs_EventDispatcher.h"
-#include "ble/cs_Nordic.h"
-#include "processing/cs_EncryptionHandler.h"
-#include "processing/cs_CommandHandler.h"
-#include "storage/cs_State.h"
-#include "time/cs_SystemTime.h"
+#include <processing/cs_BackgroundAdvHandler.h>
+#include <ble/cs_Nordic.h>
+#include <drivers/cs_Serial.h>
 #include <encryption/cs_RC5.h>
+#include <events/cs_EventDispatcher.h>
+#include <processing/cs_CommandHandler.h>
+#include <storage/cs_State.h>
+#include <time/cs_SystemTime.h>
+#include <util/cs_Utils.h>
 
 #define LOGBackgroundAdvDebug LOGnone
 #define BACKGROUND_ADV_VERBOSE false

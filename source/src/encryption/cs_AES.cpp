@@ -9,6 +9,7 @@
 #include <encryption/cs_AES.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
+
 #include <algorithm> // for std::min
 
 #if ENCRYPTION_KEY_LENGTH != SOC_ECB_KEY_LENGTH

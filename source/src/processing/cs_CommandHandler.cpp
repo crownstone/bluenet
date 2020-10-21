@@ -19,10 +19,10 @@
 #include <processing/cs_Scanner.h>
 #include <processing/cs_Setup.h>
 #include <processing/cs_TemperatureGuard.h>
-#include <uart/cs_UartHandler.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <storage/cs_State.h>
 #include <time/cs_SystemTime.h>
+#include <uart/cs_UartHandler.h>
 #include <util/cs_WireFormat.h>
 
 #define LOGCommandHandlerDebug LOGnone

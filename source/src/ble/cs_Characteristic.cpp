@@ -184,7 +184,7 @@ void CharacteristicBase::setupWritePermissions(CharacteristicInit& ci) {
 
 /** Update characteristic. This is also required when switching to/from encryption.
  */
-uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
+uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType) {
 
 //	LOGi("[%s] update Value", _name);
 
@@ -206,16 +206,14 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 
 		// we calculate what size buffer we need
 		cs_ret_code_t retVal = ERR_SUCCESS;
-		uint16_t encryptionBufferLength = EncryptionHandler::calculateEncryptionBufferLength(valueLength, encryptionType);
+		uint16_t encryptionBufferLength = ConnectionEncryption::getEncryptedBufferSize(valueLength, encryptionType);
 		if (encryptionBufferLength > getGattValueMaxLength()) {
 			retVal = ERR_BUFFER_TOO_SMALL;
 		}
 		else {
-			bool success = EncryptionHandler::getInstance().encrypt(
-					getValuePtr(),
-					valueLength,
-					valueGattAddress,
-					encryptionBufferLength,
+			retVal = ConnectionEncryption::getInstance().encrypt(
+					cs_data_t(getValuePtr(), valueLength),
+					cs_data_t(valueGattAddress, encryptionBufferLength),
 					_minAccessLevel,
 					encryptionType
 			);
@@ -223,9 +221,6 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 			_log(SERIAL_DEBUG, "encrypted: ");
 			BLEutil::printArray(valueGattAddress, encryptionBufferLength);
 #endif
-			if (!success) {
-				retVal = ERR_UNSPECIFIED;
-			}
 		}
 		if (!SUCCESS(retVal)) {
 			// clear the partially encrypted buffer.
@@ -235,7 +230,7 @@ uint32_t CharacteristicBase::updateValue(EncryptionType encryptionType) {
 			setGattValueLength(0);
 
 			// disconnect from the device.
-			EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
+			Stack::getInstance().disconnect();
 			LOGe("error encrypting data.");
 			return retVal;
 		}

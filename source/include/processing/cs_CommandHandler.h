@@ -8,6 +8,7 @@
 
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Stack.h>
+#include <cfg/cs_Boards.h>
 #include <common/cs_Types.h>
 #include <protocol/cs_CommandTypes.h>
 

@@ -18,6 +18,7 @@
  * Class that implements RC5 encryption.
  *
  * - Block size is 32 bit (so 16 bit words).
+ * - Only has decrypt method implemented, but encrypt would be possible too.
  */
 class RC5 {
 public:

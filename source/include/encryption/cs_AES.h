@@ -17,6 +17,13 @@
  */
 #define AES_BLOCK_SIZE 16
 
+/**
+ * Class that implements AES encryption.
+ *
+ * - Block size is 16 byte.
+ * - ECB mode has no decrypt method, as that's not hardware accelerated.
+ * - CTR mode has both encrypt and decrypt methods.
+ */
 class AES {
 public:
 	//! Use static variant of singleton, no dynamic memory allocation

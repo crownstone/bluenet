@@ -5,9 +5,9 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <drivers/cs_RNG.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <events/cs_EventDispatcher.h>
-#include <processing/cs_EncryptionHandler.h>
 #include <tracking/cs_TrackedDevices.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>

@@ -94,19 +94,13 @@ void SetupService::handleEvent(event_t & event) {
 	// make sure the session key is populated.
 	CrownstoneService::handleEvent(event);
 	switch(event.type) {
-		case CS_TYPE::EVT_BLE_CONNECT: {
-			// Make sure a key is generated before trying to set the value in the characteristic.
-			KeysAndAccess::getInstance().generateSetupKey();
+		case CS_TYPE::EVT_SESSION_DATA_SET: {
 			cs_data_t key = KeysAndAccess::getInstance().getSetupKey();
 			if (key.data != nullptr) {
 				_setupKeyCharacteristic->setValueLength(key.len);
 				_setupKeyCharacteristic->setValue(key.data);
 				_setupKeyCharacteristic->updateValue();
 			}
-			break;
-		}
-		case CS_TYPE::EVT_BLE_DISCONNECT: {
-			KeysAndAccess::getInstance().invalidateSetupKey();
 			break;
 		}
 		default: {}

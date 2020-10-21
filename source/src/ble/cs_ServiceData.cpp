@@ -5,15 +5,16 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "ble/cs_ServiceData.h"
-#include "drivers/cs_RNG.h"
-#include "drivers/cs_RTC.h"
-#include "drivers/cs_Serial.h"
-#include "processing/cs_EncryptionHandler.h"
-#include "uart/cs_UartHandler.h"
-#include "storage/cs_State.h"
-#include "util/cs_Utils.h"
-#include "protocol/mesh/cs_MeshModelPacketHelper.h"
+#include <ble/cs_ServiceData.h>
+#include <drivers/cs_RNG.h>
+#include <drivers/cs_RTC.h>
+#include <drivers/cs_Serial.h>
+#include <encryption/cs_AES.h>
+#include <encryption/cs_KeysAndAccess.h>
+#include <protocol/mesh/cs_MeshModelPacketHelper.h>
+#include <storage/cs_State.h>
+#include <uart/cs_UartHandler.h>
+#include <util/cs_Utils.h>
 
 #define ADVERTISE_EXTERNAL_DATA
 //#define PRINT_DEBUG_EXTERNAL_DATA
@@ -213,12 +214,17 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 	// encrypt the array using the guest key ECB if encryption is enabled.
 	if (State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) && _operationMode != OperationMode::OPERATION_MODE_SETUP) {
-		EncryptionHandler::getInstance().encrypt(
-				_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
-				_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray),
-				SERVICE_DATA, ECB_GUEST);
-//			EncryptionHandler::getInstance().encrypt((_serviceData.array) + 1, sizeof(service_data_t) - 1, _encryptedParams.payload,
-//			                                         sizeof(_encryptedParams.payload), GUEST, ECB_GUEST);
+
+		uint8_t key[ENCRYPTION_KEY_LENGTH];
+		if (KeysAndAccess::getInstance().getKey(SERVICE_DATA, key, sizeof(key))) {
+			cs_buffer_size_t writtenSize;
+			AES::getInstance().encryptEcb(
+					cs_data_t(key, sizeof(key)),
+					cs_data_t(),
+					cs_data_t(_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray)),
+					cs_data_t(_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray)),
+					writtenSize);
+		}
 	}
 
 	if (!initial) {

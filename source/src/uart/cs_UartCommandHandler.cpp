@@ -8,8 +8,8 @@
 #include <drivers/cs_Serial.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <events/cs_EventDispatcher.h>
-#include <processing/cs_EncryptionHandler.h>
 #include <protocol/cs_UartMsgTypes.h>
+#include <storage/cs_State.h>
 #include <uart/cs_UartCommandHandler.h>
 #include <uart/cs_UartConnection.h>
 #include <uart/cs_UartHandler.h>
