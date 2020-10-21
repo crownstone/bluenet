@@ -40,7 +40,7 @@ public:
 			return false;
 		}
 		if (val == 0) {
-			return true;
+			return false;
 		}
 		if(other.val == 0){
 			return false;

@@ -81,7 +81,7 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 		case CS_MESH_MODEL_TYPE_RSSI_PING:
 			return payloadSize >= sizeof(rssi_ping_message_t);
 		case CS_MESH_MODEL_TYPE_TIME_SYNC:
-			return payloadSize == sizeof(cs_mesh_model_msg_time_sync_t); // @arend use == when the msg is a fixed size.
+			return payloadSize == sizeof(cs_mesh_model_msg_time_sync_t);
 		case CS_MESH_MODEL_TYPE_UNKNOWN:
 			return false;
 	}

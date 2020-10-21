@@ -182,7 +182,6 @@ cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadS
 	LOGMeshModelInfo("handleTimeSync");
 	cs_mesh_model_msg_time_sync_t* packet = (cs_mesh_model_msg_time_sync_t*) payload;
 
-	// @arend use TYPIFY() so that the corrent type is used.
 	TYPIFY(EVT_MESH_TIME_SYNC) eventData;
 	eventData.stamp.posix_s  = packet->posix_s;
 	eventData.stamp.posix_ms = packet->posix_ms;
@@ -194,7 +193,6 @@ cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadS
 		eventData.root_id = srcId;
 	}
 
-	// @arend user sizeof(eventData) so the actual size of the variable is used, also when the type is changed.
 	event_t event(CS_TYPE::EVT_MESH_TIME_SYNC, &eventData, sizeof(eventData));
 	event.dispatch();
 
