@@ -22,6 +22,7 @@
 
 #include <localisation/cs_RssiPingMessage.h>
 #include <time/cs_TimeSyncMessage.h>
+#include <mesh/cs_MeshMsgEvent.h>
 
 // #include <presence/cs_PresenceHandler.h>
 
@@ -278,6 +279,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_TRACKED_DEVICE_HEARTBEAT,                // Mesh received a tracked device heartbeat.
 	EVT_MESH_RSSI_PING,                               // A ping message sent from another crownstone was received.
 	EVT_MESH_TIME_SYNC,                               // A time sync message was received
+	EVT_RECV_MESH_MSG,                                // A mesh message was received.
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR = InternalBaseBehaviour,        // Add a behaviour.
@@ -560,6 +562,7 @@ typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
+typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
 
 /*---------------------------------------------------------------------------------------------------------------------
  *

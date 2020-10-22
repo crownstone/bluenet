@@ -10,6 +10,7 @@
 #include <events/cs_Event.h>
 #include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshMsgHandler.h>
+#include <mesh/cs_MeshMsgEvent.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <uart/cs_UartHandler.h>
@@ -45,6 +46,35 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 	uint8_t* payload;
 	size16_t payloadSize;
 	MeshUtil::getPayload(msg.msg, msg.msgSize, payload, payloadSize);
+
+	// ===========
+
+	// (at this point, the result.returnCode should be ERR_EVENT_UNHANDLED)
+
+	MeshMsgEvent meshMsgEvent;
+	meshMsgEvent.msg.data = payload;
+	meshMsgEvent.msg.len = payloadSize;
+	meshMsgEvent.type = msgType;
+	meshMsgEvent.srcAddress = msg.srcAddress;
+	meshMsgEvent.rssi = msg.rssi;
+	meshMsgEvent.hops = msg.hops;
+	meshMsgEvent.channel = msg.channel;
+
+	event_t generic_mesh_msg_evt(
+			CS_TYPE::EVT_RECV_MESH_MSG,
+			&meshMsgEvent,
+			sizeof(meshMsgEvent),
+			result
+			);
+
+	generic_mesh_msg_evt.dispatch();
+
+	if (generic_mesh_msg_evt.result.returnCode != ERR_EVENT_UNHANDLED){
+		// some handler took care of business.
+		return;
+	}
+
+	// ===========
 
 	switch (msgType) {
 		case CS_MESH_MODEL_TYPE_TEST: {
