@@ -367,8 +367,9 @@ void Crownstone::initDrivers1() {
 		LOGi(FMT_INIT, "factory reset");
 		_factoryReset->init();
 
-		LOGi(FMT_INIT, "connection encryption");
+		LOGi(FMT_INIT, "encryption");
 		ConnectionEncryption::getInstance().init();
+		KeysAndAccess::getInstance().init();
 
 
 		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {

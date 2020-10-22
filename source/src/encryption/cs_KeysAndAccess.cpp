@@ -21,6 +21,8 @@ void KeysAndAccess::init() {
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 	_operationMode = getOperationMode(mode);
+
+	generateSetupKey();
 }
 
 bool KeysAndAccess::allowAccess(EncryptionAccessLevel minimum, EncryptionAccessLevel provided) {

@@ -80,12 +80,12 @@ private:
 	/**
 	 * Cached operation mode.
 	 */
-	OperationMode _operationMode;
+	OperationMode _operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
 	/**
 	 * Cache of whether encryption is enabled.
 	 */
-	bool _encryptionEnabled;
+	bool _encryptionEnabled = true;
 
 	/**
 	 * Current setup key.
