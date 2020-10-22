@@ -20,12 +20,6 @@
 
 #include <stdint.h>
 
-#ifdef DEBUG
-// Define this symbol for more mesh traffic but allow for easier debugging.
-// Please make sure to keep it out of release builds.
-#undef DEBUG_SYSTEM_TIME
-#endif
-
 /**
  * This class keeps track of the real time in the current time zone.
  * It may obtain its data through the mesh, or some other way and try
@@ -33,6 +27,15 @@
  */
 class SystemTime : public EventListener {
 public:
+	/**
+	 * Creates and starts the first tick timer.
+	 */
+	static void init();
+
+	virtual void handleEvent(event_t& event);
+
+	// ======================== Utility functions ========================
+
 	/**
 	 * Get the current time as posix timestamp in seconds.
 	 *
@@ -67,7 +70,7 @@ public:
 	 */
 	static high_resolution_time_stamp_t getSynchronizedStamp();
 
-	virtual void handleEvent(event_t& event);
+	// ======================== Setters ========================
 
 	/**
 	 * Set the system wide time to given posix timestamp.
@@ -91,11 +94,6 @@ public:
 	 *                       Unless it's set with throttled false.
 	 */
 	static cs_ret_code_t setSunTimes(const sun_time_t& sunTimes, bool throttled = true);
-
-	/**
-	 * Creates and starts the first tick timer.
-	 */
-	static void init();
 
 private:
 	// ========================== Run time data and constants ============================
@@ -124,13 +122,15 @@ private:
 
 	// ===================== mesh posix time sync implementation =====================
 
-	// -------------- runtime variables and constants ----------------
+	// ---------------- constants ----------------
 
-	// timeout period before considering device should have had updates
-	// during this period the device will not participate for election
-	// even if it has received a valid sync message from another device
-	// and has lower crownstone id.
-	static constexpr uint32_t reboot_sync_timeout_ms = 60 * 1000;
+	/*
+	 * timeout period before considering device should have had updates
+	 * during this period the device will not participate for election
+	 * even if it has received a valid sync message from another device
+	 * and has lower crownstone id.
+	 */
+	static constexpr uint32_t reboot_sync_timeout_ms();
 
 	/**
 	 * timing settings for the algorithm.
@@ -141,38 +141,43 @@ private:
 	 * Note: reelection should be larger than master_clock_update_period_ms
 	 * by a fair margin. This will be checked at startup in ::assertTimeSyncParameters.
 	 */
-#ifdef DEBUG_SYSTEM_TIME
-	// period of sync messages sent by the master clock in debug builds
-	static constexpr uint32_t master_clock_update_period_ms = 5* 1000;
-	static constexpr uint32_t master_clock_reelection_timeout_ms = 60 * 1000;
-#else
-	// period of sync messages sent by the master clock in release builds
-	static constexpr uint32_t master_clock_update_period_ms = 60*60* 1000;
-	static constexpr uint32_t master_clock_reelection_timeout_ms = 5 * master_clock_update_period_ms;
-#endif
+	static constexpr uint32_t master_clock_update_period_ms();
+	static constexpr uint32_t master_clock_reelection_timeout_ms();
 
-	static constexpr uint32_t stone_id_unknown_value = 0xff;
+	static constexpr uint32_t stone_id_unknown_value();
 
-	static constexpr uint8_t time_stamp_version_lollipop_max = (2 << 6) - 1;
+	/**
+	 * The time version is lollipop versioned. This constant defines
+	 * its roll over point.
+	 */
+	static constexpr uint8_t time_stamp_version_lollipop_max();
 
-	// kept track off in ::tick(void*), seeded at first call for best accuracy.
+
+	// -------------- runtime variables ----------------
+
+	/**
+	 *  kept track off in ::tick(void*), seeded at first call for best accuracy.
+	 */
 	static uint32_t last_statetimeevent_stamp_rtc;
+
+	/**
+	 * Read at ::init to avoid relatiely expensive lookup repetitively.
+	 */
+	static stone_id_t myId;
 
 	// clock synchronization data (updated on sync)
 	static high_resolution_time_stamp_t last_received_root_stamp;
 	static uint32_t local_time_of_last_received_root_stamp_rtc_ticks;
 	static stone_id_t currentMasterClockId;
-	static stone_id_t myId;
 
 	static Coroutine syncTimeCoroutine;
-#ifdef DEBUG_SYSTEM_TIME
-	static Coroutine debugSyncTimeCoroutine;
-	static constexpr uint32_t debugSyncTimeMessagePeriodMs = 5*1000;
-#endif
 
 	// ------------------ Method definitions ------------------
 
 	static uint32_t syncTimeCoroutineAction();
+
+	static uint8_t timeStampVersion();
+
 	static void onTimeSyncMessageReceive(time_sync_message_t syncmessage);
 	static void logRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id);
 
@@ -190,6 +195,10 @@ private:
 	static void sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id);
 
 	static void clearMasterClockId();
+
+	/**
+	 * Checks if settings are reasonable and log warning if necessary.
+	 */
 	static void assertTimeSyncParameters();
 
 	/**
@@ -201,8 +210,6 @@ private:
 	 * Returns true if the candidate is considered a clock authority relative to us.
 	 */
 	static bool isClockAuthority(stone_id_t candidate);
-
-	static inline uint8_t timeStampVersion() { return last_received_root_stamp.version; }
 
 	/**
 	 * Returns true if the command source is uart or ble through connection.
@@ -216,10 +223,21 @@ private:
 	static bool reelectionPeriodTimedOut();
 
 
-#ifdef DEBUG_SYSTEM_TIME
+	// ==========================================
+	// =========== Debug functions ==============
+	// ==========================================
+
+	static constexpr uint32_t debugSyncTimeMessagePeriodMs();
+	static Coroutine debugSyncTimeCoroutine;
+
+	/**
+	 * Sets up the debug symc time coroutine when DEBUG_SYSTEM_TIME
+	 * is defined in order to broadcast sync messages to the mesh
+	 * regardless of being root clock or not.
+	 */
+	static void initDebug();
+
 	static void publishSyncMessageForTesting();
 	static void pushSyncMessageToTestSuite(time_sync_message_t& syncmessage);
-#endif
-
 };
 

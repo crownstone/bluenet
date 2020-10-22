@@ -19,6 +19,8 @@
  * E.g.
  *
  * Lollipop(8,10) < Lollipop(
+ *
+ * Warning: max == 0, 1 and 255 don't work as expected.
  */
 class Lollipop{
 private:
