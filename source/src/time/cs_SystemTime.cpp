@@ -36,7 +36,7 @@
 #pragma message("SystemTime Debug is turned on.")
 #endif
 
-// ============== Static members ==============
+// ============== Static member declarations ==============
 
 // runtime variables
 uint32_t SystemTime::last_statetimeevent_stamp_rtc = 0;
@@ -56,14 +56,24 @@ Coroutine SystemTime::syncTimeCoroutine;
 Coroutine SystemTime::debugSyncTimeCoroutine;
 #endif
 
-
 // driver details
 app_timer_t SystemTime::appTimerData = {{0}};
 app_timer_id_t SystemTime::appTimerId = &appTimerData;
 
+
+// ====================== Constants ======================
+
+
+
+
+
+
 // ============ SystemTime implementation ===========
 
-// Init and start the timer.
+// ======================================================
+// =========== Public function definitions ==============
+// ======================================================
+
 void SystemTime::init(){
 	assertTimeSyncParameters();
 	syncTimeCoroutine.action = [](){ return syncTimeCoroutineAction(); };
@@ -84,6 +94,39 @@ void SystemTime::init(){
 
 	scheduleNextTick();
 }
+
+// ======================== Utility functions ========================
+
+uint32_t SystemTime::posix(){
+	auto stamp = getSynchronizedStamp();
+	return stamp.version != 0 ? stamp.posix_s : 0;
+}
+
+Time SystemTime::now(){
+	return posix();
+}
+
+DayOfWeek SystemTime::day(){
+	return now().dayOfWeek();
+}
+
+uint32_t SystemTime::up(){
+	return upTimeSec;
+}
+
+high_resolution_time_stamp_t SystemTime::getSynchronizedStamp(){
+	uint32_t ms_passed = RTC::msPassedSince(local_time_of_last_received_root_stamp_rtc_ticks);
+
+	high_resolution_time_stamp_t stamp;
+	// be aware of the bracket placement ;)
+	stamp.posix_s = last_received_root_stamp.posix_s + ms_passed / 1000;
+	stamp.posix_ms = (last_received_root_stamp.posix_ms + ms_passed) % 1000;
+	stamp.version = last_received_root_stamp.version;
+
+	return stamp;
+}
+
+// ======================== timing driver stuff ========================
 
 void SystemTime::scheduleNextTick() {
 	Timer::getInstance().start(
@@ -281,17 +324,6 @@ void SystemTime::handleEvent(event_t & event) {
 	}
 }
 
-bool SystemTime::isOnlyReceiveByThisDevice(cmd_source_with_counter_t counted_source){
-	auto src = counted_source.source;
-	if (src.flagExternal) {
-		return false;
-	}
-
-	return src.type == CS_CMD_SOURCE_TYPE_UART
-			|| (src.type == CS_CMD_SOURCE_TYPE_ENUM
-					&&  src.id == CS_CMD_SOURCE_CONNECTION);
-}
-
 // ======================== Synchronization ========================
 
 void SystemTime::logRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id){
@@ -315,19 +347,6 @@ void SystemTime::updateRootTimeStamp(){
 	// this is where we are currently losing precision
 	// because we are storing ms only, and not exact tick count.
 	local_time_of_last_received_root_stamp_rtc_ticks += RTC::msToTicks(ms_passed);
-}
-
-
-high_resolution_time_stamp_t SystemTime::getSynchronizedStamp(){
-	uint32_t ms_passed = RTC::msPassedSince(local_time_of_last_received_root_stamp_rtc_ticks);
-
-	high_resolution_time_stamp_t stamp;
-	// be aware of the bracket placement ;)
-	stamp.posix_s = last_received_root_stamp.posix_s + ms_passed / 1000;
-	stamp.posix_ms = (last_received_root_stamp.posix_ms + ms_passed) % 1000;
-	stamp.version = last_received_root_stamp.version;
-
-	return stamp;
 }
 
 uint32_t SystemTime::syncTimeCoroutineAction(){
@@ -433,14 +452,6 @@ void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_i
 	event.dispatch();
 }
 
-bool SystemTime::isClockAuthority(stone_id_t candidate){
-	return candidate <= currentMasterClockId;
-}
-
-bool SystemTime::thisDeviceClaimsMasterClock(){
-	return isClockAuthority(myId);
-}
-
 void SystemTime::clearMasterClockId(){
 	currentMasterClockId = stone_id_unknown_value;
 }
@@ -454,21 +465,52 @@ void SystemTime::assertTimeSyncParameters(){
 	}
 }
 
+// ======================= Predicates =======================
+
+bool SystemTime::isClockAuthority(stone_id_t candidate){
+	return candidate <= currentMasterClockId;
+}
+
+bool SystemTime::thisDeviceClaimsMasterClock(){
+	return isClockAuthority(myId);
+}
+
+
+
 bool SystemTime::reelectionPeriodTimedOut(){
 	return master_clock_reelection_timeout_ms <=
 			RTC::msPassedSince(local_time_of_last_received_root_stamp_rtc_ticks);
 }
 
 
-#ifdef DEBUG_SYSTEM_TIME
+bool SystemTime::isOnlyReceiveByThisDevice(cmd_source_with_counter_t counted_source){
+	auto src = counted_source.source;
+	if (src.flagExternal) {
+		return false;
+	}
+
+	return src.type == CS_CMD_SOURCE_TYPE_UART
+			|| (src.type == CS_CMD_SOURCE_TYPE_ENUM
+					&&  src.id == CS_CMD_SOURCE_CONNECTION);
+}
+
+
+
+
+// ==========================================
+// =========== Debug functions ==============
+// ==========================================
 
 void SystemTime::publishSyncMessageForTesting(){
+#ifdef DEBUG_SYSTEM_TIME
 	// we can just send a normal sync message.
 	// Implementation is robust against false root clock claims by nature.
 	sendTimeSyncMessage(getSynchronizedStamp(), myId);
+#endif // DEBUG_SYSTEM_TIME
 }
 
 void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage){
+#ifdef DEBUG_SYSTEM_TIME
 	char valuestring [50];
 
 	LOGSystemTimeDebug("push sync message to host: %d %d %d %d",
@@ -484,26 +526,6 @@ void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage){
 			syncmessage.stamp.version);
 
 	TEST_PUSH_STATIC_S("SystemTime", "timesyncmsg", valuestring);
-}
-#endif
-
-
-
-// ======================== Utility functions ========================
-
-uint32_t SystemTime::posix(){
-	auto stamp = getSynchronizedStamp();
-	return stamp.version != 0 ? stamp.posix_s : 0;
+#endif  // DEBUG_SYSTEM_TIME
 }
 
-DayOfWeek SystemTime::day(){
-	return now().dayOfWeek();
-}
-
-Time SystemTime::now(){
-	return posix();
-}
-
-uint32_t SystemTime::up(){
-	return upTimeSec;
-}

@@ -34,6 +34,15 @@
 class SystemTime : public EventListener {
 public:
 	/**
+	 * Creates and starts the first tick timer.
+	 */
+	static void init();
+
+	virtual void handleEvent(event_t& event);
+
+	// ======================== Utility functions ========================
+
+	/**
 	 * Get the current time as posix timestamp in seconds.
 	 *
 	 * If the synchronized stamp has version 0, this
@@ -67,7 +76,7 @@ public:
 	 */
 	static high_resolution_time_stamp_t getSynchronizedStamp();
 
-	virtual void handleEvent(event_t& event);
+	// ======================== Setters ========================
 
 	/**
 	 * Set the system wide time to given posix timestamp.
@@ -91,11 +100,6 @@ public:
 	 *                       Unless it's set with throttled false.
 	 */
 	static cs_ret_code_t setSunTimes(const sun_time_t& sunTimes, bool throttled = true);
-
-	/**
-	 * Creates and starts the first tick timer.
-	 */
-	static void init();
 
 private:
 	// ========================== Run time data and constants ============================
@@ -165,10 +169,6 @@ private:
 	static stone_id_t myId;
 
 	static Coroutine syncTimeCoroutine;
-#ifdef DEBUG_SYSTEM_TIME
-	static Coroutine debugSyncTimeCoroutine;
-	static constexpr uint32_t debugSyncTimeMessagePeriodMs = 5*1000;
-#endif
 
 	// ------------------ Method definitions ------------------
 
@@ -216,10 +216,16 @@ private:
 	static bool reelectionPeriodTimedOut();
 
 
+	// ==========================================
+	// =========== Debug functions ==============
+	// ==========================================
+
 #ifdef DEBUG_SYSTEM_TIME
-	static void publishSyncMessageForTesting();
-	static void pushSyncMessageToTestSuite(time_sync_message_t& syncmessage);
+	static Coroutine debugSyncTimeCoroutine;
+	static constexpr uint32_t debugSyncTimeMessagePeriodMs = 5*1000;
 #endif
 
+	static void publishSyncMessageForTesting();
+	static void pushSyncMessageToTestSuite(time_sync_message_t& syncmessage);
 };
 
