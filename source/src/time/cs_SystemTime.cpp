@@ -8,26 +8,28 @@
 #include <time/cs_SystemTime.h>
 
 #include <common/cs_Types.h>
-
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Serial.h>
-
 #include <events/cs_EventDispatcher.h>
-
 #include <storage/cs_State.h>
-
 #include <time/cs_Time.h>
 #include <time/cs_TimeOfDay.h>
 #include <time/cs_TimeSyncMessage.h>
-
 #include <test/cs_Test.h>
-
 #include <util/cs_Lollipop.h>
 
 #define LOGSystemTimeDebug   LOGnone
 #define LOGSystemTimeVerbose LOGnone
 
+
+/**
+ *  Define this symbol for more mesh traffic to facilitate debugging.
+ *  Please make sure to keep it out of release builds.
+ */
+#undef DEBUG_SYSTEM_TIME
+
+// Check for debug symbol consistency
 #if defined(DEBUGSYSTEM_TIME)
 #ifndef DEBUG
 #error "SystemTime Debug must be turned off in release"
@@ -48,13 +50,10 @@ uint16_t SystemTime::throttleSetSunTimesCountdownTicks = 0;
 // sync
 high_resolution_time_stamp_t SystemTime::last_received_root_stamp = {0};
 uint32_t SystemTime::local_time_of_last_received_root_stamp_rtc_ticks = 0;
-stone_id_t SystemTime::currentMasterClockId = stone_id_unknown_value;
-stone_id_t SystemTime::myId = stone_id_unknown_value;
+stone_id_t SystemTime::currentMasterClockId = stone_id_unknown_value();
+stone_id_t SystemTime::myId = stone_id_unknown_value();
 Coroutine SystemTime::syncTimeCoroutine;
-
-#ifdef DEBUG_SYSTEM_TIME
 Coroutine SystemTime::debugSyncTimeCoroutine;
-#endif
 
 // driver details
 app_timer_t SystemTime::appTimerData = {{0}};
@@ -63,9 +62,38 @@ app_timer_id_t SystemTime::appTimerId = &appTimerData;
 
 // ====================== Constants ======================
 
+constexpr uint32_t SystemTime::reboot_sync_timeout_ms(){
+	return 60 * 1000;
+}
 
+constexpr uint32_t SystemTime::master_clock_update_period_ms() {
+#ifdef DEBUG_SYSTEM_TIME
+	return 5* 1000;
+#else
+	return 60*60* 1000;
+#endif
+}
 
+constexpr uint32_t SystemTime::master_clock_reelection_timeout_ms() {
+#ifdef DEBUG_SYSTEM_TIME
+	return 60 * 1000;
+#else
+	return 5 * master_clock_update_period_ms();
+#endif
+}
 
+constexpr uint32_t SystemTime::stone_id_unknown_value() {
+	return 0xff;
+}
+
+constexpr uint8_t SystemTime::time_stamp_version_lollipop_max() {
+	// six bit roll over
+	return (1 << 6) - 1;
+}
+
+constexpr uint32_t SystemTime::debugSyncTimeMessagePeriodMs() {
+	return 5*1000;
+}
 
 
 // ============ SystemTime implementation ===========
@@ -76,15 +104,10 @@ app_timer_id_t SystemTime::appTimerId = &appTimerData;
 
 void SystemTime::init(){
 	assertTimeSyncParameters();
-	syncTimeCoroutine.action = [](){ return syncTimeCoroutineAction(); };
 
-#ifdef DEBUG_SYSTEM_TIME
-	debugSyncTimeCoroutine.action = [](){
-		LOGd("debug sync time");
-		publishSyncMessageForTesting();
-		return Coroutine::delay_ms(debugSyncTimeMessagePeriodMs);
-	};
-#endif
+	initDebug();
+
+	syncTimeCoroutine.action = [](){ return syncTimeCoroutineAction(); };
 
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &myId, sizeof(myId));
 
@@ -190,9 +213,7 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 	TimeOfDay t(time);
 	LOGi("Set time to %u %02d:%02d:%02d", time, t.h(), t.m(), t.s());
 
-#ifdef DEBUG_SYSTEM_TIME
 	publishSyncMessageForTesting();
-#endif
 
 	uint32_t prevtime = posix();
 
@@ -203,7 +224,7 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool unsynchronize) {
 		// incrementing the version would incur mesh syncrhonisation.
 		stamp.version = last_received_root_stamp.version;
 	} else {
-		stamp.version = Lollipop::next(last_received_root_stamp.version, time_stamp_version_lollipop_max);
+		stamp.version = Lollipop::next(last_received_root_stamp.version, time_stamp_version_lollipop_max());
 	}
 
 	if (unsynchronize) {
@@ -263,9 +284,8 @@ cs_ret_code_t SystemTime::setSunTimes(const sun_time_t& sunTimes, bool throttled
 void SystemTime::handleEvent(event_t & event) {
 	bool handled_by_coroutine = false;
 	handled_by_coroutine |= syncTimeCoroutine(event);
-#ifdef DEBUG_SYSTEM_TIME
 	handled_by_coroutine |= debugSyncTimeCoroutine(event);
-#endif
+
 	if (handled_by_coroutine) {
 		return;
 	}
@@ -273,10 +293,10 @@ void SystemTime::handleEvent(event_t & event) {
 	switch(event.type) {
 		case CS_TYPE::CMD_SET_TIME: {
 			LOGd("set time from command");
-			// TODO: based on source, decide wether or not to broadcast the update
 			setTime(*((TYPIFY(CMD_SET_TIME)*)event.data));
 			if(isOnlyReceiveByThisDevice(event.source)){
-				// only this device heard the message, so we make sure to propagate it.
+				// only this device heard the message,
+				// so we make sure to propagate it.
 				sendTimeSyncMessage(getSynchronizedStamp(), 0);
 			}
 			break;
@@ -326,6 +346,10 @@ void SystemTime::handleEvent(event_t & event) {
 
 // ======================== Synchronization ========================
 
+uint8_t SystemTime::timeStampVersion() {
+	return last_received_root_stamp.version;
+}
+
 void SystemTime::logRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id){
 	LOGSystemTimeDebug("logRootTimeStamp, changing masterClockId of #%d to: #%d", myId, id);
 
@@ -356,7 +380,7 @@ uint32_t SystemTime::syncTimeCoroutineAction(){
 		LOGSystemTimeDebug("is_first_call");
 		// reboot occured, wait until sync time is over
 		is_first_call = false;
-		return Coroutine::delay_ms(reboot_sync_timeout_ms);
+		return Coroutine::delay_ms(reboot_sync_timeout_ms());
 	}
 
 	if(reelectionPeriodTimedOut()) {
@@ -374,7 +398,7 @@ uint32_t SystemTime::syncTimeCoroutineAction(){
 		LOGSystemTimeDebug("thisDeviceClaimsMasterClock");
 		auto stamp = getSynchronizedStamp();
 		sendTimeSyncMessage(stamp, myId);
-		return Coroutine::delay_ms(master_clock_update_period_ms);
+		return Coroutine::delay_ms(master_clock_update_period_ms());
 	}
 
 	LOGSystemTimeDebug("syncTimeCoroutineAction did nothing, waiting for reelection (myid=%d, masterid= %d, version=%d)",
@@ -382,7 +406,7 @@ uint32_t SystemTime::syncTimeCoroutineAction(){
 
 	// we need to check at least once in a while so that if there are
 	// no more sync messages sent, the coroutine will eventually trigger a self promotion.
-	return Coroutine::delay_ms(master_clock_reelection_timeout_ms);
+	return Coroutine::delay_ms(master_clock_reelection_timeout_ms());
 }
 
 void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
@@ -390,7 +414,7 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 	bool version_has_incremented = Lollipop::compare(
 										last_received_root_stamp.version,
 										syncmessage.stamp.version,
-										time_stamp_version_lollipop_max);
+										time_stamp_version_lollipop_max());
 	bool version_is_equal = last_received_root_stamp.version == syncmessage.stamp.version;
 
 	if (version_has_incremented || (version_is_equal && isClockAuthority(syncmessage.root_id))) {
@@ -421,9 +445,7 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncmessage){
 				);
 	}
 
-#ifdef DEBUG_SYSTEM_TIME
 	pushSyncMessageToTestSuite(syncmessage);
-#endif
 }
 
 void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id) {
@@ -453,14 +475,14 @@ void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_i
 }
 
 void SystemTime::clearMasterClockId(){
-	currentMasterClockId = stone_id_unknown_value;
+	currentMasterClockId = stone_id_unknown_value();
 }
 
 void SystemTime::assertTimeSyncParameters(){
-	if (reboot_sync_timeout_ms < 3 * master_clock_update_period_ms) {
+	if (reboot_sync_timeout_ms() < 3 * master_clock_update_period_ms()) {
 		LOGw("reboot delay for sync times is very small compared to sync message update period");
 	}
-	if (master_clock_reelection_timeout_ms < 3 * master_clock_update_period_ms) {
+	if (master_clock_reelection_timeout_ms() < 3 * master_clock_update_period_ms()) {
 		LOGw("master clock reelection period is very small compared to sync message update period");
 	}
 }
@@ -478,7 +500,7 @@ bool SystemTime::thisDeviceClaimsMasterClock(){
 
 
 bool SystemTime::reelectionPeriodTimedOut(){
-	return master_clock_reelection_timeout_ms <=
+	return master_clock_reelection_timeout_ms() <=
 			RTC::msPassedSince(local_time_of_last_received_root_stamp_rtc_ticks);
 }
 
@@ -500,6 +522,16 @@ bool SystemTime::isOnlyReceiveByThisDevice(cmd_source_with_counter_t counted_sou
 // ==========================================
 // =========== Debug functions ==============
 // ==========================================
+
+void SystemTime::initDebug() {
+#ifdef DEBUG_SYSTEM_TIME
+	debugSyncTimeCoroutine.action = [](){
+			LOGd("debug sync time");
+			publishSyncMessageForTesting();
+			return Coroutine::delay_ms(debugSyncTimeMessagePeriodMs());
+		};
+#endif
+}
 
 void SystemTime::publishSyncMessageForTesting(){
 #ifdef DEBUG_SYSTEM_TIME

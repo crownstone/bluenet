@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cstdint>
+#include <protocol/cs_Typedefs.h>
 
 /**
  * Versioned timestamp with milliseconds precision.
