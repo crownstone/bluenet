@@ -177,6 +177,16 @@ void RssiDataTracker::handleEvent(event_t& evt){
 
 		break;
 	}
+
+	case CS_TYPE::EVT_RECV_MESH_MSG: {
+		auto& meshMsgEvent = *reinterpret_cast<MeshMsgEvent*>(evt.getData());
+		LOGd("sender: %d, hops: %d, channel: %d, rssi: %d",
+				meshMsgEvent.srcAddress,
+				meshMsgEvent.hops,
+				meshMsgEvent.channel,
+				meshMsgEvent.rssi);
+		break;
+	}
 	default:
 		break;
 	}
