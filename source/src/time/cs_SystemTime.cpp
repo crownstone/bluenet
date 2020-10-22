@@ -63,7 +63,7 @@ app_timer_id_t SystemTime::appTimerId = &appTimerData;
 // ====================== Constants ======================
 
 constexpr uint32_t SystemTime::reboot_sync_timeout_ms(){
-	return 60 * 1000;
+	return 5 * master_clock_update_period_ms();
 }
 
 constexpr uint32_t SystemTime::master_clock_update_period_ms() {
