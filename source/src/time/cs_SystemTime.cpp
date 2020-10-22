@@ -30,13 +30,13 @@
 #undef DEBUG_SYSTEM_TIME
 
 // Check for debug symbol consistency
-#if defined(DEBUGSYSTEM_TIME)
-#ifndef DEBUG
-#error "SystemTime Debug must be turned off in release"
-#endif
-#else
-#pragma message("SystemTime Debug is turned on.")
-#endif
+#ifdef DEBUG_SYSTEM_TIME
+	#ifndef DEBUG
+		#error "SystemTime Debug must be turned off in release"
+	#else
+		#pragma message("SystemTime Debug is turned on.")
+	#endif  // DEBUG
+#endif  // DEBUG_SYSTEM_TIME
 
 // ============== Static member declarations ==============
 
@@ -71,7 +71,7 @@ constexpr uint32_t SystemTime::master_clock_update_period_ms() {
 	return 5* 1000;
 #else
 	return 60*60* 1000;
-#endif
+#endif  // DEBUG_SYSTEM_TIME
 }
 
 constexpr uint32_t SystemTime::master_clock_reelection_timeout_ms() {
@@ -79,7 +79,7 @@ constexpr uint32_t SystemTime::master_clock_reelection_timeout_ms() {
 	return 60 * 1000;
 #else
 	return 5 * master_clock_update_period_ms();
-#endif
+#endif  // DEBUG_SYSTEM_TIME
 }
 
 constexpr uint32_t SystemTime::stone_id_unknown_value() {
@@ -530,7 +530,7 @@ void SystemTime::initDebug() {
 			publishSyncMessageForTesting();
 			return Coroutine::delay_ms(debugSyncTimeMessagePeriodMs());
 		};
-#endif
+#endif  // DEBUG_SYSTEM_TIME
 }
 
 void SystemTime::publishSyncMessageForTesting(){
