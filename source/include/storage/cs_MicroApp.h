@@ -2,6 +2,21 @@
 
 #include <events/cs_EventListener.h>
 
+extern "C" {
+#include <util/cs_DoubleStackCoroutine.h>
+}
+
+typedef struct {
+	coroutine *c;
+	int cntr;
+	int delay;
+} coargs;
+
+// Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
+#define MICROAPP_LOOP_FREQUENCY 10
+
+#define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
+
 /**
  * The class MicroApp has functionality to store a second app (and perhaps in the future even more apps) on another
  * part of the flash memory.
@@ -63,6 +78,14 @@ class MicroApp: public EventListener {
 		uintptr_t _loop;
 
 		static const int number_of_notifications = 3;
+	
+		coroutine _coroutine;
+	
+		coargs _coargs;
+
+		int _cocounter;
+
+		int _coskip;
 
 	protected:
 		/**
@@ -119,6 +142,11 @@ class MicroApp: public EventListener {
 		 * Actually run the app.
 		 */
 		void callApp();
+
+		/**
+		 * Call the loop function
+		 */
+		void callLoop(int & cntr, int & skip);
 
 		/**
 		 * Load ram information, set by microapp.

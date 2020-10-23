@@ -55,12 +55,12 @@ typedef struct {
 	jmp_buf caller_context;
 } coroutine;
 
-typedef void (*func)(void*);
+typedef void (*coroutine_func)(void*);
 
 /**
  * Start the coroutine.
  */
-void start(coroutine* c, func f, void* arg, void* sp);
+void start(coroutine* c, coroutine_func f, void* arg);
 
 void yield(coroutine* c);
 

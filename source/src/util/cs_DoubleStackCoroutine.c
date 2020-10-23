@@ -1,5 +1,9 @@
 #include <util/cs_DoubleStackCoroutine.h>
 
+#include <drivers/cs_Serial.h>
+
+#include <stddef.h>
+
 enum { WORKING=1, DONE };
 
 void yield(coroutine* c) {
@@ -20,45 +24,36 @@ int next(coroutine* c) {
 
 typedef struct {
 	coroutine* c;
-	func f;
+	coroutine_func f;
 	void* arg;
 	void* old_sp;
-	void* old_fp;
 } start_params;
 
-#define get_sp(p) \
-	asm volatile("movq %%rsp, %0" : "=r"(p))
-#define get_fp(p) \
-	asm volatile("movq %%rbp, %0" : "=r"(p))
-#define set_sp(p) \
-	asm volatile("movq %0, %%rsp" : : "r"(p))
-#define set_fp(p) \
-	asm volatile("movq %0, %%rbp" : : "r"(p))
+#define get_sp(p) asm volatile("mov %0, sp" : "=r"(p) : : )
+#define set_sp(p) asm volatile("mov sp, %0" : : "r"(p))
 
-enum { FRAME_SZ=5 }; //fairly arbitrary
+// We hardcode the stack at the end of the RAM dedicated to the microapp
+start_params *const params = (start_params *)(uintptr_t)(RAM_MICROAPP_BASE + RAM_MICROAPP_AMOUNT);
 
-void start(coroutine* c, func f, void* arg, void* sp)
-{
-	start_params* p = ((start_params*)sp)-1;
+void start(coroutine* c, coroutine_func f, void* arg) {
+	//save parameters before stack switching
+	params->c = c;
+	params->f = f;
+	params->arg = arg;
+	get_sp(params->old_sp);
+	
+	// set stack pointer for the coroutine (starts with start_params and goes down)
+	size_t move_down = sizeof(start_params);
+	set_sp(params - move_down);
 
-	//save params before stack switching
-	p->c = c;
-	p->f = f;
-	p->arg = arg;
-	get_sp(p->old_sp);
-	get_fp(p->old_fp);
-
-	set_sp(p - FRAME_SZ);
-	set_fp(p); //effectively clobbers p
-	//(and all other locals)
-	get_fp(p); //…so we read p back from $fp
-
-	//and now we read our params from p
-	if(!setjmp(p->c->callee_context)) {
-		set_sp(p->old_sp);
-		set_fp(p->old_fp);
+	if(!setjmp(params->c->callee_context)) {
+		set_sp(params->old_sp);
 		return;
 	}
-	(*p->f)(p->arg);
-	longjmp(p->c->caller_context, DONE);
+		
+	// call the function that will - in the end - yield
+	(*params->f)(params->arg);
+
+	// jump to caller
+	longjmp(params->c->caller_context, DONE);
 }

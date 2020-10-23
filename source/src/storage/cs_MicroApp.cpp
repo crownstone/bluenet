@@ -69,26 +69,105 @@ MicroApp::MicroApp(): EventListener() {
 	_debug = true;
 }
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 enum ErrorCodesMicroapp {
-	ERR_NO_PAYLOAD             = 0x01,    // need at least an opcode in the payload
-	ERR_TOO_LARGE              = 0x02,
+	ERR_NO_PAYLOAD                   = 0x01,    // need at least an opcode in the payload
+	ERR_TOO_LARGE                    = 0x02,
 };
+
+enum CommandMicroapp {
+	CS_MICROAPP_COMMAND_LOG          = 0x01,
+	CS_MICROAPP_COMMAND_DELAY        = 0x02,
+	CS_MICROAPP_COMMAND_PIN          = 0x03,
+};
+
+enum CommandMicroappLog {
+	CS_MICROAPP_COMMAND_LOG_CHAR     = 0x00,
+	CS_MICROAPP_COMMAND_LOG_INT      = 0x01,
+	CS_MICROAPP_COMMAND_LOG_STR      = 0x02,
+};
+
+enum CommandMicroappPin {
+	CS_MICROAPP_COMMAND_PIN_SWITCH   = 0x01,
+};
+
+enum CommandMicroappSwitch {
+	CS_MICROAPP_COMMAND_SWITCH_OFF   = 0x00,
+	CS_MICROAPP_COMMAND_SWITCH_ON    = 0x01,
+};
+
+void forwardCommand(char command, char *data, uint16_t length) {
+	LOGi("Set command");
+	switch(command) {
+	case CS_MICROAPP_COMMAND_PIN: {
+		int pin = data[0];
+		if (pin != CS_MICROAPP_COMMAND_PIN_SWITCH) {
+			LOGd("Unknown pin");
+			return;
+		}
+		int mode = data[1];
+		switch(mode) {
+		case CS_MICROAPP_COMMAND_SWITCH_OFF: {
+			LOGi("Turn switch off");
+			event_t event(CS_TYPE::CMD_SWITCH_OFF);
+			EventDispatcher::getInstance().dispatch(event);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_SWITCH_ON: {
+			LOGi("Turn switch on");
+			event_t event(CS_TYPE::CMD_SWITCH_ON);
+			EventDispatcher::getInstance().dispatch(event);
+			break;
+		}
+		}
+	}
+	}
+}
+
+extern "C" {
 
 int microapp_callback(char *payload, uint16_t length) {
 	if (length == 0) return ERR_NO_PAYLOAD;
 	if (length > 255) return ERR_TOO_LARGE;
 
-	uint8_t opcode = payload[0];
+	uint8_t command = payload[0];
 
-	switch(opcode) {
-	case 1: {
-		char *data = &(payload[1]);
-		data[length] = 0;
-		LOGi("%s", data);
+	switch(command) {
+	case CS_MICROAPP_COMMAND_LOG: {
+		char type = payload[1];
+		switch(type) {
+		case CS_MICROAPP_COMMAND_LOG_CHAR: {
+			char value = payload[2];
+			LOGi("%i", (int)value);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_LOG_INT: {
+			int value = (payload[2] << 8) + payload[3];
+			LOGi("%i", value);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_LOG_STR: {
+			int str_length = length - 2;
+			char *data = &(payload[2]);
+			data[str_length] = 0;
+			LOGi("%s", data);
+			break;
+		}
+		}
+		break;
+	}
+	case CS_MICROAPP_COMMAND_DELAY: {
+		int delay = (payload[1] << 8) + payload[2];
+		LOGd("Microapp delay of %i", delay);
+		uintptr_t coargs_ptr = (payload[3] << 24) + (payload[4] << 16) + (payload[5] << 8) + payload[6];
+		// cast to coroutine args struct
+		coargs* args = (coargs*) coargs_ptr;
+		args->cntr++;
+		args->delay = delay;
+		yield(args->c);
+		break;
+	}
+	case CS_MICROAPP_COMMAND_PIN: {
+		forwardCommand(command, &payload[1], length - 1);
 		break;
 	}
 	default:
@@ -103,9 +182,7 @@ int microapp_callback(char *payload, uint16_t length) {
 	return ERR_SUCCESS;
 }
 
-#ifdef __cplusplus
-}
-#endif
+} // extern C
 
 void MicroApp::setIpcRam() {
 	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
@@ -153,8 +230,9 @@ uint16_t MicroApp::init() {
 	setIpcRam();
 
 	// Actually, first check if there's anything there?
+	// TODO
 
-	// Check for valid app on boot 
+	// Check for valid app on boot
 	err_code = validateApp();
 	if (err_code == ERR_SUCCESS) {
 		LOGi("Set app valid");
@@ -183,7 +261,7 @@ uint16_t MicroApp::initMemory() {
 	// We allow an area of 0x2000B000 and then two pages for RAM. For now let us clear it to 0
 	// This is actually incorrect (we should skip) and it probably can be done at once as well
 	for (int i = 0; i < 1024 * 2; ++i) {
-		uint32_t *const val = (uint32_t *)(uintptr_t)(0x2000B000 + i);
+		uint32_t *const val = (uint32_t *)(uintptr_t)(RAM_MICROAPP_BASE + i);
 		*val = 0;
 	}
 
@@ -307,18 +385,28 @@ void MicroApp::tick() {
 
 		if (_loaded) {
 			if (counter == 0) {
+				// TODO: we cannot call delay in setup in this way...
 				LOGi("Call setup");
 				void (*setup_func)() = (void (*)()) _setup;
 				setup_func();
 				LOGi("Setup done");
+				_cocounter = 0;
+				_coskip = 0;
 			}
 			counter++;
-			// Call loop every 10 ticks
-			if (counter % 10 == 0) {
-				LOGi("Call loop");
-				int (*loop_func)() = (int (*)()) _loop;
-				int result = loop_func();
-				LOGi("Loop 0x%x", result);
+			if (counter % MICROAPP_LOOP_FREQUENCY == 0) {
+				if (_coskip > 0) {
+					// Skip (due to by the microapp communicated delay)
+					_coskip--;
+				} else {
+					LOGi("Call loop");
+					callLoop(_cocounter, _coskip);
+					if (_cocounter == -1) {
+						// Done, reset flags
+						_cocounter = 0;
+						_coskip = 0;
+					}
+				}
 			}
 			// Loop around, but do not hit 0 again
 			if (counter == 0) {
@@ -326,6 +414,30 @@ void MicroApp::tick() {
 			}
 		}
 	}
+}
+
+/**
+ * This function can be improved in clearity for the developer. It now works as follows:
+ *   - when cntr = 0 we start a new loop
+ *   - we call next and set skip if we actually were "yielded"
+ */
+void MicroApp::callLoop(int & cntr, int & skip) {
+	if (cntr == 0) {
+		// start a new loop
+		_coargs = {&_coroutine, 1, 0};
+		void (*loop_func)(void*) = (void (*)(void*)) _loop;
+		start(&_coroutine, loop_func, &_coargs);
+	}
+
+	if (next(&_coroutine)) {
+		// here we come only on yield
+		cntr = _coargs.cntr;
+		skip = _coargs.delay / MICROAPP_LOOP_INTERVAL_MS;
+		return;
+	}
+
+	// indicate that we are done
+	cntr = -1;
 }
 
 /**
