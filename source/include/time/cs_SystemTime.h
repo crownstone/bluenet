@@ -80,10 +80,9 @@ public:
 	 * @param[in] time            Posix time in seconds.
 	 * @param[in] throttled       When true, a new suntime won't be allowed to be set for a while.
 	 *                            Unless it's set with throttled false.
-	 * @param[in] unsynchronize   setting this to true will prevent updating other mesh nodes
-	 *                            This enables purposefully unsynchronizing this node for testing.
+	 * @param[in] sendToMesh      Setting this to false will prevent updating other mesh nodes
 	 */
-	static void setTime(uint32_t time, bool throttled = true, bool unsynchronize = false);
+	static void setTime(uint32_t time, bool throttled, bool sendToMesh);
 
 	/**
 	 * Set the sunrise and sunset times.
@@ -124,51 +123,66 @@ private:
 
 	// ---------------- constants ----------------
 
-	/*
-	 * timeout period before considering device should have had updates
-	 * during this period the device will not participate for election
-	 * even if it has received a valid sync message from another device
-	 * and has lower crownstone id.
+	/**
+	 * Timeout period before considering device should have had time sync messages.
+	 *
+	 * During this period the device will not participate for election, even if it has
+	 * received a valid sync message from another device and has lower crownstone id.
 	 */
 	static constexpr uint32_t reboot_sync_timeout_ms();
 
 	/**
-	 * timing settings for the algorithm.
-	 * - update period defines the time between two sync messages from the master clock.
-	 * - reelection period defines the time a crownstone will wait before claiming to
-	 *   be a master clock itself and start sending sync messages.
-	 *
-	 * Note: reelection should be larger than master_clock_update_period_ms
-	 * by a fair margin. This will be checked at startup in ::assertTimeSyncParameters.
+	 * Time between sync messages from the root clock.
 	 */
-	static constexpr uint32_t master_clock_update_period_ms();
-	static constexpr uint32_t master_clock_reelection_timeout_ms();
-
-	static constexpr uint32_t stone_id_unknown_value();
+	static constexpr uint32_t root_clock_update_period_ms();
 
 	/**
-	 * The time version is lollipop versioned. This constant defines
-	 * its roll over point.
+	 * If no sync message has been received from the root clock for this time, a new root clock will be selected.
 	 */
-	static constexpr uint8_t time_stamp_version_lollipop_max();
+	static constexpr uint32_t root_clock_reelection_timeout_ms();
+
+	/**
+	 * Stone id to use for initialization.
+	 */
+	static constexpr stone_id_t stone_id_init();
+
+	/**
+	 * The time version is lollipop versioned. This constant defines its roll over point.
+	 */
+	static constexpr uint8_t timestamp_version_lollipop_max();
 
 
 	// -------------- runtime variables ----------------
 
 	/**
-	 *  kept track off in ::tick(void*), seeded at first call for best accuracy.
+	 * RTC count of last time a second had passed.
 	 */
-	static uint32_t last_statetimeevent_stamp_rtc;
+	static uint32_t rtcCountOfLastSecondIncrement;
 
 	/**
-	 * Read at ::init to avoid relatiely expensive lookup repetitively.
+	 * Cached ID of this stone.
 	 */
 	static stone_id_t myId;
 
-	// clock synchronization data (updated on sync)
-	static high_resolution_time_stamp_t last_received_root_stamp;
-	static uint32_t local_time_of_last_received_root_stamp_rtc_ticks;
-	static stone_id_t currentMasterClockId;
+	/**
+	 * Root clock.
+	 */
+	static high_resolution_time_stamp_t rootTime;
+
+	/**
+	 * RTC count of last time the root clock was set.
+	 */
+	static uint32_t rtcCountOfLastRootTimeUpdate;
+
+	/**
+	 * Uptime of last time a sync message was received.
+	 */
+	static uint32_t uptimeOfLastTimeSyncMessage;
+
+	/**
+	 * Stone ID of the root clock.
+	 */
+	static stone_id_t rootClockId;
 
 	static Coroutine syncTimeCoroutine;
 
@@ -179,7 +193,7 @@ private:
 	static uint8_t timeStampVersion();
 
 	static void onTimeSyncMessageReceive(time_sync_message_t syncmessage);
-	static void logRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id);
+	static void setRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id, uint32_t rtcCount);
 
 	// adjusts the local_time_of_last_received_root_stamp_rtc_ticks
 	// and last_received_root_stamp accordingly. Calling this function
@@ -187,29 +201,22 @@ private:
 	// clock in order to prevent roll over issues,
 	// but it currently looses some precision which is tricky to avoid,
 	// so don't call it too often.
-	static void updateRootTimeStamp();
+	static void updateRootTimeStamp(uint32_t rtcCount);
 
 	/**
 	 * Send a sync message for given stamp/id combo to the mesh.
 	 */
 	static void sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id);
 
-	static void clearMasterClockId();
+	/**
+	 * Returns true if the id of this stone is considered to be root clock.
+	 */
+	static bool meIsRootClock();
 
 	/**
-	 * Checks if settings are reasonable and log warning if necessary.
+	 * Returns true if the candidate is considered to be root clock.
 	 */
-	static void assertTimeSyncParameters();
-
-	/**
-	 * Returns true if the device id of this device is lower than or equal to the currentMasterClockId.
-	 */
-	static bool thisDeviceClaimsMasterClock();
-
-	/**
-	 * Returns true if the candidate is considered a clock authority relative to us.
-	 */
-	static bool isClockAuthority(stone_id_t candidate);
+	static bool isRootClock(stone_id_t candidate);
 
 	/**
 	 * Returns true if the command source is uart or ble through connection.
@@ -218,9 +225,14 @@ private:
 
 	/**
 	 * Returns true if onTimeSyncMessageReceive hasn't received any sync messages from a
-	 * clock authority in the last master_clock_reelection_timeout_ms miliseconds.
+	 * clock authority in the last root_clock_reelection_timeout_ms milliseconds.
 	 */
 	static bool reelectionPeriodTimedOut();
+
+	/**
+	 * Returns true when reboot period is passed.
+	 */
+	static bool rebootTimedOut();
 
 
 	// ==========================================

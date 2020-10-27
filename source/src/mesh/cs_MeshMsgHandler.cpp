@@ -187,10 +187,10 @@ cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadS
 	eventData.stamp.posix_ms = packet->posix_ms;
 	eventData.stamp.version  = packet->version;
 	if (packet->overrideRoot) {
-		eventData.root_id = 0;
+		eventData.rootId = 0;
 	}
 	else {
-		eventData.root_id = srcId;
+		eventData.rootId = srcId;
 	}
 
 	event_t event(CS_TYPE::EVT_MESH_TIME_SYNC, &eventData, sizeof(eventData));

@@ -22,7 +22,7 @@
  *
  * Warning: max == 0, 1 and 255 don't work as expected.
  */
-class Lollipop{
+class Lollipop {
 private:
 	uint8_t val;
 	uint8_t max;
@@ -31,52 +31,56 @@ public:
 	Lollipop(uint8_t v, uint8_t m) : val(v), max(m) {}
 	Lollipop(const Lollipop& l) = default;
 
-	// implicit cast operator
-	operator uint8_t(){
-		return val;
-	}
-
-	// strict comparison
-	bool operator<(const Lollipop& other){
-		if(max != other.max){
+	// strict comparison: this < other
+	bool operator<(const Lollipop& other) {
+		if (max != other.max) {
 			return false;
 		}
 		if (val == 0) {
-			return false;
+			return true;
 		}
-		if(other.val == 0){
+		if (other.val == 0) {
 			return false;
 		}
 
-		bool reverse = val > max/2;
+		bool reverse = val > max / 2;
 
-		auto m = val - (reverse? max/2 : 0);
-		auto M = val + (reverse? 0 : max/2);
+		// TODO: what is m and M ?
+		int m = val - (reverse? max / 2 : 0);
+		int M = val + (reverse? 0 : max / 2);
 
 		return (m < other.val && other.val <= M) ^ reverse;
 	}
 
 	/**
-	 * uint8_t operator++, but with roll over at m and skipping 0.
+	 * Return the next value given the current value.
+	 *
+	 * Rolls over at maxValue and skips 0.
 	 */
-	static uint8_t next(uint8_t v, uint8_t m){
-		return ++v >= m ? 1 : v;
+	static uint8_t next(uint8_t currentValue, uint8_t maxValue) {
+		return ++currentValue >= maxValue ? 1 : currentValue;
 	}
 
-	static bool compare(uint8_t v_l, uint8_t v_r, uint8_t m){
-		return Lollipop(v_l, m) < Lollipop(v_r, m);
+	/**
+	 * Returns true when current value is newer than previous value.
+	 *
+	 * This is always true when previousValue is 0.
+	 * This is false when currentValue is 0.
+	 */
+	static bool isNewer(uint8_t previousValue, uint8_t currentValue, uint8_t maxValue){
+		return Lollipop(previousValue, maxValue) < Lollipop(currentValue, maxValue);
 	}
 
 	// pre-fix increment operator
-	Lollipop& operator++(){
-		val = next(val,max);
+	Lollipop& operator++() {
+		val = next(val, max);
 		return *this;
 	}
 
 	// post-fix increment operator
-	Lollipop operator++(int){
+	Lollipop operator++(int) {
 		Lollipop copy(*this);
-		val = next(val,max);
+		val = next(val, max);
 		return copy;
 	}
 };
