@@ -250,3 +250,6 @@ Value | Device type
 2 | Guidestone
 3 | Crownstone builtin
 4 | Crownstone dongle
+5 | Crownstone builtin one
+6 | Crownstone plug one
+7 | Crownstone hub
