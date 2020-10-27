@@ -52,21 +52,16 @@ public:
 		return ((ticksTo - ticksFrom) & MAX_RTC_COUNTER_VAL);
 	}
 
-	inline static uint32_t differenceMs(uint32_t ticksTo, uint32_t ticksFrom){
-		return ticksToMs(difference(ticksTo,ticksFrom));
+	//! return difference between two tick counter values in ms.
+	inline static uint32_t differenceMs(uint32_t ticksTo, uint32_t ticksFrom) {
+		return ticksToMs(difference(ticksTo, ticksFrom));
 	}
 
 	/**
-	 * Returns the number of miliseconds passed since the given tick_count.
-	 *
-	 * E.g.
-	 *
-	 * uint32_t stamp = RTC::getCount();
-	 * ... 3 seconds pass ...
-	 * printf("%d miliseconds passed", RTC::msPassedSince(stamp);
+	 * Returns the number of milliseconds passed since the given tick counter value.
 	 */
-	inline static uint32_t msPassedSince(uint32_t tick_count){
-		return ticksToMs(difference(getCount(),tick_count));
+	inline static uint32_t msPassedSince(uint32_t ticksFrom){
+		return ticksToMs(difference(getCount(), ticksFrom));
 	}
 
 	//! return current clock in ms
