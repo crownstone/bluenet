@@ -177,7 +177,7 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_GET_FIRMWARE_VERSION:
 			return handleCmdGetFirmwareVersion(commandData, accessLevel, result);
 		case CTRL_CMD_SET_TIME:
-			return handleCmdSetTime(commandData, accessLevel, result);
+			return dispatchEventForCommand(CS_TYPE::CMD_SET_TIME, commandData, source, result);
 		case CTRL_CMD_SET_SUN_TIME:
 			return handleCmdSetSunTime(commandData, accessLevel, result);
 		case CTRL_CMD_INCREASE_TX:
@@ -540,18 +540,6 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 		default:
 			result.returnCode = retCode;
 	}
-}
-
-void CommandHandler::handleCmdSetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set time:");
-	if (commandData.len != sizeof(uint32_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(uint32_t));
-		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-		return;
-	}
-	uint32_t value = reinterpret_cast<uint32_t*>(commandData.data)[0];
-	SystemTime::setTime(value);
-	result.returnCode = ERR_SUCCESS;
 }
 
 void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result){
