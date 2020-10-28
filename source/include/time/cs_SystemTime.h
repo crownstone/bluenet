@@ -24,6 +24,29 @@
  * This class keeps track of the real time in the current time zone.
  * It may obtain its data through the mesh, or some other way and try
  * to keep up to date using on board timing functionality.
+ *
+ * This class also synchronizes time with other nodes in the mesh.
+ * The node with the lowest ID is considered to be the root clock.
+ * Other nodes will update their time on receival of time sync messages from the root clock.
+ *
+ * There are some scenarios to consider here:
+ * 1. No node knows the actual posix time: in this case we still want a synchronized clock.
+ * 2. Nodes are all just booted, but not at the same time: they should still synchronize quickly.
+ * 3. Nodes are all booted at the same time.
+ * 4. A node that's not the root clock receives a set time command, this time should overrule the root clock time.
+ *
+ * This is solved by:
+ * 1. Update the clock even when no posix time is known, but mark it to be invalid with a low version.
+ * 2. Only consider ourselves to be root ID after the first time sync message is received.
+ * 2. On boot, each node will request to be synchronized (a mechanism already in the mesh). Every other node that
+ *    considers themselves to be in sync, will send their clock.
+ *    It's up to the receiving node to device which clock to use.
+ * 3. In this case we expect all nodes to be waiting for the first message to be sent.
+ * 4. Add a lollipop version to the clock: a newer version will always be accepted, even if it's not the root ID.
+ *
+ * For robustness, not only the root clock node, but all nodes will regularly send a time sync message.
+ * It's up to the receiving node to device which clock is the root clock.
+ * Not sure if this is necessary.
  */
 class SystemTime : public EventListener {
 public:
@@ -124,10 +147,7 @@ private:
 	// ---------------- constants ----------------
 
 	/**
-	 * Timeout period before considering device should have had time sync messages.
-	 *
-	 * During this period the device will not participate for election, even if it has
-	 * received a valid sync message from another device and has lower crownstone id.
+	 * Timeout period before considering this stone to be root clock.
 	 */
 	static constexpr uint32_t reboot_sync_timeout_ms();
 
@@ -150,6 +170,11 @@ private:
 	 * The time version is lollipop versioned. This constant defines its roll over point.
 	 */
 	static constexpr uint8_t timestamp_version_lollipop_max();
+
+	/**
+	 * Lowest time version at which a valid posix time is set.
+	 */
+	static constexpr uint8_t timestamp_version_min_valid();
 
 
 	// -------------- runtime variables ----------------
@@ -195,26 +220,26 @@ private:
 	static void onTimeSyncMessageReceive(time_sync_message_t syncmessage);
 	static void setRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t id, uint32_t rtcCount);
 
-	// adjusts the local_time_of_last_received_root_stamp_rtc_ticks
-	// and last_received_root_stamp accordingly. Calling this function
-	// every now and then is necessary when this crownstone claims root
-	// clock in order to prevent roll over issues,
-	// but it currently looses some precision which is tricky to avoid,
-	// so don't call it too often.
+	/**
+	 * Keep up the root clock time.
+	 *
+	 * Should be called at least every second.
+	 * But it currently looses some precision, so don't call it too often.
+	 */
 	static void updateRootTimeStamp(uint32_t rtcCount);
 
 	/**
 	 * Send a sync message for given stamp/id combo to the mesh.
 	 */
-	static void sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id);
+	static void sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id, bool reliable = false);
 
 	/**
-	 * Returns true if the id of this stone is considered to be root clock.
+	 * Returns true if the id of this stone can considered to be root clock.
 	 */
 	static bool meIsRootClock();
 
 	/**
-	 * Returns true if the candidate is considered to be root clock.
+	 * Returns true if the candidate can considered to be root clock.
 	 */
 	static bool isRootClock(stone_id_t candidate);
 

@@ -36,11 +36,11 @@ public:
 		if (max != other.max) {
 			return false;
 		}
-		if (val == 0) {
-			return true;
-		}
 		if (other.val == 0) {
 			return false;
+		}
+		if (val == 0) {
+			return true;
 		}
 
 		bool reverse = val > max / 2;
@@ -64,8 +64,8 @@ public:
 	/**
 	 * Returns true when current value is newer than previous value.
 	 *
-	 * This is always true when previousValue is 0.
-	 * This is false when currentValue is 0.
+	 * This is always false when currentValue is 0.
+	 * This is true when previousValue is 0.
 	 */
 	static bool isNewer(uint8_t previousValue, uint8_t currentValue, uint8_t maxValue){
 		return Lollipop(previousValue, maxValue) < Lollipop(currentValue, maxValue);

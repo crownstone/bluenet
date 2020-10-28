@@ -24,5 +24,5 @@ struct __attribute__((__packed__)) high_resolution_time_stamp_t {
  */
 struct __attribute__((__packed__)) time_sync_message_t {
 	high_resolution_time_stamp_t stamp;
-	stone_id_t rootId; // @arend isn't this just the source Id ? I got confused into thinking this was what the sending node believes to be the root id.
+	stone_id_t srcId; // The stone ID of this time. Set to 0 to force using this timestamp.
 };

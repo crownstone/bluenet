@@ -64,20 +64,24 @@ app_timer_id_t SystemTime::appTimerId = &appTimerData;
 // ====================== Constants ======================
 
 constexpr uint32_t SystemTime::reboot_sync_timeout_ms() {
-	// Should be larger than re-election timeout.
-	return 10 * root_clock_update_period_ms();
+	// After the mesh sync process, we should have received all the
+	// time sync messages we need to have the correct time.
+	return MESH_SYNC_GIVE_UP_MS;
 }
 
 constexpr uint32_t SystemTime::root_clock_update_period_ms() {
 #ifdef DEBUG_SYSTEM_TIME
 	return 5 * 1000;
 #else
-	return 60 * 60 * 1000; // 1 hour
+	return 20 * 60 * 1000; // 20 minutes
 #endif  // DEBUG_SYSTEM_TIME
 }
 
 constexpr uint32_t SystemTime::root_clock_reelection_timeout_ms() {
-	return 5 * root_clock_update_period_ms();
+	// Chances of missing 10 messages should be low.
+	// From a test: 57% of msgs received, with a network of 2 nodes at 0.5m distance.
+	// So chance of missing 10 msgs would be: 0.43^10 = 0.0002
+	return 10 * root_clock_update_period_ms();
 }
 
 constexpr stone_id_t SystemTime::stone_id_init() {
@@ -88,6 +92,10 @@ constexpr stone_id_t SystemTime::stone_id_init() {
 constexpr uint8_t SystemTime::timestamp_version_lollipop_max() {
 	// six bit roll over
 	return (1 << 6) - 1;
+}
+
+constexpr uint8_t SystemTime::timestamp_version_min_valid() {
+	return 1;
 }
 
 constexpr uint32_t SystemTime::debugSyncTimeMessagePeriodMs() {
@@ -112,6 +120,11 @@ void SystemTime::init() {
 			appTimerId,
 			static_cast<app_timer_timeout_handler_t>(&SystemTime::tick));
 
+	// Start the root clock, but accept clock of other IDs.
+	uint32_t rtcCount = RTC::getCount();
+	rtcCountOfLastSecondIncrement = rtcCount;
+	setRootTimeStamp(high_resolution_time_stamp_t(), stone_id_init(), rtcCount);
+
 	scheduleNextTick();
 }
 
@@ -119,7 +132,7 @@ void SystemTime::init() {
 
 uint32_t SystemTime::posix() {
 	// Since rootTime is kept up to date, we can just return rootTime.
-	return rootTime.version != 0 ? rootTime.posix_s : 0;
+	return rootTime.version < timestamp_version_min_valid() ? 0 : rootTime.posix_s;
 }
 
 Time SystemTime::now() {
@@ -158,23 +171,16 @@ void SystemTime::tick(void*) {
 	// Work with the same RTC count in all this code.
 	uint32_t rtcCount = RTC::getCount();
 
-	static bool firstTickCall = true;
-	if (firstTickCall) {
-		firstTickCall = false;
-		rtcCountOfLastSecondIncrement = rtcCount;
-
-		setRootTimeStamp(high_resolution_time_stamp_t(), myId, rtcCount);
-	}
-
 	if (RTC::difference(rtcCount, rtcCountOfLastSecondIncrement) >= RTC::msToTicks(1000)) {
 		// At least 1 second has passed!
 		rtcCountOfLastSecondIncrement += RTC::msToTicks(1000);
 		upTimeSec += 1;
 
+		// TODO: sometimes the clock increases 2s, because the ms was close to 1000. Is this a problem?
 		updateRootTimeStamp(rtcCount);
+		LOGSystemTimeVerbose("time s=%u ms=%u", rootTime.posix_s, rootTime.posix_ms);
 
 		TYPIFY(STATE_TIME) stateTime = rootTime.posix_s;
-		LOGSystemTimeVerbose("set state time ts=%u", stateTime);
 		State::getInstance().set(CS_TYPE::STATE_TIME, &stateTime, sizeof(stateTime));
 	}
 
@@ -214,18 +220,20 @@ void SystemTime::setTime(uint32_t time, bool throttled, bool sendToMesh) {
 	high_resolution_time_stamp_t stamp;
 	stamp.posix_s = time;
 	stamp.posix_ms = 0;
+	// TODO: set at least to timestamp_version_min_valid()
 	stamp.version = Lollipop::next(rootTime.version, timestamp_version_lollipop_max());
 
 	// Setting root id to 0 is a brutal claim to be root.
-	// It results in no crownstone sending time sync messages
-	// anymore until the root_clock_reelection_timeout_ms expires.
-	// It strictly enforces the synchronization among crownstones
-	// because all nodes, even the true root clock, will update
-	// their local time.
+	// It results in no crownstone claiming to be root, until re-election timeout.
+	// It enforces the synchronization among crownstones because all nodes,
+	// even the true root clock, will update their local time.
 	setRootTimeStamp(stamp, 0, rtcCount);
 
 	if (sendToMesh) {
-		sendTimeSyncMessage(getSynchronizedStamp(), 0);
+		// Send more reliable message.
+		// TODO: this sends the message multiple times without updating the timestamp in the message.
+		// It would be better to let this node be the root clock for some time or so.
+		sendTimeSyncMessage(getSynchronizedStamp(), 0, true);
 	}
 
 	event_t event(
@@ -297,7 +305,8 @@ void SystemTime::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_OUTGOING: {
-			if (timeStampVersion() == 0) {
+			// Keep requesting the time until a valid posix time is received.
+			if (timeStampVersion() < timestamp_version_min_valid()) {
 				auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING)*>(event.data);
 				req->bits.time = true;
 			}
@@ -305,15 +314,18 @@ void SystemTime::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::EVT_MESH_SYNC_REQUEST_INCOMING: {
 			auto req = reinterpret_cast<TYPIFY(EVT_MESH_SYNC_REQUEST_INCOMING)*>(event.data);
-			if (req->bits.time && timeStampVersion() != 0) {
-				// Posix time is requested by a crownstone in the mesh.
-				// If we know the time, send it.
-				// But only with a 1/10 chance, to prevent flooding the mesh.
-				if (RNG::getInstance().getRandom8() < (255 / 10 + 1)) {
-					// we're sending what we currently think is the time.
-					// don't use rootClockId here, we don't want to
-					// be an impostor as we might have drifted a bit.
-					sendTimeSyncMessage(getSynchronizedStamp(), myId);
+			if (req->bits.time) {
+				// Time is requested by a crownstone in the mesh: send our time.
+				// It doesn't matter whether we have the correct time or whether we are the root clock:
+				// the receiving node will select which clock to use.
+
+				// But only send a message when we should be in sync with the rest of the network: after boot timeout.
+				if (rebootTimedOut()) {
+					// Since we send the message with a low reliability, it doesn't flood the mesh that much.
+					// Send with a 1/4 chance, to prevent flooding the mesh.
+					if (RNG::getInstance().getRandom8() < (255 / 4 + 1)) {
+						sendTimeSyncMessage(getSynchronizedStamp(), myId);
+					}
 				}
 			}
 			break;
@@ -339,46 +351,35 @@ void SystemTime::setRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t
 void SystemTime::updateRootTimeStamp(uint32_t rtcCount) {
 	uint32_t msPassed = RTC::differenceMs(rtcCount, rtcCountOfLastRootTimeUpdate);
 
-	rootTime.posix_s += msPassed / 1000;
-	rootTime.posix_ms = (rootTime.posix_ms + msPassed) % 1000;
+	// Clock should go msPassed forward.
+	uint32_t secondsIncrement = (rootTime.posix_ms + msPassed) / 1000;
+	rootTime.posix_ms =         (rootTime.posix_ms + msPassed) - 1000 * secondsIncrement;
+	rootTime.posix_s += secondsIncrement;
 
 	rtcCountOfLastRootTimeUpdate = rtcCount;
 }
 
 uint32_t SystemTime::syncTimeCoroutineAction() {
 	LOGSystemTimeDebug("syncTimeCoroutineAction");
-	static bool firstCoroutineCall = true;
-	if (firstCoroutineCall) {
-		LOGSystemTimeDebug("first call");
-		// reboot occured, wait until sync time is over
-		firstCoroutineCall = false;
-		return Coroutine::delayMs(reboot_sync_timeout_ms());
-	}
 
 	if (reelectionPeriodTimedOut()) {
 		LOGSystemTimeDebug("reelectionPeriodTimedOut");
 		rootClockId = myId;
-
-		// optionally: return random delay to reduce chance
-		// of sync message collision during reelection?
-		// E.g.:
-		// uint8_t max_delay_ms = 100;
-		// return Coroutine::delay_ms(RNG::getInstance().getRandom8() % max_delay_ms);
 	}
 
-	if (meIsRootClock()) {
-		LOGSystemTimeDebug("meIsRootClock");
+//	if (meIsRootClock()) {
+//		LOGSystemTimeDebug("meIsRootClock");
 		auto stamp = getSynchronizedStamp();
 		sendTimeSyncMessage(stamp, myId);
 		return Coroutine::delayMs(root_clock_update_period_ms());
-	}
+//	}
 
-	LOGSystemTimeDebug("syncTimeCoroutineAction did nothing, waiting for reelection (myId=%u, rootId=%u, version=%u)",
-			myId, rootClockId, rootTime.version);
-
-	// we need to check at least once in a while so that if there are
-	// no more sync messages sent, the coroutine will eventually trigger a self promotion.
-	return Coroutine::delayMs(root_clock_reelection_timeout_ms());
+//	LOGSystemTimeDebug("syncTimeCoroutineAction did nothing, waiting for reelection (myId=%u, rootId=%u, version=%u)",
+//			myId, rootClockId, rootTime.version);
+//
+//	// we need to check at least once in a while so that if there are
+//	// no more sync messages sent, the coroutine will eventually trigger a self promotion.
+//	return Coroutine::delayMs(root_clock_reelection_timeout_ms());
 }
 
 void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncMessage) {
@@ -387,24 +388,30 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncMessage) {
 	bool versionIsEqual = rootTime.version == syncMessage.stamp.version;
 
 	LOGSystemTimeDebug("onTimeSyncMsg msg: {id=%u version=%u posix=%u} cur: {id=%u version=%u posix=%u}",
-			syncMessage.rootId,
+			syncMessage.srcId,
 			syncMessage.stamp.version,
 			syncMessage.stamp.posix_s,
 			rootClockId,
 			rootTime.version,
 			rootTime.posix_s
 	);
-	LOGSystemTimeDebug("isNewer=%d isEqual=%d isRoot=%d isRebootTimedOut=%d",
+	LOGSystemTimeDebug("isNewer=%d isEqual=%d isRoot=%d",
 			versionIsNewer,
 			versionIsEqual,
-			isRootClock(syncMessage.rootId),
-			rebootTimedOut()
+			isRootClock(syncMessage.srcId)
 	);
 
-	if (versionIsNewer || (versionIsEqual && isRootClock(syncMessage.rootId)) || (rootTime.version == 0 && !rebootTimedOut())) {
-		// sync message wons authority on the clock values.
-		setRootTimeStamp(syncMessage.stamp, syncMessage.rootId, rtcCount);
+	if (versionIsNewer || (versionIsEqual && isRootClock(syncMessage.srcId))) {
+		// sync message wins authority on the clock values.
+		setRootTimeStamp(syncMessage.stamp, syncMessage.srcId, rtcCount);
 		uptimeOfLastTimeSyncMessage = upTimeSec;
+
+		// After accepting the first time sync message, we now have a clock that should be in sync with other nodes.
+		// So this is a good time to consider ourselves to be the root clock.
+		if (meIsRootClock()) {
+			LOGSystemTimeDebug("Set me as root: myId=%u rootClockId=%u", myId, rootClockId);
+			rootClockId = myId;
+		}
 
 		// TODO: could postpone reelection if coroutine interface would be improved
 		// sync_routine.reschedule(root_clock_reelection_timeout_ms);
@@ -419,26 +426,32 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncMessage) {
 	pushSyncMessageToTestSuite(syncMessage);
 }
 
-void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id) {
-	LOGSystemTimeDebug("send time sync message");
-
+void SystemTime::sendTimeSyncMessage(high_resolution_time_stamp_t stamp, stone_id_t id, bool reliable) {
 	cs_mesh_model_msg_time_sync_t timeSyncMsg;
 	timeSyncMsg.posix_s  = stamp.posix_s;
 	timeSyncMsg.posix_ms = stamp.posix_ms;
 	timeSyncMsg.version  = stamp.version;
 	timeSyncMsg.overrideRoot = (id == 0);
 
-	LOGSystemTimeDebug("send sync message: s=%d ms=%d version=%d override=%d",
+	LOGSystemTimeDebug("sendTimeSyncMessage s=%u ms=%u version=%u override=%d",
 			timeSyncMsg.posix_s,
 			timeSyncMsg.posix_ms,
 			timeSyncMsg.version,
 			timeSyncMsg.overrideRoot);
 
+	// Send with lowest reliability, so that the message is only sent once.
+	// This means the timestamp that is sent doesn't have to be updated.
+	// But we will have to send a sync message more often.
 	cs_mesh_msg_t meshMsg;
 	meshMsg.type = CS_MESH_MODEL_TYPE_TIME_SYNC;
 	meshMsg.payload = reinterpret_cast<uint8_t*>(&timeSyncMsg);
 	meshMsg.size  = sizeof(timeSyncMsg);
-	meshMsg.reliability = CS_MESH_RELIABILITY_LOW;
+	if (reliable) {
+		meshMsg.reliability = CS_MESH_RELIABILITY_MEDIUM;
+	}
+	else {
+		meshMsg.reliability = CS_MESH_RELIABILITY_LOWEST;
+	}
 	meshMsg.urgency = CS_MESH_URGENCY_HIGH;
 
 	event_t event(CS_TYPE::CMD_SEND_MESH_MSG, &meshMsg, sizeof(meshMsg));
@@ -462,7 +475,10 @@ bool SystemTime::reelectionPeriodTimedOut() {
 }
 
 bool SystemTime::rebootTimedOut() {
-	return reboot_sync_timeout_ms() / 1000 <= upTimeSec;
+//	return reboot_sync_timeout_ms() / 1000 <= upTimeSec;
+
+	// After receiving the first message, we should already be in sync with the rest of the mesh.
+	return uptimeOfLastTimeSyncMessage != 0;
 }
 
 
@@ -487,10 +503,10 @@ bool SystemTime::isOnlyReceiveByThisDevice(cmd_source_with_counter_t counted_sou
 void SystemTime::initDebug() {
 #ifdef DEBUG_SYSTEM_TIME
 	debugSyncTimeCoroutine.action = [](){
-			LOGd("debug sync time");
-			publishSyncMessageForTesting();
-			return Coroutine::delayMs(debugSyncTimeMessagePeriodMs());
-		};
+		LOGd("debug sync time");
+		publishSyncMessageForTesting();
+		return Coroutine::delayMs(debugSyncTimeMessagePeriodMs());
+	};
 #endif  // DEBUG_SYSTEM_TIME
 }
 
@@ -498,6 +514,8 @@ void SystemTime::publishSyncMessageForTesting(){
 #ifdef DEBUG_SYSTEM_TIME
 	// we can just send a normal sync message.
 	// Implementation is robust against false root clock claims by nature.
+	// However, if the implementation is bugged, this might cover up the bug.
+	// Message should be marked to be solely for testing.
 //	sendTimeSyncMessage(getSynchronizedStamp(), myId);
 #endif // DEBUG_SYSTEM_TIME
 }
@@ -507,15 +525,15 @@ void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage){
 	char valuestring [50];
 
 	LOGSystemTimeDebug("push sync message to host: %d %d %d %d",
-				syncmessage.stamp.posix_s,
-				syncmessage.stamp.posix_ms,
-				syncmessage.rootId,
-				syncmessage.stamp.version);
+			syncmessage.stamp.posix_s,
+			syncmessage.stamp.posix_ms,
+			syncmessage.srcId,
+			syncmessage.stamp.version);
 
 	sprintf(valuestring, "%lu,%u,%u,%u",
 			syncmessage.stamp.posix_s,
 			syncmessage.stamp.posix_ms,
-			syncmessage.rootId,
+			syncmessage.srcId,
 			syncmessage.stamp.version);
 
 	TEST_PUSH_STATIC_S("SystemTime", "timesyncmsg", valuestring);
