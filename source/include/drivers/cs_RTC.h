@@ -71,8 +71,9 @@ public:
 
 	/** Return time in ms, given time in ticks */
 	inline static uint32_t ticksToMs(uint32_t ticks) {
-		// Order of multiplication and division is important, because it shouldn't lose too much precision, but also not overflow
-		return (uint32_t)ROUNDED_DIV(ticks, (uint64_t)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
+		// To increase precision: multiply both sides of the division by a large number (multiple of 2 for speed).
+		// Cast them to uint64_t to prevent overflow.
+		return (uint32_t)ROUNDED_DIV((uint64_t)65536 * ticks, (uint64_t)65536 * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
 	}
 
 	/** Return time in ticks, given time in ms
