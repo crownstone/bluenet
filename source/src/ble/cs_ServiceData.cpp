@@ -13,6 +13,7 @@
 #include <encryption/cs_KeysAndAccess.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <storage/cs_State.h>
+#include <time/cs_SystemTime.h>
 #include <uart/cs_UartHandler.h>
 #include <util/cs_Utils.h>
 
@@ -118,8 +119,8 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 	bool serviceDataSet = false;
 
-	TYPIFY(STATE_TIME) timestamp;
-	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
+	uint32_t timestamp = SystemTime::posix();
+	updateFlagsBitmask(SERVICE_DATA_FLAGS_TIME_SET, timestamp != 0);
 
 //		// Update flag
 //		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED));
@@ -412,8 +413,7 @@ uint16_t ServiceData::getPartialBehaviourHash(uint32_t behaviourHash) {
 void ServiceData::sendMeshState(bool event) {
 //#ifdef BUILD_MESHING
 	LOGi("sendMeshState");
-	TYPIFY(STATE_TIME) timestamp;
-	State::getInstance().get(CS_TYPE::STATE_TIME, &timestamp, sizeof(timestamp));
+	uint32_t timestamp = SystemTime::posix();
 
 	cs_mesh_msg_t meshMsg;
 	if (event) {

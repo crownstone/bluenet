@@ -62,8 +62,7 @@ public:
 	/**
 	 * Get the current time as posix timestamp in seconds.
 	 *
-	 * If the synchronized stamp has version 0, this
-	 * function returns 0.
+	 * Returns 0 if no valid posix time is set.
 	 */
 	static uint32_t posix();
 

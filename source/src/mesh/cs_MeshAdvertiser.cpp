@@ -238,8 +238,10 @@ void MeshAdvertiser::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::STATE_TIME: {
-			uint32_t* timestamp = (TYPIFY(STATE_TIME)*) event.data;
-			handleTime(*timestamp);
+			// Use the synchronized time stamp.
+			// It's ok if it's not a valid posix time.
+			auto timestamp = SystemTime::getSynchronizedStamp();
+			handleTime(timestamp.posix_s);
 			break;
 		}
 		case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID: {
