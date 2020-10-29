@@ -66,14 +66,13 @@ struct __attribute__((packed)) service_data_encrypted_alternative_state_t {
 
 struct __attribute__((packed)) service_data_encrypted_hub_state_t {
 	uint8_t  id;
-	uint8_t  flags;
-	uint8_t  hubDataType;
-	uint8_t  hubData[8];
+	uint8_t  flags; // uartEncrypted, uartConnectionAlive, hubNormalMode, hubInternet, hubHasError
+	uint8_t  hubDataType; // Same as uart status msg: 0=none, 1=crownstoneHub, 2-127=reserved, 128-255=free
+	uint8_t  hubData[8];  // Depends on hubDataType: same as uart status msg.
 	uint16_t partialTimestamp;
-	uint8_t  reserved2; // TODO: Only required if we want to send hub state over mesh.
+	uint8_t  reserved; // Only required if we want to send hub state over mesh.
 	uint8_t  validation;
 };
-
 
 struct __attribute__((packed)) service_data_encrypted_error_t {
 	uint8_t  id;
