@@ -41,6 +41,7 @@
  * 2. On boot, each node will request to be synchronized (a mechanism already in the mesh). Every other node that
  *    considers themselves to be in sync, will send their clock.
  *    It's up to the receiving node to device which clock to use.
+ *    Nodes will consider themselves to be in sync after hearing 1 time sync message, or after boot timeout.
  * 3. In this case we expect all nodes to be waiting for the first message to be sent.
  * 4. Add a lollipop version to the clock: a newer version will always be accepted, even if it's not the root ID.
  *

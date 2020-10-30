@@ -481,10 +481,9 @@ bool SystemTime::reelectionPeriodTimedOut() {
 }
 
 bool SystemTime::rebootTimedOut() {
-//	return reboot_sync_timeout_ms() / 1000 <= upTimeSec;
-
 	// After receiving the first message, we should already be in sync with the rest of the mesh.
-	return uptimeOfLastTimeSyncMessage != 0;
+	// Otherwise, wait for reboot timeout.
+	return (uptimeOfLastTimeSyncMessage != 0) || (reboot_sync_timeout_ms() / 1000 <= upTimeSec);
 }
 
 
