@@ -184,9 +184,6 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_TEMPERATURE:
 		*(TYPIFY(STATE_TEMPERATURE)*)data.value = STATE_TEMPERATURE_DEFAULT;
 		return ERR_SUCCESS;
-	case CS_TYPE::STATE_TIME:
-		*(TYPIFY(STATE_TIME)*)data.value = STATE_TIME_DEFAULT;
-		return ERR_SUCCESS;
 	case CS_TYPE::STATE_SUN_TIME:
 		*reinterpret_cast<TYPIFY(STATE_SUN_TIME)*>(data.value) = sun_time_t();
 		return ERR_SUCCESS;
@@ -422,7 +419,6 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
 	case CS_TYPE::STATE_TEMPERATURE:
-	case CS_TYPE::STATE_TIME:
 	case CS_TYPE::STATE_FACTORY_RESET:
 	case CS_TYPE::STATE_ERRORS:
 	case CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH:

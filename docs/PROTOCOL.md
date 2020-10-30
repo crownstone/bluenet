@@ -333,6 +333,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 32 | Reset errors | [Error bitmask](#state_error_bitmask) | - | Reset all errors which are set in the written bitmask. | x
 33 | Mesh command | [Command mesh packet](#command_mesh_packet) | - | Send a generic command over the mesh. Required access depends on the command. | x | x | x
 34 | Set sun times | [Sun time packet](#sun_time_packet) | - | Update the reference times for sunrise and sunset | x | x
+35 | Get time | - | uint 32 | Get the time. Timestamp is in seconds since epoch (Unix time). | x | x | x
 40 | Allow dimming | uint 8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 50 | UART message | payload | - | Print the payload to UART. | x
@@ -953,7 +954,6 @@ Type nr | Type name | Payload type | Description | A | M | B
 131 | Power usage | int 32 | Current power usage in mW. | r | r | 
 134 | Operation Mode | uint 8 | Internal usage. |  |  | 
 135 | Temperature | int 8 | Chip temperature in °C. | r | r | 
-136 | Time | uint 32 | The current time as unix timestamp. | r | r | 
 139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors. | r | r | 
 149 | Sun time | [Sun time packet](#sun_time_packet) | Packet with sun rise and set times. | r | r | 
 150 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Behaviour settings. | rw | rw | r

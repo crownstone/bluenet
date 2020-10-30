@@ -56,6 +56,9 @@ private:
 	// the last state that was aggregated and passed on towards the SoftwareSwitch.
 	std::optional<uint8_t> aggregatedState = {};
 
+	// Cache of previous time update.
+	uint32_t _lastTimestamp = 0;
+
 	/**
 	 * Which source claimed the switch.
 	 *

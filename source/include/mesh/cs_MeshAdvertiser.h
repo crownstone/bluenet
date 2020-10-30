@@ -70,6 +70,9 @@ private:
 	// Cache of what's in flash.
 	ibeacon_config_id_packet_t _ibeaconInterval[num_ibeacon_config_ids];
 
+	// Cache of previous time update.
+	uint32_t _lastTimestamp = 0;
+
 	void updateIbeacon();
 
 	/**

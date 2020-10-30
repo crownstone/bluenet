@@ -111,6 +111,7 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_RELAY:
 
 		case CTRL_CMD_SET_TIME:
+		case CTRL_CMD_GET_TIME:
 		case CTRL_CMD_INCREASE_TX:
 		case CTRL_CMD_RESET_ERRORS:
 		case CTRL_CMD_MESH_COMMAND:
@@ -180,6 +181,8 @@ void CommandHandler::handleCommand(
 			return dispatchEventForCommand(CS_TYPE::CMD_SET_TIME, commandData, source, result);
 		case CTRL_CMD_SET_SUN_TIME:
 			return handleCmdSetSunTime(commandData, accessLevel, result);
+		case CTRL_CMD_GET_TIME:
+			return handleCmdGetTime(commandData, accessLevel, result);
 		case CTRL_CMD_INCREASE_TX:
 			return handleCmdIncreaseTx(commandData, accessLevel, result);
 		case CTRL_CMD_DISCONNECT:
@@ -543,7 +546,7 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 }
 
 void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result){
-	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set sun time:");
+	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set sun time");
 	if (commandData.len != sizeof(sun_time_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(sun_time_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
@@ -551,6 +554,20 @@ void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const Encryption
 	}
 	sun_time_t* payload = reinterpret_cast<sun_time_t*>(commandData.data);
 	result.returnCode = SystemTime::setSunTimes(*payload);
+}
+
+void CommandHandler::handleCmdGetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result){
+	LOGi(STR_HANDLE_COMMAND, "get time");
+
+	if (result.buf.len < sizeof(uint32_t)) {
+		result.returnCode = ERR_BUFFER_TOO_SMALL;
+		return;
+	}
+
+	uint32_t* timestamp = (uint32_t*)result.buf.data;
+	*timestamp = SystemTime::posix();
+	result.dataSize = sizeof(*timestamp);
+	result.returnCode = ERR_SUCCESS;
 }
 
 void CommandHandler::handleCmdIncreaseTx(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
@@ -1048,6 +1065,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_MESH_COMMAND:
 		case CTRL_CMD_STATE_GET:
 		case CTRL_CMD_STATE_SET:
+		case CTRL_CMD_GET_TIME:
 		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
 		case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
 			return BASIC;

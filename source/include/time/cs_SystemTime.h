@@ -82,13 +82,9 @@ public:
 	static uint32_t up();
 
 	/**
-	 * Returns the current time, computed from the last received root stamp
-	 * by adding the difference between the local rtc time upon reception
-	 * and the current local rtc time.
+	 * Get the synchronized timestamp, updated to current time.
 	 *
-	 * When version == 0, this stamp contains a synchronized value which is
-	 * not posix based. Nonetheless it's seconds an miliseconds fields are
-	 * the current best synchronized values known accross the mesh.
+	 * When version == 0, the timestamp is not posix based.
 	 */
 	static high_resolution_time_stamp_t getSynchronizedStamp();
 
@@ -127,6 +123,9 @@ private:
 
 	// settings
 	static constexpr auto TICK_TIME_MS = 500;
+
+	// Time stamp will be updated at a low rate, to maintain precision. Must be lower than RTC overflow time.
+	static constexpr uint16_t TIME_UPDATE_PERIOD_MS = (60 * 1000);
 
 	// Time shouldn't differ more than 1 minute.
 	static constexpr uint16_t THROTTLE_SET_TIME_TICKS = (60 * 1000 / TICK_TIME_MS);
@@ -190,6 +189,8 @@ private:
 
 	/**
 	 * Root clock.
+	 *
+	 * Updated at a low rate, use a function to get an up to date timestamp.
 	 */
 	static high_resolution_time_stamp_t rootTime;
 

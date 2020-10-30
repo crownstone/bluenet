@@ -131,31 +131,24 @@ void SystemTime::init() {
 // ======================== Utility functions ========================
 
 uint32_t SystemTime::posix() {
-	// Since rootTime is kept up to date, we can just return rootTime.
-	return rootTime.version < timestamp_version_min_valid() ? 0 : rootTime.posix_s;
+	if (rootTime.version  < timestamp_version_min_valid()) {
+		return 0;
+	}
+
+	// Base on up to date timestamp.
+	return getSynchronizedStamp().posix_s;
 }
 
 Time SystemTime::now() {
-	return posix();
+	return Time(posix());
 }
 
 DayOfWeek SystemTime::day() {
 	return now().dayOfWeek();
 }
 
-uint32_t SystemTime::up(){
+uint32_t SystemTime::up() {
 	return upTimeSec;
-}
-
-high_resolution_time_stamp_t SystemTime::getSynchronizedStamp() {
-	uint32_t ms_passed = RTC::msPassedSince(rtcCountOfLastRootTimeUpdate);
-
-	high_resolution_time_stamp_t stamp;
-	// be aware of the bracket placement ;)
-	stamp.posix_s = rootTime.posix_s + ms_passed / 1000;
-	stamp.posix_ms = (rootTime.posix_ms + ms_passed) % 1000;
-	stamp.version = rootTime.version;
-	return stamp;
 }
 
 // ======================== timing driver stuff ========================
@@ -171,17 +164,14 @@ void SystemTime::tick(void*) {
 	// Work with the same RTC count in all this code.
 	uint32_t rtcCount = RTC::getCount();
 
+	if (RTC::difference(rtcCount, rtcCountOfLastRootTimeUpdate) >= RTC::msToTicks(TIME_UPDATE_PERIOD_MS)) {
+		updateRootTimeStamp(rtcCount);
+	}
+
 	if (RTC::difference(rtcCount, rtcCountOfLastSecondIncrement) >= RTC::msToTicks(1000)) {
 		// At least 1 second has passed!
 		rtcCountOfLastSecondIncrement += RTC::msToTicks(1000);
 		upTimeSec += 1;
-
-		// TODO: sometimes the clock increases 2s, because the ms was close to 1000. Is this a problem?
-		updateRootTimeStamp(rtcCount);
-		LOGSystemTimeVerbose("time s=%u ms=%u", rootTime.posix_s, rootTime.posix_ms);
-
-		TYPIFY(STATE_TIME) stateTime = rootTime.posix_s;
-		State::getInstance().set(CS_TYPE::STATE_TIME, &stateTime, sizeof(stateTime));
 	}
 
 	if (throttleSetTimeCountdownTicks) {
@@ -351,12 +341,28 @@ void SystemTime::setRootTimeStamp(high_resolution_time_stamp_t stamp, stone_id_t
 void SystemTime::updateRootTimeStamp(uint32_t rtcCount) {
 	uint32_t msPassed = RTC::differenceMs(rtcCount, rtcCountOfLastRootTimeUpdate);
 
-	// Clock should go msPassed forward.
+	// Clock should go msPassed forward, this can be multiple seconds.
 	uint32_t secondsIncrement = (rootTime.posix_ms + msPassed) / 1000;
-	rootTime.posix_ms =         (rootTime.posix_ms + msPassed) - 1000 * secondsIncrement;
+	rootTime.posix_ms =         (rootTime.posix_ms + msPassed) - 1000 * secondsIncrement; // Same as (rootTime.posix_ms + msPassed) % 1000.
 	rootTime.posix_s += secondsIncrement;
 
+	LOGSystemTimeDebug("updateRootTimeStamp s=%u ms=%u", rootTime.posix_s, rootTime.posix_ms);
 	rtcCountOfLastRootTimeUpdate = rtcCount;
+}
+
+high_resolution_time_stamp_t SystemTime::getSynchronizedStamp() {
+	uint32_t msPassed = RTC::msPassedSince(rtcCountOfLastRootTimeUpdate);
+
+	// Don't update the root clock, as this function can be called many times,
+	// which would add up imprecision to the root clock.
+	high_resolution_time_stamp_t stamp;
+
+	uint32_t secondsIncrement = (rootTime.posix_ms + msPassed) / 1000;
+	stamp.posix_ms =            (rootTime.posix_ms + msPassed) - 1000 * secondsIncrement; // Same as (rootTime.posix_ms + msPassed) % 1000.
+	stamp.posix_s = rootTime.posix_s + secondsIncrement;
+	stamp.version = rootTime.version;
+	LOGSystemTimeVerbose("getSynchronizedStamp s=%u ms=%u version=%u", stamp.posix_s, stamp.posix_ms, stamp.version);
+	return stamp;
 }
 
 uint32_t SystemTime::syncTimeCoroutineAction() {
@@ -387,20 +393,6 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncMessage) {
 	bool versionIsNewer = Lollipop::isNewer(rootTime.version, syncMessage.stamp.version, timestamp_version_lollipop_max());
 	bool versionIsEqual = rootTime.version == syncMessage.stamp.version;
 
-	LOGSystemTimeDebug("onTimeSyncMsg msg: {id=%u version=%u posix=%u} cur: {id=%u version=%u posix=%u}",
-			syncMessage.srcId,
-			syncMessage.stamp.version,
-			syncMessage.stamp.posix_s,
-			rootClockId,
-			rootTime.version,
-			rootTime.posix_s
-	);
-	LOGSystemTimeDebug("isNewer=%d isEqual=%d isRoot=%d",
-			versionIsNewer,
-			versionIsEqual,
-			isRootClock(syncMessage.srcId)
-	);
-
 	if (versionIsNewer || (versionIsEqual && isRootClock(syncMessage.srcId))) {
 		// sync message wins authority on the clock values.
 		setRootTimeStamp(syncMessage.stamp, syncMessage.srcId, rtcCount);
@@ -420,8 +412,22 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncMessage) {
 		// That way components can react appropriately.
 	}
 	else {
-		LOGSystemTimeDebug("dropped");
+		LOGSystemTimeDebug("ignored");
 	}
+	// These prints should be done after setRootTimeStamp(), else they influence the synchronization.
+	LOGSystemTimeDebug("onTimeSyncMsg msg: {id=%u version=%u posix=%u} cur: {id=%u version=%u posix=%u}",
+			syncMessage.srcId,
+			syncMessage.stamp.version,
+			syncMessage.stamp.posix_s,
+			rootClockId,
+			rootTime.version,
+			posix()
+	);
+	LOGSystemTimeDebug("isNewer=%d isEqual=%d isRoot=%d",
+			versionIsNewer,
+			versionIsEqual,
+			isRootClock(syncMessage.srcId)
+	);
 
 	pushSyncMessageToTestSuite(syncMessage);
 }

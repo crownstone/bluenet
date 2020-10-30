@@ -157,7 +157,6 @@ enum class CS_TYPE: uint16_t {
 //	STATE_SCHEDULE                          = 133,
 	STATE_OPERATION_MODE                    = 134,
 	STATE_TEMPERATURE                       = 135,
-	STATE_TIME                              = 136,    // Payload is not always a valid posix time. Use the SystemTime class instead.
 	STATE_FACTORY_RESET                     = 137,
 //	STATE_LEARNED_SWITCHES,
 	STATE_ERRORS                            = 139,
@@ -426,7 +425,6 @@ typedef  int32_t TYPIFY(STATE_POWER_USAGE);
 typedef uint16_t TYPIFY(STATE_RESET_COUNTER);
 typedef switch_state_t TYPIFY(STATE_SWITCH_STATE);
 typedef   int8_t TYPIFY(STATE_TEMPERATURE);
-typedef uint32_t TYPIFY(STATE_TIME);
 typedef sun_time_t TYPIFY(STATE_SUN_TIME);
 typedef void TYPIFY(STATE_BEHAVIOUR_RULE);
 typedef void TYPIFY(STATE_TWILIGHT_RULE);
