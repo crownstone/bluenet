@@ -64,9 +64,22 @@ struct __attribute__((packed)) service_data_encrypted_alternative_state_t {
 	uint8_t  validation;
 };
 
+enum ServiceDataHubFlagBits {
+	SERVICE_DATA_HUB_FLAGS_UART_ALIVE            = 0,
+	SERVICE_DATA_HUB_FLAGS_UART_ENCRYPTED        = 1,
+	SERVICE_DATA_HUB_FLAGS_HUB_HAS_BEEN_SET_UP   = 2,
+	SERVICE_DATA_HUB_FLAGS_HUB_HAS_INTERNET      = 3,
+	SERVICE_DATA_HUB_FLAGS_HUB_HAS_ERROR         = 4
+};
+
+enum ServiceDataHubDateType {
+	SERVICE_DATA_HUB_DATA_TYPE_NONE              = 0,
+	SERVICE_DATA_HUB_DATA_TYPE_CROWNSTONE_HUB    = 0,
+};
+
 struct __attribute__((packed)) service_data_encrypted_hub_state_t {
 	uint8_t  id;
-	uint8_t  flags; // uartEncrypted, uartConnectionAlive, hubNormalMode, hubInternet, hubHasError
+	uint8_t  flags; // Seee ServiceDataHubFlagBits
 	uint8_t  hubDataType; // Same as uart status msg: 0=none, 1=crownstoneHub, 2-127=reserved, 128-255=free
 	uint8_t  hubData[8];  // Depends on hubDataType: same as uart status msg.
 	uint16_t partialTimestamp;
