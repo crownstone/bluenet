@@ -415,13 +415,15 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncMessage) {
 		LOGSystemTimeDebug("ignored");
 	}
 	// These prints should be done after setRootTimeStamp(), else they influence the synchronization.
-	LOGSystemTimeDebug("onTimeSyncMsg msg: {id=%u version=%u posix=%u} cur: {id=%u version=%u posix=%u}",
+	LOGSystemTimeDebug("onTimeSyncMsg msg: {id=%u version=%u s=%u ms=%u} cur: {id=%u version=%u s=%u ms=%u}",
 			syncMessage.srcId,
 			syncMessage.stamp.version,
 			syncMessage.stamp.posix_s,
+			syncMessage.stamp.posix_ms,
 			rootClockId,
 			rootTime.version,
-			getSynchronizedStamp().posix_s
+			getSynchronizedStamp().posix_s,
+			getSynchronizedStamp().posix_ms
 	);
 	LOGSystemTimeDebug("isNewer=%d isEqual=%d isRoot=%d",
 			versionIsNewer,
