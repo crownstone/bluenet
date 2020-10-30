@@ -421,7 +421,7 @@ void SystemTime::onTimeSyncMessageReceive(time_sync_message_t syncMessage) {
 			syncMessage.stamp.posix_s,
 			rootClockId,
 			rootTime.version,
-			posix()
+			getSynchronizedStamp().posix_s
 	);
 	LOGSystemTimeDebug("isNewer=%d isEqual=%d isRoot=%d",
 			versionIsNewer,
