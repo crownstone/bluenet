@@ -206,7 +206,7 @@ void UartCommandHandler::handleCommandControl(cs_data_t commandData, const cmd_s
 
 	cs_result_t result(resultBuffer);
 
-	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), cmd_source_with_counter_t(CS_CMD_SOURCE_UART), result);
+	event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source, result);
 	EventDispatcher::getInstance().dispatch(event);
 
 	result_packet_header_t resultHeader(controlCmd.type, event.result.returnCode, event.result.dataSize);
