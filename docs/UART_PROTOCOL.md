@@ -88,7 +88,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 0     | Hello                         | Never     | -      | First command that should sent, used to determine whether this is the right crownstone, and whether encryption has to be used.
 1     | Session nonce                 | Never     | [Session nonce](#cmd_session_nonce_packet) | Refresh the session nonce.
 2     | Heartbeat                     | Yes       | [Heartbeat](#cmd_heartbeat_packet) | Used to know whether the UART connection is alive.
-3     | Status                        | Yes       | [Status](#cmd_status_packet) | Status of the user, this will be advertised by a dongle.
+3     | Status                        | Optional  | [Status](#cmd_status_packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
 10    | Control command               | Yes       | [Control msg](../docs/PROTOCOL.md#control_packet) | Send a control command.
 50000 | Enable advertising            | Never     | uint8  | Enable/disable advertising.
 50001 | Enable mesh                   | Never     | uint8  | Enable/disable mesh.
@@ -129,6 +129,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 10002 | Service data                  | Yes       | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Service data of this Crownstone (unencrypted).
 10004 | Presence change               | Yes       | [Presence change packet](#presence_change_packet) | Sent when the presence has changed. Note: a profile ID can be at multiple locations at the same time.
 10005 | Factory reset                 | Yes       | -      | Sent when a factory reset will be performed.
+10006 | Booted                        | Never     | -      | This Crownstone just booted, you probably want to start a new session.
 10102 | Mesh state msg                | Yes       | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | State of other Crownstones in the mesh (unencrypted).
 10103 | Mesh state part 0             | Yes       | [External state part 0](#mesh_state_part_0) | Part of the state of other Crownstones in the mesh.
 10104 | Mesh state part 1             | Yes       | [External state part 1](#mesh_state_part_1) | Part of the state of other Crownstones in the mesh.
@@ -165,6 +166,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+uint8 | Hub mode | 1 | Hub mode, as set by the _Enable hub mode_ command.
 uint8 | Sphere ID | 1 | Short sphere ID, as given during [setup](PROTOCOL.md#setup).
 [status](#ret_status_packet) | Status | 1 | Status packet.
 
@@ -182,16 +184,39 @@ uint16 | Timeout | 2 | If no heartbeat is received for _timeout_ seconds, the co
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Type | 1 | Status type: 0=no-data, 1=crownstone-hub, 2-127=reserved, 128-255=free to use
-uint8 | Flags | 1 | Standard flags: has_been_set_up, encryption_required, has_error, ...
-uint8[] | Data | 8 | Status data to be advertised by dongle (will be ignored if status type is _no-data_).
+uint8 | Type | 1 | Status type: 0=no-data, 1=crownstone-hub
+uint8 | [Flags](#user_status_flags) | 1 | Status flags.
+uint8[] | Data | 9 | Status data to be advertised by dongle (will be ignored if status type is _no-data_).
+
+<a name="user_status_flags"></a>
+### User status flags bitmask
+
+Bit | Name |  Description
+--- | ---- | ---
+0 | Encryption required | Whether messages with _encrypted_ set to _yes_, have to be encrypted.
+1 | Has been set up     | Whether the hub has been set up.
+2 | Has internet        | Whether internet is available.
+3 | Has error           | Whether there is some error.
+4-7 | Reserved          | Reserved for future use, must be 0 for now.
+
 
 <a name="ret_status_packet"></a>
 ### Crownstone status packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Flags | 1 | Flags: has_been_set_up, encryption_required, has_error, ...
+uint8 | [Flags](#ret_status_flags) | 1 | Status flags.
+
+<a name="ret_status_flags"></a>
+### Crownstone status flags bitmask
+
+Bit | Name |  Description
+--- | ---- | ---
+0 | Encryption required | Whether messages with _encrypted_ set to _yes_, have to be encrypted.
+1 | Has been set up     | Whether the crownstone has been set up.
+2 | Hub mode            | Whether hub mode is enabled.
+3 | Has error           | Whether there is some error.
+4-7 | Reserved          | Reserved for future use, must be 0 for now.
 
 
 <a name="cmd_session_nonce_packet"></a>
