@@ -113,6 +113,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 Data types for messages received from the Crownstone.
 
 - Messages with _encrypted_ set to _yes_, will be encrypted when the crownstone status has _encryption required_ set to true.
+- Messages with _encrypted_ set to _optional_, may be encrypted.
 - Types in range 10000 - 20000 are events, not a (direct) reply to a UART command.
 - Types in range 40000 - 50000 are for development. These may change, and will be enabled in release.
 - Types >= 50000 are for development. These may change, and will be disabled in release.
@@ -130,6 +131,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 10004 | Presence change               | Yes       | [Presence change packet](#presence_change_packet) | Sent when the presence has changed. Note: a profile ID can be at multiple locations at the same time.
 10005 | Factory reset                 | Yes       | -      | Sent when a factory reset will be performed.
 10006 | Booted                        | Never     | -      | This Crownstone just booted, you probably want to start a new session.
+10007 | Hub data                      | Optional  | uint8 [] | As requested via control command `Hub data`.
 10102 | Mesh state msg                | Yes       | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | State of other Crownstones in the mesh (unencrypted).
 10103 | Mesh state part 0             | Yes       | [External state part 0](#mesh_state_part_0) | Part of the state of other Crownstones in the mesh.
 10104 | Mesh state part 1             | Yes       | [External state part 1](#mesh_state_part_1) | Part of the state of other Crownstones in the mesh.
