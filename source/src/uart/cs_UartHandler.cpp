@@ -47,6 +47,8 @@ void UartHandler::init(serial_enable_t serialEnabled) {
 
 	UartConnection::getInstance().init();
 
+	writeMsg(UART_OPCODE_TX_BOOTED, nullptr, 0);
+
 	listen();
 }
 
