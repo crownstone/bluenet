@@ -42,6 +42,7 @@ enum CommandHandlerTypes {
 	CTRL_CMD_LOCK_SWITCH                 = 41,
 
 	CTRL_CMD_UART_MSG                    = 50,
+	CTRL_CMD_HUB_DATA                    = 51,
 
 	CTRL_CMD_SAVE_BEHAVIOUR              = 60,
 	CTRL_CMD_REPLACE_BEHAVIOUR           = 61,

@@ -50,8 +50,9 @@ public:
 	 * @param[in] opCode     OpCode of the msg.
 	 * @param[in] data       Pointer to the msg to be sent.
 	 * @param[in] size       Size of the msg.
+	 * @param[in] encrypt    How to encrypt the msg.
 	 */
-	void writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size);
+	ret_code_t writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
 
 	/**
 	 * Write a msg over UART in a streaming manner.
@@ -59,8 +60,9 @@ public:
 	 *
 	 * @param[in] opCode     OpCode of the msg.
 	 * @param[in] size       Size of the msg.
+	 * @param[in] encrypt    How to encrypt the msg.
 	 */
-	void writeMsgStart(UartOpcodeTx opCode, uint16_t size);
+	ret_code_t writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
 
 	/**
 	 * Write a msg over UART in a streaming manner.
@@ -69,16 +71,18 @@ public:
 	 * @param[in] opCode     OpCode of the msg.
 	 * @param[in] data       Pointer to the data part to be sent.
 	 * @param[in] size       Size of this data part.
+	 * @param[in] encrypt    How to encrypt the msg.
 	 */
-	void writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size);
+	ret_code_t writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
 
 	/**
 	 * Write a msg over UART in a streaming manner.
 	 * This finalizes the stream.
 	 *
 	 * @param[in] opCode     OpCode of the msg.
+	 * @param[in] encrypt    How to encrypt the msg.
 	 */
-	void writeMsgEnd(UartOpcodeTx opCode);
+	ret_code_t writeMsgEnd(UartOpcodeTx opCode, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
 
 	/**
 	 * To be called when a byte was read. Can be called from interrupt.
@@ -147,12 +151,16 @@ private:
 	TYPIFY(CONFIG_CROWNSTONE_ID) _stoneId;
 
 	/**
+	 * Whether to encrypt a msg.
+	 */
+	bool mustEncrypt(UartProtocol::Encrypt encrypt, UartOpcodeTx opCode);
+
+	/**
 	 * Handles read msgs.
 	 *
 	 * Data starts after size header, and includes wrapper header and tail (CRC).
 	 */
 	void handleMsg(uint8_t* data, uint16_t size);
-
 
 	/**
 	 * Handles unencrypted UART msg.

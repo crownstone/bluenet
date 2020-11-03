@@ -334,6 +334,10 @@ struct __attribute__((__packed__)) led_message_payload_t {
 	bool enable;
 };
 
+struct __attribute__((__packed__)) hub_data_header_t {
+	uint8_t encrypt; // See UartProtocol::Encrypt
+};
+
 struct __attribute__((packed)) behaviour_debug_t {
 	uint32_t time;    // 0 if unknown.
 	uint32_t sunrise; // 0 if unknown

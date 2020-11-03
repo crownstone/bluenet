@@ -52,7 +52,7 @@ void UartHandler::init(serial_enable_t serialEnabled) {
 	listen();
 }
 
-void UartHandler::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
+ret_code_t UartHandler::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt) {
 
 #if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 	switch(opCode) {
@@ -60,25 +60,25 @@ void UartHandler::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
 		case UART_OPCODE_TX_TEXT:
 			// Now only the special chars get escaped, no header and tail.
 			writeBytes(data, size);
-			return;
+			return ERR_SUCCESS;
 		case UART_OPCODE_TX_SERVICE_DATA:
-			return;
+			return ERR_SUCCESS;
 		case UART_OPCODE_TX_FIRMWARESTATE:
 //			writeBytes(data, size);
-			return;
+			return ERR_SUCCESS;
 		default:
 //			_log(SERIAL_DEBUG, "writeMsg opCode=%u data=", opCode);
 //			BLEutil::printArray(data, size);
-			return;
+			return ERR_SUCCESS;
 	}
 #endif
 
-	writeMsgStart(opCode, size);
-	writeMsgPart(opCode, data, size);
+	writeMsgStart(opCode, size, encrypt);
+	writeMsgPart(opCode, data, size, encrypt);
 	writeMsgEnd(opCode);
 }
 
-void UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
+ret_code_t UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartProtocol::Encrypt encrypt) {
 //	if (size > UART_TX_MAX_PAYLOAD_SIZE) {
 //		return;
 //	}
@@ -109,9 +109,10 @@ void UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size) {
 		UartProtocol::crc16((uint8_t*)(&msgHeader), sizeof(msgHeader), _crc);
 		writeBytes((uint8_t*)(&msgHeader), sizeof(msgHeader));
 //	}
+	return ERR_SUCCESS;
 }
 
-void UartHandler::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size) {
+ret_code_t UartHandler::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt) {
 
 #if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 	// when debugging we would like to drop out of certain binary data coming over the console...
@@ -119,25 +120,46 @@ void UartHandler::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t siz
 		case UART_OPCODE_TX_TEXT:
 			// Now only the special chars get escaped, no header and tail.
 			writeBytes(data, size);
-			return;
+			return ERR_SUCCESS;
 		default:
-			return;
+			return ERR_SUCCESS;
 	}
 #endif
 
 	// No logs, this function is called when logging
 	UartProtocol::crc16(data, size, _crc);
 	writeBytes(data, size);
+	return ERR_SUCCESS;
 }
 
-void UartHandler::writeMsgEnd(UartOpcodeTx opCode) {
+ret_code_t UartHandler::writeMsgEnd(UartOpcodeTx opCode, UartProtocol::Encrypt encrypt) {
 	// No logs, this function is called when logging
 	uart_msg_tail_t tail;
 	tail.crc = _crc;
 	writeBytes((uint8_t*)(&tail), sizeof(uart_msg_tail_t));
+	return ERR_SUCCESS;
 }
 
 
+
+bool UartHandler::mustEncrypt(UartProtocol::Encrypt encrypt, UartOpcodeTx opCode) {
+	switch (encrypt) {
+		case UartProtocol::ENCRYPT_NEVER:
+			return false;
+		case UartProtocol::ENCRYPT_OR_FAIL:
+			return true;
+		case UartProtocol::ENCRYPT_ACCORDING_TO_TYPE: {
+			if (!UartProtocol::mustBeEncryptedTx(opCode)) {
+				return false;
+			}
+			return UartConnection::getInstance().getSelfStatus().flags.flags.encryptionRequired;
+		}
+		case UartProtocol::ENCRYPT_IF_ENABLED:
+			return UartConnection::getInstance().getSelfStatus().flags.flags.encryptionRequired;
+	}
+	// Should not be reached.
+	return true;
+}
 
 
 

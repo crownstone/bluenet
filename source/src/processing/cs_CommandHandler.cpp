@@ -120,6 +120,7 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_LOCK_SWITCH:
 
 		case CTRL_CMD_UART_MSG:
+		case CTRL_CMD_HUB_DATA:
 
 		case CTRL_CMD_SAVE_BEHAVIOUR:
 		case CTRL_CMD_REPLACE_BEHAVIOUR:
@@ -207,6 +208,8 @@ void CommandHandler::handleCommand(
 			return handleCmdSetup(commandData, accessLevel, result);
 		case CTRL_CMD_UART_MSG:
 			return handleCmdUartMsg(commandData, accessLevel, result);
+		case CTRL_CMD_HUB_DATA:
+			return handleCmdHubData(commandData, accessLevel, result);
 		case CTRL_CMD_STATE_GET:
 			return handleCmdStateGet(commandData, accessLevel, result);
 		case CTRL_CMD_STATE_SET:
@@ -893,9 +896,27 @@ void CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAcc
 		return;
 	}
 
-	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_BLE_MSG, commandData.data, commandData.len);
-	result.returnCode = ERR_SUCCESS;
+	result.returnCode = UartHandler::getInstance().writeMsg(UART_OPCODE_TX_BLE_MSG, commandData.data, commandData.len);
 }
+
+
+void CommandHandler::handleCmdHubData(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+	LOGd(STR_HANDLE_COMMAND, "hub data");
+
+	if (commandData.len < sizeof(hub_data_header_t)) {
+		LOGe(FMT_ZERO_PAYLOAD_LENGTH, commandData.len);
+		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+		return;
+	}
+
+	hub_data_header_t* header = reinterpret_cast<hub_data_header_t*>(commandData.data);
+	buffer_ptr_t hubDataPtr =      commandData.data + sizeof(*header);
+	cs_buffer_size_t hubDataSize = commandData.len  - sizeof(*header);
+	UartProtocol::Encrypt encrypt = static_cast<UartProtocol::Encrypt>(header->encrypt);
+
+	result.returnCode = UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HUB_DATA, hubDataPtr, hubDataSize, encrypt);
+}
+
 
 void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "register tracked device");
@@ -1086,6 +1107,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_ALLOW_DIMMING:
 		case CTRL_CMD_LOCK_SWITCH:
 		case CTRL_CMD_UART_MSG:
+		case CTRL_CMD_HUB_DATA:
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
 		case CTRL_CMD_GET_UPTIME:

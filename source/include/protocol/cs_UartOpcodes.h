@@ -55,6 +55,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_PRESENCE_CHANGE =                  10004, // Sent when the presence has changed, payload: presence_change_t. When the first user enters, multiple msgs will be sent.
 	UART_OPCODE_TX_FACTORY_RESET =                    10005, // Sent when a factory reset is going to be performed.
 	UART_OPCODE_TX_BOOTED =                           10006, // Sent when this crownstone just booted.
+	UART_OPCODE_TX_HUB_DATA =                         10007, // Sent by command (CTRL_CMD_HUB_DATA), payload: buffer.
 
 	UART_OPCODE_TX_MESH_STATE =                       10102, // Received state of external stone, payload: service_data_encrypted_t
 	UART_OPCODE_TX_MESH_STATE_PART_0 =                10103, // Received part of state of external stone, payload: cs_mesh_model_msg_state_0_t
@@ -96,12 +97,23 @@ enum UartOpcodeTx {
 namespace UartProtocol {
 
 /**
- * Whether a received UART message must be encrypted when a UART key is set.
+ * Option whether a UART message should be encrypted.
+ */
+enum Encrypt {
+	ENCRYPT_NEVER = 0,                 // Never encrypt the message.
+	ENCRYPT_IF_ENABLED = 1,            // Encrypt the message when encryption is enabled
+	ENCRYPT_OR_FAIL = 2,               // Encrypt the message or return an error
+	ENCRYPT_ACCORDING_TO_TYPE = 3,     // Encrypt depending on data type (UartOpcodeTx).
+};
+
+/**
+ * Whether a received UART message must be encrypted when "encryption required" is true (when a UART key is set).
  */
 constexpr bool mustBeEncryptedRx(UartOpcodeRx opCode) {
 	switch (opCode) {
 		case UartOpcodeRx::UART_OPCODE_RX_HELLO:
 		case UartOpcodeRx::UART_OPCODE_RX_SESSION_NONCE:
+		case UartOpcodeRx::UART_OPCODE_RX_STATUS:
 			return false;
 		default:
 			if (opCode > 50000) {
@@ -112,7 +124,7 @@ constexpr bool mustBeEncryptedRx(UartOpcodeRx opCode) {
 }
 
 /**
- * Whether a written UART message must be encrypted when a UART key is set.
+ * Whether a written UART message must be encrypted when "encryption required" is true (when a UART key is set).
  */
 constexpr bool mustBeEncryptedTx(UartOpcodeTx opCode) {
 	switch (opCode) {
