@@ -9,6 +9,7 @@
 #include <uart/cs_UartConnection.h>
 #include <uart/cs_UartHandler.h>
 #include <storage/cs_State.h>
+#include <common/cs_Types.h>
 
 #define LOGUartconnectionDebug LOGnone
 
@@ -17,14 +18,21 @@ UartConnection::UartConnection() {
 }
 
 void UartConnection::init() {
+	// Init status flags.
+
+	std::vector<cs_state_id_t> *ids = nullptr;
+	State::getInstance().getIds(CS_TYPE::STATE_UART_KEY, ids);
+	_status.flags.flags.encryptionRequired = (ids->empty() == false);
+
 	TYPIFY(STATE_OPERATION_MODE) opMode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &opMode, sizeof(opMode));
+	_status.flags.flags.hasBeenSetUp = (static_cast<OperationMode>(opMode) == OperationMode::OPERATION_MODE_NORMAL);
 
-	_status.flags.flags.hasBeenSetup = (static_cast<OperationMode>(opMode) == OperationMode::OPERATION_MODE_NORMAL);
+	TYPIFY(STATE_HUB_MODE) hubMode;
+	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
+	_status.flags.flags.hubMode = (hubMode != 0);
+
 	_status.flags.flags.hasError = false;
-
-	// TODO: check if UART keys are set.
-	_status.flags.flags.encryptionRequired = false;
 
 	listen();
 }
@@ -90,7 +98,16 @@ void UartConnection::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_TICK:
 			onTick();
 			break;
-		// TODO : event UART key set.
+		case CS_TYPE::STATE_HUB_MODE: {
+			TYPIFY(STATE_HUB_MODE)* hubMode = reinterpret_cast<TYPIFY(STATE_HUB_MODE)*>(event.data);
+			_status.flags.flags.hubMode = (*hubMode != 0);
+			break;
+		}
+		case CS_TYPE::STATE_UART_KEY: {
+			// TODO : actually check if UART key are set?
+			_status.flags.flags.encryptionRequired = true;
+			break;
+		}
 		default:
 			break;
 	}

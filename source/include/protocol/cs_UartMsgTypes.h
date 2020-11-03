@@ -9,26 +9,43 @@
 
 #include <cfg/cs_Config.h>
 #include <drivers/cs_ADC.h>
+#include <protocol/cs_ServiceDataPackets.h>
 #include <cstdint>
 
 
-union __attribute__((packed)) uart_msg_status_flags_t {
+union __attribute__((packed)) uart_msg_status_user_flags_t {
 	struct __attribute__((packed)) {
-		bool hasBeenSetup : 1;
 		bool encryptionRequired : 1;
+		bool hasBeenSetUp : 1;
+		bool hasInternet : 1;
 		bool hasError : 1;
 	} flags;
 	uint8_t asInt;
 };
 
+union __attribute__((packed)) uart_msg_status_reply_flags_t {
+	struct __attribute__((packed)) {
+		bool encryptionRequired : 1;
+		bool hasBeenSetUp : 1;
+		bool hubMode : 1;
+		bool hasError : 1;
+	} flags;
+	uint8_t asInt;
+};
+
+enum UartHubDataType {
+	UART_HUB_DATA_TYPE_NONE              = 0,
+	UART_HUB_DATA_TYPE_CROWNSTONE_HUB    = 1,
+};
+
 struct __attribute__((__packed__)) uart_msg_status_user_t {
-	uint8_t type;
-	uart_msg_status_flags_t flags;
-	uint8_t data[8]; // Depends on type.
+	uint8_t type; // See UartHubDataType.
+	uart_msg_status_user_flags_t flags;
+	uint8_t data[SERVICE_DATA_HUB_DATA_SIZE]; // Depends on type.
 };
 
 struct __attribute__((__packed__)) uart_msg_status_reply_t {
-	uart_msg_status_flags_t flags;
+	uart_msg_status_reply_flags_t flags;
 };
 
 struct __attribute__((__packed__)) uart_msg_hello_t {

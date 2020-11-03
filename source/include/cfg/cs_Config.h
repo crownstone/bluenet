@@ -499,6 +499,8 @@
 #define STATE_MESH_SEQ_NUMBER_DEFAULT 0
 #endif
 
-
+#ifndef STATE_HUB_MODE_DEFAULT
+#define STATE_HUB_MODE_DEFAULT 0
+#endif
 
 
