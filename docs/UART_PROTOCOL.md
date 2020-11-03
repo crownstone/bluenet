@@ -89,11 +89,11 @@ Type  | Type name                     | Encrypted | Data   | Description
 1     | Session nonce                 | Never     | [Session nonce](#cmd_session_nonce_packet) | Refresh the session nonce.
 2     | Heartbeat                     | Yes       | [Heartbeat](#cmd_heartbeat_packet) | Used to know whether the UART connection is alive.
 3     | Status                        | Optional  | [Status](#cmd_status_packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
+4     | Get MAC                       | Never     | -      | Get MAC address of this Crownstone.
 10    | Control command               | Yes       | [Control msg](../docs/PROTOCOL.md#control_packet) | Send a control command.
 50000 | Enable advertising            | Never     | uint8  | Enable/disable advertising.
 50001 | Enable mesh                   | Never     | uint8  | Enable/disable mesh.
 50002 | Get ID                        | Never     | -      | Get ID of this Crownstone.
-50003 | Get MAC                       | Never     | -      | Get MAC address of this Crownstone.
 50103 | Inc current range             | Never     | -      | Increase the range on the current channel.
 50104 | Dec current range             | Never     | -      | Decrease the range on the current channel.
 50105 | Inc voltage range             | Never     | -      | Increase the range on the voltage channel.
@@ -124,6 +124,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 1     | Session nonce                 | Never     | [Session nonce](#ret_session_nonce_packet) | The new session nonce.
 2     | Heartbeat                     | Yes       | -      | Heartbeat reply.
 3     | Status                        | Never     | [Status](#ret_status_packet) | Status reply and event.
+4     | MAC                           | Never     | uint8 [6] | The MAC address of this crownstone.
 10    | Control result                | Yes       | [Result packet](../docs/PROTOCOL.md#result_packet) | Result of a control command.
 10000 | Uart msg                      | Yes       | string | As requested via control command `UART message`.
 10001 | Session nonce missing         | Never     | -      | The Crownstone has no session nonce, please send one.
@@ -148,7 +149,6 @@ Type  | Type name                     | Encrypted | Data   | Description
 50000 | Advertising enabled           | Never     | uint8  | Whether advertising is enabled.
 50001 | Mesh enabled                  | Never     | uint8  | Whether mesh is enabled.
 50002 | Stone ID                      | Never     | uint8  | The stone ID of this crownstone.
-50003 | MAC                           | Never     | uint8 [6] | The MAC address of this crownstone.
 50100 | ADC config                    | Never     | [ADC config](#adc_channel_config_packet) | ADC configuration.
 50101 | ADC restarted                 | Never     | -      | ADC restarted.
 50200 | Current samples               | Never     | [Current samples](#current_samples_packet) | Raw ADC samples of the current channel.

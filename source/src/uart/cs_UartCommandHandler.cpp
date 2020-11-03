@@ -43,6 +43,9 @@ void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 		case UART_OPCODE_RX_STATUS:
 			handleCommandStatus(commandData);
 			break;
+		case UART_OPCODE_RX_GET_MAC:
+			handleCommandGetMacAddress(commandData);
+			break;
 		case UART_OPCODE_RX_CONTROL:
 			handleCommandControl(commandData, source, accessLevel, resultBuffer);
 			break;
@@ -57,10 +60,6 @@ void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 		case UART_OPCODE_RX_GET_ID:
 			handleCommandGetId(commandData);
 			break;
-		case UART_OPCODE_RX_GET_MAC:
-			handleCommandGetMacAddress(commandData);
-			break;
-
 
 		case UART_OPCODE_RX_ADC_CONFIG_INC_RANGE_CURRENT:
 			dispatchEventForCommand(CS_TYPE::CMD_INC_CURRENT_RANGE, commandData);
@@ -217,19 +216,19 @@ void UartCommandHandler::handleCommandControl(cs_data_t commandData, const cmd_s
 }
 
 void UartCommandHandler::handleCommandGetId(cs_data_t commandData) {
-	LOGd("TODO");
-//	TYPIFY(CONFIG_CROWNSTONE_ID) crownstoneId;
-//	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, sizeof(crownstoneId));
-//	writeMsg(UART_OPCODE_TX_OWN_ID, (uint8_t*)&crownstoneId, sizeof(crownstoneId));
+	TYPIFY(CONFIG_CROWNSTONE_ID) crownstoneId;
+	cs_ret_code_t retCode = State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, sizeof(crownstoneId));
+	if (retCode == ERR_SUCCESS) {
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_OWN_ID, (uint8_t*)&crownstoneId, sizeof(crownstoneId));
+	}
 }
 
 void UartCommandHandler::handleCommandGetMacAddress(cs_data_t commandData) {
-	LOGd("TODO");
-//	uint32_t err_code;
-//	ble_gap_addr_t address;
-//	err_code = sd_ble_gap_addr_get(&address);
-//	APP_ERROR_CHECK(err_code);
-//	writeMsg(UART_OPCODE_TX_OWN_MAC, address.addr, sizeof(address.addr));
+	ble_gap_addr_t address;
+	uint32_t err_code = sd_ble_gap_addr_get(&address);
+	if (err_code == NRF_SUCCESS) {
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MAC, address.addr, sizeof(address.addr));
+	}
 }
 
 void UartCommandHandler::handleCommandInjectEvent(cs_data_t commandData) {

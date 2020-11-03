@@ -13,13 +13,13 @@ enum UartOpcodeRx {
 	UART_OPCODE_RX_SESSION_NONCE =                    1,
 	UART_OPCODE_RX_HEARTBEAT =                        2,
 	UART_OPCODE_RX_STATUS =                           3,
+	UART_OPCODE_RX_GET_MAC =                          4, // Get MAC address of this Crownstone
 	UART_OPCODE_RX_CONTROL =                          10,
 
 	////////// Developer messages in debug build. //////////
 	UART_OPCODE_RX_ENABLE_ADVERTISEMENT =             50000, // Enable advertising (payload: bool enable)
 	UART_OPCODE_RX_ENABLE_MESH =                      50001, // Enable mesh (payload: bool enable)
 	UART_OPCODE_RX_GET_ID =                           50002, // Get ID of this Crownstone
-	UART_OPCODE_RX_GET_MAC =                          50003, // Get MAC address of this Crownstone
 
 //	UART_OPCODE_RX_ADC_CONFIG_GET =                   50100, // Get the adc config
 //	UART_OPCODE_RX_ADC_CONFIG_SET =                   50101, // Set an adc channel config (payload: uart_msg_adc_channel_config_t)
@@ -46,6 +46,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_SESSION_NONCE =                    1,
 	UART_OPCODE_TX_HEARTBEAT =                        2,
 	UART_OPCODE_TX_STATUS =                           3,
+	UART_OPCODE_TX_MAC =                              4,  // MAC address (payload: mac address (6B))
 	UART_OPCODE_TX_CONTROL_RESULT =                   10, // The result of the control command, payload: result_packet_header_t + data.
 
 	////////// Event messages. //////////
@@ -79,7 +80,6 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_ADVERTISEMENT_ENABLED =            50000, // Whether advertising is enabled (payload: bool)
 	UART_OPCODE_TX_MESH_ENABLED =                     50001, // Whether mesh is enabled (payload: bool)
 	UART_OPCODE_TX_OWN_ID =                           50002, // Own id (payload: crownstone_id_t)
-	UART_OPCODE_TX_OWN_MAC =                          50003, // Own MAC address (payload: mac address (6B))
 
 	UART_OPCODE_TX_ADC_CONFIG =                       50100, // Current adc config (payload: adc_config_t)
 	UART_OPCODE_TX_ADC_RESTART =                      50101,
@@ -113,7 +113,8 @@ constexpr bool mustBeEncryptedRx(UartOpcodeRx opCode) {
 	switch (opCode) {
 		case UartOpcodeRx::UART_OPCODE_RX_HELLO:
 		case UartOpcodeRx::UART_OPCODE_RX_SESSION_NONCE:
-		case UartOpcodeRx::UART_OPCODE_RX_STATUS:
+		case UartOpcodeRx::UART_OPCODE_RX_STATUS: // optional
+		case UartOpcodeRx::UART_OPCODE_RX_GET_MAC:
 			return false;
 		default:
 			if (opCode > 50000) {
@@ -133,6 +134,7 @@ constexpr bool mustBeEncryptedTx(UartOpcodeTx opCode) {
 		case UartOpcodeTx::UART_OPCODE_TX_STATUS:
 		case UartOpcodeTx::UART_OPCODE_TX_SESSION_NONCE_MISSING:
 		case UartOpcodeTx::UART_OPCODE_TX_BOOTED:
+		case UartOpcodeTx::UART_OPCODE_TX_MAC:
 			return false;
 		default:
 			if (opCode > 50000) {
