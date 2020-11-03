@@ -588,7 +588,7 @@ Bit | Name |  Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Encrypted | 1 | Whether the data should be sent encrypted: 0 = not encrypted, 1 = must be encrypted, else fail.
+uint 8 | Encrypted | 1 | Whether the data should be sent encrypted: 0 = not encrypted, 1 = encrypt when encryption is enabled, 2 = encrypt or fail.
 uint 8 | Payload | N | Payload data to be sent to hub.
 
 
