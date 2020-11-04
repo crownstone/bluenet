@@ -19,7 +19,7 @@ Every UART message is wrapped.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8   | Start          | 1 | Start of a message.
+uint8   | Start          | 1 | Start of a message (0x7E).
 uint16  | Size           | 2 | Size of all data after this field, including CRC. Size 0 is always invalid.
 uint8   | Protocol major | 1 | Major protocol version, increased for breaking changes.
 uint8   | Protocol minor | 1 | Minor protocol version, increased when new types are added.

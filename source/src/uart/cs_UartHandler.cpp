@@ -5,13 +5,16 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <drivers/cs_RNG.h>
+#include <drivers/cs_Serial.h>
 #include <events/cs_EventDispatcher.h>
+#include <storage/cs_State.h>
 #include <uart/cs_UartCommandHandler.h>
 #include <uart/cs_UartConnection.h>
 #include <uart/cs_UartHandler.h>
-#include <drivers/cs_Serial.h>
-#include <storage/cs_State.h>
 #include <util/cs_BleError.h>
+#include <util/cs_Utils.h>
+
 
 #define LOGUartHandlerDebug LOGnone
 
@@ -40,6 +43,7 @@ void UartHandler::init(serial_enable_t serialEnabled) {
 	_initialized = true;
 	_readBuffer = new uint8_t[UART_RX_BUFFER_SIZE];
 	_writeBuffer = new uint8_t[UART_TX_BUFFER_SIZE];
+	_encryptionBuffer = new uint8_t[UART_TX_ENCRYPTION_BUFFER_SIZE];
 
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_stoneId, sizeof(_stoneId));
 
@@ -59,7 +63,7 @@ ret_code_t UartHandler::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t s
 		// when debugging we would like to drop out of certain binary data coming over the console...
 		case UART_OPCODE_TX_TEXT:
 			// Now only the special chars get escaped, no header and tail.
-			writeBytes(data, size);
+			writeBytes(cs_data_t(data, size), false);
 			return ERR_SUCCESS;
 		case UART_OPCODE_TX_SERVICE_DATA:
 			return ERR_SUCCESS;
@@ -73,9 +77,20 @@ ret_code_t UartHandler::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t s
 	}
 #endif
 
-	writeMsgStart(opCode, size, encrypt);
-	writeMsgPart(opCode, data, size, encrypt);
-	writeMsgEnd(opCode);
+	ret_code_t retCode;
+
+	retCode = writeMsgStart(opCode, size, encrypt);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	retCode = writeMsgPart(opCode, data, size, encrypt);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	retCode = writeMsgEnd(opCode, encrypt);
+	return retCode;
 }
 
 ret_code_t UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartProtocol::Encrypt encrypt) {
@@ -83,43 +98,49 @@ ret_code_t UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartPr
 //		return;
 //	}
 
-	uart_msg_size_header_t sizeHeader;
-	uart_msg_wrapper_header_t wrapperHeader;
-//	if (UartProtocol::mustBeEncryptedTx(opCode)) {
-//		wrapperHeader.type = static_cast<uint8_t>(UartMsgType::ENCRYPTED_UART_MSG);
-//		uint16_t encryptedDataSize = sizeof(uart_encrypted_data_header_t.size) + sizeof(uart_msg_header_t) + size;
-//		EncryptionHandler::calculateEncryptionBufferLength(encryptedDataSize, EncryptionType::CTR);
-//	}
-//	else {
-		writeStartByte();
+	uart_msg_header_t uartMsgHeader;
+	uartMsgHeader.deviceId = _stoneId;
+	uartMsgHeader.type = opCode;
 
-		// Init CRC
-		_crc = UartProtocol::crc16(nullptr, 0);
+	uint16_t uartMsgSize = sizeof(uartMsgHeader) + size;
 
-		sizeHeader.size = sizeof(wrapperHeader) + sizeof(uart_msg_header_t) + size + sizeof(uart_msg_tail_t);
-		writeBytes((uint8_t*)(&sizeHeader), sizeof(sizeHeader));
+	if (mustEncrypt(encrypt, opCode)) {
+		// Write wrapper header
+		uint16_t wrapperPayloadSize = getEncryptedBufferSize(uartMsgSize);
+		writeWrapperStart(UartMsgType::ENCRYPTED_UART_MSG, wrapperPayloadSize);
 
-		wrapperHeader.type = static_cast<uint8_t>(UartMsgType::UART_MSG);
-		UartProtocol::crc16((uint8_t*)(&wrapperHeader), sizeof(wrapperHeader), _crc);
-		writeBytes((uint8_t*)(&wrapperHeader), sizeof(wrapperHeader));
+		// Set nonce.
+		RNG::fillBuffer(_writeNonce.packetNonce, sizeof(_writeNonce.packetNonce));
+		cs_ret_code_t retCode = UartConnection::getInstance().getSessionNonceTx(cs_data_t(_writeNonce.sessionNonce, sizeof(_writeNonce.sessionNonce)));
+		if (retCode != ERR_SUCCESS) {
+			return retCode;
+		}
 
-		uart_msg_header_t msgHeader;
-		msgHeader.deviceId = _stoneId;
-		msgHeader.type = opCode;
-		UartProtocol::crc16((uint8_t*)(&msgHeader), sizeof(msgHeader), _crc);
-		writeBytes((uint8_t*)(&msgHeader), sizeof(msgHeader));
-//	}
+		// Write unencrypted header
+		uart_encrypted_msg_header_t msgHeader;
+		memcpy(msgHeader.packetNonce, _writeNonce.packetNonce, sizeof(_writeNonce.packetNonce));
+		msgHeader.keyId = 0;
+		writeBytes(cs_data_t(reinterpret_cast<uint8_t*>(&msgHeader), sizeof(msgHeader)), true);
+
+		return writeEncryptedStart(uartMsgSize);
+	}
+	else {
+		// Write wrapper header
+		writeWrapperStart(UartMsgType::UART_MSG, uartMsgSize);
+
+		// Write msg header
+		writeBytes(cs_data_t(reinterpret_cast<uint8_t*>(&uartMsgHeader), sizeof(uartMsgHeader)), true);
+	}
 	return ERR_SUCCESS;
 }
 
 ret_code_t UartHandler::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt) {
-
 #if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 	// when debugging we would like to drop out of certain binary data coming over the console...
 	switch(opCode) {
 		case UART_OPCODE_TX_TEXT:
 			// Now only the special chars get escaped, no header and tail.
-			writeBytes(data, size);
+			writeBytes(cs_data_t(data, size), false);
 			return ERR_SUCCESS;
 		default:
 			return ERR_SUCCESS;
@@ -127,20 +148,85 @@ ret_code_t UartHandler::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16
 #endif
 
 	// No logs, this function is called when logging
-	UartProtocol::crc16(data, size, _crc);
-	writeBytes(data, size);
-	return ERR_SUCCESS;
+	if (mustEncrypt(encrypt, opCode)) {
+		return writeEncryptedPart(cs_data_t(data, size));
+	}
+	else {
+		writeBytes(cs_data_t(data, size), true);
+		return ERR_SUCCESS;
+	}
 }
 
 ret_code_t UartHandler::writeMsgEnd(UartOpcodeTx opCode, UartProtocol::Encrypt encrypt) {
 	// No logs, this function is called when logging
+	if (mustEncrypt(encrypt, opCode)) {
+		writeEncryptedEnd();
+	}
+
 	uart_msg_tail_t tail;
 	tail.crc = _crc;
-	writeBytes((uint8_t*)(&tail), sizeof(uart_msg_tail_t));
+	writeBytes(cs_data_t(reinterpret_cast<uint8_t*>(&tail), sizeof(uart_msg_tail_t)), false);
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t UartHandler::writeStartByte() {
+	if (!serial_tx_ready()) {
+		return ERR_NOT_INITIALIZED;
+	}
+	writeByte(UART_START_BYTE);
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t UartHandler::writeBytes(cs_data_t data, bool updateCrc) {
+
+	if (!serial_tx_ready()) {
+		return ERR_NOT_INITIALIZED;
+	}
+
+	if (updateCrc) {
+		UartProtocol::crc16(data.data, data.len, _crc);
+	}
+
+	uint8_t val;
+	for(cs_buffer_size_t i = 0; i < data.len; ++i) {
+		val = data.data[i];
+		// Escape when necessary
+		switch (val) {
+			case UART_START_BYTE:
+			case UART_ESCAPE_BYTE:
+				writeByte(UART_ESCAPE_BYTE);
+				val ^= UART_ESCAPE_FLIP_MASK;
+				break;
+		}
+		writeByte(val);
+	}
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t UartHandler::writeWrapperStart(UartMsgType msgType, uint16_t payloadSize) {
+	// Set headers.
+	uart_msg_size_header_t sizeHeader;
+	uart_msg_wrapper_header_t wrapperHeader;
+	sizeHeader.size = sizeof(wrapperHeader) + payloadSize + sizeof(uart_msg_tail_t);
+	wrapperHeader.type = static_cast<uint8_t>(msgType);
+
+	// Start CRC.
+	_crc = UartProtocol::crc16(nullptr, 0);
+
+	// Write to uart.
+	writeStartByte();
+	writeBytes(cs_data_t(reinterpret_cast<uint8_t*>(&sizeHeader), sizeof(sizeHeader)), false);
+	writeBytes(cs_data_t(reinterpret_cast<uint8_t*>(&wrapperHeader), sizeof(wrapperHeader)), true);
+
 	return ERR_SUCCESS;
 }
 
 
+
+cs_buffer_size_t UartHandler::getEncryptedBufferSize(cs_buffer_size_t uartMsgSize) {
+	cs_buffer_size_t encryptedSize = sizeof(uart_encrypted_data_header_t) + uartMsgSize;
+	return sizeof(uart_encrypted_msg_header_t) + CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(encryptedSize, AES_BLOCK_SIZE);
+}
 
 bool UartHandler::mustEncrypt(UartProtocol::Encrypt encrypt, UartOpcodeTx opCode) {
 	switch (encrypt) {
@@ -161,7 +247,85 @@ bool UartHandler::mustEncrypt(UartProtocol::Encrypt encrypt, UartOpcodeTx opCode
 	return true;
 }
 
+cs_ret_code_t UartHandler::writeEncryptedStart(cs_buffer_size_t uartMsgSize) {
+	cs_ret_code_t retCode;
 
+	// Always start with empty encryption buffer.
+	_encryptionBufferWritten = 0;
+
+	// Write encrypted header.
+	uart_encrypted_data_header_t encryptedHeader;
+	encryptedHeader.size = uartMsgSize;
+	retCode = writeEncryptedPart(cs_data_t(reinterpret_cast<uint8_t*>(&encryptedHeader), sizeof(encryptedHeader)));
+
+	return retCode;
+}
+
+cs_ret_code_t UartHandler::writeEncryptedPart(cs_data_t data) {
+	cs_ret_code_t retCode;
+
+	// Keep up how much data we read from the input data buffer.
+	uint8_t dataSizeRead = 0;
+
+	// TODO: use KeysAndAccess class instead.
+	uint8_t key[ENCRYPTION_KEY_LENGTH];
+	State::getInstance().get(CS_TYPE::STATE_UART_KEY, key, sizeof(key));
+
+	while (dataSizeRead < data.len) {
+		// How much to read from input data and write to the encryption buffer.
+		uint8_t writeSize = std::min(data.len - dataSizeRead, AES_BLOCK_SIZE - _encryptionBufferWritten);
+
+		// Append input data to encryption buffer.
+		memcpy(_encryptionBuffer + _encryptionBufferWritten, data.data + dataSizeRead, writeSize);
+
+		dataSizeRead += writeSize;
+		_encryptionBufferWritten += writeSize;
+
+		// Check if we encryption buffer is full, so we can encrypt a block and write to uart.
+		if (_encryptionBufferWritten >= AES_BLOCK_SIZE) {
+			retCode = writeEncryptedBlock(cs_data_t(key, sizeof(key)));
+			if (retCode != ERR_SUCCESS) {
+				return retCode;
+			}
+		}
+	}
+
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t UartHandler::writeEncryptedEnd() {
+	// TODO: use KeysAndAccess class instead.
+	uint8_t key[ENCRYPTION_KEY_LENGTH];
+	State::getInstance().get(CS_TYPE::STATE_UART_KEY, key, sizeof(key));
+
+	if (_encryptionBufferWritten) {
+		// Zero pad the remaining bytes.
+		memset(_encryptionBuffer + _encryptionBufferWritten, 0, AES_BLOCK_SIZE - _encryptionBufferWritten);
+		cs_ret_code_t retCode = writeEncryptedBlock(cs_data_t(key, sizeof(key)));
+		if (retCode != ERR_SUCCESS) {
+			return retCode;
+		}
+	}
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t UartHandler::writeEncryptedBlock(cs_data_t key) {
+	cs_buffer_size_t encryptedSize;
+	cs_ret_code_t retCode = AES::getInstance().encryptCtr(
+			key,
+			cs_data_t(reinterpret_cast<uint8_t*>(&_writeNonce), sizeof(_writeNonce)),
+			cs_data_t(),
+			cs_data_t(_encryptionBuffer, sizeof(_encryptionBuffer)),
+			cs_data_t(_encryptionBuffer, sizeof(_encryptionBuffer)),
+			encryptedSize
+	);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+	writeBytes(cs_data_t(_encryptionBuffer, sizeof(_encryptionBuffer)), true);
+	_encryptionBufferWritten = 0;
+	return ERR_SUCCESS;
+}
 
 
 

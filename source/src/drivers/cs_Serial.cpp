@@ -239,6 +239,10 @@ serial_enable_t serial_get_state() {
 	return _state;
 }
 
+bool serial_tx_ready() {
+	return _initializedTx;
+}
+
 inline void _writeByte(uint8_t val) {
 #if SERIAL_VERBOSITY > SERIAL_READ_ONLY
 //	if (_initializedTx) { // Check this in functions that call this function.
@@ -284,33 +288,13 @@ int cs_write(const char *str, ...) {
 	return 0;
 }
 
-// TODO: use uart class for this.
-void writeBytes(uint8_t* data, const uint16_t size) {
+void writeByte(uint8_t val) {
 #if SERIAL_VERBOSITY > SERIAL_READ_ONLY
+	// TODO: that's an if for every byte we write.
 	if (!_initializedTx) {
 		return;
 	}
-	for(int i = 0; i < size; ++i) {
-		uint8_t val = (uint8_t)data[i];
-		// Escape when necessary
-		switch (val) {
-			case UART_START_BYTE:
-			case UART_ESCAPE_BYTE:
-				_writeByte(UART_ESCAPE_BYTE);
-				val ^= UART_ESCAPE_FLIP_MASK;
-				break;
-		}
-		_writeByte(val);
-	}
-#endif
-}
-
-// TODO: use uart class for this.
-void writeStartByte() {
-#if SERIAL_VERBOSITY > SERIAL_READ_ONLY
-	if (_initializedTx) {
-		_writeByte(UART_START_BYTE);
-	}
+	_writeByte(val);
 #endif
 }
 

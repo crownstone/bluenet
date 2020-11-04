@@ -74,6 +74,22 @@ void UartConnection::onSessionNonce(const uart_msg_session_nonce_t& sessionNonce
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_SESSION_NONCE, _sessionNonceTx, sizeof(_sessionNonceTx));
 }
 
+cs_ret_code_t UartConnection::getSessionNonceTx(cs_data_t data) {
+	if (data.data == nullptr || data.len < SESSION_NONCE_LENGTH) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
+	memcpy(data.data, _sessionNonceTx, SESSION_NONCE_LENGTH);
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t UartConnection::getSessionNonceRx(cs_data_t data) {
+	if (data.data == nullptr || data.len < SESSION_NONCE_LENGTH) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
+	memcpy(data.data, _sessionNonceRx, SESSION_NONCE_LENGTH);
+	return ERR_SUCCESS;
+}
+
 void UartConnection::onTick() {
 	if (_connectionTimeoutCountdown) {
 		--_connectionTimeoutCountdown;

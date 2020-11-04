@@ -7,14 +7,15 @@
 
 #pragma once
 
+#include <drivers/cs_Serial.h>
+#include <encryption/cs_AES.h>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_UartProtocol.h>
 #include <uart/cs_UartCommandHandler.h>
-#include <drivers/cs_Serial.h>
-
 
 #define UART_RX_BUFFER_SIZE            128
 #define UART_TX_BUFFER_SIZE            300
+#define UART_TX_ENCRYPTION_BUFFER_SIZE AES_BLOCK_SIZE
 //#define UART_TX_MAX_PAYLOAD_SIZE       500
 
 
@@ -144,16 +145,90 @@ private:
 	//! Write buffer. Currently only used as result buffer for control commands.
 	uint8_t* _writeBuffer = nullptr;
 
+	/**
+	 * Encryption buffer. Used to encrypt outgoing msgs.
+	 *
+	 * Only has to be 1 block size large, as we can stream the writes.
+	 */
+	uint8_t* _encryptionBuffer = nullptr;
+
+	//! Number of bytes written to the encryption buffer currently.
+	uint8_t _encryptionBufferWritten = 0;
+
+	//! Packet nonce to use for writing current msg.
+	encryption_nonce_t _writeNonce;
+
 	//! Keeps up the crc so far.
 	uint16_t _crc;
 
 	//! Stone ID, part of the msg header.
-	TYPIFY(CONFIG_CROWNSTONE_ID) _stoneId;
+	TYPIFY(CONFIG_CROWNSTONE_ID) _stoneId = 0;
+
+
+	/**
+	 * Write the start byte.
+	 */
+	cs_ret_code_t writeStartByte();
+
+	/**
+	 * Write bytes to UART.
+	 *
+	 * Values get escaped when necessary.
+	 *
+	 * @param[in] data       Data to write to UART.
+	 * @param[in] updateCrc  Whether to update the CRC with thise data.
+	 * @return               Result code.
+	 */
+	cs_ret_code_t writeBytes(cs_data_t data, bool updateCrc);
+
+	/**
+	 * Writes wrapper header (including start and size), and initializes CRC.
+	 */
+	cs_ret_code_t writeWrapperStart(UartMsgType msgType, uint16_t payloadSize);
 
 	/**
 	 * Whether to encrypt a msg.
 	 */
 	bool mustEncrypt(UartProtocol::Encrypt encrypt, UartOpcodeTx opCode);
+
+	/**
+	 * Get required buffer size, given the size of a uart msg.
+	 *
+	 * @param[in] uartMsgSize     Size of the msg to encrypt.
+	 * @return                    Size of the buffer, includes size of encryption headers.
+	 */
+	cs_buffer_size_t getEncryptedBufferSize(cs_buffer_size_t uartMsgSize);
+
+	/**
+	 * Write encrypted header, and update CRC.
+	 *
+	 * @param[in] uartMsgSize     Size of the msg to encrypt.
+	 * @return                    Result code.
+	 */
+	cs_ret_code_t writeEncryptedStart(cs_buffer_size_t uartMsgSize);
+
+	/**
+	 * Encrypt given data and write it to UART.
+	 *
+	 * Also updates the CRC.
+	 *
+	 * @param[in] data       Data to encrypt and write.
+	 * @return               Return code.
+	 */
+	cs_ret_code_t writeEncryptedPart(cs_data_t data);
+
+	/**
+	 * Write last encryption block, and update CRC.
+	 */
+	cs_ret_code_t writeEncryptedEnd();
+
+	/**
+	 * Encrypt 1 block of data from encryption buffer, update CRC, and write to uart.
+	 *
+	 * @param[in] key        Key to use for encryption.
+	 * @return               Return code.
+	 */
+	cs_ret_code_t writeEncryptedBlock(cs_data_t key);
 
 	/**
 	 * Handles read msgs.

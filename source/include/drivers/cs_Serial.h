@@ -173,6 +173,11 @@ void serial_enable(serial_enable_t enabled);
 serial_enable_t serial_get_state();
 
 /**
+ * Returns whether serial is ready for TX, and has it enabled.
+ */
+bool serial_tx_ready();
+
+/**
  * Write a string with printf functionality.
  */
 #ifdef HOST_TARGET
@@ -181,16 +186,10 @@ serial_enable_t serial_get_state();
 int cs_write(const char *str, ...);
 #endif
 
-/** Write a buffer of data. Values get escaped when necessary.
- *
- * @param[in] data           Pointer to the data to write.
- * @param[in] size           Size of the data.
+/**
+ * Write a single byte.
  */
-void writeBytes(uint8_t* data, const uint16_t size);
-
-/** Write the start byte
- */
-void writeStartByte();
+void writeByte(uint8_t val);
 
 #ifdef __cplusplus
 }
