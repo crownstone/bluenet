@@ -155,6 +155,9 @@ private:
 	//! Number of bytes written to the encryption buffer currently.
 	uint8_t _encryptionBufferWritten = 0;
 
+	//! Number of blocks encrypted so far.
+	uint8_t _encryptionBlocksWritten = 0;
+
 	//! Packet nonce to use for writing current msg.
 	encryption_nonce_t _writeNonce;
 

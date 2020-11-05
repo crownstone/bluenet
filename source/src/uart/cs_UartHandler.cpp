@@ -252,6 +252,7 @@ cs_ret_code_t UartHandler::writeEncryptedStart(cs_buffer_size_t uartMsgSize) {
 
 	// Always start with empty encryption buffer.
 	_encryptionBufferWritten = 0;
+	_encryptionBlocksWritten = 0;
 
 	// Write encrypted header.
 	uart_encrypted_data_header_t encryptedHeader;
@@ -317,13 +318,15 @@ cs_ret_code_t UartHandler::writeEncryptedBlock(cs_data_t key) {
 			cs_data_t(),
 			cs_data_t(_encryptionBuffer, sizeof(_encryptionBuffer)),
 			cs_data_t(_encryptionBuffer, sizeof(_encryptionBuffer)),
-			encryptedSize
+			encryptedSize,
+			_encryptionBlocksWritten
 	);
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
 	writeBytes(cs_data_t(_encryptionBuffer, sizeof(_encryptionBuffer)), true);
 	_encryptionBufferWritten = 0;
+	++_encryptionBlocksWritten;
 	return ERR_SUCCESS;
 }
 
