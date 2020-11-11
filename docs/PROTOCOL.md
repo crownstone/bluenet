@@ -868,7 +868,7 @@ Value | Name | Description
 --- | --- | ---
 0   | SUCCESS | Completed successfully.
 1   | WAIT_FOR_SUCCESS | Command is successful so far, but you need to wait for SUCCESS.
-2   | ERR_SUCCESS_NO_CHANGE | Command is succesful, but nothing changed.
+2   | SUCCESS_NO_CHANGE | Command is succesful, but nothing changed.
 16  | BUFFER_UNASSIGNED | No buffer was assigned for the command.
 17  | BUFFER_LOCKED | Buffer is locked, failed queue command.
 18  | BUFFER_TOO_SMALL | Buffer is too small for operation.
@@ -880,22 +880,22 @@ Value | Name | Description
 37  | NOT_FOUND | The thing you were looking for was not found.
 38  | NO_SPACE | There is no space for this command.
 39  | BUSY | Wait for something to be done. You can usually retry later.
-40  | ERR_WRONG_STATE | The crownstone is in a wrong state.
-41  | ERR_ALREADY_EXISTS | Item already exists.
-42  | ERR_TIMEOUT | Operation timed out.
-43  | ERR_CANCELED | Operation was canceled.
-44  | ERR_PROTOCOL_UNSUPPORTED | The protocol is not supported.
+40  | WRONG_STATE | The crownstone is in a wrong state.
+41  | ALREADY_EXISTS | Item already exists.
+42  | TIMEOUT | Operation timed out.
+43  | CANCELED | Operation was canceled.
+44  | PROTOCOL_UNSUPPORTED | The protocol is not supported.
 48  | NO_ACCESS | Invalid access for this command.
-49  | ERR_UNSAFE | It's unsafe to execute this command.
+49  | UNSAFE | It's unsafe to execute this command.
 64  | NOT_AVAILABLE | Command currently not available.
 65  | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
 67  | NOT_INITIALIZED | Something must first be initialized.
-68  | ERR_NOT_STARTED | Something must first be started.
-69  | ERR_NOT_POWERED | Something must first be powered.
+68  | NOT_STARTED | Something must first be started.
+69  | NOT_POWERED | Something must first be powered.
 80  | WRITE_DISABLED | Write is disabled for given type.
-81  | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
+81  | WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
 96  | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
-112 | ERR_EVENT_UNHANDLED | The event or command was not handled.
+112 | EVENT_UNHANDLED | The event or command was not handled.
 65535 | UNSPECIFIED | Unspecified error.
 
 
