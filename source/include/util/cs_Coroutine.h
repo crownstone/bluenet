@@ -67,10 +67,12 @@ public:
 	 *
 	 * To be called on event.
 	 */
-	void handleEvent(event_t& evt) {
+	bool handleEvent(event_t& evt) {
 		if (evt.type == CS_TYPE::EVT_TICK) {
 			this->onTick(*reinterpret_cast<TYPIFY(EVT_TICK)*>(evt.data));
+			return true;
 		}
+		return false;
 	}
 
 	static uint32_t delayMs(uint32_t ms) {
