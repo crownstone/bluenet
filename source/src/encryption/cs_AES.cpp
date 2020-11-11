@@ -109,13 +109,12 @@ cs_ret_code_t AES::encryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t prefix, 
 	return ctr(key, nonce, prefix, input, cs_data_t(), output, writtenSize, blockCtr);
 }
 
-cs_ret_code_t AES::decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t prefix, cs_data_t output, uint8_t blockCtr) {
+cs_ret_code_t AES::decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t prefix, cs_data_t output, cs_buffer_size_t& writtenSize, uint8_t blockCtr) {
 	if (input.len % AES_BLOCK_SIZE) {
 		LOGw(STR_ERR_MULTIPLE_OF_16);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	cs_buffer_size_t writtenSize;
 	return ctr(key, nonce, cs_data_t(), input, prefix, output, writtenSize);
 }
 

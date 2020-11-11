@@ -16,12 +16,18 @@ public:
 	 *
 	 * - Checks access level.
 	 * - Checks size of command data.
+	 *
+	 * @param[in] opCode          Command type.
+	 * @param[in] commandData     Command payload data.
+	 * @param[in] source          Command source.
+	 * @param[in] accessLevel     Access level: should set when the message was encrypted, else it should be ENCRYPTION_DISABLED.
+	 * @param[in] resultBuffer
 	 */
 	void handleCommand(
 			UartOpcodeRx opCode,
 			cs_data_t commandData,
 			const cmd_source_with_counter_t source,
-			const EncryptionAccessLevel accessLevel,
+			EncryptionAccessLevel accessLevel,
 			cs_data_t resultBuffer
 			);
 
@@ -40,7 +46,7 @@ public:
 
 	void handleCommandHello            (cs_data_t commandData);
 	void handleCommandSessionNonce     (cs_data_t commandData);
-	void handleCommandHeartBeat        (cs_data_t commandData);
+	void handleCommandHeartBeat        (cs_data_t commandData, bool encryptedMsg);
 	void handleCommandStatus           (cs_data_t commandData);
 	void handleCommandControl          (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultBuffer);
 	void handleCommandEnableAdvertising(cs_data_t commandData);

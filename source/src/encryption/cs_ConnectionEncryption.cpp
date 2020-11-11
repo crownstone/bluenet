@@ -114,12 +114,14 @@ cs_ret_code_t ConnectionEncryption::decrypt(cs_data_t input, cs_data_t output, E
 
 			// Decrypt the payload.
 			encryption_header_encrypted_t encryptedHeader;
+			cs_buffer_size_t decryptedPayloadSize;
 			cs_ret_code_t retCode = AES::getInstance().decryptCtr(
 					cs_data_t(key, sizeof(key)),
 					cs_data_t((uint8_t*)&_nonce, sizeof(_nonce)),
 					cs_data_t(input.data + sizeof(*header), input.len - sizeof(*header)),
 					cs_data_t((uint8_t*)&encryptedHeader, sizeof(encryptedHeader)),
-					output);
+					output,
+					decryptedPayloadSize);
 
 			// Check validation key.
 			if (memcmp(encryptedHeader.validationKey, _sessionData.validationKey, sizeof(_sessionData.validationKey)) != 0) {

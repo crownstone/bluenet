@@ -14,6 +14,7 @@
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <storage/cs_State.h>
 #include <time/cs_SystemTime.h>
+#include <uart/cs_UartConnection.h>
 #include <uart/cs_UartHandler.h>
 #include <util/cs_Utils.h>
 
@@ -170,6 +171,37 @@ void ServiceData::updateAdvertisement(bool initial) {
 		else if (getExternalAdvertisement(_crownstoneId, _serviceData)) {
 			serviceDataSet = true;
 		}
+	}
+
+	TYPIFY(STATE_HUB_MODE) hubMode;
+	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
+	if (hubMode) {
+		_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
+		_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_HUB_STATE;
+		_serviceData.params.encrypted.hubState.id = _crownstoneId;
+		auto selfFlags = UartConnection::getInstance().getSelfStatus().flags.flags;
+		auto hubFlags = UartConnection::getInstance().getUserStatus().flags.flags;
+
+		_serviceData.params.encrypted.hubState.flags.asInt = 0;
+		_serviceData.params.encrypted.hubState.flags.flags.uartAlive = UartConnection::getInstance().isAlive();
+		_serviceData.params.encrypted.hubState.flags.flags.uartAliveEncrypted = UartConnection::getInstance().isEncryptedAlive();
+		_serviceData.params.encrypted.hubState.flags.flags.uartEncryptionRequiredByStone = selfFlags.encryptionRequired;
+		_serviceData.params.encrypted.hubState.flags.flags.uartEncryptionRequiredByHub = hubFlags.encryptionRequired;
+		_serviceData.params.encrypted.hubState.flags.flags.hasBeenSetUp = hubFlags.hasBeenSetUp;
+		_serviceData.params.encrypted.hubState.flags.flags.hasInternet = hubFlags.hasInternet;
+		_serviceData.params.encrypted.hubState.flags.flags.hasError = hubFlags.hasError;
+
+		auto hubData = UartConnection::getInstance().getUserStatus();
+		if (hubData.type == UART_HUB_DATA_TYPE_CROWNSTONE_HUB) {
+			memcpy(_serviceData.params.encrypted.hubState.hubData, hubData.data, SERVICE_DATA_HUB_DATA_SIZE);
+		}
+		else {
+			memset(_serviceData.params.encrypted.hubState.hubData, 0, SERVICE_DATA_HUB_DATA_SIZE);
+		}
+		_serviceData.params.encrypted.hubState.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+		_serviceData.params.encrypted.hubState.reserved = 0;
+		_serviceData.params.encrypted.hubState.validation = SERVICE_DATA_VALIDATION;
+		serviceDataSet = true;
 	}
 
 	if (!serviceDataSet) {

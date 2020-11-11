@@ -60,7 +60,7 @@ public:
 	 * @param[in]  nonce               Nonce to use for encryption.
 	 * @param[in]  prefix              Extra data to put before the input data.
 	 * @param[in]  input               Input data to be encrypted.
-	 * @param[out] output              Buffer to encrypt to. Can be the same as input, as long as: output pointer >= input pointer + prefix size.
+	 * @param[out] output              Buffer to encrypt to. Can be the same as input, as long as: output pointer <= input pointer - prefix size.
 	 * @param[out] writtenSize         How many bytes are written to output.
 	 * @param[in]  blockCtr            Optional initial block counter.
 	 * @return                         Return code.
@@ -76,11 +76,12 @@ public:
 	 * @param[in]  nonce               Nonce to use for decryption.
 	 * @param[in]  input               Input data to be encrypted.
 	 * @param[out] prefix              Buffer to encrypt to, before the output buffer. Can be the same as input.
-	 * @param[out] output              Buffer to encrypt to. Can be the same as input, as long as: output pointer >= input pointer + prefix size.
+	 * @param[out] output              Buffer to encrypt to. Can be the same as input, as long as: output pointer <= input pointer + prefix size.
+	 * @param[out] writtenSize         How many bytes are written to output.
 	 * @param[in]  blockCtr            Optional initial block counter.
 	 * @return                         Return code.
 	 */
-	cs_ret_code_t decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t prefix, cs_data_t output, uint8_t blockCtr = 0);
+	cs_ret_code_t decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t prefix, cs_data_t output, cs_buffer_size_t& writtenSize, uint8_t blockCtr = 0);
 
 
 private:

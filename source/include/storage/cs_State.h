@@ -170,7 +170,7 @@ public:
 	/**
 	 * Get copy of a state value.
 	 *
-	 * @param[in,out] data        Data struct with state type, id, data, and size.
+	 * @param[in,out] data        Data struct with state type, id, data, and size. See cs_state_data_t.
 	 * @param[in] mode            Indicates whether to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
 	 * @return                    Return code.
 	 */

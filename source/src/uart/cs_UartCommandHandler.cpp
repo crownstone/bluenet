@@ -19,10 +19,16 @@
 void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 			cs_data_t commandData,
 			const cmd_source_with_counter_t source,
-			const EncryptionAccessLevel accessLevel,
+			EncryptionAccessLevel accessLevel,
 			cs_data_t resultBuffer
 			) {
-	LOGUartCommandHandlerDebug("Handle cmd opCode=%u size=%u", opCode, commandData.len);
+	LOGUartCommandHandlerDebug("Handle cmd opCode=%u size=%u accessLevel=%u", opCode, commandData.len, accessLevel);
+
+	bool encryptedMsg = (accessLevel != EncryptionAccessLevel::ENCRYPTION_DISABLED);
+	if (!encryptedMsg) {
+		// Assume admin access level for unencrypted uart msgs.
+		accessLevel = EncryptionAccessLevel::ADMIN;
+	}
 
 	EncryptionAccessLevel requiredAccess = getRequiredAccessLevel(opCode);
 	if (!KeysAndAccess::getInstance().allowAccess(requiredAccess, accessLevel)) {
@@ -38,7 +44,7 @@ void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 			handleCommandSessionNonce(commandData);
 			break;
 		case UART_OPCODE_RX_HEARTBEAT:
-			handleCommandHeartBeat(commandData);
+			handleCommandHeartBeat(commandData, encryptedMsg);
 			break;
 		case UART_OPCODE_RX_STATUS:
 			handleCommandStatus(commandData);
@@ -165,14 +171,14 @@ void UartCommandHandler::handleCommandSessionNonce(cs_data_t commandData) {
 	UartConnection::getInstance().onSessionNonce(*sessionNonce);
 }
 
-void UartCommandHandler::handleCommandHeartBeat(cs_data_t commandData) {
-	LOGUartCommandHandlerDebug(STR_HANDLE_COMMAND, "heartbeat");
+void UartCommandHandler::handleCommandHeartBeat(cs_data_t commandData, bool encryptedMsg) {
+	LOGUartCommandHandlerDebug(STR_HANDLE_COMMAND, "heartbeat encrypted=%u", encryptedMsg);
 	if (commandData.len < sizeof(uart_msg_heartbeat_t)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 		return;
 	}
 	uart_msg_heartbeat_t* heartbeat = reinterpret_cast<uart_msg_heartbeat_t*>(commandData.data);
-	UartConnection::getInstance().onHeartBeat(heartbeat->timeoutSeconds);
+	UartConnection::getInstance().onHeartBeat(heartbeat->timeoutSeconds, encryptedMsg);
 }
 
 void UartCommandHandler::handleCommandStatus(cs_data_t commandData) {
