@@ -20,7 +20,8 @@ public:
 	 * @param[in] opCode          Command type.
 	 * @param[in] commandData     Command payload data.
 	 * @param[in] source          Command source.
-	 * @param[in] accessLevel     Access level: should set when the message was encrypted, else it should be ENCRYPTION_DISABLED.
+	 * @param[in] accessLevel     Access level.
+	 * @param[in] wasEncrypted    Whether the incoming message was encrypted.
 	 * @param[in] resultBuffer
 	 */
 	void handleCommand(
@@ -28,6 +29,7 @@ public:
 			cs_data_t commandData,
 			const cmd_source_with_counter_t source,
 			EncryptionAccessLevel accessLevel,
+			bool wasEncrypted,
 			cs_data_t resultBuffer
 			);
 
@@ -46,7 +48,7 @@ public:
 
 	void handleCommandHello            (cs_data_t commandData);
 	void handleCommandSessionNonce     (cs_data_t commandData);
-	void handleCommandHeartBeat        (cs_data_t commandData, bool encryptedMsg);
+	void handleCommandHeartBeat        (cs_data_t commandData, bool wasEncrypted);
 	void handleCommandStatus           (cs_data_t commandData);
 	void handleCommandControl          (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultBuffer);
 	void handleCommandEnableAdvertising(cs_data_t commandData);

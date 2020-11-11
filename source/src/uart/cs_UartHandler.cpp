@@ -251,6 +251,13 @@ bool UartHandler::mustEncrypt(UartProtocol::Encrypt encrypt, UartOpcodeTx opCode
 	return true;
 }
 
+bool UartHandler::mustBeEncrypted(UartOpcodeRx opCode) {
+	return (UartProtocol::mustBeEncryptedRx(opCode) &&
+			UartConnection::getInstance().getSelfStatus().flags.flags.encryptionRequired);
+}
+
+
+
 cs_ret_code_t UartHandler::writeEncryptedStart(cs_buffer_size_t uartMsgSize) {
 	cs_ret_code_t retCode;
 
@@ -472,6 +479,7 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 			retCode = State::getInstance().get(stateData);
 			if (retCode != ERR_SUCCESS) {
 				LOGw("Can't find key %u", encryptionHeader->keyId);
+				writeMsg(UART_OPCODE_TX_DECRYPTION_FAILED);
 				return;
 			}
 
@@ -502,6 +510,7 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 			}
 			if (encryptedHeader.validation != UART_PROTOCOL_VALIDATION) {
 				LOGw("Validation=%u", encryptedHeader.validation);
+				writeMsg(UART_OPCODE_TX_DECRYPTION_FAILED);
 				return;
 			}
 
@@ -511,6 +520,7 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 				return;
 			}
 
+			// TODO: access level based on key ID.
 			handleUartMsg(decryptedPayload.data, encryptedHeader.size, EncryptionAccessLevel::ADMIN);
 			break;
 		}
@@ -528,14 +538,26 @@ void UartHandler::handleUartMsg(uint8_t* data, uint16_t size, EncryptionAccessLe
 		return;
 	}
 	uart_msg_header_t* header = reinterpret_cast<uart_msg_header_t*>(data);
+	UartOpcodeRx opCode = static_cast<UartOpcodeRx>(header->type);
 	uint16_t msgDataSize = size - sizeof(uart_msg_header_t);
 	uint8_t* msgData = data + sizeof(uart_msg_header_t);
 
+	bool wasEncrypted = (accessLevel != EncryptionAccessLevel::ENCRYPTION_DISABLED);
+	if (!wasEncrypted) {
+		if (mustBeEncrypted(opCode)) {
+			LOGw("Must be encrypted: opCode=%u", opCode);
+			return;
+		}
+		// Assume admin level.
+		accessLevel = EncryptionAccessLevel::ADMIN;
+	}
+
 	_commandHandler.handleCommand(
-			static_cast<UartOpcodeRx>(header->type),
+			opCode,
 			cs_data_t(msgData, msgDataSize),
 			cmd_source_with_counter_t(cmd_source_t(CS_CMD_SOURCE_TYPE_UART, header->deviceId)),
 			accessLevel,
+			wasEncrypted,
 			cs_data_t(_writeBuffer, (_writeBuffer == nullptr) ? 0 : UART_TX_BUFFER_SIZE)
 			);
 }

@@ -195,9 +195,14 @@ private:
 	cs_ret_code_t writeWrapperStart(UartMsgType msgType, uint16_t payloadSize);
 
 	/**
-	 * Whether to encrypt a msg.
+	 * Whether to encrypt an outgoing msg.
 	 */
 	bool mustEncrypt(UartProtocol::Encrypt encrypt, UartOpcodeTx opCode);
+
+	/**
+	 * Whether an incoming msg must've been encrypted
+	 */
+	bool mustBeEncrypted(UartOpcodeRx opCode);
 
 	/**
 	 * Get required buffer size, given the size of a uart msg.

@@ -43,7 +43,7 @@ Although the name suggests this is encrypted, only the `encrypted data` is actua
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8[] | Packet nonce | 3 | Packet nonce: should be different random numbers each time.
-uint8   | Key ID       | 1 | Key ID used for encryption: always 0 for now.
+uint8   | Key ID       | 1 | Key ID used for encryption: always 0 for now. Also determines access level: always admin for now.
 uint8[] | Encrypted data | N | Encrypted with [AES CTR](PROTOCOL.md#ctr_encryption). Get a (new) session nonce with the session nonce command.
 
 <a name="encrypted_data"></a>
@@ -128,7 +128,8 @@ Type  | Type name                     | Encrypted | Data   | Description
 10    | Control result                | Yes       | [Result packet](../docs/PROTOCOL.md#result_packet) | Result of a control command.
 10000 | Uart msg                      | Yes       | string | As requested via control command `UART message`.
 10001 | Session nonce missing         | Never     | -      | The Crownstone has no session nonce, please send one.
-10002 | Service data                  | Yes       | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Service data of this Crownstone (unencrypted).
+10002 | Service data                  | Yes       | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Service data of this Crownstone.
+10003 | Decryption failed             | Never     | -      | Decryption failed due to missing or wrong key.
 10004 | Presence change               | Yes       | [Presence change packet](#presence_change_packet) | Sent when the presence has changed. Note: a profile ID can be at multiple locations at the same time.
 10005 | Factory reset                 | Yes       | -      | Sent when a factory reset will be performed.
 10006 | Booted                        | Never     | -      | This Crownstone just booted, you probably want to start a new session.
