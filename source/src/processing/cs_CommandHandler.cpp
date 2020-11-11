@@ -111,6 +111,7 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_RELAY:
 
 		case CTRL_CMD_SET_TIME:
+		case CTRL_CMD_GET_TIME:
 		case CTRL_CMD_INCREASE_TX:
 		case CTRL_CMD_RESET_ERRORS:
 		case CTRL_CMD_MESH_COMMAND:
@@ -119,6 +120,7 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_LOCK_SWITCH:
 
 		case CTRL_CMD_UART_MSG:
+		case CTRL_CMD_HUB_DATA:
 
 		case CTRL_CMD_SAVE_BEHAVIOUR:
 		case CTRL_CMD_REPLACE_BEHAVIOUR:
@@ -177,9 +179,11 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_GET_FIRMWARE_VERSION:
 			return handleCmdGetFirmwareVersion(commandData, accessLevel, result);
 		case CTRL_CMD_SET_TIME:
-			return handleCmdSetTime(commandData, accessLevel, result);
+			return dispatchEventForCommand(CS_TYPE::CMD_SET_TIME, commandData, source, result);
 		case CTRL_CMD_SET_SUN_TIME:
 			return handleCmdSetSunTime(commandData, accessLevel, result);
+		case CTRL_CMD_GET_TIME:
+			return handleCmdGetTime(commandData, accessLevel, result);
 		case CTRL_CMD_INCREASE_TX:
 			return handleCmdIncreaseTx(commandData, accessLevel, result);
 		case CTRL_CMD_DISCONNECT:
@@ -204,6 +208,8 @@ void CommandHandler::handleCommand(
 			return handleCmdSetup(commandData, accessLevel, result);
 		case CTRL_CMD_UART_MSG:
 			return handleCmdUartMsg(commandData, accessLevel, result);
+		case CTRL_CMD_HUB_DATA:
+			return handleCmdHubData(commandData, accessLevel, result);
 		case CTRL_CMD_STATE_GET:
 			return handleCmdStateGet(commandData, accessLevel, result);
 		case CTRL_CMD_STATE_SET:
@@ -542,20 +548,8 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 	}
 }
 
-void CommandHandler::handleCmdSetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set time:");
-	if (commandData.len != sizeof(uint32_t)) {
-		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(uint32_t));
-		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-		return;
-	}
-	uint32_t value = reinterpret_cast<uint32_t*>(commandData.data)[0];
-	SystemTime::setTime(value);
-	result.returnCode = ERR_SUCCESS;
-}
-
 void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result){
-	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set sun time:");
+	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set sun time");
 	if (commandData.len != sizeof(sun_time_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(sun_time_t));
 		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
@@ -563,6 +557,20 @@ void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const Encryption
 	}
 	sun_time_t* payload = reinterpret_cast<sun_time_t*>(commandData.data);
 	result.returnCode = SystemTime::setSunTimes(*payload);
+}
+
+void CommandHandler::handleCmdGetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result){
+	LOGi(STR_HANDLE_COMMAND, "get time");
+
+	if (result.buf.len < sizeof(uint32_t)) {
+		result.returnCode = ERR_BUFFER_TOO_SMALL;
+		return;
+	}
+
+	uint32_t* timestamp = (uint32_t*)result.buf.data;
+	*timestamp = SystemTime::posix();
+	result.dataSize = sizeof(*timestamp);
+	result.returnCode = ERR_SUCCESS;
 }
 
 void CommandHandler::handleCmdIncreaseTx(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
@@ -888,9 +896,27 @@ void CommandHandler::handleCmdUartMsg(cs_data_t commandData, const EncryptionAcc
 		return;
 	}
 
-	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_BLE_MSG, commandData.data, commandData.len);
-	result.returnCode = ERR_SUCCESS;
+	result.returnCode = UartHandler::getInstance().writeMsg(UART_OPCODE_TX_BLE_MSG, commandData.data, commandData.len);
 }
+
+
+void CommandHandler::handleCmdHubData(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+	LOGd(STR_HANDLE_COMMAND, "hub data");
+
+	if (commandData.len < sizeof(hub_data_header_t)) {
+		LOGe(FMT_ZERO_PAYLOAD_LENGTH, commandData.len);
+		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+		return;
+	}
+
+	hub_data_header_t* header = reinterpret_cast<hub_data_header_t*>(commandData.data);
+	buffer_ptr_t hubDataPtr =      commandData.data + sizeof(*header);
+	cs_buffer_size_t hubDataSize = commandData.len  - sizeof(*header);
+	UartProtocol::Encrypt encrypt = static_cast<UartProtocol::Encrypt>(header->encrypt);
+
+	result.returnCode = UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HUB_DATA, hubDataPtr, hubDataSize, encrypt);
+}
+
 
 void CommandHandler::handleCmdRegisterTrackedDevice(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "register tracked device");
@@ -1060,6 +1086,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_MESH_COMMAND:
 		case CTRL_CMD_STATE_GET:
 		case CTRL_CMD_STATE_SET:
+		case CTRL_CMD_GET_TIME:
 		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
 		case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
 			return BASIC;
@@ -1080,6 +1107,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_ALLOW_DIMMING:
 		case CTRL_CMD_LOCK_SWITCH:
 		case CTRL_CMD_UART_MSG:
+		case CTRL_CMD_HUB_DATA:
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
 		case CTRL_CMD_GET_UPTIME:

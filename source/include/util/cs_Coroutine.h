@@ -28,7 +28,7 @@
  *	Coroutine hiSayer (sayHi);
  *
  *	for (int i = 0; ; i++){
- *		hiSayer(i);
+ *		hiSayer.onTick(i);
  *	}
  *
  * This will log "hi" only one in 42 calls.
@@ -38,42 +38,42 @@
  * often or not.
  *
  */
-class Coroutine{
+class Coroutine {
 private:
-	uint32_t next_call_tickcount = 0;
+	uint32_t nextCallTickcount = 0;
+
 public:
 	typedef std::function<uint32_t(void)> Action;
 
-	// void function that returns the amount of ticks before it should be called again.
+	// void function that returns the amount of tick events before it should be called again.
 	Action action;
 
 	Coroutine() = default;
 	Coroutine(Action a) : action(a) {}
 
-	void operator()(uint32_t current_tick_count){
-		// not doing roll-over checks here yet..
-		if(current_tick_count > next_call_tickcount && action){
-			auto ticks_to_wait = action();
-			next_call_tickcount = current_tick_count + ticks_to_wait;
+	/**
+	 * To be called on tick event.
+	 */
+	void onTick(uint32_t currentTickCount) {
+		// TODO: not doing roll-over checks here yet..
+		if (currentTickCount > nextCallTickcount && action) {
+			auto ticksToWait = action();
+			nextCallTickcount = currentTickCount + ticksToWait;
 		}
 	}
 
 	/**
-	 * utility wrapper to simply pass an event.
-	 * Returns true if the event type was tick.
+	 * Convenience function replacing onTick().
+	 *
+	 * To be called on event.
 	 */
-	bool operator()(event_t& evt){
-		if(evt.type == CS_TYPE::EVT_TICK){
-
-			// forward call to uint32_t
-			(*this)(*reinterpret_cast<uint32_t*>(evt.data));
-			return true;
+	void handleEvent(event_t& evt) {
+		if (evt.type == CS_TYPE::EVT_TICK) {
+			this->onTick(*reinterpret_cast<TYPIFY(EVT_TICK)*>(evt.data));
 		}
-		return false;
 	}
 
-	static uint32_t delay_ms(uint32_t ms){
-		return ms/100;
-//		return RTC::msToTicks(ms);
+	static uint32_t delayMs(uint32_t ms) {
+		return ms / TICK_INTERVAL_MS;
 	}
 };

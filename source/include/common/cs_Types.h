@@ -158,7 +158,6 @@ enum class CS_TYPE: uint16_t {
 //	STATE_SCHEDULE                          = 133,
 	STATE_OPERATION_MODE                    = 134,
 	STATE_TEMPERATURE                       = 135,
-	STATE_TIME                              = 136,
 	STATE_FACTORY_RESET                     = 137,
 //	STATE_LEARNED_SWITCHES,
 	STATE_ERRORS                            = 139,
@@ -179,6 +178,8 @@ enum class CS_TYPE: uint16_t {
 	STATE_IBEACON_CONFIG_ID                 = 154,
 	STATE_MICROAPP                          = 155,
 	STATE_SOFT_ON_SPEED                     = 156,
+	STATE_HUB_MODE                          = 157,
+	STATE_UART_KEY                          = 158,
 
 	/*
 	 * Internal commands and events.
@@ -308,7 +309,7 @@ enum class CS_TYPE: uint16_t {
 
 	CMD_SET_TIME,                                     // Set the time.
 	CMD_SET_IBEACON_CONFIG_ID,                        // Set which ibeacon config id to use for advertising.
-	EVT_TIME_SET,                                     // Time is set or changed. Payload: previous posix time
+	EVT_TIME_SET,                                     // Time is set or changed. WARNING: this event is only sent on set time command. Payload: previous posix time
 	EVT_TICK,                                         // Sent about every TICK_INTERVAL_MS ms.
 
 	CMD_CONTROL_CMD,                                  // Handle a control command.
@@ -428,7 +429,6 @@ typedef  int32_t TYPIFY(STATE_POWER_USAGE);
 typedef uint16_t TYPIFY(STATE_RESET_COUNTER);
 typedef switch_state_t TYPIFY(STATE_SWITCH_STATE);
 typedef   int8_t TYPIFY(STATE_TEMPERATURE);
-typedef uint32_t TYPIFY(STATE_TIME);
 typedef sun_time_t TYPIFY(STATE_SUN_TIME);
 typedef void TYPIFY(STATE_BEHAVIOUR_RULE);
 typedef void TYPIFY(STATE_TWILIGHT_RULE);
@@ -440,6 +440,7 @@ typedef cs_mesh_seq_number_t TYPIFY(STATE_MESH_SEQ_NUMBER);
 typedef ibeacon_config_id_packet_t TYPIFY(STATE_IBEACON_CONFIG_ID);
 typedef cs_microapp_t TYPIFY(STATE_MICROAPP);
 typedef uint8_t TYPIFY(STATE_SOFT_ON_SPEED);
+typedef uint8_t TYPIFY(STATE_HUB_MODE);
 
 
 typedef  void TYPIFY(EVT_ADC_RESTARTED);

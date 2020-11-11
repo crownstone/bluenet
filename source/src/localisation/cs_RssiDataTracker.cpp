@@ -159,9 +159,8 @@ uint32_t received_pingcounter = 0;
 void RssiDataTracker::handleEvent(event_t& evt){
 	switch(evt.type){
 	case CS_TYPE::EVT_TICK: {
-		auto current_tick_count = *reinterpret_cast<uint32_t*>(evt.data);
-
-		pingRoutine(current_tick_count);
+		auto currentTickCount = *reinterpret_cast<TYPIFY(EVT_TICK)*>(evt.data);
+		pingRoutine.onTick(currentTickCount);
 
 		break;
 	}

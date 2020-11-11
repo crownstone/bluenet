@@ -186,25 +186,22 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 		case CS_TYPE::EVT_TICK: {
 			// decrement until 0
 			_ownerTimeoutCountdown == 0 || _ownerTimeoutCountdown--;
-			break;
-		}
-		case CS_TYPE::STATE_TIME: {
-			bool behaviourValueChanged = updateBehaviourHandlers();
-			uint8_t behaviourRuleIndex = 255; // TODO: set correct value.
-			cmd_source_with_counter_t source(cmd_source_t(CS_CMD_SOURCE_TYPE_BEHAVIOUR, behaviourRuleIndex));
-			updateState(behaviourValueChanged, source);
-			if (behaviourValueChanged) {
-				addToSwitchHistory(cs_switch_history_item_t(SystemTime::posix(), *aggregatedState, smartSwitch.getActualState(), source.source));
+
+			// Execute code following this if statement, only once a second.
+			// But since we poll every tick, we are pretty close to the moment the posix seconds increase.
+			uint32_t timestamp = SystemTime::posix();
+			if (timestamp == _lastTimestamp) {
+				break;
 			}
-			break;
-		}
-		case CS_TYPE::EVT_TIME_SET: {
+			_lastTimestamp = timestamp;
+
+			// Update switch value.
 			bool behaviourValueChanged = updateBehaviourHandlers();
 			uint8_t behaviourRuleIndex = 255; // TODO: set correct value.
 			cmd_source_with_counter_t source(cmd_source_t(CS_CMD_SOURCE_TYPE_BEHAVIOUR, behaviourRuleIndex));
 			updateState(behaviourValueChanged, source);
 			if (behaviourValueChanged) {
-				addToSwitchHistory(cs_switch_history_item_t(SystemTime::posix(), *aggregatedState, smartSwitch.getActualState(), source.source));
+				addToSwitchHistory(cs_switch_history_item_t(timestamp, *aggregatedState, smartSwitch.getActualState(), source.source));
 			}
 			break;
 		}

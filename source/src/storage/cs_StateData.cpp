@@ -184,9 +184,6 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::STATE_TEMPERATURE:
 		*(TYPIFY(STATE_TEMPERATURE)*)data.value = STATE_TEMPERATURE_DEFAULT;
 		return ERR_SUCCESS;
-	case CS_TYPE::STATE_TIME:
-		*(TYPIFY(STATE_TIME)*)data.value = STATE_TIME_DEFAULT;
-		return ERR_SUCCESS;
 	case CS_TYPE::STATE_SUN_TIME:
 		*reinterpret_cast<TYPIFY(STATE_SUN_TIME)*>(data.value) = sun_time_t();
 		return ERR_SUCCESS;
@@ -232,7 +229,13 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_SUCCESS;
 	}
 	case CS_TYPE::STATE_SOFT_ON_SPEED:
-		*(TYPIFY(CONFIG_CROWNSTONE_ID)*)data.value = DIMMER_SOFT_ON_SPEED;
+		*(TYPIFY(STATE_SOFT_ON_SPEED)*)data.value = DIMMER_SOFT_ON_SPEED;
+		return ERR_SUCCESS;
+	case CS_TYPE::STATE_HUB_MODE:
+		*(TYPIFY(STATE_HUB_MODE)*)data.value = STATE_HUB_MODE_DEFAULT;
+		return ERR_SUCCESS;
+	case CS_TYPE::STATE_UART_KEY:
+		memset(data.value, 0, TypeSize(CS_TYPE::STATE_UART_KEY));
 		return ERR_SUCCESS;
 	case CS_TYPE::CMD_CONTROL_CMD:
 	case CS_TYPE::CMD_DEC_CURRENT_RANGE:
@@ -419,11 +422,12 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::STATE_IBEACON_CONFIG_ID:
 	case CS_TYPE::STATE_MICROAPP:
 	case CS_TYPE::STATE_SOFT_ON_SPEED:
+	case CS_TYPE::STATE_HUB_MODE:
+	case CS_TYPE::STATE_UART_KEY:
 		return PersistenceMode::FLASH;
 	case CS_TYPE::STATE_ACCUMULATED_ENERGY:
 	case CS_TYPE::STATE_POWER_USAGE:
 	case CS_TYPE::STATE_TEMPERATURE:
-	case CS_TYPE::STATE_TIME:
 	case CS_TYPE::STATE_FACTORY_RESET:
 	case CS_TYPE::STATE_ERRORS:
 	case CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH:

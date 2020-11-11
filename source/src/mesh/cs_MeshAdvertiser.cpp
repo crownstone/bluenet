@@ -194,6 +194,13 @@ void MeshAdvertiser::clearConfigEntry(uint8_t id) {
 }
 
 void MeshAdvertiser::handleTime(uint32_t now) {
+	// Execute code following this if statement, only once a second.
+	// But since we poll every tick, we are pretty close to the moment the posix seconds increase.
+	if (_lastTimestamp == now) {
+		return;
+	}
+	_lastTimestamp = now;
+
 	for (uint8_t i = 0; i < num_ibeacon_config_ids; ++i) {
 		if (now >= _ibeaconInterval[i].timestamp) {
 			if (_ibeaconInterval[i].interval == 0) {
@@ -237,9 +244,11 @@ void MeshAdvertiser::handleEvent(event_t & event) {
 			updateIbeacon();
 			break;
 		}
-		case CS_TYPE::STATE_TIME: {
-			uint32_t* timestamp = (TYPIFY(STATE_TIME)*) event.data;
-			handleTime(*timestamp);
+		case CS_TYPE::EVT_TICK: {
+			// Use the synchronized time stamp.
+			// It's ok if it's not a valid posix time.
+			auto timestamp = SystemTime::getSynchronizedStamp();
+			handleTime(timestamp.posix_s);
 			break;
 		}
 		case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID: {

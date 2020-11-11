@@ -105,11 +105,11 @@ cs_ret_code_t AES::encryptEcb(cs_data_t key, cs_data_t prefix, cs_data_t input, 
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t AES::encryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t prefix, cs_data_t input, cs_data_t output, cs_buffer_size_t& writtenSize) {
-	return ctr(key, nonce, prefix, input, cs_data_t(), output, writtenSize);
+cs_ret_code_t AES::encryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t prefix, cs_data_t input, cs_data_t output, cs_buffer_size_t& writtenSize, uint8_t blockCtr) {
+	return ctr(key, nonce, prefix, input, cs_data_t(), output, writtenSize, blockCtr);
 }
 
-cs_ret_code_t AES::decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t prefix, cs_data_t output) {
+cs_ret_code_t AES::decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t prefix, cs_data_t output, uint8_t blockCtr) {
 	if (input.len % AES_BLOCK_SIZE) {
 		LOGw(STR_ERR_MULTIPLE_OF_16);
 		return ERR_WRONG_PAYLOAD_LENGTH;
@@ -119,14 +119,15 @@ cs_ret_code_t AES::decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, c
 	return ctr(key, nonce, cs_data_t(), input, prefix, output, writtenSize);
 }
 
-cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs_data_t input, cs_data_t outputPrefix, cs_data_t output, cs_buffer_size_t& writtenSize) {
-	LOGAesVerbose("CTR key=%u nonce=%u inputPrefix=%u input=%u outputPrefix=%u output=%u",
+cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs_data_t input, cs_data_t outputPrefix, cs_data_t output, cs_buffer_size_t& writtenSize, uint8_t blockCtr) {
+	LOGAesVerbose("CTR key=%u nonce=%u inputPrefix=%u input=%u outputPrefix=%u output=%u ctr=%u",
 			key.data,
 			nonce.data,
 			inputPrefix.data,
 			input.data,
 			outputPrefix.data,
-			output.data
+			output.data,
+			blockCtr
 			);
 
 	uint32_t errCode;
@@ -187,7 +188,7 @@ cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs
 	for (uint8_t i = 0; i < numBlocks; ++i) {
 
 		// Put the counter in the IV.
-		_block.cleartext[AES_BLOCK_SIZE - 1] = i;
+		_block.cleartext[AES_BLOCK_SIZE - 1] = i + blockCtr;
 
 		// Encrypts the cleartext and puts it in ciphertext.
 //		LOGi("key:");

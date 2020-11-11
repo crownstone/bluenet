@@ -68,6 +68,24 @@ public:
 	 */
 	void onSessionNonce(const uart_msg_session_nonce_t& sessionNonce);
 
+	/**
+	 * Get the session nonce for TX.
+	 *
+	 * @param[out] data      Buffer to copy the session nonce to.
+	 *
+	 * @return               Result code.
+	 */
+	cs_ret_code_t getSessionNonceTx(cs_data_t data);
+
+	/**
+	 * Get the session nonce for RX.
+	 *
+	 * @param[out] data      Buffer to copy the session nonce to.
+	 *
+	 * @return               Result code.
+	 */
+	cs_ret_code_t getSessionNonceRx(cs_data_t data);
+
 
 private:
 	//! Constructor

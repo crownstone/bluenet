@@ -62,9 +62,10 @@ public:
 	 * @param[in]  input               Input data to be encrypted.
 	 * @param[out] output              Buffer to encrypt to. Can be the same as input, as long as: output pointer >= input pointer + prefix size.
 	 * @param[out] writtenSize         How many bytes are written to output.
+	 * @param[in]  blockCtr            Optional initial block counter.
 	 * @return                         Return code.
 	 */
-	cs_ret_code_t encryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t prefix, cs_data_t input, cs_data_t output, cs_buffer_size_t& writtenSize);
+	cs_ret_code_t encryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t prefix, cs_data_t input, cs_data_t output, cs_buffer_size_t& writtenSize, uint8_t blockCtr = 0);
 
 	/**
 	 * Decrypt data with given key in CTR mode.
@@ -76,9 +77,10 @@ public:
 	 * @param[in]  input               Input data to be encrypted.
 	 * @param[out] prefix              Buffer to encrypt to, before the output buffer. Can be the same as input.
 	 * @param[out] output              Buffer to encrypt to. Can be the same as input, as long as: output pointer >= input pointer + prefix size.
+	 * @param[in]  blockCtr            Optional initial block counter.
 	 * @return                         Return code.
 	 */
-	cs_ret_code_t decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t prefix, cs_data_t output);
+	cs_ret_code_t decryptCtr(cs_data_t key, cs_data_t nonce, cs_data_t input, cs_data_t prefix, cs_data_t output, uint8_t blockCtr = 0);
 
 
 private:
@@ -101,9 +103,10 @@ private:
 	 * @param[in]  outputPrefix        Extra data to be written to before writing to the output buffer.
 	 * @param[out] output              Buffer to encrypt to. Can be the same as input, as long as: output pointer + output prefix size >= input pointer + input prefix size.
 	 * @param[out] writtenSize         How many bytes are written to output.
+	 * @param[in]  blockCtr            Optional initial block counter.
 	 * @return                         Return code.
 	 */
-	cs_ret_code_t ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs_data_t input, cs_data_t outputPrefix, cs_data_t output, cs_buffer_size_t& writtenSize);
+	cs_ret_code_t ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs_data_t input, cs_data_t outputPrefix, cs_data_t output, cs_buffer_size_t& writtenSize, uint8_t blockCtr = 0);
 
 	/**
 	 * Struct with key, and single block of encrypted and decypted data.

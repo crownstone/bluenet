@@ -88,8 +88,8 @@ private:
 	void handleCmdGetMacAddress           (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdGetHardwareVersion      (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdGetFirmwareVersion      (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
-	void handleCmdSetTime                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdSetSunTime              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdGetTime                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdIncreaseTx              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdValidateSetup           (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdDisconnect              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
@@ -103,6 +103,7 @@ private:
 	void handleCmdLockSwitch              (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdSetup                   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdUartMsg                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
+	void handleCmdHubData                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdStateGet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdStateSet                (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdRegisterTrackedDevice   (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);

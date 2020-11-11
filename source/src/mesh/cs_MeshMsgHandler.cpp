@@ -199,7 +199,8 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSi
 	LOGi("received set time %u", timestamp);
 	if (timestamp != _lastReveivedSetTime) {
 		_lastReveivedSetTime = timestamp;
-		event_t event(CS_TYPE::CMD_SET_TIME, &timestamp, sizeof(timestamp));
+		// TODO: send source.
+		event_t event(CS_TYPE::CMD_SET_TIME, &timestamp, sizeof(timestamp), cmd_source_t(CS_CMD_SOURCE_TYPE_ENUM, CS_CMD_SOURCE_NONE, true));
 		event.dispatch();
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_CMD_TIME, payload, payloadSize);
 //		return event.result.returnCode;
@@ -217,10 +218,10 @@ cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadS
 	eventData.stamp.posix_ms = packet->posix_ms;
 	eventData.stamp.version  = packet->version;
 	if (packet->overrideRoot) {
-		eventData.root_id = 0;
+		eventData.srcId = 0;
 	}
 	else {
-		eventData.root_id = srcId;
+		eventData.srcId = srcId;
 	}
 
 	event_t event(CS_TYPE::EVT_MESH_TIME_SYNC, &eventData, sizeof(eventData));
