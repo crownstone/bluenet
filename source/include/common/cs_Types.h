@@ -296,7 +296,7 @@ enum class CS_TYPE: uint16_t {
 	// Localisation of devices
 	CMD_REGISTER_TRACKED_DEVICE = InternalBaseLocalisation, // Register a tracked device.
 	CMD_UPDATE_TRACKED_DEVICE,                        // Update data of a tracked device.
-	EVT_RECEIVED_PROFILE_LOCATION,                    // Received the location of a profile via mesh or command.
+	EVT_RECEIVED_PROFILE_LOCATION,                    // Received the location of a profile via mesh or command, or emulated by cs_TrackedDevices.
 	EVT_PRESENCE_MUTATION,                            // Presence changed.
 	EVT_STATE_EXTERNAL_STONE,                         // The state of another stone has been received.
 	CMD_TRACKED_DEVICE_HEARTBEAT,                     // Set location of a tracked device, with a TTL. This command can be sent instead of advertisements.
