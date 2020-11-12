@@ -32,15 +32,53 @@ void printPingMsg(rssi_ping_message_t* p){
 // ------------ RssiDataTracker methods ------------
 
 RssiDataTracker::RssiDataTracker() :
-		pingRoutine ([this](){ return sendPrimaryPingMessage(); }) {
+		pingRoutine([this]() {
+			return sendPrimaryPingMessage();
+		}),
+		logRoutine([this]() {
+			return sendUpdateToHost();
+		}) {
 }
 
-void RssiDataTracker::init(){
-	 State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id, sizeof(my_id));
-	 LOGw("RssiDataTracker: my_id %d",my_id);
+void RssiDataTracker::init() {
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id,
+	        sizeof(my_id));
+	LOGw("RssiDataTracker: my_id %d",my_id);
 }
 
-// ------------ Ping stuff ------------
+
+// ------------ Recording ping stuff ------------
+
+void RssiDataTracker::recordPingMsg(rssi_ping_message_t *ping_msg) {
+	// TODO: size constraint... map may keep up to 256**2 items. when
+	// 256 crownstones are on the same mesh.
+	RSSIDATATRACKER_LOGv("record new sampleid (%d -> %d) %d", ping_msg->sender_id, ping_msg->recipient_id, ping_msg->sample_id);
+
+	auto stone_pair = getKey(ping_msg);
+	recordSampleId(stone_pair, ping_msg->sample_id);
+	recordRssiValue(stone_pair, ping_msg->rssi);
+}
+
+void RssiDataTracker::recordSampleId(StonePair stone_pair, uint8_t sample_id) {
+	last_received_sample_indices[stone_pair] = sample_id;
+}
+
+void RssiDataTracker::recordRssiValue(StonePair stone_pair, int8_t rssi) {
+	auto var_rec_iter = variance_recorders.find(stone_pair);
+
+	if (var_rec_iter == variance_recorders.end()) {
+		OnlineVarianceRecorder ovr;
+		variance_recorders[stone_pair] = ovr;
+	} else if (var_rec_iter->second.isNumericPrecisionLow()) {
+		var_rec_iter->second.reduceCount();
+	}
+
+	last_received_rssi[stone_pair] = rssi;
+	variance_recorders[stone_pair].addValue(rssi);
+}
+
+
+// ------------ Sending ping stuff ------------
 void sendPingMsg(rssi_ping_message_t* pingmsg){
 	cs_mesh_msg_t pingmsg_wrapper;
 	pingmsg_wrapper.type = CS_MESH_MODEL_TYPE_RSSI_PING;
@@ -71,6 +109,12 @@ uint32_t RssiDataTracker::sendPrimaryPingMessage(){
 	return 5;
 }
 
+uint32_t RssiDataTracker::sendUpdateToHost() {
+	return Coroutine::delayMs(30*60*1000);
+}
+
+// ------------ Receiving ping stuff ------------
+
 void RssiDataTracker::handlePrimaryPingMessage(rssi_ping_message_t* ping_msg){
 	if(ping_msg == nullptr){
 		return;
@@ -83,7 +127,10 @@ void RssiDataTracker::handlePrimaryPingMessage(rssi_ping_message_t* ping_msg){
 		return;
 	}
 
-	sendPingMsg(ping_msg); // essentially 'sendSecondaryPingMessage'
+	// essentially 'sendSecondaryPingMessage'
+	// we are sending back a copy to the mesh in order to
+	// receive all ping messaged
+	sendPingMsg(ping_msg);
 
 	// primary ping messages will never be recorded as secondary messages
 	// since they only get propagated once (TTL=1) and there is no loopback.
@@ -132,27 +179,6 @@ rssi_ping_message_t* RssiDataTracker::filterSampleIndex(rssi_ping_message_t* p){
 	}
 
 	return p;
-}
-
-void RssiDataTracker::recordPingMsg(rssi_ping_message_t* ping_msg){
-	// TODO: size constraint... map may keep up to 256**2 items. when
-	// 256 crownstones are on the same mesh.
-
-	auto stone_pair = getKey(ping_msg);
-
-	RSSIDATATRACKER_LOGv("record new sampleid (%d -> %d) %d", ping_msg->sender_id, ping_msg->recipient_id, ping_msg->sample_id);
-
-	auto var_rec_iter = variance_recorders.find(stone_pair);
-	if(var_rec_iter == variance_recorders.end()){
-		OnlineVarianceRecorder ovr;
-		variance_recorders[stone_pair] = ovr;
-	} else if (var_rec_iter->second.isNumericPrecisionLow()){
-		var_rec_iter->second.reduceCount();
-	}
-
-	last_received_sample_indices[stone_pair] = ping_msg->sample_id;
-	last_received_rssi[stone_pair] = ping_msg->rssi;
-	variance_recorders[stone_pair].addValue(ping_msg->rssi);
 }
 
 uint32_t received_pingcounter = 0;
