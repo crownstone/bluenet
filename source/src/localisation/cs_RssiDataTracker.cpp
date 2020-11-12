@@ -98,15 +98,27 @@ uint32_t RssiDataTracker::sendPrimaryPingMessage(){
 	// details with (0) need to be filled in by primary sender RssiDataTracker.
 	// details with (1) will be filled in by primary recipient MeshMsgHandler.
 	// details with (2) will be filled in by primary recipient RssiDataTracker.
-	static rssi_ping_message_t pingmsg = {0};
-	pingmsg.sample_id = ping_sample_index++; // (0)
-	pingmsg.rssi = 0xff;                     // (1)
-	pingmsg.sender_id = 0;	                 // (1)
-	pingmsg.recipient_id = 0;                // (2)
+	static rssi_ping_message_t ping_msg = {0};
+	ping_msg.sample_id = ping_sample_index++; // (0)
+	ping_msg.rssi = 0;                        // (1)
+	ping_msg.sender_id = 0;	                 // (1)
+	ping_msg.recipient_id = 0;                // (2)
 
-	sendPingMsg(&pingmsg);
+	sendPingMsg(&ping_msg);
 
 	return Coroutine::delayMs(1000);
+}
+
+void sendSecondaryPingMsg(rssi_ping_message_t* ping_msg){
+	if (ping_msg == nullptr ||
+			ping_msg->rssi == 0 ||
+			ping_msg.sender_id == 0 ||
+			ping_msg->recipient_id == 0){
+		return false;
+	}
+
+	sendPingMsg(ping_msg);
+	return true;
 }
 
 uint32_t RssiDataTracker::sendUpdateToHost() {
@@ -120,22 +132,21 @@ uint32_t RssiDataTracker::sendUpdateToHost() {
 
 // ------------ Receiving ping stuff ------------
 
-void RssiDataTracker::handlePrimaryPingMessage(rssi_ping_message_t* ping_msg){
-	if(ping_msg == nullptr){
+void RssiDataTracker::handlePrimaryPingMessage(rssi_ping_message_t *ping_msg) {
+	if (ping_msg == nullptr) {
 		return;
 	}
 
 	ping_msg->recipient_id = my_id; // needs to be filled in before filtering
 
-	if(filterSampleIndex(ping_msg) == nullptr){
+	if (filterSampleIndex(ping_msg) == nullptr) {
 		// already seen this one before, don't re-propagate.
 		return;
 	}
 
-	// essentially 'sendSecondaryPingMessage'
-	// we are sending back a copy to the mesh in order to
-	// receive all ping messaged
-	sendPingMsg(ping_msg);
+	// send back a copy to the mesh in order to spread
+	// the information to all nodes
+	sendSecondaryPingMsg(ping_msg);
 
 	// primary ping messages will never be recorded as secondary messages
 	// since they only get propagated once (TTL=1) and there is no loopback.

@@ -67,6 +67,14 @@ private:
 	uint32_t sendPrimaryPingMessage();
 
 	/**
+	 * Checks is ping_msg contains all the data to be called a secondary
+	 * ping message and send it if it suffices.
+	 *
+	 * Return true if it was a secondary message, else false.
+	 */
+	bool sendSecondaryPingMsg(rssi_ping_message_t* ping_msg);
+
+	/**
 	 * Sends an update to the host containing the gathered information
 	 * about all the StonePairs currently know to this device.
 	 */
