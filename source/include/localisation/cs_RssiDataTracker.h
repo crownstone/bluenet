@@ -62,7 +62,8 @@ private:
 	 * Sends a primary ping message over the mesh, containing only the 'ping counter'
 	 * of this RssiDataTracker.
 	 *
-	 * Returns the number of ticks to wait before sending the next.
+	 * Coroutine method:
+	 * - Ping period: 5 minutes
 	 */
 	uint32_t sendPrimaryPingMessage();
 
@@ -84,7 +85,10 @@ private:
 	 * in the local maps, together with the (oriented) average rssi value
 	 * between those stones. After that, clear all the maps.
 	 *
+	 * Coroutine method:
 	 * To prevent the mesh from flooding, flushing is throttled.
+	 * - Flush period: 30 minutes
+	 * - Burst period: 5 milliseconds
 	 */
 	uint32_t flushAggregatedRssiData();
 

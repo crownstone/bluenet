@@ -1,4 +1,3 @@
-
 #include <localisation/cs_RssiDataTracker.h>
 
 #include <common/cs_Types.h>
@@ -9,15 +8,13 @@
 #include <time/cs_SystemTime.h>
 #include <test/cs_Test.h>
 
-
 #define RSSIDATATRACKER_LOGd LOGd
 #define RSSIDATATRACKER_LOGv LOGnone
 
-
 // utilities
 
-void printPingMsg(rssi_ping_message_t* p){
-	if(!p){
+void printPingMsg(rssi_ping_message_t *p) {
+	if (!p) {
 		return;
 	}
 
@@ -27,7 +24,6 @@ void printPingMsg(rssi_ping_message_t* p){
 			p->rssi,
 			p->sample_id);
 }
-
 
 // ------------ RssiDataTracker methods ------------
 
@@ -46,13 +42,13 @@ void RssiDataTracker::init() {
 	RSSIDATATRACKER_LOGd("RssiDataTracker: my_id %d",my_id);
 }
 
-
 // ------------ Recording ping stuff ------------
 
 void RssiDataTracker::recordPingMsg(rssi_ping_message_t *ping_msg) {
 	// TODO: size constraint... map may keep up to 256**2 items. when
 	// 256 crownstones are on the same mesh.
-	RSSIDATATRACKER_LOGv("record new sampleid (%d -> %d) %d", ping_msg->sender_id, ping_msg->recipient_id, ping_msg->sample_id);
+	RSSIDATATRACKER_LOGv("record new sampleid (%d -> %d) %d",
+			ping_msg->sender_id, ping_msg->recipient_id, ping_msg->sample_id);
 
 	auto stone_pair = getKey(ping_msg);
 	recordSampleId(stone_pair, ping_msg->sample_id);
@@ -77,43 +73,41 @@ void RssiDataTracker::recordRssiValue(StonePair stone_pair, int8_t rssi) {
 	variance_recorders[stone_pair].addValue(rssi);
 }
 
-
 // ------------ Sending ping stuff ------------
-void RssiDataTracker::sendPingMsg(rssi_ping_message_t* ping_msg){
+void RssiDataTracker::sendPingMsg(rssi_ping_message_t *ping_msg) {
 	cs_mesh_msg_t pingmsg_wrapper;
 	pingmsg_wrapper.type = CS_MESH_MODEL_TYPE_RSSI_PING;
 	pingmsg_wrapper.payload = reinterpret_cast<uint8_t*>(ping_msg);
-	pingmsg_wrapper.size  = sizeof(rssi_ping_message_t);
+	pingmsg_wrapper.size = sizeof(rssi_ping_message_t);
 	pingmsg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
 	pingmsg_wrapper.urgency = CS_MESH_URGENCY_LOW;
 
-	event_t pingmsgevt(CS_TYPE::CMD_SEND_MESH_MSG, &pingmsg_wrapper, sizeof(cs_mesh_msg_t));
+	event_t pingmsgevt(CS_TYPE::CMD_SEND_MESH_MSG, &pingmsg_wrapper,
+	        sizeof(cs_mesh_msg_t));
 	pingmsgevt.dispatch();
 }
 
-uint32_t RssiDataTracker::sendPrimaryPingMessage(){
+uint32_t RssiDataTracker::sendPrimaryPingMessage() {
 	RSSIDATATRACKER_LOGv("RssiDataTracker sending ping for my_id(%d), sample#%d",
 			my_id, ping_sample_index);
 
 	// details with (0) need to be filled in by primary sender RssiDataTracker.
 	// details with (1) will be filled in by primary recipient MeshMsgHandler.
 	// details with (2) will be filled in by primary recipient RssiDataTracker.
-	static rssi_ping_message_t ping_msg = {0};
+	static rssi_ping_message_t ping_msg = { 0 };
 	ping_msg.sample_id = ping_sample_index++; // (0)
 	ping_msg.rssi = 0;                        // (1)
-	ping_msg.sender_id = 0;	                 // (1)
+	ping_msg.sender_id = 0;	                  // (1)
 	ping_msg.recipient_id = 0;                // (2)
 
 	sendPingMsg(&ping_msg);
 
-	return Coroutine::delayMs(1000);
+	return Coroutine::delayMs(10 * 60 * 1000);
 }
 
-bool RssiDataTracker::sendSecondaryPingMsg(rssi_ping_message_t* ping_msg){
-	if (ping_msg == nullptr ||
-			ping_msg->rssi == 0 ||
-			ping_msg->sender_id == 0 ||
-			ping_msg->recipient_id == 0){
+bool RssiDataTracker::sendSecondaryPingMsg(rssi_ping_message_t *ping_msg) {
+	if (ping_msg == nullptr || ping_msg->rssi == 0 || ping_msg->sender_id == 0
+	        || ping_msg->recipient_id == 0) {
 		return false;
 	}
 
@@ -130,17 +124,14 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 		StonePair stone_pair = iter->first;
 		OnlineVarianceRecorder recorder = iter->second;
 
-		float mean = recorder.getMean();
+		uint32_t mean = static_cast<uint32_t>(recorder.getMean());
 		RSSIDATATRACKER_LOGd("flushing maps from %d: {send:%d recv:%d rssi:%d}",
-				my_id,
-				stone_pair.first,
-				stone_pair.second,
-				(uint32_t)mean);
+				my_id, stone_pair.first, stone_pair.second, mean);
 
 		rssi_ping_message_t ping_msg;
 		ping_msg.sender_id = stone_pair.first;
 		ping_msg.recipient_id = stone_pair.second;
-		ping_msg.rssi = (uint32_t)mean;
+		ping_msg.rssi = mean;
 
 		sendSecondaryPingMsg(&ping_msg);
 		variance_recorders.erase(iter);
@@ -152,7 +143,7 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 	}
 
 	// start accumulation phase: just wait very long
-	return Coroutine::delayMs(5*60*1000);
+	return Coroutine::delayMs(30 * 60 * 1000);
 }
 
 // ------------ Receiving ping stuff ------------
@@ -178,8 +169,9 @@ void RssiDataTracker::handlePrimaryPingMessage(rssi_ping_message_t *ping_msg) {
 	recordPingMsg(ping_msg);
 }
 
-void RssiDataTracker::handleSecondaryPingMessage(rssi_ping_message_t* ping_msg){
-	if(filterSampleIndex(ping_msg) == nullptr){
+void RssiDataTracker::handleSecondaryPingMessage(
+        rssi_ping_message_t *ping_msg) {
+	if (filterSampleIndex(ping_msg) == nullptr) {
 		return; // (also catches ping_msg == nullptr)
 	}
 
@@ -191,7 +183,7 @@ void RssiDataTracker::handleSecondaryPingMessage(rssi_ping_message_t* ping_msg){
 	pushPingMsgToHost(ping_msg);
 }
 
-void RssiDataTracker::pushPingMsgToHost(rssi_ping_message_t* ping_msg){
+void RssiDataTracker::pushPingMsgToHost(rssi_ping_message_t *ping_msg) {
 	// TODO: change to formal uart protocol now that the hub will use it.
 
 	char expressionstring[50];
@@ -201,10 +193,8 @@ void RssiDataTracker::pushPingMsgToHost(rssi_ping_message_t* ping_msg){
 	// on ',' and we're using this expressionstring to push
 	// stuff of several different pairs of crownstones but want
 	// to split that out on the host side.
-	sprintf(expressionstring, "rssi_%d_%d_%d",
-			ping_msg->sender_id,
-			ping_msg->recipient_id,
-			ping_msg->channel);
+	sprintf(expressionstring, "rssi_%d_%d_%d", ping_msg->sender_id,
+	        ping_msg->recipient_id, ping_msg->channel);
 
 	TEST_PUSH_EXPR_D(this, expressionstring, ping_msg->rssi);
 }
@@ -238,7 +228,8 @@ rssi_ping_message_t* RssiDataTracker::filterSampleIndex(
 		// sample index should be incremented each ping message,
 		// a second (third...) message from crownstone_id with a previously
 		// recorded sample_id is filtered out.
-		RSSIDATATRACKER_LOGv("filtered out stale ping message (%d -> %d) %d", p->sender_id, p->recipient_id, p->sample_id);
+		RSSIDATATRACKER_LOGv("filtered out stale ping message (%d -> %d) %d",
+				p->sender_id, p->recipient_id, p->sample_id);
 		return nullptr;
 	}
 
@@ -246,7 +237,7 @@ rssi_ping_message_t* RssiDataTracker::filterSampleIndex(
 }
 
 uint32_t received_pingcounter = 0;
-void RssiDataTracker::handleEvent(event_t& evt){
+void RssiDataTracker::handleEvent(event_t &evt) {
 	bool coroutines_handled_event = false;
 	coroutines_handled_event |= pingRoutine.handleEvent(evt);
 	coroutines_handled_event |= flushRoutine.handleEvent(evt);
@@ -254,27 +245,27 @@ void RssiDataTracker::handleEvent(event_t& evt){
 		return;
 	}
 
-	switch(evt.type){
-	case CS_TYPE::EVT_MESH_RSSI_PING: {
-		auto pingmsg_ptr = reinterpret_cast<rssi_ping_message_t*>(evt.data);
-		RSSIDATATRACKER_LOGv("incoming pingcounter: %d ", received_pingcounter++);
-		if(pingmsg_ptr->recipient_id == 0){
-			handlePrimaryPingMessage(pingmsg_ptr);
-		} else {
-			handleSecondaryPingMessage(pingmsg_ptr);
+	switch (evt.type) {
+		case CS_TYPE::EVT_MESH_RSSI_PING: {
+			auto pingmsg_ptr = reinterpret_cast<rssi_ping_message_t*>(evt.data);
+			RSSIDATATRACKER_LOGv("incoming pingcounter: %d ", received_pingcounter++);
+			if (pingmsg_ptr->recipient_id == 0) {
+				handlePrimaryPingMessage(pingmsg_ptr);
+			} else {
+				handleSecondaryPingMessage(pingmsg_ptr);
+			}
+
+			break;
 		}
 
-		break;
-	}
+		case CS_TYPE::EVT_RECV_MESH_MSG: {
+			auto meshMsgEvent = reinterpret_cast<MeshMsgEvent*>(evt.getData());
+			handleGenericMeshMessage(meshMsgEvent);
+			break;
+		}
 
-	case CS_TYPE::EVT_RECV_MESH_MSG: {
-		auto meshMsgEvent = reinterpret_cast<MeshMsgEvent*>(evt.getData());
-		handleGenericMeshMessage(meshMsgEvent);
-		break;
-	}
-
-	default:
-		break;
+		default:
+			break;
 	}
 
 	return;
