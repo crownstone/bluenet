@@ -46,7 +46,7 @@ private:
 	uint8_t ping_sample_index = 0;
 
 	Coroutine pingRoutine;
-	Coroutine logRoutine;
+	Coroutine flushRoutine;
 
 	// stores the relevant history, the stone id pairs are order dependent: (sender, receiver)
 	using StonePair = std::pair<stone_id_t,stone_id_t>;
@@ -75,10 +75,18 @@ private:
 	bool sendSecondaryPingMsg(rssi_ping_message_t* ping_msg);
 
 	/**
-	 * Sends an update to the host containing the gathered information
-	 * about all the StonePairs currently know to this device.
+	 * Sends the given ping_msg over the mesh without any further checking.
 	 */
-	uint32_t sendUpdateToHost();
+	void sendPingMsg(rssi_ping_message_t* ping_msg);
+
+	/**
+	 * Sends a secondary ping message for each of the pairs of crownstones
+	 * in the local maps, together with the (oriented) average rssi value
+	 * between those stones. After that, clear all the maps.
+	 */
+	uint32_t flushAggregatedRssiData();
+
+	void pushPingMsgToHost(rssi_ping_message_t* ping_msg);
 
 	/**
 	 * Forwards message over mesh

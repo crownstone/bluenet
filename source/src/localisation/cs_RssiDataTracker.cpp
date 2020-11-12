@@ -35,8 +35,8 @@ RssiDataTracker::RssiDataTracker() :
 		pingRoutine([this]() {
 			return sendPrimaryPingMessage();
 		}),
-		logRoutine([this]() {
-			return sendUpdateToHost();
+		flushRoutine([this]() {
+			return flushAggregatedRssiData();
 		}) {
 }
 
@@ -79,10 +79,10 @@ void RssiDataTracker::recordRssiValue(StonePair stone_pair, int8_t rssi) {
 
 
 // ------------ Sending ping stuff ------------
-void sendPingMsg(rssi_ping_message_t* pingmsg){
+void RssiDataTracker::sendPingMsg(rssi_ping_message_t* ping_msg){
 	cs_mesh_msg_t pingmsg_wrapper;
 	pingmsg_wrapper.type = CS_MESH_MODEL_TYPE_RSSI_PING;
-	pingmsg_wrapper.payload = reinterpret_cast<uint8_t*>(pingmsg);
+	pingmsg_wrapper.payload = reinterpret_cast<uint8_t*>(ping_msg);
 	pingmsg_wrapper.size  = sizeof(rssi_ping_message_t);
 	pingmsg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
 	pingmsg_wrapper.urgency = CS_MESH_URGENCY_LOW;
@@ -109,10 +109,10 @@ uint32_t RssiDataTracker::sendPrimaryPingMessage(){
 	return Coroutine::delayMs(1000);
 }
 
-void sendSecondaryPingMsg(rssi_ping_message_t* ping_msg){
+bool RssiDataTracker::sendSecondaryPingMsg(rssi_ping_message_t* ping_msg){
 	if (ping_msg == nullptr ||
 			ping_msg->rssi == 0 ||
-			ping_msg.sender_id == 0 ||
+			ping_msg->sender_id == 0 ||
 			ping_msg->recipient_id == 0){
 		return false;
 	}
@@ -121,13 +121,15 @@ void sendSecondaryPingMsg(rssi_ping_message_t* ping_msg){
 	return true;
 }
 
-uint32_t RssiDataTracker::sendUpdateToHost() {
+uint32_t RssiDataTracker::flushAggregatedRssiData() {
 	RSSIDATATRACKER_LOGd("sendUpdateToHost");
 	for (auto const& [key, val]: variance_recorders){
 		// note: getMean returns float, still need to make that work in logging.
 		RSSIDATATRACKER_LOGd("send %d recv %d rssi %d", key.first, key.second, (uint32_t)val.getMean());
+
+		// TODO: sendSecondaryPingMessage();
 	}
-	return Coroutine::delayMs(10*1000);
+	return Coroutine::delayMs(5*60*1000);
 }
 
 // ------------ Receiving ping stuff ------------
@@ -163,6 +165,10 @@ void RssiDataTracker::handleSecondaryPingMessage(rssi_ping_message_t* ping_msg){
 	// secondary ping messages have not yet been recorded.
 	recordPingMsg(ping_msg);
 
+	pushPingMsgToHost(ping_msg);
+}
+
+void RssiDataTracker::pushPingMsgToHost(rssi_ping_message_t* ping_msg){
 	char expressionstring[50];
 
 	// crude workaround: we're using '_' as separator since
@@ -218,7 +224,7 @@ uint32_t received_pingcounter = 0;
 void RssiDataTracker::handleEvent(event_t& evt){
 	bool coroutines_handled_event = false;
 	coroutines_handled_event |= pingRoutine.handleEvent(evt);
-	coroutines_handled_event |= logRoutine.handleEvent(evt);
+	coroutines_handled_event |= flushRoutine.handleEvent(evt);
 	if (coroutines_handled_event) {
 		return;
 	}
