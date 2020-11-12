@@ -122,13 +122,36 @@ bool RssiDataTracker::sendSecondaryPingMsg(rssi_ping_message_t* ping_msg){
 }
 
 uint32_t RssiDataTracker::flushAggregatedRssiData() {
-	RSSIDATATRACKER_LOGd("sendUpdateToHost");
-	for (auto const& [key, val]: variance_recorders){
-		// note: getMean returns float, still need to make that work in logging.
-		RSSIDATATRACKER_LOGd("send %d recv %d rssi %d", key.first, key.second, (uint32_t)val.getMean());
+	RSSIDATATRACKER_LOGd("flushAggregatedRssiData");
+	// start flushing phase, here we wait quite a bit shorter until the map is empty.
 
-		// TODO: sendSecondaryPingMessage();
+	auto iter = std::begin(variance_recorders);
+	if (iter != std::end(variance_recorders)) {
+		StonePair stone_pair = iter->first;
+		OnlineVarianceRecorder recorder = iter->second;
+
+		float mean = recorder.getMean();
+		RSSIDATATRACKER_LOGd("flushing maps from %d: {send:%d recv:%d rssi:%d}",
+				my_id,
+				stone_pair.first,
+				stone_pair.second,
+				(uint32_t)mean);
+
+		rssi_ping_message_t ping_msg;
+		ping_msg.sender_id = stone_pair.first;
+		ping_msg.recipient_id = stone_pair.second;
+		ping_msg.rssi = (uint32_t)mean;
+
+		sendSecondaryPingMsg(&ping_msg);
+		variance_recorders.erase(iter);
+
+		// note: if the mesh is very active, setting this delay higher is risky.
+		// in that case, we might need to add a condition that we only flush
+		// entries that have accumulated enough samples.
+		return Coroutine::delayMs(5);
 	}
+
+	// start accumulation phase: just wait very long
 	return Coroutine::delayMs(5*60*1000);
 }
 
@@ -169,6 +192,8 @@ void RssiDataTracker::handleSecondaryPingMessage(rssi_ping_message_t* ping_msg){
 }
 
 void RssiDataTracker::pushPingMsgToHost(rssi_ping_message_t* ping_msg){
+	// TODO: change to formal uart protocol now that the hub will use it.
+
 	char expressionstring[50];
 
 	// crude workaround: we're using '_' as separator since

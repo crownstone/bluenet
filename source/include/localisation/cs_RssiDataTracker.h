@@ -83,6 +83,8 @@ private:
 	 * Sends a secondary ping message for each of the pairs of crownstones
 	 * in the local maps, together with the (oriented) average rssi value
 	 * between those stones. After that, clear all the maps.
+	 *
+	 * To prevent the mesh from flooding, flushing is throttled.
 	 */
 	uint32_t flushAggregatedRssiData();
 
