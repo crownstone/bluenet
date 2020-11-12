@@ -72,7 +72,7 @@ private:
 	 */
 	uint32_t sendUpdateToHost();
 
-	/**
+	/**kan
 	 * Forwards message over mesh
 	 * Records ping message
 	 */

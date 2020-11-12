@@ -110,6 +110,11 @@ uint32_t RssiDataTracker::sendPrimaryPingMessage(){
 }
 
 uint32_t RssiDataTracker::sendUpdateToHost() {
+	LOGd("sendUpdateToHost");
+	for (auto const& [key, val]: variance_recorders){
+		// note: getMean returns float, still need to make that work in logging.
+		LOGd("send %d recv %d rssi %d", key.first, key.second, (uint32_t)val.getMean());
+	}
 	return Coroutine::delayMs(30*60*1000);
 }
 
