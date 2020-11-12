@@ -43,7 +43,7 @@ RssiDataTracker::RssiDataTracker() :
 void RssiDataTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id,
 	        sizeof(my_id));
-	LOGw("RssiDataTracker: my_id %d",my_id);
+	RSSIDATATRACKER_LOGd("RssiDataTracker: my_id %d",my_id);
 }
 
 
@@ -106,16 +106,16 @@ uint32_t RssiDataTracker::sendPrimaryPingMessage(){
 
 	sendPingMsg(&pingmsg);
 
-	return 5;
+	return Coroutine::delayMs(1000);
 }
 
 uint32_t RssiDataTracker::sendUpdateToHost() {
-	LOGd("sendUpdateToHost");
+	RSSIDATATRACKER_LOGd("sendUpdateToHost");
 	for (auto const& [key, val]: variance_recorders){
 		// note: getMean returns float, still need to make that work in logging.
-		LOGd("send %d recv %d rssi %d", key.first, key.second, (uint32_t)val.getMean());
+		RSSIDATATRACKER_LOGd("send %d recv %d rssi %d", key.first, key.second, (uint32_t)val.getMean());
 	}
-	return Coroutine::delayMs(30*60*1000);
+	return Coroutine::delayMs(10*1000);
 }
 
 // ------------ Receiving ping stuff ------------
@@ -188,7 +188,10 @@ rssi_ping_message_t* RssiDataTracker::filterSampleIndex(rssi_ping_message_t* p){
 
 uint32_t received_pingcounter = 0;
 void RssiDataTracker::handleEvent(event_t& evt){
-	if(pingRoutine.handleEvent(evt)){
+	bool coroutines_handled_event = false;
+	coroutines_handled_event |= pingRoutine.handleEvent(evt);
+	coroutines_handled_event |= logRoutine.handleEvent(evt);
+	if (coroutines_handled_event) {
 		return;
 	}
 

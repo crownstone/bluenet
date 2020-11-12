@@ -75,6 +75,10 @@ public:
 		return false;
 	}
 
+	uint32_t getNextCallTickCount() const {
+		return nextCallTickcount;
+	}
+
 	static uint32_t delayMs(uint32_t ms) {
 		return ms / TICK_INTERVAL_MS;
 	}
