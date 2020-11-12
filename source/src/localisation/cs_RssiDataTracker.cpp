@@ -165,17 +165,34 @@ void RssiDataTracker::handleSecondaryPingMessage(rssi_ping_message_t* ping_msg){
 			ping_msg->channel);
 
 	TEST_PUSH_EXPR_D(this, expressionstring, ping_msg->rssi);
-
 }
 
-rssi_ping_message_t* RssiDataTracker::filterSampleIndex(rssi_ping_message_t* p){
-	if (p == nullptr){
+void RssiDataTracker::handleGenericMeshMessage(MeshMsgEvent *mesh_msg_evt) {
+	if (mesh_msg_evt == nullptr || mesh_msg_evt->hops > 1) {
+		// can't interpret the rssi value in this case.
+		return;
+	}
+
+	rssi_ping_message_t forged_ping_msg;
+	forged_ping_msg.sample_id = 0x00;
+	forged_ping_msg.recipient_id = my_id;
+	forged_ping_msg.sender_id = mesh_msg_evt->srcAddress;
+	forged_ping_msg.rssi = mesh_msg_evt->rssi;
+	forged_ping_msg.channel = mesh_msg_evt->channel;
+
+	auto stone_pair = getKey(&forged_ping_msg);
+	recordRssiValue(stone_pair, forged_ping_msg.rssi);
+}
+
+rssi_ping_message_t* RssiDataTracker::filterSampleIndex(
+        rssi_ping_message_t *p) {
+	if (p == nullptr) {
 		return nullptr;
 	}
 
 	auto p_key = getKey(p);
 
-	if(last_received_sample_indices[p_key] == p->sample_id){
+	if (last_received_sample_indices[p_key] == p->sample_id) {
 		// sample index should be incremented each ping message,
 		// a second (third...) message from crownstone_id with a previously
 		// recorded sample_id is filtered out.
@@ -209,14 +226,11 @@ void RssiDataTracker::handleEvent(event_t& evt){
 	}
 
 	case CS_TYPE::EVT_RECV_MESH_MSG: {
-		auto& meshMsgEvent = *reinterpret_cast<MeshMsgEvent*>(evt.getData());
-		LOGd("sender: %d, hops: %d, channel: %d, rssi: %d",
-				meshMsgEvent.srcAddress,
-				meshMsgEvent.hops,
-				meshMsgEvent.channel,
-				meshMsgEvent.rssi);
+		auto meshMsgEvent = reinterpret_cast<MeshMsgEvent*>(evt.getData());
+		handleGenericMeshMessage(meshMsgEvent);
 		break;
 	}
+
 	default:
 		break;
 	}

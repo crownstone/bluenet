@@ -72,7 +72,7 @@ private:
 	 */
 	uint32_t sendUpdateToHost();
 
-	/**kan
+	/**
 	 * Forwards message over mesh
 	 * Records ping message
 	 */
@@ -84,6 +84,11 @@ private:
 	 */
 	void handleSecondaryPingMessage(rssi_ping_message_t* ping_msg);
 
+	/**
+	 * We forge a ping_message, bypass duplicate filtering and
+	 * call recordRssiValue(ping_msg).
+	 */
+	void handleGenericMeshMessage(MeshMsgEvent* mesh_msg_evt);
 
 	/**
 	 * Extract StonePair and then logs:
