@@ -127,9 +127,9 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
 	LOGi("UART binary protocol set: %d", CS_UART_BINARY_PROTOCOL_ENABLED);
 #ifdef DEBUG
-	LOGi("DEBUG: defined")
+	LOGi("DEBUG: defined");
 #else
-	LOGi("DEBUG: undefined")
+	LOGi("DEBUG: undefined");
 #endif
 	LOG_MEMORY;
 }

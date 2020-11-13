@@ -45,11 +45,11 @@ void FactoryReset::resetTimeout() {
 
 void FactoryReset::timeout() {
 	_recoveryEnabled = false;
-	LOGi("Recovery period expired")
+	LOGi("Recovery period expired");
 	TYPIFY(STATE_FACTORY_RESET) resetState;
 	State::getInstance().get(CS_TYPE::STATE_FACTORY_RESET, &resetState, sizeof(resetState));
 	if (resetState == FACTORY_RESET_STATE_LOWTX) {
-		LOGi("Change to normal mode")
+		LOGi("Change to normal mode");
 		Advertiser::getInstance().changeToNormalTxPower();
 	}
 	resetState = FACTORY_RESET_STATE_NORMAL;
@@ -81,12 +81,12 @@ void FactoryReset::enableRecovery(bool enable) {
 bool FactoryReset::recover(uint32_t resetCode) {
 	// we check the RTC in case the Timer is busy.
 	if (!_recoveryEnabled || RTC::difference(RTC::getCount(), _rtcStartTime) > RTC::msToTicks(FACTORY_RESET_TIMEOUT)) {
-		LOGi("recovery off")
+		LOGi("recovery off");
 		return false;
 	}
 
 	if (!validateResetCode(resetCode)) {
-		LOGi("bad recovery code")
+		LOGi("bad recovery code");
 		return false;
 	}
 

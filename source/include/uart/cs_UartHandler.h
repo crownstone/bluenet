@@ -200,7 +200,7 @@ private:
 	bool mustEncrypt(UartProtocol::Encrypt encrypt, UartOpcodeTx opCode);
 
 	/**
-	 * Whether an incoming msg must've been encrypted
+	 * Whether an incoming msg must've been encrypted.
 	 */
 	bool mustBeEncrypted(UartOpcodeRx opCode);
 
