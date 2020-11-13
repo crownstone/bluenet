@@ -155,7 +155,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 			// First check if it's already in ram.
 			ret_code = loadFromRam(data);
 			if (ret_code == ERR_SUCCESS) {
-//				LOGStateDebug("Loaded from RAM: %s", TypeName(data.type));
+//				LOGStateDebug("Loaded from RAM: $typeName(%u)", data.type);
 				return ERR_SUCCESS;
 			}
 			// Else we're going to add a new type to the ram data.
@@ -163,7 +163,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 
 			// See if we need to check flash.
 			if (DefaultLocation(type) == PersistenceMode::RAM) {
-				LOGd("Load default: %s", TypeName(ram_data.type));
+				LOGd("Load default: $typeName(%u)", ram_data.type);
 				ret_code = getDefaultValue(ram_data);
 				if (ret_code != ERR_SUCCESS) {
 					return ret_code;
@@ -184,7 +184,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 					}
 					case ERR_NOT_FOUND:
 					default: {
-						LOGd("Load default: %s", TypeName(ram_data.type));
+						LOGd("Load default: $typeName(%u)", ram_data.type);
 						ret_code = getDefaultValue(ram_data);
 						if (ret_code != ERR_SUCCESS) {
 							return ret_code;
@@ -213,7 +213,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
 	}
-	LOGStateDebug("Set value: %s: %u", TypeName(data.type), data.type);
+	LOGStateDebug("Set value: $typeName(%u)", data.type);
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
 	CS_TYPE type = data.type;
 	cs_state_id_t id = data.id;
@@ -308,7 +308,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 }
 
 cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, const PersistenceMode mode) {
-	LOGStateDebug("Remove value: %s", TypeName(type));
+	LOGStateDebug("Remove value: $typeName(%u)", type);
 	if (!isInitialized()) {
 		LOGe(STR_ERR_NOT_INITIALIZED);
 		return ERR_NOT_INITIALIZED;
@@ -713,7 +713,7 @@ cs_ret_code_t State::setDelayed(const cs_state_data_t & data, uint8_t delaySecon
 cs_ret_code_t State::addToQueue(StateQueueOp operation, const CS_TYPE & type, cs_state_id_t id, uint32_t delayMs,
 		const StateQueueMode mode) {
 	uint32_t delayTicks = delayMs / TICK_INTERVAL_MS;
-	LOGStateDebug("Add to queue op=%u type=%s id=%u delayMs=%u delayTicks=%u", operation, TypeName(type), id, delayMs, delayTicks);
+	LOGStateDebug("Add to queue op=%u type=$typeName(%u) id=%u delayMs=%u delayTicks=%u", operation, type, id, delayMs, delayTicks);
 	bool found = false;
 	switch (operation) {
 		case CS_STATE_QUEUE_OP_WRITE:

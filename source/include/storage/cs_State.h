@@ -14,21 +14,21 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <vector>
 
-constexpr const char* TypeName(OperationMode const & mode) {
+constexpr const char* operationModeName(OperationMode const & mode) {
     switch(mode) {
-	case OperationMode::OPERATION_MODE_SETUP:
-	    return "OPERATION_MODE_SETUP";
-	case OperationMode::OPERATION_MODE_DFU:
-	    return "OPERATION_MODE_DFU";
-	case OperationMode::OPERATION_MODE_FACTORY_RESET:
-	    return "OPERATION_MODE_FACTORY_RESET";
-	case OperationMode::OPERATION_MODE_NORMAL:
-	    return "OPERATION_MODE_NORMAL";
-	case OperationMode::OPERATION_MODE_UNINITIALIZED:
-	    return "OPERATION_MODE_UNINITIALIZED";
+		case OperationMode::OPERATION_MODE_SETUP:
+			return "SETUP";
+		case OperationMode::OPERATION_MODE_DFU:
+			return "DFU";
+		case OperationMode::OPERATION_MODE_FACTORY_RESET:
+			return "FACTORY_RESET";
+		case OperationMode::OPERATION_MODE_NORMAL:
+			return "NORMAL";
+		case OperationMode::OPERATION_MODE_UNINITIALIZED:
+			return "UNINITIALIZED";
     }
     // should never be reached
-    return "Mode does not exist!";
+    return "Unknown mode!";
 }
 
 constexpr int ValidMode(OperationMode const & mode) {

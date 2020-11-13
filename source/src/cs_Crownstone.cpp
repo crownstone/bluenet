@@ -503,8 +503,8 @@ void Crownstone::createService(const ServiceEvent event) {
 
 void Crownstone::switchMode(const OperationMode & newMode) {
 
-	LOGd("Current mode: %s", TypeName(_oldOperationMode));
-	LOGd("Switch to mode: %s", TypeName(newMode));
+	LOGd("Current mode: %s", operationModeName(_oldOperationMode));
+	LOGd("Switch to mode: %s", operationModeName(newMode));
 
 	switch(_oldOperationMode) {
 		case OperationMode::OPERATION_MODE_UNINITIALIZED:
@@ -910,7 +910,7 @@ void Crownstone::handleEvent(event_t & event) {
 			break;
 		}
 		default:
-			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
+			LOGnone("Event: $typeName(%u)", to_underlying_type(event.type));
 	}
 
 	// 	case CS_TYPE::CONFIG_IBEACON_ENABLED: {

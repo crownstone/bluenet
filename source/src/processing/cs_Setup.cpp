@@ -170,7 +170,7 @@ void Setup::finalize() {
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 	LOGd("New mode is 0x%X", mode);
 	OperationMode operationMode = static_cast<OperationMode>(mode);
-	LOGd("Operation mode: %s", TypeName(operationMode));
+	LOGd("Operation mode: %s", operationModeName(operationMode));
 	if (!ValidMode(operationMode)) {
 		LOGe("Invalid operation mode!");
 		// for now continue with reset (will be considered setup mode)

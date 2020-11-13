@@ -288,12 +288,12 @@ void ServiceData::handleEvent(event_t & event) {
 	// Keep track of the BLE connection status. If we are connected we do not need to update the packet.
 	switch(event.type) {
 		case CS_TYPE::EVT_BLE_CONNECT: {
-			LOGd("Event: %s", TypeName(event.type));
+			LOGd("Connected");
 			_connected = true;
 			break;
 		}
 		case CS_TYPE::EVT_BLE_DISCONNECT: {
-			LOGd("Event: %s", TypeName(event.type));
+			LOGd("Disconnected");
 			_connected = false;
 			updateAdvertisement(false);
 			break;
@@ -302,11 +302,11 @@ void ServiceData::handleEvent(event_t & event) {
 //		case CS_TYPE::EVT_DIMMER_FORCED_OFF:
 //		case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 //		case CS_TYPE::EVT_RELAY_FORCED_ON:
-//			LOGd("Event: %s", TypeName(event.type));
+//			LOGd("Event: $typeName(%u)", event.type);
 //			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, true);
 //			break;
 		case CS_TYPE::STATE_ERRORS: {
-			LOGd("Event: %s", TypeName(event.type));
+			LOGd("Event: $typeName(%u)", event.type);
 			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*) event.data;
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors->asInt);
 			break;

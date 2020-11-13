@@ -594,7 +594,7 @@ size16_t TypeSize(CS_TYPE const & type){
 	return 0;
 }
 
-const char* TypeName(CS_TYPE const & type) {
+const char* typeName(CS_TYPE const & type) {
 
 	switch(type) {
 	case CS_TYPE::CONFIG_ADV_INTERVAL: return "CONFIG_ADV_INTERVAL";
