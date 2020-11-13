@@ -65,6 +65,20 @@ typedef enum {
 // To disable particular logs, but without commenting it.
 #define LOGnone LOG_IGNORE
 
+
+
+#define H1(s,i,x)   (x*65599u+(uint8_t)s[(i)<strlen(s)?strlen(s)-1-(i):strlen(s)])
+#define H4(s,i,x)   H1(s,i,H1(s,i+1,H1(s,i+2,H1(s,i+3,x))))
+#define H16(s,i,x)  H4(s,i,H4(s,i+4,H4(s,i+8,H4(s,i+12,x))))
+#define H32(s,i,x)  H16(s,i,H16(s,i+16,x))
+#define H64(s,i,x)  H16(s,i,H16(s,i+16,H16(s,i+32,H16(s,i+48,x))))
+#define H256(s,i,x) H64(s,i,H64(s,i+64,H64(s,i+128,H64(s,i+192,x))))
+
+//#define STR_HASH(s)    ((uint32_t)(H256(s,0,0)^(H256(s,0,0)>>16)))
+#define STR_HASH(s)    ((uint32_t)(H32(s,0,0)^(H32(s,0,0)>>16)))
+
+
+
 #if !defined HOST_TARGET && (CS_SERIAL_NRF_LOG_ENABLED > 0)
 	#define LOG_FLUSH NRF_LOG_FLUSH
 #else
@@ -102,9 +116,9 @@ typedef enum {
 					cs_write(fmt, ##__VA_ARGS__); \
 				}
 
-		#define logLN(level, fmt, ...) _log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
+//		#define logLN(level, fmt, ...) _log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
 //		#define logLN(level, fmt, ...) cs_write_args(_FILE, __LINE__, ##__VA_ARGS__); _log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
-//		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(_FILE, __LINE__, ##__VA_ARGS__); }
+		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(_FILE, __LINE__, ##__VA_ARGS__); }
 
 
 	#else
@@ -228,8 +242,8 @@ void writeByte(uint8_t val);
 
 
 
-template<class T>
-void cs_write_val(const T val) {
+template<typename T>
+void cs_write_val(T val) {
 	const volatile uint8_t* const valPtr = reinterpret_cast<const volatile uint8_t* const>(&val);
 	cs_write("val[");
 	for (unsigned int i = 0; i < sizeof(T); ++i) {
@@ -237,6 +251,9 @@ void cs_write_val(const T val) {
 	}
 	cs_write("] ");
 }
+
+template<>
+void cs_write_val(char* str);
 
 //typedef char* cs_char_ptr_t;
 //

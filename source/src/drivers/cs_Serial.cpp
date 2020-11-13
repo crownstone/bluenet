@@ -253,6 +253,15 @@ inline void _writeByte(uint8_t val) {
 #endif
 }
 
+template<>
+void cs_write_val(char* str) {
+	cs_write("str(len=%u)[", strlen(str));
+	for (unsigned int i = 0; i < strlen(str); ++i) {
+		cs_write("%u ", str[i]);
+	}
+	cs_write("] ");
+}
+
 /**
  * A write function with a format specifier.
  */
