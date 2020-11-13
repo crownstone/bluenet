@@ -6,10 +6,6 @@
  */
 #pragma once
 
-//#ifdef __cplusplus
-//extern "C" {
-//#endif
-
 #include <cfg/cs_Debug.h>
 #include <cfg/cs_Git.h>
 #include <ble/cs_Nordic.h>
@@ -213,33 +209,6 @@ bool serial_tx_ready();
  */
 void writeByte(uint8_t val);
 
-//template<class T, typename = void>
-//void cs_write_val(const T& val) {
-//	cs_write("void[]");
-//}
-//
-//template<class T>
-//void cs_write_val<T, typename std::enable_if<std::is_same< T, const char* >::value>::type>(const char *str) {
-//	cs_write("str(len=%u)[", strlen(str));
-//	for (unsigned int i = 0; i < strlen(str); ++i) {
-//		cs_write("%u ", str[i]);
-//	}
-//	cs_write("] ");
-//}
-//
-//template<class T>
-//void cs_write_val<T, typename std::enable_if<std::is_arithmetic<T>::value >::type>(const T& val) {
-//	const volatile uint8_t* const valPtr = reinterpret_cast<const volatile uint8_t* const>(&val);
-//	cs_write("val[");
-//	for (unsigned int i = 0; i < sizeof(T); ++i) {
-//		cs_write("%u ", valPtr[i]);
-//	}
-//	cs_write("] ");
-//}
-
-
-
-
 
 
 template<typename T>
@@ -255,95 +224,13 @@ void cs_write_val(T val) {
 template<>
 void cs_write_val(char* str);
 
-//typedef char* cs_char_ptr_t;
-//
-//template<>
-//void cs_write_val(const cs_char_ptr_t& str) {
-//	cs_write("str(len=%u)[", strlen(str));
-//	for (unsigned int i = 0; i < strlen(str); ++i) {
-//		cs_write("%u ", str[i]);
-//	}
-//	cs_write("] ");
-//}
-//
-//template<>
-//void cs_write_val(const char[] str) {
-//	cs_write("str(len=%u)[", strlen(str));
-//	for (unsigned int i = 0; i < strlen(str); ++i) {
-//		cs_write("%u ", str[i]);
-//	}
-//	cs_write("] ");
-//}
+template<>
+void cs_write_val(const char* str);
 
-//void cs_write_val(const uint8_t* valPtr, size_t valSize) {
-//	cs_write("[");
-//	for (unsigned int i = 0; i < valSize; ++i) {
-//		cs_write("%u ", valPtr[i]);
-//	}
-//	cs_write("] ");
-//}
-//
-//void cs_write_val(const uint8_t& val) {
-//	cs_write_val(&val, sizeof(val));
-//}
-//
-//void cs_write_val(const uint16_t& val) {
-//	cs_write_val(reinterpret_cast<uint8_t*>(&val), sizeof(val));
-//}
-//
-//void cs_write_val(const uint32_t& val) {
-//	cs_write_val(reinterpret_cast<uint8_t*>(&val), sizeof(val));
-//}
-//
-//void cs_write_val(const uint64_t& val) {
-//	cs_write_val(reinterpret_cast<uint8_t*>(&val), sizeof(val));
-//}
-//
-//void cs_write_val(const int8_t& val) {
-//	cs_write_val(reinterpret_cast<uint8_t*>(&val), sizeof(val));
-//}
-//
-//void cs_write_val(const int16_t& val) {
-//	cs_write_val(reinterpret_cast<uint8_t*>(&val), sizeof(val));
-//}
-//
-//void cs_write_val(const int32_t& val) {
-//	cs_write_val(reinterpret_cast<uint8_t*>(&val), sizeof(val));
-//}
-//
-//void cs_write_val(const int64_t& val) {
-//	cs_write_val(reinterpret_cast<uint8_t*>(&val), sizeof(val));
-//}
-//
-//void cs_write_val(const char *str) {
-//	cs_write_val(reinterpret_cast<uint8_t*>(&str), strlen(str));
-//}
-
+// Uses the fold expression, an easy way to replace a recursive call.
 template<class... Args>
 void cs_write_args(const Args&... args) {
 	cs_write("args=");
 	(cs_write_val(args), ...);
 	cs_write(SERIAL_CRLF);
 }
-
-
-//#define cs_write_args_x(N, ...) CONCAT_2(cs_write_args_, N) (__VA_ARGS__)
-//#define cs_write_args(...) cs_write_args_x(NUM_VA_ARGS(__VA_ARGS__), __VA_ARGS__)
-//
-//
-//#define cs_write_args_1(arg0) cs_write_val(arg0)
-//#define cs_write_args_2(arg0, arg1) cs_write_val(arg0); cs_write_val(arg1)
-//#define cs_write_args_3(arg0, arg1, arg2) cs_write_val(arg0); cs_write_val(arg1); cs_write_val(arg2)
-//#define cs_write_args_4(arg0, arg1, arg2, arg3) cs_write_val(arg0); cs_write_val(arg1); cs_write_val(arg2); cs_write_val(arg3)
-//#define cs_write_args_5(arg0, arg1, arg2, arg3, arg4) cs_write_val(arg0); cs_write_val(arg1); cs_write_val(arg2); cs_write_val(arg3); cs_write_val(arg4)
-//#define cs_write_args_6(arg0, arg1, arg2, arg3, arg4, arg5) cs_write_val(arg0); cs_write_val(arg1); cs_write_val(arg2); cs_write_val(arg3); cs_write_val(arg4); cs_write_val(arg5)
-//#define cs_write_args_7(arg0, arg1, arg2, arg3, arg4, arg5, arg6) cs_write_val(arg0); cs_write_val(arg1); cs_write_val(arg2); cs_write_val(arg3); cs_write_val(arg4); cs_write_val(arg5); cs_write_val(arg6)
-//#define cs_write_args_8(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) cs_write_val(arg0); cs_write_val(arg1); cs_write_val(arg2); cs_write_val(arg3); cs_write_val(arg4); cs_write_val(arg5); cs_write_val(arg6); cs_write_val(arg7)
-
-
-
-
-
-//#ifdef __cplusplus
-//}
-//#endif

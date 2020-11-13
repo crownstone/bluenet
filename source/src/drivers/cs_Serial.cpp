@@ -262,6 +262,15 @@ void cs_write_val(char* str) {
 	cs_write("] ");
 }
 
+template<>
+void cs_write_val(const char* str) {
+	cs_write("const str(len=%u)[", strlen(str));
+	for (unsigned int i = 0; i < strlen(str); ++i) {
+		cs_write("%u ", str[i]);
+	}
+	cs_write("] ");
+}
+
 /**
  * A write function with a format specifier.
  */
