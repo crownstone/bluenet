@@ -62,10 +62,13 @@ typedef enum {
 #define LOGnone LOG_IGNORE
 
 
-
+/**
+ * Returns the DJB2 hash of a the reversed file name, up to the first '/'.
+ *
+ * TODO: For some reason, if this returns a uint16_t, it increased the size by 3k?
+ */
 template<size_t strLen>
-constexpr uint32_t strHash(const char* str) {
-	// Used implementation from here: http://www.cse.yorku.ca/~oz/hash.html
+constexpr uint32_t fileNameHash(const char* str) {
 	uint16_t hash = 5381;
 	for (size_t i = strLen-1; i <= 0; --i) {
 		if (str[i] == '/') {
@@ -108,7 +111,7 @@ constexpr uint32_t strHash(const char* str) {
 		#include "string.h"
 		//	#define _FILE (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 		//  #define STRING_BACK(s, l) (sizeof(s) > l ? s + (sizeof(s)-l-1) : s)
-		#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__)
+		#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__) // sizeof() returns the buffer size, so including the null terminator.
 
 		#define _log(level, fmt, ...) \
 				if (level <= SERIAL_VERBOSITY) { \
@@ -118,7 +121,8 @@ constexpr uint32_t strHash(const char* str) {
 //		#define logLN(level, fmt, ...) _log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
 //		#define logLN(level, fmt, ...) cs_write_args(_FILE, __LINE__, ##__VA_ARGS__); _log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
 //		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(_FILE, __LINE__, ##__VA_ARGS__); }
-		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(strHash<30>(_FILE), __LINE__, ##__VA_ARGS__); }
+//		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(fileNameHash<30>(_FILE), __LINE__, ##__VA_ARGS__); }
+		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(fileNameHash<sizeof(__FILE__)>(__FILE__), __LINE__, ##__VA_ARGS__); }
 
 
 	#else
