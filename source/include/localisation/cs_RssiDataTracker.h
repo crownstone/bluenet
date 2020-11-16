@@ -120,6 +120,9 @@ private:
 	 */
 	uint32_t flushAggregatedRssiData();
 
+	/**
+	 * Sends the given ping message over UART.
+	 */
 	void pushPingMsgToHost(rssi_ping_message_t* ping_msg);
 
 	/**

@@ -179,19 +179,10 @@ void RssiDataTracker::handleSecondaryPingMessage(
 }
 
 void RssiDataTracker::pushPingMsgToHost(rssi_ping_message_t *ping_msg) {
-	// TODO: change to formal uart protocol now that the hub will use it.
-
-	char expressionstring[50];
-
-	// crude workaround: we're using '_' as separator since
-	// the strings that are pushed to test suite are separated
-	// on ',' and we're using this expressionstring to push
-	// stuff of several different pairs of crownstones but want
-	// to split that out on the host side.
-	sprintf(expressionstring, "rssi_%d_%d_%d", ping_msg->sender_id,
-	        ping_msg->recipient_id, ping_msg->channel);
-
-	TEST_PUSH_EXPR_D(this, expressionstring, ping_msg->rssi);
+	UartHandler::getInstance().writeMsg(
+			UART_OPCODE_TX_RSSI_PING_MESSAGE,
+			reinterpret_cast<uint8_t*>(ping_msg),
+			sizeof(*ping_msg));
 }
 
 void RssiDataTracker::handleGenericMeshMessage(MeshMsgEvent *mesh_msg_evt) {
