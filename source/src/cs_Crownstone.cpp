@@ -127,9 +127,9 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
 	LOGi("UART binary protocol set: %d", CS_UART_BINARY_PROTOCOL_ENABLED);
 #ifdef DEBUG
-	LOGi("DEBUG: defined")
+	LOGi("DEBUG: defined");
 #else
-	LOGi("DEBUG: undefined")
+	LOGi("DEBUG: undefined");
 #endif
 	LOG_MEMORY;
 }
@@ -503,8 +503,8 @@ void Crownstone::createService(const ServiceEvent event) {
 
 void Crownstone::switchMode(const OperationMode & newMode) {
 
-	LOGd("Current mode: %s", TypeName(_oldOperationMode));
-	LOGd("Switch to mode: %s", TypeName(newMode));
+	LOGd("Current mode: %s", operationModeName(_oldOperationMode));
+	LOGd("Switch to mode: %s", operationModeName(newMode));
 
 	switch(_oldOperationMode) {
 		case OperationMode::OPERATION_MODE_UNINITIALIZED:
@@ -910,7 +910,7 @@ void Crownstone::handleEvent(event_t & event) {
 			break;
 		}
 		default:
-			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
+			LOGnone("Event: $typeName(%u)", to_underlying_type(event.type));
 	}
 
 	// 	case CS_TYPE::CONFIG_IBEACON_ENABLED: {

@@ -14,6 +14,7 @@
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
 #include <storage/cs_State.h>
 #include <time/cs_SystemTime.h>
+#include <uart/cs_UartConnection.h>
 #include <uart/cs_UartHandler.h>
 #include <util/cs_Utils.h>
 
@@ -172,6 +173,37 @@ void ServiceData::updateAdvertisement(bool initial) {
 		}
 	}
 
+	TYPIFY(STATE_HUB_MODE) hubMode;
+	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
+	if (hubMode) {
+		_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
+		_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_HUB_STATE;
+		_serviceData.params.encrypted.hubState.id = _crownstoneId;
+		auto selfFlags = UartConnection::getInstance().getSelfStatus().flags.flags;
+		auto hubFlags = UartConnection::getInstance().getUserStatus().flags.flags;
+
+		_serviceData.params.encrypted.hubState.flags.asInt = 0;
+		_serviceData.params.encrypted.hubState.flags.flags.uartAlive = UartConnection::getInstance().isAlive();
+		_serviceData.params.encrypted.hubState.flags.flags.uartAliveEncrypted = UartConnection::getInstance().isEncryptedAlive();
+		_serviceData.params.encrypted.hubState.flags.flags.uartEncryptionRequiredByStone = selfFlags.encryptionRequired;
+		_serviceData.params.encrypted.hubState.flags.flags.uartEncryptionRequiredByHub = hubFlags.encryptionRequired;
+		_serviceData.params.encrypted.hubState.flags.flags.hasBeenSetUp = hubFlags.hasBeenSetUp;
+		_serviceData.params.encrypted.hubState.flags.flags.hasInternet = hubFlags.hasInternet;
+		_serviceData.params.encrypted.hubState.flags.flags.hasError = hubFlags.hasError;
+
+		auto hubData = UartConnection::getInstance().getUserStatus();
+		if (hubData.type == UART_HUB_DATA_TYPE_CROWNSTONE_HUB) {
+			memcpy(_serviceData.params.encrypted.hubState.hubData, hubData.data, SERVICE_DATA_HUB_DATA_SIZE);
+		}
+		else {
+			memset(_serviceData.params.encrypted.hubState.hubData, 0, SERVICE_DATA_HUB_DATA_SIZE);
+		}
+		_serviceData.params.encrypted.hubState.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+		_serviceData.params.encrypted.hubState.reserved = 0;
+		_serviceData.params.encrypted.hubState.validation = SERVICE_DATA_VALIDATION;
+		serviceDataSet = true;
+	}
+
 	if (!serviceDataSet) {
 		if (_updateCount % 16 == 0) {
 			TYPIFY(STATE_BEHAVIOUR_MASTER_HASH) behaviourHash;
@@ -256,12 +288,12 @@ void ServiceData::handleEvent(event_t & event) {
 	// Keep track of the BLE connection status. If we are connected we do not need to update the packet.
 	switch(event.type) {
 		case CS_TYPE::EVT_BLE_CONNECT: {
-			LOGd("Event: %s", TypeName(event.type));
+			LOGd("Connected");
 			_connected = true;
 			break;
 		}
 		case CS_TYPE::EVT_BLE_DISCONNECT: {
-			LOGd("Event: %s", TypeName(event.type));
+			LOGd("Disconnected");
 			_connected = false;
 			updateAdvertisement(false);
 			break;
@@ -270,11 +302,11 @@ void ServiceData::handleEvent(event_t & event) {
 //		case CS_TYPE::EVT_DIMMER_FORCED_OFF:
 //		case CS_TYPE::EVT_SWITCH_FORCED_OFF:
 //		case CS_TYPE::EVT_RELAY_FORCED_ON:
-//			LOGd("Event: %s", TypeName(event.type));
+//			LOGd("Event: $typeName(%u)", event.type);
 //			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, true);
 //			break;
 		case CS_TYPE::STATE_ERRORS: {
-			LOGd("Event: %s", TypeName(event.type));
+			LOGd("Event: $typeName(%u)", event.type);
 			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*) event.data;
 			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors->asInt);
 			break;

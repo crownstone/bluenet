@@ -38,6 +38,7 @@ enum ServiceDataEncryptedType {
 	SERVICE_DATA_TYPE_EXT_STATE = 2,
 	SERVICE_DATA_TYPE_EXT_ERROR = 3,
 	SERVICE_DATA_TYPE_ALTERNATIVE_STATE = 4,
+	SERVICE_DATA_TYPE_HUB_STATE = 5,
 };
 
 struct __attribute__((packed)) service_data_encrypted_state_t {
@@ -67,11 +68,13 @@ struct __attribute__((packed)) service_data_encrypted_alternative_state_t {
 
 union __attribute__((packed)) service_data_encrypted_hub_state_flags_t {
 	struct __attribute__((packed)) {
-		bool uartAlive : 1;
-		bool uartEncrypted : 1;
-		bool hasBeenSetUp : 1;
-		bool hasInternet : 1;
-		bool hasError : 1;
+		bool uartAlive : 1;                      // Whether the UART connection is alive (heartbeats are received).
+		bool uartAliveEncrypted : 1;             // Whether the UART connection is alive (encrypted heartbeats are received).
+		bool uartEncryptionRequiredByStone : 1;  // Whether the encrypted UART is required by this Crownstone.
+		bool uartEncryptionRequiredByHub : 1;    // Whether the encrypted UART is required by the hub.
+		bool hasBeenSetUp : 1;                   // Whether the hub has been set up.
+		bool hasInternet : 1;                    // Whether the hub has internet connection.
+		bool hasError : 1;                       // Whether the hub has some error.
 	} flags;
 	uint8_t asInt;
 };
@@ -129,6 +132,7 @@ struct __attribute__((packed)) service_data_encrypted_t {
 		service_data_encrypted_ext_state_t extState;
 		service_data_encrypted_ext_error_t extError;
 		service_data_encrypted_alternative_state_t altState;
+		service_data_encrypted_hub_state_t hubState;
 	};
 };
 

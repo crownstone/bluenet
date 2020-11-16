@@ -42,8 +42,8 @@ Although the name suggests this is encrypted, only the `encrypted data` is actua
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8[] | Packet nonce | 3 | Packet nonce.
-uint8   | Key ID       | 1 | Key ID used for encryption.
+uint8[] | Packet nonce | 3 | Packet nonce: should be different random numbers each time.
+uint8   | Key ID       | 1 | Key ID used for encryption: always 0 for now. Also determines access level: always admin for now.
 uint8[] | Encrypted data | N | Encrypted with [AES CTR](PROTOCOL.md#ctr_encryption). Get a (new) session nonce with the session nonce command.
 
 <a name="encrypted_data"></a>
@@ -53,7 +53,7 @@ uint8[] | Encrypted data | N | Encrypted with [AES CTR](PROTOCOL.md#ctr_encrypti
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint32  | Validation   | 4 | Validation
+uint32  | Validation   | 4 | Validation: must be 0xCAFEBABE.
 uint16  | Message size | 2 | Size of the uart message in bytes.
 uint8[] | [UART message](#uart_msg) | Size | The uart message.
 uint8[] | Padding      | N | Padding to make this whole packet size a multiple of 16.
@@ -87,7 +87,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 ----- | ----------------------------- | --------- | ------ | -----------
 0     | Hello                         | Never     | -      | First command that should sent, used to determine whether this is the right crownstone, and whether encryption has to be used.
 1     | Session nonce                 | Never     | [Session nonce](#cmd_session_nonce_packet) | Refresh the session nonce.
-2     | Heartbeat                     | Yes       | [Heartbeat](#cmd_heartbeat_packet) | Used to know whether the UART connection is alive.
+2     | Heartbeat                     | Optional  | [Heartbeat](#cmd_heartbeat_packet) | Used to know whether the UART connection is alive.
 3     | Status                        | Optional  | [Status](#cmd_status_packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
 4     | Get MAC                       | Never     | -      | Get MAC address of this Crownstone.
 10    | Control command               | Yes       | [Control msg](../docs/PROTOCOL.md#control_packet) | Send a control command.
@@ -122,13 +122,14 @@ Type  | Type name                     | Encrypted | Data   | Description
 ----- | ----------------------------- | --------- | ------ | -----------
 0     | Hello                         | Never     | [Hello](#ret_hello_packet) | Hello reply.
 1     | Session nonce                 | Never     | [Session nonce](#ret_session_nonce_packet) | The new session nonce.
-2     | Heartbeat                     | Yes       | -      | Heartbeat reply.
+2     | Heartbeat                     | Optional  | -      | Heartbeat reply. Will be encrypted if the command was encrypted too.
 3     | Status                        | Never     | [Status](#ret_status_packet) | Status reply and event.
 4     | MAC                           | Never     | uint8 [6] | The MAC address of this crownstone.
 10    | Control result                | Yes       | [Result packet](../docs/PROTOCOL.md#result_packet) | Result of a control command.
 10000 | Uart msg                      | Yes       | string | As requested via control command `UART message`.
 10001 | Session nonce missing         | Never     | -      | The Crownstone has no session nonce, please send one.
-10002 | Service data                  | Yes       | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Service data of this Crownstone (unencrypted).
+10002 | Service data                  | Yes       | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Service data of this Crownstone.
+10003 | Decryption failed             | Never     | -      | Decryption failed due to missing or wrong key.
 10004 | Presence change               | Yes       | [Presence change packet](#presence_change_packet) | Sent when the presence has changed. Note: a profile ID can be at multiple locations at the same time.
 10005 | Factory reset                 | Yes       | -      | Sent when a factory reset will be performed.
 10006 | Booted                        | Never     | -      | This Crownstone just booted, you probably want to start a new session.

@@ -565,29 +565,12 @@ typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
 
-/*---------------------------------------------------------------------------------------------------------------------
- *
- *                                               Sizes
- *
- *-------------------------------------------------------------------------------------------------------------------*/
-
-
-
 /**
  * The size of a particular default value. In case of strings or arrays this is the maximum size of the corresponding
  * field. There are no fields that are of unrestricted size. For fields that are not implemented it is possible to
  * set size to 0.
  */
 size16_t TypeSize(CS_TYPE const & type);
-
-/*---------------------------------------------------------------------------------------------------------------------
- *
- *                                               Names
- *
- *-------------------------------------------------------------------------------------------------------------------*/
-
-
-const char* TypeName(CS_TYPE const & type);
 
 /**
  * Check if type can have multiple IDs.
@@ -598,15 +581,6 @@ bool hasMultipleIds(CS_TYPE const & type);
  * Check if type should be removed on factory reset.
  */
 bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id);
-
-
-/*---------------------------------------------------------------------------------------------------------------------
- *
- *                                               Defaults
- *
- *-------------------------------------------------------------------------------------------------------------------*/
-
-
 
 /**
  * Gives the required access level to set a state type.

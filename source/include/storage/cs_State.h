@@ -14,21 +14,21 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <vector>
 
-constexpr const char* TypeName(OperationMode const & mode) {
+constexpr const char* operationModeName(OperationMode const & mode) {
     switch(mode) {
-	case OperationMode::OPERATION_MODE_SETUP:
-	    return "OPERATION_MODE_SETUP";
-	case OperationMode::OPERATION_MODE_DFU:
-	    return "OPERATION_MODE_DFU";
-	case OperationMode::OPERATION_MODE_FACTORY_RESET:
-	    return "OPERATION_MODE_FACTORY_RESET";
-	case OperationMode::OPERATION_MODE_NORMAL:
-	    return "OPERATION_MODE_NORMAL";
-	case OperationMode::OPERATION_MODE_UNINITIALIZED:
-	    return "OPERATION_MODE_UNINITIALIZED";
+		case OperationMode::OPERATION_MODE_SETUP:
+			return "SETUP";
+		case OperationMode::OPERATION_MODE_DFU:
+			return "DFU";
+		case OperationMode::OPERATION_MODE_FACTORY_RESET:
+			return "FACTORY_RESET";
+		case OperationMode::OPERATION_MODE_NORMAL:
+			return "NORMAL";
+		case OperationMode::OPERATION_MODE_UNINITIALIZED:
+			return "UNINITIALIZED";
     }
     // should never be reached
-    return "Mode does not exist!";
+    return "Unknown mode!";
 }
 
 constexpr int ValidMode(OperationMode const & mode) {
@@ -170,7 +170,7 @@ public:
 	/**
 	 * Get copy of a state value.
 	 *
-	 * @param[in,out] data        Data struct with state type, id, data, and size.
+	 * @param[in,out] data        Data struct with state type, id, data, and size. See cs_state_data_t.
 	 * @param[in] mode            Indicates whether to get data from RAM, FLASH, FIRMWARE_DEFAULT, or a combination of this.
 	 * @return                    Return code.
 	 */

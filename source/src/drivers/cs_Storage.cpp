@@ -640,7 +640,7 @@ void Storage::eraseNextPage() {
  * Maybe we should check if data is stored at right boundary.
  *
  * if ((uint32_t)data.value % 4u != 0) {
- *		LOGe("Unaligned type: %s: %p", TypeName(type), data.value);
+ *		LOGe("Unaligned type: %u: %p", type, data.value);
  *	}
  */
 uint8_t* Storage::allocate(size16_t& size) {
@@ -777,10 +777,6 @@ cs_ret_code_t Storage::getErrorCode(ret_code_t code) {
 		return ERR_UNSPECIFIED;
 	}
 }
-
-//void Storage::print(const std::string & prefix, CS_TYPE type) {
-//	LOGStorageDebug("%s %s (%i)", prefix.c_str(), TypeName(type), type);
-//}
 
 void Storage::handleWriteEvent(fds_evt_t const * p_fds_evt) {
 	clearBusy(p_fds_evt->write.record_key);

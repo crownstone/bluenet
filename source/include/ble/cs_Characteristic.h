@@ -505,7 +505,7 @@ protected:
 		// We can flood the chip with writes and a potential forced disconnect will be delayed and could crash the chip.
 		//TODO: have this from the stack directly.
 		if (ConnectionEncryption::getInstance().allowedToWrite()) {
-			LOGi("Not allowed to write, disconnect in progress")
+			LOGi("Not allowed to write, disconnect in progress");
 			return;
 		}
 
@@ -539,7 +539,7 @@ protected:
 
 			// disconnect on failure or if the user is not authenticated
 			if (!KeysAndAccess::getInstance().allowAccess(_minAccessLevel , accessLevel)) {
-				LOGi("insufficient access")
+				LOGi("insufficient access");
 				ConnectionEncryption::getInstance().disconnect();
 				return;
 			}

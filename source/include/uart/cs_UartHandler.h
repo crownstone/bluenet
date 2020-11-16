@@ -56,6 +56,11 @@ public:
 	ret_code_t writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
 
 	/**
+	 * Convenience method to write a msg over UART without payload data.
+	 */
+	ret_code_t writeMsg(UartOpcodeTx opCode);
+
+	/**
 	 * Write a msg over UART in a streaming manner.
 	 * Must be followed by 1 or more writeMsgPart(), followed by 1 writeMsgEnd().
 	 *
@@ -190,9 +195,14 @@ private:
 	cs_ret_code_t writeWrapperStart(UartMsgType msgType, uint16_t payloadSize);
 
 	/**
-	 * Whether to encrypt a msg.
+	 * Whether to encrypt an outgoing msg.
 	 */
 	bool mustEncrypt(UartProtocol::Encrypt encrypt, UartOpcodeTx opCode);
+
+	/**
+	 * Whether an incoming msg must've been encrypted.
+	 */
+	bool mustBeEncrypted(UartOpcodeRx opCode);
 
 	/**
 	 * Get required buffer size, given the size of a uart msg.
@@ -245,7 +255,7 @@ private:
 	 *
 	 * Data includes uart msg header.
 	 */
-	void handleUartMsg(uint8_t* data, uint16_t size);
+	void handleUartMsg(uint8_t* data, uint16_t size, EncryptionAccessLevel accessLevel);
 
 	/**
 	 * Reset the read buffer and status.

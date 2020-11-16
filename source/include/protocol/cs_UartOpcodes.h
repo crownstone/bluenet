@@ -53,6 +53,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_BLE_MSG =                          10000, // Sent by command (CMD_UART_MSG), payload: buffer.
 	UART_OPCODE_TX_SESSION_NONCE_MISSING =            10001, // Sent when a session nonce is missing.
 	UART_OPCODE_TX_SERVICE_DATA =                     10002, // Sent when the service data is updated (payload: service_data_t)
+	UART_OPCODE_TX_DECRYPTION_FAILED =                10003, // Sent when decryption failed due to missing or wrong key.
 	UART_OPCODE_TX_PRESENCE_CHANGE =                  10004, // Sent when the presence has changed, payload: presence_change_t. When the first user enters, multiple msgs will be sent.
 	UART_OPCODE_TX_FACTORY_RESET =                    10005, // Sent when a factory reset is going to be performed.
 	UART_OPCODE_TX_BOOTED =                           10006, // Sent when this crownstone just booted.
@@ -115,6 +116,7 @@ constexpr bool mustBeEncryptedRx(UartOpcodeRx opCode) {
 	switch (opCode) {
 		case UartOpcodeRx::UART_OPCODE_RX_HELLO:
 		case UartOpcodeRx::UART_OPCODE_RX_SESSION_NONCE:
+		case UartOpcodeRx::UART_OPCODE_RX_HEARTBEAT: // optional
 		case UartOpcodeRx::UART_OPCODE_RX_STATUS: // optional
 		case UartOpcodeRx::UART_OPCODE_RX_GET_MAC:
 			return false;
@@ -135,6 +137,7 @@ constexpr bool mustBeEncryptedTx(UartOpcodeTx opCode) {
 		case UartOpcodeTx::UART_OPCODE_TX_SESSION_NONCE:
 		case UartOpcodeTx::UART_OPCODE_TX_STATUS:
 		case UartOpcodeTx::UART_OPCODE_TX_SESSION_NONCE_MISSING:
+		case UartOpcodeTx::UART_OPCODE_TX_DECRYPTION_FAILED:
 		case UartOpcodeTx::UART_OPCODE_TX_BOOTED:
 		case UartOpcodeTx::UART_OPCODE_TX_MAC:
 			return false;

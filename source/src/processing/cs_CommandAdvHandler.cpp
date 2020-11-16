@@ -247,13 +247,15 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	cs_ret_code_t decryptionResult = ERR_NO_ACCESS;
 	uint8_t decryptedData[AES_BLOCK_SIZE];
 	uint8_t key[ENCRYPTION_KEY_LENGTH];
+	cs_buffer_size_t decryptedPayloadSize;
 	if (KeysAndAccess::getInstance().getKey(accessLevel, key, sizeof(key))) {
 		decryptionResult = AES::getInstance().decryptCtr(
 				cs_data_t(key, sizeof(key)),
 				nonce,
 				encryptedPayload,
 				cs_data_t(),
-				cs_data_t(decryptedData, sizeof(decryptedData))
+				cs_data_t(decryptedData, sizeof(decryptedData)),
+				decryptedPayloadSize
 		);
 	}
 	if (decryptionResult != ERR_SUCCESS) {

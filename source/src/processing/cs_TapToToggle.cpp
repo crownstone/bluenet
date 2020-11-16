@@ -93,7 +93,7 @@ void TapToToggle::tick() {
 	if (timeoutCounter) {
 		timeoutCounter--;
 	}
-	LOGT2Tv("scores=%u %u %u", list[0].score, list[1].score, list[2].score)
+	LOGT2Tv("scores=%u %u %u", list[0].score, list[1].score, list[2].score);
 }
 
 void TapToToggle::handleEvent(event_t & event) {

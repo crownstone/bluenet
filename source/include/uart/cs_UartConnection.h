@@ -33,9 +33,14 @@ public:
 	void init();
 
 	/**
-	 * Returns whether encryption of uart messages is required.
+	 * Returns whether the connection is considered to be alive (receiving heartbeats).
 	 */
-	bool isEncryptionRequired();
+	bool isAlive();
+
+	/**
+	 * Returns whether the connection is considered to be alive and encrypted (receiving encrypted heartbeats).
+	 */
+	bool isEncryptedAlive();
 
 	/**
 	 * Returns the UART status reply.
@@ -52,7 +57,7 @@ public:
 	 *
 	 * Sends reply.
 	 */
-	void onHeartBeat(uint16_t timeoutSeconds);
+	void onHeartBeat(uint16_t timeoutSeconds, bool encrypted);
 
 	/**
 	 * To be called on UART status command.
@@ -109,6 +114,9 @@ private:
 
 	//! Keep up whether the connection is considered to be alive.
 	bool _isConnectionAlive = false;
+
+	//! Whether the connection heartbeats are encrypted.
+	bool _isConnectionEncrypted = false;
 
 	/**
 	 * Timeout (in tick events) set by heartbeat.

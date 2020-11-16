@@ -109,7 +109,7 @@ bool ExtendedSwitchBehaviour::isValid(Time currenttime, PresenceStateDescription
 }
 
 void ExtendedSwitchBehaviour::print(){
-    LOGd("## ExtendedSwitchBehaviour:")
+    LOGd("## ExtendedSwitchBehaviour:");
     SwitchBehaviour::print();
     extensionCondition.pred.print();
     

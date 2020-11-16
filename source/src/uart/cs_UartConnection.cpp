@@ -37,6 +37,14 @@ void UartConnection::init() {
 	listen();
 }
 
+bool UartConnection::isAlive() {
+	return _isConnectionAlive;
+}
+
+bool UartConnection::isEncryptedAlive() {
+	return _isConnectionAlive && _isConnectionEncrypted;
+}
+
 const uart_msg_status_reply_t& UartConnection::getSelfStatus() {
 	return _status;
 }
@@ -52,13 +60,15 @@ void UartConnection::onUserStatus(const uart_msg_status_user_t& status) {
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_STATUS, (uint8_t*)&_status, sizeof(_status));
 }
 
-void UartConnection::onHeartBeat(uint16_t timeoutSeconds) {
+void UartConnection::onHeartBeat(uint16_t timeoutSeconds, bool encrypted) {
 	LOGUartconnectionDebug("Heartbeat timeout=%u", timeoutSeconds);
 	_isConnectionAlive = true;
+	_isConnectionEncrypted = encrypted;
 	_connectionTimeoutCountdown = timeoutSeconds * (1000 / TICK_INTERVAL_MS);
 
-	// Reply with a heartbeat.
-	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HEARTBEAT, nullptr, 0);
+	// Reply with a heartbeat, which is only encrypted if the received heartbeat is encrypted.
+	UartProtocol::Encrypt encrypt = encrypted ? UartProtocol::ENCRYPT_OR_FAIL : UartProtocol::Encrypt::ENCRYPT_NEVER;
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HEARTBEAT, nullptr, 0, encrypt);
 }
 
 void UartConnection::onSessionNonce(const uart_msg_session_nonce_t& sessionNonce) {
@@ -97,6 +107,7 @@ void UartConnection::onTick() {
 			LOGi("Connection timed out");
 			// No heartbeat received within timeout: connection died.
 			_isConnectionAlive = false;
+			_isConnectionEncrypted = false;
 		}
 	}
 
