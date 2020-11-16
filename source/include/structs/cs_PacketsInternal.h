@@ -31,11 +31,11 @@
  * Variable length data encapsulation in terms of length and pointer to data.
  */
 struct cs_data_t {
-	buffer_ptr_t data = NULL;      /** < Pointer to data. */
+	buffer_ptr_t data = nullptr;      /** < Pointer to data. */
 	cs_buffer_size_t len = 0;      /** < Length of data. */
 
 	cs_data_t():
-		data(NULL),
+		data(nullptr),
 		len(0)
 	{}
 	cs_data_t(buffer_ptr_t buf, cs_buffer_size_t size):

@@ -1,4 +1,4 @@
-# UART Protocol 1.0
+# UART Protocol 1.0.1
 -------------------
 
 ## Special characters
@@ -139,6 +139,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 10104 | Mesh state part 1             | Yes       | [External state part 1](#mesh_state_part_1) | Part of the state of other Crownstones in the mesh.
 10105 | Mesh result                   | Yes       | [Mesh result](#mesh_result_packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
 10106 | Mesh ack all                  | Yes       | [Mesh ack all result](../docs/PROTOCOL.md#result_packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
+10107 | Rssi ping message             | Yes       | [RssiPingMessage](../docs/MESH_PROTOCOL.md#rssi_ping_message_t) | Contains an RSSI estimate between two crownstones in the mesh. When channel is unequal to 0, it has low latency and the channel corresponds to the channel on which the rssi value was collected. When channel is equal to 0, the rssi value is an average over several channels and data samples, in this case sample_id contains the number of values averaged and then the sample_id is equal to 255 when 255 or more samples were combined.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
 40103 | Mesh cmd time                 | Yes       | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Received command to set time from the mesh.
 40110 | Mesh profile location         | Yes       | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Received the location of a profile from the mesh.

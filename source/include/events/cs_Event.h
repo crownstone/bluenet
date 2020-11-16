@@ -79,6 +79,8 @@ public:
 
 	/**
 	 * Utility function so that not every file needs to include the eventdispatcher.
+	 *
+	 * This runs the handleEvent(...) method of all registered listeners.
 	 */
 	void dispatch();
 };

@@ -40,23 +40,23 @@ public:
 		M2 += diff_with_old_mean * diff_with_new_mean;
 	}
 
-	int getCount(){
+	int getCount() const {
 		return num_recorded_values;
 	}
 
-	float getMean(){
+	float getMean() const {
 		return mean;
 	}
 
-	float getVariance(){
+	float getVariance() const {
 		return M2 / (num_recorded_values -1);
 	}
 
-	float getStandardDeviation(){
+	float getStandardDeviation() const {
 		return sqrt(getVariance());
 	}
 
-	bool isNumericPrecisionLow(){
+	bool isNumericPrecisionLow() const {
 		return M2 > float_precision_threshold || num_recorded_values > count_precision_threshold;
 	}
 

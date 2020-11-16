@@ -565,28 +565,28 @@ void UartHandler::handleUartMsg(uint8_t* data, uint16_t size, EncryptionAccessLe
 void UartHandler::handleEvent(event_t & event) {
 	switch (event.type) {
 		case CS_TYPE::CONFIG_UART_ENABLED: {
-			TYPIFY(CONFIG_UART_ENABLED) enabled = *(TYPIFY(CONFIG_UART_ENABLED)*)event.data;
-			serial_enable((serial_enable_t)enabled);
+			TYPIFY(CONFIG_UART_ENABLED)* enabled = (TYPIFY(CONFIG_UART_ENABLED)*)event.data;
+			serial_enable(*reinterpret_cast<serial_enable_t*>(enabled));
 			break;
 		}
 		case CS_TYPE::EVT_STATE_EXTERNAL_STONE: {
 			TYPIFY(EVT_STATE_EXTERNAL_STONE)* state = (TYPIFY(EVT_STATE_EXTERNAL_STONE)*)event.data;
-			writeMsg(UART_OPCODE_TX_MESH_STATE, (uint8_t*)&(state->data), sizeof(state->data));
+			writeMsg(UART_OPCODE_TX_MESH_STATE, reinterpret_cast<uint8_t*>(&state->data), sizeof(state->data));
 			break;
 		}
 		case CS_TYPE::EVT_MESH_EXT_STATE_0: {
 			TYPIFY(EVT_MESH_EXT_STATE_0)* state = (TYPIFY(EVT_MESH_EXT_STATE_0)*)event.data;
-			writeMsg(UART_OPCODE_TX_MESH_STATE_PART_0, (uint8_t*)state, sizeof(*state));
+			writeMsg(UART_OPCODE_TX_MESH_STATE_PART_0, reinterpret_cast<uint8_t*>(state), sizeof(*state));
 			break;
 		}
 		case CS_TYPE::EVT_MESH_EXT_STATE_1: {
 			TYPIFY(EVT_MESH_EXT_STATE_1)* state = (TYPIFY(EVT_MESH_EXT_STATE_1)*)event.data;
-			writeMsg(UART_OPCODE_TX_MESH_STATE_PART_1, (uint8_t*)state, sizeof(*state));
+			writeMsg(UART_OPCODE_TX_MESH_STATE_PART_1, reinterpret_cast<uint8_t*>(state), sizeof(*state));
 			break;
 		}
 		case CS_TYPE::EVT_PRESENCE_CHANGE: {
 			TYPIFY(EVT_PRESENCE_CHANGE)* state = (TYPIFY(EVT_PRESENCE_CHANGE)*)event.data;
-			writeMsg(UART_OPCODE_TX_PRESENCE_CHANGE, (uint8_t*)state, sizeof(*state));
+			writeMsg(UART_OPCODE_TX_PRESENCE_CHANGE, reinterpret_cast<uint8_t*>(state), sizeof(*state));
 			break;
 		}
 		default:
