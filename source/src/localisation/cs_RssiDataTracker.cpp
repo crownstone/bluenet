@@ -114,34 +114,34 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 	RSSIDATATRACKER_LOGd("flushAggregatedRssiData");
 	// start flushing phase, here we wait quite a bit shorter until the map is empty.
 
-	auto iter = std::begin(variance_recorders);
-	if (iter != std::end(variance_recorders)) {
+	for(auto iter = std::begin(variance_recorders);
+			iter != std::end(variance_recorders); iter++) {
 		StonePair stone_pair = iter->first;
 		OnlineVarianceRecorder recorder = iter->second;
 
-		uint32_t mean = static_cast<uint32_t>(recorder.getMean());
-		RSSIDATATRACKER_LOGd("flushing maps from %d: {send:%d recv:%d rssi:%d}",
-				my_id, stone_pair.first, stone_pair.second, mean);
+		if (recorder.getCount() >= min_samples_to_trigger_burst) {
 
-		rssi_ping_message_t ping_msg;
-		ping_msg.sender_id = stone_pair.first;
-		ping_msg.recipient_id = stone_pair.second;
-		ping_msg.rssi = mean;
-		ping_msg.channel = 0;
-		ping_msg.sample_id = std::max(0xff,recorder.getCount());
+			uint32_t mean = static_cast<uint32_t>(recorder.getMean());
+			RSSIDATATRACKER_LOGd("flushing maps from %d: {send:%d recv:%d rssi:%d}",
+					my_id, stone_pair.first, stone_pair.second, mean);
+
+			rssi_ping_message_t ping_msg;
+			ping_msg.sender_id = stone_pair.first;
+			ping_msg.recipient_id = stone_pair.second;
+			ping_msg.rssi = mean;
+			ping_msg.channel = 0;
+			ping_msg.sample_id = std::max(0xff,recorder.getCount());
 
 
-		sendSecondaryPingMsg(&ping_msg);
-		variance_recorders.erase(iter);
+			sendSecondaryPingMsg(&ping_msg);
+			variance_recorders.erase(iter);
 
-		// note: if the mesh is very active, setting this delay higher is risky.
-		// in that case, we might need to add a condition that we only flush
-		// entries that have accumulated enough samples.
-		return Coroutine::delayMs(5);
+			return Coroutine::delayMs(burst_period_ms);
+		}
 	}
 
 	// start accumulation phase: just wait very long
-	return Coroutine::delayMs(30 * 60 * 1000);
+	return Coroutine::delayMs(accumulation_period_ms);
 }
 
 // ------------ Receiving ping stuff ------------
