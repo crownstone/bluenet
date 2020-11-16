@@ -10,22 +10,18 @@
 #pragma once
 
 #include <ble/cs_Nordic.h>
-
 #include <ble/cs_Service.h>
 #include <ble/cs_UUID.h>
-
 #include <cfg/cs_Config.h>
 #include <cfg/cs_Strings.h>
-#include <util/cs_BleError.h>
-#include <third/std/function.h>
-
 #include <common/cs_Types.h>
-
 #include <drivers/cs_Serial.h>
-#include <util/cs_Utils.h>
-
+#include <encryption/cs_ConnectionEncryption.h>
+#include <encryption/cs_KeysAndAccess.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
-#include <processing/cs_EncryptionHandler.h>
+#include <third/std/function.h>
+#include <util/cs_BleError.h>
+#include <util/cs_Utils.h>
 
 /** General BLE name service
  *
@@ -287,7 +283,7 @@ public:
 	 *  If somebody is also listening to notifications for the characteristic
 	 *  notifications will be sent.
 	 */
-	uint32_t updateValue(EncryptionType encryptionType = CTR);
+	uint32_t updateValue(ConnectionEncryptionType encryptionType = ConnectionEncryptionType::CTR);
 
 	/** Notify any listening party.
 	 *
@@ -508,8 +504,8 @@ protected:
 	void written(uint16_t len) {
 		// We can flood the chip with writes and a potential forced disconnect will be delayed and could crash the chip.
 		//TODO: have this from the stack directly.
-		if (EncryptionHandler::getInstance().allowedToWrite()) {
-			LOGi("Not allowed to write, disconnect in progress")
+		if (ConnectionEncryption::getInstance().allowedToWrite()) {
+			LOGi("Not allowed to write, disconnect in progress");
 			return;
 		}
 
@@ -524,21 +520,27 @@ protected:
 			// In the case of a characteristic with a dynamic buffer length we need to set the length ourselves.
 			// To do this we assume the length of the data is the same as the encrypted buffer minus the overhead for the encryption.
 			// The result can be zero padded but generally the payload has it's own length indication.
-			uint16_t decryptionBufferLength = EncryptionHandler::calculateDecryptionBufferLength(getGattValueLength());
+			uint16_t decryptionBufferLength = ConnectionEncryption::getPlaintextBufferSize(getGattValueLength(), ConnectionEncryptionType::CTR);
 			setValueLength(decryptionBufferLength);
 
-			bool success = EncryptionHandler::getInstance().decrypt(
-				getGattValuePtr(),
-				getGattValueLength(),
-				getValuePtr(),
-				getValueLength(),
-				accessLevel
+			cs_ret_code_t retCode = ConnectionEncryption::getInstance().decrypt(
+				cs_data_t(getGattValuePtr(), getGattValueLength()),
+				cs_data_t(getValuePtr(), getValueLength()),
+				accessLevel,
+				ConnectionEncryptionType::CTR
 			);
 
+
+			if (retCode != ERR_SUCCESS) {
+				LOGi("failed to decrypt retCode=%u", retCode);
+				ConnectionEncryption::getInstance().disconnect();
+				return;
+			}
+
 			// disconnect on failure or if the user is not authenticated
-			if (!success || !EncryptionHandler::getInstance().allowAccess(_minAccessLevel , accessLevel)) {
-				LOGi("insufficient access")
-				EncryptionHandler::getInstance().closeConnectionAuthenticationFailure();
+			if (!KeysAndAccess::getInstance().allowAccess(_minAccessLevel , accessLevel)) {
+				LOGi("insufficient access");
+				ConnectionEncryption::getInstance().disconnect();
 				return;
 			}
 		}
@@ -664,8 +666,7 @@ public:
 	/** @inherit */
 	uint16_t getGattValueLength() {
 		if (this->isAesEnabled() && CharacteristicBase::_minAccessLevel != ENCRYPTION_DISABLED) {
-			return EncryptionHandler::calculateEncryptionBufferLength(sizeof(T));
-			//return (1 + ((sizeof(T) + 4 - 1) / 16)) * 16 + 4; // ceil( sizeof(T) + 4 / 16 ) * 16 + 4
+			return ConnectionEncryption::getEncryptedBufferSize(sizeof(T), ConnectionEncryptionType::CTR);
 		} else {
 			return getValueLength();
 		}
@@ -715,8 +716,7 @@ public:
 	/** @inherit */
 	uint16_t getGattValueLength() {
 		if (this->isAesEnabled() && CharacteristicBase::_minAccessLevel != ENCRYPTION_DISABLED) {
-			return EncryptionHandler::calculateEncryptionBufferLength(_maxStringLength);
-			// (1 + ((MAX_CHAR_VALUE_STRING_LENGTH + 4 - 1) / 16)) * 16 + 4; // ceil( (MAX_STRING_LENGTH + 4) / 16 ) * 16 + 4
+			return ConnectionEncryption::getEncryptedBufferSize(_maxStringLength, ConnectionEncryptionType::CTR);
 		} else {
 			return getValueLength();
 		}

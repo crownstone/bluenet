@@ -12,7 +12,7 @@
 #include <mesh/cs_Mesh.h>
 #include <mesh/cs_MeshCommon.h>
 #include <uart/cs_UartHandler.h>
-//#include <storage/cs_State.h>
+#include <storage/cs_State.h>
 #include <third/std/function.h>
 #include <time/cs_SystemTime.h>
 //#include <util/cs_BleError.h>

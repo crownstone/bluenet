@@ -12,6 +12,7 @@
 #include <ble/cs_Characteristic.h>
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Strings.h>
+#include <common/cs_BaseClass.h>
 #include <common/cs_Tuple.h>
 #include <drivers/cs_Timer.h>
 #include <util/cs_BleError.h>

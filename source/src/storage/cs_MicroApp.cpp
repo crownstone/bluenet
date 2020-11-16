@@ -538,7 +538,7 @@ void MicroApp::callApp() {
 	static bool thumb_mode = true;
 
 	if (!isEnabled()) {
-		LOGi("Microapp: app not enabled.")
+		LOGi("Microapp: app not enabled.");
 		return;
 	}
 	
@@ -556,7 +556,7 @@ void MicroApp::callApp() {
 	initMemory();
 
 	uintptr_t address = state_microapp.start_addr + state_microapp.offset;
-	LOGi("Microapp: start at 0x%04x", address)
+	LOGi("Microapp: start at 0x%04x", address);
 
 	if (thumb_mode) address += 1;
 	LOGi("Check main code at %p", address);

@@ -52,21 +52,16 @@ public:
 		return ((ticksTo - ticksFrom) & MAX_RTC_COUNTER_VAL);
 	}
 
-	inline static uint32_t differenceMs(uint32_t ticksTo, uint32_t ticksFrom){
-		return ticksToMs(difference(ticksTo,ticksFrom));
+	//! return difference between two tick counter values in ms.
+	inline static uint32_t differenceMs(uint32_t ticksTo, uint32_t ticksFrom) {
+		return ticksToMs(difference(ticksTo, ticksFrom));
 	}
 
 	/**
-	 * Returns the number of miliseconds passed since the given tick_count.
-	 *
-	 * E.g.
-	 *
-	 * uint32_t stamp = RTC::getCount();
-	 * ... 3 seconds pass ...
-	 * printf("%d miliseconds passed", RTC::msPassedSince(stamp);
+	 * Returns the number of milliseconds passed since the given tick counter value.
 	 */
-	inline static uint32_t msPassedSince(uint32_t tick_count){
-		return ticksToMs(difference(getCount(),tick_count));
+	inline static uint32_t msPassedSince(uint32_t ticksFrom){
+		return ticksToMs(difference(getCount(), ticksFrom));
 	}
 
 	//! return current clock in ms
@@ -76,8 +71,9 @@ public:
 
 	/** Return time in ms, given time in ticks */
 	inline static uint32_t ticksToMs(uint32_t ticks) {
-		// Order of multiplication and division is important, because it shouldn't lose too much precision, but also not overflow
-		return (uint32_t)ROUNDED_DIV(ticks, (uint64_t)RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
+		// To increase precision: multiply both sides of the division by a large number (multiple of 2 for speed).
+		// Cast them to uint64_t to prevent overflow.
+		return (uint32_t)ROUNDED_DIV((uint64_t)65536 * ticks, (uint64_t)65536 * RTC_CLOCK_FREQ / (NRF_RTC0->PRESCALER + 1) / 1000);
 	}
 
 	/** Return time in ticks, given time in ms

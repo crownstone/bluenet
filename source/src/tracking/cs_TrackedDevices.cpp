@@ -5,8 +5,9 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <drivers/cs_RNG.h>
+#include <encryption/cs_KeysAndAccess.h>
 #include <events/cs_EventDispatcher.h>
-#include <processing/cs_EncryptionHandler.h>
 #include <tracking/cs_TrackedDevices.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
@@ -241,7 +242,7 @@ cs_ret_code_t TrackedDevices::removeDevice() {
 
 bool TrackedDevices::hasAccess(TrackedDevice& device, uint8_t accessLevel) {
 	if (BLEutil::isBitSet(device.fieldsSet, BIT_POS_ACCESS_LEVEL) &&
-			(!EncryptionHandler::getInstance().allowAccess((EncryptionAccessLevel)device.data.accessLevel, (EncryptionAccessLevel)accessLevel))) {
+			(!KeysAndAccess::getInstance().allowAccess((EncryptionAccessLevel)device.data.accessLevel, (EncryptionAccessLevel)accessLevel))) {
 		return false;
 	}
 	return true;

@@ -19,6 +19,8 @@
 #define UART_PROTOCOL_MAJOR       1
 #define UART_PROTOCOL_MINOR       0
 
+#define UART_PROTOCOL_VALIDATION  0xCAFEBABE
+
 enum class UartMsgType : uint8_t {
 	UART_MSG = 0,             // Payload is: uart_msg_header + data
 	ENCRYPTED_UART_MSG = 128, // Payload is: uart_encrypted_msg_header + encrypted blocks
@@ -56,7 +58,7 @@ struct __attribute__((__packed__)) uart_encrypted_msg_header_t {
  */
 struct __attribute__((__packed__)) uart_encrypted_data_header_t {
 	uint32_t validation;
-	uint16_t size = 0; // Size of uart msg.
+	uint16_t size; // Size of uart msg.
 	// Followed by uart msg and padding.
 };
 

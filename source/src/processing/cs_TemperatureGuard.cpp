@@ -80,7 +80,7 @@ void TemperatureGuard::tick() {
 	}
 
 	if (curEvent != _lastChipTempEvent) {
-		LOGd("Dispatch event %s", TypeName(curEvent));
+		LOGd("Dispatch event $typeName(%u)", curEvent);
 		event_t event(curEvent);
 		EventDispatcher::getInstance().dispatch(event);
 		_lastChipTempEvent = curEvent;
@@ -111,7 +111,7 @@ void TemperatureGuard::tick() {
 	}
 
 	if (curEvent != _lastPwmTempEvent) {
-		LOGd("Dispatch event %s", TypeName(curEvent));
+		LOGd("Dispatch event $typeName(%u)", curEvent);
 		event_t event(curEvent);
 		EventDispatcher::getInstance().dispatch(event);
 		_lastPwmTempEvent = curEvent;

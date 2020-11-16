@@ -414,7 +414,7 @@ void MeshModelMulticastAcked::checkDone() {
 
 	// Check for timeout.
 	if (_processCallsLeft == 0) {
-		LOGi("Timeout.")
+		LOGi("Timeout.");
 		MeshUtil::printQueueItem(" ", item.metaData);
 
 		CommandHandlerTypes cmdType = MeshUtil::getCtrlCmdType((cs_mesh_model_msg_type_t)item.metaData.type);

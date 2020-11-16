@@ -61,6 +61,8 @@ Type | Packet
 2 | [External state](#service_data_encrypted_ext_state_3).
 3 | [External error](#service_data_encrypted_ext_error_3).
 4 | [Alternative state](#service_data_encrypted_alternative_state).
+5 | [Hub state](#service_data_encrypted_hub_state).
+
 
 <a name="service_data_encrypted_state_3"></a>
 ## State packet
@@ -80,25 +82,6 @@ int 16 | Power usage | 2 | The real power usage at this moment. Divide by 8 to g
 int 32 | Energy used | 4 | The total energy used. Multiply by 64 to get the energy used in Joule.
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
 uint 8 | [Extra flags bitmask](#extra_flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
-uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
-
-<a name="service_data_encrypted_alternative_state"></a>
-## Alternative state packet
-
-The following type gives the latest state of the Crownstone.
-It's similar to the normal state, but replaces some less essential fields with other data.
-
-![Encrypted service data state](../docs/diagrams/service-data-encrypted-alternative-state.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
-uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
-uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
-uint 16 | Behaviour master hash | 2 | Part of behaviour master hash: divide hash by 65536.
-uint 8[] | Reserved | 6 | Reserved for future use, 0 for now.
-uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
-uint 8 | Reserved | 1 | Reserved for future use, 0 for now.
 uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
 
 <a name="service_data_encrypted_error_3"></a>
@@ -154,6 +137,41 @@ uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain st
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
 int 8 | RSSI | 1 | RSSI to the external crownstone. 0 when unknown, usually means the external Crownstone is out of direct reach.
+uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
+
+<a name="service_data_encrypted_alternative_state"></a>
+## Alternative state packet
+
+The following type gives the latest state of the Crownstone.
+It's similar to the normal state, but replaces some less essential fields with other data.
+
+![Encrypted service data alternative state](../docs/diagrams/service-data-encrypted-alternative-state.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
+uint 8 | [Switch state](#switch_state_packet) | 1 | The state of the switch.
+uint 8 | [Flags bitmask](#flags_bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
+uint 16 | Behaviour master hash | 2 | Part of behaviour master hash: divide hash by 65536.
+uint 8[] | Reserved | 6 | Reserved for future use, 0 for now.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
+uint 8 | Reserved | 1 | Reserved for future use, 0 for now.
+uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
+
+<a name="service_data_encrypted_hub_state"></a>
+## Hub state packet
+
+When a Crownstone dongle is set to hub mode, the hub state service data replaces the normal state.
+
+![Encrypted service data hub state](../docs/diagrams/service-data-encrypted-hub-state.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Crownstone ID | 1 | ID that identifies this Crownstone.
+uint 8 | [Hub flags bitmask](#hub_flags_bitmask) | 1 | Flags.
+uint 8 | Hub data | 9 | Data, protocol defined by hub.
+uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this was the state of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
+uint 8 | Reserved | 1 | Reserved for future use, 0 for now.
 uint 8 | Validation | 1 | Value is always `0xFA`. Can be used to help validating that the decryption was successful.
 
 
@@ -227,6 +245,20 @@ Bit | Name |  Description
 0 | Behaviour enabled | Whether behaviours are enabled.
 1-7 | Reserved for future use, will be 0 for now.
 
+<a name="hub_flags_bitmask"></a>
+#### Hub flags bitmask
+
+Bit | Name |  Description
+--- | --- | ---
+0 | UART alive | Whether the UART connection is alive (heartbeats are received).
+1 | UART alive encrypted | Whether the UART connection is alive (encrypted heartbeats are received).
+2 | UART encryption required by Crownstone | Whether the encrypted UART is required by this Crownstone.
+3 | UART encryption required by hub | Whether the encrypted UART is required by the hub.
+4 | Hub has been set up | Whether the hub has been set up.
+5 | Hub has internet | Whether the hub has internet connection.
+6 | Hub has error | Whether the hub has some error.
+7 | Reserved | Reserved for future use, will be 0 for now.
+
 <a name="state_error_bitmask"></a>
 #### Error Bitmask
 
@@ -250,3 +282,6 @@ Value | Device type
 2 | Guidestone
 3 | Crownstone builtin
 4 | Crownstone dongle
+5 | Crownstone builtin one
+6 | Crownstone plug one
+7 | Crownstone hub

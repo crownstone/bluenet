@@ -36,11 +36,13 @@ enum CommandHandlerTypes {
 	CTRL_CMD_RESET_ERRORS                = 32,
 	CTRL_CMD_MESH_COMMAND                = 33,
 	CTRL_CMD_SET_SUN_TIME                = 34,
+	CTRL_CMD_GET_TIME                    = 35,
 
 	CTRL_CMD_ALLOW_DIMMING               = 40,
 	CTRL_CMD_LOCK_SWITCH                 = 41,
 
 	CTRL_CMD_UART_MSG                    = 50,
+	CTRL_CMD_HUB_DATA                    = 51,
 
 	CTRL_CMD_SAVE_BEHAVIOUR              = 60,
 	CTRL_CMD_REPLACE_BEHAVIOUR           = 61,

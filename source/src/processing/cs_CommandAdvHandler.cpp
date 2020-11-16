@@ -5,15 +5,17 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "processing/cs_CommandAdvHandler.h"
-#include "drivers/cs_Serial.h"
-#include "util/cs_Utils.h"
-#include "events/cs_EventDispatcher.h"
-#include "common/cs_Types.h"
-#include "processing/cs_EncryptionHandler.h"
-#include "storage/cs_State.h"
-#include "time/cs_SystemTime.h"
-#include "util/cs_BleError.h"
+#include <common/cs_Types.h>
+#include <drivers/cs_Serial.h>
+#include <encryption/cs_AES.h>
+#include <encryption/cs_KeysAndAccess.h>
+#include <encryption/cs_RC5.h>
+#include <events/cs_EventDispatcher.h>
+#include <processing/cs_CommandAdvHandler.h>
+#include <storage/cs_State.h>
+#include <time/cs_SystemTime.h>
+#include <util/cs_BleError.h>
+#include <util/cs_Utils.h>
 
 // Defines to enable extra debug logs.
 //#define COMMAND_ADV_DEBUG
@@ -242,11 +244,25 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	}
 
 	// TODO: can decrypt to same buffer?
-	uint8_t decryptedData[16];
-	if (!EncryptionHandler::getInstance().decryptBlockCTR(encryptedPayload.data, encryptedPayload.len, decryptedData, 16, accessLevel, nonce.data, nonce.len)) {
+	cs_ret_code_t decryptionResult = ERR_NO_ACCESS;
+	uint8_t decryptedData[AES_BLOCK_SIZE];
+	uint8_t key[ENCRYPTION_KEY_LENGTH];
+	cs_buffer_size_t decryptedPayloadSize;
+	if (KeysAndAccess::getInstance().getKey(accessLevel, key, sizeof(key))) {
+		decryptionResult = AES::getInstance().decryptCtr(
+				cs_data_t(key, sizeof(key)),
+				nonce,
+				encryptedPayload,
+				cs_data_t(),
+				cs_data_t(decryptedData, sizeof(decryptedData)),
+				decryptedPayloadSize
+		);
+	}
+	if (decryptionResult != ERR_SUCCESS) {
 		LOGCommandAdvVerbose("Decrypt failed");
 		return false;
 	}
+
 #ifdef COMMAND_ADV_VERBOSE
 	_log(SERIAL_DEBUG, "decrypted data: ");
 	BLEutil::printArray(decryptedData, 16);
@@ -292,7 +308,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	controlCmd.size = length;
 
 	LOGCommandAdvDebug("adv cmd type=%u deviceId=%u accessLvl=%u", type, header.deviceToken, accessLevel);
-	if (!EncryptionHandler::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
+	if (!KeysAndAccess::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
 		LOGCommandAdvDebug("no access");
 		return true;
 	}
@@ -304,7 +320,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 		}
 		case ADV_CMD_MULTI_SWITCH: {
 			controlCmd.type = CTRL_CMD_MULTI_SWITCH;
-			LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, source.sourceId, source.count);
+			LOGCommandAdvDebug("send cmd type=%u source: type=%u id=%u count=%u", controlCmd.type, source.source.type, source.source.id, source.count);
 			event_t event(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 			event.dispatch();
 			break;
@@ -325,7 +341,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 				controlCmd.type = CTRL_CMD_SET_TIME;
 				controlCmd.data = commandData + flagsSize;
 				controlCmd.size = setTimeSize;
-				LOGCommandAdvDebug("send cmd type=%u sourceId=%u cmdCount=%u", controlCmd.type, source.sourceId, source.count);
+				LOGCommandAdvDebug("send cmd type=%u source: type=%u id=%u count=%u", controlCmd.type, source.source.type, source.source.id, source.count);
 				event_t eventSetTime(CS_TYPE::CMD_CONTROL_CMD, &controlCmd, sizeof(controlCmd), source);
 				eventSetTime.dispatch();
 			}
@@ -378,7 +394,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 
 bool CommandAdvHandler::decryptRC5Payload(uint16_t encryptedPayload[2], uint16_t decryptedPayload[2]) {
 	LOGCommandAdvVerbose("encrypted RC5=[%u %u]", encryptedPayload[0], encryptedPayload[1]);
-	bool success = EncryptionHandler::getInstance().RC5Decrypt(encryptedPayload, sizeof(uint16_t) * 2, decryptedPayload, sizeof(uint16_t) * 2); // Can't use sizeof(encryptedPayload) as that returns size of pointer.
+	bool success = RC5::getInstance().decrypt(encryptedPayload, sizeof(uint16_t) * 2, decryptedPayload, sizeof(uint16_t) * 2); // Can't use sizeof(encryptedPayload) as that returns size of pointer.
 	LOGCommandAdvVerbose("decrypted RC5=[%u %u]", decryptedPayload[0], decryptedPayload[1]);
 	return success;
 }

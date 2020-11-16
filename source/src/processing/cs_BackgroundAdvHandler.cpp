@@ -7,15 +7,15 @@
 
 
 
-#include "processing/cs_BackgroundAdvHandler.h"
-#include "drivers/cs_Serial.h"
-#include "util/cs_Utils.h"
-#include "events/cs_EventDispatcher.h"
-#include "ble/cs_Nordic.h"
-#include "processing/cs_EncryptionHandler.h"
-#include "processing/cs_CommandHandler.h"
-#include "storage/cs_State.h"
-#include "time/cs_SystemTime.h"
+#include <processing/cs_BackgroundAdvHandler.h>
+#include <ble/cs_Nordic.h>
+#include <drivers/cs_Serial.h>
+#include <encryption/cs_RC5.h>
+#include <events/cs_EventDispatcher.h>
+#include <processing/cs_CommandHandler.h>
+#include <storage/cs_State.h>
+#include <time/cs_SystemTime.h>
+#include <util/cs_Utils.h>
 
 #define LOGBackgroundAdvDebug LOGnone
 #define BACKGROUND_ADV_VERBOSE false
@@ -187,7 +187,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	LOGBackgroundAdvVerbose("encrypted=[%u %u]", encryptedPayload[0], encryptedPayload[1]);
 	// TODO: can decrypt to same buffer?
 	uint16_t decryptedPayload[2];
-	bool success = EncryptionHandler::getInstance().RC5Decrypt(encryptedPayload, sizeof(encryptedPayload), decryptedPayload, sizeof(decryptedPayload));
+	bool success = RC5::getInstance().decrypt(encryptedPayload, sizeof(encryptedPayload), decryptedPayload, sizeof(decryptedPayload));
 	if (!success) {
 		return;
 	}

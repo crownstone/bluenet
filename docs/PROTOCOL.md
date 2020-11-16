@@ -333,9 +333,11 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 32 | Reset errors | [Error bitmask](#state_error_bitmask) | - | Reset all errors which are set in the written bitmask. | x
 33 | Mesh command | [Command mesh packet](#command_mesh_packet) | - | Send a generic command over the mesh. Required access depends on the command. | x | x | x
 34 | Set sun times | [Sun time packet](#sun_time_packet) | - | Update the reference times for sunrise and sunset | x | x
+35 | Get time | - | uint 32 | Get the time. Timestamp is in seconds since epoch (Unix time). | x | x | x
 40 | Allow dimming | uint 8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 50 | UART message | payload | - | Print the payload to UART. | x
+51 | Hub data | [Hub data packet](#hub_data_packet) | - | Send data to hub over UART. | x
 60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#add_behaviour_result_packet) | Add a behaviour to an unoccupied index. | x | x
 61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#replace_behaviour_result_packet) | Replace the behaviour at given index. | x | x
 62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#remove_behaviour_result_packet) | Remove the behaviour at given index. | x | x
@@ -578,6 +580,17 @@ Bit | Name |  Description
 0 | Broadcast | Send command to all stones. Else, its only sent to all stones in the list of stone IDs, which will take more time.
 1 | Ack all IDs | Retry until an ack is received from all stones in the list of stone IDs, or until timeout. **More than 1 IDs without broadcast is not implemented yet.**
 2 | Use known IDs | Instead of using the provided stone IDs, use the stone IDs that this stone has seen. **Not implemented yet.**
+
+
+
+<a name="hub_data_packet"></a>
+#### Hub data packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 8 | Encrypted | 1 | Whether the data should be sent encrypted: 0 = not encrypted, 1 = encrypt when encryption is enabled, 2 = encrypt or fail.
+uint 8 | Payload | N | Payload data to be sent to hub.
+
 
 
 <a name="behaviour_debug_packet"></a>
@@ -855,7 +868,7 @@ Value | Name | Description
 --- | --- | ---
 0   | SUCCESS | Completed successfully.
 1   | WAIT_FOR_SUCCESS | Command is successful so far, but you need to wait for SUCCESS.
-2   | ERR_SUCCESS_NO_CHANGE | Command is succesful, but nothing changed.
+2   | SUCCESS_NO_CHANGE | Command is succesful, but nothing changed.
 16  | BUFFER_UNASSIGNED | No buffer was assigned for the command.
 17  | BUFFER_LOCKED | Buffer is locked, failed queue command.
 18  | BUFFER_TOO_SMALL | Buffer is too small for operation.
@@ -867,22 +880,22 @@ Value | Name | Description
 37  | NOT_FOUND | The thing you were looking for was not found.
 38  | NO_SPACE | There is no space for this command.
 39  | BUSY | Wait for something to be done. You can usually retry later.
-40  | ERR_WRONG_STATE | The crownstone is in a wrong state.
-41  | ERR_ALREADY_EXISTS | Item already exists.
-42  | ERR_TIMEOUT | Operation timed out.
-43  | ERR_CANCELED | Operation was canceled.
-44  | ERR_PROTOCOL_UNSUPPORTED | The protocol is not supported.
+40  | WRONG_STATE | The crownstone is in a wrong state.
+41  | ALREADY_EXISTS | Item already exists.
+42  | TIMEOUT | Operation timed out.
+43  | CANCELED | Operation was canceled.
+44  | PROTOCOL_UNSUPPORTED | The protocol is not supported.
 48  | NO_ACCESS | Invalid access for this command.
-49  | ERR_UNSAFE | It's unsafe to execute this command.
+49  | UNSAFE | It's unsafe to execute this command.
 64  | NOT_AVAILABLE | Command currently not available.
 65  | NOT_IMPLEMENTED | Command not implemented (not yet or not anymore).
 67  | NOT_INITIALIZED | Something must first be initialized.
-68  | ERR_NOT_STARTED | Something must first be started.
-69  | ERR_NOT_POWERED | Something must first be powered.
+68  | NOT_STARTED | Something must first be started.
+69  | NOT_POWERED | Something must first be powered.
 80  | WRITE_DISABLED | Write is disabled for given type.
-81  | ERR_WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
+81  | WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
 96  | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
-112 | ERR_EVENT_UNHANDLED | The event or command was not handled.
+112 | EVENT_UNHANDLED | The event or command was not handled.
 65535 | UNSPECIFIED | Unspecified error.
 
 
@@ -953,11 +966,12 @@ Type nr | Type name | Payload type | Description | A | M | B
 131 | Power usage | int 32 | Current power usage in mW. | r | r | 
 134 | Operation Mode | uint 8 | Internal usage. |  |  | 
 135 | Temperature | int 8 | Chip temperature in °C. | r | r | 
-136 | Time | uint 32 | The current time as unix timestamp. | r | r | 
 139 | [Error bitmask](#state_error_bitmask) | uint 32 | Bitmask with errors. | r | r | 
 149 | Sun time | [Sun time packet](#sun_time_packet) | Packet with sun rise and set times. | r | r | 
 150 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Behaviour settings. | rw | rw | r
 156 | Soft on speed | uint 8 | Speed at which the dimmer goes towards the target value. Range: 1-100. | rw
+157 | Hub mode | uint 8 | Whether hub mode is enabled. | rw
+158 | UART keys | uint 8 [16] | 16 byte key used to encrypt/decrypt UART messages. | rw
 
 <a name="switch_state_packet"></a>
 #### Switch state

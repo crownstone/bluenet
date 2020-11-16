@@ -46,9 +46,10 @@
 #include <drivers/cs_Temperature.h>
 #include <drivers/cs_Timer.h>
 #include <drivers/cs_Watchdog.h>
+#include <encryption/cs_ConnectionEncryption.h>
+#include <encryption/cs_RC5.h>
 #include <ipc/cs_IpcRamData.h>
 #include <processing/cs_BackgroundAdvHandler.h>
-#include <processing/cs_EncryptionHandler.h>
 #include <processing/cs_TapToToggle.h>
 #include <storage/cs_State.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
@@ -126,9 +127,9 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 	LOGi("Verbosity: %i", SERIAL_VERBOSITY);
 	LOGi("UART binary protocol set: %d", CS_UART_BINARY_PROTOCOL_ENABLED);
 #ifdef DEBUG
-	LOGi("DEBUG: defined")
+	LOGi("DEBUG: defined");
 #else
-	LOGi("DEBUG: undefined")
+	LOGi("DEBUG: undefined");
 #endif
 	LOG_MEMORY;
 }
@@ -366,8 +367,9 @@ void Crownstone::initDrivers1() {
 		LOGi(FMT_INIT, "factory reset");
 		_factoryReset->init();
 
-		LOGi(FMT_INIT, "encryption handler");
-		EncryptionHandler::getInstance().init();
+		LOGi(FMT_INIT, "encryption");
+		ConnectionEncryption::getInstance().init();
+		KeysAndAccess::getInstance().init();
 
 
 		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
@@ -501,8 +503,8 @@ void Crownstone::createService(const ServiceEvent event) {
 
 void Crownstone::switchMode(const OperationMode & newMode) {
 
-	LOGd("Current mode: %s", TypeName(_oldOperationMode));
-	LOGd("Switch to mode: %s", TypeName(newMode));
+	LOGd("Current mode: %s", operationModeName(_oldOperationMode));
+	LOGd("Switch to mode: %s", operationModeName(newMode));
 
 	switch(_oldOperationMode) {
 		case OperationMode::OPERATION_MODE_UNINITIALIZED:
@@ -631,7 +633,8 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 				_mesh->init(_boardsConfig);
 			}
 #endif
-			EncryptionHandler::getInstance().RC5InitKey(EncryptionAccessLevel::LOCALIZATION);
+			RC5::getInstance().init();
+
 			_commandAdvHandler = &CommandAdvHandler::getInstance();
 			_commandAdvHandler->init();
 
@@ -907,7 +910,7 @@ void Crownstone::handleEvent(event_t & event) {
 			break;
 		}
 		default:
-			LOGnone("Event: %s [%i]", TypeName(event.type), to_underlying_type(event.type));
+			LOGnone("Event: $typeName(%u)", to_underlying_type(event.type));
 	}
 
 	// 	case CS_TYPE::CONFIG_IBEACON_ENABLED: {
