@@ -77,7 +77,6 @@ private:
 	stone_id_t my_id = 0xff;
 	uint8_t ping_sample_index = 0;
 
-	Coroutine pingRoutine;
 	Coroutine flushRoutine;
 
 	// stores the relevant history, the stone id pairs are order dependent: (sender, receiver)
@@ -91,13 +90,10 @@ private:
 	StonePairMap<OnlineVarianceRecorder> variance_recorders = {};
 
 	/**
-	 * Sends a primary ping message over the mesh, containing only the 'ping counter'
-	 * of this RssiDataTracker.
-	 *
-	 * Coroutine method:
-	 * - Ping period: 5 minutes
+	 * Sends a primary ping message over the mesh, containing only the
+	 * sample_id of this RssiDataTracker to enable duplication filtering.
 	 */
-	uint32_t sendPrimaryPingMessage();
+	void sendPrimaryPingMessage();
 
 	/**
 	 * Checks is ping_msg contains all the data to be called a secondary
@@ -151,7 +147,14 @@ private:
 	 */
 	void recordPingMsg(rssi_ping_message_t* ping_msg);
 
+	/**
+	 * Saves sample_id for the stone pair to the sample id map.
+	 */
 	void recordSampleId(StonePair, uint8_t sample_id);
+
+	/**
+	 * Saves rssi value to last received map and variance recorder map.
+	 */
 	void recordRssiValue(StonePair stone_pair, int8_t rssi);
 
 	/**

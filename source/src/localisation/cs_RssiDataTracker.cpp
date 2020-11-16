@@ -28,9 +28,6 @@ void printPingMsg(rssi_ping_message_t *p) {
 // ------------ RssiDataTracker methods ------------
 
 RssiDataTracker::RssiDataTracker() :
-		pingRoutine([this]() {
-			return sendPrimaryPingMessage();
-		}),
 		flushRoutine([this]() {
 			return flushAggregatedRssiData();
 		}) {
@@ -87,7 +84,7 @@ void RssiDataTracker::sendPingMsg(rssi_ping_message_t *ping_msg) {
 	pingmsgevt.dispatch();
 }
 
-uint32_t RssiDataTracker::sendPrimaryPingMessage() {
+void RssiDataTracker::sendPrimaryPingMessage() {
 	RSSIDATATRACKER_LOGv("RssiDataTracker sending ping for my_id(%d), sample#%d",
 			my_id, ping_sample_index);
 
@@ -101,8 +98,6 @@ uint32_t RssiDataTracker::sendPrimaryPingMessage() {
 	ping_msg.recipient_id = 0;                // (2)
 
 	sendPingMsg(&ping_msg);
-
-	return Coroutine::delayMs(10 * 60 * 1000);
 }
 
 bool RssiDataTracker::sendSecondaryPingMsg(rssi_ping_message_t *ping_msg) {
@@ -238,10 +233,7 @@ rssi_ping_message_t* RssiDataTracker::filterSampleIndex(
 
 uint32_t received_pingcounter = 0;
 void RssiDataTracker::handleEvent(event_t &evt) {
-	bool coroutines_handled_event = false;
-	coroutines_handled_event |= pingRoutine.handleEvent(evt);
-	coroutines_handled_event |= flushRoutine.handleEvent(evt);
-	if (coroutines_handled_event) {
+	if (flushRoutine.handleEvent(evt)) {
 		return;
 	}
 
