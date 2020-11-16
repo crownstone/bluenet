@@ -17,9 +17,41 @@
 #include <utility>  // for pair
 
 /**
- * Launches ping messages into the mesh and receives them.
- * Exposes a static API for other firmware components to
- * query the data.
+ * Launches ping messages into the mesh and receives them in order to
+ * push Rssi information to a (debug) host, and allow other firmware
+ * components to query for that information.
+ *
+ * Three primary mechanisms drive this component:
+ * - Primary pingmessages:
+ *   These are mesh messages of type CS_MESH_MODEL_TYPE_RSSI_PING,
+ *   where the payload is a partially filled rssi_ping_message_t struct.
+ *   (Only the sample_id is filled to enable duplication filter.)
+ *
+ *   When a node in the mesh receives a primary ping message, it will
+ *   respond by constructing a secondary ping message with the given
+ *   sample_id and sending that back.
+ *
+ * - Secondary pingmessages:
+ *   These are mesh messages of type CS_MESH_MODEL_TYPE_RSSI_PING,
+ *   where the payload is a completely filled rssi_ping_message_t struct.
+ *   i.e.: .rssi != 0 && .sender_id != 0 && .recipient_id != 0.
+ *
+ *   When a node receives a secondary ping message it will record it to
+ *   its 'local data base' for duplicate filtering, tracking the
+ *   rssi data per sender-recipient pair and sending that data over UART
+ *   to a (debugging) host.
+ *
+ * - Generic mesh messages:
+ *   The RssiDataTracker responds to EVT_RECV_MESH_MSG events and
+ *   captures the sender, receiver and rssi values of those events.
+ *   These values will aggregated and stored in its the 'local data base'
+ *   in order to compute longer term averages and variance.
+ *
+ * - Database flushing:
+ *   Periodically the local data base will be flushed onto the mesh in order
+ *   to push the information to a (debug) host. This happens in the form
+ *   of a series of secondary ping messages. This burst is throttled to
+ *   ensure the RssiDataTracker-s don't flood the mesh.
  */
 class RssiDataTracker : public EventListener {
 public:
