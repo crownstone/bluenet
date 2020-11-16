@@ -8,7 +8,7 @@
 #include <time/cs_SystemTime.h>
 #include <test/cs_Test.h>
 
-#define RSSIDATATRACKER_LOGd LOGd
+#define RSSIDATATRACKER_LOGd LOGnone
 #define RSSIDATATRACKER_LOGv LOGnone
 
 // utilities
@@ -122,7 +122,7 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 		if (recorder.getCount() >= min_samples_to_trigger_burst) {
 
 			uint32_t mean = static_cast<uint32_t>(recorder.getMean());
-			RSSIDATATRACKER_LOGd("flushing maps from %d: {send:%d recv:%d rssi:%d}",
+			RSSIDATATRACKER_LOGv("flushing maps from %d: {send:%d recv:%d rssi:%d}",
 					my_id, stone_pair.first, stone_pair.second, mean);
 
 			rssi_ping_message_t ping_msg;
@@ -147,6 +147,7 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 // ------------ Receiving ping stuff ------------
 
 void RssiDataTracker::handlePrimaryPingMessage(rssi_ping_message_t *ping_msg) {
+	RSSIDATATRACKER_LOGd("handle primary ping message");
 	if (ping_msg == nullptr) {
 		return;
 	}
@@ -169,6 +170,7 @@ void RssiDataTracker::handlePrimaryPingMessage(rssi_ping_message_t *ping_msg) {
 
 void RssiDataTracker::handleSecondaryPingMessage(
         rssi_ping_message_t *ping_msg) {
+	RSSIDATATRACKER_LOGd("receive secondary ping msg");
 	if (filterSampleIndex(ping_msg) == nullptr) {
 		return; // (also catches ping_msg == nullptr)
 	}
