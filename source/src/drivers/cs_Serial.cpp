@@ -253,22 +253,48 @@ inline void _writeByte(uint8_t val) {
 #endif
 }
 
+
+template<>
+void cs_write_size(size_t& size, uint8_t& numArgs, char* str) {
+	size += sizeof(uart_msg_log_arg_header_t) + strlen(str);
+	++numArgs;
+}
+
+template<>
+void cs_write_size(size_t& size, uint8_t& numArgs, const char* str) {
+	size += sizeof(uart_msg_log_arg_header_t) + strlen(str);
+	++numArgs;
+}
+
 template<>
 void cs_write_val(char* str) {
-	cs_write("str(len=%u)[", strlen(str));
-	for (unsigned int i = 0; i < strlen(str); ++i) {
-		cs_write("%u ", str[i]);
-	}
-	cs_write("] ");
+	const uint8_t* const valPtr = reinterpret_cast<const uint8_t* const>(str);
+	cs_write_val(valPtr, strlen(str));
 }
 
 template<>
 void cs_write_val(const char* str) {
-	cs_write("const str(len=%u)[", strlen(str));
-	for (unsigned int i = 0; i < strlen(str); ++i) {
-		cs_write("%u ", str[i]);
-	}
-	cs_write("] ");
+	const uint8_t* const valPtr = reinterpret_cast<const uint8_t* const>(str);
+	cs_write_val(valPtr, strlen(str));
+}
+
+void cs_write_start(size_t msgSize) {
+	UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_LOG, msgSize);
+}
+
+void cs_write_header(uart_msg_log_header_t& header) {
+	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_LOG, reinterpret_cast<uint8_t*>(&header), sizeof(header));
+}
+
+void cs_write_val(const uint8_t* const valPtr, size_t valSize) {
+	uart_msg_log_arg_header_t valHeader;
+	valHeader.argSize = valSize;
+	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_LOG, reinterpret_cast<uint8_t*>(&valHeader), sizeof(valHeader));
+	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_LOG, valPtr, valSize);
+}
+
+void cs_write_end() {
+	UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_LOG);
 }
 
 /**

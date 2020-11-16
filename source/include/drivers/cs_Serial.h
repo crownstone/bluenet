@@ -11,6 +11,19 @@
 #include <ble/cs_Nordic.h>
 #include <cfg/cs_Strings.h>
 
+
+struct __attribute__((__packed__)) uart_msg_log_header_t {
+	uint32_t fileNameHash;
+	uint16_t lineNumber; // Line number (starting at line 1) where the ; of this log is.
+	uint8_t numArgs;
+	// Followed by <numArgs> args, with uart_msg_log_arg_header_t as header.
+};
+
+struct __attribute__((__packed__)) uart_msg_log_arg_header_t {
+	uint8_t argSize;
+	// Followed by <argSize> bytes.
+};
+
 #include <type_traits>
 #include "stdint.h"
 #include "cstring"
@@ -63,18 +76,17 @@ typedef enum {
 
 
 /**
- * Returns the DJB2 hash of a the reversed file name, up to the first '/'.
+ * Returns the 32 bits DJB2 hash of a the reversed file name, up to the first '/'.
  *
  * TODO: For some reason, if this returns a uint16_t, it increased the size by 3k?
  */
-template<size_t strLen>
-constexpr uint32_t fileNameHash(const char* str) {
-	uint16_t hash = 5381;
-	for (size_t i = strLen-1; i <= 0; --i) {
+constexpr uint32_t fileNameHash(const char* str, size_t strLen) {
+	uint32_t hash = 5381;
+	for (size_t i = strLen-1; i >= 0; --i) {
 		if (str[i] == '/') {
 			return hash;
 		}
-		hash = ((hash << 5) + hash) + str[i];
+		hash = ((hash << 5) + hash) + str[i]; // hash * 33 + c
 	}
 	return hash;
 }
@@ -122,7 +134,8 @@ constexpr uint32_t fileNameHash(const char* str) {
 //		#define logLN(level, fmt, ...) cs_write_args(_FILE, __LINE__, ##__VA_ARGS__); _log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
 //		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(_FILE, __LINE__, ##__VA_ARGS__); }
 //		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(fileNameHash<30>(_FILE), __LINE__, ##__VA_ARGS__); }
-		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(fileNameHash<sizeof(__FILE__)>(__FILE__), __LINE__, ##__VA_ARGS__); }
+//		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(fileNameHash<sizeof(__FILE__)>(__FILE__), __LINE__, ##__VA_ARGS__); }
+		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, ##__VA_ARGS__); }
 
 
 	#else
@@ -218,15 +231,29 @@ bool serial_tx_ready();
 void writeByte(uint8_t val);
 
 
+void cs_write_start(size_t msgSize);
+void cs_write_header(uart_msg_log_header_t& header);
+void cs_write_val(const uint8_t* const valPtr, size_t valSize);
+void cs_write_end();
+
+
+template<typename T>
+void cs_write_size(size_t& size, uint8_t& numArgs, T val) {
+	size += sizeof(uart_msg_log_arg_header_t) + sizeof(T);
+	++numArgs;
+}
+
+template<>
+void cs_write_size(size_t& size, uint8_t& numArgs, char* str);
+
+template<>
+void cs_write_size(size_t& size, uint8_t& numArgs, const char* str);
+
 
 template<typename T>
 void cs_write_val(T val) {
-	const volatile uint8_t* const valPtr = reinterpret_cast<const volatile uint8_t* const>(&val);
-	cs_write("val[");
-	for (unsigned int i = 0; i < sizeof(T); ++i) {
-		cs_write("%u ", valPtr[i]);
-	}
-	cs_write("] ");
+	const uint8_t* const valPtr = reinterpret_cast<const uint8_t* const>(&val);
+	cs_write_val(valPtr, sizeof(T));
 }
 
 template<>
@@ -235,10 +262,22 @@ void cs_write_val(char* str);
 template<>
 void cs_write_val(const char* str);
 
+
+
+
+
 // Uses the fold expression, an easy way to replace a recursive call.
 template<class... Args>
-void cs_write_args(const Args&... args) {
-	cs_write("args=");
+void cs_write_args(uint32_t fileNameHash, uint32_t lineNumber, const Args&... args) {
+	uart_msg_log_header_t header;
+	header.fileNameHash = fileNameHash;
+	header.lineNumber = lineNumber;
+	header.numArgs = 0;
+	size_t totalSize = sizeof(header);
+	(cs_write_size(totalSize, header.numArgs, args), ...);
+//	cs_write("hash=%u line=%u numArgs=%u size=%u", header.fileNameHash, header.lineNumber, header.numArgs, totalSize);
+	cs_write_start(totalSize);
+	cs_write_header(header);
 	(cs_write_val(args), ...);
-	cs_write(SERIAL_CRLF);
+	cs_write_end();
 }

@@ -138,7 +138,7 @@ ret_code_t UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartPr
 	return ERR_SUCCESS;
 }
 
-ret_code_t UartHandler::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt) {
+ret_code_t UartHandler::writeMsgPart(UartOpcodeTx opCode, const uint8_t* const data, uint16_t size, UartProtocol::Encrypt encrypt) {
 #if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 	// when debugging we would like to drop out of certain binary data coming over the console...
 	switch(opCode) {
@@ -153,10 +153,12 @@ ret_code_t UartHandler::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16
 
 	// No logs, this function is called when logging
 	if (mustEncrypt(encrypt, opCode)) {
-		return writeEncryptedPart(cs_data_t(data, size));
+		// TODO: make writeEncryptedPart() const
+		return writeEncryptedPart(cs_data_t((uint8_t*)data, size));
 	}
 	else {
-		writeBytes(cs_data_t(data, size), true);
+		// TODO: make writeBytes() const
+		writeBytes(cs_data_t((uint8_t*)data, size), true);
 		return ERR_SUCCESS;
 	}
 }
