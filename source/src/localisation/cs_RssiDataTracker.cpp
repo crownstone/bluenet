@@ -127,6 +127,9 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 		ping_msg.sender_id = stone_pair.first;
 		ping_msg.recipient_id = stone_pair.second;
 		ping_msg.rssi = mean;
+		ping_msg.channel = 0;
+		ping_msg.sample_id = std::max(0xff,recorder.getCount());
+
 
 		sendSecondaryPingMsg(&ping_msg);
 		variance_recorders.erase(iter);
