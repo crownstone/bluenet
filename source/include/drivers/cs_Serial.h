@@ -10,23 +10,7 @@
 #include <cfg/cs_Git.h>
 #include <ble/cs_Nordic.h>
 #include <cfg/cs_Strings.h>
-
-
-struct __attribute__((__packed__)) uart_msg_log_header_t {
-	uint32_t fileNameHash;
-	uint16_t lineNumber; // Line number (starting at line 1) where the ; of this log is.
-	struct __attribute__((packed)) {
-		bool prefix : 1;  // Whether this log should be prefixed with a timestamp etc.
-		bool newLine : 1; // Whether this log should end with a new line.
-	} flags;
-	uint8_t numArgs;
-	// Followed by <numArgs> args, with uart_msg_log_arg_header_t as header.
-};
-
-struct __attribute__((__packed__)) uart_msg_log_arg_header_t {
-	uint8_t argSize;
-	// Followed by <argSize> bytes.
-};
+#include <protocol/cs_UartMsgTypes.h>
 
 #include <type_traits>
 #include "stdint.h"
@@ -237,42 +221,41 @@ bool serial_tx_ready();
 void writeByte(uint8_t val);
 
 
-void cs_write_start(size_t msgSize);
-void cs_write_header(uart_msg_log_header_t& header);
-void cs_write_val(const uint8_t* const valPtr, size_t valSize);
+void cs_write_start(size_t msgSize, uart_msg_log_header_t &header);
+void cs_write_arg(const uint8_t* const valPtr, size_t valSize);
 void cs_write_end();
 
 
 template<typename T>
-void cs_write_size(size_t& size, uint8_t& numArgs, T val) {
+void cs_add_arg_size(size_t& size, uint8_t& numArgs, T val) {
 	size += sizeof(uart_msg_log_arg_header_t) + sizeof(T);
 	++numArgs;
 }
 
 template<>
-void cs_write_size(size_t& size, uint8_t& numArgs, char* str);
+void cs_add_arg_size(size_t& size, uint8_t& numArgs, char* str);
 
 template<>
-void cs_write_size(size_t& size, uint8_t& numArgs, const char* str);
+void cs_add_arg_size(size_t& size, uint8_t& numArgs, const char* str);
 
 
 template<typename T>
-void cs_write_val(T val) {
+void cs_write_arg(T val) {
 	const uint8_t* const valPtr = reinterpret_cast<const uint8_t* const>(&val);
-	cs_write_val(valPtr, sizeof(T));
+	cs_write_arg(valPtr, sizeof(T));
 }
 
 template<>
-void cs_write_val(char* str);
+void cs_write_arg(char* str);
 
 template<>
-void cs_write_val(const char* str);
+void cs_write_arg(const char* str);
 
 
 
 
 
-// Uses the fold expression, an easy way to replace a recursive call.
+// Uses the fold expression, a handy way to replace a recursive call.
 template<class... Args>
 void cs_write_args(uint32_t fileNameHash, uint32_t lineNumber, bool addPrefix, bool addNewLine, const Args&... args) {
 	uart_msg_log_header_t header;
@@ -281,11 +264,17 @@ void cs_write_args(uint32_t fileNameHash, uint32_t lineNumber, bool addPrefix, b
 	header.flags.prefix = addPrefix;
 	header.flags.newLine = addNewLine;
 	header.numArgs = 0;
+
+	// Get number of arguments and size of all arguments.
 	size_t totalSize = sizeof(header);
-	(cs_write_size(totalSize, header.numArgs, args), ...);
-//	cs_write("hash=%u line=%u numArgs=%u size=%u", header.fileNameHash, header.lineNumber, header.numArgs, totalSize);
-	cs_write_start(totalSize);
-	cs_write_header(header);
-	(cs_write_val(args), ...);
+	(cs_add_arg_size(totalSize, header.numArgs, args), ...);
+
+	// Write the header.
+	cs_write_start(totalSize, header);
+
+	// Write each argument.
+	(cs_write_arg(args), ...);
+
+	// Finalize the uart msg.
 	cs_write_end();
 }

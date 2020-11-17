@@ -17,7 +17,6 @@
 
 typedef void (*ps_zero_crossing_cb_t) ();
 
-typedef uint8_t adc_channel_id_t;
 
 class PowerSampling : EventListener {
 public:

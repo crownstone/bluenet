@@ -8,10 +8,8 @@
 #pragma once
 
 #include <cfg/cs_Config.h>
-#include <drivers/cs_ADC.h>
-#include <protocol/cs_ServiceDataPackets.h>
-#include <cstdint>
-
+#include <protocol/cs_Packets.h>
+#include <structs/cs_PacketsInternal.h>
 
 union __attribute__((packed)) uart_msg_status_user_flags_t {
 	struct __attribute__((packed)) {
@@ -68,12 +66,30 @@ struct __attribute__((__packed__)) uart_msg_session_nonce_reply_t {
 
 
 
-
-
 struct __attribute__((__packed__)) uart_msg_mesh_result_packet_header_t {
 	stone_id_t stoneId;
 	result_packet_header_t resultHeader;
 };
+
+
+
+struct __attribute__((__packed__)) uart_msg_log_header_t {
+	uint32_t fileNameHash;
+	uint16_t lineNumber; // Line number (starting at line 1) where the ; of this log is.
+	struct __attribute__((packed)) {
+		bool prefix : 1;  // Whether this log should be prefixed with a timestamp etc.
+		bool newLine : 1; // Whether this log should end with a new line.
+	} flags;
+	uint8_t numArgs;
+	// Followed by <numArgs> args, with uart_msg_log_arg_header_t as header.
+};
+
+struct __attribute__((__packed__)) uart_msg_log_arg_header_t {
+	uint8_t argSize;
+	// Followed by <argSize> bytes.
+};
+
+
 
 struct __attribute__((__packed__)) uart_msg_power_t {
 	uint32_t timestamp;
