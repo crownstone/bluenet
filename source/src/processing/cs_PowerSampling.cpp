@@ -526,7 +526,7 @@ bool PowerSampling::isVoltageAndCurrentSwapped(adc_buffer_id_t bufIndex, adc_buf
 		prevSample = AdcBuffer::getInstance().getValue(prevBufIndex, VOLTAGE_CHANNEL_IDX, i);
 		voltageSample = AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, i);
 		currentSample = AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i);
-		_log(SERIAL_DEBUG, "%i %i %i\r\n", prevSample, voltageSample, currentSample);
+		LOGd("%i %i %i", prevSample, voltageSample, currentSample);
 
 		sumVoltageChannel += std::abs(voltageSample - prevSample);
 		sumCurrentChannel += std::abs(currentSample - prevSample);
@@ -1345,13 +1345,17 @@ void PowerSampling::enableSwitchcraft(bool enable) {
 
 void PowerSampling::printBuf(adc_buffer_id_t bufIndex) {
 	LOGd("ADC buf:");
+	_log(SERIAL_DEBUG, true, false, "");
 	for (adc_channel_id_t channel = 0; channel < AdcBuffer::getChannelCount(); ++channel) {
 		for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
-			_log(SERIAL_DEBUG, "%i ", AdcBuffer::getInstance().getValue(bufIndex, channel, i));
+			_log(SERIAL_DEBUG, false, false, "%i ", AdcBuffer::getInstance().getValue(bufIndex, channel, i));
 			if ((i+1) % 10 == 0) {
-				_log(SERIAL_DEBUG, SERIAL_CRLF);
+				_log(SERIAL_DEBUG, false, true, "");
+				_log(SERIAL_DEBUG, true, false, "");
 			}
 		}
-		_log(SERIAL_DEBUG, SERIAL_CRLF);
+		_log(SERIAL_DEBUG, false, true, "");
+		_log(SERIAL_DEBUG, true, false, "");
 	}
+	_log(SERIAL_DEBUG, false, true, "");
 }

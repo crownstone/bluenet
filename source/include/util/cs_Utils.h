@@ -68,9 +68,10 @@ template<typename T>
 void printInlineArray(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG) {
 	__attribute__((unused)) uint8_t* ptr = (uint8_t*)arr;
 	for (int i = 0; i < len; ++i) {
-		_log(verbosity, " %02X", ptr[i]);
-		if ((i+1) % 32 == 0) {
-			_log(verbosity, SERIAL_CRLF);
+		_log(verbosity, false, false, " %02X", ptr[i]);
+		if ((i+1) % 16 == 0) {
+			_log(verbosity, false, true, "");
+			_log(verbosity, true, false, "");
 		}
 	}
 }
@@ -78,17 +79,16 @@ void printInlineArray(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG) {
 template<typename T>
 void printArray(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG) {
 	printInlineArray(arr, len, verbosity);
-	_log(verbosity, SERIAL_CRLF);
+	_log(verbosity, false, true, "");
 }
 
 template<typename T>
 void printAddress(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG) {
 	__attribute__((unused)) uint8_t* ptr = (uint8_t*)arr;
 	for (int i = len - 1; i > 0; i=i-1) {
-		_log(verbosity, "%02X:", ptr[i]);
+		_log(verbosity, false, false, "%02X:", ptr[i]);
 	}
-	_log(verbosity, "%02X", ptr[0]);
-	_log(verbosity, SERIAL_CRLF);
+	_log(verbosity, false, true, "%02X", ptr[0]);
 }
 
 template<typename T>

@@ -560,17 +560,17 @@ cs_ret_code_t ADC::_addBufferToSaadcQueue(adc_buffer_id_t bufIndex) {
 void ADC::printQueues() {
 	if (ADC_LOG_QUEUES) {
 		enterCriticalRegion();
-		_log(SERIAL_DEBUG, "queued: ");
+		_log(SERIAL_DEBUG, true, false, "queued: ");
 		for (uint8_t i = 0; i < _bufferQueue.size(); ++i) {
-			_log(SERIAL_DEBUG, "%u, ", _bufferQueue[i]);
+			_log(SERIAL_DEBUG, false, false, "%u, ", _bufferQueue[i]);
 		}
-		_log(SERIAL_DEBUG, SERIAL_CRLF);
+		_log(SERIAL_DEBUG, false, true, "");
 
-		_log(SERIAL_DEBUG, "saadc queue: ");
+		_log(SERIAL_DEBUG, true, false, "saadc queue: ");
 		for (uint8_t i = 0; i < _saadcBufferQueue.size(); ++i) {
-			_log(SERIAL_DEBUG, "%u, ", _saadcBufferQueue[i]);
+			_log(SERIAL_DEBUG, false, false, "%u, ", _saadcBufferQueue[i]);
 		}
-		_log(SERIAL_DEBUG, SERIAL_CRLF);
+		_log(SERIAL_DEBUG, false, true, "");
 		exitCriticalRegion();
 	}
 }

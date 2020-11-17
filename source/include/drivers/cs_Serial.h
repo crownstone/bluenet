@@ -15,6 +15,10 @@
 struct __attribute__((__packed__)) uart_msg_log_header_t {
 	uint32_t fileNameHash;
 	uint16_t lineNumber; // Line number (starting at line 1) where the ; of this log is.
+	struct __attribute__((packed)) {
+		bool prefix : 1;  // Whether this log should be prefixed with a timestamp etc.
+		bool newLine : 1; // Whether this log should end with a new line.
+	} flags;
 	uint8_t numArgs;
 	// Followed by <numArgs> args, with uart_msg_log_arg_header_t as header.
 };
@@ -111,7 +115,7 @@ constexpr uint32_t fileNameHash(const char* str, size_t strLen) {
 		#define LOGw NRF_LOG_WARNING
 		#define LOGe NRF_LOG_ERROR
 		#define LOGf NRF_LOG_ERROR
-		#define _log(level, fmt, ...)
+		#define _log(level, fmt, addPrefix, addNewLine, ...)
 		#define logLN(level, fmt, ...)
 	#ifdef __cplusplus
 	}
@@ -125,21 +129,23 @@ constexpr uint32_t fileNameHash(const char* str, size_t strLen) {
 		//  #define STRING_BACK(s, l) (sizeof(s) > l ? s + (sizeof(s)-l-1) : s)
 		#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__) // sizeof() returns the buffer size, so including the null terminator.
 
-		#define _log(level, fmt, ...) \
-				if (level <= SERIAL_VERBOSITY) { \
-					cs_write(fmt, ##__VA_ARGS__); \
-				}
+//		#define _log(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write(fmt, ##__VA_ARGS__); }
 
 //		#define logLN(level, fmt, ...) _log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
 //		#define logLN(level, fmt, ...) cs_write_args(_FILE, __LINE__, ##__VA_ARGS__); _log(level, "[%-30.30s : %-5d] " fmt SERIAL_CRLF, _FILE, __LINE__, ##__VA_ARGS__)
 //		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(_FILE, __LINE__, ##__VA_ARGS__); }
 //		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(fileNameHash<30>(_FILE), __LINE__, ##__VA_ARGS__); }
 //		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(fileNameHash<sizeof(__FILE__)>(__FILE__), __LINE__, ##__VA_ARGS__); }
-		#define logLN(level, fmt, ...) if (level <= SERIAL_VERBOSITY) { cs_write_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, ##__VA_ARGS__); }
+
+		#define _log(level, addPrefix, addNewLine, fmt, ...) \
+				if (level <= SERIAL_VERBOSITY) { \
+					cs_write_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, addPrefix, addNewLine, ##__VA_ARGS__); \
+				}
+		#define logLN(level, fmt, ...) _log(level, true, true, fmt, ##__VA_ARGS__)
 
 
 	#else
-		#define _log(level, fmt, ...)
+		#define _log(level, addPrefix, addNewLine, fmt, ...)
 		#define logLN(level, fmt, ...)
 	#endif
 
@@ -268,10 +274,12 @@ void cs_write_val(const char* str);
 
 // Uses the fold expression, an easy way to replace a recursive call.
 template<class... Args>
-void cs_write_args(uint32_t fileNameHash, uint32_t lineNumber, const Args&... args) {
+void cs_write_args(uint32_t fileNameHash, uint32_t lineNumber, bool addPrefix, bool addNewLine, const Args&... args) {
 	uart_msg_log_header_t header;
 	header.fileNameHash = fileNameHash;
 	header.lineNumber = lineNumber;
+	header.flags.prefix = addPrefix;
+	header.flags.newLine = addNewLine;
 	header.numArgs = 0;
 	size_t totalSize = sizeof(header);
 	(cs_write_size(totalSize, header.numArgs, args), ...);
