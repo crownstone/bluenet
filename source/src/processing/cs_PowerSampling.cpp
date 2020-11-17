@@ -1345,17 +1345,16 @@ void PowerSampling::enableSwitchcraft(bool enable) {
 
 void PowerSampling::printBuf(adc_buffer_id_t bufIndex) {
 	LOGd("ADC buf:");
-	_log(SERIAL_DEBUG, true, false, "");
+	// Copy to buf and log that buf, instead of doing a uart msg per sample.
+	adc_sample_value_id_t buf[10];
 	for (adc_channel_id_t channel = 0; channel < AdcBuffer::getChannelCount(); ++channel) {
-		for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
-			_log(SERIAL_DEBUG, false, false, "%i ", AdcBuffer::getInstance().getValue(bufIndex, channel, i));
-			if ((i+1) % 10 == 0) {
-				_log(SERIAL_DEBUG, false, true, "");
-				_log(SERIAL_DEBUG, true, false, "");
+		LOGd("channel %u:", channel);
+		for (adc_sample_value_id_t i = 0, j = 0; i < AdcBuffer::getChannelLength(); ++i) {
+			buf[j] = AdcBuffer::getInstance().getValue(bufIndex, channel, i);
+			if (++j == 10) {
+				LOGd("%4u %4u %4u %4u %4u %4u %4u %4u %4u %4u", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8], buf[9]);
+				j = 0;
 			}
 		}
-		_log(SERIAL_DEBUG, false, true, "");
-		_log(SERIAL_DEBUG, true, false, "");
 	}
-	_log(SERIAL_DEBUG, false, true, "");
 }
