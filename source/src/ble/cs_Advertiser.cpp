@@ -427,29 +427,11 @@ void Advertiser::restartAdvertising() {
 void Advertiser::printAdvertisement() {
 	LOGd("_adv_handle=%u", _advHandle);
 
-	LOGd("adv_data len=%u data:", _advData.adv_data.len);
-	char str[4*8+1] = {0};
-	int strIndex = 0;
-	for (size_t i=0; i<_advData.adv_data.len; ++i) {
-		strIndex += sprintf(&(str[strIndex]), "%3u ", _advData.adv_data.p_data[i]);
-		if (i % 8 == 8-1) {
-			LOGd("%s", str);
-			memset(str, 0, sizeof(str));
-			strIndex = 0;
-		}
-	}
+	_log(SERIAL_DEBUG, true, false, "adv_data len=%u data: ", _advData.adv_data.len);
+	BLEutil::printArray(_advData.adv_data.p_data, _advData.adv_data.len);
 
-	LOGd("scan_rsp_data len=%u data:", _advData.scan_rsp_data.len);
-	memset(str, 0, sizeof(str));
-	strIndex = 0;
-	for (size_t i=0; i<_advData.scan_rsp_data.len; ++i) {
-		strIndex += sprintf(&(str[strIndex]), "%3u ", _advData.scan_rsp_data.p_data[i]);
-		if (i % 8 == 8-1) {
-			LOGd("%s", str);
-			memset(str, 0, sizeof(str));
-			strIndex = 0;
-		}
-	}
+	_log(SERIAL_DEBUG, true, false, "scan_rsp_data len=%u data: ", _advData.scan_rsp_data.len);
+	BLEutil::printArray(_advData.scan_rsp_data.p_data, _advData.scan_rsp_data.len);
 
 	LOGd("type=%u", _advParams.properties.type);
 	LOGd("channel mask: 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
