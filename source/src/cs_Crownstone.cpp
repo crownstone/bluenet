@@ -623,6 +623,9 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	_rssiDataTracker.listen();
 #endif
 	
+	_nearestCrownstoneTracker.init();
+	_nearestCrownstoneTracker.listen();
+
 	switch(mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
 			_scanner->init();

@@ -18,6 +18,7 @@
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
 #include <localisation/cs_RssiDataTracker.h>
+#include <localisation/cs_NearestCrownstoneTracker.h>
 #include <presence/cs_PresenceHandler.h>
 #include <processing/cs_CommandAdvHandler.h>
 #include <processing/cs_CommandHandler.h>
@@ -304,32 +305,34 @@ private:
 	Storage* _storage;
 	State* _state;
 
-	TemperatureGuard* _temperatureGuard = NULL;
-	PowerSampling* _powerSampler = NULL;
+	TemperatureGuard* _temperatureGuard = nullptr;
+	PowerSampling* _powerSampler = nullptr;
 
 	// services
-	DeviceInformationService* _deviceInformationService = NULL;
-	CrownstoneService* _crownstoneService = NULL;
-	SetupService* _setupService = NULL;
+	DeviceInformationService* _deviceInformationService = nullptr;
+	CrownstoneService* _crownstoneService = nullptr;
+	SetupService* _setupService = nullptr;
 
 	// advertise
-	ServiceData* _serviceData = NULL;
+	ServiceData* _serviceData = nullptr;
 
 	// processing
 #if BUILD_MESHING == 1
-	Mesh* _mesh = NULL;
+	Mesh* _mesh = nullptr;
 #endif
-	CommandHandler* _commandHandler = NULL;
-	Scanner* _scanner = NULL;
-	FactoryReset* _factoryReset = NULL;
-	CommandAdvHandler* _commandAdvHandler = NULL;
-	MultiSwitchHandler* _multiSwitchHandler = NULL;
+	CommandHandler* _commandHandler = nullptr;
+	Scanner* _scanner = nullptr;
+	FactoryReset* _factoryReset = nullptr;
+	CommandAdvHandler* _commandAdvHandler = nullptr;
+	MultiSwitchHandler* _multiSwitchHandler = nullptr;
 	TrackedDevices _trackedDevices;
 	SystemTime _systemTime;
 
 #if RSSI_DATA_TRACKER_ENABLED==1
 	RssiDataTracker _rssiDataTracker;
 #endif
+
+	NearestCrownstoneTracker _nearestCrownstoneTracker;
 
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
