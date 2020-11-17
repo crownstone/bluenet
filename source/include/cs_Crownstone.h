@@ -38,7 +38,7 @@
 #endif
 
 #if BUILD_MICROAPP_SUPPORT == 1
-#include <storage/cs_MicroApp.h>
+#include <microapp/cs_MicroApp.h>
 #endif
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **

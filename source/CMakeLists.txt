@@ -74,6 +74,7 @@ SET(PASS_FILE                                "crownstone/firmware/dfu_pkg_signin
 SET(KEY_FILE                                 "temp.key"    CACHE STRING "Pass file (containing key")
 SET(SUPERUSER_SWITCH                         "sudo"        CACHE STRING "Switch to superuser")
 
+# Actually the deployment should not contain this information
 MATH(EXPR SWO_PORT       "${GDB_PORT}+1")
 MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
 MATH(EXPR RTT_PORT       "${GDB_PORT}+16690")

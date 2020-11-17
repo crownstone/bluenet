@@ -81,7 +81,9 @@ LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_Syscalls.c")
 LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_WireFormat.cpp")
 
 IF (BUILD_MICROAPP_SUPPORT)
-	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/storage/cs_MicroApp.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/microapp/cs_MicroApp.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/microapp/cs_MicroAppStorage.cpp")
+	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/microapp/cs_MicroAppProtocol.cpp")
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/util/cs_DoubleStackCoroutine.c")
 ENDIF()
 
