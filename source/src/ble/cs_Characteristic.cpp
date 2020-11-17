@@ -202,7 +202,6 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
 		_log(SERIAL_DEBUG, true, false, "data: ");
 		BLEutil::printArray(getValuePtr(), valueLength);
-		_log(SERIAL_DEBUG, false, true, "");
 #endif
 
 		// we calculate what size buffer we need
@@ -219,9 +218,8 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 					encryptionType
 			);
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
-			_log(SERIAL_DEBUG, "encrypted: ", true, false);
+			_log(SERIAL_DEBUG, true, false, "encrypted: ");
 			BLEutil::printArray(valueGattAddress, encryptionBufferLength);
-			_log(SERIAL_DEBUG, "", false, true);
 #endif
 		}
 		if (!SUCCESS(retVal)) {

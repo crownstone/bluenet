@@ -190,14 +190,14 @@ cs_ret_code_t AES::ctr(cs_data_t key, cs_data_t nonce, cs_data_t inputPrefix, cs
 		_block.cleartext[AES_BLOCK_SIZE - 1] = i + blockCtr;
 
 		// Encrypts the cleartext and puts it in ciphertext.
-//		LOGi("key:");
+//		_log(SERIAL_DEBUG, true, false, "key: ");
 //		BLEutil::printArray(_block.key, sizeof(_block.key));
-//		LOGi("cleartext:");
+//		_log(SERIAL_DEBUG, true, false, "cleartext: ");
 //		BLEutil::printArray(_block.cleartext, sizeof(_block.cleartext));
 		errCode = sd_ecb_block_encrypt(&_block);
 		APP_ERROR_CHECK(errCode);
 //		memcpy(_block.ciphertext, _block.cleartext, sizeof(_block.ciphertext));
-//		LOGi("cipher:");
+//		_log(SERIAL_DEBUG, true, false, "cipher: ");
 //		BLEutil::printArray(_block.ciphertext, sizeof(_block.ciphertext));
 
 		///////////////////////////////////////////////////////////////////
