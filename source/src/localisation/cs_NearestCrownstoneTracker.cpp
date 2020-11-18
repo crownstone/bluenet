@@ -91,7 +91,7 @@ NearestCrownstoneTracker::WitnessReport NearestCrownstoneTracker::createReport(
 
 void NearestCrownstoneTracker::savePersonalReport(WitnessReport report) {
 	logReport("saving personal report", report);
-//	personal_report = report;
+	personal_report = report;
 }
 
 void NearestCrownstoneTracker::saveWinningReport(WitnessReport report) {
