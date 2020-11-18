@@ -91,6 +91,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 		}
 		case CS_MESH_MODEL_TYPE_TIME_SYNC: {
 			result.returnCode = handleTimeSync(payload, payloadSize, srcId, msg.hops);
+			return;
 		}
 		case CS_MESH_MODEL_TYPE_CMD_NOOP: {
 			result.returnCode = handleCmdNoop(payload, payloadSize);
