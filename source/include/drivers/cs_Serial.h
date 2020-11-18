@@ -125,6 +125,12 @@ constexpr uint32_t fileNameHash(const char* str, size_t strLen) {
 				if (level <= SERIAL_VERBOSITY) { \
 					cs_write_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, addPrefix, addNewLine, ##__VA_ARGS__); \
 				}
+
+		#define _logData(level, addPrefix, addNewLine, pointer, size, itemSize) \
+				if (level <= SERIAL_VERBOSITY) { \
+					cs_write_data(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, addPrefix, addNewLine, pointer, size, itemSize); \
+				}
+
 		#define logLN(level, fmt, ...) _log(level, true, true, fmt, ##__VA_ARGS__)
 
 
@@ -225,6 +231,8 @@ void cs_write_start(size_t msgSize, uart_msg_log_header_t &header);
 void cs_write_arg(const uint8_t* const valPtr, size_t valSize);
 void cs_write_end();
 
+void cs_write_data(uint32_t fileNameHash, uint32_t lineNumber, bool addPrefix, bool addNewLine, const uint8_t* const ptr, size_t size, size_t itemSize);
+
 
 template<typename T>
 void cs_add_arg_size(size_t& size, uint8_t& numArgs, T val) {
@@ -252,9 +260,6 @@ template<>
 void cs_write_arg(const char* str);
 
 
-
-
-
 // Uses the fold expression, a handy way to replace a recursive call.
 template<class... Args>
 void cs_write_args(uint32_t fileNameHash, uint32_t lineNumber, bool addPrefix, bool addNewLine, const Args&... args) {
@@ -278,3 +283,4 @@ void cs_write_args(uint32_t fileNameHash, uint32_t lineNumber, bool addPrefix, b
 	// Finalize the uart msg.
 	cs_write_end();
 }
+

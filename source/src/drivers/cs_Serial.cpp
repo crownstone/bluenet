@@ -294,6 +294,10 @@ void cs_write_end() {
 	UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_LOG);
 }
 
+void cs_write_data(uint32_t fileNameHash, uint32_t lineNumber, bool addPrefix, bool addNewLine, const uint8_t* const ptr, size_t size, size_t itemSize) {
+
+}
+
 /**
  * A write function with a format specifier.
  */
