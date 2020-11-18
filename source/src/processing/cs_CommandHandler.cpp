@@ -915,6 +915,9 @@ void CommandHandler::handleCmdHubData(cs_data_t commandData, const EncryptionAcc
 	UartProtocol::Encrypt encrypt = static_cast<UartProtocol::Encrypt>(header->encrypt);
 
 	result.returnCode = UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HUB_DATA, hubDataPtr, hubDataSize, encrypt);
+	if (result.returnCode == ERR_SUCCESS) {
+		result.returnCode = ERR_WAIT_FOR_SUCCESS;
+	}
 }
 
 

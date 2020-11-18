@@ -50,6 +50,9 @@ void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 		case UART_OPCODE_RX_CONTROL:
 			handleCommandControl(commandData, source, accessLevel, resultBuffer);
 			break;
+		case UART_OPCODE_RX_HUB_DATA_REPLY:
+			handleCommandHubDataReply(commandData, source, accessLevel, resultBuffer);
+			break;
 
 #ifdef DEBUG
 		case UART_OPCODE_RX_ENABLE_ADVERTISEMENT:
@@ -214,6 +217,24 @@ void UartCommandHandler::handleCommandControl(cs_data_t commandData, const cmd_s
 	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
 	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, event.result.buf.data, event.result.dataSize);
 	UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_CONTROL_RESULT);
+}
+
+void UartCommandHandler::handleCommandHubDataReply(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultBuffer) {
+	LOGd("handleCommandHubDataReply");
+	uart_msg_hub_data_reply_header_t* replyHeader = reinterpret_cast<uart_msg_hub_data_reply_header_t*>(commandData.data);
+	if (commandData.len < sizeof(*replyHeader)) {
+		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		return;
+	}
+
+	TYPIFY(EVT_HUB_DATA_REPLY) evtData;
+	evtData.retCode = replyHeader->retCode;
+	evtData.data.data = commandData.data + sizeof(*replyHeader);
+	evtData.data.len  = commandData.len  - sizeof(*replyHeader);
+	event_t event(CS_TYPE::EVT_HUB_DATA_REPLY, &evtData, sizeof(evtData));
+	event.dispatch();
+
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HUB_DATA_REPLY_ACK);
 }
 
 void UartCommandHandler::handleCommandGetId(cs_data_t commandData) {

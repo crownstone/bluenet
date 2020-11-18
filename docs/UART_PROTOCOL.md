@@ -91,7 +91,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 3     | Status                        | Optional  | [Status](#cmd_status_packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
 4     | Get MAC                       | Never     | -      | Get MAC address of this Crownstone.
 10    | Control command               | Yes       | [Control msg](../docs/PROTOCOL.md#control_packet) | Send a control command.
-11    | Hub data reply                | Optional  | [Hub data reply](#cmd_hub_data_reply_packet) | After receiving `hub data`, reply with this command once. This data will be relayed to the device (phone) connected via BLE.
+11    | Hub data reply                | Optional  | [Hub data reply](#cmd_hub_data_reply_packet) | Only after receiving `Hub data`, reply with this command. This data will be relayed to the device (phone) connected via BLE.
 50000 | Enable advertising            | Never     | uint8  | Enable/disable advertising.
 50001 | Enable mesh                   | Never     | uint8  | Enable/disable mesh.
 50002 | Get ID                        | Never     | -      | Get ID of this Crownstone.
@@ -135,7 +135,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 10004 | Presence change               | Yes       | [Presence change packet](#presence_change_packet) | Sent when the presence has changed. Note: a profile ID can be at multiple locations at the same time.
 10005 | Factory reset                 | Yes       | -      | Sent when a factory reset will be performed.
 10006 | Booted                        | Never     | -      | This Crownstone just booted, you probably want to start a new session.
-10007 | Hub data                      | Optional  | uint8 [] | As requested via control command `Hub data`.
+10007 | Hub data                      | Optional  | uint8 [] | As requested via control command `Hub data`. Make sure you reply with the `Hub data reply` uart command.
 10102 | Mesh state msg                | Yes       | [Service data without device type](../docs/SERVICE_DATA.md#service_data_encrypted) | State of other Crownstones in the mesh (unencrypted).
 10103 | Mesh state part 0             | Yes       | [External state part 0](#mesh_state_part_0) | Part of the state of other Crownstones in the mesh.
 10104 | Mesh state part 1             | Yes       | [External state part 1](#mesh_state_part_1) | Part of the state of other Crownstones in the mesh.

@@ -310,4 +310,9 @@ struct adc_buffer_t {
 	adc_sample_value_t* samples = nullptr;
 };
 
+struct hub_data_reply_t {
+	cs_ret_code_t retCode;
+	cs_data_t data;
+};
+
 

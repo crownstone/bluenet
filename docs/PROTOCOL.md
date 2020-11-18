@@ -337,7 +337,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 40 | Allow dimming | uint 8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
 41 | Lock switch | uint 8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 50 | UART message | payload | - | Print the payload to UART. | x
-51 | Hub data | [Hub data packet](#hub_data_packet) | - | Send data to hub over UART. | x
+51 | Hub data | [Hub data packet](#hub_data_packet) | - | Send data to hub over UART. You will first get WAIT_FOR_SUCCESS, when it's sent to the hub. Once the hub processed the command, and replied, you will get the final result. | x
 60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#add_behaviour_result_packet) | Add a behaviour to an unoccupied index. | x | x
 61 | Replace behaviour | [Replace behaviour packet](BEHAVIOUR.md#replace_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#replace_behaviour_result_packet) | Replace the behaviour at given index. | x | x
 62 | Remove behaviour | [Remove behaviour packet](BEHAVIOUR.md#remove_behaviour_packet) | [Index and master hash](BEHAVIOUR.md#remove_behaviour_result_packet) | Remove the behaviour at given index. | x | x

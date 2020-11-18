@@ -328,6 +328,8 @@ enum class CS_TYPE: uint16_t {
 	CMD_MICROAPP,                                     // MicroApp upload (e.g. Arduino code).
 	EVT_MICROAPP,                                     // MicroApp event (e.g. write done)
 
+	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
+
 	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
 	EVT_GENERIC_TEST = 0xFFFF,                        // Can be used by the python test python lib for ad hoc tests during development.
 
@@ -564,6 +566,7 @@ typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
+typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);
 
 /**
  * The size of a particular default value. In case of strings or arrays this is the maximum size of the corresponding

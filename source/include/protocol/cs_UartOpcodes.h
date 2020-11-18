@@ -15,6 +15,7 @@ enum UartOpcodeRx {
 	UART_OPCODE_RX_STATUS =                           3,
 	UART_OPCODE_RX_GET_MAC =                          4, // Get MAC address of this Crownstone
 	UART_OPCODE_RX_CONTROL =                          10,
+	UART_OPCODE_RX_HUB_DATA_REPLY =                   11, // Payload starts with uart_msg_hub_data_reply_header_t.
 
 	////////// Developer messages in debug build. //////////
 	UART_OPCODE_RX_ENABLE_ADVERTISEMENT =             50000, // Enable advertising (payload: bool enable)
@@ -48,6 +49,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_STATUS =                           3,
 	UART_OPCODE_TX_MAC =                              4,  // MAC address (payload: mac address (6B))
 	UART_OPCODE_TX_CONTROL_RESULT =                   10, // The result of the control command, payload: result_packet_header_t + data.
+	UART_OPCODE_TX_HUB_DATA_REPLY_ACK =               11,
 
 	////////// Event messages. //////////
 	UART_OPCODE_TX_BLE_MSG =                          10000, // Sent by command (CMD_UART_MSG), payload: buffer.
@@ -111,6 +113,8 @@ enum Encrypt {
 
 /**
  * Whether a received UART message must be encrypted when "encryption required" is true (when a UART key is set).
+ *
+ * Optionals should return false.
  */
 constexpr bool mustBeEncryptedRx(UartOpcodeRx opCode) {
 	switch (opCode) {
@@ -119,6 +123,7 @@ constexpr bool mustBeEncryptedRx(UartOpcodeRx opCode) {
 		case UartOpcodeRx::UART_OPCODE_RX_HEARTBEAT: // optional
 		case UartOpcodeRx::UART_OPCODE_RX_STATUS: // optional
 		case UartOpcodeRx::UART_OPCODE_RX_GET_MAC:
+		case UartOpcodeRx::UART_OPCODE_RX_HUB_DATA_REPLY: // optional
 			return false;
 		default:
 			if (opCode > 50000) {
@@ -130,6 +135,8 @@ constexpr bool mustBeEncryptedRx(UartOpcodeRx opCode) {
 
 /**
  * Whether a written UART message must be encrypted when "encryption required" is true (when a UART key is set).
+ *
+ * Optionals should return true.
  */
 constexpr bool mustBeEncryptedTx(UartOpcodeTx opCode) {
 	switch (opCode) {

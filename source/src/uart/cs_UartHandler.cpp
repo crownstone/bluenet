@@ -109,16 +109,19 @@ ret_code_t UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartPr
 	uint16_t uartMsgSize = sizeof(uartMsgHeader) + size;
 
 	if (mustEncrypt(encrypt, opCode)) {
-		// Write wrapper header
-		uint16_t wrapperPayloadSize = getEncryptedBufferSize(uartMsgSize);
-		writeWrapperStart(UartMsgType::ENCRYPTED_UART_MSG, wrapperPayloadSize);
-
 		// Set nonce.
+		// Do this first, so that we don't send anything if the session nonce is missing.
 		RNG::fillBuffer(_writeNonce.packetNonce, sizeof(_writeNonce.packetNonce));
 		cs_ret_code_t retCode = UartConnection::getInstance().getSessionNonceTx(cs_data_t(_writeNonce.sessionNonce, sizeof(_writeNonce.sessionNonce)));
 		if (retCode != ERR_SUCCESS) {
+			LOGw("No TX session nonce");
+			writeMsg(UART_OPCODE_TX_SESSION_NONCE_MISSING);
 			return retCode;
 		}
+
+		// Write wrapper header
+		uint16_t wrapperPayloadSize = getEncryptedBufferSize(uartMsgSize);
+		writeWrapperStart(UartMsgType::ENCRYPTED_UART_MSG, wrapperPayloadSize);
 
 		// Write unencrypted header
 		uart_encrypted_msg_header_t msgHeader;

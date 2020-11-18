@@ -51,6 +51,7 @@ public:
 	void handleCommandHeartBeat        (cs_data_t commandData, bool wasEncrypted);
 	void handleCommandStatus           (cs_data_t commandData);
 	void handleCommandControl          (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultBuffer);
+	void handleCommandHubDataReply     (cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultBuffer);
 	void handleCommandEnableAdvertising(cs_data_t commandData);
 	void handleCommandEnableMesh       (cs_data_t commandData);
 	void handleCommandGetId            (cs_data_t commandData);
