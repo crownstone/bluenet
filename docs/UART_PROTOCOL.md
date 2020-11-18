@@ -91,6 +91,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 3     | Status                        | Optional  | [Status](#cmd_status_packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
 4     | Get MAC                       | Never     | -      | Get MAC address of this Crownstone.
 10    | Control command               | Yes       | [Control msg](../docs/PROTOCOL.md#control_packet) | Send a control command.
+11    | Hub data reply                | Optional  | [Hub data reply](#cmd_hub_data_reply_packet) | After receiving `hub data`, reply with this command once. This data will be relayed to the device (phone) connected via BLE.
 50000 | Enable advertising            | Never     | uint8  | Enable/disable advertising.
 50001 | Enable mesh                   | Never     | uint8  | Enable/disable mesh.
 50002 | Get ID                        | Never     | -      | Get ID of this Crownstone.
@@ -126,6 +127,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 3     | Status                        | Never     | [Status](#ret_status_packet) | Status reply and event.
 4     | MAC                           | Never     | uint8 [6] | The MAC address of this crownstone.
 10    | Control result                | Yes       | [Result packet](../docs/PROTOCOL.md#result_packet) | Result of a control command.
+11    | Hub data reply ack            | Optional  | -      | Simply an acknowledgement that the hub data reply was received by the crownstone. Will be encrypted if the command was encrypted too.
 10000 | Uart msg                      | Yes       | string | As requested via control command `UART message`.
 10001 | Session nonce missing         | Never     | -      | The Crownstone has no session nonce, please send one.
 10002 | Service data                  | Yes       | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Service data of this Crownstone.
@@ -240,6 +242,13 @@ Type | Name | Length | Description
 uint8[] | Session nonce | 5 | The session nonce to use for encrypted messages sent by the crownstone.
 
 
+<a name="cmd_hub_data_reply_packet"></a>
+### Hub data reply
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint16 | [Result code](../docs/PROTOCOL.md#result_codes) | 2 | The result code.
+uint8[] | Data | N | Data.
 
 
 <a name="presence_change_packet"></a>
