@@ -172,7 +172,6 @@ Type  | Type name                     | Encrypted | Data   | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Hub mode | 1 | Hub mode, as set by the _Enable hub mode_ command.
 uint8 | Sphere ID | 1 | Short sphere ID, as given during [setup](PROTOCOL.md#setup).
 [status](#ret_status_packet) | Status | 1 | Status packet.
 
