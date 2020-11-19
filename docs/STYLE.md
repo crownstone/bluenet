@@ -1,4 +1,12 @@
 
+# Etiquette
+
+- use typify
+- no implicit cast operators
+- name functions
+- don't init structs like: { 9, true, 3 }
+
+
 # Code
 
 ## Whitespace
