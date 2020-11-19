@@ -326,20 +326,23 @@ cs_ret_code_t UartHandler::writeEncryptedEnd() {
 }
 
 cs_ret_code_t UartHandler::writeEncryptedBlock(cs_data_t key) {
+	// sizeof(_encryptionBuffer) doesn't work, as it's allocated at init().
+	cs_buffer_size_t encryptionBufferSize = UART_TX_ENCRYPTION_BUFFER_SIZE;
+
 	cs_buffer_size_t encryptedSize;
 	cs_ret_code_t retCode = AES::getInstance().encryptCtr(
 			key,
 			cs_data_t(reinterpret_cast<uint8_t*>(&_writeNonce), sizeof(_writeNonce)),
 			cs_data_t(),
-			cs_data_t(_encryptionBuffer, sizeof(_encryptionBuffer)),
-			cs_data_t(_encryptionBuffer, sizeof(_encryptionBuffer)),
+			cs_data_t(_encryptionBuffer, encryptionBufferSize),
+			cs_data_t(_encryptionBuffer, encryptionBufferSize),
 			encryptedSize,
 			_encryptionBlocksWritten
 	);
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
-	writeBytes(cs_data_t(_encryptionBuffer, sizeof(_encryptionBuffer)), true);
+	writeBytes(cs_data_t(_encryptionBuffer, encryptionBufferSize), true);
 	_encryptionBufferWritten = 0;
 	++_encryptionBlocksWritten;
 	return ERR_SUCCESS;
