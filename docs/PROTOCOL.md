@@ -971,7 +971,7 @@ Type nr | Type name | Payload type | Description | A | M | B
 150 | Behaviour settings | [Behaviour settings](#behaviour_settings_packet) | Behaviour settings. | rw | rw | r
 156 | Soft on speed | uint 8 | Speed at which the dimmer goes towards the target value. Range: 1-100. | rw
 157 | Hub mode | uint 8 | Whether hub mode is enabled. | rw
-158 | UART keys | uint 8 [16] | 16 byte key used to encrypt/decrypt UART messages. | rw
+158 | UART key | uint 8 [16] | 16 byte key used to encrypt/decrypt UART messages. | rw
 
 <a name="switch_state_packet"></a>
 #### Switch state

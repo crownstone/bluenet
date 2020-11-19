@@ -142,8 +142,8 @@ void UartCommandHandler::dispatchEventForCommand(
 //	result.returnCode = event.result.returnCode;
 //	result.dataSize = event.result.dataSize;
 
-	cmd_source_with_counter_t source_description(CS_CMD_SOURCE_UART);
-	event_t event(type, commandData.data, commandData.len, source_description);
+	cmd_source_with_counter_t source(CS_CMD_SOURCE_TYPE_UART);
+	event_t event(type, commandData.data, commandData.len, source);
 	event.dispatch();
 }
 
