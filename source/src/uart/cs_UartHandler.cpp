@@ -15,8 +15,19 @@
 #include <util/cs_BleError.h>
 #include <util/cs_Utils.h>
 
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+extern "C" {
+#include "log.h"
+}
+#endif
 
 #define LOGUartHandlerDebug LOGnone
+
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+#define LOGUartHandlerRtt(fmt, ...) __LOG(LOG_SRC_APP, LOG_LEVEL_INFO, fmt, ##__VA_ARGS__)
+#else
+#define LOGUartHandlerRtt(fmt, ...)
+#endif
 
 void handle_msg(void * data, uint16_t size) {
 	UartHandler::getInstance().handleMsg((cs_data_t*)data);
@@ -44,6 +55,11 @@ void UartHandler::init(serial_enable_t serialEnabled) {
 	_readBuffer = new uint8_t[UART_RX_BUFFER_SIZE];
 	_writeBuffer = new uint8_t[UART_TX_BUFFER_SIZE];
 	_encryptionBuffer = new uint8_t[UART_TX_ENCRYPTION_BUFFER_SIZE];
+
+#if CS_SERIAL_NRF_LOG_ENABLED == 1
+	__LOG_INIT(LOG_SRC_APP, LOG_LEVEL_INFO, LOG_CALLBACK_DEFAULT);
+	__LOG(LOG_SRC_APP, LOG_LEVEL_INFO, "----- UartHandler init -----\n");
+#endif
 
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_stoneId, sizeof(_stoneId));
 
@@ -122,13 +138,22 @@ ret_code_t UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartPr
 		uint16_t wrapperPayloadSize = getEncryptedBufferSize(uartMsgSize);
 		writeWrapperStart(UartMsgType::ENCRYPTED_UART_MSG, wrapperPayloadSize);
 
-		// Write unencrypted header
+		// Write encryption header
 		uart_encrypted_msg_header_t msgHeader;
 		memcpy(msgHeader.packetNonce, _writeNonce.packetNonce, sizeof(_writeNonce.packetNonce));
 		msgHeader.keyId = 0;
 		writeBytes(cs_data_t(reinterpret_cast<uint8_t*>(&msgHeader), sizeof(msgHeader)), true);
 
-		return writeEncryptedStart(uartMsgSize);
+		// Write the encrypted header
+		retCode = writeEncryptedStart(uartMsgSize);
+		if (retCode != ERR_SUCCESS) {
+			return retCode;
+		}
+
+		LOGUartHandlerRtt("dataType=%u \n", uartMsgHeader.type);
+
+		// Write uart msg header
+		return writeEncryptedPart(cs_data_t(reinterpret_cast<uint8_t*>(&uartMsgHeader), sizeof(uartMsgHeader)));
 	}
 	else {
 		// Write wrapper header
@@ -216,6 +241,8 @@ cs_ret_code_t UartHandler::writeWrapperStart(UartMsgType msgType, uint16_t paylo
 	sizeHeader.size = sizeof(wrapperHeader) + payloadSize + sizeof(uart_msg_tail_t);
 	wrapperHeader.type = static_cast<uint8_t>(msgType);
 
+	LOGUartHandlerRtt("writeWrapperStart sizeHeader=%u \n", sizeHeader.size);
+
 	// Start CRC.
 	_crc = UartProtocol::crc16(nullptr, 0);
 
@@ -261,6 +288,7 @@ bool UartHandler::mustBeEncrypted(UartOpcodeRx opCode) {
 
 
 cs_ret_code_t UartHandler::writeEncryptedStart(cs_buffer_size_t uartMsgSize) {
+	LOGUartHandlerRtt("writeEncryptedStart\n");
 	cs_ret_code_t retCode;
 
 	// Always start with empty encryption buffer.
@@ -277,6 +305,7 @@ cs_ret_code_t UartHandler::writeEncryptedStart(cs_buffer_size_t uartMsgSize) {
 }
 
 cs_ret_code_t UartHandler::writeEncryptedPart(cs_data_t data) {
+	LOGUartHandlerRtt("writeEncryptedPart size=%u\n", data.len);
 	cs_ret_code_t retCode;
 
 	// Keep up how much data we read from the input data buffer.
@@ -289,6 +318,8 @@ cs_ret_code_t UartHandler::writeEncryptedPart(cs_data_t data) {
 	while (dataSizeRead < data.len) {
 		// How much to read from input data and write to the encryption buffer.
 		uint8_t writeSize = std::min(data.len - dataSizeRead, AES_BLOCK_SIZE - _encryptionBufferWritten);
+
+		LOGUartHandlerRtt("_encryptionBufferWritten=%u dataSizeRead=%u writeSize=%u\n", _encryptionBufferWritten, dataSizeRead, writeSize);
 
 		// Append input data to encryption buffer.
 		memcpy(_encryptionBuffer + _encryptionBufferWritten, data.data + dataSizeRead, writeSize);
@@ -309,10 +340,13 @@ cs_ret_code_t UartHandler::writeEncryptedPart(cs_data_t data) {
 }
 
 cs_ret_code_t UartHandler::writeEncryptedEnd() {
+	LOGUartHandlerRtt("writeEncryptedEnd\n");
+
 	// TODO: use KeysAndAccess class instead.
 	uint8_t key[ENCRYPTION_KEY_LENGTH];
 	State::getInstance().get(CS_TYPE::STATE_UART_KEY, key, sizeof(key));
 
+	LOGUartHandlerRtt("_encryptionBufferWritten=%u\n", _encryptionBufferWritten);
 	if (_encryptionBufferWritten) {
 		// Zero pad the remaining bytes.
 		memset(_encryptionBuffer + _encryptionBufferWritten, 0, AES_BLOCK_SIZE - _encryptionBufferWritten);
@@ -325,6 +359,8 @@ cs_ret_code_t UartHandler::writeEncryptedEnd() {
 }
 
 cs_ret_code_t UartHandler::writeEncryptedBlock(cs_data_t key) {
+	LOGUartHandlerRtt("writeEncryptedBlock\n");
+
 	// sizeof(_encryptionBuffer) doesn't work, as it's allocated at init().
 	cs_buffer_size_t encryptionBufferSize = UART_TX_ENCRYPTION_BUFFER_SIZE;
 
@@ -338,9 +374,12 @@ cs_ret_code_t UartHandler::writeEncryptedBlock(cs_data_t key) {
 			encryptedSize,
 			_encryptionBlocksWritten
 	);
+
 	if (retCode != ERR_SUCCESS) {
+		LOGUartHandlerRtt("writeEncryptedBlock failed: %u\n", retCode);
 		return retCode;
 	}
+
 	writeBytes(cs_data_t(_encryptionBuffer, encryptionBufferSize), true);
 	_encryptionBufferWritten = 0;
 	++_encryptionBlocksWritten;
