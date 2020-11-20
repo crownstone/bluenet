@@ -31,8 +31,14 @@ private:
 	struct SquashedMacAddress {
 		uint8_t bytes[3];
 
+		SquashedMacAddress() = default;
+
+		SquashedMacAddress(const SquashedMacAddress& other){
+			std::memcpy(bytes, other.bytes, 3);
+		}
+
 		bool operator==(const SquashedMacAddress& other){
-			return std::memcmp(bytes,other.bytes,3);
+			return std::memcmp(bytes,other.bytes,3) == 0;
 		}
 	};
 
@@ -45,6 +51,14 @@ private:
 		SquashedMacAddress trackable;
 		int8_t rssi;
 		stone_id_t reporter;
+
+		WitnessReport(WitnessReport &other) :
+				trackable(other.trackable),
+				rssi(other.rssi),
+				reporter(other.reporter) {
+		}
+
+		WitnessReport() = default;
 	};
 
 	stone_id_t my_id; // cached for efficiency
@@ -65,6 +79,10 @@ private:
 
 	void logReport(const char* text, WitnessReport report);
 
+	/**
+	 * Assumes my_id is set to the correct value.
+	 */
+	void resetReports();
 };
 
 #endif /* SOURCE_INCLUDE_TRACKING_CS_NEARESTCROWNSTONE_H_ */

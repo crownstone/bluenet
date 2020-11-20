@@ -17,11 +17,9 @@ void NearestCrownstoneTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id,
 	        sizeof(my_id));
 
-	personal_report.reporter = my_id;
-	personal_report.rssi = -127; // std::numeric_limits<uint8_t>::lowest();
-	personal_report.trackable = { 0 };
+	resetReports();
 
-	winning_report = { 0 };
+	logReport("init report: ", personal_report);
 }
 
 void NearestCrownstoneTracker::handleEvent(event_t &evt) {
@@ -35,6 +33,7 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 
 void NearestCrownstoneTracker::onReceive(
         adv_background_parsed_t *trackable_advertisement) {
+	LOGi("onReceive trackable, my_id(%d)", my_id);
 	auto incoming_report = createReport(trackable_advertisement);
 
 	logReport("incoming report", incoming_report);
@@ -90,13 +89,13 @@ NearestCrownstoneTracker::WitnessReport NearestCrownstoneTracker::createReport(
 }
 
 void NearestCrownstoneTracker::savePersonalReport(WitnessReport report) {
-	logReport("saving personal report", report);
 	personal_report = report;
+	logReport("saved personal report", report);
 }
 
 void NearestCrownstoneTracker::saveWinningReport(WitnessReport report) {
-	logReport("saving winning report", report);
-//	winning_report = report;
+	winning_report = report;
+	logReport("saved winning report", winning_report);
 }
 
 void NearestCrownstoneTracker::broadcastReport(WitnessReport report) {
@@ -117,4 +116,12 @@ void NearestCrownstoneTracker::logReport(const char* text, WitnessReport report)
 			report.trackable.bytes[2],
 			report.rssi
 	);
+}
+
+void NearestCrownstoneTracker::resetReports() {
+	winning_report = WitnessReport();
+	personal_report = WitnessReport();
+
+	personal_report.reporter = my_id;
+	personal_report.rssi = -127; // std::numeric_limits<uint8_t>::lowest();
 }
