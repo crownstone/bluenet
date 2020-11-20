@@ -9,9 +9,9 @@
 #define SOURCE_INCLUDE_TRACKING_CS_NEARESTCROWNSTONE_H_
 
 #include <events/cs_EventListener.h>
+#include <localisation/cs_Nearestnearestwitnessreportt.h>
 #include <protocol/cs_Typedefs.h>
 
-#include <localisation/cs_NearestWitnessReport.h>
 
 class NearestCrownstoneTracker: public EventListener {
 public:
@@ -21,22 +21,22 @@ public:
 
 private:
 	stone_id_t my_id; // cached for efficiency
-	WitnessReport personal_report;
-	WitnessReport winning_report;
+	nearest_witness_report_t personal_report;
+	nearest_witness_report_t winning_report;
 
 	void onReceive(adv_background_parsed_t* trackable_advertisement);
-	void onReceive(WitnessReport report);
+	void onReceive(nearest_witness_report_t report);
 
-	WitnessReport createReport(adv_background_parsed_t* trackable_advertisement);
+	nearest_witness_report_t createReport(adv_background_parsed_t* trackable_advertisement);
 
-	void savePersonalReport(WitnessReport report);
-	void saveWinningReport(WitnessReport report);
+	void savePersonalReport(nearest_witness_report_t report);
+	void saveWinningReport(nearest_witness_report_t report);
 
-	void broadcastReport(WitnessReport report);
+	void broadcastReport(nearest_witness_report_t report);
 
-	bool isValid(const WitnessReport& report); // crude implementation, only needed while not using maps for the reports
+	bool isValid(const nearest_witness_report_t& report); // crude implementation, only needed while not using maps for the reports
 
-	void logReport(const char* text, WitnessReport report);
+	void logReport(const char* text, nearest_witness_report_t report);
 
 	/**
 	 * Assumes my_id is set to the correct value.

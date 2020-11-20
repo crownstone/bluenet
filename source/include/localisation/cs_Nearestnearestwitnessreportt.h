@@ -52,7 +52,7 @@ struct __attribute__((__packed__)) SquashedMacAddress {
  *
  * TODO: channel?
  */
-struct __attribute__((__packed__)) WitnessReport {
+struct __attribute__((__packed__)) nearest_witness_report_t {
 	SquashedMacAddress trackable;
 	int8_t rssi;
 	stone_id_t reporter;
@@ -60,11 +60,11 @@ struct __attribute__((__packed__)) WitnessReport {
 	/**
 	 * copy constructor enables assignment.
 	 */
-	WitnessReport(WitnessReport &other) :
+	nearest_witness_report_t(nearest_witness_report_t &other) :
 			trackable(other.trackable),
 			rssi(other.rssi),
 			reporter(other.reporter) {
 	}
 
-	WitnessReport() = default;
+	nearest_witness_report_t() = default;
 };

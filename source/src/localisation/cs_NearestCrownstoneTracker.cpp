@@ -66,37 +66,37 @@ void NearestCrownstoneTracker::onReceive(
 	LOGi("----");
 }
 
-void NearestCrownstoneTracker::onReceive(WitnessReport report) {
+void NearestCrownstoneTracker::onReceive(nearest_witness_report_t report) {
 	// TODO
 }
 
 // --------------------------- Report processing ------------------------
 
-WitnessReport NearestCrownstoneTracker::createReport(
+nearest_witness_report_t NearestCrownstoneTracker::createReport(
         adv_background_parsed_t *trackable_advertisement) {
-	WitnessReport report;
+	nearest_witness_report_t report;
 	report.reporter = my_id;
 	report.trackable = SquashedMacAddress(trackable_advertisement->macAddress);
 	report.rssi = trackable_advertisement->adjustedRssi;
 	return report;
 }
 
-void NearestCrownstoneTracker::savePersonalReport(WitnessReport report) {
+void NearestCrownstoneTracker::savePersonalReport(nearest_witness_report_t report) {
 	personal_report = report;
 	logReport("saved personal report", report);
 }
 
-void NearestCrownstoneTracker::saveWinningReport(WitnessReport report) {
+void NearestCrownstoneTracker::saveWinningReport(nearest_witness_report_t report) {
 	winning_report = report;
 	logReport("saved winning report", winning_report);
 }
 
 
-bool NearestCrownstoneTracker::isValid(const WitnessReport& report) {
+bool NearestCrownstoneTracker::isValid(const nearest_witness_report_t& report) {
 	return report.rssi != 0;
 }
 
-void NearestCrownstoneTracker::logReport(const char* text, WitnessReport report) {
+void NearestCrownstoneTracker::logReport(const char* text, nearest_witness_report_t report) {
 	LOGi("%s {reporter:%d, trackable: %x %x %x, rssi:%d dB}",
 			text,
 			report.reporter,
@@ -108,8 +108,8 @@ void NearestCrownstoneTracker::logReport(const char* text, WitnessReport report)
 }
 
 void NearestCrownstoneTracker::resetReports() {
-	winning_report = WitnessReport();
-	personal_report = WitnessReport();
+	winning_report = nearest_witness_report_t();
+	personal_report = nearest_witness_report_t();
 
 	personal_report.reporter = my_id;
 	personal_report.rssi = -127; // std::numeric_limits<uint8_t>::lowest();
@@ -117,7 +117,7 @@ void NearestCrownstoneTracker::resetReports() {
 
 // ------------------- Mesh related stuff ----------------------
 
-void NearestCrownstoneTracker::broadcastReport(WitnessReport report) {
+void NearestCrownstoneTracker::broadcastReport(nearest_witness_report_t report) {
 	// TODO
 	logReport("broadcasting report", report);
 
