@@ -70,20 +70,13 @@ void NearestCrownstoneTracker::onReceive(WitnessReport report) {
 	// TODO
 }
 
-NearestCrownstoneTracker::SquashedMacAddress NearestCrownstoneTracker::getSquashed(
-        uint8_t *mac) {
-	SquashedMacAddress squash;
-	squash.bytes[0] = mac[0] ^ mac[1];
-	squash.bytes[1] = mac[2] ^ mac[3];
-	squash.bytes[2] = mac[4] ^ mac[5];
-	return squash;
-}
+// --------------------------- Report processing ------------------------
 
-NearestCrownstoneTracker::WitnessReport NearestCrownstoneTracker::createReport(
+WitnessReport NearestCrownstoneTracker::createReport(
         adv_background_parsed_t *trackable_advertisement) {
 	WitnessReport report;
 	report.reporter = my_id;
-	report.trackable = getSquashed(trackable_advertisement->macAddress);
+	report.trackable = SquashedMacAddress(trackable_advertisement->macAddress);
 	report.rssi = trackable_advertisement->adjustedRssi;
 	return report;
 }
@@ -98,10 +91,6 @@ void NearestCrownstoneTracker::saveWinningReport(WitnessReport report) {
 	logReport("saved winning report", winning_report);
 }
 
-void NearestCrownstoneTracker::broadcastReport(WitnessReport report) {
-	// TODO
-	logReport("broadcasting report", report);
-}
 
 bool NearestCrownstoneTracker::isValid(const WitnessReport& report) {
 	return report.rssi != 0;
@@ -124,4 +113,24 @@ void NearestCrownstoneTracker::resetReports() {
 
 	personal_report.reporter = my_id;
 	personal_report.rssi = -127; // std::numeric_limits<uint8_t>::lowest();
+}
+
+// ------------------- Mesh related stuff ----------------------
+
+void NearestCrownstoneTracker::broadcastReport(WitnessReport report) {
+	// TODO
+	logReport("broadcasting report", report);
+
+//	cs_mesh_msg_t report_msg_wrapper;
+//	report_msg_wrapper.type =  ;//CS_MESH_MODEL_TYPE_RSSI_PING;
+//	report_msg_wrapper.payload = reinterpret_cast<uint8_t*>(&report);
+//	report_msg_wrapper.size = ;//sizeof(rssi_ping_message_t);
+//	report_msg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
+//	report_msg_wrapper.urgency = CS_MESH_URGENCY_LOW;
+//
+//	event_t report_msg_evt(CS_TYPE::CMD_SEND_MESH_MSG, &report_msg_wrapper,
+//	        sizeof(cs_mesh_msg_t));
+//
+//	report_msg_evt.dispatch();
+
 }
