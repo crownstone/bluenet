@@ -313,7 +313,10 @@ cs_ret_code_t UartHandler::writeEncryptedPart(cs_data_t data) {
 
 	// TODO: use KeysAndAccess class instead.
 	uint8_t key[ENCRYPTION_KEY_LENGTH];
-	State::getInstance().get(CS_TYPE::STATE_UART_KEY, key, sizeof(key));
+	retCode = State::getInstance().get(CS_TYPE::STATE_UART_KEY, key, sizeof(key));
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
 
 	while (dataSizeRead < data.len) {
 		// How much to read from input data and write to the encryption buffer.
@@ -340,17 +343,20 @@ cs_ret_code_t UartHandler::writeEncryptedPart(cs_data_t data) {
 }
 
 cs_ret_code_t UartHandler::writeEncryptedEnd() {
-	LOGUartHandlerRtt("writeEncryptedEnd\n");
+	LOGUartHandlerRtt("writeEncryptedEnd _encryptionBufferWritten=%u\n", _encryptionBufferWritten);
 
-	// TODO: use KeysAndAccess class instead.
-	uint8_t key[ENCRYPTION_KEY_LENGTH];
-	State::getInstance().get(CS_TYPE::STATE_UART_KEY, key, sizeof(key));
-
-	LOGUartHandlerRtt("_encryptionBufferWritten=%u\n", _encryptionBufferWritten);
 	if (_encryptionBufferWritten) {
 		// Zero pad the remaining bytes.
 		memset(_encryptionBuffer + _encryptionBufferWritten, 0, AES_BLOCK_SIZE - _encryptionBufferWritten);
-		cs_ret_code_t retCode = writeEncryptedBlock(cs_data_t(key, sizeof(key)));
+
+		// TODO: use KeysAndAccess class instead.
+		uint8_t key[ENCRYPTION_KEY_LENGTH];
+		cs_ret_code_t retCode = State::getInstance().get(CS_TYPE::STATE_UART_KEY, key, sizeof(key));
+		if (retCode != ERR_SUCCESS) {
+			return retCode;
+		}
+
+		retCode = writeEncryptedBlock(cs_data_t(key, sizeof(key)));
 		if (retCode != ERR_SUCCESS) {
 			return retCode;
 		}
@@ -386,6 +392,10 @@ cs_ret_code_t UartHandler::writeEncryptedBlock(cs_data_t key) {
 	return ERR_SUCCESS;
 }
 
+void UartHandler::writeErrorReplyStatus() {
+	uart_msg_status_reply_t status = UartConnection::getInstance().getSelfStatus();
+	writeMsg(UART_OPCODE_TX_ERR_REPLY_STATUS, (uint8_t*)&status, sizeof(status));
+}
 
 
 
@@ -479,8 +489,8 @@ void UartHandler::handleMsg(cs_data_t* msgData) {
 	handleMsg(data, size);
 
 	// When done, ALWAYS reset and set readBusy to false!
-	_readBusy = false;
 	resetReadBuf();
+	_readBusy = false;
 }
 
 void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
@@ -489,8 +499,8 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 	// Check size
 	uint16_t wrapperSize = sizeof(uart_msg_wrapper_header_t) + sizeof(uart_msg_tail_t);
 	if (size < wrapperSize) {
-		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
-//		LOGw("Wrapper won't fit required=%u size=%u", wrapperSize, size);
+		LOGw("Wrapper won't fit required=%u size=%u", wrapperSize, size);
+		writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
 
@@ -504,6 +514,7 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 	uart_msg_tail_t* tail = reinterpret_cast<uart_msg_tail_t*>(data + size - sizeof(uart_msg_tail_t));
 	if (calculatedCrc != tail->crc) {
 		LOGw("CRC mismatch: calculated=%u received=%u", calculatedCrc, tail->crc);
+		writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
 
@@ -513,6 +524,7 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 			auto* encryptionHeader = reinterpret_cast<uart_encrypted_msg_header_t*>(payload);
 			if (payloadSize < sizeof(*encryptionHeader)) {
 				LOGw("Payload too small: size=%u", payloadSize);
+				writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 				return;
 			}
 			cs_data_t encryptedData(payload + sizeof(*encryptionHeader), payloadSize - sizeof(*encryptionHeader));
@@ -523,7 +535,7 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 			retCode = State::getInstance().get(stateData);
 			if (retCode != ERR_SUCCESS) {
 				LOGw("Can't find key %u", encryptionHeader->keyId);
-				writeMsg(UART_OPCODE_TX_DECRYPTION_FAILED);
+				writeMsg(UART_OPCODE_TX_ERR_REPLY_DECRYPTION_FAILED);
 				return;
 			}
 
@@ -532,7 +544,7 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 			retCode = UartConnection::getInstance().getSessionNonceRx(cs_data_t(nonce.sessionNonce, sizeof(nonce.sessionNonce)));
 			if (retCode != ERR_SUCCESS) {
 				LOGw("No RX session nonce");
-				writeMsg(UART_OPCODE_TX_SESSION_NONCE_MISSING);
+				writeMsg(UART_OPCODE_TX_ERR_REPLY_SESSION_NONCE_MISSING);
 				return;
 			}
 
@@ -550,17 +562,19 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 			);
 			if (retCode != ERR_SUCCESS) {
 				LOGw("Decryption failed: retCode=%u", retCode);
+				writeMsg(UART_OPCODE_TX_ERR_REPLY_DECRYPTION_FAILED);
 				return;
 			}
 			if (encryptedHeader.validation != UART_PROTOCOL_VALIDATION) {
 				LOGw("Validation=%u", encryptedHeader.validation);
-				writeMsg(UART_OPCODE_TX_DECRYPTION_FAILED);
+				writeMsg(UART_OPCODE_TX_ERR_REPLY_DECRYPTION_FAILED);
 				return;
 			}
 
 			// The encrypted header tells us how large the payload actually is (without padding).
 			if (encryptedHeader.size > decryptedPayloadSize) {
 				LOGw("Size too large: %u > %u", encryptedHeader.size, decryptedPayloadSize);
+				writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 				return;
 			}
 
@@ -577,8 +591,8 @@ void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 
 void UartHandler::handleUartMsg(uint8_t* data, uint16_t size, EncryptionAccessLevel accessLevel) {
 	if (size < sizeof(uart_msg_header_t)) {
-		LOGw("Payload too small: size=%u", size);
-//		LOGw("Header won't fit required=%u size=%u", sizeof(uart_msg_header_t), payloadSize);
+		LOGw("Header won't fit required=%u size=%u", sizeof(uart_msg_header_t), size);
+		writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
 	uart_msg_header_t* header = reinterpret_cast<uart_msg_header_t*>(data);
@@ -590,6 +604,7 @@ void UartHandler::handleUartMsg(uint8_t* data, uint16_t size, EncryptionAccessLe
 	if (!wasEncrypted) {
 		if (mustBeEncrypted(opCode)) {
 			LOGw("Must be encrypted: opCode=%u", opCode);
+			writeErrorReplyStatus();
 			return;
 		}
 		// Assume admin level.

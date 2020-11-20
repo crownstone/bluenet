@@ -53,6 +53,19 @@ const uart_msg_status_user_t& UartConnection::getUserStatus() {
 	return _userStatus;
 }
 
+void UartConnection::onHello(const uart_msg_status_user_flags_t& flags) {
+	LOGUartconnectionDebug("Set user flags");
+	_userStatus.flags = flags;
+
+	TYPIFY(CONFIG_SPHERE_ID) sphereId;
+	State::getInstance().get(CS_TYPE::CONFIG_SPHERE_ID, &sphereId, sizeof(sphereId));
+
+	uart_msg_hello_t hello;
+	hello.sphereId = sphereId;
+	hello.status = _status;
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HELLO, (uint8_t*)&hello, sizeof(hello));
+}
+
 void UartConnection::onUserStatus(const uart_msg_status_user_t& status) {
 	LOGUartconnectionDebug("Set user status");
 	_userStatus = status;

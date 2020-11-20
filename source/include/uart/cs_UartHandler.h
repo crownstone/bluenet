@@ -244,6 +244,11 @@ private:
 	cs_ret_code_t writeEncryptedBlock(cs_data_t key);
 
 	/**
+	 * Write an error reply: status.
+	 */
+	void writeErrorReplyStatus();
+
+	/**
 	 * Handles read msgs.
 	 *
 	 * Data starts after size header, and includes wrapper header and tail (CRC).

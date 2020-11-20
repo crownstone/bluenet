@@ -78,14 +78,14 @@ Data types for messages sent to the Crownstone.
 
 - Each message will be replied to with a message with the same data type.
     - You __must__ wait for the reply before sending the next message, else the next message will be ignored.
-    - However, if your message is invalid (no access, wrong payload, unknown type, etc), there will be no reply.
+    - If your message is invalid (no access, wrong payload, unknown type, etc), there will be an error reply.
 - Messages with _encrypted_ set to _yes_, have to be encrypted when the crownstone status has _encryption required_ set to true.
 - Messages with _encrypted_ set to _optional_, may be encrypted.
 - Types >= 50000 are for development. These may change, and will be disabled in release.
 
 Type  | Type name                     | Encrypted | Data   | Description
 ----- | ----------------------------- | --------- | ------ | -----------
-0     | Hello                         | Never     | -      | First command that should sent, used to determine whether this is the right crownstone, and whether encryption has to be used.
+0     | Hello                         | Never     | [Hello](#cmd_hello_packet) | First command that should sent, used to determine whether this is the right crownstone, and to tell and determine whether encryption has to be used.
 1     | Session nonce                 | Never     | [Session nonce](#cmd_session_nonce_packet) | Refresh the session nonce.
 2     | Heartbeat                     | Optional  | [Heartbeat](#cmd_heartbeat_packet) | Used to know whether the UART connection is alive.
 3     | Status                        | Optional  | [Status](#cmd_status_packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
@@ -115,6 +115,8 @@ Data types for messages received from the Crownstone.
 
 - Messages with _encrypted_ set to _yes_, will be encrypted when the crownstone status has _encryption required_ set to true.
 - Messages with _encrypted_ set to _optional_, may be encrypted.
+- Types in range 0 - 9900 are replies to a UART command with the same type.
+- Types in range 9900 - 10000 are error replies to any UART command.
 - Types in range 10000 - 20000 are events, not a (direct) reply to a UART command.
 - Types in range 40000 - 50000 are for development. These may change, and will be enabled in release.
 - Types >= 50000 are for development. These may change, and will be disabled in release.
@@ -124,14 +126,17 @@ Type  | Type name                     | Encrypted | Data   | Description
 0     | Hello                         | Never     | [Hello](#ret_hello_packet) | Hello reply.
 1     | Session nonce                 | Never     | [Session nonce](#ret_session_nonce_packet) | The new session nonce.
 2     | Heartbeat                     | Optional  | -      | Heartbeat reply. Will be encrypted if the command was encrypted too.
-3     | Status                        | Never     | [Status](#ret_status_packet) | Status reply and event.
+3     | Status                        | Never     | [Status](#ret_status_packet) | Status reply.
 4     | MAC                           | Never     | uint8 [6] | The MAC address of this crownstone.
 10    | Control result                | Yes       | [Result packet](../docs/PROTOCOL.md#result_packet) | Result of a control command.
 11    | Hub data reply ack            | Optional  | -      | Simply an acknowledgement that the hub data reply was received by the crownstone. Will be encrypted if the command was encrypted too.
+9900  | Parsing failed                | Never     | -      | Your command was probably formatted incorrectly, is too large, has an invalid data type, or you don't have the required access level.
+9901  | Error reply                   | Never     | [Status](#ret_status_packet) | Your command was probably not encrypted while it should have been.
+9902  | Session nonce missing         | Never     | -      | The Crownstone has no session nonce, please send one.
+9903  | Decryption failed             | Never     | -      | Decryption failed due to missing or wrong key.
 10000 | Uart msg                      | Yes       | string | As requested via control command `UART message`.
 10001 | Session nonce missing         | Never     | -      | The Crownstone has no session nonce, please send one.
 10002 | Service data                  | Yes       | [Service data with device type](../docs/SERVICE_DATA.md#service_data_header) | Service data of this Crownstone.
-10003 | Decryption failed             | Never     | -      | Decryption failed due to missing or wrong key.
 10004 | Presence change               | Yes       | [Presence change packet](#presence_change_packet) | Sent when the presence has changed. Note: a profile ID can be at multiple locations at the same time.
 10005 | Factory reset                 | Yes       | -      | Sent when a factory reset will be performed.
 10006 | Booted                        | Never     | -      | This Crownstone just booted, you probably want to start a new session.
@@ -167,8 +172,16 @@ Type  | Type name                     | Encrypted | Data   | Description
 
 ## Packets
 
+<a name="cmd_hello_packet"></a>
+### User hello packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | [Flags](#user_status_flags) | 1 | Status flags.
+
+
 <a name="ret_hello_packet"></a>
-### Hello packet
+### Crownstone hello packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
