@@ -64,6 +64,7 @@ enum cs_mesh_model_msg_type_t {
 	CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT  = 20, // Payload: cs_mesh_model_msg_device_heartbeat_t
 	CS_MESH_MODEL_TYPE_RSSI_PING                 = 21, // Payload: rssi_ping_message_t
 	CS_MESH_MODEL_TYPE_TIME_SYNC                 = 22, // Payload: cs_mesh_model_msg_time_sync_t
+	CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT    = 23, // Payload: nearest_witness_report_t
 
 	CS_MESH_MODEL_TYPE_UNKNOWN                   = 255
 };

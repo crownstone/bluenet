@@ -13,6 +13,7 @@
 #include <mesh/cs_MeshMsgEvent.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
+#include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <uart/cs_UartHandler.h>
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
@@ -98,6 +99,10 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 		}
 		case CS_MESH_MODEL_TYPE_RSSI_PING: {
 			result.returnCode = handleRssiPing(payload, payloadSize, srcId, msg.rssi, msg.hops, msg.channel);
+			return;
+		}
+		case CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT: {
+			result.returnCode = handleNearestWitnessReport(meshMsgEvent);
 			return;
 		}
 		case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
@@ -247,6 +252,18 @@ cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadS
 	}
 
 	event_t event(CS_TYPE::EVT_MESH_RSSI_PING, packet, sizeof(rssi_ping_message_t));
+	event.dispatch();
+
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t handleNearestWitnessReport(MeshMsgEvent& mesh_msg_event) {
+	event_t event(
+			CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT,
+			&mesh_msg_event,
+			sizeof(mesh_msg_event),
+			result
+			);
 	event.dispatch();
 
 	return ERR_SUCCESS;

@@ -121,16 +121,16 @@ void NearestCrownstoneTracker::broadcastReport(nearest_witness_report_t report) 
 	// TODO
 	logReport("broadcasting report", report);
 
-//	cs_mesh_msg_t report_msg_wrapper;
-//	report_msg_wrapper.type =  ;//CS_MESH_MODEL_TYPE_RSSI_PING;
-//	report_msg_wrapper.payload = reinterpret_cast<uint8_t*>(&report);
-//	report_msg_wrapper.size = ;//sizeof(rssi_ping_message_t);
-//	report_msg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
-//	report_msg_wrapper.urgency = CS_MESH_URGENCY_LOW;
-//
-//	event_t report_msg_evt(CS_TYPE::CMD_SEND_MESH_MSG, &report_msg_wrapper,
-//	        sizeof(cs_mesh_msg_t));
-//
-//	report_msg_evt.dispatch();
+	cs_mesh_msg_t report_msg_wrapper;
+	report_msg_wrapper.type =  CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT;
+	report_msg_wrapper.payload = reinterpret_cast<uint8_t*>(&report);
+	report_msg_wrapper.size = sizeof(report);
+	report_msg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
+	report_msg_wrapper.urgency = CS_MESH_URGENCY_LOW;
+
+	event_t report_msg_evt(CS_TYPE::CMD_SEND_MESH_MSG, &report_msg_wrapper,
+	        sizeof(cs_mesh_msg_t));
+
+	report_msg_evt.dispatch();
 
 }

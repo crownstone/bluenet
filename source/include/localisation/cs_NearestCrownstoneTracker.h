@@ -9,7 +9,7 @@
 #define SOURCE_INCLUDE_TRACKING_CS_NEARESTCROWNSTONE_H_
 
 #include <events/cs_EventListener.h>
-#include <localisation/cs_Nearestnearestwitnessreportt.h>
+#include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <protocol/cs_Typedefs.h>
 
 
