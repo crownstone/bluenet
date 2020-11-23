@@ -256,6 +256,13 @@ private:
 	void handleMsg(uint8_t* data, uint16_t size);
 
 	/**
+	 * Handles encrypted UART msg.
+	 *
+	 * Data includes encryption header.
+	 */
+	void handleEncryptedUartMsg(uint8_t* data, uint16_t size);
+
+	/**
 	 * Handles unencrypted UART msg.
 	 *
 	 * Data includes uart msg header.
