@@ -33,10 +33,6 @@ void handle_msg(void * data, uint16_t size) {
 	UartHandler::getInstance().handleMsg((cs_data_t*)data);
 }
 
-UartHandler::UartHandler() {
-
-}
-
 void UartHandler::init(serial_enable_t serialEnabled) {
 	if (_initialized) {
 		return;
@@ -493,6 +489,7 @@ void UartHandler::handleMsg(cs_data_t* msgData) {
 	_readBusy = false;
 }
 
+// TODO: split up into multiple functions.
 void UartHandler::handleMsg(uint8_t* data, uint16_t size) {
 	LOGUartHandlerDebug("Handle msg size=%u", size);
 

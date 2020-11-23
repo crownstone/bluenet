@@ -107,7 +107,7 @@ public:
 
 private:
 	//! Constructor
-	UartHandler();
+	UartHandler() = default;
 
 	//! This class is singleton, deny implementation
 	UartHandler(UartHandler const&) = delete;
