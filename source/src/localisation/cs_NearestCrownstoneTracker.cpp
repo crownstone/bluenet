@@ -10,6 +10,7 @@
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
 #include <events/cs_Event.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 #include <storage/cs_State.h>
 
 
@@ -94,6 +95,19 @@ NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* mesh_m
 			nearest_witness_report.trackable_device_mac,
 	        nearest_witness_report.rssi,
 	        mesh_msg_event->srcAddress);
+}
+
+nearest_witness_report_t NearestCrownstoneTracker::reduceReport(const NearestWitnessReport& report) {
+	nearest_witness_report_t reduced_report;
+	std::memcpy(
+			reduced_report.trackable_device_mac,
+			report.trackable.bytes,
+			sizeof(reduced_report.trackable_device_mac)
+	);
+
+	reduced_report.rssi = report.rssi;
+
+	return reduced_report;
 }
 
 void NearestCrownstoneTracker::savePersonalReport(NearestWitnessReport report) {

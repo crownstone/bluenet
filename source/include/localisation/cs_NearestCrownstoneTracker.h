@@ -9,6 +9,7 @@
 
 #include <events/cs_EventListener.h>
 #include <localisation/cs_Nearestnearestwitnessreport.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/cs_Typedefs.h>
 
 
