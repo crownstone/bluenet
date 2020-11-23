@@ -28,8 +28,14 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 		        reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
 		onReceive(parsed_adv);
 	}
-}
+	if(evt.type == CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT) {
+		MeshMsgEvent* mesh_msg_event =
+				reinterpret_cast<TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT)*>(evt.data);
+		NearestWitnessReport report = createReport(mesh_msg_event);
+		onReceive(report);
 
+	}
+}
 
 void NearestCrownstoneTracker::onReceive(
         adv_background_parsed_t *trackable_advertisement) {
@@ -66,50 +72,62 @@ void NearestCrownstoneTracker::onReceive(
 	LOGi("----");
 }
 
-void NearestCrownstoneTracker::onReceive(nearest_witness_report_t report) {
+void NearestCrownstoneTracker::onReceive(NearestWitnessReport& report) {
 	// TODO
 }
 
 // --------------------------- Report processing ------------------------
 
-nearest_witness_report_t NearestCrownstoneTracker::createReport(
+NearestWitnessReport NearestCrownstoneTracker::createReport(
         adv_background_parsed_t *trackable_advertisement) {
-	nearest_witness_report_t report;
+	NearestWitnessReport report;
 	report.reporter = my_id;
-	report.trackable = SquashedMacAddress(trackable_advertisement->macAddress);
+	report.trackable = MacAddress(trackable_advertisement->macAddress);
 	report.rssi = trackable_advertisement->adjustedRssi;
 	return report;
 }
 
-void NearestCrownstoneTracker::savePersonalReport(nearest_witness_report_t report) {
+NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* mesh_msg_event) {
+	auto nearest_witness_report = mesh_msg_event->getPacket<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT>();
+
+	return NearestWitnessReport(
+			nearest_witness_report.trackable_device_mac,
+	        nearest_witness_report.rssi,
+	        mesh_msg_event->srcAddress);
+}
+
+void NearestCrownstoneTracker::savePersonalReport(NearestWitnessReport report) {
 	personal_report = report;
 	logReport("saved personal report", report);
 }
 
-void NearestCrownstoneTracker::saveWinningReport(nearest_witness_report_t report) {
+void NearestCrownstoneTracker::saveWinningReport(NearestWitnessReport report) {
 	winning_report = report;
 	logReport("saved winning report", winning_report);
 }
 
 
-bool NearestCrownstoneTracker::isValid(const nearest_witness_report_t& report) {
+bool NearestCrownstoneTracker::isValid(const NearestWitnessReport& report) {
 	return report.rssi != 0;
 }
 
-void NearestCrownstoneTracker::logReport(const char* text, nearest_witness_report_t report) {
-	LOGi("%s {reporter:%d, trackable: %x %x %x, rssi:%d dB}",
+void NearestCrownstoneTracker::logReport(const char* text, NearestWitnessReport report) {
+	LOGi("%s {reporter:%d, trackable: %x %x %x %x %x %x, rssi:%d dB}",
 			text,
 			report.reporter,
 			report.trackable.bytes[0],
 			report.trackable.bytes[1],
 			report.trackable.bytes[2],
+			report.trackable.bytes[3],
+			report.trackable.bytes[4],
+			report.trackable.bytes[5],
 			report.rssi
 	);
 }
 
 void NearestCrownstoneTracker::resetReports() {
-	winning_report = nearest_witness_report_t();
-	personal_report = nearest_witness_report_t();
+	winning_report = NearestWitnessReport();
+	personal_report = NearestWitnessReport();
 
 	personal_report.reporter = my_id;
 	personal_report.rssi = -127; // std::numeric_limits<uint8_t>::lowest();
@@ -117,14 +135,14 @@ void NearestCrownstoneTracker::resetReports() {
 
 // ------------------- Mesh related stuff ----------------------
 
-void NearestCrownstoneTracker::broadcastReport(nearest_witness_report_t report) {
-	// TODO
+void NearestCrownstoneTracker::broadcastReport(NearestWitnessReport report) {
 	logReport("broadcasting report", report);
+	nearest_witness_report_t packed_report = reduceReport(report);
 
 	cs_mesh_msg_t report_msg_wrapper;
 	report_msg_wrapper.type =  CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT;
-	report_msg_wrapper.payload = reinterpret_cast<uint8_t*>(&report);
-	report_msg_wrapper.size = sizeof(report);
+	report_msg_wrapper.payload = reinterpret_cast<uint8_t*>(&packed_report);
+	report_msg_wrapper.size = sizeof(packed_report);
 	report_msg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
 	report_msg_wrapper.urgency = CS_MESH_URGENCY_LOW;
 

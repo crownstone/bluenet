@@ -5,8 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#ifndef SOURCE_INCLUDE_TRACKING_CS_NEARESTCROWNSTONE_H_
-#define SOURCE_INCLUDE_TRACKING_CS_NEARESTCROWNSTONE_H_
+#pragma once
 
 #include <events/cs_EventListener.h>
 #include <localisation/cs_Nearestnearestwitnessreport.h>
@@ -21,22 +20,25 @@ public:
 
 private:
 	stone_id_t my_id; // cached for efficiency
-	nearest_witness_report_t personal_report;
-	nearest_witness_report_t winning_report;
+	NearestWitnessReport personal_report;
+	NearestWitnessReport winning_report;
 
 	void onReceive(adv_background_parsed_t* trackable_advertisement);
-	void onReceive(nearest_witness_report_t report);
+	void onReceive(NearestWitnessReport& report);
 
-	nearest_witness_report_t createReport(adv_background_parsed_t* trackable_advertisement);
+	NearestWitnessReport createReport(adv_background_parsed_t* trackable_advertisement);
+	NearestWitnessReport createReport(MeshMsgEvent* trackable_advertisement);
 
-	void savePersonalReport(nearest_witness_report_t report);
-	void saveWinningReport(nearest_witness_report_t report);
+	nearest_witness_report_t reduceReport(const NearestWitnessReport& report);
 
-	void broadcastReport(nearest_witness_report_t report);
+	void savePersonalReport(NearestWitnessReport report);
+	void saveWinningReport(NearestWitnessReport report);
 
-	bool isValid(const nearest_witness_report_t& report); // crude implementation, only needed while not using maps for the reports
+	void broadcastReport(NearestWitnessReport report);
 
-	void logReport(const char* text, nearest_witness_report_t report);
+	bool isValid(const NearestWitnessReport& report); // crude implementation, only needed while not using maps for the reports
+
+	void logReport(const char* text, NearestWitnessReport report);
 
 	/**
 	 * Assumes my_id is set to the correct value.
@@ -44,4 +46,3 @@ private:
 	void resetReports();
 };
 
-#endif /* SOURCE_INCLUDE_TRACKING_CS_NEARESTCROWNSTONE_H_ */

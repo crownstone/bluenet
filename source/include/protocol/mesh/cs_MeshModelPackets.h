@@ -178,3 +178,11 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
 	bool overrideRoot : 1;   // Whether this time overrides the root time.
 	uint8_t reserved : 7;    // @arend maybe use these bits to increase version size.
 };
+
+/**
+ * Packed version of NearestWitnessReport.
+ */
+struct __attribute__((__packed__)) nearest_witness_report_t {
+	uint8_t trackable_device_mac[6];
+	int8_t rssi;
+};

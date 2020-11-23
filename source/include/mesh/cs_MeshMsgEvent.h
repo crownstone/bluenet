@@ -23,6 +23,11 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_TIME_SYNC> {
 	using type = cs_mesh_model_msg_time_sync_t;
 };
 
+template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT> {
+	using type = nearest_witness_report_t;
+};
+
 
 class MeshMsgEvent{
 public:

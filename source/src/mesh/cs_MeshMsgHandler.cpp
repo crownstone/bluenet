@@ -13,7 +13,6 @@
 #include <mesh/cs_MeshMsgEvent.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
-#include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <uart/cs_UartHandler.h>
 #include <storage/cs_State.h>
 #include <util/cs_Utils.h>
@@ -257,12 +256,13 @@ cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadS
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t handleNearestWitnessReport(MeshMsgEvent& mesh_msg_event) {
+cs_ret_code_t MeshMsgHandler::handleNearestWitnessReport(MeshMsgEvent& mesh_msg_event) {
+	auto nearest_witness_report = mesh_msg_event.getPacket<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT>();
+
 	event_t event(
 			CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT,
-			&mesh_msg_event,
-			sizeof(mesh_msg_event),
-			result
+			&nearest_witness_report,
+			sizeof(nearest_witness_report)
 			);
 	event.dispatch();
 

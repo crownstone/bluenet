@@ -6,21 +6,22 @@
  */
 #pragma once
 
+#include <cstdint>
+#include <type_traits>
+#include <tuple>
+
 #include "cfg/cs_Config.h"
 #include "drivers/cs_Serial.h"
 #include "protocol/cs_CommandTypes.h"
 #include "protocol/cs_ErrorCodes.h"
 #include "structs/cs_PacketsInternal.h"
-#include <cstddef> // For NULL
-#include <cstdint>
-#include <type_traits>
-#include <tuple>
 
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
 #include <localisation/cs_RssiPingMessage.h>
+#include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <time/cs_TimeSyncMessage.h>
 #include <mesh/cs_MeshMsgEvent.h>
 
@@ -565,6 +566,7 @@ typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
+typedef MeshMsgEvent TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT);
 
 /**
  * The size of a particular default value. In case of strings or arrays this is the maximum size of the corresponding
