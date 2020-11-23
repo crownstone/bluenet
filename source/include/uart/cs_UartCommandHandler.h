@@ -33,6 +33,7 @@ public:
 			cs_data_t resultBuffer
 			);
 
+private:
 	EncryptionAccessLevel getRequiredAccessLevel(const UartOpcodeRx opCode);
 
 	/**
