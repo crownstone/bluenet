@@ -68,7 +68,6 @@ This way, the '}' is always a line on its own, making it easier to parse in your
 By indenting the cases, it's easy to see where the switch stops.
 
 
-
 ## Naming
 
 Try to use camelcase naming. Struct definitions are the exception.
@@ -104,3 +103,24 @@ Try to actually name your variables, avoid single letters (with the exception of
  * @return        Explanation.
  */
 ```
+
+## Various
+
+### Declare variables on their own line.
+This usually makes it easier to read.
+```
+int a;
+int b;
+```
+
+### If statement body on its own line, and always in brackets.
+Putting the body on a seperate line makes it easier to read, while leaving out brackets easily introduces bugs.
+```
+if (on) {
+    turnOn = true;
+}
+```
+
+
+
+
