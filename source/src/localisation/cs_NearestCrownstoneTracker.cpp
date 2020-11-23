@@ -75,6 +75,8 @@ void NearestCrownstoneTracker::onReceive(
 
 void NearestCrownstoneTracker::onReceive(NearestWitnessReport& report) {
 	// TODO
+	LOGi("onReceive witness report, my_id(%d), reporter(%d), rssi(%d)", my_id, report.reporter, report.rssi);
+	logReport("", report);
 }
 
 // --------------------------- Report processing ------------------------
