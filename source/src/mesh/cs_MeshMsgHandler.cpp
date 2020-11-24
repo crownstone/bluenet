@@ -50,6 +50,11 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 	// ===========
 
 	// (at this point, the result.returnCode should be ERR_EVENT_UNHANDLED)
+	if (result.returnCode != ERR_EVENT_UNHANDLED){
+		// some handler took care of business.
+		LOGw("MeshMshHandler result code not clean.");
+		return;
+	}
 
 	MeshMsgEvent meshMsgEvent;
 	meshMsgEvent.msg.data = payload;
@@ -257,12 +262,11 @@ cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadS
 }
 
 cs_ret_code_t MeshMsgHandler::handleNearestWitnessReport(MeshMsgEvent& mesh_msg_event) {
-	auto nearest_witness_report = mesh_msg_event.getPacket<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT>();
 
 	event_t event(
 			CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT,
-			&nearest_witness_report,
-			sizeof(nearest_witness_report)
+			&mesh_msg_event,
+			sizeof(mesh_msg_event)
 			);
 	event.dispatch();
 
