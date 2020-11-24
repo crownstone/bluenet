@@ -346,6 +346,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 69 | Get behaviour debug | - | [Behaviour debug packet](#behaviour_debug_packet) | Obtain debug info of the current behaviour state. | x
 70 | Register tracked device | [Register tracked device packet](#register_tracked_device_packet) | - | Register or update a device to be tracked. Error codes: ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | x | x | x
 71 | Tracked device heartbeat | [Tracked device heartbeat packet](#tracked_device_heartbeat_packet) | - | Let the crownstone know where a device is, similar to [background broadcasts](BROADCAST_PROTOCOL.md#background_broadcasts). Error codes: ERR_NOT_FOUND: no device with given device ID was registered. ERR_TIMEOUT: registered device is timed out. ERR_NO_ACCESS: wrong access level, or device token. | x | x | x
+72 | Get presence | - | [Presence packet](presence_packet) | Get the current location of each profile. | x | x
 80 | Get uptime | - | uint 32 | Time in seconds since boot. | x
 81 | Get ADC restarts | - | [ADC restarts packet](#adc_restarts_packet) | **Firmware debug.** Number of ADC restarts since boot. | x
 82 | Get switch history | - | [Switch history packet](#switch_history_packet) | **Firmware debug.** A history of why the switch state has changed. | x
@@ -591,6 +592,16 @@ Type | Name | Length | Description
 uint 8 | Encrypted | 1 | Whether the data should be sent encrypted: 0 = not encrypted, 1 = encrypt when encryption is enabled, 2 = encrypt or fail.
 uint 8 | Payload | N | Payload data to be sent to hub.
 
+
+
+<a name="presence_packet"></a>
+#### Presence packet
+
+A profile can be present at multiple locations/rooms.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
 
 
 <a name="behaviour_debug_packet"></a>

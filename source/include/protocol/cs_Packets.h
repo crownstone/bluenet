@@ -396,6 +396,10 @@ struct __attribute((packed)) presence_change_t {
 	uint8_t locationId;
 };
 
+struct __attribute((packed)) presence_t {
+	uint64_t presence[8]; // Bitmask of presence per profile.
+};
+
 
 
 struct __attribute__((__packed__)) mesh_state_part_0_t {

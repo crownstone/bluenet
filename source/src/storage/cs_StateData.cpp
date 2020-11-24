@@ -326,6 +326,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_PRESENCE_CHANGE:
+	case CS_TYPE::CMD_GET_PRESENCE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
@@ -523,6 +524,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_PRESENCE_CHANGE:
+	case CS_TYPE::CMD_GET_PRESENCE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:

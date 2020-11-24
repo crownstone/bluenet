@@ -301,7 +301,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_STATE_EXTERNAL_STONE,                         // The state of another stone has been received.
 	CMD_TRACKED_DEVICE_HEARTBEAT,                     // Set location of a tracked device, with a TTL. This command can be sent instead of advertisements.
 	EVT_PRESENCE_CHANGE,                              // The presence has changed. When the first user enters, multiple events will be sent.
-
+	CMD_GET_PRESENCE,                                 // Get the current presence.
 
 	// System
 	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
@@ -537,6 +537,7 @@ typedef internal_update_tracked_device_packet_t TYPIFY(CMD_UPDATE_TRACKED_DEVICE
 typedef internal_tracked_device_heartbeat_packet_t TYPIFY(CMD_TRACKED_DEVICE_HEARTBEAT);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
 typedef presence_change_t TYPIFY(EVT_PRESENCE_CHANGE);
+typedef void TYPIFY(CMD_GET_PRESENCE);
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef void TYPIFY(EVT_GOING_TO_DFU);
