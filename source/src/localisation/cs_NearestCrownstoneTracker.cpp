@@ -63,6 +63,7 @@ void NearestCrownstoneTracker::onReceive(
 				LOGi("but now we do, so have to do something");
 				saveWinningReport(incoming_report);
 				broadcastReport(incoming_report);
+				onWinnerChanged();
 			} else {
 				LOGi("we still don't, so we're done.");
 			}
@@ -71,6 +72,7 @@ void NearestCrownstoneTracker::onReceive(
 		LOGi("no winning report yet, so our personal one wins");
 		saveWinningReport(incoming_report);
 		broadcastReport(incoming_report);
+		onWinnerChanged();
 	}
 	LOGi("----");
 }
@@ -79,13 +81,15 @@ void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incoming_report) 
 	LOGi("onReceive witness report, my_id(%d), reporter(%d), rssi(%d)", my_id, incoming_report.reporter, incoming_report.rssi);
 	logReport("", incoming_report);
 
-	if(incoming_report.reporter == my_id){                                      LOGi("Received an old report from myself. Dropped: not relevant.");
+	if(incoming_report.reporter == my_id) {
+		LOGi("Received an old report from myself. Dropped: not relevant.");
 		return;
 	}
 
 	if(!isValid(winning_report)) {
 		LOGi("Didn't have a incoming_report yet. Updated my winner.");
 		saveWinningReport(incoming_report);
+		onWinnerChanged();
 	} else if(incoming_report.reporter == winning_report.reporter) {
 		LOGi("Received an update from the winner.");
 
@@ -95,6 +99,8 @@ void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incoming_report) 
 
 			LOGi("Broadcast my personal report to update the mesh.");
 			broadcastReport(personal_report);
+
+			onWinnerChanged();
 		} else {
 			LOGi("It still wins, so I'll just update the value of my winning report.");
 			saveWinningReport(incoming_report);
@@ -103,8 +109,21 @@ void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incoming_report) 
 		if(incoming_report.rssi > winning_report.rssi) {
 			LOGi("Received a witnessreport from another crownstone that is better than my winner.");
 			saveWinningReport(incoming_report);
+			onWinnerChanged();
 		}
 	}
+}
+
+void NearestCrownstoneTracker::onWinnerChanged() {
+	LOGw("Winner changed! turning %s",winning_report.reporter == my_id ? "on":"off");
+
+	CS_TYPE on_off =
+			winning_report.reporter == my_id
+			? CS_TYPE::CMD_SWITCH_ON
+			: CS_TYPE::CMD_SWITCH_OFF;
+
+	event_t event(on_off, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
+	event.dispatch();
 }
 
 // --------------------------- Report processing ------------------------

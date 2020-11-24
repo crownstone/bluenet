@@ -36,6 +36,7 @@ private:
 	void saveWinningReport(NearestWitnessReport report);
 
 	void broadcastReport(NearestWitnessReport report);
+	void onWinnerChanged();
 
 	bool isValid(const NearestWitnessReport& report); // crude implementation, only needed while not using maps for the reports
 
