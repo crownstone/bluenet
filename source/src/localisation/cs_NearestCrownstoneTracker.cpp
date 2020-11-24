@@ -75,10 +75,36 @@ void NearestCrownstoneTracker::onReceive(
 	LOGi("----");
 }
 
-void NearestCrownstoneTracker::onReceive(NearestWitnessReport& report) {
-	// TODO
-	LOGi("onReceive witness report, my_id(%d), reporter(%d), rssi(%d)", my_id, report.reporter, report.rssi);
-	logReport("", report);
+void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incoming_report) {
+	LOGi("onReceive witness report, my_id(%d), reporter(%d), rssi(%d)", my_id, incoming_report.reporter, incoming_report.rssi);
+	logReport("", incoming_report);
+
+	if(incoming_report.reporter == my_id){                                      LOGi("Received an old report from myself. Dropped: not relevant.");
+		return;
+	}
+
+	if(!isValid(winning_report)) {
+		LOGi("Didn't have a incoming_report yet. Updated my winner.");
+		saveWinningReport(incoming_report);
+	} else if(incoming_report.reporter == winning_report.reporter) {
+		LOGi("Received an update from the winner.");
+
+		if(personal_report.rssi > incoming_report.rssi){
+			LOGi("It dropped below my own value, so I win now. ");
+			saveWinningReport(personal_report);
+
+			LOGi("Broadcast my personal report to update the mesh.");
+			broadcastReport(personal_report);
+		} else {
+			LOGi("It still wins, so I'll just update the value of my winning report.");
+			saveWinningReport(incoming_report);
+		}
+	} else {
+		if(incoming_report.rssi > winning_report.rssi) {
+			LOGi("Received a witnessreport from another crownstone that is better than my winner.");
+			saveWinningReport(incoming_report);
+		}
+	}
 }
 
 // --------------------------- Report processing ------------------------
