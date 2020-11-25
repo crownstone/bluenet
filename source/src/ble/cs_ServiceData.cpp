@@ -6,6 +6,7 @@
  */
 
 #include <ble/cs_ServiceData.h>
+#include <cfg/cs_DeviceTypes.h>
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Serial.h>
@@ -28,21 +29,13 @@ ServiceData::ServiceData() {
 	memset(_serviceData.array, 0, sizeof(_serviceData.array));
 };
 
-void ServiceData::init() {
-	// we want to update the advertisement packet on a fixed interval.
-	_updateTimerData = { {0} };
-	_updateTimerId = &_updateTimerData;
-	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
-
-	// get the operation mode from state
+void ServiceData::init(uint8_t deviceType) {
+	// Cache the operation mode.
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 	_operationMode = getOperationMode(mode);
 
 	_externalStates.init();
-
-	// start the update timer
-	Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
 
 	// Init flags
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED));
@@ -50,10 +43,30 @@ void ServiceData::init() {
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED));
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_TAP_TO_TOGGLE_ENABLED, State::getInstance().isTrue(CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED));
 
-	EventDispatcher::getInstance().addListener(this);
+	// Set the device type.
+	TYPIFY(STATE_HUB_MODE) hubMode;
+	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
+	if (hubMode) {
+		LOGd("Set device type hub");
+		setDeviceType(DEVICE_CROWNSTONE_HUB);
+	}
+	else {
+		setDeviceType(deviceType);
+	}
 
-	// set the initial advertisement.
+	// Init the timer: we want to update the advertisement packet on a fixed interval.
+	_updateTimerData = { {0} };
+	_updateTimerId = &_updateTimerData;
+	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
+
+	// Set the initial advertisement: timer has to be initialized.
 	updateAdvertisement(true);
+
+	// Start the timer.
+	Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
+
+	// Start listening for events.
+	EventDispatcher::getInstance().addListener(this);
 }
 
 void ServiceData::setDeviceType(uint8_t deviceType) {
@@ -384,6 +397,17 @@ void ServiceData::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_STATE_EXTERNAL_STONE: {
 			TYPIFY(EVT_STATE_EXTERNAL_STONE)* extState = (TYPIFY(EVT_STATE_EXTERNAL_STONE)*)event.data;
 			_externalStates.receivedState(extState);
+			break;
+		}
+		case CS_TYPE::STATE_HUB_MODE: {
+			TYPIFY(STATE_HUB_MODE)* hubMode = reinterpret_cast<TYPIFY(STATE_HUB_MODE)*>(event.data);
+			if (*hubMode) {
+				LOGd("Set device type hub");
+				setDeviceType(DEVICE_CROWNSTONE_HUB);
+			}
+			else {
+				LOGw("Reboot to set normal device type again..");
+			}
 			break;
 		}
 		// TODO: add bitmask events

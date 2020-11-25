@@ -22,8 +22,10 @@ public:
 	ServiceData();
 
 	/** Init the service data, make sure you set important fields first.
+	 *
+	 * @param[in] deviceType      The device type, see cs_DeviceTypes.h
 	 */
-	void init();
+	void init(uint8_t deviceType);
 
 	/** Set the device type field of the service data.
 	 *

@@ -454,8 +454,7 @@ void Crownstone::configureAdvertisement() {
 
 	// Create the ServiceData object which will be (mis)used to advertise select state variables from the Crownstone.
 	_serviceData = new ServiceData();
-	_serviceData->setDeviceType(_boardsConfig.deviceType);
-	_serviceData->init();
+	_serviceData->init(_boardsConfig.deviceType);
 
 	// The service data is populated with State information, but only in NORMAL mode.
 	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
