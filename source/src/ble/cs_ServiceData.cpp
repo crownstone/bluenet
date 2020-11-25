@@ -10,6 +10,7 @@
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Serial.h>
+#include <drivers/cs_Temperature.h>
 #include <encryption/cs_AES.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
@@ -54,12 +55,30 @@ void ServiceData::init(uint8_t deviceType) {
 		setDeviceType(deviceType);
 	}
 
+	// Set switch state.
+	TYPIFY(STATE_SWITCH_STATE) switchState;
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
+	updateSwitchState(switchState.asInt);
+
+	// Set temperature.
+	updateTemperature(getTemperature());
+
+	// Some state info is only set in normal mode.
+	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+
+		// Set crownstone id.
+		TYPIFY(CONFIG_CROWNSTONE_ID) crownstoneId;
+		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, sizeof(crownstoneId));
+		updateCrownstoneId(crownstoneId);
+
+	}
+
 	// Init the timer: we want to update the advertisement packet on a fixed interval.
 	_updateTimerData = { {0} };
 	_updateTimerId = &_updateTimerData;
 	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
 
-	// Set the initial advertisement: timer has to be initialized.
+	// Set the initial advertisement (timer has to be initialized before).
 	updateAdvertisement(true);
 
 	// Start the timer.
@@ -84,6 +103,7 @@ void ServiceData::updateAccumulatedEnergy(int32_t energy) {
 }
 
 void ServiceData::updateCrownstoneId(uint8_t crownstoneId) {
+	LOGi("Set crownstone id to %u", crownstoneId);
 	_crownstoneId = crownstoneId;
 }
 
@@ -189,7 +209,12 @@ void ServiceData::updateAdvertisement(bool initial) {
 	TYPIFY(STATE_HUB_MODE) hubMode;
 	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
 	if (hubMode) {
-		_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
+		if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
+			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_SETUP;
+		}
+		else {
+			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
+		}
 		_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_HUB_STATE;
 		_serviceData.params.encrypted.hubState.id = _crownstoneId;
 		auto selfFlags = UartConnection::getInstance().getSelfStatus().flags.flags;
