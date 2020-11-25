@@ -614,6 +614,12 @@ void Crownstone::setName() {
 	_advertiser->updateDeviceName(deviceName);
 }
 
+#if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
+#pragma message("closest crownstone enabled")
+#else
+#pragma message("closest crownstone disabled")
+#endif
+
 void Crownstone::startOperationMode(const OperationMode & mode) {
 	_behaviourStore.listen();
 	_presenceHandler.listen();
@@ -623,8 +629,10 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	_rssiDataTracker.listen();
 #endif
 	
+#if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
 	_nearestCrownstoneTracker.init();
 	_nearestCrownstoneTracker.listen();
+#endif
 
 	switch(mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
