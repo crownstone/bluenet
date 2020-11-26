@@ -589,7 +589,8 @@ Bit | Name |  Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Encrypted | 1 | Whether the data should be sent encrypted: 0 = not encrypted, 1 = encrypt when encryption is enabled, 2 = encrypt or fail.
+uint 8 | Encrypted | 1 | Whether the data should be sent encrypted over the UART: 0 = not encrypted, 1 = encrypt when encryption is enabled, 2 = encrypt or fail.
+uint 8 | Reserved | 1 | Reserved for future use. Must be 0 for now.
 uint 8 | Payload | N | Payload data to be sent to hub.
 
 

@@ -336,6 +336,7 @@ struct __attribute__((__packed__)) led_message_payload_t {
 
 struct __attribute__((__packed__)) hub_data_header_t {
 	uint8_t encrypt; // See UartProtocol::Encrypt
+	uint8_t reserved; // Reserved for future use (access level?). Must be 0 for now.
 };
 
 struct __attribute__((packed)) behaviour_debug_t {
