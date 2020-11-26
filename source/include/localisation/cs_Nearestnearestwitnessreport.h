@@ -22,23 +22,23 @@
  * Better alternative:
  * - upgrade tracked device tokens to work for any mac? (And they do rotations.. yay)
  */
-struct __attribute__((__packed__)) MacAddress {
+struct __attribute__((__packed__)) Uuid {
 	static constexpr uint8_t SIZE = 6;
 	uint8_t bytes[SIZE] = {0};
 
-	MacAddress() = default;
+	Uuid() = default;
 
-	MacAddress(const uint8_t * const mac){
+	Uuid(const uint8_t * const mac){
 		std::memcpy(bytes, mac, SIZE);
 	}
 
 	/**
 	 * copy constructor, creates deep copy.
 	 */
-	MacAddress(const MacAddress& other) : MacAddress(other.bytes){
+	Uuid(const Uuid& other) : Uuid(other.bytes){
 	}
 
-	bool operator==(const MacAddress& other){
+	bool operator==(const Uuid& other){
 		return std::memcmp(bytes,other.bytes,SIZE) == 0;
 	}
 };
@@ -48,7 +48,7 @@ struct __attribute__((__packed__)) MacAddress {
  */
 class NearestWitnessReport {
 public:
-	MacAddress trackable;
+	Uuid trackable;
 	int8_t rssi = 0;
 	stone_id_t reporter = 0;
 
@@ -61,7 +61,7 @@ public:
 			reporter(other.reporter) {
 	}
 
-	NearestWitnessReport(MacAddress mac, int8_t rssi, stone_id_t id) :
+	NearestWitnessReport(Uuid mac, int8_t rssi, stone_id_t id) :
 			trackable(mac), rssi(rssi), reporter(id) {
 	}
 

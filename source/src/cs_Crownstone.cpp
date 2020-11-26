@@ -614,12 +614,6 @@ void Crownstone::setName() {
 	_advertiser->updateDeviceName(deviceName);
 }
 
-#if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
-#pragma message("closest crownstone enabled")
-#else
-#pragma message("closest crownstone disabled")
-#endif
-
 void Crownstone::startOperationMode(const OperationMode & mode) {
 	_behaviourStore.listen();
 	_presenceHandler.listen();
