@@ -383,6 +383,11 @@ struct __attribute__((packed)) cs_type_and_id_t {
 
 #ifndef TYPIFY
 #define TYPIFY(NAME) NAME ## _TYPE
+
+/**
+ * Takes a pointer to a buffer and reinterprets it as the given type.
+ */
+#define UNTYPIFY(EVT_NAME, PTR) reinterpret_cast<TYPIFY(EVT_NAME)*>(PTR)
 #endif
 typedef uint16_t TYPIFY(CONFIG_ADV_INTERVAL);
 typedef uint16_t TYPIFY(CONFIG_BOOT_DELAY);

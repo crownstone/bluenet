@@ -38,8 +38,15 @@ struct __attribute__((__packed__)) Uuid {
 	Uuid(const Uuid& other) : Uuid(other.bytes){
 	}
 
-	bool operator==(const Uuid& other){
+	bool operator==(const Uuid& other) const {
 		return std::memcmp(bytes,other.bytes,SIZE) == 0;
+	}
+
+	/**
+	 * Enables to use uuids as keys for maps/sets etc.
+	 */
+	bool operator<(const Uuid& other) const {
+		return std::memcmp(bytes,other.bytes,SIZE) < 0;
 	}
 };
 

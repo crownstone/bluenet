@@ -82,4 +82,8 @@ public:
 	static uint32_t delayMs(uint32_t ms) {
 		return ms / TICK_INTERVAL_MS;
 	}
+
+	static uint32_t delayS(uint32_t s){
+		return delayMs(s * 1000);
+	}
 };

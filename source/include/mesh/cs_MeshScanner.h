@@ -13,6 +13,10 @@ extern "C" {
 
 /**
  * Class that handles scans.
+ *
+ * Implements a callback `onScan` that listens for NRF_MESH_RX_SOURCE_SCANNER events,
+ * transforms them the easier to manage scanned_device_t and then emits an event
+ * of type EVT_DEVICE_SCANNED.
  */
 class MeshScanner {
 public:
