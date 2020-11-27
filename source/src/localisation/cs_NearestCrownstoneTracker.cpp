@@ -133,7 +133,7 @@ NearestWitnessReport NearestCrownstoneTracker::createReport(
         adv_background_parsed_t *trackable_advertisement) {
 	NearestWitnessReport report;
 	report.reporter = my_id;
-	report.trackable = Uuid(trackable_advertisement->macAddress);
+	report.trackable = TrackableId(trackable_advertisement->macAddress);
 	report.rssi = trackable_advertisement->adjustedRssi;
 	return report;
 }

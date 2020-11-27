@@ -15,37 +15,35 @@
 /**
  * Mesh representation of a trackable device.
  *
- * Shortcut for MVP implementation:
- * - We may encounter mac addresses with the same squashed address
- * - Squashing is not invertible
+ * Shortcut for MVP implementation: just copy 6 byte mac.
  *
  * Better alternative:
- * - upgrade tracked device tokens to work for any mac? (And they do rotations.. yay)
+ * - register tracked devices in a whitelist of some sorts? (And they do rotations.. yay)
  */
-struct __attribute__((__packed__)) Uuid {
+struct __attribute__((__packed__)) TrackableId {
 	static constexpr uint8_t SIZE = 6;
 	uint8_t bytes[SIZE] = {0};
 
-	Uuid() = default;
+	TrackableId() = default;
 
-	Uuid(const uint8_t * const mac){
+	TrackableId(const uint8_t * const mac){
 		std::memcpy(bytes, mac, SIZE);
 	}
 
 	/**
 	 * copy constructor, creates deep copy.
 	 */
-	Uuid(const Uuid& other) : Uuid(other.bytes){
+	TrackableId(const TrackableId& other) : TrackableId(other.bytes){
 	}
 
-	bool operator==(const Uuid& other) const {
+	bool operator==(const TrackableId& other) const {
 		return std::memcmp(bytes,other.bytes,SIZE) == 0;
 	}
 
 	/**
 	 * Enables to use uuids as keys for maps/sets etc.
 	 */
-	bool operator<(const Uuid& other) const {
+	bool operator<(const TrackableId& other) const {
 		return std::memcmp(bytes,other.bytes,SIZE) < 0;
 	}
 };
@@ -55,7 +53,7 @@ struct __attribute__((__packed__)) Uuid {
  */
 class NearestWitnessReport {
 public:
-	Uuid trackable;
+	TrackableId trackable;
 	int8_t rssi = 0;
 	stone_id_t reporter = 0;
 
@@ -68,7 +66,7 @@ public:
 			reporter(other.reporter) {
 	}
 
-	NearestWitnessReport(Uuid mac, int8_t rssi, stone_id_t id) :
+	NearestWitnessReport(TrackableId mac, int8_t rssi, stone_id_t id) :
 			trackable(mac), rssi(rssi), reporter(id) {
 	}
 
