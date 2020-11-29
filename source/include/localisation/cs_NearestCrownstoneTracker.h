@@ -12,6 +12,9 @@
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/cs_Typedefs.h>
 
+#include <util/cs_Coroutine.h>
+#include <set>
+
 
 class NearestCrownstoneTracker: public EventListener {
 public:
@@ -46,5 +49,12 @@ private:
 	 * Assumes my_id is set to the correct value.
 	 */
 	void resetReports();
+
+
+	// DEBUG
+	void onReceive(scanned_device_t scanned_device);
+	std::set<TrackableId> received_uuids = {};
+	Coroutine uuid_printer;
+	// END DEBUG
 };
 

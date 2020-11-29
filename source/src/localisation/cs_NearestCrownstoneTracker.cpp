@@ -12,6 +12,7 @@
 #include <events/cs_Event.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <storage/cs_State.h>
+#include <util/cs_Coroutine.h>
 
 #define LOGNearestCrownstoneTrackerVerbose LOGnone
 #define LOGNearestCrownstoneTrackerDebug LOGnone
@@ -23,14 +24,34 @@ void NearestCrownstoneTracker::init() {
 
 	resetReports();
 
-	logReport("init report: ", personal_report);
+	logReport("init report: ", personal_report);\
+
+	uuid_printer = Coroutine([this](){
+		LOGi("current known mac addresses (%d):", received_uuids.size());
+		for(auto& uuid : received_uuids){
+			LOGi("mac [%2x %2x %2x %2x %2x %2x]",
+					uuid.bytes[0],
+					uuid.bytes[1],
+					uuid.bytes[2],
+					uuid.bytes[3],
+					uuid.bytes[4],
+					uuid.bytes[5]
+		   );
+		}
+
+		return Coroutine::delayS(10);
+	});
 }
 
 void NearestCrownstoneTracker::handleEvent(event_t &evt) {
+	if (uuid_printer.handleEvent(evt)) {
+		return;
+	}
+
 	if (evt.type == CS_TYPE::EVT_ADV_BACKGROUND_PARSED) {
-		adv_background_parsed_t *parsed_adv =
-		        reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
+		adv_background_parsed_t *parsed_adv = UNTYPIFY(EVT_ADV_BACKGROUND_PARSED,evt.data);
 		onReceive(parsed_adv);
+		return;
 	}
 
 	if(evt.type == CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT) {
@@ -39,7 +60,18 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 				reinterpret_cast<TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT)*>(evt.data);
 		NearestWitnessReport report = createReport(mesh_msg_event);
 		onReceive(report);
+		return;
 	}
+
+	if(evt.type == CS_TYPE::EVT_DEVICE_SCANNED) {
+		scanned_device_t* scanned_device = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
+		onReceive(*scanned_device);
+		return;
+	}
+}
+
+void NearestCrownstoneTracker::onReceive(scanned_device_t scanned_device) {
+	received_uuids.emplace(scanned_device.address);
 }
 
 void NearestCrownstoneTracker::onReceive(
