@@ -15,6 +15,8 @@
 void MeshScanner::onScan(const nrf_mesh_adv_packet_rx_data_t *scanData) {
 	switch (scanData->p_metadata->source) {
 	case NRF_MESH_RX_SOURCE_SCANNER:{
+		scanned_device_t _scannedDevice = {0};
+
 		memcpy(_scannedDevice.address,
 				scanData->p_metadata->params.scanner.adv_addr.addr,
 				sizeof(_scannedDevice.address));
