@@ -22,3 +22,9 @@ enum BleCompanyId : uint16_t {
 	Crownstone = 0x038E,
 	Tile = 0x067C,
 };
+
+
+/**
+ * Maximum length advertisement data.
+ */
+constexpr uint8_t ADVERTISEMENT_DATA_MAX_SIZE = 31;
