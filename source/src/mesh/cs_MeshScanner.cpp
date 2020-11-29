@@ -29,7 +29,7 @@ void MeshScanner::onScan(const nrf_mesh_adv_packet_rx_data_t *scanData) {
 		_scannedDevice.rssi = scanData->p_metadata->params.scanner.rssi;
 		_scannedDevice.channel = scanData->p_metadata->params.scanner.channel;
 		_scannedDevice.dataSize = scanData->length;
-		_scannedDevice.data = reinterpret_cast<uint8_t*>(scanData->p_payload);
+		_scannedDevice.data = const_cast<uint8_t*>(scanData->p_payload);
 
 		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, static_cast<void*>(&_scannedDevice), sizeof(_scannedDevice));
 		event.dispatch();
