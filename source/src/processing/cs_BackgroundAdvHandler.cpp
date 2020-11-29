@@ -16,6 +16,7 @@
 #include <storage/cs_State.h>
 #include <time/cs_SystemTime.h>
 #include <util/cs_Utils.h>
+#include <ble/cs_BleConstants.h>
 
 #define LOGBackgroundAdvDebug LOGnone
 #define BACKGROUND_ADV_VERBOSE false
@@ -27,8 +28,7 @@
 #define LOGBackgroundAdvVerbose LOGnone
 #endif
 
-// See https://www.bluetooth.com/specifications/assigned-numbers/company-identifiers
-#define COMPANY_ID_APPLE 0x004C
+
 #define BACKGROUND_SERVICES_MASK_TYPE 0x01
 #define BACKGROUND_SERVICES_MASK_HEADER_LEN 3
 #define BACKGROUND_SERVICES_MASK_LEN 16
@@ -81,7 +81,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	}
 
 	uint16_t companyId = *((uint16_t*)(manufacturerData.data));
-	if (companyId != COMPANY_ID_APPLE) {
+	if (companyId != BleCompanyId::Apple) {
 		return;
 	}
 	uint8_t appleAdvType = manufacturerData.data[2];
