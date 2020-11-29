@@ -18,13 +18,14 @@ void IBeaconParser::handleEvent(event_t& evt){
 	scanned_device_t* dev = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
 
 
-	uint16_t companyId = *((uint16_t*)(manufacturerData.data));
-	if (companyId != BleCompanyId::Tile) {
-		return;
-	}
+
 }
 
 
 iBeacon IBeaconParser::getIBeacon(scanned_device_t* dev){
+	uint16_t companyId = *((uint16_t*)(manufacturerData.data));
+		if (companyId != BleCompanyId::Tile) {
+			return;
+		}
 
 }
