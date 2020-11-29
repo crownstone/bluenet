@@ -9,6 +9,9 @@
 #include <ble/cs_BleConstants.h>
 #include <common/cs_Types.h>
 #include <structs/cs_PacketsInternal.h>
+#include <structs/cs_StreamBufferAccessor.h>
+#include <util/cs_Utils.h>
+
 
 void IBeaconParser::handleEvent(event_t& evt){
 	if (evt.type != CS_TYPE::EVT_DEVICE_SCANNED) {
@@ -16,16 +19,41 @@ void IBeaconParser::handleEvent(event_t& evt){
 	}
 
 	scanned_device_t* dev = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
-
-
+	/* auto beacon = */ getIBeacon(dev);
 
 }
 
 
-iBeacon IBeaconParser::getIBeacon(scanned_device_t* dev){
-	uint16_t companyId = *((uint16_t*)(manufacturerData.data));
-		if (companyId != BleCompanyId::Tile) {
-			return;
-		}
+void /* IBeacon */ IBeaconParser::getIBeacon(scanned_device_t* scanned_device){
+	uint32_t errCode;
+	cs_data_t manufacturerData;
+
+	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
+			scanned_device->data,
+			scanned_device->dataSize,
+			&manufacturerData);
+
+	if (errCode != ERR_SUCCESS) {
+		return;
+	}
+
+	StreamBufferAccessor bufferaccess(manufacturerData);
+
+	uint16_t companyId = bufferaccess.get<uint16_t>();
+//	uint8_t appleAdvType = bufferaccess.get<uint8_t>();
+
+	switch(companyId){
+		case BleCompanyId::Apple:
+			LOGi("iBeacon received: Apple");
+			break;
+		case BleCompanyId::Crownstone:
+			LOGi("iBeacon received: Crownstone");
+			break;
+		case BleCompanyId::Tile:
+			LOGi("iBeacon received: Tile");
+			break;
+		default:
+			break;
+	}
 
 }

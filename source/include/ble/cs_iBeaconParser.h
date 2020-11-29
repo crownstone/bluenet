@@ -17,8 +17,8 @@
  */
 class IBeaconParser : public EventListener {
 public:
-	void handEvent(event_t& evt);
+	void handleEvent(event_t& evt);
 
 private:
-	iBeacon getIBeacon(scanned_device_t* dev);
+	void /* IBeacon */ getIBeacon(scanned_device_t* scanned_device);
 };

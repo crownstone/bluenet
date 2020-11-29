@@ -82,7 +82,7 @@ struct __attribute__((packed)) scanned_device_t {
 	uint8_t addressType; // (ble_gap_addr_t.addr_type) & (ble_gap_addr_t.addr_id_peer << 7).
 	uint8_t channel;
 	uint8_t dataSize;
-	uint8_t *data;
+	uint8_t *data; // What is the content of this field?
 	// See ble_gap_evt_adv_report_t
 	// More possibilities: addressType, connectable, isScanResponse, directed, scannable, extended advertisements, etc.
 };
