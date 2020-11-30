@@ -46,6 +46,16 @@ struct __attribute__((__packed__)) TrackableId {
 	bool operator<(const TrackableId& other) const {
 		return std::memcmp(bytes,other.bytes,SIZE) < 0;
 	}
+
+	void print(const char* s){
+		LOGd("%s: %2x %2x %2x %2x %2x %2x", s,
+				bytes[0],
+				bytes[1],
+				bytes[2],
+				bytes[3],
+				bytes[4],
+				bytes[5]);
+	}
 };
 
 /**
