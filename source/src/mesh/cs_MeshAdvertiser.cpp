@@ -141,8 +141,8 @@ void MeshAdvertiser::advertise(IBeacon* ibeacon) {
 	_advPacket->packet.payload[2] = 0x06; // Flags
 	_advPacket->packet.payload[3] = 0x1A; // Length of next AD
 	_advPacket->packet.payload[4] = 0xFF; // Type: manufacturer data
-	_advPacket->packet.payload[5] = 0x4C; // Company id
-	_advPacket->packet.payload[6] = 0x00;
+	_advPacket->packet.payload[5] = 0x4C; // Company id low byte
+	_advPacket->packet.payload[6] = 0x00; // Company id high byte
 //	_advPacket[7] = 0x02; // Apple payload type: iBeacon
 //	_advPacket[8] = 0x15; // iBeacon payload length
 //	memcpy(&(_advPacket[9]), ) // iBeacon UUID

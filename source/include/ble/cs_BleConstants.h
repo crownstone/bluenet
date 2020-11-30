@@ -23,6 +23,18 @@ enum BleCompanyId : uint16_t {
 	Tile = 0x067C,
 };
 
+/**
+ * 16 bit service UUIDs as found on the pages:
+ *
+ * https://www.bluetooth.com/specifications/assigned-numbers/
+ * https://btprodspecificationrefs.blob.core.windows.net/assigned-values/16-bit%20UUID%20Numbers%20Document.pdf
+ */
+enum BleServiceUuid : uint16_t {
+	TileX = 0xFEEC, // proprietary service of Tile, inc.
+	TileY = 0xFEED, // proprietary service of Tile, inc.
+	TileZ = 0xFD84, // proprietary service of Tile, inc.
+};
+
 
 /**
  * Maximum length advertisement data.
