@@ -15,6 +15,7 @@
 #include <ble/cs_Stack.h>
 #include <ble/cs_Advertiser.h>
 #include <ble/cs_iBeacon.h>
+#include <ble/cs_iBeaconParser.h>
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
 #include <localisation/cs_RssiDataTracker.h>
@@ -335,6 +336,8 @@ private:
 #if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
 	NearestCrownstoneTracker _nearestCrownstoneTracker;
 #endif
+
+	IBeaconParser _iBeaconParser;
 
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;

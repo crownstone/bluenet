@@ -30,6 +30,7 @@
  *
  *********************************************************************************************************************/
 
+#include <ble/cs_iBeaconParser.h>
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_BehaviourStore.h>
 #include <cfg/cs_AutoConfig.h>
@@ -627,6 +628,8 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	_nearestCrownstoneTracker.init();
 	_nearestCrownstoneTracker.listen();
 #endif
+
+	_iBeaconParser.listen();
 
 	switch(mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
