@@ -15,9 +15,9 @@
 #include <ble/cs_Stack.h>
 #include <ble/cs_Advertiser.h>
 #include <ble/cs_iBeacon.h>
-#include <ble/cs_iBeaconParser.h>
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
+#include <localisation/cs_iBeaconParser.h>
 #include <localisation/cs_RssiDataTracker.h>
 #include <localisation/cs_NearestCrownstoneTracker.h>
 #include <presence/cs_PresenceHandler.h>

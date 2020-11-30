@@ -30,7 +30,6 @@
  *
  *********************************************************************************************************************/
 
-#include <ble/cs_iBeaconParser.h>
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_BehaviourStore.h>
 #include <cfg/cs_AutoConfig.h>

@@ -5,12 +5,13 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <ble/cs_iBeaconParser.h>
 #include <ble/cs_BleConstants.h>
 #include <common/cs_Types.h>
 #include <structs/cs_PacketsInternal.h>
 #include <structs/cs_StreamBufferAccessor.h>
 #include <util/cs_Utils.h>
+
+#include <localisation/cs_iBeaconParser.h>
 #include <localisation/cs_Nearestnearestwitnessreport.h>
 
 
