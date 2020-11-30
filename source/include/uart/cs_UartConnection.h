@@ -53,6 +53,13 @@ public:
 	const uart_msg_status_user_t& getUserStatus();
 
 	/**
+	 * To be called on UART hello command.
+	 *
+	 * Sends reply.
+	 */
+	void onHello(const uart_msg_status_user_flags_t& flags);
+
+	/**
 	 * To be called on UART heartbeat command.
 	 *
 	 * Sends reply.

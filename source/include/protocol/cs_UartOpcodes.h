@@ -15,6 +15,7 @@ enum UartOpcodeRx {
 	UART_OPCODE_RX_STATUS =                           3,
 	UART_OPCODE_RX_GET_MAC =                          4, // Get MAC address of this Crownstone
 	UART_OPCODE_RX_CONTROL =                          10,
+	UART_OPCODE_RX_HUB_DATA_REPLY =                   11, // Payload starts with uart_msg_hub_data_reply_header_t.
 
 	////////// Developer messages in debug build. //////////
 	UART_OPCODE_RX_ENABLE_ADVERTISEMENT =             50000, // Enable advertising (payload: bool enable)
@@ -48,12 +49,20 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_STATUS =                           3,
 	UART_OPCODE_TX_MAC =                              4,  // MAC address (payload: mac address (6B))
 	UART_OPCODE_TX_CONTROL_RESULT =                   10, // The result of the control command, payload: result_packet_header_t + data.
+	UART_OPCODE_TX_HUB_DATA_REPLY_ACK =               11,
+
+
+	////////// Error replies. //////////
+	UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED =         9900, // Replied on error, the command probably has a wrong format, or is too large.
+	UART_OPCODE_TX_ERR_REPLY_STATUS =                 9901, // Replied on error, the command probably should have been encrypted.
+	UART_OPCODE_TX_ERR_REPLY_SESSION_NONCE_MISSING =  9902, // Replied when RX session nonce is missing.
+	UART_OPCODE_TX_ERR_REPLY_DECRYPTION_FAILED =      9903, // Replied when decryption failed due to missing or wrong key.
 
 	////////// Event messages. //////////
 	UART_OPCODE_TX_BLE_MSG =                          10000, // Sent by command (CMD_UART_MSG), payload: buffer.
-	UART_OPCODE_TX_SESSION_NONCE_MISSING =            10001, // Sent when a session nonce is missing.
+	UART_OPCODE_TX_SESSION_NONCE_MISSING =            10001, // Sent when TX session nonce is missing.
 	UART_OPCODE_TX_SERVICE_DATA =                     10002, // Sent when the service data is updated (payload: service_data_t)
-	UART_OPCODE_TX_DECRYPTION_FAILED =                10003, // Sent when decryption failed due to missing or wrong key.
+//	UART_OPCODE_TX_DECRYPTION_FAILED =                10003, // Sent when decryption failed due to missing or wrong key.
 	UART_OPCODE_TX_PRESENCE_CHANGE =                  10004, // Sent when the presence has changed, payload: presence_change_t. When the first user enters, multiple msgs will be sent.
 	UART_OPCODE_TX_FACTORY_RESET =                    10005, // Sent when a factory reset is going to be performed.
 	UART_OPCODE_TX_BOOTED =                           10006, // Sent when this crownstone just booted.
@@ -64,6 +73,8 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_MESH_STATE_PART_1 =                10104, // Received part of state of external stone, payload: cs_mesh_model_msg_state_1_t
 	UART_OPCODE_TX_MESH_RESULT =                      10105, // Received the result of a mesh command, payload: uart_msg_mesh_result_packet_header_t + data.
 	UART_OPCODE_TX_MESH_ACK_ALL_RESULT =              10106, // Whether all stone IDs were acked, payload: result_packet_header_t.
+
+	UART_OPCODE_TX_RSSI_PING_MESSAGE =                10107, // When RssiDataTracker receives a secondary ping message, it is sent to host. Payload: rssi_ping_message_t
 
 	////////// Developer messages in release builds. //////////
 	UART_OPCODE_TX_EVT =                              40000, // Send internal events, this protocol may change
@@ -109,6 +120,8 @@ enum Encrypt {
 
 /**
  * Whether a received UART message must be encrypted when "encryption required" is true (when a UART key is set).
+ *
+ * Optionals should return false.
  */
 constexpr bool mustBeEncryptedRx(UartOpcodeRx opCode) {
 	switch (opCode) {
@@ -117,9 +130,10 @@ constexpr bool mustBeEncryptedRx(UartOpcodeRx opCode) {
 		case UartOpcodeRx::UART_OPCODE_RX_HEARTBEAT: // optional
 		case UartOpcodeRx::UART_OPCODE_RX_STATUS: // optional
 		case UartOpcodeRx::UART_OPCODE_RX_GET_MAC:
+		case UartOpcodeRx::UART_OPCODE_RX_HUB_DATA_REPLY: // optional
 			return false;
 		default:
-			if (opCode > 50000) {
+			if (opCode >= 50000) {
 				return false;
 			}
 			return true;
@@ -128,19 +142,24 @@ constexpr bool mustBeEncryptedRx(UartOpcodeRx opCode) {
 
 /**
  * Whether a written UART message must be encrypted when "encryption required" is true (when a UART key is set).
+ *
+ * Optionals should return true.
  */
 constexpr bool mustBeEncryptedTx(UartOpcodeTx opCode) {
 	switch (opCode) {
 		case UartOpcodeTx::UART_OPCODE_TX_HELLO:
 		case UartOpcodeTx::UART_OPCODE_TX_SESSION_NONCE:
 		case UartOpcodeTx::UART_OPCODE_TX_STATUS:
-		case UartOpcodeTx::UART_OPCODE_TX_SESSION_NONCE_MISSING:
-		case UartOpcodeTx::UART_OPCODE_TX_DECRYPTION_FAILED:
-		case UartOpcodeTx::UART_OPCODE_TX_BOOTED:
 		case UartOpcodeTx::UART_OPCODE_TX_MAC:
+		case UartOpcodeTx::UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED:
+		case UartOpcodeTx::UART_OPCODE_TX_ERR_REPLY_STATUS:
+		case UartOpcodeTx::UART_OPCODE_TX_ERR_REPLY_SESSION_NONCE_MISSING:
+		case UartOpcodeTx::UART_OPCODE_TX_ERR_REPLY_DECRYPTION_FAILED:
+		case UartOpcodeTx::UART_OPCODE_TX_SESSION_NONCE_MISSING:
+		case UartOpcodeTx::UART_OPCODE_TX_BOOTED:
 			return false;
 		default:
-			if (opCode > 50000) {
+			if (opCode >= 50000) {
 				return false;
 			}
 			return true;

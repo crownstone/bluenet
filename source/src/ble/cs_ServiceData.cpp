@@ -6,9 +6,11 @@
  */
 
 #include <ble/cs_ServiceData.h>
+#include <cfg/cs_DeviceTypes.h>
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
 #include <drivers/cs_Serial.h>
+#include <drivers/cs_Temperature.h>
 #include <encryption/cs_AES.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
@@ -28,21 +30,13 @@ ServiceData::ServiceData() {
 	memset(_serviceData.array, 0, sizeof(_serviceData.array));
 };
 
-void ServiceData::init() {
-	// we want to update the advertisement packet on a fixed interval.
-	_updateTimerData = { {0} };
-	_updateTimerId = &_updateTimerData;
-	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
-
-	// get the operation mode from state
+void ServiceData::init(uint8_t deviceType) {
+	// Cache the operation mode.
 	TYPIFY(STATE_OPERATION_MODE) mode;
 	State::getInstance().get(CS_TYPE::STATE_OPERATION_MODE, &mode, sizeof(mode));
 	_operationMode = getOperationMode(mode);
 
 	_externalStates.init();
-
-	// start the update timer
-	Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
 
 	// Init flags
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED));
@@ -50,10 +44,48 @@ void ServiceData::init() {
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED));
 	updateFlagsBitmask(SERVICE_DATA_FLAGS_TAP_TO_TOGGLE_ENABLED, State::getInstance().isTrue(CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED));
 
-	EventDispatcher::getInstance().addListener(this);
+	// Set the device type.
+	TYPIFY(STATE_HUB_MODE) hubMode;
+	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
+	if (hubMode) {
+		LOGd("Set device type hub");
+		setDeviceType(DEVICE_CROWNSTONE_HUB);
+	}
+	else {
+		setDeviceType(deviceType);
+	}
 
-	// set the initial advertisement.
+	// Set switch state.
+	TYPIFY(STATE_SWITCH_STATE) switchState;
+	State::getInstance().get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
+	updateSwitchState(switchState.asInt);
+
+	// Set temperature.
+	updateTemperature(getTemperature());
+
+	// Some state info is only set in normal mode.
+	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+
+		// Set crownstone id.
+		TYPIFY(CONFIG_CROWNSTONE_ID) crownstoneId;
+		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, sizeof(crownstoneId));
+		updateCrownstoneId(crownstoneId);
+
+	}
+
+	// Init the timer: we want to update the advertisement packet on a fixed interval.
+	_updateTimerData = { {0} };
+	_updateTimerId = &_updateTimerData;
+	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
+
+	// Set the initial advertisement (timer has to be initialized before).
 	updateAdvertisement(true);
+
+	// Start the timer.
+	Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
+
+	// Start listening for events.
+	EventDispatcher::getInstance().addListener(this);
 }
 
 void ServiceData::setDeviceType(uint8_t deviceType) {
@@ -71,6 +103,7 @@ void ServiceData::updateAccumulatedEnergy(int32_t energy) {
 }
 
 void ServiceData::updateCrownstoneId(uint8_t crownstoneId) {
+	LOGi("Set crownstone id to %u", crownstoneId);
 	_crownstoneId = crownstoneId;
 }
 
@@ -176,7 +209,12 @@ void ServiceData::updateAdvertisement(bool initial) {
 	TYPIFY(STATE_HUB_MODE) hubMode;
 	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
 	if (hubMode) {
-		_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
+		if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
+			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_SETUP;
+		}
+		else {
+			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
+		}
 		_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_HUB_STATE;
 		_serviceData.params.encrypted.hubState.id = _crownstoneId;
 		auto selfFlags = UartConnection::getInstance().getSelfStatus().flags.flags;
@@ -384,6 +422,17 @@ void ServiceData::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_STATE_EXTERNAL_STONE: {
 			TYPIFY(EVT_STATE_EXTERNAL_STONE)* extState = (TYPIFY(EVT_STATE_EXTERNAL_STONE)*)event.data;
 			_externalStates.receivedState(extState);
+			break;
+		}
+		case CS_TYPE::STATE_HUB_MODE: {
+			TYPIFY(STATE_HUB_MODE)* hubMode = reinterpret_cast<TYPIFY(STATE_HUB_MODE)*>(event.data);
+			if (*hubMode) {
+				LOGd("Set device type hub");
+				setDeviceType(DEVICE_CROWNSTONE_HUB);
+			}
+			else {
+				LOGw("Reboot to set normal device type again..");
+			}
 			break;
 		}
 		// TODO: add bitmask events

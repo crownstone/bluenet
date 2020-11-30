@@ -274,7 +274,7 @@ bool canShortenSource(const cmd_source_with_counter_t& source) {
 			switch (source.source.id) {
 				case CS_CMD_SOURCE_NONE:
 				case CS_CMD_SOURCE_INTERNAL:
-				case CS_CMD_SOURCE_UART:
+//				case CS_CMD_SOURCE_UART:
 				case CS_CMD_SOURCE_CONNECTION:
 				case CS_CMD_SOURCE_SWITCHCRAFT:
 					return true;
@@ -284,6 +284,8 @@ bool canShortenSource(const cmd_source_with_counter_t& source) {
 			break;
 		}
 		case CS_CMD_SOURCE_TYPE_BROADCAST:
+			return true;
+		case CS_CMD_SOURCE_TYPE_UART:
 			return true;
 		default:
 			return false;
@@ -297,7 +299,7 @@ uint8_t getShortenedSource(const cmd_source_with_counter_t& source) {
 			switch (source.source.id) {
 				case CS_CMD_SOURCE_NONE:
 				case CS_CMD_SOURCE_INTERNAL:
-				case CS_CMD_SOURCE_UART:
+//				case CS_CMD_SOURCE_UART:
 				case CS_CMD_SOURCE_CONNECTION:
 				case CS_CMD_SOURCE_SWITCHCRAFT:
 					return source.source.id;
@@ -306,6 +308,8 @@ uint8_t getShortenedSource(const cmd_source_with_counter_t& source) {
 			}
 			break;
 		}
+		case CS_CMD_SOURCE_TYPE_UART:
+			return 29;
 		case CS_CMD_SOURCE_TYPE_BROADCAST: {
 			return 30;
 		}
@@ -320,11 +324,17 @@ cmd_source_with_counter_t getInflatedSource(uint8_t sourceId) {
 	switch (sourceId) {
 		case CS_CMD_SOURCE_NONE:
 		case CS_CMD_SOURCE_INTERNAL:
-		case CS_CMD_SOURCE_UART:
+//		case CS_CMD_SOURCE_UART:
 		case CS_CMD_SOURCE_CONNECTION:
 		case CS_CMD_SOURCE_SWITCHCRAFT:
 			source.source.type = CS_CMD_SOURCE_TYPE_ENUM;
 			source.source.id = sourceId;
+			break;
+		case 29:
+			// We can't reconstruct the device id, nor the counter.
+			// So let's just set the default.
+			source.source.type = CS_CMD_SOURCE_TYPE_UART;
+			source.source.id = 0;
 			break;
 		case 30:
 			// We can't reconstruct the device id, nor the counter.

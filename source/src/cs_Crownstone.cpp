@@ -452,31 +452,11 @@ void Crownstone::configureAdvertisement() {
 	_advertiser->setAdvertisingInterval(advInterval);
 	_advertiser->init();
 
-	// Create the ServiceData object which will be (mis)used to advertise select state variables from the Crownstone.
+	// Create the ServiceData object which will be used to advertise select state variables from the Crownstone.
 	_serviceData = new ServiceData();
-	_serviceData->setDeviceType(_boardsConfig.deviceType);
-	_serviceData->init();
+	_serviceData->init(_boardsConfig.deviceType);
 
-	// The service data is populated with State information, but only in NORMAL mode.
-	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
-		LOGd("Normal mode, fill with state info");
-
-		// Write crownstone id to the service data object.
-		TYPIFY(CONFIG_CROWNSTONE_ID) crownstoneId;
-		_state->get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, sizeof(crownstoneId));
-		_serviceData->updateCrownstoneId(crownstoneId);
-		LOGi("Set crownstone id to %u", crownstoneId);
-
-		// Write switch state to the service data object.
-		TYPIFY(STATE_SWITCH_STATE) switchState;
-		_state->get(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
-		_serviceData->updateSwitchState(switchState.asInt);
-
-		// Write temperature to the service data object.
-		_serviceData->updateTemperature(getTemperature());
-	}
-
-	// assign service data to stack
+	// Assign service data to stack
 	_advertiser->setServiceData(_serviceData);
 	_advertiser->configureAdvertisement(_boardsConfig.deviceType);
 }

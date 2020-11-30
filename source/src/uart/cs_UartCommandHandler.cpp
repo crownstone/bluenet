@@ -28,6 +28,7 @@ void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 	EncryptionAccessLevel requiredAccess = getRequiredAccessLevel(opCode);
 	if (!KeysAndAccess::getInstance().allowAccess(requiredAccess, accessLevel)) {
 		LOGi("No access: required=%u given=%u", requiredAccess, accessLevel);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
 
@@ -49,6 +50,9 @@ void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 			break;
 		case UART_OPCODE_RX_CONTROL:
 			handleCommandControl(commandData, source, accessLevel, resultBuffer);
+			break;
+		case UART_OPCODE_RX_HUB_DATA_REPLY:
+			handleCommandHubDataReply(commandData, source, accessLevel, resultBuffer);
 			break;
 
 #ifdef DEBUG
@@ -109,6 +113,7 @@ void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 #endif // DEBUG
 		default:
 			LOGw("Unknown opcode: %u", opCode);
+			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 			break;
 	}
 }
@@ -139,27 +144,27 @@ void UartCommandHandler::dispatchEventForCommand(
 //	result.returnCode = event.result.returnCode;
 //	result.dataSize = event.result.dataSize;
 
-	cmd_source_with_counter_t source_description(CS_CMD_SOURCE_UART);
-	event_t event(type, commandData.data, commandData.len, source_description);
+	cmd_source_with_counter_t source(CS_CMD_SOURCE_TYPE_UART);
+	event_t event(type, commandData.data, commandData.len, source);
 	event.dispatch();
 }
 
 void UartCommandHandler::handleCommandHello(cs_data_t commandData) {
 	LOGd(STR_HANDLE_COMMAND, "hello");
-	TYPIFY(CONFIG_SPHERE_ID) sphereId;
-	State::getInstance().get(CS_TYPE::CONFIG_SPHERE_ID, &sphereId, sizeof(sphereId));
-
-	uart_msg_hello_t hello;
-	hello.sphereId = sphereId;
-	hello.status = UartConnection::getInstance().getSelfStatus();
-
-	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HELLO, (uint8_t*)&hello, sizeof(hello));
+	if (commandData.len < sizeof(uart_msg_status_user_flags_t)) {
+		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
+		return;
+	}
+	uart_msg_status_user_flags_t* userFlags = reinterpret_cast<uart_msg_status_user_flags_t*>(commandData.data);
+	UartConnection::getInstance().onHello(*userFlags);
 }
 
 void UartCommandHandler::handleCommandSessionNonce(cs_data_t commandData) {
 	LOGd(STR_HANDLE_COMMAND, "session nonce");
 	if (commandData.len < sizeof(uart_msg_session_nonce_t)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
 	uart_msg_session_nonce_t* sessionNonce = reinterpret_cast<uart_msg_session_nonce_t*>(commandData.data);
@@ -170,6 +175,7 @@ void UartCommandHandler::handleCommandHeartBeat(cs_data_t commandData, bool wasE
 	LOGUartCommandHandlerDebug(STR_HANDLE_COMMAND, "heartbeat wasEncrypted=%u", wasEncrypted);
 	if (commandData.len < sizeof(uart_msg_heartbeat_t)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
 	uart_msg_heartbeat_t* heartbeat = reinterpret_cast<uart_msg_heartbeat_t*>(commandData.data);
@@ -180,6 +186,7 @@ void UartCommandHandler::handleCommandStatus(cs_data_t commandData) {
 	LOGUartCommandHandlerDebug(STR_HANDLE_COMMAND, "status");
 	if (commandData.len < sizeof(uart_msg_status_user_t)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
 	uart_msg_status_user_t* userStatus = reinterpret_cast<uart_msg_status_user_t*>(commandData.data);
@@ -191,10 +198,12 @@ void UartCommandHandler::handleCommandControl(cs_data_t commandData, const cmd_s
 	control_packet_header_t* controlHeader = reinterpret_cast<control_packet_header_t*>(commandData.data);
 	if (commandData.len < sizeof(*controlHeader)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
 	if (commandData.len < controlHeader->payloadSize + sizeof(*controlHeader)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
@@ -214,6 +223,25 @@ void UartCommandHandler::handleCommandControl(cs_data_t commandData, const cmd_s
 	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
 	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_CONTROL_RESULT, event.result.buf.data, event.result.dataSize);
 	UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_CONTROL_RESULT);
+}
+
+void UartCommandHandler::handleCommandHubDataReply(cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_data_t resultBuffer) {
+	LOGd("handleCommandHubDataReply");
+	uart_msg_hub_data_reply_header_t* replyHeader = reinterpret_cast<uart_msg_hub_data_reply_header_t*>(commandData.data);
+	if (commandData.len < sizeof(*replyHeader)) {
+		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
+		return;
+	}
+
+	TYPIFY(EVT_HUB_DATA_REPLY) evtData;
+	evtData.retCode = replyHeader->retCode;
+	evtData.data.data = commandData.data + sizeof(*replyHeader);
+	evtData.data.len  = commandData.len  - sizeof(*replyHeader);
+	event_t event(CS_TYPE::EVT_HUB_DATA_REPLY, &evtData, sizeof(evtData));
+	event.dispatch();
+
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HUB_DATA_REPLY_ACK);
 }
 
 void UartCommandHandler::handleCommandGetId(cs_data_t commandData) {
@@ -238,12 +266,14 @@ void UartCommandHandler::handleCommandInjectEvent(cs_data_t commandData) {
 	// Header is uint16 cs type.
 	if (commandData.len < sizeof(uint16_t)) {
 		LOGw(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
 	uint16_t* type = reinterpret_cast<uint16_t*>(commandData.data);
 	CS_TYPE csType = toCsType(*type);
 	if (csType == CS_TYPE::CONFIG_DO_NOT_USE) {
 		LOGw("Invalid type: %u", type);
+		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
 	uint8_t* eventData = commandData.data + sizeof(uint16_t);
