@@ -11,6 +11,7 @@
 #include <structs/cs_PacketsInternal.h>
 #include <structs/cs_StreamBufferAccessor.h>
 #include <util/cs_Utils.h>
+#include <localisation/cs_Nearestnearestwitnessreport.h>
 
 
 void IBeaconParser::handleEvent(event_t& evt){
@@ -24,36 +25,68 @@ void IBeaconParser::handleEvent(event_t& evt){
 }
 
 
-void /* IBeacon */ IBeaconParser::getIBeacon(scanned_device_t* scanned_device){
-	uint32_t errCode;
-	cs_data_t manufacturerData;
+void /* IBeacon */ IBeaconParser::getIBeacon(scanned_device_t* scanned_device) {
+	if (!isTileDevice(scanned_device)) {
+		return;
+	}
 
-	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_MANUFACTURER_SPECIFIC_DATA,
+	// construct TrackableId to filter for
+	// (input here as read in nrf connect app)
+	uint8_t my_tile_mac[] = {0xe4, 0x96, 0x62, 0x0d, 0x5a, 0x5b};
+	std::reverse(std::begin(my_tile_mac), std::end(my_tile_mac));
+	TrackableId my_tile(my_tile_mac);
+
+	// construct TrackableId for incomming scan
+	TrackableId mac(scanned_device->address);
+
+	if (mac == my_tile) {
+		LOGd("=========================");
+		mac.print("found my tile!");
+		LOGd("=========================");
+	}
+
+	my_tile.print("this must be my tile (feed)!");
+
+	uint32_t errCode;
+	cs_data_t service_data;
+	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_SERVICE_DATA,
 			scanned_device->data,
 			scanned_device->dataSize,
-			&manufacturerData);
+			&service_data);
 
 	if (errCode != ERR_SUCCESS) {
 		return;
 	}
+}
 
-	StreamBufferAccessor bufferaccess(manufacturerData);
+bool IBeaconParser::isTileDevice(scanned_device_t* scanned_device) {
+	uint32_t errCode;
+	cs_data_t service_uuid16_list;
 
-	uint16_t companyId = bufferaccess.get<uint16_t>();
-//	uint8_t appleAdvType = bufferaccess.get<uint8_t>();
+	errCode = BLEutil::findAdvType(
+			BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE,
+			scanned_device->data,
+			scanned_device->dataSize,
+			&service_uuid16_list );
 
-	switch(companyId){
-		case BleCompanyId::Apple:
-			LOGi("iBeacon received: Apple");
-			break;
-		case BleCompanyId::Crownstone:
-			LOGi("iBeacon received: Crownstone");
-			break;
-		case BleCompanyId::Tile:
-			LOGi("iBeacon received: Tile");
-			break;
-		default:
-			break;
+	if (errCode != ERR_SUCCESS) {
+		return false;
 	}
 
+	uint16_t* uuid_list = reinterpret_cast<uint16_t*>(service_uuid16_list.data);
+
+	BleServiceUuid tile_ids[] = {
+			BleServiceUuid::TileX,
+			BleServiceUuid::TileY,
+			BleServiceUuid::TileZ };
+
+	for (auto i = 0u; i < service_uuid16_list.len; i++) {
+		for (auto j = 0u; j < std::size(tile_ids); j++) {
+			if (uuid_list[i] == tile_ids[j]) {
+				return true;
+			}
+		}
+	}
+
+	return false;
 }

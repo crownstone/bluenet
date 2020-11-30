@@ -21,4 +21,14 @@ public:
 
 private:
 	void /* IBeacon */ getIBeacon(scanned_device_t* scanned_device);
+
+
+	/**
+	 *  Checks service uuids of the scanned device and returns true
+	 *  if we can find a 16 bit tile service uuid.
+	 *
+	 *  Caveat: expects the services to be listed in the type
+	 *  BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE.
+	 */
+	bool isTileDevice(scanned_device_t* scanned_device);
 };
