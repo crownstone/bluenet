@@ -152,7 +152,7 @@ enum ServiceDataDataType {
  * This data is encrypted.
  */
 struct __attribute__((packed)) service_data_encrypted_t {
-	uint8_t type; // ServiceDataDataType
+	uint8_t type;                 // ServiceDataDataType
 	union {
 		service_data_encrypted_state_t state;
 		service_data_encrypted_error_t error;
@@ -223,7 +223,7 @@ struct __attribute__((packed)) service_data_setup_state_t {
  * This is not encrypted.
  */
 struct __attribute__((packed)) service_data_setup_t {
-	uint8_t type;
+	uint8_t type;                 // ServiceDataDataType
 	union {
 		service_data_setup_state_t state;
 		service_data_hub_state_t hubState;
@@ -259,8 +259,8 @@ enum ServiceDataType {
  */
 union service_data_t {
 	struct __attribute__((packed)) {
-		uint8_t  type;       // ServiceDataType
-		uint8_t  deviceType; // See cs_DeviceTypes.h
+		uint8_t  type;            // ServiceDataType
+		uint8_t  deviceType;      // See cs_DeviceTypes.h
 		union {
 			service_data_encrypted_t encrypted;
 			service_data_setup_t setup;

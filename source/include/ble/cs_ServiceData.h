@@ -74,8 +74,9 @@ public:
 	/**
 	 * Update the service data.
 	 *
-	 * Update the service data.
+	 * Updates some states.
 	 * Selects a type of data, and puts this in the service data.
+	 * Writes the service data to UART.
 	 * Sends out event EVT_ADVERTISEMENT_UPDATED.
 	 *
 	 * @param[in] initial         Set initial to true when this is just the initial data
@@ -154,7 +155,7 @@ private:
 	}
 
 	/**
-	 * Chooses what data to set as service data.
+	 * Selects a type of data and puts this in the service data.
 	 *
 	 * @return     True when service data has to be encrypted.
 	 */

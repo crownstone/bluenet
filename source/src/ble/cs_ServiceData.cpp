@@ -158,7 +158,8 @@ void ServiceData::updateServiceData(bool initial) {
 	BLEutil::printArray(_serviceData.array, sizeof(service_data_t));
 //		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u", serviceData->params.type, serviceData->params.crownstoneId, serviceData->params.switchState, serviceData->params.flagBitmask, serviceData->params.temperature, serviceData->params.powerUsageReal, serviceData->params.accumulatedEnergy, serviceData->params.partialTimestamp);
 #endif
-	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_SERVICE_DATA, _serviceData.array, sizeof(service_data_t));
+
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_SERVICE_DATA, _serviceData.array, sizeof(_serviceData.array));
 
 	if (encrypt && State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
 		encryptServiceData();
@@ -240,7 +241,7 @@ void ServiceData::encryptServiceData() {
 
 void ServiceData::fillWithSetupState(uint32_t timestamp) {
 	_serviceData.params.type = SERVICE_DATA_TYPE_SETUP;
-	_serviceData.params.setup.type = 0;
+	_serviceData.params.setup.type = SERVICE_DATA_DATA_TYPE_STATE;
 	_serviceData.params.setup.state.switchState = _switchState;
 	_serviceData.params.setup.state.flags = _flags;
 	_serviceData.params.setup.state.temperature = _temperature;
@@ -307,14 +308,15 @@ void ServiceData::fillWithHubState(uint32_t timestamp) {
 	service_data_hub_state_t* serviceDataHubState = nullptr;
 	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
 		_serviceData.params.type = SERVICE_DATA_TYPE_SETUP;
+		_serviceData.params.setup.type = SERVICE_DATA_DATA_TYPE_HUB_STATE;
 		serviceDataHubState = &(_serviceData.params.setup.hubState);
 	}
 	else {
 		_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
+		_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_HUB_STATE;
 		serviceDataHubState = &(_serviceData.params.encrypted.hubState);
 	}
 
-	_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_HUB_STATE;
 	serviceDataHubState->id = _crownstoneId;
 	auto selfFlags = UartConnection::getInstance().getSelfStatus().flags.flags;
 	auto hubFlags = UartConnection::getInstance().getUserStatus().flags.flags;
