@@ -14,16 +14,7 @@
 #include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <localisation/cs_TrackableParser.h>
 
-void TrackableParser::TrackableParser() {
-	// construct TrackableId to filter for
-	// (input here as read in nrf connect app)
-	uint8_t my_tile_mac[] = {0xe4, 0x96, 0x62, 0x0d, 0x5a, 0x5b};
-	std::reverse(std::begin(my_tile_mac), std::end(my_tile_mac));
-	myTile = TrackableId (my_tile_mac);
-}
-
-
-void TrackableParser::handleEvent(event_t& evt){
+void TrackableParser::handleEvent(event_t& evt) {
 	if (evt.type != CS_TYPE::EVT_DEVICE_SCANNED) {
 		return;
 	}
@@ -32,7 +23,6 @@ void TrackableParser::handleEvent(event_t& evt){
 	if (handleAsTileDevice(dev)) {
 		return;
 	}
-
 }
 
 bool TrackableParser::handleAsTileDevice(scanned_device_t* scanned_device) {
@@ -40,6 +30,18 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scanned_device) {
 		return false;
 	}
 
+	TrackableId tile(scanned_device->address);
+	tile.print("found tile device!");
+
+	if(isMyTrackable(scanned_device)) {
+		LOGd("its my trackable, lets check the adv data");
+		logServiceData(scanned_device);
+	}
+
+	return true;
+}
+
+void TrackableParser::logServiceData(scanned_device_t* scanned_device) {
 	uint32_t errCode;
 	cs_data_t service_data;
 	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_SERVICE_DATA,
@@ -48,23 +50,30 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scanned_device) {
 			&service_data);
 
 	if (errCode != ERR_SUCCESS) {
-		// recognized as tile device, malformed a bit but still valid.
-		return true;
+		return;
 	}
 
-	LOGd("TODO: log service data for development.");
-	return true;
+	// format string
+	char buff_start[50] = {0}; // should be len(12) * len(repr) ~= 36.
+	char* buff = buff_start;
+	for(auto i = 0u; i < service_data.len; i++){
+		buff += sprintf(buff, "%2x,", service_data.data[i]);
+	}
+
+	// and log the formatted string
+	LOGd("my tile servicedata(%d): [%s]", service_data.len, buff_start);
 }
 
-bool TrackableParser::handleMyTrackable(scanned_device_t* scanned_device) {
+bool TrackableParser::isMyTrackable(scanned_device_t* scanned_device) {
+	// Note: mac address here as read in nrf connect app, hence the std::reverse call.
+	uint8_t my_tile_mac[] = {0xe4, 0x96, 0x62, 0x0d, 0x5a, 0x5b};
+	std::reverse(std::begin(my_tile_mac), std::end(my_tile_mac));
+	TrackableId myTrackable(my_tile_mac);
+
 	// construct TrackableId for incomming scan
 	TrackableId mac(scanned_device->address);
 
-	if (mac == myTrackable) {
-		LOGd("=========================");
-		mac.print("found my tile!");
-		LOGd("=========================");
-	}
+	return mac == myTrackable;
 }
 
 bool TrackableParser::isTileDevice(scanned_device_t* scanned_device) {

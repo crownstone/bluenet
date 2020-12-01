@@ -30,12 +30,6 @@ struct __attribute__((__packed__)) TrackableId {
 		std::memcpy(bytes, mac, SIZE);
 	}
 
-	/**
-	 * copy constructor, creates deep copy.
-	 */
-	TrackableId(const TrackableId& other) : TrackableId(other.bytes){
-	}
-
 	bool operator==(const TrackableId& other) const {
 		return std::memcmp(bytes,other.bytes,SIZE) == 0;
 	}

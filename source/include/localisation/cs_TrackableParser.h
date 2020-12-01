@@ -33,9 +33,9 @@ private:
 
 	/**
 	 * Checks if the mac address of the trackable device is equal
-	 * to myTrackableId. If so, handles it.
+	 * to myTrackableId.
 	 */
-	bool handleMyTrackable(scanned_device_t* scanned_device);
+	bool isMyTrackable(scanned_device_t* scanned_device);
 
 	/**
 	 *  Checks service uuids of the scanned device and returns true
@@ -48,9 +48,5 @@ private:
 	 */
 	bool isTileDevice(scanned_device_t* scanned_device);
 
-	/**
-	 * Setup in constructor, change if you want to filter for a
-	 * different device.
-	 */
-	TrackableId myTrackable;
+	void logServiceData(scanned_device_t* scanned_device);
 };

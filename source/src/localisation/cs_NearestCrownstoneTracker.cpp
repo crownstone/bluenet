@@ -56,8 +56,7 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 
 	if(evt.type == CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT) {
 		LOGNearestCrownstoneTrackerVerbose("NearestCrownstone received event: EVT_MESH_NEAREST_WITNESS_REPORT");
-		MeshMsgEvent* mesh_msg_event =
-				reinterpret_cast<TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT)*>(evt.data);
+		MeshMsgEvent* mesh_msg_event = UNTYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT, evt.data);
 		NearestWitnessReport report = createReport(mesh_msg_event);
 		onReceive(report);
 		return;
