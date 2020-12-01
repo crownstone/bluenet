@@ -57,26 +57,6 @@ public:
 	 */
 	void updateSwitchState(uint8_t switchState);
 
-	/** Set the event bitmask field of the service data.
-	 *
-	 * @param[in] bitmask         The bitmask.
-	 */
-	void updateFlagsBitmask(uint8_t bitmask);
-
-	/** Set or unset a bit of the flags bitmask.
-	 *
-	 * @param[in] bit             The bit position.
-	 * @param[in] set             True when setting the bit, false when unsetting it.
-	 */
-	void updateFlagsBitmask(uint8_t bit, bool set);
-
-	/** Set or unset a bit of the extra flags bitmask.
-	 *
-	 * @param[in] bit             The bit position.
-	 * @param[in] set             True when setting the bit, false when unsetting it.
-	 */
-	void updateExtraFlagsBitmask(uint8_t bit, bool set);
-
 	/** Set the temperature field of the service data.
 	 *
 	 * @param[in] temperature     The temperature.
@@ -128,10 +108,10 @@ private:
 	uint8_t _switchState = 0; // TODO: use State for this?
 
 	//! Store flags
-	uint8_t _flags = 0; // TODO: use State for this?
+	service_data_state_flags_t _flags;
 
 	//! Store extra flags
-	uint8_t _extraFlags = 0;
+	service_data_state_extra_flags_t _extraFlags;
 
 	//! Store the temperature
 	int8_t  _temperature = 0; // TODO: use State for this?

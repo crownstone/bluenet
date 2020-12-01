@@ -40,17 +40,6 @@ struct __attribute__((packed)) service_data_hub_state_t {
 
 
 
-enum ServiceDataFlagBits {
-	SERVICE_DATA_FLAGS_DIMMING_AVAILABLE       = 0,
-	SERVICE_DATA_FLAGS_MARKED_DIMMABLE         = 1,
-	SERVICE_DATA_FLAGS_ERROR                   = 2,
-	SERVICE_DATA_FLAGS_SWITCH_LOCKED           = 3,
-	SERVICE_DATA_FLAGS_TIME_SET                = 4,
-	SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED     = 5,
-	SERVICE_DATA_FLAGS_TAP_TO_TOGGLE_ENABLED   = 6,
-	SERVICE_DATA_FLAGS_BEHAVIOUR_OVERRIDDEN    = 7
-};
-
 union __attribute__((packed)) service_data_state_flags_t {
 	struct __attribute__((packed)) {
 		bool dimmingReady : 1;         // Whether the dimmer is ready to be used.
@@ -63,10 +52,6 @@ union __attribute__((packed)) service_data_state_flags_t {
 		bool behaviourOverridden : 1;  // Whether behaviour is overridden.
 	} flags;
 	uint8_t asInt;
-};
-
-enum ServiceDataExtraFlagBits {
-	SERVICE_DATA_EXTRA_FLAGS_BEHAVIOUR_ENABLED = 0,
 };
 
 union __attribute__((packed)) service_data_state_extra_flags_t {
@@ -82,13 +67,13 @@ union __attribute__((packed)) service_data_state_extra_flags_t {
 struct __attribute__((packed)) service_data_encrypted_state_t {
 	uint8_t  id;                  // ID of this stone.
 	uint8_t  switchState;
-	uint8_t  flags;               // ServiceDataFlagBits.
+	service_data_state_flags_t flags;
 	int8_t   temperature;
 	int8_t   powerFactor;
 	int16_t  powerUsageReal;
 	int32_t  energyUsed;
 	uint16_t partialTimestamp;    // Current timestamp.
-	uint8_t  extraFlags;          // ServiceDataExtraFlagBits.
+	service_data_state_extra_flags_t extraFlags;
 	uint8_t  validation;          // Used to check if decryption is successful. Value is always SERVICE_DATA_VALIDATION.
 };
 
@@ -99,7 +84,7 @@ struct __attribute__((packed)) service_data_encrypted_error_t {
 	uint8_t  id;                  // ID of this stone.
 	uint32_t errors;
 	uint32_t timestamp;           // Timestamp of first error.
-	uint8_t  flags;               // ServiceDataFlagBits.
+	service_data_state_flags_t flags;
 	int8_t   temperature;
 	uint16_t partialTimestamp;    // Current timestamp.
 	int16_t  powerUsageReal;
@@ -111,7 +96,7 @@ struct __attribute__((packed)) service_data_encrypted_error_t {
 struct __attribute__((packed)) service_data_encrypted_ext_state_t {
 	uint8_t  id;                  // ID of another stone of which this is the state.
 	uint8_t  switchState;
-	uint8_t  flags;               // ServiceDataFlagBits.
+	service_data_state_flags_t flags;
 	int8_t   temperature;
 	int8_t   powerFactor;
 	int16_t  powerUsageReal;
@@ -128,7 +113,7 @@ struct __attribute__((packed)) service_data_encrypted_ext_error_t {
 	uint8_t  id;                  // ID of another stone of which this is the state.
 	uint32_t errors;
 	uint32_t timestamp;           // Timestamp of first error.
-	uint8_t  flags;               // ServiceDataFlagBits.
+	service_data_state_flags_t flags;
 	int8_t   temperature;
 	uint16_t partialTimestamp;    // Timestamp of when the other stone was in this state.
 	int8_t   rssi;                // RSSI between this stone and the other stone.
@@ -143,7 +128,7 @@ struct __attribute__((packed)) service_data_encrypted_ext_error_t {
 struct __attribute__((packed)) service_data_encrypted_alternative_state_t {
 	uint8_t  id;                  // ID of this stone.
 	uint8_t  switchState;
-	uint8_t  flags;               // ServiceDataFlagBits.
+	service_data_state_flags_t flags;
 	uint16_t behaviourMasterHash;
 	uint8_t  reserved[6];
 	uint16_t partialTimestamp;    // Current timestamp.
@@ -223,7 +208,7 @@ constexpr void convertToExternalError(service_data_encrypted_t* data, int8_t rss
 
 struct __attribute__((packed)) service_data_setup_state_t {
 	uint8_t  switchState;
-	uint8_t  flags;
+	service_data_state_flags_t flags;
 	int8_t   temperature;
 	int8_t   powerFactor;
 	int16_t  powerUsageReal;

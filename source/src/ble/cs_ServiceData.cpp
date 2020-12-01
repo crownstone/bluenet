@@ -40,10 +40,13 @@ void ServiceData::init(uint8_t deviceType) {
 	_externalStates.init();
 
 	// Init flags
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED));
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED));
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED));
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_TAP_TO_TOGGLE_ENABLED, State::getInstance().isTrue(CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED));
+	_flags.asInt = 0;
+	_flags.flags.markedDimmable = State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED);
+	_flags.flags.switchLocked = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED);
+	_flags.flags.switchcraft = State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED);
+	_flags.flags.tapToToggle = State::getInstance().isTrue(CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED);
+
+	_extraFlags.asInt = 0;
 
 	// Set the device type.
 	TYPIFY(STATE_HUB_MODE) hubMode;
@@ -112,28 +115,6 @@ void ServiceData::updateSwitchState(uint8_t switchState) {
 	_switchState = switchState;
 }
 
-void ServiceData::updateFlagsBitmask(uint8_t bitmask) {
-	_flags = bitmask;
-}
-
-void ServiceData::updateFlagsBitmask(uint8_t bit, bool set) {
-	if (set) {
-		BLEutil::setBit(_flags, bit);
-	}
-	else {
-		BLEutil::clearBit(_flags, bit);
-	}
-}
-
-void ServiceData::updateExtraFlagsBitmask(uint8_t bit, bool set) {
-	if (set) {
-		BLEutil::setBit(_extraFlags, bit);
-	}
-	else {
-		BLEutil::clearBit(_extraFlags, bit);
-	}
-}
-
 void ServiceData::updateTemperature(int8_t temperature) {
 	_temperature = temperature;
 }
@@ -155,7 +136,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 	bool serviceDataSet = false;
 
 	uint32_t timestamp = SystemTime::posix();
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_TIME_SET, timestamp != 0);
+	_flags.flags.timeSet = (timestamp != 0);
 
 //		// Update flag
 //		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED));
@@ -163,7 +144,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 	TYPIFY(STATE_ERRORS) stateErrors;
 	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
-	updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors.asInt);
+	_flags.flags.error = stateErrors.asInt != 0;
 
 	// Set error timestamp
 	if (stateErrors.asInt == 0) {
@@ -351,7 +332,7 @@ void ServiceData::handleEvent(event_t & event) {
 		case CS_TYPE::STATE_ERRORS: {
 			LOGd("Event: $typeName(%u)", event.type);
 			state_errors_t* stateErrors = (TYPIFY(STATE_ERRORS)*) event.data;
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_ERROR, stateErrors->asInt);
+			_flags.flags.error = stateErrors->asInt;
 			break;
 		}
 		case CS_TYPE::CONFIG_CROWNSTONE_ID: {
@@ -383,35 +364,35 @@ void ServiceData::handleEvent(event_t & event) {
 		}
 		case CS_TYPE::STATE_BEHAVIOUR_SETTINGS: {
 			TYPIFY(STATE_BEHAVIOUR_SETTINGS)* behaviourSettings = (TYPIFY(STATE_BEHAVIOUR_SETTINGS)*)event.data;
-			updateExtraFlagsBitmask(SERVICE_DATA_EXTRA_FLAGS_BEHAVIOUR_ENABLED, behaviourSettings->flags.enabled);
+			_extraFlags.flags.behaviourEnabled = behaviourSettings->flags.enabled;
 			break;
 		}
 		case CS_TYPE::EVT_TIME_SET: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_TIME_SET, true);
+			_flags.flags.timeSet = true;
 			break;
 		}
 		case CS_TYPE::EVT_DIMMER_POWERED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_DIMMING_AVAILABLE, *(TYPIFY(EVT_DIMMER_POWERED)*)event.data);
+			_flags.flags.dimmingReady = *reinterpret_cast<TYPIFY(EVT_DIMMER_POWERED)*>(event.data);
 			break;
 		}
 		case CS_TYPE::CONFIG_PWM_ALLOWED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, *(TYPIFY(CONFIG_PWM_ALLOWED)*)event.data);
+			_flags.flags.markedDimmable = *reinterpret_cast<TYPIFY(CONFIG_PWM_ALLOWED)*>(event.data);
 			break;
 		}
 		case CS_TYPE::CONFIG_SWITCH_LOCKED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, *(TYPIFY(CONFIG_SWITCH_LOCKED)*)event.data);
+			_flags.flags.switchLocked = *reinterpret_cast<TYPIFY(CONFIG_SWITCH_LOCKED)*>(event.data);
 			break;
 		}
 		case CS_TYPE::CONFIG_SWITCHCRAFT_ENABLED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED, *(TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)*)event.data);
+			_flags.flags.switchcraft = *reinterpret_cast<TYPIFY(CONFIG_SWITCHCRAFT_ENABLED)*>(event.data);
 			break;
 		}
 		case CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_TAP_TO_TOGGLE_ENABLED, *(TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED)*)event.data);
+			_flags.flags.tapToToggle = *reinterpret_cast<TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED)*>(event.data);
 			break;
 		}
 		case CS_TYPE::EVT_BEHAVIOUR_OVERRIDDEN: {
-			updateFlagsBitmask(SERVICE_DATA_FLAGS_BEHAVIOUR_OVERRIDDEN, *(TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN)*)event.data);
+			_flags.flags.behaviourOverridden = *reinterpret_cast<TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN)*>(event.data);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {
@@ -526,7 +507,7 @@ void ServiceData::sendMeshState(bool event) {
 	{
 		cs_mesh_model_msg_state_0_t packet;
 		packet.switchState = _switchState;
-		packet.flags = _flags;
+		packet.flags = _flags.asInt;
 		packet.powerFactor = _powerFactor;
 		packet.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
 		packet.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);

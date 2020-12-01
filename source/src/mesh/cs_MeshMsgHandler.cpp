@@ -294,7 +294,7 @@ cs_ret_code_t MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSiz
 	_lastReceivedState.srcId = srcId;
 	_lastReceivedState.state.data.state.id = srcId;
 	_lastReceivedState.state.data.extState.switchState = packet->switchState;
-	_lastReceivedState.state.data.extState.flags = packet->flags;
+	_lastReceivedState.state.data.extState.flags.asInt = packet->flags;
 	_lastReceivedState.state.data.extState.powerFactor = packet->powerFactor;
 	_lastReceivedState.state.data.extState.powerUsageReal = packet->powerUsageReal;
 	_lastReceivedState.state.data.extState.partialTimestamp = packet->partialTimestamp;
