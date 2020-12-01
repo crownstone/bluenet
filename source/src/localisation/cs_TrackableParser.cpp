@@ -54,9 +54,9 @@ void TrackableParser::logServiceData(scanned_device_t* scanned_device) {
 	}
 
 	// format string
-	char buff_start[50] = {0}; // should be len(12) * len(repr) ~= 36.
+	char buff_start[50] = {0}; // should be len(servicedata) * len(repr) ~= 3*12 = 36.
 	char* buff = buff_start;
-	for(auto i = 0u; i < service_data.len; i++){
+	for (auto i = 0u; i < service_data.len; i++) {
 		buff += sprintf(buff, "%2x,", service_data.data[i]);
 	}
 
