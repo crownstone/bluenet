@@ -83,7 +83,7 @@ void ServiceData::init(uint8_t deviceType) {
 	Timer::getInstance().createSingleShot(_updateTimerId, (app_timer_timeout_handler_t)ServiceData::staticTimeout);
 
 	// Set the initial advertisement (timer has to be initialized before).
-	updateAdvertisement(true);
+	updateServiceData(true);
 
 	// Start the timer.
 	Timer::getInstance().start(_updateTimerId, MS_TO_TICKS(ADVERTISING_REFRESH_PERIOD), this);
@@ -128,7 +128,7 @@ uint16_t ServiceData::getArraySize() {
 }
 
 
-void ServiceData::updateAdvertisement(bool initial) {
+void ServiceData::updateServiceData(bool initial) {
 	Timer::getInstance().stop(_updateTimerId);
 
 	_updateCount++;
@@ -319,7 +319,7 @@ void ServiceData::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_BLE_DISCONNECT: {
 			LOGd("Disconnected");
 			_connected = false;
-			updateAdvertisement(false);
+			updateServiceData(false);
 			break;
 		}
 //		// TODO: do we need to keep up the error? Or we can simply retrieve it every service data update?
@@ -435,27 +435,6 @@ int16_t ServiceData::compressPowerUsageMilliWatt(int32_t powerUsageMW) {
 
 int32_t ServiceData::decompressPowerUsage(int16_t compressedPowerUsage) {
 	int32_t retVal = compressedPowerUsage * 125; // similar to /8*1000, but then without losing precision.
-	return retVal;
-}
-
-int32_t ServiceData::convertEnergyV3ToV1(int32_t energyUsed) {
-	int32_t retVal = ((int64_t)energyUsed) * 64 / 3600;
-	return retVal;
-}
-
-int32_t ServiceData::convertEnergyV1ToV3(int32_t energyUsed) {
-	int32_t retVal = ((int64_t)energyUsed) * 3600 / 64;
-	return retVal;
-}
-
-uint16_t ServiceData::energyToPartialEnergy(int32_t energyUsage) {
-//	uint16_t retVal = energyUsage & 0x0000FFFF; // TODO: also drops the sign
-	uint16_t retVal = abs(energyUsage) % (UINT16_MAX+1); // Safer
-	return retVal;
-}
-
-int32_t ServiceData::partialEnergyToEnergy (uint16_t partialEnergy) {
-	int32_t retVal = partialEnergy; // TODO: what else can we do?
 	return retVal;
 }
 

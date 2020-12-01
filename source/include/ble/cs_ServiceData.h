@@ -21,75 +21,74 @@ class ServiceData : EventListener {
 public:
 	ServiceData();
 
-	/** Init the service data, make sure you set important fields first.
+	/**
+	 * Init the service data, make sure you set important fields first.
 	 *
 	 * @param[in] deviceType      The device type, see cs_DeviceTypes.h
 	 */
 	void init(uint8_t deviceType);
 
-	/** Set the device type field of the service data.
+	/**
+	 * Set the device type field of the service data.
 	 *
 	 * @param[in] deviceType      The device type, see cs_DeviceTypes.h
 	 */
 	void setDeviceType(uint8_t deviceType);
 
-	/** Set the power usage field of the service data.
+	/**
+	 * Set the power usage field of the service data.
 	 *
 	 * @param[in] powerUsage      The power usage in milliWatt.
 	 */
 	void updatePowerUsage(int32_t powerUsage);
 
-	/** Set the energy used field of the service data.
+	/**
+	 * Set the energy used field of the service data.
 	 *
 	 * @param[in] energy          The energy used in units of 64 Joule.
 	 */
 	void updateAccumulatedEnergy(int32_t energy);
 
-	/** Set the ID field of the service data.
+	/**
+	 * Set the ID field of the service data.
 	 *
 	 * @param[in] crownstoneId    The Crownstone ID.
 	 */
 	void updateCrownstoneId(stone_id_t crownstoneId);
 
-	/** Set the switch state field of the service data.
+	/**
+	 * Set the switch state field of the service data.
 	 *
 	 * @param[in] switchState     The switch state.
 	 */
 	void updateSwitchState(uint8_t switchState);
 
-	/** Set the temperature field of the service data.
+	/**
+	 * Set the temperature field of the service data.
 	 *
 	 * @param[in] temperature     The temperature.
 	 */
 	void updateTemperature(int8_t temperature);
 
-	/** Set the cached state errors
+	/**
+	 * Update the service data.
 	 *
-	 * @param[in] type            Type of error
-	 * @param[in] set             Whether to set the error.
-	 */
-	void updateStateErrors(CS_TYPE type, bool set);
-
-	/** Update the advertisement.
-	 *
-	 * Update the advertisement with the latest data, and encrypt the data.
-	 * When meshing is enabled, the data of external Crownstones can be put in the advertisement instead.
+	 * Update the service data.
+	 * Selects a type of data, and puts this in the service data.
 	 * Sends out event EVT_ADVERTISEMENT_UPDATED.
 	 *
 	 * @param[in] initial         Set initial to true when this is just the initial data
 	 *                            when there's no need to send out the event.
 	 */
-	void updateAdvertisement(bool initial);
+	void updateServiceData(bool initial);
 
-	/** Get the service data as array.
-	 *
-	 * @return                    Pointer to the service data array.
+	/**
+	 * Get the service data as array.
 	 */
 	uint8_t* getArray();
 
-	/** Get the size of the service.
-	 *
-	 * @return                    Size of the service data.
+	/**
+	 * Get the size of the service data.
 	 */
 	uint16_t getArraySize();
 
@@ -98,45 +97,46 @@ private:
 	app_timer_t    _updateTimerData;
 	app_timer_id_t _updateTimerId = NULL;
 
-	//! Stores the last (current) advertised service data
+	/**
+	 * Stores the last (current) advertised service data.
+	 *
+	 * This data will be copied by the advertiser.
+	 */
 	service_data_t _serviceData;
 
-	//! Store own ID
-	stone_id_t _crownstoneId = 0; // TODO: use State for this?
+	//! Cache own ID
+	stone_id_t _crownstoneId = 0;
 
-	//! Store switch state
-	uint8_t _switchState = 0; // TODO: use State for this?
+	//! Cache switch state
+	uint8_t _switchState = 0;
 
-	//! Store flags
+	//! Cache flags
 	service_data_state_flags_t _flags;
 
-	//! Store extra flags
+	//! Cache extra flags
 	service_data_state_extra_flags_t _extraFlags;
 
-	//! Store the temperature
-	int8_t  _temperature = 0; // TODO: use State for this?
+	//! Cache the temperature
+	int8_t  _temperature = 0;
 
-	//! Store the power factor
-	int8_t  _powerFactor = 0; // TODO: use State for this?
+	//! Cache the power factor
+	int8_t  _powerFactor = 0;
 
-	//! Store the power usage in mW
-	int32_t _powerUsageReal = 0; // TODO: use State for this?
+	//! Cache the power usage in mW
+	int32_t _powerUsageReal = 0;
 
-	//! Store the energy used, in units of 64 J
-	int32_t _energyUsed = 0; // TODO: use State for this?
+	//! Cache the energy used, in units of 64 J
+	int32_t _energyUsed = 0;
 
-	//! Store timestamp of first error
-	uint32_t _firstErrorTimestamp = 0; // TODO: use State for this?
+	//! Cache timestamp of first error
+	uint32_t _firstErrorTimestamp = 0;
 
 	uint32_t _sendStateCountdown = MESH_SEND_STATE_INTERVAL_MS / TICK_INTERVAL_MS;
 
-//	//! Store the error state, so that they don't have to be retrieved every time.
-//	state_errors_t _stateErrors;
-
-	//! Store the operation mode.
+	//! Cache the operation mode.
 	OperationMode _operationMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 
-	//! Store whether a device is connected or not.
+	//! Cache whether a device is connected or not.
 	bool _connected = false;
 
 	//! Counter that keeps up the number of times that the advertisement has been updated.
@@ -146,7 +146,7 @@ private:
 
 	/* Static function for the timeout */
 	static void staticTimeout(ServiceData *ptr) {
-		ptr->updateAdvertisement(false);
+		ptr->updateServiceData(false);
 	}
 
 	/** Decide which external Crownstone's state to advertise.
@@ -181,33 +181,6 @@ private:
 	 */
 	int32_t decompressPowerUsage(int16_t compressedPowerUsage);
 
-	/** Convert energy used from service data protocol v3 to service data protocol v1.
-	 *
-	 * @param[in] energyUsed      The accumulated energy in units of 64J.
-	 * @return                    The accumulated energy in units of Wh.
-	 */
-	int32_t convertEnergyV3ToV1(int32_t energyUsed);
-
-	/** Convert energy used from service data protocol v1 to service data protocol v3.
-	 *
-	 * @param[in] energyUsed      The accumulated energy in units of Wh.
-	 * @return                    The accumulated energy in units of 64J.
-	 */
-	int32_t convertEnergyV1ToV3(int32_t energyUsed);
-
-	/** Convert complete energy usage value to a partial energy usage value, according to service data protocol v3.
-	 *
-	 * @param[in] energyUsed      The accumulated energy in units of 64J.
-	 * @return                    The least significant part of the energy usage.
-	 */
-	uint16_t energyToPartialEnergy(int32_t energyUsed);
-
-	/** Convert partial energy usage value to a complete energy usage value, according to service data protocol v3.
-	 *
-	 * @param[in] partialEnergy   The least significant part of the energy usage.
-	 * @return                    Energy usage.
-	 */
-	int32_t partialEnergyToEnergy (uint16_t partialEnergy);
 
 	/** Convert timestamp to a partial timestamp, according to service data protocol v3.
 	 *
