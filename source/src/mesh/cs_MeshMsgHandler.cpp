@@ -350,7 +350,7 @@ void MeshMsgHandler::checkStateReceived(int8_t rssi, uint8_t hops) {
 		_lastReceivedState.state.data.extState.rssi = 0;
 	}
 	_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
-	_lastReceivedState.state.data.type = SERVICE_DATA_TYPE_EXT_STATE;
+	_lastReceivedState.state.data.type = SERVICE_DATA_DATA_TYPE_EXT_STATE;
 #if CS_SERIAL_NRF_LOG_ENABLED != 2
 	LOGi("Received state: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u rssi=%i",
 			_lastReceivedState.state.data.extState.id,

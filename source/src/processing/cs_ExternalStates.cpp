@@ -48,7 +48,7 @@ void ExternalStates::receivedState(state_external_stone_t* state) {
 			state->data.extState.energyUsed,
 			state->data.extState.partialTimestamp);
 
-	stone_id_t id = service_data_encrypted_get_id(&(state->data));
+	stone_id_t id = getStoneId(&(state->data));
 
 	// Overwrite item with same id
 	for (int i=0; i<EXTERNAL_STATE_LIST_COUNT; ++i) {
@@ -108,15 +108,15 @@ service_data_encrypted_t* ExternalStates::getNextState() {
  */
 void ExternalStates::fixState(state_external_stone_t* state) {
 	switch (state->data.type) {
-	case SERVICE_DATA_TYPE_STATE:
-		service_data_encrypted_convert_state_to_ext_state(&(state->data), state->rssi);
+	case SERVICE_DATA_DATA_TYPE_STATE:
+		convertToExternalState(&(state->data), state->rssi);
 		break;
-	case SERVICE_DATA_TYPE_ERROR:
-		service_data_encrypted_convert_error_to_ext_error(&(state->data), state->rssi);
+	case SERVICE_DATA_DATA_TYPE_ERROR:
+		convertToExternalError(&(state->data), state->rssi);
 		break;
-	case SERVICE_DATA_TYPE_EXT_STATE:
+	case SERVICE_DATA_DATA_TYPE_EXT_STATE:
 		break;
-	case SERVICE_DATA_TYPE_EXT_ERROR:
+	case SERVICE_DATA_DATA_TYPE_EXT_ERROR:
 		break;
 	}
 }

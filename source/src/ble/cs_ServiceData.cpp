@@ -20,7 +20,6 @@
 #include <uart/cs_UartHandler.h>
 #include <util/cs_Utils.h>
 
-#define ADVERTISE_EXTERNAL_DATA
 //#define PRINT_DEBUG_EXTERNAL_DATA
 //#define PRINT_VERBOSE_EXTERNAL_DATA
 
@@ -28,6 +27,8 @@ ServiceData::ServiceData() {
 //	_stateErrors.asInt = 0;
 	// Initialize the service data
 	memset(_serviceData.array, 0, sizeof(_serviceData.array));
+	assert(sizeof(service_data_encrypted_t) == AES_BLOCK_SIZE, "Size of service_data_encrypted_t must be 1 block.");
+	assert(sizeof(service_data_micro_app_encrypted_t) == AES_BLOCK_SIZE, "Size of service_data_micro_app_encrypted_t must be 1 block.");
 };
 
 void ServiceData::init(uint8_t deviceType) {
@@ -174,7 +175,7 @@ void ServiceData::updateAdvertisement(bool initial) {
 
 	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
 		// In setup mode, only advertise this state.
-		_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_SETUP;
+		_serviceData.params.type = SERVICE_DATA_TYPE_SETUP;
 		_serviceData.params.setup.type = 0;
 		_serviceData.params.setup.state.switchState = _switchState;
 		_serviceData.params.setup.state.flags = _flags;
@@ -190,8 +191,8 @@ void ServiceData::updateAdvertisement(bool initial) {
 	// Every 2 updates, we advertise the errors (if any), or the state of another crownstone.
 	if (!serviceDataSet && _updateCount % 2 == 0) {
 		if (stateErrors.asInt != 0) {
-			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
-			_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_ERROR;
+			_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
+			_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_ERROR;
 			_serviceData.params.encrypted.error.id = _crownstoneId;
 			_serviceData.params.encrypted.error.errors = stateErrors.asInt;
 			_serviceData.params.encrypted.error.timestamp = _firstErrorTimestamp;
@@ -209,36 +210,40 @@ void ServiceData::updateAdvertisement(bool initial) {
 	TYPIFY(STATE_HUB_MODE) hubMode;
 	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
 	if (hubMode) {
+		service_data_hub_state_t* serviceDataHubState = nullptr;
 		if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
-			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_SETUP;
+			_serviceData.params.type = SERVICE_DATA_TYPE_SETUP;
+			serviceDataHubState = &(_serviceData.params.setup.hubState);
 		}
 		else {
-			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
+			_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
+			serviceDataHubState = &(_serviceData.params.encrypted.hubState);
 		}
-		_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_HUB_STATE;
-		_serviceData.params.encrypted.hubState.id = _crownstoneId;
+
+		_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_HUB_STATE;
+		serviceDataHubState->id = _crownstoneId;
 		auto selfFlags = UartConnection::getInstance().getSelfStatus().flags.flags;
 		auto hubFlags = UartConnection::getInstance().getUserStatus().flags.flags;
 
-		_serviceData.params.encrypted.hubState.flags.asInt = 0;
-		_serviceData.params.encrypted.hubState.flags.flags.uartAlive = UartConnection::getInstance().isAlive();
-		_serviceData.params.encrypted.hubState.flags.flags.uartAliveEncrypted = UartConnection::getInstance().isEncryptedAlive();
-		_serviceData.params.encrypted.hubState.flags.flags.uartEncryptionRequiredByStone = selfFlags.encryptionRequired;
-		_serviceData.params.encrypted.hubState.flags.flags.uartEncryptionRequiredByHub = hubFlags.encryptionRequired;
-		_serviceData.params.encrypted.hubState.flags.flags.hasBeenSetUp = hubFlags.hasBeenSetUp;
-		_serviceData.params.encrypted.hubState.flags.flags.hasInternet = hubFlags.hasInternet;
-		_serviceData.params.encrypted.hubState.flags.flags.hasError = hubFlags.hasError;
+		serviceDataHubState->flags.asInt = 0;
+		serviceDataHubState->flags.flags.uartAlive = UartConnection::getInstance().isAlive();
+		serviceDataHubState->flags.flags.uartAliveEncrypted = UartConnection::getInstance().isEncryptedAlive();
+		serviceDataHubState->flags.flags.uartEncryptionRequiredByStone = selfFlags.encryptionRequired;
+		serviceDataHubState->flags.flags.uartEncryptionRequiredByHub = hubFlags.encryptionRequired;
+		serviceDataHubState->flags.flags.hasBeenSetUp = hubFlags.hasBeenSetUp;
+		serviceDataHubState->flags.flags.hasInternet = hubFlags.hasInternet;
+		serviceDataHubState->flags.flags.hasError = hubFlags.hasError;
 
 		auto hubData = UartConnection::getInstance().getUserStatus();
 		if (hubData.type == UART_HUB_DATA_TYPE_CROWNSTONE_HUB) {
-			memcpy(_serviceData.params.encrypted.hubState.hubData, hubData.data, SERVICE_DATA_HUB_DATA_SIZE);
+			memcpy(serviceDataHubState->hubData, hubData.data, SERVICE_DATA_HUB_DATA_SIZE);
 		}
 		else {
-			memset(_serviceData.params.encrypted.hubState.hubData, 0, SERVICE_DATA_HUB_DATA_SIZE);
+			memset(serviceDataHubState->hubData, 0, SERVICE_DATA_HUB_DATA_SIZE);
 		}
-		_serviceData.params.encrypted.hubState.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-		_serviceData.params.encrypted.hubState.reserved = 0;
-		_serviceData.params.encrypted.hubState.validation = SERVICE_DATA_VALIDATION;
+		serviceDataHubState->partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+		serviceDataHubState->reserved = 0;
+		serviceDataHubState->validation = SERVICE_DATA_VALIDATION;
 		serviceDataSet = true;
 	}
 
@@ -246,8 +251,8 @@ void ServiceData::updateAdvertisement(bool initial) {
 		if (_updateCount % 16 == 0) {
 			TYPIFY(STATE_BEHAVIOUR_MASTER_HASH) behaviourHash;
 			State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH, &behaviourHash, sizeof(behaviourHash));
-			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
-			_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_ALTERNATIVE_STATE;
+			_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
+			_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_ALTERNATIVE_STATE;
 			_serviceData.params.encrypted.altState.id = _crownstoneId;
 			_serviceData.params.encrypted.altState.switchState = _switchState;
 			_serviceData.params.encrypted.altState.flags = _flags;
@@ -259,8 +264,8 @@ void ServiceData::updateAdvertisement(bool initial) {
 			_serviceData.params.encrypted.altState.validation = SERVICE_DATA_VALIDATION;
 		}
 		else {
-			_serviceData.params.protocolVersion = SERVICE_DATA_TYPE_ENCRYPTED;
-			_serviceData.params.encrypted.type = SERVICE_DATA_TYPE_STATE;
+			_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
+			_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_STATE;
 			_serviceData.params.encrypted.state.id = _crownstoneId;
 			_serviceData.params.encrypted.state.switchState = _switchState;
 			_serviceData.params.encrypted.state.flags = _flags;
