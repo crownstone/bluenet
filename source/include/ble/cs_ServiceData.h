@@ -9,12 +9,13 @@
  */
 #pragma once
 
-#include "processing/cs_ExternalStates.h"
-#include "events/cs_EventListener.h"
-#include "events/cs_EventDispatcher.h"
-#include "storage/cs_State.h"
-#include "drivers/cs_Timer.h"
-#include "cfg/cs_Config.h"
+#include <cfg/cs_Config.h>
+#include <common/cs_Types.h>
+#include <drivers/cs_Timer.h>
+#include <events/cs_EventDispatcher.h>
+#include <events/cs_EventListener.h>
+#include <processing/cs_ExternalStates.h>
+#include <storage/cs_State.h>
 
 class ServiceData : EventListener {
 
@@ -128,6 +129,9 @@ private:
 	//! Cache the energy used, in units of 64 J
 	int32_t _energyUsed = 0;
 
+	//! Cache the state errors.
+	TYPIFY(STATE_ERRORS) _stateErrors;
+
 	//! Cache timestamp of first error
 	uint32_t _firstErrorTimestamp = 0;
 
@@ -149,13 +153,50 @@ private:
 		ptr->updateServiceData(false);
 	}
 
-	/** Decide which external Crownstone's state to advertise.
+	/**
+	 * Chooses what data to set as service data.
 	 *
-	 * @param[in] ownId           Id of this Crownstone.
-	 * @param[out] serviceData    Service data to fill with the state of the selected Crownstone.
-	 * @return                    True when Crownstone was selected and service data has been filled.
+	 * @return     True when service data has to be encrypted.
 	 */
-	bool getExternalAdvertisement(stone_id_t ownId, service_data_t& serviceData);
+	bool fillServiceData(uint32_t timestamp);
+
+	/**
+	 * Encrypt the service data.
+	 */
+	void encryptServiceData();
+
+	/**
+	 * Put the state of this Crownstone in setup mode in the service data.
+	 */
+	void fillWithSetupState(uint32_t timestamp);
+
+	/**
+	 * Put the state of this Crownstone in the service data.
+	 */
+	void fillWithState(uint32_t timestamp);
+
+	/**
+	 * Put the error state of this Crownstone in the service data.
+	 */
+	void fillWithError(uint32_t timestamp);
+
+	/**
+	 * Put the state or error state of another Crownstone in the service data.
+	 *
+	 * @return                    True when Crownstone service data has been filled.
+	 */
+	bool fillWithExternalState();
+
+	/**
+	 * Put the alternative state of this Crownstone in the service data.
+	 */
+	void fillWithAlternativeState(uint32_t timestamp);
+
+	/**
+	 * Put the hub state in the service data.
+	 */
+	void fillWithHubState(uint32_t timestamp);
+
 
 	/** Called when there are events to handle.
 	 *

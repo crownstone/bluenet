@@ -128,137 +128,30 @@ uint16_t ServiceData::getArraySize() {
 }
 
 
+
 void ServiceData::updateServiceData(bool initial) {
 	Timer::getInstance().stop(_updateTimerId);
 
 	_updateCount++;
 
-	bool serviceDataSet = false;
-
 	uint32_t timestamp = SystemTime::posix();
+
+	// Update the state errors.
+	State::getInstance().get(CS_TYPE::STATE_ERRORS, &_stateErrors, sizeof(_stateErrors));
+
+	// Update flags.
 	_flags.flags.timeSet = (timestamp != 0);
+	_flags.flags.error = _stateErrors.asInt != 0;
 
-//		// Update flag
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_MARKED_DIMMABLE, State::getInstance().isTrue(CS_TYPE::CONFIG_PWM_ALLOWED));
-//		updateFlagsBitmask(SERVICE_DATA_FLAGS_SWITCH_LOCKED, State::getInstance().isTrue(CS_TYPE::CONFIG_SWITCH_LOCKED));
-
-	TYPIFY(STATE_ERRORS) stateErrors;
-	State::getInstance().get(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
-	_flags.flags.error = stateErrors.asInt != 0;
-
-	// Set error timestamp
-	if (stateErrors.asInt == 0) {
+	// Set timestamp of first error.
+	if (_stateErrors.asInt == 0) {
 		_firstErrorTimestamp = 0;
 	}
 	else if (_firstErrorTimestamp != 0) {
 		_firstErrorTimestamp = timestamp;
 	}
 
-	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
-		// In setup mode, only advertise this state.
-		_serviceData.params.type = SERVICE_DATA_TYPE_SETUP;
-		_serviceData.params.setup.type = 0;
-		_serviceData.params.setup.state.switchState = _switchState;
-		_serviceData.params.setup.state.flags = _flags;
-		_serviceData.params.setup.state.temperature = _temperature;
-		_serviceData.params.setup.state.powerFactor = _powerFactor;
-		_serviceData.params.setup.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
-		_serviceData.params.setup.state.errors = stateErrors.asInt;
-		_serviceData.params.setup.state.counter = _updateCount;
-		memset(_serviceData.params.setup.state.reserved, 0, sizeof(_serviceData.params.setup.state.reserved));
-		serviceDataSet = true;
-	}
-
-	// Every 2 updates, we advertise the errors (if any), or the state of another crownstone.
-	if (!serviceDataSet && _updateCount % 2 == 0) {
-		if (stateErrors.asInt != 0) {
-			_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
-			_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_ERROR;
-			_serviceData.params.encrypted.error.id = _crownstoneId;
-			_serviceData.params.encrypted.error.errors = stateErrors.asInt;
-			_serviceData.params.encrypted.error.timestamp = _firstErrorTimestamp;
-			_serviceData.params.encrypted.error.flags = _flags;
-			_serviceData.params.encrypted.error.temperature = _temperature;
-			_serviceData.params.encrypted.error.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-			_serviceData.params.encrypted.error.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
-			serviceDataSet = true;
-		}
-		else if (getExternalAdvertisement(_crownstoneId, _serviceData)) {
-			serviceDataSet = true;
-		}
-	}
-
-	TYPIFY(STATE_HUB_MODE) hubMode;
-	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
-	if (hubMode) {
-		service_data_hub_state_t* serviceDataHubState = nullptr;
-		if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
-			_serviceData.params.type = SERVICE_DATA_TYPE_SETUP;
-			serviceDataHubState = &(_serviceData.params.setup.hubState);
-		}
-		else {
-			_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
-			serviceDataHubState = &(_serviceData.params.encrypted.hubState);
-		}
-
-		_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_HUB_STATE;
-		serviceDataHubState->id = _crownstoneId;
-		auto selfFlags = UartConnection::getInstance().getSelfStatus().flags.flags;
-		auto hubFlags = UartConnection::getInstance().getUserStatus().flags.flags;
-
-		serviceDataHubState->flags.asInt = 0;
-		serviceDataHubState->flags.flags.uartAlive = UartConnection::getInstance().isAlive();
-		serviceDataHubState->flags.flags.uartAliveEncrypted = UartConnection::getInstance().isEncryptedAlive();
-		serviceDataHubState->flags.flags.uartEncryptionRequiredByStone = selfFlags.encryptionRequired;
-		serviceDataHubState->flags.flags.uartEncryptionRequiredByHub = hubFlags.encryptionRequired;
-		serviceDataHubState->flags.flags.hasBeenSetUp = hubFlags.hasBeenSetUp;
-		serviceDataHubState->flags.flags.hasInternet = hubFlags.hasInternet;
-		serviceDataHubState->flags.flags.hasError = hubFlags.hasError;
-
-		auto hubData = UartConnection::getInstance().getUserStatus();
-		if (hubData.type == UART_HUB_DATA_TYPE_CROWNSTONE_HUB) {
-			memcpy(serviceDataHubState->hubData, hubData.data, SERVICE_DATA_HUB_DATA_SIZE);
-		}
-		else {
-			memset(serviceDataHubState->hubData, 0, SERVICE_DATA_HUB_DATA_SIZE);
-		}
-		serviceDataHubState->partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-		serviceDataHubState->reserved = 0;
-		serviceDataHubState->validation = SERVICE_DATA_VALIDATION;
-		serviceDataSet = true;
-	}
-
-	if (!serviceDataSet) {
-		if (_updateCount % 16 == 0) {
-			TYPIFY(STATE_BEHAVIOUR_MASTER_HASH) behaviourHash;
-			State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH, &behaviourHash, sizeof(behaviourHash));
-			_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
-			_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_ALTERNATIVE_STATE;
-			_serviceData.params.encrypted.altState.id = _crownstoneId;
-			_serviceData.params.encrypted.altState.switchState = _switchState;
-			_serviceData.params.encrypted.altState.flags = _flags;
-			_serviceData.params.encrypted.altState.behaviourMasterHash = getPartialBehaviourHash(behaviourHash);
-			memset(_serviceData.params.encrypted.altState.reserved, 0, sizeof(_serviceData.params.encrypted.altState.reserved));
-//			_serviceData.params.encrypted.altState.reserved = {0};
-			_serviceData.params.encrypted.altState.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-			_serviceData.params.encrypted.altState.reserved2 = 0;
-			_serviceData.params.encrypted.altState.validation = SERVICE_DATA_VALIDATION;
-		}
-		else {
-			_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
-			_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_STATE;
-			_serviceData.params.encrypted.state.id = _crownstoneId;
-			_serviceData.params.encrypted.state.switchState = _switchState;
-			_serviceData.params.encrypted.state.flags = _flags;
-			_serviceData.params.encrypted.state.temperature = _temperature;
-			_serviceData.params.encrypted.state.powerFactor = _powerFactor;
-			_serviceData.params.encrypted.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
-			_serviceData.params.encrypted.state.energyUsed = _energyUsed;
-			_serviceData.params.encrypted.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-			_serviceData.params.encrypted.state.extraFlags = _extraFlags;
-			_serviceData.params.encrypted.state.validation = SERVICE_DATA_VALIDATION;
-		}
-	}
+	bool encrypt = fillServiceData(timestamp);
 
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
 	LOGd("servideData:");
@@ -267,21 +160,8 @@ void ServiceData::updateServiceData(bool initial) {
 #endif
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_SERVICE_DATA, _serviceData.array, sizeof(service_data_t));
 
-//		Mesh::getInstance().printRssiList();
-
-	// encrypt the array using the guest key ECB if encryption is enabled.
-	if (State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED) && _operationMode != OperationMode::OPERATION_MODE_SETUP) {
-
-		uint8_t key[ENCRYPTION_KEY_LENGTH];
-		if (KeysAndAccess::getInstance().getKey(SERVICE_DATA, key, sizeof(key))) {
-			cs_buffer_size_t writtenSize;
-			AES::getInstance().encryptEcb(
-					cs_data_t(key, sizeof(key)),
-					cs_data_t(),
-					cs_data_t(_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray)),
-					cs_data_t(_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray)),
-					writtenSize);
-		}
+	if (encrypt && State::getInstance().isTrue(CS_TYPE::CONFIG_ENCRYPTION_ENABLED)) {
+		encryptServiceData();
 	}
 
 	if (!initial) {
@@ -298,14 +178,170 @@ void ServiceData::updateServiceData(bool initial) {
 	}
 }
 
-bool ServiceData::getExternalAdvertisement(stone_id_t ownId, service_data_t& serviceData) {
+
+
+bool ServiceData::fillServiceData(uint32_t timestamp) {
+	bool serviceDataSet = false;
+
+	TYPIFY(STATE_HUB_MODE) hubMode;
+	State::getInstance().get(CS_TYPE::STATE_HUB_MODE, &hubMode, sizeof(hubMode));
+	if (hubMode) {
+		// In hub mode, only use hub state as service data.
+		fillWithHubState(timestamp);
+		return _operationMode != OperationMode::OPERATION_MODE_SETUP;
+	}
+
+	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
+		// In setup mode, only use setup state as service data.
+		fillWithSetupState(timestamp);
+		return false;
+	}
+
+	// Every 2 updates, we advertise the errors (if any), or the state of another crownstone.
+	if (_updateCount % 2 == 0) {
+		if (_stateErrors.asInt != 0) {
+			fillWithError(timestamp);
+			return true;
+		}
+		else {
+			serviceDataSet = fillWithExternalState();
+		}
+	}
+
+	// If service data wasn't filled with external state
+	if (!serviceDataSet) {
+		if (_updateCount % 16 == 1) {
+			fillWithAlternativeState(timestamp);
+		}
+		else {
+			fillWithState(timestamp);
+		}
+	}
+	return true;
+}
+
+
+
+void ServiceData::encryptServiceData() {
+	// encrypt the array using the guest key ECB if encryption is enabled.
+	uint8_t key[ENCRYPTION_KEY_LENGTH];
+	if (KeysAndAccess::getInstance().getKey(SERVICE_DATA, key, sizeof(key))) {
+		cs_buffer_size_t writtenSize;
+		AES::getInstance().encryptEcb(
+				cs_data_t(key, sizeof(key)),
+				cs_data_t(),
+				cs_data_t(_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray)),
+				cs_data_t(_serviceData.params.encryptedArray, sizeof(_serviceData.params.encryptedArray)),
+				writtenSize);
+	}
+}
+
+
+
+void ServiceData::fillWithSetupState(uint32_t timestamp) {
+	_serviceData.params.type = SERVICE_DATA_TYPE_SETUP;
+	_serviceData.params.setup.type = 0;
+	_serviceData.params.setup.state.switchState = _switchState;
+	_serviceData.params.setup.state.flags = _flags;
+	_serviceData.params.setup.state.temperature = _temperature;
+	_serviceData.params.setup.state.powerFactor = _powerFactor;
+	_serviceData.params.setup.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
+	_serviceData.params.setup.state.errors = _stateErrors.asInt;
+	_serviceData.params.setup.state.counter = _updateCount;
+	memset(_serviceData.params.setup.state.reserved, 0, sizeof(_serviceData.params.setup.state.reserved));
+}
+
+void ServiceData::fillWithState(uint32_t timestamp) {
+	_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
+	_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_STATE;
+	_serviceData.params.encrypted.state.id = _crownstoneId;
+	_serviceData.params.encrypted.state.switchState = _switchState;
+	_serviceData.params.encrypted.state.flags = _flags;
+	_serviceData.params.encrypted.state.temperature = _temperature;
+	_serviceData.params.encrypted.state.powerFactor = _powerFactor;
+	_serviceData.params.encrypted.state.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
+	_serviceData.params.encrypted.state.energyUsed = _energyUsed;
+	_serviceData.params.encrypted.state.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+	_serviceData.params.encrypted.state.extraFlags = _extraFlags;
+	_serviceData.params.encrypted.state.validation = SERVICE_DATA_VALIDATION;
+}
+
+void ServiceData::fillWithError(uint32_t timestamp) {
+	_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
+	_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_ERROR;
+	_serviceData.params.encrypted.error.id = _crownstoneId;
+	_serviceData.params.encrypted.error.errors = _stateErrors.asInt;
+	_serviceData.params.encrypted.error.timestamp = _firstErrorTimestamp;
+	_serviceData.params.encrypted.error.flags = _flags;
+	_serviceData.params.encrypted.error.temperature = _temperature;
+	_serviceData.params.encrypted.error.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+	_serviceData.params.encrypted.error.powerUsageReal = compressPowerUsageMilliWatt(_powerUsageReal);
+}
+
+bool ServiceData::fillWithExternalState() {
 	service_data_encrypted_t* extState = _externalStates.getNextState();
 	if (extState == NULL) {
 		return false;
 	}
-	memcpy(&serviceData.params.encrypted, extState, sizeof(*extState));
+	memcpy(&_serviceData.params.encrypted, extState, sizeof(*extState));
 	return true;
 }
+
+void ServiceData::fillWithAlternativeState(uint32_t timestamp) {
+	TYPIFY(STATE_BEHAVIOUR_MASTER_HASH) behaviourHash;
+	State::getInstance().get(CS_TYPE::STATE_BEHAVIOUR_MASTER_HASH, &behaviourHash, sizeof(behaviourHash));
+	_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
+	_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_ALTERNATIVE_STATE;
+	_serviceData.params.encrypted.altState.id = _crownstoneId;
+	_serviceData.params.encrypted.altState.switchState = _switchState;
+	_serviceData.params.encrypted.altState.flags = _flags;
+	_serviceData.params.encrypted.altState.behaviourMasterHash = getPartialBehaviourHash(behaviourHash);
+	memset(_serviceData.params.encrypted.altState.reserved, 0, sizeof(_serviceData.params.encrypted.altState.reserved));
+//	_serviceData.params.encrypted.altState.reserved = {0};
+	_serviceData.params.encrypted.altState.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+	_serviceData.params.encrypted.altState.reserved2 = 0;
+	_serviceData.params.encrypted.altState.validation = SERVICE_DATA_VALIDATION;
+}
+
+void ServiceData::fillWithHubState(uint32_t timestamp) {
+	service_data_hub_state_t* serviceDataHubState = nullptr;
+	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
+		_serviceData.params.type = SERVICE_DATA_TYPE_SETUP;
+		serviceDataHubState = &(_serviceData.params.setup.hubState);
+	}
+	else {
+		_serviceData.params.type = SERVICE_DATA_TYPE_ENCRYPTED;
+		serviceDataHubState = &(_serviceData.params.encrypted.hubState);
+	}
+
+	_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_HUB_STATE;
+	serviceDataHubState->id = _crownstoneId;
+	auto selfFlags = UartConnection::getInstance().getSelfStatus().flags.flags;
+	auto hubFlags = UartConnection::getInstance().getUserStatus().flags.flags;
+
+	serviceDataHubState->flags.asInt = 0;
+	serviceDataHubState->flags.flags.uartAlive = UartConnection::getInstance().isAlive();
+	serviceDataHubState->flags.flags.uartAliveEncrypted = UartConnection::getInstance().isEncryptedAlive();
+	serviceDataHubState->flags.flags.uartEncryptionRequiredByStone = selfFlags.encryptionRequired;
+	serviceDataHubState->flags.flags.uartEncryptionRequiredByHub = hubFlags.encryptionRequired;
+	serviceDataHubState->flags.flags.hasBeenSetUp = hubFlags.hasBeenSetUp;
+	serviceDataHubState->flags.flags.hasInternet = hubFlags.hasInternet;
+	serviceDataHubState->flags.flags.hasError = hubFlags.hasError;
+
+	auto hubData = UartConnection::getInstance().getUserStatus();
+	if (hubData.type == UART_HUB_DATA_TYPE_CROWNSTONE_HUB) {
+		memcpy(serviceDataHubState->hubData, hubData.data, SERVICE_DATA_HUB_DATA_SIZE);
+	}
+	else {
+		memset(serviceDataHubState->hubData, 0, SERVICE_DATA_HUB_DATA_SIZE);
+	}
+	serviceDataHubState->partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+	serviceDataHubState->reserved = 0;
+	serviceDataHubState->validation = SERVICE_DATA_VALIDATION;
+}
+
+
+
 
 
 void ServiceData::handleEvent(event_t & event) {
