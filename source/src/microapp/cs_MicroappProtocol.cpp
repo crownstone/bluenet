@@ -59,28 +59,28 @@ enum CommandMicroappSwitch {
 void forwardCommand(char command, char *data, uint16_t length) {
 	LOGi("Set command");
 	switch(command) {
-	case CS_MICROAPP_COMMAND_PIN: {
-		int pin = data[0];
-		if (pin != CS_MICROAPP_COMMAND_PIN_SWITCH) {
-			LOGd("Unknown pin");
-			return;
+		case CS_MICROAPP_COMMAND_PIN: {
+			int pin = data[0];
+			if (pin != CS_MICROAPP_COMMAND_PIN_SWITCH) {
+				LOGd("Unknown pin");
+				return;
+			}
+			int mode = data[1];
+			switch(mode) {
+				case CS_MICROAPP_COMMAND_SWITCH_OFF: {
+					LOGi("Turn switch off");
+					event_t event(CS_TYPE::CMD_SWITCH_OFF);
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_SWITCH_ON: {
+					LOGi("Turn switch on");
+					event_t event(CS_TYPE::CMD_SWITCH_ON);
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
+			}
 		}
-		int mode = data[1];
-		switch(mode) {
-		case CS_MICROAPP_COMMAND_SWITCH_OFF: {
-			LOGi("Turn switch off");
-			event_t event(CS_TYPE::CMD_SWITCH_OFF);
-			EventDispatcher::getInstance().dispatch(event);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_SWITCH_ON: {
-			LOGi("Turn switch on");
-			event_t event(CS_TYPE::CMD_SWITCH_ON);
-			EventDispatcher::getInstance().dispatch(event);
-			break;
-		}
-		}
-	}
 	}
 }
 
@@ -93,51 +93,51 @@ int microapp_callback(char *payload, uint16_t length) {
 	uint8_t command = payload[0];
 
 	switch(command) {
-	case CS_MICROAPP_COMMAND_LOG: {
-		char type = payload[1];
-		switch(type) {
-		case CS_MICROAPP_COMMAND_LOG_CHAR: {
-			char value = payload[2];
-			LOGi("%i", (int)value);
+		case CS_MICROAPP_COMMAND_LOG: {
+			char type = payload[1];
+			switch(type) {
+				case CS_MICROAPP_COMMAND_LOG_CHAR: {
+					char value = payload[2];
+					LOGi("%i", (int)value);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_LOG_INT: {
+					int value = (payload[2] << 8) + payload[3];
+					LOGi("%i", value);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_LOG_STR: {
+					int str_length = length - 2;
+					char *data = &(payload[2]);
+					data[str_length] = 0;
+					LOGi("%s", data);
+					break;
+				}
+			}
 			break;
 		}
-		case CS_MICROAPP_COMMAND_LOG_INT: {
-			int value = (payload[2] << 8) + payload[3];
-			LOGi("%i", value);
+		case CS_MICROAPP_COMMAND_DELAY: {
+			int delay = (payload[1] << 8) + payload[2];
+			LOGd("Microapp delay of %i", delay);
+			uintptr_t coargs_ptr = (payload[3] << 24) + (payload[4] << 16) + (payload[5] << 8) + payload[6];
+			// cast to coroutine args struct
+			coargs* args = (coargs*) coargs_ptr;
+			args->cntr++;
+			args->delay = delay;
+			yield(args->c);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_LOG_STR: {
-			int str_length = length - 2;
-			char *data = &(payload[2]);
-			data[str_length] = 0;
-			LOGi("%s", data);
+		case CS_MICROAPP_COMMAND_PIN: {
+			forwardCommand(command, &payload[1], length - 1);
 			break;
 		}
-		}
-		break;
-	}
-	case CS_MICROAPP_COMMAND_DELAY: {
-		int delay = (payload[1] << 8) + payload[2];
-		LOGd("Microapp delay of %i", delay);
-		uintptr_t coargs_ptr = (payload[3] << 24) + (payload[4] << 16) + (payload[5] << 8) + payload[6];
-		// cast to coroutine args struct
-		coargs* args = (coargs*) coargs_ptr;
-		args->cntr++;
-		args->delay = delay;
-		yield(args->c);
-		break;
-	}
-	case CS_MICROAPP_COMMAND_PIN: {
-		forwardCommand(command, &payload[1], length - 1);
-		break;
-	}
-	default:
-		LOGi("Unknown command of length %i", length);
-		int ml = length;
-		if (length > 4) ml = 4;
-		for (int i = 0; i < ml; i++) {
-			LOGi("0x%i", payload[i]);
-		}
+		default:
+			LOGi("Unknown command of length %i", length);
+			int ml = length;
+			if (length > 4) ml = 4;
+			for (int i = 0; i < ml; i++) {
+				LOGi("0x%i", payload[i]);
+			}
 	}
 
 	return ERR_SUCCESS;
