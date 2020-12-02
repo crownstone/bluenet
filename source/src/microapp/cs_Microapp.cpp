@@ -2,15 +2,16 @@
  *
  * Write a file to flash. This class listens to events and stores them in flash. The location where it is stored in 
  * flash is separate from the bluenet binary. It can be seen as a DFU process where bluenet functions as a bootloader
- * for yet other binaries that we call here micro apps.
+ * for yet other binaries that we call here microapps.
  *
- * A typical micro app can be a small binary compiled with Arduino conventions for the Crownstone architecture.
+ * A typical microapp can be a small binary compiled with Arduino conventions for the Crownstone architecture.
  *
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
  * Date: April 4, 2020
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
+
 
 #include "nrf_fstorage_sd.h"
 
@@ -22,9 +23,9 @@
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
-#include <microapp/cs_MicroApp.h>
-#include <microapp/cs_MicroAppProtocol.h>
-#include <microapp/cs_MicroAppStorage.h>
+#include <microapp/cs_Microapp.h>
+#include <microapp/cs_MicroappProtocol.h>
+#include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 #include <storage/cs_StateData.h>
@@ -33,7 +34,7 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
-MicroApp::MicroApp(): EventListener() {
+Microapp::Microapp(): EventListener() {
 	
 	EventDispatcher::getInstance().addListener(this);
 
@@ -48,14 +49,14 @@ MicroApp::MicroApp(): EventListener() {
 	
 }
 
-uint16_t MicroApp::init() {
+uint16_t Microapp::init() {
 	uint32_t err_code;
 
-	MicroAppStorage & storage = MicroAppStorage::getInstance();
+	MicroappStorage & storage = MicroappStorage::getInstance();
 	storage.init();
 
 	// Set callback handler in IPC ram
-	MicroAppProtocol & protocol = MicroAppProtocol::getInstance();
+	MicroappProtocol & protocol = MicroappProtocol::getInstance();
 	protocol.setIpcRam();
 
 	// Actually, first check if there's anything there?
@@ -86,7 +87,7 @@ uint16_t MicroApp::init() {
 	return err_code;
 }
 
-void MicroApp::tick() {
+void Microapp::tick() {
 	// decrement repeat counter up to zero
 	if (_prevMessage.repeat > 0) {
 		_prevMessage.repeat--;
@@ -97,12 +98,12 @@ void MicroApp::tick() {
 		event.dispatch();
 	}
 					
-	MicroAppProtocol & protocol = MicroAppProtocol::getInstance();
+	MicroappProtocol & protocol = MicroappProtocol::getInstance();
 	protocol.callSetupAndLoop();
 
 }
 
-uint32_t MicroApp::handlePacket(microapp_packet_header_t *packet_stub) {
+uint32_t Microapp::handlePacket(microapp_packet_header_t *packet_stub) {
 	
 	uint32_t err_code = ERR_EVENT_UNHANDLED;
 	
@@ -116,7 +117,7 @@ uint32_t MicroApp::handlePacket(microapp_packet_header_t *packet_stub) {
 	case CS_MICROAPP_OPCODE_REQUEST: {
 		microapp_request_packet_t* packet = reinterpret_cast<microapp_request_packet_t*>(packet_stub);
 		// Check if app size is not too large.
-		MicroAppStorage & storage = MicroAppStorage::getInstance();
+		MicroappStorage & storage = MicroappStorage::getInstance();
 		err_code = storage.checkAppSize(packet->size);
 		if (err_code != ERR_SUCCESS) {
 			break;
@@ -152,19 +153,19 @@ uint32_t MicroApp::handlePacket(microapp_packet_header_t *packet_stub) {
 		State::getInstance().set(data);
 
 		LOGi("Enable app");
-		MicroAppStorage & storage = MicroAppStorage::getInstance();
+		MicroappStorage & storage = MicroappStorage::getInstance();
 		err_code = storage.enableApp(true);
 
 		if (err_code == ERR_SUCCESS) {
 			LOGi("Call app");
-			MicroAppProtocol & protocol = MicroAppProtocol::getInstance();
+			MicroappProtocol & protocol = MicroappProtocol::getInstance();
 			protocol.callApp();
 		}
 		break;
 	}
 	case CS_MICROAPP_OPCODE_DISABLE: {
 		LOGi("Disable app");
-		MicroAppStorage & storage = MicroAppStorage::getInstance();
+		MicroappStorage & storage = MicroappStorage::getInstance();
 		err_code = storage.enableApp(false);
 		break;
 	}
@@ -176,7 +177,7 @@ uint32_t MicroApp::handlePacket(microapp_packet_header_t *packet_stub) {
 
 		// Validate chunk in ram.
 		LOGi("Validate chunk %i", packet->index);
-		MicroAppStorage & storage = MicroAppStorage::getInstance();
+		MicroappStorage & storage = MicroappStorage::getInstance();
 		err_code = storage.validateChunk(packet->data, MICROAPP_CHUNK_SIZE, packet->checksum);
 		if (err_code != ERR_SUCCESS) {
 			break;
@@ -199,7 +200,7 @@ uint32_t MicroApp::handlePacket(microapp_packet_header_t *packet_stub) {
 	case CS_MICROAPP_OPCODE_VALIDATE: {
 		microapp_validate_packet_t* packet = reinterpret_cast<microapp_validate_packet_t*>(packet_stub);
 		LOGi("Store meta data (checksum, etc.)");
-		MicroAppStorage & storage = MicroAppStorage::getInstance();
+		MicroappStorage & storage = MicroappStorage::getInstance();
 		storage.storeAppMetadata(packet->app_id, packet->checksum, packet->size);
 
 		// Assumes that storage of meta data gets actually through at one point
@@ -227,7 +228,7 @@ uint32_t MicroApp::handlePacket(microapp_packet_header_t *packet_stub) {
 /**
  * Handle incoming events from other modules (mainly the CommandController).
  */
-void MicroApp::handleEvent(event_t & evt) {
+void Microapp::handleEvent(event_t & evt) {
 
 	// The err_code will be written to the event and returned to the caller over BLE.
 	uint32_t err_code = ERR_EVENT_UNHANDLED;
@@ -237,7 +238,7 @@ void MicroApp::handleEvent(event_t & evt) {
 		// Immediately stop previous notifications
 		_prevMessage.repeat = 0;
 
-		LOGi("MicroApp receives event");
+		LOGi("Microapp receives event");
 		microapp_packet_header_t* packet = reinterpret_cast<microapp_packet_header_t*>(evt.data);
 
 		// Handle packet

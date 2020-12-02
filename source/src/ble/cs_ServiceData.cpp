@@ -28,7 +28,7 @@ ServiceData::ServiceData() {
 	// Initialize the service data
 	memset(_serviceData.array, 0, sizeof(_serviceData.array));
 	assert(sizeof(service_data_encrypted_t) == AES_BLOCK_SIZE, "Size of service_data_encrypted_t must be 1 block.");
-	assert(sizeof(service_data_micro_app_encrypted_t) == AES_BLOCK_SIZE, "Size of service_data_micro_app_encrypted_t must be 1 block.");
+	assert(sizeof(service_data_microapp_encrypted_t) == AES_BLOCK_SIZE, "Size of service_data_microapp_encrypted_t must be 1 block.");
 };
 
 void ServiceData::init(uint8_t deviceType) {
@@ -340,6 +340,19 @@ void ServiceData::fillWithHubState(uint32_t timestamp) {
 	serviceDataHubState->partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
 	serviceDataHubState->reserved = 0;
 	serviceDataHubState->validation = SERVICE_DATA_VALIDATION;
+}
+
+bool ServiceData::fillWithMicroapp(uint32_t timestamp) {
+	if (!_hasMicroappServiceData) {
+		return false;
+	}
+	_serviceData.params.type = SERVICE_DATA_TYPE_MICROAPP;
+	_serviceData.params.microappEncrypted.version = _microappServiceData.version;
+	_serviceData.params.microappEncrypted.appUuid = _microappServiceData.appUuid;
+	memcpy(_serviceData.params.microappEncrypted.data, _microappServiceData.data, sizeof(_serviceData.params.microappEncrypted.data));
+	_serviceData.params.microappEncrypted.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+	_serviceData.params.microappEncrypted.validation = SERVICE_DATA_VALIDATION;
+	return true;
 }
 
 

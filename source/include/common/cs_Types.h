@@ -325,8 +325,9 @@ enum class CS_TYPE: uint16_t {
 	CMD_GET_ADC_CHANNEL_SWAPS,                        // Get number of detected ADC channel swaps.
 	CMD_GET_RAM_STATS,                                // Get RAM statistics.
 
-	CMD_MICROAPP,                                     // MicroApp upload (e.g. Arduino code).
-	EVT_MICROAPP,                                     // MicroApp event (e.g. write done)
+	CMD_MICROAPP,                                     // Microapp upload (e.g. Arduino code).
+	EVT_MICROAPP,                                     // Microapp event (e.g. write done)
+	CMD_MICROAPP_ADVERTISE,                           // A microapp wants to advertise something.
 
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
 
@@ -563,6 +564,7 @@ typedef void TYPIFY(CMD_GET_ADC_CHANNEL_SWAPS);
 typedef void TYPIFY(CMD_GET_RAM_STATS);
 typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP);
 typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
+typedef microapp_advertise_request_t TYPIFY(CMD_MICROAPP_ADVERTISE);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);

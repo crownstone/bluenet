@@ -236,7 +236,7 @@ ELSE()
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
 	ELSE()
-		MESSAGE(STATUS "MicroApp support disabled, no fstorage module required")
+		MESSAGE(STATUS "Microapp support disabled, no fstorage module required")
 	ENDIF()
 
 	IF (BUILD_MESHING)

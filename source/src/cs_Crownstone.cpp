@@ -211,7 +211,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 	_mesh = &Mesh::getInstance();
 #endif
 #if BUILD_MICROAPP_SUPPORT == 1
-	_microApp = &MicroApp::getInstance();
+	_microapp = &Microapp::getInstance();
 #endif
 
 	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
@@ -270,7 +270,7 @@ void Crownstone::init1() {
 
 #if BUILD_MICROAPP_SUPPORT == 1
 	LOGi(FMT_HEADER, "init microapp");
-	_microApp->init();
+	_microapp->init();
 #endif
 }
 

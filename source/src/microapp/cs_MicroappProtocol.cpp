@@ -18,7 +18,7 @@
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
-#include <microapp/cs_MicroAppProtocol.h>
+#include <microapp/cs_MicroappProtocol.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 #include <storage/cs_StateData.h>
@@ -145,7 +145,7 @@ int microapp_callback(char *payload, uint16_t length) {
 
 } // extern C
 
-MicroAppProtocol::MicroAppProtocol() {
+MicroappProtocol::MicroappProtocol() {
 	_setup = 0;
 	_loop = 0;
 	_booted = false;
@@ -155,7 +155,7 @@ MicroAppProtocol::MicroAppProtocol() {
  * Set the microapp_callback in the IPC ram data bank. It can later on be used by the microapp to find the address
  * of that function to call back into the bluenet code.
  */
-void MicroAppProtocol::setIpcRam() {
+void MicroappProtocol::setIpcRam() {
 	LOGi("Set IPC info for microapp");
 	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
 
@@ -183,7 +183,7 @@ void MicroAppProtocol::setIpcRam() {
 /**
  * Get the ram structure in which loop and setup of the microapp are stored.
  */
-uint16_t MicroAppProtocol::interpretRamdata() {
+uint16_t MicroappProtocol::interpretRamdata() {
 	LOGi("Get IPC info for microapp");
 	uint8_t buf[BLUENET_IPC_RAM_DATA_ITEM_SIZE];
 	for (int i = 0; i < BLUENET_IPC_RAM_DATA_ITEM_SIZE; ++i) {
@@ -206,7 +206,7 @@ uint16_t MicroAppProtocol::interpretRamdata() {
 	}
 
 	if (ret_code == IPC_RET_SUCCESS) {
-		LOGi("Found RAM for MicroApp");
+		LOGi("Found RAM for Microapp");
 		LOGi("  protocol: %02x", buf[0]);
 		LOGi("  setup():  %02x %02x %02x %02x", buf[1], buf[2], buf[3], buf[4]);
 		LOGi("  loop():   %02x %02x %02x %02x", buf[5], buf[6], buf[7], buf[8]);
@@ -241,7 +241,7 @@ uint16_t MicroAppProtocol::interpretRamdata() {
  *
  * TODO: Return setup and loop addresses
  */
-void MicroAppProtocol::callApp() {
+void MicroappProtocol::callApp() {
 	static bool thumb_mode = true;
 
 	// Check if we want to do this again
@@ -278,7 +278,7 @@ void MicroAppProtocol::callApp() {
 	_booted = true;
 }
 
-uint16_t MicroAppProtocol::initMemory() {
+uint16_t MicroappProtocol::initMemory() {
 	// We allow an area of 0x2000B000 and then two pages for RAM. For now let us clear it to 0
 	// This is actually incorrect (we should skip) and it probably can be done at once as well
 	for (int i = 0; i < 1024 * 2; ++i) {
@@ -292,7 +292,7 @@ uint16_t MicroAppProtocol::initMemory() {
 }
 
 
-void MicroAppProtocol::callSetupAndLoop() {
+void MicroappProtocol::callSetupAndLoop() {
 
 	static uint16_t counter = 0;
 	if (_booted) {
@@ -348,7 +348,7 @@ void MicroAppProtocol::callSetupAndLoop() {
  *   - when cntr = 0 we start a new loop
  *   - we call next and set skip if we actually were "yielded"
  */
-void MicroAppProtocol::callLoop(int & cntr, int & skip) {
+void MicroappProtocol::callLoop(int & cntr, int & skip) {
 	if (cntr == 0) {
 		// start a new loop
 		_coargs = {&_coroutine, 1, 0};

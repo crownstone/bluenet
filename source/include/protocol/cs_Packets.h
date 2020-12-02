@@ -11,7 +11,7 @@
 #include <protocol/cs_CmdSource.h>
 #include <protocol/cs_CommandTypes.h>
 #include <protocol/cs_ErrorCodes.h>
-#include <protocol/cs_MicroAppPackets.h>
+#include <protocol/cs_MicroappPackets.h>
 #include <protocol/cs_ServiceDataPackets.h>
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>

@@ -149,6 +149,16 @@ private:
 
 	ExternalStates _externalStates;
 
+	/**
+	 * Whether the microapp wants to advertise service data.
+	 */
+	bool _hasMicroappServiceData = false;
+
+	/**
+	 * Microapp data to be advertised in crownstone service data.
+	 */
+	service_data_microapp_encrypted_t _microappServiceData;
+
 	/* Static function for the timeout */
 	static void staticTimeout(ServiceData *ptr) {
 		ptr->updateServiceData(false);
@@ -184,7 +194,7 @@ private:
 	/**
 	 * Put the state or error state of another Crownstone in the service data.
 	 *
-	 * @return                    True when Crownstone service data has been filled.
+	 * @return     True when Crownstone service data has been filled.
 	 */
 	bool fillWithExternalState();
 
@@ -197,6 +207,13 @@ private:
 	 * Put the hub state in the service data.
 	 */
 	void fillWithHubState(uint32_t timestamp);
+
+	/**
+	 * Put microapp data in the service data.
+	 *
+	 * @return     True when Crownstone service data has been filled.
+	 */
+	bool fillWithMicroapp(uint32_t timestamp);
 
 
 	/** Called when there are events to handle.

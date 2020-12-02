@@ -315,4 +315,10 @@ struct hub_data_reply_t {
 	cs_data_t data;
 };
 
+struct microapp_advertise_request_t {
+	uint8_t version;
+	uint16_t appUuid;
+	cs_data_t data;
+};
+
 

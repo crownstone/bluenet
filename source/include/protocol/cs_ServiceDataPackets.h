@@ -233,12 +233,12 @@ struct __attribute__((packed)) service_data_setup_t {
 
 
 /**
- * Micro app data that will be encrypted.
+ * Microapp data that will be encrypted.
  */
-struct __attribute__((packed)) service_data_micro_app_encrypted_t {
+struct __attribute__((packed)) service_data_microapp_encrypted_t {
 	uint8_t version;              // Version set by firmware.
-	uint16_t appUuid;             // Identifier picked by the micro app.
-	uint8_t data[10];             // Data filled in by the micro app.
+	uint16_t appUuid;             // Identifier picked by the microapp.
+	uint8_t data[10];             // Data filled in by the microapp.
 	uint16_t partialTimestamp;    // Required, so that the data keeps changing.
 	uint8_t validation;           // Used to check if decryption is successful. Value is always SERVICE_DATA_VALIDATION.
 };
@@ -249,7 +249,7 @@ struct __attribute__((packed)) service_data_micro_app_encrypted_t {
 enum ServiceDataType {
 	SERVICE_DATA_TYPE_SETUP = 6,
 	SERVICE_DATA_TYPE_ENCRYPTED = 7,
-	SERVICE_DATA_TYPE_MICRO_APP = 8,
+	SERVICE_DATA_TYPE_MICROAPP = 8,
 };
 
 /**
@@ -264,7 +264,7 @@ union service_data_t {
 		union {
 			service_data_encrypted_t encrypted;
 			service_data_setup_t setup;
-			service_data_micro_app_encrypted_t microAppEncrypted;
+			service_data_microapp_encrypted_t microappEncrypted;
 			uint8_t encryptedArray[sizeof(service_data_encrypted_t)];
 		};
 	} params;

@@ -18,17 +18,17 @@ typedef struct {
 #define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
 
 /**
- * The class MicroAppProtocol has functionality to store a second app (and perhaps in the future even more apps) on another
+ * The class MicroappProtocol has functionality to store a second app (and perhaps in the future even more apps) on another
  * part of the flash memory.
  */
-class MicroAppProtocol { //: public EventListener {
+class MicroappProtocol { //: public EventListener {
 	private:
 		/**
 		 * Singleton, constructor, also copy constructor, is private.
 		 */
-		MicroAppProtocol();
-		MicroAppProtocol(MicroAppProtocol const&);
-		void operator=(MicroAppProtocol const &);
+		MicroappProtocol();
+		MicroappProtocol(MicroappProtocol const&);
+		void operator=(MicroappProtocol const &);
 
 		/**
 		 * Local flag to check if app did boot. This flag is set to true after the main of the microapp is called
@@ -99,8 +99,8 @@ class MicroAppProtocol { //: public EventListener {
 		 */
 		uint16_t interpretRamdata();
 	public:
-		static MicroAppProtocol& getInstance() {
-			static MicroAppProtocol instance;
+		static MicroappProtocol& getInstance() {
+			static MicroappProtocol instance;
 			return instance;
 		}
 

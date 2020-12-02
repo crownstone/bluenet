@@ -8,17 +8,17 @@
 #define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
 
 /**
- * The class MicroAppStorage has functionality to store a second app (and perhaps in the future even more apps) on another
+ * The class MicroappStorage has functionality to store a second app (and perhaps in the future even more apps) on another
  * part of the flash memory.
  */
-class MicroAppStorage { //: public EventListener {
+class MicroappStorage { //: public EventListener {
 	private:
 		/**
 		 * Singleton, constructor, also copy constructor, is private.
 		 */
-		MicroAppStorage();
-		MicroAppStorage(MicroAppStorage const&);
-		void operator=(MicroAppStorage const &);
+		MicroappStorage();
+		MicroappStorage(MicroappStorage const&);
+		void operator=(MicroappStorage const &);
 
 		/**
 		 * The last message we have sent. It has a repeat value that will start at "number_of_notifications". If it
@@ -57,13 +57,13 @@ class MicroAppStorage { //: public EventListener {
 
 	protected:
 		/**
-		 * Erases all pages of the MicroAppStorage binary.
+		 * Erases all pages of the MicroappStorage binary.
 		 */
 		uint16_t erasePages();
 
 	public:
-		static MicroAppStorage& getInstance() {
-			static MicroAppStorage instance;
+		static MicroappStorage& getInstance() {
+			static MicroappStorage instance;
 			return instance;
 		}
 

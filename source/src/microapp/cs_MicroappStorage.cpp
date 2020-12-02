@@ -7,6 +7,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+
 #include "nrf_fstorage_sd.h"
 
 #include <algorithm>
@@ -17,8 +18,8 @@
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
-#include <microapp/cs_MicroAppProtocol.h>
-#include <microapp/cs_MicroAppStorage.h>
+#include <microapp/cs_MicroappProtocol.h>
+#include <microapp/cs_MicroappStorage.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
 #include <storage/cs_StateData.h>
@@ -29,7 +30,7 @@
 
 void fs_evt_handler_sched(void *data, uint16_t size) {
 	nrf_fstorage_evt_t * evt = (nrf_fstorage_evt_t*) data;
-	MicroAppStorage::getInstance().handleFileStorageEvent(evt);
+	MicroappStorage::getInstance().handleFileStorageEvent(evt);
 }
 
 static void fs_evt_handler(nrf_fstorage_evt_t * p_evt) {
@@ -37,19 +38,19 @@ static void fs_evt_handler(nrf_fstorage_evt_t * p_evt) {
 	APP_ERROR_CHECK(retVal);
 }
 
-#define MICRO_APP_PAGES      2
+#define MICROAPP_PAGES      2
 
 /**
  * Storage, 4 pages reserved. From 68000 up to 6C000.
  */
-NRF_FSTORAGE_DEF(nrf_fstorage_t micro_app_storage) =
+NRF_FSTORAGE_DEF(nrf_fstorage_t microapp_storage) =
 {
 	.evt_handler    = fs_evt_handler,
 	.start_addr     = 0x68000,
-	.end_addr       = 0x68000 + (0x1000*(MICRO_APP_PAGES)) - 1,
+	.end_addr       = 0x68000 + (0x1000*(MICROAPP_PAGES)) - 1,
 };
 
-MicroAppStorage::MicroAppStorage() { //: EventListener() {
+MicroappStorage::MicroappStorage() { //: EventListener() {
 	
 //	EventDispatcher::getInstance().addListener(this);
 
@@ -62,14 +63,14 @@ MicroAppStorage::MicroAppStorage() { //: EventListener() {
 	_debug = true;
 }
 
-uint16_t MicroAppStorage::init() {
+uint16_t MicroappStorage::init() {
 	_buffer = new uint8_t[MICROAPP_CHUNK_SIZE];
 
 	uint32_t err_code;
-	err_code = nrf_fstorage_init(&micro_app_storage, &nrf_fstorage_sd, NULL);
+	err_code = nrf_fstorage_init(&microapp_storage, &nrf_fstorage_sd, NULL);
 	switch(err_code) {
 	case NRF_SUCCESS:
-		LOGi("Sucessfully initialized from 0x%08X to 0x%08X", micro_app_storage.start_addr, micro_app_storage.end_addr);
+		LOGi("Sucessfully initialized from 0x%08X to 0x%08X", microapp_storage.start_addr, microapp_storage.end_addr);
 		break;
 	default:
 		LOGw("Error code %i", err_code);
@@ -79,15 +80,15 @@ uint16_t MicroAppStorage::init() {
 	return err_code;
 }
 
-uint16_t MicroAppStorage::erasePages() {
+uint16_t MicroappStorage::erasePages() {
 	uint32_t err_code;
-	err_code = nrf_fstorage_erase(&micro_app_storage, micro_app_storage.start_addr, MICRO_APP_PAGES, NULL);
+	err_code = nrf_fstorage_erase(&microapp_storage, microapp_storage.start_addr, MICROAPP_PAGES, NULL);
 	return err_code;
 }
 
-uint16_t MicroAppStorage::checkAppSize(uint16_t size) {
-	uint32_t start = micro_app_storage.start_addr;
-	if ((start + size) > micro_app_storage.end_addr) {
+uint16_t MicroappStorage::checkAppSize(uint16_t size) {
+	uint32_t start = microapp_storage.start_addr;
+	if ((start + size) > microapp_storage.end_addr) {
 		LOGw("Microapp binary too large. Application can not be written");
 		return ERR_NO_SPACE;
 	}
@@ -100,21 +101,21 @@ uint16_t MicroAppStorage::checkAppSize(uint16_t size) {
  * early in the process. We also assume that all data buffers are of size MICROAPP_CHUNK_SIZE. The last one should be
  * appended with 0xFF values to make it the right size.
  */
-uint16_t MicroAppStorage::writeChunk(uint8_t index, const uint8_t *data, uint16_t size) {
+uint16_t MicroappStorage::writeChunk(uint8_t index, const uint8_t *data, uint16_t size) {
 	uint32_t err_code;
-	uint32_t start = micro_app_storage.start_addr + (MICROAPP_CHUNK_SIZE * index);
+	uint32_t start = microapp_storage.start_addr + (MICROAPP_CHUNK_SIZE * index);
 	LOGi("Write chunk: %i at 0x%08X of size %i", index, start, size);
 	LOGi("Start with data [%02X,%02X,%02X]", data[0], data[1], data[2]);
 
 	// check chunk size
-	if ((start + size) > micro_app_storage.end_addr) {
+	if ((start + size) > microapp_storage.end_addr) {
 		LOGw("Microapp binary too large. Chunk not written");
 		return ERR_NO_SPACE;
 	}
 	// Make a copy of the data object
 	memcpy(_buffer, data, size);
 
-	err_code = nrf_fstorage_write(&micro_app_storage, start, _buffer, size, NULL);
+	err_code = nrf_fstorage_write(&microapp_storage, start, _buffer, size, NULL);
 	switch(err_code) {
 	case NRF_ERROR_NULL:
 		LOGw("Error code %i, NRF_ERROR_NULL", err_code);
@@ -128,7 +129,7 @@ uint16_t MicroAppStorage::writeChunk(uint8_t index, const uint8_t *data, uint16_
 		break;
 	case NRF_ERROR_INVALID_ADDR:
 		LOGw("Error code %i, NRF_ERROR_INVALID_ADDR", err_code);
-		LOGw("  at 0x%08X (start at 0x%08X)", start, micro_app_storage.start_addr);
+		LOGw("  at 0x%08X (start at 0x%08X)", start, microapp_storage.start_addr);
 		LOGw("  is 0x%08X word-aligned as well?", data);
 		break;
 	case NRF_ERROR_NO_MEM:
@@ -144,10 +145,10 @@ uint16_t MicroAppStorage::writeChunk(uint8_t index, const uint8_t *data, uint16_
 /**
  * For now only allow one app.
  */
-void MicroAppStorage::storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t size) {
-	LOGi("Store app %i, checksum %i, size %i, start address %x", id, checksum, size, micro_app_storage.start_addr);
+void MicroappStorage::storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t size) {
+	LOGi("Store app %i, checksum %i, size %i, start address %x", id, checksum, size, microapp_storage.start_addr);
 	TYPIFY(STATE_MICROAPP) state_microapp;
-	state_microapp.start_addr = micro_app_storage.start_addr;
+	state_microapp.start_addr = microapp_storage.start_addr;
 	state_microapp.size = size;
 	state_microapp.checksum = checksum;
 	state_microapp.id = id;
@@ -164,7 +165,7 @@ void MicroAppStorage::storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t s
 /**
  * Validate a chunk of data given a checksum to compare with.
  */
-uint16_t MicroAppStorage::validateChunk(const uint8_t * const data, uint16_t size, uint16_t compare) {
+uint16_t MicroappStorage::validateChunk(const uint8_t * const data, uint16_t size, uint16_t compare) {
 	uint32_t checksum = 0;
 	checksum = Fletcher(data, size, checksum);
 	LOGi("Chunk checksum %04X (versus %04X)", (uint16_t)checksum, compare);
@@ -182,7 +183,7 @@ uint16_t MicroAppStorage::validateChunk(const uint8_t * const data, uint16_t siz
  * The checksum is calculated iteratively, by using the chunk size. For the last chunk we will only use the part 
  * up to the total size of the binary. By doing it iteratively we can keep the local buffer relatively small.
  */
-uint16_t MicroAppStorage::validateApp() {
+uint16_t MicroappStorage::validateApp() {
 	TYPIFY(STATE_MICROAPP) state_microapp;
 	cs_state_id_t id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, id, (uint8_t*)&state_microapp, sizeof(state_microapp));
@@ -194,26 +195,26 @@ uint16_t MicroAppStorage::validateApp() {
 	uint8_t count = state_microapp.size / MICROAPP_CHUNK_SIZE;
 	uint16_t remain = state_microapp.size - (count * MICROAPP_CHUNK_SIZE);
 	uint32_t checksum_iterative = 0;
-	uint32_t addr = micro_app_storage.start_addr;
+	uint32_t addr = microapp_storage.start_addr;
 	for (int i = 0; i < count; ++i) {
-		nrf_fstorage_read(&micro_app_storage, addr, &buf, MICROAPP_CHUNK_SIZE);
+		nrf_fstorage_read(&microapp_storage, addr, &buf, MICROAPP_CHUNK_SIZE);
 		checksum_iterative = Fletcher(buf, MICROAPP_CHUNK_SIZE, checksum_iterative);
 		addr += MICROAPP_CHUNK_SIZE;
 	}
 	// last chunk of alternative size
 	if (remain) {
-		nrf_fstorage_read(&micro_app_storage, addr, &buf, remain);
+		nrf_fstorage_read(&microapp_storage, addr, &buf, remain);
 		checksum_iterative = Fletcher(buf, remain, checksum_iterative);
 	}
 	uint16_t checksum = (uint16_t)checksum_iterative;
 	// compare checksum
 	if (state_microapp.checksum != checksum) {
-		LOGw("Micro app %i has checksum 0x%04X, but calculation shows 0x%04X", state_microapp.id,
+		LOGw("Microapp %i has checksum 0x%04X, but calculation shows 0x%04X", state_microapp.id,
 				state_microapp.checksum, checksum);
 		return ERR_INVALID_MESSAGE;
 	}
 	
-	LOGi("Yes, micro app %i has proper checksum", state_microapp.id);
+	LOGi("Yes, microapp %i has proper checksum", state_microapp.id);
 	return ERR_SUCCESS;
 }
 
@@ -221,7 +222,7 @@ uint16_t MicroAppStorage::validateApp() {
  * Set the app to be "valid". This is normally done after the checksum has been checked and considered correct.
  * This information is written to flash.
  */
-void MicroAppStorage::setAppValid() {
+void MicroappStorage::setAppValid() {
 	TYPIFY(STATE_MICROAPP) state_microapp;
 	cs_state_id_t app_id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
@@ -235,7 +236,7 @@ void MicroAppStorage::setAppValid() {
 /**
  * Get if the app is actually valid. If not available from memory it will be obtained from flash.
  */
-bool MicroAppStorage::isAppValid() {
+bool MicroappStorage::isAppValid() {
 	TYPIFY(STATE_MICROAPP) state_microapp;
 	cs_state_id_t app_id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
@@ -247,7 +248,7 @@ bool MicroAppStorage::isAppValid() {
  * After an app has been considered "valid" it is possible to enable it. It is also possible to disable an app
  * afterwards (without invalidating it). The app can be enabled later on again.
  */
-uint16_t MicroAppStorage::enableApp(bool flag) {
+uint16_t MicroappStorage::enableApp(bool flag) {
 	TYPIFY(STATE_MICROAPP) state_microapp;
 	cs_state_id_t app_id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
@@ -272,7 +273,7 @@ uint16_t MicroAppStorage::enableApp(bool flag) {
 /**
  * Check if an app is enabled.
  */
-bool MicroAppStorage::isEnabled() {
+bool MicroappStorage::isEnabled() {
 	TYPIFY(STATE_MICROAPP) state_microapp;
 	cs_state_id_t app_id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
@@ -284,7 +285,7 @@ bool MicroAppStorage::isEnabled() {
  * Return result of fstorage operation to sender. We only send this event after fstorage returns to pace the 
  * incoming messages. In this way it is also possible to resend a particular chunk.
  */
-void MicroAppStorage::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
+void MicroappStorage::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
 	uint16_t error;
 	if (evt->result != NRF_SUCCESS) {
 		LOGe("Flash error");
