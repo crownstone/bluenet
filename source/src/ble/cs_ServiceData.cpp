@@ -204,7 +204,12 @@ bool ServiceData::fillServiceData(uint32_t timestamp) {
 			fillWithError(timestamp);
 			return true;
 		}
-		else {
+
+		// Interleave microapp data with state of other crownstones.
+		if (_updateCount % 4 == 0) {
+			serviceDataSet = fillWithMicroapp(timestamp);
+		}
+		if (!serviceDataSet) {
 			serviceDataSet = fillWithExternalState();
 		}
 	}
@@ -343,7 +348,7 @@ void ServiceData::fillWithHubState(uint32_t timestamp) {
 }
 
 bool ServiceData::fillWithMicroapp(uint32_t timestamp) {
-	if (!_hasMicroappServiceData) {
+	if (!_microappServiceDataSet) {
 		return false;
 	}
 	_serviceData.params.type = SERVICE_DATA_TYPE_MICROAPP;
@@ -472,7 +477,26 @@ void ServiceData::handleEvent(event_t & event) {
 			}
 			break;
 		}
-		// TODO: add bitmask events
+		case CS_TYPE::CMD_MICROAPP_ADVERTISE: {
+			TYPIFY(CMD_MICROAPP_ADVERTISE)* advertise = reinterpret_cast<TYPIFY(CMD_MICROAPP_ADVERTISE)*>(event.data);
+			if (advertise->type != 0) {
+				break;
+			}
+			if (advertise->data.len == 0) {
+				break;
+			}
+			_microappServiceData.version = advertise->version;
+			_microappServiceData.appUuid = advertise->appUuid;
+
+			memset(_microappServiceData.data, 0, sizeof(_microappServiceData.data));
+			cs_buffer_size_t dataSize = std::min(advertise->data.len, static_cast<uint16_t>(sizeof(_microappServiceData.data)));
+			memcpy(_microappServiceData.data, advertise->data.data, dataSize);
+//			cs_buffer_size_t padSize = sizeof(_microappServiceData.data) - dataSize;
+//			memset(_microappServiceData.data + dataSize, 0, padSize);
+
+			_microappServiceDataSet = true;
+			break;
+		}
 		default:
 			return;
 	}

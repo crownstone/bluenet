@@ -152,7 +152,7 @@ private:
 	/**
 	 * Whether the microapp wants to advertise service data.
 	 */
-	bool _hasMicroappServiceData = false;
+	bool _microappServiceDataSet = false;
 
 	/**
 	 * Microapp data to be advertised in crownstone service data.

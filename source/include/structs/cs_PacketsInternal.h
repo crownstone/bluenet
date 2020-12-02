@@ -316,6 +316,7 @@ struct hub_data_reply_t {
 };
 
 struct microapp_advertise_request_t {
+	uint8_t type; // 0 for encrypted service data.
 	uint8_t version;
 	uint16_t appUuid;
 	cs_data_t data;
