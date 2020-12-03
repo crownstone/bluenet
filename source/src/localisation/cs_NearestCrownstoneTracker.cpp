@@ -6,6 +6,7 @@
  */
 
 #include <localisation/cs_NearestCrownstoneTracker.h>
+#include <localisation/cs_TrackableEvent.h>
 
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
@@ -53,8 +54,13 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 		onReceive(parsed_adv);
 		return;
 	}
+	if (evt.type == CS_TYPE::EVT_DEVICE_SCANNED) {
+		scanned_device_t* scanned_device = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
+		onReceive(*scanned_device);
+		return;
+	}
 
-	if(evt.type == CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT) {
+	if (evt.type == CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT) {
 		LOGNearestCrownstoneTrackerVerbose("NearestCrownstone received event: EVT_MESH_NEAREST_WITNESS_REPORT");
 		MeshMsgEvent* mesh_msg_event = UNTYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT, evt.data);
 		NearestWitnessReport report = createReport(mesh_msg_event);
@@ -62,10 +68,10 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 		return;
 	}
 
-	if(evt.type == CS_TYPE::EVT_DEVICE_SCANNED) {
-		scanned_device_t* scanned_device = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
-		onReceive(*scanned_device);
-		return;
+
+	if (evt.type == CS_TYPE::EVT_TRACKABLE) {
+		TrackableEvent* trackevt = UNTYPIFY(EVT_TRACKABLE, evt.data);
+		trackevt->id.print("Nearest crowntstone received trackable event!");
 	}
 }
 

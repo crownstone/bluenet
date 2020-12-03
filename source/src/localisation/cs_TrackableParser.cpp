@@ -13,6 +13,7 @@
 
 #include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <localisation/cs_TrackableParser.h>
+#include <localisation/cs_TrackableEvent.h>
 
 void TrackableParser::handleEvent(event_t& evt) {
 	if (evt.type != CS_TYPE::EVT_DEVICE_SCANNED) {
@@ -25,44 +26,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 	}
 }
 
-bool TrackableParser::handleAsTileDevice(scanned_device_t* scanned_device) {
-	if (!isTileDevice(scanned_device)) {
-		return false;
-	}
-
-	TrackableId tile(scanned_device->address);
-	tile.print("found tile device!");
-
-	if(isMyTrackable(scanned_device)) {
-		LOGd("its my trackable, lets check the adv data");
-		logServiceData(scanned_device);
-	}
-
-	return true;
-}
-
-void TrackableParser::logServiceData(scanned_device_t* scanned_device) {
-	uint32_t errCode;
-	cs_data_t service_data;
-	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_SERVICE_DATA,
-			scanned_device->data,
-			scanned_device->dataSize,
-			&service_data);
-
-	if (errCode != ERR_SUCCESS) {
-		return;
-	}
-
-	// format string
-	char buff_start[50] = {0}; // should be len(servicedata) * len(repr) ~= 3*12 = 36.
-	char* buff = buff_start;
-	for (auto i = 0u; i < service_data.len; i++) {
-		buff += sprintf(buff, "%2x,", service_data.data[i]);
-	}
-
-	// and log the formatted string
-	LOGd("my tile servicedata(%d): [%s]", service_data.len, buff_start);
-}
+// ====================== Mac Filter =====================
 
 bool TrackableParser::isMyTrackable(scanned_device_t* scanned_device) {
 	// Note: mac address here as read in nrf connect app, hence the std::reverse call.
@@ -75,6 +39,8 @@ bool TrackableParser::isMyTrackable(scanned_device_t* scanned_device) {
 
 	return mac == myTrackable;
 }
+
+// ======================== Tile ========================
 
 bool TrackableParser::isTileDevice(scanned_device_t* scanned_device) {
 	uint32_t errCode;
@@ -107,3 +73,51 @@ bool TrackableParser::isTileDevice(scanned_device_t* scanned_device) {
 
 	return false;
 }
+
+bool TrackableParser::handleAsTileDevice(scanned_device_t* scanned_device) {
+	if (!isTileDevice(scanned_device)) {
+		return false;
+	}
+
+	TrackableId tile(scanned_device->address);
+	tile.print("found tile device!");
+
+	if(!isMyTrackable(scanned_device)) {
+		// it was a Tile device, so return true.
+		return true;
+	}
+
+	logServiceData(scanned_device);
+
+	TrackableEvent trackevt;
+	trackevt.rssi = scanned_device->rssi;
+	trackevt.dispatch();
+
+	return true;
+}
+
+// ======================== Utils ========================
+
+void TrackableParser::logServiceData(scanned_device_t* scanned_device) {
+	uint32_t errCode;
+	cs_data_t service_data;
+	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_SERVICE_DATA,
+			scanned_device->data,
+			scanned_device->dataSize,
+			&service_data);
+
+	if (errCode != ERR_SUCCESS) {
+		return;
+	}
+
+	// format string
+	char buff_start[50] = {0}; // should be len(servicedata) * len(repr) ~= 3*12 = 36.
+	char* buff = buff_start;
+	for (auto i = 0u; i < service_data.len; i++) {
+		buff += sprintf(buff, "%2x,", service_data.data[i]);
+	}
+
+	// and log the formatted string
+	LOGd("my tile servicedata(%d): [%s]", service_data.len, buff_start);
+}
+

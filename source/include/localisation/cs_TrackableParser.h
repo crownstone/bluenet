@@ -11,7 +11,8 @@
 
 
 /**
- * Transforms EVT_DEVICE_SCANNED into EVT_TRACKING_UPDATE events.
+ * Transforms EVT_DEVICE_SCANNED and EVT_ADV_BACKGROUND_PARSED
+ * into EVT_TRACKING_UPDATE events.
  *
  * Responsible for throttling input to the localisation module, which
  * may take up more computation resources.

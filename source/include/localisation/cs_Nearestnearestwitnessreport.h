@@ -6,51 +6,7 @@
  */
 
 #pragma once
-
-#include <protocol/mesh/cs_MeshModelPackets.h>
-
-#include <cstdint> // for uint8_t
-#include <cstring> // for memcmp, memcpy
-
-/**
- * Mesh representation of a trackable device.
- *
- * Shortcut for MVP implementation: just copy 6 byte mac.
- *
- * Better alternative:
- * - register tracked devices in a whitelist of some sorts? (And they do rotations.. yay)
- */
-struct __attribute__((__packed__)) TrackableId {
-	static constexpr uint8_t SIZE = 6;
-	uint8_t bytes[SIZE] = {0};
-
-	TrackableId() = default;
-
-	TrackableId(const uint8_t * const mac){
-		std::memcpy(bytes, mac, SIZE);
-	}
-
-	bool operator==(const TrackableId& other) const {
-		return std::memcmp(bytes,other.bytes,SIZE) == 0;
-	}
-
-	/**
-	 * Enables to use uuids as keys for maps/sets etc.
-	 */
-	bool operator<(const TrackableId& other) const {
-		return std::memcmp(bytes,other.bytes,SIZE) < 0;
-	}
-
-	void print(const char* s){
-		LOGd("%s: %2x %2x %2x %2x %2x %2x", s,
-				bytes[0],
-				bytes[1],
-				bytes[2],
-				bytes[3],
-				bytes[4],
-				bytes[5]);
-	}
-};
+#include <localisation/cs_TrackableId.h>
 
 /**
  *
