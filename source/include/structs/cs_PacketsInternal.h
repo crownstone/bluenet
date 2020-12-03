@@ -31,11 +31,11 @@
  * Variable length data encapsulation in terms of length and pointer to data.
  */
 struct cs_data_t {
-	buffer_ptr_t data = NULL;      /** < Pointer to data. */
+	buffer_ptr_t data = nullptr;      /** < Pointer to data. */
 	cs_buffer_size_t len = 0;      /** < Length of data. */
 
 	cs_data_t():
-		data(NULL),
+		data(nullptr),
 		len(0)
 	{}
 	cs_data_t(buffer_ptr_t buf, cs_buffer_size_t size):
@@ -308,6 +308,18 @@ struct adc_buffer_t {
 	 * Pointer to the samples.
 	 */
 	adc_sample_value_t* samples = nullptr;
+};
+
+struct hub_data_reply_t {
+	cs_ret_code_t retCode;
+	cs_data_t data;
+};
+
+struct microapp_advertise_request_t {
+	uint8_t type; // 0 for encrypted service data.
+	uint8_t version;
+	uint16_t appUuid;
+	cs_data_t data;
 };
 
 

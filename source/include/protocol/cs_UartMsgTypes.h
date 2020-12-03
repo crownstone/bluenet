@@ -64,14 +64,16 @@ struct __attribute__((__packed__)) uart_msg_session_nonce_reply_t {
 	uint8_t sessionNonce[SESSION_NONCE_LENGTH];
 };
 
+struct __attribute__((__packed__)) uart_msg_hub_data_reply_header_t {
+	cs_ret_code_t retCode;
+	// Followed by data
+};
 
 
 struct __attribute__((__packed__)) uart_msg_mesh_result_packet_header_t {
 	stone_id_t stoneId;
 	result_packet_header_t resultHeader;
 };
-
-
 
 struct __attribute__((__packed__)) uart_msg_log_header_t {
 	uint32_t fileNameHash;

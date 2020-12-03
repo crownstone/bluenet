@@ -20,8 +20,8 @@
 
 #define LOGAdcDebug LOGd
 #define LOGAdcVerbose LOGnone
-#define LOGAdcInterruptWarn LOGw
-#define LOGAdcInterruptInfo LOGi
+#define LOGAdcInterruptWarn LOGnone
+#define LOGAdcInterruptInfo LOGnone
 #define LOGAdcInterruptDebug LOGnone
 #define LOGAdcInterruptVerbose LOGnone
 #define ADC_LOG_QUEUES false

@@ -171,6 +171,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_PRESENCE_CHANGE:
+	case CS_TYPE::CMD_GET_PRESENCE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
@@ -186,6 +187,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_MESH_RSSI_PING:
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
+	case CS_TYPE::EVT_RECV_MESH_MSG:
 	case CS_TYPE::CMD_GET_ADC_RESTARTS:
 	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
 	case CS_TYPE::CMD_GET_POWER_SAMPLES:
@@ -198,6 +200,8 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP:
 	case CS_TYPE::EVT_MICROAPP:
+	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
+	case CS_TYPE::EVT_HUB_DATA_REPLY:
 		return csType;
 	}
 	return CS_TYPE::CONFIG_DO_NOT_USE;
@@ -534,6 +538,8 @@ size16_t TypeSize(CS_TYPE const & type){
 		return sizeof(TYPIFY(EVT_PRESENCE_MUTATION));
 	case CS_TYPE::EVT_PRESENCE_CHANGE:
 		return sizeof(TYPIFY(EVT_PRESENCE_CHANGE));
+	case CS_TYPE::CMD_GET_PRESENCE:
+		return 0;
 	case CS_TYPE::CMD_SET_RELAY:
 		return sizeof(TYPIFY(CMD_SET_RELAY));
 	case CS_TYPE::CMD_SET_DIMMER:
@@ -564,6 +570,8 @@ size16_t TypeSize(CS_TYPE const & type){
 		return sizeof(TYPIFY(EVT_MESH_RSSI_PING));
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
 		return sizeof(TYPIFY(EVT_MESH_TIME_SYNC));
+	case CS_TYPE::EVT_RECV_MESH_MSG:
+		return sizeof(TYPIFY(EVT_RECV_MESH_MSG));
 	case CS_TYPE::CMD_GET_ADC_RESTARTS:
 		return 0;
 	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
@@ -588,6 +596,10 @@ size16_t TypeSize(CS_TYPE const & type){
 		return sizeof(TYPIFY(CMD_MICROAPP));
 	case CS_TYPE::EVT_MICROAPP:
 		return sizeof(TYPIFY(EVT_MICROAPP));
+	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
+		return sizeof(TYPIFY(CMD_MICROAPP_ADVERTISE));
+	case CS_TYPE::EVT_HUB_DATA_REPLY:
+		return sizeof(TYPIFY(EVT_HUB_DATA_REPLY));
 	} // end switch
 
 	// should never happen
@@ -755,7 +767,8 @@ const char* typeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_UPDATE_TRACKED_DEVICE: return "CMD_UPDATE_TRACKED_DEVICE";
 	case CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT: return "CMD_TRACKED_DEVICE_HEARTBEAT";
 	case CS_TYPE::EVT_PRESENCE_MUTATION: return "EVT_PRESENCE_MUTATION";
-	case CS_TYPE::EVT_PRESENCE_CHANGE: return "EVT_PROFILE_LOCATION_UPDATE";
+	case CS_TYPE::EVT_PRESENCE_CHANGE: return "EVT_PRESENCE_CHANGE";
+	case CS_TYPE::CMD_GET_PRESENCE: return "CMD_GET_PRESENCE";
 	case CS_TYPE::CMD_SET_RELAY: return "CMD_SET_RELAY";
 	case CS_TYPE::CMD_SET_DIMMER: return "CMD_SET_DIMMER";
 	case CS_TYPE::EVT_GOING_TO_DFU: return "EVT_GOING_TO_DFU";
@@ -771,6 +784,7 @@ const char* typeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP: return "CMD_SEND_MESH_MSG_NOOP";
 	case CS_TYPE::EVT_MESH_RSSI_PING: return "EVT_MESH_RSSI_PING";
 	case CS_TYPE::EVT_MESH_TIME_SYNC: return "EVT_MESH_TIME_SYNC";
+	case CS_TYPE::EVT_RECV_MESH_MSG: return "EVT_RECV_MESH_MSG";
 	case CS_TYPE::CMD_GET_ADC_RESTARTS: return "CMD_GET_ADC_RESTARTS";
 	case CS_TYPE::CMD_GET_SWITCH_HISTORY: return "CMD_GET_SWITCH_HISTORY";
 	case CS_TYPE::CMD_GET_POWER_SAMPLES: return "CMD_GET_POWER_SAMPLES";
@@ -783,6 +797,8 @@ const char* typeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_TEST_SET_TIME: return "CMD_TEST_SET_TIME";
 	case CS_TYPE::CMD_MICROAPP: return "CMD_MICROAPP";
 	case CS_TYPE::EVT_MICROAPP: return "EVT_MICROAPP";
+	case CS_TYPE::CMD_MICROAPP_ADVERTISE: return "CMD_MICROAPP_ADVERTISE";
+	case CS_TYPE::EVT_HUB_DATA_REPLY: return "EVT_HUB_DATA_REPLY";
 	}
 	return "Unknown";
 }
@@ -941,6 +957,7 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_PRESENCE_CHANGE:
+	case CS_TYPE::CMD_GET_PRESENCE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
@@ -956,6 +973,7 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_MESH_RSSI_PING:
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
+	case CS_TYPE::EVT_RECV_MESH_MSG:
 	case CS_TYPE::CMD_GET_ADC_RESTARTS:
 	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
 	case CS_TYPE::CMD_GET_POWER_SAMPLES:
@@ -968,6 +986,8 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP:
 	case CS_TYPE::EVT_MICROAPP:
+	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
+	case CS_TYPE::EVT_HUB_DATA_REPLY:
 		return false;
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
 	case CS_TYPE::STATE_TWILIGHT_RULE:
@@ -1147,6 +1167,7 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_PRESENCE_CHANGE:
+	case CS_TYPE::CMD_GET_PRESENCE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
@@ -1162,6 +1183,7 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_MESH_RSSI_PING:
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
+	case CS_TYPE::EVT_RECV_MESH_MSG:
 	case CS_TYPE::CMD_GET_ADC_RESTARTS:
 	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
 	case CS_TYPE::CMD_GET_POWER_SAMPLES:
@@ -1174,6 +1196,8 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP:
 	case CS_TYPE::EVT_MICROAPP:
+	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
+	case CS_TYPE::EVT_HUB_DATA_REPLY:
 		return true;
 	}
 	// should not reach this
@@ -1343,6 +1367,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_PRESENCE_CHANGE:
+	case CS_TYPE::CMD_GET_PRESENCE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
@@ -1358,6 +1383,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_MESH_RSSI_PING:
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
+	case CS_TYPE::EVT_RECV_MESH_MSG:
 	case CS_TYPE::CMD_GET_ADC_RESTARTS:
 	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
 	case CS_TYPE::CMD_GET_POWER_SAMPLES:
@@ -1370,6 +1396,8 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP:
 	case CS_TYPE::EVT_MICROAPP:
+	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
+	case CS_TYPE::EVT_HUB_DATA_REPLY:
 		return NO_ONE;
 	}
 	return NO_ONE;
@@ -1539,6 +1567,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_PRESENCE_CHANGE:
+	case CS_TYPE::CMD_GET_PRESENCE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
@@ -1554,6 +1583,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_MESH_RSSI_PING:
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
+	case CS_TYPE::EVT_RECV_MESH_MSG:
 	case CS_TYPE::CMD_GET_ADC_RESTARTS:
 	case CS_TYPE::CMD_GET_SWITCH_HISTORY:
 	case CS_TYPE::CMD_GET_POWER_SAMPLES:
@@ -1566,6 +1596,8 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP:
 	case CS_TYPE::EVT_MICROAPP:
+	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
+	case CS_TYPE::EVT_HUB_DATA_REPLY:
 		return NO_ONE;
 	}
 	return NO_ONE;

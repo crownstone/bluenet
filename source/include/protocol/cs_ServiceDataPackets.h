@@ -8,65 +8,13 @@
 #pragma once
 
 #include <cstdint>
-#include "protocol/cs_Typedefs.h"
+#include <protocol/cs_Typedefs.h>
 
 #define SERVICE_DATA_VALIDATION 0xFA
 
-enum ServiceDataFlagBits {
-	SERVICE_DATA_FLAGS_DIMMING_AVAILABLE       = 0,
-	SERVICE_DATA_FLAGS_MARKED_DIMMABLE         = 1,
-	SERVICE_DATA_FLAGS_ERROR                   = 2,
-	SERVICE_DATA_FLAGS_SWITCH_LOCKED           = 3,
-	SERVICE_DATA_FLAGS_TIME_SET                = 4,
-	SERVICE_DATA_FLAGS_SWITCHCRAFT_ENABLED     = 5,
-	SERVICE_DATA_FLAGS_TAP_TO_TOGGLE_ENABLED   = 6,
-	SERVICE_DATA_FLAGS_BEHAVIOUR_OVERRIDDEN    = 7
-};
-
-enum ServiceDataExtraFlagBits {
-	SERVICE_DATA_EXTRA_FLAGS_BEHAVIOUR_ENABLED = 0,
-};
-
-enum ServiceDataUnencryptedType {
-	SERVICE_DATA_TYPE_ENCRYPTED = 7,
-	SERVICE_DATA_TYPE_SETUP = 6,
-};
-
-enum ServiceDataEncryptedType {
-	SERVICE_DATA_TYPE_STATE = 0,
-	SERVICE_DATA_TYPE_ERROR = 1,
-	SERVICE_DATA_TYPE_EXT_STATE = 2,
-	SERVICE_DATA_TYPE_EXT_ERROR = 3,
-	SERVICE_DATA_TYPE_ALTERNATIVE_STATE = 4,
-	SERVICE_DATA_TYPE_HUB_STATE = 5,
-};
-
-struct __attribute__((packed)) service_data_encrypted_state_t {
-	uint8_t  id;
-	uint8_t  switchState;
-	uint8_t  flags;
-	int8_t   temperature;
-	int8_t   powerFactor;
-	int16_t  powerUsageReal;
-	int32_t  energyUsed;
-	uint16_t partialTimestamp;
-	uint8_t  extraFlags;
-	uint8_t  validation;
-};
-
-struct __attribute__((packed)) service_data_encrypted_alternative_state_t {
-	uint8_t  id;
-	uint8_t  switchState;
-	uint8_t  flags;
-	uint16_t behaviourMasterHash;
-	uint8_t  reserved[6];
-	uint16_t partialTimestamp;
-	uint8_t  reserved2;
-	uint8_t  validation;
-};
 
 
-union __attribute__((packed)) service_data_encrypted_hub_state_flags_t {
+union __attribute__((packed)) service_data_hub_state_flags_t {
 	struct __attribute__((packed)) {
 		bool uartAlive : 1;                      // Whether the UART connection is alive (heartbeats are received).
 		bool uartAliveEncrypted : 1;             // Whether the UART connection is alive (encrypted heartbeats are received).
@@ -81,68 +29,153 @@ union __attribute__((packed)) service_data_encrypted_hub_state_flags_t {
 
 #define SERVICE_DATA_HUB_DATA_SIZE 9
 
-struct __attribute__((packed)) service_data_encrypted_hub_state_t {
+struct __attribute__((packed)) service_data_hub_state_t {
 	uint8_t  id;
-	service_data_encrypted_hub_state_flags_t flags;
+	service_data_hub_state_flags_t flags;
 	uint8_t  hubData[SERVICE_DATA_HUB_DATA_SIZE];
 	uint16_t partialTimestamp;
 	uint8_t  reserved; // Only required if we want to send hub state over mesh.
 	uint8_t  validation;
 };
 
-struct __attribute__((packed)) service_data_encrypted_error_t {
-	uint8_t  id;
-	uint32_t errors;
-	uint32_t timestamp;
-	uint8_t  flags;
-	int8_t   temperature;
-	uint16_t partialTimestamp;
-	int16_t  powerUsageReal;
+
+
+union __attribute__((packed)) service_data_state_flags_t {
+	struct __attribute__((packed)) {
+		bool dimmingReady : 1;         // Whether the dimmer is ready to be used.
+		bool markedDimmable : 1;       // Whether dimming is configured to be allowed
+		bool error : 1;                // Whether the Crownstone has an error.
+		bool switchLocked : 1;         // Whether the switch is locked.
+		bool timeSet : 1;              // Whether the time is set.
+		bool switchcraft : 1;          // Whether switchcraft is enabled.
+		bool tapToToggle : 1;          // Whether tap to toggle is enabled.
+		bool behaviourOverridden : 1;  // Whether behaviour is overridden.
+	} flags;
+	uint8_t asInt;
 };
 
-struct __attribute__((packed)) service_data_encrypted_ext_state_t {
-	uint8_t  id;
+union __attribute__((packed)) service_data_state_extra_flags_t {
+	struct __attribute__((packed)) {
+		bool behaviourEnabled : 1;     // Whether behaviour is enabled.
+	} flags;
+	uint8_t asInt;
+};
+
+/**
+ * State of this crownstone.
+ */
+struct __attribute__((packed)) service_data_encrypted_state_t {
+	uint8_t  id;                  // ID of this stone.
 	uint8_t  switchState;
-	uint8_t  flags;
+	service_data_state_flags_t flags;
 	int8_t   temperature;
 	int8_t   powerFactor;
 	int16_t  powerUsageReal;
 	int32_t  energyUsed;
-	uint16_t partialTimestamp;
-	int8_t   rssi;
-	uint8_t  validation;
+	uint16_t partialTimestamp;    // Current timestamp.
+	service_data_state_extra_flags_t extraFlags;
+	uint8_t  validation;          // Used to check if decryption is successful. Value is always SERVICE_DATA_VALIDATION.
 };
 
-struct __attribute__((packed)) service_data_encrypted_ext_error_t {
-	uint8_t  id;
+/**
+ * In case the crownstone has errors, this will be advertised next to the state.
+ */
+struct __attribute__((packed)) service_data_encrypted_error_t {
+	uint8_t  id;                  // ID of this stone.
 	uint32_t errors;
-	uint32_t timestamp;
-	uint8_t  flags;
+	uint32_t timestamp;           // Timestamp of first error.
+	service_data_state_flags_t flags;
 	int8_t   temperature;
-	uint16_t partialTimestamp;
-	int8_t   rssi;
-	uint8_t  validation;
+	uint16_t partialTimestamp;    // Current timestamp.
+	int16_t  powerUsageReal;
 };
 
+/**
+ * State of another crownstone.
+ */
+struct __attribute__((packed)) service_data_encrypted_ext_state_t {
+	uint8_t  id;                  // ID of another stone of which this is the state.
+	uint8_t  switchState;
+	service_data_state_flags_t flags;
+	int8_t   temperature;
+	int8_t   powerFactor;
+	int16_t  powerUsageReal;
+	int32_t  energyUsed;
+	uint16_t partialTimestamp;    // Timestamp of when the other stone was in this state.
+	int8_t   rssi;                // RSSI between this stone and the other stone.
+	uint8_t  validation;          // Used to check if decryption is successful. Value is always SERVICE_DATA_VALIDATION.
+};
+
+/**
+ * Errors of another crownstone.
+ */
+struct __attribute__((packed)) service_data_encrypted_ext_error_t {
+	uint8_t  id;                  // ID of another stone of which this is the state.
+	uint32_t errors;
+	uint32_t timestamp;           // Timestamp of first error.
+	service_data_state_flags_t flags;
+	int8_t   temperature;
+	uint16_t partialTimestamp;    // Timestamp of when the other stone was in this state.
+	int8_t   rssi;                // RSSI between this stone and the other stone.
+	uint8_t  validation;          // Used to check if decryption is successful. Value is always SERVICE_DATA_VALIDATION.
+};
+
+/**
+ * State of this crownstone.
+ *
+ * Has some other info than the usual state.
+ */
+struct __attribute__((packed)) service_data_encrypted_alternative_state_t {
+	uint8_t  id;                  // ID of this stone.
+	uint8_t  switchState;
+	service_data_state_flags_t flags;
+	uint16_t behaviourMasterHash;
+	uint8_t  reserved[6];
+	uint16_t partialTimestamp;    // Current timestamp.
+	uint8_t  reserved2;
+	uint8_t  validation;          // Used to check if decryption is successful. Value is always SERVICE_DATA_VALIDATION.
+};
+
+
+
+
+enum ServiceDataDataType {
+	SERVICE_DATA_DATA_TYPE_STATE = 0,
+	SERVICE_DATA_DATA_TYPE_ERROR = 1,
+	SERVICE_DATA_DATA_TYPE_EXT_STATE = 2,
+	SERVICE_DATA_DATA_TYPE_EXT_ERROR = 3,
+	SERVICE_DATA_DATA_TYPE_ALTERNATIVE_STATE = 4,
+	SERVICE_DATA_DATA_TYPE_HUB_STATE = 5,
+};
+
+/**
+ * This data is encrypted.
+ */
 struct __attribute__((packed)) service_data_encrypted_t {
-	uint8_t type;
+	uint8_t type;                 // ServiceDataDataType
 	union {
 		service_data_encrypted_state_t state;
 		service_data_encrypted_error_t error;
 		service_data_encrypted_ext_state_t extState;
 		service_data_encrypted_ext_error_t extError;
 		service_data_encrypted_alternative_state_t altState;
-		service_data_encrypted_hub_state_t hubState;
+		service_data_hub_state_t hubState;
 	};
 };
 
 /**
  * Function to get the stone ID from the encrypted service data.
- *
- * For now, the id is at the same place for the different types, so just return one.
  */
-constexpr stone_id_t service_data_encrypted_get_id(service_data_encrypted_t* data) {
-	return data->state.id;
+constexpr stone_id_t getStoneId(service_data_encrypted_t* data) {
+	switch (data->type) {
+		case SERVICE_DATA_DATA_TYPE_STATE: return data->state.id;
+		case SERVICE_DATA_DATA_TYPE_ERROR: return data->error.id;
+		case SERVICE_DATA_DATA_TYPE_EXT_STATE: return data->extState.id;
+		case SERVICE_DATA_DATA_TYPE_EXT_ERROR: return data->extError.id;
+		case SERVICE_DATA_DATA_TYPE_ALTERNATIVE_STATE: return data->altState.id;
+		case SERVICE_DATA_DATA_TYPE_HUB_STATE: return data->hubState.id;
+	}
+	return 0;
 }
 
 /**
@@ -153,8 +186,8 @@ constexpr stone_id_t service_data_encrypted_get_id(service_data_encrypted_t* dat
  * @param[in,out]  data      Service data that will be converted.
  * @param[in]      rssi      RSSI to the stone, or 0 if unknown / out of reach.
  */
-constexpr void service_data_encrypted_convert_state_to_ext_state(service_data_encrypted_t* data, int8_t rssi) {
-	data->type = SERVICE_DATA_TYPE_EXT_STATE;
+constexpr void convertToExternalState(service_data_encrypted_t* data, int8_t rssi) {
+	data->type = SERVICE_DATA_DATA_TYPE_EXT_STATE;
 	data->extState.rssi = rssi;
 }
 
@@ -166,15 +199,16 @@ constexpr void service_data_encrypted_convert_state_to_ext_state(service_data_en
  * @param[in,out]  data      Service data that will be converted.
  * @param[in]      rssi      RSSI to the stone, or 0 if unknown / out of reach.
  */
-constexpr void service_data_encrypted_convert_error_to_ext_error(service_data_encrypted_t* data, int8_t rssi) {
-	data->type = SERVICE_DATA_TYPE_EXT_ERROR;
+constexpr void convertToExternalError(service_data_encrypted_t* data, int8_t rssi) {
+	data->type = SERVICE_DATA_DATA_TYPE_EXT_ERROR;
 	data->extError.rssi = rssi;
 }
 
 
+
 struct __attribute__((packed)) service_data_setup_state_t {
 	uint8_t  switchState;
-	uint8_t  flags;
+	service_data_state_flags_t flags;
 	int8_t   temperature;
 	int8_t   powerFactor;
 	int16_t  powerUsageReal;
@@ -183,24 +217,56 @@ struct __attribute__((packed)) service_data_setup_state_t {
 	uint8_t  reserved[4];
 };
 
+/**
+ * Setup data.
+ *
+ * This is not encrypted.
+ */
 struct __attribute__((packed)) service_data_setup_t {
-	uint8_t type;
+	uint8_t type;                 // ServiceDataDataType
 	union {
 		service_data_setup_state_t state;
+		service_data_hub_state_t hubState;
 	};
 };
 
-//! Service data struct, this data type is what ends up in the advertisement.
+
+
+/**
+ * Microapp data that will be encrypted.
+ */
+struct __attribute__((packed)) service_data_microapp_encrypted_t {
+	uint8_t version;              // Version set by firmware.
+	uint16_t appUuid;             // Identifier picked by the microapp.
+	uint8_t data[10];             // Data filled in by the microapp.
+	uint16_t partialTimestamp;    // Required, so that the data keeps changing.
+	uint8_t validation;           // Used to check if decryption is successful. Value is always SERVICE_DATA_VALIDATION.
+};
+
+
+
+// The type of service data: this type is not encrypted.
+enum ServiceDataType {
+	SERVICE_DATA_TYPE_SETUP = 6,
+	SERVICE_DATA_TYPE_ENCRYPTED = 7,
+	SERVICE_DATA_TYPE_MICROAPP = 8,
+};
+
+/**
+ * Service data
+ *
+ * This is all the data that ends up in the service data field of the advertisement.
+ */
 union service_data_t {
 	struct __attribute__((packed)) {
-		uint8_t  protocolVersion;
-		uint8_t  deviceType;
+		uint8_t  type;            // ServiceDataType
+		uint8_t  deviceType;      // See cs_DeviceTypes.h
 		union {
 			service_data_encrypted_t encrypted;
 			service_data_setup_t setup;
+			service_data_microapp_encrypted_t microappEncrypted;
 			uint8_t encryptedArray[sizeof(service_data_encrypted_t)];
 		};
 	} params;
 	uint8_t array[sizeof(params)] = {};
 };
-

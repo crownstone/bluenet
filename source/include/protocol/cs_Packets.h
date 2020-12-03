@@ -11,7 +11,7 @@
 #include <protocol/cs_CmdSource.h>
 #include <protocol/cs_CommandTypes.h>
 #include <protocol/cs_ErrorCodes.h>
-#include <protocol/cs_MicroAppPackets.h>
+#include <protocol/cs_MicroappPackets.h>
 #include <protocol/cs_ServiceDataPackets.h>
 #include <protocol/cs_Typedefs.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
@@ -336,6 +336,7 @@ struct __attribute__((__packed__)) led_message_payload_t {
 
 struct __attribute__((__packed__)) hub_data_header_t {
 	uint8_t encrypt; // See UartProtocol::Encrypt
+	uint8_t reserved; // Reserved for future use (access level?). Must be 0 for now.
 };
 
 struct __attribute__((packed)) behaviour_debug_t {
@@ -394,6 +395,10 @@ struct __attribute((packed)) presence_change_t {
 	uint8_t type;
 	uint8_t profileId;
 	uint8_t locationId;
+};
+
+struct __attribute((packed)) presence_t {
+	uint64_t presence[8]; // Bitmask of presence per profile.
 };
 
 

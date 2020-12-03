@@ -14,7 +14,7 @@
 
 #include <type_traits>
 #include "stdint.h"
-#include "cstring"
+#include "string.h"
 
 #ifdef HOST_TARGET
 #include "stdio.h"

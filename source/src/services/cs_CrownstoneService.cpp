@@ -170,24 +170,37 @@ void CrownstoneService::addFactoryResetCharacteristic() {
 }
 
 void CrownstoneService::writeResult(uint8_t protocol, CommandHandlerTypes type, cs_result_t & result) {
+
+	// 2020-11-18 Bart: maybe we can remove this check now.
+	assert(result.dataSize == 0 || result.buf.data == _resultPacketAccessor->getPayloadBuffer(), "Wrong buffer");
+
+	writeResult(protocol, type, result.returnCode, cs_data_t(result.buf.data, result.dataSize));
+}
+
+void CrownstoneService::writeResult(uint8_t protocol, CommandHandlerTypes type, cs_ret_code_t retCode, cs_data_t data) {
 	if (_resultCharacteristic == NULL) {
 		return;
 	}
 	assert(_resultPacketAccessor != NULL, "_resultPacketAccessor is null");
-	// Payload has already been set by command handler.
-	// But the size hasn't been set yet.
-//	cs_ret_code_t retVal = _resultPacketAccessor->setPayload(result.data.data, result.data.len);
-	assert(result.dataSize == 0 || result.buf.data == _resultPacketAccessor->getPayloadBuffer(), "Wrong buffer");
-	cs_ret_code_t retVal = _resultPacketAccessor->setPayloadSize(result.dataSize);
+
+	cs_ret_code_t retVal;
+	if (data.len != 0 && data.data != _resultPacketAccessor->getPayloadBuffer()) {
+		retVal = _resultPacketAccessor->setPayload(data.data, data.len);
+	}
+	else {
+		// No need to copy data, it's already at the right buffer.
+		retVal = _resultPacketAccessor->setPayloadSize(data.len);
+	}
 	if (!SUCCESS(retVal)) {
 		LOGe("Unable to set result: %u", retVal);
-		result.returnCode = retVal;
+		retCode = retVal;
 		_resultPacketAccessor->setPayloadSize(0);
 	}
-	LOGd("Result: protocol=%u type=%u code=%u size=%u", protocol, type, result.returnCode, result.dataSize);
+
+	LOGd("Result: protocol=%u type=%u code=%u size=%u", protocol, type, retCode, data.len);
 	_resultPacketAccessor->setProtocolVersion(protocol);
 	_resultPacketAccessor->setType(type);
-	_resultPacketAccessor->setResult(result.returnCode);
+	_resultPacketAccessor->setResult(retCode);
 	_resultCharacteristic->setValueLength(_resultPacketAccessor->getSerializedSize());
 	_resultCharacteristic->updateValue();
 }
@@ -228,16 +241,18 @@ void CrownstoneService::handleEvent(event_t & event) {
 		break;
 	}
 	case CS_TYPE::EVT_MICROAPP: {
-		memcpy(_resultPacketAccessor->getPayloadBuffer(), event.data, TypeSize(event.type));
-		cs_data_t resultData(_resultPacketAccessor->getPayloadBuffer(), TypeSize(event.type));
-		cs_result_t result(resultData);
 		TYPIFY(EVT_MICROAPP) data = *((TYPIFY(EVT_MICROAPP)*)event.data);
-		result.returnCode = data.error;
-		result.dataSize = TypeSize(event.type);
 		uint8_t protocolVersion = 5; // TODO: get this from event.
-		writeResult(protocolVersion, CTRL_CMD_MICROAPP, result);
+		writeResult(protocolVersion, CTRL_CMD_MICROAPP, data.error, cs_data_t(reinterpret_cast<buffer_ptr_t>(event.data), TypeSize(event.type)));
 		break;
 	}
+	case CS_TYPE::EVT_HUB_DATA_REPLY: {
+		TYPIFY(EVT_HUB_DATA_REPLY)* reply = reinterpret_cast<TYPIFY(EVT_HUB_DATA_REPLY)*>(event.data);
+		writeResult(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_HUB_DATA, reply->retCode, reply->data);
+		break;
+	}
+
+
 	default: {}
 	}
 }

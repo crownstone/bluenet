@@ -191,6 +191,8 @@ uint 8[] | Data | 15 | Data, see below.
 Type | Packet
 --- | ---
 0 | [State](#service_data_setup_state_2).
+5 | [Hub state](#service_data_encrypted_hub_state).
+
 
 <a name="service_data_setup_state_2"></a>
 ## Setup state packet
@@ -257,7 +259,7 @@ Bit | Name |  Description
 4 | Hub has been set up | Whether the hub has been set up.
 5 | Hub has internet | Whether the hub has internet connection.
 6 | Hub has error | Whether the hub has some error.
-7 | Reserved | Reserved for future use, will be 0 for now.
+7 | Time set | Whether the time is set on this Crownstone.
 
 <a name="state_error_bitmask"></a>
 #### Error Bitmask

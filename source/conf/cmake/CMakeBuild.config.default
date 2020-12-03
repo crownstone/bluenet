@@ -322,6 +322,16 @@ RAM_BOOTLOADER_START_OFFSET=0x718
 ATTR_TABLE_SIZE=0x500
 HEAP_SIZE=20000
 
+# Interprocess communication
 RAM_BLUENET_IPC_LENGTH=0x100
 
+# Parameters for IPC with the bootloader
 BOOTLOADER_IPC_RAM_PROTOCOL=1
+
+# Parameters for IPC with microapp code
+
+# The start of where the microapp is allowed to put its memory (start of its .bss .data and then the heap)
+RAM_MICROAPP_BASE=0x2000B000
+
+# The amount of RAM it is allowed to use (stack grows down from RAM_MICROAPP_BASE + RAM_MICROAPP_AMOUNT)
+RAM_MICROAPP_AMOUNT=0x2000

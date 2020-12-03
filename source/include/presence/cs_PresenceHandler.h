@@ -133,7 +133,7 @@ private:
     // out of order
     void print();
     
-    stone_id_t _ownId = 0;
+    TYPIFY(CONFIG_CROWNSTONE_ID) _ownId = 0;
 
 public:
     // register as event handler

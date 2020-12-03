@@ -87,6 +87,15 @@ protected:
 	 */
 	void writeResult(uint8_t protocol, CommandHandlerTypes type, cs_result_t & result);
 
+	/** Write a result to the result characteristic.
+	 *
+	 * @param[in] protocol        The protocol version.
+	 * @param[in] type            The command type that was handled.
+	 * @param[in] retCode         The result code of handling the command.
+	 * @param[in] data            The result data of handling the command.
+	 */
+	void writeResult(uint8_t protocol, CommandHandlerTypes type, cs_ret_code_t retCode, cs_data_t data);
+
 
 private:
 	Characteristic<buffer_ptr_t>* _sessionDataCharacteristic = NULL;
