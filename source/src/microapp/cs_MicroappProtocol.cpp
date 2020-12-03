@@ -36,6 +36,7 @@ enum CommandMicroapp {
 	CS_MICROAPP_COMMAND_LOG          = 0x01,
 	CS_MICROAPP_COMMAND_DELAY        = 0x02,
 	CS_MICROAPP_COMMAND_PIN          = 0x03,
+	CS_MICROAPP_COMMAND_SERVICE_DATA = 0x04,
 };
 
 enum CommandMicroappLog {
@@ -56,7 +57,7 @@ enum CommandMicroappSwitch {
 /*
  * The function forwardCommand is called from microapp_callback.
  */
-void forwardCommand(char command, char *data, uint16_t length) {
+void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 	LOGi("Set command");
 	switch(command) {
 		case CS_MICROAPP_COMMAND_PIN: {
@@ -86,7 +87,7 @@ void forwardCommand(char command, char *data, uint16_t length) {
 
 extern "C" {
 
-int microapp_callback(char *payload, uint16_t length) {
+int microapp_callback(uint8_t *payload, uint16_t length) {
 	if (length == 0) return ERR_NO_PAYLOAD;
 	if (length > 255) return ERR_TOO_LARGE;
 
@@ -107,8 +108,8 @@ int microapp_callback(char *payload, uint16_t length) {
 					break;
 				}
 				case CS_MICROAPP_COMMAND_LOG_STR: {
-					int str_length = length - 2;
-					char *data = &(payload[2]);
+					int str_length = length - 2; // Check if length <= max_length - 1, for null terminator.
+					char *data = reinterpret_cast<char*>(&(payload[2]));
 					data[str_length] = 0;
 					LOGi("%s", data);
 					break;
@@ -129,6 +130,24 @@ int microapp_callback(char *payload, uint16_t length) {
 		}
 		case CS_MICROAPP_COMMAND_PIN: {
 			forwardCommand(command, &payload[1], length - 1);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
+			LOGd("Service data");
+			uint16_t commandDataSize = length - 2; // byte 0 is command, byte 1 is type.
+			TYPIFY(CMD_MICROAPP_ADVERTISE) eventData;
+			if (commandDataSize < sizeof(eventData.appUuid)) {
+				LOGi("payload too small");
+				break;
+			}
+			eventData.version = 0; // TODO: define somewhere.
+			eventData.type = 0; // TODO: define somewhere.
+			eventData.appUuid = (payload[2] << 8) + payload[3];
+			eventData.data.len = commandDataSize - sizeof(eventData.appUuid);
+			eventData.data.data = &(payload[4]);
+//			BLEutil::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
+			event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
+			event.dispatch();
 			break;
 		}
 		default:
