@@ -139,8 +139,8 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scanned_device) {
 
 // ======================== UUIDs ========================
 
-void TrackableParser::logUuid(scanned_device_t scanned_device) {
-	mac_log.emplace(scanned_device.address);
+void TrackableParser::logUuid(scanned_device_t* scanned_device) {
+	mac_log.emplace(scanned_device->address);
 }
 
 

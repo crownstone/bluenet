@@ -64,7 +64,7 @@ private:
 
 
 	// DEBUG
-	void logUuid(scanned_device_t scanned_device);
+	void logUuid(scanned_device_t* scanned_device);
 	std::set<TrackableId> mac_log = {};
 	Coroutine uuid_printer;
 	// END DEBUG
