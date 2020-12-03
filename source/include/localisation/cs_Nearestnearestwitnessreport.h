@@ -9,7 +9,8 @@
 #include <localisation/cs_TrackableId.h>
 
 /**
- *
+ * Firmware internal representation of witness reports.
+ * This contains auxiliary data compared to the mesh representation.
  */
 class NearestWitnessReport {
 public:

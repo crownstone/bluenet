@@ -25,16 +25,10 @@ void NearestCrownstoneTracker::init() {
 
 	resetReports();
 
-	logReport("init report: ", personal_report);\
+	logReport("init report: ", personal_report);
 }
 
 void NearestCrownstoneTracker::handleEvent(event_t &evt) {
-	if (evt.type == CS_TYPE::EVT_ADV_BACKGROUND_PARSED) {
-		adv_background_parsed_t *parsed_adv = UNTYPIFY(EVT_ADV_BACKGROUND_PARSED,evt.data);
-		onReceive(parsed_adv);
-		return;
-	}
-
 	if (evt.type == CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT) {
 		LOGNearestCrownstoneTrackerVerbose("NearestCrownstone received event: EVT_MESH_NEAREST_WITNESS_REPORT");
 		MeshMsgEvent* mesh_msg_event = UNTYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT, evt.data);
@@ -43,18 +37,17 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 		return;
 	}
 
-
 	if (evt.type == CS_TYPE::EVT_TRACKABLE) {
 		TrackableEvent* trackevt = UNTYPIFY(EVT_TRACKABLE, evt.data);
 		trackevt->id.print("Nearest crowntstone received trackable event!");
+		// TODO: call onReceive(adv_background_parsed_t)
 	}
 }
 
 
-void NearestCrownstoneTracker::onReceive(
-        adv_background_parsed_t *trackable_advertisement) {
+void NearestCrownstoneTracker::onReceive(TrackableEvent* tracked_event) {
 	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, my_id(%d)", my_id);
-	auto incoming_report = createReport(trackable_advertisement);
+	auto incoming_report = createReport(tracked_event);
 
 	logReport("incoming report", incoming_report);
 
@@ -138,13 +131,8 @@ void NearestCrownstoneTracker::onWinnerChanged() {
 
 // --------------------------- Report processing ------------------------
 
-NearestWitnessReport NearestCrownstoneTracker::createReport(
-        adv_background_parsed_t *trackable_advertisement) {
-	NearestWitnessReport report;
-	report.reporter = my_id;
-	report.trackable = TrackableId(trackable_advertisement->macAddress);
-	report.rssi = trackable_advertisement->adjustedRssi;
-	return report;
+NearestWitnessReport NearestCrownstoneTracker::createReport(TrackableEvent* tracked_event){
+	return NearestWitnessReport(tracked_event->id, tracked_event->rssi, my_id);
 }
 
 NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* mesh_msg_event) {

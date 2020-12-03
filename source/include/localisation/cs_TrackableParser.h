@@ -30,8 +30,16 @@ public:
 
 private:
 	/**
+	 * Dispatches a TrackedEvent for the given advertisement.
+	 */
+	void handleBackgroundParsed(adv_background_parsed_t *trackable_advertisement);
+
+	/**
 	 * Check if this device is a Tile device, if so handle it and
 	 * return true. Else, return false.
+	 *
+	 * Will emit a TrackableEvent when it is a tile device and mac
+	 * matches the hard coded address to filter for.
 	 */
 	bool handleAsTileDevice(scanned_device_t* scanned_device);
 

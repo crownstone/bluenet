@@ -19,5 +19,7 @@ public:
 	TrackableId id;
 	int8_t rssi;
 
+	// (Meta data about how this trackable is throttled.)
+
 	TrackableEvent();
 };

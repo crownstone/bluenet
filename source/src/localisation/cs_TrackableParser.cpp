@@ -39,18 +39,33 @@ void TrackableParser::handleEvent(event_t& evt) {
 		return;
 	}
 
-	if (evt.type != CS_TYPE::EVT_DEVICE_SCANNED) {
+	if (evt.type == CS_TYPE::EVT_ADV_BACKGROUND_PARSED) {
+		adv_background_parsed_t *parsed_adv = UNTYPIFY(EVT_ADV_BACKGROUND_PARSED,evt.data);
+		handleBackgroundParsed(parsed_adv);
 		return;
 	}
 
-	scanned_device_t* scanned_device = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
+	if (evt.type != CS_TYPE::EVT_DEVICE_SCANNED) {
+		scanned_device_t* scanned_device = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
 
-	logUuid(*scanned_device);
-
-	if (handleAsTileDevice(scanned_device)) {
-		return;
+		logUuid(*scanned_device);
+		handleAsTileDevice(scanned_device);
+		// add other trackable device types here
 	}
 }
+
+
+void TrackableParser::handleBackgroundParsed(
+		adv_background_parsed_t *trackable_advertisement) {
+	// TODO: Throttle here?
+
+	TrackableEvent trackevent;
+	trackevent.id = TrackableId(trackable_advertisement->macAddress);
+	trackevent.rssi = trackable_advertisement->adjustedRssi;
+
+	trackevent.dispatch();
+}
+
 
 // ====================== Mac Filter =====================
 

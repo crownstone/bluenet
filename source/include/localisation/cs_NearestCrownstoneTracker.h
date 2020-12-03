@@ -9,9 +9,9 @@
 
 #include <events/cs_EventListener.h>
 #include <localisation/cs_Nearestnearestwitnessreport.h>
+#include <localisation/cs_TrackableEvent.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/cs_Typedefs.h>
-
 
 
 class NearestCrownstoneTracker: public EventListener {
@@ -25,10 +25,10 @@ private:
 	NearestWitnessReport personal_report;
 	NearestWitnessReport winning_report;
 
-	void onReceive(adv_background_parsed_t* trackable_advertisement);
+	void onReceive(TrackableEvent* tracked_event);
 	void onReceive(NearestWitnessReport& report);
 
-	NearestWitnessReport createReport(adv_background_parsed_t* trackable_advertisement);
+	NearestWitnessReport createReport(TrackableEvent* tracked_event);
 	NearestWitnessReport createReport(MeshMsgEvent* trackable_advertisement);
 
 	nearest_witness_report_t reduceReport(const NearestWitnessReport& report);
