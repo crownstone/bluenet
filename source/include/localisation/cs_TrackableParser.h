@@ -9,6 +9,8 @@
 #include <events/cs_EventListener.h>
 #include <ble/cs_iBeacon.h>
 
+#include <util/cs_Coroutine.h>
+#include <set>
 
 /**
  * Transforms EVT_DEVICE_SCANNED and EVT_ADV_BACKGROUND_PARSED
@@ -23,6 +25,7 @@
  */
 class TrackableParser : public EventListener {
 public:
+	void init();
 	void handleEvent(event_t& evt);
 
 private:
@@ -50,4 +53,11 @@ private:
 	bool isTileDevice(scanned_device_t* scanned_device);
 
 	void logServiceData(scanned_device_t* scanned_device);
+
+
+	// DEBUG
+	void logUuid(scanned_device_t scanned_device);
+	std::set<TrackableId> mac_log = {};
+	Coroutine uuid_printer;
+	// END DEBUG
 };

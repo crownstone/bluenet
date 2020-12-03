@@ -15,13 +15,39 @@
 #include <localisation/cs_TrackableParser.h>
 #include <localisation/cs_TrackableEvent.h>
 
+
+void TrackableParser::init() {
+	uuid_printer = Coroutine([this](){
+		LOGi("current known mac addresses (%d):", mac_log.size());
+		for(auto& uuid : mac_log){
+			LOGi("mac [%2x %2x %2x %2x %2x %2x]",
+					uuid.bytes[0],
+					uuid.bytes[1],
+					uuid.bytes[2],
+					uuid.bytes[3],
+					uuid.bytes[4],
+					uuid.bytes[5]
+		   );
+		}
+
+		return Coroutine::delayS(10);
+	});
+}
+
 void TrackableParser::handleEvent(event_t& evt) {
+	if (uuid_printer.handleEvent(evt)) {
+		return;
+	}
+
 	if (evt.type != CS_TYPE::EVT_DEVICE_SCANNED) {
 		return;
 	}
 
-	scanned_device_t* dev = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
-	if (handleAsTileDevice(dev)) {
+	scanned_device_t* scanned_device = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
+
+	logUuid(*scanned_device);
+
+	if (handleAsTileDevice(scanned_device)) {
 		return;
 	}
 }
@@ -95,6 +121,13 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scanned_device) {
 
 	return true;
 }
+
+// ======================== UUIDs ========================
+
+void TrackableParser::logUuid(scanned_device_t scanned_device) {
+	mac_log.emplace(scanned_device.address);
+}
+
 
 // ======================== Utils ========================
 

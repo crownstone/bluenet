@@ -337,7 +337,7 @@ private:
 	NearestCrownstoneTracker _nearestCrownstoneTracker;
 #endif
 
-	TrackableParser _iBeaconParser;
+	TrackableParser _trackableParser;
 
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
