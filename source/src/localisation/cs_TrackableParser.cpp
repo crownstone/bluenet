@@ -47,10 +47,11 @@ void TrackableParser::handleEvent(event_t& evt) {
 
 	if (evt.type != CS_TYPE::EVT_DEVICE_SCANNED) {
 		scanned_device_t* scanned_device = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
-
-		logUuid(*scanned_device);
-		handleAsTileDevice(scanned_device);
+//		handleAsTileDevice(scanned_device); // !
+		logUuid(scanned_device);
 		// add other trackable device types here
+
+		return;
 	}
 }
 
