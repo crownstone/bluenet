@@ -39,8 +39,7 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 
 	if (evt.type == CS_TYPE::EVT_TRACKABLE) {
 		TrackableEvent* trackevt = UNTYPIFY(EVT_TRACKABLE, evt.data);
-		trackevt->id.print("Nearest crowntstone received trackable event!");
-		// TODO: call onReceive(adv_background_parsed_t)
+		onReceive(trackevt);
 	}
 }
 

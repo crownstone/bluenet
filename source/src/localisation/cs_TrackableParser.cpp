@@ -38,14 +38,13 @@ void TrackableParser::handleEvent(event_t& evt) {
 
 void TrackableParser::handleBackgroundParsed(
 		adv_background_parsed_t *trackable_advertisement) {
-	// TODO: Throttle here?
-
-	TrackableEvent trackevent;
-	trackevent.id = TrackableId(trackable_advertisement->macAddress);
-	trackevent.rssi = trackable_advertisement->adjustedRssi;
-
-	trackevent.dispatch();
-	LOGd("handle background parsed dispatched a track event");
+	// TODO: implement when we have a good representation of trackables in the mesh.
+	//
+	//	TrackableEvent trackevent;
+	//	trackevent.id = TrackableId(trackable_advertisement->macAddress);
+	//	trackevent.rssi = trackable_advertisement->adjustedRssi;
+	//
+	//	trackevent.dispatch();
 }
 
 
