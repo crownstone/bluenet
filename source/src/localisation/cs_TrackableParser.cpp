@@ -47,7 +47,9 @@ void TrackableParser::handleEvent(event_t& evt) {
 
 	if (evt.type != CS_TYPE::EVT_DEVICE_SCANNED) {
 		scanned_device_t* scanned_device = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
-//		handleAsTileDevice(scanned_device); // !
+		LOGd("-------------BIN SEARCH BEFORE OFFENSE-------------");
+		handleAsTileDevice(scanned_device);
+		LOGd("-------------BIN SEARCH AFTER OFFENSE-------------");
 		logUuid(scanned_device);
 		// add other trackable device types here
 
@@ -117,9 +119,12 @@ bool TrackableParser::isTileDevice(scanned_device_t* scanned_device) {
 }
 
 bool TrackableParser::handleAsTileDevice(scanned_device_t* scanned_device) {
+	LOGd("handling tile device");
 	if (!isTileDevice(scanned_device)) {
+		LOGd("not a tile device after all");
 		return false;
 	}
+	LOGd("continue handling");
 
 	TrackableId tile(scanned_device->address);
 	tile.print("found tile device!");
