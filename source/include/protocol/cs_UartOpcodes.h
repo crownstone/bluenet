@@ -76,6 +76,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_RSSI_PING_MESSAGE =                10107, // When RssiDataTracker receives a secondary ping message, it is sent to host. Payload: rssi_ping_message_t
 
 	UART_OPCODE_TX_LOG =                              10200, // Debug logs, payload is in the form: [uart_msg_log_header_t, [uart_msg_log_arg_header_t, data], [uart_msg_log_arg_header_t, data], ...]
+	UART_OPCODE_TX_LOG_ARRAY =                        10201, // Debug logs, payload is in the form: [uart_msg_log_header_t, [uart_msg_log_arg_header_t, data], [uart_msg_log_arg_header_t, data], ...]
 
 
 	////////// Developer messages in release builds. //////////

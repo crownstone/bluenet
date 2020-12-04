@@ -294,8 +294,20 @@ void cs_write_end() {
 	UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_LOG);
 }
 
-void cs_write_data(uint32_t fileNameHash, uint32_t lineNumber, bool addPrefix, bool addNewLine, const uint8_t* const ptr, size_t size, size_t itemSize) {
-
+void cs_write_data(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addPrefix, bool addNewLine, const uint8_t* const ptr, size_t size, ElementType elementType, size_t elementSize) {
+	uart_msg_log_array_header_t header;
+	header.header.fileNameHash = fileNameHash;
+	header.header.lineNumber = lineNumber;
+	header.header.logLevel = logLevel;
+	header.header.flags.prefix = addPrefix;
+	header.header.flags.newLine = addNewLine;
+	header.elementType = elementType;
+	header.elementSize = elementSize;
+	uint16_t msgSize = sizeof(header) + size;
+	UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_LOG_ARRAY, msgSize);
+	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_LOG_ARRAY, reinterpret_cast<uint8_t*>(&header), sizeof(header));
+	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_LOG_ARRAY, ptr, size);
+	UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_LOG_ARRAY);
 }
 
 /**

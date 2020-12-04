@@ -75,13 +75,18 @@ struct __attribute__((__packed__)) uart_msg_mesh_result_packet_header_t {
 	result_packet_header_t resultHeader;
 };
 
-struct __attribute__((__packed__)) uart_msg_log_header_t {
+struct __attribute__((__packed__)) uart_msg_log_common_header_t {
 	uint32_t fileNameHash;
 	uint16_t lineNumber; // Line number (starting at line 1) where the ; of this log is.
+	uint8_t logLevel; // SERIAL_VERBOSE, SERIAL_DEBUG, etc.
 	struct __attribute__((packed)) {
 		bool prefix : 1;  // Whether this log should be prefixed with a timestamp etc.
 		bool newLine : 1; // Whether this log should end with a new line.
 	} flags;
+};
+
+struct __attribute__((__packed__)) uart_msg_log_header_t {
+	uart_msg_log_common_header_t header;
 	uint8_t numArgs;
 	// Followed by <numArgs> args, with uart_msg_log_arg_header_t as header.
 };
@@ -89,6 +94,20 @@ struct __attribute__((__packed__)) uart_msg_log_header_t {
 struct __attribute__((__packed__)) uart_msg_log_arg_header_t {
 	uint8_t argSize;
 	// Followed by <argSize> bytes.
+};
+
+
+enum ElementType {
+	ELEMENT_TYPE_SIGNED_INTEGER = 0,
+	ELEMENT_TYPE_UNSIGNED_INTEGER = 1,
+	ELEMENT_TYPE_FLOAT = 2,
+};
+
+struct __attribute__((__packed__)) uart_msg_log_array_header_t {
+	uart_msg_log_common_header_t header;
+	uint8_t elementType; // ElementType
+	uint8_t elementSize;
+	// Followed by all elements, each of size <elementSize>.
 };
 
 

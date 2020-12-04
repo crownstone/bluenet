@@ -76,7 +76,8 @@ static uint32_t cs_mesh_read_cb(uint16_t handle, void* data_ptr, uint16_t data_s
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	State::getInstance().get(type, data_ptr, data_size);
 	_log(SERIAL_INFO, true, false, "cs_mesh_read_cb handle=%u size=%u ", handle, data_size);
-	BLEutil::printArray(data_ptr, data_size, SERIAL_INFO);
+//	BLEutil::printArray(data_ptr, data_size, SERIAL_INFO);
+	_logArray(SERIAL_INFO, false, true, (uint8_t*)data_ptr, data_size);
 	return NRF_SUCCESS;
 }
 
@@ -450,7 +451,8 @@ void MeshCore::start() {
 
 	const uint8_t *uuid = nrf_mesh_configure_device_uuid_get();
 	_log(SERIAL_DEBUG, true, false, "Device UUID: ");
-	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
+//	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
+	_logArray(SERIAL_DEBUG, false, true, uuid, NRF_MESH_UUID_SIZE);
 	retCode = mesh_stack_start();
 	APP_ERROR_CHECK(retCode);
 }
