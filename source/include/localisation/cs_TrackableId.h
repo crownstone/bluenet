@@ -42,8 +42,9 @@ struct __attribute__((__packed__)) TrackableId {
 		return std::memcmp(bytes,other.bytes,SIZE) < 0;
 	}
 
-	void print(const char* s){
-		LOGd("%s: %2x %2x %2x %2x %2x %2x", s,
+	void print(const char* headerstr){
+		LOGd("%s mac=[%2x,%2x,%2x,%2x,%2x,%2x]",
+				headerstr,
 				bytes[0],
 				bytes[1],
 				bytes[2],

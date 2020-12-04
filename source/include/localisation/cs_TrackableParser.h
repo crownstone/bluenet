@@ -60,12 +60,5 @@ private:
 	 */
 	bool isTileDevice(scanned_device_t* scanned_device);
 
-	void logServiceData(scanned_device_t* scanned_device);
-
-
-	// DEBUG
-	void logUuid(scanned_device_t* scanned_device);
-	std::set<TrackableId> mac_log = {};
-	Coroutine uuid_printer;
-	// END DEBUG
+	void logServiceData(const char* headerstr, scanned_device_t* scanned_device);
 };

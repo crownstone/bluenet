@@ -118,7 +118,9 @@ void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incoming_report) 
 }
 
 void NearestCrownstoneTracker::onWinnerChanged() {
-	LOGNearestCrownstoneTrackerInfo("Winner changed. Turning %s",winning_report.reporter == my_id ? "on":"off");
+	LOGNearestCrownstoneTrackerInfo("Nearest changed to stoneid=%d. I'm turning %s",
+			winning_report.reporter,
+			winning_report.reporter == my_id ? "on":"off");
 
 	CS_TYPE on_off =
 			winning_report.reporter == my_id

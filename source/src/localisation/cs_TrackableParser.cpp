@@ -17,28 +17,9 @@
 
 
 void TrackableParser::init() {
-	uuid_printer = Coroutine([this](){
-		LOGi("current known mac addresses (%d):", mac_log.size());
-		for(auto& uuid : mac_log){
-			LOGi("mac [%2x %2x %2x %2x %2x %2x]",
-					uuid.bytes[0],
-					uuid.bytes[1],
-					uuid.bytes[2],
-					uuid.bytes[3],
-					uuid.bytes[4],
-					uuid.bytes[5]
-		   );
-		}
-
-		return Coroutine::delayS(10);
-	});
 }
 
 void TrackableParser::handleEvent(event_t& evt) {
-	if (uuid_printer.handleEvent(evt)) {
-		return;
-	}
-
 	if (evt.type == CS_TYPE::EVT_ADV_BACKGROUND_PARSED) {
 		adv_background_parsed_t *parsed_adv = UNTYPIFY(EVT_ADV_BACKGROUND_PARSED,evt.data);
 		handleBackgroundParsed(parsed_adv);
@@ -47,10 +28,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 
 	if (evt.type == CS_TYPE::EVT_DEVICE_SCANNED) {
 		scanned_device_t* scanned_device = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
-		LOGd("-------------BIN SEARCH BEFORE OFFENSE-------------");
 		handleAsTileDevice(scanned_device);
-		LOGd("-------------BIN SEARCH AFTER OFFENSE-------------");
-		logUuid(scanned_device);
 		// add other trackable device types here
 
 		return;
@@ -67,6 +45,7 @@ void TrackableParser::handleBackgroundParsed(
 	trackevent.rssi = trackable_advertisement->adjustedRssi;
 
 	trackevent.dispatch();
+	LOGd("handle background parsed dispatched a track event");
 }
 
 
@@ -118,23 +97,24 @@ bool TrackableParser::isTileDevice(scanned_device_t* scanned_device) {
 	return false;
 }
 
+
 bool TrackableParser::handleAsTileDevice(scanned_device_t* scanned_device) {
-	LOGd("handling tile device");
 	if (!isTileDevice(scanned_device)) {
-		LOGd("not a tile device after all");
 		return false;
 	}
-	LOGd("continue handling");
+
+	char logtext[25];
+	sprintf(logtext, "Tile device: rssi=%d ", scanned_device->rssi);
 
 	TrackableId tile(scanned_device->address);
-	tile.print("found tile device!");
+	tile.print(logtext);
 
 	if(!isMyTrackable(scanned_device)) {
 		// it was a Tile device, so return true.
 		return true;
 	}
 
-	logServiceData(scanned_device);
+	logServiceData("Tile device servicedata", scanned_device);
 
 	TrackableEvent trackevt;
 	trackevt.rssi = scanned_device->rssi;
@@ -143,16 +123,10 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scanned_device) {
 	return true;
 }
 
-// ======================== UUIDs ========================
-
-void TrackableParser::logUuid(scanned_device_t* scanned_device) {
-	mac_log.emplace(scanned_device->address);
-}
-
 
 // ======================== Utils ========================
 
-void TrackableParser::logServiceData(scanned_device_t* scanned_device) {
+void TrackableParser::logServiceData(const char* headerstr, scanned_device_t* scanned_device) {
 	uint32_t errCode;
 	cs_data_t service_data;
 	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_SERVICE_DATA,
@@ -172,6 +146,6 @@ void TrackableParser::logServiceData(scanned_device_t* scanned_device) {
 	}
 
 	// and log the formatted string
-	LOGd("my tile servicedata(%d): [%s]", service_data.len, buff_start);
+	LOGd("%s: len=%d data=[%s]", headerstr, service_data.len, buff_start);
 }
 

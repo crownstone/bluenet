@@ -152,14 +152,8 @@ inline static cs_ret_code_t findAdvType(uint8_t type, uint8_t* advData, uint8_t 
 	foundData->data = nullptr;
 	foundData->len = 0;
 	while (index < advLen-1) {
-		LOGd("0) %d, %d",index, advLen);
-		intptr_t p = reinterpret_cast<intptr_t>(advData);
-		LOGd("scanned data ptr: %x", p);
-		LOGd("0) %d",advData[index]);
-		LOGd("0) %d",advData[index+1]);
 		uint8_t fieldLen = advData[index];
 		uint8_t fieldType = advData[index + 1];
-		LOGd("1) %d",index);
 		// Check if length is not 0 or larger than remaining advertisement data.
 		if (fieldLen == 0 || index + 1 + fieldLen > advLen) {
 			return ERR_NOT_FOUND;
