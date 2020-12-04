@@ -45,7 +45,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 		return;
 	}
 
-	if (evt.type != CS_TYPE::EVT_DEVICE_SCANNED) {
+	if (evt.type == CS_TYPE::EVT_DEVICE_SCANNED) {
 		scanned_device_t* scanned_device = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
 		LOGd("-------------BIN SEARCH BEFORE OFFENSE-------------");
 		handleAsTileDevice(scanned_device);
