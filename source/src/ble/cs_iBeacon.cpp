@@ -50,7 +50,7 @@ void IBeacon::setUUID(cs_uuid128_t& uuid) {
 	}
 
 #ifdef PRINT_IBEACON_VERBOSE
-	_log(SERIAL_DEBUG, true, false, "Set UUID to: ");
+	_log(SERIAL_DEBUG, false, "Set UUID to: ");
 	BLEutil::printArray(_params.uuid.uuid128, 16);
 #endif
 }

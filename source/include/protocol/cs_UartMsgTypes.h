@@ -80,7 +80,6 @@ struct __attribute__((__packed__)) uart_msg_log_common_header_t {
 	uint16_t lineNumber; // Line number (starting at line 1) where the ; of this log is.
 	uint8_t logLevel; // SERIAL_VERBOSE, SERIAL_DEBUG, etc.
 	struct __attribute__((packed)) {
-		bool prefix : 1;  // Whether this log should be prefixed with a timestamp etc.
 		bool newLine : 1; // Whether this log should end with a new line.
 	} flags;
 };

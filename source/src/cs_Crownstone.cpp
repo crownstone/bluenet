@@ -717,7 +717,7 @@ void Crownstone::startUp() {
 	APP_ERROR_CHECK(err_code);
 
 	// TODO: log in plain text.
-	_log(SERIAL_INFO, true, false, "Address: ");
+	_log(SERIAL_INFO, false, "Address: ");
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN, SERIAL_INFO);
 
 	_state->startWritesToFlash();

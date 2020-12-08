@@ -73,7 +73,7 @@ bool RC5::prepareKey(uint8_t* key, uint8_t keyLength) {
 		i %= RC5_NUM_SUBKEYS;
 		j %= keyLenWords;
 	}
-//	_log(SERIAL_DEBUG, true, false, "key=");
+//	_log(SERIAL_DEBUG, false, "key=");
 //	BLEutil::printArray(key, keyLength);
 //	for (int i=0; i<RC5_NUM_SUBKEYS; ++i) {
 //		LOGi("RC5 key[%i] = %u", i, _rc5SubKeys[i]);

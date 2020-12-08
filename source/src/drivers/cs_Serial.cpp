@@ -294,12 +294,11 @@ void cs_write_end() {
 	UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_LOG);
 }
 
-void cs_write_data(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addPrefix, bool addNewLine, const uint8_t* const ptr, size_t size, ElementType elementType, size_t elementSize) {
+void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint8_t* const ptr, size_t size, ElementType elementType, size_t elementSize) {
 	uart_msg_log_array_header_t header;
 	header.header.fileNameHash = fileNameHash;
 	header.header.lineNumber = lineNumber;
 	header.header.logLevel = logLevel;
-	header.header.flags.prefix = addPrefix;
 	header.header.flags.newLine = addNewLine;
 	header.elementType = elementType;
 	header.elementSize = elementSize;

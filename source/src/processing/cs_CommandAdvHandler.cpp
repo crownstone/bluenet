@@ -83,11 +83,11 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	if (scannedDevice->rssi > RSSI_LOG_THRESHOLD) {
 #ifdef COMMAND_ADV_VERBOSE
 		LOGCommandAdvVerbose("rssi=%i", scannedDevice->rssi);
-		_log(SERIAL_DEBUG, true, false, "16bit services: ");
+		_log(SERIAL_DEBUG, false, "16bit services: ");
 		BLEutil::printArray(services16bit.data, services16bit.len);
 #endif
 #ifdef COMMAND_ADV_VERBOSE
-		_log(SERIAL_DEBUG, true, false, "128bit services: ");
+		_log(SERIAL_DEBUG, false, "128bit services: ");
 		BLEutil::printArray(services128bit.data, services128bit.len); // Received as uint128, so bytes are reversed.
 #endif
 	}
@@ -264,7 +264,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	}
 
 #ifdef COMMAND_ADV_VERBOSE
-	_log(SERIAL_DEBUG, true, false, "decrypted data: ");
+	_log(SERIAL_DEBUG, false, "decrypted data: ");
 	BLEutil::printArray(decryptedData, 16);
 #endif
 
