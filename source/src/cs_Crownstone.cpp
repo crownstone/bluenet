@@ -606,10 +606,11 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 #if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
 	_nearestCrownstoneTracker.init();
 	_nearestCrownstoneTracker.listen();
-#endif
 
 	_trackableParser.init();
 	_trackableParser.listen();
+#endif
+
 
 	switch(mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {

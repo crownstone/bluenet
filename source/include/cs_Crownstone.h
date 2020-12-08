@@ -335,9 +335,9 @@ private:
 
 #if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
 	NearestCrownstoneTracker _nearestCrownstoneTracker;
+	TrackableParser _trackableParser;
 #endif
 
-	TrackableParser _trackableParser;
 
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
