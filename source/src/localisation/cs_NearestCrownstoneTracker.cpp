@@ -16,7 +16,7 @@
 #include <util/cs_Coroutine.h>
 
 #define LOGNearestCrownstoneTrackerVerbose LOGnone
-#define LOGNearestCrownstoneTrackerDebug LOGnone
+#define LOGNearestCrownstoneTrackerDebug LOGd
 #define LOGNearestCrownstoneTrackerInfo LOGi
 
 void NearestCrownstoneTracker::init() {
@@ -24,8 +24,6 @@ void NearestCrownstoneTracker::init() {
 	        sizeof(my_id));
 
 	resetReports();
-
-	logReport("init report: ", personal_report);
 }
 
 void NearestCrownstoneTracker::handleEvent(event_t &evt) {
@@ -47,8 +45,6 @@ void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 void NearestCrownstoneTracker::onReceive(TrackableEvent* tracked_event) {
 	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, my_id(%d)", my_id);
 	auto incoming_report = createReport(tracked_event);
-
-	logReport("incoming report", incoming_report);
 
 	savePersonalReport(incoming_report);
 
@@ -81,7 +77,6 @@ void NearestCrownstoneTracker::onReceive(TrackableEvent* tracked_event) {
 
 void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incoming_report) {
 	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, my_id(%d), reporter(%d), rssi(%d)", my_id, incoming_report.reporter, incoming_report.rssi);
-	logReport("", incoming_report);
 
 	if(incoming_report.reporter == my_id) {
 		LOGNearestCrownstoneTrackerVerbose("Received an old report from myself. Dropped: not relevant.");
@@ -117,7 +112,7 @@ void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incoming_report) 
 }
 
 void NearestCrownstoneTracker::onWinnerChanged() {
-	LOGNearestCrownstoneTrackerInfo("Nearest changed to stoneid=%d. I'm turning %s",
+	LOGNearestCrownstoneTrackerDebug("Nearest changed to stoneid=%d. I'm turning %s",
 			winning_report.reporter,
 			winning_report.reporter == my_id ? "on":"off");
 
@@ -160,12 +155,10 @@ nearest_witness_report_t NearestCrownstoneTracker::reduceReport(const NearestWit
 
 void NearestCrownstoneTracker::savePersonalReport(NearestWitnessReport report) {
 	personal_report = report;
-	logReport("saved personal report", report);
 }
 
 void NearestCrownstoneTracker::saveWinningReport(NearestWitnessReport report) {
 	winning_report = report;
-	logReport("saved winning report", winning_report);
 }
 
 
@@ -198,7 +191,6 @@ void NearestCrownstoneTracker::resetReports() {
 // ------------------- Mesh related stuff ----------------------
 
 void NearestCrownstoneTracker::broadcastReport(NearestWitnessReport report) {
-	logReport("broadcasting report", report);
 	nearest_witness_report_t packed_report = reduceReport(report);
 
 	cs_mesh_msg_t report_msg_wrapper;
