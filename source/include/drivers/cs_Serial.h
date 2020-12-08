@@ -99,8 +99,9 @@ constexpr uint32_t fileNameHash(const char* str, size_t strLen) {
 		#define LOGw NRF_LOG_WARNING
 		#define LOGe NRF_LOG_ERROR
 		#define LOGf NRF_LOG_ERROR
-		#define _log(level, fmt, addNewLine, ...)
+		#define _log(level, addNewLine, fmt, ...) NRF_LOG_DEBUG(fmt, ##__VA_ARGS__)
 		#define logLN(level, fmt, ...)
+		#define _logArray(level, addNewLine, pointer, size, ...) NRF_LOG_HEXDUMP_DEBUG(pointer, size)
 	#ifdef __cplusplus
 	}
 	#endif

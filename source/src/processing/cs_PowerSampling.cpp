@@ -1353,7 +1353,8 @@ void PowerSampling::printBuf(adc_buffer_id_t bufIndex) {
 		for (adc_sample_value_id_t i = 0, j = 0; i < AdcBuffer::getChannelLength(); ++i) {
 			buf[j] = AdcBuffer::getInstance().getValue(bufIndex, channel, i);
 			if (++j == 10) {
-				LOGd("%4u %4u %4u %4u %4u %4u %4u %4u %4u %4u", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8], buf[9]);
+				_logArray(SERIAL_DEBUG, true, buf, sizeof(buf));
+//				LOGd("%4u %4u %4u %4u %4u %4u %4u %4u %4u %4u", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8], buf[9]);
 				j = 0;
 			}
 		}
