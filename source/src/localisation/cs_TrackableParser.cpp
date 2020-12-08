@@ -16,6 +16,8 @@
 #include <localisation/cs_TrackableEvent.h>
 
 
+#define TrackableParser_LOGd LOGnone
+
 void TrackableParser::init() {
 }
 
@@ -102,18 +104,18 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scanned_device) {
 		return false;
 	}
 
-	char logtext[25];
-	sprintf(logtext, "Tile device: rssi=%d ", scanned_device->rssi);
 
 	TrackableId tile(scanned_device->address);
-	tile.print(logtext);
+
+	TrackableParser_LOGd("Tile device: rssi=%d ", scanned_device->rssi);
+	tile.print(" ");
 
 	if(!isMyTrackable(scanned_device)) {
 		// it was a Tile device, so return true.
 		return true;
 	}
 
-	logServiceData("Tile device servicedata", scanned_device);
+	// logServiceData("Tile device servicedata", scanned_device);
 
 	TrackableEvent trackevt;
 	trackevt.rssi = scanned_device->rssi;
@@ -137,14 +139,10 @@ void TrackableParser::logServiceData(const char* headerstr, scanned_device_t* sc
 		return;
 	}
 
-	// format string
-	char buff_start[50] = {0}; // should be len(servicedata) * len(repr) ~= 3*12 = 36.
-	char* buff = buff_start;
+	_log(SERIAL_INFO, "len=%d data=[", service_data.len);
 	for (auto i = 0u; i < service_data.len; i++) {
-		buff += sprintf(buff, "%2x,", service_data.data[i]);
+		_log(SERIAL_INFO, " %2x,", service_data.data[i]);
 	}
-
-	// and log the formatted string
-	LOGd("%s: len=%d data=[%s]", headerstr, service_data.len, buff_start);
+	_log(SERIAL_INFO, "]\r\n");
 }
 
