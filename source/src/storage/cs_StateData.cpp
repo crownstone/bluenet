@@ -326,6 +326,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_PRESENCE_CHANGE:
+	case CS_TYPE::CMD_GET_PRESENCE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
@@ -356,6 +357,8 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP:
 	case CS_TYPE::EVT_MICROAPP:
+	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
+	case CS_TYPE::EVT_HUB_DATA_REPLY:
 		return ERR_NOT_FOUND;
 	}
 	return ERR_NOT_FOUND;
@@ -524,6 +527,7 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_TRACKED_DEVICE_HEARTBEAT:
 	case CS_TYPE::EVT_PRESENCE_MUTATION:
 	case CS_TYPE::EVT_PRESENCE_CHANGE:
+	case CS_TYPE::CMD_GET_PRESENCE:
 	case CS_TYPE::CMD_SET_RELAY:
 	case CS_TYPE::CMD_SET_DIMMER:
 	case CS_TYPE::EVT_GOING_TO_DFU:
@@ -554,6 +558,8 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_TEST_SET_TIME:
 	case CS_TYPE::CMD_MICROAPP:
 	case CS_TYPE::EVT_MICROAPP:
+	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
+	case CS_TYPE::EVT_HUB_DATA_REPLY:
 		return PersistenceMode::NEITHER_RAM_NOR_FLASH;
 	}
 	// should not reach this

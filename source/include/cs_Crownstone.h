@@ -40,7 +40,7 @@
 #endif
 
 #if BUILD_MICROAPP_SUPPORT == 1
-#include <storage/cs_MicroApp.h>
+#include <microapp/cs_Microapp.h>
 #endif
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
@@ -343,7 +343,7 @@ private:
 	PresenceHandler _presenceHandler;
 
 #if BUILD_MICROAPP_SUPPORT == 1
-	MicroApp* _microApp;
+	Microapp* _microapp;
 #endif
 
 	app_timer_t              _mainTimerData;

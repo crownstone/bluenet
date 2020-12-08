@@ -304,4 +304,16 @@ struct adc_buffer_t {
 	adc_sample_value_t* samples = nullptr;
 };
 
+struct hub_data_reply_t {
+	cs_ret_code_t retCode;
+	cs_data_t data;
+};
+
+struct microapp_advertise_request_t {
+	uint8_t type; // 0 for encrypted service data.
+	uint8_t version;
+	uint16_t appUuid;
+	cs_data_t data;
+};
+
 

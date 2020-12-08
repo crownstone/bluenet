@@ -74,6 +74,7 @@ SET(PASS_FILE                                "crownstone/firmware/dfu_pkg_signin
 SET(KEY_FILE                                 "temp.key"    CACHE STRING "Pass file (containing key")
 SET(SUPERUSER_SWITCH                         "sudo"        CACHE STRING "Switch to superuser")
 
+# Actually the deployment should not contain this information
 MATH(EXPR SWO_PORT       "${GDB_PORT}+1")
 MATH(EXPR TELNET_PORT    "${GDB_PORT}+2")
 MATH(EXPR RTT_PORT       "${GDB_PORT}+16690")
@@ -235,7 +236,7 @@ ELSE()
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
 	ELSE()
-		MESSAGE(STATUS "MicroApp support disabled, no fstorage module required")
+		MESSAGE(STATUS "Microapp support disabled, no fstorage module required")
 	ENDIF()
 
 	IF (BUILD_MESHING)

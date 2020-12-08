@@ -96,6 +96,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 		}
 		case CS_MESH_MODEL_TYPE_TIME_SYNC: {
 			result.returnCode = handleTimeSync(payload, payloadSize, srcId, msg.hops);
+			return;
 		}
 		case CS_MESH_MODEL_TYPE_CMD_NOOP: {
 			result.returnCode = handleCmdNoop(payload, payloadSize);
@@ -314,7 +315,7 @@ cs_ret_code_t MeshMsgHandler::handleState0(uint8_t* payload, size16_t payloadSiz
 	_lastReceivedState.srcId = srcId;
 	_lastReceivedState.state.data.state.id = srcId;
 	_lastReceivedState.state.data.extState.switchState = packet->switchState;
-	_lastReceivedState.state.data.extState.flags = packet->flags;
+	_lastReceivedState.state.data.extState.flags.asInt = packet->flags;
 	_lastReceivedState.state.data.extState.powerFactor = packet->powerFactor;
 	_lastReceivedState.state.data.extState.powerUsageReal = packet->powerUsageReal;
 	_lastReceivedState.state.data.extState.partialTimestamp = packet->partialTimestamp;
@@ -370,7 +371,7 @@ void MeshMsgHandler::checkStateReceived(int8_t rssi, uint8_t hops) {
 		_lastReceivedState.state.data.extState.rssi = 0;
 	}
 	_lastReceivedState.state.data.extState.validation = SERVICE_DATA_VALIDATION;
-	_lastReceivedState.state.data.type = SERVICE_DATA_TYPE_EXT_STATE;
+	_lastReceivedState.state.data.type = SERVICE_DATA_DATA_TYPE_EXT_STATE;
 #if CS_SERIAL_NRF_LOG_ENABLED != 2
 	LOGi("Received state: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u rssi=%i",
 			_lastReceivedState.state.data.extState.id,

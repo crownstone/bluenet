@@ -36,7 +36,7 @@ enum MICROAPP_OPCODE {
 #define ENCRYPTION_OVERHEAD 20
 
 /**
- * Size of MicroApp packet.
+ * Size of Microapp packet.
  *
  * TODO: Bart: Encryption isn't the only overhead, is this really the optimal size?
  */
@@ -62,7 +62,7 @@ struct __attribute__((packed)) microapp_upload_header_packet_t {
 #define MICROAPP_CHUNK_RESERVED 0
 
 /**
- * Size of MicroApp chunk (without header)
+ * Size of Microapp chunk (without header)
  */
 #define MICROAPP_CHUNK_SIZE (MICROAPP_PACKET_SIZE - sizeof(microapp_upload_header_packet_t) - MICROAPP_CHUNK_RESERVED)
 

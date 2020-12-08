@@ -16,7 +16,7 @@ extern "C" {
 #include <cfg/cs_Strings.h>
 
 #include "stdint.h"
-#include "cstring"
+#include "string.h"
 
 #ifdef HOST_TARGET
 #include "stdio.h"

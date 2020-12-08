@@ -221,6 +221,13 @@ Another convenient variable to set there is `GDB_PORT`. To have both running in 
     cd build/board1
     make debug_server
 
+## Common issues
+
+On older ubuntu versions, python2.7 is the default version. This gives issues with nrfutil.
+
+This can be fixed by installing pip2, removing nrfutil from pip3, and installing nrfutil with pip2.
+
+
 ## Maintainers
 
 Not for everyday users, just for maintainers of this code base, there are more options.

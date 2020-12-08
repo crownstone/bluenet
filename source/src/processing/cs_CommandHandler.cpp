@@ -127,6 +127,7 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_REMOVE_BEHAVIOUR:
 		case CTRL_CMD_GET_BEHAVIOUR:
 		case CTRL_CMD_GET_BEHAVIOUR_INDICES:
+		case CTRL_CMD_GET_PRESENCE:
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 
 		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
@@ -230,6 +231,8 @@ void CommandHandler::handleCommand(
 			return handleCmdRegisterTrackedDevice(commandData, accessLevel, result);
 		case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
 			return handleCmdTrackedDeviceHeartbeat(commandData, accessLevel, result);
+		case CTRL_CMD_GET_PRESENCE:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_PRESENCE, commandData, source, result);
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
 			return dispatchEventForCommand(CS_TYPE::CMD_SET_IBEACON_CONFIG_ID, commandData, source, result);
 		case CTRL_CMD_GET_UPTIME:
@@ -914,7 +917,15 @@ void CommandHandler::handleCmdHubData(cs_data_t commandData, const EncryptionAcc
 	cs_buffer_size_t hubDataSize = commandData.len  - sizeof(*header);
 	UartProtocol::Encrypt encrypt = static_cast<UartProtocol::Encrypt>(header->encrypt);
 
+	if (header->reserved != 0) {
+		result.returnCode = ERR_WRONG_PARAMETER;
+		return;
+	}
+
 	result.returnCode = UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HUB_DATA, hubDataPtr, hubDataSize, encrypt);
+	if (result.returnCode == ERR_SUCCESS) {
+		result.returnCode = ERR_WAIT_FOR_SUCCESS;
+	}
 }
 
 
@@ -1108,6 +1119,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_LOCK_SWITCH:
 		case CTRL_CMD_UART_MSG:
 		case CTRL_CMD_HUB_DATA:
+		case CTRL_CMD_GET_PRESENCE:
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
 		case CTRL_CMD_GET_UPTIME:

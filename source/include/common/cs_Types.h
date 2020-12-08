@@ -305,6 +305,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_STATE_EXTERNAL_STONE,                         // The state of another stone has been received.
 	CMD_TRACKED_DEVICE_HEARTBEAT,                     // Set location of a tracked device, with a TTL. This command can be sent instead of advertisements.
 	EVT_PRESENCE_CHANGE,                              // The presence has changed. When the first user enters, multiple events will be sent.
+	CMD_GET_PRESENCE,                                 // Get the current presence.
 	EVT_TRACKABLE,                                    // TrackableParser emits updates of this type.
 
 	// System
@@ -329,8 +330,11 @@ enum class CS_TYPE: uint16_t {
 	CMD_GET_ADC_CHANNEL_SWAPS,                        // Get number of detected ADC channel swaps.
 	CMD_GET_RAM_STATS,                                // Get RAM statistics.
 
-	CMD_MICROAPP,                                     // MicroApp upload (e.g. Arduino code).
-	EVT_MICROAPP,                                     // MicroApp event (e.g. write done)
+	CMD_MICROAPP,                                     // Microapp upload (e.g. Arduino code).
+	EVT_MICROAPP,                                     // Microapp event (e.g. write done)
+	CMD_MICROAPP_ADVERTISE,                           // A microapp wants to advertise something.
+
+	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
 
 	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
 	EVT_GENERIC_TEST = 0xFFFF,                        // Can be used by the python test python lib for ad hoc tests during development.
@@ -544,6 +548,7 @@ typedef internal_update_tracked_device_packet_t TYPIFY(CMD_UPDATE_TRACKED_DEVICE
 typedef internal_tracked_device_heartbeat_packet_t TYPIFY(CMD_TRACKED_DEVICE_HEARTBEAT);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
 typedef presence_change_t TYPIFY(EVT_PRESENCE_CHANGE);
+typedef void TYPIFY(CMD_GET_PRESENCE);
 typedef profile_location_t TYPIFY(EVT_RECEIVED_PROFILE_LOCATION);
 typedef TrackableEvent TYPIFY(EVT_TRACKABLE);
 
@@ -571,10 +576,12 @@ typedef void TYPIFY(CMD_GET_ADC_CHANNEL_SWAPS);
 typedef void TYPIFY(CMD_GET_RAM_STATS);
 typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP);
 typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
+typedef microapp_advertise_request_t TYPIFY(CMD_MICROAPP_ADVERTISE);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
+typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT);
 
 /**

@@ -53,6 +53,19 @@ const uart_msg_status_user_t& UartConnection::getUserStatus() {
 	return _userStatus;
 }
 
+void UartConnection::onHello(const uart_msg_status_user_flags_t& flags) {
+	LOGUartconnectionDebug("Set user flags");
+	_userStatus.flags = flags;
+
+	TYPIFY(CONFIG_SPHERE_ID) sphereId;
+	State::getInstance().get(CS_TYPE::CONFIG_SPHERE_ID, &sphereId, sizeof(sphereId));
+
+	uart_msg_hello_t hello;
+	hello.sphereId = sphereId;
+	hello.status = _status;
+	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HELLO, (uint8_t*)&hello, sizeof(hello));
+}
+
 void UartConnection::onUserStatus(const uart_msg_status_user_t& status) {
 	LOGUartconnectionDebug("Set user status");
 	_userStatus = status;
@@ -88,6 +101,9 @@ cs_ret_code_t UartConnection::getSessionNonceTx(cs_data_t data) {
 	if (data.data == nullptr || data.len < SESSION_NONCE_LENGTH) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
+	if (!_sessionNonceValid) {
+		return ERR_NOT_FOUND;
+	}
 	memcpy(data.data, _sessionNonceTx, SESSION_NONCE_LENGTH);
 	return ERR_SUCCESS;
 }
@@ -95,6 +111,9 @@ cs_ret_code_t UartConnection::getSessionNonceTx(cs_data_t data) {
 cs_ret_code_t UartConnection::getSessionNonceRx(cs_data_t data) {
 	if (data.data == nullptr || data.len < SESSION_NONCE_LENGTH) {
 		return ERR_BUFFER_TOO_SMALL;
+	}
+	if (!_sessionNonceValid) {
+		return ERR_NOT_FOUND;
 	}
 	memcpy(data.data, _sessionNonceRx, SESSION_NONCE_LENGTH);
 	return ERR_SUCCESS;
