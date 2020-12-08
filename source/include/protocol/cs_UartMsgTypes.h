@@ -101,6 +101,7 @@ enum ElementType {
 	ELEMENT_TYPE_SIGNED_INTEGER = 0,
 	ELEMENT_TYPE_UNSIGNED_INTEGER = 1,
 	ELEMENT_TYPE_FLOAT = 2,
+	ELEMENT_TYPE_FROM_FORMAT = 10,
 };
 
 struct __attribute__((__packed__)) uart_msg_log_array_header_t {

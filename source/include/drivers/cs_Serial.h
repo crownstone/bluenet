@@ -126,10 +126,24 @@ constexpr uint32_t fileNameHash(const char* str, size_t strLen) {
 					cs_write_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addPrefix, addNewLine, ##__VA_ARGS__); \
 				}
 
-		#define _logArray(level, addPrefix, addNewLine, pointer, size) \
+		#define _logArray0(level, addPrefix, addNewLine, pointer, size) \
 				if (level <= SERIAL_VERBOSITY) { \
 					cs_write_data(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addPrefix, addNewLine, pointer, size); \
 				}
+
+		#define _logArray1(level, addPrefix, addNewLine, pointer, size, elementFmt) \
+				if (level <= SERIAL_VERBOSITY) { \
+					cs_write_data(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addPrefix, addNewLine, reinterpret_cast<const uint8_t* const>(pointer), size, ELEMENT_TYPE_FROM_FORMAT, sizeof(pointer[0])); \
+				}
+
+		// Helper function that returns argument 1 (which is once of the definitions).
+		#define _logArrayGetArg1(arg0, arg1, arg2, ...) arg2
+
+		// Helper function that returns a defined function with the number of arguments in VA_ARGS.
+		#define _logArrayChooser(...) _logArrayGetArg1(##__VA_ARGS__, _logArray1, _logArray0)
+
+//		#define _logArray(level, addPrefix, addNewLine, pointer, size, ...) _logArrayChooser(##__VA_ARGS__)(level, addPrefix, addNewLine, pointer, size, ##__VA_ARGS__)
+		#define _logArray(level, addPrefix, addNewLine, pointer, size, ...) _logArray0(level, addPrefix, addNewLine, pointer, size, ##__VA_ARGS__)
 
 		#define logLN(level, fmt, ...) _log(level, true, true, fmt, ##__VA_ARGS__)
 

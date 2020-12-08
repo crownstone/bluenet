@@ -452,6 +452,7 @@ void MeshCore::start() {
 	const uint8_t *uuid = nrf_mesh_configure_device_uuid_get();
 	_log(SERIAL_DEBUG, true, false, "Device UUID: ");
 //	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
+//	_logArray(SERIAL_DEBUG, false, true, uuid, NRF_MESH_UUID_SIZE, "%02X");
 	_logArray(SERIAL_DEBUG, false, true, uuid, NRF_MESH_UUID_SIZE);
 	retCode = mesh_stack_start();
 	APP_ERROR_CHECK(retCode);
