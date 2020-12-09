@@ -45,11 +45,18 @@ enum CommandMicroappLog {
 	CS_MICROAPP_COMMAND_LOG_STR      = 0x02,
 };
 
+enum CommandMicroappPinOpcode {
+	CS_MICROAPP_COMMAND_PIN_READ          = 0x01,
+	CS_MICROAPP_COMMAND_PIN_WRITE         = 0x02,
+	CS_MICROAPP_COMMAND_PIN_I2C_READ      = 0x03,
+	CS_MICROAPP_COMMAND_PIN_I2C_WRITE     = 0x04,
+};
+
 enum CommandMicroappPin {
 	CS_MICROAPP_COMMAND_PIN_SWITCH   = 0x01,
 };
 
-enum CommandMicroappSwitch {
+enum CommandMicroappPinSwitch {
 	CS_MICROAPP_COMMAND_SWITCH_OFF   = 0x00,
 	CS_MICROAPP_COMMAND_SWITCH_ON    = 0x01,
 };

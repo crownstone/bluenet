@@ -232,11 +232,17 @@ ELSE()
 		MESSAGE(STATUS "SERIAL from NORDIC disabled")
 	ENDIF()
 
-	IF (BUILD_MICROAPP_SUPPORT) 
+	IF (BUILD_MICROAPP_SUPPORT)
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage.c")
 		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/fstorage/nrf_fstorage_sd.c")
 	ELSE()
 		MESSAGE(STATUS "Microapp support disabled, no fstorage module required")
+	ENDIF()
+
+	IF (BUILD_TWI)
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_twi.c")
+	ELSE()
+		MESSAGE(STATUS "Module for twi disabled")
 	ENDIF()
 
 	IF (BUILD_MESHING)

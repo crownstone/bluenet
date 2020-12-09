@@ -174,7 +174,11 @@
 // <1=> Remove WDT IRQ handling
 #define NRFX_WDT_CONFIG_NO_IRQ 1
 
-
+// Enable TWI
+// Still TWI0_ENABLED rather than NRFX_TWI0_ENABLED which won't work
+#ifdef BUILD_TWI
+#define TWI0_ENABLED 1
+#endif
 
 
 //#define NRFX_SAADC_ENABLED 1

@@ -46,6 +46,10 @@ typedef uint32_t ret_code_t;
 //#include <nrf_drv_comp.h>
 #include <nrfx_wdt.h>
 
+#ifdef BUILD_TWI
+#include <nrfx_twi.h>
+#endif
+
 #if CS_SERIAL_NRF_LOG_ENABLED > 0
 #include <nrfx_log.h>
 #include <nrf_log_ctrl.h>

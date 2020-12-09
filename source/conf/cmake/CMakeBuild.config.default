@@ -91,6 +91,9 @@ CHANGE_NAME_ON_RESET=0
 # Enable Arduino like apps
 BUILD_MICROAPP_SUPPORT=0
 
+# Enable i2c/twi
+BUILD_TWI=0
+
 # Enable RSSI data tracker
 RSSI_DATA_TRACKER_ENABLED=0
 
