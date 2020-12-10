@@ -9,6 +9,15 @@
 
 /**
  * Logger class for C code.
+ *
+ * Generally, you want to use: CLOGv, CLOGd, CLOGi, CLOGw, CLOGe, or CLOGf.
+ * These can be used like printf(), but without padding, flags, width, or other specifier.
+ *
+ * The logs will always be written to UART in plain text.
+ *
+ * Since the log functions have an unknown amount of arguments, these macros require a variadic macro as well.
+ * See http://www.wikiwand.com/en/Variadic_macro.
+ * The two ## are e.g. a gcc specific extension that removes the , so that the ... arguments can also be left out.
  */
 
 #include <drivers/cs_Serial.h> // For SERIAL_VERBOSITY.

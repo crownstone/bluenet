@@ -16,9 +16,6 @@
 	static char _logBuffer[128];
 	#endif
 
-	/**
-	 * A write function with a format specifier.
-	 */
 	void cs_log_printf(const char *str, ...) {
 	#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
 		va_list ap;

@@ -9,6 +9,17 @@
 
 /**
  * Logger class.
+ *
+ * Generally, you want to use: LOGnone, LOGv, LOGd, LOGi, LOGw, LOGe, or LOGf.
+ * These can be used like printf(), except that they will always add a newline.
+ *
+ * With binary logging, the arguments are not first converted into plain text before sending them over the UART.
+ * This is why templated and specialized functions are required for the implementation.
+ * This saves a lot of bytes to be sent, and saves binary size, as the strings do not end up in the firmware.
+ *
+ * Since the log functions have an unknown amount of arguments, these macros require a variadic macro as well.
+ * See http://www.wikiwand.com/en/Variadic_macro.
+ * The two ## are e.g. a gcc specific extension that removes the , so that the ... arguments can also be left out.
  */
 
 #ifdef HOST_TARGET
@@ -207,9 +218,11 @@
 		cs_log_end();
 	}
 
+	// Write logs as plain text.
 	#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 		void cs_log_printf(const char *str, ...);
 
+		// Adding the file name and line number, adds a lot to the binary size.
 		#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__)
 
 		#undef _log
@@ -222,14 +235,14 @@
 		#define _logArray(level, addNewLine, pointer, size, ...)
 	#endif
 
-	/**
-	 * Write a string with printf functionality.
-	 */
+	// Write a string with printf functionality.
 	#ifdef HOST_TARGET
+		#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__)
+
 		#undef _log
 		#define _log(level, addNewLine, fmt, ...) \
 				if (level <= SERIAL_VERBOSITY) { \
-					printf(fmt"\r\n", ##__VA_ARGS__); \
+					printf("[%-30.30s : %-4d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__); \
 				}
 
 		#undef _logArray

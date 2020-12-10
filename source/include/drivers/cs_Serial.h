@@ -20,18 +20,10 @@ extern "C" {
 #include <util/cs_BleError.h>
 
 
-/*
- * Commonly LOG functionality is provided with as first parameter the level of severity of the message. Subsequently
- * the message follows, eventually succeeded by content if the string contains format specifiers. This means that this
- * requires a variadic macro as well, see http://www.wikiwand.com/en/Variadic_macro. The two ## are e.g. a gcc
- * specific extension that removes the , after __LINE__, so log(level, msg) can also be used without arguments.
- *
- * The log levels follow more or less common conventions with a few exeptions. There are some modes in which we run
+/**
+ * The log levels follow more or less common conventions with a few exceptions. There are some modes in which we run
  * where even fatal messages will not be written to console. In production we use SERIAL_NONE, SERIAL_READ_ONLY, or
  * SERIAL_BYTE_PROTOCOL_ONLY.
- *
- * TODO: Somehow all namespaces are removed. This leads to conflicts! The function "log" means something if you
- * include <cmath>...
  */
 #define SERIAL_NONE                 0
 #define SERIAL_READ_ONLY            1
