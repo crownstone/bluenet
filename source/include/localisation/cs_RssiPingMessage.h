@@ -10,15 +10,9 @@
 
 
 /**
- * Sent between crownstones in a mesh with TTL 0 in order to find out
- * what the rssi between each pair of nodes is.
- *
- * For now, ping messages are echoed once when all information is gathered
- * so that all rssi-pairs can be recorded using a single crownstone for
- * debugging purpose.
+ * Sent from a crownstone when it has too little rssi information from
+ * its neighbors.
  */
 struct __attribute__((__packed__)) rssi_ping_message_t {
-	stone_id_t sender_id;
-	int8_t rssi;
-	uint8_t channel;
+
 };
