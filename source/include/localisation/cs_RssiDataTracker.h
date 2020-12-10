@@ -9,12 +9,12 @@
 #include <cstdint>
 #include <events/cs_EventListener.h>
 #include <localisation/cs_RssiPingMessage.h>
+#include <localisation/cs_RssiDataMessage.h>
 
 #include <util/cs_Coroutine.h>
 #include <util/cs_Variance.h>
 
 #include <map>
-#include <utility>  // for pair
 
 /**
  * Launches ping messages into the mesh and receives them in order to
@@ -65,6 +65,11 @@ public:
 	 * When receiving a ping message with both sender and receiver
 	 * filled in, push data to test host.
 	 *
+	 * input:
+	 *  - EVT_MESH_RSSI_PING
+	 *  - EVT_RECV_MESH_MSG
+	 * output:
+	 *  - CMD_SEND_MESH_MSG -> CS_MESH_MODEL_TYPE_RSSI_PING
 	 */
 	void handleEvent(event_t& evt);
 
@@ -75,50 +80,14 @@ public:
 
 private:
 	stone_id_t my_id = 0xff;
-	uint8_t ping_sample_index = 0;
+
+	// stores the relevant history, per neighbor stone_id.
+	std::map<stone_id_t,int8_t> last_received_rssi = {};
+	std::map<stone_id_t,OnlineVarianceRecorder> variance_recorders = {};
+
+	// --------------- Coroutine parameters ---------------
 
 	Coroutine flushRoutine;
-
-	// stores the relevant history, the stone id pairs are order dependent: (sender, receiver)
-	using StonePair = std::pair<stone_id_t,stone_id_t>;
-
-	template <class T>
-	using StonePairMap = std::map<StonePair, T>;
-
-	StonePairMap<uint8_t> last_received_sample_indices = {};
-	StonePairMap<int8_t> last_received_rssi = {};
-	StonePairMap<OnlineVarianceRecorder> variance_recorders = {};
-
-	/**
-	 * Sends a primary ping message over the mesh, containing only the
-	 * sample_id of this RssiDataTracker to enable duplication filtering.
-	 */
-	void sendPrimaryPingMessage();
-
-	/**
-	 * Checks is ping_msg contains all the data to be called a secondary
-	 * ping message and send it if it suffices.
-	 *
-	 * Return true if it was a secondary message, else false.
-	 */
-	bool sendSecondaryPingMsg(rssi_ping_message_t* ping_msg);
-
-	/**
-	 * Sends the given ping_msg over the mesh without any further checking.
-	 */
-	void sendPingMsg(rssi_ping_message_t* ping_msg);
-
-	/**
-	 * Sends a secondary ping message for each of the pairs of crownstones
-	 * in the local maps, together with the (oriented) average rssi value
-	 * between those stones. After that, clear all the maps.
-	 *
-	 * Coroutine method:
-	 * To prevent the mesh from flooding, flushing is throttled.
-	 * - Flush period: 30 minutes
-	 * - Burst period: 5 milliseconds
-	 */
-	uint32_t flushAggregatedRssiData();
 
 	/**
 	 * When flushAggregatedRssiData is in the flushing phase,
@@ -142,62 +111,70 @@ private:
 	 */
 	static constexpr uint32_t accumulation_period_ms = 30 * 60 * 1000;
 
-	/**
-	 * Sends the given ping message over UART.
-	 */
-	void pushPingMsgToHost(rssi_ping_message_t* ping_msg);
+	// -------------------- Methods --------------------
 
 	/**
-	 * Forwards message over mesh
-	 * Records ping message
+	 * Coroutine method:
+	 * To prevent the mesh from flooding, flushing is throttled.
+	 * - Flush period: 30 minutes
+	 * - Burst period: 5 milliseconds
+	 *
+	 * Broadcasts a rssi_data_message_t for each of the pairs of crownstones
+	 * in the local maps, together with the (oriented) average rssi value
+	 * between those stones. After that, clear all the maps.
+	 *
 	 */
-	void handlePrimaryPingMessage(rssi_ping_message_t* ping_msg);
+	uint32_t flushAggregatedRssiData();
+
+	// ------------- generating rssi data-------------
 
 	/**
-	 * Forwards message to test suite
-	 * Records ping message
+	 * Dispatches an event of type CMD_SEND_MESH_MSG
+	 * in order to send a CS_MESH_MODEL_TYPE_RSSI_PING.
 	 */
-	void handleSecondaryPingMessage(rssi_ping_message_t* ping_msg);
+	void sendPingRequestOverMesh();
 
 	/**
-	 * We forge a ping_message, bypass duplicate filtering and
-	 * call recordRssiValue(ping_msg).
+	 * Dispatches an event of type CMD_SEND_MESH_MSG
+	 * in order to send a CMD_SEND_MESH_MSG_NOOP.
+	 *
+	 * (This nop will be handled by receiveGenericMeshMessage)
 	 */
-	void handleGenericMeshMessage(MeshMsgEvent* mesh_msg_evt);
+	void sendPingResponseOverMesh();
 
 	/**
-	 * Extract StonePair and then logs:
-	 * - recordSampleId
-	 * - recordRssi
+	 * If the ping message is a request that has not hopped,
+	 * call sendPingResponseOverMesh(); Else do nothing.
 	 */
-	void recordPingMsg(rssi_ping_message_t* ping_msg);
+	void receivePingMessage(rssi_ping_message_t* ping_msg);
+
+	// ------------- communicating rssi data -------------
 
 	/**
-	 * Saves sample_id for the stone pair to the sample id map.
+	 *
 	 */
-	void recordSampleId(StonePair, uint8_t sample_id);
+	void sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message);
+
+	/**
+	 *
+	 */
+	void sendRssiDataOverUart(rssi_data_message_t* rssi_data_message);
+
+	/**
+	 * Any received rssi_data_message_t will be sendRssiDataOverUart
+	 */
+	void receiveRssiDataMessage(rssi_data_message_t* rssi_data_message);
+
+
+	// ------------- recording mesh messages -------------
+
+	/**
+	 * If the hop count of the Records the rssi value data
+	 */
+	void receiveGenericMeshMessage(MeshMsgEvent* mesh_msg_evt);
 
 	/**
 	 * Saves rssi value to last received map and variance recorder map.
 	 */
-	void recordRssiValue(StonePair stone_pair, int8_t rssi);
-
-	/**
-	 * Filters out ping messages that have been seen recently.
-	 *
-	 * Extracts stonepair = {sender, recipient} from p and if
-	 * p also has a sample index equal to the last one logged
-	 * with recordSampleId, nullptr is returned.
-	 * Else p is returned.
-	 */
-	rssi_ping_message_t* filterSampleIndex(rssi_ping_message_t* p);
-
-	// mapping utils
-	// Note: the stone id pairs are order dependent: (sender, receiver)
-	inline StonePair getKey(stone_id_t i, stone_id_t j){
-		return {i,j};
-	}
-	inline StonePair getKey(rssi_ping_message_t* p){
-		return getKey(p->sender_id, p->recipient_id);
-	}
+	void recordRssiValue(stone_id_t sender_id, int8_t rssi);
 };

@@ -19,8 +19,6 @@
  */
 struct __attribute__((__packed__)) rssi_ping_message_t {
 	stone_id_t sender_id;
-	stone_id_t recipient_id;
-	uint8_t sample_id;
 	int8_t rssi;
 	uint8_t channel;
 };
