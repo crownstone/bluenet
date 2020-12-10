@@ -6,12 +6,11 @@
 #pragma once
 
 #include <ble/cs_Nordic.h>
-#include <drivers/cs_Serial.h>
 #include <util/cs_Error.h>
+#include <logging/cs_CLogger.h>
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 
@@ -37,7 +36,7 @@ void mesh_assertion_handler(uint32_t pc);
 			const uint32_t LOCAL_ret_code_t = (ret_code_t);                                                            \
 			if (LOCAL_ret_code_t != NRF_SUCCESS)                                                                       \
 			{                                                                                                          \
-				LOGe("ret_code_t: $nordicFDSTypeName(%u) (0x%X)", LOCAL_ret_code_t, LOCAL_ret_code_t);                 \
+				CLOGe("ret_code_t: $nordicFDSTypeName(%u) (0x%X)", LOCAL_ret_code_t, LOCAL_ret_code_t);                 \
 			}                                                                                                          \
 		} while (0)
 
@@ -62,14 +61,14 @@ void mesh_assertion_handler(uint32_t pc);
 			const uint32_t LOCAL_cs_ret_code_t = (cs_ret_code_t);                                                      \
 			if (LOCAL_cs_ret_code_t != NRF_SUCCESS)                                                                    \
 			{                                                                                                          \
-				LOGe("cs_ret_code_t: $nordicTypeName(%u) (0x%X)", LOCAL_cs_ret_code_t, LOCAL_cs_ret_code_t);           \
+				CLOGe("cs_ret_code_t: $nordicTypeName(%u) (0x%X)", LOCAL_cs_ret_code_t, LOCAL_cs_ret_code_t);           \
 				APP_ERROR_HANDLER(LOCAL_cs_ret_code_t);                                                                \
 			}                                                                                                          \
 		} while (0)
 
 #define APP_ERROR_CHECK_EXCEPT(cs_ret_code_t, EXCEPTION)                                                               \
 		if (cs_ret_code_t == EXCEPTION) {                                                                              \
-			LOGw(STRINGIFY(EXCEPTION));                                                                                \
+			CLOGw(STRINGIFY(EXCEPTION));                                                                                \
 		} else {                                                                                                       \
 			APP_ERROR_CHECK(cs_ret_code_t);                                                                            \
 		}
@@ -116,14 +115,14 @@ void mesh_assertion_handler(uint32_t pc);
 	#define BLE_THROW_IF(result, message)                               \
 			do {                                                        \
 				if (result != NRF_SUCCESS) {                            \
-					LOGd("BLE_THROW: %s", message);                     \
+					CLOGd("BLE_THROW: %s", message);                     \
 					ble_error_handler(message, __LINE__, __FILE__);     \
 				}                                                       \
 			} while(0)
 
 	#define BLE_THROW(message)                                          \
 			do {                                                        \
-				LOGd("BLE_THROW: %s", message);                         \
+				CLOGd("BLE_THROW: %s", message);                         \
 				ble_error_handler(message, __LINE__, __FILE__);         \
 			} while(0)
 

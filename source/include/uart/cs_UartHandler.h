@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <drivers/cs_Serial.h>
 #include <encryption/cs_AES.h>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_UartProtocol.h>

@@ -11,7 +11,7 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <cfg/cs_Strings.h>
 #include <drivers/cs_GpRegRet.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <ipc/cs_IpcRamData.h>
 #include <processing/cs_CommandHandler.h>

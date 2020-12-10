@@ -9,7 +9,7 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_Temperature.h>
 #include <encryption/cs_AES.h>
 #include <encryption/cs_KeysAndAccess.h>

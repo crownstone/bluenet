@@ -7,7 +7,7 @@
 
 #include "drivers/cs_PWM.h"
 #include "util/cs_BleError.h"
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 #include "cfg/cs_Strings.h"
 #include "protocol/cs_ErrorCodes.h"
 

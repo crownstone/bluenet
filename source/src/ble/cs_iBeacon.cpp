@@ -7,6 +7,7 @@
 
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Strings.h>
+#include <logging/cs_Logger.h>
 
 //#define PRINT_IBEACON_VERBOSE
 

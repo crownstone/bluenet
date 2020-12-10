@@ -449,11 +449,10 @@ void MeshCore::start() {
 //	}
 	LOGMeshInfo("ACCESS_FLASH_ENTRY_SIZE=%u", ACCESS_FLASH_ENTRY_SIZE);
 
-	const uint8_t *uuid = nrf_mesh_configure_device_uuid_get();
 	_log(SERIAL_DEBUG, false, "Device UUID: ");
 //	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
 //	_logArray(SERIAL_DEBUG, true, uuid, NRF_MESH_UUID_SIZE, "%02X");
-	_logArray(SERIAL_DEBUG, true, uuid, NRF_MESH_UUID_SIZE);
+	_logArray(SERIAL_DEBUG, true, nrf_mesh_configure_device_uuid_get(), NRF_MESH_UUID_SIZE);
 	retCode = mesh_stack_start();
 	APP_ERROR_CHECK(retCode);
 }

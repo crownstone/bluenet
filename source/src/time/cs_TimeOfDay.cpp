@@ -10,7 +10,7 @@
 #include <time/cs_TimeOfDay.h>
 #include <util/cs_WireFormat.h>
 
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 void TimeOfDay::wrap(){ 
     switch(base){

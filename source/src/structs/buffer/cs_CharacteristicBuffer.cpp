@@ -7,7 +7,7 @@
 
 #include <cstring>
 #include <cstdlib>
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 #include "structs/buffer/cs_CharacteristicBuffer.h"
 #include "util/cs_Error.h"
 

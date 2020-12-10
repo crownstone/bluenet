@@ -7,7 +7,7 @@
 
 #include <ble/cs_Nordic.h>
 #include <drivers/cs_GpRegRet.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <util/cs_BleError.h>
 
 // Set true to enable debug logs.

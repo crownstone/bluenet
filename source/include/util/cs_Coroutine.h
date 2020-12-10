@@ -10,7 +10,6 @@
 
 #include <drivers/cs_Timer.h>
 #include <drivers/cs_RTC.h>
-#include <drivers/cs_Serial.h>
 
 // coroutines
 // note: coroutine is currently built upon the event buss tickrate

@@ -7,7 +7,6 @@
 #pragma once
 
 #include "cfg/cs_Config.h"
-#include "drivers/cs_Serial.h"
 #include "protocol/cs_CommandTypes.h"
 #include "protocol/cs_ErrorCodes.h"
 #include "structs/cs_PacketsInternal.h"

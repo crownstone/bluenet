@@ -12,7 +12,7 @@
 #include <cfg/cs_Strings.h>
 #include <drivers/cs_ADC.h>
 #include <drivers/cs_RTC.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <uart/cs_UartHandler.h>
 #include <structs/buffer/cs_AdcBuffer.h>

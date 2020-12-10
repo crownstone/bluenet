@@ -9,7 +9,7 @@
 
 #include "common/cs_Types.h"
 #include "drivers/cs_RTC.h"
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 #include "events/cs_EventDispatcher.h"
 #include "processing/cs_RecognizeSwitch.h"
 #include "protocol/cs_UartMsgTypes.h"

@@ -5,23 +5,22 @@
  */
 #pragma once
 
+#include <logging/cs_CLogger.h>
 
 #ifdef	NDEBUG
 //! for release version ignore asserts
 #define assert(expr, message) \
 	if (!(expr)) { \
-		LOGe("%s", message); \
+		CLOGe("%s", message); \
 	}
 
 #else
 
-extern "C" {
 #include <util/cs_Syscalls.h>
-}
 
 #define assert(expr, message) \
 	if (!(expr)) { \
-		LOGe("%s", message); \
+		CLOGe("%s", message); \
 		_exit(1); \
 	}
 

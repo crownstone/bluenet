@@ -6,7 +6,7 @@
  */
 
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <encryption/cs_AES.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <encryption/cs_RC5.h>

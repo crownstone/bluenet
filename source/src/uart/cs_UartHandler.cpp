@@ -8,6 +8,7 @@
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_Serial.h>
 #include <events/cs_EventDispatcher.h>
+#include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
 #include <uart/cs_UartCommandHandler.h>
 #include <uart/cs_UartConnection.h>
@@ -31,6 +32,10 @@ extern "C" {
 
 void handle_msg(void * data, uint16_t size) {
 	UartHandler::getInstance().handleMsg((cs_data_t*)data);
+}
+
+void on_serial_read(uint8_t val) {
+	UartHandler::getInstance().onRead(val);
 }
 
 void UartHandler::init(serial_enable_t serialEnabled) {
@@ -62,6 +67,9 @@ void UartHandler::init(serial_enable_t serialEnabled) {
 	// TODO: get UART key?
 
 	UartConnection::getInstance().init();
+
+	// We are now ready to receive uart messages.
+	serial_set_read_callback(on_serial_read);
 
 	writeMsg(UART_OPCODE_TX_BOOTED);
 
@@ -167,7 +175,8 @@ ret_code_t UartHandler::writeMsgPart(UartOpcodeTx opCode, const uint8_t* const d
 	switch(opCode) {
 		case UART_OPCODE_TX_TEXT:
 			// Now only the special chars get escaped, no header and tail.
-			writeBytes(cs_data_t(data, size), false);
+			// TODO: make writeBytes() const
+			writeBytes(cs_data_t((uint8_t*)data, size), false);
 			return ERR_SUCCESS;
 		default:
 			return ERR_SUCCESS;

@@ -9,7 +9,7 @@
 
 #include <algorithm>
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>

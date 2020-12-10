@@ -7,7 +7,7 @@
 
 #include <presence/cs_PresencePredicate.h>
 #include <util/cs_WireFormat.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <time/cs_SystemTime.h>
 
 PresencePredicate::PresencePredicate(Condition c, PresenceStateDescription roomsMask): 

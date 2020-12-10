@@ -6,7 +6,7 @@
  */
 
 #include <protocol/mesh/cs_MeshModelPacketHelper.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 #include <localisation/cs_RssiPingMessage.h>
 

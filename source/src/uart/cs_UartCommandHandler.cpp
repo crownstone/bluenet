@@ -5,7 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <events/cs_EventDispatcher.h>
 #include <protocol/cs_UartMsgTypes.h>

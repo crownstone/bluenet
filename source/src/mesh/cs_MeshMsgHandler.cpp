@@ -6,7 +6,7 @@
  */
 
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <events/cs_Event.h>
 #include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshMsgHandler.h>

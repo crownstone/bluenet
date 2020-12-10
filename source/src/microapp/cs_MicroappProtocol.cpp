@@ -14,7 +14,7 @@
 #include <ble/cs_UUID.h>
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
@@ -92,12 +92,12 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 			char type = payload[1];
 			switch(type) {
 				case CS_MICROAPP_COMMAND_LOG_CHAR: {
-					char value = payload[2];
+					__attribute__((unused)) char value = payload[2];
 					LOGi("%i", (int)value);
 					break;
 				}
 				case CS_MICROAPP_COMMAND_LOG_INT: {
-					int value = (payload[2] << 8) + payload[3];
+					__attribute__((unused)) int value = (payload[2] << 8) + payload[3];
 					LOGi("%i", value);
 					break;
 				}

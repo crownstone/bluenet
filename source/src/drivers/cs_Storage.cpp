@@ -8,7 +8,7 @@
 
 #include <climits>
 #include <common/cs_Handlers.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <float.h>

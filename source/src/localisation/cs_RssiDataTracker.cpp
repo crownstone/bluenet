@@ -1,7 +1,7 @@
 #include <localisation/cs_RssiDataTracker.h>
 
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_Timer.h>
 #include <events/cs_Event.h>
 #include <storage/cs_State.h>

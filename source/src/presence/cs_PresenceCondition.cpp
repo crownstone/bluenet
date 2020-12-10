@@ -8,7 +8,7 @@
 
 #include <presence/cs_PresenceCondition.h>
 #include <util/cs_WireFormat.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 PresenceCondition::PresenceCondition(PresencePredicate p, uint32_t t) : 
     pred(p), timeOut(t){}

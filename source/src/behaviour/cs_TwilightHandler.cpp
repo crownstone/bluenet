@@ -12,7 +12,7 @@
 
 #include <test/cs_Test.h>
 #include <time/cs_SystemTime.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 #define LOGTwilightHandlerDebug LOGnone
 

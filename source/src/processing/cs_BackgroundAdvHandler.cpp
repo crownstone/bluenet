@@ -9,7 +9,7 @@
 
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <ble/cs_Nordic.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <encryption/cs_RC5.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_CommandHandler.h>

@@ -12,7 +12,7 @@
 #include <storage/cs_State.h>
 
 #include <drivers/cs_RNG.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 #define LOGPresenceHandler LOGnone
 

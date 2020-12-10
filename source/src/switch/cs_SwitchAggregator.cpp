@@ -10,6 +10,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <presence/cs_PresenceHandler.h>
 #include <util/cs_Utils.h>
+#include <logging/cs_Logger.h>
 
 #include <test/cs_Test.h>
 
