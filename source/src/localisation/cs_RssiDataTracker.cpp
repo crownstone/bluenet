@@ -190,70 +190,46 @@ void RssiDataTracker::pushPingMsgToHost(rssi_ping_message_t *ping_msg) {
 			sizeof(*ping_msg));
 }
 
-void RssiDataTracker::handleGenericMeshMessage(MeshMsgEvent *mesh_msg_evt) {
-	if (mesh_msg_evt == nullptr || mesh_msg_evt->hops > 1) {
+// ------------- recording mesh messages -------------
+
+void RssiDataTracker::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
+	if (mesh_msg_evt->hops > 1) { // TODO: 0 hops, or 1 hops?!
 		// can't interpret the rssi value in this case.
 		return;
 	}
 
-	rssi_ping_message_t forged_ping_msg;
-	forged_ping_msg.sample_id = 0x00;
-	forged_ping_msg.recipient_id = my_id;
-	forged_ping_msg.sender_id = mesh_msg_evt->srcAddress;
-	forged_ping_msg.rssi = mesh_msg_evt->rssi;
-	forged_ping_msg.channel = mesh_msg_evt->channel;
-
-	auto stone_pair = getKey(&forged_ping_msg);
-	recordRssiValue(stone_pair, forged_ping_msg.rssi);
+	recordRssiValue(
+			mesh_msg_evt.srcAddress,
+			mesh_msg_evt.rssi,
+			mesh_msg_evt.channel
+			);
 }
 
-rssi_ping_message_t* RssiDataTracker::filterSampleIndex(
-        rssi_ping_message_t *p) {
-	if (p == nullptr) {
-		return nullptr;
-	}
-
-	auto p_key = getKey(p);
-
-	if (last_received_sample_indices[p_key] == p->sample_id) {
-		// sample index should be incremented each ping message,
-		// a second (third...) message from crownstone_id with a previously
-		// recorded sample_id is filtered out.
-		RSSIDATATRACKER_LOGv("filtered out stale ping message (%d -> %d) %d",
-				p->sender_id, p->recipient_id, p->sample_id);
-		return nullptr;
-	}
-
-	return p;
-}
-
-uint32_t received_pingcounter = 0;
 void RssiDataTracker::handleEvent(event_t &evt) {
 	if (flushRoutine.handleEvent(evt)) {
 		return;
 	}
 
-	switch (evt.type) {
-		case CS_TYPE::EVT_MESH_RSSI_PING: {
-			auto pingmsg_ptr = reinterpret_cast<rssi_ping_message_t*>(evt.data);
-			RSSIDATATRACKER_LOGv("incoming pingcounter: %d ", received_pingcounter++);
-			if (pingmsg_ptr->recipient_id == 0) {
-				handlePrimaryPingMessage(pingmsg_ptr);
-			} else {
-				handleSecondaryPingMessage(pingmsg_ptr);
+	if (evt.type == CS_TYPE::CS_TYPE_EVT_RECV_MESH_MSG) {
+		auto& meshMsgEvent = *UNTYPIFY(CS_TYPE::EVT_RECV_MESH_MSG, evt.getData());
+
+		receiveMeshMsgEvent(meshMsgEvent);
+
+		switch (meshMsgEvent->type) {
+			case CS_MESH_MODEL_TYPE_RSSI_PING: {
+				receivePingMessage(
+						meshMsgEvent->getPacket<CS_MESH_MODEL_TYPE_RSSI_PING>());
+				break;
 			}
-
-			break;
+			case CS_MESH_MODEL_TYPE_RSSI_DATA: {
+				receiveRssiDataMessage(
+							meshMsgEvent->getPacket<CS_MESH_MODEL_TYPE_RSSI_DATA>());
+				break;
+			}
+			default: {
+				break;
+			}
 		}
-
-		case CS_TYPE::EVT_RECV_MESH_MSG: {
-			auto meshMsgEvent = reinterpret_cast<MeshMsgEvent*>(evt.getData());
-			handleGenericMeshMessage(meshMsgEvent);
-			break;
-		}
-
-		default:
-			break;
 	}
 
 	return;

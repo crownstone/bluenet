@@ -82,8 +82,12 @@ private:
 	stone_id_t my_id = 0xff;
 
 	// stores the relevant history, per neighbor stone_id.
-	std::map<stone_id_t,int8_t> last_received_rssi = {};
-	std::map<stone_id_t,OnlineVarianceRecorder> variance_recorders = {};
+	std::map<stone_id_t,int8_t> last_received_rssi_ch37 = {};
+	std::map<stone_id_t,int8_t> last_received_rssi_ch38 = {};
+	std::map<stone_id_t,int8_t> last_received_rssi_ch39 = {};
+	std::map<stone_id_t,OnlineVarianceRecorder> variance_recorders_ch37 = {};
+	std::map<stone_id_t,OnlineVarianceRecorder> variance_recorders_ch38 = {};
+	std::map<stone_id_t,OnlineVarianceRecorder> variance_recorders_ch39 = {};
 
 	// --------------- Coroutine parameters ---------------
 
@@ -146,7 +150,7 @@ private:
 	 * If the ping message is a request that has not hopped,
 	 * call sendPingResponseOverMesh(); Else do nothing.
 	 */
-	void receivePingMessage(rssi_ping_message_t* ping_msg);
+	void receivePingMessage(rssi_ping_message_t& ping_msg);
 
 	// ------------- communicating rssi data -------------
 
@@ -163,18 +167,21 @@ private:
 	/**
 	 * Any received rssi_data_message_t will be sendRssiDataOverUart
 	 */
-	void receiveRssiDataMessage(rssi_data_message_t* rssi_data_message);
+	void receiveRssiDataMessage(rssi_data_message_t& rssi_data_message);
 
 
 	// ------------- recording mesh messages -------------
 
 	/**
-	 * If the hop count of the Records the rssi value data
+	 * If the hop count of the message is 0,
+	 * Records the rssi value data.
+	 * If type is ping message: receivePingMessage
+	 * If type is rssi data message: receiveRssiDataMessage
 	 */
-	void receiveGenericMeshMessage(MeshMsgEvent* mesh_msg_evt);
+	void receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt);
 
 	/**
 	 * Saves rssi value to last received map and variance recorder map.
 	 */
-	void recordRssiValue(stone_id_t sender_id, int8_t rssi);
+	void recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t channel);
 };
