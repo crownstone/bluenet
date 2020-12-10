@@ -18,7 +18,7 @@
 #include <cstdint>
 #include <protocol/cs_UartMsgTypes.h>
 #include <drivers/cs_Serial.h> // For SERIAL_VERBOSITY.
-
+#include <cfg/cs_Strings.h> // Should actually be included by the files that use these.
 
 
 // To disable particular logs, but without commenting it.
@@ -54,17 +54,17 @@
 
 		#define _log(level, addNewLine, fmt, ...) \
 				if (level <= SERIAL_VERBOSITY) { \
-					cs_write_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, ##__VA_ARGS__); \
+					cs_log_args(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, ##__VA_ARGS__); \
 				}
 
 		#define _logArray0(level, addNewLine, pointer, size) \
 				if (level <= SERIAL_VERBOSITY) { \
-					cs_write_array(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, pointer, size); \
+					cs_log_array(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, pointer, size); \
 				}
 
 		#define _logArray1(level, addNewLine, pointer, size, elementFmt) \
 				if (level <= SERIAL_VERBOSITY) { \
-					cs_write_array(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, reinterpret_cast<const uint8_t* const>(pointer), size, ELEMENT_TYPE_FROM_FORMAT, sizeof(pointer[0])); \
+					cs_log_array(fileNameHash(__FILE__, sizeof(__FILE__)), __LINE__, level, addNewLine, reinterpret_cast<const uint8_t* const>(pointer), size, ELEMENT_TYPE_FROM_FORMAT, sizeof(pointer[0])); \
 				}
 
 		// Helper function that returns argument 1 (which is once of the definitions).
@@ -108,84 +108,84 @@
 
 
 
-	void cs_write_start(size_t msgSize, uart_msg_log_header_t &header);
-	void cs_write_arg(const uint8_t* const valPtr, size_t valSize);
-	void cs_write_end();
+	void cs_log_start(size_t msgSize, uart_msg_log_header_t &header);
+	void cs_log_arg(const uint8_t* const valPtr, size_t valSize);
+	void cs_log_end();
 
-	void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint8_t* const ptr, size_t size, ElementType elementType, size_t elementSize);
+	void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint8_t* const ptr, size_t size, ElementType elementType, size_t elementSize);
 
-	inline void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint8_t* const ptr, size_t size) {
-		cs_write_array(fileNameHash, lineNumber, logLevel, addNewLine, ptr, size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]));
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint8_t* const ptr, size_t size) {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, ptr, size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]));
 	}
 
-	inline void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint16_t* const ptr, size_t size) {
-		cs_write_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]));
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint16_t* const ptr, size_t size) {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]));
 	}
 
-	inline void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint32_t* const ptr, size_t size) {
-		cs_write_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]));
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint32_t* const ptr, size_t size) {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]));
 	}
 
-	inline void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint64_t* const ptr, size_t size) {
-		cs_write_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]));
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const uint64_t* const ptr, size_t size) {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_UNSIGNED_INTEGER, sizeof(ptr[0]));
 	}
 
-	inline void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int8_t* const ptr, size_t size) {
-		cs_write_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]));
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int8_t* const ptr, size_t size) {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]));
 	}
 
-	inline void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int16_t* const ptr, size_t size) {
-		cs_write_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]));
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int16_t* const ptr, size_t size) {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]));
 	}
 
-	inline void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int32_t* const ptr, size_t size) {
-		cs_write_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]));
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int32_t* const ptr, size_t size) {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]));
 	}
 
-	inline void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int64_t* const ptr, size_t size) {
-		cs_write_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]));
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const int64_t* const ptr, size_t size) {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_SIGNED_INTEGER, sizeof(ptr[0]));
 	}
 
-	inline void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const float* const ptr, size_t size) {
-		cs_write_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_FLOAT, sizeof(ptr[0]));
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const float* const ptr, size_t size) {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_FLOAT, sizeof(ptr[0]));
 	}
 
-	inline void cs_write_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const double* const ptr, size_t size) {
-		cs_write_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_FLOAT, sizeof(ptr[0]));
+	inline void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const double* const ptr, size_t size) {
+		cs_log_array(fileNameHash, lineNumber, logLevel, addNewLine, reinterpret_cast<const uint8_t* const>(ptr), size, ELEMENT_TYPE_FLOAT, sizeof(ptr[0]));
 	}
 
 
 
 
 	template<typename T>
-	void cs_add_arg_size(size_t& size, uint8_t& numArgs, T val) {
+	void cs_log_add_arg_size(size_t& size, uint8_t& numArgs, T val) {
 		size += sizeof(uart_msg_log_arg_header_t) + sizeof(T);
 		++numArgs;
 	}
 
 	template<>
-	void cs_add_arg_size(size_t& size, uint8_t& numArgs, char* str);
+	void cs_log_add_arg_size(size_t& size, uint8_t& numArgs, char* str);
 
 	template<>
-	void cs_add_arg_size(size_t& size, uint8_t& numArgs, const char* str);
+	void cs_log_add_arg_size(size_t& size, uint8_t& numArgs, const char* str);
 
 
 	template<typename T>
-	void cs_write_arg(T val) {
+	void cs_log_arg(T val) {
 		const uint8_t* const valPtr = reinterpret_cast<const uint8_t* const>(&val);
-		cs_write_arg(valPtr, sizeof(T));
+		cs_log_arg(valPtr, sizeof(T));
 	}
 
 	template<>
-	void cs_write_arg(char* str);
+	void cs_log_arg(char* str);
 
 	template<>
-	void cs_write_arg(const char* str);
+	void cs_log_arg(const char* str);
 
 
 	// Uses the fold expression, a handy way to replace a recursive call.
 	template<class... Args>
-	void cs_write_args(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const Args&... args) {
+	void cs_log_args(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, bool addNewLine, const Args&... args) {
 		uart_msg_log_header_t header;
 		header.header.fileNameHash = fileNameHash;
 		header.header.lineNumber = lineNumber;
@@ -195,25 +195,42 @@
 
 		// Get number of arguments and size of all arguments.
 		size_t totalSize = sizeof(header);
-		(cs_add_arg_size(totalSize, header.numArgs, args), ...);
+		(cs_log_add_arg_size(totalSize, header.numArgs, args), ...);
 
 		// Write the header.
-		cs_write_start(totalSize, header);
+		cs_log_start(totalSize, header);
 
 		// Write each argument.
-		(cs_write_arg(args), ...);
+		(cs_log_arg(args), ...);
 
 		// Finalize the uart msg.
-		cs_write_end();
+		cs_log_end();
 	}
 
+	#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
+		void cs_log_printf(const char *str, ...);
+
+		#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__)
+
+		#undef _log
+		#define _log(level, addNewLine, fmt, ...) \
+				if (level <= SERIAL_VERBOSITY) { \
+					cs_log_printf("[%-30.30s : %-4d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__); \
+				}
+
+		#undef _logArray
+		#define _logArray(level, addNewLine, pointer, size, ...)
+	#endif
 
 	/**
 	 * Write a string with printf functionality.
 	 */
 	#ifdef HOST_TARGET
 		#undef _log
-		#define _log(level, addNewLine, fmt, ...) printf(fmt, ##__VA_ARGS__)
+		#define _log(level, addNewLine, fmt, ...) \
+				if (level <= SERIAL_VERBOSITY) { \
+					printf(fmt"\r\n", ##__VA_ARGS__); \
+				}
 
 		#undef _logArray
 		#define _logArray(level, addNewLine, pointer, size, ...)
