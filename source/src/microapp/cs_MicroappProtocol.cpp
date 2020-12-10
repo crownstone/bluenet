@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <ble/cs_UUID.h>
+#include <cs_MicroappStructs.h>
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
@@ -27,100 +28,104 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
-enum ErrorCodesMicroapp {
-	ERR_NO_PAYLOAD                   = 0x01,    // need at least an opcode in the payload
-	ERR_TOO_LARGE                    = 0x02,
-};
-
-enum CommandMicroapp {
-	CS_MICROAPP_COMMAND_LOG          = 0x01,
-	CS_MICROAPP_COMMAND_DELAY        = 0x02,
-	CS_MICROAPP_COMMAND_PIN          = 0x03,
-	CS_MICROAPP_COMMAND_SERVICE_DATA = 0x04,
-};
-
-enum CommandMicroappLog {
-	CS_MICROAPP_COMMAND_LOG_CHAR     = 0x00,
-	CS_MICROAPP_COMMAND_LOG_INT      = 0x01,
-	CS_MICROAPP_COMMAND_LOG_STR      = 0x02,
-};
-
-enum CommandMicroappPinOpcode {
-	CS_MICROAPP_COMMAND_PIN_READ          = 0x01,
-	CS_MICROAPP_COMMAND_PIN_WRITE         = 0x02,
-	CS_MICROAPP_COMMAND_PIN_I2C_READ      = 0x03,
-	CS_MICROAPP_COMMAND_PIN_I2C_WRITE     = 0x04,
-};
-
-enum CommandMicroappPin {
-	CS_MICROAPP_COMMAND_PIN_SWITCH   = 0x01,
-};
-
-enum CommandMicroappPinSwitch {
-	CS_MICROAPP_COMMAND_SWITCH_OFF   = 0x00,
-	CS_MICROAPP_COMMAND_SWITCH_ON    = 0x01,
-};
-
 /*
  * The function forwardCommand is called from microapp_callback.
  */
 void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 	LOGi("Set command");
 	switch(command) {
-		case CS_MICROAPP_COMMAND_PIN: {
-			int pin = data[0];
-			if (pin != CS_MICROAPP_COMMAND_PIN_SWITCH) {
-				LOGd("Unknown pin");
-				return;
-			}
-			int mode = data[1];
+	case CS_MICROAPP_COMMAND_PIN: {
+		pin_cmd_t *pin_cmd = (pin_cmd_t*)data;
+		CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
+		switch(pin) {
+		case CS_MICROAPP_COMMAND_PIN_SWITCH: {
+			CommandMicroappPinOpcode mode = (CommandMicroappPinOpcode)pin_cmd->opcode;
 			switch(mode) {
-				case CS_MICROAPP_COMMAND_SWITCH_OFF: {
+			case CS_MICROAPP_COMMAND_PIN_WRITE: {
+				CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
+				switch(val) {
+				case CS_MICROAPP_COMMAND_VALUE_OFF: {
 					LOGi("Turn switch off");
 					event_t event(CS_TYPE::CMD_SWITCH_OFF);
 					EventDispatcher::getInstance().dispatch(event);
 					break;
 				}
-				case CS_MICROAPP_COMMAND_SWITCH_ON: {
+				case CS_MICROAPP_COMMAND_VALUE_ON: {
 					LOGi("Turn switch on");
 					event_t event(CS_TYPE::CMD_SWITCH_ON);
 					EventDispatcher::getInstance().dispatch(event);
 					break;
 				}
+				default:
+					LOGw("Unknown switch command");
+				}
+				break;
 			}
+			case CS_MICROAPP_COMMAND_PIN_I2C_WRITE: {
+				//CommandMicroappPinValue val = pin_cmd->value;
+				// TODO: Create event, trivial.
+				//event_t event(CS_TYPE::CMD_WRITE_TWI_VALUE);
+				//EventDispatcher::getInstance().dispatch(event);
+				LOGw("Not yet implemented");
+				break;
+			}
+			case CS_MICROAPP_COMMAND_PIN_I2C_READ: {
+				//CommandMicroappPinValue val = pin_cmd->value;
+				// TODO: 
+				// 1. Create buffer at i2c side in which data is dumped
+				// 2. Create event that will be broadcasted from this side and picked up by i2c
+				// 3. The i2c module will set pointer to latest item in buffer in result of event, returns immediately
+				// 4. Return results by overwrite *data struct
+				//
+				//event_t event(CS_TYPE::CMD_READ_TWI_VALUE);
+				//EventDispatcher::getInstance().dispatch(event);
+				LOGw("Not yet implemented");
+				break;
+			}
+			default:
+				LOGw("Unknown pin mode / opcode");
+			}
+			break;
 		}
+		default: 
+			LOGw("Unknown pin");
+		}
+		break;
+	}
+	default:
+		LOGw("Unkonwn command");
 	}
 }
 
 extern "C" {
 
-int microapp_callback(uint8_t *payload, uint16_t length) {
-	if (length == 0) return ERR_NO_PAYLOAD;
-	if (length > 255) return ERR_TOO_LARGE;
+	int microapp_callback(uint8_t *payload, uint16_t length) {
+		if (length == 0) return ERR_NO_PAYLOAD;
+		if (length > 255) return ERR_TOO_LARGE;
 
-	uint8_t command = payload[0];
+		uint8_t command = payload[0];
 
-	switch(command) {
+		switch(command) {
 		case CS_MICROAPP_COMMAND_LOG: {
 			char type = payload[1];
 			switch(type) {
-				case CS_MICROAPP_COMMAND_LOG_CHAR: {
-					char value = payload[2];
-					LOGi("%i", (int)value);
-					break;
-				}
-				case CS_MICROAPP_COMMAND_LOG_INT: {
-					int value = (payload[2] << 8) + payload[3];
-					LOGi("%i", value);
-					break;
-				}
-				case CS_MICROAPP_COMMAND_LOG_STR: {
-					int str_length = length - 2; // Check if length <= max_length - 1, for null terminator.
-					char *data = reinterpret_cast<char*>(&(payload[2]));
-					data[str_length] = 0;
-					LOGi("%s", data);
-					break;
-				}
+			case CS_MICROAPP_COMMAND_LOG_CHAR: {
+				char value = payload[2];
+				LOGi("%i", (int)value);
+				break;
+			}
+			case CS_MICROAPP_COMMAND_LOG_INT: {
+				int value = (payload[2] << 8) + payload[3];
+				LOGi("%i", value);
+				break;
+			}
+			case CS_MICROAPP_COMMAND_LOG_STR: {
+				int str_length = length - 2; // Check if length <= max_length - 1, for null terminator.
+				char *data = reinterpret_cast<char*>(&(payload[2]));
+				data[str_length] = 0;
+				LOGi("%s", data);
+				break;
+			}
 			}
 			break;
 		}
@@ -136,7 +141,8 @@ int microapp_callback(uint8_t *payload, uint16_t length) {
 			break;
 		}
 		case CS_MICROAPP_COMMAND_PIN: {
-			forwardCommand(command, &payload[1], length - 1);
+			forwardCommand(command, &payload[0], length);
+			//forwardCommand(command, &payload[1], length - 1);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
@@ -164,10 +170,10 @@ int microapp_callback(uint8_t *payload, uint16_t length) {
 			for (int i = 0; i < ml; i++) {
 				LOGi("0x%i", payload[i]);
 			}
-	}
+		}
 
-	return ERR_SUCCESS;
-}
+		return ERR_SUCCESS;
+	}
 
 } // extern C
 
@@ -217,7 +223,7 @@ uint16_t MicroappProtocol::interpretRamdata() {
 	}
 	uint8_t rd_size = 0;
 	uint8_t ret_code = getRamData(IPC_INDEX_MICROAPP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &rd_size);
-	
+
 	bluenet_ipc_ram_data_item_t *ramStr = getRamStruct(IPC_INDEX_MICROAPP);
 	if (ramStr != NULL) {
 		LOGi("Get microapp info from address: %p", ramStr);
