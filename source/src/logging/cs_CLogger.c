@@ -25,7 +25,7 @@ void cs_clog_write_uint_dec(unsigned int value) {
 	} while (value && i);
 
 	for (; i < C_LOGGER_BUF_SIZE; ++i) {
-		writeByte(_logBuffer[i]);
+		serial_write(_logBuffer[i]);
 	}
 }
 
@@ -44,7 +44,7 @@ void cs_clog_write_uint_hex(unsigned int value) {
 	} while (value && i);
 
 	for (; i < C_LOGGER_BUF_SIZE; ++i) {
-		writeByte(_logBuffer[i]);
+		serial_write(_logBuffer[i]);
 	}
 }
 
@@ -55,7 +55,7 @@ void cs_clog(bool addNewLine, const char* fmt, ...) {
 
 	while (*fmt != 0) {
 		if (*fmt != '%') {
-			writeByte(*fmt);
+			serial_write(*fmt);
 			fmt++;
 			continue;
 		}
@@ -67,7 +67,7 @@ void cs_clog(bool addNewLine, const char* fmt, ...) {
 			case 'i': {
 				const int value = va_arg(va, int);
 				if (value < 0) {
-					writeByte('-');
+					serial_write('-');
 					cs_clog_write_uint_dec(0 - value);
 				}
 				else {
@@ -94,25 +94,25 @@ void cs_clog(bool addNewLine, const char* fmt, ...) {
 			case 's': {
 				char* str = va_arg(va, char*);
 				while (*str != 0) {
-					writeByte(*str);
+					serial_write(*str);
 					++str;
 				}
 				break;
 			}
 			case '%': {
-				writeByte('%');
+				serial_write('%');
 				break;
 			}
 			default: {
-				writeByte(*fmt);
+				serial_write(*fmt);
 				break;
 			}
 		}
 		++fmt;
 	}
 	if (addNewLine) {
-		writeByte('\r');
-		writeByte('\n');
+		serial_write('\r');
+		serial_write('\n');
 	}
 	va_end(va);
 }

@@ -5,23 +5,26 @@
  */
 #pragma once
 
+// These macros can end up in C code, so use the C logger.
 #include <logging/cs_CLogger.h>
 
+
 #ifdef	NDEBUG
-//! for release version ignore asserts
-#define assert(expr, message) \
-	if (!(expr)) { \
-		CLOGe("%s", message); \
-	}
+	// For release version ignore asserts
+	#define assert(expr, message) \
+		if (!(expr)) { \
+			CLOGe("%s", message); \
+		}
 
 #else
 
-#include <util/cs_Syscalls.h>
+	#include <util/cs_Syscalls.h>
 
-#define assert(expr, message) \
-	if (!(expr)) { \
-		CLOGe("%s", message); \
-		_exit(1); \
-	}
+	#define assert(expr, message) \
+		if (!(expr)) { \
+			CLOGe("%s", message); \
+			_exit(1); \
+		}
 
 #endif
+

@@ -87,7 +87,7 @@ bool serial_tx_ready();
 /**
  * Write a single byte.
  */
-void writeByte(uint8_t val);
+void serial_write(uint8_t val);
 
 #ifdef __cplusplus
 }

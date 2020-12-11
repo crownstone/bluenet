@@ -33,7 +33,7 @@
 			len = vsprintf(_logBuffer, str, ap);
 			va_end(ap);
 			for (int i = 0; i < len; ++i) {
-				writeByte(_logBuffer[i]);
+				serial_write(_logBuffer[i]);
 			}
 //			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)_logBuffer, len);
 		}
@@ -46,7 +46,7 @@
 			len = vsprintf(buf, str, ap);
 			va_end(ap);
 			for (int i = 0; i < len; ++i) {
-				writeByte(buf[i]);
+				serial_write(buf[i]);
 			}
 //			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)buf, len);
 			free(buf);

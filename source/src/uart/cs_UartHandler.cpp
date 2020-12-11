@@ -211,7 +211,7 @@ cs_ret_code_t UartHandler::writeStartByte() {
 	if (!serial_tx_ready()) {
 		return ERR_NOT_INITIALIZED;
 	}
-	writeByte(UART_START_BYTE);
+	serial_write(UART_START_BYTE);
 	return ERR_SUCCESS;
 }
 
@@ -232,11 +232,11 @@ cs_ret_code_t UartHandler::writeBytes(cs_data_t data, bool updateCrc) {
 		switch (val) {
 			case UART_START_BYTE:
 			case UART_ESCAPE_BYTE:
-				writeByte(UART_ESCAPE_BYTE);
+				serial_write(UART_ESCAPE_BYTE);
 				val ^= UART_ESCAPE_FLIP_MASK;
 				break;
 		}
-		writeByte(val);
+		serial_write(val);
 	}
 	return ERR_SUCCESS;
 }

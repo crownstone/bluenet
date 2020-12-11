@@ -9,6 +9,8 @@
 #include <util/cs_Error.h>
 #include <logging/cs_CLogger.h>
 
+// These macros can end up in C code, so use the C logger.
+
 #ifdef __cplusplus
 extern "C" {
 #endif
