@@ -50,6 +50,11 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 	// ===========
 
 	// (at this point, the result.returnCode should be ERR_EVENT_UNHANDLED)
+	if (result.returnCode != ERR_EVENT_UNHANDLED){
+		// some handler took care of business.
+		LOGw("MeshMshHandler result code not clean.");
+		return;
+	}
 
 	MeshMsgEvent meshMsgEvent;
 	meshMsgEvent.msg.data = payload;
@@ -99,6 +104,10 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 		}
 		case CS_MESH_MODEL_TYPE_RSSI_PING: {
 			result.returnCode = handleRssiPing(payload, payloadSize, srcId, msg.rssi, msg.hops, msg.channel);
+			return;
+		}
+		case CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT: {
+			result.returnCode = handleNearestWitnessReport(meshMsgEvent);
 			return;
 		}
 		case CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH: {
@@ -248,6 +257,18 @@ cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadS
 	}
 
 	event_t event(CS_TYPE::EVT_MESH_RSSI_PING, packet, sizeof(rssi_ping_message_t));
+	event.dispatch();
+
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t MeshMsgHandler::handleNearestWitnessReport(MeshMsgEvent& mesh_msg_event) {
+
+	event_t event(
+			CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT,
+			&mesh_msg_event,
+			sizeof(mesh_msg_event)
+			);
 	event.dispatch();
 
 	return ERR_SUCCESS;

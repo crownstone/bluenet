@@ -5,12 +5,11 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <protocol/mesh/cs_MeshModelPacketHelper.h>
-#include <logging/cs_Logger.h>
-
-#include <localisation/cs_RssiPingMessage.h>
-
 #include <cstring> // For memcpy
+#include <localisation/cs_Nearestnearestwitnessreport.h>
+#include <localisation/cs_RssiPingMessage.h>
+#include <logging/cs_Logger.h>
+#include <protocol/mesh/cs_MeshModelPacketHelper.h>
 
 #define LOGMeshModelPacketHelperDebug LOGnone
 #define LOGMeshModelPacketHelperWarn LOGw
@@ -82,6 +81,8 @@ bool isValidMeshPayload(cs_mesh_model_msg_type_t type, uint8_t* payload, size16_
 			return payloadSize >= sizeof(rssi_ping_message_t);
 		case CS_MESH_MODEL_TYPE_TIME_SYNC:
 			return payloadSize == sizeof(cs_mesh_model_msg_time_sync_t);
+		case CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT:
+			return payloadSize == sizeof(nearest_witness_report_t);
 		case CS_MESH_MODEL_TYPE_UNKNOWN:
 			return false;
 	}

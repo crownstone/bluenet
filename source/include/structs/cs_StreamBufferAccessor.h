@@ -50,6 +50,13 @@
  */
 class StreamBufferAccessor {
 public:
+	StreamBufferAccessor(buffer_ptr_t buffer, cs_buffer_size_t size) {
+		assign(buffer,size);
+	}
+	StreamBufferAccessor(cs_data_t data) :
+		StreamBufferAccessor(data.data, data.len) {
+	}
+
 
 	/**
 	 * Resets the stream buffer accessor to construction state,
@@ -134,7 +141,7 @@ public:
 	T get(){
 		if( !size_check<T>() && !status_check() ){
 			increment_buff<T>();
-			return *reinterpret_cast<T>(buff_curr);
+			return *reinterpret_cast<T*>(buff_curr);
 		}
 
 		// try to return a default when possible

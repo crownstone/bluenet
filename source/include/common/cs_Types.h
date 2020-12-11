@@ -6,20 +6,23 @@
  */
 #pragma once
 
+#include <cstdint>
+#include <type_traits>
+#include <tuple>
+
 #include "cfg/cs_Config.h"
 #include "protocol/cs_CommandTypes.h"
 #include "protocol/cs_ErrorCodes.h"
 #include "structs/cs_PacketsInternal.h"
-#include <cstddef> // For NULL
-#include <cstdint>
-#include <type_traits>
-#include <tuple>
 
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
 #include <localisation/cs_RssiPingMessage.h>
+#include <localisation/cs_Nearestnearestwitnessreport.h>
+class TrackableEvent;
+
 #include <time/cs_TimeSyncMessage.h>
 #include <mesh/cs_MeshMsgEvent.h>
 
@@ -280,6 +283,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_MESH_RSSI_PING,                               // A ping message sent from another crownstone was received.
 	EVT_MESH_TIME_SYNC,                               // A time sync message was received
 	EVT_RECV_MESH_MSG,                                // A mesh message was received.
+	EVT_MESH_NEAREST_WITNESS_REPORT,                  // CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT was received on the mesh and parsed by MeshMsgHandler. Payload: MeshMsgEvent
 
 	// Behaviour
 	CMD_ADD_BEHAVIOUR = InternalBaseBehaviour,        // Add a behaviour.
@@ -301,6 +305,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_TRACKED_DEVICE_HEARTBEAT,                     // Set location of a tracked device, with a TTL. This command can be sent instead of advertisements.
 	EVT_PRESENCE_CHANGE,                              // The presence has changed. When the first user enters, multiple events will be sent.
 	CMD_GET_PRESENCE,                                 // Get the current presence.
+	EVT_TRACKABLE,                                    // TrackableParser emits updates of this type.
 
 	// System
 	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
@@ -383,6 +388,11 @@ struct __attribute__((packed)) cs_type_and_id_t {
 
 #ifndef TYPIFY
 #define TYPIFY(NAME) NAME ## _TYPE
+
+/**
+ * Takes a pointer to a buffer and reinterprets it as pointer to the given type.
+ */
+#define UNTYPIFY(EVT_NAME, PTR) reinterpret_cast<TYPIFY(EVT_NAME)*>(PTR)
 #endif
 typedef uint16_t TYPIFY(CONFIG_ADV_INTERVAL);
 typedef uint16_t TYPIFY(CONFIG_BOOT_DELAY);
@@ -531,17 +541,19 @@ typedef void TYPIFY(CMD_GET_BEHAVIOUR_DEBUG);
 typedef void TYPIFY(EVT_BEHAVIOURSTORE_MUTATION);
 typedef BOOL TYPIFY(EVT_BEHAVIOUR_OVERRIDDEN);
 
-
+// Localisation
 typedef internal_register_tracked_device_packet_t TYPIFY(CMD_REGISTER_TRACKED_DEVICE);
 typedef internal_update_tracked_device_packet_t TYPIFY(CMD_UPDATE_TRACKED_DEVICE);
 typedef internal_tracked_device_heartbeat_packet_t TYPIFY(CMD_TRACKED_DEVICE_HEARTBEAT);
 typedef uint8_t /* PresenceHandler::MutationType */ TYPIFY(EVT_PRESENCE_MUTATION);
 typedef presence_change_t TYPIFY(EVT_PRESENCE_CHANGE);
 typedef void TYPIFY(CMD_GET_PRESENCE);
+typedef profile_location_t TYPIFY(EVT_RECEIVED_PROFILE_LOCATION);
+typedef TrackableEvent TYPIFY(EVT_TRACKABLE);
+
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
 typedef void TYPIFY(EVT_GOING_TO_DFU);
-typedef profile_location_t TYPIFY(EVT_RECEIVED_PROFILE_LOCATION);
 
 // Mesh
 typedef cs_mesh_model_msg_sync_request_t TYPIFY(EVT_MESH_SYNC_REQUEST_OUTGOING);
@@ -569,6 +581,7 @@ typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
 typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);
+typedef MeshMsgEvent TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT);
 
 /**
  * The size of a particular default value. In case of strings or arrays this is the maximum size of the corresponding

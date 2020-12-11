@@ -10,6 +10,7 @@
 // Debug logs
 #define LOGMeshInfo LOGnone
 #define LOGMeshDebug LOGnone
+#define LOGMeshWarning LOGw
 
 // Debug logs
 #define LOGMeshModelInfo    LOGnone

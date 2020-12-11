@@ -10,18 +10,13 @@
 #include <events/cs_EventDispatcher.h>
 #include <util/cs_BleError.h>
 
-//#define PRINT_EVENTDISPATCHER_VERBOSE
+#define LOGEventdispatcherInfo LOGi
+#define LOGEventdispatcherWarning LOGw
 
-EventDispatcher::EventDispatcher() : _listenerCount(0)
-{
-
+EventDispatcher::EventDispatcher() : _listenerCount(0) {
 }
 
 void EventDispatcher::dispatch(event_t & event) {
-#ifdef PRINT_EVENTDISPATCHER_VERBOSE
-	LOGi("dispatch event: %d", event.type);
-#endif
-
 	if (event.size != 0 && event.data == nullptr) {
 		LOGe("data nullptr while size != 0");
 		event.result.returnCode = ERR_BUFFER_UNASSIGNED;
@@ -36,6 +31,7 @@ void EventDispatcher::dispatch(event_t & event) {
 		break;
 	default:
 		if (event.size != TypeSize(event.type)) {
+			LOGEventdispatcherWarning("Can't dispatch: wrong payload length");
 			event.result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
 			return;
 		}
@@ -55,9 +51,9 @@ bool EventDispatcher::addListener(EventListener *listener) {
 		APP_ERROR_CHECK(NRF_ERROR_NULL);
 		return false;
 	}
-#ifdef PRINT_EVENTDISPATCHER_VERBOSE
-	LOGi("add listener: %u", _listenerCount);
-#endif
+
+	LOGEventdispatcherInfo("add listener: %u", _listenerCount);
+
 	_listeners[_listenerCount++] = listener;
 	return true;
 }

@@ -115,16 +115,6 @@ void MeshAdvertiser::updateIbeacon() {
 		}
 	}
 
-//	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_MAJOR, &major, sizeof(major));
-//	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_MINOR, &minor, sizeof(minor));
-//	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_UUID, uuid.uuid128, sizeof(uuid.uuid128));
-//	State::getInstance().get(CS_TYPE::CONFIG_IBEACON_TXPOWER, &rssi, sizeof(rssi));
-
-//	State::getInstance().get(cs_state_data_t(CS_TYPE::CONFIG_IBEACON_MAJOR,   ibeaconIndex, (uint8_t*)&major, sizeof(major)));
-//	State::getInstance().get(cs_state_data_t(CS_TYPE::CONFIG_IBEACON_MINOR,   ibeaconIndex, (uint8_t*)&minor, sizeof(minor)));
-//	State::getInstance().get(cs_state_data_t(CS_TYPE::CONFIG_IBEACON_UUID,    ibeaconIndex, (uint8_t*)uuid.uuid128, sizeof(uuid.uuid128)));
-//	State::getInstance().get(cs_state_data_t(CS_TYPE::CONFIG_IBEACON_TXPOWER, ibeaconIndex, (uint8_t*)&rssi, sizeof(rssi)));
-
 	IBeacon beacon(uuid, major, minor, rssi);
 	LOGd("Advertise ibeacon uuid=[%x %x .. %x] major=%u, minor=%u, rssi_on_1m=%i", uuid.uuid128[0], uuid.uuid128[1], uuid.uuid128[15], major, minor, rssi);
 	advertise(&beacon);
@@ -151,8 +141,8 @@ void MeshAdvertiser::advertise(IBeacon* ibeacon) {
 	_advPacket->packet.payload[2] = 0x06; // Flags
 	_advPacket->packet.payload[3] = 0x1A; // Length of next AD
 	_advPacket->packet.payload[4] = 0xFF; // Type: manufacturer data
-	_advPacket->packet.payload[5] = 0x4C; // Company id
-	_advPacket->packet.payload[6] = 0x00;
+	_advPacket->packet.payload[5] = 0x4C; // Company id low byte
+	_advPacket->packet.payload[6] = 0x00; // Company id high byte
 //	_advPacket[7] = 0x02; // Apple payload type: iBeacon
 //	_advPacket[8] = 0x15; // iBeacon payload length
 //	memcpy(&(_advPacket[9]), ) // iBeacon UUID
