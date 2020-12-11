@@ -66,7 +66,6 @@ struct __attribute__((__packed__)) uart_encrypted_data_header_t {
  * UART message, either non-encrypted, or after decryption.
  */
 struct __attribute__((__packed__)) uart_msg_header_t {
-	uint8_t deviceId; // Stone ID for outgoing messages, device ID for incoming messages.
 	uint16_t type; // Type of message, see ..
 	// Followed by data.
 };

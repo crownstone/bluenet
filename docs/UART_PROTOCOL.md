@@ -66,7 +66,6 @@ uint8[] | Padding      | N | Padding to make this whole packet size a multiple o
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8   | Device ID    | 1 | User device ID for messages to the crownstone, or crownstone ID for messages from the crownstone.
 uint16  | Data type    | 2 | Type of UART data.
 uint8[] | Data         | N | The data packet, depends on type.
 

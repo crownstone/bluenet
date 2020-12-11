@@ -18,7 +18,6 @@
 
 void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 			cs_data_t commandData,
-			const cmd_source_with_counter_t source,
 			EncryptionAccessLevel accessLevel,
 			bool wasEncrypted,
 			cs_data_t resultBuffer
@@ -31,6 +30,8 @@ void UartCommandHandler::handleCommand(UartOpcodeRx opCode,
 		UartHandler::getInstance().writeMsg(UART_OPCODE_TX_ERR_REPLY_PARSING_FAILED);
 		return;
 	}
+
+	cmd_source_with_counter_t source(cmd_source_t(CS_CMD_SOURCE_TYPE_UART, 63), 0); // Least likely real device ID.
 
 	switch (opCode) {
 		case UART_OPCODE_RX_HELLO:
