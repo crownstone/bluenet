@@ -183,11 +183,22 @@ void RssiDataTracker::handleSecondaryPingMessage(
 	pushPingMsgToHost(ping_msg);
 }
 
-void RssiDataTracker::pushPingMsgToHost(rssi_ping_message_t *ping_msg) {
+
+// ------------- communicating rssi data -------------
+
+void RssiDataTracker::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message){
+
+}
+
+void RssiDataTracker::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message){
 	UartHandler::getInstance().writeMsg(
-			UART_OPCODE_TX_RSSI_PING_MESSAGE,
-			reinterpret_cast<uint8_t*>(ping_msg),
-			sizeof(*ping_msg));
+			UART_OPCODE_TX_RSSI_DATA_MESSAGE,
+			reinterpret_cast<uint8_t*>(rssi_data_message),
+			sizeof(*rssi_data_message));
+}
+
+void RssiDataTracker::receiveRssiDataMessage(rssi_data_message_t& rssi_data_message){
+	sendRssiDataOverUart(rssi_data_message);
 }
 
 // ------------- recording mesh messages -------------
