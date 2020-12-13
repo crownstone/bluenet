@@ -316,10 +316,26 @@ struct microapp_advertise_request_t {
 	cs_data_t data;
 };
 
+
+/**
+ * Sent from a crownstone when it has too little rssi information from
+ * its neighbors.
+ */
+struct __attribute__((__packed__)) rssi_ping_message_t {
+
+};
+
 /**
  * The data in this packet contains information about the
  * bluetooth channels between this crownstone and the one
  * with id sender_id.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpacked-bitfield-compat"
+/**
+ * GCC 4.4 fixed padding issues when bitfields of type char
+ * overflow word boundary. This GCC warning is just to notify
+ * the programmer of that breaking change.
  */
 struct __attribute__((__packed__)) rssi_data_message_t {
 	stone_id_t sender_id;
@@ -354,4 +370,5 @@ struct __attribute__((__packed__)) rssi_data_message_t {
 	uint8_t variance_ch38 : 3;
 	uint8_t variance_ch39 : 3;
 };
+#pragma GCC diagnostic pop
 

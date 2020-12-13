@@ -282,6 +282,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT,       // Send a tracked device heartbeat mesh message.
 	EVT_MESH_TRACKED_DEVICE_HEARTBEAT,                // Mesh received a tracked device heartbeat.
 	EVT_MESH_RSSI_PING,                               // A ping message sent from another crownstone was received.
+	EVT_MESH_RSSI_DATA,                               // A message containing rssi data between sender and one of its neighbors was received.
 	EVT_MESH_TIME_SYNC,                               // A time sync message was received
 	EVT_RECV_MESH_MSG,                                // A mesh message was received.
 	EVT_MESH_NEAREST_WITNESS_REPORT,                  // CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT was received on the mesh and parsed by MeshMsgHandler. Payload: MeshMsgEvent
@@ -578,7 +579,8 @@ typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP);
 typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
 typedef microapp_advertise_request_t TYPIFY(CMD_MICROAPP_ADVERTISE);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
-typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
+typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_PING);
+typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_DATA);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
 typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);

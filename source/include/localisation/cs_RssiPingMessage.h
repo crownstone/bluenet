@@ -8,11 +8,13 @@
 
 #include <cstdint>
 
+// MOVED TO cs_PacketsInternal.h
 
-/**
- * Sent from a crownstone when it has too little rssi information from
- * its neighbors.
- */
-struct __attribute__((__packed__)) rssi_ping_message_t {
-
-};
+//
+///**
+// * Sent from a crownstone when it has too little rssi information from
+// * its neighbors.
+// */
+//struct __attribute__((__packed__)) rssi_ping_message_t {
+//
+//};
