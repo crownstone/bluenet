@@ -50,7 +50,7 @@ struct cs_result_t {
 	/**
 	 * Buffer to put the result data in.
 	 *
-	 * Can be NULL.
+	 * Cannot be NULL, buf.data can be NULL.
 	 */
 	cs_data_t buf;
 

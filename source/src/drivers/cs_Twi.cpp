@@ -7,6 +7,7 @@
 
 #include <drivers/cs_Twi.h>
 #include <drivers/cs_Serial.h>
+#include <events/cs_EventDispatcher.h>
 
 #include <nrfx_twi.h>
 
@@ -15,6 +16,13 @@
 const nrfx_twi_t Twi::_twi = NRFX_TWI_INSTANCE(TWI_INSTANCE_ID);
 
 void twi_event_handler(nrfx_twi_evt_t const *p_event, void *p_context) {
+}
+
+Twi::Twi(): EventListener() {
+	EventDispatcher::getInstance().addListener(this);
+
+	_buf = NULL;
+	_bufSize = 0;
 }
 
 void Twi::init(uint8_t pin_scl, uint8_t pin_sda, uint8_t address) {
@@ -26,6 +34,13 @@ void Twi::init(uint8_t pin_scl, uint8_t pin_sda, uint8_t address) {
 	_config.hold_bus_uninit = false;
 	_address = address;
 	nrfx_twi_init(&_twi, &_config, twi_event_handler, NULL);
+
+	// minimal buffer for reading just a single value
+	// TODO: make this also into a circular buffer
+	if (_buf == NULL) {
+		_bufSize = 1;
+		_buf = new uint8_t[_bufSize];
+	}
 }
 
 void Twi::write(uint8_t *data, size_t length) {
@@ -45,4 +60,26 @@ void Twi::read(uint8_t *data, size_t length) {
 	nrfx_twi_rx(&_twi, _address, data, length);
 
 	nrfx_twi_disable(&_twi);
+}
+
+void Twi::tick() {
+	read(_buf, _bufSize);
+	TYPIFY(EVT_TWI_UPDATE) twiData;
+	twiData = _buf[0];
+	event_t(CS_TYPE::EVT_TWI_UPDATE, &twiData, sizeof(twiData));
+}
+
+void Twi::handleEvent(event_t & event) {
+	switch(event.type) {
+	case CS_TYPE::EVT_TWI_INIT: {
+		// TODO: Obtain from message
+		uint8_t pin_scl = 31;
+		uint8_t pin_sda = 32;
+		uint8_t address = 10;
+		init(pin_scl, pin_sda, address);
+		break;
+	}
+	default:
+		break;
+	}
 }

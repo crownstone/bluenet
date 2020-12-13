@@ -62,11 +62,10 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 				break;
 			}
 			case CS_MICROAPP_COMMAND_PIN_I2C_WRITE: {
-				//CommandMicroappPinValue val = pin_cmd->value;
-				// TODO: Create event, trivial.
-				//event_t event(CS_TYPE::CMD_WRITE_TWI_VALUE);
-				//EventDispatcher::getInstance().dispatch(event);
-				LOGw("Not yet implemented");
+				CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
+				TYPIFY(EVT_TWI_WRITE) twiValue = val;
+				event_t event(CS_TYPE::EVT_TWI_WRITE, &twiValue, sizeof(twiValue));
+				EventDispatcher::getInstance().dispatch(event);
 				break;
 			}
 			case CS_MICROAPP_COMMAND_PIN_I2C_READ: {
@@ -76,10 +75,16 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 				// 2. Create event that will be broadcasted from this side and picked up by i2c
 				// 3. The i2c module will set pointer to latest item in buffer in result of event, returns immediately
 				// 4. Return results by overwrite *data struct
-				//
-				//event_t event(CS_TYPE::CMD_READ_TWI_VALUE);
-				//EventDispatcher::getInstance().dispatch(event);
-				LOGw("Not yet implemented");
+				// TODO: What!!! Returning a value from an event should be WAY easier!
+				cs_buffer_size_t bufSize = 1;
+				uint8_t buf_array[bufSize];
+				buffer_ptr_t buf = &buf_array[0];
+				cs_data_t result_data(buf, bufSize);
+				cs_result_t result(result_data);
+				event_t event(CS_TYPE::EVT_TWI_READ, NULL, 0, result);
+				EventDispatcher::getInstance().dispatch(event);
+				pin_cmd->value = buf_array[0];
+				pin_cmd->ack = event.result.returnCode;
 				break;
 			}
 			default:
@@ -177,10 +182,15 @@ extern "C" {
 
 } // extern C
 
-MicroappProtocol::MicroappProtocol() {
+MicroappProtocol::MicroappProtocol(): EventListener() {
+
+	EventDispatcher::getInstance().addListener(this);
+
 	_setup = 0;
 	_loop = 0;
 	_booted = false;
+
+	_i2c_data = NULL;
 }
 
 /*
@@ -242,7 +252,7 @@ uint16_t MicroappProtocol::interpretRamdata() {
 		LOGi("  protocol: %02x", buf[0]);
 		LOGi("  setup():  %02x %02x %02x %02x", buf[1], buf[2], buf[3], buf[4]);
 		LOGi("  loop():   %02x %02x %02x %02x", buf[5], buf[6], buf[7], buf[8]);
-	
+
 		uint8_t protocol = buf[0];
 		if (protocol == 0) {
 			_setup = 0, _loop =0;
@@ -281,7 +291,7 @@ void MicroappProtocol::callApp() {
 	//	LOGi("Microapp: app not enabled.");
 	//	return;
 	//} 
-	
+
 	TYPIFY(STATE_MICROAPP) state_microapp;
 	cs_state_id_t app_id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
@@ -328,7 +338,7 @@ void MicroappProtocol::callSetupAndLoop() {
 
 	static uint16_t counter = 0;
 	if (_booted) {
-		
+
 		if (!_loaded) {
 			uint16_t ret_code = interpretRamdata();
 			if (ret_code == ERR_SUCCESS) {
@@ -399,3 +409,41 @@ void MicroappProtocol::callLoop(int & cntr, int & skip) {
 	cntr = -1;
 }
 
+void MicroappProtocol::handleEvent(event_t & event) {
+	switch(event.type) {
+	case CS_TYPE::EVT_TWI_UPDATE: {
+		if (_i2c_data == NULL) break;
+		TYPIFY(EVT_TWI_UPDATE)* data = reinterpret_cast< TYPIFY(EVT_TWI_UPDATE)*> (event.data);
+		uint8_t* raw_data = reinterpret_cast<uint8_t*>(data);
+		_i2c_data->push(raw_data[0]);
+		break;
+	}
+	case CS_TYPE::EVT_TWI_INIT: {
+		if (_i2c_data == NULL) {
+			_i2c_data->init();
+		} else {
+			LOGw("Already initialized i2c");
+		}
+		break;
+	}
+	case CS_TYPE::EVT_TWI_READ: {
+		if ((_i2c_data != NULL) && (!_i2c_data->empty())) {
+			// write single(!) result
+			uint8_t d = _i2c_data->pop();
+			// TODO: De-uglify sending results on incoming events (in tandem with above)
+			if (event.result.buf.data != NULL) {
+				event.result.buf.data[0] = d;
+				event.result.buf.len = 1;
+				event.result.returnCode = ERR_SUCCESS;
+			} else {
+				event.result.returnCode = ERR_NO_PAYLOAD;
+			}
+		} else {
+			event.result.returnCode = ERR_NOT_AVAILABLE;
+		}
+		break;
+	}
+	default:
+		break;
+	}
+}

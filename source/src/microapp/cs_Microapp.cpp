@@ -35,7 +35,7 @@
 #include <util/cs_Utils.h>
 
 Microapp::Microapp(): EventListener() {
-	
+
 	EventDispatcher::getInstance().addListener(this);
 
 	_prevMessage.protocol = 0;
@@ -45,8 +45,6 @@ Microapp::Microapp(): EventListener() {
 
 	_enabled = false;
 	_debug = true;
-
-	
 }
 
 uint16_t Microapp::init() {

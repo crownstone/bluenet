@@ -209,8 +209,8 @@ enum class CS_TYPE: uint16_t {
 	CMD_SET_RELAY,                                    // Set the relay state.
 	CMD_SET_DIMMER,                                   // Set the dimmer state.
 	CMD_MULTI_SWITCH,                                 // Handle a multi switch.
-	CMD_SWITCHING_ALLOWED,		                      // Set switch lock.
-	CMD_DIMMING_ALLOWED,	                          // Set allow dimming.
+	CMD_SWITCHING_ALLOWED,                            // Set switch lock.
+	CMD_DIMMING_ALLOWED,                              // Set allow dimming.
 
 	// Power
 	EVT_DIMMER_POWERED = InternalBasePower,           // Dimmer being powered is changed. Payload: true when powered, and ready to be used.
@@ -337,8 +337,13 @@ enum class CS_TYPE: uint16_t {
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
 
 	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
-	EVT_GENERIC_TEST = 0xFFFF,                        // Can be used by the python test python lib for ad hoc tests during development.
 
+	EVT_TWI_INIT,                                     // TWI initialisation.
+	EVT_TWI_WRITE,                                    // TWI write.
+	EVT_TWI_READ,                                     // TWI read (request).
+	EVT_TWI_UPDATE,                                   // TWI update from TWI module to anyone listening in.
+
+	EVT_GENERIC_TEST = 0xFFFF,                        // Can be used by the python test python lib for ad hoc tests during development.
 };
 
 CS_TYPE toCsType(uint16_t type);
@@ -583,6 +588,12 @@ typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
 typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT);
+
+// TWI / I2C module
+typedef void TYPIFY(EVT_TWI_INIT);
+typedef uint8_t TYPIFY(EVT_TWI_WRITE);
+typedef void TYPIFY(EVT_TWI_READ);
+typedef uint8_t TYPIFY(EVT_TWI_UPDATE);
 
 /**
  * The size of a particular default value. In case of strings or arrays this is the maximum size of the corresponding

@@ -72,6 +72,7 @@ typedef struct {
 	uint8_t pin;
 	uint8_t opcode;
 	uint8_t value;
+	uint8_t ack;
 } pin_cmd_t;
 
 /*
