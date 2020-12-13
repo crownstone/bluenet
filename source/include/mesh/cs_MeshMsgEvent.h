@@ -19,6 +19,11 @@ struct MeshPacketTraits<CS_MESH_MODEL_TYPE_RSSI_PING> {
 };
 
 template<>
+struct MeshPacketTraits<CS_MESH_MODEL_TYPE_RSSI_DATA> {
+	using type = rssi_data_message_t;
+};
+
+template<>
 struct MeshPacketTraits<CS_MESH_MODEL_TYPE_TIME_SYNC> {
 	using type = cs_mesh_model_msg_time_sync_t;
 };

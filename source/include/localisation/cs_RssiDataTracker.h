@@ -17,59 +17,29 @@
 #include <map>
 
 /**
- * Launches ping messages into the mesh and receives them in order to
- * push Rssi information to a (debug) host, and allow other firmware
- * components to query for that information.
- *
- * Three primary mechanisms drive this component:
- * - Primary pingmessages:
- *   These are mesh messages of type CS_MESH_MODEL_TYPE_RSSI_PING,
- *   where the payload is a partially filled rssi_ping_message_t struct.
- *   (Only the sample_id is filled to enable duplication filter.)
- *
- *   When a node in the mesh receives a primary ping message, it will
- *   respond by constructing a secondary ping message with the given
- *   sample_id and sending that back.
- *
- * - Secondary pingmessages:
- *   These are mesh messages of type CS_MESH_MODEL_TYPE_RSSI_PING,
- *   where the payload is a completely filled rssi_ping_message_t struct.
- *   i.e.: .rssi != 0 && .sender_id != 0 && .recipient_id != 0.
- *
- *   When a node receives a secondary ping message it will record it to
- *   its 'local data base' for duplicate filtering, tracking the
- *   rssi data per sender-recipient pair and sending that data over UART
- *   to a (debugging) host.
- *
- * - Generic mesh messages:
- *   The RssiDataTracker responds to EVT_RECV_MESH_MSG events and
- *   captures the sender, receiver and rssi values of those events.
- *   These values will aggregated and stored in its the 'local data base'
- *   in order to compute longer term averages and variance.
- *
- * - Database flushing:
- *   Periodically the local data base will be flushed onto the mesh in order
- *   to push the information to a (debug) host. This happens in the form
- *   of a series of secondary ping messages. This burst is throttled to
- *   ensure the RssiDataTracker-s don't flood the mesh.
+ * This component monitors bluetooth messages in order to keep track of the Rssi
+ * distances between crownstones in the mesh. It regularly pushes rssi information
+ * over UART.
  */
 class RssiDataTracker : public EventListener {
 public:
 	RssiDataTracker();
 
 	/**
-	 * When receiving a ping msg from another crownstone,
-	 * broadcast one more time with the id of this crownstone
-	 * filled in.
+	 * CS_TICK:
+	 *   Coroutine for rssi data updates.
 	 *
-	 * When receiving a ping message with both sender and receiver
-	 * filled in, push data to test host.
 	 *
-	 * input:
-	 *  - EVT_MESH_RSSI_PING
-	 *  - EVT_RECV_MESH_MSG
-	 * output:
-	 *  - CMD_SEND_MESH_MSG -> CS_MESH_MODEL_TYPE_RSSI_PING
+	 * CS_TYPE_EVT_RECV_MESH_MSG:
+	 *   if the hop count of the message is 0:
+	 *    - recordRssiValue(args...)
+	 *
+	 *   if type is CS_MESH_MODEL_TYPE_RSSI_PING:
+	 *   	 - if the hop count is 0:
+	 *         - sendPingResponseOverMesh()
+	 *
+	 *   if type is CS_MESH_MODEL_TYPE_RSSI_DATA:
+	 *     - sendRssiDataOverUart(arg...)
 	 */
 	void handleEvent(event_t& evt);
 
@@ -82,12 +52,10 @@ private:
 	stone_id_t my_id = 0xff;
 
 	// stores the relevant history, per neighbor stone_id.
-	std::map<stone_id_t,int8_t> last_received_rssi_ch37 = {};
-	std::map<stone_id_t,int8_t> last_received_rssi_ch38 = {};
-	std::map<stone_id_t,int8_t> last_received_rssi_ch39 = {};
-	std::map<stone_id_t,OnlineVarianceRecorder> variance_recorders_ch37 = {};
-	std::map<stone_id_t,OnlineVarianceRecorder> variance_recorders_ch38 = {};
-	std::map<stone_id_t,OnlineVarianceRecorder> variance_recorders_ch39 = {};
+	static constexpr uint8_t CHANNEL_COUNT = 3;
+	static constexpr uint8_t CHANNEL_START = 37;
+	std::map<stone_id_t,int8_t> last_rssi_map[CHANNEL_COUNT] = {};
+	std::map<stone_id_t,OnlineVarianceRecorder> recorder_map[CHANNEL_COUNT] = {};
 
 	// --------------- Coroutine parameters ---------------
 
@@ -130,7 +98,7 @@ private:
 	 */
 	uint32_t flushAggregatedRssiData();
 
-	// ------------- generating rssi data-------------
+	// --------------- generating rssi data --------------
 
 	/**
 	 * Dispatches an event of type CMD_SEND_MESH_MSG
@@ -148,40 +116,44 @@ private:
 
 	/**
 	 * If the ping message is a request that has not hopped,
-	 * call sendPingResponseOverMesh(); Else do nothing.
+	 *  - sendPingResponseOverMesh()
 	 */
-	void receivePingMessage(rssi_ping_message_t& ping_msg);
+	void receivePingMessage(MeshMsgEvent& mesh_msg_evt);
 
 	// ------------- communicating rssi data -------------
 
 	/**
-	 *
+	 * Dispatches an event of type CMD_SEND_MESH_MSG
+	 * in order to send a CS_MESH_MODEL_TYPE_RSSI_DATA.
 	 */
 	void sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message);
 
 	/**
-	 *
+	 * Writes a message of type UART_OPCODE_TX_RSSI_DATA_MESSAGE
+	 * with the given parameter as data.
 	 */
 	void sendRssiDataOverUart(rssi_data_message_t* rssi_data_message);
 
 	/**
-	 * Any received rssi_data_message_t will be sendRssiDataOverUart
+	 * Any received rssi_data_message_t will be sendRssiDataOverUart.
+	 *
+	 * Assumes mesh_msg_event is of type CS_MESH_MODEL_TYPE_RSSI_DATA.
 	 */
-	void receiveRssiDataMessage(rssi_data_message_t& rssi_data_message);
+	void receiveRssiDataMessage(MeshMsgEvent& mesh_msg_evt);
 
 
 	// ------------- recording mesh messages -------------
 
 	/**
-	 * If the hop count of the message is 0,
-	 * Records the rssi value data.
-	 * If type is ping message: receivePingMessage
-	 * If type is rssi data message: receiveRssiDataMessage
+	 * If the event was no-hop:
+	 * 	- recordRssiValue(args...)
 	 */
 	void receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt);
 
 	/**
 	 * Saves rssi value to last received map and variance recorder map.
+	 * If the long term recorder has accumulated a lot of data, it will
+	 * be reduced to prevent overflow.
 	 */
 	void recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t channel);
 };
