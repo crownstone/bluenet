@@ -70,8 +70,8 @@ private:
 
 		/**
 		 * Note: if the mesh is very active, setting this delay higher is risky.
-		 * When a StonePair recorder accumulates more then min_samples_to_trigger_burst
-		 * samples _during_ the burst phase, it will be propagated in same burst again.
+		 * When we accumulate more then min_samples_to_trigger_burst
+		 * samples _during_ the burst phase, it will be propagated a second time in same burst.
 		 * Hence a low value for that constant makes it possible to keep running in burst
 		 * mode. (If multiple nodes are bursting, this effect will snowball!)
 		 */
@@ -88,7 +88,7 @@ private:
 #ifdef DEBUG
 		.min_samples_to_trigger_burst = 20,
 		.burst_period_ms = 500,
-		.accumulation_period_ms = 2 * 60 * 1000
+		.accumulation_period_ms = 1 * 60 * 1000
 #else
 		.min_samples_to_trigger_burst = 20,
 		.burst_period_ms = 5,
@@ -110,6 +110,12 @@ private:
 	 *
 	 */
 	uint32_t flushAggregatedRssiData();
+
+	/**
+	 * Returns the 3 bit descriptor of the given variance as defined
+	 * in cs_PacketsInternal.h.
+	 */
+	inline uint8_t getVarianceDescriptor(float variance);
 
 	// --------------- generating rssi data --------------
 

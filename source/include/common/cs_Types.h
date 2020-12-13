@@ -20,7 +20,6 @@
 #include <behaviour/cs_TwilightBehaviour.h>
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
-#include <localisation/cs_RssiPingMessage.h>
 #include <localisation/cs_Nearestnearestwitnessreport.h>
 class TrackableEvent;
 

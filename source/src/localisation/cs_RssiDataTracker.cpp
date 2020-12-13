@@ -8,6 +8,8 @@
 #include <time/cs_SystemTime.h>
 #include <test/cs_Test.h>
 
+#include <cmath>
+
 #define RSSIDATATRACKER_LOGd LOGd
 #define RSSIDATATRACKER_LOGv LOGd
 
@@ -47,40 +49,82 @@ void RssiDataTracker::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t
 	last_rssi_map[channel_index ][sender_id] = rssi;
 }
 
-// ------------ Sending ping stuff ------------
+// ------------ Sending Rssi Data ------------
+
+uint8_t RssiDataTracker::getVarianceDescriptor(float variance) {
+	variance = std::abs(variance);
+	if(variance <  2) return 0;
+	if(variance <  4) return 1;
+	if(variance <  8) return 2;
+	if(variance < 12) return 3;
+	if(variance < 16) return 4;
+	if(variance < 24) return 5;
+	if(variance < 32) return 6;
+	return 7;
+}
 
 
 uint32_t RssiDataTracker::flushAggregatedRssiData() {
 	RSSIDATATRACKER_LOGd("flushAggregatedRssiData");
 	// start flushing phase, here we wait quite a bit shorter until the map is empty.
 
-//	for(auto iter = std::begin(variance_recorders);
-//			iter != std::end(variance_recorders); iter++) {
-//		StonePair stone_pair = iter->first;
-//		OnlineVarianceRecorder recorder = iter->second;
-//
-//		if (recorder.getCount() >= min_samples_to_trigger_burst) {
-//
-//			uint32_t mean = static_cast<uint32_t>(recorder.getMean());
-//			RSSIDATATRACKER_LOGv("flushing maps from %d: {send:%d recv:%d rssi:%d}",
-//					my_id, stone_pair.first, stone_pair.second, mean);
-//
-//			rssi_ping_message_t ping_msg;
-//			ping_msg.sender_id = stone_pair.first;
-//			ping_msg.recipient_id = stone_pair.second;
-//			ping_msg.rssi = mean;
-//			ping_msg.channel = 0;
-//			ping_msg.sample_id = std::max(0xff,recorder.getCount());
-//
-//
-//			sendSecondaryPingMsg(&ping_msg);
-//			variance_recorders.erase(iter);
-//
-//			return Coroutine::delayMs(burst_period_ms);
-//		}
-//	}
+	// ** begin burst loop **
+	for (auto main_iter = recorder_map[0].begin();
+			main_iter != recorder_map[0].end();
+			++main_iter) {
+		stone_id_t id = main_iter->first;
 
-	// start accumulation phase: just wait very long
+		RSSIDATATRACKER_LOGd("Burst start for id(%d)", id);
+
+		// the maps may not have the same key sets, this depends
+		// on possible loss differences between the channels.
+
+		// Intersecting the key sets of these maps is pure ugly.
+		// Fortunately we only doing this once every half hour or so.
+		decltype(main_iter) rec_iters[] = {
+				main_iter,
+				recorder_map[1].find(id),
+				recorder_map[2].find(id),
+		};
+
+		bool all_maps_have_sufficient_data_for_id = true;
+		for(auto i = 0; i < CHANNEL_COUNT; ++i) {
+			if (rec_iters[i] == recorder_map[i].end() ||
+					rec_iters[i]->second.getCount() < Settings.min_samples_to_trigger_burst) {
+				all_maps_have_sufficient_data_for_id = false;
+				break;
+			}
+		}
+
+		if (all_maps_have_sufficient_data_for_id) {
+			rssi_data_message_t rssi_data;
+
+			rssi_data.sample_count_ch37 = rec_iters[0]->second.getCount();
+			rssi_data.sample_count_ch38 = rec_iters[1]->second.getCount();
+			rssi_data.sample_count_ch39 = rec_iters[2]->second.getCount();
+
+			rssi_data.rssi_ch37 = rec_iters[0]->second.getMean();
+			rssi_data.rssi_ch38 = rec_iters[1]->second.getMean();
+			rssi_data.rssi_ch39 = rec_iters[2]->second.getMean();
+
+			rssi_data.variance_ch37 = getVarianceDescriptor(rec_iters[0]->second.getVariance());
+			rssi_data.variance_ch38 = getVarianceDescriptor(rec_iters[1]->second.getVariance());
+			rssi_data.variance_ch39 = getVarianceDescriptor(rec_iters[2]->second.getVariance());
+
+			sendRssiDataOverMesh(&rssi_data);
+
+			// delete entry from map
+			for(auto i = 0; i < 3; ++i) {
+				recorder_map[i].erase(rec_iters[i]);
+				// this invalidates main_iter, so we _must_ return after deleting.
+			}
+			return Coroutine::delayMs(Settings.burst_period_ms);
+		}
+	} // ** end burst loop **
+
+	RSSIDATATRACKER_LOGd("End of burst");
+
+	// burst is finished, now we wait a little longer
 	return Coroutine::delayMs(Settings.accumulation_period_ms);
 }
 
@@ -133,7 +177,7 @@ void RssiDataTracker::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_messag
 	msg_wrapper.urgency = CS_MESH_URGENCY_LOW;
 
 	msg_wrapper.payload = reinterpret_cast<uint8_t*>(rssi_data_message);
-	msg_wrapper.size = sizeof(rssi_data_message);
+	msg_wrapper.size = sizeof(*rssi_data_message);
 
 	event_t msgevt(CS_TYPE::CMD_SEND_MESH_MSG, &msg_wrapper,
 			sizeof(cs_mesh_msg_t));
@@ -158,6 +202,7 @@ void RssiDataTracker::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent){
 
 void RssiDataTracker::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
 	if (mesh_msg_evt.hops == 0) { // TODO: 0 hops, or 1 hops?!
+		RSSIDATATRACKER_LOGd("logging mesh msg event with 0 hops");
 		recordRssiValue(
 				mesh_msg_evt.srcAddress,
 				mesh_msg_evt.rssi,
