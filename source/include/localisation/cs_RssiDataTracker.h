@@ -8,8 +8,7 @@
 
 #include <cstdint>
 #include <events/cs_EventListener.h>
-#include <localisation/cs_RssiPingMessage.h>
-#include <localisation/cs_RssiDataMessage.h>
+#include <structs/cs_PacketsInternal.h>
 
 #include <util/cs_Coroutine.h>
 #include <util/cs_Variance.h>
@@ -61,27 +60,41 @@ private:
 
 	Coroutine flushRoutine;
 
-	/**
-	 * When flushAggregatedRssiData is in the flushing phase,
-	 * only recorders that have accumulated this many samples will
-	 * be included.
-	 */
-	static constexpr uint8_t min_samples_to_trigger_burst = 20;
+	struct RssiDataTrackerTiming {
+		/**
+		 * When flushAggregatedRssiData is in the flushing phase,
+		 * only recorders that have accumulated this many samples will
+		 * be included.
+		 */
+		uint8_t min_samples_to_trigger_burst;
 
-	/**
-	 * Note: if the mesh is very active, setting this delay higher is risky.
-	 * When a StonePair recorder accumulates more then min_samples_to_trigger_burst
-	 * samples _during_ the burst phase, it will be propagated in same burst again.
-	 * Hence a low value for that constant makes it possible to keep running in burst
-	 * mode. (If multiple nodes are bursting, this effect will snowball!)
-	 */
-	static constexpr uint32_t burst_period_ms = 5;
+		/**
+		 * Note: if the mesh is very active, setting this delay higher is risky.
+		 * When a StonePair recorder accumulates more then min_samples_to_trigger_burst
+		 * samples _during_ the burst phase, it will be propagated in same burst again.
+		 * Hence a low value for that constant makes it possible to keep running in burst
+		 * mode. (If multiple nodes are bursting, this effect will snowball!)
+		 */
+		uint32_t burst_period_ms;
 
-	/**
-	 * This value determines how often bursts occur. It is much less sensitive
-	 * than burst_period_ms and min_samples_to_trigger_burst.
-	 */
-	static constexpr uint32_t accumulation_period_ms = 30 * 60 * 1000;
+		/**
+		 * This value determines how often bursts occur. It is much less sensitive
+		 * than burst_period_ms and min_samples_to_trigger_burst.
+		 */
+		uint32_t accumulation_period_ms;
+	};
+
+	static constexpr RssiDataTrackerTiming Settings = {
+#ifdef DEBUG
+		.min_samples_to_trigger_burst = 20,
+		.burst_period_ms = 500,
+		.accumulation_period_ms = 2 * 60 * 1000
+#else
+		.min_samples_to_trigger_burst = 20,
+		.burst_period_ms = 5,
+		.accumulation_period_ms = 30 * 60 * 1000
+#endif
+	};
 
 	// -------------------- Methods --------------------
 

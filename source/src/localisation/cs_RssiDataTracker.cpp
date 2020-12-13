@@ -1,6 +1,4 @@
 #include <localisation/cs_RssiDataTracker.h>
-#include <localisation/cs_RssiDataMessage.h>
-#include <localisation/cs_RssiPingMessage.h>
 
 #include <common/cs_Types.h>
 #include <drivers/cs_Serial.h>
@@ -10,22 +8,8 @@
 #include <time/cs_SystemTime.h>
 #include <test/cs_Test.h>
 
-#define RSSIDATATRACKER_LOGd LOGnone
-#define RSSIDATATRACKER_LOGv LOGnone
-
-// utilities
-
-void printPingMsg(rssi_ping_message_t *p) {
-	if (!p) {
-		return;
-	}
-
-	RSSIDATATRACKER_LOGv("ping: %d -> %d @ %d dB sample(#%d)",
-			p->sender_id,
-			p->recipient_id,
-			p->rssi,
-			p->sample_id);
-}
+#define RSSIDATATRACKER_LOGd LOGd
+#define RSSIDATATRACKER_LOGv LOGd
 
 // ------------ RssiDataTracker methods ------------
 
@@ -97,7 +81,7 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 //	}
 
 	// start accumulation phase: just wait very long
-	return Coroutine::delayMs(accumulation_period_ms);
+	return Coroutine::delayMs(Settings.accumulation_period_ms);
 }
 
 // --------------- generating rssi data --------------
@@ -196,10 +180,12 @@ void RssiDataTracker::handleEvent(event_t &evt) {
 
 		switch (meshMsgEvent.type) {
 			case CS_MESH_MODEL_TYPE_RSSI_PING: {
+				RSSIDATATRACKER_LOGd("received rssi ping message");
 				receivePingMessage(meshMsgEvent);
 				break;
 			}
 			case CS_MESH_MODEL_TYPE_RSSI_DATA: {
+				RSSIDATATRACKER_LOGd("received rssi data message");
 				receiveRssiDataMessage(meshMsgEvent);
 				break;
 			}
