@@ -25,6 +25,8 @@ void RssiDataTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id,
 	        sizeof(my_id));
 	RSSIDATATRACKER_LOGd("RssiDataTracker: my_id %d",my_id);
+
+	boot_sequence_finished = false;
 }
 
 // ------------ Recording ping stuff ------------
@@ -80,6 +82,12 @@ uint8_t RssiDataTracker::getCountRepresentation(uint32_t count) {
 
 
 uint32_t RssiDataTracker::flushAggregatedRssiData() {
+	if(!boot_sequence_finished) {
+		RSSIDATATRACKER_LOGd("flushAggregatedRssiData boot delay");
+		boot_sequence_finished = true;
+		return Coroutine::delayMs(Settings.boot_sequence_period_ms);
+	}
+
 	RSSIDATATRACKER_LOGd("flushAggregatedRssiData");
 	// start flushing phase, here we wait quite a bit shorter until the map is empty.
 

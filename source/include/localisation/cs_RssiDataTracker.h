@@ -57,6 +57,9 @@ private:
 	std::map<stone_id_t,int8_t> last_rssi_map[CHANNEL_COUNT] = {};
 	std::map<stone_id_t,OnlineVarianceRecorder> recorder_map[CHANNEL_COUNT] = {};
 
+	// will be set to true by coroutine to flush data after startup.
+	bool boot_sequence_finished = false;
+
 	// --------------- Coroutine parameters ---------------
 
 	Coroutine flushRoutine;
@@ -83,17 +86,25 @@ private:
 		 * than burst_period_ms and min_samples_to_trigger_burst.
 		 */
 		uint32_t accumulation_period_ms;
+
+		/**
+		 * When boot sequence period expires, a flush of the rssi data will be
+		 * triggered.
+		 */
+		uint32_t boot_sequence_period_ms;
 	};
 
 	static constexpr RssiDataTrackerTiming Settings = {
 #ifdef DEBUG
 		.min_samples_to_trigger_burst = 20,
 		.burst_period_ms = 500,
-		.accumulation_period_ms = 1 * 60 * 1000
+		.accumulation_period_ms = 2 * 60 * 1000,
+		.boot_sequence_period_ms = 1 * 60 * 1000
 #else
 		.min_samples_to_trigger_burst = 20,
 		.burst_period_ms = 5,
-		.accumulation_period_ms = 30 * 60 * 1000
+		.accumulation_period_ms = 30 * 60 * 1000,
+		.boot_sequence_period_ms = 1 * 60 * 1000,
 #endif
 	};
 
