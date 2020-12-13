@@ -357,18 +357,18 @@ struct __attribute__((__packed__)) rssi_data_message_t {
 
 	/**
 	 * variance of the given channel, rounded to intervals:
-	 * 0: 0  - 2
-	 * 1: 2  - 4
-	 * 2: 4  - 8
-	 * 3: 8  - 12
-	 * 4: 12 - 16
-	 * 5: 16 - 24
-	 * 6: 24 - 32
-	 * 7: 32 and over
+	 * 0: [ 0  - 2)
+	 * 1: [ 2  - 4)
+	 * 2: [ 4  - 6)
+	 * 3: [ 6 -  8)
+	 * 4: [ 8 - 10)
+	 * 5: [10 - 15)
+	 * 6: [15 - 20)
+	 * 7: 20 and over
 	 */
-	uint8_t variance_ch37 : 3;
-	uint8_t variance_ch38 : 3;
-	uint8_t variance_ch39 : 3;
+	uint8_t standard_deviation_ch37 : 3;
+	uint8_t standard_deviation_ch38 : 3;
+	uint8_t standard_deviation_ch39 : 3;
 };
 #pragma GCC diagnostic pop
 

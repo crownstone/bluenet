@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <events/cs_EventListener.h>
 #include <structs/cs_PacketsInternal.h>
+#include <localisation/cs_RssiDataMessage.h>
 
 #include <util/cs_Coroutine.h>
 #include <util/cs_Variance.h>
@@ -112,10 +113,22 @@ private:
 	uint32_t flushAggregatedRssiData();
 
 	/**
-	 * Returns the 3 bit descriptor of the given variance as defined
+	 * Returns the 3 bit descriptor of the given standard deviation as defined
 	 * in cs_PacketsInternal.h.
 	 */
-	inline uint8_t getVarianceDescriptor(float variance);
+	inline uint8_t getStdDevRepresentation(float standard_deviation);
+
+	/**
+	 * Returns the 7 bit representation of the given mean as defined
+	 * in cs_PacketsInternal.h.
+	 */
+	inline uint8_t getMeanRepresentation(float mean);
+
+	/**
+	 * Returns the 6 bit representation of the given count as defined
+	 * in cs_PacketsInternal.h.
+	 */
+	inline uint8_t getCountRepresentation(uint32_t count);
 
 	// --------------- generating rssi data --------------
 

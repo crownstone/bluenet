@@ -9,7 +9,6 @@
 #include <drivers/cs_Serial.h>
 
 #include <localisation/cs_Nearestnearestwitnessreport.h>
-#include <localisation/cs_RssiPingMessage.h>
 
 #include <cstring> // For memcpy
 

@@ -74,7 +74,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_MESH_RESULT =                      10105, // Received the result of a mesh command, payload: uart_msg_mesh_result_packet_header_t + data.
 	UART_OPCODE_TX_MESH_ACK_ALL_RESULT =              10106, // Whether all stone IDs were acked, payload: result_packet_header_t.
 
-	UART_OPCODE_TX_RSSI_DATA_MESSAGE =                10107, // When RssiDataTracker receives a secondary ping message, it is sent to host. Payload: rssi_data_message_t
+	UART_OPCODE_TX_RSSI_DATA_MESSAGE =                10107, // When RssiDataTracker receives an rssi_data_message, it is sent to host. Payload: RssiDataMessage.
 
 	////////// Developer messages in release builds. //////////
 	UART_OPCODE_TX_EVT =                              40000, // Send internal events, this protocol may change

@@ -51,16 +51,31 @@ void RssiDataTracker::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t
 
 // ------------ Sending Rssi Data ------------
 
-uint8_t RssiDataTracker::getVarianceDescriptor(float variance) {
-	variance = std::abs(variance);
-	if(variance <  2) return 0;
-	if(variance <  4) return 1;
-	if(variance <  8) return 2;
-	if(variance < 12) return 3;
-	if(variance < 16) return 4;
-	if(variance < 24) return 5;
-	if(variance < 32) return 6;
+uint8_t RssiDataTracker::getStdDevRepresentation(float standard_deviation) {
+	standard_deviation = std::abs(standard_deviation);
+	if(standard_deviation <  2) return 0;
+	if(standard_deviation <  4) return 1;
+	if(standard_deviation <  6) return 2;
+	if(standard_deviation <  8) return 3;
+	if(standard_deviation < 10) return 4;
+	if(standard_deviation < 15) return 5;
+	if(standard_deviation < 20) return 6;
 	return 7;
+}
+
+uint8_t RssiDataTracker::getMeanRepresentation(float mean) {
+	mean = std::abs(mean);
+	if (mean >= 1<<7 ) {
+		return (1<<7) - 1;
+	}
+	return static_cast<uint8_t>(mean);
+}
+
+uint8_t RssiDataTracker::getCountRepresentation(uint32_t count) {
+	if (count >= 1<<6) {
+		return (1<< 6) - 1;
+	}
+	return count;
 }
 
 
@@ -99,17 +114,17 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 		if (all_maps_have_sufficient_data_for_id) {
 			rssi_data_message_t rssi_data;
 
-			rssi_data.sample_count_ch37 = rec_iters[0]->second.getCount();
-			rssi_data.sample_count_ch38 = rec_iters[1]->second.getCount();
-			rssi_data.sample_count_ch39 = rec_iters[2]->second.getCount();
+			rssi_data.sample_count_ch37 = getCountRepresentation(rec_iters[0]->second.getCount());
+			rssi_data.sample_count_ch38 = getCountRepresentation(rec_iters[1]->second.getCount());
+			rssi_data.sample_count_ch39 = getCountRepresentation(rec_iters[2]->second.getCount());
 
-			rssi_data.rssi_ch37 = rec_iters[0]->second.getMean();
-			rssi_data.rssi_ch38 = rec_iters[1]->second.getMean();
-			rssi_data.rssi_ch39 = rec_iters[2]->second.getMean();
+			rssi_data.rssi_ch37 = getMeanRepresentation(rec_iters[0]->second.getMean());
+			rssi_data.rssi_ch38 = getMeanRepresentation(rec_iters[1]->second.getMean());
+			rssi_data.rssi_ch39 = getMeanRepresentation(rec_iters[2]->second.getMean());
 
-			rssi_data.variance_ch37 = getVarianceDescriptor(rec_iters[0]->second.getVariance());
-			rssi_data.variance_ch38 = getVarianceDescriptor(rec_iters[1]->second.getVariance());
-			rssi_data.variance_ch39 = getVarianceDescriptor(rec_iters[2]->second.getVariance());
+			rssi_data.standard_deviation_ch37 = getStdDevRepresentation(rec_iters[0]->second.getStandardDeviation());
+			rssi_data.standard_deviation_ch38 = getStdDevRepresentation(rec_iters[1]->second.getStandardDeviation());
+			rssi_data.standard_deviation_ch39 = getStdDevRepresentation(rec_iters[2]->second.getStandardDeviation());
 
 			sendRssiDataOverMesh(&rssi_data);
 
@@ -186,10 +201,35 @@ void RssiDataTracker::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_messag
 }
 
 void RssiDataTracker::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message){
+	RssiDataMessage datamessage;
+
+	datamessage.receiver_id = my_id;
+	datamessage.sender_id = rssi_data_message->sender_id;
+
+	datamessage.count[0] = rssi_data_message->sample_count_ch37;
+	datamessage.count[1] = rssi_data_message->sample_count_ch38;
+	datamessage.count[2] = rssi_data_message->sample_count_ch39;
+
+	datamessage.rssi[0] = rssi_data_message->rssi_ch37;
+	datamessage.rssi[1] = rssi_data_message->rssi_ch38;
+	datamessage.rssi[2] = rssi_data_message->rssi_ch39;
+
+	datamessage.standard_deviation[0] = rssi_data_message->standard_deviation_ch37;
+	datamessage.standard_deviation[1] = rssi_data_message->standard_deviation_ch38;
+	datamessage.standard_deviation[2] = rssi_data_message->standard_deviation_ch39;
+
+	RSSIDATATRACKER_LOGd("%d -> %d: ch37 #%d  -%d dB",
+			datamessage.sender_id,
+			datamessage.receiver_id,
+			datamessage.count[0],
+			datamessage.rssi[0],
+			datamessage.standard_deviation[0]
+	);
+
 	UartHandler::getInstance().writeMsg(
 			UART_OPCODE_TX_RSSI_DATA_MESSAGE,
-			reinterpret_cast<uint8_t*>(rssi_data_message),
-			sizeof(*rssi_data_message));
+			reinterpret_cast<uint8_t*>(&datamessage),
+			sizeof(datamessage));
 }
 
 void RssiDataTracker::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent){
