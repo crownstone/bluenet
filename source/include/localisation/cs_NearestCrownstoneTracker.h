@@ -13,7 +13,7 @@
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/cs_Typedefs.h>
 
-
+// REVIEW: Missing description.
 class NearestCrownstoneTracker: public EventListener {
 public:
 	/**
@@ -31,6 +31,7 @@ public:
 private:
 	stone_id_t my_id; // cached for efficiency
 
+	// REVIEW: What is winning, why not call it nearest? What is personal?
 	// TODO: expand to a map<TrackableID, NearestWitnessReport>.
 	NearestWitnessReport personal_report;
 	NearestWitnessReport winning_report;
@@ -80,10 +81,11 @@ private:
 	 * Currently dispatches an event for CMD_SWITCH_[ON,OFF] depending on
 	 * whether this crownstone is closest (ON) or not the closest.
 	 *
-	 * Also prints a debug log stating the current winner.
+	 * Also prints a debug log stating the current winner. // REVIEW: Implementation detail.
 	 */
 	void onWinnerChanged();
 
+	// REVIEW: Describes implementation instead of what it does/is for.
 	/**
 	 * Returns report.rssi != 0.
 	 *

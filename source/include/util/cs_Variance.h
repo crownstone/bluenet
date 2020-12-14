@@ -1,3 +1,4 @@
+// REVIEW: Missing author header.
 
 /**
  * Compute mean and variance of a running measurement without keeping track of
@@ -14,6 +15,7 @@
 
 #include <math.h>
 
+// REVIEW: Recorder?
 class OnlineVarianceRecorder {
 private:
 	// running values

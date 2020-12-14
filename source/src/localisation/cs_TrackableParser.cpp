@@ -15,7 +15,7 @@
 #include <localisation/cs_TrackableParser.h>
 #include <localisation/cs_TrackableEvent.h>
 
-
+// REVIEW: This won't be recognized by binary logger.
 #define TrackableParser_LOGd LOGnone
 
 void TrackableParser::init() {
@@ -139,6 +139,7 @@ void TrackableParser::logServiceData(const char* headerstr, scanned_device_t* sc
 		return;
 	}
 
+	// REVIEW: Use the Util function for this.
 	_log(SERIAL_INFO, "len=%d data=[", service_data.len);
 	for (auto i = 0u; i < service_data.len; i++) {
 		_log(SERIAL_INFO, " %2x,", service_data.data[i]);

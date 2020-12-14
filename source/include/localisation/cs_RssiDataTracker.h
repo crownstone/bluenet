@@ -16,6 +16,7 @@
 
 #include <map>
 
+// REVIEW: Rename to MeshConnectivity or so?
 /**
  * This component monitors bluetooth messages in order to keep track of the Rssi
  * distances between crownstones in the mesh. It regularly pushes rssi information
@@ -25,6 +26,7 @@ class RssiDataTracker : public EventListener {
 public:
 	RssiDataTracker();
 
+	// REVIEW: Implementation details.
 	/**
 	 * CS_TICK:
 	 *   Coroutine for rssi data updates.
@@ -54,8 +56,12 @@ private:
 	// stores the relevant history, per neighbor stone_id.
 	static constexpr uint8_t CHANNEL_COUNT = 3;
 	static constexpr uint8_t CHANNEL_START = 37;
+
+	// REVIEW: Aren't maps actually slower than arrays for a small number of elements?
+	// REVIEW: Elements never time out, so these maps can keep on growing.
+	// REVIEW: Last rssi map is not used.
 	std::map<stone_id_t,int8_t> last_rssi_map[CHANNEL_COUNT] = {};
-	std::map<stone_id_t,OnlineVarianceRecorder> recorder_map[CHANNEL_COUNT] = {};
+	std::map<stone_id_t,OnlineVarianceRecorder> recorder_map[CHANNEL_COUNT] = {}; // REVIEW: why not call it varianceMap or so?
 
 	// will be set to true by coroutine to flush data after startup.
 	bool boot_sequence_finished = false;
@@ -72,6 +78,10 @@ private:
 		 */
 		uint8_t min_samples_to_trigger_burst;
 
+		// REVIEW: Doesn't say what this burst_period_ms does.
+		// REVIEW: Maybe have a queue of stone ids to send? so you can just send them 1 by 1,
+		//         with any delay in between (large for normal operation, smaller when data is requested).
+		//         I'm not a big fan of the snowball risk.
 		/**
 		 * Note: if the mesh is very active, setting this delay higher is risky.
 		 * When we accumulate more then min_samples_to_trigger_burst

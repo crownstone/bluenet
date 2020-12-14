@@ -15,11 +15,13 @@
 #include <storage/cs_State.h>
 #include <util/cs_Coroutine.h>
 
+// REVIEW: If you commit log defines not as LOGnone, then just put them in the code as LOGi and LOGd.
 #define LOGNearestCrownstoneTrackerVerbose LOGnone
 #define LOGNearestCrownstoneTrackerDebug LOGd
 #define LOGNearestCrownstoneTrackerInfo LOGi
 
 void NearestCrownstoneTracker::init() {
+	// REVIEW: Use TYPIFY for variable.
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id,
 	        sizeof(my_id));
 
@@ -51,7 +53,9 @@ void NearestCrownstoneTracker::onReceive(TrackableEvent* tracked_event) {
 	// TODO: replace condition with std::find when
 	// we have a map of uuid --> report for all the datas
 
+	// REVIEW: Why not start with lowest rssi, so you don't need to do the isvalid check?
 	if (isValid(winning_report)) {
+		// REVIEW: Does it matter who reported it?
 		if(winning_report.reporter == my_id){
 			LOGNearestCrownstoneTrackerVerbose("we already believed we were closest, so this is just an update");
 			saveWinningReport(incoming_report);
@@ -75,6 +79,7 @@ void NearestCrownstoneTracker::onReceive(TrackableEvent* tracked_event) {
 	}
 }
 
+// REVIEW: This code looks very much like the other onReceive.
 void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incoming_report) {
 	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, my_id(%d), reporter(%d), rssi(%d)", my_id, incoming_report.reporter, incoming_report.rssi);
 
@@ -131,7 +136,9 @@ NearestWitnessReport NearestCrownstoneTracker::createReport(TrackableEvent* trac
 	return NearestWitnessReport(tracked_event->id, tracked_event->rssi, my_id);
 }
 
+// REVIEW: Return by ref?
 NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* mesh_msg_event) {
+	// REVIEW: Lot of mesh implementation details: shouldn't this be done in the mesh msg handler?
 	auto nearest_witness_report = mesh_msg_event->getPacket<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT>();
 
 	return NearestWitnessReport(

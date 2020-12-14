@@ -10,6 +10,7 @@
 
 #include <cmath>
 
+// REVIEW: This won't be recognized by binary logger.
 #define RSSIDATATRACKER_LOGd LOGd
 #define RSSIDATATRACKER_LOGv LOGd
 
@@ -22,6 +23,7 @@ RssiDataTracker::RssiDataTracker() :
 }
 
 void RssiDataTracker::init() {
+	// REVIEW: Use TYPIFY for variable.
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id,
 	        sizeof(my_id));
 	RSSIDATATRACKER_LOGd("RssiDataTracker: my_id %d",my_id);
@@ -41,11 +43,13 @@ void RssiDataTracker::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t
 
 	auto& recorder = recorder_map[channel_index ][sender_id];
 
+	// REVIEW: Why isn't this done in the class?
 	// If we aqcuired a lot of data, need to reduce to prevent overflow.
 	if (recorder.isNumericPrecisionLow()) {
 		recorder.reduceCount();
 	}
 
+	// REVIEW: logging means storing here?
 	// log the data
 	recorder.addValue(rssi);
 	last_rssi_map[channel_index ][sender_id] = rssi;
@@ -65,7 +69,9 @@ uint8_t RssiDataTracker::getStdDevRepresentation(float standard_deviation) {
 	return 7;
 }
 
+// REVIEW: Mean what?
 uint8_t RssiDataTracker::getMeanRepresentation(float mean) {
+	// REVIEW: Isn't rssi negative?
 	mean = std::abs(mean);
 	if (mean >= 1<<7 ) {
 		return (1<<7) - 1;
@@ -208,6 +214,7 @@ void RssiDataTracker::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_messag
 	msgevt.dispatch();
 }
 
+// REVIEW: Why not a simpler message (without bit fields) for uart?
 void RssiDataTracker::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message){
 	RssiDataMessage datamessage;
 
@@ -249,6 +256,7 @@ void RssiDataTracker::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent){
 // ------------- recording mesh messages -------------
 
 void RssiDataTracker::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
+	// REVIEW: Mesh specific code, should be in the mesh code.
 	if (mesh_msg_evt.hops == 0) { // TODO: 0 hops, or 1 hops?!
 		RSSIDATATRACKER_LOGd("logging mesh msg event with 0 hops");
 		recordRssiValue(

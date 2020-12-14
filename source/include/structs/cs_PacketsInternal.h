@@ -317,6 +317,7 @@ struct microapp_advertise_request_t {
 };
 
 
+// REVIEW: Why is this in packet inernal? it's used in mesh protocol. Should be in mesh messages.
 /**
  * Sent from a crownstone when it has too little rssi information from
  * its neighbors.
@@ -337,8 +338,12 @@ struct __attribute__((__packed__)) rssi_ping_message_t {
  * overflow word boundary. This GCC warning is just to notify
  * the programmer of that breaking change.
  */
+
+// REVIEW: Why is this in packet inernal? it's used in mesh protocol. Should be in mesh messages.
 struct __attribute__((__packed__)) rssi_data_message_t {
 	stone_id_t sender_id;
+
+	// REVIEW: Why not have 3x [count, rssi, std], that also aligns nicer.
 
 	/**
 	 * a samplecount == 0x111111, indicates the channel had
@@ -355,6 +360,7 @@ struct __attribute__((__packed__)) rssi_data_message_t {
 	uint8_t rssi_ch38 : 7;
 	uint8_t rssi_ch39 : 7;
 
+	// REVIEW: Why is it called standard deviation, while it's variance?
 	/**
 	 * variance of the given channel, rounded to intervals:
 	 * 0: [ 0  - 2)

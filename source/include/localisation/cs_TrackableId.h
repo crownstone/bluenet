@@ -27,6 +27,7 @@ struct __attribute__((__packed__)) TrackableId {
 
 	TrackableId() = default;
 
+	// REVIEW: Missing size (or use mac address struct)
 	TrackableId(const uint8_t * const mac){
 		std::memcpy(bytes, mac, SIZE);
 	}
