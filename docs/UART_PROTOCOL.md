@@ -146,8 +146,8 @@ Type  | Type name                     | Encrypted | Data   | Description
 10105 | Mesh result                   | Yes       | [Mesh result](#mesh_result_packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
 10106 | Mesh ack all                  | Yes       | [Mesh ack all result](../docs/PROTOCOL.md#result_packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
 10107 | Rssi between stones           | Yes       | To be defined.
-10200 | Binary debug log              | Yes       | [Binary log](binary_log_packet) | Binary debug logs, that you have to reconstruct on the client side.
-10201 | Binary debug log array        | Yes       | [Binary log array](binary_log_array_packet) | Binary debug logs, that you have to reconstruct on the client side.
+10200 | Binary debug log              | Yes       | [Binary log](#binary_log_packet) | Binary debug logs, that you have to reconstruct on the client side.
+10201 | Binary debug log array        | Yes       | [Binary log array](#binary_log_array_packet) | Binary debug logs, that you have to reconstruct on the client side.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
 40103 | Mesh cmd time                 | Yes       | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Received command to set time from the mesh.
 40110 | Mesh profile location         | Yes       | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Received the location of a profile from the mesh.
@@ -326,6 +326,7 @@ uint8[] | Payload | N | The argument data.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
+[Header](#binary_log_header) | Header | 8 | Header.
 [Element type](#binary_log_element_type) | Element type | 1 | The type of the elements.
 uint8 | Element size | 1 | The size of each element.
 uint8[] | Payload | X | The element data, of size: elementSize * numberOfElements.
