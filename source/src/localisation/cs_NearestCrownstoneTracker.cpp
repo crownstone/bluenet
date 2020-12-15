@@ -31,14 +31,14 @@ void NearestCrownstoneTracker::init() {
 void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 	if (evt.type == CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT) {
 		LOGNearestCrownstoneTrackerVerbose("NearestCrownstone received event: EVT_MESH_NEAREST_WITNESS_REPORT");
-		MeshMsgEvent* mesh_msg_event = UNTYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT, evt.data);
+		MeshMsgEvent* mesh_msg_event = CS_TYPE_CAST(EVT_MESH_NEAREST_WITNESS_REPORT, evt.data);
 		NearestWitnessReport report = createReport(mesh_msg_event);
 		onReceive(report);
 		return;
 	}
 
 	if (evt.type == CS_TYPE::EVT_TRACKABLE) {
-		TrackableEvent* trackevt = UNTYPIFY(EVT_TRACKABLE, evt.data);
+		TrackableEvent* trackevt = CS_TYPE_CAST(EVT_TRACKABLE, evt.data);
 		onReceive(trackevt);
 	}
 }

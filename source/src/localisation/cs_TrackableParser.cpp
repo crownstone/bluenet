@@ -24,13 +24,13 @@ void TrackableParser::init() {
 
 void TrackableParser::handleEvent(event_t& evt) {
 	if (evt.type == CS_TYPE::EVT_ADV_BACKGROUND_PARSED) {
-		adv_background_parsed_t *parsed_adv = UNTYPIFY(EVT_ADV_BACKGROUND_PARSED,evt.data);
+		adv_background_parsed_t *parsed_adv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED,evt.data);
 		handleBackgroundParsed(parsed_adv);
 		return;
 	}
 
 	if (evt.type == CS_TYPE::EVT_DEVICE_SCANNED) {
-		scanned_device_t* scanned_device = UNTYPIFY(EVT_DEVICE_SCANNED, evt.data);
+		scanned_device_t* scanned_device = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
 		handleAsTileDevice(scanned_device);
 		// add other trackable device types here
 

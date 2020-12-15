@@ -275,7 +275,7 @@ void RssiDataTracker::handleEvent(event_t &evt) {
 	}
 
 	if (evt.type == CS_TYPE::EVT_RECV_MESH_MSG) {
-		auto& meshMsgEvent = *UNTYPIFY(EVT_RECV_MESH_MSG, evt.getData());
+		auto& meshMsgEvent = *CS_TYPE_CAST(EVT_RECV_MESH_MSG, evt.getData());
 
 		receiveMeshMsgEvent(meshMsgEvent);
 
