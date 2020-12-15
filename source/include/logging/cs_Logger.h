@@ -102,7 +102,7 @@
 
 
 	/**
-	 * Returns the 32 bits DJB2 hash of a the reversed file name, up to the first '/'.
+	 * Returns the 32 bits DJB2 hash of the reversed file name, up to the first '/'.
 	 *
 	 * TODO: For some reason, if this returns a uint16_t, it increased the size by 3k?
 	 */
