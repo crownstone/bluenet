@@ -128,17 +128,17 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 		if (all_maps_have_sufficient_data_for_id) {
 			rssi_data_message_t rssi_data;
 
-			rssi_data.sample_count_ch37 = getCountRepresentation(rec_iters[0]->second.getCount());
-			rssi_data.sample_count_ch38 = getCountRepresentation(rec_iters[1]->second.getCount());
-			rssi_data.sample_count_ch39 = getCountRepresentation(rec_iters[2]->second.getCount());
+			rssi_data.channel37.sampleCount = getCountRepresentation(rec_iters[0]->second.getCount());
+			rssi_data.channel38.sampleCount = getCountRepresentation(rec_iters[1]->second.getCount());
+			rssi_data.channel39.sampleCount = getCountRepresentation(rec_iters[2]->second.getCount());
 
-			rssi_data.rssi_ch37 = getMeanRepresentation(rec_iters[0]->second.getMean());
-			rssi_data.rssi_ch38 = getMeanRepresentation(rec_iters[1]->second.getMean());
-			rssi_data.rssi_ch39 = getMeanRepresentation(rec_iters[2]->second.getMean());
+			rssi_data.channel37.rssi = getMeanRepresentation(rec_iters[0]->second.getMean());
+			rssi_data.channel38.rssi = getMeanRepresentation(rec_iters[1]->second.getMean());
+			rssi_data.channel39.rssi = getMeanRepresentation(rec_iters[2]->second.getMean());
 
-			rssi_data.standard_deviation_ch37 = getStdDevRepresentation(rec_iters[0]->second.getStandardDeviation());
-			rssi_data.standard_deviation_ch38 = getStdDevRepresentation(rec_iters[1]->second.getStandardDeviation());
-			rssi_data.standard_deviation_ch39 = getStdDevRepresentation(rec_iters[2]->second.getStandardDeviation());
+			rssi_data.channel37.variance = getStdDevRepresentation(rec_iters[0]->second.getStandardDeviation());
+			rssi_data.channel38.variance = getStdDevRepresentation(rec_iters[1]->second.getStandardDeviation());
+			rssi_data.channel39.variance = getStdDevRepresentation(rec_iters[2]->second.getStandardDeviation());
 
 			sendRssiDataOverMesh(&rssi_data);
 
@@ -221,17 +221,17 @@ void RssiDataTracker::sendRssiDataOverUart(rssi_data_message_t* rssi_data_messag
 	datamessage.receiver_id = my_id;
 	datamessage.sender_id = rssi_data_message->sender_id;
 
-	datamessage.count[0] = rssi_data_message->sample_count_ch37;
-	datamessage.count[1] = rssi_data_message->sample_count_ch38;
-	datamessage.count[2] = rssi_data_message->sample_count_ch39;
+	datamessage.count[0] = rssi_data_message->channel37.sampleCount;
+	datamessage.count[1] = rssi_data_message->channel38.sampleCount;
+	datamessage.count[2] = rssi_data_message->channel39.sampleCount;
 
-	datamessage.rssi[0] = rssi_data_message->rssi_ch37;
-	datamessage.rssi[1] = rssi_data_message->rssi_ch38;
-	datamessage.rssi[2] = rssi_data_message->rssi_ch39;
+	datamessage.rssi[0] = rssi_data_message->channel37.rssi;
+	datamessage.rssi[1] = rssi_data_message->channel38.rssi;
+	datamessage.rssi[2] = rssi_data_message->channel39.rssi;
 
-	datamessage.standard_deviation[0] = rssi_data_message->standard_deviation_ch37;
-	datamessage.standard_deviation[1] = rssi_data_message->standard_deviation_ch38;
-	datamessage.standard_deviation[2] = rssi_data_message->standard_deviation_ch39;
+	datamessage.standard_deviation[0] = rssi_data_message->channel37.variance;
+	datamessage.standard_deviation[1] = rssi_data_message->channel38.variance;
+	datamessage.standard_deviation[2] = rssi_data_message->channel39.variance;
 
 	RSSIDATATRACKER_LOGd("%d -> %d: ch37 #%d  -%d dB",
 			datamessage.sender_id,

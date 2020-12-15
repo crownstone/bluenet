@@ -187,3 +187,64 @@ struct __attribute__((__packed__)) nearest_witness_report_t {
 	uint8_t trackable_device_mac[6];
 	int8_t rssi;
 };
+
+// REVIEW: Why is this in packet inernal? it's used in mesh protocol. Should be in mesh messages.
+/**
+ * Sent from a crownstone when it has too little rssi information from
+ * its neighbors.
+ */
+struct __attribute__((__packed__)) rssi_ping_message_t {
+
+};
+
+/**
+ * The data in this packet contains information about the
+ * bluetooth channels between this crownstone and the one
+ * with id sender_id.
+ */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpacked-bitfield-compat"
+/**
+ * GCC 4.4 fixed padding issues when bitfields of type char
+ * overflow word boundary. This GCC warning is just to notify
+ * the programmer of that breaking change.
+ */
+
+
+struct __attribute__((__packed__)) rssi_data_t {
+	/**
+	 * variance of the given channel, rounded to intervals:
+	 * 0: [ 0  - 2)
+	 * 1: [ 2  - 4)
+	 * 2: [ 4  - 6)
+	 * 3: [ 6 -  8)
+	 * 4: [ 8 - 10)
+	 * 5: [10 - 15)
+	 * 6: [15 - 20)
+	 * 7: 20 and over
+	 */
+	uint8_t variance : 3;
+
+	/**
+	 * absolute value of the average rssi
+	 */
+	uint8_t rssi : 7;
+
+	/**
+	 * a samplecount == 0x111111, indicates the channel had
+	 * at least 2^6-1 == 63 samples.
+	 */
+	uint8_t sampleCount : 6;
+};
+
+// REVIEW: Why is this in packet inernal? it's used in mesh protocol. Should be in mesh messages.
+struct __attribute__((__packed__)) rssi_data_message_t {
+	stone_id_t sender_id;
+	rssi_data_t channel37;
+	rssi_data_t channel38;
+	rssi_data_t channel39;
+};
+
+
+
+#pragma GCC diagnostic pop
