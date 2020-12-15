@@ -29,6 +29,7 @@ void RssiDataTracker::init() {
 	RSSIDATATRACKER_LOGd("RssiDataTracker: my_id %d",my_id);
 
 	boot_sequence_finished = false;
+	last_stone_id_broadcasted_in_burst = 0;
 }
 
 // ------------ Recording ping stuff ------------
@@ -98,9 +99,9 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 	// start flushing phase, here we wait quite a bit shorter until the map is empty.
 
 	// ** begin burst loop **
-	for (auto main_iter = recorder_map[0].begin();
-			main_iter != recorder_map[0].end();
-			++main_iter) {
+	for(auto main_iter = recorder_map[0].upper_bound(last_stone_id_broadcasted_in_burst);
+			main_iter != recorder_map[0].end(); ++main_iter) {
+
 		stone_id_t id = main_iter->first;
 
 		RSSIDATATRACKER_LOGd("Burst start for id(%d)", id);
@@ -128,6 +129,8 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 		if (all_maps_have_sufficient_data_for_id) {
 			rssi_data_message_t rssi_data;
 
+			rssi_data.sender_id = id;
+
 			rssi_data.channel37.sampleCount = getCountRepresentation(rec_iters[0]->second.getCount());
 			rssi_data.channel38.sampleCount = getCountRepresentation(rec_iters[1]->second.getCount());
 			rssi_data.channel39.sampleCount = getCountRepresentation(rec_iters[2]->second.getCount());
@@ -147,13 +150,18 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 				recorder_map[i].erase(rec_iters[i]);
 				// this invalidates main_iter, so we _must_ return after deleting.
 			}
+
+			last_stone_id_broadcasted_in_burst = id;
+
 			return Coroutine::delayMs(Settings.burst_period_ms);
 		}
+
 	} // ** end burst loop **
 
 	RSSIDATATRACKER_LOGd("End of burst");
 
-	// burst is finished, now we wait a little longer
+	last_stone_id_broadcasted_in_burst = 0;
+
 	return Coroutine::delayMs(Settings.accumulation_period_ms);
 }
 

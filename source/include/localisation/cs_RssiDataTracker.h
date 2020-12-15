@@ -66,6 +66,9 @@ private:
 	// will be set to true by coroutine to flush data after startup.
 	bool boot_sequence_finished = false;
 
+	// loop variables to keep track of outside of coroutine for the burst loop
+	stone_id_t last_stone_id_broadcasted_in_burst = 0;
+
 	// --------------- Coroutine parameters ---------------
 
 	Coroutine flushRoutine;
