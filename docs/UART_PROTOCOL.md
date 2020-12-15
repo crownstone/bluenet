@@ -1,4 +1,4 @@
-# UART Protocol 1.1.0
+# UART Protocol 1.0.0
 -------------------
 
 ## Special characters
