@@ -123,7 +123,6 @@ ret_code_t UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartPr
 //	}
 
 	uart_msg_header_t uartMsgHeader;
-	uartMsgHeader.deviceId = _stoneId;
 	uartMsgHeader.type = opCode;
 
 	uint16_t uartMsgSize = sizeof(uartMsgHeader) + size;
@@ -628,7 +627,6 @@ void UartHandler::handleUartMsg(uint8_t* data, uint16_t size, EncryptionAccessLe
 	_commandHandler.handleCommand(
 			opCode,
 			cs_data_t(msgData, msgDataSize),
-			cmd_source_with_counter_t(cmd_source_t(CS_CMD_SOURCE_TYPE_UART, header->deviceId)),
 			accessLevel,
 			wasEncrypted,
 			cs_data_t(_writeBuffer, (_writeBuffer == nullptr) ? 0 : UART_TX_BUFFER_SIZE)
