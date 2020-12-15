@@ -8,7 +8,7 @@
 #pragma once
 
 #include <protocol/mesh/cs_MeshModelPackets.h>
-
+#include <logging/cs_Logger.h>
 #include <cstdint> // for uint8_t
 #include <cstring> // for memcmp, memcpy
 
