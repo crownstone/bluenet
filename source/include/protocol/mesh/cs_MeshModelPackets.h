@@ -223,18 +223,18 @@ struct __attribute__((__packed__)) rssi_data_t {
 	 * 6: [15 - 20)
 	 * 7: 20 and over
 	 */
-	uint8_t variance : 3;
+	uint16_t variance : 3;
 
 	/**
 	 * absolute value of the average rssi
 	 */
-	uint8_t rssi : 7;
+	uint16_t rssi : 7;
 
 	/**
 	 * a samplecount == 0x111111, indicates the channel had
 	 * at least 2^6-1 == 63 samples.
 	 */
-	uint8_t sampleCount : 6;
+	uint16_t sampleCount : 6;
 };
 
 // REVIEW: Why is this in packet inernal? it's used in mesh protocol. Should be in mesh messages.
