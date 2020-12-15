@@ -134,10 +134,10 @@ private:
 	uint32_t flushAggregatedRssiData();
 
 	/**
-	 * Returns the 3 bit descriptor of the given standard deviation as defined
+	 * Returns the 3 bit descriptor of the given variance as defined
 	 * in cs_PacketsInternal.h.
 	 */
-	inline uint8_t getStdDevRepresentation(float standard_deviation);
+	inline uint8_t getVarianceRepresentation(float standard_deviation);
 
 	/**
 	 * Returns the 7 bit representation of the given mean as defined

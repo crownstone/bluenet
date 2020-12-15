@@ -57,15 +57,15 @@ void RssiDataTracker::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t
 
 // ------------ Sending Rssi Data ------------
 
-uint8_t RssiDataTracker::getStdDevRepresentation(float standard_deviation) {
-	standard_deviation = std::abs(standard_deviation);
-	if(standard_deviation <  2) return 0;
-	if(standard_deviation <  4) return 1;
-	if(standard_deviation <  6) return 2;
-	if(standard_deviation <  8) return 3;
-	if(standard_deviation < 10) return 4;
-	if(standard_deviation < 15) return 5;
-	if(standard_deviation < 20) return 6;
+uint8_t RssiDataTracker::getVarianceRepresentation(float variance) {
+	variance = std::abs(variance);
+	if(variance <  2 *  2) return 0;
+	if(variance <  4 *  4) return 1;
+	if(variance <  6 *  6) return 2;
+	if(variance <  8 *  8) return 3;
+	if(variance < 10 * 10) return 4;
+	if(variance < 15 * 15) return 5;
+	if(variance < 20 * 15) return 6;
 	return 7;
 }
 
@@ -136,9 +136,9 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 			rssi_data.channel38.rssi = getMeanRepresentation(rec_iters[1]->second.getMean());
 			rssi_data.channel39.rssi = getMeanRepresentation(rec_iters[2]->second.getMean());
 
-			rssi_data.channel37.variance = getStdDevRepresentation(rec_iters[0]->second.getStandardDeviation());
-			rssi_data.channel38.variance = getStdDevRepresentation(rec_iters[1]->second.getStandardDeviation());
-			rssi_data.channel39.variance = getStdDevRepresentation(rec_iters[2]->second.getStandardDeviation());
+			rssi_data.channel37.variance = getVarianceRepresentation(rec_iters[0]->second.getVariance());
+			rssi_data.channel38.variance = getVarianceRepresentation(rec_iters[1]->second.getVariance());
+			rssi_data.channel39.variance = getVarianceRepresentation(rec_iters[2]->second.getVariance());
 
 			sendRssiDataOverMesh(&rssi_data);
 

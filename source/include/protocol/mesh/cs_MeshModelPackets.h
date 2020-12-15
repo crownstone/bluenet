@@ -198,30 +198,21 @@ struct __attribute__((__packed__)) rssi_ping_message_t {
 };
 
 /**
- * The data in this packet contains information about the
- * bluetooth channels between this crownstone and the one
+ * The data in this packet contains information about a
+ * bluetooth channel between this crownstone and the one
  * with id sender_id.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpacked-bitfield-compat"
-/**
- * GCC 4.4 fixed padding issues when bitfields of type char
- * overflow word boundary. This GCC warning is just to notify
- * the programmer of that breaking change.
- */
-
-
 struct __attribute__((__packed__)) rssi_data_t {
 	/**
 	 * variance of the given channel, rounded to intervals:
-	 * 0: [ 0  - 2)
-	 * 1: [ 2  - 4)
-	 * 2: [ 4  - 6)
-	 * 3: [ 6 -  8)
-	 * 4: [ 8 - 10)
-	 * 5: [10 - 15)
-	 * 6: [15 - 20)
-	 * 7: 20 and over
+	 * 0: [ 0  - 2^2)
+	 * 1: [ 2^2  - 4^2)
+	 * 2: [ 4^2  - 6^2)
+	 * 3: [ 6^2 -  8^2)
+	 * 4: [ 8^2 - 10^2)
+	 * 5: [10^2 - 15^2)
+	 * 6: [15^2 - 20^2)
+	 * 7: 20^2 and over
 	 */
 	uint16_t variance : 3;
 
