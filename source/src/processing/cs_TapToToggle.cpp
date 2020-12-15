@@ -8,7 +8,7 @@
 #include "processing/cs_TapToToggle.h"
 #include "events/cs_EventDispatcher.h"
 #include "drivers/cs_RTC.h"
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 #include "processing/cs_CommandHandler.h"
 #include "util/cs_Utils.h"
 #include "storage/cs_State.h"

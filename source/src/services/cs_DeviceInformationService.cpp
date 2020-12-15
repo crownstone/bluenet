@@ -8,9 +8,10 @@
 #include <ble/cs_Nordic.h>
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Boards.h>
+#include <cfg/cs_Git.h>
 #include <cfg/cs_HardwareVersions.h>
 #include <cfg/cs_UuidConfig.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <services/cs_DeviceInformationService.h>
 #include <util/cs_Utils.h>
 

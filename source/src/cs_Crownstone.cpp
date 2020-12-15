@@ -49,6 +49,8 @@
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_RC5.h>
 #include <ipc/cs_IpcRamData.h>
+#include <logging/cs_CLogger.h>
+#include <logging/cs_Logger.h>
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_TapToToggle.h>
 #include <storage/cs_State.h>
@@ -107,16 +109,13 @@ void startHFClock() {
 void initUart(uint8_t pinRx, uint8_t pinTx) {
 	serial_config(pinRx, pinTx);
 	serial_init(SERIAL_ENABLE_RX_AND_TX);
-	_log(SERIAL_INFO, SERIAL_CRLF);
 
 	LOGi("Welcome to Bluenet!");
-	LOGi("\033[35;1m");
 	LOGi(" _|_|_|    _|                                            _|     ");
 	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");
 	LOGi(" _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     ");
 	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
 	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
-	LOGi("\033[0m");
 	
 	LOGi("Firmware version %s", g_FIRMWARE_VERSION);
 	LOGi("Git hash %s", g_GIT_SHA1);
@@ -333,6 +332,9 @@ void Crownstone::initDrivers1() {
 			// Init UartHandler only now, because it will read State.
 			UartHandler::getInstance().init(SERIAL_ENABLE_RX_AND_TX);
 		}
+
+		// Plain text log.
+		CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
 
 		LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
 
@@ -725,10 +727,11 @@ void Crownstone::startUp() {
 	err_code = sd_ble_gap_addr_get(&address);
 	APP_ERROR_CHECK(err_code);
 
-	_log(SERIAL_INFO, "\r\n");
-	_log(SERIAL_INFO, "\t\t\tAddress: ");
+	_log(SERIAL_INFO, false, "Address: ");
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN, SERIAL_INFO);
-	_log(SERIAL_INFO, "\r\n");
+
+	// Plain text log.
+	CLOGi("\r\nAddress: %X:%X:%X:%X:%X:%X", address.addr[5], address.addr[4], address.addr[3], address.addr[2], address.addr[1], address.addr[0]);
 
 	_state->startWritesToFlash();
 

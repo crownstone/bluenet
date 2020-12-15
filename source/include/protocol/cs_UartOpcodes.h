@@ -73,8 +73,11 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_MESH_STATE_PART_1 =                10104, // Received part of state of external stone, payload: cs_mesh_model_msg_state_1_t
 	UART_OPCODE_TX_MESH_RESULT =                      10105, // Received the result of a mesh command, payload: uart_msg_mesh_result_packet_header_t + data.
 	UART_OPCODE_TX_MESH_ACK_ALL_RESULT =              10106, // Whether all stone IDs were acked, payload: result_packet_header_t.
-
 	UART_OPCODE_TX_RSSI_DATA_MESSAGE =                10107, // When RssiDataTracker receives an rssi_data_message, it is sent to host. Payload: RssiDataMessage.
+
+	UART_OPCODE_TX_LOG =                              10200, // Debug logs, payload is in the form: [uart_msg_log_header_t, [uart_msg_log_arg_header_t, data], [uart_msg_log_arg_header_t, data], ...]
+	UART_OPCODE_TX_LOG_ARRAY =                        10201, // Debug logs, payload is in the form: [uart_msg_log_header_t, [uart_msg_log_arg_header_t, data], [uart_msg_log_arg_header_t, data], ...]
+
 
 	////////// Developer messages in release builds. //////////
 	UART_OPCODE_TX_EVT =                              40000, // Send internal events, this protocol may change
@@ -87,6 +90,7 @@ enum UartOpcodeTx {
 	UART_OPCODE_TX_MESH_TRACKED_DEVICE_TOKEN =        40113, // Received cmd to set the token of a tracked device, payload: cs_mesh_model_msg_device_token_t
 	UART_OPCODE_TX_MESH_SYNC_REQUEST =                40114, // Received a sync request, payload: cs_mesh_model_msg_sync_request_t
 	UART_OPCODE_TX_MESH_TRACKED_DEVICE_HEARTBEAT =    40120, // Received heartbeat cmd of a tracked device, payload: cs_mesh_model_msg_device_heartbeat_t
+
 
 	////////// Developer messages in debug builds. //////////
 	UART_OPCODE_TX_ADVERTISEMENT_ENABLED =            50000, // Whether advertising is enabled (payload: bool)

@@ -1,8 +1,7 @@
 #include <util/cs_DoubleStackCoroutine.h>
 
-#include <drivers/cs_Serial.h>
-
 #include <stddef.h>
+#include <stdint.h>
 
 enum { WORKING=1, DONE };
 

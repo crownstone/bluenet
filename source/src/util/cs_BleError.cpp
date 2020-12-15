@@ -5,7 +5,7 @@
  */
 
 #include <util/cs_BleError.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 //! Called by BluetoothLE.h classes when exceptions are disabled.
 void ble_error_handler (const char * msg, uint32_t line_num, const char * p_file_name) {

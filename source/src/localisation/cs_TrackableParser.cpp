@@ -10,6 +10,7 @@
 #include <structs/cs_PacketsInternal.h>
 #include <structs/cs_StreamBufferAccessor.h>
 #include <util/cs_Utils.h>
+#include <logging/cs_Logger.h>
 
 #include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <localisation/cs_TrackableParser.h>
@@ -140,10 +141,10 @@ void TrackableParser::logServiceData(const char* headerstr, scanned_device_t* sc
 	}
 
 	// REVIEW: Use the Util function for this.
-	_log(SERIAL_INFO, "len=%d data=[", service_data.len);
+	_log(SERIAL_INFO, false, "len=%d data=[", service_data.len);
 	for (auto i = 0u; i < service_data.len; i++) {
-		_log(SERIAL_INFO, " %2x,", service_data.data[i]);
+		_log(SERIAL_INFO, false, " %2x,", service_data.data[i]);
 	}
-	_log(SERIAL_INFO, "]\r\n");
+	_log(SERIAL_INFO, true, "]");
 }
 

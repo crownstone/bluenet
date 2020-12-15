@@ -7,7 +7,6 @@
 #include <stddef.h>
 
 #include "util/cs_Error.h"
-#include "drivers/cs_Serial.h"
 
 ///! ERROR HANDLING ROUTINES /////////////////////////////////////////////////////////////////////////
 

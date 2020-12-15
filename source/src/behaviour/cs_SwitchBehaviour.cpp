@@ -7,7 +7,7 @@
 
 #include <behaviour/cs_SwitchBehaviour.h>
 
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <time/cs_SystemTime.h>
 #include <util/cs_WireFormat.h>
 

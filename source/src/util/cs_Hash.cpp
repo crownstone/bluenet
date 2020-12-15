@@ -7,7 +7,7 @@
 
 #include <util/cs_Hash.h>
 #include <util/cs_Math.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 // based on source(30-10-2019): https://en.wikipedia.org/wiki/Fletcher%27s_checksum
 // adjusted to handle uint8_t arrays by padding with 0x00

@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <ble/cs_Service.h>
 #include <ble/cs_Softdevice.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 ///! Service //////////////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -11,7 +11,7 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <cfg/cs_Strings.h>
 #include <drivers/cs_GpRegRet.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <ipc/cs_IpcRamData.h>
 #include <processing/cs_CommandHandler.h>
@@ -711,10 +711,10 @@ void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_sourc
 }
 
 void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "mesh command");
 	uint16_t size = commandData.len;
 	buffer_ptr_t buffer = commandData.data;
-	BLEutil::printArray(buffer, size);
+	_log(SERIAL_INFO, false, STR_HANDLE_COMMAND, "mesh command: ");
+	BLEutil::printArray(buffer, size, SERIAL_INFO);
 
 	// Keep up the required size, and where in the buffer we are.
 	uint16_t bufIndex = 0;
@@ -805,8 +805,8 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 		resultHeader.resultHeader.commandType = meshCtrlCmd.controlCommand.type;
 		resultHeader.resultHeader.returnCode = result.returnCode;
 		resultHeader.resultHeader.payloadSize = result.dataSize;
-		LOGi("Result: id=%u cmdType=%u retCode=%u data:", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
-		BLEutil::printArray(result.buf.data, result.dataSize);
+		_log(SERIAL_INFO, false, "Result: id=%u cmdType=%u retCode=%u data: ", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
+		BLEutil::printArray(result.buf.data, result.dataSize, SERIAL_INFO);
 
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + result.dataSize);
 		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));

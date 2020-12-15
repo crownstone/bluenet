@@ -6,7 +6,7 @@
  */
 
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <events/cs_EventDispatcher.h>
 #include <util/cs_BleError.h>
 

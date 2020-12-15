@@ -6,7 +6,7 @@
  */
 
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <events/cs_Event.h>
 #include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshMsgHandler.h>
@@ -494,14 +494,14 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_r
 	uint8_t stateDataSize = payloadSize - sizeof(*meshStateHeader);
 	uint8_t* stateData = payload + sizeof(*meshStateHeader);
 
-	LOGi("handleStateSet: type=%u id=%u persistenceMode=%u accessLevel=%u sourceId=%u data:",
+	_log(SERIAL_INFO, false, "handleStateSet: type=%u id=%u persistenceMode=%u accessLevel=%u sourceId=%u data: ",
 			meshStateHeader->header.type,
 			meshStateHeader->header.id,
 			meshStateHeader->header.persistenceMode,
 			meshStateHeader->accessLevel,
 			meshStateHeader->sourceId
 			);
-	BLEutil::printArray(stateData, stateDataSize);
+	BLEutil::printArray(stateData, stateDataSize, SERIAL_INFO);
 
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
 
@@ -558,8 +558,8 @@ cs_ret_code_t MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSiz
 		LOGw("Unknown command type %u, did you add it to getCtrlCmdType() and getMeshType()?", header->msgType);
 	}
 
-	LOGi("handleResult: id=%u meshType=%u retCode=%u data:", srcId, header->msgType, header->retCode);
-	BLEutil::printArray(resultData.data, resultData.len);
+	_log(SERIAL_INFO, false, "handleResult: id=%u meshType=%u retCode=%u data: ", srcId, header->msgType, header->retCode);
+	BLEutil::printArray(resultData.data, resultData.len, SERIAL_INFO);
 
 	// Convert result data if needed.
 	switch (header->msgType) {
@@ -588,8 +588,8 @@ cs_ret_code_t MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSiz
 void MeshMsgHandler::sendResult(uart_msg_mesh_result_packet_header_t& resultHeader, const cs_data_t& resultData) {
 	resultHeader.resultHeader.payloadSize = resultData.len;
 
-	LOGi("Result: id=%u cmdType=%u retCode=%u data:", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
-	BLEutil::printArray(resultData.data, resultData.len);
+	_log(SERIAL_INFO, false, "Result: id=%u cmdType=%u retCode=%u data: ", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
+	BLEutil::printArray(resultData.data, resultData.len, SERIAL_INFO);
 
 	// Send out result.
 	UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + resultData.len);

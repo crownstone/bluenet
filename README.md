@@ -92,7 +92,7 @@ There are many ways to help us!
 
 Copyrights belong to the team of Crownstone B.V. and are provided under a noncontagious open-source license:
 
-* Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Alex de Mulder, Christian Haas, Naveen Chakravarthy, Aniket Samant
+* Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Alex de Mulder, Christian Haas, Naveen Chakravarthy, Aniket Samant, Arend de Jonge
 * Creation date: 27 Jan. 2014
 * Triple-licensed: LGPL v3+, Apache, MIT
 * Crownstone B.V., https://crownstone.rocks

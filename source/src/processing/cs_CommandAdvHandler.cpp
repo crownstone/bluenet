@@ -6,7 +6,7 @@
  */
 
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <encryption/cs_AES.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <encryption/cs_RC5.h>
@@ -80,14 +80,14 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 		return;
 	}
 
-	if(scannedDevice->rssi > RSSI_LOG_THRESHOLD) {
+	if (scannedDevice->rssi > RSSI_LOG_THRESHOLD) {
 #ifdef COMMAND_ADV_VERBOSE
 		LOGCommandAdvVerbose("rssi=%i", scannedDevice->rssi);
-		_log(SERIAL_DEBUG, "16bit services: ");
+		_log(SERIAL_DEBUG, false, "16bit services: ");
 		BLEutil::printArray(services16bit.data, services16bit.len);
 #endif
 #ifdef COMMAND_ADV_VERBOSE
-		_log(SERIAL_DEBUG, "128bit services: ");
+		_log(SERIAL_DEBUG, false, "128bit services: ");
 		BLEutil::printArray(services128bit.data, services128bit.len); // Received as uint128, so bytes are reversed.
 #endif
 	}
@@ -264,7 +264,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	}
 
 #ifdef COMMAND_ADV_VERBOSE
-	_log(SERIAL_DEBUG, "decrypted data: ");
+	_log(SERIAL_DEBUG, false, "decrypted data: ");
 	BLEutil::printArray(decryptedData, 16);
 #endif
 

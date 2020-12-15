@@ -12,7 +12,7 @@
 #include <cfg/cs_Strings.h>
 #include <drivers/cs_ADC.h>
 #include <drivers/cs_RTC.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <uart/cs_UartHandler.h>
 #include <structs/buffer/cs_AdcBuffer.h>
@@ -560,17 +560,17 @@ cs_ret_code_t ADC::_addBufferToSaadcQueue(adc_buffer_id_t bufIndex) {
 void ADC::printQueues() {
 	if (ADC_LOG_QUEUES) {
 		enterCriticalRegion();
-		_log(SERIAL_DEBUG, "queued: ");
+		_log(SERIAL_DEBUG, false, "queued: ");
 		for (uint8_t i = 0; i < _bufferQueue.size(); ++i) {
-			_log(SERIAL_DEBUG, "%u, ", _bufferQueue[i]);
+			_log(SERIAL_DEBUG, false, "%u, ", _bufferQueue[i]);
 		}
-		_log(SERIAL_DEBUG, SERIAL_CRLF);
+		_log(SERIAL_DEBUG, true, "");
 
-		_log(SERIAL_DEBUG, "saadc queue: ");
+		_log(SERIAL_DEBUG, false, "saadc queue: ");
 		for (uint8_t i = 0; i < _saadcBufferQueue.size(); ++i) {
-			_log(SERIAL_DEBUG, "%u, ", _saadcBufferQueue[i]);
+			_log(SERIAL_DEBUG, false, "%u, ", _saadcBufferQueue[i]);
 		}
-		_log(SERIAL_DEBUG, SERIAL_CRLF);
+		_log(SERIAL_DEBUG, true, "");
 		exitCriticalRegion();
 	}
 }

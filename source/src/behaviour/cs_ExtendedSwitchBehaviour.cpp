@@ -10,7 +10,7 @@
 #include <time/cs_SystemTime.h>
 #include <util/cs_WireFormat.h>
 
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SwitchBehaviour corebehaviour, PresenceCondition extensioncondition) :
     SwitchBehaviour(corebehaviour), extensionCondition(extensioncondition) {

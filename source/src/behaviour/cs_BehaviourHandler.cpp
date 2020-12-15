@@ -17,10 +17,8 @@
 #include <storage/cs_State.h>
 #include <time/cs_SystemTime.h>
 #include <time/cs_TimeOfDay.h>
-
+#include <logging/cs_Logger.h>
 #include <test/cs_Test.h>
-
-#include "drivers/cs_Serial.h"
 
 
 #define LOGBehaviourHandlerDebug LOGnone

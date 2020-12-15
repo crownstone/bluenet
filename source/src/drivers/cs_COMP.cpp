@@ -9,7 +9,7 @@
 
 //#include <nrf.h>
 #include "util/cs_BleError.h"
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 #include "drivers/cs_RTC.h"
 #include "ble/cs_Nordic.h"
 #include "protocol/cs_ErrorCodes.h"

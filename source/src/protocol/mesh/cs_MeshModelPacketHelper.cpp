@@ -5,12 +5,10 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <protocol/mesh/cs_MeshModelPacketHelper.h>
-#include <drivers/cs_Serial.h>
-
-#include <localisation/cs_Nearestnearestwitnessreport.h>
-
 #include <cstring> // For memcpy
+#include <localisation/cs_Nearestnearestwitnessreport.h>
+#include <logging/cs_Logger.h>
+#include <protocol/mesh/cs_MeshModelPacketHelper.h>
 
 #define LOGMeshModelPacketHelperDebug LOGnone
 #define LOGMeshModelPacketHelperWarn LOGw

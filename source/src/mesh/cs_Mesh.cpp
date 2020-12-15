@@ -7,7 +7,7 @@
 
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Boards.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_RNG.h>
 #include <mesh/cs_Mesh.h>
 #include <mesh/cs_MeshCommon.h>
