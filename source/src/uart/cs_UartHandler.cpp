@@ -79,7 +79,7 @@ void UartHandler::init(serial_enable_t serialEnabled) {
 ret_code_t UartHandler::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt) {
 
 #if CS_UART_BINARY_PROTOCOL_ENABLED == 0
-	switch(opCode) {
+	switch (opCode) {
 		// when debugging we would like to drop out of certain binary data coming over the console...
 		case UART_OPCODE_TX_TEXT:
 			// Now only the special chars get escaped, no header and tail.
@@ -171,7 +171,7 @@ ret_code_t UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartPr
 ret_code_t UartHandler::writeMsgPart(UartOpcodeTx opCode, const uint8_t* const data, uint16_t size, UartProtocol::Encrypt encrypt) {
 #if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 	// when debugging we would like to drop out of certain binary data coming over the console...
-	switch(opCode) {
+	switch (opCode) {
 		case UART_OPCODE_TX_TEXT:
 			// Now only the special chars get escaped, no header and tail.
 			// TODO: make writeBytes() const
@@ -225,7 +225,7 @@ cs_ret_code_t UartHandler::writeBytes(cs_data_t data, bool updateCrc) {
 	}
 
 	uint8_t val;
-	for(cs_buffer_size_t i = 0; i < data.len; ++i) {
+	for (cs_buffer_size_t i = 0; i < data.len; ++i) {
 		val = data.data[i];
 		// Escape when necessary
 		switch (val) {

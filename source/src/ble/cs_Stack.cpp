@@ -154,7 +154,7 @@ void Stack::initRadio() {
 	// TODO: make a separate function, that tells you what to set RAM_R1_BASE to.
 	// TODO: make a unit test for that.
 	ret_code = nrf_sdh_ble_default_cfg_set(APP_BLE_CONN_CFG_TAG, &ram_start);
-	switch(ret_code) {
+	switch (ret_code) {
 		case NRF_ERROR_NO_MEM:
 			LOGe("Unrecoverable, memory softdevice and app overlaps. RAM_R1_BASE should be: %p", ram_start);
 			break;
@@ -169,7 +169,7 @@ void Stack::initRadio() {
 
 	LOGd("nrf_sdh_ble_enable ram_start=%p", ram_start);
 	ret_code = nrf_sdh_ble_enable(&ram_start);
-	switch(ret_code) {
+	switch (ret_code) {
 		case NRF_ERROR_INVALID_STATE:
 			LOGe("BLE: invalid radio state");
 			break;
@@ -177,7 +177,7 @@ void Stack::initRadio() {
 			LOGe("BLE: invalid memory address");
 			break;
 		case NRF_ERROR_NO_MEM:
-			 // Read out ram_start, use that as RAM_R1_BASE, and adjust RAM_APPLICATION_AMOUNT.
+			// Read out ram_start, use that as RAM_R1_BASE, and adjust RAM_APPLICATION_AMOUNT.
 			LOGe("BLE: no memory available, RAM_R1_BASE should be %p", ram_start);
 			break;
 		case NRF_SUCCESS:
@@ -292,25 +292,25 @@ void Stack::updateConnParams() {
  */
 bool Stack::checkCondition(condition_t condition, bool expectation) {
 	bool field = false;
-	switch(condition) {
-	case C_STACK_INITIALIZED:
-		field = isInitialized(C_STACK_INITIALIZED);
-		if (expectation != field) {
-			LOGw("Stack init %s", field ? "true" : "false");
-		}
-		break;
-	case C_RADIO_INITIALIZED:
-		field = isInitialized(C_RADIO_INITIALIZED);
-		if (expectation != field) {
-			LOGw("Radio init %s", field ? "true" : "false");
-		}
-		break;
-	case C_SERVICES_INITIALIZED:
-		field = isInitialized(C_SERVICES_INITIALIZED);
-		if (expectation != field) {
-			LOGw("Services init %s", field ? "true" : "false");
-		}
-		break;
+	switch (condition) {
+		case C_STACK_INITIALIZED:
+			field = isInitialized(C_STACK_INITIALIZED);
+			if (expectation != field) {
+				LOGw("Stack init %s", field ? "true" : "false");
+			}
+			break;
+		case C_RADIO_INITIALIZED:
+			field = isInitialized(C_RADIO_INITIALIZED);
+			if (expectation != field) {
+				LOGw("Radio init %s", field ? "true" : "false");
+			}
+			break;
+		case C_SERVICES_INITIALIZED:
+			field = isInitialized(C_SERVICES_INITIALIZED);
+			if (expectation != field) {
+				LOGw("Services init %s", field ? "true" : "false");
+			}
+			break;
 	}
 	return field;
 }
@@ -450,7 +450,7 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 
 	case BLE_GATTS_EVT_SYS_ATTR_MISSING:
 		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0,
-                BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS));
+				BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS));
 		break;
 
 	case BLE_GAP_EVT_PASSKEY_DISPLAY: {

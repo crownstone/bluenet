@@ -70,7 +70,7 @@ UUID::operator ble_uuid128_t() {
 		} else {
 			BLE_THROW("invalid character");
 //				char cc[] = {c};// can't just call std::string(c) apparently.
-//				BLE_THROW(std::string("Invalid character ") + std::string(1,cc[0]) + " in UUID.");
+//				BLE_THROW(std::string("Invalid character ") + std::string(1, cc[0]) + " in UUID.");
 		}
 
 		v = v * 16 + vv;

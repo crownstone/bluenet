@@ -75,7 +75,7 @@ bool Dimmer::set(uint8_t intensity, bool fade) {
 
 	uint8_t speed = fade ? softOnfSpeed : 100;
 
-	TEST_PUSH_EXPR_D(this,"intensity", intensity);
+	TEST_PUSH_EXPR_D(this, "intensity", intensity);
 	PWM::getInstance().setValue(0, intensity, speed);
 	
 	return true;

@@ -31,7 +31,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 	// (checks payload size)
 	if (!MeshUtil::isValidMeshMessage(msg.msg, msg.msgSize)) {
 		if (msg.msgSize > 0) {
-			LOGw("Invalid mesh message of type %d", MeshUtil::getType(msg.msg));
+			LOGw("Invalid mesh message of type %u", MeshUtil::getType(msg.msg));
 		} else {
 			LOGw("Invalid mesh message of size 0");
 		}
@@ -50,7 +50,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 	// ===========
 
 	// (at this point, the result.returnCode should be ERR_EVENT_UNHANDLED)
-	if (result.returnCode != ERR_EVENT_UNHANDLED){
+	if (result.returnCode != ERR_EVENT_UNHANDLED) {
 		// some handler took care of business.
 		LOGw("MeshMshHandler result code not clean.");
 		return;
@@ -74,7 +74,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 
 	generic_mesh_msg_evt.dispatch();
 
-	if (generic_mesh_msg_evt.result.returnCode != ERR_EVENT_UNHANDLED){
+	if (generic_mesh_msg_evt.result.returnCode != ERR_EVENT_UNHANDLED) {
 		// some handler took care of business.
 		return;
 	}
@@ -223,7 +223,7 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSi
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, uint8_t hops){
+cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, uint8_t hops) {
 	LOGMeshModelInfo("handleTimeSync");
 	cs_mesh_model_msg_time_sync_t* packet = (cs_mesh_model_msg_time_sync_t*) payload;
 

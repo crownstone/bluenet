@@ -6,118 +6,116 @@
  */
 
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
-
+#include <logging/cs_Logger.h>
 #include <time/cs_SystemTime.h>
 #include <util/cs_WireFormat.h>
 
-#include <logging/cs_Logger.h>
-
-ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SwitchBehaviour corebehaviour, PresenceCondition extensioncondition) :
-    SwitchBehaviour(corebehaviour), extensionCondition(extensioncondition) {
+ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SwitchBehaviour coreBehaviour, PresenceCondition extCondition) :
+	SwitchBehaviour(coreBehaviour), extensionCondition(extCondition) {
 }
 
 ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SerializedDataType arr) : 
-    ExtendedSwitchBehaviour(
-        WireFormat::deserialize<SwitchBehaviour>(   
-            arr.data() +  0, 
-            WireFormat::size<SwitchBehaviour>()
-        ),  
-        WireFormat::deserialize<PresenceCondition>( 
-            arr.data() + WireFormat::size<SwitchBehaviour>(), 
-            WireFormat::size<PresenceCondition>()
-        )
-    ) {
+	ExtendedSwitchBehaviour(
+			WireFormat::deserialize<SwitchBehaviour>(
+					arr.data() +  0,
+					WireFormat::size<SwitchBehaviour>()
+			),
+			WireFormat::deserialize<PresenceCondition>(
+					arr.data() + WireFormat::size<SwitchBehaviour>(),
+					WireFormat::size<PresenceCondition>()
+			)
+	) {
 }
 
-ExtendedSwitchBehaviour::SerializedDataType ExtendedSwitchBehaviour::serialize(){
-    SerializedDataType result;
+ExtendedSwitchBehaviour::SerializedDataType ExtendedSwitchBehaviour::serialize() {
+	SerializedDataType result;
 
-    serialize(result.data(),WireFormat::size<ExtendedSwitchBehaviour>());
+	serialize(result.data(), WireFormat::size<ExtendedSwitchBehaviour>());
 
-    return result;
+	return result;
 }
 
-uint8_t* ExtendedSwitchBehaviour::serialize(uint8_t* outbuff, size_t max_size){
-    if(max_size != 0){
-        if (outbuff == nullptr || max_size < serializedSize()) {
-            // all or nothing..
-            return outbuff;
-        }
-    }
+uint8_t* ExtendedSwitchBehaviour::serialize(uint8_t* outBuff, size_t maxSize) {
+	if (maxSize != 0) {
+		if (outBuff == nullptr || maxSize < serializedSize()) {
+			// all or nothing..
+			return outBuff;
+		}
+	}
 
-    // outbuff is big enough :)
+	// outbuff is big enough :)
 
-    outbuff = SwitchBehaviour::serialize(outbuff, max_size);
-    outbuff = extensionCondition.serialize(outbuff);
+	outBuff = SwitchBehaviour::serialize(outBuff, maxSize);
+	outBuff = extensionCondition.serialize(outBuff);
 
-    return outbuff;
+	return outBuff;
 }
 
 size_t ExtendedSwitchBehaviour::serializedSize() const {
-    return WireFormat::size<ExtendedSwitchBehaviour>();
+	return WireFormat::size<ExtendedSwitchBehaviour>();
 }
 
-bool ExtendedSwitchBehaviour::requiresPresence(){
-    return extensionIsActive 
-        ? presenceCondition.pred.requiresPresence()
-        : extensionCondition.pred.requiresPresence();
+bool ExtendedSwitchBehaviour::requiresPresence() {
+	return extensionIsActive
+			? presenceCondition.pred.requiresPresence()
+			: extensionCondition.pred.requiresPresence();
 }
 
-bool ExtendedSwitchBehaviour::requiresAbsence(){
-    return extensionIsActive 
-        ? presenceCondition.pred.requiresAbsence()
-        : extensionCondition.pred.requiresAbsence();
+bool ExtendedSwitchBehaviour::requiresAbsence() {
+	return extensionIsActive
+			? presenceCondition.pred.requiresAbsence()
+			: extensionCondition.pred.requiresAbsence();
 }
 
-bool ExtendedSwitchBehaviour::isValid(Time currenttime, PresenceStateDescription currentpresence){
-    // implementation detail: 
-    // SwitchBehaviour::isValid(PresenceStateDescription) caches the last valid presence timestamp.
-    // However, this must be recomputed in the extension anyway because the conditions may differ.
+bool ExtendedSwitchBehaviour::isValid(Time currentTime, PresenceStateDescription currentPresence) {
+	// implementation detail:
+	// SwitchBehaviour::isValid(PresenceStateDescription) caches the last valid presence timestamp.
+	// However, this must be recomputed in the extension anyway because the conditions may differ.
 
-    if (SwitchBehaviour::isValid(currenttime)) {
-        // currenttime between from() and until()
-        extensionIsActive = SwitchBehaviour::isValid(currentpresence);
-        return extensionIsActive;
-    }
+	if (SwitchBehaviour::isValid(currentTime)) {
+		// currenttime between from() and until()
+		extensionIsActive = SwitchBehaviour::isValid(currentPresence);
+		return extensionIsActive;
+	}
 
-    if (!extensionIsActive) {
-        // not extended, nor in active time slot
-        return false;
-    }
+	if (!extensionIsActive) {
+		// not extended, nor in active time slot
+		return false;
+	}
 
-    if (extensionCondition(currentpresence)) {
-        // in extension and presence match
-        prevExtensionIsValidTimeStamp = SystemTime::now();
-        return true;
-    }
+	if (extensionCondition(currentPresence)) {
+		// in extension and presence match
+		prevExtensionIsValidTimeStamp = SystemTime::now();
+		return true;
+	}
 
-    if(prevExtensionIsValidTimeStamp){
-        if ( CsMath::Interval<uint32_t>(
-                SystemTime::posix(), extensionCondition.timeOut, true )
-            .contains(prevExtensionIsValidTimeStamp->timestamp()) ) {
-            // in extension and presence is invalid,
-            // but we're in the extension's grace period.
-            return true;
-        } 
-    }
-    
-    // deactivate
-    extensionIsActive = false;
-    prevExtensionIsValidTimeStamp.reset();
+	if (prevExtensionIsValidTimeStamp) {
+		if (CsMath::Interval<uint32_t>(
+				SystemTime::posix(), extensionCondition.timeOut, true)
+				.contains(prevExtensionIsValidTimeStamp->timestamp())) {
+			// in extension and presence is invalid,
+			// but we're in the extension's grace period.
+			return true;
+		}
+	}
 
-    return false;
+	// deactivate
+	extensionIsActive = false;
+	prevExtensionIsValidTimeStamp.reset();
+
+	return false;
 }
 
-void ExtendedSwitchBehaviour::print(){
-    LOGd("## ExtendedSwitchBehaviour:");
-    SwitchBehaviour::print();
-    extensionCondition.pred.print();
-    
-    LOGd("extension is active: %d", extensionIsActive);
+void ExtendedSwitchBehaviour::print() {
+	LOGd("## ExtendedSwitchBehaviour:");
+	SwitchBehaviour::print();
+	extensionCondition.pred.print();
 
-    if(prevExtensionIsValidTimeStamp){
-    	[[maybe_unused]] TimeOfDay t = prevExtensionIsValidTimeStamp->timeOfDay();
-        LOGd("extension timestamp : %02d:%02d:%02d", t.h(),t.m(),t.s());
-    }
-    LOGd("##");
+	LOGd("extension is active: %d", extensionIsActive);
+
+	if (prevExtensionIsValidTimeStamp) {
+		[[maybe_unused]] TimeOfDay t = prevExtensionIsValidTimeStamp->timeOfDay();
+		LOGd("extension timestamp : %02d:%02d:%02d", t.h(), t.m(), t.s());
+	}
+	LOGd("##");
 }

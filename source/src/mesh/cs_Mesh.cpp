@@ -143,7 +143,7 @@ void Mesh::handleEvent(event_t & event) {
 					// but don't send anything over the mesh. Our chance has passed.
 					_synced = !requestSync(false);
 
-					if(!_synced){
+					if (!_synced) {
 						LOGw("Sync failed");
 						event_t syncFailEvent(CS_TYPE::EVT_MESH_SYNC_FAILED);
 						syncFailEvent.dispatch();
@@ -202,7 +202,7 @@ bool Mesh::requestSync(bool propagateSyncMessageOverMesh) {
 
 	LOGd("requestSync bitmask=%u", syncRequest.bitmask);
 
-	if (syncRequest.bitmask == 0 || !propagateSyncMessageOverMesh){
+	if (syncRequest.bitmask == 0 || !propagateSyncMessageOverMesh) {
 		// bitmask == 0 implies sync is unnecessary 
 		// propagateSyncMessageOverMesh==false implies we return here, before contacting the mesh.
 		return syncRequest.bitmask != 0;

@@ -138,13 +138,17 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	}
 	for (int i=0; i < CMD_ADV_NUM_SERVICES_16BIT; ++i) {
 		if (!foundSequences[i]) {
-			if(scannedDevice->rssi > RSSI_LOG_THRESHOLD) { LOGCommandAdvVerbose("Missing UUID with sequence %i", i);}
+			if (scannedDevice->rssi > RSSI_LOG_THRESHOLD) {
+				LOGCommandAdvVerbose("Missing UUID with sequence %i", i);
+			}
 			return;
 		}
 	}
 
 	if (header.sphereId != _sphereId) {
-		if(scannedDevice->rssi > RSSI_LOG_THRESHOLD) {LOGCommandAdvVerbose("Wrong sphereId got=%u stored=%u", header.sphereId, _sphereId);}
+		if (scannedDevice->rssi > RSSI_LOG_THRESHOLD) {
+			LOGCommandAdvVerbose("Wrong sphereId got=%u stored=%u", header.sphereId, _sphereId);
+		}
 		return;
 	}
 
@@ -221,22 +225,22 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	}
 
 	EncryptionAccessLevel accessLevel;
-	switch(header.accessLevel) {
-	case 0:
-		accessLevel = ADMIN;
-		break;
-	case 1:
-		accessLevel = MEMBER;
-		break;
-	case 2:
-		accessLevel = BASIC;
-		break;
-	case 4:
-		accessLevel = SETUP;
-		break;
-	default:
-		accessLevel = NOT_SET;
-		break;
+	switch (header.accessLevel) {
+		case 0:
+			accessLevel = ADMIN;
+			break;
+		case 1:
+			accessLevel = MEMBER;
+			break;
+		case 2:
+			accessLevel = BASIC;
+			break;
+		case 4:
+			accessLevel = SETUP;
+			break;
+		default:
+			accessLevel = NOT_SET;
+			break;
 	}
 	if (accessLevel == NOT_SET) {
 		LOGw("Invalid access level %u", header.accessLevel);
@@ -434,17 +438,17 @@ EncryptionAccessLevel CommandAdvHandler::getRequiredAccessLevel(const AdvCommand
 }
 
 void CommandAdvHandler::handleEvent(event_t & event) {
-	switch(event.type) {
-	case CS_TYPE::EVT_DEVICE_SCANNED: {
-		TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice = (TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
-		parseAdvertisement(scannedDevice);
-		break;
-	}
-	case CS_TYPE::EVT_TICK: {
-		tickClaims();
-		break;
-	}
-	default:
-		break;
+	switch (event.type) {
+		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice = (TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
+			parseAdvertisement(scannedDevice);
+			break;
+		}
+		case CS_TYPE::EVT_TICK: {
+			tickClaims();
+			break;
+		}
+		default:
+			break;
 	}
 }

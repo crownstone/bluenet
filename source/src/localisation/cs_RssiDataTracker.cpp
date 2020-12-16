@@ -12,7 +12,7 @@
 
 // REVIEW: This won't be recognized by binary logger.
 #define RSSIDATATRACKER_LOGd LOGd
-#define RSSIDATATRACKER_LOGv LOGd
+#define RSSIDATATRACKER_LOGv LOGnone
 
 // ------------ RssiDataTracker methods ------------
 
@@ -25,8 +25,8 @@ RssiDataTracker::RssiDataTracker() :
 void RssiDataTracker::init() {
 	// REVIEW: Use TYPIFY for variable.
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id,
-	        sizeof(my_id));
-	RSSIDATATRACKER_LOGd("RssiDataTracker: my_id %d",my_id);
+			sizeof(my_id));
+	RSSIDATATRACKER_LOGd("RssiDataTracker: my_id %d", my_id);
 
 	boot_sequence_finished = false;
 	last_stone_id_broadcasted_in_burst = 0;
@@ -38,7 +38,7 @@ void RssiDataTracker::init() {
 void RssiDataTracker::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t channel) {
 	auto channel_index = channel - CHANNEL_START;
 
-	if (channel_index < 0 || CHANNEL_COUNT <= channel_index ){
+	if (channel_index < 0 || CHANNEL_COUNT <= channel_index ) {
 		return;
 	}
 
@@ -60,13 +60,13 @@ void RssiDataTracker::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t
 
 uint8_t RssiDataTracker::getVarianceRepresentation(float variance) {
 	variance = std::abs(variance);
-	if(variance <  2 *  2) return 0;
-	if(variance <  4 *  4) return 1;
-	if(variance <  6 *  6) return 2;
-	if(variance <  8 *  8) return 3;
-	if(variance < 10 * 10) return 4;
-	if(variance < 15 * 15) return 5;
-	if(variance < 20 * 15) return 6;
+	if (variance <  2 *  2) return 0;
+	if (variance <  4 *  4) return 1;
+	if (variance <  6 *  6) return 2;
+	if (variance <  8 *  8) return 3;
+	if (variance < 10 * 10) return 4;
+	if (variance < 15 * 15) return 5;
+	if (variance < 20 * 15) return 6;
 	return 7;
 }
 
@@ -89,7 +89,7 @@ uint8_t RssiDataTracker::getCountRepresentation(uint32_t count) {
 
 
 uint32_t RssiDataTracker::flushAggregatedRssiData() {
-	if(!boot_sequence_finished) {
+	if (!boot_sequence_finished) {
 		RSSIDATATRACKER_LOGd("flushAggregatedRssiData boot delay");
 		boot_sequence_finished = true;
 		return Coroutine::delayMs(Settings.boot_sequence_period_ms);
@@ -99,12 +99,12 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 	// start flushing phase, here we wait quite a bit shorter until the map is empty.
 
 	// ** begin burst loop **
-	for(auto main_iter = recorder_map[0].upper_bound(last_stone_id_broadcasted_in_burst);
+	for (auto main_iter = recorder_map[0].upper_bound(last_stone_id_broadcasted_in_burst);
 			main_iter != recorder_map[0].end(); ++main_iter) {
 
 		stone_id_t id = main_iter->first;
 
-		RSSIDATATRACKER_LOGd("Burst start for id(%d)", id);
+		RSSIDATATRACKER_LOGd("Burst start for id=%u", id);
 
 		// the maps may not have the same key sets, this depends
 		// on possible loss differences between the channels.
@@ -118,7 +118,7 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 		};
 
 		bool all_maps_have_sufficient_data_for_id = true;
-		for(auto i = 0; i < CHANNEL_COUNT; ++i) {
+		for (auto i = 0; i < CHANNEL_COUNT; ++i) {
 			if (rec_iters[i] == recorder_map[i].end() ||
 					rec_iters[i]->second.getCount() < Settings.min_samples_to_trigger_burst) {
 				all_maps_have_sufficient_data_for_id = false;
@@ -146,7 +146,7 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 			sendRssiDataOverMesh(&rssi_data);
 
 			// delete entry from map
-			for(auto i = 0; i < 3; ++i) {
+			for (auto i = 0; i < 3; ++i) {
 				recorder_map[i].erase(rec_iters[i]);
 				// this invalidates main_iter, so we _must_ return after deleting.
 			}
@@ -167,7 +167,7 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 
 // --------------- generating rssi data --------------
 
-void RssiDataTracker::sendPingRequestOverMesh(){
+void RssiDataTracker::sendPingRequestOverMesh() {
 	rssi_ping_message_t ping_msg;
 
 	cs_mesh_msg_t msg_wrapper;
@@ -184,7 +184,7 @@ void RssiDataTracker::sendPingRequestOverMesh(){
 	msgevt.dispatch();
 }
 
-void RssiDataTracker::sendPingResponseOverMesh(){
+void RssiDataTracker::sendPingResponseOverMesh() {
 	cs_mesh_msg_t msg_wrapper;
 	msg_wrapper.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
 	msg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
@@ -199,7 +199,7 @@ void RssiDataTracker::sendPingResponseOverMesh(){
 	msgevt.dispatch();
 }
 
-void RssiDataTracker::receivePingMessage(MeshMsgEvent& meshMsgEvent){
+void RssiDataTracker::receivePingMessage(MeshMsgEvent& meshMsgEvent) {
 	if (meshMsgEvent.hops == 0) {
 		sendPingResponseOverMesh();
 	}
@@ -207,7 +207,7 @@ void RssiDataTracker::receivePingMessage(MeshMsgEvent& meshMsgEvent){
 
 // ------------- communicating rssi data -------------
 
-void RssiDataTracker::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message){
+void RssiDataTracker::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message) {
 	cs_mesh_msg_t msg_wrapper;
 	msg_wrapper.type = CS_MESH_MODEL_TYPE_RSSI_DATA;
 	msg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
@@ -223,7 +223,7 @@ void RssiDataTracker::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_messag
 }
 
 // REVIEW: Why not a simpler message (without bit fields) for uart?
-void RssiDataTracker::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message){
+void RssiDataTracker::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message) {
 	RssiDataMessage datamessage;
 
 	datamessage.receiver_id = my_id;
@@ -255,7 +255,7 @@ void RssiDataTracker::sendRssiDataOverUart(rssi_data_message_t* rssi_data_messag
 			sizeof(datamessage));
 }
 
-void RssiDataTracker::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent){
+void RssiDataTracker::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent) {
 	auto& rssi_data_message =
 			meshMsgEvent.getPacket<CS_MESH_MODEL_TYPE_RSSI_DATA>();
 	sendRssiDataOverUart(&rssi_data_message);
@@ -266,7 +266,7 @@ void RssiDataTracker::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent){
 void RssiDataTracker::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
 	// REVIEW: Mesh specific code, should be in the mesh code.
 	if (mesh_msg_evt.hops == 0) { // TODO: 0 hops, or 1 hops?!
-		RSSIDATATRACKER_LOGd("logging mesh msg event with 0 hops");
+		RSSIDATATRACKER_LOGv("handle mesh msg event with 0 hops");
 		recordRssiValue(
 				mesh_msg_evt.srcAddress,
 				mesh_msg_evt.rssi,

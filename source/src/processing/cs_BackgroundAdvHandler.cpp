@@ -264,19 +264,19 @@ int8_t BackgroundAdvertisementHandler::getAdjustedRssi(int16_t rssi, int16_t rss
 }
 
 void BackgroundAdvertisementHandler::handleEvent(event_t & event) {
-	switch(event.type) {
-	case CS_TYPE::EVT_DEVICE_SCANNED: {
-		TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice = (TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
-		parseAdvertisement(scannedDevice);
-		parseServicesAdvertisement(scannedDevice);
-		break;
-	}
-	case CS_TYPE::EVT_ADV_BACKGROUND: {
-		TYPIFY(EVT_ADV_BACKGROUND)* backgroundAdv = (TYPIFY(EVT_ADV_BACKGROUND)*)event.data;
-		handleBackgroundAdvertisement(backgroundAdv);
-		break;
-	}
-	default:
-		break;
+	switch (event.type) {
+		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice = (TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
+			parseAdvertisement(scannedDevice);
+			parseServicesAdvertisement(scannedDevice);
+			break;
+		}
+		case CS_TYPE::EVT_ADV_BACKGROUND: {
+			TYPIFY(EVT_ADV_BACKGROUND)* backgroundAdv = (TYPIFY(EVT_ADV_BACKGROUND)*)event.data;
+			handleBackgroundAdvertisement(backgroundAdv);
+			break;
+		}
+		default:
+			break;
 	}
 }

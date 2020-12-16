@@ -517,7 +517,7 @@ void SystemTime::initDebug() {
 #endif  // DEBUG_SYSTEM_TIME
 }
 
-void SystemTime::publishSyncMessageForTesting(){
+void SystemTime::publishSyncMessageForTesting() {
 #ifdef DEBUG_SYSTEM_TIME
 	// we can just send a normal sync message.
 	// Implementation is robust against false root clock claims by nature.
@@ -527,7 +527,7 @@ void SystemTime::publishSyncMessageForTesting(){
 #endif // DEBUG_SYSTEM_TIME
 }
 
-void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage){
+void SystemTime::pushSyncMessageToTestSuite(time_sync_message_t& syncmessage) {
 #ifdef DEBUG_SYSTEM_TIME
 	char valuestring [50];
 

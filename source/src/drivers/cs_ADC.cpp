@@ -640,7 +640,7 @@ void ADC::setLimitDown() {
 
 
 void ADC::handleEvent(event_t & event) {
-	switch(event.type) {
+	switch (event.type) {
 		default: {}
 	}
 }
@@ -837,7 +837,7 @@ extern "C" void CS_ADC_TIMER_IRQ(void) {
 }
 
 nrf_ppi_channel_t ADC::getPpiChannel(uint8_t index) {
-	switch(index) {
+	switch (index) {
 		case 0:
 			return NRF_PPI_CHANNEL0;
 		case 1:
@@ -954,7 +954,7 @@ nrf_saadc_event_t ADC::getLimitHighEvent(adc_channel_id_t channel) {
 }
 
 nrf_gpiote_tasks_t ADC::getGpioteTaskOut(uint8_t index) {
-	switch(index) {
+	switch (index) {
 		case 0:
 			return NRF_GPIOTE_TASKS_OUT_0;
 		case 1:

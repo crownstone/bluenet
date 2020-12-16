@@ -1,7 +1,4 @@
 /**
- * Bluetooth Low Energy Characteristic
- *
- * Author: Crownstone Team
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Apr 23, 2015
@@ -15,8 +12,8 @@
 // #define PRINT_CHARACTERISTIC_VERBOSE
 
 CharacteristicBase::CharacteristicBase() :
-    _name(NULL),
-    _handles( { }), _service(0), _status({}), _encryptionBuffer(NULL)
+	_name(NULL),
+	_handles( { }), _service(0), _status({}), _encryptionBuffer(NULL)
 {
 }
 
@@ -280,33 +277,33 @@ uint32_t CharacteristicBase::notify() {
 
 	err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
 
-	switch(err_code) {
-	    case NRF_SUCCESS:
-		break;
-	    case NRF_ERROR_RESOURCES:
-		// Dominik: this happens if several characteristics want to send a notification,
-		//   but the system only has a limited number of tx buffers available. so queueing up
-		//   notifications faster than being able to send them out from the stack results
-		//   in this error.
-		onNotifyTxError();
-		break;
-	    case NRF_ERROR_INVALID_STATE:
-		// Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
-		//   it can happen that it tries to update it's value although notification was disabled in
-		//   in the meantime, in which case an invalid state error is returned. but this case we can
-		//   ignore
+	switch (err_code) {
+		case NRF_SUCCESS:
+			break;
+		case NRF_ERROR_RESOURCES:
+			// Dominik: this happens if several characteristics want to send a notification,
+			//   but the system only has a limited number of tx buffers available. so queueing up
+			//   notifications faster than being able to send them out from the stack results
+			//   in this error.
+			onNotifyTxError();
+			break;
+		case NRF_ERROR_INVALID_STATE:
+			// Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
+			//   it can happen that it tries to update it's value although notification was disabled in
+			//   in the meantime, in which case an invalid state error is returned. but this case we can
+			//   ignore
 
-		// this is not a serious error, but better to at least write it to the log
-		LOGe("cs_ret_code_t: %d (0x%X)", err_code, err_code);
+			// this is not a serious error, but better to at least write it to the log
+			LOGe("cs_ret_code_t: %d (0x%X)", err_code, err_code);
 
-		// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
-		_status.notificationPending = false;
-		break;
-	    case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
-		// TODO: Currently excluded from APP_ERROR_CHECK, seems to originate from MESH code
-		break;
-	    default:
-		APP_ERROR_CHECK(err_code);
+			// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
+			_status.notificationPending = false;
+			break;
+		case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
+			// TODO: Currently excluded from APP_ERROR_CHECK, seems to originate from MESH code
+			break;
+		default:
+			APP_ERROR_CHECK(err_code);
 	}
 
 	return err_code;

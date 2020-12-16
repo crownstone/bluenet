@@ -1,10 +1,10 @@
 #include <behaviour/cs_BehaviourConflictResolution.h>
 
 bool FromUntilIntervalIsMoreRelevantOrEqual(
-		int32_t lhs_from, int32_t lhs_until,
-		int32_t rhs_from, int32_t rhs_until,
-		int32_t current_tod){
-	constexpr uint32_t seconds_per_day = 24*60*60;
+		int32_t lhsFrom, int32_t lhsUntil,
+		int32_t rhsFrom, int32_t rhsUntil,
+		int32_t currentTimeOfDay) {
+	constexpr uint32_t secondsPerDay = 24*60*60;
 
 	// Note: I think the current_tod parameter actually isn't necessary:
 	// we only compare behavious when they are both active, meaning that current_tod
@@ -20,19 +20,18 @@ bool FromUntilIntervalIsMoreRelevantOrEqual(
 	//
 	// Warning: be careful about integer underflow in the subtraction. Changed the signature to
 	// _signed_ integers in order to circumvent extra casting here.
-	uint32_t lhs_from_normalized = CsMath::mod(lhs_from - current_tod, seconds_per_day);
-	uint32_t rhs_from_normalized = CsMath::mod(rhs_from - current_tod, seconds_per_day);
-	uint32_t lhs_until_normalized = CsMath::mod(lhs_until - current_tod, seconds_per_day);
-	uint32_t rhs_until_normalized = CsMath::mod(rhs_until - current_tod, seconds_per_day);
+	uint32_t lhsFromNormalized = CsMath::mod(lhsFrom - currentTimeOfDay, secondsPerDay);
+	uint32_t rhsFromNormalized = CsMath::mod(rhsFrom - currentTimeOfDay, secondsPerDay);
+	uint32_t lhsUntilNormalized = CsMath::mod(lhsUntil - currentTimeOfDay, secondsPerDay);
+	uint32_t rhsUntilNormalized = CsMath::mod(rhsUntil - currentTimeOfDay, secondsPerDay);
 
-	if ( lhs_from_normalized > rhs_from_normalized ) {
-			 // essentially means lhs_from is less far in the past than rhs_from.
-
-			return true;
+	if (lhsFromNormalized > rhsFromNormalized) {
+		// essentially means lhs_from is less far in the past than rhs_from.
+		return true;
 	}
 
-	if( rhs_from_normalized == lhs_from_normalized &&
-		lhs_until_normalized <=	rhs_until_normalized){
+	if (rhsFromNormalized == lhsFromNormalized &&
+		lhsUntilNormalized <= rhsUntilNormalized) {
 		// essentially means lhs_until is nearer in the future than rhs_until.
 		// (Be careful about the 'or equal' part.)
 		return true;
@@ -41,7 +40,7 @@ bool FromUntilIntervalIsMoreRelevantOrEqual(
 	return false;
 }
 
-bool FromUntilIntervalIsMoreRelevantOrEqual(Behaviour* lhs, Behaviour* rhs, Time currentTime){
+bool FromUntilIntervalIsMoreRelevantOrEqual(Behaviour* lhs, Behaviour* rhs, Time currentTime) {
 	return FromUntilIntervalIsMoreRelevantOrEqual(
 			lhs->from(), lhs->until(),
 			rhs->from(), rhs->until(),
@@ -49,9 +48,8 @@ bool FromUntilIntervalIsMoreRelevantOrEqual(Behaviour* lhs, Behaviour* rhs, Time
 }
 
 
-bool FromUntilIntervalIsEqual(
-		Behaviour* lhs, Behaviour* rhs){
-	return 	lhs != nullptr &&
+bool FromUntilIntervalIsEqual(Behaviour* lhs, Behaviour* rhs) {
+	return lhs != nullptr &&
 			rhs != nullptr &&
 			lhs->from() == rhs->from() &&
 			lhs->until() == rhs->until();

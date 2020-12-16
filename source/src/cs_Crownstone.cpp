@@ -464,7 +464,7 @@ void Crownstone::configureAdvertisement() {
 }
 
 void Crownstone::createService(const ServiceEvent event) {
-	switch(event) {
+	switch (event) {
 		case CREATE_DEVICE_INFO_SERVICE:
 			LOGd("Create device info service");
 			_deviceInformationService = new DeviceInformationService();
@@ -488,7 +488,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	LOGd("Current mode: %s", operationModeName(_oldOperationMode));
 	LOGd("Switch to mode: %s", operationModeName(newMode));
 
-	switch(_oldOperationMode) {
+	switch (_oldOperationMode) {
 		case OperationMode::OPERATION_MODE_UNINITIALIZED:
 			break;
 		case OperationMode::OPERATION_MODE_DFU:
@@ -511,7 +511,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	startOperationMode(newMode);
 
 	// Create services that belong to the new mode.
-	switch(newMode) {
+	switch (newMode) {
 		case OperationMode::OPERATION_MODE_NORMAL:
 			if (_oldOperationMode == OperationMode::OPERATION_MODE_UNINITIALIZED) {
 				createService(CREATE_DEVICE_INFO_SERVICE);
@@ -534,7 +534,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 
 	_stack->resume();
 
-	switch(newMode) {
+	switch (newMode) {
 		case OperationMode::OPERATION_MODE_SETUP: {
 			LOGd("Configure setup mode");
 //			_advertiser->changeToLowTxPower();
@@ -614,7 +614,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 #endif
 
 
-	switch(mode) {
+	switch (mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
 			_scanner->init();
 			_scanner->setStack(_stack);
@@ -635,14 +635,14 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			_multiSwitchHandler->init();
 			break;
 		} 
-		case OperationMode::OPERATION_MODE_SETUP:{
+		case OperationMode::OPERATION_MODE_SETUP: {
 			// TODO: Why this hack?
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {
 				serial_enable(SERIAL_ENABLE_RX_ONLY);
 			}
 			break;
 		}
-		default:{
+		default: {
 			// nothing to be done
 			break;
 		}
@@ -788,12 +788,9 @@ void Crownstone::scheduleNextTick() {
 }
 
 void Crownstone::run() {
-
-	// static bool mesh_sync_complete = false;
-
 	LOGi(FMT_HEADER, "running");
 
-	while(1) {
+	while (1) {
 		app_sched_execute();
 #if BUILD_MESHING == 1
 		// See mesh_interrupt_priorities.md
@@ -805,16 +802,12 @@ void Crownstone::run() {
 		sd_app_evt_wait();
 #endif
 		LOG_FLUSH();
-
-		// if(!mesh_sync_complete){
-		// 	mesh_sync_complete = _mesh->requestSync();
-		// }
 	}
 }
 
 void Crownstone::handleEvent(event_t & event) {
 
-	switch(event.type) {
+	switch (event.type) {
 		case CS_TYPE::EVT_STORAGE_INITIALIZED:
 			init(1);
 			startUp();

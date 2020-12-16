@@ -26,14 +26,14 @@
 
 
 
-void BehaviourHandler::handleEvent(event_t& evt){
-	switch(evt.type){
+void BehaviourHandler::handleEvent(event_t& evt) {
+	switch (evt.type) {
 		case CS_TYPE::EVT_PRESENCE_MUTATION: {
 			LOGBehaviourHandlerDebug("Presence mutation event in BehaviourHandler");
 			update();
 			break;
 		}
-		case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION:{
+		case CS_TYPE::EVT_BEHAVIOURSTORE_MUTATION: {
 			update();
 			break;
 		}
@@ -49,23 +49,25 @@ void BehaviourHandler::handleEvent(event_t& evt){
 			handleGetBehaviourDebug(evt);
 			break;
 		}
-		default:{
+		default: {
 			// ignore other events
 			break;
 		}
 	}
 }
 
-bool BehaviourHandler::update(){
+bool BehaviourHandler::update() {
 	if (!isActive) {
 		currentIntendedState = std::nullopt;
-	} else {
+	}
+	else {
 		Time time = SystemTime::now();
 		std::optional<PresenceStateDescription> presence = PresenceHandler::getCurrentPresenceDescription();
 
 		if (!presence) {
 			LOGBehaviourHandlerVerbose("Not updating, because presence data is missing");
-		} else {
+		}
+		else {
 			currentIntendedState = computeIntendedState(time, presence.value());
 		}
 	}
@@ -99,42 +101,43 @@ std::optional<uint8_t> BehaviourHandler::computeIntendedState(
 	LOGBehaviourHandlerDebug("BehaviourHandler computeIntendedState resolves");
 
 	// 'best' meaning most relevant considering from/until time window.
-	SwitchBehaviour* current_best_switchbehaviour = nullptr;
-	for(auto candidate_behaviour : BehaviourStore::getActiveBehaviours()){
-		SwitchBehaviour* candidate_switchbehaviour = ValidateSwitchBehaviour(
-				candidate_behaviour,currentTime, currentPresence);
+	SwitchBehaviour* currentBestSwitchBehaviour = nullptr;
+	for (auto candidateBehaviour : BehaviourStore::getActiveBehaviours()) {
+		SwitchBehaviour* candidateSwitchBehaviour = ValidateSwitchBehaviour(
+				candidateBehaviour, currentTime, currentPresence);
 
 		// check for failed transformation from right to left. If either
 		// current or candidate is nullptr, we can continue to the next candidate.
-		if (current_best_switchbehaviour == nullptr) {
+		if (currentBestSwitchBehaviour == nullptr) {
 			// candidate always wins when there is no current best.
-			current_best_switchbehaviour = candidate_switchbehaviour;
+			currentBestSwitchBehaviour = candidateSwitchBehaviour;
 			continue;
 		}
-		if (candidate_switchbehaviour == nullptr) {
+		if (candidateSwitchBehaviour == nullptr) {
 			continue;
 		}
 
 		// conflict resolve:
 		if (FromUntilIntervalIsEqual(
-				current_best_switchbehaviour,
-				candidate_switchbehaviour)) {
+				currentBestSwitchBehaviour,
+				candidateSwitchBehaviour)) {
 			// when interval coincides, lowest intensity behaviour wins:
-			if (candidate_switchbehaviour->value() < current_best_switchbehaviour->value()){
-				current_best_switchbehaviour = candidate_switchbehaviour;
+			if (candidateSwitchBehaviour->value() < currentBestSwitchBehaviour->value()) {
+				currentBestSwitchBehaviour = candidateSwitchBehaviour;
 			}
-		} else if (FromUntilIntervalIsMoreRelevantOrEqual(
-				candidate_switchbehaviour,
-				current_best_switchbehaviour,
+		}
+		else if (FromUntilIntervalIsMoreRelevantOrEqual(
+				candidateSwitchBehaviour,
+				currentBestSwitchBehaviour,
 				currentTime)) {
 			// when interval is more relevant, that behaviour wins
-			current_best_switchbehaviour = candidate_switchbehaviour;
+			currentBestSwitchBehaviour = candidateSwitchBehaviour;
 		}
 	}
 
 
-	if (current_best_switchbehaviour) {
-		return current_best_switchbehaviour->value();
+	if (currentBestSwitchBehaviour) {
+		return currentBestSwitchBehaviour->value();
 	}
 
 	return 0;
@@ -214,7 +217,7 @@ void BehaviourHandler::handleGetBehaviourDebug(event_t& evt) {
 				}
 			}
 
-			if(ExtendedSwitchBehaviour* extendedswitchbehave = dynamic_cast<ExtendedSwitchBehaviour*>(behaviours[index])) {
+			if (ExtendedSwitchBehaviour* extendedswitchbehave = dynamic_cast<ExtendedSwitchBehaviour*>(behaviours[index])) {
 				behaviourDebug->extensionActive |=
 						extendedswitchbehave->extensionPeriodIsActive() ? (1 << index) : 0;
 			}
@@ -238,12 +241,12 @@ std::optional<uint8_t> BehaviourHandler::getValue() {
 
 bool BehaviourHandler::requiresPresence(Time t) {
 	uint8_t i = 0;
-	for (auto& behaviour_ptr : BehaviourStore::getActiveBehaviours()) {
+	for (auto& behaviourPtr : BehaviourStore::getActiveBehaviours()) {
 		i += 1;
-		if (behaviour_ptr != nullptr) {
-			if (behaviour_ptr->requiresPresence()) {
+		if (behaviourPtr != nullptr) {
+			if (behaviourPtr->requiresPresence()) {
 				LOGBehaviourHandlerVerbose("presence requiring behaviour found %d", i);
-				if (behaviour_ptr->isValid(t)) {
+				if (behaviourPtr->isValid(t)) {
 					LOGBehaviourHandlerVerbose("presence requiring behaviour is currently valid %d", i);
 					return true;
 				}
@@ -255,9 +258,9 @@ bool BehaviourHandler::requiresPresence(Time t) {
 }
 
 bool BehaviourHandler::requiresAbsence(Time t) {
-	for (auto& behaviour_ptr : BehaviourStore::getActiveBehaviours()) {
-		if (behaviour_ptr != nullptr) {
-			if (behaviour_ptr->isValid(t) && behaviour_ptr->requiresAbsence()) {
+	for (auto& behaviourPtr : BehaviourStore::getActiveBehaviours()) {
+		if (behaviourPtr != nullptr) {
+			if (behaviourPtr->isValid(t) && behaviourPtr->requiresAbsence()) {
 				return true;
 			}
 		}

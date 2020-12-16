@@ -40,7 +40,7 @@ public:
 	cs_mesh_model_msg_type_t type;
 	uint16_t srcAddress; // of the original sender
 	int8_t rssi; // of the last hop
-	uint8_t hops;
+	uint8_t hops; // 0 hops means the msg was received directly from the original source.
 	uint8_t channel;
 
 	/**

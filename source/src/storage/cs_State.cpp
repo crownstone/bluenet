@@ -75,7 +75,7 @@ cs_ret_code_t State::get(const CS_TYPE type, void *value, const size16_t size) {
 
 bool State::isTrue(CS_TYPE type, const PersistenceMode mode) {
 	TYPIFY(CONFIG_MESH_ENABLED) enabled = false;
-	switch(type) {
+	switch (type) {
 		case CS_TYPE::CONFIG_MESH_ENABLED:
 		case CS_TYPE::CONFIG_ENCRYPTION_ENABLED:
 		case CS_TYPE::CONFIG_IBEACON_ENABLED:
@@ -141,7 +141,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
 
-	switch(mode) {
+	switch (mode) {
 		case PersistenceMode::NEITHER_RAM_NOR_FLASH:
 			return ERR_NOT_AVAILABLE;
 		case PersistenceMode::FIRMWARE_DEFAULT:
@@ -178,7 +178,7 @@ cs_ret_code_t State::get(cs_state_data_t & data, const PersistenceMode mode) {
 					ret_code = _storage->readV3ResetCounter(ram_data);
 				}
 
-				switch(ret_code) {
+				switch (ret_code) {
 					case ERR_SUCCESS: {
 						break;
 					}
@@ -233,7 +233,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 		LOGw("Type size is different (%u rather than %u).", data.size, typeSize);
 		return ERR_BUFFER_TOO_SMALL;
 	}
-	switch(mode) {
+	switch (mode) {
 		case PersistenceMode::NEITHER_RAM_NOR_FLASH:
 			return ERR_NOT_AVAILABLE;
 		case PersistenceMode::RAM: {
@@ -257,7 +257,7 @@ cs_ret_code_t State::setInternal(const cs_state_data_t & data, const Persistence
 		}
 		case PersistenceMode::STRATEGY1: {
 			// first get if default location is RAM or FLASH
-			switch(DefaultLocation(data.type)) {
+			switch (DefaultLocation(data.type)) {
 				case PersistenceMode::RAM:
 					ret_code = storeInRam(data);
 					switch (ret_code) {
@@ -314,7 +314,7 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 		return ERR_NOT_INITIALIZED;
 	}
 	cs_ret_code_t ret_code = ERR_UNSPECIFIED;
-	switch(mode) {
+	switch (mode) {
 		case PersistenceMode::NEITHER_RAM_NOR_FLASH:
 			return ERR_NOT_AVAILABLE;
 		case PersistenceMode::RAM: {
@@ -325,7 +325,7 @@ cs_ret_code_t State::removeInternal(const CS_TYPE & type, cs_state_id_t id, cons
 			return ERR_NOT_IMPLEMENTED;
 		}
 		case PersistenceMode::STRATEGY1: {
-			switch(DefaultLocation(type)) {
+			switch (DefaultLocation(type)) {
 				case PersistenceMode::RAM:
 					return removeFromRam(type, id);
 				case PersistenceMode::FLASH:
@@ -392,7 +392,7 @@ cs_ret_code_t State::storeInRam(const cs_state_data_t & data, size16_t & index_i
 		cs_state_data_t & ram_data = _ram_data_register[index_in_ram];
 		if (ram_data.size != data.size) {
 			LOGe("Should not happen: ram_data.size=%u data.size=%u", ram_data.size, data.size);
-			assert(false,"See last error message");
+			assert(false, "See last error message");
 			
 			free(ram_data.value);
 			ram_data.size = data.size;
@@ -476,7 +476,7 @@ cs_ret_code_t State::storeInFlash(size16_t & index_in_ram) {
 		return ERR_WRITE_NOT_ALLOWED;
 	}
 	cs_state_data_t ram_data = _ram_data_register[index_in_ram];
-	LOGStateDebug("Storage write type=%u size=%u data=%p [0x%X,...]", ram_data.type, ram_data.size, ram_data.value, ram_data.value[0]);
+	LOGStateDebug("Storage write type=%u size=%u data=%p [0x%X, ...]", ram_data.type, ram_data.size, ram_data.value, ram_data.value[0]);
 	cs_ret_code_t ret_code = _storage->write(ram_data);
 	switch (ret_code) {
 		case ERR_BUSY: {
@@ -500,7 +500,7 @@ cs_ret_code_t State::removeFromFlash(const CS_TYPE & type, const cs_state_id_t i
 	}
 	LOGd("removeFromFlash type=%u id=%u", to_underlying_type(type), id);
 	cs_ret_code_t ret_code = _storage->remove(type, id);
-	switch(ret_code) {
+	switch (ret_code) {
 		case ERR_SUCCESS:
 		case ERR_NOT_FOUND:
 			return ERR_SUCCESS;
@@ -519,18 +519,22 @@ cs_ret_code_t State::compareWithRam(const cs_state_data_t & data, uint32_t & cmp
 	ret_code_t ret_code = loadFromRam(local_data);
 	if (ret_code == ERR_NOT_FOUND) {
 		cmp_result = 1; // not-found
-	} else if (ret_code == ERR_SUCCESS) {
+	}
+	else if (ret_code == ERR_SUCCESS) {
 		if (data.size == local_data.size) {
 			int n = memcmp(data.value, local_data.value, data.size);
 			if (n == 0) {
 				cmp_result = 0;
-			} else {
+			}
+			else {
 				cmp_result = 3; // data-mismatch
 			}
-		} else {
+		}
+		else {
 			cmp_result = 2; // size-mismatch
 		}
-	} else {
+	}
+	else {
 		cmp_result = 4; // load from ram error
 	}
 	return ret_code;
@@ -717,7 +721,7 @@ cs_ret_code_t State::addToQueue(StateQueueOp operation, const CS_TYPE & type, cs
 	bool found = false;
 	switch (operation) {
 		case CS_STATE_QUEUE_OP_WRITE:
-		case CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE:{
+		case CS_STATE_QUEUE_OP_REM_ONE_ID_OF_TYPE: {
 			for (size_t i=0; i<_store_queue.size(); ++i) {
 				// A write operation replaces a remove operation, and vice versa.
 				if ((_store_queue[i].type == type && _store_queue[i].id == id) &&
@@ -729,7 +733,8 @@ cs_ret_code_t State::addToQueue(StateQueueOp operation, const CS_TYPE & type, cs
 					// n-th time, now execute becomes true and for throttle init_counter will be set as well
 					if (mode == StateQueueMode::THROTTLE) {
 						_store_queue[i].init_counter = delayTicks;
-					} else {
+					}
+					else {
 						_store_queue[i].counter = delayTicks;
 					}
 					_store_queue[i].execute = true;

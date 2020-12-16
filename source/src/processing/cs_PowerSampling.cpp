@@ -218,7 +218,7 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
 }
 
 void PowerSampling::handleEvent(event_t & event) {
-	switch(event.type) {
+	switch (event.type) {
 		case CS_TYPE::CMD_ENABLE_LOG_POWER:
 			_logsEnabled.flags.power = *(TYPIFY(CMD_ENABLE_LOG_POWER)*)event.data;
 			break;
@@ -866,7 +866,7 @@ bool PowerSampling::calculatePower(adc_buffer_id_t bufIndex) {
 	if (_logsEnabled.flags.current) {
 		// Write uart_msg_current_t without allocating a buffer.
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
-		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT,(uint8_t*)&(rtcCount), sizeof(rtcCount));
+		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(rtcCount), sizeof(rtcCount));
 		adc_sample_value_t val;
 		for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
 			val = AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i);
@@ -890,11 +890,11 @@ bool PowerSampling::calculatePower(adc_buffer_id_t bufIndex) {
 	if (_logsEnabled.flags.voltage) {
 		// Write uart_msg_voltage_t without allocating a buffer.
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
-		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(rtcCount), sizeof(rtcCount));
+		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, (uint8_t*)&(rtcCount), sizeof(rtcCount));
 		adc_sample_value_t val;
 		for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
 			val = AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, i);
-			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&val, sizeof(val));
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, (uint8_t*)&val, sizeof(val));
 		}
 		UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_VOLTAGE);
 	}

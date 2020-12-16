@@ -183,7 +183,7 @@ inline void _serial_write(uint8_t val) {
 //	if (_initializedTx) { // Check this in functions that call this function.
 		NRF_UART0->EVENTS_TXDRDY = 0;
 		NRF_UART0->TXD = val;
-		while(NRF_UART0->EVENTS_TXDRDY != 1) {}
+		while (NRF_UART0->EVENTS_TXDRDY != 1) {}
 //	}
 #endif
 }

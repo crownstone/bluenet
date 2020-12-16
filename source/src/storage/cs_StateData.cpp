@@ -16,7 +16,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	// for all non-string types we already know the to-be expected size
 	data.size = TypeSize(data.type);
 
-	switch(data.type) {
+	switch (data.type) {
 	case CS_TYPE::CONFIG_NAME: {
 		data.size = MIN(data.size, sizeof(STRINGIFY(BLUETOOTH_NAME)));
 		memcpy(data.value, STRINGIFY(BLUETOOTH_NAME), data.size);
@@ -366,7 +366,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 }
 
 PersistenceMode DefaultLocation(CS_TYPE const & type) {
-	switch(type) {
+	switch (type) {
 	case CS_TYPE::CONFIG_NAME:
 	case CS_TYPE::CONFIG_PWM_PERIOD:
 	case CS_TYPE::CONFIG_IBEACON_MAJOR:

@@ -42,7 +42,7 @@ inline std::string get_hardware_revision(void) {
 	// get nordic chip version
 	char nordic_chip_version[6];
 
-	switch(NRF_FICR->INFO.PACKAGE) {
+	switch (NRF_FICR->INFO.PACKAGE) {
 		case 0x2000:
 			nordic_chip_version[0] = 'Q';
 			nordic_chip_version[1] = 'F';

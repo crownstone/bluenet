@@ -11,41 +11,41 @@
 #include <logging/cs_Logger.h>
 
 PresenceCondition::PresenceCondition(PresencePredicate p, uint32_t t) : 
-    pred(p), timeOut(t){}
+		pred(p), timeOut(t) {}
 
 PresenceCondition::PresenceCondition(SerializedDataType arr): 
-    PresenceCondition(
-        WireFormat::deserialize<PresencePredicate>(arr.data() + 0, 9),
-        WireFormat::deserialize<uint32_t>(         arr.data() + 9, 4)){
+		PresenceCondition(
+				WireFormat::deserialize<PresencePredicate>(arr.data() + 0, 9),
+				WireFormat::deserialize<uint32_t>(         arr.data() + 9, 4)) {
 }
 
 size_t PresenceCondition::serializedSize() const {
-    return WireFormat::size<PresenceCondition>();
+	return WireFormat::size<PresenceCondition>();
 }
 
-PresenceCondition::SerializedDataType PresenceCondition::serialize(){
-    SerializedDataType result;
-    std::copy_n(std::begin(WireFormat::serialize(pred)),    9, std::begin(result) + 0);
-    std::copy_n(std::begin(WireFormat::serialize(timeOut)), 4, std::begin(result) + 9);
+PresenceCondition::SerializedDataType PresenceCondition::serialize() {
+	SerializedDataType result;
+	std::copy_n(std::begin(WireFormat::serialize(pred)),    9, std::begin(result) + 0);
+	std::copy_n(std::begin(WireFormat::serialize(timeOut)), 4, std::begin(result) + 9);
 
-    return result;
+	return result;
 }
 
-uint8_t* PresenceCondition::serialize(uint8_t* outbuff, size_t max_size){
-    if(max_size != 0){
-        if(outbuff == nullptr || max_size < serializedSize()) { 
-            return outbuff;
-        }
-    }
+uint8_t* PresenceCondition::serialize(uint8_t* outbuff, size_t max_size) {
+	if (max_size != 0) {
+		if (outbuff == nullptr || max_size < serializedSize()) {
+			return outbuff;
+		}
+	}
 
-    auto serialized_repr = serialize();
+	auto serialized_repr = serialize();
 
-    return std::copy_n (
-        std::begin (serialized_repr), 
-        WireFormat::size<PresenceCondition>(),
-        outbuff );
+	return std::copy_n (
+			std::begin (serialized_repr),
+			WireFormat::size<PresenceCondition>(),
+			outbuff );
 }
 
-bool PresenceCondition::operator()(PresenceStateDescription currentPresence){
-    return pred(currentPresence);
+bool PresenceCondition::operator()(PresenceStateDescription currentPresence) {
+	return pred(currentPresence);
 }

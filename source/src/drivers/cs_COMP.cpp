@@ -58,31 +58,31 @@ void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 	if (ainPin > 7) {
 		APP_ERROR_CHECK(ERR_WRONG_PARAMETER);
 	}
-	switch(ainPin) {
-	case 0:
-		config.input = NRF_COMP_INPUT_0; // AIN0, gpio 2
-		break;
-	case 1:
-		config.input = NRF_COMP_INPUT_1; // AIN1, gpio 3
-		break;
-	case 2:
-		config.input = NRF_COMP_INPUT_2; // AIN2, gpio 4
-		break;
-	case 3:
-		config.input = NRF_COMP_INPUT_3; // AIN3, gpio 5
-		break;
-	case 4:
-		config.input = NRF_COMP_INPUT_4; // AIN4
-		break;
-	case 5:
-		config.input = NRF_COMP_INPUT_5; // AIN5
-		break;
-	case 6:
-		config.input = NRF_COMP_INPUT_6; // AIN6
-		break;
-	case 7:
-		config.input = NRF_COMP_INPUT_7; // AIN7
-		break;
+	switch (ainPin) {
+		case 0:
+			config.input = NRF_COMP_INPUT_0; // AIN0, gpio 2
+			break;
+		case 1:
+			config.input = NRF_COMP_INPUT_1; // AIN1, gpio 3
+			break;
+		case 2:
+			config.input = NRF_COMP_INPUT_2; // AIN2, gpio 4
+			break;
+		case 3:
+			config.input = NRF_COMP_INPUT_3; // AIN3, gpio 5
+			break;
+		case 4:
+			config.input = NRF_COMP_INPUT_4; // AIN4
+			break;
+		case 5:
+			config.input = NRF_COMP_INPUT_5; // AIN5
+			break;
+		case 6:
+			config.input = NRF_COMP_INPUT_6; // AIN6
+			break;
+		case 7:
+			config.input = NRF_COMP_INPUT_7; // AIN7
+			break;
 	}
 
 	ret_code_t err_code = nrfx_comp_init(&config, comp_callback);
@@ -92,22 +92,22 @@ void COMP::init(uint8_t ainPin, float thresholdDown, float thresholdUp) {
 void COMP::start(CompEvent_t event) {
 	LOGd("start");
 	uint32_t evtMask;
-	switch(event) {
-	case COMP_EVENT_BOTH:
-		evtMask = NRF_COMP_EVENT_UP | NRF_COMP_EVENT_DOWN;
-		break;
-	case COMP_EVENT_UP:
-		evtMask = NRF_COMP_EVENT_UP;
-		break;
-	case COMP_EVENT_DOWN:
-		evtMask = NRF_COMP_EVENT_DOWN;
-		break;
-	case COMP_EVENT_CROSS:
-		evtMask = NRF_COMP_EVENT_CROSS;
-		break;
-	case COMP_EVENT_NONE:
-	default:
-		return;
+	switch (event) {
+		case COMP_EVENT_BOTH:
+			evtMask = NRF_COMP_EVENT_UP | NRF_COMP_EVENT_DOWN;
+			break;
+		case COMP_EVENT_UP:
+			evtMask = NRF_COMP_EVENT_UP;
+			break;
+		case COMP_EVENT_DOWN:
+			evtMask = NRF_COMP_EVENT_DOWN;
+			break;
+		case COMP_EVENT_CROSS:
+			evtMask = NRF_COMP_EVENT_CROSS;
+			break;
+		case COMP_EVENT_NONE:
+		default:
+			return;
 	}
 	nrfx_comp_start(evtMask, 0);
 //	nrf_comp_int_enable(COMP_INTENSET_UP_Msk | COMP_INTENSET_DOWN_Msk);

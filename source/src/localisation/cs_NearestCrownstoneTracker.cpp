@@ -96,7 +96,7 @@ void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incomingReport) {
 	else if (incomingReport.reporter == _winningReport.reporter) {
 		LOGNearestCrownstoneTrackerVerbose("Received an update from the winner.");
 
-		if(_personalReport.rssi > incomingReport.rssi) {
+		if (_personalReport.rssi > incomingReport.rssi) {
 			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now. ");
 			saveWinningReport(_personalReport);
 
@@ -134,7 +134,7 @@ void NearestCrownstoneTracker::onWinnerChanged() {
 
 // --------------------------- Report processing ------------------------
 
-NearestWitnessReport NearestCrownstoneTracker::createReport(TrackableEvent* trackedEvent){
+NearestWitnessReport NearestCrownstoneTracker::createReport(TrackableEvent* trackedEvent) {
 	return NearestWitnessReport(trackedEvent->id, trackedEvent->rssi, _myId);
 }
 
@@ -145,8 +145,8 @@ NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* meshMs
 
 	return NearestWitnessReport(
 			nearestWitnessReport.trackableDeviceMac,
-	        nearestWitnessReport.rssi,
-	        meshMsgEvent->srcAddress);
+			nearestWitnessReport.rssi,
+			meshMsgEvent->srcAddress);
 }
 
 nearest_witness_report_t NearestCrownstoneTracker::reduceReport(const NearestWitnessReport& report) {

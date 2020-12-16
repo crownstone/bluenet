@@ -138,33 +138,33 @@ void Scanner::executeScan() {
 	LOGd("Execute Scan");
 #endif
 
-	switch(_opCode) {
-	case SCAN_START: {
+	switch (_opCode) {
+		case SCAN_START: {
 
-		// start scanning
-		manualStartScan();
+			// start scanning
+			manualStartScan();
 
-		// set timer to trigger in SCAN_DURATION sec, then stop again
-		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanDuration), this);
+			// set timer to trigger in SCAN_DURATION sec, then stop again
+			Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanDuration), this);
 
-		_opCode = SCAN_STOP;
-		break;
-	}
-	case SCAN_STOP: {
+			_opCode = SCAN_STOP;
+			break;
+		}
+		case SCAN_STOP: {
 
-		// stop scanning
-		manualStopScan();
+			// stop scanning
+			manualStopScan();
 
 #ifdef PRINT_DEBUG
-		_scanResult->print();
+			_scanResult->print();
 #endif
 
-		// Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
-		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
+			// Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
+			Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
 
-		_opCode = SCAN_START;
-		break;
-	}
+			_opCode = SCAN_START;
+			break;
+		}
 	}
 
 }

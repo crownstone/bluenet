@@ -176,7 +176,7 @@ bool FactoryReset::finishFactoryReset(uint8_t deviceType) {
 
 void FactoryReset::handleEvent(event_t & event) {
 	switch (event.type) {
-		case CS_TYPE::EVT_STATE_FACTORY_RESET_DONE:{
+		case CS_TYPE::EVT_STATE_FACTORY_RESET_DONE: {
 			onClassFactoryResetDone(FACTORY_RESET_BIT_STATE);
 			break;
 		}
