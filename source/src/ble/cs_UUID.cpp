@@ -6,9 +6,8 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "ble/cs_UUID.h"
-
-#include "util/cs_BleError.h"
+#include <ble/cs_UUID.h>
+#include <util/cs_BleError.h>
 
 // TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean, methodical and understandable way
 

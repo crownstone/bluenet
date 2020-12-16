@@ -6,6 +6,7 @@
  */
 
 #pragma once
+
 #include <localisation/cs_TrackableId.h>
 
 // REVIEW: Someone reading this doesn't know what a witness report is.

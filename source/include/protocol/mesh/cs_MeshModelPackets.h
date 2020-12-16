@@ -184,11 +184,10 @@ struct __attribute__((__packed__)) cs_mesh_model_msg_time_sync_t {
  * Packed version of NearestWitnessReport.
  */
 struct __attribute__((__packed__)) nearest_witness_report_t {
-	uint8_t trackable_device_mac[6];
+	uint8_t trackableDeviceMac[6];
 	int8_t rssi;
 };
 
-// REVIEW: Why is this in packet inernal? it's used in mesh protocol. Should be in mesh messages.
 /**
  * Sent from a crownstone when it has too little rssi information from
  * its neighbors.
@@ -228,7 +227,6 @@ struct __attribute__((__packed__)) rssi_data_t {
 	uint16_t sampleCount : 6;
 };
 
-// REVIEW: Why is this in packet inernal? it's used in mesh protocol. Should be in mesh messages.
 struct __attribute__((__packed__)) rssi_data_message_t {
 	stone_id_t sender_id;
 	rssi_data_t channel37;
@@ -236,6 +234,3 @@ struct __attribute__((__packed__)) rssi_data_message_t {
 	rssi_data_t channel39;
 };
 
-
-
-#pragma GCC diagnostic pop

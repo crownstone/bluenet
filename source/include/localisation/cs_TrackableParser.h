@@ -6,11 +6,10 @@
  */
 #pragma once
 
-#include <events/cs_EventListener.h>
 #include <ble/cs_iBeacon.h>
-
-#include <util/cs_Coroutine.h>
+#include <events/cs_EventListener.h>
 #include <set>
+#include <util/cs_Coroutine.h>
 
 /**
  * Transforms EVT_DEVICE_SCANNED and EVT_ADV_BACKGROUND_PARSED
@@ -32,7 +31,7 @@ private:
 	/**
 	 * Dispatches a TrackedEvent for the given advertisement.
 	 */
-	void handleBackgroundParsed(adv_background_parsed_t *trackable_advertisement);
+	void handleBackgroundParsed(adv_background_parsed_t *trackableAdvertisement);
 
 	/**
 	 * Check if this device is a Tile device, if so handle it and
@@ -41,13 +40,13 @@ private:
 	 * Will emit a TrackableEvent when it is a tile device and mac
 	 * matches the hard coded address to filter for.
 	 */
-	bool handleAsTileDevice(scanned_device_t* scanned_device);
+	bool handleAsTileDevice(scanned_device_t* scannedDevice);
 
 	/**
 	 * Checks if the mac address of the trackable device is equal
 	 * to myTrackableId.
 	 */
-	bool isMyTrackable(scanned_device_t* scanned_device);
+	bool isMyTrackable(scanned_device_t* scannedDevice);
 
 	/**
 	 *  Checks service uuids of the scanned device and returns true
@@ -58,7 +57,7 @@ private:
 	 *  - expects the services to be listed in the type
 	 *    BLE_GAP_AD_TYPE_16BIT_SERVICE_UUID_COMPLETE.
 	 */
-	bool isTileDevice(scanned_device_t* scanned_device);
+	bool isTileDevice(scanned_device_t* scannedDevice);
 
-	void logServiceData(const char* headerstr, scanned_device_t* scanned_device);
+	void logServiceData(const char* headerStr, scanned_device_t* scannedDevice);
 };

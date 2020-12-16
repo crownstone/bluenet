@@ -5,12 +5,11 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <common/cs_Types.h>
+#include <events/cs_Event.h>
 #include <localisation/cs_NearestCrownstoneTracker.h>
 #include <localisation/cs_TrackableEvent.h>
-
-#include <common/cs_Types.h>
 #include <logging/cs_Logger.h>
-#include <events/cs_Event.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <storage/cs_State.h>
 #include <util/cs_Coroutine.h>
@@ -21,9 +20,7 @@
 #define LOGNearestCrownstoneTrackerInfo LOGi
 
 void NearestCrownstoneTracker::init() {
-	// REVIEW: Use TYPIFY for variable.
-	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id,
-	        sizeof(my_id));
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
 
 	resetReports();
 }
@@ -31,141 +28,146 @@ void NearestCrownstoneTracker::init() {
 void NearestCrownstoneTracker::handleEvent(event_t &evt) {
 	if (evt.type == CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT) {
 		LOGNearestCrownstoneTrackerVerbose("NearestCrownstone received event: EVT_MESH_NEAREST_WITNESS_REPORT");
-		MeshMsgEvent* mesh_msg_event = CS_TYPE_CAST(EVT_MESH_NEAREST_WITNESS_REPORT, evt.data);
-		NearestWitnessReport report = createReport(mesh_msg_event);
+		MeshMsgEvent* meshMsgEvent = CS_TYPE_CAST(EVT_MESH_NEAREST_WITNESS_REPORT, evt.data);
+		NearestWitnessReport report = createReport(meshMsgEvent);
 		onReceive(report);
 		return;
 	}
 
 	if (evt.type == CS_TYPE::EVT_TRACKABLE) {
-		TrackableEvent* trackevt = CS_TYPE_CAST(EVT_TRACKABLE, evt.data);
-		onReceive(trackevt);
+		TrackableEvent* trackEvt = CS_TYPE_CAST(EVT_TRACKABLE, evt.data);
+		onReceive(trackEvt);
 	}
 }
 
 
-void NearestCrownstoneTracker::onReceive(TrackableEvent* tracked_event) {
-	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, my_id(%d)", my_id);
-	auto incoming_report = createReport(tracked_event);
+void NearestCrownstoneTracker::onReceive(TrackableEvent* trackedEvent) {
+	LOGNearestCrownstoneTrackerVerbose("onReceive trackable, myId(%u)", _myId);
+	auto incomingReport = createReport(trackedEvent);
 
-	savePersonalReport(incoming_report);
+	savePersonalReport(incomingReport);
 
 	// TODO: replace condition with std::find when
 	// we have a map of uuid --> report for all the datas
 
 	// REVIEW: Why not start with lowest rssi, so you don't need to do the isvalid check?
-	if (isValid(winning_report)) {
+	if (isValid(_winningReport)) {
 		// REVIEW: Does it matter who reported it?
-		if(winning_report.reporter == my_id){
+		if (_winningReport.reporter == _myId) {
 			LOGNearestCrownstoneTrackerVerbose("we already believed we were closest, so this is just an update");
-			saveWinningReport(incoming_report);
-			broadcastReport(incoming_report);
-		} else {
+			saveWinningReport(incomingReport);
+			broadcastReport(incomingReport);
+		}
+		else {
 			LOGNearestCrownstoneTrackerVerbose("we didn't win before");
-			if (incoming_report.rssi > winning_report.rssi)  {
+			if (incomingReport.rssi > _winningReport.rssi)  {
 				LOGNearestCrownstoneTrackerVerbose("but now we do, so have to do something");
-				saveWinningReport(incoming_report);
-				broadcastReport(incoming_report);
+				saveWinningReport(incomingReport);
+				broadcastReport(incomingReport);
 				onWinnerChanged();
-			} else {
+			}
+			else {
 				LOGNearestCrownstoneTrackerVerbose("we still don't, so we're done.");
 			}
 		}
-	} else {
+	}
+	else {
 		LOGNearestCrownstoneTrackerVerbose("no winning report yet, so our personal one wins");
-		saveWinningReport(incoming_report);
-		broadcastReport(incoming_report);
+		saveWinningReport(incomingReport);
+		broadcastReport(incomingReport);
 		onWinnerChanged();
 	}
 }
 
 // REVIEW: This code looks very much like the other onReceive.
-void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incoming_report) {
-	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, my_id(%d), reporter(%d), rssi(%d)", my_id, incoming_report.reporter, incoming_report.rssi);
+void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incomingReport) {
+	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i)", _myId, incomingReport.reporter, incomingReport.rssi);
 
-	if(incoming_report.reporter == my_id) {
+	if (incomingReport.reporter == _myId) {
 		LOGNearestCrownstoneTrackerVerbose("Received an old report from myself. Dropped: not relevant.");
 		return;
 	}
 
-	if(!isValid(winning_report)) {
+	if (!isValid(_winningReport)) {
 		LOGNearestCrownstoneTrackerVerbose("Didn't have a incoming_report yet. Updated my winner.");
-		saveWinningReport(incoming_report);
+		saveWinningReport(incomingReport);
 		onWinnerChanged();
-	} else if(incoming_report.reporter == winning_report.reporter) {
+	}
+	else if (incomingReport.reporter == _winningReport.reporter) {
 		LOGNearestCrownstoneTrackerVerbose("Received an update from the winner.");
 
-		if(personal_report.rssi > incoming_report.rssi){
+		if(_personalReport.rssi > incomingReport.rssi) {
 			LOGNearestCrownstoneTrackerVerbose("It dropped below my own value, so I win now. ");
-			saveWinningReport(personal_report);
+			saveWinningReport(_personalReport);
 
 			LOGNearestCrownstoneTrackerVerbose("Broadcast my personal report to update the mesh.");
-			broadcastReport(personal_report);
+			broadcastReport(_personalReport);
 
 			onWinnerChanged();
 		} else {
 			LOGNearestCrownstoneTrackerVerbose("It still wins, so I'll just update the value of my winning report.");
-			saveWinningReport(incoming_report);
+			saveWinningReport(incomingReport);
 		}
-	} else {
-		if(incoming_report.rssi > winning_report.rssi) {
+	}
+	else {
+		if (incomingReport.rssi > _winningReport.rssi) {
 			LOGNearestCrownstoneTrackerVerbose("Received a witnessreport from another crownstone that is better than my winner.");
-			saveWinningReport(incoming_report);
+			saveWinningReport(incomingReport);
 			onWinnerChanged();
 		}
 	}
 }
 
 void NearestCrownstoneTracker::onWinnerChanged() {
-	LOGNearestCrownstoneTrackerDebug("Nearest changed to stoneid=%d. I'm turning %s",
-			winning_report.reporter,
-			winning_report.reporter == my_id ? "on":"off");
+	LOGNearestCrownstoneTrackerDebug("Nearest changed to stoneid=%u. I'm turning %s",
+			_winningReport.reporter,
+			_winningReport.reporter == _myId ? "on":"off");
 
-	CS_TYPE on_off =
-			winning_report.reporter == my_id
+	CS_TYPE onOff =
+			_winningReport.reporter == _myId
 			? CS_TYPE::CMD_SWITCH_ON
 			: CS_TYPE::CMD_SWITCH_OFF;
 
-	event_t event(on_off, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
+	event_t event(onOff, nullptr, 0, cmd_source_t(CS_CMD_SOURCE_SWITCHCRAFT));
 	event.dispatch();
 }
 
 // --------------------------- Report processing ------------------------
 
-NearestWitnessReport NearestCrownstoneTracker::createReport(TrackableEvent* tracked_event){
-	return NearestWitnessReport(tracked_event->id, tracked_event->rssi, my_id);
+NearestWitnessReport NearestCrownstoneTracker::createReport(TrackableEvent* trackedEvent){
+	return NearestWitnessReport(trackedEvent->id, trackedEvent->rssi, _myId);
 }
 
 // REVIEW: Return by ref?
-NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* mesh_msg_event) {
+NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* meshMsgEvent) {
 	// REVIEW: Lot of mesh implementation details: shouldn't this be done in the mesh msg handler?
-	auto nearest_witness_report = mesh_msg_event->getPacket<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT>();
+	auto nearestWitnessReport = meshMsgEvent->getPacket<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT>();
 
 	return NearestWitnessReport(
-			nearest_witness_report.trackable_device_mac,
-	        nearest_witness_report.rssi,
-	        mesh_msg_event->srcAddress);
+			nearestWitnessReport.trackableDeviceMac,
+	        nearestWitnessReport.rssi,
+	        meshMsgEvent->srcAddress);
 }
 
 nearest_witness_report_t NearestCrownstoneTracker::reduceReport(const NearestWitnessReport& report) {
-	nearest_witness_report_t reduced_report;
+	nearest_witness_report_t reducedReport;
 	std::memcpy(
-			reduced_report.trackable_device_mac,
+			reducedReport.trackableDeviceMac,
 			report.trackable.bytes,
-			sizeof(reduced_report.trackable_device_mac)
+			sizeof(reducedReport.trackableDeviceMac)
 	);
 
-	reduced_report.rssi = report.rssi;
+	reducedReport.rssi = report.rssi;
 
-	return reduced_report;
+	return reducedReport;
 }
 
 void NearestCrownstoneTracker::savePersonalReport(NearestWitnessReport report) {
-	personal_report = report;
+	_personalReport = report;
 }
 
 void NearestCrownstoneTracker::saveWinningReport(NearestWitnessReport report) {
-	winning_report = report;
+	_winningReport = report;
 }
 
 
@@ -174,7 +176,7 @@ bool NearestCrownstoneTracker::isValid(const NearestWitnessReport& report) {
 }
 
 void NearestCrownstoneTracker::logReport(const char* text, NearestWitnessReport report) {
-	LOGNearestCrownstoneTrackerDebug("%s {reporter:%d, trackable: %x %x %x %x %x %x, rssi:%d dB}",
+	LOGNearestCrownstoneTrackerDebug("%s {reporter:%u, trackable: %x %x %x %x %x %x, rssi:%i dB}",
 			text,
 			report.reporter,
 			report.trackable.bytes[0],
@@ -188,28 +190,27 @@ void NearestCrownstoneTracker::logReport(const char* text, NearestWitnessReport 
 }
 
 void NearestCrownstoneTracker::resetReports() {
-	winning_report = NearestWitnessReport();
-	personal_report = NearestWitnessReport();
+	_winningReport = NearestWitnessReport();
+	_personalReport = NearestWitnessReport();
 
-	personal_report.reporter = my_id;
-	personal_report.rssi = -127; // std::numeric_limits<uint8_t>::lowest();
+	_personalReport.reporter = _myId;
+	_personalReport.rssi = -127; // std::numeric_limits<uint8_t>::lowest();
 }
 
 // ------------------- Mesh related stuff ----------------------
 
 void NearestCrownstoneTracker::broadcastReport(NearestWitnessReport report) {
-	nearest_witness_report_t packed_report = reduceReport(report);
+	nearest_witness_report_t packedReport = reduceReport(report);
 
-	cs_mesh_msg_t report_msg_wrapper;
-	report_msg_wrapper.type =  CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT;
-	report_msg_wrapper.payload = reinterpret_cast<uint8_t*>(&packed_report);
-	report_msg_wrapper.size = sizeof(packed_report);
-	report_msg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
-	report_msg_wrapper.urgency = CS_MESH_URGENCY_LOW;
+	cs_mesh_msg_t reportMsgWrapper;
+	reportMsgWrapper.type =  CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT;
+	reportMsgWrapper.payload = reinterpret_cast<uint8_t*>(&packedReport);
+	reportMsgWrapper.size = sizeof(packedReport);
+	reportMsgWrapper.reliability = CS_MESH_RELIABILITY_LOW;
+	reportMsgWrapper.urgency = CS_MESH_URGENCY_LOW;
 
-	event_t report_msg_evt(CS_TYPE::CMD_SEND_MESH_MSG, &report_msg_wrapper,
-	        sizeof(cs_mesh_msg_t));
+	event_t reportMsgEvt(CS_TYPE::CMD_SEND_MESH_MSG, &reportMsgWrapper, sizeof(reportMsgWrapper));
 
-	report_msg_evt.dispatch();
+	reportMsgEvt.dispatch();
 
 }

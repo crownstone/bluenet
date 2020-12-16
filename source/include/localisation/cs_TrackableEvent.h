@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <localisation/cs_TrackableId.h>
 #include <events/cs_Event.h>
+#include <localisation/cs_TrackableId.h>
 
 // REVIEW: Why a derivative of event_t, instead of a data struct?
 /**
