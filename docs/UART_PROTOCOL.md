@@ -86,7 +86,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 ----- | ----------------------------- | --------- | ------ | -----------
 0     | Hello                         | Never     | [Hello](#cmd_hello_packet) | First command that should sent, used to determine whether this is the right crownstone, and to tell and determine whether encryption has to be used.
 1     | Session nonce                 | Never     | [Session nonce](#cmd_session_nonce_packet) | Refresh the session nonce.
-2     | Heartbeat                     | Optional  | [Heartbeat](#cmd_heartbeat_packet) | Used to know whether the UART connection is alive.
+2     | Heartbeat                     | Optional  | [Heartbeat](#cmd_heartbeat_packet) | Used to know whether the UART connection is alive. You can mix encrypted and unencrypted heartbeat commands. With current implementation though, each time you send an unencrypted heartbeat, the hub service data flag `UART alive encrypted` will be false until an encrypted heartbeat is sent.
 3     | Status                        | Optional  | [Status](#cmd_status_packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
 4     | Get MAC                       | Never     | -      | Get MAC address of this Crownstone.
 10    | Control command               | Yes       | [Control msg](../docs/PROTOCOL.md#control_packet) | Send a control command.
@@ -260,7 +260,7 @@ uint8[] | Session nonce | 5 | The session nonce to use for encrypted messages se
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint16 | [Result code](../docs/PROTOCOL.md#result_codes) | 2 | The result code.
+uint16 | [Result code](PROTOCOL.md#result_codes) | 2 | The result code, which will be set as the result code of the [result packet](PROTOCOL.md#result_packet).
 uint8[] | Data | N | Data.
 
 
@@ -289,9 +289,11 @@ Value | Name | Description
 
 
 <a name="binary_log_header"></a>
-##### Binary log header
+### Binary log header
 
 The log header should contain enough info to find the log string from the source code.
+
+![Binary log header](../docs/diagrams/binary_log_header.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -301,11 +303,13 @@ uint8 | Log level | 1 | Verbosity of the log, similar to serial_verbosity in con
 uint8 | Flags | 1 | Options for the log. Currently only bit 0 is used, which is true to end the line.
 
 <a name="binary_log_packet"></a>
-##### Binary log packet
+### Binary log packet
 
 The binary log packet consists of a header and arguments. The header is used to find the string in printf format. The arguments are then filled in according to this string.
 
 For example, if the format string is `"%s is %u"` then the first argument is interpreted as a string, which replaces the `%s`. While the second arguement is interpreted as an unsigned integer, that replaces the `%u`.
+
+![Binary log packet](../docs/diagrams/binary_log_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -314,7 +318,7 @@ uint8 | Num args | 1 | Number of arguments that follow.
 [Args[]](#binary_log_arg_packet) | Args | N | Array of argument packets.
 
 <a name="binary_log_arg_packet"></a>
-##### Binary log argument packet
+### Binary log argument packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -322,7 +326,9 @@ uint8 | Arg size | 1 | Size of the payload.
 uint8[] | Payload | N | The argument data.
 
 <a name="binary_log_array_packet"></a>
-##### Binary log array packet
+### Binary log array packet
+
+![Binary log array packet](../docs/diagrams/binary_log_array_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
