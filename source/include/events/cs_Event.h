@@ -45,6 +45,20 @@ public:
 		result()
 	{}
 
+	/**
+	 * Expands a locally defined array to its pointer and length.
+	 *
+	 * Usage:
+	 * uint8_t result[10];
+	 * event_t event(CS_TYPE::FOO, result);
+	 * event.dispatch();
+	 *
+	 */
+	template<int N>
+	inline event_t(CS_TYPE type, uint8_t data[N]) :
+		event_t(type, data, N)
+	{}
+
 	event_t(CS_TYPE type) :
 		event_t(type, nullptr, 0)
 	{}
