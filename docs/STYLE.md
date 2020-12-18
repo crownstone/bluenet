@@ -39,18 +39,21 @@ int MyClass::bar(int value, bool triple) {
 	}
 
 	switch (value) {
-		case 0:
+		case 0: {
 			return 0;
-		case 1:
+		}
+		case 1: {
 			value +=1;
 			break;
+		}
 		case 2: {
 			int temp = 4;
 			value += temp;
 			break;
 		}
-		default:
+		default: {
 			return 0;
+		}
 	}
 
 	switch (value) {
