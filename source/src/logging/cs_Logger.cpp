@@ -8,6 +8,7 @@
 #include <logging/cs_Logger.h>
 #include <uart/cs_UartHandler.h>
 #include <cstdarg>
+#if CS_SERIAL_NRF_LOG_ENABLED != 2
 
 #if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 	#include <cstring>
@@ -113,3 +114,6 @@ void cs_log_array(uint32_t fileNameHash, uint32_t lineNumber, uint8_t logLevel, 
 	UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_LOG_ARRAY, ptr, size);
 	UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_LOG_ARRAY);
 }
+
+#endif // CS_SERIAL_NRF_LOG_ENABLED != 2
+
