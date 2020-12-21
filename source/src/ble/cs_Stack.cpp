@@ -697,3 +697,34 @@ void Stack::setOnDisconnectCallback(const callback_disconnected_t& callback) {
 	_callback_disconnected = callback;
 }
 
+void Stack::connect() {
+	ble_gap_addr_t addr;
+	addr.addr[5] = 0xC8;
+	addr.addr[4] = 0x62;
+	addr.addr[3] = 0xA6;
+	addr.addr[2] = 0xD8;
+	addr.addr[1] = 0xB9;
+	addr.addr[0] = 0x59;
+
+	addr.addr_id_peer = 0;
+	addr.addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC;
+
+	ble_gap_scan_params_t p_scan_params;
+	p_scan_params.extended = 0;
+	p_scan_params.report_incomplete_evts = 0;
+	p_scan_params.active = 1;
+	p_scan_params.filter_policy = BLE_GAP_SCAN_FP_ACCEPT_ALL; // Scanning filter policy. See BLE_GAP_SCAN_FILTER_POLICIES
+	p_scan_params.scan_phys = BLE_GAP_PHY_1MBPS;
+	p_scan_params.timeout = 300; // Connection timeout in 10 ms units. See BLE_GAP_SCAN_TIMEOUT.
+	p_scan_params.channel_mask[0] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	p_scan_params.channel_mask[1] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	p_scan_params.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	p_scan_params.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	p_scan_params.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	p_scan_params.interval = 160;
+	p_scan_params.window = 80;
+
+	uint32_t errCode = sd_ble_gap_connect(&addr, &p_scan_params, &_gap_conn_params, APP_BLE_CONN_CFG_TAG);
+	LOGi("connect err=%u or 0x%X", errCode, errCode);
+}
+

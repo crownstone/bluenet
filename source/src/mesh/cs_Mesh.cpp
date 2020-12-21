@@ -53,7 +53,15 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	});
 	_modelSelector.init(&_modelMulticast, &_modelMulticastAcked, &_modelUnicast);
 	_msgSender.init(&_modelSelector);
-	return _core->init(board);
+
+	cs_ret_code_t retCode = _core->init(board);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	_msgSender.listen();
+	this->listen();
+	return retCode;
 }
 
 void Mesh::initModels() {
@@ -83,12 +91,13 @@ void Mesh::configureModels(dsm_handle_t appkeyHandle) {
 void Mesh::start() {
 	LOGi("start");
 	_core->start();
-	_msgSender.listen();
-	this->listen();
+//	_msgSender.listen();
+//	this->listen();
 }
 
 void Mesh::stop() {
-	assert(false, "TODO");
+	LOGi("stop");
+	_core->stop();
 }
 
 void Mesh::initAdvertiser() {

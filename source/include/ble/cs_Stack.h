@@ -193,6 +193,8 @@ public:
 	 */
 	bool isScanning();
 
+	void connect();
+
 	bool connected() {
 		return _conn_handle != BLE_CONN_HANDLE_INVALID;
 	}

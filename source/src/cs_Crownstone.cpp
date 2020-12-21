@@ -769,6 +769,12 @@ void Crownstone::tick() {
 //		_stack->updateAdvertisement();
 	}
 
+	if (_tickCount == (5 * 1000 / TICK_INTERVAL_MS)) {
+		Mesh::getInstance().stop();
+		Advertiser::getInstance().stopAdvertising();
+		_stack->connect();
+	}
+
 	if (!_clearedGpRegRetCount && _tickCount == (CS_CLEAR_GPREGRET_COUNTER_TIMEOUT_S * 1000 / TICK_INTERVAL_MS)) {
 		GpRegRet::clearAll();
 		_clearedGpRegRetCount = true;
