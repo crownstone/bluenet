@@ -277,4 +277,6 @@ protected:
 	void onConnect();
 
 	void onDisconnect();
+
+	void onConnectOutgoing();
 };

@@ -424,26 +424,7 @@ void Crownstone::configure() {
 }
 
 void Crownstone::configureStack() {
-	// Set callback handler for a connection event
-	_stack->setOnConnectCallback([&](uint16_t conn_handle) {
-		LOGi("onConnect...");
-		// TODO: see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
-		// be neater about it... we do not need to stop, only after a disconnect we do...
-#if ENABLE_RSSI_FOR_CONNECTION==1
-		sd_ble_gap_rssi_stop(conn_handle);
-		sd_ble_gap_rssi_start(conn_handle, 0, 0);
-#endif
-	});
 
-	// Set callback handler for a disconnection event
-	_stack->setOnDisconnectCallback([&](uint16_t conn_handle) {
-		LOGi("onDisconnect...");
-		if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
-//			_advertiser->changeToLowTxPower();
-			_advertiser->changeToNormalTxPower();
-			_advertiser->updateAdvertisementParams();
-		}
-	});
 }
 
 void Crownstone::configureAdvertisement() {
@@ -502,7 +483,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			return;
 	}
 
-	_stack->halt();
+//	_stack->halt();
 
 	// Remove services that belong to the current operation mode.
 	// This is not done... It is impossible to remove services in the SoftDevice.
@@ -532,7 +513,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	// Loop through all services added to the stack and create the characteristics.
 	_stack->createCharacteristics();
 
-	_stack->resume();
+//	_stack->resume();
 
 	switch (newMode) {
 		case OperationMode::OPERATION_MODE_SETUP: {
@@ -770,8 +751,6 @@ void Crownstone::tick() {
 	}
 
 	if (_tickCount == (5 * 1000 / TICK_INTERVAL_MS)) {
-		Mesh::getInstance().stop();
-		Advertiser::getInstance().stopAdvertising();
 		_stack->connect();
 	}
 

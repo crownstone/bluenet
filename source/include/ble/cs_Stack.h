@@ -44,20 +44,9 @@ public:
 		return instance;
 	}
 
-	//! Format of the callback when a connection has been made
-	typedef function<void(uint16_t conn_handle)>   callback_connected_t;
-	//! Format of the callback after a disconnection event
-	typedef function<void(uint16_t conn_handle)>   callback_disconnected_t;
-	//! Format of the callback of any radio event
-	typedef function<void(bool radio_active)>   callback_radio_t;
-
 	//! Maximum number of services (currently set to 5)
 	static const uint8_t MAX_SERVICE_COUNT = 5;
-
 	typedef fixed_tuple<Service*, MAX_SERVICE_COUNT> Services_t;
-
-	//! The low-frequency clock, currently generated from the high frequency clock
-	static const nrf_clock_lf_cfg_t        defaultClockSource;
 
 	enum condition_t { C_STACK_INITIALIZED, C_RADIO_INITIALIZED, C_SERVICES_INITIALIZED };
 protected:
@@ -68,27 +57,16 @@ protected:
 	// we can loop over but doesn't allocate more space than needed
 	Services_t                                  _services;
 
-	nrf_clock_lf_cfg_t                          _clock_source;
-	ble_gap_conn_params_t                       _gap_conn_params;
+	nrf_clock_lf_cfg_t                          _clockSource;
+	ble_gap_conn_params_t                       _connectionParams;
 
-	bool                                        _scanning;
+	bool                                        _scanning = false;
 
-	uint16_t                                    _conn_handle;
-
-	callback_connected_t                        _callback_connected;  // 16
-	callback_disconnected_t                     _callback_disconnected;  // 16
-	callback_radio_t                            _callback_radio;  // 16
-	//! 0 = no notification (radio off), 1 = notify radio on, 2 = no notification (radio on), 3 = notify radio off.
-	volatile uint8_t                            _radio_notify;
-
-	ble_user_mem_block_t 						_user_mem_block; //! used for user memory (long write)
+	uint16_t                                    _connectionHandle = BLE_CONN_HANDLE_INVALID;
+	bool                                        _connectionIsOutgoing = false;
 
 	app_timer_t                                 _connectionKeepAliveTimerData;
-	app_timer_id_t                              _connectionKeepAliveTimerId;
-
-	struct stack_state {
-		bool advertising;
-	} _stack_state;
+	app_timer_id_t                              _connectionKeepAliveTimerId = NULL;
 
 	uint8_t _scanBuffer[31]; // Same size as buffer in cs_stack_scan_t.
 	ble_data_t _scanBufferStruct = { _scanBuffer, sizeof(_scanBuffer) };
@@ -110,12 +88,6 @@ public:
 	 *   - set the callback for BLE events (if we use Source/sd_common/softdevice_handler.c in Nordic's SDK)
 	 */
 	void init();
-
-	//! Temporarily halt the stack
-	void halt();
-
-	//! Continue running the stack
-	void resume();
 
 	/** Initialization of the radio
 	 *
@@ -140,6 +112,12 @@ public:
 	bool isDisconnecting();
 
 	bool isConnected();
+
+	bool isConnectedPeripheral();
+
+	uint16_t getConnectionHandle() {
+		return _connectionHandle;
+	}
 
 	/** Shutdown the BLE stack
 	 *
@@ -167,12 +145,6 @@ public:
 	/** Set and update the preferred connection supervision timeout in units of 10 ms. */
 	void updateConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms);
 
-	//! Set on connect callback.
-	void setOnConnectCallback(const callback_connected_t& callback);
-
-	//! Set on disconnect callback.
-	void setOnDisconnectCallback(const callback_disconnected_t& callback);
-
 	/** Add a service to the stack.
 	 */
 	Stack & addService(Service* svc);
@@ -193,14 +165,14 @@ public:
 	 */
 	bool isScanning();
 
-	void connect();
-
-	bool connected() {
-		return _conn_handle != BLE_CONN_HANDLE_INVALID;
-	}
-	uint16_t getConnectionHandle() {
-		return _conn_handle;
-	}
+	/**
+	 * Connect to a device.
+	 *
+	 * @param[in]  timeoutMs      Time in ms before giving up to connect.
+	 *
+	 * @return ERR_BUSY when already connected to a device.
+	 */
+	cs_ret_code_t connect(uint16_t timeoutMs = 3000);
 
 	/** Function that handles BLE events
 	 *
@@ -236,12 +208,26 @@ protected:
 	//! Update connection parameters, can be called when already initialized.
 	void updateConnParams();
 
+	void onConnect(const ble_evt_t * p_ble_evt);
+	void onDisconnect(const ble_evt_t * p_ble_evt);
+	void onGapTimeout(uint8_t src);
+
+	void onConnectionTimeout();
+
 	/** Connection request
 	 *
 	 * On a connection request send it to all services.
 	 */
-	void onConnected(const ble_evt_t * p_ble_evt);
-	void onDisconnected(const ble_evt_t * p_ble_evt);
+	void onIncomingConnected(const ble_evt_t * p_ble_evt);
+	void onIncomingDisconnected(const ble_evt_t * p_ble_evt);
+
+	void onOutgoingConnected();
+	void onOutgoingDisconnected();
+
+	void onMemoryRequest(uint16_t connectionHandle);
+	void onMemoryRelease(uint16_t connectionHandle);
+
+	void onWrite(const ble_gatts_evt_write_t& writeEvt);
 
 	/** Transmission complete event
 	 *
