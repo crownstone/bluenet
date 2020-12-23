@@ -43,6 +43,33 @@ void handle_discovery(ble_db_discovery_evt_t* event) {
 	switch (event->evt_type) {
 		case BLE_DB_DISCOVERY_COMPLETE: {
 			LOGi("Discovery found uuid=0x%X type=%u characteristicCount=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type, event->params.discovered_db.char_count);
+			if (event->params.discovered_db.srv_uuid.type >= BLE_UUID_TYPE_VENDOR_BEGIN) {
+				ble_uuid128_t fullUuid;
+				uint8_t uuidSize = 0;
+				uint32_t retCode = sd_ble_uuid_encode(&(event->params.discovered_db.srv_uuid), &uuidSize, fullUuid.uuid128);
+				if (retCode == NRF_SUCCESS && uuidSize == sizeof(fullUuid)) {
+					LOGi("Full uuid: %02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+							fullUuid.uuid128[15],
+							fullUuid.uuid128[14],
+							fullUuid.uuid128[13],
+							fullUuid.uuid128[12],
+							fullUuid.uuid128[11],
+							fullUuid.uuid128[10],
+							fullUuid.uuid128[9],
+							fullUuid.uuid128[8],
+							fullUuid.uuid128[7],
+							fullUuid.uuid128[6],
+							fullUuid.uuid128[5],
+							fullUuid.uuid128[4],
+							fullUuid.uuid128[3],
+							fullUuid.uuid128[2],
+							fullUuid.uuid128[1],
+							fullUuid.uuid128[0]);
+				}
+				else {
+					LOGw("Failed to get full uuid");
+				}
+			}
 			break;
 		}
 		case BLE_DB_DISCOVERY_SRV_NOT_FOUND: {
