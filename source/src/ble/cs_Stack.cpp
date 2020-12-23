@@ -20,7 +20,6 @@
 #include "structs/buffer/cs_CharacteristicWriteBuffer.h"
 #include <util/cs_Utils.h>
 
-
 #define LOGStackDebug LOGnone
 
 
@@ -38,6 +37,27 @@ Stack::Stack() {
 
 Stack::~Stack() {
 	shutdown();
+}
+
+void handle_discovery(ble_db_discovery_evt_t* event) {
+	switch (event->evt_type) {
+		case BLE_DB_DISCOVERY_COMPLETE: {
+			LOGi("Discovery found uuid=0x%X type=%u characteristicCount=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type, event->params.discovered_db.char_count);
+			break;
+		}
+		case BLE_DB_DISCOVERY_SRV_NOT_FOUND: {
+			LOGi("Discovery not found uuid=0x%X type=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type);
+			break;
+		}
+		case BLE_DB_DISCOVERY_ERROR: {
+			LOGw("Discovery error %u", event->params.err_code);
+			break;
+		}
+		case BLE_DB_DISCOVERY_AVAILABLE: {
+			LOGd("Discovery available");
+			break;
+		}
+	}
 }
 
 /**
@@ -180,6 +200,12 @@ void Stack::initRadio() {
 	ble_version_t version( { });
 	version.company_id = 12;
 	ret_code = sd_ble_version_get(&version);
+	APP_ERROR_CHECK(ret_code);
+
+	_discoveryModule.discovery_in_progress = 0;
+	_discoveryModule.discovery_pending = 0;
+	_discoveryModule.conn_handle = BLE_CONN_HANDLE_INVALID;
+	ret_code = ble_db_discovery_init(handle_discovery);
 	APP_ERROR_CHECK(ret_code);
 
 	setInitialized(C_RADIO_INITIALIZED);
@@ -356,6 +382,8 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 		LOGi("BLE event $nordicEventTypeName(%u) (0x%X)", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id);
 	}
 
+	ble_db_discovery_on_ble_evt(p_ble_evt, &_discoveryModule);
+
 	switch (p_ble_evt->header.evt_id) {
 		case BLE_EVT_USER_MEM_REQUEST: {
 			onMemoryRequest(p_ble_evt->evt.gap_evt.conn_handle);
@@ -406,6 +434,15 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 			onTxComplete(p_ble_evt);
 			break;
 		}
+		case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP: {
+			ble_gattc_evt_t gattsEvent = p_ble_evt->evt.gattc_evt;
+			ble_gattc_evt_prim_srvc_disc_rsp_t response = gattsEvent.params.prim_srvc_disc_rsp;
+			LOGi("Primary services: num=%u", response.count);
+			for (uint16_t i=0; i<response.count; ++i) {
+				LOGi("uuid=0x%X", response.services[i].uuid.uuid);
+			}
+			break;
+		}
 		default: {
 			break;
 		}
@@ -421,7 +458,8 @@ struct cs_stack_scan_t {
 void csStackOnScan(const ble_gap_evt_adv_report_t* advReport) {
 	scanned_device_t scan;
 	memcpy(scan.address, advReport->peer_addr.addr, sizeof(scan.address)); // TODO: check addr_type and addr_id_peer
-	scan.addressType = (advReport->peer_addr.addr_type & 0x7F) & ((advReport->peer_addr.addr_id_peer & 0x01) << 7);
+	scan.resolvedPrivateAddress = advReport->peer_addr.addr_id_peer;
+	scan.addressType = advReport->peer_addr.addr_type;
 	scan.rssi = advReport->rssi;
 	scan.channel = advReport->ch_index;
 	scan.dataSize = advReport->data.len;
@@ -662,6 +700,47 @@ void Stack::onOutgoingConnected() {
 
 	event_t event(CS_TYPE::EVT_OUTGOING_CONNECTED);
 	event.dispatch();
+
+	LOGi("Start discovery");
+	uint32_t retCode;
+
+	// We have to tell the discovery module what services we're interested in _before_ the discovery.
+	ble_uuid_t serviceUuid;
+
+	// Device information service.
+	serviceUuid.type = BLE_UUID_TYPE_BLE;
+	serviceUuid.uuid = 0x180A;
+	retCode = ble_db_discovery_evt_register(&serviceUuid);
+
+
+	// When looking for 128b services, you have to first add the 128 bit uuid to the softdevice with sd_ble_uuid_vs_add().
+	// Then use the type that's returned in calls that follow, while bytes 12 and 13 (from the right when looking at the uuid string) form the 16 bit uuid.
+
+	UUID uuidSetup(SETUP_UUID);
+	uuidSetup.init();
+	serviceUuid = uuidSetup; // Uses cast operator.
+	LOGi("setup service uuid=0x%X type=%u", serviceUuid.uuid, serviceUuid.type);
+	retCode = ble_db_discovery_evt_register(&serviceUuid);
+
+	// Crownstone service.
+	// Byte nr:    15 14 13 12 11 10 9  8  7  6  5  4  3  2  1  0
+	// Hex value:  24 F0 00 00 7D 10 48 05 BF C1 76 63 A0 1C 3B FF
+	UUID uuidCrownstone(CROWNSTONE_UUID);
+	uuidCrownstone.init();
+	serviceUuid = uuidCrownstone; // Uses cast operator.
+	LOGi("crownstone service uuid=0x%X type=%u", serviceUuid.uuid, serviceUuid.type);
+	retCode = ble_db_discovery_evt_register(&serviceUuid);
+
+	// Secure DFU service
+	serviceUuid.type = BLE_UUID_TYPE_BLE;
+	serviceUuid.uuid = 0xFE59;
+	retCode = ble_db_discovery_evt_register(&serviceUuid);
+
+	retCode = ble_db_discovery_start(&_discoveryModule, _connectionHandle);
+	if (retCode != NRF_SUCCESS) {
+		LOGe("Failed to start discovery retCode=%u", retCode);
+		disconnect();
+	}
 }
 
 void Stack::onOutgoingDisconnected() {
@@ -714,7 +793,7 @@ void Stack::onTxComplete(const ble_evt_t * p_ble_evt) {
 }
 
 
-cs_ret_code_t Stack::connect(uint16_t timeoutMs) {
+cs_ret_code_t Stack::connect(const device_address_t& address, uint16_t timeoutMs) {
 	if (isConnected()) {
 		LOGi("Already connected");
 		return ERR_BUSY;
@@ -731,39 +810,31 @@ cs_ret_code_t Stack::connect(uint16_t timeoutMs) {
 		return connectEvent.result.returnCode;
 	}
 
-	ble_gap_addr_t addr;
+	ble_gap_addr_t gapAddress;
+	memcpy(gapAddress.addr, address.address, sizeof(address.address));
+	gapAddress.addr_id_peer = 0;
+	gapAddress.addr_type = address.addressType;
 
-	// F9:20:7C:70:36:CD
-	addr.addr[5] = 0xF9;
-	addr.addr[4] = 0x20;
-	addr.addr[3] = 0x7C;
-	addr.addr[2] = 0x70;
-	addr.addr[1] = 0x36;
-	addr.addr[0] = 0xCD;
+	ble_gap_scan_params_t scanParams;
+	scanParams.extended = 0;
+	scanParams.report_incomplete_evts = 0;
+	scanParams.active = 1;
+	scanParams.filter_policy = BLE_GAP_SCAN_FP_ACCEPT_ALL; // Scanning filter policy. See BLE_GAP_SCAN_FILTER_POLICIES
+	scanParams.scan_phys = BLE_GAP_PHY_1MBPS;
+	scanParams.timeout = timeoutMs / 10; // This acts as connection timeout.
+	scanParams.channel_mask[0] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[1] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.interval = 160;
+	scanParams.window = 80;
 
-	addr.addr_id_peer = 0;
-	addr.addr_type = BLE_GAP_ADDR_TYPE_RANDOM_STATIC; // Similar to what we advertise.
-
-	ble_gap_scan_params_t p_scan_params;
-	p_scan_params.extended = 0;
-	p_scan_params.report_incomplete_evts = 0;
-	p_scan_params.active = 1;
-	p_scan_params.filter_policy = BLE_GAP_SCAN_FP_ACCEPT_ALL; // Scanning filter policy. See BLE_GAP_SCAN_FILTER_POLICIES
-	p_scan_params.scan_phys = BLE_GAP_PHY_1MBPS;
-	p_scan_params.timeout = timeoutMs / 10; // This acts as connection timeout.
-	p_scan_params.channel_mask[0] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	p_scan_params.channel_mask[1] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	p_scan_params.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	p_scan_params.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	p_scan_params.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	p_scan_params.interval = 160;
-	p_scan_params.window = 80;
-
-	if (p_scan_params.timeout < BLE_GAP_SCAN_TIMEOUT_MIN) {
-		p_scan_params.timeout = BLE_GAP_SCAN_TIMEOUT_MIN;
+	if (scanParams.timeout < BLE_GAP_SCAN_TIMEOUT_MIN) {
+		scanParams.timeout = BLE_GAP_SCAN_TIMEOUT_MIN;
 	}
 
-	uint32_t errCode = sd_ble_gap_connect(&addr, &p_scan_params, &_connectionParams, APP_BLE_CONN_CFG_TAG);
+	uint32_t errCode = sd_ble_gap_connect(&gapAddress, &scanParams, &_connectionParams, APP_BLE_CONN_CFG_TAG);
 	if (errCode == NRF_SUCCESS) {
 		LOGi("Connecting..");
 		_connectionIsOutgoing = true;

@@ -71,6 +71,8 @@ protected:
 	uint8_t _scanBuffer[31]; // Same size as buffer in cs_stack_scan_t.
 	ble_data_t _scanBufferStruct = { _scanBuffer, sizeof(_scanBuffer) };
 
+	ble_db_discovery_t                          _discoveryModule;
+
 public:
 
 	/** Initialization of the BLE stack
@@ -168,11 +170,12 @@ public:
 	/**
 	 * Connect to a device.
 	 *
+	 * @param[in]  address        Address to connect to.
 	 * @param[in]  timeoutMs      Time in ms before giving up to connect.
 	 *
 	 * @return ERR_BUSY when already connected to a device.
 	 */
-	cs_ret_code_t connect(uint16_t timeoutMs = 3000);
+	cs_ret_code_t connect(const device_address_t& address, uint16_t timeoutMs = 3000);
 
 	/** Function that handles BLE events
 	 *

@@ -140,6 +140,7 @@ INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/toolchain/cmsis/include")
 INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/config")
 INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/fstorage")
 INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/experimental_section_vars")
+INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/ble/ble_db_discovery")
 
 SET(BOOTLOADER "_bootloader_.hex")
 
@@ -179,6 +180,7 @@ ELSE()
 	# save space in production. It should then be enclosed within a macro.
 	# Those files are: nrf_strerror.c
 
+	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/ble_db_discovery/ble_db_discovery.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/common/ble_advdata.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/common/ble_srv_common.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/atomic/nrf_atomic.c")

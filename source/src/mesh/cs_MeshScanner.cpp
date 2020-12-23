@@ -21,10 +21,8 @@ void MeshScanner::onScan(const nrf_mesh_adv_packet_rx_data_t *scanData) {
 					scanData->p_metadata->params.scanner.adv_addr.addr,
 					sizeof(_scannedDevice.address));
 
-			// TODO: check addr_type and addr_id_peer
-			_scannedDevice.addressType =
-					(scanData->p_metadata->params.scanner.adv_addr.addr_type & 0x7F) &
-					((scanData->p_metadata->params.scanner.adv_addr.addr_id_peer & 0x01) << 7);
+			_scannedDevice.resolvedPrivateAddress = scanData->p_metadata->params.scanner.adv_addr.addr_id_peer;
+			_scannedDevice.addressType = scanData->p_metadata->params.scanner.adv_addr.addr_type;
 
 			_scannedDevice.rssi = scanData->p_metadata->params.scanner.rssi;
 			_scannedDevice.channel = scanData->p_metadata->params.scanner.channel;

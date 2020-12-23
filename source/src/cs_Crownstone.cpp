@@ -710,6 +710,7 @@ void Crownstone::startUp() {
 
 	_log(SERIAL_INFO, false, "Address: ");
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN, SERIAL_INFO);
+	LOGi("Address id=%u type=%u", address.addr_id_peer, address.addr_type);
 
 	// Plain text log.
 	CLOGi("\r\nAddress: %X:%X:%X:%X:%X:%X", address.addr[5], address.addr[4], address.addr[3], address.addr[2], address.addr[1], address.addr[0]);
@@ -751,7 +752,16 @@ void Crownstone::tick() {
 	}
 
 	if (_tickCount == (5 * 1000 / TICK_INTERVAL_MS)) {
-		_stack->connect();
+		device_address_t address;
+		// F9:20:7C:70:36:CD
+		address.address[5] = 0xF9;
+		address.address[4] = 0x20;
+		address.address[3] = 0x7C;
+		address.address[2] = 0x70;
+		address.address[1] = 0x36;
+		address.address[0] = 0xCD;
+		address.addressType = BLE_GAP_ADDR_TYPE_RANDOM_STATIC;
+		_stack->connect(address);
 	}
 
 	if (!_clearedGpRegRetCount && _tickCount == (CS_CLEAR_GPREGRET_COUNTER_TIMEOUT_S * 1000 / TICK_INTERVAL_MS)) {
