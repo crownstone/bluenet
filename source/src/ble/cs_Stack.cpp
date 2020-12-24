@@ -417,6 +417,15 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 			onTxComplete(p_ble_evt);
 			break;
 		}
+
+		// ---- GATTC events ---- //
+		case BLE_GATTC_EVT_EXCHANGE_MTU_RSP: {
+			const ble_gattc_evt_t& gattcEvent = p_ble_evt->evt.gattc_evt;
+			const ble_gattc_evt_exchange_mtu_rsp_t& mtuEvent = gattcEvent.params.exchange_mtu_rsp;
+			LOGi("MTU=%u", mtuEvent.server_rx_mtu);
+			_writeMtu = mtuEvent.server_rx_mtu;
+			break;
+		}
 		case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP: {
 //			ble_gattc_evt_t gattcEvent = p_ble_evt->evt.gattc_evt;
 //			ble_gattc_evt_prim_srvc_disc_rsp_t response = gattcEvent.params.prim_srvc_disc_rsp;
@@ -441,6 +450,12 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 					LOGw("Failed to continue long read. retCode=%u", retCode);
 				}
 			}
+			break;
+		}
+		case BLE_GATTC_EVT_WRITE_RSP: {
+			const ble_gattc_evt_t& gattcEvent = p_ble_evt->evt.gattc_evt;
+			const ble_gattc_evt_write_rsp_t& writeResponse = gattcEvent.params.write_rsp;
+			LOGi("Write response offset=%u len=%u", writeResponse.offset, writeResponse.len);
 			break;
 		}
 		default: {
@@ -768,7 +783,7 @@ void Stack::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 	uint32_t retCode;
 	switch (event->evt_type) {
 		case BLE_DB_DISCOVERY_COMPLETE: {
-			LOGi("Discovery found uuid=0x%X type=%u characteristicCount=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type, event->params.discovered_db.char_count);
+			LOGi("Discovery found uuid=0x%04X type=%u characteristicCount=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type, event->params.discovered_db.char_count);
 			if (event->params.discovered_db.srv_uuid.type >= BLE_UUID_TYPE_VENDOR_BEGIN) {
 				ble_uuid128_t fullUuid;
 				uint8_t uuidSize = 0;
@@ -799,7 +814,7 @@ void Stack::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 			break;
 		}
 		case BLE_DB_DISCOVERY_SRV_NOT_FOUND: {
-			LOGi("Discovery not found uuid=0x%X type=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type);
+			LOGi("Discovery not found uuid=0x%04X type=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type);
 			break;
 		}
 		case BLE_DB_DISCOVERY_ERROR: {
@@ -815,13 +830,14 @@ void Stack::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 
 			// According to the doc, the "services" struct is only for internal usage.
 			// But it seems to store all the discovered services and characteristics.
-			uint16_t fwVersionHandle = 0xFFFF;
+			uint16_t fwVersionHandle = BLE_GATT_HANDLE_INVALID;
+			uint16_t controlHandle = BLE_GATT_HANDLE_INVALID;
 
 			for (uint8_t s = 0; s < _discoveryModule.discoveries_count; ++s) {
-				LOGi("service: uuidType=%u uuid=0x%X", _discoveryModule.services[s].srv_uuid.type, _discoveryModule.services[s].srv_uuid.uuid);
+				LOGi("service: uuidType=%u uuid=0x%04X", _discoveryModule.services[s].srv_uuid.type, _discoveryModule.services[s].srv_uuid.uuid);
 				for (uint8_t c = 0; c < _discoveryModule.services[s].char_count; ++c) {
 					ble_gatt_db_char_t* characteristic = &(_discoveryModule.services[s].charateristics[c]);
-					LOGi("    char: cccd_handle=0x%X uuidType=%u uuid=0x%X handle_value=0x%X handle_decl=0x%X",
+					LOGi("    char: cccd_handle=0x%X uuidType=%u uuid=0x%04X handle_value=0x%X handle_decl=0x%X",
 							characteristic->cccd_handle,
 							characteristic->characteristic.uuid.type,
 							characteristic->characteristic.uuid.uuid,
@@ -830,15 +846,43 @@ void Stack::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 					if (characteristic->characteristic.uuid.type == BLE_UUID_TYPE_BLE && characteristic->characteristic.uuid.uuid == 0x2A26) {
 						fwVersionHandle = characteristic->characteristic.handle_value;
 					}
+					if (characteristic->characteristic.uuid.type >= BLE_UUID_TYPE_VENDOR_BEGIN && characteristic->characteristic.uuid.uuid == 0x000E) {
+						controlHandle = characteristic->characteristic.handle_value;
+					}
 				}
 			}
 
-			if (fwVersionHandle != 0xFFFF) {
-				LOGi("Read fw version");
-				// Triggers event BLE_GATTC_EVT_READ_RSP.
-				retCode = sd_ble_gattc_read(_connectionHandle, fwVersionHandle, 0);
+			if (fwVersionHandle != BLE_GATT_HANDLE_INVALID) {
+//				LOGi("Read fw version");
+//				// Triggers event BLE_GATTC_EVT_READ_RSP.
+//				retCode = sd_ble_gattc_read(_connectionHandle, fwVersionHandle, 0);
+//				if (retCode != NRF_SUCCESS) {
+//					LOGw("Failed to read fw version retCode=%u", retCode);
+//				}
+			}
+
+			if (controlHandle != BLE_GATT_HANDLE_INVALID) {
+				for (uint16_t i = 0; i < sizeof(_writeBuf); ++i) {
+					_writeBuf[i] = i;
+				}
+
+				ble_gattc_write_params_t writeParams;
+				writeParams.write_op = BLE_GATT_OP_WRITE_REQ; // Write with response (ack). Triggers BLE_GATTC_EVT_WRITE_RSP.
+				writeParams.flags = 0; // Ignored for write_req
+				writeParams.handle = controlHandle;
+				writeParams.offset = 0;
+				writeParams.len = sizeof(_writeBuf);
+				writeParams.p_value = _writeBuf;
+
+				// We can't write more than MTU.
+				// For long writes, use BLE_GATT_OP_PREP_WRITE_REQ followed by BLE_GATT_OP_EXEC_WRITE_REQ.
+				if (writeParams.len > _writeMtu) {
+					writeParams.len = _writeMtu;
+				}
+
+				retCode = sd_ble_gattc_write(_connectionHandle, &writeParams);
 				if (retCode != NRF_SUCCESS) {
-					LOGw("Failed to read fw version retCode=%u", retCode);
+					LOGw("Failed to write. retCode=%u", retCode);
 				}
 			}
 			break;

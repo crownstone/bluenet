@@ -73,6 +73,9 @@ protected:
 
 	ble_db_discovery_t                          _discoveryModule;
 
+	uint16_t                                    _writeMtu = BLE_GATT_ATT_MTU_DEFAULT - 3;
+	uint8_t                                     _writeBuf[200];
+
 public:
 
 	/** Initialization of the BLE stack
