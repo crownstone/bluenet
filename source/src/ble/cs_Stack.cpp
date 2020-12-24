@@ -40,51 +40,7 @@ Stack::~Stack() {
 }
 
 void handle_discovery(ble_db_discovery_evt_t* event) {
-	switch (event->evt_type) {
-		case BLE_DB_DISCOVERY_COMPLETE: {
-			LOGi("Discovery found uuid=0x%X type=%u characteristicCount=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type, event->params.discovered_db.char_count);
-			if (event->params.discovered_db.srv_uuid.type >= BLE_UUID_TYPE_VENDOR_BEGIN) {
-				ble_uuid128_t fullUuid;
-				uint8_t uuidSize = 0;
-				uint32_t retCode = sd_ble_uuid_encode(&(event->params.discovered_db.srv_uuid), &uuidSize, fullUuid.uuid128);
-				if (retCode == NRF_SUCCESS && uuidSize == sizeof(fullUuid)) {
-					LOGi("Full uuid: %02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
-							fullUuid.uuid128[15],
-							fullUuid.uuid128[14],
-							fullUuid.uuid128[13],
-							fullUuid.uuid128[12],
-							fullUuid.uuid128[11],
-							fullUuid.uuid128[10],
-							fullUuid.uuid128[9],
-							fullUuid.uuid128[8],
-							fullUuid.uuid128[7],
-							fullUuid.uuid128[6],
-							fullUuid.uuid128[5],
-							fullUuid.uuid128[4],
-							fullUuid.uuid128[3],
-							fullUuid.uuid128[2],
-							fullUuid.uuid128[1],
-							fullUuid.uuid128[0]);
-				}
-				else {
-					LOGw("Failed to get full uuid");
-				}
-			}
-			break;
-		}
-		case BLE_DB_DISCOVERY_SRV_NOT_FOUND: {
-			LOGi("Discovery not found uuid=0x%X type=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type);
-			break;
-		}
-		case BLE_DB_DISCOVERY_ERROR: {
-			LOGw("Discovery error %u", event->params.err_code);
-			break;
-		}
-		case BLE_DB_DISCOVERY_AVAILABLE: {
-			LOGd("Discovery available");
-			break;
-		}
-	}
+	Stack::getInstance().onDiscoveryEvent(event);
 }
 
 /**
@@ -462,11 +418,28 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 			break;
 		}
 		case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP: {
-			ble_gattc_evt_t gattsEvent = p_ble_evt->evt.gattc_evt;
-			ble_gattc_evt_prim_srvc_disc_rsp_t response = gattsEvent.params.prim_srvc_disc_rsp;
-			LOGi("Primary services: num=%u", response.count);
-			for (uint16_t i=0; i<response.count; ++i) {
-				LOGi("uuid=0x%X", response.services[i].uuid.uuid);
+//			ble_gattc_evt_t gattcEvent = p_ble_evt->evt.gattc_evt;
+//			ble_gattc_evt_prim_srvc_disc_rsp_t response = gattcEvent.params.prim_srvc_disc_rsp;
+//			LOGi("Primary services: num=%u", response.count);
+//			for (uint16_t i=0; i<response.count; ++i) {
+//				LOGi("uuid=0x%X", response.services[i].uuid.uuid);
+//			}
+			break;
+		}
+		case BLE_GATTC_EVT_READ_RSP: {
+			const ble_gattc_evt_t& gattcEvent = p_ble_evt->evt.gattc_evt;
+			const ble_gattc_evt_read_rsp_t& readResponse = gattcEvent.params.read_rsp;
+			_log(SERIAL_INFO, false, "Read offset=%u len=%u", readResponse.offset, readResponse.len);
+			_logArray(SERIAL_INFO, true, readResponse.data, readResponse.len);
+
+			// Not sure how to know if we need another read (has something to do with ATT_MTU). So just keep on trying until len = 0.
+//			if (readResponse.len == ATT_MTU - 1) {
+			if (readResponse.len != 0) {
+				// Continue long read.
+				uint32_t retCode = sd_ble_gattc_read(gattcEvent.conn_handle, readResponse.handle, readResponse.offset + readResponse.len);
+				if (retCode != NRF_SUCCESS) {
+					LOGw("Failed to continue long read. retCode=%u", retCode);
+				}
 			}
 			break;
 		}
@@ -646,6 +619,21 @@ void Stack::onConnect(const ble_evt_t * p_ble_evt) {
 		sd_ble_gap_rssi_start(_connectionHandle, 0, 0);
 #endif
 
+		switch (p_ble_evt->evt.gap_evt.params.connected.role) {
+			case BLE_GAP_ROLE_PERIPH: {
+				LOGi("onConnect as peripheral");
+				break;
+			}
+			case BLE_GAP_ROLE_CENTRAL: {
+				LOGi("onConnect as central");
+				break;
+			}
+			default: {
+				LOGw("onConnect with unknown role");
+				break;
+			}
+		}
+
 		if (_connectionIsOutgoing) {
 			onOutgoingConnected();
 		}
@@ -734,12 +722,6 @@ void Stack::onOutgoingConnected() {
 	// We have to tell the discovery module what services we're interested in _before_ the discovery.
 	ble_uuid_t serviceUuid;
 
-	// Device information service.
-	serviceUuid.type = BLE_UUID_TYPE_BLE;
-	serviceUuid.uuid = 0x180A;
-	retCode = ble_db_discovery_evt_register(&serviceUuid);
-
-
 	// When looking for 128b services, you have to first add the 128 bit uuid to the softdevice with sd_ble_uuid_vs_add().
 	// Then use the type that's returned in calls that follow, while bytes 12 and 13 (from the right when looking at the uuid string) form the 16 bit uuid.
 
@@ -763,6 +745,11 @@ void Stack::onOutgoingConnected() {
 	serviceUuid.uuid = 0xFE59;
 	retCode = ble_db_discovery_evt_register(&serviceUuid);
 
+	// Device information service.
+	serviceUuid.type = BLE_UUID_TYPE_BLE;
+	serviceUuid.uuid = 0x180A;
+	retCode = ble_db_discovery_evt_register(&serviceUuid);
+
 	retCode = ble_db_discovery_start(&_discoveryModule, _connectionHandle);
 	if (retCode != NRF_SUCCESS) {
 		LOGe("Failed to start discovery retCode=%u", retCode);
@@ -775,6 +762,93 @@ void Stack::onOutgoingDisconnected() {
 
 	event_t event(CS_TYPE::EVT_OUTGOING_DISCONNECTED);
 	event.dispatch();
+}
+
+void Stack::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
+	uint32_t retCode;
+	switch (event->evt_type) {
+		case BLE_DB_DISCOVERY_COMPLETE: {
+			LOGi("Discovery found uuid=0x%X type=%u characteristicCount=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type, event->params.discovered_db.char_count);
+			if (event->params.discovered_db.srv_uuid.type >= BLE_UUID_TYPE_VENDOR_BEGIN) {
+				ble_uuid128_t fullUuid;
+				uint8_t uuidSize = 0;
+				retCode = sd_ble_uuid_encode(&(event->params.discovered_db.srv_uuid), &uuidSize, fullUuid.uuid128);
+				if (retCode == NRF_SUCCESS && uuidSize == sizeof(fullUuid)) {
+					LOGd("Full uuid: %02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+							fullUuid.uuid128[15],
+							fullUuid.uuid128[14],
+							fullUuid.uuid128[13],
+							fullUuid.uuid128[12],
+							fullUuid.uuid128[11],
+							fullUuid.uuid128[10],
+							fullUuid.uuid128[9],
+							fullUuid.uuid128[8],
+							fullUuid.uuid128[7],
+							fullUuid.uuid128[6],
+							fullUuid.uuid128[5],
+							fullUuid.uuid128[4],
+							fullUuid.uuid128[3],
+							fullUuid.uuid128[2],
+							fullUuid.uuid128[1],
+							fullUuid.uuid128[0]);
+				}
+				else {
+					LOGw("Failed to get full uuid");
+				}
+			}
+			break;
+		}
+		case BLE_DB_DISCOVERY_SRV_NOT_FOUND: {
+			LOGi("Discovery not found uuid=0x%X type=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type);
+			break;
+		}
+		case BLE_DB_DISCOVERY_ERROR: {
+			LOGw("Discovery error %u", event->params.err_code);
+			break;
+		}
+		case BLE_DB_DISCOVERY_AVAILABLE: {
+			// A bug prevents this event from ever firing. It is fixed in SDK 16.0.0.
+			// Instead, we should be done when the number of registered uuids equals the number of received BLE_DB_DISCOVERY_COMPLETE + BLE_DB_DISCOVERY_SRV_NOT_FOUND events.
+			// See https://devzone.nordicsemi.com/f/nordic-q-a/20846/getting-service-count-from-database-discovery-module
+			// We apply a similar patch to the SDK.
+			LOGi("Discovery done");
+
+			// According to the doc, the "services" struct is only for internal usage.
+			// But it seems to store all the discovered services and characteristics.
+			uint16_t fwVersionHandle = 0xFFFF;
+
+			for (uint8_t s = 0; s < _discoveryModule.discoveries_count; ++s) {
+				LOGi("service: uuidType=%u uuid=0x%X", _discoveryModule.services[s].srv_uuid.type, _discoveryModule.services[s].srv_uuid.uuid);
+				for (uint8_t c = 0; c < _discoveryModule.services[s].char_count; ++c) {
+					ble_gatt_db_char_t* characteristic = &(_discoveryModule.services[s].charateristics[c]);
+					LOGi("    char: cccd_handle=0x%X uuidType=%u uuid=0x%X handle_value=0x%X handle_decl=0x%X",
+							characteristic->cccd_handle,
+							characteristic->characteristic.uuid.type,
+							characteristic->characteristic.uuid.uuid,
+							characteristic->characteristic.handle_value,
+							characteristic->characteristic.handle_decl);
+					if (characteristic->characteristic.uuid.type == BLE_UUID_TYPE_BLE && characteristic->characteristic.uuid.uuid == 0x2A26) {
+						fwVersionHandle = characteristic->characteristic.handle_value;
+					}
+				}
+			}
+
+			if (fwVersionHandle != 0xFFFF) {
+				LOGi("Read fw version");
+				// Triggers event BLE_GATTC_EVT_READ_RSP.
+				retCode = sd_ble_gattc_read(_connectionHandle, fwVersionHandle, 0);
+				if (retCode != NRF_SUCCESS) {
+					LOGw("Failed to read fw version retCode=%u", retCode);
+				}
+			}
+			break;
+		}
+	}
+	LOGd("Discovery progress=%u pending=%u numServicesHandled=%u numServices=%u",
+			_discoveryModule.discovery_in_progress,
+			_discoveryModule.discovery_pending,
+			_discoveryModule.discoveries_count,
+			_discoveryModule.srv_count);
 }
 
 

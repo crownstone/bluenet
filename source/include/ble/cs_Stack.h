@@ -203,6 +203,8 @@ public:
 	void setAesEncrypted(bool encrypted);
 	void disconnect();
 
+	void onDiscoveryEvent(ble_db_discovery_evt_t* event);
+
 	bool checkCondition(condition_t condition, bool expectation);
 
 protected:
