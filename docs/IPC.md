@@ -15,10 +15,10 @@ Each IPC RAM item will have the following data:
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | [Index](#index_types) | 1 | Index of this item. Each index has a specific use.
+uint8 | [Index](#index-types) | 1 | Index of this item. Each index has a specific use.
 uint8 | Size | 1 | Size of the payload.
 uint16 | Checksum | 2 | Checksum of index, size, and payload.
-uint8[] | Payload | N | Depends on [index](#index_types). Max 24 bytes.
+uint8[] | Payload | N | Depends on [index](#index-types). Max 24 bytes.
 
 The checksum is a sum of: index, size, and all 24 payload bytes.
 Then ...
@@ -30,7 +30,7 @@ Index | Type | Set by | Value
 ----- | ---- | ------ | -----
 0     | Reserved |
 1     | Crownstone app | App |
-2     | Bootloader info | Bootloader | [Bootloader info packet](#bootloader_info_packet).
+2     | Bootloader info | Bootloader | [Bootloader info packet](#bootloader-info-packet).
 3     | Micro app | Arduino programs |
 
 
