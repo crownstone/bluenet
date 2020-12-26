@@ -1,19 +1,19 @@
 # Behaviour
 
-Behaviours can be set and retrieved. The user can check the [master hash](#behaviour_master_hash) to check if all behaviours are synchronized.
+Behaviours can be set and retrieved. The user can check the [master hash](#behaviour-master-hash) to check if all behaviours are synchronized.
 
 ## Table of contents
 
-- [Commands](#behaviour_commands)
-- [Packets](#behaviour_packets)
+- [Commands](#behaviour-commands)
+- [Packets](#behaviour-packets)
 
 ## Behaviour Commands
 
-- [Add](#add_behaviour)
-- [Replace](#replace_behaviour)
-- [Remove](#remove_behaviour)
-- [Get](#get_behaviour)
-- [List](#get_behaviour_indices)
+- [Add](#add-behaviour)
+- [Replace](#replace-behaviour)
+- [Remove](#remove-behaviour)
+- [Get](#get-behaviour)
+- [List](#get-behaviour-indices)
 
 
 
@@ -25,7 +25,7 @@ Add a new behaviour to an empty index.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Behaviour](#behaviour_payload) | Data | ... | Behaviour to add.
+[Behaviour](#behaviour-payload) | Data | ... | Behaviour to add.
 
 #### Result codes
 
@@ -43,7 +43,7 @@ The result will always contain the most current master hash.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index at which the behaviour is stored, or 255 when not successful.
-[Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
+[Hash](#behaviour-master-hash) | Master hash | 4 | The master hash after handling the request.
 
 
 
@@ -56,7 +56,7 @@ Replace a behaviour at given index by the given behaviour.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to replace.
-[Behaviour](#behaviour_payload) | Data | ... | Behaviour to replace the current one at given index with.
+[Behaviour](#behaviour-payload) | Data | ... | Behaviour to replace the current one at given index with.
 
 #### Result codes
 
@@ -74,7 +74,7 @@ The result will always contain the most current master hash.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index at which the behaviour was replaced.
-[Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
+[Hash](#behaviour-master-hash) | Master hash | 4 | The master hash after handling the request.
 
 
 
@@ -105,7 +105,7 @@ The result will always contain the most current master hash.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index from which the behaviour was removed.
-[Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
+[Hash](#behaviour-master-hash) | Master hash | 4 | The master hash after handling the request.
 
 
 
@@ -136,7 +136,7 @@ If the index is unoccupied, the result payload has length 0.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index of the requested behaviour.
-[Behaviour](#behaviour_payload) | Data | ... | The behaviour that is stored at the given `Index`.
+[Behaviour](#behaviour-payload) | Data | ... | The behaviour that is stored at the given `Index`.
 
 
 
@@ -156,7 +156,7 @@ SUCCESS | Memory could be queried. See return payload for details.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Index with hash](#index_and_behaviour_hash)[] | list | ... | List of all occupied indices, and their hashes.
+[Index with hash](#index-and-behaviour-hash)[] | list | ... | List of all occupied indices, and their hashes.
 
 
 
@@ -168,7 +168,7 @@ Type | Name | Length | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | Type | 1 | <ol start="0"><li>[Switch behaviour](#switch_behaviour)</li><li>[Twilight behaviour](#twilight_behaviour)</li><li>[Smart timer](#smart_timer)</li></ol>
+uint8_t | Type | 1 | <ol start="0"><li>[Switch behaviour](#switch-behaviour)</li><li>[Twilight behaviour](#twilight-behaviour)</li><li>[Smart timer](#smart-timer)</li></ol>
 uint8_t[] | Data | ... | Type dependent
 
 #### Switch behaviour
@@ -179,10 +179,10 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
 uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Currently unused)
-[Day of week bitmask](#day_of_week_bitmask) | Active days | 1 | Selects which days of the week this behaviour is active
-[Time of day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
-[Time of day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
-[Presence description](#presence_description) | Presence | 13 | Description of the presence conditions that need to hold for this behaviour to be active.
+[Day of week bitmask](#day-of-week-bitmask) | Active days | 1 | Selects which days of the week this behaviour is active
+[Time of day](#time-of-day) | From | 5 | The behaviour is active from, inclusive, this time of day.
+[Time of day](#time-of-day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
+[Presence description](#presence-description) | Presence | 13 | Description of the presence conditions that need to hold for this behaviour to be active.
 
 #### Twilight behaviour
 
@@ -192,9 +192,9 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
 uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Currently unused)
-[Day of week bitmask](#day_of_week_bitmask) | Active days | 1 | Selects which days of the week this behaviour is active
-[Time of day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
-[Time of day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
+[Day of week bitmask](#day-of-week-bitmask) | Active days | 1 | Selects which days of the week this behaviour is active
+[Time of day](#time-of-day) | From | 5 | The behaviour is active from, inclusive, this time of day.
+[Time of day](#time-of-day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
 
 #### Smart timer
 
@@ -210,8 +210,8 @@ expires. If the extension end condition timeout is set to 0, the temporary behav
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Switch behaviour](#switch_behaviour) | Core behaviour | 26 | The core behaviour is interpreted identical to switch behaviour.
-[End condition](#behaviour_end_condition) | Extension end condition | 17 | Describes the conditions that determine when this extension will be removed.
+[Switch behaviour](#switch-behaviour) | Core behaviour | 26 | The core behaviour is interpreted identical to switch behaviour.
+[End condition](#behaviour-end-condition) | Extension end condition | 17 | Describes the conditions that determine when this extension will be removed.
 
 #### Behaviour end condition
 
@@ -219,7 +219,7 @@ Type | Name | Length | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Presence description](#presence_description) | Extension presence | 13 | Description of the presence conditions that the Extension behaviour will use.
+[Presence description](#presence-description) | Extension presence | 13 | Description of the presence conditions that the Extension behaviour will use.
 
 #### Behaviour master hash
 
@@ -230,16 +230,16 @@ Only indices with non empty behaviours are used to calculate the master hash.
 Type | Name | Length
 --- | --- | ---
 uint8 | Index0 | 1 (padded with 0x00)
-[Behaviour](#behaviour_payload) | Behaviour0 | size depends on the type of payload
+[Behaviour](#behaviour-payload) | Behaviour0 | size depends on the type of payload
 uint8 | Index1 | 1 (padded with 0x00)
-[Behaviour](#behaviour_payload) | Behaviour1 | size depends on the type of payload
+[Behaviour](#behaviour-payload) | Behaviour1 | size depends on the type of payload
 ... | ... | ...
 uint8 | IndexLast | 1 (padded with 0x00)
-[Behaviour](#behaviour_payload) | BehaviourLast | size depends on the type of payload
+[Behaviour](#behaviour-payload) | BehaviourLast | size depends on the type of payload
 
 #### Index and behaviour hash
 
-For each behaviour individually, a hash can be calculated as well, similar to the [master hash](#behaviour_master_hash).
+For each behaviour individually, a hash can be calculated as well, similar to the [master hash](#behaviour-master-hash).
 
 ![Index and behaviour hash](../docs/diagrams/behaviour-index-and-behaviour-hash.png)
 
@@ -264,7 +264,7 @@ int32 | Time payload | 4 | Signed difference in seconds since a known-from-conte
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Base time |  1 | <ol start="0"><li>Midnight </li><li>Sunrise </li><li>Sunset</li></ol>
-[Time difference](#time_difference) | Offset | 4 | 
+[Time difference](#time-difference) | Offset | 4 | 
 
 #### Day of week bitmask
 
