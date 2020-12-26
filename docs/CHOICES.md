@@ -122,7 +122,7 @@ We add a message type to the mesh state items to allow for more specialized type
 
 We increase the size of the mesh state item to 14 bytes, which decreases the number of items to 2x6. This makes the state item size closer to the service data size (16B), so that the mesh state can be advertised 1 to 1, while the chance of 12 crownstones having to send their state is rather small.
 
-### <a name="flags_bitmask"></a>Flags Bitmask
+### Flags Bitmask
 
 Bit | Name |  Description
 --- | --- | ---
