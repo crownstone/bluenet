@@ -16,7 +16,6 @@ This only documents the latest protocol, older versions can be found in the git 
     - [State](#state_types). State variables of the Crownstone.
 
 
-<a name="setup"></a>
 # Setup mode
 When a Crownstone is new or factory reset, it will go into setup mode.
 
@@ -32,7 +31,6 @@ The setup process goes as follows:
 - Phone waits for result to become SUCCESS (See [result packet](#result_packet)).
 - Crownstone will reboot to normal mode.
 
-<a name="normal"></a>
 # Normal mode
 When a Crownstone has been set up, it will run in "normal mode".
 
@@ -48,7 +46,6 @@ To write a command via connection, the process goes as follows:
 - Next command can be written.
 
 
-<a name="encryption"></a>
 # Encryption
 By default, Crownstones have encryption enabled as a security and privacy measure.
 
@@ -61,13 +58,11 @@ What is encrypted:
 - Broadcasted commands.
 
 
-<a name="ecb_encryption"></a>
 ## AES 128 ECB encryption
 
 Some packets are [ECB encrypted](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Electronic_Codebook_.28ECB.29).
 
 
-<a name="ctr_encryption"></a>
 ## AES 128 CTR encryption
 
 We use the [AES 128 CTR](https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation#Counter_.28CTR.29) method to encrypt everything that is written to- and read from characteristics. For this you need an 8 byte number called a **nonce**. The counter starts at 0 for each packet, and is increased by 1 for every block of 16 bytes in the packet.
@@ -83,7 +78,6 @@ Type | Name | Length | Description
 uint8 [] | Packet nonce | 3 | Packet nonce, sent with every packet (see [encrypted packet](#encrypted_packet)). Should be different for each encrypted packet.
 uint8 [] | Session nonce | 5 | Session nonce, should be [read](#session_data) when connected, each time you connect.
 
-<a name="session_data"></a>
 #### Session data
 
 After connecting, you should first read the session data from the [Crownstone service](#crownstone_service).
@@ -102,14 +96,12 @@ uint8 [] | Validation key | 4 | The validation key for this session. Used to ver
 uint8 [] | Padding | 2 | Zero-padding so that the whole packet is 16 bytes.
 
 
-<a name="encrypted_write_read"></a>
 ## Reading and writing characteristics
 
 When reading and writing characteristics, the data is wrapped in an [encrypted packet](#encrypted_packet).
 
 After subscribing, notified data will be sent as [multipart notifications](#multipart_notifaction_packet).
 
-<a name="multipart_notifaction_packet"></a>
 ### Multipart notification packet
 
 When data is sent via notifications, it will be done via multiple notification packets.
@@ -123,7 +115,6 @@ uint8 [] | Data part |  | Part of the data.
 
 Once you received the last packet, you should concatenate all data parts to get the payload (which is usually an [encrypted packet](#encrypted_packet)).
 
-<a name="encrypted_packet"></a>
 ### Encrypted packet
 
 Unlike the name suggests, only the payload of this packet is encrypted. The header is used to determine how to decrypt the payload.
@@ -136,7 +127,6 @@ uint8 [] | Packet nonce | 3 | First 3 bytes of nonce used for encrypting the pay
 uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup. This determines which key has been used for encryption.
 [Encrypted payload](#encrypted_payload) | Encrypted payload | N*16 | The encrypted payload of N blocks.
 
-<a name="encrypted_payload"></a>
 #### Encrypted payload
 
 ![Encrypted payload](../docs/diagrams/encrypted-payload.png)
@@ -152,7 +142,6 @@ uint8 | Padding |  | Zero-padding so that the whole packet is of size N*16 bytes
 
 
 
-<a name="advertisement_data"></a>
 # Advertisements
 By default, [iBeacon advertisements](#ibeacon_adv_packet) will be broadcast  at a regular interval.
 On top of that, [advertisements with service data](#service_data_adv_packet) are also broadcasted at regular interval. The [service data](SERVICE_DATA.md) contains useful info about the state of the Crownstone.
@@ -162,7 +151,6 @@ The advertisements with service data will use the original MAC address, and will
 To calculate the MAC address used for iBeacon advertisements, simply subtract 1 from the first byte of the original MAC address (overflow only that byte, so it only changes the first byte).
 
 
-<a name="ibeacon_adv_packet"></a>
 ### iBeacon advertisement packet
 This packet is according to iBeacon spec, see for example [here](http://www.havlena.net/en/location-technologies/ibeacons-how-do-they-technically-work/).
 
@@ -183,7 +171,6 @@ uint 16 | Major | 2 | Configurable number.
 uint 16 | Minor | 2 | Configurable number.
 int 8 | TX power | 1 | Received signal strength at 1 meter.
 
-<a name="service_data_adv_packet"></a>
 ### Service data advertisement
 This packet contains the state of the Crownstone.
 
@@ -204,7 +191,6 @@ char [] | Name | length-1 | The shortened name of this device.
 
 
 
-<a name="broadcasts"></a>
 # Broadcast commands
 
 Some commands can also be sent via broadcasts. This is the prefered way, as there is no need to connect to the Crownstone, which takes quite some time.
@@ -212,7 +198,6 @@ The broadcast protocol is documented in the [broadcast protocol](BROADCAST_PROTO
 
 
 
-<a name="services"></a>
 # Services
 When connected, the following services are available.
 
@@ -228,7 +213,6 @@ The following services are available (depending on state and config):
 
 
 
-<a name="crownstone_service"></a>
 ## Crownstone service
 
 The crownstone service has UUID 24f00000-7d10-4805-bfc1-7663a01c3bff and provides all the functionality of the Crownstone through the following characteristics:
@@ -243,7 +227,6 @@ Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recov
 Every command written to the control characteristic returns a [result packet](#result_packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
 
-<a name="recovery"></a>
 #### Recovery
 If you lost your encryption keys you can use this characteristic to factory reset the Crownstone.
 This method is only available for 60 seconds after the Crownstone powers on.
@@ -251,7 +234,6 @@ You need to write **0xDEADBEEF** to it. Then, the Crownstone disconnects and goe
 
 
 
-<a name="setup_service"></a>
 ## Setup service
 
 The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only available after a factory reset or when you first power on the Crownstone.
@@ -272,7 +254,6 @@ If commands have to be executed sequentially, make sure that the result packet o
 
 
 
-<a name="data_structs"></a>
 # Data structures
 
 Index:
@@ -282,7 +263,6 @@ Index:
 - [State](#state_types). State variables of the Crownstone.
 
 
-<a name="control_packet"></a>
 ## Control packet
 
 __If encryption is enabled, this packet must be encrypted using any of the keys where the box is checked.__
@@ -297,7 +277,6 @@ uint 16 | Size | 2 | Size of the payload in bytes.
 uint 8 | Payload | Size | Payload data, depends on command type.
 
 
-<a name="command_types"></a>
 ## Command types
 
 The AMBS columns indicate which users have access to these commands if encryption is enabled.
@@ -359,7 +338,6 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 90 | Upload microapp | [Upload microapp packet](#upload_microapp_packet) | [Microapp result packet](#microapp_result_packet) | Upload microapp. | x
 100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
 
-<a name="setup_packet"></a>
 #### Setup packet
 
 ![Setup packet](../docs/diagrams/setup-packet.png)
@@ -381,7 +359,6 @@ uint 16 | iBeacon major | 2 | The iBeacon major. Together with the minor, should
 uint 16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should be unique per sphere.
 
 
-<a name="switch_command_value"></a>
 #### Switch command value (uint 8)
 
 Value | Name | Description
@@ -392,7 +369,6 @@ Value | Name | Description
 255 | Smart on | Switch on, the value will be determined by _behaviour_ rules.
 
 
-<a name="state_get_packet"></a>
 #### State get packet
 
 Type | Name | Length | Description
@@ -402,7 +378,6 @@ uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
 uint 8 | [Persistence mode](#state_get_persistence_mode) | 1 | Type of persistence mode.
 uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 
-<a name="state_set_packet"></a>
 #### State set packet
 
 Most configuration changes will only be applied after a reboot.
@@ -418,7 +393,6 @@ uint 8 | Payload | N | Payload data, depends on state type.
 Most configuration changes will only be applied after a reboot.
 Available configurations types:
 
-<a name="state_get_result_packet"></a>
 #### State get result packet
 
 Type | Name | Length | Description
@@ -429,7 +403,6 @@ uint 8 | [Persistence mode](#state_get_persistence_mode) | 1 | Type of persisten
 uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 uint 8 | Payload | N | Payload data, depends on state type.
 
-<a name="state_set_result_packet"></a>
 #### State set result packet
 
 Type | Name | Length | Description
@@ -439,7 +412,6 @@ uint 16 | id | 2 | ID of state that was set.
 uint 8 | [Persistence mode](#state_set_persistence_mode_set) | 1 | Type of persistence mode.
 uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
 
-<a name="state_get_persistence_mode"></a>
 #### State get persistence mode
 Value | Name | Description
 --- | --- | ---
@@ -447,7 +419,6 @@ Value | Name | Description
 1   | STORED | Get value from flash, else get default. This value will be used after a reboot.
 2   | FIRMWARE_DEFAULT | Get default value.
 
-<a name="state_set_persistence_mode_set"></a>
 #### State set persistence mode
 Value | Name | Description
 --- | --- | ---
@@ -455,7 +426,6 @@ Value | Name | Description
 1   | STORED | Set value to ram and flash. This value will be used by the firmware, also after a reboot. Overwrites the temporary value.
 
 
-<a name="uicr_data_packet"></a>
 ##### UICR data packet
 
 This packet is meant for developers. For more information, see [UICR](UICR.md) and [Naming](NAMING.md).
@@ -479,7 +449,6 @@ uint 8 | Production year | 1 | Last 2 digits of the year.
 uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
 
 
-<a name="ibeacon_config_id_packet"></a>
 ##### Ibeacon config ID packet
 
 ![Ibeacon config ID packet](../docs/diagrams/ibeacon_config_id_packet.png)
@@ -494,7 +463,6 @@ uint 16 | Interval | 2 | Interval in seconds when the ibeacon config ID should b
 - Set the interval to 0 if you want to set the ibeacon config ID only once, at the given timestamp. Use timestamp 0 if you want it to be set immediately.
 - To interleave between two config IDs every 60 seconds, you will need two commands. First set ID=0, at timestamp=0 with interval=60, then set ID=1 at timestamp=30 with interval=60.
 
-<a name="sun_time_packet"></a>
 ##### Sun time packet
 
 ![Sun time packet](../docs/diagrams/set_sun_time_packet.png)
@@ -505,7 +473,6 @@ uint 32 | Sunrise | 4 | The moment when the upper limb of the sun appears on the
 uint 32 | Sunset | 4 | The moment when the upper limb of the Sun disappears below the horizon. Units: seconds since midnight.
 
 
-<a name="multi_switch_packet"></a>
 ##### Multi switch packet
 
 ![Multi switch list](../docs/diagrams/multi_switch_packet.png)
@@ -515,7 +482,6 @@ Type | Name | Length | Description
 uint 8 | Count | 1 | Number of valid entries.
 [Multi switch entry](#multi_switch_entry_packet) [] | List | Count * 2 | A list of switch commands.
 
-<a name="multi_switch_entry_packet"></a>
 ##### Multi switch entry
 
 ![Multi switch short entry](../docs/diagrams/multi_switch_entry_packet.png)
@@ -526,7 +492,6 @@ uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item
 uint 8 | [Switch value](#switch_command_value) | 1 | The switch value to be set by the targeted crownstone.
 
 
-<a name="state_error_bitmask"></a>
 #### Error Bitmask
 
 Bit | Name |  Description
@@ -540,7 +505,6 @@ Bit | Name |  Description
 6-31 | Reserved | Reserved for future use.
 
 
-<a name="command_mesh_packet"></a>
 #### Mesh command packet
 For now, only a few of commands are implemented:
 
@@ -560,14 +524,12 @@ uint 8 | ID count | 1 | The number of stone IDs provided.
 uint8 [] | List of stone IDs | Count | IDs of the stones at which this message is aimed. Can be empty, then the command payload follows directly after the count field.
 uint 8 | Command payload | N | The command payload data, which depends on the [type](#mesh_command_types).
 
-<a name="mesh_command_types"></a>
 ##### Mesh command types
 
 Type nr | Type name | Payload type | Payload description
 --- | --- | --- | ---
 0 | Control | [Control](#control_packet) | Send a control command over the mesh, see control packet.
 
-<a name="mesh_command_flags"></a>
 ##### Mesh command flags
 
 For now there are only a couple of combinations possible:
@@ -584,7 +546,6 @@ Bit | Name |  Description
 
 
 
-<a name="hub_data_packet"></a>
 #### Hub data packet
 
 Type | Name | Length | Description
@@ -595,7 +556,6 @@ uint 8 | Payload | N | Payload data to be sent to hub.
 
 
 
-<a name="presence_packet"></a>
 #### Presence packet
 
 A profile can be present at multiple locations/rooms.
@@ -605,7 +565,6 @@ Type | Name | Length | Description
 uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
 
 
-<a name="behaviour_debug_packet"></a>
 #### Behaviour debug packet
 
 ![Behaviour debug packet](../docs/diagrams/behaviour_debug_packet.png)
@@ -628,7 +587,6 @@ uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupi
 
 
 
-<a name="adc_restarts_packet"></a>
 #### ADC restarts packet
 
 Type | Name | Length | Description
@@ -637,7 +595,6 @@ uint32 | Restart count | 4 | Number of ADC restarts since boot.
 uint32 | Timestamp | 4 | Unix timestamp of the last ADC restart.
 
 
-<a name="adc_channel_swaps_packet"></a>
 #### ADC channel swaps packet
 
 Type | Name | Length | Description
@@ -646,7 +603,6 @@ uint32 | Swap count | 4 | Number of detected ADC channel swaps since boot.
 uint32 | Timestamp | 4 | Unix timestamp of the last detected ADC channel swap.
 
 
-<a name="gpregret_result_packet"></a>
 #### GPREGRET result packet
 
 Type | Name | Length | Description
@@ -655,7 +611,6 @@ uint8 | Index | 1 | Which GPREGRET.
 uint32 | Value | 4 | Value of this GPREGRET. For index 0: bits 0-4 are used to count resets, bit 5 is set on brownout (doesn't work yet), bit 6 is set to go to DFU mode, bit 7 is set after storage was recovered.
 
 
-<a name="ram_stats_packet"></a>
 #### RAM stats packet
 
 Type | Name | Length | Description
@@ -666,7 +621,6 @@ uint32 | Min free | 4 | Minimal observed free RAM in bytes. It might take some t
 uint32 | Num sbrk fails | 4 | Number of times sbrk failed to hand out space.
 
 
-<a name="switch_history_packet"></a>
 #### Switch history packet
 
 Type | Name | Length | Description
@@ -674,7 +628,6 @@ Type | Name | Length | Description
 uint8 | Count | 1 | Number of items in the list.
 [Switch history item](#switch_history_item_packet) [] | List |
 
-<a name="switch_history_item_packet"></a>
 ##### Switch history item packet
 
 Type | Name | Length | Description
@@ -686,7 +639,6 @@ uint32 | Timestamp | 4 | Unix timestamp of the switch command.
 
 
 
-<a name="command_source_packet"></a>
 #### Command source packet
 
 Type | Name | Length in bits | Description
@@ -696,7 +648,6 @@ uint 8 | Reserved | 4 | Reserved for future use, must be 0 for now. Bits 1-4.
 bool | External | 1 | Whether the command was received via the mesh. Bit 0.
 uint 8 | [Source ID](#command_source_ID) | 8 | The ID of the source.
 
-<a name="command_source_type"></a>
 ##### Command source type
 
 Value | Name | Description
@@ -706,7 +657,6 @@ Value | Name | Description
 3 | Broadcast | ID is the [device ID](BROADCAST_PROTOCOL.md#command_adv_header)
 4 | Uart | ID is the device ID
 
-<a name="command_source_ID"></a>
 ##### Command source ID
 
 Value | Name | Description
@@ -720,7 +670,6 @@ Value | Name | Description
 
 
 
-<a name="power_samples_request_packet"></a>
 #### Power samples request packet
 
 Type | Name | Length | Description
@@ -728,7 +677,6 @@ Type | Name | Length | Description
 uint 8 | [Type](#power_samples_type) | 1 | Type of samples.
 uint 8 | Index | 1 | Some types have multiple lists of samples.
 
-<a name="power_samples_type"></a>
 #### Power samples type
 
 Value | Name| Description
@@ -740,7 +688,6 @@ Value | Name| Description
 4 | Soft fuse | Last samples that triggered a soft fuse. Has 1 list: index 0 for current.
 5 | Switch event | Last samples around a switch event. Has N lists: even index for voltage samples, uneven index for current samples.
 
-<a name="power_samples_result_packet"></a>
 #### Power samples result packet
 background broadcast
 ![Power samples result packet](../docs/diagrams/power_samples_result_packet.png)
@@ -759,7 +706,6 @@ float | Multiplier | 4 | Multiply the sample value minus offset with this value 
 int 16 [] | Samples | 2 | List of samples.
 
 
-<a name="register_tracked_device_packet"></a>
 #### Register tracked device packet
 
 ![Register tracked device packet](../docs/diagrams/register_tracked_device_packet.png)
@@ -775,7 +721,6 @@ uint 24 | Device token | 3 | Token that will be advertised by the device.
 uint 16 | Time to live | 2 | Time in minutes after which the device token will be invalid.
 
 
-<a name="tracked_device_heartbeat_packet"></a>
 #### Tracked device heartbeat packet
 
 ![Tracked device heartbeat packet](../docs/diagrams/tracked_device_heartbeat_packet.png)
@@ -788,7 +733,6 @@ uint 24 | Device token | 3 | Token that has been registered.
 uint 8 | Time to live | 1 | How long (in minutes) the crownstone assumes the device is at the given location, so should best be larger than the interval at which the heartbeat is sent. Setting this to 0 is similar to sending a single [background broadcast](BROADCAST_PROTOCOL.md#background_broadcasts). Currently the max is 60, a longer time will result in an error WRONG_PARAMETER.
 
 
-<a name="upload_microapp_packet"></a>
 #### Upload microapp
 
 ![Upload microapp packet](../docs/diagrams/upload_microapp_packet.png)
@@ -810,7 +754,6 @@ The total maximum size of a binary (256 packets with each 49 bytes) is around 12
 for this first version. Larger binaries would require more stringent containerization as well to make sure its not
 eating too many other resources.
 
-<a name="send_microapp_validate_packet"></a>
 #### Validate microapp
 
 ![Send microapp validate packet](../docs/diagrams/send_microapp_validate_packet.png)
@@ -825,7 +768,6 @@ uint 16 | Checksum | 2 | The checksum of the complete program.
 
 After sending the last packet, the microapp has to be validated.
 
-<a name="send_microapp_enable_packet"></a>
 #### Enable/disable microapp
 
 ![Send microapp enable packet](../docs/diagrams/send_microapp_enable_packet.png)
@@ -840,7 +782,6 @@ uint 16 | Offset | 2 | Offset of the `dummy_main` function into the binary.
 After uploading a microapp you will first have to validate, the overall app (see above). After that you can
 enable the app.
 
-<a name="microapp_result_packet"></a>
 #### Microapp result packet
 
 ![Microapp result packet](../docs/diagrams/microapp_result_packet.png)
@@ -857,7 +798,6 @@ The result packet is important to retrieve a notification that a particular writ
 
 To make the process more graceful for the receiving party to miss a notification, the notification is sent repeatedly with decrementing repeat counter.
 
-<a name="result_packet"></a>
 ## Result packet
 
 __If encryption is enabled, this packet will be encrypted using any of the keys where the box is checked.__
@@ -873,7 +813,6 @@ uint 16 | Size | 2 | Size of the payload in bytes.
 uint 8 | Payload | Size | Payload data, depends on command type.
 
 
-<a name="result_codes"></a>
 #### Result codes
 
 Value | Name | Description
@@ -912,7 +851,6 @@ Value | Name | Description
 
 
 
-<a name="state_types"></a>
 ## State types
 
 The AMBS columns indicate which users have access to these states: `r` for read access, `w` for write access.
@@ -985,7 +923,6 @@ Type nr | Type name | Payload type | Description | A | M | B
 157 | Hub mode | uint 8 | Whether hub mode is enabled. | rw
 158 | UART key | uint 8 [16] | 16 byte key used to encrypt/decrypt UART messages. | rw
 
-<a name="switch_state_packet"></a>
 #### Switch state
 To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
 
@@ -996,7 +933,6 @@ Bit | Name |  Description
 0 | Relay | Value of the relay, where 0 = OFF, 1 = ON.
 1-7 | Dimmer | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
 
-<a name="behaviour_settings_packet"></a>
 ##### Behaviour settings
 
 ![Behaviour settings packet](../docs/diagrams/behaviour_settings_packet.png)
@@ -1006,7 +942,6 @@ Type | Name | Length | Description
 uint 32 | [Flags](#behaviour_settings_flags) | 4 | Flags.
 
 
-<a name="behaviour_settings_flags"></a>
 ##### Behaviour settings flags
 
 ![Behaviour settings flags](../docs/diagrams/behaviour_settings_flags.png)

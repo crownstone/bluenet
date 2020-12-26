@@ -7,12 +7,10 @@ This only documents the latest protocol, older versions can be found in the git 
 - [Background](#background_broadcasts)
 - [Command](#command_broadcasts)
 
-<a name="background_broadcasts"></a>
 # Background broadcasts
 
 These are meant to be broadcasted by phones all the time.
 
-<a name="background_advertisement"></a>
 #### Background broadcast advertisement
 
 The packet that the phone should advertise to send a background broadcast.
@@ -28,7 +26,6 @@ uint8 | type | 1 | 0x01: Services bitmask.
 uint8 [] | Services bitmask | 16 | Consists of 3x the same [data](#background_adv_data) plus 2 unused bits.
 
 
-<a name="background_adv_data v0"></a>
 #### Background broadcast data v0
 
 ![Background broadcast data v0](../docs/diagrams/background_broadcast_data_v0.png)
@@ -39,7 +36,6 @@ uint8 | Protocol | 2 | Protocol version = 0.
 uint8 | Sphere ID | 8 | Hash of the sphere ID, acts as filter, so that not every advertisement has to be decrypted.
 uint16 [] | Payload | 32 | Encrypted [payload](#background_adv_payload), using 32b RC5 with 128b localization key.
 
-<a name="background_adv_data v1"></a>
 #### Background broadcast data v1
 
 ![Background broadcast data v1](../docs/diagrams/background_broadcast_data_v1.png)
@@ -50,7 +46,6 @@ uint8 | Protocol | 2 | Protocol version = 1.
 uint24 | device token | 24 | Token of this device, set via command [Register tracked device](PROTOCOL.md#command_types) or [Update tracked device](#command_adv_types).
 uint16 | reserved | 16 | Reserved for future use, should be 0 for now.
 
-<a name="background_adv_payload"></a>
 #### Background broadcast payload
 
 ![Background broadcast payload](../docs/diagrams/background_broadcast_payload.png)
@@ -64,7 +59,6 @@ uint8 | RSSI offset | 4 | Offset from standard signal strength. Divide by 2, the
 uint8 | flags | 3 | [Flags](#background_adv_flags).
 
 
-<a name="rc5_adv_payload"></a>
 #### RC5 broadcast payload
 
 ![RC5 broadcast payload](../docs/diagrams/rc5_broadcast_payload.png)
@@ -80,7 +74,6 @@ uint8 | flags | 3 | [Flags](#background_adv_flags).
 
 
 
-<a name="background_adv_flags"></a>
 #### Background broadcast flags
 
 Bit | Name |  Description
@@ -93,12 +86,10 @@ Bit | Name |  Description
 
 
 
-<a name="command_broadcasts"></a>
 ## Command broadcasts
 
 These are meant to be broadcasted by phones for specific commands, like switching Crownstones.
 
-<a name="command_advertisement"></a>
 #### Command broadcast advertisement
 
 The packet that the phone should advertise to send a command broadcast.
@@ -114,7 +105,6 @@ uint8 | AD Length | 1 | 17: Length of the next AD structure.
 uint8 | AD Type | 1 | 0x07: Complete list of 128 bit service UUIDs.
 uint64[] | 128bit service | 16 | Single 128 bit service UUID, which is used as [encrypted payload](#command_adv_payload), sent as two uint64.
 
-<a name="command_adv_header"></a>
 #### Command broadcast header
 
 ![Command broadcast header](../docs/diagrams/command_broadcast_header.png)
@@ -135,7 +125,6 @@ uint16 | RC5 payload | 2 | First 2 bits of second block of [encrypted RC5 payloa
 uint8 | Sequence | 2 | 3: Sequence of this service UUID.
 uint16 | RC5 payload | 14 | Last 14 bits of second block of [encrypted RC5 payload](#rc5_adv_payload).
 
-<a name="command_adv_payload"></a>
 #### Command broadcast payload
 
 ![Command broadcast payload](../docs/diagrams/command_broadcast_payload.png)
@@ -146,7 +135,6 @@ uint32 | Validation | 4 | Validation in the form of a local time unix timestamp.
 uint8 | Command type | 1 | See the list of [types](#command_adv_types).
 uint8[] | Command data | 11 | Depends on command type.
 
-<a name="command_adv_types"></a>
 #### Command broadcast types
 
 Type nr | Type name | Payload type | Payload Description | A | M | B | S
@@ -158,7 +146,6 @@ Type nr | Type name | Payload type | Payload Description | A | M | B | S
 4 | Update tracked device | [Update tracked device packet](#update_tracked_device_packet) | Updates the data of a tracked device. Access level should match the original access level. | x | x | x |
 
 
-<a name="multi_switch_short_list_packet"></a>
 ##### Multi switch short list packet
 
 ![Multi switch short list](../docs/diagrams/multi_switch_short_list.png)
@@ -169,7 +156,6 @@ uint 8 | Count | 1 | Number of valid entries.
 [Multi switch short entry](#multi_switch_short_entry_packet) [] | List | 10 | A list of switch commands.
 
 
-<a name="multi_switch_short_entry_packet"></a>
 ##### Multi switch short entry
 
 ![Multi switch short entry](../docs/diagrams/multi_switch_short_entry.png)
@@ -179,7 +165,6 @@ Type | Name | Length | Description
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
 uint 8 | [Switch value](PROTOCOL.md#switch_command_value) | 1 | The switch value to be set by the targeted crownstone.
 
-<a name="set_time_packet"></a>
 ##### Set time packet
 
 ![Set time packet](../docs/diagrams/broadcast_set_time_packet.png)
@@ -191,7 +176,6 @@ uint 32 | Timestamp | 4 | Current local time.
 uint 24 | Sunrise | 3 | Seconds after midnight that the sun rises.
 uint 24 | Sunset | 3 | Seconds after midnight that the sun sets.
 
-<a name="set_time_flags"></a>
 ##### Set time flags
 
 ![Set time flags](../docs/diagrams/broadcast_set_time_flags.png)
@@ -203,7 +187,6 @@ Bit | Name |  Description
 2-7 | Reserved | Reserved for future use, should be 0 for now.
 
 
-<a name="behaviour_settings_packet"></a>
 ##### Behaviour settings
 
 ![Behaviour settings packet](../docs/diagrams/broadcast_behaviour_settings_packet.png)
@@ -213,7 +196,6 @@ Type | Name | Length | Description
 uint 32 | [Flags](#behaviour_settings_flags) | 4 | Flags.
 uint 8[] | Reserved | 7 | Reserved for future use, should be 0 for now.
 
-<a name="behaviour_settings_flags"></a>
 ##### Behaviour settings flags
 
 ![Behaviour settings packet](../docs/diagrams/behaviour_settings_flags.png)
@@ -223,7 +205,6 @@ Bit | Name |  Description
 0 | Enabled | Whether behaviours are enabled.
 1-31 | Reserved | Reserved for future use, should be 0 for now.
 
-<a name="update_tracked_device_packet"></a>
 ##### Update tracked device packet
 
 ![Update tracked device packet](../docs/diagrams/update_tracked_device_packet.png)

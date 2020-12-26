@@ -3,7 +3,6 @@
 
 This only documents the latest protocol, older versions can be found in the git history.
 
-<a name="message_types"></a>
 ## Message types
 
 id | name | Payload | Result data
@@ -30,7 +29,6 @@ id | name | Payload | Result data
 
 ## Packet descriptors
 
-<a name="cs_mesh_model_msg_test_t"></a>
 #### cs_mesh_model_msg_test_t
 ![Time](../docs/diagrams/mesh_message_test.png)
 
@@ -40,7 +38,6 @@ uint32 | Counter | 4 |
 uint8[3] | Dummy | 3 |
 
 
-<a name="cs_mesh_model_msg_time_t"></a>
 #### cs_mesh_model_msg_time_t
 ![Time](../docs/diagrams/mesh_message_time.png)
 
@@ -52,7 +49,6 @@ Type | Name | Length | Description
 uint32 | Timestamp | 4 | posix time stamp
 
 
-<a name="cs_mesh_model_msg_profile_location_t"></a>
 #### cs_mesh_model_msg_profile_location_t
 
 ![profile location](../docs/diagrams/mesh_profile_location.png)
@@ -63,7 +59,6 @@ uint8 | Profile | 1 |
 uint8 | Location | 1 |
 
 
-<a name="cs_mesh_model_msg_state_0_t"></a>
 #### cs_mesh_model_msg_state_0_t
 
 ![model state 0](../docs/diagrams/mesh_model_state_0.png)
@@ -77,7 +72,6 @@ int16 | Power usage real | 2 |
 uint16 | Partial timestamp | 2 |
 
 
-<a name="cs_mesh_model_msg_state_1_t"></a>
 #### cs_mesh_model_msg_state_1_t
 
 ![model state 1](../docs/diagrams/mesh_model_state_1.png)
@@ -89,7 +83,6 @@ int32 | Energy used | 4 |
 uint16 | Partial timestamp | 2 |
 
 
-<a name="cs_mesh_model_msg_multi_switch_item_t"></a>
 #### cs_mesh_model_msg_multi_switch_item_t
 
 ![multi switch item](../docs/diagrams/mesh_multi_switch_item.png)
@@ -102,7 +95,6 @@ uint16 | Delay | 2 |
 cmd_source_with_counter_t | Source | 3 |
 
 
-<a name="behaviour_settings_t"></a>
 #### behaviour_settings_t
 
 ![behaviour settings](../docs/diagrams/mesh_behaviour_settings.png)
@@ -112,7 +104,6 @@ Type | Name | Length | Description
 uint32 | Flags | 4 | only bit 0 is currently in use, as 'behaviour enabled'. Other bits must remain 0.
 
 
-<a name="cs_mesh_model_msg_device_register_t"></a>
 #### cs_mesh_model_msg_device_register_t
 
 ![register device](../docs/diagrams/mesh_register_device.png)
@@ -127,7 +118,6 @@ uint8 | Flags | 1 |
 uint8 | Access level | 1 |
 
 
-<a name="cs_mesh_model_msg_device_token_t"></a>
 #### cs_mesh_model_msg_device_token_t
 
 ![device token](../docs/diagrams/mesh_device_token.png)
@@ -139,7 +129,6 @@ uint8[3] | Device token | 3 |
 uint16 | TTL minutes | 2 |
 
 
-<a name="cs_mesh_model_msg_device_heartbeat_t"></a>
 #### cs_mesh_model_msg_device_heartbeat_t
 
 ![device heartbeat](../docs/diagrams/mesh_device_heartbeat.png)
@@ -152,7 +141,6 @@ uint8 | TTL minutes | 1 |
 
 
 
-<a name="cs_mesh_model_msg_device_list_size_t"></a>
 #### cs_mesh_model_msg_device_list_size_t
 
 ![device list](../docs/diagrams/mesh_device_list_size.png)
@@ -162,7 +150,6 @@ Type | Name | Length | Description
 uint8_t | List size | 1 | Size of tracked devices list.
 
 
-<a name="cs_mesh_model_msg_sync_request_t"></a>
 #### cs_mesh_model_msg_sync_request_t
 
 ![sync request](../docs/diagrams/mesh_sync_request.png)
@@ -173,7 +160,6 @@ uint8_t | Stone ID | 1 | ID of stone that requests for a sync.
 uint32_t | [requestBitmask](#cs_mesh_model_sync_bitmask) | 4 | Bitmask of all things that are requested to be synced.
 
 
-<a name="cs_mesh_model_sync_bitmask"></a>
 #### Sync bitmask
 
 Bit | Name |  Description
@@ -184,7 +170,6 @@ Bit | Name |  Description
 
 
 
-<a name="cs_mesh_model_msg_state_set"></a>
 #### cs_mesh_model_msg_state_set
 
 ![state set](../docs/diagrams/mesh_state_set.png)
@@ -195,7 +180,6 @@ Type | Name | Length | Description
 uint8_t[] | Payload | N | Payload data, depends on state type.
 
 
-<a name="cs_mesh_model_msg_state_header_ext_t"></a>
 #### cs_mesh_model_msg_state_header_ext_t
 
 ![state header](../docs/diagrams/mesh_state_header_ext.png)
@@ -207,7 +191,6 @@ uint8_t | Access level | 3 | Shortened version of access level: 0=ADMIN, 1=MEMBE
 uint8_t | Source ID | 5 | Shortened version of source ID: 0=NONE, 2=INTERNAL, 3=UART, 4=CONNECTION, 5=SWITCHCRAFT, 30=BROADCAST
 
 
-<a name="cs_mesh_model_msg_state_header_t"></a>
 #### cs_mesh_model_msg_state_header_t
 
 ![state header ext](../docs/diagrams/mesh_state_header.png)
@@ -219,7 +202,6 @@ uint8_t | State ID | 6 | ID of state to get. Most state types will only have ID 
 uint8_t | [Persistence mode](PROTOCOL.md#state_set_persistence_mode_set) | 2 | Type of persistence mode.
 
 
-<a name="rssi_ping_message_t"></a>
 #### rssi_ping_message_t
 ![Rssi ping message](../docs/diagrams/rssi_ping_msg.png)
 
@@ -232,7 +214,6 @@ int8_t     |rssi         | 1 |
 uint8_t    | channel     | 1 |
 
 
-<a name="high_resolution_time_stamp_t"></a>
 #### high_resolution_time_stamp_t
 
 ![High resolution time stamp](../docs/diagrams/high_resolution_time_stamp.png)
@@ -242,7 +223,6 @@ Type | Name | Length | Description
 uint32_t | posix_s  | 4 | seconds since epoch
 uint16_t | posix_ms, version | 2 | bits 0-9: miliseconds passed since posix_s. bits 10-15: synchronisation version
 
-<a name="time_sync_message_t"></a>
 #### time_sync_message_t
 
 ![Time sync message](../docs/diagrams/time_sync_message_t.png)
@@ -253,7 +233,6 @@ high_resolution_time_stamp_t  | stamp | 6 | current stamp of root clock
 stone_id_t | root_id | 1 | id of root clock (may differ from sender id)
 
 
-<a name="cs_mesh_model_msg_result"></a>
 #### cs_mesh_model_msg_result
 
 ![state set](../docs/diagrams/mesh_result.png)
@@ -264,7 +243,6 @@ Type | Name | Length | Description
 uint8_t[] | Payload | N | Payload data, depends on result type.
 
 
-<a name="cs_mesh_model_msg_result_header_t"></a>
 #### cs_mesh_model_msg_result_header_t
 
 ![result header](../docs/diagrams/mesh_result_header.png)

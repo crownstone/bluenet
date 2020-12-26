@@ -10,7 +10,6 @@ There are two special characters:
 Every byte in the UART message that equals one of the special characters will be XORed by `0x40`, and prepended by the escape character.
 
 
-<a name="uart_wrapper"></a>
 ## UART wrapper
 
 Every UART message is wrapped.
@@ -33,7 +32,6 @@ Type | Payload | Description
 128  | [Encrypted UART message](#encrypted_uart_msg) | Encrypted UART message. **Not implemented yet.**
 
 
-<a name="encrypted_uart_msg"></a>
 ### Encrypted UART message
 
 Although the name suggests this is encrypted, only the `encrypted data` is actually encrypted. The other fields are unencrypted, but required for the encryption.
@@ -46,7 +44,6 @@ uint8[] | Packet nonce | 3 | Packet nonce: should be different random numbers ea
 uint8   | Key ID       | 1 | Key ID used for encryption: always 0 for now. Also determines access level: always admin for now.
 uint8[] | Encrypted data | N | Encrypted with [AES CTR](PROTOCOL.md#ctr_encryption). Get a (new) session nonce with the session nonce command.
 
-<a name="encrypted_data"></a>
 ### Encrypted data
 
 ![Encrypted data](../docs/diagrams/uart_encrypted_data.png)
@@ -59,7 +56,6 @@ uint8[] | [UART message](#uart_msg) | Size | The uart message.
 uint8[] | Padding      | N | Padding to make this whole packet size a multiple of 16.
 
 
-<a name="uart_msg"></a>
 ### UART message
 
 ![UART message](../docs/diagrams/uart_msg.png)
@@ -173,7 +169,6 @@ Type  | Type name                     | Encrypted | Data   | Description
 
 ## Packets
 
-<a name="cmd_hello_packet"></a>
 ### User hello packet
 
 Type | Name | Length | Description
@@ -181,7 +176,6 @@ Type | Name | Length | Description
 uint8 | [Flags](#user_status_flags) | 1 | Status flags.
 
 
-<a name="ret_hello_packet"></a>
 ### Crownstone hello packet
 
 Type | Name | Length | Description
@@ -190,7 +184,6 @@ uint8 | Sphere ID | 1 | Short sphere ID, as given during [setup](PROTOCOL.md#set
 [status](#ret_status_packet) | Status | 1 | Status packet.
 
 
-<a name="cmd_heartbeat_packet"></a>
 ### Heartbeat packet
 
 Type | Name | Length | Description
@@ -198,7 +191,6 @@ Type | Name | Length | Description
 uint16 | Timeout | 2 | If no heartbeat is received for _timeout_ seconds, the connection can be considered to be dead.
 
 
-<a name="cmd_status_packet"></a>
 ### User status packet
 
 Type | Name | Length | Description
@@ -207,7 +199,6 @@ uint8 | Type | 1 | Status type: 0=no-data, 1=crownstone-hub
 uint8 | [Flags](#user_status_flags) | 1 | Status flags.
 uint8[] | Data | 9 | Status data to be advertised by dongle (will be ignored if status type is _no-data_).
 
-<a name="user_status_flags"></a>
 ### User status flags bitmask
 
 Bit | Name |  Description
@@ -219,14 +210,12 @@ Bit | Name |  Description
 4-7 | Reserved          | Reserved for future use, must be 0 for now.
 
 
-<a name="ret_status_packet"></a>
 ### Crownstone status packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | [Flags](#ret_status_flags) | 1 | Status flags.
 
-<a name="ret_status_flags"></a>
 ### Crownstone status flags bitmask
 
 Bit | Name |  Description
@@ -238,7 +227,6 @@ Bit | Name |  Description
 4-7 | Reserved          | Reserved for future use, must be 0 for now.
 
 
-<a name="cmd_session_nonce_packet"></a>
 ### Refresh session nonce packet
 
 Type | Name | Length | Description
@@ -247,7 +235,6 @@ uint8 | Timeout | 1 | How long (minutes) this session nonce is valid.
 uint8[] | Session nonce | 5 | The session nonce to use for encrypted messages sent by the user.
 
 
-<a name="ret_session_nonce_packet"></a>
 ### Session nonce reply packet
 
 Type | Name | Length | Description
@@ -255,7 +242,6 @@ Type | Name | Length | Description
 uint8[] | Session nonce | 5 | The session nonce to use for encrypted messages sent by the crownstone.
 
 
-<a name="cmd_hub_data_reply_packet"></a>
 ### Hub data reply
 
 Type | Name | Length | Description
@@ -264,7 +250,6 @@ uint16 | [Result code](PROTOCOL.md#result_codes) | 2 | The result code, which wi
 uint8[] | Data | N | Data.
 
 
-<a name="presence_change_packet"></a>
 ### Presence change packet
 
 Type | Name | Length | Description
@@ -274,7 +259,6 @@ uint8 | Profile ID | 1 | ID of the profile.
 uint8 | Location ID | 1 | ID of the location.
 
 
-<a name="presence_change_type"></a>
 ##### Presence change type
 
 Value | Name | Description
@@ -288,7 +272,6 @@ Value | Name | Description
 
 
 
-<a name="binary_log_header"></a>
 ### Binary log header
 
 The log header should contain enough info to find the log string from the source code.
@@ -302,7 +285,6 @@ uint16 | Line number | 2 | Line number (starting at line 1) where the ; of the s
 uint8 | Log level | 1 | Verbosity of the log, similar to serial_verbosity in config: verbose=8, debug=7, info=6, warn=5, error=4, fatal=3.
 uint8 | Flags | 1 | Options for the log. Currently only bit 0 is used, which is true to end the line.
 
-<a name="binary_log_packet"></a>
 ### Binary log packet
 
 The binary log packet consists of a header and arguments. The header is used to find the string in printf format. The arguments are then filled in according to this string.
@@ -317,7 +299,6 @@ Type | Name | Length | Description
 uint8 | Num args | 1 | Number of arguments that follow.
 [Args[]](#binary_log_arg_packet) | Args | N | Array of argument packets.
 
-<a name="binary_log_arg_packet"></a>
 ### Binary log argument packet
 
 Type | Name | Length | Description
@@ -325,7 +306,6 @@ Type | Name | Length | Description
 uint8 | Arg size | 1 | Size of the payload.
 uint8[] | Payload | N | The argument data.
 
-<a name="binary_log_array_packet"></a>
 ### Binary log array packet
 
 ![Binary log array packet](../docs/diagrams/binary_log_array_packet.png)
@@ -337,7 +317,6 @@ Type | Name | Length | Description
 uint8 | Element size | 1 | The size of each element.
 uint8[] | Payload | X | The element data, of size: elementSize * numberOfElements.
 
-<a name="binary_log_element_type"></a>
 ##### Binary log element type
 
 Value | Name | Description
@@ -349,7 +328,6 @@ Value | Name | Description
 
 
 
-<a name="mesh_result_packet"></a>
 ### Mesh result packet
 
 Type | Name | Length | Description
@@ -358,7 +336,6 @@ uint8 | Stone ID | 1 | ID of the stone.
 [Result packet](../docs/PROTOCOL.md#result_packet) | Result | N | The result.
 
 
-<a name="mesh_state_part_0"></a>
 ### Mesh state part 0
 
 Type | Name | Length | Description
@@ -367,7 +344,6 @@ uint8 | Stone ID | 1 | ID of the stone.
 [Mesh msg state 0](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_0_t) | State | 7 | The state.
 
 
-<a name="mesh_state_part_1"></a>
 ### Mesh state part 1
 
 Type | Name | Length | Description
@@ -377,7 +353,6 @@ uint8 | Stone ID | 1 | ID of the stone.
 
 
 
-<a name="adc_config_packet"></a>
 ### ADC config
 
 Sent when the ADC config changes.
@@ -389,7 +364,6 @@ uint8 | Count | 1 | Number of channels.
 uint32 | Sampling period | 4 | Sampling period in μs. Each period, all channels are sampled once.
 
 
-<a name="adc_channel_config_packet"></a>
 ### ADC channel config
 
 Type | Name | Length | Description
@@ -399,7 +373,6 @@ uint32 | Range | 4 | Range in mV. Max is 3600.
 uint8 | RefPin | 1 | Reference pin for differential measurements. Set to 255 to disable differential measurements.
 
 
-<a name="current_samples_packet"></a>
 ### Current samples
 
 Type | Name | Length | Description
@@ -407,7 +380,6 @@ Type | Name | Length | Description
 uint32  | Timestamp | 4 | Counter of the RTC (running at 32768 Hz, max value is 0x00FFFFFF).
 int16[] | Samples | 200 | Raw sample data.
 
-<a name="voltage_samples_packet"></a>
 ### Voltage samples
 
 Type | Name | Length | Description
@@ -415,7 +387,6 @@ Type | Name | Length | Description
 uint32  | Timestamp | 4 | Counter of the RTC (running at 32768 Hz, max value is 0x00FFFFFF).
 int16[] | Samples | 200 | Raw sample data.
 
-<a name="power_calculation_packet"></a>
 ### Power calculations
 
 Type | Name | Length | Description

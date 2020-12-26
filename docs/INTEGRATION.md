@@ -15,11 +15,9 @@ Integration can be done on multiple levels.
 - [Identify devices.](#device_identification)
 
 
-<a name="control_via_rest"></a>Control Crownstones via REST API
 =====
 A Crownstone [REST API](#rest_api) is available that uses the official Crownstone app to control devices that are in range of the phone of the user.
 
-<a name="control_via_own_app"></a>Control Crownstones from within your own app
 =====
 There are two options:
 
@@ -27,7 +25,6 @@ There are two options:
 - You can use our [React Native app](https://github.com/crownstone/CrownstoneApp) and integrate it with your RN app
 
 
-<a name="control_via_own_hardware"></a>Control Crownstones from your own hardware
 =================
 Your hardware needs to have a Bluetooth low energy (BLE) radio or a USB port in which a Bluetooth low energy dongle can be plugged. The hardware needs to be able to run software that transforms requests towards commands that are sent over BLE. 
 
@@ -48,7 +45,6 @@ A (language-agnostic) binary will be provided on github (not yet available). It 
 ### Crownstone REST API
 A Crownstone [REST API](#rest_api) is available that uses the official Crownstone app to control devices that are in range of the phone of the user. 
 
-<a name="read"></a>Read out information from Crownstones
 ====
 All data sent from the Crownstones is safely encrypted. If you want to be able to read the information, you will need the [keys](#keys).
 
@@ -57,25 +53,20 @@ If you want to download the information from the cloud, use the [REST interface]
 If you want to read out the information from the Crownstones using a computer or raspberry pi, use the python lib, if you want to read it out through a phone, use the phone libs.
 
 
-<a name="localization_via_rest"></a>Use indoor localization from the Crownstone app to trigger my things 
 ======
 You can use the [REST interface](#rest_api) to subscribe to a location change event.
 
 
-<a name="localization_via_own_app"></a>Use indoor localization with my own app running on a phone 
 === 
 You will have to use our [Android](https://github.com/crownstone/localization-lib-android-basic) or [iOS](https://github.com/crownstone/bluenet-ios-basic-localization) indoor localization lib, provide your own UI for training locations and use our training helper libs to train these locations. You can optionally use our bluenet libs to get the ibeacon data and/or advertisements from the Crownstones. These can also be obtained though your own code. The indoor localization libs will provide you with a location per sample you give them.
 
-<a name="track"></a>Track wearables
 ===
 Soon.
 
-<a name="device_identification"></a>Identify devices
 ====
 Soon.
 
 
-<a name="keys"></a>Retrieving keys
 ====
 You need keys to read and control Crownstones. The keys can be retrieved at the [website](https://my.crownstone.rocks/), or through [OAUTH2](https://github.com/crownstone/crownstone-sdk/blob/master/REST_API.md#oauth2).
 
@@ -83,7 +74,6 @@ Currently you first log in to the [cloud](https://cloud.crownstone.rocks/), then
 After that, get your user id, with a [GET on /users/me](https://crownstone-cloud.herokuapp.com/explorer/#!/user/user_me).
 Finally, get your keys with a [GET on /users/{id}/keys](https://crownstone-cloud.herokuapp.com/explorer/#!/user/user_getEncryptionKeys).
 
-<a name="rest_api"></a>The REST interface
 ====
 You can control and read out Crownstones via the [REST API](https://github.com/crownstone/crownstone-sdk/blob/master/REST_API.md).
 The cloud data can be accessible to external developers by using the [OAUTH2](https://github.com/crownstone/crownstone-sdk/blob/master/REST_API.md#oauth2) interface, or to users through the REST explorer.
