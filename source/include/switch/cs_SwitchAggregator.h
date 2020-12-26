@@ -9,7 +9,6 @@
 
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_TwilightHandler.h>
-#include <drivers/cs_Serial.h>
 #include <events/cs_EventListener.h>
 #include <optional>
 #include <structs/buffer/cs_CircularBuffer.h>

@@ -7,7 +7,7 @@
 
 #include <ble/cs_Nordic.h>
 #include <drivers/cs_Relay.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
 #include <util/cs_Error.h>
 

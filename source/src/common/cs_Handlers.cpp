@@ -72,38 +72,38 @@ void crownstone_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_si
 void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
 	LOGInterruptLevel("soc evt int=%u", BLEutil::getInterruptLevel());
 
-    switch(evt_id) {
-    case NRF_EVT_POWER_FAILURE_WARNING:
-    	// Set brownout flag, so next boot we know the cause.
-    	// Only works when we reset as well?
-    	// Only works when softdevice handler dispatch model is interrupt?
-    	GpRegRet::setFlag(GpRegRet::FLAG_BROWNOUT);
-    	// Fall through
-	case NRF_EVT_FLASH_OPERATION_SUCCESS:
-	case NRF_EVT_FLASH_OPERATION_ERROR: {
-//		uint32_t gpregret_id = 0;
-//		uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
-//		// NOTE: do not clear the gpregret register, this way
-//		//   we can count the number of brownouts in the bootloader.
-//		sd_power_gpregret_set(gpregret_id, gpregret_msk);
-//		// Soft reset, because brownout can't be distinguished from hard reset otherwise.
-//		sd_nvic_SystemReset();
+	switch (evt_id) {
+		case NRF_EVT_POWER_FAILURE_WARNING:
+			// Set brownout flag, so next boot we know the cause.
+			// Only works when we reset as well?
+			// Only works when softdevice handler dispatch model is interrupt?
+			GpRegRet::setFlag(GpRegRet::FLAG_BROWNOUT);
+			// Fall through
+		case NRF_EVT_FLASH_OPERATION_SUCCESS:
+		case NRF_EVT_FLASH_OPERATION_ERROR: {
+//			uint32_t gpregret_id = 0;
+//			uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
+//			// NOTE: do not clear the gpregret register, this way
+//			//   we can count the number of brownouts in the bootloader.
+//			sd_power_gpregret_set(gpregret_id, gpregret_msk);
+//			// Soft reset, because brownout can't be distinguished from hard reset otherwise.
+//			sd_nvic_SystemReset();
 
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
-		uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), crownstone_soc_evt_handler_decoupled);
-		APP_ERROR_CHECK(retVal);
+			uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), crownstone_soc_evt_handler_decoupled);
+			APP_ERROR_CHECK(retVal);
 #else
-		crownstone_soc_evt_handler_decoupled(&evt_id, sizeof(evt_id));
+			crownstone_soc_evt_handler_decoupled(&evt_id, sizeof(evt_id));
 #endif
-	    break;
+			break;
+		}
+		case NRF_EVT_RADIO_BLOCKED:
+		case NRF_EVT_RADIO_CANCELED:
+			break;
+		default: {
+			LOGd("Unhandled event: %i", evt_id);
+		}
 	}
-	case NRF_EVT_RADIO_BLOCKED:
-	case NRF_EVT_RADIO_CANCELED:
-		break;
-	default: {
-	    LOGd("Unhandled event: %i", evt_id);
-	}
-    }
 }
 NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, crownstone_soc_evt_handler, NULL);
 
@@ -231,7 +231,7 @@ static void mesh_soc_evt_handler(uint32_t evt_id, void * p_context) {
 	uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), mesh_soc_evt_handler_decoupled);
 	APP_ERROR_CHECK(retVal);
 #else
-    nrf_mesh_on_sd_evt(evt_id);
+	nrf_mesh_on_sd_evt(evt_id);
 #endif
 }
 NRF_SDH_SOC_OBSERVER(m_mesh_soc_observer, MESH_SOC_OBSERVER_PRIO, mesh_soc_evt_handler, NULL);

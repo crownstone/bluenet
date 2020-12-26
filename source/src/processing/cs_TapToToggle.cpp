@@ -8,7 +8,7 @@
 #include "processing/cs_TapToToggle.h"
 #include "events/cs_EventDispatcher.h"
 #include "drivers/cs_RTC.h"
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 #include "processing/cs_CommandHandler.h"
 #include "util/cs_Utils.h"
 #include "storage/cs_State.h"
@@ -97,27 +97,27 @@ void TapToToggle::tick() {
 }
 
 void TapToToggle::handleEvent(event_t & event) {
-	switch(event.type) {
-	case CS_TYPE::EVT_TICK: {
-		tick();
-		break;
-	}
-	case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
-		TYPIFY(EVT_ADV_BACKGROUND_PARSED)* backgroundAdv = (TYPIFY(EVT_ADV_BACKGROUND_PARSED)*)event.data;
-		handleBackgroundAdvertisement(backgroundAdv);
-		break;
-	}
-	case CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED: {
-		enabled = *((TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED)*)event.data);
-		break;
-	}
-	case CS_TYPE::CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET: {
-		TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET) thresholdOffset = *((TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET)*)event.data);
-		rssiThreshold = defaultRssiThreshold + thresholdOffset;
-		break;
-	}
-	default:
-		break;
+	switch (event.type) {
+		case CS_TYPE::EVT_TICK: {
+			tick();
+			break;
+		}
+		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
+			TYPIFY(EVT_ADV_BACKGROUND_PARSED)* backgroundAdv = (TYPIFY(EVT_ADV_BACKGROUND_PARSED)*)event.data;
+			handleBackgroundAdvertisement(backgroundAdv);
+			break;
+		}
+		case CS_TYPE::CONFIG_TAP_TO_TOGGLE_ENABLED: {
+			enabled = *((TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED)*)event.data);
+			break;
+		}
+		case CS_TYPE::CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET: {
+			TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET) thresholdOffset = *((TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET)*)event.data);
+			rssiThreshold = defaultRssiThreshold + thresholdOffset;
+			break;
+		}
+		default:
+			break;
 	}
 }
 

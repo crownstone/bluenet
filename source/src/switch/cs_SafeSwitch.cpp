@@ -29,8 +29,8 @@ void SafeSwitch::init(const boards_config_t& board) {
 
 	// relay only pushes test value on ::set(bool) because it doesn't keep track of its own state.
 	// we'll push the stored value upon init so that the test suite knows it's state.
-	TEST_PUSH_EXPR_B(this,"storedState.state.relay",storedState.state.relay);
-	TEST_PUSH_EXPR_X(this,"storedState.state", storedState.asInt);
+	TEST_PUSH_EXPR_B(this, "storedState.state.relay", storedState.state.relay);
+	TEST_PUSH_EXPR_X(this, "storedState.state", storedState.asInt);
 
 
 	TYPIFY(STATE_OPERATION_MODE) mode;
@@ -284,7 +284,7 @@ bool SafeSwitch::isSafeToTurnRelayOff(state_errors_t stateErrors) {
 	return !hasDimmerError(stateErrors);
 }
 
-bool SafeSwitch::isRelayStateChangeAllowed(){
+bool SafeSwitch::isRelayStateChangeAllowed() {
 	if (!allowStateChanges) {
 		// early return if general flag disallowes state changes
 		return false;
@@ -294,7 +294,7 @@ bool SafeSwitch::isRelayStateChangeAllowed(){
 	return operationMode != OperationMode::OPERATION_MODE_FACTORY_RESET;
 }
 
-bool SafeSwitch::isDimmerStateChangeAllowed(){
+bool SafeSwitch::isDimmerStateChangeAllowed() {
 	if (!allowStateChanges) {
 		// early return if general flag disallowes state changes
 		return false;

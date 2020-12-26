@@ -10,10 +10,10 @@
 #include <events/cs_EventListener.h>
 #include <localisation/cs_Nearestnearestwitnessreport.h>
 #include <localisation/cs_TrackableEvent.h>
-#include <protocol/mesh/cs_MeshModelPackets.h>
 #include <protocol/cs_Typedefs.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 
-
+// REVIEW: Missing description.
 class NearestCrownstoneTracker: public EventListener {
 public:
 	/**
@@ -29,11 +29,12 @@ public:
 	void handleEvent(event_t &evt);
 
 private:
-	stone_id_t my_id; // cached for efficiency
+	TYPIFY(CONFIG_CROWNSTONE_ID) _myId; // cached for efficiency
 
+	// REVIEW: What is winning, why not call it nearest? What is personal?
 	// TODO: expand to a map<TrackableID, NearestWitnessReport>.
-	NearestWitnessReport personal_report;
-	NearestWitnessReport winning_report;
+	NearestWitnessReport _personalReport;
+	NearestWitnessReport _winningReport;
 
 	/**
 	 * Heart of the algorithm. See implementation for exact behaviour.
@@ -42,7 +43,7 @@ private:
 	 * and possibly broadcasts a message to inform other devices
 	 * in the mesh of relevant changes.
 	 */
-	void onReceive(TrackableEvent* tracked_event);
+	void onReceive(TrackableEvent* trackedEvent);
 	/**
 	 * Heart of the algorithm. See implementation for exact behaviour.
 	 *
@@ -53,8 +54,8 @@ private:
 	 */
 	void onReceive(NearestWitnessReport& report);
 
-	NearestWitnessReport createReport(TrackableEvent* tracked_event);
-	NearestWitnessReport createReport(MeshMsgEvent* trackable_advertisement);
+	NearestWitnessReport createReport(TrackableEvent* trackedEvent);
+	NearestWitnessReport createReport(MeshMsgEvent* trackableAdvertisement);
 
 	/**
 	 * Returns a nearest_witness_report_t that can be sent over the mesh.
@@ -80,10 +81,11 @@ private:
 	 * Currently dispatches an event for CMD_SWITCH_[ON,OFF] depending on
 	 * whether this crownstone is closest (ON) or not the closest.
 	 *
-	 * Also prints a debug log stating the current winner.
+	 * Also prints a debug log stating the current winner. // REVIEW: Implementation detail.
 	 */
 	void onWinnerChanged();
 
+	// REVIEW: Describes implementation instead of what it does/is for.
 	/**
 	 * Returns report.rssi != 0.
 	 *

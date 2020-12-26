@@ -8,6 +8,6 @@
 #include <events/cs_EventListener.h>
 #include <events/cs_EventDispatcher.h>
 
-void EventListener::listen(){
-    EventDispatcher::getInstance().addListener(this);
+void EventListener::listen() {
+	EventDispatcher::getInstance().addListener(this);
 }

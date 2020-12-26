@@ -10,6 +10,7 @@
 #include <events/cs_EventDispatcher.h>
 #include <presence/cs_PresenceHandler.h>
 #include <util/cs_Utils.h>
+#include <logging/cs_Logger.h>
 
 #include <test/cs_Test.h>
 
@@ -205,7 +206,7 @@ bool SwitchAggregator::handleTimingEvents(event_t& event) {
 			}
 			break;
 		}
-		default:{
+		default: {
 			return false;
 		}
 	}
@@ -281,7 +282,7 @@ bool SwitchAggregator::handleStateIntentionEvents(event_t& event) {
 			executeStateIntentionUpdate(CS_SWITCH_CMD_VAL_TOGGLE, event.source);
 			break;
 		}
-		default:{
+		default: {
 			// event not handled.
 			return false;
 		}

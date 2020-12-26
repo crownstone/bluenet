@@ -8,7 +8,7 @@
 
 #include <climits>
 #include <common/cs_Handlers.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <float.h>
@@ -344,28 +344,28 @@ ret_code_t Storage::writeInternal(const cs_state_data_t & stateData) {
 		LOGStorageVerbose("Write key=%u file=%u ptr=%p", record.key, record.file_id, record.data.p_data);
 		fdsRetCode = fds_record_write(&recordDesc, &record);
 	}
-	switch(fdsRetCode) {
-	case NRF_SUCCESS:
-		setBusy(recordKey);
-		LOGStorageVerbose("Started writing");
-		break;
-	case FDS_ERR_NO_SPACE_IN_FLASH: {
-		LOGStorageInfo("Flash is full, start garbage collection");
-		ret_code_t gcRetCode = garbageCollect();
-		if (gcRetCode == NRF_SUCCESS) {
-			fdsRetCode = FDS_ERR_BUSY;
+	switch (fdsRetCode) {
+		case NRF_SUCCESS:
+			setBusy(recordKey);
+			LOGStorageVerbose("Started writing");
+			break;
+		case FDS_ERR_NO_SPACE_IN_FLASH: {
+			LOGStorageInfo("Flash is full, start garbage collection");
+			ret_code_t gcRetCode = garbageCollect();
+			if (gcRetCode == NRF_SUCCESS) {
+				fdsRetCode = FDS_ERR_BUSY;
+			}
+			else {
+				LOGe("Failed to start GC: %u", gcRetCode);
+				fdsRetCode = gcRetCode;
+			}
+			break;
 		}
-		else {
-			LOGe("Failed to start GC: %u", gcRetCode);
-			fdsRetCode = gcRetCode;
-		}
-		break;
-	}
-	case FDS_ERR_NO_SPACE_IN_QUEUES:
-	case FDS_ERR_BUSY:
-		break;
-	default:
-		LOGw("Unhandled write error: %u", fdsRetCode);
+		case FDS_ERR_NO_SPACE_IN_QUEUES:
+		case FDS_ERR_BUSY:
+			break;
+		default:
+			LOGw("Unhandled write error: %u", fdsRetCode);
 	}
 	return fdsRetCode;
 }
@@ -891,34 +891,34 @@ void Storage::handleFileStorageEvent(fds_evt_t const * p_fds_evt) {
 		LOGw("Stopped factory reset process");
 		_performingFactoryReset = false;
 	}
-	switch(p_fds_evt->id) {
-	case FDS_EVT_INIT: {
-		if (p_fds_evt->result == NRF_SUCCESS) {
-			LOGStorageDebug("Storage initialized");
-			_initialized = true;
-			event_t event(CS_TYPE::EVT_STORAGE_INITIALIZED);
-			EventDispatcher::getInstance().dispatch(event);
+	switch (p_fds_evt->id) {
+		case FDS_EVT_INIT: {
+			if (p_fds_evt->result == NRF_SUCCESS) {
+				LOGStorageDebug("Storage initialized");
+				_initialized = true;
+				event_t event(CS_TYPE::EVT_STORAGE_INITIALIZED);
+				EventDispatcher::getInstance().dispatch(event);
+			}
+			else {
+				LOGe("Failed to init storage: %u", p_fds_evt->result);
+				// Only option left is to reboot and see if things work out next time.
+				APP_ERROR_CHECK(p_fds_evt->result);
+			}
+			break;
 		}
-		else {
-			LOGe("Failed to init storage: %u", p_fds_evt->result);
-			// Only option left is to reboot and see if things work out next time.
-			APP_ERROR_CHECK(p_fds_evt->result);
-		}
-		break;
-	}
-	case FDS_EVT_WRITE:
-	case FDS_EVT_UPDATE:
-		handleWriteEvent(p_fds_evt);
-		break;
-	case FDS_EVT_DEL_RECORD:
-		handleRemoveRecordEvent(p_fds_evt);
-		break;
-	case FDS_EVT_DEL_FILE:
-		handleRemoveFileEvent(p_fds_evt);
-		break;
-	case FDS_EVT_GC:
-		handleGarbageCollectionEvent(p_fds_evt);
-		break;
+		case FDS_EVT_WRITE:
+		case FDS_EVT_UPDATE:
+			handleWriteEvent(p_fds_evt);
+			break;
+		case FDS_EVT_DEL_RECORD:
+			handleRemoveRecordEvent(p_fds_evt);
+			break;
+		case FDS_EVT_DEL_FILE:
+			handleRemoveFileEvent(p_fds_evt);
+			break;
+		case FDS_EVT_GC:
+			handleGarbageCollectionEvent(p_fds_evt);
+			break;
 	}
 }
 

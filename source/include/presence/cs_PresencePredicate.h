@@ -8,7 +8,7 @@
 #pragma once
 
 #include <presence/cs_PresenceDescription.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 #include <array>
 

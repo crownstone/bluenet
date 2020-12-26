@@ -1,4 +1,4 @@
-# UART Protocol 1.0.1
+# UART Protocol 1.0.0
 -------------------
 
 ## Special characters
@@ -66,7 +66,6 @@ uint8[] | Padding      | N | Padding to make this whole packet size a multiple o
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8   | Device ID    | 1 | User device ID for messages to the crownstone, or crownstone ID for messages from the crownstone.
 uint16  | Data type    | 2 | Type of UART data.
 uint8[] | Data         | N | The data packet, depends on type.
 
@@ -87,7 +86,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 ----- | ----------------------------- | --------- | ------ | -----------
 0     | Hello                         | Never     | [Hello](#cmd_hello_packet) | First command that should sent, used to determine whether this is the right crownstone, and to tell and determine whether encryption has to be used.
 1     | Session nonce                 | Never     | [Session nonce](#cmd_session_nonce_packet) | Refresh the session nonce.
-2     | Heartbeat                     | Optional  | [Heartbeat](#cmd_heartbeat_packet) | Used to know whether the UART connection is alive.
+2     | Heartbeat                     | Optional  | [Heartbeat](#cmd_heartbeat_packet) | Used to know whether the UART connection is alive. You can mix encrypted and unencrypted heartbeat commands. With current implementation though, each time you send an unencrypted heartbeat, the hub service data flag `UART alive encrypted` will be false until an encrypted heartbeat is sent.
 3     | Status                        | Optional  | [Status](#cmd_status_packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
 4     | Get MAC                       | Never     | -      | Get MAC address of this Crownstone.
 10    | Control command               | Yes       | [Control msg](../docs/PROTOCOL.md#control_packet) | Send a control command.
@@ -147,6 +146,8 @@ Type  | Type name                     | Encrypted | Data   | Description
 10105 | Mesh result                   | Yes       | [Mesh result](#mesh_result_packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
 10106 | Mesh ack all                  | Yes       | [Mesh ack all result](../docs/PROTOCOL.md#result_packet) | SUCCESS when all IDs were acked, or TIMEOUT if any timed out.
 10107 | Rssi between stones           | Yes       | To be defined.
+10200 | Binary debug log              | Yes       | [Binary log](#binary_log_packet) | Binary debug logs, that you have to reconstruct on the client side.
+10201 | Binary debug log array        | Yes       | [Binary log array](#binary_log_array_packet) | Binary debug logs, that you have to reconstruct on the client side.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
 40103 | Mesh cmd time                 | Yes       | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Received command to set time from the mesh.
 40110 | Mesh profile location         | Yes       | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Received the location of a profile from the mesh.
@@ -259,7 +260,7 @@ uint8[] | Session nonce | 5 | The session nonce to use for encrypted messages se
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint16 | [Result code](../docs/PROTOCOL.md#result_codes) | 2 | The result code.
+uint16 | [Result code](PROTOCOL.md#result_codes) | 2 | The result code, which will be set as the result code of the [result packet](PROTOCOL.md#result_packet).
 uint8[] | Data | N | Data.
 
 
@@ -284,6 +285,68 @@ Value | Name | Description
 3 | Profile sphere exit    | The last user of given profile left the sphere. Ignore location value.
 4 | Profile location enter | The first user of given profile entered the given location.
 5 | Profile location exit  | The first user of given profile left the given location.
+
+
+
+<a name="binary_log_header"></a>
+### Binary log header
+
+The log header should contain enough info to find the log string from the source code.
+
+![Binary log header](../docs/diagrams/binary_log_header.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Filename hash | 4 | 32 bits DJB2 hash of the reversed filename of the source code where the log is.
+uint16 | Line number | 2 | Line number (starting at line 1) where the ; of the source code where the log is.
+uint8 | Log level | 1 | Verbosity of the log, similar to serial_verbosity in config: verbose=8, debug=7, info=6, warn=5, error=4, fatal=3.
+uint8 | Flags | 1 | Options for the log. Currently only bit 0 is used, which is true to end the line.
+
+<a name="binary_log_packet"></a>
+### Binary log packet
+
+The binary log packet consists of a header and arguments. The header is used to find the string in printf format. The arguments are then filled in according to this string.
+
+For example, if the format string is `"%s is %u"` then the first argument is interpreted as a string, which replaces the `%s`. While the second arguement is interpreted as an unsigned integer, that replaces the `%u`.
+
+![Binary log packet](../docs/diagrams/binary_log_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Header](#binary_log_header) | Header | 8 | Header.
+uint8 | Num args | 1 | Number of arguments that follow.
+[Args[]](#binary_log_arg_packet) | Args | N | Array of argument packets.
+
+<a name="binary_log_arg_packet"></a>
+### Binary log argument packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Arg size | 1 | Size of the payload.
+uint8[] | Payload | N | The argument data.
+
+<a name="binary_log_array_packet"></a>
+### Binary log array packet
+
+![Binary log array packet](../docs/diagrams/binary_log_array_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Header](#binary_log_header) | Header | 8 | Header.
+[Element type](#binary_log_element_type) | Element type | 1 | The type of the elements.
+uint8 | Element size | 1 | The size of each element.
+uint8[] | Payload | X | The element data, of size: elementSize * numberOfElements.
+
+<a name="binary_log_element_type"></a>
+##### Binary log element type
+
+Value | Name | Description
+--- | --- | ---
+0   | INT     | Signed integer.
+1   | UINT    | Unsigned integer.
+2   | FLOAT   | Floating point number.
+10  | FORMAT  | Use format string to determine the type, like printf. Not implemented yet.
+
 
 
 <a name="mesh_result_packet"></a>

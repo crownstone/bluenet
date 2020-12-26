@@ -11,7 +11,7 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <cfg/cs_Strings.h>
 #include <drivers/cs_GpRegRet.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <ipc/cs_IpcRamData.h>
 #include <processing/cs_CommandHandler.h>
@@ -69,7 +69,7 @@ void CommandHandler::resetDelayed(uint8_t opCode, uint16_t delayMs) {
 	static uint8_t resetOpCode = opCode;
 	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(delayMs), &resetOpCode);
 //	// Loop until reset trigger
-//	while(true) {}; // This doesn't seem to work
+//	while (true) {}; // This doesn't seem to work
 }
 
 void CommandHandler::handleCommand(
@@ -551,7 +551,7 @@ void CommandHandler::handleCmdStateSet(cs_data_t commandData, const EncryptionAc
 	}
 }
 
-void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result){
+void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGCommandHandlerDebug(STR_HANDLE_COMMAND, "set sun time");
 	if (commandData.len != sizeof(sun_time_t)) {
 		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(sun_time_t));
@@ -562,7 +562,7 @@ void CommandHandler::handleCmdSetSunTime(cs_data_t commandData, const Encryption
 	result.returnCode = SystemTime::setSunTimes(*payload);
 }
 
-void CommandHandler::handleCmdGetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result){
+void CommandHandler::handleCmdGetTime(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	LOGi(STR_HANDLE_COMMAND, "get time");
 
 	if (result.buf.len < sizeof(uint32_t)) {
@@ -711,10 +711,10 @@ void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_sourc
 }
 
 void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	LOGi(STR_HANDLE_COMMAND, "mesh command");
 	uint16_t size = commandData.len;
 	buffer_ptr_t buffer = commandData.data;
-	BLEutil::printArray(buffer, size);
+	_log(SERIAL_INFO, false, STR_HANDLE_COMMAND, "mesh command: ");
+	BLEutil::printArray(buffer, size, SERIAL_INFO);
 
 	// Keep up the required size, and where in the buffer we are.
 	uint16_t bufIndex = 0;
@@ -805,8 +805,8 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 		resultHeader.resultHeader.commandType = meshCtrlCmd.controlCommand.type;
 		resultHeader.resultHeader.returnCode = result.returnCode;
 		resultHeader.resultHeader.payloadSize = result.dataSize;
-		LOGi("Result: id=%u cmdType=%u retCode=%u data:", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
-		BLEutil::printArray(result.buf.data, result.dataSize);
+		_log(SERIAL_INFO, false, "Result: id=%u cmdType=%u retCode=%u data: ", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
+		BLEutil::printArray(result.buf.data, result.dataSize, SERIAL_INFO);
 
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + result.dataSize);
 		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_MESH_RESULT, (uint8_t*)&resultHeader, sizeof(resultHeader));
@@ -993,79 +993,78 @@ void CommandHandler::handleMicroappCommand(cs_data_t commandData, const Encrypti
 	}
 
 	uint8_t opcode = ((microapp_packet_header_t*)commandData.data)->opcode;
-	switch(opcode) {
-	case CS_MICROAPP_OPCODE_UPLOAD: {
-		if (commandData.len != sizeof(microapp_upload_packet_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_upload_packet_t));
-			result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-			return;
-		}
-		LOGi(STR_HANDLE_COMMAND, "microapp upload");
+	switch (opcode) {
+		case CS_MICROAPP_OPCODE_UPLOAD: {
+			if (commandData.len != sizeof(microapp_upload_packet_t)) {
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_upload_packet_t));
+				result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+				return;
+			}
+			LOGi(STR_HANDLE_COMMAND, "microapp upload");
 
-		// TODO: don't copy the data. Maybe just use dispatchEventForCommand().
-		TYPIFY(CMD_MICROAPP) evtData;
-		evtData = *((microapp_upload_packet_t*)commandData.data);
-		event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
-		event.dispatch();
-	
-		result.returnCode = event.result.returnCode;
-		break;
-	}
-	case CS_MICROAPP_OPCODE_ENABLE:
-	case CS_MICROAPP_OPCODE_DISABLE: {
-		if (commandData.len != sizeof(microapp_enable_packet_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_enable_packet_t));
-			result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-			return;
-		}
-		LOGi(STR_HANDLE_COMMAND, "microapp en/disable");
+			// TODO: don't copy the data. Maybe just use dispatchEventForCommand().
+			TYPIFY(CMD_MICROAPP) evtData;
+			evtData = *((microapp_upload_packet_t*)commandData.data);
+			event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
+			event.dispatch();
 
-		// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
-		//       also make sure that for sending the data back, another buffer is used
-		microapp_enable_packet_t evtData = *((microapp_enable_packet_t*)commandData.data);
-		event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
-		event.dispatch();
-	
-		result.returnCode = event.result.returnCode;
-		break;
-	}
-	case CS_MICROAPP_OPCODE_VALIDATE: {
-		if (commandData.len != sizeof(microapp_validate_packet_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_validate_packet_t));
-			result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-			return;
+			result.returnCode = event.result.returnCode;
+			break;
 		}
-		LOGi(STR_HANDLE_COMMAND, "microapp validate");
-
-		// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
-		microapp_validate_packet_t evtData = *((microapp_validate_packet_t*)commandData.data);
-		event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
-		event.dispatch();
+		case CS_MICROAPP_OPCODE_ENABLE:
+		case CS_MICROAPP_OPCODE_DISABLE: {
+			if (commandData.len != sizeof(microapp_enable_packet_t)) {
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_enable_packet_t));
+				result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+				return;
+			}
+			LOGi(STR_HANDLE_COMMAND, "microapp en/disable");
 	
-		result.returnCode = event.result.returnCode;
-		break;
-	}
-	case CS_MICROAPP_OPCODE_REQUEST: {
-		if (commandData.len != sizeof(microapp_request_packet_t)) {
-			LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_request_packet_t));
-			result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-			return;
+			// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
+			//       also make sure that for sending the data back, another buffer is used
+			microapp_enable_packet_t evtData = *((microapp_enable_packet_t*)commandData.data);
+			event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
+			event.dispatch();
+
+			result.returnCode = event.result.returnCode;
+			break;
 		}
+		case CS_MICROAPP_OPCODE_VALIDATE: {
+			if (commandData.len != sizeof(microapp_validate_packet_t)) {
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_validate_packet_t));
+				result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+				return;
+			}
+			LOGi(STR_HANDLE_COMMAND, "microapp validate");
 	
-		LOGi(STR_HANDLE_COMMAND, "microapp request");
+			// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
+			microapp_validate_packet_t evtData = *((microapp_validate_packet_t*)commandData.data);
+			event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
+			event.dispatch();
 
-		// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
-		microapp_request_packet_t evtData = *((microapp_request_packet_t*)commandData.data);
-		event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
-		event.dispatch();
+			result.returnCode = event.result.returnCode;
+			break;
+		}
+		case CS_MICROAPP_OPCODE_REQUEST: {
+			if (commandData.len != sizeof(microapp_request_packet_t)) {
+				LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_request_packet_t));
+				result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+				return;
+			}
+
+			LOGi(STR_HANDLE_COMMAND, "microapp request");
 	
-		result.returnCode = event.result.returnCode;
-		break;
+			// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
+			microapp_request_packet_t evtData = *((microapp_request_packet_t*)commandData.data);
+			event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
+			event.dispatch();
+
+			result.returnCode = event.result.returnCode;
+			break;
+		}
+		default:
+			result.returnCode = ERR_INVALID_MESSAGE;
 	}
-	default:
-		result.returnCode = ERR_INVALID_MESSAGE;
-	}
-	
 }
 
 void CommandHandler::dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, const cmd_source_with_counter_t& source, cs_result_t & result) {

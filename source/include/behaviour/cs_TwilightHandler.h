@@ -51,7 +51,7 @@ class TwilightHandler : public EventListener {
      * Else returns a non-empty optional containing the conflict resolved value
      * of all active twilights, defaulting to 100 if none are active.
      */
-    std::optional<uint8_t> computeIntendedState(Time currenttime);
+    std::optional<uint8_t> computeIntendedState(Time currentTime);
 
     std::optional<uint8_t> currentIntendedState = 100;
 

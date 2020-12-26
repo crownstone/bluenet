@@ -15,7 +15,7 @@
 #include <cfg/cs_Config.h>
 #include <cfg/cs_Strings.h>
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>

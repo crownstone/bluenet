@@ -8,6 +8,7 @@
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_Serial.h>
 #include <events/cs_EventDispatcher.h>
+#include <logging/cs_Logger.h>
 #include <storage/cs_State.h>
 #include <uart/cs_UartCommandHandler.h>
 #include <uart/cs_UartConnection.h>
@@ -31,6 +32,10 @@ extern "C" {
 
 void handle_msg(void * data, uint16_t size) {
 	UartHandler::getInstance().handleMsg((cs_data_t*)data);
+}
+
+void on_serial_read(uint8_t val) {
+	UartHandler::getInstance().onRead(val);
 }
 
 void UartHandler::init(serial_enable_t serialEnabled) {
@@ -63,6 +68,9 @@ void UartHandler::init(serial_enable_t serialEnabled) {
 
 	UartConnection::getInstance().init();
 
+	// We are now ready to receive uart messages.
+	serial_set_read_callback(on_serial_read);
+
 	writeMsg(UART_OPCODE_TX_BOOTED);
 
 	listen();
@@ -71,7 +79,7 @@ void UartHandler::init(serial_enable_t serialEnabled) {
 ret_code_t UartHandler::writeMsg(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt) {
 
 #if CS_UART_BINARY_PROTOCOL_ENABLED == 0
-	switch(opCode) {
+	switch (opCode) {
 		// when debugging we would like to drop out of certain binary data coming over the console...
 		case UART_OPCODE_TX_TEXT:
 			// Now only the special chars get escaped, no header and tail.
@@ -115,7 +123,6 @@ ret_code_t UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartPr
 //	}
 
 	uart_msg_header_t uartMsgHeader;
-	uartMsgHeader.deviceId = _stoneId;
 	uartMsgHeader.type = opCode;
 
 	uint16_t uartMsgSize = sizeof(uartMsgHeader) + size;
@@ -161,13 +168,14 @@ ret_code_t UartHandler::writeMsgStart(UartOpcodeTx opCode, uint16_t size, UartPr
 	return ERR_SUCCESS;
 }
 
-ret_code_t UartHandler::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt) {
+ret_code_t UartHandler::writeMsgPart(UartOpcodeTx opCode, const uint8_t* const data, uint16_t size, UartProtocol::Encrypt encrypt) {
 #if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 	// when debugging we would like to drop out of certain binary data coming over the console...
-	switch(opCode) {
+	switch (opCode) {
 		case UART_OPCODE_TX_TEXT:
 			// Now only the special chars get escaped, no header and tail.
-			writeBytes(cs_data_t(data, size), false);
+			// TODO: make writeBytes() const
+			writeBytes(cs_data_t((uint8_t*)data, size), false);
 			return ERR_SUCCESS;
 		default:
 			return ERR_SUCCESS;
@@ -176,10 +184,12 @@ ret_code_t UartHandler::writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16
 
 	// No logs, this function is called when logging
 	if (mustEncrypt(encrypt, opCode)) {
-		return writeEncryptedPart(cs_data_t(data, size));
+		// TODO: make writeEncryptedPart() const
+		return writeEncryptedPart(cs_data_t((uint8_t*)data, size));
 	}
 	else {
-		writeBytes(cs_data_t(data, size), true);
+		// TODO: make writeBytes() const
+		writeBytes(cs_data_t((uint8_t*)data, size), true);
 		return ERR_SUCCESS;
 	}
 }
@@ -200,7 +210,7 @@ cs_ret_code_t UartHandler::writeStartByte() {
 	if (!serial_tx_ready()) {
 		return ERR_NOT_INITIALIZED;
 	}
-	writeByte(UART_START_BYTE);
+	serial_write(UART_START_BYTE);
 	return ERR_SUCCESS;
 }
 
@@ -215,17 +225,17 @@ cs_ret_code_t UartHandler::writeBytes(cs_data_t data, bool updateCrc) {
 	}
 
 	uint8_t val;
-	for(cs_buffer_size_t i = 0; i < data.len; ++i) {
+	for (cs_buffer_size_t i = 0; i < data.len; ++i) {
 		val = data.data[i];
 		// Escape when necessary
 		switch (val) {
 			case UART_START_BYTE:
 			case UART_ESCAPE_BYTE:
-				writeByte(UART_ESCAPE_BYTE);
+				serial_write(UART_ESCAPE_BYTE);
 				val ^= UART_ESCAPE_FLIP_MASK;
 				break;
 		}
-		writeByte(val);
+		serial_write(val);
 	}
 	return ERR_SUCCESS;
 }
@@ -617,7 +627,6 @@ void UartHandler::handleUartMsg(uint8_t* data, uint16_t size, EncryptionAccessLe
 	_commandHandler.handleCommand(
 			opCode,
 			cs_data_t(msgData, msgDataSize),
-			cmd_source_with_counter_t(cmd_source_t(CS_CMD_SOURCE_TYPE_UART, header->deviceId)),
 			accessLevel,
 			wasEncrypted,
 			cs_data_t(_writeBuffer, (_writeBuffer == nullptr) ? 0 : UART_TX_BUFFER_SIZE)

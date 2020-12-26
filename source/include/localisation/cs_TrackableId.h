@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include <protocol/mesh/cs_MeshModelPackets.h>
-
 #include <cstdint> // for uint8_t
 #include <cstring> // for memcmp, memcpy
+#include <logging/cs_Logger.h>
+#include <protocol/mesh/cs_MeshModelPackets.h>
 
 /**
  * Mesh representation of a trackable device.
@@ -27,6 +27,7 @@ struct __attribute__((__packed__)) TrackableId {
 
 	TrackableId() = default;
 
+	// REVIEW: Missing size (or use mac address struct)
 	TrackableId(const uint8_t * const mac){
 		std::memcpy(bytes, mac, SIZE);
 	}
@@ -42,7 +43,8 @@ struct __attribute__((__packed__)) TrackableId {
 		return std::memcmp(bytes,other.bytes,SIZE) < 0;
 	}
 
-	void print(const char* headerstr){
+	// REVIEW: string as argument can't be left out from binary size.
+	void print(const char* headerstr) {
 		LOGd("%s mac=[%2x,%2x,%2x,%2x,%2x,%2x]",
 				headerstr,
 				bytes[0],

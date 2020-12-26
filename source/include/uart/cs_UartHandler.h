@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <drivers/cs_Serial.h>
 #include <encryption/cs_AES.h>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_UartProtocol.h>
@@ -79,7 +78,7 @@ public:
 	 * @param[in] size       Size of this data part.
 	 * @param[in] encrypt    How to encrypt the msg.
 	 */
-	ret_code_t writeMsgPart(UartOpcodeTx opCode, uint8_t * data, uint16_t size, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
+	ret_code_t writeMsgPart(UartOpcodeTx opCode, const uint8_t* const data, uint16_t size, UartProtocol::Encrypt encrypt = UartProtocol::ENCRYPT_ACCORDING_TO_TYPE);
 
 	/**
 	 * Write a msg over UART in a streaming manner.

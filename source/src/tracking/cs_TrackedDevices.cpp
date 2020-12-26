@@ -455,7 +455,7 @@ void TrackedDevices::sendDeviceList() {
 }
 
 void TrackedDevices::handleEvent(event_t& evt) {
-	switch(evt.type) {
+	switch (evt.type) {
 		case CS_TYPE::CMD_REGISTER_TRACKED_DEVICE: {
 			internal_register_tracked_device_packet_t* data = reinterpret_cast<TYPIFY(CMD_REGISTER_TRACKED_DEVICE)*>(evt.data);
 			evt.result.returnCode = handleRegister(*data);

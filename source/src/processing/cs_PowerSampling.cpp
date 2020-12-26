@@ -9,7 +9,7 @@
 
 #include "common/cs_Types.h"
 #include "drivers/cs_RTC.h"
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 #include "events/cs_EventDispatcher.h"
 #include "processing/cs_RecognizeSwitch.h"
 #include "protocol/cs_UartMsgTypes.h"
@@ -218,7 +218,7 @@ void PowerSampling::enableZeroCrossingInterrupt(ps_zero_crossing_cb_t callback) 
 }
 
 void PowerSampling::handleEvent(event_t & event) {
-	switch(event.type) {
+	switch (event.type) {
 		case CS_TYPE::CMD_ENABLE_LOG_POWER:
 			_logsEnabled.flags.power = *(TYPIFY(CMD_ENABLE_LOG_POWER)*)event.data;
 			break;
@@ -526,7 +526,7 @@ bool PowerSampling::isVoltageAndCurrentSwapped(adc_buffer_id_t bufIndex, adc_buf
 		prevSample = AdcBuffer::getInstance().getValue(prevBufIndex, VOLTAGE_CHANNEL_IDX, i);
 		voltageSample = AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, i);
 		currentSample = AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i);
-		_log(SERIAL_DEBUG, "%i %i %i\r\n", prevSample, voltageSample, currentSample);
+		LOGd("%i %i %i", prevSample, voltageSample, currentSample);
 
 		sumVoltageChannel += std::abs(voltageSample - prevSample);
 		sumCurrentChannel += std::abs(currentSample - prevSample);
@@ -866,7 +866,7 @@ bool PowerSampling::calculatePower(adc_buffer_id_t bufIndex) {
 	if (_logsEnabled.flags.current) {
 		// Write uart_msg_current_t without allocating a buffer.
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_CURRENT, sizeof(uart_msg_current_t));
-		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT,(uint8_t*)&(rtcCount), sizeof(rtcCount));
+		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_CURRENT, (uint8_t*)&(rtcCount), sizeof(rtcCount));
 		adc_sample_value_t val;
 		for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
 			val = AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, i);
@@ -890,11 +890,11 @@ bool PowerSampling::calculatePower(adc_buffer_id_t bufIndex) {
 	if (_logsEnabled.flags.voltage) {
 		// Write uart_msg_voltage_t without allocating a buffer.
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, sizeof(uart_msg_voltage_t));
-		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&(rtcCount), sizeof(rtcCount));
+		UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, (uint8_t*)&(rtcCount), sizeof(rtcCount));
 		adc_sample_value_t val;
 		for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
 			val = AdcBuffer::getInstance().getValue(bufIndex, VOLTAGE_CHANNEL_IDX, i);
-			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE,(uint8_t*)&val, sizeof(val));
+			UartHandler::getInstance().writeMsgPart(UART_OPCODE_TX_POWER_LOG_VOLTAGE, (uint8_t*)&val, sizeof(val));
 		}
 		UartHandler::getInstance().writeMsgEnd(UART_OPCODE_TX_POWER_LOG_VOLTAGE);
 	}
@@ -1345,13 +1345,18 @@ void PowerSampling::enableSwitchcraft(bool enable) {
 
 void PowerSampling::printBuf(adc_buffer_id_t bufIndex) {
 	LOGd("ADC buf:");
+	// Copy to buf and log that buf, instead of doing a uart msg per sample.
+	// Only works if channel length is divisible by 10.
+	__attribute__((unused)) adc_sample_value_id_t buf[10];
 	for (adc_channel_id_t channel = 0; channel < AdcBuffer::getChannelCount(); ++channel) {
-		for (adc_sample_value_id_t i = 0; i < AdcBuffer::getChannelLength(); ++i) {
-			_log(SERIAL_DEBUG, "%i ", AdcBuffer::getInstance().getValue(bufIndex, channel, i));
-			if ((i+1) % 10 == 0) {
-				_log(SERIAL_DEBUG, SERIAL_CRLF);
+		LOGd("channel %u:", channel);
+		for (adc_sample_value_id_t i = 0, j = 0; i < AdcBuffer::getChannelLength(); ++i) {
+			buf[j] = AdcBuffer::getInstance().getValue(bufIndex, channel, i);
+			if (++j == 10) {
+				_logArray(SERIAL_DEBUG, true, buf, sizeof(buf));
+//				LOGd("%4u %4u %4u %4u %4u %4u %4u %4u %4u %4u", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6], buf[7], buf[8], buf[9]);
+				j = 0;
 			}
 		}
-		_log(SERIAL_DEBUG, SERIAL_CRLF);
 	}
 }

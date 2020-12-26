@@ -49,6 +49,8 @@
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_RC5.h>
 #include <ipc/cs_IpcRamData.h>
+#include <logging/cs_CLogger.h>
+#include <logging/cs_Logger.h>
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <processing/cs_TapToToggle.h>
 #include <storage/cs_State.h>
@@ -107,16 +109,13 @@ void startHFClock() {
 void initUart(uint8_t pinRx, uint8_t pinTx) {
 	serial_config(pinRx, pinTx);
 	serial_init(SERIAL_ENABLE_RX_AND_TX);
-	_log(SERIAL_INFO, SERIAL_CRLF);
 
 	LOGi("Welcome to Bluenet!");
-	LOGi("\033[35;1m");
 	LOGi(" _|_|_|    _|                                            _|     ");
 	LOGi(" _|    _|  _|  _|    _|    _|_|    _|_|_|      _|_|    _|_|_|_| ");
 	LOGi(" _|_|_|    _|  _|    _|  _|_|_|_|  _|    _|  _|_|_|_|    _|     ");
 	LOGi(" _|    _|  _|  _|    _|  _|        _|    _|  _|          _|     ");
 	LOGi(" _|_|_|    _|    _|_|_|    _|_|_|  _|    _|    _|_|_|      _|_| ");
-	LOGi("\033[0m");
 	
 	LOGi("Firmware version %s", g_FIRMWARE_VERSION);
 	LOGi("Git hash %s", g_GIT_SHA1);
@@ -334,6 +333,9 @@ void Crownstone::initDrivers1() {
 			UartHandler::getInstance().init(SERIAL_ENABLE_RX_AND_TX);
 		}
 
+		// Plain text log.
+		CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
+
 		LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
 
 		// Store reset reason.
@@ -462,7 +464,7 @@ void Crownstone::configureAdvertisement() {
 }
 
 void Crownstone::createService(const ServiceEvent event) {
-	switch(event) {
+	switch (event) {
 		case CREATE_DEVICE_INFO_SERVICE:
 			LOGd("Create device info service");
 			_deviceInformationService = new DeviceInformationService();
@@ -486,7 +488,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	LOGd("Current mode: %s", operationModeName(_oldOperationMode));
 	LOGd("Switch to mode: %s", operationModeName(newMode));
 
-	switch(_oldOperationMode) {
+	switch (_oldOperationMode) {
 		case OperationMode::OPERATION_MODE_UNINITIALIZED:
 			break;
 		case OperationMode::OPERATION_MODE_DFU:
@@ -509,7 +511,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	startOperationMode(newMode);
 
 	// Create services that belong to the new mode.
-	switch(newMode) {
+	switch (newMode) {
 		case OperationMode::OPERATION_MODE_NORMAL:
 			if (_oldOperationMode == OperationMode::OPERATION_MODE_UNINITIALIZED) {
 				createService(CREATE_DEVICE_INFO_SERVICE);
@@ -532,7 +534,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 
 	_stack->resume();
 
-	switch(newMode) {
+	switch (newMode) {
 		case OperationMode::OPERATION_MODE_SETUP: {
 			LOGd("Configure setup mode");
 //			_advertiser->changeToLowTxPower();
@@ -612,7 +614,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 #endif
 
 
-	switch(mode) {
+	switch (mode) {
 		case OperationMode::OPERATION_MODE_NORMAL: {
 			_scanner->init();
 			_scanner->setStack(_stack);
@@ -633,14 +635,14 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			_multiSwitchHandler->init();
 			break;
 		} 
-		case OperationMode::OPERATION_MODE_SETUP:{
+		case OperationMode::OPERATION_MODE_SETUP: {
 			// TODO: Why this hack?
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {
 				serial_enable(SERIAL_ENABLE_RX_ONLY);
 			}
 			break;
 		}
-		default:{
+		default: {
 			// nothing to be done
 			break;
 		}
@@ -725,10 +727,11 @@ void Crownstone::startUp() {
 	err_code = sd_ble_gap_addr_get(&address);
 	APP_ERROR_CHECK(err_code);
 
-	_log(SERIAL_INFO, "\r\n");
-	_log(SERIAL_INFO, "\t\t\tAddress: ");
+	_log(SERIAL_INFO, false, "Address: ");
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN, SERIAL_INFO);
-	_log(SERIAL_INFO, "\r\n");
+
+	// Plain text log.
+	CLOGi("\r\nAddress: %X:%X:%X:%X:%X:%X", address.addr[5], address.addr[4], address.addr[3], address.addr[2], address.addr[1], address.addr[0]);
 
 	_state->startWritesToFlash();
 
@@ -785,12 +788,9 @@ void Crownstone::scheduleNextTick() {
 }
 
 void Crownstone::run() {
-
-	// static bool mesh_sync_complete = false;
-
 	LOGi(FMT_HEADER, "running");
 
-	while(1) {
+	while (1) {
 		app_sched_execute();
 #if BUILD_MESHING == 1
 		// See mesh_interrupt_priorities.md
@@ -802,16 +802,12 @@ void Crownstone::run() {
 		sd_app_evt_wait();
 #endif
 		LOG_FLUSH();
-
-		// if(!mesh_sync_complete){
-		// 	mesh_sync_complete = _mesh->requestSync();
-		// }
 	}
 }
 
 void Crownstone::handleEvent(event_t & event) {
 
-	switch(event.type) {
+	switch (event.type) {
 		case CS_TYPE::EVT_STORAGE_INITIALIZED:
 			init(1);
 			startUp();

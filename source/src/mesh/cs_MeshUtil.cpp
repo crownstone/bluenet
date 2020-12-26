@@ -5,7 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshUtil.h>
 
@@ -13,47 +13,47 @@ namespace MeshUtil {
 
 int8_t getRssi(const nrf_mesh_rx_metadata_t* metaData) {
 	switch (metaData->source) {
-	case NRF_MESH_RX_SOURCE_SCANNER:
-		return metaData->params.scanner.rssi;
-	case NRF_MESH_RX_SOURCE_GATT:
-		// TODO: return connection rssi?
-		return -10;
-//	case NRF_MESH_RX_SOURCE_FRIEND:
-//		// TODO: is this correct?
-//		return metaData->params.scanner.rssi;
-//		break;
-//	case NRF_MESH_RX_SOURCE_LOW_POWER:
-//		// TODO: is this correct?
-//		return metaData->params.scanner.rssi;
-//		break;
-	case NRF_MESH_RX_SOURCE_INSTABURST:
-		return metaData->params.instaburst.rssi;
-		break;
-	case NRF_MESH_RX_SOURCE_LOOPBACK:
-		return -1;
-		break;
+		case NRF_MESH_RX_SOURCE_SCANNER:
+			return metaData->params.scanner.rssi;
+		case NRF_MESH_RX_SOURCE_GATT:
+			// TODO: return connection rssi?
+			return -10;
+//		case NRF_MESH_RX_SOURCE_FRIEND:
+//			// TODO: is this correct?
+//			return metaData->params.scanner.rssi;
+//			break;
+//		case NRF_MESH_RX_SOURCE_LOW_POWER:
+//			// TODO: is this correct?
+//			return metaData->params.scanner.rssi;
+//			break;
+		case NRF_MESH_RX_SOURCE_INSTABURST:
+			return metaData->params.instaburst.rssi;
+			break;
+		case NRF_MESH_RX_SOURCE_LOOPBACK:
+			return -1;
+			break;
 	}
 	return 0;
 }
 
 uint8_t getChannel(const nrf_mesh_rx_metadata_t* metaData) {
 	switch (metaData->source) {
-	case NRF_MESH_RX_SOURCE_SCANNER:
-		return metaData->params.scanner.channel;
-	case NRF_MESH_RX_SOURCE_INSTABURST:
-		 return metaData->params.instaburst.channel;
-	case NRF_MESH_RX_SOURCE_GATT:
-		// a semi decent solution: connection index is uint16_t.
-		// return metaData->params.gatt.connection_index & 0xff;
-		return 0xff;
-	case NRF_MESH_RX_SOURCE_LOOPBACK:
-		return 0xff;
+		case NRF_MESH_RX_SOURCE_SCANNER:
+			return metaData->params.scanner.channel;
+		case NRF_MESH_RX_SOURCE_INSTABURST:
+			return metaData->params.instaburst.channel;
+		case NRF_MESH_RX_SOURCE_GATT:
+			// a semi decent solution: connection index is uint16_t.
+			// return metaData->params.gatt.connection_index & 0xff;
+			return 0xff;
+		case NRF_MESH_RX_SOURCE_LOOPBACK:
+			return 0xff;
 	}
 
 	return 0xff;
 }
 
-cs_mesh_received_msg_t fromAccessMessageRX(const access_message_rx_t&  accessMsg){
+cs_mesh_received_msg_t fromAccessMessageRX(const access_message_rx_t&  accessMsg) {
 	cs_mesh_received_msg_t msg;
 	msg.opCode = accessMsg.opcode.opcode;
 	msg.srcAddress = accessMsg.meta_data.src.value;
@@ -69,24 +69,24 @@ cs_mesh_received_msg_t fromAccessMessageRX(const access_message_rx_t&  accessMsg
 
 void printMeshAddress(const char* prefix, const nrf_mesh_address_t* addr) {
 	switch (addr->type) {
-	case NRF_MESH_ADDRESS_TYPE_INVALID:
-		LOGMeshModelVerbose("%s type=invalid", prefix);
-		break;
-	case NRF_MESH_ADDRESS_TYPE_UNICAST:
-		LOGMeshModelVerbose("%s type=unicast id=%u", prefix, addr->value);
-		break;
-	case NRF_MESH_ADDRESS_TYPE_VIRTUAL:{
-		//128-bit virtual label UUID,
-		__attribute__((unused)) uint32_t* uuid1 = (uint32_t*)(addr->p_virtual_uuid);
-		__attribute__((unused)) uint32_t* uuid2 = (uint32_t*)(addr->p_virtual_uuid + 4);
-		__attribute__((unused)) uint32_t* uuid3 = (uint32_t*)(addr->p_virtual_uuid + 8);
-		__attribute__((unused)) uint32_t* uuid4 = (uint32_t*)(addr->p_virtual_uuid + 12);
-		LOGMeshModelVerbose("%s type=virtual id=%u uuid=%x%x%x%x", prefix, addr->value, uuid1, uuid2, uuid3, uuid4);
-		break;
-	}
-	case NRF_MESH_ADDRESS_TYPE_GROUP:
-		LOGMeshModelVerbose("%s type=group id=%u", prefix, addr->value);
-		break;
+		case NRF_MESH_ADDRESS_TYPE_INVALID:
+			LOGMeshModelVerbose("%s type=invalid", prefix);
+			break;
+		case NRF_MESH_ADDRESS_TYPE_UNICAST:
+			LOGMeshModelVerbose("%s type=unicast id=%u", prefix, addr->value);
+			break;
+		case NRF_MESH_ADDRESS_TYPE_VIRTUAL: {
+			//128-bit virtual label UUID,
+			__attribute__((unused)) uint32_t* uuid1 = (uint32_t*)(addr->p_virtual_uuid);
+			__attribute__((unused)) uint32_t* uuid2 = (uint32_t*)(addr->p_virtual_uuid + 4);
+			__attribute__((unused)) uint32_t* uuid3 = (uint32_t*)(addr->p_virtual_uuid + 8);
+			__attribute__((unused)) uint32_t* uuid4 = (uint32_t*)(addr->p_virtual_uuid + 12);
+			LOGMeshModelVerbose("%s type=virtual id=%u uuid=%x%x%x%x", prefix, addr->value, uuid1, uuid2, uuid3, uuid4);
+			break;
+		}
+		case NRF_MESH_ADDRESS_TYPE_GROUP:
+			LOGMeshModelVerbose("%s type=group id=%u", prefix, addr->value);
+			break;
 	}
 }
 

@@ -101,13 +101,8 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			result.returnCode = ERR_BUFFER_LOCKED;
 		}
 
-		LOGd("addControlCharacteristic returnCode=%u dataSize=%u", result.returnCode, result.dataSize);
-//		[[maybe_unused]] uint8_t* buf = _resultPacketAccessor->getSerializedBuffer().data;
-//		for(auto i = 0; i < 50; i+=10){
-//			LOGd("  %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
-//			buf[i+0],buf[i+1],buf[i+2],buf[i+3],buf[i+4],
-//			buf[i+5],buf[i+6],buf[i+7],buf[i+8],buf[i+9]);
-//		}
+		_log(SERIAL_DEBUG, false, "addControlCharacteristic returnCode=%u dataSize=%u", result.returnCode, result.dataSize);
+		_logArray(SERIAL_DEBUG, true, _resultPacketAccessor->getSerializedBuffer().data, _resultPacketAccessor->getSerializedBuffer().len);
 
 		writeResult(protocol, type, result);
 	});
@@ -206,50 +201,50 @@ void CrownstoneService::writeResult(uint8_t protocol, CommandHandlerTypes type, 
 }
 
 void CrownstoneService::handleEvent(event_t & event) {
-	switch(event.type) {
-	case CS_TYPE::EVT_SESSION_DATA_SET: {
-		// Check if this characteristic exists first. In case of setup mode it does not for instance.
-		if (_sessionDataCharacteristic != NULL) {
-			// In setup mode, this requires the setup key to be generated.
-			_sessionDataCharacteristic->setValueLength(event.size);
-			_sessionDataCharacteristic->setValue((uint8_t*)event.data);
-			_sessionDataCharacteristic->updateValue(ConnectionEncryptionType::ECB);
+	switch (event.type) {
+		case CS_TYPE::EVT_SESSION_DATA_SET: {
+			// Check if this characteristic exists first. In case of setup mode it does not for instance.
+			if (_sessionDataCharacteristic != NULL) {
+				// In setup mode, this requires the setup key to be generated.
+				_sessionDataCharacteristic->setValueLength(event.size);
+				_sessionDataCharacteristic->setValue((uint8_t*)event.data);
+				_sessionDataCharacteristic->updateValue(ConnectionEncryptionType::ECB);
+			}
+			break;
 		}
-		break;
-	}
-	case CS_TYPE::EVT_BLE_CONNECT: {
-		// Check if this characteristic exists first. In case of setup mode it does not for instance.
-		if (_factoryResetCharacteristic != NULL) {
-			_factoryResetCharacteristic->operator=(0);
+		case CS_TYPE::EVT_BLE_CONNECT: {
+			// Check if this characteristic exists first. In case of setup mode it does not for instance.
+			if (_factoryResetCharacteristic != NULL) {
+				_factoryResetCharacteristic->operator=(0);
+			}
+			if (_resultCharacteristic != NULL) {
+				_resultCharacteristic->setValueLength(0);
+			}
+			break;
 		}
-		if (_resultCharacteristic != NULL) {
-			_resultCharacteristic->setValueLength(0);
+		case CS_TYPE::EVT_BLE_DISCONNECT: {
+			// Check if this characteristic exists first. In case of setup mode it does not for instance.
+			if (_sessionDataCharacteristic != NULL) {
+				_sessionDataCharacteristic->setValueLength(0);
+			}
+			break;
 		}
-		break;
-	}
-	case CS_TYPE::EVT_BLE_DISCONNECT: {
-		// Check if this characteristic exists first. In case of setup mode it does not for instance.
-		if (_sessionDataCharacteristic != NULL) {
-			_sessionDataCharacteristic->setValueLength(0);
+		case CS_TYPE::EVT_SETUP_DONE: {
+			cs_result_t result(ERR_SUCCESS);
+			writeResult(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_SETUP, result);
+//			writeResult(CTRL_CMD_SETUP, cs_result_t(ERR_SUCCESS));
+			break;
 		}
-		break;
-	}
-	case CS_TYPE::EVT_SETUP_DONE: {
-		cs_result_t result(ERR_SUCCESS);
-		writeResult(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_SETUP, result);
-//		writeResult(CTRL_CMD_SETUP, cs_result_t(ERR_SUCCESS));
-		break;
-	}
-	case CS_TYPE::EVT_MICROAPP: {
-		TYPIFY(EVT_MICROAPP) data = *((TYPIFY(EVT_MICROAPP)*)event.data);
-		uint8_t protocolVersion = 5; // TODO: get this from event.
-		writeResult(protocolVersion, CTRL_CMD_MICROAPP, data.error, cs_data_t(reinterpret_cast<buffer_ptr_t>(event.data), TypeSize(event.type)));
-		break;
-	}
-	case CS_TYPE::EVT_HUB_DATA_REPLY: {
-		TYPIFY(EVT_HUB_DATA_REPLY)* reply = reinterpret_cast<TYPIFY(EVT_HUB_DATA_REPLY)*>(event.data);
-		writeResult(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_HUB_DATA, reply->retCode, reply->data);
-		break;
+		case CS_TYPE::EVT_MICROAPP: {
+			TYPIFY(EVT_MICROAPP) data = *((TYPIFY(EVT_MICROAPP)*)event.data);
+			uint8_t protocolVersion = 5; // TODO: get this from event.
+			writeResult(protocolVersion, CTRL_CMD_MICROAPP, data.error, cs_data_t(reinterpret_cast<buffer_ptr_t>(event.data), TypeSize(event.type)));
+			break;
+		}
+		case CS_TYPE::EVT_HUB_DATA_REPLY: {
+			TYPIFY(EVT_HUB_DATA_REPLY)* reply = reinterpret_cast<TYPIFY(EVT_HUB_DATA_REPLY)*>(event.data);
+			writeResult(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_HUB_DATA, reply->retCode, reply->data);
+			break;
 	}
 
 

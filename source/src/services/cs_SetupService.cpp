@@ -20,8 +20,8 @@
 #include <nrf_soc.h>
 
 SetupService::SetupService() :
-    _macAddressCharacteristic(NULL),
-    _setupKeyCharacteristic(NULL)
+	_macAddressCharacteristic(NULL),
+	_setupKeyCharacteristic(NULL)
 {
 	setUUID(UUID(SETUP_UUID));
 	setName(BLE_SERVICE_SETUP);
@@ -93,7 +93,7 @@ void SetupService::addSetupKeyCharacteristic(buffer_ptr_t buffer, uint16_t size)
 void SetupService::handleEvent(event_t & event) {
 	// make sure the session key is populated.
 	CrownstoneService::handleEvent(event);
-	switch(event.type) {
+	switch (event.type) {
 		case CS_TYPE::EVT_SESSION_DATA_SET: {
 			cs_data_t key = KeysAndAccess::getInstance().getSetupKey();
 			if (key.data != nullptr) {

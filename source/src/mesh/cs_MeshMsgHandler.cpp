@@ -6,7 +6,7 @@
  */
 
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <events/cs_Event.h>
 #include <mesh/cs_MeshCommon.h>
 #include <mesh/cs_MeshMsgHandler.h>
@@ -31,7 +31,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 	// (checks payload size)
 	if (!MeshUtil::isValidMeshMessage(msg.msg, msg.msgSize)) {
 		if (msg.msgSize > 0) {
-			LOGw("Invalid mesh message of type %d", MeshUtil::getType(msg.msg));
+			LOGw("Invalid mesh message of type %u", MeshUtil::getType(msg.msg));
 		} else {
 			LOGw("Invalid mesh message of size 0");
 		}
@@ -50,7 +50,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 	// ===========
 
 	// (at this point, the result.returnCode should be ERR_EVENT_UNHANDLED)
-	if (result.returnCode != ERR_EVENT_UNHANDLED){
+	if (result.returnCode != ERR_EVENT_UNHANDLED) {
 		// some handler took care of business.
 		LOGw("MeshMshHandler result code not clean.");
 		return;
@@ -74,7 +74,7 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 
 	generic_mesh_msg_evt.dispatch();
 
-	if (generic_mesh_msg_evt.result.returnCode != ERR_EVENT_UNHANDLED){
+	if (generic_mesh_msg_evt.result.returnCode != ERR_EVENT_UNHANDLED) {
 		// some handler took care of business.
 		return;
 	}
@@ -103,7 +103,11 @@ void MeshMsgHandler::handleMsg(const MeshUtil::cs_mesh_received_msg_t& msg, cs_r
 			return;
 		}
 		case CS_MESH_MODEL_TYPE_RSSI_PING: {
-			result.returnCode = handleRssiPing(payload, payloadSize, srcId, msg.rssi, msg.hops, msg.channel);
+			result.returnCode = handleRssiPing(meshMsgEvent);
+			return;
+		}
+		case CS_MESH_MODEL_TYPE_RSSI_DATA: {
+			result.returnCode = handleRssiData(meshMsgEvent);
 			return;
 		}
 		case CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT: {
@@ -219,7 +223,7 @@ cs_ret_code_t MeshMsgHandler::handleCmdTime(uint8_t* payload, size16_t payloadSi
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, uint8_t hops){
+cs_ret_code_t MeshMsgHandler::handleTimeSync(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, uint8_t hops) {
 	LOGMeshModelInfo("handleTimeSync");
 	cs_mesh_model_msg_time_sync_t* packet = (cs_mesh_model_msg_time_sync_t*) payload;
 
@@ -245,18 +249,23 @@ cs_ret_code_t MeshMsgHandler::handleCmdNoop(uint8_t* payload, size16_t payloadSi
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t MeshMsgHandler::handleRssiPing(uint8_t* payload, size16_t payloadSize, stone_id_t srcId, int8_t rssi, uint8_t hops, uint8_t channel){
-	rssi_ping_message_t* packet = (rssi_ping_message_t*) payload;
+cs_ret_code_t MeshMsgHandler::handleRssiPing(MeshMsgEvent& mesh_msg_event) {
+	event_t event(
+			CS_TYPE::EVT_MESH_RSSI_PING,
+			&mesh_msg_event,
+			sizeof(mesh_msg_event)
+			);
+	event.dispatch();
 
-	// copy metadata into event data if it is an original ping message.
-	// (i.e. if sender and rssi hasn't been filled in yet.)
-	if (packet->sender_id == 0) { // && hops == 0?
-		packet->rssi = rssi;
-		packet->sender_id = srcId;
-		packet->channel = channel;
-	}
+	return ERR_SUCCESS;
+}
 
-	event_t event(CS_TYPE::EVT_MESH_RSSI_PING, packet, sizeof(rssi_ping_message_t));
+cs_ret_code_t MeshMsgHandler::handleRssiData(MeshMsgEvent& mesh_msg_event) {
+	event_t event(
+			CS_TYPE::EVT_MESH_RSSI_DATA,
+			&mesh_msg_event,
+			sizeof(mesh_msg_event)
+			);
 	event.dispatch();
 
 	return ERR_SUCCESS;
@@ -485,14 +494,14 @@ void MeshMsgHandler::handleStateSet(uint8_t* payload, size16_t payloadSize, cs_r
 	uint8_t stateDataSize = payloadSize - sizeof(*meshStateHeader);
 	uint8_t* stateData = payload + sizeof(*meshStateHeader);
 
-	LOGi("handleStateSet: type=%u id=%u persistenceMode=%u accessLevel=%u sourceId=%u data:",
+	_log(SERIAL_INFO, false, "handleStateSet: type=%u id=%u persistenceMode=%u accessLevel=%u sourceId=%u data: ",
 			meshStateHeader->header.type,
 			meshStateHeader->header.id,
 			meshStateHeader->header.persistenceMode,
 			meshStateHeader->accessLevel,
 			meshStateHeader->sourceId
 			);
-	BLEutil::printArray(stateData, stateDataSize);
+	BLEutil::printArray(stateData, stateDataSize, SERIAL_INFO);
 
 	TYPIFY(CMD_CONTROL_CMD) controlCmd;
 
@@ -549,8 +558,8 @@ cs_ret_code_t MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSiz
 		LOGw("Unknown command type %u, did you add it to getCtrlCmdType() and getMeshType()?", header->msgType);
 	}
 
-	LOGi("handleResult: id=%u meshType=%u retCode=%u data:", srcId, header->msgType, header->retCode);
-	BLEutil::printArray(resultData.data, resultData.len);
+	_log(SERIAL_INFO, false, "handleResult: id=%u meshType=%u retCode=%u data: ", srcId, header->msgType, header->retCode);
+	BLEutil::printArray(resultData.data, resultData.len, SERIAL_INFO);
 
 	// Convert result data if needed.
 	switch (header->msgType) {
@@ -579,8 +588,8 @@ cs_ret_code_t MeshMsgHandler::handleResult(uint8_t* payload, size16_t payloadSiz
 void MeshMsgHandler::sendResult(uart_msg_mesh_result_packet_header_t& resultHeader, const cs_data_t& resultData) {
 	resultHeader.resultHeader.payloadSize = resultData.len;
 
-	LOGi("Result: id=%u cmdType=%u retCode=%u data:", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
-	BLEutil::printArray(resultData.data, resultData.len);
+	_log(SERIAL_INFO, false, "Result: id=%u cmdType=%u retCode=%u data: ", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
+	BLEutil::printArray(resultData.data, resultData.len, SERIAL_INFO);
 
 	// Send out result.
 	UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + resultData.len);

@@ -7,7 +7,7 @@
 #pragma once
 
 #include <cstdint>
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 #include "protocol/cs_ErrorCodes.h"
 #include "structs/cs_BufferAccessor.h"
 #include "structs/cs_PacketsInternal.h"

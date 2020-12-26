@@ -14,7 +14,7 @@
 #include <ble/cs_UUID.h>
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
@@ -85,25 +85,19 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 	}
 }
 
-extern "C" {
-
-int microapp_callback(uint8_t *payload, uint16_t length) {
-	if (length == 0) return ERR_NO_PAYLOAD;
-	if (length > 255) return ERR_TOO_LARGE;
-
+int handleCommand(uint8_t *payload, uint16_t length) {
 	uint8_t command = payload[0];
-
 	switch(command) {
 		case CS_MICROAPP_COMMAND_LOG: {
 			char type = payload[1];
 			switch(type) {
 				case CS_MICROAPP_COMMAND_LOG_CHAR: {
-					char value = payload[2];
+					__attribute__((unused)) char value = payload[2];
 					LOGi("%i", (int)value);
 					break;
 				}
 				case CS_MICROAPP_COMMAND_LOG_INT: {
-					int value = (payload[2] << 8) + payload[3];
+					__attribute__((unused)) int value = (payload[2] << 8) + payload[3];
 					LOGi("%i", value);
 					break;
 				}
@@ -160,6 +154,15 @@ int microapp_callback(uint8_t *payload, uint16_t length) {
 	}
 
 	return ERR_SUCCESS;
+}
+
+extern "C" {
+
+int microapp_callback(uint8_t *payload, uint16_t length) {
+	if (length == 0) return ERR_NO_PAYLOAD;
+	if (length > 255) return ERR_TOO_LARGE;
+
+	return handleCommand(payload, length);
 }
 
 } // extern C

@@ -11,7 +11,6 @@
 
 #include <ble/cs_UUID.h>
 #include <protocol/cs_Typedefs.h>
-#include <drivers/cs_Serial.h>
 #include <util/cs_Utils.h>
 
 /** Implementation of the iBeacon specification.

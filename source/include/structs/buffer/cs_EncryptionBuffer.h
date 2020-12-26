@@ -9,7 +9,7 @@
 #include <cstdlib>
 
 #include <common/cs_Types.h>
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 
 #include <cstring>
 

@@ -12,7 +12,7 @@
 #include <storage/cs_State.h>
 
 #include <drivers/cs_RNG.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 #define LOGPresenceHandler LOGnone
 
@@ -34,7 +34,7 @@ void PresenceHandler::handleEvent(event_t& evt) {
 	uint8_t location;
 	uint8_t profile;
 	bool fromMesh = false;
-	switch(evt.type) {
+	switch (evt.type) {
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
 			// drop through
 			adv_background_parsed_t* parsed_adv_ptr = reinterpret_cast<TYPIFY(EVT_ADV_BACKGROUND_PARSED)*>(evt.data);
@@ -168,7 +168,7 @@ PresenceHandler::MutationType PresenceHandler::handleProfileLocationAdministrati
 	}
 
 	auto nextdescription = getCurrentPresenceDescription();
-	return getMutationType(prevdescription,nextdescription);
+	return getMutationType(prevdescription, nextdescription);
 }
 
 PresenceHandler::MutationType PresenceHandler::getMutationType(
@@ -217,7 +217,7 @@ void PresenceHandler::removeOldRecords() {
 }
 
 void PresenceHandler::triggerPresenceMutation(MutationType mutationtype) {
-	event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION,&mutationtype,sizeof(mutationtype));
+	event_t presence_event(CS_TYPE::EVT_PRESENCE_MUTATION, &mutationtype, sizeof(mutationtype));
 	presence_event.dispatch();
 }
 
@@ -291,7 +291,7 @@ void PresenceHandler::tickSecond() {
 }
 
 void PresenceHandler::print() {
-	// for(auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); iter++){
+	// for (auto iter = WhenWhoWhere.begin(); iter != WhenWhoWhere.end(); iter++) {
 	//     LOGd("at %d seconds after startup user #%d was found in room %d", iter->when, iter->who, iter->where);
 	// }
 

@@ -8,6 +8,6 @@
 #include <events/cs_Event.h>
 #include <events/cs_EventDispatcher.h>
 
-void event_t::dispatch(){
-    EventDispatcher::getInstance().dispatch(*this);
+void event_t::dispatch() {
+	EventDispatcher::getInstance().dispatch(*this);
 }

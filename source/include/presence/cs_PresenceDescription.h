@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 #include <cstdint>
 

@@ -6,9 +6,8 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "ble/cs_UUID.h"
-
-#include "util/cs_BleError.h"
+#include <ble/cs_UUID.h>
+#include <util/cs_BleError.h>
 
 // TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean, methodical and understandable way
 
@@ -71,7 +70,7 @@ UUID::operator ble_uuid128_t() {
 		} else {
 			BLE_THROW("invalid character");
 //				char cc[] = {c};// can't just call std::string(c) apparently.
-//				BLE_THROW(std::string("Invalid character ") + std::string(1,cc[0]) + " in UUID.");
+//				BLE_THROW(std::string("Invalid character ") + std::string(1, cc[0]) + " in UUID.");
 		}
 
 		v = v * 16 + vv;
