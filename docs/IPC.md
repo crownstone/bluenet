@@ -1,5 +1,5 @@
 # Inter-process communication
------------------------------
+
 Bluenet has a way for different processes (bootloader, application, arduino programs) to communicate with eachother.
 
 This is done by allocating a section of RAM for IPC. This is done at the **end** of the RAM region.
@@ -8,6 +8,7 @@ Each index will have a certain purpose.
 
 
 ## Item data
+
 Each IPC RAM item will have the following data:
 
 ![IPC item](../docs/diagrams/ipc_item_packet.png)
@@ -23,7 +24,6 @@ The checksum is a sum of: index, size, and all 24 payload bytes.
 Then ...
 
 
-<a name="index_types"></a>
 ## Index types
 
 Index | Type | Set by | Value
@@ -33,10 +33,12 @@ Index | Type | Set by | Value
 2     | Bootloader info | Bootloader | [Bootloader info packet](#bootloader_info_packet).
 3     | Micro app | Arduino programs |
 
+
 ## Packets
+
 Each packet will be 24 bytes or smaller.
 
-<a name="bootloader_info_packet"></a>
+
 ### Bootloader info packet
 
 The bootloader can communicate with the bluenet firmware through a struct at a fixed location in RAM that sets e.g. 
@@ -55,21 +57,27 @@ uint 8 | Prerelease | 1 | Prerelease version, will be 255 if not a pre-release. 
 uint 8 | Build type | 1 | Build type (Debug = 1, Release = 2, RelWithDebInfo = 3, MinSizeRel = 4). Set by CMakeLists.txt file.
 
 
+## Relevant files
 
-## Relavant files
 
-#### Shared
+### Shared
+
 - Config file `CMakeBuild.config.default` determines the size of the IPC RAM.
 - Files `cs_IpcRamData.h` and `cs_IpcRamData.cpp` implement functions to set and get items.
 
-#### Application
+
+### Application
+
 - Linker file `generic_gcc_nrf52.ld` reserves the RAM, and creates a section.
 
-#### Bootloader
+
+### Bootloader
+
 - Linker file `secure_bootloader_gcc_nrf52.ld` reserves the RAM, and creates a section.
 
 
 ## General purpose retention register
+
 The general purpose retention register (GPREGRET) is used for communication between bootloader and application, as well as to store data that survives a reboot.
 
 How this is done can be read in `cs_GpRegRetConfig.h`.
