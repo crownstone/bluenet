@@ -38,22 +38,13 @@ void RssiDataTracker::init() {
 void RssiDataTracker::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t channel) {
 	auto channel_index = channel - CHANNEL_START;
 
-	if (channel_index < 0 || CHANNEL_COUNT <= channel_index ) {
+	if (channel_index < 0 || CHANNEL_COUNT <= channel_index) {
 		return;
 	}
 
-	auto& recorder = recorder_map[channel_index ][sender_id];
+	auto& recorder = variance_map[channel_index][sender_id];
 
-	// REVIEW: Why isn't this done in the class?
-	// If we aqcuired a lot of data, need to reduce to prevent overflow.
-	if (recorder.isNumericPrecisionLow()) {
-		recorder.reduceCount();
-	}
-
-	// REVIEW: logging means storing here?
-	// log the data
 	recorder.addValue(rssi);
-	last_rssi_map[channel_index ][sender_id] = rssi;
 }
 
 // ------------ Sending Rssi Data ------------
@@ -70,9 +61,7 @@ uint8_t RssiDataTracker::getVarianceRepresentation(float variance) {
 	return 7;
 }
 
-// REVIEW: Mean what?
-uint8_t RssiDataTracker::getMeanRepresentation(float mean) {
-	// REVIEW: Isn't rssi negative?
+uint8_t RssiDataTracker::getMeanRssiRepresentation(float mean) {
 	mean = std::abs(mean);
 	if (mean >= 1<<7 ) {
 		return (1<<7) - 1;
@@ -99,8 +88,8 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 	// start flushing phase, here we wait quite a bit shorter until the map is empty.
 
 	// ** begin burst loop **
-	for (auto main_iter = recorder_map[0].upper_bound(last_stone_id_broadcasted_in_burst);
-			main_iter != recorder_map[0].end(); ++main_iter) {
+	for (auto main_iter = variance_map[0].upper_bound(last_stone_id_broadcasted_in_burst);
+			main_iter != variance_map[0].end(); ++main_iter) {
 
 		stone_id_t id = main_iter->first;
 
@@ -113,13 +102,13 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 		// Fortunately we only doing this once every half hour or so.
 		decltype(main_iter) rec_iters[] = {
 				main_iter,
-				recorder_map[1].find(id),
-				recorder_map[2].find(id),
+				variance_map[1].find(id),
+				variance_map[2].find(id),
 		};
 
 		bool all_maps_have_sufficient_data_for_id = true;
 		for (auto i = 0; i < CHANNEL_COUNT; ++i) {
-			if (rec_iters[i] == recorder_map[i].end() ||
+			if (rec_iters[i] == variance_map[i].end() ||
 					rec_iters[i]->second.getCount() < Settings.min_samples_to_trigger_burst) {
 				all_maps_have_sufficient_data_for_id = false;
 				break;
@@ -147,7 +136,7 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 
 			// delete entry from map
 			for (auto i = 0; i < 3; ++i) {
-				recorder_map[i].erase(rec_iters[i]);
+				variance_map[i].erase(rec_iters[i]);
 				// this invalidates main_iter, so we _must_ return after deleting.
 			}
 

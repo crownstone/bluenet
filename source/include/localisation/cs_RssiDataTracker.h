@@ -18,30 +18,29 @@
 
 // REVIEW: Rename to MeshConnectivity or so?
 /**
- * This component monitors bluetooth messages in order to keep track of the Rssi
- * distances between crownstones in the mesh. It regularly pushes rssi information
- * over UART.
+ * This class/component keeps track of the rssi distance of a
+ * crownstone to its neighbors (i.e. those within zero hop distance
+ * on the mesh).
+ *
+ * At configurable intervals it will broadcast its acquired data in a burst
+ * over the mesh so that a hub, or other interested connected devices
+ * can retrieve it.
  */
 class RssiDataTracker : public EventListener {
 public:
 	RssiDataTracker();
 
-	// REVIEW: Implementation details.
 	/**
+	 * Handles the following events:
 	 * CS_TICK:
 	 *   Coroutine for rssi data updates.
 	 *
 	 *
-	 * CS_TYPE_EVT_RECV_MESH_MSG:
-	 *   if the hop count of the message is 0:
-	 *    - recordRssiValue(args...)
+	 * CS_TYPE_EVT_RECV_MESH_MSG of types:
+	 *   - CS_MESH_MODEL_TYPE_RSSI_PING
+	 *   - CS_MESH_MODEL_TYPE_RSSI_DATA
 	 *
-	 *   if type is CS_MESH_MODEL_TYPE_RSSI_PING:
-	 *   	 - if the hop count is 0:
-	 *         - sendPingResponseOverMesh()
-	 *
-	 *   if type is CS_MESH_MODEL_TYPE_RSSI_DATA:
-	 *     - sendRssiDataOverUart(arg...)
+	 * (Will propagate data over UART for the hub to use it.)
 	 */
 	void handleEvent(event_t& evt);
 
@@ -58,10 +57,13 @@ private:
 	static constexpr uint8_t CHANNEL_START = 37;
 
 	// REVIEW: Aren't maps actually slower than arrays for a small number of elements?
+	// @Bart: I'm not expecting this to be a bottleneck, most stl classes have small-number implementations.
+
 	// REVIEW: Elements never time out, so these maps can keep on growing.
-	// REVIEW: Last rssi map is not used.
-	std::map<stone_id_t,int8_t> last_rssi_map[CHANNEL_COUNT] = {};
-	std::map<stone_id_t,OnlineVarianceRecorder> recorder_map[CHANNEL_COUNT] = {}; // REVIEW: why not call it varianceMap or so?
+	// @Bart: elements are erased after flush. natural maximum: 256 entries (sizeof(stone_id_t)),
+	// when we have such a huge mesh, we could implement a more elaborate throtling mechanism.
+	// (e.g. segmenting the record-bursts cycli in groups of stone ids [0-63], [64-127], [128-191], [192-256].
+	std::map<stone_id_t,OnlineVarianceRecorder> variance_map[CHANNEL_COUNT] = {};
 
 	// will be set to true by coroutine to flush data after startup.
 	bool boot_sequence_finished = false;
@@ -76,32 +78,23 @@ private:
 	struct RssiDataTrackerTiming {
 		/**
 		 * When flushAggregatedRssiData is in the flushing phase,
-		 * only recorders that have accumulated this many samples will
+		 * only variance_map entries that have accumulated this many samples will
 		 * be included.
 		 */
 		uint8_t min_samples_to_trigger_burst;
 
-		// REVIEW: Doesn't say what this burst_period_ms does.
-		// REVIEW: Maybe have a queue of stone ids to send? so you can just send them 1 by 1,
-		//         with any delay in between (large for normal operation, smaller when data is requested).
-		//         I'm not a big fan of the snowball risk.
 		/**
-		 * Note: if the mesh is very active, setting this delay higher is risky.
-		 * When we accumulate more then min_samples_to_trigger_burst
-		 * samples _during_ the burst phase, it will be propagated a second time in same burst.
-		 * Hence a low value for that constant makes it possible to keep running in burst
-		 * mode. (If multiple nodes are bursting, this effect will snowball!)
+		 * Period between sending data in 'burst mode'.
 		 */
 		uint32_t burst_period_ms;
 
 		/**
-		 * This value determines how often bursts occur. It is much less sensitive
-		 * than burst_period_ms and min_samples_to_trigger_burst.
+		 * This value determines the period between end and start of bursts.
 		 */
 		uint32_t accumulation_period_ms;
 
 		/**
-		 * When boot sequence period expires, a flush of the rssi data will be
+		 * When boot sequence period expires, a flush (burst) of the rssi data will be
 		 * triggered.
 		 */
 		uint32_t boot_sequence_period_ms;
@@ -146,7 +139,7 @@ private:
 	 * Returns the 7 bit representation of the given mean as defined
 	 * in cs_PacketsInternal.h.
 	 */
-	inline uint8_t getMeanRepresentation(float mean);
+	inline uint8_t getMeanRssiRepresentation(float mean);
 
 	/**
 	 * Returns the 6 bit representation of the given count as defined

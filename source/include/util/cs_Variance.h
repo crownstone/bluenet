@@ -1,4 +1,12 @@
-// REVIEW: Missing author header.
+/**
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Nov 29, 2020
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ */
+
+
+#include <math.h>
 
 /**
  * Compute mean and variance of a running measurement without keeping track of
@@ -12,9 +20,6 @@
  * - no overflow protection implemented
  *
  */
-
-#include <math.h>
-
 // REVIEW: Recorder?
 class OnlineVarianceRecorder {
 private:
@@ -32,6 +37,10 @@ public:
 	 * update the aggregated data with a new measurement.
 	 */
 	void addValue(float new_measurement){
+		if (isNumericPrecisionLow()) {
+			reduceCount();
+		}
+
 		float diff_with_old_mean = new_measurement - mean;
 
 		num_recorded_values++;
