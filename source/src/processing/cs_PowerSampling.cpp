@@ -1065,10 +1065,12 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRms
 				AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, 1));
 		printBuf(bufIndex);
 
-		event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
-		EventDispatcher::getInstance().dispatch(event);
+		// Set error first, so the switch knows what it's allowed to do.
 		stateErrors.errors.overCurrent = true;
 		State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
+
+		event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD);
+		EventDispatcher::getInstance().dispatch(event);
 		return;
 	}
 
@@ -1089,12 +1091,14 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRms
 				AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, 0),
 				AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, 1));
 			printBuf(bufIndex);
+
+			// Set error first, so the switch knows what it's allowed to do.
+			stateErrors.errors.overCurrentDimmer = true;
+			State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
+
 			// Dispatch the event that will turn off the dimmer
 			event_t event(CS_TYPE::EVT_CURRENT_USAGE_ABOVE_THRESHOLD_DIMMER);
 			EventDispatcher::getInstance().dispatch(event);
-
-			stateErrors.errors.overCurrentDimmer = true;
-			State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
 		}
 		else if (switchState.state.relay == 0 && !recentlySwitchedOff && _dimmerFailureDetectionStarted) {
 			// If there is current flowing, but relay and dimmer are both off, then the dimmer is probably broken.
@@ -1105,11 +1109,13 @@ void PowerSampling::checkSoftfuse(int32_t currentRmsMilliAmp, int32_t currentRms
 				AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, 0),
 				AdcBuffer::getInstance().getValue(bufIndex, CURRENT_CHANNEL_IDX, 1));
 			printBuf(bufIndex);
-			event_t event(CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED);
-			EventDispatcher::getInstance().dispatch(event);
 
+			// Set error first, so the switch knows what it's allowed to do.
 			stateErrors.errors.dimmerOn = true;
 			State::getInstance().set(CS_TYPE::STATE_ERRORS, &stateErrors, sizeof(stateErrors));
+
+			event_t event(CS_TYPE::EVT_DIMMER_ON_FAILURE_DETECTED);
+			EventDispatcher::getInstance().dispatch(event);
 		}
 	}
 }
