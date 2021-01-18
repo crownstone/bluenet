@@ -454,7 +454,7 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 		}
 		case BLE_GATTC_EVT_WRITE_RSP: {
 			const ble_gattc_evt_t& gattcEvent = p_ble_evt->evt.gattc_evt;
-			const ble_gattc_evt_write_rsp_t& writeResponse = gattcEvent.params.write_rsp;
+			__attribute__((unused)) const ble_gattc_evt_write_rsp_t& writeResponse = gattcEvent.params.write_rsp;
 			LOGi("Write response offset=%u len=%u", writeResponse.offset, writeResponse.len);
 			break;
 		}
@@ -790,6 +790,7 @@ void Stack::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 				uint8_t uuidSize = 0;
 				retCode = sd_ble_uuid_encode(&(event->params.discovered_db.srv_uuid), &uuidSize, fullUuid.uuid128);
 				if (retCode == NRF_SUCCESS && uuidSize == sizeof(fullUuid)) {
+#if CS_SERIAL_NRF_LOG_ENABLED != 2
 					LOGd("Full uuid: %02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
 							fullUuid.uuid128[15],
 							fullUuid.uuid128[14],
@@ -807,6 +808,7 @@ void Stack::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 							fullUuid.uuid128[2],
 							fullUuid.uuid128[1],
 							fullUuid.uuid128[0]);
+#endif
 				}
 				else {
 					LOGw("Failed to get full uuid");
