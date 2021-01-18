@@ -745,25 +745,6 @@ void Crownstone::tick() {
 		_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature));
 	}
 
-	// Update advertisement service data
-	// TODO: synchronize with servicedata.updateAdvertisementData()
-	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
-//		_stack->updateAdvertisement();
-	}
-
-	if (_tickCount == (5 * 1000 / TICK_INTERVAL_MS)) {
-		device_address_t address;
-		// F9:20:7C:70:36:CD
-		address.address[5] = 0xF9;
-		address.address[4] = 0x20;
-		address.address[3] = 0x7C;
-		address.address[2] = 0x70;
-		address.address[1] = 0x36;
-		address.address[0] = 0xCD;
-		address.addressType = BLE_GAP_ADDR_TYPE_RANDOM_STATIC;
-		_stack->connect(address);
-	}
-
 	if (!_clearedGpRegRetCount && _tickCount == (CS_CLEAR_GPREGRET_COUNTER_TIMEOUT_S * 1000 / TICK_INTERVAL_MS)) {
 		GpRegRet::clearAll();
 		_clearedGpRegRetCount = true;
