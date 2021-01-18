@@ -16,7 +16,6 @@
 
 #include <map>
 
-// REVIEW: Rename to MeshConnectivity or so?
 /**
  * This class/component keeps track of the rssi distance of a
  * crownstone to its neighbors (i.e. those within zero hop distance
@@ -26,9 +25,9 @@
  * over the mesh so that a hub, or other interested connected devices
  * can retrieve it.
  */
-class RssiDataTracker : public EventListener {
+class MeshTopology : public EventListener {
 public:
-	RssiDataTracker();
+	MeshTopology();
 
 	/**
 	 * Handles the following events:
@@ -61,7 +60,8 @@ private:
 
 	// REVIEW: Elements never time out, so these maps can keep on growing.
 	// @Bart: elements are erased after flush. natural maximum: 256 entries (sizeof(stone_id_t)),
-	// when we have such a huge mesh, we could implement a more elaborate throtling mechanism.
+	// when we have such a huge and dense mesh, we could implement a more elaborate throtling mechanism.
+	// (Note the maps only keep track of this neighbors, not the whole mesh.)
 	// (e.g. segmenting the record-bursts cycli in groups of stone ids [0-63], [64-127], [128-191], [192-256].
 	std::map<stone_id_t,OnlineVarianceRecorder> variance_map[CHANNEL_COUNT] = {};
 
@@ -75,7 +75,7 @@ private:
 
 	Coroutine flushRoutine;
 
-	struct RssiDataTrackerTiming {
+	struct TimingSettings {
 		/**
 		 * When flushAggregatedRssiData is in the flushing phase,
 		 * only variance_map entries that have accumulated this many samples will
@@ -100,7 +100,7 @@ private:
 		uint32_t boot_sequence_period_ms;
 	};
 
-	static constexpr RssiDataTrackerTiming Settings = {
+	static constexpr TimingSettings Settings = {
 #ifdef DEBUG
 		.min_samples_to_trigger_burst = 20,
 		.burst_period_ms = 500,

@@ -73,13 +73,36 @@ By indenting the cases, it's easy to see where the switch stops.
 
 ## Naming
 
-Try to use camelcase naming. Struct definitions are the exception.
+Upper CamelCase naming is used for class names, typedefs and aliases. Members and functions are lower camel cased except for inner classes and types. 
 
-- ClassName
-- functionName()
-- cs_some_struct_t
+```
+class ClassName {
+    private:
+    typedef std::vector<uint8_t>::iterator IteratorType;
+    
+    class Settings {
+        bool isActive;
+    };
+    
+    public:
+    void functionName();
+};
 
-Sometimes you have a full uppercase abbreviation in your name, in that case just pretend it's a word. For example: rssiMacAddress.
+using MyVec = std::vector<uint8_t>;
+
+void doNothing();
+```
+
+Struct are named with snake case and suffixed with `_t` when they are `__packed__`.
+
+```
+struct __attribute__((__packed__)) a_packed_packet_t {
+    uint8_t shortWord;
+    uint32_t longWord;
+};
+```
+
+Sometimes you have a full uppercase abbreviation in your name, in that case just pretend it's a word. For example: `rssiMacAddress`.
 
 ### Variables
 

@@ -9,6 +9,7 @@
 #include <events/cs_Event.h>
 #include <localisation/cs_NearestCrownstoneTracker.h>
 #include <localisation/cs_TrackableEvent.h>
+#include <localisation/cs_TrackableId.h>
 #include <logging/cs_Logger.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <storage/cs_State.h>
@@ -144,7 +145,9 @@ NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* meshMs
 	auto nearestWitnessReport = meshMsgEvent->getPacket<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT>();
 
 	return NearestWitnessReport(
-			nearestWitnessReport.trackableDeviceMac,
+			TrackableId(
+					nearestWitnessReport.trackableDeviceMac,
+					sizeof(nearestWitnessReport.trackableDeviceMac)),
 			nearestWitnessReport.rssi,
 			meshMsgEvent->srcAddress);
 }

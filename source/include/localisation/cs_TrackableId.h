@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <algorithm> // for reverse_copy
 #include <cstdint> // for uint8_t
 #include <cstring> // for memcmp, memcpy
 #include <logging/cs_Logger.h>
@@ -23,14 +24,31 @@
  */
 struct __attribute__((__packed__)) TrackableId {
 	static constexpr uint8_t SIZE = 6;
-	uint8_t bytes[SIZE] = {0};
+	uint8_t bytes[SIZE] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
 	TrackableId() = default;
 
 	// REVIEW: Missing size (or use mac address struct)
-	TrackableId(const uint8_t * const mac){
-		std::memcpy(bytes, mac, SIZE);
+	/**
+	 * mac is the address as read on the NRF connect app.
+	 * (It is reversed before written to the member this->bytes.)
+	 */
+	TrackableId(const uint8_t* const mac, uint8_t len){
+		if (len != SIZE) {
+			LOGe("mac address of wrong size instantiated.");
+		} else {
+			std::reverse_copy(mac, mac + SIZE, bytes);
+		}
 	}
+
+	/**
+	 * Enables initialization like:
+	 * TrackableId myId = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
+	 */
+	TrackableId(const std::initializer_list<uint8_t> mac) :
+		TrackableId(std::begin(mac), mac.size()) {
+	}
+
 
 	bool operator==(const TrackableId& other) const {
 		return std::memcmp(bytes,other.bytes,SIZE) == 0;
@@ -43,10 +61,8 @@ struct __attribute__((__packed__)) TrackableId {
 		return std::memcmp(bytes,other.bytes,SIZE) < 0;
 	}
 
-	// REVIEW: string as argument can't be left out from binary size.
-	void print(const char* headerstr) {
-		LOGd("%s mac=[%2x,%2x,%2x,%2x,%2x,%2x]",
-				headerstr,
+	void print() {
+		LOGd("tracked id mac=[%2x,%2x,%2x,%2x,%2x,%2x]",
 				bytes[0],
 				bytes[1],
 				bytes[2],

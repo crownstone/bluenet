@@ -53,14 +53,16 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableA
 
 bool TrackableParser::isMyTrackable(scanned_device_t* scannedDevice) {
 	// Note: mac address here as read in nrf connect app, hence the std::reverse call.
-	uint8_t myTileMac[] = {0xe4, 0x96, 0x62, 0x0d, 0x5a, 0x5b};
-	std::reverse(std::begin(myTileMac), std::end(myTileMac));
-	TrackableId myTrackable(myTileMac);
+//	uint8_t myTileMac[6] = {0xe4, 0x96, 0x62, 0x0d, 0x5a, 0x5b};
+//	std::reverse(std::begin(myTileMac), std::end(myTileMac));
+//	TrackableId myTrackable(myTileMac);
+
+	TrackableId myTrackableId{0xe4, 0x96, 0x62, 0x0d, 0x5a, 0x5b};
 
 	// construct TrackableId for incomming scan
-	TrackableId mac(scannedDevice->address);
+	TrackableId incomingTrackableId(scannedDevice->address, sizeof(scannedDevice->address));
 
-	return mac == myTrackable;
+	return myTrackableId == incomingTrackableId;
 }
 
 // ======================== Tile ========================
@@ -103,11 +105,10 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scannedDevice) {
 		return false;
 	}
 
-
-	TrackableId tile(scannedDevice->address);
+	TrackableId tile(scannedDevice->address, sizeof(scannedDevice->address));
 
 	TrackableParser_LOGd("Tile device: rssi=%i ", scannedDevice->rssi);
-	tile.print(" ");
+	tile.print();
 
 	if (!isMyTrackable(scannedDevice)) {
 		// it was a Tile device, so return true.

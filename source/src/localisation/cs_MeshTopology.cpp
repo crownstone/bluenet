@@ -1,4 +1,4 @@
-#include <localisation/cs_RssiDataTracker.h>
+#include <localisation/cs_MeshTopology.h>
 
 #include <common/cs_Types.h>
 #include <logging/cs_Logger.h>
@@ -11,22 +11,22 @@
 #include <cmath>
 
 // REVIEW: This won't be recognized by binary logger.
-#define RSSIDATATRACKER_LOGd LOGd
-#define RSSIDATATRACKER_LOGv LOGnone
+#define MeshTopology_LOGd LOGd
+#define MeshTopology_LOGv LOGnone
 
-// ------------ RssiDataTracker methods ------------
+// ------------ MeshTopology methods ------------
 
-RssiDataTracker::RssiDataTracker() :
+MeshTopology::MeshTopology() :
 		flushRoutine([this]() {
 			return flushAggregatedRssiData();
 		}) {
 }
 
-void RssiDataTracker::init() {
+void MeshTopology::init() {
 	// REVIEW: Use TYPIFY for variable.
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id,
 			sizeof(my_id));
-	RSSIDATATRACKER_LOGd("RssiDataTracker: my_id %d", my_id);
+	MeshTopology_LOGd("MeshTopology: my_id %d", my_id);
 
 	boot_sequence_finished = false;
 	last_stone_id_broadcasted_in_burst = 0;
@@ -35,7 +35,7 @@ void RssiDataTracker::init() {
 // ------------ Recording ping stuff ------------
 
 
-void RssiDataTracker::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t channel) {
+void MeshTopology::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t channel) {
 	auto channel_index = channel - CHANNEL_START;
 
 	if (channel_index < 0 || CHANNEL_COUNT <= channel_index) {
@@ -49,7 +49,7 @@ void RssiDataTracker::recordRssiValue(stone_id_t sender_id, int8_t rssi, uint8_t
 
 // ------------ Sending Rssi Data ------------
 
-uint8_t RssiDataTracker::getVarianceRepresentation(float variance) {
+uint8_t MeshTopology::getVarianceRepresentation(float variance) {
 	variance = std::abs(variance);
 	if (variance <  2 *  2) return 0;
 	if (variance <  4 *  4) return 1;
@@ -61,7 +61,7 @@ uint8_t RssiDataTracker::getVarianceRepresentation(float variance) {
 	return 7;
 }
 
-uint8_t RssiDataTracker::getMeanRssiRepresentation(float mean) {
+uint8_t MeshTopology::getMeanRssiRepresentation(float mean) {
 	mean = std::abs(mean);
 	if (mean >= 1<<7 ) {
 		return (1<<7) - 1;
@@ -69,7 +69,7 @@ uint8_t RssiDataTracker::getMeanRssiRepresentation(float mean) {
 	return static_cast<uint8_t>(mean);
 }
 
-uint8_t RssiDataTracker::getCountRepresentation(uint32_t count) {
+uint8_t MeshTopology::getCountRepresentation(uint32_t count) {
 	if (count >= 1<<6) {
 		return (1<< 6) - 1;
 	}
@@ -77,14 +77,14 @@ uint8_t RssiDataTracker::getCountRepresentation(uint32_t count) {
 }
 
 
-uint32_t RssiDataTracker::flushAggregatedRssiData() {
+uint32_t MeshTopology::flushAggregatedRssiData() {
 	if (!boot_sequence_finished) {
-		RSSIDATATRACKER_LOGd("flushAggregatedRssiData boot delay");
+		MeshTopology_LOGd("flushAggregatedRssiData boot delay");
 		boot_sequence_finished = true;
 		return Coroutine::delayMs(Settings.boot_sequence_period_ms);
 	}
 
-	RSSIDATATRACKER_LOGd("flushAggregatedRssiData");
+	MeshTopology_LOGd("flushAggregatedRssiData");
 	// start flushing phase, here we wait quite a bit shorter until the map is empty.
 
 	// ** begin burst loop **
@@ -93,7 +93,7 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 
 		stone_id_t id = main_iter->first;
 
-		RSSIDATATRACKER_LOGd("Burst start for id=%u", id);
+		MeshTopology_LOGd("Burst start for id=%u", id);
 
 		// the maps may not have the same key sets, this depends
 		// on possible loss differences between the channels.
@@ -124,9 +124,9 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 			rssi_data.channel38.sampleCount = getCountRepresentation(rec_iters[1]->second.getCount());
 			rssi_data.channel39.sampleCount = getCountRepresentation(rec_iters[2]->second.getCount());
 
-			rssi_data.channel37.rssi = getMeanRepresentation(rec_iters[0]->second.getMean());
-			rssi_data.channel38.rssi = getMeanRepresentation(rec_iters[1]->second.getMean());
-			rssi_data.channel39.rssi = getMeanRepresentation(rec_iters[2]->second.getMean());
+			rssi_data.channel37.rssi = getMeanRssiRepresentation(rec_iters[0]->second.getMean());
+			rssi_data.channel38.rssi = getMeanRssiRepresentation(rec_iters[1]->second.getMean());
+			rssi_data.channel39.rssi = getMeanRssiRepresentation(rec_iters[2]->second.getMean());
 
 			rssi_data.channel37.variance = getVarianceRepresentation(rec_iters[0]->second.getVariance());
 			rssi_data.channel38.variance = getVarianceRepresentation(rec_iters[1]->second.getVariance());
@@ -147,7 +147,7 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 
 	} // ** end burst loop **
 
-	RSSIDATATRACKER_LOGd("End of burst");
+	MeshTopology_LOGd("End of burst");
 
 	last_stone_id_broadcasted_in_burst = 0;
 
@@ -156,7 +156,7 @@ uint32_t RssiDataTracker::flushAggregatedRssiData() {
 
 // --------------- generating rssi data --------------
 
-void RssiDataTracker::sendPingRequestOverMesh() {
+void MeshTopology::sendPingRequestOverMesh() {
 	rssi_ping_message_t ping_msg;
 
 	cs_mesh_msg_t msg_wrapper;
@@ -173,7 +173,7 @@ void RssiDataTracker::sendPingRequestOverMesh() {
 	msgevt.dispatch();
 }
 
-void RssiDataTracker::sendPingResponseOverMesh() {
+void MeshTopology::sendPingResponseOverMesh() {
 	cs_mesh_msg_t msg_wrapper;
 	msg_wrapper.type = CS_MESH_MODEL_TYPE_CMD_NOOP;
 	msg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
@@ -188,7 +188,7 @@ void RssiDataTracker::sendPingResponseOverMesh() {
 	msgevt.dispatch();
 }
 
-void RssiDataTracker::receivePingMessage(MeshMsgEvent& meshMsgEvent) {
+void MeshTopology::receivePingMessage(MeshMsgEvent& meshMsgEvent) {
 	if (meshMsgEvent.hops == 0) {
 		sendPingResponseOverMesh();
 	}
@@ -196,7 +196,7 @@ void RssiDataTracker::receivePingMessage(MeshMsgEvent& meshMsgEvent) {
 
 // ------------- communicating rssi data -------------
 
-void RssiDataTracker::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message) {
+void MeshTopology::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message) {
 	cs_mesh_msg_t msg_wrapper;
 	msg_wrapper.type = CS_MESH_MODEL_TYPE_RSSI_DATA;
 	msg_wrapper.reliability = CS_MESH_RELIABILITY_LOW;
@@ -212,7 +212,7 @@ void RssiDataTracker::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_messag
 }
 
 // REVIEW: Why not a simpler message (without bit fields) for uart?
-void RssiDataTracker::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message) {
+void MeshTopology::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message) {
 	RssiDataMessage datamessage;
 
 	datamessage.receiver_id = my_id;
@@ -230,7 +230,7 @@ void RssiDataTracker::sendRssiDataOverUart(rssi_data_message_t* rssi_data_messag
 	datamessage.standard_deviation[1] = rssi_data_message->channel38.variance;
 	datamessage.standard_deviation[2] = rssi_data_message->channel39.variance;
 
-	RSSIDATATRACKER_LOGd("%d -> %d: ch37 #%d  -%d dB",
+	MeshTopology_LOGd("%d -> %d: ch37 #%d  -%d dB",
 			datamessage.sender_id,
 			datamessage.receiver_id,
 			datamessage.count[0],
@@ -244,7 +244,7 @@ void RssiDataTracker::sendRssiDataOverUart(rssi_data_message_t* rssi_data_messag
 			sizeof(datamessage));
 }
 
-void RssiDataTracker::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent) {
+void MeshTopology::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent) {
 	auto& rssi_data_message =
 			meshMsgEvent.getPacket<CS_MESH_MODEL_TYPE_RSSI_DATA>();
 	sendRssiDataOverUart(&rssi_data_message);
@@ -252,10 +252,10 @@ void RssiDataTracker::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent) {
 
 // ------------- recording mesh messages -------------
 
-void RssiDataTracker::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
+void MeshTopology::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
 	// REVIEW: Mesh specific code, should be in the mesh code.
 	if (mesh_msg_evt.hops == 0) { // TODO: 0 hops, or 1 hops?!
-		RSSIDATATRACKER_LOGv("handle mesh msg event with 0 hops");
+		MeshTopology_LOGv("handle mesh msg event with 0 hops");
 		recordRssiValue(
 				mesh_msg_evt.srcAddress,
 				mesh_msg_evt.rssi,
@@ -266,7 +266,7 @@ void RssiDataTracker::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
 	// can't interpret the rssi value in this case.
 }
 
-void RssiDataTracker::handleEvent(event_t &evt) {
+void MeshTopology::handleEvent(event_t &evt) {
 	if (flushRoutine.handleEvent(evt)) {
 		return;
 	}
@@ -278,12 +278,12 @@ void RssiDataTracker::handleEvent(event_t &evt) {
 
 		switch (meshMsgEvent.type) {
 			case CS_MESH_MODEL_TYPE_RSSI_PING: {
-				RSSIDATATRACKER_LOGd("received rssi ping message");
+				MeshTopology_LOGd("received rssi ping message");
 				receivePingMessage(meshMsgEvent);
 				break;
 			}
 			case CS_MESH_MODEL_TYPE_RSSI_DATA: {
-				RSSIDATATRACKER_LOGd("received rssi data message");
+				MeshTopology_LOGd("received rssi data message");
 				receiveRssiDataMessage(meshMsgEvent);
 				break;
 			}
