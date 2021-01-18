@@ -641,6 +641,7 @@ void Stack::onConnect(const ble_evt_t * p_ble_evt) {
 			}
 			case BLE_GAP_ROLE_CENTRAL: {
 				LOGi("onConnect as central");
+				assert(_connectionIsOutgoing == true, "Central role whith no outgoing connection?");
 				break;
 			}
 			default: {
@@ -862,28 +863,28 @@ void Stack::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 			}
 
 			if (controlHandle != BLE_GATT_HANDLE_INVALID) {
-				for (uint16_t i = 0; i < sizeof(_writeBuf); ++i) {
-					_writeBuf[i] = i;
-				}
-
-				ble_gattc_write_params_t writeParams;
-				writeParams.write_op = BLE_GATT_OP_WRITE_REQ; // Write with response (ack). Triggers BLE_GATTC_EVT_WRITE_RSP.
-				writeParams.flags = 0; // Ignored for write_req
-				writeParams.handle = controlHandle;
-				writeParams.offset = 0;
-				writeParams.len = sizeof(_writeBuf);
-				writeParams.p_value = _writeBuf;
-
-				// We can't write more than MTU.
-				// For long writes, use BLE_GATT_OP_PREP_WRITE_REQ followed by BLE_GATT_OP_EXEC_WRITE_REQ.
-				if (writeParams.len > _writeMtu) {
-					writeParams.len = _writeMtu;
-				}
-
-				retCode = sd_ble_gattc_write(_connectionHandle, &writeParams);
-				if (retCode != NRF_SUCCESS) {
-					LOGw("Failed to write. retCode=%u", retCode);
-				}
+//				for (uint16_t i = 0; i < sizeof(_writeBuf); ++i) {
+//					_writeBuf[i] = i;
+//				}
+//
+//				ble_gattc_write_params_t writeParams;
+//				writeParams.write_op = BLE_GATT_OP_WRITE_REQ; // Write with response (ack). Triggers BLE_GATTC_EVT_WRITE_RSP.
+//				writeParams.flags = 0; // Ignored for write_req
+//				writeParams.handle = controlHandle;
+//				writeParams.offset = 0;
+//				writeParams.len = sizeof(_writeBuf);
+//				writeParams.p_value = _writeBuf;
+//
+//				// We can't write more than MTU.
+//				// For long writes, use BLE_GATT_OP_PREP_WRITE_REQ followed by BLE_GATT_OP_EXEC_WRITE_REQ.
+//				if (writeParams.len > _writeMtu) {
+//					writeParams.len = _writeMtu;
+//				}
+//
+//				retCode = sd_ble_gattc_write(_connectionHandle, &writeParams);
+//				if (retCode != NRF_SUCCESS) {
+//					LOGw("Failed to write. retCode=%u", retCode);
+//				}
 			}
 			break;
 		}
@@ -944,6 +945,8 @@ cs_ret_code_t Stack::connect(const device_address_t& address, uint16_t timeoutMs
 		return ERR_BUSY;
 	}
 
+	LOGw("Not ready for release");
+	return ERR_NOT_IMPLEMENTED;
 
 	event_t connectEvent(CS_TYPE::EVT_OUTGOING_CONNECT_START);
 	connectEvent.dispatch();
