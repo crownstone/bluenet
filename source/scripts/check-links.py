@@ -45,7 +45,7 @@ def checkLinks(filename):
 		match = patternHeaderLink.match(line)
 		if match:
 			link = match.group(1)
-			linkResult(filename, line, lineNr, link)
+			linkResult(filename, line, lineNr, filename, link)
 
 		match = patternHeaderLinkExternal.match(line)
 		if match:
@@ -54,13 +54,13 @@ def checkLinks(filename):
 
 			if not patternWebLink.match(externalFilename):
 				externalFilename = os.path.dirname(filename) + '/' + externalFilename
-				linkResult(externalFilename, line, lineNr, link)
+				linkResult(filename, line, lineNr, externalFilename, link)
 
 
-def linkResult(filename, line, lineNr, link):
-	if link not in getHeaders(filename):
+def linkResult(filename, line, lineNr, linkFilename, link):
+	if link not in getHeaders(linkFilename):
 		print(f"{filename}:{lineNr} Link not found: \"{link}\"\n    {line.rstrip()}")
-		suggestion = getSuggestion(filename, link)
+		suggestion = getSuggestion(linkFilename, link)
 		if suggestion:
 			print(f"Did you mean \"{suggestion}\"?")
 		print()
