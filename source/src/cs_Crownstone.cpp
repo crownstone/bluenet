@@ -130,7 +130,6 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 #else
 	LOGi("DEBUG: undefined");
 #endif
-	LOG_MEMORY;
 }
 
 /** Overwrite the hardware version.
@@ -243,7 +242,6 @@ void Crownstone::init0() {
 
 void Crownstone::init1() {
 	initDrivers(1);
-	LOG_MEMORY;
 	LOG_FLUSH();
 
 	TYPIFY(STATE_OPERATION_MODE) mode;
@@ -900,7 +898,12 @@ void Crownstone::updateMinStackEnd() {
 
 void Crownstone::printLoadStats() {
 	// Log ram usage.
-	LOG_MEMORY;
+	uint8_t *heapPointer = (uint8_t*)malloc(1);
+	void* stackPointer;
+	asm("mov %0, sp" : "=r"(stackPointer) : : );
+	LOGd("Memory heap=%p, stack=%p", heapPointer, (uint8_t*)stackPointer);
+	free(heapPointer);
+
 	LOGi("heapEnd=0x%X maxHeapEnd=0x%X minStackEnd=0x%X minFree=%u sbrkFails=%u", (uint32_t)getHeapEnd(), _ramStats.maxHeapEnd, _ramStats.minStackEnd, _ramStats.minFree, _ramStats.numSbrkFails);
 
 	// Log scheduler usage.

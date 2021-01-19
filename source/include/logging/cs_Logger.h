@@ -253,15 +253,6 @@
 #endif
 
 
-#define LOG_MEMORY \
-	uint8_t *p = (uint8_t*)malloc(1); \
-	void* sp; \
-	asm("mov %0, sp" : "=r"(sp) : : ); \
-	LOGd("Memory %s() heap=%p, stack=%p", __func__, p, (uint8_t*)sp); \
-	free(p);
-
-
-
 #if SERIAL_VERBOSITY < SERIAL_VERBOSE
 	#undef LOGv
 	#define LOGv(fmt, ...)
