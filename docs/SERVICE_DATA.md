@@ -40,7 +40,7 @@ Type | Name | Length | Description
 uint 8 | [Device type](#device-type) | 1 | Type of stone: plug, builtin, guidestone, etc.
 uint 8[] | [Encrypted data](#service-data-encrypted) | 16 | Encrypted data, see below.
 
-Encrypted data:
+## Encrypted data
 
 ![Encrypted service data](../docs/diagrams/service-data-encrypted-2.png)
 
