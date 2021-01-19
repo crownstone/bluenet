@@ -79,30 +79,28 @@ def getSuggestion(filename, link):
 			bestMatch = header
 	return bestMatch
 
-def levenshtein(seq1, seq2):
-	size_x = len(seq1) + 1
-	size_y = len(seq2) + 1
-	matrix = np.zeros((size_x, size_y))
-	for x in range(size_x):
-		matrix[x, 0] = x
-	for y in range(size_y):
-		matrix[0, y] = y
+def levenshtein(string1, string2):
+	# See https://en.wikipedia.org/wiki/Levenshtein_distance
+	size1 = len(string1) + 1
+	size2 = len(string2) + 1
+	dist = np.zeros((size1, size2))
+	for i in range(0, size1):
+		dist[i, 0] = i
+	for j in range(0, size2):
+		dist[0, j] = j
 
-	for x in range(1, size_x):
-		for y in range(1, size_y):
-			if seq1[x - 1] == seq2[y - 1]:
-				matrix[x, y] = min(
-					matrix[x - 1, y] + 1,
-					matrix[x - 1, y - 1],
-					matrix[x, y - 1] + 1
-				)
-			else:
-				matrix[x, y] = min(
-					matrix[x - 1, y] + 1,
-					matrix[x - 1, y - 1] + 1,
-					matrix[x, y - 1] + 1
-				)
-	return (matrix[size_x - 1, size_y - 1])
+	for i in range(1, size1):
+		for j in range(1, size2):
+			substitutionCost = 1
+			if string1[i - 1] == string2[j - 1]:
+				substitutionCost = 0
+
+			dist[i, j] = min(dist[i - 1, j] + 1,                      # deletion
+			                 dist[i, j - 1] + 1,                      # insertion
+			                 dist[i - 1, j - 1] + substitutionCost    # substitution
+			                 )
+
+	return (dist[size1 - 1, size2 - 1])
 
 
 for filename in FILENAMES:
