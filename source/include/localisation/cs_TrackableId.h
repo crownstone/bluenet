@@ -45,6 +45,7 @@ struct __attribute__((__packed__)) TrackableId {
 
 	// REVIEW: string as argument can't be left out from binary size.
 	void print(const char* headerstr) {
+#if CS_SERIAL_NRF_LOG_ENABLED != 2
 		LOGd("%s mac=[%2x,%2x,%2x,%2x,%2x,%2x]",
 				headerstr,
 				bytes[0],
@@ -53,5 +54,6 @@ struct __attribute__((__packed__)) TrackableId {
 				bytes[3],
 				bytes[4],
 				bytes[5]);
+#endif
 	}
 };
