@@ -101,7 +101,7 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	if (empty_index >= MaxBehaviours) {
 		return ERR_NO_SPACE;
 	}
-	LOGBehaviourStoreInfo("Add behaviour to index %u", empty_index);
+	LOGBehaviourStoreInfo("Add behaviour of type %u to index %u", typ, empty_index);
 	switch (typ) {
 		case SwitchBehaviour::Type::Switch: {
 			if (bufSize != WireFormat::size<SwitchBehaviour>()) {
@@ -451,7 +451,7 @@ void BehaviourStore::LoadBehavioursFromMemory(CS_TYPE BehaviourCsType) {
 				}
 				activeBehaviours[iter] = new BehaviourType(WireFormat::deserialize<BehaviourType>(data_array, data_size));
 				LOGBehaviourStoreInfo("Loaded behaviour at ind=%u:", iter);
-				activeBehaviours[iter]->print();
+//				activeBehaviours[iter]->print();
 			}
 		}
 		storeMasterHash();
