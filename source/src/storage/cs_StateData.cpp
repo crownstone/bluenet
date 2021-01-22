@@ -53,10 +53,10 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		*(TYPIFY(CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET)*)data.value = CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET_DEFAULT;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_IBEACON_MAJOR:
-		*(TYPIFY(CONFIG_IBEACON_MAJOR)*)data.value = BEACON_MAJOR;
+		*(TYPIFY(CONFIG_IBEACON_MAJOR)*)data.value = g_BEACON_MAJOR;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_IBEACON_MINOR:
-		*(TYPIFY(CONFIG_IBEACON_MINOR)*)data.value = BEACON_MINOR;
+		*(TYPIFY(CONFIG_IBEACON_MINOR)*)data.value = g_BEACON_MINOR;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_IBEACON_UUID: {
 		std::string uuidString = g_BEACON_UUID;
@@ -66,7 +66,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	case CS_TYPE::CONFIG_IBEACON_TXPOWER:
-		*(TYPIFY(CONFIG_IBEACON_TXPOWER)*)data.value = BEACON_RSSI;
+		*(TYPIFY(CONFIG_IBEACON_TXPOWER)*)data.value = g_BEACON_RSSI;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_TX_POWER:
 		*(TYPIFY(CONFIG_TX_POWER)*)data.value = TX_POWER;

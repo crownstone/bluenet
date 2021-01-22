@@ -1,3 +1,6 @@
+// Needs to be static
+#define CS_RAM_MICROAPP_END (@RAM_MICROAPP_BASE@ + @RAM_MICROAPP_AMOUNT@)
+
 #include <cfg/cs_AutoConfig.h>
 
 #include <cfg/cs_Boards.h>
@@ -14,6 +17,12 @@ const char g_BUILD_TYPE[] = CS_BUILD_TYPE;
 #define CS_BEACON_UUID "@BEACON_UUID@"
 const char g_BEACON_UUID[] = CS_BEACON_UUID;
 
+const uint16_t g_BEACON_MAJOR = @BEACON_MAJOR@;
+
+const uint16_t g_BEACON_MINOR = @BEACON_MINOR@;
+
+const uint8_t g_BEACON_RSSI = @BEACON_RSSI@;
+
 uint32_t g_APPLICATION_START_ADDRESS = @APPLICATION_START_ADDRESS@;
 
 uint32_t g_APPLICATION_LENGTH = @APPLICATION_LENGTH@;
@@ -27,3 +36,13 @@ uint32_t g_HARDWARE_BOARD_ADDRESS = @HARDWARE_BOARD_ADDRESS@;
 
 // The default hardware board
 uint32_t g_DEFAULT_HARDWARE_BOARD = @DEFAULT_HARDWARE_BOARD@;
+
+// Start of flash for microapps
+uint32_t g_FLASH_MICROAPP_BASE = @FLASH_MICROAPP_BASE@;
+
+// Number of pages
+uint8_t g_FLASH_MICROAPP_PAGES = @FLASH_MICROAPP_PAGES@;
+
+uint32_t g_RAM_MICROAPP_BASE = @RAM_MICROAPP_BASE@;
+
+uint32_t g_RAM_MICROAPP_AMOUNT = @RAM_MICROAPP_AMOUNT@;

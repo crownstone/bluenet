@@ -1,0 +1,14 @@
+#pragma once
+
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+const uintptr_t g_RAM_MICROAPP_END = (@RAM_MICROAPP_BASE@ + @RAM_MICROAPP_AMOUNT@);
+
+#ifdef __cplusplus
+}
+#endif
+

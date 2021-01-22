@@ -331,10 +331,17 @@ RAM_BLUENET_IPC_LENGTH=0x100
 # Parameters for IPC with the bootloader
 BOOTLOADER_IPC_RAM_PROTOCOL=1
 
-# Parameters for IPC with microapp code
+# Parameters for the microapps
+
+# The start of microapps in flash
+FLASH_MICROAPP_BASE=0x68000
+
+# The number of pages for microapps (each page is 0x1000 / 4096 bytes)
+FLASH_MICROAPP_PAGES=2
 
 # The start of where the microapp is allowed to put its memory (start of its .bss .data and then the heap)
 RAM_MICROAPP_BASE=0x2000B000
 
 # The amount of RAM it is allowed to use (stack grows down from RAM_MICROAPP_BASE + RAM_MICROAPP_AMOUNT)
 RAM_MICROAPP_AMOUNT=0x2000
+
