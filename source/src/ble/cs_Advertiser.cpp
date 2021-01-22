@@ -454,7 +454,20 @@ void Advertiser::onConnect() {
 }
 
 void Advertiser::onDisconnect() {
+//	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
+////			_advertiser->changeToLowTxPower();
+//		_advertiser->changeToNormalTxPower();
+//		_advertiser->updateAdvertisementParams();
+//	}
 	updateAdvertisementParams();
+}
+
+void Advertiser::onConnectOutgoing() {
+	// When making an outgoing connection, we should not advertise as being connectable anymore.
+	if (_advertising) {
+		setNonConnectableAdvParams();
+		restartAdvertising();
+	}
 }
 
 void Advertiser::handleEvent(event_t & event) {
@@ -464,6 +477,18 @@ void Advertiser::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_BLE_DISCONNECT: {
+			onDisconnect();
+			break;
+		}
+		case CS_TYPE::EVT_OUTGOING_CONNECT_START: {
+			onConnectOutgoing();
+			event.result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case CS_TYPE::EVT_OUTGOING_CONNECTED: {
+			break;
+		}
+		case CS_TYPE::EVT_OUTGOING_DISCONNECTED: {
 			onDisconnect();
 			break;
 		}

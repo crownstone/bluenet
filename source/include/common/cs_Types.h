@@ -198,6 +198,9 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_CONNECT,                                       // Device connected.
 	EVT_BLE_DISCONNECT,                                    // Device disconnected.
 	CMD_ENABLE_ADVERTISEMENT,                              // Enable/disable advertising.
+	EVT_OUTGOING_CONNECT_START,                            // An outgoing connection is going to be made. Always followed by either connected or disconnected event.
+	EVT_OUTGOING_CONNECTED,                                // An outgoing connection is made.
+	EVT_OUTGOING_DISCONNECTED,                             // An outgoing connection is terminated or failed.
 
 	// Switch (aggregator)
 	CMD_SWITCH_OFF = InternalBaseSwitch,              // Turn switch off.
@@ -462,6 +465,9 @@ typedef  adv_background_parsed_v1_t TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1);
 typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
 typedef  void TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
+typedef  void TYPIFY(EVT_OUTGOING_CONNECT_START);
+typedef  void TYPIFY(EVT_OUTGOING_CONNECTED);
+typedef  void TYPIFY(EVT_OUTGOING_DISCONNECTED);
 typedef  void TYPIFY(EVT_BROWNOUT_IMPENDING);
 typedef  void TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_CHIP_TEMP_OK);

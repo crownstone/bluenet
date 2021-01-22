@@ -385,7 +385,7 @@ void MeshMsgHandler::checkStateReceived(int8_t rssi, uint8_t hops) {
 	LOGi("Received state: id=%u switch=%u flags=%u temp=%i pf=%i power=%i energy=%i ts=%u rssi=%i",
 			_lastReceivedState.state.data.extState.id,
 			_lastReceivedState.state.data.extState.switchState,
-			_lastReceivedState.state.data.extState.flags,
+			_lastReceivedState.state.data.extState.flags.asInt,
 			_lastReceivedState.state.data.extState.temperature,
 			_lastReceivedState.state.data.extState.powerFactor,
 			_lastReceivedState.state.data.extState.powerUsageReal,

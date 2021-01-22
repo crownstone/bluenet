@@ -20,35 +20,27 @@
 #include "structs/buffer/cs_CharacteristicWriteBuffer.h"
 #include <util/cs_Utils.h>
 
-
 #define LOGStackDebug LOGnone
 
 
-Stack::Stack() :
-//	_clock_source(defaultClockSource),
-	_gap_conn_params({ }),
-	_scanning(false),
-	_conn_handle(BLE_CONN_HANDLE_INVALID),
-	_radio_notify(0),
-	_connectionKeepAliveTimerId(NULL)
-{
-
+Stack::Stack() {
 	_connectionKeepAliveTimerData = { {0} };
 	_connectionKeepAliveTimerId = &_connectionKeepAliveTimerData;
 
-	_gap_conn_params.min_conn_interval = MIN_CONNECTION_INTERVAL;
-	_gap_conn_params.max_conn_interval = MAX_CONNECTION_INTERVAL;
-	_gap_conn_params.slave_latency = SLAVE_LATENCY;
-	_gap_conn_params.conn_sup_timeout = CONNECTION_SUPERVISION_TIMEOUT;
-
-	// default stack state (will be used in halt/resume)
-	_stack_state.advertising = false;
+	_connectionParams.min_conn_interval = MIN_CONNECTION_INTERVAL;
+	_connectionParams.max_conn_interval = MAX_CONNECTION_INTERVAL;
+	_connectionParams.slave_latency = SLAVE_LATENCY;
+	_connectionParams.conn_sup_timeout = CONNECTION_SUPERVISION_TIMEOUT;
 }
 
 #define CS_STACK_LONG_WRITE_HEADER_SIZE 6
 
 Stack::~Stack() {
 	shutdown();
+}
+
+void handle_discovery(ble_db_discovery_evt_t* event) {
+	Stack::getInstance().onDiscoveryEvent(event);
 }
 
 /**
@@ -193,27 +185,19 @@ void Stack::initRadio() {
 	ret_code = sd_ble_version_get(&version);
 	APP_ERROR_CHECK(ret_code);
 
+	_discoveryModule.discovery_in_progress = 0;
+	_discoveryModule.discovery_pending = 0;
+	_discoveryModule.conn_handle = BLE_CONN_HANDLE_INVALID;
+	ret_code = ble_db_discovery_init(handle_discovery);
+	APP_ERROR_CHECK(ret_code);
+
 	setInitialized(C_RADIO_INITIALIZED);
 
 	updateConnParams();
 }
 
-void Stack::halt() {
-//	_stack_state.advertising = _advertising;
-//	if (_advertising) {
-//		stopAdvertising();
-//	}
-}
-
-void Stack::resume() {
-//	if (_stack_state.advertising) {
-//		_stack_state.advertising = false;
-//		startAdvertising();
-//	}
-}
-
 void Stack::setClockSource(nrf_clock_lf_cfg_t clockSource) {
-	_clock_source = clockSource;
+	_clockSource = clockSource;
 }
 
 void Stack::createCharacteristics() {
@@ -252,36 +236,36 @@ Stack& Stack::addService(Service* svc) {
 }
 
 void Stack::updateMinConnectionInterval(uint16_t connectionInterval_1_25_ms) {
-	if (_gap_conn_params.min_conn_interval != connectionInterval_1_25_ms) {
-		_gap_conn_params.min_conn_interval = connectionInterval_1_25_ms;
+	if (_connectionParams.min_conn_interval != connectionInterval_1_25_ms) {
+		_connectionParams.min_conn_interval = connectionInterval_1_25_ms;
 		updateConnParams();
 	}
 }
 
 void Stack::updateMaxConnectionInterval(uint16_t connectionInterval_1_25_ms) {
-	if (_gap_conn_params.max_conn_interval != connectionInterval_1_25_ms) {
-		_gap_conn_params.max_conn_interval = connectionInterval_1_25_ms;
+	if (_connectionParams.max_conn_interval != connectionInterval_1_25_ms) {
+		_connectionParams.max_conn_interval = connectionInterval_1_25_ms;
 		updateConnParams();
 	}
 }
 
 void Stack::updateSlaveLatency(uint16_t slaveLatency) {
-	if ( _gap_conn_params.slave_latency != slaveLatency ) {
-		_gap_conn_params.slave_latency = slaveLatency;
+	if ( _connectionParams.slave_latency != slaveLatency ) {
+		_connectionParams.slave_latency = slaveLatency;
 		updateConnParams();
 	}
 }
 
 void Stack::updateConnectionSupervisionTimeout(uint16_t conSupTimeout_10_ms) {
-	if (_gap_conn_params.conn_sup_timeout != conSupTimeout_10_ms) {
-		_gap_conn_params.conn_sup_timeout = conSupTimeout_10_ms;
+	if (_connectionParams.conn_sup_timeout != conSupTimeout_10_ms) {
+		_connectionParams.conn_sup_timeout = conSupTimeout_10_ms;
 		updateConnParams();
 	}
 }
 
 void Stack::updateConnParams() {
 	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	ret_code_t ret_code = sd_ble_gap_ppcp_set(&_gap_conn_params);
+	ret_code_t ret_code = sd_ble_gap_ppcp_set(&_connectionParams);
 	APP_ERROR_CHECK(ret_code);
 }
 
@@ -317,28 +301,30 @@ bool Stack::checkCondition(condition_t condition, bool expectation) {
 
 
 void Stack::startScanning() {
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) {
+		return;
+	}
 	if (_scanning) {
 		return;
 	}
 
 //	LOGi(FMT_START, "scanning");
-	ble_gap_scan_params_t p_scan_params;
-	p_scan_params.extended = 0;
-	p_scan_params.report_incomplete_evts = 0;
-	p_scan_params.active = 1;
-	p_scan_params.filter_policy = BLE_GAP_SCAN_FP_ACCEPT_ALL; // Scanning filter policy. See BLE_GAP_SCAN_FILTER_POLICIES
-	p_scan_params.scan_phys = BLE_GAP_PHY_1MBPS;
-	p_scan_params.timeout = BLE_GAP_SCAN_TIMEOUT_UNLIMITED; // Scan timeout in 10 ms units. See BLE_GAP_SCAN_TIMEOUT.
-	p_scan_params.channel_mask[0] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	p_scan_params.channel_mask[1] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	p_scan_params.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	p_scan_params.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	p_scan_params.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &p_scan_params.interval, sizeof(p_scan_params.interval));
-	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &p_scan_params.window, sizeof(p_scan_params.window));
+	ble_gap_scan_params_t scanParams;
+	scanParams.extended = 0;
+	scanParams.report_incomplete_evts = 0;
+	scanParams.active = 1;
+	scanParams.filter_policy = BLE_GAP_SCAN_FP_ACCEPT_ALL; // Scanning filter policy. See BLE_GAP_SCAN_FILTER_POLICIES
+	scanParams.scan_phys = BLE_GAP_PHY_1MBPS;
+	scanParams.timeout = BLE_GAP_SCAN_TIMEOUT_UNLIMITED; // Scan timeout in 10 ms units. See BLE_GAP_SCAN_TIMEOUT.
+	scanParams.channel_mask[0] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[1] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &scanParams.interval, sizeof(scanParams.interval));
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &scanParams.window, sizeof(scanParams.window));
 
-	uint32_t retVal = sd_ble_gap_scan_start(&p_scan_params, &_scanBufferStruct);
+	uint32_t retVal = sd_ble_gap_scan_start(&scanParams, &_scanBufferStruct);
 	APP_ERROR_CHECK(retVal);
 	//BLE_CALL(sd_ble_gap_scan_start, (&p_scan_params), (&scan_buffer_struct));
 	_scanning = true;
@@ -349,9 +335,12 @@ void Stack::startScanning() {
 
 
 void Stack::stopScanning() {
-	if (!checkCondition(C_RADIO_INITIALIZED, true)) return;
-	if (!_scanning)
+	if (!checkCondition(C_RADIO_INITIALIZED, true)) {
 		return;
+	}
+	if (!_scanning) {
+		return;
+	}
 
 //	LOGi(FMT_STOP, "scanning");
 	BLE_CALL(sd_ble_gap_scan_stop, ());
@@ -372,139 +361,106 @@ void Stack::setAesEncrypted(bool encrypted) {
 }
 
 void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
-
-	if (p_ble_evt->header.evt_id !=  BLE_GAP_EVT_RSSI_CHANGED && p_ble_evt->header.evt_id != BLE_GAP_EVT_ADV_REPORT) {
-		LOGd("BLE event $nordicEventTypeName(%u) (0x%X)", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id);
+	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED && p_ble_evt->header.evt_id != BLE_GAP_EVT_ADV_REPORT) {
+		LOGi("BLE event $nordicEventTypeName(%u) (0x%X)", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id);
 	}
+
+	ble_db_discovery_on_ble_evt(p_ble_evt, &_discoveryModule);
 
 	switch (p_ble_evt->header.evt_id) {
-	case BLE_GAP_EVT_CONNECTED: {
-		onConnected(p_ble_evt);
-		event_t event(CS_TYPE::EVT_BLE_CONNECT, NULL, 0);
-		EventDispatcher::getInstance().dispatch(event);
-		break;
-	}
-	case BLE_EVT_USER_MEM_REQUEST: {
-		// You can check which type is requested: p_ble_evt->evt.common_evt.params.user_mem_request.type
-		// Currently only option is: BLE_USER_MEM_TYPE_GATTS_QUEUED_WRITES
-		// See https://devzone.nordicsemi.com/f/nordic-q-a/33366/is-it-necessary-handle-ble_evt_user_mem_request-respectivly-is-it-required-to-support-prepared-writes
-		// And https://devzone.nordicsemi.com/f/nordic-q-a/53074/ble_evt_user_mem_request-if-data_length-is-180-bytes-on-ios-but-not-for-android
-		// And https://devzone.nordicsemi.com/f/nordic-q-a/50043/ble_evt_user_mem_request-patterns
-		// Also see https://interrupt.memfault.com/blog/ble-throughput-primer
-//		BLE_CALL(sd_ble_user_mem_reply, (p_ble_evt->evt.gap_evt.conn_handle, NULL));
-
-		ble_user_mem_block_t memBlock;
-		cs_data_t writeBuffer = CharacteristicWriteBuffer::getInstance().getBuffer(CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
-		memBlock.p_mem = writeBuffer.data;
-		memBlock.len = writeBuffer.len;
-		BLE_CALL(sd_ble_user_mem_reply, (p_ble_evt->evt.gap_evt.conn_handle, &memBlock));
-		break;
-	}
-	case BLE_EVT_USER_MEM_RELEASE:
-		// nothing to do
-		break;
-	case BLE_GAP_EVT_DISCONNECTED: {
-		onDisconnected(p_ble_evt);
-		event_t event(CS_TYPE::EVT_BLE_DISCONNECT, NULL, 0);
-		EventDispatcher::getInstance().dispatch(event);
-		break;
-	}
-	case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
-	case BLE_GATTS_EVT_TIMEOUT:
-	case BLE_GAP_EVT_RSSI_CHANGED:
-		for (Service* svc : _services) {
-			svc->on_ble_event(p_ble_evt);
+		case BLE_EVT_USER_MEM_REQUEST: {
+			onMemoryRequest(p_ble_evt->evt.gap_evt.conn_handle);
+			break;
 		}
-		break;
-	case BLE_GATTS_EVT_WRITE: {
-		resetConnectionAliveTimer();
-		if (p_ble_evt->evt.gatts_evt.params.write.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
-			cs_data_t writeBuffer = CharacteristicWriteBuffer::getInstance().getBuffer(CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
-			uint16_t* header = (uint16_t*)(writeBuffer.data);
-			for (Service* svc : _services) {
-				// for a long write, don't have the service handle available to check for the correct
-				// service, so we just go through all the services and characteristics until we find
-				// the correct characteristic, then we return
-				if (svc->on_write(p_ble_evt->evt.gatts_evt.params.write, header[0])) {
-					return;
+		case BLE_EVT_USER_MEM_RELEASE: {
+			onMemoryRelease(p_ble_evt->evt.gap_evt.conn_handle);
+			break;
+		}
+
+		// ---- GAP events ---- //
+		case BLE_GAP_EVT_CONNECTED: {
+			onConnect(p_ble_evt);
+			break;
+		}
+		case BLE_GAP_EVT_DISCONNECTED: {
+			onDisconnect(p_ble_evt);
+			break;
+		}
+		case BLE_GAP_EVT_TIMEOUT: {
+			onGapTimeout(p_ble_evt->evt.gap_evt.params.timeout.src);
+			break;
+		}
+		case BLE_GAP_EVT_RSSI_CHANGED: {
+			break;
+		}
+
+		// ---- GATTS events ---- //
+		case BLE_GATTS_EVT_TIMEOUT: {
+			break;
+		}
+		case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST: {
+			break;
+		}
+		case BLE_GATTS_EVT_WRITE: {
+			onWrite(p_ble_evt->evt.gatts_evt.params.write);
+			break;
+		}
+		case BLE_GATTS_EVT_HVC: {
+			break;
+		}
+		case BLE_GATTS_EVT_SYS_ATTR_MISSING: {
+			BLE_CALL(sd_ble_gatts_sys_attr_set, (_connectionHandle, NULL, 0,
+					BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS));
+			break;
+		}
+		case BLE_GATTS_EVT_HVN_TX_COMPLETE: {
+			onTxComplete(p_ble_evt);
+			break;
+		}
+
+		// ---- GATTC events ---- //
+		case BLE_GATTC_EVT_EXCHANGE_MTU_RSP: {
+			const ble_gattc_evt_t& gattcEvent = p_ble_evt->evt.gattc_evt;
+			const ble_gattc_evt_exchange_mtu_rsp_t& mtuEvent = gattcEvent.params.exchange_mtu_rsp;
+			LOGi("MTU=%u", mtuEvent.server_rx_mtu);
+			_writeMtu = mtuEvent.server_rx_mtu;
+			break;
+		}
+		case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP: {
+//			ble_gattc_evt_t gattcEvent = p_ble_evt->evt.gattc_evt;
+//			ble_gattc_evt_prim_srvc_disc_rsp_t response = gattcEvent.params.prim_srvc_disc_rsp;
+//			LOGi("Primary services: num=%u", response.count);
+//			for (uint16_t i=0; i<response.count; ++i) {
+//				LOGi("uuid=0x%X", response.services[i].uuid.uuid);
+//			}
+			break;
+		}
+		case BLE_GATTC_EVT_READ_RSP: {
+			const ble_gattc_evt_t& gattcEvent = p_ble_evt->evt.gattc_evt;
+			const ble_gattc_evt_read_rsp_t& readResponse = gattcEvent.params.read_rsp;
+			_log(SERIAL_INFO, false, "Read offset=%u len=%u", readResponse.offset, readResponse.len);
+			_logArray(SERIAL_INFO, true, readResponse.data, readResponse.len);
+
+			// Not sure how to know if we need another read (has something to do with ATT_MTU). So just keep on trying until len = 0.
+//			if (readResponse.len == ATT_MTU - 1) {
+			if (readResponse.len != 0) {
+				// Continue long read.
+				uint32_t retCode = sd_ble_gattc_read(gattcEvent.conn_handle, readResponse.handle, readResponse.offset + readResponse.len);
+				if (retCode != NRF_SUCCESS) {
+					LOGw("Failed to continue long read. retCode=%u", retCode);
 				}
 			}
+			break;
 		}
-		else {
-			for (Service* svc : _services) {
-				svc->on_write(p_ble_evt->evt.gatts_evt.params.write, p_ble_evt->evt.gatts_evt.params.write.handle);
-			}
+		case BLE_GATTC_EVT_WRITE_RSP: {
+			const ble_gattc_evt_t& gattcEvent = p_ble_evt->evt.gattc_evt;
+			__attribute__((unused)) const ble_gattc_evt_write_rsp_t& writeResponse = gattcEvent.params.write_rsp;
+			LOGi("Write response offset=%u len=%u", writeResponse.offset, writeResponse.len);
+			break;
 		}
-		break;
-	}
-
-	case BLE_GATTS_EVT_HVC:
-		for (Service* svc : _services) {
-			// TODO: this check is probably be wrong
-			if (svc->getHandle() == p_ble_evt->evt.gatts_evt.params.write.handle) {
-				svc->on_ble_event(p_ble_evt);
-				return;
-			}
+		default: {
+			break;
 		}
-		break;
-
-	case BLE_GATTS_EVT_SYS_ATTR_MISSING:
-		BLE_CALL(sd_ble_gatts_sys_attr_set, (_conn_handle, NULL, 0,
-				BLE_GATTS_SYS_ATTR_FLAG_SYS_SRVCS | BLE_GATTS_SYS_ATTR_FLAG_USR_SRVCS));
-		break;
-
-	case BLE_GAP_EVT_PASSKEY_DISPLAY: {
-#ifdef PRINT_STACK_VERBOSE
-		LOGd("PASSKEY: %.6s", p_ble_evt->evt.gap_evt.params.passkey_display.passkey);
-#endif
-		break;
-	}
-
-/*
-	case BLE_GAP_EVT_ADV_REPORT: {
-		const ble_gap_evt_adv_report_t* advReport = &(p_ble_evt->evt.gap_evt.params.adv_report);
-		scanned_device_t scan;
-		memcpy(scan.address, advReport->peer_addr.addr, sizeof(scan.address)); // TODO: Only valid when advReport->peer_addr.addr_id_peer == 1
-//		uint8_t* scanData = new uint8_t[advReport->data.len];
-//		memcpy(scanData, advReport->data.p_data, advReport->data.len);
-		scan.rssi = advReport->rssi;
-		scan.channel = advReport->ch_index;
-		scan.dataSize = advReport->data.len;
-		scan.data = advReport->data.p_data;
-		uint16_t type = *((uint16_t*)&(advReport->type));
-
-		const uint8_t* addr = scan.address;
-		const uint8_t* p = scan.data;
-		if (p[0] == 0x15 && p[1] == 0x16 && p[2] == 0x01 && p[3] == 0xC0 && p[4] == 0x05) {
-//		if (p[1] == 0xFF && p[2] == 0xCD && p[3] == 0xAB) {
-//		if (advReport->peer_addr.addr_type == BLE_GAP_ADDR_TYPE_PUBLIC && addr[5] == 0xE7 && addr[4] == 0x09 && addr[3] == 0x62) { // E7:09:62:02:91:3D
-//		if (addr[5] == 0xE7 && addr[4] == 0x09 && addr[3] == 0x62) { // E7:09:62:02:91:3D
-			LOGi("Stack scan: address=%02X:%02X:%02X:%02X:%02X:%02X addrType=%u type=%u rssi=%i chan=%u", addr[5], addr[4], addr[3], addr[2], addr[1], addr[0], advReport->peer_addr.addr_type, type, scan.rssi, scan.channel);
-			LOGd("  adv_type=%u len=%u data=", type, scan.dataSize);
-			BLEutil::printArray(scan.data, scan.dataSize);
-		}
-		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, (void*)&scan, sizeof(scan));
-		EventDispatcher::getInstance().dispatch(event);
-//		free(scanData);
-		break;
-	}
-*/
-	case BLE_GAP_EVT_TIMEOUT:
-		LOGw("Timeout!");
-		// BLE_GAP_TIMEOUT_SRC_ADVERTISING does not exist anymore...
-//		if (p_ble_evt->evt.gap_evt.params.timeout.src == BLE_GAP_TIMEOUT_SRC_ADVERTISING) {
-//			_advertising = false;
-//			// Advertising stops, see: https://devzone.nordicsemi.com/question/80959/check-if-currently-advertising/
-//		}
-		break;
-
-	case BLE_GATTS_EVT_HVN_TX_COMPLETE:
-		onTxComplete(p_ble_evt);
-		break;
-
-	default:
-		break;
-
 	}
 }
 
@@ -517,7 +473,8 @@ struct cs_stack_scan_t {
 void csStackOnScan(const ble_gap_evt_adv_report_t* advReport) {
 	scanned_device_t scan;
 	memcpy(scan.address, advReport->peer_addr.addr, sizeof(scan.address)); // TODO: check addr_type and addr_id_peer
-	scan.addressType = (advReport->peer_addr.addr_type & 0x7F) & ((advReport->peer_addr.addr_id_peer & 0x01) << 7);
+	scan.resolvedPrivateAddress = advReport->peer_addr.addr_id_peer;
+	scan.addressType = advReport->peer_addr.addr_type;
 	scan.rssi = advReport->rssi;
 	scan.channel = advReport->ch_index;
 	scan.dataSize = advReport->data.len;
@@ -547,47 +504,47 @@ void csStackOnScan(void * p_event_data, uint16_t event_size) {
 
 void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt) {
 	switch (p_ble_evt->header.evt_id) {
-	case BLE_GAP_EVT_ADV_REPORT: {
-		const uint16_t status = p_ble_evt->evt.gap_evt.params.adv_report.type.status;
-		if (status != BLE_GAP_ADV_DATA_STATUS_COMPLETE) {
-			LOGw("adv report status=%u", status);
+		case BLE_GAP_EVT_ADV_REPORT: {
+			const uint16_t status = p_ble_evt->evt.gap_evt.params.adv_report.type.status;
+			if (status != BLE_GAP_ADV_DATA_STATUS_COMPLETE) {
+				LOGw("adv report status=%u", status);
+				break;
+			}
+
+			if (isInterrupt) {
+				// Handle scan via app scheduler. The app scheduler copies the data.
+				// But, since the payload data is a pointer, that will not be copied.
+				// So copy the payload data as well.
+				// This copy of advReport + payload data will be copied again by the scheduler.
+				// TODO: use multiple scan buffers?
+				cs_stack_scan_t scan;
+				memcpy(&(scan.advReport), &(p_ble_evt->evt.gap_evt.params.adv_report), sizeof(ble_gap_evt_adv_report_t));
+				scan.dataSize = p_ble_evt->evt.gap_evt.params.adv_report.data.len;
+				memcpy(scan.data, p_ble_evt->evt.gap_evt.params.adv_report.data.p_data, scan.dataSize);
+				scan.advReport.data.p_data = NULL; // This pointer can't be set now, as the data is copied by scheduler.
+
+				uint32_t retVal = app_sched_event_put(&scan, sizeof(scan), csStackOnScan);
+				APP_ERROR_CHECK(retVal);
+			}
+			else {
+				// Handle scan immediately, since we're already on thread level.
+				csStackOnScan(&(p_ble_evt->evt.gap_evt.params.adv_report));
+			}
+
+			// If ble_gap_adv_report_type_t::status is set to BLE_GAP_ADV_DATA_STATUS_INCOMPLETE_MORE_DATA,
+			//      not all fields in the advertising report may be available.
+			// Else, scanning will be paused. To continue scanning, call sd_ble_gap_scan_start.
+
+			// Resume scanning: ignore _scanning state as this is executed in an interrupt. Rely on return value instead.
+			uint32_t retVal = sd_ble_gap_scan_start(NULL, &_scanBufferStruct);
+			switch (retVal) {
+				case NRF_ERROR_INVALID_STATE:
+					break;
+				default:
+					APP_ERROR_CHECK(retVal);
+			}
 			break;
 		}
-
-		if (isInterrupt) {
-			// Handle scan via app scheduler. The app scheduler copies the data.
-			// But, since the payload data is a pointer, that will not be copied.
-			// So copy the payload data as well.
-			// This copy of advReport + payload data will be copied again by the scheduler.
-			// TODO: use multiple scan buffers?
-			cs_stack_scan_t scan;
-			memcpy(&(scan.advReport), &(p_ble_evt->evt.gap_evt.params.adv_report), sizeof(ble_gap_evt_adv_report_t));
-			scan.dataSize = p_ble_evt->evt.gap_evt.params.adv_report.data.len;
-			memcpy(scan.data, p_ble_evt->evt.gap_evt.params.adv_report.data.p_data, scan.dataSize);
-			scan.advReport.data.p_data = NULL; // This pointer can't be set now, as the data is copied by scheduler.
-
-			uint32_t retVal = app_sched_event_put(&scan, sizeof(scan), csStackOnScan);
-			APP_ERROR_CHECK(retVal);
-		}
-		else {
-			// Handle scan immediately, since we're already on thread level.
-			csStackOnScan(&(p_ble_evt->evt.gap_evt.params.adv_report));
-		}
-
-		// If ble_gap_adv_report_type_t::status is set to BLE_GAP_ADV_DATA_STATUS_INCOMPLETE_MORE_DATA,
-		//      not all fields in the advertising report may be available.
-		// Else, scanning will be paused. To continue scanning, call sd_ble_gap_scan_start.
-
-		// Resume scanning: ignore _scanning state as this is executed in an interrupt. Rely on return value instead.
-		uint32_t retVal = sd_ble_gap_scan_start(NULL, &_scanBufferStruct);
-		switch (retVal) {
-		case NRF_ERROR_INVALID_STATE:
-			break;
-		default:
-			APP_ERROR_CHECK(retVal);
-		}
-		break;
-	}
 	}
 }
 
@@ -618,52 +575,342 @@ void Stack::resetConnectionAliveTimer() {
 #endif
 }
 
-void Stack::onConnected(const ble_evt_t * p_ble_evt) {
-	LOGd("Connection event");
-	//ble_gap_evt_connected_t connected_evt = p_ble_evt->evt.gap_evt.params.connected;
+void Stack::onMemoryRequest(uint16_t connectionHandle) {
+	// You can check which type is requested: p_ble_evt->evt.common_evt.params.user_mem_request.type
+	// Currently only option is: BLE_USER_MEM_TYPE_GATTS_QUEUED_WRITES
+	// See https://devzone.nordicsemi.com/f/nordic-q-a/33366/is-it-necessary-handle-ble_evt_user_mem_request-respectivly-is-it-required-to-support-prepared-writes
+	// And https://devzone.nordicsemi.com/f/nordic-q-a/53074/ble_evt_user_mem_request-if-data_length-is-180-bytes-on-ios-but-not-for-android
+	// And https://devzone.nordicsemi.com/f/nordic-q-a/50043/ble_evt_user_mem_request-patterns
+	// Also see https://interrupt.memfault.com/blog/ble-throughput-primer
+//		BLE_CALL(sd_ble_user_mem_reply, (connectionHandle, NULL));
 
-	// 12-sep-2019 TODO: why do we do this? In the peripheral examples this is not done.
-//	BLE_CALL(sd_ble_gap_conn_param_update, (p_ble_evt->evt.gap_evt.conn_handle, &_gap_conn_params));
+	ble_user_mem_block_t memBlock;
+	cs_data_t writeBuffer = CharacteristicWriteBuffer::getInstance().getBuffer(CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
+	memBlock.p_mem = writeBuffer.data;
+	memBlock.len = writeBuffer.len;
+	BLE_CALL(sd_ble_user_mem_reply, (connectionHandle, &memBlock));
+}
 
-//	ble_gap_addr_t* peerAddr = &p_ble_evt->evt.gap_evt.params.connected.peer_addr;
-//	LOGi("Connection from: %02X:%02X:%02X:%02X:%02X:%02X", peerAddr->addr[5],
-//	                       peerAddr->addr[4], peerAddr->addr[3], peerAddr->addr[2], peerAddr->addr[1],
-//	                       peerAddr->addr[0]);
+void Stack::onMemoryRelease(uint16_t connectionHandle) {
+	// No need to do anything
+}
 
-	_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+void Stack::onWrite(const ble_gatts_evt_write_t& writeEvt) {
+	if (isDisconnecting()) {
+		LOGw("Discard write: disconnect in progress.");
+		return;
+	}
+
+	resetConnectionAliveTimer();
+
+	if (writeEvt.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
+		cs_data_t writeBuffer = CharacteristicWriteBuffer::getInstance().getBuffer(CS_CHAR_BUFFER_DEFAULT_OFFSET - CS_STACK_LONG_WRITE_HEADER_SIZE);
+		uint16_t* header = (uint16_t*)(writeBuffer.data);
+		for (Service* svc : _services) {
+			// for a long write, don't have the service handle available to check for the correct
+			// service, so we just go through all the services and characteristics until we find
+			// the correct characteristic, then we return
+			if (svc->on_write(writeEvt, header[0])) {
+				return;
+			}
+		}
+	}
+	else {
+		for (Service* svc : _services) {
+			svc->on_write(writeEvt, writeEvt.handle);
+		}
+	}
+}
+
+
+
+void Stack::onConnect(const ble_evt_t * p_ble_evt) {
+	_connectionHandle = p_ble_evt->evt.gap_evt.conn_handle;
 	_disconnectingInProgress = false;
 
-	if (_callback_connected) {
-		_callback_connected(p_ble_evt->evt.gap_evt.conn_handle);
-	}
-	for (Service* svc : _services) {
-		svc->on_ble_event(p_ble_evt);
-	}
-	startConnectionAliveTimer();
+#if ENABLE_RSSI_FOR_CONNECTION == 1
+		// See https://devzone.nordicsemi.com/f/nordic-q-a/228/about-rssi-of-ble
+//		sd_ble_gap_rssi_stop(_conn_handle);
+		sd_ble_gap_rssi_start(_connectionHandle, 0, 0);
+#endif
+
+		switch (p_ble_evt->evt.gap_evt.params.connected.role) {
+			case BLE_GAP_ROLE_PERIPH: {
+				LOGi("onConnect as peripheral");
+				break;
+			}
+			case BLE_GAP_ROLE_CENTRAL: {
+				LOGi("onConnect as central");
+				assert(_connectionIsOutgoing == true, "Central role whith no outgoing connection?");
+				break;
+			}
+			default: {
+				LOGw("onConnect with unknown role");
+				break;
+			}
+		}
+
+		if (_connectionIsOutgoing) {
+			onOutgoingConnected();
+		}
+		else {
+			onIncomingConnected(p_ble_evt);
+		}
 }
 
-void Stack::onDisconnected(const ble_evt_t * p_ble_evt) {
-	//ble_gap_evt_disconnected_t disconnected_evt = p_ble_evt->evt.gap_evt.params.disconnected;
-	_conn_handle = BLE_CONN_HANDLE_INVALID;
-	if (_callback_connected) {
-		_callback_disconnected(p_ble_evt->evt.gap_evt.conn_handle);
+void Stack::onConnectionTimeout() {
+	LOGd("onConnectionTimeout");
+	if (_connectionIsOutgoing) {
+		event_t event(CS_TYPE::EVT_OUTGOING_DISCONNECTED);
+		event.dispatch();
+		_connectionIsOutgoing = false;
 	}
+	else {
+		LOGw("No outgoing connection");
+	}
+}
+
+void Stack::onDisconnect(const ble_evt_t * p_ble_evt) {
+	_connectionHandle = BLE_CONN_HANDLE_INVALID;
+
+	if (_connectionIsOutgoing) {
+		onOutgoingDisconnected();
+	}
+	else {
+		onIncomingDisconnected(p_ble_evt);
+	}
+	_connectionIsOutgoing = false;
+}
+
+void Stack::onGapTimeout(uint8_t src) {
+	switch (src) {
+		case BLE_GAP_TIMEOUT_SRC_CONN: {
+			onConnectionTimeout();
+			break;
+		}
+		case BLE_GAP_TIMEOUT_SRC_SCAN: {
+			LOGi("Scan timeout");
+			break;
+		}
+		default: {
+			LOGi("GAP timeout");
+			break;
+		}
+	}
+}
+
+
+void Stack::onIncomingConnected(const ble_evt_t * p_ble_evt) {
+	LOGi("Device connected");
+
 	for (Service* svc : _services) {
 		svc->on_ble_event(p_ble_evt);
 	}
-	stopConnectionAliveTimer();
+
+	startConnectionAliveTimer();
+
+	event_t event(CS_TYPE::EVT_BLE_CONNECT);
+	event.dispatch();
 }
+
+void Stack::onIncomingDisconnected(const ble_evt_t * p_ble_evt) {
+	LOGi("Device disconnected");
+
+	for (Service* svc : _services) {
+		svc->on_ble_event(p_ble_evt);
+	}
+
+	stopConnectionAliveTimer();
+
+	event_t event(CS_TYPE::EVT_BLE_DISCONNECT);
+	event.dispatch();
+}
+
+void Stack::onOutgoingConnected() {
+	LOGi("Connected to device");
+
+	event_t event(CS_TYPE::EVT_OUTGOING_CONNECTED);
+	event.dispatch();
+
+	LOGi("Start discovery");
+	uint32_t retCode;
+
+	// We have to tell the discovery module what services we're interested in _before_ the discovery.
+	ble_uuid_t serviceUuid;
+
+	// When looking for 128b services, you have to first add the 128 bit uuid to the softdevice with sd_ble_uuid_vs_add().
+	// Then use the type that's returned in calls that follow, while bytes 12 and 13 (from the right when looking at the uuid string) form the 16 bit uuid.
+
+	UUID uuidSetup(SETUP_UUID);
+	uuidSetup.init();
+	serviceUuid = uuidSetup; // Uses cast operator.
+	LOGi("setup service uuid=0x%X type=%u", serviceUuid.uuid, serviceUuid.type);
+	retCode = ble_db_discovery_evt_register(&serviceUuid);
+
+	// Crownstone service.
+	// Byte nr:    15 14 13 12 11 10 9  8  7  6  5  4  3  2  1  0
+	// Hex value:  24 F0 00 00 7D 10 48 05 BF C1 76 63 A0 1C 3B FF
+	UUID uuidCrownstone(CROWNSTONE_UUID);
+	uuidCrownstone.init();
+	serviceUuid = uuidCrownstone; // Uses cast operator.
+	LOGi("crownstone service uuid=0x%X type=%u", serviceUuid.uuid, serviceUuid.type);
+	retCode = ble_db_discovery_evt_register(&serviceUuid);
+
+	// Secure DFU service
+	serviceUuid.type = BLE_UUID_TYPE_BLE;
+	serviceUuid.uuid = 0xFE59;
+	retCode = ble_db_discovery_evt_register(&serviceUuid);
+
+	// Device information service.
+	serviceUuid.type = BLE_UUID_TYPE_BLE;
+	serviceUuid.uuid = 0x180A;
+	retCode = ble_db_discovery_evt_register(&serviceUuid);
+
+	retCode = ble_db_discovery_start(&_discoveryModule, _connectionHandle);
+	if (retCode != NRF_SUCCESS) {
+		LOGe("Failed to start discovery retCode=%u", retCode);
+		disconnect();
+	}
+}
+
+void Stack::onOutgoingDisconnected() {
+	LOGi("Disconnected from device");
+
+	event_t event(CS_TYPE::EVT_OUTGOING_DISCONNECTED);
+	event.dispatch();
+}
+
+void Stack::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
+	uint32_t retCode;
+	switch (event->evt_type) {
+		case BLE_DB_DISCOVERY_COMPLETE: {
+			LOGi("Discovery found uuid=0x%04X type=%u characteristicCount=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type, event->params.discovered_db.char_count);
+			if (event->params.discovered_db.srv_uuid.type >= BLE_UUID_TYPE_VENDOR_BEGIN) {
+				ble_uuid128_t fullUuid;
+				uint8_t uuidSize = 0;
+				retCode = sd_ble_uuid_encode(&(event->params.discovered_db.srv_uuid), &uuidSize, fullUuid.uuid128);
+				if (retCode == NRF_SUCCESS && uuidSize == sizeof(fullUuid)) {
+#if CS_SERIAL_NRF_LOG_ENABLED != 2
+					LOGd("Full uuid: %02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+							fullUuid.uuid128[15],
+							fullUuid.uuid128[14],
+							fullUuid.uuid128[13],
+							fullUuid.uuid128[12],
+							fullUuid.uuid128[11],
+							fullUuid.uuid128[10],
+							fullUuid.uuid128[9],
+							fullUuid.uuid128[8],
+							fullUuid.uuid128[7],
+							fullUuid.uuid128[6],
+							fullUuid.uuid128[5],
+							fullUuid.uuid128[4],
+							fullUuid.uuid128[3],
+							fullUuid.uuid128[2],
+							fullUuid.uuid128[1],
+							fullUuid.uuid128[0]);
+#endif
+				}
+				else {
+					LOGw("Failed to get full uuid");
+				}
+			}
+			break;
+		}
+		case BLE_DB_DISCOVERY_SRV_NOT_FOUND: {
+			LOGi("Discovery not found uuid=0x%04X type=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type);
+			break;
+		}
+		case BLE_DB_DISCOVERY_ERROR: {
+			LOGw("Discovery error %u", event->params.err_code);
+			break;
+		}
+		case BLE_DB_DISCOVERY_AVAILABLE: {
+			// A bug prevents this event from ever firing. It is fixed in SDK 16.0.0.
+			// Instead, we should be done when the number of registered uuids equals the number of received BLE_DB_DISCOVERY_COMPLETE + BLE_DB_DISCOVERY_SRV_NOT_FOUND events.
+			// See https://devzone.nordicsemi.com/f/nordic-q-a/20846/getting-service-count-from-database-discovery-module
+			// We apply a similar patch to the SDK.
+			LOGi("Discovery done");
+
+			// According to the doc, the "services" struct is only for internal usage.
+			// But it seems to store all the discovered services and characteristics.
+			uint16_t fwVersionHandle = BLE_GATT_HANDLE_INVALID;
+			uint16_t controlHandle = BLE_GATT_HANDLE_INVALID;
+
+			for (uint8_t s = 0; s < _discoveryModule.discoveries_count; ++s) {
+				LOGi("service: uuidType=%u uuid=0x%04X", _discoveryModule.services[s].srv_uuid.type, _discoveryModule.services[s].srv_uuid.uuid);
+				for (uint8_t c = 0; c < _discoveryModule.services[s].char_count; ++c) {
+					ble_gatt_db_char_t* characteristic = &(_discoveryModule.services[s].charateristics[c]);
+					LOGi("    char: cccd_handle=0x%X uuidType=%u uuid=0x%04X handle_value=0x%X handle_decl=0x%X",
+							characteristic->cccd_handle,
+							characteristic->characteristic.uuid.type,
+							characteristic->characteristic.uuid.uuid,
+							characteristic->characteristic.handle_value,
+							characteristic->characteristic.handle_decl);
+					if (characteristic->characteristic.uuid.type == BLE_UUID_TYPE_BLE && characteristic->characteristic.uuid.uuid == 0x2A26) {
+						fwVersionHandle = characteristic->characteristic.handle_value;
+					}
+					if (characteristic->characteristic.uuid.type >= BLE_UUID_TYPE_VENDOR_BEGIN && characteristic->characteristic.uuid.uuid == 0x000E) {
+						controlHandle = characteristic->characteristic.handle_value;
+					}
+				}
+			}
+
+			if (fwVersionHandle != BLE_GATT_HANDLE_INVALID) {
+//				LOGi("Read fw version");
+//				// Triggers event BLE_GATTC_EVT_READ_RSP.
+//				retCode = sd_ble_gattc_read(_connectionHandle, fwVersionHandle, 0);
+//				if (retCode != NRF_SUCCESS) {
+//					LOGw("Failed to read fw version retCode=%u", retCode);
+//				}
+			}
+
+			if (controlHandle != BLE_GATT_HANDLE_INVALID) {
+//				for (uint16_t i = 0; i < sizeof(_writeBuf); ++i) {
+//					_writeBuf[i] = i;
+//				}
+//
+//				ble_gattc_write_params_t writeParams;
+//				writeParams.write_op = BLE_GATT_OP_WRITE_REQ; // Write with response (ack). Triggers BLE_GATTC_EVT_WRITE_RSP.
+//				writeParams.flags = 0; // Ignored for write_req
+//				writeParams.handle = controlHandle;
+//				writeParams.offset = 0;
+//				writeParams.len = sizeof(_writeBuf);
+//				writeParams.p_value = _writeBuf;
+//
+//				// We can't write more than MTU.
+//				// For long writes, use BLE_GATT_OP_PREP_WRITE_REQ followed by BLE_GATT_OP_EXEC_WRITE_REQ.
+//				if (writeParams.len > _writeMtu) {
+//					writeParams.len = _writeMtu;
+//				}
+//
+//				retCode = sd_ble_gattc_write(_connectionHandle, &writeParams);
+//				if (retCode != NRF_SUCCESS) {
+//					LOGw("Failed to write. retCode=%u", retCode);
+//				}
+			}
+			break;
+		}
+	}
+	LOGd("Discovery progress=%u pending=%u numServicesHandled=%u numServices=%u",
+			_discoveryModule.discovery_in_progress,
+			_discoveryModule.discovery_pending,
+			_discoveryModule.discoveries_count,
+			_discoveryModule.srv_count);
+}
+
+
+
 
 void Stack::disconnect() {
 	// Only disconnect when we are actually connected to something
-	if (_conn_handle != BLE_CONN_HANDLE_INVALID && _disconnectingInProgress == false) {
+	if (_connectionHandle != BLE_CONN_HANDLE_INVALID && _disconnectingInProgress == false) {
 		_disconnectingInProgress = true;
 		LOGi("Forcibly disconnecting from device");
 		// It seems like we're only allowed to use BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION.
 		// This sometimes gives us an NRF_ERROR_INVALID_STATE (disconnection is already in progress)
 		// NRF_ERROR_INVALID_STATE can safely be ignored, see: https://devzone.nordicsemi.com/question/81108/handling-nrf_error_invalid_state-error-code/
 		// BLE_ERROR_INVALID_CONN_HANDLE can safely be ignored, see: https://devzone.nordicsemi.com/f/nordic-q-a/34353/error-0x3002/132078#132078
-		uint32_t errorCode = sd_ble_gap_disconnect(_conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+		uint32_t errorCode = sd_ble_gap_disconnect(_connectionHandle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
 		switch (errorCode) {
 		case BLE_ERROR_INVALID_CONN_HANDLE:
 		case NRF_ERROR_INVALID_STATE:
@@ -680,7 +927,11 @@ bool Stack::isDisconnecting() {
 };
 
 bool Stack::isConnected() {
-	return _conn_handle != BLE_CONN_HANDLE_INVALID;
+	return _connectionHandle != BLE_CONN_HANDLE_INVALID;
+}
+
+bool Stack::isConnectedPeripheral() {
+	return isConnected() && !_connectionIsOutgoing;
 }
 
 void Stack::onTxComplete(const ble_evt_t * p_ble_evt) {
@@ -689,11 +940,60 @@ void Stack::onTxComplete(const ble_evt_t * p_ble_evt) {
 	}
 }
 
-void Stack::setOnConnectCallback(const callback_connected_t& callback) {
-	_callback_connected = callback;
-}
 
-void Stack::setOnDisconnectCallback(const callback_disconnected_t& callback) {
-	_callback_disconnected = callback;
+cs_ret_code_t Stack::connect(const device_address_t& address, uint16_t timeoutMs) {
+	if (isConnected()) {
+		LOGi("Already connected");
+		return ERR_BUSY;
+	}
+
+	LOGw("Not ready for release");
+	return ERR_NOT_IMPLEMENTED;
+
+	event_t connectEvent(CS_TYPE::EVT_OUTGOING_CONNECT_START);
+	connectEvent.dispatch();
+
+	if (connectEvent.result.returnCode != ERR_SUCCESS) {
+		LOGe("Unable to start connecting: err=%u", connectEvent.result.returnCode);
+		event_t disconnectEvent(CS_TYPE::EVT_OUTGOING_DISCONNECTED);
+		disconnectEvent.dispatch();
+		return connectEvent.result.returnCode;
+	}
+
+	ble_gap_addr_t gapAddress;
+	memcpy(gapAddress.addr, address.address, sizeof(address.address));
+	gapAddress.addr_id_peer = 0;
+	gapAddress.addr_type = address.addressType;
+
+	ble_gap_scan_params_t scanParams;
+	scanParams.extended = 0;
+	scanParams.report_incomplete_evts = 0;
+	scanParams.active = 1;
+	scanParams.filter_policy = BLE_GAP_SCAN_FP_ACCEPT_ALL; // Scanning filter policy. See BLE_GAP_SCAN_FILTER_POLICIES
+	scanParams.scan_phys = BLE_GAP_PHY_1MBPS;
+	scanParams.timeout = timeoutMs / 10; // This acts as connection timeout.
+	scanParams.channel_mask[0] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[1] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
+	scanParams.interval = 160;
+	scanParams.window = 80;
+
+	if (scanParams.timeout < BLE_GAP_SCAN_TIMEOUT_MIN) {
+		scanParams.timeout = BLE_GAP_SCAN_TIMEOUT_MIN;
+	}
+
+	uint32_t errCode = sd_ble_gap_connect(&gapAddress, &scanParams, &_connectionParams, APP_BLE_CONN_CFG_TAG);
+	if (errCode == NRF_SUCCESS) {
+		LOGi("Connecting..");
+		_connectionIsOutgoing = true;
+		// We will get either BLE_GAP_EVT_CONNECTED or BLE_GAP_EVT_TIMEOUT.
+		return ERR_SUCCESS;
+	}
+	else {
+		LOGe("Connect err=%u", errCode);
+		return ERR_UNSPECIFIED;
+	}
 }
 

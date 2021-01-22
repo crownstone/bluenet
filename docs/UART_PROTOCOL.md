@@ -28,8 +28,8 @@ uint16  | CRC            | 2 | The CRC16 (CRC-16-CCITT) of everything after the 
 
 Type | Payload | Description
 ---- | ------- | -----------
-0    | [UART message](#uart-msg) | Plain text UART message.
-128  | [Encrypted UART message](#encrypted-uart-msg) | Encrypted UART message. **Not implemented yet.**
+0    | [UART message](#uart-message) | Plain text UART message.
+128  | [Encrypted UART message](#encrypted-uart-message) | Encrypted UART message. **Not implemented yet.**
 
 
 ### Encrypted UART message
@@ -42,7 +42,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8[] | Packet nonce | 3 | Packet nonce: should be different random numbers each time.
 uint8   | Key ID       | 1 | Key ID used for encryption: always 0 for now. Also determines access level: always admin for now.
-uint8[] | Encrypted data | N | Encrypted with [AES CTR](PROTOCOL.md#ctr-encryption). Get a (new) session nonce with the session nonce command.
+uint8[] | Encrypted data | N | Encrypted with [AES CTR](PROTOCOL.md#aes-128-ctr-encryption). Get a (new) session nonce with the session nonce command.
 
 ### Encrypted data
 
@@ -52,7 +52,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint32  | Validation   | 4 | Validation: must be 0xCAFEBABE.
 uint16  | Message size | 2 | Size of the uart message in bytes.
-uint8[] | [UART message](#uart-msg) | Size | The uart message.
+uint8[] | [UART message](#uart-message) | Size | The uart message.
 uint8[] | Padding      | N | Padding to make this whole packet size a multiple of 16.
 
 
@@ -80,13 +80,13 @@ Data types for messages sent to the Crownstone.
 
 Type  | Type name                     | Encrypted | Data   | Description
 ----- | ----------------------------- | --------- | ------ | -----------
-0     | Hello                         | Never     | [Hello](#cmd-hello-packet) | First command that should sent, used to determine whether this is the right crownstone, and to tell and determine whether encryption has to be used.
-1     | Session nonce                 | Never     | [Session nonce](#cmd-session-nonce-packet) | Refresh the session nonce.
-2     | Heartbeat                     | Optional  | [Heartbeat](#cmd-heartbeat-packet) | Used to know whether the UART connection is alive. You can mix encrypted and unencrypted heartbeat commands. With current implementation though, each time you send an unencrypted heartbeat, the hub service data flag `UART alive encrypted` will be false until an encrypted heartbeat is sent.
-3     | Status                        | Optional  | [Status](#cmd-status-packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
+0     | Hello                         | Never     | [Hello](#user-hello-packet) | First command that should sent, used to determine whether this is the right crownstone, and to tell and determine whether encryption has to be used.
+1     | Session nonce                 | Never     | [Session nonce](#refresh-session-nonce-packet) | Refresh the session nonce.
+2     | Heartbeat                     | Optional  | [Heartbeat](#heartbeat-packet) | Used to know whether the UART connection is alive. You can mix encrypted and unencrypted heartbeat commands. With current implementation though, each time you send an unencrypted heartbeat, the hub service data flag `UART alive encrypted` will be false until an encrypted heartbeat is sent.
+3     | Status                        | Optional  | [Status](#user-status-packet) | Status of the user, this will be advertised by a dongle when it is in hub mode. Hub mode can be enabled via a _Set state_ control command.
 4     | Get MAC                       | Never     | -      | Get MAC address of this Crownstone.
 10    | Control command               | Yes       | [Control msg](../docs/PROTOCOL.md#control-packet) | Send a control command.
-11    | Hub data reply                | Optional  | [Hub data reply](#cmd-hub-data-reply-packet) | Only after receiving `Hub data`, reply with this command. This data will be relayed to the device (phone) connected via BLE.
+11    | Hub data reply                | Optional  | [Hub data reply](#hub-data-reply) | Only after receiving `Hub data`, reply with this command. This data will be relayed to the device (phone) connected via BLE.
 50000 | Enable advertising            | Never     | uint8  | Enable/disable advertising.
 50001 | Enable mesh                   | Never     | uint8  | Enable/disable mesh.
 50002 | Get ID                        | Never     | -      | Get ID of this Crownstone.
@@ -118,15 +118,15 @@ Data types for messages received from the Crownstone.
 
 Type  | Type name                     | Encrypted | Data   | Description
 ----- | ----------------------------- | --------- | ------ | -----------
-0     | Hello                         | Never     | [Hello](#ret-hello-packet) | Hello reply.
-1     | Session nonce                 | Never     | [Session nonce](#ret-session-nonce-packet) | The new session nonce.
+0     | Hello                         | Never     | [Hello](#crownstone-hello-packet) | Hello reply.
+1     | Session nonce                 | Never     | [Session nonce](#session-nonce-reply-packet) | The new session nonce.
 2     | Heartbeat                     | Optional  | -      | Heartbeat reply. Will be encrypted if the command was encrypted too.
-3     | Status                        | Never     | [Status](#ret-status-packet) | Status reply.
+3     | Status                        | Never     | [Status](#crownstone-status-packet) | Status reply.
 4     | MAC                           | Never     | uint8 [6] | The MAC address of this crownstone.
 10    | Control result                | Yes       | [Result packet](../docs/PROTOCOL.md#result-packet) | Result of a control command.
 11    | Hub data reply ack            | Optional  | -      | Simply an acknowledgement that the hub data reply was received by the crownstone. Will be encrypted if the command was encrypted too.
 9900  | Parsing failed                | Never     | -      | Your command was probably formatted incorrectly, is too large, has an invalid data type, or you don't have the required access level.
-9901  | Error reply                   | Never     | [Status](#ret-status-packet) | Your command was probably not encrypted while it should have been.
+9901  | Error reply                   | Never     | [Status](#crownstone-status-packet) | Your command was probably not encrypted while it should have been.
 9902  | Session nonce missing         | Never     | -      | The Crownstone has no session nonce, please send one.
 9903  | Decryption failed             | Never     | -      | Decryption failed due to missing or wrong key.
 10000 | Uart msg                      | Yes       | string | As requested via control command `UART message`.
@@ -136,7 +136,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 10005 | Factory reset                 | Yes       | -      | Sent when a factory reset will be performed.
 10006 | Booted                        | Never     | -      | This Crownstone just booted, you probably want to start a new session.
 10007 | Hub data                      | Optional  | uint8 [] | As requested via control command `Hub data`. Make sure you reply with the `Hub data reply` uart command.
-10102 | Mesh state msg                | Yes       | [Service data without device type](../docs/SERVICE_DATA.md#service-data-encrypted) | State of other Crownstones in the mesh (unencrypted).
+10102 | Mesh state msg                | Yes       | [Service data without device type](../docs/SERVICE_DATA.md#encrypted-data) | State of other Crownstones in the mesh (unencrypted).
 10103 | Mesh state part 0             | Yes       | [External state part 0](#mesh-state-part-0) | Part of the state of other Crownstones in the mesh.
 10104 | Mesh state part 1             | Yes       | [External state part 1](#mesh-state-part-1) | Part of the state of other Crownstones in the mesh.
 10105 | Mesh result                   | Yes       | [Mesh result](#mesh-result-packet) | Result of an acked mesh command. You will get a mesh result for each Crownstone, also when it timed out. Note: you might get this multiple times for the same ID.
@@ -145,23 +145,23 @@ Type  | Type name                     | Encrypted | Data   | Description
 10200 | Binary debug log              | Yes       | [Binary log](#binary-log-packet) | Binary debug logs, that you have to reconstruct on the client side.
 10201 | Binary debug log array        | Yes       | [Binary log array](#binary-log-array-packet) | Binary debug logs, that you have to reconstruct on the client side.
 40000 | Event                         | Yes       | ?      | Raw data from the internal event bus.
-40103 | Mesh cmd time                 | Yes       | [Time](../docs/MESH_PROTOCOL.md#cs-mesh-model-msg-time-t) | Received command to set time from the mesh.
-40110 | Mesh profile location         | Yes       | [Profile location](../docs/MESH_PROTOCOL.md#cs-mesh-model-msg-profile-location-t) | Received the location of a profile from the mesh.
-40111 | Mesh set behaviour settings   | Yes       | [Behaviour settings](../docs/MESH_PROTOCOL.md#behaviour-settings-t) | Received command to set behaviour settings from the mesh.
-40112 | Mesh tracked device register  | Yes       | [Tracked device register](../docs/MESH_PROTOCOL.md#cs-mesh-model-msg-device-register-t) | Received command to register a tracked device from the mesh.
-40113 | Mesh tracked device token     | Yes       | [Tracked device token](../docs/MESH_PROTOCOL.md#cs-mesh-model-msg-device-token-t) | Received command to set the token of a tracked device from the mesh.
-40114 | Mesh sync request             | Yes       | [Sync request](../docs/MESH_PROTOCOL.md#cs-mesh-model-msg-sync-request-t) | Received a sync request from the mesh.
-40120 | Mesh tracked device heartbeat | Yes       | [Tracked device heartbeat](../docs/MESH_PROTOCOL.md#cs-mesh-model-msg-device-heartbeat-t) | Received heartbeat command of a tracked device from the mesh.
+40103 | Mesh cmd time                 | Yes       | [Time](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_time_t) | Received command to set time from the mesh.
+40110 | Mesh profile location         | Yes       | [Profile location](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_profile_location_t) | Received the location of a profile from the mesh.
+40111 | Mesh set behaviour settings   | Yes       | [Behaviour settings](../docs/MESH_PROTOCOL.md#behaviour_settings_t) | Received command to set behaviour settings from the mesh.
+40112 | Mesh tracked device register  | Yes       | [Tracked device register](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_register_t) | Received command to register a tracked device from the mesh.
+40113 | Mesh tracked device token     | Yes       | [Tracked device token](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_token_t) | Received command to set the token of a tracked device from the mesh.
+40114 | Mesh sync request             | Yes       | [Sync request](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_sync_request_t) | Received a sync request from the mesh.
+40120 | Mesh tracked device heartbeat | Yes       | [Tracked device heartbeat](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_device_heartbeat_t) | Received heartbeat command of a tracked device from the mesh.
 50000 | Advertising enabled           | Never     | uint8  | Whether advertising is enabled.
 50001 | Mesh enabled                  | Never     | uint8  | Whether mesh is enabled.
 50002 | Stone ID                      | Never     | uint8  | The stone ID of this crownstone.
-50100 | ADC config                    | Never     | [ADC config](#adc-channel-config-packet) | ADC configuration.
+50100 | ADC config                    | Never     | [ADC config](#adc-channel-config) | ADC configuration.
 50101 | ADC restarted                 | Never     | -      | ADC restarted.
-50200 | Current samples               | Never     | [Current samples](#current-samples-packet) | Raw ADC samples of the current channel.
-50201 | Voltage samples               | Never     | [Voltage samples](#voltage-samples-packet) | Raw ADC samples of the voltage channel.
-50202 | Filtered current samples      | Never     | [Filtered current samples](#current-samples-packet) | Filtered ADC samples of the current channel.
-50203 | Filtered voltage samples      | Never     | [Filtered voltage samples](#voltage-samples-packet) | Filtered ADC samples of the voltage channel.
-50204 | Power                         | Never     | [Power calculations](#power-calculation-packet) | Calculated power values.
+50200 | Current samples               | Never     | [Current samples](#current-samples) | Raw ADC samples of the current channel.
+50201 | Voltage samples               | Never     | [Voltage samples](#voltage-samples) | Raw ADC samples of the voltage channel.
+50202 | Filtered current samples      | Never     | [Filtered current samples](#current-samples) | Filtered ADC samples of the current channel.
+50203 | Filtered voltage samples      | Never     | [Filtered voltage samples](#voltage-samples) | Filtered ADC samples of the voltage channel.
+50204 | Power                         | Never     | [Power calculations](#power-calculations) | Calculated power values.
 60000 | Debug log                     | Never     | string | Debug strings.
 60001 | Test                          | Never     | string | Firmware test strings.
 
@@ -173,15 +173,15 @@ Type  | Type name                     | Encrypted | Data   | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | [Flags](#user-status-flags) | 1 | Status flags.
+uint8 | [Flags](#user-status-flags-bitmask) | 1 | Status flags.
 
 
 ### Crownstone hello packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Sphere ID | 1 | Short sphere ID, as given during [setup](PROTOCOL.md#setup).
-[status](#ret-status-packet) | Status | 1 | Status packet.
+uint8 | Sphere ID | 1 | Short sphere ID, as given during [setup](PROTOCOL.md#setup-mode).
+[status](#crownstone-status-packet) | Status | 1 | Status packet.
 
 
 ### Heartbeat packet
@@ -196,7 +196,7 @@ uint16 | Timeout | 2 | If no heartbeat is received for _timeout_ seconds, the co
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Type | 1 | Status type: 0=no-data, 1=crownstone-hub
-uint8 | [Flags](#user-status-flags) | 1 | Status flags.
+uint8 | [Flags](#user-status-flags-bitmask) | 1 | Status flags.
 uint8[] | Data | 9 | Status data to be advertised by dongle (will be ignored if status type is _no-data_).
 
 ### User status flags bitmask
@@ -214,7 +214,7 @@ Bit | Name |  Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | [Flags](#ret-status-flags) | 1 | Status flags.
+uint8 | [Flags](#crownstone-status-flags-bitmask) | 1 | Status flags.
 
 ### Crownstone status flags bitmask
 
@@ -297,7 +297,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 [Header](#binary-log-header) | Header | 8 | Header.
 uint8 | Num args | 1 | Number of arguments that follow.
-[Args[]](#binary-log-arg-packet) | Args | N | Array of argument packets.
+[Args[]](#binary-log-argument-packet) | Args | N | Array of argument packets.
 
 ### Binary log argument packet
 
@@ -341,7 +341,7 @@ uint8 | Stone ID | 1 | ID of the stone.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Stone ID | 1 | ID of the stone.
-[Mesh msg state 0](../docs/MESH_PROTOCOL.md#cs-mesh-model-msg-state-0-t) | State | 7 | The state.
+[Mesh msg state 0](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_0_t) | State | 7 | The state.
 
 
 ### Mesh state part 1
@@ -349,7 +349,7 @@ uint8 | Stone ID | 1 | ID of the stone.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Stone ID | 1 | ID of the stone.
-[Mesh msg state 1](../docs/MESH_PROTOCOL.md#cs-mesh-model-msg-state-1-t) | State | 7 | The state.
+[Mesh msg state 1](../docs/MESH_PROTOCOL.md#cs_mesh_model_msg_state_1_t) | State | 7 | The state.
 
 
 
@@ -360,7 +360,7 @@ Sent when the ADC config changes.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Count | 1 | Number of channels.
-[channel_config](#adc-channel-config-packet)[] | Channels |  | List of channel configs.
+[channel_config](#adc-channel-config)[] | Channels |  | List of channel configs.
 uint32 | Sampling period | 4 | Sampling period in μs. Each period, all channels are sampled once.
 
 

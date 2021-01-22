@@ -84,6 +84,11 @@ public:
 	void start();
 
 	/**
+	 * Stop using the radio.
+	 */
+	void stop();
+
+	/**
 	 * Factory reset.
 	 *
 	 * Clear all stored data.

@@ -248,7 +248,7 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 			_handles.value_handle, &gattValueLength, valueGattAddress));
 
 	//! stop here if we are not in notifying state
-	if ((!_status.notifies) || (!_service->getStack()->connected()) || !_status.notifyingEnabled) {
+	if ((!_status.notifies) || (!_service->getStack()->isConnectedPeripheral()) || !_status.notifyingEnabled) {
 		return ERR_SUCCESS;
 	} else {
 		return notify();
@@ -258,7 +258,7 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 
 uint32_t CharacteristicBase::notify() {
 
-	if (!_status.notifies || !_service->getStack()->connected() || !_status.notifyingEnabled) {
+	if (!_status.notifies || !_service->getStack()->isConnectedPeripheral() || !_status.notifyingEnabled) {
 		return NRF_ERROR_INVALID_STATE;
 	}
 
@@ -319,7 +319,7 @@ struct __attribute__((__packed__)) notification_t {
 
 uint32_t Characteristic<buffer_ptr_t>::notify() {
 
-	if (!CharacteristicBase::_status.notifies || !_service->getStack()->connected() || !_status.notifyingEnabled) {
+	if (!CharacteristicBase::_status.notifies || !_service->getStack()->isConnectedPeripheral() || !_status.notifyingEnabled) {
 		return NRF_ERROR_INVALID_STATE;
 	}
 

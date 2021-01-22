@@ -5,18 +5,19 @@ This only documents the latest protocol, older versions can be found in the git 
 
 # Index
 
-- [Setup](#setup). How to setup the crownstone.
+- [Setup](#setup-mode). How to setup the crownstone.
 - [Encryption](#encryption). How to encrypt and decrypt the data.
-- [Advertisements](#advertisement-data). What data is broadcasted by the crownstones.
-- [Broadcast commands](#broadcasts). Broadcast commands.
+- [Advertisements](#advertisements). What data is broadcasted by the crownstones.
+- [Broadcast commands](#broadcast-commands). Broadcast commands.
 - [Services and characteristics](#services). Which Bluetooth GATT services and characteristics the crownstones have.
-- [Data structures](#data-structs). The data structures used for the characteristics, advertisements, and mesh.
+- [Data structures](#data-structures). The data structures used for the characteristics, advertisements, and mesh.
     - [Control](#control-packet). Used to send commands to the Crownstone.
     - [Result](#result-packet). The result of a command.
     - [State](#state-types). State variables of the Crownstone.
 
 
 # Setup mode
+
 When a Crownstone is new or factory reset, it will go into setup mode.
 
 The setup process goes as follows:
@@ -32,6 +33,7 @@ The setup process goes as follows:
 - Crownstone will reboot to normal mode.
 
 # Normal mode
+
 When a Crownstone has been set up, it will run in "normal mode".
 
 To write a command via connection, the process goes as follows:
@@ -180,7 +182,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | AD Length | 1 | Length of the next AD structure.
 uint 8 | AD Type | 1 | 0x01: flags.
-uint 8 | Flags | 1 |
+uint 8 | Flags | 1 | 
 uint 8 | AD Length | 1 | Length of the next AD structure.
 uint 8 | AD Type | 1 | 0x16: service data with 16 bit service UUID.
 uint 16 | Service UUID | 2 | Service UUID: 0xC001, 0xC002, or 0xC003. The last two are deprecated, see service data doc.
@@ -222,7 +224,7 @@ Characteristic | UUID | Date type | Description | A | M | B
 Session nonce  | 24f0000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data. |  |  | ECB
 Control        | 24f0000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone. | x | x | x
 Result         | 24f0000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone. | x | x | x
-Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). |
+Recovery       | 24f00009-7d10-4805-bfc1-7663a01c3bff | uint32 | Used for [recovery](#recovery). | | | 
 
 Every command written to the control characteristic returns a [result packet](#result-packet) on the result characteristic.
 If commands have to be executed sequentially, make sure that the result packet of the previous command was received before calling the next (either by polling or subscribing).
@@ -297,7 +299,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 3 | Set state | [State set packet](#state-set-packet) | [State set result packet](#state-set-result-packet) | Required access depends on the state type. | x | x | x
 4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) | Get bootloader version info. | x | x | x | x
 5 | Get UICR data | - | [UICR data packet](#uicr-data-packet) | Get the UICR data. | x | x | x | x
-6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon-config-id-packet) | - | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x
+6 | Set ibeacon config ID | [Ibeacon config ID packet](#ibeacon-config-id-packet) | - | Set the ibeacon config ID that is used. The config values can be set via the *Set state* command, with corresponding state ID. You can use this command to interleave between config ID 0 and 1. | x | | | 
 7 | Get MAC address | - | uint8[6] | Get the MAC address of this stone. | x | x | x | x
 10 | Reset | - | - | Reset device | x
 11 | Goto DFU | - | - | Reset device to DFU mode | x

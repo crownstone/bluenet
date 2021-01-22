@@ -7,25 +7,25 @@ This only documents the latest protocol, older versions can be found in the git 
 
 id | name | Payload | Result data
 ---|---|---|---
-0 | CS_MESH_MODEL_TYPE_TEST | [cs_mesh_model_msg_test_t](#cs-mesh-model-msg-test-t)
+0 | CS_MESH_MODEL_TYPE_TEST | [cs_mesh_model_msg_test_t](#cs_mesh_model_msg_test_t)
 1 | CS_MESH_MODEL_TYPE_ACK | none
-3 | CS_MESH_MODEL_TYPE_CMD_TIME | [cs_mesh_model_msg_time_t](#cs-mesh-model-msg-time-t)
+3 | CS_MESH_MODEL_TYPE_CMD_TIME | [cs_mesh_model_msg_time_t](#cs_mesh_model_msg_time_t)
 4 | CS_MESH_MODEL_TYPE_CMD_NOOP | none
-5 | CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH | [cs_mesh_model_msg_multi_switch_item_t](#cs-mesh-model-msg-multi-switch-item-t)
-8 | CS_MESH_MODEL_TYPE_STATE_0 | [cs_mesh_model_msg_state_0_t](#cs-mesh-model-msg-state-0-t)
-9 | CS_MESH_MODEL_TYPE_STATE_1 | [cs_mesh_model_msg_state_1_t](#cs-mesh-model-msg-state-1-t)
-10 | CS_MESH_MODEL_TYPE_PROFILE_LOCATION | [cs_mesh_model_msg_profile_location_t](#cs-mesh-model-msg-profile-location-t)
-11 | CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS | [behaviour_settings_t](#behaviour-settings-t)
-12 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER | [cs_mesh_model_msg_device_register_t](#cs-mesh-model-msg-device-register-t)
-13 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN | [cs_mesh_model_msg_device_token_t](#cs-mesh-model-msg-device-token-t)
-14 | CS_MESH_MODEL_TYPE_SYNC_REQUEST | [cs_mesh_model_msg_sync_request_t](#cs-mesh-model-msg-sync-request-t)
-16 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE | [cs_mesh_model_msg_device_list_size_t](#cs-mesh-model-msg-device-list-size-t)
-17 | CS_MESH_MODEL_TYPE_STATE_SET | [cs_mesh_model_msg_state_set](#cs-mesh-model-msg-state-set) | [cs-mesh-model-msg-state-header-t](#cs-mesh-model-msg-state-header-t)
-18 | CS_MESH_MODEL_TYPE_RESULT | [cs_mesh_model_msg_result](#cs-mesh-model-msg-result)
+5 | CS_MESH_MODEL_TYPE_CMD_MULTI_SWITCH | [cs_mesh_model_msg_multi_switch_item_t](#cs_mesh_model_msg_multi_switch_item_t)
+8 | CS_MESH_MODEL_TYPE_STATE_0 | [cs_mesh_model_msg_state_0_t](#cs_mesh_model_msg_state_0_t)
+9 | CS_MESH_MODEL_TYPE_STATE_1 | [cs_mesh_model_msg_state_1_t](#cs_mesh_model_msg_state_1_t)
+10 | CS_MESH_MODEL_TYPE_PROFILE_LOCATION | [cs_mesh_model_msg_profile_location_t](#cs_mesh_model_msg_profile_location_t)
+11 | CS_MESH_MODEL_TYPE_SET_BEHAVIOUR_SETTINGS | [behaviour_settings_t](#behaviour_settings_t)
+12 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_REGISTER | [cs_mesh_model_msg_device_register_t](#cs_mesh_model_msg_device_register_t)
+13 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_TOKEN | [cs_mesh_model_msg_device_token_t](#cs_mesh_model_msg_device_token_t)
+14 | CS_MESH_MODEL_TYPE_SYNC_REQUEST | [cs_mesh_model_msg_sync_request_t](#cs_mesh_model_msg_sync_request_t)
+16 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_LIST_SIZE | [cs_mesh_model_msg_device_list_size_t](#cs_mesh_model_msg_device_list_size_t)
+17 | CS_MESH_MODEL_TYPE_STATE_SET | [cs_mesh_model_msg_state_set](#cs_mesh_model_msg_state_set) | [cs-mesh-model-msg-state-header-t](#cs_mesh_model_msg_state_header_t)
+18 | CS_MESH_MODEL_TYPE_RESULT | [cs_mesh_model_msg_result](#cs_mesh_model_msg_result)
 19 | CS_MESH_MODEL_TYPE_SET_IBEACON_CONFIG_ID | [Ibeacon config ID packet](PROTOCOL.md#ibeacon-config-id-packet)
-20 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT | [Device heartbeat packet](#cs-mesh-model-msg-device-heartbeat-t)
-21 | CS_MESH_MODEL_TYPE_RSSI_PING | [rssi_ping_message_t](#rssi-ping-message-t)
-22 | CS_MESH_MODEL_TYPE_TIME_SYNC|  [time_sync_message_t](#time-sync-message-t)
+20 | CS_MESH_MODEL_TYPE_TRACKED_DEVICE_HEARTBEAT | [Device heartbeat packet](#cs_mesh_model_msg_device_heartbeat_t)
+21 | CS_MESH_MODEL_TYPE_RSSI_PING | [rssi_ping_message_t](#rssi_ping_message_t)
+22 | CS_MESH_MODEL_TYPE_TIME_SYNC|  [time_sync_message_t](#time_sync_message_t)
 
 ## Packet descriptors
 
@@ -157,7 +157,7 @@ uint8_t | List size | 1 | Size of tracked devices list.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8_t | Stone ID | 1 | ID of stone that requests for a sync.
-uint32_t | [requestBitmask](#cs-mesh-model-sync-bitmask) | 4 | Bitmask of all things that are requested to be synced.
+uint32_t | [requestBitmask](#sync-bitmask) | 4 | Bitmask of all things that are requested to be synced.
 
 
 #### Sync bitmask
@@ -176,7 +176,7 @@ Bit | Name |  Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[state header](#cs-mesh-model-msg-state-header-ext-t) | State header | 3 |
+[state header](#cs_mesh_model_msg_state_header_ext_t) | State header | 3 |
 uint8_t[] | Payload | N | Payload data, depends on state type.
 
 
@@ -186,7 +186,7 @@ uint8_t[] | Payload | N | Payload data, depends on state type.
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
-[cs_mesh_model_msg_state_header_t](#cs-mesh-model-msg-state-header-t) | Header | 16 | State header.
+[cs_mesh_model_msg_state_header_t](#cs_mesh_model_msg_state_header_t) | Header | 16 | State header.
 uint8_t | Access level | 3 | Shortened version of access level: 0=ADMIN, 1=MEMBER, 2=BASIC, 6=SETUP, 7=NOT_SET.
 uint8_t | Source ID | 5 | Shortened version of source ID: 0=NONE, 2=INTERNAL, 3=UART, 4=CONNECTION, 5=SWITCHCRAFT, 30=BROADCAST
 
@@ -199,7 +199,7 @@ Type | Name | Length in bits | Description
 --- | --- | --- | ---
 uint8_t | Type | 8 | [State type](PROTOCOL.md#state-types).
 uint8_t | State ID | 6 | ID of state to get. Most state types will only have ID 0.
-uint8_t | [Persistence mode](PROTOCOL.md#state-set-persistence-mode-set) | 2 | Type of persistence mode.
+uint8_t | [Persistence mode](PROTOCOL.md#state-set-persistence-mode) | 2 | Type of persistence mode.
 
 
 #### rssi_ping_message_t
@@ -209,7 +209,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 stone_id_t | sender_id   | 1 |
 stone_id_t |recipient_id | 1 |
-uint8_t    | sample_id;  | 1 | 
+uint8_t    | sample_id;  | 1 |
 int8_t     |rssi         | 1 |
 uint8_t    | channel     | 1 |
 
@@ -239,7 +239,7 @@ stone_id_t | root_id | 1 | id of root clock (may differ from sender id)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[result header](#cs-mesh-model-msg-result-header-t) | Result header | 2 | Header.
+[result header](#cs_mesh_model_msg_result_header_t) | Result header | 2 | Header.
 uint8_t[] | Payload | N | Payload data, depends on result type.
 
 

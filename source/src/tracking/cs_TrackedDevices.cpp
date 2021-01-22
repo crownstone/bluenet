@@ -172,7 +172,9 @@ TrackedDevices::TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 	TrackedDevice* device = find(deviceId);
 	if (device == nullptr) {
 		device = add();
-		device->data.data.deviceId = deviceId;
+		if (device != nullptr) {
+			device->data.data.deviceId = deviceId;
+		}
 	}
 	return device;
 }

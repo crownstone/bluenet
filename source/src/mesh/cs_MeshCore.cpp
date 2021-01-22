@@ -452,8 +452,26 @@ void MeshCore::start() {
 //	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
 //	_logArray(SERIAL_DEBUG, true, uuid, NRF_MESH_UUID_SIZE, "%02X");
 	_logArray(SERIAL_DEBUG, true, nrf_mesh_configure_device_uuid_get(), NRF_MESH_UUID_SIZE);
+
+	// Returns NRF_ERROR_INVALID_STATE if the mesh was already enabled (or mesh stack not initialized).
 	retCode = mesh_stack_start();
-	APP_ERROR_CHECK(retCode);
+	if (retCode != NRF_SUCCESS) {
+		LOGw("mesh stack start failed: %u", retCode);
+	}
+}
+
+void MeshCore::stop() {
+	// Returns NRF_ERROR_INVALID_STATE if the mesh was already disabled.
+	uint32_t retCode = nrf_mesh_disable();
+	if (retCode != NRF_SUCCESS) {
+		LOGw("mesh disable failed: %u", retCode);
+	}
+
+	// Scanner doesn't stop immediately, but will quickly timeout.
+	// See https://devzone.nordicsemi.com/f/nordic-q-a/43301/nrf_mesh_disable-function-changed-since-sdk-for-mesh-v3-1-0
+//	[2020-12-21 14:08:39.941] <info> app: stop
+//	[2020-12-21 14:08:39.944] <debug> nrf_sdh_soc: SoC event: 0x7.
+//	[2020-12-21 14:08:39.947] <debug> nrf_sdh_soc: SoC event: 0x8.
 }
 
 

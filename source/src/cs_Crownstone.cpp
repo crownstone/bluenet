@@ -130,7 +130,6 @@ void initUart(uint8_t pinRx, uint8_t pinTx) {
 #else
 	LOGi("DEBUG: undefined");
 #endif
-	LOG_MEMORY;
 }
 
 /** Overwrite the hardware version.
@@ -243,7 +242,6 @@ void Crownstone::init0() {
 
 void Crownstone::init1() {
 	initDrivers(1);
-	LOG_MEMORY;
 	LOG_FLUSH();
 
 	TYPIFY(STATE_OPERATION_MODE) mode;
@@ -424,26 +422,7 @@ void Crownstone::configure() {
 }
 
 void Crownstone::configureStack() {
-	// Set callback handler for a connection event
-	_stack->setOnConnectCallback([&](uint16_t conn_handle) {
-		LOGi("onConnect...");
-		// TODO: see https://devzone.nordicsemi.com/index.php/about-rssi-of-ble
-		// be neater about it... we do not need to stop, only after a disconnect we do...
-#if ENABLE_RSSI_FOR_CONNECTION==1
-		sd_ble_gap_rssi_stop(conn_handle);
-		sd_ble_gap_rssi_start(conn_handle, 0, 0);
-#endif
-	});
 
-	// Set callback handler for a disconnection event
-	_stack->setOnDisconnectCallback([&](uint16_t conn_handle) {
-		LOGi("onDisconnect...");
-		if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
-//			_advertiser->changeToLowTxPower();
-			_advertiser->changeToNormalTxPower();
-			_advertiser->updateAdvertisementParams();
-		}
-	});
 }
 
 void Crownstone::configureAdvertisement() {
@@ -502,7 +481,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 			return;
 	}
 
-	_stack->halt();
+//	_stack->halt();
 
 	// Remove services that belong to the current operation mode.
 	// This is not done... It is impossible to remove services in the SoftDevice.
@@ -532,7 +511,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 	// Loop through all services added to the stack and create the characteristics.
 	_stack->createCharacteristics();
 
-	_stack->resume();
+//	_stack->resume();
 
 	switch (newMode) {
 		case OperationMode::OPERATION_MODE_SETUP: {
@@ -729,6 +708,7 @@ void Crownstone::startUp() {
 
 	_log(SERIAL_INFO, false, "Address: ");
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN, SERIAL_INFO);
+	LOGi("Address id=%u type=%u", address.addr_id_peer, address.addr_type);
 
 	// Plain text log.
 	CLOGi("\r\nAddress: %X:%X:%X:%X:%X:%X", address.addr[5], address.addr[4], address.addr[3], address.addr[2], address.addr[1], address.addr[0]);
@@ -761,12 +741,6 @@ void Crownstone::tick() {
 	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
 		TYPIFY(STATE_TEMPERATURE) temperature = getTemperature();
 		_state->set(CS_TYPE::STATE_TEMPERATURE, &temperature, sizeof(temperature));
-	}
-
-	// Update advertisement service data
-	// TODO: synchronize with servicedata.updateAdvertisementData()
-	if (_tickCount % (500/TICK_INTERVAL_MS) == 0) {
-//		_stack->updateAdvertisement();
 	}
 
 	if (!_clearedGpRegRetCount && _tickCount == (CS_CLEAR_GPREGRET_COUNTER_TIMEOUT_S * 1000 / TICK_INTERVAL_MS)) {
@@ -924,7 +898,12 @@ void Crownstone::updateMinStackEnd() {
 
 void Crownstone::printLoadStats() {
 	// Log ram usage.
-	LOG_MEMORY;
+	uint8_t *heapPointer = (uint8_t*)malloc(1);
+	void* stackPointer;
+	asm("mov %0, sp" : "=r"(stackPointer) : : );
+	LOGd("Memory heap=%p, stack=%p", heapPointer, (uint8_t*)stackPointer);
+	free(heapPointer);
+
 	LOGi("heapEnd=0x%X maxHeapEnd=0x%X minStackEnd=0x%X minFree=%u sbrkFails=%u", (uint32_t)getHeapEnd(), _ramStats.maxHeapEnd, _ramStats.minStackEnd, _ramStats.minFree, _ramStats.numSbrkFails);
 
 	// Log scheduler usage.
