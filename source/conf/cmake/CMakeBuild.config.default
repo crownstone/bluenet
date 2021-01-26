@@ -115,10 +115,6 @@ MESH_PERSISTENT_STORAGE=2
 # Advertise iBeacon packets.
 IBEACON=1
 
-# Set if crownstone should set switch on by default, on boot.
-# TODO: This macro is deprecated. It will be removed in the future.
-DEFAULT_ON=0
-
 # Enable or disable interval scanner, will scann every
 # SCAN_DURATION + SCAN_BREAK_DURATION ms, for SCAN_DURATION ms
 INTERVAL_SCANNER_ENABLED=0

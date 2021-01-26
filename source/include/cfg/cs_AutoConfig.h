@@ -40,6 +40,18 @@ extern uint32_t g_RAM_MICROAPP_BASE;
 
 extern uint32_t g_RAM_MICROAPP_AMOUNT;
 
+extern uint8_t g_MAX_CHIP_TEMPERATURE;
+
+extern uint16_t g_BOOT_DELAY;
+
+extern uint16_t g_SCAN_DURATION;
+
+extern uint16_t g_SCAN_BREAK_DURATION;
+
+extern uint16_t g_ADVERTISEMENT_INTERVAL;
+
+extern uint16_t g_TX_POWER;
+
 #ifdef __cplusplus
 }
 #endif
