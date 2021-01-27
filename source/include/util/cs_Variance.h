@@ -20,7 +20,6 @@
  * - no overflow protection implemented
  *
  */
-// REVIEW: Recorder?
 class VarianceAggregator {
 private:
 	// running values

@@ -59,5 +59,5 @@ private:
 	 */
 	bool isTileDevice(scanned_device_t* scannedDevice);
 
-	void logServiceData(const char* headerStr, scanned_device_t* scannedDevice);
+	void logServiceData(scanned_device_t* scannedDevice);
 };
