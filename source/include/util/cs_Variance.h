@@ -21,14 +21,16 @@
  *
  */
 // REVIEW: Recorder?
-class OnlineVarianceRecorder {
+class VarianceAggregator {
 private:
 	// running values
 	uint32_t num_recorded_values = 0;
 	float M2 = 0.0f;
 	float mean = 0.0f;
 
-	// these values are just guesses...
+	// these values are just estimated to be reasonable.
+	// reduceCount is called if M2 or num_recorded_values surpass
+	// these thresholds.
 	static const constexpr float float_precision_threshold = 10e9f;
 	static const constexpr int count_precision_threshold = 10e6;
 
@@ -71,9 +73,19 @@ public:
 		return M2 > float_precision_threshold || num_recorded_values > count_precision_threshold;
 	}
 
+	/**
+	 * Reduce |M2| and num_recorded_values to prevent overflow.
+	 * The factors have been chosen to ensure that if we have:
+	 *   float v0 = getVariance();
+	 *   reduceCount();
+	 *   float v1 = getVariance();
+	 * Then the absolute difference |v0-v1| is minimal (0 if no rounding error occurs).
+	 *
+	 * Since the mean converges to the actual mean of the measurements,
+	 * no correction is necessary for that member value.
+	 */
 	void reduceCount(){
-		// suggestion:
-		M2 /= 2;
+		M2 /= (2 + 2/(num_recorded_values - 2));
 		num_recorded_values /= 2;
 	}
 

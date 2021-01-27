@@ -28,7 +28,6 @@ struct __attribute__((__packed__)) TrackableId {
 
 	TrackableId() = default;
 
-	// REVIEW: Missing size (or use mac address struct)
 	/**
 	 * mac is the address as read on the NRF connect app.
 	 * (It is reversed before written to the member this->bytes.)

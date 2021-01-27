@@ -55,15 +55,8 @@ private:
 	static constexpr uint8_t CHANNEL_COUNT = 3;
 	static constexpr uint8_t CHANNEL_START = 37;
 
-	// REVIEW: Aren't maps actually slower than arrays for a small number of elements?
-	// @Bart: I'm not expecting this to be a bottleneck, most stl classes have small-number implementations.
-
-	// REVIEW: Elements never time out, so these maps can keep on growing.
-	// @Bart: elements are erased after flush. natural maximum: 256 entries (sizeof(stone_id_t)),
-	// when we have such a huge and dense mesh, we could implement a more elaborate throtling mechanism.
-	// (Note the maps only keep track of this neighbors, not the whole mesh.)
-	// (e.g. segmenting the record-bursts cycli in groups of stone ids [0-63], [64-127], [128-191], [192-256].
-	std::map<stone_id_t,OnlineVarianceRecorder> variance_map[CHANNEL_COUNT] = {};
+	// TODO: change maps to object for small ram memory footprint optimization
+	std::map<stone_id_t,VarianceAggregator> variance_map[CHANNEL_COUNT] = {};
 
 	// will be set to true by coroutine to flush data after startup.
 	bool boot_sequence_finished = false;
