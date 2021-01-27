@@ -52,9 +52,9 @@ extern uint16_t g_SCAN_WINDOW;
 
 extern uint16_t g_SCAN_BREAK_DURATION;
 
-extern uint16_t g_ADVERTISEMENT_INTERVAL;
-
 extern uint16_t g_TX_POWER;
+
+extern const uint16_t g_CONNECTION_ALIVE_TIMEOUT;
 
 extern const uint16_t g_MASTER_BUFFER_SIZE;
 
@@ -103,6 +103,8 @@ extern const uint16_t g_CONFIG_POWER_ZERO_DEFAULT;
 extern const uint16_t g_CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP_DEFAULT;
 
 extern const uint16_t g_CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN_DEFAULT;
+
+extern const uint8_t g_CS_SERIAL_ENABLED;
 
 #ifdef __cplusplus
 }

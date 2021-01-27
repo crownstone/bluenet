@@ -7,6 +7,7 @@
 
 #include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
+#include <cfg/cs_StaticConfig.h>
 #include <common/cs_Types.h>
 #include <storage/cs_StateData.h>
 #include <util/cs_UuidParser.h>
@@ -155,7 +156,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		*(TYPIFY(CONFIG_SWITCHCRAFT_THRESHOLD)*)data.value = SWITCHCRAFT_THRESHOLD;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_UART_ENABLED:
-		*(TYPIFY(CONFIG_UART_ENABLED)*)data.value = CS_SERIAL_ENABLED;
+		*(TYPIFY(CONFIG_UART_ENABLED)*)data.value = g_CS_SERIAL_ENABLED;
 		return ERR_SUCCESS;
 	case CS_TYPE::STATE_RESET_COUNTER:
 		*(TYPIFY(STATE_RESET_COUNTER)*)data.value = STATE_RESET_COUNTER_DEFAULT;

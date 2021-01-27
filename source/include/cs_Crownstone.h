@@ -329,15 +329,14 @@ private:
 	TrackedDevices _trackedDevices;
 	SystemTime _systemTime;
 
-#if RSSI_DATA_TRACKER_ENABLED==1
+#if BUILD_RSSI_DATA_TRACKER == 1
 	RssiDataTracker _rssiDataTracker;
 #endif
 
-#if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	NearestCrownstoneTracker _nearestCrownstoneTracker;
 	TrackableParser _trackableParser;
 #endif
-
 
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;

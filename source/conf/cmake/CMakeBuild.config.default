@@ -88,14 +88,14 @@ DEFAULT_HARDWARE_BOARD=ACR01B2C
 # Add reset counter at end of name
 CHANGE_NAME_ON_RESET=0
 
-# Enable Arduino like apps
+# Add support for microapps
 BUILD_MICROAPP_SUPPORT=0
 
-# Enable RSSI data tracker
-RSSI_DATA_TRACKER_ENABLED=0
+# Add support for RSSI data tracker
+BUILD_RSSI_DATA_TRACKER=0
 
-# Enables tracking of which crownstone is closest to  trackable device
-CLOSEST_CROWNSTONE_TRACKER_ENABLED=0
+# Add support for tracking functionality w.r.t which crownstone is closest to a trackable device
+BUILD_CLOSEST_CROWNSTONE_TRACKER=0
 
 # Compile the mesh code.
 BUILD_MESHING=1
@@ -151,9 +151,6 @@ ENCRYPTION=1
 # NOTE: increasing this will also need to increase the RAM_R1_BASE
 MAX_NUM_VS_SERVICES=2
 
-# Enable or disable characteristics.
-CHAR_CONTROL=1
-
 # Size of master buffers.
 # It should not be larger than BLE_GATTS_VAR_ATTR_LEN_MAX (512)
 MASTER_BUFFER_SIZE=300
@@ -171,9 +168,6 @@ MAX_CHIP_TEMP=75
 
 # Time (ms) to wait with during booting
 BOOT_DELAY=400
-
-# Enable RSSI measurements when connected.
-ENABLE_RSSI_FOR_CONNECTION=1
 
 # Connection alive timeout.
 # If no valid control command is received within timeout,

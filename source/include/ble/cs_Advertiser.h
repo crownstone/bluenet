@@ -8,12 +8,13 @@
 #pragma once
 
 #include <cstdint>
-#include "ble/cs_Nordic.h"
-#include "ble/cs_iBeacon.h"
-#include "ble/cs_ServiceData.h"
-#include "ble/cs_Stack.h"
-#include "cfg/cs_Config.h"
-#include "events/cs_EventListener.h"
+#include <ble/cs_Nordic.h>
+#include <ble/cs_iBeacon.h>
+#include <ble/cs_ServiceData.h>
+#include <ble/cs_Stack.h>
+#include <cfg/cs_StaticConfig.h>
+#include <cfg/cs_Config.h>
+#include <events/cs_EventListener.h>
 
 class Advertiser: EventListener {
 private:
@@ -138,7 +139,7 @@ public:
 	//! The low-frequency clock, currently generated from the high frequency clock
 	static const nrf_clock_lf_cfg_t        defaultClockSource;
 	//! Advertising interval in 0.625 ms.
-	static const uint16_t                  defaultAdvertisingInterval_0_625_ms = ADVERTISEMENT_INTERVAL;
+	static const uint16_t                  defaultAdvertisingInterval_0_625_ms = g_ADVERTISEMENT_INTERVAL;
 	//! Time after which advertising stops.
 	static const uint16_t                  defaultAdvertisingTimeout_seconds = ADVERTISING_TIMEOUT;
 

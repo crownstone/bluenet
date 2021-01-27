@@ -5,10 +5,10 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "ble/cs_Advertiser.h"
-#include "cfg/cs_DeviceTypes.h"
-#include "cfg/cs_UuidConfig.h"
-#include "events/cs_EventDispatcher.h"
+#include <ble/cs_Advertiser.h>
+#include <cfg/cs_DeviceTypes.h>
+#include <cfg/cs_UuidConfig.h>
+#include <events/cs_EventDispatcher.h>
 #include <uart/cs_UartHandler.h>
 
 #define LOGAdvertiserDebug LOGnone

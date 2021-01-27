@@ -548,31 +548,22 @@ void Stack::onBleEventInterrupt(const ble_evt_t * p_ble_evt, bool isInterrupt) {
 	}
 }
 
-
-#if CONNECTION_ALIVE_TIMEOUT>0
 static void connection_keep_alive_timeout(void* p_context) {
 	LOGw("connection keep alive timeout!");
 	Stack::getInstance().disconnect();
 }
-#endif
 
 void Stack::startConnectionAliveTimer() {
-#if CONNECTION_ALIVE_TIMEOUT>0
 	Timer::getInstance().createSingleShot(_connectionKeepAliveTimerId, connection_keep_alive_timeout);
-	Timer::getInstance().start(_connectionKeepAliveTimerId, MS_TO_TICKS(CONNECTION_ALIVE_TIMEOUT), NULL);
-#endif
+	Timer::getInstance().start(_connectionKeepAliveTimerId, MS_TO_TICKS(g_CONNECTION_ALIVE_TIMEOUT), NULL);
 }
 
 void Stack::stopConnectionAliveTimer() {
-#if CONNECTION_ALIVE_TIMEOUT>0
 	Timer::getInstance().stop(_connectionKeepAliveTimerId);
-#endif
 }
 
 void Stack::resetConnectionAliveTimer() {
-#if CONNECTION_ALIVE_TIMEOUT>0
-	Timer::getInstance().reset(_connectionKeepAliveTimerId, MS_TO_TICKS(CONNECTION_ALIVE_TIMEOUT), NULL);
-#endif
+	Timer::getInstance().reset(_connectionKeepAliveTimerId, MS_TO_TICKS(g_CONNECTION_ALIVE_TIMEOUT), NULL);
 }
 
 void Stack::onMemoryRequest(uint16_t connectionHandle) {
@@ -628,11 +619,7 @@ void Stack::onConnect(const ble_evt_t * p_ble_evt) {
 	_connectionHandle = p_ble_evt->evt.gap_evt.conn_handle;
 	_disconnectingInProgress = false;
 
-#if ENABLE_RSSI_FOR_CONNECTION == 1
-		// See https://devzone.nordicsemi.com/f/nordic-q-a/228/about-rssi-of-ble
-//		sd_ble_gap_rssi_stop(_conn_handle);
 		sd_ble_gap_rssi_start(_connectionHandle, 0, 0);
-#endif
 
 		switch (p_ble_evt->evt.gap_evt.params.connected.role) {
 			case BLE_GAP_ROLE_PERIPH: {
