@@ -556,7 +556,10 @@ ELSE()
 		
 		message(STATUS "Configure cs_StaticConfig.h file")
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_StaticConfig.h" @ONLY)
-		
+
+		message(STATUS "Configure cs_config.h file")
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/cs_config.h" @ONLY)
+
 		message(STATUS "Configure nrf_symbols.ld file")
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)
 		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld")
@@ -578,7 +581,7 @@ ELSE()
 		# Add path with files like sdk_config.h to include directories
 		# The include/third/nrf file dir is required for files in the sdk (e.g. link "sdk_config.h" without path prefix)
 		# The ${CMAKE_CURRENT_BINARY_DIR}/include dir is required for files generated through configure_file
-		target_include_directories(${PROJECT_NAME} PRIVATE "include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include")
+		target_include_directories(${PROJECT_NAME} PRIVATE "include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include")
 
 		# This does lead to a cmake reconfigure when the file changes... However, nothing else gets rebuild after
 		# the reconfiguration

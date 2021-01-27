@@ -7,17 +7,19 @@
 #pragma once
 
 #include <cstdint>
+#include <cfg/cs_StaticConfig.h>
 #include <logging/cs_Logger.h>
-#include "protocol/cs_ErrorCodes.h"
-#include "structs/cs_BufferAccessor.h"
-#include "structs/cs_PacketsInternal.h"
-#include "util/cs_Error.h"
+#include <protocol/cs_ErrorCodes.h>
+#include <structs/cs_BufferAccessor.h>
+#include <structs/cs_PacketsInternal.h>
+#include <util/cs_Error.h>
 
 /**
  * Default payload size for a control packet.
  * Requires CS_CHAR_WRITE_BUF_SIZE to be defined.
  */
-#define CS_CONTROL_PACKET_DEFAULT_PAYLOAD_SIZE (CS_CHAR_WRITE_BUF_SIZE - sizeof(control_packet_header_t))
+//#define CS_CONTROL_PACKET_DEFAULT_PAYLOAD_SIZE (CS_CHAR_WRITE_BUF_SIZE - sizeof(control_packet_header_t))
+static constexpr size_t CS_CONTROL_PACKET_DEFAULT_PAYLOAD_SIZE = (g_CS_CHAR_WRITE_BUF_SIZE - sizeof(control_packet_header_t));
 
 template <cs_buffer_size_t PAYLOAD_SIZE = CS_CONTROL_PACKET_DEFAULT_PAYLOAD_SIZE>
 class ControlPacketAccessor: BufferAccessor {

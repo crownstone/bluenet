@@ -6,6 +6,8 @@
  */
 #pragma once
 
+#include <cs_config.h>
+
 /**
  * Use this config file to overwrite values in sdk_config.h.
  *

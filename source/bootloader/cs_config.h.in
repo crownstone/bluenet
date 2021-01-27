@@ -1,0 +1,7 @@
+/*
+ * Will be fed from cmake and needs to be source from app_config.h
+ */
+
+#pragma once
+
+#define CS_SERIAL_NRF_LOG_PIN_TX @CS_SERIAL_NRF_LOG_PIN_TX@

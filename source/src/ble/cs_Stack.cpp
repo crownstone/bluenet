@@ -205,8 +205,8 @@ void Stack::createCharacteristics() {
 	LOGd("Create characteristics");
 
 	// Init buffers.
-	CharacteristicReadBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
-	CharacteristicWriteBuffer::getInstance().alloc(MASTER_BUFFER_SIZE);
+	CharacteristicReadBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
+	CharacteristicWriteBuffer::getInstance().alloc(g_MASTER_BUFFER_SIZE);
 
 	for (Service* svc: _services) {
 		svc->createCharacteristics();

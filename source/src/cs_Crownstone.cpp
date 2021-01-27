@@ -553,16 +553,11 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 }
 
 void Crownstone::setName() {
-	static bool addResetCounterToName = false;
-#if CHANGE_NAME_ON_RESET==1
-	addResetCounterToName = true;
-#endif
-//	TYPIFY(CONFIG_NAME)
 	char device_name[32];
 	cs_state_data_t stateNameData(CS_TYPE::CONFIG_NAME, (uint8_t*)device_name, sizeof(device_name));
 	_state->get(stateNameData);
 	std::string deviceName;
-	if (addResetCounterToName) {
+	if (g_CHANGE_NAME_ON_RESET) {
 		//! clip name to 5 chars and add reset counter at the end
 		TYPIFY(STATE_RESET_COUNTER) resetCounter;
 		_state->get(CS_TYPE::STATE_RESET_COUNTER, &resetCounter, sizeof(resetCounter));

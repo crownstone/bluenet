@@ -7,7 +7,6 @@
 
 #include <algorithm>
 #include <ble/cs_Service.h>
-#include <ble/cs_Softdevice.h>
 #include <logging/cs_Logger.h>
 
 ///! Service //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,10 +149,26 @@ bool Service::on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_ha
 			} else if (write_evt.op == BLE_GATTS_OP_EXEC_WRITE_REQ_NOW) {
 
 				// get length of data, header does not contain full length but rather the "step size"
-				uint16_t length = 0;
-				cs_sd_ble_gatts_value_get(getStack()->getConnectionHandle(), characteristic->getValueHandle(),
-						&length, NULL);
-				characteristic->written(length);
+				ble_gatts_value_t gatts_value;
+				gatts_value.len = 0;
+				gatts_value.offset = 0;
+				gatts_value.p_value = NULL;
+				
+				uint32_t err_code;
+				err_code = sd_ble_gatts_value_get(getStack()->getConnectionHandle(), characteristic->getValueHandle(),
+						&gatts_value);
+				
+				// TODO: check err_code 
+				if (err_code != ERR_SUCCESS) {
+					//
+				}
+
+				characteristic->written(gatts_value.len);
+
+				//uint16_t length = 0;
+				//cs_sd_ble_gatts_value_get(getStack()->getConnectionHandle(), characteristic->getValueHandle(),
+				//		&length, NULL);
+				//characteristic->written(length);
 			}
 
 			return true;

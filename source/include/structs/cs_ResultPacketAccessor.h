@@ -7,17 +7,18 @@
 #pragma once
 
 #include <cstdint>
+#include <cfg/cs_StaticConfig.h>
 #include <logging/cs_Logger.h>
-#include "protocol/cs_ErrorCodes.h"
-#include "structs/cs_BufferAccessor.h"
-#include "structs/cs_PacketsInternal.h"
-#include "util/cs_Error.h"
+#include <protocol/cs_ErrorCodes.h>
+#include <structs/cs_BufferAccessor.h>
+#include <structs/cs_PacketsInternal.h>
+#include <util/cs_Error.h>
 
 /**
  * Default payload size for a result packet.
  * Requires CS_CHAR_READ_BUF_SIZE to be defined.
  */
-#define CS_RESULT_PACKET_DEFAULT_PAYLOAD_SIZE (CS_CHAR_READ_BUF_SIZE - sizeof(result_packet_header_t))
+static const size_t CS_RESULT_PACKET_DEFAULT_PAYLOAD_SIZE = (g_CS_CHAR_READ_BUF_SIZE - sizeof(result_packet_header_t));
 
 template <cs_buffer_size_t PAYLOAD_SIZE = CS_RESULT_PACKET_DEFAULT_PAYLOAD_SIZE>
 class ResultPacketAccessor: BufferAccessor {
