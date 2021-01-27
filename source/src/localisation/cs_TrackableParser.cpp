@@ -15,8 +15,7 @@
 #include <structs/cs_StreamBufferAccessor.h>
 #include <util/cs_Utils.h>
 
-// REVIEW: This won't be recognized by binary logger.
-#define TrackableParser_LOGd LOGd
+#define LOGTrackableParserDebug LOGnone
 
 void TrackableParser::init() {
 }
@@ -100,7 +99,7 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scannedDevice) {
 
 	TrackableId tile(scannedDevice->address, sizeof(scannedDevice->address));
 
-	LOGd("incoming tile device: rssi=%i ", scannedDevice->rssi);
+	LOGTrackableParserDebug("incoming tile device: rssi=%i ", scannedDevice->rssi);
 	tile.print();
 
 	if (!isMyTrackable(scannedDevice)) {
@@ -120,7 +119,6 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scannedDevice) {
 
 // ======================== Utils ========================
 
-// REVIEW: string as argument can't be left out from binary size.
 void TrackableParser::logServiceData(scanned_device_t* scannedDevice) {
 	uint32_t errCode;
 	cs_data_t serviceData;
@@ -133,7 +131,6 @@ void TrackableParser::logServiceData(scanned_device_t* scannedDevice) {
 		return;
 	}
 
-	// REVIEW: Use the Util function for this.
 	_log(SERIAL_DEBUG, false, "servicedata trackableparser: ");
 	_logArray(SERIAL_DEBUG,false,serviceData.data, serviceData.len);
 }

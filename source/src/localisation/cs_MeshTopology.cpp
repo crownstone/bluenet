@@ -11,8 +11,8 @@
 #include <cmath>
 
 // REVIEW: This won't be recognized by binary logger.
-#define MeshTopology_LOGd LOGd
-#define MeshTopology_LOGv LOGnone
+#define LOGMeshTopologyDebug LOGd
+#define LOGMeshTopologyVerbose LOGnone
 
 // ------------ MeshTopology methods ------------
 
@@ -26,7 +26,7 @@ void MeshTopology::init() {
 	// REVIEW: Use TYPIFY for variable.
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id,
 			sizeof(my_id));
-	MeshTopology_LOGd("MeshTopology: my_id %d", my_id);
+	LOGMeshTopologyDebug("MeshTopology: my_id %d", my_id);
 
 	boot_sequence_finished = false;
 	last_stone_id_broadcasted_in_burst = 0;
@@ -79,12 +79,12 @@ uint8_t MeshTopology::getCountRepresentation(uint32_t count) {
 
 uint32_t MeshTopology::flushAggregatedRssiData() {
 	if (!boot_sequence_finished) {
-		MeshTopology_LOGd("flushAggregatedRssiData boot delay");
+		LOGMeshTopologyDebug("flushAggregatedRssiData boot delay");
 		boot_sequence_finished = true;
 		return Coroutine::delayMs(Settings.boot_sequence_period_ms);
 	}
 
-	MeshTopology_LOGd("flushAggregatedRssiData");
+	LOGMeshTopologyDebug("flushAggregatedRssiData");
 	// start flushing phase, here we wait quite a bit shorter until the map is empty.
 
 	// ** begin burst loop **
@@ -93,7 +93,7 @@ uint32_t MeshTopology::flushAggregatedRssiData() {
 
 		stone_id_t id = main_iter->first;
 
-		MeshTopology_LOGd("Burst start for id=%u", id);
+		LOGMeshTopologyDebug("Burst start for id=%u", id);
 
 		// the maps may not have the same key sets, this depends
 		// on possible loss differences between the channels.
@@ -147,7 +147,7 @@ uint32_t MeshTopology::flushAggregatedRssiData() {
 
 	} // ** end burst loop **
 
-	MeshTopology_LOGd("End of burst");
+	LOGMeshTopologyDebug("End of burst");
 
 	last_stone_id_broadcasted_in_burst = 0;
 
@@ -230,7 +230,7 @@ void MeshTopology::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message) 
 	datamessage.standard_deviation[1] = rssi_data_message->channel38.variance;
 	datamessage.standard_deviation[2] = rssi_data_message->channel39.variance;
 
-	MeshTopology_LOGd("%d -> %d: ch37 #%d  -%d dB",
+	LOGMeshTopologyDebug("%d -> %d: ch37 #%d  -%d dB",
 			datamessage.sender_id,
 			datamessage.receiver_id,
 			datamessage.count[0],
@@ -255,7 +255,7 @@ void MeshTopology::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent) {
 void MeshTopology::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
 	// REVIEW: Mesh specific code, should be in the mesh code.
 	if (mesh_msg_evt.hops == 0) { // TODO: 0 hops, or 1 hops?!
-		MeshTopology_LOGv("handle mesh msg event with 0 hops");
+		LOGMeshTopologyVerbose("handle mesh msg event with 0 hops");
 		recordRssiValue(
 				mesh_msg_evt.srcAddress,
 				mesh_msg_evt.rssi,
@@ -278,12 +278,12 @@ void MeshTopology::handleEvent(event_t &evt) {
 
 		switch (meshMsgEvent.type) {
 			case CS_MESH_MODEL_TYPE_RSSI_PING: {
-				MeshTopology_LOGd("received rssi ping message");
+				LOGMeshTopologyDebug("received rssi ping message");
 				receivePingMessage(meshMsgEvent);
 				break;
 			}
 			case CS_MESH_MODEL_TYPE_RSSI_DATA: {
-				MeshTopology_LOGd("received rssi data message");
+				LOGMeshTopologyDebug("received rssi data message");
 				receiveRssiDataMessage(meshMsgEvent);
 				break;
 			}
