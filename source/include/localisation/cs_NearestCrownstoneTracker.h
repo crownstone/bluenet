@@ -58,6 +58,9 @@ private:
 	/**
 	 * Heart of the algorithm. See implementation for exact behaviour.
 	 *
+	 * This method implements what a crownstone needs to communicate when
+	 * it directly receives an advertisement from a trackable device.
+	 *
 	 * Updates personal report, possibly updates winning report
 	 * and possibly broadcasts a message to inform other devices
 	 * in the mesh of relevant changes.
@@ -66,6 +69,10 @@ private:
 
 	/**
 	 * Heart of the algorithm. See implementation for exact behaviour.
+	 *
+	 * This method implements what a crownstone needs to communicate when
+	 * it receives a message from another crownstone containing information
+	 * about a trackable device.
 	 *
 	 * Possibly updates winning report and possibly broadcasts
 	 * a message to inform other devices in the mesh of relevant changes.
@@ -114,17 +121,10 @@ private:
 	void onWinnerChanged();
 
 	/**
-	 * Returns report.rssi != 0.
-	 *
-	 * Only used to see if a prior NearestWitnessReport exists.
-	 * When adding the multiple TrackableIds feature this method
-	 * becomes obsolete. We can then use map::find to check if a winnin/personal
-	 * report exists.
-	 */
-	bool isValid(const NearestWitnessReport& report);
-
-	/**
 	 * Assumes my_id is set to the stone id of this crownstone.
+	 * Sets the reporter id of the personal report to my_id.
+	 * Sets the reporter id of the winning report to 0.
+	 * Sets the rssi value of both these reports to -127.
 	 */
 	void resetReports();
 

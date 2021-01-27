@@ -10,7 +10,6 @@
 
 #include <cmath>
 
-// REVIEW: This won't be recognized by binary logger.
 #define LOGMeshTopologyDebug LOGd
 #define LOGMeshTopologyVerbose LOGnone
 
@@ -23,9 +22,12 @@ MeshTopology::MeshTopology() :
 }
 
 void MeshTopology::init() {
-	// REVIEW: Use TYPIFY for variable.
-	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &my_id,
-			sizeof(my_id));
+	TYPIFY(CONFIG_CROWNSTONE_ID) state_id;
+	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &state_id,
+			sizeof(state_id));
+
+	my_id = state_id;
+
 	LOGMeshTopologyDebug("MeshTopology: my_id %d", my_id);
 
 	boot_sequence_finished = false;
@@ -211,7 +213,6 @@ void MeshTopology::sendRssiDataOverMesh(rssi_data_message_t* rssi_data_message) 
 	msgevt.dispatch();
 }
 
-// REVIEW: Why not a simpler message (without bit fields) for uart?
 void MeshTopology::sendRssiDataOverUart(rssi_data_message_t* rssi_data_message) {
 	RssiDataMessage datamessage;
 
@@ -253,8 +254,7 @@ void MeshTopology::receiveRssiDataMessage(MeshMsgEvent& meshMsgEvent) {
 // ------------- recording mesh messages -------------
 
 void MeshTopology::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
-	// REVIEW: Mesh specific code, should be in the mesh code.
-	if (mesh_msg_evt.hops == 0) { // TODO: 0 hops, or 1 hops?!
+	if (mesh_msg_evt.hops == 0) { // TODO: 0 hops, or 1 hops?
 		LOGMeshTopologyVerbose("handle mesh msg event with 0 hops");
 		recordRssiValue(
 				mesh_msg_evt.srcAddress,
@@ -263,7 +263,7 @@ void MeshTopology::receiveMeshMsgEvent(MeshMsgEvent& mesh_msg_evt) {
 				);
 	}
 
-	// can't interpret the rssi value in this case.
+	// can't really interpret the rssi value if it was relayed.
 }
 
 void MeshTopology::handleEvent(event_t &evt) {
