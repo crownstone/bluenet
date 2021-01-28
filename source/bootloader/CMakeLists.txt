@@ -388,7 +388,7 @@ ADD_CUSTOM_TARGET(write_bootloader
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE_BINARY" "-DBINARY=${PROJECT_NAME}.hex" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Flashes bootloader to remote target board"
 	)
-		
+
 ADD_CUSTOM_TARGET(write_bootloader_address
 	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE" "-DADDRESS=0x10001014" "-DVALUE=${BOOTLOADER_START_ADDRESS}" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Writes bootloader start addresss to UICR"

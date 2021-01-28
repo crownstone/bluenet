@@ -6,7 +6,7 @@ include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
 #   cmake <CONFIG_FILE> <NRF_DEVICE_FAMILY> <INSTRUCTION>
 #
 # Examples of instructions:
-#   cmake ... READ <ADDRESS> [SERIAL_NUM]
+#   cmake ... READ <ADDRESS> [COUNT] [SERIAL_NUM]
 #   cmake ... LIST [SERIAL_NUM]
 #   cmake ... RESET [SERIAL_NUM]
 #   cmake ... ERASE [SERIAL_NUM]
@@ -106,6 +106,14 @@ if(INSTRUCTION STREQUAL "READ")
 			load_board_name(${DEFAULT_MODULES_PATH}/../../../include/cfg/cs_Boards.h BOARD_NAME ${BOARD_VERSION})
 			message(STATUS "Board version: ${BOARD_VERSION}")
 			message(STATUS "Board name: ${BOARD_NAME}")
+		elseif ("${ADDRESS}" STREQUAL "0x100000A4") # MAC address
+			string(REGEX MATCH "^0x([0-9a-fA-F]+): *([0-9a-fA-F]+) *([0-9a-fA-F]+)" Tmp ${output})
+			set(Address ${CMAKE_MATCH_1})
+			set(Value1 ${CMAKE_MATCH_2})
+			set(Value2 ${CMAKE_MATCH_3})
+			words(${Value1} DelimValue1 0 ":")
+			words(${Value2} DelimValue2 4 ":")
+			message(STATUS "Address: ${DelimValue2}:${DelimValue1}")
 		else()
 			message(STATUS "Unknown address to parse: ${ADDRESS}")
 			message(STATUS "Result: \n\n${output}")

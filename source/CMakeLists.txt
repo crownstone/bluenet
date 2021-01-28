@@ -753,6 +753,13 @@ ELSE()
 			COMMENT "Read board version"
 			)
 
+		ADD_CUSTOM_TARGET(read_mac_address
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x100000A4" "-DCOUNT=8" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMENT "Read MAC address"
+			)
+
+
+
 		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
 		#IF(NOT CONFIG_DIR STREQUAL "release")
 
