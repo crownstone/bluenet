@@ -85,6 +85,13 @@ This can be forwarded to other CMake projects, but does not yet give this partic
 values. Henceforth, a side-effect of this function is that it also sets those keys with their values in the 
 `PARENT_SCOPE`. That means that values like `SERIAL_NUM`, `GDB_PORT` etc. become available to the parent CMake build.
 
+There is also a `config/$target/CMakeBuild.overwrite.config` file that will be sourced after 
+`config/$target/CMakeBuild.config` and that you can use to write specifics to the particular system you are working on.
+
+There is also a `config/$target/CMakeBuild.runtime.config` file that will only be used at **runtime**. This means that
+if you set `SERIAL_NUM` or `GDB_PORT` in this file, it will immediately pick up these values without you having to
+run `cmake`. For example `make reset` will immediately reset the right device (without a configuration or compilation step).
+
 # Dependency on configuration
 
 The dependency on the configuration file is made possible to adding it explicitly as a dependency on the source files.
