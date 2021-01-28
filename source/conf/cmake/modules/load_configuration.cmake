@@ -1,6 +1,6 @@
 function(load_configuration CONFIG_FILE CONFIG_LIST)
 	if(EXISTS ${CONFIG_FILE})
-		message(STATUS "Load configuration file: ${CONFIG_FILE}")
+		#message(STATUS "Load configuration file: ${CONFIG_FILE}")
 		file(STRINGS ${CONFIG_FILE} ConfigContents)
 		foreach(NameAndValue ${ConfigContents})
 			# Strip leading spaces
