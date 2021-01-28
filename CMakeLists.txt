@@ -361,11 +361,6 @@ endif()
 # Write softdevice and read version of softdevice
 #######################################################################################################################
 
-IF(SERIAL_NUM)
-	set(SERIAL_NUM_SWITCH "--snr")
-	set(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
-ENDIF()
-
 SET(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH} \
 	-DCONFIG_FILE:STRING=${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.runtime.config \
 	-DDEVICE:STRING=${DEVICE} \

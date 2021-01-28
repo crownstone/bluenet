@@ -53,17 +53,8 @@ if(NOT GDB_PORT)
 endif()
 
 if(NOT BOARD_TARGET)
-	set(BOARD_TARGET "2331")
+	set(BOARD_TARGET "default")
 endif()
-
-# Get the following information via JlinkExe and then ShowEmuList
-#if(NOT SERIAL_NUM)
-#	set(SERIAL_NUM "")
-#endif()
-
-#if(NOT GIT_BRANCH)
-#  message(FATAL_ERROR "The code should live on a branch in a git repository")
-#endif()
 
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
 SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
