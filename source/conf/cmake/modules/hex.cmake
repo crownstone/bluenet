@@ -141,7 +141,7 @@ function(words VALUE OUTPUT SKIP DELIMITER)
 	set(${OUTPUT} "${_res}" PARENT_SCOPE)
 endfunction()
 
-function(xor VALUE MASK OUTPUT)
+function(bitwise_or VALUE MASK OUTPUT)
 	math(EXPR _res "0x${VALUE} | ${MASK}" OUTPUT_FORMAT HEXADECIMAL)
 	set(${OUTPUT} "${_res}" PARENT_SCOPE)
 endfunction()

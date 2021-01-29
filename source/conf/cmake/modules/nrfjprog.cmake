@@ -113,7 +113,7 @@ if(INSTRUCTION STREQUAL "READ")
 			set(ValueA ${CMAKE_MATCH_3})
 			# The address will be a Random Static Address, denoted by the last bits being 11, hence, the OR with 0xC
 			# at exactly the last two bits (endianness) that belong to the 48 bits of the MAC address.
-			xor(${ValueA} "0xC00000" ValueB)
+			bitwise_or(${ValueA} "0xC00000" ValueB)
 			string(TOUPPER "${ValueB}" Half2)
 			words(${Half1} DelimValue1 0 ":")
 			words(${Half2} DelimValue2 4 ":")
