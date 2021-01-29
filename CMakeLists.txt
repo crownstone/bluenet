@@ -254,7 +254,16 @@ if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
 		)
 endif()
 
-
+if(DOWNLOAD_CSUTIL)
+	ExternalProject_Add(csutil
+		GIT_REPOSITORY https://github.com/mrquincle/csutil
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/csutil
+		BINARY_DIR ${WORKSPACE_DIR}/tools/csutil
+		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		)
+endif()
 
 if(FACTORY_IMAGE)
 	MESSAGE(WARNING "Make a factory image. The usual CMakeBuild.config files will not be used. "

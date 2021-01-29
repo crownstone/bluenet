@@ -695,6 +695,11 @@ ELSE()
 			COMMENT "Flashes application to remote target board (takes a while)"
 			)
 
+		ADD_CUSTOM_TARGET(setup
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=SETUP" -P ${DEFAULT_MODULES_PATH}/cstool.cmake
+			COMMENT "Setup Crownstone via csutil"
+			)
+
 		ADD_CUSTOM_TARGET(check
 			COMMAND cppcheck --enable=style --quiet ${CMAKE_SOURCE_DIR} 
 			COMMENT "Check for style or worse types of errors (linter)"
