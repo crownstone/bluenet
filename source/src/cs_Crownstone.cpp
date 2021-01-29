@@ -415,7 +415,7 @@ void Crownstone::configure() {
 
 	increaseResetCounter();
 
-	setName();
+	setName(true);
 
 	LOGi("> advertisement ...");
 	configureAdvertisement();
@@ -552,7 +552,7 @@ void Crownstone::switchMode(const OperationMode & newMode) {
 //	_operationMode = newMode;
 }
 
-void Crownstone::setName() {
+void Crownstone::setName(bool firstTime) {
 	char device_name[32];
 	cs_state_data_t stateNameData(CS_TYPE::CONFIG_NAME, (uint8_t*)device_name, sizeof(device_name));
 	_state->get(stateNameData);
@@ -567,7 +567,11 @@ void Crownstone::setName() {
 	} else {
 		deviceName = std::string(device_name, MIN(stateNameData.size, 5));
 	}
-	_advertiser->updateDeviceName(deviceName);
+	if (firstTime) {
+		_advertiser->setDeviceName(deviceName);
+	} else {
+		_advertiser->updateDeviceName(deviceName);
+	}
 }
 
 void Crownstone::startOperationMode(const OperationMode & mode) {
