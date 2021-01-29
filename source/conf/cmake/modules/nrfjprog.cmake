@@ -109,10 +109,14 @@ if(INSTRUCTION STREQUAL "READ")
 		elseif ("${ADDRESS}" STREQUAL "0x100000A4") # MAC address
 			string(REGEX MATCH "^0x([0-9a-fA-F]+): *([0-9a-fA-F]+) *([0-9a-fA-F]+)" Tmp ${output})
 			set(Address ${CMAKE_MATCH_1})
-			set(Value1 ${CMAKE_MATCH_2})
-			set(Value2 ${CMAKE_MATCH_3})
-			words(${Value1} DelimValue1 0 ":")
-			words(${Value2} DelimValue2 4 ":")
+			set(Half1 ${CMAKE_MATCH_2})
+			set(ValueA ${CMAKE_MATCH_3})
+			# The address will be a Random Static Address, denoted by the last bits being 11, hence, the OR with 0xC
+			# at exactly the last two bits (endianness) that belong to the 48 bits of the MAC address.
+			xor(${ValueA} "0xC00000" ValueB)
+			string(TOUPPER "${ValueB}" Half2)
+			words(${Half1} DelimValue1 0 ":")
+			words(${Half2} DelimValue2 4 ":")
 			message(STATUS "Address: ${DelimValue2}:${DelimValue1}")
 		else()
 			message(STATUS "Unknown address to parse: ${ADDRESS}")
