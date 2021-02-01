@@ -700,6 +700,12 @@ ELSE()
 			COMMENT "Setup Crownstone via csutil"
 			)
 
+		ADD_CUSTOM_TARGET(factory_reset
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=FACTORY_RESET" -P ${DEFAULT_MODULES_PATH}/cstool.cmake
+			COMMENT "Perform a factory reset of a Crownstone via csutil"
+			)
+
+
 		ADD_CUSTOM_TARGET(check
 			COMMAND cppcheck --enable=style --quiet ${CMAKE_SOURCE_DIR} 
 			COMMENT "Check for style or worse types of errors (linter)"

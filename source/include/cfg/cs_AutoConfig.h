@@ -52,7 +52,7 @@ extern uint16_t g_SCAN_WINDOW;
 
 extern uint16_t g_SCAN_BREAK_DURATION;
 
-extern uint16_t g_TX_POWER;
+extern const uint8_t g_TX_POWER;
 
 extern const uint16_t g_CONNECTION_ALIVE_TIMEOUT;
 
@@ -88,7 +88,7 @@ extern const bool g_CONFIG_CROWNSTONE_ID_DEFAULT;
 
 extern const bool g_CONFIG_RELAY_HIGH_DURATION_DEFAULT;
 
-extern const uint16_t g_CONFIG_LOW_TX_POWER_DEFAULT;
+extern const uint8_t g_CONFIG_LOW_TX_POWER_DEFAULT;
 
 extern const float g_CONFIG_VOLTAGE_MULTIPLIER_DEFAULT;
 

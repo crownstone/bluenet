@@ -29,6 +29,7 @@ void Advertiser::init() {
 	}
 	// Can't update device name or appearance when radio is not initialized (error 0x3001 == BLE_ERROR_NOT_ENABLED).
 	if (!_stack->checkCondition(Stack::C_RADIO_INITIALIZED, true)) {
+		LOGw("Radio not (yet) initialized");
 		return;
 	}
 	_isInitialized = true;
