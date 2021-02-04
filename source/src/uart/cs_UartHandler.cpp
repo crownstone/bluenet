@@ -430,6 +430,8 @@ void UartHandler::onRead(uint8_t val) {
 		return;
 	}
 
+//	LOGUartHandlerRtt("%u\n", val);
+
 	// An escape shouldn't be followed by a special byte.
 	switch (val) {
 		case UART_START_BYTE:
@@ -441,6 +443,9 @@ void UartHandler::onRead(uint8_t val) {
 	}
 
 	if (val == UART_START_BYTE) {
+		if (_startedReading) {
+			LOGUartHandlerRtt("onRead: discard %uB read of %uB\n", _readBufferIdx, _sizeToRead);
+		}
 		resetReadBuf();
 		_startedReading = true;
 		return;
@@ -467,12 +472,14 @@ void UartHandler::onRead(uint8_t val) {
 			// Check received size
 			uart_msg_size_header_t* sizeHeader = reinterpret_cast<uart_msg_size_header_t*>(_readBuffer);
 			if (sizeHeader->size == 0 || sizeHeader->size > UART_RX_BUFFER_SIZE) {
+				LOGUartHandlerRtt("onRead: sizeToRead > UART_RX_BUFFER_SIZE\n");
 				resetReadBuf();
 				return;
 			}
 			// Set size to read and reset read buffer index.
 			_sizeToRead = sizeHeader->size;
 			_readBufferIdx = 0;
+			LOGUartHandlerRtt("onRead: sizeToRead=%u\n", _sizeToRead);
 		}
 	}
 	else if (_readBufferIdx >= _sizeToRead) {
@@ -482,6 +489,7 @@ void UartHandler::onRead(uint8_t val) {
 		cs_data_t msgData;
 		msgData.data = _readBuffer;
 		msgData.len = _readBufferIdx;
+		LOGUartHandlerRtt("onRead: dispatch msg of size %u\n", msgData.len);
 		uint32_t errorCode = app_sched_event_put(&msgData, sizeof(msgData), handle_msg);
 		APP_ERROR_CHECK(errorCode);
 	}

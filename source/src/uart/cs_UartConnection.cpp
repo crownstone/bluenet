@@ -63,6 +63,7 @@ void UartConnection::onHello(const uart_msg_status_user_flags_t& flags) {
 	uart_msg_hello_t hello;
 	hello.sphereId = sphereId;
 	hello.status = _status;
+	LOGd("Reply hello with sphereId=%u, flags=%u", hello.sphereId, hello.status.flags.asInt);
 	UartHandler::getInstance().writeMsg(UART_OPCODE_TX_HELLO, (uint8_t*)&hello, sizeof(hello));
 }
 
