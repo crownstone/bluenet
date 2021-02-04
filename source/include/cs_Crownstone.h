@@ -242,7 +242,7 @@ private:
 	 * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
 	 * It is loaded from memory or from the default and written to the Stack.
 	 */
-	void setName();
+	void setName(bool firstTime);
 
 	/**
 	 * Create a particular service. Depending on the mode we can choose to create a set of services that we would need.
@@ -333,15 +333,14 @@ private:
 	TrackedDevices _trackedDevices;
 	SystemTime _systemTime;
 
-#if RSSI_DATA_TRACKER_ENABLED==1
+#if BUILD_RSSI_DATA_TRACKER == 1
 	RssiDataTracker _rssiDataTracker;
 #endif
 
-#if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	NearestCrownstoneTracker _nearestCrownstoneTracker;
 	TrackableParser _trackableParser;
 #endif
-
 
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;

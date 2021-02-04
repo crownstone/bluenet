@@ -43,7 +43,7 @@ int MyClass::bar(int value, bool triple) {
 			return 0;
 		}
 		case 1: {
-			value +=1;
+			value += 1;
 			break;
 		}
 		case 2: {

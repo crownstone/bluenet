@@ -58,13 +58,10 @@ PWM::PWM() :
 		_started(false),
 		_startOnZeroCrossing(false)
 		{
-#if PWM_ENABLE==1
-
-#endif
 }
 
 uint32_t PWM::init(const pwm_config_t& config) {
-#if PWM_ENABLE==1
+//#if PWM_ENABLE==1
 	LOGi(FMT_INIT, "PWM");
 	_config = config;
 //	memcpy(&_config, &config, sizeof(pwm_config_t));
@@ -113,9 +110,9 @@ uint32_t PWM::init(const pwm_config_t& config) {
 
 	_initialized = true;
 	return ERR_SUCCESS;
-#endif
+//#endif
 
-	return ERR_PWM_NOT_ENABLED;
+//	return ERR_PWM_NOT_ENABLED;
 }
 
 uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
@@ -163,15 +160,15 @@ uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
 
 uint32_t PWM::deinit() {
 
-#if PWM_ENABLE==1
+//#if PWM_ENABLE==1
 
 	LOGi("DeInit PWM");
 
 	_initialized = false;
 	return ERR_SUCCESS;
-#endif
+//#endif
 
-	return ERR_PWM_NOT_ENABLED;
+//	return ERR_PWM_NOT_ENABLED;
 }
 
 uint32_t PWM::start(bool onZeroCrossing) {

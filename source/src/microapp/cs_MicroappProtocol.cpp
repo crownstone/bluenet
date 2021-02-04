@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <ble/cs_UUID.h>
 #include <cfg/cs_Config.h>
+#include <cfg/cs_AutoConfig.h>
 #include <common/cs_Types.h>
 #include <logging/cs_Logger.h>
 #include <drivers/cs_Storage.h>
@@ -304,7 +305,7 @@ uint16_t MicroappProtocol::initMemory() {
 	// We allow an area of 0x2000B000 and then two pages for RAM. For now let us clear it to 0
 	// This is actually incorrect (we should skip) and it probably can be done at once as well
 	for (int i = 0; i < 1024 * 2; ++i) {
-		uint32_t *const val = (uint32_t *)(uintptr_t)(RAM_MICROAPP_BASE + i);
+		uint32_t *const val = (uint32_t *)(uintptr_t)(g_RAM_MICROAPP_BASE + i);
 		*val = 0;
 	}
 

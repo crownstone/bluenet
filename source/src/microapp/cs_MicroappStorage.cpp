@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <ble/cs_UUID.h>
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <logging/cs_Logger.h>
@@ -38,16 +39,11 @@ static void fs_evt_handler(nrf_fstorage_evt_t * p_evt) {
 	APP_ERROR_CHECK(retVal);
 }
 
-#define MICROAPP_PAGES      2
-
-/**
- * Storage, 4 pages reserved. From 68000 up to 6C000.
- */
 NRF_FSTORAGE_DEF(nrf_fstorage_t microapp_storage) =
 {
 	.evt_handler    = fs_evt_handler,
-	.start_addr     = 0x68000,
-	.end_addr       = 0x68000 + (0x1000*(MICROAPP_PAGES)) - 1,
+	.start_addr     = g_FLASH_MICROAPP_BASE,
+	.end_addr       = g_FLASH_MICROAPP_BASE + (0x1000*(g_FLASH_MICROAPP_PAGES)) - 1,
 };
 
 MicroappStorage::MicroappStorage() { //: EventListener() {
@@ -82,7 +78,7 @@ uint16_t MicroappStorage::init() {
 
 uint16_t MicroappStorage::erasePages() {
 	uint32_t err_code;
-	err_code = nrf_fstorage_erase(&microapp_storage, microapp_storage.start_addr, MICROAPP_PAGES, NULL);
+	err_code = nrf_fstorage_erase(&microapp_storage, microapp_storage.start_addr, g_FLASH_MICROAPP_PAGES, NULL);
 	return err_code;
 }
 

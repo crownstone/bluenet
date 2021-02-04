@@ -5,13 +5,13 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "processing/cs_TemperatureGuard.h"
-
-#include "storage/cs_State.h"
+#include <cfg/cs_AutoConfig.h>
+#include <processing/cs_TemperatureGuard.h>
+#include <storage/cs_State.h>
 
 TemperatureGuard::TemperatureGuard() :
 		_appTimerId(NULL),
-		_maxChipTemp(MAX_CHIP_TEMP),
+		_maxChipTemp(g_MAX_CHIP_TEMPERATURE),
 		_comp(NULL)
 	{
 		_appTimerData = { {0} };

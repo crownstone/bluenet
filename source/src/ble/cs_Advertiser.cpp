@@ -5,10 +5,10 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "ble/cs_Advertiser.h"
-#include "cfg/cs_DeviceTypes.h"
-#include "cfg/cs_UuidConfig.h"
-#include "events/cs_EventDispatcher.h"
+#include <ble/cs_Advertiser.h>
+#include <cfg/cs_DeviceTypes.h>
+#include <cfg/cs_UuidConfig.h>
+#include <events/cs_EventDispatcher.h>
 #include <uart/cs_UartHandler.h>
 
 #define LOGAdvertiserDebug LOGnone
@@ -29,6 +29,7 @@ void Advertiser::init() {
 	}
 	// Can't update device name or appearance when radio is not initialized (error 0x3001 == BLE_ERROR_NOT_ENABLED).
 	if (!_stack->checkCondition(Stack::C_RADIO_INITIALIZED, true)) {
+		LOGw("Radio not (yet) initialized");
 		return;
 	}
 	_isInitialized = true;

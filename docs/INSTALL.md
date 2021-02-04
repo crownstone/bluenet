@@ -197,6 +197,10 @@ Only after this you can assume that the `make` targets in `build/default` or any
 
 ## Advanced
 
+### Overwrites and runtime configs
+
+The following is convenient if you have multiple boards attached to your system.
+
 It is possible to have a second file in your target directory that overwrites values in your `CMakeBuild.config`.
 The file is called `CMakeBuild.overwrite.config`.
 
@@ -220,6 +224,18 @@ Another convenient variable to set there is `GDB_PORT`. To have both running in 
     cmake .. -DBOARD_TARGET=board1 && make
     cd build/board1
     make debug_server
+
+For in particular the above information you perhaps do not want to have everything recompiled just because you use
+a particular JLINK device. The file that is used for runtime only is `CMakeBuild.runtime.config`. If you write
+something like `SERIAL_NUM=682450212` in that file this can be altered without causing `cmake` to run again.
+
+### Wireless
+
+Information about the MAC address can be obtained through the make system as well:
+
+    make read_mac_address
+
+The address is stored by Nordic as 48 bits in two registers, `DEVICEADDR[0]` and `DEVICEADDR[1]`. Depending on the last two bits, this is a static or a private address (resolvable or non-resolvable). Those bits are normally set to 00, but due to the fact that the Crownstones are static addresses, we set them to 11. This means we can use the result to connect to the Crownstone (for the setup process for instance).
 
 ## Common issues
 

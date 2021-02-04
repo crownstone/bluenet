@@ -4,12 +4,12 @@
  * Date: Dec 2, 2015
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
-#include "processing/cs_Scanner.h"
-
-#include <storage/cs_State.h>
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_DeviceTypes.h>
-#include <events/cs_EventDispatcher.h>
 #include <cfg/cs_UuidConfig.h>
+#include <events/cs_EventDispatcher.h>
+#include <processing/cs_Scanner.h>
+#include <storage/cs_State.h>
 
 //#define PRINT_SCANNER_VERBOSE
 //#define PRINT_DEBUG
@@ -18,8 +18,8 @@ Scanner::Scanner() :
 	_opCode(SCAN_START),
 	_scanning(false),
 	_running(false),
-	_scanDuration(SCAN_DURATION),
-	_scanBreakDuration(SCAN_BREAK_DURATION),
+	_scanDuration(g_SCAN_DURATION),
+	_scanBreakDuration(g_SCAN_BREAK_DURATION),
 	_scanCount(0),
 	_appTimerId(NULL),
 	_stack(NULL)

@@ -6,7 +6,6 @@
  */
 
 #include <ble/cs_Characteristic.h>
-#include <ble/cs_Softdevice.h>
 #include <storage/cs_State.h>
 
 // #define PRINT_CHARACTERISTIC_VERBOSE
@@ -137,13 +136,8 @@ void CharacteristicBase::init(Service* svc) {
 		APP_ERROR_CHECK(err_code);
 	}
 
-	//BLE_CALL(sd_ble_gatts_characteristic_add, (svc_handle, &ci.char_md, &ci.attr_char_value, &_handles));
-
 	//! set initial value (default value)
 	updateValue();
-	//	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
-	//			_handles.value_handle, &ci.attr_char_value.init_len, ci.attr_char_value.p_value));
-
 	_status.initialized = true;
 }
 
@@ -244,8 +238,19 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
 	LOGd("gattValueLength=%u gattValueAddress=%p, gattValueMaxSize=%u", gattValueLength, valueGattAddress, getGattValueMaxLength());
 #endif
-	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
-			_handles.value_handle, &gattValueLength, valueGattAddress));
+
+	ble_gatts_value_t gatts_value;
+	gatts_value.len = gattValueLength;
+	gatts_value.offset = 0;
+	gatts_value.p_value = valueGattAddress;
+	
+	uint32_t err_code;
+	err_code = sd_ble_gatts_value_set(_service->getStack()->getConnectionHandle(),
+			_handles.value_handle, &gatts_value);
+
+	if (err_code != ERR_SUCCESS) {
+		// TODO:
+	}
 
 	//! stop here if we are not in notifying state
 	if ((!_status.notifies) || (!_service->getStack()->isConnectedPeripheral()) || !_status.notifyingEnabled) {

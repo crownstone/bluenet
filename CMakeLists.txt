@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 #######################################################################################################################
-# Set board target 
+# Set board target
 #######################################################################################################################
 
 option(DOWNLOAD_JLINK                            "Download JLink"                        ON)
@@ -180,7 +180,7 @@ ExternalProject_Add(nordic_mesh_sdk
 set(MESH_SDK_DIR ${WORKSPACE_DIR}/tools/mesh_sdk)
 list(APPEND CMAKE_ARGS "-DMESH_SDK_DIR:STRING=${MESH_SDK_DIR}")
 
-if(DOWNLOAD_JLINK) 
+if(DOWNLOAD_JLINK)
 	ExternalProject_Add(jlink
 		DOWNLOAD_COMMAND wget --timestamping --post-data "accept_license_agreement=accepted&non_emb_ctr=confirmed" ${JLINK_LINUX_DOWNLOAD_URL}
 		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
@@ -190,7 +190,7 @@ if(DOWNLOAD_JLINK)
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/jlink
 		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE} 
+		INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/downloads/${JLINK_DEB_FILE}
 		# USES_TERMINAL_INSTALL 1 # Does not actually work
 		)
 endif()
@@ -216,7 +216,7 @@ if(DOWNLOAD_NRFJPROG)
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfjprog
 		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
-		INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/tools/nrfjprog/${NRFJPROG_DEB_FILE} 
+		INSTALL_COMMAND ${SUPERUSER_SWITCH} dpkg -i ${WORKSPACE_DIR}/tools/nrfjprog/${NRFJPROG_DEB_FILE}
 		)
 endif()
 
@@ -231,19 +231,19 @@ if(DOWNLOAD_NRFUTIL)
 		)
 endif()
 
-if(DOWNLOAD_NRFCONNECT) 
+if(DOWNLOAD_NRFCONNECT)
 	ExternalProject_Add(git_nrfconnect_core
 		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-core
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
 		BINARY_DIR ${WORKSPACE_DIR}/tools/nrfconnect/pc-nrfconnect-core
 		CONFIGURE_COMMAND ${SUPERUSER_SWITCH} apt-get install -y build-essential python2.7 libudev-dev libgconf-2-4
 		BUILD_COMMAND npm install
-		INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${WORKSPACE_DIR}/tools/nrfconnect_apps 
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E make_directory ${WORKSPACE_DIR}/tools/nrfconnect_apps
 		COMMAND ${CMAKE_COMMAND} -E create_symlink ${WORKSPACE_DIR}/tools/nrfconnect_apps $ENV{HOME}/.nrfconnect-apps/local
 		)
 endif()
 
-if(DOWNLOAD_NRFCONNECT_PROGRAMMER) 
+if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
 	ExternalProject_Add(git_nrfconnect_apps
 		GIT_REPOSITORY https://github.com/NordicSemiconductor/pc-nrfconnect-programmer
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfconnect_apps/pc-nrfconnect-programmer
@@ -254,7 +254,16 @@ if(DOWNLOAD_NRFCONNECT_PROGRAMMER)
 		)
 endif()
 
-
+if(DOWNLOAD_CSUTIL)
+	ExternalProject_Add(csutil
+		GIT_REPOSITORY https://github.com/mrquincle/csutil
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/csutil
+		BINARY_DIR ${WORKSPACE_DIR}/tools/csutil
+		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		)
+endif()
 
 if(FACTORY_IMAGE)
 	MESSAGE(WARNING "Make a factory image. The usual CMakeBuild.config files will not be used. "
@@ -317,7 +326,7 @@ ADD_CUSTOM_TARGET(micro_eec
 	COMMAND chmod u+x build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMAND ${CMAKE_COMMAND} -E env "GNU_INSTALL_ROOT=${WORKSPACE_DIR}/tools/gcc_arm_none_eabi/bin/" "MAKEFLAGS=-j1" ./build_all.sh WORKING_DIRECTORY ${NRF5_DIR}/external/micro-ecc
 	COMMENT "Build micro-eec"
-	DEPENDS 
+	DEPENDS
 	nordic_sdk
 	gcc_arm_none_eabi
 	)
@@ -345,7 +354,7 @@ if(EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.c
 	set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
 endif()
 
-# Regretfully, this "trick" will make it impossible to pull after a change in CMakeBuild.config . 
+# Regretfully, this "trick" will make it impossible to pull after a change in CMakeBuild.config .
 #ExternalProject_Add_Step(bluenet BUILD
 #  COMMAND ${CMAKE_COMMAND} -E echo "-- Execute git update-index --skip-worktree for default config file to prevent accidental commits"
 #  COMMAND git update-index --skip-worktree ${WORKSPACE_DIR}/config/default/CMakeBuild.config
@@ -361,61 +370,53 @@ endif()
 # Write softdevice and read version of softdevice
 #######################################################################################################################
 
-IF(SERIAL_NUM) 
-	set(SERIAL_NUM_SWITCH "--snr")
-	set(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
-ENDIF()
+SET(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH} \
+	-DCONFIG_FILE:STRING=${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.runtime.config \
+	-DDEVICE:STRING=${DEVICE} \
+	-DNRF_DEVICE_FAMILY:STRING=${NRF_DEVICE_FAMILY} \
+	-DSERIAL_NUM:STRING=${SERIAL_NUM} \
+	-DGDB_PORT:STRING=${GDB_PORT} \
+	-DSWO_PORT:STRING=${SWO_PORT} \
+	-DTELNET_PORT:STRING=${TELNET_PORT} \
+	-DUART_DEVICE:STRING=${UART_DEVICE} \
+	-DUART_BAUDRATE:STRING=${UART_BAUDRATE} \
+	-DRTT_PORT:STRING=${RTT_PORT}")
 
 ADD_CUSTOM_TARGET(write_softdevice
-	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write softdevice"
-	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMAND nrfjprog -f nrf52 --program ${NRF5_DIR}/${SOFTDEVICE_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE_BINARY" "-DBINARY=${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	#DEPENDS bluenet
 	COMMENT "Flashes softdevice to remote target board"
 	)
 
 ADD_CUSTOM_TARGET(write_mbr_param_address
-	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write MBR param page address 0x0007E000 to UICR"
-	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMAND nrfjprog -f nrf52 --memwr 0x10001018 --val 0x0007E000 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE" "-DADDRESS=0x10001018" "-DVALUE=0x0007E000" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Writes MBR param page address to UICR"
 	)
 
-SET(DEFAULT_NRFJPROG_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
-SET(DEFAULT_NRFJPROG_READ_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH};-DINSTRUCTION:STRING=READ")
-
 ADD_CUSTOM_TARGET(read_softdevice_version
-	COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFJPROG_READ_DPARAM} -DADDRESS:STRING=0x000300C ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x000300C" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Reads version of softdevice"
 	)
 
 ADD_CUSTOM_TARGET(erase
-	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to erase target board"
-	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMAND nrfjprog -f nrf52 --eraseall ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=ERASE" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Erase everything on target board"
 	)
 
 ADD_CUSTOM_TARGET(reset
-	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to reset target board"
-	COMMAND ${CMAKE_COMMAND} -E echo
-	COMMAND nrfjprog -f nrf52 --reset ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+	COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=RESET" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 	COMMENT "Reset target board"
 	)
 
 #######################################################################################################################
-# Forward commands for a particular board towards its build directory 
+# Forward commands for a particular board towards its build directory
 #######################################################################################################################
 
 # Will not be called automatically (this is done through the external project bluenet)
 ADD_CUSTOM_TARGET(${BOARD_TARGET}
 	COMMAND make
 	WORKING_DIRECTORY ${BOARD_TARGET}
-	DEPENDS 
+	DEPENDS
 	bluenet
 	COMMENT "Build application"
 	)
@@ -423,7 +424,7 @@ ADD_CUSTOM_TARGET(${BOARD_TARGET}
 ADD_CUSTOM_TARGET(debug_application
 	COMMAND make debug_application
 	WORKING_DIRECTORY ${BOARD_TARGET}
-	DEPENDS 
+	DEPENDS
 	bluenet
 	COMMENT "Debug application"
 	)
@@ -431,7 +432,7 @@ ADD_CUSTOM_TARGET(debug_application
 ADD_CUSTOM_TARGET(write_board_version
 	COMMAND make write_board_version
 	WORKING_DIRECTORY ${BOARD_TARGET}
-	DEPENDS 
+	DEPENDS
 	nrfjprog
 	bluenet
 	COMMENT "Write board version"
@@ -484,7 +485,7 @@ ADD_CUSTOM_TARGET(create_git_release_bootloader
 ADD_CUSTOM_TARGET(list_jlinks
 	COMMAND JLinkExe -commanderscript list.jlink
 	WORKING_DIRECTORY ${WORKSPACE_DIR}/source/conf/jlink
-	DEPENDS 
+	DEPENDS
 	jlink
 	COMMENT "List JLink devices"
 	)
@@ -518,7 +519,7 @@ ADD_CUSTOM_TARGET(nrfconnect_programmer
 # Factory images
 #######################################################################################################################
 
-# We can not use math(EXPR ...) because it does not have support for unsigned integers and older cmake versions 
+# We can not use math(EXPR ...) because it does not have support for unsigned integers and older cmake versions
 # do not support hexadecimal values either
 if(FACTORY_IMAGE)
 	include(${DEFAULT_MODULES_PATH}/hex.cmake)

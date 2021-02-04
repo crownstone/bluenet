@@ -158,9 +158,11 @@ ENDFOREACH()
 # Set compiler flags
 
 # Only from nRF52 onwards we have a coprocessor for floating point operations
-IF(NRF_SERIES MATCHES NRF52)
+IF(NRF_DEVICE_FAMILY MATCHES NRF52)
 	SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -mcpu=cortex-m4")
 	SET(DEFAULT_C_AND_CXX_FLAGS "${DEFAULT_C_AND_CXX_FLAGS} -mfloat-abi=hard -mfpu=fpv4-sp-d16")
+ELSE()
+	MESSAGE(STATUS "Unknown hardware support for floating point ops")
 ENDIF()
 
 IF(PRINT_FLOATS)
