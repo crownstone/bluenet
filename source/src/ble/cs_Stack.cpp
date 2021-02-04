@@ -619,7 +619,9 @@ void Stack::onConnect(const ble_evt_t * p_ble_evt) {
 	_connectionHandle = p_ble_evt->evt.gap_evt.conn_handle;
 	_disconnectingInProgress = false;
 
-		sd_ble_gap_rssi_start(_connectionHandle, 0, 0);
+		if (g_ENABLE_RSSI_FOR_CONNECTION) {
+			sd_ble_gap_rssi_start(_connectionHandle, 0, 0);
+		}
 
 		switch (p_ble_evt->evt.gap_evt.params.connected.role) {
 			case BLE_GAP_ROLE_PERIPH: {

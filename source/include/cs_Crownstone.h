@@ -230,7 +230,6 @@ private:
 	 *   [23.06.16] restart the mesh on disconnect, otherwise we have ~10s delay until the device starts advertising.
 	 *   [29.06.16] restart the mesh disabled, this was limited to pca10000, it does crash dobeacon v0.7
 	 */
-	void configureStack();
 
 	/**
 	 * Populate advertisement (including service data) with information. The persistence mode is obtained from storage

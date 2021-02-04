@@ -106,6 +106,8 @@ extern const uint16_t g_CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN_DEFAULT;
 
 extern const uint8_t g_CS_SERIAL_ENABLED;
 
+extern const bool g_ENABLE_RSSI_FOR_CONNECTION;
+
 #ifdef __cplusplus
 }
 #endif

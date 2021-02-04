@@ -316,6 +316,9 @@ PWM_TEMP_VOLTAGE_THRESHOLD_UP=0
 # Set dimming temperature threshold
 PWM_TEMP_VOLTAGE_THRESHOLD_DOWN=0
 
+# Set RSSI by default off
+ENABLE_RSSI_FOR_CONNECTION=0
+
 #######################################################################################################################
 # S132 6.1 (comes with SDK 15)
 #######################################################################################################################

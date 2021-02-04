@@ -596,6 +596,10 @@ ELSE()
 
 		# Reconfigure cmake to get up-to-date GIT_SHA1
 		set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/.git/index")
+		
+		# Make also depend on helper files
+		set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/conf/cmake/crownstone.defs.cmake")
+		set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/conf/cmake/crownstone.src.cmake")
 
 		SET(INCLUDE_ONLY_SECTIONS "")
 

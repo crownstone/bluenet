@@ -411,8 +411,6 @@ void Crownstone::configure() {
 	LOGi("> stack ...");
 	_stack->initRadio();
 
-	configureStack();
-
 	// Don't do garbage collection now, it will block reading flash.
 //	_storage->garbageCollect();
 
@@ -422,10 +420,6 @@ void Crownstone::configure() {
 
 	LOGi("> advertisement ...");
 	configureAdvertisement();
-}
-
-void Crownstone::configureStack() {
-
 }
 
 void Crownstone::configureAdvertisement() {
