@@ -245,12 +245,12 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 	gatts_value.p_value = valueGattAddress;
 	
 	uint32_t err_code;
-	err_code = sd_ble_gatts_value_set(_service->getStack()->getConnectionHandle(),
-			_handles.value_handle, &gatts_value);
-
-	if (err_code != ERR_SUCCESS) {
-		// TODO:
-	}
+	err_code = sd_ble_gatts_value_set(
+			_service->getStack()->getConnectionHandle(),
+			_handles.value_handle,
+			&gatts_value
+	);
+	APP_ERROR_CHECK(err_code);
 
 	//! stop here if we are not in notifying state
 	if ((!_status.notifies) || (!_service->getStack()->isConnectedPeripheral()) || !_status.notifyingEnabled) {

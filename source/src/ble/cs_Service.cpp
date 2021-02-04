@@ -155,13 +155,12 @@ bool Service::on_write(const ble_gatts_evt_write_t& write_evt, uint16_t value_ha
 				gatts_value.p_value = NULL;
 				
 				uint32_t err_code;
-				err_code = sd_ble_gatts_value_get(getStack()->getConnectionHandle(), characteristic->getValueHandle(),
-						&gatts_value);
-				
-				// TODO: check err_code 
-				if (err_code != ERR_SUCCESS) {
-					//
-				}
+				err_code = sd_ble_gatts_value_get(
+						getStack()->getConnectionHandle(),
+						characteristic->getValueHandle(),
+						&gatts_value
+				);
+				APP_ERROR_CHECK(err_code);
 
 				characteristic->written(gatts_value.len);
 
