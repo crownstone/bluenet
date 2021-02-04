@@ -5,9 +5,10 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include <test/cs_MemUsageTest.h>
-#include <events/cs_Event.h>
+#include <behaviour/cs_BehaviourStore.h>
 #include <cs_Crownstone.h>
+#include <events/cs_Event.h>
+#include <test/cs_MemUsageTest.h>
 #include <tracking/cs_TrackedDevices.h>
 
 MemUsageTest::MemUsageTest(const boards_config_t& boardsConfig):
@@ -58,10 +59,12 @@ void MemUsageTest::printRamStats() {
 
 bool MemUsageTest::setNextBehaviour() {
 	// Can't add all behaviours at once, as that prints too much and crashes the firmware.
-	if (_behaviourIndex >= 50) {
+	if (_behaviourIndex >= (int)BehaviourStore::MaxBehaviours) {
 		return true;
 	}
 	cs_result_t result;
+
+	// ExtenedSwitchBehaviour is the largest behaviour type.
 	ExtendedSwitchBehaviour behaviour(
 			SwitchBehaviour(
 						100,
@@ -92,13 +95,14 @@ bool MemUsageTest::setNextBehaviour() {
 }
 
 bool MemUsageTest::sendNextRssiData() {
-	if (_rssiDataStoneId >= 256) {
+	stone_id_t maxId = -1;
+	if (_rssiDataStoneId > maxId) {
 		return true;
 	}
 	LOGi("sendNextRssiData id=%i", _rssiDataStoneId);
 	int untilId = _rssiDataStoneId + 1;
-	if (untilId > 256) {
-		untilId = 256;
+	if (untilId > (int)maxId + 1) {
+		untilId = (int)maxId + 1;
 	}
 
 	TYPIFY(EVT_RECV_MESH_MSG) msg;
@@ -121,14 +125,15 @@ bool MemUsageTest::sendNextRssiData() {
 }
 
 bool MemUsageTest::sendNextPresence() {
-	if (_presenceProfileId >= 8) {
+	if (_presenceProfileId > PresenceHandler::max_profile_id) {
 		return true;
 	}
 	LOGi("sendNextPresence profile=%i location=%i", _presenceProfileId, _presenceLocationId);
 
 	int locationIdUntil = _presenceLocationId + 8;
-	if (locationIdUntil > 64) {
-		locationIdUntil = 64;
+	int locationIdMaxUntil = (int)PresenceHandler::max_location_id + 1;
+	if (locationIdUntil > locationIdMaxUntil) {
+		locationIdUntil = locationIdMaxUntil;
 	}
 
 	TYPIFY(EVT_RECEIVED_PROFILE_LOCATION) profileLocation;
@@ -142,7 +147,7 @@ bool MemUsageTest::sendNextPresence() {
 		event.dispatch();
 	}
 
-	if (locationIdUntil >= 64) {
+	if (locationIdUntil >= locationIdMaxUntil) {
 		// Next profile ID
 		++_presenceProfileId;
 		_presenceLocationId = 0;

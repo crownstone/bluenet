@@ -29,6 +29,9 @@ public:
         OccupiedRoomsMaskChanged    ,
     };
 
+    static const constexpr uint8_t max_location_id = 63;
+    static const constexpr uint8_t max_profile_id = 7;
+
 private:
     // after this amount of seconds a presence_record becomes invalid.
     static const constexpr uint8_t presence_time_out_s = 10;
@@ -43,8 +46,6 @@ private:
      */
     static const constexpr uint32_t presence_uncertain_due_reboot_time_out_s = 30;
 
-    static const constexpr uint8_t max_location_id = 63;
-    static const constexpr uint8_t max_profile_id = 7;
 
     // using a list because of constant time insertion/deletion of
     // any item in the container
