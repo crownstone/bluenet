@@ -185,6 +185,9 @@ void handleZeroCrossing() {
 
 Crownstone::Crownstone(boards_config_t& board) :
 	_boardsConfig(board),
+#if BUILD_MEM_USAGE_TEST == 1
+	_memTest(board),
+#endif
 	_mainTimerId(NULL),
 	_operationMode(OperationMode::OPERATION_MODE_UNINITIALIZED)
 {
@@ -718,6 +721,12 @@ void Crownstone::startUp() {
 	_mesh->startSync();
 #endif
 
+#if BUILD_MEM_USAGE_TEST == 1
+	if (_operationMode == OperationMode::OPERATION_MODE_NORMAL) {
+		_memTest.start();
+	}
+#endif
+
 	// Clear all reset reasons after initializing and starting all modules.
 	// So the modules had the opportunity to read it out.
 	sd_power_reset_reason_clr(0xFFFFFFFF);
@@ -746,6 +755,10 @@ void Crownstone::tick() {
 		GpRegRet::clearAll();
 		_clearedGpRegRetCount = true;
 	}
+
+#if BUILD_MEM_USAGE_TEST == 1
+	_memTest.onTick();
+#endif
 
 	Watchdog::kick();
 

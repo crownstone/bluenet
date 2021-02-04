@@ -43,6 +43,10 @@
 #include <microapp/cs_Microapp.h>
 #endif
 
+#if BUILD_MEM_USAGE_TEST == 1
+#include <test/cs_MemUsageTest.h>
+#endif
+
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -154,6 +158,11 @@ public:
 	 * Should be called regularly from high level interrupt.
 	 */
 	static void updateMinStackEnd();
+
+	/**
+	 * Print load stats: RAM usage, app scheduler usage, etc.
+	 */
+	static void printLoadStats();
 
 	/** tick function called by app timer
 	 */
@@ -292,11 +301,6 @@ private:
 	 */
 	void increaseResetCounter();
 
-	/**
-	 * Print load stats: RAM usage, app scheduler usage, etc.
-	 */
-	void printLoadStats();
-
 	boards_config_t _boardsConfig;
 
 	// drivers
@@ -343,6 +347,10 @@ private:
 
 #if BUILD_MICROAPP_SUPPORT == 1
 	Microapp* _microapp;
+#endif
+
+#if BUILD_MEM_USAGE_TEST == 1
+	MemUsageTest _memTest;
 #endif
 
 	app_timer_t              _mainTimerData;

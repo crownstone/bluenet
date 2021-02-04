@@ -97,6 +97,9 @@ BUILD_RSSI_DATA_TRACKER=0
 # Add support for tracking functionality w.r.t which crownstone is closest to a trackable device
 BUILD_CLOSEST_CROWNSTONE_TRACKER=0
 
+# Enables memory usage testing
+BUILD_MEM_USAGE_TEST=0
+
 # Compile the mesh code.
 BUILD_MESHING=1
 
