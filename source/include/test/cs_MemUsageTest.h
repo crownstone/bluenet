@@ -31,6 +31,8 @@ private:
 	int _presenceProfileId = 0;
 	int _presenceLocationId = 0;
 
+	int _trackedDeviceId = 0;
+
 	int _stateType = 0;
 
 	// Returns true when done with all.
@@ -41,6 +43,9 @@ private:
 
 	// Returns true when done with all.
 	bool sendNextPresence();
+
+	// Returns true when done with all.
+	bool setNextTrackedDevice();
 
 	// Returns true when done with all.
 	bool setNextStateType();

@@ -38,7 +38,9 @@ public:
 	 */
 	void handleEvent(event_t& evt) override;
 
-private:
+	/**
+	 * Maximum number of registered tracked devices.
+	 */
 	static const uint8_t MAX_TRACKED_DEVICES = 20;
 
 	/**
@@ -53,6 +55,7 @@ private:
 	 */
 	static const uint16_t HEARTBEAT_TTL_MINUTES_MAX = 60;
 
+private:
 	static const uint16_t TICKS_PER_SECOND = (1000 / TICK_INTERVAL_MS);
 	static const uint16_t TICKS_PER_MINUTES = (60 * 1000 / TICK_INTERVAL_MS);
 

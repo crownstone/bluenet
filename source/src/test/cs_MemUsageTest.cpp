@@ -8,6 +8,7 @@
 #include <test/cs_MemUsageTest.h>
 #include <events/cs_Event.h>
 #include <cs_Crownstone.h>
+#include <tracking/cs_TrackedDevices.h>
 
 MemUsageTest::MemUsageTest(const boards_config_t& boardsConfig):
 	_boardConfig(boardsConfig) {
@@ -39,6 +40,11 @@ void MemUsageTest::onTick() {
 	}
 
 	if (sendNextRssiData() == false) {
+		printRamStats();
+		return;
+	}
+
+	if (setNextTrackedDevice() == false) {
 		printRamStats();
 		return;
 	}
@@ -144,6 +150,29 @@ bool MemUsageTest::sendNextPresence() {
 	else {
 		_presenceLocationId = locationIdUntil;
 	}
+	return false;
+}
+
+bool MemUsageTest::setNextTrackedDevice() {
+	if (_trackedDeviceId > TrackedDevices::MAX_TRACKED_DEVICES) {
+		return true;
+	}
+	LOGi("setNextTrackedDevice trackedDeviceId=%i", _trackedDeviceId);
+
+	TYPIFY(CMD_REGISTER_TRACKED_DEVICE) trackedDevice;
+	trackedDevice.accessLevel = ADMIN;
+	trackedDevice.data.deviceId = _trackedDeviceId;
+	trackedDevice.data.deviceToken[0] = _trackedDeviceId;
+	trackedDevice.data.flags.flags.ignoreForBehaviour = false;
+	trackedDevice.data.flags.flags.tapToToggle = false;
+	trackedDevice.data.locationId = 0;
+	trackedDevice.data.profileId = 0;
+	trackedDevice.data.rssiOffset = 0;
+	trackedDevice.data.timeToLiveMinutes = 10;
+	event_t event(CS_TYPE::CMD_REGISTER_TRACKED_DEVICE, reinterpret_cast<uint8_t*>(&trackedDevice), sizeof(trackedDevice));
+	event.dispatch();
+
+	++_trackedDeviceId;
 	return false;
 }
 
