@@ -10,6 +10,11 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+if(COMMAND cmake_policy)
+	# only interpret arguments as variables when unquoted
+	cmake_policy(SET CMP0054 NEW)
+endif()
+
 # Set application shorthand
 SET(APPLICATION_SHORTHAND "crownstone")
 
@@ -509,7 +514,8 @@ ELSE()
 			set(BOOTLOADER_VERSION_PRERELEASE 255)
 		endif()
 		message(STATUS "Bootloader version: ${PRINT_BOOTLOADER_VERSION}")
-	
+
+		# TODO: can be removed
 		IF(SERIAL_NUM)
 			SET(SERIAL_NUM_SWITCH "--snr")
 			SET(SERIAL_NUM_GDB_SELECT "-select")
@@ -518,8 +524,13 @@ ELSE()
 
 		MESSAGE(STATUS "Descend into bootloader directory and compile if needed")
 		add_subdirectory(bootloader)
-		
-		IF(NOT EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
+
+		#set(DEFAULT_CONFIG_FILE "${DEFAULT_CONFIGURATION_FILE}")
+		set(DEFAULT_CONFIG_FILE "${CMAKE_SOURCE_DIR}/conf/cmake/CMakeBuild.config.default")
+		set(TARGET_CONFIG_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config")
+		set(TARGET_CONFIG_OVERWRITE_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config")
+
+		IF(NOT EXISTS "${TARGET_CONFIG_FILE}")
 			MESSAGE(FATAL_ERROR "There should be a CMakeBuild.config file in the ${CONFIG_DIR}/${BOARD_TARGET} directory")
 		ENDIF()
 		
@@ -528,11 +539,11 @@ ELSE()
 		)
 
 		SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
-			PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config
+			PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_FILE}
 		)
-		IF(EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+		IF(EXISTS "${TARGET_CONFIG_OVERWRITE_FILE}")
 			SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
-				PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config
+				PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_OVERWRITE_FILE}
 			)
 		ENDIF()
 
@@ -561,7 +572,7 @@ ELSE()
 		message(STATUS "RAM amount: ${RAM_APPLICATION_AMOUNT}")
 		message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
 
-		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
+		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${TARGET_CONFIG_FILE})
 		
 		# Be more strict about our own files (then about Nordic's files)
 		#SET(CROWNSTONE_ONLY_FLAGS "-W")
@@ -575,9 +586,9 @@ ELSE()
 
 		# This does lead to a cmake reconfigure when the file changes... However, nothing else gets rebuild after
 		# the reconfiguration
-		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
-		IF(EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}${BOARD_TARGET}/CMakeBuild.overwrite.config)
-			set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${TARGET_CONFIG_FILE})
+		IF(EXISTS ${TARGET_CONFIG_OVERWRITE_FILE})
+			set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${TARGET_CONFIG_OVERWRITE_FILE})
 		ENDIF()
 		
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/source/VERSION)
@@ -655,6 +666,7 @@ ELSE()
 			)
 		
 		SET(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH} \
+			-DDEFAULT_CONFIG_FILE:STRING=${DEFAULT_CONFIG_FILE} \
 			-DCONFIG_FILE:STRING=${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.runtime.config \
 			-DDEVICE:STRING=${DEVICE} \
 			-DNRF_DEVICE_FAMILY:STRING=${NRF_DEVICE_FAMILY} \
@@ -772,7 +784,10 @@ ELSE()
 			COMMENT "Read MAC address"
 			)
 
-
+		ADD_CUSTOM_TARGET(write_config
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writeconfig.cmake
+			COMMMENT "Write config"
+			)
 
 		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
 		#IF(NOT CONFIG_DIR STREQUAL "release")

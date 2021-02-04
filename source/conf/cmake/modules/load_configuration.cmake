@@ -14,9 +14,11 @@ function(load_configuration CONFIG_FILE CONFIG_LIST)
 				# Find the value
 				string(REPLACE "${Name}=" "" Value ${NameAndValue})
 
-				if(NOT Value STREQUAL "") 
+				if(NOT Value STREQUAL "")
 					# Strip double quotes
 					string(REGEX REPLACE "\"" "" Value ${Value})
+					string(STRIP "${Name}" Name)
+					string(STRIP "${Value}" Value)
 					set(${Name} "${Value}")
 					if(VERBOSITY GREATER 4)
 						message(STATUS "CMakeConfig [${CONFIG_FILE}]: Set ${Name} to ${Value}")

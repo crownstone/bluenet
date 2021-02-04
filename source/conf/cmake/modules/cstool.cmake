@@ -1,3 +1,7 @@
+if(COMMAND cmake_policy)
+	cmake_policy(SET CMP0054 NEW)
+endif()
+
 include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
 include(${DEFAULT_MODULES_PATH}/get_mac_address.cmake)
 
@@ -11,28 +15,31 @@ include(${DEFAULT_MODULES_PATH}/get_mac_address.cmake)
 #   cmake ... ERASE [SERIAL_NUM]
 
 # Overwrite with runtime config
-load_configuration(${CONFIG_FILE} CONFIG_LIST)
+load_configuration(${CONFIG_FILE} CONFIG_DUMMY_LIST)
 
-#get_mac_address(${SERIAL_NUM} MAC_ADDRESS)
-set(MAC_ADDRESS "C2:81:75:46:D8:F1")
+# Get MAC address etc.
+set(setupConfigFile "CMakeBuild.dynamic.config")
+load_configuration(${setupConfigFile} CONFIG_DUMMY_LIST)
 
-set(setupConfigFile "config.json")
+message(STATUS "Connect to device with address ${MAC_ADDRESS}")
+
+set(setupConfigJsonFile "config.json")
 
 string(REGEX REPLACE "~" "$ENV{HOME}" KEYS_JSON_FILE "${KEYS_JSON_FILE}")
 
 if(INSTRUCTION STREQUAL "SETUP")
 	message(STATUS "Set up Crownstone (timeout is 60 seconds)")
-	file(WRITE ${setupConfigFile} "{\n")
-	file(APPEND ${setupConfigFile} "  \"crownstoneId\": 1,\n")
-	file(APPEND ${setupConfigFile} "  \"sphereId\": 1,\n")
-	file(APPEND ${setupConfigFile} "  \"meshDeviceKey\": \"IamTheMeshKeyJey\",\n")
-	file(APPEND ${setupConfigFile} "  \"ibeaconUUID\": \"1843423e-e175-4af0-a2e4-31e32f729a8a\",\n")
-	file(APPEND ${setupConfigFile} "  \"ibeaconMajor\": 123,\n")
-	file(APPEND ${setupConfigFile} "  \"ibeaconMinor\": 456\n")
-	file(APPEND ${setupConfigFile} "}\n")
-	file(READ ${setupConfigFile} FILE_CONTENTS)
+	file(WRITE ${setupConfigJsonFile} "{\n")
+	file(APPEND ${setupConfigJsonFile} "  \"crownstoneId\": ${CROWNSTONE_ID},\n")
+	file(APPEND ${setupConfigJsonFile} "  \"sphereId\": ${SPHERE_ID},\n")
+	file(APPEND ${setupConfigJsonFile} "  \"meshDeviceKey\": \"${MESH_DEVICE_KEY}\",\n")
+	file(APPEND ${setupConfigJsonFile} "  \"ibeaconUUID\": \"${BEACON_UUID}\",\n")
+	file(APPEND ${setupConfigJsonFile} "  \"ibeaconMajor\": ${BEACON_MAJOR},\n")
+	file(APPEND ${setupConfigJsonFile} "  \"ibeaconMinor\": ${BEACON_MINOR}\n")
+	file(APPEND ${setupConfigJsonFile} "}\n")
+	file(READ ${setupConfigJsonFile} FILE_CONTENTS)
 	execute_process(
-		COMMAND ${DEFAULT_MODULES_PATH}/../../../../tools/csutil/csutil "${KEYS_JSON_FILE}" "setup" "${MAC_ADDRESS}" "${setupConfigFile}"
+		COMMAND ${DEFAULT_MODULES_PATH}/../../../../tools/csutil/csutil "${KEYS_JSON_FILE}" "setup" "${MAC_ADDRESS}" "${setupConfigJsonFile}"
 		TIMEOUT 60
 		RESULT_VARIABLE status
 		OUTPUT_VARIABLE output
