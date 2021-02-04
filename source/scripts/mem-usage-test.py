@@ -4,6 +4,8 @@ Test the maximum memory usage of the firmware.
 Make sure to compile the firmware with BUILD_MEM_USAGE_TEST=1.
 Then erase flash and upload all.
 Then, run this script.
+
+This script depends on the crownstone python library: https://github.com/crownstone/crownstone-lib-python-uart
 """
 
 #!/usr/bin/env python3
@@ -42,7 +44,7 @@ UartEventBus.subscribe(UartTopics.hello, handleHello)
 
 
 # Start up the USB bridge.
-uart.initialize_usb_sync()
+uart.initialize_usb_sync(writeChunkMaxSize=64)
 
 # Sphere specific settings:
 adminKey = "adminKeyForCrown"
@@ -62,6 +64,7 @@ ibeaconMajor = 123
 ibeaconMinor = 456
 
 def setup() -> bool:
+	logging.log(logging.INFO, "Perform setup")
 	try:
 		controlPacket = ControlPacketsGenerator.getSetupPacket(
 			crownstoneId=crownstoneId,
@@ -114,7 +117,10 @@ def getRamStats():
 try:
 	time.sleep(1)
 	if isSetupMode():
-		setup()
+		success = setup()
+		if not success:
+			exit(1)
+		logging.log(logging.INFO, "Setup completed")
 		time.sleep(2)
 
 #	uart._usbDev.resetCrownstone()
@@ -141,5 +147,5 @@ try:
 except KeyboardInterrupt:
 	print("\nStopping UART..")
 
-print(f"minStackEnd=0x{minStackEnd:08X} maxHeapEnd=0x{maxHeapEnd:08X} minFree={minFree} numSbrkFails={numSbrkFails}")
+logging.log(logging.INFO, f"minStackEnd=0x{minStackEnd:08X} maxHeapEnd=0x{maxHeapEnd:08X} minFree={minFree} numSbrkFails={numSbrkFails}")
 uart.stop()
