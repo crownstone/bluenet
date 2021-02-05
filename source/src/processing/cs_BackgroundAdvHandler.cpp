@@ -93,7 +93,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	servicesMask = manufacturerData.data + BACKGROUND_SERVICES_MASK_HEADER_LEN;
 
 #if BACKGROUND_ADV_VERBOSE == true
-	_log(SERIAL_DEBUG, false, "rssi=%i servicesMask: ", scannedDevice->rssi);
+	_log(SERIAL_DEBUG, true, false, "rssi=%i servicesMask: ", scannedDevice->rssi);
 	BLEutil::printArray(servicesMask, BACKGROUND_SERVICES_MASK_LEN);
 #endif
 
@@ -226,9 +226,9 @@ void BackgroundAdvertisementHandler::handleBackgroundAdvertisement(adv_backgroun
 	}
 	uint16_t* decryptedPayload = (uint16_t*)(backgroundAdvertisement->data);
 #if BACKGROUND_ADV_VERBOSE == true
-	_log(SERIAL_DEBUG, false, "bg adv: ");
-	_log(SERIAL_DEBUG, false, "protocol=%u sphereId=%u rssi=%i ", backgroundAdvertisement->protocol, backgroundAdvertisement->sphereId, backgroundAdvertisement->rssi);
-	_log(SERIAL_DEBUG, false, "payload=[%u %u] address=", decryptedPayload[0], decryptedPayload[1]);
+	_log(SERIAL_DEBUG, true, false, "bg adv: ");
+	_log(SERIAL_DEBUG, true, false, "protocol=%u sphereId=%u rssi=%i ", backgroundAdvertisement->protocol, backgroundAdvertisement->sphereId, backgroundAdvertisement->rssi);
+	_log(SERIAL_DEBUG, true, false, "payload=[%u %u] address=", decryptedPayload[0], decryptedPayload[1]);
 	BLEutil::printAddress(backgroundAdvertisement->macAddress, BLE_GAP_ADDR_LEN);
 #endif
 

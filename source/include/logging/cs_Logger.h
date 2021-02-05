@@ -92,12 +92,12 @@
 		#define _logArray(level, addNewLine, pointer, size, ...)
 	#endif
 
-	#define LOGv(fmt, ...) _log(SERIAL_VERBOSE, true, fmt, ##__VA_ARGS__)
-	#define LOGd(fmt, ...) _log(SERIAL_DEBUG,   true, fmt, ##__VA_ARGS__)
-	#define LOGi(fmt, ...) _log(SERIAL_INFO,    true, fmt, ##__VA_ARGS__)
-	#define LOGw(fmt, ...) _log(SERIAL_WARN,    true, fmt, ##__VA_ARGS__)
-	#define LOGe(fmt, ...) _log(SERIAL_ERROR,   true, fmt, ##__VA_ARGS__)
-	#define LOGf(fmt, ...) _log(SERIAL_FATAL,   true, fmt, ##__VA_ARGS__)
+	#define LOGv(fmt, ...) _log(SERIAL_VERBOSE, true, true, fmt, ##__VA_ARGS__)
+	#define LOGd(fmt, ...) _log(SERIAL_DEBUG,   true, true, fmt, ##__VA_ARGS__)
+	#define LOGi(fmt, ...) _log(SERIAL_INFO,    true, true, fmt, ##__VA_ARGS__)
+	#define LOGw(fmt, ...) _log(SERIAL_WARN,    true, true, fmt, ##__VA_ARGS__)
+	#define LOGe(fmt, ...) _log(SERIAL_ERROR,   true, true, fmt, ##__VA_ARGS__)
+	#define LOGf(fmt, ...) _log(SERIAL_FATAL,   true, true, fmt, ##__VA_ARGS__)
 
 
 
@@ -226,9 +226,24 @@
 		#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__)
 
 		#undef _log
-		#define _log(level, addNewLine, fmt, ...) \
+		#define _log(level, prefix, addNewLine, fmt, ...) \
 				if (level <= SERIAL_VERBOSITY) { \
-					cs_log_printf("[%-30.30s : %-4d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__); \
+					if (prefix) { \
+						if (addNewLine) { \
+							cs_log_printf("[%-30.30s : %-4d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__); \
+						} \
+						else { \
+							cs_log_printf("[%-30.30s : %-4d] " fmt, _FILE, __LINE__, ##__VA_ARGS__); \
+						} \
+					} \
+					else { \
+						if (addNewLine) { \
+							cs_log_printf(fmt "\r\n", ##__VA_ARGS__); \
+						} \
+						else { \
+							cs_log_printf(fmt, ##__VA_ARGS__); \
+						} \
+					} \
 				}
 
 		#undef _logArray
@@ -240,7 +255,7 @@
 		#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__)
 
 		#undef _log
-		#define _log(level, addNewLine, fmt, ...) \
+		#define _log(level, prefix, addNewLine, fmt, ...) \
 				if (level <= SERIAL_VERBOSITY) { \
 					printf("[%-30.30s : %-4d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__); \
 				}

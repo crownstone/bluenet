@@ -702,7 +702,7 @@ void Crownstone::startUp() {
 	err_code = sd_ble_gap_addr_get(&address);
 	APP_ERROR_CHECK(err_code);
 
-	_log(SERIAL_INFO, false, "Address: ");
+	_log(SERIAL_INFO, true, false, "Address: ");
 	BLEutil::printAddress((uint8_t*)address.addr, BLE_GAP_ADDR_LEN, SERIAL_INFO);
 	LOGi("Address id=%u type=%u", address.addr_id_peer, address.addr_type);
 

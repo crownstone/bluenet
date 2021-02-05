@@ -713,7 +713,7 @@ void CommandHandler::handleCmdMultiSwitch(cs_data_t commandData, const cmd_sourc
 void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandData, const cmd_source_with_counter_t source, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
 	uint16_t size = commandData.len;
 	buffer_ptr_t buffer = commandData.data;
-	_log(SERIAL_INFO, false, STR_HANDLE_COMMAND, "mesh command: ");
+	_log(SERIAL_INFO, true, false, STR_HANDLE_COMMAND, "mesh command: ");
 	BLEutil::printArray(buffer, size, SERIAL_INFO);
 
 	// Keep up the required size, and where in the buffer we are.
@@ -805,7 +805,7 @@ void CommandHandler::handleCmdMeshCommand(uint8_t protocol, cs_data_t commandDat
 		resultHeader.resultHeader.commandType = meshCtrlCmd.controlCommand.type;
 		resultHeader.resultHeader.returnCode = result.returnCode;
 		resultHeader.resultHeader.payloadSize = result.dataSize;
-		_log(SERIAL_INFO, false, "Result: id=%u cmdType=%u retCode=%u data: ", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
+		_log(SERIAL_INFO, true, false, "Result: id=%u cmdType=%u retCode=%u data: ", resultHeader.stoneId, resultHeader.resultHeader.commandType, resultHeader.resultHeader.returnCode);
 		BLEutil::printArray(result.buf.data, result.dataSize, SERIAL_INFO);
 
 		UartHandler::getInstance().writeMsgStart(UART_OPCODE_TX_MESH_RESULT, sizeof(resultHeader) + result.dataSize);

@@ -75,7 +75,7 @@ static uint32_t cs_mesh_read_cb(uint16_t handle, void* data_ptr, uint16_t data_s
 	assert(BLEutil::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	State::getInstance().get(type, data_ptr, data_size);
-	_log(SERIAL_INFO, false, "cs_mesh_read_cb handle=%u size=%u ", handle, data_size);
+	_log(SERIAL_INFO, true, false, "cs_mesh_read_cb handle=%u size=%u ", handle, data_size);
 //	BLEutil::printArray(data_ptr, data_size, SERIAL_INFO);
 	_logArray(SERIAL_INFO, true, (uint8_t*)data_ptr, data_size);
 	return NRF_SUCCESS;
@@ -448,7 +448,7 @@ void MeshCore::start() {
 //	}
 	LOGMeshInfo("ACCESS_FLASH_ENTRY_SIZE=%u", ACCESS_FLASH_ENTRY_SIZE);
 
-	_log(SERIAL_DEBUG, false, "Device UUID: ");
+	_log(SERIAL_DEBUG, true, false, "Device UUID: ");
 //	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
 //	_logArray(SERIAL_DEBUG, true, uuid, NRF_MESH_UUID_SIZE, "%02X");
 	_logArray(SERIAL_DEBUG, true, nrf_mesh_configure_device_uuid_get(), NRF_MESH_UUID_SIZE);

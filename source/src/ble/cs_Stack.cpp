@@ -438,7 +438,7 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 		case BLE_GATTC_EVT_READ_RSP: {
 			const ble_gattc_evt_t& gattcEvent = p_ble_evt->evt.gattc_evt;
 			const ble_gattc_evt_read_rsp_t& readResponse = gattcEvent.params.read_rsp;
-			_log(SERIAL_INFO, false, "Read offset=%u len=%u", readResponse.offset, readResponse.len);
+			_log(SERIAL_INFO, true, false, "Read offset=%u len=%u", readResponse.offset, readResponse.len);
 			_logArray(SERIAL_INFO, true, readResponse.data, readResponse.len);
 
 			// Not sure how to know if we need another read (has something to do with ATT_MTU). So just keep on trying until len = 0.
