@@ -4,9 +4,8 @@ import os
 import re
 import numpy as np
 
-DOCS_DIR_PREFIX = "../"
 DOCS_DIR = "../docs/"
-FILENAMES = [DOCS_DIR_PREFIX + DOCS_DIR + F for F in ["PROTOCOL.md", "BEHAVIOUR.md", "SERVICE_DATA.md", "SERVICE_DATA_DEPRECATED.md", "BROADCAST_PROTOCOL.md", "UART_PROTOCOL.md", "MESH_PROTOCOL.md", "IPC.md"]]
+FILENAMES = [DOCS_DIR + F for F in ["PROTOCOL.md", "BEHAVIOUR.md", "SERVICE_DATA.md", "SERVICE_DATA_DEPRECATED.md", "BROADCAST_PROTOCOL.md", "UART_PROTOCOL.md", "MESH_PROTOCOL.md", "IPC.md"]]
 
 patternHeaderLink = re.compile(".*\]\(#([^\)]+)\)") # Matches: [some text](#header-to-link-to)
 patternHeaderLinkExternal = re.compile(".*\]\(([^#]+)#([^\)]+)\)") # Matches: [some text](File.md#header-to-link-to)
