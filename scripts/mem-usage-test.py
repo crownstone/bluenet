@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Test the maximum memory usage of the firmware.
 
@@ -8,7 +9,6 @@ Then, run this script.
 This script depends on the crownstone python library: https://github.com/crownstone/crownstone-lib-python-uart
 """
 
-#!/usr/bin/env python3
 import logging
 import time
 
@@ -114,6 +114,11 @@ def getRamStats():
 	return None
 
 # Main
+def stop():
+	logging.log(logging.INFO, f"minStackEnd=0x{minStackEnd:08X} maxHeapEnd=0x{maxHeapEnd:08X} minFree={minFree} numSbrkFails={numSbrkFails}")
+	uart.stop()
+	exit(0)
+
 try:
 	time.sleep(1)
 	if isSetupMode():
@@ -130,12 +135,20 @@ try:
 	maxHeapEnd =  0x00000000
 	minFree = minStackEnd - maxHeapEnd
 	numSbrkFails = 0
+	similarStats = 0
 
 	while True:
 		time.sleep(1)
 		ramStats = getRamStats()
 		if ramStats is not None:
 			print(ramStats)
+
+			if (minStackEnd == ramStats.minStackEnd) and (maxHeapEnd == ramStats.maxHeapEnd):
+				similarStats += 1
+			else:
+				similarStats = 0
+			if similarStats > 60:
+				stop()
 
 			# Keep up the minima and maxima
 			minStackEnd = min(ramStats.minStackEnd, minStackEnd)
@@ -147,5 +160,4 @@ try:
 except KeyboardInterrupt:
 	print("\nStopping UART..")
 
-logging.log(logging.INFO, f"minStackEnd=0x{minStackEnd:08X} maxHeapEnd=0x{maxHeapEnd:08X} minFree={minFree} numSbrkFails={numSbrkFails}")
-uart.stop()
+stop()
