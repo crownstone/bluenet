@@ -12,11 +12,11 @@ Bluenet is code running on [Crownstone](http://crownstone.rocks) compatible devi
 
 # Usage
 
-To use a device with bluenet code on it, you only need to know the Bluetooth protocol that bluenet uses. You can find the protocol definitions in the [protocol document](docs/PROTOCOL.md).
+To use a device with bluenet code on it, you only need to know the Bluetooth protocol that bluenet uses. You can find the protocol definitions in the [protocol document](/docs/PROTOCOL.md).
 
 # Build
 
-To build the bluenet code yourself, follow the [installation instructions](docs/INSTALL.md).
+To build the bluenet code yourself, follow the [installation instructions](/docs/INSTALL.md).
 
 # Communication
 
