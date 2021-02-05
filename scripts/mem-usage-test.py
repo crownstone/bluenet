@@ -36,10 +36,10 @@ uart = CrownstoneUart()
 stoneHasBeenSetUp = False
 def handleHello(data):
 	helloResult = data
-	logging.log(logging.INFO, f"flags={helloResult.status.flags}")
+	logging.log(logging.DEBUG, f"flags={helloResult.status.flags}")
 	global stoneHasBeenSetUp
 	stoneHasBeenSetUp = helloResult.status.hasBeenSetUp
-	logging.log(logging.INFO, f"stoneHasBeenSetUp={stoneHasBeenSetUp}")
+	logging.log(logging.DEBUG, f"stoneHasBeenSetUp={stoneHasBeenSetUp}")
 UartEventBus.subscribe(UartTopics.hello, handleHello)
 
 
@@ -141,13 +141,14 @@ try:
 		time.sleep(1)
 		ramStats = getRamStats()
 		if ramStats is not None:
-			print(ramStats)
+			logging.log(logging.INFO, ramStats)
 
 			if (minStackEnd == ramStats.minStackEnd) and (maxHeapEnd == ramStats.maxHeapEnd):
 				similarStats += 1
 			else:
 				similarStats = 0
 			if similarStats > 60:
+				logging.log(logging.INFO, "No change in RAM statistics for some time.")
 				stop()
 
 			# Keep up the minima and maxima
@@ -158,6 +159,6 @@ try:
 
 
 except KeyboardInterrupt:
-	print("\nStopping UART..")
+	pass
 
 stop()
