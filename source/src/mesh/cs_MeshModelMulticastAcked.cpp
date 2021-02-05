@@ -231,7 +231,7 @@ void MeshModelMulticastAcked::handleReply(MeshUtil::cs_mesh_received_msg_t & msg
 	cs_result_t result;
 	_msgCallback(msg, result);
 	if (result.returnCode != ERR_SUCCESS || MeshUtil::getType(msg.msg) != CS_MESH_MODEL_TYPE_RESULT) {
-		_log(SERIAL_WARN, true, false, "Invalid reply: ");
+		_log(SERIAL_WARN, false, "Invalid reply: ");
 		BLEutil::printArray(msg.msg, msg.msgSize, SERIAL_WARN);
 		return;
 	}

@@ -140,10 +140,10 @@ void TrackableParser::logServiceData(const char* headerStr, scanned_device_t* sc
 	}
 
 	// REVIEW: Use the Util function for this.
-	_log(SERIAL_INFO, true, false, "len=%d data=[", serviceData.len);
+	_log(SERIAL_INFO, false, "len=%d data=[", serviceData.len);
 	for (auto i = 0u; i < serviceData.len; i++) {
-		_log(SERIAL_INFO, false, false, " %2x,", serviceData.data[i]);
+		_log(SERIAL_INFO, false, " %2x,", serviceData.data[i]);
 	}
-	_log(SERIAL_INFO, false, true, "]");
+	_log(SERIAL_INFO, true, "]");
 }
 

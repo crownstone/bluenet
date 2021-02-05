@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Test the maximum memory usage of the firmware.
 
@@ -8,7 +9,6 @@ Then, run this script.
 This script depends on the crownstone python library: https://github.com/crownstone/crownstone-lib-python-uart
 """
 
-#!/usr/bin/env python3
 import logging
 import time
 
@@ -36,10 +36,10 @@ uart = CrownstoneUart()
 stoneHasBeenSetUp = False
 def handleHello(data):
 	helloResult = data
-	logging.log(logging.INFO, f"flags={helloResult.status.flags}")
+	logging.log(logging.DEBUG, f"flags={helloResult.status.flags}")
 	global stoneHasBeenSetUp
 	stoneHasBeenSetUp = helloResult.status.hasBeenSetUp
-	logging.log(logging.INFO, f"stoneHasBeenSetUp={stoneHasBeenSetUp}")
+	logging.log(logging.DEBUG, f"stoneHasBeenSetUp={stoneHasBeenSetUp}")
 UartEventBus.subscribe(UartTopics.hello, handleHello)
 
 
@@ -114,6 +114,11 @@ def getRamStats():
 	return None
 
 # Main
+def stop():
+	logging.log(logging.INFO, f"minStackEnd=0x{minStackEnd:08X} maxHeapEnd=0x{maxHeapEnd:08X} minFree={minFree} numSbrkFails={numSbrkFails}")
+	uart.stop()
+	exit(0)
+
 try:
 	time.sleep(1)
 	if isSetupMode():
@@ -130,12 +135,21 @@ try:
 	maxHeapEnd =  0x00000000
 	minFree = minStackEnd - maxHeapEnd
 	numSbrkFails = 0
+	similarStats = 0
 
 	while True:
 		time.sleep(1)
 		ramStats = getRamStats()
 		if ramStats is not None:
-			print(ramStats)
+			logging.log(logging.INFO, ramStats)
+
+			if (minStackEnd == ramStats.minStackEnd) and (maxHeapEnd == ramStats.maxHeapEnd):
+				similarStats += 1
+			else:
+				similarStats = 0
+			if similarStats > 60:
+				logging.log(logging.INFO, "No change in RAM statistics for some time.")
+				stop()
 
 			# Keep up the minima and maxima
 			minStackEnd = min(ramStats.minStackEnd, minStackEnd)
@@ -145,7 +159,6 @@ try:
 
 
 except KeyboardInterrupt:
-	print("\nStopping UART..")
+	pass
 
-logging.log(logging.INFO, f"minStackEnd=0x{minStackEnd:08X} maxHeapEnd=0x{maxHeapEnd:08X} minFree={minFree} numSbrkFails={numSbrkFails}")
-uart.stop()
+stop()

@@ -724,6 +724,10 @@ ELSE()
 			COMMENT "Perform a factory reset of a Crownstone via csutil"
 			)
 
+		ADD_CUSTOM_TARGET(memory_usage_test_client
+			COMMAND ${DEFAULT_MODULES_PATH}/../../../../scripts/mem-usage-test.py
+			COMMENT "Run memory usage test client, which communicates with a Crownstone."
+			)
 
 		ADD_CUSTOM_TARGET(check
 			COMMAND cppcheck --enable=style --quiet ${CMAKE_SOURCE_DIR} 

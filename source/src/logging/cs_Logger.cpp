@@ -30,11 +30,6 @@
 		for (int i = 0; i < len; ++i) {
 			serial_write(_logBuffer[i]);
 		}
-		if (len >= (int)sizeof(_logBuffer) - 1) {
-			// The log string is most likely cut off, append a newline.
-			serial_write('\r');
-			serial_write('\n');
-		}
 		return;
 	#endif
 		return;
