@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include "common/cs_Types.h"
 #include "util/cs_BleError.h"
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 
 /** Struct with dynamic length, used by StackBuffer class.
  */

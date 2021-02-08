@@ -172,7 +172,9 @@ TrackedDevices::TrackedDevice* TrackedDevices::findOrAdd(device_id_t deviceId) {
 	TrackedDevice* device = find(deviceId);
 	if (device == nullptr) {
 		device = add();
-		device->data.data.deviceId = deviceId;
+		if (device != nullptr) {
+			device->data.data.deviceId = deviceId;
+		}
 	}
 	return device;
 }
@@ -455,7 +457,7 @@ void TrackedDevices::sendDeviceList() {
 }
 
 void TrackedDevices::handleEvent(event_t& evt) {
-	switch(evt.type) {
+	switch (evt.type) {
 		case CS_TYPE::CMD_REGISTER_TRACKED_DEVICE: {
 			internal_register_tracked_device_packet_t* data = reinterpret_cast<TYPIFY(CMD_REGISTER_TRACKED_DEVICE)*>(evt.data);
 			evt.result.returnCode = handleRegister(*data);

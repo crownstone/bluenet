@@ -7,7 +7,7 @@
 
 #include "drivers/cs_PWM.h"
 #include "util/cs_BleError.h"
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 #include "cfg/cs_Strings.h"
 #include "protocol/cs_ErrorCodes.h"
 
@@ -58,13 +58,10 @@ PWM::PWM() :
 		_started(false),
 		_startOnZeroCrossing(false)
 		{
-#if PWM_ENABLE==1
-
-#endif
 }
 
 uint32_t PWM::init(const pwm_config_t& config) {
-#if PWM_ENABLE==1
+//#if PWM_ENABLE==1
 	LOGi(FMT_INIT, "PWM");
 	_config = config;
 //	memcpy(&_config, &config, sizeof(pwm_config_t));
@@ -111,11 +108,11 @@ uint32_t PWM::init(const pwm_config_t& config) {
 
 	PWM_TEST_PIN_INIT;
 
-    _initialized = true;
-    return ERR_SUCCESS;
-#endif
+	_initialized = true;
+	return ERR_SUCCESS;
+//#endif
 
-    return ERR_PWM_NOT_ENABLED;
+//	return ERR_PWM_NOT_ENABLED;
 }
 
 uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
@@ -163,15 +160,15 @@ uint32_t PWM::initChannel(uint8_t channel, pwm_channel_config_t& config) {
 
 uint32_t PWM::deinit() {
 
-#if PWM_ENABLE==1
+//#if PWM_ENABLE==1
 
 	LOGi("DeInit PWM");
 
 	_initialized = false;
 	return ERR_SUCCESS;
-#endif
+//#endif
 
-	return ERR_PWM_NOT_ENABLED;
+//	return ERR_PWM_NOT_ENABLED;
 }
 
 uint32_t PWM::start(bool onZeroCrossing) {
@@ -570,7 +567,7 @@ uint32_t PWM::readCC(uint8_t channelIdx) {
 
 nrf_timer_cc_channel_t PWM::getTimerChannel(uint8_t index) {
 	assert(index < 6, "invalid timer channel index");
-	switch(index) {
+	switch (index) {
 		case 0: return NRF_TIMER_CC_CHANNEL0;
 		case 1: return NRF_TIMER_CC_CHANNEL1;
 		case 2: return NRF_TIMER_CC_CHANNEL2;
@@ -584,7 +581,7 @@ nrf_timer_cc_channel_t PWM::getTimerChannel(uint8_t index) {
 
 nrf_gpiote_tasks_t PWM::getGpioteTaskOut(uint8_t index) {
 	assert(index < 8, "invalid gpiote task index");
-	switch(index) {
+	switch (index) {
 		case 0: return NRF_GPIOTE_TASKS_OUT_0;
 		case 1: return NRF_GPIOTE_TASKS_OUT_1;
 		case 2: return NRF_GPIOTE_TASKS_OUT_2;
@@ -600,7 +597,7 @@ nrf_gpiote_tasks_t PWM::getGpioteTaskOut(uint8_t index) {
 
 nrf_gpiote_tasks_t PWM::getGpioteTaskSet(uint8_t index) {
 	assert(index < 8, "invalid gpiote task index");
-	switch(index) {
+	switch (index) {
 		case 0: return NRF_GPIOTE_TASKS_SET_0;
 		case 1: return NRF_GPIOTE_TASKS_SET_1;
 		case 2: return NRF_GPIOTE_TASKS_SET_2;
@@ -616,7 +613,7 @@ nrf_gpiote_tasks_t PWM::getGpioteTaskSet(uint8_t index) {
 
 nrf_gpiote_tasks_t PWM::getGpioteTaskClear(uint8_t index) {
 	assert(index < 8, "invalid gpiote task index");
-	switch(index) {
+	switch (index) {
 		case 0: return NRF_GPIOTE_TASKS_CLR_0;
 		case 1: return NRF_GPIOTE_TASKS_CLR_1;
 		case 2: return NRF_GPIOTE_TASKS_CLR_2;
@@ -632,7 +629,7 @@ nrf_gpiote_tasks_t PWM::getGpioteTaskClear(uint8_t index) {
 
 nrf_ppi_channel_t PWM::getPpiChannel(uint8_t index) {
 	assert(index < 16, "invalid ppi channel index");
-	switch(index) {
+	switch (index) {
 		case 0: return NRF_PPI_CHANNEL0;
 		case 1: return NRF_PPI_CHANNEL1;
 		case 2: return NRF_PPI_CHANNEL2;
@@ -655,7 +652,7 @@ nrf_ppi_channel_t PWM::getPpiChannel(uint8_t index) {
 
 nrf_ppi_channel_group_t PWM::getPpiGroup(uint8_t index) {
 	assert(index < 6, "invalid ppi group index");
-	switch(index) {
+	switch (index) {
 	case 0: return NRF_PPI_CHANNEL_GROUP0;
 	case 1: return NRF_PPI_CHANNEL_GROUP1;
 	case 2: return NRF_PPI_CHANNEL_GROUP2;
@@ -668,7 +665,7 @@ nrf_ppi_channel_group_t PWM::getPpiGroup(uint8_t index) {
 
 nrf_ppi_task_t PWM::getPpiTaskEnable(uint8_t index) {
 	assert(index < 6, "invalid ppi group index");
-	switch(index) {
+	switch (index) {
 	case 0: return NRF_PPI_TASK_CHG0_EN;
 	case 1: return NRF_PPI_TASK_CHG1_EN;
 	case 2: return NRF_PPI_TASK_CHG2_EN;
@@ -681,7 +678,7 @@ nrf_ppi_task_t PWM::getPpiTaskEnable(uint8_t index) {
 
 nrf_ppi_task_t PWM::getPpiTaskDisable(uint8_t index) {
 	assert(index < 6, "invalid ppi group index");
-	switch(index) {
+	switch (index) {
 	case 0: return NRF_PPI_TASK_CHG0_DIS;
 	case 1: return NRF_PPI_TASK_CHG1_DIS;
 	case 2: return NRF_PPI_TASK_CHG2_DIS;

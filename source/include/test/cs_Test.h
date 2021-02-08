@@ -7,7 +7,6 @@
 
 #pragma once
 
-#include <drivers/cs_Serial.h>
 #include <uart/cs_UartHandler.h>
 
 #include <cstdarg>

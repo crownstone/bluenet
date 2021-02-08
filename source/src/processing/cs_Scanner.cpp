@@ -4,12 +4,12 @@
  * Date: Dec 2, 2015
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
-#include "processing/cs_Scanner.h"
-
-#include <storage/cs_State.h>
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_DeviceTypes.h>
-#include <events/cs_EventDispatcher.h>
 #include <cfg/cs_UuidConfig.h>
+#include <events/cs_EventDispatcher.h>
+#include <processing/cs_Scanner.h>
+#include <storage/cs_State.h>
 
 //#define PRINT_SCANNER_VERBOSE
 //#define PRINT_DEBUG
@@ -18,8 +18,8 @@ Scanner::Scanner() :
 	_opCode(SCAN_START),
 	_scanning(false),
 	_running(false),
-	_scanDuration(SCAN_DURATION),
-	_scanBreakDuration(SCAN_BREAK_DURATION),
+	_scanDuration(g_SCAN_DURATION),
+	_scanBreakDuration(g_SCAN_BREAK_DURATION),
 	_scanCount(0),
 	_appTimerId(NULL),
 	_stack(NULL)
@@ -138,33 +138,33 @@ void Scanner::executeScan() {
 	LOGd("Execute Scan");
 #endif
 
-	switch(_opCode) {
-	case SCAN_START: {
+	switch (_opCode) {
+		case SCAN_START: {
 
-		// start scanning
-		manualStartScan();
+			// start scanning
+			manualStartScan();
 
-		// set timer to trigger in SCAN_DURATION sec, then stop again
-		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanDuration), this);
+			// set timer to trigger in SCAN_DURATION sec, then stop again
+			Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanDuration), this);
 
-		_opCode = SCAN_STOP;
-		break;
-	}
-	case SCAN_STOP: {
+			_opCode = SCAN_STOP;
+			break;
+		}
+		case SCAN_STOP: {
 
-		// stop scanning
-		manualStopScan();
+			// stop scanning
+			manualStopScan();
 
 #ifdef PRINT_DEBUG
-		_scanResult->print();
+			_scanResult->print();
 #endif
 
-		// Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
-		Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
+			// Wait SCAN_SEND_WAIT ms before sending the results, so that it can listen to the mesh before sending
+			Timer::getInstance().start(_appTimerId, MS_TO_TICKS(_scanBreakDuration), this);
 
-		_opCode = SCAN_START;
-		break;
-	}
+			_opCode = SCAN_START;
+			break;
+		}
 	}
 
 }

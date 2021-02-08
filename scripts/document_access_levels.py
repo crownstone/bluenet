@@ -3,9 +3,9 @@
 import re
 import os
 
-STATE_TYPE_FILE =   "../include/common/cs_Types.h"
-STATE_ACCESS_FILE = "../src/common/cs_Types.cpp"
-PROTOCOL_FILE = "../../docs/PROTOCOL.md"
+STATE_TYPE_FILE =   "../source/include/common/cs_Types.h"
+STATE_ACCESS_FILE = "../source/src/common/cs_Types.cpp"
+PROTOCOL_FILE = "../docs/PROTOCOL.md"
 OUTPUT_FILE = "access.md"
 
 ACCESS_LEVELS = ["ADMIN", "MEMBER", "BASIC", "NO_ONE", ]

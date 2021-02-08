@@ -6,7 +6,7 @@
  */
 
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <events/cs_Event.h>
 #include <mesh/cs_MeshMsgSender.h>
 #include <mesh/cs_MeshCommon.h>
@@ -15,7 +15,6 @@
 #include <util/cs_BleError.h>
 
 
-#include <drivers/cs_Serial.h>
 
 void MeshMsgSender::init(MeshModelSelector* selector) {
 	_selector = selector;

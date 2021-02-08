@@ -6,7 +6,7 @@
  */
 
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <encryption/cs_AES.h>
 #include <encryption/cs_KeysAndAccess.h>
 #include <encryption/cs_RC5.h>
@@ -80,14 +80,14 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 		return;
 	}
 
-	if(scannedDevice->rssi > RSSI_LOG_THRESHOLD) {
+	if (scannedDevice->rssi > RSSI_LOG_THRESHOLD) {
 #ifdef COMMAND_ADV_VERBOSE
 		LOGCommandAdvVerbose("rssi=%i", scannedDevice->rssi);
-		_log(SERIAL_DEBUG, "16bit services: ");
+		_log(SERIAL_DEBUG, false, "16bit services: ");
 		BLEutil::printArray(services16bit.data, services16bit.len);
 #endif
 #ifdef COMMAND_ADV_VERBOSE
-		_log(SERIAL_DEBUG, "128bit services: ");
+		_log(SERIAL_DEBUG, false, "128bit services: ");
 		BLEutil::printArray(services128bit.data, services128bit.len); // Received as uint128, so bytes are reversed.
 #endif
 	}
@@ -138,13 +138,17 @@ void CommandAdvHandler::parseAdvertisement(scanned_device_t* scannedDevice) {
 	}
 	for (int i=0; i < CMD_ADV_NUM_SERVICES_16BIT; ++i) {
 		if (!foundSequences[i]) {
-			if(scannedDevice->rssi > RSSI_LOG_THRESHOLD) { LOGCommandAdvVerbose("Missing UUID with sequence %i", i);}
+			if (scannedDevice->rssi > RSSI_LOG_THRESHOLD) {
+				LOGCommandAdvVerbose("Missing UUID with sequence %i", i);
+			}
 			return;
 		}
 	}
 
 	if (header.sphereId != _sphereId) {
-		if(scannedDevice->rssi > RSSI_LOG_THRESHOLD) {LOGCommandAdvVerbose("Wrong sphereId got=%u stored=%u", header.sphereId, _sphereId);}
+		if (scannedDevice->rssi > RSSI_LOG_THRESHOLD) {
+			LOGCommandAdvVerbose("Wrong sphereId got=%u stored=%u", header.sphereId, _sphereId);
+		}
 		return;
 	}
 
@@ -221,22 +225,22 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	}
 
 	EncryptionAccessLevel accessLevel;
-	switch(header.accessLevel) {
-	case 0:
-		accessLevel = ADMIN;
-		break;
-	case 1:
-		accessLevel = MEMBER;
-		break;
-	case 2:
-		accessLevel = BASIC;
-		break;
-	case 4:
-		accessLevel = SETUP;
-		break;
-	default:
-		accessLevel = NOT_SET;
-		break;
+	switch (header.accessLevel) {
+		case 0:
+			accessLevel = ADMIN;
+			break;
+		case 1:
+			accessLevel = MEMBER;
+			break;
+		case 2:
+			accessLevel = BASIC;
+			break;
+		case 4:
+			accessLevel = SETUP;
+			break;
+		default:
+			accessLevel = NOT_SET;
+			break;
 	}
 	if (accessLevel == NOT_SET) {
 		LOGw("Invalid access level %u", header.accessLevel);
@@ -264,7 +268,7 @@ bool CommandAdvHandler::handleEncryptedCommandPayload(scanned_device_t* scannedD
 	}
 
 #ifdef COMMAND_ADV_VERBOSE
-	_log(SERIAL_DEBUG, "decrypted data: ");
+	_log(SERIAL_DEBUG, false, "decrypted data: ");
 	BLEutil::printArray(decryptedData, 16);
 #endif
 
@@ -434,17 +438,17 @@ EncryptionAccessLevel CommandAdvHandler::getRequiredAccessLevel(const AdvCommand
 }
 
 void CommandAdvHandler::handleEvent(event_t & event) {
-	switch(event.type) {
-	case CS_TYPE::EVT_DEVICE_SCANNED: {
-		TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice = (TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
-		parseAdvertisement(scannedDevice);
-		break;
-	}
-	case CS_TYPE::EVT_TICK: {
-		tickClaims();
-		break;
-	}
-	default:
-		break;
+	switch (event.type) {
+		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice = (TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
+			parseAdvertisement(scannedDevice);
+			break;
+		}
+		case CS_TYPE::EVT_TICK: {
+			tickClaims();
+			break;
+		}
+		default:
+			break;
 	}
 }

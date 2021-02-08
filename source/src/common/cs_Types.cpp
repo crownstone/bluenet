@@ -12,7 +12,7 @@
 CS_TYPE toCsType(uint16_t type) {
 
 	CS_TYPE csType = static_cast<CS_TYPE>(type);
-	switch(csType) {
+	switch (csType) {
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 	case CS_TYPE::CONFIG_NAME:
 	case CS_TYPE::CONFIG_PWM_PERIOD:
@@ -110,6 +110,9 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
+	case CS_TYPE::EVT_OUTGOING_CONNECT_START:
+	case CS_TYPE::EVT_OUTGOING_CONNECTED:
+	case CS_TYPE::EVT_OUTGOING_DISCONNECTED:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
 	case CS_TYPE::EVT_SESSION_DATA_SET:
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
@@ -188,6 +191,7 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_MESH_RSSI_PING:
+	case CS_TYPE::EVT_MESH_RSSI_DATA:
 	case CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT:
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
 	case CS_TYPE::EVT_RECV_MESH_MSG:
@@ -214,19 +218,19 @@ CS_TYPE toCsType(uint16_t type) {
 	return CS_TYPE::CONFIG_DO_NOT_USE;
 }
 
-// bool validateSize(cs_state_data_t const & data, size16_t size){
-// 	auto type = data.type;
-// 	switch (type) {
-// 		case CS_TYPE::CONFIG_BEHAVIOUR:{
-// 			return SwitchBehaviour::checkSize(data.data, data.size, size);
-// 		}
-// 	}
-// 	return size == TypeSize(type);
-// }
+//bool validateSize(cs_state_data_t const & data, size16_t size) {
+//	auto type = data.type;
+//	switch (type) {
+//		case CS_TYPE::CONFIG_BEHAVIOUR: {
+//			return SwitchBehaviour::checkSize(data.data, data.size, size);
+//		}
+//	}
+//	return size == TypeSize(type);
+//}
 
-size16_t TypeSize(CS_TYPE const & type){
+size16_t TypeSize(CS_TYPE const & type) {
 
-	switch(type) {
+	switch (type) {
 	case CS_TYPE::CONFIG_DO_NOT_USE:
 		return 0;
 	case CS_TYPE::CONFIG_NAME:
@@ -326,9 +330,9 @@ size16_t TypeSize(CS_TYPE const & type){
 	case CS_TYPE::CONFIG_UART_ENABLED:
 		return sizeof(TYPIFY(CONFIG_UART_ENABLED));
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
-    	return WireFormat::size<SwitchBehaviour>();
+		return WireFormat::size<SwitchBehaviour>();
 	case CS_TYPE::STATE_TWILIGHT_RULE:
-    	return WireFormat::size<TwilightBehaviour>();
+		return WireFormat::size<TwilightBehaviour>();
 	case CS_TYPE::STATE_EXTENDED_BEHAVIOUR_RULE:
 		return WireFormat::size<ExtendedSwitchBehaviour>();
 	case CS_TYPE::STATE_BEHAVIOUR_SETTINGS:
@@ -420,6 +424,12 @@ size16_t TypeSize(CS_TYPE const & type){
 	case CS_TYPE::EVT_BLE_CONNECT:
 		return 0;
 	case CS_TYPE::EVT_BLE_DISCONNECT:
+		return 0;
+	case CS_TYPE::EVT_OUTGOING_CONNECT_START:
+		return 0;
+	case CS_TYPE::EVT_OUTGOING_CONNECTED:
+		return 0;
+	case CS_TYPE::EVT_OUTGOING_DISCONNECTED:
 		return 0;
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
 		return 0;
@@ -577,6 +587,8 @@ size16_t TypeSize(CS_TYPE const & type){
 		return 0;
 	case CS_TYPE::EVT_MESH_RSSI_PING:
 		return sizeof(TYPIFY(EVT_MESH_RSSI_PING));
+	case CS_TYPE::EVT_MESH_RSSI_DATA:
+			return sizeof(TYPIFY(EVT_MESH_RSSI_DATA));
 	case CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT:
 		return sizeof(TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT));
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
@@ -627,7 +639,7 @@ size16_t TypeSize(CS_TYPE const & type){
 
 const char* typeName(CS_TYPE const & type) {
 
-	switch(type) {
+	switch (type) {
 	case CS_TYPE::CONFIG_ADV_INTERVAL: return "CONFIG_ADV_INTERVAL";
 	case CS_TYPE::CONFIG_BOOT_DELAY: return "CONFIG_BOOT_DELAY";
 	case CS_TYPE::CONFIG_SPHERE_ID: return "CONFIG_SPHERE_ID";
@@ -684,6 +696,9 @@ const char* typeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED: return "EVT_ADVERTISEMENT_UPDATED";
 	case CS_TYPE::EVT_BLE_CONNECT: return "EVT_BLE_CONNECT";
 	case CS_TYPE::EVT_BLE_DISCONNECT: return "EVT_BLE_DISCONNECT";
+	case CS_TYPE::EVT_OUTGOING_CONNECT_START: return "EVT_OUTGOING_CONNECT_START";
+	case CS_TYPE::EVT_OUTGOING_CONNECTED: return "EVT_OUTGOING_CONNECTED";
+	case CS_TYPE::EVT_OUTGOING_DISCONNECTED: return "EVT_OUTGOING_DISCONNECTED";
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING: return "EVT_BROWNOUT_IMPENDING";
 	case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD: return "EVT_CHIP_TEMP_ABOVE_THRESHOLD";
 	case CS_TYPE::EVT_CHIP_TEMP_OK: return "EVT_CHIP_TEMP_OK";
@@ -803,6 +818,7 @@ const char* typeName(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID: return "CMD_SET_IBEACON_CONFIG_ID";
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP: return "CMD_SEND_MESH_MSG_NOOP";
 	case CS_TYPE::EVT_MESH_RSSI_PING: return "EVT_MESH_RSSI_PING";
+	case CS_TYPE::EVT_MESH_RSSI_DATA: return "EVT_MESH_RSSI_DATA";
 	case CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT: return "EVT_MESH_NEAREST_WITNESS_REPORT";
 	case CS_TYPE::EVT_MESH_TIME_SYNC: return "EVT_MESH_TIME_SYNC";
 	case CS_TYPE::EVT_RECV_MESH_MSG: return "EVT_RECV_MESH_MSG";
@@ -830,8 +846,8 @@ const char* typeName(CS_TYPE const & type) {
 
 
 
-bool hasMultipleIds(CS_TYPE const & type){
-	switch(type) {
+bool hasMultipleIds(CS_TYPE const & type) {
+	switch (type) {
 	case CS_TYPE::CONFIG_NAME:
 	case CS_TYPE::CONFIG_PWM_PERIOD:
 	case CS_TYPE::CONFIG_TX_POWER:
@@ -920,6 +936,9 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
+	case CS_TYPE::EVT_OUTGOING_CONNECT_START:
+	case CS_TYPE::EVT_OUTGOING_CONNECTED:
+	case CS_TYPE::EVT_OUTGOING_DISCONNECTED:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
 	case CS_TYPE::EVT_SESSION_DATA_SET:
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
@@ -998,6 +1017,7 @@ bool hasMultipleIds(CS_TYPE const & type){
 	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_MESH_RSSI_PING:
+	case CS_TYPE::EVT_MESH_RSSI_DATA:
 	case CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT:
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
 	case CS_TYPE::EVT_RECV_MESH_MSG:
@@ -1036,8 +1056,8 @@ bool hasMultipleIds(CS_TYPE const & type){
 }
 
 bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
-	switch(type) {
-	case CS_TYPE::STATE_RESET_COUNTER:{
+	switch (type) {
+	case CS_TYPE::STATE_RESET_COUNTER: {
 		return id != 0;
 	}
 	case CS_TYPE::CONFIG_NAME:
@@ -1136,6 +1156,9 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::CMD_SEND_MESH_CONTROL_COMMAND:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
+	case CS_TYPE::EVT_OUTGOING_CONNECT_START:
+	case CS_TYPE::EVT_OUTGOING_CONNECTED:
+	case CS_TYPE::EVT_OUTGOING_DISCONNECTED:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
 	case CS_TYPE::EVT_SESSION_DATA_SET:
 	case CS_TYPE::EVT_DIMMER_FORCED_OFF:
@@ -1214,6 +1237,7 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_MESH_RSSI_PING:
+	case CS_TYPE::EVT_MESH_RSSI_DATA:
 	case CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT:
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
 	case CS_TYPE::EVT_RECV_MESH_MSG:
@@ -1348,6 +1372,9 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
+	case CS_TYPE::EVT_OUTGOING_CONNECT_START:
+	case CS_TYPE::EVT_OUTGOING_CONNECTED:
+	case CS_TYPE::EVT_OUTGOING_DISCONNECTED:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
 	case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_CHIP_TEMP_OK:
@@ -1420,6 +1447,7 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_MESH_RSSI_PING:
+	case CS_TYPE::EVT_MESH_RSSI_DATA:
 	case CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT:
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
 	case CS_TYPE::EVT_RECV_MESH_MSG:
@@ -1554,6 +1582,9 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_ADVERTISEMENT_UPDATED:
 	case CS_TYPE::EVT_BLE_CONNECT:
 	case CS_TYPE::EVT_BLE_DISCONNECT:
+	case CS_TYPE::EVT_OUTGOING_CONNECT_START:
+	case CS_TYPE::EVT_OUTGOING_CONNECTED:
+	case CS_TYPE::EVT_OUTGOING_DISCONNECTED:
 	case CS_TYPE::EVT_BROWNOUT_IMPENDING:
 	case CS_TYPE::EVT_CHIP_TEMP_ABOVE_THRESHOLD:
 	case CS_TYPE::EVT_CHIP_TEMP_OK:
@@ -1626,6 +1657,7 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::CMD_SET_IBEACON_CONFIG_ID:
 	case CS_TYPE::CMD_SEND_MESH_MSG_NOOP:
 	case CS_TYPE::EVT_MESH_RSSI_PING:
+	case CS_TYPE::EVT_MESH_RSSI_DATA:
 	case CS_TYPE::EVT_MESH_NEAREST_WITNESS_REPORT:
 	case CS_TYPE::EVT_MESH_TIME_SYNC:
 	case CS_TYPE::EVT_RECV_MESH_MSG:

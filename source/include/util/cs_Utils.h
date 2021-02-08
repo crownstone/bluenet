@@ -7,7 +7,7 @@
 #pragma once
 
 #include <string>
-#include "drivers/cs_Serial.h"
+#include <logging/cs_Logger.h>
 #include "protocol/cs_ErrorCodes.h"
 #include "structs/cs_PacketsInternal.h"
 
@@ -66,29 +66,21 @@ inline uint32_t convertEndian32(uint32_t val) {
 
 template<typename T>
 void printInlineArray(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG) {
-	__attribute__((unused)) uint8_t* ptr = (uint8_t*)arr;
-	for (int i = 0; i < len; ++i) {
-		_log(verbosity, " %02X", ptr[i]);
-		if ((i+1) % 32 == 0) {
-			_log(verbosity, SERIAL_CRLF);
-		}
-	}
+	_logArray(verbosity, false, arr, len);
 }
 
 template<typename T>
 void printArray(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG) {
-	printInlineArray(arr, len, verbosity);
-	_log(verbosity, SERIAL_CRLF);
+	_logArray(verbosity, true, arr, len);
 }
 
 template<typename T>
 void printAddress(T* arr, uint16_t len, uint8_t verbosity = SERIAL_DEBUG) {
 	__attribute__((unused)) uint8_t* ptr = (uint8_t*)arr;
 	for (int i = len - 1; i > 0; i=i-1) {
-		_log(verbosity, "%02X:", ptr[i]);
+		_log(verbosity, false, "%02X:", ptr[i]);
 	}
-	_log(verbosity, "%02X", ptr[0]);
-	_log(verbosity, SERIAL_CRLF);
+	_log(verbosity, true, "%02X", ptr[0]);
 }
 
 template<typename T>

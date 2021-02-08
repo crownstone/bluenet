@@ -9,7 +9,7 @@
 
 #include <processing/cs_BackgroundAdvHandler.h>
 #include <ble/cs_Nordic.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <encryption/cs_RC5.h>
 #include <events/cs_EventDispatcher.h>
 #include <processing/cs_CommandHandler.h>
@@ -93,7 +93,7 @@ void BackgroundAdvertisementHandler::parseAdvertisement(scanned_device_t* scanne
 	servicesMask = manufacturerData.data + BACKGROUND_SERVICES_MASK_HEADER_LEN;
 
 #if BACKGROUND_ADV_VERBOSE == true
-	_log(SERIAL_DEBUG, "rssi=%i servicesMask: ", scannedDevice->rssi);
+	_log(SERIAL_DEBUG, false, "rssi=%i servicesMask: ", scannedDevice->rssi);
 	BLEutil::printArray(servicesMask, BACKGROUND_SERVICES_MASK_LEN);
 #endif
 
@@ -226,9 +226,9 @@ void BackgroundAdvertisementHandler::handleBackgroundAdvertisement(adv_backgroun
 	}
 	uint16_t* decryptedPayload = (uint16_t*)(backgroundAdvertisement->data);
 #if BACKGROUND_ADV_VERBOSE == true
-	_log(SERIAL_DEBUG, "bg adv: ");
-	_log(SERIAL_DEBUG, "protocol=%u sphereId=%u rssi=%i ", backgroundAdvertisement->protocol, backgroundAdvertisement->sphereId, backgroundAdvertisement->rssi);
-	_log(SERIAL_DEBUG, "payload=[%u %u] address=", decryptedPayload[0], decryptedPayload[1]);
+	_log(SERIAL_DEBUG, false, "bg adv: ");
+	_log(SERIAL_DEBUG, false, "protocol=%u sphereId=%u rssi=%i ", backgroundAdvertisement->protocol, backgroundAdvertisement->sphereId, backgroundAdvertisement->rssi);
+	_log(SERIAL_DEBUG, false, "payload=[%u %u] address=", decryptedPayload[0], decryptedPayload[1]);
 	BLEutil::printAddress(backgroundAdvertisement->macAddress, BLE_GAP_ADDR_LEN);
 #endif
 
@@ -264,19 +264,19 @@ int8_t BackgroundAdvertisementHandler::getAdjustedRssi(int16_t rssi, int16_t rss
 }
 
 void BackgroundAdvertisementHandler::handleEvent(event_t & event) {
-	switch(event.type) {
-	case CS_TYPE::EVT_DEVICE_SCANNED: {
-		TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice = (TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
-		parseAdvertisement(scannedDevice);
-		parseServicesAdvertisement(scannedDevice);
-		break;
-	}
-	case CS_TYPE::EVT_ADV_BACKGROUND: {
-		TYPIFY(EVT_ADV_BACKGROUND)* backgroundAdv = (TYPIFY(EVT_ADV_BACKGROUND)*)event.data;
-		handleBackgroundAdvertisement(backgroundAdv);
-		break;
-	}
-	default:
-		break;
+	switch (event.type) {
+		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			TYPIFY(EVT_DEVICE_SCANNED)* scannedDevice = (TYPIFY(EVT_DEVICE_SCANNED)*)event.data;
+			parseAdvertisement(scannedDevice);
+			parseServicesAdvertisement(scannedDevice);
+			break;
+		}
+		case CS_TYPE::EVT_ADV_BACKGROUND: {
+			TYPIFY(EVT_ADV_BACKGROUND)* backgroundAdv = (TYPIFY(EVT_ADV_BACKGROUND)*)event.data;
+			handleBackgroundAdvertisement(backgroundAdv);
+			break;
+		}
+		default:
+			break;
 	}
 }

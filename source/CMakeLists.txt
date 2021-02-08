@@ -10,6 +10,11 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
+if(COMMAND cmake_policy)
+	# only interpret arguments as variables when unquoted
+	cmake_policy(SET CMP0054 NEW)
+endif()
+
 # Set application shorthand
 SET(APPLICATION_SHORTHAND "crownstone")
 
@@ -53,17 +58,8 @@ if(NOT GDB_PORT)
 endif()
 
 if(NOT BOARD_TARGET)
-	set(BOARD_TARGET "2331")
+	set(BOARD_TARGET "default")
 endif()
-
-# Get the following information via JlinkExe and then ShowEmuList
-if(NOT SERIAL_NUM)
-	set(SERIAL_NUM "")
-endif()
-
-#if(NOT GIT_BRANCH)
-#  message(FATAL_ERROR "The code should live on a branch in a git repository")
-#endif()
 
 SET(VERBOSITY                                "4"           CACHE STRING "Verbosity")
 SET(HOST_TARGET                              "ON"          CACHE BOOL "Compile for host platform")
@@ -86,16 +82,16 @@ MATH(EXPR RTT_PORT       "${GDB_PORT}+16690")
 MESSAGE(STATUS "Set verbosity to level: ${VERBOSITY}")
 MESSAGE(STATUS "Compiler: ${CMAKE_C_COMPILER}")
 
-IF(SERIAL_NUM STREQUAL "")
-  MESSAGE(STATUS "Default JLink device (serial number not specified)")
-ELSE()
-  MESSAGE(STATUS "Serial number of JLink device to use ${SERIAL_NUM}")
-ENDIF()
+#IF(SERIAL_NUM STREQUAL "")
+#  MESSAGE(STATUS "Default JLink device (serial number not specified)")
+#ELSE()
+#  MESSAGE(STATUS "Serial number of JLink device to use ${SERIAL_NUM}")
+#ENDIF()
 
-IF(GDB_PORT STREQUAL "2331")
-	MESSAGE(STATUS "Default GDB port (2331)")
-ENDIF()
-MESSAGE(STATUS "GDB port to use ${GDB_PORT}")
+#IF(GDB_PORT STREQUAL "2331")
+#	MESSAGE(STATUS "Default GDB port (2331)")
+#ENDIF()
+#MESSAGE(STATUS "GDB port to use ${GDB_PORT}")
 
 #######################################################################################################################
 # Include your own FindX cmake files and options in the following file!
@@ -140,6 +136,7 @@ INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/toolchain/cmsis/include")
 INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/config")
 INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/fstorage")
 INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/libraries/experimental_section_vars")
+INCLUDE_DIRECTORIES(SYSTEM "${NRF5_DIR}/components/ble/ble_db_discovery")
 
 SET(BOOTLOADER "_bootloader_.hex")
 
@@ -179,6 +176,7 @@ ELSE()
 	# save space in production. It should then be enclosed within a macro.
 	# Those files are: nrf_strerror.c
 
+	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/ble_db_discovery/ble_db_discovery.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/common/ble_advdata.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/ble/common/ble_srv_common.c")
 	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/components/libraries/atomic/nrf_atomic.c")
@@ -470,7 +468,7 @@ ELSE()
 	ENDIF()
 
 ENDIF()
-		
+
 # Show which directories are actually included to the user
 GET_PROPERTY(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
 IF(VERBOSITY GREATER 4)
@@ -478,7 +476,7 @@ IF(VERBOSITY GREATER 4)
 		MESSAGE(STATUS "Add to the include directories: '${dir}'")
 	ENDFOREACH()
 ENDIF()
-		
+
 IF(NOT (DEFINED SOFTDEVICE_DIR AND DEFINED SOFTDEVICE_DIR_HEX))
 	SET(${SOFTDEVICE_DIR}, "${NRF5_DIR}/components/softdevice/s${SOFTDEVICE_SERIES}/")
 	SET(${SOFTDEVICE_DIR_HEX}, "hex")
@@ -522,18 +520,23 @@ ELSE()
 			set(BOOTLOADER_VERSION_PRERELEASE 255)
 		endif()
 		message(STATUS "Bootloader version: ${PRINT_BOOTLOADER_VERSION}")
-	
-		IF(SERIAL_NUM) 
+
+		# TODO: can be removed
+		IF(SERIAL_NUM)
 			SET(SERIAL_NUM_SWITCH "--snr")
 			SET(SERIAL_NUM_GDB_SELECT "-select")
 			SET(SERIAL_NUM_GDB_PARAM "usb=${SERIAL_NUM}")
-			SET(SERIAL_NUM_DPARAM "-DSERIAL_NUM:STRING=${SERIAL_NUM}")
 		ENDIF()
 
 		MESSAGE(STATUS "Descend into bootloader directory and compile if needed")
 		add_subdirectory(bootloader)
-		
-		IF(NOT EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
+
+		#set(DEFAULT_CONFIG_FILE "${DEFAULT_CONFIGURATION_FILE}")
+		set(DEFAULT_CONFIG_FILE "${CMAKE_SOURCE_DIR}/conf/cmake/CMakeBuild.config.default")
+		set(TARGET_CONFIG_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config")
+		set(TARGET_CONFIG_OVERWRITE_FILE "${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config")
+
+		IF(NOT EXISTS "${TARGET_CONFIG_FILE}")
 			MESSAGE(FATAL_ERROR "There should be a CMakeBuild.config file in the ${CONFIG_DIR}/${BOARD_TARGET} directory")
 		ENDIF()
 		
@@ -542,11 +545,11 @@ ELSE()
 		)
 
 		SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
-			PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config
+			PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_FILE}
 		)
-		IF(EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+		IF(EXISTS "${TARGET_CONFIG_OVERWRITE_FILE}")
 			SET_SOURCE_FILES_PROPERTIES(${FOLDER_SOURCE}
-				PROPERTIES OBJECT_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config
+				PROPERTIES OBJECT_DEPENDS ${TARGET_CONFIG_OVERWRITE_FILE}
 			)
 		ENDIF()
 
@@ -558,6 +561,12 @@ ELSE()
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/src/cfg/cs_AutoConfig.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp" @ONLY)
 		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/src/cfg/cs_AutoConfig.cpp")
 		
+		message(STATUS "Configure cs_StaticConfig.h file")
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/cfg/cs_StaticConfig.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/cfg/cs_StaticConfig.h" @ONLY)
+
+		message(STATUS "Configure cs_config.h file")
+		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/cs_config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/cs_config.h" @ONLY)
+
 		message(STATUS "Configure nrf_symbols.ld file")
 		configure_file("${CMAKE_CURRENT_SOURCE_DIR}/include/third/nrf/nrf_symbols.ld.in" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld" @ONLY)
 		list(APPEND GENERATED_SOURCES "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf/nrf_symbols.ld")
@@ -569,7 +578,7 @@ ELSE()
 		message(STATUS "RAM amount: ${RAM_APPLICATION_AMOUNT}")
 		message(STATUS "RAM for IPC: ${RAM_BLUENET_IPC_LENGTH}")
 
-		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
+		ADD_EXECUTABLE(${PROJECT_NAME} ${FOLDER_SOURCE} ${GENERATED_SOURCES} ${FOLDER_HEADER} ${OBJECT_FILES} ${PROJECT_NAME}.bin ${PROJECT_NAME}.hex ${PROJECT_NAME}.elf ${TARGET_CONFIG_FILE})
 		
 		# Be more strict about our own files (then about Nordic's files)
 		#SET(CROWNSTONE_ONLY_FLAGS "-W")
@@ -577,17 +586,26 @@ ELSE()
 		SET_PROPERTY(SOURCE ${FOLDER_SOURCE} APPEND PROPERTY COMPILE_FLAGS ${CROWNSTONE_ONLY_FLAGS})
 
 		# Add path with files like sdk_config.h to include directories
-		target_include_directories(${PROJECT_NAME} PRIVATE "include/third/nrf")
+		# The include/third/nrf file dir is required for files in the sdk (e.g. link "sdk_config.h" without path prefix)
+		# The ${CMAKE_CURRENT_BINARY_DIR}/include dir is required for files generated through configure_file
+		target_include_directories(${PROJECT_NAME} PRIVATE "include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include/third/nrf" "${CMAKE_CURRENT_BINARY_DIR}/include")
 
 		# This does lead to a cmake reconfigure when the file changes... However, nothing else gets rebuild after
 		# the reconfiguration
-		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.config)
-		IF(EXISTS  ${WORKSPACE_DIR}/${CONFIG_DIR}${BOARD_TARGET}/CMakeBuild.overwrite.config)
-			set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.overwrite.config)
+		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${TARGET_CONFIG_FILE})
+		IF(EXISTS ${TARGET_CONFIG_OVERWRITE_FILE})
+			set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${TARGET_CONFIG_OVERWRITE_FILE})
 		ENDIF()
 		
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/source/VERSION)
 		set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS ${WORKSPACE_DIR}/source/bootloader/VERSION)
+
+		# Reconfigure cmake to get up-to-date GIT_SHA1
+		set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/.git/index")
+		
+		# Make also depend on helper files
+		set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/conf/cmake/crownstone.defs.cmake")
+		set_property(GLOBAL APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/conf/cmake/crownstone.src.cmake")
 
 		SET(INCLUDE_ONLY_SECTIONS "")
 
@@ -656,14 +674,27 @@ ELSE()
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Read headers ${PROJECT_NAME}.elf"
 			)
-	
+		
+		SET(DEFAULT_TOOL_PARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH} \
+			-DDEFAULT_CONFIG_FILE:STRING=${DEFAULT_CONFIG_FILE} \
+			-DCONFIG_FILE:STRING=${WORKSPACE_DIR}/${CONFIG_DIR}/${BOARD_TARGET}/CMakeBuild.runtime.config \
+			-DDEVICE:STRING=${DEVICE} \
+			-DNRF_DEVICE_FAMILY:STRING=${NRF_DEVICE_FAMILY} \
+			-DSERIAL_NUM:STRING=${SERIAL_NUM} \
+			-DGDB_PORT:STRING=${GDB_PORT} \
+			-DSWO_PORT:STRING=${SWO_PORT} \
+			-DTELNET_PORT:STRING=${TELNET_PORT} \
+			-DUART_DEVICE:STRING=${UART_DEVICE} \
+			-DUART_BAUDRATE:STRING=${UART_BAUDRATE} \
+			-DRTT_PORT:STRING=${RTT_PORT}")
+		
 		# The gdb server can be started with configuration specific information
 		ADD_CUSTOM_TARGET(debug_server
 			COMMAND ${CMAKE_COMMAND} -E echo "** Debug server, keep running in separate shell"
-			COMMAND JLinkGDBServer -Device nRF52832_xxAA ${SERIAL_NUM_GDB_SELECT} ${SERIAL_NUM_GDB_PARAM} -If SWD -speed 4000 -port ${GDB_PORT} -swoport ${SWO_PORT} -telnetport ${TELNET_PORT} -RTTTelnetPort ${RTT_PORT}
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=START_GDB_SERVER" -P ${DEFAULT_MODULES_PATH}/debug_tool.cmake
 			COMMENT "Debug server, runs in background"
 			)
-		
+
 		ADD_CUSTOM_TARGET(uart_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
 			COMMAND ${SUPERUSER_SWITCH} minicom -b 230400 -c on -D /dev/ttyACM0
@@ -682,17 +713,26 @@ ELSE()
 			DEPENDS ${PROJECT_NAME}.elf
 			COMMENT "Debug ${PROJECT_NAME}.elf"
 			)
-	
-		SET(DEFAULT_NRFUTIL_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH}")
-		SET(DEFAULT_NRFUTIL_READ_DPARAM "-DDEFAULT_MODULES_PATH:STRING=${DEFAULT_MODULES_PATH};-DINSTRUCTION:STRING=READ")
 
 		ADD_CUSTOM_TARGET(write_application
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write binary"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --program ${PROJECT_NAME}.hex --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE_BINARY" "-DBINARY=${PROJECT_NAME}.hex" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			DEPENDS ${PROJECT_NAME}.hex
-			COMMENT "Flashes application to remote target board"
+			COMMENT "Flashes application to remote target board (takes a while)"
+			)
+
+		ADD_CUSTOM_TARGET(setup
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=SETUP" -P ${DEFAULT_MODULES_PATH}/cstool.cmake
+			COMMENT "Setup Crownstone via csutil"
+			)
+
+		ADD_CUSTOM_TARGET(factory_reset
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=FACTORY_RESET" -P ${DEFAULT_MODULES_PATH}/cstool.cmake
+			COMMENT "Perform a factory reset of a Crownstone via csutil"
+			)
+
+		ADD_CUSTOM_TARGET(memory_usage_test_client
+			COMMAND ${DEFAULT_MODULES_PATH}/../../../../scripts/mem-usage-test.py
+			COMMENT "Run memory usage test client, which communicates with a Crownstone."
 			)
 
 		ADD_CUSTOM_TARGET(check
@@ -717,61 +757,67 @@ ELSE()
 			COMMENT "View documentation"
 			DEPENDS generate_documentation
 			)
+		
+		ADD_CUSTOM_TARGET(list_debuggers
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=LIST" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMENT "List debuggers"
+			)
 
 		ADD_CUSTOM_TARGET(erase
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to erase target board"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --eraseall ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=ERASE" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Erase everything on target board"
 			)
 
 		ADD_CUSTOM_TARGET(reset
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to reset target board"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --reset ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=RESET" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Reset target board"
 			)
 			
 		MESSAGE(STATUS "Persistent flags disabled: ${PERSISTENT_FLAGS_DISABLED}")
 		
 		ADD_CUSTOM_TARGET(read_bootloader_address
-			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x10001014 ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10001014" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read bootloader address"
 			)
 	
 		# Actually piping over the command line might fail in another OS, this might be replaced by a particular
 		# cmake utility function
 		ADD_CUSTOM_TARGET(read_nrf_chip_version
-			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x10000100 ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
-			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=0x10000104 ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10000100" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x10000104" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read nRF chip version"
 			)
 		
 		ADD_CUSTOM_TARGET(read_board_version
-			COMMAND ${CMAKE_COMMAND} ${DEFAULT_NRFUTIL_READ_DPARAM} -DADDRESS:STRING=${HARDWARE_BOARD_ADDRESS} ${SERIAL_NUM_DPARAM} -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS:STRING=${HARDWARE_BOARD_ADDRESS}" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read board version"
+			)
+
+		ADD_CUSTOM_TARGET(read_mac_address
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x100000A4" "-DCOUNT=8" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
+			COMMENT "Read MAC address"
+			)
+
+		ADD_CUSTOM_TARGET(write_config
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} -P ${DEFAULT_MODULES_PATH}/writeconfig.cmake
+			COMMMENT "Write config"
 			)
 
 		# Ideally we only want to call load_hardware_version when the write_hw_version target is used
 		#IF(NOT CONFIG_DIR STREQUAL "release")
 
-			set(JLINK_LINUX_DOWNLOAD_URL_BOARD_HARDWARE_VERSION "")
-			include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
-			message(STATUS "Get version for hardware \"${HARDWARE_BOARD}\"")
-			load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
-			message(STATUS "Got ${LOAD_BOARD_HARDWARE_VERSION}")
-			include(${DEFAULT_MODULES_PATH}/hex.cmake)
-			to_hex_raw(${LOAD_BOARD_HARDWARE_VERSION} HARDWARE_BOARD_HEX 8 "0x")
-			message(STATUS "Hexadecimal ${HARDWARE_BOARD_HEX}")
+		set(JLINK_LINUX_DOWNLOAD_URL_BOARD_HARDWARE_VERSION "")
+		include(${DEFAULT_MODULES_PATH}/load_hardware_version_mapping.cmake)
+		message(STATUS "Get version for hardware \"${HARDWARE_BOARD}\"")
+		load_hardware_version(${CMAKE_SOURCE_DIR}/include/cfg/cs_Boards.h ${HARDWARE_BOARD} LOAD_BOARD_HARDWARE_VERSION)
+		message(STATUS "Got ${LOAD_BOARD_HARDWARE_VERSION}")
+		include(${DEFAULT_MODULES_PATH}/hex.cmake)
+		to_hex_raw(${LOAD_BOARD_HARDWARE_VERSION} HARDWARE_BOARD_HEX 8 "0x")
+		message(STATUS "Hexadecimal ${HARDWARE_BOARD_HEX}")
 		#ENDIF()
 
 		ADD_CUSTOM_TARGET(write_board_version
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Write board version ${LOAD_BOARD_HARDWARE_VERSION}"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --memwr ${HARDWARE_BOARD_ADDRESS} --val ${LOAD_BOARD_HARDWARE_VERSION} ${SERIAL_NUM_SWITCH} ${SERIAL_NUM} 
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE" "-DADDRESS=${HARDWARE_BOARD_ADDRESS}" "-DVALUE=${LOAD_BOARD_HARDWARE_VERSION}" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Flashes board version to remote target board"
 			)
 	
@@ -794,28 +840,18 @@ ELSE()
 			)
 		
 		ADD_CUSTOM_TARGET(write_bootloader_settings
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to write bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND echo "nrfjprog -f nrf52 --program ${BOOTLOADER_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
-			COMMAND nrfjprog -f nrf52 --program ${BOOTLOADER_HEX_FILE} --sectorerase ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=WRITE_BINARY" "-DBINARY=${BOOTLOADER_HEX_FILE}" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Flashes bootloader settings to remote target board"
 			DEPENDS build_bootloader_settings
 			)
 		
 		ADD_CUSTOM_TARGET(read_bootloader_settings
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to read bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --memrd 0x7F000 --n 128 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x7F00" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read bootloader settings from remote target board"
 			)
 		
 		ADD_CUSTOM_TARGET(read_bootloader_settings_backup
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND ${CMAKE_COMMAND} -E echo "** Use nrfjprog to read bootloader settings ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}"
-			COMMAND ${CMAKE_COMMAND} -E echo
-			COMMAND nrfjprog -f nrf52 --memrd 0x7E000 --n 128 ${SERIAL_NUM_SWITCH} ${SERIAL_NUM}
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=READ" "-DADDRESS=0x7E00" "-DCOUNT=128" -P ${DEFAULT_MODULES_PATH}/nrfjprog.cmake
 			COMMENT "Read bootloader settings from remote target board"
 			)
 	
@@ -840,7 +876,6 @@ ELSE()
 			COMMAND bash -c "echo \"   Softdevice id: $(cat softdevice_id)\"" VERBATIM
 			COMMAND ${CMAKE_COMMAND} -E echo
 		)
-
 
 		ADD_CUSTOM_TARGET(generate_dfu_package_all
 			COMMAND ${CMAKE_COMMAND} -E echo
@@ -969,8 +1004,6 @@ ELSE()
 					COMMENT "Copy all generated files to release repository"
 					)
 		ENDIF()
-
-
 
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.bin)
 		SET_DIRECTORY_PROPERTIES(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${PROJECT_NAME}.elf)

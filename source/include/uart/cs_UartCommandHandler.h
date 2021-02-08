@@ -19,7 +19,6 @@ public:
 	 *
 	 * @param[in] opCode          Command type.
 	 * @param[in] commandData     Command payload data.
-	 * @param[in] source          Command source.
 	 * @param[in] accessLevel     Access level.
 	 * @param[in] wasEncrypted    Whether the incoming message was encrypted.
 	 * @param[in] resultBuffer
@@ -27,7 +26,6 @@ public:
 	void handleCommand(
 			UartOpcodeRx opCode,
 			cs_data_t commandData,
-			const cmd_source_with_counter_t source,
 			EncryptionAccessLevel accessLevel,
 			bool wasEncrypted,
 			cs_data_t resultBuffer

@@ -1,7 +1,4 @@
 /**
- * Bluetooth Low Energy Characteristic
- *
- * Author: Crownstone Team
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
  * Date: Apr 23, 2015
@@ -9,14 +6,13 @@
  */
 
 #include <ble/cs_Characteristic.h>
-#include <ble/cs_Softdevice.h>
 #include <storage/cs_State.h>
 
 // #define PRINT_CHARACTERISTIC_VERBOSE
 
 CharacteristicBase::CharacteristicBase() :
-    _name(NULL),
-    _handles( { }), _service(0), _status({}), _encryptionBuffer(NULL)
+	_name(NULL),
+	_handles( { }), _service(0), _status({}), _encryptionBuffer(NULL)
 {
 }
 
@@ -140,13 +136,8 @@ void CharacteristicBase::init(Service* svc) {
 		APP_ERROR_CHECK(err_code);
 	}
 
-	//BLE_CALL(sd_ble_gatts_characteristic_add, (svc_handle, &ci.char_md, &ci.attr_char_value, &_handles));
-
 	//! set initial value (default value)
 	updateValue();
-	//	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
-	//			_handles.value_handle, &ci.attr_char_value.init_len, ci.attr_char_value.p_value));
-
 	_status.initialized = true;
 }
 
@@ -200,7 +191,7 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 		// getValuePtr is not padded, it's the size of an int, or string or whatever is required.
 		// the valueGattAddress can be used as buffer for encryption
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
-		_log(SERIAL_DEBUG, "data: ");
+		_log(SERIAL_DEBUG, false, "data: ");
 		BLEutil::printArray(getValuePtr(), valueLength);
 #endif
 
@@ -218,7 +209,7 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 					encryptionType
 			);
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
-			_log(SERIAL_DEBUG, "encrypted: ");
+			_log(SERIAL_DEBUG, false, "encrypted: ");
 			BLEutil::printArray(valueGattAddress, encryptionBufferLength);
 #endif
 		}
@@ -247,11 +238,22 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 #ifdef PRINT_CHARACTERISTIC_VERBOSE
 	LOGd("gattValueLength=%u gattValueAddress=%p, gattValueMaxSize=%u", gattValueLength, valueGattAddress, getGattValueMaxLength());
 #endif
-	BLE_CALL(cs_sd_ble_gatts_value_set, (_service->getStack()->getConnectionHandle(),
-			_handles.value_handle, &gattValueLength, valueGattAddress));
+
+	ble_gatts_value_t gatts_value;
+	gatts_value.len = gattValueLength;
+	gatts_value.offset = 0;
+	gatts_value.p_value = valueGattAddress;
+	
+	uint32_t err_code;
+	err_code = sd_ble_gatts_value_set(
+			_service->getStack()->getConnectionHandle(),
+			_handles.value_handle,
+			&gatts_value
+	);
+	APP_ERROR_CHECK(err_code);
 
 	//! stop here if we are not in notifying state
-	if ((!_status.notifies) || (!_service->getStack()->connected()) || !_status.notifyingEnabled) {
+	if ((!_status.notifies) || (!_service->getStack()->isConnectedPeripheral()) || !_status.notifyingEnabled) {
 		return ERR_SUCCESS;
 	} else {
 		return notify();
@@ -261,7 +263,7 @@ uint32_t CharacteristicBase::updateValue(ConnectionEncryptionType encryptionType
 
 uint32_t CharacteristicBase::notify() {
 
-	if (!_status.notifies || !_service->getStack()->connected() || !_status.notifyingEnabled) {
+	if (!_status.notifies || !_service->getStack()->isConnectedPeripheral() || !_status.notifyingEnabled) {
 		return NRF_ERROR_INVALID_STATE;
 	}
 
@@ -280,33 +282,33 @@ uint32_t CharacteristicBase::notify() {
 
 	err_code = sd_ble_gatts_hvx(_service->getStack()->getConnectionHandle(), &hvx_params);
 
-	switch(err_code) {
-	    case NRF_SUCCESS:
-		break;
-	    case NRF_ERROR_RESOURCES:
-		// Dominik: this happens if several characteristics want to send a notification,
-		//   but the system only has a limited number of tx buffers available. so queueing up
-		//   notifications faster than being able to send them out from the stack results
-		//   in this error.
-		onNotifyTxError();
-		break;
-	    case NRF_ERROR_INVALID_STATE:
-		// Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
-		//   it can happen that it tries to update it's value although notification was disabled in
-		//   in the meantime, in which case an invalid state error is returned. but this case we can
-		//   ignore
+	switch (err_code) {
+		case NRF_SUCCESS:
+			break;
+		case NRF_ERROR_RESOURCES:
+			// Dominik: this happens if several characteristics want to send a notification,
+			//   but the system only has a limited number of tx buffers available. so queueing up
+			//   notifications faster than being able to send them out from the stack results
+			//   in this error.
+			onNotifyTxError();
+			break;
+		case NRF_ERROR_INVALID_STATE:
+			// Dominik: if a characteristic is updating it's value "too fast" and notification is enabled
+			//   it can happen that it tries to update it's value although notification was disabled in
+			//   in the meantime, in which case an invalid state error is returned. but this case we can
+			//   ignore
 
-		// this is not a serious error, but better to at least write it to the log
-		LOGe("cs_ret_code_t: %d (0x%X)", err_code, err_code);
+			// this is not a serious error, but better to at least write it to the log
+			LOGe("cs_ret_code_t: %d (0x%X)", err_code, err_code);
 
-		// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
-		_status.notificationPending = false;
-		break;
-	    case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
-		// TODO: Currently excluded from APP_ERROR_CHECK, seems to originate from MESH code
-		break;
-	    default:
-		APP_ERROR_CHECK(err_code);
+			// [26.07.16] seems to happen frequently on disconnect. clear flags and offset and return
+			_status.notificationPending = false;
+			break;
+		case BLE_ERROR_GATTS_SYS_ATTR_MISSING:
+			// TODO: Currently excluded from APP_ERROR_CHECK, seems to originate from MESH code
+			break;
+		default:
+			APP_ERROR_CHECK(err_code);
 	}
 
 	return err_code;
@@ -322,7 +324,7 @@ struct __attribute__((__packed__)) notification_t {
 
 uint32_t Characteristic<buffer_ptr_t>::notify() {
 
-	if (!CharacteristicBase::_status.notifies || !_service->getStack()->connected() || !_status.notifyingEnabled) {
+	if (!CharacteristicBase::_status.notifies || !_service->getStack()->isConnectedPeripheral() || !_status.notifyingEnabled) {
 		return NRF_ERROR_INVALID_STATE;
 	}
 

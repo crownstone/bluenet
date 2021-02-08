@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <cfg/cs_Config.h>
 #include <util/cs_Error.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <structs/cs_PacketsInternal.h>
 
 

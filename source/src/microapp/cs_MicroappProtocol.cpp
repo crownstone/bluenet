@@ -14,8 +14,9 @@
 #include <ble/cs_UUID.h>
 #include <cs_MicroappStructs.h>
 #include <cfg/cs_Config.h>
+#include <cfg/cs_AutoConfig.h>
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
@@ -102,83 +103,86 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 	}
 }
 
+int handleCommand(uint8_t *payload, uint16_t length) {
+	uint8_t command = payload[0];
+	switch(command) {
+	case CS_MICROAPP_COMMAND_LOG: {
+		char type = payload[1];
+		switch(type) {
+		case CS_MICROAPP_COMMAND_LOG_CHAR: {
+			__attribute__((unused)) char value = payload[2];
+			LOGi("%i", (int)value);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_LOG_INT: {
+			__attribute__((unused)) int value = (payload[2] << 8) + payload[3];
+			LOGi("%i", value);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_LOG_STR: {
+			int str_length = length - 2; // Check if length <= max_length - 1, for null terminator.
+			char *data = reinterpret_cast<char*>(&(payload[2]));
+			data[str_length] = 0;
+			LOGi("%s", data);
+			break;
+		}
+		}
+		break;
+	}
+	case CS_MICROAPP_COMMAND_DELAY: {
+		int delay = (payload[1] << 8) + payload[2];
+		LOGd("Microapp delay of %i", delay);
+		uintptr_t coargs_ptr = (payload[3] << 24) + (payload[4] << 16) + (payload[5] << 8) + payload[6];
+		// cast to coroutine args struct
+		coargs* args = (coargs*) coargs_ptr;
+		args->cntr++;
+		args->delay = delay;
+		yield(args->c);
+		break;
+	}
+	case CS_MICROAPP_COMMAND_PIN: {
+		forwardCommand(command, &payload[0], length);
+		//forwardCommand(command, &payload[1], length - 1);
+		break;
+	}
+	case CS_MICROAPP_COMMAND_SERVICE_DATA: {
+		LOGd("Service data");
+		uint16_t commandDataSize = length - 2; // byte 0 is command, byte 1 is type.
+		TYPIFY(CMD_MICROAPP_ADVERTISE) eventData;
+		if (commandDataSize < sizeof(eventData.appUuid)) {
+			LOGi("payload too small");
+			break;
+		}
+		eventData.version = 0; // TODO: define somewhere.
+		eventData.type = 0; // TODO: define somewhere.
+		eventData.appUuid = (payload[2] << 8) + payload[3];
+		eventData.data.len = commandDataSize - sizeof(eventData.appUuid);
+		eventData.data.data = &(payload[4]);
+		//			BLEutil::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
+		event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
+		event.dispatch();
+		break;
+	}
+	default:
+		LOGi("Unknown command of length %i", length);
+		int ml = length;
+		if (length > 4) ml = 4;
+		for (int i = 0; i < ml; i++) {
+			LOGi("0x%i", payload[i]);
+		}
+	}
+
+	return ERR_SUCCESS;
+}
+
 extern "C" {
 
-	int microapp_callback(uint8_t *payload, uint16_t length) {
-		if (length == 0) return ERR_NO_PAYLOAD;
-		if (length > 255) return ERR_TOO_LARGE;
+int microapp_callback(uint8_t *payload, uint16_t length) {
+	if (length == 0) return ERR_NO_PAYLOAD;
+	if (length > 255) return ERR_TOO_LARGE;
 
-		uint8_t command = payload[0];
-
-		switch(command) {
-		case CS_MICROAPP_COMMAND_LOG: {
-			char type = payload[1];
-			switch(type) {
-			case CS_MICROAPP_COMMAND_LOG_CHAR: {
-				char value = payload[2];
-				LOGi("%i", (int)value);
-				break;
-			}
-			case CS_MICROAPP_COMMAND_LOG_INT: {
-				int value = (payload[2] << 8) + payload[3];
-				LOGi("%i", value);
-				break;
-			}
-			case CS_MICROAPP_COMMAND_LOG_STR: {
-				int str_length = length - 2; // Check if length <= max_length - 1, for null terminator.
-				char *data = reinterpret_cast<char*>(&(payload[2]));
-				data[str_length] = 0;
-				LOGi("%s", data);
-				break;
-			}
-			}
-			break;
-		}
-		case CS_MICROAPP_COMMAND_DELAY: {
-			int delay = (payload[1] << 8) + payload[2];
-			LOGd("Microapp delay of %i", delay);
-			uintptr_t coargs_ptr = (payload[3] << 24) + (payload[4] << 16) + (payload[5] << 8) + payload[6];
-			// cast to coroutine args struct
-			coargs* args = (coargs*) coargs_ptr;
-			args->cntr++;
-			args->delay = delay;
-			yield(args->c);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_PIN: {
-			forwardCommand(command, &payload[0], length);
-			//forwardCommand(command, &payload[1], length - 1);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
-			LOGd("Service data");
-			uint16_t commandDataSize = length - 2; // byte 0 is command, byte 1 is type.
-			TYPIFY(CMD_MICROAPP_ADVERTISE) eventData;
-			if (commandDataSize < sizeof(eventData.appUuid)) {
-				LOGi("payload too small");
-				break;
-			}
-			eventData.version = 0; // TODO: define somewhere.
-			eventData.type = 0; // TODO: define somewhere.
-			eventData.appUuid = (payload[2] << 8) + payload[3];
-			eventData.data.len = commandDataSize - sizeof(eventData.appUuid);
-			eventData.data.data = &(payload[4]);
-//			BLEutil::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
-			event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
-			event.dispatch();
-			break;
-		}
-		default:
-			LOGi("Unknown command of length %i", length);
-			int ml = length;
-			if (length > 4) ml = 4;
-			for (int i = 0; i < ml; i++) {
-				LOGi("0x%i", payload[i]);
-			}
-		}
-
-		return ERR_SUCCESS;
-	}
+	return handleCommand(payload, length);
+}
 
 } // extern C
 
@@ -324,7 +328,7 @@ uint16_t MicroappProtocol::initMemory() {
 	// We allow an area of 0x2000B000 and then two pages for RAM. For now let us clear it to 0
 	// This is actually incorrect (we should skip) and it probably can be done at once as well
 	for (int i = 0; i < 1024 * 2; ++i) {
-		uint32_t *const val = (uint32_t *)(uintptr_t)(RAM_MICROAPP_BASE + i);
+		uint32_t *const val = (uint32_t *)(uintptr_t)(g_RAM_MICROAPP_BASE + i);
 		*val = 0;
 	}
 

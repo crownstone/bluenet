@@ -13,7 +13,7 @@
 
 
 class BehaviourHandler : public EventListener {
-    public:
+public:
 
     /**
      * Computes the intended behaviour state of this crownstone based on
@@ -44,7 +44,7 @@ class BehaviourHandler : public EventListener {
     bool requiresPresence(Time t);
     bool requiresAbsence(Time t);
 
-    private:
+private:
 
     /**
      * Given current time/presence, query the behaviourstore and check

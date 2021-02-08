@@ -75,8 +75,9 @@ static uint32_t cs_mesh_read_cb(uint16_t handle, void* data_ptr, uint16_t data_s
 	assert(BLEutil::getInterruptLevel() == 0, "Invalid interrupt level");
 	CS_TYPE type = cs_mesh_get_type_from_handle(handle);
 	State::getInstance().get(type, data_ptr, data_size);
-	BLEutil::printArray(data_ptr, data_size);
-	LOGi("cs_mesh_read_cb handle=%u size=%u", handle, data_size);
+	_log(SERIAL_INFO, false, "cs_mesh_read_cb handle=%u size=%u ", handle, data_size);
+//	BLEutil::printArray(data_ptr, data_size, SERIAL_INFO);
+	_logArray(SERIAL_INFO, true, (uint8_t*)data_ptr, data_size);
 	return NRF_SUCCESS;
 }
 
@@ -91,102 +92,101 @@ static uint32_t cs_mesh_erase_cb(uint16_t handle) {
 
 static void meshEventHandler(const nrf_mesh_evt_t * p_evt) {
 //	LOGMeshInfo("Mesh event type=%u", p_evt->type);
-	switch(p_evt->type) {
-	case NRF_MESH_EVT_MESSAGE_RECEIVED:
-		LOGMeshDebug("NRF_MESH_EVT_MESSAGE_RECEIVED");
-//		LOGMeshInfo("NRF_MESH_EVT_MESSAGE_RECEIVED");
-//		LOGMeshInfo("src=%u data:", p_evt->params.message.p_metadata->source);
-//		BLEutil::printArray(p_evt->params.message.p_buffer, p_evt->params.message.length);
-		break;
-	case NRF_MESH_EVT_TX_COMPLETE:
-		LOGMeshDebug("NRF_MESH_EVT_TX_COMPLETE");
-		break;
-	case NRF_MESH_EVT_IV_UPDATE_NOTIFICATION:
-		LOGMeshDebug("NRF_MESH_EVT_IV_UPDATE_NOTIFICATION");
-		break;
-	case NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION:
-		LOGMeshDebug("NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION");
-		break;
-	case NRF_MESH_EVT_NET_BEACON_RECEIVED:
-		LOGMeshDebug("NRF_MESH_EVT_NET_BEACON_RECEIVED");
-		break;
-	case NRF_MESH_EVT_HB_MESSAGE_RECEIVED:
-		LOGMeshDebug("NRF_MESH_EVT_HB_MESSAGE_RECEIVED");
-		break;
-	case NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE:
-		LOGMeshDebug("NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE");
-		break;
-	case NRF_MESH_EVT_DFU_REQ_RELAY:
-		LOGMeshDebug("NRF_MESH_EVT_DFU_REQ_SOURCE");
-		break;
-	case NRF_MESH_EVT_DFU_REQ_SOURCE:
-		LOGMeshDebug("NRF_MESH_EVT_DFU_REQ_SOURCE");
-		break;
-	case NRF_MESH_EVT_DFU_START:
-		LOGMeshDebug("NRF_MESH_EVT_DFU_START");
-		break;
-	case NRF_MESH_EVT_DFU_END:
-		LOGMeshDebug("NRF_MESH_EVT_DFU_END");
-		break;
-	case NRF_MESH_EVT_DFU_BANK_AVAILABLE:
-		LOGMeshDebug("NRF_MESH_EVT_DFU_BANK_AVAILABLE");
-		break;
-	case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED:
-		LOGMeshDebug("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED");
-		break;
-	case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH:
-		LOGMeshDebug("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH");
-		break;
-	case NRF_MESH_EVT_FLASH_STABLE:
-		LOGMeshDebug("NRF_MESH_EVT_FLASH_STABLE");
-		MeshCore::getInstance().factoryResetDone();
-		break;
-	case NRF_MESH_EVT_RX_FAILED:
-		LOGMeshDebug("NRF_MESH_EVT_RX_FAILED");
-		break;
-	case NRF_MESH_EVT_SAR_FAILED:
-		LOGMeshDebug("NRF_MESH_EVT_SAR_FAILED");
-		break;
-	case NRF_MESH_EVT_FLASH_FAILED:
-		LOGMeshDebug("NRF_MESH_EVT_FLASH_FAILED");
-		break;
-	case NRF_MESH_EVT_CONFIG_STABLE:
-		LOGMeshDebug("NRF_MESH_EVT_CONFIG_STABLE");
-		break;
-	case NRF_MESH_EVT_CONFIG_STORAGE_FAILURE:
-		LOGMeshDebug("NRF_MESH_EVT_CONFIG_STORAGE_FAILURE");
-		break;
-	case NRF_MESH_EVT_CONFIG_LOAD_FAILURE:
-		LOGMeshDebug("NRF_MESH_EVT_CONFIG_LOAD_FAILURE");
-		break;
-	case NRF_MESH_EVT_LPN_FRIEND_OFFER:
-		LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_OFFER");
-		break;
-	case NRF_MESH_EVT_LPN_FRIEND_UPDATE:
-		LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_UPDATE");
-		break;
-	case NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT:
-		LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT");
-		break;
-	case NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE:
-		LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE");
-		break;
-	case NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED:
-		LOGMeshDebug("NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED");
-		break;
-	case NRF_MESH_EVT_FRIENDSHIP_TERMINATED:
-		LOGMeshDebug("NRF_MESH_EVT_FRIENDSHIP_TERMINATED");
-		break;
-	case NRF_MESH_EVT_DISABLED:
-		LOGMeshDebug("NRF_MESH_EVT_DISABLED");
-		break;
-	case NRF_MESH_EVT_PROXY_STOPPED:
-		LOGMeshDebug("NRF_MESH_EVT_PROXY_STOPPED");
-		break;
-	case NRF_MESH_EVT_FRIEND_REQUEST:
-		LOGMeshDebug("NRF_MESH_EVT_FRIEND_REQUEST");
-		break;
-
+	switch (p_evt->type) {
+		case NRF_MESH_EVT_MESSAGE_RECEIVED:
+			LOGMeshDebug("NRF_MESH_EVT_MESSAGE_RECEIVED");
+//			LOGMeshInfo("NRF_MESH_EVT_MESSAGE_RECEIVED");
+//			LOGMeshInfo("src=%u data:", p_evt->params.message.p_metadata->source);
+//			BLEutil::printArray(p_evt->params.message.p_buffer, p_evt->params.message.length);
+			break;
+		case NRF_MESH_EVT_TX_COMPLETE:
+			LOGMeshDebug("NRF_MESH_EVT_TX_COMPLETE");
+			break;
+		case NRF_MESH_EVT_IV_UPDATE_NOTIFICATION:
+			LOGMeshDebug("NRF_MESH_EVT_IV_UPDATE_NOTIFICATION");
+			break;
+		case NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION:
+			LOGMeshDebug("NRF_MESH_EVT_KEY_REFRESH_NOTIFICATION");
+			break;
+		case NRF_MESH_EVT_NET_BEACON_RECEIVED:
+			LOGMeshDebug("NRF_MESH_EVT_NET_BEACON_RECEIVED");
+			break;
+		case NRF_MESH_EVT_HB_MESSAGE_RECEIVED:
+			LOGMeshDebug("NRF_MESH_EVT_HB_MESSAGE_RECEIVED");
+			break;
+		case NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE:
+			LOGMeshDebug("NRF_MESH_EVT_HB_SUBSCRIPTION_CHANGE");
+			break;
+		case NRF_MESH_EVT_DFU_REQ_RELAY:
+			LOGMeshDebug("NRF_MESH_EVT_DFU_REQ_SOURCE");
+			break;
+		case NRF_MESH_EVT_DFU_REQ_SOURCE:
+			LOGMeshDebug("NRF_MESH_EVT_DFU_REQ_SOURCE");
+			break;
+		case NRF_MESH_EVT_DFU_START:
+			LOGMeshDebug("NRF_MESH_EVT_DFU_START");
+			break;
+		case NRF_MESH_EVT_DFU_END:
+			LOGMeshDebug("NRF_MESH_EVT_DFU_END");
+			break;
+		case NRF_MESH_EVT_DFU_BANK_AVAILABLE:
+			LOGMeshDebug("NRF_MESH_EVT_DFU_BANK_AVAILABLE");
+			break;
+		case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED:
+			LOGMeshDebug("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED");
+			break;
+		case NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH:
+			LOGMeshDebug("NRF_MESH_EVT_DFU_FIRMWARE_OUTDATED_NO_AUTH");
+			break;
+		case NRF_MESH_EVT_FLASH_STABLE:
+			LOGMeshDebug("NRF_MESH_EVT_FLASH_STABLE");
+			MeshCore::getInstance().factoryResetDone();
+			break;
+		case NRF_MESH_EVT_RX_FAILED:
+			LOGMeshDebug("NRF_MESH_EVT_RX_FAILED");
+			break;
+		case NRF_MESH_EVT_SAR_FAILED:
+			LOGMeshDebug("NRF_MESH_EVT_SAR_FAILED");
+			break;
+		case NRF_MESH_EVT_FLASH_FAILED:
+			LOGMeshDebug("NRF_MESH_EVT_FLASH_FAILED");
+			break;
+		case NRF_MESH_EVT_CONFIG_STABLE:
+			LOGMeshDebug("NRF_MESH_EVT_CONFIG_STABLE");
+			break;
+		case NRF_MESH_EVT_CONFIG_STORAGE_FAILURE:
+			LOGMeshDebug("NRF_MESH_EVT_CONFIG_STORAGE_FAILURE");
+			break;
+		case NRF_MESH_EVT_CONFIG_LOAD_FAILURE:
+			LOGMeshDebug("NRF_MESH_EVT_CONFIG_LOAD_FAILURE");
+			break;
+		case NRF_MESH_EVT_LPN_FRIEND_OFFER:
+			LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_OFFER");
+			break;
+		case NRF_MESH_EVT_LPN_FRIEND_UPDATE:
+			LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_UPDATE");
+			break;
+		case NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT:
+			LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_REQUEST_TIMEOUT");
+			break;
+		case NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE:
+			LOGMeshDebug("NRF_MESH_EVT_LPN_FRIEND_POLL_COMPLETE");
+			break;
+		case NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED:
+			LOGMeshDebug("NRF_MESH_EVT_FRIENDSHIP_ESTABLISHED");
+			break;
+		case NRF_MESH_EVT_FRIENDSHIP_TERMINATED:
+			LOGMeshDebug("NRF_MESH_EVT_FRIENDSHIP_TERMINATED");
+			break;
+		case NRF_MESH_EVT_DISABLED:
+			LOGMeshDebug("NRF_MESH_EVT_DISABLED");
+			break;
+		case NRF_MESH_EVT_PROXY_STOPPED:
+			LOGMeshDebug("NRF_MESH_EVT_PROXY_STOPPED");
+			break;
+		case NRF_MESH_EVT_FRIEND_REQUEST:
+			LOGMeshDebug("NRF_MESH_EVT_FRIEND_REQUEST");
+			break;
 	}
 }
 static nrf_mesh_evt_handler_t meshEventHandlerStruct = {
@@ -224,7 +224,7 @@ void MeshCore::modelsInitCallback() {
 
 
 
-MeshCore::MeshCore(){
+MeshCore::MeshCore() {
 
 }
 
@@ -378,16 +378,16 @@ void MeshCore::provisionSelf(uint16_t id) {
 	uint8_t key[NRF_MESH_KEY_SIZE];
 	LOGMeshInfo("netKeyHandle=%u netKey=", _netkeyHandle);
 	dsm_subnet_key_get(_netkeyHandle, key);
-	BLEutil::printArray(key, NRF_MESH_KEY_SIZE);
+	//BLEutil::printArray(key, NRF_MESH_KEY_SIZE);
 	LOGMeshInfo("appKeyHandle=%u appKey=", _appkeyHandle);
 	LOGMeshInfo("devKeyHandle=%u devKey=", _devkeyHandle);
 
 #if MESH_PERSISTENT_STORAGE == 0
-	retCode = net_state_iv_index_set(0,0);
+	retCode = net_state_iv_index_set(0, 0);
 	APP_ERROR_CHECK(retCode);
 #endif
 
-    // Bind config server to the device key
+	// Bind config server to the device key
 	retCode = config_server_bind(_devkeyHandle);
 	APP_ERROR_CHECK(retCode);
 
@@ -422,7 +422,7 @@ void MeshCore::provisionLoad() {
 	uint8_t key[NRF_MESH_KEY_SIZE];
 	LOGMeshInfo("netKeyHandle=%u netKey=", _netkeyHandle);
 	dsm_subnet_key_get(_netkeyHandle, key);
-	BLEutil::printArray(key, NRF_MESH_KEY_SIZE);
+//	BLEutil::printArray(key, NRF_MESH_KEY_SIZE);
 	LOGMeshInfo("appKeyHandle=%u appKey=", _appkeyHandle);
 	LOGMeshInfo("devKeyHandle=%u devKey=", _devkeyHandle);
 }
@@ -448,11 +448,30 @@ void MeshCore::start() {
 //	}
 	LOGMeshInfo("ACCESS_FLASH_ENTRY_SIZE=%u", ACCESS_FLASH_ENTRY_SIZE);
 
-	const uint8_t *uuid = nrf_mesh_configure_device_uuid_get();
-	LOGd("Device UUID:");
-	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
+	_log(SERIAL_DEBUG, false, "Device UUID: ");
+//	BLEutil::printArray(uuid, NRF_MESH_UUID_SIZE);
+//	_logArray(SERIAL_DEBUG, true, uuid, NRF_MESH_UUID_SIZE, "%02X");
+	_logArray(SERIAL_DEBUG, true, nrf_mesh_configure_device_uuid_get(), NRF_MESH_UUID_SIZE);
+
+	// Returns NRF_ERROR_INVALID_STATE if the mesh was already enabled (or mesh stack not initialized).
 	retCode = mesh_stack_start();
-	APP_ERROR_CHECK(retCode);
+	if (retCode != NRF_SUCCESS) {
+		LOGw("mesh stack start failed: %u", retCode);
+	}
+}
+
+void MeshCore::stop() {
+	// Returns NRF_ERROR_INVALID_STATE if the mesh was already disabled.
+	uint32_t retCode = nrf_mesh_disable();
+	if (retCode != NRF_SUCCESS) {
+		LOGw("mesh disable failed: %u", retCode);
+	}
+
+	// Scanner doesn't stop immediately, but will quickly timeout.
+	// See https://devzone.nordicsemi.com/f/nordic-q-a/43301/nrf_mesh_disable-function-changed-since-sdk-for-mesh-v3-1-0
+//	[2020-12-21 14:08:39.941] <info> app: stop
+//	[2020-12-21 14:08:39.944] <debug> nrf_sdh_soc: SoC event: 0x7.
+//	[2020-12-21 14:08:39.947] <debug> nrf_sdh_soc: SoC event: 0x8.
 }
 
 

@@ -9,7 +9,7 @@
 
 #include <algorithm>
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_ErrorCodes.h>
 #include <storage/cs_State.h>
@@ -23,7 +23,7 @@
 std::array<Behaviour*, BehaviourStore::MaxBehaviours> BehaviourStore::activeBehaviours = {};
 
 void BehaviourStore::handleEvent(event_t& evt) {
-	switch(evt.type) {
+	switch (evt.type) {
 		case CS_TYPE::CMD_ADD_BEHAVIOUR: {
 			handleSaveBehaviour(evt);
 			dispatchBehaviourMutationEvent();
@@ -39,7 +39,7 @@ void BehaviourStore::handleEvent(event_t& evt) {
 			dispatchBehaviourMutationEvent();
 			break;
 		}
-		case CS_TYPE::CMD_GET_BEHAVIOUR:{
+		case CS_TYPE::CMD_GET_BEHAVIOUR: {
 			handleGetBehaviour(evt);
 			break;
 		}
@@ -51,7 +51,7 @@ void BehaviourStore::handleEvent(event_t& evt) {
 			clearActiveBehavioursArray();
 			break;
 		}
-		default:{
+		default: {
 			break;
 		}
 	}
@@ -101,9 +101,9 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 	if (empty_index >= MaxBehaviours) {
 		return ERR_NO_SPACE;
 	}
-	LOGBehaviourStoreInfo("Add behaviour to index %u", empty_index);
+	LOGBehaviourStoreInfo("Add behaviour of type %u to index %u", typ, empty_index);
 	switch (typ) {
-		case SwitchBehaviour::Type::Switch:{
+		case SwitchBehaviour::Type::Switch: {
 			if (bufSize != WireFormat::size<SwitchBehaviour>()) {
 				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d)",
 						bufSize,
@@ -123,7 +123,7 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 			storeMasterHash();
 			return ERR_SUCCESS;
 		}
-		case SwitchBehaviour::Type::Twilight:{// check size
+		case SwitchBehaviour::Type::Twilight: {// check size
 			if (bufSize != WireFormat::size<TwilightBehaviour>()) {
 				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d)",
 						bufSize,
@@ -143,7 +143,7 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 			storeMasterHash();
 			return ERR_SUCCESS;
 		}
-		case SwitchBehaviour::Type::Extended:{
+		case SwitchBehaviour::Type::Extended: {
 			if (bufSize != WireFormat::size<ExtendedSwitchBehaviour>()) {
 				LOGe(FMT_WRONG_PAYLOAD_LENGTH " while type of behaviour to save: type (%d)",
 						bufSize,
@@ -163,7 +163,7 @@ ErrorCodesGeneral BehaviourStore::addBehaviour(uint8_t* buf, cs_buffer_size_t bu
 			storeMasterHash();
 			return ERR_SUCCESS;
 		}
-		default:{
+		default: {
 			LOGe("Invalid behaviour type: %d", typ);
 			return ERR_WRONG_PARAMETER;
 		}
@@ -213,8 +213,8 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 	LOGBehaviourStoreInfo("Replace behaviour at ind=%u, type=%u", index, static_cast<uint8_t>(type));
 
-	switch(type) {
-		case Behaviour::Type::Switch:{
+	switch (type) {
+		case Behaviour::Type::Switch: {
 			if (!ReplaceParameterValidation(evt, index, WireFormat::size<SwitchBehaviour>())) {
 				break;
 			}
@@ -231,7 +231,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 			evt.result.returnCode = ERR_SUCCESS;
 			break;
 		}
-		case Behaviour::Type::Twilight:{
+		case Behaviour::Type::Twilight: {
 			if (!ReplaceParameterValidation(evt, index, WireFormat::size<TwilightBehaviour>())) {
 				break;
 			}
@@ -249,7 +249,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 
 			break;
 		}
-		case Behaviour::Type::Extended:{
+		case Behaviour::Type::Extended: {
 			if (!ReplaceParameterValidation(evt, index, WireFormat::size<ExtendedSwitchBehaviour>())) {
 				break;
 			}
@@ -266,7 +266,7 @@ void BehaviourStore::handleReplaceBehaviour(event_t& evt) {
 			evt.result.returnCode = ERR_SUCCESS;
 			break;
 		}
-		default:{
+		default: {
 			LOGe("Invalid behaviour type");
 			evt.result.returnCode = ERR_WRONG_PARAMETER;
 			break;
@@ -451,7 +451,7 @@ void BehaviourStore::LoadBehavioursFromMemory(CS_TYPE BehaviourCsType) {
 				}
 				activeBehaviours[iter] = new BehaviourType(WireFormat::deserialize<BehaviourType>(data_array, data_size));
 				LOGBehaviourStoreInfo("Loaded behaviour at ind=%u:", iter);
-				activeBehaviours[iter]->print();
+//				activeBehaviours[iter]->print();
 			}
 		}
 		storeMasterHash();

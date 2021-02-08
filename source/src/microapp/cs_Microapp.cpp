@@ -19,7 +19,7 @@
 #include <ble/cs_UUID.h>
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
@@ -85,6 +85,11 @@ uint16_t Microapp::init() {
 	return err_code;
 }
 
+/*
+ * Currently the implementation sends a return message several times. The sender has to receive the return message
+ * before the next message can be sent. Especially when sending a large binary chunk (like a microapp), it is 
+ * useful to send a few semi-duplicates so that messages are not missed. 
+ */
 void Microapp::tick() {
 	// decrement repeat counter up to zero
 	if (_prevMessage.repeat > 0) {
@@ -95,7 +100,7 @@ void Microapp::tick() {
 		event_t event(CS_TYPE::EVT_MICROAPP, &_prevMessage, sizeof(_prevMessage));
 		event.dispatch();
 	}
-					
+
 	MicroappProtocol & protocol = MicroappProtocol::getInstance();
 	protocol.callSetupAndLoop();
 
@@ -223,7 +228,7 @@ uint32_t Microapp::handlePacket(microapp_packet_header_t *packet_stub) {
 	return err_code;
 }
 
-/**
+/*
  * Handle incoming events from other modules (mainly the CommandController).
  */
 void Microapp::handleEvent(event_t & evt) {

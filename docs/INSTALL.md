@@ -168,7 +168,7 @@ In a third console, you can also run an RTT Client
     make rtt_client
 
 Alternatively, you can use e.g. minicom over UART (`sudo apt install minicom`)
-    
+
     make uart_client
 
 ## Configuration
@@ -197,6 +197,10 @@ Only after this you can assume that the `make` targets in `build/default` or any
 
 ## Advanced
 
+### Overwrites and runtime configs
+
+The following is convenient if you have multiple boards attached to your system.
+
 It is possible to have a second file in your target directory that overwrites values in your `CMakeBuild.config`.
 The file is called `CMakeBuild.overwrite.config`.
 
@@ -220,6 +224,46 @@ Another convenient variable to set there is `GDB_PORT`. To have both running in 
     cmake .. -DBOARD_TARGET=board1 && make
     cd build/board1
     make debug_server
+
+For in particular the above information you perhaps do not want to have everything recompiled just because you use
+a particular JLINK device. The file that is used for runtime only is `CMakeBuild.runtime.config`. If you write
+something like `SERIAL_NUM=682450212` in that file this can be altered without causing `cmake` to run again.
+
+### Wireless
+
+Information about the MAC address can be obtained through the make system as well:
+
+    make read_mac_address
+
+The address is stored by Nordic as 48 bits in two registers, `DEVICEADDR[0]` and `DEVICEADDR[1]`. Depending on the last two bits, this is a static or a private address (resolvable or non-resolvable). Those bits are normally set to 00, but due to the fact that the Crownstones are static addresses, we set them to 11. This means we can use the result to connect to the Crownstone (for the setup process for instance).
+
+Note that reading out UICR/FICR registers can cause the firmware to halt. Run `make reset` afterwards.
+
+### Setup
+
+It is possible to make use of the `csutil` utility which can be sourced through a cmake flag:
+
+    cmake .. -DDOWNLOAD_CSUTIL=ON      # and other flags
+
+You can prepare the configuration used to set up a Crownstone by
+
+    make write_config
+
+Or individually as
+
+    BLUENET_CONFIG=MAC_ADDRESS make write_config
+    BLUENET_CONFIG=IBEACON_MINOR make write_config
+    ...
+
+This will write a `CMakeBuild.dynamic.config` file locally. To perform the setup, run
+
+    make setup
+
+This will generate a `config.json` file with the proper information and use the `csutil` tool to perform the setup. You can also do a factory reset.
+
+    make factory_reset
+
+The `csutil` tool uses the Crownstone BLE library under the hood. That means that you can also setup hardware that is not attached to your machine. In that case make sure you have the right config values set (e.g. in `CMakeBuild.runtime.config`).
 
 ## Common issues
 

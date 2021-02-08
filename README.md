@@ -2,22 +2,22 @@
 
 <p align="center">
   <a href="https://crownstone.rocks">
-    <img src="https://avatars0.githubusercontent.com/u/19687047?s=300&u=2bf39117bd4b49d941d1fe3d8d3a53957aafbc6b" alt="Crownstone">
+    <img src="https://avatars0.githubusercontent.com/u/19687047?s=300&u=2bf39117bd4b49d941d1fe3d8d3a53957aafbc6b" alt="Crownstone" />
   </a>
 </p>
 
 <p align="center">
   <a href="http://crownstone.github.io/bluenet/">
-    <img src="http://img.shields.io/badge/read_the-docs-2196f3.svg" alt="Documentation">
+    <img src="http://img.shields.io/badge/read_the-docs-2196f3.svg" alt="Documentation" />
   </a>
   <a href="https://travis-ci.org/crownstone/bluenet">
-    <img src="https://travis-ci.org/crownstone/bluenet.svg?branch=master" alt="Build Status">
+    <img src="https://travis-ci.org/crownstone/bluenet.svg?branch=master" alt="Build Status" />
   </a>
   <a href="https://crownstone.slack.com/">
-    <img src="https://img.shields.io/badge/Forum-Slack-blue" alt="Forum">
+    <img src="https://img.shields.io/badge/Forum-Slack-blue" alt="Forum" />
   </a>
   <a href="https://twitter.com/CrownstoneRocks">
-    <img src="https://img.shields.io/badge/Twitter-CrownstoneRocks-blue" alt="Twitter">
+    <img src="https://img.shields.io/badge/Twitter-CrownstoneRocks-blue" alt="Twitter" />
   </a>
 </p>
 
@@ -92,7 +92,7 @@ There are many ways to help us!
 
 Copyrights belong to the team of Crownstone B.V. and are provided under a noncontagious open-source license:
 
-* Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Alex de Mulder, Christian Haas, Naveen Chakravarthy, Aniket Samant
+* Authors: Dominik Egger, Bart van Vliet, Anne van Rossum, Marc Hulscher, Peet van Tooren, Alex de Mulder, Christian Haas, Naveen Chakravarthy, Aniket Samant, Arend de Jonge
 * Creation date: 27 Jan. 2014
 * Triple-licensed: LGPL v3+, Apache, MIT
 * Crownstone B.V., https://crownstone.rocks
@@ -101,13 +101,13 @@ Copyrights belong to the team of Crownstone B.V. and are provided under a noncon
 This code is built on the shoulders of giants. Our special thanks go to Christopher Mason for the initial C++ code base at [http://hg.cmason.com/nrf](http://hg.cmason.com/nrf) and Trond Einar Snekvik, department of Engineering Cybernetics at Norwegian University of Science and Technology (and Nordic Semiconductor) for the meshing functionality ([OpenMesh](https://github.com/NordicSemiconductor/nRF51-ble-bcast-mesh)) and Nordic Semiconductor for the beautiful SoftDevices they have developed. The code of Mason falls under the same triple license. The code by Nordic falls under the license from Nordic (and that code is not part of this repository).
 
 <p align="center">
-	<a href="http://www.gnu.org/licenses/lgpl-3.0">
-    <img src="https://img.shields.io/badge/License-LGPL%20v3-blue.svg" alt="License: LGPL v3">
+  <a href="http://www.gnu.org/licenses/lgpl-3.0">
+    <img src="https://img.shields.io/badge/License-LGPL%20v3-blue.svg" alt="License: LGPL v3" />
   </a>
-	<a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+  <a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT" />
   </a>
-	<a href="https://opensource.org/licenses/Apache-2.0">
-     <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0">
+  <a href="https://opensource.org/licenses/Apache-2.0">
+    <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0" />
   </a>
 </p>

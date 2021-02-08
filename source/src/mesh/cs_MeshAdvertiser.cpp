@@ -203,7 +203,7 @@ void MeshAdvertiser::handleTime(uint32_t now) {
 				clearConfigEntry(i);
 				updateIbeacon();
 			}
-			else if (CsMath::mod((_ibeaconInterval[i].timestamp - now), _ibeaconInterval[i].interval) == 0)	{
+			else if (CsMath::mod((_ibeaconInterval[i].timestamp - now), _ibeaconInterval[i].interval) == 0) {
 				_ibeaconConfigId = i;
 				updateIbeacon();
 				return;
@@ -213,7 +213,7 @@ void MeshAdvertiser::handleTime(uint32_t now) {
 }
 
 void MeshAdvertiser::handleEvent(event_t & event) {
-	switch(event.type) {
+	switch (event.type) {
 		case CS_TYPE::CONFIG_IBEACON_MAJOR: {
 //			uint16_t* major = reinterpret_cast<TYPIFY(CONFIG_IBEACON_MAJOR)*>(event.data);
 			updateIbeacon();

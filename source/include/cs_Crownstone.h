@@ -43,6 +43,10 @@
 #include <microapp/cs_Microapp.h>
 #endif
 
+#if BUILD_MEM_USAGE_TEST == 1
+#include <test/cs_MemUsageTest.h>
+#endif
+
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -155,6 +159,11 @@ public:
 	 */
 	static void updateMinStackEnd();
 
+	/**
+	 * Print load stats: RAM usage, app scheduler usage, etc.
+	 */
+	static void printLoadStats();
+
 	/** tick function called by app timer
 	 */
 	static void staticTick(Crownstone *ptr) {
@@ -221,7 +230,6 @@ private:
 	 *   [23.06.16] restart the mesh on disconnect, otherwise we have ~10s delay until the device starts advertising.
 	 *   [29.06.16] restart the mesh disabled, this was limited to pca10000, it does crash dobeacon v0.7
 	 */
-	void configureStack();
 
 	/**
 	 * Populate advertisement (including service data) with information. The persistence mode is obtained from storage
@@ -233,7 +241,7 @@ private:
 	 * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
 	 * It is loaded from memory or from the default and written to the Stack.
 	 */
-	void setName();
+	void setName(bool firstTime);
 
 	/**
 	 * Create a particular service. Depending on the mode we can choose to create a set of services that we would need.
@@ -292,11 +300,6 @@ private:
 	 */
 	void increaseResetCounter();
 
-	/**
-	 * Print load stats: RAM usage, app scheduler usage, etc.
-	 */
-	void printLoadStats();
-
 	boards_config_t _boardsConfig;
 
 	// drivers
@@ -329,21 +332,24 @@ private:
 	TrackedDevices _trackedDevices;
 	SystemTime _systemTime;
 
-#if RSSI_DATA_TRACKER_ENABLED==1
+#if BUILD_RSSI_DATA_TRACKER == 1
 	RssiDataTracker _rssiDataTracker;
 #endif
 
-#if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	NearestCrownstoneTracker _nearestCrownstoneTracker;
 	TrackableParser _trackableParser;
 #endif
-
 
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
 
 #if BUILD_MICROAPP_SUPPORT == 1
 	Microapp* _microapp;
+#endif
+
+#if BUILD_MEM_USAGE_TEST == 1
+	MemUsageTest _memTest;
 #endif
 
 	app_timer_t              _mainTimerData;

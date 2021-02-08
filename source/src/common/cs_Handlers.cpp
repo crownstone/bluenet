@@ -51,59 +51,60 @@ void crownstone_soc_evt_handler_decoupled(void * p_event_data, uint16_t event_si
 	LOGInterruptLevel("soc evt decoupled int=%u", BLEutil::getInterruptLevel());
 	uint32_t evt_id = *(uint32_t*)p_event_data;
 	switch (evt_id) {
-	case NRF_EVT_POWER_FAILURE_WARNING: {
-		event_t event(CS_TYPE::EVT_BROWNOUT_IMPENDING);
-		EventDispatcher::getInstance().dispatch(event);
-		break;
-	}
-	case NRF_EVT_FLASH_OPERATION_SUCCESS: {
-		Storage::getInstance().handleFlashOperationSuccess();
-		break;
-	}
-	case NRF_EVT_FLASH_OPERATION_ERROR: {
-		Storage::getInstance().handleFlashOperationError();
-		break;
-	}
-	default:
-		break;
+		case NRF_EVT_POWER_FAILURE_WARNING: {
+			event_t event(CS_TYPE::EVT_BROWNOUT_IMPENDING);
+			EventDispatcher::getInstance().dispatch(event);
+			break;
+		}
+		case NRF_EVT_FLASH_OPERATION_SUCCESS: {
+			Storage::getInstance().handleFlashOperationSuccess();
+			break;
+		}
+		case NRF_EVT_FLASH_OPERATION_ERROR: {
+			Storage::getInstance().handleFlashOperationError();
+			break;
+		}
+		default: {
+			break;
+		}
 	}
 }
 
 void crownstone_soc_evt_handler(uint32_t evt_id, void * p_context) {
 	LOGInterruptLevel("soc evt int=%u", BLEutil::getInterruptLevel());
 
-    switch(evt_id) {
-    case NRF_EVT_POWER_FAILURE_WARNING:
-    	// Set brownout flag, so next boot we know the cause.
-    	// Only works when we reset as well?
-    	// Only works when softdevice handler dispatch model is interrupt?
-    	GpRegRet::setFlag(GpRegRet::FLAG_BROWNOUT);
-    	// Fall through
-	case NRF_EVT_FLASH_OPERATION_SUCCESS:
-	case NRF_EVT_FLASH_OPERATION_ERROR: {
-//		uint32_t gpregret_id = 0;
-//		uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
-//		// NOTE: do not clear the gpregret register, this way
-//		//   we can count the number of brownouts in the bootloader.
-//		sd_power_gpregret_set(gpregret_id, gpregret_msk);
-//		// Soft reset, because brownout can't be distinguished from hard reset otherwise.
-//		sd_nvic_SystemReset();
+	switch (evt_id) {
+		case NRF_EVT_POWER_FAILURE_WARNING:
+			// Set brownout flag, so next boot we know the cause.
+			// Only works when we reset as well?
+			// Only works when softdevice handler dispatch model is interrupt?
+			GpRegRet::setFlag(GpRegRet::FLAG_BROWNOUT);
+			// Fall through
+		case NRF_EVT_FLASH_OPERATION_SUCCESS:
+		case NRF_EVT_FLASH_OPERATION_ERROR: {
+//			uint32_t gpregret_id = 0;
+//			uint32_t gpregret_msk = CS_GPREGRET_BROWNOUT_RESET;
+//			// NOTE: do not clear the gpregret register, this way
+//			//   we can count the number of brownouts in the bootloader.
+//			sd_power_gpregret_set(gpregret_id, gpregret_msk);
+//			// Soft reset, because brownout can't be distinguished from hard reset otherwise.
+//			sd_nvic_SystemReset();
 
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
-		uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), crownstone_soc_evt_handler_decoupled);
-		APP_ERROR_CHECK(retVal);
+			uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), crownstone_soc_evt_handler_decoupled);
+			APP_ERROR_CHECK(retVal);
 #else
-		crownstone_soc_evt_handler_decoupled(&evt_id, sizeof(evt_id));
+			crownstone_soc_evt_handler_decoupled(&evt_id, sizeof(evt_id));
 #endif
-	    break;
+			break;
+		}
+		case NRF_EVT_RADIO_BLOCKED:
+		case NRF_EVT_RADIO_CANCELED:
+			break;
+		default: {
+			LOGd("Unhandled event: %i", evt_id);
+		}
 	}
-	case NRF_EVT_RADIO_BLOCKED:
-	case NRF_EVT_RADIO_CANCELED:
-		break;
-	default: {
-	    LOGd("Unhandled event: %i", evt_id);
-	}
-    }
 }
 NRF_SDH_SOC_OBSERVER(m_crownstone_soc_observer, CROWNSTONE_SOC_OBSERVER_PRIO, crownstone_soc_evt_handler, NULL);
 
@@ -124,68 +125,69 @@ void crownstone_sdh_ble_evt_handler_sched(void * p_event_data, uint16_t event_si
  * Some event should be handled on interrupt level, while most are decouple via app scheduler.
  */
 void crownstone_sdh_ble_evt_handler(const ble_evt_t * p_ble_evt, void * p_context) {
+
+
 	LOGInterruptLevel("sdh ble evt int=%u", BLEutil::getInterruptLevel());
 	switch (p_ble_evt->header.evt_id) {
-	case BLE_GAP_EVT_ADV_REPORT:
+		case BLE_GAP_EVT_ADV_REPORT: {
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
-		Stack::getInstance().onBleEventInterrupt(p_ble_evt, true);
+			Stack::getInstance().onBleEventInterrupt(p_ble_evt, true);
 #else
-		Stack::getInstance().onBleEventInterrupt(p_ble_evt, false);
+			Stack::getInstance().onBleEventInterrupt(p_ble_evt, false);
 #endif
-		break;
-	case BLE_GAP_EVT_CONNECTED:
-	case BLE_GAP_EVT_DISCONNECTED:
-	case BLE_GAP_EVT_PASSKEY_DISPLAY:
-	case BLE_GAP_EVT_TIMEOUT:
-	case BLE_EVT_USER_MEM_REQUEST:
-	case BLE_EVT_USER_MEM_RELEASE:
-	case BLE_GATTS_EVT_WRITE:
-	case BLE_GATTS_EVT_HVN_TX_COMPLETE:
-	case BLE_GATTS_EVT_SYS_ATTR_MISSING: {
+			break;
+		}
+		case BLE_GAP_EVT_PHY_UPDATE_REQUEST: {
+			ble_gap_phys_t phys;
+			phys.rx_phys = BLE_GAP_PHY_AUTO;
+			phys.tx_phys = BLE_GAP_PHY_AUTO;
+			uint32_t retVal = sd_ble_gap_phy_update(p_ble_evt->evt.gap_evt.conn_handle, &phys);
+			APP_ERROR_CHECK(retVal);
+			break;
+		}
+		case BLE_GATTC_EVT_TIMEOUT: {
+			// Disconnect on GATT Client timeout event.
+			uint32_t retVal = sd_ble_gap_disconnect(p_ble_evt->evt.gattc_evt.conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+			APP_ERROR_CHECK(retVal);
+			break;
+		}
+		case BLE_GATTS_EVT_TIMEOUT: {
+			// Disconnect on GATT Server timeout event.
+			uint32_t retVal = sd_ble_gap_disconnect(p_ble_evt->evt.gatts_evt.conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
+			APP_ERROR_CHECK(retVal);
+			break;
+		}
+		case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST: {
+			uint32_t retVal = sd_ble_gap_data_length_update(p_ble_evt->evt.gatts_evt.conn_handle, NULL, NULL);
+			APP_ERROR_CHECK(retVal);
+			break;
+		}
+		case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST: {
+//			uint32_t retVal = sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle, BLE_GATT_ATT_MTU_DEFAULT);
+			uint32_t retVal = sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle, NRF_SDH_BLE_GATT_MAX_MTU_SIZE);
+			APP_ERROR_CHECK(retVal);
+			break;
+		}
+		case BLE_GAP_EVT_RSSI_CHANGED:
+		case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
+		case BLE_GAP_EVT_CONNECTED:
+		case BLE_GAP_EVT_DISCONNECTED:
+		case BLE_GAP_EVT_PASSKEY_DISPLAY:
+		case BLE_GAP_EVT_TIMEOUT:
+		case BLE_EVT_USER_MEM_REQUEST:
+		case BLE_EVT_USER_MEM_RELEASE:
+		case BLE_GATTS_EVT_WRITE:
+		case BLE_GATTS_EVT_HVN_TX_COMPLETE:
+		case BLE_GATTS_EVT_SYS_ATTR_MISSING:
+		default: {
 #if NRF_SDH_DISPATCH_MODEL == NRF_SDH_DISPATCH_MODEL_INTERRUPT
-		uint32_t retVal = app_sched_event_put(p_ble_evt, sizeof(ble_evt_t), crownstone_sdh_ble_evt_handler_sched);
-		APP_ERROR_CHECK(retVal);
+			uint32_t retVal = app_sched_event_put(p_ble_evt, sizeof(ble_evt_t), crownstone_sdh_ble_evt_handler_sched);
+			APP_ERROR_CHECK(retVal);
 #else
-		crownstone_sdh_ble_evt_handler_decoupled(p_ble_evt, sizeof(ble_evt_t));
+			crownstone_sdh_ble_evt_handler_decoupled(p_ble_evt, sizeof(ble_evt_t));
 #endif
-		break;
-	}
-	case BLE_GAP_EVT_RSSI_CHANGED:
-	case BLE_GATTS_EVT_RW_AUTHORIZE_REQUEST:
-		break;
-	case BLE_GAP_EVT_PHY_UPDATE_REQUEST: {
-		ble_gap_phys_t phys;
-		phys.rx_phys = BLE_GAP_PHY_AUTO;
-		phys.tx_phys = BLE_GAP_PHY_AUTO;
-		uint32_t retVal = sd_ble_gap_phy_update(p_ble_evt->evt.gap_evt.conn_handle, &phys);
-		APP_ERROR_CHECK(retVal);
-		break;
-	}
-	case BLE_GATTC_EVT_TIMEOUT: {
-		// Disconnect on GATT Client timeout event.
-		uint32_t retVal = sd_ble_gap_disconnect(p_ble_evt->evt.gattc_evt.conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-		APP_ERROR_CHECK(retVal);
-		break;
-	}
-	case BLE_GATTS_EVT_TIMEOUT: {
-		// Disconnect on GATT Server timeout event.
-		uint32_t retVal = sd_ble_gap_disconnect(p_ble_evt->evt.gatts_evt.conn_handle, BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
-		APP_ERROR_CHECK(retVal);
-		break;
-	}
-	case BLE_GAP_EVT_DATA_LENGTH_UPDATE_REQUEST: {
-		uint32_t retVal = sd_ble_gap_data_length_update(p_ble_evt->evt.gatts_evt.conn_handle, NULL, NULL);
-		APP_ERROR_CHECK(retVal);
-		break;
-	}
-	case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST: {
-//		uint32_t retVal = sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle, BLE_GATT_ATT_MTU_DEFAULT);
-		uint32_t retVal = sd_ble_gatts_exchange_mtu_reply(p_ble_evt->evt.gatts_evt.conn_handle, NRF_SDH_BLE_GATT_MAX_MTU_SIZE);
-		APP_ERROR_CHECK(retVal);
-		break;
-	}
-	default:
-		break;
+			break;
+		}
 	}
 }
 NRF_SDH_BLE_OBSERVER(m_stack, CROWNSTONE_BLE_OBSERVER_PRIO, crownstone_sdh_ble_evt_handler, NULL);
@@ -231,7 +233,7 @@ static void mesh_soc_evt_handler(uint32_t evt_id, void * p_context) {
 	uint32_t retVal = app_sched_event_put(&evt_id, sizeof(evt_id), mesh_soc_evt_handler_decoupled);
 	APP_ERROR_CHECK(retVal);
 #else
-    nrf_mesh_on_sd_evt(evt_id);
+	nrf_mesh_on_sd_evt(evt_id);
 #endif
 }
 NRF_SDH_SOC_OBSERVER(m_mesh_soc_observer, MESH_SOC_OBSERVER_PRIO, mesh_soc_evt_handler, NULL);

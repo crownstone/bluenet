@@ -8,10 +8,9 @@
 #pragma once
 
 
-#include <util/cs_Math.h>
-
 #include <array>
 #include <stdint.h>
+#include <util/cs_Math.h>
 
 /**
  * Objects of this type represent a time of day. They are stored as time offset relative
@@ -19,13 +18,13 @@
  */
 class TimeOfDay {
     public:
-    enum class BaseTime : uint8_t { Midnight = 0, Sunrise = 1, Sunset = 2};
-    typedef std::array<uint8_t,5> SerializedDataType;
+    enum class BaseTime : uint8_t { Midnight = 0, Sunrise = 1, Sunset = 2 };
+    typedef std::array<uint8_t, 5> SerializedDataType;
     
     private:
 
     BaseTime base;
-    int32_t sec_since_base;
+    int32_t secSinceBase;
 
     // ensures that sec_since_base is positive when base is equal to BaseTime::Midnight
     // otherwise does nothing 
@@ -44,7 +43,7 @@ class TimeOfDay {
 
     // H:M:S constructor, creates a Midnight based TimeOfDay.
     TimeOfDay(uint32_t h, uint32_t m, uint32_t s);
-    TimeOfDay(uint32_t seconds_since_midnight);
+    TimeOfDay(uint32_t secondsSinceMidnight);
 
 
     // TimeOfDay describing the given 'event'

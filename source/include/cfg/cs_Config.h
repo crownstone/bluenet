@@ -56,30 +56,6 @@
 #define SCHED_QUEUE_SIZE                         32
 #endif
 
-/**
- * Buffer size that is used for characteristics that the user reads from.
- */
-#define CS_CHAR_READ_BUF_SIZE                    MASTER_BUFFER_SIZE
-
-/**
- * Buffer size that is used for characteristics that the user writes to.
- */
-#define CS_CHAR_WRITE_BUF_SIZE                   MASTER_BUFFER_SIZE
-
-/**
- * Determines scan interval in units of 0.625 millisecond.
- * Channel is changed every interval.
- */
-#define SCAN_INTERVAL                            160 // 100 ms
-/**
- * Determines scan window in units of 0.625 millisecond.
- * This is the amount of time in an interval that the scanner actually listens.
- * You should leave some radio time for other modules (like advertising).
- * See https://devzone.nordicsemi.com/question/84767/s132-scan-intervalwindow-adv-interval
- * See https://devzone.nordicsemi.com/f/nordic-q-a/14733/s132-scan-interval-window-adv-interval
- * Old https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
- */
-#define SCAN_WINDOW                              158 // 98.75 ms
 
 #define APP_BLE_CONN_CFG_TAG                     1 // Connection configuration identifier.
 
@@ -95,18 +71,6 @@
 #define SECURITY_REQUEST_DELAY                   1500                                        /**< Delay after connection until security request is sent, if necessary (ms). */
 
 #define SWITCH_CLAIM_TIME_MS                     2000                                        /**< Time that switch commands of other sources are ignored. */
-
-// tx power used for low power mode during bonding
-/* moved to boards config in cs_Boards.c
-#define LOW_TX_POWER                             -40
- */
-
-//#define CLOCK_SOURCE                             NRF_CLOCK_LFCLKSRC_RC_250_PPM_TEMP_8000MS_CALIBRATION
-
-// duration (in ms) how long the relay pins should be set to high
-#define RELAY_HIGH_DURATION                      15
-// duration (in ms) how long to retry switching the relay if there was not enough power to switch.
-#define RELAY_DELAY                              50
 
 // Max number of schedule entries in the schedule service.
 #define MAX_SCHEDULE_ENTRIES                     10
@@ -190,15 +154,6 @@
 
 #define BROWNOUT_TRIGGER_THRESHOLD               NRF_POWER_THRESHOLD_V27
 
-/* moved to boards config in cs_Boards.c
-#define VOLTAGE_MULTIPLIER                       0.20f
-//#define VOLTAGE_MULTIPLIER                       0.40f // For 1_4 gain
-#define CURRENT_MULTIPLIER                       0.0045f
-//#define CURRENT_MULTIPLIER                       0.0110f // For 1_4 gain
-#define VOLTAGE_ZERO                             2003
-#define CURRENT_ZERO                             1997
-#define POWER_ZERO                               1500
-*/
 // Octave: a=0.05; x=[0:1000]; y=(1-a).^x; y2=cumsum(y)*a; figure(1); plot(x,y); figure(2); plot(x,y2); find(y2 > 0.99)(1)
 // Python: d=0.1; x=range(0,1000); y=np.power(1.0 - d, x); y2=np.cumsum(y) * d; indices=np.where(y2 > 0.99); print(indices[0][0])
 #define VOLTAGE_ZERO_EXP_AVG_DISCOUNT            20  // Is divided by 1000, so 20 is a discount of 0.02. // 99% of the average is influenced by the last 228 values
@@ -298,154 +253,7 @@
  */
 #define TICK_INTERVAL_MS 100
 
-/**
- * The configuration parameters here will have the following format:
- *   LABEL
- * and
- *   CONFIG_LABEL_DEFAULT
- * It would be cumbersome for the user to type CONFIG and DEFAULT all the time, so the incoming macro is assumed
- * to be just LABEL. Hence, you will have a macro that can be used within the firmware:
- *
- *   #ifdef LABEL
- *     #define CONFIG_LABEL_DEFAULT LABEL
- *   #else
- *     #define CONFIG_LABEL_DEFAULT ...
- *   #endif
- *
- * In this way we will be able to quickly rewrite the code if there is a conflict. For example, prepending each
- * config macro with a Crownstone specific prefix (parallel to the Nordic prefix, NRF_, we might go for CS_ as
- * Crownstone abbreviation). If we use a short abbreviation we can have exactly the same macro for the user.
- *
- * There are values that indicate if parts of the code base will be compiled such as:
- *
- *   CS_MESH_COMPILED
- *
- *   CS_MESH_ENABLED
- *   CS_ENCRYPTION_ENABLED
- *   CS_IBEACON_ENABLED
- *   CS_SCANNER_ENABLED
- *   CS_POWER_SAMPLER_ENABLED
- *   CS_RELAY_START_STATE
- *   CS_PWM_ENABLED
- *
- * For now, a lot of these variables has not yet been made conform to the above naming scheme.
- */
-
-
-#if defined MESHING
-#define CONFIG_MESH_ENABLED_DEFAULT MESHING
-#else
-#define CONFIG_MESH_ENABLED_DEFAULT 1
-#endif
-
-#if defined ENCRYPTION
-#define CONFIG_ENCRYPTION_ENABLED_DEFAULT ENCRYPTION
-#else
-#define CONFIG_ENCRYPTION_ENABLED_DEFAULT 1
-#endif
-
-#if defined IBEACON
-#define CONFIG_IBEACON_ENABLED_DEFAULT IBEACON
-#else
-#define CONFIG_IBEACON_ENABLED_DEFAULT 1
-#endif
-
-#if defined INTERVAL_SCANNER_ENABLED
-#define CONFIG_SCANNER_ENABLED_DEFAULT INTERVAL_SCANNER_ENABLED
-#else
-#define CONFIG_SCANNER_ENABLED_DEFAULT 0
-#endif
-
-#if defined PWM
-#define CONFIG_PWM_DEFAULT PWM
-#else
-#define CONFIG_PWM_DEFAULT 0
-#endif
-
-#if defined CONFIG_START_DIMMER_ON_ZERO_CROSSING_DEFAULT
-#else
-#define CONFIG_START_DIMMER_ON_ZERO_CROSSING_DEFAULT 1
-#endif
-
-#if defined CONFIG_TAP_TO_TOGGLE_ENABLED_DEFAULT
-#else
-#define CONFIG_TAP_TO_TOGGLE_ENABLED_DEFAULT 0
-#endif
-
-#if defined CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET_DEFAULT
-#else
-#define CONFIG_TAP_TO_TOGGLE_RSSI_THRESHOLD_OFFSET_DEFAULT 0
-#endif
-
-#if defined SWITCH_LOCK
-#define CONFIG_SWITCH_LOCK_DEFAULT SWITCH_LOCK
-#else
-#define CONFIG_SWITCH_LOCK_DEFAULT 0
-#endif
-
-#if defined SWITCHCRAFT
-#define CONFIG_SWITCHCRAFT_DEFAULT SWITCHCRAFT
-#else
-#define CONFIG_SWITCHCRAFT_DEFAULT 0
-#endif
-
-#if defined SPHERE_ID
-#define CONFIG_SPHERE_ID_DEFAULT SPHERE_ID
-#else
-#define CONFIG_SPHERE_ID_DEFAULT 0
-#endif
-
-#if defined CROWNSTONE_ID
-#define CONFIG_CROWNSTONE_ID_DEFAULT CROWNSTONE_ID
-#else
-#define CONFIG_CROWNSTONE_ID_DEFAULT 0
-#endif
-
-#if defined BOOT_DELAY
-#define CONFIG_BOOT_DELAY_DEFAULT BOOT_DELAY
-#else
-#define CONFIG_BOOT_DELAY_DEFAULT 0
-#endif
-
-#if defined CONFIG_LOW_TX_POWER_DEFAULT
-#else
-#define CONFIG_LOW_TX_POWER_DEFAULT 0
-#endif
-
-#if defined CONFIG_VOLTAGE_MULTIPLIER_DEFAULT
-#else
-#define CONFIG_VOLTAGE_MULTIPLIER_DEFAULT 1
-#endif
-
-#if defined CONFIG_CURRENT_MULTIPLIER_DEFAULT
-#else
-#define CONFIG_CURRENT_MULTIPLIER_DEFAULT 1
-#endif
-
-#if defined CONFIG_VOLTAGE_ZERO_DEFAULT
-#else
-#define CONFIG_VOLTAGE_ZERO_DEFAULT 0
-#endif
-
-#if defined CONFIG_CURRENT_ZERO_DEFAULT
-#else
-#define CONFIG_CURRENT_ZERO_DEFAULT 0
-#endif
-
-#if defined CONFIG_POWER_ZERO_DEFAULT
-#else
-#define CONFIG_POWER_ZERO_DEFAULT 0
-#endif
 #define CONFIG_POWER_ZERO_INVALID 0x7FFFFFFF
-
-#if defined CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP_DEFAULT
-#else
-#define CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_UP_DEFAULT 0
-#endif
-
-#ifndef CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN_DEFAULT
-#define CONFIG_PWM_TEMP_VOLTAGE_THRESHOLD_DOWN_DEFAULT 0
-#endif
 
 #ifndef STATE_SWITCH_STATE_DEFAULT
 #define STATE_SWITCH_STATE_DEFAULT 0

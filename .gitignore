@@ -21,3 +21,4 @@ nohup.out
 .vimrc
 .ctags/
 **/CMakeBuild.overwrite.config
+**/CMakeBuild.runtime.config

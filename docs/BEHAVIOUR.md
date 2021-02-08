@@ -1,35 +1,33 @@
 # Behaviour
 
-Behaviours can be set and retrieved. The user can check the [master hash](#behaviour_master_hash) to check if all behaviours are synchronized.
+Behaviours can be set and retrieved. The user can check the [master hash](#behaviour-master-hash) to check if all behaviours are synchronized.
 
 ## Table of contents
 
-- [Commands](#behaviour_commands)
-- [Packets](#behaviour_packets)
+- [Commands](#behaviour-commands)
+- [Packets](#behaviour-packets)
 
-<a name="behaviour_commands"></a>
 ## Behaviour Commands
 
-- [Add](#add_behaviour)
-- [Replace](#replace_behaviour)
-- [Remove](#remove_behaviour)
-- [Get](#get_behaviour)
-- [List](#get_behaviour_indices)
+- [Add](#add-behaviour)
+- [Replace](#replace-behaviour)
+- [Remove](#remove-behaviour)
+- [Get](#get-behaviour)
+- [List](#get-behaviour-indices)
 
 
 
-<a name="add_behaviour"></a>
 ### Add behaviour
+
 Add a new behaviour to an empty index.
 
-<a name="add_behaviour_packet"></a>
-##### Add behaviour packet
+#### Add behaviour packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Behaviour](#behaviour_payload) | Data | ... | Behaviour to add.
+[Behaviour](#behaviour-payload) | Data | ... | Behaviour to add.
 
-##### Result codes
+#### Result codes
 
 Value | Explanation
 --- | ---
@@ -38,30 +36,29 @@ BUSY | The memory was too busy to respond.
 SUCCESS | There was a slot free, and memory wasn't busy - request executed. See return payload for details.
 ... | Other cases may happen in case of exception.
 
-<a name="add_behaviour_result_packet"></a>
-##### Add behaviour result packet
+#### Add behaviour result packet
+
 The result will always contain the most current master hash.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index at which the behaviour is stored, or 255 when not successful.
-[Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
+[Hash](#behaviour-master-hash) | Master hash | 4 | The master hash after handling the request.
 
 
 
-<a name="replace_behaviour"></a>
 ### Replace Behaviour
+
 Replace a behaviour at given index by the given behaviour.
 
-<a name="replace_behaviour_packet"></a>
-##### Replace behaviour packet
+#### Replace behaviour packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to replace.
-[Behaviour](#behaviour_payload) | Data | ... | Behaviour to replace the current one at given index with.
+[Behaviour](#behaviour-payload) | Data | ... | Behaviour to replace the current one at given index with.
 
-##### Result codes
+#### Result codes
 
 Value | Explanation
 --- | ---
@@ -70,30 +67,29 @@ BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
 
-<a name="replace_behaviour_result_packet"></a>
-##### Replace behaviour result packet
+#### Replace behaviour result packet
+
 The result will always contain the most current master hash.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index at which the behaviour was replaced.
-[Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
+[Hash](#behaviour-master-hash) | Master hash | 4 | The master hash after handling the request.
 
 
 
-<a name="remove_behaviour"></a>
 ### Remove behaviour
+
 Remove the behaviour at given index.
 
-<a name="remove_behaviour_packet"></a>
-##### Remove behaviour packet
+#### Remove behaviour packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to remove.
 
 
-##### Result codes
+#### Result codes
 
 Value | Explanation
 --- | ---
@@ -102,29 +98,28 @@ BUSY | The memory was too busy to respond.
 SUCCESS | Behaviour at given index is removed, or was already empty.
 ... | Other cases may happen in case of exception.
 
-<a name="remove_behaviour_result_packet"></a>
-##### Remove behaviour result packet
+#### Remove behaviour result packet
+
 The result will always contain the most current master hash.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index from which the behaviour was removed.
-[Hash](#behaviour_master_hash) | Master hash | 4 | The master hash after handling the request.
+[Hash](#behaviour-master-hash) | Master hash | 4 | The master hash after handling the request.
 
 
 
-<a name="get_behaviour"></a>
 ### Get behaviour
+
 Retrieve the behaviour at given index.
 
-<a name="get_behaviour_packet"></a>
-##### Get behaviour packet
+#### Get behaviour packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | Index of the behaviour to obtain.
 
-##### Result codes
+#### Result codes
 
 Value | Explanation
 --- | ---
@@ -134,22 +129,22 @@ BUSY | The memory was too busy to respond.
 SUCCESS | The index is valid and memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
 
-<a name="get_behaviour_result_packet"></a>
-##### Get behaviour result packet
+#### Get behaviour result packet
+
 If the index is unoccupied, the result payload has length 0.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Index | 1 | The index of the requested behaviour.
-[Behaviour](#behaviour_payload) | Data | ... | The behaviour that is stored at the given `Index`.
+[Behaviour](#behaviour-payload) | Data | ... | The behaviour that is stored at the given `Index`.
 
 
 
-<a name="get_behaviour_indices"></a>
 ### Get behaviour indices
+
 Query which indices in the behaviour store are currently occupied.
 
-##### Result codes
+#### Result codes
 
 Value | Explanation
 --- | ---
@@ -157,29 +152,25 @@ BUSY | The memory was too busy to respond.
 SUCCESS | Memory could be queried. See return payload for details.
 ... | Other cases may happen in case of exception.
 
-<a name="get_behaviour_indices_packet"></a>
-##### Behaviour indices result packet
+#### Behaviour indices result packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Index with hash](#index_and_behaviour_hash)[] | list | ... | List of all occupied indices, and their hashes.
+[Index with hash](#index-and-behaviour-hash)[] | list | ... | List of all occupied indices, and their hashes.
 
 
 
-<a name="behaviour_packets"></a>
 ## Behaviour packets
 
-<a name="behaviour_payload"></a>
 #### Behaviour payload
 
 ![Behaviour payload](../docs/diagrams/behaviour-payload.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | Type | 1 | <ol start="0"><li>[Switch behaviour](#switch_behaviour)</li><li>[Twilight behaviour](#twilight_behaviour)</li><li>[Smart timer](#smart_timer)</li></ol>
+uint8_t | Type | 1 | <ol start="0"><li>[Switch behaviour](#switch-behaviour)</li><li>[Twilight behaviour](#twilight-behaviour)</li><li>[Smart timer](#smart-timer)</li></ol>
 uint8_t[] | Data | ... | Type dependent
 
-<a name="switch_behaviour"></a>
 #### Switch behaviour
 
 ![Switch behaviour](../docs/diagrams/switch-behaviour.png)
@@ -188,12 +179,11 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
 uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Currently unused)
-[Day of week bitmask](#day_of_week_bitmask) | Active days | 1 | Selects which days of the week this behaviour is active
-[Time of day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
-[Time of day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
-[Presence description](#presence_description) | Presence | 13 | Description of the presence conditions that need to hold for this behaviour to be active.
+[Day of week bitmask](#day-of-week-bitmask) | Active days | 1 | Selects which days of the week this behaviour is active
+[Time of day](#time-of-day) | From | 5 | The behaviour is active from, inclusive, this time of day.
+[Time of day](#time-of-day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
+[Presence description](#presence-description) | Presence | 13 | Description of the presence conditions that need to hold for this behaviour to be active.
 
-<a name="twilight_behaviour"></a>
 #### Twilight behaviour
 
 ![Twilight behaviour](../docs/diagrams/twilight-behaviour.png)
@@ -202,11 +192,10 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Intensity | 1 | Value from 0-100, both inclusive, indicating the desired intensity of the device (0 for 'off', 100 for 'fully on')
 uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Currently unused)
-[Day of week bitmask](#day_of_week_bitmask) | Active days | 1 | Selects which days of the week this behaviour is active
-[Time of day](#time_of_day) | From | 5 | The behaviour is active from, inclusive, this time of day.
-[Time of day](#time_of_day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
+[Day of week bitmask](#day-of-week-bitmask) | Active days | 1 | Selects which days of the week this behaviour is active
+[Time of day](#time-of-day) | From | 5 | The behaviour is active from, inclusive, this time of day.
+[Time of day](#time-of-day) | Until | 5 | The behaviour is active until, exclusive, this time of day.
 
-<a name="smart_timer"></a>
 #### Smart timer
 
 A Smart timer consists of a switch behaviour and an exit condition. This can be used to ensure that for example,
@@ -221,19 +210,17 @@ expires. If the extension end condition timeout is set to 0, the temporary behav
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Switch behaviour](#switch_behaviour) | Core behaviour | 26 | The core behaviour is interpreted identical to switch behaviour.
-[End condition](#behaviour_end_condition) | Extension end condition | 17 | Describes the conditions that determine when this extension will be removed.
+[Switch behaviour](#switch-behaviour) | Core behaviour | 26 | The core behaviour is interpreted identical to switch behaviour.
+[End condition](#behaviour-end-condition) | Extension end condition | 17 | Describes the conditions that determine when this extension will be removed.
 
-<a name="behaviour_end_condition"></a>
 #### Behaviour end condition
 
 ![End Condition](../docs/diagrams/behaviour-end-condition.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Presence description](#presence_description) | Extension presence | 13 | Description of the presence conditions that the Extension behaviour will use.
+[Presence description](#presence-description) | Extension presence | 13 | Description of the presence conditions that the Extension behaviour will use.
 
-<a name="behaviour_master_hash"></a>
 #### Behaviour master hash
 
 The `BehaviourStore` can generate a hash that can be used to verify if an application is up to date. The data that is hashed is as in the following table. The hashing algorithm used is [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum). As this algorithm is based on 16-bit integer array as input each entry in the table below is padded with 0x00 at the end if its length is uneven.
@@ -243,17 +230,16 @@ Only indices with non empty behaviours are used to calculate the master hash.
 Type | Name | Length
 --- | --- | ---
 uint8 | Index0 | 1 (padded with 0x00)
-[Behaviour](#behaviour_payload) | Behaviour0 | size depends on the type of payload
+[Behaviour](#behaviour-payload) | Behaviour0 | size depends on the type of payload
 uint8 | Index1 | 1 (padded with 0x00)
-[Behaviour](#behaviour_payload) | Behaviour1 | size depends on the type of payload
+[Behaviour](#behaviour-payload) | Behaviour1 | size depends on the type of payload
 ... | ... | ...
 uint8 | IndexLast | 1 (padded with 0x00)
-[Behaviour](#behaviour_payload) | BehaviourLast | size depends on the type of payload
+[Behaviour](#behaviour-payload) | BehaviourLast | size depends on the type of payload
 
-<a name="index_and_behaviour_hash"></a>
 #### Index and behaviour hash
 
-For each behaviour individually, a hash can be calculated as well, similar to the [master hash](#behaviour_master_hash).
+For each behaviour individually, a hash can be calculated as well, similar to the [master hash](#behaviour-master-hash).
 
 ![Index and behaviour hash](../docs/diagrams/behaviour-index-and-behaviour-hash.png)
 
@@ -263,7 +249,6 @@ uint8 | index | 1 | Index of an occupied behaviour.
 uint32 | Behaviour hash | 4 | The hash of the behaviour at this index. Generated by calculating the [Fletcher32](https://en.wikipedia.org/wiki/Fletcher%27s_checksum) hash of the behaviour data, padded with zeroes if necessary.
 
 
-<a name="time_difference"></a>
 #### Time difference
 
 ![Time difference](../docs/diagrams/time-difference.png)
@@ -272,7 +257,6 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 int32 | Time payload | 4 | Signed difference in seconds since a known-from-context moment in time (future - past >= 0).
 
-<a name="time_of_day"></a>
 #### Time of day
 
 ![Time of day](../docs/diagrams/time-of-day.png)
@@ -280,9 +264,8 @@ int32 | Time payload | 4 | Signed difference in seconds since a known-from-conte
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Base time |  1 | <ol start="0"><li>Midnight </li><li>Sunrise </li><li>Sunset</li></ol>
-[Time difference](#time_difference) | Offset | 4 | 
+[Time difference](#time-difference) | Offset | 4 | 
 
-<a name="day_of_week_bitmask"></a>
 #### Day of week bitmask
 
 ![Day of week](../docs/diagrams/day-of-week-bitmask.png)
@@ -291,7 +274,6 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Bitmask | 1 | 0: sunday - 6: saturday. 7: must be 0.
 
-<a name="presence_description"></a>
 #### Presence description
 
 Given that for each room it is known if there are users present in that room or not, a Presence Description
@@ -307,7 +289,6 @@ uint32_t | Timeout | 4 | Whenever a presence description is satisfied (evaluates
 
 
 
-<a name="firmware_design"></a>
 ## Firmware design internals
 
 In the diagram below the event flow concerning Behaviours and Twilights is depicted. Double arrows (annotated) indicate which `event`'s are received and handled by the node pointed to, red/dashed objects indicate not-yet implemented features, aggregation arrows indicate object ownership as in the sense of UML and lines indicate connection to physical domain.

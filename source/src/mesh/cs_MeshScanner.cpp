@@ -14,32 +14,30 @@
 
 void MeshScanner::onScan(const nrf_mesh_adv_packet_rx_data_t *scanData) {
 	switch (scanData->p_metadata->source) {
-	case NRF_MESH_RX_SOURCE_SCANNER:{
-		scanned_device_t _scannedDevice = {0};
+		case NRF_MESH_RX_SOURCE_SCANNER: {
+			scanned_device_t _scannedDevice = {0};
 
-		memcpy(_scannedDevice.address,
-				scanData->p_metadata->params.scanner.adv_addr.addr,
-				sizeof(_scannedDevice.address));
+			memcpy(_scannedDevice.address,
+					scanData->p_metadata->params.scanner.adv_addr.addr,
+					sizeof(_scannedDevice.address));
 
-		// TODO: check addr_type and addr_id_peer
-		_scannedDevice.addressType =
-				(scanData->p_metadata->params.scanner.adv_addr.addr_type & 0x7F) &
-				((scanData->p_metadata->params.scanner.adv_addr.addr_id_peer & 0x01) << 7);
+			_scannedDevice.resolvedPrivateAddress = scanData->p_metadata->params.scanner.adv_addr.addr_id_peer;
+			_scannedDevice.addressType = scanData->p_metadata->params.scanner.adv_addr.addr_type;
 
-		_scannedDevice.rssi = scanData->p_metadata->params.scanner.rssi;
-		_scannedDevice.channel = scanData->p_metadata->params.scanner.channel;
-		_scannedDevice.dataSize = scanData->length;
-		_scannedDevice.data = const_cast<uint8_t*>(scanData->p_payload);
+			_scannedDevice.rssi = scanData->p_metadata->params.scanner.rssi;
+			_scannedDevice.channel = scanData->p_metadata->params.scanner.channel;
+			_scannedDevice.dataSize = scanData->length;
+			_scannedDevice.data = const_cast<uint8_t*>(scanData->p_payload);
 
-		event_t event(CS_TYPE::EVT_DEVICE_SCANNED, static_cast<void*>(&_scannedDevice), sizeof(_scannedDevice));
-		event.dispatch();
-		break;
-	}
-	case NRF_MESH_RX_SOURCE_GATT:
-		break;
-	case NRF_MESH_RX_SOURCE_INSTABURST:
-		break;
-	case NRF_MESH_RX_SOURCE_LOOPBACK:
-		break;
+			event_t event(CS_TYPE::EVT_DEVICE_SCANNED, static_cast<void*>(&_scannedDevice), sizeof(_scannedDevice));
+			event.dispatch();
+			break;
+		}
+		case NRF_MESH_RX_SOURCE_GATT:
+			break;
+		case NRF_MESH_RX_SOURCE_INSTABURST:
+			break;
+		case NRF_MESH_RX_SOURCE_LOOPBACK:
+			break;
 	}
 }

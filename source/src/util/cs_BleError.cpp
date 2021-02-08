@@ -5,7 +5,7 @@
  */
 
 #include <util/cs_BleError.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 
 //! Called by BluetoothLE.h classes when exceptions are disabled.
 void ble_error_handler (const char * msg, uint32_t line_num, const char * p_file_name) {
@@ -18,7 +18,7 @@ void ble_error_handler (const char * msg, uint32_t line_num, const char * p_file
 	NRF_BREAKPOINT_COND;
 	NVIC_SystemReset();
 //	__asm("BKPT");
-//	while(1) {}
+//	while (1) {}
 }
 
 /**
@@ -111,7 +111,7 @@ constexpr const char* nordicTypeName(uint32_t nordic_type) {
 }
 
 constexpr const char* nordicFDSTypeName(uint32_t nordic_type) {
-	switch(nordic_type) {
+	switch (nordic_type) {
 //		case FDS_SUCCESS:
 //			return "FDS_SUCCESS";
 		case FDS_ERR_OPERATION_TIMEOUT:
@@ -150,7 +150,7 @@ constexpr const char* nordicFDSTypeName(uint32_t nordic_type) {
 }
 
 constexpr const char* nordicFDSEventTypeName(uint32_t nordic_type) {
-	switch(nordic_type) {
+	switch (nordic_type) {
 		case FDS_EVT_INIT:
 			return "FDS_EVT_INIT";
 		case FDS_EVT_WRITE:
@@ -169,7 +169,7 @@ constexpr const char* nordicFDSEventTypeName(uint32_t nordic_type) {
 }
 
 constexpr const char* nordicEventTypeName(uint32_t nordic_type) {
-	switch(nordic_type) {
+	switch (nordic_type) {
 		case BLE_GAP_EVT_CONNECTED:
 			return "BLE_GAP_EVT_CONNECTED";
 		case BLE_EVT_USER_MEM_REQUEST:
@@ -214,7 +214,7 @@ constexpr const char* nordicEventTypeName(uint32_t nordic_type) {
 //	LOGf("FATAL ERROR 0x%X, at %s:%d", error, file, line);
 //
 //	__asm("BKPT");
-//	while(1) {}
+//	while (1) {}
 //}
 //
 ////! Called by softdevice
@@ -229,7 +229,7 @@ constexpr const char* nordicEventTypeName(uint32_t nordic_type) {
 //	LOGf("FATAL ERROR 0x%X", error);
 //
 //	__asm("BKPT");
-//	while(1) {}
+//	while (1) {}
 //}
 //
 ////called by NRF SDK when it has an internal error.
@@ -240,17 +240,17 @@ constexpr const char* nordicEventTypeName(uint32_t nordic_type) {
 //	LOGf("FATAL ERROR at %s:%d", file, line);
 //
 //	__asm("BKPT");
-//	while(1) {}
+//	while (1) {}
 //}
 //
 ///*
 //
 ////called by soft device when it has an internal error.
-//void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name){
+//void softdevice_assertion_handler(uint32_t pc, uint16_t line_num, const uint8_t * file_name) {
 //	volatile uint16_t line __attribute__((unused)) = line_num;
 //	volatile const uint8_t* file __attribute__((unused)) = file_name;
 //	__asm("BKPT");
-//	while(1) {}
+//	while (1) {}
 //}
 //
 //*/

@@ -240,10 +240,10 @@ void asACR01B2C(boards_config_t* p_config) {
 	p_config->pinGpioEnablePwm                   = 11; // Something unused
 	p_config->pinGpioRelayOn                     = 6;
 	p_config->pinGpioRelayOff                    = 7;
-	p_config->pinAinCurrentGainLow               = 2;
-	p_config->pinAinVoltage                      = 1;
+	p_config->pinAinCurrentGainLow               = 2;  // GPIO 0.04
+	p_config->pinAinVoltage                      = 1;  // GPIO 0.03
 //	p_config->pinAinZeroRef                      = -1; // Non existing
-	p_config->pinAinPwmTemp                      = 3;
+	p_config->pinAinPwmTemp                      = 3;  // GPIO 0.05
 	p_config->pinGpioRx                          = 20;
 	p_config->pinGpioTx                          = 19;
 	p_config->pinLedRed                          = 10;

@@ -6,7 +6,7 @@
  */
 
 #include <common/cs_Types.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <events/cs_EventDispatcher.h>
 #include <util/cs_BleError.h>
 
@@ -51,8 +51,6 @@ bool EventDispatcher::addListener(EventListener *listener) {
 		APP_ERROR_CHECK(NRF_ERROR_NULL);
 		return false;
 	}
-
-	LOGEventdispatcherInfo("add listener: %u", _listenerCount);
 
 	_listeners[_listenerCount++] = listener;
 	return true;

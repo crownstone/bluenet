@@ -11,7 +11,6 @@
 #include <tuple>
 
 #include "cfg/cs_Config.h"
-#include "drivers/cs_Serial.h"
 #include "protocol/cs_CommandTypes.h"
 #include "protocol/cs_ErrorCodes.h"
 #include "structs/cs_PacketsInternal.h"
@@ -20,7 +19,6 @@
 #include <behaviour/cs_TwilightBehaviour.h>
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
-#include <localisation/cs_RssiPingMessage.h>
 #include <localisation/cs_Nearestnearestwitnessreport.h>
 class TrackableEvent;
 
@@ -200,6 +198,9 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_CONNECT,                                       // Device connected.
 	EVT_BLE_DISCONNECT,                                    // Device disconnected.
 	CMD_ENABLE_ADVERTISEMENT,                              // Enable/disable advertising.
+	EVT_OUTGOING_CONNECT_START,                            // An outgoing connection is going to be made. Always followed by either connected or disconnected event.
+	EVT_OUTGOING_CONNECTED,                                // An outgoing connection is made.
+	EVT_OUTGOING_DISCONNECTED,                             // An outgoing connection is terminated or failed.
 
 	// Switch (aggregator)
 	CMD_SWITCH_OFF = InternalBaseSwitch,              // Turn switch off.
@@ -282,6 +283,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_SEND_MESH_MSG_TRACKED_DEVICE_HEARTBEAT,       // Send a tracked device heartbeat mesh message.
 	EVT_MESH_TRACKED_DEVICE_HEARTBEAT,                // Mesh received a tracked device heartbeat.
 	EVT_MESH_RSSI_PING,                               // A ping message sent from another crownstone was received.
+	EVT_MESH_RSSI_DATA,                               // A message containing rssi data between sender and one of its neighbors was received.
 	EVT_MESH_TIME_SYNC,                               // A time sync message was received
 	EVT_RECV_MESH_MSG,                                // A mesh message was received.
 	EVT_MESH_NEAREST_WITNESS_REPORT,                  // CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT was received on the mesh and parsed by MeshMsgHandler. Payload: MeshMsgEvent
@@ -398,7 +400,7 @@ struct __attribute__((packed)) cs_type_and_id_t {
 /**
  * Takes a pointer to a buffer and reinterprets it as pointer to the given type.
  */
-#define UNTYPIFY(EVT_NAME, PTR) reinterpret_cast<TYPIFY(EVT_NAME)*>(PTR)
+#define CS_TYPE_CAST(EVT_NAME, PTR) reinterpret_cast<TYPIFY(EVT_NAME)*>(PTR)
 #endif
 typedef uint16_t TYPIFY(CONFIG_ADV_INTERVAL);
 typedef uint16_t TYPIFY(CONFIG_BOOT_DELAY);
@@ -468,6 +470,9 @@ typedef  adv_background_parsed_v1_t TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1);
 typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
 typedef  void TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
+typedef  void TYPIFY(EVT_OUTGOING_CONNECT_START);
+typedef  void TYPIFY(EVT_OUTGOING_CONNECTED);
+typedef  void TYPIFY(EVT_OUTGOING_DISCONNECTED);
 typedef  void TYPIFY(EVT_BROWNOUT_IMPENDING);
 typedef  void TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_CHIP_TEMP_OK);
@@ -583,7 +588,8 @@ typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP);
 typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
 typedef microapp_advertise_request_t TYPIFY(CMD_MICROAPP_ADVERTISE);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
-typedef rssi_ping_message_t TYPIFY(EVT_MESH_RSSI_PING);
+typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_PING);
+typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_DATA);
 typedef time_sync_message_t TYPIFY(EVT_MESH_TIME_SYNC);
 typedef MeshMsgEvent TYPIFY(EVT_RECV_MESH_MSG);
 typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);

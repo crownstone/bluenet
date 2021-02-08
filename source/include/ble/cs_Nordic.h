@@ -45,6 +45,7 @@ typedef uint32_t ret_code_t;
 #include <nrfx_comp.h>
 //#include <nrf_drv_comp.h>
 #include <nrfx_wdt.h>
+#include <ble_db_discovery.h>
 
 #ifdef BUILD_TWI
 #include <nrfx_twi.h>

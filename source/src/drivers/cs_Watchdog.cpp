@@ -7,7 +7,7 @@
 
 #include <cfg/cs_Config.h>
 #include <drivers/cs_GpRegRet.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_Watchdog.h>
 #include <util/cs_BleError.h>
 

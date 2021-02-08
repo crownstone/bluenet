@@ -9,7 +9,7 @@
 #include <cfg/cs_DeviceTypes.h>
 #include <drivers/cs_RNG.h>
 #include <drivers/cs_RTC.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_Temperature.h>
 #include <encryption/cs_AES.h>
 #include <encryption/cs_KeysAndAccess.h>
@@ -154,7 +154,7 @@ void ServiceData::updateServiceData(bool initial) {
 	bool encrypt = fillServiceData(timestamp);
 
 #ifdef PRINT_DEBUG_EXTERNAL_DATA
-	LOGd("servideData:");
+	_log(SERIAL_DEBUG, false, "servideData: ");
 	BLEutil::printArray(_serviceData.array, sizeof(service_data_t));
 //		LOGd("serviceData: type=%u id=%u switch=%u bitmask=%u temp=%i P=%i E=%i time=%u", serviceData->params.type, serviceData->params.crownstoneId, serviceData->params.switchState, serviceData->params.flagBitmask, serviceData->params.temperature, serviceData->params.powerUsageReal, serviceData->params.accumulatedEnergy, serviceData->params.partialTimestamp);
 #endif
@@ -366,7 +366,7 @@ bool ServiceData::fillWithMicroapp(uint32_t timestamp) {
 
 void ServiceData::handleEvent(event_t & event) {
 	// Keep track of the BLE connection status. If we are connected we do not need to update the packet.
-	switch(event.type) {
+	switch (event.type) {
 		case CS_TYPE::EVT_BLE_CONNECT: {
 			LOGd("Connected");
 			_connected = true;

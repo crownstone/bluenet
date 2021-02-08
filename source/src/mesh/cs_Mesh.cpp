@@ -7,7 +7,7 @@
 
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Boards.h>
-#include <drivers/cs_Serial.h>
+#include <logging/cs_Logger.h>
 #include <drivers/cs_RNG.h>
 #include <mesh/cs_Mesh.h>
 #include <mesh/cs_MeshCommon.h>
@@ -53,7 +53,15 @@ cs_ret_code_t Mesh::init(const boards_config_t& board) {
 	});
 	_modelSelector.init(&_modelMulticast, &_modelMulticastAcked, &_modelUnicast);
 	_msgSender.init(&_modelSelector);
-	return _core->init(board);
+
+	cs_ret_code_t retCode = _core->init(board);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	_msgSender.listen();
+	this->listen();
+	return retCode;
 }
 
 void Mesh::initModels() {
@@ -81,14 +89,15 @@ void Mesh::configureModels(dsm_handle_t appkeyHandle) {
 }
 
 void Mesh::start() {
-	LOGi("start");
-	_core->start();
-	_msgSender.listen();
-	this->listen();
+	if (_enabled) {
+		LOGi("start");
+		_core->start();
+	}
 }
 
 void Mesh::stop() {
-	assert(false, "TODO");
+	LOGi("stop");
+	_core->stop();
 }
 
 void Mesh::initAdvertiser() {
@@ -117,74 +126,99 @@ void Mesh::advertiseIbeacon() {
 	_advertiser.advertiseIbeacon(0);
 }
 
+void Mesh::stopAdvertising() {
+	_advertiser.stop();
+}
+
 void Mesh::handleEvent(event_t & event) {
 	switch (event.type) {
-	case CS_TYPE::EVT_TICK: {
-		TYPIFY(EVT_TICK) tickCount = *((TYPIFY(EVT_TICK)*)event.data);
-		if (tickCount % (500/TICK_INTERVAL_MS) == 0) {
-			if (Stack::getInstance().isScanning()) {
-//				Stack::getInstance().stopScanning();
-			}
-			else {
-//				Stack::getInstance().startScanning();
-			}
+		case CS_TYPE::EVT_TICK: {
+			TYPIFY(EVT_TICK) tickCount = *((TYPIFY(EVT_TICK)*)event.data);
+			onTick(tickCount);
+			break;
 		}
-		if (!_synced) {
-			if (_syncCountdown) {
-				--_syncCountdown;
-			}
-			else {
-				_synced = !requestSync();
-				_syncCountdown = MESH_SYNC_RETRY_INTERVAL_MS / TICK_INTERVAL_MS;
-			}
-			if (_syncFailedCountdown) {
-				if (--_syncFailedCountdown == 0) {
-					// Do one last check, internally to see if the previous requestSync succeeded.
-					// but don't send anything over the mesh. Our chance has passed.
-					_synced = !requestSync(false);
-
-					if(!_synced){
-						LOGw("Sync failed");
-						event_t syncFailEvent(CS_TYPE::EVT_MESH_SYNC_FAILED);
-						syncFailEvent.dispatch();
-
-						// yes, we know that sync failed, we're just misusing the _synced variable.
-						// (setting it to true will prevent any further sync requests.)
-						_synced = true;
-					}
-				}
-			}
-		}
-#if MESH_MODEL_TEST_MSG == 1
-		if (_core->getUnicastAddress() == 2 && tickCount % (100 / TICK_INTERVAL_MS) == 0) {
-			_msgSender.sendTestMsg();
-		}
-#elif MESH_MODEL_TEST_MSG == 2
-		if (_core->getUnicastAddress() == 2 && tickCount % (1000 / TICK_INTERVAL_MS) == 0) {
-			_msgSender.sendTestMsg();
-		}
-#endif
-		_modelMulticast.tick(tickCount);
-		_modelMulticastAcked.tick(tickCount);
-		_modelUnicast.tick(tickCount);
-		break;
-	}
-	case CS_TYPE::CMD_ENABLE_MESH: {
+		case CS_TYPE::CMD_ENABLE_MESH: {
 #if BUILD_MESHING == 1
-			uint8_t enable = *(uint8_t*)event.data;
-			if (enable) {
+			_enabled = *(TYPIFY(CMD_ENABLE_MESH)*)event.data;
+			if (_enabled) {
 				start();
 			}
 			else {
 				stop();
 			}
-			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &enable, 1);
+			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_MESH_ENABLED, &_enabled, 1);
 #endif
 			break;
+		}
+		case CS_TYPE::EVT_OUTGOING_CONNECT_START: {
+			// An outgoing connection is made, stop listening to mesh,
+			// so that the softdevice has time to listen for advertisements.
+			stop();
+			event.result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case CS_TYPE::EVT_OUTGOING_CONNECTED: {
+			start();
+			break;
+		}
+		case CS_TYPE::EVT_OUTGOING_DISCONNECTED: {
+			start();
+			break;
+		}
+
+		default:
+			break;
 	}
-	default:
-		break;
+}
+
+void Mesh::onTick(uint32_t tickCount) {
+	if (tickCount % (500/TICK_INTERVAL_MS) == 0) {
+		if (Stack::getInstance().isScanning()) {
+//				Stack::getInstance().stopScanning();
+		}
+		else {
+//				Stack::getInstance().startScanning();
+		}
 	}
+
+	if (!_synced) {
+		if (_syncCountdown) {
+			--_syncCountdown;
+		}
+		else {
+			_synced = !requestSync();
+			_syncCountdown = MESH_SYNC_RETRY_INTERVAL_MS / TICK_INTERVAL_MS;
+		}
+		if (_syncFailedCountdown) {
+			if (--_syncFailedCountdown == 0) {
+				// Do one last check, internally to see if the previous requestSync succeeded.
+				// but don't send anything over the mesh. Our chance has passed.
+				_synced = !requestSync(false);
+
+				if (!_synced) {
+					LOGw("Sync failed");
+					event_t syncFailEvent(CS_TYPE::EVT_MESH_SYNC_FAILED);
+					syncFailEvent.dispatch();
+
+					// yes, we know that sync failed, we're just misusing the _synced variable.
+					// (setting it to true will prevent any further sync requests.)
+					_synced = true;
+				}
+			}
+		}
+	}
+#if MESH_MODEL_TEST_MSG == 1
+	if (_core->getUnicastAddress() == 2 && tickCount % (100 / TICK_INTERVAL_MS) == 0) {
+		_msgSender.sendTestMsg();
+	}
+#elif MESH_MODEL_TEST_MSG == 2
+	if (_core->getUnicastAddress() == 2 && tickCount % (1000 / TICK_INTERVAL_MS) == 0) {
+		_msgSender.sendTestMsg();
+	}
+#endif
+	_modelMulticast.tick(tickCount);
+	_modelMulticastAcked.tick(tickCount);
+	_modelUnicast.tick(tickCount);
 }
 
 void Mesh::startSync() {
@@ -202,7 +236,7 @@ bool Mesh::requestSync(bool propagateSyncMessageOverMesh) {
 
 	LOGd("requestSync bitmask=%u", syncRequest.bitmask);
 
-	if (syncRequest.bitmask == 0 || !propagateSyncMessageOverMesh){
+	if (syncRequest.bitmask == 0 || !propagateSyncMessageOverMesh) {
 		// bitmask == 0 implies sync is unnecessary 
 		// propagateSyncMessageOverMesh==false implies we return here, before contacting the mesh.
 		return syncRequest.bitmask != 0;

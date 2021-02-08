@@ -1,8 +1,8 @@
 #include <util/cs_DoubleStackCoroutine.h>
-
-#include <drivers/cs_Serial.h>
+#include <cfg/cs_StaticConfig.h>
 
 #include <stddef.h>
+#include <stdint.h>
 
 enum { WORKING=1, DONE };
 
@@ -33,7 +33,7 @@ typedef struct {
 #define set_sp(p) asm volatile("mov sp, %0" : : "r"(p))
 
 // We hardcode the stack at the end of the RAM dedicated to the microapp
-start_params *const params = (start_params *)(uintptr_t)(RAM_MICROAPP_BASE + RAM_MICROAPP_AMOUNT);
+start_params *const params = (start_params *)(uintptr_t)(g_RAM_MICROAPP_END);
 
 void start(coroutine* c, coroutine_func f, void* arg) {
 	//save parameters before stack switching
