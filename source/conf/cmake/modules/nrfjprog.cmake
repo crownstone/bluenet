@@ -11,14 +11,22 @@ include(${DEFAULT_MODULES_PATH}/load_configuration.cmake)
 #   cmake ... RESET [SERIAL_NUM]
 #   cmake ... ERASE [SERIAL_NUM]
 
+if(EXISTS "${DEFAULT_CONFIG_FILE}")
+	load_configuration(${DEFAULT_CONFIG_FILE} CONFIG_LIST)
+endif()
+
 # Overwrite with runtime config
-load_configuration(${CONFIG_FILE} CONFIG_LIST)
+if(EXISTS "${CONFIG_FILE}")
+	load_configuration(${CONFIG_FILE} CONFIG_LIST)
+endif()
 
 if(SERIAL_NUM)
+	message("Add serial num flag for ${SERIAL_NUM}")
 	set(SERIAL_NUM_SWITCH "--snr")
 endif()
 
 if(COUNT)
+	message("Add count flag ${COUNT}")
 	set(COUNT_SWITCH "--n")
 endif()
 
