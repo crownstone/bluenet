@@ -3,9 +3,9 @@
 This is slightly different approach from actually adding files to the build system (as described [here](/docs/tutorials/ADD_BUILD_SUPPORT.md)).
 
 1. Add configuration option(s)
-2a. Adjust `cs_AutoConfig.cpp.in`, or
-2b. Adjust `s_StaticConfig.h.in`, or
-2c. Adjust `cs_config.h.in`.
+2. Adjust `cs_AutoConfig.cpp.in`, or
+3. Adjust `s_StaticConfig.h.in`, or
+4. Adjust `cs_config.h.in`.
 
 # Adjust autoconfig
 
