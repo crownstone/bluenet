@@ -19,11 +19,11 @@ Very likely you will need additional files to be compiled. Use the files with th
 The location where you can specify where this is done is in `/source/CMakeLists.txt` (note, it is **not** in the root `/CMakeList.txt` file). 
 
 ```
-	IF (BUILD_TWI)
-		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_twi.c")
-	ELSE()
-		MESSAGE(STATUS "Module for twi disabled")
-	ENDIF()
+IF (BUILD_TWI)
+	LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_twi.c")
+ELSE()
+	MESSAGE(STATUS "Module for twi disabled")
+ENDIF()
 ```
 
 ## Add your own new files
@@ -57,7 +57,7 @@ You can derive from an EventListener to get all kind of events from other module
 
 ```
 class Twi: public EventListener {
-  ...  
+	...  
 	void handleEvent(event_t & event);
 ```
 
@@ -66,9 +66,10 @@ If you have defined your own event, e.g. `CS_TYPE::EVT_TWI_INIT` you can capture
 ```
 void Twi::handleEvent(event_t & event) {
 	switch(event.type) {
-	case CS_TYPE::EVT_TWI_INIT: {
-    ...
-  }
+		case CS_TYPE::EVT_TWI_INIT: 
+		...
+	}
+}
 ```
 
 Sending an event is through something like:
