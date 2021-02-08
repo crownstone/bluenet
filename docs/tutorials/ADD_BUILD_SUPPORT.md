@@ -8,7 +8,7 @@ To add support for particular functionality, you'll need to touch a few files. W
 
 ## Add configuration options
 
-In [CMakeBuild.config.default(/source/conf/cmake/CMakeBuild.config.default) add an option, say `BUILD_TWI = 0` (the default is off for a new function). 
+In [CMakeBuild.config.default](/source/conf/cmake/CMakeBuild.config.default) add an option, say `BUILD_TWI = 0` (the default is off for a new function). 
 
 In your own local configuration file, e.g. [CMakeBuild.overwrite.config](/config/default/CMakeBuild.overwrite.config), set `BUILD_TWI = 1`.
 
