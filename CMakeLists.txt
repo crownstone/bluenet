@@ -119,9 +119,9 @@ set(NORDIC_MESH_SDK_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/sDKS/nRF5-SDK-for-Mesh/n
 set(NORDIC_MESH_SDK_MD5 29e813a85e209fd07837c4fd3c616178)
 
 # The nrfjprog
-set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/nRFCommandLineTools1030Linuxamd64tar.gz)
-set(NRFJPROG_DEB_FILE nRF-Command-Line-Tools_10_3_0_Linux-amd64.deb)
-set(NRFJPROG_MD5 545df3556fc1a70da7a99926fb426eb3)
+set(NRFJPROG_DOWNLOAD_URL ${NORDIC_DOWNLOAD_URL}/Desktop-software/nRF-command-line-tools/sw/Versions-10-x-x/10-12-1/nRFCommandLineTools10121Linuxamd64.tar.gz)
+set(NRFJPROG_DEB_FILE nRF-Command-Line-Tools_10_12_1_Linux-amd64.deb)
+set(NRFJPROG_MD5 a5d88595f13296614f07a8e8da6716b6)
 
 # The cross-compiler
 set(GCC_ARM_NONE_EABI_DOWNLOAD_URL https://developer.arm.com/-/media/Files/downloads/gnu-rm/8-2019q3/RC1.1/gcc-arm-none-eabi-8-2019-q3-update-linux.tar.bz2?revision=c34d758a-be0c-476e-a2de-af8c6e16a8a2?product=GNU%20Arm%20Embedded%20Toolchain,64-bit,,Linux,8-2019-q3-update)
