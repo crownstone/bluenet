@@ -2,9 +2,12 @@
 
 To add support for particular functionality, you'll need to touch a few files. We will give an example using the i2c (also called twi) driver.
 
-* Add configuration options
-* Add Nordic files
-* Add compiler flags
+1. Add configuration option(s). 
+2. Add Nordic files to the build system
+3. Add your own files to the build system.
+4. Add compiler flags (if necessary)
+
+If you actually have to include new source files, use `BUILD_X`. If you only set parameters without the need for additional source files, only add the configuration option, but skip the rest of this tutorial. You only need to follow the [tutorial to add a configuration option](/docs/tutorials/ADD_CONFIGURATION_OPTION.md).
 
 ## Add configuration options
 
