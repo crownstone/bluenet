@@ -16,7 +16,7 @@ In your own local configuration file, e.g. [CMakeBuild.overwrite.config](/config
 ## Add Nordic files
 
 Very likely you will need additional files to be compiled. Use the files with the `nrfx_` prefix (the other ones are old and will be phased out in the end). 
-The location where you can specify where this is done is in `/source/CMakeLists.txt` (note, it is **not** in the root `/CMakeList.txt` file). 
+The location where you can specify where this is done is in [source/CMakeLists.txt](/source/CMakeLists.txt) (note, it is **not** in the root `/CMakeList.txt` file). 
 
 ```
 IF (BUILD_TWI)
@@ -28,7 +28,7 @@ ENDIF()
 
 ## Add your own new files
 
-The code you have written and which interfaces with the Nordic code also has to be included. This is through [crownstone.src.cmake](source/conf/cmake/crownstone.src.cmake).
+The code you have written and which interfaces with the Nordic code also has to be included. This is through [crownstone.src.cmake](/source/conf/cmake/crownstone.src.cmake).
 
 ```
 IF (BUILD_TWI)
@@ -59,6 +59,7 @@ You can derive from an EventListener to get all kind of events from other module
 class Twi: public EventListener {
 	...  
 	void handleEvent(event_t & event);
+};
 ```
 
 If you have defined your own event, e.g. `CS_TYPE::EVT_TWI_INIT` you can capture it here.
