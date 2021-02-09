@@ -4,9 +4,24 @@ This document describes the flash memory layout, and how to add more data to sto
 
 The global layout of the the flash is shown below:
 
-![Flash memory layout](../docs/diagrams/flash-memory-layout.png)
 
-TODO: update
+| Start address | What | Nr of pages
+| ------------- |:-------------:| -----:|
+| 0x00000000 | MBR | 1
+| 0x00001000 | SD | 37
+| 0x00026000 | App / Bluenet | 43
+| 0x00051000 | Free | 23
+| 0x00068000 | Microapp (if only 1 page) | 1
+| 0x00069000 | Mesh storage | 4
+| 0x0006D000 | IPC page | 1
+| 0x0006E000 | Reserved for FDS expansion | 4
+| 0x00072000 | FDS | 4
+| 0x00076000 | Bootloader | 7
+| 0x0007D000 | Reserved for bootloader expansion | 1
+| 0x0007E000 | MBR settings | 1
+| 0x0007F000 | Bootloader settings | 1
+| | **Total** | 128
+
 
 The bootloader start address is defined in the _CMakeBuild.config_ as `BOOTLOADER_START_ADDRESS`.
 
