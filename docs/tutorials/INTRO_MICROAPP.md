@@ -7,6 +7,8 @@ The support for microapps is very preliminary. Be warned!
 
 ## Enable, flash, and setup
 
+Make sure you are on the right branch (and now its limitations). There is support for microapps in the `master` branch, but it is old. You will likely want to have the `microapp` branch.
+
 First enable support for microapps in e.g. `/config/$target/CMakeBuild.overwrite.config`.
 
 ```
