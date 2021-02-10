@@ -624,11 +624,11 @@ size16_t TypeSize(CS_TYPE const & type) {
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
 		return sizeof(TYPIFY(EVT_HUB_DATA_REPLY));
 	case CS_TYPE::EVT_TWI_INIT:
-		return 0;
+		return sizeof(TYPIFY(EVT_TWI_INIT));
 	case CS_TYPE::EVT_TWI_WRITE:
 		return sizeof(TYPIFY(EVT_TWI_WRITE));
 	case CS_TYPE::EVT_TWI_READ:
-		return 0;
+		return sizeof(TYPIFY(EVT_TWI_READ));
 	case CS_TYPE::EVT_TWI_UPDATE:
 		return sizeof(TYPIFY(EVT_TWI_UPDATE));
 	} // end switch

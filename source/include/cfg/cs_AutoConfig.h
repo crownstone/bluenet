@@ -108,6 +108,12 @@ extern const uint8_t g_CS_SERIAL_ENABLED;
 
 extern const bool g_ENABLE_RSSI_FOR_CONNECTION;
 
+extern const uint8_t g_PIN_TWI_SCL;
+
+extern const uint8_t g_PIN_TWI_SDA;
+
+extern const bool g_AUTO_ENABLE_MICROAPP_ON_BOOT;
+
 #ifdef __cplusplus
 }
 #endif

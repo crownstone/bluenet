@@ -18,19 +18,19 @@ public:
 	Twi();
 
 	/**
-	 * Init twi.
+	 * Init twi as master.
 	 */
-	void init(uint8_t pin_scl, uint8_t pin_sda, uint8_t address);
+	void init(uint8_t pin_scl, uint8_t pin_sda);
 
 	/**
-	 * Write data.
+	 * Write data to given address.
 	 */
-	void write(uint8_t *data, size_t length);
+	void write(uint8_t address, uint8_t *data, size_t length, bool stop);
 
 	/**
-	 * Read data.
+	 * Read data from given address.
 	 */
-	void read(uint8_t *data, size_t length);
+	void read(uint8_t address, uint8_t *data, size_t length);
 
 	/**
 	 * Read on ticks and update.
@@ -50,11 +50,12 @@ protected:
 private:
 	nrfx_twi_config_t _config;
 
-	uint8_t _address;
-
 	// Internal buffer for reading
 	uint8_t *_buf;
 
 	// Size of internal buffer
 	uint8_t _bufSize;
+
+	// Initialized flag
+	bool _init;
 };

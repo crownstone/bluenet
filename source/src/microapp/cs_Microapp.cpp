@@ -103,7 +103,6 @@ void Microapp::tick() {
 
 	MicroappProtocol & protocol = MicroappProtocol::getInstance();
 	protocol.callSetupAndLoop();
-
 }
 
 uint32_t Microapp::handlePacket(microapp_packet_header_t *packet_stub) {

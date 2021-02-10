@@ -5101,14 +5101,12 @@
 #define NRFX_TWI_ENABLED 0
 #endif
 // <q> NRFX_TWI0_ENABLED  - Enable TWI0 instance
- 
 
 #ifndef NRFX_TWI0_ENABLED
 #define NRFX_TWI0_ENABLED 0
 #endif
 
 // <q> NRFX_TWI1_ENABLED  - Enable TWI1 instance
- 
 
 #ifndef NRFX_TWI1_ENABLED
 #define NRFX_TWI1_ENABLED 0
@@ -6595,9 +6593,9 @@
 
 // <e> TWI_ENABLED - nrf_drv_twi - TWI/TWIM peripheral driver - legacy layer
 //==========================================================
-#ifndef TWI_ENABLED
-#define TWI_ENABLED 0
-#endif
+//#ifndef TWI_ENABLED
+//#define TWI_ENABLED 0
+//#endif
 // <o> TWI_DEFAULT_CONFIG_FREQUENCY  - Frequency
  
 // <26738688=> 100k 
@@ -6641,9 +6639,9 @@
 
 // <e> TWI0_ENABLED - Enable TWI0 instance
 //==========================================================
-#ifndef TWI0_ENABLED
-#define TWI0_ENABLED 0
-#endif
+//#ifndef TWI0_ENABLED
+//#define TWI0_ENABLED 0
+//#endif
 // <q> TWI0_USE_EASY_DMA  - Use EasyDMA (if present)
  
 

@@ -596,9 +596,9 @@ typedef hub_data_reply_t TYPIFY(EVT_HUB_DATA_REPLY);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_NEAREST_WITNESS_REPORT);
 
 // TWI / I2C module
-typedef void TYPIFY(EVT_TWI_INIT);
-typedef uint8_t TYPIFY(EVT_TWI_WRITE);
-typedef void TYPIFY(EVT_TWI_READ);
+typedef cs_twi_init_t TYPIFY(EVT_TWI_INIT);
+typedef cs_twi_write_t TYPIFY(EVT_TWI_WRITE);
+typedef cs_twi_read_t TYPIFY(EVT_TWI_READ);
 typedef uint8_t TYPIFY(EVT_TWI_UPDATE);
 
 /**

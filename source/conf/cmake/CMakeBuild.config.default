@@ -181,6 +181,10 @@ BOOT_DELAY=400
 # Set to 0 to disable the timeout.
 CONNECTION_ALIVE_TIMEOUT=20000
 
+# Twi / i2c defaults
+PIN_TWI_SCL=19
+PIN_TWI_SDA=20
+
 # This is the directory where the cross-compiler resides
 COMPILER_PATH=
 
@@ -400,6 +404,9 @@ RAM_BLUENET_IPC_LENGTH=0x100
 BOOTLOADER_IPC_RAM_PROTOCOL=1
 
 # Parameters for the microapps
+
+# Enable the microapp on boot (if set to 0 this will need to be done over the air)
+AUTO_ENABLE_MICROAPP_ON_BOOT=0
 
 # The start of microapps in flash
 FLASH_MICROAPP_BASE=0x68000
