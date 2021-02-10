@@ -73,3 +73,20 @@ make ota-enable
 ```
 
 Check for details the <https://github.com/mrquincle/crownstone-microapp> README as well!
+
+# What does not work yet?
+
+## Reading
+
+Currently, reading i2c is in the works. The code expects the bluenet firmware to be the master. This simplifies reading a lot (there's no asynchronicity required).
+There is already some code in place that would work for the async case though.
+
+## Enabling / validation
+
+Currently there is an enable command required which has as a payload the address of a particular custom main function in the Arduino code. However, this means that you can't just start the microapp at its start address (we shift the PC with this information). The same is true for the checksum with which we check if the application is correct. On the moment this information is out-band while we want it in-band.
+
+* Prepend the binary with a jump instruction towards the custom main function.
+* Append or prepend the binary with a field that contains the checksum of the binary (excluding the indicated fields).
+
+This will make generating the `bin` file slightly more complex (and depending on `srec_cat` or similar binary manipulation tools). However, it makes the upload process much easier. Note that the checksum that the over-the-air process uses will be a different one (which includes the other checksum).
+
