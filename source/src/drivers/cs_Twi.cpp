@@ -64,11 +64,16 @@ void Twi::write(uint8_t address, uint8_t *data, size_t length, bool stop) {
 	nrfx_twi_disable(&_twi);
 }
 
-void Twi::read(uint8_t address, uint8_t *data, size_t length) {
+void Twi::read(uint8_t address, uint8_t *data, size_t & length) {
+	uint16_t ret_code;
 	LOGi("Read i2c value");
 	nrfx_twi_enable(&_twi);
 
-	nrfx_twi_rx(&_twi, address, data, length);
+	ret_code = nrfx_twi_rx(&_twi, address, data, length);
+	if (ret_code != ERR_SUCCESS) {
+		LOGw("Error with twi rx");
+		length = 0;
+	}
 
 	nrfx_twi_disable(&_twi);
 }
@@ -94,7 +99,9 @@ void Twi::handleEvent(event_t & event) {
 	}
 	case CS_TYPE::EVT_TWI_READ: {
 		TYPIFY(EVT_TWI_READ)* twi = (TYPIFY(EVT_TWI_READ)*)event.data;
-		read(twi->address, twi->buf, twi->length);
+		size_t length = twi->length;
+		read(twi->address, twi->buf, length);
+		twi->length = length;
 		break;
 	}
 	case CS_TYPE::EVT_TICK: {

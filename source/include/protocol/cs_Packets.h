@@ -537,6 +537,7 @@ struct __attribute__((packed)) cs_twi_read_t {
 	uint8_t address;
 	uint8_t length;
 	uint8_t* buf;
+	bool stop;
 };
 
 // ========================= functions =========================

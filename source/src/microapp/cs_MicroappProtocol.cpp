@@ -110,20 +110,19 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 			// 3. The i2c module will set pointer to latest item in buffer in result of event, returns immediately
 			// 4. Return results by overwrite *data struct
 			// TODO: What!!! Returning a value from an event should be WAY easier!
-			// cs_buffer_size_t bufSize = 1;
-			cs_buffer_size_t bufSize = twi_cmd->length;
+			uint8_t bufSize = twi_cmd->length;
+			TYPIFY(EVT_TWI_READ) twi;
 			uint8_t buf_array[bufSize];
 			buffer_ptr_t buf = &buf_array[0];
-			cs_data_t result_data(buf, bufSize);
-			cs_result_t result(result_data);
-			event_t event(CS_TYPE::EVT_TWI_READ, NULL, 0, result);
+			twi.address = twi_cmd->address;
+			twi.buf = buf;
+			twi.length = bufSize;
+			twi.stop = twi_cmd->stop;
+			event_t event(CS_TYPE::EVT_TWI_READ, &twi, sizeof(twi));
 			EventDispatcher::getInstance().dispatch(event);
-			LOGd("Obtained data of length: %i", result_data.len);
-			twi_cmd->length = result_data.len;
-			for (int i = 0; i < twi_cmd->length && i < MAX_TWI_PAYLOAD; ++i) {
-				twi_cmd->buf[i] = buf_array[i];
-			}
 			twi_cmd->ack = event.result.returnCode;
+			twi_cmd->length = twi.length;
+			LOGd("Return value of length: %i", twi_cmd->length);
 			break;
 		}
 		default:
@@ -176,7 +175,7 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 	}
 	case CS_MICROAPP_COMMAND_PIN:
 	case CS_MICROAPP_COMMAND_TWI: {
-		forwardCommand(command, &payload[0], length);
+		forwardCommand(command, payload, length);
 		break;
 	}
 	case CS_MICROAPP_COMMAND_SERVICE_DATA: {

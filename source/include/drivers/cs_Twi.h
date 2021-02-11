@@ -30,7 +30,7 @@ public:
 	/**
 	 * Read data from given address.
 	 */
-	void read(uint8_t address, uint8_t *data, size_t length);
+	void read(uint8_t address, uint8_t *data, size_t & length);
 
 	/**
 	 * Read on ticks and update.

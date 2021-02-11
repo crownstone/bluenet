@@ -204,6 +204,11 @@ uint16_t MicroappStorage::validateApp() {
 	LOGd("Offset: %i", offset);
 	int size = (int)((buf[5] << 8) + (buf[4]));
 	LOGd("Size: %i", size);
+
+	if (size == 0xFFFF) {
+		LOGw("Do not load");
+		return ERR_WRONG_STATE;
+	}
 	int g_checksum = (int)((buf[9] << 8) + (buf[8]));
 	LOGd("Checksum: %x", g_checksum);
 
