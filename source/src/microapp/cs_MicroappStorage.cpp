@@ -173,27 +173,64 @@ uint16_t MicroappStorage::validateChunk(const uint8_t * const data, uint16_t siz
 }
 
 /**
- * This function validates the app in flash. It can only be used when the state is written and all flash operations
- * have finished. Only use it when all chunks, also the last chunk has been written successfully.
+ * This function validates the app in flash. Only use it when all chunks, also the last chunk has been written 
+ * successfully.
  *
  * The checksum is calculated iteratively, by using the chunk size. For the last chunk we will only use the part 
  * up to the total size of the binary. By doing it iteratively we can keep the local buffer relatively small.
  */
 uint16_t MicroappStorage::validateApp() {
 	TYPIFY(STATE_MICROAPP) state_microapp;
+
+	LOGd("Validate app");
+	uint16_t ret_code;
+
 	cs_state_id_t id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, id, (uint8_t*)&state_microapp, sizeof(state_microapp));
 	State::getInstance().get(data);
+
+	LOGd("Found microapp of size: %x", state_microapp.size);
 	
+	LOGd("Compare with checksum: %x", state_microapp.checksum);
 	uint8_t buf[MICROAPP_CHUNK_SIZE];
+	uint32_t addr;
+
+	microapp_storage.start_addr = g_FLASH_MICROAPP_BASE;
+	
+	addr = microapp_storage.start_addr;
+
+	nrf_fstorage_read(&microapp_storage, addr, &buf, 16);
+	int offset = (int)((buf[1] << 8) + (buf[0]));
+	LOGd("Offset: %i", offset);
+	int size = (int)((buf[5] << 8) + (buf[4]));
+	LOGd("Size: %i", size);
+	int g_checksum = (int)((buf[9] << 8) + (buf[8]));
+	LOGd("Checksum: %x", g_checksum);
+
+	state_microapp.start_addr = microapp_storage.start_addr;
+	state_microapp.offset = offset;
+	state_microapp.size = size;
+	state_microapp.checksum = g_checksum;
+
+	LOGd("Write microapp config");
+	State::getInstance().set(data);
 
 	// read from flash with fstorage, calculate checksum
 	uint8_t count = state_microapp.size / MICROAPP_CHUNK_SIZE;
 	uint16_t remain = state_microapp.size - (count * MICROAPP_CHUNK_SIZE);
 	uint32_t checksum_iterative = 0;
-	uint32_t addr = microapp_storage.start_addr;
+	
 	for (int i = 0; i < count; ++i) {
-		nrf_fstorage_read(&microapp_storage, addr, &buf, MICROAPP_CHUNK_SIZE);
+		ret_code = nrf_fstorage_read(&microapp_storage, addr, &buf, MICROAPP_CHUNK_SIZE);
+		if (ret_code != ERR_SUCCESS) {
+			LOGw("Error with reading with fstorage: %i", ret_code);
+			return ERR_INVALID_MESSAGE;
+		}
+		if (i == 0) {
+			for (int j = 0; j < 16; ++j) {
+				buf[j] = 0;
+			}
+		}
 		checksum_iterative = Fletcher(buf, MICROAPP_CHUNK_SIZE, checksum_iterative);
 		addr += MICROAPP_CHUNK_SIZE;
 	}
@@ -203,6 +240,7 @@ uint16_t MicroappStorage::validateApp() {
 		checksum_iterative = Fletcher(buf, remain, checksum_iterative);
 	}
 	uint16_t checksum = (uint16_t)checksum_iterative;
+	LOGd("Calculated checksum: %x", checksum);
 	// compare checksum
 	if (state_microapp.checksum != checksum) {
 		LOGw("Microapp %i has checksum 0x%04X, but calculation shows 0x%04X", state_microapp.id,

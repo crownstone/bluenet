@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <ble/cs_UUID.h>
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <logging/cs_Logger.h>
@@ -74,7 +75,7 @@ uint16_t Microapp::init() {
 	}
 
 	// If enabled, call the app
-	if (storage.isEnabled()) {
+	if (g_AUTO_ENABLE_MICROAPP_ON_BOOT || storage.isEnabled()) {
 		LOGi("Enable microapp");
 		_enabled = true;
 		// Actually call app
