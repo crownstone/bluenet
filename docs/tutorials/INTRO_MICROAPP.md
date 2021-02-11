@@ -38,6 +38,13 @@ In this repository you will see the code itself. First, adjust the location to t
 GCC_PATH=$(HOME)/workspace/bluenet/tools/gcc_arm_none_eabi/bin
 ```
 
+You also need a path to the most recent bluenet (make sure you have checked out the right branch and pulled the recent code):
+
+```
+# The path to the bluenet repository
+BLUENET_PATH=$(HOME)/workspace/bluenet
+```
+
 Then compile in the usual sense with:
 
 ```
