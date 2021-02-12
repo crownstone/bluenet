@@ -451,31 +451,31 @@ void asACR01B11A(boards_config_t* p_config) {
  * There is also default Arduino routing. For example:
  *
  *   + P0.02 = AREF
+ *   + P0.24 = D12
+ *   + P0.25 = D13
  *   + P0.26 = SDA
  *   + P0.27 = SCL
- *   + P0.25 = D13
- *   + P0.24 = D12
  *
  * https://infocenter.nordicsemi.com/pdf/nRF52_DK_User_Guide_v1.2.pdf
  */
 void asPca10040(boards_config_t* p_config) {
-	p_config->pinGpioPwm                         = 17;
-	p_config->pinGpioEnablePwm                   = 22;  // GPIO P0.19
-	p_config->pinGpioRelayOn                     = 11;  // GPIO P0.09 / NFC1
-	p_config->pinGpioRelayOff                    = 12;  // GPIO P0.10 / NFC2
-	p_config->pinAinCurrentGainLow               = 1;   // GPIO P0.03
-	p_config->pinAinVoltage                      = 2;   // GPIO P0.00 / XL1
-	p_config->pinAinZeroRef                      = 4;   // GPIO P0.28
-	p_config->pinAinPwmTemp                      = 0;   // GPIO P0.02
-	p_config->pinGpioRx                          = 8;   // GPIO P0.06, for UART commands/input
-	p_config->pinGpioTx                          = 6;   // GPIO P0.04 / AIN2, for UART output
-	p_config->pinLedRed                          = 19;  // GPIO P0.16
-	p_config->pinLedGreen                        = 20;  // GPIO P0.17
+	p_config->pinGpioPwm                         = 17;  // GPIO P0.17
+	p_config->pinGpioEnablePwm                   = 22;  // GPIO P0.22
+	p_config->pinGpioRelayOn                     = 11;  // GPIO P0.11
+	p_config->pinGpioRelayOff                    = 12;  // GPIO P0.12
+	p_config->pinAinCurrentGainLow               = 1;   // GPIO P0.01
+	p_config->pinAinVoltage                      = 2;   // GPIO P0.02
+	p_config->pinAinZeroRef                      = 4;   // GPIO P0.04
+	p_config->pinAinPwmTemp                      = 0;   // GPIO P0.00
+	p_config->pinGpioRx                          = 8;   // GPIO P0.08
+	p_config->pinGpioTx                          = 6;   // GPIO P0.06
+	p_config->pinLedRed                          = 19;  // GPIO P0.19
+	p_config->pinLedGreen                        = 20;  // GPIO P0.20
 
-	p_config->pinGpio[0]                         = 31;  // TODO: fails on 39 = GPIO P0.27, also for SCL (by default)
-	p_config->pinGpio[1]                         = 30;  // TODO: fails on 38 = GPIO P0.26, also for SDA (by default)
-	p_config->pinGpio[2]                         = 37;  // GPIO P0.25
-	p_config->pinGpio[3]                         = 29;  // GPIO P0.24
+	p_config->pinGpio[0]                         = 27;  // GPIO P0.27, also for SCL (by default)
+	p_config->pinGpio[1]                         = 26;  // GPIO P0.26, also for SDA (by default)
+	p_config->pinGpio[2]                         = 25;  // GPIO P0.25
+	p_config->pinGpio[3]                         = 24;  // GPIO P0.24
 
 	p_config->flags.hasRelay                     = false;
 	p_config->flags.pwmInverted                  = true;
