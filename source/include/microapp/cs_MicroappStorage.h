@@ -7,9 +7,16 @@
 
 #define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
 
+typedef struct __attribute__((__packed__)) microapp_header_t {
+	uint16_t size;
+	uint16_t checksum;
+	uint16_t offset;
+	uint16_t reserve;
+} microapp_header_t;
+
 /**
- * The class MicroappStorage has functionality to store a second app (and perhaps in the future even more apps) on another
- * part of the flash memory.
+ * The class MicroappStorage has functionality to store a second app (and perhaps in the future even more apps) on
+ * another part of the flash memory.
  */
 class MicroappStorage { //: public EventListener {
 	private:
@@ -86,6 +93,11 @@ class MicroappStorage { //: public EventListener {
 		 * When fstorage is done, this function will be called (indirectly through app_scheduler).
 		 */
 		void handleFileStorageEvent(nrf_fstorage_evt_t *evt);
+
+		/**
+		 * Get header of microapp.
+		 */
+		void getHeaderApp(microapp_header_t *header);
 
 		/**
 		 * Check if app is valid (only checking the FDS record field).
