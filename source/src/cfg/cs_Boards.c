@@ -436,7 +436,7 @@ void asACR01B11A(boards_config_t* p_config) {
  * This is the development board for the nRF52832. Certain pins have multiple functions, for example:
  *
  *   + P0.05 = UART_RTS
- *   + P0.06 = UART_TDX
+ *   + P0.06 = UART_TXD
  *   + P0.07 = UART_CTS
  *   + P0.08 = UART_RXD
  *   + P0.13 = BUTTON1
