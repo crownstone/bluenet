@@ -14,11 +14,11 @@
 
 const nrfx_twi_t Twi::_twi = NRFX_TWI_INSTANCE(TWI_INSTANCE_ID);
 
-// TODO: implement
 void twi_event_handler(nrfx_twi_evt_t const *p_event, void *p_context) {
+	// the event handler is not used yet, it is only required if we cannot just use read()
 }
 
-Twi::Twi(): EventListener(), _buf(NULL), _bufSize(0), _init(false) {
+Twi::Twi(): EventListener(), _init(false) {
 	EventDispatcher::getInstance().addListener(this);
 }
 
@@ -42,12 +42,6 @@ void Twi::init(uint8_t pin_scl, uint8_t pin_sda) {
 		return;
 	}
 
-	// minimal buffer for reading just a single value
-	// TODO: make this also into a circular buffer
-	if (_buf == NULL) {
-		_bufSize = 1;
-		_buf = new uint8_t[_bufSize];
-	}
 	_init = true;
 }
 
@@ -78,13 +72,6 @@ void Twi::read(uint8_t address, uint8_t *data, size_t & length) {
 	nrfx_twi_disable(&_twi);
 }
 
-void Twi::tick() {
-	//read(_buf, _bufSize);
-	//TYPIFY(EVT_TWI_UPDATE) twiData;
-	//twiData = _buf[0];
-	//event_t(CS_TYPE::EVT_TWI_UPDATE, &twiData, sizeof(twiData));
-}
-
 void Twi::handleEvent(event_t & event) {
 	switch(event.type) {
 	case CS_TYPE::EVT_TWI_INIT: {
@@ -102,10 +89,6 @@ void Twi::handleEvent(event_t & event) {
 		size_t length = twi->length;
 		read(twi->address, twi->buf, length);
 		twi->length = length;
-		break;
-	}
-	case CS_TYPE::EVT_TICK: {
-		// tick
 		break;
 	}
 	default:

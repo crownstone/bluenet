@@ -11,10 +11,13 @@
 #include <events/cs_EventListener.h>
 
 /**
- * Class that implements twi/i2c.
+ * Class that implements twi/i2c. This on the moment only implements twi as master.
  */
 class Twi: public EventListener {
 public:
+	/**
+	 * Construct twi/i2c instance.
+	 */
 	Twi();
 
 	/**
@@ -24,37 +27,38 @@ public:
 
 	/**
 	 * Write data to given address.
+	 *
+	 * @param[in]     address      The address of the device to write to.
+	 * @param[in]     data         Pointer to data to be written.
+	 * @param[in]     length       The number of items to be written.
+	 * @param[in]     stop         Release the bus after a write (for e.g. another i2c master).
 	 */
 	void write(uint8_t address, uint8_t *data, size_t length, bool stop);
 
 	/**
 	 * Read data from given address.
+	 *
+	 * @param[in]     address      The address of the device to read from.
+	 * @param[out]    data         Pointer to data array where result will be received.
+	 * @param[in,out] length       Number of items to read, and returns number of items actually read.
 	 */
 	void read(uint8_t address, uint8_t *data, size_t & length);
-
-	/**
-	 * Read on ticks and update.
-	 */
-	void tick();
 
 	/**
 	 * Incoming events.
 	 */
 	void handleEvent(event_t & event);
 protected:
+
 	/**
 	 * Local struct to store configuration.
 	 */
 	static const nrfx_twi_t _twi;
 
 private:
+
+	// Local config for driver
 	nrfx_twi_config_t _config;
-
-	// Internal buffer for reading
-	uint8_t *_buf;
-
-	// Size of internal buffer
-	uint8_t _bufSize;
 
 	// Initialized flag
 	bool _init;
