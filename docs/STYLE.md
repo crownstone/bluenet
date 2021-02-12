@@ -19,13 +19,13 @@ Header example:
 ```
 class MyClass: public Foo {
 public:
-	int barMethod(uint8_t valueOne, bool valueTwo);
+	int barMethod(uint8_t value, bool triple);
 }
 ```
 
 Source example:
 ```
-int MyClass::bar(int value, bool triple) {
+int MyClass::barMethod(uint8_t value, bool triple) {
 	if (triple && value > 0) {
 		value = value * 3;
 	}
@@ -70,6 +70,12 @@ The `case` clauses are indented w.r.t. the `switch` statement. This makes it eas
 The brackets are optional.
 
 Nerd tip: create a `source/.vimrc` file with as option `set cinoptions=l1`.
+
+In a function with pointers or address references, the operator is attached to the type (`void*` you can call a "void pointer").
+
+```
+void someEventHandler(pod_t const* event, void* context, uint32_t& address) {
+```
 
 ## Naming
 
