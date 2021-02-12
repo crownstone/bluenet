@@ -47,6 +47,11 @@
 #include <test/cs_MemUsageTest.h>
 #endif
 
+#if BUILD_TWI == 1
+#include <drivers/cs_Twi.h>
+#endif
+
+
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -350,6 +355,10 @@ private:
 
 #if BUILD_MEM_USAGE_TEST == 1
 	MemUsageTest _memTest;
+#endif
+
+#if BUILD_TWI == 1
+	Twi _twi;
 #endif
 
 	app_timer_t              _mainTimerData;

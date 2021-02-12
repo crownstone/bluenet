@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <ble/cs_UUID.h>
+#include <cfg/cs_AutoConfig.h>
 #include <cfg/cs_Config.h>
 #include <common/cs_Types.h>
 #include <logging/cs_Logger.h>
@@ -35,7 +36,7 @@
 #include <util/cs_Utils.h>
 
 Microapp::Microapp(): EventListener() {
-	
+
 	EventDispatcher::getInstance().addListener(this);
 
 	_prevMessage.protocol = 0;
@@ -45,8 +46,6 @@ Microapp::Microapp(): EventListener() {
 
 	_enabled = false;
 	_debug = true;
-
-	
 }
 
 uint16_t Microapp::init() {
@@ -76,7 +75,7 @@ uint16_t Microapp::init() {
 	}
 
 	// If enabled, call the app
-	if (storage.isEnabled()) {
+	if (g_AUTO_ENABLE_MICROAPP_ON_BOOT || storage.isEnabled()) {
 		LOGi("Enable microapp");
 		_enabled = true;
 		// Actually call app
@@ -105,7 +104,6 @@ void Microapp::tick() {
 
 	MicroappProtocol & protocol = MicroappProtocol::getInstance();
 	protocol.callSetupAndLoop();
-
 }
 
 uint32_t Microapp::handlePacket(microapp_packet_header_t *packet_stub) {

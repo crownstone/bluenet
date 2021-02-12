@@ -47,6 +47,10 @@ typedef uint32_t ret_code_t;
 #include <nrfx_wdt.h>
 #include <ble_db_discovery.h>
 
+#if BUILD_TWI == 1
+#include <nrfx_twi.h>
+#endif
+
 #if CS_SERIAL_NRF_LOG_ENABLED > 0
 #include <nrfx_log.h>
 #include <nrf_log_ctrl.h>

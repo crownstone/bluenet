@@ -19,7 +19,11 @@ load_configuration(${CONFIG_FILE} CONFIG_DUMMY_LIST)
 
 # Get MAC address etc.
 set(setupConfigFile "CMakeBuild.dynamic.config")
-load_configuration(${setupConfigFile} CONFIG_DUMMY_LIST)
+if(EXISTS "${setupConfigFile}")
+	load_configuration(${setupConfigFile} CONFIG_DUMMY_LIST)
+else()
+	message(FATAL_ERROR "${setupConfigFile} does not exist. First run make write_config or fill file manually.")
+endif()
 
 message(STATUS "Connect to device with address ${MAC_ADDRESS}")
 
@@ -38,6 +42,7 @@ if(INSTRUCTION STREQUAL "SETUP")
 	file(APPEND ${setupConfigJsonFile} "  \"ibeaconMinor\": ${BEACON_MINOR}\n")
 	file(APPEND ${setupConfigJsonFile} "}\n")
 	file(READ ${setupConfigJsonFile} FILE_CONTENTS)
+	message(STATUS "csutil ${KEYS_JSON_FILE} setup ${MAC_ADDRESS} ${setupConfigJsonFile}")
 	execute_process(
 		COMMAND ${DEFAULT_MODULES_PATH}/../../../../tools/csutil/csutil "${KEYS_JSON_FILE}" "setup" "${MAC_ADDRESS}" "${setupConfigJsonFile}"
 		TIMEOUT 60

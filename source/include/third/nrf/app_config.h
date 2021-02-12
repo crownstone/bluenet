@@ -18,6 +18,13 @@
 // This will overwrite some NRFX defines, via apply_old_config.h.
 #define CS_DEFINE_LEGACY_NRF_DRIVERS_CONFIGS 0
 
+// It is still the case that apply_old_config.h is applied...
+// The problem is described at 
+//   https://devzone.nordicsemi.com/f/nordic-q-a/60127/compare-sdk_config-files
+// As soon as an old macro like TWI_ENABLED is defined in app_config.h (or anywhere else) it will lead to the
+// NRFX_TWI_ENABLED macro to be disabled.
+// Note that it does not matter if it is defined as 0, even worse. The default app_config.h will define it such even
+// if it is not defined!
 
 #define APP_SCHEDULER_ENABLED 1
 #define APP_TIMER_ENABLED 1
@@ -182,7 +189,12 @@
 // <1=> Remove WDT IRQ handling
 #define NRFX_WDT_CONFIG_NO_IRQ 1
 
-
+// Enable TWI
+// Still TWI0_ENABLED rather than NRFX_TWI0_ENABLED which won't work
+#ifdef BUILD_TWI
+#define NRFX_TWI_ENABLED 1
+#define NRFX_TWI0_ENABLED 1
+#endif
 
 
 //#define NRFX_SAADC_ENABLED 1

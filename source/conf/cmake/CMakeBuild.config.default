@@ -91,6 +91,9 @@ CHANGE_NAME_ON_RESET=0
 # Add support for microapps
 BUILD_MICROAPP_SUPPORT=0
 
+# Enable i2c/twi
+BUILD_TWI=0
+
 # Add support for RSSI data tracker
 BUILD_RSSI_DATA_TRACKER=0
 
@@ -177,6 +180,10 @@ BOOT_DELAY=400
 # the connection is closed by the device.
 # Set to 0 to disable the timeout.
 CONNECTION_ALIVE_TIMEOUT=20000
+
+# Twi / i2c defaults (maps to GPIO 0 and 1 by default, see board configuration for which physical pins those are)
+TWI_SCL_INDEX=0
+TWI_SDA_INDEX=1
 
 # This is the directory where the cross-compiler resides
 COMPILER_PATH=
@@ -397,6 +404,9 @@ RAM_BLUENET_IPC_LENGTH=0x100
 BOOTLOADER_IPC_RAM_PROTOCOL=1
 
 # Parameters for the microapps
+
+# Enable the microapp on boot (if set to 0 this will need to be done over the air)
+AUTO_ENABLE_MICROAPP_ON_BOOT=0
 
 # The start of microapps in flash
 FLASH_MICROAPP_BASE=0x68000

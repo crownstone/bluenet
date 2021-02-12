@@ -355,6 +355,10 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::EVT_MICROAPP:
 	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
+	case CS_TYPE::EVT_TWI_INIT:
+	case CS_TYPE::EVT_TWI_WRITE:
+	case CS_TYPE::EVT_TWI_READ:
+	case CS_TYPE::EVT_TWI_UPDATE:
 		return ERR_NOT_FOUND;
 	}
 	return ERR_NOT_FOUND;
@@ -560,6 +564,10 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::EVT_MICROAPP:
 	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
+	case CS_TYPE::EVT_TWI_INIT:
+	case CS_TYPE::EVT_TWI_WRITE:
+	case CS_TYPE::EVT_TWI_READ:
+	case CS_TYPE::EVT_TWI_UPDATE:
 		return PersistenceMode::NEITHER_RAM_NOR_FLASH;
 	}
 	// should not reach this
