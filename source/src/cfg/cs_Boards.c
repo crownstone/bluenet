@@ -463,10 +463,10 @@ void asPca10040(boards_config_t* p_config) {
 	p_config->pinGpioEnablePwm                   = 22;  // GPIO P0.22
 	p_config->pinGpioRelayOn                     = 11;  // GPIO P0.11
 	p_config->pinGpioRelayOff                    = 12;  // GPIO P0.12
-	p_config->pinAinCurrentGainLow               = 1;   // GPIO P0.01
-	p_config->pinAinVoltage                      = 2;   // GPIO P0.02
-	p_config->pinAinZeroRef                      = 4;   // GPIO P0.04
-	p_config->pinAinPwmTemp                      = 0;   // GPIO P0.00
+	p_config->pinAinCurrentGainLow               = 1;   // AIN1 / GPIO P0.03
+	p_config->pinAinVoltage                      = 2;   // AIN2 / GPIO P0.04
+	p_config->pinAinZeroRef                      = 4;   // AIN4 / GPIO P0.28
+	p_config->pinAinPwmTemp                      = 0;   // AIN0 / GPIO P0.02
 	p_config->pinGpioRx                          = 8;   // GPIO P0.08
 	p_config->pinGpioTx                          = 6;   // GPIO P0.06
 	p_config->pinLedRed                          = 19;  // GPIO P0.19
