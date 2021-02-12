@@ -6,15 +6,17 @@
  */
 
 #include <drivers/cs_Twi.h>
+
+#include <ble/cs_Nordic.h>
+#include <cfg/cs_AutoConfig.h>
 #include <drivers/cs_Serial.h>
 #include <events/cs_EventDispatcher.h>
-#include <ble/cs_Nordic.h>
 
 #define TWI_INSTANCE_ID 0
 
 const nrfx_twi_t Twi::_twi = NRFX_TWI_INSTANCE(TWI_INSTANCE_ID);
 
-void twi_event_handler(nrfx_twi_evt_t const *pEvent, void *pContext) {
+void twiEventHandler(nrfx_twi_evt_t const* event, void* context) {
 	// the event handler is not used yet, it is only required if we cannot just use read()
 }
 
@@ -22,21 +24,25 @@ Twi::Twi(): EventListener(), _init(false) {
 	EventDispatcher::getInstance().addListener(this);
 }
 
+void Twi::init(const boards_config_t & board) {
+	_config.sda = board.pinGpio[g_TWI_SDA_INDEX];
+	_config.scl = board.pinGpio[g_TWI_SCL_INDEX];
+	LOGi("Configured TWI at SDA %i and SCL %i", _config.sda, _config.scl);
+}
+
 /*
  * Only operate as master.
  */
-void Twi::init(uint8_t pinScl, uint8_t pinSda) {
-	LOGi("Init TWI");
+void Twi::initBus(cs_twi_init_t& twi) {
+	LOGi("Init TWI bus");
 	if (_init) {
 		LOGw("Already initialized!");
 		return;
 	}
-	_config.scl = pinScl;
-	_config.sda = pinSda;
 	_config.frequency = NRF_TWI_FREQ_100K;
 	_config.interrupt_priority = NRFX_TWI_DEFAULT_CONFIG_IRQ_PRIORITY;
 	_config.hold_bus_uninit = false;
-	nrfx_err_t ret = nrfx_twi_init(&_twi, &_config, twi_event_handler, NULL);
+	nrfx_err_t ret = nrfx_twi_init(&_twi, &_config, twiEventHandler, NULL);
 	if (ret != ERR_SUCCESS) {
 		LOGw("Init error: %i", ret);
 		return;
@@ -45,7 +51,7 @@ void Twi::init(uint8_t pinScl, uint8_t pinSda) {
 	_init = true;
 }
 
-void Twi::write(uint8_t address, uint8_t *data, size_t length, bool stop) {
+void Twi::write(uint8_t address, uint8_t* data, size_t length, bool stop) {
 	if (!_init) {
 		LOGw("Twi not initialized yet, cannot write");
 		return;
@@ -58,7 +64,7 @@ void Twi::write(uint8_t address, uint8_t *data, size_t length, bool stop) {
 	nrfx_twi_disable(&_twi);
 }
 
-void Twi::read(uint8_t address, uint8_t *data, size_t & length) {
+void Twi::read(uint8_t address, uint8_t* data, size_t & length) {
 	uint16_t ret_code;
 	LOGi("Read i2c value");
 	nrfx_twi_enable(&_twi);
@@ -72,11 +78,11 @@ void Twi::read(uint8_t address, uint8_t *data, size_t & length) {
 	nrfx_twi_disable(&_twi);
 }
 
-void Twi::handleEvent(event_t & event) {
+void Twi::handleEvent(event_t& event) {
 	switch(event.type) {
 		case CS_TYPE::EVT_TWI_INIT: {
 			TYPIFY(EVT_TWI_INIT) twi = *(TYPIFY(EVT_TWI_INIT)*)event.data;
-			init(twi.scl, twi.sda);
+			initBus(twi);
 			break;
 		}
 		case CS_TYPE::EVT_TWI_WRITE: {

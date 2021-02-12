@@ -524,6 +524,7 @@ struct __attribute__((packed)) cs_ram_stats_t {
 struct __attribute__((packed)) cs_twi_init_t {
 	uint8_t scl;
 	uint8_t sda;
+	uint8_t freq;
 };
 
 struct __attribute__((packed)) cs_twi_write_t {

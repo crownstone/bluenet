@@ -337,13 +337,13 @@ enum class CS_TYPE: uint16_t {
 	CMD_MICROAPP_ADVERTISE,                           // A microapp wants to advertise something.
 
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
-
-	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
-
+	
 	EVT_TWI_INIT,                                     // TWI initialisation.
 	EVT_TWI_WRITE,                                    // TWI write.
 	EVT_TWI_READ,                                     // TWI read (request).
-	EVT_TWI_UPDATE,                                   // TWI update from TWI module to anyone listening in.
+	EVT_TWI_UPDATE,                                   // TWI update from TWI module to listeners (not implemented yet).
+
+	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
 
 	EVT_GENERIC_TEST = 0xFFFF,                        // Can be used by the python test python lib for ad hoc tests during development.
 };

@@ -149,6 +149,10 @@ void asACR01B10D(boards_config_t* p_config) {
  * Crownstone Built-in Two
  * *******************************************************************************************************************/
 
+/**
+ * The built-in two has an nRF52833 chipset. The pin layout however depends on the actual form factor being used,
+ * for example the aQFN73, the QFN48 or the WLCSP assignments are different.
+ */
 void asACR01B13B(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 15;
 //	p_config->pinGpioEnablePwm                   = 10; // Not needed anymore.
@@ -168,6 +172,11 @@ void asACR01B13B(boards_config_t* p_config) {
 	p_config->pinGpioTx                          = 9;
 	p_config->pinLedRed                          = 0; // Not there
 	p_config->pinLedGreen                        = 0; // Not there
+	
+	p_config->pinGpio[0]                         = 24;  // GPIO P0.24 / AD20
+	p_config->pinGpio[1]                         = 32;  // GPIO P1.00 / AD22
+	p_config->pinGpio[2]                         = 34;  // GPIO P1.02 / W24
+	p_config->pinGpio[3]                         = 36;  // GPIO P1.04 / U24
 
 	p_config->flags.hasRelay                     = true;
 	p_config->flags.pwmInverted                  = true;
@@ -374,17 +383,17 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->pinAinVoltage                      = 7; // default
 
 	p_config->pinAinCurrentGainHigh              = 5; // Actually voltage high gain.
-	
+
 	p_config->pinAinZeroRef	                     = 3; // GPIO 0.05
 	p_config->pinAinPwmTemp                      = 2; // GPIO 0.04
 
-	p_config->pinGpioRx                          = 22; 
+	p_config->pinGpioRx                          = 22;
 	p_config->pinGpioTx                          = 20;
-	
-	p_config->pinGpio1                           = 24;
-	p_config->pinGpio2                           = 32;
-	p_config->pinGpio3                           = 34;
-	p_config->pinGpio4                           = 36;
+
+	p_config->pinGpio[0]                         = 24;
+	p_config->pinGpio[1]                         = 32;
+	p_config->pinGpio[2]                         = 34;
+	p_config->pinGpio[3]                         = 36;
 
 	p_config->pinLedRed                          = 8;   // not placed, now for patch to PWM
 	p_config->pinLedGreen                        = 41;  // not placed
@@ -395,7 +404,7 @@ void asACR01B11A(boards_config_t* p_config) {
 	p_config->flags.hasLed                       = false; // not placed
 	p_config->flags.ledInverted                  = false; // not placed
 	p_config->flags.hasAdcZeroRef                = true;
-	p_config->flags.pwmTempInverted              = true; 
+	p_config->flags.pwmTempInverted              = true;
 
 //	p_config->deviceType                         = DEVICE_CROWNSTONE_PLUG_ONE;
 	p_config->deviceType                         = DEVICE_CROWNSTONE_BUILTIN_ONE;
@@ -423,22 +432,52 @@ void asACR01B11A(boards_config_t* p_config) {
  * Dev Boards
  * *******************************************************************************************************************/
 
+/**
+ * This is the development board for the nRF52832. Certain pins have multiple functions, for example:
+ *
+ *   + P0.05 = UART_RTS
+ *   + P0.06 = UART_TDX
+ *   + P0.07 = UART_CTS
+ *   + P0.08 = UART_RXD
+ *   + P0.13 = BUTTON1
+ *   + P0.14 = BUTTON2
+ *   + P0.15 = BUTTON3
+ *   + P0.16 = BUTTON4
+ *   + P0.17 = LED1
+ *   + P0.18 = LED2
+ *   + P0.19 = LED3
+ *   + P0.20 = LED4
+ *
+ * There is also default Arduino routing. For example:
+ *
+ *   + P0.02 = AREF
+ *   + P0.26 = SDA
+ *   + P0.27 = SCL
+ *   + P0.25 = D13
+ *   + P0.24 = D12
+ *
+ * https://infocenter.nordicsemi.com/pdf/nRF52_DK_User_Guide_v1.2.pdf
+ */
 void asPca10040(boards_config_t* p_config) {
 	p_config->pinGpioPwm                         = 17;
-	p_config->pinGpioEnablePwm                   = 22; // Something unused
-	p_config->pinGpioRelayOn                     = 11; // something unused
-	p_config->pinGpioRelayOff                    = 12; // something unused
-	p_config->pinAinCurrentGainLow               = 1; // gpio3
-	p_config->pinAinVoltage                      = 2; // gpio4
-	p_config->pinAinZeroRef	                     = 4; // gpio28
-	p_config->pinAinPwmTemp                      = 0; // gpio2
-	p_config->pinGpioRx                          = 8; // for UART commands
-	p_config->pinGpioTx                          = 6; // for UART output
-	p_config->pinLedRed                          = 19;
-	p_config->pinLedGreen                        = 20;
+	p_config->pinGpioEnablePwm                   = 22;  // GPIO P0.19
+	p_config->pinGpioRelayOn                     = 11;  // GPIO P0.09 / NFC1
+	p_config->pinGpioRelayOff                    = 12;  // GPIO P0.10 / NFC2
+	p_config->pinAinCurrentGainLow               = 1;   // GPIO P0.03
+	p_config->pinAinVoltage                      = 2;   // GPIO P0.00 / XL1
+	p_config->pinAinZeroRef                      = 4;   // GPIO P0.28
+	p_config->pinAinPwmTemp                      = 0;   // GPIO P0.02
+	p_config->pinGpioRx                          = 8;   // GPIO P0.06, for UART commands/input
+	p_config->pinGpioTx                          = 6;   // GPIO P0.04 / AIN2, for UART output
+	p_config->pinLedRed                          = 19;  // GPIO P0.16
+	p_config->pinLedGreen                        = 20;  // GPIO P0.17
+
+	p_config->pinGpio[0]                         = 31;  // TODO: fails on 39 = GPIO P0.27, also for SCL (by default)
+	p_config->pinGpio[1]                         = 30;  // TODO: fails on 38 = GPIO P0.26, also for SDA (by default)
+	p_config->pinGpio[2]                         = 37;  // GPIO P0.25
+	p_config->pinGpio[3]                         = 29;  // GPIO P0.24
 
 	p_config->flags.hasRelay                     = false;
-//	p_config->flags.hasRelay                     = true;
 	p_config->flags.pwmInverted                  = true;
 	p_config->flags.hasSerial                    = true;
 	p_config->flags.hasLed                       = true;
@@ -452,10 +491,6 @@ void asPca10040(boards_config_t* p_config) {
 	p_config->currentMultiplier                  = 0.0; // set to 0 to disable sampling checks
 	p_config->voltageZero                        = 1000; // something
 	p_config->currentZero                        = 1000; // something
-//	p_config->voltageMultiplier                  = 1.0;
-//	p_config->currentMultiplier                  = 1.0;
-//	p_config->voltageZero                        = 0;
-//	p_config->currentZero                        = 0;
 	p_config->powerZero                          = 0; // something
 	p_config->voltageRange                       = 3600; // 0V - 3.6V
 	p_config->currentRange                       = 3600; // 0V - 3.6V

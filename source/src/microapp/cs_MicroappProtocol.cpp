@@ -35,103 +35,97 @@
 void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 	LOGi("Set command");
 	switch(command) {
-	case CS_MICROAPP_COMMAND_PIN: {
-		pin_cmd_t *pin_cmd = (pin_cmd_t*)data;
-		CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
-		switch(pin) {
-		case CS_MICROAPP_COMMAND_PIN_SWITCH: // same as DIMMER
-		case CS_MICROAPP_COMMAND_PIN_GPIO1:
-		case CS_MICROAPP_COMMAND_PIN_GPIO2:
-		case CS_MICROAPP_COMMAND_PIN_GPIO3: {
-			CommandMicroappPinOpcode mode = (CommandMicroappPinOpcode)pin_cmd->opcode;
-			switch(mode) {
-			case CS_MICROAPP_COMMAND_PIN_WRITE: {
-				CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
-				switch(val) {
-				case CS_MICROAPP_COMMAND_VALUE_OFF: {
-					LOGi("Turn switch off");
-					event_t event(CS_TYPE::CMD_SWITCH_OFF);
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				case CS_MICROAPP_COMMAND_VALUE_ON: {
-					LOGi("Turn switch on");
-					event_t event(CS_TYPE::CMD_SWITCH_ON);
-					EventDispatcher::getInstance().dispatch(event);
+		case CS_MICROAPP_COMMAND_PIN: {
+			pin_cmd_t *pin_cmd = (pin_cmd_t*)data;
+			CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
+			switch(pin) {
+				case CS_MICROAPP_COMMAND_PIN_SWITCH: // same as DIMMER
+				case CS_MICROAPP_COMMAND_PIN_GPIO1:
+				case CS_MICROAPP_COMMAND_PIN_GPIO2:
+				case CS_MICROAPP_COMMAND_PIN_GPIO3: {
+					CommandMicroappPinOpcode mode = (CommandMicroappPinOpcode)pin_cmd->opcode;
+					switch(mode) {
+						case CS_MICROAPP_COMMAND_PIN_WRITE: {
+							CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
+							switch(val) {
+								case CS_MICROAPP_COMMAND_VALUE_OFF: {
+									LOGi("Turn switch off");
+									event_t event(CS_TYPE::CMD_SWITCH_OFF);
+									EventDispatcher::getInstance().dispatch(event);
+									break;
+								}
+								case CS_MICROAPP_COMMAND_VALUE_ON: {
+									LOGi("Turn switch on");
+									event_t event(CS_TYPE::CMD_SWITCH_ON);
+									EventDispatcher::getInstance().dispatch(event);
+									break;
+								}
+								default:
+									LOGw("Unknown switch command");
+							}
+							break;
+						}
+						default:
+							LOGw("Unknown pin mode / opcode: %i", pin_cmd->opcode);
+					}
 					break;
 				}
 				default:
-					LOGw("Unknown switch command");
+					LOGw("Unknown pin: %i", pin_cmd->pin);
+			}
+			break;
+		}
+		case CS_MICROAPP_COMMAND_TWI: {
+			twi_cmd_t *twi_cmd = (twi_cmd_t*)data;
+			CommandMicroappTwiOpcode opcode = (CommandMicroappTwiOpcode)twi_cmd->opcode;
+			switch(opcode) {
+				case CS_MICROAPP_COMMAND_TWI_INIT: {
+					LOGi("Init i2c");
+					TYPIFY(EVT_TWI_INIT) twi;
+					// no need to write twi.config (is not under control of microapp)
+					event_t event(CS_TYPE::EVT_TWI_INIT, &twi, sizeof(twi));
+					EventDispatcher::getInstance().dispatch(event);
+					break;
 				}
-				break;
-			}
-			default:
-				LOGw("Unknown pin mode / opcode: %i", pin_cmd->opcode);
+				case CS_MICROAPP_COMMAND_TWI_WRITE: {
+					LOGi("Write over i2c to address: %i", twi_cmd->address);
+					uint8_t bufSize = twi_cmd->length;
+					TYPIFY(EVT_TWI_WRITE) twi;
+					uint8_t buf_array[bufSize];
+					buffer_ptr_t buf = &buf_array[0];
+					twi.address = twi_cmd->address;
+					twi.buf = buf;
+					twi.length = bufSize;
+					twi.stop = twi_cmd->stop;
+					event_t event(CS_TYPE::EVT_TWI_WRITE, &twi, sizeof(twi));
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_TWI_READ: {
+					LOGi("Read from i2c address: %i", twi_cmd->address);
+					// TODO: What!!! Returning a value from an event should be WAY easier!
+					uint8_t bufSize = twi_cmd->length;
+					TYPIFY(EVT_TWI_READ) twi;
+					uint8_t buf_array[bufSize];
+					buffer_ptr_t buf = &buf_array[0];
+					twi.address = twi_cmd->address;
+					twi.buf = buf;
+					twi.length = bufSize;
+					twi.stop = twi_cmd->stop;
+					event_t event(CS_TYPE::EVT_TWI_READ, &twi, sizeof(twi));
+					EventDispatcher::getInstance().dispatch(event);
+					twi_cmd->ack = event.result.returnCode;
+					twi_cmd->length = twi.length;
+					LOGd("Return value of length: %i", twi_cmd->length);
+					break;
+				}
+				default:
+					LOGw("Unknown i2c opcode: %i", twi_cmd->opcode);
 			}
 			break;
 		}
 		default:
-			LOGw("Unknown pin: %i", pin_cmd->pin);
-		}
-		break;
-	}
-	case CS_MICROAPP_COMMAND_TWI: {
-		twi_cmd_t *twi_cmd = (twi_cmd_t*)data;
-		CommandMicroappTwiOpcode opcode = (CommandMicroappTwiOpcode)twi_cmd->opcode;
-		switch(opcode) {
-		case CS_MICROAPP_COMMAND_TWI_INIT: {
-			LOGi("Init i2c");
-			TYPIFY(EVT_TWI_INIT) twi;
-			twi.scl = g_PIN_TWI_SCL;
-			twi.sda = g_PIN_TWI_SDA;
-			event_t event(CS_TYPE::EVT_TWI_INIT, &twi, sizeof(twi));
-			EventDispatcher::getInstance().dispatch(event);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_TWI_WRITE: {
-			LOGi("Write over i2c to address: %i", twi_cmd->address);
-			uint8_t bufSize = twi_cmd->length;
-			TYPIFY(EVT_TWI_WRITE) twi;
-			uint8_t buf_array[bufSize];
-			buffer_ptr_t buf = &buf_array[0];
-			twi.address = twi_cmd->address;
-			twi.buf = buf;
-			twi.length = bufSize;
-			twi.stop = twi_cmd->stop;
-			event_t event(CS_TYPE::EVT_TWI_WRITE, &twi, sizeof(twi));
-			EventDispatcher::getInstance().dispatch(event);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_TWI_READ: {
-			LOGi("Read from i2c address: %i", twi_cmd->address);
-			// TODO: 
-			// 1. Create buffer at i2c side in which data is dumped
-			// 2. Create event that will be broadcasted from this side and picked up by i2c
-			// 3. The i2c module will set pointer to latest item in buffer in result of event, returns immediately
-			// 4. Return results by overwrite *data struct
-			// TODO: What!!! Returning a value from an event should be WAY easier!
-			uint8_t bufSize = twi_cmd->length;
-			TYPIFY(EVT_TWI_READ) twi;
-			uint8_t buf_array[bufSize];
-			buffer_ptr_t buf = &buf_array[0];
-			twi.address = twi_cmd->address;
-			twi.buf = buf;
-			twi.length = bufSize;
-			twi.stop = twi_cmd->stop;
-			event_t event(CS_TYPE::EVT_TWI_READ, &twi, sizeof(twi));
-			EventDispatcher::getInstance().dispatch(event);
-			twi_cmd->ack = event.result.returnCode;
-			twi_cmd->length = twi.length;
-			LOGd("Return value of length: %i", twi_cmd->length);
-			break;
-		}
-		default:
-			LOGw("Unknown i2c opcode: %i", twi_cmd->opcode);
-		}
-		break;
-	}
-	default:
-		LOGw("Unknown command: %i", command);
+			LOGw("Unknown command: %i", command);
 	}
 }
 
@@ -139,70 +133,70 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 	//LOGd("Incoming message: [%i, %i, %i, ...]", payload[0], payload[1], payload[2]);
 	uint8_t command = payload[0];
 	switch(command) {
-	case CS_MICROAPP_COMMAND_LOG: {
-		char type = payload[1];
-		switch(type) {
-		case CS_MICROAPP_COMMAND_LOG_CHAR: {
-			__attribute__((unused)) char value = payload[2];
-			LOGi("%i", (int)value);
+		case CS_MICROAPP_COMMAND_LOG: {
+			char type = payload[1];
+			switch(type) {
+				case CS_MICROAPP_COMMAND_LOG_CHAR: {
+					__attribute__((unused)) char value = payload[2];
+					LOGi("%i", (int)value);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_LOG_INT: {
+					__attribute__((unused)) int value = (payload[2] << 8) + payload[3];
+					LOGi("%i", value);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_LOG_STR: {
+					int str_length = length - 2; // Check if length <= max_length - 1, for null terminator.
+					char *data = reinterpret_cast<char*>(&(payload[2]));
+					data[str_length] = 0;
+					LOGi("%s", data);
+					break;
+				}
+			}
 			break;
 		}
-		case CS_MICROAPP_COMMAND_LOG_INT: {
-			__attribute__((unused)) int value = (payload[2] << 8) + payload[3];
-			LOGi("%i", value);
+		case CS_MICROAPP_COMMAND_DELAY: {
+			int delay = (payload[1] << 8) + payload[2];
+			LOGd("Microapp delay of %i", delay);
+			uintptr_t coargs_ptr = (payload[3] << 24) + (payload[4] << 16) + (payload[5] << 8) + payload[6];
+			// cast to coroutine args struct
+			coargs* args = (coargs*) coargs_ptr;
+			args->cntr++;
+			args->delay = delay;
+			yield(args->c);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_LOG_STR: {
-			int str_length = length - 2; // Check if length <= max_length - 1, for null terminator.
-			char *data = reinterpret_cast<char*>(&(payload[2]));
-			data[str_length] = 0;
-			LOGi("%s", data);
+		case CS_MICROAPP_COMMAND_PIN:
+		case CS_MICROAPP_COMMAND_TWI: {
+			forwardCommand(command, payload, length);
 			break;
 		}
-		}
-		break;
-	}
-	case CS_MICROAPP_COMMAND_DELAY: {
-		int delay = (payload[1] << 8) + payload[2];
-		LOGd("Microapp delay of %i", delay);
-		uintptr_t coargs_ptr = (payload[3] << 24) + (payload[4] << 16) + (payload[5] << 8) + payload[6];
-		// cast to coroutine args struct
-		coargs* args = (coargs*) coargs_ptr;
-		args->cntr++;
-		args->delay = delay;
-		yield(args->c);
-		break;
-	}
-	case CS_MICROAPP_COMMAND_PIN:
-	case CS_MICROAPP_COMMAND_TWI: {
-		forwardCommand(command, payload, length);
-		break;
-	}
-	case CS_MICROAPP_COMMAND_SERVICE_DATA: {
-		LOGd("Service data");
-		uint16_t commandDataSize = length - 2; // byte 0 is command, byte 1 is type.
-		TYPIFY(CMD_MICROAPP_ADVERTISE) eventData;
-		if (commandDataSize < sizeof(eventData.appUuid)) {
-			LOGi("payload too small");
+		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
+			LOGd("Service data");
+			uint16_t commandDataSize = length - 2; // byte 0 is command, byte 1 is type.
+			TYPIFY(CMD_MICROAPP_ADVERTISE) eventData;
+			if (commandDataSize < sizeof(eventData.appUuid)) {
+				LOGi("payload too small");
+				break;
+			}
+			eventData.version = 0; // TODO: define somewhere.
+			eventData.type = 0; // TODO: define somewhere.
+			eventData.appUuid = (payload[2] << 8) + payload[3];
+			eventData.data.len = commandDataSize - sizeof(eventData.appUuid);
+			eventData.data.data = &(payload[4]);
+			//			BLEutil::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
+			event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
+			event.dispatch();
 			break;
 		}
-		eventData.version = 0; // TODO: define somewhere.
-		eventData.type = 0; // TODO: define somewhere.
-		eventData.appUuid = (payload[2] << 8) + payload[3];
-		eventData.data.len = commandDataSize - sizeof(eventData.appUuid);
-		eventData.data.data = &(payload[4]);
-		//			BLEutil::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
-		event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
-		event.dispatch();
-		break;
-	}
-	default:
-		LOGi("Unknown command of length %i", length);
-		int ml = length;
-		if (length > 4) ml = 4;
-		for (int i = 0; i < ml; i++) {
-			LOGi("0x%i", payload[i]);
-		}
+		default:
+			LOGi("Unknown command of length %i", length);
+			int ml = length;
+			if (length > 4) ml = 4;
+			for (int i = 0; i < ml; i++) {
+				LOGi("0x%i", payload[i]);
+			}
 	}
 
 	return ERR_SUCCESS;
@@ -210,12 +204,12 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 
 extern "C" {
 
-int microapp_callback(uint8_t *payload, uint16_t length) {
-	if (length == 0) return ERR_NO_PAYLOAD;
-	if (length > 255) return ERR_TOO_LARGE;
+	int microapp_callback(uint8_t *payload, uint16_t length) {
+		if (length == 0) return ERR_NO_PAYLOAD;
+		if (length > 255) return ERR_TOO_LARGE;
 
-	return handleCommand(payload, length);
-}
+		return handleCommand(payload, length);
+	}
 
 } // extern C
 
@@ -227,7 +221,7 @@ MicroappProtocol::MicroappProtocol(): EventListener() {
 	_loop = 0;
 	_booted = false;
 
-	_i2c_data = NULL;
+	_callbackData = NULL;
 }
 
 /*
@@ -378,7 +372,7 @@ void MicroappProtocol::callSetupAndLoop() {
 
 	static uint16_t counter = 0;
 	if (_booted) {
-	
+
 		if (!_loaded) {
 			LOGi("Start loading");
 			uint16_t ret_code = interpretRamdata();
@@ -451,42 +445,23 @@ void MicroappProtocol::callLoop(int & cntr, int & skip) {
 	cntr = -1;
 }
 
+/**
+ * Required if we have to pass events through to the microapp.
+ */
 void MicroappProtocol::handleEvent(event_t & event) {
 	switch(event.type) {
-	case CS_TYPE::EVT_TWI_UPDATE: {
-		if (_i2c_data == NULL) break;
-		TYPIFY(EVT_TWI_UPDATE)* data = reinterpret_cast< TYPIFY(EVT_TWI_UPDATE)*> (event.data);
-		uint8_t* raw_data = reinterpret_cast<uint8_t*>(data);
-		_i2c_data->push(raw_data[0]);
-		break;
-	}
-	case CS_TYPE::EVT_TWI_INIT: {
-		//if (_i2c_data == NULL) {
-		//	_i2c_data->init();
-		//} else {
-		//	LOGw("Already initialized i2c");
-		//}
-		break;
-	}
-	case CS_TYPE::EVT_TWI_READ: {
+		// Listen to GPIO events, will be used later to implement attachInterrupt in microapp.
 		/*
-		if ((_i2c_data != NULL) && (!_i2c_data->empty())) {
-			// write single(!) result
-			uint8_t d = _i2c_data->pop();
-			// TODO: De-uglify sending results on incoming events (in tandem with above)
-			if (event.result.buf.data != NULL) {
-				event.result.buf.data[0] = d;
-				event.result.buf.len = 1;
-				event.result.returnCode = ERR_SUCCESS;
-			} else {
-				event.result.returnCode = ERR_NO_PAYLOAD;
-			}
-		} else {
-			event.result.returnCode = ERR_NOT_AVAILABLE;
+		   case CS_TYPE::EVT_PARTICULAR_UPDATE: {
+		// allocate _calbackData if necessary
+		if (_callbackData == NULL) break;
+		TYPIFY(EVT_MICROAPP_UPDATE)* data = reinterpret_cast< TYPIFY(EVT_MICROAPP_UPDATE)*> (event.data);
+		uint8_t* raw_data = reinterpret_cast<uint8_t*>(data);
+		// TODO: loop over data
+		_callbackData->push(raw_data[0]);
+		break;
 		}*/
-		break;
-	}
-	default:
-		break;
+		default:
+			break;
 	}
 }

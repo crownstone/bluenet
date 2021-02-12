@@ -320,88 +320,92 @@ void Crownstone::initDrivers0() {
 void Crownstone::initDrivers1() {
 	_state->init(&_boardsConfig);
 
-		// If not done already, init UART
-		// TODO: make into a class with proper init() function
-		if (!_boardsConfig.flags.hasSerial) {
-			serial_config(_boardsConfig.pinGpioRx, _boardsConfig.pinGpioTx);
-			TYPIFY(CONFIG_UART_ENABLED) uartEnabled;
-			_state->get(CS_TYPE::CONFIG_UART_ENABLED, &uartEnabled, sizeof(uartEnabled));
-			serial_enable((serial_enable_t)uartEnabled);
-			UartHandler::getInstance().init((serial_enable_t)uartEnabled);
+	// If not done already, init UART
+	// TODO: make into a class with proper init() function
+	if (!_boardsConfig.flags.hasSerial) {
+		serial_config(_boardsConfig.pinGpioRx, _boardsConfig.pinGpioTx);
+		TYPIFY(CONFIG_UART_ENABLED) uartEnabled;
+		_state->get(CS_TYPE::CONFIG_UART_ENABLED, &uartEnabled, sizeof(uartEnabled));
+		serial_enable((serial_enable_t)uartEnabled);
+		UartHandler::getInstance().init((serial_enable_t)uartEnabled);
+	}
+	else {
+		// Init UartHandler only now, because it will read State.
+		UartHandler::getInstance().init(SERIAL_ENABLE_RX_AND_TX);
+	}
+
+	// Plain text log.
+	CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
+
+	LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
+
+	// Store reset reason.
+	sd_power_reset_reason_get(&_resetReason);
+	LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u", _resetReason,
+			(_resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
+			(_resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
+			(_resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
+			(_resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
+
+	// Store gpregret.
+	_gpregret[0] = GpRegRet::getValue(GpRegRet::GPREGRET);
+	_gpregret[1] = GpRegRet::getValue(GpRegRet::GPREGRET2);
+
+	if (GpRegRet::isFlagSet(GpRegRet::FLAG_STORAGE_RECOVERED)) {
+		_setStateValuesAfterStorageRecover = true;
+		GpRegRet::clearFlag(GpRegRet::FLAG_STORAGE_RECOVERED);
+	}
+	if (_setStateValuesAfterStorageRecover) {
+		LOGw("Set state values after storage recover.");
+		// Set switch state to on, as that's the most likely and preferred state of the switch.
+		TYPIFY(STATE_SWITCH_STATE) switchState;
+		switchState.state.dimmer = 0;
+		switchState.state.relay = 1;
+		_state->set(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
+	}
+
+	LOGi(FMT_INIT, "command handler");
+	_commandHandler->init(&_boardsConfig);
+
+	LOGi(FMT_INIT, "factory reset");
+	_factoryReset->init();
+
+	LOGi(FMT_INIT, "encryption");
+	ConnectionEncryption::getInstance().init();
+	KeysAndAccess::getInstance().init();
+
+
+	if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
+		LOGi(FMT_INIT, "switch");
+		SwitchAggregator::getInstance().init(_boardsConfig);
+
+		LOGi(FMT_INIT, "temperature guard");
+		_temperatureGuard->init(_boardsConfig);
+
+		LOGi(FMT_INIT, "power sampler");
+		_powerSampler->init(_boardsConfig);
+	}
+
+	// init GPIOs
+	if (_boardsConfig.flags.hasLed) {
+		LOGi("Configure LEDs");
+		// Note: DO NOT USE THEM WHILE SCANNING OR MESHING
+		nrf_gpio_cfg_output(_boardsConfig.pinLedRed);
+		nrf_gpio_cfg_output(_boardsConfig.pinLedGreen);
+		// Turn the leds off
+		if (_boardsConfig.flags.ledInverted) {
+			nrf_gpio_pin_set(_boardsConfig.pinLedRed);
+			nrf_gpio_pin_set(_boardsConfig.pinLedGreen);
 		}
 		else {
-			// Init UartHandler only now, because it will read State.
-			UartHandler::getInstance().init(SERIAL_ENABLE_RX_AND_TX);
+			nrf_gpio_pin_clear(_boardsConfig.pinLedRed);
+			nrf_gpio_pin_clear(_boardsConfig.pinLedGreen);
 		}
+	}
 
-		// Plain text log.
-		CLOGi("\r\nFirmware version %s", g_FIRMWARE_VERSION);
-
-		LOGi("GPRegRet: %u %u", GpRegRet::getValue(GpRegRet::GPREGRET), GpRegRet::getValue(GpRegRet::GPREGRET2));
-
-		// Store reset reason.
-		sd_power_reset_reason_get(&_resetReason);
-		LOGi("Reset reason: %u - watchdog=%u soft=%u lockup=%u off=%u", _resetReason,
-				(_resetReason & NRF_POWER_RESETREAS_DOG_MASK) != 0,
-				(_resetReason & NRF_POWER_RESETREAS_SREQ_MASK) != 0,
-				(_resetReason & NRF_POWER_RESETREAS_LOCKUP_MASK) != 0,
-				(_resetReason & NRF_POWER_RESETREAS_OFF_MASK) != 0);
-
-		// Store gpregret.
-		_gpregret[0] = GpRegRet::getValue(GpRegRet::GPREGRET);
-		_gpregret[1] = GpRegRet::getValue(GpRegRet::GPREGRET2);
-
-		if (GpRegRet::isFlagSet(GpRegRet::FLAG_STORAGE_RECOVERED)) {
-			_setStateValuesAfterStorageRecover = true;
-			GpRegRet::clearFlag(GpRegRet::FLAG_STORAGE_RECOVERED);
-		}
-		if (_setStateValuesAfterStorageRecover) {
-			LOGw("Set state values after storage recover.");
-			// Set switch state to on, as that's the most likely and preferred state of the switch.
-			TYPIFY(STATE_SWITCH_STATE) switchState;
-			switchState.state.dimmer = 0;
-			switchState.state.relay = 1;
-			_state->set(CS_TYPE::STATE_SWITCH_STATE, &switchState, sizeof(switchState));
-		}
-
-		LOGi(FMT_INIT, "command handler");
-		_commandHandler->init(&_boardsConfig);
-
-		LOGi(FMT_INIT, "factory reset");
-		_factoryReset->init();
-
-		LOGi(FMT_INIT, "encryption");
-		ConnectionEncryption::getInstance().init();
-		KeysAndAccess::getInstance().init();
-
-
-		if (IS_CROWNSTONE(_boardsConfig.deviceType)) {
-			LOGi(FMT_INIT, "switch");
-			SwitchAggregator::getInstance().init(_boardsConfig);
-
-			LOGi(FMT_INIT, "temperature guard");
-			_temperatureGuard->init(_boardsConfig);
-
-			LOGi(FMT_INIT, "power sampler");
-			_powerSampler->init(_boardsConfig);
-		}
-
-		// init GPIOs
-		if (_boardsConfig.flags.hasLed) {
-			LOGi("Configure LEDs");
-			// Note: DO NOT USE THEM WHILE SCANNING OR MESHING
-			nrf_gpio_cfg_output(_boardsConfig.pinLedRed);
-			nrf_gpio_cfg_output(_boardsConfig.pinLedGreen);
-			// Turn the leds off
-			if (_boardsConfig.flags.ledInverted) {
-				nrf_gpio_pin_set(_boardsConfig.pinLedRed);
-				nrf_gpio_pin_set(_boardsConfig.pinLedGreen);
-			}
-			else {
-				nrf_gpio_pin_clear(_boardsConfig.pinLedRed);
-				nrf_gpio_pin_clear(_boardsConfig.pinLedGreen);
-			}
-		}
+#if BUILD_TWI
+	_twi.init(_boardsConfig);
+#endif
 }
 
 void Crownstone::configure() {

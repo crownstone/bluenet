@@ -84,9 +84,9 @@ class MicroappProtocol: public EventListener {
 		int _coskip;
 
 		/**
-		 * Store i2c data
+		 * Store data for callbacks towards the microapp.
 		 */
-		CircularBuffer<uint8_t>* _i2c_data;
+		CircularBuffer<uint8_t>* _callbackData;
 	protected:
 
 		/**

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <ble/cs_Nordic.h>
+#include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
 
 /**
@@ -19,13 +20,20 @@ public:
 	 * Construct twi/i2c instance.
 	 */
 	Twi();
+	
+	/**
+	 * Init twi with board configuration (nothing is happening to the pins yet).
+	 *
+	 * @param[in]     board        Hardware board.
+	 */
+	void init(const boards_config_t& board);
 
 	/**
-	 * Init twi as master.
-	 * @param[in]     pinScl       Clock pin for TWI.
-	 * @param[in]     pinSda       Data pin for TWI.
+	 * Init twi as master on the i2c bus.
+	 *
+	 * @param[in]     twi          Configuration (frequency, etc.)
 	 */
-	void init(uint8_t pinScl, uint8_t pinSda);
+	void initBus(cs_twi_init_t& twi);
 
 	/**
 	 * Write data to given address.
@@ -35,7 +43,7 @@ public:
 	 * @param[in]     length       The number of items to be written.
 	 * @param[in]     stop         Release the bus after a write (for e.g. another i2c master).
 	 */
-	void write(uint8_t address, uint8_t *data, size_t length, bool stop);
+	void write(uint8_t address, uint8_t* data, size_t length, bool stop);
 
 	/**
 	 * Read data from given address.
@@ -44,17 +52,16 @@ public:
 	 * @param[out]    data         Pointer to data array where result will be received.
 	 * @param[in,out] length       Number of items to read, and returns number of items actually read.
 	 */
-	void read(uint8_t address, uint8_t *data, size_t & length);
+	void read(uint8_t address, uint8_t* data, size_t & length);
 
 	/**
 	 * Incoming events.
+	 * @param[in]     event        Event from other modules in bluenet.
 	 */
-	void handleEvent(event_t & event);
+	void handleEvent(event_t& event);
 protected:
 
-	/**
-	 * Local struct to store configuration.
-	 */
+	// Local struct to store configuration.
 	static const nrfx_twi_t _twi;
 
 private:
@@ -65,3 +72,4 @@ private:
 	// Initialized flag
 	bool _init;
 };
+

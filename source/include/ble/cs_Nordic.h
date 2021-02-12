@@ -47,7 +47,7 @@ typedef uint32_t ret_code_t;
 #include <nrfx_wdt.h>
 #include <ble_db_discovery.h>
 
-#ifdef BUILD_TWI
+#if BUILD_TWI == 1
 #include <nrfx_twi.h>
 #endif
 

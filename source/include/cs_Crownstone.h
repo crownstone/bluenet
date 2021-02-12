@@ -47,7 +47,7 @@
 #include <test/cs_MemUsageTest.h>
 #endif
 
-#ifdef BUILD_TWI
+#if BUILD_TWI == 1
 #include <drivers/cs_Twi.h>
 #endif
 
@@ -358,9 +358,8 @@ private:
 #endif
 
 #if BUILD_TWI == 1
-	Twi twi;
+	Twi _twi;
 #endif
-
 
 	app_timer_t              _mainTimerData;
 	app_timer_id_t           _mainTimerId;

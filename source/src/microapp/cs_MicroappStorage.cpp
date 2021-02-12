@@ -46,9 +46,7 @@ NRF_FSTORAGE_DEF(nrf_fstorage_t nrf_microapp_storage) =
 	.end_addr       = g_FLASH_MICROAPP_BASE + (0x1000*(g_FLASH_MICROAPP_PAGES)) - 1,
 };
 
-MicroappStorage::MicroappStorage() { //: EventListener() {
-	
-//	EventDispatcher::getInstance().addListener(this);
+MicroappStorage::MicroappStorage() { 
 
 	_prevMessage.protocol = 0;
 	_prevMessage.app_id = 0;
@@ -176,15 +174,16 @@ uint16_t MicroappStorage::validateChunk(const uint8_t * const data, uint16_t siz
  * Get configuration from the header in the app.
  */
 void MicroappStorage::getHeaderApp(microapp_header_t *header) {
-	
+
 	LOGd("Get app header");
 	const uint32_t addr = nrf_microapp_storage.start_addr;
-	uint8_t buf[MICROAPP_CHUNK_SIZE];
+	const uint8_t size = sizeof(microapp_header_t);
+	uint8_t buf[size];
 
-	nrf_fstorage_read(&nrf_microapp_storage, addr, &buf, sizeof(*header));
-	header->offset   = (uint16_t)((buf[1] << 8) + (buf[0]));
-	header->size     = (uint16_t)((buf[5] << 8) + (buf[4]));
-	header->checksum = (uint16_t)((buf[9] << 8) + (buf[8]));
+	nrf_fstorage_read(&nrf_microapp_storage, addr, &buf, size);
+	header->offset   = (uint32_t)((buf[1] << 8) + (buf[0]));
+	header->size     = (uint32_t)((buf[5] << 8) + (buf[4]));
+	header->checksum = (uint32_t)((buf[9] << 8) + (buf[8]));
 
 	LOGd("Offset: %i", header->offset);
 	LOGd("Size: %i", header->size);
@@ -234,15 +233,25 @@ uint16_t MicroappStorage::validateApp() {
 	// loop and limit required data to MICROAPP_CHUNK_SIZE
 	uint8_t buf[MICROAPP_CHUNK_SIZE];
 	uint32_t addr = nrf_microapp_storage.start_addr;
+
+	// actually we now fletcher returns 0 for all zeros, but already in place if we use something else
+	memset(&buf, 0, sizeof(header));
+	uint8_t header_count = sizeof(header) / MICROAPP_CHUNK_SIZE;
+	uint16_t header_remain = sizeof(header) - header_count;
+	for (int i = 0; i < header_count; ++i) {
+		checksum_iterative = Fletcher(buf, MICROAPP_CHUNK_SIZE, checksum_iterative);
+		addr += MICROAPP_CHUNK_SIZE;
+	}
+	if (header_remain) {
+		checksum_iterative = Fletcher(buf, header_remain, checksum_iterative);
+		addr += header_remain;
+	}
+
 	for (int i = 0; i < count; ++i) {
 		ret_code = nrf_fstorage_read(&nrf_microapp_storage, addr, &buf, MICROAPP_CHUNK_SIZE);
 		if (ret_code != ERR_SUCCESS) {
 			LOGw("Error with reading with fstorage: %i", ret_code);
 			return ERR_INVALID_MESSAGE;
-		}
-		// the header does partake in the checksum, but with all values set to 0
-		if (i == 0) {
-			memset(buf, 0, sizeof(header));
 		}
 		checksum_iterative = Fletcher(buf, MICROAPP_CHUNK_SIZE, checksum_iterative);
 		addr += MICROAPP_CHUNK_SIZE;
@@ -251,6 +260,7 @@ uint16_t MicroappStorage::validateApp() {
 	if (remain) {
 		nrf_fstorage_read(&nrf_microapp_storage, addr, &buf, remain);
 		checksum_iterative = Fletcher(buf, remain, checksum_iterative);
+		addr += remain;
 	}
 	// checksum is truncated to 16 bits
 	uint16_t checksum = (uint16_t)checksum_iterative;

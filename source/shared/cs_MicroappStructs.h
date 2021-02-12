@@ -67,7 +67,7 @@ enum CommandMicroappPinValue {
  */
 typedef struct {
 	uint8_t payload[MAX_PAYLOAD];
-	int length;
+	uint8_t length;
 } message_t;
 
 /*
@@ -91,7 +91,7 @@ typedef struct {
 	uintptr_t coargs;
 } sleep_cmd_t;
 
-const uint8_t MAX_TWI_PAYLOAD = 32 - 6;
+const uint8_t MAX_TWI_PAYLOAD = MAX_PAYLOAD - 6;
 
 /*
  * Struct for i2c initialization, writes, and reads.

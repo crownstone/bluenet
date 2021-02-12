@@ -8,10 +8,10 @@
 #define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
 
 typedef struct __attribute__((__packed__)) microapp_header_t {
-	uint16_t size;
-	uint16_t checksum;
-	uint16_t offset;
-	uint16_t reserve;
+	uint32_t size;
+	uint32_t checksum;
+	uint32_t offset;
+	uint32_t reserve;
 } microapp_header_t;
 
 /**

@@ -131,17 +131,8 @@ typedef struct  {
 	//! GPIO pin to send uart.
 	uint8_t pinGpioTx;
 	
-	//! GPIO custom pin 
-	uint8_t pinGpio1;
-	
-	//! GPIO custom pin 
-	uint8_t pinGpio2;
-	
-	//! GPIO custom pin 
-	uint8_t pinGpio3;
-	
-	//! GPIO custom pin 
-	uint8_t pinGpio4;
+	//! GPIO custom pins (only four)
+	uint8_t pinGpio[4];
 
 	//! GPIO pin to control the "red" led.
 	uint8_t pinLedRed;
