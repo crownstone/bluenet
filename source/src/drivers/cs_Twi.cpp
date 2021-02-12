@@ -14,7 +14,7 @@
 
 const nrfx_twi_t Twi::_twi = NRFX_TWI_INSTANCE(TWI_INSTANCE_ID);
 
-void twi_event_handler(nrfx_twi_evt_t const *p_event, void *p_context) {
+void twi_event_handler(nrfx_twi_evt_t const *pEvent, void *pContext) {
 	// the event handler is not used yet, it is only required if we cannot just use read()
 }
 
@@ -25,14 +25,14 @@ Twi::Twi(): EventListener(), _init(false) {
 /*
  * Only operate as master.
  */
-void Twi::init(uint8_t pin_scl, uint8_t pin_sda) {
+void Twi::init(uint8_t pinScl, uint8_t pinSda) {
 	LOGi("Init TWI");
 	if (_init) {
 		LOGw("Already initialized!");
 		return;
 	}
-	_config.scl = pin_scl;
-	_config.sda = pin_sda;
+	_config.scl = pinScl;
+	_config.sda = pinSda;
 	_config.frequency = NRF_TWI_FREQ_100K;
 	_config.interrupt_priority = NRFX_TWI_DEFAULT_CONFIG_IRQ_PRIORITY;
 	_config.hold_bus_uninit = false;

@@ -22,8 +22,10 @@ public:
 
 	/**
 	 * Init twi as master.
+	 * @param[in]     pinScl       Clock pin for TWI.
+	 * @param[in]     pinSda       Data pin for TWI.
 	 */
-	void init(uint8_t pin_scl, uint8_t pin_sda);
+	void init(uint8_t pinScl, uint8_t pinSda);
 
 	/**
 	 * Write data to given address.
