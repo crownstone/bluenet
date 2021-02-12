@@ -74,24 +74,24 @@ void Twi::read(uint8_t address, uint8_t *data, size_t & length) {
 
 void Twi::handleEvent(event_t & event) {
 	switch(event.type) {
-	case CS_TYPE::EVT_TWI_INIT: {
-		TYPIFY(EVT_TWI_INIT) twi = *(TYPIFY(EVT_TWI_INIT)*)event.data;
-		init(twi.scl, twi.sda);
-		break;
-	}
-	case CS_TYPE::EVT_TWI_WRITE: {
-		TYPIFY(EVT_TWI_WRITE)* twi = (TYPIFY(EVT_TWI_WRITE)*)event.data;
-		write(twi->address, twi->buf, twi->length, twi->stop);
-		break;
-	}
-	case CS_TYPE::EVT_TWI_READ: {
-		TYPIFY(EVT_TWI_READ)* twi = (TYPIFY(EVT_TWI_READ)*)event.data;
-		size_t length = twi->length;
-		read(twi->address, twi->buf, length);
-		twi->length = length;
-		break;
-	}
-	default:
-		break;
+		case CS_TYPE::EVT_TWI_INIT: {
+			TYPIFY(EVT_TWI_INIT) twi = *(TYPIFY(EVT_TWI_INIT)*)event.data;
+			init(twi.scl, twi.sda);
+			break;
+		}
+		case CS_TYPE::EVT_TWI_WRITE: {
+			TYPIFY(EVT_TWI_WRITE)* twi = (TYPIFY(EVT_TWI_WRITE)*)event.data;
+			write(twi->address, twi->buf, twi->length, twi->stop);
+			break;
+		}
+		case CS_TYPE::EVT_TWI_READ: {
+			TYPIFY(EVT_TWI_READ)* twi = (TYPIFY(EVT_TWI_READ)*)event.data;
+			size_t length = twi->length;
+			read(twi->address, twi->buf, length);
+			twi->length = length;
+			break;
+		}
+		default:
+			break;
 	}
 }
