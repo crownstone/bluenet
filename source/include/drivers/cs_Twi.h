@@ -70,6 +70,9 @@ private:
 	nrfx_twi_config_t _config;
 
 	// Initialized flag
-	bool _init;
+	bool _initialized;
+
+	// Initialized flag
+	bool _initializedBus;
 };
 

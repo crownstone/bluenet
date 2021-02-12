@@ -20,13 +20,17 @@ void twiEventHandler(nrfx_twi_evt_t const* event, void* context) {
 	// the event handler is not used yet, it is only required if we cannot just use read()
 }
 
-Twi::Twi(): EventListener(), _init(false) {
+Twi::Twi(): EventListener(), _initialized(false), _initializedBus(false) {
 	EventDispatcher::getInstance().addListener(this);
 }
 
+/*
+ * General initialization from board config.
+ */
 void Twi::init(const boards_config_t & board) {
 	_config.sda = board.pinGpio[g_TWI_SDA_INDEX];
 	_config.scl = board.pinGpio[g_TWI_SCL_INDEX];
+	_initialized = true;
 	LOGi("Configured TWI at SDA %i and SCL %i", _config.sda, _config.scl);
 }
 
@@ -35,8 +39,12 @@ void Twi::init(const boards_config_t & board) {
  */
 void Twi::initBus(cs_twi_init_t& twi) {
 	LOGi("Init TWI bus");
-	if (_init) {
-		LOGw("Already initialized!");
+	if (!_initialized) {
+		LOGw("Class not initialized.");
+		return;
+	}
+	if (_initializedBus) {
+		LOGw("Already initialized bus.");
 		return;
 	}
 	_config.frequency = NRF_TWI_FREQ_100K;
@@ -48,11 +56,11 @@ void Twi::initBus(cs_twi_init_t& twi) {
 		return;
 	}
 
-	_init = true;
+	_initializedBus = true;
 }
 
 void Twi::write(uint8_t address, uint8_t* data, size_t length, bool stop) {
-	if (!_init) {
+	if (!_initialized || !_initializedBus) {
 		LOGw("Twi not initialized yet, cannot write");
 		return;
 	}
@@ -65,6 +73,11 @@ void Twi::write(uint8_t address, uint8_t* data, size_t length, bool stop) {
 }
 
 void Twi::read(uint8_t address, uint8_t* data, size_t & length) {
+	if (!_initialized || !_initializedBus) {
+		LOGw("Twi not initialized yet, cannot read");
+		length = 0;
+		return;
+	}
 	uint16_t ret_code;
 	LOGi("Read i2c value");
 	nrfx_twi_enable(&_twi);
