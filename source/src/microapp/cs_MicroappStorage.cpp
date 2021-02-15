@@ -204,10 +204,14 @@ uint16_t MicroappStorage::validateApp() {
 	microapp_header_t header;
 	getHeaderApp(&header);
 	
-	if (header.size == 0xFFFF) {
-		LOGi("Microapp size at default. Do not load");
+	if (header.size > 0x1000*(g_FLASH_MICROAPP_PAGES)) {
+		LOGi("Microapp size, %i, too large. Do not load", header.size);
 		return ERR_WRONG_STATE;
 	}
+    if (header.offset > 0x1000*(g_FLASH_MICROAPP_PAGES)) {
+		LOGi("Microapp offset, %i, too large. Do not load", header.offset);
+		return ERR_WRONG_STATE;
+    }
 	LOGd("Microapp size field is: %x", header.size);
 
 	// get the state fields for the microapp and store results

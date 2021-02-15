@@ -88,13 +88,11 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 					break;
 				}
 				case CS_MICROAPP_COMMAND_TWI_WRITE: {
-					LOGi("Write over i2c to address: %i", twi_cmd->address);
+					LOGi("Write over i2c to address: 0x%02x", twi_cmd->address);
 					uint8_t bufSize = twi_cmd->length;
 					TYPIFY(EVT_TWI_WRITE) twi;
-					uint8_t buf_array[bufSize];
-					buffer_ptr_t buf = &buf_array[0];
 					twi.address = twi_cmd->address;
-					twi.buf = buf;
+					twi.buf = twi_cmd->buf;
 					twi.length = bufSize;
 					twi.stop = twi_cmd->stop;
 					event_t event(CS_TYPE::EVT_TWI_WRITE, &twi, sizeof(twi));
@@ -102,14 +100,12 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 					break;
 				}
 				case CS_MICROAPP_COMMAND_TWI_READ: {
-					LOGi("Read from i2c address: %i", twi_cmd->address);
+					LOGi("Read from i2c address: 0x%02x", twi_cmd->address);
 					// TODO: What!!! Returning a value from an event should be WAY easier!
 					uint8_t bufSize = twi_cmd->length;
 					TYPIFY(EVT_TWI_READ) twi;
-					uint8_t buf_array[bufSize];
-					buffer_ptr_t buf = &buf_array[0];
 					twi.address = twi_cmd->address;
-					twi.buf = buf;
+					twi.buf = twi_cmd->buf;
 					twi.length = bufSize;
 					twi.stop = twi_cmd->stop;
 					event_t event(CS_TYPE::EVT_TWI_READ, &twi, sizeof(twi));

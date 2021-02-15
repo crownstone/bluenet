@@ -64,7 +64,11 @@ void Twi::write(uint8_t address, uint8_t* data, size_t length, bool stop) {
 		LOGw("Twi not initialized yet, cannot write");
 		return;
 	}
-	LOGi("Write i2c value");
+	if (length < 1) {
+		LOGw("Nothing to write");
+		return;
+	}
+	LOGi("Write i2c value starting with [0x%x,...]", data[0]);
 	nrfx_twi_enable(&_twi);
 
 	nrfx_twi_tx(&_twi, address, data, length, !stop);
@@ -82,10 +86,71 @@ void Twi::read(uint8_t address, uint8_t* data, size_t & length) {
 	LOGi("Read i2c value");
 	nrfx_twi_enable(&_twi);
 
-	ret_code = nrfx_twi_rx(&_twi, address, data, length);
-	if (ret_code != ERR_SUCCESS) {
-		LOGw("Error with twi rx");
+	nrfx_twi_xfer_desc_t xfer;
+	xfer.type = NRFX_TWI_XFER_RX;
+	xfer.address = address;
+	xfer.primary_length = length;
+	xfer.p_primary_buf = data;
+	const uint32_t flags = 0;
+
+#define DEBUG_SEARCH_FOR_TWI_ADDRESS 1
+#define DEBUG_TWI_WHILE_LOOP 0
+
+#if DEBUG_SEARCH_FOR_TWI_ADDRESS == 1
+	static bool once = false;
+	if (!once) {
+		LOGi("Search for the address: 0x%02x", address);
+		for (int i = 0; i <= 0x7F; ++i) {
+			xfer.address = i;
+			ret_code = nrfx_twi_xfer(&_twi, &xfer, flags);
+			if (ret_code == NRFX_SUCCESS) {
+				LOGi("Found it at address: %02x", i);
+				once = true;
+				break;
+			}
+		}
+		if (!once) {
+			LOGi("Could not find it");
+		}
+		once = true;
+	}
+
+	xfer.address = address;
+#endif
+
+#if DEBUG_TWI_WHILE_LOOP == 1
+	while (nrfx_twi_is_busy(&_twi)) {
+		__WFE();
+	}
+#endif
+
+	//ret_code = nrfx_twi_rx(&_twi, address, data, length);
+	ret_code = nrfx_twi_xfer(&_twi, &xfer, flags);
+	if (ret_code != NRFX_SUCCESS) {
 		length = 0;
+		switch(ret_code) {
+			case NRFX_ERROR_BUSY:
+				LOGw("Busy error with twi rx: %x", ret_code);
+			break;
+			case NRFX_ERROR_INTERNAL:
+				LOGw("Internal error with twi rx: %x", ret_code);
+			break;
+			case NRFX_ERROR_INVALID_STATE:
+				LOGw("State error with twi rx: %x", ret_code);
+			break;
+			case NRFX_ERROR_DRV_TWI_ERR_OVERRUN:
+				LOGw("Overrun error with twi rx: %x", ret_code);
+			break;
+			case NRFX_ERROR_DRV_TWI_ERR_ANACK:
+				LOGw("Anack error with twi rx: %x", ret_code);
+			break;
+			case NRFX_ERROR_DRV_TWI_ERR_DNACK:
+				LOGw("Dnack error with twi rx: %x", ret_code);
+			break;
+			default:
+				LOGw("Unkown error with twi rx: %x", ret_code);
+				break;
+		}
 	}
 
 	nrfx_twi_disable(&_twi);
