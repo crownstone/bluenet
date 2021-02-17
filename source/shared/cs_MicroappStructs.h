@@ -37,6 +37,11 @@ enum CommandMicroapp {
 	CS_MICROAPP_COMMAND_TWI               = 0x05,
 };
 
+enum CommandMicroappLogOption {
+	CS_MICROAPP_COMMAND_LOG_NEWLINE       = 0x00,
+	CS_MICROAPP_COMMAND_LOG_NO_NEWLINE    = 0x01,
+};
+
 enum CommandMicroappLog {
 	CS_MICROAPP_COMMAND_LOG_CHAR          = 0x00,
 	CS_MICROAPP_COMMAND_LOG_INT           = 0x01,

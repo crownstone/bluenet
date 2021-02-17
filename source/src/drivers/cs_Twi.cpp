@@ -114,7 +114,7 @@ void Twi::write(uint8_t address, uint8_t* data, size_t length, bool stop) {
 		LOGw("Nothing to write");
 		return;
 	}
-	LOGi("Write i2c value starting with [0x%x,...]", data[0]);
+	LOGd("Write i2c value starting with [0x%x,...]", data[0]);
 
 	nrfx_twi_tx(&_twi, address, data, length, !stop);
 }
@@ -135,36 +135,50 @@ void Twi::read(uint8_t address, uint8_t* data, size_t & length) {
 	xfer.p_primary_buf = data;
 	const uint32_t flags = 0;
 
-	_eventRead = false;
-	_eventError = false;
-	ret_code = nrfx_twi_xfer(&_twi, &xfer, flags);
-	if (ret_code != NRFX_SUCCESS) {
-		length = 0;
-		switch(ret_code) {
-			case NRFX_ERROR_BUSY:
-				LOGw("Busy error with twi rx: %x", ret_code);
+	while (true) { 
+		_eventRead = false;
+		_eventError = false;
+		ret_code = nrfx_twi_xfer(&_twi, &xfer, flags);
+		if (ret_code != NRFX_SUCCESS) {
+			length = 0;
+			switch(ret_code) {
+				case NRFX_ERROR_BUSY:
+					LOGd("Busy error with twi rx: %x", ret_code);
+					break;
+				case NRFX_ERROR_INTERNAL:
+					LOGw("Internal error with twi rx: %x", ret_code);
+					break;
+				case NRFX_ERROR_INVALID_STATE:
+					LOGw("State error with twi rx: %x", ret_code);
+					break;
+				case NRFX_ERROR_DRV_TWI_ERR_OVERRUN:
+					LOGw("Overrun error with twi rx: %x", ret_code);
+					break;
+				case NRFX_ERROR_DRV_TWI_ERR_ANACK:
+					LOGw("Anack error with twi rx: %x", ret_code);
+					break;
+				case NRFX_ERROR_DRV_TWI_ERR_DNACK:
+					LOGw("Dnack error with twi rx: %x", ret_code);
+					break;
+				default:
+					LOGw("Unkown error with twi rx: %x", ret_code);
+					break;
+			}
+		}
+		// only on busy loop around, if not break
+		if (ret_code == NRFX_ERROR_BUSY) {
+			sd_app_evt_wait();
+		} else {
 			break;
-			case NRFX_ERROR_INTERNAL:
-				LOGw("Internal error with twi rx: %x", ret_code);
-			break;
-			case NRFX_ERROR_INVALID_STATE:
-				LOGw("State error with twi rx: %x", ret_code);
-			break;
-			case NRFX_ERROR_DRV_TWI_ERR_OVERRUN:
-				LOGw("Overrun error with twi rx: %x", ret_code);
-			break;
-			case NRFX_ERROR_DRV_TWI_ERR_ANACK:
-				LOGw("Anack error with twi rx: %x", ret_code);
-			break;
-			case NRFX_ERROR_DRV_TWI_ERR_DNACK:
-				LOGw("Dnack error with twi rx: %x", ret_code);
-			break;
-			default:
-				LOGw("Unkown error with twi rx: %x", ret_code);
-				break;
 		}
 	}
-	else {
+	
+	if (ret_code == NRFX_SUCCESS) {
+		while (true) {
+			sd_app_evt_wait();
+			if (_eventRead) break;
+			if (_eventError) break;
+		}
 		// TODO: use time outs to break out of the following loops
 		while (nrfx_twi_is_busy(&_twi)) {
 			sd_app_evt_wait();

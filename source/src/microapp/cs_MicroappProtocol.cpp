@@ -87,7 +87,7 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 					break;
 				}
 				case CS_MICROAPP_COMMAND_TWI_WRITE: {
-					LOGi("Write over i2c to address: 0x%02x", twi_cmd->address);
+					LOGd("Write over i2c to address: 0x%02x", twi_cmd->address);
 					uint8_t bufSize = twi_cmd->length;
 					TYPIFY(EVT_TWI_WRITE) twi;
 					twi.address = twi_cmd->address;
@@ -99,7 +99,7 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 					break;
 				}
 				case CS_MICROAPP_COMMAND_TWI_READ: {
-					LOGi("Read from i2c address: 0x%02x", twi_cmd->address);
+					LOGd("Read from i2c address: 0x%02x", twi_cmd->address);
 					uint8_t bufSize = twi_cmd->length;
 					TYPIFY(EVT_TWI_READ) twi;
 					twi.address = twi_cmd->address;
@@ -132,43 +132,48 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 	switch(command) {
 		case CS_MICROAPP_COMMAND_LOG: {
 			char type = payload[1];
+			char option = payload[2];
+			bool newLine = false;
+			if (option == CS_MICROAPP_COMMAND_LOG_NEWLINE) {
+				newLine = true;
+			}
 			switch(type) {
 				case CS_MICROAPP_COMMAND_LOG_CHAR: {
-					__attribute__((unused)) char value = payload[2];
-					LOGi("%i", (int)value);
+					__attribute__((unused)) char value = payload[3];
+					_log(SERIAL_INFO, newLine, "%i%s", (int)value);
 					break;
 				}
 				case CS_MICROAPP_COMMAND_LOG_SHORT: {
-					__attribute__((unused)) uint16_t value = *(uint16_t*)&payload[2];
-					LOGi("%i", value);
+					__attribute__((unused)) uint16_t value = *(uint16_t*)&payload[3];
+					_log(SERIAL_INFO, newLine, "%i%s", (int)value);
 					break;
 				}
 				case CS_MICROAPP_COMMAND_LOG_UINT:
 				case CS_MICROAPP_COMMAND_LOG_INT: {
-//					__attribute__((unused)) int value = (payload[2] << 8) + payload[3];
-					__attribute__((unused)) int value = *(int*)&payload[2];
-					LOGi("%i", value);
+//					__attribute__((unused)) int value = (payload[3] << 8) + payload[3];
+					__attribute__((unused)) int value = *(int*)&payload[3];
+					_log(SERIAL_INFO, newLine, "%i%s", (int)value);
 					break;
 				}
 				case CS_MICROAPP_COMMAND_LOG_FLOAT: {
 					// TODO: We get into trouble when printing using %f
-					__attribute__((unused)) int value = *(int*)&payload[2];
+					__attribute__((unused)) int value = *(int*)&payload[3];
 					int before = value / 10000;
 					int after = value - (before * 10000);
-					LOGi("%i.%i", before, after);
+					_log(SERIAL_INFO, newLine, "%i.%i", before, after);
 					break;
 				}
 				case CS_MICROAPP_COMMAND_LOG_DOUBLE: {
 					// TODO: This will fail (see float for workaround)
-					__attribute__((unused)) double value = *(double*)&payload[2];
-					LOGi("%f", value);
+					__attribute__((unused)) double value = *(double*)&payload[3];
+					_log(SERIAL_INFO, newLine, "%f%s", value);
 					break;
 				}
 				case CS_MICROAPP_COMMAND_LOG_STR: {
-					int str_length = length - 2; // Check if length <= max_length - 1, for null terminator.
-					char *data = reinterpret_cast<char*>(&(payload[2]));
+					int str_length = length - 3; // Check if length <= max_length - 1, for null terminator.
+					char *data = reinterpret_cast<char*>(&(payload[3]));
 					data[str_length] = 0;
-					LOGi("%s", data);
+					_log(SERIAL_INFO, newLine, "%s", data);
 					break;
 				}
 				default:
