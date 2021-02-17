@@ -160,7 +160,7 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 					__attribute__((unused)) int value = *(int*)&payload[3];
 					int before = value / 10000;
 					int after = value - (before * 10000);
-					_log(SERIAL_INFO, newLine, "%i.%i", before, after);
+					_log(SERIAL_INFO, newLine, "%i.%04i", before, after);
 					break;
 				}
 				case CS_MICROAPP_COMMAND_LOG_DOUBLE: {
