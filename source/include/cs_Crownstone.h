@@ -358,7 +358,7 @@ private:
 #endif
 
 #if BUILD_TWI == 1
-	Twi _twi;
+	Twi* _twi = nullptr;
 #endif
 
 	app_timer_t              _mainTimerData;

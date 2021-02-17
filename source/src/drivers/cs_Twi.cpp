@@ -17,11 +17,56 @@
 const nrfx_twi_t Twi::_twi = NRFX_TWI_INSTANCE(TWI_INSTANCE_ID);
 
 void twiEventHandler(nrfx_twi_evt_t const* event, void* context) {
-	// the event handler is not used yet, it is only required if we cannot just use read()
+	switch(event->type) {
+		case NRFX_TWI_EVT_DONE:
+			if (event->xfer_desc.type == NRFX_TWI_XFER_RX) {
+				Twi::getInstance().isrEvent(TwiIsrEvent::Read);
+			} else {
+				Twi::getInstance().isrEvent(TwiIsrEvent::Write);
+			}
+			break;
+		case NRFX_TWI_EVT_ADDRESS_NACK:
+			LOGw("TWI address nack (check pins/connection and the address)");
+			Twi::getInstance().isrEvent(TwiIsrEvent::Error);
+			break;
+		case NRFX_TWI_EVT_DATA_NACK:
+			LOGw("TWI data nack");
+			Twi::getInstance().isrEvent(TwiIsrEvent::Error);
+			break;
+		//case NRFX_TWI_EVT_OVERRUN:
+		//	LOGw("TWI overrun");
+		//	break;
+		default:
+			LOGw("Unknown event");
+			Twi::getInstance().isrEvent(TwiIsrEvent::Error);
+			break;
+	}
+}
+
+Twi& Twi::getInstance() {
+	static Twi instance;
+	return instance;
 }
 
 Twi::Twi(): EventListener(), _initialized(false), _initializedBus(false) {
 	EventDispatcher::getInstance().addListener(this);
+
+	_eventRead = false;
+	_eventError = false;
+}
+
+void Twi::isrEvent(TwiIsrEvent event) {
+	switch(event) {
+		case TwiIsrEvent::Read:
+			_eventRead = true;
+			_eventError = false;
+			break;
+		case TwiIsrEvent::Write:
+			break;
+		case TwiIsrEvent::Error:
+			_eventError = true;
+			break;
+	}
 }
 
 /*
@@ -55,6 +100,7 @@ void Twi::initBus(cs_twi_init_t& twi) {
 		LOGw("Init error: %i", ret);
 		return;
 	}
+	nrfx_twi_enable(&_twi);
 
 	_initializedBus = true;
 }
@@ -69,11 +115,8 @@ void Twi::write(uint8_t address, uint8_t* data, size_t length, bool stop) {
 		return;
 	}
 	LOGi("Write i2c value starting with [0x%x,...]", data[0]);
-	nrfx_twi_enable(&_twi);
 
 	nrfx_twi_tx(&_twi, address, data, length, !stop);
-
-	nrfx_twi_disable(&_twi);
 }
 
 void Twi::read(uint8_t address, uint8_t* data, size_t & length) {
@@ -83,8 +126,7 @@ void Twi::read(uint8_t address, uint8_t* data, size_t & length) {
 		return;
 	}
 	uint16_t ret_code;
-	LOGi("Read i2c value");
-	nrfx_twi_enable(&_twi);
+	//LOGi("Read i2c value");
 
 	nrfx_twi_xfer_desc_t xfer;
 	xfer.type = NRFX_TWI_XFER_RX;
@@ -93,38 +135,8 @@ void Twi::read(uint8_t address, uint8_t* data, size_t & length) {
 	xfer.p_primary_buf = data;
 	const uint32_t flags = 0;
 
-#define DEBUG_SEARCH_FOR_TWI_ADDRESS 1
-#define DEBUG_TWI_WHILE_LOOP 0
-
-#if DEBUG_SEARCH_FOR_TWI_ADDRESS == 1
-	static bool once = false;
-	if (!once) {
-		LOGi("Search for the address: 0x%02x", address);
-		for (int i = 0; i <= 0x7F; ++i) {
-			xfer.address = i;
-			ret_code = nrfx_twi_xfer(&_twi, &xfer, flags);
-			if (ret_code == NRFX_SUCCESS) {
-				LOGi("Found it at address: %02x", i);
-				once = true;
-				break;
-			}
-		}
-		if (!once) {
-			LOGi("Could not find it");
-		}
-		once = true;
-	}
-
-	xfer.address = address;
-#endif
-
-#if DEBUG_TWI_WHILE_LOOP == 1
-	while (nrfx_twi_is_busy(&_twi)) {
-		__WFE();
-	}
-#endif
-
-	//ret_code = nrfx_twi_rx(&_twi, address, data, length);
+	_eventRead = false;
+	_eventError = false;
 	ret_code = nrfx_twi_xfer(&_twi, &xfer, flags);
 	if (ret_code != NRFX_SUCCESS) {
 		length = 0;
@@ -152,8 +164,28 @@ void Twi::read(uint8_t address, uint8_t* data, size_t & length) {
 				break;
 		}
 	}
+	else {
+		// TODO: use time outs to break out of the following loops
+		while (nrfx_twi_is_busy(&_twi)) {
+			sd_app_evt_wait();
+		}
+		while (true) {
+			sd_app_evt_wait();
+			if (_eventRead) break;
+			if (_eventError) break;
+		}
+		//if (_eventRead) {
+		//	LOGd("Event read");
+		//}
+		if (_eventError) {
+			LOGd("Event error");
+		}
+		length = xfer.primary_length;
+		//for (int i = 0; i < (int)length; ++i) {
+		//	LOGi("Read: 0x%02x", xfer.p_primary_buf[i]);
+		//}
+	}
 
-	nrfx_twi_disable(&_twi);
 }
 
 void Twi::handleEvent(event_t& event) {

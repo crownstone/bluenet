@@ -41,6 +41,11 @@ enum CommandMicroappLog {
 	CS_MICROAPP_COMMAND_LOG_CHAR          = 0x00,
 	CS_MICROAPP_COMMAND_LOG_INT           = 0x01,
 	CS_MICROAPP_COMMAND_LOG_STR           = 0x02,
+	CS_MICROAPP_COMMAND_LOG_ARR           = 0x03,
+	CS_MICROAPP_COMMAND_LOG_FLOAT         = 0x04,
+	CS_MICROAPP_COMMAND_LOG_DOUBLE        = 0x05,
+	CS_MICROAPP_COMMAND_LOG_UINT          = 0x06,
+	CS_MICROAPP_COMMAND_LOG_SHORT         = 0x07,
 };
 
 enum CommandMicroappPinOpcode {

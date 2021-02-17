@@ -33,7 +33,6 @@
  * The function forwardCommand is called from microapp_callback.
  */
 void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
-	LOGi("Set command");
 	switch(command) {
 		case CS_MICROAPP_COMMAND_PIN: {
 			pin_cmd_t *pin_cmd = (pin_cmd_t*)data;
@@ -101,7 +100,6 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 				}
 				case CS_MICROAPP_COMMAND_TWI_READ: {
 					LOGi("Read from i2c address: 0x%02x", twi_cmd->address);
-					// TODO: What!!! Returning a value from an event should be WAY easier!
 					uint8_t bufSize = twi_cmd->length;
 					TYPIFY(EVT_TWI_READ) twi;
 					twi.address = twi_cmd->address;
@@ -112,7 +110,10 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 					EventDispatcher::getInstance().dispatch(event);
 					twi_cmd->ack = event.result.returnCode;
 					twi_cmd->length = twi.length;
-					LOGd("Return value of length: %i", twi_cmd->length);
+					//LOGi("Return value of length: %i", twi_cmd->length);
+					//for (int i = 0; i < (int)twi_cmd->length; ++i) {
+					//	LOGi("Read: 0x%02x", twi.buf[i]);
+					//}
 					break;
 				}
 				default:
@@ -137,9 +138,30 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 					LOGi("%i", (int)value);
 					break;
 				}
-				case CS_MICROAPP_COMMAND_LOG_INT: {
-					__attribute__((unused)) int value = (payload[2] << 8) + payload[3];
+				case CS_MICROAPP_COMMAND_LOG_SHORT: {
+					__attribute__((unused)) uint16_t value = *(uint16_t*)&payload[2];
 					LOGi("%i", value);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_LOG_UINT:
+				case CS_MICROAPP_COMMAND_LOG_INT: {
+//					__attribute__((unused)) int value = (payload[2] << 8) + payload[3];
+					__attribute__((unused)) int value = *(int*)&payload[2];
+					LOGi("%i", value);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_LOG_FLOAT: {
+					// TODO: We get into trouble when printing using %f
+					__attribute__((unused)) int value = *(int*)&payload[2];
+					int before = value / 10000;
+					int after = value - (before * 10000);
+					LOGi("%i.%i", before, after);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_LOG_DOUBLE: {
+					// TODO: This will fail (see float for workaround)
+					__attribute__((unused)) double value = *(double*)&payload[2];
+					LOGi("%f", value);
 					break;
 				}
 				case CS_MICROAPP_COMMAND_LOG_STR: {
@@ -149,6 +171,8 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 					LOGi("%s", data);
 					break;
 				}
+				default:
+					LOGi("Unsupported type (for now): %i", type);
 			}
 			break;
 		}
@@ -398,7 +422,7 @@ void MicroappProtocol::callSetupAndLoop() {
 					// Skip (due to by the microapp communicated delay)
 					_coskip--;
 				} else {
-					LOGi("Call loop");
+					//LOGd("Call loop");
 					callLoop(_cocounter, _coskip);
 					if (_cocounter == -1) {
 						// Done, reset flags
