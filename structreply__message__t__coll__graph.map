@@ -1,7 +1,0 @@
-<map id="reply_message_t" name="reply_message_t">
-<area shape="rect" id="node2" href="$structstatus__reply__item__t.html" title="Reply to a status message. " alt="" coords="291,5,427,32"/>
-<area shape="rect" id="node3" href="$structstate__reply__item__t.html" title="Reply to a state message. " alt="" coords="294,56,423,83"/>
-<area shape="rect" id="node4" href="$structstream__t.html" title="stream_t\&lt; uint8_t,\l MAX_STATE_REPLY_DATA\l_LENGTH \&gt;" alt="" coords="10,33,209,89"/>
-<area shape="rect" id="node5" href="$structconfig__reply__item__t.html" title="Reply to a configuration message. " alt="" coords="291,113,426,140"/>
-<area shape="rect" id="node6" href="$structstream__t.html" title="stream_t\&lt; uint8_t,\l MAX_CONFIG_REPLY_DATA\l_LENGTH \&gt;" alt="" coords="5,113,213,169"/>
-</map>

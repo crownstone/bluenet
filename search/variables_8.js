@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['id',['id',['../structstorage__config__t.html#ab7384f28c79adf15576e2afc31677ff2',1,'storage_config_t']]],
-  ['indicates',['indicates',['../structStatus.html#a2834c97389c8ac4d2b7277870aa6c271',1,'Status']]]
+  ['id_1642',['id',['../structcs__mesh__model__msg__sync__request__t.html#ace52aa0ab163cef52e20a1b44b1f701b',1,'cs_mesh_model_msg_sync_request_t']]],
+  ['indicates_1643',['indicates',['../structStatus.html#ace4bfe4b95fa93f32be7595197e4d49d',1,'Status']]]
 ];

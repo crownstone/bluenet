@@ -1,11 +1,7 @@
 <map id="State" name="State">
-<area shape="rect" id="node2" href="$classStorage.html" title="Class to store items persistently in FLASH. " alt="" coords="287,12,353,39"/>
-<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener. " alt="" coords="20,12,123,39"/>
-<area shape="rect" id="node4" href="$unionstate__ignore__bitmask__t.html" title="state_ignore_bitmask_t" alt="" coords="241,63,399,89"/>
-<area shape="rect" id="node5" href="$unionstate__errors__t.html" title="state_errors_t" alt="" coords="269,113,371,140"/>
-<area shape="rect" id="node6" href="$classCyclicStorage.html" title="CyclicStorage\&lt; switch\l_state_storage_t, SWITCH\l_STATE_REDUNDANCY, small\l_seq_number_t \&gt;" alt="" coords="213,165,427,235"/>
-<area shape="rect" id="node7" href="$structps__general__vars__t.html" title="Struct used to ... " alt="" coords="256,260,384,287"/>
-<area shape="rect" id="node8" href="$structps__storage__base__t.html" title="enable additional debug output " alt="" coords="5,260,137,287"/>
-<area shape="rect" id="node9" href="$classCyclicStorage.html" title="CyclicStorage\&lt; accumulated\l_energy_t, ACCUMULATED_ENERGY\l_REDUNDANCY, large_seq_number_t \&gt;" alt="" coords="189,311,451,367"/>
-<area shape="rect" id="node10" href="$classCyclicStorage.html" title="CyclicStorage\&lt; reset\l_counter_t, RESET_COUNTER\l_REDUNDANCY, small_seq_number_t \&gt;" alt="" coords="187,391,453,447"/>
+<area shape="rect" id="node1" title="Stores state values in RAM and/or FLASH." alt="" coords="147,171,201,197"/>
+<area shape="rect" id="node2" href="$classBaseClass.html" title=" " alt="" coords="5,81,108,108"/>
+<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener." alt="" coords="111,5,213,32"/>
+<area shape="rect" id="node4" href="$classStorage.html" title="Class to store items persistently in flash (persistent) memory." alt="" coords="183,81,250,108"/>
+<area shape="rect" id="node5" href="$structboards__config__t.html" title="Board configuration." alt="" coords="274,81,389,108"/>
 </map>

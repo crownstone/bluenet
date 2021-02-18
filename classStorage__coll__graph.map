@@ -1,3 +1,4 @@
 <map id="Storage" name="Storage">
-<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener. " alt="" coords="5,5,108,32"/>
+<area shape="rect" id="node1" title="Class to store items persistently in flash (persistent) memory." alt="" coords="23,80,90,107"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="5,5,108,32"/>
 </map>

@@ -1,8 +1,7 @@
 var searchData=
 [
-  ['update',['update',['../classScanResult.html#a6ff76ed6d3973219c559120498bd14ae',1,'ScanResult']]],
-  ['updateadvertisement',['updateAdvertisement',['../classNrf51822BluetoothStack.html#ab5b9a5fabc4f020cc7d0d7281eef29e5',1,'Nrf51822BluetoothStack']]],
-  ['updatedevicename',['updateDeviceName',['../classNrf51822BluetoothStack.html#aafc1669beef91b1722417b98d847ca1c',1,'Nrf51822BluetoothStack']]],
-  ['updatevalue',['updateValue',['../classCharacteristicBase.html#a93dfce87563f7c8113df69b0ee95013b',1,'CharacteristicBase']]],
-  ['uuid',['UUID',['../classUUID.html#a56b6dfa8d38418093502ad169a814dfb',1,'UUID::UUID()'],['../classUUID.html#a12e127ba070a7f883e31e9a02dc740db',1,'UUID::UUID(const char *fullUid)'],['../classUUID.html#a117287ee88059dfbe1b0ecdac81c3771',1,'UUID::UUID(uint16_t uuid)'],['../classUUID.html#a5870ad95d095f52e2a10ff38c18b7006',1,'UUID::UUID(UUID &amp;parent, uint16_t uidValue)'],['../classUUID.html#aa4c9baa1a13d474ef6caf12e0664d579',1,'UUID::UUID(const UUID &amp;rhs)'],['../classUUID.html#a4fc7b9c4a7e4aa5202a4d0077307bb56',1,'UUID::UUID(const ble_uuid_t &amp;value)']]]
+  ['tick_1519',['tick',['../classMeshModelMulticast.html#af4d9c1f46dfa941797e34d14452aa84b',1,'MeshModelMulticast::tick()'],['../classMeshModelMulticastAcked.html#a17a6466ab26561cfda256fdff1ccc9fd',1,'MeshModelMulticastAcked::tick()'],['../classMeshModelUnicast.html#a6221c1c35867b33a393e406cb8d1d4ce',1,'MeshModelUnicast::tick()'],['../classMicroapp.html#a764429f1ae1694c80eea066afd439a7b',1,'Microapp::tick()'],['../classMicroappStorage.html#a4c112dd89be7b55a2dd1cef3e0d467ca',1,'MicroappStorage::tick()'],['../classExternalStates.html#a28aa23c2f5a84c5d27adf76ac4a20f5b',1,'ExternalStates::tick()']]],
+  ['tickstoms_1520',['ticksToMs',['../classRTC.html#a027acf711855d4ef4065333f0d47fb06',1,'RTC']]],
+  ['toarray_1521',['toArray',['../classCrownstoneManufacturer.html#a6780f5beffd465380122bb0c01c8361a',1,'CrownstoneManufacturer']]],
+  ['tuple_1522',['tuple',['../classtuple.html#a2739c6d30f8d1c85b06da220f463149b',1,'tuple']]]
 ];

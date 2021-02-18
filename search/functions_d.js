@@ -1,19 +1,7 @@
 var searchData=
 [
-  ['on_5fble_5fevt',['on_ble_evt',['../classNrf51822BluetoothStack.html#a8c6808589f4b627fe4448ed453b7927a',1,'Nrf51822BluetoothStack']]],
-  ['on_5fconnected',['on_connected',['../classNrf51822BluetoothStack.html#a8de4dd2c650e34fb6f465e2a88f84c6d',1,'Nrf51822BluetoothStack']]],
-  ['on_5fdisconnect',['on_disconnect',['../classService.html#a8821a49b0022c636c8e279635aade7e4',1,'Service']]],
-  ['on_5fwrite',['on_write',['../classService.html#a73b29a6f04eafef5ec0f04e9c74e638b',1,'Service']]],
-  ['onnotifytxerror',['onNotifyTxError',['../classCharacteristicBase.html#af03f33031404fb103999a03df356162f',1,'CharacteristicBase']]],
-  ['onradionotificationinterrupt',['onRadioNotificationInterrupt',['../classNrf51822BluetoothStack.html#a9056197294656ad3d7abdcd436bbe218',1,'Nrf51822BluetoothStack']]],
-  ['ontxcomplete',['onTxComplete',['../classCharacteristicBase.html#a57d6e19b6fea27e67b85ac07c7e253fc',1,'CharacteristicBase::onTxComplete()'],['../classCharacteristic_3_01buffer__ptr__t_01_4.html#ad61d03dd29381afc1939d22cca4fb1f7',1,'Characteristic&lt; buffer_ptr_t &gt;::onTxComplete()'],['../classService.html#aa31d62d5f7c838f3f7515e220ab93c42',1,'Service::onTxComplete()'],['../classNrf51822BluetoothStack.html#ab12a11a34691bb52869225b61e2b3358',1,'Nrf51822BluetoothStack::onTxComplete()']]],
-  ['onwrite',['onWrite',['../classCharacteristicGeneric.html#afa4a09d7fcddfcdb90e74fea71456afe',1,'CharacteristicGeneric']]],
-  ['onzerocrossing',['onZeroCrossing',['../classPWM.html#acc48aac95cadcea380f0de3b597d0c98',1,'PWM']]],
-  ['opcode',['opCode',['../classStreamBuffer.html#a93b4205827da8eaed637cfda709bbde5',1,'StreamBuffer']]],
-  ['operator_20ble_5fuuid128_5ft',['operator ble_uuid128_t',['../classUUID.html#a49ef2add2678262a3c56409b226f1247',1,'UUID']]],
-  ['operator_20ble_5fuuid_5ft',['operator ble_uuid_t',['../classUUID.html#a5c0c8427ecdbe0c036017871cfc5eb0b',1,'UUID']]],
-  ['operator_20t_20_26',['operator T &amp;',['../classCharacteristicGeneric.html#aba34f730c4c9982b44cdf2e75057dfb3',1,'CharacteristicGeneric']]],
-  ['operator_2b_2b',['operator++',['../classMeshMessageCounter.html#a175d7b6ca01036ec472c37b44d4a6636',1,'MeshMessageCounter::operator++()'],['../classstate__message_1_1iterator.html#a7cceab8897b55e7ee183469bbf74bbdc',1,'state_message::iterator::operator++()'],['../classstate__message_1_1iterator.html#af96a7dd9875e3ef2431f027ee703cf4a',1,'state_message::iterator::operator++(int)']]],
-  ['operator_3d',['operator=',['../classCharacteristicGeneric.html#a799481d5f5f17c114991ddeacac90153',1,'CharacteristicGeneric']]],
-  ['operator_5b_5d',['operator[]',['../classCircularBuffer.html#aca1eae677eeeef6af682c06338c785a6',1,'CircularBuffer']]]
+  ['nearestwitnessreport_1388',['NearestWitnessReport',['../classNearestWitnessReport.html#a693d18e7af7989d3e0f07a5edda6609c',1,'NearestWitnessReport']]],
+  ['next_1389',['next',['../classLollipop.html#a858f23a5d04adf680032886b0f5ebc0e',1,'Lollipop']]],
+  ['notify_1390',['notify',['../classCharacteristicBase.html#a45dc76c383dce042289cb7723e95c1f5',1,'CharacteristicBase::notify()'],['../classCharacteristic_3_01buffer__ptr__t_01_4.html#ad9fc8e898c632d913212619fa31f45b2',1,'Characteristic&lt; buffer_ptr_t &gt;::notify()']]],
+  ['now_1391',['now',['../classRTC.html#a95be12ea90bc4c69136ddbf8cf45500e',1,'RTC::now()'],['../classSystemTime.html#aa1c7c2a9f489533d4f506b37a6afc428',1,'SystemTime::now()']]]
 ];

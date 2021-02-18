@@ -1,6 +1,0 @@
-<map id="include/ble/cs_NordicMesh.h" name="include/ble/cs_NordicMesh.h">
-<area shape="rect" id="node2" href="$cs__MeshMessageTypes_8h_source.html" title="include/protocol/cs\l_MeshMessageTypes.h" alt="" coords="80,80,241,121"/>
-<area shape="rect" id="node3" href="$cs__Mesh_8h_source.html" title="include/mesh/cs_Mesh.h" alt="" coords="5,259,172,285"/>
-<area shape="rect" id="node4" href="$cs__MeshControl_8h_source.html" title="include/mesh/cs_MeshControl.h" alt="" coords="56,177,265,203"/>
-<area shape="rect" id="node5" href="$cs__MeshCommand_8h_source.html" title="include/structs/cs\l_MeshCommand.h" alt="" coords="289,169,421,211"/>
-</map>

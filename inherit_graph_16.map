@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$classCOMP.html" title="The comparator is a hardware peripheral on the nRF52. " alt="" coords="5,5,68,32"/>
+<area shape="rect" id="node1" href="$classBufferAccessor.html" title="Base class for a buffer accessor object." alt="" coords="5,46,117,73"/>
+<area shape="rect" id="node2" href="$classControlPacketAccessor.html" title=" " alt="" coords="165,5,325,47"/>
+<area shape="rect" id="node3" href="$classResultPacketAccessor.html" title=" " alt="" coords="167,71,323,112"/>
 </map>

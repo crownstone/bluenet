@@ -1,4 +1,24 @@
 var searchData=
 [
-  ['occurrences',['occurrences',['../structperipheral__device__t.html#ac1417570e08497ad5d21816d8c79a417',1,'peripheral_device_t']]]
+  ['pinaincurrentgainhigh_1655',['pinAinCurrentGainHigh',['../structboards__config__t.html#a5b494e6ef51de59a362b620aeec74d08',1,'boards_config_t']]],
+  ['pinaincurrentgainlow_1656',['pinAinCurrentGainLow',['../structboards__config__t.html#a54d6476bf913d045f62115fd0ac22e82',1,'boards_config_t']]],
+  ['pinaincurrentgainmed_1657',['pinAinCurrentGainMed',['../structboards__config__t.html#a23b2e948504bc257f8fec951eff16af8',1,'boards_config_t']]],
+  ['pinainpwmtemp_1658',['pinAinPwmTemp',['../structboards__config__t.html#a27c3a6844692e4974b6b23a564bfa246',1,'boards_config_t']]],
+  ['pinainvoltage_1659',['pinAinVoltage',['../structboards__config__t.html#aaade8456d67a5e93f10f88a7e38da813',1,'boards_config_t']]],
+  ['pinainzeroref_1660',['pinAinZeroRef',['../structboards__config__t.html#ae08ac936512bf631266344b62540fb49',1,'boards_config_t']]],
+  ['pingpio_1661',['pinGpio',['../structboards__config__t.html#ae0c977fd02ed1dc8a7b4428498cf9643',1,'boards_config_t']]],
+  ['pingpioenablepwm_1662',['pinGpioEnablePwm',['../structboards__config__t.html#aa78232c099a0ef658b370d21b8d01f9e',1,'boards_config_t']]],
+  ['pingpiopwm_1663',['pinGpioPwm',['../structboards__config__t.html#ab10354112a389ce12746bb47ad988861',1,'boards_config_t']]],
+  ['pingpiorelayoff_1664',['pinGpioRelayOff',['../structboards__config__t.html#ab067d65e09e5376739412bed70bd6d4a',1,'boards_config_t']]],
+  ['pingpiorelayon_1665',['pinGpioRelayOn',['../structboards__config__t.html#ae53d271b3796404c045c4368187a80f3',1,'boards_config_t']]],
+  ['pingpiorx_1666',['pinGpioRx',['../structboards__config__t.html#ac2586ed67fe798342ffe14cbedcd22e8',1,'boards_config_t']]],
+  ['pingpiotx_1667',['pinGpioTx',['../structboards__config__t.html#a9812ed9f406fedf55458386996a8b1c1',1,'boards_config_t']]],
+  ['pinledgreen_1668',['pinLedGreen',['../structboards__config__t.html#af8f4dfe486e358eba6e9098f3824bc43',1,'boards_config_t']]],
+  ['pinledred_1669',['pinLedRed',['../structboards__config__t.html#a4db10606c1a04da57180d89b6aa448b0',1,'boards_config_t']]],
+  ['powerzero_1670',['powerZero',['../structboards__config__t.html#a488d1f81fc535992590459ebc9f877f8',1,'boards_config_t']]],
+  ['presentation_5fformat_1671',['presentation_format',['../structCharacteristicInit.html#a0216e933ca9c133b0209ccd2eba11d42',1,'CharacteristicInit']]],
+  ['pwminverted_1672',['pwmInverted',['../structboards__config__t.html#aaa8f487954302d7c4cb913d63c3d86ba',1,'boards_config_t']]],
+  ['pwmtempinverted_1673',['pwmTempInverted',['../structboards__config__t.html#a0c36af15c380e236e0695cfc5313d351',1,'boards_config_t']]],
+  ['pwmtempvoltagethreshold_1674',['pwmTempVoltageThreshold',['../structboards__config__t.html#aca7741ed42538545936863444e57ca03',1,'boards_config_t']]],
+  ['pwmtempvoltagethresholddown_1675',['pwmTempVoltageThresholdDown',['../structboards__config__t.html#a70bd38475536196ca64bb85f0535bb8b',1,'boards_config_t']]]
 ];

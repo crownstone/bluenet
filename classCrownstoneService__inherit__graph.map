@@ -1,5 +1,7 @@
 <map id="CrownstoneService" name="CrownstoneService">
-<area shape="rect" id="node4" href="$classSetupService.html" title="Author: Dominik Egger Copyright: Distributed Organisms B.V. " alt="" coords="43,155,143,181"/>
-<area shape="rect" id="node2" href="$classService.html" title="Service as defined in the GATT Specification. " alt="" coords="5,5,72,32"/>
-<area shape="rect" id="node3" href="$classEventListener.html" title="Event listener. " alt="" coords="97,5,199,32"/>
+<area shape="rect" id="node1" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 22,..." alt="" coords="51,155,187,181"/>
+<area shape="rect" id="node5" href="$classSetupService.html" title="Author: Crownstone Team Copyright: Crownstone (https://crownstone.rocks) Date: Oct 22,..." alt="" coords="69,229,169,256"/>
+<area shape="rect" id="node2" href="$classService.html" title="Service as defined in the GATT Specification." alt="" coords="31,80,97,107"/>
+<area shape="rect" id="node3" href="$classBaseClass.html" title=" " alt="" coords="5,5,123,32"/>
+<area shape="rect" id="node4" href="$classEventListener.html" title="Event listener." alt="" coords="122,80,225,107"/>
 </map>

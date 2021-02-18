@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['notify',['notify',['../classCharacteristicBase.html#a45dc76c383dce042289cb7723e95c1f5',1,'CharacteristicBase::notify()'],['../classCharacteristic_3_01buffer__ptr__t_01_4.html#ad9fc8e898c632d913212619fa31f45b2',1,'Characteristic&lt; buffer_ptr_t &gt;::notify()']]],
-  ['now',['now',['../classRTC.html#a95be12ea90bc4c69136ddbf8cf45500e',1,'RTC']]]
+  ['modelsinitcallback_1385',['modelsInitCallback',['../classMeshCore.html#a2b1858cfba48d286d5e8f48712e6ab68',1,'MeshCore']]],
+  ['mspassedsince_1386',['msPassedSince',['../classRTC.html#aa5ef0d21cb68f3b4287ee3ed822d2ae7',1,'RTC']]],
+  ['mstoticks_1387',['msToTicks',['../classRTC.html#acfadc7aec118a7c886cc721bc7bf01bf',1,'RTC']]]
 ];

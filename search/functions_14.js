@@ -1,9 +1,8 @@
 var searchData=
 [
-  ['_7ebufferaccessor',['~BufferAccessor',['../classBufferAccessor.html#a012a181514aae89ffaf810ed394523b3',1,'BufferAccessor']]],
-  ['_7echaracteristicbase',['~CharacteristicBase',['../classCharacteristicBase.html#a8fe8ea90a4ebff6056992ffb0a67153b',1,'CharacteristicBase']]],
-  ['_7echaracteristicgeneric',['~CharacteristicGeneric',['../classCharacteristicGeneric.html#a9cb7b4f243a1579eb2bc16b43fa61467',1,'CharacteristicGeneric']]],
-  ['_7ecircularbuffer',['~CircularBuffer',['../classCircularBuffer.html#a01861c6bbf055b5bff4055c425b5036a',1,'CircularBuffer']]],
-  ['_7ecirculardifferentialbuffer',['~CircularDifferentialBuffer',['../classCircularDifferentialBuffer.html#afe3becdfd984646f3b7535a9440a83ba',1,'CircularDifferentialBuffer']]],
-  ['_7eservice',['~Service',['../classService.html#aa173db92a095e3198256fcd6b9b47d9d',1,'Service']]]
+  ['validateapp_1548',['validateApp',['../classMicroappStorage.html#a23588877c48ebf9bd953badd52e947ad',1,'MicroappStorage']]],
+  ['validatechunk_1549',['validateChunk',['../classMicroappStorage.html#ac1a55f7a1cee69976c1b2574819438b5',1,'MicroappStorage']]],
+  ['value_1550',['value',['../classBehaviour.html#abb308138d1188e8b209f5e1109a5c168',1,'Behaviour']]],
+  ['verifysizeforget_1551',['verifySizeForGet',['../classState.html#a6d963b9f6ade3b8662e1ff0062e27708',1,'State']]],
+  ['verifysizeforset_1552',['verifySizeForSet',['../classState.html#a46d2af69aaa0380f678f138be0618e02',1,'State']]]
 ];
