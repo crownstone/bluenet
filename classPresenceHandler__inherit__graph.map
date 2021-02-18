@@ -1,0 +1,4 @@
+<map id="PresenceHandler" name="PresenceHandler">
+<area shape="rect" id="node1" title="This handler listens for background advertisements to find out which users are in which room." alt="" coords="5,80,128,107"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="15,5,118,32"/>
+</map>

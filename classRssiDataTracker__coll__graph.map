@@ -1,0 +1,4 @@
+<map id="RssiDataTracker" name="RssiDataTracker">
+<area shape="rect" id="node1" title="This component monitors bluetooth messages in order to keep track of the Rssi distances between crown..." alt="" coords="5,80,127,107"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="15,5,117,32"/>
+</map>

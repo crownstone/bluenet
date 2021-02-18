@@ -1,0 +1,4 @@
+<map id="NearestWitnessReport" name="NearestWitnessReport">
+<area shape="rect" id="node1" title="Firmware internal representation of witness reports." alt="" coords="5,95,160,121"/>
+<area shape="rect" id="node2" href="$structTrackableId.html" title="Mesh representation of a trackable device." alt="" coords="37,5,128,32"/>
+</map>

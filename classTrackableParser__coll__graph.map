@@ -1,0 +1,4 @@
+<map id="TrackableParser" name="TrackableParser">
+<area shape="rect" id="node1" title="Transforms EVT_DEVICE_SCANNED and EVT_ADV_BACKGROUND_PARSED into EVT_TRACKING_UPDATE events." alt="" coords="5,80,123,107"/>
+<area shape="rect" id="node2" href="$classEventListener.html" title="Event listener." alt="" coords="13,5,115,32"/>
+</map>
