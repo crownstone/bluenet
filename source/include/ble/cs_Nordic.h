@@ -32,6 +32,9 @@ typedef uint32_t ret_code_t;
 #include <nrf_fstorage.h>
 #include <nrf_gpio.h>
 #include <nrf_gpiote.h>
+
+#include <nrfx_gpiote.h>
+
 #include <nrf_nvic.h>
 #include <nrf_power.h>
 #include <nrf_sdh.h>

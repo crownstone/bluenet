@@ -1,6 +1,8 @@
+#include <cfg/cs_AutoConfig.h>
 #include <drivers/cs_Gpio.h>
+#include <events/cs_EventDispatcher.h>
 
-static void gpioEventHandler(nrf_drv_gpiote_pin_t pin, nrf_gpiote_polarity_t polarity) {
+static void gpioEventHandler(nrfx_gpiote_pin_t pin, nrf_gpiote_polarity_t polarity) {
 	LOGi("GPIO event");
 }
 
@@ -86,24 +88,24 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 		case GpioDirection::SENSE:
 			// enable GPIOTE in general
 			uint32_t err_code;
-			if (!nrf_drv_gpiote_is_init()) {
-				err_code = nrf_drv_gpiote_init();
+			if (!nrfx_gpiote_is_init()) {
+				err_code = nrfx_gpiote_init();
 				if (err_code != NRF_SUCCESS) {
 					LOGw("Error initializing GPIOTE");
 					return;
 				}
 			}
 
-			nrf_drv_gpiote_in_config_t config;
-			switch(pull) {
+			nrfx_gpiote_in_config_t config;
+			switch(polarity) {
 				case GpioPolarity::HITOLO:
-					config = GPIOTE_CONFIG_IN_SENSE_HITOLO(false);
+					config.sense = NRF_GPIOTE_POLARITY_HITOLO;
 					break;
 				case GpioPolarity::LOTOHI:
-					config = GPIOTE_CONFIG_IN_SENSE_LOTOHI(false);
+					config.sense = NRF_GPIOTE_POLARITY_LOTOHI;
 					break;
 				case GpioPolarity::TOGGLE:
-					config = GPIOTE_CONFIG_IN_SENSE_TOGGLE(false);
+					config.sense = NRF_GPIOTE_POLARITY_TOGGLE;
 					break;
 				default:
 					LOGw("Huh? No such pull registor construction exists");
@@ -113,12 +115,12 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 
 			LOGi("Register pin %i with event handler", pin);
 
-			err_code = nrf_drv_gpiote_in_init(pin, &config, gpio_event_handler);
+			err_code = nrfx_gpiote_in_init(pin, &config, gpioEventHandler);
 			if (err_code != NRF_SUCCESS) {
 				LOGw("Cannot initialize GPIOTE on this pin");
 				return;
 			}
-			nrf_drv_gpiote_in_event_enable(pin, true);
+			nrfx_gpiote_in_event_enable(pin, true);
 
 			break;
 		default:
@@ -130,7 +132,7 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 /*
  * We just write, we assume the user has already configured the pin as output and with desired pull-up, etc.
  */
-void Gpio::write(uint8_t pin_index, uint8_t value) {
+void Gpio::write(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
 	if (pin_index >= _pins.size()) {
 		LOGi("Pin index does not exist");
 		return;
@@ -138,27 +140,52 @@ void Gpio::write(uint8_t pin_index, uint8_t value) {
 
 	// to lazy to store writeable flag with each pin, can be done for buttons e.g.
 	uint32_t pin = _pins[pin_index];
-	LOGi("Write value %i to pin %i", value, pin);
-	nrf_gpio_pin_write(pin, value);
+
+	// TODO: limit length
+	for (int i = 0; i < length; ++i) {
+		LOGi("Write value %i to pin %i", buf[i], pin);
+		nrf_gpio_pin_write(pin, buf[i]);
+	}
+}
+
+void Gpio::read(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
+	if (pin_index >= _pins.size()) {
+		LOGi("Pin index does not exist");
+		return;
+	}
+
+	// to lazy to store readeable flag with each pin, can be done for buttons e.g.
+	uint32_t pin = _pins[pin_index];
+
+	// TODO: limit length
+	for (int i = 0; i < length; ++i) {
+		buf[i] = nrf_gpio_pin_read(pin);
+		LOGi("Read value %i from pin %i", buf[i], pin);
+	}
 }
 
 void Gpio::handleEvent(event_t& event) {
 	switch(event.type) {
-		case CS_TYPE::EVT_GPIO_REGISTER: {
-			TYPIFY(EVT_GPIO_REGISTER) gpio = *(TYPIFY(EVT_GPIO_REGISTER)*)event.data;
-			initBus(gpio);
+		case CS_TYPE::EVT_GPIO_INIT: {
+			TYPIFY(EVT_GPIO_INIT) gpio = *(TYPIFY(EVT_GPIO_INIT)*)event.data;
+			GpioPolarity polarity = (GpioPolarity)gpio.polarity;
+			GpioDirection direction = (GpioDirection)gpio.direction;
+			GpioPullResistor pull = (GpioPullResistor)gpio.pull;
+			configure(gpio.pin_index, direction, pull, polarity);
 			break;
 		}
 		case CS_TYPE::EVT_GPIO_WRITE: {
-			TYPIFY(EVT_GPIO_WRITE)* gpio = (TYPIFY(EVT_GPIO_WRITE)*)event.data;
-			write(gpio->pin);
+			TYPIFY(EVT_GPIO_WRITE) gpio = *(TYPIFY(EVT_GPIO_WRITE)*)event.data;
+			if (gpio.buf == NULL) {
+				LOGw("Buffer is null");
+				return;
+			}
+			write(gpio.pin_index, gpio.buf, gpio.length);
 			break;
 		}
 		case CS_TYPE::EVT_GPIO_READ: {
-			TYPIFY(EVT_GPIO_READ)* gpio = (TYPIFY(EVT_GPIO_READ)*)event.data;
-			size_t length = gpio->length;
-			read(gpio->address, gpio->buf, length);
-			gpio->length = length;
+			TYPIFY(EVT_GPIO_READ) gpio = *(TYPIFY(EVT_GPIO_READ)*)event.data;
+			read(gpio.pin_index, gpio.buf, gpio.length);
 			break;
 		}
 		default:
