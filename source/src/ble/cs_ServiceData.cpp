@@ -360,10 +360,6 @@ bool ServiceData::fillWithMicroapp(uint32_t timestamp) {
 	return true;
 }
 
-
-
-
-
 void ServiceData::handleEvent(event_t & event) {
 	// Keep track of the BLE connection status. If we are connected we do not need to update the packet.
 	switch (event.type) {

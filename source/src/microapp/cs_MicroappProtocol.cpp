@@ -216,11 +216,17 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 			break;
 		}
 		default:
-			LOGi("Unknown command of length %i", length);
-			int ml = length;
-			if (length > 4) ml = 4;
-			for (int i = 0; i < ml; i++) {
-				LOGi("0x%i", payload[i]);
+			_log(SERIAL_INFO, false, "Unknown command %i of length %i: [", command, length);
+			// print first few bytes
+			int maxl = length;
+			if (length > 4) maxl = 4;
+			for (int i = 0; i < maxl; i++) {
+				_log(SERIAL_INFO, false, "0x%i ", payload[i]);
+			}
+			if (length > 4) {
+				_log(SERIAL_INFO, true, "...,...]");
+			} else {
+				_log(SERIAL_INFO, true, "]");
 			}
 	}
 

@@ -409,7 +409,7 @@ BOOTLOADER_IPC_RAM_PROTOCOL=1
 AUTO_ENABLE_MICROAPP_ON_BOOT=0
 
 # The start of microapps in flash
-FLASH_MICROAPP_BASE=0x68000
+FLASH_MICROAPP_BASE=0x69000
 
 # The number of pages for microapps (each page is 0x1000 / 4096 bytes)
 FLASH_MICROAPP_PAGES=2
