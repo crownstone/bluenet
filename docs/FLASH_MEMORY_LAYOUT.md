@@ -37,7 +37,8 @@ The amount of RAM in the nRF52832 is 64kB. See the [config file](https://github.
 | 0x20000000 | SD | 0x2A00 | 10752 | 10.5 
 | 0x20002A00 | App heap | 0x8600 | 34304 | 33.5 
 | 0x2000B000 | Microapp | 0x2000 | 8192 | 8
-| 0x2000D000 | App stack (downwards) | 0x2C00 | 11264 | 11.75 
+| 0x2000D000 | App stack (max) | 0x2C00 | 11264 | 11.75 
+| 0x2000FDFF | App stack (start) |  |  |  
 | 0x0000FE00 | IPC | 0x100 | 256 | 0.25  
 | | **Total** | 0x10000 | 65536 | 64
 
