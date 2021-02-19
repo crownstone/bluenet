@@ -1,11 +1,9 @@
-
 # Etiquette
 
 - use typify
 - no implicit cast operators
-- name functions
+- give names to functions
 - don't init structs like: { 9, true, 3 }
-
 
 # Code
 
@@ -21,13 +19,13 @@ Header example:
 ```
 class MyClass: public Foo {
 public:
-	int bar(int value, bool triple);
+	int barMethod(uint8_t value, bool triple);
 }
 ```
 
 Source example:
 ```
-int MyClass::bar(int value, bool triple) {
+int MyClass::barMethod(uint8_t value, bool triple) {
 	if (triple && value > 0) {
 		value = value * 3;
 	}
@@ -43,7 +41,7 @@ int MyClass::bar(int value, bool triple) {
 			return 0;
 		}
 		case 1: {
-			value +=1;
+			value++;
 			break;
 		}
 		case 2: {
@@ -67,9 +65,25 @@ int MyClass::bar(int value, bool triple) {
 }
 ```
 
-This way, the '}' is always a line on its own, making it easier to parse in your head, especially when the body of the if statements become larger.
-By indenting the cases, it's easy to see where the switch stops.
+The end bracket, `}`, is always on a line of its own. This makes it easier to parse in your head when the body of the `if` statement becomes larger.
+The `case` clauses are indented w.r.t. the `switch` statement. This makes it easy to see where the switch stops. 
+The brackets are optional.
 
+Nerd tip: create a `source/.vimrc` file with as option `set cinoptions=l1`.
+
+In a function with pointers or address references, the operator is attached to the type (`void*` you can call a "void pointer").
+
+```
+void someEventHandler(pod_t const* event, void* context, uint32_t& address) {
+```
+
+## Naming
+
+Upper CamelCase naming is used for class names, typedefs and aliases. Members and functions are lower camel cased except for inner classes and types. 
+
+```
+void someEventHandler(pod_t const* event, void* context, uint32_t& address) {
+```
 
 ## Naming
 
@@ -90,10 +104,7 @@ class ClassName {
 
 using MyVec = std::vector<uint8_t>;
 
-void doNothing();
-```
-
-Struct are named with snake case and suffixed with `_t` when they are `__packed__`.
+Struct definitions (or in general **plain old data**, POD) are the exception, end them with `_t`.
 
 ```
 struct __attribute__((__packed__)) a_packed_packet_t {
@@ -101,18 +112,20 @@ struct __attribute__((__packed__)) a_packed_packet_t {
     uint32_t longWord;
 };
 ```
+Macros are an exception as well (use them sparingly), use underscores.
 
-Sometimes you have a full uppercase abbreviation in your name, in that case just pretend it's a word. For example: `rssiMacAddress`.
+- `BLUETOOTH_NAME`
+
+Sometimes you have a full uppercase abbreviation in your name, in that case just pretend it's a word. For example: rssiMacAddress.
 
 ### Variables
 
-- localVar
-- _memberVar
+- `localVar`
+- `_memberVar`
 
 This makes it easier to recognize member variables, and saves you from coming up with alternative names when you have things like: `void setRssi(int8_t rssi) { _rssi = rssi; }`.
 
-Try to actually name your variables, avoid single letters (with the exception of loop counters).
-
+Try to actually name your variables, avoid single letters (with the exception of a variable for loop iterations).
 
 ## Comments
 
@@ -133,14 +146,18 @@ Try to actually name your variables, avoid single letters (with the exception of
 ## Various
 
 ### Declare variables on their own line.
+
 This usually makes it easier to read.
+
 ```
 int a;
 int b;
 ```
 
 ### If statement body on its own line, and always in brackets.
-Putting the body on a seperate line makes it easier to read, while leaving out brackets easily introduces bugs.
+
+Putting the body on a separate line makes it easier to read, while leaving out brackets easily introduces bugs.
+
 ```
 if (on) {
     turnOn = true;

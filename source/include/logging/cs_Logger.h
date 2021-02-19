@@ -221,6 +221,7 @@
 	// Write logs as plain text.
 	#if CS_UART_BINARY_PROTOCOL_ENABLED == 0
 		void cs_log_printf(const char *str, ...);
+		__attribute__((unused)) static bool _logPrefix = true;
 
 		// Adding the file name and line number, adds a lot to the binary size.
 		#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__)
@@ -228,7 +229,14 @@
 		#undef _log
 		#define _log(level, addNewLine, fmt, ...) \
 				if (level <= SERIAL_VERBOSITY) { \
-					cs_log_printf("[%-30.30s : %-4d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__); \
+					if (_logPrefix) { \
+						cs_log_printf("[%-30.30s : %-4d] ", _FILE, __LINE__); \
+					} \
+					cs_log_printf(fmt, ##__VA_ARGS__); \
+					if (addNewLine) { \
+						cs_log_printf("\r\n"); \
+					} \
+					_logPrefix = addNewLine; \
 				}
 
 		#undef _logArray
@@ -237,12 +245,21 @@
 
 	// Write a string with printf functionality.
 	#ifdef HOST_TARGET
+		__attribute__((unused)) static bool _logPrefix = true;
+
 		#define _FILE (sizeof(__FILE__) > 30 ? __FILE__ + (sizeof(__FILE__)-30-1) : __FILE__)
 
 		#undef _log
 		#define _log(level, addNewLine, fmt, ...) \
 				if (level <= SERIAL_VERBOSITY) { \
-					printf("[%-30.30s : %-4d] " fmt "\r\n", _FILE, __LINE__, ##__VA_ARGS__); \
+					if (_logPrefix) { \
+						printf("[%-30.30s : %-4d] ", _FILE, __LINE__); \
+					} \
+					printf(fmt, ##__VA_ARGS__); \
+					if (addNewLine) { \
+						printf("\r\n"); \
+					} \
+					_logPrefix = addNewLine; \
 				}
 
 		#undef _logArray
@@ -251,15 +268,6 @@
 
 
 #endif
-
-
-#define LOG_MEMORY \
-	uint8_t *p = (uint8_t*)malloc(1); \
-	void* sp; \
-	asm("mov %0, sp" : "=r"(sp) : : ); \
-	LOGd("Memory %s() heap=%p, stack=%p", __func__, p, (uint8_t*)sp); \
-	free(p);
-
 
 
 #if SERIAL_VERBOSITY < SERIAL_VERBOSE

@@ -12,6 +12,7 @@
 
 ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SwitchBehaviour coreBehaviour, PresenceCondition extCondition) :
 	SwitchBehaviour(coreBehaviour), extensionCondition(extCondition) {
+	typ = Behaviour::Type::Extended;
 }
 
 ExtendedSwitchBehaviour::ExtendedSwitchBehaviour(SerializedDataType arr) : 

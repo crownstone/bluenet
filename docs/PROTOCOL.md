@@ -5,18 +5,19 @@ This only documents the latest protocol, older versions can be found in the git 
 
 # Index
 
-- [Setup](#setup). How to setup the crownstone.
+- [Setup](#setup-mode). How to setup the crownstone.
 - [Encryption](#encryption). How to encrypt and decrypt the data.
-- [Advertisements](#advertisement-data). What data is broadcasted by the crownstones.
-- [Broadcast commands](#broadcasts). Broadcast commands.
+- [Advertisements](#advertisements). What data is broadcasted by the crownstones.
+- [Broadcast commands](#broadcast-commands). Broadcast commands.
 - [Services and characteristics](#services). Which Bluetooth GATT services and characteristics the crownstones have.
-- [Data structures](#data-structs). The data structures used for the characteristics, advertisements, and mesh.
+- [Data structures](#data-structures). The data structures used for the characteristics, advertisements, and mesh.
     - [Control](#control-packet). Used to send commands to the Crownstone.
     - [Result](#result-packet). The result of a command.
     - [State](#state-types). State variables of the Crownstone.
 
 
 # Setup mode
+
 When a Crownstone is new or factory reset, it will go into setup mode.
 
 The setup process goes as follows:
@@ -32,6 +33,7 @@ The setup process goes as follows:
 - Crownstone will reboot to normal mode.
 
 # Normal mode
+
 When a Crownstone has been set up, it will run in "normal mode".
 
 To write a command via connection, the process goes as follows:

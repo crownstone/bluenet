@@ -21,36 +21,14 @@
 	#if SERIAL_VERBOSITY > SERIAL_BYTE_PROTOCOL_ONLY
 		va_list ap;
 		va_start(ap, str);
-		int len = vsnprintf(NULL, 0, str, ap);
+		int len = vsnprintf(_logBuffer, sizeof(_logBuffer), str, ap);
 		va_end(ap);
 
 		if (len < 0) {
 			return;
 		}
-
-		// if strings are small we do not need to allocate by malloc
-		if (sizeof(_logBuffer) >= len + 1UL) {
-			va_start(ap, str);
-			len = vsprintf(_logBuffer, str, ap);
-			va_end(ap);
-			for (int i = 0; i < len; ++i) {
-				serial_write(_logBuffer[i]);
-			}
-//			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)_logBuffer, len);
-		}
-		else {
-			char *buf = (char*)malloc(len + 1);
-			if (!buf) {
-				return;
-			}
-			va_start(ap, str);
-			len = vsprintf(buf, str, ap);
-			va_end(ap);
-			for (int i = 0; i < len; ++i) {
-				serial_write(buf[i]);
-			}
-//			UartHandler::getInstance().writeMsg(UART_OPCODE_TX_TEXT, (uint8_t*)buf, len);
-			free(buf);
+		for (int i = 0; i < len; ++i) {
+			serial_write(_logBuffer[i]);
 		}
 		return;
 	#endif

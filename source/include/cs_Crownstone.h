@@ -43,6 +43,15 @@
 #include <microapp/cs_Microapp.h>
 #endif
 
+#if BUILD_MEM_USAGE_TEST == 1
+#include <test/cs_MemUsageTest.h>
+#endif
+
+#if BUILD_TWI == 1
+#include <drivers/cs_Twi.h>
+#endif
+
+
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality
  ** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** */
@@ -155,6 +164,11 @@ public:
 	 */
 	static void updateMinStackEnd();
 
+	/**
+	 * Print load stats: RAM usage, app scheduler usage, etc.
+	 */
+	static void printLoadStats();
+
 	/** tick function called by app timer
 	 */
 	static void staticTick(Crownstone *ptr) {
@@ -221,7 +235,6 @@ private:
 	 *   [23.06.16] restart the mesh on disconnect, otherwise we have ~10s delay until the device starts advertising.
 	 *   [29.06.16] restart the mesh disabled, this was limited to pca10000, it does crash dobeacon v0.7
 	 */
-	void configureStack();
 
 	/**
 	 * Populate advertisement (including service data) with information. The persistence mode is obtained from storage
@@ -233,7 +246,7 @@ private:
 	 * The default name. This can later be altered by the user if the corresponding service and characteristic is enabled.
 	 * It is loaded from memory or from the default and written to the Stack.
 	 */
-	void setName();
+	void setName(bool firstTime);
 
 	/**
 	 * Create a particular service. Depending on the mode we can choose to create a set of services that we would need.
@@ -292,11 +305,6 @@ private:
 	 */
 	void increaseResetCounter();
 
-	/**
-	 * Print load stats: RAM usage, app scheduler usage, etc.
-	 */
-	void printLoadStats();
-
 	boards_config_t _boardsConfig;
 
 	// drivers
@@ -338,12 +346,19 @@ private:
 	TrackableParser _trackableParser;
 #endif
 
-
 	BehaviourStore _behaviourStore;
 	PresenceHandler _presenceHandler;
 
 #if BUILD_MICROAPP_SUPPORT == 1
 	Microapp* _microapp;
+#endif
+
+#if BUILD_MEM_USAGE_TEST == 1
+	MemUsageTest _memTest;
+#endif
+
+#if BUILD_TWI == 1
+	Twi _twi;
 #endif
 
 	app_timer_t              _mainTimerData;

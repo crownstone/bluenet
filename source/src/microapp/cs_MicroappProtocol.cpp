@@ -12,7 +12,9 @@
 
 #include <algorithm>
 #include <ble/cs_UUID.h>
+#include <cs_MicroappStructs.h>
 #include <cfg/cs_Config.h>
+#include <cfg/cs_AutoConfig.h>
 #include <common/cs_Types.h>
 #include <logging/cs_Logger.h>
 #include <drivers/cs_Storage.h>
@@ -27,33 +29,6 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
-enum ErrorCodesMicroapp {
-	ERR_NO_PAYLOAD                   = 0x01,    // need at least an opcode in the payload
-	ERR_TOO_LARGE                    = 0x02,
-};
-
-enum CommandMicroapp {
-	CS_MICROAPP_COMMAND_LOG          = 0x01,
-	CS_MICROAPP_COMMAND_DELAY        = 0x02,
-	CS_MICROAPP_COMMAND_PIN          = 0x03,
-	CS_MICROAPP_COMMAND_SERVICE_DATA = 0x04,
-};
-
-enum CommandMicroappLog {
-	CS_MICROAPP_COMMAND_LOG_CHAR     = 0x00,
-	CS_MICROAPP_COMMAND_LOG_INT      = 0x01,
-	CS_MICROAPP_COMMAND_LOG_STR      = 0x02,
-};
-
-enum CommandMicroappPin {
-	CS_MICROAPP_COMMAND_PIN_SWITCH   = 0x01,
-};
-
-enum CommandMicroappSwitch {
-	CS_MICROAPP_COMMAND_SWITCH_OFF   = 0x00,
-	CS_MICROAPP_COMMAND_SWITCH_ON    = 0x01,
-};
-
 /*
  * The function forwardCommand is called from microapp_callback.
  */
@@ -61,31 +36,101 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 	LOGi("Set command");
 	switch(command) {
 		case CS_MICROAPP_COMMAND_PIN: {
-			int pin = data[0];
-			if (pin != CS_MICROAPP_COMMAND_PIN_SWITCH) {
-				LOGd("Unknown pin");
-				return;
-			}
-			int mode = data[1];
-			switch(mode) {
-				case CS_MICROAPP_COMMAND_SWITCH_OFF: {
-					LOGi("Turn switch off");
-					event_t event(CS_TYPE::CMD_SWITCH_OFF);
-					EventDispatcher::getInstance().dispatch(event);
+			pin_cmd_t *pin_cmd = (pin_cmd_t*)data;
+			CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
+			switch(pin) {
+				case CS_MICROAPP_COMMAND_PIN_SWITCH: // same as DIMMER
+				case CS_MICROAPP_COMMAND_PIN_GPIO1:
+				case CS_MICROAPP_COMMAND_PIN_GPIO2:
+				case CS_MICROAPP_COMMAND_PIN_GPIO3: {
+					CommandMicroappPinOpcode mode = (CommandMicroappPinOpcode)pin_cmd->opcode;
+					switch(mode) {
+						case CS_MICROAPP_COMMAND_PIN_WRITE: {
+							CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
+							switch(val) {
+								case CS_MICROAPP_COMMAND_VALUE_OFF: {
+									LOGi("Turn switch off");
+									event_t event(CS_TYPE::CMD_SWITCH_OFF);
+									EventDispatcher::getInstance().dispatch(event);
+									break;
+								}
+								case CS_MICROAPP_COMMAND_VALUE_ON: {
+									LOGi("Turn switch on");
+									event_t event(CS_TYPE::CMD_SWITCH_ON);
+									EventDispatcher::getInstance().dispatch(event);
+									break;
+								}
+								default:
+									LOGw("Unknown switch command");
+							}
+							break;
+						}
+						default:
+							LOGw("Unknown pin mode / opcode: %i", pin_cmd->opcode);
+					}
 					break;
 				}
-				case CS_MICROAPP_COMMAND_SWITCH_ON: {
-					LOGi("Turn switch on");
-					event_t event(CS_TYPE::CMD_SWITCH_ON);
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
+				default:
+					LOGw("Unknown pin: %i", pin_cmd->pin);
 			}
+			break;
 		}
+		case CS_MICROAPP_COMMAND_TWI: {
+			twi_cmd_t *twi_cmd = (twi_cmd_t*)data;
+			CommandMicroappTwiOpcode opcode = (CommandMicroappTwiOpcode)twi_cmd->opcode;
+			switch(opcode) {
+				case CS_MICROAPP_COMMAND_TWI_INIT: {
+					LOGi("Init i2c");
+					TYPIFY(EVT_TWI_INIT) twi;
+					// no need to write twi.config (is not under control of microapp)
+					event_t event(CS_TYPE::EVT_TWI_INIT, &twi, sizeof(twi));
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_TWI_WRITE: {
+					LOGi("Write over i2c to address: %i", twi_cmd->address);
+					uint8_t bufSize = twi_cmd->length;
+					TYPIFY(EVT_TWI_WRITE) twi;
+					uint8_t buf_array[bufSize];
+					buffer_ptr_t buf = &buf_array[0];
+					twi.address = twi_cmd->address;
+					twi.buf = buf;
+					twi.length = bufSize;
+					twi.stop = twi_cmd->stop;
+					event_t event(CS_TYPE::EVT_TWI_WRITE, &twi, sizeof(twi));
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_TWI_READ: {
+					LOGi("Read from i2c address: %i", twi_cmd->address);
+					// TODO: What!!! Returning a value from an event should be WAY easier!
+					uint8_t bufSize = twi_cmd->length;
+					TYPIFY(EVT_TWI_READ) twi;
+					uint8_t buf_array[bufSize];
+					buffer_ptr_t buf = &buf_array[0];
+					twi.address = twi_cmd->address;
+					twi.buf = buf;
+					twi.length = bufSize;
+					twi.stop = twi_cmd->stop;
+					event_t event(CS_TYPE::EVT_TWI_READ, &twi, sizeof(twi));
+					EventDispatcher::getInstance().dispatch(event);
+					twi_cmd->ack = event.result.returnCode;
+					twi_cmd->length = twi.length;
+					LOGd("Return value of length: %i", twi_cmd->length);
+					break;
+				}
+				default:
+					LOGw("Unknown i2c opcode: %i", twi_cmd->opcode);
+			}
+			break;
+		}
+		default:
+			LOGw("Unknown command: %i", command);
 	}
 }
 
 int handleCommand(uint8_t *payload, uint16_t length) {
+	//LOGd("Incoming message: [%i, %i, %i, ...]", payload[0], payload[1], payload[2]);
 	uint8_t command = payload[0];
 	switch(command) {
 		case CS_MICROAPP_COMMAND_LOG: {
@@ -122,8 +167,9 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 			yield(args->c);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_PIN: {
-			forwardCommand(command, &payload[1], length - 1);
+		case CS_MICROAPP_COMMAND_PIN:
+		case CS_MICROAPP_COMMAND_TWI: {
+			forwardCommand(command, payload, length);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
@@ -139,7 +185,7 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 			eventData.appUuid = (payload[2] << 8) + payload[3];
 			eventData.data.len = commandDataSize - sizeof(eventData.appUuid);
 			eventData.data.data = &(payload[4]);
-//			BLEutil::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
+			//			BLEutil::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
 			event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
 			event.dispatch();
 			break;
@@ -158,19 +204,24 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 
 extern "C" {
 
-int microapp_callback(uint8_t *payload, uint16_t length) {
-	if (length == 0) return ERR_NO_PAYLOAD;
-	if (length > 255) return ERR_TOO_LARGE;
+	int microapp_callback(uint8_t *payload, uint16_t length) {
+		if (length == 0) return ERR_NO_PAYLOAD;
+		if (length > 255) return ERR_TOO_LARGE;
 
-	return handleCommand(payload, length);
-}
+		return handleCommand(payload, length);
+	}
 
 } // extern C
 
-MicroappProtocol::MicroappProtocol() {
+MicroappProtocol::MicroappProtocol(): EventListener() {
+
+	EventDispatcher::getInstance().addListener(this);
+
 	_setup = 0;
 	_loop = 0;
 	_booted = false;
+
+	_callbackData = NULL;
 }
 
 /*
@@ -213,7 +264,7 @@ uint16_t MicroappProtocol::interpretRamdata() {
 	}
 	uint8_t rd_size = 0;
 	uint8_t ret_code = getRamData(IPC_INDEX_MICROAPP, buf, BLUENET_IPC_RAM_DATA_ITEM_SIZE, &rd_size);
-	
+
 	bluenet_ipc_ram_data_item_t *ramStr = getRamStruct(IPC_INDEX_MICROAPP);
 	if (ramStr != NULL) {
 		LOGi("Get microapp info from address: %p", ramStr);
@@ -232,7 +283,7 @@ uint16_t MicroappProtocol::interpretRamdata() {
 		LOGi("  protocol: %02x", buf[0]);
 		LOGi("  setup():  %02x %02x %02x %02x", buf[1], buf[2], buf[3], buf[4]);
 		LOGi("  loop():   %02x %02x %02x %02x", buf[5], buf[6], buf[7], buf[8]);
-	
+
 		uint8_t protocol = buf[0];
 		if (protocol == 0) {
 			_setup = 0, _loop =0;
@@ -271,7 +322,7 @@ void MicroappProtocol::callApp() {
 	//	LOGi("Microapp: app not enabled.");
 	//	return;
 	//} 
-	
+
 	TYPIFY(STATE_MICROAPP) state_microapp;
 	cs_state_id_t app_id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
@@ -295,16 +346,17 @@ void MicroappProtocol::callApp() {
 		void (*microapp_main)() = (void (*)()) address;
 		LOGi("Call function in module: %p", microapp_main);
 		(*microapp_main)();
-		LOGi("Module run.");
+		LOGi("Module did run.");
 	}
 	_booted = true;
+	LOGi("Booted is at address: %p", &_booted);
 }
 
 uint16_t MicroappProtocol::initMemory() {
 	// We allow an area of 0x2000B000 and then two pages for RAM. For now let us clear it to 0
 	// This is actually incorrect (we should skip) and it probably can be done at once as well
 	for (int i = 0; i < 1024 * 2; ++i) {
-		uint32_t *const val = (uint32_t *)(uintptr_t)(RAM_MICROAPP_BASE + i);
+		uint32_t *const val = (uint32_t *)(uintptr_t)(g_RAM_MICROAPP_BASE + i);
 		*val = 0;
 	}
 
@@ -313,15 +365,19 @@ uint16_t MicroappProtocol::initMemory() {
 	return ERR_SUCCESS;
 }
 
-
+/*
+ * Called from cs_Microapp every time tick. Only when _booted gets up will this function become active.
+ */
 void MicroappProtocol::callSetupAndLoop() {
 
 	static uint16_t counter = 0;
 	if (_booted) {
-		
+
 		if (!_loaded) {
+			LOGi("Start loading");
 			uint16_t ret_code = interpretRamdata();
 			if (ret_code == ERR_SUCCESS) {
+				LOGi("Set loaded to true");
 				_loaded = true;
 			} else {
 				LOGw("Disable microapp. After boot not the right info available");
@@ -389,3 +445,23 @@ void MicroappProtocol::callLoop(int & cntr, int & skip) {
 	cntr = -1;
 }
 
+/**
+ * Required if we have to pass events through to the microapp.
+ */
+void MicroappProtocol::handleEvent(event_t & event) {
+	switch(event.type) {
+		// Listen to GPIO events, will be used later to implement attachInterrupt in microapp.
+		/*
+		   case CS_TYPE::EVT_PARTICULAR_UPDATE: {
+		// allocate _calbackData if necessary
+		if (_callbackData == NULL) break;
+		TYPIFY(EVT_MICROAPP_UPDATE)* data = reinterpret_cast< TYPIFY(EVT_MICROAPP_UPDATE)*> (event.data);
+		uint8_t* raw_data = reinterpret_cast<uint8_t*>(data);
+		// TODO: loop over data
+		_callbackData->push(raw_data[0]);
+		break;
+		}*/
+		default:
+			break;
+	}
+}

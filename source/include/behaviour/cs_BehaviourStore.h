@@ -22,8 +22,9 @@
  * Keeps track of the behaviours that are active on this crownstone.
  */
 class BehaviourStore : public EventListener {
-private:
+public:
 	static constexpr size_t MaxBehaviours = 50;
+private:
 	static std::array<Behaviour*, MaxBehaviours> activeBehaviours;
 
 public:

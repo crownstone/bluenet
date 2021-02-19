@@ -52,8 +52,6 @@ bool EventDispatcher::addListener(EventListener *listener) {
 		return false;
 	}
 
-	LOGEventdispatcherInfo("add listener: %u", _listenerCount);
-
 	_listeners[_listenerCount++] = listener;
 	return true;
 }

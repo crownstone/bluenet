@@ -88,14 +88,20 @@ DEFAULT_HARDWARE_BOARD=ACR01B2C
 # Add reset counter at end of name
 CHANGE_NAME_ON_RESET=0
 
-# Enable Arduino like apps
+# Add support for microapps
 BUILD_MICROAPP_SUPPORT=0
 
-# Enable RSSI data tracker
-RSSI_DATA_TRACKER_ENABLED=0
+# Enable i2c/twi
+BUILD_TWI=0
 
-# Enables tracking of which crownstone is closest to  trackable device
-CLOSEST_CROWNSTONE_TRACKER_ENABLED=0
+# Add support for RSSI data tracker
+BUILD_RSSI_DATA_TRACKER=0
+
+# Add support for tracking functionality w.r.t which crownstone is closest to a trackable device
+BUILD_CLOSEST_CROWNSTONE_TRACKER=0
+
+# Enables memory usage testing
+BUILD_MEM_USAGE_TEST=0
 
 # Compile the mesh code.
 BUILD_MESHING=1
@@ -115,10 +121,6 @@ MESH_PERSISTENT_STORAGE=2
 # Advertise iBeacon packets.
 IBEACON=1
 
-# Set if crownstone should set switch on by default, on boot.
-# TODO: This macro is deprecated. It will be removed in the future.
-DEFAULT_ON=0
-
 # Enable or disable interval scanner, will scann every
 # SCAN_DURATION + SCAN_BREAK_DURATION ms, for SCAN_DURATION ms
 INTERVAL_SCANNER_ENABLED=0
@@ -126,6 +128,18 @@ INTERVAL_SCANNER_ENABLED=0
 # Durations for the interval scanner in ms.
 SCAN_DURATION=2000
 SCAN_BREAK_DURATION=7000
+
+# Determines scan interval in units of 0.625 millisecond. Channel is changed every interval (160 = 100 ms).
+SCAN_INTERVAL=160
+
+# Determines scan window in units of 0.625 millisecond.
+# This is the amount of time in an interval that the scanner actually listens.
+# You should leave some radio time for other modules (like advertising).
+# See https://devzone.nordicsemi.com/question/84767/s132-scan-intervalwindow-adv-interval
+# See https://devzone.nordicsemi.com/f/nordic-q-a/14733/s132-scan-interval-window-adv-interval
+# Old https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
+# Window default is set at 158 = 98.75 ms.
+SCAN_WINDOW=158
 
 # Enables the dimmer.
 PWM_ENABLE=1
@@ -143,9 +157,6 @@ ENCRYPTION=1
 # NOTE: increasing this will also need to increase the RAM_R1_BASE
 MAX_NUM_VS_SERVICES=2
 
-# Enable or disable characteristics.
-CHAR_CONTROL=1
-
 # Size of master buffers.
 # It should not be larger than BLE_GATTS_VAR_ATTR_LEN_MAX (512)
 MASTER_BUFFER_SIZE=300
@@ -153,8 +164,6 @@ MASTER_BUFFER_SIZE=300
 # Default transmission power
 # Can be: -40, -20, -16, -12, -8, -4, 0, or 4
 TX_POWER=4
-
-NRF_SERIES=NRF52
 
 # Default advertisement interval, in units of 0.625 ms
 # Must be between 32 and 16384
@@ -166,14 +175,15 @@ MAX_CHIP_TEMP=75
 # Time (ms) to wait with during booting
 BOOT_DELAY=400
 
-# Enable RSSI measurements when connected.
-ENABLE_RSSI_FOR_CONNECTION=1
-
 # Connection alive timeout.
 # If no valid control command is received within timeout,
 # the connection is closed by the device.
 # Set to 0 to disable the timeout.
 CONNECTION_ALIVE_TIMEOUT=20000
+
+# Twi / i2c defaults (maps to GPIO 0 and 1 by default, see board configuration for which physical pins those are)
+TWI_SCL_INDEX=0
+TWI_SDA_INDEX=1
 
 # This is the directory where the cross-compiler resides
 COMPILER_PATH=
@@ -189,13 +199,21 @@ JLINK_GDB_SERVER=/usr/bin/JLinkGDBServer
 
 # The device can be nRF52832_xxAA or nRF52833
 # Matches the options of JLink
-DEVICE=nRF52832_xxAA
-#DEVICE=nRF52833
 
-# Use SoftDevice (setting to 0 is untested)
-# [18.07.16] do we really want this flag still? Most of our code depends on the
-# softdevice being present. disabling this flag won't work without major code changes!!
-NRF51_USE_SOFTDEVICE=1
+# TODO: REMOVE, ONLY USE NRF_DEVICE
+DEVICE=nRF52832_xxAA
+
+# The particular device
+NRF_DEVICE=NRF52832_XXAA
+
+# The device type without specific hardware series suffix
+NRF_DEVICE_TYPE=NRF52832
+
+# The device family
+NRF_DEVICE_FAMILY=NRF52
+
+# The device series
+NRF_DEVICE_SERIES=NRF52_SERIES
 
 # the directory with /Source and /Include subdirectories from the Nordic SDK
 NRF5_DIR=
@@ -254,6 +272,60 @@ HARDWARE_BOARD_ADDRESS=0x10001084
 # RAM_R1_BASE                          - starting point for softdevice in RAM
 # RAM_APPLICATION_AMOUNT               - size of softdevice in RAM
 
+# Default configuration values (will be overruled after setup for example)
+
+SPHERE_ID=0
+
+CROWNSTONE_ID=0
+
+# Duration (in ms) how long the relay pins should be set to high
+RELAY_HIGH_DURATION=15
+
+# Hold smartphone close to device to make it toggle from state
+TAP_TO_TOGGLE=0
+
+# Tap to toggle uses RSSI values to detect the presence of a phone, this can be offset for a type of Crownstone device
+TAP_TO_TOGGLE_RSSI_OFFSET=0
+
+# Recognize switch events in the power supply towards the device
+SWITCHCRAFT=0
+
+# Lock the device so it cannot be changed from state by the user
+SWITCH_LOCK=0
+
+# Scan for all kind of Bluetooth devices
+SCANNER=0
+
+# Wait for zero-crossing to start with dimming (prevents a flash in the start)
+START_DIMMER_ON_ZERO_CROSSING=1
+
+# Drop TX power in particular scenarios (an additional security measure)
+LOW_TX_POWER=0
+
+# Scale incoming measured voltage levels
+VOLTAGE_MULTIPLIER=1
+
+# Scale incoming measured voltage levels
+CURRENT_MULTIPLIER=1
+
+# Set zero-crossing threshold
+VOLTAGE_ZERO=0
+
+# Set zero-crossing threshold
+CURRENT_ZERO=0
+
+# Set zero-crossing threshold
+POWER_ZERO=0
+
+# Set dimming temperature threshold
+PWM_TEMP_VOLTAGE_THRESHOLD_UP=0
+
+# Set dimming temperature threshold
+PWM_TEMP_VOLTAGE_THRESHOLD_DOWN=0
+
+# Set RSSI by default off
+ENABLE_RSSI_FOR_CONNECTION=0
+
 #######################################################################################################################
 # S132 6.1 (comes with SDK 15)
 #######################################################################################################################
@@ -272,10 +344,10 @@ APPLICATION_LENGTH=0x50000
 
 # Start of RAM for the application
 # Find out what the minimal value is by calling nrf_sdh_ble_default_cfg_set() with p_ram_start = 0.
-RAM_R1_BASE=0x20002380
+RAM_R1_BASE=0x20002A00
 
 # Amount of RAM for the application: 0x20010000 - RAM_R1_BASE
-RAM_APPLICATION_AMOUNT=0xDC80
+RAM_APPLICATION_AMOUNT=0xD600
 
 # Amount of RAM required by the bootloader (figure this setting out by enabling debug in the bootloader)
 #   CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED=2
@@ -331,10 +403,20 @@ RAM_BLUENET_IPC_LENGTH=0x100
 # Parameters for IPC with the bootloader
 BOOTLOADER_IPC_RAM_PROTOCOL=1
 
-# Parameters for IPC with microapp code
+# Parameters for the microapps
+
+# Enable the microapp on boot (if set to 0 this will need to be done over the air)
+AUTO_ENABLE_MICROAPP_ON_BOOT=0
+
+# The start of microapps in flash
+FLASH_MICROAPP_BASE=0x68000
+
+# The number of pages for microapps (each page is 0x1000 / 4096 bytes)
+FLASH_MICROAPP_PAGES=2
 
 # The start of where the microapp is allowed to put its memory (start of its .bss .data and then the heap)
 RAM_MICROAPP_BASE=0x2000B000
 
 # The amount of RAM it is allowed to use (stack grows down from RAM_MICROAPP_BASE + RAM_MICROAPP_AMOUNT)
 RAM_MICROAPP_AMOUNT=0x2000
+

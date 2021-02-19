@@ -12,7 +12,7 @@
 #include <protocol/cs_UartProtocol.h>
 #include <uart/cs_UartCommandHandler.h>
 
-#define UART_RX_BUFFER_SIZE            128
+#define UART_RX_BUFFER_SIZE            192
 #define UART_TX_BUFFER_SIZE            300
 #define UART_TX_ENCRYPTION_BUFFER_SIZE AES_BLOCK_SIZE
 //#define UART_TX_MAX_PAYLOAD_SIZE       500

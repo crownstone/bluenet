@@ -31,8 +31,6 @@ CrownstoneService::CrownstoneService() : EventListener()
 void CrownstoneService::createCharacteristics() {
 	LOGi(FMT_SERVICE_INIT, BLE_SERVICE_CROWNSTONE);
 
-#if CHAR_CONTROL==1
-	LOGi(FMT_CHAR_ADD, STR_CHAR_CONTROL);
 	cs_data_t writeBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
 	_controlPacketAccessor = new ControlPacketAccessor<>();
 	_controlPacketAccessor->assign(writeBuf.data, writeBuf.len);
@@ -42,9 +40,6 @@ void CrownstoneService::createCharacteristics() {
 	_resultPacketAccessor = new ResultPacketAccessor<>();
 	_resultPacketAccessor->assign(readBuf.data, readBuf.len);
 	addResultCharacteristic(readBuf.data, readBuf.len, RESULT_UUID, BASIC);
-#else
-	LOGi(FMT_CHAR_SKIP, STR_CHAR_CONTROL);
-#endif
 
 	{
 		LOGi(FMT_CHAR_ADD, STR_CHAR_SESSION_DATA);

@@ -9,10 +9,10 @@ import os
 DOCS_DIR_PREFIX = "../"
 DOCS_DIR = "../docs/"
 DIR = "diagrams/"
-GEN_DIR = DOCS_DIR_PREFIX + DOCS_DIR + DIR
-FILENAMES = [DOCS_DIR_PREFIX + DOCS_DIR + F for F in ["PROTOCOL.md", "BEHAVIOUR.md", "SERVICE_DATA.md", "SERVICE_DATA_DEPRECATED.md", "BROADCAST_PROTOCOL.md", "UART_PROTOCOL.md", "MESH_PROTOCOL.md", "IPC.md"]]
+GEN_DIR = DOCS_DIR + DIR
+FILENAMES = [DOCS_DIR + F for F in ["PROTOCOL.md", "BEHAVIOUR.md", "SERVICE_DATA.md", "SERVICE_DATA_DEPRECATED.md", "BROADCAST_PROTOCOL.md", "UART_PROTOCOL.md", "MESH_PROTOCOL.md", "IPC.md"]]
 
-fontPath = DOCS_DIR_PREFIX + DOCS_DIR + "diagrams/fonts/LiberationSans-Regular.ttf"
+fontPath = DOCS_DIR + "diagrams/fonts/LiberationSans-Regular.ttf"
 fontSizeBlocks = 24
 fontSizeBytes = 16
 
@@ -29,6 +29,8 @@ WHITE = (255, 255, 255)
 BLUE =  (  0,   0, 255)
 GREEN = (  0, 255,   0)
 RED =   (255,   0,   0)
+
+BACKGROUND = WHITE
 
 GREYS = [None]*16
 GREYS[4]  = (178, 178, 178)
@@ -137,7 +139,7 @@ def drawRect(rect, color):
 	# Rect: left, top, width, height
 	# width of 0 to fill
 	pygame.draw.rect(screen, color, rect)
-	pygame.draw.rect(screen, WHITE, rect, BOX_WIDTH)
+	pygame.draw.rect(screen, BACKGROUND, rect, BOX_WIDTH)
 
 
 def drawTextLines(x, y, labels, width, height, vertical, zoom):
@@ -269,6 +271,25 @@ def drawVar(startX, y, varName, varLen, color):
 	return startX + width
 
 
+def drawByteText(text, x, y, center=True):
+	global screen
+
+	x += 1
+	y += 1
+
+	byteLabel = fontBytes.render(text, True, WHITE)
+
+	if center:
+		x -= 0.5*byteLabel.get_width()
+
+	borderSize = 1
+	for border in range(1, borderSize + 1):
+		for dx in range(-border, border + 1):
+			for dy in range(-border, border + 1):
+				screen.blit(byteLabel, (x + dx, y + dy))
+	byteLabel = fontBytes.render(text, True, BLACK)
+	screen.blit(byteLabel, (x, y))
+
 def drawVarList(varList, filename, lengthInBits):
 	if not filename:
 		print("no filename for:")
@@ -295,13 +316,14 @@ def drawVarList(varList, filename, lengthInBits):
 
 	global screen
 	screen = pygame.display.set_mode(size)
-	screen.fill(WHITE)
+	screen.fill(BACKGROUND)
 
 	x=0
 	y=0
 
 	# Draw the text "byte"
-	screen.blit(byteLabel, (x, y))
+#	screen.blit(byteLabel, (x, y))
+	drawByteText(byteTxt, x, y, False)
 	xVar = x + byteLabel.get_width()
 	yVar = y + byteLabel.get_height()
 	x += byteLabel.get_width()
@@ -321,31 +343,25 @@ def drawVarList(varList, filename, lengthInBits):
 				if varLen > MAX_VAR_LEN:
 					endByteNum = byteNum + varLen-1
 					for i in range(0, MAX_VAR_LEN-2):
-						byteLabel = fontBytes.render(str(byteNum), True, BLACK)
-						screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
+						drawByteText(str(byteNum), x + 0.5*STEP_X, y)
 						byteNum += 1
 						x += STEP_X
-					byteLabel = fontBytes.render("...", True, BLACK)
-					screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
+					drawByteText("...", x + 0.5 * STEP_X, y)
 					byteNum += 1
 					x += STEP_X
 					byteNum = endByteNum
-					byteLabel = fontBytes.render(str(byteNum), True, BLACK)
-					screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
+					drawByteText(str(byteNum), x + 0.5*STEP_X, y)
 					byteNum += 1
 					x += STEP_X
 
 				else:
 					for i in range(0, varLen):
-						byteLabel = fontBytes.render(str(byteNum), True, BLACK)
-						screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
+						drawByteText(str(byteNum), x + 0.5*STEP_X, y)
 						byteNum += 1
 						x += STEP_X
 			else:
-				byteLabel = fontBytes.render(str(byteNum), True, BLACK)
-				screen.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
-				byteLabel = fontBytes.render("...", True, BLACK)
-				screen.blit(byteLabel, (x + 1.5*STEP_X - 0.5*byteLabel.get_width(), y))
+				drawByteText(str(byteNum), x + 0.5*STEP_X, y)
+				drawByteText("...", x + 1.5*STEP_X, y)
 				byteNumKnown = False
 
 		# Determine color
@@ -457,7 +473,7 @@ patternLink = re.compile("\\[([^]]+)\\]\\([^\\)]+\\)")
 for filename in FILENAMES:
 	print(filename)
 	parseFile(filename)
-	
+
 
 # pygame.display.flip()
 

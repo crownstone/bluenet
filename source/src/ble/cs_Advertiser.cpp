@@ -5,10 +5,10 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#include "ble/cs_Advertiser.h"
-#include "cfg/cs_DeviceTypes.h"
-#include "cfg/cs_UuidConfig.h"
-#include "events/cs_EventDispatcher.h"
+#include <ble/cs_Advertiser.h>
+#include <cfg/cs_DeviceTypes.h>
+#include <cfg/cs_UuidConfig.h>
+#include <events/cs_EventDispatcher.h>
 #include <uart/cs_UartHandler.h>
 
 #define LOGAdvertiserDebug LOGnone
@@ -29,6 +29,7 @@ void Advertiser::init() {
 	}
 	// Can't update device name or appearance when radio is not initialized (error 0x3001 == BLE_ERROR_NOT_ENABLED).
 	if (!_stack->checkCondition(Stack::C_RADIO_INITIALIZED, true)) {
+		LOGw("Radio not (yet) initialized");
 		return;
 	}
 	_isInitialized = true;
@@ -454,7 +455,20 @@ void Advertiser::onConnect() {
 }
 
 void Advertiser::onDisconnect() {
+//	if (_operationMode == OperationMode::OPERATION_MODE_SETUP) {
+////			_advertiser->changeToLowTxPower();
+//		_advertiser->changeToNormalTxPower();
+//		_advertiser->updateAdvertisementParams();
+//	}
 	updateAdvertisementParams();
+}
+
+void Advertiser::onConnectOutgoing() {
+	// When making an outgoing connection, we should not advertise as being connectable anymore.
+	if (_advertising) {
+		setNonConnectableAdvParams();
+		restartAdvertising();
+	}
 }
 
 void Advertiser::handleEvent(event_t & event) {
@@ -464,6 +478,18 @@ void Advertiser::handleEvent(event_t & event) {
 			break;
 		}
 		case CS_TYPE::EVT_BLE_DISCONNECT: {
+			onDisconnect();
+			break;
+		}
+		case CS_TYPE::EVT_OUTGOING_CONNECT_START: {
+			onConnectOutgoing();
+			event.result.returnCode = ERR_SUCCESS;
+			break;
+		}
+		case CS_TYPE::EVT_OUTGOING_CONNECTED: {
+			break;
+		}
+		case CS_TYPE::EVT_OUTGOING_DISCONNECTED: {
 			onDisconnect();
 			break;
 		}

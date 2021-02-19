@@ -1,6 +1,7 @@
 #pragma once
 
 #include <events/cs_EventListener.h>
+#include <structs/buffer/cs_CircularBuffer.h>
 
 extern "C" {
 #include <util/cs_DoubleStackCoroutine.h>
@@ -21,7 +22,7 @@ typedef struct {
  * The class MicroappProtocol has functionality to store a second app (and perhaps in the future even more apps) on another
  * part of the flash memory.
  */
-class MicroappProtocol { //: public EventListener {
+class MicroappProtocol: public EventListener {
 	private:
 		/**
 		 * Singleton, constructor, also copy constructor, is private.
@@ -82,6 +83,10 @@ class MicroappProtocol { //: public EventListener {
 		 */
 		int _coskip;
 
+		/**
+		 * Store data for callbacks towards the microapp.
+		 */
+		CircularBuffer<uint8_t>* _callbackData;
 	protected:
 
 		/**
@@ -98,16 +103,12 @@ class MicroappProtocol { //: public EventListener {
 		 * Load ram information, set by microapp.
 		 */
 		uint16_t interpretRamdata();
+
 	public:
 		static MicroappProtocol& getInstance() {
 			static MicroappProtocol instance;
 			return instance;
 		}
-
-		/**
-		 * Initialize fstorage. Allocate buffer.
-		 */
-		uint16_t init();
 
 		/**
 		 * Set IPC ram data.
@@ -124,4 +125,8 @@ class MicroappProtocol { //: public EventListener {
 		 */
 		void callSetupAndLoop();
 
+		/**
+		 * Receive events (for example for i2c)
+		 */
+		void handleEvent(event_t & event);
 };

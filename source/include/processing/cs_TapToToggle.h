@@ -6,8 +6,9 @@
  */
 #pragma once
 
-#include "events/cs_EventListener.h"
-#include "ble/cs_Nordic.h"
+#include <ble/cs_Nordic.h>
+#include <cfg/cs_AutoConfig.h>
+#include <events/cs_EventListener.h>
 
 struct __attribute__((__packed__)) t2t_entry_t {
 	uint8_t address[BLE_GAP_ADDR_LEN];
@@ -47,7 +48,7 @@ private:
 	/**
 	 * Whether tap to toggle is enabled on this crownstone.
 	 */
-	TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED) enabled = CONFIG_TAP_TO_TOGGLE_ENABLED_DEFAULT;
+	TYPIFY(CONFIG_TAP_TO_TOGGLE_ENABLED) enabled = g_CONFIG_TAP_TO_TOGGLE_ENABLED_DEFAULT;
 
 	t2t_entry_t list[T2T_LIST_COUNT];
 	/**

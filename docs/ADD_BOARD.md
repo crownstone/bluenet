@@ -2,8 +2,9 @@
 
 ## Information required
 
-The pin layout can be found online for e.g. the [nRF52833](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fps_nrf52833%2Fpin.html).
-It has mappings like:
+The pin layout can be found online for e.g. the [nRF52832](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.nrf52832.ps.v1.1%2Fpin.html&cp=4_2_0_3&anchor=pin_assign) and the [nRF52833](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fps_nrf52833%2Fpin.html).
+
+The nRF52833 has mappings like:
 
 | Pin   | Name          | Crownstone Description | Pin nr |
 | ----- | ------------- | ---------------------- | ------ |

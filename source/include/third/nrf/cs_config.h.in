@@ -1,0 +1,17 @@
+/*
+ * Will be fed from cmake and needs to be source from app_config.h
+ */
+
+#pragma once
+
+#define CS_SERIAL_NRF_LOG_PIN_TX                 @CS_SERIAL_NRF_LOG_PIN_TX@
+
+#define MAX_NUM_VS_SERVICES                      @MAX_NUM_VS_SERVICES@
+
+#define MESHING                                  @MESHING@
+
+#define MESH_SCANNER                             @MESH_SCANNER@
+
+#define MESH_PERSISTENT_STORAGE                  @MESH_PERSISTENT_STORAGE@
+
+#define ATTR_TABLE_SIZE                          @ATTR_TABLE_SIZE@

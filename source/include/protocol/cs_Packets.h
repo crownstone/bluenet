@@ -521,6 +521,25 @@ struct __attribute__((packed)) cs_ram_stats_t {
 	uint32_t numSbrkFails = 0;
 };
 
+struct __attribute__((packed)) cs_twi_init_t {
+	uint8_t scl;
+	uint8_t sda;
+	uint8_t freq;
+};
+
+struct __attribute__((packed)) cs_twi_write_t {
+	uint8_t address;
+	uint8_t length;
+	uint8_t* buf;
+	bool stop;
+};
+
+struct __attribute__((packed)) cs_twi_read_t {
+	uint8_t address;
+	uint8_t length;
+	uint8_t* buf;
+	bool stop;
+};
 
 // ========================= functions =========================
 

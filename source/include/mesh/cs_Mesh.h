@@ -82,6 +82,11 @@ public:
 	void advertiseIbeacon();
 
 	/**
+	 * Stop advertising.
+	 */
+	void stopAdvertising();
+
+	/**
 	 * Start synchronization of data with other nodes in mesh.
 	 */
 	void startSync();
@@ -109,6 +114,8 @@ private:
 	MeshAdvertiser           _advertiser;
 	MeshScanner              _scanner;
 
+	BOOL _enabled = true;
+
 	// Sync request
 	bool _synced = false;
 	uint32_t _syncCountdown = -1;
@@ -131,4 +138,6 @@ private:
 	void initModels();
 
 	void configureModels(dsm_handle_t appkeyHandle);
+
+	void onTick(uint32_t tickCount);
 };

@@ -50,7 +50,7 @@ struct cs_result_t {
 	/**
 	 * Buffer to put the result data in.
 	 *
-	 * Can be NULL.
+	 * Cannot be NULL, buf.data can be NULL.
 	 */
 	cs_data_t buf;
 
@@ -74,19 +74,39 @@ struct cs_result_t {
 };
 
 /**
+ * Copy of BLE_GAP_ADDR_TYPES.
+ *
+ * More details, see:
+ * https://devzone.nordicsemi.com/f/nordic-q-a/27012/how-to-distinguish-between-random-and-public-gap-addresses
+ * https://devzone.nordicsemi.com/f/nordic-q-a/2084/gap-address-types
+ */
+enum CS_ADDRESS_TYPE {
+	CS_ADDRESS_TYPE_PUBLIC                          = 0, // Public (registered) static address.
+	CS_ADDRESS_TYPE_RANDOM_STATIC                   = 1, // Random static address (can only change at boot).
+	CS_ADDRESS_TYPE_RANDOM_PRIVATE_RESOLVABLE       = 2, // Random resolvable address (can change at any moment).
+	CS_ADDRESS_TYPE_RANDOM_PRIVATE_NON_RESOLVABLE   = 3, // Random address (can change at any moment).
+	CS_ADDRESS_TYPE_ANONYMOUS                       = 0x7F // No address is advertised.
+};
+
+struct __attribute__((packed)) device_address_t {
+	uint8_t address[MAC_ADDRESS_LEN];
+	uint8_t addressType; // See CS_ADDRESS_TYPE
+};
+
+/**
  * Scanned device.
  */
 struct __attribute__((packed)) scanned_device_t {
 	int8_t rssi;
 	uint8_t address[MAC_ADDRESS_LEN];
-	uint8_t addressType; // (ble_gap_addr_t.addr_type) & (ble_gap_addr_t.addr_id_peer << 7).
+	bool resolvedPrivateAddress;
+	uint8_t addressType; // See CS_ADDRESS_TYPE
 	uint8_t channel;
 	uint8_t dataSize;
 	uint8_t *data; // What is the content of this field?
 	// See ble_gap_evt_adv_report_t
 	// More possibilities: addressType, connectable, isScanResponse, directed, scannable, extended advertisements, etc.
 };
-
 
 /**
  * A single multi switch command.

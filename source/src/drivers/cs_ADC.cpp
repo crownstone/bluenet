@@ -829,6 +829,8 @@ void ADC::_handleAdcInterrupt() {
 // SAADC interrupt handler
 extern "C" void CS_ADC_IRQ(void) {
 	ADC::getInstance()._handleAdcInterrupt();
+
+	// Update the stack statistic in this interrupt, so that can be updated anywhere in the main loop code.
 	Crownstone::updateMinStackEnd();
 }
 
