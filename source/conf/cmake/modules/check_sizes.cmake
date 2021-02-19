@@ -1,7 +1,7 @@
 include(${DEFAULT_MODULES_PATH}/hex.cmake)
 
-set(offset "${OFFSET}")
-set(max_size "${MAX_SIZE}")
+set(offset_hex "${OFFSET}")
+set(max_size_hex "${MAX_SIZE}")
 set(binary "${BINARY}")
 
 # Note, these commands are Linux only. Check for other OS how to retrieve this info
@@ -35,14 +35,17 @@ to_hex("${app_size}" app_size_hex "0x")
 
 message(STATUS "The app is of size ${app_size} (${app_size_hex})")
 
+from_hex("${offset_hex}" offset)
 math(EXPR flash_size "${text_size} + ${data_size} + ${offset}")
 to_hex("${flash_size}" flash_size_hex "0x")
 
 message(STATUS "The app ends at address ${flash_size} (${flash_size_hex})")
 
-if(flash_size_hex GREATER max_size)
-	message(FATAL_ERROR "Size ${flash_size_hex} is beyond ${max_size}")
+from_hex("${max_size_hex}" max_size)
+
+if(flash_size GREATER max_size)
+	message(FATAL_ERROR "Size ${flash_size_hex} is beyond ${max_size_hex}")
 else()
-	message(STATUS "Size ${flash_size_hex} is below ${max_size}. Good! This might fit.")
+	message(STATUS "Size ${flash_size_hex} is below ${max_size_hex}. Good! This might fit.")
 endif()
 
