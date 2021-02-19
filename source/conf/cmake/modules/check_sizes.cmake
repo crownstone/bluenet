@@ -1,3 +1,5 @@
+include(${DEFAULT_MODULES_PATH}/hex.cmake)
+
 set(offset "${OFFSET}")
 set(max_size "${MAX_SIZE}")
 set(binary "${BINARY}")
@@ -29,17 +31,17 @@ list(GET sizes 1 data_size)
 #message(STATUS "Data size: ${data_size}")
 
 math(EXPR app_size "${text_size} + ${data_size}")
-math(EXPR app_size_hex "${app_size}" OUTPUT_FORMAT HEXADECIMAL)
+to_hex("${app_size}" app_size_hex "0x")
 
 message(STATUS "The app is of size ${app_size} (${app_size_hex})")
 
 math(EXPR flash_size "${text_size} + ${data_size} + ${offset}")
-math(EXPR flash_size_hex "${flash_size}" OUTPUT_FORMAT HEXADECIMAL)
+to_hex("${flash_size}" flash_size_hex "0x")
 
 message(STATUS "The app ends at address ${flash_size} (${flash_size_hex})")
 
 if(flash_size_hex GREATER max_size)
-	message(WARNING "Size ${flash_size_hex} is beyond ${max_size}")
+	message(FATAL_ERROR "Size ${flash_size_hex} is beyond ${max_size}")
 else()
 	message(STATUS "Size ${flash_size_hex} is below ${max_size}. Good! This might fit.")
 endif()
