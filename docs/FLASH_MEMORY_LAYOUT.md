@@ -11,8 +11,7 @@ The global layout of the the flash is shown below:
 | 0x00001000 | SD | 37
 | 0x00026000 | App / Bluenet | 43
 | 0x00051000 | Free | 23
-| 0x00068000 | Microapp (if only 1 page) | 1
-| 0x00069000 | Mesh storage | 4
+| 0x00068000 | Microapp | 5 (max)
 | 0x0006D000 | IPC page | 1
 | 0x0006E000 | Reserved for FDS expansion | 4
 | 0x00072000 | FDS | 4
