@@ -1,9 +1,8 @@
+#include <third/cuckoo/CuckooFilter.h>
+#include <third/cuckoo/CuckooRand.h>
+
 #include <iostream>
 #include <limits>
-
-#include "cuckoo_filter.h"
-#include "cuckoo_status.h"
-
 /**
  * Checks if 
  *   _new, 

@@ -1,6 +1,7 @@
+#include <third/cuckoo/CuckooFilter.h>
+#include <third/cuckoo/CuckooRand.h>
 
-#include <cuckoo_filter.h>
-#include <cuckoo_rand.h>
+#include <cstring>
 
 /* ------------------------------------------------------------------------- */
 /* ---------------------------- Hashing methods ---------------------------- */

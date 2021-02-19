@@ -1,7 +1,7 @@
-#include <iostream>
+#include <third/cuckoo/CuckooFilter.h>
+#include <third/cuckoo/CuckooRand.h>
 
-#include "cuckoo_filter.h"
-#include "cuckoo_status.h"
+#include <iostream>
 
 /**
  * Checks if the sequence 

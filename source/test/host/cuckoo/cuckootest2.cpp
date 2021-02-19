@@ -4,8 +4,8 @@
 #include <random>
 #include <algorithm>
 
-#include "cuckoo_filter.h"
-#include "cuckoo_status.h"
+#include <third/cuckoo/CuckooFilter.h>
+#include <third/cuckoo/CuckooRand.h>
 
 
 std::string random_string(std::string::size_type length)
