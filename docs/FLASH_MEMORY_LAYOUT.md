@@ -41,7 +41,8 @@ The amount of RAM in the nRF52832 is 64kB. See the [config file](https://github.
 | 0x0000FE00 | IPC | 0x100 | 256 | 0.25  
 | | **Total** | 0x10000 | 65536 | 64
 
-TODO: There is a reference to `CORE_BL_RAM`. I suppose this is not actually used... If RAM has to be preserved for the bootloader, we have to move the IPC section below this part.
+
+* TODO: There is a reference to `CORE_BL_RAM`. I suppose this is not actually used... If RAM has to be preserved for the bootloader, we have to move the IPC section below this part.
 
 In bootloader mode, RAM is (see the [bootloader linker file](https://github.com/crownstone/bluenet/blob/master/source/bootloader/secure_bootloader_gcc_nrf52.ld)): 
 
@@ -49,7 +50,7 @@ In bootloader mode, RAM is (see the [bootloader linker file](https://github.com/
 | ------------- |:-------------:| -----:| -----:| -----:|
 | 0x20000000 | SD + offset | 0x3118 | 12568 | 12.273 
 | 0x20002A00 | Bootloader heap/stack | 0xCDE8 | 52712 | 51.477 
-| 0x0000FC00 | IPC | 0x100 | 256 | 0.250
+| 0x0000FE00 | IPC | 0x100 | 256 | 0.250
 | | **Total** | 0x10000 | 65536 | 64
 
 ## App data
