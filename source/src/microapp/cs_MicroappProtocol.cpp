@@ -17,6 +17,7 @@
 #include <cfg/cs_AutoConfig.h>
 #include <common/cs_Types.h>
 #include <logging/cs_Logger.h>
+#include <drivers/cs_Gpio.h>
 #include <drivers/cs_Storage.h>
 #include <events/cs_EventDispatcher.h>
 #include <ipc/cs_IpcRamData.h>
@@ -29,6 +30,207 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
+void handleSwitchCommand(pin_cmd_t* pin_cmd) {
+	CommandMicroappPinOpcode2 mode = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
+	switch(mode) {
+		case CS_MICROAPP_COMMAND_PIN_WRITE: {
+			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
+			switch(val) {
+				case CS_MICROAPP_COMMAND_VALUE_OFF: {
+					LOGi("Turn switch off");
+					event_t event(CS_TYPE::CMD_SWITCH_OFF);
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_VALUE_ON: {
+					LOGi("Turn switch on");
+					event_t event(CS_TYPE::CMD_SWITCH_ON);
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
+				default:
+					LOGw("Unknown switch command");
+			}
+			break;
+		}
+		default:
+			LOGw("Unknown pin mode / opcode: %i", pin_cmd->opcode2);
+	}
+}
+
+/*
+ * Set mode
+ */
+void handlePinSetModeCommand(pin_cmd_t* pin_cmd) {
+	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
+	TYPIFY(EVT_GPIO_INIT) gpio;
+	gpio.pin_index = pin;
+	gpio.pull = 0;
+	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
+	switch(opcode2) {
+		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
+			gpio.pull = 1;
+		case CS_MICROAPP_COMMAND_PIN_READ: {
+			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
+			gpio.direction = INPUT;
+			gpio.polarity = NONE;
+			switch(val) {
+				case CS_MICROAPP_COMMAND_VALUE_RISING:
+					gpio.polarity = LOTOHI;
+					break;
+				case CS_MICROAPP_COMMAND_VALUE_FALLING:
+					gpio.polarity = HITOLO;
+					break;
+				case CS_MICROAPP_COMMAND_VALUE_CHANGE:
+					gpio.polarity = TOGGLE;
+					break;
+				default:
+					break;
+			}
+			event_t event(CS_TYPE::EVT_GPIO_INIT, &gpio, sizeof(gpio));
+			EventDispatcher::getInstance().dispatch(event);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_PIN_WRITE: {
+			gpio.direction = OUTPUT;
+			event_t event(CS_TYPE::EVT_GPIO_INIT, &gpio, sizeof(gpio));
+			EventDispatcher::getInstance().dispatch(event);
+			break;
+		}
+		default:
+			LOGw("Unknown mode");
+			return;
+	}
+}
+
+void handlePinActionCommand(pin_cmd_t* pin_cmd) {
+	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
+	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
+	switch(opcode2) {
+		case CS_MICROAPP_COMMAND_PIN_WRITE: {
+			TYPIFY(EVT_GPIO_WRITE) gpio;
+			gpio.pin_index = pin;
+			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
+			switch(val) {
+				case CS_MICROAPP_COMMAND_VALUE_OFF: {
+					LOGi("Clear GPIO pin");
+					gpio.length = 1;
+					uint8_t buf[1];
+					buf[0] = 0;
+					gpio.buf = buf;
+					event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
+				case CS_MICROAPP_COMMAND_VALUE_ON: {
+					LOGi("Set GPIO pin");
+					gpio.length = 1;
+					uint8_t buf[1];
+					buf[0] = 1;
+					gpio.buf = buf;
+					event_t event(CS_TYPE::EVT_GPIO_WRITE, &gpio, sizeof(gpio));
+					EventDispatcher::getInstance().dispatch(event);
+					break;
+				}
+				default:
+					LOGw("Unknown switch command");
+					return;
+			}
+			break;
+		}
+		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
+		case CS_MICROAPP_COMMAND_PIN_READ: {
+			// TODO; (not that we do not handle event handler registration here but in SetMode above
+			break;
+		}
+		default:
+			LOGw("Unknown pin mode / opcode: %i", pin_cmd->opcode2);
+			return;
+	}
+}
+
+/*
+ * Handle pin commands
+ */
+void handlePinCommand(pin_cmd_t* pin_cmd) {
+	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
+	switch(pin) {
+		case CS_MICROAPP_COMMAND_PIN_SWITCH: { // same as DIMMER
+			handleSwitchCommand(pin_cmd);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_PIN_GPIO1:
+		case CS_MICROAPP_COMMAND_PIN_GPIO2:
+		case CS_MICROAPP_COMMAND_PIN_GPIO3:
+		case CS_MICROAPP_COMMAND_PIN_GPIO4: {
+			CommandMicroappPinOpcode1 opcode1 = (CommandMicroappPinOpcode1)pin_cmd->opcode1;
+			switch(opcode1) {
+				case CS_MICROAPP_COMMAND_PIN_MODE:
+					handlePinSetModeCommand(pin_cmd);
+					break;
+				case CS_MICROAPP_COMMAND_PIN_ACTION:
+					handlePinActionCommand(pin_cmd);
+					break;
+				default:
+					LOGw("Unknown opcode1");
+					return;
+			}
+		}
+		default:
+			LOGw("Unknown pin: %i", pin_cmd->pin);
+	}
+}
+
+/*
+ * Handle TWI commands
+ */
+void handleTwiCommand(twi_cmd_t* twi_cmd) {
+	CommandMicroappTwiOpcode opcode = (CommandMicroappTwiOpcode)twi_cmd->opcode;
+	switch(opcode) {
+		case CS_MICROAPP_COMMAND_TWI_INIT: {
+			LOGi("Init i2c");
+			TYPIFY(EVT_TWI_INIT) twi;
+			// no need to write twi.config (is not under control of microapp)
+			event_t event(CS_TYPE::EVT_TWI_INIT, &twi, sizeof(twi));
+			EventDispatcher::getInstance().dispatch(event);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_TWI_WRITE: {
+			LOGd("Write over i2c to address: 0x%02x", twi_cmd->address);
+			uint8_t bufSize = twi_cmd->length;
+			TYPIFY(EVT_TWI_WRITE) twi;
+			twi.address = twi_cmd->address;
+			twi.buf = twi_cmd->buf;
+			twi.length = bufSize;
+			twi.stop = twi_cmd->stop;
+			event_t event(CS_TYPE::EVT_TWI_WRITE, &twi, sizeof(twi));
+			EventDispatcher::getInstance().dispatch(event);
+			break;
+		}
+		case CS_MICROAPP_COMMAND_TWI_READ: {
+			LOGd("Read from i2c address: 0x%02x", twi_cmd->address);
+			uint8_t bufSize = twi_cmd->length;
+			TYPIFY(EVT_TWI_READ) twi;
+			twi.address = twi_cmd->address;
+			twi.buf = twi_cmd->buf;
+			twi.length = bufSize;
+			twi.stop = twi_cmd->stop;
+			event_t event(CS_TYPE::EVT_TWI_READ, &twi, sizeof(twi));
+			EventDispatcher::getInstance().dispatch(event);
+			twi_cmd->ack = event.result.returnCode;
+			twi_cmd->length = twi.length;
+			//LOGi("Return value of length: %i", twi_cmd->length);
+			//for (int i = 0; i < (int)twi_cmd->length; ++i) {
+			//	LOGi("Read: 0x%02x", twi.buf[i]);
+			//}
+			break;
+		}
+		default:
+			LOGw("Unknown i2c opcode: %i", twi_cmd->opcode);
+	}
+}
+
+
 /*
  * The function forwardCommand is called from microapp_callback.
  */
@@ -36,89 +238,12 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 	switch(command) {
 		case CS_MICROAPP_COMMAND_PIN: {
 			pin_cmd_t *pin_cmd = (pin_cmd_t*)data;
-			CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
-			switch(pin) {
-				case CS_MICROAPP_COMMAND_PIN_SWITCH: // same as DIMMER
-				case CS_MICROAPP_COMMAND_PIN_GPIO1:
-				case CS_MICROAPP_COMMAND_PIN_GPIO2:
-				case CS_MICROAPP_COMMAND_PIN_GPIO3: {
-					CommandMicroappPinOpcode mode = (CommandMicroappPinOpcode)pin_cmd->opcode;
-					switch(mode) {
-						case CS_MICROAPP_COMMAND_PIN_WRITE: {
-							CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
-							switch(val) {
-								case CS_MICROAPP_COMMAND_VALUE_OFF: {
-									LOGi("Turn switch off");
-									event_t event(CS_TYPE::CMD_SWITCH_OFF);
-									EventDispatcher::getInstance().dispatch(event);
-									break;
-								}
-								case CS_MICROAPP_COMMAND_VALUE_ON: {
-									LOGi("Turn switch on");
-									event_t event(CS_TYPE::CMD_SWITCH_ON);
-									EventDispatcher::getInstance().dispatch(event);
-									break;
-								}
-								default:
-									LOGw("Unknown switch command");
-							}
-							break;
-						}
-						default:
-							LOGw("Unknown pin mode / opcode: %i", pin_cmd->opcode);
-					}
-					break;
-				}
-				default:
-					LOGw("Unknown pin: %i", pin_cmd->pin);
-			}
+			handlePinCommand(pin_cmd);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_TWI: {
 			twi_cmd_t *twi_cmd = (twi_cmd_t*)data;
-			CommandMicroappTwiOpcode opcode = (CommandMicroappTwiOpcode)twi_cmd->opcode;
-			switch(opcode) {
-				case CS_MICROAPP_COMMAND_TWI_INIT: {
-					LOGi("Init i2c");
-					TYPIFY(EVT_TWI_INIT) twi;
-					// no need to write twi.config (is not under control of microapp)
-					event_t event(CS_TYPE::EVT_TWI_INIT, &twi, sizeof(twi));
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				case CS_MICROAPP_COMMAND_TWI_WRITE: {
-					LOGd("Write over i2c to address: 0x%02x", twi_cmd->address);
-					uint8_t bufSize = twi_cmd->length;
-					TYPIFY(EVT_TWI_WRITE) twi;
-					twi.address = twi_cmd->address;
-					twi.buf = twi_cmd->buf;
-					twi.length = bufSize;
-					twi.stop = twi_cmd->stop;
-					event_t event(CS_TYPE::EVT_TWI_WRITE, &twi, sizeof(twi));
-					EventDispatcher::getInstance().dispatch(event);
-					break;
-				}
-				case CS_MICROAPP_COMMAND_TWI_READ: {
-					LOGd("Read from i2c address: 0x%02x", twi_cmd->address);
-					uint8_t bufSize = twi_cmd->length;
-					TYPIFY(EVT_TWI_READ) twi;
-					twi.address = twi_cmd->address;
-					twi.buf = twi_cmd->buf;
-					twi.length = bufSize;
-					twi.stop = twi_cmd->stop;
-					event_t event(CS_TYPE::EVT_TWI_READ, &twi, sizeof(twi));
-					EventDispatcher::getInstance().dispatch(event);
-					twi_cmd->ack = event.result.returnCode;
-					twi_cmd->length = twi.length;
-					//LOGi("Return value of length: %i", twi_cmd->length);
-					//for (int i = 0; i < (int)twi_cmd->length; ++i) {
-					//	LOGi("Read: 0x%02x", twi.buf[i]);
-					//}
-					break;
-				}
-				default:
-					LOGw("Unknown i2c opcode: %i", twi_cmd->opcode);
-			}
+			handleTwiCommand(twi_cmd);
 			break;
 		}
 		default:
@@ -126,7 +251,7 @@ void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
 	}
 }
 
-int handleCommand(uint8_t *payload, uint16_t length) {
+int handleCommand(uint8_t* payload, uint16_t length) {
 	//LOGd("Incoming message: [%i, %i, %i, ...]", payload[0], payload[1], payload[2]);
 	uint8_t command = payload[0];
 	switch(command) {
