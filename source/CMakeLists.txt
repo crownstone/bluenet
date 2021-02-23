@@ -242,6 +242,12 @@ ELSE()
 	ELSE()
 		MESSAGE(STATUS "Module for twi disabled")
 	ENDIF()
+	
+	IF (BUILD_GPIOTE)
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_gpiote.c")
+	ELSE()
+		MESSAGE(STATUS "Module for gpio tasks and events disabled")
+	ENDIF()
 
 	IF (BUILD_MESHING)
 		# All C files in mesh/core/src

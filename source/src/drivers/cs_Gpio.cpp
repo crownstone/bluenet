@@ -108,12 +108,12 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 					config.sense = NRF_GPIOTE_POLARITY_TOGGLE;
 					break;
 				default:
-					LOGw("Huh? No such pull registor construction exists");
+					LOGw("Huh? No such polarity exists");
 					return;
 			}
 			config.pull = nrf_pull;
 
-			LOGi("Register pin %i with event handler", pin);
+			LOGi("Register pin %i using polarity %i with event handler", pin, polarity);
 
 			err_code = nrfx_gpiote_in_init(pin, &config, gpioEventHandler);
 			if (err_code != NRF_SUCCESS) {
@@ -167,6 +167,7 @@ void Gpio::read(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
 void Gpio::handleEvent(event_t& event) {
 	switch(event.type) {
 		case CS_TYPE::EVT_GPIO_INIT: {
+			LOGi("Configure GPIO pin");
 			TYPIFY(EVT_GPIO_INIT) gpio = *(TYPIFY(EVT_GPIO_INIT)*)event.data;
 			GpioPolarity polarity = (GpioPolarity)gpio.polarity;
 			GpioDirection direction = (GpioDirection)gpio.direction;

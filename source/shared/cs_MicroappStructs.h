@@ -102,8 +102,9 @@ typedef struct {
 	uint8_t pin;
 	uint8_t opcode1;
 	uint8_t opcode2;
-	uint32_t value;
+	uint8_t value;
 	uint8_t ack;
+	uint32_t callback;
 } pin_cmd_t;
 
 /*

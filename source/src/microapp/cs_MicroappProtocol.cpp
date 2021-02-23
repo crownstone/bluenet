@@ -67,24 +67,31 @@ void handlePinSetModeCommand(pin_cmd_t* pin_cmd) {
 	gpio.pin_index = pin;
 	gpio.pull = 0;
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
+	LOGi("Set mode %i for GPIO pin %i", opcode2, pin);
 	switch(opcode2) {
 		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
 			gpio.pull = 1;
 		case CS_MICROAPP_COMMAND_PIN_READ: {
 			CommandMicroappPinValue val = (CommandMicroappPinValue)pin_cmd->value;
-			gpio.direction = INPUT;
-			gpio.polarity = NONE;
 			switch(val) {
 				case CS_MICROAPP_COMMAND_VALUE_RISING:
+					gpio.direction = SENSE;
 					gpio.polarity = LOTOHI;
+					gpio.callback = pin_cmd->callback;
 					break;
 				case CS_MICROAPP_COMMAND_VALUE_FALLING:
+					gpio.direction = SENSE;
 					gpio.polarity = HITOLO;
+					gpio.callback = pin_cmd->callback;
 					break;
 				case CS_MICROAPP_COMMAND_VALUE_CHANGE:
+					gpio.direction = SENSE;
 					gpio.polarity = TOGGLE;
+					gpio.callback = pin_cmd->callback;
 					break;
 				default:
+					gpio.direction = INPUT;
+					gpio.polarity = NONE;
 					break;
 			}
 			event_t event(CS_TYPE::EVT_GPIO_INIT, &gpio, sizeof(gpio));
@@ -105,6 +112,7 @@ void handlePinSetModeCommand(pin_cmd_t* pin_cmd) {
 
 void handlePinActionCommand(pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
+	LOGi("Action on GPIO pin %i", pin);
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
 	switch(opcode2) {
 		case CS_MICROAPP_COMMAND_PIN_WRITE: {
@@ -175,6 +183,7 @@ void handlePinCommand(pin_cmd_t* pin_cmd) {
 					LOGw("Unknown opcode1");
 					return;
 			}
+			break;
 		}
 		default:
 			LOGw("Unknown pin: %i", pin_cmd->pin);
@@ -227,27 +236,6 @@ void handleTwiCommand(twi_cmd_t* twi_cmd) {
 		}
 		default:
 			LOGw("Unknown i2c opcode: %i", twi_cmd->opcode);
-	}
-}
-
-
-/*
- * The function forwardCommand is called from microapp_callback.
- */
-void forwardCommand(uint8_t command, uint8_t *data, uint16_t length) {
-	switch(command) {
-		case CS_MICROAPP_COMMAND_PIN: {
-			pin_cmd_t *pin_cmd = (pin_cmd_t*)data;
-			handlePinCommand(pin_cmd);
-			break;
-		}
-		case CS_MICROAPP_COMMAND_TWI: {
-			twi_cmd_t *twi_cmd = (twi_cmd_t*)data;
-			handleTwiCommand(twi_cmd);
-			break;
-		}
-		default:
-			LOGw("Unknown command: %i", command);
 	}
 }
 
@@ -317,9 +305,14 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 			yield(args->c);
 			break;
 		}
-		case CS_MICROAPP_COMMAND_PIN:
+		case CS_MICROAPP_COMMAND_PIN: {
+			pin_cmd_t *pin_cmd = (pin_cmd_t*)payload;
+			handlePinCommand(pin_cmd);
+			break;
+		}
 		case CS_MICROAPP_COMMAND_TWI: {
-			forwardCommand(command, payload, length);
+			twi_cmd_t *twi_cmd = (twi_cmd_t*)payload;
+			handleTwiCommand(twi_cmd);
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
@@ -376,6 +369,11 @@ MicroappProtocol::MicroappProtocol(): EventListener() {
 	_setup = 0;
 	_loop = 0;
 	_booted = false;
+
+	for (int i = 0; i < MAX_ISR_COUNT; ++i) {
+		_isr[i].pin = 0;
+		_isr[i].callback = 0;
+	}
 
 	_callbackData = NULL;
 }
@@ -607,16 +605,40 @@ void MicroappProtocol::callLoop(int & cntr, int & skip) {
 void MicroappProtocol::handleEvent(event_t & event) {
 	switch(event.type) {
 		// Listen to GPIO events, will be used later to implement attachInterrupt in microapp.
-		/*
-		   case CS_TYPE::EVT_PARTICULAR_UPDATE: {
-		// allocate _calbackData if necessary
-		if (_callbackData == NULL) break;
-		TYPIFY(EVT_MICROAPP_UPDATE)* data = reinterpret_cast< TYPIFY(EVT_MICROAPP_UPDATE)*> (event.data);
-		uint8_t* raw_data = reinterpret_cast<uint8_t*>(data);
-		// TODO: loop over data
-		_callbackData->push(raw_data[0]);
-		break;
-		}*/
+		case CS_TYPE::EVT_GPIO_INIT: {
+			LOGi("Register GPIO event handler for microapp");
+			TYPIFY(EVT_GPIO_INIT) gpio = *(TYPIFY(EVT_GPIO_INIT)*)event.data;
+			
+			// we will register the handler in the class
+			for (int i = 0; i < MAX_ISR_COUNT; ++i) {
+				if (_isr[i].callback == 0) {
+					_isr[i].callback = gpio.callback;
+					_isr[i].pin = gpio.pin_index;
+				}
+			}
+			break;
+		}
+		case CS_TYPE::EVT_GPIO_UPDATE: {
+			LOGi("Get GPIO update");
+			TYPIFY(EVT_GPIO_UPDATE) gpio = *(TYPIFY(EVT_GPIO_UPDATE)*)event.data;
+	
+			uintptr_t callback = 0;
+			// get callback and call
+			for (int i = 0; i < MAX_ISR_COUNT; ++i) {
+				if (_isr[i].pin == gpio.pin_index) {
+					callback = _isr[i].callback;
+					break;
+				}
+			}
+			if (callback == 0) {
+				// LOGd("Not yet registered");
+				break;
+			}
+			// we have to do this through another coroutine perhaps (not the same one as loop!), for
+			// now stay on this stack
+			void (*callback_func)() = (void (*)()) callback;
+			callback_func();
+		}
 		default:
 			break;
 	}
