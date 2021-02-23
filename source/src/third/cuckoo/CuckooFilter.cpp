@@ -1,5 +1,5 @@
 #include <third/cuckoo/CuckooFilter.h>
-#include <third/cuckoo/CuckooRand.h>
+#include <util/cs_Random.h>
 
 #include <cstring>
 

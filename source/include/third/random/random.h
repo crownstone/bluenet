@@ -35,13 +35,35 @@
 *                                                                          *
 \**************************************************************************/
 
+#pragma once
+
 #include <stdint.h>
 
+#include <third/random/state.h>
 
-uint64_t x = 0, w = 0, s = 0xb5ad4eceda1ce2a9;
+namespace Msws {
 
-inline static uint32_t msws() {
-   x *= x;
-   x += (w += s);
-   return x = (x>>32) | (x<<32);
+
+State GlobalMswsState = {
+	.x = 0,
+	.w = 0,
+	.s = 0xb5ad4eceda1ce2a9
+};
+
+/**
+ * Generate new pseudo random number from given state variables and update them.
+ */
+inline static uint32_t msws(State& state) {
+   state.x *= state.x;
+   state.x += (state.w += state.s);
+   return state.x = (state.x>>32) | (state.x<<32);
 }
+
+/**
+ * Generate new pseudo random number from global state variables and update them.
+ */
+inline static uint32_t msws() {
+	return msws(GlobalMswsState);
+}
+
+} // namespace Msws
