@@ -143,6 +143,9 @@ typedef struct  {
 	//! GPIO pin to control the "green" led.
 	uint8_t pinLedGreen;
 
+	//! Leds as array
+	uint8_t pinLed[4];
+
 	//! Flags about pin order, presence of components, etc.
 	struct __attribute__((__packed__)) {
 		//! True if board has relays.

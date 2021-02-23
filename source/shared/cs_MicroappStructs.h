@@ -22,6 +22,7 @@ enum CommandMicroappPin {
 	CS_MICROAPP_COMMAND_PIN_GPIO1         = 0x01, // GPIO pin on connector
 	CS_MICROAPP_COMMAND_PIN_GPIO2         = 0x02, // GPIO pin on connector
 	CS_MICROAPP_COMMAND_PIN_GPIO3         = 0x03, // GPIO pin on connector
+	CS_MICROAPP_COMMAND_PIN_GPIO4         = 0x04, // GPIO pin on connector
 };
 
 enum ErrorCodesMicroapp {
@@ -53,10 +54,16 @@ enum CommandMicroappLog {
 	CS_MICROAPP_COMMAND_LOG_SHORT         = 0x07,
 };
 
-enum CommandMicroappPinOpcode {
+enum CommandMicroappPinOpcode1 {
+	CS_MICROAPP_COMMAND_PIN_MODE          = 0x00,
+	CS_MICROAPP_COMMAND_PIN_ACTION        = 0x01,
+};
+
+enum CommandMicroappPinOpcode2 {
 	CS_MICROAPP_COMMAND_PIN_READ          = 0x01,
 	CS_MICROAPP_COMMAND_PIN_WRITE         = 0x02,
 	CS_MICROAPP_COMMAND_PIN_TOGGLE        = 0x03,
+	CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP  = 0x04,
 };
 
 enum CommandMicroappTwiOpcode {
@@ -70,6 +77,9 @@ enum CommandMicroappTwiOpcode {
 enum CommandMicroappPinValue {
 	CS_MICROAPP_COMMAND_VALUE_OFF         = 0x00,
 	CS_MICROAPP_COMMAND_VALUE_ON          = 0x01,
+	CS_MICROAPP_COMMAND_VALUE_CHANGE      = 0x02,
+	CS_MICROAPP_COMMAND_VALUE_RISING      = 0x03,
+	CS_MICROAPP_COMMAND_VALUE_FALLING     = 0x04,
 };
 
 /*
@@ -83,13 +93,18 @@ typedef struct {
 /*
  * Struct to set and read pins. This can be used for analog and digital writes and reads. For digital writes it is
  * just zeros or ones. For analog writes it is an uint8_t. For reads the value field is the one that is being returned.
+ * There is just one struct to keep binary small.
+ *
+ * The value field is large enough to store a function pointer.
  */
 typedef struct {
 	uint8_t cmd;
 	uint8_t pin;
-	uint8_t opcode;
+	uint8_t opcode1;
+	uint8_t opcode2;
 	uint8_t value;
 	uint8_t ack;
+	uint32_t callback;
 } pin_cmd_t;
 
 /*

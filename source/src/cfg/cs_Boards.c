@@ -459,7 +459,7 @@ void asACR01B11A(boards_config_t* p_config) {
  * https://infocenter.nordicsemi.com/pdf/nRF52_DK_User_Guide_v1.2.pdf
  */
 void asPca10040(boards_config_t* p_config) {
-	p_config->pinGpioPwm                         = 17;  // GPIO P0.17
+	p_config->pinGpioPwm                         = 17;  // GPIO P0.17 (also led 1)
 	p_config->pinGpioEnablePwm                   = 22;  // GPIO P0.22
 	p_config->pinGpioRelayOn                     = 11;  // GPIO P0.11
 	p_config->pinGpioRelayOff                    = 12;  // GPIO P0.12
@@ -476,6 +476,16 @@ void asPca10040(boards_config_t* p_config) {
 	p_config->pinGpio[1]                         = 26;  // GPIO P0.26, also for SDA (by default)
 	p_config->pinGpio[2]                         = 25;  // GPIO P0.25
 	p_config->pinGpio[3]                         = 24;  // GPIO P0.24
+
+	p_config->pinButton[0]                       = 13;  // P0.13
+	p_config->pinButton[1]                       = 14;  // P0.14
+	p_config->pinButton[2]                       = 15;  // P0.15
+	p_config->pinButton[3]                       = 16;  // P0.16
+	
+	p_config->pinLed[0]                          = 17;  // P0.17
+	p_config->pinLed[1]                          = 18;  // P0.18
+	p_config->pinLed[2]                          = 19;  // P0.19
+	p_config->pinLed[3]                          = 20;  // P0.20
 
 	p_config->flags.hasRelay                     = false;
 	p_config->flags.pwmInverted                  = true;

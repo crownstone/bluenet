@@ -94,6 +94,9 @@ BUILD_MICROAPP_SUPPORT=0
 # Enable i2c/twi
 BUILD_TWI=0
 
+# Enable nrfx gpiote driver (for GPIO pins)
+BUILD_GPIOTE=0
+
 # Add support for RSSI data tracker
 BUILD_RSSI_DATA_TRACKER=0
 

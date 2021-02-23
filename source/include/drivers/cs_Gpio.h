@@ -18,6 +18,12 @@ enum GpioPullResistor { NONE = 0, UP = 1, DOWN = 2 };
 
 enum GpioPolarity { HITOLO = 1, LOTOHI = 2, TOGGLE = 3 };
 
+typedef struct pin_info_t {
+	uint8_t pin;
+	bool event;
+	uint8_t direction;
+} pin_info_t;
+
 class Gpio : public EventListener {
 
 public:
@@ -31,6 +37,8 @@ public:
 	//! Handle incoming events
 	void handleEvent(event_t & event);
 
+	//! Register event (from event handler)
+	void registerEvent(uint8_t pin);
 private:
 
 	//! Constructor
@@ -42,8 +50,11 @@ private:
 	//! This class is a singleton, deny implementation
 	void operator=(Gpio const &);
 
+	//! Get regular ticks to send events
+	void tick();
+
 	//! Map from virtual pins to physical pins
-	std::vector<uint8_t> _pins;
+	std::vector<pin_info_t> _pins;
 
 	//! Configure pin
 	void configure(uint8_t pin_index, GpioDirection direction, GpioPullResistor pull, GpioPolarity polarity);
@@ -56,4 +67,5 @@ private:
 
 	//! Initialized flag
 	bool _initialized;
+
 };

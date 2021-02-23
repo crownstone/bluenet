@@ -546,6 +546,7 @@ struct __attribute__((packed)) cs_gpio_init_t {
 	uint8_t direction;
 	uint8_t pull;
 	uint8_t polarity;
+	uintptr_t callback;
 };
 
 struct __attribute__((packed)) cs_gpio_write_t {
@@ -561,6 +562,7 @@ struct __attribute__((packed)) cs_gpio_read_t {
 };
 
 struct __attribute__((packed)) cs_gpio_update_t {
+	uint8_t pin_index;
 	uint8_t length;
 	uint8_t *buf;
 };
