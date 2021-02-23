@@ -91,7 +91,7 @@ IF (BUILD_TWI)
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/drivers/cs_Twi.cpp")
 ENDIF()
 
-IF (RSSI_DATA_TRACKER_ENABLED)
+IF (BUILD_RSSI_DATA_TRACKER)
 	LIST(APPEND FOLDER_SOURCE "${SOURCE_DIR}/localisation/cs_MeshTopology.cpp")
 ENDIF()
 
@@ -133,4 +133,3 @@ IF (BUILD_MESHING)
 		MESSAGE(FATAL_ERROR "Directory for the mesh, \"${MESH_SDK_DIR}\", does not exist!")
 	ENDIF()
 ENDIF()
-
