@@ -341,7 +341,7 @@ private:
 	MeshTopology _meshTopology;
 #endif
 
-#if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
+#if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
 	NearestCrownstoneTracker _nearestCrownstoneTracker;
 	TrackableParser _trackableParser;
 #endif
@@ -384,4 +384,3 @@ private:
 
 	bool _clearedGpRegRetCount = false;
 };
-
