@@ -198,8 +198,10 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 			break;
 		}
 		case CS_MICROAPP_COMMAND_SERVICE_DATA: {
-			LOGd("Service data");
-			uint16_t commandDataSize = length - 2; // byte 0 is command, byte 1 is type.
+			LOGd("Service data:");
+			_logArray(SERIAL_DEBUG, true, payload, length);
+
+			uint16_t commandDataSize = length - 3; // byte 0 is command, byte 1 is type, byte 2 is ??.
 			TYPIFY(CMD_MICROAPP_ADVERTISE) eventData;
 			if (commandDataSize < sizeof(eventData.appUuid)) {
 				LOGi("payload too small");
@@ -207,9 +209,9 @@ int handleCommand(uint8_t *payload, uint16_t length) {
 			}
 			eventData.version = 0; // TODO: define somewhere.
 			eventData.type = 0; // TODO: define somewhere.
-			eventData.appUuid = (payload[2] << 8) + payload[3];
+			eventData.appUuid = (payload[3] << 8) + payload[4];
 			eventData.data.len = commandDataSize - sizeof(eventData.appUuid);
-			eventData.data.data = &(payload[4]);
+			eventData.data.data = &(payload[5]);
 			//			BLEutil::printArray(eventData.data.data, eventData.data.len, SERIAL_INFO);
 			event_t event(CS_TYPE::CMD_MICROAPP_ADVERTISE, &eventData, sizeof(eventData));
 			event.dispatch();
