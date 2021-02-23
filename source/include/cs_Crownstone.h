@@ -338,7 +338,7 @@ private:
 	SystemTime _systemTime;
 
 #if RSSI_DATA_TRACKER_ENABLED==1
-	MeshTopology _MeshTopology;
+	MeshTopology _meshTopology;
 #endif
 
 #if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1
@@ -384,5 +384,4 @@ private:
 
 	bool _clearedGpRegRetCount = false;
 };
-
 
