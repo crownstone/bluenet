@@ -132,6 +132,5 @@ void TrackableParser::logServiceData(scanned_device_t* scannedDevice) {
 	}
 
 	_log(SERIAL_DEBUG, false, "servicedata trackableparser: ");
-	_logArray(SERIAL_DEBUG,false,serviceData.data, serviceData.len);
+	_logArray(SERIAL_DEBUG, true, serviceData.data, serviceData.len);
 }
-
