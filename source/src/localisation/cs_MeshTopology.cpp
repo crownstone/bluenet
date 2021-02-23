@@ -66,6 +66,7 @@ uint8_t MeshTopology::getVarianceRepresentation(float variance) {
 uint8_t MeshTopology::getMeanRssiRepresentation(float mean) {
 	mean = std::abs(mean);
 	if (mean >= 1<<7 ) {
+		// mean rssi is worse than -128 dB, return 127.
 		return (1<<7) - 1;
 	}
 	return static_cast<uint8_t>(mean);
