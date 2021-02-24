@@ -32,21 +32,22 @@ private:
 	void handleBackgroundParsed(adv_background_parsed_t *trackableAdvertisement);
 
 
-
+	// -------------- Filter definitions and storage -------------------
 
 	class FilterMetaData {
 	public:
-		uint16_t version : 12; // Lollipop
-		uint8_t protocolVersion; // ?
-
 		uint8_t profileId; // devices passing the filter are assigned this profile id
 		uint8_t inputType; // determines wether the filter has mac or advertisement data as input
 
+		// sync info
+		uint8_t protocol; // determines implementation type of filter
+		uint16_t version : 12; // Lollipop
+
+		// sync state
 		union{
 			uint8_t flags;
 			struct {
 				uint8_t isActive : 1;
-				uint8_t pendingRemoval : 1;
 			} bits;
 		};
 	};
@@ -61,13 +62,48 @@ private:
 	/**
 	 * Combined metadata for the filters.
 	 */
-	uint16_t _masterHash;
-	uint16_t _masterVersion; // Lollipop
+	uint16_t _masterHash; //
+	uint16_t _masterVersion; // Lollipop @Persisted
 
 
-	HasValue<fingerprint> filter(void* data, size_t len);
+	// ---------------------- Command interface --------------------
 
 
+	/**
+	 * Returns:
+	 *  - master version
+	 *  - master crc
+	 *  - for each filter:
+	 *    - filter id
+	 *    - filter version
+	 *    - filter crc
+	 */
+	void handleGetFilterSummariesCommand();
+
+
+	/**
+	 * Inactive filters are activated.
+	 * Crcs are (re)computed.
+	 * This crownstones master version and crc are broadcasted over the mesh.
+	 * Sets 'filter modification in progress' flag of this crownstone back to off.
+	 */
+	void handleCommitFilterChangesCommand(masterversion, mastercrc);
+
+	/**
+	 * Removes given filter immediately.
+	 * Flags this crownstone as 'filter modification in progress'.
+	 */
+	void handleRemoveFilterCommand(filter_id);
+
+	/**
+	 * Upon first reception of this command with the given filter_id,
+	 * reallocate space. If this fails, abort. Else set the filter_id to
+	 * 'upload in progress'.
+	 */
+	void handleUploadFilterCommand(filted_id, chunkno, total_chunked_size, chunk);
+
+
+	// --------------------------- OLD interface -------------------------
 
 
 
