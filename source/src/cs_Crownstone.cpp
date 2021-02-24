@@ -927,14 +927,6 @@ void Crownstone::printLoadStats() {
 
 	LOGi("heapEnd=0x%X maxHeapEnd=0x%X minStackEnd=0x%X minFree=%u sbrkFails=%u", (uint32_t)getHeapEnd(), _ramStats.maxHeapEnd, _ramStats.minStackEnd, _ramStats.minFree, _ramStats.numSbrkFails);
 
-	if (_ramStats.maxHeapEnd > g_RAM_MICROAPP_BASE) {
-		LOGw("Overwriting microapp memory with heap");
-	}
-	
-	if (_ramStats.minStackEnd < (g_RAM_MICROAPP_BASE + g_RAM_MICROAPP_AMOUNT)) {
-		LOGw("Overwriting microapp memory with heap");
-	}
-
 	// Log scheduler usage.
 	__attribute__((unused)) uint16_t maxUsed = app_sched_queue_utilization_get();
 	__attribute__((unused)) uint16_t currentFree = app_sched_queue_space_get();

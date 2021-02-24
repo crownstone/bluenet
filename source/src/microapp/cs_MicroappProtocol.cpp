@@ -509,9 +509,10 @@ void MicroappProtocol::callApp() {
 }
 
 uint16_t MicroappProtocol::initMemory() {
-	// We allow an area of 0x2000B000 and then two pages for RAM. For now let us clear it to 0
+	// We have a reserved area of RAM. For now let us clear it to 0
 	// This is actually incorrect (we should skip) and it probably can be done at once as well
-	for (int i = 0; i < 1024 * 2; ++i) {
+	LOGi("Init memory: clear %p to %p", g_RAM_MICROAPP_BASE, g_RAM_MICROAPP_BASE + g_RAM_MICROAPP_AMOUNT);
+	for (uint32_t i = 0; i < g_RAM_MICROAPP_AMOUNT; ++i) {
 		uint32_t *const val = (uint32_t *)(uintptr_t)(g_RAM_MICROAPP_BASE + i);
 		*val = 0;
 	}
@@ -640,6 +641,7 @@ void MicroappProtocol::handleEvent(event_t & event) {
 			// now stay on this stack
 			void (*callback_func)() = (void (*)()) callback;
 			callback_func();
+			break;
 		}
 		default:
 			break;

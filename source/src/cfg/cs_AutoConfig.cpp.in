@@ -1,6 +1,3 @@
-// Needs to be static
-#define CS_RAM_MICROAPP_END (@RAM_MICROAPP_BASE@ + @RAM_MICROAPP_AMOUNT@)
-
 #include <cfg/cs_AutoConfig.h>
 
 #include <cfg/cs_Boards.h>
@@ -43,7 +40,8 @@ uint32_t g_FLASH_MICROAPP_BASE = @FLASH_MICROAPP_BASE@;
 // Number of pages
 uint8_t g_FLASH_MICROAPP_PAGES = @FLASH_MICROAPP_PAGES@;
 
-uint32_t g_RAM_MICROAPP_BASE = @RAM_MICROAPP_BASE@;
+// Microapp ram is located before IPC ram.
+uint32_t g_RAM_MICROAPP_BASE = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - (@RAM_BLUENET_IPC_LENGTH@ + @RAM_MICROAPP_AMOUNT@);
 
 uint32_t g_RAM_MICROAPP_AMOUNT = @RAM_MICROAPP_AMOUNT@;
 
