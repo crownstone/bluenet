@@ -33,24 +33,34 @@ The firmware size + free size is 352kB. For the dual bank bootloader, this means
 The amount of RAM in the nRF52832 is 64kB. See the [config file](https://github.com/crownstone/bluenet/blob/master/source/conf/cmake/CMakeBuild.config.default) and the [bluenet linker file](https://github.com/crownstone/bluenet/blob/master/source/include/third/nrf/generic_gcc_nrf52.ld).
 
 | Start address | What | Size | Size | Size (kB)
-| ------------- |:-------------:| -----:| -----:| -----:|
-| 0x20000000 | SD | 0x2A00 | 10752 | 10.5 
-| 0x20002A00 | App heap | 0x8600 | 34304 | 33.5 
-| 0x2000B000 | Microapp | 0x2000 | 8192 | 8
-| 0x2000D000 | App stack (max) | 0x2C00 | 11264 | 11.75 
-| 0x2000FDFF | App stack (start) |  |  |  
-| 0x0000FE00 | IPC | 0x100 | 256 | 0.25  
+| ------------- |:----:| ----:| ----:| --------:|
+| 0x20000000 | SD | 0x2A00 | 10752 | 10.5
+| 0x20002A00 | App heap and stack | 0xCD00 | 52480 | 51.25
+| 0x2000F700 | Microapp | 0x800 | 2048 | 2
+| 0x2000FF00 | IPC | 0x100 | 256 | 0.25
 | | **Total** | 0x10000 | 65536 | 64
+
+### RAM start and end addresses
+
+| Start address | End address | What
+| ------------- | ----------- | ----
+| 0x20000000    | 0x20002A00  | Soft device.
+| 0x20002A00    |             | App heap start, grows up to stack.
+| 0x2000F6FF    |             | App stack start, grows down to heap.
+| 0x2000F700    | 0x2000FEFF  | Microapp stack, grows from `end` down to `start`.
+| 0x2000FF00    | 0x20010000  | IPC, fixed layout.
 
 
 * TODO: There is a reference to `CORE_BL_RAM`. I suppose this is not actually used... If RAM has to be preserved for the bootloader, we have to move the IPC section below this part.
 
-In bootloader mode, RAM is (see the [bootloader linker file](https://github.com/crownstone/bluenet/blob/master/source/bootloader/secure_bootloader_gcc_nrf52.ld)): 
+### Bootloader RAM
+
+In bootloader mode, RAM is (see the [bootloader linker file](https://github.com/crownstone/bluenet/blob/master/source/bootloader/secure_bootloader_gcc_nrf52.ld)):
 
 | Start address | What | Size | Size | Size (kB)
 | ------------- |:-------------:| -----:| -----:| -----:|
-| 0x20000000 | SD + offset | 0x3118 | 12568 | 12.273 
-| 0x20002A00 | Bootloader heap/stack | 0xCDE8 | 52712 | 51.477 
+| 0x20000000 | SD + offset | 0x3118 | 12568 | 12.273
+| 0x20002A00 | Bootloader heap/stack | 0xCDE8 | 52712 | 51.477
 | 0x0000FE00 | IPC | 0x100 | 256 | 0.250
 | | **Total** | 0x10000 | 65536 | 64
 
