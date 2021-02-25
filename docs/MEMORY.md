@@ -1,4 +1,10 @@
-# Memory layout
+# Memory
+
+Information and decisions with respect to memory on the Crownstone (both flash and ram).
+
+## Memory layout
+
+### Flash
 
 This document describes the flash memory layout, and how to add more data to store. Bluenet makes use of the Persistent storage manager from the Nordic SDK.
 
@@ -28,7 +34,7 @@ The application start address is defined in the _CMakeBuild.config_ as `APPLICAT
 
 The firmware size + free size is 352kB. For the dual bank bootloader, this means that the firmware can be 176kB max.
 
-## RAM
+### RAM
 
 The amount of RAM in the nRF52832 is 64kB. See the [config file](https://github.com/crownstone/bluenet/blob/master/source/conf/cmake/CMakeBuild.config.default) and the [bluenet linker file](https://github.com/crownstone/bluenet/blob/master/source/include/third/nrf/generic_gcc_nrf52.ld).
 
@@ -68,8 +74,8 @@ The app data can be read out with a script:
 ./scripts/printAppData.sh
 ```
 
-
 ### Adding a page
+
 Since the first entry in the `ps_storage_id` and `storage_config_t` gets the lowest address on flash, and since the app data grows downwards, **a new page should be added as first entry**.
 More spefically: the order is determined by the order in which `pstorage_register` is called. The first call gets the lowest address.
 
@@ -84,6 +90,7 @@ To make sure that no data is already at the new page, a value  should be added t
 
 
 ### Swap page
+
 The swap page is used for clear and update commands.
 Since for a write, a pstorage_update is used, the following happens for each write:
 - swap page is cleared
@@ -94,6 +101,7 @@ Since for a write, a pstorage_update is used, the following happens for each wri
 This makes the current cyclic storage implementation usesless for its purpose.
 
 ### Blocks
+
 The page can be didived in several blocks. Only a whole block can be read or written at a time.
 
 > For example, if a module has a table with 10 entries, and each entry is 64 bytes in size, it can request 10 blocks with a block size of 64 bytes. The module can also request one block that is 640 bytes depending on how it would like to access or alter the memory in persistent memory. The first option is preferred when it is a single entry that needs to be updated often and doesn't impact the other entries. The second option is preferred when table entries are not changed individually but have a common point of loading and storing data. 
@@ -104,5 +112,10 @@ A better way could be to use smaller blocks and have functions to deal with valu
 Maybe a call to `pstorage_store()` uses the swap when size is less than the block size? --> Doesn't seem so from the diagram (on the _persistent storage manager_ page).
 
 ### Queuing
+
 PStorage functions are asynchronous, but writes to flash can not happen simultaneously. This is why cs_Storage has a queue. This queue is also used to wait for high priority events to be done, like scanning and meshing.
 
+# Decisions
+
+Currently there is support for 255 mesh devices (this in contrast with 40 devices that we supported first).
+This increases RAM uses by around 1500 bytes.
