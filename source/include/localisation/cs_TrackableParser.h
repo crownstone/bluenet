@@ -15,8 +15,7 @@
  * Transforms EVT_DEVICE_SCANNED and EVT_ADV_BACKGROUND_PARSED
  * into EVT_TRACKING_UPDATE events.
  *
- * Responsible for throttling input to the localisation module, which
- * may take up more computation resources.
+ * Responsible for throttling input to the localisation module using filter parsers.
  */
 class TrackableParser : public EventListener {
 public:
@@ -39,15 +38,23 @@ private:
 	// working space for the filters.
 	uint8_t _filterBuffer[FILTER_BUFFER_SIZE];
 
-	class FilterMetaData {
+	/**
+	 * Data associated to a parsing filter that is persisted to flash.
+	 */
+	struct __attribute__((__packed__)) FilterMetaData {
 	public:
-		uint8_t profileId; // devices passing the filter are assigned this profile id
-		uint8_t inputType; // determines wether the filter has mac or advertisement data as input
-
 		// sync info
 		uint8_t protocol; // determines implementation type of filter
-		uint16_t version : 12; // Lollipop
-		uint16_t unused : 4; // explicit padd
+		union {
+			struct {
+				uint16_t value: 12; // Lollipop
+				uint16_t unused : 4; // explicit padd
+			} version;
+			uint16_t version_int;
+		};
+
+		uint8_t profileId; // devices passing the filter are assigned this profile id
+		uint8_t inputType; // determines wether the filter has mac or advertisement data as input
 
 		// sync state
 		union{
@@ -59,12 +66,27 @@ private:
 	};
 
 	/**
-	 * The filters and their associated metadata.
-	 * Allocated on the FilterBuffer.
+	 * Data associated to a parsing filter that is not persisted
 	 */
-	CuckooFilter* _filters[MAX_FILTER_IDS];
-	FilterMetaData* _filterMetadata[MAX_FILTER_IDS];
-	uint16_t _filterCrcs[MAX_FILTER_IDS]; // since uint16_t is smaller than a pointer, we save space by allocating these here instead of in the buffer.
+	struct __attribute__((__packed__)) FilterRuntimeData {
+		uint16_t crc;
+	};
+
+	/**
+	 * The filters and their associated metadata.
+	 * Allocated on the FilterBuffer are packed into a single
+	 * struct. That saves a bit of administration.
+	 *
+	 * Warning: keep this structure and order as-is, that makes chunking
+	 * the whole thing a stupid load simpler.
+	 */
+	struct __attribute__((__packed__)) ParsingFilter {
+		FilterMetaData metadata;
+		FilterRuntimeData runtimedata;
+		CuckooFilter filter;
+	};
+
+	ParsingFilter* _parsingFilters[MAX_FILTER_IDS];
 
 	uint16_t _masterHash; //
 	uint16_t _masterVersion; // Lollipop @Persisted
@@ -76,9 +98,20 @@ private:
 	/**
 	 * Constructs a CuckooFilter in the _filterBuffer together with
 	 * the necessary fingerprint buffer.
+	 * Returns nullptr on failure.
 	 */
-	bool allocateCuckooFilter(uint8_t filterId, uint8_t bucket_count, uint8_t nests_per_bucket);
+	ParsingFilter* allocateParsingFilter(uint8_t filterId, size_t totalSize);
 
+	/**
+	 * If the filter can be found in the buffer and the chunk was successfully
+	 * applied, returns true. Else, returns false.
+	 */
+	bool applyFilterChunk(uint8_t filterId, uint16_t chunkStartIndex, uint8_t* chunk, uint16_t chunkSize);
+
+	/**
+	 * Looks up given filter id in the buffer. Returns nullptr if not found.
+	 */
+	ParsingFilter* findParsingFilter(uint8_t filterId);
 	// -------------------------------------------------------------
 	// ---------------------- Command interface --------------------
 	// -------------------------------------------------------------
@@ -111,10 +144,10 @@ private:
 
 	/**
 	 * Upon first reception of this command with the given filter_id,
-	 * reallocate space. If this fails, abort. Else set the filter_id to
+	 * allocate space in the buffer. If this fails, abort. Else set the filter_id to
 	 * 'upload in progress'.
 	 */
-	void handleUploadFilterCommand(uint8_t filterId, uint16_t chunkStartIndex, uint16_t totalSize, uint8_t* chunk, uint16_t chunkSize);
+	bool handleUploadFilterCommand(uint8_t filterId, uint16_t chunkStartIndex, uint16_t totalSize, uint8_t* chunk, uint16_t chunkSize);
 
 	// -------------------------------------------------------------
 	// ----------------------- OLD interface -----------------------

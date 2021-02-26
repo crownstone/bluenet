@@ -52,45 +52,69 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableA
 // ------------------ Internal filter management ---------------
 // -------------------------------------------------------------
 
-bool TrackableParser::allocateCuckooFilter(uint8_t filterId, uint8_t bucket_count, uint8_t nests_per_bucket) {
+bool TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
 	// structure of the buffer:
 	// [CuckooFilter_0][CuckooData_0] ... [CuckooFilter_n][CuckooData_n] 0x00 ... 0x00
 	// remove operations will immediately move all data to make space.
 	// to find index of first empty buffer space, check the highest indexed filter.
 
-	// preliminary implementation:
-	// ignore filterId, always start at index 0
-	size_t cuckooObjectIndex = 0;
-	size_t cuckooDataIndex = 0 + sizeof(CuckooFilter);
+	// preliminary implementation: ignore filterId, always start at index 0
+	(void)filterId;
+	size_t parsingFilterIndex = 0;
+	size_t filterDataIndex = 0 + sizeof(ParsingFilter);
 
-	if (FILTER_BUFFER_SIZE < cuckooDataIndex) {
+	if (FILTER_BUFFER_SIZE < parsingFilterIndex) {
 		// can't even allocate the CuckooFilter object in this case.
 		return false;
 	}
 
-	size_t bufferSpaceLeftForCuckooData = FILTER_BUFFER_SIZE - cuckooDataIndex;
+	size_t bufferSpaceLeftForFilterData = FILTER_BUFFER_SIZE - parsingFilterIndex;
 
-	uint8_t* cuckooObjectPosition =  _filterBuffer + cuckooObjectIndex;
-	uint8_t* cuckooDataPosition   =  _filterBuffer + cuckooDataIndex;
+	uint8_t* parsingFilterPosition =  _filterBuffer + parsingFilterIndex;
+	uint8_t* filterDataPosition    =  _filterBuffer + filterDataIndex;
 
 	// placement new is used to construct an object into a user specified location
 	// without copying. It is exception safe by specification.
-	_filters[0] = new (cuckooObjectPosition) CuckooFilter;
+	_parsingFilters[0] = new (parsingFilterPosition) ParsingFilter;
 
 	// After constructing the instance, we need to assign the buffer space for it.
-	bool cuckooFilterFits = _filters[0]->_new (
+	bool filterDataFitsBuffer = _parsingFilters[0]->filter.assignBuffer (
 			bucket_count, nests_per_bucket,
-			cuckooDataPosition, bufferSpaceLeftForCuckooData);
+			filterDataPosition, bufferSpaceLeftForFilterData);
 
-	if (!cuckooFilterFits) {
+	if (!filterDataFitsBuffer) {
 		// buffer not big enough for requested number of fingerprints,
 		// reverting changes (placement new requires manual destruction).
-		_filters[0]->~CuckooFilter();
-		_filters[0] = nullptr;
+		_parsingFilters[0]->~ParsingFilter();
+		_parsingFilters[0] = nullptr;
 		return false;
 	}
 
 	return true;
+}
+
+bool TrackableParser::applyFilterChunk (
+		uint8_t filterId,
+		uint16_t chunkStartIndex,
+		uint8_t* chunk,
+		uint16_t chunkSize) {
+	ParsingFilter* parsingFilter = findParsingFilter(filterId);
+
+	if (parsingFilter == nullptr) {
+		// If this is the 'first chunk', try to allocate a filter.
+		allocateFilter(filterId, )
+		return false;
+	}
+
+	// First chunk needs to be handled separately.
+
+
+	return true;
+}
+
+
+TrackableParser::ParsingFilter* TrackableParser::findParsingFilter(uint8_t filterId) {
+	return reinterpret_cast<ParsingFilter*>(_filterBuffer);
 }
 
 
@@ -110,8 +134,26 @@ void TrackableParser::handleRemoveFilterCommand(uint8_t filterId) {
 	// TODO(Arend): implement later.
 }
 
-void TrackableParser::handleUploadFilterCommand(uint8_t filterId, uint16_t chunkStartIndex, uint16_t totalSize, uint8_t* chunk, uint16_t chunkSize) {
+bool TrackableParser::handleUploadFilterCommand(uint8_t filterId, uint16_t chunkStartIndex, uint16_t totalSize, uint8_t* chunk, uint16_t chunkSize) {
+	ParsingFilter* parsingFilter = findParsingFilter(filterId);
 
+	if(parsingFilter == nullptr) {
+		parsingFilter = allocateParsingFilter(filterId, totalSize);
+		if(parsingFilter == nullptr) {
+			// failed to handle command, no space.
+			return false;
+		}
+	}
+
+	// note: we're not doing corruption checks here yet
+	// E.g.: when totalSize changes for a specific filterId before
+	//       a commit is reached, we have a parsingFilter allocated
+	//       but it's of the wrong size.
+
+	// apply filter chunk:
+	std::memcpy (parsingFilter + chunkStartIndex, chunk, chunkSize);
+
+	return true;
 }
 
 // -------------------------------------------------------------

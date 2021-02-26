@@ -3,6 +3,15 @@
 #include <stddef.h>
 #include <cstdint>
  
+/**
+ * TODO(Arend):
+ * - add test assert(std::is_standard_layout_v<CuckooFilter>);
+ * - add test assert(std::is_trivial_v<CuckooFilter>);
+ *
+ * CuckooFilter datatype is made s.t. the buffer is at the back of the
+ * struct, in one contiguous chunk of memory. Thus avoiding pointer assignment
+ * on construction. It is fully memcpy-able.
+ */
 class CuckooFilter {
 public:
 	typedef const void* key_type;
@@ -11,7 +20,7 @@ public:
 
 	static constexpr size_t max_kick_attempts = 100;
 	
-private:
+//private:
 	/**
 	 * Data chunk that can be reused in several functions.
 	 */
@@ -31,11 +40,13 @@ private:
 
 	index_type            	bucket_count;
 	index_type              nests_per_bucket; // rename to fingerprints_per_bucket.
-	fingerprint_type*	    bucket_array = nullptr;
 
 	// if this is != 0, it was kicked from the filter
 	// and can't be reinserted because the filter is full.
 	fingerprint_type		victim = 0;
+
+
+	fingerprint_type	    bucket_array[]; // 'flexible array member'
   
 	// -------------------------------------------------------------
 	// ----- Private methods -----
@@ -132,43 +143,47 @@ public:
 	// Init/deinit like stuff.
 	// -------------------------------------------------------------
 
-	constexpr size_t fingerprintCount() {
+	/**
+	 * TODO(Arend)
+	 */
+	void clear();
+
+	constexpr size_t fingerprintCount(
+			index_type bucket_count, index_type nests_per_bucket) {
 		return bucket_count * nests_per_bucket;
 	}
 
 	/**
 	 * Size of the byte buffer in bytes.
 	 */
-	constexpr size_t byteCount() {
-		return fingerprintCount() * sizeof(fingerprint_type);
+	constexpr size_t bufferSize(
+			index_type bucket_count, index_type nests_per_bucket) {
+		return fingerprintCount(bucket_count, nests_per_bucket) * sizeof(fingerprint_type);
 	}
 
 	/**
-	 * total number of bytes this filter occupies.
+	 * Total number of bytes a CuckooFilter with the given parameters would occupy.
+	 *
+	 * As per cppreference.com:
+	 *   "sizeof, and the assignment operator ignore the flexible array member."
+	 *   https://en.cppreference.com/w/c/language/struct
+	 */
+	constexpr size_t size(index_type bucket_count, index_type nests_per_bucket) {
+		return sizeof(CuckooFilter) + bufferSize(bucket_count, nests_per_bucket);
+	}
+
+	/**
+	 * Total number of bytes this instance occypies.
+	 * Use this function instead of sizeof for this class to take the buffer into account.
 	 */
 	constexpr size_t size() {
-		return byteCount() + sizeof(CuckooFilter);
+		return size(bucket_count, nests_per_bucket);
 	}
 
-	/**
-	 * Allocatees a new buffer on the heap big enough to contain
-	 * bucket_count * nests_pers_bucket fingerprints.
-	 *
-	 * TODO(Arend): add pointer parameter to allow for use of preallocated space.
-	 * TODO(Arend): also ensure that preallocated space will not be destroyed.
-	 */
-	bool _new (index_type bucket_count, index_type nests_per_bucket, void* buffer, size_t bufferSize);
 
-	/**
-	 * Default constructor leaves everything blanc.
-	 */
-	CuckooFilter() = default;
-
-	/**
-	 * Parameterized constructor immediately assigns array for the requested size.
-	 */
-	CuckooFilter(index_type bucket_count, index_type nests_per_bucket, void* buffer, size_t bufferSize) {
-		_new(bucket_count, nests_per_bucket, buffer, bufferSize);
-	}
-
+//	/**
+//	 * Assigns the buffer to this filter after checking if it has enough space
+//	 * bucket_count * nests_pers_bucket fingerprints.
+//	 */
+//	bool assignBuffer(index_type bucket_count, index_type nests_per_bucket, size_t bufferSize);
 };
