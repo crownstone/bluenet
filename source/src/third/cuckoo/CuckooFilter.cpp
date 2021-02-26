@@ -214,39 +214,30 @@ bool CuckooFilter::move(ExtendedFingerprint entry_to_insert) {
 }
 
 /* ------------------------------------------------------------------------- */
-
-bool CuckooFilter::_new(
+bool CuckooFilter::_new (
 		index_type bucket_count,
-		index_type nests_per_bucket){
+		index_type nests_per_bucket,
+		void* buffer,
+		size_t bufferSize) {
   if(bucket_array != nullptr) {
 	  return false;
   }
 
-  bucket_array = new fingerprint_type[bucket_count * nests_per_bucket];
-  memset(bucket_array, 0x00, bucket_count * nests_per_bucket *  sizeof(fingerprint_type));
+  const auto fingerprintCount = bucket_count * nests_per_bucket;
+  const auto allocSize = fingerprintCount * sizeof(fingerprint_type);
 
-  if (bucket_array == nullptr) {
-	  // now we're really in trouble
+  if (bufferSize < allocSize) {
 	  return false;
   }
+
+  bucket_array = reinterpret_cast<fingerprint_type*>(buffer);
+  memset(bucket_array, 0x00, allocSize);
 
   this->bucket_count = bucket_count;
   this->nests_per_bucket = nests_per_bucket;
   this->victim = 0;
 
   return true;
-}
-
-/* ------------------------------------------------------------------------- */
-
-bool CuckooFilter::_free() {
-	if (bucket_array != nullptr) {
-		delete [] bucket_array;
-		bucket_array = nullptr;
-		return true;
-	}
-
-	return false;
 }
 
 /* ------------------------------------------------------------------------- */

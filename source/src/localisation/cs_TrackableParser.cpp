@@ -16,7 +16,7 @@
 #include <util/cs_Utils.h>
 
 // REVIEW: This won't be recognized by binary logger.
-#define TrackableParser_LOGd LOGnone
+#define LOGTrackableParserDebug LOGnone
 
 void TrackableParser::init() {
 }
@@ -47,6 +47,78 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableA
 	//
 	//	trackEvent.dispatch();
 }
+
+// -------------------------------------------------------------
+// ------------------ Internal filter management ---------------
+// -------------------------------------------------------------
+
+bool TrackableParser::allocateCuckooFilter(uint8_t filterId, uint8_t bucket_count, uint8_t nests_per_bucket) {
+	// structure of the buffer:
+	// [CuckooFilter_0][CuckooData_0] ... [CuckooFilter_n][CuckooData_n] 0x00 ... 0x00
+	// remove operations will immediately move all data to make space.
+	// to find index of first empty buffer space, check the highest indexed filter.
+
+	// preliminary implementation:
+	// ignore filterId, always start at index 0
+	size_t cuckooObjectIndex = 0;
+	size_t cuckooDataIndex = 0 + sizeof(CuckooFilter);
+
+	if (FILTER_BUFFER_SIZE < cuckooDataIndex) {
+		// can't even allocate the CuckooFilter object in this case.
+		return false;
+	}
+
+	size_t bufferSpaceLeftForCuckooData = FILTER_BUFFER_SIZE - cuckooDataIndex;
+
+	uint8_t* cuckooObjectPosition =  _filterBuffer + cuckooObjectIndex;
+	uint8_t* cuckooDataPosition   =  _filterBuffer + cuckooDataIndex;
+
+	// placement new is used to construct an object into a user specified location
+	// without copying. It is exception safe by specification.
+	_filters[0] = new (cuckooObjectPosition) CuckooFilter;
+
+	// After constructing the instance, we need to assign the buffer space for it.
+	bool cuckooFilterFits = _filters[0]->_new (
+			bucket_count, nests_per_bucket,
+			cuckooDataPosition, bufferSpaceLeftForCuckooData);
+
+	if (!cuckooFilterFits) {
+		// buffer not big enough for requested number of fingerprints,
+		// reverting changes (placement new requires manual destruction).
+		_filters[0]->~CuckooFilter();
+		_filters[0] = nullptr;
+		return false;
+	}
+
+	return true;
+}
+
+
+// -------------------------------------------------------------
+// ---------------------- Command interface --------------------
+// -------------------------------------------------------------
+
+void TrackableParser::handleGetFilterSummariesCommand() {
+	// TODO(Arend): implement later.
+}
+
+void TrackableParser::handleCommitFilterChangesCommand(uint16_t masterversion, uint16_t mastercrc) {
+	// TODO(Arend): implement later.
+}
+
+void TrackableParser::handleRemoveFilterCommand(uint8_t filterId) {
+	// TODO(Arend): implement later.
+}
+
+void TrackableParser::handleUploadFilterCommand(uint8_t filterId, uint16_t chunkStartIndex, uint16_t totalSize, uint8_t* chunk, uint16_t chunkSize) {
+
+}
+
+// -------------------------------------------------------------
+// ----------------------- OLD interface -----------------------
+// -------------------------------------------------------------
+
+
 
 
 // ====================== Mac Filter =====================
@@ -106,7 +178,7 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scannedDevice) {
 
 	TrackableId tile(scannedDevice->address);
 
-	TrackableParser_LOGd("Tile device: rssi=%i ", scannedDevice->rssi);
+	LOGTrackableParserDebug("Tile device: rssi=%i ", scannedDevice->rssi);
 	tile.print(" ");
 
 	if (!isMyTrackable(scannedDevice)) {

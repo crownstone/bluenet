@@ -24,6 +24,7 @@ public:
 	void handleEvent(event_t& evt);
 
 	constexpr static size_t MAX_FILTER_IDS = 8;
+	constexpr static size_t FILTER_BUFFER_SIZE = 512;
 
 private:
 	/**
@@ -31,8 +32,12 @@ private:
 	 */
 	void handleBackgroundParsed(adv_background_parsed_t *trackableAdvertisement);
 
+	// -------------------------------------------------------------
+	// --------------- Filter definitions and storage --------------
+	// -------------------------------------------------------------
 
-	// -------------- Filter definitions and storage -------------------
+	// working space for the filters.
+	uint8_t _filterBuffer[FILTER_BUFFER_SIZE];
 
 	class FilterMetaData {
 	public:
@@ -42,6 +47,7 @@ private:
 		// sync info
 		uint8_t protocol; // determines implementation type of filter
 		uint16_t version : 12; // Lollipop
+		uint16_t unused : 4; // explicit padd
 
 		// sync state
 		union{
@@ -54,20 +60,28 @@ private:
 
 	/**
 	 * The filters and their associated metadata.
+	 * Allocated on the FilterBuffer.
 	 */
-	CuckooFilter _filters[MAX_FILTER_IDS];
-	FilterMetaData _filterMetadata[MAX_FILTER_IDS];
-	uint16_t _filterCrcs[MAX_FILTER_IDS];
+	CuckooFilter* _filters[MAX_FILTER_IDS];
+	FilterMetaData* _filterMetadata[MAX_FILTER_IDS];
+	uint16_t _filterCrcs[MAX_FILTER_IDS]; // since uint16_t is smaller than a pointer, we save space by allocating these here instead of in the buffer.
 
-	/**
-	 * Combined metadata for the filters.
-	 */
 	uint16_t _masterHash; //
 	uint16_t _masterVersion; // Lollipop @Persisted
 
+	// -------------------------------------------------------------
+	// ------------------ Internal filter management ---------------
+	// -------------------------------------------------------------
 
+	/**
+	 * Constructs a CuckooFilter in the _filterBuffer together with
+	 * the necessary fingerprint buffer.
+	 */
+	bool allocateCuckooFilter(uint8_t filterId, uint8_t bucket_count, uint8_t nests_per_bucket);
+
+	// -------------------------------------------------------------
 	// ---------------------- Command interface --------------------
-
+	// -------------------------------------------------------------
 
 	/**
 	 * Returns:
@@ -87,24 +101,24 @@ private:
 	 * This crownstones master version and crc are broadcasted over the mesh.
 	 * Sets 'filter modification in progress' flag of this crownstone back to off.
 	 */
-	void handleCommitFilterChangesCommand(masterversion, mastercrc);
+	void handleCommitFilterChangesCommand(uint16_t masterversion, uint16_t mastercrc);
 
 	/**
 	 * Removes given filter immediately.
 	 * Flags this crownstone as 'filter modification in progress'.
 	 */
-	void handleRemoveFilterCommand(filter_id);
+	void handleRemoveFilterCommand(uint8_t filterId);
 
 	/**
 	 * Upon first reception of this command with the given filter_id,
 	 * reallocate space. If this fails, abort. Else set the filter_id to
 	 * 'upload in progress'.
 	 */
-	void handleUploadFilterCommand(filted_id, chunkno, total_chunked_size, chunk);
+	void handleUploadFilterCommand(uint8_t filterId, uint16_t chunkStartIndex, uint16_t totalSize, uint8_t* chunk, uint16_t chunkSize);
 
-
-	// --------------------------- OLD interface -------------------------
-
+	// -------------------------------------------------------------
+	// ----------------------- OLD interface -----------------------
+	// -------------------------------------------------------------
 
 
 	/**

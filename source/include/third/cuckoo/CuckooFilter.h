@@ -131,17 +131,33 @@ public:
 	// -------------------------------------------------------------
 	// Init/deinit like stuff.
 	// -------------------------------------------------------------
+
+	constexpr size_t fingerprintCount() {
+		return bucket_count * nests_per_bucket;
+	}
+
+	/**
+	 * Size of the byte buffer in bytes.
+	 */
+	constexpr size_t byteCount() {
+		return fingerprintCount() * sizeof(fingerprint_type);
+	}
+
+	/**
+	 * total number of bytes this filter occupies.
+	 */
+	constexpr size_t size() {
+		return byteCount() + sizeof(CuckooFilter);
+	}
+
 	/**
 	 * Allocatees a new buffer on the heap big enough to contain
 	 * bucket_count * nests_pers_bucket fingerprints.
+	 *
+	 * TODO(Arend): add pointer parameter to allow for use of preallocated space.
+	 * TODO(Arend): also ensure that preallocated space will not be destroyed.
 	 */
-	bool _new (index_type bucket_count, index_type nests_per_bucket);
-
-	/**
-	 * Deallocates the buffer. Returns true on success, false if buffer
-	 * was nullptr.
-	 */
-	bool _free ();
+	bool _new (index_type bucket_count, index_type nests_per_bucket, void* buffer, size_t bufferSize);
 
 	/**
 	 * Default constructor leaves everything blanc.
@@ -149,23 +165,10 @@ public:
 	CuckooFilter() = default;
 
 	/**
-	 * Parameterized constructor immediately allocates an array for the requested size.
+	 * Parameterized constructor immediately assigns array for the requested size.
 	 */
-	CuckooFilter(index_type bucket_count, index_type nests_per_bucket) {
-		_new(bucket_count, nests_per_bucket);
+	CuckooFilter(index_type bucket_count, index_type nests_per_bucket, void* buffer, size_t bufferSize) {
+		_new(bucket_count, nests_per_bucket, buffer, bufferSize);
 	}
 
-	/**
-	 * Please don't copy these around, they're far too large.
-	 */
-	CuckooFilter(const CuckooFilter& other) = delete;
-	bool operator==(const CuckooFilter& other) = delete;
-	bool operator==(const CuckooFilter&& other) = delete;
-
-	/**
-	 * Takes care of the only possible leak in case a filter accidentally goes out of scope.
-	 */
-	virtual ~CuckooFilter() {
-		_free();
-	}
 };
