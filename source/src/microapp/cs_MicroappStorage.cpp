@@ -26,7 +26,7 @@
 #include <storage/cs_StateData.h>
 #include <util/cs_BleError.h>
 #include <util/cs_Error.h>
-#include <util/cs_Hash.h>
+#include <util/cs_Crc16.h>
 #include <util/cs_Utils.h>
 
 void fs_evt_handler_sched(void *data, uint16_t size) {
@@ -160,10 +160,9 @@ void MicroappStorage::storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t s
  * Validate a chunk of data given a checksum to compare with.
  */
 uint16_t MicroappStorage::validateChunk(const uint8_t * const data, uint16_t size, uint16_t compare) {
-	uint32_t checksum = 0;
-	checksum = Fletcher(data, size, checksum);
-	LOGi("Chunk checksum %04X (versus %04X)", (uint16_t)checksum, compare);
-	if ((uint16_t)checksum == compare) {
+	uint16_t crc = crc16(data, size);
+	LOGi("Chunk checksum %04X (versus %04X)", crc, compare);
+	if (crc == compare) {
 		return ERR_SUCCESS;
 	} else {
 		return ERR_INVALID_MESSAGE;
@@ -212,7 +211,7 @@ uint16_t MicroappStorage::validateApp() {
 		LOGi("Microapp offset, %i, too large. Do not load", header.offset);
 		return ERR_WRONG_STATE;
     }
-	LOGd("Microapp size field is: %x", header.size);
+	LOGd("Microapp size field is: 0x%x", header.size);
 
 	// get the state fields for the microapp and store results
 	TYPIFY(STATE_MICROAPP) state_microapp;
@@ -229,25 +228,26 @@ uint16_t MicroappStorage::validateApp() {
 	State::getInstance().set(data);
 	
 	// read from flash with fstorage, calculate checksum
-	LOGd("Calculate checksum, should become: %x", header.checksum);
-	uint8_t count = state_microapp.size / MICROAPP_CHUNK_SIZE;
-	uint16_t remain = state_microapp.size - (count * MICROAPP_CHUNK_SIZE);
-	uint32_t checksum_iterative = 0;
+	LOGd("Calculate checksum, should become: 0x%x", header.checksum);
+	uint8_t count = (state_microapp.size - sizeof(header)) / MICROAPP_CHUNK_SIZE;
+	uint16_t remain = (state_microapp.size - sizeof(header)) - (count * MICROAPP_CHUNK_SIZE);
+	uint16_t crcIterative = crc16(nullptr, 0);
 
 	// loop and limit required data to MICROAPP_CHUNK_SIZE
 	uint8_t buf[MICROAPP_CHUNK_SIZE];
 	uint32_t addr = nrf_microapp_storage.start_addr;
 
-	// actually we now fletcher returns 0 for all zeros, but already in place if we use something else
+	// Calculate checksum with an empty header.
 	memset(&buf, 0, sizeof(header));
+
 	uint8_t header_count = sizeof(header) / MICROAPP_CHUNK_SIZE;
 	uint16_t header_remain = sizeof(header) - header_count;
 	for (int i = 0; i < header_count; ++i) {
-		checksum_iterative = Fletcher(buf, MICROAPP_CHUNK_SIZE, checksum_iterative);
+		crcIterative = crc16(buf, MICROAPP_CHUNK_SIZE, &crcIterative);
 		addr += MICROAPP_CHUNK_SIZE;
 	}
 	if (header_remain) {
-		checksum_iterative = Fletcher(buf, header_remain, checksum_iterative);
+		crcIterative = crc16(buf, header_remain, &crcIterative);
 		addr += header_remain;
 	}
 
@@ -257,22 +257,22 @@ uint16_t MicroappStorage::validateApp() {
 			LOGw("Error with reading with fstorage: %i", ret_code);
 			return ERR_INVALID_MESSAGE;
 		}
-		checksum_iterative = Fletcher(buf, MICROAPP_CHUNK_SIZE, checksum_iterative);
+		crcIterative = crc16(buf, MICROAPP_CHUNK_SIZE, &crcIterative);
 		addr += MICROAPP_CHUNK_SIZE;
 	}
 	// last chunk of alternative size (smaller than MICROAPP_CHUNK_SIZE)
 	if (remain) {
 		nrf_fstorage_read(&nrf_microapp_storage, addr, &buf, remain);
-		checksum_iterative = Fletcher(buf, remain, checksum_iterative);
+		crcIterative = crc16(buf, remain, &crcIterative);
 		addr += remain;
 	}
 	// checksum is truncated to 16 bits
-	uint16_t checksum = (uint16_t)checksum_iterative;
-	LOGd("Calculated checksum: %x", checksum);
+	uint16_t crc = crcIterative;
+	LOGd("Calculated checksum: %x", crc);
 	// compare checksum
-	if (state_microapp.checksum != checksum) {
+	if (state_microapp.checksum != crc) {
 		LOGw("Microapp %i has checksum 0x%04X, but calculation shows 0x%04X", state_microapp.id,
-				state_microapp.checksum, checksum);
+				state_microapp.checksum, crc);
 		return ERR_INVALID_MESSAGE;
 	}
 	
