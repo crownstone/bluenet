@@ -214,6 +214,14 @@ bool CuckooFilter::move(ExtendedFingerprint entry_to_insert) {
 }
 
 /* ------------------------------------------------------------------------- */
+
+void CuckooFilter::init(index_type bucket_count, index_type nests_per_bucket) {
+	this->bucket_count = bucket_count;
+	this->nests_per_bucket = nests_per_bucket;
+	this->victim = 0;
+	std::memset(bucket_array, 0x00, bufferSize());
+}
+
 //bool CuckooFilter::assignBuffer (
 //		index_type bucket_count,
 //		index_type nests_per_bucket,

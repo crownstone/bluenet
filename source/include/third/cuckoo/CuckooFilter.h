@@ -11,6 +11,8 @@
  * CuckooFilter datatype is made s.t. the buffer is at the back of the
  * struct, in one contiguous chunk of memory. Thus avoiding pointer assignment
  * on construction. It is fully memcpy-able.
+ *
+ * CuckooFilter is not aware of its buffer size. That must be managed by its owner.
  */
 class CuckooFilter {
 public:
@@ -44,7 +46,6 @@ public:
 	// if this is != 0, it was kicked from the filter
 	// and can't be reinserted because the filter is full.
 	fingerprint_type		victim = 0;
-
 
 	fingerprint_type	    bucket_array[]; // 'flexible array member'
   
@@ -161,6 +162,10 @@ public:
 		return fingerprintCount(bucket_count, nests_per_bucket) * sizeof(fingerprint_type);
 	}
 
+	constexpr size_t bufferSize() {
+		return bufferSize(bucket_count, nests_per_bucket);
+	}
+
 	/**
 	 * Total number of bytes a CuckooFilter with the given parameters would occupy.
 	 *
@@ -180,6 +185,10 @@ public:
 		return size(bucket_count, nests_per_bucket);
 	}
 
+	/**
+	 * Sets the size members, clears victim and buffer. No sizechecks done.
+	 */
+	void init(index_type bucket_count, index_type nests_per_bucket);
 
 //	/**
 //	 * Assigns the buffer to this filter after checking if it has enough space

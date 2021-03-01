@@ -32,11 +32,17 @@ private:
 	void handleBackgroundParsed(adv_background_parsed_t *trackableAdvertisement);
 
 	// -------------------------------------------------------------
-	// --------------- Filter definitions and storage --------------
+	// ------------------ Filter buffer definitions ----------------
 	// -------------------------------------------------------------
 
-	// working space for the filters.
 	uint8_t _filterBuffer[FILTER_BUFFER_SIZE];
+
+	// keeps track of first empty byte in buffer.
+	size_t _filterBufferEndIndex = 0;
+
+	// -------------------------------------------------------------
+	// --------------- Filter definitions and storage --------------
+	// -------------------------------------------------------------
 
 	/**
 	 * Data associated to a parsing filter that is persisted to flash.
@@ -66,9 +72,10 @@ private:
 	};
 
 	/**
-	 * Data associated to a parsing filter that is not persisted
+	 * Data associated to a parsing filter that is not persisted to flash.
 	 */
 	struct __attribute__((__packed__)) FilterRuntimeData {
+		uint8_t filterId; 				// can be runtime only since it's saved as part of record metadata on flash.
 		uint16_t crc;
 	};
 
@@ -81,12 +88,20 @@ private:
 	 * the whole thing a stupid load simpler.
 	 */
 	struct __attribute__((__packed__)) ParsingFilter {
-		FilterMetaData metadata;
 		FilterRuntimeData runtimedata;
-		CuckooFilter filter;
+		FilterMetaData metadata; 		// must be kept next to cuckoo filter to make copy to flash a simple memcpy.
+		CuckooFilter filter;			// must be last item to give space to flexible array
+
+		size_t size() {
+			return sizeof(ParsingFilter) + filter.bufferSize();
+		}
 	};
 
+	// nullptr terminated list of filters pointing into the _filterBuffer.
 	ParsingFilter* _parsingFilters[MAX_FILTER_IDS];
+
+	// keeps track of first empty filter pointer in list.
+	uint8_t _parsingFiltersEndIndex;
 
 	uint16_t _masterHash; //
 	uint16_t _masterVersion; // Lollipop @Persisted
@@ -96,22 +111,27 @@ private:
 	// -------------------------------------------------------------
 
 	/**
-	 * Constructs a CuckooFilter in the _filterBuffer together with
-	 * the necessary fingerprint buffer.
+	 * Returns a pointer in the _filterBuffer, promising that at least
+	 * totalsSize bytes space starting from that address are free to use.
+	 *
 	 * Returns nullptr on failure.
+	 *
+	 * Internally adjusts _filterBufferEnd to point to one byte after this array.
 	 */
 	ParsingFilter* allocateParsingFilter(uint8_t filterId, size_t totalSize);
 
 	/**
-	 * If the filter can be found in the buffer and the chunk was successfully
-	 * applied, returns true. Else, returns false.
+	 * Readjust the filterbuffer to create space at the back. Adjust the
+	 * _parsingFilter array too.
 	 */
-	bool applyFilterChunk(uint8_t filterId, uint16_t chunkStartIndex, uint8_t* chunk, uint16_t chunkSize);
+	void deallocateParsingFilter(uint8_t filterId);
 
 	/**
-	 * Looks up given filter id in the buffer. Returns nullptr if not found.
+	 * Looks up given filter id in the list of filters. Returns nullptr if not found.
+	 * Assumes _parsingFilters is nullptr terminated
 	 */
 	ParsingFilter* findParsingFilter(uint8_t filterId);
+
 	// -------------------------------------------------------------
 	// ---------------------- Command interface --------------------
 	// -------------------------------------------------------------

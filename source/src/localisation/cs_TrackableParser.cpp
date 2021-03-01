@@ -15,6 +15,7 @@
 #include <structs/cs_StreamBufferAccessor.h>
 #include <util/cs_Utils.h>
 
+
 // REVIEW: This won't be recognized by binary logger.
 #define LOGTrackableParserDebug LOGnone
 
@@ -52,69 +53,43 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableA
 // ------------------ Internal filter management ---------------
 // -------------------------------------------------------------
 
-bool TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
-	// structure of the buffer:
-	// [CuckooFilter_0][CuckooData_0] ... [CuckooFilter_n][CuckooData_n] 0x00 ... 0x00
-	// remove operations will immediately move all data to make space.
-	// to find index of first empty buffer space, check the highest indexed filter.
-
-	// preliminary implementation: ignore filterId, always start at index 0
-	(void)filterId;
-	size_t parsingFilterIndex = 0;
-	size_t filterDataIndex = 0 + sizeof(ParsingFilter);
-
-	if (FILTER_BUFFER_SIZE < parsingFilterIndex) {
-		// can't even allocate the CuckooFilter object in this case.
-		return false;
+TrackableParser::ParsingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
+	if(_filterBufferEndIndex + size > FILTER_BUFFER_SIZE) {
+		// not enough space for filter of this total size.
+		return nullptr;
 	}
 
-	size_t bufferSpaceLeftForFilterData = FILTER_BUFFER_SIZE - parsingFilterIndex;
+	_parsingFilters[_parsingFiltersEndIndex] = reinterpret_cast<ParsingFilter*>(_filterBuffer + _filterBufferEndIndex);
+	_filterBufferEndIndex += size;
 
-	uint8_t* parsingFilterPosition =  _filterBuffer + parsingFilterIndex;
-	uint8_t* filterDataPosition    =  _filterBuffer + filterDataIndex;
-
-	// placement new is used to construct an object into a user specified location
-	// without copying. It is exception safe by specification.
-	_parsingFilters[0] = new (parsingFilterPosition) ParsingFilter;
-
-	// After constructing the instance, we need to assign the buffer space for it.
-	bool filterDataFitsBuffer = _parsingFilters[0]->filter.assignBuffer (
-			bucket_count, nests_per_bucket,
-			filterDataPosition, bufferSpaceLeftForFilterData);
-
-	if (!filterDataFitsBuffer) {
-		// buffer not big enough for requested number of fingerprints,
-		// reverting changes (placement new requires manual destruction).
-		_parsingFilters[0]->~ParsingFilter();
-		_parsingFilters[0] = nullptr;
-		return false;
-	}
-
-	return true;
+	// don't forget to postcrement the EndIndex for the filter list in return statement.
+	return _parsingFilters[_parsingFiltersEndIndex++];
 }
-
-bool TrackableParser::applyFilterChunk (
-		uint8_t filterId,
-		uint16_t chunkStartIndex,
-		uint8_t* chunk,
-		uint16_t chunkSize) {
-	ParsingFilter* parsingFilter = findParsingFilter(filterId);
-
-	if (parsingFilter == nullptr) {
-		// If this is the 'first chunk', try to allocate a filter.
-		allocateFilter(filterId, )
-		return false;
-	}
-
-	// First chunk needs to be handled separately.
-
-
-	return true;
-}
-
 
 TrackableParser::ParsingFilter* TrackableParser::findParsingFilter(uint8_t filterId) {
-	return reinterpret_cast<ParsingFilter*>(_filterBuffer);
+	ParsingFilter* parsingFilter;
+	for (size_t index = 0; index < _parsingFiltersEndIndex; ++index) {
+		parsingFilter = _parsingFilters[index];
+
+		if(parsingFilter == nullptr) {
+			LOGw("_parsingFiltersEndIndex incorrect: found nullptr before reaching end of filter list.");
+			return nullptr;
+		}
+
+		if (parsingFilter->runtimedata.filterId == filterId) {
+			return _parsingFilters[index];
+		}
+	}
+
+	return nullptr;
+}
+
+void TrackableParser::deallocateParsingFilter(uint8_t filterId) {
+	// TODO(Arend);
+	// find filter pointer in _parsingFiltser
+	// wipe memory in buffer at that location
+	// memcpy the tail onto the created opening
+	// remove filterId from _parsingFilters list
 }
 
 
@@ -134,24 +109,43 @@ void TrackableParser::handleRemoveFilterCommand(uint8_t filterId) {
 	// TODO(Arend): implement later.
 }
 
-bool TrackableParser::handleUploadFilterCommand(uint8_t filterId, uint16_t chunkStartIndex, uint16_t totalSize, uint8_t* chunk, uint16_t chunkSize) {
-	ParsingFilter* parsingFilter = findParsingFilter(filterId);
+bool TrackableParser::handleUploadFilterCommand(
+		uint8_t filterId,
+		uint16_t chunkStartIndex,
+		uint16_t totalSize,
+		uint8_t* chunk,
+		uint16_t chunkSize) {
 
+	// find or allocate a parsing filter
+	ParsingFilter* parsingFilter = findParsingFilter(filterId);
 	if(parsingFilter == nullptr) {
 		parsingFilter = allocateParsingFilter(filterId, totalSize);
+
 		if(parsingFilter == nullptr) {
 			// failed to handle command, no space.
 			return false;
 		}
+
+		// initialize runtime data.
+		parsingFilter->runtimedata.filterId = filterId;
+		parsingFilter->runtimedata.crc = 0;
+
+		// meta data and filter data will be memcpy'd from chunks,
+		// no need to copy those.
 	}
 
-	// note: we're not doing corruption checks here yet
+	// WARNING(Arend): we're not doing corruption checks here yet.
 	// E.g.: when totalSize changes for a specific filterId before
 	//       a commit is reached, we have a parsingFilter allocated
 	//       but it's of the wrong size.
+	// Edit(Arend):
+	// 		As we keep a list of pointers _parsingFilters, as well
+	// 		as the end pointer to the byte array, this information
+	// 		is implicitly available even if multiple filters are
+	// 		uploaded in chunks concurrently. Just ptrdiff them.
 
-	// apply filter chunk:
-	std::memcpy (parsingFilter + chunkStartIndex, chunk, chunkSize);
+	// apply filter chunk, counting chunk index from metadata onwards:
+	std::memcpy (&(parsingFilter->metadata) + chunkStartIndex, chunk, chunkSize);
 
 	return true;
 }
