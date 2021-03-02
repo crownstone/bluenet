@@ -161,6 +161,7 @@ void CommandHandler::handleCommand(
 	}
 
 	switch (type) {
+		// cases handled by specific handlers
 		case CTRL_CMD_NOP:
 			return handleCmdNop(commandData, accessLevel, result);
 		case CTRL_CMD_GOTO_DFU:
@@ -179,8 +180,6 @@ void CommandHandler::handleCommand(
 			return handleCmdGetHardwareVersion(commandData, accessLevel, result);
 		case CTRL_CMD_GET_FIRMWARE_VERSION:
 			return handleCmdGetFirmwareVersion(commandData, accessLevel, result);
-		case CTRL_CMD_SET_TIME:
-			return dispatchEventForCommand(CS_TYPE::CMD_SET_TIME, commandData, source, result);
 		case CTRL_CMD_SET_SUN_TIME:
 			return handleCmdSetSunTime(commandData, accessLevel, result);
 		case CTRL_CMD_GET_TIME:
@@ -215,6 +214,17 @@ void CommandHandler::handleCommand(
 			return handleCmdStateGet(commandData, accessLevel, result);
 		case CTRL_CMD_STATE_SET:
 			return handleCmdStateSet(commandData, accessLevel, result);
+		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
+			return handleCmdRegisterTrackedDevice(commandData, accessLevel, result);
+		case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
+			return handleCmdTrackedDeviceHeartbeat(commandData, accessLevel, result);
+		case CTRL_CMD_GET_UPTIME:
+			return handleCmdGetUptime(commandData, accessLevel, result);
+		case CTRL_CMD_MICROAPP:
+			return handleMicroappCommand(commandData, accessLevel, result);
+		// cases handled by dispatchEventForCommand:
+		case CTRL_CMD_SET_TIME:
+			return dispatchEventForCommand(CS_TYPE::CMD_SET_TIME, commandData, source, result);
 		case CTRL_CMD_SAVE_BEHAVIOUR:
 			return dispatchEventForCommand(CS_TYPE::CMD_ADD_BEHAVIOUR, commandData, source, result);
 		case CTRL_CMD_REPLACE_BEHAVIOUR:
@@ -227,16 +237,10 @@ void CommandHandler::handleCommand(
 			return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_INDICES, commandData, source, result);
 		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
 			return dispatchEventForCommand(CS_TYPE::CMD_GET_BEHAVIOUR_DEBUG, commandData, source, result);
-		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
-			return handleCmdRegisterTrackedDevice(commandData, accessLevel, result);
-		case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
-			return handleCmdTrackedDeviceHeartbeat(commandData, accessLevel, result);
 		case CTRL_CMD_GET_PRESENCE:
 			return dispatchEventForCommand(CS_TYPE::CMD_GET_PRESENCE, commandData, source, result);
 		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
 			return dispatchEventForCommand(CS_TYPE::CMD_SET_IBEACON_CONFIG_ID, commandData, source, result);
-		case CTRL_CMD_GET_UPTIME:
-			return handleCmdGetUptime(commandData, accessLevel, result);
 		case CTRL_CMD_GET_ADC_RESTARTS:
 			return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_RESTARTS, commandData, source, result);
 		case CTRL_CMD_GET_SWITCH_HISTORY:
@@ -253,14 +257,13 @@ void CommandHandler::handleCommand(
 			return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS, commandData, source, result);
 		case CTRL_CMD_GET_RAM_STATS:
 			return dispatchEventForCommand(CS_TYPE::CMD_GET_RAM_STATS, commandData, source, result);
-		case CTRL_CMD_MICROAPP:
-			return handleMicroappCommand(commandData, accessLevel, result);
 		case CTRL_CMD_CLEAN_FLASH:
 			return dispatchEventForCommand(CS_TYPE::CMD_STORAGE_GARBAGE_COLLECT, commandData, source, result);
 		case CTRL_CMD_UNKNOWN:
 			result.returnCode = ERR_UNKNOWN_TYPE;
 			return;
 	}
+
 	LOGe("Unknown type: %u", type);
 	result.returnCode = ERR_UNKNOWN_TYPE;
 	return;

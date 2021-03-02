@@ -103,6 +103,12 @@ void TrackableParser::handleGetFilterSummariesCommand() {
 
 void TrackableParser::handleCommitFilterChangesCommand(uint16_t masterversion, uint16_t mastercrc) {
 	// TODO(Arend): implement later.
+	// - compute and check all filter sizes
+	// - compute and check all filter crcs
+	// - compute and check(?) master crc
+	// - persist all filters
+	// - unset in progress flag (async?)
+	// - broadcast update to the mesh
 }
 
 void TrackableParser::handleRemoveFilterCommand(uint8_t filterId) {
