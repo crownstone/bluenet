@@ -40,25 +40,39 @@ void TrackableParser::handleEvent(event_t& evt) {
 
 		// incoming filter commands
 		case CS_TYPE::CMD_UPLOAD_FILTER: {
+			LOGd("CMD_UPLOAD_FILTER");
+			return;
+
 			trackable_parser_cmd_upload_filter_t* cmd_data =
 					CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
+
 
 			handleUploadFilterCommand(cmd_data);
 			break;
 		}
 		case CS_TYPE::CMD_REMOVE_FILTER: {
+			LOGd("CMD_REMOVE_FILTER");
+			return;
+
 			trackable_parser_cmd_remove_filter_t* cmd_data =
 					CS_TYPE_CAST(CMD_REMOVE_FILTER, evt.data);
+
 			handleRemoveFilterCommand(cmd_data);
 			break;
 		}
 		case CS_TYPE::CMD_COMMIT_FILTER_CHANGES: {
+			LOGd("CMD_COMMIT_FILTER_CHANGES");
+			return;
+
 			trackable_parser_cmd_commit_filter_changes_t* cmd_data =
 					CS_TYPE_CAST(CMD_COMMIT_FILTER_CHANGES, evt.data);
 			handleCommitFilterChangesCommand(cmd_data);
 			break;
 		}
 		case CS_TYPE::CMD_GET_FILTER_SUMMARIES: {
+			LOGd("CMD_GET_FILTER_SUMMARIES");
+			return;
+
 			trackable_parser_cmd_get_filer_summaries_t* cmd_data =
 					CS_TYPE_CAST(CMD_GET_FILTER_SUMMARIES, evt.data);
 			handleGetFilterSummariesCommand(cmd_data);

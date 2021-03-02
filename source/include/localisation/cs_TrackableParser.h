@@ -142,14 +142,12 @@ private:
 	 * allocate space in the buffer. If this fails, abort. Else set the filter_id to
 	 * 'upload in progress'.
 	 */
-	bool handleUploadFilterCommand(uint8_t filterId, uint16_t chunkStartIndex, uint16_t totalSize, uint8_t* chunk, uint16_t chunkSize);
 	bool handleUploadFilterCommand(trackable_parser_cmd_upload_filter_t* cmd_data);
 
 	/**
 	 * Removes given filter immediately.
 	 * Flags this crownstone as 'filter modification in progress'.
 	 */
-	void handleRemoveFilterCommand(uint8_t filterId);
 	void handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmd_data);
 
 	/**
@@ -158,7 +156,6 @@ private:
 	 * This crownstones master version and crc are broadcasted over the mesh.
 	 * Sets 'filter modification in progress' flag of this crownstone back to off.
 	 */
-	void handleCommitFilterChangesCommand(uint16_t masterversion, uint16_t mastercrc);
 	void handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmd_data);
 
 	/**
@@ -170,7 +167,6 @@ private:
 	 *    - filter version
 	 *    - filter crc
 	 */
-	void handleGetFilterSummariesCommand();
 	void handleGetFilterSummariesCommand(trackable_parser_cmd_get_filer_summaries_t* cmd_data);
 
 	// -------------------------------------------------------------
