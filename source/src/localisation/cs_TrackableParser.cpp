@@ -23,18 +23,50 @@ void TrackableParser::init() {
 }
 
 void TrackableParser::handleEvent(event_t& evt) {
-	if (evt.type == CS_TYPE::EVT_ADV_BACKGROUND_PARSED) {
-		adv_background_parsed_t *parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
-		handleBackgroundParsed(parsedAdv);
-		return;
-	}
+	switch(evt.type) {
+		// incoming devices to filter
+		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
+			adv_background_parsed_t *parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
+			handleBackgroundParsed(parsedAdv);
+			return;
+		}
+		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			scanned_device_t* scannedDevice = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
+			handleAsTileDevice(scannedDevice);
+			// add other trackable device types here
 
-	if (evt.type == CS_TYPE::EVT_DEVICE_SCANNED) {
-		scanned_device_t* scannedDevice = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
-		handleAsTileDevice(scannedDevice);
-		// add other trackable device types here
+			return;
+		}
 
-		return;
+		// incoming filter commands
+		case CS_TYPE::CMD_UPLOAD_FILTER: {
+			trackable_parser_cmd_upload_filter_t* cmd_data =
+					CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
+
+			handleUploadFilterCommand(cmd_data);
+			break;
+		}
+		case CS_TYPE::CMD_REMOVE_FILTER: {
+			trackable_parser_cmd_remove_filter_t* cmd_data =
+					CS_TYPE_CAST(CMD_REMOVE_FILTER, evt.data);
+			handleRemoveFilterCommand(cmd_data);
+			break;
+		}
+		case CS_TYPE::CMD_COMMIT_FILTER_CHANGES: {
+			trackable_parser_cmd_commit_filter_changes_t* cmd_data =
+					CS_TYPE_CAST(CMD_COMMIT_FILTER_CHANGES, evt.data);
+			handleCommitFilterChangesCommand(cmd_data);
+			break;
+		}
+		case CS_TYPE::CMD_GET_FILTER_SUMMARIES: {
+			trackable_parser_cmd_get_filer_summaries_t* cmd_data =
+					CS_TYPE_CAST(CMD_GET_FILTER_SUMMARIES, evt.data);
+			handleGetFilterSummariesCommand(cmd_data);
+			break;
+		}
+		default:
+			break;
+
 	}
 }
 
@@ -97,35 +129,13 @@ void TrackableParser::deallocateParsingFilter(uint8_t filterId) {
 // ---------------------- Command interface --------------------
 // -------------------------------------------------------------
 
-void TrackableParser::handleGetFilterSummariesCommand() {
-	// TODO(Arend): implement later.
-}
-
-void TrackableParser::handleCommitFilterChangesCommand(uint16_t masterversion, uint16_t mastercrc) {
-	// TODO(Arend): implement later.
-	// - compute and check all filter sizes
-	// - compute and check all filter crcs
-	// - compute and check(?) master crc
-	// - persist all filters
-	// - unset in progress flag (async?)
-	// - broadcast update to the mesh
-}
-
-void TrackableParser::handleRemoveFilterCommand(uint8_t filterId) {
-	// TODO(Arend): implement later.
-}
-
 bool TrackableParser::handleUploadFilterCommand(
-		uint8_t filterId,
-		uint16_t chunkStartIndex,
-		uint16_t totalSize,
-		uint8_t* chunk,
-		uint16_t chunkSize) {
+		trackable_parser_cmd_upload_filter_t* cmd_data) {
 
 	// find or allocate a parsing filter
-	ParsingFilter* parsingFilter = findParsingFilter(filterId);
+	ParsingFilter* parsingFilter = findParsingFilter(cmd_data->filterId);
 	if(parsingFilter == nullptr) {
-		parsingFilter = allocateParsingFilter(filterId, totalSize);
+		parsingFilter = allocateParsingFilter(cmd_data->filterId, cmd_data->totalSize);
 
 		if(parsingFilter == nullptr) {
 			// failed to handle command, no space.
@@ -133,7 +143,7 @@ bool TrackableParser::handleUploadFilterCommand(
 		}
 
 		// initialize runtime data.
-		parsingFilter->runtimedata.filterId = filterId;
+		parsingFilter->runtimedata.filterId = cmd_data->filterId;
 		parsingFilter->runtimedata.crc = 0;
 
 		// meta data and filter data will be memcpy'd from chunks,
@@ -151,10 +161,29 @@ bool TrackableParser::handleUploadFilterCommand(
 	// 		uploaded in chunks concurrently. Just ptrdiff them.
 
 	// apply filter chunk, counting chunk index from metadata onwards:
-	std::memcpy (&(parsingFilter->metadata) + chunkStartIndex, chunk, chunkSize);
+	std::memcpy (&(parsingFilter->metadata) + cmd_data->chunkStartIndex, cmd_data->chunk, cmd_data->chunkSize);
 
 	return true;
 }
+
+void TrackableParser::handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmd_data) {
+	// TODO(Arend): implement later.
+}
+
+void TrackableParser::handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmd_data) {
+	// TODO(Arend): implement later.
+	// - compute and check all filter sizes
+	// - compute and check all filter crcs
+	// - compute and check(?) master crc
+	// - persist all filters
+	// - unset in progress flag (async?)
+	// - broadcast update to the mesh
+}
+
+void TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_filer_summaries_t* cmd_data) {
+	// TODO(Arend): implement later.
+}
+
 
 // -------------------------------------------------------------
 // ----------------------- OLD interface -----------------------

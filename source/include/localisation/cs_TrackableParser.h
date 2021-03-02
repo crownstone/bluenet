@@ -8,6 +8,7 @@
 
 #include <ble/cs_iBeacon.h>
 #include <events/cs_EventListener.h>
+#include <protocol/cs_TrackableParserPackets.h>
 
 #include <third/cuckoo/CuckooFilter.h>
 
@@ -137,6 +138,30 @@ private:
 	// -------------------------------------------------------------
 
 	/**
+	 * Upon first reception of this command with the given filter_id,
+	 * allocate space in the buffer. If this fails, abort. Else set the filter_id to
+	 * 'upload in progress'.
+	 */
+	bool handleUploadFilterCommand(uint8_t filterId, uint16_t chunkStartIndex, uint16_t totalSize, uint8_t* chunk, uint16_t chunkSize);
+	bool handleUploadFilterCommand(trackable_parser_cmd_upload_filter_t* cmd_data);
+
+	/**
+	 * Removes given filter immediately.
+	 * Flags this crownstone as 'filter modification in progress'.
+	 */
+	void handleRemoveFilterCommand(uint8_t filterId);
+	void handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmd_data);
+
+	/**
+	 * Inactive filters are activated.
+	 * Crcs are (re)computed.
+	 * This crownstones master version and crc are broadcasted over the mesh.
+	 * Sets 'filter modification in progress' flag of this crownstone back to off.
+	 */
+	void handleCommitFilterChangesCommand(uint16_t masterversion, uint16_t mastercrc);
+	void handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmd_data);
+
+	/**
 	 * Returns:
 	 *  - master version
 	 *  - master crc
@@ -146,28 +171,7 @@ private:
 	 *    - filter crc
 	 */
 	void handleGetFilterSummariesCommand();
-
-
-	/**
-	 * Inactive filters are activated.
-	 * Crcs are (re)computed.
-	 * This crownstones master version and crc are broadcasted over the mesh.
-	 * Sets 'filter modification in progress' flag of this crownstone back to off.
-	 */
-	void handleCommitFilterChangesCommand(uint16_t masterversion, uint16_t mastercrc);
-
-	/**
-	 * Removes given filter immediately.
-	 * Flags this crownstone as 'filter modification in progress'.
-	 */
-	void handleRemoveFilterCommand(uint8_t filterId);
-
-	/**
-	 * Upon first reception of this command with the given filter_id,
-	 * allocate space in the buffer. If this fails, abort. Else set the filter_id to
-	 * 'upload in progress'.
-	 */
-	bool handleUploadFilterCommand(uint8_t filterId, uint16_t chunkStartIndex, uint16_t totalSize, uint8_t* chunk, uint16_t chunkSize);
+	void handleGetFilterSummariesCommand(trackable_parser_cmd_get_filer_summaries_t* cmd_data);
 
 	// -------------------------------------------------------------
 	// ----------------------- OLD interface -----------------------
