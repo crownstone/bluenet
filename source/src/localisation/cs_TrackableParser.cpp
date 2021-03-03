@@ -106,13 +106,18 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 		}
 	}
 
+	// TODO: Add the ADD field loop.
 	// loop over filters fields to check addata fields
 	//	// keeps fields as outer loop because that's more expensive to loop over.
 	//	for (auto field: devicefields) {
-	//		for (auto filter: filters) {
-	//			if(filter.inputType == FilterInputType::AdData) {
+	//		for(size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
+	//			TrackingFilter* filter = _parsingFilters[i];
+	//			if(filter->metadata.inputType == FilterInputType::AdData) {
 	//				// check each AD Data field for this filter
-	////				id = foo;
+	//				// TODO: query filter for fingerprint
+	//				TrackableEvent trackEvent;
+	//				trackEvent.dispatch();
+	//				return;
 	//			}
 	//		}
 	//	}
