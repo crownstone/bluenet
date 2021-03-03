@@ -36,7 +36,7 @@
  * Length of a MAC address
  * TODO: check if this length is similar to BLE_GAP_ADDR_LEN
  */
-#define MAC_ADDRESS_LEN 6
+static constexpr uint8_t MAC_ADDRESS_LEN = 6;
 
 enum EncryptionAccessLevel {
 	ADMIN               = 0,

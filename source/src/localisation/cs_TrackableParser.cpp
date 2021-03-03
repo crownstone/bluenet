@@ -16,7 +16,6 @@
 #include <util/cs_Utils.h>
 
 
-// REVIEW: This won't be recognized by binary logger.
 #define LOGTrackableParserDebug LOGnone
 
 void TrackableParser::init() {
@@ -26,13 +25,13 @@ void TrackableParser::handleEvent(event_t& evt) {
 	switch(evt.type) {
 		// incoming devices to filter
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
-			adv_background_parsed_t *parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
-			handleBackgroundParsed(parsedAdv);
+			// adv_background_parsed_t *parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
+			// handleBackgroundParsed(parsedAdv);
 			return;
 		}
 		case CS_TYPE::EVT_DEVICE_SCANNED: {
 			scanned_device_t* scannedDevice = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
-			handleAsTileDevice(scannedDevice);
+			handleScannedDevice(scannedDevice);
 			// add other trackable device types here
 
 			return;
@@ -84,19 +83,49 @@ void TrackableParser::handleEvent(event_t& evt) {
 	}
 }
 
+// -------------------------------------------------------------
+// ------------------ Advertisment processing ------------------
+// -------------------------------------------------------------
+void TrackableParser::handleScannedDevice(scanned_device_t* device) {
+
+	// loop over filters to check mac address
+	for(size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
+		TrackingFilter* filter = _parsingFilters[i];
+
+		// check mac address for this filter
+		if (filter->metadata.inputType == FilterInputType::MacAddress &&
+			filter->filter.contains(device->address, MAC_ADDRESS_LEN)) {
+			// TODO: get fingerprint from filter instead of literal mac address.
+			// TODO: we should just pass on the device, right than copying rssi?
+			LOGd("filter %d accepted mac addres", filter->runtimedata.filterId);
+			TrackableEvent trackEvent;
+			trackEvent.id = TrackableId(device->address);
+			trackEvent.rssi = device->rssi;
+			trackEvent.dispatch();
+			return;
+		}
+	}
+
+	// loop over filters fields to check addata fields
+	//	// keeps fields as outer loop because that's more expensive to loop over.
+	//	for (auto field: devicefields) {
+	//		for (auto filter: filters) {
+	//			if(filter.inputType == FilterInputType::AdData) {
+	//				// check each AD Data field for this filter
+	////				id = foo;
+	//			}
+	//		}
+	//	}
+
+}
 
 void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableAdv) {
 	// TODO: implement when we have a good representation of trackables in the mesh.
 	//
-	//	TrackableEvent trackEvent;
-	//	trackEvent.id = TrackableId(trackableAdv->macAddress);
-	//	trackEvent.rssi = trackableAdv->adjustedRssi;
-	//
-	//	trackEvent.dispatch();
 }
 
 // -------------------------------------------------------------
-// ------------------ Internal filter management ---------------
+// ------------------- Filter data management ------------------
 // -------------------------------------------------------------
 
 TrackingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {

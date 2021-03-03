@@ -16,7 +16,7 @@
  */
 class CuckooFilter {
 public:
-	typedef const void* key_type;
+	typedef const uint8_t* key_type;
 	typedef uint16_t fingerprint_type;
 	typedef uint8_t index_type;
 
