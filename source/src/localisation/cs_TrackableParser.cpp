@@ -25,15 +25,13 @@ void TrackableParser::handleEvent(event_t& evt) {
 	switch(evt.type) {
 		// incoming devices to filter
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
-			// adv_background_parsed_t *parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
-			// handleBackgroundParsed(parsedAdv);
+			adv_background_parsed_t *parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
+			handleBackgroundParsed(parsedAdv);
 			return;
 		}
 		case CS_TYPE::EVT_DEVICE_SCANNED: {
 			scanned_device_t* scannedDevice = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
 			handleScannedDevice(scannedDevice);
-			// add other trackable device types here
-
 			return;
 		}
 
@@ -121,12 +119,10 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 	//			}
 	//		}
 	//	}
-
 }
 
 void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableAdv) {
-	// TODO: implement when we have a good representation of trackables in the mesh.
-	//
+	// TODO: implement
 }
 
 // -------------------------------------------------------------
