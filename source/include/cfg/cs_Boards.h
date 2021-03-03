@@ -134,11 +134,17 @@ typedef struct  {
 	//! GPIO custom pins (only four)
 	uint8_t pinGpio[4];
 
+	//! Buttons (four on dev. kit)
+	uint8_t pinButton[4];
+
 	//! GPIO pin to control the "red" led.
 	uint8_t pinLedRed;
 
 	//! GPIO pin to control the "green" led.
 	uint8_t pinLedGreen;
+
+	//! Leds as array
+	uint8_t pinLed[4];
 
 	//! Flags about pin order, presence of components, etc.
 	struct __attribute__((__packed__)) {

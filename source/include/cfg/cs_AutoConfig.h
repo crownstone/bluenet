@@ -114,6 +114,16 @@ extern const uint8_t g_TWI_SDA_INDEX;
 
 extern const bool g_AUTO_ENABLE_MICROAPP_ON_BOOT;
 
+extern const int8_t g_GPIO_PIN1_INDEX;
+extern const int8_t g_GPIO_PIN2_INDEX;
+extern const int8_t g_GPIO_PIN3_INDEX;
+extern const int8_t g_GPIO_PIN4_INDEX;
+
+extern const int8_t g_BUTTON1_INDEX;
+extern const int8_t g_BUTTON2_INDEX;
+extern const int8_t g_BUTTON3_INDEX;
+extern const int8_t g_BUTTON4_INDEX;
+
 #ifdef __cplusplus
 }
 #endif

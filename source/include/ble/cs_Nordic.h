@@ -32,6 +32,7 @@ typedef uint32_t ret_code_t;
 #include <nrf_fstorage.h>
 #include <nrf_gpio.h>
 #include <nrf_gpiote.h>
+
 #include <nrf_nvic.h>
 #include <nrf_power.h>
 #include <nrf_sdh.h>
@@ -49,6 +50,10 @@ typedef uint32_t ret_code_t;
 
 #if BUILD_TWI == 1
 #include <nrfx_twi.h>
+#endif
+
+#if BUILD_GPIOTE == 1
+#include <nrfx_gpiote.h>
 #endif
 
 #if CS_SERIAL_NRF_LOG_ENABLED > 0

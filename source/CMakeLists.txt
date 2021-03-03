@@ -242,6 +242,12 @@ ELSE()
 	ELSE()
 		MESSAGE(STATUS "Module for twi disabled")
 	ENDIF()
+	
+	IF (BUILD_GPIOTE)
+		LIST(APPEND NORDIC_SOURCE "${NRF5_DIR}/modules/nrfx/drivers/src/nrfx_gpiote.c")
+	ELSE()
+		MESSAGE(STATUS "Module for gpio tasks and events disabled")
+	ENDIF()
 
 	IF (BUILD_MESHING)
 		# All C files in mesh/core/src
@@ -622,20 +628,21 @@ ELSE()
 			COMMAND ${CMAKE_COMMAND} -E echo ""
 			COMMAND ${CMAKE_COMMAND} -E echo "** Available size: 360kB, that is 512kB - softdevice - bootloader - app storage"
 			COMMAND ${CMAKE_COMMAND} -E echo "** Dual bank Size: 180kB = DFU_IMAGE_MAX_SIZE_BANKED"
-			DEPENDS 
+			DEPENDS
 				${PROJECT_NAME}
 			COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.bin")
 		
 		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.hex
 			COMMAND ${CMAKE_OBJCOPY_OVERLOAD} ${INCLUDE_ONLY_SECTIONS} -O ihex ${PROJECT_NAME} ${PROJECT_NAME}.hex
-			DEPENDS 
+			DEPENDS
 				${PROJECT_NAME}
 			COMMENT "Object copy ${PROJECT_NAME} to ${PROJECT_NAME}.hex")
 		
 		ADD_CUSTOM_COMMAND(OUTPUT ${PROJECT_NAME}.elf
 			COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} ${PROJECT_NAME}.elf
 			COMMAND ${CMAKE_SIZE} ${PROJECT_NAME}.elf
-			DEPENDS 
+			COMMAND ${CMAKE_COMMAND} -DDEFAULT_MODULES_PATH=${DEFAULT_MODULES_PATH} -DCMAKE_SIZE=${CMAKE_SIZE} -DBINARY=${PROJECT_NAME}.elf -DOFFSET=${APPLICATION_START_ADDRESS} -DMAX_SIZE=${FLASH_MICROAPP_BASE} -P ${DEFAULT_MODULES_PATH}/check_sizes.cmake
+			DEPENDS
 				${PROJECT_NAME}
 			COMMENT "Copy ${PROJECT_NAME} to ${PROJECT_NAME}.elf")
 

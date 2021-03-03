@@ -28,7 +28,6 @@ ServiceData::ServiceData() {
 	// Initialize the service data
 	memset(_serviceData.array, 0, sizeof(_serviceData.array));
 	assert(sizeof(service_data_encrypted_t) == AES_BLOCK_SIZE, "Size of service_data_encrypted_t must be 1 block.");
-	assert(sizeof(service_data_microapp_encrypted_t) == AES_BLOCK_SIZE, "Size of service_data_microapp_encrypted_t must be 1 block.");
 };
 
 void ServiceData::init(uint8_t deviceType) {
@@ -75,6 +74,10 @@ void ServiceData::init(uint8_t deviceType) {
 		State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &crownstoneId, sizeof(crownstoneId));
 		updateCrownstoneId(crownstoneId);
 
+		// Init microapp service data.
+		_microappServiceData.id = crownstoneId;
+		_microappServiceData.validation = SERVICE_DATA_VALIDATION;
+		_microappServiceData.flags.asInt = 0;
 	}
 
 	// Init the timer: we want to update the advertisement packet on a fixed interval.
@@ -351,18 +354,12 @@ bool ServiceData::fillWithMicroapp(uint32_t timestamp) {
 	if (!_microappServiceDataSet) {
 		return false;
 	}
-	_serviceData.params.type = SERVICE_DATA_TYPE_MICROAPP;
-	_serviceData.params.microappEncrypted.version = _microappServiceData.version;
-	_serviceData.params.microappEncrypted.appUuid = _microappServiceData.appUuid;
-	memcpy(_serviceData.params.microappEncrypted.data, _microappServiceData.data, sizeof(_serviceData.params.microappEncrypted.data));
-	_serviceData.params.microappEncrypted.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
-	_serviceData.params.microappEncrypted.validation = SERVICE_DATA_VALIDATION;
+	_serviceData.params.encrypted.type = SERVICE_DATA_DATA_TYPE_MICROAPP;
+	_serviceData.params.encrypted.microapp = _microappServiceData;
+	// Stone ID and validation are set at init.
+	// Timestamp is set when microapp service data was received.
 	return true;
 }
-
-
-
-
 
 void ServiceData::handleEvent(event_t & event) {
 	// Keep track of the BLE connection status. If we are connected we do not need to update the packet.
@@ -485,15 +482,18 @@ void ServiceData::handleEvent(event_t & event) {
 			if (advertise->data.len == 0) {
 				break;
 			}
-			_microappServiceData.version = advertise->version;
 			_microappServiceData.appUuid = advertise->appUuid;
 
 			memset(_microappServiceData.data, 0, sizeof(_microappServiceData.data));
 			cs_buffer_size_t dataSize = std::min(advertise->data.len, static_cast<uint16_t>(sizeof(_microappServiceData.data)));
 			memcpy(_microappServiceData.data, advertise->data.data, dataSize);
-//			cs_buffer_size_t padSize = sizeof(_microappServiceData.data) - dataSize;
-//			memset(_microappServiceData.data + dataSize, 0, padSize);
 
+
+			uint32_t timestamp = SystemTime::posix();
+			_microappServiceData.partialTimestamp = getPartialTimestampOrCounter(timestamp, _updateCount);
+			_microappServiceData.flags.flags.timeSet = _flags.flags.timeSet;
+
+			LOGd("Updated microapp data: uuid=%u timestamp=%u", _microappServiceData.appUuid, _microappServiceData.partialTimestamp);
 			_microappServiceDataSet = true;
 			break;
 		}
