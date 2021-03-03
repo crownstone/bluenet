@@ -99,21 +99,21 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableA
 // ------------------ Internal filter management ---------------
 // -------------------------------------------------------------
 
-ParsingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
+TrackingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
 	if(_filterBufferEndIndex + size > FILTER_BUFFER_SIZE) {
 		// not enough space for filter of this total size.
 		return nullptr;
 	}
 
-	_parsingFilters[_parsingFiltersEndIndex] = reinterpret_cast<ParsingFilter*>(_filterBuffer + _filterBufferEndIndex);
+	_parsingFilters[_parsingFiltersEndIndex] = reinterpret_cast<TrackingFilter*>(_filterBuffer + _filterBufferEndIndex);
 	_filterBufferEndIndex += size;
 
 	// don't forget to postcrement the EndIndex for the filter list in return statement.
 	return _parsingFilters[_parsingFiltersEndIndex++];
 }
 
-ParsingFilter* TrackableParser::findParsingFilter(uint8_t filterId) {
-	ParsingFilter* parsingFilter;
+TrackingFilter* TrackableParser::findParsingFilter(uint8_t filterId) {
+	TrackingFilter* parsingFilter;
 	for (size_t index = 0; index < _parsingFiltersEndIndex; ++index) {
 		parsingFilter = _parsingFilters[index];
 
@@ -147,7 +147,7 @@ bool TrackableParser::handleUploadFilterCommand(
 		trackable_parser_cmd_upload_filter_t* cmd_data) {
 
 	// find or allocate a parsing filter
-	ParsingFilter* parsingFilter = findParsingFilter(cmd_data->filterId);
+	TrackingFilter* parsingFilter = findParsingFilter(cmd_data->filterId);
 	if(parsingFilter == nullptr) {
 		parsingFilter = allocateParsingFilter(cmd_data->filterId, cmd_data->totalSize);
 

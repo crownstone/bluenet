@@ -44,7 +44,7 @@ private:
 
 
 	// nullptr terminated list of filters pointing into the _filterBuffer.
-	ParsingFilter* _parsingFilters[MAX_FILTER_IDS];
+	TrackingFilter* _parsingFilters[MAX_FILTER_IDS];
 
 	// keeps track of first empty filter pointer in list.
 	uint8_t _parsingFiltersEndIndex;
@@ -64,7 +64,7 @@ private:
 	 *
 	 * Internally adjusts _filterBufferEnd to point to one byte after this array.
 	 */
-	ParsingFilter* allocateParsingFilter(uint8_t filterId, size_t totalSize);
+	TrackingFilter* allocateParsingFilter(uint8_t filterId, size_t totalSize);
 
 	/**
 	 * Readjust the filterbuffer to create space at the back. Adjust the
@@ -76,7 +76,7 @@ private:
 	 * Looks up given filter id in the list of filters. Returns nullptr if not found.
 	 * Assumes _parsingFilters is nullptr terminated
 	 */
-	ParsingFilter* findParsingFilter(uint8_t filterId);
+	TrackingFilter* findParsingFilter(uint8_t filterId);
 
 	// -------------------------------------------------------------
 	// ---------------------- Command interface --------------------

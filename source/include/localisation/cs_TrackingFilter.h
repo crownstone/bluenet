@@ -18,7 +18,7 @@
 /**
  * Data associated to a parsing filter that is persisted to flash.
  */
-struct __attribute__((__packed__)) FilterMetaData {
+struct __attribute__((__packed__)) TrackingFilterMetaData {
 public:
 	// sync info
 	uint8_t protocol; // determines implementation type of filter
@@ -45,7 +45,7 @@ public:
 /**
  * Data associated to a parsing filter that is not persisted to flash.
  */
-struct __attribute__((__packed__)) FilterRuntimeData {
+struct __attribute__((__packed__)) TrackingFilterRuntimeData {
 	uint8_t filterId; 				// can be runtime only since it's saved as part of record metadata on flash.
 	uint16_t crc;
 };
@@ -58,12 +58,12 @@ struct __attribute__((__packed__)) FilterRuntimeData {
  * Warning: keep this structure and order as-is, that makes chunking
  * the whole thing a stupid load simpler.
  */
-struct __attribute__((__packed__)) ParsingFilter {
-	FilterRuntimeData runtimedata;
-	FilterMetaData metadata; 		// must be kept next to cuckoo filter to make copy to flash a simple memcpy.
+struct __attribute__((__packed__)) TrackingFilter {
+	TrackingFilterRuntimeData runtimedata;
+	TrackingFilterMetaData metadata; 		// must be kept next to cuckoo filter to make copy to flash a simple memcpy.
 	CuckooFilter filter;			// must be last item to give space to flexible array
 
 	size_t size() {
-		return sizeof(ParsingFilter) + filter.bufferSize();
+		return sizeof(TrackingFilter) + filter.bufferSize();
 	}
 };
