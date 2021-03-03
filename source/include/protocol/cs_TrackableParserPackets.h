@@ -5,8 +5,7 @@
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
-#ifndef SOURCE_INCLUDE_PROTOCOL_CS_TRACKABLEPARSERPACKETS_H_
-#define SOURCE_INCLUDE_PROTOCOL_CS_TRACKABLEPARSERPACKETS_H_
+#pragma once
 
 // ------------------ Command values -----------------
 
@@ -49,6 +48,3 @@ struct __attribute__((__packed__)) trackable_parser_cmd_commit_filter_changes_re
 struct __attribute__((__packed__)) trackable_parser_cmd_get_filer_summaries_ret_t {
 
 };
-
-
-#endif /* SOURCE_INCLUDE_PROTOCOL_CS_TRACKABLEPARSERPACKETS_H_ */

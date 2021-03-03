@@ -99,7 +99,7 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableA
 // ------------------ Internal filter management ---------------
 // -------------------------------------------------------------
 
-TrackableParser::ParsingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
+ParsingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
 	if(_filterBufferEndIndex + size > FILTER_BUFFER_SIZE) {
 		// not enough space for filter of this total size.
 		return nullptr;
@@ -112,7 +112,7 @@ TrackableParser::ParsingFilter* TrackableParser::allocateParsingFilter(uint8_t f
 	return _parsingFilters[_parsingFiltersEndIndex++];
 }
 
-TrackableParser::ParsingFilter* TrackableParser::findParsingFilter(uint8_t filterId) {
+ParsingFilter* TrackableParser::findParsingFilter(uint8_t filterId) {
 	ParsingFilter* parsingFilter;
 	for (size_t index = 0; index < _parsingFiltersEndIndex; ++index) {
 		parsingFilter = _parsingFilters[index];
