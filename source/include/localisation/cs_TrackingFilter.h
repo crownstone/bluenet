@@ -16,6 +16,14 @@
 // -------------------------------------------------------------
 
 /**
+ * Determines whether the filter has mac or advertisement data as input.
+ */
+enum class FilterInputType : uint8_t {
+	MacAddress = 0,
+	AdData = 1,
+};
+
+/**
  * Data associated to a parsing filter that is persisted to flash.
  */
 struct __attribute__((__packed__)) TrackingFilterMetaData {
@@ -31,7 +39,7 @@ public:
 	};
 
 	uint8_t profileId; // devices passing the filter are assigned this profile id
-	uint8_t inputType; // determines wether the filter has mac or advertisement data as input
+	FilterInputType inputType;
 
 	// sync state
 	union{

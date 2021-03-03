@@ -27,29 +27,40 @@ public:
 	constexpr static size_t FILTER_BUFFER_SIZE = 512;
 
 private:
+	// -------------------------------------------------------------
+	// ------------------ Advertisment processing ------------------
+	// -------------------------------------------------------------
+
+	void handleScannedDevice(scanned_device_t* device);
+
 	/**
 	 * Dispatches a TrackedEvent for the given advertisement.
 	 */
 	void handleBackgroundParsed(adv_background_parsed_t *trackableAdvertisement);
 
 	// -------------------------------------------------------------
-	// ------------------ Filter buffer definitions ----------------
+	// --------------------- Filter buffer data --------------------
 	// -------------------------------------------------------------
 
+	/**
+	 * The raw byte buffer in which TrackingFilters are allocated.
+	 * Memory is managed as a stack:
+	 * - the top is administrated by _filterBufferEndIndex
+	 * - new filters are allocated at the top (if space allows)
+	 * - when a filter is removed, all filters on top of it are relocated
+	 *   immediately to avoid gaps.
+	 */
 	uint8_t _filterBuffer[FILTER_BUFFER_SIZE];
-
-	// keeps track of first empty byte in buffer.
 	size_t _filterBufferEndIndex = 0;
 
-
-
-	// nullptr terminated list of filters pointing into the _filterBuffer.
+	/**
+	 * List of pointers to the currently allocated filters in the _filterBuffer.
+	 * The memory is managed in same fashiona as the _filterBuffer itself.
+	 */
 	TrackingFilter* _parsingFilters[MAX_FILTER_IDS];
-
-	// keeps track of first empty filter pointer in list.
 	uint8_t _parsingFiltersEndIndex;
 
-	uint16_t _masterHash; //
+	uint16_t _masterHash;
 	uint16_t _masterVersion; // Lollipop @Persisted
 
 	// -------------------------------------------------------------
