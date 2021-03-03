@@ -129,22 +129,6 @@ private:
 	// ----------------------- OLD interface -----------------------
 	// -------------------------------------------------------------
 
-
-	/**
-	 * Check if this device is a Tile device, if so handle it and
-	 * return true. Else, return false.
-	 *
-	 * Will emit a TrackableEvent when it is a tile device and mac
-	 * matches the hard coded address to filter for.
-	 */
-	bool handleAsTileDevice(scanned_device_t* scannedDevice);
-
-	/**
-	 * Checks if the mac address of the trackable device is equal
-	 * to myTrackableId.
-	 */
-	bool isMyTrackable(scanned_device_t* scannedDevice);
-
 	/**
 	 *  Checks service uuids of the scanned device and returns true
 	 *  if we can find an official 16 bit Tile service uuid.

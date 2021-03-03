@@ -107,6 +107,7 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 	// TODO: Add the ADD field loop.
 	// loop over filters fields to check addata fields
 	//	// keeps fields as outer loop because that's more expensive to loop over.
+	// 	// See BLEutil:findAdvType how to loop the fields.
 	//	for (auto field: devicefields) {
 	//		for(size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
 	//			TrackingFilter* filter = _parsingFilters[i];
@@ -233,23 +234,6 @@ void TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_f
 // ----------------------- OLD interface -----------------------
 // -------------------------------------------------------------
 
-
-
-
-// ====================== Mac Filter =====================
-
-bool TrackableParser::isMyTrackable(scanned_device_t* scannedDevice) {
-	// Note: mac address here as read in nrf connect app, hence the std::reverse call.
-	uint8_t myTileMac[] = {0xe4, 0x96, 0x62, 0x0d, 0x5a, 0x5b};
-	std::reverse(std::begin(myTileMac), std::end(myTileMac));
-	TrackableId myTrackable(myTileMac);
-
-	// construct TrackableId for incomming scan
-	TrackableId mac(scannedDevice->address);
-
-	return mac == myTrackable;
-}
-
 // ======================== Tile ========================
 
 bool TrackableParser::isTileDevice(scanned_device_t* scannedDevice) {
@@ -283,33 +267,6 @@ bool TrackableParser::isTileDevice(scanned_device_t* scannedDevice) {
 
 	return false;
 }
-
-
-bool TrackableParser::handleAsTileDevice(scanned_device_t* scannedDevice) {
-	if (!isTileDevice(scannedDevice)) {
-		return false;
-	}
-
-
-	TrackableId tile(scannedDevice->address);
-
-	LOGTrackableParserDebug("Tile device: rssi=%i ", scannedDevice->rssi);
-	tile.print(" ");
-
-	if (!isMyTrackable(scannedDevice)) {
-		// it was a Tile device, so return true.
-		return true;
-	}
-
-	// logServiceData("Tile device servicedata", scanned_device);
-
-	TrackableEvent trackEvt;
-	trackEvt.rssi = scannedDevice->rssi;
-	trackEvt.dispatch();
-
-	return true;
-}
-
 
 // ======================== Utils ========================
 
