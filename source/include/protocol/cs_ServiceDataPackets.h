@@ -137,6 +137,24 @@ struct __attribute__((packed)) service_data_encrypted_alternative_state_t {
 };
 
 
+union __attribute__((packed)) service_data_microapp_flags_t {
+	struct __attribute__((packed)) {
+		bool timeSet : 1; // Whether the time is set.
+	} flags;
+	uint8_t asInt;
+};
+
+/**
+ * Microapp data that will be encrypted.
+ */
+struct __attribute__((packed)) service_data_encrypted_microapp_t {
+	service_data_microapp_flags_t flags;
+	uint16_t appUuid;             // Identifier picked by the microapp.
+	uint8_t data[8];              // Data filled in by the microapp.
+	uint8_t id;                   // ID of this stone.
+	uint16_t partialTimestamp;    // Required, so that the data keeps changing.
+	uint8_t validation;           // Used to check if decryption is successful. Value is always SERVICE_DATA_VALIDATION.
+};
 
 
 enum ServiceDataDataType {
@@ -146,6 +164,7 @@ enum ServiceDataDataType {
 	SERVICE_DATA_DATA_TYPE_EXT_ERROR = 3,
 	SERVICE_DATA_DATA_TYPE_ALTERNATIVE_STATE = 4,
 	SERVICE_DATA_DATA_TYPE_HUB_STATE = 5,
+	SERVICE_DATA_DATA_TYPE_MICROAPP = 6,
 };
 
 /**
@@ -160,6 +179,7 @@ struct __attribute__((packed)) service_data_encrypted_t {
 		service_data_encrypted_ext_error_t extError;
 		service_data_encrypted_alternative_state_t altState;
 		service_data_hub_state_t hubState;
+		service_data_encrypted_microapp_t microapp;
 	};
 };
 
@@ -174,6 +194,7 @@ constexpr stone_id_t getStoneId(service_data_encrypted_t* data) {
 		case SERVICE_DATA_DATA_TYPE_EXT_ERROR: return data->extError.id;
 		case SERVICE_DATA_DATA_TYPE_ALTERNATIVE_STATE: return data->altState.id;
 		case SERVICE_DATA_DATA_TYPE_HUB_STATE: return data->hubState.id;
+		case SERVICE_DATA_DATA_TYPE_MICROAPP: return data->microapp.id;
 	}
 	return 0;
 }
@@ -232,24 +253,11 @@ struct __attribute__((packed)) service_data_setup_t {
 
 
 
-/**
- * Microapp data that will be encrypted.
- */
-struct __attribute__((packed)) service_data_microapp_encrypted_t {
-	uint8_t version;              // Version set by firmware.
-	uint16_t appUuid;             // Identifier picked by the microapp.
-	uint8_t data[10];             // Data filled in by the microapp.
-	uint16_t partialTimestamp;    // Required, so that the data keeps changing.
-	uint8_t validation;           // Used to check if decryption is successful. Value is always SERVICE_DATA_VALIDATION.
-};
-
-
 
 // The type of service data: this type is not encrypted.
 enum ServiceDataType {
 	SERVICE_DATA_TYPE_SETUP = 6,
 	SERVICE_DATA_TYPE_ENCRYPTED = 7,
-	SERVICE_DATA_TYPE_MICROAPP = 8,
 };
 
 /**
@@ -264,7 +272,6 @@ union service_data_t {
 		union {
 			service_data_encrypted_t encrypted;
 			service_data_setup_t setup;
-			service_data_microapp_encrypted_t microappEncrypted;
 			uint8_t encryptedArray[sizeof(service_data_encrypted_t)];
 		};
 	} params;

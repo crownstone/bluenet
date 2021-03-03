@@ -301,7 +301,8 @@ var display = function(root) {
 
 		if (block.value < block.declaredSize) {
 			var freeSpace = {"name": "FREE", "size": (block.declaredSize - block.value)};
-			block.children.push(freeSpace);
+			if (block.children)
+				block.children.push(freeSpace);
 		}
 	}
 	

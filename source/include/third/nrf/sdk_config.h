@@ -2467,9 +2467,10 @@
 
 // <e> GPIOTE_ENABLED - nrf_drv_gpiote - GPIOTE peripheral driver - legacy layer
 //==========================================================
-#ifndef GPIOTE_ENABLED
-#define GPIOTE_ENABLED 0
-#endif
+// This will also disable NRX_GPIOTE_ENABLED !
+//#ifndef GPIOTE_ENABLED
+//#define GPIOTE_ENABLED 0
+//#endif
 // <o> GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS - Number of lower power input pins 
 #ifndef GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS
 #define GPIOTE_CONFIG_NUM_OF_LOW_POWER_EVENTS 1

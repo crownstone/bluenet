@@ -220,6 +220,13 @@ Crownstone::Crownstone(boards_config_t& board) :
 		_powerSampler = &PowerSampling::getInstance();
 	}
 
+#if BUILD_TWI == 1
+	_twi = &Twi::getInstance();
+#endif
+
+#if BUILD_GPIOTE == 1
+	_gpio = &Gpio::getInstance();
+#endif
 };
 
 void Crownstone::init(uint16_t step) {
@@ -403,8 +410,12 @@ void Crownstone::initDrivers1() {
 		}
 	}
 
-#if BUILD_TWI
-	_twi.init(_boardsConfig);
+#if BUILD_TWI == 1
+	_twi->init(_boardsConfig);
+#endif
+
+#if BUILD_GPIOTE == 1
+	_gpio->init(_boardsConfig);
 #endif
 }
 

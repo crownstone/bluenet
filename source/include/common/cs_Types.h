@@ -351,6 +351,11 @@ enum class CS_TYPE: uint16_t {
 	EVT_TWI_READ,                                     // TWI read (request).
 	EVT_TWI_UPDATE,                                   // TWI update from TWI module to listeners (not implemented yet).
 
+	EVT_GPIO_INIT,                                    // GPIO, init pin (eventually event handler)
+	EVT_GPIO_WRITE,                                   // GPIO, write value
+	EVT_GPIO_READ,                                    // GPIO, read value (directly)
+	EVT_GPIO_UPDATE,                                  // GPIO, update other modules with read values
+
 	CMD_TEST_SET_TIME = InternalBaseTests,            // Set time for testing.
 
 	EVT_GENERIC_TEST = 0xFFFF,                        // Can be used by the python test python lib for ad hoc tests during development.
@@ -613,6 +618,11 @@ typedef cs_twi_init_t TYPIFY(EVT_TWI_INIT);
 typedef cs_twi_write_t TYPIFY(EVT_TWI_WRITE);
 typedef cs_twi_read_t TYPIFY(EVT_TWI_READ);
 typedef uint8_t TYPIFY(EVT_TWI_UPDATE);
+
+typedef cs_gpio_init_t TYPIFY(EVT_GPIO_INIT);
+typedef cs_gpio_write_t TYPIFY(EVT_GPIO_WRITE);
+typedef cs_gpio_read_t TYPIFY(EVT_GPIO_READ);
+typedef cs_gpio_update_t TYPIFY(EVT_GPIO_UPDATE);
 
 /**
  * The size of a particular default value. In case of strings or arrays this is the maximum size of the corresponding
