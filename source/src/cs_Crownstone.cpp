@@ -591,8 +591,8 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 	_presenceHandler.listen();
 
 #if RSSI_DATA_TRACKER_ENABLED==1
-	_rssiDataTracker.init();
-	_rssiDataTracker.listen();
+	_meshTopology.init();
+	_meshTopology.listen();
 #endif
 	
 #if CLOSEST_CROWNSTONE_TRACKER_ENABLED==1

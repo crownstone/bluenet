@@ -79,16 +79,39 @@ void someEventHandler(pod_t const* event, void* context, uint32_t& address) {
 
 ## Naming
 
-Use camel case names for classes, for function names, for function arguments, for member variables, and in general most of the times. 
+Upper CamelCase naming is used for class names, typedefs and aliases. Members and functions are lower camel cased except for inner classes and types. 
 
-- `ClassName`
-- `functionName(uint8_t argOne, size_t argTwo)`
-- `_memberVar`
+```
+void someEventHandler(pod_t const* event, void* context, uint32_t& address) {
+```
+
+## Naming
+
+Upper CamelCase naming is used for class names, typedefs and aliases. Members and functions are lower camel cased except for inner classes and types. 
+
+```
+class ClassName {
+    private:
+    typedef std::vector<uint8_t>::iterator IteratorType;
+    
+    class Settings {
+        bool isActive;
+    };
+    
+    public:
+    void functionName();
+};
+
+using MyVec = std::vector<uint8_t>;
 
 Struct definitions (or in general **plain old data**, POD) are the exception, end them with `_t`.
 
-- `cs_some_struct_t`
-
+```
+struct __attribute__((__packed__)) a_packed_packet_t {
+    uint8_t shortWord;
+    uint32_t longWord;
+};
+```
 Macros are an exception as well (use them sparingly), use underscores.
 
 - `BLUETOOTH_NAME`
@@ -100,7 +123,7 @@ Sometimes you have a full uppercase abbreviation in your name, in that case just
 - `localVar`
 - `_memberVar`
 
-This makes it easy to recognize member variables. It also saves you from coming up with alternative names when you have things like: `void setRssi(int8_t rssi) { _rssi = rssi; }`.
+This makes it easier to recognize member variables, and saves you from coming up with alternative names when you have things like: `void setRssi(int8_t rssi) { _rssi = rssi; }`.
 
 Try to actually name your variables, avoid single letters (with the exception of a variable for loop iterations).
 

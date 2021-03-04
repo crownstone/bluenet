@@ -15,7 +15,6 @@
 #include <structs/cs_StreamBufferAccessor.h>
 #include <util/cs_Utils.h>
 
-
 #define LOGTrackableParserDebug LOGnone
 
 void TrackableParser::init() {
@@ -270,8 +269,7 @@ bool TrackableParser::isTileDevice(scanned_device_t* scannedDevice) {
 
 // ======================== Utils ========================
 
-// REVIEW: string as argument can't be left out from binary size.
-void TrackableParser::logServiceData(const char* headerStr, scanned_device_t* scannedDevice) {
+void TrackableParser::logServiceData(scanned_device_t* scannedDevice) {
 	uint32_t errCode;
 	cs_data_t serviceData;
 	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_SERVICE_DATA,
@@ -283,11 +281,7 @@ void TrackableParser::logServiceData(const char* headerStr, scanned_device_t* sc
 		return;
 	}
 
-	// REVIEW: Use the Util function for this.
-	_log(SERIAL_INFO, false, "len=%d data=[", serviceData.len);
-	for (auto i = 0u; i < serviceData.len; i++) {
-		_log(SERIAL_INFO, false, " %2x,", serviceData.data[i]);
-	}
-	_log(SERIAL_INFO, true, "]");
+	_log(SERIAL_DEBUG, false, "servicedata trackableparser: ");
+	_logArray(SERIAL_DEBUG, true, serviceData.data, serviceData.len);
 }
 

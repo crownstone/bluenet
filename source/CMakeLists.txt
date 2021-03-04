@@ -704,7 +704,13 @@ ELSE()
 
 		ADD_CUSTOM_TARGET(uart_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
-			COMMAND ${SUPERUSER_SWITCH} minicom -b 230400 -c on -D /dev/ttyACM0
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=START_MINICOM" -P ${DEFAULT_MODULES_PATH}/uart_tool.cmake
+			COMMENT "UART client, runs in background"
+			)
+		
+		ADD_CUSTOM_TARGET(uart_binary_client
+			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
+			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=START_BINARY_CLIENT" -P ${DEFAULT_MODULES_PATH}/uart_tool.cmake
 			COMMENT "UART client, runs in background"
 			)
 		
