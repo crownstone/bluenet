@@ -95,10 +95,12 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 			// TODO: get fingerprint from filter instead of literal mac address.
 			// TODO: we should just pass on the device, right than copying rssi?
 			LOGd("filter %d accepted mac addres", filter->runtimedata.filterId);
-			TrackableEvent trackEvent;
-			trackEvent.id = TrackableId(device->address);
-			trackEvent.rssi = device->rssi;
-			trackEvent.dispatch();
+			TrackableEvent trackableEventData;
+			trackableEventData.id = TrackableId(device->address, MAC_ADDRESS_LEN);
+			trackableEventData.rssi = device->rssi;
+
+			event_t trackableEvent(CS_TYPE::EVT_TRACKABLE, &trackableEventData, sizeof(trackableEventData));
+			trackableEvent.dispatch();
 			return;
 		}
 	}
