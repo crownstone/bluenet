@@ -17,7 +17,7 @@
 #include <ble/cs_iBeacon.h>
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
-#include <localisation/cs_RssiDataTracker.h>
+#include <localisation/cs_MeshTopology.h>
 #include <localisation/cs_NearestCrownstoneTracker.h>
 #include <localisation/cs_TrackableParser.h>
 #include <presence/cs_PresenceHandler.h>
@@ -341,7 +341,7 @@ private:
 	SystemTime _systemTime;
 
 #if BUILD_RSSI_DATA_TRACKER == 1
-	RssiDataTracker _rssiDataTracker;
+	MeshTopology _meshTopology;
 #endif
 
 #if BUILD_CLOSEST_CROWNSTONE_TRACKER == 1
@@ -391,5 +391,3 @@ private:
 
 	bool _clearedGpRegRetCount = false;
 };
-
-

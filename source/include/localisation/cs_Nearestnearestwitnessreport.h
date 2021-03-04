@@ -9,10 +9,20 @@
 
 #include <localisation/cs_TrackableId.h>
 
-// REVIEW: Someone reading this doesn't know what a witness report is.
 /**
- * Firmware internal representation of witness reports.
- * This contains auxiliary data compared to the mesh representation.
+ * A Nearest Witness Report contains the rssi data and some meta-data
+ * of a crownstone that received  an advertisement of a trackable device
+ * without hops. (That crownstone 'witnessed' the trackable device.)
+ *
+ * These reports are communicated between crowntones in the mesh to determine
+ * which crownstone is currently closest to the trackable device.
+ *
+ * The accuracy of the rssi data depends on physical conditions of the
+ * witnessing crownstone.
+ *
+ * NearestWitnessReport is the firmware internal representation of witness
+ * reports. This contains auxiliary data compared to the mesh representation
+ * (rssi_data_message_t).
  */
 class NearestWitnessReport {
 public:

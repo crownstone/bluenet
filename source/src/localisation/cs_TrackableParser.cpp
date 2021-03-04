@@ -15,8 +15,7 @@
 #include <structs/cs_StreamBufferAccessor.h>
 #include <util/cs_Utils.h>
 
-// REVIEW: This won't be recognized by binary logger.
-#define TrackableParser_LOGd LOGnone
+#define LOGTrackableParserDebug LOGnone
 
 void TrackableParser::init() {
 }
@@ -52,15 +51,10 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableA
 // ====================== Mac Filter =====================
 
 bool TrackableParser::isMyTrackable(scanned_device_t* scannedDevice) {
-	// Note: mac address here as read in nrf connect app, hence the std::reverse call.
-	uint8_t myTileMac[] = {0xe4, 0x96, 0x62, 0x0d, 0x5a, 0x5b};
-	std::reverse(std::begin(myTileMac), std::end(myTileMac));
-	TrackableId myTrackable(myTileMac);
+	TrackableId myTrackableId{0xe4, 0x96, 0x62, 0x0d, 0x5a, 0x5b}; // Arend's test Tile, as read on nrf connect app
+	TrackableId incomingTrackableId(scannedDevice->address, sizeof(scannedDevice->address));
 
-	// construct TrackableId for incomming scan
-	TrackableId mac(scannedDevice->address);
-
-	return mac == myTrackable;
+	return myTrackableId == incomingTrackableId;
 }
 
 // ======================== Tile ========================
@@ -103,22 +97,24 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scannedDevice) {
 		return false;
 	}
 
+	TrackableId tile(scannedDevice->address, sizeof(scannedDevice->address));
 
-	TrackableId tile(scannedDevice->address);
-
-	TrackableParser_LOGd("Tile device: rssi=%i ", scannedDevice->rssi);
-	tile.print(" ");
+	LOGTrackableParserDebug("incoming tile device: rssi=%i ", scannedDevice->rssi);
+	tile.print();
 
 	if (!isMyTrackable(scannedDevice)) {
 		// it was a Tile device, so return true.
 		return true;
 	}
 
-	// logServiceData("Tile device servicedata", scanned_device);
+	logServiceData(scannedDevice);
 
-	TrackableEvent trackEvt;
-	trackEvt.rssi = scannedDevice->rssi;
-	trackEvt.dispatch();
+	TrackableEvent trackableEventData;
+	trackableEventData.id = tile;
+	trackableEventData.rssi = scannedDevice->rssi;
+
+	event_t trackableEvent(CS_TYPE::EVT_TRACKABLE,	&trackableEventData, sizeof(trackableEventData));
+	trackableEvent.dispatch();
 
 	return true;
 }
@@ -126,8 +122,7 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scannedDevice) {
 
 // ======================== Utils ========================
 
-// REVIEW: string as argument can't be left out from binary size.
-void TrackableParser::logServiceData(const char* headerStr, scanned_device_t* scannedDevice) {
+void TrackableParser::logServiceData(scanned_device_t* scannedDevice) {
 	uint32_t errCode;
 	cs_data_t serviceData;
 	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_SERVICE_DATA,
@@ -139,11 +134,6 @@ void TrackableParser::logServiceData(const char* headerStr, scanned_device_t* sc
 		return;
 	}
 
-	// REVIEW: Use the Util function for this.
-	_log(SERIAL_INFO, false, "len=%d data=[", serviceData.len);
-	for (auto i = 0u; i < serviceData.len; i++) {
-		_log(SERIAL_INFO, false, " %2x,", serviceData.data[i]);
-	}
-	_log(SERIAL_INFO, true, "]");
+	_log(SERIAL_DEBUG, false, "servicedata trackableparser: ");
+	_logArray(SERIAL_DEBUG, true, serviceData.data, serviceData.len);
 }
-

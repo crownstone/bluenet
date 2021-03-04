@@ -9,15 +9,15 @@
 #include <events/cs_Event.h>
 #include <localisation/cs_NearestCrownstoneTracker.h>
 #include <localisation/cs_TrackableEvent.h>
+#include <localisation/cs_TrackableId.h>
 #include <logging/cs_Logger.h>
 #include <protocol/mesh/cs_MeshModelPackets.h>
 #include <storage/cs_State.h>
 #include <util/cs_Coroutine.h>
 
-// REVIEW: If you commit log defines not as LOGnone, then just put them in the code as LOGi and LOGd.
 #define LOGNearestCrownstoneTrackerVerbose LOGnone
-#define LOGNearestCrownstoneTrackerDebug LOGd
-#define LOGNearestCrownstoneTrackerInfo LOGi
+#define LOGNearestCrownstoneTrackerDebug LOGnone
+#define LOGNearestCrownstoneTrackerInfo LOGnone
 
 void NearestCrownstoneTracker::init() {
 	State::getInstance().get(CS_TYPE::CONFIG_CROWNSTONE_ID, &_myId, sizeof(_myId));
@@ -47,39 +47,33 @@ void NearestCrownstoneTracker::onReceive(TrackableEvent* trackedEvent) {
 
 	savePersonalReport(incomingReport);
 
-	// TODO: replace condition with std::find when
-	// we have a map of uuid --> report for all the datas
-
-	// REVIEW: Why not start with lowest rssi, so you don't need to do the isvalid check?
-	if (isValid(_winningReport)) {
-		// REVIEW: Does it matter who reported it?
-		if (_winningReport.reporter == _myId) {
-			LOGNearestCrownstoneTrackerVerbose("we already believed we were closest, so this is just an update");
-			saveWinningReport(incomingReport);
-			broadcastReport(incomingReport);
-		}
-		else {
-			LOGNearestCrownstoneTrackerVerbose("we didn't win before");
-			if (incomingReport.rssi > _winningReport.rssi)  {
-				LOGNearestCrownstoneTrackerVerbose("but now we do, so have to do something");
-				saveWinningReport(incomingReport);
-				broadcastReport(incomingReport);
-				onWinnerChanged();
-			}
-			else {
-				LOGNearestCrownstoneTrackerVerbose("we still don't, so we're done.");
-			}
-		}
-	}
-	else {
-		LOGNearestCrownstoneTrackerVerbose("no winning report yet, so our personal one wins");
+	// REVIEW: Does it matter who reported it?
+	// @Bart: Yes. The crownstone always saves a 'personal report', but the rssi value between
+	// this crownstone and the trackable only becomes relevant to other crownstones when it is (or becomes)
+	// the new closest. Those are the cases you see:
+	// - we are already the closest. Then all updates are relevant.
+	// - we are becoming the closest. Then 'winner' changes, and we start updating towards the mesh.
+	// - we are not the closest. Then we don't need to do anything beyond keeping track of our own distance to the trackable.
+	//   (Which was already done before the ifstatement.)
+	if (_winningReport.reporter == _myId) {
+		LOGNearestCrownstoneTrackerVerbose("we already believed we were closest, so it's time to send an update towards the mesh");
 		saveWinningReport(incomingReport);
 		broadcastReport(incomingReport);
-		onWinnerChanged();
+	}
+	else {
+		LOGNearestCrownstoneTrackerVerbose("we didn't win before");
+		if (incomingReport.rssi > _winningReport.rssi)  {
+			LOGNearestCrownstoneTrackerVerbose("but now we do, so have to send an update towards the mesh");
+			saveWinningReport(incomingReport);
+			broadcastReport(incomingReport);
+			onWinnerChanged();
+		}
+		else {
+			LOGNearestCrownstoneTrackerVerbose("we still don't, so we're done.");
+		}
 	}
 }
 
-// REVIEW: This code looks very much like the other onReceive.
 void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incomingReport) {
 	LOGNearestCrownstoneTrackerVerbose("onReceive witness report, myId(%u), reporter(%u), rssi(%i)", _myId, incomingReport.reporter, incomingReport.rssi);
 
@@ -88,12 +82,7 @@ void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incomingReport) {
 		return;
 	}
 
-	if (!isValid(_winningReport)) {
-		LOGNearestCrownstoneTrackerVerbose("Didn't have a incoming_report yet. Updated my winner.");
-		saveWinningReport(incomingReport);
-		onWinnerChanged();
-	}
-	else if (incomingReport.reporter == _winningReport.reporter) {
+	if (incomingReport.reporter == _winningReport.reporter) {
 		LOGNearestCrownstoneTrackerVerbose("Received an update from the winner.");
 
 		if (_personalReport.rssi > incomingReport.rssi) {
@@ -119,7 +108,7 @@ void NearestCrownstoneTracker::onReceive(NearestWitnessReport& incomingReport) {
 }
 
 void NearestCrownstoneTracker::onWinnerChanged() {
-	LOGNearestCrownstoneTrackerDebug("Nearest changed to stoneid=%u. I'm turning %s",
+	LOGd("Nearest changed to stoneid=%u. I'm turning %s",
 			_winningReport.reporter,
 			_winningReport.reporter == _myId ? "on":"off");
 
@@ -139,12 +128,19 @@ NearestWitnessReport NearestCrownstoneTracker::createReport(TrackableEvent* trac
 }
 
 // REVIEW: Return by ref?
+// @Bart: RVO (return value optimization) is guaranteed to take place
+// as the constructor call is part of the return statement.
+// (This means the return value is constructed on the stack frame below the current one.)
 NearestWitnessReport NearestCrownstoneTracker::createReport(MeshMsgEvent* meshMsgEvent) {
 	// REVIEW: Lot of mesh implementation details: shouldn't this be done in the mesh msg handler?
+	// @Bart: We cannot. That would imply the component gets severely intertwined with other components
+	// and makes modularization a mess.
 	auto nearestWitnessReport = meshMsgEvent->getPacket<CS_MESH_MODEL_TYPE_NEAREST_WITNESS_REPORT>();
 
 	return NearestWitnessReport(
-			nearestWitnessReport.trackableDeviceMac,
+			TrackableId(
+					nearestWitnessReport.trackableDeviceMac,
+					sizeof(nearestWitnessReport.trackableDeviceMac)),
 			nearestWitnessReport.rssi,
 			meshMsgEvent->srcAddress);
 }
@@ -170,11 +166,6 @@ void NearestCrownstoneTracker::saveWinningReport(NearestWitnessReport report) {
 	_winningReport = report;
 }
 
-
-bool NearestCrownstoneTracker::isValid(const NearestWitnessReport& report) {
-	return report.rssi != 0;
-}
-
 void NearestCrownstoneTracker::logReport(const char* text, NearestWitnessReport report) {
 	LOGNearestCrownstoneTrackerDebug("%s {reporter:%u, trackable: %x %x %x %x %x %x, rssi:%i dB}",
 			text,
@@ -195,6 +186,7 @@ void NearestCrownstoneTracker::resetReports() {
 
 	_personalReport.reporter = _myId;
 	_personalReport.rssi = -127; // std::numeric_limits<uint8_t>::lowest();
+	_winningReport.rssi = -127;
 }
 
 // ------------------- Mesh related stuff ----------------------
