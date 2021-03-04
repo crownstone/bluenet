@@ -109,9 +109,12 @@ bool TrackableParser::handleAsTileDevice(scanned_device_t* scannedDevice) {
 
 	logServiceData(scannedDevice);
 
-	TrackableEvent trackEvt;
-	trackEvt.rssi = scannedDevice->rssi;
-	trackEvt.dispatch();
+	TrackableEvent trackableEventData;
+	trackableEventData.id = tile;
+	trackableEventData.rssi = scannedDevice->rssi;
+
+	event_t trackableEvent(CS_TYPE::EVT_TRACKABLE,	&trackableEventData, sizeof(trackableEventData));
+	trackableEvent.dispatch();
 
 	return true;
 }

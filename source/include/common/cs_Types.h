@@ -20,7 +20,7 @@
 #include <behaviour/cs_ExtendedSwitchBehaviour.h>
 
 #include <localisation/cs_Nearestnearestwitnessreport.h>
-class TrackableEvent;
+#include <localisation/cs_TrackableEvent.h>
 
 #include <time/cs_TimeSyncMessage.h>
 #include <mesh/cs_MeshMsgEvent.h>
