@@ -157,7 +157,7 @@ private:
 	/**
 	 * Microapp data to be advertised in crownstone service data.
 	 */
-	service_data_microapp_encrypted_t _microappServiceData;
+	service_data_encrypted_microapp_t _microappServiceData;
 
 	/* Static function for the timeout */
 	static void staticTimeout(ServiceData *ptr) {

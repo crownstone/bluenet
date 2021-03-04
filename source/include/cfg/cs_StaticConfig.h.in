@@ -18,7 +18,8 @@
 extern "C" {
 #endif
 
-const uintptr_t g_RAM_MICROAPP_END = (@RAM_MICROAPP_BASE@ + @RAM_MICROAPP_AMOUNT@);
+// Microapp ram is located before IPC ram.
+const uintptr_t g_RAM_MICROAPP_END = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - @RAM_BLUENET_IPC_LENGTH@;
 
 /**
  * Buffer size that is used for characteristics that the user reads from.

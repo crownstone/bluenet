@@ -196,6 +196,9 @@
 #define NRFX_TWI0_ENABLED 1
 #endif
 
+#ifdef BUILD_GPIOTE
+#define NRFX_GPIOTE_ENABLED 1
+#endif
 
 //#define NRFX_SAADC_ENABLED 1
 

@@ -47,6 +47,10 @@ CS_SERIAL_NRF_LOG_ENABLED=0
 CS_SERIAL_BOOTLOADER_NRF_LOG_ENABLED=0
 CS_SERIAL_NRF_LOG_PIN_TX=6
 
+# Default values for the UART client
+UART_DEVICE="/dev/ttyACM0"
+UART_BAUDRATE=230300
+
 # The different boards that can be used (from cs_Boards.h):
 # ## Nordic boards
 # PCA10036             40
@@ -93,6 +97,9 @@ BUILD_MICROAPP_SUPPORT=0
 
 # Enable i2c/twi
 BUILD_TWI=0
+
+# Enable nrfx gpiote driver (for GPIO pins)
+BUILD_GPIOTE=0
 
 # Add support for RSSI data tracker
 BUILD_RSSI_DATA_TRACKER=0
@@ -184,6 +191,16 @@ CONNECTION_ALIVE_TIMEOUT=20000
 # Twi / i2c defaults (maps to GPIO 0 and 1 by default, see board configuration for which physical pins those are)
 TWI_SCL_INDEX=0
 TWI_SDA_INDEX=1
+
+GPIO_PIN1_INDEX=-1
+GPIO_PIN2_INDEX=-1
+GPIO_PIN3_INDEX=-1
+GPIO_PIN4_INDEX=-1
+
+BUTTON1_INDEX=-1
+BUTTON2_INDEX=-1
+BUTTON3_INDEX=-1
+BUTTON4_INDEX=-1
 
 # This is the directory where the cross-compiler resides
 COMPILER_PATH=
@@ -409,14 +426,11 @@ BOOTLOADER_IPC_RAM_PROTOCOL=1
 AUTO_ENABLE_MICROAPP_ON_BOOT=0
 
 # The start of microapps in flash
-FLASH_MICROAPP_BASE=0x68000
+FLASH_MICROAPP_BASE=0x69000
 
 # The number of pages for microapps (each page is 0x1000 / 4096 bytes)
 FLASH_MICROAPP_PAGES=2
 
-# The start of where the microapp is allowed to put its memory (start of its .bss .data and then the heap)
-RAM_MICROAPP_BASE=0x2000B000
-
-# The amount of RAM it is allowed to use (stack grows down from RAM_MICROAPP_BASE + RAM_MICROAPP_AMOUNT)
-RAM_MICROAPP_AMOUNT=0x2000
+# The amount of RAM it is allowed to use (microapp is placed before IPC ram, and grows down).
+RAM_MICROAPP_AMOUNT=0x800
 

@@ -1,6 +1,3 @@
-// Needs to be static
-#define CS_RAM_MICROAPP_END (@RAM_MICROAPP_BASE@ + @RAM_MICROAPP_AMOUNT@)
-
 #include <cfg/cs_AutoConfig.h>
 
 #include <cfg/cs_Boards.h>
@@ -43,7 +40,8 @@ uint32_t g_FLASH_MICROAPP_BASE = @FLASH_MICROAPP_BASE@;
 // Number of pages
 uint8_t g_FLASH_MICROAPP_PAGES = @FLASH_MICROAPP_PAGES@;
 
-uint32_t g_RAM_MICROAPP_BASE = @RAM_MICROAPP_BASE@;
+// Microapp ram is located before IPC ram.
+uint32_t g_RAM_MICROAPP_BASE = @RAM_R1_BASE@ + @RAM_APPLICATION_AMOUNT@ - (@RAM_BLUENET_IPC_LENGTH@ + @RAM_MICROAPP_AMOUNT@);
 
 uint32_t g_RAM_MICROAPP_AMOUNT = @RAM_MICROAPP_AMOUNT@;
 
@@ -124,4 +122,14 @@ const uint8_t g_TWI_SCL_INDEX = @TWI_SCL_INDEX@;
 const uint8_t g_TWI_SDA_INDEX = @TWI_SDA_INDEX@;
 
 const bool g_AUTO_ENABLE_MICROAPP_ON_BOOT = @AUTO_ENABLE_MICROAPP_ON_BOOT@;
+
+const int8_t g_GPIO_PIN1_INDEX = @GPIO_PIN1_INDEX@;
+const int8_t g_GPIO_PIN2_INDEX = @GPIO_PIN2_INDEX@;
+const int8_t g_GPIO_PIN3_INDEX = @GPIO_PIN3_INDEX@;
+const int8_t g_GPIO_PIN4_INDEX = @GPIO_PIN4_INDEX@;
+
+const int8_t g_BUTTON1_INDEX = @BUTTON1_INDEX@;
+const int8_t g_BUTTON2_INDEX = @BUTTON2_INDEX@;
+const int8_t g_BUTTON3_INDEX = @BUTTON3_INDEX@;
+const int8_t g_BUTTON4_INDEX = @BUTTON4_INDEX@;
 

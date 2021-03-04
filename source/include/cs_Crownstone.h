@@ -51,6 +51,9 @@
 #include <drivers/cs_Twi.h>
 #endif
 
+#if BUILD_GPIOTE == 1
+#include <drivers/cs_Gpio.h>
+#endif
 
 /** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** *** **
  * Main functionality
@@ -358,7 +361,11 @@ private:
 #endif
 
 #if BUILD_TWI == 1
-	Twi _twi;
+	Twi* _twi = nullptr;
+#endif
+
+#if BUILD_GPIOTE == 1
+	Gpio* _gpio = nullptr;
 #endif
 
 	app_timer_t              _mainTimerData;

@@ -213,6 +213,10 @@ CS_TYPE toCsType(uint16_t type) {
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
 	case CS_TYPE::EVT_TWI_UPDATE:
+	case CS_TYPE::EVT_GPIO_INIT:
+	case CS_TYPE::EVT_GPIO_WRITE:
+	case CS_TYPE::EVT_GPIO_READ:
+	case CS_TYPE::EVT_GPIO_UPDATE:
 		return csType;
 	}
 	return CS_TYPE::CONFIG_DO_NOT_USE;
@@ -631,6 +635,14 @@ size16_t TypeSize(CS_TYPE const & type) {
 		return sizeof(TYPIFY(EVT_TWI_READ));
 	case CS_TYPE::EVT_TWI_UPDATE:
 		return sizeof(TYPIFY(EVT_TWI_UPDATE));
+	case CS_TYPE::EVT_GPIO_INIT:
+		return sizeof(TYPIFY(EVT_GPIO_INIT));
+	case CS_TYPE::EVT_GPIO_WRITE:
+		return sizeof(TYPIFY(EVT_GPIO_WRITE));
+	case CS_TYPE::EVT_GPIO_READ:
+		return sizeof(TYPIFY(EVT_GPIO_READ));
+	case CS_TYPE::EVT_GPIO_UPDATE:
+		return sizeof(TYPIFY(EVT_GPIO_UPDATE));
 	} // end switch
 
 	// should never happen
@@ -840,6 +852,10 @@ const char* typeName(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TWI_WRITE: return "EVT_TWI_WRITE";
 	case CS_TYPE::EVT_TWI_READ: return "EVT_TWI_READ";
 	case CS_TYPE::EVT_TWI_UPDATE: return "EVT_TWI_UPDATE";
+	case CS_TYPE::EVT_GPIO_INIT: return "EVT_GPIO_INIT";
+	case CS_TYPE::EVT_GPIO_WRITE: return "EVT_GPIO_WRITE";
+	case CS_TYPE::EVT_GPIO_READ: return "EVT_GPIO_READ";
+	case CS_TYPE::EVT_GPIO_UPDATE: return "EVT_GPIO_UPDATE";
 	}
 	return "Unknown";
 }
@@ -1039,6 +1055,10 @@ bool hasMultipleIds(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
 	case CS_TYPE::EVT_TWI_UPDATE:
+	case CS_TYPE::EVT_GPIO_INIT:
+	case CS_TYPE::EVT_GPIO_WRITE:
+	case CS_TYPE::EVT_GPIO_READ:
+	case CS_TYPE::EVT_GPIO_UPDATE:
 		return false;
 	case CS_TYPE::STATE_BEHAVIOUR_RULE:
 	case CS_TYPE::STATE_TWILIGHT_RULE:
@@ -1259,6 +1279,10 @@ bool removeOnFactoryReset(CS_TYPE const & type, cs_state_id_t id) {
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
 	case CS_TYPE::EVT_TWI_UPDATE:
+	case CS_TYPE::EVT_GPIO_INIT:
+	case CS_TYPE::EVT_GPIO_WRITE:
+	case CS_TYPE::EVT_GPIO_READ:
+	case CS_TYPE::EVT_GPIO_UPDATE:
 		return true;
 	}
 	// should not reach this
@@ -1469,6 +1493,10 @@ EncryptionAccessLevel getUserAccessLevelSet(CS_TYPE const & type)  {
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
 	case CS_TYPE::EVT_TWI_UPDATE:
+	case CS_TYPE::EVT_GPIO_INIT:
+	case CS_TYPE::EVT_GPIO_WRITE:
+	case CS_TYPE::EVT_GPIO_READ:
+	case CS_TYPE::EVT_GPIO_UPDATE:
 		return NO_ONE;
 	}
 	return NO_ONE;
@@ -1679,6 +1707,10 @@ EncryptionAccessLevel getUserAccessLevelGet(CS_TYPE const & type) {
 	case CS_TYPE::EVT_TWI_WRITE:
 	case CS_TYPE::EVT_TWI_READ:
 	case CS_TYPE::EVT_TWI_UPDATE:
+	case CS_TYPE::EVT_GPIO_INIT:
+	case CS_TYPE::EVT_GPIO_WRITE:
+	case CS_TYPE::EVT_GPIO_READ:
+	case CS_TYPE::EVT_GPIO_UPDATE:
 		return NO_ONE;
 	}
 	return NO_ONE;

@@ -11,6 +11,7 @@
 #include <cfg/cs_Boards.h>
 #include <events/cs_EventListener.h>
 
+enum class TwiIsrEvent { Read, Write, Error };
 /**
  * Class that implements twi/i2c. This on the moment only implements twi as master.
  */
@@ -19,7 +20,7 @@ public:
 	/**
 	 * Construct twi/i2c instance.
 	 */
-	Twi();
+	static Twi& getInstance();
 	
 	/**
 	 * Init twi with board configuration (nothing is happening to the pins yet).
@@ -56,15 +57,24 @@ public:
 
 	/**
 	 * Incoming events.
+	 *
 	 * @param[in]     event        Event from other modules in bluenet.
 	 */
 	void handleEvent(event_t& event);
+
+	/**
+	 * Events from the hardware.
+	 */
+	void isrEvent(TwiIsrEvent event);
 protected:
 
 	// Local struct to store configuration.
 	static const nrfx_twi_t _twi;
 
 private:
+	Twi();
+	Twi(Twi const&);
+	void operator=(Twi const &);
 
 	// Local config for driver
 	nrfx_twi_config_t _config;
@@ -74,5 +84,11 @@ private:
 
 	// Initialized flag
 	bool _initializedBus;
+
+	// Event is read
+	bool _eventRead;
+
+	// Error event
+	bool _eventError;
 };
 
