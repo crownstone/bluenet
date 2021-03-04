@@ -710,7 +710,7 @@ ELSE()
 		
 		ADD_CUSTOM_TARGET(uart_binary_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
-			COMMAND ${CMAKE_COMMAND} ${DEFAULT_TOOL_PARAM} "-DINSTRUCTION=START_BINARY_CLIENT" -P ${DEFAULT_MODULES_PATH}/uart_tool.cmake
+			COMMAND ${WORKSPACE_DIR}/scripts/log-client.py -d ${UART_DEVICE}
 			COMMENT "UART client, runs in background"
 			)
 		
@@ -744,7 +744,7 @@ ELSE()
 			)
 
 		ADD_CUSTOM_TARGET(memory_usage_test_client
-			COMMAND ${DEFAULT_MODULES_PATH}/../../../../scripts/mem-usage-test.py
+			COMMAND ${WORKSPACE_DIR}/scripts/mem-usage-test.py
 			COMMENT "Run memory usage test client, which communicates with a Crownstone."
 			)
 
