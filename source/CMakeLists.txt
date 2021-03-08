@@ -708,10 +708,13 @@ ELSE()
 			COMMENT "UART client, runs in background"
 			)
 		
+		SET(UART_CONFIG_PARAM "-DCONFIG_NAME:STRING=UART_DEVICE")
+
 		ADD_CUSTOM_TARGET(uart_binary_client
 			COMMAND ${CMAKE_COMMAND} -E echo "** UART client, keep running in separate shell"
-			COMMAND ${WORKSPACE_DIR}/scripts/log-client.py -d ${UART_DEVICE}
+			COMMAND bash -c "cmake ${DEFAULT_TOOL_PARAM} ${UART_CONFIG_PARAM} -P ${DEFAULT_MODULES_PATH}/get_config.cmake 2>&1 | xargs -I uart ${WORKSPACE_DIR}/scripts/log-client.py -d uart"
 			COMMENT "UART client, runs in background"
+			VERBATIM
 			)
 		
 		ADD_CUSTOM_TARGET(rtt_client
