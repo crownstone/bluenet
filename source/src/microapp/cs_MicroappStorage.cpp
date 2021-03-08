@@ -8,7 +8,7 @@
  */
 
 
-#include "nrf_fstorage_sd.h"
+#include <nrf_fstorage_sd.h>
 
 #include <algorithm>
 #include <ble/cs_UUID.h>
@@ -80,7 +80,7 @@ uint16_t MicroappStorage::erasePages() {
 	return err_code;
 }
 
-uint16_t MicroappStorage::checkAppSize(uint16_t size) {
+cs_ret_code_t MicroappStorage::checkAppSize(uint16_t size) {
 	uint32_t start = nrf_microapp_storage.start_addr;
 	if ((start + size) > nrf_microapp_storage.end_addr) {
 		LOGw("Microapp binary too large. Application can not be written");
@@ -95,7 +95,7 @@ uint16_t MicroappStorage::checkAppSize(uint16_t size) {
  * early in the process. We also assume that all data buffers are of size MICROAPP_CHUNK_SIZE. The last one should be
  * appended with 0xFF values to make it the right size.
  */
-uint16_t MicroappStorage::writeChunk(uint8_t index, const uint8_t *data, uint16_t size) {
+cs_ret_code_t MicroappStorage::writeChunk(uint8_t index, const uint8_t *data, uint16_t size) {
 	uint32_t err_code;
 	uint32_t start = nrf_microapp_storage.start_addr + (MICROAPP_CHUNK_SIZE * index);
 	LOGi("Write chunk: %i at 0x%08X of size %i", index, start, size);
@@ -196,8 +196,8 @@ void MicroappStorage::getHeaderApp(microapp_header_t *header) {
  * The checksum is calculated iteratively, by using the chunk size. For the last chunk we will only use the part 
  * up to the total size of the binary. By doing it iteratively we can keep the local buffer relatively small.
  */
-uint16_t MicroappStorage::validateApp() {
-	LOGd("Validate app");
+cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
+	LOGd("Validate app %u", appIndex);
 	uint16_t ret_code;
 
 	microapp_header_t header;
@@ -310,7 +310,7 @@ bool MicroappStorage::isAppValid() {
  * After an app has been considered "valid" it is possible to enable it. It is also possible to disable an app
  * afterwards (without invalidating it). The app can be enabled later on again.
  */
-uint16_t MicroappStorage::enableApp(bool flag) {
+cs_ret_code_t MicroappStorage::enableApp(uint8_t appIndex, bool enable) {
 	TYPIFY(STATE_MICROAPP) state_microapp;
 	cs_state_id_t app_id = 0;
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));

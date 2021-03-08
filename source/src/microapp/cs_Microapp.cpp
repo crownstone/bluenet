@@ -92,57 +92,83 @@ uint16_t Microapp::init() {
  * useful to send a few semi-duplicates so that messages are not missed. 
  */
 void Microapp::tick() {
-	// decrement repeat counter up to zero
-	if (_prevMessage.repeat > 0) {
-		_prevMessage.repeat--;
-	}
-	// only sent when repeat counter is non-zero
-	if (_prevMessage.repeat > 0) {
-		event_t event(CS_TYPE::EVT_MICROAPP, &_prevMessage, sizeof(_prevMessage));
-		event.dispatch();
-	}
-
 	MicroappProtocol & protocol = MicroappProtocol::getInstance();
 	protocol.callSetupAndLoop();
 }
 
-uint32_t Microapp::handlePacket(microapp_packet_header_t *packet_stub) {
-	
-	uint32_t err_code = ERR_EVENT_UNHANDLED;
-	
-	// For now accept only apps with id == 0.
-	if (packet_stub->app_id != 0) {
-		err_code = ERR_NOT_IMPLEMENTED;
-		return err_code;
+cs_ret_code_t Microapp::handleGetInfo(cs_result_t& result) {
+	if (result.buf.len < sizeof(microapp_info_t)) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
+	microapp_info_t* info = reinterpret_cast<microapp_info_t*>(result.buf.data);
+
+	info->protocol = MICROAPP_PROTOCOL;
+	info->maxApps = MAX_MICROAPPS;
+	info->maxAppSize = MICROAPP_MAX_SIZE;
+	info->maxChunkSize = MICROAPP_UPLOAD_MAX_CHUNK_SIZE;
+	info->maxRamUsage = MICROAPP_MAX_RAM;
+	info->sdkVersion.major = MICROAPP_SDK_MAJOR;
+	info->sdkVersion.minor = MICROAPP_SDK_MINOR;
+//	info.appsStatus[0].
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t Microapp::handleUpload(microapp_upload_internal_t* packet) {
+	if (packet->header.header.protocol != MICROAPP_PROTOCOL) {
+		return ERR_PROTOCOL_UNSUPPORTED;
 	}
 
+	MicroappStorage & storage = MicroappStorage::getInstance();
+	// CAREFUL: This assumes the data stays in ram during the write.
+	cs_ret_code_t retCode = storage.writeChunk(packet->header.header.index, packet->data.data, packet->data.len);
+
+	// User should wait for the data to be written to flash before sending the next chunk.
+	if (retCode == ERR_SUCCESS) {
+		return ERR_WAIT_FOR_SUCCESS;
+	}
+	return retCode;
+}
+
+cs_ret_code_t Microapp::handleValidate(microapp_ctrl_header_t* packet) {
+	if (packet->protocol != MICROAPP_PROTOCOL) {
+		return ERR_PROTOCOL_UNSUPPORTED;
+	}
+
+	MicroappStorage & storage = MicroappStorage::getInstance();
+	return storage.validateApp(packet->index);
+}
+
+cs_ret_code_t Microapp::handleRemove(microapp_ctrl_header_t* packet) {
+	if (packet->protocol != MICROAPP_PROTOCOL) {
+		return ERR_PROTOCOL_UNSUPPORTED;
+	}
+
+	return ERR_NOT_IMPLEMENTED;
+}
+
+cs_ret_code_t Microapp::handleEnable(microapp_ctrl_header_t* packet) {
+	if (packet->protocol != MICROAPP_PROTOCOL) {
+		return ERR_PROTOCOL_UNSUPPORTED;
+	}
+
+	MicroappStorage & storage = MicroappStorage::getInstance();
+	return storage.enableApp(packet->index, true);
+}
+
+cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {
+	if (packet->protocol != MICROAPP_PROTOCOL) {
+		return ERR_PROTOCOL_UNSUPPORTED;
+	}
+
+	MicroappStorage & storage = MicroappStorage::getInstance();
+	return storage.enableApp(packet->index, false);
+}
+
+
+uint32_t Microapp::handlePacket(microapp_packet_header_t *packet_stub) {
+	
 	switch(packet_stub->opcode) {
-		case CS_MICROAPP_OPCODE_REQUEST: {
-			microapp_request_packet_t* packet = reinterpret_cast<microapp_request_packet_t*>(packet_stub);
-			// Check if app size is not too large.
-			MicroappStorage & storage = MicroappStorage::getInstance();
-			err_code = storage.checkAppSize(packet->size);
-			if (err_code != ERR_SUCCESS) {
-				break;
-			}
 
-			if (packet->chunk_size != MICROAPP_CHUNK_SIZE) {
-				err_code = ERR_WRONG_STATE;
-				LOGi("Chunk size %i (should be %i)", packet->chunk_size, MICROAPP_CHUNK_SIZE);
-				_prevMessage.payload = MICROAPP_CHUNK_SIZE;
-				break;
-			}
-
-			if (packet->size > packet->count * packet->chunk_size) {
-				err_code = ERR_WRONG_PARAMETER;
-				_prevMessage.payload = packet->count * packet->chunk_size;
-				break;
-			}
-
-			// We can add here a method to check if the memory is clear... However, this is quite an intensive
-			// read of flash memory. So, it is probably smart to do this with another opcode.
-			break;
-		}
 		case CS_MICROAPP_OPCODE_ENABLE: {
 			microapp_enable_packet_t* packet = reinterpret_cast<microapp_enable_packet_t*>(packet_stub);
 
@@ -237,16 +263,33 @@ void Microapp::handleEvent(event_t & evt) {
 	uint32_t err_code = ERR_EVENT_UNHANDLED;
 
 	switch (evt.type) {
-		case CS_TYPE::CMD_MICROAPP: {
-			// Immediately stop previous notifications
-			_prevMessage.repeat = 0;
-
-			LOGi("Microapp receives event");
-			microapp_packet_header_t* packet = reinterpret_cast<microapp_packet_header_t*>(evt.data);
-
-			// Handle packet
-			err_code = handlePacket(packet);
-
+		case CS_TYPE::CMD_MICROAPP_GET_INFO: {
+			evt.result.returnCode = handleGetInfo(evt.result);
+			break;
+		}
+		case CS_TYPE::CMD_MICROAPP_UPLOAD: {
+			auto packet = CS_TYPE_CAST(CMD_MICROAPP_UPLOAD, evt.data);
+			evt.result.returnCode = handleUpload(packet);
+			break;
+		}
+		case CS_TYPE::CMD_MICROAPP_VALIDATE: {
+			auto packet = CS_TYPE_CAST(CMD_MICROAPP_VALIDATE, evt.data);
+			evt.result.returnCode = handleValidate(packet);
+			break;
+		}
+		case CS_TYPE::CMD_MICROAPP_REMOVE: {
+			auto packet = CS_TYPE_CAST(CMD_MICROAPP_REMOVE, evt.data);
+			evt.result.returnCode = handleRemove(packet);
+			break;
+		}
+		case CS_TYPE::CMD_MICROAPP_ENABLE: {
+			auto packet = CS_TYPE_CAST(CMD_MICROAPP_ENABLE, evt.data);
+			evt.result.returnCode = handleEnable(packet);
+			break;
+		}
+		case CS_TYPE::CMD_MICROAPP_DISABLE: {
+			auto packet = CS_TYPE_CAST(CMD_MICROAPP_DISABLE, evt.data);
+			evt.result.returnCode = handleDisable(packet);
 			break;
 		}
 		case CS_TYPE::EVT_TICK: {
@@ -256,10 +299,5 @@ void Microapp::handleEvent(event_t & evt) {
 		default: {
 			// ignore other events
 		}
-	}
-
-	if (evt.type == CS_TYPE::CMD_MICROAPP) {
-		LOGi("Return code %i", err_code);
-		evt.result.returnCode = err_code;
 	}
 }

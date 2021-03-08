@@ -143,7 +143,12 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_GET_ADC_CHANNEL_SWAPS:
 		case CTRL_CMD_GET_RAM_STATS:
 
-		case CTRL_CMD_MICROAPP:
+		case CTRL_CMD_MICROAPP_GET_INFO:
+		case CTRL_CMD_MICROAPP_UPLOAD:
+		case CTRL_CMD_MICROAPP_VALIDATE:
+		case CTRL_CMD_MICROAPP_REMOVE:
+		case CTRL_CMD_MICROAPP_ENABLE:
+		case CTRL_CMD_MICROAPP_DISABLE:
 
 		case CTRL_CMD_CLEAN_FLASH:
 			LOGd("cmd=%u lvl=%u", type, accessLevel);
@@ -253,8 +258,18 @@ void CommandHandler::handleCommand(
 			return dispatchEventForCommand(CS_TYPE::CMD_GET_ADC_CHANNEL_SWAPS, commandData, source, result);
 		case CTRL_CMD_GET_RAM_STATS:
 			return dispatchEventForCommand(CS_TYPE::CMD_GET_RAM_STATS, commandData, source, result);
-		case CTRL_CMD_MICROAPP:
-			return handleMicroappCommand(commandData, accessLevel, result);
+		case CTRL_CMD_MICROAPP_GET_INFO:
+			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_GET_INFO, commandData, source, result);
+		case CTRL_CMD_MICROAPP_UPLOAD:
+			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_UPLOAD, commandData, source, result);
+		case CTRL_CMD_MICROAPP_VALIDATE:
+			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_VALIDATE, commandData, source, result);
+		case CTRL_CMD_MICROAPP_REMOVE:
+			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_REMOVE, commandData, source, result);
+		case CTRL_CMD_MICROAPP_ENABLE:
+			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_ENABLE, commandData, source, result);
+		case CTRL_CMD_MICROAPP_DISABLE:
+			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_DISABLE, commandData, source, result);
 		case CTRL_CMD_CLEAN_FLASH:
 			return dispatchEventForCommand(CS_TYPE::CMD_STORAGE_GARBAGE_COLLECT, commandData, source, result);
 		case CTRL_CMD_UNKNOWN:
@@ -981,92 +996,6 @@ void CommandHandler::handleCmdGetUptime(cs_data_t commandData, const EncryptionA
 	return;
 }
 
-void CommandHandler::handleMicroappCommand(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
-	//LOGi(STR_HANDLE_COMMAND, "microapp");
-
-	// First cast to header packet, must be large enough for that.
-	if (commandData.len < sizeof(microapp_packet_header_t)) {
-		LOGe("Wrong payload length received: %u (should be >= %u)",
-			commandData.len, sizeof(microapp_packet_header_t));
-		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-		return;
-	}
-
-	uint8_t opcode = ((microapp_packet_header_t*)commandData.data)->opcode;
-	switch (opcode) {
-		case CS_MICROAPP_OPCODE_UPLOAD: {
-			if (commandData.len != sizeof(microapp_upload_packet_t)) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_upload_packet_t));
-				result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-				return;
-			}
-			LOGi(STR_HANDLE_COMMAND, "microapp upload");
-
-			// TODO: don't copy the data. Maybe just use dispatchEventForCommand().
-			TYPIFY(CMD_MICROAPP) evtData;
-			evtData = *((microapp_upload_packet_t*)commandData.data);
-			event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
-			event.dispatch();
-
-			result.returnCode = event.result.returnCode;
-			break;
-		}
-		case CS_MICROAPP_OPCODE_ENABLE:
-		case CS_MICROAPP_OPCODE_DISABLE: {
-			if (commandData.len != sizeof(microapp_enable_packet_t)) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_enable_packet_t));
-				result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-				return;
-			}
-			LOGi(STR_HANDLE_COMMAND, "microapp en/disable");
-	
-			// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
-			//       also make sure that for sending the data back, another buffer is used
-			microapp_enable_packet_t evtData = *((microapp_enable_packet_t*)commandData.data);
-			event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
-			event.dispatch();
-
-			result.returnCode = event.result.returnCode;
-			break;
-		}
-		case CS_MICROAPP_OPCODE_VALIDATE: {
-			if (commandData.len != sizeof(microapp_validate_packet_t)) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_validate_packet_t));
-				result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-				return;
-			}
-			LOGi(STR_HANDLE_COMMAND, "microapp validate");
-	
-			// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
-			microapp_validate_packet_t evtData = *((microapp_validate_packet_t*)commandData.data);
-			event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
-			event.dispatch();
-
-			result.returnCode = event.result.returnCode;
-			break;
-		}
-		case CS_MICROAPP_OPCODE_REQUEST: {
-			if (commandData.len != sizeof(microapp_request_packet_t)) {
-				LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_request_packet_t));
-				result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
-				return;
-			}
-
-			LOGi(STR_HANDLE_COMMAND, "microapp request");
-	
-			// TODO: don't copy the data (but also make sure that the sending party does not overwrite it!)
-			microapp_request_packet_t evtData = *((microapp_request_packet_t*)commandData.data);
-			event_t event(CS_TYPE::CMD_MICROAPP, &evtData, sizeof(evtData), result);
-			event.dispatch();
-
-			result.returnCode = event.result.returnCode;
-			break;
-		}
-		default:
-			result.returnCode = ERR_INVALID_MESSAGE;
-	}
-}
-
 void CommandHandler::dispatchEventForCommand(CS_TYPE type, cs_data_t commandData, const cmd_source_with_counter_t& source, cs_result_t & result) {
 	event_t event(type, commandData.data, commandData.len, source, result);
 	event.dispatch();
@@ -1130,7 +1059,7 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_GET_GPREGRET:
 		case CTRL_CMD_GET_ADC_CHANNEL_SWAPS:
 		case CTRL_CMD_GET_RAM_STATS:
-		case CTRL_CMD_MICROAPP:
+		case CTRL_CMD_MICROAPP_UPLOAD:
 		case CTRL_CMD_CLEAN_FLASH:
 			return ADMIN;
 		case CTRL_CMD_UNKNOWN:

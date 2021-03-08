@@ -7,12 +7,13 @@
 
 #define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
 
-typedef struct __attribute__((__packed__)) microapp_header_t {
-	uint32_t size;
-	uint32_t checksum;
-	uint32_t offset;
-	uint32_t reserve;
-} microapp_header_t;
+//// Has to match section .firmware_header in linker file nrf_common.ld.
+//typedef struct __attribute__((__packed__)) microapp_header_t {
+//	uint32_t size;
+//	uint32_t checksum;
+//	uint32_t offset;
+//	uint32_t reserve;
+//};
 
 /**
  * The class MicroappStorage has functionality to store a second app (and perhaps in the future even more apps) on
@@ -27,11 +28,11 @@ class MicroappStorage { //: public EventListener {
 		MicroappStorage(MicroappStorage const&);
 		void operator=(MicroappStorage const &);
 
-		/**
-		 * The last message we have sent. It has a repeat value that will start at "number_of_notifications". If it
-		 * is at zero, it will not be repeated anymore.
-		 */
-		TYPIFY(EVT_MICROAPP) _prevMessage;
+//		/**
+//		 * The last message we have sent. It has a repeat value that will start at "number_of_notifications". If it
+//		 * is at zero, it will not be repeated anymore.
+//		 */
+//		TYPIFY(EVT_MICROAPP) _prevMessage;
 
 		/**
 		 * We will only allocate the buffer on init(). The buffer is required because when writing to flash, a stack
@@ -39,27 +40,27 @@ class MicroappStorage { //: public EventListener {
 		 */
 		uint8_t *_buffer;
 
-		/**
-		 * For the last chunk we have to do some other things. Validate the entire app, etc.
-		 */
-		bool _lastChunk;
+//		/**
+//		 * For the last chunk we have to do some other things. Validate the entire app, etc.
+//		 */
+//		bool _lastChunk;
 
-		/**
-		 * Local flag to check if microapp is enabled.
-		 */
-		bool _enabled;
+//		/**
+//		 * Local flag to check if microapp is enabled.
+//		 */
+//		bool _enabled;
 
-		/**
-		 * Debug mode
-		 */
-		bool _debug;
+//		/**
+//		 * Debug mode
+//		 */
+//		bool _debug;
 		
-		/**
-		 * Number of repeated notifications you want to send.
-		 *
-		 * TODO: Must be implemented somewhere else perhaps.
-		 */
-		static const int number_of_notifications = 3;
+//		/**
+//		 * Number of repeated notifications you want to send.
+//		 *
+//		 * TODO: Must be implemented somewhere else perhaps.
+//		 */
+//		static const int number_of_notifications = 3;
 	
 
 	protected:
@@ -108,7 +109,7 @@ class MicroappStorage { //: public EventListener {
 		 * Validate the overall binary. This goes through flash and checks it completely. All flash write operations
 		 * have to have finished before.
 		 */
-		uint16_t validateApp();
+		cs_ret_code_t validateApp(uint8_t appIndex);
 
 		/**
 		 * Set app to be valid (only the FDS record field).
@@ -118,7 +119,7 @@ class MicroappStorage { //: public EventListener {
 		/**
 		 * Enable app.
 		 */
-		uint16_t enableApp(bool flag);
+		cs_ret_code_t enableApp(uint8_t appIndex, bool enable);
 
 		/**
 		 * Check if app is enabled.
@@ -128,12 +129,12 @@ class MicroappStorage { //: public EventListener {
 		/**
 		 * Check if app will fit in the reserved pages.
 		 */
-		uint16_t checkAppSize(uint16_t size);
+		cs_ret_code_t checkAppSize(uint16_t size);
 
 		/**
 		 * Write a chunk to flash memory. Writes to buffer at index start + index * CHUNK_SIZE up to size of the data.
 		 */
-		uint16_t writeChunk(uint8_t index, const uint8_t *data, uint16_t size);
+		cs_ret_code_t writeChunk(uint8_t index, const uint8_t *data, uint16_t size);
 
 		/**
 		 * Validate chunk by comparing its calculated checksum with the checksum in the packet.

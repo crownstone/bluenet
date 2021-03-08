@@ -27,6 +27,18 @@ const uint16_t MICROAPP_UPLOAD_MAX_CHUNK_SIZE = 256;
  */
 const uint8_t MICROAPP_PROTOCOL = 1;
 
+const uint8_t MICROAPP_SDK_MAJOR = 1;
+
+const uint8_t MICROAPP_SDK_MINOR = 0;
+
+const uint16_t MICROAPP_MAX_SIZE = 0x1000; // 1 Flash page.
+
+const uint16_t MICROAPP_MAX_RAM = 0x200; // Something for now.
+
+
+
+
+
 /**
  * Header of a microapp binary.
  *
@@ -51,23 +63,22 @@ typedef struct __attribute__((__packed__)) microapp_binary_header_t {
 /*
 nr  | Type name                | Payload type           | Result payload  | Description
 --- | ------------------------ | ---------------------- | --------------- | -----------
-90  | Upload microapp          | microapp_upload_t      | -               | Upload (part of) a microapp.
-91  | Validate microapp upload | microapp_ctrl_header_t | -               | Validate upload of microapp, checks if CRC matches.
-92  | Remove microapp          | microapp_ctrl_header_t | -               | Remove a microapp.
-93  | Enable microapp          | microapp_ctrl_header_t | -               | Enable a microapp, checks if protocol is supported.
-94  | Disable microapp         | microapp_ctrl_header_t | -               | Disable a microapp.
-95  | Get microapp info        | -                      | microapp_info_t | Get info about supported microapps and status of all microapps.
+90  | Get microapp info        | -                      | microapp_info_t | Get info about supported microapps and status of all microapps.
+91  | Upload microapp          | microapp_upload_t      | -               | Upload (part of) a microapp.
+92  | Validate microapp upload | microapp_ctrl_header_t | -               | Validate upload of microapp, checks if CRC matches.
+93  | Remove microapp          | microapp_ctrl_header_t | -               | Remove a microapp.
+94  | Enable microapp          | microapp_ctrl_header_t | -               | Enable a microapp, checks if protocol is supported.
+95  | Disable microapp         | microapp_ctrl_header_t | -               | Disable a microapp.
 */
 
 struct __attribute__((packed)) microapp_ctrl_header_t {
 	uint8_t protocol;   // Protocol of the microapp command and result packets, should match MICROAPP_PROTOCOL.
-	uint8_t index;
+	uint8_t index;      // Index of the microapp on the firmware.
 };
 
 struct __attribute__((packed)) microapp_upload_t {
 	microapp_ctrl_header_t header;
 	uint16_t offset;    // Offset in bytes of this chunk of data. Must be a multiple of 4.
-	uint16_t totalSize; // Size of the complete microapp binary.
 //	uint8[] data;       // A chunk of the microapp binary.
 };
 
@@ -91,6 +102,7 @@ struct __attribute__((packed)) microapp_state_t {
 	uint8_t tryingFunction;       // Index of registered function that didn't pass yet, and that we are calling now.
 	uint8_t failedFunction;       // Index of registered function that was tried, but didn't pass.
 	uint32_t passedFunctions;     // Bitmask of registered functions that were called and returned to firmware successfully.
+	// TODO: maybe checksum and size in here as well?
 };
 
 /**
@@ -98,6 +110,7 @@ struct __attribute__((packed)) microapp_state_t {
  */
 struct __attribute__((packed)) microapp_status_t {
 	uint32_t buildVersion;             // Build version of this microapp.
+	uint16_t checkSum;                 // Checksum of this microapp.
 	microapp_sdk_version_t sdkVersion; // SDK version this microapp was built for.
 	microapp_state_t state;
 };
@@ -106,11 +119,11 @@ struct __attribute__((packed)) microapp_status_t {
  * Packet with all info required to upload a microapp, and to see the status of already uploaded microapps.
  */
 struct __attribute__((packed)) microapp_info_t {
-	uint8_t protocol = MICROAPP_PROTOCOL;   // Protocol of this packet, and the microapp command packets.
-	uint8_t maxApps = MAX_MICROAPPS;        // Maximum number of packets.
-	uint16_t maxAppSize;                    // Maximum binary size of a microapp.
-	uint16_t maxChunkSize;                  // Maximum chunk size for uploading a microapp.
-	uint16_t maxRamUsage;                   // Maximum RAM usage of a microapp.
-	microapp_sdk_version_t sdkVersion;      // SDK version the firmware supports.
+	uint8_t protocol = MICROAPP_PROTOCOL;                   // Protocol of this packet, and the microapp command packets.
+	uint8_t maxApps = MAX_MICROAPPS;                        // Maximum number of packets.
+	uint16_t maxAppSize = MICROAPP_MAX_SIZE;                // Maximum binary size of a microapp.
+	uint16_t maxChunkSize = MICROAPP_UPLOAD_MAX_CHUNK_SIZE; // Maximum chunk size for uploading a microapp.
+	uint16_t maxRamUsage = MICROAPP_MAX_RAM;                // Maximum RAM usage of a microapp.
+	microapp_sdk_version_t sdkVersion;                      // SDK version the firmware supports.
 	microapp_status_t appsStatus[MAX_MICROAPPS];
 };

@@ -65,7 +65,12 @@ enum CommandHandlerTypes {
 	CTRL_CMD_GET_ADC_CHANNEL_SWAPS       = 87,
 	CTRL_CMD_GET_RAM_STATS               = 88,
 
-	CTRL_CMD_MICROAPP                    = 90,
+	CTRL_CMD_MICROAPP_GET_INFO           = 90,
+	CTRL_CMD_MICROAPP_UPLOAD             = 91,
+	CTRL_CMD_MICROAPP_VALIDATE           = 92,
+	CTRL_CMD_MICROAPP_REMOVE             = 93,
+	CTRL_CMD_MICROAPP_ENABLE             = 94,
+	CTRL_CMD_MICROAPP_DISABLE            = 95,
 
 	CTRL_CMD_CLEAN_FLASH                 = 100,
 

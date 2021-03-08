@@ -46,6 +46,13 @@ class Microapp: public EventListener {
 		 */
 		bool _debug;
 
+		cs_ret_code_t handleGetInfo(cs_result_t& result);
+		cs_ret_code_t handleUpload(microapp_upload_internal_t* packet);
+		cs_ret_code_t handleValidate(microapp_ctrl_header_t* packet);
+		cs_ret_code_t handleRemove(microapp_ctrl_header_t* packet);
+		cs_ret_code_t handleEnable(microapp_ctrl_header_t* packet);
+		cs_ret_code_t handleDisable(microapp_ctrl_header_t* packet);
+
 	protected:
 		/**
 		 * Set IPC ram data.
