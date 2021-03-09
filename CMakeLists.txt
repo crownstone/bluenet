@@ -344,6 +344,11 @@ ADD_CUSTOM_TARGET(micro_eec
 	gcc_arm_none_eabi
 	)
 
+ADD_CUSTOM_TARGET(target_depend
+	COMMAND cd ${BOARD_TARGET} && make depend
+	COMMENT "Run make depend in target directory"
+	)
+
 #######################################################################################################################
 # Build bluenet as external project
 #######################################################################################################################
@@ -358,7 +363,7 @@ if(NOT FACTORY_IMAGE)
 		CMAKE_CACHE_ARGS "${CMAKE_ARGS}"
 		CMAKE_ARGS "${CMAKE_ARGS}"
 		BUILD_ALWAYS 1
-		DEPENDS micro_eec
+		DEPENDS micro_eec target_depend
 		)
 endif()
 
