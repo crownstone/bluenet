@@ -9,6 +9,8 @@ option(DOWNLOAD_NRFUTIL                          "Download nrfutil"             
 option(DOWNLOAD_NRFJPROG                         "Download nrfjprog"                     ON)
 option(DOWNLOAD_NRFCONNECT                       "Download nrfconnect"                   OFF)
 option(DOWNLOAD_NRFCONNECT_PROGRAMMER            "Download nrfconnect programmer"        OFF)
+option(DOWNLOAD_CSUTIL                           "Download csutil utility"               OFF)
+option(DOWNLOAD_BLUENET_LIB_LOGS                 "Download lib for binary logging"       OFF)
 
 if(NOT CONFIG_DIR)
 	set(CONFIG_DIR "config")
@@ -265,6 +267,17 @@ if(DOWNLOAD_CSUTIL)
 		)
 endif()
 
+if(DOWNLOAD_BLUENET_LIB_LOGS)
+	ExternalProject_Add(bluenet_lib_logs
+		DOWNLOAD_COMMAND ${PYTHON_EXECUTABLE} -m pip install bluenet-lib-logs
+		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfutil
+		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
+		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
+		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
+		)
+endif()
+
 if(FACTORY_IMAGE)
 	MESSAGE(WARNING "Make a factory image. The usual CMakeBuild.config files will not be used. "
 		"They will be overwritten by the CMakeFactoryImage.config files. "
@@ -315,8 +328,8 @@ endif()
 #message(STATUS "Git hash: ${GIT_HASH}")
 #message(STATUS "Compilation day: ${COMPILATION_DAY}")
 
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}/stamp/${BOARD_TARGET})
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${WORKSPACE_DIR}/tmp/${BOARD_TARGET})
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/stamp)
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/${BOARD_TARGET}/tmp)
 
 #######################################################################################################################
 # Build encryption library (required by bootloader)
@@ -332,7 +345,7 @@ ADD_CUSTOM_TARGET(micro_eec
 	)
 
 #######################################################################################################################
-# Build mluenet as external project
+# Build bluenet as external project
 #######################################################################################################################
 
 if(NOT FACTORY_IMAGE)
