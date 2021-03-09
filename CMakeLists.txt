@@ -268,8 +268,8 @@ if(DOWNLOAD_CSUTIL)
 endif()
 
 if(DOWNLOAD_BLUENET_LIB_LOGS)
-	ExternalProject_Add(bluenet_lib_logs
-		DOWNLOAD_COMMAND ${PYTHON_EXECUTABLE} -m pip install bluenet-lib-logs
+	ExternalProject_Add(bluenet_logs
+		DOWNLOAD_COMMAND ${PYTHON_EXECUTABLE} -m pip install bluenet-logs
 		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
 		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfutil
 		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
@@ -345,7 +345,7 @@ ADD_CUSTOM_TARGET(micro_eec
 	)
 
 ADD_CUSTOM_TARGET(target_depend
-	COMMAND cd ${BOARD_TARGET} && make depend
+	COMMAND cd ${BOARD_TARGET} && test -f "Makefile" && make depend || echo "-- First install"
 	COMMENT "Run make depend in target directory"
 	)
 
