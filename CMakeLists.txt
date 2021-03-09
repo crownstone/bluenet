@@ -271,7 +271,7 @@ if(DOWNLOAD_BLUENET_LIB_LOGS)
 	ExternalProject_Add(bluenet_logs
 		DOWNLOAD_COMMAND ${PYTHON_EXECUTABLE} -m pip install bluenet-logs
 		DOWNLOAD_DIR ${WORKSPACE_DIR}/downloads
-		SOURCE_DIR ${WORKSPACE_DIR}/tools/nrfutil
+		SOURCE_DIR ${WORKSPACE_DIR}/tools/bluenet_logs
 		CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping configure step."
 		BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping build step."
 		INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping install step."
