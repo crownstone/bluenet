@@ -38,8 +38,6 @@ Microapp::Microapp(): EventListener() {
 }
 
 void Microapp::init() {
-	uint32_t err_code;
-
 	MicroappStorage & storage = MicroappStorage::getInstance();
 	storage.init();
 
@@ -75,7 +73,7 @@ void Microapp::loadApps() {
 void Microapp::loadState(uint8_t index) {
 	LOGi("Load state of app %u", index);
 	cs_ret_code_t retCode;
-	cs_state_data_t stateData(CS_TYPE::STATE_MICROAPP, index, &(_states[index]), sizeof(_states[0]));
+	cs_state_data_t stateData(CS_TYPE::STATE_MICROAPP, index, reinterpret_cast<uint8_t*>(&(_states[index])), sizeof(_states[0]));
 	retCode = State::getInstance().get(stateData);
 	if (retCode != ERR_SUCCESS) {
 		resetState(index);
@@ -98,7 +96,7 @@ cs_ret_code_t Microapp::validateApp(uint8_t index) {
 	microapp_binary_header_t appHeader;
 	storage.getAppHeader(index, &appHeader);
 	if (state.checksum != appHeader.checksum) {
-		LOGi("New app on index %u: stored checksum 0x%x, binary checksum 0x%x", index, state->checksum, appHeader.checksum);
+		LOGi("New app on index %u: stored checksum 0x%x, binary checksum 0x%x", index, state.checksum, appHeader.checksum);
 		resetState(index);
 	}
 	state.checksum = appHeader.checksum;
@@ -131,7 +129,7 @@ void Microapp::resetTestState(uint8_t index) {
 }
 
 cs_ret_code_t Microapp::storeState(uint8_t index) {
-	cs_state_data_t stateData(CS_TYPE::STATE_MICROAPP, index, &(_states[index]), sizeof(_states[0]));
+	cs_state_data_t stateData(CS_TYPE::STATE_MICROAPP, index, reinterpret_cast<uint8_t*>(&(_states[index])), sizeof(_states[0]));
 	cs_ret_code_t retCode = State::getInstance().set(stateData);
 	switch (retCode) {
 		case ERR_SUCCESS:
@@ -201,7 +199,7 @@ cs_ret_code_t Microapp::handleUpload(microapp_upload_internal_t* packet) {
 
 	MicroappStorage & storage = MicroappStorage::getInstance();
 	// CAREFUL: This assumes the data stays in ram during the write.
-	retCode = storage.writeChunk(packet->header.header.index, packet->data.data, packet->data.len);
+	retCode = storage.writeChunk(packet->header.header.index, packet->header.offset, packet->data.data, packet->data.len);
 
 	// User should wait for the data to be written to flash before sending the next chunk.
 	if (retCode == ERR_SUCCESS) {

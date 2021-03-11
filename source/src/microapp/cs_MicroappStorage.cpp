@@ -65,14 +65,14 @@ cs_ret_code_t MicroappStorage::init() {
 			LOGi("Sucessfully initialized from 0x%08X to 0x%08X", nrf_microapp_storage.start_addr, nrf_microapp_storage.end_addr);
 			break;
 		default:
-			LOGw("Error code %i", err_code);
+			LOGw("Error code %i", nrfCode);
 			return ERR_NOT_INITIALIZED;
 			break;
 	}
 
 	uint8_t testData[10] = {0,1,2,3,4,5,6,7,8,9};
 	nrfCode = nrf_fstorage_write(&nrf_microapp_storage, g_FLASH_MICROAPP_BASE, testData + 3, 4, NULL);
-	LOGi(err_code);
+	LOGi(nrfCode);
 
 	return ERR_SUCCESS;
 }
@@ -123,7 +123,7 @@ void MicroappStorage::getAppHeader(uint8_t appIndex, microapp_binary_header_t* h
 	const uint8_t size = sizeof(*header);
 
 	nrf_fstorage_read(&nrf_microapp_storage, addr, header, size);
-	printHeader(header);
+	printHeader(SERIAL_DEBUG, header);
 }
 
 cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
@@ -155,7 +155,7 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 
 	// Compare binary checksum.
 	// Calculate checksum in chunks, so that we don't have to load the whole binary in ram.
-	const uint8_t bufSize = MICROAPP_STORAGE_BUF_SIZE;
+	const uint32_t bufSize = MICROAPP_STORAGE_BUF_SIZE;
 	uint8_t buf[bufSize];
 	uint32_t nrfCode;
 
@@ -193,12 +193,12 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 	crc = crc16(nullptr, 0);
 	for (uint16_t flashAddress = binStartAddress; flashAddress < endAddress; flashAddress += bufSize) {
 		uint16_t readSize = std::min(bufSize, endAddress - flashAddress);
-		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, flashAddress, buf, bufSize);
+		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, flashAddress, buf, readSize);
 		if (nrfCode != ERR_SUCCESS) {
 			LOGw("Error reading fstorage: %u", nrfCode);
 			return ERR_READ_FAILED;
 		}
-		crc16(buf, bufSize, &crc);
+		crc16(buf, readSize, &crc);
 	}
 	LOGd("crc=%u", crc);
 
@@ -209,74 +209,11 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 	return ERR_SUCCESS;
 }
 
-/**
- * Set the app to be "valid". This is normally done after the checksum has been checked and considered correct.
- * This information is written to flash.
- */
-void MicroappStorage::setAppValid() {
-	TYPIFY(STATE_MICROAPP) state_microapp;
-	cs_state_id_t app_id = 0;
-	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
-	State::getInstance().get(data);
-	
-	// write validation = VALIDATION_CHECKSUM to fds record
-	state_microapp.validation = static_cast<uint8_t>(CS_MICROAPP_VALIDATION_CHECKSUM);
-	State::getInstance().set(data);
-}
-
-/**
- * Get if the app is actually valid. If not available from memory it will be obtained from flash.
- */
-bool MicroappStorage::isAppValid() {
-	TYPIFY(STATE_MICROAPP) state_microapp;
-	cs_state_id_t app_id = 0;
-	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
-	State::getInstance().get(data);
-	return (state_microapp.validation == static_cast<uint8_t>(CS_MICROAPP_VALIDATION_CHECKSUM));
-}
-
-/**
- * After an app has been considered "valid" it is possible to enable it. It is also possible to disable an app
- * afterwards (without invalidating it). The app can be enabled later on again.
- */
-cs_ret_code_t MicroappStorage::enableApp(uint8_t appIndex, bool enable) {
-	TYPIFY(STATE_MICROAPP) state_microapp;
-	cs_state_id_t app_id = 0;
-	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
-	State::getInstance().get(data);
-
-	if (state_microapp.validation >= static_cast<uint8_t>(CS_MICROAPP_VALIDATION_CHECKSUM)) {
-		if (flag) {
-			state_microapp.validation = static_cast<uint8_t>(CS_MICROAPP_VALIDATION_ENABLED);
-			_enabled = true;
-		} else {
-			state_microapp.validation = static_cast<uint8_t>(CS_MICROAPP_VALIDATION_DISABLED);
-			_enabled = false;
-		}
-	} else {
-		// Not allowed to enable/disable app that did not pass checksum valid state.
-		return ERR_INVALID_MESSAGE;
-	}
-	State::getInstance().set(data);
-	return ERR_SUCCESS;
-}
-
-/**
- * Check if an app is enabled.
- */
-bool MicroappStorage::isEnabled() {
-	TYPIFY(STATE_MICROAPP) state_microapp;
-	cs_state_id_t app_id = 0;
-	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
-	State::getInstance().get(data);
-	return (state_microapp.validation == static_cast<uint8_t>(CS_MICROAPP_VALIDATION_ENABLED));
-}
-
-void printHeader(uint8_t logLevel, microapp_binary_header_t* header) {
+void MicroappStorage::printHeader(uint8_t logLevel, microapp_binary_header_t* header) {
 	_log(logLevel, true, "startAddress=%u sdkVersion=%u.%u size=%u checksum=%u checksumHeader=%u appBuildVersion=%u",
 			header->startAddress,
 			header->sdkVersionMajor,
-			header->sdkVersionMinor
+			header->sdkVersionMinor,
 			header->size,
 			header->checksum,
 			header->checksumHeader,
@@ -288,21 +225,21 @@ void printHeader(uint8_t logLevel, microapp_binary_header_t* header) {
  * incoming messages. In this way it is also possible to resend a particular chunk.
  */
 void MicroappStorage::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
-	uint16_t error;
-	if (evt->result != NRF_SUCCESS) {
-		LOGe("Flash error");
-		error = ERR_UNSPECIFIED;
-	} else {
-		LOGi("Flash event successful");
-		error = ERR_SUCCESS;
+	cs_ret_code_t retCode = ERR_SUCCESS;
+	switch (evt->result) {
+		case NRF_SUCCESS: {
+			retCode = ERR_SUCCESS;
+			break;
+		}
+		default: {
+			LOGe("Flash error: %u", evt->result);
+			retCode = ERR_UNSPECIFIED;
+		}
 	}
-
 	switch (evt->id) {
 		case NRF_FSTORAGE_EVT_WRITE_RESULT: {
 			LOGi("Flash written");
-			_prevMessage.repeat = number_of_notifications;
-			_prevMessage.error = error;
-			event_t event(CS_TYPE::EVT_MICROAPP, &_prevMessage, sizeof(_prevMessage));
+			event_t event(CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT, &retCode, sizeof(retCode));
 			event.dispatch();
 			break;
 		}
@@ -314,4 +251,3 @@ void MicroappStorage::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
 			break;
 	}
 }
-

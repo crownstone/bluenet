@@ -230,10 +230,10 @@ void CrownstoneService::handleEvent(event_t & event) {
 //			writeResult(CTRL_CMD_SETUP, cs_result_t(ERR_SUCCESS));
 			break;
 		}
-		case CS_TYPE::EVT_MICROAPP: {
-			TYPIFY(EVT_MICROAPP) data = *((TYPIFY(EVT_MICROAPP)*)event.data);
-			uint8_t protocolVersion = 5; // TODO: get this from event.
-			writeResult(protocolVersion, CTRL_CMD_MICROAPP_UPLOAD, data.error, cs_data_t(reinterpret_cast<buffer_ptr_t>(event.data), TypeSize(event.type)));
+		case CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT: {
+			TYPIFY(EVT_MICROAPP_UPLOAD_RESULT)* retCode = CS_TYPE_CAST(EVT_MICROAPP_UPLOAD_RESULT, event.data);
+			cs_result_t result(*retCode);
+			writeResult(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_MICROAPP_UPLOAD, result);
 			break;
 		}
 		case CS_TYPE::EVT_HUB_DATA_REPLY: {

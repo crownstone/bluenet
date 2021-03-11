@@ -29,6 +29,7 @@
 #include <util/cs_Error.h>
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
+#include <microapp/cs_MicroappStorage.h>
 
 void handleSwitchCommand(pin_cmd_t* pin_cmd) {
 	CommandMicroappPinOpcode2 mode = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
@@ -470,7 +471,7 @@ uint16_t MicroappProtocol::interpretRamdata() {
  *
  * TODO: Return setup and loop addresses
  */
-void MicroappProtocol::callApp() {
+void MicroappProtocol::callApp(uint8_t appIndex) {
 	static bool thumb_mode = true;
 
 	// Check if we want to do this again
@@ -478,21 +479,19 @@ void MicroappProtocol::callApp() {
 	//	LOGi("Microapp: app not enabled.");
 	//	return;
 	//} 
+	microapp_binary_header_t header;
+	MicroappStorage::getInstance().getAppHeader(appIndex, &header);
 
-	TYPIFY(STATE_MICROAPP) state_microapp;
-	cs_state_id_t app_id = 0;
-	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
-	State::getInstance().get(data);
-
-	if (state_microapp.start_addr == 0x00) {
-		LOGi("Module can't be run. Start address 0?");
-		_booted = false;
-		return;
-	}
+//	if (state_microapp.start_addr == 0x00) {
+//		LOGi("Module can't be run. Start address 0?");
+//		_booted = false;
+//		return;
+//	}
 
 	initMemory();
 
-	uintptr_t address = state_microapp.start_addr + state_microapp.offset;
+//	uintptr_t address = state_microapp.start_addr + state_microapp.offset;
+	uintptr_t address = header.startAddress;
 	LOGi("Microapp: start at 0x%04x", address);
 
 	if (thumb_mode) address += 1;
@@ -525,7 +524,7 @@ uint16_t MicroappProtocol::initMemory() {
 /*
  * Called from cs_Microapp every time tick. Only when _booted gets up will this function become active.
  */
-void MicroappProtocol::callSetupAndLoop() {
+void MicroappProtocol::callSetupAndLoop(uint8_t appIndex) {
 
 	static uint16_t counter = 0;
 	if (_booted) {

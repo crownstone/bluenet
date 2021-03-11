@@ -47,7 +47,7 @@ public:
 	 */
 	cs_ret_code_t writeChunk(uint8_t appIndex, uint16_t offset, const uint8_t* data, uint16_t size);
 
-	void printHeader(microapp_binary_header_t* header);
+	void printHeader(uint8_t logLevel, microapp_binary_header_t* header);
 
 	/**
 	 * Internal usage: when fstorage is done, this function will be called (indirectly through app_scheduler).

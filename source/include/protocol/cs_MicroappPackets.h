@@ -45,7 +45,7 @@ const uint16_t MICROAPP_MAX_RAM = 0x200; // Something for now.
  * Assumed to be word sized (multiple of 4B).
  * Has to match section .firmware_header in linker file nrf_common.ld of the microapp repo.
  */
-typedef struct __attribute__((__packed__)) microapp_binary_header_t {
+struct __attribute__((__packed__)) microapp_binary_header_t {
 	uint32_t startAddress;     // Address of first function to call.
 
 	uint8_t sdkVersionMajor;   // Similar to microapp_sdk_version_t

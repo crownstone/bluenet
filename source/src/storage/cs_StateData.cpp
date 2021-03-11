@@ -217,7 +217,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_SUCCESS;
 	}
 	case CS_TYPE::STATE_MICROAPP: {
-		*reinterpret_cast<TYPIFY(STATE_MICROAPP)*>(data.value) = cs_microapp_t();
+		*reinterpret_cast<TYPIFY(STATE_MICROAPP)*>(data.value) = microapp_state_t();
 		return ERR_SUCCESS;
 	}
 	case CS_TYPE::STATE_SOFT_ON_SPEED:
