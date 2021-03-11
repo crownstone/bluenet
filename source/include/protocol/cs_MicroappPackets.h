@@ -42,6 +42,7 @@ const uint16_t MICROAPP_MAX_RAM = 0x200; // Something for now.
 /**
  * Header of a microapp binary.
  *
+ * Assumed to be word sized (multiple of 4B).
  * Has to match section .firmware_header in linker file nrf_common.ld of the microapp repo.
  */
 typedef struct __attribute__((__packed__)) microapp_binary_header_t {
@@ -90,19 +91,30 @@ struct __attribute__((packed)) microapp_sdk_version_t {
 	uint8_t minor;
 };
 
+enum MICROAPP_TEST_STATE {
+	MICROAPP_TEST_STATE_UNTESTED = 0,
+	MICROAPP_TEST_STATE_TRYING = 1,
+	MICROAPP_TEST_STATE_FAILED = 2,
+	MICROAPP_TEST_STATE_PASSED = 3,
+};
+
+const uint8_t MICROAPP_FUNCTION_NONE = 255;
+
 /**
  * State of tests of a microapp, also stored in flash.
  */
 struct __attribute__((packed)) microapp_state_t {
+	uint16_t checksum;            // Checksum of the microapp, should be equal to the checksum field of the binary.
+
 	bool enabled: 1;              // Whether the microapp is enabled.
-	uint8_t checksum: 2;          // values: untested, passed, failed
+	uint8_t checksumTest: 2;      // values: MICROAPP_TEST_STATE
 	uint8_t memoryUsage: 1;       // values: ok, excessive
-	uint8_t boot: 2;              // Values: untested, trying, passed, failed. Checks if the microapp starts, registers callback function in IPC, and returns to firmware.
-	uint16_t reserved: 10;        // Reserved, must be 0 for now.
-	uint8_t tryingFunction;       // Index of registered function that didn't pass yet, and that we are calling now.
-	uint8_t failedFunction;       // Index of registered function that was tried, but didn't pass.
+	uint8_t bootTest: 2;          // Values: MICROAPP_TEST_STATE. Checks if the microapp starts, registers callback function in IPC, and returns to firmware.
+	uint16_t reservedTest: 10;    // Reserved, must be 0 for now.
+
+	uint8_t tryingFunction;       // Index of registered function that didn't pass yet, and that we are calling now. MICROAPP_FUNCTION_NONE for none.
+	uint8_t failedFunction;       // Index of registered function that was tried, but didn't pass. MICROAPP_FUNCTION_NONE for none.
 	uint32_t passedFunctions;     // Bitmask of registered functions that were called and returned to firmware successfully.
-	// TODO: maybe checksum and size in here as well?
 };
 
 /**
@@ -110,7 +122,6 @@ struct __attribute__((packed)) microapp_state_t {
  */
 struct __attribute__((packed)) microapp_status_t {
 	uint32_t buildVersion;             // Build version of this microapp.
-	uint16_t checkSum;                 // Checksum of this microapp.
 	microapp_sdk_version_t sdkVersion; // SDK version this microapp was built for.
 	microapp_state_t state;
 };
@@ -125,5 +136,5 @@ struct __attribute__((packed)) microapp_info_t {
 	uint16_t maxChunkSize = MICROAPP_UPLOAD_MAX_CHUNK_SIZE; // Maximum chunk size for uploading a microapp.
 	uint16_t maxRamUsage = MICROAPP_MAX_RAM;                // Maximum RAM usage of a microapp.
 	microapp_sdk_version_t sdkVersion;                      // SDK version the firmware supports.
-	microapp_status_t appsStatus[MAX_MICROAPPS];
+	microapp_status_t appsStatus[MAX_MICROAPPS];            // Status of each microapp.
 };

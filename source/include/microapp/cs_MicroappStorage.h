@@ -2,10 +2,10 @@
 
 #include <events/cs_EventListener.h>
 
-// Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
-#define MICROAPP_LOOP_FREQUENCY 10
-
-#define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
+//// Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
+//#define MICROAPP_LOOP_FREQUENCY 10
+//
+//#define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
 
 //// Has to match section .firmware_header in linker file nrf_common.ld.
 //typedef struct __attribute__((__packed__)) microapp_header_t {
@@ -19,132 +19,55 @@
  * The class MicroappStorage has functionality to store a second app (and perhaps in the future even more apps) on
  * another part of the flash memory.
  */
-class MicroappStorage { //: public EventListener {
-	private:
-		/**
-		 * Singleton, constructor, also copy constructor, is private.
-		 */
-		MicroappStorage();
-		MicroappStorage(MicroappStorage const&);
-		void operator=(MicroappStorage const &);
+class MicroappStorage {
+public:
+	static MicroappStorage& getInstance() {
+		static MicroappStorage instance;
+		return instance;
+	}
 
-//		/**
-//		 * The last message we have sent. It has a repeat value that will start at "number_of_notifications". If it
-//		 * is at zero, it will not be repeated anymore.
-//		 */
-//		TYPIFY(EVT_MICROAPP) _prevMessage;
+	/**
+	 * Initialize fstorage, allocate buffer.
+	 */
+	cs_ret_code_t init();
 
-		/**
-		 * We will only allocate the buffer on init(). The buffer is required because when writing to flash, a stack
-		 * allocated pointer might already be gone. The buffer will be of size MICROAPP_CHUNK_SIZE.
-		 */
-		uint8_t *_buffer;
+	/**
+	 * Get a copy of the microapp binary header.
+	 */
+	void getAppHeader(uint8_t appIndex, microapp_binary_header_t* header);
 
-//		/**
-//		 * For the last chunk we have to do some other things. Validate the entire app, etc.
-//		 */
-//		bool _lastChunk;
+	/**
+	 * Validate the overall binary, this goes through flash and checks it completely.
+	 * All flash write operations have to have finished before.
+	 */
+	cs_ret_code_t validateApp(uint8_t appIndex);
 
-//		/**
-//		 * Local flag to check if microapp is enabled.
-//		 */
-//		bool _enabled;
+	/**
+	 * Write a chunk to flash.
+	 */
+	cs_ret_code_t writeChunk(uint8_t appIndex, uint16_t offset, const uint8_t* data, uint16_t size);
 
-//		/**
-//		 * Debug mode
-//		 */
-//		bool _debug;
-		
-//		/**
-//		 * Number of repeated notifications you want to send.
-//		 *
-//		 * TODO: Must be implemented somewhere else perhaps.
-//		 */
-//		static const int number_of_notifications = 3;
-	
+	void printHeader(microapp_binary_header_t* header);
 
-	protected:
-		/**
-		 * Erases all pages of the MicroappStorage binary.
-		 */
-		uint16_t erasePages();
+	/**
+	 * Internal usage: when fstorage is done, this function will be called (indirectly through app_scheduler).
+	 */
+	void handleFileStorageEvent(nrf_fstorage_evt_t *evt);
+private:
+	/**
+	 * Singleton, constructor, also copy constructor, is private.
+	 */
+	MicroappStorage();
+	MicroappStorage(MicroappStorage const&);
+	void operator=(MicroappStorage const &);
 
-	public:
-		static MicroappStorage& getInstance() {
-			static MicroappStorage instance;
-			return instance;
-		}
+	/**
+	 * The buffer is required to perform writes to flash, as the data has to stay in memory until the  write is done.
+	 */
+	uint8_t *_buffer = nullptr;
 
-		/**
-		 * Initialize fstorage. Allocate buffer.
-		 */
-		uint16_t init();
-
-		/**
-		 * The tick function is used to send more notifications than one.
-		 */
-		void tick();
-
-		/**
-		 * Handle incoming packet. Returns err_code.
-		 */
-		uint32_t handlePacket(microapp_packet_header_t *packet_stub);
-
-		/**
-		 * When fstorage is done, this function will be called (indirectly through app_scheduler).
-		 */
-		void handleFileStorageEvent(nrf_fstorage_evt_t *evt);
-
-		/**
-		 * Get header of microapp.
-		 */
-		void getHeaderApp(microapp_header_t *header);
-
-		/**
-		 * Check if app is valid (only checking the FDS record field).
-		 */
-		bool isAppValid();
-
-		/**
-		 * Validate the overall binary. This goes through flash and checks it completely. All flash write operations
-		 * have to have finished before.
-		 */
-		cs_ret_code_t validateApp(uint8_t appIndex);
-
-		/**
-		 * Set app to be valid (only the FDS record field).
-		 */
-		void setAppValid();
-
-		/**
-		 * Enable app.
-		 */
-		cs_ret_code_t enableApp(uint8_t appIndex, bool enable);
-
-		/**
-		 * Check if app is enabled.
-		 */
-		bool isEnabled();
-
-		/**
-		 * Check if app will fit in the reserved pages.
-		 */
-		cs_ret_code_t checkAppSize(uint16_t size);
-
-		/**
-		 * Write a chunk to flash memory. Writes to buffer at index start + index * CHUNK_SIZE up to size of the data.
-		 */
-		cs_ret_code_t writeChunk(uint8_t index, const uint8_t *data, uint16_t size);
-
-		/**
-		 * Validate chunk by comparing its calculated checksum with the checksum in the packet.
-		 */
-		uint16_t validateChunk(const uint8_t * const data, uint16_t size, uint16_t compare);
-
-		/**
-		 * Store in flash information about the app (start address, checksum, etc.)
-		 */
-		void storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t size);
-
-
+	/**
+	 * Erases all pages of the microapp storage.
+	 */
+	uint16_t erasePages();
 };

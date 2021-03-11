@@ -29,6 +29,8 @@
 #include <util/cs_Crc16.h>
 #include <util/cs_Utils.h>
 
+const uint8_t MICROAPP_STORAGE_BUF_SIZE = 32;
+
 void fs_evt_handler_sched(void *data, uint16_t size) {
 	nrf_fstorage_evt_t * evt = (nrf_fstorage_evt_t*) data;
 	MicroappStorage::getInstance().handleFileStorageEvent(evt);
@@ -47,31 +49,32 @@ NRF_FSTORAGE_DEF(nrf_fstorage_t nrf_microapp_storage) =
 };
 
 MicroappStorage::MicroappStorage() { 
-
-	_prevMessage.protocol = 0;
-	_prevMessage.app_id = 0;
-	_prevMessage.payload = 0;
-	_prevMessage.repeat = 0;
-
-	_enabled = false;
-	_debug = true;
 }
 
-uint16_t MicroappStorage::init() {
-	_buffer = new uint8_t[MICROAPP_CHUNK_SIZE];
-
-	uint32_t err_code;
-	err_code = nrf_fstorage_init(&nrf_microapp_storage, &nrf_fstorage_sd, NULL);
-	switch(err_code) {
-	case NRF_SUCCESS:
-		LOGi("Sucessfully initialized from 0x%08X to 0x%08X", nrf_microapp_storage.start_addr, nrf_microapp_storage.end_addr);
-		break;
-	default:
-		LOGw("Error code %i", err_code);
-		break;
+cs_ret_code_t MicroappStorage::init() {
+	_buffer = new uint8_t[MICROAPP_STORAGE_BUF_SIZE];
+	if (_buffer == nullptr) {
+		LOGw("Could not allocate buffer");
+		return ERR_NO_SPACE;
 	}
 
-	return err_code;
+	uint32_t nrfCode;
+	nrfCode = nrf_fstorage_init(&nrf_microapp_storage, &nrf_fstorage_sd, NULL);
+	switch (nrfCode) {
+		case NRF_SUCCESS:
+			LOGi("Sucessfully initialized from 0x%08X to 0x%08X", nrf_microapp_storage.start_addr, nrf_microapp_storage.end_addr);
+			break;
+		default:
+			LOGw("Error code %i", err_code);
+			return ERR_NOT_INITIALIZED;
+			break;
+	}
+
+	uint8_t testData[10] = {0,1,2,3,4,5,6,7,8,9};
+	nrfCode = nrf_fstorage_write(&nrf_microapp_storage, g_FLASH_MICROAPP_BASE, testData + 3, 4, NULL);
+	LOGi(err_code);
+
+	return ERR_SUCCESS;
 }
 
 uint16_t MicroappStorage::erasePages() {
@@ -80,203 +83,129 @@ uint16_t MicroappStorage::erasePages() {
 	return err_code;
 }
 
-cs_ret_code_t MicroappStorage::checkAppSize(uint16_t size) {
-	uint32_t start = nrf_microapp_storage.start_addr;
-	if ((start + size) > nrf_microapp_storage.end_addr) {
-		LOGw("Microapp binary too large. Application can not be written");
+cs_ret_code_t MicroappStorage::writeChunk(uint8_t appIndex, uint16_t offset, const uint8_t* data, uint16_t size) {
+	uint32_t flashAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE + offset;
+	LOGi("Write chunk at 0x%08X of size %u", flashAddress, size);
+
+	if (offset + size > MICROAPP_MAX_SIZE) {
 		return ERR_NO_SPACE;
 	}
-	return ERR_SUCCESS;
-}
 
-/**
- * We assume that the checksum of the particular chunk is already performed. It would be a waste to send an event with
- * incorrect checksum. If other sources for microapp code (e.g. UART) are added, the checksum should also be checked
- * early in the process. We also assume that all data buffers are of size MICROAPP_CHUNK_SIZE. The last one should be
- * appended with 0xFF values to make it the right size.
- */
-cs_ret_code_t MicroappStorage::writeChunk(uint8_t index, const uint8_t *data, uint16_t size) {
-	uint32_t err_code;
-	uint32_t start = nrf_microapp_storage.start_addr + (MICROAPP_CHUNK_SIZE * index);
-	LOGi("Write chunk: %i at 0x%08X of size %i", index, start, size);
-	LOGi("Start with data [%02X,%02X,%02X]", data[0], data[1], data[2]);
+//	// Make a copy of the data
+//	if (size > MICROAPP_STORAGE_BUF_SIZE) {
+//		return ERR_BUFFER_TOO_SMALL;
+//	}
+//	memcpy(_buffer, data, size);
 
-	// check chunk size
-	if ((start + size) > nrf_microapp_storage.end_addr) {
-		LOGw("Microapp binary too large. Chunk not written");
-		return ERR_NO_SPACE;
-	}
-	// Make a copy of the data object
-	memcpy(_buffer, data, size);
-
-	err_code = nrf_fstorage_write(&nrf_microapp_storage, start, _buffer, size, NULL);
-	switch(err_code) {
-		case NRF_ERROR_NULL:
-			LOGw("Error code %i, NRF_ERROR_NULL", err_code);
-			break;
-		case NRF_ERROR_INVALID_STATE:
-			LOGw("Error code %i, NRF_ERROR_INVALID_STATE", err_code);
-			break;
-		case NRF_ERROR_INVALID_LENGTH:
-			LOGw("Error code %i, NRF_ERROR_INVALID_LENGTH", err_code);
-			LOGw("  start %i, data [%02X,%02X,%02X], size, %i", start, data[0], data[1], data[2], size);
-			break;
-		case NRF_ERROR_INVALID_ADDR:
-			LOGw("Error code %i, NRF_ERROR_INVALID_ADDR", err_code);
-			LOGw("  at 0x%08X (start at 0x%08X)", start, nrf_microapp_storage.start_addr);
-			LOGw("  is 0x%08X word-aligned as well?", data);
-			break;
-		case NRF_ERROR_NO_MEM:
-			LOGw("Error code %i, NRF_ERROR_NO_MEM", err_code);
-			break;
+	uint32_t nrfCode = nrf_fstorage_write(&nrf_microapp_storage, flashAddress, data, size, NULL);
+	switch (nrfCode) {
 		case NRF_SUCCESS:
-			LOGi("Sucessfully written");
-			break;
-	}
-	return err_code;
-}
-
-/**
- * For now only allow one app.
- */
-void MicroappStorage::storeAppMetadata(uint8_t id, uint16_t checksum, uint16_t size) {
-	LOGi("Store app %i, checksum %i, size %i, start address %x", id, checksum, size, nrf_microapp_storage.start_addr);
-	TYPIFY(STATE_MICROAPP) state_microapp;
-	state_microapp.start_addr = nrf_microapp_storage.start_addr;
-	state_microapp.size = size;
-	state_microapp.checksum = checksum;
-	state_microapp.id = id;
-	state_microapp.validation = static_cast<uint8_t>(CS_MICROAPP_VALIDATION_NONE);
-	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, id, (uint8_t*)&state_microapp, sizeof(state_microapp));
-	uint32_t err_code = State::getInstance().set(data);
-
-	if (err_code != ERR_SUCCESS) {
-		LOGi("Error: remove state microapp");
-		Storage::getInstance().remove(CS_TYPE::STATE_MICROAPP);
+			LOGd("Success");
+			return ERR_SUCCESS;
+		case NRF_ERROR_NO_MEM:
+			LOGw("Write queue is full");
+			return ERR_BUSY;
+		case NRF_ERROR_INVALID_LENGTH:
+			LOGw("Invalid length: size=%u", size);
+			return ERR_WRONG_PAYLOAD_LENGTH;
+		case NRF_ERROR_INVALID_ADDR:
+			LOGw("Invalid address: flashAddress=0x%08X data=0x%08X");
+			return ERR_NOT_ALIGNED;
+		default:
+			LOGw("Error %u", nrfCode);
+			return ERR_UNSPECIFIED;
 	}
 }
 
-/**
- * Validate a chunk of data given a checksum to compare with.
- */
-uint16_t MicroappStorage::validateChunk(const uint8_t * const data, uint16_t size, uint16_t compare) {
-	uint16_t crc = crc16(data, size);
-	LOGi("Chunk checksum %04X (versus %04X)", crc, compare);
-	if (crc == compare) {
-		return ERR_SUCCESS;
-	} else {
-		return ERR_INVALID_MESSAGE;
-	}
-}
-
-/**
- * Get configuration from the header in the app.
- */
-void MicroappStorage::getHeaderApp(microapp_header_t *header) {
-
+void MicroappStorage::getAppHeader(uint8_t appIndex, microapp_binary_header_t* header) {
 	LOGd("Get app header");
-	const uint32_t addr = nrf_microapp_storage.start_addr;
-	const uint8_t size = sizeof(microapp_header_t);
-	uint8_t buf[size];
+	const uint32_t addr = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
+	const uint8_t size = sizeof(*header);
 
-	nrf_fstorage_read(&nrf_microapp_storage, addr, &buf, size);
-	header->offset   = (uint32_t)((buf[1] << 8) + (buf[0]));
-	header->size     = (uint32_t)((buf[5] << 8) + (buf[4]));
-	header->checksum = (uint32_t)((buf[9] << 8) + (buf[8]));
-
-	LOGd("Offset: %i", header->offset);
-	LOGd("Size: %i", header->size);
-	LOGd("Checksum: %x", header->checksum);
+	nrf_fstorage_read(&nrf_microapp_storage, addr, header, size);
+	printHeader(header);
 }
 
-/**
- * This function validates the app in flash. Only use it when all chunks, also the last chunk has been written 
- * successfully.
- *
- * The checksum is calculated iteratively, by using the chunk size. For the last chunk we will only use the part 
- * up to the total size of the binary. By doing it iteratively we can keep the local buffer relatively small.
- */
 cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 	LOGd("Validate app %u", appIndex);
-	uint16_t ret_code;
 
-	microapp_header_t header;
-	getHeaderApp(&header);
-	
-	if (header.size > 0x1000*(g_FLASH_MICROAPP_PAGES)) {
-		LOGi("Microapp size, %i, too large. Do not load", header.size);
-		return ERR_WRONG_STATE;
-	}
-    if (header.offset > 0x1000*(g_FLASH_MICROAPP_PAGES)) {
-		LOGi("Microapp offset, %i, too large. Do not load", header.offset);
-		return ERR_WRONG_STATE;
-    }
-	LOGd("Microapp size field is: 0x%x", header.size);
+	microapp_binary_header_t header;
+	getAppHeader(appIndex, &header);
 
-	// get the state fields for the microapp and store results
-	TYPIFY(STATE_MICROAPP) state_microapp;
-	cs_state_id_t id = 0;
-	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, id, (uint8_t*)&state_microapp, sizeof(state_microapp));
-	State::getInstance().get(data);
-
-	state_microapp.start_addr = nrf_microapp_storage.start_addr;
-	state_microapp.offset = header.offset;
-	state_microapp.size = header.size;
-	state_microapp.checksum = header.checksum;
-	
-	LOGd("Write microapp config");
-	State::getInstance().set(data);
-	
-	// read from flash with fstorage, calculate checksum
-	LOGd("Calculate checksum, should become: 0x%x", header.checksum);
-	uint8_t count = (state_microapp.size - sizeof(header)) / MICROAPP_CHUNK_SIZE;
-	uint16_t remain = (state_microapp.size - sizeof(header)) - (count * MICROAPP_CHUNK_SIZE);
-	uint16_t crcIterative = crc16(nullptr, 0);
-
-	// loop and limit required data to MICROAPP_CHUNK_SIZE
-	uint8_t buf[MICROAPP_CHUNK_SIZE];
-	uint32_t addr = nrf_microapp_storage.start_addr;
-
-	// Calculate checksum with an empty header.
-	memset(&buf, 0, sizeof(header));
-
-	uint8_t header_count = sizeof(header) / MICROAPP_CHUNK_SIZE;
-	uint16_t header_remain = sizeof(header) - header_count;
-	for (int i = 0; i < header_count; ++i) {
-		crcIterative = crc16(buf, MICROAPP_CHUNK_SIZE, &crcIterative);
-		addr += MICROAPP_CHUNK_SIZE;
-	}
-	if (header_remain) {
-		crcIterative = crc16(buf, header_remain, &crcIterative);
-		addr += header_remain;
+	if (header.size > MICROAPP_MAX_SIZE) {
+		LOGw("Microapp size=%u is too large", header.size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 
-	for (int i = 0; i < count; ++i) {
-		ret_code = nrf_fstorage_read(&nrf_microapp_storage, addr, &buf, MICROAPP_CHUNK_SIZE);
-		if (ret_code != ERR_SUCCESS) {
-			LOGw("Error with reading with fstorage: %i", ret_code);
-			return ERR_INVALID_MESSAGE;
+	uint32_t startAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
+	uint32_t endAddress = startAddress + header.size;
+	if (header.startAddress > endAddress - sizeof(header.startAddress)) {
+		LOGw("Microapp startAddress=0x%08X is too large.", header.startAddress);
+		return ERR_WRONG_PARAMETER;
+	}
+
+	// Compare header checksum.
+	uint16_t checksumHeader = header.checksumHeader;
+	header.checksum = 0;
+	uint16_t crc = crc16(reinterpret_cast<uint8_t*>(&header), sizeof(header));
+	LOGi("Header checksum: expected=%u calculated=%u", checksumHeader, crc);
+	if (checksumHeader != crc) {
+		return ERR_MISMATCH;
+	}
+
+	// Compare binary checksum.
+	// Calculate checksum in chunks, so that we don't have to load the whole binary in ram.
+	const uint8_t bufSize = MICROAPP_STORAGE_BUF_SIZE;
+	uint8_t buf[bufSize];
+	uint32_t nrfCode;
+
+	// Init the CRC.
+	crc = crc16(nullptr, 0);
+
+	uint32_t binStartAddress = startAddress + sizeof(header);
+	uint16_t binSize = header.size - sizeof(header);
+
+	// First read whole chunks.
+	uint16_t wholeChunkCount = binSize / bufSize;
+	uint32_t flashAddress = binStartAddress;
+	for (uint16_t i = 0; i < wholeChunkCount; ++i) {
+		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, flashAddress, buf, bufSize);
+		if (nrfCode != ERR_SUCCESS) {
+			LOGw("Error reading fstorage: %u", nrfCode);
+			return ERR_READ_FAILED;
 		}
-		crcIterative = crc16(buf, MICROAPP_CHUNK_SIZE, &crcIterative);
-		addr += MICROAPP_CHUNK_SIZE;
+		crc16(buf, bufSize, &crc);
+		flashAddress += bufSize;
 	}
-	// last chunk of alternative size (smaller than MICROAPP_CHUNK_SIZE)
-	if (remain) {
-		nrf_fstorage_read(&nrf_microapp_storage, addr, &buf, remain);
-		crcIterative = crc16(buf, remain, &crcIterative);
-		addr += remain;
+	// Then read the remainder.
+	uint16_t remainder = binSize - wholeChunkCount * bufSize;
+	if (remainder) {
+		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, flashAddress, buf, remainder);
+		if (nrfCode != ERR_SUCCESS) {
+			LOGw("Error reading fstorage: %u", nrfCode);
+			return ERR_READ_FAILED;
+		}
+		crc16(buf, remainder, &crc);
 	}
-	// checksum is truncated to 16 bits
-	uint16_t crc = crcIterative;
-	LOGd("Calculated checksum: %x", crc);
-	// compare checksum
-	if (state_microapp.checksum != crc) {
-		LOGw("Microapp %i has checksum 0x%04X, but calculation shows 0x%04X", state_microapp.id,
-				state_microapp.checksum, crc);
-		return ERR_INVALID_MESSAGE;
+	LOGd("crc=%u", crc);
+
+	// Or in one loop.
+	crc = crc16(nullptr, 0);
+	for (uint16_t flashAddress = binStartAddress; flashAddress < endAddress; flashAddress += bufSize) {
+		uint16_t readSize = std::min(bufSize, endAddress - flashAddress);
+		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, flashAddress, buf, bufSize);
+		if (nrfCode != ERR_SUCCESS) {
+			LOGw("Error reading fstorage: %u", nrfCode);
+			return ERR_READ_FAILED;
+		}
+		crc16(buf, bufSize, &crc);
 	}
-	
-	LOGi("Yes, microapp %i has proper checksum", state_microapp.id);
+	LOGd("crc=%u", crc);
+
+	LOGi("Binary checksum: expected=%u calculated=%u", header.checksum, crc);
+	if (header.checksum != crc) {
+		return ERR_MISMATCH;
+	}
 	return ERR_SUCCESS;
 }
 
@@ -341,6 +270,17 @@ bool MicroappStorage::isEnabled() {
 	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
 	State::getInstance().get(data);
 	return (state_microapp.validation == static_cast<uint8_t>(CS_MICROAPP_VALIDATION_ENABLED));
+}
+
+void printHeader(uint8_t logLevel, microapp_binary_header_t* header) {
+	_log(logLevel, true, "startAddress=%u sdkVersion=%u.%u size=%u checksum=%u checksumHeader=%u appBuildVersion=%u",
+			header->startAddress,
+			header->sdkVersionMajor,
+			header->sdkVersionMinor
+			header->size,
+			header->checksum,
+			header->checksumHeader,
+			header->appBuildVersion);
 }
 
 /**

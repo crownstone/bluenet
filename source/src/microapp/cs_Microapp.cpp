@@ -13,8 +13,6 @@
  */
 
 
-#include "nrf_fstorage_sd.h"
-
 #include <algorithm>
 #include <ble/cs_UUID.h>
 #include <cfg/cs_AutoConfig.h>
@@ -36,19 +34,10 @@
 #include <util/cs_Utils.h>
 
 Microapp::Microapp(): EventListener() {
-
 	EventDispatcher::getInstance().addListener(this);
-
-	_prevMessage.protocol = 0;
-	_prevMessage.app_id = 0;
-	_prevMessage.payload = 0;
-	_prevMessage.repeat = 0;
-
-	_enabled = false;
-	_debug = true;
 }
 
-uint16_t Microapp::init() {
+void Microapp::init() {
 	uint32_t err_code;
 
 	MicroappStorage & storage = MicroappStorage::getInstance();
@@ -58,49 +47,124 @@ uint16_t Microapp::init() {
 	MicroappProtocol & protocol = MicroappProtocol::getInstance();
 	protocol.setIpcRam();
 
-	// Actually, first check if there's anything there?
-	// TODO
-
-	// Check for valid app on boot
-	err_code = storage.validateApp();
-	if (err_code == ERR_SUCCESS) {
-		LOGi("Set app valid");
-		storage.setAppValid();
-	} else {
-		LOGi("Checksum error");
-	}
-
-	if (err_code != NRF_SUCCESS) {
-		return err_code;
-	}
-
-	// If enabled, call the app
-	if (g_AUTO_ENABLE_MICROAPP_ON_BOOT || storage.isEnabled()) {
-		LOGi("Enable microapp");
-		_enabled = true;
-		// Actually call app
-		protocol.callApp();
-	} else {
-		LOGi("Microapp is not enabled");
-	}
-	return err_code;
+	loadApps();
 }
 
-/*
- * Currently the implementation sends a return message several times. The sender has to receive the return message
- * before the next message can be sent. Especially when sending a large binary chunk (like a microapp), it is 
- * useful to send a few semi-duplicates so that messages are not missed. 
- */
+void Microapp::loadApps() {
+	cs_ret_code_t retCode;
+	std::vector<cs_state_id_t>* ids = nullptr;
+	retCode = State::getInstance().getIds(CS_TYPE::STATE_MICROAPP, ids);
+	if (retCode == ERR_SUCCESS) {
+		for (auto index: *ids) {
+			if (index >= MAX_MICROAPPS) {
+				LOGw("Ignore app %u", index);
+				continue;
+			}
+			LOGi("Found app %u", index);
+			loadState(index);
+			validateApp(index);
+			storeState(index);
+		}
+	}
+
+	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
+		startApp(index);
+	}
+}
+
+void Microapp::loadState(uint8_t index) {
+	LOGi("Load state of app %u", index);
+	cs_ret_code_t retCode;
+	cs_state_data_t stateData(CS_TYPE::STATE_MICROAPP, index, &(_states[index]), sizeof(_states[0]));
+	retCode = State::getInstance().get(stateData);
+	if (retCode != ERR_SUCCESS) {
+		resetState(index);
+		return;
+	}
+}
+
+cs_ret_code_t Microapp::validateApp(uint8_t index) {
+	cs_ret_code_t retCode;
+	microapp_state_t & state = _states[index];
+
+	MicroappStorage & storage = MicroappStorage::getInstance();
+	retCode = storage.validateApp(index);
+	if (retCode != ERR_SUCCESS) {
+		LOGi("No valid app binary on index %u", index);
+		state.checksumTest = MICROAPP_TEST_STATE_FAILED;
+		return retCode;
+	}
+
+	microapp_binary_header_t appHeader;
+	storage.getAppHeader(index, &appHeader);
+	if (state.checksum != appHeader.checksum) {
+		LOGi("New app on index %u: stored checksum 0x%x, binary checksum 0x%x", index, state->checksum, appHeader.checksum);
+		resetState(index);
+	}
+	state.checksum = appHeader.checksum;
+	state.checksumTest = MICROAPP_TEST_STATE_PASSED;
+
+	if (g_AUTO_ENABLE_MICROAPP_ON_BOOT) {
+		LOGi("Enable microapp %u", index);
+		state.enabled = true;
+	}
+	return ERR_SUCCESS;
+}
+
+void Microapp::startApp(uint8_t index) {
+	if (canRunApp(index)) {
+		MicroappProtocol & protocol = MicroappProtocol::getInstance();
+		protocol.callApp(index);
+	}
+}
+
+void Microapp::resetState(uint8_t index) {
+	_states[index] = {0};
+}
+
+void Microapp::resetTestState(uint8_t index) {
+	_states[index].checksumTest = MICROAPP_TEST_STATE_UNTESTED;
+	_states[index].memoryUsage = MICROAPP_TEST_STATE_UNTESTED;
+	_states[index].tryingFunction = MICROAPP_FUNCTION_NONE;
+	_states[index].failedFunction = MICROAPP_FUNCTION_NONE;
+	_states[index].passedFunctions = 0;
+}
+
+cs_ret_code_t Microapp::storeState(uint8_t index) {
+	cs_state_data_t stateData(CS_TYPE::STATE_MICROAPP, index, &(_states[index]), sizeof(_states[0]));
+	cs_ret_code_t retCode = State::getInstance().set(stateData);
+	switch (retCode) {
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE: {
+			return ERR_SUCCESS;
+		}
+		default:
+			return retCode;
+	}
+}
+
+bool Microapp::canRunApp(uint8_t index) {
+	return _states[index].enabled &&
+			_states[index].checksumTest == MICROAPP_TEST_STATE_PASSED &&
+			_states[index].memoryUsage != 1 &&
+			_states[index].bootTest != MICROAPP_TEST_STATE_FAILED &&
+			_states[index].failedFunction != MICROAPP_FUNCTION_NONE;
+}
+
 void Microapp::tick() {
 	MicroappProtocol & protocol = MicroappProtocol::getInstance();
-	protocol.callSetupAndLoop();
+	for (uint8_t i = 0; i < MAX_MICROAPPS; ++i) {
+		if (canRunApp(i)) {
+			protocol.callSetupAndLoop(i);
+		}
+	}
 }
 
 cs_ret_code_t Microapp::handleGetInfo(cs_result_t& result) {
-	if (result.buf.len < sizeof(microapp_info_t)) {
+	microapp_info_t* info = reinterpret_cast<microapp_info_t*>(result.buf.data);
+	if (result.buf.len < sizeof(*info)) {
 		return ERR_BUFFER_TOO_SMALL;
 	}
-	microapp_info_t* info = reinterpret_cast<microapp_info_t*>(result.buf.data);
 
 	info->protocol = MICROAPP_PROTOCOL;
 	info->maxApps = MAX_MICROAPPS;
@@ -109,18 +173,35 @@ cs_ret_code_t Microapp::handleGetInfo(cs_result_t& result) {
 	info->maxRamUsage = MICROAPP_MAX_RAM;
 	info->sdkVersion.major = MICROAPP_SDK_MAJOR;
 	info->sdkVersion.minor = MICROAPP_SDK_MINOR;
-//	info.appsStatus[0].
+
+//	memset(info->appsStatus, 0, sizeof(info->appsStatus));
+	MicroappStorage & storage = MicroappStorage::getInstance();
+	microapp_binary_header_t appHeader;
+	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
+		storage.getAppHeader(index, &appHeader);
+//		if (appHeader.checksum == _states[index].checksum) {
+			info->appsStatus[index].buildVersion = appHeader.appBuildVersion;
+			info->appsStatus[index].sdkVersion.major = appHeader.sdkVersionMajor;
+			info->appsStatus[index].sdkVersion.minor = appHeader.sdkVersionMinor;
+//		}
+		memcpy(&(info->appsStatus[index].state), &(_states[index]), sizeof(_states[0]));
+	}
+	result.dataSize = sizeof(*info);
 	return ERR_SUCCESS;
 }
 
 cs_ret_code_t Microapp::handleUpload(microapp_upload_internal_t* packet) {
-	if (packet->header.header.protocol != MICROAPP_PROTOCOL) {
-		return ERR_PROTOCOL_UNSUPPORTED;
+	cs_ret_code_t retCode = checkHeader(&(packet->header.header));
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
 	}
+
+	// The previous app at this index will not run anymore, so reset the state.
+	resetState(packet->header.header.index);
 
 	MicroappStorage & storage = MicroappStorage::getInstance();
 	// CAREFUL: This assumes the data stays in ram during the write.
-	cs_ret_code_t retCode = storage.writeChunk(packet->header.header.index, packet->data.data, packet->data.len);
+	retCode = storage.writeChunk(packet->header.header.index, packet->data.data, packet->data.len);
 
 	// User should wait for the data to be written to flash before sending the next chunk.
 	if (retCode == ERR_SUCCESS) {
@@ -130,138 +211,79 @@ cs_ret_code_t Microapp::handleUpload(microapp_upload_internal_t* packet) {
 }
 
 cs_ret_code_t Microapp::handleValidate(microapp_ctrl_header_t* packet) {
-	if (packet->protocol != MICROAPP_PROTOCOL) {
-		return ERR_PROTOCOL_UNSUPPORTED;
+	cs_ret_code_t retCode = checkHeader(packet);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
 	}
 
-	MicroappStorage & storage = MicroappStorage::getInstance();
-	return storage.validateApp(packet->index);
+	uint8_t index = packet->index;
+	retCode = validateApp(index);
+	storeState(index);
+	if (retCode == ERR_SUCCESS) {
+		startApp(index);
+	}
+	return retCode;
 }
 
 cs_ret_code_t Microapp::handleRemove(microapp_ctrl_header_t* packet) {
-	if (packet->protocol != MICROAPP_PROTOCOL) {
-		return ERR_PROTOCOL_UNSUPPORTED;
+	cs_ret_code_t retCode = checkHeader(packet);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
 	}
 
 	return ERR_NOT_IMPLEMENTED;
 }
 
 cs_ret_code_t Microapp::handleEnable(microapp_ctrl_header_t* packet) {
-	if (packet->protocol != MICROAPP_PROTOCOL) {
-		return ERR_PROTOCOL_UNSUPPORTED;
+	cs_ret_code_t retCode = checkHeader(packet);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
 	}
 
-	MicroappStorage & storage = MicroappStorage::getInstance();
-	return storage.enableApp(packet->index, true);
+	uint8_t index = packet->index;
+	microapp_state_t & state = _states[index];
+
+	if (state.checksumTest != MICROAPP_TEST_STATE_PASSED) {
+		LOGi("app %u checksum did not pass yet", index);
+		return ERR_WRONG_STATE;
+	}
+
+	// The enable command resets all test, except checksum.
+	resetTestState(index);
+	state.enabled = true;
+	state.checksumTest = MICROAPP_TEST_STATE_PASSED;
+
+	retCode = storeState(index);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	startApp(index);
+	return retCode;
 }
 
 cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {
+	cs_ret_code_t retCode = checkHeader(packet);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	uint8_t index = packet->index;
+	_states[index].enabled = false;
+	return storeState(index);
+}
+
+cs_ret_code_t Microapp::checkHeader(microapp_ctrl_header_t* packet) {
 	if (packet->protocol != MICROAPP_PROTOCOL) {
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}
-
-	MicroappStorage & storage = MicroappStorage::getInstance();
-	return storage.enableApp(packet->index, false);
-}
-
-
-uint32_t Microapp::handlePacket(microapp_packet_header_t *packet_stub) {
-	
-	switch(packet_stub->opcode) {
-
-		case CS_MICROAPP_OPCODE_ENABLE: {
-			microapp_enable_packet_t* packet = reinterpret_cast<microapp_enable_packet_t*>(packet_stub);
-
-			// write the offset to flash
-			TYPIFY(STATE_MICROAPP) state_microapp;
-			cs_state_data_t data(CS_TYPE::STATE_MICROAPP, packet->app_id,
-					(uint8_t*)&state_microapp, sizeof(state_microapp));
-			LOGi("Set of offset to 0x%x", packet->offset);
-			State::getInstance().get(data);
-			state_microapp.offset = packet->offset;
-			State::getInstance().set(data);
-
-			LOGi("Enable app");
-			MicroappStorage & storage = MicroappStorage::getInstance();
-			err_code = storage.enableApp(true);
-
-			if (err_code == ERR_SUCCESS) {
-				LOGi("Call app");
-				MicroappProtocol & protocol = MicroappProtocol::getInstance();
-				protocol.callApp();
-			}
-			break;
-		}
-		case CS_MICROAPP_OPCODE_DISABLE: {
-			LOGi("Disable app");
-			MicroappStorage & storage = MicroappStorage::getInstance();
-			err_code = storage.enableApp(false);
-			break;
-		}
-		case CS_MICROAPP_OPCODE_UPLOAD: {
-			microapp_upload_packet_t* packet = reinterpret_cast<microapp_upload_packet_t*>(packet_stub);
-
-			// Prepare notification packet.
-			_prevMessage.app_id = packet->app_id;
-
-			// Validate chunk in ram.
-			LOGi("Validate chunk %i", packet->index);
-			MicroappStorage & storage = MicroappStorage::getInstance();
-			err_code = storage.validateChunk(packet->data, MICROAPP_CHUNK_SIZE, packet->checksum);
-			if (err_code != ERR_SUCCESS) {
-				break;
-			}
-
-			// Write chunk with fstorage to flash.
-			err_code = storage.writeChunk(packet->index, packet->data, MICROAPP_CHUNK_SIZE);
-			if (err_code != ERR_SUCCESS) {
-				break;
-			}
-			LOGi("Successfully written to chunk");
-
-			// For now tell the sending party to wait (storing to flash).
-			if (err_code == ERR_SUCCESS) {
-				_prevMessage.payload = packet->index;
-				err_code = ERR_WAIT_FOR_SUCCESS;
-			}
-			break;
-		}
-		case CS_MICROAPP_OPCODE_VALIDATE: {
-			microapp_validate_packet_t* packet = reinterpret_cast<microapp_validate_packet_t*>(packet_stub);
-			LOGi("Store meta data (checksum, etc.)");
-			MicroappStorage & storage = MicroappStorage::getInstance();
-			storage.storeAppMetadata(packet->app_id, packet->checksum, packet->size);
-
-			// Assumes that storage of meta data gets actually through at one point
-			LOGi("Validate app");
-			err_code = storage.validateApp();
-			if (err_code != ERR_SUCCESS) {
-				break;
-			}
-
-			// Set app to valid
-			LOGi("Set app valid");
-			storage.setAppValid();
-
-			break;
-		}
-		default: {
-			LOGw("Microapp: Unknown opcode");
-			err_code = ERR_NOT_IMPLEMENTED;
-			break;
-		}
+	if (packet->index > MAX_MICROAPPS) {
+		return ERR_WRONG_PARAMETER;
 	}
-	return err_code;
+	return ERR_SUCCESS;
 }
 
-/*
- * Handle incoming events from other modules (mainly the CommandController).
- */
 void Microapp::handleEvent(event_t & evt) {
-
-	// The err_code will be written to the event and returned to the caller over BLE.
-	uint32_t err_code = ERR_EVENT_UNHANDLED;
-
 	switch (evt.type) {
 		case CS_TYPE::CMD_MICROAPP_GET_INFO: {
 			evt.result.returnCode = handleGetInfo(evt.result);

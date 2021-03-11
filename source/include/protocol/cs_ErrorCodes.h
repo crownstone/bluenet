@@ -14,6 +14,7 @@ enum ErrorCodesGeneral {
 	ERR_BUFFER_UNASSIGNED           = 0x10,
 	ERR_BUFFER_LOCKED               = 0x11,
 	ERR_BUFFER_TOO_SMALL            = 0x12,
+	ERR_NOT_ALIGNED                 = 0x13,
 
 	ERR_WRONG_PAYLOAD_LENGTH        = 0x20,
 	ERR_WRONG_PARAMETER             = 0x21,
@@ -28,6 +29,7 @@ enum ErrorCodesGeneral {
 	ERR_TIMEOUT                     = 0x2A,
 	ERR_CANCELED                    = 0x2B,
 	ERR_PROTOCOL_UNSUPPORTED        = 0x2C,
+	ERR_MISMATCH                    = 0x2D, // Mismatch of CRC, checksum, etc
 
 	ERR_NO_ACCESS                   = 0x30,
 	ERR_UNSAFE                      = 0x31,
@@ -41,6 +43,7 @@ enum ErrorCodesGeneral {
 
 	ERR_WRITE_DISABLED              = 0x50,
 	ERR_WRITE_NOT_ALLOWED           = 0x51,
+	ERR_READ_FAILED                 = 0x52,
 
 	ERR_ADC_INVALID_CHANNEL         = 0x60,
 

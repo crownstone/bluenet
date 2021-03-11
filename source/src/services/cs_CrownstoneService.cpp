@@ -96,7 +96,7 @@ void CrownstoneService::addControlCharacteristic(buffer_ptr_t buffer, cs_buffer_
 			result.returnCode = ERR_BUFFER_LOCKED;
 		}
 
-		_log(SERIAL_DEBUG, false, "addControlCharacteristic returnCode=%u dataSize=%u", result.returnCode, result.dataSize);
+		_log(SERIAL_DEBUG, false, "addControlCharacteristic returnCode=%u dataSize=%u ", result.returnCode, result.dataSize);
 		_logArray(SERIAL_DEBUG, true, _resultPacketAccessor->getSerializedBuffer().data, _resultPacketAccessor->getSerializedBuffer().len);
 
 		writeResult(protocol, type, result);
@@ -233,7 +233,7 @@ void CrownstoneService::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_MICROAPP: {
 			TYPIFY(EVT_MICROAPP) data = *((TYPIFY(EVT_MICROAPP)*)event.data);
 			uint8_t protocolVersion = 5; // TODO: get this from event.
-			writeResult(protocolVersion, CTRL_CMD_MICROAPP, data.error, cs_data_t(reinterpret_cast<buffer_ptr_t>(event.data), TypeSize(event.type)));
+			writeResult(protocolVersion, CTRL_CMD_MICROAPP_UPLOAD, data.error, cs_data_t(reinterpret_cast<buffer_ptr_t>(event.data), TypeSize(event.type)));
 			break;
 		}
 		case CS_TYPE::EVT_HUB_DATA_REPLY: {

@@ -468,7 +468,7 @@ typedef uint32_t TYPIFY(STATE_BEHAVIOUR_MASTER_HASH);
 typedef cs_mesh_iv_index_t TYPIFY(STATE_MESH_IV_INDEX);
 typedef cs_mesh_seq_number_t TYPIFY(STATE_MESH_SEQ_NUMBER);
 typedef ibeacon_config_id_packet_t TYPIFY(STATE_IBEACON_CONFIG_ID);
-typedef cs_microapp_t TYPIFY(STATE_MICROAPP);
+typedef microapp_state_t TYPIFY(STATE_MICROAPP);
 typedef uint8_t TYPIFY(STATE_SOFT_ON_SPEED);
 typedef uint8_t TYPIFY(STATE_HUB_MODE);
 
