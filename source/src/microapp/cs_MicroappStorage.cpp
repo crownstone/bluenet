@@ -70,9 +70,21 @@ cs_ret_code_t MicroappStorage::init() {
 			break;
 	}
 
-	uint8_t testData[10] = {0,1,2,3,4,5,6,7,8,9};
-	nrfCode = nrf_fstorage_write(&nrf_microapp_storage, g_FLASH_MICROAPP_BASE, testData + 3, 4, NULL);
-	LOGi(nrfCode);
+//	uint8_t testData[10] = {0,1,2,3,4,5,6,7,8,9};
+//	uint8_t* testDataPtr = testData + 3;
+//	uint8_t testDataSize = 4;
+//	nrfCode = nrf_fstorage_write(&nrf_microapp_storage, g_FLASH_MICROAPP_BASE, testDataPtr, testDataSize, NULL);
+//	LOGi("nrf_fstorage_write data=%u size=%u nrfCode=%u", testDataPtr, testDataSize, nrfCode);
+//
+//	testDataPtr = testData + 4;
+//	testDataSize = 3;
+//	nrfCode = nrf_fstorage_write(&nrf_microapp_storage, g_FLASH_MICROAPP_BASE, testDataPtr, testDataSize, NULL);
+//	LOGi("nrf_fstorage_write data=%u size=%u nrfCode=%u", testDataPtr, testDataSize, nrfCode);
+//
+//	testDataPtr = testData + 4;
+//	testDataSize = 4;
+//	nrfCode = nrf_fstorage_write(&nrf_microapp_storage, g_FLASH_MICROAPP_BASE, testDataPtr, testDataSize, NULL);
+//	LOGi("nrf_fstorage_write data=%u size=%u nrfCode=%u", testDataPtr, testDataSize, nrfCode);
 
 	return ERR_SUCCESS;
 }
@@ -91,15 +103,63 @@ cs_ret_code_t MicroappStorage::writeChunk(uint8_t appIndex, uint16_t offset, con
 		return ERR_NO_SPACE;
 	}
 
-//	// Make a copy of the data
-//	if (size > MICROAPP_STORAGE_BUF_SIZE) {
-//		return ERR_BUFFER_TOO_SMALL;
-//	}
-//	memcpy(_buffer, data, size);
+	if (size % 4 != 0) {
+		LOGw("Chunk size must be multiple of 4B, size=%u", size);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
 
+	// Write chunk in even smaller chunks of MICROAPP_STORAGE_BUF_SIZE.
+	// TODO: This could be avoided if `data` would be word aligned,
+	// which we could do by making sure the control command payload is word aligned.
+	_chunkData = data;
+	_chunkSize = size;
+	_chunkWritten = 0;
+	_chunkFlashAddress = flashAddress;
+
+	return writeNextChunkPart();
+}
+
+cs_ret_code_t MicroappStorage::writeNextChunkPart() {
+	cs_ret_code_t retCode;
+
+	// Check if done.
+	if (_chunkWritten >= _chunkSize) {
+		retCode = ERR_SUCCESS;
+		LOGi("Chunk written to flash, dispatch event with result %u", retCode);
+		resetChunkVars();
+		event_t event(CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT, &retCode, sizeof(retCode));
+		event.dispatch();
+	}
+
+	// Write part of the chunk.
+	// Copy to _buffer, so that the data is aligned.
+	uint16_t writeSize = std::min((int)MICROAPP_STORAGE_BUF_SIZE, _chunkSize - _chunkWritten);
+	memcpy(_buffer, _chunkData + _chunkWritten, writeSize);
+	retCode = write(_chunkFlashAddress + _chunkWritten, _buffer, writeSize);
+	_chunkWritten += writeSize;
+
+	if (retCode != ERR_SUCCESS) {
+		LOGw("Failed to start write to flash, dispatch event with result %u", retCode);
+		resetChunkVars();
+		event_t event(CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT, &retCode, sizeof(retCode));
+		event.dispatch();
+	}
+
+	return retCode;
+}
+
+cs_ret_code_t MicroappStorage::write(uint32_t flashAddress, const uint8_t* data, uint16_t size) {
+	// Only allow 1 write to flash at a time.
+	if (_writing) {
+		LOGw("Busy writing");
+		return ERR_BUSY;
+	}
+
+	// Write will only work if the flashAddress, and data pointer are word aligned, and when size is word sized.
 	uint32_t nrfCode = nrf_fstorage_write(&nrf_microapp_storage, flashAddress, data, size, NULL);
 	switch (nrfCode) {
 		case NRF_SUCCESS:
+			_writing = true;
 			LOGd("Success");
 			return ERR_SUCCESS;
 		case NRF_ERROR_NO_MEM:
@@ -116,6 +176,29 @@ cs_ret_code_t MicroappStorage::writeChunk(uint8_t appIndex, uint16_t offset, con
 			return ERR_UNSPECIFIED;
 	}
 }
+
+void MicroappStorage::onFlashWritten(cs_ret_code_t retCode) {
+	LOGi("Flash written");
+	_writing = false;
+	if (retCode == ERR_SUCCESS) {
+		writeNextChunkPart();
+	}
+	else {
+		resetChunkVars();
+		LOGw("Failed to complete write to flash, dispatch event with result %u", retCode);
+		event_t event(CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT, &retCode, sizeof(retCode));
+		event.dispatch();
+	}
+}
+
+void MicroappStorage::resetChunkVars() {
+	_chunkData = nullptr;
+	_chunkSize = 0;
+	_chunkWritten = 0;
+	_chunkFlashAddress = 0;
+}
+
+
 
 void MicroappStorage::getAppHeader(uint8_t appIndex, microapp_binary_header_t* header) {
 	LOGd("Get app header");
@@ -238,9 +321,7 @@ void MicroappStorage::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
 	}
 	switch (evt->id) {
 		case NRF_FSTORAGE_EVT_WRITE_RESULT: {
-			LOGi("Flash written");
-			event_t event(CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT, &retCode, sizeof(retCode));
-			event.dispatch();
+			onFlashWritten(retCode);
 			break;
 		}
 		case NRF_FSTORAGE_EVT_ERASE_RESULT: {

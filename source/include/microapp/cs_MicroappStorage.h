@@ -2,19 +2,6 @@
 
 #include <events/cs_EventListener.h>
 
-//// Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
-//#define MICROAPP_LOOP_FREQUENCY 10
-//
-//#define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
-
-//// Has to match section .firmware_header in linker file nrf_common.ld.
-//typedef struct __attribute__((__packed__)) microapp_header_t {
-//	uint32_t size;
-//	uint32_t checksum;
-//	uint32_t offset;
-//	uint32_t reserve;
-//};
-
 /**
  * The class MicroappStorage has functionality to store a second app (and perhaps in the future even more apps) on
  * another part of the flash memory.
@@ -62,9 +49,35 @@ private:
 	void operator=(MicroappStorage const &);
 
 	/**
+	 * Keep up whether or not we are currently writing to flash.
+	 */
+	bool _writing = false;
+
+	/**
 	 * The buffer is required to perform writes to flash, as the data has to stay in memory until the  write is done.
 	 */
 	uint8_t *_buffer = nullptr;
+
+	/**
+	 * When writing a chunk of data, it will be done in parts.
+	 * These variable are needed to know what to write where to.
+	 */
+	const uint8_t* _chunkData = nullptr;
+	uint16_t _chunkSize = 0;
+	uint16_t _chunkWritten = 0;
+	uint32_t _chunkFlashAddress = 0;
+
+	cs_ret_code_t writeNextChunkPart();
+
+	cs_ret_code_t write(uint32_t flashAddress, const uint8_t* data, uint16_t size);
+
+	void onFlashWritten(cs_ret_code_t retCode);
+
+	/**
+	 * To be called when a chunk has been written (or when it failed to write).
+	 * Resets all variables.
+	 */
+	void resetChunkVars();
 
 	/**
 	 * Erases all pages of the microapp storage.
