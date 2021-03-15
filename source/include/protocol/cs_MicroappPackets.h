@@ -50,8 +50,8 @@ struct __attribute__((__packed__)) microapp_binary_header_t {
 	uint8_t sdkVersionMinor;
 	uint16_t size;             // Size of the binary, including this header.
 
-	uint16_t checksum;         // Checksum of the binary, after this header.
-	uint16_t checksumHeader;   // Checksum of this header, with this field set to 0.
+	uint16_t checksum;         // Checksum (CRC16-CCITT) of the binary, after this header.
+	uint16_t checksumHeader;   // Checksum (CRC16-CCITT) of this header, with this field set to 0.
 
 	uint32_t appBuildVersion;  // Build version of this microapp.
 
@@ -108,10 +108,10 @@ struct __attribute__((packed)) microapp_state_t {
 	uint16_t checksum;            // Checksum of the microapp, should be equal to the checksum field of the binary.
 	uint16_t checksumHeader;      // Checksum of the microapp, should be equal to the checksumHeader field of the binary.
 
-	bool enabled: 1;              // Whether the microapp is enabled.
 	uint8_t checksumTest: 2;      // values: MICROAPP_TEST_STATE
-	uint8_t memoryUsage: 1;       // values: ok, excessive
+	bool enabled: 1;              // Whether the microapp is enabled.
 	uint8_t bootTest: 2;          // Values: MICROAPP_TEST_STATE. Checks if the microapp starts, registers callback function in IPC, and returns to firmware.
+	uint8_t memoryUsage: 1;       // values: ok, excessive
 	uint16_t reservedTest: 10;    // Reserved, must be 0 for now.
 
 	uint8_t tryingFunction;       // Index of registered function that didn't pass yet, and that we are calling now. MICROAPP_FUNCTION_NONE for none.
@@ -133,7 +133,7 @@ struct __attribute__((packed)) microapp_status_t {
  */
 struct __attribute__((packed)) microapp_info_t {
 	uint8_t protocol = MICROAPP_PROTOCOL;                   // Protocol of this packet, and the microapp command packets.
-	uint8_t maxApps = MAX_MICROAPPS;                        // Maximum number of packets.
+	uint8_t maxApps = MAX_MICROAPPS;                        // Maximum number of microapps.
 	uint16_t maxAppSize = MICROAPP_MAX_SIZE;                // Maximum binary size of a microapp.
 	uint16_t maxChunkSize = MICROAPP_UPLOAD_MAX_CHUNK_SIZE; // Maximum chunk size for uploading a microapp.
 	uint16_t maxRamUsage = MICROAPP_MAX_RAM;                // Maximum RAM usage of a microapp.
