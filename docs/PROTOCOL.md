@@ -740,7 +740,7 @@ uint 8 | Time to live | 1 | How long (in minutes) the crownstone assumes the dev
 
 
 
-#### Microapp header
+#### Microapp header packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
@@ -753,8 +753,9 @@ uint 8 | App index | 1 | Index of the microapp on this Crownstone.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Microapp header](#microapp-header) | Header | 2 |
+[Microapp header](#microapp-header-packet) | Header | 2 |
 uint 16 | Offset | 2 | Offset in bytes of this chunk of data. Must be a multiple of 4.
+uint 8[] | Data chunk | N | A chunk of the binary.
 
 For example, if the microapp binary is 299 byte, and your chunks are 128 byte, then you have 3 upload commands with offsets: 0, 128, 256. The last command will have 44 byte of data: the remaining 43 byte, padded to 44 byte, so it is a multiple of 4.
 
@@ -772,7 +773,7 @@ uint 16 | Max app size | 2 | Maximum binary size of a microapp.
 uint 16 | Max chunk size | 2 |  Maximum chunk size for uploading a microapp.
 uint 16 | Max ram usage | 2 | Maximum RAM usage of a microapp.
 [SDK version](#microapp-sdk-version-packet) | SDK version | 2 | SDK version the firmware supports.
-[App status](#microapp-status-packet)[] |  | Status of all microapps, no matter how many have been uploaded.
+[App status](#microapp-status-packet)[] | App status |  | Status of all microapps, no matter how many have been uploaded.
 
 #### Microapp SDK version packet
 
@@ -782,6 +783,8 @@ uint 8 | Major | 1 | Major version: different major indicates breaking changes.
 uint 8 | Minor | 1 | Minor version: higher minor means more features.
 
 #### Microapp status packet
+
+![Microapp status packet](../docs/diagrams/microapp_status_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
