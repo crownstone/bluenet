@@ -472,35 +472,22 @@ uint16_t MicroappProtocol::interpretRamdata() {
  * TODO: Return setup and loop addresses
  */
 void MicroappProtocol::callApp(uint8_t appIndex) {
-	static bool thumb_mode = true;
-
-	// Check if we want to do this again
-	//if (!isEnabled()) {
-	//	LOGi("Microapp: app not enabled.");
-	//	return;
-	//} 
-	microapp_binary_header_t header;
-	MicroappStorage::getInstance().getAppHeader(appIndex, &header);
-
-//	if (state_microapp.start_addr == 0x00) {
-//		LOGi("Module can't be run. Start address 0?");
-//		_booted = false;
-//		return;
-//	}
+	static bool thumbMode = true;
 
 	initMemory();
 
-//	uintptr_t address = state_microapp.start_addr + state_microapp.offset;
-	uintptr_t address = header.startAddress;
-	LOGi("Microapp: start at 0x%04x", address);
+	uintptr_t address = MicroappStorage::getInstance().getStartInstructionAddress(appIndex);
+	LOGi("Microapp: start at 0x%08X", address);
 
-	if (thumb_mode) address += 1;
+	if (thumbMode) {
+		address += 1;
+	}
 	LOGi("Check main code at %p", address);
 	char *arr = (char*)address;
 	if (arr[0] != 0xFF) {
-		void (*microapp_main)() = (void (*)()) address;
-		LOGi("Call function in module: %p", microapp_main);
-		(*microapp_main)();
+		void (*microappMain)() = (void (*)()) address;
+		LOGi("Call function in module: %p", microappMain);
+		(*microappMain)();
 		LOGi("Module did run.");
 	}
 	_booted = true;

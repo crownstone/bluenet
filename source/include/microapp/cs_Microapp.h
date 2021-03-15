@@ -57,7 +57,16 @@ private:
 	 */
 	cs_ret_code_t validateApp(uint8_t index);
 
-	void startApp(uint8_t index);
+	/**
+	 * Enables app: checks sdk version.
+	 * App state is updated in this call, make sure to store the state afterwards.
+	 */
+	cs_ret_code_t enableApp(uint8_t index);
+
+	/**
+	 * Start app, if it passed all tests.
+	 */
+	cs_ret_code_t startApp(uint8_t index);
 
 	/**
 	 * Resets app state in ram only.
@@ -78,8 +87,6 @@ private:
 	 * Checks app state and returns true if this app is allowed to run.
 	 */
 	bool canRunApp(uint8_t index);
-
-	cs_ret_code_t enableApp(uint8_t index);
 
 	/**
 	 * The tick function is used to send more notifications than one.

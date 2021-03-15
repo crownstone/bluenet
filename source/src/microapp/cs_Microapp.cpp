@@ -49,23 +49,30 @@ void Microapp::init() {
 }
 
 void Microapp::loadApps() {
-	cs_ret_code_t retCode;
-	std::vector<cs_state_id_t>* ids = nullptr;
-	retCode = State::getInstance().getIds(CS_TYPE::STATE_MICROAPP, ids);
-	if (retCode == ERR_SUCCESS) {
-		for (auto index: *ids) {
-			if (index >= MAX_MICROAPPS) {
-				LOGw("Ignore app %u", index);
-				continue;
-			}
-			LOGi("Found app %u", index);
-			loadState(index);
-			validateApp(index);
-			storeState(index);
-		}
-	}
+//	cs_ret_code_t retCode;
+//	std::vector<cs_state_id_t>* ids = nullptr;
+//	retCode = State::getInstance().getIds(CS_TYPE::STATE_MICROAPP, ids);
+//	if (retCode == ERR_SUCCESS) {
+//		for (auto index: *ids) {
+//			if (index >= MAX_MICROAPPS) {
+//				LOGw("Ignore app %u", index);
+//				continue;
+//			}
+//			LOGi("Found app %u", index);
+//			loadState(index);
+//			validateApp(index);
+//			storeState(index);
+//		}
+//	}
+//
+//	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
+//		startApp(index);
+//	}
 
 	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
+		loadState(index);
+		validateApp(index);
+		storeState(index);
 		startApp(index);
 	}
 }
@@ -95,25 +102,53 @@ cs_ret_code_t Microapp::validateApp(uint8_t index) {
 
 	microapp_binary_header_t appHeader;
 	storage.getAppHeader(index, &appHeader);
-	if (state.checksum != appHeader.checksum) {
-		LOGi("New app on index %u: stored checksum 0x%x, binary checksum 0x%x", index, state.checksum, appHeader.checksum);
+	if (state.checksum != appHeader.checksum || state.checksumHeader != appHeader.checksumHeader) {
+		LOGi("New app on index %u: stored checksum %u and %u, binary checksum %u and %u",
+				index,
+				state.checksum,
+				state.checksumHeader,
+				appHeader.checksum,
+				appHeader.checksumHeader);
 		resetState(index);
 	}
 	state.checksum = appHeader.checksum;
+	state.checksumHeader = appHeader.checksumHeader;
 	state.checksumTest = MICROAPP_TEST_STATE_PASSED;
 
 	if (g_AUTO_ENABLE_MICROAPP_ON_BOOT) {
 		LOGi("Enable microapp %u", index);
-		state.enabled = true;
+		enableApp(index);
 	}
 	return ERR_SUCCESS;
 }
 
-void Microapp::startApp(uint8_t index) {
-	if (canRunApp(index)) {
-		MicroappProtocol & protocol = MicroappProtocol::getInstance();
-		protocol.callApp(index);
+cs_ret_code_t Microapp::enableApp(uint8_t index) {
+	microapp_state_t & state = _states[index];
+
+	if (state.checksumTest != MICROAPP_TEST_STATE_PASSED) {
+		LOGi("app %u checksum did not pass yet", index);
+		return ERR_WRONG_STATE;
 	}
+
+	microapp_binary_header_t header;
+	MicroappStorage & storage = MicroappStorage::getInstance();
+	storage.getAppHeader(index, &header);
+	if (header.sdkVersionMajor != MICROAPP_SDK_MAJOR || header.sdkVersionMinor > MICROAPP_SDK_MINOR) {
+		LOGw("Microapp sdk version %u.%u is not supported", header.sdkVersionMajor, header.sdkVersionMinor);
+		return ERR_PROTOCOL_UNSUPPORTED;
+	}
+
+	state.enabled = true;
+	return ERR_SUCCESS;
+}
+
+cs_ret_code_t Microapp::startApp(uint8_t index) {
+	if (!canRunApp(index)) {
+		return ERR_UNSAFE;
+	}
+	MicroappProtocol & protocol = MicroappProtocol::getInstance();
+	protocol.callApp(index);
+	return ERR_SUCCESS;
 }
 
 void Microapp::resetState(uint8_t index) {
@@ -239,25 +274,22 @@ cs_ret_code_t Microapp::handleEnable(microapp_ctrl_header_t* packet) {
 	}
 
 	uint8_t index = packet->index;
-	microapp_state_t & state = _states[index];
 
-	if (state.checksumTest != MICROAPP_TEST_STATE_PASSED) {
-		LOGi("app %u checksum did not pass yet", index);
-		return ERR_WRONG_STATE;
+	retCode = enableApp(index);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
 	}
 
-	// The enable command resets all test, except checksum.
+	// The enable command resets all test, except checksum test.
 	resetTestState(index);
-	state.enabled = true;
-	state.checksumTest = MICROAPP_TEST_STATE_PASSED;
+	_states[index].checksumTest = MICROAPP_TEST_STATE_PASSED;
 
 	retCode = storeState(index);
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
 
-	startApp(index);
-	return retCode;
+	return startApp(index);
 }
 
 cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {

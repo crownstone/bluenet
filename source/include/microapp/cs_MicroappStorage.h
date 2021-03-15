@@ -24,6 +24,11 @@ public:
 	void getAppHeader(uint8_t appIndex, microapp_binary_header_t* header);
 
 	/**
+	 * Get the address in flash, where the microapp program starts.
+	 */
+	uint32_t getStartInstructionAddress(uint8_t appIndex);
+
+	/**
 	 * Validate the overall binary, this goes through flash and checks it completely.
 	 * All flash write operations have to have finished before.
 	 */

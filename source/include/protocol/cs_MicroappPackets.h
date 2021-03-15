@@ -27,9 +27,9 @@ const uint16_t MICROAPP_UPLOAD_MAX_CHUNK_SIZE = 256;
  */
 const uint8_t MICROAPP_PROTOCOL = 1;
 
-const uint8_t MICROAPP_SDK_MAJOR = 1;
+const uint8_t MICROAPP_SDK_MAJOR = 0;
 
-const uint8_t MICROAPP_SDK_MINOR = 0;
+const uint8_t MICROAPP_SDK_MINOR = 1;
 
 const uint16_t MICROAPP_MAX_SIZE = 0x1000; // 1 Flash page.
 
@@ -46,8 +46,6 @@ const uint16_t MICROAPP_MAX_RAM = 0x200; // Something for now.
  * Has to match section .firmware_header in linker file nrf_common.ld of the microapp repo.
  */
 struct __attribute__((__packed__)) microapp_binary_header_t {
-	uint32_t startAddress;     // Address of first function to call.
-
 	uint8_t sdkVersionMajor;   // Similar to microapp_sdk_version_t
 	uint8_t sdkVersionMinor;
 	uint16_t size;             // Size of the binary, including this header.
@@ -57,7 +55,10 @@ struct __attribute__((__packed__)) microapp_binary_header_t {
 
 	uint32_t appBuildVersion;  // Build version of this microapp.
 
-	uint32_t reserved;         // Reserved for future use, must be 0 for now.
+	uint16_t startOffset;      // Offset in bytes of the first instruction to execute.
+	uint16_t reserved;         // Reserved for future use, must be 0 for now.
+
+	uint32_t reserved2;        // Reserved for future use, must be 0 for now.
 };
 
 
@@ -105,6 +106,7 @@ const uint8_t MICROAPP_FUNCTION_NONE = 255;
  */
 struct __attribute__((packed)) microapp_state_t {
 	uint16_t checksum;            // Checksum of the microapp, should be equal to the checksum field of the binary.
+	uint16_t checksumHeader;      // Checksum of the microapp, should be equal to the checksumHeader field of the binary.
 
 	bool enabled: 1;              // Whether the microapp is enabled.
 	uint8_t checksumTest: 2;      // values: MICROAPP_TEST_STATE

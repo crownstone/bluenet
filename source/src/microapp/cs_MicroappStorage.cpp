@@ -209,6 +209,15 @@ void MicroappStorage::getAppHeader(uint8_t appIndex, microapp_binary_header_t* h
 	printHeader(SERIAL_DEBUG, header);
 }
 
+uint32_t MicroappStorage::getStartInstructionAddress(uint8_t appIndex) {
+	uint32_t startAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
+	microapp_binary_header_t header;
+	getAppHeader(appIndex, &header);
+
+	startAddress += header.startOffset;
+	return startAddress;
+}
+
 cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 	LOGd("Validate app %u", appIndex);
 
@@ -222,23 +231,27 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 
 	uint32_t startAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
 	uint32_t endAddress = startAddress + header.size;
-	if (header.startAddress > endAddress - sizeof(header.startAddress)) {
-		LOGw("Microapp startAddress=0x%08X is too large.", header.startAddress);
+	LOGd("startAddress=0x%08X endAddress=0x%08X", startAddress, endAddress);
+
+	// Check if the address of first instruction is in the binary.
+	if (startAddress + header.startOffset >= endAddress) {
+		LOGw("Microapp startOffset=%u is too large.", header.startOffset);
 		return ERR_WRONG_PARAMETER;
 	}
 
 	// Compare header checksum.
 	uint16_t checksumHeader = header.checksumHeader;
-	header.checksum = 0;
+	header.checksumHeader = 0;
 	uint16_t crc = crc16(reinterpret_cast<uint8_t*>(&header), sizeof(header));
 	LOGi("Header checksum: expected=%u calculated=%u", checksumHeader, crc);
 	if (checksumHeader != crc) {
+		_logArray(SERIAL_DEBUG, true, reinterpret_cast<uint8_t*>(&header), sizeof(header));
 		return ERR_MISMATCH;
 	}
 
 	// Compare binary checksum.
 	// Calculate checksum in chunks, so that we don't have to load the whole binary in ram.
-	const uint32_t bufSize = MICROAPP_STORAGE_BUF_SIZE;
+	const uint32_t bufSize = MICROAPP_STORAGE_BUF_SIZE; // Can be any size.
 	uint8_t buf[bufSize];
 	uint32_t nrfCode;
 
@@ -247,43 +260,19 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 
 	uint32_t binStartAddress = startAddress + sizeof(header);
 	uint16_t binSize = header.size - sizeof(header);
+	LOGd("binStartAddress=0x%08X binSize=%u sizeof(header)=%u", binStartAddress, binSize, sizeof(header));
 
-	// First read whole chunks.
-	uint16_t wholeChunkCount = binSize / bufSize;
-	uint32_t flashAddress = binStartAddress;
-	for (uint16_t i = 0; i < wholeChunkCount; ++i) {
-		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, flashAddress, buf, bufSize);
-		if (nrfCode != ERR_SUCCESS) {
-			LOGw("Error reading fstorage: %u", nrfCode);
-			return ERR_READ_FAILED;
-		}
-		crc16(buf, bufSize, &crc);
-		flashAddress += bufSize;
-	}
-	// Then read the remainder.
-	uint16_t remainder = binSize - wholeChunkCount * bufSize;
-	if (remainder) {
-		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, flashAddress, buf, remainder);
-		if (nrfCode != ERR_SUCCESS) {
-			LOGw("Error reading fstorage: %u", nrfCode);
-			return ERR_READ_FAILED;
-		}
-		crc16(buf, remainder, &crc);
-	}
-	LOGd("crc=%u", crc);
-
-	// Or in one loop.
-	crc = crc16(nullptr, 0);
-	for (uint16_t flashAddress = binStartAddress; flashAddress < endAddress; flashAddress += bufSize) {
+//	endAddress = CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(endAddress, 4);
+	for (uint32_t flashAddress = binStartAddress; flashAddress < endAddress; flashAddress += bufSize) {
 		uint16_t readSize = std::min(bufSize, endAddress - flashAddress);
+		LOGv("nrf_fstorage_read 0x%08X 0x%X %u", flashAddress, buf, readSize);
 		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, flashAddress, buf, readSize);
-		if (nrfCode != ERR_SUCCESS) {
-			LOGw("Error reading fstorage: %u", nrfCode);
+		if (nrfCode != NRF_SUCCESS) {
+			LOGw("Error reading fstorage: %u. flashAddress=0x%08X buf=0x%X readSize=%u", nrfCode, flashAddress, buf, readSize);
 			return ERR_READ_FAILED;
 		}
-		crc16(buf, readSize, &crc);
+		crc = crc16(buf, readSize, &crc);
 	}
-	LOGd("crc=%u", crc);
 
 	LOGi("Binary checksum: expected=%u calculated=%u", header.checksum, crc);
 	if (header.checksum != crc) {
@@ -293,14 +282,14 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 }
 
 void MicroappStorage::printHeader(uint8_t logLevel, microapp_binary_header_t* header) {
-	_log(logLevel, true, "startAddress=%u sdkVersion=%u.%u size=%u checksum=%u checksumHeader=%u appBuildVersion=%u",
-			header->startAddress,
+	_log(logLevel, true, "sdkVersion=%u.%u size=%u checksum=%u checksumHeader=%u appBuildVersion=%u startOffset=%u ",
 			header->sdkVersionMajor,
 			header->sdkVersionMinor,
 			header->size,
 			header->checksum,
 			header->checksumHeader,
-			header->appBuildVersion);
+			header->appBuildVersion,
+			header->startOffset);
 }
 
 /**
