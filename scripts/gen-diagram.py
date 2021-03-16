@@ -24,70 +24,70 @@ MAX_VAR_LEN = 6
 DEFAULT_VAR_LEN = 6
 
 # Define the colors we will use in RGB format
-BLACK = (  0,   0,   0)
-WHITE = (255, 255, 255)
-BLUE =  (  0,   0, 255)
-GREEN = (  0, 255,   0)
-RED =   (255,   0,   0)
+BLACK = (  0,   0,   0,   0)
+WHITE = (255, 255, 255,   0)
+BLUE =  (  0,   0, 255,   0)
+GREEN = (  0, 255,   0,   0)
+RED =   (255,   0,   0,   0)
 
-BACKGROUND = WHITE
+TRANSPARENT = (255, 255, 255, 128)
 
 GREYS = [None]*16
-GREYS[4]  = (178, 178, 178)
+GREYS[4]  = (178, 178, 178,   0)
 
 SKY_BLUES = [None]*16
-SKY_BLUES[2]  = (51, 153, 255)
-SKY_BLUES[3]  = (0, 102, 255)
-SKY_BLUES[6]  = (0, 0, 128)
-SKY_BLUES[7]  = (0, 51, 102) # Dark
-SKY_BLUES[8]  = (51, 102, 153)
-SKY_BLUES[9]  = (102, 153, 204)
-SKY_BLUES[10] = (153, 204, 255) # Light
+SKY_BLUES[2]  = (51, 153, 255,   0)
+SKY_BLUES[3]  = (0, 102, 255,   0)
+SKY_BLUES[6]  = (0, 0, 128,   0)
+SKY_BLUES[7]  = (0, 51, 102,   0) # Dark
+SKY_BLUES[8]  = (51, 102, 153,   0)
+SKY_BLUES[9]  = (102, 153, 204,   0)
+SKY_BLUES[10] = (153, 204, 255,   0) # Light
 
 GREENS = [None]*16
-GREENS[4]  = (0, 153, 0)
-GREENS[5]  = (0, 102, 0)
-GREENS[7]  = (51, 102, 51)
-GREENS[8]  = (102, 153, 102)
-GREENS[9]  = (153, 204, 153)
-GREENS[10] = (204, 255, 204)
+GREENS[4]  = (0, 153, 0,   0)
+GREENS[5]  = (0, 102, 0,   0)
+GREENS[7]  = (51, 102, 51,   0)
+GREENS[8]  = (102, 153, 102,   0)
+GREENS[9]  = (153, 204, 153,   0)
+GREENS[10] = (204, 255, 204,   0)
 
 REDS = [None]*16
-REDS[3]    = (255, 0, 0)
-REDS[5]    = (153, 0, 0)
-REDS[7]    = (102, 51, 51)
-REDS[8]    = (153, 102, 102)
-REDS[9]    = (204, 153, 153)
-REDS[10]   = (255, 204, 204)
+REDS[3]    = (255, 0, 0,   0)
+REDS[5]    = (153, 0, 0,   0)
+REDS[7]    = (102, 51, 51,   0)
+REDS[8]    = (153, 102, 102,   0)
+REDS[9]    = (204, 153, 153,   0)
+REDS[10]   = (255, 204, 204,   0)
 
 YELLOWS = [None]*16
-YELLOW_7  = (102, 102, 51)
-YELLOW_8  = (153, 153, 102)
-YELLOW_9  = (204, 204, 153)
-YELLOW_10 = (255, 255, 204)
+YELLOW_7  = (102, 102, 51,   0)
+YELLOW_8  = (153, 153, 102,   0)
+YELLOW_9  = (204, 204, 153,   0)
+YELLOW_10 = (255, 255, 204,   0)
 YELLOWS = [YELLOW_7, YELLOW_8, YELLOW_9, YELLOW_10]
 
 PURPLES = [None]*16
-PURPLES[4]  = (102, 0, 204)
-PURPLES[5]  = (51, 0, 153)
-PURPLES[7]  = (51, 0, 102)
-PURPLES[8]  = (102, 51, 153)
-PURPLES[9]  = (153, 102, 204)
-PURPLES[10] = (204, 153, 255)
+PURPLES[4]  = (102, 0, 204,   0)
+PURPLES[5]  = (51, 0, 153,   0)
+PURPLES[7]  = (51, 0, 102,   0)
+PURPLES[8]  = (102, 51, 153,   0)
+PURPLES[9]  = (153, 102, 204,   0)
+PURPLES[10] = (204, 153, 255,   0)
 
 CHARTS = [None]*16
-CHARTS[1]  = (  0,  69, 134) # Blue
-CHARTS[2]  = (255,  66,  14) # Orange
-CHARTS[3]  = (255, 255, 255) # Yellow
-CHARTS[4]  = ( 87, 157,  28) # Green
-CHARTS[5]  = (126,   0,  33) # Brown
-CHARTS[6]  = (131, 202, 255) # Light blue
-CHARTS[7]  = ( 49,  64,   4) # Dark green
-CHARTS[8]  = (174, 207,   0) # Light green
-CHARTS[9]  = ( 75,  31, 111) # Purple
-CHARTS[10] = (255, 149,  14) # Orange
-CHARTS[11] = (197,   0,  11) # Red
-CHARTS[12] = (  0, 132, 209) # Blue
+CHARTS[1]  = (  0,  69, 134,   0) # Blue
+CHARTS[2]  = (255,  66,  14,   0) # Orange
+CHARTS[3]  = (255, 255, 255,   0) # Yellow
+CHARTS[4]  = ( 87, 157,  28,   0) # Green
+CHARTS[5]  = (126,   0,  33,   0) # Brown
+CHARTS[6]  = (131, 202, 255,   0) # Light blue
+CHARTS[7]  = ( 49,  64,   4,   0) # Dark green
+CHARTS[8]  = (174, 207,   0,   0) # Light green
+CHARTS[9]  = ( 75,  31, 111,   0) # Purple
+CHARTS[10] = (255, 149,  14,   0) # Orange
+CHARTS[11] = (197,   0,  11,   0) # Red
+CHARTS[12] = (  0, 132, 209,   0) # Blue
 
 
 
@@ -135,11 +135,16 @@ colorDict['service data'] = CHARTS[2]
 colorDict['command payload'] = CHARTS[2]
 colorDict['command data'] = CHARTS[2]
 
+os.environ['SDL_VIDEODRIVER'] = 'dummy'
+
 def drawRect(rect, color):
 	# Rect: left, top, width, height
 	# width of 0 to fill
-	pygame.draw.rect(screen, color, rect)
-	pygame.draw.rect(screen, BACKGROUND, rect, BOX_WIDTH)
+	print(rect)
+	s = pygame.Surface((rect[2], rect[3]))  # the size of your rect
+	s.set_alpha(128)                # alpha level
+	s.fill((color))           # this fills the entire surface
+	background.blit(s, (rect[0],rect[1]))    # (0,0) are the top-left coordinates
 
 
 def drawTextLines(x, y, labels, width, height, vertical, zoom):
@@ -163,14 +168,14 @@ def drawTextLines(x, y, labels, width, height, vertical, zoom):
 			rotated = pygame.transform.rotozoom(labels[i], -90, zoom)
 			drawY = yCenter - 0.5*labels[i].get_width()*zoom
 			drawX = xCenter - 0.5*textHeight + (len(labels) - 1 - i) * maxLineHeight
-			screen.blit(rotated, (drawX, drawY))
+			background.blit(rotated, (drawX, drawY))
 
 	else:
 		for i in range(0, len(labels)):
 			zoomed = pygame.transform.rotozoom(labels[i], 0, zoom)
 			drawX = xCenter - 0.5*labels[i].get_width()*zoom
 			drawY = yCenter - 0.5*textHeight + i*maxLineHeight
-			screen.blit(zoomed, (drawX, drawY))
+			background.blit(zoomed, (drawX, drawY))
 			
 
 
@@ -266,29 +271,11 @@ def drawVar(startX, y, varName, varLen, color):
 	width = varLen*STEP_X
 	height = STEP_Y
 	
-	drawRect([startX, y, width, height], color)
+	drawRect([startX, 0, width-2, y-2], color)
+	drawRect([startX, y, width-2, height], color)
 	drawText(startX+MARGIN, y+MARGIN, varName, WHITE, width-2*MARGIN, height-2*MARGIN, varLen < 3)
 	return startX + width
 
-
-def drawByteText(text, x, y, center=True):
-	global screen
-
-	x += 1
-	y += 1
-
-	byteLabel = fontBytes.render(text, True, WHITE)
-
-	if center:
-		x -= 0.5*byteLabel.get_width()
-
-	borderSize = 1
-	for border in range(1, borderSize + 1):
-		for dx in range(-border, border + 1):
-			for dy in range(-border, border + 1):
-				screen.blit(byteLabel, (x + dx, y + dy))
-	byteLabel = fontBytes.render(text, True, BLACK)
-	screen.blit(byteLabel, (x, y))
 
 def drawVarList(varList, filename, lengthInBits):
 	if not filename:
@@ -309,24 +296,32 @@ def drawVarList(varList, filename, lengthInBits):
 	size = [totalLen * STEP_X, STEP_Y]
 
 	# Add text "byte" or "bit" to screen size
-	byteTxt = "Bit" if lengthInBits else "Byte"
-	byteLabel = fontBytes.render(byteTxt, True, BLACK)
+	byteTxt = "bit" if lengthInBits else "byte"
+	byteLabel = fontBytes.render(byteTxt, True, WHITE)
 	size[0] += byteLabel.get_width()
 	size[1] += byteLabel.get_height()
 
 	global screen
-	screen = pygame.display.set_mode(size)
-	screen.fill(BACKGROUND)
+	screen = pygame.display.set_mode(size, pygame.DOUBLEBUF, 32)
+	screen.convert_alpha()
 
+	#screen.fill(TRANSPARENT)
+
+	global background
+	background = pygame.Surface(size, pygame.SRCALPHA, 32)
+	background.set_alpha(128)
+
+	#screen.blit(background, (0,0))
 	x=0
 	y=0
 
 	# Draw the text "byte"
-#	screen.blit(byteLabel, (x, y))
-	drawByteText(byteTxt, x, y, False)
+	background.blit(byteLabel, (x, y))
 	xVar = x + byteLabel.get_width()
 	yVar = y + byteLabel.get_height()
 	x += byteLabel.get_width()
+	
+        drawRect([0, 0, xVar, yVar], BLACK)
 
 	cycleColorInd = 0
 	prevColorInd = -1
@@ -343,25 +338,31 @@ def drawVarList(varList, filename, lengthInBits):
 				if varLen > MAX_VAR_LEN:
 					endByteNum = byteNum + varLen-1
 					for i in range(0, MAX_VAR_LEN-2):
-						drawByteText(str(byteNum), x + 0.5*STEP_X, y)
+						byteLabel = fontBytes.render(str(byteNum), True, WHITE)
+						background.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
 						byteNum += 1
 						x += STEP_X
-					drawByteText("...", x + 0.5 * STEP_X, y)
+					byteLabel = fontBytes.render("...", True, WHITE)
+					background.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
 					byteNum += 1
 					x += STEP_X
 					byteNum = endByteNum
-					drawByteText(str(byteNum), x + 0.5*STEP_X, y)
+					byteLabel = fontBytes.render(str(byteNum), True, WHITE)
+					background.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
 					byteNum += 1
 					x += STEP_X
 
 				else:
 					for i in range(0, varLen):
-						drawByteText(str(byteNum), x + 0.5*STEP_X, y)
+						byteLabel = fontBytes.render(str(byteNum), True, WHITE)
+						background.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
 						byteNum += 1
 						x += STEP_X
 			else:
-				drawByteText(str(byteNum), x + 0.5*STEP_X, y)
-				drawByteText("...", x + 1.5*STEP_X, y)
+				byteLabel = fontBytes.render(str(byteNum), True, WHITE)
+				background.blit(byteLabel, (x + 0.5*STEP_X - 0.5*byteLabel.get_width(), y))
+				byteLabel = fontBytes.render("...", True, WHITE)
+				background.blit(byteLabel, (x + 1.5*STEP_X - 0.5*byteLabel.get_width(), y))
 				byteNumKnown = False
 
 		# Determine color
@@ -388,8 +389,7 @@ def drawVarList(varList, filename, lengthInBits):
 
 		xVar = drawVar(xVar, yVar, varName, varLen, color)
 
-	pygame.image.save(screen, filename)
-
+	pygame.image.save(background, filename)
 
 
 def parseFile(textFilename):
@@ -457,7 +457,7 @@ if not os.path.exists(GEN_DIR):
 	os.makedirs(GEN_DIR)
 
 pygame.init()
-screen = None
+pygame.display.init()
 
 #myFont = pygame.font.SysFont("monospace", 15)
 fontBlocks = pygame.font.Font(fontPath, fontSizeBlocks)
@@ -473,7 +473,7 @@ patternLink = re.compile("\\[([^]]+)\\]\\([^\\)]+\\)")
 for filename in FILENAMES:
 	print(filename)
 	parseFile(filename)
-
+	
 
 # pygame.display.flip()
 
