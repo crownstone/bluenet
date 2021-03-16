@@ -305,9 +305,11 @@ cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {
 
 cs_ret_code_t Microapp::checkHeader(microapp_ctrl_header_t* packet) {
 	if (packet->protocol != MICROAPP_PROTOCOL) {
+		LOGw("Unsupported protocol: %u", packet->protocol);
 		return ERR_PROTOCOL_UNSUPPORTED;
 	}
 	if (packet->index > MAX_MICROAPPS) {
+		LOGw("Index too large: %u", packet->index);
 		return ERR_WRONG_PARAMETER;
 	}
 	return ERR_SUCCESS;

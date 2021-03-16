@@ -261,7 +261,7 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_MICROAPP_GET_INFO:
 			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_GET_INFO, commandData, source, result);
 		case CTRL_CMD_MICROAPP_UPLOAD:
-			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_UPLOAD, commandData, source, result);
+			return handleCmdMicroappUpload(commandData, accessLevel, result);
 		case CTRL_CMD_MICROAPP_VALIDATE:
 			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_VALIDATE, commandData, source, result);
 		case CTRL_CMD_MICROAPP_REMOVE:
@@ -993,6 +993,25 @@ void CommandHandler::handleCmdGetUptime(cs_data_t commandData, const EncryptionA
 	*uptime = SystemTime::up();
 	result.dataSize = sizeof(uint32_t);
 	result.returnCode = ERR_SUCCESS;
+	return;
+}
+
+void CommandHandler::handleCmdMicroappUpload(cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result) {
+	LOGi(STR_HANDLE_COMMAND, "microapp upload");
+	if (commandData.len < sizeof(microapp_upload_t)) {
+		LOGe(FMT_WRONG_PAYLOAD_LENGTH, commandData.len, sizeof(microapp_upload_t));
+		result.returnCode = ERR_WRONG_PAYLOAD_LENGTH;
+		return;
+	}
+
+	TYPIFY(CMD_MICROAPP_UPLOAD) evtData;
+	evtData.header = *reinterpret_cast<microapp_upload_t*>(commandData.data);
+	evtData.data.len = commandData.len - sizeof(evtData.header);
+	evtData.data.data = commandData.data + sizeof(evtData.header);
+	event_t event(CS_TYPE::CMD_MICROAPP_UPLOAD, &evtData, sizeof(evtData), result);
+	event.dispatch();
+	result.returnCode = event.result.returnCode;
+	result.dataSize = event.result.dataSize;
 	return;
 }
 

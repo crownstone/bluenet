@@ -120,6 +120,7 @@ cs_ret_code_t MicroappStorage::writeChunk(uint8_t appIndex, uint16_t offset, con
 }
 
 cs_ret_code_t MicroappStorage::writeNextChunkPart() {
+	LOGi("writeNextChunkPart _chunkSize=%u _chunkWritten=%u", _chunkSize, _chunkWritten);
 	cs_ret_code_t retCode;
 
 	// Check if done.
@@ -129,6 +130,7 @@ cs_ret_code_t MicroappStorage::writeNextChunkPart() {
 		resetChunkVars();
 		event_t event(CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT, &retCode, sizeof(retCode));
 		event.dispatch();
+		return retCode;
 	}
 
 	// Write part of the chunk.
