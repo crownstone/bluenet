@@ -72,6 +72,10 @@ void Microapp::loadApps() {
 	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
 		loadState(index);
 		validateApp(index);
+		if (g_AUTO_ENABLE_MICROAPP_ON_BOOT) {
+			LOGi("Enable microapp %u", index);
+			enableApp(index);
+		}
 		storeState(index);
 		startApp(index);
 	}
@@ -114,11 +118,6 @@ cs_ret_code_t Microapp::validateApp(uint8_t index) {
 	state.checksum = appHeader.checksum;
 	state.checksumHeader = appHeader.checksumHeader;
 	state.checksumTest = MICROAPP_TEST_STATE_PASSED;
-
-	if (g_AUTO_ENABLE_MICROAPP_ON_BOOT) {
-		LOGi("Enable microapp %u", index);
-		enableApp(index);
-	}
 	return ERR_SUCCESS;
 }
 
