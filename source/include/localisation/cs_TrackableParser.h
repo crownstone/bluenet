@@ -85,7 +85,10 @@ private:
 
 	/**
 	 * Looks up given filter id in the list of filters. Returns nullptr if not found.
-	 * Assumes _parsingFilters is nullptr terminated
+	 *
+	 * Assumes there are no 'gaps' in the _parsingFilter array. I.e. that
+	 * if _parsingFilters[i] == nullptr then _parsingFilters[j] == nullptr
+	 * for all j>=i.
 	 */
 	TrackingFilter* findParsingFilter(uint8_t filterId);
 
@@ -94,17 +97,17 @@ private:
 	// -------------------------------------------------------------
 
 	/**
-	 * Upon first reception of this command with the given filter_id,
-	 * allocate space in the buffer. If this fails, abort. Else set the filter_id to
+	 * Upon first reception of this command with the given filterId,
+	 * allocate space in the buffer. If this fails, abort. Else set the filterId to
 	 * 'upload in progress'.
 	 */
-	bool handleUploadFilterCommand(trackable_parser_cmd_upload_filter_t* cmd_data);
+	cs_ret_code_t handleUploadFilterCommand(trackable_parser_cmd_upload_filter_t* cmdData);
 
 	/**
 	 * Removes given filter immediately.
 	 * Flags this crownstone as 'filter modification in progress'.
 	 */
-	void handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmd_data);
+	cs_ret_code_t handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmdData);
 
 	/**
 	 * Inactive filters are activated.
@@ -112,7 +115,7 @@ private:
 	 * This crownstones master version and crc are broadcasted over the mesh.
 	 * Sets 'filter modification in progress' flag of this crownstone back to off.
 	 */
-	void handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmd_data);
+	cs_ret_code_t handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmdData);
 
 	/**
 	 * Returns:
@@ -123,7 +126,7 @@ private:
 	 *    - filter version
 	 *    - filter crc
 	 */
-	void handleGetFilterSummariesCommand(trackable_parser_cmd_get_filer_summaries_t* cmd_data);
+	cs_ret_code_t handleGetFilterSummariesCommand(trackable_parser_cmd_get_filer_summaries_t* cmdData);
 
 	// -------------------------------------------------------------
 	// ----------------------- OLD interface -----------------------

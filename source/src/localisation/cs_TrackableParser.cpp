@@ -11,6 +11,7 @@
 #include <localisation/cs_TrackableEvent.h>
 #include <localisation/cs_TrackableParser.h>
 #include <logging/cs_Logger.h>
+#include <protocol/cs_ErrorCodes.h>
 #include <structs/cs_PacketsInternal.h>
 #include <structs/cs_StreamBufferAccessor.h>
 #include <util/cs_Utils.h>
@@ -21,7 +22,7 @@ void TrackableParser::init() {
 }
 
 void TrackableParser::handleEvent(event_t& evt) {
-	switch(evt.type) {
+	switch (evt.type) {
 		// incoming devices to filter
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
 			adv_background_parsed_t *parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
@@ -43,7 +44,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 					CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
 
 
-			handleUploadFilterCommand(cmd_data);
+			evt.result.returnCode = handleUploadFilterCommand(cmd_data);
 			break;
 		}
 		case CS_TYPE::CMD_REMOVE_FILTER: {
@@ -86,7 +87,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 
 	// loop over filters to check mac address
-	for(size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
+	for (size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
 		TrackingFilter* filter = _parsingFilters[i];
 
 		// check mac address for this filter
@@ -132,7 +133,7 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableA
 // -------------------------------------------------------------
 
 TrackingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
-	if(_filterBufferEndIndex + size > FILTER_BUFFER_SIZE) {
+	if (_filterBufferEndIndex + size > FILTER_BUFFER_SIZE) {
 		// not enough space for filter of this total size.
 		return nullptr;
 	}
@@ -175,7 +176,7 @@ void TrackableParser::deallocateParsingFilter(uint8_t filterId) {
 // ---------------------- Command interface --------------------
 // -------------------------------------------------------------
 
-bool TrackableParser::handleUploadFilterCommand(
+cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 		trackable_parser_cmd_upload_filter_t* cmd_data) {
 
 	// find or allocate a parsing filter
@@ -209,14 +210,15 @@ bool TrackableParser::handleUploadFilterCommand(
 	// apply filter chunk, counting chunk index from metadata onwards:
 	std::memcpy (&(parsingFilter->metadata) + cmd_data->chunkStartIndex, cmd_data->chunk, cmd_data->chunkSize);
 
-	return true;
+	return ERR_SUCCESS;
 }
 
-void TrackableParser::handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmd_data) {
+cs_ret_code_t TrackableParser::handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmd_data) {
 	// TODO(Arend): implement later.
+	return ERR_NOT_IMPLEMENTED;
 }
 
-void TrackableParser::handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmd_data) {
+cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmd_data) {
 	// TODO(Arend): implement later.
 	// - compute and check all filter sizes
 	// - compute and check all filter crcs
@@ -224,10 +226,12 @@ void TrackableParser::handleCommitFilterChangesCommand(trackable_parser_cmd_comm
 	// - persist all filters
 	// - unset in progress flag (async?)
 	// - broadcast update to the mesh
+	return ERR_NOT_IMPLEMENTED;
 }
 
-void TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_filer_summaries_t* cmd_data) {
+cs_ret_code_t TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_filer_summaries_t* cmd_data) {
 	// TODO(Arend): implement later.
+	return ERR_NOT_IMPLEMENTED;
 }
 
 
@@ -286,4 +290,3 @@ void TrackableParser::logServiceData(scanned_device_t* scannedDevice) {
 	_log(SERIAL_DEBUG, false, "servicedata trackableparser: ");
 	_logArray(SERIAL_DEBUG, true, serviceData.data, serviceData.len);
 }
-
