@@ -151,6 +151,8 @@ cs_ret_code_t MicroappStorage::writeNextChunkPart() {
 }
 
 cs_ret_code_t MicroappStorage::write(uint32_t flashAddress, const uint8_t* data, uint16_t size) {
+	LOGd("write %u bytes from 0x%X to 0x%08X", size, data, flashAddress);
+	_logArray(SERIAL_DEBUG, true, data, size);
 	// Only allow 1 write to flash at a time.
 	if (_writing) {
 		LOGw("Busy writing");
@@ -207,7 +209,11 @@ void MicroappStorage::getAppHeader(uint8_t appIndex, microapp_binary_header_t* h
 	const uint32_t addr = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
 	const uint8_t size = sizeof(*header);
 
-	nrf_fstorage_read(&nrf_microapp_storage, addr, header, size);
+	LOGd("read %u bytes from 0x%08X to 0x%X", size, addr, header);
+	uint32_t nrfCode = nrf_fstorage_read(&nrf_microapp_storage, addr, header, size);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to read app header");
+	}
 	printHeader(SERIAL_DEBUG, header);
 }
 
@@ -312,6 +318,8 @@ void MicroappStorage::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
 	}
 	switch (evt->id) {
 		case NRF_FSTORAGE_EVT_WRITE_RESULT: {
+			LOGd("Write result addr=0x%08X len=%u src=0x%X", evt->addr, evt->len, evt->p_src);
+			_logArray(SERIAL_DEBUG, true, (const uint8_t*)(evt->p_src), evt->len);
 			onFlashWritten(retCode);
 			break;
 		}
