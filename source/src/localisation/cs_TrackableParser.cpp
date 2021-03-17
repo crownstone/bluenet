@@ -21,7 +21,7 @@ void TrackableParser::init() {
 }
 
 void TrackableParser::handleEvent(event_t& evt) {
-	switch(evt.type) {
+	switch (evt.type) {
 		// incoming devices to filter
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
 			adv_background_parsed_t *parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
@@ -43,7 +43,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 					CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
 
 
-			handleUploadFilterCommand(cmd_data);
+			evt.result.returnCode = handleUploadFilterCommand(cmd_data);
 			break;
 		}
 		case CS_TYPE::CMD_REMOVE_FILTER: {
@@ -86,7 +86,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 
 	// loop over filters to check mac address
-	for(size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
+	for (size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
 		TrackingFilter* filter = _parsingFilters[i];
 
 		// check mac address for this filter
@@ -132,7 +132,7 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableA
 // -------------------------------------------------------------
 
 TrackingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
-	if(_filterBufferEndIndex + size > FILTER_BUFFER_SIZE) {
+	if (_filterBufferEndIndex + size > FILTER_BUFFER_SIZE) {
 		// not enough space for filter of this total size.
 		return nullptr;
 	}
@@ -286,4 +286,3 @@ void TrackableParser::logServiceData(scanned_device_t* scannedDevice) {
 	_log(SERIAL_DEBUG, false, "servicedata trackableparser: ");
 	_logArray(SERIAL_DEBUG, true, serviceData.data, serviceData.len);
 }
-
