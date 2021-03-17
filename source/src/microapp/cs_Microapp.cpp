@@ -180,7 +180,7 @@ bool Microapp::canRunApp(uint8_t index) {
 			_states[index].checksumTest == MICROAPP_TEST_STATE_PASSED &&
 			_states[index].memoryUsage != 1 &&
 			_states[index].bootTest != MICROAPP_TEST_STATE_FAILED &&
-			_states[index].failedFunction != MICROAPP_FUNCTION_NONE;
+			_states[index].failedFunction == MICROAPP_FUNCTION_NONE;
 }
 
 void Microapp::tick() {
@@ -287,6 +287,13 @@ cs_ret_code_t Microapp::handleEnable(microapp_ctrl_header_t* packet) {
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
+
+	LOGv("enabled=%u checkSumTest=%u, memoryUsage=%u, bootTest=%u, failedFunction=%u",
+			_states[index].enabled,
+			_states[index].checksumTest,
+			_states[index].memoryUsage,
+			_states[index].bootTest,
+			_states[index].failedFunction);
 
 	return startApp(index);
 }
