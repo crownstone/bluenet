@@ -138,6 +138,11 @@ TrackingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t 
 		return nullptr;
 	}
 
+	if (_parsingFiltersEndIndex + 1u > MAX_FILTER_IDS) {
+		// not enough space for more filter ids.
+		return nullptr;
+	}
+
 	_parsingFilters[_parsingFiltersEndIndex] = reinterpret_cast<TrackingFilter*>(_filterBuffer + _filterBufferEndIndex);
 	_filterBufferEndIndex += size;
 
@@ -179,6 +184,10 @@ void TrackableParser::deallocateParsingFilter(uint8_t filterId) {
 cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 		trackable_parser_cmd_upload_filter_t* cmd_data) {
 
+	if (cmd_data->chunkStartIndex + cmd_data->chunkSize > cmd_data->totalSize) {
+		return ERR_INVALID_MESSAGE;
+	}
+
 	// find or allocate a parsing filter
 	TrackingFilter* parsingFilter = findParsingFilter(cmd_data->filterId);
 	if(parsingFilter == nullptr) {
@@ -186,7 +195,7 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 
 		if(parsingFilter == nullptr) {
 			// failed to handle command, no space.
-			return false;
+			return ERR_NO_SPACE;
 		}
 
 		// initialize runtime data.
@@ -207,8 +216,18 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 	// 		is implicitly available even if multiple filters are
 	// 		uploaded in chunks concurrently. Just ptrdiff them.
 
+	// chunk index starts counting from metadata onwards (ignoring runtimedata)
+	uint8_t* parsingFilterBase_ptr = reinterpret_cast<uint8_t*>(&(parsingFilter->metadata));
+	uint8_t* parsingFilterChunk_ptr = parsingFilterBase_ptr + cmd_data->chunkStartIndex;
+
+	if (parsingFilterChunk_ptr + cmd_data->chunkSize > _filterBuffer + FILTER_BUFFER_SIZE) {
+		// chunk would overwrite end of filterbuffer.
+		// (Unlikely to happen, previous guards should have caught this.)
+		return ERR_NO_SPACE;
+	}
+
 	// apply filter chunk, counting chunk index from metadata onwards:
-	std::memcpy (&(parsingFilter->metadata) + cmd_data->chunkStartIndex, cmd_data->chunk, cmd_data->chunkSize);
+	std::memcpy (parsingFilterChunk_ptr, cmd_data->chunk, cmd_data->chunkSize);
 
 	return ERR_SUCCESS;
 }
