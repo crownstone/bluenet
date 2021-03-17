@@ -9,7 +9,8 @@
 #include <ble/cs_iBeacon.h>
 #include <events/cs_EventListener.h>
 #include <protocol/cs_TrackableParserPackets.h>
-#include <localisation/cs_TrackingFilter.h>
+#include <structs/cs_TrackableParserStructs.h>
+
 
 
 /**

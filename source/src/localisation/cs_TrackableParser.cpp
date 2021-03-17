@@ -91,8 +91,8 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 		TrackingFilter* filter = _parsingFilters[i];
 
 		// check mac address for this filter
-		if (filter->metadata.inputType == FilterInputType::MacAddress &&
-			filter->filter.contains(device->address, MAC_ADDRESS_LEN)) {
+		if (filter->filterdata.metadata.inputType == FilterInputType::MacAddress &&
+			filter->filterdata.filter.contains(device->address, MAC_ADDRESS_LEN)) {
 			// TODO: get fingerprint from filter instead of literal mac address.
 			// TODO: we should just pass on the device, right than copying rssi?
 			LOGd("filter %d accepted mac addres", filter->runtimedata.filterId);
@@ -217,7 +217,7 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 	// 		uploaded in chunks concurrently. Just ptrdiff them.
 
 	// chunk index starts counting from metadata onwards (ignoring runtimedata)
-	uint8_t* parsingFilterBase_ptr = reinterpret_cast<uint8_t*>(&(parsingFilter->metadata));
+	uint8_t* parsingFilterBase_ptr = reinterpret_cast<uint8_t*>(&(parsingFilter->filterdata.metadata));
 	uint8_t* parsingFilterChunk_ptr = parsingFilterBase_ptr + cmd_data->chunkStartIndex;
 
 	if (parsingFilterChunk_ptr + cmd_data->chunkSize > _filterBuffer + FILTER_BUFFER_SIZE) {
