@@ -482,22 +482,22 @@ void MicroappProtocol::callApp(uint8_t appIndex) {
 	if (thumbMode) {
 		address += 1;
 	}
-	LOGi("Check main code at %p", address);
+	LOGi("Check main code at 0x%08X", address);
 	char *arr = (char*)address;
 	if (arr[0] != 0xFF) {
 		void (*microappMain)() = (void (*)()) address;
-		LOGi("Call function in module: %p", microappMain);
+		LOGi("Call function in module: 0x%p", microappMain);
 		(*microappMain)();
 		LOGi("Module did run.");
 	}
 	_booted = true;
-	LOGi("Booted is at address: %p", &_booted);
+	LOGi("Booted is at address: 0x%p", &_booted);
 }
 
 uint16_t MicroappProtocol::initMemory() {
 	// We have a reserved area of RAM. For now let us clear it to 0
 	// This is actually incorrect (we should skip) and it probably can be done at once as well
-	LOGi("Init memory: clear %p to %p", g_RAM_MICROAPP_BASE, g_RAM_MICROAPP_BASE + g_RAM_MICROAPP_AMOUNT);
+	LOGi("Init memory: clear 0x%p to 0x%p", g_RAM_MICROAPP_BASE, g_RAM_MICROAPP_BASE + g_RAM_MICROAPP_AMOUNT);
 	for (uint32_t i = 0; i < g_RAM_MICROAPP_AMOUNT; ++i) {
 		uint32_t *const val = (uint32_t *)(uintptr_t)(g_RAM_MICROAPP_BASE + i);
 		*val = 0;
