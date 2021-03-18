@@ -79,20 +79,34 @@ void someEventHandler(pod_t const* event, void* context, uint32_t& address) {
 
 ## Naming
 
-Upper CamelCase naming is used for class names, typedefs and aliases. Members and functions are lower camel cased except for inner classes and types. 
+Identifiers follow the following convention, falling back to a previous rule if no specific case is declared for that particular scope.
+
+- Namespace scope (possibly global):
+	- classes (non-PODs): `UpperCamel`
+	- structs (PODs): `small_caps_t` 
+	- enums: both members and type names currently varying between `UpperCamel` and `ALL_CAPS`
+	- macros: `ALL_CAPS`
+	- functions: `lowerCamel`
+	- constants: `ALL_CAPS`
+	- templates: same as underlying type
+	- typedefs/aliases: same as underlying type
+- Class/struct scope:
+	- variables: `_underscoredLowerCamel`
+	- methods: `lowerCamel`
+	- constants: `ALL_CAPS`
+- Method/function scope, including their parameters:
+	- variables: `lowerCamel`
+
+In a short overview:
 
 ```
-void someEventHandler(pod_t const* event, void* context, uint32_t& address) {
-```
+#define CS_TYPE_CAST(EVT_NAME, PTR) reinterpret_cast<TYPIFY(EVT_NAME)*>(PTR)
 
-## Naming
+static constexpr auto BLUETOOTH_NAME = "CRWN";
 
-Upper CamelCase naming is used for class names, typedefs and aliases. Members and functions are lower camel cased except for inner classes and types. 
-
-```
 class ClassName {
     private:
-    typedef std::vector<uint8_t>::iterator IteratorType;
+    typedef uint8_t index_t;
     
     class Settings {
         bool isActive;
@@ -104,28 +118,20 @@ class ClassName {
 
 using MyVec = std::vector<uint8_t>;
 
-Struct definitions (or in general **plain old data**, POD) are the exception, end them with `_t`.
-
-```
 struct __attribute__((__packed__)) a_packed_packet_t {
     uint8_t shortWord;
     uint32_t longWord;
 };
 ```
-Macros are an exception as well (use them sparingly), use underscores.
 
-- `BLUETOOTH_NAME`
-
-Sometimes you have a full uppercase abbreviation in your name, in that case just pretend it's a word. For example: rssiMacAddress.
-
-### Variables
-
-- `localVar`
-- `_memberVar`
-
-This makes it easier to recognize member variables, and saves you from coming up with alternative names when you have things like: `void setRssi(int8_t rssi) { _rssi = rssi; }`.
-
-Try to actually name your variables, avoid single letters (with the exception of a variable for loop iterations).
+Notes:
+- Abbreviations in identifyer are considered to be a whole word in `lowerCamel` or `UpperCamel`. Only the first letter of an abbreviation will be upper case. For example: `rssiMacAddress`.
+- The convention for variable/member names is chosen to make it easier to recognize their scope and saves you from coming up with alternative names in contexts such as:
+	```
+	void setRssi(int8_t rssi) { _rssi = rssi; }
+	```
+- Avoid use of single letters for identifiers (with the exception of a variable for loop iterations) as it impairs search/replace tools and readibility.
+- Avoid use of names longer than about 35 characters.
 
 ## Comments
 
@@ -136,14 +142,33 @@ Try to actually name your variables, avoid single letters (with the exception of
  *
  * Optional longer explanation.
  *
- * @param[in]     val    Explanation.
- * @param[out]    val    Explanation.
- * @param[in,out] val    Explanation.
+ * @param[in]     aParameter    Explanation.
+ * @param[out]    anotherParameter    Explanation.
+ * @param[in,out] exoticInOutParameter    Explanation.
  * @return        Explanation.
  */
 ```
 
 ## Various
+
+### POD types
+
+All data types that are used for communication over hardware protocols will be **Plain Old Data** types (PODs). All PODs will be declared as structs with the modifier `__attribute__((__packed__))`. Adding methods to datatypes that cross hardware boundaries is possible as long as these definitions do not interfere with the POD property of said type.
+
+```
+struct __attribute__((__packed__)) a_packed_packet_t {
+    uint8_t shortWord;
+    uint32_t longWord;
+};
+```
+
+### Constants
+There is a strong preference to use typed `constexpr` values over macros. The use of `auto` is permitted if the codebase would emit warnings when replacing a macro with a constexprs of particular type.
+
+```
+#define BLUETOOTH_NAME "CRWN"
+static constexpr auto BLUETOOTH_NAME = "CRWN"; // <-- strongly preferred
+```
 
 ### Declare variables on their own line.
 

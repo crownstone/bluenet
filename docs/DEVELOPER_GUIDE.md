@@ -6,7 +6,7 @@ For syntax see the separate [style document](/docs/STYLE.md).
 
 Bluenet is firmware, it is **embedded**, it is (almost) bare-metal. There is very restricted memory, both **flash** (the "disk" space) as well as **ram** (the "working" memory). In contrast to "normal" development, there are two guidelines:
 
-* Limit the use of dynamic memory allocation;
+* Limit the use of dynamic memory allocation
 * Limit the use of libraries.
 
 ### Dynamic memory allocation
@@ -22,7 +22,16 @@ In practice, what this means that it is often the right solution to create for e
 
 Preferably, the entire code base has a single **maximum** value for the heap size.
 
-### Libraries
+## Object pool buffers
+
+To accomodate flexibility while keeping dynamic memory usage to a minimum, components are allowed to contain a buffer that can be used for dynamic data. Since the components in the firmware are known at compiletime, as well as their buffer size, it remains possible to assert that the device will not run into heap allocation problems.
+
+Guidelines:
+- Components must contain such buffers as a member to avoid double initialisation and avoid `nullptr` checks.
+- Arrays, vectors, etc. that need to grow and shrink in size can use these buffers to do so. Effectively, all components have their own isolated miniheap.
+
+
+## Libraries
 
 Normally you have the C++ standard libraries to work with `std::vector`, `std::map`, etc. Very, very, carefully consider if you actually need this. A lot of functionality has been disabled by using compiler flags such as `-no-exceptions` (remove exception handling), `-no-unwind-tables`(also remove those), etc.
 

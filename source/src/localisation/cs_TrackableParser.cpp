@@ -11,6 +11,7 @@
 #include <localisation/cs_TrackableEvent.h>
 #include <localisation/cs_TrackableParser.h>
 #include <logging/cs_Logger.h>
+#include <protocol/cs_ErrorCodes.h>
 #include <structs/cs_PacketsInternal.h>
 #include <structs/cs_StreamBufferAccessor.h>
 #include <util/cs_Utils.h>
@@ -21,41 +22,241 @@ void TrackableParser::init() {
 }
 
 void TrackableParser::handleEvent(event_t& evt) {
-	if (evt.type == CS_TYPE::EVT_ADV_BACKGROUND_PARSED) {
-		adv_background_parsed_t *parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
-		handleBackgroundParsed(parsedAdv);
-		return;
-	}
+	switch (evt.type) {
+		// incoming devices to filter
+		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
+			adv_background_parsed_t *parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
+			handleBackgroundParsed(parsedAdv);
+			return;
+		}
+		case CS_TYPE::EVT_DEVICE_SCANNED: {
+			scanned_device_t* scannedDevice = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
+			handleScannedDevice(scannedDevice);
+			return;
+		}
 
-	if (evt.type == CS_TYPE::EVT_DEVICE_SCANNED) {
-		scanned_device_t* scannedDevice = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
-		handleAsTileDevice(scannedDevice);
-		// add other trackable device types here
+		// incoming filter commands
+		case CS_TYPE::CMD_UPLOAD_FILTER: {
+			LOGd("CMD_UPLOAD_FILTER");
+			return;
 
-		return;
+			trackable_parser_cmd_upload_filter_t* cmd_data =
+					CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
+
+
+			evt.result.returnCode = handleUploadFilterCommand(cmd_data);
+			break;
+		}
+		case CS_TYPE::CMD_REMOVE_FILTER: {
+			LOGd("CMD_REMOVE_FILTER");
+			return;
+
+			trackable_parser_cmd_remove_filter_t* cmd_data =
+					CS_TYPE_CAST(CMD_REMOVE_FILTER, evt.data);
+
+			handleRemoveFilterCommand(cmd_data);
+			break;
+		}
+		case CS_TYPE::CMD_COMMIT_FILTER_CHANGES: {
+			LOGd("CMD_COMMIT_FILTER_CHANGES");
+			return;
+
+			trackable_parser_cmd_commit_filter_changes_t* cmd_data =
+					CS_TYPE_CAST(CMD_COMMIT_FILTER_CHANGES, evt.data);
+			handleCommitFilterChangesCommand(cmd_data);
+			break;
+		}
+		case CS_TYPE::CMD_GET_FILTER_SUMMARIES: {
+			LOGd("CMD_GET_FILTER_SUMMARIES");
+			return;
+
+			trackable_parser_cmd_get_filer_summaries_t* cmd_data =
+					CS_TYPE_CAST(CMD_GET_FILTER_SUMMARIES, evt.data);
+			handleGetFilterSummariesCommand(cmd_data);
+			break;
+		}
+		default:
+			break;
+
 	}
 }
 
+// -------------------------------------------------------------
+// ------------------ Advertisment processing ------------------
+// -------------------------------------------------------------
+void TrackableParser::handleScannedDevice(scanned_device_t* device) {
+
+	// loop over filters to check mac address
+	for (size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
+		TrackingFilter* filter = _parsingFilters[i];
+
+		// check mac address for this filter
+		if (filter->filterdata.metadata.inputType == FilterInputType::MacAddress &&
+			filter->filterdata.filter.contains(device->address, MAC_ADDRESS_LEN)) {
+			// TODO: get fingerprint from filter instead of literal mac address.
+			// TODO: we should just pass on the device, right than copying rssi?
+			LOGd("filter %d accepted mac addres", filter->runtimedata.filterId);
+			TrackableEvent trackableEventData;
+			trackableEventData.id = TrackableId(device->address, MAC_ADDRESS_LEN);
+			trackableEventData.rssi = device->rssi;
+
+			event_t trackableEvent(CS_TYPE::EVT_TRACKABLE, &trackableEventData, sizeof(trackableEventData));
+			trackableEvent.dispatch();
+			return;
+		}
+	}
+
+	// TODO: Add the ADD field loop.
+	// loop over filters fields to check addata fields
+	//	// keeps fields as outer loop because that's more expensive to loop over.
+	// 	// See BLEutil:findAdvType how to loop the fields.
+	//	for (auto field: devicefields) {
+	//		for(size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
+	//			TrackingFilter* filter = _parsingFilters[i];
+	//			if(filter->metadata.inputType == FilterInputType::AdData) {
+	//				// check each AD Data field for this filter
+	//				// TODO: query filter for fingerprint
+	//				TrackableEvent trackEvent;
+	//				trackEvent.dispatch();
+	//				return;
+	//			}
+	//		}
+	//	}
+}
 
 void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableAdv) {
-	// TODO: implement when we have a good representation of trackables in the mesh.
-	//
-	//	TrackableEvent trackEvent;
-	//	trackEvent.id = TrackableId(trackableAdv->macAddress);
-	//	trackEvent.rssi = trackableAdv->adjustedRssi;
-	//
-	//	trackEvent.dispatch();
+	// TODO: implement
+}
+
+// -------------------------------------------------------------
+// ------------------- Filter data management ------------------
+// -------------------------------------------------------------
+
+TrackingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
+	if (_filterBufferEndIndex + size > FILTER_BUFFER_SIZE) {
+		// not enough space for filter of this total size.
+		return nullptr;
+	}
+
+	if (_parsingFiltersEndIndex + 1u > MAX_FILTER_IDS) {
+		// not enough space for more filter ids.
+		return nullptr;
+	}
+
+	_parsingFilters[_parsingFiltersEndIndex] = reinterpret_cast<TrackingFilter*>(_filterBuffer + _filterBufferEndIndex);
+	_filterBufferEndIndex += size;
+
+	// don't forget to postcrement the EndIndex for the filter list in return statement.
+	return _parsingFilters[_parsingFiltersEndIndex++];
+}
+
+TrackingFilter* TrackableParser::findParsingFilter(uint8_t filterId) {
+	TrackingFilter* parsingFilter;
+	for (size_t index = 0; index < _parsingFiltersEndIndex; ++index) {
+		parsingFilter = _parsingFilters[index];
+
+		if(parsingFilter == nullptr) {
+			LOGw("_parsingFiltersEndIndex incorrect: found nullptr before reaching end of filter list.");
+			return nullptr;
+		}
+
+		if (parsingFilter->runtimedata.filterId == filterId) {
+			return _parsingFilters[index];
+		}
+	}
+
+	return nullptr;
+}
+
+void TrackableParser::deallocateParsingFilter(uint8_t filterId) {
+	// TODO(Arend);
+	// find filter pointer in _parsingFiltser
+	// wipe memory in buffer at that location
+	// memcpy the tail onto the created opening
+	// remove filterId from _parsingFilters list
 }
 
 
-// ====================== Mac Filter =====================
+// -------------------------------------------------------------
+// ---------------------- Command interface --------------------
+// -------------------------------------------------------------
 
-bool TrackableParser::isMyTrackable(scanned_device_t* scannedDevice) {
-	TrackableId myTrackableId{0xe4, 0x96, 0x62, 0x0d, 0x5a, 0x5b}; // Arend's test Tile, as read on nrf connect app
-	TrackableId incomingTrackableId(scannedDevice->address, sizeof(scannedDevice->address));
+cs_ret_code_t TrackableParser::handleUploadFilterCommand(
+		trackable_parser_cmd_upload_filter_t* cmd_data) {
 
-	return myTrackableId == incomingTrackableId;
+	if (cmd_data->chunkStartIndex + cmd_data->chunkSize > cmd_data->totalSize) {
+		return ERR_INVALID_MESSAGE;
+	}
+
+	// find or allocate a parsing filter
+	TrackingFilter* parsingFilter = findParsingFilter(cmd_data->filterId);
+	if(parsingFilter == nullptr) {
+		parsingFilter = allocateParsingFilter(cmd_data->filterId, cmd_data->totalSize);
+
+		if(parsingFilter == nullptr) {
+			// failed to handle command, no space.
+			return ERR_NO_SPACE;
+		}
+
+		// initialize runtime data.
+		parsingFilter->runtimedata.filterId = cmd_data->filterId;
+		parsingFilter->runtimedata.crc = 0;
+
+		// meta data and filter data will be memcpy'd from chunks,
+		// no need to copy those.
+	}
+
+	// WARNING(Arend): we're not doing corruption checks here yet.
+	// E.g.: when totalSize changes for a specific filterId before
+	//       a commit is reached, we have a parsingFilter allocated
+	//       but it's of the wrong size.
+	// Edit(Arend):
+	// 		As we keep a list of pointers _parsingFilters, as well
+	// 		as the end pointer to the byte array, this information
+	// 		is implicitly available even if multiple filters are
+	// 		uploaded in chunks concurrently. Just ptrdiff them.
+
+	// chunk index starts counting from metadata onwards (ignoring runtimedata)
+	uint8_t* parsingFilterBase_ptr = reinterpret_cast<uint8_t*>(&(parsingFilter->filterdata.metadata));
+	uint8_t* parsingFilterChunk_ptr = parsingFilterBase_ptr + cmd_data->chunkStartIndex;
+
+	if (parsingFilterChunk_ptr + cmd_data->chunkSize > _filterBuffer + FILTER_BUFFER_SIZE) {
+		// chunk would overwrite end of filterbuffer.
+		// (Unlikely to happen, previous guards should have caught this.)
+		return ERR_NO_SPACE;
+	}
+
+	// apply filter chunk, counting chunk index from metadata onwards:
+	std::memcpy (parsingFilterChunk_ptr, cmd_data->chunk, cmd_data->chunkSize);
+
+	return ERR_SUCCESS;
 }
+
+cs_ret_code_t TrackableParser::handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmd_data) {
+	// TODO(Arend): implement later.
+	return ERR_NOT_IMPLEMENTED;
+}
+
+cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmd_data) {
+	// TODO(Arend): implement later.
+	// - compute and check all filter sizes
+	// - compute and check all filter crcs
+	// - compute and check(?) master crc
+	// - persist all filters
+	// - unset in progress flag (async?)
+	// - broadcast update to the mesh
+	return ERR_NOT_IMPLEMENTED;
+}
+
+cs_ret_code_t TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_filer_summaries_t* cmd_data) {
+	// TODO(Arend): implement later.
+	return ERR_NOT_IMPLEMENTED;
+}
+
+
+// -------------------------------------------------------------
+// ----------------------- OLD interface -----------------------
+// -------------------------------------------------------------
 
 // ======================== Tile ========================
 
@@ -90,35 +291,6 @@ bool TrackableParser::isTileDevice(scanned_device_t* scannedDevice) {
 
 	return false;
 }
-
-
-bool TrackableParser::handleAsTileDevice(scanned_device_t* scannedDevice) {
-	if (!isTileDevice(scannedDevice)) {
-		return false;
-	}
-
-	TrackableId tile(scannedDevice->address, sizeof(scannedDevice->address));
-
-	LOGTrackableParserDebug("incoming tile device: rssi=%i ", scannedDevice->rssi);
-	tile.print();
-
-	if (!isMyTrackable(scannedDevice)) {
-		// it was a Tile device, so return true.
-		return true;
-	}
-
-	logServiceData(scannedDevice);
-
-	TrackableEvent trackableEventData;
-	trackableEventData.id = tile;
-	trackableEventData.rssi = scannedDevice->rssi;
-
-	event_t trackableEvent(CS_TYPE::EVT_TRACKABLE,	&trackableEventData, sizeof(trackableEventData));
-	trackableEvent.dispatch();
-
-	return true;
-}
-
 
 // ======================== Utils ========================
 

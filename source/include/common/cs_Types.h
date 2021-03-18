@@ -11,8 +11,11 @@
 #include <tuple>
 
 #include "cfg/cs_Config.h"
+
 #include "protocol/cs_CommandTypes.h"
 #include "protocol/cs_ErrorCodes.h"
+#include "protocol/cs_TrackableParserPackets.h"
+
 #include "structs/cs_PacketsInternal.h"
 
 #include <behaviour/cs_SwitchBehaviour.h>
@@ -310,6 +313,11 @@ enum class CS_TYPE: uint16_t {
 	CMD_GET_PRESENCE,                                 // Get the current presence.
 	EVT_TRACKABLE,                                    // TrackableParser emits updates of this type.
 
+	CMD_UPLOAD_FILTER,                                // Update data chunk for a filter.                 See protocol or cs_TrackableParser.h for more information.
+	CMD_REMOVE_FILTER,                                // Remove a filter by id.                          See protocol or cs_TrackableParser.h for more information.
+	CMD_COMMIT_FILTER_CHANGES,                        // Confirm all recent changes to filters.          See protocol or cs_TrackableParser.h for more information.
+	CMD_GET_FILTER_SUMMARIES,                         // Obtain status summary for each filter in RAM.   See protocol or cs_TrackableParser.h for more information.
+
 	// System
 	CMD_RESET_DELAYED = InternalBaseSystem,           // Reboot scheduled with a (short) delay.
 	EVT_GOING_TO_DFU,                                 // The system will reboot to DFU mode soon.
@@ -566,6 +574,11 @@ typedef presence_change_t TYPIFY(EVT_PRESENCE_CHANGE);
 typedef void TYPIFY(CMD_GET_PRESENCE);
 typedef profile_location_t TYPIFY(EVT_RECEIVED_PROFILE_LOCATION);
 typedef TrackableEvent TYPIFY(EVT_TRACKABLE);
+
+typedef trackable_parser_cmd_upload_filter_t TYPIFY(CMD_UPLOAD_FILTER);
+typedef trackable_parser_cmd_remove_filter_t TYPIFY(CMD_REMOVE_FILTER);
+typedef trackable_parser_cmd_commit_filter_changes_t TYPIFY(CMD_COMMIT_FILTER_CHANGES);
+typedef trackable_parser_cmd_get_filer_summaries_t TYPIFY(CMD_GET_FILTER_SUMMARIES);
 
 typedef bool TYPIFY(CMD_SET_RELAY);
 typedef uint8_t TYPIFY(CMD_SET_DIMMER); // interpret as intensity value, not combined with relay state.
