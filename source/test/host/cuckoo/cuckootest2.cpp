@@ -4,8 +4,8 @@
 #include <random>
 #include <algorithm>
 
-#include <third/cuckoo/CuckooFilter.h>
-#include <third/cuckoo/CuckooRand.h>
+#include "cuckoo_filter.h"
+#include "cuckoo_status.h"
 
 
 std::string random_string(std::string::size_type length)
@@ -34,27 +34,22 @@ bool contains(const std::set<std::string>& my_set, const std::string& val) {
 /**
  * Allocates FILTER_COUNT filters, then adds the same sequence to each,
  * tests if this sequence is passes containment check and frees the filters.
- * 
- * NOTE(Arend): This seems utterly pointless to me.
  */
 int main (int argc, char ** argv) {
-	CuckooFilter filter;
+	// Settings for this test
+	const CuckooFilter::index_type max_buckets = 128;
+	const CuckooFilter::index_type nests_per_bucket = 4;
+	const float load_factor = 0.75f;
+	
+	// allocate buffer and cast to CuckooFilter
+	uint8_t filterBuffer[CuckooFilter::size(max_buckets, nests_per_bucket)];	
+	CuckooFilter* filter = reinterpret_cast<CuckooFilter*>(filterBuffer);
+	filter->init(max_buckets, nests_per_bucket);
+
+	// setup test variables
+	const uint32_t max_items = max_buckets * nests_per_bucket;
+	const uint32_t num_items_to_test = max_items * load_factor;
 	uint32_t fails = 0;
-
-	CuckooFilter::index_type max_buckets = std::numeric_limits<CuckooFilter::index_type>::max();
-	CuckooFilter::index_type nests_per_bucket = 4;
-	float load_factor = 0.75f;
-	uint32_t max_items = max_buckets * nests_per_bucket;
-	uint32_t num_items_to_test = max_items * load_factor;
-
-	std::cout << "filter contains " << +max_buckets << " buckets with " << +nests_per_bucket << " items each." << std::endl;
-	std::cout << "max items: " << +max_items << " num_items_to_test: " << +num_items_to_test << std::endl;
-
-	// allocate the filter
-	if (filter._new(max_buckets, nests_per_bucket) == false) {
-		fails++;
-	}
-	std::cout << "NEW" << Status(fails) << std::endl;
 
 	// generate a bunch of random strings
 	std::set<std::string> my_mac_whitelist;
@@ -66,7 +61,7 @@ int main (int argc, char ** argv) {
 
 	// add the whitelisted items to the filter
 	for (auto& mac : my_mac_whitelist) {
-		if (filter.add(mac.data(), mac.length()) == false) {
+		if (filter->add(mac.data(), mac.length()) == false) {
 			fails++;
 		}
 	}
@@ -75,7 +70,7 @@ int main (int argc, char ** argv) {
 
 	// check if all the whitelisted items pass the filter
 	for (auto& mac : my_mac_whitelist) {
-		if (filter.contains(mac.data(), mac.length()) == false) {
+		if (filter->contains(mac.data(), mac.length()) == false) {
 			fails++;
 		}
 	}
@@ -88,7 +83,7 @@ int main (int argc, char ** argv) {
 	uint32_t false_negatives = 0;
 	for (auto& mac : random_mac_addresses) {
 		bool should_contain = contains(my_mac_whitelist, mac);
-		bool filter_contains = filter.contains(mac.data(), mac.length());
+		bool filter_contains = filter->contains(mac.data(), mac.length());
 
 		if (filter_contains != should_contain) {
 			fails++;
@@ -102,17 +97,6 @@ int main (int argc, char ** argv) {
 	}
 	std::cout << "CONTAINS false negatives" << Status(false_negatives, random_mac_addresses.size(), 0.00f) << std::endl;
 	std::cout << "CONTAINS false positives" << Status(false_positives, random_mac_addresses.size(), 0.05f) << std::endl;
-	fails = 0;
-	false_negatives = 0;
-	false_positives = 0;
-
-
-	// deallocate the filter
-	if (filter._free() == false) {
-		fails++;
-	}
-	std::cout << "FREE" << Status(fails) << std::endl;
-	fails = 0;
 
 	return 0;
 

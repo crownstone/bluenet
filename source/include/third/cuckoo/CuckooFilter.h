@@ -16,7 +16,7 @@
  */
 class CuckooFilter {
 public:
-	typedef const uint8_t* key_type;
+	typedef const void* key_type;
 	typedef uint16_t fingerprint_type;
 	typedef uint8_t index_type;
 
@@ -34,7 +34,12 @@ public:
 	};
 
 	ExtendedFingerprint getExtendedFingerprint(key_type key, size_t key_length_in_bytes);
-	ExtendedFingerprint getExtendedFingerprint(fingerprint_type fingerprint);
+
+	/**
+	 * Note: to obtain a valid extended fingerprint from a fingerprint and bucket index,
+	 * bucket_count _must_ be a power of two.
+	 */
+	ExtendedFingerprint getExtendedFingerprint(fingerprint_type fingerprint, index_type bucket_index);
 
 	// -------------------------------------------------------------
 	// Run time variables
@@ -45,7 +50,7 @@ public:
 
 	// if this is != 0, it was kicked from the filter
 	// and can't be reinserted because the filter is full.
-	fingerprint_type		victim = 0;
+	ExtendedFingerprint		victim = {};
 
 	fingerprint_type	    bucket_array[]; // 'flexible array member'
   
@@ -63,13 +68,7 @@ public:
 	/**
 	 * Hashes the given key (data) into a fingerprint.
 	 */
-	fingerprint_type getFingerprint(key_type key, size_t key_length_in_bytes);
-
-	/**
-	 * A bijection on fingerprint_type, that has high entropy according to a suitable
-	 * definition of entropy. (E.g. the entropy of (x-scramble(x)), assuming x is uniform.)
-	 */
-	fingerprint_type scramble(fingerprint_type fingerprint);
+	fingerprint_type hash(key_type key, size_t key_length_in_bytes);
 
 	/**
 	 * Returns a reference to the fingerprint at the given coordinates.
@@ -112,16 +111,16 @@ public:
 	// -------------------------------------------------------------
 	// These might be useful for fingerprints coming from the mesh.
 	// -------------------------------------------------------------
-	bool add(fingerprint_type fp) {
-		return add(getExtendedFingerprint(fp));
+	bool add(fingerprint_type finger, index_type bucket_index) {
+		return add(getExtendedFingerprint(finger, bucket_index));
 	}
 
-	bool remove(fingerprint_type fp) {
-		return remove(getExtendedFingerprint(fp));
+	bool remove(fingerprint_type finger, index_type bucket_index) {
+		return remove(getExtendedFingerprint(finger, bucket_index));
 	}
 
-	bool contains(fingerprint_type fp) {
-		return contains(getExtendedFingerprint(fp));
+	bool contains(fingerprint_type finger, index_type bucket_index) {
+		return contains(getExtendedFingerprint(finger, bucket_index));
 	}
 
 	// -------------------------------------------------------------
@@ -145,11 +144,12 @@ public:
 	// -------------------------------------------------------------
 
 	/**
-	 * TODO(Arend)
+	 * Memsets the bucket_array to 0x00 and sets victim to 0.
+	 * No changes are made to size.
 	 */
 	void clear();
 
-	constexpr size_t fingerprintCount(
+	static constexpr size_t fingerprintCount(
 			index_type bucket_count, index_type nests_per_bucket) {
 		return bucket_count * nests_per_bucket;
 	}
@@ -157,7 +157,7 @@ public:
 	/**
 	 * Size of the byte buffer in bytes.
 	 */
-	constexpr size_t bufferSize(
+	static constexpr size_t bufferSize(
 			index_type bucket_count, index_type nests_per_bucket) {
 		return fingerprintCount(bucket_count, nests_per_bucket) * sizeof(fingerprint_type);
 	}
@@ -173,7 +173,7 @@ public:
 	 *   "sizeof, and the assignment operator ignore the flexible array member."
 	 *   https://en.cppreference.com/w/c/language/struct
 	 */
-	constexpr size_t size(index_type bucket_count, index_type nests_per_bucket) {
+	static constexpr size_t size(index_type bucket_count, index_type nests_per_bucket) {
 		return sizeof(CuckooFilter) + bufferSize(bucket_count, nests_per_bucket);
 	}
 
@@ -186,7 +186,9 @@ public:
 	}
 
 	/**
-	 * Sets the size members, clears victim and buffer. No sizechecks done.
+	 * Sets the size members, clears victim and buffer. No sizechecks done, but
+	 *
+	 *  WARNING: bucket count must be power of 2.
 	 */
 	void init(index_type bucket_count, index_type nests_per_bucket);
 
