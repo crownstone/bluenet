@@ -799,13 +799,14 @@ uint 32 | Passed functions | 4 | Bitmask of registered functions that were calle
 
 #### Microapp tests packet
 
-Bit | Name |  Description
---- | --- | ---
-0-1 | checksum | 0=untested, 1=trying, 2=failed, 3=passed.
-2 | enabled | 0=disabled, 1=enabled.
-3-4 | boot | 0=untested, 1=trying, 2=failed, 3=passed.
-5 | memory | 0=ok, 1=excessive
-6-15 | reserved | Reserved, must be 0 for now.
+Bit  | Name     | Description
+---- | -------- | -----------
+0    | occupied | Whether the storage space of this app contains data.
+1-2  | checksum | 0=untested, 1=trying, 2=failed, 3=passed.
+3    | enabled  | 0=disabled, 1=enabled.
+4-5  | boot     | 0=untested, 1=trying, 2=failed, 3=passed.
+6    | memory   | 0=ok, 1=excessive
+7-15 | reserved | Reserved, must be 0 for now.
 
 
 

@@ -236,6 +236,12 @@ void CrownstoneService::handleEvent(event_t & event) {
 			writeResult(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_MICROAPP_UPLOAD, result);
 			break;
 		}
+		case CS_TYPE::EVT_MICROAPP_ERASE_RESULT: {
+			TYPIFY(EVT_MICROAPP_ERASE_RESULT)* retCode = CS_TYPE_CAST(EVT_MICROAPP_ERASE_RESULT, event.data);
+			cs_result_t result(*retCode);
+			writeResult(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_MICROAPP_REMOVE, result);
+			break;
+		}
 		case CS_TYPE::EVT_HUB_DATA_REPLY: {
 			TYPIFY(EVT_HUB_DATA_REPLY)* reply = reinterpret_cast<TYPIFY(EVT_HUB_DATA_REPLY)*>(event.data);
 			writeResult(CS_CONNECTION_PROTOCOL_VERSION, CTRL_CMD_HUB_DATA, reply->retCode, reply->data);

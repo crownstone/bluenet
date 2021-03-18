@@ -88,13 +88,20 @@ void Microapp::loadState(uint8_t index) {
 	retCode = State::getInstance().get(stateData);
 	if (retCode != ERR_SUCCESS) {
 		resetState(index);
-		return;
 	}
+
+	MicroappStorage & storage = MicroappStorage::getInstance();
+	_states[index].occupied = !storage.isErased(index);
 }
 
 cs_ret_code_t Microapp::validateApp(uint8_t index) {
 	cs_ret_code_t retCode;
 	microapp_state_t & state = _states[index];
+
+	if (!state.occupied) {
+		LOGi("app %u is empty", index);
+		return ERR_WRONG_STATE;
+	}
 
 	MicroappStorage & storage = MicroappStorage::getInstance();
 	retCode = storage.validateApp(index);
@@ -227,18 +234,36 @@ cs_ret_code_t Microapp::handleUpload(microapp_upload_internal_t* packet) {
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
+	uint8_t index = packet->header.header.index;
+
+	if (_states[index].occupied) {
+		LOGw("app %u is occupied, remove first");
+		return ERR_WRITE_DISABLED;
+	}
 
 	// The previous app at this index will not run anymore, so reset the state.
-	resetState(packet->header.header.index);
+	resetState(index);
 
 	MicroappStorage & storage = MicroappStorage::getInstance();
 	// CAREFUL: This assumes the data stays in ram during the write.
 	retCode = storage.writeChunk(packet->header.header.index, packet->header.offset, packet->data.data, packet->data.len);
 
-	// User should wait for the data to be written to flash before sending the next chunk.
-	if (retCode == ERR_SUCCESS) {
-		return ERR_WAIT_FOR_SUCCESS;
+	switch (retCode) {
+		case ERR_SUCCESS: {
+			// Assume the flash will be written.
+			_states[index].occupied = true;
+			// User should wait for the data to be written to flash before sending the next chunk.
+			retCode = ERR_WAIT_FOR_SUCCESS;
+			break;
+		}
+		case ERR_WRITE_DISABLED: {
+			// Specific error we get when the storage space is not empty, update state.
+			_states[index].occupied = true;
+			break;
+		}
 	}
+
+	storeState(index);
 	return retCode;
 }
 
@@ -262,8 +287,19 @@ cs_ret_code_t Microapp::handleRemove(microapp_ctrl_header_t* packet) {
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
+	uint8_t index = packet->index;
 
-	return ERR_NOT_IMPLEMENTED;
+	MicroappStorage & storage = MicroappStorage::getInstance();
+	retCode = storage.erase(index);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	// Assume the erase will succeed. If not, the state will be corrected later.
+	_states[index].occupied = false;
+	storeState(index);
+
+	return ERR_WAIT_FOR_SUCCESS;
 }
 
 cs_ret_code_t Microapp::handleEnable(microapp_ctrl_header_t* packet) {
@@ -279,8 +315,9 @@ cs_ret_code_t Microapp::handleEnable(microapp_ctrl_header_t* packet) {
 		return retCode;
 	}
 
-	// The enable command resets all test, except checksum test.
+	// The enable command resets all test, except occupied field and checksum test.
 	resetTestState(index);
+	_states[index].occupied = true;
 	_states[index].checksumTest = MICROAPP_TEST_STATE_PASSED;
 
 	retCode = storeState(index);

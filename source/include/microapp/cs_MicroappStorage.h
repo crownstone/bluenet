@@ -3,8 +3,7 @@
 #include <events/cs_EventListener.h>
 
 /**
- * The class MicroappStorage has functionality to store a second app (and perhaps in the future even more apps) on
- * another part of the flash memory.
+ * Class to store microapps on flash.
  */
 class MicroappStorage {
 public:
@@ -20,24 +19,60 @@ public:
 
 	/**
 	 * Get a copy of the microapp binary header.
+	 *
+	 * @param[in] appIndex   Index of the microapp, validity is not checked.
+	 * @param[out] header    Pointer where will be read to.
 	 */
 	void getAppHeader(uint8_t appIndex, microapp_binary_header_t* header);
 
 	/**
 	 * Get the address in flash, where the microapp program starts.
+	 *
+	 * @param[in] appIndex   Index of the microapp, validity is not checked.
 	 */
 	uint32_t getStartInstructionAddress(uint8_t appIndex);
 
 	/**
-	 * Validate the overall binary, this goes through flash and checks it completely.
-	 * All flash write operations have to have finished before.
+	 * Checks if storage space of this microapp is erased.
+	 *
+	 * @param[in] appIndex   Index of the microapp, validity is not checked.
+	 * @return true                         Storage space of this app is erased, and thus ready to be written.
 	 */
-	cs_ret_code_t validateApp(uint8_t appIndex);
+	bool isErased(uint8_t appIndex);
+
+	/**
+	 * Erases storage space of given app.
+	 *
+	 * @param[in] appIndex   Index of the microapp, validity is not checked.
+	 *
+	 * @return ERR_SUCCESS                  The storage will be written erased, wait for EVT_MICROAPP_ERASE_RESULT.
+	 */
+	cs_ret_code_t erase(uint8_t appIndex);
 
 	/**
 	 * Write a chunk to flash.
+	 *
+	 * @param[in] appIndex   Index of the microapp, validity is not checked.
+	 * @param[in] offset     Offset of the data in bytes from the start of the app storage space.
+	 * @param[in] data       Pointer to the data to be written.
+	 * @param[in] size       Size of the data to be written, must be a multiple of 4.
+	 *
+	 * @return ERR_SUCCESS                  The data will be written to flash, wait for EVT_MICROAPP_UPLOAD_RESULT.
+	 * @return ERR_NO_SPACE                 Data would go outside the app storage space.
+	 * @return ERR_WRONG_PAYLOAD_LENGTH     Data size is not a multiple of 4.
+	 * @return ERR_WRITE_DISABLED           App storage space is not erased.
+	 * @return ERR_BUSY                     Another chunk is being written already.
 	 */
 	cs_ret_code_t writeChunk(uint8_t appIndex, uint16_t offset, const uint8_t* data, uint16_t size);
+
+	/**
+	 * Validate the overall binary, this goes through flash and checks it completely.
+	 * All flash write operations have to have finished before.
+	 *
+	 * @param[in] appIndex   Index of the microapp, validity is not checked.
+	 * @return ERR_SUCCESS                  The app binary header is valid, and the checksums match.
+	 */
+	cs_ret_code_t validateApp(uint8_t appIndex);
 
 	void printHeader(uint8_t logLevel, microapp_binary_header_t* header);
 
@@ -72,10 +107,20 @@ private:
 	uint16_t _chunkWritten = 0;
 	uint32_t _chunkFlashAddress = 0;
 
+	/**
+	 * Write the next part of a chunk.
+	 * Called first time from command, and every time when a flash write is done.
+	 */
 	cs_ret_code_t writeNextChunkPart();
 
+	/**
+	 * Write to flash.
+	 */
 	cs_ret_code_t write(uint32_t flashAddress, const uint8_t* data, uint16_t size);
 
+	/**
+	 * Called when data has been written to flash.
+	 */
 	void onFlashWritten(cs_ret_code_t retCode);
 
 	/**
@@ -85,7 +130,7 @@ private:
 	void resetChunkVars();
 
 	/**
-	 * Erases all pages of the microapp storage.
+	 * Reads flash, and checks if it's erased.
 	 */
-	uint16_t erasePages();
+	bool isErased(uint32_t flashAddress, uint16_t size);
 };

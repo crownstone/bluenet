@@ -103,16 +103,19 @@ const uint8_t MICROAPP_FUNCTION_NONE = 255;
 
 /**
  * State of tests of a microapp, also stored in flash.
+ *
+ * Starts with all fields set to 0.
  */
 struct __attribute__((packed)) microapp_state_t {
 	uint16_t checksum;            // Checksum of the microapp, should be equal to the checksum field of the binary.
 	uint16_t checksumHeader;      // Checksum of the microapp, should be equal to the checksumHeader field of the binary.
 
+	bool occupied: 1;             // Whether the storage space of this app contains data.
 	uint8_t checksumTest: 2;      // values: MICROAPP_TEST_STATE
 	bool enabled: 1;              // Whether the microapp is enabled.
 	uint8_t bootTest: 2;          // Values: MICROAPP_TEST_STATE. Checks if the microapp starts, registers callback function in IPC, and returns to firmware.
 	uint8_t memoryUsage: 1;       // values: ok, excessive
-	uint16_t reservedTest: 10;    // Reserved, must be 0 for now.
+	uint16_t reservedTest: 9;     // Reserved, must be 0 for now.
 
 	uint8_t tryingFunction;       // Index of registered function that didn't pass yet, and that we are calling now. MICROAPP_FUNCTION_NONE for none.
 	uint8_t failedFunction;       // Index of registered function that was tried, but didn't pass. MICROAPP_FUNCTION_NONE for none.

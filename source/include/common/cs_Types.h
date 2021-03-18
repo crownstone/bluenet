@@ -339,6 +339,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_MICROAPP_ENABLE,                              // Microapp control command.
 	CMD_MICROAPP_DISABLE,                             // Microapp control command.
 	EVT_MICROAPP_UPLOAD_RESULT,                       // Uploaded chunk has been written to flash, or failed to do so.
+	EVT_MICROAPP_ERASE_RESULT,                        // Microapp has been erase from flash, or failed to do so.
 	CMD_MICROAPP_ADVERTISE,                           // A microapp wants to advertise something.
 
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
@@ -601,6 +602,7 @@ typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_REMOVE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_ENABLE);
 typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_DISABLE);
 typedef cs_ret_code_t TYPIFY(EVT_MICROAPP_UPLOAD_RESULT);
+typedef cs_ret_code_t TYPIFY(EVT_MICROAPP_ERASE_RESULT);
 typedef microapp_advertise_request_t TYPIFY(CMD_MICROAPP_ADVERTISE);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_PING);

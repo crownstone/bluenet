@@ -89,10 +89,18 @@ cs_ret_code_t MicroappStorage::init() {
 	return ERR_SUCCESS;
 }
 
-uint16_t MicroappStorage::erasePages() {
-	uint32_t err_code;
-	err_code = nrf_fstorage_erase(&nrf_microapp_storage, nrf_microapp_storage.start_addr, g_FLASH_MICROAPP_PAGES, NULL);
-	return err_code;
+cs_ret_code_t MicroappStorage::erase(uint8_t appIndex) {
+	if (_writing) {
+		return ERR_BUSY;
+	}
+
+	uint32_t flashAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
+	uint32_t nrfCode = nrf_fstorage_erase(&nrf_microapp_storage, flashAddress, MICROAPP_MAX_SIZE / 0x1000, NULL);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGe("Failed to start erase: %u", nrfCode);
+		return ERR_UNSPECIFIED;
+	}
+	return ERR_SUCCESS;
 }
 
 cs_ret_code_t MicroappStorage::writeChunk(uint8_t appIndex, uint16_t offset, const uint8_t* data, uint16_t size) {
@@ -106,6 +114,11 @@ cs_ret_code_t MicroappStorage::writeChunk(uint8_t appIndex, uint16_t offset, con
 	if (size % 4 != 0) {
 		LOGw("Chunk size must be multiple of 4B, size=%u", size);
 		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+
+	if (!isErased(flashAddress, size)) {
+		LOGd("Chunk is not erased");
+		return ERR_WRITE_DISABLED;
 	}
 
 	// Write chunk in even smaller chunks of MICROAPP_STORAGE_BUF_SIZE.
@@ -226,6 +239,33 @@ uint32_t MicroappStorage::getStartInstructionAddress(uint8_t appIndex) {
 	return startAddress;
 }
 
+bool MicroappStorage::isErased(uint8_t appIndex) {
+	const uint32_t addr = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
+	return isErased(addr, MICROAPP_MAX_SIZE);
+}
+
+bool MicroappStorage::isErased(uint32_t flashAddress, uint16_t size) {
+	const uint32_t bufSize = MICROAPP_STORAGE_BUF_SIZE; // Can be any multiple of 4.
+	uint8_t readBuf[bufSize];
+	uint8_t emptyBuf[bufSize] = { 0xFF };
+
+	uint32_t nrfCode;
+	uint32_t endAddress = flashAddress + size;
+	for (uint32_t addr = flashAddress; addr < endAddress; addr += bufSize) {
+		uint16_t readSize = std::min(bufSize, endAddress - addr);
+		LOGv("read %u bytes from 0x%08X to 0x%X", readSize, addr, readBuf);
+		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, addr, readBuf, readSize);
+		if (nrfCode != NRF_SUCCESS) {
+			LOGw("Error reading fstorage: %u. flashAddress=0x%08X buf=0x%X readSize=%u", nrfCode, flashAddress, readBuf, readSize);
+			return false;
+		}
+		if (memcmp(readBuf, emptyBuf, bufSize)) {
+			return false;
+		}
+	}
+	return true;
+}
+
 cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 	LOGd("Validate app %u", appIndex);
 
@@ -259,7 +299,7 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 
 	// Compare binary checksum.
 	// Calculate checksum in chunks, so that we don't have to load the whole binary in ram.
-	const uint32_t bufSize = MICROAPP_STORAGE_BUF_SIZE; // Can be any size.
+	const uint32_t bufSize = MICROAPP_STORAGE_BUF_SIZE; // Can be any multiple of 4.
 	uint8_t buf[bufSize];
 	uint32_t nrfCode;
 
@@ -273,7 +313,7 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 //	endAddress = CS_ROUND_UP_TO_MULTIPLE_OF_POWER_OF_2(endAddress, 4);
 	for (uint32_t flashAddress = binStartAddress; flashAddress < endAddress; flashAddress += bufSize) {
 		uint16_t readSize = std::min(bufSize, endAddress - flashAddress);
-		LOGv("nrf_fstorage_read 0x%08X 0x%X %u", flashAddress, buf, readSize);
+		LOGv("read %u bytes from 0x%08X to 0x%X", readSize, flashAddress, buf);
 		nrfCode = nrf_fstorage_read(&nrf_microapp_storage, flashAddress, buf, readSize);
 		if (nrfCode != NRF_SUCCESS) {
 			LOGw("Error reading fstorage: %u. flashAddress=0x%08X buf=0x%X readSize=%u", nrfCode, flashAddress, buf, readSize);
@@ -324,7 +364,9 @@ void MicroappStorage::handleFileStorageEvent(nrf_fstorage_evt_t *evt) {
 			break;
 		}
 		case NRF_FSTORAGE_EVT_ERASE_RESULT: {
-			LOGi("Flash erased");
+			LOGi("Flash erase result: %u", evt->result);
+			event_t event(CS_TYPE::EVT_MICROAPP_ERASE_RESULT, &retCode, sizeof(retCode));
+			event.dispatch();
 			break;
 		}
 		default:
