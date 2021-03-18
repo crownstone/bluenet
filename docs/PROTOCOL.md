@@ -77,8 +77,8 @@ The nonce is a combination of 2 pieces: the session nonce and the packet nonce
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 [] | Packet nonce | 3 | Packet nonce, sent with every packet (see [encrypted packet](#encrypted-packet)). Should be different for each encrypted packet.
-uint8 [] | Session nonce | 5 | Session nonce, should be [read](#session-data) when connected, each time you connect.
+uint8[] | Packet nonce | 3 | Packet nonce, sent with every packet (see [encrypted packet](#encrypted-packet)). Should be different for each encrypted packet.
+uint8[] | Session nonce | 5 | Session nonce, should be [read](#session-data) when connected, each time you connect.
 
 #### Session data
 
@@ -91,11 +91,11 @@ The session nonce and validation key will be different each time you connect.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 32 | Validation | 4 | 0xCAFEBABE as validation.
+uint32 | Validation | 4 | 0xCAFEBABE as validation.
 uint8 | Protocol | 1 | The protocol version to use for communication.
-uint8 [] | Session nonce | 5 | The session nonce for this session. Used to encrypt or decrypt packets.
-uint8 [] | Validation key | 4 | The validation key for this session. Used to verify decryption/encryption.
-uint8 [] | Padding | 2 | Zero-padding so that the whole packet is 16 bytes.
+uint8[] | Session nonce | 5 | The session nonce for this session. Used to encrypt or decrypt packets.
+uint8[] | Validation key | 4 | The validation key for this session. Used to verify decryption/encryption.
+uint8[] | Padding | 2 | Zero-padding so that the whole packet is 16 bytes.
 
 
 ## Reading and writing characteristics
@@ -113,7 +113,7 @@ When data is sent via notifications, it will be done via multiple notification p
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Counter | 1 | Part counter: starts at 0, 255 for last packet.
-uint8 [] | Data part |  | Part of the data.
+uint8[] | Data part |  | Part of the data.
 
 Once you received the last packet, you should concatenate all data parts to get the payload (which is usually an [encrypted packet](#encrypted-packet)).
 
@@ -125,7 +125,7 @@ Unlike the name suggests, only the payload of this packet is encrypted. The head
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 [] | Packet nonce | 3 | First 3 bytes of nonce used for encrypting the payload, see [CTR encryption](#ctr-encryption).
+uint8[] | Packet nonce | 3 | First 3 bytes of nonce used for encrypting the payload, see [CTR encryption](#ctr-encryption).
 uint8 | User level | 1 | 0: Admin, 1: Member, 2: Basic, 100: Setup. This determines which key has been used for encryption.
 [Encrypted payload](#encrypted-payload) | Encrypted payload | N*16 | The encrypted payload of N blocks.
 
@@ -160,18 +160,18 @@ This packet is according to iBeacon spec, see for example [here](http://www.havl
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | AD Length | 1 | Length of the next AD structure.
-uint 8 | AD Type | 1 | 0x01: flags.
-uint 8 | Flags | 1 |
-uint 8 | AD Length | 1 | Length of the next AD structure.
-uint 8 | AD Type | 1 | 0xFF: manufacturer specific data.
-uint 8 | Company id | 2 | 0x004C: Apple.
-uint 8 | iBeacon type | 1 | 0x02: iBeacon.
-uint 8 | iBeacon length | 1 | iBeacon struct length (0x15).
-uint 8 | Proximity UUID | 16 | Configurable number.
-uint 16 | Major | 2 | Configurable number.
-uint 16 | Minor | 2 | Configurable number.
-int 8 | TX power | 1 | Received signal strength at 1 meter.
+uint8 | AD Length | 1 | Length of the next AD structure.
+uint8 | AD Type | 1 | 0x01: flags.
+uint8 | Flags | 1 |
+uint8 | AD Length | 1 | Length of the next AD structure.
+uint8 | AD Type | 1 | 0xFF: manufacturer specific data.
+uint8 | Company id | 2 | 0x004C: Apple.
+uint8 | iBeacon type | 1 | 0x02: iBeacon.
+uint8 | iBeacon length | 1 | iBeacon struct length (0x15).
+uint8 | Proximity UUID | 16 | Configurable number.
+uint16 | Major | 2 | Configurable number.
+uint16 | Minor | 2 | Configurable number.
+int8 | TX power | 1 | Received signal strength at 1 meter.
 
 ### Service data advertisement
 This packet contains the state of the Crownstone.
@@ -180,16 +180,16 @@ This packet contains the state of the Crownstone.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | AD Length | 1 | Length of the next AD structure.
-uint 8 | AD Type | 1 | 0x01: flags.
-uint 8 | Flags | 1 | 
-uint 8 | AD Length | 1 | Length of the next AD structure.
-uint 8 | AD Type | 1 | 0x16: service data with 16 bit service UUID.
-uint 16 | Service UUID | 2 | Service UUID: 0xC001, 0xC002, or 0xC003. The last two are deprecated, see service data doc.
+uint8 | AD Length | 1 | Length of the next AD structure.
+uint8 | AD Type | 1 | 0x01: flags.
+uint8 | Flags | 1 | 
+uint8 | AD Length | 1 | Length of the next AD structure.
+uint8 | AD Type | 1 | 0x16: service data with 16 bit service UUID.
+uint16 | Service UUID | 2 | Service UUID: 0xC001, 0xC002, or 0xC003. The last two are deprecated, see service data doc.
 [Service data](SERVICE_DATA.md) | Service data | length-3 | Service data, contains state of the Crownstone.
-uint 8 | AD Length | 1 | Length of the next AD structure.
-uint 8 | AD Type | 1 | 0x08: shortened local name.
-char [] | Name | length-1 | The shortened name of this device.
+uint8 | AD Length | 1 | Length of the next AD structure.
+uint8 | AD Type | 1 | 0x08: shortened local name.
+char[] | Name | length-1 | The shortened name of this device.
 
 
 
@@ -244,8 +244,8 @@ The setup service has UUID 24f10000-7d10-4805-bfc1-7663a01c3bff and is only avai
 
 Characteristic | UUID | Date type | Description
 --- | --- | --- | ---
-MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint 8 [6] | Read the MAC address of the crownstone.
-Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint 8 [16] | Read the session key that will be for encryption.
+MAC address    | 24f10002-7d10-4805-bfc1-7663a01c3bff | uint8[6] | Read the MAC address of the crownstone.
+Session key    | 24f10003-7d10-4805-bfc1-7663a01c3bff | uint8[16] | Read the session key that will be for encryption.
 Session data   | 24f1000e-7d10-4805-bfc1-7663a01c3bff | [Session data](#session-data) | Read the session data.
 Control        | 24f1000c-7d10-4805-bfc1-7663a01c3bff | [Control packet](#control-packet) | Write a command to the crownstone.
 Result         | 24f1000d-7d10-4805-bfc1-7663a01c3bff | [Result packet](#result-packet) | Read the result of a command from the crownstone.
@@ -273,10 +273,10 @@ __If encryption is enabled, this packet must be encrypted using any of the keys 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Protocol | 1 | Which protocol the command is. Should be similar to the protocol as received in the [session data](#session-data). Older protocols might be supported, but there's no guarantee.
-uint 16 | [Command type](#command-types) | 2 | Type of the command.
-uint 16 | Size | 2 | Size of the payload in bytes.
-uint 8 | Payload | Size | Payload data, depends on command type.
+uint8 | Protocol | 1 | Which protocol the command is. Should be similar to the protocol as received in the [session data](#session-data). Older protocols might be supported, but there's no guarantee.
+uint16 | [Command type](#command-types) | 2 | Type of the command.
+uint16 | Size | 2 | Size of the payload in bytes.
+uint8 | Payload | Size | Payload data, depends on command type.
 
 
 ## Command types
@@ -294,7 +294,7 @@ Available command types:
 Type nr | Type name | Payload type | Result payload | Description | A | M | B | S
 --- | --- | --- | --- | --- | :---: | :---: | :---: | :--:
 0 | Setup | [Setup packet](#setup-packet) | - | Perform setup. |  |  |  | x
-1 | Factory reset | uint 32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
+1 | Factory reset | uint32 | - | Reset device to factory setting, needs Code 0xDEADBEEF as payload | x
 2 | Get state | [State get packet](#state-get-packet) | [State get result packet](#state-get-result-packet) | Required access depends on the state type. | x | x | x
 3 | Set state | [State set packet](#state-set-packet) | [State set result packet](#state-set-result-packet) | Required access depends on the state type. | x | x | x
 4 | Get bootloader version | - | [Bootloader info packet](IPC.md#bootloader-info-packet) | Get bootloader version info. | x | x | x | x
@@ -307,16 +307,16 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 13 | Disconnect | - | - | Causes the crownstone to disconnect | x | x | x
 20 | Switch | [Switch value](#switch-command-value) | - | Switch power. | x | x | x | x |
 21 | Multi switch | [Multi switch packet](#multi-switch-packet) | - | Switch multiple Crownstones (via mesh). | x | x | x
-22 | Dimmer | uint 8 | - | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
-23 | Relay | uint 8 | - | Switch relay, 0 = off, 1 = on | x | x | x
-30 | Set time | uint 32 | - | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
+22 | Dimmer | uint8 | - | Set dimmer to value, 0 = off, 100 = full on | x | x | x |
+23 | Relay | uint8 | - | Switch relay, 0 = off, 1 = on | x | x | x
+30 | Set time | uint32 | - | Sets the time. Timestamp is in seconds since epoch (Unix time). | x | x |
 31 | Increase TX | - | - | Temporarily increase the TX power when in setup mode |  |  |  | x
 32 | Reset errors | [Error bitmask](#state-error-bitmask) | - | Reset all errors which are set in the written bitmask. | x
 33 | Mesh command | [Command mesh packet](#command-mesh-packet) | - | Send a generic command over the mesh. Required access depends on the command. | x | x | x
 34 | Set sun times | [Sun time packet](#sun-time-packet) | - | Update the reference times for sunrise and sunset | x | x
-35 | Get time | - | uint 32 | Get the time. Timestamp is in seconds since epoch (Unix time). | x | x | x
-40 | Allow dimming | uint 8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
-41 | Lock switch | uint 8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
+35 | Get time | - | uint32 | Get the time. Timestamp is in seconds since epoch (Unix time). | x | x | x
+40 | Allow dimming | uint8 | - | Allow/disallow dimming, 0 = disallow, 1 = allow. | x
+41 | Lock switch | uint8 | - | Lock/unlock switch, 0 = unlock, 1 = lock. | x
 50 | UART message | payload | - | Print the payload to UART. | x
 51 | Hub data | [Hub data packet](#hub-data-packet) | - | Send data to hub over UART. You will first get WAIT_FOR_SUCCESS, when it's sent to the hub. Once the hub processed the command, and replied, you will get the final result. | x
 60 | Add behaviour | [Add behaviour packet](BEHAVIOUR.md#add-behaviour-packet) | [Index and master hash](BEHAVIOUR.md#add-behaviour-result-packet) | Add a behaviour to an unoccupied index. | x | x
@@ -328,12 +328,12 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 70 | Register tracked device | [Register tracked device packet](#register-tracked-device-packet) | - | Register or update a device to be tracked. Error codes: ALREADY_EXISTS: another device ID registered the same token. ERR_NO_ACCESS: this device ID was set with a higher access level. ERR_NO_SPACE: max number of devices have been registered. | x | x | x
 71 | Tracked device heartbeat | [Tracked device heartbeat packet](#tracked-device-heartbeat-packet) | - | Let the crownstone know where a device is, similar to [background broadcasts](BROADCAST-PROTOCOL.md#background-broadcasts). Error codes: ERR_NOT_FOUND: no device with given device ID was registered. ERR_TIMEOUT: registered device is timed out. ERR_NO_ACCESS: wrong access level, or device token. | x | x | x
 72 | Get presence | - | [Presence packet](presence_packet) | Get the current location of each profile. | x | x
-80 | Get uptime | - | uint 32 | Time in seconds since boot. | x
+80 | Get uptime | - | uint32 | Time in seconds since boot. | x
 81 | Get ADC restarts | - | [ADC restarts packet](#adc-restarts-packet) | **Firmware debug.** Number of ADC restarts since boot. | x
 82 | Get switch history | - | [Switch history packet](#switch-history-packet) | **Firmware debug.** A history of why the switch state has changed. | x
 83 | Get power samples | [Request power samples](#power-samples-request-packet) | [Power samples](#power-samples-result-packet) | **Firmware debug.** Get the current or voltage samples of certain events. | x
-84 | Get min scheduler free space | - | uint 16 | **Firmware debug.** Get minimum queue space left of app scheduler observed so far. A lower number indicates the CPU has been busy a lot. | x
-85 | Get last reset reason | - | uint 32 | **Firmware debug.** Contents of POWER->RESETREAS as it was on boot. Bitmask with bit 0=ResetPin, 1=Watchdog, 2=SoftReset, 3=Lockup, 16=GPIO, 17=LPComp, 18=DebugInterface, 19=NFC. | x
+84 | Get min scheduler free space | - | uint16 | **Firmware debug.** Get minimum queue space left of app scheduler observed so far. A lower number indicates the CPU has been busy a lot. | x
+85 | Get last reset reason | - | uint32 | **Firmware debug.** Contents of POWER->RESETREAS as it was on boot. Bitmask with bit 0=ResetPin, 1=Watchdog, 2=SoftReset, 3=Lockup, 16=GPIO, 17=LPComp, 18=DebugInterface, 19=NFC. | x
 86 | Get GPREGRET | Index (uint8) | [Gpregret packet](#gpregret-result-packet) | **Firmware debug.** Get the Nth general purpose retention register as it was on boot. There are currently 2 registers. | x
 87 | Get ADC channel swaps | - | [ADC channel swaps packet](#adc-channel-swaps-packet) | **Firmware debug.** Get the number of detected ADC channel swaps. | x
 88 | Get RAM statistics | - | [RAM stats packet](#ram-stats-packet) | **Firmware debug.** Get RAM statistics. | x
@@ -346,22 +346,22 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Stone ID | 1 | Crownstone ID. Should be unique per sphere.
-uint 8 | Sphere ID | 1 | Short sphere ID. Should be the same for each Crownstone in the sphere.
-uint 8[] | Admin key  | 16 | 16 byte key used to encrypt/decrypt admin access functions.
-uint 8[] | Member key | 16 | 16 byte key used to encrypt/decrypt member access functions.
-uint 8[] | Basic key  | 16 | 16 byte key used to encrypt/decrypt basic access functions.
-uint 8[] | Service data key  | 16 | 16 byte key used to encrypt/decrypt service data.
-uint 8[] | Localization key  | 16 | 16 byte key used to encrypt/decrypt localization messages.
-uint 8[] | Mesh device key  | 16 | 16 byte key used to encrypt/decrypt mesh config. Should be different for each Crownstone.
-uint 8[] | Mesh app key  | 16 | 16 byte key used to encrypt/decrypt mesh messages. Should be the same for each Crownstone in the sphere.
-uint 8[] | Mesh net key  | 16 | 16 byte key used to encrypt/decrypt relays of mesh messages. Should be the same for each Crownstone in the sphere.
-uint 8[] | iBeacon UUID | 16 | The iBeacon UUID. Should be the same for each Crownstone in the sphere.
-uint 16 | iBeacon major | 2 | The iBeacon major. Together with the minor, should be unique per sphere.
-uint 16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should be unique per sphere.
+uint8 | Stone ID | 1 | Crownstone ID. Should be unique per sphere.
+uint8 | Sphere ID | 1 | Short sphere ID. Should be the same for each Crownstone in the sphere.
+uint8[] | Admin key  | 16 | 16 byte key used to encrypt/decrypt admin access functions.
+uint8[] | Member key | 16 | 16 byte key used to encrypt/decrypt member access functions.
+uint8[] | Basic key  | 16 | 16 byte key used to encrypt/decrypt basic access functions.
+uint8[] | Service data key  | 16 | 16 byte key used to encrypt/decrypt service data.
+uint8[] | Localization key  | 16 | 16 byte key used to encrypt/decrypt localization messages.
+uint8[] | Mesh device key  | 16 | 16 byte key used to encrypt/decrypt mesh config. Should be different for each Crownstone.
+uint8[] | Mesh app key  | 16 | 16 byte key used to encrypt/decrypt mesh messages. Should be the same for each Crownstone in the sphere.
+uint8[] | Mesh net key  | 16 | 16 byte key used to encrypt/decrypt relays of mesh messages. Should be the same for each Crownstone in the sphere.
+uint8[] | iBeacon UUID | 16 | The iBeacon UUID. Should be the same for each Crownstone in the sphere.
+uint16 | iBeacon major | 2 | The iBeacon major. Together with the minor, should be unique per sphere.
+uint16 | iBeacon minor | 2 | The iBeacon minor. Together with the major, should be unique per sphere.
 
 
-#### Switch command value (uint 8)
+#### Switch command value (uint8)
 
 Value | Name | Description
 --- | --- | ---
@@ -375,10 +375,10 @@ Value | Name | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | [State type](#state-types) | 2 | Type of state to get.
-uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
-uint 8 | [Persistence mode](#state-get-persistence-mode) | 1 | Type of persistence mode.
-uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
+uint16 | [State type](#state-types) | 2 | Type of state to get.
+uint16 | id | 2 | ID of state to get. Most state types will only have ID 0.
+uint8 | [Persistence mode](#state-get-persistence-mode) | 1 | Type of persistence mode.
+uint8 | reserved | 1 | Reserved for future use, must be 0 for now.
 
 #### State set packet
 
@@ -386,11 +386,11 @@ Most configuration changes will only be applied after a reboot.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | [State type](#state-types) | 2 | Type of state to set.
-uint 16 | id | 2 | ID of state to get. Most state types will only have ID 0.
-uint 8 | [Persistence mode](#state-set-persistence-mode-set) | 1 | Type of persistence mode.
-uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
-uint 8 | Payload | N | Payload data, depends on state type.
+uint16 | [State type](#state-types) | 2 | Type of state to set.
+uint16 | id | 2 | ID of state to get. Most state types will only have ID 0.
+uint8 | [Persistence mode](#state-set-persistence-mode-set) | 1 | Type of persistence mode.
+uint8 | reserved | 1 | Reserved for future use, must be 0 for now.
+uint8 | Payload | N | Payload data, depends on state type.
 
 Most configuration changes will only be applied after a reboot.
 Available configurations types:
@@ -399,20 +399,20 @@ Available configurations types:
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | [State type](#state-types) | 2 | Type of state.
-uint 16 | id | 2 | ID of state.
-uint 8 | [Persistence mode](#state-get-persistence-mode) | 1 | Type of persistence mode.
-uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
-uint 8 | Payload | N | Payload data, depends on state type.
+uint16 | [State type](#state-types) | 2 | Type of state.
+uint16 | id | 2 | ID of state.
+uint8 | [Persistence mode](#state-get-persistence-mode) | 1 | Type of persistence mode.
+uint8 | reserved | 1 | Reserved for future use, must be 0 for now.
+uint8 | Payload | N | Payload data, depends on state type.
 
 #### State set result packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | [State type](#state-types) | 2 | Type of state.
-uint 16 | id | 2 | ID of state that was set.
-uint 8 | [Persistence mode](#state-set-persistence-mode-set) | 1 | Type of persistence mode.
-uint 8 | reserved | 1 | Reserved for future use, must be 0 for now.
+uint16 | [State type](#state-types) | 2 | Type of state.
+uint16 | id | 2 | ID of state that was set.
+uint8 | [Persistence mode](#state-set-persistence-mode-set) | 1 | Type of persistence mode.
+uint8 | reserved | 1 | Reserved for future use, must be 0 for now.
 
 #### State get persistence mode
 Value | Name | Description
@@ -436,19 +436,19 @@ This packet is meant for developers. For more information, see [UICR](UICR.md) a
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 32 | Board | 4 | The board version.
-uint 8 | Product type | 1 | Type of product.
-uint 8 | Region | 1 | Which region the product is for.
-uint 8 | Product family | 1 | Product family.
-uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
-uint 8 | Hardware patch | 1 | Hardware version patch.
-uint 8 | Hardware minor | 1 | Hardware version minor.
-uint 8 | Hardware major | 1 | Hardware version major.
-uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
-uint 8 | Product housing | 1 |
-uint 8 | Production week | 1 | Week number.
-uint 8 | Production year | 1 | Last 2 digits of the year.
-uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
+uint32 | Board | 4 | The board version.
+uint8 | Product type | 1 | Type of product.
+uint8 | Region | 1 | Which region the product is for.
+uint8 | Product family | 1 | Product family.
+uint8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
+uint8 | Hardware patch | 1 | Hardware version patch.
+uint8 | Hardware minor | 1 | Hardware version minor.
+uint8 | Hardware major | 1 | Hardware version major.
+uint8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
+uint8 | Product housing | 1 |
+uint8 | Production week | 1 | Week number.
+uint8 | Production year | 1 | Last 2 digits of the year.
+uint8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
 
 
 ##### Ibeacon config ID packet
@@ -457,9 +457,9 @@ uint 8 | Reserved | 1 | Reserved for future use, will be 0xFF for now.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | ID | 1 | The ibeacon config ID to set.
-uint 32 | Timestamp | 4 | Unix timestamp when the ibeacon config ID should be set (the first time).
-uint 16 | Interval | 2 | Interval in seconds when the ibeacon config ID should be set again, after the given timestamp.
+uint8 | ID | 1 | The ibeacon config ID to set.
+uint32 | Timestamp | 4 | Unix timestamp when the ibeacon config ID should be set (the first time).
+uint16 | Interval | 2 | Interval in seconds when the ibeacon config ID should be set again, after the given timestamp.
 
 - ID can only be 0 or 1.
 - Set the interval to 0 if you want to set the ibeacon config ID only once, at the given timestamp. Use timestamp 0 if you want it to be set immediately.
@@ -471,8 +471,8 @@ uint 16 | Interval | 2 | Interval in seconds when the ibeacon config ID should b
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 32 | Sunrise | 4 | The moment when the upper limb of the sun appears on the horizon. Units: seconds since midnight.
-uint 32 | Sunset | 4 | The moment when the upper limb of the Sun disappears below the horizon. Units: seconds since midnight.
+uint32 | Sunrise | 4 | The moment when the upper limb of the sun appears on the horizon. Units: seconds since midnight.
+uint32 | Sunset | 4 | The moment when the upper limb of the Sun disappears below the horizon. Units: seconds since midnight.
 
 
 ##### Multi switch packet
@@ -481,8 +481,8 @@ uint 32 | Sunset | 4 | The moment when the upper limb of the Sun disappears belo
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Count | 1 | Number of valid entries.
-[Multi switch entry](#multi-switch-entry-packet) [] | List | Count * 2 | A list of switch commands.
+uint8 | Count | 1 | Number of valid entries.
+[Multi switch entry](#multi-switch-entry-packet)[] | List | Count * 2 | A list of switch commands.
 
 ##### Multi switch entry
 
@@ -490,8 +490,8 @@ uint 8 | Count | 1 | Number of valid entries.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
-uint 8 | [Switch value](#switch-command-value) | 1 | The switch value to be set by the targeted crownstone.
+uint8 | Crownstone ID | 1 | The identifier of the crownstone to which this item is targeted.
+uint8 | [Switch value](#switch-command-value) | 1 | The switch value to be set by the targeted crownstone.
 
 
 #### Error Bitmask
@@ -519,12 +519,12 @@ For now, only a few of commands are implemented:
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | [Type](#mesh-command-types) | 1 | Type of command, see table below.
-uint 8 | [Flags](#mesh-command-flags) | 1 | Options.
-uint 8 | Timeout / transmissions | 1 | When acked: timeout time in seconds. Else: number of times to send the command. 0 to use the default (10s timeout or 3 transmissions).
-uint 8 | ID count | 1 | The number of stone IDs provided.
-uint8 [] | List of stone IDs | Count | IDs of the stones at which this message is aimed. Can be empty, then the command payload follows directly after the count field.
-uint 8 | Command payload | N | The command payload data, which depends on the [type](#mesh-command-types).
+uint8 | [Type](#mesh-command-types) | 1 | Type of command, see table below.
+uint8 | [Flags](#mesh-command-flags) | 1 | Options.
+uint8 | Timeout / transmissions | 1 | When acked: timeout time in seconds. Else: number of times to send the command. 0 to use the default (10s timeout or 3 transmissions).
+uint8 | ID count | 1 | The number of stone IDs provided.
+uint8[] | List of stone IDs | Count | IDs of the stones at which this message is aimed. Can be empty, then the command payload follows directly after the count field.
+uint8 | Command payload | N | The command payload data, which depends on the [type](#mesh-command-types).
 
 ##### Mesh command types
 
@@ -552,9 +552,9 @@ Bit | Name |  Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Encrypted | 1 | Whether the data should be sent encrypted over the UART: 0 = not encrypted, 1 = encrypt when encryption is enabled, 2 = encrypt or fail.
-uint 8 | Reserved | 1 | Reserved for future use. Must be 0 for now.
-uint 8 | Payload | N | Payload data to be sent to hub.
+uint8 | Encrypted | 1 | Whether the data should be sent encrypted over the UART: 0 = not encrypted, 1 = encrypt when encryption is enabled, 2 = encrypt or fail.
+uint8 | Reserved | 1 | Reserved for future use. Must be 0 for now.
+uint8 | Payload | N | Payload data to be sent to hub.
 
 
 
@@ -564,7 +564,7 @@ A profile can be present at multiple locations/rooms.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
+uint64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
 
 
 #### Behaviour debug packet
@@ -573,19 +573,19 @@ uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupi
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 32 | Time | 4 | Current time. 0 if not set.
-uint 32 | Sunrise | 4 | Sunrise time, seconds after midnight. 0 if not set.
-uint 32 | Sunset | 4 | Sunset time, seconds after midnight. 0 if not set.
-uint 8 | Override state | 1 | Override state. 254 if not set.
-uint 8 | Behaviour state | 1 | Behaviour state. 254 if not set.
-uint 8 | Aggregated state | 1 | Aggregated state. 254 if not set.
-uint 8 | Dimmer powered | 1 | Whether the dimmer is powered.
-uint 8 | Behaviour enabled | 1 | Whether behaviour is enabled.
-uint 64 | Stored behaviours | 8 | Bitmask of behaviours that are stored. Nth bit is Nth behaviour index.
-uint 64 | Active behaviours | 8 | Bitmask of behaviours that are currently active. Nth bit is Nth behaviour index.
-uint 64 | Active end conditions | 8 | Bitmask of behaviours with active end conditions. Nth bit is Nth behaviour index.
-uint 64 | Active timeout periods | 8 | Bitmask of behaviours that are in (presence) timeout period. Nth bit is Nth behaviour index.
-uint 64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
+uint32 | Time | 4 | Current time. 0 if not set.
+uint32 | Sunrise | 4 | Sunrise time, seconds after midnight. 0 if not set.
+uint32 | Sunset | 4 | Sunset time, seconds after midnight. 0 if not set.
+uint8 | Override state | 1 | Override state. 254 if not set.
+uint8 | Behaviour state | 1 | Behaviour state. 254 if not set.
+uint8 | Aggregated state | 1 | Aggregated state. 254 if not set.
+uint8 | Dimmer powered | 1 | Whether the dimmer is powered.
+uint8 | Behaviour enabled | 1 | Whether behaviour is enabled.
+uint64 | Stored behaviours | 8 | Bitmask of behaviours that are stored. Nth bit is Nth behaviour index.
+uint64 | Active behaviours | 8 | Bitmask of behaviours that are currently active. Nth bit is Nth behaviour index.
+uint64 | Active end conditions | 8 | Bitmask of behaviours with active end conditions. Nth bit is Nth behaviour index.
+uint64 | Active timeout periods | 8 | Bitmask of behaviours that are in (presence) timeout period. Nth bit is Nth behaviour index.
+uint64[] | Presence | 64 | Bitmask per profile (there are 8 profiles) of occupied rooms. Nth bit is Nth room.
 
 
 
@@ -628,7 +628,7 @@ uint32 | Num sbrk fails | 4 | Number of times sbrk failed to hand out space.
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Count | 1 | Number of items in the list.
-[Switch history item](#switch-history-item-packet) [] | List |
+[Switch history item](#switch-history-item-packet)[] | List |
 
 ##### Switch history item packet
 
@@ -645,10 +645,10 @@ uint32 | Timestamp | 4 | Unix timestamp of the switch command.
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
-uint 8 | [Source type](#command-source-type) | 3 | What type of source ID. Bits 5-7.
-uint 8 | Reserved | 4 | Reserved for future use, must be 0 for now. Bits 1-4.
+uint8 | [Source type](#command-source-type) | 3 | What type of source ID. Bits 5-7.
+uint8 | Reserved | 4 | Reserved for future use, must be 0 for now. Bits 1-4.
 bool | External | 1 | Whether the command was received via the mesh. Bit 0.
-uint 8 | [Source ID](#command-source-ID) | 8 | The ID of the source.
+uint8 | [Source ID](#command-source-ID) | 8 | The ID of the source.
 
 ##### Command source type
 
@@ -676,8 +676,8 @@ Value | Name | Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | [Type](#power-samples-type) | 1 | Type of samples.
-uint 8 | Index | 1 | Some types have multiple lists of samples.
+uint8 | [Type](#power-samples-type) | 1 | Type of samples.
+uint8 | Index | 1 | Some types have multiple lists of samples.
 
 #### Power samples type
 
@@ -696,16 +696,16 @@ background broadcast
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | [Type](#power-samples-type) | 1 | Type of samples, also determines whether the samples are voltage or current samples.
-uint 8 | Index | 1 | Some types have multiple lists of samples, see the type description.
-uint 16 | Count | 2 | Number of samples in the list.
-uint 32 | Timestamp | 4 | Unix timestamp of time the samples have been set.
-uint 16 | Delay | 2 | Measurement delay in μs, due to hardware. A sample measured now, will get the value of delay μs ago. Not set yet, will be 0.
-uint 16 | Sample interval | 2 | Sample interval in μs.
-uint 16 | Reserved | 2 | Reserved for future use, should be 0 for now.
-int 16 | Offset | 2 | Calculated offset of the samples. (Sort of the average of the sample values). Not set yet, will be 0.
+uint8 | [Type](#power-samples-type) | 1 | Type of samples, also determines whether the samples are voltage or current samples.
+uint8 | Index | 1 | Some types have multiple lists of samples, see the type description.
+uint16 | Count | 2 | Number of samples in the list.
+uint32 | Timestamp | 4 | Unix timestamp of time the samples have been set.
+uint16 | Delay | 2 | Measurement delay in μs, due to hardware. A sample measured now, will get the value of delay μs ago. Not set yet, will be 0.
+uint16 | Sample interval | 2 | Sample interval in μs.
+uint16 | Reserved | 2 | Reserved for future use, should be 0 for now.
+int16 | Offset | 2 | Calculated offset of the samples. (Sort of the average of the sample values). Not set yet, will be 0.
 float | Multiplier | 4 | Multiply the sample value minus offset with this value to get a value in ampere (when samples are current), or volt (when samples are voltage). Not set yet, will be 0.
-int 16 [] | Samples | 2 | List of samples.
+int16[] | Samples | 2 | List of samples.
 
 
 #### Register tracked device packet
@@ -714,13 +714,13 @@ int 16 [] | Samples | 2 | List of samples.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Device ID | 2 | Unique ID of the device.
-uint 8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
-uint 8 | Profile ID | 1 | Profile ID of the device.
-int 8 | RSSI offset | 1 | Offset from standard signal strength.
-uint 8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background-adv-flags).
-uint 24 | Device token | 3 | Token that will be advertised by the device.
-uint 16 | Time to live | 2 | Time in minutes after which the device token will be invalid.
+uint16 | Device ID | 2 | Unique ID of the device.
+uint8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
+uint8 | Profile ID | 1 | Profile ID of the device.
+int8 | RSSI offset | 1 | Offset from standard signal strength.
+uint8 | Flags | 1 | [Flags](BROADCAST_PROTOCOL.md#background-adv-flags).
+uint24 | Device token | 3 | Token that will be advertised by the device.
+uint16 | Time to live | 2 | Time in minutes after which the device token will be invalid.
 
 
 #### Tracked device heartbeat packet
@@ -729,10 +729,10 @@ uint 16 | Time to live | 2 | Time in minutes after which the device token will b
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 16 | Device ID | 2 | Unique ID of the device.
-uint 8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
-uint 24 | Device token | 3 | Token that has been registered.
-uint 8 | Time to live | 1 | How long (in minutes) the crownstone assumes the device is at the given location, so should best be larger than the interval at which the heartbeat is sent. Setting this to 0 is similar to sending a single [background broadcast](BROADCAST_PROTOCOL.md#background-broadcasts). Currently the max is 60, a longer time will result in an error WRONG_PARAMETER.
+uint16 | Device ID | 2 | Unique ID of the device.
+uint8 | Location ID | 1 | ID of the location where the device is. 0 for in sphere, but no specific location.
+uint24 | Device token | 3 | Token that has been registered.
+uint8 | Time to live | 1 | How long (in minutes) the crownstone assumes the device is at the given location, so should best be larger than the interval at which the heartbeat is sent. Setting this to 0 is similar to sending a single [background broadcast](BROADCAST_PROTOCOL.md#background-broadcasts). Currently the max is 60, a longer time will result in an error WRONG_PARAMETER.
 
 
 #### Upload microapp
@@ -741,14 +741,14 @@ uint 8 | Time to live | 1 | How long (in minutes) the crownstone assumes the dev
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Protocol | 1 | Protocol version of binary uploads (default 0).
-uint 8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
-uint 8 | Opcode | 1 | `CS_MICROAPP_OPCODE_UPLOAD` (`0x01`)
-uint 8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0)
-uint 8 | Count | 1 | The total number of chunks (rounded up, max 256 packets).
-uint 16 | Size | 2 | Size in bytes of the complete binary.
-uint 16 | Checksum | 2 | The checksum of this chunk. The checksum of the last packet is of the complete program.
-uint 8 | Data | N | `NRF_SDH_BLE_GATT_MAX_MTU_SIZE` (69)  - `OVERHEAD` (20), should be 49.
+uint8 | Protocol | 1 | Protocol version of binary uploads (default 0).
+uint8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
+uint8 | Opcode | 1 | `CS_MICROAPP_OPCODE_UPLOAD` (`0x01`)
+uint8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0)
+uint8 | Count | 1 | The total number of chunks (rounded up, max 256 packets).
+uint16 | Size | 2 | Size in bytes of the complete binary.
+uint16 | Checksum | 2 | The checksum of this chunk. The checksum of the last packet is of the complete program.
+uint8 | Data | N | `NRF_SDH_BLE_GATT_MAX_MTU_SIZE` (69)  - `OVERHEAD` (20), should be 49.
 
 The packets are all of the same size. Important! The data in the last packet has to contain `0xFF` for the values beyond the application size. This is due to the fact that on flash writing `0xFF` does not change the flash. 
 
@@ -762,11 +762,11 @@ eating too many other resources.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Protocol | 1 | Protocol version of binary sends (default 0).
-uint 8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
-uint 8 | Opcode | 1 | `CS_MICROAPP_OPCODE_VALIDATE` (`0x02`).
-uint 16 | Size | 2 | Size in bytes of the complete binary.
-uint 16 | Checksum | 2 | The checksum of the complete program.
+uint8 | Protocol | 1 | Protocol version of binary sends (default 0).
+uint8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
+uint8 | Opcode | 1 | `CS_MICROAPP_OPCODE_VALIDATE` (`0x02`).
+uint16 | Size | 2 | Size in bytes of the complete binary.
+uint16 | Checksum | 2 | The checksum of the complete program.
 
 After sending the last packet, the microapp has to be validated.
 
@@ -776,10 +776,10 @@ After sending the last packet, the microapp has to be validated.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Protocol | 1 | Protocol version of binary sends (default 0).
-uint 8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
-uint 8 | Opcode | 1 | `CS_MICROAPP_OPCODE_ENABLE` (`0x03`) or `CS_MICROAPP_OPCODE_DISABLE` (`0x04`).
-uint 16 | Offset | 2 | Offset of the `dummy_main` function into the binary.
+uint8 | Protocol | 1 | Protocol version of binary sends (default 0).
+uint8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
+uint8 | Opcode | 1 | `CS_MICROAPP_OPCODE_ENABLE` (`0x03`) or `CS_MICROAPP_OPCODE_DISABLE` (`0x04`).
+uint16 | Offset | 2 | Offset of the `dummy_main` function into the binary.
 
 After uploading a microapp you will first have to validate, the overall app (see above). After that you can
 enable the app.
@@ -790,11 +790,11 @@ enable the app.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Protocol | 1 | Protocol version of binary uploads (default 0).
-uint 8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
-uint 8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0) if index != 255.
-uint 8 | Repeat | 1 | A decrementing counter (down from 3 to improve reception thanks to unique ads).
-uint 16 | Error | 2 | Any error that might have happened (checksum, size, etc.).
+uint8 | Protocol | 1 | Protocol version of binary uploads (default 0).
+uint8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
+uint8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0) if index != 255.
+uint8 | Repeat | 1 | A decrementing counter (down from 3 to improve reception thanks to unique ads).
+uint16 | Error | 2 | Any error that might have happened (checksum, size, etc.).
 
 The result packet is important to retrieve a notification that a particular write has been successful. Only then you should send the next chunk.
 
@@ -808,11 +808,11 @@ __If encryption is enabled, this packet will be encrypted using any of the keys 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 8 | Protocol | 1 | Which protocol the result is. Should be similar to the protocol in the [control packet](#control-packet).
-uint 16 | [Command type](#command-types) | 2 | Type of the command of which this packet is the result.
-uint 16 | [Result code](#result-codes) | 2 | The result code.
-uint 16 | Size | 2 | Size of the payload in bytes.
-uint 8 | Payload | Size | Payload data, depends on command type.
+uint8 | Protocol | 1 | Which protocol the result is. Should be similar to the protocol in the [control packet](#control-packet).
+uint16 | [Command type](#command-types) | 2 | Type of the command of which this packet is the result.
+uint16 | [Result code](#result-codes) | 2 | The result code.
+uint16 | Size | 2 | Size of the payload in bytes.
+uint8 | Payload | Size | Payload data, depends on command type.
 
 
 #### Result codes
@@ -865,65 +865,65 @@ Setup access means the packet is available in setup mode, and encrypted with the
 
 Type nr | Type name | Payload type | Description | A | M | B
 ------- | ---------- | ------------- | ------------ | --- | --- | ---
-5 | PWM period | uint 32 | Sets PWM period in μs for the dimmer. **Setting this to a wrong value may cause damage.**  | rw |  | 
-6 | iBeacon major | uint 16 | iBeacon major number.  | rw |  | 
-7 | iBeacon minor | uint 16 | iBeacon minor number.  | rw |  | 
-8 | iBeacon UUID | uint 8 [16] | iBeacon UUID.  | rw |  | 
-9 | iBeacon TX power | int 8 | iBeacon signal strength at 1 meter.  | rw |  | 
-11 | TX power | int 8 | TX power, can be: -40, -20, -16, -12, -8, -4, 0, or 4.  | rw |  | 
-12 | Advertisement interval | uint 16 | Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms.  | rw |  | 
-16 | Scan duration | uint 16 | Scan duration in ms. Only used by interval scanner, which isn't used by default. **Deprecated**  | rw |  | 
-18 | Scan break duration | uint 16 | Waiting time in ms to start next scan. Only used by interval scanner, which isn't used by default. **Deprecated**  | rw |  | 
-19 | Boot delay | uint 16 | Time to wait with radio after boot (ms). **Setting this to a wrong value may cause damage.**  | rw |  | 
-20 | Max chip temp | int 8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off. **Setting this to a wrong value may cause damage.**  | rw |  | 
-24 | Mesh enabled | uint 8 | Whether mesh is enabled.  | rw |  | 
-25 | Encryption enabled | uint 8 | Whether encryption is enabled. **Not implemented** |  |  | 
-26 | iBeacon enabled | uint 8 | Whether iBeacon is enabled. **Not implemented** |  |  | 
-27 | Scanner enabled | uint 8 | Whether device scanning is enabled. | rw |  | 
-33 | Sphere id | uint 8 | Short id of the sphere this Crownstone is part of. | rw |  | 
-34 | Crownstone id | uint 8 | Crownstone identifier used in advertisement package. | rw |  | 
-35 | Admin key | uint 8 [16] | 16 byte key used to encrypt/decrypt owner access functions. |  |  | 
-36 | Member key | uint 8 [16] | 16 byte key used to encrypt/decrypt member access functions. |  |  | 
-37 | Basic key | uint 8 [16] | 16 byte key used to encrypt/decrypt basic access functions. |  |  | 
-39 | Scan interval | uint 16 | The scan interval in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default. | rw |  | 
-40 | Scan window | uint 16 | The scan window to in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default. | rw |  | 
-41 | Relay high duration | uint 16 | The time/duration that the relay is powered for a switch (ms). **Setting this to a wrong value may cause damage.** | rw |  | 
-42 | Low TX power | int 8 | The TX power used when in low transmission power for bonding (can be: -40, -20, -16, -12, -8, -4, 0, or 4). | rw |  | 
+5 | PWM period | uint32 | Sets PWM period in μs for the dimmer. **Setting this to a wrong value may cause damage.**  | rw |  | 
+6 | iBeacon major | uint16 | iBeacon major number.  | rw |  | 
+7 | iBeacon minor | uint16 | iBeacon minor number.  | rw |  | 
+8 | iBeacon UUID | uint8 [16] | iBeacon UUID.  | rw |  | 
+9 | iBeacon TX power | int8 | iBeacon signal strength at 1 meter.  | rw |  | 
+11 | TX power | int8 | TX power, can be: -40, -20, -16, -12, -8, -4, 0, or 4.  | rw |  | 
+12 | Advertisement interval | uint16 | Advertisement interval between 0x0020 and 0x4000 in units of 0.625 ms.  | rw |  | 
+16 | Scan duration | uint16 | Scan duration in ms. Only used by interval scanner, which isn't used by default. **Deprecated**  | rw |  | 
+18 | Scan break duration | uint16 | Waiting time in ms to start next scan. Only used by interval scanner, which isn't used by default. **Deprecated**  | rw |  | 
+19 | Boot delay | uint16 | Time to wait with radio after boot (ms). **Setting this to a wrong value may cause damage.**  | rw |  | 
+20 | Max chip temp | int8 | If the chip temperature (in degrees Celcius) goes above this value, the power gets switched off. **Setting this to a wrong value may cause damage.**  | rw |  | 
+24 | Mesh enabled | uint8 | Whether mesh is enabled.  | rw |  | 
+25 | Encryption enabled | uint8 | Whether encryption is enabled. **Not implemented** |  |  | 
+26 | iBeacon enabled | uint8 | Whether iBeacon is enabled. **Not implemented** |  |  | 
+27 | Scanner enabled | uint8 | Whether device scanning is enabled. | rw |  | 
+33 | Sphere id | uint8 | Short id of the sphere this Crownstone is part of. | rw |  | 
+34 | Crownstone id | uint8 | Crownstone identifier used in advertisement package. | rw |  | 
+35 | Admin key | uint8 [16] | 16 byte key used to encrypt/decrypt owner access functions. |  |  | 
+36 | Member key | uint8 [16] | 16 byte key used to encrypt/decrypt member access functions. |  |  | 
+37 | Basic key | uint8 [16] | 16 byte key used to encrypt/decrypt basic access functions. |  |  | 
+39 | Scan interval | uint16 | The scan interval in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default. | rw |  | 
+40 | Scan window | uint16 | The scan window to in units of 0.625 millisecond. Only used by interval scanner, which isn't used by default. | rw |  | 
+41 | Relay high duration | uint16 | The time/duration that the relay is powered for a switch (ms). **Setting this to a wrong value may cause damage.** | rw |  | 
+42 | Low TX power | int8 | The TX power used when in low transmission power for bonding (can be: -40, -20, -16, -12, -8, -4, 0, or 4). | rw |  | 
 43 | Voltage multiplier | float | Voltage multiplier (for power measurement). **Setting this to a wrong value may cause damage.** | rw |  | 
 44 | Current multiplier | float | Current multiplier (for power measurement). **Setting this to a wrong value may cause damage.** | rw |  | 
-45 | Voltage zero | int 32 | Voltage zero level (for power measurement).      **Setting this to a wrong value may cause damage.** | rw |  | 
-46 | Current zero | int 32 | Current zero level (for power measurement).      **Setting this to a wrong value may cause damage.** | rw |  | 
-47 | Power zero | int 32 | Power zero level in mW (for power measurement).    **Setting this to a wrong value may cause damage.** | rw |  | 
-50 | Current consumption threshold | uint 16 | At how much mA the switch will be turned off (soft fuse).            **Setting this to a wrong value may cause damage.** | rw |  | 
-51 | Current consumption threshold dimmer | uint 16 | At how much mA the dimmer will be turned off (soft fuse).     **Setting this to a wrong value may cause damage.** | rw |  | 
+45 | Voltage zero | int32 | Voltage zero level (for power measurement).      **Setting this to a wrong value may cause damage.** | rw |  | 
+46 | Current zero | int32 | Current zero level (for power measurement).      **Setting this to a wrong value may cause damage.** | rw |  | 
+47 | Power zero | int32 | Power zero level in mW (for power measurement).    **Setting this to a wrong value may cause damage.** | rw |  | 
+50 | Current consumption threshold | uint16 | At how much mA the switch will be turned off (soft fuse).            **Setting this to a wrong value may cause damage.** | rw |  | 
+51 | Current consumption threshold dimmer | uint16 | At how much mA the dimmer will be turned off (soft fuse).     **Setting this to a wrong value may cause damage.** | rw |  | 
 52 | Dimmer temp up voltage | float | Voltage of upper threshold of the dimmer thermometer.                         **Setting this to a wrong value may cause damage.** | rw |  | 
 53 | Dimmer temp down voltage | float | Voltage of lower threshold of the dimmer thermometer.                       **Setting this to a wrong value may cause damage.** | rw |  | 
 54 | Dimming allowed | uint8 | Whether this Crownstone is allowed to dim. | rw |  | 
 55 | Switch locked | uint8 | Whether this Crownstone is allowed to change the switch state. | rw |  | 
 56 | Switchcraft enabled | uint8 | Whether this Crownstone has switchcraft enabled. | rw |  | 
 57 | Switchcraft threshold | float | Sets the threshold for switchcraft. A higher threshold will generally make it less likely to detect a switch (less true and false positives). **Setting this to a wrong value may cause damage.** | rw |  | 
-59 | UART enabled | uint 8 | Whether UART is enabled, 0 = none, 1 = RX only, 3 = TX and RX. | rw |  | 
-60 | Device name | char [] | Name of the device. | rw |  | 
-61 | Service data key | uint 8 [16] | 16 byte key used to encrypt/decrypt service data. |  |  | 
-62 | Mesh device key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to configure this Crownstone. |  |  | 
-63 | Mesh application key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages for the application of this Crownstone. |  |  | 
-64 | Mesh network key | uint 8 [16] | 16 byte key used to encrypt/decrypt mesh messages to be received or relayed by this Crownstone. |  |  | 
-65 | Localization key | uint 8 [16] | 16 byte key used to encrypt/decrypt messages to tell your location to this Crownstone. |  |  | 
-66 | Start dimmer on zero crossing | uint 8 | Whether the dimmer should start on a zero crossing or not. | rw |  | 
-67 | Tap to toggle enabled | uint 8 | Whether tap to toggle is enabled on this Crownstone. | rw |  | 
-68 | Tap to toggle RSSI threshold offset | int 8 | RSSI threshold offset from default, above which tap to toggle will respond. | rw |  | 
-128 | Reset counter | uint 16 | Counts the number of resets. | r | r | 
-129 | [Switch state](#switch-state-packet) | uint 8 | Current switch state. | r | r | 
-130 | Accumulated energy | int 64 | Accumulated energy in μJ. | r | r | 
-131 | Power usage | int 32 | Current power usage in mW. | r | r | 
-134 | Operation Mode | uint 8 | Internal usage. |  |  | 
-135 | Temperature | int 8 | Chip temperature in °C. | r | r | 
-139 | [Error bitmask](#state-error-bitmask) | uint 32 | Bitmask with errors. | r | r | 
+59 | UART enabled | uint8 | Whether UART is enabled, 0 = none, 1 = RX only, 3 = TX and RX. | rw |  | 
+60 | Device name | char[] | Name of the device. | rw |  | 
+61 | Service data key | uint8 [16] | 16 byte key used to encrypt/decrypt service data. |  |  | 
+62 | Mesh device key | uint8 [16] | 16 byte key used to encrypt/decrypt mesh messages to configure this Crownstone. |  |  | 
+63 | Mesh application key | uint8 [16] | 16 byte key used to encrypt/decrypt mesh messages for the application of this Crownstone. |  |  | 
+64 | Mesh network key | uint8 [16] | 16 byte key used to encrypt/decrypt mesh messages to be received or relayed by this Crownstone. |  |  | 
+65 | Localization key | uint8 [16] | 16 byte key used to encrypt/decrypt messages to tell your location to this Crownstone. |  |  | 
+66 | Start dimmer on zero crossing | uint8 | Whether the dimmer should start on a zero crossing or not. | rw |  | 
+67 | Tap to toggle enabled | uint8 | Whether tap to toggle is enabled on this Crownstone. | rw |  | 
+68 | Tap to toggle RSSI threshold offset | int8 | RSSI threshold offset from default, above which tap to toggle will respond. | rw |  | 
+128 | Reset counter | uint16 | Counts the number of resets. | r | r | 
+129 | [Switch state](#switch-state-packet) | uint8 | Current switch state. | r | r | 
+130 | Accumulated energy | int64 | Accumulated energy in μJ. | r | r | 
+131 | Power usage | int32 | Current power usage in mW. | r | r | 
+134 | Operation Mode | uint8 | Internal usage. |  |  | 
+135 | Temperature | int8 | Chip temperature in °C. | r | r | 
+139 | [Error bitmask](#state-error-bitmask) | uint32 | Bitmask with errors. | r | r | 
 149 | Sun time | [Sun time packet](#sun-time-packet) | Packet with sun rise and set times. | r | r | 
 150 | Behaviour settings | [Behaviour settings](#behaviour-settings-packet) | Behaviour settings. | rw | rw | r
-156 | Soft on speed | uint 8 | Speed at which the dimmer goes towards the target value. Range: 1-100. | rw
-157 | Hub mode | uint 8 | Whether hub mode is enabled. | rw
-158 | UART key | uint 8 [16] | 16 byte key used to encrypt/decrypt UART messages. | rw
+156 | Soft on speed | uint8 | Speed at which the dimmer goes towards the target value. Range: 1-100. | rw
+157 | Hub mode | uint8 | Whether hub mode is enabled. | rw
+158 | UART key | uint8 [16] | 16 byte key used to encrypt/decrypt UART messages. | rw
 
 #### Switch state
 To be able to distinguish between the relay and dimmer state, the switch state is a bit struct with the following layout:
@@ -941,7 +941,7 @@ Bit | Name |  Description
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint 32 | [Flags](#behaviour-settings-flags) | 4 | Flags.
+uint32 | [Flags](#behaviour-settings-flags) | 4 | Flags.
 
 
 ##### Behaviour settings flags
