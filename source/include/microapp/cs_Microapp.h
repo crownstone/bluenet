@@ -40,7 +40,7 @@ private:
 	/**
 	 * The state of each microapp.
 	 */
-	microapp_state_t _states[MAX_MICROAPPS] = {0};
+	microapp_state_t _states[MAX_MICROAPPS];
 
 	/**
 	 * Local flag to indicate that ram section has been loaded.

@@ -42,10 +42,12 @@ public:
 
 	/**
 	 * Erases storage space of given app.
+	 * First checks if storage is already erased.
 	 *
 	 * @param[in] appIndex   Index of the microapp, validity is not checked.
 	 *
-	 * @return ERR_SUCCESS                  The storage will be written erased, wait for EVT_MICROAPP_ERASE_RESULT.
+	 * @return ERR_SUCCESS_NO_CHANGE        The storage is already erased.
+	 * @return ERR_WAIT_FOR_SUCCESS         The storage will be written erased, wait for EVT_MICROAPP_ERASE_RESULT.
 	 */
 	cs_ret_code_t erase(uint8_t appIndex);
 
@@ -57,7 +59,8 @@ public:
 	 * @param[in] data       Pointer to the data to be written.
 	 * @param[in] size       Size of the data to be written, must be a multiple of 4.
 	 *
-	 * @return ERR_SUCCESS                  The data will be written to flash, wait for EVT_MICROAPP_UPLOAD_RESULT.
+	 * @return ERR_SUCCESS_NO_CHANGE        The data is already on flash.
+	 * @return ERR_WAIT_FOR_SUCCESS         The data will be written to flash, wait for EVT_MICROAPP_UPLOAD_RESULT.
 	 * @return ERR_NO_SPACE                 Data would go outside the app storage space.
 	 * @return ERR_WRONG_PAYLOAD_LENGTH     Data size is not a multiple of 4.
 	 * @return ERR_WRITE_DISABLED           App storage space is not erased.
@@ -110,11 +113,16 @@ private:
 	/**
 	 * Write the next part of a chunk.
 	 * Called first time from command, and every time when a flash write is done.
+	 *
+	 * @return ERR_SUCCESS                  Complete chunk has been written to flash.
+	 * @return ERR_WAIT_FOR_SUCCESS         The data will be written to flash.
 	 */
 	cs_ret_code_t writeNextChunkPart();
 
 	/**
 	 * Write to flash.
+	 *
+	 * @return ERR_SUCCESS                  The data will be written to flash.
 	 */
 	cs_ret_code_t write(uint32_t flashAddress, const uint8_t* data, uint16_t size);
 

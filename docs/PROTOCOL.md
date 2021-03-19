@@ -340,6 +340,7 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 90 | Get microapp info | - | [Microapp info packet](#microapp-info-packet) | Get info like supported protocol and SDK, maximum sizes, and the state of uploaded microapps. | x
 91 | Upload microapp | [Microapp upload packet](#microapp-upload-packet) | - | Upload (a part of) a microapp. | x
 92 | Validate microapp | [Microapp header packet](#microapp-header-packet) | - | Validate a microapp. Should be done after upload: checks integrity of the uploaded data. | x
+93 | Remove microapp | [Microapp header packet](#microapp-header-packet) | - | Removes a microapp. When result is ERR_WAIT_FOR_SUCCESS, you have to wait for ERR_SUCCESS. In case the microapp is already removed, you will get ERR_SUCCESS_NO_CHANGE. | x
 94 | Enable microapp | [Microapp header packet](#microapp-header-packet) | - | Enable a microapp. Should be done after validation: checks SDK version, resets any failed tests, and starts running the microapp. | x
 95 | Disable microapp | [Microapp header packet](#microapp-header-packet) | - | Disable a microapp, stops running the microapp. | x
 100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
@@ -761,6 +762,10 @@ For example, if the microapp binary is 299 byte, and your chunks are 128 byte, t
 
 From the get info command, you know which index to use, and what protocol, sdk, and sizes are supported.
 
+When result is ERR_WAIT_FOR_SUCCESS, you have to wait for the result to change to ERR_SUCCESS.
+In case the stored data matches what you upload, you will get ERR_SUCCESS_NO_CHANGE.
+If the stored data does not match, you will get ERR_WRITE_DISABLED, meaning you should first remove the current microapp.
+
 #### Microapp info packet
 
 ![Microapp info packet](../docs/diagrams/microapp_info_packet.png)
@@ -801,7 +806,7 @@ uint 32 | Passed functions | 4 | Bitmask of registered functions that were calle
 
 Bit  | Name     | Description
 ---- | -------- | -----------
-0    | occupied | Whether the storage space of this app contains data.
+0    | hasData  | Whether the storage space of this app contains data.
 1-2  | checksum | 0=untested, 1=trying, 2=failed, 3=passed.
 3    | enabled  | 0=disabled, 1=enabled.
 4-5  | boot     | 0=untested, 1=trying, 2=failed, 3=passed.
@@ -836,6 +841,7 @@ Value | Name | Description
 16  | BUFFER_UNASSIGNED | No buffer was assigned for the command.
 17  | BUFFER_LOCKED | Buffer is locked, failed queue command.
 18  | BUFFER_TOO_SMALL | Buffer is too small for operation.
+19  | NOT_ALIGNED | Buffer is not aligned.
 32  | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
 33  | WRONG_PARAMETER | Wrong parameter provided.
 34  | INVALID_MESSAGE | invalid message provided.
@@ -849,6 +855,7 @@ Value | Name | Description
 42  | TIMEOUT | Operation timed out.
 43  | CANCELED | Operation was canceled.
 44  | PROTOCOL_UNSUPPORTED | The protocol is not supported.
+45  | MISMATCH | There is a mismatch, usually in CRC/checksum/hash.
 48  | NO_ACCESS | Invalid access for this command.
 49  | UNSAFE | It's unsafe to execute this command.
 64  | NOT_AVAILABLE | Command currently not available.
@@ -858,6 +865,7 @@ Value | Name | Description
 69  | NOT_POWERED | Something must first be powered.
 80  | WRITE_DISABLED | Write is disabled for given type.
 81  | WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
+82  | READ_FAILED | Failed to read.
 96  | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
 112 | EVENT_UNHANDLED | The event or command was not handled.
 65535 | UNSPECIFIED | Unspecified error.

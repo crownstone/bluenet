@@ -33,6 +33,10 @@
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
 
+#define LOGMicroappInfo LOGi
+#define LOGMicroappDebug LOGnone
+#define LOGMicroappVerbose LOGnone
+
 Microapp::Microapp(): EventListener() {
 	EventDispatcher::getInstance().addListener(this);
 }
@@ -69,11 +73,12 @@ void Microapp::loadApps() {
 //		startApp(index);
 //	}
 
+	cs_ret_code_t retCode;
 	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
 		loadState(index);
-		validateApp(index);
-		if (g_AUTO_ENABLE_MICROAPP_ON_BOOT) {
-			LOGi("Enable microapp %u", index);
+		retCode = validateApp(index);
+		if (g_AUTO_ENABLE_MICROAPP_ON_BOOT && retCode == ERR_SUCCESS) {
+			LOGMicroappInfo("Enable microapp %u", index);
 			enableApp(index);
 		}
 		storeState(index);
@@ -82,7 +87,7 @@ void Microapp::loadApps() {
 }
 
 void Microapp::loadState(uint8_t index) {
-	LOGi("Load state of app %u", index);
+	LOGMicroappDebug("loadState %u", index);
 	cs_ret_code_t retCode;
 	cs_state_data_t stateData(CS_TYPE::STATE_MICROAPP, index, reinterpret_cast<uint8_t*>(&(_states[index])), sizeof(_states[0]));
 	retCode = State::getInstance().get(stateData);
@@ -90,23 +95,25 @@ void Microapp::loadState(uint8_t index) {
 		resetState(index);
 	}
 
+	// TODO: we only need this because you may have flashed the microapp on the chip.
 	MicroappStorage & storage = MicroappStorage::getInstance();
-	_states[index].occupied = !storage.isErased(index);
+	_states[index].hasData = !storage.isErased(index);
 }
 
 cs_ret_code_t Microapp::validateApp(uint8_t index) {
+	LOGMicroappDebug("validateApp %u", index);
 	cs_ret_code_t retCode;
 	microapp_state_t & state = _states[index];
 
-	if (!state.occupied) {
-		LOGi("app %u is empty", index);
+	if (!state.hasData) {
+		LOGMicroappInfo("app %u is erased", index);
 		return ERR_WRONG_STATE;
 	}
 
 	MicroappStorage & storage = MicroappStorage::getInstance();
 	retCode = storage.validateApp(index);
 	if (retCode != ERR_SUCCESS) {
-		LOGi("No valid app binary on index %u", index);
+		LOGMicroappInfo("No valid app binary on index %u", index);
 		state.checksumTest = MICROAPP_TEST_STATE_FAILED;
 		return retCode;
 	}
@@ -114,7 +121,7 @@ cs_ret_code_t Microapp::validateApp(uint8_t index) {
 	microapp_binary_header_t appHeader;
 	storage.getAppHeader(index, &appHeader);
 	if (state.checksum != appHeader.checksum || state.checksumHeader != appHeader.checksumHeader) {
-		LOGi("New app on index %u: stored checksum %u and %u, binary checksum %u and %u",
+		LOGMicroappInfo("New app on index %u: stored checksum %u and %u, binary checksum %u and %u",
 				index,
 				state.checksum,
 				state.checksumHeader,
@@ -132,7 +139,7 @@ cs_ret_code_t Microapp::enableApp(uint8_t index) {
 	microapp_state_t & state = _states[index];
 
 	if (state.checksumTest != MICROAPP_TEST_STATE_PASSED) {
-		LOGi("app %u checksum did not pass yet", index);
+		LOGMicroappInfo("app %u checksum did not pass yet", index);
 		return ERR_WRONG_STATE;
 	}
 
@@ -149,7 +156,14 @@ cs_ret_code_t Microapp::enableApp(uint8_t index) {
 }
 
 cs_ret_code_t Microapp::startApp(uint8_t index) {
+	LOGMicroappInfo("startApp %u", index);
 	if (!canRunApp(index)) {
+		LOGMicroappDebug("Can't run app: enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u failedFunction=%u",
+				_states[index].enabled,
+				_states[index].checksumTest,
+				_states[index].memoryUsage,
+				_states[index].bootTest,
+				_states[index].failedFunction);
 		return ERR_UNSAFE;
 	}
 	MicroappProtocol & protocol = MicroappProtocol::getInstance();
@@ -158,7 +172,9 @@ cs_ret_code_t Microapp::startApp(uint8_t index) {
 }
 
 void Microapp::resetState(uint8_t index) {
-	_states[index] = {0};
+	memset(&(_states[index]), 0, sizeof(_states[0]));
+	_states[index].tryingFunction = MICROAPP_FUNCTION_NONE;
+	_states[index].failedFunction = MICROAPP_FUNCTION_NONE;
 }
 
 void Microapp::resetTestState(uint8_t index) {
@@ -170,6 +186,7 @@ void Microapp::resetTestState(uint8_t index) {
 }
 
 cs_ret_code_t Microapp::storeState(uint8_t index) {
+	LOGMicroappVerbose("storeState %u", index);
 	cs_state_data_t stateData(CS_TYPE::STATE_MICROAPP, index, reinterpret_cast<uint8_t*>(&(_states[index])), sizeof(_states[0]));
 	cs_ret_code_t retCode = State::getInstance().set(stateData);
 	switch (retCode) {
@@ -183,6 +200,12 @@ cs_ret_code_t Microapp::storeState(uint8_t index) {
 }
 
 bool Microapp::canRunApp(uint8_t index) {
+	LOGMicroappVerbose("enabled=%u checkSumTest=%u memoryUsage=%u bootTest=%u failedFunction=%u",
+			_states[index].enabled,
+			_states[index].checksumTest,
+			_states[index].memoryUsage,
+			_states[index].bootTest,
+			_states[index].failedFunction);
 	return _states[index].enabled &&
 			_states[index].checksumTest == MICROAPP_TEST_STATE_PASSED &&
 			_states[index].memoryUsage != 1 &&
@@ -200,8 +223,10 @@ void Microapp::tick() {
 }
 
 cs_ret_code_t Microapp::handleGetInfo(cs_result_t& result) {
+	LOGMicroappInfo("handleGetInfo");
 	microapp_info_t* info = reinterpret_cast<microapp_info_t*>(result.buf.data);
 	if (result.buf.len < sizeof(*info)) {
+		LOGw("Buffer too small len=%u required=%u", result.buf.len, sizeof(*info));
 		return ERR_BUFFER_TOO_SMALL;
 	}
 
@@ -230,16 +255,12 @@ cs_ret_code_t Microapp::handleGetInfo(cs_result_t& result) {
 }
 
 cs_ret_code_t Microapp::handleUpload(microapp_upload_internal_t* packet) {
+	LOGMicroappInfo("handleUpload index=%u offset=%u", packet->header.header.index, packet->header.offset);
 	cs_ret_code_t retCode = checkHeader(&(packet->header.header));
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
 	uint8_t index = packet->header.header.index;
-
-	if (_states[index].occupied) {
-		LOGw("app %u is occupied, remove first");
-		return ERR_WRITE_DISABLED;
-	}
 
 	// The previous app at this index will not run anymore, so reset the state.
 	resetState(index);
@@ -249,16 +270,16 @@ cs_ret_code_t Microapp::handleUpload(microapp_upload_internal_t* packet) {
 	retCode = storage.writeChunk(packet->header.header.index, packet->header.offset, packet->data.data, packet->data.len);
 
 	switch (retCode) {
-		case ERR_SUCCESS: {
-			// Assume the flash will be written.
-			_states[index].occupied = true;
-			// User should wait for the data to be written to flash before sending the next chunk.
-			retCode = ERR_WAIT_FOR_SUCCESS;
+		case ERR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE:
+		case ERR_WAIT_FOR_SUCCESS: {
+			// In case of wait: assume the flash will be written.
+			_states[index].hasData = true;
 			break;
 		}
 		case ERR_WRITE_DISABLED: {
-			// Specific error we get when the storage space is not empty, update state.
-			_states[index].occupied = true;
+			// Specific error we get when the storage space at this chunk is not empty, update state.
+			_states[index].hasData = true;
 			break;
 		}
 	}
@@ -268,6 +289,7 @@ cs_ret_code_t Microapp::handleUpload(microapp_upload_internal_t* packet) {
 }
 
 cs_ret_code_t Microapp::handleValidate(microapp_ctrl_header_t* packet) {
+	LOGMicroappInfo("handleValidate %u", packet->index);
 	cs_ret_code_t retCode = checkHeader(packet);
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
@@ -283,6 +305,7 @@ cs_ret_code_t Microapp::handleValidate(microapp_ctrl_header_t* packet) {
 }
 
 cs_ret_code_t Microapp::handleRemove(microapp_ctrl_header_t* packet) {
+	LOGMicroappInfo("handleRemove %u", packet->index);
 	cs_ret_code_t retCode = checkHeader(packet);
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
@@ -291,18 +314,24 @@ cs_ret_code_t Microapp::handleRemove(microapp_ctrl_header_t* packet) {
 
 	MicroappStorage & storage = MicroappStorage::getInstance();
 	retCode = storage.erase(index);
-	if (retCode != ERR_SUCCESS) {
-		return retCode;
+	switch (retCode) {
+		case ERR_SUCCESS:
+		case ERR_WAIT_FOR_SUCCESS:
+		case ERR_SUCCESS_NO_CHANGE:
+			break;
+		default:
+			return retCode;
 	}
 
 	// Assume the erase will succeed. If not, the state will be corrected later.
-	_states[index].occupied = false;
+//	_states[index].hasData = false;
+	resetState(index);
 	storeState(index);
-
-	return ERR_WAIT_FOR_SUCCESS;
+	return retCode;
 }
 
 cs_ret_code_t Microapp::handleEnable(microapp_ctrl_header_t* packet) {
+	LOGMicroappInfo("handleEnable %u", packet->index);
 	cs_ret_code_t retCode = checkHeader(packet);
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
@@ -317,25 +346,18 @@ cs_ret_code_t Microapp::handleEnable(microapp_ctrl_header_t* packet) {
 
 	// The enable command resets all test, except occupied field and checksum test.
 	resetTestState(index);
-	_states[index].occupied = true;
+	_states[index].hasData = true;
 	_states[index].checksumTest = MICROAPP_TEST_STATE_PASSED;
 
 	retCode = storeState(index);
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
 	}
-
-	LOGv("enabled=%u checkSumTest=%u, memoryUsage=%u, bootTest=%u, failedFunction=%u",
-			_states[index].enabled,
-			_states[index].checksumTest,
-			_states[index].memoryUsage,
-			_states[index].bootTest,
-			_states[index].failedFunction);
-
 	return startApp(index);
 }
 
 cs_ret_code_t Microapp::handleDisable(microapp_ctrl_header_t* packet) {
+	LOGMicroappInfo("handleDisable %u", packet->index);
 	cs_ret_code_t retCode = checkHeader(packet);
 	if (retCode != ERR_SUCCESS) {
 		return retCode;
