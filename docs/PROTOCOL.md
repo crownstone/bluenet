@@ -930,10 +930,10 @@ To be able to distinguish between the relay and dimmer state, the switch state i
 
 ![Switch state packet](../docs/diagrams/switch_state_packet.png)
 
-Bit | Name |  Description
---- | --- | ---
-0 | Relay | Value of the relay, where 0 = OFF, 1 = ON.
-1-7 | Dimmer | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+uint8t | Relay | 1 | Value of the relay, where 0 = OFF, 1 = ON.
+uint8t | Dimmer | 7 | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
 
 ##### Behaviour settings
 
