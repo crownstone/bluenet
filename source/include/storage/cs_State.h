@@ -195,6 +195,12 @@ public:
 	/**
 	 * Get a list of IDs for given type.
 	 *
+	 * Example usage:
+	 *     std::vector<cs_state_id_t>* ids = nullptr;
+	 *     retCode = State::getInstance().getIds(CS_TYPE::STATE_EXAMPLE, ids);
+	 *     if (retCode == ERR_SUCCESS) {
+	 *         for (auto id: *ids) {
+	 *
 	 * @param[in] type            State type.
 	 * @param[out] ids            Pointer to list of ids. This is not a copy, so make sure not to modify this list.
 	 * @return                    Return code.
