@@ -33,7 +33,7 @@ const uint8_t MICROAPP_STORAGE_BUF_SIZE = 32;
 
 #define LOGMicroappInfo LOGi
 #define LOGMicroappDebug LOGnone
-#define LOGMicroappVerboseLevel SERIAL_NONE
+#define LOGMicroappVerboseLevel SERIAL_VERBOSE
 
 void fs_evt_handler_sched(void *data, uint16_t size) {
 	nrf_fstorage_evt_t * evt = (nrf_fstorage_evt_t*) data;
