@@ -1,0 +1,37 @@
+
+1) arxiv.pdf       - Middle Square Weyl Sequence RNG arxiv paper
+
+2) bigcrush        - directory for running the BigCrush test
+
+3) example         - directory for running a simple example program
+
+4) init.h          - init_rand_digits utility
+
+5) msws.h          - msws include file
+
+6) practrand       - directory for running the PractRand test
+
+7) seed            - directory for creating seed.h file
+
+8) seed.h          - seed include file
+
+9) streams_example - directory for running the streams example program
+
+a) time            - directory for running the timing tests
+
+
+License:  The Middle Square Weyl Sequence RNG is available (free,
+ 
+but without warranty) as open-source software under the GNU General
+
+Public License.
+
+
+Contributions:  This software is free for any usage.  However, if you
+
+find it useful you may send a contribution to PayPal mswsrng@gmail.com
+
+
+Bernard Widynski  email: mswsrng@gmail.com
+
+https://mswsrng.wixsite.com/rand
