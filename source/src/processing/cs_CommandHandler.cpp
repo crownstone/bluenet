@@ -225,8 +225,8 @@ void CommandHandler::handleCommand(
 			return handleCmdTrackedDeviceHeartbeat(commandData, accessLevel, result);
 		case CTRL_CMD_GET_UPTIME:
 			return handleCmdGetUptime(commandData, accessLevel, result);
-		case CTRL_CMD_MICROAPP:
-			return handleMicroappCommand(commandData, accessLevel, result);
+		case CTRL_CMD_MICROAPP_UPLOAD:
+			return handleCmdMicroappUpload(commandData, accessLevel, result);
 		// cases handled by dispatchEventForCommand:
 		case CTRL_CMD_SET_TIME:
 			return dispatchEventForCommand(CS_TYPE::CMD_SET_TIME, commandData, source, result);
@@ -264,8 +264,6 @@ void CommandHandler::handleCommand(
 			return dispatchEventForCommand(CS_TYPE::CMD_GET_RAM_STATS, commandData, source, result);
 		case CTRL_CMD_MICROAPP_GET_INFO:
 			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_GET_INFO, commandData, source, result);
-		case CTRL_CMD_MICROAPP_UPLOAD:
-			return handleCmdMicroappUpload(commandData, accessLevel, result);
 		case CTRL_CMD_MICROAPP_VALIDATE:
 			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_VALIDATE, commandData, source, result);
 		case CTRL_CMD_MICROAPP_REMOVE:
