@@ -74,21 +74,6 @@ cs_ret_code_t MicroappStorage::init() {
 			break;
 	}
 
-//	uint8_t testData[10] = {0,1,2,3,4,5,6,7,8,9};
-//	uint8_t* testDataPtr = testData + 3;
-//	uint8_t testDataSize = 4;
-//	nrfCode = nrf_fstorage_write(&nrf_microapp_storage, g_FLASH_MICROAPP_BASE, testDataPtr, testDataSize, NULL);
-//	LOGi("nrf_fstorage_write data=%u size=%u nrfCode=%u", testDataPtr, testDataSize, nrfCode);
-//
-//	testDataPtr = testData + 4;
-//	testDataSize = 3;
-//	nrfCode = nrf_fstorage_write(&nrf_microapp_storage, g_FLASH_MICROAPP_BASE, testDataPtr, testDataSize, NULL);
-//	LOGi("nrf_fstorage_write data=%u size=%u nrfCode=%u", testDataPtr, testDataSize, nrfCode);
-//
-//	testDataPtr = testData + 4;
-//	testDataSize = 4;
-//	nrfCode = nrf_fstorage_write(&nrf_microapp_storage, g_FLASH_MICROAPP_BASE, testDataPtr, testDataSize, NULL);
-//	LOGi("nrf_fstorage_write data=%u size=%u nrfCode=%u", testDataPtr, testDataSize, nrfCode);
 
 	return ERR_SUCCESS;
 }
