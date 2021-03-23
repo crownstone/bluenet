@@ -77,6 +77,17 @@ In a function with pointers or address references, the operator is attached to t
 void someEventHandler(pod_t const* event, void* context, uint32_t& address) {
 ```
 
+### If statement body on its own line, and always in brackets.
+
+Putting the body on a separate line makes it easier to read, while leaving out brackets easily introduces bugs.
+
+```
+if (on) {
+    turnOn = true;
+}
+```
+
+
 ## Naming
 
 Identifiers follow the following convention, falling back to a previous rule if no specific case is declared for that particular scope.
@@ -167,10 +178,11 @@ There is a strong preference to use typed `constexpr` values over macros. The us
 
 ```
 #define BLUETOOTH_NAME "CRWN"
-static constexpr auto BLUETOOTH_NAME = "CRWN"; // <-- strongly preferred
+static constexpr auto BLUETOOTH_NAME = "CRWN"; // <-- acceptable
+static constexpr char[] BLUETOOTH_NAME = "CRWN"; // <-- preferred
 ```
 
-### Declare variables on their own line.
+### Declare variables on their own line
 
 This usually makes it easier to read.
 
@@ -179,16 +191,18 @@ int a;
 int b;
 ```
 
-### If statement body on its own line, and always in brackets.
+### Use nullptr instead of NULL
 
-Putting the body on a separate line makes it easier to read, while leaving out brackets easily introduces bugs.
-
-```
-if (on) {
-    turnOn = true;
-}
-```
+The preprocessor symbol `NULL` is usually defined as `(void*)0)`, but it is implementation defined. There are subtle differences between `NULL` and `nullptr` due to freedom of implementation. Hence `nullptr` is preferred or possibly an explicit alternative if `nullptr` doesn't lead to intended behaviour.
 
 
+### Include what you use
+
+Each source file `filename.cpp` file includes its corresponding header `filename.h`. 
+If a class, struct or function etc., say `class someclass{};` is defined in `otherfilename.h`:
+- If `filename.h` uses `someclass`, it should _directly_ `#include <otherfilename.h>`
+- Else, if `filename.cpp` uses `someclass`, it should _directly_ `#include <otherfilename.h>`
+
+This paradigm ensures that changing a header does not break any upward dependencies increases awareness of dependencies and make them easier to analyse.    
 
 
