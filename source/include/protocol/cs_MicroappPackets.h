@@ -20,7 +20,7 @@ const uint8_t MAX_MICROAPPS = 1;
  * We could calculate this from MTU or characteristic buffer size for BLE, and UART RX buffer size for UART.
  * But let's just start with a number that fits in both.
  */
-const uint16_t MICROAPP_UPLOAD_MAX_CHUNK_SIZE = 256;
+constexpr uint16_t MICROAPP_UPLOAD_MAX_CHUNK_SIZE = 256;
 
 /**
  * Protocol version of the communication between the user and the firmware: the microapp command and result packets.
