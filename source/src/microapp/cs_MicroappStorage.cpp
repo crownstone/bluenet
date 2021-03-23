@@ -29,8 +29,6 @@
 #include <util/cs_Crc16.h>
 #include <util/cs_Utils.h>
 
-constexpr uint8_t MICROAPP_STORAGE_BUF_SIZE = 32;
-
 #define LOGMicroappInfo LOGi
 #define LOGMicroappDebug LOGnone
 #define LOGMicroappVerboseLevel SERIAL_VERBOSE
@@ -40,7 +38,9 @@ void fs_evt_handler_sched(void *data, uint16_t size) {
 	MicroappStorage::getInstance().handleFileStorageEvent(evt);
 }
 
+// Event handler of our nrf_fstorage instance.
 static void fs_evt_handler(nrf_fstorage_evt_t * p_evt) {
+	// TODO: do we need to schedule these events? They might already be called from app scheduler, depending on sdk_config.
 	uint32_t retVal = app_sched_event_put(p_evt, sizeof(*p_evt), fs_evt_handler_sched);
 	APP_ERROR_CHECK(retVal);
 }
@@ -49,19 +49,13 @@ NRF_FSTORAGE_DEF(nrf_fstorage_t nrf_microapp_storage) =
 {
 	.evt_handler    = fs_evt_handler,
 	.start_addr     = g_FLASH_MICROAPP_BASE,
-	.end_addr       = g_FLASH_MICROAPP_BASE + (0x1000*(g_FLASH_MICROAPP_PAGES)) - 1,
+	.end_addr       = g_FLASH_MICROAPP_BASE + (CS_FLASH_PAGE_SIZE * g_FLASH_MICROAPP_PAGES) - 1,
 };
 
-MicroappStorage::MicroappStorage() { 
+MicroappStorage::MicroappStorage() {
 }
 
 cs_ret_code_t MicroappStorage::init() {
-	_buffer = new uint8_t[MICROAPP_STORAGE_BUF_SIZE];
-	if (_buffer == nullptr) {
-		LOGw("Could not allocate buffer");
-		return ERR_NO_SPACE;
-	}
-
 	uint32_t nrfCode;
 	nrfCode = nrf_fstorage_init(&nrf_microapp_storage, &nrf_fstorage_sd, NULL);
 	switch (nrfCode) {
@@ -88,8 +82,8 @@ cs_ret_code_t MicroappStorage::erase(uint8_t appIndex) {
 	}
 
 	uint32_t flashAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
-	LOGMicroappInfo("erase addr=0x%08X size=%u", flashAddress, MICROAPP_MAX_SIZE / 0x1000);
-	uint32_t nrfCode = nrf_fstorage_erase(&nrf_microapp_storage, flashAddress, MICROAPP_MAX_SIZE / 0x1000, NULL);
+	LOGMicroappInfo("erase addr=0x%08X size=%u", flashAddress, MICROAPP_MAX_SIZE / CS_FLASH_PAGE_SIZE);
+	uint32_t nrfCode = nrf_fstorage_erase(&nrf_microapp_storage, flashAddress, MICROAPP_MAX_SIZE / CS_FLASH_PAGE_SIZE, NULL);
 	if (nrfCode != NRF_SUCCESS) {
 		LOGe("Failed to start erase: %u", nrfCode);
 		return ERR_UNSPECIFIED;
@@ -139,8 +133,8 @@ cs_ret_code_t MicroappStorage::writeNextChunkPart() {
 	// Write part of the chunk.
 	// Copy to _buffer, so that the data is aligned.
 	uint16_t writeSize = std::min((int)MICROAPP_STORAGE_BUF_SIZE, _chunkSize - _chunkWritten);
-	memcpy(_buffer, _chunkData + _chunkWritten, writeSize);
-	retCode = write(_chunkFlashAddress + _chunkWritten, _buffer, writeSize);
+	memcpy(_writeBuffer, _chunkData + _chunkWritten, writeSize);
+	retCode = write(_chunkFlashAddress + _chunkWritten, _writeBuffer, writeSize);
 	_chunkWritten += writeSize;
 
 	if (retCode != ERR_SUCCESS) {

@@ -772,7 +772,7 @@ If the stored data does not match, you will get ERR_WRITE_DISABLED, meaning you 
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Protocol | 1 | Supported microapp protocol.
+uint8 | Protocol | 1 | Supported protocol of the microapp command and result packets.
 uint8 | Max apps | 1 | Maximum number of microapps.
 uint16 | Max app size | 2 | Maximum binary size of a microapp.
 uint16 | Max chunk size | 2 |  Maximum chunk size for uploading a microapp.

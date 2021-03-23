@@ -8,6 +8,7 @@
 #pragma once
 
 #include <events/cs_EventListener.h>
+#include <protocol/cs_MicroappPackets.h>
 
 /**
  * Class that enables the feature to run microapps on the firmware.
@@ -64,7 +65,7 @@ private:
 	cs_ret_code_t enableApp(uint8_t index);
 
 	/**
-	 * Start app, if it passed all tests.
+	 * Start app, if it passed all tests according to cached state.
 	 */
 	cs_ret_code_t startApp(uint8_t index);
 
@@ -89,7 +90,8 @@ private:
 	bool canRunApp(uint8_t index);
 
 	/**
-	 * The tick function is used to send more notifications than one.
+	 * To be called every tick.
+	 * Calls all microapps.
 	 */
 	void tick();
 

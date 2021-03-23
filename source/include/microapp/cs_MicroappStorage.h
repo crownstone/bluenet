@@ -1,6 +1,10 @@
 #pragma once
 
 #include <events/cs_EventListener.h>
+#include <protocol/cs_MicroappPackets.h>
+#include <ble/cs_Nordic.h> // TODO: don't use nrf_fstorage_evt_t in header.
+
+constexpr uint8_t MICROAPP_STORAGE_BUF_SIZE = 32;
 
 /**
  * Class to store microapps on flash.
@@ -56,7 +60,7 @@ public:
 	 *
 	 * @param[in] appIndex   Index of the microapp, validity is not checked.
 	 * @param[in] offset     Offset of the data in bytes from the start of the app storage space.
-	 * @param[in] data       Pointer to the data to be written.
+	 * @param[in] data       Pointer to the data to be written. Must remain valid until the write is finished.
 	 * @param[in] size       Size of the data to be written, must be a multiple of 4.
 	 *
 	 * @return ERR_SUCCESS_NO_CHANGE        The data is already on flash.
@@ -97,9 +101,10 @@ private:
 	bool _writing = false;
 
 	/**
-	 * The buffer is required to perform writes to flash, as the data has to stay in memory until the  write is done.
+	 * The buffer is required to perform writes to flash, as the data has to
+	 * be aligned, and stay in memory until the write is done.
 	 */
-	uint8_t *_buffer = nullptr;
+	__attribute__((aligned(4)))	uint8_t _writeBuffer[MICROAPP_STORAGE_BUF_SIZE];
 
 	/**
 	 * When writing a chunk of data, it will be done in parts.
