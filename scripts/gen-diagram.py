@@ -140,9 +140,9 @@ os.environ['SDL_VIDEODRIVER'] = 'dummy'
 def drawRect(rect, color):
 	# Rect: left, top, width, height
 	# width of 0 to fill
-	print(rect)
+        # print(rect)
 	s = pygame.Surface((rect[2], rect[3]))  # the size of your rect
-	s.set_alpha(128)                # alpha level
+	#s.set_alpha(128)                # alpha level
 	s.fill((color))           # this fills the entire surface
 	background.blit(s, (rect[0],rect[1]))    # (0,0) are the top-left coordinates
 
@@ -316,12 +316,13 @@ def drawVarList(varList, filename, lengthInBits):
 	y=0
 
 	# Draw the text "byte"
-	background.blit(byteLabel, (x, y))
 	xVar = x + byteLabel.get_width()
 	yVar = y + byteLabel.get_height()
-	x += byteLabel.get_width()
 	
-        drawRect([0, 0, xVar, yVar], BLACK)
+        drawRect([0, 0, xVar-2, yVar], BLACK)
+	background.blit(byteLabel, (x, y))
+	
+        x += byteLabel.get_width() + 2
 
 	cycleColorInd = 0
 	prevColorInd = -1
@@ -331,6 +332,30 @@ def drawVarList(varList, filename, lengthInBits):
 		varName = var[0]
 		varLen = var[1]
 		varLenKnown = var[2]
+
+		# Determine color
+		# First check if this var name already has an assigned color
+		varNameLower = varName.lower()
+		# print "in dict " + varNameLower + "=" + str(varNameLower in colorDict)
+		if varNameLower in colorDict:
+			color = colorDict[varNameLower]
+		else:
+			# Don't use the same color as the previous color
+			colorInd = prevColorInd
+			while colorInd == prevColorInd:
+				# colorInd = randint(0, len(COLOR_PALETTE)-1)
+				colorInd = cycleColorInd
+				cycleColorInd = (cycleColorInd + 1) % len(COLOR_PALETTE)
+			color = COLOR_PALETTE[colorInd]
+			colorDict[varNameLower] = color
+
+		# Keep up last used color index
+		if (color in COLOR_PALETTE):
+			prevColorInd = COLOR_PALETTE.index(color)
+		else:
+			prevColorInd = -1
+
+		xVar = drawVar(xVar, yVar, varName, varLen, color)
 
 		# Draw the byte numbers
 		if byteNumKnown:
@@ -365,29 +390,6 @@ def drawVarList(varList, filename, lengthInBits):
 				background.blit(byteLabel, (x + 1.5*STEP_X - 0.5*byteLabel.get_width(), y))
 				byteNumKnown = False
 
-		# Determine color
-		# First check if this var name already has an assigned color
-		varNameLower = varName.lower()
-		# print "in dict " + varNameLower + "=" + str(varNameLower in colorDict)
-		if varNameLower in colorDict:
-			color = colorDict[varNameLower]
-		else:
-			# Don't use the same color as the previous color
-			colorInd = prevColorInd
-			while colorInd == prevColorInd:
-				# colorInd = randint(0, len(COLOR_PALETTE)-1)
-				colorInd = cycleColorInd
-				cycleColorInd = (cycleColorInd + 1) % len(COLOR_PALETTE)
-			color = COLOR_PALETTE[colorInd]
-			colorDict[varNameLower] = color
-
-		# Keep up last used color index
-		if (color in COLOR_PALETTE):
-			prevColorInd = COLOR_PALETTE.index(color)
-		else:
-			prevColorInd = -1
-
-		xVar = drawVar(xVar, yVar, varName, varLen, color)
 
 	pygame.image.save(background, filename)
 

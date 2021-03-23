@@ -951,10 +951,10 @@ To be able to distinguish between the relay and dimmer state, the switch state i
 
 ![Switch state packet](../docs/diagrams/switch_state_packet.png)
 
-Bit | Name |  Description
---- | --- | ---
-0 | Relay | Value of the relay, where 0 = OFF, 1 = ON.
-1-7 | Dimmer | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+bool | Relay | 1 | Value of the relay, where 0 = OFF, 1 = ON.
+uint8 | Dimmer | 7 | Value of the dimmer, where 100 if fully on, 0 is OFF, dimmed in between.
 
 ##### Behaviour settings
 
@@ -969,7 +969,7 @@ uint32 | [Flags](#behaviour-settings-flags) | 4 | Flags.
 
 ![Behaviour settings flags](../docs/diagrams/behaviour_settings_flags.png)
 
-Bit | Name |  Description
---- | --- | ---
-0 | Enabled | Whether behaviours are enabled.
-1-31 | Reserved | Reserved for future use, should be 0 for now.
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+bool | Enabled | 1 | Whether behaviours are enabled.
+uint32 | Reserved | 31| Reserved for future use, should be 0 for now.
