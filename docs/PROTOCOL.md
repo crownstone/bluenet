@@ -782,6 +782,8 @@ uint16 | Max ram usage | 2 | Maximum RAM usage of a microapp.
 
 #### Microapp SDK version packet
 
+The microapp SDK version determines the API for communication between bluenet firmware and microapps.
+
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint8 | Major | 1 | Major version: different major indicates breaking changes.
