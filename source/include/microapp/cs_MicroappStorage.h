@@ -92,8 +92,8 @@ private:
 	 * Singleton, constructor, also copy constructor, is private.
 	 */
 	MicroappStorage();
-	MicroappStorage(MicroappStorage const&);
-	void operator=(MicroappStorage const &);
+	MicroappStorage(MicroappStorage const&) = delete;
+	void operator=(MicroappStorage const &)  = delete;
 
 	/**
 	 * Keep up whether or not we are currently writing to flash.
