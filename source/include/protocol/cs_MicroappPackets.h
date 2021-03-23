@@ -12,7 +12,7 @@
 /**
  * Max number of microapps.
  */
-const uint8_t MAX_MICROAPPS = 1;
+constexpr uint8_t MAX_MICROAPPS = 1;
 
 /**
  * Max allowed chunk size when uploading a microapp.
