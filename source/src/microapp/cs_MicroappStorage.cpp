@@ -57,7 +57,7 @@ MicroappStorage::MicroappStorage() {
 
 cs_ret_code_t MicroappStorage::init() {
 	uint32_t nrfCode;
-	nrfCode = nrf_fstorage_init(&nrf_microapp_storage, &nrf_fstorage_sd, NULL);
+	nrfCode = nrf_fstorage_init(&nrf_microapp_storage, &nrf_fstorage_sd, nullptr);
 	switch (nrfCode) {
 		case NRF_SUCCESS:
 			LOGMicroappInfo("Sucessfully initialized from 0x%08X to 0x%08X", nrf_microapp_storage.start_addr, nrf_microapp_storage.end_addr);
@@ -83,7 +83,7 @@ cs_ret_code_t MicroappStorage::erase(uint8_t appIndex) {
 
 	uint32_t flashAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
 	LOGMicroappInfo("erase addr=0x%08X size=%u", flashAddress, MICROAPP_MAX_SIZE / CS_FLASH_PAGE_SIZE);
-	uint32_t nrfCode = nrf_fstorage_erase(&nrf_microapp_storage, flashAddress, MICROAPP_MAX_SIZE / CS_FLASH_PAGE_SIZE, NULL);
+	uint32_t nrfCode = nrf_fstorage_erase(&nrf_microapp_storage, flashAddress, MICROAPP_MAX_SIZE / CS_FLASH_PAGE_SIZE, nullptr);
 	if (nrfCode != NRF_SUCCESS) {
 		LOGe("Failed to start erase: %u", nrfCode);
 		return ERR_UNSPECIFIED;
@@ -154,7 +154,7 @@ cs_ret_code_t MicroappStorage::write(uint32_t flashAddress, const uint8_t* data,
 	}
 
 	// Write will only work if the flashAddress, and data pointer are word aligned, and when size is word sized.
-	uint32_t nrfCode = nrf_fstorage_write(&nrf_microapp_storage, flashAddress, data, size, NULL);
+	uint32_t nrfCode = nrf_fstorage_write(&nrf_microapp_storage, flashAddress, data, size, nullptr);
 	switch (nrfCode) {
 		case NRF_SUCCESS:
 			_writing = true;
