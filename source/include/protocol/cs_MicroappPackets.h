@@ -73,7 +73,7 @@ struct __attribute__((packed)) microapp_ctrl_header_t {
 struct __attribute__((packed)) microapp_upload_t {
 	microapp_ctrl_header_t header;
 	uint16_t offset;    // Offset in bytes of this chunk of data. Must be a multiple of 4.
-//	uint8[] data;       // A chunk of the microapp binary.
+	// Followed by a chunk of the microapp binary.
 };
 
 /**
