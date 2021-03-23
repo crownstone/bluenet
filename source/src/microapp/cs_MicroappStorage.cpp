@@ -207,13 +207,13 @@ void MicroappStorage::resetChunkVars() {
 
 
 
-void MicroappStorage::getAppHeader(uint8_t appIndex, microapp_binary_header_t* header) {
+void MicroappStorage::getAppHeader(uint8_t appIndex, microapp_binary_header_t& header) {
 	LOGMicroappDebug("Get app header");
 	const uint32_t addr = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
-	const uint8_t size = sizeof(*header);
+	const uint8_t size = sizeof(header);
 
 	LOGMicroappDebug("read %u bytes from 0x%08X to 0x%X", size, addr, header);
-	uint32_t nrfCode = nrf_fstorage_read(&nrf_microapp_storage, addr, header, size);
+	uint32_t nrfCode = nrf_fstorage_read(&nrf_microapp_storage, addr, &header, size);
 	if (nrfCode != NRF_SUCCESS) {
 		LOGw("Failed to read app header");
 	}
@@ -223,7 +223,7 @@ void MicroappStorage::getAppHeader(uint8_t appIndex, microapp_binary_header_t* h
 uint32_t MicroappStorage::getStartInstructionAddress(uint8_t appIndex) {
 	uint32_t startAddress = nrf_microapp_storage.start_addr + appIndex * MICROAPP_MAX_SIZE;
 	microapp_binary_header_t header;
-	getAppHeader(appIndex, &header);
+	getAppHeader(appIndex, header);
 
 	startAddress += header.startOffset;
 	return startAddress;
@@ -262,7 +262,7 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 	LOGMicroappInfo("Validate app %u", appIndex);
 
 	microapp_binary_header_t header;
-	getAppHeader(appIndex, &header);
+	getAppHeader(appIndex, header);
 
 	if (header.size > MICROAPP_MAX_SIZE) {
 		LOGw("Microapp size=%u is too large", header.size);
@@ -320,15 +320,15 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 	return ERR_SUCCESS;
 }
 
-void MicroappStorage::printHeader(uint8_t logLevel, microapp_binary_header_t* header) {
+void MicroappStorage::printHeader(uint8_t logLevel, microapp_binary_header_t& header) {
 	_log(logLevel, true, "sdkVersion=%u.%u size=%u checksum=%u checksumHeader=%u appBuildVersion=%u startOffset=%u ",
-			header->sdkVersionMajor,
-			header->sdkVersionMinor,
-			header->size,
-			header->checksum,
-			header->checksumHeader,
-			header->appBuildVersion,
-			header->startOffset);
+			header.sdkVersionMajor,
+			header.sdkVersionMinor,
+			header.size,
+			header.checksum,
+			header.checksumHeader,
+			header.appBuildVersion,
+			header.startOffset);
 }
 
 /**

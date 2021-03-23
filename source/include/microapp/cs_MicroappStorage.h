@@ -25,9 +25,9 @@ public:
 	 * Get a copy of the microapp binary header.
 	 *
 	 * @param[in] appIndex   Index of the microapp, validity is not checked.
-	 * @param[out] header    Pointer where will be read to.
+	 * @param[out] header    Header to read to.
 	 */
-	void getAppHeader(uint8_t appIndex, microapp_binary_header_t* header);
+	void getAppHeader(uint8_t appIndex, microapp_binary_header_t& header);
 
 	/**
 	 * Get the address in flash, where the microapp program starts.
@@ -81,7 +81,7 @@ public:
 	 */
 	cs_ret_code_t validateApp(uint8_t appIndex);
 
-	void printHeader(uint8_t logLevel, microapp_binary_header_t* header);
+	void printHeader(uint8_t logLevel, microapp_binary_header_t& header);
 
 	/**
 	 * Internal usage: when fstorage is done, this function will be called (indirectly through app_scheduler).

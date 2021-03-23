@@ -119,7 +119,7 @@ cs_ret_code_t Microapp::validateApp(uint8_t index) {
 	}
 
 	microapp_binary_header_t appHeader;
-	storage.getAppHeader(index, &appHeader);
+	storage.getAppHeader(index, appHeader);
 	if (state.checksum != appHeader.checksum || state.checksumHeader != appHeader.checksumHeader) {
 		LOGMicroappInfo("New app on index %u: stored checksum %u and %u, binary checksum %u and %u",
 				index,
@@ -145,7 +145,7 @@ cs_ret_code_t Microapp::enableApp(uint8_t index) {
 
 	microapp_binary_header_t header;
 	MicroappStorage & storage = MicroappStorage::getInstance();
-	storage.getAppHeader(index, &header);
+	storage.getAppHeader(index, header);
 	if (header.sdkVersionMajor != MICROAPP_SDK_MAJOR || header.sdkVersionMinor > MICROAPP_SDK_MINOR) {
 		LOGw("Microapp sdk version %u.%u is not supported", header.sdkVersionMajor, header.sdkVersionMinor);
 		return ERR_PROTOCOL_UNSUPPORTED;
@@ -242,7 +242,7 @@ cs_ret_code_t Microapp::handleGetInfo(cs_result_t& result) {
 	MicroappStorage & storage = MicroappStorage::getInstance();
 	microapp_binary_header_t appHeader;
 	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
-		storage.getAppHeader(index, &appHeader);
+		storage.getAppHeader(index, appHeader);
 //		if (appHeader.checksum == _states[index].checksum) {
 			info->appsStatus[index].buildVersion = appHeader.appBuildVersion;
 			info->appsStatus[index].sdkVersion.major = appHeader.sdkVersionMajor;
