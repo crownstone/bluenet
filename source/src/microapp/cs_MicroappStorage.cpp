@@ -29,7 +29,7 @@
 #include <util/cs_Crc16.h>
 #include <util/cs_Utils.h>
 
-const uint8_t MICROAPP_STORAGE_BUF_SIZE = 32;
+constexpr uint8_t MICROAPP_STORAGE_BUF_SIZE = 32;
 
 #define LOGMicroappInfo LOGi
 #define LOGMicroappDebug LOGnone
