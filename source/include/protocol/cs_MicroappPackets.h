@@ -64,16 +64,6 @@ struct __attribute__((__packed__)) microapp_binary_header_t {
 };
 
 
-/*
-nr  | Type name                | Payload type           | Result payload  | Description
---- | ------------------------ | ---------------------- | --------------- | -----------
-90  | Get microapp info        | -                      | microapp_info_t | Get info about supported microapps and status of all microapps.
-91  | Upload microapp          | microapp_upload_t      | -               | Upload (part of) a microapp.
-92  | Validate microapp upload | microapp_ctrl_header_t | -               | Validate upload of microapp, checks if CRC matches.
-93  | Remove microapp          | microapp_ctrl_header_t | -               | Remove a microapp.
-94  | Enable microapp          | microapp_ctrl_header_t | -               | Enable a microapp, checks if protocol is supported.
-95  | Disable microapp         | microapp_ctrl_header_t | -               | Disable a microapp.
-*/
 
 struct __attribute__((packed)) microapp_ctrl_header_t {
 	uint8_t protocol;   // Protocol of the microapp command and result packets, should match MICROAPP_PROTOCOL.
