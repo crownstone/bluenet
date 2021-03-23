@@ -35,8 +35,8 @@ private:
 	 * Singleton, constructor, also copy constructor, is private.
 	 */
 	Microapp();
-	Microapp(Microapp const&);
-	void operator=(Microapp const &);
+	Microapp(Microapp const&) = delete;
+	void operator=(Microapp const &) = delete;
 
 	/**
 	 * The state of each microapp.
