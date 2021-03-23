@@ -341,7 +341,7 @@ enum class CS_TYPE: uint16_t {
 	CMD_GET_RAM_STATS,                                // Get RAM statistics.
 
 	CMD_MICROAPP_GET_INFO,                            // Microapp control command.
-	CMD_MICROAPP_UPLOAD,                              // Microapp control command.
+	CMD_MICROAPP_UPLOAD,                              // Microapp control command. The data pointer is assume to remain valid until write is completed!
 	CMD_MICROAPP_VALIDATE,                            // Microapp control command.
 	CMD_MICROAPP_REMOVE,                              // Microapp control command.
 	CMD_MICROAPP_ENABLE,                              // Microapp control command.

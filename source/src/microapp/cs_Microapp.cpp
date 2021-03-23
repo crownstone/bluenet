@@ -38,7 +38,6 @@
 #define LOGMicroappVerbose LOGnone
 
 Microapp::Microapp(): EventListener() {
-	EventDispatcher::getInstance().addListener(this);
 }
 
 void Microapp::init() {
@@ -50,29 +49,12 @@ void Microapp::init() {
 	protocol.setIpcRam();
 
 	loadApps();
+
+	EventDispatcher::getInstance().addListener(this);
 }
 
 void Microapp::loadApps() {
-//	cs_ret_code_t retCode;
-//	std::vector<cs_state_id_t>* ids = nullptr;
-//	retCode = State::getInstance().getIds(CS_TYPE::STATE_MICROAPP, ids);
-//	if (retCode == ERR_SUCCESS) {
-//		for (auto index: *ids) {
-//			if (index >= MAX_MICROAPPS) {
-//				LOGw("Ignore app %u", index);
-//				continue;
-//			}
-//			LOGi("Found app %u", index);
-//			loadState(index);
-//			validateApp(index);
-//			storeState(index);
-//		}
-//	}
-//
-//	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
-//		startApp(index);
-//	}
-
+	// Loop over every app index, as an app might've been uploaded via jlink.
 	cs_ret_code_t retCode;
 	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
 		loadState(index);
@@ -238,16 +220,13 @@ cs_ret_code_t Microapp::handleGetInfo(cs_result_t& result) {
 	info->sdkVersion.major = MICROAPP_SDK_MAJOR;
 	info->sdkVersion.minor = MICROAPP_SDK_MINOR;
 
-//	memset(info->appsStatus, 0, sizeof(info->appsStatus));
 	MicroappStorage & storage = MicroappStorage::getInstance();
 	microapp_binary_header_t appHeader;
 	for (uint8_t index = 0; index < MAX_MICROAPPS; ++index) {
 		storage.getAppHeader(index, appHeader);
-//		if (appHeader.checksum == _states[index].checksum) {
-			info->appsStatus[index].buildVersion = appHeader.appBuildVersion;
-			info->appsStatus[index].sdkVersion.major = appHeader.sdkVersionMajor;
-			info->appsStatus[index].sdkVersion.minor = appHeader.sdkVersionMinor;
-//		}
+		info->appsStatus[index].buildVersion = appHeader.appBuildVersion;
+		info->appsStatus[index].sdkVersion.major = appHeader.sdkVersionMajor;
+		info->appsStatus[index].sdkVersion.minor = appHeader.sdkVersionMinor;
 		memcpy(&(info->appsStatus[index].state), &(_states[index]), sizeof(_states[0]));
 	}
 	result.dataSize = sizeof(*info);
