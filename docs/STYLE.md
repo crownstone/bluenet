@@ -66,7 +66,7 @@ int MyClass::barMethod(uint8_t value, bool triple) {
 ```
 
 The end bracket, `}`, is always on a line of its own. This makes it easier to parse in your head when the body of the `if` statement becomes larger.
-The `case` clauses are indented w.r.t. the `switch` statement. This makes it easy to see where the switch stops. 
+The `case` clauses are indented w.r.t. the `switch` statement. This makes it easy to see where the switch stops.
 The brackets are optional.
 
 Nerd tip: create a `source/.vimrc` file with as option `set cinoptions=l1`.
@@ -83,7 +83,7 @@ Identifiers follow the following convention, falling back to a previous rule if 
 
 - Namespace scope (possibly global):
 	- classes (non-PODs): `UpperCamel`
-	- structs (PODs): `small_caps_t` 
+	- structs (PODs): `small_caps_t`
 	- enums: both members and type names currently varying between `UpperCamel` and `ALL_CAPS`
 	- macros: `ALL_CAPS`
 	- functions: `lowerCamel`
@@ -105,22 +105,22 @@ In a short overview:
 static constexpr auto BLUETOOTH_NAME = "CRWN";
 
 class ClassName {
-    private:
-    typedef uint8_t index_t;
-    
-    class Settings {
-        bool isActive;
-    };
-    
-    public:
-    void functionName();
+private:
+	typedef uint8_t index_t;
+
+	class Settings {
+		bool isActive;
+	};
+
+public:
+	void functionName();
 };
 
 using MyVec = std::vector<uint8_t>;
 
 struct __attribute__((__packed__)) a_packed_packet_t {
-    uint8_t shortWord;
-    uint32_t longWord;
+	uint8_t shortWord;
+	uint32_t longWord;
 };
 ```
 
@@ -142,9 +142,9 @@ Notes:
  *
  * Optional longer explanation.
  *
- * @param[in]     aParameter    Explanation.
- * @param[out]    anotherParameter    Explanation.
- * @param[in,out] exoticInOutParameter    Explanation.
+ * @param[in]     aParameter            Explanation.
+ * @param[out]    anotherParameter      Explanation.
+ * @param[in,out] exoticInOutParameter  Explanation.
  * @return        Explanation.
  */
 ```
@@ -157,8 +157,8 @@ All data types that are used for communication over hardware protocols will be *
 
 ```
 struct __attribute__((__packed__)) a_packed_packet_t {
-    uint8_t shortWord;
-    uint32_t longWord;
+	uint8_t shortWord;
+	uint32_t longWord;
 };
 ```
 
@@ -185,7 +185,7 @@ Putting the body on a separate line makes it easier to read, while leaving out b
 
 ```
 if (on) {
-    turnOn = true;
+	turnOn = true;
 }
 ```
 
