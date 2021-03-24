@@ -629,6 +629,7 @@ void Crownstone::startOperationMode(const OperationMode & mode) {
 			// TODO: Why this hack?
 			if (serial_get_state() == SERIAL_ENABLE_NONE) {
 				serial_enable(SERIAL_ENABLE_RX_ONLY);
+				UartHandler::getInstance().init(SERIAL_ENABLE_RX_ONLY);
 			}
 			break;
 		}
