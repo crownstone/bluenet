@@ -28,7 +28,7 @@ git_info("${WORKSPACE_DIR}/source" GIT_BRANCH GIT_HASH)
 
 message(STATUS "We are on the \"${GIT_BRANCH}\" branch")
 
-if(NOT "${GIT_BRANCH}" STREQUAL "master") 
+if(NOT "${GIT_BRANCH}" STREQUAL "5.4.x")
   message(FATAL_ERROR "We should be on the master branch for release!")
 endif()
 
