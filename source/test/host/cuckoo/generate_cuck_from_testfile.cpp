@@ -39,9 +39,10 @@ void handleAdd(std::vector<uint8_t>& data, CuckooFilter* filter);
  */
 int main (int argc, char ** argv) {
 	std::string filename = "cuckoo_size_128_4_len_6_20";
-	std::string testdatafolder = "../testdata/";
-	std::string filename_in = testdatafolder + filename + ".csv";
+	std::string testdatafolder = "./";
+	std::string filename_in = testdatafolder + filename + "csv.cuck";
 	std::string filename_out = testdatafolder + filename + ".cpp.cuck";
+//	std::string filename_expect = testdatafolder + filename + ".cuck";
 	
 	std::ifstream instream (filename_in);
 	std::ofstream outstream (filename_out);
@@ -86,6 +87,9 @@ int main (int argc, char ** argv) {
 				<< ",";
 		}
 	}
+
+	// ----------- Check equality with the _expect file -----------
+	// TODO.
 
 	return 0;
 
