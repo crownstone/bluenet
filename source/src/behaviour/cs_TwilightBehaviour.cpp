@@ -41,7 +41,7 @@ size_t TwilightBehaviour::serializedSize() const {
 }
 
 void TwilightBehaviour::print() {
-#if CS_SERIAL_NRF_LOG_ENABLED != 2
+#if CS_SERIAL_NRF_LOG_ENABLED == 0
 	LOGd("TwilightBehaviour: type(%d) %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x), profile(%d)",
 			static_cast<uint8_t>(typ),
 			from().h(), from().m(), from().s(),

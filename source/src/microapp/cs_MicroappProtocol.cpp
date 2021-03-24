@@ -29,6 +29,7 @@
 #include <util/cs_Error.h>
 #include <util/cs_Hash.h>
 #include <util/cs_Utils.h>
+#include <microapp/cs_MicroappStorage.h>
 
 void handleSwitchCommand(pin_cmd_t* pin_cmd) {
 	CommandMicroappPinOpcode2 mode = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
@@ -246,7 +247,7 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 		case CS_MICROAPP_COMMAND_LOG: {
 			char type = payload[1];
 			char option = payload[2];
-			bool newLine = false;
+			__attribute__((unused)) bool newLine = false;
 			if (option == CS_MICROAPP_COMMAND_LOG_NEWLINE) {
 				newLine = true;
 			}
@@ -470,48 +471,33 @@ uint16_t MicroappProtocol::interpretRamdata() {
  *
  * TODO: Return setup and loop addresses
  */
-void MicroappProtocol::callApp() {
-	static bool thumb_mode = true;
-
-	// Check if we want to do this again
-	//if (!isEnabled()) {
-	//	LOGi("Microapp: app not enabled.");
-	//	return;
-	//} 
-
-	TYPIFY(STATE_MICROAPP) state_microapp;
-	cs_state_id_t app_id = 0;
-	cs_state_data_t data(CS_TYPE::STATE_MICROAPP, app_id, (uint8_t*)&state_microapp, sizeof(state_microapp));
-	State::getInstance().get(data);
-
-	if (state_microapp.start_addr == 0x00) {
-		LOGi("Module can't be run. Start address 0?");
-		_booted = false;
-		return;
-	}
+void MicroappProtocol::callApp(uint8_t appIndex) {
+	static bool thumbMode = true;
 
 	initMemory();
 
-	uintptr_t address = state_microapp.start_addr + state_microapp.offset;
-	LOGi("Microapp: start at 0x%04x", address);
+	uintptr_t address = MicroappStorage::getInstance().getStartInstructionAddress(appIndex);
+	LOGi("Microapp: start at 0x%08X", address);
 
-	if (thumb_mode) address += 1;
-	LOGi("Check main code at %p", address);
+	if (thumbMode) {
+		address += 1;
+	}
+	LOGi("Check main code at 0x%08X", address);
 	char *arr = (char*)address;
 	if (arr[0] != 0xFF) {
-		void (*microapp_main)() = (void (*)()) address;
-		LOGi("Call function in module: %p", microapp_main);
-		(*microapp_main)();
+		void (*microappMain)() = (void (*)()) address;
+		LOGi("Call function in module: 0x%p", microappMain);
+		(*microappMain)();
 		LOGi("Module did run.");
 	}
 	_booted = true;
-	LOGi("Booted is at address: %p", &_booted);
+	LOGi("Booted is at address: 0x%p", &_booted);
 }
 
 uint16_t MicroappProtocol::initMemory() {
 	// We have a reserved area of RAM. For now let us clear it to 0
 	// This is actually incorrect (we should skip) and it probably can be done at once as well
-	LOGi("Init memory: clear %p to %p", g_RAM_MICROAPP_BASE, g_RAM_MICROAPP_BASE + g_RAM_MICROAPP_AMOUNT);
+	LOGi("Init memory: clear 0x%p to 0x%p", g_RAM_MICROAPP_BASE, g_RAM_MICROAPP_BASE + g_RAM_MICROAPP_AMOUNT);
 	for (uint32_t i = 0; i < g_RAM_MICROAPP_AMOUNT; ++i) {
 		uint32_t *const val = (uint32_t *)(uintptr_t)(g_RAM_MICROAPP_BASE + i);
 		*val = 0;
@@ -525,7 +511,7 @@ uint16_t MicroappProtocol::initMemory() {
 /*
  * Called from cs_Microapp every time tick. Only when _booted gets up will this function become active.
  */
-void MicroappProtocol::callSetupAndLoop() {
+void MicroappProtocol::callSetupAndLoop(uint8_t appIndex) {
 
 	static uint16_t counter = 0;
 	if (_booted) {

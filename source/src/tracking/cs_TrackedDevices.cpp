@@ -328,7 +328,7 @@ bool TrackedDevices::isValidTTL(TrackedDevice& device) {
 }
 
 void TrackedDevices::print(TrackedDevice& device) {
-#if CS_SERIAL_NRF_LOG_ENABLED != 2
+#if CS_SERIAL_NRF_LOG_ENABLED == 0
 	LOGTrackedDevicesDebug("id=%u fieldsSet=%u accessLvl=%u profile=%u location=%u rssiOffset=%i flags=%u TTL=%u token=[%u %u %u]",
 			device.data.data.deviceId,
 			device.fieldsSet,

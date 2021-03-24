@@ -335,3 +335,8 @@ struct microapp_advertise_request_t {
 	uint16_t appUuid;
 	cs_data_t data;
 };
+
+struct microapp_upload_internal_t {
+	microapp_upload_t header;
+	cs_data_t data;
+};

@@ -430,9 +430,9 @@ void BehaviourStore::LoadBehavioursFromMemory(CS_TYPE BehaviourCsType) {
 	cs_ret_code_t retCode;
 	std::vector<cs_state_id_t> *ids = nullptr;
 
-	State::getInstance().getIds(BehaviourCsType, ids);
+	retCode = State::getInstance().getIds(BehaviourCsType, ids);
 
-	if (ids != nullptr) {
+	if (retCode == ERR_SUCCESS) {
 		size16_t data_size = WireFormat::size<BehaviourType>();
 		uint8_t data_array[data_size];
 		for (auto iter: *ids) {

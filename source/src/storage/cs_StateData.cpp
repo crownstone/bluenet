@@ -217,7 +217,7 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_SUCCESS;
 	}
 	case CS_TYPE::STATE_MICROAPP: {
-		*reinterpret_cast<TYPIFY(STATE_MICROAPP)*>(data.value) = cs_microapp_t();
+		*reinterpret_cast<TYPIFY(STATE_MICROAPP)*>(data.value) = microapp_state_t();
 		return ERR_SUCCESS;
 	}
 	case CS_TYPE::STATE_SOFT_ON_SPEED:
@@ -355,8 +355,14 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 	case CS_TYPE::CMD_GET_RAM_STATS:
 	case CS_TYPE::EVT_GENERIC_TEST:
 	case CS_TYPE::CMD_TEST_SET_TIME:
-	case CS_TYPE::CMD_MICROAPP:
-	case CS_TYPE::EVT_MICROAPP:
+	case CS_TYPE::CMD_MICROAPP_GET_INFO:
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
+	case CS_TYPE::CMD_MICROAPP_VALIDATE:
+	case CS_TYPE::CMD_MICROAPP_REMOVE:
+	case CS_TYPE::CMD_MICROAPP_ENABLE:
+	case CS_TYPE::CMD_MICROAPP_DISABLE:
+	case CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT:
+	case CS_TYPE::EVT_MICROAPP_ERASE_RESULT:
 	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
 	case CS_TYPE::EVT_TWI_INIT:
@@ -572,8 +578,14 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CMD_GET_RAM_STATS:
 	case CS_TYPE::EVT_GENERIC_TEST:
 	case CS_TYPE::CMD_TEST_SET_TIME:
-	case CS_TYPE::CMD_MICROAPP:
-	case CS_TYPE::EVT_MICROAPP:
+	case CS_TYPE::CMD_MICROAPP_GET_INFO:
+	case CS_TYPE::CMD_MICROAPP_UPLOAD:
+	case CS_TYPE::CMD_MICROAPP_VALIDATE:
+	case CS_TYPE::CMD_MICROAPP_REMOVE:
+	case CS_TYPE::CMD_MICROAPP_ENABLE:
+	case CS_TYPE::CMD_MICROAPP_DISABLE:
+	case CS_TYPE::EVT_MICROAPP_UPLOAD_RESULT:
+	case CS_TYPE::EVT_MICROAPP_ERASE_RESULT:
 	case CS_TYPE::CMD_MICROAPP_ADVERTISE:
 	case CS_TYPE::EVT_HUB_DATA_REPLY:
 	case CS_TYPE::EVT_TWI_INIT:

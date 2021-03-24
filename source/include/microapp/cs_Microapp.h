@@ -1,99 +1,117 @@
+/*
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: Mar 09, 2021
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ */
+
 #pragma once
 
 #include <events/cs_EventListener.h>
-
-// Call loop every 10 ticks. The ticks are every 100 ms so this means every second.
-//#define MICROAPP_LOOP_FREQUENCY 10
-
-//#define MICROAPP_LOOP_INTERVAL_MS (TICK_INTERVAL_MS * MICROAPP_LOOP_FREQUENCY)
+#include <protocol/cs_MicroappPackets.h>
 
 /**
- * The class Microapp has functionality to store a second app (and perhaps in the future even more apps) on another
- * part of the flash memory.
+ * Class that enables the feature to run microapps on the firmware.
+ *
+ * This class:
+ * - Handles control commands (from BLE and UART).
+ * - Keeps up the state of microapps.
+ * - Instantiates and uses classes MicroappStorage and MicroappProtocol.
  */
 class Microapp: public EventListener {
-	private:
-		/**
-		 * Singleton, constructor, also copy constructor, is private.
-		 */
-		Microapp();
-		Microapp(Microapp const&);
-		void operator=(Microapp const &);
+public:
+	static Microapp& getInstance() {
+		static Microapp instance;
+		return instance;
+	}
 
-		/**
-		 * The last message we have sent. It has a repeat value that will start at "number_of_notifications". If it
-		 * is at zero, it will not be repeated anymore.
-		 */
-		TYPIFY(EVT_MICROAPP) _prevMessage;
+	/**
+	 * Initialize storage, and load microapps.
+	 */
+	void init();
 
-		/**
-		 * For the last chunk we have to do some other things. Validate the entire app, etc.
-		 */
-		bool _lastChunk;
+private:
+	/**
+	 * Singleton, constructor, also copy constructor, is private.
+	 */
+	Microapp();
+	Microapp(Microapp const&) = delete;
+	void operator=(Microapp const &) = delete;
 
-		/**
-		 * Local flag to check if microapp is enabled.
-		 */
-		bool _enabled;
+	/**
+	 * The state of each microapp.
+	 */
+	microapp_state_t _states[MAX_MICROAPPS];
 
-		/**
-		 * Local flag to indicate that ram section has been loaded.
-		 */
-		bool _loaded;
+	/**
+	 * Local flag to indicate that ram section has been loaded.
+	 */
+	bool _loaded = false;
 
-		/**
-		 * Debug mode
-		 */
-		bool _debug;
+	void loadApps();
 
-	protected:
-		/**
-		 * Set IPC ram data.
-		 */
-		void setIpcRam();
+	void loadState(uint8_t index);
 
-		/**
-		 * Enable app.
-		 */
-		uint16_t enableApp(bool flag);
+	/**
+	 * Validates app: compare checksum.
+	 * App state is updated in this call, make sure to store the state afterwards.
+	 */
+	cs_ret_code_t validateApp(uint8_t index);
 
-		/**
-		 * Check if app is enabled.
-		 */
-		bool isEnabled();
+	/**
+	 * Enables app: checks sdk version.
+	 * App state is updated in this call, make sure to store the state afterwards.
+	 */
+	cs_ret_code_t enableApp(uint8_t index);
 
-		/**
-		 * Call the loop function
-		 */
-		void callLoop(int & cntr, int & skip);
+	/**
+	 * Start app, if it passed all tests according to cached state.
+	 */
+	cs_ret_code_t startApp(uint8_t index);
 
-		/**
-		 * Load ram information, set by microapp.
-		 */
-		uint16_t interpretRamdata();
-	public:
-		static Microapp& getInstance() {
-			static Microapp instance;
-			return instance;
-		}
+	/**
+	 * Resets app state in ram only.
+	 */
+	void resetState(uint8_t index);
 
-		/**
-		 * Initialize fstorage. Allocate buffer.
-		 */
-		uint16_t init();
+	/**
+	 * Resets app state tests in ram only.
+	 */
+	void resetTestState(uint8_t index);
 
-		/**
-		 * The tick function is used to send more notifications than one.
-		 */
-		void tick();
+	/**
+	 * Store app state to flash.
+	 */
+	cs_ret_code_t storeState(uint8_t index);
 
-		/**
-		 * Handle incoming events.
-		 */
-		void handleEvent(event_t & event);
+	/**
+	 * Checks app state and returns true if this app is allowed to run.
+	 */
+	bool canRunApp(uint8_t index);
 
-		/**
-		 * Handle incoming packet. Returns err_code.
-		 */
-		uint32_t handlePacket(microapp_packet_header_t *packet_stub);
+	/**
+	 * To be called every tick.
+	 * Calls all microapps.
+	 */
+	void tick();
+
+	/**
+	 * Handle control commands.
+	 */
+	cs_ret_code_t handleGetInfo(cs_result_t& result);
+	cs_ret_code_t handleUpload(microapp_upload_internal_t* packet);
+	cs_ret_code_t handleValidate(microapp_ctrl_header_t* packet);
+	cs_ret_code_t handleRemove(microapp_ctrl_header_t* packet);
+	cs_ret_code_t handleEnable(microapp_ctrl_header_t* packet);
+	cs_ret_code_t handleDisable(microapp_ctrl_header_t* packet);
+
+	/**
+	 * Checks if control command header is ok.
+	 */
+	cs_ret_code_t checkHeader(microapp_ctrl_header_t* packet);
+
+	/**
+	 * Handle incoming events.
+	 */
+	void handleEvent(event_t & event);
 };
