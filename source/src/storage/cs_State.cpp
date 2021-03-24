@@ -606,6 +606,9 @@ cs_ret_code_t State::getIdsFromFlash(const CS_TYPE & type, std::vector<cs_state_
 		}
 	}
 	std::vector<cs_state_id_t>* ids = new std::vector<cs_state_id_t>();
+	if (ids == nullptr) {
+		return ERR_NO_SPACE;
+	}
 
 	cs_state_id_t id;
 	cs_ret_code_t retCode = _storage->findFirst(type, id);

@@ -340,8 +340,14 @@ enum class CS_TYPE: uint16_t {
 	CMD_GET_ADC_CHANNEL_SWAPS,                        // Get number of detected ADC channel swaps.
 	CMD_GET_RAM_STATS,                                // Get RAM statistics.
 
-	CMD_MICROAPP,                                     // Microapp upload (e.g. Arduino code).
-	EVT_MICROAPP,                                     // Microapp event (e.g. write done)
+	CMD_MICROAPP_GET_INFO,                            // Microapp control command.
+	CMD_MICROAPP_UPLOAD,                              // Microapp control command. The data pointer is assume to remain valid until write is completed!
+	CMD_MICROAPP_VALIDATE,                            // Microapp control command.
+	CMD_MICROAPP_REMOVE,                              // Microapp control command.
+	CMD_MICROAPP_ENABLE,                              // Microapp control command.
+	CMD_MICROAPP_DISABLE,                             // Microapp control command.
+	EVT_MICROAPP_UPLOAD_RESULT,                       // Uploaded chunk has been written to flash, or failed to do so.
+	EVT_MICROAPP_ERASE_RESULT,                        // Microapp has been erase from flash, or failed to do so.
 	CMD_MICROAPP_ADVERTISE,                           // A microapp wants to advertise something.
 
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
@@ -471,7 +477,7 @@ typedef uint32_t TYPIFY(STATE_BEHAVIOUR_MASTER_HASH);
 typedef cs_mesh_iv_index_t TYPIFY(STATE_MESH_IV_INDEX);
 typedef cs_mesh_seq_number_t TYPIFY(STATE_MESH_SEQ_NUMBER);
 typedef ibeacon_config_id_packet_t TYPIFY(STATE_IBEACON_CONFIG_ID);
-typedef cs_microapp_t TYPIFY(STATE_MICROAPP);
+typedef microapp_state_t TYPIFY(STATE_MICROAPP);
 typedef uint8_t TYPIFY(STATE_SOFT_ON_SPEED);
 typedef uint8_t TYPIFY(STATE_HUB_MODE);
 
@@ -602,8 +608,14 @@ typedef void TYPIFY(CMD_GET_RESET_REASON);
 typedef uint8_t TYPIFY(CMD_GET_GPREGRET);
 typedef void TYPIFY(CMD_GET_ADC_CHANNEL_SWAPS);
 typedef void TYPIFY(CMD_GET_RAM_STATS);
-typedef microapp_upload_packet_t TYPIFY(CMD_MICROAPP);
-typedef microapp_notification_packet_t TYPIFY(EVT_MICROAPP);
+typedef void TYPIFY(CMD_MICROAPP_GET_INFO);
+typedef microapp_upload_internal_t TYPIFY(CMD_MICROAPP_UPLOAD);
+typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_VALIDATE);
+typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_REMOVE);
+typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_ENABLE);
+typedef microapp_ctrl_header_t TYPIFY(CMD_MICROAPP_DISABLE);
+typedef cs_ret_code_t TYPIFY(EVT_MICROAPP_UPLOAD_RESULT);
+typedef cs_ret_code_t TYPIFY(EVT_MICROAPP_ERASE_RESULT);
 typedef microapp_advertise_request_t TYPIFY(CMD_MICROAPP_ADVERTISE);
 typedef uint32_t TYPIFY(CMD_TEST_SET_TIME);
 typedef MeshMsgEvent TYPIFY(EVT_MESH_RSSI_PING);

@@ -337,7 +337,12 @@ Type nr | Type name | Payload type | Result payload | Description | A | M | B | 
 86 | Get GPREGRET | Index (uint8) | [Gpregret packet](#gpregret-result-packet) | **Firmware debug.** Get the Nth general purpose retention register as it was on boot. There are currently 2 registers. | x
 87 | Get ADC channel swaps | - | [ADC channel swaps packet](#adc-channel-swaps-packet) | **Firmware debug.** Get the number of detected ADC channel swaps. | x
 88 | Get RAM statistics | - | [RAM stats packet](#ram-stats-packet) | **Firmware debug.** Get RAM statistics. | x
-90 | Upload microapp | [Upload microapp packet](#upload-microapp-packet) | [Microapp result packet](#microapp-result-packet) | Upload microapp. | x
+90 | Get microapp info | - | [Microapp info packet](#microapp-info-packet) | Get info like supported protocol and SDK, maximum sizes, and the state of uploaded microapps. | x
+91 | Upload microapp | [Microapp upload packet](#microapp-upload-packet) | - | Upload (a part of) a microapp. | x
+92 | Validate microapp | [Microapp header packet](#microapp-header-packet) | - | Validate a microapp. Should be done after upload: checks integrity of the uploaded data. | x
+93 | Remove microapp | [Microapp header packet](#microapp-header-packet) | - | Removes a microapp. When result is ERR_WAIT_FOR_SUCCESS, you have to wait for ERR_SUCCESS. In case the microapp is already removed, you will get ERR_SUCCESS_NO_CHANGE. | x
+94 | Enable microapp | [Microapp header packet](#microapp-header-packet) | - | Enable a microapp. Should be done after validation: checks SDK version, resets any failed tests, and starts running the microapp. | x
+95 | Disable microapp | [Microapp header packet](#microapp-header-packet) | - | Disable a microapp, stops running the microapp. | x
 100 | Clean flash | - | - | **Firmware debug.** Start cleaning flash: permanently deletes removed state variables, and defragments the persistent storage. | x
 
 #### Setup packet
@@ -735,70 +740,83 @@ uint24 | Device token | 3 | Token that has been registered.
 uint8 | Time to live | 1 | How long (in minutes) the crownstone assumes the device is at the given location, so should best be larger than the interval at which the heartbeat is sent. Setting this to 0 is similar to sending a single [background broadcast](BROADCAST_PROTOCOL.md#background-broadcasts). Currently the max is 60, a longer time will result in an error WRONG_PARAMETER.
 
 
-#### Upload microapp
 
-![Upload microapp packet](../docs/diagrams/upload_microapp_packet.png)
-
-Type | Name | Length | Description
---- | --- | --- | ---
-uint8 | Protocol | 1 | Protocol version of binary uploads (default 0).
-uint8 | App ID | 1 | Appliciation identifier. In theory, multiple apps can be supported (not supported yet).
-uint8 | Opcode | 1 | `CS_MICROAPP_OPCODE_UPLOAD` (`0x01`)
-uint8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0)
-uint8 | Count | 1 | The total number of chunks (rounded up, max 256 packets).
-uint16 | Size | 2 | Size in bytes of the complete binary.
-uint16 | Checksum | 2 | The checksum of this chunk. The checksum of the last packet is of the complete program.
-uint8 | Data | N | `NRF_SDH_BLE_GATT_MAX_MTU_SIZE` (69)  - `OVERHEAD` (20), should be 49.
-
-The packets are all of the same size. Important! The data in the last packet has to contain `0xFF` for the values beyond the application size. This is due to the fact that on flash writing `0xFF` does not change the flash. 
-
-The total maximum size of a binary (256 packets with each 49 bytes) is around 12 kB. This is considered sufficient
-for this first version. Larger binaries would require more stringent containerization as well to make sure its not
-eating too many other resources.
-
-#### Validate microapp
-
-![Send microapp validate packet](../docs/diagrams/send_microapp_validate_packet.png)
+#### Microapp header packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Protocol | 1 | Protocol version of binary sends (default 0).
-uint8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
-uint8 | Opcode | 1 | `CS_MICROAPP_OPCODE_VALIDATE` (`0x02`).
-uint16 | Size | 2 | Size in bytes of the complete binary.
-uint16 | Checksum | 2 | The checksum of the complete program.
+uint8 | Protocol | 1 | Protocol of the microapp command and result packets, should match what you get from the [microapp info packet](#microapp-info-packet).
+uint8 | App index | 1 | Index of the microapp on this Crownstone.
 
-After sending the last packet, the microapp has to be validated.
+#### Microapp upload packet
 
-#### Enable/disable microapp
-
-![Send microapp enable packet](../docs/diagrams/send_microapp_enable_packet.png)
+![Microapp upload packet](../docs/diagrams/microapp_upload_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Protocol | 1 | Protocol version of binary sends (default 0).
-uint8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
-uint8 | Opcode | 1 | `CS_MICROAPP_OPCODE_ENABLE` (`0x03`) or `CS_MICROAPP_OPCODE_DISABLE` (`0x04`).
-uint16 | Offset | 2 | Offset of the `dummy_main` function into the binary.
+[Microapp header](#microapp-header-packet) | Header | 2 |
+uint16 | Offset | 2 | Offset in bytes of this chunk of data. Must be a multiple of 4.
+uint8[] | Data chunk | N | A chunk of the binary.
 
-After uploading a microapp you will first have to validate, the overall app (see above). After that you can
-enable the app.
+For example, if the microapp binary is 299 byte, and your chunks are 128 byte, then you have 3 upload commands with offsets: 0, 128, 256. The last command will have 44 byte of data: the remaining 43 byte, padded to 44 byte, so it is a multiple of 4.
 
-#### Microapp result packet
+From the get info command, you know which index to use, and what protocol, sdk, and sizes are supported.
 
-![Microapp result packet](../docs/diagrams/microapp_result_packet.png)
+When result is ERR_WAIT_FOR_SUCCESS, you have to wait for the result to change to ERR_SUCCESS.
+In case the stored data matches what you upload, you will get ERR_SUCCESS_NO_CHANGE.
+If the stored data does not match, you will get ERR_WRITE_DISABLED, meaning you should first remove the current microapp.
+
+#### Microapp info packet
+
+![Microapp info packet](../docs/diagrams/microapp_info_packet.png)
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | Protocol | 1 | Protocol version of binary uploads (default 0).
-uint8 | App ID | 1 | Application identifier. In theory, multiple apps can be supported (not supported yet).
-uint8 | Index  | 1 | Index refering to the chunk in the packet (starts with 0) if index != 255.
-uint8 | Repeat | 1 | A decrementing counter (down from 3 to improve reception thanks to unique ads).
-uint16 | Error | 2 | Any error that might have happened (checksum, size, etc.).
+uint8 | Protocol | 1 | Supported protocol of the microapp command and result packets.
+uint8 | Max apps | 1 | Maximum number of microapps.
+uint16 | Max app size | 2 | Maximum binary size of a microapp.
+uint16 | Max chunk size | 2 |  Maximum chunk size for uploading a microapp.
+uint16 | Max ram usage | 2 | Maximum RAM usage of a microapp.
+[SDK version](#microapp-sdk-version-packet) | SDK version | 2 | SDK version the firmware supports.
+[App status](#microapp-status-packet)[] | App status |  | Status of all microapps, no matter how many have been uploaded.
 
-The result packet is important to retrieve a notification that a particular write has been successful. Only then you should send the next chunk.
+#### Microapp SDK version packet
 
-To make the process more graceful for the receiving party to miss a notification, the notification is sent repeatedly with decrementing repeat counter.
+The microapp SDK version determines the API for communication between bluenet firmware and microapps.
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Major | 1 | Major version: different major indicates breaking changes.
+uint8 | Minor | 1 | Minor version: higher minor means more features.
+
+#### Microapp status packet
+
+![Microapp status packet](../docs/diagrams/microapp_status_packet.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint32 | Build version | 4 | Build version of this microapp, should increase each release.
+[SDK version](#microapp-sdk-version-packet) | SDK version | 2 | SDK version this microapp was built for.
+uint16 | Checksum | 2 | CRC-16-CCITT of the binary, after the header.
+uint16 | Checksum header | 2 | CRC-16-CCITT of the binary header.
+[tests](#microapp-tests-packet) | Tests | 2 | State of tests that have been performed.
+uint8 | Trying function | 1 | Index of registered function that didn't pass yet, and that we are calling now. 255 for none.
+uint8 | Failed function | 1 | Index of registered function that was tried, but didn't pass. 255 for none.
+uint32 | Passed functions | 4 | Bitmask of registered functions that were called and returned to firmware successfully.
+
+#### Microapp tests packet
+
+Bit  | Name     | Description
+---- | -------- | -----------
+0    | hasData  | Whether the storage space of this app contains data.
+1-2  | checksum | 0=untested, 1=trying, 2=failed, 3=passed.
+3    | enabled  | 0=disabled, 1=enabled.
+4-5  | boot     | 0=untested, 1=trying, 2=failed, 3=passed.
+6    | memory   | 0=ok, 1=excessive
+7-15 | reserved | Reserved, must be 0 for now.
+
+
+
 
 ## Result packet
 
@@ -825,6 +843,7 @@ Value | Name | Description
 16  | BUFFER_UNASSIGNED | No buffer was assigned for the command.
 17  | BUFFER_LOCKED | Buffer is locked, failed queue command.
 18  | BUFFER_TOO_SMALL | Buffer is too small for operation.
+19  | NOT_ALIGNED | Buffer is not aligned.
 32  | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
 33  | WRONG_PARAMETER | Wrong parameter provided.
 34  | INVALID_MESSAGE | invalid message provided.
@@ -838,6 +857,7 @@ Value | Name | Description
 42  | TIMEOUT | Operation timed out.
 43  | CANCELED | Operation was canceled.
 44  | PROTOCOL_UNSUPPORTED | The protocol is not supported.
+45  | MISMATCH | There is a mismatch, usually in CRC/checksum/hash.
 48  | NO_ACCESS | Invalid access for this command.
 49  | UNSAFE | It's unsafe to execute this command.
 64  | NOT_AVAILABLE | Command currently not available.
@@ -847,6 +867,7 @@ Value | Name | Description
 69  | NOT_POWERED | Something must first be powered.
 80  | WRITE_DISABLED | Write is disabled for given type.
 81  | WRITE_NOT_ALLOWED | Direct write is not allowed for this type, use command instead.
+82  | READ_FAILED | Failed to read.
 96  | ADC_INVALID_CHANNEL | Invalid adc input channel selected.
 112 | EVENT_UNHANDLED | The event or command was not handled.
 65535 | UNSPECIFIED | Unspecified error.

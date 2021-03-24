@@ -8,213 +8,130 @@
 #pragma once
 
 #include <cstdint>
-#include <third/nrf/app_config.h>
 
 /**
- * Opcodes for microapp commands.
+ * Max number of microapps.
  */
-enum MICROAPP_OPCODE {
-	CS_MICROAPP_OPCODE_UPLOAD   = 0x01,
-	CS_MICROAPP_OPCODE_VALIDATE = 0x02,
-	CS_MICROAPP_OPCODE_ENABLE   = 0x03,
-	CS_MICROAPP_OPCODE_DISABLE  = 0x04,
-	CS_MICROAPP_OPCODE_REQUEST  = 0x05,
+constexpr uint8_t MAX_MICROAPPS = 1;
+
+/**
+ * Max allowed chunk size when uploading a microapp.
+ *
+ * We could calculate this from MTU or characteristic buffer size for BLE, and UART RX buffer size for UART.
+ * But let's just start with a number that fits in both.
+ */
+constexpr uint16_t MICROAPP_UPLOAD_MAX_CHUNK_SIZE = 256;
+
+/**
+ * Protocol version of the communication between the user and the firmware: the microapp command and result packets.
+ */
+constexpr uint8_t MICROAPP_PROTOCOL = 0;
+
+constexpr uint8_t MICROAPP_SDK_MAJOR = 0;
+
+constexpr uint8_t MICROAPP_SDK_MINOR = 1;
+
+constexpr uint16_t CS_FLASH_PAGE_SIZE = 0x1000; // Size of 1 flash page.
+
+constexpr uint16_t MICROAPP_MAX_SIZE = (1* CS_FLASH_PAGE_SIZE); // Must be a multiple of flash page size.
+
+constexpr uint16_t MICROAPP_MAX_RAM = 0x200; // Something for now.
+
+
+
+
+
+/**
+ * Header of a microapp binary.
+ *
+ * Assumed to be word sized (multiple of 4B).
+ * Has to match section .firmware_header in linker file nrf_common.ld of the microapp repo.
+ */
+struct __attribute__((__packed__)) microapp_binary_header_t {
+	uint8_t sdkVersionMajor;   // Similar to microapp_sdk_version_t
+	uint8_t sdkVersionMinor;
+	uint16_t size;             // Size of the binary, including this header.
+
+	uint16_t checksum;         // Checksum (CRC16-CCITT) of the binary, after this header.
+	uint16_t checksumHeader;   // Checksum (CRC16-CCITT) of this header, with this field set to 0.
+
+	uint32_t appBuildVersion;  // Build version of this microapp.
+
+	uint16_t startOffset;      // Offset in bytes of the first instruction to execute.
+	uint16_t reserved;         // Reserved for future use, must be 0 for now.
+
+	uint32_t reserved2;        // Reserved for future use, must be 0 for now.
 };
 
 
-/**
- * Overhead of encryption
- *
- * TODO: Bart: defined somewhere else.
- *       Anne: Yes, this is just one variable for all protocol overhead. Feel free to make it less hard-coded.
- *             It is concerning all bytes before `commandData` in 
- *               `CommandHandler::handleMicroappCommand(cs_data_t commandData, ...)`
- *             Following the code this must be e.g.:
- *               + ... from standard overhead
- *               + 5 bytes from sizeof(control_packet_header_t)
- */
-#define ENCRYPTION_OVERHEAD 20
 
-/**
- * Size of Microapp packet.
- *
- * TODO: Bart: Encryption isn't the only overhead, is this really the optimal size?
- */
-#define MICROAPP_PACKET_SIZE (NRF_SDH_BLE_GATT_MAX_MTU_SIZE - ENCRYPTION_OVERHEAD)
-
-/*
- * Header part of upload packet. Only used to define sizeof(microapp_upload_header_packet_t) = 8 below.
- */
-struct __attribute__((packed)) microapp_upload_header_packet_t {
-	uint8_t  protocol;
-	uint8_t  app_id;
-	uint8_t  opcode;
-	uint8_t  index;
-	uint8_t  count;
-	uint16_t size;
-	uint16_t checksum;
+struct __attribute__((packed)) microapp_ctrl_header_t {
+	uint8_t protocol;   // Protocol of the microapp command and result packets, should match MICROAPP_PROTOCOL.
+	uint8_t index;      // Index of the microapp on the firmware.
 };
 
-/*
- * Throw away that part of the chunk that cannot be used. If NRF_SDH_BLE_GATT_MAX_MTU_SIZE changes, this has to
- * be adjusted as well. 
- */
-#define MICROAPP_CHUNK_RESERVED 0
-
-/**
- * Size of Microapp chunk (without header)
- */
-#define MICROAPP_CHUNK_SIZE (MICROAPP_PACKET_SIZE - sizeof(microapp_upload_header_packet_t) - MICROAPP_CHUNK_RESERVED)
-
-/**
- * TODO: Anne @Bart. This would be my proposal.
- *
- * We can dynamically adjust it with a change of the actual MTU size used. Then the sending party should know.
- * We can introduce a command CS_MICROAPP_OPCODE_REQUEST that sends a request for uploading a new microapp.
- * The return packet can indicate if the area is free (or requires an erase first) and indicate the mtu size to 
- * use (and thus the chunk size). In that way, we can make this all dynamic.
- */
-static_assert (MICROAPP_CHUNK_SIZE % 4 == 0, "Microapp chunk size is misaligned with memory");
-
-enum MICROAPP_VALIDATION {
-	CS_MICROAPP_VALIDATION_NONE = 0,
-	CS_MICROAPP_VALIDATION_CHECKSUM = 1,
-	CS_MICROAPP_VALIDATION_ENABLED = 2,
-	CS_MICROAPP_VALIDATION_DISABLED = 3,
-	CS_MICROAPP_VALIDATION_BOOTS = 4,
-	CS_MICROAPP_VALIDATION_FAILS = 5
+struct __attribute__((packed)) microapp_upload_t {
+	microapp_ctrl_header_t header;
+	uint16_t offset;    // Offset in bytes of this chunk of data. Must be a multiple of 4.
+	// Followed by a chunk of the microapp binary.
 };
 
 /**
- * Struct stored in FDS to be able to run an app using only this info.
- *
- * Fields:
- *   - start_addr    The address the binary starts at.
- *   - size          The size of the binary.
- *   - checksum      The checksum calculated over the size of the binary (only padded by single zero for an odd size).
- *   - validation    Validation state: checksum correct, enabled, to being able to boot. See MICROAPP_VALIDATION.
- *   - id            The app id.
- *   - offset        The entry into the binary (will assume thumb mode, offset will be incremented with one).
+ * SDK version: determines the API / protocol between microapp and firmware.
  */
-struct __attribute__((packed)) cs_microapp_t {
-	uint32_t start_addr = 0;
-	uint16_t size = 0;
-	uint16_t checksum = 0;
-	uint8_t  validation = CS_MICROAPP_VALIDATION_NONE;
-	uint8_t  id = 0;
-	uint16_t offset = 0;
+struct __attribute__((packed)) microapp_sdk_version_t {
+	uint8_t major;
+	uint8_t minor;
+};
+
+enum MICROAPP_TEST_STATE {
+	MICROAPP_TEST_STATE_UNTESTED = 0,
+	MICROAPP_TEST_STATE_TRYING = 1,
+	MICROAPP_TEST_STATE_FAILED = 2,
+	MICROAPP_TEST_STATE_PASSED = 3,
+};
+
+const uint8_t MICROAPP_FUNCTION_NONE = 255;
+
+/**
+ * State of tests of a microapp, also stored in flash.
+ *
+ * Starts with all fields set to 0.
+ */
+struct __attribute__((packed)) microapp_state_t {
+	uint16_t checksum;            // Checksum of the microapp, should be equal to the checksum field of the binary.
+	uint16_t checksumHeader;      // Checksum of the microapp, should be equal to the checksumHeader field of the binary.
+
+	bool hasData: 1;              // Whether the storage space of this app contains data.
+	uint8_t checksumTest: 2;      // values: MICROAPP_TEST_STATE
+	bool enabled: 1;              // Whether the microapp is enabled.
+	uint8_t bootTest: 2;          // Values: MICROAPP_TEST_STATE. Checks if the microapp starts, registers callback function in IPC, and returns to firmware.
+	uint8_t memoryUsage: 1;       // values: ok, excessive
+	uint16_t reservedTest: 9;     // Reserved, must be 0 for now.
+
+	uint8_t tryingFunction = MICROAPP_FUNCTION_NONE;  // Index of registered function that didn't pass yet, and that we are calling now. MICROAPP_FUNCTION_NONE for none.
+	uint8_t failedFunction = MICROAPP_FUNCTION_NONE;  // Index of registered function that was tried, but didn't pass. MICROAPP_FUNCTION_NONE for none.
+	uint32_t passedFunctions;     // Bitmask of registered functions that were called and returned to firmware successfully.
 };
 
 /**
- * Header for all packets.
+ * Status of a microapp.
  */
-struct __attribute__((packed)) microapp_packet_header_t {
-	uint8_t  protocol;
-	uint8_t  app_id;
-	uint8_t  opcode;
+struct __attribute__((packed)) microapp_status_t {
+	uint32_t buildVersion;             // Build version of this microapp.
+	microapp_sdk_version_t sdkVersion; // SDK version this microapp was built for.
+	microapp_state_t state;
 };
 
 /**
- * Struct for microapp upload packet.
- *
- *  - The protocol byte is reserved for future changes.
- *  - The app_id is an identifier for the app (in theory we can support multiple apps).
- *  - The opcode should be `CS_MICROAPP_OPCODE_UPLOAD`.
- *
- *  - The index refers to the chunk index.
- *  - The checksum is a checksum for this chunk.
- *  - The data itself.
- *
- * Two remarks:
- *  - The data of the last packet has to be filled with `0xFF`. It will be written like that to flash.
- *  - The data of the last packet should be over this entire buffer (including the `0xFF` values).
+ * Packet with all info required to upload a microapp, and to see the status of already uploaded microapps.
  */
-struct __attribute__((packed)) microapp_upload_packet_t {
-	//microapp_packet_header_t header;
-	uint8_t  protocol;
-	uint8_t  app_id;
-	uint8_t  opcode;
-	uint8_t  index;
-	uint16_t checksum;
-	uint8_t  data[MICROAPP_CHUNK_SIZE];
+struct __attribute__((packed)) microapp_info_t {
+	uint8_t protocol = MICROAPP_PROTOCOL;                   // Protocol of this packet, and the microapp command packets.
+	uint8_t maxApps = MAX_MICROAPPS;                        // Maximum number of microapps.
+	uint16_t maxAppSize = MICROAPP_MAX_SIZE;                // Maximum binary size of a microapp.
+	uint16_t maxChunkSize = MICROAPP_UPLOAD_MAX_CHUNK_SIZE; // Maximum chunk size for uploading a microapp.
+	uint16_t maxRamUsage = MICROAPP_MAX_RAM;                // Maximum RAM usage of a microapp.
+	microapp_sdk_version_t sdkVersion;                      // SDK version the firmware supports.
+	microapp_status_t appsStatus[MAX_MICROAPPS];            // Status of each microapp.
 };
-
-/**
- * Struct for microapp request. If for example th chunk size does not match with what is expected, the
- * response indicates the chunk size to use. 
- *
- *   - The size of the total program (without `0xFF` padding).
- *   - The number of chunks to be expected (count * chunk_size =< size).
- *   - The chunk size to be used.
- */
-struct __attribute__((packed)) microapp_request_packet_t {
-	//microapp_packet_header_t header;
-	uint8_t  protocol;
-	uint8_t  app_id;
-	uint8_t  opcode;
-	uint16_t size;
-	uint8_t  count;
-	uint8_t  chunk_size;
-};
-
-/**
- * Struct for the microapp enable packet.
- *
- *   - The opcode should be `CS_MICROAPP_OPCODE_ENABLE` or `CS_MICROAPP_OPCODE_DISABLE`.
- */
-struct __attribute__((packed)) microapp_enable_packet_t {
-	uint8_t  protocol;
-	uint8_t  app_id;
-	uint8_t  opcode;
-	uint16_t offset;
-};
-
-/**
- * Struct for the microapp validate packet.
- *
- *   - The size parameter is about the complete program (but without the `0xFF` padding).
- */
-struct __attribute__((packed)) microapp_validate_packet_t {
-	uint8_t  protocol;
-	uint8_t  app_id;
-	uint8_t  opcode;
-	uint16_t size;
-	uint16_t checksum;
-};
-
-/**
- * Struct for the microapp erase packet.
- *
- *   - The opcode is `CS_MICROAPP_OPCODE_ERASE`.
- *
- * This currently erases anything without taking into account size and without asking for permissions to erase.
- * In this way it can always be used to restore the microapp region to the original state.
- */
-struct __attribute__((packed)) microapp_erase_packet_t {
-	uint8_t protocol;
-	uint8_t app_id;
-	uint8_t opcode;
-};
-
-/**
- * Notification from the microapp module.
- *
- *   - The protocol byte is reserved for forward-compatibility.
- *   - The app_id identifies the app (for now we use only one app).
- *   - The opcode (often the opcode of the writing action).
- *   - The payload (on upload refers to index being written).
- *   - The repeat value is an index that goes down (notifications will be written with decreasing repeat value).
- *   - The error value.
- *
- * After getting the first notification it is already fine to start sending a new packet. Do check the index in
- * the notification though (to not accidentally treat it as an ACK for the current chunk).
- */
-struct __attribute__((packed)) microapp_notification_packet_t {
-	uint8_t  protocol;
-	uint8_t  app_id;
-	uint8_t  opcode;
-	uint8_t  payload;
-	uint8_t  repeat;
-	uint16_t error;
-};
-

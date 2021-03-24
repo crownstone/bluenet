@@ -132,12 +132,12 @@ class MicroappProtocol: public EventListener {
 		/**
 		 * Actually run the app.
 		 */
-		void callApp();
+		void callApp(uint8_t appIndex);
 
 		/**
 		 * Call setup and loop functions.
 		 */
-		void callSetupAndLoop();
+		void callSetupAndLoop(uint8_t appIndex);
 
 		/**
 		 * Receive events (for example for i2c)
