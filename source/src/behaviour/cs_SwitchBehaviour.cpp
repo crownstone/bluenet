@@ -145,7 +145,7 @@ bool SwitchBehaviour::_isValid(PresenceStateDescription currentPresence) {
 }
 
 void SwitchBehaviour::print() {
-#if CS_SERIAL_NRF_LOG_ENABLED != 2
+#if CS_SERIAL_NRF_LOG_ENABLED == 0
 	LOGd("SwitchBehaviour: %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(0x%x), presencetype(%d), timeout(%d) (%s)",
 			from().h(), from().m(), from().s(),
 			until().h(), until().m(), until().s(),

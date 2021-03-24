@@ -247,7 +247,7 @@ int handleCommand(uint8_t* payload, uint16_t length) {
 		case CS_MICROAPP_COMMAND_LOG: {
 			char type = payload[1];
 			char option = payload[2];
-			bool newLine = false;
+			__attribute__((unused)) bool newLine = false;
 			if (option == CS_MICROAPP_COMMAND_LOG_NEWLINE) {
 				newLine = true;
 			}

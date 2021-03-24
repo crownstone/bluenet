@@ -779,7 +779,7 @@ void Stack::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 				uint8_t uuidSize = 0;
 				retCode = sd_ble_uuid_encode(&(event->params.discovered_db.srv_uuid), &uuidSize, fullUuid.uuid128);
 				if (retCode == NRF_SUCCESS && uuidSize == sizeof(fullUuid)) {
-#if CS_SERIAL_NRF_LOG_ENABLED != 2
+#if CS_SERIAL_NRF_LOG_ENABLED == 0
 					LOGd("Full uuid: %02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
 							fullUuid.uuid128[15],
 							fullUuid.uuid128[14],

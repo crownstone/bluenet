@@ -321,6 +321,7 @@ cs_ret_code_t MicroappStorage::validateApp(uint8_t appIndex) {
 }
 
 void MicroappStorage::printHeader(uint8_t logLevel, microapp_binary_header_t& header) {
+#if CS_SERIAL_NRF_LOG_ENABLED == 0
 	_log(logLevel, true, "sdkVersion=%u.%u size=%u checksum=%u checksumHeader=%u appBuildVersion=%u startOffset=%u ",
 			header.sdkVersionMajor,
 			header.sdkVersionMinor,
@@ -329,6 +330,7 @@ void MicroappStorage::printHeader(uint8_t logLevel, microapp_binary_header_t& he
 			header.checksumHeader,
 			header.appBuildVersion,
 			header.startOffset);
+#endif
 }
 
 /**

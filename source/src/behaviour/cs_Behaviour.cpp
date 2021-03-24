@@ -129,7 +129,7 @@ bool Behaviour::isValid(Time currenttime) {
 }
 
 void Behaviour::print() {
-#if CS_SERIAL_NRF_LOG_ENABLED != 2
+#if CS_SERIAL_NRF_LOG_ENABLED == 0
 	LOGd("Behaviour: type(%d) %02d:%02d:%02d - %02d:%02d:%02d %3d%%, days(%x) for #% (%s)",
 			static_cast<uint8_t>(typ),
 			from().h(), from().m(), from().s(),
