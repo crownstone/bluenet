@@ -103,7 +103,21 @@
 /** Device version identifier. */
 #define DEVICE_VERSION_ID (0x0000)
 
-
+/**
+ * Number of entries in the replay protection cache.
+ *
+ * @note The number of entries in the replay protection list directly limits the number of elements
+ * a node can receive messages from on the current IV index. This means if your device has a replay
+ * protection list with 40 entries, a message from a 41st unicast address (element )will be dropped
+ * by the transport layer.
+ *
+ * @note The replay protection list size *does not* affect the node's ability to relay messages.
+ *
+ * @note This number is indicated in the device composition data of the node and provisioner can
+ * make use of this information to prevent unwarranted filling of the replay list on a given node in
+ * a mesh network.
+ */
+#define REPLAY_CACHE_ENTRIES 255
 
 /**
  * The default TTL value for the node.
