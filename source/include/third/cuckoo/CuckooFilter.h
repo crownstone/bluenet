@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 #include <cstdint>
- 
+
 /**
  * TODO(Arend):
  * - add test assert(std::is_standard_layout_v<CuckooFilter>);
@@ -15,186 +15,171 @@
  * CuckooFilter is not aware of its buffer size. That must be managed by its owner.
  */
 class CuckooFilter {
-public:
-	typedef const void* key_type;
-	typedef uint16_t fingerprint_type;
-	typedef uint8_t index_type;
+   public:
+    typedef const void* key_type;
+    typedef uint16_t fingerprint_type;
+    typedef uint8_t index_type;
 
-	static constexpr size_t max_kick_attempts = 100;
-	
-//private:
-	/**
-	 * Data chunk that can be reused in several functions.
-	 */
-	class ExtendedFingerprint {
-	public:
-		fingerprint_type fingerprint;
-		index_type bucketA; // the bucket this fingerprint should be put in
-		index_type bucketB; // and the alternative bucket.
-	};
+    static constexpr size_t max_kick_attempts = 100;
 
-	ExtendedFingerprint getExtendedFingerprint(key_type key, size_t key_length_in_bytes);
+    /**
+     * Data chunk that can be reused in several functions.
+     */
+    class ExtendedFingerprint {
+       public:
+        fingerprint_type fingerprint;
+        index_type bucketA;  // the bucket this fingerprint should be put in
+        index_type bucketB;  // and the alternative bucket.
+    };
 
-	/**
-	 * Note: to obtain a valid extended fingerprint from a fingerprint and bucket index,
-	 * bucket_count _must_ be a power of two.
-	 */
-	ExtendedFingerprint getExtendedFingerprint(fingerprint_type fingerprint, index_type bucket_index);
+    // -------------------------------------------------------------
+    // Run time variables
+    // -------------------------------------------------------------
 
-	// -------------------------------------------------------------
-	// Run time variables
-	// -------------------------------------------------------------
+    index_type bucket_count;
+    index_type nests_per_bucket;  // rename to fingerprints_per_bucket.
 
-	index_type            	bucket_count;
-	index_type              nests_per_bucket; // rename to fingerprints_per_bucket.
+    // if this is != 0, it was kicked from the filter
+    // and can't be reinserted because the filter is full.
+    ExtendedFingerprint victim = {};
 
-	// if this is != 0, it was kicked from the filter
-	// and can't be reinserted because the filter is full.
-	ExtendedFingerprint		victim = {};
+    fingerprint_type bucket_array[];  // 'flexible array member'
 
-	fingerprint_type	    bucket_array[]; // 'flexible array member'
-  
-	// -------------------------------------------------------------
-	// ----- Private methods -----
-	// -------------------------------------------------------------
+   private:
+    /**
+     * Note: bucket_count _must_ be a power of two. (which is validated at construction/init)
+     */
+    ExtendedFingerprint getExtendedFingerprint(key_type key, size_t key_length_in_bytes);
 
-	/**
-	 * A hash of this filters current contents.
-	 * TODO(Arend): replace with CRC16
-	 * TODO(Arend): incorporate victim and other settings.
-	 */
-	fingerprint_type filterhash();
+    /**
+     * Note: bucket_count _must_ be a power of two. (which is validated at construction/init)
+     */
+    ExtendedFingerprint getExtendedFingerprint(
+        fingerprint_type fingerprint, index_type bucket_index);
 
-	/**
-	 * Hashes the given key (data) into a fingerprint.
-	 */
-	fingerprint_type hash(key_type key, size_t key_length_in_bytes);
+    // -------------------------------------------------------------
+    // ----- Private methods -----
+    // -------------------------------------------------------------
 
-	/**
-	 * Returns a reference to the fingerprint at the given coordinates.
-	 */
-	fingerprint_type& lookupFingerprint(index_type bucket_number, index_type finger_index) {
-		return bucket_array[(bucket_number * nests_per_bucket) + finger_index];
-	}
+    /**
+     * A hash of this filters current contents.
+     * TODO(Arend): replace with CRC16
+     * TODO(Arend): incorporate victim and other settings.
+     */
+    fingerprint_type filterhash();
 
-	/**
-	 * Returns true if there was an empty space in the bucket and placement
-	 * was successful, returns false otherwise.
-	 *
-	 * Does _not_ check for duplicates.
-	 */
-	bool add_fingerprint_to_bucket (
-	  fingerprint_type        fingerprint,
-	  index_type              bucket_number
-	);
-	
-	/**
-	 * Returns true if found and removed, returns false if not found.
-	 */
-	bool remove_fingerprint_from_bucket (
-	  fingerprint_type        fingerprint,
-	  index_type              bucket_number
-	);
-	
-	// puts the fingerprint in the filter, moving aside anything
-	// that is in the way unless it takes more than max_kick_attempts.
-	// return _OK or _FULL.
-	// This doesn't check if the given fingerprint is already contained in the filter.
-	bool move(ExtendedFingerprint entry_to_insert);
+    /**
+     * Hashes the given key (data) into a fingerprint.
+     */
+    fingerprint_type hash(key_type key, size_t key_length_in_bytes);
 
-	// uses extended fingerprints to facilitate reuse of computed hash values.
-	bool add(ExtendedFingerprint efp);
-	bool remove(ExtendedFingerprint efp);
-	bool contains(ExtendedFingerprint efp);
+    /**
+     * Returns a reference to the fingerprint at the given coordinates.
+     */
+    fingerprint_type& lookupFingerprint(index_type bucket_number, index_type finger_index) {
+        return bucket_array[(bucket_number * nests_per_bucket) + finger_index];
+    }
 
-public:
-	// -------------------------------------------------------------
-	// These might be useful for fingerprints coming from the mesh.
-	// -------------------------------------------------------------
-	bool add(fingerprint_type finger, index_type bucket_index) {
-		return add(getExtendedFingerprint(finger, bucket_index));
-	}
+    /**
+     * Returns true if there was an empty space in the bucket and placement
+     * was successful, returns false otherwise.
+     *
+     * Does _not_ check for duplicates.
+     */
+    bool add_fingerprint_to_bucket(fingerprint_type fingerprint, index_type bucket_number);
 
-	bool remove(fingerprint_type finger, index_type bucket_index) {
-		return remove(getExtendedFingerprint(finger, bucket_index));
-	}
+    /**
+     * Returns true if found and removed, returns false if not found.
+     */
+    bool remove_fingerprint_from_bucket(fingerprint_type fingerprint, index_type bucket_number);
 
-	bool contains(fingerprint_type finger, index_type bucket_index) {
-		return contains(getExtendedFingerprint(finger, bucket_index));
-	}
+    // puts the fingerprint in the filter, moving aside anything
+    // that is in the way unless it takes more than max_kick_attempts.
+    // return _OK or _FULL.
+    // This doesn't check if the given fingerprint is already contained in the filter.
+    bool move(ExtendedFingerprint entry_to_insert);
 
-	// -------------------------------------------------------------
-	// these might be useful for stuff that comes in from commands
-	// -------------------------------------------------------------
+    // uses extended fingerprints to facilitate reuse of computed hash values.
+    bool add(ExtendedFingerprint efp);
+    bool remove(ExtendedFingerprint efp);
+    bool contains(ExtendedFingerprint efp);
 
-	bool add(key_type key, size_t key_length_in_bytes) {
-		return add(getExtendedFingerprint(key,key_length_in_bytes));
-	}
+   public:
+    // -------------------------------------------------------------
+    // These might be useful for fingerprints coming from the mesh.
+    // -------------------------------------------------------------
+    bool add(fingerprint_type finger, index_type bucket_index) {
+        return add(getExtendedFingerprint(finger, bucket_index));
+    }
 
-	bool remove(key_type key, size_t key_length_in_bytes) {
-		return remove(getExtendedFingerprint(key,key_length_in_bytes));
-	}
+    bool remove(fingerprint_type finger, index_type bucket_index) {
+        return remove(getExtendedFingerprint(finger, bucket_index));
+    }
 
-	bool contains(key_type key, size_t key_length_in_bytes) {
-		return contains(getExtendedFingerprint(key,key_length_in_bytes));
-	}
-	
-	// -------------------------------------------------------------
-	// Init/deinit like stuff.
-	// -------------------------------------------------------------
+    bool contains(fingerprint_type finger, index_type bucket_index) {
+        return contains(getExtendedFingerprint(finger, bucket_index));
+    }
 
-	/**
-	 * Memsets the bucket_array to 0x00 and sets victim to 0.
-	 * No changes are made to size.
-	 */
-	void clear();
+    // -------------------------------------------------------------
+    // these might be useful for stuff that comes in from commands
+    // -------------------------------------------------------------
 
-	static constexpr size_t fingerprintCount(
-			index_type bucket_count, index_type nests_per_bucket) {
-		return bucket_count * nests_per_bucket;
-	}
+    bool add(key_type key, size_t key_length_in_bytes) {
+        return add(getExtendedFingerprint(key, key_length_in_bytes));
+    }
 
-	/**
-	 * Size of the byte buffer in bytes.
-	 */
-	static constexpr size_t bufferSize(
-			index_type bucket_count, index_type nests_per_bucket) {
-		return fingerprintCount(bucket_count, nests_per_bucket) * sizeof(fingerprint_type);
-	}
+    bool remove(key_type key, size_t key_length_in_bytes) {
+        return remove(getExtendedFingerprint(key, key_length_in_bytes));
+    }
 
-	constexpr size_t bufferSize() {
-		return bufferSize(bucket_count, nests_per_bucket);
-	}
+    bool contains(key_type key, size_t key_length_in_bytes) {
+        return contains(getExtendedFingerprint(key, key_length_in_bytes));
+    }
 
-	/**
-	 * Total number of bytes a CuckooFilter with the given parameters would occupy.
-	 *
-	 * As per cppreference.com:
-	 *   "sizeof, and the assignment operator ignore the flexible array member."
-	 *   https://en.cppreference.com/w/c/language/struct
-	 */
-	static constexpr size_t size(index_type bucket_count, index_type nests_per_bucket) {
-		return sizeof(CuckooFilter) + bufferSize(bucket_count, nests_per_bucket);
-	}
+    // -------------------------------------------------------------
+    // Init/deinit like stuff.
+    // -------------------------------------------------------------
 
-	/**
-	 * Total number of bytes this instance occypies.
-	 * Use this function instead of sizeof for this class to take the buffer into account.
-	 */
-	constexpr size_t size() {
-		return size(bucket_count, nests_per_bucket);
-	}
+    /**
+     * Memsets the bucket_array to 0x00 and sets victim to 0.
+     * No changes are made to size.
+     */
+    void clear();
 
-	/**
-	 * Sets the size members, clears victim and buffer. No sizechecks done, but
-	 *
-	 *  WARNING: bucket count must be power of 2.
-	 */
-	void init(index_type bucket_count, index_type nests_per_bucket);
+    static constexpr size_t fingerprintCount(index_type bucket_count, index_type nests_per_bucket) {
+        return bucket_count * nests_per_bucket;
+    }
 
-//	/**
-//	 * Assigns the buffer to this filter after checking if it has enough space
-//	 * bucket_count * nests_pers_bucket fingerprints.
-//	 */
-//	bool assignBuffer(index_type bucket_count, index_type nests_per_bucket, size_t bufferSize);
+    /**
+     * Size of the byte buffer in bytes.
+     */
+    static constexpr size_t bufferSize(index_type bucket_count, index_type nests_per_bucket) {
+        return fingerprintCount(bucket_count, nests_per_bucket) * sizeof(fingerprint_type);
+    }
+
+    constexpr size_t bufferSize() { return bufferSize(bucket_count, nests_per_bucket); }
+
+    /**
+     * Total number of bytes a CuckooFilter with the given parameters would occupy.
+     *
+     * As per cppreference.com:
+     *   "sizeof, and the assignment operator ignore the flexible array member."
+     *   https://en.cppreference.com/w/c/language/struct
+     */
+    static constexpr size_t size(index_type bucket_count, index_type nests_per_bucket) {
+        return sizeof(CuckooFilter) + bufferSize(bucket_count, nests_per_bucket);
+    }
+
+    /**
+     * Total number of bytes this instance occypies.
+     * Use this function instead of sizeof for this class to take the buffer into account.
+     */
+    constexpr size_t size() { return size(bucket_count, nests_per_bucket); }
+
+    /**
+     * Sets the size members, clears victim and buffer. No sizechecks done, but
+     *
+     *  WARNING: bucket count must be power of 2.
+     */
+    void init(index_type bucket_count, index_type nests_per_bucket);
 };
