@@ -1,3 +1,10 @@
+# Formatter
+
+Bluenet style is defined in source/.clang-format. Support for autoformatting in IDEs is widespread.
+E.g.: 
+- This [Eclipse plugin](https://marketplace.eclipse.org/content/cppstyle) enables formatting files on save or selected pieces of code using `ctrl+shift+f`.
+- Commandline tools such as `python3 -m pip install clang-format` are also available.
+
 # Etiquette
 
 - use typify
@@ -6,76 +13,6 @@
 - don't init structs like: { 9, true, 3 }
 
 # Code
-
-## Whitespace
-
-Indent with tabs, align with spaces.
-
-Always put spaces after a comma, and before a `{`.
-Although you could argue that `if`, `switch`, etc are also functions, we put a space between those and the `(`.
-Math operators (`+`, `-`, `*`, etc) should also be surrounded by spaces.
-
-Header example:
-```
-class MyClass: public Foo {
-public:
-	int barMethod(uint8_t value, bool triple);
-}
-```
-
-Source example:
-```
-int MyClass::barMethod(uint8_t value, bool triple) {
-	if (triple && value > 0) {
-		value = value * 3;
-	}
-	else if (triple) {
-		value = (value + 3) / 3;
-	}
-	else {
-		value = value * 1;
-	}
-
-	switch (value) {
-		case 0: {
-			return 0;
-		}
-		case 1: {
-			value++;
-			break;
-		}
-		case 2: {
-			int temp = 4;
-			value += temp;
-			break;
-		}
-		default: {
-			return 0;
-		}
-	}
-
-	switch (value) {
-		case 0:    return 100    + value;
-		case 10:   return 1000   + value;
-		case 100:  return 10000  + value;
-		case 1000: return 100000 + value;
-	}
-
-	return value;
-}
-```
-
-The end bracket, `}`, is always on a line of its own. This makes it easier to parse in your head when the body of the `if` statement becomes larger.
-The `case` clauses are indented w.r.t. the `switch` statement. This makes it easy to see where the switch stops.
-The brackets are optional.
-
-Nerd tip: create a `source/.vimrc` file with as option `set cinoptions=l1`.
-
-In a function with pointers or address references, the operator is attached to the type (`void*` you can call a "void pointer").
-
-```
-void someEventHandler(pod_t const* event, void* context, uint32_t& address) {
-```
 
 ## Naming
 
@@ -105,22 +42,22 @@ In a short overview:
 static constexpr auto BLUETOOTH_NAME = "CRWN";
 
 class ClassName {
-private:
-	typedef uint8_t index_t;
+   private:
+    typedef uint8_t index_t;
 
-	class Settings {
-		bool isActive;
-	};
+    class Settings {
+        bool isActive;
+    };
 
-public:
-	void functionName();
+   public:
+    void functionName();
 };
 
 using MyVec = std::vector<uint8_t>;
 
 struct __attribute__((__packed__)) a_packed_packet_t {
-	uint8_t shortWord;
-	uint32_t longWord;
+    uint8_t shortWord;
+    uint32_t longWord;
 };
 ```
 
@@ -179,9 +116,9 @@ int a;
 int b;
 ```
 
-### If statement body on its own line, and always in brackets.
+### If statement block must always be in brackets.
 
-Putting the body on a separate line makes it easier to read, while leaving out brackets easily introduces bugs.
+Leaving out brackets easily introduces bugs.
 
 ```
 if (on) {
