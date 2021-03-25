@@ -23,28 +23,24 @@ CuckooFilter::fingerprint_type CuckooFilter::hash (
 /* ------------------------------------------------------------------------- */
 
 CuckooFilter::ExtendedFingerprint CuckooFilter::getExtendedFingerprint(
-		fingerprint_type finger, index_type bucket_index) {
+    fingerprint_type finger, index_type bucket_index) {
 
-	return ExtendedFingerprint {
-		.fingerprint = finger,
-		.bucketA = static_cast<index_type>(bucket_index),
-		.bucketB = static_cast<index_type>((bucket_index ^ finger) % bucket_count)
-	};
+    return ExtendedFingerprint{
+        .fingerprint = finger,
+        .bucketA = static_cast<index_type>(bucket_index),
+        .bucketB = static_cast<index_type>((bucket_index ^ finger) % bucket_count)};
 }
 
-
-
 CuckooFilter::ExtendedFingerprint CuckooFilter::getExtendedFingerprint(
-		key_type key, size_t key_length_in_bytes) {
+    key_type key, size_t key_length_in_bytes) {
 
-	fingerprint_type finger = hash(key, key_length_in_bytes);
-	fingerprint_type hashed_finger = hash(&finger, sizeof(finger));
+    fingerprint_type finger = hash(key, key_length_in_bytes);
+    fingerprint_type hashed_finger = hash(&finger, sizeof(finger));
 
-	return ExtendedFingerprint {
-		.fingerprint = finger,
-		.bucketA = static_cast<index_type>(hashed_finger % bucket_count),
-		.bucketB = static_cast<index_type>((hashed_finger ^ finger) % bucket_count)
-	};
+    return ExtendedFingerprint{
+        .fingerprint = finger,
+        .bucketA = static_cast<index_type>(hashed_finger % bucket_count),
+        .bucketB = static_cast<index_type>((hashed_finger ^ finger) % bucket_count)};
 }
 
 /* ------------------------------------------------------------------------- */
