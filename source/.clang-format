@@ -35,6 +35,7 @@ AlignConsecutiveAssignments: true
 
 ColumnLimit: '100'
 AllowShortIfStatementsOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
 KeepEmptyLinesAtTheStartOfBlocks: true
 
 UseTab: ForContinuationAndIndentation
