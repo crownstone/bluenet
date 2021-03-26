@@ -7,7 +7,7 @@
 
 #pragma once
 #include <cstdint>
-#include <third/cuckoo/CuckooFilter.h>
+#include <third/cuckoo/CuckooFilterStructs.h>
 
 // ------------------ Command values -----------------
 
@@ -84,5 +84,5 @@ public:
 
 struct __attribute__((__packed__)) TrackingFilterData {
 	TrackingFilterMetaData metadata;
-	CuckooFilter filter;
+	cuckoo_filter_data_t filter;
 };
