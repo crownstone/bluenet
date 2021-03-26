@@ -2,34 +2,44 @@
 BasedOnStyle: Chromium
 Language: Cpp
 
-###### Source file preamble ######
+###### Source file preamble and comments ######
 
 IncludeBlocks: Preserve
+AlignTrailingComments: true
 
 ###### brackets ######
 
 AlignAfterOpenBracket: AlwaysBreak
 
+BreakBeforeBraces: Custom
+BraceWrapping:
+  BeforeElse: true
+
 ###### parameter lists ######
 
-AllowAllParametersOfDeclarationOnNextLine: 'true'
-BinPackArguments: 'false'
-BinPackParameters: 'false'
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackArguments: false
+BinPackParameters: false
 BreakConstructorInitializers: BeforeComma
-ConstructorInitializerAllOnOneLineOrOnePerLine: 'true'
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
 
 ###### Operators ######
 
+AlignOperands: true
 BreakBeforeBinaryOperators: NonAssignment
-BreakBeforeTernaryOperators: 'true'
+BreakBeforeTernaryOperators: true
+AlignConsecutiveAssignments: true
+
 
 ###### Wrapping and general whitespace ######
 
 ColumnLimit: '100'
-KeepEmptyLinesAtTheStartOfBlocks: 'true'
+AllowShortIfStatementsOnASingleLine: true
+KeepEmptyLinesAtTheStartOfBlocks: true
 
 UseTab: ForContinuationAndIndentation
 TabWidth: 4
 IndentWidth: 4
 ContinuationIndentWidth: 8
+
 ...
