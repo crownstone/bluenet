@@ -88,19 +88,21 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 
 	// loop over filters to check mac address
 	for (size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
-		TrackingFilter* filter = _parsingFilters[i];
+		tracking_filter_t* trackingFilter = _parsingFilters[i];
+		CuckooFilter cuckoo(trackingFilter->filterdata);
 
 		// check mac address for this filter
-		if (filter->filterdata.metadata.inputType == FilterInputType::MacAddress &&
-			filter->filterdata.filter.contains(device->address, MAC_ADDRESS_LEN)) {
+		if (trackingFilter->metadata.inputType == FilterInputType::MacAddress
+			&& cuckoo.contains(device->address, MAC_ADDRESS_LEN)) {
 			// TODO: get fingerprint from filter instead of literal mac address.
 			// TODO: we should just pass on the device, right than copying rssi?
-			LOGd("filter %d accepted mac addres", filter->runtimedata.filterId);
+			LOGd("filter %d accepted mac addres", trackingFilter->runtimedata.filterId);
 			TrackableEvent trackableEventData;
-			trackableEventData.id = TrackableId(device->address, MAC_ADDRESS_LEN);
+			trackableEventData.id   = TrackableId(device->address, MAC_ADDRESS_LEN);
 			trackableEventData.rssi = device->rssi;
 
-			event_t trackableEvent(CS_TYPE::EVT_TRACKABLE, &trackableEventData, sizeof(trackableEventData));
+			event_t trackableEvent(
+					CS_TYPE::EVT_TRACKABLE, &trackableEventData, sizeof(trackableEventData));
 			trackableEvent.dispatch();
 			return;
 		}
@@ -112,7 +114,7 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 	// 	// See BLEutil:findAdvType how to loop the fields.
 	//	for (auto field: devicefields) {
 	//		for(size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
-	//			TrackingFilter* filter = _parsingFilters[i];
+	//			tracking_filter_t* filter = _parsingFilters[i];
 	//			if(filter->metadata.inputType == FilterInputType::AdData) {
 	//				// check each AD Data field for this filter
 	//				// TODO: query filter for fingerprint
@@ -132,7 +134,7 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableA
 // ------------------- Filter data management ------------------
 // -------------------------------------------------------------
 
-TrackingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
+tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
 	if (_filterBufferEndIndex + size > FILTER_BUFFER_SIZE) {
 		// not enough space for filter of this total size.
 		return nullptr;
@@ -143,15 +145,15 @@ TrackingFilter* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t 
 		return nullptr;
 	}
 
-	_parsingFilters[_parsingFiltersEndIndex] = reinterpret_cast<TrackingFilter*>(_filterBuffer + _filterBufferEndIndex);
+	_parsingFilters[_parsingFiltersEndIndex] = reinterpret_cast<tracking_filter_t*>(_filterBuffer + _filterBufferEndIndex);
 	_filterBufferEndIndex += size;
 
 	// don't forget to postcrement the EndIndex for the filter list in return statement.
 	return _parsingFilters[_parsingFiltersEndIndex++];
 }
 
-TrackingFilter* TrackableParser::findParsingFilter(uint8_t filterId) {
-	TrackingFilter* parsingFilter;
+tracking_filter_t* TrackableParser::findParsingFilter(uint8_t filterId) {
+	tracking_filter_t* parsingFilter;
 	for (size_t index = 0; index < _parsingFiltersEndIndex; ++index) {
 		parsingFilter = _parsingFilters[index];
 
@@ -189,7 +191,7 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 	}
 
 	// find or allocate a parsing filter
-	TrackingFilter* parsingFilter = findParsingFilter(cmd_data->filterId);
+	tracking_filter_t* parsingFilter = findParsingFilter(cmd_data->filterId);
 	if(parsingFilter == nullptr) {
 		parsingFilter = allocateParsingFilter(cmd_data->filterId, cmd_data->totalSize);
 
@@ -217,7 +219,7 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 	// 		uploaded in chunks concurrently. Just ptrdiff them.
 
 	// chunk index starts counting from metadata onwards (ignoring runtimedata)
-	uint8_t* parsingFilterBase_ptr = reinterpret_cast<uint8_t*>(&(parsingFilter->filterdata.metadata));
+	uint8_t* parsingFilterBase_ptr = reinterpret_cast<uint8_t*>(&(parsingFilter->metadata));
 	uint8_t* parsingFilterChunk_ptr = parsingFilterBase_ptr + cmd_data->chunkStartIndex;
 
 	if (parsingFilterChunk_ptr + cmd_data->chunkSize > _filterBuffer + FILTER_BUFFER_SIZE) {
