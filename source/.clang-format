@@ -31,4 +31,5 @@ KeepEmptyLinesAtTheStartOfBlocks: 'true'
 UseTab: ForContinuationAndIndentation
 TabWidth: 4
 IndentWidth: 4
+ContinuationIndentWidth: 8
 ...
