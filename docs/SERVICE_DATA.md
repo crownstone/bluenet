@@ -119,7 +119,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
 uint 32 | [Error bitmask](#state-error-bitmask) | 4 | Error bitmask of the Crownstone.
-uint 32 | Timestamp | 4 | The timestamp when the first error occured.
+uint 32 | Timestamp | 4 | The timestamp when the first error occurred.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.
@@ -154,7 +154,7 @@ Type | Name | Length | Description
 --- | --- | --- | ---
 uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
 uint 32 | [Error bitmask](#state-error-bitmask) | 4 | Error bitmask of the Crownstone.
-uint 32 | Timestamp | 4 | The timestamp when the first error occured.
+uint 32 | Timestamp | 4 | The timestamp when the first error occurred.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone. If the time was not set on the Crownstone (can be seen in flags), this will be replaced by a counter.

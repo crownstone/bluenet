@@ -59,7 +59,7 @@ For example the socket part of the plastic can be reused for both products. Or w
       E Electronics related part (Circuit board etc.)
     Name:
       Plug_Part (the semisphere of the Guidestone and the Crownstone plug that is inserted into existing electrical sockets)
-      Plug_cap_part (the insert of the plug part containing the actual electrical contact meterials, pins, ground plate etc.)
+      Plug_cap_part (the insert of the plug part containing the actual electrical contact materials, pins, ground plate etc.)
       Socket_Part (the top semisphere of the Crownstone plug that accepts other electrical plugs into itself)
       Beacon_cap (the top with eventually a logo of the Guidestone)
       Ring (the ring separating both hemispheres on both the Guidestone and the Crownstone plug)

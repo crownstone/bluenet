@@ -11,7 +11,7 @@ If you get a popup that something is wrong with one of your crownstones:
 
 - Take a screenshot of the popup.
 - Get the firmware version of the crownstone (in the edit menu of the crownstone).
-- Get sotffuse buffers
+- Get softfuse buffers.
 - Turn crownstone on.
 - Get filtered, and unfiltered buffers.
 - Share all buffers (via dev menu). Mention what load is plugged in, where the crownstone is located.

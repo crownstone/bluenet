@@ -24,7 +24,7 @@ Preferably, the entire code base has a single **maximum** value for the heap siz
 
 ## Object pool buffers
 
-To accomodate flexibility while keeping dynamic memory usage to a minimum, components are allowed to contain a buffer that can be used for dynamic data. Since the components in the firmware are known at compiletime, as well as their buffer size, it remains possible to assert that the device will not run into heap allocation problems.
+To accommodate flexibility while keeping dynamic memory usage to a minimum, components are allowed to contain a buffer that can be used for dynamic data. Since the components in the firmware are known at compiletime, as well as their buffer size, it remains possible to assert that the device will not run into heap allocation problems.
 
 Guidelines:
 - Components must contain such buffers as a member to avoid double initialisation and avoid `nullptr` checks.

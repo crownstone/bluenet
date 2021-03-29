@@ -28,7 +28,7 @@ All dimmable lights that we tested, worked great! We keep up a list of lights [h
 #### KS
 - [Classic Gold Rustic Led 3857](https://www.nostalux.nl/Buitenverlichting/lichtbronnen/lamp-edison-led-3857.html)
 
-### Persistance
+### Persistence
 
 The state of the dimmer is saved, so that when you turn the Crownstone off and on again, the dimmer will be at same percentage again.
 Unfortunately, it currently takes about 2 seconds before the dimmer state is restored, as it takes some time for the internal power supply to initialize. However, this delay can be reduced by software improvements later on.

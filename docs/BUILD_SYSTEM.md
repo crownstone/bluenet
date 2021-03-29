@@ -1,6 +1,6 @@
 # Build system
 
-We are using the `CMake` build system. There are some old scripts in `source/scripts`. They are slowly fased out
+We are using the `CMake` build system. There are some old scripts in `source/scripts`. They are slowly phased out
 to make place for `CMake` equivalents.
 
 The purpose of [CMake](https://cmake.org/):

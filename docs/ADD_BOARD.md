@@ -12,8 +12,8 @@ The nRF52833 has mappings like:
 | A10   | P0.29 (AIN5)  | V2                     | 29     |
 | A12   | P0.02 (AIN0)  | I1                     |  2     |
 | B13   | P0.03 (AIN1)  | I2                     |  3     |
-| AD8   | P0.13         | reset (relais)         | 13     |
-| AD10  | P0.15         | set (relais)           | 15     |
+| AD8   | P0.13         | reset (relay)          | 13     |
+| AD10  | P0.15         | set (relay)            | 15     |
 | J1    | P0.04 (AIN2)  | NTC <needs patch>      |  4     |
 | A14   | P0.19         | floating               | 19     |
 | N1    | P0.08         | PWM                    |  8     |

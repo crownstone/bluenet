@@ -221,7 +221,7 @@ uint8_t    | channel     | 1 |
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint32_t | posix_s  | 4 | seconds since epoch
-uint16_t | posix_ms, version | 2 | bits 0-9: miliseconds passed since posix_s. bits 10-15: synchronisation version
+uint16_t | posix_ms, version | 2 | bits 0-9: milliseconds passed since posix_s. bits 10-15: synchronisation version
 
 #### time_sync_message_t
 

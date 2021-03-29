@@ -84,7 +84,7 @@ uint8[] | Session nonce | 5 | Session nonce, should be [read](#session-data) whe
 
 After connecting, you should first read the session data from the [Crownstone service](#crownstone-service).
 The session data is [ECB encrypted](#ecb-encryption) with the basic key, or when in setup mode: the session key.
-After decryption, you should verify whether you have read and decrypted succesfully by checking if the validation is equal to **0xCAFEBABE**.
+After decryption, you should verify whether you have read and decrypted successfully by checking if the validation is equal to **0xCAFEBABE**.
 The session nonce and validation key will be different each time you connect.
 
 ![Session data](../docs/diagrams/session-data.png)
@@ -102,7 +102,7 @@ uint8[] | Padding | 2 | Zero-padding so that the whole packet is 16 bytes.
 
 When reading and writing characteristics, the data is wrapped in an [encrypted packet](#encrypted-packet).
 
-After subscribing, notified data will be sent as [multipart notifications](#multipart-notifaction-packet).
+After subscribing, notified data will be sent as [multipart notifications](#multipart-notification-packet).
 
 ### Multipart notification packet
 
@@ -195,15 +195,16 @@ char[] | Name | length-1 | The shortened name of this device.
 
 # Broadcast commands
 
-Some commands can also be sent via broadcasts. This is the prefered way, as there is no need to connect to the Crownstone, which takes quite some time.
+Some commands can also be sent via broadcasts. This is the preferred way, as there is no need to connect to the Crownstone, which takes quite some time.
 The broadcast protocol is documented in the [broadcast protocol](BROADCAST_PROTOCOL.md) document.
 
 
 
 # Services
+
 When connected, the following services are available.
 
-The AMB columns indicate which users can use these characteristics if encryption is enabled. The access can be further restricted per packet.
+The `A`, `M`, and `B` columns indicate which users can use these characteristics if encryption is enabled. The access can be further restricted per packet.
 
 - A: Admin
 - M: Member
@@ -281,9 +282,10 @@ uint8 | Payload | Size | Payload data, depends on command type.
 
 ## Command types
 
-The AMBS columns indicate which users have access to these commands if encryption is enabled.
+The `A`, `M`, `B`, and `S` columns indicate which users have access to these commands if encryption is enabled.
 Admin access means the packet is encrypted with the admin key.
 Setup access means the packet is available in setup mode, and encrypted with the temporary setup key, see [setup](#setup).
+
 - A: Admin
 - M: Member
 - B: Basic
@@ -625,7 +627,7 @@ Type | Name | Length | Description
 uint32 | Min stack end | 4 | Minimal observed stack end pointer since boot. It might take some time before this reflects the actual minimum.
 uint32 | Max heap end | 4 | Maximal observed heap end pointer since boot.
 uint32 | Min free | 4 | Minimal observed free RAM in bytes. It might take some time before this reflects the actual minimum.
-uint32 | Num sbrk fails | 4 | Number of times sbrk failed to hand out space.
+uint32 | Number of sbrk fails | 4 | Number of times sbrk failed to hand out space.
 
 
 #### Switch history packet
@@ -839,12 +841,12 @@ Value | Name | Description
 --- | --- | ---
 0   | SUCCESS | Completed successfully.
 1   | WAIT_FOR_SUCCESS | Command is successful so far, but you need to wait for SUCCESS.
-2   | SUCCESS_NO_CHANGE | Command is succesful, but nothing changed.
+2   | SUCCESS_NO_CHANGE | Command is successful, but nothing changed.
 16  | BUFFER_UNASSIGNED | No buffer was assigned for the command.
 17  | BUFFER_LOCKED | Buffer is locked, failed queue command.
 18  | BUFFER_TOO_SMALL | Buffer is too small for operation.
 19  | NOT_ALIGNED | Buffer is not aligned.
-32  | WRONG_PAYLOAD_LENGTH | Wrong payload lenght provided.
+32  | WRONG_PAYLOAD_LENGTH | Wrong payload length provided.
 33  | WRONG_PARAMETER | Wrong parameter provided.
 34  | INVALID_MESSAGE | invalid message provided.
 35  | UNKNOWN_OP_CODE | Unknown operation code provided.
@@ -876,15 +878,16 @@ Value | Name | Description
 
 ## State types
 
-The AMBS columns indicate which users have access to these states: `r` for read access, `w` for write access.
+The `A`, `M`, `B`, and `S` columns indicate which users have access to these states: `r` for read access, `w` for write access.
 Admin access means the packet is encrypted with the admin key.
 Setup access means the packet is available in setup mode, and encrypted with the temporary setup key, see [setup](#setup).
+
 - A: Admin
 - M: Member
 - B: Basic
 - S: Setup
 
-Type nr | Type name | Payload type | Description | A | M | B
+Type nr | Type name | Payload type | Payload description | A | M | B
 ------- | ---------- | ------------- | ------------ | --- | --- | ---
 5 | PWM period | uint32 | Sets PWM period in μs for the dimmer. **Setting this to a wrong value may cause damage.**  | rw |  | 
 6 | iBeacon major | uint16 | iBeacon major number.  | rw |  | 
