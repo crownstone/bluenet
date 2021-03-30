@@ -627,7 +627,7 @@ Type | Name | Length | Description
 uint32 | Min stack end | 4 | Minimal observed stack end pointer since boot. It might take some time before this reflects the actual minimum.
 uint32 | Max heap end | 4 | Maximal observed heap end pointer since boot.
 uint32 | Min free | 4 | Minimal observed free RAM in bytes. It might take some time before this reflects the actual minimum.
-uint32 | Number of sbrk fails | 4 | Number of times sbrk failed to hand out space.
+uint32 | Sbrk fail count | 4 | Number of times sbrk failed to hand out space.
 
 
 #### Switch history packet
