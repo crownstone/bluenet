@@ -27,7 +27,7 @@ class CuckooFilter {
 	// Compile time settings
 	// -------------------------------------------------------------
 
-	static constexpr size_t max_kick_attempts = 100;
+	static constexpr size_t MAX_KICK_ATTEMPTS = 100;
 
 	// -------------------------------------------------------------
 	// Run time variables
@@ -43,19 +43,19 @@ class CuckooFilter {
 	 * Reduces a key (element) to an extended fingerprint, consisting of
 	 * the fingerprint of the key and its associated positions in the fingerprint array.
 	 *
-	 * Note: bucket_count _must_ be a power of two. (which is validated at construction/init)
+	 * Note: bucketCount _must_ be a power of two. (which is validated at construction/init)
 	 */
 	cuckoo_extended_fingerprint_t getExtendedFingerprint(
-			cuckoo_key_t key, size_t key_length_in_bytes);
+			cuckoo_key_t key, size_t keyLengthInBytes);
 
 	/**
 	 * Expands a fingerprint and the index where it is placed into an extended fingerprint,
 	 * by computing the alternative index in the fingerprint array.
 	 *
-	 * Note: bucket_count _must_ be a power of two. (which is validated at construction/init)
+	 * Note: bucketCount _must_ be a power of two. (which is validated at construction/init)
 	 */
 	cuckoo_extended_fingerprint_t getExtendedFingerprint(
-			cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucket_index);
+			cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucketIndex);
 
 	/**
 	 * A hash of this filters current contents (data).
@@ -65,14 +65,14 @@ class CuckooFilter {
 	/**
 	 * Hashes the given key (data) into a fingerprint.
 	 */
-	cuckoo_fingerprint_t hash(cuckoo_key_t key, size_t key_length_in_bytes);
+	cuckoo_fingerprint_t hash(cuckoo_key_t key, size_t keyLengthInBytes);
 
 	/**
 	 * Returns a reference to the fingerprint at the given coordinates.
 	 */
 	cuckoo_fingerprint_t& lookupFingerprint(
-			cuckoo_index_t bucket_number, cuckoo_index_t finger_index) {
-		return data.bucket_array[(bucket_number * data.nests_per_bucket) + finger_index];
+			cuckoo_index_t bucketIndex, cuckoo_index_t fingerIndex) {
+		return data.bucket_array[(bucketIndex * data.nests_per_bucket) + fingerIndex];
 	}
 
 	/**
@@ -81,20 +81,20 @@ class CuckooFilter {
 	 *
 	 * Does _not_ check for duplicates.
 	 */
-	bool add_fingerprint_to_bucket(cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucket_number);
+	bool addFingerprintToBucket(cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucketIndex);
 
 	/**
 	 * Returns true if found and removed, returns false if not found.
 	 */
-	bool remove_fingerprint_from_bucket(
-			cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucket_number);
+	bool removeFingerprintFromBucket(
+			cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucketIndex);
 
 	/*
 	 * Puts the fingerprint in the filter, moving aside anything that is in the way unless it takes
 	 * more than max_kick_attempts. return true on success, false when max kick attempts was
 	 * reached. This doesn't check if the given fingerprint is already contained in the filter.
 	 */
-	bool move(cuckoo_extended_fingerprint_t entry_to_insert);
+	bool move(cuckoo_extended_fingerprint_t entryToInsert);
 
 	// -------------------------------------------------------------
 	// Core methods for manipulating this->data
@@ -108,32 +108,32 @@ class CuckooFilter {
 	// -------------------------------------------------------------
 	// These might be useful for fingerprints coming from the mesh.
 	// -------------------------------------------------------------
-	bool add(cuckoo_fingerprint_t finger, cuckoo_index_t bucket_index) {
-		return add(getExtendedFingerprint(finger, bucket_index));
+	bool add(cuckoo_fingerprint_t finger, cuckoo_index_t bucketIndex) {
+		return add(getExtendedFingerprint(finger, bucketIndex));
 	}
 
-	bool remove(cuckoo_fingerprint_t finger, cuckoo_index_t bucket_index) {
-		return remove(getExtendedFingerprint(finger, bucket_index));
+	bool remove(cuckoo_fingerprint_t finger, cuckoo_index_t bucketIndex) {
+		return remove(getExtendedFingerprint(finger, bucketIndex));
 	}
 
-	bool contains(cuckoo_fingerprint_t finger, cuckoo_index_t bucket_index) {
-		return contains(getExtendedFingerprint(finger, bucket_index));
+	bool contains(cuckoo_fingerprint_t finger, cuckoo_index_t bucketIndex) {
+		return contains(getExtendedFingerprint(finger, bucketIndex));
 	}
 
 	// -------------------------------------------------------------
 	// these might be useful for stuff that comes in from commands
 	// -------------------------------------------------------------
 
-	bool add(cuckoo_key_t key, size_t key_length_in_bytes) {
-		return add(getExtendedFingerprint(key, key_length_in_bytes));
+	bool add(cuckoo_key_t key, size_t keyLengthInBytes) {
+		return add(getExtendedFingerprint(key, keyLengthInBytes));
 	}
 
-	bool remove(cuckoo_key_t key, size_t key_length_in_bytes) {
-		return remove(getExtendedFingerprint(key, key_length_in_bytes));
+	bool remove(cuckoo_key_t key, size_t keyLengthInBytes) {
+		return remove(getExtendedFingerprint(key, keyLengthInBytes));
 	}
 
-	bool contains(cuckoo_key_t key, size_t key_length_in_bytes) {
-		return contains(getExtendedFingerprint(key, key_length_in_bytes));
+	bool contains(cuckoo_key_t key, size_t keyLengthInBytes) {
+		return contains(getExtendedFingerprint(key, keyLengthInBytes));
 	}
 
 	// -------------------------------------------------------------
@@ -159,23 +159,23 @@ class CuckooFilter {
 	 * 		power of 2 because of theoretical requirements.
 	 */
 
-	void init(cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket);
+	void init(cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucket);
 
 	// -------------------------------------------------------------
 	// Sizing helpers
 	// -------------------------------------------------------------
 
 	static constexpr size_t fingerprintCount(
-			cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket) {
-		return bucket_count * nests_per_bucket;
+			cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucket) {
+		return bucketCount * nestsPerBucket;
 	}
 
 	/**
 	 * Size of the byte buffer in bytes.
 	 */
 	static constexpr size_t bufferSize(
-			cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket) {
-		return fingerprintCount(bucket_count, nests_per_bucket) * sizeof(cuckoo_fingerprint_t);
+			cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucket) {
+		return fingerprintCount(bucketCount, nestsPerBucket) * sizeof(cuckoo_fingerprint_t);
 	}
 
 	/**
@@ -185,14 +185,14 @@ class CuckooFilter {
 	 *   "sizeof, and the assignment operator ignore the flexible array member."
 	 *   https://en.cppreference.com/w/c/language/struct
 	 */
-	static constexpr size_t size(cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket) {
-		return sizeof(cuckoo_filter_data_t) + bufferSize(bucket_count, nests_per_bucket);
+	static constexpr size_t size(cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucket) {
+		return sizeof(cuckoo_filter_data_t) + bufferSize(bucketCount, nestsPerBucket);
 	}
 
 	/**
 	 * Actual bucket count value may be bigger than a cuckoo_index_t can hold.
 	 */
-	constexpr auto bucketCount() { return (1 << data.bucket_count_log2); }
+	constexpr auto bucketCount() { return 1 << data.bucket_count_log2; }
 
 	constexpr size_t bufferSize() { return bufferSize(bucketCount(), data.nests_per_bucket); }
 
