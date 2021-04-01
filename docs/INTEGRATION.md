@@ -1,7 +1,7 @@
 Getting Started Guide to use Crownstone tech
 ===================
 
-Crownstone tech can be used to enrich smart home and smart building solutions, build indoor positioning and proximity systems, unlock Bluetooth low energy devices through the Crownstone bluetooth mesh, recognize daily activities, and much more. This document is meant as a Getting Started Guide to experiment, demo, and integrate with Crownston tech.
+Crownstone tech can be used to enrich smart home and smart building solutions, build indoor positioning and proximity systems, unlock Bluetooth low energy devices through the Crownstone bluetooth mesh, recognize daily activities, and much more. This document is meant as a Getting Started Guide to experiment, demo, and integrate with Crownstone tech.
 
 Integration can be done on multiple levels.
 

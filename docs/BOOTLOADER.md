@@ -13,10 +13,9 @@ You can find the information at the [Infocenter - Bootloader and DFU modules](ht
 The code for the bootloader is already there if you have downloaded the Nordic SDK. In the `CMakeList` file in the bootloader directory you see that the main file is set to `bootloader/main.c`. The `cs_Boards.h` file is included so the right pins for serial are used. Including the logging functionalities by Nordic increases the binary size of the bootloader a lot. For release, make sure debugging output over serial is disabled.
 
 A prerequisite to building the bootloader is a compiled encryption library (`micro-eec`):
-Om de bootloader te bouwen, is er een gecompileerde lib nodig:
 
 Set the compiler (again, sorry!):
-    
+
     xdg-open ${NRF5_DIR}/components/toolchain/gcc/Makefile.posix
 
 Build the lib:
@@ -34,12 +33,12 @@ Read more on the crypto backend at the [Infocenter](https://infocenter.nordicsem
 To flash the bootloader to the device, use instructions from the [INSTALL](https://github.com/crownstone/bluenet/blob/master/docs/INSTALL.md) document.
 
     ./bluenet.sh -buB -t default
-  
-Note. If you set general breakpoints like `b main`, note that `gdb` will set the breakpoint both in the main of the bootloader and that of the firmware. 
+
+Note. If you set general breakpoints like `b main`, note that `gdb` will set the breakpoint both in the main of the bootloader and that of the firmware.
 
     ./bluenet.sh -dB -t default
 
-It has no way to distinghuish them. If you debug the firmware, `gdb` will start at the application address and breakpoints in the bootloader are skipped.
+It has no way to distinguish them. If you debug the firmware, `gdb` will start at the application address and breakpoints in the bootloader are skipped.
 
     ./bluenet.sh -dF -t default
 
@@ -64,9 +63,9 @@ FLASH (rx) : ORIGIN = 0x71000, LENGTH = 0xd000
 There are currently actually **two** locations where you have to define the start of the bootloader.
 
 1. The [secure_bootloader_gcc_nrf52.ld](https://github.com/crownstone/bluenet/blob/master/bootloader/secure_bootloader_gcc_nrf52.ld) script in the `bootloader` directory (see above).
-2. The `CMakeBuild.config` file for the target you are building for. The default comes from [CMakeBuild.config.default](https://github.com/crownstone/bluenet/blob/master/conf/cmake/CMakeBuild.config.default). 
+2. The `CMakeBuild.config` file for the target you are building for. The default comes from [CMakeBuild.config.default](https://github.com/crownstone/bluenet/blob/master/conf/cmake/CMakeBuild.config.default).
 
-To allow for the additional space for debugging, starting at 0x71000 up to (almost!) the end of FLASH should be sufficient (adds up to `0x7E000`). Note, it's not up to `0x7FFFF`. 
+To allow for the additional space for debugging, starting at 0x71000 up to (almost!) the end of FLASH should be sufficient (adds up to `0x7E000`). Note, it's not up to `0x7FFFF`.
 
 ```
 BOOTLOADER_START_ADDRESS=0x00071000
@@ -75,7 +74,7 @@ BOOTLOADER_LENGTH=0xD000
 
 ### Challenge
 
-The devices in the field have an older bootloader. They need to be upgraded to the new bootloader which uses more space. 
+The devices in the field have an older bootloader. They need to be upgraded to the new bootloader which uses more space.
 
 * A delicate upgrade process is required to update the current bootloader to the new bigger bootloader. This needs to be done in such a way that the chance of bricking a device in the field is neglectable. The process is stipulated at [this forum post](https://devzone.nordicsemi.com/f/nordic-q-a/18199/dfu---updating-from-legacy-sdk-v11-0-0-bootloader-to-secure-sdk-v12-x-0-bootloader).
 * Diligently optimize for size and memory of the bootloader. For example, enable link time optimization and analyse other ways to decrease the footprint of the bootloader.

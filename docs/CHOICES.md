@@ -21,7 +21,7 @@ Since the ADC is not constantly sampling, we sometimes get an interrupt before a
 
 ### Power sampling
 
-The buffers from the ADC are processed by the power sampling class. Since the zero of the voltage and current are not stable, these are first calculated by taking the averare of a single period (20ms). This value is then smoothed by an exponential moving average.
+The buffers from the ADC are processed by the power sampling class. Since the zero of the voltage and current are not stable, these are first calculated by taking the average of a single period (20ms). This value is then smoothed by an exponential moving average.
 
 The real power is calculated by multiplying voltage with current at every time step, and taking the average of this over a period. This is a different number than the apparent power, which is V<sub>rms</sub> * I<sub>rms</sub> (see [wikipedia](https://en.wikipedia.org/wiki/AC_power)). Again, the calculated power is smoothed by calculating the exponential moving average. This is required, because the measured signal is noisy due to interference with the radio.
 
@@ -157,7 +157,7 @@ Type | Name | Length | Description
 uint 8 | Type | 1 | 1 (error)
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
 uint 32 | [Error bitmask](#state-error-bitmask) | 4 | Error bitmask of the Crownstone.
-uint 32 | Timestamp | 4 | The timestamp when the first error occured.
+uint 32 | Timestamp | 4 | The timestamp when the first error occurred.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
@@ -206,7 +206,7 @@ uint 8 | Unencrypted opcode | 1 | 3 (encrypted data)
 uint 8 | Type | 1 | 1 (error)
 uint 8 | Crownstone ID | 1 | The identifier of the crownstone which has this state.
 uint 32 | [Error bitmask](#state-error-bitmask) | 4 | Error bitmask of the Crownstone.
-uint 32 | Timestamp | 4 | The timestamp when the first error occured.
+uint 32 | Timestamp | 4 | The timestamp when the first error occurred.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.
@@ -238,7 +238,7 @@ uint 8 | Version | 1 | 3 (encrypted data)
 uint 8 | Type | 1 | 3 (external error)
 uint 8 | External Crownstone ID | 1 | The identifier of the crownstone which has the following state.
 uint 32 | [Error bitmask](#state-error-bitmask) | 4 | Error bitmask of the Crownstone.
-uint 32 | Timestamp | 4 | The timestamp when the first error occured.
+uint 32 | Timestamp | 4 | The timestamp when the first error occurred.
 uint 8 | [Flags bitmask](#flags-bitmask) | 1 | Bitflags to indicate a certain state of the Crownstone.
 int 8 | Temperature | 1 | Chip temperature (°C).
 uint 16 | Partial timestamp | 2 | The least significant bytes of the timestamp when this were the flags and temperature of the Crownstone.

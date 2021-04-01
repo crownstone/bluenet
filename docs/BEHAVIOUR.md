@@ -201,7 +201,7 @@ uint8 | ProfileId | 1 | This behaviour belongs to the given Profile ID. (Current
 A Smart timer consists of a switch behaviour and an exit condition. This can be used to ensure that for example,
 when a timer expires it will wait until the room is empty before switching off the device. (Essentially extending the original behaviour.)
 
-At the 'Until'-time of the 'Core' behaviour, it is checked wether the behaviour is still active (i.e. its presence condition is still fullfilled).
+At the 'Until'-time of the 'Core' behaviour, it is checked whether the behaviour is still active (i.e. its presence condition is still fullfilled).
 If that is the case, a temporary extension for the behaviour is created which is identical to the Core behaviour with the Presence condition replaced
 by the Extension Presence and the Until time replaced by the Extension Until time. This temporary rule will be destroyed after the Extension Until time
 expires. If the extension end condition timeout is set to 0, the temporary behaviour will be destroyed as soon as the presencecondition is no longer met.
@@ -293,8 +293,8 @@ uint32_t | Timeout | 4 | Whenever a presence description is satisfied (evaluates
 
 In the diagram below the event flow concerning Behaviours and Twilights is depicted. Double arrows (annotated) indicate which `event`'s are received and handled by the node pointed to, red/dashed objects indicate not-yet implemented features, aggregation arrows indicate object ownership as in the sense of UML and lines indicate connection to physical domain.
 
-Main essence of the design is that there are multiple ways that a use can operate on the same switch. Each of these has their own semantics, and therefore a piece of software needs to aggregate between these input channels in order to decide what actually will have to happen. This is the job of the SwitchAggregator. The aggregator has a SystemSwitch object which takes care of the safety and integrity of the phyisical device by monitoring error states and for example blocking access in case of overheating. Any commands passed down from SystemSwitch onto HwSwitch will be pushed into the driver. This last layer allows to abstract away from any hardware specifics and later could be part of the mock-up surface.
+Main essence of the design is that there are multiple ways that a use can operate on the same switch. Each of these has their own semantics, and therefore a piece of software needs to aggregate between these input channels in order to decide what actually will have to happen. This is the job of the SwitchAggregator. The aggregator has a SystemSwitch object which takes care of the safety and integrity of the physical device by monitoring error states and for example blocking access in case of overheating. Any commands passed down from SystemSwitch onto HwSwitch will be pushed into the driver. This last layer allows to abstract away from any hardware specifics and later could be part of the mock-up surface.
 
-Storing behaviours and Twilights will require additional logic in order to ensure synchronisation accross different devices/phones. All communication from and to host devices regarding Behaviours and Twilights is extracted into a Store object, that takes care of this matter. The corresponding handler object can access the store to query the active Behaviours/Twilights whenever necessary through a static reference.
+Storing behaviours and Twilights will require additional logic in order to ensure synchronisation across different devices/phones. All communication from and to host devices regarding Behaviours and Twilights is extracted into a Store object, that takes care of this matter. The corresponding handler object can access the store to query the active Behaviours/Twilights whenever necessary through a static reference.
 
 ![Behaviour handler overview](../docs/diagrams/behaviourhandler-overview.svg)
