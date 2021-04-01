@@ -136,21 +136,22 @@ class CuckooFilter {
 	// -------------------------------------------------------------
 
 	/**
+	 * Wraps a data struct into a CuckooFilter object
+	 */
+	CuckooFilter(cuckoo_filter_data_t& data) : data(data) {}
+
+	/**
 	 * Memsets the bucket_array to 0x00 and sets victim to 0.
 	 * No changes are made to size.
 	 */
 	void clear();
 
 	/**
-	 * Wraps a data struct into a CuckooFilter object
-	 */
-	CuckooFilter(cuckoo_filter_data_t& data) : data(data) {}
-
-	/**
 	 * Sets the size parameters and then  clear()s this object so that the bucket_array is
 	 * filled with precisely enough 0x00s to represent an empty filter.
 	 *
-	 * @param[in] bucket_array must be a power of 2.
+	 * @param[in] bucket_count_log2 number of buckets allocated will be rounde up to nearest
+	 * 		power of 2 because of theoretical requirements.
 	 */
 
 	void init(cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket);
@@ -172,8 +173,6 @@ class CuckooFilter {
 		return fingerprintCount(bucket_count, nests_per_bucket) * sizeof(cuckoo_fingerprint_t);
 	}
 
-	constexpr size_t bufferSize() { return bufferSize(data.bucket_count, data.nests_per_bucket); }
-
 	/**
 	 * Total number of bytes a CuckooFilter with the given parameters would occupy.
 	 *
@@ -186,8 +185,15 @@ class CuckooFilter {
 	}
 
 	/**
+	 * Actual bucket count value may be bigger than a cuckoo_index_t can hold.
+	 */
+	constexpr auto bucketCount() { return (1 << data.bucket_count_log2); }
+
+	constexpr size_t bufferSize() { return bufferSize(bucketCount(), data.nests_per_bucket); }
+
+	/**
 	 * Total number of bytes this instance occypies.
 	 * Use this function instead of sizeof for this class to take the buffer into account.
 	 */
-	constexpr size_t size() { return size(data.bucket_count, data.nests_per_bucket); }
+	constexpr size_t size() { return size(bucketCount(), data.nests_per_bucket); }
 };

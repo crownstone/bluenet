@@ -30,7 +30,7 @@ struct __attribute__((__packed__)) cuckoo_extended_fingerprint_t {
  * Data content of the cuckoo filter.
  */
 struct __attribute__((__packed__)) cuckoo_filter_data_t {
-	cuckoo_index_t bucket_count;
+	cuckoo_index_t bucket_count_log2; // we save the log2 value since bucket_count needs to be a power of 2.
 	cuckoo_index_t nests_per_bucket;
 	cuckoo_extended_fingerprint_t victim;
 	cuckoo_fingerprint_t bucket_array[];  // 'flexible array member'

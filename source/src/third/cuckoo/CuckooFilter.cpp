@@ -22,7 +22,7 @@ cuckoo_extended_fingerprint_t CuckooFilter::getExtendedFingerprint(
 	return cuckoo_extended_fingerprint_t{
 			.fingerprint = finger,
 			.bucketA     = static_cast<cuckoo_index_t>(bucket_index),
-			.bucketB = static_cast<cuckoo_index_t>((bucket_index ^ finger) % data.bucket_count)};
+			.bucketB     = static_cast<cuckoo_index_t>((bucket_index ^ finger) % bucketCount())};
 }
 
 cuckoo_extended_fingerprint_t CuckooFilter::getExtendedFingerprint(
@@ -33,17 +33,14 @@ cuckoo_extended_fingerprint_t CuckooFilter::getExtendedFingerprint(
 
 	return cuckoo_extended_fingerprint_t{
 			.fingerprint = finger,
-			.bucketA     = static_cast<cuckoo_index_t>(hashed_finger % data.bucket_count),
-			.bucketB = static_cast<cuckoo_index_t>((hashed_finger ^ finger) % data.bucket_count)};
+			.bucketA     = static_cast<cuckoo_index_t>(hashed_finger % bucketCount()),
+			.bucketB     = static_cast<cuckoo_index_t>((hashed_finger ^ finger) % bucketCount())};
 }
 
 /* ------------------------------------------------------------------------- */
 
 cuckoo_fingerprint_t CuckooFilter::filterhash() {
 	return hash(&data, size());
-
-	// TODO: change to
-	// return hash(this, this->size());
 }
 
 /* ------------------------------------------------------------------------- */
@@ -139,10 +136,16 @@ bool CuckooFilter::move(cuckoo_extended_fingerprint_t entry_to_insert) {
 /* ------------------------------------------------------------------------- */
 
 void CuckooFilter::init(cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket) {
-	// ASSERT(bucket_count & (bucket_count -1) == 0) // bucket count must be power of 2.
-	// TODO(Arend): just use data.bucket_count = 1 << log2_bucket_count;
+	// find ceil(log2(bucket_count)):
+	data.bucket_count_log2 = 0;
+	if (bucket_count > 0) {
+		bucket_count--;
+		while (bucket_count > 0) {
+			bucket_count >>= 1;
+			data.bucket_count_log2 += 1;
+		}
+	}
 
-	data.bucket_count     = bucket_count;
 	data.nests_per_bucket = nests_per_bucket;
 	clear();
 }
