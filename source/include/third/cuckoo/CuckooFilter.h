@@ -11,35 +11,49 @@
  * The cuckoo_filter_data_t struct is not aware of its size. That must be managed by the owning
  * scope, which can query the required size in bytes for the given amount of fingerprints through
  * the CuckooFilter class.
+ *
+ * The 'elements' that one can `add` to a `CuckooFilter` are of type `cuckoo_key_t` which are
+ * simply sequences of bytes. To check if an element is contained in a filter, refer to the
+ * `contains` methods.
  */
 class CuckooFilter {
-   public:
+   private:
+	// -------------------------------------------------------------
+	// Compile time settings
+	// -------------------------------------------------------------
+
 	static constexpr size_t max_kick_attempts = 100;
 
-   private:
 	// -------------------------------------------------------------
 	// Run time variables
 	// -------------------------------------------------------------
 
 	cuckoo_filter_data_t& data;
 
-	/**
-	 * Note: bucket_count _must_ be a power of two. (which is validated at construction/init)
-	 */
-	cuckoo_extended_fingerprint_t getExtendedFingerprint(cuckoo_key_t key, size_t key_length_in_bytes);
-
-	/**
-	 * Note: bucket_count _must_ be a power of two. (which is validated at construction/init)
-	 */
-	cuckoo_extended_fingerprint_t getExtendedFingerprint(cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucket_index);
-
 	// -------------------------------------------------------------
 	// ----- Private methods -----
 	// -------------------------------------------------------------
 
 	/**
-	 * A hash of this filters current contents.
-	 * TODO(Arend): incorporate victim and other settings.
+	 * Reduces a key (element) to an extended fingerprint, consisting of
+	 * the fingerprint of the key and its associated positions in the fingerprint array.
+	 *
+	 * Note: bucket_count _must_ be a power of two. (which is validated at construction/init)
+	 */
+	cuckoo_extended_fingerprint_t getExtendedFingerprint(
+			cuckoo_key_t key, size_t key_length_in_bytes);
+
+	/**
+	 * Expands a fingerprint and the index where it is placed into an extended fingerprint,
+	 * by computing the alternative index in the fingerprint array.
+	 *
+	 * Note: bucket_count _must_ be a power of two. (which is validated at construction/init)
+	 */
+	cuckoo_extended_fingerprint_t getExtendedFingerprint(
+			cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucket_index);
+
+	/**
+	 * A hash of this filters current contents (data).
 	 */
 	cuckoo_fingerprint_t filterhash();
 
@@ -51,7 +65,8 @@ class CuckooFilter {
 	/**
 	 * Returns a reference to the fingerprint at the given coordinates.
 	 */
-	cuckoo_fingerprint_t& lookupFingerprint(cuckoo_index_t bucket_number, cuckoo_index_t finger_index) {
+	cuckoo_fingerprint_t& lookupFingerprint(
+			cuckoo_index_t bucket_number, cuckoo_index_t finger_index) {
 		return data.bucket_array[(bucket_number * data.nests_per_bucket) + finger_index];
 	}
 
@@ -66,14 +81,19 @@ class CuckooFilter {
 	/**
 	 * Returns true if found and removed, returns false if not found.
 	 */
-	bool remove_fingerprint_from_bucket(cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucket_number);
+	bool remove_fingerprint_from_bucket(
+			cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucket_number);
 
 	/*
 	 * Puts the fingerprint in the filter, moving aside anything that is in the way unless it takes
-	 * more than max_kick_attempts. return _OK or _FULL. This doesn't check if the given fingerprint
-	 * is already contained in the filter.
+	 * more than max_kick_attempts. return true on success, false when max kick attempts was
+	 * reached. This doesn't check if the given fingerprint is already contained in the filter.
 	 */
 	bool move(cuckoo_extended_fingerprint_t entry_to_insert);
+
+	// -------------------------------------------------------------
+	// Core methods for manipulating this->data
+	// -------------------------------------------------------------
 
 	bool add(cuckoo_extended_fingerprint_t efp);
 	bool remove(cuckoo_extended_fingerprint_t efp);
@@ -121,36 +141,6 @@ class CuckooFilter {
 	 */
 	void clear();
 
-	static constexpr size_t fingerprintCount(cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket) {
-		return bucket_count * nests_per_bucket;
-	}
-
-	/**
-	 * Size of the byte buffer in bytes.
-	 */
-	static constexpr size_t bufferSize(cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket) {
-		return fingerprintCount(bucket_count, nests_per_bucket) * sizeof(cuckoo_fingerprint_t);
-	}
-
-	constexpr size_t bufferSize() { return bufferSize(data.bucket_count, data.nests_per_bucket); }
-
-	/**
-	 * Total number of bytes a CuckooFilter with the given parameters would occupy.
-	 *
-	 * As per cppreference.com:
-	 *   "sizeof, and the assignment operator ignore the flexible array member."
-	 *   https://en.cppreference.com/w/c/language/struct
-	 */
-	static constexpr size_t size(cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket) {
-		return sizeof(CuckooFilter) + bufferSize(bucket_count, nests_per_bucket);
-	}
-
-	/**
-	 * Total number of bytes this instance occypies.
-	 * Use this function instead of sizeof for this class to take the buffer into account.
-	 */
-	constexpr size_t size() { return size(data.bucket_count, data.nests_per_bucket); }
-
 	/**
 	 * Wraps a data struct into a CuckooFilter object
 	 */
@@ -164,4 +154,40 @@ class CuckooFilter {
 	 */
 
 	void init(cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket);
+
+	// -------------------------------------------------------------
+	// Sizing helpers
+	// -------------------------------------------------------------
+
+	static constexpr size_t fingerprintCount(
+			cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket) {
+		return bucket_count * nests_per_bucket;
+	}
+
+	/**
+	 * Size of the byte buffer in bytes.
+	 */
+	static constexpr size_t bufferSize(
+			cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket) {
+		return fingerprintCount(bucket_count, nests_per_bucket) * sizeof(cuckoo_fingerprint_t);
+	}
+
+	constexpr size_t bufferSize() { return bufferSize(data.bucket_count, data.nests_per_bucket); }
+
+	/**
+	 * Total number of bytes a CuckooFilter with the given parameters would occupy.
+	 *
+	 * As per cppreference.com:
+	 *   "sizeof, and the assignment operator ignore the flexible array member."
+	 *   https://en.cppreference.com/w/c/language/struct
+	 */
+	static constexpr size_t size(cuckoo_index_t bucket_count, cuckoo_index_t nests_per_bucket) {
+		return sizeof(cuckoo_filter_data_t) + bufferSize(bucket_count, nests_per_bucket);
+	}
+
+	/**
+	 * Total number of bytes this instance occypies.
+	 * Use this function instead of sizeof for this class to take the buffer into account.
+	 */
+	constexpr size_t size() { return size(data.bucket_count, data.nests_per_bucket); }
 };

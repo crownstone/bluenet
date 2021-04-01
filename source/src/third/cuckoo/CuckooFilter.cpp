@@ -22,7 +22,7 @@ cuckoo_extended_fingerprint_t CuckooFilter::getExtendedFingerprint(
 	return cuckoo_extended_fingerprint_t{
 			.fingerprint = finger,
 			.bucketA     = static_cast<cuckoo_index_t>(bucket_index),
-			.bucketB     = static_cast<cuckoo_index_t>((bucket_index ^ finger) % data.bucket_count)};
+			.bucketB = static_cast<cuckoo_index_t>((bucket_index ^ finger) % data.bucket_count)};
 }
 
 cuckoo_extended_fingerprint_t CuckooFilter::getExtendedFingerprint(
@@ -33,16 +33,14 @@ cuckoo_extended_fingerprint_t CuckooFilter::getExtendedFingerprint(
 
 	return cuckoo_extended_fingerprint_t{
 			.fingerprint = finger,
-.bucketA     = static_cast<cuckoo_index_t>(hashed_finger % data.bucket_count),
-			.bucketB     = static_cast<cuckoo_index_t>((hashed_finger ^ finger) % data.bucket_count)};
+			.bucketA     = static_cast<cuckoo_index_t>(hashed_finger % data.bucket_count),
+			.bucketB = static_cast<cuckoo_index_t>((hashed_finger ^ finger) % data.bucket_count)};
 }
 
 /* ------------------------------------------------------------------------- */
 
 cuckoo_fingerprint_t CuckooFilter::filterhash() {
-	return hash(
-			data.bucket_array,
-			data.bucket_count * data.nests_per_bucket * sizeof(cuckoo_fingerprint_t) / sizeof(uint8_t));
+	return hash(&data, size());
 
 	// TODO: change to
 	// return hash(this, this->size());
@@ -79,7 +77,8 @@ bool CuckooFilter::remove_fingerprint_from_bucket(
 			// to keep the bucket front loaded, move the last non-zero
 			// fingerprint behind ii into the slot.
 			for (cuckoo_index_t jj = data.nests_per_bucket - 1; jj > ii; --jj) {
-				cuckoo_fingerprint_t& last_fingerprint_of_bucket = lookupFingerprint(bucket_number, jj);
+				cuckoo_fingerprint_t& last_fingerprint_of_bucket =
+						lookupFingerprint(bucket_number, jj);
 
 				if (last_fingerprint_of_bucket != 0) {
 					candidate_fingerprint_for_removal_in_array = last_fingerprint_of_bucket;
@@ -125,7 +124,7 @@ bool CuckooFilter::move(cuckoo_extended_fingerprint_t entry_to_insert) {
 		cuckoo_fingerprint_t& kicked_item_fingerprint_ref =
 				lookupFingerprint(kicked_item_bucket, kicked_item_index);
 		cuckoo_fingerprint_t kicked_item_fingerprint_value = kicked_item_fingerprint_ref;
-		kicked_item_fingerprint_ref                    = entry_to_insert.fingerprint;
+		kicked_item_fingerprint_ref                        = entry_to_insert.fingerprint;
 		entry_to_insert = getExtendedFingerprint(kicked_item_fingerprint_value, kicked_item_bucket);
 
 		// next iteration will try to re-insert the footprint previously at (h,i).
