@@ -11,7 +11,7 @@ if they hide their sloppy implementation under an NDA!
 
 | Security feature                  | Description                                                            |
 | ---                               | ---                                                                    |
-| Message encryption                | Every message, including advertisements are encryped with AES128       |
+| Message encryption                | Every message, including advertisements are encrypted with AES128      |
 | Usage leakage protection          | Each plug sends out advertisements, even if nothing happens            |
 | Replay attack protection          | There are counters involved that make replay attacks much harder       |
 | Close-range setup                 | Minimize sniffing opportunities at the setup process                   |

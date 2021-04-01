@@ -154,16 +154,7 @@ If the dust settles we might have one single `make write_all` command as well. K
 
 ## Logs
 
-The firmware will send logs via UART (depending on the configuration you set).
-By default, binary logs will be used, for that you will need to install [bluenet-lib-logs](#https://github.com/crownstone/bluenet-lib-logs/).
-
-    make uart_binary_client
-
-If the you use plain text UART, then use can use a program like minicom (`sudo apt install minicom`):
-
-    make uart_client
-
-Make sure you have the right permissions: Add yourself to the dialout group, or use sudo.
+You can find more on logs (over UART) in [this document](LOGGING.md).
 
 ## Debug
 

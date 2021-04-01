@@ -62,12 +62,12 @@ struct __attribute__((__packed__)) a_packed_packet_t {
 ```
 
 Notes:
-- Abbreviations in identifyer are considered to be a whole word in `lowerCamel` or `UpperCamel`. Only the first letter of an abbreviation will be upper case. For example: `rssiMacAddress`.
+- Abbreviations in identifier are considered to be a whole word in `lowerCamel` or `UpperCamel`. Only the first letter of an abbreviation will be upper case. For example: `rssiMacAddress`.
 - The convention for variable/member names is chosen to make it easier to recognize their scope and saves you from coming up with alternative names in contexts such as:
 	```
 	void setRssi(int8_t rssi) { _rssi = rssi; }
 	```
-- Avoid use of single letters for identifiers (with the exception of a variable for loop iterations) as it impairs search/replace tools and readibility.
+- Avoid use of single letters for identifiers (with the exception of a variable for loop iterations) as it impairs search/replace tools and readability.
 - Avoid use of names longer than about 35 characters.
 
 ## Comments

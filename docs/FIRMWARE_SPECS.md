@@ -6,7 +6,7 @@ The bluenet firmware does have a lot of sophisticated features:
 | ---                               | ---                                                                    |
 | Dual memory bank                  | On a firmware update, have option to roll back to previous version     |
 | Mesh broadcast with cyclic buffer | A cyclic buffer for application specific data in the BLE mesh          |
-| Perisistent storage               | Persistent storage of certain state variables, e.g. switch state       |
+| Persistent storage                | Persistent storage of certain state variables, e.g. switch state       |
 | Flash write optimization          | Write optimization w.r.t. number of times that can be written to flash |
 | Buffer reuse                      | Buffer reuse for different purposes                                    |
 | App-specific scan responses       | Connection-less messages embedded in service data (scan responses)     |

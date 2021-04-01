@@ -9,10 +9,10 @@ The ADC samples one or multiple pins using the SAADC peripheral.
 In normal operation the ADC works roughly like this:
 
 1. The SAADC is given a 2 buffers.
-- The SAADC fills the 1st buffer with sampled values, every time a hardware timer ticks.
-- The SAADC triggers an interrupt that the buffer is filled, and continues with the 2nd buffer.
-- The 1st buffer is processed by the user.
-- The 1st buffer is given to the SAADC.
+- The SAADC fills the first buffer with sampled values, every time a hardware timer ticks.
+- The SAADC triggers an interrupt that the buffer is filled, and continues with the second buffer.
+- The first buffer is processed by the user.
+- The first buffer is given to the SAADC.
 - Etc.
 
 A detailed diagram can be found [here](uml/adc/normal-operation.svg).
