@@ -15,6 +15,11 @@
  * The 'elements' that one can `add` to a `CuckooFilter` are of type `cuckoo_key_t` which are
  * simply sequences of bytes. To check if an element is contained in a filter, refer to the
  * `contains` methods.
+ *
+ * CuckooFilter data contents are stored in an array of fingerprints which is segmented into
+ * 'buckets'. These buckets are used for indexing, and although for an element, the bucket index and
+ * fingerprint are deterministic, the index inside the bucket is dependent on order of insertion.
+ * More details can be found in `https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf`.
  */
 class CuckooFilter {
    private:
