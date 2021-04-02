@@ -89,7 +89,7 @@ cuckoo_fingerprint_t CuckooFilter::filterhash() {
 
 bool CuckooFilter::addFingerprintToBucket(
 		cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucketIndex) {
-	for (size_t ii = 0; ii < data.nests_per_bucket; ++ii) {
+	for (size_t ii = 0; ii < data.nestsPerBucket; ++ii) {
 		cuckoo_fingerprint_t& fingerprintInArray = lookupFingerprint(bucketIndex, ii);
 		if (0 == fingerprintInArray) {
 			fingerprintInArray = fingerprint;
@@ -104,7 +104,7 @@ bool CuckooFilter::addFingerprintToBucket(
 
 bool CuckooFilter::removeFingerprintFromBucket(
 		cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucketIndex) {
-	for (cuckoo_index_t ii = 0; ii < data.nests_per_bucket; ++ii) {
+	for (cuckoo_index_t ii = 0; ii < data.nestsPerBucket; ++ii) {
 		cuckoo_fingerprint_t& candidateFingerprintForRemovalInArray =
 				lookupFingerprint(bucketIndex, ii);
 
@@ -113,7 +113,7 @@ bool CuckooFilter::removeFingerprintFromBucket(
 
 			// to keep the bucket front loaded, move the last non-zero
 			// fingerprint behind ii into the slot.
-			for (cuckoo_index_t jj = data.nests_per_bucket - 1; jj > ii; --jj) {
+			for (cuckoo_index_t jj = data.nestsPerBucket - 1; jj > ii; --jj) {
 				cuckoo_fingerprint_t& lastFingerprintOfBucket = lookupFingerprint(bucketIndex, jj);
 
 				if (lastFingerprintOfBucket != 0) {
@@ -154,7 +154,7 @@ bool CuckooFilter::move(cuckoo_extended_fingerprint_t entryToInsert) {
 				(rand() % 2) ? entryToInsert.bucketA : entryToInsert.bucketB;
 
 		// and which fingerprint index
-		cuckoo_index_t kickedItemIndex = rand() % data.nests_per_bucket;
+		cuckoo_index_t kickedItemIndex = rand() % data.nestsPerBucket;
 
 		// swap entry to insert and the randomly chosen (kicked) item
 		cuckoo_fingerprint_t& kicked_item_fingerprint_ref =
@@ -176,16 +176,16 @@ bool CuckooFilter::move(cuckoo_extended_fingerprint_t entryToInsert) {
 
 void CuckooFilter::init(cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucket) {
 	// find ceil(log2(bucketCount)):
-	data.bucket_count_log2 = 0;
+	data.bucketCountLog2 = 0;
 	if (bucketCount > 0) {
 		bucketCount--;
 		while (bucketCount > 0) {
 			bucketCount >>= 1;
-			data.bucket_count_log2 += 1;
+			data.bucketCountLog2 += 1;
 		}
 	}
 
-	data.nests_per_bucket = nestsPerBucket;
+	data.nestsPerBucket = nestsPerBucket;
 	clear();
 }
 
@@ -195,14 +195,14 @@ bool CuckooFilter::contains(cuckoo_extended_fingerprint_t efp) {
 	// loops are split to improve cache hit rate.
 
 	// search bucketA
-	for (size_t ii = 0; ii < data.nests_per_bucket; ++ii) {
+	for (size_t ii = 0; ii < data.nestsPerBucket; ++ii) {
 		if (efp.fingerprint == lookupFingerprint(efp.bucketA, ii)) {
 			return true;
 		}
 	}
 
 	// search bucketB
-	for (size_t ii = 0; ii < data.nests_per_bucket; ++ii) {
+	for (size_t ii = 0; ii < data.nestsPerBucket; ++ii) {
 		if (efp.fingerprint == lookupFingerprint(efp.bucketB, ii)) {
 			return true;
 		}
@@ -228,7 +228,7 @@ bool CuckooFilter::add(cuckoo_extended_fingerprint_t efp) {
 /* ------------------------------------------------------------------------- */
 
 void CuckooFilter::clear() {
-	std::memset(data.bucket_array, 0x00, bufferSize());
+	std::memset(data.bucketArray, 0x00, bufferSize());
 	data.victim = cuckoo_extended_fingerprint_t{};
 }
 

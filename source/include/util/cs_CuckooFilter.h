@@ -150,15 +150,15 @@ public:
 	/**
 	 * Actual bucket count value may be bigger than a cuckoo_index_t can hold.
 	 */
-	constexpr auto bucketCount() { return 1 << data.bucket_count_log2; }
+	constexpr auto bucketCount() { return 1 << data.bucketCountLog2; }
 
-	constexpr size_t bufferSize() { return bufferSize(bucketCount(), data.nests_per_bucket); }
+	constexpr size_t bufferSize() { return bufferSize(bucketCount(), data.nestsPerBucket); }
 
 	/**
 	 * Total number of bytes this instance occypies.
 	 * Use this function instead of sizeof for this class to take the buffer into account.
 	 */
-	constexpr size_t size() { return size(bucketCount(), data.nests_per_bucket); }
+	constexpr size_t size() { return size(bucketCount(), data.nestsPerBucket); }
 
 private:
 	// -------------------------------------------------------------
@@ -207,7 +207,7 @@ private:
 	 * Returns a reference to the fingerprint at the given coordinates.
 	 */
 	cuckoo_fingerprint_t& lookupFingerprint(cuckoo_index_t bucketIndex, cuckoo_index_t fingerIndex) {
-		return data.bucket_array[(bucketIndex * data.nests_per_bucket) + fingerIndex];
+		return data.bucketArray[(bucketIndex * data.nestsPerBucket) + fingerIndex];
 	}
 
 	/**
