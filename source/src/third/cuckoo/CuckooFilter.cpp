@@ -1,3 +1,41 @@
+/**
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: 02 Apr., 2021
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ *
+ * This library is forked from the public [github repository](https://github.com/jonahharris/libcuckoofilter)
+ * and initially added to bluenet on 19-02-2021. Code has been extensively refactored for idiomatic use of C++
+ * and many implementation details have changed e.g. to fix implicit narrowing/widening of integers,
+ * large recursion and type punning in allocations.
+ *
+ * Those changes have been made by the Crownstone Team and fall under the project license mentioned above.
+ *
+ * The original code and the extent to which is required by applicable law is left under its original license
+ * included below and is attributed to the original author Jonah H. Harris <jonah.harris@gmail.com>.
+ *
+ * The MIT License
+ *
+ * Copyright (c) 2015 Jonah H. Harris
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 #include <third/cuckoo/CuckooFilter.h>
 #include <util/cs_RandomGenerator.h>
 
@@ -28,7 +66,7 @@ cuckoo_extended_fingerprint_t CuckooFilter::getExtendedFingerprint(
 cuckoo_extended_fingerprint_t CuckooFilter::getExtendedFingerprint(
 		cuckoo_key_t key, size_t keyLengthInBytes) {
 
-	cuckoo_fingerprint_t finger        = hash(key, keyLengthInBytes);
+	cuckoo_fingerprint_t finger       = hash(key, keyLengthInBytes);
 	cuckoo_fingerprint_t hashedFinger = hash(&finger, sizeof(finger));
 
 	return cuckoo_extended_fingerprint_t{
@@ -74,8 +112,7 @@ bool CuckooFilter::removeFingerprintFromBucket(
 			// to keep the bucket front loaded, move the last non-zero
 			// fingerprint behind ii into the slot.
 			for (cuckoo_index_t jj = data.nests_per_bucket - 1; jj > ii; --jj) {
-				cuckoo_fingerprint_t& lastFingerprintOfBucket =
-						lookupFingerprint(bucketIndex, jj);
+				cuckoo_fingerprint_t& lastFingerprintOfBucket = lookupFingerprint(bucketIndex, jj);
 
 				if (lastFingerprintOfBucket != 0) {
 					candidateFingerprintForRemovalInArray = lastFingerprintOfBucket;
@@ -121,7 +158,7 @@ bool CuckooFilter::move(cuckoo_extended_fingerprint_t entryToInsert) {
 		cuckoo_fingerprint_t& kicked_item_fingerprint_ref =
 				lookupFingerprint(kickedItemBucket, kickedItemIndex);
 		cuckoo_fingerprint_t kickedItemFingerprintValue = kicked_item_fingerprint_ref;
-		kicked_item_fingerprint_ref                        = entryToInsert.fingerprint;
+		kicked_item_fingerprint_ref                     = entryToInsert.fingerprint;
 		entryToInsert = getExtendedFingerprint(kickedItemFingerprintValue, kickedItemBucket);
 
 		// next iteration will try to re-insert the footprint previously at (h,i).

@@ -1,6 +1,46 @@
+/**
+ * Author: Crownstone Team
+ * Copyright: Crownstone (https://crownstone.rocks)
+ * Date: 02 Apr., 2021
+ * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
+ *
+ * This library is forked from the public [github repository](https://github.com/jonahharris/libcuckoofilter)
+ * and initially added to bluenet on 19-02-2021. Code has been extensively refactored for idiomatic use of C++
+ * and many implementation details have changed e.g. to fix implicit narrowing/widening of integers,
+ * large recursion and type punning in allocations.
+ *
+ * Those changes have been made by the Crownstone Team and fall under the project license mentioned above.
+ *
+ * The original code and the extent to which is required by applicable law is left under its original license
+ * included below and is attributed to the original author Jonah H. Harris <jonah.harris@gmail.com>.
+ *
+ * The MIT License
+ *
+ * Copyright (c) 2015 Jonah H. Harris
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+
 #pragma once
 
-#include <third/cuckoo/CuckooFilterStructs.h>
+#include <protocol/cs_CuckooFilterStructs.h>
 
 /**
  * A CuckooFilter is a probabilistic datatype is made for approximate membership queries.
@@ -19,7 +59,9 @@
  * CuckooFilter data contents are stored in an array of fingerprints which is segmented into
  * 'buckets'. These buckets are used for indexing, and although for an element, the bucket index and
  * fingerprint are deterministic, the index inside the bucket is dependent on order of insertion.
+ *
  * More details can be found in `https://www.cs.cmu.edu/~dga/papers/cuckoo-conext2014.pdf`.
+ * "Cuckoo Filter: Better Than Bloom" by Bin Fan, Dave Andersen, and Michael Kaminsky
  */
 class CuckooFilter {
    private:
