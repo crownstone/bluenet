@@ -7,7 +7,7 @@
 
 #pragma once
 #include <cstdint>
-#include <third/cuckoo/CuckooFilterStructs.h>
+#include <protocol/cs_CuckooFilterStructs.h>
 
 // ------------------ Command values -----------------
 
