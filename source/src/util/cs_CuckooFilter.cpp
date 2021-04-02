@@ -36,9 +36,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <third/cuckoo/CuckooFilter.h>
+#include <util/cs_CuckooFilter.h>
 #include <util/cs_RandomGenerator.h>
-
 #include <util/cs_Crc16.h>
 
 #include <cstring>

@@ -15,6 +15,7 @@
 #include <structs/cs_PacketsInternal.h>
 #include <structs/cs_StreamBufferAccessor.h>
 #include <util/cs_Utils.h>
+#include <util/cs_CuckooFilter.h>
 
 #define LOGTrackableParserDebug LOGnone
 

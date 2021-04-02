@@ -8,7 +8,7 @@
 
 #include <cstdint>
 #include <protocol/cs_TrackableParserPackets.h>
-#include <third/cuckoo/CuckooFilter.h>
+#include <protocol/cs_CuckooFilterStructs.h>
 
 /**
  * Data associated to a parsing filter that is not persisted to flash.
@@ -30,8 +30,4 @@ struct __attribute__((__packed__)) tracking_filter_t {
 	tracking_filter_runtime_data_t  runtimedata;
 	tracking_filter_meta_data_t metadata;
 	cuckoo_filter_data_t filterdata;
-
-	size_t size() {
-		return sizeof(tracking_filter_t) + CuckooFilter(filterdata).bufferSize();
-	}
 };
