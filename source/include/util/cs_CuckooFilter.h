@@ -4,15 +4,18 @@
  * Date: 02 Apr., 2021
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  *
- * This library is forked from the public [github repository](https://github.com/jonahharris/libcuckoofilter)
- * and initially added to bluenet on 19-02-2021. Code has been extensively refactored for idiomatic use of C++
- * and many implementation details have changed e.g. to fix implicit narrowing/widening of integers,
- * large recursion and type punning in allocations.
+ * This library is forked from the public [github
+ * repository](https://github.com/jonahharris/libcuckoofilter) and initially added to bluenet on
+ * 19-02-2021. Code has been extensively refactored for idiomatic use of C++ and many implementation
+ * details have changed e.g. to fix implicit narrowing/widening of integers, large recursion and
+ * type punning in allocations.
  *
- * Those changes have been made by the Crownstone Team and fall under the project license mentioned above.
+ * Those changes have been made by the Crownstone Team and fall under the project license mentioned
+ * above.
  *
- * The original code and the extent to which is required by applicable law is left under its original license
- * included below and is attributed to the original author Jonah H. Harris <jonah.harris@gmail.com>.
+ * The original code and the extent to which is required by applicable law is left under its
+ * original license included below and is attributed to the original author Jonah H. Harris
+ * <jonah.harris@gmail.com>.
  *
  * The MIT License
  *
@@ -36,7 +39,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 
 #pragma once
 
@@ -64,7 +66,7 @@
  * "Cuckoo Filter: Better Than Bloom" by Bin Fan, Dave Andersen, and Michael Kaminsky
  */
 class CuckooFilter {
-   private:
+private:
 	// -------------------------------------------------------------
 	// Compile time settings
 	// -------------------------------------------------------------
@@ -87,8 +89,7 @@ class CuckooFilter {
 	 *
 	 * Note: bucketCount _must_ be a power of two. (which is validated at construction/init)
 	 */
-	cuckoo_extended_fingerprint_t getExtendedFingerprint(
-			cuckoo_key_t key, size_t keyLengthInBytes);
+	cuckoo_extended_fingerprint_t getExtendedFingerprint(cuckoo_key_t key, size_t keyLengthInBytes);
 
 	/**
 	 * Expands a fingerprint and the index where it is placed into an extended fingerprint,
@@ -128,8 +129,7 @@ class CuckooFilter {
 	/**
 	 * Returns true if found and removed, returns false if not found.
 	 */
-	bool removeFingerprintFromBucket(
-			cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucketIndex);
+	bool removeFingerprintFromBucket(cuckoo_fingerprint_t fingerprint, cuckoo_index_t bucketIndex);
 
 	/*
 	 * Puts the fingerprint in the filter, moving aside anything that is in the way unless it takes
@@ -146,7 +146,7 @@ class CuckooFilter {
 	bool remove(cuckoo_extended_fingerprint_t efp);
 	bool contains(cuckoo_extended_fingerprint_t efp);
 
-   public:
+public:
 	// -------------------------------------------------------------
 	// These might be useful for fingerprints coming from the mesh.
 	// -------------------------------------------------------------
@@ -215,8 +215,7 @@ class CuckooFilter {
 	/**
 	 * Size of the byte buffer in bytes.
 	 */
-	static constexpr size_t bufferSize(
-			cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucket) {
+	static constexpr size_t bufferSize(cuckoo_index_t bucketCount, cuckoo_index_t nestsPerBucket) {
 		return fingerprintCount(bucketCount, nestsPerBucket) * sizeof(cuckoo_fingerprint_t);
 	}
 

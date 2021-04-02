@@ -18,14 +18,14 @@
  * Responsible for throttling input to the localisation module using filter parsers.
  */
 class TrackableParser : public EventListener {
-   public:
+public:
 	void init();
 	void handleEvent(event_t& evt);
 
 	constexpr static size_t MAX_FILTER_IDS     = 8;
 	constexpr static size_t FILTER_BUFFER_SIZE = 512;
 
-   private:
+private:
 	// -------------------------------------------------------------
 	// ------------------ Advertisment processing ------------------
 	// -------------------------------------------------------------

@@ -14,19 +14,18 @@
 #include <protocol/cs_ErrorCodes.h>
 #include <structs/cs_PacketsInternal.h>
 #include <structs/cs_StreamBufferAccessor.h>
-#include <util/cs_Utils.h>
 #include <util/cs_CuckooFilter.h>
+#include <util/cs_Utils.h>
 
 #define LOGTrackableParserDebug LOGnone
 
-void TrackableParser::init() {
-}
+void TrackableParser::init() {}
 
 void TrackableParser::handleEvent(event_t& evt) {
 	switch (evt.type) {
 		// incoming devices to filter
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
-			adv_background_parsed_t *parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
+			adv_background_parsed_t* parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
 			handleBackgroundParsed(parsedAdv);
 			return;
 		}
@@ -43,7 +42,6 @@ void TrackableParser::handleEvent(event_t& evt) {
 
 			trackable_parser_cmd_upload_filter_t* cmd_data =
 					CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
-
 
 			evt.result.returnCode = handleUploadFilterCommand(cmd_data);
 			break;
@@ -76,9 +74,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 			handleGetFilterSummariesCommand(cmd_data);
 			break;
 		}
-		default:
-			break;
-
+		default: break;
 	}
 }
 
@@ -127,7 +123,7 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 	//	}
 }
 
-void TrackableParser::handleBackgroundParsed(adv_background_parsed_t *trackableAdv) {
+void TrackableParser::handleBackgroundParsed(adv_background_parsed_t* trackableAdv) {
 	// TODO: implement
 }
 
@@ -146,7 +142,8 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 		return nullptr;
 	}
 
-	_parsingFilters[_parsingFiltersEndIndex] = reinterpret_cast<tracking_filter_t*>(_filterBuffer + _filterBufferEndIndex);
+	_parsingFilters[_parsingFiltersEndIndex] =
+			reinterpret_cast<tracking_filter_t*>(_filterBuffer + _filterBufferEndIndex);
 	_filterBufferEndIndex += size;
 
 	// don't forget to postcrement the EndIndex for the filter list in return statement.
@@ -158,8 +155,9 @@ tracking_filter_t* TrackableParser::findParsingFilter(uint8_t filterId) {
 	for (size_t index = 0; index < _parsingFiltersEndIndex; ++index) {
 		parsingFilter = _parsingFilters[index];
 
-		if(parsingFilter == nullptr) {
-			LOGw("_parsingFiltersEndIndex incorrect: found nullptr before reaching end of filter list.");
+		if (parsingFilter == nullptr) {
+			LOGw("_parsingFiltersEndIndex incorrect: found nullptr before reaching end of filter "
+				 "list.");
 			return nullptr;
 		}
 
@@ -179,7 +177,6 @@ void TrackableParser::deallocateParsingFilter(uint8_t filterId) {
 	// remove filterId from _parsingFilters list
 }
 
-
 // -------------------------------------------------------------
 // ---------------------- Command interface --------------------
 // -------------------------------------------------------------
@@ -193,17 +190,17 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 
 	// find or allocate a parsing filter
 	tracking_filter_t* parsingFilter = findParsingFilter(cmd_data->filterId);
-	if(parsingFilter == nullptr) {
+	if (parsingFilter == nullptr) {
 		parsingFilter = allocateParsingFilter(cmd_data->filterId, cmd_data->totalSize);
 
-		if(parsingFilter == nullptr) {
+		if (parsingFilter == nullptr) {
 			// failed to handle command, no space.
 			return ERR_NO_SPACE;
 		}
 
 		// initialize runtime data.
 		parsingFilter->runtimedata.filterId = cmd_data->filterId;
-		parsingFilter->runtimedata.crc = 0;
+		parsingFilter->runtimedata.crc      = 0;
 
 		// meta data and filter data will be memcpy'd from chunks,
 		// no need to copy those.
@@ -220,7 +217,7 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 	// 		uploaded in chunks concurrently. Just ptrdiff them.
 
 	// chunk index starts counting from metadata onwards (ignoring runtimedata)
-	uint8_t* parsingFilterBase_ptr = reinterpret_cast<uint8_t*>(&(parsingFilter->metadata));
+	uint8_t* parsingFilterBase_ptr  = reinterpret_cast<uint8_t*>(&(parsingFilter->metadata));
 	uint8_t* parsingFilterChunk_ptr = parsingFilterBase_ptr + cmd_data->chunkStartIndex;
 
 	if (parsingFilterChunk_ptr + cmd_data->chunkSize > _filterBuffer + FILTER_BUFFER_SIZE) {
@@ -230,17 +227,19 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 	}
 
 	// apply filter chunk, counting chunk index from metadata onwards:
-	std::memcpy (parsingFilterChunk_ptr, cmd_data->chunk, cmd_data->chunkSize);
+	std::memcpy(parsingFilterChunk_ptr, cmd_data->chunk, cmd_data->chunkSize);
 
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t TrackableParser::handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmd_data) {
+cs_ret_code_t TrackableParser::handleRemoveFilterCommand(
+		trackable_parser_cmd_remove_filter_t* cmd_data) {
 	// TODO(Arend): implement later.
 	return ERR_NOT_IMPLEMENTED;
 }
 
-cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmd_data) {
+cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(
+		trackable_parser_cmd_commit_filter_changes_t* cmd_data) {
 	// TODO(Arend): implement later.
 	// - compute and check all filter sizes
 	// - compute and check all filter crcs
@@ -251,11 +250,11 @@ cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(trackable_parser
 	return ERR_NOT_IMPLEMENTED;
 }
 
-cs_ret_code_t TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_filer_summaries_t* cmd_data) {
+cs_ret_code_t TrackableParser::handleGetFilterSummariesCommand(
+		trackable_parser_cmd_get_filer_summaries_t* cmd_data) {
 	// TODO(Arend): implement later.
 	return ERR_NOT_IMPLEMENTED;
 }
-
 
 // -------------------------------------------------------------
 // ----------------------- OLD interface -----------------------
@@ -280,9 +279,7 @@ bool TrackableParser::isTileDevice(scanned_device_t* scannedDevice) {
 	uint16_t* uuidList = reinterpret_cast<uint16_t*>(serviceUuid16List.data);
 
 	BleServiceUuid tileServiceUuids[] = {
-			BleServiceUuid::TileX,
-			BleServiceUuid::TileY,
-			BleServiceUuid::TileZ };
+			BleServiceUuid::TileX, BleServiceUuid::TileY, BleServiceUuid::TileZ};
 
 	for (auto i = 0u; i < serviceUuid16List.len; i++) {
 		for (auto j = 0u; j < std::size(tileServiceUuids); j++) {
@@ -300,7 +297,8 @@ bool TrackableParser::isTileDevice(scanned_device_t* scannedDevice) {
 void TrackableParser::logServiceData(scanned_device_t* scannedDevice) {
 	uint32_t errCode;
 	cs_data_t serviceData;
-	errCode = BLEutil::findAdvType(BLE_GAP_AD_TYPE_SERVICE_DATA,
+	errCode = BLEutil::findAdvType(
+			BLE_GAP_AD_TYPE_SERVICE_DATA,
 			scannedDevice->data,
 			scannedDevice->dataSize,
 			&serviceData);

@@ -4,15 +4,18 @@
  * Date: 02 Apr., 2021
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  *
- * This library is forked from the public [github repository](https://github.com/jonahharris/libcuckoofilter)
- * and initially added to bluenet on 19-02-2021. Code has been extensively refactored for idiomatic use of C++
- * and many implementation details have changed e.g. to fix implicit narrowing/widening of integers,
- * large recursion and type punning in allocations.
+ * This library is forked from the public [github
+ * repository](https://github.com/jonahharris/libcuckoofilter) and initially added to bluenet on
+ * 19-02-2021. Code has been extensively refactored for idiomatic use of C++ and many implementation
+ * details have changed e.g. to fix implicit narrowing/widening of integers, large recursion and
+ * type punning in allocations.
  *
- * Those changes have been made by the Crownstone Team and fall under the project license mentioned above.
+ * Those changes have been made by the Crownstone Team and fall under the project license mentioned
+ * above.
  *
- * The original code and the extent to which is required by applicable law is left under its original license
- * included below and is attributed to the original author Jonah H. Harris <jonah.harris@gmail.com>.
+ * The original code and the extent to which is required by applicable law is left under its
+ * original license included below and is attributed to the original author Jonah H. Harris
+ * <jonah.harris@gmail.com>.
  *
  * The MIT License
  *
@@ -36,9 +39,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include <util/cs_Crc16.h>
 #include <util/cs_CuckooFilter.h>
 #include <util/cs_RandomGenerator.h>
-#include <util/cs_Crc16.h>
 
 #include <cstring>
 
