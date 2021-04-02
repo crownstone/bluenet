@@ -33,7 +33,7 @@ AlignConsecutiveAssignments: true
 
 ###### Wrapping and general whitespace ######
 
-ColumnLimit: '100'
+ColumnLimit: 120
 AllowShortIfStatementsOnASingleLine: true
 AllowShortCaseLabelsOnASingleLine: true
 KeepEmptyLinesAtTheStartOfBlocks: true
