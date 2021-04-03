@@ -11,8 +11,6 @@
 #include <protocol/cs_TrackableParserPackets.h>
 #include <structs/cs_TrackableParserStructs.h>
 
-
-
 /**
  * Transforms EVT_DEVICE_SCANNED and EVT_ADV_BACKGROUND_PARSED
  * into EVT_TRACKING_UPDATE events.
@@ -24,7 +22,7 @@ public:
 	void init();
 	void handleEvent(event_t& evt);
 
-	constexpr static size_t MAX_FILTER_IDS = 8;
+	constexpr static size_t MAX_FILTER_IDS     = 8;
 	constexpr static size_t FILTER_BUFFER_SIZE = 512;
 
 private:
@@ -37,7 +35,7 @@ private:
 	/**
 	 * Dispatches a TrackedEvent for the given advertisement.
 	 */
-	void handleBackgroundParsed(adv_background_parsed_t *trackableAdvertisement);
+	void handleBackgroundParsed(adv_background_parsed_t* trackableAdvertisement);
 
 	// -------------------------------------------------------------
 	// --------------------- Filter buffer data --------------------
@@ -58,11 +56,11 @@ private:
 	 * List of pointers to the currently allocated filters in the _filterBuffer.
 	 * The memory is managed in same fashiona as the _filterBuffer itself.
 	 */
-	TrackingFilter* _parsingFilters[MAX_FILTER_IDS];
+	tracking_filter_t* _parsingFilters[MAX_FILTER_IDS];
 	uint8_t _parsingFiltersEndIndex;
 
 	uint16_t _masterHash;
-	uint16_t _masterVersion; // Lollipop @Persisted
+	uint16_t _masterVersion;  // Lollipop @Persisted
 
 	// -------------------------------------------------------------
 	// ------------------- Filter data management ------------------
@@ -76,7 +74,7 @@ private:
 	 *
 	 * Internally adjusts _filterBufferEnd to point to one byte after this array.
 	 */
-	TrackingFilter* allocateParsingFilter(uint8_t filterId, size_t totalSize);
+	tracking_filter_t* allocateParsingFilter(uint8_t filterId, size_t totalSize);
 
 	/**
 	 * Readjust the filterbuffer to create space at the back. Adjust the
@@ -91,7 +89,7 @@ private:
 	 * if _parsingFilters[i] == nullptr then _parsingFilters[j] == nullptr
 	 * for all j>=i.
 	 */
-	TrackingFilter* findParsingFilter(uint8_t filterId);
+	tracking_filter_t* findParsingFilter(uint8_t filterId);
 
 	// -------------------------------------------------------------
 	// ---------------------- Command interface --------------------
@@ -116,7 +114,8 @@ private:
 	 * This crownstones master version and crc are broadcasted over the mesh.
 	 * Sets 'filter modification in progress' flag of this crownstone back to off.
 	 */
-	cs_ret_code_t handleCommitFilterChangesCommand(trackable_parser_cmd_commit_filter_changes_t* cmdData);
+	cs_ret_code_t handleCommitFilterChangesCommand(
+			trackable_parser_cmd_commit_filter_changes_t* cmdData);
 
 	/**
 	 * Returns:
@@ -127,7 +126,8 @@ private:
 	 *    - filter version
 	 *    - filter crc
 	 */
-	cs_ret_code_t handleGetFilterSummariesCommand(trackable_parser_cmd_get_filer_summaries_t* cmdData);
+	cs_ret_code_t handleGetFilterSummariesCommand(
+			trackable_parser_cmd_get_filer_summaries_t* cmdData);
 
 	// -------------------------------------------------------------
 	// ----------------------- OLD interface -----------------------
