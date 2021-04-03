@@ -42,22 +42,22 @@ In a short overview:
 static constexpr auto BLUETOOTH_NAME = "CRWN";
 
 class ClassName {
-   private:
-    typedef uint8_t index_t;
+private:
+	typedef uint8_t index_t;
 
-    class Settings {
-        bool isActive;
-    };
+	class Settings {
+		bool isActive;
+	};
 
-   public:
-    void functionName();
+public:
+	void functionName();
 };
 
 using MyVec = std::vector<uint8_t>;
 
 struct __attribute__((__packed__)) a_packed_packet_t {
-    uint8_t shortWord;
-    uint32_t longWord;
+	uint8_t shortWord;
+	uint32_t longWord;
 };
 ```
 
@@ -65,7 +65,9 @@ Notes:
 - Abbreviations in identifier are considered to be a whole word in `lowerCamel` or `UpperCamel`. Only the first letter of an abbreviation will be upper case. For example: `rssiMacAddress`.
 - The convention for variable/member names is chosen to make it easier to recognize their scope and saves you from coming up with alternative names in contexts such as:
 	```
-	void setRssi(int8_t rssi) { _rssi = rssi; }
+	void setRssi(int8_t rssi) {
+		_rssi = rssi;
+	}
 	```
 - Avoid use of single letters for identifiers (with the exception of a variable for loop iterations) as it impairs search/replace tools and readability.
 - Avoid use of names longer than about 35 characters.
@@ -103,11 +105,12 @@ struct __attribute__((__packed__)) a_packed_packet_t {
 There is a strong preference to use typed `constexpr` values over macros. The use of `auto` is permitted if the codebase would emit warnings when replacing a macro with a constexprs of particular type.
 
 ```
-#define BLUETOOTH_NAME "CRWN"
-static constexpr auto BLUETOOTH_NAME = "CRWN"; // <-- strongly preferred
+#define BLUETOOTH_NAME "CRWN"                     // <-- obsolete
+static constexpr auto BLUETOOTH_NAME   = "CRWN";  // <-- acceptable
+static constexpr char[] BLUETOOTH_NAME = "CRWN";  // <-- preferred
 ```
 
-### Declare variables on their own line.
+### Declare variables on their own line
 
 This usually makes it easier to read.
 
@@ -115,6 +118,10 @@ This usually makes it easier to read.
 int a;
 int b;
 ```
+
+### Use nullptr instead of NULL
+
+The preprocessor symbol `NULL` is usually defined as `(void*)0)`, but it is implementation defined. There are subtle differences between `NULL` and `nullptr` due to freedom of implementation. Hence `nullptr` is preferred or possibly an explicit alternative if `nullptr` doesn't lead to intended behaviour.
 
 ### If statement block must always be in brackets.
 
@@ -126,6 +133,13 @@ if (on) {
 }
 ```
 
+### Include what you use
 
+Each source file `filename.cpp` file includes its corresponding header `filename.h`. 
+If a class, struct or function etc., say `class someclass{};` is defined in `otherfilename.h`:
+- If `filename.h` uses `someclass`, it should _directly_ `#include <otherfilename.h>`
+- Else, if `filename.cpp` uses `someclass`, it should _directly_ `#include <otherfilename.h>`
+
+This paradigm ensures that changing a header does not break any upward dependencies increases awareness of dependencies and make them easier to analyse.    
 
 
