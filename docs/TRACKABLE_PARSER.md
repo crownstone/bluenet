@@ -1,57 +1,51 @@
-# Whitelist
+# Trackable Parser
 
-This page describes the commands and packets that affect Bluenets whitelist
-filter component public API.
+This page describes the commands and packets that affect Bluenets Trackable Parser component public API.
+
+Status: *Under active development. Protocol NOT FIXED YET*.
 
 ## Table of contents
 
-- [Command](#commands)
-- [Packets](#packets)
+[Commands](#commands)
+- [Upload filter](#upload-filter)
+- [Remove filter](#remove-filter)
+- [Commit filter changes](#commit-filter-changes)
+- [Get filter summaries](#get-filter-summaries)
 
-## Bulk filter commands
-
-- [Add filter](#initialize-filter)
-- [Replace filter](#replace-filter)
-- [Remove filter](#clear-filter)
+[Packets](#packets)
+- [Tracking filter data](#tracking-filter-data)
+- [Tracking filter meta data](#tracking-filter-meta-data)
+- [Cuckoo filter data](#cuckoo-filter-data)
+- [Filter input type](#filter-input-type)
+- [Filter version](#filter-version)
+- [Filter flags](#filter-flags)
+- [Result code](#result-code)
 
 *************************************************************************
 
 ## Commands
 
-### Add filter
+### Upload filter
 
-Allocates a new filter with the given parameters.
+Upon receiving the first upload command for a given `filterId`, the firmware allocates a byte array of totalSize bytes. Then the chunk will be copied into the allocated space starting from the chunkStartIndex. Subsequent commands for the same id will use this same byte array until a commit command is received.
 
-#### Add filter packet
+The `chunk` must be part of a [tracking filter data](#tracking-filter-data). 
 
-Type | Name | Length | Description
---- | --- | --- | ---
-[Filter ID](#filter-id) | Id | 1 | Which filter to add the entry to.
-[Filter Type](#filter-type) | Type | 1 | Version of filter after the update.
-[Filter parameters](#filter-specific-data) | Params | ... | Filter type specific parameters.
-
-#### Add filter result packet
-
-A [Result](#result-code) packet is returned on this command. If result is not SUCCESS, 
-no change has been made to the filter or the mesh.
-
-*************************************************************************
-
-### Replace filter
-
-Deallocates the given filter.
-
-#### Replace filter packet
+#### Upload filter packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Filter ID](#filter-id) | Id | 1 | Which filter to add the entry to.
+uint8_t | filterId | 1 | Which filter to add the entry to.
+uint16_t | chunkStartIndex | 2 |  
+uint16_t[] | totalSize | 2 |
+uint16_t | chunkSize | 2 |
+uint8_t[] | chunk | ... | 
 
-#### Replace filter result packet
+
+#### Upload filter result packet
 
 A [Result](#result-code) packet is returned on this command. If result is not SUCCESS, 
 no change has been made to the filter or the mesh.
-
 
 *************************************************************************
 
@@ -63,7 +57,7 @@ Deallocates the given filter.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Filter ID](#filter-id) | Id | 1 | Which filter to add the entry to.
+uint8_t | filterId | 1 | Which filter to add the entry to.
 
 #### Remove filter result packet
 
@@ -73,47 +67,100 @@ no change has been made to the filter or the mesh.
 
 *************************************************************************
 
-## Packets
+### Commit filter changes
 
+**TODO** *Add description and change packet definition*
 
-### Filter parameters
-
-
-### Cuckoo filter parameters
+#### Commit filter packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | Max key count | 1 | Power of 2. Maximum number of different objects that can be stored. (Slightly lower cap in practice ~90%)
-uint8_t | Keys per bucket | 1 | Power of 2, usually 1, 2, 4 or 8. Tradeoff between insertion, containment check speed and storage.
-uint8_t | Max kick | 1 | Max insertion attempts. Influences practical max  capacity.
-uint32_t | Seed | 4 | Seed for the hash to use. Must be equal for all crownstones in mesh to facilitate compressed commands.
+[Filter ID](#filter-id) | Id | 1 | Which filter to add the entry to.
+
+#### Commit filter result packet
+
+A [Result](#result-code) packet is returned on this command. If result is not SUCCESS, 
+no change has been made to the filter or the mesh.
+
+
+*************************************************************************
+
+### Get filter summaries
+
+**TODO** *Add description and change packet definition*
+
+#### Commit filter packet
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Filter ID](#filter-id) | Id | 1 | Which filter to add the entry to.
+
+#### Commit filter result packet
+
+A [Result](#result-code) packet is returned on this command. If result is not SUCCESS, 
+no change has been made to the filter or the mesh.
+
+
+*************************************************************************
+
+## Packets
+
+### Tracking filter data
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+[Tracking filter meta data](#tracking-filter-meta-data) | metadata | | Metadata determining how the filter behaves
+[Cuckoo filter data](#cuckoo-filter-data) | filter | | Byte representation of the filter
+
+
+### Tracking filter meta data
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8_t | protocol | 1 | Filter protocol of this filter. 
+[Filter version](#filter-version) | version | 1 | Synchronisation version of this filter.
+uint16_t | profileId | 2 | Entrys that pass this filter will be associated with this profile id.
+[Filter input type](#filter-input-type) | inputType | 1 | Determines how this filter interprets incoming entries.
+[Filter flags](#filter-flags) | flags | 1 | bitmask for future use. Must remain 0 for now.
+
+
+### Cuckoo filter data
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8_t | number of buckets log2 | 1 | Cuckoofilter will contain 2^(num buckets) buckets.
+uint8_t | Keys per bucket | 1 | Each bucket will contain at most this amount of fingerprints. 
+uint16_t | victim fingerprint | 2 | Fingerprint of last item that failed to be inserted, 0 if none.
+uint8_t | victim bucket index A | 1 | Bucket A of victim, 0 if none.
+uint8_t | victim bucket index B | 1 | Bucket V of victim, 0 if none.
+uint8_t[] | fingerprint array | 2^N*K | Fingerprint array. Here N = number of buckets log 2, K is number of fingerprints per bucket
 
 
 ### Filter input type
-A `uint8_t` value to determine which filter in the firmware an operation should be applied on.
-Filter IDs that are not in this list will result in `FILTER_ID_NOT_FOUND` return values.
+A `uint8_t` value to determine which part of an advertisment is fed to the filter and how it is interpreted. 
 
-Value | Explanation
---- | ---
-0 | MAC filter
-1 | AD identifyable data filter
-2 | AD category data filter
-... | Other filters may follow
+Value | Name | Explanation
+--- | --- | ---
+0 | MAC filter | Mac address is fed into the filter and determines the trackable id.
+1 | AD data identity filter | AD data is fed into the filter and determines the trackable id.
+2 | AD data category filter | AD data is fed into the filter but MAC address determines the trackable id.
 
 ### Filter version
-A `uint8_t` "lollipop" value used for determining if a filter is up-to-date. 
+A `uint16_t` "lollipop" value used for determining if a filter is up-to-date. 
 
 
 Value | Description
 --- | --- 
-0 | Unknown, unset. Always inferior to non-zero versions.
-other | For non zero versions `v` and all `1 <= n <127`, `v` is inferior to `v+n` including lollipop roll over.
+0 | Unknown or unset version. Always inferior to non-zero versions.
+other | For non zero versions `v` and all `1 <= n < 2^16`, `v` is inferior to `v+n` including lollipop roll over.
 
-### Filter type
-Value | Description
---- | --- 
-0 | Cuckoo filter
-1 | Raw list filter.
+### Filter flags
+A `uint8_t` bitmask.
+
+Bits | Name | Explanation
+--- | --- | ---
+0 | isActive | Determines if the filter is currently active or not.
+1-7 | - | Reserved for future use. Must be 0.
 
 ### Result code
 A uin8_t constant explaining the operations result.

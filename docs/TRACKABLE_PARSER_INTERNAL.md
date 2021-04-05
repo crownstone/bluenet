@@ -1,28 +1,27 @@
-# Whitelist internals
+# Trackable Parser Private API
 
-This page describes features of Bluenets whitelist component that are 
-considered non-public API. As such, Crownstone might change this protocol
-to better suit any desired requirement, possibly without backward compatibility.
+This page describes the commands and packets that can manipulate the filters in the Trackable Parser component at a more granular level. These commands that are considered private API. As such, Crownstone might change this protocol to better suit any desired requirement, possibly without backward compatibility.
+
+Status: Currently unimplemented
 
 # Index
-- [Commands](#commands)
-  - [Add](#add-entry)
-  - [Remove](#remove-entry)
-  - [Add compressed](#add-compressed-entry)
-  - [Remove compressed](#remove-compressed-entry)
-- [Packets](#packets) 
-  - entry data
-  - compressed entry data
+[Commands](#commands)
+- [Add filter entry](#add-filter-entry)
+- [Remove filter entry](#remove-filter-entry)
+- [Add compressed filter entry](#add-compressed-filter-entry)
+- [Remove compressed filter entry](#remove-compressed-filter-entry)
+
+[Packets](#packets) 
+- [Filter entry data](#cuckoo-filter-entry-data)
+- [Compressed filter entry data](#compressed-cuckoo-filter-entry-data)
 
 *************************************************************************
 
 ## Commands
 
-### Add entry
+### Add filter entry
 
-The crownstone receiving this command will try to add the entry in the 
-given filter. When this is successful, it will handle resynchronisation
-of the filter in the mesh.
+Currently unimplemented.
 
 #### Add entry packet
 
@@ -39,11 +38,9 @@ Type | Name | Length | Description
 
 *************************************************************************
 
-### Remove entry
+### Remove filter entry
 
-The crownstone receiving this command will try to remove the Data entry in the 
-given filter. When this is successful, it will handle resynchronisation
-of the filter in the mesh.
+Currently unimplemented.
 
 #### Remove entry packet
 
@@ -65,12 +62,12 @@ Type | Name | Length | Description
 The cuckoo filter only stores fingerprints of entries, so it is possible to 
 update remote filters by simply communicating these compressed (constant size)
 packets rather than communicating the full entry (variable length) to achieve
-the same command. This requires the host to be up to date concerning the 
+the same result. This requires the host to be up to date concerning the 
 implementation of the filter method and results in less communication.
 
-### Add compressed entry 
+### Add compressed filter entry 
 
-When filter version is set to 0, the crownstone always accepts the command and will increment its local version for the given filter id. Else, a crownstone only accepts the command if the received filter version is superior to its current version for the given id.
+Currently unimplemented.
 
 ### Add compressed entry packet
 
@@ -88,11 +85,9 @@ no change has been made to the filter or the mesh.
 
 *************************************************************************
 
-### Remove compressed entry
+### Remove compressed filter entry
 
-When filter version is set to 0, the crownstone always accepts the command and will increment its local version for the given filter id. Else, a crownstone only accepts the command if the received filter version is superior to its current version for the given id.
-
-This command may only available for select filter types.
+Currently unimplemented.
 
 #### Remove compressed entry packet
 
@@ -122,6 +117,6 @@ uint8_t | Data | Len | Actual data of the entry
 Type | Name | Length | Description
 --- | --- | --- | ---
 uint16_t | Fingerprint | 2 | Fingerprint of the data to add
-uint8_t | Bucket index | 1 | Index of the bucket to add the data to (i.e. h1, h2)
+uint8_t | Bucket index | 1 | Index of the bucket to that the fingerprint belongs to.
 
 
