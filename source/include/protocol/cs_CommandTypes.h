@@ -74,6 +74,11 @@ enum CommandHandlerTypes {
 
 	CTRL_CMD_CLEAN_FLASH                 = 100,
 
+	CTRL_CMD_FILTER_UPLOAD               = 110,
+	CTRL_CMD_FILTER_REMOVE               = 111,
+	CTRL_CMD_FILTER_COMMIT               = 112,
+	CTRL_CMD_FILTER_GET_SUMMARIES        = 113,
+
 	CTRL_CMD_UNKNOWN                     = 0xFFFF
 };
 
