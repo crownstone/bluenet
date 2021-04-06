@@ -274,6 +274,14 @@ void CommandHandler::handleCommand(
 			return dispatchEventForCommand(CS_TYPE::CMD_MICROAPP_DISABLE, commandData, source, result);
 		case CTRL_CMD_CLEAN_FLASH:
 			return dispatchEventForCommand(CS_TYPE::CMD_STORAGE_GARBAGE_COLLECT, commandData, source, result);
+		case CTRL_CMD_FILTER_UPLOAD:
+			return dispatchEventForCommand(CS_TYPE::CMD_UPLOAD_FILTER, commandData, source, result);
+		case CTRL_CMD_FILTER_REMOVE:
+			return dispatchEventForCommand(CS_TYPE::CMD_REMOVE_FILTER, commandData, source, result);
+		case CTRL_CMD_FILTER_COMMIT:
+			return dispatchEventForCommand(CS_TYPE::CMD_COMMIT_FILTER_CHANGES, commandData, source, result);
+		case CTRL_CMD_FILTER_GET_SUMMARIES:
+			return dispatchEventForCommand(CS_TYPE::CMD_GET_FILTER_SUMMARIES, commandData, source, result);
 		case CTRL_CMD_UNKNOWN:
 			result.returnCode = ERR_UNKNOWN_TYPE;
 			return;
@@ -1088,6 +1096,10 @@ EncryptionAccessLevel CommandHandler::getRequiredAccessLevel(const CommandHandle
 		case CTRL_CMD_MICROAPP_ENABLE:
 		case CTRL_CMD_MICROAPP_DISABLE:
 		case CTRL_CMD_CLEAN_FLASH:
+		case CTRL_CMD_FILTER_UPLOAD:
+		case CTRL_CMD_FILTER_REMOVE:
+		case CTRL_CMD_FILTER_COMMIT:
+		case CTRL_CMD_FILTER_GET_SUMMARIES:
 			return ADMIN;
 		case CTRL_CMD_UNKNOWN:
 			return NOT_SET;
