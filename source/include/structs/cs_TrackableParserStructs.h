@@ -11,10 +11,29 @@
 #include <cstdint>
 
 /**
- * Data associated to a parsing filter that is not persisted to flash.
+ * Runtime meta data associated to a tracking_filter_t that is not persisted to flash.
  */
 struct __attribute__((__packed__)) tracking_filter_runtime_data_t {
-	uint8_t filterId;  // can be runtime only since it's saved as part of record metadata on flash.
+	/**
+	 *
+	 *
+	 * can be runtime only since it's saved as part of record metadata on flash.
+	 * */
+	uint8_t filterId;
+
+	/**
+	 * The size of the tracking_filter_t, including the buffer.
+	 * can be runtime only since it's saved as part of record metadata on flash.
+	 */
+	uint16_t totalSize;
+
+	/**
+	 * crc16 of the fields:
+	 * - tracking_filter_t::metadata
+	 * - tracking_filter_t::filterdata
+	 *
+	 * The value 0 wil be interpreted as 'not valid'.
+	 */
 	uint16_t crc;
 };
 

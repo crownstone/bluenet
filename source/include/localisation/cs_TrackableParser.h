@@ -19,6 +19,10 @@
  */
 class TrackableParser : public EventListener {
 public:
+	/**
+	 * TODO(Arend): load filters from memory.
+	 * - after loading, set filterModificationInProgress to false.
+	 */
 	void init();
 	void handleEvent(event_t& evt);
 
@@ -62,6 +66,15 @@ private:
 	uint16_t _masterHash;
 	uint16_t _masterVersion;  // Lollipop @Persisted
 
+	/**
+	 * When this value is true:
+	 * - no incoming advertisements are parsed.
+	 * - filters may be in inconsistent state.
+	 *
+	 * Defaults to true, so that the system has time to load data from flash.
+	 */
+	bool filterModificationInProgress = true;
+
 	// -------------------------------------------------------------
 	// ------------------- Filter data management ------------------
 	// -------------------------------------------------------------
@@ -69,6 +82,9 @@ private:
 	/**
 	 * Returns a pointer in the _filterBuffer, promising that at least
 	 * totalsSize bytes space starting from that address are free to use.
+	 *
+	 * Initializes the .runtimedata of the newly allocated tracking_filter_t
+	 * with the given size, filterid and crc == 0.
 	 *
 	 * Returns nullptr on failure.
 	 *
