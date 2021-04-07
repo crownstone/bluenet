@@ -17,9 +17,11 @@
 #include <util/cs_CuckooFilter.h>
 #include <util/cs_Utils.h>
 
-#define LOGTrackableParserDebug LOGnone
+#define LOGTrackableParserDebug LOGd
 
-void TrackableParser::init() {}
+void TrackableParser::init() {
+	LOGTrackableParserDebug("trackable parser initialised");
+}
 
 void TrackableParser::handleEvent(event_t& evt) {
 	switch (evt.type) {
@@ -38,7 +40,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 		// incoming filter commands
 		case CS_TYPE::CMD_UPLOAD_FILTER: {
 			LOGd("CMD_UPLOAD_FILTER");
-			return;
+			return; // DEBUG
 
 			trackable_parser_cmd_upload_filter_t* cmd_data =
 					CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
@@ -82,6 +84,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 // ------------------ Advertisment processing ------------------
 // -------------------------------------------------------------
 void TrackableParser::handleScannedDevice(scanned_device_t* device) {
+	return; // DEBUG
 
 	// loop over filters to check mac address
 	for (size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
