@@ -18,6 +18,7 @@
 #include <util/cs_Utils.h>
 
 #define LOGTrackableParserDebug LOGd
+#define LOGTrackableParserWarn LOGw
 
 void TrackableParser::init() {
 	LOGTrackableParserDebug("trackable parser initialised");
@@ -39,8 +40,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 
 		// incoming filter commands
 		case CS_TYPE::CMD_UPLOAD_FILTER: {
-			LOGd("CMD_UPLOAD_FILTER");
-			return; // DEBUG
+			LOGTrackableParserDebug("CMD_UPLOAD_FILTER");
 
 			trackable_parser_cmd_upload_filter_t* cmd_data =
 					CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
@@ -49,7 +49,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 			break;
 		}
 		case CS_TYPE::CMD_REMOVE_FILTER: {
-			LOGd("CMD_REMOVE_FILTER");
+			LOGTrackableParserDebug("CMD_REMOVE_FILTER not implemented yet");
 			return;
 
 			trackable_parser_cmd_remove_filter_t* cmd_data =
@@ -59,8 +59,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 			break;
 		}
 		case CS_TYPE::CMD_COMMIT_FILTER_CHANGES: {
-			LOGd("CMD_COMMIT_FILTER_CHANGES");
-			return;
+			LOGTrackableParserDebug("CMD_COMMIT_FILTER_CHANGES not implemented yet");
 
 			trackable_parser_cmd_commit_filter_changes_t* cmd_data =
 					CS_TYPE_CAST(CMD_COMMIT_FILTER_CHANGES, evt.data);
@@ -68,7 +67,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 			break;
 		}
 		case CS_TYPE::CMD_GET_FILTER_SUMMARIES: {
-			LOGd("CMD_GET_FILTER_SUMMARIES");
+			LOGTrackableParserDebug("CMD_GET_FILTER_SUMMARIES not implemented yet");
 			return;
 
 			trackable_parser_cmd_get_filer_summaries_t* cmd_data =
@@ -84,8 +83,6 @@ void TrackableParser::handleEvent(event_t& evt) {
 // ------------------ Advertisment processing ------------------
 // -------------------------------------------------------------
 void TrackableParser::handleScannedDevice(scanned_device_t* device) {
-	return; // DEBUG
-
 	// loop over filters to check mac address
 	for (size_t i = 0; i < _parsingFiltersEndIndex; ++i) {
 		tracking_filter_t* trackingFilter = _parsingFilters[i];
@@ -96,7 +93,16 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 			&& cuckoo.contains(device->address, MAC_ADDRESS_LEN)) {
 			// TODO: get fingerprint from filter instead of literal mac address.
 			// TODO: we should just pass on the device, right than copying rssi?
-			LOGd("filter %d accepted mac addres", trackingFilter->runtimedata.filterId);
+			LOGw("filter %d accepted mac addres: %x %x %x %x %x %x", trackingFilter->runtimedata.filterId,
+					device->address[0],
+					device->address[1],
+					device->address[2],
+					device->address[3],
+					device->address[4],
+					device->address[5]
+					);
+
+			continue; // DEBUG
 			TrackableEvent trackableEventData;
 			trackableEventData.id   = TrackableId(device->address, MAC_ADDRESS_LEN);
 			trackableEventData.rssi = device->rssi;
@@ -135,6 +141,8 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t* trackableA
 // -------------------------------------------------------------
 
 tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
+	LOGTrackableParserDebug("Allocating parsing filter #%d, of size %d", filterId, size);
+
 	if (_filterBufferEndIndex + size > FILTER_BUFFER_SIZE) {
 		// not enough space for filter of this total size.
 		return nullptr;
@@ -154,6 +162,7 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 }
 
 tracking_filter_t* TrackableParser::findParsingFilter(uint8_t filterId) {
+	LOGTrackableParserDebug("Looking up filter %d, end index: %d", filterId, _parsingFiltersEndIndex);
 	tracking_filter_t* parsingFilter;
 	for (size_t index = 0; index < _parsingFiltersEndIndex; ++index) {
 		parsingFilter = _parsingFilters[index];
@@ -165,6 +174,7 @@ tracking_filter_t* TrackableParser::findParsingFilter(uint8_t filterId) {
 		}
 
 		if (parsingFilter->runtimedata.filterId == filterId) {
+			LOGTrackableParserDebug("Filter found at index %d", index);
 			return _parsingFilters[index];
 		}
 	}
@@ -212,6 +222,8 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 
 		// meta data and filter data will be memcpy'd from chunks,
 		// no need to copy those.
+	} else {
+		LOGTrackableParserDebug("Parsing filter %d found", cmd_data->filterId);
 	}
 
 	// WARNING(Arend): we're not doing corruption checks here yet.
