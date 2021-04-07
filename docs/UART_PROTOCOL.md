@@ -22,9 +22,13 @@ uint8   | Start          | 1 | Start of a message (0x7E).
 uint16  | Size           | 2 | Size of all data after this field, including CRC. Size 0 is always invalid.
 uint8   | Protocol major | 1 | Major protocol version, increased for breaking changes.
 uint8   | Protocol minor | 1 | Minor protocol version, increased when new types are added.
-uint8   | Message type   | 1 | Type of UART message, see below.
+[Uart message type](#uart-message-type)   | Message type   | 1 | Type of UART message, see below.
 uint8[] | Payload        | N | Depends on message type.
 uint16  | CRC            | 2 | The CRC16 (CRC-16-CCITT) of everything after the size field.
+
+
+## UART message type
+A uint8 to differentiate between several uart message formats.
 
 Type | Payload | Description
 ---- | ------- | -----------
@@ -101,7 +105,7 @@ Type  | Type name                     | Encrypted | Data   | Description
 50201 | Log voltage                   | Never     | uint8  | Enable sending voltage samples.
 50202 | Log filtered current          | Never     | uint8  | Enable sending filtered current samples.
 50204 | Log power                     | Never     | uint8  | Enable sending calculated power samples.
-60000 | Inject event                  | Never     | ?      | Inject an internal event.
+60000 | Inject event                  | Never     | uint8[]      | Inject an internal event. Payload consists of the CS_TYPE and its associated event data structure.
 
 
 ## RX data types (events and replies)

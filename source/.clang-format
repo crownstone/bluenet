@@ -29,8 +29,6 @@ AlignOperands: true
 BreakBeforeBinaryOperators: NonAssignment
 BreakBeforeTernaryOperators: true
 AlignConsecutiveAssignments: true
-AlignConsecutiveBitFields: true
-
 
 ###### Wrapping and general whitespace ######
 
