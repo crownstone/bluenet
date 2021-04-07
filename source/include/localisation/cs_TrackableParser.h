@@ -57,7 +57,7 @@ private:
 	 * The memory is managed in same fashiona as the _filterBuffer itself.
 	 */
 	tracking_filter_t* _parsingFilters[MAX_FILTER_IDS];
-	uint8_t _parsingFiltersEndIndex;
+	uint8_t _parsingFiltersEndIndex = 0;
 
 	uint16_t _masterHash;
 	uint16_t _masterVersion;  // Lollipop @Persisted
