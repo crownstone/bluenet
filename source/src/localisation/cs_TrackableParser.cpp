@@ -186,18 +186,23 @@ void TrackableParser::deallocateParsingFilter(uint8_t filterId) {
 
 cs_ret_code_t TrackableParser::handleUploadFilterCommand(
 		trackable_parser_cmd_upload_filter_t* cmd_data) {
+	LOGTrackableParserDebug("start %d, chunksize %d, total size %d",cmd_data->chunkStartIndex, cmd_data->chunkSize, cmd_data->totalSize);
 
 	if (cmd_data->chunkStartIndex + cmd_data->chunkSize > cmd_data->totalSize) {
+		LOGTrackableParserWarn("Chunk overflows total size.");
 		return ERR_INVALID_MESSAGE;
 	}
 
 	// find or allocate a parsing filter
 	tracking_filter_t* parsingFilter = findParsingFilter(cmd_data->filterId);
 	if (parsingFilter == nullptr) {
-		parsingFilter = allocateParsingFilter(cmd_data->filterId, cmd_data->totalSize);
+		LOGTrackableParserDebug("parsing filter %d not found", cmd_data->filterId);
+		// command totalSize only includes the size of the cuckoo filter and its metadata, not the runtime data yet.
+		parsingFilter = allocateParsingFilter(cmd_data->filterId, sizeof(tracking_filter_runtime_data_t) + cmd_data->totalSize);
 
 		if (parsingFilter == nullptr) {
 			// failed to handle command, no space.
+			LOGTrackableParserWarn("parsing filter allocation failed");
 			return ERR_NO_SPACE;
 		}
 
