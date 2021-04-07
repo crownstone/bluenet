@@ -246,8 +246,39 @@ cs_ret_code_t TrackableParser::handleRemoveFilterCommand(
 	return ERR_NOT_IMPLEMENTED;
 }
 
+void logfilter(tracking_filter_t* filter) {
+	if (filter != nullptr) {
+		LOGTrackableParserDebug("medatadata.inputType: %d",filter->metadata.inputType);
+		LOGTrackableParserDebug("medatadata.profileId: %x",filter->metadata.profileId);
+		LOGTrackableParserDebug("medatadata.protocol: %d",filter->metadata.protocol);
+		LOGTrackableParserDebug("medatadata.version: %d",filter->metadata.version);
+		LOGTrackableParserDebug("medatadata.flags: %x",filter->metadata.flags);
+		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.bucketCountLog2);
+		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.nestsPerBucket);
+		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.victim.fingerprint);
+		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.victim.bucketA);
+		LOGTrackableParserDebug("filterdata.: %d", filter->filterdata.victim.bucketB);
+
+		auto cuckoo = CuckooFilter(filter->filterdata);
+		LOGTrackableParserDebug("cuckoo filter buffer size: %d", cuckoo.bufferSize());
+	}
+	else {
+		LOGTrackableParserDebug("Trying to print tracking filter but pointer is null");
+	}
+}
+
 cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(
 		trackable_parser_cmd_commit_filter_changes_t* cmd_data) {
+	tracking_filter_t* parsingFilter = findParsingFilter(1);
+	logfilter(parsingFilter);
+
+	uint8_t testelement [] = {0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7, 0x8, 0x9};
+
+	auto cuckoo = CuckooFilter(parsingFilter->filterdata);
+	bool contains = cuckoo.contains(testelement, sizeof(testelement));
+	LOGd("cuckoo contains test element: %s", contains? "true" : "false");
+
+
 	// TODO(Arend): implement later.
 	// - compute and check all filter sizes
 	// - compute and check all filter crcs
