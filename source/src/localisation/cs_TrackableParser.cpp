@@ -182,11 +182,10 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 			reinterpret_cast<tracking_filter_t*>(_filterBuffer + _filterBufferEndIndex);
 	_filterBufferEndIndex += size;
 
-
 	// initialize runtime data.
 	_parsingFilters[_parsingFiltersEndIndex]->runtimedata.totalSize = size;
-	_parsingFilters[_parsingFiltersEndIndex]->runtimedata.filterId = filterId;
-	_parsingFilters[_parsingFiltersEndIndex]->runtimedata.crc      = 0;
+	_parsingFilters[_parsingFiltersEndIndex]->runtimedata.filterId  = filterId;
+	_parsingFilters[_parsingFiltersEndIndex]->runtimedata.crc       = 0;
 
 	// don't forget to postcrement the EndIndex for the filter list in return statement.
 	return _parsingFilters[_parsingFiltersEndIndex++];
@@ -228,6 +227,7 @@ void TrackableParser::deallocateParsingFilter(uint8_t filterId) {
 
 cs_ret_code_t TrackableParser::handleUploadFilterCommand(trackable_parser_cmd_upload_filter_t* cmd_data) {
 	filterModificationInProgress = true;
+	_masterVersion = 0;
 
 	LOGTrackableParserDebug(
 			"start %d, chunksize %d, total size %d",
@@ -244,15 +244,23 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(trackable_parser_cmd_up
 	tracking_filter_t* parsingFilter = findParsingFilter(cmd_data->filterId);
 
 	// check if we need to clean up an old filter.
-	if (parsingFilter != nullptr) {
-		LOGTrackableParserDebug("Parsing filter %d found", cmd_data->filterId);
-		if(parsingFilter->runtimedata.crc != 0) {
-			LOGTrackableParserDebug("upload command received but pre-existing filter is not removed.");
-			deallocateParsingFilter(parsingFilter->runtimedata.filterId);
+	if (parsingFilter != nullptr && parsingFilter->runtimedata.crc != 0) {
+		LOGTrackableParserDebug("pre-existing filter %d found", cmd_data->filterId);
 
-			// after deallocation, the filter is clearly gone.
-			parsingFilter = nullptr;
-		}
+		LOGTrackableParserDebug("upload command received but pre-existing filter is not removed.");
+		deallocateParsingFilter(parsingFilter->runtimedata.filterId);
+
+		// after deallocation, the filter is clearly gone.
+		LOGw("assumption fails, deallocation not implemented yet");
+		parsingFilter = nullptr;
+	}
+
+	// check if the total size hasn't changed in the mean time
+	if (parsingFilter != nullptr && parsingFilter->runtimedata.totalSize != cmd_data->totalSize){
+		// this really is a mess. @Bart do we re-allocate and report partial success,
+		// or do we refuse to continue and de-allocate to clean up?
+		LOGe("Handling of corrupt incoming command not fully implemented.");
+		return ERR_WRONG_PARAMETER;
 	}
 
 	// check if we need to create a new filter
@@ -267,26 +275,14 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(trackable_parser_cmd_up
 			LOGTrackableParserWarn("parsing filter allocation failed");
 			return ERR_NO_SPACE;
 		}
-
-
-		// meta data and filter data will be memcpy'd from chunks,
-		// no need to copy those.
 	}
 
-	// WARNING(Arend): we're not doing corruption checks here yet.
-	// E.g.: when totalSize changes for a specific filterId before
-	//       a commit is reached, we have a parsingFilter allocated
-	//       but it's of the wrong size.
-	// Edit(Arend):
-	// 		As we keep a list of pointers _parsingFilters, as well
-	// 		as the end pointer to the byte array, this information
-	// 		is implicitly available even if multiple filters are
-	// 		uploaded in chunks concurrently. Just ptrdiff them.
-	// Edit(Arend): this won't be the case if we heap-allocate!
+	// by now, the filter exists, is clean, and the incoming chunk is verified for totalSize consistency.
 
 	// chunk index starts counting from metadata onwards (ignoring runtimedata)
 	uint8_t* parsingFilterBase_ptr  = reinterpret_cast<uint8_t*>(&(parsingFilter->metadata));
 	uint8_t* parsingFilterChunk_ptr = parsingFilterBase_ptr + cmd_data->chunkStartIndex;
+
 
 	if (parsingFilterChunk_ptr + cmd_data->chunkSize > _filterBuffer + FILTER_BUFFER_SIZE) {
 		// chunk would overwrite end of filterbuffer.
@@ -302,8 +298,10 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(trackable_parser_cmd_up
 
 cs_ret_code_t TrackableParser::handleRemoveFilterCommand(trackable_parser_cmd_remove_filter_t* cmd_data) {
 	filterModificationInProgress = true;
+	_masterVersion = 0;
 
-	// TODO(Arend): implement later.
+	deallocateParsingFilter(cmd_data->filterId);
+
 	return ERR_NOT_IMPLEMENTED;
 }
 
@@ -319,8 +317,8 @@ cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(
 	LOGd("cuckoo contains test element: %s", contains ? "true" : "false");
 
 	// TODO(Arend): implement later.
-	// - compute and check all filter sizes
-	// - compute and check all filter crcs
+	// - compute and check all filter sizes (i.e. cuckoo.size() + sizeof... == runtimemetadata.totalSize
+	// - compute and check all filter crcs (maybe only the ones wit crc == 0?)
 	// - compute and check(?) master crc
 	// - persist all filters
 	// - broadcast update to the mesh
