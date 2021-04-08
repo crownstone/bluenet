@@ -31,36 +31,19 @@ public:
 
 private:
 	// -------------------------------------------------------------
-	// ------------------ Advertisment processing ------------------
-	// -------------------------------------------------------------
-
-	void handleScannedDevice(scanned_device_t* device);
-
-	/**
-	 * Dispatches a TrackedEvent for the given advertisement.
-	 */
-	void handleBackgroundParsed(adv_background_parsed_t* trackableAdvertisement);
-
-	// -------------------------------------------------------------
 	// --------------------- Filter buffer data --------------------
 	// -------------------------------------------------------------
-
-	/**
-	 * The raw byte buffer in which TrackingFilters are allocated.
-	 * Memory is managed as a stack:
-	 * - the top is administrated by _filterBufferEndIndex
-	 * - new filters are allocated at the top (if space allows)
-	 * - when a filter is removed, all filters on top of it are relocated
-	 *   immediately to avoid gaps.
-	 */
-	uint8_t _filterBuffer[FILTER_BUFFER_SIZE];
-	size_t _filterBufferEndIndex = 0;
 
 	/**
 	 * List of pointers to the currently allocated filters in the _filterBuffer.
 	 * The memory is managed in same fashiona as the _filterBuffer itself.
 	 */
-	tracking_filter_t* _parsingFilters[MAX_FILTER_IDS];
+	tracking_filter_t* _parsingFilters[MAX_FILTER_IDS] = {};
+
+	/**
+	 * Index of the first element in _parsingFilters equal to nullptr.
+	 * Equal to MAX_FILTER_IDS if that doesn't exist.
+	 */
 	uint8_t _parsingFiltersEndIndex = 0;
 
 	uint16_t _masterHash;
@@ -76,12 +59,26 @@ private:
 	bool filterModificationInProgress = true;
 
 	// -------------------------------------------------------------
+	// ------------------ Advertisment processing ------------------
+	// -------------------------------------------------------------
+
+	void handleScannedDevice(scanned_device_t* device);
+
+	/**
+	 * Dispatches a TrackedEvent for the given advertisement.
+	 */
+	void handleBackgroundParsed(adv_background_parsed_t* trackableAdvertisement);
+
+
+	// -------------------------------------------------------------
 	// ------------------- Filter data management ------------------
 	// -------------------------------------------------------------
 
 	/**
-	 * Returns a pointer in the _filterBuffer, promising that at least
-	 * totalsSize bytes space starting from that address are free to use.
+	 * Heap allocates a tracking_filter_t object, if there is enough free
+	 * space on the heap and if the total allocated size of this TrackableParser
+	 * component used for filters will not exceed the maximum as result of this
+	 * allocation.
 	 *
 	 * Initializes the .runtimedata of the newly allocated tracking_filter_t
 	 * with the given size, filterid and crc == 0.
@@ -90,7 +87,7 @@ private:
 	 *
 	 * Internally adjusts _filterBufferEnd to point to one byte after this array.
 	 */
-	tracking_filter_t* allocateParsingFilter(uint8_t filterId, size_t totalSize);
+	tracking_filter_t* allocateParsingFilter(uint8_t filterId, size_t payloadSize);
 
 	/**
 	 * Readjust the filterbuffer to create space at the back. Adjust the
@@ -106,6 +103,8 @@ private:
 	 * for all j>=i.
 	 */
 	tracking_filter_t* findParsingFilter(uint8_t filterId);
+
+	size_t getTotalHeapAllocatedSize();
 
 	// -------------------------------------------------------------
 	// ---------------------- Command interface --------------------

@@ -74,8 +74,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 			break;
 		}
 		case CS_TYPE::CMD_REMOVE_FILTER: {
-			LOGTrackableParserDebug("CMD_REMOVE_FILTER not implemented yet");
-			return;
+			LOGTrackableParserDebug("CMD_REMOVE_FILTER");
 
 			trackable_parser_cmd_remove_filter_t* cmd_data = CS_TYPE_CAST(CMD_REMOVE_FILTER, evt.data);
 
@@ -139,7 +138,7 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 		}
 	}
 
-	// TODO: Add the AD Data field loop.
+	// TODO: Add the AD Data loop for other filter inputTypes.
 	// loop over filters fields to check addata fields
 	//	// keeps fields as outer loop because that's more expensive to loop over.
 	// 	// See BLEutil:findAdvType how to loop the fields.
@@ -165,46 +164,62 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t* trackableA
 // ------------------- Filter data management ------------------
 // -------------------------------------------------------------
 
-tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t size) {
-	LOGTrackableParserDebug("Allocating parsing filter #%d, of size %d", filterId, size);
+tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t payloadSize) {
+	LOGTrackableParserDebug("Allocating parsing filter #%d, of size %d (endindex: %u)", filterId, payloadSize, _parsingFiltersEndIndex);
+	size_t totalSize = sizeof(tracking_filter_runtime_data_t) + payloadSize;
 
-	if (_filterBufferEndIndex + size > FILTER_BUFFER_SIZE) {
+
+	if (getTotalHeapAllocatedSize() + totalSize > FILTER_BUFFER_SIZE) {
 		// not enough space for filter of this total size.
 		return nullptr;
 	}
 
-	if (_parsingFiltersEndIndex + 1u > MAX_FILTER_IDS) {
+	if (_parsingFiltersEndIndex >= MAX_FILTER_IDS) {
 		// not enough space for more filter ids.
 		return nullptr;
 	}
 
-	_parsingFilters[_parsingFiltersEndIndex] =
-			reinterpret_cast<tracking_filter_t*>(_filterBuffer + _filterBufferEndIndex);
-	_filterBufferEndIndex += size;
+	// just a shorthand
+	auto& newFilterLocation = _parsingFilters[_parsingFiltersEndIndex];
 
+	LOGTrackableParserDebug("Try allocation");
+	// try heap allocation
+	uint8_t* foo = new (std::nothrow) uint8_t[totalSize];
+	newFilterLocation =	reinterpret_cast<tracking_filter_t*>(foo);
+
+	LOGTrackableParserDebug("after allocation");
+
+	if (newFilterLocation == nullptr) {
+		// new couldn't be allocated, heap is too full.
+		return nullptr;
+	}
+
+	LOGTrackableParserDebug("before assignments");
 	// initialize runtime data.
-	_parsingFilters[_parsingFiltersEndIndex]->runtimedata.totalSize = size;
-	_parsingFilters[_parsingFiltersEndIndex]->runtimedata.filterId  = filterId;
-	_parsingFilters[_parsingFiltersEndIndex]->runtimedata.crc       = 0;
+	newFilterLocation->runtimedata.totalSize = payloadSize;
+	newFilterLocation->runtimedata.filterId  = filterId;
+	newFilterLocation->runtimedata.crc       = 0;
 
-	// don't forget to postcrement the EndIndex for the filter list in return statement.
-	return _parsingFilters[_parsingFiltersEndIndex++];
+	// don't forget to postcrement the EndIndex for the filter list.
+	_parsingFiltersEndIndex++;
+
+	return newFilterLocation;
 }
 
 tracking_filter_t* TrackableParser::findParsingFilter(uint8_t filterId) {
 	LOGTrackableParserDebug("Looking up filter %d, end index: %d", filterId, _parsingFiltersEndIndex);
 
-	tracking_filter_t* parsingFilter;
+	tracking_filter_t* trackingFilter;
 	for (size_t index = 0; index < _parsingFiltersEndIndex; ++index) {
-		parsingFilter = _parsingFilters[index];
+		trackingFilter = _parsingFilters[index];
 
-		if (parsingFilter == nullptr) {
+		if (trackingFilter == nullptr) {
 			LOGw("_parsingFiltersEndIndex incorrect: found nullptr before reaching end of filter "
 				 "list.");
 			return nullptr;
 		}
 
-		if (parsingFilter->runtimedata.filterId == filterId) {
+		if (trackingFilter->runtimedata.filterId == filterId) {
 			LOGTrackableParserDebug("Filter found at index %d", index);
 			return _parsingFilters[index];
 		}
@@ -214,11 +229,47 @@ tracking_filter_t* TrackableParser::findParsingFilter(uint8_t filterId) {
 }
 
 void TrackableParser::deallocateParsingFilter(uint8_t filterId) {
-	// TODO(Arend);
-	// find filter pointer in _parsingFiltser
-	// wipe memory in buffer at that location
-	// memcpy the tail onto the created opening
-	// remove filterId from _parsingFilters list
+	LOGTrackableParserDebug("deallocating %u", filterId);
+
+	for (size_t index = 0; index < _parsingFiltersEndIndex; ++index) {
+		tracking_filter_t*& trackingFilter_ref = _parsingFilters[index];
+		if(trackingFilter_ref == nullptr) {
+			// we keep the array nullptr terminated.
+			break;
+		}
+
+		if (trackingFilter_ref->runtimedata.filterId == filterId) {
+			LOGTrackableParserDebug("found filter. deleting");
+			auto asByteArray = reinterpret_cast<uint8_t*>(trackingFilter_ref);
+			delete[] asByteArray;
+			LOGTrackableParserDebug("post-delete.");
+
+			if(_parsingFiltersEndIndex < MAX_FILTER_IDS) {
+				// move the last filter in the array into the empty slot.
+				trackingFilter_ref = _parsingFilters[index];
+				_parsingFilters[index] = nullptr;
+			} else {
+				trackingFilter_ref = nullptr;
+			}
+			// eiter way, the last filter has been cleaned up, so reduce filter end by 1.
+			_parsingFiltersEndIndex--;
+		}
+	}
+}
+
+size_t TrackableParser::getTotalHeapAllocatedSize() {
+	LOGTrackableParserDebug("computing allocated size");
+
+	size_t total = 0;
+	for (tracking_filter_t* trackingFilter : _parsingFilters) {
+		if (trackingFilter == nullptr) {
+			// reached back of the list (nullptr).
+			break;
+		}
+		total += sizeof(tracking_filter_runtime_data_t) + trackingFilter->runtimedata.totalSize;
+	}
+
+	return total;
 }
 
 // -------------------------------------------------------------
@@ -229,11 +280,7 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(trackable_parser_cmd_up
 	filterModificationInProgress = true;
 	_masterVersion = 0;
 
-	LOGTrackableParserDebug(
-			"start %d, chunksize %d, total size %d",
-			cmd_data->chunkStartIndex,
-			cmd_data->chunkSize,
-			cmd_data->totalSize);
+	LOGTrackableParserDebug("start %d, chunksize %d, total size %d", cmd_data->chunkStartIndex, cmd_data->chunkSize, cmd_data->totalSize);
 
 	if (cmd_data->chunkStartIndex + cmd_data->chunkSize > cmd_data->totalSize) {
 		LOGTrackableParserWarn("Chunk overflows total size.");
@@ -267,8 +314,7 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(trackable_parser_cmd_up
 	if (parsingFilter == nullptr) {
 		LOGTrackableParserDebug("parsing filter %d not found", cmd_data->filterId);
 		// command totalSize only includes the size of the cuckoo filter and its metadata, not the runtime data yet.
-		parsingFilter =
-				allocateParsingFilter(cmd_data->filterId, sizeof(tracking_filter_runtime_data_t) + cmd_data->totalSize);
+		parsingFilter = allocateParsingFilter(cmd_data->filterId, cmd_data->totalSize);
 
 		if (parsingFilter == nullptr) {
 			// failed to handle command, no space.
@@ -283,13 +329,6 @@ cs_ret_code_t TrackableParser::handleUploadFilterCommand(trackable_parser_cmd_up
 	uint8_t* parsingFilterBase_ptr  = reinterpret_cast<uint8_t*>(&(parsingFilter->metadata));
 	uint8_t* parsingFilterChunk_ptr = parsingFilterBase_ptr + cmd_data->chunkStartIndex;
 
-
-	if (parsingFilterChunk_ptr + cmd_data->chunkSize > _filterBuffer + FILTER_BUFFER_SIZE) {
-		// chunk would overwrite end of filterbuffer.
-		// (Unlikely to happen, previous guards should have caught this.)
-		return ERR_NO_SPACE;
-	}
-
 	// apply filter chunk, counting chunk index from metadata onwards:
 	std::memcpy(parsingFilterChunk_ptr, cmd_data->chunk, cmd_data->chunkSize);
 
@@ -302,7 +341,7 @@ cs_ret_code_t TrackableParser::handleRemoveFilterCommand(trackable_parser_cmd_re
 
 	deallocateParsingFilter(cmd_data->filterId);
 
-	return ERR_NOT_IMPLEMENTED;
+	return ERR_NOT_IMPLEMENTED; // TODO: change to success
 }
 
 cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(
