@@ -106,6 +106,8 @@ private:
 
 	size_t getTotalHeapAllocatedSize();
 
+	size_t getTotalSize(tracking_filter_t& trackingFilter);
+
 	// -------------------------------------------------------------
 	// ---------------------- Command interface --------------------
 	// -------------------------------------------------------------

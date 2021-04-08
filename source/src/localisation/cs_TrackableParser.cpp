@@ -16,6 +16,7 @@
 #include <structs/cs_StreamBufferAccessor.h>
 #include <util/cs_CuckooFilter.h>
 #include <util/cs_Utils.h>
+#include <util/cs_Crc16.h>
 
 #define LOGTrackableParserDebug LOGd
 #define LOGTrackableParserWarn LOGw
@@ -82,7 +83,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 			break;
 		}
 		case CS_TYPE::CMD_COMMIT_FILTER_CHANGES: {
-			LOGTrackableParserDebug("CMD_COMMIT_FILTER_CHANGES not implemented yet");
+			LOGTrackableParserDebug("CMD_COMMIT_FILTER_CHANGES");
 
 			trackable_parser_cmd_commit_filter_changes_t* cmd_data = CS_TYPE_CAST(CMD_COMMIT_FILTER_CHANGES, evt.data);
 			handleCommitFilterChangesCommand(cmd_data);
@@ -179,20 +180,41 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 		return nullptr;
 	}
 
-	// just a shorthand
-	auto& newFilterLocation = _parsingFilters[_parsingFiltersEndIndex];
-
 	LOGTrackableParserDebug("Try allocation");
 	// try heap allocation
-	uint8_t* foo = new (std::nothrow) uint8_t[totalSize];
-	newFilterLocation =	reinterpret_cast<tracking_filter_t*>(foo);
+	uint8_t* newArray = new (std::nothrow) uint8_t[totalSize];
 
 	LOGTrackableParserDebug("after allocation");
 
-	if (newFilterLocation == nullptr) {
+	if (newArray== nullptr) {
 		// new couldn't be allocated, heap is too full.
 		return nullptr;
 	}
+
+	uint8_t index_for_new_entry = 0;
+	if( _parsingFiltersEndIndex > 0) {
+		// create space for the new entry and keep the list sorted
+
+		for (uint8_t i = _parsingFiltersEndIndex - 1; i > 0 ; --i) {
+			// _parsingFiltersEndIndex points exactly one after the last non-nullptr
+			// i is always a valid position because of previous check is strictly less than MAX)_FILTER_IDS
+			// (i-1) won't roll over, i > 0.
+
+			if(_parsingFilters[i - 1]->runtimedata.filterId > filterId) {
+				// move this entry up one position in the list.
+				_parsingFilters[i] = _parsingFilters[i - 1];
+			}
+			else {
+				index_for_new_entry = i - 1;
+				break;
+			}
+		}
+	}
+
+	// just a shorthand
+	auto& newFilterLocation = _parsingFilters[index_for_new_entry];
+
+	newFilterLocation =	reinterpret_cast<tracking_filter_t*>(newArray);
 
 	LOGTrackableParserDebug("before assignments");
 	// initialize runtime data.
@@ -202,6 +224,8 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 
 	// don't forget to postcrement the EndIndex for the filter list.
 	_parsingFiltersEndIndex++;
+
+	// TODO: sort
 
 	return newFilterLocation;
 }
@@ -257,6 +281,10 @@ void TrackableParser::deallocateParsingFilter(uint8_t filterId) {
 	}
 }
 
+size_t TrackableParser::getTotalSize(tracking_filter_t& trackingFilter) {
+	return sizeof(tracking_filter_runtime_data_t) + trackingFilter.runtimedata.totalSize;
+}
+
 size_t TrackableParser::getTotalHeapAllocatedSize() {
 	LOGTrackableParserDebug("computing allocated size");
 
@@ -266,7 +294,7 @@ size_t TrackableParser::getTotalHeapAllocatedSize() {
 			// reached back of the list (nullptr).
 			break;
 		}
-		total += sizeof(tracking_filter_runtime_data_t) + trackingFilter->runtimedata.totalSize;
+		total += getTotalSize(*trackingFilter);
 	}
 
 	return total;
@@ -356,11 +384,44 @@ cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(
 	LOGd("cuckoo contains test element: %s", contains ? "true" : "false");
 
 	// TODO(Arend): implement later.
-	// - compute and check all filter sizes (i.e. cuckoo.size() + sizeof... == runtimemetadata.totalSize
-	// - compute and check all filter crcs (maybe only the ones wit crc == 0?)
 	// - compute and check(?) master crc
-	// - persist all filters
 	// - broadcast update to the mesh
+
+	uint16_t mastercrc = 0;
+	uint16_t* prevcrc = nullptr;
+	for (auto& trackingFilter_ptr : _parsingFilters) {
+		if (trackingFilter_ptr == nullptr) {
+			// early return: last filter has been handled.
+			break;
+		}
+
+		if (trackingFilter_ptr->runtimedata.crc == 0) {
+			// filter changed since commit.
+
+			size_t trackingFilterSize = getTotalSize(*trackingFilter_ptr);
+			auto cuckoo = CuckooFilter(trackingFilter_ptr->filterdata);
+
+			if (trackingFilterSize != sizeof(tracking_filter_t) + cuckoo.bufferSize()) {
+				// the cuckoo filter size parameters do not match the allocated space.
+				// likely cause by malformed data on the host side.
+				// This check can't be performed earlier: as long as not all chuncks are
+				// received the filterdata may be in invalid state.
+
+				// TODO handle this case.
+			}
+
+			trackingFilter_ptr->runtimedata.crc =
+					crc16(static_cast<const uint8_t*>(trackingFilter_ptr->metadata),
+						  trackingFilter_ptr->runtimedata.totalSize,
+						  nullptr);
+
+			// TODO persist filter.
+		}
+
+		mastercrc = crc16(trackingFilter_ptr->runtimedata.crc, sizeof(trackingFilter_ptr->runtimedata.crc), prevcrc);
+		prevcrc   = &mastercrc;  // first iteration will have prevcrc==nullptr, all subsequent ones point to mastercrc.
+	}
+
 
 	filterModificationInProgress = false;  // NOTE: if writing flash, this may need to be delayed until write success.
 
