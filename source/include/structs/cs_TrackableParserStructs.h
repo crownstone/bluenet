@@ -22,7 +22,12 @@ struct __attribute__((__packed__)) tracking_filter_runtime_data_t {
 	uint8_t filterId;
 
 	/**
-	 * The size of the tracking_filter_t, including the buffer.
+	 * The size of the tracking_filter_t, including the buffer, excluding sizeof(runtimedata).
+	 * i.e.:
+	 * - sizeof(metadata)
+	 * - sizeof(filterdata)
+	 * - fingerprint array size of the filterdata
+	 *
 	 * can be runtime only since it's saved as part of record metadata on flash.
 	 */
 	uint16_t totalSize;
