@@ -47,6 +47,11 @@ uint8_t[] | chunk | ... |
 
 A [result code](./PROTOCOL.md#result-codes) packet is returned on this command. If result is not SUCCESS, 
 no change has been made to the filter or the mesh.
+- `SUCCESS`: Chunk has been copied into the desired filter.
+- `INVALID_MESSAGE`: Chunk would overflow total size of the filter. Message dropped.
+- `WRONG_STATE`: Total size changed between upload commands. Filter deallocated. 
+- `NO_SPACE`: Message dropped.
+
 
 *************************************************************************
 
@@ -63,8 +68,8 @@ uint8_t | filterId | 1 | Which filter to add the entry to.
 #### Remove filter result packet
 
 A [result code](./PROTOCOL.md#result-codes) packet is returned on this command.
-ERR_SUCCESS: filter was found and deallocated. Progress was started.
-ERR_NOT_FOUND: filter wasn't found. Progress was started.
+- `SUCCESS`: filter was found and deallocated. Progress was started.
+- `NOT_FOUND`: filter wasn't found. Progress was started.
 
 *************************************************************************
 
@@ -75,41 +80,42 @@ will perform several consistency checks:
 - Crc values are recomputed where necessary
 - Filters are checked for size consistency (e.g. allocated space for a tracking filter must match the cuckoo filter size definition)
 
-Any malformed filters may immediately be deallocated to save resources and prevent firmware crashes. When return value is not ERR_SUCCESS, query the status with a [get filter summaries](#get-filter-summaries) command for more information.
+Any malformed filters may immediately be deallocated to save resources and prevent firmware crashes. When return value is not `SUCCESS`, query the status with a [get filter summaries](#get-filter-summaries) command for more information.
 
 #### Commit filter packet
 
-Type | Name | Length | Description
---- | --- | --- | ---
-
+Empty.
 
 #### Commit filter result packet
 
 A [result code](./PROTOCOL.md#result-codes) packet is returned on this command. 
 
-If result is SUCCESS all filters passed the consistency checks and the master crc matches.
-
-If ERR_MISMATCH is returned, the master crc did not match but no consistency checks failed.
-
-IF ERR_WRONG_STATE was returned some filters have been deleted due to failed consistency. 
+- `SUCCESS`: all filters passed the consistency checks and the master crc matches.
+- `MISMATCH`:the master crc did not match but no consistency checks failed.
+- `WRONG_STATE`: some filters have been deleted due to failed consistency checks.
 
 
 *************************************************************************
 
 ### Get filter summaries
 
-**TODO** *Add description and change packet definition*
+Obtain a summary of the state of all filters currently on the device.
 
-#### Commit filter packet
+#### Get filter summaries packet
 
+Empty.
+
+#### Get filter summaries result packet
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Filter ID](#filter-id) | Id | 1 | Which filter to add the entry to.
+uint16_t | masterVersion | 2 | Synchronization version of the TrackableParser at time of constructing this result packet.  
+uint16_t | masterCrc | 2 | Master crc at time of constructing this result packet.
+[Filter summary](#filter-summary) | summaries | < MAX_FILTERS_IDS * 6 | Summaries of all filters currently on the device.
 
-#### Commit filter result packet
 
-A [result code](./PROTOCOL.md#result-codes)(#result-code) packet is returned on this command. If result is not SUCCESS, 
-no change has been made to the filter or the mesh.
+A [result code](./PROTOCOL.md#result-codes) packet is returned on this command.
+- `SUCCESS`: No filter modifications in progress.
+- `BUSY`: There was a filter modification in progress while handling this command.
 
 
 *************************************************************************
@@ -150,7 +156,7 @@ uint8_t[] | fingerprint array | 2^N*K | Fingerprint array. Here N = number of bu
 ### Filter input type
 A `uint8_t` value to determine which part of an advertisment is fed to the filter and how it is interpreted. 
 
-Value | Name | Explanation
+Value | Name | Description
 --- | --- | ---
 0 | MAC filter | Mac address is fed into the filter and determines the trackable id.
 1 | AD data identity filter | AD data is fed into the filter and determines the trackable id.
@@ -168,10 +174,20 @@ other | For non zero versions `v` and all `1 <= n < 2^16`, `v` is inferior to `v
 ### Filter flags
 A `uint8_t` bitmask.
 
-Bits | Name | Explanation
+Bits | Name | Description
 --- | --- | ---
 0 | isActive | Determines if the filter is currently active or not.
 1-7 | - | Reserved for future use. Must be 0.
+
+### Filter summary
+A short summary of a filters state.
+
+Type | Name | Length
+--- | --- | --- 
+uint8_t | filterId | 1 
+uint8_t | flags | 1 
+uint16_t | filterVersion | 2
+uint16_t | filterCrc | 2
 
 
 
