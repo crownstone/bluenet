@@ -53,7 +53,7 @@ no change has been made to the filter or the mesh.
 
 ### Remove filter
 
-Deallocates the given filter.
+Deallocates the given filter and starts progress.
 
 #### Remove filter packet
 
@@ -63,9 +63,9 @@ uint8_t | filterId | 1 | Which filter to add the entry to.
 
 #### Remove filter result packet
 
-A [Result](#result-code) packet is returned on this command. If result is not SUCCESS, 
-no change has been made to the filter or the mesh.
-
+A [Result](#result-code) packet is returned on this command.
+ERR_SUCCESS: filter was found and deallocated. Progress was started.
+ERR_NOT_FOUND: filter wasn't found. Progress was started.
 
 *************************************************************************
 

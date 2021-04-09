@@ -95,8 +95,10 @@ private:
 	/**
 	 * Readjust the filterbuffer to create space at the back. Adjust the
 	 * _parsingFilter array too.
+	 *
+	 * Returns true when id is found and filter is deallocated, false else.
 	 */
-	void deallocateParsingFilter(uint8_t filterId);
+	bool deallocateParsingFilter(uint8_t filterId);
 	void deallocateParsingFilterByIndex(uint8_t parsingFilterIndex);
 
 	/**
@@ -116,6 +118,7 @@ private:
 	// -------------------------------------------------------------
 	// ---------------------- Command interface --------------------
 	// -------------------------------------------------------------
+
 
 	/**
 	 * Upon first reception of this command with the given filterId,
@@ -150,6 +153,40 @@ private:
 	 */
 	cs_ret_code_t handleGetFilterSummariesCommand(
 			trackable_parser_cmd_get_filer_summaries_t* cmdData);
+
+	// -------------------------------------------------------------
+	// ---------------------- Utility functions --------------------
+	// -------------------------------------------------------------
+
+	/**
+	 * sets _masterVersion to 0 and filterModificationInProgress to true.
+	 *
+	 * This will result in the TrackableParser not handling incoming advertisements
+	 * and ensure that it is safe to adjust the filters.
+	 */
+	void startProgress();
+
+	/**
+	 * The master crc is the crc16 of the filters in the buffer.
+	 * This method assumes the filter crcs are up to date.
+	 */
+	uint16_t masterCrc();
+
+	/**
+	 * Checks if the cuckoo filter buffer size plus the constant overhead
+	 * equals the total size allocated for the tracking_filter*s in the
+	 * _parsingFilter array.
+	 *
+	 * Deallocates any filters failing the check.
+	 *
+	 * Check is only performed on filters that are currently in progress (.crc == 0)
+	 */
+	bool checkFilterSizeConsistency();
+
+	/**
+	 * Computes the crcs of filters that currently have their crc set to 0.
+	 */
+	void computeCrcs();
 
 	// -------------------------------------------------------------
 	// ----------------------- OLD interface -----------------------
