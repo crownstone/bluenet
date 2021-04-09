@@ -45,6 +45,36 @@ cs_ret_code_t UuidHelper::add(const ble_uuid128_t& fullUuid, ble_uuid_t& resultU
 	return ERR_UNSPECIFIED;
 }
 
+ble_uuid_t UuidHelper::add(const ble_uuid128_t& fullUuid, cs_ret_code_t* retCodePointer) {
+	ble_uuid_t uuid;
+	cs_ret_code_t retCode = add(fullUuid, uuid);
+	if (retCodePointer == nullptr) {
+		// TODO: Crash instead of assert?
+		assert(retCode == ERR_SUCCESS, "Failed to add UUID");
+	}
+	else {
+		*retCodePointer = retCode;
+	}
+	return uuid;
+}
+
+ble_uuid_t UuidHelper::fromBaseUuid(const ble_uuid_t& baseUuid, uint16_t shortUuid, cs_ret_code_t* retCodePointer) {
+	ble_uuid_t uuid = {
+			.type = baseUuid.type,
+			.uuid = shortUuid
+	};
+	if (uuid.type == BLE_UUID_TYPE_UNKNOWN) {
+		if (retCodePointer == nullptr) {
+			// TODO: crash?
+			assert(false, "Invalid base UUID");
+		}
+		else {
+			*retCodePointer = ERR_WRONG_PARAMETER;
+		}
+	}
+	return uuid;
+}
+
 cs_ret_code_t UuidHelper::getFromCache(const ble_uuid128_t& fullUuid, ble_uuid_t& resultUuid) {
 	uint32_t nrfCode = sd_ble_uuid_decode(sizeof(fullUuid.uuid128), fullUuid.uuid128, &resultUuid);
 	switch (nrfCode) {

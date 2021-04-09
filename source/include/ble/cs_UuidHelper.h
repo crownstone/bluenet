@@ -42,12 +42,36 @@ public:
 	}
 
 	/**
+	 * Get a UUID from a 16b UUID.
+	 */
+	static constexpr ble_uuid_t fromShortUuid(uint16_t shortUuid) {
+		return ble_uuid_t {
+				.type = BLE_UUID_TYPE_BLE,
+				.uuid = shortUuid
+		};
+	}
+
+	static ble_uuid_t fromBaseUuid(const ble_uuid_t& baseUuid, uint16_t shortUuid, cs_ret_code_t* retCode);
+
+	/**
 	 * Add a 128b UUID.
 	 *
 	 * @param[in] fullUuid        The 128b UUID to be registered.
 	 * @param[out] resultUuid     UUID that can be used in other functions.
 	 */
 	static cs_ret_code_t add(const ble_uuid128_t& fullUuid, ble_uuid_t& resultUuid);
+
+	/**
+	 * Add a 128b UUID.
+	 *
+	 * @param[in] fullUuid        The 128b UUID to be registered.
+	 * @param[out] retCode        Pointer to return code, which will be set.
+	 *                            If pointer is a null pointer, any error will result in a crash.
+	 * @return                    Resulting UUID.
+	 */
+	static ble_uuid_t add(const ble_uuid128_t& fullUuid, cs_ret_code_t* retCode);
+
+
 
 	/**
 	 * Add a 128b UUID derived from an already added 128b base UUID.
