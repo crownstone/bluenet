@@ -727,24 +727,15 @@ void Stack::onOutgoingConnected() {
 	// We have to tell the discovery module what services we're interested in _before_ the discovery.
 	ble_uuid_t serviceUuid;
 	UUID uuid;
-
-	// When looking for 128b services, you have to first add the 128 bit uuid to the softdevice with sd_ble_uuid_vs_add().
-	// Then use the type that's returned in calls that follow, while bytes 12 and 13 (from the right when looking at the uuid string) form the 16 bit uuid.
-
-//	UuidHelper::add(UuidHelper::fromString(SETUP_UUID, strlen(SETUP_UUID)), serviceUuid);
-
 	cs_ret_code_t csRetCode;
+
+	// Setup service.
 	csRetCode = uuid.fromFullUuid(SETUP_UUID);
 	serviceUuid = uuid.getUuid();
 	LOGi("setup service uuid=0x%X type=%u", serviceUuid.uuid, serviceUuid.type);
 	retCode = ble_db_discovery_evt_register(&serviceUuid);
 
 	// Crownstone service.
-	// Byte nr:    15 14 13 12 11 10 9  8  7  6  5  4  3  2  1  0
-	// Hex value:  24 F0 00 00 7D 10 48 05 BF C1 76 63 A0 1C 3B FF
-
-//	UuidHelper::add(UuidHelper::fromString(CROWNSTONE_UUID, strlen(CROWNSTONE_UUID)), serviceUuid);
-
 	csRetCode = uuid.fromFullUuid(CROWNSTONE_UUID);
 	if (csRetCode != ERR_SUCCESS) {
 		LOGe("Failed to get UUID err=%u", csRetCode);
@@ -754,13 +745,13 @@ void Stack::onOutgoingConnected() {
 	retCode = ble_db_discovery_evt_register(&serviceUuid);
 
 	// Secure DFU service
-	serviceUuid.type = BLE_UUID_TYPE_BLE;
-	serviceUuid.uuid = 0xFE59;
+	csRetCode = uuid.fromShortUuid(0xFE59);
+	serviceUuid = uuid.getUuid();
 	retCode = ble_db_discovery_evt_register(&serviceUuid);
 
 	// Device information service.
-	serviceUuid.type = BLE_UUID_TYPE_BLE;
-	serviceUuid.uuid = 0x180A;
+	csRetCode = uuid.fromShortUuid(0x180A);
+	serviceUuid = uuid.getUuid();
 	retCode = ble_db_discovery_evt_register(&serviceUuid);
 
 	retCode = ble_db_discovery_start(&_discoveryModule, _connectionHandle);
