@@ -31,6 +31,8 @@ Upon receiving the first upload command for a given `filterId`, the firmware all
 
 The `chunk` must be part of a [tracking filter data](#tracking-filter-data). 
 
+If a previously committed ilter with the given filterId is already present on the firmware, this will be deallocated prior to handling the chunk and a new filter of given total size will be allocated. 
+
 #### Upload filter packet
 
 Type | Name | Length | Description
@@ -69,18 +71,28 @@ no change has been made to the filter or the mesh.
 
 ### Commit filter changes
 
-**TODO** *Add description and change packet definition*
+A commit filter changes command signifies the end of a sequence of changes. When this is received the firmware
+will perform several consistency checks:
+- Crc values are recomputed where necessary
+- Filters are checked for size consistency (e.g. allocated space for a tracking filter must match the cuckoo filter size definition)
+
+Any malformed filters may immediately be deallocated to save resources and prevent firmware crashes. When return value is not ERR_SUCCESS, query the status with a [get filter summaries](#get-filter-summaries) command for more information.
 
 #### Commit filter packet
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-[Filter ID](#filter-id) | Id | 1 | Which filter to add the entry to.
+
 
 #### Commit filter result packet
 
-A [Result](#result-code) packet is returned on this command. If result is not SUCCESS, 
-no change has been made to the filter or the mesh.
+A [Result](#result-code) packet is returned on this command. 
+
+If result is SUCCESS all filters passed the consistency checks and the master crc matches.
+
+If ERR_MISMATCH is returned, the master crc did not match but no consistency checks failed.
+
+IF ERR_WRONG_STATE was returned some filters have been deleted due to failed consistency. 
 
 
 *************************************************************************

@@ -11,6 +11,8 @@
 #include <protocol/cs_TrackableParserPackets.h>
 #include <structs/cs_TrackableParserStructs.h>
 
+#include <optional>
+
 /**
  * Transforms EVT_DEVICE_SCANNED and EVT_ADV_BACKGROUND_PARSED
  * into EVT_TRACKING_UPDATE events.
@@ -36,15 +38,16 @@ private:
 
 	/**
 	 * List of pointers to the currently allocated filters in the _filterBuffer.
-	 * The memory is managed in same fashiona as the _filterBuffer itself.
+	 * The filters in this array are always sorted by filterId, the list is
+	 * nullptr terminated.
 	 */
 	tracking_filter_t* _parsingFilters[MAX_FILTER_IDS] = {};
 
 	/**
-	 * Index of the first element in _parsingFilters equal to nullptr.
-	 * Equal to MAX_FILTER_IDS if that doesn't exist.
+	 * Number of allocated filters in the parsingFilters array.
+	 * Shall suffice: 0 <=  _parsingFiltersCount < MAX_FILTER_IDS
 	 */
-	uint8_t _parsingFiltersEndIndex = 0;
+	uint8_t _parsingFiltersCount = 0;
 
 	uint16_t _masterHash;
 	uint16_t _masterVersion;  // Lollipop @Persisted
@@ -94,6 +97,7 @@ private:
 	 * _parsingFilter array too.
 	 */
 	void deallocateParsingFilter(uint8_t filterId);
+	void deallocateParsingFilterByIndex(uint8_t parsingFilterIndex);
 
 	/**
 	 * Looks up given filter id in the list of filters. Returns nullptr if not found.
@@ -103,6 +107,7 @@ private:
 	 * for all j>=i.
 	 */
 	tracking_filter_t* findParsingFilter(uint8_t filterId);
+	std::optional<size_t> findParsingFilterIndex(uint8_t filterId);
 
 	size_t getTotalHeapAllocatedSize();
 
