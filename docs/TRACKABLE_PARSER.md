@@ -19,7 +19,6 @@ Status: *Under active development. Protocol NOT FIXED YET*.
 - [Filter input type](#filter-input-type)
 - [Filter version](#filter-version)
 - [Filter flags](#filter-flags)
-- [Result code](#result-code)
 
 *************************************************************************
 
@@ -46,7 +45,7 @@ uint8_t[] | chunk | ... |
 
 #### Upload filter result packet
 
-A [Result](#result-code) packet is returned on this command. If result is not SUCCESS, 
+A [result code](./PROTOCOL.md#result-codes) packet is returned on this command. If result is not SUCCESS, 
 no change has been made to the filter or the mesh.
 
 *************************************************************************
@@ -63,7 +62,7 @@ uint8_t | filterId | 1 | Which filter to add the entry to.
 
 #### Remove filter result packet
 
-A [Result](#result-code) packet is returned on this command.
+A [result code](./PROTOCOL.md#result-codes) packet is returned on this command.
 ERR_SUCCESS: filter was found and deallocated. Progress was started.
 ERR_NOT_FOUND: filter wasn't found. Progress was started.
 
@@ -86,7 +85,7 @@ Type | Name | Length | Description
 
 #### Commit filter result packet
 
-A [Result](#result-code) packet is returned on this command. 
+A [result code](./PROTOCOL.md#result-codes) packet is returned on this command. 
 
 If result is SUCCESS all filters passed the consistency checks and the master crc matches.
 
@@ -109,7 +108,7 @@ Type | Name | Length | Description
 
 #### Commit filter result packet
 
-A [Result](#result-code) packet is returned on this command. If result is not SUCCESS, 
+A [result code](./PROTOCOL.md#result-codes)(#result-code) packet is returned on this command. If result is not SUCCESS, 
 no change has been made to the filter or the mesh.
 
 
@@ -173,18 +172,6 @@ Bits | Name | Explanation
 --- | --- | ---
 0 | isActive | Determines if the filter is currently active or not.
 1-7 | - | Reserved for future use. Must be 0.
-
-### Result code
-A uin8_t constant explaining the operations result.
-
-Value | Explanation
---- | ---
-0 | SUCCESS
-1 | NO_SPACE
-2 | FILTER_ID_NOT_FOUND
-3 | VERSION_MISMATCH
-4 | COMPRESSION_UNAVAILABLE
-
 
 
 
