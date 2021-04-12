@@ -9,15 +9,34 @@
 
 #include <ble/cs_UUID.h>
 #include <structs/cs_PacketsInternal.h>
+#include <ble/cs_Nordic.h>
 
 class BleCentral {
 public:
+	static BleCentral& getInstance() {
+		static BleCentral instance;
+		return instance;
+	}
+
+	void init();
+
 	/**
 	 * Connect to a device.
 	 *
+	 * @return ERR_BUSY                When already connected or another operation is in progress (discovery, read, write, connect, disconnect).
 	 * @return ERR_WAIT_FOR_SUCCESS    When the connection will be attempted. Wait for the connect result event.
 	 */
 	cs_ret_code_t connect(const device_address_t& address, uint16_t timeoutMs = 3000);
+
+	/**
+	 * Terminate current connection.
+	 *
+	 * @return ERR_SUCCESS             When already disconnected.
+	 * @return ERR_WAIT_FOR_SUCCESS    When disconnecting. Wait for the disconnect result event.
+	 */
+	cs_ret_code_t disconnect();
+
+	bool isConnected();
 
 	/**
 	 * Discover services.
@@ -36,10 +55,11 @@ public:
 	/**
 	 * Write data to a characteristic.
 	 *
-	 * @param[in] uuid                 The characteristic UUID to write to.
+	 * @param[in] handle               The characteristic handle to write to. The handle was received during discovery.
 	 * @param[in] data                 Pointer to data, which will be copied.
 	 * @param[in] len                  Length of the data to write.
 	 *
+	 * @return ERR_BUFFER_TOO_SMALL    The data size is too large.
 	 * @return ERR_BUSY                An operation is in progress (discovery, read, write, connect, disconnect).
 	 * @return ERR_WAIT_FOR_SUCCESS    When the write is started. Wait for the write result event.
 	 *
@@ -58,12 +78,12 @@ public:
 	 *     multiple      BLE_GATT_OP_PREP_WRITE_REQ
 	 *     finalized by  BLE_GATT_OP_EXEC_WRITE_REQ
 	 */
-	cs_ret_code_t write(UUID uuid, const uint8_t* data, uint16_t len);
+	cs_ret_code_t write(uint16_t handle, const uint8_t* data, uint16_t len);
 
 	/**
 	 * Read data from a characteristic.
 	 *
-	 * @param[in]                      The characteristic UUID to read.
+	 * @param[in] handle               The characteristic handle to read from. The handle was received during discovery.
 	 *
 	 * @return ERR_BUSY                An operation is in progress (discovery, read, write, connect, disconnect).
 	 * @return ERR_WAIT_FOR_SUCCESS    When the read is started. Wait for the read result event.
@@ -73,13 +93,36 @@ public:
 	 * Start with                         sd_ble_gattc_read(conn_handle, handle, 0);
 	 * Then do, until read_rsp.len == 0:  sd_ble_gattc_read(conn_handle, read_rsp.handle, read_rsp.offset + read_rsp.len);
 	 */
-	cs_ret_code_t read(UUID uuid);
+	cs_ret_code_t read(uint16_t handle);
 
 private:
+	BleCentral();
+	BleCentral(BleCentral const&);
+	void operator=(BleCentral const &);
+
 	/**
 	 * Buffer used for reading and writing.
 	 */
 	uint8_t _buf[200];
+	uint16_t _bufDataSize = 0;
+
+	uint16_t _connectionHandle = BLE_CONN_HANDLE_INVALID;
+
+	ble_db_discovery_t _discoveryModule;
+
+	uint16_t _writeMtu = BLE_GATT_ATT_MTU_DEFAULT - 3;
+
+	/**
+	 * Writes the next chunk of a long write.
+	 */
+	cs_ret_code_t nextWrite(uint16_t handle, uint16_t offset);
+
+public:
+
+	/**
+	 * Internal usage.
+	 */
+	void onDiscoveryEvent(ble_db_discovery_evt_t* event);
 };
 
 
