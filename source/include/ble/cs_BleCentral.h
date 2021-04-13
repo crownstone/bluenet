@@ -7,9 +7,11 @@
 
 #pragma once
 
-#include <ble/cs_UUID.h>
-#include <structs/cs_PacketsInternal.h>
 #include <ble/cs_Nordic.h>
+#include <ble/cs_UUID.h>
+#include <common/cs_Types.h>
+#include <events/cs_Event.h>
+#include <structs/cs_PacketsInternal.h>
 
 class BleCentral {
 public:
@@ -117,12 +119,31 @@ private:
 	 */
 	cs_ret_code_t nextWrite(uint16_t handle, uint16_t offset);
 
+	void finalizeOperation(CS_TYPE type, cs_ret_code_t retCode);
+	void finalizeOperation(CS_TYPE type, uint8_t* data, uint8_t dataSize);
+
+	void onGapEvent(uint16_t evtId, const ble_gap_evt_t& event);
+	void onGattCentralEvent(uint16_t evtId, const ble_gattc_evt_t& event);
+
+	void onConnect(uint16_t connectionHandle, ble_gap_evt_connected_t& event);
+	void onDisconnect(ble_gap_evt_disconnected_t& event);
+	void onGapTimeout(ble_gap_evt_timeout_t& event);
+
+	void onMtu(uint16_t gattStatus, ble_gattc_evt_exchange_mtu_rsp_t& event);
+	void onRead(uint16_t gattStatus, ble_gattc_evt_read_rsp_t& event);
+	void onWrite(uint16_t gattStatus, ble_gattc_evt_write_rsp_t& event);
+
+
+
+
 public:
 
 	/**
 	 * Internal usage.
 	 */
 	void onDiscoveryEvent(ble_db_discovery_evt_t* event);
+
+	void onBleEvent(const ble_evt_t* event);
 };
 
 

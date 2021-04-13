@@ -201,9 +201,13 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_CONNECT,                                       // Device connected.
 	EVT_BLE_DISCONNECT,                                    // Device disconnected.
 	CMD_ENABLE_ADVERTISEMENT,                              // Enable/disable advertising.
-	EVT_OUTGOING_CONNECT_START,                            // An outgoing connection is going to be made. Always followed by either connected or disconnected event.
-	EVT_OUTGOING_CONNECTED,                                // An outgoing connection is made.
-	EVT_OUTGOING_DISCONNECTED,                             // An outgoing connection is terminated or failed.
+	EVT_BLE_CENTRAL_CONNECT_START,                         // An outgoing connection is going to be made. Always followed by EVT_BLE_CENTRAL_CONNECT_RESULT.
+	EVT_BLE_CENTRAL_CONNECT_RESULT,                        // Result of a connection attempt.
+	EVT_BLE_CENTRAL_DISCONNECTED,                          // Outgoing connection was terminated. By request, or due to some error.
+	EVT_BLE_CENTRAL_DISCOVERY,                             // A single service or characteristic is discovered.
+	EVT_BLE_CENTRAL_DISCOVERY_RESULT,                      // Result of service discovery.
+	EVT_BLE_CENTRAL_WRITE_RESULT,                          // Result of a write.
+	EVT_BLE_CENTRAL_READ_RESULT,                           // Result of a read.
 
 	// Switch (aggregator)
 	CMD_SWITCH_OFF = InternalBaseSwitch,              // Turn switch off.
@@ -489,9 +493,13 @@ typedef  adv_background_parsed_v1_t TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1);
 typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
 typedef  void TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
-typedef  void TYPIFY(EVT_OUTGOING_CONNECT_START);
-typedef  void TYPIFY(EVT_OUTGOING_CONNECTED);
-typedef  void TYPIFY(EVT_OUTGOING_DISCONNECTED);
+typedef  void TYPIFY(EVT_BLE_CENTRAL_CONNECT_START);
+typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT);
+typedef  void TYPIFY(EVT_BLE_CENTRAL_DISCONNECTED);
+typedef  ble_central_discovery_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY);
+typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT);
+typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
+typedef  ble_central_read_result_t TYPIFY(EVT_BLE_CENTRAL_READ_RESULT);
 typedef  void TYPIFY(EVT_BROWNOUT_IMPENDING);
 typedef  void TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_CHIP_TEMP_OK);
