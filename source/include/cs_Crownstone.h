@@ -312,6 +312,7 @@ private:
 
 	// drivers
 	Stack* _stack;
+	BleCentral* _bleCentral;
 	Advertiser* _advertiser;
 	Timer* _timer;
 	Storage* _storage;

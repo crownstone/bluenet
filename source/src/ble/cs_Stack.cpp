@@ -409,6 +409,8 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 			break;
 		}
 	}
+
+	BleCentral::getInstance().onBleEvent(p_ble_evt);
 }
 
 struct cs_stack_scan_t {
@@ -573,11 +575,12 @@ void Stack::onConnect(const ble_evt_t * p_ble_evt) {
 		switch (p_ble_evt->evt.gap_evt.params.connected.role) {
 			case BLE_GAP_ROLE_PERIPH: {
 				LOGi("onConnect as peripheral");
+				_connectionIsOutgoing = false;
 				break;
 			}
 			case BLE_GAP_ROLE_CENTRAL: {
 				LOGi("onConnect as central");
-				assert(_connectionIsOutgoing == true, "Central role whith no outgoing connection?");
+				_connectionIsOutgoing = true;
 				break;
 			}
 			default: {
@@ -595,14 +598,6 @@ void Stack::onConnect(const ble_evt_t * p_ble_evt) {
 
 void Stack::onConnectionTimeout() {
 	LOGd("onConnectionTimeout");
-	if (_connectionIsOutgoing) {
-		event_t event(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED);
-		event.dispatch();
-		_connectionIsOutgoing = false;
-	}
-	else {
-		LOGw("No outgoing connection");
-	}
 }
 
 void Stack::onDisconnect(const ble_evt_t * p_ble_evt) {
@@ -613,7 +608,6 @@ void Stack::onDisconnect(const ble_evt_t * p_ble_evt) {
 	else {
 		onIncomingDisconnected(p_ble_evt);
 	}
-	_connectionIsOutgoing = false;
 }
 
 void Stack::onGapTimeout(uint8_t src) {

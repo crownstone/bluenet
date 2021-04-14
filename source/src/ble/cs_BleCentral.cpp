@@ -28,7 +28,7 @@ void BleCentral::init() {
 
 }
 
-cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t timeoutMs = 3000) {
+cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t timeoutMs) {
 	if (isBusy()) {
 		LOGi("Busy");
 		return ERR_BUSY;
@@ -45,7 +45,7 @@ cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t time
 	if (connectEvent.result.returnCode != ERR_SUCCESS) {
 		LOGe("Unable to start connecting: err=%u", connectEvent.result.returnCode);
 		// Let modules know they can resume their normal operation.
-		event_t disconnectEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECT_RESULT);
+		event_t disconnectEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED);
 		disconnectEvent.dispatch();
 		return connectEvent.result.returnCode;
 	}
@@ -90,6 +90,7 @@ cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t time
 	LOGi("Connecting..");
 
 	// We will get either BLE_GAP_EVT_CONNECTED or BLE_GAP_EVT_TIMEOUT.
+	_currentOperation = Operation::CONNECT;
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
@@ -111,6 +112,7 @@ cs_ret_code_t BleCentral::disconnect() {
 		case NRF_SUCCESS: {
 			LOGi("Disconnecting..");
 			// We will get BLE_GAP_EVT_DISCONNECTED.
+			_currentOperation = Operation::DISCONNECT;
 			return ERR_WAIT_FOR_SUCCESS;
 		}
 		case NRF_ERROR_INVALID_STATE: {
@@ -134,7 +136,7 @@ bool BleCentral::isConnected() {
 }
 
 bool BleCentral::isBusy() {
-	return _currentOperation == Operation::NONE;
+	return _currentOperation != Operation::NONE;
 }
 
 cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount) {
@@ -149,7 +151,8 @@ cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount)
 
 	uint32_t nrfCode = NRF_SUCCESS;
 	for (uint8_t i = 0; i < uuidCount; ++i) {
-		nrfCode = ble_db_discovery_evt_register(&(uuids[i].getUuid()));
+		ble_uuid_t uuid = uuids[i].getUuid();
+		nrfCode = ble_db_discovery_evt_register(&uuid);
 		switch (nrfCode) {
 			case NRF_SUCCESS:
 				break;
@@ -168,7 +171,8 @@ cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount)
 		return ERR_UNSPECIFIED;
 	}
 
-	return ERR_SUCCESS;
+	_currentOperation = Operation::DISCOVERY;
+	return ERR_WAIT_FOR_SUCCESS;
 }
 
 void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
@@ -213,6 +217,7 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 		}
 		case BLE_DB_DISCOVERY_ERROR: {
 			LOGw("Discovery error %u", event->params.err_code);
+			finalizeOperation(Operation::DISCOVERY, ERR_UNSPECIFIED);
 			break;
 		}
 		case BLE_DB_DISCOVERY_AVAILABLE: {
@@ -236,7 +241,7 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 							characteristic->characteristic.handle_decl);
 				}
 			}
-
+			finalizeOperation(Operation::DISCOVERY, ERR_SUCCESS);
 			break;
 		}
 	}
@@ -300,13 +305,15 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 			default:                             return ERR_UNSPECIFIED;
 		}
 	}
+
+	_currentOperation = Operation::WRITE;
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
 cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 	ble_gattc_write_params_t writeParams;
 	if (offset < _bufDataSize) {
-		const uint16_t chunkSize = _writeMtu - 2;
+		const int chunkSize = _writeMtu - 2;
 		writeParams.write_op = BLE_GATT_OP_PREP_WRITE_REQ;
 		writeParams.flags = 0;
 		writeParams.handle = handle;
@@ -354,6 +361,8 @@ cs_ret_code_t BleCentral::read(uint16_t handle) {
 			default:                             return ERR_UNSPECIFIED;
 		}
 	}
+
+	_currentOperation = Operation::READ;
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
@@ -484,7 +493,7 @@ void BleCentral::sendOperationResult(event_t& event) {
 
 
 
-void BleCentral::onConnect(uint16_t connectionHandle, ble_gap_evt_connected_t& event) {
+void BleCentral::onConnect(uint16_t connectionHandle, const ble_gap_evt_connected_t& event) {
 	if (event.role != BLE_GAP_ROLE_CENTRAL) {
 		return;
 	}
@@ -494,7 +503,7 @@ void BleCentral::onConnect(uint16_t connectionHandle, ble_gap_evt_connected_t& e
 	finalizeOperation(Operation::CONNECT, ERR_SUCCESS);
 }
 
-void BleCentral::onGapTimeout(ble_gap_evt_timeout_t& event) {
+void BleCentral::onGapTimeout(const ble_gap_evt_timeout_t& event) {
 	if (event.src != BLE_GAP_TIMEOUT_SRC_CONN) {
 		return;
 	}
@@ -505,7 +514,12 @@ void BleCentral::onGapTimeout(ble_gap_evt_timeout_t& event) {
 	finalizeOperation(Operation::CONNECT, ERR_TIMEOUT);
 }
 
-void BleCentral::onDisconnect(ble_gap_evt_disconnected_t& event) {
+void BleCentral::onDisconnect(const ble_gap_evt_disconnected_t& event) {
+	if (!isConnected()) {
+		// Ignore disconnect event as peripheral.
+		return;
+	}
+
 	LOGi("Disconnected reason=%u", event.reason);
 
 	// Disconnected, reset state.
@@ -513,7 +527,7 @@ void BleCentral::onDisconnect(ble_gap_evt_disconnected_t& event) {
 	finalizeOperation(Operation::DISCONNECT, nullptr, 0);
 }
 
-void BleCentral::onMtu(uint16_t gattStatus, ble_gattc_evt_exchange_mtu_rsp_t& event) {
+void BleCentral::onMtu(uint16_t gattStatus, const ble_gattc_evt_exchange_mtu_rsp_t& event) {
 	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
 		return;
 	}
@@ -521,7 +535,7 @@ void BleCentral::onMtu(uint16_t gattStatus, ble_gattc_evt_exchange_mtu_rsp_t& ev
 	LOGi("MTU=%u", _writeMtu);
 }
 
-void BleCentral::onRead(uint16_t gattStatus, ble_gattc_evt_read_rsp_t& event) {
+void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& event) {
 	_log(SERIAL_INFO, false, "Read offset=%u len=%u", event.offset, event.len);
 	_logArray(SERIAL_INFO, true, event.data, event.len);
 
@@ -556,7 +570,7 @@ void BleCentral::onRead(uint16_t gattStatus, ble_gattc_evt_read_rsp_t& event) {
 	}
 }
 
-void BleCentral::onWrite(uint16_t gattStatus, ble_gattc_evt_write_rsp_t& event) {
+void BleCentral::onWrite(uint16_t gattStatus, const ble_gattc_evt_write_rsp_t& event) {
 	LOGi("onWrite write_op=%u offset=%u len=%u", event.write_op, event.offset, event.len);
 
 	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
@@ -587,11 +601,11 @@ void BleCentral::onWrite(uint16_t gattStatus, ble_gattc_evt_write_rsp_t& event) 
 void BleCentral::onGapEvent(uint16_t evtId, const ble_gap_evt_t& event) {
 	switch (evtId) {
 		case BLE_GAP_EVT_CONNECTED: {
-			onConnect(event.conn_handle, event.params.connect);
+			onConnect(event.conn_handle, event.params.connected);
 			break;
 		}
 		case BLE_GAP_EVT_DISCONNECTED: {
-			onDisconnect(event.params.disconnect);
+			onDisconnect(event.params.disconnected);
 			break;
 		}
 		case BLE_GAP_EVT_TIMEOUT: {

@@ -161,13 +161,13 @@ private:
 	void onGapEvent(uint16_t evtId, const ble_gap_evt_t& event);
 	void onGattCentralEvent(uint16_t evtId, const ble_gattc_evt_t& event);
 
-	void onConnect(uint16_t connectionHandle, ble_gap_evt_connected_t& event);
-	void onDisconnect(ble_gap_evt_disconnected_t& event);
-	void onGapTimeout(ble_gap_evt_timeout_t& event);
+	void onConnect(uint16_t connectionHandle, const ble_gap_evt_connected_t& event);
+	void onDisconnect(const ble_gap_evt_disconnected_t& event);
+	void onGapTimeout(const ble_gap_evt_timeout_t& event);
 
-	void onMtu(uint16_t gattStatus, ble_gattc_evt_exchange_mtu_rsp_t& event);
-	void onRead(uint16_t gattStatus, ble_gattc_evt_read_rsp_t& event);
-	void onWrite(uint16_t gattStatus, ble_gattc_evt_write_rsp_t& event);
+	void onMtu(uint16_t gattStatus, const ble_gattc_evt_exchange_mtu_rsp_t& event);
+	void onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& event);
+	void onWrite(uint16_t gattStatus, const ble_gattc_evt_write_rsp_t& event);
 
 
 public:
