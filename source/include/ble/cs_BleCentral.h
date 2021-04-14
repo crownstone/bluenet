@@ -38,7 +38,15 @@ public:
 	 */
 	cs_ret_code_t disconnect();
 
+	/**
+	 * Check whether this crownstone is connected as central.
+	 */
 	bool isConnected();
+
+	/**
+	 * Check whether an operation is in progress.
+	 */
+	bool isBusy();
 
 	/**
 	 * Discover services.
@@ -98,6 +106,15 @@ public:
 	cs_ret_code_t read(uint16_t handle);
 
 private:
+	enum class Operation: uint8_t {
+		NONE,
+		CONNECT,
+		DISCONNECT,
+		DISCOVERY,
+		READ,
+		WRITE
+	};
+
 	BleCentral();
 	BleCentral(BleCentral const&);
 	void operator=(BleCentral const &);
@@ -106,22 +123,41 @@ private:
 	 * Buffer used for reading and writing.
 	 */
 	uint8_t _buf[200];
+
+	/**
+	 * How much data is actually in the buffer.
+	 */
 	uint16_t _bufDataSize = 0;
 
 	uint16_t _connectionHandle = BLE_CONN_HANDLE_INVALID;
 
 	ble_db_discovery_t _discoveryModule;
 
+	/**
+	 * Current MTU.
+	 */
 	uint16_t _writeMtu = BLE_GATT_ATT_MTU_DEFAULT - 3;
+
+	/**
+	 * Operation in progress.
+	 */
+	Operation _currentOperation = Operation::NONE;
 
 	/**
 	 * Writes the next chunk of a long write.
 	 */
 	cs_ret_code_t nextWrite(uint16_t handle, uint16_t offset);
 
-	void finalizeOperation(CS_TYPE type, cs_ret_code_t retCode);
-	void finalizeOperation(CS_TYPE type, uint8_t* data, uint8_t dataSize);
+	/**
+	 * Finalize an operation.
+	 */
+	void finalizeOperation(Operation operation, cs_ret_code_t retCode);
+	void finalizeOperation(Operation operation, uint8_t* data, uint8_t dataSize);
+	void sendOperationResult(event_t& event);
 
+	/**
+	 * Event handlers.
+	 */
 	void onGapEvent(uint16_t evtId, const ble_gap_evt_t& event);
 	void onGattCentralEvent(uint16_t evtId, const ble_gattc_evt_t& event);
 
@@ -134,16 +170,16 @@ private:
 	void onWrite(uint16_t gattStatus, ble_gattc_evt_write_rsp_t& event);
 
 
-
-
 public:
+	/**
+	 * Internal usage: to be called on BLE events.
+	 */
+	void onBleEvent(const ble_evt_t* event);
 
 	/**
 	 * Internal usage.
 	 */
 	void onDiscoveryEvent(ble_db_discovery_evt_t* event);
-
-	void onBleEvent(const ble_evt_t* event);
 };
 
 

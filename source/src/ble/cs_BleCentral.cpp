@@ -10,6 +10,7 @@
 #include <events/cs_Event.h>
 #include <ble/cs_Nordic.h>
 #include <common/cs_Types.h>
+#include <ble/cs_Stack.h>
 
 void handle_discovery(ble_db_discovery_evt_t* event) {
 	BleCentral::getInstance().onDiscoveryEvent(event);
@@ -28,11 +29,14 @@ void BleCentral::init() {
 }
 
 cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t timeoutMs = 3000) {
-	// TODO: check state
-
-	if (isConnected()) {
-		LOGi("Already connected");
+	if (isBusy()) {
+		LOGi("Busy");
 		return ERR_BUSY;
+	}
+
+	if (Stack::getInstance().isConnected() || isConnected()) {
+		LOGi("Already connected");
+		return ERR_WRONG_STATE;
 	}
 
 	// In order to connect, other modules need to change their operation.
@@ -90,7 +94,15 @@ cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t time
 }
 
 cs_ret_code_t BleCentral::disconnect() {
-	// TODO: check state
+	if (isBusy()) {
+		LOGi("Busy");
+		return ERR_BUSY;
+	}
+
+	if (!isConnected()) {
+		LOGd("Already disconnected");
+		return ERR_SUCCESS;
+	}
 
 	// NRF_ERROR_INVALID_STATE can safely be ignored, see: https://devzone.nordicsemi.com/question/81108/handling-nrf_error_invalid_state-error-code/
 	// BLE_ERROR_INVALID_CONN_HANDLE can safely be ignored, see: https://devzone.nordicsemi.com/f/nordic-q-a/34353/error-0x3002/132078#132078
@@ -121,8 +133,19 @@ bool BleCentral::isConnected() {
 	return _connectionHandle != BLE_CONN_HANDLE_INVALID;
 }
 
+bool BleCentral::isBusy() {
+	return _currentOperation == Operation::NONE;
+}
+
 cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount) {
-	// TODO: check state
+	if (isBusy()) {
+		LOGi("Busy");
+		return ERR_BUSY;
+	}
+	if (!isConnected()) {
+		LOGi("Not connected");
+		return ERR_WRONG_STATE;
+	}
 
 	uint32_t nrfCode = NRF_SUCCESS;
 	for (uint8_t i = 0; i < uuidCount; ++i) {
@@ -225,7 +248,15 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 }
 
 cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t len) {
-	// TODO: check state.
+	if (isBusy()) {
+		LOGi("Busy");
+		return ERR_BUSY;
+	}
+
+	if (!isConnected()) {
+		LOGi("Not connected");
+		return ERR_WRONG_STATE;
+	}
 
 	if (data == nullptr) {
 		return ERR_BUFFER_UNASSIGNED;
@@ -305,7 +336,15 @@ cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 
 
 cs_ret_code_t BleCentral::read(uint16_t handle) {
-	// TODO: check state.
+	if (isBusy()) {
+		LOGi("Busy");
+		return ERR_BUSY;
+	}
+
+	if (!isConnected()) {
+		LOGi("Not connected");
+		return ERR_WRONG_STATE;
+	}
 
 	uint32_t nrfCode = sd_ble_gattc_read(_connectionHandle, handle, 0);
 	if (nrfCode != NRF_SUCCESS) {
@@ -318,14 +357,128 @@ cs_ret_code_t BleCentral::read(uint16_t handle) {
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
-void BleCentral::finalizeOperation(CS_TYPE type, cs_ret_code_t retCode) {
-	finalizeOperation(type, reinterpret_cast<uint8_t*>(&retCode), sizeof(retCode));
+void BleCentral::finalizeOperation(Operation operation, cs_ret_code_t retCode) {
+	switch (operation) {
+		case Operation::NONE:
+		case Operation::CONNECT:
+		case Operation::DISCONNECT:
+		case Operation::DISCOVERY:
+		case Operation::WRITE: {
+			finalizeOperation(operation, reinterpret_cast<uint8_t*>(&retCode), sizeof(retCode));
+			break;
+		}
+		case Operation::READ: {
+			// TODO: is this a good way of setting .data?
+			ble_central_read_result_t result = {
+					.retCode = retCode,
+					.data = cs_data_t()
+			};
+			finalizeOperation(operation, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+			break;
+		}
+	}
 }
 
-void BleCentral::finalizeOperation(CS_TYPE type, uint8_t* data, uint8_t dataSize) {
-	event_t event(type, data, dataSize);
-	event.dispatch();
-	// TODO: set state.
+void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t dataSize) {
+	LOGi("finalizeOperation operation=%u _currentOperation=%u", operation, _currentOperation);
+	event_t event(CS_TYPE::CONFIG_DO_NOT_USE);
+	event.data = data;
+	event.size = dataSize;
+	switch (_currentOperation) {
+		case Operation::NONE: {
+			LOGw("No operation was in progress")
+			break;
+		}
+		case Operation::CONNECT: {
+//			if (operation != Operation::CONNECT) {
+//				// Ignore data, finalize with error instead.
+//				finalizeOperation(Operation::CONNECT, ERR_WRONG_STATE);
+//				return;
+//			}
+			if (operation != Operation::CONNECT) {
+				// Ignore data, finalize with error instead.
+				cs_ret_code_t errCode = ERR_WRONG_STATE;
+				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&errCode), sizeof(errCode));
+				sendOperationResult(errEvent);
+				return;
+			}
+			event.type = CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT;
+			break;
+		}
+		case Operation::DISCONNECT: {
+			// Skip: if the finalized operation is disconnect, we always send it.
+			// Otherwise, we keep on waiting for the disconnect event.
+			break;
+		}
+		case Operation::DISCOVERY: {
+//			if (operation != Operation::DISCOVERY) {
+//				// Ignore data, finalize with error instead.
+//				finalizeOperation(Operation::DISCOVERY, ERR_WRONG_STATE);
+//				return;
+//			}
+			if (operation != Operation::DISCOVERY) {
+				// Ignore data, finalize with error instead.
+				cs_ret_code_t errCode = ERR_WRONG_STATE;
+				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, reinterpret_cast<uint8_t*>(&errCode), sizeof(errCode));
+				sendOperationResult(errEvent);
+				return;
+			}
+			event.type = CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT;
+			break;
+		}
+		case Operation::READ: {
+//			if (operation != Operation::READ) {
+//				// Ignore data, finalize with error instead.
+//				finalizeOperation(Operation::READ, ERR_WRONG_STATE);
+//				return;
+//			}
+			if (operation != Operation::READ) {
+				// Ignore data, finalize with error instead.
+				ble_central_read_result_t result = {
+						.retCode = ERR_WRONG_STATE,
+						.data = cs_data_t()
+				};
+				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+				sendOperationResult(errEvent);
+				return;
+			}
+			event.type = CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT;
+			break;
+		}
+		case Operation::WRITE: {
+//			if (operation != Operation::WRITE) {
+//				// Ignore data, finalize with error instead.
+//				finalizeOperation(Operation::WRITE, ERR_WRONG_STATE);
+//				return;
+//			}
+			if (operation != Operation::WRITE) {
+				// Ignore data, finalize with error instead.
+				cs_ret_code_t errCode = ERR_WRONG_STATE;
+				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&errCode), sizeof(errCode));
+				sendOperationResult(errEvent);
+				return;
+			}
+			event.type = CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT;
+			break;
+		}
+	}
+
+	sendOperationResult(event);
+
+	if (operation == Operation::DISCONNECT) {
+		// Always send the disconnect event, but after the operation result event.
+		event_t disconnectEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED);
+		disconnectEvent.dispatch();
+	}
+}
+
+void BleCentral::sendOperationResult(event_t& event) {
+	// Set current operation before dispatching the event, so that a new command can be issued on event.
+	_currentOperation = Operation::NONE;
+
+	if (event.type != CS_TYPE::CONFIG_DO_NOT_USE) {
+		event.dispatch();
+	}
 }
 
 
@@ -338,7 +491,7 @@ void BleCentral::onConnect(uint16_t connectionHandle, ble_gap_evt_connected_t& e
 	LOGi("Connected");
 
 	_connectionHandle = connectionHandle;
-	finalizeOperation(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, ERR_SUCCESS);
+	finalizeOperation(Operation::CONNECT, ERR_SUCCESS);
 }
 
 void BleCentral::onGapTimeout(ble_gap_evt_timeout_t& event) {
@@ -349,7 +502,7 @@ void BleCentral::onGapTimeout(ble_gap_evt_timeout_t& event) {
 
 	// Connection failed, reset state.
 	_connectionHandle = BLE_CONN_HANDLE_INVALID;
-	finalizeOperation(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, ERR_TIMEOUT);
+	finalizeOperation(Operation::CONNECT, ERR_TIMEOUT);
 }
 
 void BleCentral::onDisconnect(ble_gap_evt_disconnected_t& event) {
@@ -357,7 +510,7 @@ void BleCentral::onDisconnect(ble_gap_evt_disconnected_t& event) {
 
 	// Disconnected, reset state.
 	_connectionHandle = BLE_CONN_HANDLE_INVALID;
-	finalizeOperation(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECT_RESULT, ERR_SUCCESS);
+	finalizeOperation(Operation::DISCONNECT, nullptr, 0);
 }
 
 void BleCentral::onMtu(uint16_t gattStatus, ble_gattc_evt_exchange_mtu_rsp_t& event) {
@@ -373,7 +526,7 @@ void BleCentral::onRead(uint16_t gattStatus, ble_gattc_evt_read_rsp_t& event) {
 	_logArray(SERIAL_INFO, true, event.data, event.len);
 
 	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
-		finalizeOperation(CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT, ERR_GATT_ERROR);
+		finalizeOperation(Operation::READ, ERR_GATT_ERROR);
 		return;
 	}
 
@@ -381,7 +534,7 @@ void BleCentral::onRead(uint16_t gattStatus, ble_gattc_evt_read_rsp_t& event) {
 	if (event.len != 0) {
 		// Copy data that was read.
 		if (event.offset + event.len > sizeof(_buf)) {
-			finalizeOperation(CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT, ERR_BUFFER_TOO_SMALL);
+			finalizeOperation(Operation::READ, ERR_BUFFER_TOO_SMALL);
 			return;
 		}
 		memcpy(_buf + event.offset, event.data, event.len);
@@ -390,7 +543,7 @@ void BleCentral::onRead(uint16_t gattStatus, ble_gattc_evt_read_rsp_t& event) {
 		uint32_t nrfCode = sd_ble_gattc_read(_connectionHandle, event.handle, event.offset + event.len);
 		if (nrfCode != NRF_SUCCESS) {
 			LOGw("Failed to continue long read. retCode=%u", nrfCode);
-			finalizeOperation(CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT, ERR_READ_FAILED);
+			finalizeOperation(Operation::READ, ERR_READ_FAILED);
 			return;
 		}
 	}
@@ -399,28 +552,28 @@ void BleCentral::onRead(uint16_t gattStatus, ble_gattc_evt_read_rsp_t& event) {
 				.retCode = ERR_SUCCESS,
 				.data = cs_data_t(_buf, event.offset)
 		};
-		finalizeOperation(CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+		finalizeOperation(Operation::READ, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 	}
 }
 
 void BleCentral::onWrite(uint16_t gattStatus, ble_gattc_evt_write_rsp_t& event) {
-	LOGi("onWrite offset=%u len=%u", event.offset, event.len);
+	LOGi("onWrite write_op=%u offset=%u len=%u", event.write_op, event.offset, event.len);
 
 	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
-		finalizeOperation(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, ERR_GATT_ERROR);
+		finalizeOperation(Operation::WRITE, ERR_GATT_ERROR);
 		return;
 	}
 
 	switch (event.write_op) {
 		case BLE_GATT_OP_WRITE_REQ:
 		case BLE_GATT_OP_EXEC_WRITE_REQ: {
-			finalizeOperation(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, ERR_SUCCESS);
+			finalizeOperation(Operation::WRITE, ERR_SUCCESS);
 			break;
 		}
 		case BLE_GATT_OP_PREP_WRITE_REQ: {
 			cs_ret_code_t retCode = nextWrite(event.handle, event.offset + event.len);
 			if (retCode != ERR_WAIT_FOR_SUCCESS) {
-				finalizeOperation(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, retCode);
+				finalizeOperation(Operation::WRITE, retCode);
 			}
 			break;
 		}
