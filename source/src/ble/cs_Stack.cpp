@@ -6,6 +6,7 @@
  */
 
 #include <algorithm>
+#include <ble/cs_BleCentral.h>
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Config.h>
