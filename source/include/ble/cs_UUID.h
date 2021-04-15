@@ -37,6 +37,8 @@ public:
 	 */
 	UUID();
 
+	UUID(ble_uuid_t uuid);
+
 	/**
 	 * Set UUID from a 128b UUID string.
 	 *
@@ -81,6 +83,8 @@ public:
 	UUID(const char* fullUuid);
 	UUID(uint16_t shortUuid);
 	UUID(const UUID& baseUuid, uint16_t shortUuid);
+
+	bool operator==(const UUID& other);
 
 private:
 	ble_uuid_t _uuid = {

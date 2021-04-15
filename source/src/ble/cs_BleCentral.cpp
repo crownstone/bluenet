@@ -209,6 +209,25 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 					LOGw("Failed to get full uuid");
 				}
 			}
+
+			// Send an event for the service
+			ble_central_discovery_t packet = {
+				.uuid = UUID(event->params.discovered_db.srv_uuid),
+				.valueHandle = BLE_GATT_HANDLE_INVALID,
+				.cccdHandle = BLE_GATT_HANDLE_INVALID
+			};
+			event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
+			eventOut.dispatch();
+
+			// Send an event for each characteristic
+			for (uint8_t i = 0; i < event->params.discovered_db.char_count; ++i) {
+				packet.uuid = UUID(event->params.discovered_db.charateristics[i].characteristic.uuid);
+				packet.valueHandle = event->params.discovered_db.charateristics[i].characteristic.handle_value;
+				packet.cccdHandle = event->params.discovered_db.charateristics[i].cccd_handle;
+				event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
+				eventOut.dispatch();
+			}
+
 			break;
 		}
 		case BLE_DB_DISCOVERY_SRV_NOT_FOUND: {
@@ -263,6 +282,11 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 		return ERR_WRONG_STATE;
 	}
 
+	if (handle == BLE_GATT_HANDLE_INVALID) {
+		LOGi("Invalid handle");
+		return ERR_WRONG_PARAMETER;
+	}
+
 	if (data == nullptr) {
 		return ERR_BUFFER_UNASSIGNED;
 	}
@@ -284,6 +308,11 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 		// finalized by  BLE_GATT_OP_EXEC_WRITE_REQ
 
 		_bufDataSize = len;
+//		cs_ret_code_t retCode = nextWrite(handle, 0);
+//		if (retCode == ERR_WAIT_FOR_SUCCESS) {
+//			_currentOperation = Operation::WRITE;
+//		}
+//		return retCode;
 		return nextWrite(handle, 0);
 	}
 
@@ -301,7 +330,6 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 	if (nrfCode != NRF_SUCCESS) {
 		LOGe("Failed to write. nrfCode=%u", nrfCode);
 		switch (nrfCode) {
-			case BLE_ERROR_INVALID_CONN_HANDLE:  return ERR_WRONG_PARAMETER;
 			default:                             return ERR_UNSPECIFIED;
 		}
 	}
@@ -329,6 +357,8 @@ cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 		writeParams.len = 0;
 		writeParams.p_value = nullptr;
 	}
+	LOGd("nextWrite offset=%u _bufDataSize=%u writeParams: offset=%u len=%u op=%u", offset, _bufDataSize, writeParams.offset, writeParams.len, writeParams.write_op);
+
 	uint32_t nrfCode = sd_ble_gattc_write(_connectionHandle, &writeParams);
 	if (nrfCode != NRF_SUCCESS) {
 		LOGe("Failed to long write. nrfCode=%u", nrfCode);
@@ -337,6 +367,7 @@ cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 			default:                             return ERR_UNSPECIFIED;
 		}
 	}
+	_currentOperation = Operation::WRITE;
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
@@ -353,11 +384,15 @@ cs_ret_code_t BleCentral::read(uint16_t handle) {
 		return ERR_WRONG_STATE;
 	}
 
+	if (handle == BLE_GATT_HANDLE_INVALID) {
+		LOGi("Invalid handle");
+		return ERR_WRONG_PARAMETER;
+	}
+
 	uint32_t nrfCode = sd_ble_gattc_read(_connectionHandle, handle, 0);
 	if (nrfCode != NRF_SUCCESS) {
 		LOGe("Failed to read. nrfCode=%u", nrfCode);
 		switch (nrfCode) {
-			case BLE_ERROR_INVALID_CONN_HANDLE:  return ERR_WRONG_PARAMETER;
 			default:                             return ERR_UNSPECIFIED;
 		}
 	}
@@ -406,8 +441,8 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 //			}
 			if (operation != Operation::CONNECT) {
 				// Ignore data, finalize with error instead.
-				cs_ret_code_t errCode = ERR_WRONG_STATE;
-				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&errCode), sizeof(errCode));
+				TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT) result = ERR_WRONG_STATE;
+				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
@@ -427,8 +462,8 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 //			}
 			if (operation != Operation::DISCOVERY) {
 				// Ignore data, finalize with error instead.
-				cs_ret_code_t errCode = ERR_WRONG_STATE;
-				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, reinterpret_cast<uint8_t*>(&errCode), sizeof(errCode));
+				TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT) result = ERR_WRONG_STATE;
+				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
@@ -443,15 +478,15 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 //			}
 			if (operation != Operation::READ) {
 				// Ignore data, finalize with error instead.
-				ble_central_read_result_t result = {
+				TYPIFY(EVT_BLE_CENTRAL_READ_RESULT) result = {
 						.retCode = ERR_WRONG_STATE,
 						.data = cs_data_t()
 				};
-				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
-			event.type = CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT;
+			event.type = CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT;
 			break;
 		}
 		case Operation::WRITE: {
@@ -462,8 +497,8 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 //			}
 			if (operation != Operation::WRITE) {
 				// Ignore data, finalize with error instead.
-				cs_ret_code_t errCode = ERR_WRONG_STATE;
-				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&errCode), sizeof(errCode));
+				TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT) result = ERR_WRONG_STATE;
+				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
@@ -529,6 +564,7 @@ void BleCentral::onDisconnect(const ble_gap_evt_disconnected_t& event) {
 
 void BleCentral::onMtu(uint16_t gattStatus, const ble_gattc_evt_exchange_mtu_rsp_t& event) {
 	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
+		LOGw("gattStatus=%u", gattStatus);
 		return;
 	}
 	_writeMtu = event.server_rx_mtu;
@@ -536,37 +572,49 @@ void BleCentral::onMtu(uint16_t gattStatus, const ble_gattc_evt_exchange_mtu_rsp
 }
 
 void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& event) {
-	_log(SERIAL_INFO, false, "Read offset=%u len=%u", event.offset, event.len);
+	_log(SERIAL_INFO, false, "Read offset=%u len=%u data=", event.offset, event.len);
 	_logArray(SERIAL_INFO, true, event.data, event.len);
 
-	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
-		finalizeOperation(Operation::READ, ERR_GATT_ERROR);
-		return;
-	}
-
-	// Not sure how to know if we need another read (has something to do with ATT_MTU). So just keep on trying until len = 0.
-	if (event.len != 0) {
-		// Copy data that was read.
-		if (event.offset + event.len > sizeof(_buf)) {
-			finalizeOperation(Operation::READ, ERR_BUFFER_TOO_SMALL);
-			return;
-		}
-		memcpy(_buf + event.offset, event.data, event.len);
-
-		// Continue long read.
-		uint32_t nrfCode = sd_ble_gattc_read(_connectionHandle, event.handle, event.offset + event.len);
-		if (nrfCode != NRF_SUCCESS) {
-			LOGw("Failed to continue long read. retCode=%u", nrfCode);
-			finalizeOperation(Operation::READ, ERR_READ_FAILED);
-			return;
-		}
-	}
-	else {
+	// According to https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.s132.api.v6.1.1/group___b_l_e___g_a_t_t_c___v_a_l_u_e___r_e_a_d___m_s_c.html
+	// we should continue reading, until we get a gatt status of invalid offset.
+	// But it seems like the last read we get is with a length of 0.
+	if (gattStatus == BLE_GATT_STATUS_ATTERR_INVALID_OFFSET) {
 		ble_central_read_result_t result = {
 				.retCode = ERR_SUCCESS,
 				.data = cs_data_t(_buf, event.offset)
 		};
 		finalizeOperation(Operation::READ, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+		return;
+	}
+
+	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
+		LOGw("gattStatus=%u", gattStatus);
+		finalizeOperation(Operation::READ, ERR_GATT_ERROR);
+		return;
+	}
+
+	if (event.len == 0) {
+		ble_central_read_result_t result = {
+				.retCode = ERR_SUCCESS,
+				.data = cs_data_t(_buf, event.offset)
+		};
+		finalizeOperation(Operation::READ, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+		return;
+	}
+
+	// Copy data that was read.
+	if (event.offset + event.len > sizeof(_buf)) {
+		finalizeOperation(Operation::READ, ERR_BUFFER_TOO_SMALL);
+		return;
+	}
+	memcpy(_buf + event.offset, event.data, event.len);
+
+	// Continue long read.
+	uint32_t nrfCode = sd_ble_gattc_read(_connectionHandle, event.handle, event.offset + event.len);
+	if (nrfCode != NRF_SUCCESS) {
+		LOGw("Failed to continue long read. retCode=%u", nrfCode);
+		finalizeOperation(Operation::READ, ERR_READ_FAILED);
+		return;
 	}
 }
 
@@ -574,6 +622,7 @@ void BleCentral::onWrite(uint16_t gattStatus, const ble_gattc_evt_write_rsp_t& e
 	LOGi("onWrite write_op=%u offset=%u len=%u", event.write_op, event.offset, event.len);
 
 	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
+		LOGw("gattStatus=%u", gattStatus);
 		finalizeOperation(Operation::WRITE, ERR_GATT_ERROR);
 		return;
 	}
@@ -620,7 +669,7 @@ void BleCentral::onGattCentralEvent(uint16_t evtId, const ble_gattc_evt_t& event
 		return;
 	}
 	if (event.gatt_status != BLE_GATT_STATUS_SUCCESS) {
-		LOGe("Event id=%u status=%u", evtId, event.gatt_status);
+		LOGw("Event id=%u status=%u", evtId, event.gatt_status);
 	}
 	switch (evtId) {
 		case BLE_GATTC_EVT_EXCHANGE_MTU_RSP: {

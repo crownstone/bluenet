@@ -14,6 +14,10 @@
 
 UUID::UUID() {}
 
+UUID::UUID(ble_uuid_t uuid):
+		_uuid(uuid)
+{}
+
 UUID::UUID(const char* fullUuid) {
 	ble_uuid128_t uuid;
 	bool success = BLEutil::parseUuid(fullUuid, strlen(fullUuid), uuid.uuid128, sizeof(uuid.uuid128));
@@ -137,4 +141,9 @@ cs_ret_code_t UUID::fromNrfCode(ret_code_t nrfCode) {
 		case NRF_ERROR_FORBIDDEN:      return ERR_BUSY;
 		default:                       return ERR_UNSPECIFIED;
 	}
+}
+
+bool UUID::operator==(const UUID& other) {
+	return (_uuid.uuid == other._uuid.uuid) && (_uuid.type == other._uuid.type);
+//	return memcmp(&_uuid, &(other._uuid), sizeof(_uuid)) == 0; // Bad idea, as the struct is not packed.
 }

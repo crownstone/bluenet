@@ -6,8 +6,9 @@
  */
 #pragma once
 
-#include "protocol/cs_Packets.h"
-#include "protocol/cs_ErrorCodes.h"
+#include <ble/cs_UUID.h>
+#include <protocol/cs_ErrorCodes.h>
+#include <protocol/cs_Packets.h>
 
 /**
  * Packets (structs) that are used internally in the firmware, and can be changed freely.
@@ -347,5 +348,7 @@ struct ble_central_read_result_t {
 };
 
 struct ble_central_discovery_t {
-
+	UUID uuid;
+	uint16_t valueHandle;    // Set to BLE_GATT_HANDLE_INVALID when not existing.
+	uint16_t cccdHandle;     // Set to BLE_GATT_HANDLE_INVALID when not existing.
 };
