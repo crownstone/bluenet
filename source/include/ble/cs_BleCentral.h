@@ -13,6 +13,12 @@
 #include <events/cs_Event.h>
 #include <structs/cs_PacketsInternal.h>
 
+/**
+ * Class that enables you to connect to a device, and perform write or read operations.
+ *
+ * Generally, you first connect, then discover, then perform read and/or write operations, and finally disconnect.
+ * Note that the disconnect event might happen at any time.
+ */
 class BleCentral {
 public:
 	static BleCentral& getInstance() {
@@ -26,7 +32,7 @@ public:
 	 * Connect to a device.
 	 *
 	 * @return ERR_BUSY                When already connected or another operation is in progress (discovery, read, write, connect, disconnect).
-	 * @return ERR_WAIT_FOR_SUCCESS    When the connection will be attempted. Wait for the connect result event.
+	 * @return ERR_WAIT_FOR_SUCCESS    When the connection will be attempted. Wait for EVT_BLE_CENTRAL_CONNECT_RESULT.
 	 */
 	cs_ret_code_t connect(const device_address_t& address, uint16_t timeoutMs = 3000);
 
@@ -34,33 +40,34 @@ public:
 	 * Terminate current connection.
 	 *
 	 * @return ERR_SUCCESS             When already disconnected.
-	 * @return ERR_WAIT_FOR_SUCCESS    When disconnecting. Wait for the disconnect result event.
+	 * @return ERR_WAIT_FOR_SUCCESS    When disconnecting. Wait for EVT_BLE_CENTRAL_DISCONNECTED.
 	 */
 	cs_ret_code_t disconnect();
-
-	/**
-	 * Check whether this crownstone is connected as central.
-	 */
-	bool isConnected();
-
-	/**
-	 * Check whether an operation is in progress.
-	 */
-	bool isBusy();
 
 	/**
 	 * Discover services.
 	 *
 	 * Unfortunately you cannot simply discover all services, you will need to tell in advance which services you are looking for.
 	 *
-	 * For each discovered service, an event is dispatched.
+	 * For each discovered service and characteristic, EVT_BLE_CENTRAL_DISCOVERY is dispatched.
+	 * Use these events to figure out which handles to use for reading and writing.
 	 *
 	 * @param[in] uuids                Array of UUIDs that will be attempted to discover.
 	 * @param[in] uuidCount            Number of UUIDs in the array.
 	 *
-	 * @return ERR_WAIT_FOR_SUCCESS    When the discovery is started. Wait for the discovery result event.
+	 * @return ERR_WAIT_FOR_SUCCESS    When the discovery is started. Wait for EVT_BLE_CENTRAL_DISCOVERY_RESULT.
 	 */
 	cs_ret_code_t discoverServices(const UUID* uuids, uint8_t uuidCount);
+
+	/**
+	 * Read data from a characteristic.
+	 *
+	 * @param[in] handle               The characteristic handle to read from. The handle was received during discovery.
+	 *
+	 * @return ERR_BUSY                An operation is in progress (discovery, read, write, connect, disconnect).
+	 * @return ERR_WAIT_FOR_SUCCESS    When the read is started. Wait for EVT_BLE_CENTRAL_READ_RESULT.
+	 */
+	cs_ret_code_t read(uint16_t handle);
 
 	/**
 	 * Write data to a characteristic.
@@ -71,20 +78,19 @@ public:
 	 *
 	 * @return ERR_BUFFER_TOO_SMALL    The data size is too large.
 	 * @return ERR_BUSY                An operation is in progress (discovery, read, write, connect, disconnect).
-	 * @return ERR_WAIT_FOR_SUCCESS    When the write is started. Wait for the write result event.
+	 * @return ERR_WAIT_FOR_SUCCESS    When the write is started. Wait for EVT_BLE_CENTRAL_WRTIE_RESULT.
 	 */
 	cs_ret_code_t write(uint16_t handle, const uint8_t* data, uint16_t len);
 
 	/**
-	 * Read data from a characteristic.
-	 *
-	 * @param[in] handle               The characteristic handle to read from. The handle was received during discovery.
-	 *
-	 * @return ERR_BUSY                An operation is in progress (discovery, read, write, connect, disconnect).
-	 * @return ERR_WAIT_FOR_SUCCESS    When the read is started. Wait for the read result event.
-	 *                                 This event will have a pointer to the data, which will be valid only during this event.
+	 * Check whether this crownstone is connected as central.
 	 */
-	cs_ret_code_t read(uint16_t handle);
+	bool isConnected();
+
+	/**
+	 * Check whether an operation is in progress.
+	 */
+	bool isBusy();
 
 private:
 	enum class Operation: uint8_t {
@@ -117,7 +123,7 @@ private:
 	/**
 	 * Current MTU.
 	 */
-	uint16_t _writeMtu = BLE_GATT_ATT_MTU_DEFAULT - 3;
+	uint16_t _mtu = BLE_GATT_ATT_MTU_DEFAULT;
 
 	/**
 	 * Operation in progress.

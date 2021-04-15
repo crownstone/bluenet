@@ -104,7 +104,7 @@ void TestCentral::handleEvent(event_t & event) {
 			if (packet->retCode == ERR_SUCCESS) {
 				_logArray(SERIAL_INFO, true, packet->data.data, packet->data.len);
 
-				uint8_t writeData[50];
+				uint8_t writeData[100];
 				for (size_t i = 0; i < sizeof(writeData); ++i) {
 					writeData[i] = i;
 				}

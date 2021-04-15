@@ -297,7 +297,8 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 	}
 	memcpy(_buf, data, len);
 
-	if (len > _writeMtu) {
+	const uint16_t writeMtu = _mtu - 3; // Subtract overhead.
+	if (len > writeMtu) {
 		// We need to break up the write into chunks.
 		// Although it seems like what we're looking for, the "Queued Write module" is NOT what we can use for this.
 		//     https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.2.0/lib_ble_queued_write.html
@@ -341,7 +342,7 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 	ble_gattc_write_params_t writeParams;
 	if (offset < _bufDataSize) {
-		const int chunkSize = _writeMtu - 2;
+		const int chunkSize = _mtu - 5; // Subtract overhead.
 		writeParams.write_op = BLE_GATT_OP_PREP_WRITE_REQ;
 		writeParams.flags = 0;
 		writeParams.handle = handle;
@@ -535,7 +536,15 @@ void BleCentral::onConnect(uint16_t connectionHandle, const ble_gap_evt_connecte
 	LOGi("Connected");
 
 	_connectionHandle = connectionHandle;
-	finalizeOperation(Operation::CONNECT, ERR_SUCCESS);
+
+	uint32_t nrfCode = sd_ble_gattc_exchange_mtu_request(_connectionHandle, NRF_SDH_BLE_GATT_MAX_MTU_SIZE);
+	if (nrfCode == NRF_SUCCESS) {
+		// Wait for MTU response.
+	}
+	else {
+		LOGw("Failed MTU request nrfCode=%u", nrfCode);
+		finalizeOperation(Operation::CONNECT, ERR_SUCCESS);
+	}
 }
 
 void BleCentral::onGapTimeout(const ble_gap_evt_timeout_t& event) {
@@ -565,10 +574,12 @@ void BleCentral::onDisconnect(const ble_gap_evt_disconnected_t& event) {
 void BleCentral::onMtu(uint16_t gattStatus, const ble_gattc_evt_exchange_mtu_rsp_t& event) {
 	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
 		LOGw("gattStatus=%u", gattStatus);
+		finalizeOperation(Operation::CONNECT, ERR_GATT_ERROR);
 		return;
 	}
-	_writeMtu = event.server_rx_mtu;
-	LOGi("MTU=%u", _writeMtu);
+	_mtu = event.server_rx_mtu;
+	LOGi("MTU=%u", _mtu);
+	finalizeOperation(Operation::CONNECT, ERR_SUCCESS);
 }
 
 void BleCentral::onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& event) {
