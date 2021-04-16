@@ -1,6 +1,6 @@
 # Mesh
 
-The bluenet firmware supports Bluetooth Mesh. On top of Bluetooth Mesh we have defined a protocol, which can be found
+The bluenet firmware supports Bluetooth Mesh. On top of Bluetooth Mesh (spec, [pdf](https://www.bluetooth.org/docman/handlers/downloaddoc.ashx?doc_id=457092)) we have defined a protocol, which can be found
 [here](MESH_PROTOCOL.md).
 
 Bluetooth mesh uses **flooding**. Each node broadcasts to all its neighbouring nodes. All authenticated network packets
@@ -58,7 +58,13 @@ the air and the IV (4 bytes) is only very slowly changing and considered to be k
 
 The encryption itself is done through AES-CCM (just as Bluetooth LE).
 
-## Mesh message packet
+## Mesh messages
+
+This overview from silabs gives the best insight into segmentation.
+
+![Mesh segment](../docs/images/silabs-bluetooth-segmentation.jpg)
+
+Compare the below with this image to get a grasp on the make-up of a packet.
 
 ![Mesh message packet](../docs/diagrams/mesh-message-packet.png)
 
@@ -78,6 +84,9 @@ The first byte are in the clear, then there are a couple obfuscated, and destina
 encrypted. The transport PDU is of of a maximum size of 128 bits (16 bytes) for an access message and 96 bits (12 bytes)
 for a control message. The total message is 31 bytes.
 
+The TTL can have a value of `0`. In that case the message will not be relayed. This means all receiving nodes will
+know that this message is a single radio link away. This can be used to build up a topology of the network.
+
 The transport payload can be separated into multiple segments. However, this eats a little bit from the payload to 
 indicate the segment index and count. For our access messages with a transport PDU of 16 bytes:
 
@@ -85,28 +94,47 @@ indicate the segment index and count. For our access messages with a transport P
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
-uint8 | 1 | 1 | High bit means a segmented message
+uint8 | SEG=1 | 1 | High bit means a segmented message
 uint8 | AKF | 1 | Indicates the application layer key
 uint8 | AID | 6 | Defines the application layer key
 uint8 | SZMIC | 1 | Indicates that the size of the NetMIC in the upper layer is 4 bytes (32 bits)
 uint8 | SeqZero | 13 | Least significant bits of SeqAuth.
 uint8 | SegO | 5 | Segment number of segment m
 uint8 | SegN | 5 | Maximum number of segments
-uint8 | Segment m | 96 | The actual segment contents (for last segment can be 8 up to 96 bits)
+uint8 | Segment m | 96 | The segment itself (for last segment can be 8 up to 96 bits)
 
 You see that a single segmented message contains 96 bits or only 12 bytes. It is actually even worse. Even that
 segment is not free to define.
 
 Type | Name | Length in bits | Description
 --- | --- | --- | ---
-uint8 | vendor | 32 | Vendor model identifier (16 bits for SIG model ids)
-uint8 | opcode | 24 | A manufacturer-specific opcode starts with `11` and takes 3 bytes.
+uint8 | Opcode | 24 | A manufacturer-specific opcode starts with `11` and takes 3 bytes.
+uint8 | Payload | 40 | Actual contents (5 bytes)
+uint8 | TransMIC | 32 | Transport Message Integrity Check (4 bytes)
 
-Now there are only 12 - 7 = 5 bytes left.
+Note that there are only 5 bytes of actualy contents left (8 bytes if you add the opcode)!
 
-TODO: There should be 8 bytes for non-segmented messages. Spell this out as well.
+![Mesh transport PDU unsegmented](../docs/diagrams/mesh-transport-pdu-unsegmented.png)
 
-TODO: Explain why only 6 bytes are available in `MESH_PROTOCOL`.
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+uint8 | SEG=0 | 1 | Low bit means a segmented message
+uint8 | AKF | 1 | Indicates the application layer key
+uint8 | AID | 6 | Defines the application layer key
+uint8 | Upper PDU | 120 | The upper transport access PDU
+
+There are 120 bits (15 bytes). And again this is divided into:
+
+Type | Name | Length in bits | Description
+--- | --- | --- | ---
+uint8 | Opcode | 24 | A manufacturer-specific opcode starts with `11` and takes 3 bytes.
+uint8 | Payload | 64 | Actual contents (8 bytes)
+uint8 | TransMIC | 32 | Transport Message Integrity Check (4 bytes)
+
+There are 64 bits for the message (8 bytes).
+
+The [protocol](MESH_PROTOCOL.md) uses one byte for the message type which leaves 7 bytes for contents to be communicated
+over the mesh. Note that this not contain versioning. From the first byte starting with `11` we might use the remaining six to do versioning later on.
 
 ## Radio access
 
@@ -118,6 +146,12 @@ The mesh stack implements a Bluetooth LE compliant **scanner**. This is enabled 
 ```
 MESH_SCANNER = 1
 ```
+
+We use actually a clone of the implementation on the Bluetooth Mesh by Nordic (see [here](https://github.com/crownstone/nRF5-SDK-for-Mesh)) which implements **active scanning**. The default is passive scanning which only listens on the
+radio for incoming advertisements. Active scanning means that the firmware asks for more information in the form of
+a **scan response request** and gets this information as a **scan response**.
+
+Over the course of time broadcasts of advertisements on iOS are moving more and more data into scan responses. First, when having apps running in the background, but this might be now the case for apps running in the foreground as well. This is why those **scan response requests** are important to send out. The details of this can be found in the [broadcast protocol](BROADCAST_PROTOCOL.md).
 
 Similarly, it has **advertiser(s)** implemented as well. We do use both the ordinary advertiser in the nRF5 SDK and
 the advertiser in the mesh.
@@ -137,11 +171,10 @@ _advertiser.setMacAddress(address)
 
 This advertiser is responsible for broadcasting iBeacon messages (it can even iterate through a couple of them).
 
-The `Advertiser` class defined in `cs_Advertiser.cpp` is responsible for broadcasting advertisements (or scan
-responses) with Crownstone service data.
 
-TODO: Indicate why this cannot be done by the mesh advertiser. Has it to do with
-https://github.com/crownstone/bluenet/issues/67?
+The `Advertiser` class defined in `cs_Advertiser.cpp` is responsible for broadcasting advertisements (or scan
+responses) with Crownstone service data. This advertiser sends out **connectable advertisements**. It is not possible
+to do that with the advertiser in the mesh SDK.
 
 ## Self-provisioning
 
@@ -155,10 +188,11 @@ by the mesh. We obtain keys etc from persistent memory and define an address as 
 provisionSelf(uint16_t id)
 ```
 
-This reduces the number of potential nodes from `2^16` to `2^8`. 
+This reduces the number of potential nodes from `2^16` to `2^8`. There are a couple of places from which this
+limitation stems:
 
-TODO: Indicate for which parts in the protocol the limitation to 8 bits is forced.
-
+* To send RSSI reports between two nodes we currently require 5 bytes, using `uint16_t` would push it to 7 bytes which would require us to drop or compression meta-info about the channel for example.
+* To send a multi-switch message (this only switches a single Crownstone though) we use 7 bytes. It allows to execute with a delay using a timestamp of 2 bytes and it specifies the source of the command (switchcraft, connection, internal, etc.) including a counter with 3 bytes. Going to `uint16_t` would require e.g. compression of the delay field (e.g. using the high bit to indicate two different time regimes).
 
 ## Syncing
 

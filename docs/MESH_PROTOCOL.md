@@ -5,6 +5,16 @@ This only documents the latest protocol, older versions can be found in the git 
 
 ## Message types
 
+![Crownstone mesh message](../docs/diagrams/crownstone-mesh-message.png)
+
+Type | Name | Length | Description
+--- | --- | --- | ---
+uint8 | Message type | 1 | A type of mesh message (see table below)
+uint8 | Payload | 7 | Payload for the mesh message
+
+This is in total 8 bytes (an unsegmented message). There's currently no versioning in use except for bumping the 
+identifier of a message.
+
 id | name | Payload | Result data
 ---|---|---|---
 0 | CS_MESH_MODEL_TYPE_TEST | [cs_mesh_model_msg_test_t](#cs_mesh_model_msg_test_t)
@@ -156,7 +166,7 @@ uint8_t | List size | 1 | Size of tracked devices list.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8_t | Stone ID | 1 | ID of stone that requests for a sync.
+stone_id_t | Stone ID | 1 | ID of stone that requests for a sync.
 uint32_t | [requestBitmask](#sync-bitmask) | 4 | Bitmask of all things that are requested to be synced.
 
 
@@ -205,13 +215,13 @@ uint8_t | [Persistence mode](PROTOCOL.md#state-set-persistence-mode) | 2 | Type 
 #### rssi_ping_message_t
 ![Rssi ping message](../docs/diagrams/rssi_ping_msg.png)
 
-Type | Name | Length | Description
---- | --- | --- | ---
-stone_id_t | sender_id   | 1 |
-stone_id_t |recipient_id | 1 |
-uint8_t    | sample_id;  | 1 |
-int8_t     |rssi         | 1 |
-uint8_t    | channel     | 1 |
+Type       | Name         | Length | Description
+---        | ---          | ---    | ---
+stone_id_t | sender_id    | 1      | ID of node sending the message
+stone_id_t | recipient_id | 1      | ID of the receiving node
+uint8_t    | sample_id    | 1      | ID of the sample
+int8_t     | rssi         | 1      | RSSI at the receiver
+uint8_t    | channel      | 1      | channel over which the message was broadcasted
 
 
 #### high_resolution_time_stamp_t
