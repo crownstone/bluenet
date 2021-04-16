@@ -64,7 +64,9 @@ This overview from silabs gives the best insight into segmentation.
 
 ![Mesh segment](../docs/images/silabs-bluetooth-segmentation.jpg)
 
-Compare the below with this image to get a grasp on the make-up of a packet.
+Compare this image with the information below to get a grasp on the make-up of a packet.
+
+### Mesh message packet
 
 ![Mesh message packet](../docs/diagrams/mesh-message-packet.png)
 
@@ -86,6 +88,8 @@ for a control message. The total message is 31 bytes.
 
 The TTL can have a value of `0`. In that case the message will not be relayed. This means all receiving nodes will
 know that this message is a single radio link away. This can be used to build up a topology of the network.
+
+### Segmented message
 
 The transport payload can be separated into multiple segments. However, this eats a little bit from the payload to 
 indicate the segment index and count. For our access messages with a transport PDU of 16 bytes:
@@ -113,6 +117,10 @@ uint8 | Payload | 40 | Actual contents (5 bytes)
 uint8 | TransMIC | 32 | Transport Message Integrity Check (4 bytes)
 
 Note that there are only 5 bytes of actualy contents left (8 bytes if you add the opcode)!
+
+### Unsegmented message
+
+A single unsegmented message can have slightly more space (because there is no segmentation overhead).
 
 ![Mesh transport PDU unsegmented](../docs/diagrams/mesh-transport-pdu-unsegmented.png)
 
