@@ -6,11 +6,15 @@
  */
 
 #include <ble/cs_BleCentral.h>
-#include <logging/cs_Logger.h>
-#include <events/cs_Event.h>
 #include <ble/cs_Nordic.h>
-#include <common/cs_Types.h>
 #include <ble/cs_Stack.h>
+#include <common/cs_Types.h>
+#include <events/cs_Event.h>
+#include <events/cs_EventDispatcher.h>
+#include <logging/cs_Logger.h>
+
+const uint16_t WRITE_OVERHEAD = 3;
+const uint16_t LONG_WRITE_OVERHEAD = 5;
 
 void handle_discovery(ble_db_discovery_evt_t* event) {
 	BleCentral::getInstance().onDiscoveryEvent(event);
@@ -25,7 +29,7 @@ BleCentral::BleCentral() {
 }
 
 void BleCentral::init() {
-
+	EventDispatcher::getInstance().addListener(this);
 }
 
 cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t timeoutMs) {
@@ -297,8 +301,7 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 	}
 	memcpy(_buf, data, len);
 
-	const uint16_t writeMtu = _mtu - 3; // Subtract overhead.
-	if (len > writeMtu) {
+	if (len > _mtu - WRITE_OVERHEAD) {
 		// We need to break up the write into chunks.
 		// Although it seems like what we're looking for, the "Queued Write module" is NOT what we can use for this.
 		//     https://infocenter.nordicsemi.com/topic/com.nordic.infocenter.sdk5.v15.2.0/lib_ble_queued_write.html
@@ -342,7 +345,7 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 cs_ret_code_t BleCentral::nextWrite(uint16_t handle, uint16_t offset) {
 	ble_gattc_write_params_t writeParams;
 	if (offset < _bufDataSize) {
-		const int chunkSize = _mtu - 5; // Subtract overhead.
+		const int chunkSize = _mtu - LONG_WRITE_OVERHEAD;
 		writeParams.write_op = BLE_GATT_OP_PREP_WRITE_REQ;
 		writeParams.flags = 0;
 		writeParams.handle = handle;
@@ -718,4 +721,35 @@ void BleCentral::onBleEvent(const ble_evt_t* event) {
 	}
 }
 
+void BleCentral::handleEvent(event_t& event) {
+	switch (event.type) {
+		case CS_TYPE::CMD_BLE_CENTRAL_CONNECT: {
+			auto packet = CS_TYPE_CAST(CMD_BLE_CENTRAL_CONNECT, event.data);
+			event.result.returnCode = connect(packet->address, packet->timeoutMs);
+			break;
+		}
+		case CS_TYPE::CMD_BLE_CENTRAL_DISCONNECT: {
+			event.result.returnCode = disconnect();
+			break;
+		}
+		case CS_TYPE::CMD_BLE_CENTRAL_DISCOVER: {
+			auto packet = CS_TYPE_CAST(CMD_BLE_CENTRAL_DISCOVER, event.data);
+			event.result.returnCode = discoverServices(packet->uuids, packet->uuidCount);
+			break;
+		}
+		case CS_TYPE::CMD_BLE_CENTRAL_READ: {
+			auto packet = CS_TYPE_CAST(CMD_BLE_CENTRAL_READ, event.data);
+			event.result.returnCode = read(packet->handle);
+			break;
+		}
+		case CS_TYPE::CMD_BLE_CENTRAL_WRITE: {
+			auto packet = CS_TYPE_CAST(CMD_BLE_CENTRAL_WRITE, event.data);
+			event.result.returnCode = write(packet->handle, packet->data.data, packet->data.len);
+			break;
+		}
+		default: {
+			break;
+		}
+	}
+}
 

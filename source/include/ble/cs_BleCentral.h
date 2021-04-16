@@ -12,6 +12,7 @@
 #include <common/cs_Types.h>
 #include <events/cs_Event.h>
 #include <structs/cs_PacketsInternal.h>
+#include <events/cs_EventListener.h>
 
 /**
  * Class that enables you to connect to a device, and perform write or read operations.
@@ -19,7 +20,7 @@
  * Generally, you first connect, then discover, then perform read and/or write operations, and finally disconnect.
  * Note that the disconnect event might happen at any time.
  */
-class BleCentral {
+class BleCentral: EventListener {
 public:
 	static BleCentral& getInstance() {
 		static BleCentral instance;
@@ -167,6 +168,11 @@ public:
 	 * Internal usage.
 	 */
 	void onDiscoveryEvent(ble_db_discovery_evt_t* event);
+
+	/**
+	 * Internal usage.
+	 */
+	void handleEvent(event_t& event);
 };
 
 

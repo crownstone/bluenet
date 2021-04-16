@@ -17,6 +17,7 @@
 #include "protocol/cs_TrackableParserPackets.h"
 
 #include "structs/cs_PacketsInternal.h"
+#include <structs/cs_BleCentralPackets.h>
 
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
@@ -201,13 +202,6 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_CONNECT,                                       // Device connected.
 	EVT_BLE_DISCONNECT,                                    // Device disconnected.
 	CMD_ENABLE_ADVERTISEMENT,                              // Enable/disable advertising.
-	EVT_BLE_CENTRAL_CONNECT_START,                         // An outgoing connection is going to be made. Always followed by EVT_BLE_CENTRAL_CONNECT_RESULT.
-	EVT_BLE_CENTRAL_CONNECT_RESULT,                        // Result of a connection attempt.
-	EVT_BLE_CENTRAL_DISCONNECTED,                          // Outgoing connection was terminated. By request, or due to some error.
-	EVT_BLE_CENTRAL_DISCOVERY,                             // A single service or characteristic is discovered.
-	EVT_BLE_CENTRAL_DISCOVERY_RESULT,                      // Result of service discovery.
-	EVT_BLE_CENTRAL_WRITE_RESULT,                          // Result of a write.
-	EVT_BLE_CENTRAL_READ_RESULT,                           // Result of a read.
 
 	// Switch (aggregator)
 	CMD_SWITCH_OFF = InternalBaseSwitch,              // Turn switch off.
@@ -354,6 +348,20 @@ enum class CS_TYPE: uint16_t {
 	EVT_MICROAPP_ERASE_RESULT,                        // Microapp has been erase from flash, or failed to do so.
 	CMD_MICROAPP_ADVERTISE,                           // A microapp wants to advertise something.
 
+	CMD_BLE_CENTRAL_CONNECT,                          // Connect to a device.    See BleCentral::connect().
+	CMD_BLE_CENTRAL_DISCONNECT,                       // Disconnect from device. See BleCentral::disconnect().
+	CMD_BLE_CENTRAL_DISCOVER,                         // Discover services.      See BleCentral::discoverServices().
+	CMD_BLE_CENTRAL_READ,                             // Read a characteristic.  See BleCentral::read().
+	CMD_BLE_CENTRAL_WRITE,                            // Write a characteristic. See BleCentral::write().
+
+	EVT_BLE_CENTRAL_CONNECT_START,                    // An outgoing connection is going to be made. Always followed by EVT_BLE_CENTRAL_CONNECT_RESULT.
+	EVT_BLE_CENTRAL_CONNECT_RESULT,                   // Result of a connection attempt.
+	EVT_BLE_CENTRAL_DISCONNECTED,                     // Outgoing connection was terminated. By request, or due to some error.
+	EVT_BLE_CENTRAL_DISCOVERY,                        // A single service or characteristic is discovered.
+	EVT_BLE_CENTRAL_DISCOVERY_RESULT,                 // Result of service discovery.
+	EVT_BLE_CENTRAL_READ_RESULT,                      // Result of a read.
+	EVT_BLE_CENTRAL_WRITE_RESULT,                     // Result of a write.
+
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
 	
 	EVT_TWI_INIT,                                     // TWI initialisation.
@@ -491,6 +499,11 @@ typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
 typedef  adv_background_parsed_t TYPIFY(EVT_ADV_BACKGROUND_PARSED);
 typedef  adv_background_parsed_v1_t TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1);
 typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
+typedef  ble_central_connect_t TYPIFY(CMD_BLE_CENTRAL_CONNECT);
+typedef  ble_central_disconnect_t TYPIFY(CMD_BLE_CENTRAL_DISCONNECT);
+typedef  ble_central_discover_t TYPIFY(CMD_BLE_CENTRAL_DISCOVER);
+typedef  ble_central_read_t TYPIFY(CMD_BLE_CENTRAL_READ);
+typedef  ble_central_write_t TYPIFY(CMD_BLE_CENTRAL_WRITE);
 typedef  void TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
 typedef  void TYPIFY(EVT_BLE_CENTRAL_CONNECT_START);
