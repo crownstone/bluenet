@@ -116,11 +116,11 @@ uint8 | Opcode | 24 | A manufacturer-specific opcode starts with `11` and takes 
 uint8 | Payload | 40 | Actual contents (5 bytes)
 uint8 | TransMIC | 32 | Transport Message Integrity Check (4 bytes)
 
-Note that there are only 5 bytes of actualy contents left (8 bytes if you add the opcode)!
+Note that there are only 5 bytes of actual contents left (8 bytes if you add the opcode)!
 
 ### Unsegmented message
 
-A single unsegmented message can have slightly more space (because there is no segmentation overhead).
+A single unsegmented message has slightly more space for data (because there is no segmentation overhead).
 
 ![Mesh transport PDU unsegmented](../docs/diagrams/mesh-transport-pdu-unsegmented.png)
 
