@@ -13,6 +13,14 @@ class TestCentral: EventListener {
 public:
 	TestCentral();
 	void init();
+
+	void connect();
+	void discover();
+	void onDiscovery(ble_central_discovery_t& packet);
+	void read();
+	void write();
+	void disconnect();
+
 	void handleEvent(event_t & event);
 private:
 	uint16_t _fwVersionHandle;

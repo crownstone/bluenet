@@ -32,7 +32,8 @@ public:
 	/**
 	 * Connect to a device.
 	 *
-	 * @return ERR_BUSY                When already connected or another operation is in progress (discovery, read, write, connect, disconnect).
+	 * @return ERR_WRONG_STATE         When already connected.
+	 * @return ERR_BUSY                An operation is in progress (discovery, read, write, connect, disconnect).
 	 * @return ERR_WAIT_FOR_SUCCESS    When the connection will be attempted. Wait for EVT_BLE_CENTRAL_CONNECT_RESULT.
 	 */
 	cs_ret_code_t connect(const device_address_t& address, uint16_t timeoutMs = 3000);
@@ -167,7 +168,7 @@ public:
 	/**
 	 * Internal usage.
 	 */
-	void onDiscoveryEvent(ble_db_discovery_evt_t* event);
+	void onDiscoveryEvent(ble_db_discovery_evt_t& event);
 
 	/**
 	 * Internal usage.

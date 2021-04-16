@@ -17,18 +17,19 @@ const uint16_t WRITE_OVERHEAD = 3;
 const uint16_t LONG_WRITE_OVERHEAD = 5;
 
 void handle_discovery(ble_db_discovery_evt_t* event) {
-	BleCentral::getInstance().onDiscoveryEvent(event);
+		BleCentral::getInstance().onDiscoveryEvent(*event);
 }
 
 BleCentral::BleCentral() {
+}
+
+void BleCentral::init() {
 	_discoveryModule.discovery_in_progress = false;
 	_discoveryModule.discovery_pending = false;
 	_discoveryModule.conn_handle = BLE_CONN_HANDLE_INVALID;
 	uint32_t nrfCode = ble_db_discovery_init(handle_discovery);
 	APP_ERROR_CHECK(nrfCode);
-}
 
-void BleCentral::init() {
 	EventDispatcher::getInstance().addListener(this);
 }
 
@@ -179,15 +180,15 @@ cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount)
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
-void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
+void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 	uint32_t retCode;
-	switch (event->evt_type) {
+	switch (event.evt_type) {
 		case BLE_DB_DISCOVERY_COMPLETE: {
-			LOGi("Discovery found uuid=0x%04X type=%u characteristicCount=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type, event->params.discovered_db.char_count);
-			if (event->params.discovered_db.srv_uuid.type >= BLE_UUID_TYPE_VENDOR_BEGIN) {
+			LOGi("Discovery found uuid=0x%04X type=%u characteristicCount=%u", event.params.discovered_db.srv_uuid.uuid, event.params.discovered_db.srv_uuid.type, event.params.discovered_db.char_count);
+			if (event.params.discovered_db.srv_uuid.type >= BLE_UUID_TYPE_VENDOR_BEGIN) {
 				ble_uuid128_t fullUuid;
 				uint8_t uuidSize = 0;
-				retCode = sd_ble_uuid_encode(&(event->params.discovered_db.srv_uuid), &uuidSize, fullUuid.uuid128);
+				retCode = sd_ble_uuid_encode(&(event.params.discovered_db.srv_uuid), &uuidSize, fullUuid.uuid128);
 				if (retCode == NRF_SUCCESS && uuidSize == sizeof(fullUuid)) {
 #if CS_SERIAL_NRF_LOG_ENABLED == 0
 					LOGd("Full uuid: %02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
@@ -216,7 +217,7 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 
 			// Send an event for the service
 			ble_central_discovery_t packet = {
-				.uuid = UUID(event->params.discovered_db.srv_uuid),
+				.uuid = UUID(event.params.discovered_db.srv_uuid),
 				.valueHandle = BLE_GATT_HANDLE_INVALID,
 				.cccdHandle = BLE_GATT_HANDLE_INVALID
 			};
@@ -224,10 +225,10 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 			eventOut.dispatch();
 
 			// Send an event for each characteristic
-			for (uint8_t i = 0; i < event->params.discovered_db.char_count; ++i) {
-				packet.uuid = UUID(event->params.discovered_db.charateristics[i].characteristic.uuid);
-				packet.valueHandle = event->params.discovered_db.charateristics[i].characteristic.handle_value;
-				packet.cccdHandle = event->params.discovered_db.charateristics[i].cccd_handle;
+			for (uint8_t i = 0; i < event.params.discovered_db.char_count; ++i) {
+				packet.uuid = UUID(event.params.discovered_db.charateristics[i].characteristic.uuid);
+				packet.valueHandle = event.params.discovered_db.charateristics[i].characteristic.handle_value;
+				packet.cccdHandle = event.params.discovered_db.charateristics[i].cccd_handle;
 				event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY, &packet, sizeof(packet));
 				eventOut.dispatch();
 			}
@@ -235,11 +236,11 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
 			break;
 		}
 		case BLE_DB_DISCOVERY_SRV_NOT_FOUND: {
-			LOGi("Discovery not found uuid=0x%04X type=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type);
+			LOGi("Discovery not found uuid=0x%04X type=%u", event.params.discovered_db.srv_uuid.uuid, event.params.discovered_db.srv_uuid.type);
 			break;
 		}
 		case BLE_DB_DISCOVERY_ERROR: {
-			LOGw("Discovery error %u", event->params.err_code);
+			LOGw("Discovery error %u", event.params.err_code);
 			finalizeOperation(Operation::DISCOVERY, ERR_UNSPECIFIED);
 			break;
 		}
@@ -312,11 +313,7 @@ cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t l
 		// finalized by  BLE_GATT_OP_EXEC_WRITE_REQ
 
 		_bufDataSize = len;
-//		cs_ret_code_t retCode = nextWrite(handle, 0);
-//		if (retCode == ERR_WAIT_FOR_SUCCESS) {
-//			_currentOperation = Operation::WRITE;
-//		}
-//		return retCode;
+		// Current operation is set in nextWrite().
 		return nextWrite(handle, 0);
 	}
 
