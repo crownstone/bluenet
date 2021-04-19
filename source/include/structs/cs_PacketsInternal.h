@@ -6,8 +6,8 @@
  */
 #pragma once
 
-#include "protocol/cs_Packets.h"
-#include "protocol/cs_ErrorCodes.h"
+#include <protocol/cs_ErrorCodes.h>
+#include <protocol/cs_Packets.h>
 
 /**
  * Packets (structs) that are used internally in the firmware, and can be changed freely.

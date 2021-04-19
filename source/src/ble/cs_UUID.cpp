@@ -1,91 +1,149 @@
-/**
- * Author: Crownstone Team
+/*
  * Author: Crownstone Team
  * Copyright: Crownstone (https://crownstone.rocks)
- * Date: Feb 23, 2015
+ * Date: Apr 7, 2021
  * License: LGPLv3+, Apache License 2.0, and/or MIT (triple-licensed)
  */
 
+#include <ble/cs_Nordic.h>
 #include <ble/cs_UUID.h>
+#include <protocol/cs_ErrorCodes.h>
+#include <cstring>
+#include <util/cs_UuidParser.h>
 #include <util/cs_BleError.h>
 
-// TODO: CRAPPY IMPLEMENTATION!!!! implement in a clean, methodical and understandable way
+UUID::UUID() {}
 
-///! UUID //////////////////////////////////////////////////////////////////////////////////////////
+UUID::UUID(ble_uuid_t uuid):
+		_uuid(uuid)
+{}
 
-uint16_t UUID::init() {
-
-	if (_full && _type == BLE_UUID_TYPE_UNKNOWN) {
-		ble_uuid128_t u = *this;
-
-		ble_uuid_t uu;
-
-		uint32_t error_code = sd_ble_uuid_decode(16, u.uuid128, &uu);
-
-		if (error_code == NRF_ERROR_NOT_FOUND) {
-			BLE_CALL(sd_ble_uuid_vs_add, (&u, &_type));
-
-			_uuid = (uint16_t) (u.uuid128[13] << 8 | u.uuid128[12]);
-		} else if (error_code == NRF_SUCCESS) {
-			_type = uu.type;
-			_uuid = uu.uuid;
-		} else {
-			BLE_THROW("Failed to add uuid.");
-		}
-	} else if (_type == BLE_UUID_TYPE_UNKNOWN) {
-		BLE_THROW("TODO generate random UUID");
-	} else {
-		// nothing to do.
+UUID::UUID(const char* fullUuid) {
+	ble_uuid128_t uuid;
+	bool success = BLEutil::parseUuid(fullUuid, strlen(fullUuid), uuid.uuid128, sizeof(uuid.uuid128));
+	if (!success) {
+		APP_ERROR_CHECK(NRF_ERROR_INVALID_PARAM);
 	}
-	return _type;
+
+	ret_code_t nrfCode = fromFullUuidInternal(uuid);
+	APP_ERROR_CHECK(nrfCode);
 }
 
-UUID::operator ble_uuid_t() {
-	ble_uuid_t ret;
-	ret.uuid = _uuid;
-	ret.type = _type;
-
-	return ret;
+UUID::UUID(uint16_t shortUuid) {
+	ret_code_t nrfCode = fromShortUuidInternal(shortUuid);
+	APP_ERROR_CHECK(nrfCode);
 }
 
-UUID::operator ble_uuid128_t() {
-	ble_uuid128_t res;
+UUID::UUID(const UUID& baseUuid, uint16_t shortUuid) {
+	ret_code_t nrfCode = fromBaseUuidInternal(baseUuid, shortUuid);
+	APP_ERROR_CHECK(nrfCode);
+}
 
-	int i = 0;
-	int j = 0;
-	int k = 0;
-	uint8_t c;
-	uint8_t v = 0;
-	for (; ((c = _full[i]) != 0) && (j < 16); i++) {
-		uint8_t vv = 0;
+///// Public functions /////
 
-		if (c == '-' || c == ' ') {
-			continue;
-		} else if (c >= '0' && c <= '9') {
-			vv = c - '0';
-		} else if (c >= 'A' && c <= 'F') {
-			vv = c - 'A' + 10;
-		} else if (c >= 'a' && c <= 'f') {
-			vv = c - 'a' + 10;
-		} else {
-			BLE_THROW("invalid character");
-//				char cc[] = {c};// can't just call std::string(c) apparently.
-//				BLE_THROW(std::string("Invalid character ") + std::string(1, cc[0]) + " in UUID.");
-		}
-
-		v = v * 16 + vv;
-
-		if (k++ % 2 == 1) {
-			res.uuid128[15 - (j++)] = v;
-			v = 0;
-		}
-
+cs_ret_code_t UUID::fromFullUuid(const char* fullUuid) {
+	ble_uuid128_t uuid;
+	bool success = BLEutil::parseUuid(fullUuid, strlen(fullUuid), uuid.uuid128, sizeof(uuid.uuid128));
+	if (!success) {
+		return ERR_WRONG_PARAMETER;
 	}
-	if (j < 16) {
-		BLE_THROW("UUID too short.");
-	} else if (_full[i] != 0) {
-		BLE_THROW("UUID too long.");
+	return fromFullUuid(uuid);
+}
+
+cs_ret_code_t UUID::fromFullUuid(const ble_uuid128_t& fullUuid) {
+	ret_code_t nrfCode = fromFullUuidInternal(fullUuid);
+	return fromNrfCode(nrfCode);
+}
+
+cs_ret_code_t UUID::fromShortUuid(uint16_t shortUuid) {
+	ret_code_t nrfCode = fromShortUuidInternal(shortUuid);
+	return fromNrfCode(nrfCode);
+}
+
+cs_ret_code_t UUID::fromBaseUuid(const UUID& baseUuid, uint16_t shortUuid) {
+	ret_code_t nrfCode = fromBaseUuidInternal(baseUuid, shortUuid);
+	return fromNrfCode(nrfCode);
+}
+
+ble_uuid_t UUID::getUuid() const {
+	return _uuid;
+}
+
+///// Internal functions /////
+
+ret_code_t UUID::fromShortUuidInternal(uint16_t shortUuid) {
+	_uuid.type = BLE_UUID_TYPE_BLE;
+	_uuid.uuid = shortUuid;
+	return NRF_SUCCESS;
+}
+
+ret_code_t UUID::fromBaseUuidInternal(const UUID& baseUuid, uint16_t shortUuid) {
+	if (baseUuid._uuid.type == BLE_UUID_TYPE_UNKNOWN) {
+		return NRF_ERROR_INVALID_PARAM;
+	}
+	_uuid.type = baseUuid._uuid.type;
+	_uuid.uuid = shortUuid;
+	return NRF_SUCCESS;
+}
+
+ret_code_t UUID::fromFullUuidInternal(const ble_uuid128_t& fullUuid) {
+	ret_code_t nrfCode;
+	nrfCode = getFromCache(fullUuid);
+	switch (nrfCode) {
+		case NRF_SUCCESS: {
+			// UUID was already registered.
+			return ERR_SUCCESS;
+		}
+		case NRF_ERROR_NOT_FOUND: {
+			// Register UUID
+			nrfCode = add(fullUuid);
+			if (nrfCode != NRF_SUCCESS) {
+				return nrfCode;
+			}
+			return getFromCache(fullUuid);
+		}
+	}
+	return nrfCode;
+}
+
+ret_code_t UUID::getFromCache(const ble_uuid128_t& fullUuid) {
+	uint32_t nrfCode = sd_ble_uuid_decode(sizeof(fullUuid.uuid128), fullUuid.uuid128, &_uuid);
+	return nrfCode;
+}
+
+ret_code_t UUID::add(const ble_uuid128_t& fullUuid) {
+	uint32_t nrfCode = sd_ble_uuid_vs_add(&fullUuid, &(_uuid.type));
+	return nrfCode;
+}
+
+ret_code_t UUID::rem(const ble_uuid_t& uuid) {
+	// If the type is set to @ref BLE_UUID_TYPE_UNKNOWN, or the pointer is NULL,
+	// the last Vendor Specific base UUID will be removed.
+	if (uuid.type < BLE_UUID_TYPE_VENDOR_BEGIN) {
+		return ERR_WRONG_PARAMETER;
 	}
 
-	return res;
+	// The remove function changes the type, we don't want that.
+	uint8_t type = uuid.type;
+
+	uint32_t nrfCode = sd_ble_uuid_vs_remove(&type);
+	return nrfCode;
+}
+
+cs_ret_code_t UUID::fromNrfCode(ret_code_t nrfCode) {
+	switch (nrfCode) {
+		case NRF_SUCCESS:              return ERR_SUCCESS;
+		case NRF_ERROR_NO_MEM:         return ERR_NO_SPACE;
+		case NRF_ERROR_NOT_FOUND:      return ERR_NOT_FOUND;
+
+		// We only get these in rem()
+		case NRF_ERROR_INVALID_PARAM:  return ERR_WRONG_PARAMETER;
+		case NRF_ERROR_FORBIDDEN:      return ERR_BUSY;
+		default:                       return ERR_UNSPECIFIED;
+	}
+}
+
+bool UUID::operator==(const UUID& other) {
+	return (_uuid.uuid == other._uuid.uuid) && (_uuid.type == other._uuid.type);
+//	return memcmp(&_uuid, &(other._uuid), sizeof(_uuid)) == 0; // Bad idea, as the struct is not packed.
 }

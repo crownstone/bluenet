@@ -49,6 +49,8 @@ enum ErrorCodesGeneral {
 
 	ERR_EVENT_UNHANDLED	            = 0x70,
 
+	ERR_GATT_ERROR                  = 0x80,
+
 	// Mesh uses 0xFF as max.
 	ERR_UNSPECIFIED                 = 0xFFFF
 };

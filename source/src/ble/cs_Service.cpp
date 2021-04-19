@@ -36,8 +36,7 @@ void Service::init(Stack* stack) {
 
 	uint32_t err_code;
 
-	_uuid.init();
-	const ble_uuid_t uuid = _uuid;
+	const ble_uuid_t& uuid = _uuid.getUuid();
 
 	_service_handle = BLE_CONN_HANDLE_INVALID;
 	err_code = sd_ble_gatts_service_add(BLE_GATTS_SRVC_TYPE_PRIMARY, &uuid, (uint16_t*) &_service_handle);

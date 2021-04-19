@@ -46,10 +46,6 @@ extern uint16_t g_BOOT_DELAY;
 
 extern uint16_t g_SCAN_DURATION;
 
-extern uint16_t g_SCAN_INTERVAL;
-
-extern uint16_t g_SCAN_WINDOW;
-
 extern uint16_t g_SCAN_BREAK_DURATION;
 
 extern const uint8_t g_TX_POWER;

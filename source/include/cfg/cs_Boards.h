@@ -220,6 +220,7 @@ typedef struct  {
 	 * Scan window in μs.
 	 *
 	 * Must not be larger than scan interval, and not smaller than (1000 * BEARER_SCAN_WIN_MIN_MS).
+	 * See https://devzone.nordicsemi.com/f/nordic-q-a/14733/s132-scan-interval-window-adv-interval
 	 */
 	uint32_t scanWindowUs;
 

@@ -17,6 +17,7 @@
 #include "protocol/cs_TrackableParserPackets.h"
 
 #include "structs/cs_PacketsInternal.h"
+#include <structs/cs_BleCentralPackets.h>
 
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
@@ -120,8 +121,8 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_KEY_MEMBER                       = 36,
 	CONFIG_KEY_BASIC                        = 37,
 //	CONFIG_DEFAULT_ON                       = 38,
-	CONFIG_SCAN_INTERVAL                    = 39,
-	CONFIG_SCAN_WINDOW                      = 40,
+	CONFIG_SCAN_INTERVAL_625US              = 39, // Scan interval in 625 µs units.
+	CONFIG_SCAN_WINDOW_625US                = 40, // Scan window in 625 µs units.
 	CONFIG_RELAY_HIGH_DURATION              = 41,
 	CONFIG_LOW_TX_POWER                     = 42,
 	CONFIG_VOLTAGE_MULTIPLIER               = 43,
@@ -201,9 +202,6 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_CONNECT,                                       // Device connected.
 	EVT_BLE_DISCONNECT,                                    // Device disconnected.
 	CMD_ENABLE_ADVERTISEMENT,                              // Enable/disable advertising.
-	EVT_OUTGOING_CONNECT_START,                            // An outgoing connection is going to be made. Always followed by either connected or disconnected event.
-	EVT_OUTGOING_CONNECTED,                                // An outgoing connection is made.
-	EVT_OUTGOING_DISCONNECTED,                             // An outgoing connection is terminated or failed.
 
 	// Switch (aggregator)
 	CMD_SWITCH_OFF = InternalBaseSwitch,              // Turn switch off.
@@ -350,6 +348,20 @@ enum class CS_TYPE: uint16_t {
 	EVT_MICROAPP_ERASE_RESULT,                        // Microapp has been erase from flash, or failed to do so.
 	CMD_MICROAPP_ADVERTISE,                           // A microapp wants to advertise something.
 
+	CMD_BLE_CENTRAL_CONNECT,                          // Connect to a device.    See BleCentral::connect().
+	CMD_BLE_CENTRAL_DISCONNECT,                       // Disconnect from device. See BleCentral::disconnect().
+	CMD_BLE_CENTRAL_DISCOVER,                         // Discover services.      See BleCentral::discoverServices().
+	CMD_BLE_CENTRAL_READ,                             // Read a characteristic.  See BleCentral::read().
+	CMD_BLE_CENTRAL_WRITE,                            // Write a characteristic. See BleCentral::write().
+
+	EVT_BLE_CENTRAL_CONNECT_START,                    // An outgoing connection is going to be made. Always followed by EVT_BLE_CENTRAL_CONNECT_RESULT.
+	EVT_BLE_CENTRAL_CONNECT_RESULT,                   // Result of a connection attempt.
+	EVT_BLE_CENTRAL_DISCONNECTED,                     // Outgoing connection was terminated. By request, or due to some error.
+	EVT_BLE_CENTRAL_DISCOVERY,                        // A single service or characteristic is discovered.
+	EVT_BLE_CENTRAL_DISCOVERY_RESULT,                 // Result of service discovery.
+	EVT_BLE_CENTRAL_READ_RESULT,                      // Result of a read.
+	EVT_BLE_CENTRAL_WRITE_RESULT,                     // Result of a write.
+
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
 	
 	EVT_TWI_INIT,                                     // TWI initialisation.
@@ -445,8 +457,8 @@ typedef uint16_t TYPIFY(CONFIG_RELAY_HIGH_DURATION);
 typedef     BOOL TYPIFY(CONFIG_SCANNER_ENABLED);
 typedef uint16_t TYPIFY(CONFIG_SCAN_BREAK_DURATION);
 typedef uint16_t TYPIFY(CONFIG_SCAN_DURATION);
-typedef uint16_t TYPIFY(CONFIG_SCAN_INTERVAL);
-typedef uint16_t TYPIFY(CONFIG_SCAN_WINDOW);
+typedef uint16_t TYPIFY(CONFIG_SCAN_INTERVAL_625US);
+typedef uint16_t TYPIFY(CONFIG_SCAN_WINDOW_625US);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_DIMMER);
 typedef     BOOL TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING);
@@ -487,11 +499,20 @@ typedef  adv_background_t TYPIFY(EVT_ADV_BACKGROUND);
 typedef  adv_background_parsed_t TYPIFY(EVT_ADV_BACKGROUND_PARSED);
 typedef  adv_background_parsed_v1_t TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1);
 typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
+typedef  ble_central_connect_t TYPIFY(CMD_BLE_CENTRAL_CONNECT);
+typedef  void TYPIFY(CMD_BLE_CENTRAL_DISCONNECT);
+typedef  ble_central_discover_t TYPIFY(CMD_BLE_CENTRAL_DISCOVER);
+typedef  ble_central_read_t TYPIFY(CMD_BLE_CENTRAL_READ);
+typedef  ble_central_write_t TYPIFY(CMD_BLE_CENTRAL_WRITE);
 typedef  void TYPIFY(EVT_BLE_CONNECT);
 typedef  void TYPIFY(EVT_BLE_DISCONNECT);
-typedef  void TYPIFY(EVT_OUTGOING_CONNECT_START);
-typedef  void TYPIFY(EVT_OUTGOING_CONNECTED);
-typedef  void TYPIFY(EVT_OUTGOING_DISCONNECTED);
+typedef  void TYPIFY(EVT_BLE_CENTRAL_CONNECT_START);
+typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT);
+typedef  void TYPIFY(EVT_BLE_CENTRAL_DISCONNECTED);
+typedef  ble_central_discovery_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY);
+typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT);
+typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
+typedef  ble_central_read_result_t TYPIFY(EVT_BLE_CENTRAL_READ_RESULT);
 typedef  void TYPIFY(EVT_BROWNOUT_IMPENDING);
 typedef  void TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_CHIP_TEMP_OK);

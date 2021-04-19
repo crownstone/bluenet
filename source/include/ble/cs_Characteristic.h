@@ -82,7 +82,7 @@ class CharacteristicBase {
 public:
 
 protected:
-	//! Universally Unique Identifier (8 bytes)
+	//! UUID of this characteristic.
 	UUID                      _uuid;
 	//! Name (4 bytes)
 	const char *              _name;
@@ -180,10 +180,6 @@ public:
 
 	const char* getName() {
 		return _name;
-	}
-
-	const UUID & getUUID() {
-		return _uuid;
 	}
 
 	uint16_t getValueHandle() {

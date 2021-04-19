@@ -200,6 +200,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 	// TODO (Anne @Arend). Yes, you can call this in constructor. All non-virtual member functions can be called as well.
 	this->listen();
 	_stack = &Stack::getInstance();
+	_bleCentral = &BleCentral::getInstance();
 	_advertiser = &Advertiser::getInstance();
 	_timer = &Timer::getInstance();
 	_storage = &Storage::getInstance();
@@ -274,6 +275,9 @@ void Crownstone::init1() {
 	LOGi(FMT_HEADER, "init services");
 	_stack->initServices();
 	LOG_FLUSH();
+
+	LOGi(FMT_HEADER, "init central");
+	_bleCentral->init();
 
 #if BUILD_MICROAPP_SUPPORT == 1
 	LOGi(FMT_HEADER, "init microapp");

@@ -12,6 +12,7 @@
 
 #include <behaviour/cs_BehaviourHandler.h>
 #include <behaviour/cs_BehaviourStore.h>
+#include <ble/cs_BleCentral.h>
 #include <ble/cs_Stack.h>
 #include <ble/cs_Advertiser.h>
 #include <ble/cs_iBeacon.h>
@@ -312,6 +313,7 @@ private:
 
 	// drivers
 	Stack* _stack;
+	BleCentral* _bleCentral;
 	Advertiser* _advertiser;
 	Timer* _timer;
 	Storage* _storage;

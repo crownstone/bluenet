@@ -150,18 +150,15 @@ void Mesh::handleEvent(event_t & event) {
 #endif
 			break;
 		}
-		case CS_TYPE::EVT_OUTGOING_CONNECT_START: {
+		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_START: {
 			// An outgoing connection is made, stop listening to mesh,
 			// so that the softdevice has time to listen for advertisements.
 			stop();
 			event.result.returnCode = ERR_SUCCESS;
 			break;
 		}
-		case CS_TYPE::EVT_OUTGOING_CONNECTED: {
-			start();
-			break;
-		}
-		case CS_TYPE::EVT_OUTGOING_DISCONNECTED: {
+		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT: {
+			// We can start listening to the mesh again, regardless of the result.
 			start();
 			break;
 		}
