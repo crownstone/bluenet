@@ -63,7 +63,7 @@ public:
 		return _stack;
 	}
 
-	UUID& getUUID() {
+	const UUID& getUUID() const {
 		return _uuid;
 	}
 

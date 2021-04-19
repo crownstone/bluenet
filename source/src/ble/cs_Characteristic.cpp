@@ -63,9 +63,7 @@ void CharacteristicBase::init(Service* svc) {
 	//! attribute value //
 	/////////////////////
 
-	_uuid.init();
-	ble_uuid_t uuid = _uuid;
-
+	const ble_uuid_t& uuid = _uuid.getUuid();
 	memset(&ci.attr_char_value, 0, sizeof(ci.attr_char_value));
 
 	ci.attr_char_value.p_uuid = &uuid;

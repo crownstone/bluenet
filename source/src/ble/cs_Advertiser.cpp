@@ -481,15 +481,19 @@ void Advertiser::handleEvent(event_t & event) {
 			onDisconnect();
 			break;
 		}
-		case CS_TYPE::EVT_OUTGOING_CONNECT_START: {
+		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_START: {
 			onConnectOutgoing();
 			event.result.returnCode = ERR_SUCCESS;
 			break;
 		}
-		case CS_TYPE::EVT_OUTGOING_CONNECTED: {
+		case CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT: {
+			cs_ret_code_t* retCode = CS_TYPE_CAST(EVT_BLE_CENTRAL_CONNECT_RESULT, event.data);
+			if (*retCode != ERR_SUCCESS) {
+				onDisconnect();
+			}
 			break;
 		}
-		case CS_TYPE::EVT_OUTGOING_DISCONNECTED: {
+		case CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED: {
 			onDisconnect();
 			break;
 		}

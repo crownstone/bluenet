@@ -6,6 +6,7 @@
  */
 
 #include <algorithm>
+#include <ble/cs_BleCentral.h>
 #include <ble/cs_Nordic.h>
 #include <ble/cs_Stack.h>
 #include <cfg/cs_Config.h>
@@ -37,10 +38,6 @@ Stack::Stack() {
 
 Stack::~Stack() {
 	shutdown();
-}
-
-void handle_discovery(ble_db_discovery_evt_t* event) {
-	Stack::getInstance().onDiscoveryEvent(event);
 }
 
 /**
@@ -185,12 +182,6 @@ void Stack::initRadio() {
 	ret_code = sd_ble_version_get(&version);
 	APP_ERROR_CHECK(ret_code);
 
-	_discoveryModule.discovery_in_progress = 0;
-	_discoveryModule.discovery_pending = 0;
-	_discoveryModule.conn_handle = BLE_CONN_HANDLE_INVALID;
-	ret_code = ble_db_discovery_init(handle_discovery);
-	APP_ERROR_CHECK(ret_code);
-
 	setInitialized(C_RADIO_INITIALIZED);
 
 	updateConnParams();
@@ -321,8 +312,8 @@ void Stack::startScanning() {
 	scanParams.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
 	scanParams.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
 	scanParams.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &scanParams.interval, sizeof(scanParams.interval));
-	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &scanParams.window, sizeof(scanParams.window));
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL_625US, &scanParams.interval, sizeof(scanParams.interval));
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW_625US, &scanParams.window, sizeof(scanParams.window));
 
 	uint32_t retVal = sd_ble_gap_scan_start(&scanParams, &_scanBufferStruct);
 	APP_ERROR_CHECK(retVal);
@@ -364,8 +355,6 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 	if (p_ble_evt->header.evt_id != BLE_GAP_EVT_RSSI_CHANGED && p_ble_evt->header.evt_id != BLE_GAP_EVT_ADV_REPORT) {
 		LOGi("BLE event $nordicEventTypeName(%u) (0x%X)", p_ble_evt->header.evt_id, p_ble_evt->header.evt_id);
 	}
-
-	ble_db_discovery_on_ble_evt(p_ble_evt, &_discoveryModule);
 
 	switch (p_ble_evt->header.evt_id) {
 		case BLE_EVT_USER_MEM_REQUEST: {
@@ -417,51 +406,12 @@ void Stack::onBleEvent(const ble_evt_t * p_ble_evt) {
 			onTxComplete(p_ble_evt);
 			break;
 		}
-
-		// ---- GATTC events ---- //
-		case BLE_GATTC_EVT_EXCHANGE_MTU_RSP: {
-			const ble_gattc_evt_t& gattcEvent = p_ble_evt->evt.gattc_evt;
-			const ble_gattc_evt_exchange_mtu_rsp_t& mtuEvent = gattcEvent.params.exchange_mtu_rsp;
-			LOGi("MTU=%u", mtuEvent.server_rx_mtu);
-			_writeMtu = mtuEvent.server_rx_mtu;
-			break;
-		}
-		case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP: {
-//			ble_gattc_evt_t gattcEvent = p_ble_evt->evt.gattc_evt;
-//			ble_gattc_evt_prim_srvc_disc_rsp_t response = gattcEvent.params.prim_srvc_disc_rsp;
-//			LOGi("Primary services: num=%u", response.count);
-//			for (uint16_t i=0; i<response.count; ++i) {
-//				LOGi("uuid=0x%X", response.services[i].uuid.uuid);
-//			}
-			break;
-		}
-		case BLE_GATTC_EVT_READ_RSP: {
-			const ble_gattc_evt_t& gattcEvent = p_ble_evt->evt.gattc_evt;
-			const ble_gattc_evt_read_rsp_t& readResponse = gattcEvent.params.read_rsp;
-			_log(SERIAL_INFO, false, "Read offset=%u len=%u", readResponse.offset, readResponse.len);
-			_logArray(SERIAL_INFO, true, readResponse.data, readResponse.len);
-
-			// Not sure how to know if we need another read (has something to do with ATT_MTU). So just keep on trying until len = 0.
-//			if (readResponse.len == ATT_MTU - 1) {
-			if (readResponse.len != 0) {
-				// Continue long read.
-				uint32_t retCode = sd_ble_gattc_read(gattcEvent.conn_handle, readResponse.handle, readResponse.offset + readResponse.len);
-				if (retCode != NRF_SUCCESS) {
-					LOGw("Failed to continue long read. retCode=%u", retCode);
-				}
-			}
-			break;
-		}
-		case BLE_GATTC_EVT_WRITE_RSP: {
-			const ble_gattc_evt_t& gattcEvent = p_ble_evt->evt.gattc_evt;
-			__attribute__((unused)) const ble_gattc_evt_write_rsp_t& writeResponse = gattcEvent.params.write_rsp;
-			LOGi("Write response offset=%u len=%u", writeResponse.offset, writeResponse.len);
-			break;
-		}
 		default: {
 			break;
 		}
 	}
+
+	BleCentral::getInstance().onBleEvent(p_ble_evt);
 }
 
 struct cs_stack_scan_t {
@@ -626,11 +576,12 @@ void Stack::onConnect(const ble_evt_t * p_ble_evt) {
 		switch (p_ble_evt->evt.gap_evt.params.connected.role) {
 			case BLE_GAP_ROLE_PERIPH: {
 				LOGi("onConnect as peripheral");
+				_connectionIsOutgoing = false;
 				break;
 			}
 			case BLE_GAP_ROLE_CENTRAL: {
 				LOGi("onConnect as central");
-				assert(_connectionIsOutgoing == true, "Central role whith no outgoing connection?");
+				_connectionIsOutgoing = true;
 				break;
 			}
 			default: {
@@ -640,7 +591,6 @@ void Stack::onConnect(const ble_evt_t * p_ble_evt) {
 		}
 
 		if (_connectionIsOutgoing) {
-			onOutgoingConnected();
 		}
 		else {
 			onIncomingConnected(p_ble_evt);
@@ -649,26 +599,16 @@ void Stack::onConnect(const ble_evt_t * p_ble_evt) {
 
 void Stack::onConnectionTimeout() {
 	LOGd("onConnectionTimeout");
-	if (_connectionIsOutgoing) {
-		event_t event(CS_TYPE::EVT_OUTGOING_DISCONNECTED);
-		event.dispatch();
-		_connectionIsOutgoing = false;
-	}
-	else {
-		LOGw("No outgoing connection");
-	}
 }
 
 void Stack::onDisconnect(const ble_evt_t * p_ble_evt) {
 	_connectionHandle = BLE_CONN_HANDLE_INVALID;
 
 	if (_connectionIsOutgoing) {
-		onOutgoingDisconnected();
 	}
 	else {
 		onIncomingDisconnected(p_ble_evt);
 	}
-	_connectionIsOutgoing = false;
 }
 
 void Stack::onGapTimeout(uint8_t src) {
@@ -715,181 +655,6 @@ void Stack::onIncomingDisconnected(const ble_evt_t * p_ble_evt) {
 	event.dispatch();
 }
 
-void Stack::onOutgoingConnected() {
-	LOGi("Connected to device");
-
-	event_t event(CS_TYPE::EVT_OUTGOING_CONNECTED);
-	event.dispatch();
-
-	LOGi("Start discovery");
-	uint32_t retCode;
-
-	// We have to tell the discovery module what services we're interested in _before_ the discovery.
-	ble_uuid_t serviceUuid;
-
-	// When looking for 128b services, you have to first add the 128 bit uuid to the softdevice with sd_ble_uuid_vs_add().
-	// Then use the type that's returned in calls that follow, while bytes 12 and 13 (from the right when looking at the uuid string) form the 16 bit uuid.
-
-	UUID uuidSetup(SETUP_UUID);
-	uuidSetup.init();
-	serviceUuid = uuidSetup; // Uses cast operator.
-	LOGi("setup service uuid=0x%X type=%u", serviceUuid.uuid, serviceUuid.type);
-	retCode = ble_db_discovery_evt_register(&serviceUuid);
-
-	// Crownstone service.
-	// Byte nr:    15 14 13 12 11 10 9  8  7  6  5  4  3  2  1  0
-	// Hex value:  24 F0 00 00 7D 10 48 05 BF C1 76 63 A0 1C 3B FF
-	UUID uuidCrownstone(CROWNSTONE_UUID);
-	uuidCrownstone.init();
-	serviceUuid = uuidCrownstone; // Uses cast operator.
-	LOGi("crownstone service uuid=0x%X type=%u", serviceUuid.uuid, serviceUuid.type);
-	retCode = ble_db_discovery_evt_register(&serviceUuid);
-
-	// Secure DFU service
-	serviceUuid.type = BLE_UUID_TYPE_BLE;
-	serviceUuid.uuid = 0xFE59;
-	retCode = ble_db_discovery_evt_register(&serviceUuid);
-
-	// Device information service.
-	serviceUuid.type = BLE_UUID_TYPE_BLE;
-	serviceUuid.uuid = 0x180A;
-	retCode = ble_db_discovery_evt_register(&serviceUuid);
-
-	retCode = ble_db_discovery_start(&_discoveryModule, _connectionHandle);
-	if (retCode != NRF_SUCCESS) {
-		LOGe("Failed to start discovery retCode=%u", retCode);
-		disconnect();
-	}
-}
-
-void Stack::onOutgoingDisconnected() {
-	LOGi("Disconnected from device");
-
-	event_t event(CS_TYPE::EVT_OUTGOING_DISCONNECTED);
-	event.dispatch();
-}
-
-void Stack::onDiscoveryEvent(ble_db_discovery_evt_t* event) {
-	uint32_t retCode;
-	switch (event->evt_type) {
-		case BLE_DB_DISCOVERY_COMPLETE: {
-			LOGi("Discovery found uuid=0x%04X type=%u characteristicCount=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type, event->params.discovered_db.char_count);
-			if (event->params.discovered_db.srv_uuid.type >= BLE_UUID_TYPE_VENDOR_BEGIN) {
-				ble_uuid128_t fullUuid;
-				uint8_t uuidSize = 0;
-				retCode = sd_ble_uuid_encode(&(event->params.discovered_db.srv_uuid), &uuidSize, fullUuid.uuid128);
-				if (retCode == NRF_SUCCESS && uuidSize == sizeof(fullUuid)) {
-#if CS_SERIAL_NRF_LOG_ENABLED == 0
-					LOGd("Full uuid: %02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
-							fullUuid.uuid128[15],
-							fullUuid.uuid128[14],
-							fullUuid.uuid128[13],
-							fullUuid.uuid128[12],
-							fullUuid.uuid128[11],
-							fullUuid.uuid128[10],
-							fullUuid.uuid128[9],
-							fullUuid.uuid128[8],
-							fullUuid.uuid128[7],
-							fullUuid.uuid128[6],
-							fullUuid.uuid128[5],
-							fullUuid.uuid128[4],
-							fullUuid.uuid128[3],
-							fullUuid.uuid128[2],
-							fullUuid.uuid128[1],
-							fullUuid.uuid128[0]);
-#endif
-				}
-				else {
-					LOGw("Failed to get full uuid");
-				}
-			}
-			break;
-		}
-		case BLE_DB_DISCOVERY_SRV_NOT_FOUND: {
-			LOGi("Discovery not found uuid=0x%04X type=%u", event->params.discovered_db.srv_uuid.uuid, event->params.discovered_db.srv_uuid.type);
-			break;
-		}
-		case BLE_DB_DISCOVERY_ERROR: {
-			LOGw("Discovery error %u", event->params.err_code);
-			break;
-		}
-		case BLE_DB_DISCOVERY_AVAILABLE: {
-			// A bug prevents this event from ever firing. It is fixed in SDK 16.0.0.
-			// Instead, we should be done when the number of registered uuids equals the number of received BLE_DB_DISCOVERY_COMPLETE + BLE_DB_DISCOVERY_SRV_NOT_FOUND events.
-			// See https://devzone.nordicsemi.com/f/nordic-q-a/20846/getting-service-count-from-database-discovery-module
-			// We apply a similar patch to the SDK.
-			LOGi("Discovery done");
-
-			// According to the doc, the "services" struct is only for internal usage.
-			// But it seems to store all the discovered services and characteristics.
-			uint16_t fwVersionHandle = BLE_GATT_HANDLE_INVALID;
-			uint16_t controlHandle = BLE_GATT_HANDLE_INVALID;
-
-			for (uint8_t s = 0; s < _discoveryModule.discoveries_count; ++s) {
-				LOGi("service: uuidType=%u uuid=0x%04X", _discoveryModule.services[s].srv_uuid.type, _discoveryModule.services[s].srv_uuid.uuid);
-				for (uint8_t c = 0; c < _discoveryModule.services[s].char_count; ++c) {
-					ble_gatt_db_char_t* characteristic = &(_discoveryModule.services[s].charateristics[c]);
-					LOGi("    char: cccd_handle=0x%X uuidType=%u uuid=0x%04X handle_value=0x%X handle_decl=0x%X",
-							characteristic->cccd_handle,
-							characteristic->characteristic.uuid.type,
-							characteristic->characteristic.uuid.uuid,
-							characteristic->characteristic.handle_value,
-							characteristic->characteristic.handle_decl);
-					if (characteristic->characteristic.uuid.type == BLE_UUID_TYPE_BLE && characteristic->characteristic.uuid.uuid == 0x2A26) {
-						fwVersionHandle = characteristic->characteristic.handle_value;
-					}
-					if (characteristic->characteristic.uuid.type >= BLE_UUID_TYPE_VENDOR_BEGIN && characteristic->characteristic.uuid.uuid == 0x000E) {
-						controlHandle = characteristic->characteristic.handle_value;
-					}
-				}
-			}
-
-			if (fwVersionHandle != BLE_GATT_HANDLE_INVALID) {
-//				LOGi("Read fw version");
-//				// Triggers event BLE_GATTC_EVT_READ_RSP.
-//				retCode = sd_ble_gattc_read(_connectionHandle, fwVersionHandle, 0);
-//				if (retCode != NRF_SUCCESS) {
-//					LOGw("Failed to read fw version retCode=%u", retCode);
-//				}
-			}
-
-			if (controlHandle != BLE_GATT_HANDLE_INVALID) {
-//				for (uint16_t i = 0; i < sizeof(_writeBuf); ++i) {
-//					_writeBuf[i] = i;
-//				}
-//
-//				ble_gattc_write_params_t writeParams;
-//				writeParams.write_op = BLE_GATT_OP_WRITE_REQ; // Write with response (ack). Triggers BLE_GATTC_EVT_WRITE_RSP.
-//				writeParams.flags = 0; // Ignored for write_req
-//				writeParams.handle = controlHandle;
-//				writeParams.offset = 0;
-//				writeParams.len = sizeof(_writeBuf);
-//				writeParams.p_value = _writeBuf;
-//
-//				// We can't write more than MTU.
-//				// For long writes, use BLE_GATT_OP_PREP_WRITE_REQ followed by BLE_GATT_OP_EXEC_WRITE_REQ.
-//				if (writeParams.len > _writeMtu) {
-//					writeParams.len = _writeMtu;
-//				}
-//
-//				retCode = sd_ble_gattc_write(_connectionHandle, &writeParams);
-//				if (retCode != NRF_SUCCESS) {
-//					LOGw("Failed to write. retCode=%u", retCode);
-//				}
-			}
-			break;
-		}
-	}
-	LOGd("Discovery progress=%u pending=%u numServicesHandled=%u numServices=%u",
-			_discoveryModule.discovery_in_progress,
-			_discoveryModule.discovery_pending,
-			_discoveryModule.discoveries_count,
-			_discoveryModule.srv_count);
-}
-
-
-
-
 void Stack::disconnect() {
 	// Only disconnect when we are actually connected to something
 	if (_connectionHandle != BLE_CONN_HANDLE_INVALID && _disconnectingInProgress == false) {
@@ -929,60 +694,4 @@ void Stack::onTxComplete(const ble_evt_t * p_ble_evt) {
 	}
 }
 
-
-cs_ret_code_t Stack::connect(const device_address_t& address, uint16_t timeoutMs) {
-	if (isConnected()) {
-		LOGi("Already connected");
-		return ERR_BUSY;
-	}
-
-	LOGw("Not ready for release");
-	return ERR_NOT_IMPLEMENTED;
-
-	event_t connectEvent(CS_TYPE::EVT_OUTGOING_CONNECT_START);
-	connectEvent.dispatch();
-
-	if (connectEvent.result.returnCode != ERR_SUCCESS) {
-		LOGe("Unable to start connecting: err=%u", connectEvent.result.returnCode);
-		event_t disconnectEvent(CS_TYPE::EVT_OUTGOING_DISCONNECTED);
-		disconnectEvent.dispatch();
-		return connectEvent.result.returnCode;
-	}
-
-	ble_gap_addr_t gapAddress;
-	memcpy(gapAddress.addr, address.address, sizeof(address.address));
-	gapAddress.addr_id_peer = 0;
-	gapAddress.addr_type = address.addressType;
-
-	ble_gap_scan_params_t scanParams;
-	scanParams.extended = 0;
-	scanParams.report_incomplete_evts = 0;
-	scanParams.active = 1;
-	scanParams.filter_policy = BLE_GAP_SCAN_FP_ACCEPT_ALL; // Scanning filter policy. See BLE_GAP_SCAN_FILTER_POLICIES
-	scanParams.scan_phys = BLE_GAP_PHY_1MBPS;
-	scanParams.timeout = timeoutMs / 10; // This acts as connection timeout.
-	scanParams.channel_mask[0] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	scanParams.channel_mask[1] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	scanParams.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	scanParams.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	scanParams.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	scanParams.interval = 160;
-	scanParams.window = 80;
-
-	if (scanParams.timeout < BLE_GAP_SCAN_TIMEOUT_MIN) {
-		scanParams.timeout = BLE_GAP_SCAN_TIMEOUT_MIN;
-	}
-
-	uint32_t errCode = sd_ble_gap_connect(&gapAddress, &scanParams, &_connectionParams, APP_BLE_CONN_CFG_TAG);
-	if (errCode == NRF_SUCCESS) {
-		LOGi("Connecting..");
-		_connectionIsOutgoing = true;
-		// We will get either BLE_GAP_EVT_CONNECTED or BLE_GAP_EVT_TIMEOUT.
-		return ERR_SUCCESS;
-	}
-	else {
-		LOGe("Connect err=%u", errCode);
-		return ERR_UNSPECIFIED;
-	}
-}
 

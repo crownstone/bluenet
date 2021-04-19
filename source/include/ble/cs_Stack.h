@@ -71,10 +71,6 @@ protected:
 	uint8_t _scanBuffer[31]; // Same size as buffer in cs_stack_scan_t.
 	ble_data_t _scanBufferStruct = { _scanBuffer, sizeof(_scanBuffer) };
 
-	ble_db_discovery_t                          _discoveryModule;
-
-	uint16_t                                    _writeMtu = BLE_GATT_ATT_MTU_DEFAULT - 3;
-	uint8_t                                     _writeBuf[200];
 
 public:
 
@@ -170,16 +166,6 @@ public:
 	 */
 	bool isScanning();
 
-	/**
-	 * Connect to a device.
-	 *
-	 * @param[in]  address        Address to connect to.
-	 * @param[in]  timeoutMs      Time in ms before giving up to connect.
-	 *
-	 * @return ERR_BUSY when already connected to a device.
-	 */
-	cs_ret_code_t connect(const device_address_t& address, uint16_t timeoutMs = 3000);
-
 	/** Function that handles BLE events
 	 *
 	 * A BLE event is generated, these can be connect or disconnect events. It can also be RSSI values that changed, or
@@ -206,8 +192,6 @@ public:
 	void setAesEncrypted(bool encrypted);
 	void disconnect();
 
-	void onDiscoveryEvent(ble_db_discovery_evt_t* event);
-
 	bool checkCondition(condition_t condition, bool expectation);
 
 protected:
@@ -228,9 +212,6 @@ protected:
 	 */
 	void onIncomingConnected(const ble_evt_t * p_ble_evt);
 	void onIncomingDisconnected(const ble_evt_t * p_ble_evt);
-
-	void onOutgoingConnected();
-	void onOutgoingDisconnected();
 
 	void onMemoryRequest(uint16_t connectionHandle);
 	void onMemoryRelease(uint16_t connectionHandle);
