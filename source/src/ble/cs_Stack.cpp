@@ -312,8 +312,8 @@ void Stack::startScanning() {
 	scanParams.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
 	scanParams.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
 	scanParams.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &scanParams.interval, sizeof(scanParams.interval));
-	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &scanParams.window, sizeof(scanParams.window));
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL_625US, &scanParams.interval, sizeof(scanParams.interval));
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW_625US, &scanParams.window, sizeof(scanParams.window));
 
 	uint32_t retVal = sd_ble_gap_scan_start(&scanParams, &_scanBufferStruct);
 	APP_ERROR_CHECK(retVal);

@@ -121,8 +121,8 @@ enum class CS_TYPE: uint16_t {
 	CONFIG_KEY_MEMBER                       = 36,
 	CONFIG_KEY_BASIC                        = 37,
 //	CONFIG_DEFAULT_ON                       = 38,
-	CONFIG_SCAN_INTERVAL                    = 39,
-	CONFIG_SCAN_WINDOW                      = 40,
+	CONFIG_SCAN_INTERVAL_625US              = 39, // Scan interval in 625 µs units.
+	CONFIG_SCAN_WINDOW_625US                = 40, // Scan window in 625 µs units.
 	CONFIG_RELAY_HIGH_DURATION              = 41,
 	CONFIG_LOW_TX_POWER                     = 42,
 	CONFIG_VOLTAGE_MULTIPLIER               = 43,
@@ -457,8 +457,8 @@ typedef uint16_t TYPIFY(CONFIG_RELAY_HIGH_DURATION);
 typedef     BOOL TYPIFY(CONFIG_SCANNER_ENABLED);
 typedef uint16_t TYPIFY(CONFIG_SCAN_BREAK_DURATION);
 typedef uint16_t TYPIFY(CONFIG_SCAN_DURATION);
-typedef uint16_t TYPIFY(CONFIG_SCAN_INTERVAL);
-typedef uint16_t TYPIFY(CONFIG_SCAN_WINDOW);
+typedef uint16_t TYPIFY(CONFIG_SCAN_INTERVAL_625US);
+typedef uint16_t TYPIFY(CONFIG_SCAN_WINDOW_625US);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD);
 typedef uint16_t TYPIFY(CONFIG_SOFT_FUSE_CURRENT_THRESHOLD_DIMMER);
 typedef     BOOL TYPIFY(CONFIG_START_DIMMER_ON_ZERO_CROSSING);
@@ -500,7 +500,7 @@ typedef  adv_background_parsed_t TYPIFY(EVT_ADV_BACKGROUND_PARSED);
 typedef  adv_background_parsed_v1_t TYPIFY(EVT_ADV_BACKGROUND_PARSED_V1);
 typedef  void TYPIFY(EVT_ADVERTISEMENT_UPDATED);
 typedef  ble_central_connect_t TYPIFY(CMD_BLE_CENTRAL_CONNECT);
-typedef  ble_central_disconnect_t TYPIFY(CMD_BLE_CENTRAL_DISCONNECT);
+typedef  void TYPIFY(CMD_BLE_CENTRAL_DISCONNECT);
 typedef  ble_central_discover_t TYPIFY(CMD_BLE_CENTRAL_DISCOVER);
 typedef  ble_central_read_t TYPIFY(CMD_BLE_CENTRAL_READ);
 typedef  ble_central_write_t TYPIFY(CMD_BLE_CENTRAL_WRITE);

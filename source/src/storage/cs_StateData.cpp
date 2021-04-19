@@ -6,6 +6,7 @@
  */
 
 #include <cfg/cs_AutoConfig.h>
+#include <cfg/cs_Boards.h>
 #include <cfg/cs_Config.h>
 #include <cfg/cs_StaticConfig.h>
 #include <common/cs_Types.h>
@@ -109,11 +110,11 @@ cs_ret_code_t getDefault(cs_state_data_t & data, const boards_config_t& boardsCo
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
 		return ERR_SUCCESS;
-	case CS_TYPE::CONFIG_SCAN_INTERVAL:
-		*(TYPIFY(CONFIG_SCAN_INTERVAL)*)data.value = g_SCAN_INTERVAL;
+	case CS_TYPE::CONFIG_SCAN_INTERVAL_625US:
+		*(TYPIFY(CONFIG_SCAN_INTERVAL_625US)*)data.value = boardsConfig.scanIntervalUs / 625;
 		return ERR_SUCCESS;
-	case CS_TYPE::CONFIG_SCAN_WINDOW:
-		*(TYPIFY(CONFIG_SCAN_WINDOW)*)data.value = g_SCAN_WINDOW;
+	case CS_TYPE::CONFIG_SCAN_WINDOW_625US:
+		*(TYPIFY(CONFIG_SCAN_WINDOW_625US)*)data.value = boardsConfig.scanWindowUs / 625;
 		return ERR_SUCCESS;
 	case CS_TYPE::CONFIG_RELAY_HIGH_DURATION:
 		*(TYPIFY(CONFIG_RELAY_HIGH_DURATION)*)data.value = g_CONFIG_RELAY_HIGH_DURATION_DEFAULT;
@@ -416,8 +417,8 @@ PersistenceMode DefaultLocation(CS_TYPE const & type) {
 	case CS_TYPE::CONFIG_MESH_APP_KEY:
 	case CS_TYPE::CONFIG_MESH_NET_KEY:
 	case CS_TYPE::CONFIG_KEY_LOCALIZATION:
-	case CS_TYPE::CONFIG_SCAN_INTERVAL:
-	case CS_TYPE::CONFIG_SCAN_WINDOW:
+	case CS_TYPE::CONFIG_SCAN_INTERVAL_625US:
+	case CS_TYPE::CONFIG_SCAN_WINDOW_625US:
 	case CS_TYPE::CONFIG_RELAY_HIGH_DURATION:
 	case CS_TYPE::CONFIG_LOW_TX_POWER:
 	case CS_TYPE::CONFIG_VOLTAGE_MULTIPLIER:

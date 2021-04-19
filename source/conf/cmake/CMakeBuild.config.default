@@ -136,18 +136,6 @@ INTERVAL_SCANNER_ENABLED=0
 SCAN_DURATION=2000
 SCAN_BREAK_DURATION=7000
 
-# Determines scan interval in units of 0.625 millisecond. Channel is changed every interval (160 = 100 ms).
-SCAN_INTERVAL=160
-
-# Determines scan window in units of 0.625 millisecond.
-# This is the amount of time in an interval that the scanner actually listens.
-# You should leave some radio time for other modules (like advertising).
-# See https://devzone.nordicsemi.com/question/84767/s132-scan-intervalwindow-adv-interval
-# See https://devzone.nordicsemi.com/f/nordic-q-a/14733/s132-scan-interval-window-adv-interval
-# Old https://devzone.nordicsemi.com/question/21164/s130-unstable-advertising-reports-during-scan-updated/
-# Window default is set at 158 = 98.75 ms.
-SCAN_WINDOW=158
-
 # Enables the dimmer.
 PWM_ENABLE=1
 
