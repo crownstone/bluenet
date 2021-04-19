@@ -9,6 +9,12 @@
 
 #include <events/cs_EventListener.h>
 
+/**
+ * Class to test the BleCentral class.
+ *
+ * Currently has hard coded values, so it's really plug and play.
+ * It also serves as an example usage.
+ */
 class TestCentral: EventListener {
 public:
 	TestCentral();

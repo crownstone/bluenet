@@ -133,6 +133,14 @@ private:
 	Operation _currentOperation = Operation::NONE;
 
 	/**
+	 * Scan setting to be used when connecting.
+	 * Will be retrieved from State at init.
+	 */
+	TYPIFY(CONFIG_SCAN_INTERVAL_625US) _scanInterval;
+	TYPIFY(CONFIG_SCAN_WINDOW_625US) _scanWindow;
+
+
+	/**
 	 * Writes the next chunk of a long write.
 	 */
 	cs_ret_code_t nextWrite(uint16_t handle, uint16_t offset);

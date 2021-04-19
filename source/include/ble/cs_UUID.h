@@ -29,6 +29,9 @@
  *
  * A typical example is a BLE service with multiple characteristics.
  * All of them will have the same base UUID, but different 16b UUIDs.
+ *
+ * TODO: rename to cs_ServiceUuid
+ * TODO: maybe change function names "from...." to something else and make clear you can call them multiple times.
  */
 class UUID {
 public:

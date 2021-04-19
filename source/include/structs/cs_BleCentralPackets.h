@@ -18,10 +18,6 @@ struct ble_central_connect_t {
 	uint16_t timeoutMs = 3000;
 };
 
-struct ble_central_disconnect_t {
-
-};
-
 struct ble_central_discover_t {
 	const UUID* uuids;
 	uint8_t uuidCount;

@@ -12,6 +12,7 @@
 #include <events/cs_Event.h>
 #include <events/cs_EventDispatcher.h>
 #include <logging/cs_Logger.h>
+#include <storage/cs_State.h>
 
 #define LOGBleCentralInfo LOGi
 #define LOGBleCentralDebug LOGnone
@@ -34,6 +35,9 @@ void BleCentral::init() {
 	_discoveryModule.conn_handle = BLE_CONN_HANDLE_INVALID;
 	uint32_t nrfCode = ble_db_discovery_init(handle_discovery);
 	APP_ERROR_CHECK(nrfCode);
+
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL_625US, &_scanInterval, sizeof(_scanInterval));
+	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW_625US, &_scanWindow, sizeof(_scanWindow));
 
 	EventDispatcher::getInstance().addListener(this);
 }
@@ -78,11 +82,8 @@ cs_ret_code_t BleCentral::connect(const device_address_t& address, uint16_t time
 	scanParams.channel_mask[2] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
 	scanParams.channel_mask[3] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
 	scanParams.channel_mask[4] = 0; // See ble_gap_ch_mask_t and sd_ble_gap_scan_start
-	scanParams.interval = 160;
-	scanParams.window = 80;
-
-//	State::getInstance().get(CS_TYPE::CONFIG_SCAN_INTERVAL, &scanParams.interval, sizeof(scanParams.interval));
-//	State::getInstance().get(CS_TYPE::CONFIG_SCAN_WINDOW, &scanParams.window, sizeof(scanParams.window));
+	scanParams.interval = _scanInterval;
+	scanParams.window = _scanWindow;
 
 	if (scanParams.timeout < BLE_GAP_SCAN_TIMEOUT_MIN) {
 		scanParams.timeout = BLE_GAP_SCAN_TIMEOUT_MIN;
@@ -180,10 +181,11 @@ cs_ret_code_t BleCentral::discoverServices(const UUID* uuids, uint8_t uuidCount)
 	nrfCode = ble_db_discovery_start(&_discoveryModule, _connectionHandle);
 	if (nrfCode != NRF_SUCCESS) {
 		LOGe("Failed to start discovery retCode=%u", nrfCode);
-//		disconnect();
+		// Bart 19-04-2021 TODO: Should we disconnect on errors?
 		return ERR_UNSPECIFIED;
 	}
 
+	LOGBleCentralInfo("Discovering..");
 	_currentOperation = Operation::DISCOVERY;
 	return ERR_WAIT_FOR_SUCCESS;
 }
@@ -387,7 +389,6 @@ void BleCentral::finalizeOperation(Operation operation, cs_ret_code_t retCode) {
 			break;
 		}
 		case Operation::READ: {
-			// TODO: is this a good way of setting .data?
 			ble_central_read_result_t result = {
 					.retCode = retCode,
 					.data = cs_data_t()
@@ -399,59 +400,34 @@ void BleCentral::finalizeOperation(Operation operation, cs_ret_code_t retCode) {
 }
 
 void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t dataSize) {
-	LOGBleCentralDebug("finalizeOperation operation=%u _currentOperation=%u", operation, _currentOperation);
+	LOGBleCentralDebug("finalizeOperation operation=%u _currentOperation=%u dataSize=%u", operation, _currentOperation, dataSize);
 	event_t event(CS_TYPE::CONFIG_DO_NOT_USE);
-	event.data = data;
-	event.size = dataSize;
-	switch (_currentOperation) {
-		case Operation::NONE: {
-			LOGBleCentralDebug("No operation was in progress")
-			break;
-		}
-		case Operation::CONNECT: {
-//			if (operation != Operation::CONNECT) {
-//				// Ignore data, finalize with error instead.
-//				finalizeOperation(Operation::CONNECT, ERR_WRONG_STATE);
-//				return;
-//			}
-			if (operation != Operation::CONNECT) {
+
+	// Handle error first.
+	if (_currentOperation != operation) {
+		switch (_currentOperation) {
+			case Operation::NONE: {
+				break;
+			}
+			case Operation::CONNECT: {
 				// Ignore data, finalize with error instead.
 				TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT) result = ERR_WRONG_STATE;
 				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
-			event.type = CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT;
-			break;
-		}
-		case Operation::DISCONNECT: {
-			// Skip: if the finalized operation is disconnect, we always send it.
-			// Otherwise, we keep on waiting for the disconnect event.
-			break;
-		}
-		case Operation::DISCOVERY: {
-//			if (operation != Operation::DISCOVERY) {
-//				// Ignore data, finalize with error instead.
-//				finalizeOperation(Operation::DISCOVERY, ERR_WRONG_STATE);
-//				return;
-//			}
-			if (operation != Operation::DISCOVERY) {
+			case Operation::DISCONNECT: {
+				// Keep on waiting for the disconnect event.
+				break;
+			}
+			case Operation::DISCOVERY: {
 				// Ignore data, finalize with error instead.
 				TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT) result = ERR_WRONG_STATE;
 				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
-			event.type = CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT;
-			break;
-		}
-		case Operation::READ: {
-//			if (operation != Operation::READ) {
-//				// Ignore data, finalize with error instead.
-//				finalizeOperation(Operation::READ, ERR_WRONG_STATE);
-//				return;
-//			}
-			if (operation != Operation::READ) {
+			case Operation::READ: {
 				// Ignore data, finalize with error instead.
 				TYPIFY(EVT_BLE_CENTRAL_READ_RESULT) result = {
 						.retCode = ERR_WRONG_STATE,
@@ -461,22 +437,40 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 				sendOperationResult(errEvent);
 				return;
 			}
-			event.type = CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT;
-			break;
-		}
-		case Operation::WRITE: {
-//			if (operation != Operation::WRITE) {
-//				// Ignore data, finalize with error instead.
-//				finalizeOperation(Operation::WRITE, ERR_WRONG_STATE);
-//				return;
-//			}
-			if (operation != Operation::WRITE) {
+			case Operation::WRITE: {
 				// Ignore data, finalize with error instead.
 				TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT) result = ERR_WRONG_STATE;
 				event_t errEvent(CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
 				sendOperationResult(errEvent);
 				return;
 			}
+		}
+	}
+
+	event.data = data;
+	event.size = dataSize;
+	switch (_currentOperation) {
+		case Operation::NONE: {
+			LOGBleCentralDebug("No operation was in progress")
+			break;
+		}
+		case Operation::CONNECT: {
+			event.type = CS_TYPE::EVT_BLE_CENTRAL_CONNECT_RESULT;
+			break;
+		}
+		case Operation::DISCONNECT: {
+			// Skip: if the finalized operation is disconnect, we always send it.
+			break;
+		}
+		case Operation::DISCOVERY: {
+			event.type = CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT;
+			break;
+		}
+		case Operation::READ: {
+			event.type = CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT;
+			break;
+		}
+		case Operation::WRITE: {
 			event.type = CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT;
 			break;
 		}
@@ -485,13 +479,15 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 	sendOperationResult(event);
 
 	if (operation == Operation::DISCONNECT) {
-		// Always send the disconnect event, but after the operation result event.
+		// Always send the disconnect event, but after the current operation result event.
+		LOGBleCentralDebug("Dispatch disconnect event");
 		event_t disconnectEvent(CS_TYPE::EVT_BLE_CENTRAL_DISCONNECTED);
 		disconnectEvent.dispatch();
 	}
 }
 
 void BleCentral::sendOperationResult(event_t& event) {
+	LOGBleCentralDebug("sendOperationResult type=%u size=%u", event.type, event.size);
 	// Set current operation before dispatching the event, so that a new command can be issued on event.
 	_currentOperation = Operation::NONE;
 
@@ -666,15 +662,6 @@ void BleCentral::onGattCentralEvent(uint16_t evtId, const ble_gattc_evt_t& event
 		}
 		case BLE_GATTC_EVT_WRITE_RSP: {
 			onWrite(event.gatt_status, event.params.write_rsp);
-			break;
-		}
-		case BLE_GATTC_EVT_PRIM_SRVC_DISC_RSP: {
-			//			ble_gattc_evt_t gattcEvent = p_ble_evt->evt.gattc_evt;
-			//			ble_gattc_evt_prim_srvc_disc_rsp_t response = gattcEvent.params.prim_srvc_disc_rsp;
-			//			LOGi("Primary services: num=%u", response.count);
-			//			for (uint16_t i=0; i<response.count; ++i) {
-			//				LOGi("uuid=0x%X", response.services[i].uuid.uuid);
-			//			}
 			break;
 		}
 	}
