@@ -98,12 +98,41 @@ void TrackableParser::handleEvent(event_t& evt) {
 	}
 }
 
+
+bool findUuid128(scanned_device_t* scannedDevice) {
+	uint32_t errCode;
+	cs_data_t serviceUuid16List;
+
+	errCode = BLEutil::findAdvType(
+			BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_COMPLETE,
+			scannedDevice->data,
+			scannedDevice->dataSize,
+			&serviceUuid16List);
+
+	if (errCode == ERR_SUCCESS) {
+		return true;
+	}
+
+	errCode = BLEutil::findAdvType(
+			BLE_GAP_AD_TYPE_128BIT_SERVICE_UUID_MORE_AVAILABLE,
+			scannedDevice->data,
+			scannedDevice->dataSize,
+			&serviceUuid16List);
+
+	if (errCode == ERR_SUCCESS) {
+		return true;
+	}
+
+	return false;
+}
+
 // -------------------------------------------------------------
 // ------------------ Advertisment processing ------------------
 // -------------------------------------------------------------
 void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 	if (filterModificationInProgress) {
-		return;
+		// DEBUG
+		// return;
 	}
 
 	// loop over filters to check mac address
@@ -116,16 +145,18 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 			&& cuckoo.contains(device->address, MAC_ADDRESS_LEN)) {
 			// TODO: get fingerprint from filter instead of literal mac address.
 			// TODO: we should just pass on the device, right than copying rssi?
-			LOGw("filter %d accepted mac addres: %x %x %x %x %x %x",
+			LOGw("filter %d accepted adv from mac addres: %x %x %x %x %x %x %s",
 				 trackingFilter->runtimedata.filterId,
 				 device->address[0],
 				 device->address[1],
 				 device->address[2],
 				 device->address[3],
 				 device->address[4],
-				 device->address[5]);
+				 device->address[5],
+				 findUuid128(device) ? "button pressed!" : "");
 
 			continue;  // DEBUG
+
 			TrackableEvent trackableEventData;
 			trackableEventData.id   = TrackableId(device->address, MAC_ADDRESS_LEN);
 			trackableEventData.rssi = device->rssi;
