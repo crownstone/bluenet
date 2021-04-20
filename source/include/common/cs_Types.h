@@ -18,6 +18,7 @@
 
 #include "structs/cs_PacketsInternal.h"
 #include <structs/cs_BleCentralPackets.h>
+#include <structs/cs_CrownstoneCentralPackets.h>
 
 #include <behaviour/cs_SwitchBehaviour.h>
 #include <behaviour/cs_TwilightBehaviour.h>
@@ -362,6 +363,12 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_CENTRAL_READ_RESULT,                      // Result of a read.
 	EVT_BLE_CENTRAL_WRITE_RESULT,                     // Result of a write.
 
+	CMD_CS_CENTRAL_CONNECT,                           // Connect to a device. See CrownstoneCentral::connect().
+
+	EVT_CS_CENTRAL_CONNECT_RESULT,
+	EVT_CS_CENTRAL_READ_RESULT,
+	EVT_CS_CENTRAL_WRITE_RESULT,
+
 	EVT_HUB_DATA_REPLY,                               // Sent when the hub data reply is received.
 	
 	EVT_TWI_INIT,                                     // TWI initialisation.
@@ -511,8 +518,12 @@ typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_CONNECT_RESULT);
 typedef  void TYPIFY(EVT_BLE_CENTRAL_DISCONNECTED);
 typedef  ble_central_discovery_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY);
 typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT);
-typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
 typedef  ble_central_read_result_t TYPIFY(EVT_BLE_CENTRAL_READ_RESULT);
+typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
+typedef  cs_central_connect_t TYPIFY(CMD_CS_CENTRAL_CONNECT);
+typedef  cs_ret_code_t TYPIFY(EVT_CS_CENTRAL_CONNECT_RESULT);
+typedef  cs_central_read_result_t TYPIFY(EVT_CS_CENTRAL_READ_RESULT);
+typedef  cs_central_read_result_t TYPIFY(EVT_CS_CENTRAL_WRITE_RESULT);
 typedef  void TYPIFY(EVT_BROWNOUT_IMPENDING);
 typedef  void TYPIFY(EVT_CHIP_TEMP_ABOVE_THRESHOLD);
 typedef  void TYPIFY(EVT_CHIP_TEMP_OK);

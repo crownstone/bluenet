@@ -30,6 +30,7 @@ enum ErrorCodesGeneral {
 	ERR_CANCELED                    = 0x2B,
 	ERR_PROTOCOL_UNSUPPORTED        = 0x2C,
 	ERR_MISMATCH                    = 0x2D, // Mismatch of CRC, checksum, etc
+	ERR_WRONG_OPERATION             = 0x2E,
 
 	ERR_NO_ACCESS                   = 0x30,
 	ERR_UNSAFE                      = 0x31,

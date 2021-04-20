@@ -115,6 +115,15 @@ void KeysAndAccess::generateSetupKey() {
 	}
 }
 
+cs_ret_code_t KeysAndAccess::setSetupKey(cs_data_t data) {
+	if (data.len != sizeof(_setupKey)) {
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	memcpy(_setupKey, data.data, sizeof(_setupKey));
+	_setupKeyValid = true;
+	return ERR_SUCCESS;
+}
+
 void KeysAndAccess::invalidateSetupKey() {
 	_setupKeyValid = false;
 }

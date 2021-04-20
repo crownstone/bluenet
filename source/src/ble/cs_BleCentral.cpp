@@ -451,7 +451,7 @@ void BleCentral::finalizeOperation(Operation operation, uint8_t* data, uint8_t d
 	event.size = dataSize;
 	switch (_currentOperation) {
 		case Operation::NONE: {
-			LOGBleCentralDebug("No operation was in progress")
+			LOGBleCentralDebug("No operation was in progress");
 			break;
 		}
 		case Operation::CONNECT: {

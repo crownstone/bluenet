@@ -201,6 +201,7 @@ Crownstone::Crownstone(boards_config_t& board) :
 	this->listen();
 	_stack = &Stack::getInstance();
 	_bleCentral = &BleCentral::getInstance();
+	_crownstoneCentral = new CrownstoneCentral();
 	_advertiser = &Advertiser::getInstance();
 	_timer = &Timer::getInstance();
 	_storage = &Storage::getInstance();
@@ -278,6 +279,7 @@ void Crownstone::init1() {
 
 	LOGi(FMT_HEADER, "init central");
 	_bleCentral->init();
+	_crownstoneCentral->init();
 
 #if BUILD_MICROAPP_SUPPORT == 1
 	LOGi(FMT_HEADER, "init microapp");
