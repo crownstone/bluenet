@@ -98,6 +98,9 @@ protected:
 
 
 private:
+	uint8_t _keySessionDataBuffer[sizeof(session_data_t)];
+
 	Characteristic<buffer_ptr_t>* _sessionDataCharacteristic = NULL;
+	Characteristic<buffer_ptr_t>* _sessionDataUnencryptedCharacteristic = NULL;
 	Characteristic<uint32_t>*     _factoryResetCharacteristic = NULL;
 };
