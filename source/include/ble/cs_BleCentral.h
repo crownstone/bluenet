@@ -19,6 +19,8 @@
  *
  * Generally, you first connect, then discover, then perform read and/or write operations, and finally disconnect.
  * Note that the disconnect event might happen at any time.
+ *
+ * TODO: introduce a timeout, so that a connection cannot remain open.
  */
 class BleCentral: EventListener {
 public:
