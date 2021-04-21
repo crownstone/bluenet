@@ -94,6 +94,10 @@ public:
 			LOGe(STR_ERR_BUFFER_NOT_LARGE_ENOUGH);
 			return ERR_BUFFER_TOO_SMALL;
 		}
+		if (size != 0 && payload == nullptr) {
+			LOGe("Null pointer");
+			return ERR_BUFFER_UNASSIGNED;
+		}
 		_buffer->header.payloadSize = size;
 		memcpy(_buffer->payload, payload, size);
 		return ERR_SUCCESS;
