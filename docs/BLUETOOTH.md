@@ -89,9 +89,9 @@ these have the following structure.
 
 Type | Name | Length | Description
 --- | --- | --- | ---
-uint8 | AD length | 2 | Advertisement data length
+uint8 | AD length | 1 | Advertisement data length
 uint8 | AD type | 1 | Advertisement data type
-uint8 | AD contents | N | Advertisement data contents (max 28 bytes)
+uint8 | AD contents | N | Advertisement data contents (max 29 bytes)
 
 ## Receive connectionless presence
 
