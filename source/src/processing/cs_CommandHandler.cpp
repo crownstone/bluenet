@@ -25,7 +25,7 @@
 #include <uart/cs_UartHandler.h>
 #include <util/cs_WireFormat.h>
 
-#define LOGCommandHandlerDebug LOGnone
+#define LOGCommandHandlerDebug LOGd
 
 void reset(void* p_context) {
 
@@ -156,14 +156,6 @@ void CommandHandler::handleCommand(
 		LOGw("Wrong protocol: %u", protocolVersion);
 		result.returnCode = ERR_PROTOCOL_UNSUPPORTED;
 		return;
-	}
-
-	if (!isValidCommandHandlerType(type)) {
-		LOGe("Unknown type: %u", type);
-		result.returnCode = ERR_UNKNOWN_TYPE;
-		return;
-	} else {
-		LOGd("cmd=%u lvl=%u", type, accessLevel);
 	}
 
 	if (!KeysAndAccess::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
