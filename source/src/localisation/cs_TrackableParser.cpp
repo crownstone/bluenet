@@ -197,24 +197,21 @@ tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size
 			filterId, payloadSize, _parsingFiltersCount);
 	size_t totalSize = sizeof(tracking_filter_runtime_data_t) + payloadSize;
 
-	if (getTotalHeapAllocatedSize() + totalSize > FILTER_BUFFER_SIZE) {
-		// not enough space for filter of this total size.
-		return nullptr;
-	}
-
 	if (_parsingFiltersCount >= MAX_FILTER_IDS) {
 		// not enough space for more filter ids.
 		return nullptr;
 	}
 
-	LOGTrackableParserDebug("Try allocation");
+	if (getTotalHeapAllocatedSize() + totalSize > FILTER_BUFFER_SIZE) {
+		// not enough space for filter of this total size.
+		return nullptr;
+	}
+
 	// try heap allocation
 	uint8_t* newArray = new (std::nothrow) uint8_t[totalSize];
 
-	LOGTrackableParserDebug("after allocation");
-
 	if (newArray == nullptr) {
-		// new couldn't be allocated, heap is too full.
+		LOGTrackableParserWarn("Filter couldn't be allocated, heap is too full");
 		return nullptr;
 	}
 
