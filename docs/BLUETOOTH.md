@@ -10,7 +10,7 @@ There are seven ways the Bluetooth LE radio is used in bluenet.
 2. **Receive connectionless commands**. To receive (mostly by smartphone) broadcasted Bluetooth LE advertisements, see the [broadcast protocol](BROADCAST_PROTOCOL.md).
 3. **Receive connectionless presence**. To receive any type of Bluetooth LE advertisement, for in-network presence detection and in-network localization (not yet documented).
 4. **Send connectionless state**. To broadcast data from bluenet about the state of the device towards smartphones etc., see the [service data protocol](SERVICE_DATA.md).
-5. **Send connectionless presence**. To broadcast presence for indoor localization in the form of iBeacon messages, see [localization](LOCALIZATION.md).
+5. **Send connectionless presence**. To broadcast anchor information for indoor localization in the form of iBeacon messages, see [localization](LOCALIZATION.md).
 6. **Send and receive over mesh**. To communicate with other bluenet devices using Bluetooth Mesh, see the [mesh overview](MESH.md) and [mesh protocol](MESH_PROTOCOL.md) documents.
 7. **Send connection commands**. To set up a connection to other Crownstones or other Bluetooth LE devices (not yet documented).
 
@@ -93,24 +93,32 @@ uint8 | AD length | 1 | Advertisement data length
 uint8 | AD type | 1 | Advertisement data type
 uint8 | AD contents | N | Advertisement data contents (max 29 bytes)
 
-
-
-
 ## Receive connectionless presence
 
-TBD
+The format for advertisement payload packets can be found in the [protocol doc](../docs/PROTOCOL.md#advertisements).
+The more or less standardized iBeacon format is used for this, which is a couple of well-defined AD structures (see
+also section above).
+
+The frequency with with those messages are sent is defined by the smartphone manufacturers. The fastest rate with 
+which they are sent is every 20 ms. For tags or other devices this is often much less, say every couple of seconds.
+
+On the bluenet side we try to scan most of the time for such packets. This makes it possible to respond fast.
 
 ## Send connectionless state
 
-TBD
+The device running bluenet can broadcast state information in an encrypted manner. Devices can pick up on e.g. data
+about real-time energy consumption in a vary fast manner (without the need to set up a connection). The smartphone or
+device scanning for this information might not be scanning all the time, so this should be considered a lossy way to
+broadcast status information.
 
 ## Send connectionless presence
 
-TBD
+The device running bluenet can broadcast iBeacon messages. The devices can then be used as anchor points for presence
+or positioning information.
 
 ## Send and receive over mesh
 
-TBD
+Details on how to send and receive over mesh can be found at the [mesh doc](MESH.md).
 
 ## Send connection commands
 
