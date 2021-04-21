@@ -130,8 +130,7 @@ bool findUuid128(scanned_device_t* scannedDevice) {
 // -------------------------------------------------------------
 void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 	if (filterModificationInProgress) {
-		// DEBUG
-		// return;
+		 return;
 	}
 
 	// loop over filters to check mac address
@@ -152,9 +151,7 @@ void TrackableParser::handleScannedDevice(scanned_device_t* device) {
 				 device->address[3],
 				 device->address[4],
 				 device->address[5],
-				 findUuid128(device) ? "button pressed!" : "");
-
-			continue;  // DEBUG
+				 findUuid128(device) ? "button pressed!" : ""); // TODO(#177858707) when in/out types is added, test with actual uuid
 
 			TrackableEvent trackableEventData;
 			trackableEventData.id   = TrackableId(device->address, MAC_ADDRESS_LEN);
@@ -409,7 +406,9 @@ cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(
 
 	uint16_t masterHash = masterCrc();
 	if (cmd_data->masterCrc != masterHash) {
-		LOGTrackableParserWarn("Master Crc did not match, filterModificationInProgress stays true.");
+		LOGTrackableParserWarn("Master Crc did not match (%x != %x, filterModificationInProgress stays true.",
+				cmd_data->masterCrc,
+				masterHash);
 		return ERR_MISMATCH;
 	}
 
