@@ -14,6 +14,7 @@
 #include <structs/cs_ControlPacketAccessor.h>
 #include <structs/cs_ResultPacketAccessor.h>
 #include <structs/buffer/cs_CharacteristicBuffer.h>
+#include <structs/buffer/cs_CharacteristicReadBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
 
@@ -85,6 +86,7 @@ cs_ret_code_t CrownstoneCentral::write(cs_control_cmd_t commandType, uint8_t* da
 	}
 
 	_currentOperation = Operation::WRITE;
+	setStep(WriteControlSteps::WRITE);
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
@@ -99,7 +101,7 @@ void CrownstoneCentral::enableNotifications() {
 }
 
 
-cs_ret_code_t CrownstoneCentral::mergeNotification(cs_const_data_t& data) {
+cs_ret_code_t CrownstoneCentral::mergeNotification(const cs_const_data_t& data, cs_data_t& resultData) {
 	const uint16_t headerSize = 1;
 	if (data.len < (headerSize + 1)) {
 		LOGw("Invalid length=%u", data.len);
@@ -134,22 +136,22 @@ cs_ret_code_t CrownstoneCentral::mergeNotification(cs_const_data_t& data) {
 		_log(SERIAL_INFO, false, "Merged notification data=");
 		_logArray(SERIAL_INFO, true, inputBuf.data, inputBuf.len);
 
-		cs_data_t readBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
-		ResultPacketAccessor<> resultPacketAccessor;
-		cs_ret_code_t retCode = resultPacketAccessor.assign(readBuf.data, readBuf.len);
-		if (retCode != ERR_SUCCESS) {
-			return retCode;
-		}
+		cs_data_t readBuf = CharacteristicReadBuffer::getInstance().getBuffer();
+//		ResultPacketAccessor<> resultPacketAccessor;
+//		cs_ret_code_t retCode = resultPacketAccessor.assign(readBuf.data, readBuf.len);
+//		if (retCode != ERR_SUCCESS) {
+//			return retCode;
+//		}
 		EncryptionAccessLevel accessLevel;
-		retCode = ConnectionEncryption::getInstance().decrypt(inputBuf, readBuf, accessLevel, ConnectionEncryptionType::CTR);
+		cs_ret_code_t retCode = ConnectionEncryption::getInstance().decrypt(inputBuf, readBuf, accessLevel, ConnectionEncryptionType::CTR);
 		if (retCode != ERR_SUCCESS) {
 			return retCode;
 		}
-		_log(SERIAL_INFO, false, "Result: protocol=%u type=%u result=%u data=", resultPacketAccessor.getProtocolVersion(), resultPacketAccessor.getType(), resultPacketAccessor.getResult());
-		_logArray(SERIAL_INFO, true, resultPacketAccessor.getPayload().data, resultPacketAccessor.getPayload().len);
 		resetNotifactionMergerState();
+		resultData = readBuf;
+		return ERR_SUCCESS;
 	}
-	return ERR_SUCCESS;
+	return ERR_WAIT_FOR_SUCCESS;
 }
 
 void CrownstoneCentral::readSessionData() {
@@ -188,10 +190,23 @@ void CrownstoneCentral::setStep(ConnectSteps step) {
 	_currentStep = static_cast<uint8_t>(step);
 }
 
+void CrownstoneCentral::setStep(WriteControlSteps step) {
+	_currentStep = static_cast<uint8_t>(step);
+}
+
 bool CrownstoneCentral::finalizeStep(ConnectSteps step, cs_ret_code_t retCode) {
 	if (_currentOperation != Operation::CONNECT) {
 		LOGCsCentralInfo("Wrong operation: _currentOperation=%u", _currentOperation);
 		finalizeOperation(Operation::CONNECT, ERR_WRONG_OPERATION);
+		return false;
+	}
+	return finalizeStep(static_cast<uint8_t>(step), retCode);
+}
+
+bool CrownstoneCentral::finalizeStep(WriteControlSteps step, cs_ret_code_t retCode) {
+	if (_currentOperation != Operation::WRITE) {
+		LOGCsCentralInfo("Wrong operation: _currentOperation=%u", _currentOperation);
+		finalizeOperation(Operation::WRITE, ERR_WRONG_OPERATION);
 		return false;
 	}
 	return finalizeStep(static_cast<uint8_t>(step), retCode);
@@ -223,7 +238,7 @@ void CrownstoneCentral::finalizeOperation(Operation operation, cs_ret_code_t ret
 			break;
 		}
 		case Operation::WRITE: {
-			cs_central_read_result_t result = {
+			cs_central_write_result_t result = {
 					.retCode = retCode,
 					.data = cs_data_t()
 			};
@@ -462,8 +477,11 @@ void CrownstoneCentral::onWrite(cs_ret_code_t retCode) {
 			break;
 		}
 		case Operation::WRITE: {
-			// Done.
-			finalizeOperation(_currentOperation, retCode);
+			if (!finalizeStep(WriteControlSteps::WRITE, retCode)) {
+				return;
+			}
+			// Wait for notifications.
+			setStep(WriteControlSteps::RECEIVE_RESULT);
 			break;
 		}
 		default: {
@@ -479,10 +497,44 @@ void CrownstoneCentral::onNotification(ble_central_notification_t& result) {
 		return;
 	}
 
-	cs_ret_code_t retCode = mergeNotification(result.data);
-	if (retCode != ERR_SUCCESS) {
-		LOGw("Failed to merge notification retCode=%u", retCode);
-		resetNotifactionMergerState();
+	// In theory, we can receive notifications at any moment.
+	// So only handle them when we expect them, and ignore them otherwise.
+
+	if (_currentOperation == Operation::WRITE
+			&& static_cast<WriteControlSteps>(_currentStep) == WriteControlSteps::RECEIVE_RESULT) {
+
+		cs_data_t resultData;
+		cs_ret_code_t retCode = mergeNotification(result.data, resultData);
+		switch (retCode) {
+			case ERR_SUCCESS: {
+				if (resultData.data == nullptr) {
+					finalizeOperation(_currentOperation, ERR_BUFFER_UNASSIGNED);
+					return;
+				}
+				ResultPacketAccessor<> resultPacketAccessor;
+				retCode = resultPacketAccessor.assign(resultData.data, resultData.len);
+				if (retCode != ERR_SUCCESS) {
+					finalizeOperation(_currentOperation, retCode);
+					return;
+				}
+				_log(SERIAL_INFO, false, "Result: protocol=%u type=%u result=%u data=", resultPacketAccessor.getProtocolVersion(), resultPacketAccessor.getType(), resultPacketAccessor.getResult());
+				_logArray(SERIAL_INFO, true, resultPacketAccessor.getPayload().data, resultPacketAccessor.getPayload().len);
+				cs_central_write_result_t result = {
+						.retCode = ERR_SUCCESS,
+						.data = resultData
+				};
+				finalizeOperation(_currentOperation, reinterpret_cast<uint8_t*>(&result), sizeof(result));
+				break;
+			}
+			case ERR_WAIT_FOR_SUCCESS: {
+				// Keep waiting for more notifications.
+				break;
+			}
+			default: {
+				finalizeOperation(_currentOperation, retCode);
+				break;
+			}
+		}
 	}
 }
 

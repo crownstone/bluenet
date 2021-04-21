@@ -24,7 +24,7 @@ struct cs_central_write_t {
 
 // Events:
 
-struct cs_central_read_result_t {
+struct cs_central_write_result_t {
 	cs_ret_code_t retCode;
 	cs_data_t data;
 };

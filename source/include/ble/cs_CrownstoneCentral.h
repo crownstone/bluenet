@@ -79,15 +79,28 @@ private:
 
 	void enableNotifications();
 	void readSessionData();
-	cs_ret_code_t mergeNotification(cs_const_data_t& data);
+
+	/**
+	 * Merge this notification data with that of others.
+	 *
+	 * @param[in] notificationData     The data of this notification.
+	 * @param[out] resultData          The result data, only set on success.
+	 *
+	 * @return ERR_SUCCESS             All notifications have been merged, and decrypted. The resultData is set.
+	 * @return ERR_WAIT_FOR_SUCCESS    The notification has been merged, but there are more to come.
+	 * @return ERR_*                   The notification data could not be processed.
+	 */
+	cs_ret_code_t mergeNotification(const cs_const_data_t& notificationData, cs_data_t& resultData);
 
 	void setStep(ConnectSteps step);
+	void setStep(WriteControlSteps step);
 
 	/**
 	 * Returns true when you can continue.
 	 */
 	bool finalizeStep(uint8_t step, cs_ret_code_t retCode);
 	bool finalizeStep(ConnectSteps step, cs_ret_code_t retCode);
+	bool finalizeStep(WriteControlSteps step, cs_ret_code_t retCode);
 
 	void finalizeOperation(Operation operation, cs_ret_code_t retCode);
 	void finalizeOperation(Operation operation, uint8_t* data, uint8_t dataSize);
