@@ -25,7 +25,7 @@
 #include <uart/cs_UartHandler.h>
 #include <util/cs_WireFormat.h>
 
-#define LOGCommandHandlerDebug LOGd
+#define LOGCommandHandlerDebug LOGnone
 
 void reset(void* p_context) {
 
@@ -70,78 +70,6 @@ void CommandHandler::resetDelayed(uint8_t opCode, uint16_t delayMs) {
 	Timer::getInstance().start(_resetTimerId, MS_TO_TICKS(delayMs), &resetOpCode);
 //	// Loop until reset trigger
 //	while (true) {}; // This doesn't seem to work
-}
-
-bool CommandHandler::isValidCommandHandlerType(CommandHandlerTypes type) {
-	switch (type) {
-		case CTRL_CMD_SET_SUN_TIME:
-		case CTRL_CMD_SETUP:
-		case CTRL_CMD_FACTORY_RESET:
-		case CTRL_CMD_STATE_GET:
-		case CTRL_CMD_STATE_SET:
-		case CTRL_CMD_GET_BOOTLOADER_VERSION:
-		case CTRL_CMD_GET_UICR_DATA:
-		case CTRL_CMD_SET_IBEACON_CONFIG_ID:
-		case CTRL_CMD_GET_MAC_ADDRESS:
-		case CTRL_CMD_GET_HARDWARE_VERSION:
-		case CTRL_CMD_GET_FIRMWARE_VERSION:
-
-		case CTRL_CMD_RESET:
-		case CTRL_CMD_GOTO_DFU:
-		case CTRL_CMD_NOP:
-		case CTRL_CMD_DISCONNECT:
-
-		case CTRL_CMD_SWITCH:
-		case CTRL_CMD_MULTI_SWITCH:
-		case CTRL_CMD_PWM:
-		case CTRL_CMD_RELAY:
-
-		case CTRL_CMD_SET_TIME:
-		case CTRL_CMD_GET_TIME:
-		case CTRL_CMD_INCREASE_TX:
-		case CTRL_CMD_RESET_ERRORS:
-		case CTRL_CMD_MESH_COMMAND:
-
-		case CTRL_CMD_ALLOW_DIMMING:
-		case CTRL_CMD_LOCK_SWITCH:
-
-		case CTRL_CMD_UART_MSG:
-		case CTRL_CMD_HUB_DATA:
-
-		case CTRL_CMD_SAVE_BEHAVIOUR:
-		case CTRL_CMD_REPLACE_BEHAVIOUR:
-		case CTRL_CMD_REMOVE_BEHAVIOUR:
-		case CTRL_CMD_GET_BEHAVIOUR:
-		case CTRL_CMD_GET_BEHAVIOUR_INDICES:
-		case CTRL_CMD_GET_PRESENCE:
-		case CTRL_CMD_GET_BEHAVIOUR_DEBUG:
-
-		case CTRL_CMD_REGISTER_TRACKED_DEVICE:
-		case CTRL_CMD_TRACKED_DEVICE_HEARTBEAT:
-
-		case CTRL_CMD_GET_UPTIME:
-		case CTRL_CMD_GET_ADC_RESTARTS:
-		case CTRL_CMD_GET_SWITCH_HISTORY:
-		case CTRL_CMD_GET_POWER_SAMPLES:
-		case CTLR_CMD_GET_SCHEDULER_MIN_FREE:
-		case CTRL_CMD_GET_RESET_REASON:
-		case CTRL_CMD_GET_GPREGRET:
-		case CTRL_CMD_GET_ADC_CHANNEL_SWAPS:
-		case CTRL_CMD_GET_RAM_STATS:
-
-		case CTRL_CMD_MICROAPP_GET_INFO:
-		case CTRL_CMD_MICROAPP_UPLOAD:
-		case CTRL_CMD_MICROAPP_VALIDATE:
-		case CTRL_CMD_MICROAPP_REMOVE:
-		case CTRL_CMD_MICROAPP_ENABLE:
-		case CTRL_CMD_MICROAPP_DISABLE:
-
-		case CTRL_CMD_CLEAN_FLASH:
-			return true;
-		case CTRL_CMD_UNKNOWN:
-		default:
-			return false;
-	}
 }
 
 void CommandHandler::handleCommand(

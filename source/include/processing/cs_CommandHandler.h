@@ -78,7 +78,6 @@ private:
 
 	EncryptionAccessLevel getRequiredAccessLevel(const CommandHandlerTypes type);
 	bool allowedAsMeshCommand(const CommandHandlerTypes type);
-	bool isValidCommandHandlerType(CommandHandlerTypes type);
 
 	void handleCmdNop                     (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
 	void handleCmdGotoDfu                 (cs_data_t commandData, const EncryptionAccessLevel accessLevel, cs_result_t & result);
