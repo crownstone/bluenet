@@ -193,8 +193,8 @@ void TrackableParser::handleBackgroundParsed(adv_background_parsed_t* trackableA
 // -------------------------------------------------------------
 
 tracking_filter_t* TrackableParser::allocateParsingFilter(uint8_t filterId, size_t payloadSize) {
-	LOGTrackableParserDebug(
-			"Allocating parsing filter #%d, of size %d (endindex: %u)", filterId, payloadSize, _parsingFiltersCount);
+	LOGTrackableParserDebug("Allocating parsing filter #%d, of size %d (endindex: %u)",
+			filterId, payloadSize, _parsingFiltersCount);
 	size_t totalSize = sizeof(tracking_filter_runtime_data_t) + payloadSize;
 
 	if (getTotalHeapAllocatedSize() + totalSize > FILTER_BUFFER_SIZE) {
@@ -340,8 +340,7 @@ size_t TrackableParser::getTotalHeapAllocatedSize() {
 cs_ret_code_t TrackableParser::handleUploadFilterCommand(trackable_parser_cmd_upload_filter_t* cmd_data) {
 	startProgress();
 
-	LOGTrackableParserDebug(
-			"upload command received chunkStartIndex %d, chunkSize %d, totalSize %d",
+	LOGTrackableParserDebug("upload command received chunkStartIndex %d, chunkSize %d, totalSize %d",
 			cmd_data->chunkStartIndex,
 			cmd_data->chunkSize,
 			cmd_data->totalSize);
