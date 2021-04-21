@@ -39,6 +39,23 @@ struct cs_data_t {
 	{}
 };
 
+/**
+ * Variable length data encapsulation in terms of length and pointer to data.
+ */
+struct cs_const_data_t {
+	const uint8_t* data = nullptr;      /** < Pointer to data. */
+	cs_buffer_size_t len = 0;      /** < Length of data. */
+
+	cs_const_data_t():
+		data(nullptr),
+		len(0)
+	{}
+	cs_const_data_t(const uint8_t* buf, cs_buffer_size_t size):
+		data(buf),
+		len(size)
+	{}
+};
+
 struct cs_result_t {
 	/**
 	 * Return code.

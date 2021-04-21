@@ -362,6 +362,7 @@ enum class CS_TYPE: uint16_t {
 	EVT_BLE_CENTRAL_DISCOVERY_RESULT,                 // Result of service discovery.
 	EVT_BLE_CENTRAL_READ_RESULT,                      // Result of a read.
 	EVT_BLE_CENTRAL_WRITE_RESULT,                     // Result of a write.
+	EVT_BLE_CENTRAL_NOTIFICATION,                     // A notification has been received.
 
 	CMD_CS_CENTRAL_CONNECT,                           // Connect to a device. See CrownstoneCentral::connect().
 	CMD_CS_CENTRAL_WRITE,                             // Write a control command.
@@ -521,6 +522,7 @@ typedef  ble_central_discovery_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY);
 typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_DISCOVERY_RESULT);
 typedef  ble_central_read_result_t TYPIFY(EVT_BLE_CENTRAL_READ_RESULT);
 typedef  cs_ret_code_t TYPIFY(EVT_BLE_CENTRAL_WRITE_RESULT);
+typedef  ble_central_notification_t TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION);
 typedef  cs_central_connect_t TYPIFY(CMD_CS_CENTRAL_CONNECT);
 typedef  cs_central_write_t TYPIFY(CMD_CS_CENTRAL_WRITE);
 typedef  cs_ret_code_t TYPIFY(EVT_CS_CENTRAL_CONNECT_RESULT);

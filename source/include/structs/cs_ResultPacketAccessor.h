@@ -55,6 +55,11 @@ public:
 		_buffer->header.commandType = type;
 	}
 
+	cs_ret_code_t getResult() const {
+		checkInitialized();
+		return _buffer->header.returnCode;
+	}
+
 	/**
 	 * Set the result code.
 	 */

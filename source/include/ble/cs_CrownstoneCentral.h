@@ -48,8 +48,16 @@ private:
 		GET_ADDRESS,
 		CONNECT,
 		DISCOVER,
+		ENABLE_NOTIFICATIONS,
 		SESSION_KEY,
 		SESSION_DATA,
+		DONE
+	};
+
+	enum class WriteControlSteps: uint8_t {
+		NONE = 0,
+		WRITE,
+		RECEIVE_RESULT,
 		DONE
 	};
 
@@ -59,9 +67,19 @@ private:
 	uint16_t _sessionDataHandle;
 	uint16_t _controlHandle;
 	uint16_t _resultHandle;
+	uint16_t _resultCccdHandle;
 	OperationMode _opMode = OperationMode::OPERATION_MODE_UNINITIALIZED;
 	Operation _currentOperation = Operation::NONE;
 	uint8_t _currentStep;
+
+	uint8_t _notificationNextIndex = 0;
+	uint16_t _notificationMergedDataSize = 0;
+
+	void resetNotifactionMergerState();
+
+	void enableNotifications();
+	void readSessionData();
+	cs_ret_code_t mergeNotification(cs_const_data_t& data);
 
 	void setStep(ConnectSteps step);
 
@@ -80,6 +98,7 @@ private:
 	void onDiscoveryDone(cs_ret_code_t retCode);
 	void onRead(ble_central_read_result_t& result);
 	void onWrite(cs_ret_code_t result);
+	void onNotification(ble_central_notification_t& result);
 
 public:
 	/**

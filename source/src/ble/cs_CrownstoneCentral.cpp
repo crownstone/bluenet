@@ -12,6 +12,7 @@
 #include <encryption/cs_KeysAndAccess.h>
 
 #include <structs/cs_ControlPacketAccessor.h>
+#include <structs/cs_ResultPacketAccessor.h>
 #include <structs/buffer/cs_CharacteristicBuffer.h>
 #include <structs/buffer/cs_CharacteristicWriteBuffer.h>
 #include <structs/buffer/cs_EncryptionBuffer.h>
@@ -30,9 +31,17 @@ cs_ret_code_t CrownstoneCentral::init() {
 	return ERR_SUCCESS;
 }
 
+void CrownstoneCentral::resetNotifactionMergerState() {
+	_notificationNextIndex = 0;
+	_notificationMergedDataSize = 0;
+}
+
 cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16_t timeoutMs) {
 	cs_ret_code_t retCode = BleCentral::getInstance().connect(address, timeoutMs);
 	if (retCode == ERR_WAIT_FOR_SUCCESS) {
+
+		resetNotifactionMergerState();
+
 		_currentOperation = Operation::CONNECT;
 		setStep(ConnectSteps::CONNECT);
 	}
@@ -79,6 +88,99 @@ cs_ret_code_t CrownstoneCentral::write(cs_control_cmd_t commandType, uint8_t* da
 	return ERR_WAIT_FOR_SUCCESS;
 }
 
+
+void CrownstoneCentral::enableNotifications() {
+	cs_ret_code_t retCode = BleCentral::getInstance().writeNotificationConfig(_resultCccdHandle, true);
+	if (retCode != ERR_WAIT_FOR_SUCCESS) {
+		finalizeOperation(Operation::CONNECT, retCode);
+		return;
+	}
+	setStep(ConnectSteps::ENABLE_NOTIFICATIONS);
+}
+
+
+cs_ret_code_t CrownstoneCentral::mergeNotification(cs_const_data_t& data) {
+	const uint16_t headerSize = 1;
+	if (data.len < (headerSize + 1)) {
+		LOGw("Invalid length=%u", data.len);
+		return ERR_WRONG_PAYLOAD_LENGTH;
+	}
+	const uint16_t dataSize = data.len - headerSize;
+
+	uint8_t index = data.data[0];
+	if (index != _notificationNextIndex && index != 255) {
+		LOGw("Expected index=%u, received index=%u", _notificationNextIndex, index);
+		return ERR_WRONG_PARAMETER;
+	}
+
+	cs_data_t encryptionBuffer;
+	if (!EncryptionBuffer::getInstance().getBuffer(encryptionBuffer.data, encryptionBuffer.len)) {
+		return ERR_BUFFER_UNASSIGNED;
+	}
+
+	if (encryptionBuffer.len < _notificationMergedDataSize + dataSize) {
+		return ERR_BUFFER_TOO_SMALL;
+	}
+
+	memcpy(encryptionBuffer.data + _notificationMergedDataSize, data.data + headerSize, dataSize);
+	_notificationNextIndex++;
+	_notificationMergedDataSize += dataSize;
+
+
+	if (index == 255) {
+		// Last index.
+
+		cs_data_t inputBuf(encryptionBuffer.data, _notificationMergedDataSize);
+		_log(SERIAL_INFO, false, "Merged notification data=");
+		_logArray(SERIAL_INFO, true, inputBuf.data, inputBuf.len);
+
+		cs_data_t readBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
+		ResultPacketAccessor<> resultPacketAccessor;
+		cs_ret_code_t retCode = resultPacketAccessor.assign(readBuf.data, readBuf.len);
+		if (retCode != ERR_SUCCESS) {
+			return retCode;
+		}
+		EncryptionAccessLevel accessLevel;
+		retCode = ConnectionEncryption::getInstance().decrypt(inputBuf, readBuf, accessLevel, ConnectionEncryptionType::CTR);
+		if (retCode != ERR_SUCCESS) {
+			return retCode;
+		}
+		_log(SERIAL_INFO, false, "Result: protocol=%u type=%u result=%u data=", resultPacketAccessor.getProtocolVersion(), resultPacketAccessor.getType(), resultPacketAccessor.getResult());
+		_logArray(SERIAL_INFO, true, resultPacketAccessor.getPayload().data, resultPacketAccessor.getPayload().len);
+		resetNotifactionMergerState();
+	}
+	return ERR_SUCCESS;
+}
+
+void CrownstoneCentral::readSessionData() {
+	cs_ret_code_t retCode;
+	switch (_opMode) {
+		case OperationMode::OPERATION_MODE_NORMAL: {
+			// Read session data.
+			retCode = BleCentral::getInstance().read(_sessionDataHandle);
+			if (retCode != ERR_WAIT_FOR_SUCCESS) {
+				finalizeOperation(Operation::CONNECT, retCode);
+				return;
+			}
+			setStep(ConnectSteps::SESSION_DATA);
+			break;
+		}
+		case OperationMode::OPERATION_MODE_SETUP: {
+			// Read session key.
+			retCode = BleCentral::getInstance().read(_sessionKeyHandle);
+			if (retCode != ERR_WAIT_FOR_SUCCESS) {
+				finalizeOperation(Operation::CONNECT, retCode);
+				return;
+			}
+			setStep(ConnectSteps::SESSION_KEY);
+			break;
+		}
+		default: {
+			finalizeOperation(Operation::CONNECT, ERR_WRONG_MODE);
+			return;
+		}
+	}
+}
 
 
 
@@ -209,7 +311,7 @@ void CrownstoneCentral::onConnect(cs_ret_code_t retCode) {
 	setStep(ConnectSteps::DISCOVER);
 	_sessionDataHandle = BLE_GATT_HANDLE_INVALID;
 	_controlHandle = BLE_GATT_HANDLE_INVALID;
-	_resultHandle = BLE_GATT_HANDLE_INVALID;
+	_resultCccdHandle = BLE_GATT_HANDLE_INVALID;
 }
 
 void CrownstoneCentral::onDiscovery(ble_central_discovery_t& result) {
@@ -243,6 +345,7 @@ void CrownstoneCentral::onDiscovery(ble_central_discovery_t& result) {
 	uuid.fromBaseUuid(_uuids[0], RESULT_UUID);
 	if (result.uuid == uuid) {
 		_resultHandle = result.valueHandle;
+		_resultCccdHandle = result.cccdHandle;
 		LOGCsCentralDebug("Found result handle: %u", _resultHandle);
 	}
 
@@ -269,6 +372,7 @@ void CrownstoneCentral::onDiscovery(ble_central_discovery_t& result) {
 	uuid.fromBaseUuid(_uuids[1], SETUP_RESULT_UUID);
 	if (result.uuid == uuid) {
 		_resultHandle = result.valueHandle;
+		_resultCccdHandle = result.cccdHandle;
 		LOGCsCentralDebug("Found result handle: %u", _resultHandle);
 	}
 
@@ -278,33 +382,7 @@ void CrownstoneCentral::onDiscoveryDone(cs_ret_code_t retCode) {
 	if (!finalizeStep(ConnectSteps::DISCOVER, retCode)) {
 		return;
 	}
-
-	switch (_opMode) {
-		case OperationMode::OPERATION_MODE_NORMAL: {
-			// Read session data.
-			retCode = BleCentral::getInstance().read(_sessionDataHandle);
-			if (retCode != ERR_WAIT_FOR_SUCCESS) {
-				finalizeOperation(Operation::CONNECT, retCode);
-				return;
-			}
-			setStep(ConnectSteps::SESSION_DATA);
-			break;
-		}
-		case OperationMode::OPERATION_MODE_SETUP: {
-			// Read session key.
-			retCode = BleCentral::getInstance().read(_sessionKeyHandle);
-			if (retCode != ERR_WAIT_FOR_SUCCESS) {
-				finalizeOperation(Operation::CONNECT, retCode);
-				return;
-			}
-			setStep(ConnectSteps::SESSION_KEY);
-			break;
-		}
-		default: {
-			// TODO: event
-			return;
-		}
-	}
+	enableNotifications();
 }
 
 void CrownstoneCentral::onRead(ble_central_read_result_t& result) {
@@ -376,6 +454,13 @@ void CrownstoneCentral::onWrite(cs_ret_code_t retCode) {
 		return;
 	}
 	switch (_currentOperation) {
+		case Operation::CONNECT: {
+			if (!finalizeStep(ConnectSteps::ENABLE_NOTIFICATIONS, retCode)) {
+				return;
+			}
+			readSessionData();
+			break;
+		}
 		case Operation::WRITE: {
 			// Done.
 			finalizeOperation(_currentOperation, retCode);
@@ -388,6 +473,18 @@ void CrownstoneCentral::onWrite(cs_ret_code_t retCode) {
 	}
 }
 
+void CrownstoneCentral::onNotification(ble_central_notification_t& result) {
+	if (result.handle != _resultHandle) {
+		LOGw("Unexpected handle=%u", result.handle);
+		return;
+	}
+
+	cs_ret_code_t retCode = mergeNotification(result.data);
+	if (retCode != ERR_SUCCESS) {
+		LOGw("Failed to merge notification retCode=%u", retCode);
+		resetNotifactionMergerState();
+	}
+}
 
 
 void CrownstoneCentral::handleEvent(event_t& event) {
@@ -427,6 +524,11 @@ void CrownstoneCentral::handleEvent(event_t& event) {
 		case CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT: {
 			auto result = CS_TYPE_CAST(EVT_BLE_CENTRAL_WRITE_RESULT, event.data);
 			onWrite(*result);
+			break;
+		}
+		case CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION: {
+			auto result = CS_TYPE_CAST(EVT_BLE_CENTRAL_NOTIFICATION, event.data);
+			onNotification(*result);
 			break;
 		}
 		default: {

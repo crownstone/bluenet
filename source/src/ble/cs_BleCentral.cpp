@@ -252,6 +252,13 @@ void BleCentral::onDiscoveryEvent(ble_db_discovery_evt_t& event) {
 	}
 }
 
+cs_data_t BleCentral::requestWriteBuffer() {
+	if (isBusy()) {
+		return cs_data_t();
+	}
+	return cs_data_t(_buf, sizeof(_buf));
+}
+
 cs_ret_code_t BleCentral::write(uint16_t handle, const uint8_t* data, uint16_t len) {
 	if (isBusy()) {
 		LOGBleCentralInfo("Busy");
@@ -376,6 +383,11 @@ cs_ret_code_t BleCentral::read(uint16_t handle) {
 
 	_currentOperation = Operation::READ;
 	return ERR_WAIT_FOR_SUCCESS;
+}
+
+cs_ret_code_t BleCentral::writeNotificationConfig(uint16_t cccdHandle, bool enable) {
+	uint16_t value = enable ? BLE_GATT_HVX_NOTIFICATION : 0;
+	return write(cccdHandle, reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
 void BleCentral::finalizeOperation(Operation operation, cs_ret_code_t retCode) {
@@ -626,6 +638,31 @@ void BleCentral::onWrite(uint16_t gattStatus, const ble_gattc_evt_write_rsp_t& e
 	}
 }
 
+void BleCentral::onNotification(uint16_t gattStatus, const ble_gattc_evt_hvx_t& event) {
+	_log(LogLevelBleCentralDebug, false, "onNotification handle=%u len=%u data=", event.handle, event.len);
+	_logArray(LogLevelBleCentralDebug, true, event.data, event.len);
+
+	if (gattStatus != BLE_GATT_STATUS_SUCCESS) {
+		LOGw("gattStatus=%u", gattStatus);
+		return;
+	}
+
+	// BLE_GATT_HVX_NOTIFICATION are unacknowledged, while BLE_GATT_HVX_INDICATION have to be acknowledged.
+	if (event.type != BLE_GATT_HVX_NOTIFICATION) {
+		LOGw("unexpected type=%u", event.type);
+		return;
+	}
+
+	TYPIFY(EVT_BLE_CENTRAL_NOTIFICATION) packet = {
+			.handle = event.handle,
+			.data = cs_const_data_t(event.data, event.len)
+	};
+	event_t eventOut(CS_TYPE::EVT_BLE_CENTRAL_NOTIFICATION, &packet, sizeof(packet));
+	eventOut.dispatch();
+}
+
+
+
 
 void BleCentral::onGapEvent(uint16_t evtId, const ble_gap_evt_t& event) {
 	switch (evtId) {
@@ -662,6 +699,10 @@ void BleCentral::onGattCentralEvent(uint16_t evtId, const ble_gattc_evt_t& event
 		}
 		case BLE_GATTC_EVT_WRITE_RSP: {
 			onWrite(event.gatt_status, event.params.write_rsp);
+			break;
+		}
+		case BLE_GATTC_EVT_HVX: {
+			onNotification(event.gatt_status, event.params.hvx);
 			break;
 		}
 	}

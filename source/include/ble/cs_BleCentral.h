@@ -87,6 +87,24 @@ public:
 	cs_ret_code_t write(uint16_t handle, const uint8_t* data, uint16_t len);
 
 	/**
+	 * Performs a write() with the value to enable or disable notifications.
+	 *
+	 * @param[in] cccdHandle           The characteristic CCCD handle to write to. The handle was received during discovery.
+	 * @param[in] enableNotifications  True to enable notifications.
+	 *
+	 * @return                         See write().
+	 */
+	cs_ret_code_t writeNotificationConfig(uint16_t cccdHandle, bool enableNotifications);
+
+	/**
+	 * Request the write buffer, to avoid having to copy data to the write buffer.
+	 *
+	 * @return     When busy:          A null pointer.
+	 * @return     On success:         A pointer to the write buffer, and the length of the buffer.
+	 */
+	cs_data_t requestWriteBuffer();
+
+	/**
 	 * Check whether this crownstone is connected as central.
 	 */
 	bool isConnected();
@@ -112,6 +130,7 @@ private:
 
 	/**
 	 * Buffer used for reading and writing.
+	 * TODO: use CharacteristicWriteBuffer, CharacteristicReadBuffer, or EncryptionBuffer ?
 	 */
 	uint8_t _buf[200];
 
@@ -167,6 +186,7 @@ private:
 	void onMtu(uint16_t gattStatus, const ble_gattc_evt_exchange_mtu_rsp_t& event);
 	void onRead(uint16_t gattStatus, const ble_gattc_evt_read_rsp_t& event);
 	void onWrite(uint16_t gattStatus, const ble_gattc_evt_write_rsp_t& event);
+	void onNotification(uint16_t gattStatus, const ble_gattc_evt_hvx_t& event);
 
 
 public:
