@@ -72,23 +72,9 @@ void CommandHandler::resetDelayed(uint8_t opCode, uint16_t delayMs) {
 //	while (true) {}; // This doesn't seem to work
 }
 
-void CommandHandler::handleCommand(
-		uint8_t protocolVersion,
-		const CommandHandlerTypes type,
-		cs_data_t commandData,
-		const cmd_source_with_counter_t source,
-		const EncryptionAccessLevel accessLevel,
-		cs_result_t & result
-		) {
-	if (protocolVersion != CS_CONNECTION_PROTOCOL_VERSION) {
-		LOGw("Wrong protocol: %u", protocolVersion);
-		result.returnCode = ERR_PROTOCOL_UNSUPPORTED;
-		return;
-	}
-
+bool CommandHandler::isValidCommandHandlerType(CommandHandlerTypes type) {
 	switch (type) {
 		case CTRL_CMD_SET_SUN_TIME:
-			break;
 		case CTRL_CMD_SETUP:
 		case CTRL_CMD_FACTORY_RESET:
 		case CTRL_CMD_STATE_GET:
@@ -151,16 +137,37 @@ void CommandHandler::handleCommand(
 		case CTRL_CMD_MICROAPP_DISABLE:
 
 		case CTRL_CMD_CLEAN_FLASH:
-			LOGd("cmd=%u lvl=%u", type, accessLevel);
-			break;
+			return true;
 		case CTRL_CMD_UNKNOWN:
 		default:
-			LOGe("Unknown type: %u", type);
-			result.returnCode = ERR_UNKNOWN_TYPE;
-			return;
+			return false;
+	}
+}
+
+void CommandHandler::handleCommand(
+		uint8_t protocolVersion,
+		const CommandHandlerTypes type,
+		cs_data_t commandData,
+		const cmd_source_with_counter_t source,
+		const EncryptionAccessLevel accessLevel,
+		cs_result_t & result
+		) {
+	if (protocolVersion != CS_CONNECTION_PROTOCOL_VERSION) {
+		LOGw("Wrong protocol: %u", protocolVersion);
+		result.returnCode = ERR_PROTOCOL_UNSUPPORTED;
+		return;
+	}
+
+	if (!isValidCommandHandlerType(type)) {
+		LOGe("Unknown type: %u", type);
+		result.returnCode = ERR_UNKNOWN_TYPE;
+		return;
+	} else {
+		LOGd("cmd=%u lvl=%u", type, accessLevel);
 	}
 
 	if (!KeysAndAccess::getInstance().allowAccess(getRequiredAccessLevel(type), accessLevel)) {
+		LOGCommandHandlerDebug("command message skipped, access not allowed");
 		result.returnCode = ERR_NO_ACCESS;
 		return;
 	}
