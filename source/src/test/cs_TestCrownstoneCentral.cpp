@@ -38,6 +38,14 @@ void TestCrownstoneCentral::read() {
 }
 
 void TestCrownstoneCentral::write() {
+	TYPIFY(CMD_CS_CENTRAL_WRITE) cmdPacket = {
+			.commandType = CTRL_CMD_GET_MAC_ADDRESS,
+			.data = cs_data_t()
+	};
+
+	event_t cmdEvent(CS_TYPE::CMD_CS_CENTRAL_WRITE, &cmdPacket, sizeof(cmdPacket));
+	cmdEvent.dispatch();
+	LOGi("write: %u", cmdEvent.result.returnCode);
 }
 
 void TestCrownstoneCentral::disconnect() {
@@ -55,9 +63,14 @@ void TestCrownstoneCentral::handleEvent(event_t & event) {
 		case CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT: {
 			cs_ret_code_t result = *CS_TYPE_CAST(EVT_CS_CENTRAL_CONNECT_RESULT, event.data);
 			LOGi("Connect result: %u", result);
-//			if (result == ERR_SUCCESS) {
-//				read();
-//			}
+			if (result == ERR_SUCCESS) {
+				write();
+			}
+			break;
+		}
+		case CS_TYPE::EVT_CS_CENTRAL_WRITE_RESULT: {
+			auto result = CS_TYPE_CAST(EVT_CS_CENTRAL_WRITE_RESULT, event.data);
+			LOGi("Write result: %u", result->retCode);
 			break;
 		}
 

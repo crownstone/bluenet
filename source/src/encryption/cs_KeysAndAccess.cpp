@@ -82,7 +82,9 @@ bool KeysAndAccess::getKey(EncryptionAccessLevel accessLevel, buffer_ptr_t outBu
 			keyConfigType = CS_TYPE::CONFIG_KEY_LOCALIZATION;
 			break;
 		case SETUP: {
-			if (_operationMode == OperationMode::OPERATION_MODE_SETUP && _setupKeyValid) {
+			// Don't check if in setup mode: we want to use this for outgoing connections too.
+			// The check _setupKeyValid == true should be enough.
+			if (_setupKeyValid) {
 				memcpy(outBuf, _setupKey, ENCRYPTION_KEY_LENGTH);
 				return true;
 			}
@@ -116,7 +118,9 @@ void KeysAndAccess::generateSetupKey() {
 }
 
 cs_ret_code_t KeysAndAccess::setSetupKey(cs_data_t data) {
+	KeysAndAccessDebug("Set setup key");
 	if (data.len != sizeof(_setupKey)) {
+		LOGw("Wrong key length: %u", data.len);
 		return ERR_WRONG_PAYLOAD_LENGTH;
 	}
 	memcpy(_setupKey, data.data, sizeof(_setupKey));

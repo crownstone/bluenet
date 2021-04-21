@@ -11,6 +11,11 @@
 #include <encryption/cs_ConnectionEncryption.h>
 #include <encryption/cs_KeysAndAccess.h>
 
+#include <structs/cs_ControlPacketAccessor.h>
+#include <structs/buffer/cs_CharacteristicBuffer.h>
+#include <structs/buffer/cs_CharacteristicWriteBuffer.h>
+#include <structs/buffer/cs_EncryptionBuffer.h>
+
 #define LOGCsCentralInfo LOGi
 #define LOGCsCentralDebug LOGd
 
@@ -32,6 +37,46 @@ cs_ret_code_t CrownstoneCentral::connect(const device_address_t& address, uint16
 		setStep(ConnectSteps::CONNECT);
 	}
 	return retCode;
+}
+
+cs_ret_code_t CrownstoneCentral::write(cs_control_cmd_t commandType, uint8_t* data, uint16_t size) {
+	cs_ret_code_t retCode;
+
+	cs_data_t encryptionBuffer;
+	if (!EncryptionBuffer::getInstance().getBuffer(encryptionBuffer.data, encryptionBuffer.len)) {
+		return ERR_BUFFER_UNASSIGNED;
+	}
+
+	cs_data_t writeBuf = CharacteristicWriteBuffer::getInstance().getBuffer();
+	ControlPacketAccessor<> controlPacketAccessor;
+	retCode = controlPacketAccessor.assign(writeBuf.data, writeBuf.len);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+
+	controlPacketAccessor.setProtocolVersion(CS_CONNECTION_PROTOCOL_VERSION);
+	controlPacketAccessor.setType(commandType);
+	retCode = controlPacketAccessor.setPayload(data, size);
+	if (retCode != ERR_SUCCESS) {
+		return retCode;
+	}
+	cs_data_t controlPacket = controlPacketAccessor.getSerializedBuffer();
+
+	uint16_t encryptedSize = ConnectionEncryption::getEncryptedBufferSize(controlPacket.len, ConnectionEncryptionType::CTR);
+	if (_opMode == OperationMode::OPERATION_MODE_SETUP) {
+		ConnectionEncryption::getInstance().encrypt(controlPacket, encryptionBuffer, SETUP, ConnectionEncryptionType::CTR);
+	}
+	else {
+		ConnectionEncryption::getInstance().encrypt(controlPacket, encryptionBuffer, ADMIN, ConnectionEncryptionType::CTR);
+	}
+
+	retCode = BleCentral::getInstance().write(_controlHandle, encryptionBuffer.data, encryptedSize);
+	if (retCode != ERR_WAIT_FOR_SUCCESS) {
+		return retCode;
+	}
+
+	_currentOperation = Operation::WRITE;
+	return ERR_WAIT_FOR_SUCCESS;
 }
 
 
@@ -75,8 +120,7 @@ void CrownstoneCentral::finalizeOperation(Operation operation, cs_ret_code_t ret
 			finalizeOperation(operation, reinterpret_cast<uint8_t*>(&retCode), sizeof(retCode));
 			break;
 		}
-		case Operation::WRITE:
-		case Operation::READ: {
+		case Operation::WRITE: {
 			cs_central_read_result_t result = {
 					.retCode = retCode,
 					.data = cs_data_t()
@@ -104,16 +148,6 @@ void CrownstoneCentral::finalizeOperation(Operation operation, uint8_t* data, ui
 				sendOperationResult(errEvent);
 				return;
 			}
-			case Operation::READ: {
-				// Ignore data, finalize with error instead.
-				TYPIFY(EVT_CS_CENTRAL_READ_RESULT) result = {
-						.retCode = ERR_WRONG_STATE,
-						.data = cs_data_t()
-				};
-				event_t errEvent(CS_TYPE::EVT_CS_CENTRAL_READ_RESULT, reinterpret_cast<uint8_t*>(&result), sizeof(result));
-				sendOperationResult(errEvent);
-				return;
-			}
 			case Operation::WRITE: {
 				// Ignore data, finalize with error instead.
 				TYPIFY(EVT_CS_CENTRAL_WRITE_RESULT) result = {
@@ -136,10 +170,6 @@ void CrownstoneCentral::finalizeOperation(Operation operation, uint8_t* data, ui
 		}
 		case Operation::CONNECT: {
 			event.type = CS_TYPE::EVT_CS_CENTRAL_CONNECT_RESULT;
-			break;
-		}
-		case Operation::READ: {
-			event.type = CS_TYPE::EVT_CS_CENTRAL_READ_RESULT;
 			break;
 		}
 		case Operation::WRITE: {
@@ -182,63 +212,63 @@ void CrownstoneCentral::onConnect(cs_ret_code_t retCode) {
 	_resultHandle = BLE_GATT_HANDLE_INVALID;
 }
 
-void CrownstoneCentral::onDiscovery(ble_central_discovery_t* result) {
+void CrownstoneCentral::onDiscovery(ble_central_discovery_t& result) {
 
 //	// Quicker / shorter method?
 //	ble_uuid_t csUuid = _uuids[0].getUuid();
-//	ble_uuid_t uuid = result->uuid.getUuid();
+//	ble_uuid_t uuid = result.uuid.getUuid();
 //
 //	if (uuid.type == csUuid.type && uuid.uuid == CONTROL_UUID) {
-//		_controlHandle = result->valueHandle;
+//		_controlHandle = result.valueHandle;
 //		LOGi("Found control handle: %u", _controlHandle);
 //	}
 
 	UUID uuid;
 
 	// Normal mode
-	if (result->uuid == _uuids[0]) {
+	if (result.uuid == _uuids[0]) {
 		_opMode = OperationMode::OPERATION_MODE_NORMAL;
 		LOGCsCentralInfo("Crownstone service found");
 	}
 	uuid.fromBaseUuid(_uuids[0], SESSION_DATA_UNENCRYPTED_UUID);
-	if (result->uuid == uuid) {
-		_sessionDataHandle = result->valueHandle;
+	if (result.uuid == uuid) {
+		_sessionDataHandle = result.valueHandle;
 		LOGCsCentralDebug("Found session data handle: %u", _sessionDataHandle);
 	}
 	uuid.fromBaseUuid(_uuids[0], CONTROL_UUID);
-	if (result->uuid == uuid) {
-		_controlHandle = result->valueHandle;
+	if (result.uuid == uuid) {
+		_controlHandle = result.valueHandle;
 		LOGCsCentralDebug("Found control handle: %u", _controlHandle);
 	}
 	uuid.fromBaseUuid(_uuids[0], RESULT_UUID);
-	if (result->uuid == uuid) {
-		_resultHandle = result->valueHandle;
+	if (result.uuid == uuid) {
+		_resultHandle = result.valueHandle;
 		LOGCsCentralDebug("Found result handle: %u", _resultHandle);
 	}
 
 	// Setup mode
-	if (result->uuid == _uuids[1]) {
+	if (result.uuid == _uuids[1]) {
 		_opMode = OperationMode::OPERATION_MODE_SETUP;
 		LOGCsCentralInfo("Setup service found");
 	}
 	uuid.fromBaseUuid(_uuids[1], SETUP_KEY_UUID);
-	if (result->uuid == uuid) {
-		_sessionKeyHandle = result->valueHandle;
-		LOGCsCentralDebug("Found session data handle: %u", _sessionDataHandle);
+	if (result.uuid == uuid) {
+		_sessionKeyHandle = result.valueHandle;
+		LOGCsCentralDebug("Found session key handle: %u", _sessionKeyHandle);
 	}
 	uuid.fromBaseUuid(_uuids[1], SESSION_DATA_UNENCRYPTED_UUID);
-	if (result->uuid == uuid) {
-		_sessionDataHandle = result->valueHandle;
+	if (result.uuid == uuid) {
+		_sessionDataHandle = result.valueHandle;
 		LOGCsCentralDebug("Found session data handle: %u", _sessionDataHandle);
 	}
 	uuid.fromBaseUuid(_uuids[1], SETUP_CONTROL_UUID);
-	if (result->uuid == uuid) {
-		_controlHandle = result->valueHandle;
+	if (result.uuid == uuid) {
+		_controlHandle = result.valueHandle;
 		LOGCsCentralDebug("Found control handle: %u", _controlHandle);
 	}
 	uuid.fromBaseUuid(_uuids[1], SETUP_RESULT_UUID);
-	if (result->uuid == uuid) {
-		_resultHandle = result->valueHandle;
+	if (result.uuid == uuid) {
+		_resultHandle = result.valueHandle;
 		LOGCsCentralDebug("Found result handle: %u", _resultHandle);
 	}
 
@@ -277,8 +307,8 @@ void CrownstoneCentral::onDiscoveryDone(cs_ret_code_t retCode) {
 	}
 }
 
-void CrownstoneCentral::onRead(ble_central_read_result_t* result) {
-	cs_ret_code_t retCode = result->retCode;
+void CrownstoneCentral::onRead(ble_central_read_result_t& result) {
+	cs_ret_code_t retCode = result.retCode;
 	if (retCode != ERR_SUCCESS) {
 		finalizeOperation(_currentOperation, retCode);
 		return;
@@ -293,12 +323,12 @@ void CrownstoneCentral::onRead(ble_central_read_result_t* result) {
 						return;
 					}
 					// Parse data that was read.
-					if (result->data.len != sizeof(session_data_t)) {
+					if (result.data.len != sizeof(session_data_t)) {
 						finalizeOperation(_currentOperation, ERR_WRONG_PAYLOAD_LENGTH);
 						return;
 					}
 					// Store the session data.
-					retCode = ConnectionEncryption::getInstance().setSessionData(*reinterpret_cast<session_data_t*>(result->data.data));
+					retCode = ConnectionEncryption::getInstance().setSessionData(*reinterpret_cast<session_data_t*>(result.data.data));
 					if (retCode != ERR_SUCCESS) {
 						finalizeOperation(_currentOperation, retCode);
 						return;
@@ -312,40 +342,51 @@ void CrownstoneCentral::onRead(ble_central_read_result_t* result) {
 						return;
 					}
 					// Parse and store the session key.
-					retCode = KeysAndAccess::getInstance().setSetupKey(result->data);
+					retCode = KeysAndAccess::getInstance().setSetupKey(result.data);
 					if (retCode != ERR_SUCCESS) {
 						finalizeOperation(_currentOperation, retCode);
 						return;
 					}
 					// Read session data.
 					retCode = BleCentral::getInstance().read(_sessionDataHandle);
-					if (retCode != ERR_SUCCESS) {
+					if (retCode != ERR_WAIT_FOR_SUCCESS) {
 						finalizeOperation(_currentOperation, retCode);
 						return;
 					}
 					setStep(ConnectSteps::SESSION_DATA);
-					break;
+					return;
 				}
 				default:
 					finalizeOperation(_currentOperation, ERR_WRONG_OPERATION);
-					break;
+					return;
 			}
-
-
 			break;
 		}
 		default: {
-			LOGw("TODO");
-			break;
+			finalizeOperation(_currentOperation, ERR_WRONG_OPERATION);
+			return;
 		}
 	}
 
-
-
 }
 
-
-
+void CrownstoneCentral::onWrite(cs_ret_code_t retCode) {
+	if (retCode != ERR_SUCCESS) {
+		finalizeOperation(_currentOperation, retCode);
+		return;
+	}
+	switch (_currentOperation) {
+		case Operation::WRITE: {
+			// Done.
+			finalizeOperation(_currentOperation, retCode);
+			break;
+		}
+		default: {
+			finalizeOperation(_currentOperation, ERR_WRONG_OPERATION);
+			return;
+		}
+	}
+}
 
 
 
@@ -354,6 +395,11 @@ void CrownstoneCentral::handleEvent(event_t& event) {
 		case CS_TYPE::CMD_CS_CENTRAL_CONNECT: {
 			auto packet = CS_TYPE_CAST(CMD_CS_CENTRAL_CONNECT, event.data);
 			event.result.returnCode = connect(packet->address, packet->timeoutMs);
+			break;
+		}
+		case CS_TYPE::CMD_CS_CENTRAL_WRITE: {
+			auto packet = CS_TYPE_CAST(CMD_CS_CENTRAL_WRITE, event.data);
+			event.result.returnCode = write(packet->commandType, packet->data.data, packet->data.len);
 			break;
 		}
 
@@ -365,7 +411,7 @@ void CrownstoneCentral::handleEvent(event_t& event) {
 
 		case CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY: {
 			auto result = CS_TYPE_CAST(EVT_BLE_CENTRAL_DISCOVERY, event.data);
-			onDiscovery(result);
+			onDiscovery(*result);
 			break;
 		}
 		case CS_TYPE::EVT_BLE_CENTRAL_DISCOVERY_RESULT: {
@@ -375,7 +421,12 @@ void CrownstoneCentral::handleEvent(event_t& event) {
 		}
 		case CS_TYPE::EVT_BLE_CENTRAL_READ_RESULT: {
 			auto result = CS_TYPE_CAST(EVT_BLE_CENTRAL_READ_RESULT, event.data);
-			onRead(result);
+			onRead(*result);
+			break;
+		}
+		case CS_TYPE::EVT_BLE_CENTRAL_WRITE_RESULT: {
+			auto result = CS_TYPE_CAST(EVT_BLE_CENTRAL_WRITE_RESULT, event.data);
+			onWrite(*result);
 			break;
 		}
 		default: {

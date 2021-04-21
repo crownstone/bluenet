@@ -18,6 +18,7 @@ struct cs_central_connect_t {
 };
 
 struct cs_central_write_t {
+	cs_control_cmd_t commandType;
 	cs_data_t data;
 };
 

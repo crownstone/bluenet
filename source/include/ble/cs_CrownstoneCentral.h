@@ -39,7 +39,7 @@ private:
 		NONE,
 		CONNECT,
 //		DISCONNECT,
-		READ,
+//		READ,
 		WRITE
 	};
 
@@ -76,9 +76,10 @@ private:
 	void sendOperationResult(event_t& event);
 
 	void onConnect(cs_ret_code_t retCode);
-	void onDiscovery(ble_central_discovery_t* result);
+	void onDiscovery(ble_central_discovery_t& result);
 	void onDiscoveryDone(cs_ret_code_t retCode);
-	void onRead(ble_central_read_result_t* result);
+	void onRead(ble_central_read_result_t& result);
+	void onWrite(cs_ret_code_t result);
 
 public:
 	/**
