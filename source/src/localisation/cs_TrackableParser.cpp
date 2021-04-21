@@ -55,12 +55,12 @@ void TrackableParser::handleEvent(event_t& evt) {
 	switch (evt.type) {
 		// incoming devices to filter
 		case CS_TYPE::EVT_ADV_BACKGROUND_PARSED: {
-			adv_background_parsed_t* parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
+			auto parsedAdv = CS_TYPE_CAST(EVT_ADV_BACKGROUND_PARSED, evt.data);
 			handleBackgroundParsed(parsedAdv);
 			return;
 		}
 		case CS_TYPE::EVT_DEVICE_SCANNED: {
-			scanned_device_t* scannedDevice = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
+			auto scannedDevice = CS_TYPE_CAST(EVT_DEVICE_SCANNED, evt.data);
 			handleScannedDevice(scannedDevice);
 			return;
 		}
@@ -69,29 +69,29 @@ void TrackableParser::handleEvent(event_t& evt) {
 		case CS_TYPE::CMD_UPLOAD_FILTER: {
 			LOGTrackableParserDebug("CMD_UPLOAD_FILTER");
 
-			trackable_parser_cmd_upload_filter_t* cmd_data = CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
-			evt.result.returnCode                          = handleUploadFilterCommand(cmd_data);
+			auto cmd_data         = CS_TYPE_CAST(CMD_UPLOAD_FILTER, evt.data);
+			evt.result.returnCode = handleUploadFilterCommand(cmd_data);
 			break;
 		}
 		case CS_TYPE::CMD_REMOVE_FILTER: {
 			LOGTrackableParserDebug("CMD_REMOVE_FILTER");
 
-			trackable_parser_cmd_remove_filter_t* cmd_data = CS_TYPE_CAST(CMD_REMOVE_FILTER, evt.data);
-			evt.result.returnCode                          = handleRemoveFilterCommand(cmd_data);
+			auto cmd_data         = CS_TYPE_CAST(CMD_REMOVE_FILTER, evt.data);
+			evt.result.returnCode = handleRemoveFilterCommand(cmd_data);
 			break;
 		}
 		case CS_TYPE::CMD_COMMIT_FILTER_CHANGES: {
 			LOGTrackableParserDebug("CMD_COMMIT_FILTER_CHANGES");
 
-			trackable_parser_cmd_commit_filter_changes_t* cmd_data = CS_TYPE_CAST(CMD_COMMIT_FILTER_CHANGES, evt.data);
-			evt.result.returnCode                                  = handleCommitFilterChangesCommand(cmd_data);
+			auto cmd_data         = CS_TYPE_CAST(CMD_COMMIT_FILTER_CHANGES, evt.data);
+			evt.result.returnCode = handleCommitFilterChangesCommand(cmd_data);
 			break;
 		}
 		case CS_TYPE::CMD_GET_FILTER_SUMMARIES: {
 			LOGTrackableParserDebug("CMD_GET_FILTER_SUMMARIES");
 
-			trackable_parser_cmd_get_filer_summaries_t* cmd_data = CS_TYPE_CAST(CMD_GET_FILTER_SUMMARIES, evt.data);
-			evt.result.returnCode                                = handleGetFilterSummariesCommand(cmd_data);
+			auto cmd_data         = CS_TYPE_CAST(CMD_GET_FILTER_SUMMARIES, evt.data);
+			evt.result.returnCode = handleGetFilterSummariesCommand(cmd_data);
 			break;
 		}
 		default: break;
@@ -442,12 +442,12 @@ cs_ret_code_t TrackableParser::handleGetFilterSummariesCommand(trackable_parser_
 	// placement new constructs the object in the buff and now has enough space for the summaries.
 	auto retvalptr = new (buff) trackable_parser_cmd_get_filter_summaries_ret_t;
 
-	retvalptr->masterCrc     = _masterCrc;
+	retvalptr->masterCrc     = _masterHash;
 	retvalptr->masterVersion = _masterVersion;
 	retvalptr->freeSpace     = getTotalHeapAllocatedSize();
 
 	size_t sizeof_retval = 0;
-	for (auto i = 0; i < MAX_FILTER_IDS; i++) {
+	for (size_t i = 0; i < MAX_FILTER_IDS; i++) {
 		if (_parsingFilters[i] == nullptr) {
 			sizeof_retval =
 					sizeof(trackable_parser_cmd_get_filter_summaries_ret_t) + sizeof(tracking_filter_summary_t) * i;
@@ -461,6 +461,7 @@ cs_ret_code_t TrackableParser::handleGetFilterSummariesCommand(trackable_parser_
 		// TODO: add version here?
 	}
 
+	LOGd("use this variable",sizeof_retval);
 	// TODO(Arend): fill in sizeof_retval.
 	// TODO(Arend): return the retvalptr.
 	return ERR_NOT_IMPLEMENTED;

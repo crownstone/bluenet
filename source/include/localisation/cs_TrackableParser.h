@@ -152,7 +152,7 @@ private:
 	 *    - filter crc
 	 */
 	cs_ret_code_t handleGetFilterSummariesCommand(
-			trackable_parser_cmd_get_filer_summaries_t* cmdData);
+			trackable_parser_cmd_get_filter_summaries_t* cmdData);
 
 	// -------------------------------------------------------------
 	// ---------------------- Utility functions --------------------
