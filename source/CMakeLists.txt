@@ -1046,5 +1046,15 @@ ELSE()
 		INSTALL(FILES "${NRF5_DIR}/${SOFTDEVICE_HEX_FILE}" DESTINATION .)
 		INSTALL(DIRECTORY "${CMAKE_BINARY_DIR}/dfu"       DESTINATION . FILES_MATCHING PATTERN "*.zip" PATTERN "*.sha1")
 	ENDIF()
+	
+	set(FILE_LIST_VARIABLES "${CMAKE_BINARY_DIR}/list_variables.txt")
+	file(WRITE ${FILE_LIST_VARIABLES} "")
+	message(STATUS "Write variables to ${FILE_LIST_VARIABLES}")
+	get_cmake_property(_variableNames VARIABLES)
+	list (SORT _variableNames)
+	foreach (_variableName ${_variableNames})
+		file(APPEND "${FILE_LIST_VARIABLES}" "${_variableName}=${${_variableName}}\n")
+	endforeach()
+
 
 ENDIF()
