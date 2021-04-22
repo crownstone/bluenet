@@ -190,6 +190,11 @@ BUTTON2_INDEX=-1
 BUTTON3_INDEX=-1
 BUTTON4_INDEX=-1
 
+LED1_INDEX=-1
+LED2_INDEX=-1
+LED3_INDEX=-1
+LED4_INDEX=-1
+
 # This is the directory where the cross-compiler resides
 COMPILER_PATH=
 
