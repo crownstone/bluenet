@@ -22,10 +22,13 @@ public:
 
 	void connect();
 	void read();
-	void write();
+	void writeGetMac();
+	void writeSetup();
+	void writeGetPowerSamples();
 	void disconnect();
 
 	void handleEvent(event_t & event);
 private:
+	uint8_t _writeStep = 0;
 };
 

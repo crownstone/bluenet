@@ -135,6 +135,24 @@ struct __attribute__((__packed__)) result_packet_t {
 	uint8_t payload[N];
 };
 
+
+struct __attribute__((__packed__)) setup_data_t {
+	stone_id_t     stoneId;
+	uint8_t        sphereId;
+	uint8_t        adminKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        memberKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        basicKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        serviceDataKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        localizationKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        meshDeviceKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        meshAppKey[ENCRYPTION_KEY_LENGTH];
+	uint8_t        meshNetKey[ENCRYPTION_KEY_LENGTH];
+	cs_uuid128_t   ibeaconUuid;
+	uint16_t       ibeaconMajor;
+	uint16_t       ibeaconMinor;
+};
+
+
 enum class PersistenceModeGet {
 	CURRENT = 0,
 	STORED = 1,
