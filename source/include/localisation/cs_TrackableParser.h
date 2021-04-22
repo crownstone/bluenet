@@ -143,16 +143,14 @@ private:
 			trackable_parser_cmd_commit_filter_changes_t* cmdData);
 
 	/**
-	 * Returns:
-	 *  - master version
-	 *  - master crc
-	 *  - for each filter:
-	 *    - filter id
-	 *    - filter version
-	 *    - filter crc
+	 * Writes summaries of the filters into the result as a
+	 * trackable_parser_cmd_get_filter_summaries_ret_t.
+	 *
+	 * returnCode is ERR_BUFFER_TOO_SMALL if result data doesn't fit the result buffer.
+	 * Else, returnCode is ERR_SUCCESS.
 	 */
-	cs_ret_code_t handleGetFilterSummariesCommand(
-			trackable_parser_cmd_get_filter_summaries_t* cmdData);
+	void handleGetFilterSummariesCommand(
+			trackable_parser_cmd_get_filter_summaries_t* cmdData, cs_result_t& result);
 
 	// -------------------------------------------------------------
 	// ---------------------- Utility functions --------------------

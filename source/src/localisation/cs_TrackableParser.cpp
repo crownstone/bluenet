@@ -91,7 +91,7 @@ void TrackableParser::handleEvent(event_t& evt) {
 			LOGTrackableParserDebug("CMD_GET_FILTER_SUMMARIES");
 
 			auto cmd_data         = CS_TYPE_CAST(CMD_GET_FILTER_SUMMARIES, evt.data);
-			evt.result.returnCode = handleGetFilterSummariesCommand(cmd_data);
+			handleGetFilterSummariesCommand(cmd_data, evt.result);
 			break;
 		}
 		default: break;
@@ -420,7 +420,7 @@ cs_ret_code_t TrackableParser::handleCommitFilterChangesCommand(
 	return ERR_SUCCESS;
 }
 
-cs_ret_code_t TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_filter_summaries_t* cmd_data) {
+void TrackableParser::handleGetFilterSummariesCommand(trackable_parser_cmd_get_filter_summaries_t* cmd_data, cs_result_t& result) {
 	LOGTrackableParserDebug("handle get filter summaries:");
 	for (auto& trackingFilter : _parsingFilters) {
 		if (trackingFilter == nullptr) {
@@ -430,41 +430,29 @@ cs_ret_code_t TrackableParser::handleGetFilterSummariesCommand(trackable_parser_
 		LOGTrackableParserDebug("filter: %u", trackingFilter->runtimedata.filterId);
 	}
 
-	if (filterModificationInProgress) {
-		// TODO: this doesn't make much sense.. we can send them a summary anyway, right?
-		return ERR_BUSY;
+	// stack allocate a buffer summaries object fitting at most max summaries:
+	auto requiredBuffSize = sizeof(trackable_parser_cmd_get_filter_summaries_ret_t)
+							  + sizeof(tracking_filter_summary_t) * _parsingFiltersCount;
+
+	if (result.buf.len < requiredBuffSize) {
+		result.returnCode = ERR_BUFFER_TOO_SMALL;
+		return;
 	}
 
-	// stack allocate a buffer summaries object fitting at most max summaries:
-	constexpr auto buffsize = sizeof(trackable_parser_cmd_get_filter_summaries_ret_t)
-							  + sizeof(tracking_filter_summary_t) * MAX_FILTER_IDS;
-	uint8_t buff[buffsize] = {};
 	// placement new constructs the object in the buff and now has enough space for the summaries.
-	auto retvalptr = new (buff) trackable_parser_cmd_get_filter_summaries_ret_t;
+	auto retvalptr = new (result.buf.data) trackable_parser_cmd_get_filter_summaries_ret_t;
+	result.dataSize = requiredBuffSize;
 
 	retvalptr->masterCrc     = _masterHash;
 	retvalptr->masterVersion = _masterVersion;
 	retvalptr->freeSpace     = getTotalHeapAllocatedSize();
 
-	size_t sizeof_retval = 0;
-	for (size_t i = 0; i < MAX_FILTER_IDS; i++) {
-		if (_parsingFilters[i] == nullptr) {
-			sizeof_retval =
-					sizeof(trackable_parser_cmd_get_filter_summaries_ret_t) + sizeof(tracking_filter_summary_t) * i;
-			break;
-		}
-
+	for (size_t i = 0; i < _parsingFiltersCount; i++) {
 		retvalptr->summaries[i].id      = _parsingFilters[i]->runtimedata.filterId;
 		retvalptr->summaries[i].crc     = _parsingFilters[i]->runtimedata.crc;
 		retvalptr->summaries[i].flags   = _parsingFilters[i]->metadata.flags;
 		retvalptr->summaries[i].version = _parsingFilters[i]->metadata.version;
-		// TODO: add version here?
 	}
-
-	LOGd("use this variable",sizeof_retval);
-	// TODO(Arend): fill in sizeof_retval.
-	// TODO(Arend): return the retvalptr.
-	return ERR_NOT_IMPLEMENTED;
 }
 
 // -------------------------------------------------------------
