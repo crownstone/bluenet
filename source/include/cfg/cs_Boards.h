@@ -212,6 +212,9 @@ typedef struct  {
 	/**
 	 * Scan interval in μs.
 	 *
+	 * Since this setting is also used when connecting, it influences the time it takes to make an outgoing connection.
+	 * For some reason, if the scan interval is 2s, it takes at least 2s before a connection is made.
+	 *
 	 * Must not be larger than (1000 * BEARER_SCAN_INT_MAX_MS).
 	 */
 	uint32_t scanIntervalUs;
