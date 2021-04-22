@@ -99,7 +99,9 @@ public:
 			return ERR_BUFFER_UNASSIGNED;
 		}
 		_buffer->header.payloadSize = size;
-		memcpy(_buffer->payload, payload, size);
+		if (size) {
+			memcpy(_buffer->payload, payload, size);
+		}
 		return ERR_SUCCESS;
 	}
 
