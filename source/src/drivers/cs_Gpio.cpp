@@ -71,6 +71,32 @@ void Gpio::init(const boards_config_t & board) {
 		pin_info.event = false;
 		_pins.push_back(pin_info);
 	}
+	
+	// Leds can be reached as GPIO as well
+	if (g_LED1_INDEX != -1) {
+		pin_info_t pin_info;
+		pin_info.pin = board.pinLed[g_LED1_INDEX];
+		pin_info.event = false;
+		_pins.push_back(pin_info);
+	}
+	if (g_LED2_INDEX != -1) {
+		pin_info_t pin_info;
+		pin_info.pin = board.pinLed[g_LED2_INDEX];
+		pin_info.event = false;
+		_pins.push_back(pin_info);
+	}
+	if (g_LED3_INDEX != -1) {
+		pin_info_t pin_info;
+		pin_info.pin = board.pinLed[g_LED3_INDEX];
+		pin_info.event = false;
+		_pins.push_back(pin_info);
+	}
+	if (g_LED4_INDEX != -1) {
+		pin_info_t pin_info;
+		pin_info.pin = board.pinLed[g_LED4_INDEX];
+		pin_info.event = false;
+		_pins.push_back(pin_info);
+	}
 
 	_initialized = true;
 	LOGi("Configured %i GPIO pins", _pins.size());
@@ -99,6 +125,7 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 			LOGw("Huh? No such pull registor construction exists");
 			return;
 	}
+	LOGi("Set pin with pull none / up / down setting: %i", nrf_pull);
 
 	switch(direction) {
 		case GpioDirection::INPUT:
@@ -136,6 +163,9 @@ void Gpio::configure(uint8_t pin_index, GpioDirection direction, GpioPullResisto
 					return;
 			}
 			config.pull = nrf_pull;
+			config.hi_accuracy = true;
+			config.is_watcher = false;
+			config.skip_gpio_setup = false;
 
 			LOGi("Register pin %i using polarity %i with event handler", pin, polarity);
 
@@ -188,8 +218,11 @@ void Gpio::read(uint8_t pin_index, uint8_t *buf, uint8_t & length) {
 	}
 }
 
+/*
+ * Called from interrupt service routine, only write which pin is fired and return immediately.
+ */
 void Gpio::registerEvent(uint8_t pin) {
-	LOGi("GPIO event on pin %i", pin);
+	//LOGi("GPIO event on pin %i", pin);
 	for (uint8_t i = 0; i < _pins.size(); ++i) {
 		if (_pins[i].pin == pin) {
 			_pins[i].event = true;
@@ -206,9 +239,9 @@ void Gpio::tick() {
 			// we send back the pin index, not the pin number
 			gpio.pin_index = i;
 			gpio.length = 0;
+			LOGi("Send GPIO event on pin %i at index %i", _pins[i], gpio.pin_index);
 			event_t event(CS_TYPE::EVT_GPIO_UPDATE, &gpio, sizeof(gpio));
 			EventDispatcher::getInstance().dispatch(event);
-
 		}
 	}
 }

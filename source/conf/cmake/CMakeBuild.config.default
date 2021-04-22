@@ -49,7 +49,7 @@ CS_SERIAL_NRF_LOG_PIN_TX=6
 
 # Default values for the UART client
 UART_DEVICE="/dev/ttyACM0"
-UART_BAUDRATE=230300
+UART_BAUDRATE=230400
 
 # The different boards that can be used (from cs_Boards.h):
 # ## Nordic boards
@@ -189,6 +189,11 @@ BUTTON1_INDEX=-1
 BUTTON2_INDEX=-1
 BUTTON3_INDEX=-1
 BUTTON4_INDEX=-1
+
+LED1_INDEX=-1
+LED2_INDEX=-1
+LED3_INDEX=-1
+LED4_INDEX=-1
 
 # This is the directory where the cross-compiler resides
 COMPILER_PATH=

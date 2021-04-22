@@ -126,7 +126,7 @@ cs_ret_code_t MicroappStorage::writeNextChunkPart() {
 
 	// Check if done.
 	if (_chunkWritten >= _chunkSize) {
-		LOGMicroappInfo("Chunk written to flash, dispatch event with result %u", retCode);
+		LOGMicroappInfo("Done");
 		return ERR_SUCCESS;
 	}
 

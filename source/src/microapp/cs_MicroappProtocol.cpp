@@ -67,8 +67,9 @@ void handlePinSetModeCommand(pin_cmd_t* pin_cmd) {
 	TYPIFY(EVT_GPIO_INIT) gpio;
 	gpio.pin_index = pin;
 	gpio.pull = 0;
+	gpio.callback = 0;
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
-	LOGi("Set mode %i for GPIO pin %i", opcode2, pin);
+	LOGi("Set mode %i for virtual pin %i", opcode2, pin);
 	switch(opcode2) {
 		case CS_MICROAPP_COMMAND_PIN_INPUT_PULLUP:
 			gpio.pull = 1;
@@ -113,7 +114,7 @@ void handlePinSetModeCommand(pin_cmd_t* pin_cmd) {
 
 void handlePinActionCommand(pin_cmd_t* pin_cmd) {
 	CommandMicroappPin pin = (CommandMicroappPin)pin_cmd->pin;
-	LOGi("Action on GPIO pin %i", pin);
+	LOGi("Clear, set or configure pin %i", pin);
 	CommandMicroappPinOpcode2 opcode2 = (CommandMicroappPinOpcode2)pin_cmd->opcode2;
 	switch(opcode2) {
 		case CS_MICROAPP_COMMAND_PIN_WRITE: {
@@ -171,8 +172,19 @@ void handlePinCommand(pin_cmd_t* pin_cmd) {
 		case CS_MICROAPP_COMMAND_PIN_GPIO1:
 		case CS_MICROAPP_COMMAND_PIN_GPIO2:
 		case CS_MICROAPP_COMMAND_PIN_GPIO3:
-		case CS_MICROAPP_COMMAND_PIN_GPIO4: {
+		case CS_MICROAPP_COMMAND_PIN_GPIO4:
+		case CS_MICROAPP_COMMAND_PIN_BUTTON1:
+		case CS_MICROAPP_COMMAND_PIN_BUTTON2:
+		case CS_MICROAPP_COMMAND_PIN_BUTTON3:
+		case CS_MICROAPP_COMMAND_PIN_BUTTON4:
+		case CS_MICROAPP_COMMAND_PIN_LED1:
+		case CS_MICROAPP_COMMAND_PIN_LED2:
+		case CS_MICROAPP_COMMAND_PIN_LED3:
+		case CS_MICROAPP_COMMAND_PIN_LED4: {
 			CommandMicroappPinOpcode1 opcode1 = (CommandMicroappPinOpcode1)pin_cmd->opcode1;
+			// We have one virtual device at location 0, so we have to decrement the pin number by one to map
+			// to the array in the GPIO module
+			pin_cmd->pin--;
 			switch(opcode1) {
 				case CS_MICROAPP_COMMAND_PIN_MODE:
 					handlePinSetModeCommand(pin_cmd);
@@ -532,8 +544,8 @@ void MicroappProtocol::callSetupAndLoop(uint8_t appIndex) {
 		if (_loaded) {
 			if (counter == 0) {
 				// TODO: we cannot call delay in setup in this way...
-				LOGi("Call setup");
 				void (*setup_func)() = (void (*)()) _setup;
+				LOGi("Call setup at 0x%x", _setup);
 				setup_func();
 				LOGi("Setup done");
 				_cocounter = 0;
@@ -598,18 +610,20 @@ void MicroappProtocol::handleEvent(event_t & event) {
 			LOGi("Register GPIO event handler for microapp");
 			TYPIFY(EVT_GPIO_INIT) gpio = *(TYPIFY(EVT_GPIO_INIT)*)event.data;
 			
-			// we will register the handler in the class
+			// we will register the handler in the class for first empty slot
 			for (int i = 0; i < MAX_ISR_COUNT; ++i) {
 				if (_isr[i].callback == 0) {
+					LOGi("Register callback %x or %i for pin %i", gpio.callback, gpio.callback, gpio.pin_index);
 					_isr[i].callback = gpio.callback;
 					_isr[i].pin = gpio.pin_index;
+					break;
 				}
 			}
 			break;
 		}
 		case CS_TYPE::EVT_GPIO_UPDATE: {
-			LOGi("Get GPIO update");
 			TYPIFY(EVT_GPIO_UPDATE) gpio = *(TYPIFY(EVT_GPIO_UPDATE)*)event.data;
+			LOGi("Get GPIO update for pin %i", gpio.pin_index);
 	
 			uintptr_t callback = 0;
 			// get callback and call
@@ -619,13 +633,16 @@ void MicroappProtocol::handleEvent(event_t & event) {
 					break;
 				}
 			}
+			LOGi("Call %x", callback);
+
 			if (callback == 0) {
-				// LOGd("Not yet registered");
+				LOGi("Callback not yet registered");
 				break;
 			}
 			// we have to do this through another coroutine perhaps (not the same one as loop!), for
 			// now stay on this stack
 			void (*callback_func)() = (void (*)()) callback;
+			LOGi("Call callback at 0x%x", callback);
 			callback_func();
 			break;
 		}
