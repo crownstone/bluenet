@@ -20,8 +20,8 @@
 #include <structs/buffer/cs_EncryptionBuffer.h>
 
 #define LOGCsCentralInfo LOGi
-#define LOGCsCentralDebug LOGd
-#define LogLevelCsCentralDebug SERIAL_DEBUG
+#define LOGCsCentralDebug LOGv
+#define LogLevelCsCentralDebug SERIAL_VERBOSE
 
 cs_ret_code_t CrownstoneCentral::init() {
 	// Make use of the fact ERR_SUCCESS = 0, to avoid many if statements.

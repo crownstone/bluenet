@@ -15,7 +15,7 @@
 #include <storage/cs_State.h>
 
 #define LOGBleCentralInfo LOGi
-#define LOGBleCentralDebug LOGnone
+#define LOGBleCentralDebug LOGv
 #define LogLevelBleCentralDebug SERIAL_VERBOSE
 
 const uint16_t WRITE_OVERHEAD = 3;
